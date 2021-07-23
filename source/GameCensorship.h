@@ -5,9 +5,7 @@
 #if !defined(AFX_GAMECENSORSHIP_H__BF1AD1A5_06C5_47AA_9F65_22EB0E88E86F__INCLUDED_)
 #define AFX_GAMECENSORSHIP_H__BF1AD1A5_06C5_47AA_9F65_22EB0E88E86F__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "Sprite.h"
 #include "./Time/Timer.h"

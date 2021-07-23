@@ -5,9 +5,7 @@
 #if !defined(AFX_EVENT_H__8075B067_D2AB_48AC_8A39_370D3B3DD089__INCLUDED_)
 #define AFX_EVENT_H__8075B067_D2AB_48AC_8A39_370D3B3DD089__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 // 앞으로 이벤트 관련 클래스는 이곳에다가 생성한다.
 

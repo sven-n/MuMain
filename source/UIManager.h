@@ -2,20 +2,12 @@
 //  
 //  UIManager.h
 //  
-//  내  용 : UI 들을 관리 해주는 클래스
-//  
-//  날  짜 : 2004년 11월 09일
-//  
-//  작성자 : 강 병 국
-//  
 //////////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_UIMANAGER_H__2A2AD8F0_E731_4B40_AA6E_E86226026AF9__INCLUDED_)
 #define AFX_UIMANAGER_H__2A2AD8F0_E731_4B40_AA6E_E86226026AF9__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "UIGuildInfo.h"
 #include "UIGuildMaster.h"

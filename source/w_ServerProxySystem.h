@@ -7,9 +7,7 @@
 #if !defined(AFX_W_WORLDSERVERPROXY_H__0B29E2D6_83C8_4BB7_AC9F_FE8E704A1539__INCLUDED_)
 #define AFX_W_WORLDSERVERPROXY_H__0B29E2D6_83C8_4BB7_AC9F_FE8E704A1539__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_InputProxy.h"
 #include "w_ShopServerProxy.h"

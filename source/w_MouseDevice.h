@@ -7,9 +7,7 @@
 #if !defined(AFX_W_MOUSEDEVICE_H__063B37AB_D4F1_412C_B583_02142C62013B__INCLUDED_)
 #define AFX_W_MOUSEDEVICE_H__063B37AB_D4F1_412C_B583_02142C62013B__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_typedevice.h"
 #include "w_InputProxy.h"

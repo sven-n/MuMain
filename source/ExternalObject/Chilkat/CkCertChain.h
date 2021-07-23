@@ -5,9 +5,7 @@
 #if !defined(AFX_CKCERTCHAIN_H__CB7CF92E_A9AC_469E_B628_C76FAA866AB7__INCLUDED_)
 #define AFX_CKCERTCHAIN_H__CB7CF92E_A9AC_469E_B628_C76FAA866AB7__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 class CkCert;
 class CkCertCollection;

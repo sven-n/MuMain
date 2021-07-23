@@ -7,9 +7,7 @@
 #if !defined(AFX_W_GAMEINFOBUILDER_H__A33AA6A6_C067_4DC0_9E22_958D0DDD7535__INCLUDED_)
 #define AFX_W_GAMEINFOBUILDER_H__A33AA6A6_C067_4DC0_9E22_958D0DDD7535__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 /*
 	게임 빌더는 게임에 필요한 정보를 읽어 들이는 부분이다.

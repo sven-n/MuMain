@@ -5,18 +5,9 @@
 #if !defined(AFX_SHADOWVOLUME_H__8C7DEDBA_0557_4B98_AD53_900F41EAC8AD__INCLUDED_)
 #define AFX_SHADOWVOLUME_H__8C7DEDBA_0557_4B98_AD53_900F41EAC8AD__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
-
-
-
-//#ifdef USE_SHADOWVOLUME
-
 
 #include "ZzzBmd.h"
-
 
 typedef struct
 {

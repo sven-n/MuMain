@@ -7,9 +7,7 @@
 #if !defined(AFX_W_UIWND_H__27DA28D8_254C_4870_8F5D_3FC5F37617F1__INCLUDED_)
 #define AFX_W_UIWND_H__27DA28D8_254C_4870_8F5D_3FC5F37617F1__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_UIEvent.h"
 

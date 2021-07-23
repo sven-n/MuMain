@@ -10,9 +10,7 @@
 #if !defined(AFX_WIN_H__A06C4911_F775_4A87_97B9_42FE76BC1DEB__INCLUDED_)
 #define AFX_WIN_H__A06C4911_F775_4A87_97B9_42FE76BC1DEB__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "UIBaseDef.h"
 #include "PList.h"

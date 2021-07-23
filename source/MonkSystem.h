@@ -5,9 +5,8 @@
 #if !defined(AFX_MONKSYSTEM_H__BB2D80C0_92D7_4E8D_BF3E_32C643EDD764__INCLUDED_)
 #define AFX_MONKSYSTEM_H__BB2D80C0_92D7_4E8D_BF3E_32C643EDD764__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
+
 #ifdef PBG_ADD_NEWCHAR_MONK
 #include "ZzzBMD.h"
 #include "ZzzObject.h"

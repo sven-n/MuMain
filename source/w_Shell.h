@@ -7,9 +7,7 @@
 #if !defined(AFX_W_SHELL_H__2ECDDA4C_D3F9_4B28_B277_786B1998587A__INCLUDED_)
 #define AFX_W_SHELL_H__2ECDDA4C_D3F9_4B28_B277_786B1998587A__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 //새로운 스스템 관리자
 #include "w_BuildSystem.h"

@@ -5,9 +5,7 @@
 #if !defined(AFX_CNewUIEmpireGuardianTimer_H__8AD8FE50_F906_4AB7_8944_FD34CB3D3F91__INCLUDED_)
 #define AFX_CNewUIEmpireGuardianTimer_H__8AD8FE50_F906_4AB7_8944_FD34CB3D3F91__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #ifdef LDK_ADD_EMPIREGUARDIAN_UI
 

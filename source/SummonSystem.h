@@ -5,9 +5,7 @@
 #if !defined(AFX_SUMMONSYSTEM_H__B6F7054C_8D6B_4E3C_94E1_C9A5B1207076__INCLUDED_)
 #define AFX_SUMMONSYSTEM_H__B6F7054C_8D6B_4E3C_94E1_C9A5B1207076__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "zzzinfomation.h"
 #include "ZzzBMD.h"

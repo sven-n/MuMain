@@ -7,9 +7,7 @@
 #if !defined(AFX_W_CLIENTINFOBUILDER_H__A61B2F84_D816_459C_BB92_0EB016635151__INCLUDED_)
 #define AFX_W_CLIENTINFOBUILDER_H__A61B2F84_D816_459C_BB92_0EB016635151__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 /*
 	클라이언트 빌더는 게임에 필요한 정보가 아닌 좀 더 큰 의미로 총괄적이고 더 큰 의미이다.

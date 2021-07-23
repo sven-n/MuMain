@@ -5,9 +5,7 @@
 #if !defined(_CK_GZIP_H)
 #define _CK_GZIP_H
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "CkObject.h"
 

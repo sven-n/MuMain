@@ -5,17 +5,12 @@
 #if !defined(AFX_PHYSICSMANAGER_H__11A9449A_CF75_4963_8F71_C8EB8EA7FE2D__INCLUDED_)
 #define AFX_PHYSICSMANAGER_H__11A9449A_CF75_4963_8F71_C8EB8EA7FE2D__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 
 #include "ZzzBmd.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "BaseCls.h"
-
-
 
 //--------------------------------------------------------------------
 //

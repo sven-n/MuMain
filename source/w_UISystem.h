@@ -9,9 +9,7 @@
 #include "w_UIFrame.h"
 #include "w_UIWnd.h"
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 namespace ui
 {

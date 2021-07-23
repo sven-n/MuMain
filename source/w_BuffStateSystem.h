@@ -5,9 +5,7 @@
 #if !defined(AFX_W_BUFFSTATESYSTEM_H__7D37D31C_5DE8_4908_A6BE_6C9702CCC19A__INCLUDED_)
 #define AFX_W_BUFFSTATESYSTEM_H__7D37D31C_5DE8_4908_A6BE_6C9702CCC19A__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_BuffStateValueControl.h"
 #include "w_BuffTimeControl.h"

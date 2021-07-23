@@ -5,9 +5,7 @@
 #if !defined(AFX_NEWUICRYWOLF_H__AD267ADA_D799_4033_85B8_6B03E42EFB13__INCLUDED_)
 #define AFX_NEWUICRYWOLF_H__AD267ADA_D799_4033_85B8_6B03E42EFB13__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "NewUIBase.h"
 #include "NewUIManager.h"

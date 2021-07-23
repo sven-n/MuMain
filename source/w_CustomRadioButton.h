@@ -7,9 +7,7 @@
 #if !defined(AFX_W_CUSTOMRADIOBUTTON_H__D500FC92_128D_4EA7_BB1F_A132873BA2E1__INCLUDED_)
 #define AFX_W_CUSTOMRADIOBUTTON_H__D500FC92_128D_4EA7_BB1F_A132873BA2E1__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_RadioButton.h"
 #include "w_ImageUnit.h"

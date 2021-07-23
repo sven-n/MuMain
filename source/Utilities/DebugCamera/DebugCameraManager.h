@@ -7,9 +7,7 @@
 #if !defined(AFX_DEBUGCAMERAMANAGER_H__4140B1CA_99EC_47E8_8C85_CDF1ECA855E1__INCLUDED_)
 #define AFX_DEBUGCAMERAMANAGER_H__4140B1CA_99EC_47E8_8C85_CDF1ECA855E1__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "./Utilities/Debug/debugSingleton_.h"
 

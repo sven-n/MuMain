@@ -10,9 +10,7 @@
 #if !defined(AFX_W_PETACTIONSTAND_H__5F7FD6F9_0980_402C_9E5A_13928A221608__INCLUDED_)
 #define AFX_W_PETACTIONSTAND_H__5F7FD6F9_0980_402C_9E5A_13928A221608__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 BoostSmartPointer(PetActionStand);
 class PetActionStand : public PetAction

@@ -167,8 +167,8 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
 #endif // KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL
 
 	// Period
-	pPackage->SetProductSeqFirst(); //louis
-	pPackage->GetProductSeqNext(iProductSeq); //louis
+	pPackage->SetProductSeqFirst();
+	pPackage->GetProductSeqNext(iProductSeq);
 	
 	g_InGameShopSystem->GetProductInfoFromProductSeq(iProductSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_USE_LIMIT_PERIOD, iValue, szText);
 

@@ -7,9 +7,7 @@
 #if !defined(AFX_W_TEXT_H__4CF15885_03B5_4A15_AB4F_63FA7D07A021__INCLUDED_)
 #define AFX_W_TEXT_H__4CF15885_03B5_4A15_AB4F_63FA7D07A021__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "TextBitmap.h"
 #include "Text.h"

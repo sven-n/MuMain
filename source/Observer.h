@@ -10,9 +10,7 @@
 #if !defined(AFX_OBSERVER_H__D77AB996_491E_44AD_AE54_179DE70DFC3B__INCLUDED_)
 #define AFX_OBSERVER_H__D77AB996_491E_44AD_AE54_179DE70DFC3B__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 //*****************************************************************************
 // CObserver

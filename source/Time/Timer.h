@@ -5,9 +5,7 @@
 #if !defined(AFX_TIMER_H__DF94D50D_ED17_4DF1_9BD1_FA13662C8B74__INCLUDED_)
 #define AFX_TIMER_H__DF94D50D_ED17_4DF1_9BD1_FA13662C8B74__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <windows.h>
 

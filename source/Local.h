@@ -5,10 +5,7 @@
 #if !defined(AFX_LOCAL_H__542800D0_DC18_4483_9D91_C8989BA698F4__INCLUDED_)
 #define AFX_LOCAL_H__542800D0_DC18_4483_9D91_C8989BA698F4__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 
 extern char *lpszFindHackFiles[NUM_LANGUAGE];
 extern char *LanguageName[NUM_LANGUAGE];

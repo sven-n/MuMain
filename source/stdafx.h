@@ -28,9 +28,7 @@
 	//#pragma warning( disable : 4786 )	// GlobalBitmap.h ¿¡¼­ ¿Å°Ü¿È
 #endif // _VS2008PORTING
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 // Exclude rarely-used stuff from Windows headers
 #define WIN32_LEAN_AND_MEAN	

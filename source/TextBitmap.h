@@ -13,9 +13,7 @@
 #if !defined(AFX_TEXTBITMAP_H__B29A08B3_BF8F_4C9D_BA9C_23A24AC4C0A5__INCLUDED_)
 #define AFX_TEXTBITMAP_H__B29A08B3_BF8F_4C9D_BA9C_23A24AC4C0A5__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <map>
 #include <string>

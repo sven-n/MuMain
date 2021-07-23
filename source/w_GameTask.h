@@ -7,9 +7,7 @@
 #if !defined(AFX_W_GAMETASK_H__9C3E0E5B_46E5_4C9C_8727_3CC998BCE928__INCLUDED_)
 #define AFX_W_GAMETASK_H__9C3E0E5B_46E5_4C9C_8727_3CC998BCE928__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 //상속이 많으면 좋지 않다.
 //부분적으로 나눠야 할것들은 나눠서 관리 하자

@@ -5,13 +5,9 @@
 #if !defined(AFX_SIDEHAIR_H__8C7DEDBA_0577_4B98_BD53_900F41EAC8AD__INCLUDED_)
 #define AFX_SIDEHAIR_H__8C7DEDBA_0577_4B98_BD53_900F41EAC8AD__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 
 #include "ShadowVolume.h"
-
 
 class CSideHair : CShadowVolume
 {

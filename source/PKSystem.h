@@ -1,14 +1,10 @@
 // PKSystem.h: interface for the CPKSystem class.
-//
-// 혼합유료화 서버에서의 PK 시스템
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_PKSYSTEM_H__646E4968_61BD_45E8_8648_CC6C6B5CAA31__INCLUDED_)
 #define AFX_PKSYSTEM_H__646E4968_61BD_45E8_8648_CC6C6B5CAA31__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
 

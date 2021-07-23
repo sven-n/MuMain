@@ -7,9 +7,7 @@
 #if !defined(AFX_W_MODELVIEW_H__5EA1C31A_E431_4AD0_B198_5AA69BE70661__INCLUDED_)
 #define AFX_W_MODELVIEW_H__5EA1C31A_E431_4AD0_B198_5AA69BE70661__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_ImageUnit.h"
 #include "w_UIWnd.h"

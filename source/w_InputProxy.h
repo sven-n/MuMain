@@ -7,9 +7,7 @@
 #if !defined(AFX_W_INPUTPROXY_H__F2C9B24C_EC4C_4042_A956_5A9FF8D3E2CD__INCLUDED_)
 #define AFX_W_INPUTPROXY_H__F2C9B24C_EC4C_4042_A956_5A9FF8D3E2CD__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_ServerProxy.h"
 

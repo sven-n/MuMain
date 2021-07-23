@@ -7,9 +7,7 @@
 #if !defined(AFX_W_SHOPRIGHTMODULE_H__3AD1393A_F6C6_4C45_B3AD_01545CA8F243__INCLUDED_)
 #define AFX_W_SHOPRIGHTMODULE_H__3AD1393A_F6C6_4C45_B3AD_01545CA8F243__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_CompositedPanel.h"
 #include "w_ModelView.h"

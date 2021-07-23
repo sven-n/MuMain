@@ -7,9 +7,7 @@
 #if !defined(AFX_W_IMAGE_H__F46E9485_8567_41A3_B315_106F60F0E227__INCLUDED_)
 #define AFX_W_IMAGE_H__F46E9485_8567_41A3_B315_106F60F0E227__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "ZzzTexture.h"
 

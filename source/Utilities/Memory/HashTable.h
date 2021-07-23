@@ -5,10 +5,7 @@
 #if !defined(AFX_HASHTABLE_H__BDC457BB_BA46_47A2_83DC_0617C57FF876__INCLUDED_)
 #define AFX_HASHTABLE_H__BDC457BB_BA46_47A2_83DC_0617C57FF876__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 
 #include "./Utilities/Log/ErrorReport.h"
 

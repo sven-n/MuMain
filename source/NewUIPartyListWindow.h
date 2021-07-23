@@ -5,9 +5,7 @@
 #if !defined(_NEWUIPARTYMINIWINDOW_H_)
 #define _NEWUIPARTYMINIWINDOW_H_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "NewUIBase.h"
 #include "NewUIManager.h"

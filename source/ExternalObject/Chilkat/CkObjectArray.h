@@ -5,9 +5,7 @@
 #if !defined(AFX_CKOBJECTARRAY_H__10278D9D_3CD5_4AC8_A322_CE62A7DF95B6__INCLUDED_)
 #define AFX_CKOBJECTARRAY_H__10278D9D_3CD5_4AC8_A322_CE62A7DF95B6__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "CkString.h"
 #include "CkObject.h"

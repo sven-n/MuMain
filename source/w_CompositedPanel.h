@@ -7,9 +7,7 @@
 #if !defined(AFX_W_COMPOSITEDPANEL_H__48C4D2EA_FFE8_4CCD_A0AA_A493383B8F15__INCLUDED_)
 #define AFX_W_COMPOSITEDPANEL_H__48C4D2EA_FFE8_4CCD_A0AA_A493383B8F15__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_ImageUnit.h"
 #include "w_UIWnd.h"

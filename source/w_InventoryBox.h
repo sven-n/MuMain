@@ -7,9 +7,7 @@
 #if !defined(AFX_W_INVENTORYBOX_H__F7181555_C9DF_4294_AA1C_4ED89FD9273B__INCLUDED_)
 #define AFX_W_INVENTORYBOX_H__F7181555_C9DF_4294_AA1C_4ED89FD9273B__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 //OTL....¤Ð..¤Ð
 #include "w_ImageUnit.h"

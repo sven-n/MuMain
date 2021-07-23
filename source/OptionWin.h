@@ -10,9 +10,7 @@
 #if !defined(AFX_OPTIONWIN_H__D197E99D_D0C5_4E07_8095_68F233E7A428__INCLUDED_)
 #define AFX_OPTIONWIN_H__D197E99D_D0C5_4E07_8095_68F233E7A428__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "WinEx.h"
 #include "Button.h"

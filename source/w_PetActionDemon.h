@@ -10,9 +10,7 @@
 #if !defined(AFX_W_PetActionDemon_H__C962E1B9_079B_4B48_AC98_62CCFBF3CBDB__INCLUDED_)
 #define AFX_W_PetActionDemon_H__C962E1B9_079B_4B48_AC98_62CCFBF3CBDB__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 BoostSmartPointer(PetActionDemon);
 class PetActionDemon : public PetAction

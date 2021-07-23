@@ -9,9 +9,7 @@
 
 #include "w_UIWnd.h"
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 BoostSmartPointer( ShopTopModule );
 class ShopTopModule : public Module, public ShopServerProxyHandler

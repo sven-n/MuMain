@@ -10,9 +10,7 @@
 #if !defined(AFX_UIMNG_H__9C8B9D12_9584_47C7_8F6E_6E9F402ACB65__INCLUDED_)
 #define AFX_UIMNG_H__9C8B9D12_9584_47C7_8F6E_6E9F402ACB65__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "PList.h"
 

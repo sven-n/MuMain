@@ -7,9 +7,7 @@
 #if !defined(AFX_W_PANEL_H__D0B291FA_8F36_4163_B02C_54BE645826E6__INCLUDED_)
 #define AFX_W_PANEL_H__D0B291FA_8F36_4163_B02C_54BE645826E6__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_ImageUnit.h"
 #include "w_UIWnd.h"

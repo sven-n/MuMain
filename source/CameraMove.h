@@ -5,9 +5,7 @@
 #if !defined(AFX_CAMERAMOVE_H__B3723780_481C_43B7_B72C_5D1782D8324C__INCLUDED_)
 #define AFX_CAMERAMOVE_H__B3723780_481C_43B7_B72C_5D1782D8324C__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <vector>
 #include <string>

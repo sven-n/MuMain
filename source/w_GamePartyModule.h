@@ -7,9 +7,7 @@
 #if !defined(AFX_W_GAMEPARTYMODULE_H__00369957_94C4_4B72_93E1_1B04EF78FE15__INCLUDED_)
 #define AFX_W_GAMEPARTYMODULE_H__00369957_94C4_4B72_93E1_1B04EF78FE15__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 BoostSmartPointer( GamePartyModule );
 class GamePartyModule : public Module, public GameServerProxyHandler 

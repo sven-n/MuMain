@@ -7,9 +7,7 @@
 
 #ifdef LDK_ADD_CS7_UNICORN_PET
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_PetAction.h"
 #include "ZzzBMD.h"

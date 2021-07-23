@@ -7,9 +7,7 @@
 #if !defined(AFX_W_IMEDEVICE_H__0FF214B1_6A4B_49DD_8717_A6111B3F1ED3__INCLUDED_)
 #define AFX_W_IMEDEVICE_H__0FF214B1_6A4B_49DD_8717_A6111B3F1ED3__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_typedevice.h"
 #include "w_InputProxy.h"

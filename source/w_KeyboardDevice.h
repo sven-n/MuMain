@@ -7,9 +7,7 @@
 #if !defined(AFX_W_KEYBOARDDEVICE_H__A1498391_959C_4304_AC01_58CE93D03254__INCLUDED_)
 #define AFX_W_KEYBOARDDEVICE_H__A1498391_959C_4304_AC01_58CE93D03254__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <dinput.h>
 #include "w_typedevice.h"

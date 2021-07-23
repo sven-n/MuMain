@@ -7,9 +7,7 @@
 #if !defined(AFX_W_INPUTSYSTEM_H__27D210BC_DDDD_4A76_972E_AB6E6B3F4C01__INCLUDED_)
 #define AFX_W_INPUTSYSTEM_H__27D210BC_DDDD_4A76_972E_AB6E6B3F4C01__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_MouseDevice.h"
 #include "w_KeyboardDevice.h"

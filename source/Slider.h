@@ -10,9 +10,7 @@
 #if !defined(AFX_SLIDER_H__51DCB080_BB6D_4486_BD3E_6A0CA739DD85__INCLUDED_)
 #define AFX_SLIDER_H__51DCB080_BB6D_4486_BD3E_6A0CA739DD85__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "Button.h"
 

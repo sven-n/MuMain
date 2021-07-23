@@ -7,9 +7,7 @@
 #if !defined(AFX_W_BUILDSYSTEM_H__40403F88_C341_4728_9D8E_D5005A519406__INCLUDED_)
 #define AFX_W_BUILDSYSTEM_H__40403F88_C341_4728_9D8E_D5005A519406__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 /*
 	절대 Build 함수를 자주 이용하지 말자. 함수 콜도 많은 비용을 소모 할 수 있다.

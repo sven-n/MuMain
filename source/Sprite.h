@@ -10,9 +10,7 @@
 #if !defined(AFX_SPRITE_H__1696B800_F6E1_4AB2_AA02_F67BBA8EFD2E__INCLUDED_)
 #define AFX_SPRITE_H__1696B800_F6E1_4AB2_AA02_F67BBA8EFD2E__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "ZzzTexture.h"
 #include "UIBaseDef.h"

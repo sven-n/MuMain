@@ -7,9 +7,7 @@
 #if !defined(AFX_W_MESSAGEBOXMODULE_H__5FCDC925_B524_4156_8388_5DE4AA38E75A__INCLUDED_)
 #define AFX_W_MESSAGEBOXMODULE_H__5FCDC925_B524_4156_8388_5DE4AA38E75A__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 BoostSmartPointer( MessageBoxModule );
 class MessageBoxModule : public Module

@@ -7,9 +7,7 @@
 #if !defined(AFX_W_CLIENTSYSTEM_H__BFCD8B0E_724D_490A_AA71_5E0DA827EC1B__INCLUDED_)
 #define AFX_W_CLIENTSYSTEM_H__BFCD8B0E_724D_490A_AA71_5E0DA827EC1B__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_Task.h"
 #include "w_Module.h"

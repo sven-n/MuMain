@@ -5,9 +5,7 @@
 #if !defined(AFX_UIREFINERY_H__29D29488_91BA_4EB6_AEE3_F936A9C872EE__INCLUDED_)
 #define AFX_UIREFINERY_H__29D29488_91BA_4EB6_AEE3_F936A9C872EE__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////// JewelHarmony info ///////////////////////////

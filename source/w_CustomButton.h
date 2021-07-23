@@ -7,9 +7,7 @@
 #if !defined(AFX_W_CUSTOMBUTTON_H__EB9D7B0A_C257_4C5A_B309_E0E12F8DB262__INCLUDED_)
 #define AFX_W_CUSTOMBUTTON_H__EB9D7B0A_C257_4C5A_B309_E0E12F8DB262__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_ImageUnit.h"
 #include "w_UIWnd.h"

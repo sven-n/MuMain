@@ -10,9 +10,7 @@
 #if !defined(AFX_SYSMENUWIN_H__66B83E6D_1A2F_43FB_812F_78F24BB0EF6C__INCLUDED_)
 #define AFX_SYSMENUWIN_H__66B83E6D_1A2F_43FB_812F_78F24BB0EF6C__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "WinEx.h"
 #include "Button.h"

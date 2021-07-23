@@ -13,9 +13,7 @@
 #if !defined(AFX_TEXT_H__187E89A7_433E_496C_994F_0D3B2BDE8144__INCLUDED_)
 #define AFX_TEXT_H__187E89A7_433E_496C_994F_0D3B2BDE8144__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "UIBaseDef.h"
 #include "TextBitmap.h"

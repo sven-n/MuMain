@@ -10,9 +10,7 @@
 #if !defined(AFX_W_PETACTIONROUND_H__74746333_F761_43C8_BAA7_AC9BB6F2F858__INCLUDED_)
 #define AFX_W_PETACTIONROUND_H__74746333_F761_43C8_BAA7_AC9BB6F2F858__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 BoostSmartPointer(PetActionRound);
 class PetActionRound : public PetAction

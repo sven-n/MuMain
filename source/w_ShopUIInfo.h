@@ -7,9 +7,7 @@
 #if !defined(AFX_W_SHOPUIINFO_H__7FE2742E_BCF7_4DAE_8493_F897AD7C7D3D__INCLUDED_)
 #define AFX_W_SHOPUIINFO_H__7FE2742E_BCF7_4DAE_8493_F897AD7C7D3D__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 BoostSmartPointer( ShopUIInfo );
 class ShopUIInfo  

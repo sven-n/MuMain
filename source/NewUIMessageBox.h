@@ -5,9 +5,7 @@
 #if !defined(AFX_NEWUIMESSAGEBOX_H__04F9569D_E943_4995_8FB6_9EF3CB57AF82__INCLUDED_)
 #define AFX_NEWUIMESSAGEBOX_H__04F9569D_E943_4995_8FB6_9EF3CB57AF82__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "NewUIBase.h"
 #include "./ExternalObject/leaf/xstreambuf.h"

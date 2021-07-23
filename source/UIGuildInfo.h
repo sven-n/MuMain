@@ -13,13 +13,9 @@
 #if !defined(AFX_UIGUILDINFO_H__EC7AE059_4458_4AA3_A31E_C893AEFDECD2__INCLUDED_)
 #define AFX_UIGUILDINFO_H__EC7AE059_4458_4AA3_A31E_C893AEFDECD2__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 
 #include "UIWindows.h"
-
 
 class CUIManager;
 class CUIGuildInfo;

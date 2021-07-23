@@ -7,9 +7,7 @@
 #if !defined(AFX_W_PETPROCESS_H__95A7D82D_B7F0_405F_A95B_FD4CBB548E5D__INCLUDED_)
 #define AFX_W_PETPROCESS_H__95A7D82D_B7F0_405F_A95B_FD4CBB548E5D__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "w_BasePet.h"
 #include "w_PetAction.h"

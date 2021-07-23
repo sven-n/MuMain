@@ -7,9 +7,7 @@
 #if !defined(AFX_UIDEFAULTBASE_H__9F7419C7_E7DA_4EED_B32B_A40D3F6932F1__INCLUDED_)
 #define AFX_UIDEFAULTBASE_H__9F7419C7_E7DA_4EED_B32B_A40D3F6932F1__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #define UIInitializeFunction( classname ) \
 	public: \
