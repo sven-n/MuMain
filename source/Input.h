@@ -1,9 +1,5 @@
 //*****************************************************************************
 // File: Input.h
-//
-// Desc: interface for the CInput class.
-//		 Singleton 패턴.
-//
 // producer: Ahn Sang-Kyu
 //*****************************************************************************
 
@@ -12,55 +8,51 @@
 
 #pragma once
 
-#ifdef KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-#include "NewUICommon.h"
-#endif // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-
 class CInput
 {
 protected:
 	HWND	m_hWnd;
 
-	POINT	m_ptCursor;			// 마우스 커서 좌표.
-	long	m_lDX;				// X축 변화량.
-	long	m_lDY;				// Y축 변화량.
-//	long	m_lDZ;				// Z축 변화량(mouse의 휠).
-	bool	m_bLBtnDn;			// 왼쪽 버튼 Down.
-	bool	m_bLBtnHeldDn;		// 왼쪽 버튼 Down 유지.
-	bool	m_bLBtnUp;			// 왼쪽 버튼 Up.
-	bool	m_bLBtnDbl;			// 왼쪽 버튼 더블 클릭.
-	bool	m_bRBtnDn;			// 오른쪽 버튼 Down.
-	bool	m_bRBtnHeldDn;		// 오른쪽 버튼 Down 유지.
-	bool	m_bRBtnUp;			// 오른쪽 버튼 Up.
-	bool	m_bRBtnDbl;			// 오른쪽 버튼 더블 클릭.
-	bool	m_bMBtnDn;			// 가운데(휠) 버튼 Down.
-	bool	m_bMBtnHeldDn;		// 가운데(휠) 버튼 Down 유지.
-	bool	m_bMBtnUp;			// 가운데(휠) 버튼 Up.
-	bool	m_bMBtnDbl;			// 가운데(휠) 버튼 더블 클릭.
+	POINT	m_ptCursor;
+	long	m_lDX;
+	long	m_lDY;
+//	long	m_lDZ;
+	bool	m_bLBtnDn;
+	bool	m_bLBtnHeldDn;
+	bool	m_bLBtnUp;
+	bool	m_bLBtnDbl;	
+	bool	m_bRBtnDn;
+	bool	m_bRBtnHeldDn;
+	bool	m_bRBtnUp;
+	bool	m_bRBtnDbl;
+	bool	m_bMBtnDn;
+	bool	m_bMBtnHeldDn;
+	bool	m_bMBtnUp;
+	bool	m_bMBtnDbl;
 
-	long	m_lScreenWidth;		// 스크린(BackBuffer) 가로 크기.
-	long	m_lScreenHeight;	// 스크린(BackBuffer) 세로 크기.
-	bool	m_bLeftHand;		// 왼손잡이인가?
-	bool	m_bTextEditMode;	// 채팅 모드인가?(TextEdit중.)
+	long	m_lScreenWidth;	
+	long	m_lScreenHeight;
+	bool	m_bLeftHand;
+	bool	m_bTextEditMode;
 
-	POINT	m_ptFormerCursor;		// 이전 마우스 커서 좌표.
-	double	m_dDoubleClickTime;		// 더블 클릭 시간.
-	double	m_dBtn0LastClickTime;	// 버튼0이 마지막으로 클릭한 시간.
-	double	m_dBtn1LastClickTime;	// 버튼1이 마지막으로 클릭한 시간.
-	double	m_dBtn2LastClickTime;	// 버튼2가 마지막으로 클릭한 시간.
-	bool	m_bFormerBtn0Dn;		// 이전에 버튼0가 Down이었나?
-	bool	m_bFormerBtn1Dn;		// 이전에 버튼1가 Down이었나?
-	bool	m_bFormerBtn2Dn;		// 이전에 버튼2가 Down이었나?
+	POINT	m_ptFormerCursor;
+	double	m_dDoubleClickTime;
+	double	m_dBtn0LastClickTime;
+	double	m_dBtn1LastClickTime;
+	double	m_dBtn2LastClickTime;
+	bool	m_bFormerBtn0Dn;
+	bool	m_bFormerBtn1Dn;
+	bool	m_bFormerBtn2Dn;
 	
 #ifdef NEW_USER_INTERFACE_UTIL
 	typedef std::list< BoostWeak_Ptr(InputMessageHandler) >   HandlerList;
 	
     HandlerList										m_HandlerList;
 	int												m_PosValue;
-#endif //NEW_USER_INTERFACE_UTIL
+#endif
 
-protected:						// 생성자를 protected로 선언해서
-	CInput();					//외부에서의 생성을 강제로 막음.
+protected:
+	CInput();
 
 public:
 	virtual ~CInput();
@@ -69,17 +61,12 @@ public:
 	bool Create(HWND hWnd, long lScreenWidth, long lScreenHeight);
 	void Update();
 
-	// 키를 눌렀는가?(누르는 순간 true)
-	// 이 함수는 아직 불안 함. 키를 누른 후 첫 프레임에 true가 되고 다음 프레임
-	//이후엔 당분간 false가 되지만 곧 true로 고정. 아마도 메모장 등에서 키를 누
-	//르고 있으면 당분간 문자가 안찍히다가 연속으로 찍히는 것과 관련이 있을 듯.
 	bool IsKeyDown(int nVirtualKeyCode)
 	{
 		if (m_bTextEditMode)
 			return false;
 		return SEASON3B::IsPress(nVirtualKeyCode);
 	}
-	// 키를 누루고 있는가?
 	bool IsKeyHeldDown(int nVirtualKeyCode)
 	{
 		if (m_bTextEditMode)
@@ -119,7 +106,7 @@ public:
 private:
 	//Mouse
 	void HandleMouseMessage( eKeyType key, eKeyStateType type, int value );
-#endif //NEW_USER_INTERFACE_UTIL
+#endif
 };
 
-#endif // !defined(AFX_INPUT_H__56D42544_2BF6_4B84_B368_F36CACDFEF1E__INCLUDED_)
+#endif

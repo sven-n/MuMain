@@ -389,8 +389,9 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 		if (pObject->HiddenMesh != -2)
 		{
  			pObject->HiddenMesh = -2;
-#ifdef _VS2008PORTING
+
 			int icntIndex=0;
+
 			for(int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
 			{
 				icntIndex = i;
@@ -402,16 +403,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			CreateCharacterPointer(pCharacter,MODEL_PLAYER,0,0,0);
 			Vector(0.3f,0.3f,0.3f,pNewObject->Light);
 			pCharacter->Key = icntIndex;
-#else // _VS2008PORTING
-			for(int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
-				if (!CharactersClient[i].Object.Live) break;
 
-			CHARACTER * pCharacter = &CharactersClient[i];
-			OBJECT * pNewObject = &CharactersClient[i].Object;
-			CreateCharacterPointer(pCharacter,MODEL_PLAYER,0,0,0);
-			Vector(0.3f,0.3f,0.3f,pNewObject->Light);
-			pCharacter->Key = i;
-#endif // _VS2008PORTING
 			int Level = 0;
 			switch(pObject->Type)
 			{
@@ -622,19 +614,16 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			pNewObject->PriorAnimationFrame = pNewObject->AnimationFrame = 
 				rand() % Models[pNewObject->Type].Actions[pNewObject->CurrentAction].NumAnimationKeys;
 			pObject->Owner = pNewObject;
-#ifdef _VS2008PORTING
 			pObject->SubType = icntIndex;
-#else // _VS2008PORTING
-			pObject->SubType = i;
-#endif // _VS2008PORTING
 		}
 		break;
 	case 149:		case 150:		case 151:		case 152:		case 153:		case 154:		case 155:
 		if (pObject->HiddenMesh != -2)
 		{
  			pObject->HiddenMesh = -2;
-#ifdef _VS2008PORTING
+
 			int icntIndex = 0;
+
 			for(int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
 			{
 				icntIndex = i;
@@ -648,38 +637,15 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 
 			switch (pObject->Type)
 			{
-				//case 148: CreateMonster(418, 0, 0, icntIndex); break;		148번은 염소로 사용
-			case 149: CreateMonster(419, 0, 0, icntIndex); break;
-			case 150: CreateMonster(420, 0, 0, icntIndex); break;
-			case 151: CreateMonster(421, 0, 0, icntIndex); break;
-				//case 152: CreateMonster(422, 0, 0, icntIndex); break;
-			case 153: CreateMonster(423, 0, 0, icntIndex); break;
-				//case 154: CreateMonster(424, 0, 0, icntIndex); break;
-			case 155: CreateMonster(425, 0, 0, icntIndex); break;
+					//case 148: CreateMonster(418, 0, 0, icntIndex); break;
+				case 149: CreateMonster(419, 0, 0, icntIndex); break;
+				case 150: CreateMonster(420, 0, 0, icntIndex); break;
+				case 151: CreateMonster(421, 0, 0, icntIndex); break;
+					//case 152: CreateMonster(422, 0, 0, icntIndex); break;
+				case 153: CreateMonster(423, 0, 0, icntIndex); break;
+					//case 154: CreateMonster(424, 0, 0, icntIndex); break;
+				case 155: CreateMonster(425, 0, 0, icntIndex); break;
 			}
-#else // _VS2008PORTING
-			for(int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
-			{
-				if (!CharactersClient[i].Object.Live)
-				{
-					break;
-				}
-			}
-
-			OBJECT * pNewObject = &CharactersClient[i].Object;
-
-			switch (pObject->Type)
-			{
-				//case 148: CreateMonster(418, 0, 0, i); break;		148번은 염소로 사용
-			case 149: CreateMonster(419, 0, 0, i); break;
-			case 150: CreateMonster(420, 0, 0, i); break;
-			case 151: CreateMonster(421, 0, 0, i); break;
-				//case 152: CreateMonster(422, 0, 0, i); break;
-			case 153: CreateMonster(423, 0, 0, i); break;
-				//case 154: CreateMonster(424, 0, 0, i); break;
-			case 155: CreateMonster(425, 0, 0, i); break;
-			}
-#endif // _VS2008PORTING
 
 			VectorCopy(pObject->Position, pNewObject->Position);
 			VectorCopy(pObject->Angle, pNewObject->Angle);
@@ -1206,7 +1172,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 			CreateParticle(BITMAP_LIGHT, vPos, pObject->Angle, Light, 12, fScale, pObject);
 		}
 		break;
-	case MODEL_ELBELAND_MARCE:	// 마법 파는 NPC 마르세
+	case MODEL_ELBELAND_MARCE:
 		{
 			Vector(10.0f, 0.0f, 0.0f, vRelative);
 			pModel->TransformPosition(pObject->BoneTransform[81], vRelative, vPos, true);
@@ -1220,19 +1186,15 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 			CreateSprite(BITMAP_FLARE_BLUE, vPos, fScale*0.8f, Light, pObject, -WorldTime*0.1f);
 		}
 		break;
-	case MODEL_MONSTER01+132:	// 저주받은 리치 불
-#ifdef _VS2008PORTING
+	case MODEL_MONSTER01+132:
 		for (int i = 0; i < 4; ++i)
-#else // _VS2008PORTING
-		for (i = 0; i < 4; ++i)
-#endif // _VS2008PORTING
 		{
 			Vector(0, (rand()%300-150)*0.1f, (rand()%200-100)*0.1f, vRelative);
 			pModel->TransformPosition(pObject->BoneTransform[30],vRelative,vPos,true);
 			CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, pObject->Light, 0, 1, pObject);
 		}
 		break;
-	case MODEL_MONSTER01+133:	// 토템 골램 사망동작
+	case MODEL_MONSTER01+133:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			vec3_t Position;
@@ -1243,7 +1205,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 		{
 			if (pObject->LifeTime == 100)
 			{
-				pObject->LifeTime = 90;	// 한번만 실행
+				pObject->LifeTime = 90;
 				pObject->m_bRenderShadow = false;
 
 				vec3_t vRelativePos, vWorldPos, Light;
@@ -1271,11 +1233,8 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 
 				pModel->TransformPosition(pObject->BoneTransform[5], vRelativePos, vWorldPos, true);
 				VectorCopy(vWorldPos, vRelativePos);
-#ifdef _VS2008PORTING
+
 				for (int i = 0; i < 6; ++i)
-#else // _VS2008PORTING
-				for (i = 0; i < 6; ++i)
-#endif // _VS2008PORTING
 				{
 					vWorldPos[0] = vRelativePos[0] + rand()%160-80;
 					vWorldPos[1] = vRelativePos[1] + rand()%160-80;
@@ -1284,11 +1243,8 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 				}
 
 				Vector(0.5f,0.5f,0.5f,Light);	// 연기 펑
-#ifdef _VS2008PORTING
+
 				for ( int i = 0; i < 20; ++i)
-#else // _VS2008PORTING
-				for ( i = 0; i < 20; ++i)
-#endif // _VS2008PORTING
 				{
 					vWorldPos[0] = vRelativePos[0] + rand()%160-80;
 					vWorldPos[1] = vRelativePos[1] + rand()%160-80;
@@ -1315,10 +1271,9 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 
 	if (fDistance > 500.0f) return true;
 
-	// 사운드 처리
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+128:	// 기괴한 토끼
+	case MODEL_MONSTER01+128:
 		if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{
 			PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_ATTACK01);
@@ -1328,7 +1283,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+129:	// 흉측한 토끼
+	case MODEL_MONSTER01+129:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)
@@ -1345,7 +1300,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_ELBELAND_RABBITUGLY_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+130:	// 늑대인간
+	case MODEL_MONSTER01+130:
 		if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2
 			|| pObject->CurrentAction == MONSTER01_WALK)
 		{
@@ -1363,7 +1318,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_ELBELAND_WOLFHUMAN_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+131:	// 오염된 나비
+	case MODEL_MONSTER01+131:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)
@@ -1376,7 +1331,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+132:	// 저주받은 리치 불
+	case MODEL_MONSTER01+132:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)
@@ -1393,7 +1348,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_ELBELAND_CURSERICH_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+133:	// 토템골렘
+	case MODEL_MONSTER01+133:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 2 == 0)
@@ -1414,7 +1369,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+134:	// 괴수우씨
+	case MODEL_MONSTER01+134:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)
@@ -1431,7 +1386,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_ELBELAND_BEASTWOO_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+135:	// 괴수우씨대장
+	case MODEL_MONSTER01+135:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)

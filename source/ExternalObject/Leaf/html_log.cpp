@@ -33,11 +33,7 @@ bool CHtmlLog::LoadHtmlLog(const std::string& filename)
 		TYPE_END_BODY
 	} KeyWordType = TYPE_NONE;
 
-#ifdef _VS2008PORTING
 	for(int offset=0; offset<(int)size; offset++) 
-#else // _VS2008PORTING
-	for(int offset=0; offset<size; offset++) 
-#endif // _VS2008PORTING
 	{
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		bool bBeginSyntax = false;

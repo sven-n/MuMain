@@ -526,22 +526,18 @@ BYTE	CSQuest::CheckQuestState ( BYTE state )
 	return m_byCurrState;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 대화를 보여준다.
-//////////////////////////////////////////////////////////////////////////
 void    CSQuest::ShowDialogText ( int iDialogIndex )
 {
 	g_iCurrentDialogScript = iDialogIndex;
-	// 1. 텍스트 초기화
+
 	g_iNumLineMessageBoxCustom = SeparateTextIntoLines( g_DialogScript[g_iCurrentDialogScript].m_lpszText, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 
-	// 3. 대답 초기화
 	char lpszAnswer[MAX_LENGTH_ANSWER+8];
 	g_iNumAnswer = 0;
 	ZeroMemory( g_lpszDialogAnswer, MAX_ANSWER_FOR_DIALOG * NUM_LINE_DA * MAX_LENGTH_CMB);
-#ifdef _VS2008PORTING
+
 	int iTextSize=0;
+
 	for ( int i = 0; i < g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer; ++i)
 	{
 		wsprintf( lpszAnswer, "%d) %s", i + 1, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
@@ -553,36 +549,15 @@ void    CSQuest::ShowDialogText ( int iDialogIndex )
 		g_iNumAnswer++;
 		iTextSize = i;
 	}
+
 	if ( 0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
 	{
 		wsprintf( lpszAnswer, "%d) %s", iTextSize + 1, GlobalText[609]);
 		strcpy( g_lpszDialogAnswer[0][0], lpszAnswer );
 		g_iNumAnswer = 1;
 	}
-#else // _VS2008PORTING
-	for ( int i = 0; i < g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer; ++i)
-	{
-		wsprintf( lpszAnswer, "%d) %s", i + 1, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
-		int iNumLine = SeparateTextIntoLines( lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB );
-		if ( iNumLine < NUM_LINE_DA - 1)
-		{
-			g_lpszDialogAnswer[i][iNumLine][0] = '\0';
-		}
-		g_iNumAnswer++;
-	}
-	if ( 0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
-	{
-		wsprintf( lpszAnswer, "%d) %s", i + 1, GlobalText[609]);
-		strcpy( g_lpszDialogAnswer[0][0], lpszAnswer );
-		g_iNumAnswer = 1;
-	}
-#endif // _VS2008PORTING
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  자신의 퀘스트 정보를 보여주는 창.
-//////////////////////////////////////////////////////////////////////////
 void CSQuest::ShowQuestPreviewWindow ( int index )
 {
     if(index != -1)
@@ -595,16 +570,12 @@ void CSQuest::ShowQuestPreviewWindow ( int index )
     BYTE tmp = m_byCurrQuestIndex;
     m_byCurrQuestIndex = m_byCurrQuestIndexWnd;
 
-    //  퀘스트 검색.
     CheckQuestState ();
     ShowDialogText ( m_shCurrPage );
 
     m_byCurrQuestIndex = tmp;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  NPC와의 대화를 통해 나오는 퀘스트 내용을 보여주는 창.
-//////////////////////////////////////////////////////////////////////////
 void    CSQuest::ShowQuestNpcWindow ( int index )
 {
     if ( index!=-1 ) m_byCurrQuestIndex = index;
@@ -617,9 +588,6 @@ void    CSQuest::ShowQuestNpcWindow ( int index )
     ShowDialogText ( m_shCurrPage );
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 수행 조건을 만족 하는가?
-//////////////////////////////////////////////////////////////////////////
 bool    CSQuest::BeQuestItem ( void )
 {
     bool bCompleteItem = false;
@@ -681,15 +649,6 @@ bool    CSQuest::BeQuestItem ( void )
     return bCompleteItem;
 }
 
-//*****************************************************************************
-// 함수 이름 : FindQuestItemsInInven()
-// 함수 설명 : 인벤토리에서 퀘스트 아이템을 찾음.
-// 반환 값	 : 모자른 개수.
-//			   0 이면 찾을 아이템이 인벤토리에 찾을 개수 이상 있다는 것.
-// 매개 변수 : nType	: 아이템 타잎.
-//			   nCount	: 아이템 개수.
-//			   nLevel	: 아이템 레벨. -1일 경우 레벨 무시. 기본값은 -1.
-//*****************************************************************************
 int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
 {
 	SEASON3B::CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
@@ -715,12 +674,6 @@ int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
 	return nCount - nFindItemCount;
 }
 
-//*****************************************************************************
-// 함수 이름 : GetKillMobCount()
-// 함수 설명 : 죽인 몬스터 마리수를 구함.
-// 반환 값	 : 죽인 몬스터 마리수.
-// 매개 변수 : nMobType	: 몬스터 타잎.
-//*****************************************************************************
 int CSQuest::GetKillMobCount(int nMobType)
 {
 	for (int i = 0; i < 5; ++i)
@@ -732,9 +685,6 @@ int CSQuest::GetKillMobCount(int nMobType)
 	return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 다음 진행 처리.
-//////////////////////////////////////////////////////////////////////////
 bool CSQuest::ProcessNextProgress()
 {
 	QUEST_ATTRIBUTE* lpQuest = &m_Quest[m_byCurrQuestIndex];
@@ -750,9 +700,6 @@ bool CSQuest::ProcessNextProgress()
     }
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 창에서의 퀘스트.
-//////////////////////////////////////////////////////////////////////////
 void CSQuest::SetKillMobInfo(int* anKillMobInfo)
 {
 	for (int i = 0; i < 10; i += 2)
@@ -762,26 +709,18 @@ void CSQuest::SetKillMobInfo(int* anKillMobInfo)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  악마의 광장에 관한 내용.
-//////////////////////////////////////////////////////////////////////////
-void    CSQuest::RenderDevilSquare ( void )
+void CSQuest::RenderDevilSquare ( void )
 {
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetTextColor(230, 230, 230, 255);
 	g_pRenderText->SetBgColor(20, 20, 20, 255);
 	g_pRenderText->RenderText(m_iStartX+95-60, m_iStartY+12, GlobalText[1145],120, 0, RT3_SORT_CENTER);
 
-    //  퀘스트 이름.
 	g_pRenderText->SetTextColor(200, 220, 255, 255);
 //	RenderText ( m_iStartX+95-73, m_iStartY+22, m_Quest[m_byCurrQuestIndex].strQuestName, 150*WindowWidth/640, true );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  블러드캐슬의 관한 내용.
-//////////////////////////////////////////////////////////////////////////
-void    CSQuest::RenderBloodCastle ( void )
+void CSQuest::RenderBloodCastle ( void )
 {
     char Text[100];
 	g_pRenderText->SetFont(g_hFontBold);
@@ -789,7 +728,6 @@ void    CSQuest::RenderBloodCastle ( void )
 	g_pRenderText->SetBgColor(20, 20, 20, 255);
 	g_pRenderText->RenderText(m_iStartX+95-60, m_iStartY+12, GlobalText[1146],120, 0, RT3_SORT_CENTER);
 
-	//  퀘스트 이름.
 	g_pRenderText->SetTextColor(223, 191, 103, 255);
 	g_pRenderText->SetBgColor(0);
 	sprintf ( Text, GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
@@ -798,7 +736,6 @@ void    CSQuest::RenderBloodCastle ( void )
 	g_pRenderText->RenderText(m_iStartX+85, m_iStartY+100, GlobalText[877], 0 ,0, RT3_WRITE_CENTER);
     g_pRenderText->RenderText(m_iStartX+105, m_iStartY+120, GlobalText[878], 0 ,0, RT3_WRITE_CENTER);
 
-    //  이용 가능 횟수.
 	g_pRenderText->SetFont(g_hFontBig);
 	sprintf ( Text, GlobalText[868], m_byEventCount[m_byQuestType] );
 	g_pRenderText->RenderText(m_iStartX+95, m_iStartY+65+60*4, Text, 0 ,0, RT3_WRITE_CENTER);

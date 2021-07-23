@@ -515,11 +515,8 @@ int CMixRecipes::CheckRecipeSimilarity(int iNumMixItems, CMixItem * pMixItems)
 		memset(m_iMixSourceTest, 0, sizeof(int) * MAX_MIX_SOURCES);
 		for (int i = 0; i < (*iter)->m_iNumMixSoruces; ++i)
 			m_iMixSourceTest[i] = (*iter)->m_MixSources[i].m_iCountMax;	// 조합법 충족 검사용 카운트 변수를 초기화
-#ifdef _VS2008PORTING
+
 		for (int i = 0; i < iNumMixItems; ++i)
-#else // _VS2008PORTING
-		for (i = 0; i < iNumMixItems; ++i)
-#endif // _VS2008PORTING
 			pMixItems[i].m_iTestCount = pMixItems[i].m_iCount;	// 검사용 카운트 변수를 초기화
 
 		iSimilarityPoint = CheckRecipeSimilaritySub(iter, iNumMixItems, pMixItems);

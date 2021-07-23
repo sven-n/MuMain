@@ -224,11 +224,7 @@ void SEASON3B::CNewUIChatInputBox::AddChatHistory(const type_string& strText)
 
 void SEASON3B::CNewUIChatInputBox::RemoveChatHistory(int index)
 {
-#ifdef _VS2008PORTING
 	if(index >= 0 && index < (int)m_vecChatHistory.size())
-#else // _VS2008PORTING
-	if(index >= 0 && index < m_vecChatHistory.size())
-#endif // _VS2008PORTING
 		m_vecChatHistory.erase(m_vecChatHistory.begin() + index);
 }
 
@@ -249,11 +245,7 @@ void SEASON3B::CNewUIChatInputBox::AddWhsprIDHistory(const type_string& strWhspr
 
 void SEASON3B::CNewUIChatInputBox::RemoveWhsprIDHistory(int index)
 {
-#ifdef _VS2008PORTING
 	if(index >= 0 && index < (int)m_vecWhsprIDHistory.size())
-#else // _VS2008PORTING
-	if(index >= 0 && index < m_vecWhsprIDHistory.size())
-#endif // _VS2008PORTING
 	{
 		m_vecWhsprIDHistory.erase(m_vecWhsprIDHistory.begin() + index);
 	}
@@ -750,12 +742,10 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 		else if(SEASON3B::IsPress(VK_DOWN) && false == m_vecChatHistory.empty())
 		{
 			m_iCurChatHistory++;
-#ifdef _VS2008PORTING
+
 			if(m_iCurChatHistory >= (int)m_vecChatHistory.size())
-#else // _VS2008PORTING
-			if(m_iCurChatHistory >= m_vecChatHistory.size())
-#endif // _VS2008PORTING
 				m_iCurChatHistory = 0;
+
 			m_pChatInputBox->SetText(m_vecChatHistory[m_iCurChatHistory].c_str());
 
 			return false;
@@ -777,12 +767,10 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 		else if(SEASON3B::IsPress(VK_DOWN) && false == m_vecWhsprIDHistory.empty())
 		{
 			m_iCurWhisperIDHistory++;
-#ifdef _VS2008PORTING
+
 			if(m_iCurWhisperIDHistory >= (int)m_vecWhsprIDHistory.size())
-#else // _VS2008PORTING
-			if(m_iCurWhisperIDHistory >= m_vecWhsprIDHistory.size())
-#endif // _VS2008PORTING
 				m_iCurWhisperIDHistory = 0;
+
 			m_pWhsprIDInputBox->SetText(m_vecWhsprIDHistory[m_iCurWhisperIDHistory].c_str());
 
 			return false;

@@ -64,11 +64,8 @@ bool CCameraMove::LoadCameraWalkScript(const std::string& filename)
 
 	size_t size;
 	fread(&size, sizeof(size_t), 1, fp);
-#ifdef _VS2008PORTING
+
 	for(int i=0; i<(int)size; i++) 
-#else // _VS2008PORTING
-	for(int i=0; i<size; i++) 
-#endif // _VS2008PORTING
 	{
 		WAYPOINT* pWayPoint = new WAYPOINT;
 		fread(pWayPoint, sizeof(WAYPOINT), 1, fp);

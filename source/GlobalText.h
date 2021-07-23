@@ -98,11 +98,7 @@ public:
 		if(GTHeader.wSignature != 0x5447)
 			return false;
 
-#ifdef _VS2008PORTING
 		for(int i=0; i<(int)(GTHeader.dwNumberOfText); i++)
-#else // _VS2008PORTING
-		for(int i=0; i<GTHeader.dwNumberOfText; i++)
-#endif // _VS2008PORTING
 		{
 			GLOBALTEXT_STRING_HEADER GTStringHeader;
 			fread(&GTStringHeader, sizeof(GLOBALTEXT_STRING_HEADER), 1, fp);
@@ -191,11 +187,8 @@ protected:
 	{
 		PBYTE pbyBuffer = (PBYTE)(pvBuffer);
 		BYTE byBuxCode[3] = {0xfc,0xcf,0xab};
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<(int)dwSize;i++)
-#else // _VS2008PORTING
-		for(int i=0;i<dwSize;i++)
-#endif // _VS2008PORTING
 			pbyBuffer[i] ^= byBuxCode[i%3];
 	}
 	bool CheckLoadDisposition(int key, DWORD dwLoadDisposition)

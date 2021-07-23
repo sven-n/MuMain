@@ -265,21 +265,21 @@ bool M38Kanturu2nd::Move_Kanturu2nd_Object(OBJECT* o)
 				o->Velocity = 0.02f;
 			}
 			break;
-		case 45:	// 흰안개박스1
-		case 46:	// 흰안개박스2
-		case 47:	// 검은안개박스1
-		case 48:	// 검은안개박스2
-		case 49:	// 푸른안개박스
+		case 45:
+		case 46:
+		case 47:
+		case 48:
+		case 49:
 		case 50:
 		case 51:
-		case 52:	// 먼지불빛박스
-		case 53:	// 물방울 박스
-		case 54:	// 번개박스1
-		case 55:	// 번개박스2
-		case 56:	// 번개박스3
-		case 65:	// 번개박스4
+		case 52:
+		case 53:
+		case 54:
+		case 55:
+		case 56:
+		case 65:
 			{
-				o->HiddenMesh = -2;	// 메쉬 안보이게 하는 기능
+				o->HiddenMesh = -2;
 			}
 			break;
 	}
@@ -291,11 +291,11 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c,OBJECT* o, BMD* b
 {
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+114:	// 페르소나(임시로 번호 지정)
+	case MODEL_MONSTER01+114:
 		{
 		}
 		break;
-	case MODEL_MONSTER01+115:	// 트윈테일(임시로 번호 지정)
+	case MODEL_MONSTER01+115:
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK2 &&
 				(o->AnimationFrame >= 5.5f && o->AnimationFrame <= 6.5f))
@@ -306,31 +306,24 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c,OBJECT* o, BMD* b
 
 				if(World == WD_39KANTURU_3RD)
 				{
-					// 독 연기 이펙트
 					Vector(0.4f,0.9f,0.6f,vLight);
 					for(int i=0; i<2; i++)
 						CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
 
-					// 물방울 올라오는 이펙트
 					Vector(0.4f,1.0f,0.6f,vLight);
 					CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
 				}
 				else
 				{
-					// 독 연기 이펙트
 					Vector(0.4f,0.9f,0.6f,vLight);
 					for(int i=0; i<5; i++)
 					{
 						CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
 					}
 
-					// 물방울 올라오는 이펙트
 					Vector(0.4f,1.0f,0.6f,vLight);
-#ifdef _VS2008PORTING
+
 					for(int i=0; i<2; i++)
-#else // _VS2008PORTING
-					for(i=0; i<2; i++)
-#endif // _VS2008PORTING
 					{
 						CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
 					}
@@ -338,7 +331,7 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c,OBJECT* o, BMD* b
 			}
 		}
 		break;
-	case MODEL_MONSTER01+116:	// 드레드피어(임시로 번호 지정)
+	case MODEL_MONSTER01+116:
 		{
 			
 		}

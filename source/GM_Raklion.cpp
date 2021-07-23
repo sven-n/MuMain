@@ -1983,13 +1983,9 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				fAnimationFrame += fSpeedPerFrame;
 			}
 
-			// 기본 연기 이펙트
 			int iBones[] = { 20, 37, 45, 51 };
-#ifdef _VS2008PORTING
+
 			for (int i = 0; i < 4; ++i)
-#else // _VS2008PORTING
-			for (i = 0; i < 4; ++i)
-#endif // _VS2008PORTING
 			{
 				if (rand()%6 > 0) continue;
 
@@ -2017,7 +2013,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 	// 			}
 
 				if ( 2 <= c->AttackTime && c->AttackTime <= 8)
-				{	// 기 모으기
+				{
 					for ( int j = 0; j < 3; ++j)
 					{
 						vec3_t CurPos;
@@ -2032,7 +2028,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					}
 				}
 				if ( c->AttackTime <= 8)
-				{	// 기 모일 곳 위치
+				{
 					vec3_t Position2 = { 0.0f, 0.0f, 0.0f};
 					b->TransformPosition(o->BoneTransform[26],Position2,o->m_vPosSword,true);
 
@@ -2041,7 +2037,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					o->m_vPosSword[1] += -fDistance * cosf( o->Angle[2]*Q_PI/180.0f);
 				}
 				if ( 6 <= c->AttackTime && c->AttackTime <= 12)
-				{	// 꼬깔 만들기
+				{
 					vec3_t Position;
 					vec3_t Position2 = { 0.0f, 0.0f, 0.0f};
 
@@ -2090,9 +2086,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 		}
 		break;
 #endif	// ADD_RAKLION_IRON_KNIGHT
-	case MODEL_MONSTER01+150:	// 세루판 (보스몬스터)
+	case MODEL_MONSTER01+150:
 		{
-			// 검기 효과
 			vec3_t  Light;
 			Vector(1.0f, 1.2f, 2.f, Light);
 			
@@ -2116,14 +2111,12 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				fAnimationFrame += fSpeedPerFrame;
 			}
 
-			// 이펙트 시작
 			VectorCopy(o->Position, b->BodyOrigin);
 			Vector(0.0f, 0.0f, 0.0f, vRelative);
 
 			float fLumi1 = (sinf(WorldTime*0.004f) + 1.f) * 0.25f;
 			float fLumi2 = (sinf(WorldTime*0.004f) + 1.f) * 0.2f;
 
-			// 머리
 			Vector(0.3f+fLumi1, 0.6f+fLumi1, 1.0f+fLumi1, vLight);
 			Vector(0.0f, 10.0f, 0.0f, vRelative);
 			b->TransformByObjectBone(vPos, o, 9, vRelative);
@@ -2132,7 +2125,6 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			CreateSprite(BITMAP_LIGHT, vPos, 2.0f+fLumi2, vLight, o);
 			CreateSprite(BITMAP_LIGHT, vPos, 3.0f+fLumi2, vLight, o);
 
-			// 지팡이
 			Vector(0.0f, 0.0f, 0.0f, vRelative);
 			fLumi1 = (sinf(WorldTime*0.004f) + 1.f) * 0.1f;
 			Vector(0.1f+fLumi1, 0.2f+fLumi1, 1.0f+fLumi1, vLight);
@@ -2160,7 +2152,6 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			CreateSprite(BITMAP_SHINY+1, vPos, 2.3f+fLumi2, vLight, o, (int)WorldTime*0.08f);
 			// shiny05.jpg
 			CreateSprite(BITMAP_SHINY+6, vPos, 2.3f+fLumi2, vLight, o, (int)WorldTime*0.15f);
-			// 사방으로 퍼지는 파티클
 			CreateParticle( BITMAP_SPARK+1, vPos, o->Angle, vLight, 11, 1.5f );
 
 			b->TransformByObjectBone(vPos, o, 72);
@@ -2172,20 +2163,20 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+151:	// 거대 거미알
-	case MODEL_MONSTER01+152:	// 거대 거미알
-	case MODEL_MONSTER01+153:	// 거대 거미알
+	case MODEL_MONSTER01+151:
+	case MODEL_MONSTER01+152:
+	case MODEL_MONSTER01+153:
 		{
 			return true;
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
-	case MODEL_MONSTER01+205:	// 다크 자이언트 메머드
+	case MODEL_MONSTER01+205:
 		{
 
 		}
 		break;
-	case MODEL_MONSTER01+206:	// 다크 아이스 자이언트
+	case MODEL_MONSTER01+206:
 		{
 			if (o->CurrentAction == MONSTER01_ATTACK2 && o->AnimationFrame > 7.4f && o->AnimationFrame < 7.7f)
 			{
@@ -2204,7 +2195,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 						CreateEffect(MODEL_EFFECT_BROKEN_ICE0+rand()%3,vPos,o->Angle,vLight,0);
 				}
 				
-				o->LifeTime = 90;	// 한 번만 실행(적절한 변수가 없어서 o->LifeTime 사용)
+				o->LifeTime = 90;
 				o->m_bRenderShadow = false;
 				
 				Vector(1.0f, 1.0f, 1.0f,vLight);
@@ -2224,9 +2215,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+208:	// 다크 아이언 나이트
+	case MODEL_MONSTER01+208:
 		{
-			// 전 프레임에 검기
 			vec3_t  Light;
 			Vector(1.0f, 1.2f, 2.f, Light);
 
@@ -2250,13 +2240,9 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				fAnimationFrame += fSpeedPerFrame;
 			}
 
-			// 기본 연기 이펙트
 			int iBones[] = { 20, 37, 45, 51 };
-#ifdef _VS2008PORTING
+
 			for (int i = 0; i < 4; ++i)
-#else // _VS2008PORTING
-			for (i = 0; i < 4; ++i)
-#endif // _VS2008PORTING
 			{
 				if (rand()%6 > 0) continue;
 
@@ -2270,8 +2256,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				}
 
 				b->TransformByObjectBone(vPos, o, iBones[i]);
-				CreateParticle(BITMAP_SMOKE,vPos,o->Angle,vLight,50,1.0f);	// 연기
-				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,o->Angle,vLight,2,0.8f);	// 3종 연기
+				CreateParticle(BITMAP_SMOKE,vPos,o->Angle,vLight,50,1.0f);
+				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,o->Angle,vLight,2,0.8f);
 			}
 
 			if (o->CurrentAction == MONSTER01_ATTACK2)

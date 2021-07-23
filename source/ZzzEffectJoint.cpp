@@ -7072,11 +7072,8 @@ void MoveJoint( JOINT *o, int i)
 			if ( o->LifeTime>9 )
 			{
 				AngleMatrix ( o->Angle, Matrix );
-#ifdef _VS2008PORTING
+
 				for ( int i=0; i<30; ++i )
-#else // _VS2008PORTING
-				for ( i=0; i<30; ++i )
-#endif // _VS2008PORTING
 				{
 					CreateTail ( o, Matrix );
 					

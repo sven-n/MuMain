@@ -895,11 +895,8 @@ namespace giPetManager
 				sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 				
 				DWORD gold = CharacterMachine->Gold;
-#ifdef _VS2008PORTING
+
 				if(((int)gold < price) && (g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE))
-#else // _VS2008PORTING
-				if(gold < price && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
-#endif // _VS2008PORTING
 				{
 					TextListColor[TextNum] = TEXT_COLOR_RED;
 					TextBold[TextNum] = true;
@@ -1173,11 +1170,8 @@ namespace giPetManager
                             sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
                             
                             DWORD gold = CharacterMachine->Gold;
-#ifdef _VS2008PORTING
+
 							if(((int)gold < price) && (g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE))
-#else // _VS2008PORTING
-							if(gold < price && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
-#endif // _VS2008PORTING
                             {
                                 TextListColor[TextNum] = TEXT_COLOR_RED;
                                 TextBold[TextNum] = true;

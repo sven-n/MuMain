@@ -562,13 +562,8 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 	bool bLoop = true;
 	while(bLoop)
 	{
-#ifdef _VS2008PORTING
 		int prev_offset = 0;
 		for(int cur_offset = 0; cur_offset<(int)strRemainText.size(); )
-#else // _VS2008PORTING
-		int cur_offset = 0, prev_offset = 0;
-		for(; cur_offset<strRemainText.size(); )
-#endif // _VS2008PORTING
 		{
 			prev_offset = cur_offset;
 			size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str()+cur_offset));
@@ -1026,13 +1021,9 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
 	bool bLoop = true;
 	while(bLoop)
 	{
-#ifdef _VS2008PORTING
 		int prev_offset = 0;
+
 		for(int cur_offset = 0; cur_offset<(int)strRemainText.size(); )
-#else // _VS2008PORTING
-		int cur_offset = 0, prev_offset = 0;
-		for(; cur_offset<strRemainText.size(); )
-#endif // _VS2008PORTING
 		{
 			prev_offset = cur_offset;
 			size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str()+cur_offset));

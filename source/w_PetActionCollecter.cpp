@@ -31,11 +31,7 @@ PetActionCollecter::PetActionCollecter()
 	m_dwSendDelayTime = 0;
 	m_dwRootingTime = 0;
 	m_dwRoundCountDelay = 0;
-#ifdef _VS2008PORTING
 	m_state = eAction_Stand;
-#else // _VS2008PORTING
-	m_state = ActionState::eAction_Stand;
-#endif // _VS2008PORTING
 
 	m_fRadWidthStand = 0.0f;
 	m_fRadWidthGet = 0.0f;
@@ -66,17 +62,10 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 
 	FindZen(obj);
 
-#ifdef _VS2008PORTING
 	if( eAction_Stand == m_state && m_isRooting )
 	{
 		m_state = eAction_Move;
 	}
-#else // _VS2008PORTING
-	if( ActionState::eAction_Stand == m_state && m_isRooting )
- 	{
-		m_state = ActionState::eAction_Move;
-	}
-#endif // _VS2008PORTING
 
 	//------------------------------------------//
 	float FlyRange = 10.0f;
@@ -95,17 +84,12 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 	float Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 	if( Distance > SEARCH_LENGTH*3)
 	{
-		//맵 이동시 ...
 		obj->Position[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 		obj->Position[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 		
 		VectorCopy ( obj->Owner->Angle, obj->Angle );
 
-#ifdef _VS2008PORTING
 		m_state = eAction_Stand;
-#else // _VS2008PORTING
-		m_state = ActionState::eAction_Stand;
-#endif // _VS2008PORTING
 		m_isRooting = false;
 	}
 				
@@ -144,20 +128,12 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 		}
 		break;
 
-#ifdef _VS2008PORTING
 	case eAction_Move:
-#else // _VS2008PORTING
-	case ActionState::eAction_Move:
-#endif // _VS2008PORTING
 		{
 			if( !m_isRooting )
 			{
 				m_isRooting = false;
-#ifdef _VS2008PORTING
 				m_state = eAction_Return;
-#else // _VS2008PORTING
-				m_state = ActionState::eAction_Return;
-#endif // _VS2008PORTING
 				break;
 			}
 
@@ -189,31 +165,18 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 			{
 				m_dwSendDelayTime = GetTickCount();
 				m_dwRootingTime = GetTickCount();
-#ifdef _VS2008PORTING
 				m_state = eAction_Get;
-#else // _VS2008PORTING
-				m_state = ActionState::eAction_Get;
-#endif // _VS2008PORTING
 			}
 		}
 		break;
 
-#ifdef _VS2008PORTING
-	case eAction_Get: //줍는 행동
-#else // _VS2008PORTING
-	case ActionState::eAction_Get: //줍는 행동
-#endif // _VS2008PORTING
-
+	case eAction_Get:
 		{
 			if(	!m_isRooting || SEARCH_LENGTH < Distance || CompTimeControl(3000, m_dwRootingTime))
 			{
 				m_isRooting = false;
 				m_dwRootingTime = GetTickCount();
-#ifdef _VS2008PORTING
 				m_state = eAction_Return;
-#else // _VS2008PORTING
-				m_state = ActionState::eAction_Return;
-#endif // _VS2008PORTING
 				break;
 			}
 
@@ -229,17 +192,13 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 #ifdef LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
 				if(&Hero->Object == obj->Owner)
 #endif //LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
-					//1000ms 마다 패킷 보냄
+					//1000m
 					SendRequestGetItem(m_RootItem.itemIndex);
 			}	
 		}
 		break;
 
-#ifdef _VS2008PORTING
 	case eAction_Return:
-#else // _VS2008PORTING
-	case ActionState::eAction_Return:
-#endif // _VS2008PORTING
 		{
 			targetPos[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 			targetPos[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
@@ -267,11 +226,7 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 
 			if(	0 == Speed || CompTimeControl(3000, m_dwRootingTime) )
 			{
-#ifdef _VS2008PORTING
 				m_state = eAction_Stand;
-#else // _VS2008PORTING
-				m_state = ActionState::eAction_Stand;
-#endif // _VS2008PORTING
 			}
 		}
 		break;
@@ -305,41 +260,28 @@ bool PetActionCollecter::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, D
 
  	switch(m_state)
  	{
-#ifdef _VS2008PORTING
 	case eAction_Move:
-#else // _VS2008PORTING
-	case ActionState::eAction_Move:
-#endif // _VS2008PORTING
 		fSize = 0.8f;
 		fSize2 = 3.0f;
 		break;
 			
-#ifdef _VS2008PORTING
 	case eAction_Get:
-#else // _VS2008PORTING
-	case ActionState::eAction_Get:
-#endif // _VS2008PORTING
 		fSize = 0.8f;
 		fSize2 = 3.0f;
 		break;
 
-#ifdef _VS2008PORTING
 	case eAction_Return:
-#else // _VS2008PORTING
-	case ActionState::eAction_Return:
-#endif // _VS2008PORTING
 		CreateEffect(MODEL_NEWYEARSDAY_EVENT_MONEY, Position, obj->Angle, Light);
  		break;
  	}
 
-	//코
 	b->TransformPosition(BoneTransform[10], vRelativePos, Position, false);
 	Vector( 1.0f, 0.8f, 0.2f, Light);
 	CreateSprite(BITMAP_FLARE_RED, Position, (0.5f + fSize), Light, obj);
 	Vector( 1.0f, 0.1f, 0.2f, Light);
 	CreateSprite(BITMAP_LIGHT, Position, (2.0f + fSize), Light, obj);
 
-	int temp[] = { 19, 32, 33, 34, 35 }; //목, 안장X4
+	int temp[] = { 19, 32, 33, 34, 35 };
 	for(int i=0; i<5; i++)
 	{
 		b->TransformPosition(BoneTransform[temp[i]], vRelativePos, Position, false);
@@ -359,11 +301,7 @@ bool PetActionCollecter::Sound( OBJECT* obj, CHARACTER *Owner, int targetKey, DW
 	
 	switch(m_state)
  	{
-#ifdef _VS2008PORTING
 	case eAction_Return:
-#else // _VS2008PORTING
-	case ActionState::eAction_Return:
-#endif // _VS2008PORTING
 		PlayBuffer(SOUND_DROP_GOLD01);
  		break;
  	}
@@ -388,23 +326,20 @@ void PetActionCollecter::FindZen(OBJECT* obj)
 			continue;
 		}
 
-		dx = obj->Owner->Position[0] - _item->Position[0]; // 자기와의 거리를 계산한다.
+		dx = obj->Owner->Position[0] - _item->Position[0]; 
 		dy = obj->Owner->Position[1] - _item->Position[1];
 
 		dl = sqrtf(dx*dx+dy*dy);
 		
-		//범위 지정
 		if( SEARCH_LENGTH > dl )
 		{
-			//젠만 먹도록 할려면 여기서 걸러버리자...
-			//다른 아이템까지 먹도록할려면 여기서 list에 담아버리자...
 			//if( -1 == g_pMyInventory->FindEmptySlot(&Items[i].Item) && Items[i].Item.Type != ITEM_POTION+15 )
 			if( Items[i].Item.Type != ITEM_POTION+15 ) //젠만 먹자
 			{
 				continue;
 			}
 
-			if(!m_isRooting) //그냥 한번더 검사....
+			if(!m_isRooting)
 			{
 				m_isRooting = true;
 				m_RootItem.itemIndex = i;

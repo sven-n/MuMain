@@ -1,18 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  GMBattleCastle.cpp
-//  
-//  내  용 : 공성전 맵
-//  
-//  날  짜 : 2004년 10월 11일
-//  
-//  작성자 : 조 규 하
-//  
 //////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
-//////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UIWindows.h"
 #include "UIManager.h"
@@ -38,9 +27,6 @@
 
 #include "GMBattleCastle.h"
 
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
 extern  int     g_iTotalObj;
 extern  int     WaterTextureNumber;
 extern  char*   g_lpszMp3[NUM_MUSIC];
@@ -57,13 +43,10 @@ namespace battleCastle
     {
         vec3_t  m_vPosition;
         BYTE    m_byBuildTime;
-    }BuildTime;
+    } BuildTime;
 
-//////////////////////////////////////////////////////////////////////////
-//  Global Variable.
-//////////////////////////////////////////////////////////////////////////
     static  BYTE    g_byGuardAI = 0;
-    static  bool    g_bBeGate = false;          //  성문의 존재 여부.
+    static  bool    g_bBeGate = false;
     static  BYTE    g_byGateLocation[6][2]      = { { 67, 114 }, {  93, 114 }, { 119, 114 }, {  81, 161 }, { 107, 161 }, { 93, 204 } };
     static  float   g_fGuardStoneLocation[4][2] = { { 8200, 13000 }, { 10700, 13000 }, {  9400, 18200 }, {  9400, 22700 } };
     static  float   g_fLifeStoneLocation[2]     = { 0.f, 0.f };
@@ -76,9 +59,6 @@ namespace battleCastle
     queue<BuildTime>   g_qBuildTimeLocation;
 
     
-//////////////////////////////////////////////////////////////////////////
-//  Enum.
-//////////////////////////////////////////////////////////////////////////
     enum
     {
         GUARD_STOP = 0,
@@ -88,26 +68,15 @@ namespace battleCastle
     };
 
 
-//////////////////////////////////////////////////////////////////////////
-//  Function.
-//////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-    //  Util.
-    //////////////////////////////////////////////////////////////////////////
-
-    //////////////////////////////////////////////////////////////////////////
-    //  
-    //////////////////////////////////////////////////////////////////////////
-    bool    IsBattleCastleStart ( void )        
+    bool IsBattleCastleStart ( void )        
     { 
         return g_bBattleCastleStart; 
     }
-    void    SetBattleCastleStart ( bool bResult )
+    void SetBattleCastleStart ( bool bResult )
     { 
         g_bBattleCastleStartBackup = g_bBattleCastleStart;
         g_bBattleCastleStart = bResult;
 
-        //  이전 상태와 다를경우.
         if ( /*g_bBattleCastleStart!=g_bBattleCastleStartBackup && */World!=-1 && battleCastle::InBattleCastle() )
         {
 	        char FileName[64];
@@ -135,10 +104,8 @@ namespace battleCastle
             g_iMp3PlayTime = 0;
         }
     }
-    //////////////////////////////////////////////////////////////////////////
-    //  해당 위치의 범위에 포함되는가?
-    //////////////////////////////////////////////////////////////////////////
-    bool    InArea ( float x, float y, vec3_t Position, float Range )
+
+    bool InArea ( float x, float y, vec3_t Position, float Range )
     {
         float dx = x-Position[0];
         float dy = y-Position[1];
@@ -148,12 +115,7 @@ namespace battleCastle
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  주인공과의 충돌을 체크한다.
-    //  충돌시 애니메이션을 생성시킨다.
-    //////////////////////////////////////////////////////////////////////////
-    void    CollisionHeroCharacter ( vec3_t Position, float Range, int AniType )
+    void CollisionHeroCharacter ( vec3_t Position, float Range, int AniType )
     {
         OBJECT* o = &Hero->Object;
 
@@ -173,10 +135,6 @@ namespace battleCastle
         }
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  임시 생성된 캐릭터와의 충돌을 검사한다.
-    //////////////////////////////////////////////////////////////////////////
     void    CollisionTempCharacter ( vec3_t Position, float Range, int AniType )
     {
         for ( int i=0; i<MAX_CHARACTERS_CLIENT; ++i )
@@ -195,11 +153,7 @@ namespace battleCastle
         }
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  해당 오브젝트가 원하는 효과와 충돌을 했는가?
-    //////////////////////////////////////////////////////////////////////////
-    bool    CollisionEffectToObject ( OBJECT* eff, float Range, float RangeZ, bool bCollisionGround, bool bRealCollision )
+    bool CollisionEffectToObject ( OBJECT* eff, float Range, float RangeZ, bool bCollisionGround, bool bRealCollision )
     {
         int i = (int)(eff->Position[0]/(16*TERRAIN_SCALE));
         int j = (int)(eff->Position[1]/(16*TERRAIN_SCALE));
@@ -214,7 +168,6 @@ namespace battleCastle
             {
                 if ( o->Live && o->HiddenMesh==-1 && o->m_bCollisionCheck )
                 {
-                    //  충돌 검사를 한다.
                     float dx = eff->Position[0]-o->Position[0];
                     float dy = eff->Position[1]-o->Position[1];
                     float Distance = sqrtf ( dx*dx+dy*dy );
@@ -232,7 +185,7 @@ namespace battleCastle
                             }
                             return true;
                         }
-                        else //  충돌했음.
+                        else
                         if ( fabs( eff->Position[2]-o->Position[2] )<RangeZ )
                         {
                             if ( o->m_bCollisionCheck )
@@ -261,11 +214,7 @@ namespace battleCastle
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  캐릭터와 캐릭터 사이의 원하는 범위에 포함되는가?
-    //////////////////////////////////////////////////////////////////////////
-    bool    CalcDistanceChrToChr ( OBJECT* o, BYTE Type, float fRange )
+    bool CalcDistanceChrToChr ( OBJECT* o, BYTE Type, float fRange )
     {
         for ( int i=0; i<MAX_CHARACTERS_CLIENT; i++ )
         {
@@ -300,11 +249,7 @@ namespace battleCastle
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  성문의 속성 설정.
-    //////////////////////////////////////////////////////////////////////////
-    void    SetCastleGate_Attribute ( int x, int y, BYTE Operator, bool bAllClear )
+    void SetCastleGate_Attribute ( int x, int y, BYTE Operator, bool bAllClear )
     {
       for ( int i=0; i<6; ++i )
         {
@@ -327,10 +272,7 @@ namespace battleCastle
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    //  바닥에 오로라를 보여준다.
-    //////////////////////////////////////////////////////////////////////////
-    void    RenderAurora ( int Type, int RenderType, float x, float y, float sx, float sy, vec3_t Light )
+    void RenderAurora ( int Type, int RenderType, float x, float y, float sx, float sy, vec3_t Light )
     {
         float   Luminosity = sinf ( WorldTime*0.0015f )*0.3f+0.7f;
 
@@ -355,14 +297,7 @@ namespace battleCastle
         RenderTerrainAlphaBitmap ( Type, x, y, sx, sy, Light, -WorldTime*0.01f );
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  Interface 관련.
-    //////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-    //  빌링 타임을 표시할 위치를 저장한다.
-    //////////////////////////////////////////////////////////////////////////
-    void    SetBuildTimeLocation ( OBJECT* o )
+    void SetBuildTimeLocation ( OBJECT* o )
     {
         if ( o->Type==MODEL_MONSTER01+86 && o->m_byBuildTime<5 )
         {
@@ -375,18 +310,10 @@ namespace battleCastle
         }
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  생성되는 시간을 표시한다.
-    //////////////////////////////////////////////////////////////////////////
-    void    RenderBuildTimes ( void )
+	void RenderBuildTimes ( void )
     {
         BuildTime bt;
-#ifdef _VS2008PORTING
         for ( int i=0; i<(int)g_qBuildTimeLocation.size(); ++i )
-#else // _VS2008PORTING
-        for ( int i=0; i<g_qBuildTimeLocation.size(); ++i )
-#endif // _VS2008PORTING
         {
             bt = g_qBuildTimeLocation.front ();
 
@@ -403,10 +330,7 @@ namespace battleCastle
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    //  초기화.
-    //////////////////////////////////////////////////////////////////////////
-    void    Init ( void )
+    void Init ( void )
     {
         if ( InBattleCastle()==false ) return;
 
@@ -414,15 +338,12 @@ namespace battleCastle
     	g_iMp3PlayTime = 0;
 //        SetBattleCastleStart ( false );
 
-        //  가짜 경비병 NPC를 찍는다.
         vec3_t Angle, Position;
 		Vector ( 0.f, 0.f, 0.f, Angle );
 		Vector ( 0.f, 0.f, 270.f, Position );
 
-        //  성 마크.
         SendGetCastleGuildMark ();
 
-        //  모델 데이터를 읽는다.
         OpenMonsterModel ( 77 );
         
         Position[0] = 65*TERRAIN_SCALE; Position[1] = 113*TERRAIN_SCALE;
@@ -441,22 +362,16 @@ namespace battleCastle
         CreateObject ( MODEL_MONSTER01+77, Position, Angle );
     }
     
-    //////////////////////////////////////////////////////////////////////////
-    //  진형을 설정한다.
-    //////////////////////////////////////////////////////////////////////////
-
     bool    SettingBattleFormation ( CHARACTER* c, eBuffState state )
     {
         if ( InBattleCastle()==false )  return false;
 
-        //  비공성시 무시.
         if ( state == eBuff_CastleRegimentAttack1 )
         {
             if ( c->EtcPart==PARTS_DEFENSE_TEAM_MARK )
             {
                 DeleteParts ( c );
             }
-            //  일반 길원
             c->EtcPart = PARTS_ATTACK_TEAM_MARK;
         }
 
@@ -466,7 +381,6 @@ namespace battleCastle
             {
                 DeleteParts ( c );
             }
-            //  일반 길원
             c->EtcPart = PARTS_ATTACK_TEAM_MARK2;
         }
 		else if ( state == eBuff_CastleRegimentAttack3 )
@@ -475,7 +389,6 @@ namespace battleCastle
             {
                 DeleteParts ( c );
             }
-            //  일반 길원
             c->EtcPart = PARTS_ATTACK_TEAM_MARK3;
         }
         else if ( state == eBuff_CastleRegimentDefense )
@@ -487,7 +400,6 @@ namespace battleCastle
             {
                 DeleteParts ( c );
             }
-            //  일반 길원
             c->EtcPart = PARTS_DEFENSE_TEAM_MARK;
         }
         else if ( c->EtcPart==PARTS_ATTACK_TEAM_MARK || c->EtcPart==PARTS_DEFENSE_TEAM_MARK 
@@ -501,23 +413,16 @@ namespace battleCastle
         return true;
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    //  연합(길드)마스터를 찾는다.
-    //////////////////////////////////////////////////////////////////////////
     bool    GetGuildMaster ( CHARACTER* c )
     {
-        if ( strcmp( GuildMark[c->GuildMarkIndex].GuildName, "" )==NULL ) return false;                               //  길드 이름이 없을 경우.
-        if ( strcmp( GuildMark[c->GuildMarkIndex].UnionName, "" )==NULL && c->GuildStatus!=G_MASTER ) return false;   //  연합 이름이 없고, 길드 마스터가 아닐경우.
+        if ( strcmp( GuildMark[c->GuildMarkIndex].GuildName, "" )==NULL ) return false;
+        if ( strcmp( GuildMark[c->GuildMarkIndex].UnionName, "" )==NULL && c->GuildStatus!=G_MASTER ) return false;
         if ( strcmp( GuildMark[c->GuildMarkIndex].UnionName, GuildMark[c->GuildMarkIndex].GuildName )==NULL && c->GuildStatus!=G_MASTER ) return false;
 
         return true;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  연합 길드 마스터를 설정한다.
-    //////////////////////////////////////////////////////////////////////////
-    void    SettingBattleKing ( CHARACTER* c )
+	void SettingBattleKing ( CHARACTER* c )
     {
         OBJECT* o = &c->Object;
 
@@ -545,10 +450,6 @@ namespace battleCastle
 		}
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    //  진형을 설정한다.
-    //////////////////////////////////////////////////////////////////////////
-
     void    DeleteBattleFormation ( CHARACTER* c, eBuffState state )
     {
         if ( InBattleCastle()==false )  return;
@@ -572,12 +473,7 @@ namespace battleCastle
 		}
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    //  중간 승리로 인해서 해당 길드에 포함되는 길원과 그렇지 않은 캐릭터와의 
-    //  진형 표시를 변경한다.
-	//  wsclient.cpp 에서만 쓴다.
-    //////////////////////////////////////////////////////////////////////////
-    void    ChangeBattleFormation ( char* GuildName, bool bEffect )
+    void ChangeBattleFormation ( char* GuildName, bool bEffect )
     {
         for ( int i=0; i<MAX_CHARACTERS_CLIENT; ++i )
         {
@@ -585,9 +481,8 @@ namespace battleCastle
 		    OBJECT *o = &c->Object;
 		    if ( o->Live && o->Visible )
             {
-                //  현재 등록된 모든 진형 표시를 제거한다.
                 DeleteParts ( c );
-    			if( strcmp( GuildMark[c->GuildMarkIndex].UnionName, GuildName )==NULL ) //  방어 진형.
+    			if( strcmp( GuildMark[c->GuildMarkIndex].UnionName, GuildName )==NULL )
                 {
 					// _buffwani_
 					g_TokenCharacterBuff( o, eBuff_CastleRegimentDefense );
@@ -625,26 +520,16 @@ namespace battleCastle
         }
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전에서 캐릭터에게 표시를 해주는 효과들.
-    //////////////////////////////////////////////////////////////////////////
     void    CreateBattleCastleCharacter_Visual ( CHARACTER* c, OBJECT* o )
     {
         if ( InBattleCastle()==false )  return;
         if ( IsBattleCastleStart()==false ) return;
 
-        //  비공성시 무시.
-        if ( o->Visible==false ) return;        //  보이지 않으면 적용하지 않는다.
+        if ( o->Visible==false ) return;
 
-        //  ( 수호석상, 라이프 스톤 )의 치료 효과.
         CreateGuardStoneHealingVisual ( c, 380.f );
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  생성한 임시 뷰포트의 캐릭터를 제거한다.
-    //////////////////////////////////////////////////////////////////////////
     void    DeleteTmpCharacter ( void )
     {
         for ( int i=0; i<MAX_CHARACTERS_CLIENT; ++i )
@@ -671,10 +556,6 @@ namespace battleCastle
         }
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  안개 시작.
-    //////////////////////////////////////////////////////////////////////////
     void    StartFog ( vec3_t Color )
     {
         glEnable ( GL_FOG );
@@ -685,19 +566,11 @@ namespace battleCastle
         glFogf ( GL_FOG_END,   2700.f );
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  안개 끝.
-    //////////////////////////////////////////////////////////////////////////
     void    EndFog ( void )
     {
         glDisable ( GL_FOG );
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전시의 기본적인 연기.
-    //////////////////////////////////////////////////////////////////////////
     void    RenderBaseSmoke ( void )
     {
         if ( InBattleCastle()==false ) return;
@@ -713,10 +586,6 @@ namespace battleCastle
         RenderBitmapUV(BITMAP_CHROME+2,0.f,0.f,640.f,480.f-45.f,WindX,0.f,0.3f,0.3f);
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전의 불씨.
-    //////////////////////////////////////////////////////////////////////////
     bool CreateFireSnuff ( PARTICLE* o )
     {
 		if(World != WD_55LOGINSCENE)
@@ -757,20 +626,10 @@ namespace battleCastle
         return true;
     }
 
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //  오브젝트 관련.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-    //  공성/수성시 오브젝트 변경.
-    //////////////////////////////////////////////////////////////////////////
-    void    SetAttackDefenseObjectType ( OBJECT* o )
+    void SetAttackDefenseObjectType ( OBJECT* o )
     {
-        //  공/수성시 변경되는 오브젝트들.
         switch ( o->Type )
         {
-            //  평화시에만 보이는 오브젝트.
         case 16:
         case 38:
         case 39:
@@ -787,7 +646,6 @@ namespace battleCastle
         case 85:
         case 86:
         case 87:
-            //  공성시에만.
             if ( IsBattleCastleStart() )
             {
                 o->HiddenMesh = -2;
@@ -798,7 +656,6 @@ namespace battleCastle
             }
             break;
 
-            //  공성시에만 보이는 오브젝트.
         case 4:
         case 11:
         case 37:
@@ -820,7 +677,6 @@ namespace battleCastle
         case 75:
         case 76:
         case 88:
-            //  평화시에만.
             if ( IsBattleCastleStart() )
             {
                 o->HiddenMesh = -1;
@@ -833,12 +689,7 @@ namespace battleCastle
         }
     }
 
-
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전의 오브젝트 효과.
-    //////////////////////////////////////////////////////////////////////////
-    bool    MoveBattleCastleObjectSetting ( int& objCount, int object )
+    bool MoveBattleCastleObjectSetting ( int& objCount, int object )
     {
         if ( InBattleCastle()==false ) return false;
 
@@ -861,7 +712,6 @@ namespace battleCastle
             }
         }
 
-        //  배경 효과음을 나타낸다.
         PlayBuffer ( SOUND_BC_AMBIENT );
         if ( IsBattleCastleStart() && rand()%10==0 )
         {
@@ -889,7 +739,6 @@ namespace battleCastle
 
         if ( IsBattleCastleStart() )
         {
-            //  투석기 돌맹이 발사.
             if ( (MoveSceneFrame%20)==0 )
             {
                 int HeroY = ( Hero->PositionY );
@@ -951,8 +800,6 @@ namespace battleCastle
                 }
             }
 
-            //  공성일때만 불화살, 화살 발사.
-            //  때로 쏘는 직선으로 날아가는 화살들.
             int HeroY = ( Hero->PositionY );
             if ( ( HeroY>58 && HeroY<113 ) || ( HeroY>117 && HeroY<159 ) )
             {
@@ -1057,7 +904,6 @@ namespace battleCastle
             }
         }
     /*
-        맵에서 자동적으로 발생하는 효과 처리.
         if ( (rand()%10)==0 && object )
         {
             objCount = rand()%object;
@@ -1089,30 +935,26 @@ namespace battleCastle
         return true;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  각각 오브젝트들을 검사후 해당 오브젝트를 찾는다.
-    //////////////////////////////////////////////////////////////////////////
-    bool    MoveBattleCastleObject ( OBJECT* o, int& object, int& visibleObject )
+    bool MoveBattleCastleObject ( OBJECT* o, int& object, int& visibleObject )
     {
         if ( InBattleCastle()==false )  return false;
 
         switch ( o->Type )
         {
-        case 81 :
+        case 81:
             o->BlendMesh = 1;
             o->BlendMeshLight = 1.f;
             o->BlendMeshTexCoordV = WorldTime*0.0002f;
             break;
 
-        case 83 :
+        case 83:
             o->BlendMesh = 1;
             o->BlendMeshLight = 1.f;
             o->BlendMeshTexCoordV = -WorldTime*0.0004f;
             break;
 
-        case    BATTLE_CASTLE_WALL1 : //  성문 옆의 성벽.
-        case    BATTLE_CASTLE_WALL2 : //  성문 옆의 성벽.
+        case BATTLE_CASTLE_WALL1:
+        case BATTLE_CASTLE_WALL2:
             if ( IsBattleCastleStart()==false ) break;
 
             if ( o->ExtState==0 )
@@ -1129,8 +971,8 @@ namespace battleCastle
                 o->HiddenMesh = 0;
             }
             break;
-        case    BATTLE_CASTLE_WALL3 : //  성문 옆의 성벽.
-        case    BATTLE_CASTLE_WALL4 : //  성문 옆의 성벽.
+        case BATTLE_CASTLE_WALL3:
+        case BATTLE_CASTLE_WALL4:
             if ( IsBattleCastleStart()==false ) break;
 
             if ( o->ExtState==0 )
@@ -1149,37 +991,32 @@ namespace battleCastle
             break;
         }
 
-        //  공/수성시 오브젝트 변경.
         SetAttackDefenseObjectType ( o );
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 오브젝트 생성.
-    //////////////////////////////////////////////////////////////////////////
-    bool    CreateBattleCastleObject ( OBJECT* o )
+    bool CreateBattleCastleObject ( OBJECT* o )
     {
         if ( InBattleCastle()==false ) return false;
 
         switch ( o->Type )
         {
-        case    8 :
-        case    9 :
+        case 8:
+        case 9:
             o->ExtState = 0;
             break;
 
-        case    7 :     //  충돌 처리될 오브젝트.
-        case    10 :
-        case    13 :
-        case    14 :
+        case 7:
+        case 10:
+        case 13:
+        case 14:
 //        case    18 :
             o->ExtState = 0;
             o->m_bCollisionCheck = true;
             break;
 
 
-        case    BATTLE_CASTLE_WALL1:     //  부서지는 성벽.
+        case    BATTLE_CASTLE_WALL1:
         case    BATTLE_CASTLE_WALL2:
         case    BATTLE_CASTLE_WALL3:
         case    BATTLE_CASTLE_WALL4:
@@ -1187,7 +1024,7 @@ namespace battleCastle
             o->m_bCollisionCheck = true;
             break;
 
-        case    19 :    //  수호석상.
+        case    19:
             o->Scale = 1.f;
             break;
 
@@ -1208,28 +1045,23 @@ namespace battleCastle
             break;
 
 		case 41:
-			o->Timer = float(rand()%1000) * 0.01f;	//. 동적인 표현을 위한 시드값으로 사용한다.
+			o->Timer = float(rand()%1000) * 0.01f;
 			break;
 
-        case 77:    //  왕관 뒤 의자.
+        case 77:
         case 84:
 			CreateOperate ( o );
             break;
 
-        case 79 :   //  2층 --> 1층으로 가는 입구.
+        case 79:
             CreateEffect ( MODEL_TOWER_GATE_PLANE, o->Position, o->Angle, o->Light, 0, o );
             break;
         }
 
-        //  공/수성시 오브젝트 변경.
         SetAttackDefenseObjectType ( o );
         return true;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 오브젝트의 효과 처리.
-    //////////////////////////////////////////////////////////////////////////
     bool    MoveBattleCastleVisual ( OBJECT* o )
     {
         if ( InBattleCastle()==false ) return false;
@@ -1239,17 +1071,17 @@ namespace battleCastle
 
         switch(o->Type)
         {
-        case 4 :
+        case 4:
             o->HiddenMesh = -1;
             o->BlendMeshTexCoordU = WorldTime*0.0001f;
             break;
 
-        case    19 :    //  수호석상.
+        case 19:
             break;
 
-		case	42 :		//. 검은 연기박스 : 2004/11/05
-		case	52 :		//. 물파티클 박스1 : 2004/11/05
-		case	54 :		//. 물파티클 박스2 : 2004/11/05
+		case 42:
+		case 52:
+		case 54:
             o->HiddenMesh = -2;
             break;
 
@@ -1263,7 +1095,7 @@ namespace battleCastle
 			o->HiddenMesh = -2;
 			break;
 		
-        case	53:		//. 빨간불 박스 : 2004/11/05
+        case 53:
 			if ( IsBattleCastleStart() ) 
             {
 			    Luminosity = (float)(rand()%4+3)*0.1f;
@@ -1273,7 +1105,7 @@ namespace battleCastle
 			o->HiddenMesh = -2;
 			break;
 
-        case 66 :    //  왕관 보호막 이펙트
+        case 66:
             o->HiddenMesh = -2;
             if ( IsBattleCastleStart() )
             {
@@ -1306,12 +1138,7 @@ namespace battleCastle
         return true;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전의 오브젝트들에 효과를 추가한다.
-    //  오브젝트의 위치에서 Particle효과 등을 발생시킨다.
-    //////////////////////////////////////////////////////////////////////////
-    bool    RenderBattleCastleVisual ( OBJECT* o, BMD* b )
+    bool RenderBattleCastleVisual ( OBJECT* o, BMD* b )
     {
         if ( InBattleCastle()==false ) return false;
 
@@ -1322,7 +1149,7 @@ namespace battleCastle
 
         switch(o->Type)
         {
-		case 0:	//. 빨간불 박스 : 2004/11/05
+		case 0:
 			if ( IsBattleCastleStart()==false && rand()%3==0) 
             {
 				Vector ( 1.f, 1.f, 1.f, Light );
@@ -1330,32 +1157,32 @@ namespace battleCastle
 			}
 			break;
 
-        case 41 :    // 불씨 : 2004/11/05
+        case 41 :
             o->BlendMeshLight = sinf(WorldTime*0.002f)*0.3f+0.7f;
             break;
 
-		case 42:	//. 검은연기 박스 : 2004/11/05
+		case 42:
 			if ( IsBattleCastleStart() && rand()%3==0 )
             {
 				Vector ( 1.f, 1.f, 1.f, Light );
                 CreateParticle ( BITMAP_SMOKE, o->Position, o->Angle, Light, 21 , o->Scale);
             }
 			break;
-		case 52:	//. 물파티클 박스1 : 2004/11/05
+		case 52:
             if ( IsBattleCastleStart()==false )
             {
 			    Vector ( 1.f, 1.f, 1.f, Light );
 			    CreateParticle ( BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 6 , o->Scale);
             }
 			break;
-		case 53:	//. 빨간불 박스 : 2004/11/05
+		case 53:
 			if ( IsBattleCastleStart() && rand()%3==0) 
             {
 				Vector ( 1.f, 1.f, 1.f, Light );
 				CreateParticle ( BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 0, o->Scale );
 			}
 			break;
-		case 54:	//. 물파티클 박스2 : 2004/11/05
+		case 54:
             if ( IsBattleCastleStart()==false )
             {
 			    Vector ( 1.f, 1.f, 1.f, Light );
@@ -1368,23 +1195,18 @@ namespace battleCastle
         return true;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전에 속하는 오브젝트들의 효과. ( 메쉬 효과 ).
-    //  공성전을 구성하는 오브젝트들의 모델 데이터에 효과를 적용할때 루틴.
-    //////////////////////////////////////////////////////////////////////////
     bool    RenderBattleCastleObjectMesh ( OBJECT* o, BMD* b )
     {
         if ( InBattleCastle()==false )  return false;
 
-        if ( o->Type==12 )  //  플래그.
+        if ( o->Type==12 )
         {
             Vector ( 1.f, 1.f, 1.f, b->BodyLight );
             b->RenderMesh ( 0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
             b->RenderMesh ( 1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_INTERFACE_MAP );
             return true;
         }
-		else if(o->Type==17)	// 또랑 : 2004/11/05
+		else if(o->Type==17)
 		{
 			b->StreamMesh = 0;
             Vector ( 0.45f, 0.45f, 0.45f, b->BodyLight );
@@ -1392,7 +1214,7 @@ namespace battleCastle
 			b->StreamMesh = -1;
 			return true;
 		}
-		else if(o->Type==51)	// 폭포 : 2004/11/05
+		else if(o->Type==51)
 		{
 			b->StreamMesh = 0;
 			b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,-(int)WorldTime%10000*0.0002f,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1405,7 +1227,7 @@ namespace battleCastle
 			b->RenderBody ( RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,sinf(WorldTime*0.001f)*0.2f+0.3f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			return true;
         }
-        else if ( o->Type==50 || o->Type==83 || o->Type==84 || o->Type==85 )  //  그림자 포함.
+        else if ( o->Type==50 || o->Type==83 || o->Type==84 || o->Type==85 )
         {
       		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
@@ -1462,9 +1284,6 @@ namespace battleCastle
         return false;
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    //  투석기용 큰돌의 이동 경로 계산 ( 비주얼용 ).
-    //////////////////////////////////////////////////////////////////////////
     void    MoveFlyBigStone ( OBJECT* o )
     {
     /*
@@ -1486,13 +1305,6 @@ namespace battleCastle
     */
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //  몬스터.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 몬스터를 생성한다.
-    //////////////////////////////////////////////////////////////////////////
     CHARACTER* CreateBattleCastleMonster ( int Type, int PositionX, int PositionY, int Key )
     {
         if ( InBattleCastle()==false ) return NULL;
@@ -1500,13 +1312,13 @@ namespace battleCastle
         CHARACTER*  c = NULL;
         switch ( Type )
         {
-        case 104:   //  트랩.
+        case 104:
     		c = CreateCharacter ( Key, 11, PositionX, PositionY );
             c->m_bFixForm = true;
             c->Object.m_bRenderShadow = false;
             break;
 
-        case 215:   //  2층 보호막.
+        case 215:
     	    OpenNpc ( MODEL_NPC_BARRIER );      //  MODEL_NPC_BARRIER 
 		    c = CreateCharacter ( Key, MODEL_NPC_BARRIER, PositionX, PositionY );
             c->m_bFixForm = true;
@@ -1519,7 +1331,7 @@ namespace battleCastle
  			strcpy( c->ID, "왕관" );
             break;
 
-        case 216 :  //  왕관.
+        case 216:
     	    OpenNpc ( MODEL_NPC_CROWN );      //  MODEL_NPC_CROWN 
 		    c = CreateCharacter ( Key, MODEL_NPC_CROWN, PositionX, PositionY );
             c->m_bFixForm = true;
@@ -1529,7 +1341,7 @@ namespace battleCastle
  			strcpy( c->ID, "왕관" );
             break;
 
-        case 217 :  //  왕관 발판2
+        case 217:
     	    OpenNpc ( MODEL_NPC_CHECK_FLOOR );      //  MODEL_NPC_CHECK_FLOOR 
 		    c = CreateCharacter ( Key, MODEL_NPC_CHECK_FLOOR , PositionX, PositionY );
             c->m_bFixForm = true;
@@ -1541,7 +1353,7 @@ namespace battleCastle
                 c->Object.Position[2] -= 100.f;
             break;
 
-        case 218 :  //  왕관 발판1
+        case 218:
     	    OpenNpc ( MODEL_NPC_CHECK_FLOOR );      //  MODEL_NPC_CHECK_FLOOR 
 		    c = CreateCharacter ( Key, MODEL_NPC_CHECK_FLOOR , PositionX, PositionY );
             c->m_bFixForm = true;
@@ -1563,7 +1375,7 @@ namespace battleCastle
  			strcpy( c->ID, "성문 스위치" );
             break;
 
-        case 220:   //  문지기.
+        case 220:
     	    OpenNpc ( 77 );      //  MODEL_MONSTER01+77
 		    c = CreateCharacter(Key,MODEL_MONSTER01+77,PositionX,PositionY);
             c->m_bFixForm = true;
@@ -1595,7 +1407,7 @@ namespace battleCastle
 		    c->Weapon[1].Type = -1;
             break;
 
-        case 223:	// 원로원 NPC
+        case 223:
     	    OpenNpc ( MODEL_NPC_SENATUS );      //  MODEL_NPC_SENATUS
 		    c = CreateCharacter(Key,MODEL_NPC_SENATUS,PositionX,PositionY);
             c->m_bFixForm = true;
@@ -1605,7 +1417,7 @@ namespace battleCastle
  			strcpy( c->ID, "원로원" );
             break;
 
-        case 224:   //  신청 서기.
+        case 224:
     	    OpenNpc ( MODEL_NPC_CLERK );        //  
 		    c = CreateCharacter ( Key, MODEL_NPC_CLERK, PositionX, PositionY );
             c->m_bFixForm = true;
@@ -1616,7 +1428,7 @@ namespace battleCastle
 			strcpy( c->ID, "근위병" );
             break;
     
-        case 277 :  //  공성전 성문.
+        case 277:
     	    OpenMonsterModel(73);
 		    c = CreateCharacter(Key,MODEL_MONSTER01+73,PositionX,PositionY);
             c->m_bFixForm = true;
@@ -1626,7 +1438,7 @@ namespace battleCastle
 		    c->Weapon[1].Type = -1;
             break;
 
-        case 278 :  //  라이프스톤.
+        case 278:
     	    OpenMonsterModel(86);
 		    c = CreateCharacter(Key,MODEL_MONSTER01+86,PositionX,PositionY);
             c->m_bFixForm = true;
@@ -1636,11 +1448,10 @@ namespace battleCastle
 		    c->Weapon[0].Type = -1;
 		    c->Weapon[1].Type = -1;
 
-            //  회복 영역.
             CreateEffect ( MODEL_AURORA, c->Object.Position, c->Object.Angle, c->Object.Light, 0, &c->Object, 120 );
             break;
 
-        case 283 :  //  수호석상.
+        case 283:
     	    OpenMonsterModel(74);
 		    c = CreateCharacter(Key,MODEL_MONSTER01+74,PositionX,PositionY);
             c->m_bFixForm = true;
@@ -1658,13 +1469,11 @@ namespace battleCastle
             {
                 c->Object.HiddenMesh = -2;
             }
-
-            //  회복 영역.
             CreateEffect ( MODEL_AURORA, c->Object.Position, c->Object.Angle, c->Object.Light, 0, &c->Object, 120 );
             break;
 
-        case 285 :  //  가디언.
-    	    OpenMonsterModel(74);   //  78
+        case 285:
+    	    OpenMonsterModel(74);
 		    c = CreateCharacter(Key,MODEL_MONSTER01+74,PositionX,PositionY);
             c->m_bFixForm = true;
 		    c->Object.Scale = 1.f;
@@ -1673,8 +1482,8 @@ namespace battleCastle
 		    c->Weapon[1].Type = -1;
             break;
     
-        case 286:   //  전투 경비병1.   궁수.
-    	    OpenMonsterModel(76);   //  76
+        case 286:
+    	    OpenMonsterModel(76);
 		    c = CreateCharacter(Key,MODEL_MONSTER01+76,PositionX,PositionY);
             c->m_bFixForm = true;
 		    c->Object.Scale = 1.f;
@@ -1682,8 +1491,8 @@ namespace battleCastle
 		    c->Weapon[1].Type = -1;
             break;
 
-        case 287:   //  전투 경비병2.   창병.
-    	    OpenMonsterModel(77);   //  77
+        case 287:
+    	    OpenMonsterModel(77);
 		    c = CreateCharacter(Key,MODEL_MONSTER01+77,PositionX,PositionY);
             c->m_bFixForm = true;
 		    c->Object.Scale = 1.f;
@@ -1692,8 +1501,8 @@ namespace battleCastle
 		    c->Weapon[1].Type = -1;
             break;
 
-        case 288:   //  캐논 타워.
-    	    OpenMonsterModel(79);   //  79
+        case 288:
+    	    OpenMonsterModel(79);
 		    c = CreateCharacter(Key,MODEL_MONSTER01+79,PositionX,PositionY);
             c->m_bFixForm = true;
 		    c->Object.Scale = 1.f;
@@ -1717,10 +1526,6 @@ namespace battleCastle
         return c;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 몬스터의 링크본 설정.
-    //////////////////////////////////////////////////////////////////////////
     bool    SettingBattleCastleMonsterLinkBone ( CHARACTER* c, int Type )
     {
         switch ( Type )
@@ -1740,18 +1545,14 @@ namespace battleCastle
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성 몬스터 애니메이션 정지시 특정 몬스터 처리.
-    //////////////////////////////////////////////////////////////////////////
     bool    StopBattleCastleMonster ( CHARACTER* c, OBJECT* o )
     {
         if ( InBattleCastle()==false )  return false;
 
         switch ( c->MonsterIndex )
         {
-        case 286 :  //  궁수병.
-        case 287 :  //  창기병.
+        case 286:
+        case 287:
             if ( o->CurrentAction==5 )
             {
 		        o->PriorAction = 4;
@@ -1790,19 +1591,19 @@ namespace battleCastle
             }
             return false;
 
-        case 221 :  //  투석기 ( 공성 )
-        case 222 :  //  투석기 ( 수성 )
+        case 221:
+        case 222:
 			SetAction ( o, 0 );
             return true;
 			
-        case 277 :  //  성문.
+        case 277:
 			{
-				if ( g_isCharacterBuff(o, eBuff_CastleGateIsOpen) )  //  성문이 열려있는 상태.
+				if ( g_isCharacterBuff(o, eBuff_CastleGateIsOpen) )
 				{
 					c->m_bIsSelected = false;
 					SetAction ( o, 2 );
 				}
-				else//  성문이 닫혀있는 상태.
+				else
 				{
 					c->m_bIsSelected = true;
 					SetAction ( o, 0 );
@@ -1813,23 +1614,14 @@ namespace battleCastle
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  성문 속성값 초기화.
-    //////////////////////////////////////////////////////////////////////////
     void    InitGateAttribute ( void )
     {
-        //  맵상에 성문이 존재하지 않을 때.
         if ( g_bBeGate==false )
         {
             SetCastleGate_Attribute ( 0, 0, 0, true );
         }
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  각종 데이터 초기화.
-    //////////////////////////////////////////////////////////////////////////
     void    InitEtcSetting ( void )
     {
         g_fLifeStoneLocation[0] =0.f;
@@ -1839,12 +1631,7 @@ namespace battleCastle
         g_bBeGate = false;
     }
 
-
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 몬스터만의 처리.
-    //////////////////////////////////////////////////////////////////////////
-    bool    MoveBattleCastleMonster ( CHARACTER* c, OBJECT* o )
+    bool MoveBattleCastleMonster ( CHARACTER* c, OBJECT* o )
     {
         if ( InBattleCastle()==false )  return false;
 
@@ -1933,11 +1720,7 @@ namespace battleCastle
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 몬스터 액션 설정.
-    //////////////////////////////////////////////////////////////////////////
-    bool    SetCurrentAction_BattleCastleMonster ( CHARACTER* c, OBJECT* o )
+    bool SetCurrentAction_BattleCastleMonster ( CHARACTER* c, OBJECT* o )
     {
         switch ( o->Type )
         {
@@ -1953,12 +1736,7 @@ namespace battleCastle
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 몬스터의 공격 효과.
-    //  몬스터 공격 이펙트.
-    //////////////////////////////////////////////////////////////////////////
-    bool    AttackEffect_BattleCastleMonster ( CHARACTER* c, OBJECT* o, BMD* b )
+    bool AttackEffect_BattleCastleMonster ( CHARACTER* c, OBJECT* o, BMD* b )
     {
         if ( InBattleCastle()==false ) return false;
 
@@ -1977,7 +1755,7 @@ namespace battleCastle
 
         switch ( c->MonsterIndex )
         {
-        case 104 :                   //  트랩.
+        case 104:
             if ( c->AttackTime==5 )
             {
                 VectorCopy ( o->Position, Position );
@@ -1986,23 +1764,19 @@ namespace battleCastle
             }
             return true;
 
-        case 288 :   //  캐논 타워
+        case 288:
             CreateEffect ( BITMAP_JOINT_FORCE, o->Position, o->Angle, o->Light );
             return true;
         }
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  (수호석상, 자신의 라이프 스톤 )의 치료범위에 포함되는가?
-    //////////////////////////////////////////////////////////////////////////
-    void    CreateGuardStoneHealingVisual ( CHARACTER* c, float Range )
+    void CreateGuardStoneHealingVisual ( CHARACTER* c, float Range )
     {
         OBJECT* o = &c->Object;
         bool bHealing = false;
 
-		if( g_isCharacterBuff(o, eBuff_CastleRegimentDefense) ) //수성측은 수호 석상에서 치료가 된다.
+		if( g_isCharacterBuff(o, eBuff_CastleRegimentDefense) )
         {
             for ( int i=0; i<4; ++i )
             {
@@ -2013,7 +1787,7 @@ namespace battleCastle
                 }
             }
         }
-        else //if ( (o->State&STATE_REGIMENT_ATTACK)==STATE_REGIMENT_ATTACK )     //  공성측은 자신 길드의 라이프 스톤에서 치료가 된다.
+        else //if ( (o->State&STATE_REGIMENT_ATTACK)==STATE_REGIMENT_ATTACK )
         {
             if ( g_fLifeStoneLocation[0]!=0.f && g_fLifeStoneLocation[1]!=0.f && Hero->GuildMarkIndex==c->GuildMarkIndex )
             {
@@ -2030,13 +1804,7 @@ namespace battleCastle
         }
     }
     
-
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 몬스터 비주얼 처리.
-    //  파티클, 스프라이트등의 효과 붙임.
-    //////////////////////////////////////////////////////////////////////////
-    bool    MoveBattleCastleMonsterVisual ( OBJECT* o, BMD* b )
+    bool MoveBattleCastleMonsterVisual ( OBJECT* o, BMD* b )
     {
         if ( InBattleCastle()==false ) return false;
 
@@ -2045,13 +1813,11 @@ namespace battleCastle
 
         switch ( o->Type )
         {
-        case 11 :   //  트랩.
+        case 11 :
 //            o->HiddenMesh = -2;
-            //  테스트로 이 위치에 공격 대상이 왔는지 검사한다.
-            //  
             break;
 
-        case MODEL_NPC_CROWN: // //  왕관 npc
+        case MODEL_NPC_CROWN:
             o->HiddenMesh = -1;
             if ( IsBattleCastleStart() )
             {
@@ -2062,11 +1828,11 @@ namespace battleCastle
             }
             break;
 
-        case MODEL_MONSTER01+73:    //  성문.
+        case MODEL_MONSTER01+73:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01+74:    //  수호석상.
+        case MODEL_MONSTER01+74:
             o->Angle[2] = 0.f;
 
             Luminosity = sinf ( WorldTime*0.0005 )*0.58f+0.42f;
@@ -2090,7 +1856,7 @@ namespace battleCastle
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01+79:    //  캐논 타워.
+        case MODEL_MONSTER01+79:
             o->Angle[2] = 45.f;
             return true;
         }
@@ -2098,10 +1864,6 @@ namespace battleCastle
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 몬스터 효과를 나타낸다.
-    //////////////////////////////////////////////////////////////////////////
     bool    RenderBattleCastleMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
     {
         if ( InBattleCastle()==false ) return false;
@@ -2113,29 +1875,26 @@ namespace battleCastle
 
         switch ( o->Type )
         {
-        case MODEL_MONSTER01+73:    //  석상.
+        case MODEL_MONSTER01+73:
             break;
 
-        case MODEL_MONSTER01+74:    //  수호석상.
+        case MODEL_MONSTER01+74:
             if ( IsBattleCastleStart() )
             {
-                //  오로라 발생.
                 Vector ( 0.3f, 0.2f, 0.f, Light );
                 RenderAurora ( BITMAP_MAGIC+1, RENDER_BRIGHT, o->Position[0], o->Position[1], 9.f, 9.f, Light );
             }
             else
             {
-                //  오로라 발생.
                 RenderAurora ( BITMAP_MAGIC+1, RENDER_DARK, o->Position[0], o->Position[1], 5.5f, 5.5f, o->Light );
             }
             return true;
 
-        case MODEL_MONSTER01+86:    //  라이프 스톤.
+        case MODEL_MONSTER01+86:
             if ( o->m_byBuildTime>=5 )
             {
                 o->BlendMeshLight = sinf( WorldTime*0.001f )*0.3+0.3f;
             
-                //  오로라 발생.
                 Vector ( 0.3f, 0.2f, 0.f, Light );
                 RenderAurora ( BITMAP_MAGIC+1, RENDER_BRIGHT, o->Position[0], o->Position[1], 9.f, 9.f, Light );
             }
@@ -2166,7 +1925,6 @@ namespace battleCastle
                 b->TransformPosition ( o->BoneTransform[2], p, Position, true );
                 CreateSprite ( BITMAP_LIGHT, Position, 4.f, Light, NULL );
 
-                //  오로라 발생.
                 RenderAurora ( BITMAP_MAGIC+1, RENDER_DARK, o->Position[0], o->Position[1], 5.5f, 5.5f, o->Light );
             }
             else
@@ -2194,19 +1952,11 @@ namespace battleCastle
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성전 몬스터의 천 추가.
-    //////////////////////////////////////////////////////////////////////////
     bool    RenderBattleCastleMonsterCloth ( CHARACTER* c, OBJECT* o, bool Translate, int Select )
     {
         return false;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  해당 맵에 속하는 몬스터들의 (메쉬) 효과 처리.
-    //////////////////////////////////////////////////////////////////////////
     bool    RenderBattleCastleMonsterObjectMesh ( OBJECT* o, BMD* b )
     {
         if ( InBattleCastle()==false ) return false;
@@ -2219,7 +1969,6 @@ namespace battleCastle
             {
                 b->RenderBody ( RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh );
 
-                //  투석기 돌.
                 OBB_t   OBB;
                 vec3_t  Temp, p, Position;
                 BMD*    linkBmd = &Models[MODEL_FLY_BIG_STONE1];
@@ -2229,7 +1978,6 @@ namespace battleCastle
                 linkBmd->BodyScale     = 1.3f;
                 linkBmd->CurrentAction = 0;
 
-                //  제자리시 무조건 돌이 담겨있고, 공격시 적당한 프레임에만 돌이 담겨있음.
                 if ( o->CurrentAction==0 || o->AnimationFrame<2.f || o->AnimationFrame>=22.f )
                 {
                     Vector ( 0.f, 0.f, 0.f, p );
@@ -2240,7 +1988,6 @@ namespace battleCastle
                     linkBmd->RenderBody ( RENDER_TEXTURE, o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh );
                 }
 
-                //  오커의 돌. ( 공격 애니메이션 때만 ).
                 if ( o->CurrentAction==1 && o->AnimationFrame>13.f && o->AnimationFrame<22.f )
                 {
                     Vector ( 0.f, 0.f, 0.f, p );
@@ -2254,7 +2001,7 @@ namespace battleCastle
             success = true;
             break;
 
-        case MODEL_NPC_BARRIER:     //  보호막.
+        case MODEL_NPC_BARRIER:
             Vector ( 0.3f, 0.3f, 1.f, b->BodyLight );
             b->RenderBody ( RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,BITMAP_WATER+WaterTextureNumber );
             Vector ( 0.3f, 1.f, 0.3f, b->BodyLight );
@@ -2262,7 +2009,7 @@ namespace battleCastle
             success = true;
             break;
 
-        case MODEL_MONSTER01+73 :   //  성문.
+        case MODEL_MONSTER01+73:
             if (  o->CurrentAction==MONSTER01_DIE )
             {
                 if ( o->CurrentAction==MONSTER01_DIE)
@@ -2278,10 +2025,10 @@ namespace battleCastle
             }
             break;
 
-        case MODEL_MONSTER01+74:    //  수호석상.
+        case MODEL_MONSTER01+74:
             if ( IsBattleCastleStart() )
             {
-				if(o->CurrentAction!=MONSTER01_DIE)//수호석상.
+				if(o->CurrentAction!=MONSTER01_DIE)
 					o->HiddenMesh = -1;
 
                 if (  o->CurrentAction==MONSTER01_DIE )
@@ -2307,7 +2054,7 @@ namespace battleCastle
             success = true;
             break;
 
-        case MODEL_MONSTER01+86:    //  라이프 스톤.
+        case MODEL_MONSTER01+86:
             o->BlendMeshLight = o->m_byBuildTime/10.f;
             Vector ( o->BlendMeshLight, o->BlendMeshLight, o->BlendMeshLight, b->BodyLight );
             if ( o->m_byBuildTime>=2 )
@@ -2339,16 +2086,13 @@ namespace battleCastle
     }
 
 
-    //////////////////////////////////////////////////////////////////////////
-    //  몬스터가 공격을 받았을때 효과.
-    //////////////////////////////////////////////////////////////////////////
-    void    RenderMonsterHitEffect ( OBJECT* o )
+    void RenderMonsterHitEffect ( OBJECT* o )
     {
         if ( InBattleCastle()==false ) return;
 
         switch ( o->Type )
         {
-        case MODEL_MONSTER01+73:   //  성문.
+        case MODEL_MONSTER01+73:
             {
                 vec3_t Position;
                 VectorCopy ( o->Position, Position );
@@ -2357,7 +2101,6 @@ namespace battleCastle
                 Position[1] -= 100.f;
                 Position[2] += 150.f;
 
-				// 문이 열려 있으면 이펙트 보여주지 않음
 				if( !g_isCharacterBuff(o, eBuff_CastleGateIsOpen) )
 				{
 					if( !g_isCharacterBuff((&Hero->Object), eBuff_BlessPotion) && !g_isCharacterBuff((&Hero->Object), eBuff_SoulPotion) )
@@ -2377,7 +2120,7 @@ namespace battleCastle
             }
             break;
 
-        case MODEL_MONSTER01+74:   //  수호석상.
+        case MODEL_MONSTER01+74:
             {
                 vec3_t Position;
                 for ( int i=0; i<5; i++ )

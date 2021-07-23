@@ -382,12 +382,9 @@ HRESULT ReleaseBuffer(int Buffer)
 		}
 	}
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_CHANNEL;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CHANNEL;i++)
-#endif // _VS2008PORTING
      	Object3DSound[Buffer][i] = 0;
+
 	MaxBufferChannel[Buffer] = 0;
 
 	SoundLoadCount--;

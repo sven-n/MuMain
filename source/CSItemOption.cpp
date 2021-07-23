@@ -1,8 +1,3 @@
-//////////////////////////////////////////////////////////////////////////
-//  - 아이템 옵션 관련 -
-//  
-//  
-//////////////////////////////////////////////////////////////////////////
 /*+++++++++++++++++++++++++++++++++++++
     INCLUDE.
 +++++++++++++++++++++++++++++++++++++*/
@@ -51,12 +46,8 @@ static void BuxConvert(BYTE *Buffer,int Size)
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//	세트 아이템 옵션을 위한 데이터를 읽는다.
-//////////////////////////////////////////////////////////////////////////
-bool    CSItemOption::OpenItemSetScript ( bool bTestServer )     //  세트 아이템 정보를 읽는다.
+bool CSItemOption::OpenItemSetScript ( bool bTestServer )
 {
-// ItemSetType.bmd는 Localization-free 파일이지만, ItemSetOption은 국가에 따라 다름
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	string strFileName = "";
 	string strTest = (bTestServer) ? "Test" : "";
@@ -83,11 +74,6 @@ bool    CSItemOption::OpenItemSetScript ( bool bTestServer )     //  세트 아이템
 	return true;
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////
-//	세트 아이템 타입을 "ItemSetType.bmd" 읽는다.
-//////////////////////////////////////////////////////////////////////////
 bool	CSItemOption::OpenItemSetType ( const char* filename )
 {
 	FILE* fp = fopen ( filename, "rb" );
@@ -134,10 +120,6 @@ bool	CSItemOption::OpenItemSetType ( const char* filename )
 	return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	세트 아이템 옵션을 "ItemSetOption.bmd" 읽는다.
-//////////////////////////////////////////////////////////////////////////
 bool	CSItemOption::OpenItemSetOption ( const char* filename )
 {
 	FILE* fp = fopen ( filename, "rb" );
@@ -184,16 +166,11 @@ bool	CSItemOption::OpenItemSetOption ( const char* filename )
 	return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
 {
 
 	int SkillEnergy = 20+SkillAttribute[Type].Energy*(SkillAttribute[Type].Level)*4/100;
 
-	// 익스플로전, 레퀴엠
 	if( Type == AT_SKILL_SUMMON_EXPLOSION || Type == AT_SKILL_SUMMON_REQUIEM ) {
 		SkillEnergy = 20+SkillAttribute[Type].Energy*(SkillAttribute[Type].Level)*3/100;
 	}
@@ -206,34 +183,34 @@ bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
     
     switch ( Type )
     {
-    case 17:SkillEnergy = 0;break;      //  에너지볼
-	case 30:SkillEnergy = 30;break;     //  고블린소환	
-	case 31:SkillEnergy = 60;break;     //  돌괴물소환	
-	case 32:SkillEnergy = 90;break;     //  암살자소환
-	case 33:SkillEnergy = 130;break;    //  설인대장소환
-	case 34:SkillEnergy = 170;break;    //  다크나이트소환
-	case 35:SkillEnergy = 210;break;    //  발리소환
-	case 36:SkillEnergy = 300;break;    //  솔져소환
+    case 17:SkillEnergy = 0;break;
+	case 30:SkillEnergy = 30;break;
+	case 31:SkillEnergy = 60;break;
+	case 32:SkillEnergy = 90;break;
+	case 33:SkillEnergy = 130;break;
+	case 34:SkillEnergy = 170;break;
+	case 35:SkillEnergy = 210;break;
+	case 36:SkillEnergy = 300;break;
 #ifdef ADD_ELF_SUMMON
-	case 37:SkillEnergy = 500;break;    //  쉐도우나이트소환
+	case 37:SkillEnergy = 500;break;
 #endif // ADD_ELF_SUMMON
-    case 60:SkillEnergy = 15; break;    //  포스.
+    case 60:SkillEnergy = 15; break;
 	case AT_SKILL_ASHAKE_UP:
 	case AT_SKILL_ASHAKE_UP+1:
 	case AT_SKILL_ASHAKE_UP+2:
 	case AT_SKILL_ASHAKE_UP+3:
 	case AT_SKILL_ASHAKE_UP+4:
-    case AT_SKILL_DARK_HORSE:    SkillEnergy = 0; break;    //  
-    case AT_PET_COMMAND_DEFAULT: SkillEnergy = 0; break;    //  
-    case AT_PET_COMMAND_RANDOM:  SkillEnergy = 0; break;    //  
-    case AT_PET_COMMAND_OWNER:   SkillEnergy = 0; break;    //  
-    case AT_PET_COMMAND_TARGET:  SkillEnergy = 0; break;    //  
-	case AT_SKILL_PLASMA_STORM_FENRIR: SkillEnergy = 0; break;	// 플라즈마스톰
+    case AT_SKILL_DARK_HORSE:    SkillEnergy = 0; break;  
+    case AT_PET_COMMAND_DEFAULT: SkillEnergy = 0; break; 
+    case AT_PET_COMMAND_RANDOM:  SkillEnergy = 0; break;
+    case AT_PET_COMMAND_OWNER:   SkillEnergy = 0; break; 
+    case AT_PET_COMMAND_TARGET:  SkillEnergy = 0; break; 
+	case AT_SKILL_PLASMA_STORM_FENRIR: SkillEnergy = 0; break;
 	case AT_SKILL_INFINITY_ARROW: SkillEnergy = 0; 
 		break;	// 인피니티 애로우
 		
 #ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-	case AT_SKILL_BLOW_OF_DESTRUCTION: SkillEnergy = 0;	// 파괴의일격
+	case AT_SKILL_BLOW_OF_DESTRUCTION: SkillEnergy = 0;
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
@@ -262,12 +239,12 @@ bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
     }
 
 	/*
-    AT_SKILL_STUN               ,       //  스턴.
-    AT_SKILL_REMOVAL_STUN       ,       //  스턴 제거.
-    AT_SKILL_MANA               ,       //  마나증가.
-    AT_SKILL_INVISIBLE          ,       //  투명.
-    AT_SKILL_REMOVAL_INVISIBLE  ,       //  투명 해제.
-    AT_SKILL_REMOVAL_BUFF       ,       //  보조마법 일시 제거.
+    AT_SKILL_STUN               , 
+    AT_SKILL_REMOVAL_STUN       , 
+    AT_SKILL_MANA               ,  
+    AT_SKILL_INVISIBLE          ,   
+    AT_SKILL_REMOVAL_INVISIBLE  ,     
+    AT_SKILL_REMOVAL_BUFF       ,   
 	*/
 
 	if(Type >= AT_SKILL_STUN && Type <= AT_SKILL_REMOVAL_BUFF)
@@ -276,7 +253,6 @@ bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
 	}
 	else
     //  17, 18, 19, 20, 21, 22, 23, 41, 47, 49, 48, 43, 42, 24, 52, 51, 30, 31, 32, 33, 34, 35, 36, 55, 56
-    //      방어    ~    베기       회오리베기 ~  블로우         창찌르기   ~ 레이드 슛       다발        관통   아이스애로우   블러드어택  파워슬레쉬
 #ifdef KJH_FIX_SKILL_REQUIRE_ENERGY
 	if ( ( Type>=18 && Type<=23 ) || ( Type>=41 && Type<=43 ) || ( Type>=47 && Type<=49 ) || Type==24 || Type==51 || Type==52 || Type==55 || Type==56 )
 #else // KJH_FIX_SKILL_REQUIRE_ENERGY
@@ -286,15 +262,14 @@ bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
         SkillEnergy = 0;
     }
     else if ( Type==44 || Type==45 || Type==46 || Type==57 || Type==73 || Type==74 )
-    {	// 공성스킬은 최소요구 에너지가 없다. 
+    {	
         SkillEnergy = 0;
     }
 	
-	// 마이너스 열매 관련
 	if(Charisma > 0)
 	{
 		int SkillCharisma = SkillAttribute[Type].Charisma;
-		if(Charisma < SkillCharisma)	// 통솔포인트 비교 해서 적으면 스킬 사용 못하는거다.
+		if(Charisma < SkillCharisma)
 		{
 			return true;
 		}
@@ -309,21 +284,17 @@ bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	세트 아이템으로 조합 가능?
-//////////////////////////////////////////////////////////////////////////
 BYTE CSItemOption::IsChangeSetItem ( const int Type, const int SubType=-1 )
 {
 	ITEM_SET_TYPE& itemSType = m_ItemSetType[Type];
 
-    if ( SubType==-1 )  //  A, B세트중 하나.
+    if ( SubType==-1 )
     {
         if ( itemSType.byOption[0]==255 && itemSType.byOption[1]==255 )
             return 0;
         return 255;
     }
-    else                //  해당되는 세트.
+    else
     {
         if ( itemSType.byOption[SubType]==255 )
             return 0;
@@ -332,9 +303,6 @@ BYTE CSItemOption::IsChangeSetItem ( const int Type, const int SubType=-1 )
     }
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  세트아이템 조합 레벨.
-//////////////////////////////////////////////////////////////////////////
 WORD CSItemOption::GetMixItemLevel ( const int Type )
 {
     if ( Type<0 ) return 0;
@@ -347,10 +315,6 @@ WORD CSItemOption::GetMixItemLevel ( const int Type )
     return MixLevel;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	해당 아이템의 세트아이템 이름을 얻는다.
-//////////////////////////////////////////////////////////////////////////
 bool	CSItemOption::GetSetItemName( char* strName, const int iType, const int setType )
 {
     int setItemType = (setType%0x04);
@@ -384,11 +348,7 @@ bool	CSItemOption::GetSetItemName( char* strName, const int iType, const int set
 	return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	해당 아이템의 세트 타입을 검색한다.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::checkItemType ( BYTE* optionList, const int iType, const int setType )
+void CSItemOption::checkItemType ( BYTE* optionList, const int iType, const int setType )
 {
 	int setItemType = (setType%0x04);
 
@@ -396,11 +356,8 @@ void	CSItemOption::checkItemType ( BYTE* optionList, const int iType, const int 
 	{
 		ITEM_SET_TYPE& itemSType = m_ItemSetType[iType];
 
-        //  세트 옵션이 존재한다.
 		if ( itemSType.byOption[setItemType-1]!=255 && itemSType.byOption[setItemType-1]!=0 )
 		{
-            //  같은 무기이면서 같은 세트인 아이템은 제외한다.
-			//  총 4번의 루핑이 돌며, 즉 세트 아이템 4개 까지만 가능하다. // 
 #ifdef YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
 			for (int i = 0; i < 30; i += 3)
 #else	// YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
@@ -413,15 +370,15 @@ void	CSItemOption::checkItemType ( BYTE* optionList, const int iType, const int 
 			{
 				if ( optionList[i]==0 )
 				{
-					optionList[i] = itemSType.byOption[setItemType-1];          //  옵션.
-					optionList[i+1]++;                                          //  갯수.
-                    optionList[i+2] = setItemType-1;                            //  세트 종류.
+					optionList[i] = itemSType.byOption[setItemType-1];
+					optionList[i+1]++;
+                    optionList[i+2] = setItemType-1;
 					break;
 				}
-				else if ( optionList[i]==itemSType.byOption[setItemType-1] )    //  옵션.
+				else if ( optionList[i]==itemSType.byOption[setItemType-1] )
 				{
 					optionList[i+1]++;
-                    optionList[i+2] = setItemType-1;                            //  세트 종류.
+                    optionList[i+2] = setItemType-1;
 					break;
 				}
 			}
@@ -429,18 +386,14 @@ void	CSItemOption::checkItemType ( BYTE* optionList, const int iType, const int 
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	옵션들의 정보를 계산한다.
-//////////////////////////////////////////////////////////////////////////
 void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 {
     int Class = GetBaseClass ( Hero->Class );
 	int ExClass = IsSecondClass(Hero->Class);
 
-    BYTE    bySetOptionListTmp[2][16];  //  세트 옵션 리스트.
-    BYTE    bySetOptionListTmp2[2][16]; //  세트 옵션 가능 리스트.
-    int     iSetOptionListValue[2][16]; //  옵션 값.
+	BYTE    bySetOptionListTmp[2][16];
+    BYTE    bySetOptionListTmp2[2][16];
+    int     iSetOptionListValue[2][16];
 
 #ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 	unsigned int    
@@ -489,10 +442,9 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 #endif //PBG_FIX_SETITEM_4OVER
 #endif	// YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
 	{
-		// 동일한 세트가 2개 이상이다.
 		if ( optionList[i+1]>=2 )
 		{
-			int count = optionList[i+1]-1;									// 같은 세트 옵션 아이템 갯수 - 1 // 인덱스 접근
+			int count = optionList[i+1]-1;
 			int standardCount = min ( count, 6 );
 			ITEM_SET_OPTION& itemOption = m_ItemSetOption[optionList[i]];		
 
@@ -532,8 +484,6 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 
 
 #ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-			// 1. SetItemNameMap에서 찾아보고 없으면 추가. 추가된 아이템의 TypeSequence를 알아놓고 있는다.
-			// 2. SetItemSequence Table에 현재 TypeSequence와 Index Sequence를 저장
 			
 			bool	bFind	=	false;
 			for( m_iterESIN = m_mapEquippedSetItemName.begin(); m_iterESIN != m_mapEquippedSetItemName.end(); ++m_iterESIN )
@@ -639,14 +589,9 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 				}
 			}
 
-			//	풀옵션인 경우.
 			if ( count>=itemOption.byOptionCount-2 )
 			{
-#ifdef _VS2008PORTING
 				for (int j=0; j<5; ++j )
-#else // _VS2008PORTING
-				for ( j=0; j<5; ++j )
-#endif // _VS2008PORTING
 				{
 					option[0] = itemOption.byFullOption[j];
                     value[0]  = itemOption.byFullOptionValue[j];
@@ -690,22 +635,17 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 		}
 	}
 
-	// 각 옵션의 순번대로 1차원적으로 옵션을 기재 하여 나아간다.		// 세트 옵션의 추가 옵션만 해당
-#ifdef _VS2008PORTING
 	for (int i=0; i<2; ++i )
-#else // _VS2008PORTING	
-    for ( i=0; i<2; ++i )
-#endif // _VS2008PORTING
     {
         for ( int j=0; j<optionCount[i]; ++j )
         {
 #ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 			m_mapEquippedSetItemSequence.insert( pair<BYTE, int>((i*optionCount[0])+j, arruiSetItemTypeSequence[i][j]) );
 #endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-            m_bySetOptionList[(i*optionCount[0])+j][0] = bySetOptionListTmp[i][j];		// 옵션 요소 타입으로 어떤  Text 출력할지 	//ex) "힘 증가 "
-            m_bySetOptionList[(i*optionCount[0])+j][1] = bySetOptionListTmp2[i][j];		//
-            m_iSetOptionListValue[(i*optionCount[0])+j][0] = iSetOptionListValue[i][j];	// 증감 수치
-            m_iSetOptionListValue[(i*optionCount[0])+j][1] = iSetOptionListValue[i][j];	// 증감 수치
+            m_bySetOptionList[(i*optionCount[0])+j][0] = bySetOptionListTmp[i][j];
+            m_bySetOptionList[(i*optionCount[0])+j][1] = bySetOptionListTmp2[i][j];	
+            m_iSetOptionListValue[(i*optionCount[0])+j][0] = iSetOptionListValue[i][j];
+            m_iSetOptionListValue[(i*optionCount[0])+j][1] = iSetOptionListValue[i][j];
         }
     }
     m_bySetOptionANum = optionCount[0];
@@ -713,80 +653,73 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//	옵션의 설명 텍스트를 얻는다.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::getExplainText ( char* text, const BYTE option, const BYTE value, const BYTE SetIndex )
+void CSItemOption::getExplainText ( char* text, const BYTE option, const BYTE value, const BYTE SetIndex )
 {
 	switch ( option+AT_SET_OPTION_IMPROVE_STRENGTH )
 	{
-    case AT_SET_OPTION_IMPROVE_MAGIC_POWER:                   //  마력 증가.
+    case AT_SET_OPTION_IMPROVE_MAGIC_POWER:
     	sprintf( text, GlobalText[632], value );
         break;
 
-	case AT_SET_OPTION_IMPROVE_STRENGTH: 				//	힘 증가
-	case AT_SET_OPTION_IMPROVE_DEXTERITY: 			    //	민첩성 증가
-	case AT_SET_OPTION_IMPROVE_ENERGY: 				    //	에너지 증가	                 
-	case AT_SET_OPTION_IMPROVE_VITALITY: 				//	체력 증가
-    case AT_SET_OPTION_IMPROVE_CHARISMA:                //  통솔력 증가.
-    case AT_SET_OPTION_IMPROVE_ATTACK_MIN:              //  최소 공격력 증가.
-    case AT_SET_OPTION_IMPROVE_ATTACK_MAX:              //  최대 공격력 증가.
+	case AT_SET_OPTION_IMPROVE_STRENGTH: 
+	case AT_SET_OPTION_IMPROVE_DEXTERITY:
+	case AT_SET_OPTION_IMPROVE_ENERGY:	                 
+	case AT_SET_OPTION_IMPROVE_VITALITY:
+    case AT_SET_OPTION_IMPROVE_CHARISMA:
+    case AT_SET_OPTION_IMPROVE_ATTACK_MIN:
+    case AT_SET_OPTION_IMPROVE_ATTACK_MAX:
 		sprintf( text, GlobalText[950+option], value );
         break;
 
-    case AT_SET_OPTION_IMPROVE_DAMAGE: 	                //	데미지 증가	 
-	case AT_SET_OPTION_IMPROVE_ATTACKING_PERCENT: 		//	공격 성공률 증가  
-	case AT_SET_OPTION_IMPROVE_DEFENCE: 			    //	방어력 증가		 
-	case AT_SET_OPTION_IMPROVE_MAX_LIFE: 				//	최대 생명력 증가
-	case AT_SET_OPTION_IMPROVE_MAX_MANA: 				//	최대 마나 증가
-	case AT_SET_OPTION_IMPROVE_MAX_AG: 					//	최대 AG 증가		             
-    case AT_SET_OPTION_IMPROVE_ADD_AG:                  //  AG 증가양 증가.
-    case AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE_PERCENT: //  크리티컬 데미지 확률 증가.
-    case AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE:         //  크리티컬 데미지 증가.
-    case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE_PERCENT://  액설런트 데미지 확률 증가.
-    case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE:        //  액설런트 데미지 증가.
-    case AT_SET_OPTION_IMPROVE_SKILL_ATTACK:            //  스킬 공격력 증가.
-    case AT_SET_OPTION_DOUBLE_DAMAGE:					//	더블 데미지 확률
+    case AT_SET_OPTION_IMPROVE_DAMAGE:
+	case AT_SET_OPTION_IMPROVE_ATTACKING_PERCENT: 
+	case AT_SET_OPTION_IMPROVE_DEFENCE:	 
+	case AT_SET_OPTION_IMPROVE_MAX_LIFE:
+	case AT_SET_OPTION_IMPROVE_MAX_MANA:
+	case AT_SET_OPTION_IMPROVE_MAX_AG:		             
+    case AT_SET_OPTION_IMPROVE_ADD_AG:
+    case AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE_PERCENT:
+    case AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE:
+    case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE_PERCENT:
+    case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE:
+    case AT_SET_OPTION_IMPROVE_SKILL_ATTACK:
+    case AT_SET_OPTION_DOUBLE_DAMAGE:
 		sprintf( text, GlobalText[949+option], value );
 		break;					    					
 
     case AT_SET_OPTION_DISABLE_DEFENCE:
-		sprintf( text, GlobalText[970], value );        //  적 방어력 무시.
+		sprintf( text, GlobalText[970], value );
 		break;					    					
 
-	case AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE: 	//	두손검 장비시 데미지 15% 증가	 
+	case AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE: 
 		sprintf( text, GlobalText[983], value );        
         break;
 
-	case AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE: 			//	방패 장비시 방어력 5% 증가		 
+	case AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE:	 
 		sprintf( text, GlobalText[984], value );        
         break;
 
 
-	case AT_SET_OPTION_IMPROVE_ATTACK_1: 				//	특정 캐릭터 공격력 증가 민첩성/60
-	case AT_SET_OPTION_IMPROVE_ATTACK_2: 				//	특정 캐릭터 공격력 증가 힘/50	 
-	case AT_SET_OPTION_IMPROVE_MAGIC: 					//	특정 캐릭터 마력 증가 에너지/70	 
-//	case AT_SET_OPTION_IMPROVE_DEFENCE_1: 				//	특정 캐릭터 방어력 증가 레벨/20	 
-//	case AT_SET_OPTION_IMPROVE_DEFENCE_2: 				//	특정 캐릭터 방어력 증가 3%		 
-	case AT_SET_OPTION_IMPROVE_DEFENCE_3: 				//	특정 캐릭터 방어력 증가 민첩성/50
-	case AT_SET_OPTION_IMPROVE_DEFENCE_4: 				//	특정 캐릭터 방어력 증가 체력/40	 
-	case AT_SET_OPTION_FIRE_MASTERY: 					//	특정 캐릭터 불속성 추가			 
-	case AT_SET_OPTION_ICE_MASTERY: 					//	특정 캐릭터 얼음속성 추가		 
-	case AT_SET_OPTION_THUNDER_MASTERY: 				//	특정 캐릭터 번개속성 추가		 
-	case AT_SET_OPTION_POSION_MASTERY: 					//	특정 캐릭터 독속성 추가			 
-	case AT_SET_OPTION_WATER_MASTERY: 					//	특정 캐릭터 물속성 추가			 
-	case AT_SET_OPTION_WIND_MASTERY: 					//	특정 캐릭터 바람속성 추가		 
-	case AT_SET_OPTION_EARTH_MASTERY: 					//	특정 캐릭터 땅속성 추가			 
+	case AT_SET_OPTION_IMPROVE_ATTACK_1:
+	case AT_SET_OPTION_IMPROVE_ATTACK_2:
+	case AT_SET_OPTION_IMPROVE_MAGIC: 
+//	case AT_SET_OPTION_IMPROVE_DEFENCE_1:
+//	case AT_SET_OPTION_IMPROVE_DEFENCE_2:
+	case AT_SET_OPTION_IMPROVE_DEFENCE_3:
+	case AT_SET_OPTION_IMPROVE_DEFENCE_4:
+	case AT_SET_OPTION_FIRE_MASTERY:	 
+	case AT_SET_OPTION_ICE_MASTERY:	 
+	case AT_SET_OPTION_THUNDER_MASTERY: 
+	case AT_SET_OPTION_POSION_MASTERY:		 
+	case AT_SET_OPTION_WATER_MASTERY:	 
+	case AT_SET_OPTION_WIND_MASTERY:	 
+	case AT_SET_OPTION_EARTH_MASTERY:	 
         sprintf ( text, GlobalText[971+(option+AT_SET_OPTION_IMPROVE_STRENGTH-AT_SET_OPTION_IMPROVE_ATTACK_2)], value );
 		break;						
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	등록된 옵션의 값을 얻는다.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::PlusSpecial ( WORD* Value, int Special )
+void CSItemOption::PlusSpecial ( WORD* Value, int Special )
 {
 	Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
 	int optionValue = 0;
@@ -805,11 +738,7 @@ void	CSItemOption::PlusSpecial ( WORD* Value, int Special )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	등록된 옵션의 %값을 얻는다.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::PlusSpecialPercent ( WORD* Value, int Special )
+void CSItemOption::PlusSpecialPercent ( WORD* Value, int Special )
 {
 	Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
 	int optionValue = 0;
@@ -829,10 +758,7 @@ void	CSItemOption::PlusSpecialPercent ( WORD* Value, int Special )
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//	등록 옵션의 Level / ? 증가.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::PlusSpecialLevel ( WORD* Value, const WORD SrcValue, int Special )
+void CSItemOption::PlusSpecialLevel ( WORD* Value, const WORD SrcValue, int Special )
 {
 	Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
 	int optionValue = 0;
@@ -854,11 +780,7 @@ void	CSItemOption::PlusSpecialLevel ( WORD* Value, const WORD SrcValue, int Spec
 	}
 }
 
-
-/////////////////////////////////////////////////////////////////////////
-//  특수 캐릭터에 적용되는 옵션.
-//////////////////////////////////////////////////////////////////////////
-void    CSItemOption::PlusMastery ( int* Value, const BYTE MasteryType )
+void CSItemOption::PlusMastery ( int* Value, const BYTE MasteryType )
 {
     int optionValue = 0;
 	for ( int i=0; i<m_bySetOptionANum+m_bySetOptionBNum; ++i )
@@ -876,11 +798,7 @@ void    CSItemOption::PlusMastery ( int* Value, const BYTE MasteryType )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	등록된 옵션의 %값을 얻는다.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::MinusSpecialPercent ( int* Value, int Special )
+void CSItemOption::MinusSpecialPercent ( int* Value, int Special )
 {
 	Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
 	int optionValue = 0;
@@ -899,12 +817,7 @@ void	CSItemOption::MinusSpecialPercent ( int* Value, int Special )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-// 등록된 옵션의 값을 얻는다. 같은 종류의 세트 아이템을 위하여 이후 
-// 영향을 주는 Flag를 설정 한다.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::GetSpecial ( WORD* Value, int Special )
+void CSItemOption::GetSpecial ( WORD* Value, int Special )
 {
 	Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
 	int optionValue = 0;
@@ -923,9 +836,6 @@ void	CSItemOption::GetSpecial ( WORD* Value, int Special )
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	등록된 옵션의 %값을 얻는다.
-//////////////////////////////////////////////////////////////////////////
 void	CSItemOption::GetSpecialPercent ( WORD* Value, int Special )
 {
 	Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
@@ -945,10 +855,6 @@ void	CSItemOption::GetSpecialPercent ( WORD* Value, int Special )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	등록 옵션의 Level / ? 증가.
-//////////////////////////////////////////////////////////////////////////
 void	CSItemOption::GetSpecialLevel ( WORD* Value, const WORD SrcValue, int Special )
 {
 	Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
@@ -971,11 +877,7 @@ void	CSItemOption::GetSpecialLevel ( WORD* Value, const WORD SrcValue, int Speci
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  세트 아이템의 기본 옵션 값을 알려준다.
-//////////////////////////////////////////////////////////////////////////
-int     CSItemOption::GetDefaultOptionValue ( ITEM* ip, WORD* Value )
+int CSItemOption::GetDefaultOptionValue ( ITEM* ip, WORD* Value )
 {
     *Value = ((ip->ExtOption>>2)%0x04);
 
@@ -984,33 +886,29 @@ int     CSItemOption::GetDefaultOptionValue ( ITEM* ip, WORD* Value )
     return p->AttType;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  세트 아이템의 기본 옵션을 표시한다.
-//////////////////////////////////////////////////////////////////////////
-bool    CSItemOption::GetDefaultOptionText ( const ITEM* ip, char* Text )
+bool CSItemOption::GetDefaultOptionText ( const ITEM* ip, char* Text )
 {
     if ( ((ip->ExtOption>>2)%0x04)<=0 ) return false;
 
     switch ( ItemAttribute[ip->Type].AttType )
     {
-    case SET_OPTION_STRENGTH :      //  힘 옵션 증가.
+    case SET_OPTION_STRENGTH:
         sprintf ( Text, GlobalText[950], ((ip->ExtOption>>2)%0x04)*5 );
         break;
 
-    case SET_OPTION_DEXTERITY :     //  민첩 옵션 증가.
+    case SET_OPTION_DEXTERITY:
         sprintf ( Text, GlobalText[951], ((ip->ExtOption>>2)%0x04)*5 );
         break;
 
-    case SET_OPTION_ENERGY :        //  에너지 옵션 증가.
+    case SET_OPTION_ENERGY:
         sprintf ( Text, GlobalText[952], ((ip->ExtOption>>2)%0x04)*5 );
         break;
 
-    case SET_OPTION_VITALITY :      //  체력 옵션 증가.
+    case SET_OPTION_VITALITY:
         sprintf ( Text, GlobalText[953], ((ip->ExtOption>>2)%0x04)*5 );
         break;
 
-    default :
+    default:
         return false;
     }
     return true;
@@ -1018,7 +916,7 @@ bool    CSItemOption::GetDefaultOptionText ( const ITEM* ip, char* Text )
 
 
 #ifdef PJH_FIX_4_BUGFIX_33
-bool     CSItemOption::Special_Option_Check(int Kind)
+bool CSItemOption::Special_Option_Check(int Kind)
 {
 	int i,j;
 	for(i = 0; i < 2; i++)
@@ -1028,7 +926,7 @@ bool     CSItemOption::Special_Option_Check(int Kind)
 		if(item == NULL || item->Type <= -1)
 			continue;
 
-		if(Kind == 0)	//파워슬레쉬 스킬.
+		if(Kind == 0)
 		{
 			for(j=0;j<item->SpecialNum;j++)
 			{
@@ -1050,10 +948,7 @@ bool     CSItemOption::Special_Option_Check(int Kind)
 }
 #endif //PJH_FIX_4_BUGFIX_33
 
-//////////////////////////////////////////////////////////////////////////
-//  기본 세트 능력치를 화면에 표시.
-//////////////////////////////////////////////////////////////////////////
-int     CSItemOption::RenderDefaultOptionText ( const ITEM* ip, int TextNum )
+int CSItemOption::RenderDefaultOptionText ( const ITEM* ip, int TextNum )
 {
     int TNum = TextNum;
     if ( GetDefaultOptionText( ip, TextList[TNum] ) )
@@ -1072,14 +967,10 @@ int     CSItemOption::RenderDefaultOptionText ( const ITEM* ip, int TextNum )
     return TNum;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  모든 추가 스탯을 저장한다.
-//////////////////////////////////////////////////////////////////////////
 #ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION 
-void    CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma )
+void CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma )
 #else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-void    CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality )
+void CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality )
 #endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 {
     for ( int i=EQUIPMENT_WEAPON_RIGHT; i<MAX_EQUIPMENT; ++i )
@@ -1116,23 +1007,19 @@ void    CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* En
         }
     }
 
-	GetSpecial ( Strength,  AT_SET_OPTION_IMPROVE_STRENGTH );	    //	힘 증가
-	GetSpecial ( Dexterity, AT_SET_OPTION_IMPROVE_DEXTERITY );	    //	민첩성 증가
-	GetSpecial ( Energy,    AT_SET_OPTION_IMPROVE_ENERGY );        //	에너지 증가
-	GetSpecial ( Vitality,  AT_SET_OPTION_IMPROVE_VITALITY );	    //	체력 증가
+	GetSpecial ( Strength,  AT_SET_OPTION_IMPROVE_STRENGTH );
+	GetSpecial ( Dexterity, AT_SET_OPTION_IMPROVE_DEXTERITY );
+	GetSpecial ( Energy,    AT_SET_OPTION_IMPROVE_ENERGY );
+	GetSpecial ( Vitality,  AT_SET_OPTION_IMPROVE_VITALITY );
 #ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION 
-	GetSpecial ( Charisma,  AT_SET_OPTION_IMPROVE_CHARISMA );		//  통솔 증가
+	GetSpecial ( Charisma,  AT_SET_OPTION_IMPROVE_CHARISMA );
 #endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 }
 
-
-
 #ifdef LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
-//////////////////////////////////////////////////////////////////////////
-// 모든 스탯을 0으로 초기화 한뒤에 옵션 증감 수치들만 반환한다.
-//////////////////////////////////////////////////////////////////////////
+
 #ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	void	CSItemOption::getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma )
+	void CSItemOption::getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma )
 	{
 		*AddStrength = *AddDexterity = *AddEnergy = *AddVitality = *AddCharisma = 0;
 		memset ( m_bySetOptionListOnOff, 0, sizeof( BYTE )* 16 );
@@ -1140,7 +1027,7 @@ void    CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* En
 		getAllAddState( AddStrength, AddDexterity, AddEnergy, AddVitality, AddCharisma );
 	}	
 #else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	void	CSItemOption::getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality )
+	void CSItemOption::getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality )
 	{
 		*AddStrength = *AddDexterity = *AddEnergy = *AddVitality = 0;
 		memset ( m_bySetOptionListOnOff, 0, sizeof( BYTE )* 16 );
@@ -1149,14 +1036,11 @@ void    CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* En
 	}
 #endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 
-//////////////////////////////////////////////////////////////////////////
-//  모든 추가 스탯을 각 스탯별 비교 수치 와 연산된 값만 가감 하여 반환 한다.
-//////////////////////////////////////////////////////////////////////////
 #ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-void    CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma,
+void CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma,
 													  WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality, WORD iCompareCharisma )
 #else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-void    CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality,
+void CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality,
 													  WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality )
 #endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 {	
@@ -1203,22 +1087,19 @@ void    CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dex
 
 	memset ( m_bySetOptionListOnOff, 0, sizeof( BYTE )* 16 );
 	
-	GetSpecial ( Strength,  AT_SET_OPTION_IMPROVE_STRENGTH );	    //	힘 증가
-	GetSpecial ( Dexterity, AT_SET_OPTION_IMPROVE_DEXTERITY );	    //	민첩성 증가
-	GetSpecial ( Energy,    AT_SET_OPTION_IMPROVE_ENERGY );			//	에너지 증가
-	GetSpecial ( Vitality,  AT_SET_OPTION_IMPROVE_VITALITY );	    //	체력 증가
+	GetSpecial ( Strength,  AT_SET_OPTION_IMPROVE_STRENGTH );
+	GetSpecial ( Dexterity, AT_SET_OPTION_IMPROVE_DEXTERITY );
+	GetSpecial ( Energy,    AT_SET_OPTION_IMPROVE_ENERGY );
+	GetSpecial ( Vitality,  AT_SET_OPTION_IMPROVE_VITALITY );
 	
 #ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	GetSpecial ( Charisma,  AT_SET_OPTION_IMPROVE_CHARISMA );	    //	통솔 증가
+	GetSpecial ( Charisma,  AT_SET_OPTION_IMPROVE_CHARISMA );
 #endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 }
 #endif // LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
 
 
-//////////////////////////////////////////////////////////////////////////
-//	장비창에 장착한 장비들의 세트 옵션을 체크한다.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::CheckItemSetOptions ( void )
+void CSItemOption::CheckItemSetOptions ( void )
 {
 	BYTE byOptionList[30] = { 0, };
     ITEM itemTmp;
@@ -1247,7 +1128,6 @@ void	CSItemOption::CheckItemSetOptions ( void )
 #endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
 #endif	//LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
 
-        //  같은 무기 같은 세트는 세트 옵션에서 제외.
         if ( ( i==EQUIPMENT_WEAPON_LEFT || i==EQUIPMENT_RING_LEFT ) && itemTmp.Type==ip->Type && itemTmp.ExtOption==(ip->ExtOption%0x04) )
         {
             continue;
@@ -1268,8 +1148,7 @@ void	CSItemOption::CheckItemSetOptions ( void )
 	calcSetOptionList( byOptionList );
 
 #ifdef LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
-	// 통솔은 증가가 빠져 있음
-	// 하지만 나중에 추가 할때 추가 하는게 좋을듯.
+
 #ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 	getAllAddStateOnlyAddValue ( &CharacterAttribute->AddStrength,	&CharacterAttribute->AddDexterity, 
 								 &CharacterAttribute->AddEnergy,	&CharacterAttribute->AddVitality, 
@@ -1282,8 +1161,7 @@ void	CSItemOption::CheckItemSetOptions ( void )
 #endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 
 #if defined PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM || defined LDK_FIX_USE_SECRET_ITEM_TO_SETITEM_OPTION_BUG
-    //  총 추가 스탯을 계산한다
-	// 통솔, 레벨을 추가 하였다.
+
     WORD AllStrength  = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
     WORD AllDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
     WORD AllEnergy    = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
@@ -1291,7 +1169,7 @@ void	CSItemOption::CheckItemSetOptions ( void )
 	WORD AllCharisma  = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 	WORD AllLevel     = CharacterAttribute->Level;
 #else //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-    //  총 추가 스탯을 계산한다.
+
     WORD AllStrength = CharacterAttribute->Strength;
     WORD AllDexterity = CharacterAttribute->Dexterity;
     WORD AllEnergy = CharacterAttribute->Energy;
@@ -1304,8 +1182,7 @@ void	CSItemOption::CheckItemSetOptions ( void )
 
 #else //LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
 #if defined PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM || defined LDK_FIX_USE_SECRET_ITEM_TO_SETITEM_OPTION_BUG
-    //  총 추가 스탯을 계산한다
-	// 통솔, 레벨을 추가 하였다.
+
     WORD AllStrength  = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
     WORD AllDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
     WORD AllEnergy    = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
@@ -1313,7 +1190,7 @@ void	CSItemOption::CheckItemSetOptions ( void )
 	WORD AllCharisma  = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 	WORD AllLevel     = CharacterAttribute->Level;
 #else //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-    //  총 추가 스탯을 계산한다.
+
     WORD AllStrength = CharacterAttribute->Strength;
     WORD AllDexterity = CharacterAttribute->Dexterity;
     WORD AllEnergy = CharacterAttribute->Energy;
@@ -1324,8 +1201,7 @@ void	CSItemOption::CheckItemSetOptions ( void )
 	
 #endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
 
-	// 통솔은 증가가 빠져 있음
-	// 하지만 나중에 추가 할때 추가 하는게 좋을듯.
+
 #ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 	getAllAddState ( &AllStrength, &AllDexterity, &AllEnergy, &AllVitality, &AllCharisma );
 #else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
@@ -1334,17 +1210,13 @@ void	CSItemOption::CheckItemSetOptions ( void )
 
 #endif	//LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
 
-    //  다시 옵션을 검사한다.
+
     memset ( byOptionList, 0, sizeof( BYTE ) * 30 );
     memset ( m_bySetOptionList, 255, sizeof( BYTE ) * 16 );
 
 
 #ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-#ifdef _VS2008PORTING
 	for (int i=0; i<MAX_EQUIPMENT_INDEX; ++i )
-#else // _VS2008PORTING
-	for ( i=0; i<MAX_EQUIPMENT_INDEX; ++i )
-#endif // _VS2008PORTING
 #else // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 	for ( i=0; i<12; ++i )
 #endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
@@ -1355,7 +1227,6 @@ void	CSItemOption::CheckItemSetOptions ( void )
 
         if ( ip->RequireDexterity>AllDexterity || ip->RequireEnergy>AllEnergy || ip->RequireStrength>AllStrength 
 #if defined PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM || defined YDG_FIX_SETITEM_REQUIRED_STATUS_BUG
-			// 통솔은 비교 안 해도 될듯 하지만 추가 될 경우 넣어 둬도 상관 없을듯.
 			|| ip->RequireLevel > AllLevel || ip->RequireCharisma > AllCharisma || ip->Durability <= 0 || ( IsRequireEquipItem( ip ) == false )
 #endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
 			)
@@ -1363,7 +1234,6 @@ void	CSItemOption::CheckItemSetOptions ( void )
             continue;
         }
 
-        //  같은 무기 같은 세트는 세트 옵션에서 제외.
         if ( ( i==EQUIPMENT_WEAPON_LEFT || i==EQUIPMENT_RING_LEFT ) && itemTmp.Type==ip->Type && itemTmp.ExtOption==(ip->ExtOption%0x04) )
         {
             continue;
@@ -1382,23 +1252,18 @@ void	CSItemOption::CheckItemSetOptions ( void )
 	}
 
 #ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-	// 장착된 아이템들의 세트 아이템만 골라내어 출력할 추가 옵션의 갯수를 설정하여 반환합니다. 
 	UpdateCount_SetOptionPerEquippedSetItem( byOptionList, m_arLimitSetItemOptionCount, CharacterMachine->Equipment );
 #endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 
 	calcSetOptionList( byOptionList );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	세트 아이템 처리.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::MoveSetOptionList ( const int StartX, const int StartY )
+void CSItemOption::MoveSetOptionList ( const int StartX, const int StartY )
 {
     int x,y,Width,Height;
 	
 	Width=162; Height=20; x=StartX+14; y=StartY+22;
-	if ( MouseX>=x && MouseX<x+Width && MouseY>=y && MouseY<y+Height )//&& MouseLButtonPush )
+	if ( MouseX>=x && MouseX<x+Width && MouseY>=y && MouseY<y+Height )
 	{
 		m_bViewOptionList = true;
 
@@ -1408,11 +1273,7 @@ void	CSItemOption::MoveSetOptionList ( const int StartX, const int StartY )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	세트 아이템 정보를 화면에 보여준다.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::RenderSetOptionButton ( const int StartX, const int StartY )
+void CSItemOption::RenderSetOptionButton ( const int StartX, const int StartY )
 {
     float x,y,Width,Height;
     char  Text[100];
@@ -1435,11 +1296,7 @@ void	CSItemOption::RenderSetOptionButton ( const int StartX, const int StartY )
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	세트 아이템 정보를 화면에 보여준다.
-//////////////////////////////////////////////////////////////////////////
-void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
+void CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 {
 	if ( m_bViewOptionList && ( m_bySetOptionANum>0 || m_bySetOptionBNum>0 ) )
 	{
@@ -1448,7 +1305,7 @@ void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 
         int PosX, PosY;
 
-        PosX = StartX+95;//+60;
+        PosX = StartX+95;
         PosY = StartY+40;
 
         BYTE TextNum = 0;
@@ -1468,10 +1325,6 @@ void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 #ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 			std::string	strCurrent;
 
-			// For TEST
-			//unsigned int uiSizeESIS = m_mapEquippedSetItemSequence.size();
-			// For TEST
-
 			m_iterESIS = m_mapEquippedSetItemSequence.find( i );
 
 			if( m_mapEquippedSetItemSequence.end() != m_iterESIS )
@@ -1485,10 +1338,6 @@ void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 
 			if( iCurSetItemType != iCurSetItemTypeSequence )
 			{
-				// For TEST
-				//unsigned int uiSizeSetItemName = m_mapEquippedSetItemName.size();
-				// For TEST
-
 				iCurSetItemType = iCurSetItemTypeSequence;
 
 				m_iterESIN = m_mapEquippedSetItemName.find( iCurSetItemTypeSequence );
@@ -1497,7 +1346,6 @@ void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 				{
 					strCurrent = m_iterESIN->second;
 					
-					// 1089 "세트"
 					sprintf ( TextList[TextNum], "%s %s", strCurrent.c_str(), GlobalText[1089] );
 					TextListColor[TextNum] = 3;
 					TextBold[TextNum] = true;
@@ -1508,7 +1356,6 @@ void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 #else // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
             if ( i==0 && m_bySetOptionANum>0 )
             {
-				// 1089 "세트"
                 sprintf ( TextList[TextNum], "%s %s", m_strSetName[0], GlobalText[1089] );
        		    TextListColor[TextNum] = 3;
 			    TextBold[TextNum] = true;
@@ -1523,7 +1370,6 @@ void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 			    TextBold[TextNum] = false;
                 TextNum++; SkipNum++;
 
-				// 1089 "세트"
                 sprintf ( TextList[TextNum], "%s %s", m_strSetName[1], GlobalText[1089] );
        		    TextListColor[TextNum] = 3;
 			    TextBold[TextNum] = true;
@@ -1536,7 +1382,6 @@ void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 			    TextBold[TextNum] = false;
                 TextNum++; SkipNum++;
 
-				// 1089 "세트"
                 sprintf ( TextList[TextNum], "%s %s", m_strSetName[1], GlobalText[1089] );
        		    TextListColor[TextNum] = 3;
 			    TextBold[TextNum] = true;
@@ -1549,7 +1394,6 @@ void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 			    TextBold[TextNum] = false;
                 TextNum++; SkipNum++;
 
-				// 1089 "세트"
                 sprintf ( TextList[TextNum], "%s %s", m_strSetName[0], GlobalText[1089] );
        		    TextListColor[TextNum] = 3;
 			    TextBold[TextNum] = true;
@@ -1571,10 +1415,7 @@ void	CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//  찾는 /NAME이 원하는 세트인지 검사한다.
-//////////////////////////////////////////////////////////////////////////
-void    CSItemOption::CheckRenderOptionHelper ( const char* FilterName )
+void CSItemOption::CheckRenderOptionHelper ( const char* FilterName )
 {
     char Name[256];
 
@@ -1605,11 +1446,7 @@ void    CSItemOption::CheckRenderOptionHelper ( const char* FilterName )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  찾아는 세트 아이템의 모든 옵션을 표시한다.
-//////////////////////////////////////////////////////////////////////////
-void    CSItemOption::RenderOptionHelper ( void )
+void CSItemOption::RenderOptionHelper ( void )
 {
     if ( m_byRenderOptionList<=0 ) return;
 
@@ -1639,11 +1476,8 @@ void    CSItemOption::RenderOptionHelper ( void )
 
 	sprintf(TextList[TextNum],"\n");TextNum++;
 	sprintf(TextList[TextNum],"\n");TextNum++;
-#ifdef _VS2008PORTING
+
 	for ( int i=0; i<13; ++i )
-#else // _VS2008PORTING
-    for ( i=0; i<13; ++i )
-#endif // _VS2008PORTING
     {
         if ( i<6 )
         {
@@ -1699,7 +1533,6 @@ int CSItemOption::GetSetItmeCount( const ITEM* pselecteditem )
 
 	int setitemcount = 0;
 
-	//여긴 반드시 수정이 필요함...
 	for( int j = 0; j < MAX_ITEM; j++ )
 	{
 		ITEM_SET_TYPE& temptype = m_ItemSetType[j];
@@ -1772,9 +1605,6 @@ bool CSItemOption::isFullseteffect( const ITEM* pselecteditem )
 		return false;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  선택한 아이템의 모든 옵션을 표시한다.
-//////////////////////////////////////////////////////////////////////////
 #ifdef LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum, bool bIsEquippedItem )
 #else // LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
@@ -1815,8 +1645,6 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 	byLimitOptionNum = m_bySetOptionANum-m_bySameSetItem;//m_bySetOptionANum-1;
 #endif
 
-
-	// 현재 2개 이상 착용중인 세트 아이템들에 대한 해당 세트 아이템의 Sequence Index와 출력될 추가 옵션 수
 #ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 
 	count1 = Search_From_EquippedSetItemNameSequence( setOption.strSetName );
@@ -1889,21 +1717,16 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 #ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 
 #ifdef LDS_FIX_OUTPUT_WRONG_EQUIPPEDSETITEMOPTION_BY_WRONG_SLOTINDEX
-	// 선택Item 판별 위한 인덱스를 반지 인경우만 bySelectedSlotIndex로 참조 합니다.
-	//  기존 ip->Type을 참조 하였으나 ip->Type 에서 반지의 경우만 모두 오른손 반지(10)로 잘
-	//	못된 값이 넘어오기 때문입니다.
+
 	BYTE byCurrentSelectedSlotIndex = ip->bySelectedSlotIndex;
 
 	int iLimitOptionCount = m_arLimitSetItemOptionCount[byCurrentSelectedSlotIndex]-1;
 #else // LDS_FIX_OUTPUT_WRONG_EQUIPPEDSETITEMOPTION_BY_WRONG_SLOTINDEX
-	// 현재 세트 아이템 옵션의 출력 숫자 제한 
 	int iLimitOptionCount = m_arLimitSetItemOptionCount[ip->bySelectedSlotIndex]-1;
 #endif // LDS_FIX_OUTPUT_WRONG_EQUIPPEDSETITEMOPTION_BY_WRONG_SLOTINDEX
 
 #endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 	
-
-	// (세트)아이템의 모든 추가 옵션 출력. i 하나당 라인 한줄
 #ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 #ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 	for ( int i=0; i<=MAX_SETITEM_OPTIONS; ++i )	// 아이템 추가옵션 갯수 제한 수치 반영
@@ -1976,14 +1799,14 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 #ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 				&& iLimitOptionCount > i
 #endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY	// 옵션이 모두 비활성화 출력이 되는 Flag (byLimitOptionNum = 0) 검사 추가
+#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 				&& byLimitOptionNum!=0			
 #endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 #ifdef LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 #ifdef PBG_FIX_SETITEMTOOLTIP
-				&& bIsEquippedItem == false	//장착외의 아이템을 구분하자
+				&& bIsEquippedItem == false
 #else //PBG_FIX_SETITEMTOOLTIP
-				&& bIsEquippedItem == true // 미장착된 인벤토리에 있는 세트 아이템인지. (장착된 세트아이템만 옵션 활성화 색 설정.)
+				&& bIsEquippedItem == true
 #endif //PBG_FIX_SETITEMTOOLTIP
 #endif // LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 				)
@@ -1995,7 +1818,7 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 #ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 					&& iLimitOptionCount > i
 #endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY	// 옵션이 모두 비활성화 출력이 되는 Flag (byLimitOptionNum = 0) 검사 추가
+#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 					&& byLimitOptionNum!=0
 #endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 				)
@@ -2017,7 +1840,7 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
             if ( m_bySetOptionList[count1][0]==option2 
 				&& byLimitOptionNum!=255
 				&& iLimitOptionCount > i
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY	// 옵션이 모두 비활성화 출력이 되는 Flag (byLimitOptionNum = 0) 검사 추가
+#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 				&& byLimitOptionNum!=0
 #endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 				)
@@ -2025,7 +1848,7 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 			if ( m_bySetOptionList[count1][0]==option2 
 				&& i<byLimitOptionNum 
 				&& byLimitOptionNum!=255
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY	// 옵션이 모두 비활성화 출력이 되는 Flag (byLimitOptionNum = 0) 검사 추가
+#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 				&& byLimitOptionNum!=0
 #endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 				)

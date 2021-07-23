@@ -1,19 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  CSWaterTerrain.cpp
-//
-//  내  용 : 출렁거리는 물지형을 표현한다.
-//
-//  날  짜 : 2004/03/30.
-//
-//  작성자 : 조 규 하.
-//  
 //////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
-//////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
 #include "ZzzOpenglUtil.h"
@@ -29,40 +17,19 @@
 #include "CSWaterTerrain.h"
 #include "GMHellas.h"
 
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
 extern  float   WorldTime;
 extern  int     MoveSceneFrame;
 extern  float   TerrainMappingAlpha[TERRAIN_SIZE*TERRAIN_SIZE];
 extern  float   g_chrome[MAX_VERTICES][2];
 
-
-
-//////////////////////////////////////////////////////////////////////////
-//  STRUCTURE.
-//////////////////////////////////////////////////////////////////////////
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//  CLASS.
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  초기화.
-//////////////////////////////////////////////////////////////////////////
-void    CSWaterTerrain::Init ( void )
+void CSWaterTerrain::Init ( void )
 {
     Vector ( 1.f, -1.f, 1.f, m_vLightVector );
 
     memset ( m_iWaveHeight, 0, sizeof( int )*WATER_TERRAIN_SIZE*WATER_TERRAIN_SIZE*4 );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  물에 대한 계산을 한다.
-//////////////////////////////////////////////////////////////////////////
-void    CSWaterTerrain::Update ( void )
+void CSWaterTerrain::Update ( void )
 {
     if ( !InHellas(m_iMapIndex) ) return;
 
@@ -82,15 +49,10 @@ void    CSWaterTerrain::Update ( void )
     calcBaseWave ();
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  물을 화면에 생성시킨다.
-//////////////////////////////////////////////////////////////////////////
 void    CSWaterTerrain::Render ( void )
 {
     if ( !InHellas(m_iMapIndex) ) return;
 
-    //  물지형을 생성한다.
     CreateTerrain ( (Hero->PositionX)*2, (Hero->PositionY)*2 );
 
     float alpha;
@@ -128,10 +90,6 @@ void    CSWaterTerrain::Render ( void )
 	glEnd();
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  현재 물의 높이를 이용해 화면을 구성하는 면을 생성한다.
-//////////////////////////////////////////////////////////////////////////
 void    CSWaterTerrain::CreateTerrain ( int x, int y )
 {
     float   fHeight, fHeight1;
@@ -155,7 +113,6 @@ void    CSWaterTerrain::CreateTerrain ( int x, int y )
                 fHeight1+= m_iWaveHeight[3][offset]+350.f;
 
                 fHeight = (fHeight+fHeight1/2.f)/2.f;
-//                fHeight = fHeight1/2.f;
             }
         
             offset = offX+(offY*MAX_WATER_GRID);
@@ -167,7 +124,6 @@ void    CSWaterTerrain::CreateTerrain ( int x, int y )
                 continue;
             }
 
-            //  리스트 작성.
             if ( ( (offX%2)==0 && (offY%2)==0 ) || ( (offX%2)==1 && (offY%2)==1 ) )
             {
                 m_iTriangleList[m_iTriangleListNum+0] = offset;
@@ -193,7 +149,6 @@ void    CSWaterTerrain::CreateTerrain ( int x, int y )
         }
     }
 
-    //  노멜벡터 생성.
     int     v1, v2, v3;
     vec3_t  normalV;
     int     NormalNum[MAX_WATER_GRID*MAX_WATER_GRID] = { 0, };
@@ -214,11 +169,7 @@ void    CSWaterTerrain::CreateTerrain ( int x, int y )
         NormalNum[v3]++;
 	}
 
-#ifdef _VS2008PORTING
 	for (int i=0; i<MAX_WATER_GRID*MAX_WATER_GRID; i++ )
-#else // _VS2008PORTING
-	for ( i=0; i<MAX_WATER_GRID*MAX_WATER_GRID; i++ )
-#endif // _VS2008PORTING
 	{
         m_Normals[i][0] /= (float)(NormalNum[i]);
         m_Normals[i][1] /= (float)(NormalNum[i]);
@@ -228,10 +179,7 @@ void    CSWaterTerrain::CreateTerrain ( int x, int y )
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  원하는 구역의 물을 누른다.
-//////////////////////////////////////////////////////////////////////////
-void    CSWaterTerrain::addSineWave ( int x, int y, int radiusX, int radiusY, int height )
+void CSWaterTerrain::addSineWave ( int x, int y, int radiusX, int radiusY, int height )
 {
 	int* p = &m_iWaveHeight[m_iWaterPage][0];
 
@@ -272,10 +220,6 @@ void    CSWaterTerrain::addSineWave ( int x, int y, int radiusX, int radiusY, in
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  기본 물결을 계산한다.
-//////////////////////////////////////////////////////////////////////////
 void    CSWaterTerrain::calcBaseWave ( void )
 {
 /*
@@ -318,11 +262,7 @@ void    CSWaterTerrain::calcBaseWave ( void )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  눌려진 물을 계산한다.
-//////////////////////////////////////////////////////////////////////////
-void    CSWaterTerrain::calcWave ( void )
+void CSWaterTerrain::calcWave ( void )
 {
 	int newh;
 	
@@ -346,11 +286,7 @@ void    CSWaterTerrain::calcWave ( void )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  현재 위치의 물결의 높이를 알아낸다.
-//////////////////////////////////////////////////////////////////////////
-float   CSWaterTerrain::GetWaterTerrain ( float xf, float yf )
+float CSWaterTerrain::GetWaterTerrain ( float xf, float yf )
 {
     int x = (int)(xf/TERRAIN_SCALE*2);
     int y = (int)(yf/TERRAIN_SCALE*2);
@@ -372,11 +308,7 @@ float   CSWaterTerrain::GetWaterTerrain ( float xf, float yf )
     return fHeight;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  지형에 맞춰서 이미지를 표시한다.
-//////////////////////////////////////////////////////////////////////////
-void    CSWaterTerrain::RenderWaterAlphaBitmap ( int Texture, float xf, float yf, float SizeX, float SizeY, vec3_t Light, float Rotation, float Alpha, float Height )
+void CSWaterTerrain::RenderWaterAlphaBitmap ( int Texture, float xf, float yf, float SizeX, float SizeY, vec3_t Light, float Rotation, float Alpha, float Height )
 {
 	if(Alpha==1.f)
      	glColor3fv(Light);
@@ -431,10 +363,6 @@ void    CSWaterTerrain::RenderWaterAlphaBitmap ( int Texture, float xf, float yf
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 void    CSWaterTerrain::RenderWaterBitmapTile(float xf,float yf,float lodf,int lodi,vec3_t c[4],bool LightEnable,float Alpha,float Height)
 {
     vec3_t TerrainVertex[4];

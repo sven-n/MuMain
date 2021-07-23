@@ -112,11 +112,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 	EnableAlphaTest();
 	for(int i=iRenderStartLine, s=0; i<=GetCurrentRenderEndLine(); i++, s++)
 	{
-#ifdef _VS2008PORTING
 		if(i < 0 && i >= (int)pvecMsgs->size()) break;
-#else // _VS2008PORTING
-		if(i < 0 && i >= pvecMsgs->size()) break;
-#endif // _VS2008PORTING
 		
 		bool bRenderMessage = true;	
 		g_pRenderText->SetFont(g_hFont);
@@ -348,11 +344,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
 		RenderImage(IMAGE_SCROLL_TOP, fRenderPosX+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE, 
 			fRenderPosY+WND_TOP_BOTTOM_EDGE, 7, 3);
 		
-#ifdef _VS2008PORTING
 		for(int i=0; i<(int)GetNumberOfShowingLines(); i++)
-#else // _VS2008PORTING
-		for(int i=0; i<GetNumberOfShowingLines(); i++)
-#endif // _VS2008PORTING
 		{
 			RenderImage(IMAGE_SCROLL_MIDDLE, fRenderPosX+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE, 
 				fRenderPosY+WND_TOP_BOTTOM_EDGE+(float)(i*SCROLL_MIDDLE_PART_HEIGHT+SCROLL_TOP_BOTTOM_PART_HEIGHT), 7, 15);
@@ -846,11 +838,7 @@ void SEASON3B::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
 		return;
 	}
 
-#ifdef _VS2008PORTING
 	if((int)pvecMsgs->size() <= m_nShowingLines)
-#else // _VS2008PORTING
-	if(pvecMsgs->size() <= m_nShowingLines)
-#endif // _VS2008PORTING
 	{
 		m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 	}
@@ -858,11 +846,8 @@ void SEASON3B::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
 	{
 		if(nRenderEndLine < m_nShowingLines)
 			m_iCurrentRenderEndLine = m_nShowingLines - 1;
-#ifdef _VS2008PORTING
+
 		else if(nRenderEndLine >= (int)pvecMsgs->size())
-#else // _VS2008PORTING
-		else if(nRenderEndLine >= pvecMsgs->size())
-#endif // _VS2008PORTING
 			m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 		else
 			m_iCurrentRenderEndLine = nRenderEndLine;
@@ -1431,11 +1416,7 @@ void SEASON3B::CNewUIChatLogWindow::UpdateScrollPos()
 	if(GetNumberOfLines() > GetNumberOfShowingLines())
 #endif // KJH_FIX_UI_CHAT_MESSAGE
 	{
-#ifdef _VS2008PORTING
 		if((int)GetNumberOfShowingLines() > GetCurrentRenderEndLine())
-#else // _VS2008PORTING
-		if(GetNumberOfShowingLines() > GetCurrentRenderEndLine())
-#endif // _VS2008PORTING
 		{
 			fPosRate = 0.f;
 		}

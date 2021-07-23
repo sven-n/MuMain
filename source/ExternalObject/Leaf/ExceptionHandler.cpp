@@ -139,24 +139,18 @@ bool CExceptionHandler::SaveDmpFile(const std::string& filename, CONTEXT* pConte
 	fwrite(&DmpHeader, sizeof(DMPFILEHEADER), 1, fd);
 	
 	//. Write image file infomation
-	if(DmpHeader.ProcessInfo.IsExistFixedFileInfo)	//. 파일정보가 있으면 기록한다.
+	if(DmpHeader.ProcessInfo.IsExistFixedFileInfo)
 		fwrite(&ImageFileInfo, sizeof(VS_FIXEDFILEINFO), 1, fd);
 	
 	//. Write modules infomation
-#ifdef _VS2008PORTING
-	for(int i=0; i<(int)DmpHeader.ProcessInfo.NumOfModules; i++) {
-#else // _VS2008PORTING
-	for(int i=0; i<DmpHeader.ProcessInfo.NumOfModules; i++) {
-#endif // _VS2008PORTING
+	for(int i=0; i<(int)DmpHeader.ProcessInfo.NumOfModules; i++) 
+	{
 		fwrite(&ModuleInfo[i], sizeof(DMPMODULEINFO), 1, fd);
 	}
 	
 	//. Write callstack infomation
-#ifdef _VS2008PORTING
-	for(int j=0; j<(int)CallStackDmp.GetStackDepth(); j++) {
-#else // _VS2008PORTING
-	for(int j=0; j<CallStackDmp.GetStackDepth(); j++) {
-#endif // _VS2008PORTING
+	for(int j=0; j<(int)CallStackDmp.GetStackDepth(); j++) 
+	{
 		DMPCALLSTACKFRAME DmpStackFrame;
 		DmpStackFrame.FrameAddr = (DWORD)CallStackDmp.GetFrameAddr(j);
 		DmpStackFrame.ReturnAddr = (DWORD)CallStackDmp.GetReturnAddr(j);
@@ -268,12 +262,10 @@ void CExceptionHandler::SetProcessInfoHeader(DMPPROCESSINFOHEADER* pProcessInfoH
 					lstrcpyn(pModuleInfo->szModulePath, ModuleEntry.szExePath,256);
 					pModuleInfo->lpBaseAddr = ModuleEntry.modBaseAddr;
 					pModuleInfo->SizeOfModule = ModuleEntry.modBaseSize;
-#ifdef _VS2008PORTING
+
 					if((int)++NumOfModules >= MaxModules)
-#else // _VS2008PORTING
-					if(++NumOfModules >= MaxModules)
-#endif // _VS2008PORTING
 						break;
+
 				} while(Module32Next(hModuleSnap, &ModuleEntry));
 			}
 			pProcessInfoHeader->NumOfModules = NumOfModules;	//. set number of modules.
@@ -411,11 +403,9 @@ bool CDmpFileLoader::Create(const std::string& dmpfile)
 	}
 
 	//. Read modules infomation
-#ifdef _VS2008PORTING
-	for(int i=0; i<(int)pProcessInfoHeader->NumOfModules; i++) {
-#else // _VS2008PORTING
-	for(int i=0; i<pProcessInfoHeader->NumOfModules; i++) {
-#endif // _VS2008PORTING
+
+	for(int i=0; i<(int)pProcessInfoHeader->NumOfModules; i++) 
+	{
 		DMPMODULEINFO* pModuleInfo = new DMPMODULEINFO;
 		fread(pModuleInfo, sizeof(DMPMODULEINFO), 1, fd);
 		m_listModule.push_back(pModuleInfo);
@@ -425,11 +415,9 @@ bool CDmpFileLoader::Create(const std::string& dmpfile)
 	DMPEXCEPTIONINFOHEADER* pExceptionInfoHeader = &m_DmpFileHeader.ExceptionInfo;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	//. Read callstack infomation
-#ifdef _VS2008PORTING
-	for(int j=0; j<(int)m_DmpFileHeader.CallStackDepth; j++) {
-#else // _VS2008PORTING
-	for(int j=0; j<m_DmpFileHeader.CallStackDepth; j++) {
-#endif // _VS2008PORTING
+
+	for(int j=0; j<(int)m_DmpFileHeader.CallStackDepth; j++) 
+	{
 		DMPCALLSTACKFRAME* pCallstackFrame = new DMPCALLSTACKFRAME;
 		fread(pCallstackFrame, sizeof(DMPCALLSTACKFRAME), 1, fd);
 		m_listStackFrame.push_back(pCallstackFrame);
@@ -507,11 +495,7 @@ size_t CDmpFileLoader::GetStackDepth() const
 { return m_listStackFrame.size(); }
 const DMPCALLSTACKFRAME* CDmpFileLoader::GetCallStackFrame(int index) const
 {
-#ifdef _VS2008PORTING
 	if(index >=0 && index < (int)GetStackDepth())
-#else // _VS2008PORTING
-	if(index >=0 && index < GetStackDepth())
-#endif // _VS2008PORTING
 		return m_listStackFrame[index];
 	return NULL;
 }

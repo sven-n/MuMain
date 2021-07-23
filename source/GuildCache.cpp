@@ -36,11 +36,7 @@ void CGuildCache::Reset()
 
 int CGuildCache::GetGuildMarkIndex( int nGuildKey )
 {
-#ifdef _VS2008PORTING
 	for( int i=0 ; i<=(int)m_dwCurrIndex ; ++i )
-#else // _VS2008PORTING
-	for( int i=0 ; i<=m_dwCurrIndex ; ++i )
-#endif // _VS2008PORTING
 	{
 		if( GuildMark[i].Key == nGuildKey )
 			return i;

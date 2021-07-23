@@ -75,9 +75,11 @@ void CCallStackDump::Dump(const CONTEXT* pContext) {
 #endif // KJH_LOG_ERROR_DUMP
 	
 	DWORD* pEbp = (DWORD*)pContext->Ebp;
-	for(int i=0; i<64; i++) {
+	for(int i=0; i<64; i++) 
+	{
 		CCallStackFrame* pCallStackFrame = new CCallStackFrame;
-		if(!pCallStackFrame->Create(pEbp)) {
+		if(!pCallStackFrame->Create(pEbp)) 
+		{
 			delete pCallStackFrame; break;
 		}
 		m_listFrame.push_back(pCallStackFrame);
@@ -89,11 +91,11 @@ void CCallStackDump::Dump(const CONTEXT* pContext) {
 		if(IsBadReadPtr((DWORD*)*pEbp, sizeof(DWORD)))
 			break;
 
-		//. 이전 함수로
 		pEbp = (DWORD*)*pEbp;
 	}
 }
-void CCallStackDump::Dump() {
+void CCallStackDump::Dump() 
+{
 	CONTEXT ct;
 	ZeroMemory(&ct, sizeof(CONTEXT));
 	
@@ -110,28 +112,21 @@ void CCallStackDump::Clear() {
 }
 
 size_t CCallStackDump::GetStackDepth() const { return m_listFrame.size(); }
-void* CCallStackDump::GetFrameAddr(int index) {
-#ifdef _VS2008PORTING
+
+void* CCallStackDump::GetFrameAddr(int index) 
+{
 	if(index >= (int)GetStackDepth()) return NULL;
-#else // _VS2008PORTING
-	if(index >= GetStackDepth()) return NULL;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-#endif // _VS2008PORTING
-	return m_listFrame[index]->GetFrameAddr();
+		return m_listFrame[index]->GetFrameAddr();
 }
-void* CCallStackDump::GetReturnAddr(int index) {
-#ifdef _VS2008PORTING                                                                      
+void* CCallStackDump::GetReturnAddr(int index) 
+{
+                                                                
 	if(index >= (int)GetStackDepth()) return NULL;
-#else // _VS2008PORTING
-	if(index >= GetStackDepth()) return NULL;
-#endif // _VS2008PORTING
-	return m_listFrame[index]->GetReturnAddr();
+		return m_listFrame[index]->GetReturnAddr();
 }
-void CCallStackDump::GetParameter(int index, DWORD* pBuf, size_t size) {
-#ifdef _VS2008PORTING
+void CCallStackDump::GetParameter(int index, DWORD* pBuf, size_t size) 
+{
 	if(index >=0 && index < (int)GetStackDepth()) {
-#else // _VS2008PORTING
-	if(index >=0 && index < GetStackDepth()) {
-#endif // _VS2008PORTING
 		m_listFrame[index]->GetParameter(pBuf, size);
 	}
 }

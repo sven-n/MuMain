@@ -424,11 +424,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename,
 		BITMAP_t* pBitmap = (*mi).second;
 		if(pBitmap->Ref > 0)
 		{
-#ifdef _VS2008PORTING
 			if(0 == _stricmp(pBitmap->FileName, filename.c_str()))
-#else // _VS2008PORTING
-			if(0 == stricmp(pBitmap->FileName, filename.c_str()))
-#endif // _VS2008PORTING
 			{
 				pBitmap->Ref++;
 				return true;
@@ -445,17 +441,10 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename,
 	std::string ext;
 	SplitExt(filename, ext, false);
 	
-#ifdef _VS2008PORTING
 	if(0 == _stricmp(ext.c_str(), "jpg"))
 		return OpenJpeg(uiBitmapIndex, filename, uiFilter, uiWrapMode);
 	else if(0 == _stricmp(ext.c_str(), "tga"))
 		return OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode);
-#else // _VS2008PORTING
-	if(0 == stricmp(ext.c_str(), "jpg"))
-		return OpenJpeg(uiBitmapIndex, filename, uiFilter, uiWrapMode);
-	else if(0 == stricmp(ext.c_str(), "tga"))
-		return OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode);
-#endif // _VS2008PORTING
 	
 	return false;
 }
@@ -475,11 +464,7 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 		StringToLower( strKey );
 		StringToLower( strKey_Identity );
 
-#ifdef _VS2008PORTING
 		type_bitmap_namemap::iterator iter_ = m_mapBitmap_Namemap.end();
-#else // _VS2008PORTING
-		type_bitmap_namemap::iterator iter_ = 0;
-#endif // _VS2008PORTING
 		
 		// FullNameMap에 존재여부 검사 후 존재시 erase 하여준다.
 		// erase 인자값으로 map::iterator를 넣어도 되고, firstKey를 인자로 해도 무방하다.
@@ -668,11 +653,8 @@ BITMAP_t* CGlobalBitmap::FindTexture_Linear(const std::string& filename)
 	for(; mi != m_mapBitmap.end(); mi++)
 	{
 		BITMAP_t* pBitmap = (*mi).second;
-#ifdef _VS2008PORTING
+
 		if(0 == _stricmp(filename.c_str(), pBitmap->FileName)) 
-#else // _VS2008PORTING
-		if(0 == stricmp(filename.c_str(), pBitmap->FileName)) 
-#endif // _VS2008PORTING
 		{
 			return pBitmap;
 		}
@@ -797,7 +779,6 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
 
 	if(cinfo.output_width<=MAX_WIDTH && cinfo.output_height<=MAX_HEIGHT)
 	{
-#ifdef _VS2008PORTING
 		int Width, Height;
 		for(int i=1;i<=MAX_WIDTH;i<<=1)
 		{
@@ -809,26 +790,13 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
 			Height = i;
 			if(i >= (int)cinfo.output_height) break;
 		}
-#else // _VS2008PORTING
-		for(int Width=1;Width<MAX_WIDTH;Width<<=1)
-		{
-			if(Width >= (int)cinfo.output_width) break;
-		}
-		for(int Height=1;Height<MAX_HEIGHT;Height<<=1)
-		{
-			if(Height >= (int)cinfo.output_height) break;
-		}
-#endif // _VS2008PORTING
 
 		BITMAP_t* pNewBitmap = new BITMAP_t;
 		memset(pNewBitmap, 0, sizeof(BITMAP_t));
 
 		pNewBitmap->BitmapIndex = uiBitmapIndex;
-#ifdef _VS2008PORTING
+
 		filename._Copy_s(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME, MAX_BITMAP_FILE_NAME);
-#else // _VS2008PORTING
-		filename.copy(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME);
-#endif // _VS2008PORTING
 
 		pNewBitmap->Width      = (float)Width;
 		pNewBitmap->Height     = (float)Height;
@@ -844,11 +812,7 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
 		JSAMPARRAY buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 		while (cinfo.output_scanline < cinfo.output_height) 
 		{
-#ifdef _VS2008PORTING
 			if(offset+row_stride > (int)BufferSize)
-#else // _VS2008PORTING
-			if(offset+row_stride > BufferSize)
-#endif // _VS2008PORTING
 				break;
 
 			(void) jpeg_read_scanlines(&cinfo, buffer, 1);
@@ -971,8 +935,6 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
 		return false;
 	}
 
-	// 텍스처를 만들기 위해 텍스처 크기 정함. 2의 자승으로 증가(<<=1)
-#ifdef _VS2008PORTING
 	int Width = 0, Height = 0;
 	for(int i=1;i<=MAX_WIDTH;i<<=1)
 	{
@@ -984,47 +946,30 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
 		Height = i;
 		if(i >= ny) break;
 	}
-#else // _VS2008PORTING
-	for(int Width=1;Width<MAX_WIDTH;Width<<=1)
-	{
-		if(Width >= nx) break;
-	}
-	for(int Height=1;Height<MAX_HEIGHT;Height<<=1)
-	{
-		if(Height >= ny) break;
-	}
-#endif // _VS2008PORTING
 
-	// BITMAP_t 구조체 채움.
 	BITMAP_t* pNewBitmap = new BITMAP_t;
 	memset(pNewBitmap, 0, sizeof(BITMAP_t));
 	
 	pNewBitmap->BitmapIndex = uiBitmapIndex;
-#ifdef _VS2008PORTING
+
 	filename._Copy_s(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME, MAX_BITMAP_FILE_NAME);
-#else // _VS2008PORTING
-	filename.copy(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME);
-#endif // _VS2008PORTING
 	
 	pNewBitmap->Width      = (float)Width;
 	pNewBitmap->Height     = (float)Height;
-	pNewBitmap->Components = 4;	//ARGB 등의 요소 수(4이므로 32bit이며 4byte임) 
+	pNewBitmap->Components = 4;
 	pNewBitmap->Ref = 1;
 	
 	size_t BufferSize = Width*Height*pNewBitmap->Components;
 	pNewBitmap->Buffer     = (unsigned char*)new BYTE[BufferSize];
-	// m_dwUsedTextureMemory는 게임엔 사용하지 않고 개발자 확인용. #define ENABLE_EDIT 관련.
+
 	m_dwUsedTextureMemory += BufferSize;
 
     for(int y=0;y<ny;y++)
 	{
-		// 파일에서 읽어들인 데이터.
         unsigned char *src = &PakBuffer[index];
 		index += nx * 4;
-		// 텍스처 데이터. 밑에서부터 위로 채움.(TGA 파일의 특성 때문인 듯)
 		unsigned char *dst = &pNewBitmap->Buffer[(ny-1-y)*Width*pNewBitmap->Components];
 
-		// TGA와 비트맵의 ARGB형식이 다르므로.
 		for(int x=0;x<nx;x++)
         {
 			dst[0] = src[2];
@@ -1042,39 +987,30 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
 #endif // KJH_FIX_ARRAY_DELETE
 
 #ifdef LDS_OPTIMIZE_FORLOADING
-	// Texture Image Open의 Bitmap_map이 구성될 시점에 Bitmap_namemap에 또한 검색 키 값이 되는 
-	// filename을 기준으로 Firstkey(FileName), Secondkey(BITMAP_t*) 키로 삽입 한다.
-	// 삽입시 각 FileName은 필수로 소문자화 시킨다.
 	std::string strFileName, strFullFileName( pNewBitmap->FileName );
 	
 	StringToLower(strFullFileName);
 	SplitFileName(strFullFileName, strFileName, true);
 	
-	// 1. Namemap 에 추가. FindTexture(string) 함수의 검색시 활용 된다.
 	m_mapBitmap_Namemap.insert( type_bitmap_namemap::value_type(strFullFileName, pNewBitmap) );
 	
-	// 2. NameMap Identity 추가  한다. FindTextureByName(string) 함수의 검색시 활용 된다.
-		m_mapBitmap_Namemap_identity.insert( type_bitmap_namemap::value_type(strFileName, pNewBitmap) );
+	m_mapBitmap_Namemap_identity.insert( type_bitmap_namemap::value_type(strFileName, pNewBitmap) );
 #endif // LDS_OPTIMIZE_FORLOADING
 
 	m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, pNewBitmap));
 	
-	glGenTextures( 1, &(pNewBitmap->TextureNumber));		// 텍스처 ID(pNewBitmap->TextureNumber) 얻음.
+	glGenTextures( 1, &(pNewBitmap->TextureNumber));
 
-	glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);	// 텍스처 바인드.
+	glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
 
-	// 텍스처 이미지 정의.
     glTexImage2D(GL_TEXTURE_2D, 0, 4, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
 
-	// 텍스처 효과 정의.
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	// 텍스처 필터링.
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
 
-	// 텍스처 랩핑.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);

@@ -15,11 +15,7 @@ CTimeCheck::~CTimeCheck()
 
 int CTimeCheck::CheckIndex(int index)
 {
-#ifdef _VS2008PORTING
 	for(int i = 0; i < (int)stl_Time.size(); i++)
-#else // _VS2008PORTING
-	for(int i = 0; i < stl_Time.size(); i++)
-#endif // _VS2008PORTING
 	{
 		if(stl_Time[i].iIndex == index)
 			return i;
@@ -59,11 +55,7 @@ bool CTimeCheck::GetTimeCheck(int index, int DelayTime)
 
 void CTimeCheck::DeleteTimeIndex(int index)
 {
-#ifdef _VS2008PORTING
 	for(int i = 0; i < (int)stl_Time.size(); i++)
-#else // _VS2008PORTING
-	for(int i = 0; i < stl_Time.size(); i++)
-#endif // _VS2008PORTING
 	{
 		if(stl_Time[i].iIndex == index)
 		{

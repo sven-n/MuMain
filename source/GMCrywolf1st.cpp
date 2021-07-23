@@ -1094,11 +1094,8 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 				}
 				if(c->AttackTime == 1)
 					PlayBuffer(SOUND_EVIL);
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-				for(i=0;i<4;i++)
-#endif // _VS2008PORTING
 				{
 					int Hand = 0;
 					if(i>=2) Hand = 1;
@@ -1110,7 +1107,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 				}
 		}
 		break;
-	case MODEL_MONSTER01+99:	// 탱커
+	case MODEL_MONSTER01+99:
 		{
 			if( c->AttackTime==15 )
 			{
@@ -2514,7 +2511,6 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
 		g_pRenderText->SetBgColor(0x00000000);
 		
-#ifdef _VS2008PORTING
 		int icntIndex = 0;
 		for(int i = 0; i < 5; i++)
 		{
@@ -2539,51 +2535,13 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 
 		if(View_Suc_Or_Fail == 1)
 		{
-			//"몬스터의 체력이 10% 하락되었습니다."
 			g_pRenderText->RenderText(330, 175 + icntIndex*17, GlobalText[2000], 0 ,0, RT3_WRITE_CENTER); icntIndex++;
-			//"모든 캐슬 및 광장의 입장권 조합확률이 5%상향 조정되었습니다."
 			g_pRenderText->RenderText(328, 175 + icntIndex*17, GlobalText[2001], 0 ,0, RT3_WRITE_CENTER );
 		}
 		else
 		{
-			//"크라이울프 내 모든 NPC가 삭제되었습니다."
 			g_pRenderText->RenderText(330, 175 + icntIndex*17, GlobalText[2009], 0 ,0, RT3_WRITE_CENTER);
 		}
-#else // _VS2008PORTING
-		for(int i = 0; i < 5; i++)
-		{
-			if(HeroScore[i] == -1)
-				continue;
-
-			wsprintf ( Text, "%d", i+1);
-			g_pRenderText->RenderText(240, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
-			wsprintf ( Text, "%s", HeroName[i]);
-			g_pRenderText->RenderText(285, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
-
-			wsprintf(Text, "%s", GetCharacterClassText(HeroClass[i]));
-			
-			g_pRenderText->RenderText(335, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
-			wsprintf ( Text, "%d", HeroScore[i]);
-			g_pRenderText->RenderText(385, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
-		}
-
-		g_pRenderText->SetTextColor(255, 0, 255, 255);
-		g_pRenderText->SetBgColor(0);
-
-		if(View_Suc_Or_Fail == 1)
-		{
-			//"몬스터의 체력이 10% 하락되었습니다."
-			g_pRenderText->RenderText(330, 175 + i*17, GlobalText[2000], 0 ,0, RT3_WRITE_CENTER); i++;
-			//"모든 캐슬 및 광장의 입장권 조합확률이 5%상향 조정되었습니다."
-			g_pRenderText->RenderText(328, 175 + i*17, GlobalText[2001], 0 ,0, RT3_WRITE_CENTER );
-		}
-		else
-		{
-			//"크라이울프 내 모든 NPC가 삭제되었습니다."
-			g_pRenderText->RenderText(330, 175 + i*17, GlobalText[2009], 0 ,0, RT3_WRITE_CENTER);
-		}
-#endif // _VS2008PORTING
-		
 		
 		if(MouseX > 300 && MouseX < 300 + 54 && MouseY > 300 && MouseY < 300+30)
 		{
@@ -2616,7 +2574,6 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 		}
 	}
 	
-	//-1 : 안찍는다., 0 : 찍는다.
 	if(Suc_Or_Fail >= 0)
 	{
 		float A_Value = 0.f;

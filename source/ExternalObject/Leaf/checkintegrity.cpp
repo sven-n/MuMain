@@ -154,11 +154,7 @@ bool CCheckSumGenerator::RemoveSegment(const std::string& name)
 }
 bool CCheckSumGenerator::RemoveSegment(int index)
 {
-#ifdef _VS2008PORTING
 	if(index >= 0 && index < (int)m_listSegment.size())
-#else // _VS2008PORTING
-	if(index >= 0 && index < m_listSegment.size())
-#endif // _VS2008PORTING
 	{
 		std::vector<SEGMENTINFO*>::iterator where = m_listSegment.begin() + index;
 		delete (*where);
@@ -188,11 +184,7 @@ const CCheckSumGenerator::SEGMENTINFO* CCheckSumGenerator::GetSegmentInfo(const 
 }
 const CCheckSumGenerator::SEGMENTINFO* CCheckSumGenerator::GetSegmentInfo(int index)
 { 
-#ifdef _VS2008PORTING
 	if(index >= 0 && index < (int)m_listSegment.size())
-#else // _VS2008PORTING
-	if(index >= 0 && index < m_listSegment.size())
-#endif // _VS2008PORTING
 	{
 		return m_listSegment[index];
 	}

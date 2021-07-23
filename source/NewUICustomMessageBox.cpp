@@ -249,13 +249,8 @@ int SEASON3B::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWO
 	bool bLoop = true;
 	while(bLoop)
 	{
-#ifdef _VS2008PORTING
 		int prev_offset = 0;
 		for(int cur_offset = 0; cur_offset<(int)strRemainText.size(); )
-#else // _VS2008PORTING
-		int cur_offset = 0, prev_offset = 0;
-		for(; cur_offset<strRemainText.size(); )
-#endif // _VS2008PORTING
 		{
 			prev_offset = cur_offset;
 			size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str()+cur_offset));
@@ -536,7 +531,6 @@ bool SEASON3B::CNewUIKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
 
 	int x, y, width, height;
 
-	// 메세지창 정보
 	x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
 	y = 100;
 	width = MSGBOX_WIDTH;
@@ -546,21 +540,14 @@ bool SEASON3B::CNewUIKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
 		return false;
 	}
 
-	// 키패드 타입
 	m_dwType = dwType;
 
-	// 키패드 초기화
 	for(int i=0; i<MAX_KEYPADINPUT; ++i)
 	{
 		m_iKeyPadMapping[i] = i;
 	}
 
-	// 스왑 과정
-#ifdef _VS2008PORTING
 	for(int i=0; i<20; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<20; ++i)
-#endif // _VS2008PORTING
 	{
 		int iFirst = rand() % 10;
 		int iSecond = rand() % 10;
@@ -572,7 +559,6 @@ bool SEASON3B::CNewUIKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
 	
 	ZeroMemory( m_strKeyPadInput, sizeof(m_strKeyPadInput));
 
-	// 버튼 정보 입력
 	SetButtonInfo();
 
 	return true;
@@ -3171,15 +3157,12 @@ void SEASON3B::CDevilSquareRankMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분1
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<MIDDLE_COUNT1; ++i)
 	{
@@ -3187,28 +3170,21 @@ void SEASON3B::CDevilSquareRankMsgBox::RenderFrame()
 		y += height;
 	}
 
-	// 메세지박스 중간라인
 	x = GetPos().x; width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
 	y += height;
 	
-	// 메세지박스 중간부분2
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-#ifdef _VS2008PORTING
+
 	for( int i=0; i<MIDDLE_COUNT2; ++i)
-#else // _VS2008PORTING
-	for( i=0; i<MIDDLE_COUNT2; ++i)
-#endif // _VS2008PORTING
 	{
 		RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-	
-	// 구분선
+
 	x = GetPos().x+13; y=GetPos().y+75; width = MSGBOX_SEPARATE_LINE_WIDTH; height = MSGBOX_SEPARATE_LINE_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
 
@@ -3222,8 +3198,6 @@ void SEASON3B::CDevilSquareRankMsgBox::RenderFrame()
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
 	
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 SEASON3B::CChaosCastleResultMsgBox::CChaosCastleResultMsgBox()
 {
@@ -3990,13 +3964,9 @@ int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwC
 	bool bLoop = true;
 	while(bLoop)
 	{
-#ifdef _VS2008PORTING
 		int prev_offset = 0;
+
 		for(int cur_offset = 0; cur_offset<(int)strRemainText.size(); )
-#else // _VS2008PORTING
-		int cur_offset = 0, prev_offset = 0;
-		for(; cur_offset<strRemainText.size(); )
-#endif // _VS2008PORTING
 		{
 			prev_offset = cur_offset;
 			size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str()+cur_offset));
@@ -5247,17 +5217,12 @@ CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIMessage
 		return CALLBACK_CONTINUE;	
 	}
 	
-#ifdef _VS2008PORTING
 	if(iInputZen <= (int)CharacterMachine->Gold)
-#else // _VS2008PORTING
-	if(iInputZen <= CharacterMachine->Gold)
-#endif // _VS2008PORTING
 	{
 		SendRequestStorageGold(0, iInputZen);
 	}
 	else
 	{
-		// 423 "젠이 부족합니다."
 		SEASON3B::CreateOkMessageBox(GlobalText[423]);
 	}
 	
@@ -5425,11 +5390,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 		//	선택된 아이템의 판매가격.
 		DWORD dwItemValue = ItemValue(pItem, 2);
 
-#ifdef _VS2008PORTING
 		if(iInputZen < (int)dwItemValue) 
-#else // _VS2008PORTING
-		if(iInputZen < dwItemValue) 
-#endif // _VS2008PORTING
 		{
 			bResult = true;				
 		}
@@ -5437,17 +5398,16 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 
 	if(bResult == true)
 	{
-		// 판매 가격 확인 메세지박스 생성
 		SEASON3B::CNewUI3DItemCommonMsgBox* lpMsgBox = NULL;
 
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout), &lpMsgBox);
 		if(lpMsgBox)
 		{
 			unicode::t_char strText2[MAX_TEXT_LENGTH] = { 0, };
-			// 1132 "판매가격 : %s젠 "
+			// 1132
 			unicode::_sprintf(strText2, GlobalText[1132], strText);
 			lpMsgBox->AddMsg(strText2, RGBA(255, 0, 0, 255), MSGBOX_FONT_BOLD);
-			// 1133 "이 가격으로 하시겠습니까?"
+			// 1133
 			lpMsgBox->AddMsg(GlobalText[1133]);
 			lpMsgBox->SetItemValue(iInputZen);
 		}

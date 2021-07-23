@@ -322,28 +322,18 @@ void CCreditWin::RenderControls()
 		break;
 	}
 
-	// 텍스트 가리개 스프라이트.
-#ifdef _VS2008PORTING
 	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
-#else // _VS2008PORTING
-	for (i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
-#endif // _VS2008PORTING
 		m_aSpr[i].Render();
 
-	::glEnable(GL_ALPHA_TEST);	// 알파 테스트 원상태로 돌려줌.
+	::glEnable(GL_ALPHA_TEST);
 
 	CWin::RenderButtons();
 }
 
-//*****************************************************************************
-// 함수 이름 : CloseWin()
-// 함수 설명 : 크레딧 창을 닫음.
-//*****************************************************************************
 void CCreditWin::CloseWin()
 {
 	CUIMng::Instance().HideWin(this);
 
-	// 5분 동안 아무짓 안하면 서버에서 끊어버리기 때문에 서버리스트를 요청함.
 #ifdef PKD_ADD_ENHANCED_ENCRYPTION
 	SendRequestServerList2();
 #else // PKD_ADD_ENHANCED_ENCRYPTION
@@ -354,19 +344,13 @@ void CCreditWin::CloseWin()
 	::PlayMp3(g_lpszMp3[MUSIC_MAIN_THEME]);
 }
 
-//*****************************************************************************
-// 함수 이름 : Init()
-// 함수 설명 : 일러스트, 텍스트 초기화.
-//*****************************************************************************
 void CCreditWin::Init()
 {
-	// 일러스트 애니 초기화.
 	m_eIllustState = FADEIN;
 	m_dIllustDeltaTickSum = 0.0;
 	m_byIllust = 0;
 	LoadIllust();
 
-	// 텍스트 애니 초기화.
 	for (int i = 0; i <= CRW_INDEX_NAME; ++i)
 		m_aeTextState[i] = FADEIN;
 	m_dTextDeltaTickSum = 0.0;
@@ -375,10 +359,6 @@ void CCreditWin::Init()
 	SetTextIndex();
 }
 
-//*****************************************************************************
-// 함수 이름 : LoadIllust()
-// 함수 설명 : 일러스트 파일을 읽어 스프라이트를 생성함.
-//*****************************************************************************
 void CCreditWin::LoadIllust()
 {
 	CInput rInput = CInput::Instance();
@@ -400,17 +380,13 @@ void CCreditWin::LoadIllust()
 	m_aSpr[CRW_SPR_PIC_R].SetPosition(400, 126);
 }
 
-//*****************************************************************************
-// 함수 이름 : AnimationIllust()
-// 함수 설명 : 일러스트의 사라지고 나타남과 일러스트 교체 처리.
-// 매개 변수 : dDeltaTick	: 이전 Update()호출 후부터 지금 Update()까지 시간.
-//*****************************************************************************
+
 void CCreditWin::AnimationIllust(double dDeltaTick)
 {
 	short nAlpha;
 	switch (m_eIllustState)
 	{
-	case FADEIN:	// 서서히 나타나는 경우.
+	case FADEIN:
 		nAlpha = short(m_aSpr[CRW_SPR_PIC_L].GetAlpha());
 		nAlpha += short(255.0 * dDeltaTick / CRW_ILLUST_FADE_TIME);
 		if (255 <= nAlpha)
@@ -422,7 +398,7 @@ void CCreditWin::AnimationIllust(double dDeltaTick)
 		m_aSpr[CRW_SPR_PIC_R].SetAlpha((BYTE)nAlpha);
 		break;
 
-	case SHOW:		// 완전히 보이는 경우.
+	case SHOW:
 		m_dIllustDeltaTickSum += dDeltaTick;
 		if (m_dIllustDeltaTickSum > CRW_ILLUST_SHOW_TIME)
 		{
@@ -431,7 +407,7 @@ void CCreditWin::AnimationIllust(double dDeltaTick)
 		}
 		break;
 
-	case FADEOUT:	// 서서히 사라지는 경우.
+	case FADEOUT:
 		nAlpha = short(m_aSpr[CRW_SPR_PIC_L].GetAlpha());
 		nAlpha -= short(255.0 * dDeltaTick / CRW_ILLUST_FADE_TIME);
 		if (0 >= nAlpha)
@@ -450,10 +426,6 @@ void CCreditWin::AnimationIllust(double dDeltaTick)
 
 void BuxConvert(BYTE *Buffer, int Size);
 
-//*****************************************************************************
-// 함수 이름 : LoadText()
-// 함수 설명 : 텍스트 정보 파일을 읽음.
-//*****************************************************************************
 void CCreditWin::LoadText()
 {
 	FILE *fp = ::fopen(CRW_DATA_FILE, "rb");
@@ -474,34 +446,30 @@ void CCreditWin::LoadText()
 	::fclose(fp);
 }
 
-//*****************************************************************************
-// 함수 이름 : SetTextIndex()
-// 함수 설명 : 한번에 보여줄 텍스트의 정보 인덱스를 세팅.
-//*****************************************************************************
 void CCreditWin::SetTextIndex()
 {
-	if (0 == m_aCredit[m_nNowIndex].byClass)	// 0이면 끝임.
+	if (0 == m_aCredit[m_nNowIndex].byClass)
 	{
-		::PlayBuffer(SOUND_CLICK01);	// 클릭 사운드.
+		::PlayBuffer(SOUND_CLICK01);
 		CloseWin();
 	}
 
-	if (1 == m_aCredit[m_nNowIndex].byClass)	// 1째줄에 들어갈 내용인가?
+	if (1 == m_aCredit[m_nNowIndex].byClass)
 	{
 		m_anTextIndex[CRW_INDEX_DEPARTMENT] = m_nNowIndex;
 		++m_nNowIndex;
 	}
-	if (2 == m_aCredit[m_nNowIndex].byClass)	// 2째줄에 들어갈 내용인가?
+	if (2 == m_aCredit[m_nNowIndex].byClass)
 	{
 		m_anTextIndex[CRW_INDEX_TEAM] = m_nNowIndex;
 		++m_nNowIndex;
 	}
-#ifdef _VS2008PORTING
+
 	int iNameCnt = 0;
-	for (int i = 0; i < 4; ++i)		// 3번째줄은 한번에 최대 4개까지 표시.
+	for (int i = 0; i < 4; ++i)
 	{
 		iNameCnt = i;
-		if (3 == m_aCredit[m_nNowIndex].byClass)// 3째줄에 들어갈 내용인가?
+		if (3 == m_aCredit[m_nNowIndex].byClass)
 		{
 			m_anTextIndex[CRW_INDEX_NAME0+i] = m_nNowIndex;
 			++m_nNowIndex;
@@ -509,39 +477,19 @@ void CCreditWin::SetTextIndex()
 		else
 			break;
 	}
-	m_nNameCount = iNameCnt;	// 3째줄에 표시할 항목 개수.
-#else // _VS2008PORTING
-	for (int i = 0; i < 4; ++i)		// 3번째줄은 한번에 최대 4개까지 표시.
-	{
-		if (3 == m_aCredit[m_nNowIndex].byClass)// 3째줄에 들어갈 내용인가?
-		{
-			m_anTextIndex[CRW_INDEX_NAME0+i] = m_nNowIndex;
-			++m_nNowIndex;
-		}
-		else
-			break;
-	}
-	m_nNameCount = i;	// 3째줄에 표시할 항목 개수.
-#endif // _VS2008PORTING
-
+	m_nNameCount = iNameCnt;
 }
 
-//*****************************************************************************
-// 함수 이름 : AnimationText()
-// 함수 설명 : 텍스트의 사라지고 나타남과 텍스트 교체 처리.
-// 매개 변수 : nClass		: 애니메이션 시킬 줄 번호(1~3)
-//			   dDeltaTick	: 이전 Update()호출 후부터 지금 Update()까지 시간.
-//*****************************************************************************
 void CCreditWin::AnimationText(int nClass, double dDeltaTick)
 {
 	SHOW_STATE* peTextState = &m_aeTextState[nClass];
 	short nAlpha;
-	// 텍스트를 가리고 있는 스프라이트.
+
 	CSprite* psprHide = &m_aSpr[CRW_SPR_TXT_HIDE0 + nClass];
 
 	switch (*peTextState)
 	{
-	case FADEIN:	// 서서히 나타나는 경우.
+	case FADEIN:
 		nAlpha = short(psprHide->GetAlpha());
 		nAlpha -= short(255.0 * dDeltaTick / CRW_TEXT_FADE_TIME);
 		if (0 >= nAlpha)
@@ -552,7 +500,7 @@ void CCreditWin::AnimationText(int nClass, double dDeltaTick)
 		psprHide->SetAlpha((BYTE)nAlpha);
 		break;
 
-	case SHOW:		// 완전히 보이는 경우.
+	case SHOW:
 		if (nClass != CRW_INDEX_NAME)
 			break;
 
@@ -562,16 +510,16 @@ void CCreditWin::AnimationText(int nClass, double dDeltaTick)
 			m_aeTextState[CRW_INDEX_NAME] = FADEOUT;
 			m_dTextDeltaTickSum = 0.0;
 
-			if (3 != m_aCredit[m_nNowIndex].byClass)	// 0 ~ 2면.
+			if (3 != m_aCredit[m_nNowIndex].byClass)
 			{
 				m_aeTextState[CRW_INDEX_TEAM] = FADEOUT;
-				if (2 != m_aCredit[m_nNowIndex].byClass)// 0 ~ 1이면.
+				if (2 != m_aCredit[m_nNowIndex].byClass)
 					m_aeTextState[CRW_INDEX_DEPARTMENT] = FADEOUT;
 			}
 		}
 		break;
 
-	case FADEOUT:	// 서서히 사라지는 경우.
+	case FADEOUT:
 		nAlpha = short(psprHide->GetAlpha());
 		nAlpha += short(255.0 * dDeltaTick / CRW_TEXT_FADE_TIME);
 		if (255 <= nAlpha)

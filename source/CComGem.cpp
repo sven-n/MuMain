@@ -93,11 +93,7 @@ bool COMGEM::FindWantedList()
 #ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		for (int i = 0; i < nInvenMaxIndex; ++i)
 #else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-#ifdef _VS2008PORTING
 	for (int i = 0; i < (int)pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#else // _VS2008PORTING
-	for (int i = 0; i < pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#endif // _VS2008PORTING
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	{
 		pItem = pNewInventoryCtrl->GetItem(i);
@@ -220,11 +216,7 @@ bool COMGEM::CheckMyInvValid()
 #ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 또는 해체 가능한 보석의 수를 체크 (2010.10.27)
 		for (int i = 0; i < nInvenMaxIndex; ++i)
 #else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-#ifdef _VS2008PORTING
 		for (int i = 0; i < (int)pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#else // _VS2008PORTING
-		for (int i = 0; i < pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#endif // _VS2008PORTING
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		{
 			pItem = pNewInventoryCtrl->GetItem(i);

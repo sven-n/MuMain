@@ -270,7 +270,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
 	RenderImage(IMAGE_CHAINFO_RIGHT, m_Pos.x+190-21, m_Pos.y+64, 21.f, 320.f);
 	RenderImage(IMAGE_CHAINFO_BOTTOM, m_Pos.x, m_Pos.y+429-45, 190.f, 45.f);
 
-	// 테이블 렌더링
 	glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
 	RenderColor(m_Pos.x+12, m_Pos.y+48, 160, 66);
 	EndRenderColor();
@@ -279,38 +278,23 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
 	RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_LEFT, m_Pos.x+12, m_Pos.y+119-14, 14, 14);
 	RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_RIGHT, m_Pos.x+12+165-14, m_Pos.y+119-14, 14, 14);
 	
-	// 윗라인, 아래라인
-#ifdef _VS2008PORTING
 	for(int x=m_Pos.x+12+14; x<m_Pos.x+12+165-14; ++x)
-#else // _VS2008PORTING
-	int x, y;
-	for(x=m_Pos.x+12+14; x<m_Pos.x+12+165-14; ++x)
-#endif // _VS2008PORTING
 	{
 		RenderImage(IMAGE_CHAINFO_TABLE_TOP_PIXEL, x, m_Pos.y+48, 1, 14);
 		RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, x, m_Pos.y+119-14, 1, 14);
 	}
-	// 중간라인
-#ifdef _VS2008PORTING
+
 	for(int x=m_Pos.x+14; x<m_Pos.x+12+165-4; ++x)
-#else // _VS2008PORTING
-	for(x=m_Pos.x+14; x<m_Pos.x+12+165-4; ++x)
-#endif // _VS2008PORTING
 	{
 		RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, x, m_Pos.y+48+12, 1, 14);
 	}
-	// 왼쪽 라인, 오른쪽 라인
-#ifdef _VS2008PORTING
+
 	for(int y=m_Pos.y+48+14; y<m_Pos.y+119-14; y++)
-#else // _VS2008PORTING
-	for(y=m_Pos.y+48+14; y<m_Pos.y+119-14; y++)
-#endif // _VS2008PORTING
 	{
 		RenderImage(IMAGE_CHAINFO_TABLE_LEFT_PIXEL, m_Pos.x+12, y, 14, 1);
 		RenderImage(IMAGE_CHAINFO_TABLE_RIGHT_PIXEL, m_Pos.x+12+165-14, y, 14, 1);
 	}
 
-	// 텍스트박스
 	RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x+11, m_Pos.y+HEIGHT_STRENGTH, 170.f, 21.f);
 	RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x+11, m_Pos.y+HEIGHT_DEXTERITY, 170.f, 21.f);
 	RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x+11, m_Pos.y+HEIGHT_VITALITY, 170.f, 21.f);
@@ -327,13 +311,10 @@ bool SEASON3B::CNewUICharacterInfoWindow::Render()
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// 프레임을 그린다.
 	RenderFrame();
 	
-	// 텍스트를 그린다.
 	RenderTexts();
 
-	// 버튼을 그린다.
 	RenderButtons();
 
 	DisableAlphaBlend();
@@ -343,32 +324,25 @@ bool SEASON3B::CNewUICharacterInfoWindow::Render()
 
 void SEASON3B::CNewUICharacterInfoWindow::RenderTexts()
 {
-	// ID, 서버명, 클래스명
 	RenderSubjectTexts();
 
-	// 레벨, 경험치, 포인트
 	RenderTableTexts();
 
-	// 속성
 	RenderAttribute();
 }
 
 void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
 {
-	// 캐릭터 ID는 무조건 안시이다.
 	char strID[256];
 	sprintf(strID, "%s", CharacterAttribute->Name);
-	// 캐릭터 클래스명
 	unicode::t_char strClassName[256];
 	unicode::_sprintf(strClassName, "(%s)", GetCharacterClassText(CharacterAttribute->Class));
 	
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(20, 20, 20, 20);
-	// 캐릭터ID 칼라 세팅
 	SetPlayerColor(Hero->PK);
 	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+12, strID, 190, 0, RT3_SORT_CENTER);
 
-	// 클래스명과 서버명
 #ifdef KJH_ADD_SERVER_LIST_SYSTEM
 	unicode::t_char strServerName[MAX_TEXT_LENGTH];
 #ifdef ASG_MOD_SERVER_LIST_ADD_CHARGED_CHANNEL
@@ -640,9 +614,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	// 함수내부에서 memorylock 사용
 	bool bAttackDamage = GetAttackDamage( &iAttackDamageMin, &iAttackDamageMax );
 
-#ifndef _VS2008PORTING			// #ifndef
-	int i = 0;
-#endif // _VS2008PORTING
 	int Add_Dex = 0;		//대인공격율추가
 	int Add_Rat = 0;		//공격성공율추가
 	int Add_Dfe = 0;		//대인방어율추가
@@ -657,11 +628,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	int Add_Mana_Max = 0;
 	int Add_Mana_Min = 0;
 #endif //
-#ifdef _VS2008PORTING
-	for(int i=0; i<MAX_MAGIC; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<MAX_MAGIC; ++i)
-#endif // _VS2008PORTING
+
+	for(int i=0; i < MAX_MAGIC; ++i)
 	{
 		if(CharacterAttribute->Skill[i] >= AT_SKILL_TOMAN_ATTACKUP && CharacterAttribute->Skill[i] < AT_SKILL_TOMAN_ATTACKUP + 5)
 		{
@@ -1188,20 +1156,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	bool bDexSuccess = true;
 	int iBaseClass = GetBaseClass(Hero->Class);
 
-	// 장비를 전부 착용하고 있는가 검사
-#ifdef _VS2008PORTING
 	for(int i=EQUIPMENT_HELM; i<=EQUIPMENT_BOOTS; ++i)
-#else // _VS2008PORTING
-	i = 0;
-	for(i=EQUIPMENT_HELM; i<=EQUIPMENT_BOOTS; ++i)
-#endif // _VS2008PORTING
 	{
-        //  마검일 경우 헬멧을 제외한 장비.
         if( iBaseClass == CLASS_DARK )
         {
-			// 장비를 하나라도 착용하고 있지 않거나
-			// 장비중 내구도가 0이면 Success는 false
-			// memorylock 사용
 		    if((CharacterMachine->Equipment[i].Type == -1 && ( i!=EQUIPMENT_HELM && iBaseClass == CLASS_DARK )) 
 				|| (CharacterMachine->Equipment[i].Type != -1 && CharacterMachine->Equipment[i].Durability<=0 ))
 		    {
@@ -1220,11 +1178,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		    }
 		}
 #endif //PBG_ADD_NEWCHAR_MONK
-        else	// 마검이 아닐 경우
+        else
         {
-			// 장비를 하나라도 착용하고 있지 않거나
-			// 장비중 내구도가 0이면 Success는 false
-			// memorylock 사용
 		    if((CharacterMachine->Equipment[i].Type == -1 ) ||
                (CharacterMachine->Equipment[i].Type != -1 && CharacterMachine->Equipment[i].Durability <= 0 ))
 		    {
@@ -1234,16 +1189,14 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         }
 	}
 
-	// 모든 장비를 착용하고 있고
 	if(bDexSuccess)
 	{
-        //  장비가 같은 종류의 것인지 검사한다.
         int iType;
-        if(iBaseClass == CLASS_DARK)	// 마검일 경우
-        {
-			// memorylock 사용
+        if(iBaseClass == CLASS_DARK)       
+		{
+
 		    iType = CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type;
-            //  마검 갑옷중 아틀란스, 선더호크, 아스릴, 볼케이노, 발리언트 갑옷에만 적용
+
             if(
 				(iType != ITEM_ARMOR+15) 
 				&& (iType != ITEM_ARMOR+20) 
@@ -1251,40 +1204,29 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				&& (iType != ITEM_ARMOR+32)
 				&& (iType != ITEM_ARMOR+37)
 #ifdef KJH_FIX_EQUIPED_FULL_SOCKETITEM_APPLY_TO_STAT
-				&& (iType != ITEM_ARMOR+47)				// 팬텀
-				&& (iType != ITEM_ARMOR+48)				// 디스트로이
+				&& (iType != ITEM_ARMOR+47)
+				&& (iType != ITEM_ARMOR+48)
 #endif // KJH_FIX_EQUIPED_FULL_SOCKETITEM_APPLY_TO_STAT
 				)
             {
-				// 다른 갑옷이면 Success는 false
                 bDexSuccess = false;
             }
 
             iType = iType % MAX_ITEM_INDEX;
         }
-        else	// 마검이 아닐 경우 타입만 입력해 놓고 Success는 무조건 true
+        else
         {
-			// memorylock 사용
 		    iType = CharacterMachine->Equipment[EQUIPMENT_HELM].Type % MAX_ITEM_INDEX;
         }
 
-		// 마검의 특정 갑옷이거나 다른 클래스이면 다른 장비들을 검사해서 
-		// 하나라도 다른 타입이면 풀셋이 아닌걸로 판별
         if(bDexSuccess)
         {
-#ifdef _VS2008PORTING
 		    for(int i=EQUIPMENT_ARMOR; i<=EQUIPMENT_BOOTS; ++i)
-#else // _VS2008PORTING
-		    for(i=EQUIPMENT_ARMOR; i<=EQUIPMENT_BOOTS; ++i)
-#endif // _VS2008PORTING
 		    {
 #ifdef PBG_ADD_NEWCHAR_MONK
-			// 레이지 파이터는 장갑을 검사하지 않는다.
 				if(iBaseClass==CLASS_RAGEFIGHTER && i == EQUIPMENT_GLOVES)
 					continue;
 #endif //PBG_ADD_NEWCHAR_MONK
-				// 헬멧의 타입과 하나라도 다른 타입이면 Success는 false
-				// memorylock 사용
 			    if(iType != CharacterMachine->Equipment[i].Type % MAX_ITEM_INDEX)
 			    {
 				    bDexSuccess = false;
@@ -1294,29 +1236,21 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         }
 	}
 
-	// 캐릭터 방어력 계산 부분
-	// 캐릭터의 방어력
-	// memorylock 사용
 	int t_adjdef = CharacterAttribute->Defense + Add_Ch_Dfe;
 
-	// 캐릭터의 현재 상태가 방어력 향상이면
-	// 캐릭터의 방어력에 (자신의 레벨 / 5 + 50) 만큼을 더해준다.
 	if( g_isCharacterBuff((&Hero->Object), eBuff_HelpNpc) )
 	{
-		// memorylock 사용
 		if(CharacterAttribute->Level > 180)
 		{
 			t_adjdef += 180 / 5 + 50;
 		}
 		else
 		{
-			// memorylock 사용
 			t_adjdef += (CharacterAttribute->Level / 5 + 50);
 		}
 	}
 
 #ifdef ASG_ADD_SKILL_BERSERKER
-	// 버서커 버프에 걸려 있는가?
 	if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
 	{
 		int nTemp = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
@@ -1328,12 +1262,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 	int maxdefense = 0; 
 
-	// 캐릭터가 강화 아이템을 착용하고 있으면
-#ifdef _VS2008PORTING
 	for(int j=0; j<MAX_EQUIPMENT; ++j)
-#else // _VS2008PORTING
-	for(j=0; j<MAX_EQUIPMENT; ++j)
-#endif // _VS2008PORTING
 	{
 		// memorylock 사용
 		int TempLevel = (CharacterMachine->Equipment[j].Level>>3)&15;
@@ -1346,29 +1275,26 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 			if( SC.SI_isSD )
 			{
-				// 강화 아이템 디펜스 저장
 				maxdefense += SC.SI_SD.SI_defense;
 			}
 		}
 	}
 
-	// 엘리트 해골전사 변신반지를 착용하고 있다면 추가 방어력 10% 더해준다.
 	int iChangeRingAddDefense = 0;
-	// memorylock 사용
+
 	pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
 	pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 	if(pItemRingLeft->Type == ITEM_HELPER+39 || pItemRingRight->Type == ITEM_HELPER+39)
 	{
-		// 최종 구해진 방어력의 10% 값을 구해논다.
 		iChangeRingAddDefense = (t_adjdef + maxdefense) / 10;
 	}
 
 #ifdef PJH_ADD_PANDA_PET
-	if(Hero->Helper.Type == MODEL_HELPER+80) //펜더펫
+	if(Hero->Helper.Type == MODEL_HELPER+80)
 		iChangeRingAddDefense += 50;
 #endif //PJH_ADD_PANDA_PET
 #ifdef LDK_FIX_CS7_UNICORN_PET_INFO
-	if(Hero->Helper.Type == MODEL_HELPER+106) //유니콘
+	if(Hero->Helper.Type == MODEL_HELPER+106)
 		iChangeRingAddDefense += 50;
 #endif //LDK_FIX_CS7_UNICORN_PET_INFO
 	unicode::t_char strBlocking[256];
@@ -1390,16 +1316,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		nAdd_FulBlocking += _AddStat;
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-	// 장비가 풀셋이면
 	if(bDexSuccess)
 	{
-		// 캐릭터의 방어율이 존재하면
 		// memorylock 사용
 		if(CharacterAttribute->SuccessfulBlocking > 0)
 		{
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-			// 206 "방어력(율): %d (%d +%d)"
-			// memorylock 사용
 			if(nAdd_FulBlocking)
 			{
 				unicode::_sprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,
@@ -1411,8 +1333,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				CharacterAttribute->SuccessfulBlocking,(CharacterAttribute->SuccessfulBlocking) / 10);
 			}
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
-			// 206 "방어력(율): %d (%d +%d)"
-			// memorylock 사용
 			unicode::_sprintf(strBlocking, GlobalText[206], 
 				t_adjdef + maxdefense + iChangeRingAddDefense,
 				CharacterAttribute->SuccessfulBlocking,
@@ -1424,7 +1344,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				);
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		}
-		else // 캐릭터의 방어율이 없으면
+		else
 		{
 			// 207 "방 어 력: %d (+%d)"
           	unicode::_sprintf(strBlocking, GlobalText[207],
@@ -1433,7 +1353,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				);
 		}
 	}
-	else	// 장비가 풀셋이 아니라면
+	else
 	{
 		// memorylock 사용
 		if(CharacterAttribute->SuccessfulBlocking > 0)
@@ -1458,7 +1378,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		}
 		else
 		{
-			// 209 "방 어 력: %d"
+			// 209
           	unicode::_sprintf(strBlocking, GlobalText[209],
 				t_adjdef + maxdefense + iChangeRingAddDefense
 				);
@@ -1469,7 +1389,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin3)) // 잭오랜턴의 외침
+	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin3))
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
@@ -1780,20 +1700,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 		int maxMg = 0; 
 
-#ifdef _VS2008PORTING
 		for(int j=0; j<MAX_EQUIPMENT; ++j)
-#else // _VS2008PORTING
-		for(j=0; j<MAX_EQUIPMENT; ++j)
-#endif // _VS2008PORTING
 		{
-			// memorylock 사용
 			int TempLevel = (CharacterMachine->Equipment[j].Level>>3)&15;
 
-			// memorylock 사용
 			if(  TempLevel >= CharacterMachine->Equipment[j].Jewel_Of_Harmony_OptionLevel )
 			{
 				StrengthenCapability SC;
-				// memorylock 사용
 				g_pUIJewelHarmonyinfo->GetStrengthenCapability( &SC, &CharacterMachine->Equipment[j], 1 );
 
 				if( SC.SI_isSP )
@@ -1803,24 +1716,21 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			}
 		}
 
-		// 크리스마스 변신 반지를 끼고 있으면
-		// memorylock 사용
 		pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
 		pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 
 #ifdef YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK
-		// 만기 체크
 		int iNonExpiredLRingType = -1;
 		int iNonExpiredRRingType = -1;
 #ifdef LJH_FIX_IGNORING_EXPIRATION_PERIOD
 		iNonExpiredLRingType = pItemRingLeft->Type;
 		iNonExpiredRRingType = pItemRingRight->Type;
 #else  //LJH_FIX_IGNORING_EXPIRATION_PERIOD
-		if(!pItemRingLeft->bPeriodItem || !pItemRingLeft->bExpiredPeriod)	// 왼손
+		if(!pItemRingLeft->bPeriodItem || !pItemRingLeft->bExpiredPeriod)
 		{
 			iNonExpiredLRingType = pItemRingLeft->Type;
 		}
-		if(!pItemRingRight->bPeriodItem || !pItemRingRight->bExpiredPeriod)	// 오른손
+		if(!pItemRingRight->bPeriodItem || !pItemRingRight->bExpiredPeriod)
 		{
 			iNonExpiredRRingType = pItemRingRight->Type;
 		}
@@ -1831,49 +1741,43 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 		if(iNonExpiredLRingType == ITEM_HELPER+41 || iNonExpiredRRingType == ITEM_HELPER+41)
 		{
-			//  착용중인변신 반지들 중 크리스마스 변신 반지에 의해 가장 높은 마력 데미지 추가.
-			maxIMagicDamageMin = max(maxIMagicDamageMin, 20);		// 최소 마력 데미지
-			maxIMagicDamageMax = max(maxIMagicDamageMax, 20);		// 최소 마력 데미지
+			maxIMagicDamageMin = max(maxIMagicDamageMin, 20);
+			maxIMagicDamageMax = max(maxIMagicDamageMax, 20);
 		}
 #ifdef PJH_ADD_PANDA_CHANGERING
 		if(iNonExpiredLRingType == ITEM_HELPER+76 || iNonExpiredRRingType == ITEM_HELPER+76)
 		{
-			// 착용중인 변신 반지들 중 팬더 변신 반지에 의해 가장 높은 마력 데미지 추가.
-			maxIMagicDamageMin = max(maxIMagicDamageMin, 30);		// 최소 마력 데미지
-			maxIMagicDamageMax = max(maxIMagicDamageMax, 30);		// 최소 마력 데미지
+			maxIMagicDamageMin = max(maxIMagicDamageMin, 30);
+			maxIMagicDamageMax = max(maxIMagicDamageMax, 30);
 		}
 #endif	// PJH_ADD_PANDA_CHANGERING
 #ifdef YDG_ADD_SKELETON_CHANGE_RING
-		if(iNonExpiredLRingType == ITEM_HELPER+122 || iNonExpiredRRingType == ITEM_HELPER+122)	// 스켈레톤 변신반지
+		if(iNonExpiredLRingType == ITEM_HELPER+122 || iNonExpiredRRingType == ITEM_HELPER+122)
 		{
-			// 착용중인 변신 반지들 중 스켈레톤 변신 반지에 의해 가장 높은 마력 데미지 추가 
-			maxIMagicDamageMin = max(maxIMagicDamageMin, 40);		// 최소 마력 데미지
-			maxIMagicDamageMax = max(maxIMagicDamageMax, 40);		// 최소 마력 데미지
+			maxIMagicDamageMin = max(maxIMagicDamageMin, 40);
+			maxIMagicDamageMax = max(maxIMagicDamageMax, 40);
 		}
 #endif	// YDG_ADD_SKELETON_CHANGE_RING
 
-		// 최종 구해진 마법공격력에 착용중인 변신 반지들의 데미지 증가 중에 가장 높은 값을 더해준다.
-		iMagicDamageMin += maxIMagicDamageMin;	// 최소 마력 데미지
-		iMagicDamageMax += maxIMagicDamageMax;	// 최대 마력 데미지
+		iMagicDamageMin += maxIMagicDamageMin;
+		iMagicDamageMax += maxIMagicDamageMax;
 
 
-#else	// YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK	// 소스정리시 삭제할 부분!!!
+#else	// YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK
 #ifdef LJH_FIX_CHANGE_RING_DAMAGE_BUG
 		int maxIMagicDamageMin = 0;
 		int maxIMagicDamageMax = 0;
 
 		if(pItemRingLeft->Type == ITEM_HELPER+41 || pItemRingRight->Type == ITEM_HELPER+41)
 		{
-			//  착용중인변신 반지들 중 크리스마스 변신 반지에 의해 가장 높은 공격데미지 추가.
-			maxIMagicDamageMin = max(maxIMagicDamageMin, 20);		// 최소 마력 데미지
-			maxIMagicDamageMax = max(maxIMagicDamageMax, 20);		// 최소 마력 데미지
+			maxIMagicDamageMin = max(maxIMagicDamageMin, 20);
+			maxIMagicDamageMax = max(maxIMagicDamageMax, 20);
 		}
 #ifdef PJH_ADD_PANDA_CHANGERING
 		if(pItemRingLeft->Type == ITEM_HELPER+76 || pItemRingRight->Type == ITEM_HELPER+76)
 		{
-			// 착용중인 변신 반지들 중 팬더 변신 반지에 의해 가장 높은 공격데미지 추가.
-			maxIMagicDamageMin = max(maxIMagicDamageMin, 30);		// 최소 마력 데미지
-			maxIMagicDamageMax = max(maxIMagicDamageMax, 30);		// 최소 마력 데미지
+			maxIMagicDamageMin = max(maxIMagicDamageMin, 30);
+			maxIMagicDamageMax = max(maxIMagicDamageMax, 30);
 		}
 #endif	// PJH_ADD_PANDA_CHANGERING
 

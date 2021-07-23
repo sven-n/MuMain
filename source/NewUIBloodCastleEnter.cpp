@@ -339,7 +339,6 @@ void CNewUIEnterBloodCastle::OpenningProcess()
 		m_BtnEnter[i].Lock( );
 	}
 
-	// 레벨 제한 체크
 	int iLimitLVIndex = 0;
 	if( GetBaseClass(Hero->Class)==CLASS_DARK || GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
@@ -355,14 +354,9 @@ void CNewUIEnterBloodCastle::OpenningProcess()
 	m_BtnEnter[ m_iNumActiveBtn ].UnLock();
 	m_BtnEnter[ m_iNumActiveBtn ].ChangeTextColor( m_dwBtnTextColor[ ENTERBTN_ENABLE ] );
 
-	// 캐슬 입장 버튼 텍스트
 	unicode::t_char sztext[255] = {0, };
 
-#ifdef _VS2008PORTING
 	for( int i=0 ; i<MAX_ENTER_GRADE-1 ; i++)
-#else // _VS2008PORTING
-	for( i=0 ; i<MAX_ENTER_GRADE-1 ; i++)
-#endif // _VS2008PORTING
 	{
 		unicode::_sprintf( sztext, GlobalText[ 847 ], i+1
 			, m_iBloodCastleLimitLevel[ (iLimitLVIndex*MAX_ENTER_GRADE)+i ][ 0 ]
@@ -371,26 +365,19 @@ void CNewUIEnterBloodCastle::OpenningProcess()
 		m_BtnEnter[ i ].ChangeText( sztext );
 	}
 	
-	// 1779	"제%d캐슬(마스터레벨)"
 	unicode::_sprintf( sztext, GlobalText[ 1779 ], 8 );
 
 	m_BtnEnter[ MAX_ENTER_GRADE-1 ].SetFont( g_hFontBold );
 	m_BtnEnter[ MAX_ENTER_GRADE-1 ].ChangeText( sztext );
 }
 
-//---------------------------------------------------------------------------------------------
-// ClosingProcess
 void CNewUIEnterBloodCastle::ClosingProcess()
 {
-	// 왜 호출해야 하는거지??
 	SendExitInventory();
 }
 
-//---------------------------------------------------------------------------------------------
-// LoadImages
 void CNewUIEnterBloodCastle::LoadImages()
 {
-	// 기본창
 	LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_ENTERBC_BASE_WINDOW_BACK, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_ENTERBC_BASE_WINDOW_TOP, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_ENTERBC_BASE_WINDOW_LEFT, GL_LINEAR);
@@ -400,11 +387,8 @@ void CNewUIEnterBloodCastle::LoadImages()
 	LoadBitmap("Interface\\newui_btn_empty_big.tga", IMAGE_ENTERBC_BASE_WINDOW_BTN_ENTER, GL_LINEAR);		// Enter Button
 }
 
-//---------------------------------------------------------------------------------------------
-// UnloadImages
 void CNewUIEnterBloodCastle::UnloadImages()
 {
-	// 기본창
 	DeleteBitmap( IMAGE_ENTERBC_BASE_WINDOW_BACK );
 	DeleteBitmap( IMAGE_ENTERBC_BASE_WINDOW_TOP );
 	DeleteBitmap( IMAGE_ENTERBC_BASE_WINDOW_LEFT );

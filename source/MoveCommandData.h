@@ -11,9 +11,9 @@ namespace SEASON3B
 {
 	class CMoveCommandData  
 	{
-#ifdef _VS2008PORTING
+
 	public:
-#endif // _VS2008PORTING
+
 #pragma pack(push, 1)
 		typedef struct tagMOVEREQ
 		{
