@@ -1,0 +1,657 @@
+// CameraMove.cpp: implementation of the CCameraMove class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "CameraMove.h"
+
+#include "ZzzLodTerrain.h"
+// 
+// #include <gl\gl.h>
+// #include <gl\glu.h>
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+CCameraMove::CCameraMove()
+{
+	Init();
+}
+CCameraMove::~CCameraMove() 
+{
+	UnLoadCameraWalkScript();
+}
+
+void CCameraMove::Init()
+{
+	m_CameraStartPos[0] = m_CameraStartPos[1] = m_CameraStartPos[2] = 0.0f;
+	m_fCameraStartDistanceLevel = 10.f;
+	m_iDelayCount = 0;
+	m_dwCameraWalkState = CAMERAWALK_STATE_READY;
+
+	m_CurrentCameraPos[0] = m_CurrentCameraPos[1] = m_CurrentCameraPos[2] = 0.0f;
+	m_fCurrentDistanceLevel = 0.f;
+
+	m_dwCurrentIndex = 0;
+	m_iSelectedTile = -1;
+
+	m_bTourMode = FALSE;
+	m_bTourPause = FALSE;
+	m_fForceSpeed = 0;
+	m_vTourCameraPos[0] = m_vTourCameraPos[1] = m_vTourCameraPos[2] = 0.0f;
+	m_fTourCameraAngle = 0;
+	m_fTargetTourCameraAngle = 0;
+
+#ifdef PJH_NEW_SERVER_SELECT_MAP
+	m_fCameraAngle =0;
+	m_fFrustumAngle =0;
+#endif //PJH_NEW_SERVER_SELECT_MAP
+}
+
+bool CCameraMove::LoadCameraWalkScript(const std::string& filename)
+{
+	UnLoadCameraWalkScript();
+
+	FILE* fp = fopen(filename.c_str(), "rb");
+	if(fp == NULL)
+		return false;
+
+	DWORD dwSign;
+	fread(&dwSign, 4, 1, fp);
+	if(dwSign != 0x00535743)
+		return false;
+
+	size_t size;
+	fread(&size, sizeof(size_t), 1, fp);
+#ifdef _VS2008PORTING
+	for(int i=0; i<(int)size; i++) 
+#else // _VS2008PORTING
+	for(int i=0; i<size; i++) 
+#endif // _VS2008PORTING
+	{
+		WAYPOINT* pWayPoint = new WAYPOINT;
+		fread(pWayPoint, sizeof(WAYPOINT), 1, fp);
+		m_listWayPoint.push_back(pWayPoint);
+	}
+	fclose(fp);
+
+	return true;
+}
+void CCameraMove::UnLoadCameraWalkScript()
+{
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++)
+		delete (*iter);
+	m_listWayPoint.clear();
+
+	Init();
+}
+bool CCameraMove::SaveCameraWalkScript(const std::string& filename)
+{
+	if(!m_listWayPoint.empty()) {
+		FILE* fp = fopen(filename.c_str(), "wb");
+		if(fp == NULL)
+			return false;
+
+		DWORD dwSign = 0x00535743;
+		fwrite(&dwSign, 4, 1, fp);
+		size_t size = m_listWayPoint.size();
+		fwrite(&size, sizeof(size_t), 1, fp);
+		t_WayPointList::iterator iter = m_listWayPoint.begin();
+		for(; iter != m_listWayPoint.end(); iter++) {
+			fwrite((*iter), sizeof(WAYPOINT), 1, fp);
+		}
+		fclose(fp);
+		return true;
+	}
+	return false;
+}
+
+void CCameraMove::AddWayPoint(int iGridX, int iGridY, float fCameraMoveAccel, float fCameraDistanceLevel, int iDelay)
+{
+	WAYPOINT* pWayPoint = new WAYPOINT;
+	pWayPoint->iIndex = TERRAIN_INDEX_REPEAT(iGridX, iGridY);
+	pWayPoint->fCameraX = iGridX*TERRAIN_SCALE;
+	pWayPoint->fCameraY = iGridY*TERRAIN_SCALE;
+	pWayPoint->fCameraZ = RequestTerrainHeight(pWayPoint->fCameraX,pWayPoint->fCameraY);
+	
+#ifdef YDG_MOD_TOURMODE_MAXSPEED
+	if(fCameraMoveAccel > 40.f)
+		fCameraMoveAccel = 40.f;
+#else	// YDG_MOD_TOURMODE_MAXSPEED
+	if(fCameraMoveAccel > 20.f)
+		fCameraMoveAccel = 20.f;
+#endif	// YDG_MOD_TOURMODE_MAXSPEED
+	if(fCameraMoveAccel < 0.1f)
+		fCameraMoveAccel = 0.1f;
+	pWayPoint->fCameraMoveAccel = fCameraMoveAccel;
+
+	if(fCameraDistanceLevel > 20.f)
+		fCameraDistanceLevel = 20.f;
+	if(fCameraDistanceLevel < 5.f)
+		fCameraDistanceLevel = 5.f;
+	pWayPoint->fCameraDistanceLevel = fCameraDistanceLevel;
+
+	pWayPoint->iDelay = iDelay;
+
+	m_listWayPoint.push_back(pWayPoint);
+}
+void CCameraMove::RemoveWayPoint(int iGridX, int iGridY)
+{
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		if((*iter)->iIndex == TERRAIN_INDEX_REPEAT(iGridX, iGridY)) {
+#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
+			if((*iter)->iIndex == (int)GetSelectedTile())
+#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
+			if((*iter)->iIndex == GetSelectedTile())
+#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+				SetSelectedTile(-1);
+			m_listWayPoint.erase(iter);
+			break;
+		}
+	}
+}
+
+void CCameraMove::SetCameraMoveAccel(int iTileIndex, float fCameraMoveAccel)
+{
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		if((*iter)->iIndex == iTileIndex) {
+#ifdef YDG_MOD_TOURMODE_MAXSPEED
+			if(fCameraMoveAccel > 40.f)
+				fCameraMoveAccel = 40.f;
+#else	// YDG_MOD_TOURMODE_MAXSPEED
+			if(fCameraMoveAccel > 20.f)
+				fCameraMoveAccel = 20.f;
+#endif	// YDG_MOD_TOURMODE_MAXSPEED
+			if(fCameraMoveAccel < 0.1f)
+				fCameraMoveAccel = 0.1f;
+
+			(*iter)->fCameraMoveAccel = fCameraMoveAccel;
+		}
+	}
+}
+void CCameraMove::SetCameraDistanceLevel(int iTileIndex, float fCameraDistanceLevel)
+{
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		if((*iter)->iIndex == iTileIndex) {
+			if(fCameraDistanceLevel > 20.f)
+				fCameraDistanceLevel = 20.f;
+			if(fCameraDistanceLevel < 5.f)
+				fCameraDistanceLevel = 5.f;
+
+			(*iter)->fCameraDistanceLevel = fCameraDistanceLevel;
+		}
+	}
+}
+void CCameraMove::SetDelay(int iTileIndex, int iDelay)
+{
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		if((*iter)->iIndex == iTileIndex) {
+			if(iDelay < 0)
+				iDelay = 0;
+			(*iter)->iDelay = iDelay;
+		}
+	}
+}
+float CCameraMove::GetCameraMoveAccel(int iTileIndex)
+{
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		if((*iter)->iIndex == iTileIndex) {
+			return (*iter)->fCameraMoveAccel;
+		}
+	}
+	return 0.0f;
+}
+float CCameraMove::GetCameraDistanceLevel(int iTileIndex)
+{
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		if((*iter)->iIndex == iTileIndex) {
+			return (*iter)->fCameraDistanceLevel;
+		}
+	}
+	return 0.0f;
+}
+int CCameraMove::GetDelay(int iTileIndex)
+{
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		if((*iter)->iIndex == iTileIndex) {
+			return (*iter)->iDelay;
+		}
+	}
+	return -1;
+}
+
+bool CCameraMove::IsCameraMove() const
+{ return (m_dwCameraWalkState == CAMERAWALK_STATE_MOVE); }
+void CCameraMove::UpdateWayPoint()
+{
+UPDATE_WAY_POINT_ENTRY:
+	if(m_dwCameraWalkState == CAMERAWALK_STATE_MOVE && m_listWayPoint.empty() == false) {
+		if(m_dwCurrentIndex < m_listWayPoint.size()) {
+			WAYPOINT* pTargetWayPoint = m_listWayPoint[m_dwCurrentIndex];
+			
+			if(m_iDelayCount >= pTargetWayPoint->iDelay) {
+				float fSubVector[2] = { pTargetWayPoint->fCameraX - m_CurrentCameraPos[0], pTargetWayPoint->fCameraY - m_CurrentCameraPos[1] };
+				float fSubDistance = sqrt(fSubVector[0]*fSubVector[0] + fSubVector[1]*fSubVector[1]);
+				float fDirVector[2] = { fSubVector[0] / fSubDistance, fSubVector[1] / fSubDistance };
+				float fDirDistance = sqrt(fDirVector[0]*fDirVector[0] + fDirVector[1]*fDirVector[1]);
+				
+				if(fSubDistance <= fDirDistance*pTargetWayPoint->fCameraMoveAccel) {
+					m_dwCurrentIndex++;		//. 다음 WayPoint로
+					m_iDelayCount = 0;
+					goto UPDATE_WAY_POINT_ENTRY;
+				}
+				else {	//. 이동
+					m_CurrentCameraPos[0] += (fDirVector[0] * pTargetWayPoint->fCameraMoveAccel);
+					m_CurrentCameraPos[1] += (fDirVector[1] * pTargetWayPoint->fCameraMoveAccel);
+					m_CurrentCameraPos[2] = RequestTerrainHeight(m_CurrentCameraPos[0],m_CurrentCameraPos[1]);
+					
+					if(m_fCurrentDistanceLevel < pTargetWayPoint->fCameraDistanceLevel) {
+						m_fCurrentDistanceLevel += (pTargetWayPoint->fCameraMoveAccel * 0.005f);
+						if(m_fCurrentDistanceLevel > pTargetWayPoint->fCameraDistanceLevel)
+							m_fCurrentDistanceLevel = pTargetWayPoint->fCameraDistanceLevel;
+					}
+					if(m_fCurrentDistanceLevel > pTargetWayPoint->fCameraDistanceLevel) {
+						m_fCurrentDistanceLevel -= (pTargetWayPoint->fCameraMoveAccel * 0.005f);
+						if(m_fCurrentDistanceLevel < pTargetWayPoint->fCameraDistanceLevel)
+							m_fCurrentDistanceLevel = pTargetWayPoint->fCameraDistanceLevel;
+					}
+				}
+			}
+			m_iDelayCount++;
+		}
+		else if(m_dwCurrentIndex == m_listWayPoint.size()) {
+			float fSubVector[2] = { m_CameraStartPos[0] - m_CurrentCameraPos[0], m_CameraStartPos[1] - m_CurrentCameraPos[1] };
+			float fSubDistance = sqrt(fSubVector[0]*fSubVector[0] + fSubVector[1]*fSubVector[1]);
+			float fDirVector[2] = { fSubVector[0] / fSubDistance, fSubVector[1] / fSubDistance };
+			float fDirDistance = sqrt(fDirVector[0]*fDirVector[0] + fDirVector[1]*fDirVector[1]);
+			
+			if(fSubDistance <= fDirDistance*10.f) {
+				m_dwCurrentIndex++;		//. 다음 WayPoint로
+			}
+			else {	//. 이동
+				m_CurrentCameraPos[0] += (fDirVector[0] * 10.f);
+				m_CurrentCameraPos[1] += (fDirVector[1] * 10.f);
+				m_CurrentCameraPos[2] = RequestTerrainHeight(m_CurrentCameraPos[0],m_CurrentCameraPos[1]);
+
+				if(fabs(m_fCameraStartDistanceLevel - m_fCurrentDistanceLevel) > 0.2f)
+					m_fCurrentDistanceLevel += (m_fCameraStartDistanceLevel - m_fCurrentDistanceLevel)*0.2f;
+				else
+					m_fCurrentDistanceLevel = m_fCameraStartDistanceLevel;
+			}
+		}
+		else {
+			m_dwCameraWalkState = CAMERAWALK_STATE_DONE;
+			m_iDelayCount = 0;
+			m_dwCurrentIndex = 0;
+		}
+	}
+	else {
+		m_dwCameraWalkState = CAMERAWALK_STATE_DONE;
+		m_iDelayCount = 0;
+		m_dwCurrentIndex = 0;
+	}
+}
+void CCameraMove::GetCurrentCameraPos(float CameraPos[3])
+{
+	if (IsTourMode())
+	{
+		CameraPos[0] = m_vTourCameraPos[0];
+		CameraPos[1] = m_vTourCameraPos[1];
+		CameraPos[2] = m_vTourCameraPos[2];
+	}
+	else
+	{
+		CameraPos[0] = m_CurrentCameraPos[0];
+		CameraPos[1] = m_CurrentCameraPos[1];
+		CameraPos[2] = m_CurrentCameraPos[2];
+	}
+}
+float CCameraMove::GetCurrentCameraDistanceLevel() const
+{
+	return m_fCurrentDistanceLevel;
+}
+
+void CCameraMove::PlayCameraWalk(float StartPos[3], float fStartDistanceLevel)
+{
+	if(m_dwCameraWalkState == CAMERAWALK_STATE_READY) {
+		m_dwCameraWalkState = CAMERAWALK_STATE_MOVE;
+		m_CameraStartPos[0] = m_CurrentCameraPos[0] = StartPos[0];
+		m_CameraStartPos[1] = m_CurrentCameraPos[1] = StartPos[1];
+		m_CameraStartPos[2] = m_CurrentCameraPos[2] = StartPos[2];
+		m_fCameraStartDistanceLevel = m_fCurrentDistanceLevel = fStartDistanceLevel;
+		m_iDelayCount = 0;
+		m_dwCurrentIndex = 0;
+	}
+}
+void CCameraMove::StopCameraWalk(bool bDone)
+{
+	if(m_dwCameraWalkState == CAMERAWALK_STATE_MOVE) {
+		if(bDone) {
+			m_dwCameraWalkState = CAMERAWALK_STATE_DONE;
+		}
+		else {
+			m_dwCameraWalkState = CAMERAWALK_STATE_READY;
+		}
+		m_iDelayCount = 0;
+		m_dwCurrentIndex = 0;
+	}
+}
+void CCameraMove::UpdateCameraStartPos(float StartPos[3])
+{
+	m_CameraStartPos[0] = StartPos[0];
+	m_CameraStartPos[1] = StartPos[1];
+	m_CameraStartPos[2] = StartPos[2];
+}
+
+void CCameraMove::SetCameraWalkState(DWORD dwCameraWalkState)
+{
+	m_dwCameraWalkState = dwCameraWalkState;
+}
+DWORD CCameraMove::GetCameraWalkState() const
+{ return m_dwCameraWalkState; }
+
+void CCameraMove::RenderWayPoint()
+{
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
+	
+	glBegin(GL_QUADS);
+	glColor4f(1.0f,0.0f,0.0f,0.8f);
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		WAYPOINT* pWayPoint = (*iter);
+		glNormal3f(0.0f, 0.0f, 1.0f);
+		glVertex3f(pWayPoint->fCameraX+50-10, pWayPoint->fCameraY+50-10, pWayPoint->fCameraZ);
+		glVertex3f(pWayPoint->fCameraX+50+10, pWayPoint->fCameraY+50-10, pWayPoint->fCameraZ);
+		glVertex3f(pWayPoint->fCameraX+50+10, pWayPoint->fCameraY+50+10, pWayPoint->fCameraZ);
+		glVertex3f(pWayPoint->fCameraX+50-10, pWayPoint->fCameraY+50+10, pWayPoint->fCameraZ);
+	}
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+
+	glColor4f(1.0f,1.0f,1.0f,0.5f);
+	iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		WAYPOINT* pWayPoint = (*iter);
+		glVertex3f(pWayPoint->fCameraX+50, pWayPoint->fCameraY+50, pWayPoint->fCameraZ);
+	}
+
+	glEnd();
+
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_TEXTURE_2D);
+}
+void CCameraMove::SetSelectedTile(int iTileIndex)
+{
+	//. find
+	t_WayPointList::iterator iter = m_listWayPoint.begin();
+	for(; iter != m_listWayPoint.end(); iter++) {
+		if((*iter)->iIndex == iTileIndex) {
+			m_iSelectedTile = iTileIndex;
+			return ;
+		}
+	}
+	m_iSelectedTile = -1;
+}
+DWORD CCameraMove::GetSelectedTile() const
+{ return m_iSelectedTile; }
+
+CCameraMove* CCameraMove::GetInstancePtr()
+{
+	static CCameraMove s_CameraWalkInstance;
+	return &s_CameraWalkInstance;
+}
+
+float CreateAngle(float x1,float y1,float x2,float y2);
+float absf(float a);
+
+#ifdef PJH_NEW_SERVER_SELECT_MAP
+BOOL CCameraMove::SetTourMode(BOOL bFlag, BOOL bRandomStart, int _index)
+#else //PJH_NEW_SERVER_SELECT_MAP
+BOOL CCameraMove::SetTourMode(BOOL bFlag, BOOL bRandomStart)
+#endif //PJH_NEW_SERVER_SELECT_MAP
+{
+	if (m_listWayPoint.size() <= 1) return FALSE;
+
+	m_bTourMode = bFlag;
+
+	if (bFlag == TRUE)
+	{
+		if (bRandomStart)
+		{
+			m_dwCurrentIndex = rand() % m_listWayPoint.size();
+		}
+#ifdef PJH_NEW_SERVER_SELECT_MAP
+		else
+		{
+			m_dwCurrentIndex = _index;
+		}
+#endif //PJH_NEW_SERVER_SELECT_MAP
+
+		DWORD dwTargetIndex = (m_dwCurrentIndex < m_listWayPoint.size() ? m_dwCurrentIndex : 0);
+		WAYPOINT* pTargetWayPoint = m_listWayPoint[dwTargetIndex];
+		DWORD dwStartIndex = (m_dwCurrentIndex > 0 ? m_dwCurrentIndex - 1 : m_listWayPoint.size() - 1);
+		WAYPOINT* pStartWayPoint = m_listWayPoint[dwStartIndex];
+		m_CameraStartPos[0] = m_CurrentCameraPos[0] = m_vTourCameraPos[0] = pStartWayPoint->fCameraX;
+		m_CameraStartPos[1] = m_CurrentCameraPos[1] = m_vTourCameraPos[1] = pStartWayPoint->fCameraY;
+		m_CameraStartPos[2] = m_CurrentCameraPos[2] = m_vTourCameraPos[2] = pStartWayPoint->fCameraZ;
+
+		// 현재위치-목적지 벡터
+		float fSubVector[2] = { pTargetWayPoint->fCameraX - pStartWayPoint->fCameraX,
+			pTargetWayPoint->fCameraY - pStartWayPoint->fCameraY };
+		// 현재위치-목적지 벡터 길이
+		float fSubDistance = sqrt(fSubVector[0]*fSubVector[0] + fSubVector[1]*fSubVector[1]);
+		// 현재위치-목적지 노멀벡터
+		float fDirVector[2] = { fSubVector[0] / fSubDistance, fSubVector[1] / fSubDistance };
+		m_fTargetTourCameraAngle = m_fTourCameraAngle = CreateAngle(0, 0, fDirVector[0], -fDirVector[1]);
+	}
+
+	return TRUE;
+}
+
+void CCameraMove::PauseTour(BOOL bFlag)
+{
+	m_bTourPause = bFlag;
+	m_fForceSpeed = 0.0f;
+}
+
+void CCameraMove::ForwardTour(float fSpeed)
+{
+	m_fForceSpeed = fSpeed;
+}
+
+void CCameraMove::BackwardTour(float fSpeed)
+{
+	m_fForceSpeed = -fSpeed;
+}
+
+void CCameraMove::UpdateTourWayPoint()
+{
+UPDATE_WAY_POINT_ENTRY:
+	if(m_dwCameraWalkState == CAMERAWALK_STATE_MOVE && m_listWayPoint.empty() == false)
+	{
+		DWORD dwTargetIndex = (m_dwCurrentIndex < m_listWayPoint.size() ? m_dwCurrentIndex : 0);
+		WAYPOINT* pTargetWayPoint = m_listWayPoint[dwTargetIndex];
+		DWORD dwOriginIndex = (m_dwCurrentIndex > 0 ? m_dwCurrentIndex - 1 : m_listWayPoint.size() - 1);
+		WAYPOINT* pOriginWayPoint = m_listWayPoint[dwOriginIndex];
+		
+		if(m_iDelayCount >= pTargetWayPoint->iDelay)
+		{
+			// 현재위치-목적지 벡터
+			float fSubVector[2] = { pTargetWayPoint->fCameraX - m_CurrentCameraPos[0], pTargetWayPoint->fCameraY - m_CurrentCameraPos[1] };
+			// 현재위치-목적지 벡터 길이
+			float fSubDistance = sqrt(fSubVector[0]*fSubVector[0] + fSubVector[1]*fSubVector[1]);
+			// 현재위치-목적지 노멀벡터
+			float fDirVector[2] = { fSubVector[0] / fSubDistance, fSubVector[1] / fSubDistance };
+			// 현재위치-출발지 벡터
+			float fOrgVector[2] = { pOriginWayPoint->fCameraX - m_CurrentCameraPos[0], pOriginWayPoint->fCameraY - m_CurrentCameraPos[1] };
+			// 현재위치-출발지 벡터 길이
+			float fOrgDistance = sqrt(fOrgVector[0]*fOrgVector[0] + fOrgVector[1]*fOrgVector[1]);
+			// 현재위치-출발지 노멀벡터
+			float fRvsDirVector[2] = { -fOrgVector[0] / fOrgDistance, -fOrgVector[1] / fOrgDistance };
+
+			float fBlendDist = 300.0f;
+			float fTourDirVector[2] = { fDirVector[0], fDirVector[1] };
+			if (fSubDistance <= fBlendDist)
+			{
+				// 위치 보간
+				DWORD dwNextTargetIndex = (dwTargetIndex + 1 < m_listWayPoint.size() ? dwTargetIndex + 1 : 0);
+				WAYPOINT* pNextTargetWayPoint = m_listWayPoint[dwNextTargetIndex];
+				// 목적지-다음 목적지 벡터
+				float fNextSubVector[2] = { pNextTargetWayPoint->fCameraX - pTargetWayPoint->fCameraX,
+					pNextTargetWayPoint->fCameraY - pTargetWayPoint->fCameraY };
+				// 목적지-다음 목적지 벡터 길이
+				float fNextSubDistance = sqrt(fNextSubVector[0]*fNextSubVector[0] + fNextSubVector[1]*fNextSubVector[1]);
+				// 목적지-다음 목적지 노멀벡터
+				float fNextDirVector[2] = { fNextSubVector[0] / fNextSubDistance, fNextSubVector[1] / fNextSubDistance };
+
+				float fBlendRate = fSubDistance / fBlendDist * 0.5f + 0.5f;
+				fTourDirVector[0] = fDirVector[0] * fBlendRate + fNextDirVector[0] * (1.0f - fBlendRate);
+				fTourDirVector[1] = fDirVector[1] * fBlendRate + fNextDirVector[1] * (1.0f - fBlendRate);
+			}
+			else if (fOrgDistance <= fBlendDist)
+			{
+				// 위치 보간
+				DWORD dwPrevOriginIndex = (dwOriginIndex > 0 ? dwOriginIndex - 1 : m_listWayPoint.size() - 1);
+				WAYPOINT* pPrevOriginWayPoint = m_listWayPoint[dwPrevOriginIndex];
+				// 출발지-이전 출발지 벡터
+				float fPrevSubVector[2] = { pOriginWayPoint->fCameraX - pPrevOriginWayPoint->fCameraX,
+					pOriginWayPoint->fCameraY - pPrevOriginWayPoint->fCameraY };
+				// 출발지-이전 출발지 벡터 길이
+				float fPrevSubDistance = sqrt(fPrevSubVector[0]*fPrevSubVector[0] + fPrevSubVector[1]*fPrevSubVector[1]);
+				// 출발지-이전 출발지 노멀벡터
+				float fPrevDirVector[2] = { fPrevSubVector[0] / fPrevSubDistance, fPrevSubVector[1] / fPrevSubDistance };
+
+				float fBlendRate = fOrgDistance / fBlendDist * 0.5f + 0.5f;
+				fTourDirVector[0] = fDirVector[0] * fBlendRate + fPrevDirVector[0] * (1.0f - fBlendRate);
+				fTourDirVector[1] = fDirVector[1] * fBlendRate + fPrevDirVector[1] * (1.0f - fBlendRate);
+			}
+
+			float fSpeed = 1.0f;
+			if (m_fForceSpeed > 0) fSpeed = m_fForceSpeed;
+			else if (m_fForceSpeed < 0) fSpeed = - m_fForceSpeed;
+
+			if(m_fForceSpeed >= 0 && fSubDistance <= pTargetWayPoint->fCameraMoveAccel * fSpeed)
+			{
+				if (m_dwCurrentIndex < m_listWayPoint.size())
+					m_dwCurrentIndex++;		//. 다음 WayPoint로
+				else
+					m_dwCurrentIndex = 0;
+				m_iDelayCount = 0;
+				goto UPDATE_WAY_POINT_ENTRY;
+			}
+			else if(m_fForceSpeed < 0 && fOrgDistance <= pTargetWayPoint->fCameraMoveAccel * fSpeed)
+			{
+				if (m_dwCurrentIndex > 0)
+					m_dwCurrentIndex--;		// 이전 WayPoint로
+				else
+					m_dwCurrentIndex = m_listWayPoint.size() - 1;
+				m_iDelayCount = 0;
+				goto UPDATE_WAY_POINT_ENTRY;
+			}
+			else
+			{
+				// 카메라 회전
+				if (fSubDistance > 5.0f && fOrgDistance > 5.0f)
+				{
+					m_fTargetTourCameraAngle = CreateAngle(0, 0, fTourDirVector[0], -fTourDirVector[1]);
+				}
+				//if (m_fTargetTourCameraAngle != m_fTourCameraAngle)
+				{
+					float fRotDir = 0;			// 회전 방향
+					float fAngleDistance = 0;	// 각도 차이
+					float fAngleTest = absf(m_fTargetTourCameraAngle - m_fTourCameraAngle);
+					if (fAngleTest > 180)	// 0도 지나 회전
+					{
+						fRotDir = (m_fTargetTourCameraAngle - m_fTourCameraAngle > 0.f ? -1.0f : 1.0f);
+						fAngleDistance = 360.0f - fAngleTest;
+					}
+					else	// 0도 지나지 않고 회전
+					{
+						fRotDir = (m_fTargetTourCameraAngle - m_fTourCameraAngle > 0.f ? 1.0f : -1.0f);
+						fAngleDistance = fAngleTest;
+					}
+
+					const float fMaxRotateSpeed = 1.0f;	// 최대 회전 속도
+					float fRotateSpeed = 0;
+					if (fAngleDistance > 0) fRotateSpeed = fAngleDistance / 30.0f;
+					if (fRotateSpeed > fMaxRotateSpeed) fRotateSpeed = fMaxRotateSpeed;
+					fRotateSpeed *= fSpeed;	// 강제 속도 적용
+
+					if (fAngleDistance <= fRotateSpeed)
+						m_fTourCameraAngle = m_fTargetTourCameraAngle;
+					else
+						m_fTourCameraAngle += fRotateSpeed * fRotDir;
+
+					if (m_fTourCameraAngle < 0.0f) m_fTourCameraAngle += 360.0f;
+					else if (m_fTourCameraAngle > 360.0f) m_fTourCameraAngle -= 360.0f;
+				}
+
+				// 이동
+				if (IsTourPaused())
+				{
+					if (m_fForceSpeed > 0)
+					{
+						m_CurrentCameraPos[0] += (fDirVector[0] * pTargetWayPoint->fCameraMoveAccel * m_fForceSpeed);
+						m_CurrentCameraPos[1] += (fDirVector[1] * pTargetWayPoint->fCameraMoveAccel * m_fForceSpeed);
+						m_vTourCameraPos[0] += (fTourDirVector[0] * pTargetWayPoint->fCameraMoveAccel * m_fForceSpeed);
+						m_vTourCameraPos[1] += (fTourDirVector[1] * pTargetWayPoint->fCameraMoveAccel * m_fForceSpeed);
+					}
+					else if (m_fForceSpeed < 0)
+					{
+						m_CurrentCameraPos[0] += (fRvsDirVector[0] * pOriginWayPoint->fCameraMoveAccel * m_fForceSpeed);
+						m_CurrentCameraPos[1] += (fRvsDirVector[1] * pOriginWayPoint->fCameraMoveAccel * m_fForceSpeed);
+						m_vTourCameraPos[0] += (fTourDirVector[0] * pOriginWayPoint->fCameraMoveAccel * m_fForceSpeed);
+						m_vTourCameraPos[1] += (fTourDirVector[1] * pOriginWayPoint->fCameraMoveAccel * m_fForceSpeed);
+					}
+				}
+				else
+				{
+					m_CurrentCameraPos[0] += (fDirVector[0] * pTargetWayPoint->fCameraMoveAccel);
+					m_CurrentCameraPos[1] += (fDirVector[1] * pTargetWayPoint->fCameraMoveAccel);
+					m_vTourCameraPos[0] += (fTourDirVector[0] * pTargetWayPoint->fCameraMoveAccel);
+					m_vTourCameraPos[1] += (fTourDirVector[1] * pTargetWayPoint->fCameraMoveAccel);
+				}
+				m_vTourCameraPos[2] = -300;//RequestTerrainHeight(m_CurrentCameraPos[0],m_CurrentCameraPos[1]);
+
+				m_fCurrentDistanceLevel = pOriginWayPoint->fCameraDistanceLevel * fSubDistance / (fOrgDistance+fSubDistance)
+					+ pTargetWayPoint->fCameraDistanceLevel * fOrgDistance / (fOrgDistance+fSubDistance);
+			}
+		}
+		m_iDelayCount++;
+	}
+	else
+	{
+		m_dwCameraWalkState = CAMERAWALK_STATE_DONE;
+		m_iDelayCount = 0;
+		m_dwCurrentIndex = 0;
+	}
+}
+
+#ifdef PJH_NEW_SERVER_SELECT_MAP
+void CCameraMove::SetAngleFrustum(float _Value)
+{
+	m_fCameraAngle = _Value;
+}
+void CCameraMove::SetFrustumAngle(float _Value)
+{
+	m_fFrustumAngle = _Value;
+}
+float CCameraMove::GetFrustumAngle()
+{
+	return (m_fCameraAngle - m_fFrustumAngle);
+}
+#endif //PJH_NEW_SERVER_SELECT_MAP

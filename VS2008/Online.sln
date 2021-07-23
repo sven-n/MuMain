@@ -1,0 +1,70 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Online", "Online.vcxproj", "{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Blue Real Server Debug|Win32 = Blue Real Server Debug|Win32
+		Blue Real Server Release|Win32 = Blue Real Server Release|Win32
+		Chinese Debug|Win32 = Chinese Debug|Win32
+		Chinese Release|Win32 = Chinese Release|Win32
+		Global Debug|Win32 = Global Debug|Win32
+		Global Release|Win32 = Global Release|Win32
+		Japanese Debug|Win32 = Japanese Debug|Win32
+		Japanese Release|Win32 = Japanese Release|Win32
+		Orig Real Server Debug|Win32 = Orig Real Server Debug|Win32
+		Orig Real Server Release|Win32 = Orig Real Server Release|Win32
+		Orig Test Server Debug|Win32 = Orig Test Server Debug|Win32
+		Orig Test Server Release|Win32 = Orig Test Server Release|Win32
+		Philippines Debug|Win32 = Philippines Debug|Win32
+		Philippines Release|Win32 = Philippines Release|Win32
+		Taiwanese Debug|Win32 = Taiwanese Debug|Win32
+		Taiwanese Release|Win32 = Taiwanese Release|Win32
+		Vietnamese Debug|Win32 = Vietnamese Debug|Win32
+		Vietnamese Release|Win32 = Vietnamese Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Blue Real Server Debug|Win32.ActiveCfg = Blue Real Server Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Blue Real Server Debug|Win32.Build.0 = Blue Real Server Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Blue Real Server Release|Win32.ActiveCfg = Blue Real Server Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Blue Real Server Release|Win32.Build.0 = Blue Real Server Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Chinese Debug|Win32.ActiveCfg = Chinese Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Chinese Debug|Win32.Build.0 = Chinese Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Chinese Release|Win32.ActiveCfg = Chinese Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Chinese Release|Win32.Build.0 = Chinese Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Global Debug|Win32.ActiveCfg = Global Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Global Debug|Win32.Build.0 = Global Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Global Release|Win32.ActiveCfg = Global Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Global Release|Win32.Build.0 = Global Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Japanese Debug|Win32.ActiveCfg = Japanese Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Japanese Debug|Win32.Build.0 = Japanese Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Japanese Release|Win32.ActiveCfg = Japanese Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Japanese Release|Win32.Build.0 = Japanese Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Orig Real Server Debug|Win32.ActiveCfg = Orig Real Server Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Orig Real Server Debug|Win32.Build.0 = Orig Real Server Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Orig Real Server Release|Win32.ActiveCfg = Orig Real Server Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Orig Real Server Release|Win32.Build.0 = Orig Real Server Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Orig Test Server Debug|Win32.ActiveCfg = Orig Test Server Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Orig Test Server Debug|Win32.Build.0 = Orig Test Server Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Orig Test Server Release|Win32.ActiveCfg = Orig Test Server Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Orig Test Server Release|Win32.Build.0 = Orig Test Server Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Philippines Debug|Win32.ActiveCfg = Philippines Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Philippines Debug|Win32.Build.0 = Philippines Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Philippines Release|Win32.ActiveCfg = Philippines Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Philippines Release|Win32.Build.0 = Philippines Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Taiwanese Debug|Win32.ActiveCfg = Taiwanese Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Taiwanese Debug|Win32.Build.0 = Taiwanese Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Taiwanese Release|Win32.ActiveCfg = Taiwanese Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Taiwanese Release|Win32.Build.0 = Taiwanese Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Vietnamese Debug|Win32.ActiveCfg = Vietnamese Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Vietnamese Debug|Win32.Build.0 = Vietnamese Debug|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Vietnamese Release|Win32.ActiveCfg = Vietnamese Release|Win32
+		{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}.Vietnamese Release|Win32.Build.0 = Vietnamese Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,3469 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{60be10b2-b0d1-4d2d-9777-88fc89d417a3}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="MU">
+      <UniqueIdentifier>{00d02322-d5fd-4b86-8b06-3ad0936dd70a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ui">
+      <UniqueIdentifier>{211b3ece-e00c-4dd0-8d38-04362dbc33fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\common">
+      <UniqueIdentifier>{fbe110ab-d140-4d7f-9b72-767b617ed27b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\client">
+      <UniqueIdentifier>{112706dc-9dfe-4bf3-9bde-e4538b7897ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\client\Header Files">
+      <UniqueIdentifier>{9eb1c99e-df2a-4dd4-9f08-45fe8eb93ed8}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="MU\client\info">
+      <UniqueIdentifier>{b6aaf1fd-e912-4d8f-8ca0-0ce5de0c4743}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\client\info\resource">
+      <UniqueIdentifier>{80af241f-0009-4773-acf6-36b1a59934dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\client\info\helper">
+      <UniqueIdentifier>{0c236c0f-9c5b-4e86-8b0e-f4d310337389}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\client\core">
+      <UniqueIdentifier>{f9421654-994b-4a4b-8854-1718bc8b84db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\client\Source Files">
+      <UniqueIdentifier>{c456f4dd-ca3d-4a2f-abcb-daaeb49a08eb}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="MU\network">
+      <UniqueIdentifier>{b4fc75d3-8d4d-4ee7-9808-642e1adee74f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\network\proxy">
+      <UniqueIdentifier>{cc4c6829-4399-4fce-830d-5b80979261dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\network\proxy\receive">
+      <UniqueIdentifier>{5c622a63-f68c-4288-8890-6e56cd846811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\network\proxy\send">
+      <UniqueIdentifier>{8f14d950-b6dd-4b7f-b92f-798721b1a8a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\sound">
+      <UniqueIdentifier>{bb394fb2-52ff-44d8-b94c-022ca3a635a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\effect">
+      <UniqueIdentifier>{6c987b5a-2e03-4c6a-a301-b2c11ebca53e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\input">
+      <UniqueIdentifier>{f42ce68d-c805-4b89-a15f-e46ba93dcca7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\graphic">
+      <UniqueIdentifier>{279a9f26-baa3-4b5a-9595-9b6c04505f2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\graphic\2D">
+      <UniqueIdentifier>{37a925da-57d0-4472-ac23-284c2a225ef3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\graphic\2D\2d_resource">
+      <UniqueIdentifier>{d50e9e14-72fa-42c6-b195-ee9c444b6232}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI">
+      <UniqueIdentifier>{6a68301a-bbcc-488d-8a17-775a2d1c3508}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI">
+      <UniqueIdentifier>{2f4e1f59-143d-4aa4-9172-f3826c950b96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI\CursedTemple">
+      <UniqueIdentifier>{7b4f1476-ea1c-4a52-ab12-525fd94d7793}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI\ChaosCastle">
+      <UniqueIdentifier>{2adb5d67-33da-4482-a7d4-75e0306cb768}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI\BloodCastle">
+      <UniqueIdentifier>{10e09dd5-226c-4eb7-8295-c9442eafb6f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI\KanturuEvent">
+      <UniqueIdentifier>{539acb41-8b22-4ca1-bcc2-b9fca40c95de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI\DevilSquare">
+      <UniqueIdentifier>{ecc33dbe-13ff-4b61-bb96-41a1589bac80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI\SiegeWar">
+      <UniqueIdentifier>{95724c1a-41ae-4871-b8f5-fbc8ea213a73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI\CryWolf">
+      <UniqueIdentifier>{8f0266f7-dd2e-48a7-b108-6d2df9acda27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI\DoppelGanger">
+      <UniqueIdentifier>{ba1f1e8e-2fb6-4970-a833-19056f77f8a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewUI\EventMapUI\EmpireGuardian">
+      <UniqueIdentifier>{10604ac8-4215-4268-a6b9-635d3facb4dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI">
+      <UniqueIdentifier>{b04ad5c1-a7ce-4726-9884-8fdd423c1f51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\UIModule">
+      <UniqueIdentifier>{4781c7d2-e4ee-412d-9d86-27a36c6f48c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\UIModule\core No. 1">
+      <UniqueIdentifier>{4abed350-9d71-4cbc-90f0-d08ee71865bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\UIModule\logical">
+      <UniqueIdentifier>{a3906b11-6f2f-4d9b-8544-821f105a3593}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\UIModule\physical">
+      <UniqueIdentifier>{8093c3ee-0d7e-4209-8cd9-f55054105500}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\UtilModule">
+      <UniqueIdentifier>{d378ab81-fa08-4e4d-a152-e00bd29831d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\InputModule">
+      <UniqueIdentifier>{0ecc218d-508f-41b2-9f31-c80ace776f3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\InputModule\deviec">
+      <UniqueIdentifier>{a4480a8b-57e5-47e5-958c-ea5b38cd0192}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\InputModule\core No. 2">
+      <UniqueIdentifier>{b06bc9aa-b218-406e-ac2c-55b03c3bc1cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ProxyModule">
+      <UniqueIdentifier>{b12a16cd-4934-4e96-b6ce-14de47171f02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ProxyModule\core No. 3">
+      <UniqueIdentifier>{7b761291-2af3-4eb1-a537-a0873b22875e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ProxyModule\proxy No. 1">
+      <UniqueIdentifier>{665dc4b3-9591-479f-b4b4-6f691d41b322}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ImageModule">
+      <UniqueIdentifier>{a90b9c8e-855a-43fb-aadd-32b921abf633}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ClientModule">
+      <UniqueIdentifier>{ae5a7046-2eed-4347-aed1-bd5719897052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ClientModule\module">
+      <UniqueIdentifier>{8ecc628c-77a4-4dd4-9f5e-60e948b12980}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ClientModule\core No. 4">
+      <UniqueIdentifier>{bbed0b69-13a7-4b63-8449-cb512acb5ee7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ClientModule\task">
+      <UniqueIdentifier>{148e6632-06b1-4e76-b3b0-9be541a2b013}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ClientModule\info No. 1">
+      <UniqueIdentifier>{5768d8ce-b66f-498e-9e04-6a165e699f29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ShopUI\ClientModule\info No. 1\infodata">
+      <UniqueIdentifier>{737d77b0-61df-4e30-9710-70ddea6b31b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewMap">
+      <UniqueIdentifier>{f912360d-43e2-43cc-83cd-c011db7a286b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewMap\MapExpress">
+      <UniqueIdentifier>{5500398e-32eb-4034-b4e9-bb022f3c5f8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewPet">
+      <UniqueIdentifier>{46fe5a1f-b593-451d-80d2-3165204575e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\NewPet\ActionExpress">
+      <UniqueIdentifier>{224aa9bf-1534-4c8c-b21b-5bbb0e35f077}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\InGameShop">
+      <UniqueIdentifier>{762b5127-8a1c-4253-890f-910c1621b302}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\InGameShop\MessageBox">
+      <UniqueIdentifier>{630e6ad3-f069-4450-918e-344da3992925}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\InGameShop\Include">
+      <UniqueIdentifier>{a8c975c7-4468-4287-b51e-e5269f4f705c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\InGameShop\Include\Interface">
+      <UniqueIdentifier>{54170de7-539a-4d5c-aecb-07063a051209}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\InGameShop\Include\Interface\PathMethod">
+      <UniqueIdentifier>{e80ac63a-2df3-4b31-8c68-2d42e68a8637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\InGameShop\Include\Interface\WZResult">
+      <UniqueIdentifier>{f1a8f3c1-80ba-4a58-ade1-fa7e55589c72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\ServerListSystem">
+      <UniqueIdentifier>{44ff8e0b-a372-4491-9f06-ef26ce39b518}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\MultiLanguageSystem">
+      <UniqueIdentifier>{33c1fb94-54e8-4254-b333-43a472d04842}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\math">
+      <UniqueIdentifier>{4276e326-0e3f-4949-9b61-e9928243cc21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\time">
+      <UniqueIdentifier>{5dbd88cd-af6b-4dfb-ae40-a22d53483be2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\LauncherHelper">
+      <UniqueIdentifier>{ce7cdc3c-5166-44f3-a6f9-6ea1785e2453}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\Shader">
+      <UniqueIdentifier>{3bd1707c-2d35-4348-8d20-06ac12336fc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\GFx">
+      <UniqueIdentifier>{aef444d9-3318-4c2c-a7d6-c414f6dba1ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\GFx\memberClass">
+      <UniqueIdentifier>{a0c62acb-b23d-4beb-813d-6c1c7b5398a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities">
+      <UniqueIdentifier>{1a7667a9-0f3c-4e7e-b90e-24b53dc23a71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities\debugprofiling">
+      <UniqueIdentifier>{cd9cf2fa-c7d2-4e1a-b5c8-5dbb8e0ca9fb}</UniqueIdentifier>
+      <Extensions>Profiling For Debuging</Extensions>
+    </Filter>
+    <Filter Include="Utilities\debugcamera">
+      <UniqueIdentifier>{209f0108-3b30-43fa-85e2-718767892f2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities\log">
+      <UniqueIdentifier>{70fde5e0-b183-4fdb-a534-652e7a8caafc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities\memory">
+      <UniqueIdentifier>{842676d0-97dc-418a-ae84-69610ecb5343}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities\debug">
+      <UniqueIdentifier>{8141915d-8f95-439c-aeb2-8957dc36e983}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities\dump">
+      <UniqueIdentifier>{2f5e25ac-f12f-49eb-93ed-37dba5598850}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Object">
+      <UniqueIdentifier>{c68b5a58-e20a-44b4-90bc-cda094cf209c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Object\Leaf">
+      <UniqueIdentifier>{ede80b54-ed94-4607-ae98-c2bfe13a3927}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Object\ResourceGuard">
+      <UniqueIdentifier>{729d2c04-2c9e-4d9b-8dce-8db0a3694f9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Object\ResourceGuard\Script">
+      <UniqueIdentifier>{2718e24a-c1cb-4ff0-b5e0-52d91f9a454d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Object\nprotect">
+      <UniqueIdentifier>{80e06668-3db6-4d70-ba6d-56e474349b72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Object\Chilkat">
+      <UniqueIdentifier>{f66dc144-ca2e-4533-bcde-2ec70682e9af}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\source\icon1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\source\icon2.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\source\resource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="..\source\resourceblue.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\source\BlackWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Button.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CharInfoBalloon.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CharInfoBalloonMng.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CharMakeWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CharSelMainWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CreditWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GaugeBar.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Input.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ItemAddOptioninfo.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\LoadingScene.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\LoginMainWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\LoginWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Observer.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\OneTimePassword.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\OptionWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PersonalShopTitleImp.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PList.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ServerMsgWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ServerSelWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Slider.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Sprite.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SysMenuWin.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIControls.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIDefaultBase.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIGateKeeper.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIGuardsMan.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIGuildInfo.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIGuildMaster.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIJewelHarmony.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIManager.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIMapName.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIMng.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIPopup.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UISenatus.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UIWindows.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Win.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\WinEx.cpp">
+      <Filter>MU\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\_GlobalFunctions.cpp">
+      <Filter>MU\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\StdAfx.cpp">
+      <Filter>MU\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_BuffScriptLoader.cpp">
+      <Filter>MU\client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_BuffStateSystem.cpp">
+      <Filter>MU\client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_BuffStateValueControl.cpp">
+      <Filter>MU\client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_BuffTimeControl.cpp">
+      <Filter>MU\client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Builder.cpp">
+      <Filter>MU\client\info</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_Buff.cpp">
+      <Filter>MU\client\info</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_CharacterInfo.cpp">
+      <Filter>MU\client\info</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ObjectInfo.cpp">
+      <Filter>MU\client\info</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CreditInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\DialogInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExplanationInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\FilterInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\FilterNameInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ItemInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MovereqInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\QuestInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SkillInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SlideInfo.cpp">
+      <Filter>MU\client\info\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ImportanceData.cpp">
+      <Filter>MU\client\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Winmain.cpp">
+      <Filter>MU\client\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzScene.cpp">
+      <Filter>MU\client\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\BoneManager.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CameraMove.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CBTMessageBox.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CComGem.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CDirection.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ChangeRingManager.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CKANTURUDirection.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CMVP1stDirection.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CSChaosCastle.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CSEventMatch.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CSItemOption.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CSMapInterface.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CSMapServer.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CSParts.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CSPetSystem.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CSQuest.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CSWaterTerrain.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\DuelMgr.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\DummyAttackProtocol.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Event.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GambleSystem.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GameCensorship.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GIPetManager.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GlobalBitmap.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GlobalPortalSystem.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GOBoid.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GuildCache.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\HackTest.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Local.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MatchEvent.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MixMgr.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MonkSystem.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MoveCommandData.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MovieScene.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\npcBreeder.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\npcCatapult.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\npcGateSwitch.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PartyManager.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PCRoomPoint.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PhysicsManager.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PortalMgr.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ProtectAuto.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ProtectSysKey.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PvPSystem.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\QuestMng.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ShadowVolume.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SideHair.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Slotlimit.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SMD.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SMD2BMD.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SocketSystem.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SummonSystem.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\TextureScript.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UsefulDef.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzAI.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzBMD.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzCharacter.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzInfomation.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzInterface.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzInventory.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzLodTerrain.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\zzzMixInvetory.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzObject.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzOpenData.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzOpenglUtil.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\zzzpath.cpp">
+      <Filter>MU\client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\KeyGenerater.cpp">
+      <Filter>MU\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\WSctlc.cpp">
+      <Filter>MU\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\WSclient.cpp">
+      <Filter>MU\network\proxy\receive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\DSplaysound.cpp">
+      <Filter>MU\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\DSwaveIO.cpp">
+      <Filter>MU\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\SkillEffectMgr.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzEffect.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzEffectBlurSpark.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzEffectFireLeave.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzEffectJoint.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzEffectMagicSkill.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzEffectNoUse.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzEffectParticle.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzEffectPoint.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzEffectPointer.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\zzzeffectsprite.cpp">
+      <Filter>MU\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\DImouse.cpp">
+      <Filter>MU\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ZzzTexture.cpp">
+      <Filter>MU\graphic\2D\2d_resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUI3DRenderMng.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIBattleSoccerScore.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIBuffWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIButton.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICharacterInfoWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIChatInputBox.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIChatLogWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICommandWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICommon.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICommonMessageBox.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICustomMessageBox.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIDuelWatchMainFrameWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIDuelWatchUserListWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIDuelWatchWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIDuelWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIExchangeLuckyCoin.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIFriendWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIGensRanking.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIGoldBowmanLena.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIGoldBowmanWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIGroup.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIGuildInfoWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIGuildMakeWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIHelpWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIHeroPositionInfo.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIHotKey.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIInventoryCtrl.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIItemEnduranceInfo.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIItemExplanationWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIItemMng.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUILuckyItemWnd.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIMainFrameWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIManager.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIMasterLevel.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIMessageBox.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIMiniMap.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIMixInventory.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIMoveCommandWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIMyInventory.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIMyQuestInfoWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIMyShopInventory.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUINameWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUINPCDialogue.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUINPCMenu.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUINPCQuest.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUINPCShop.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIOptionWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIPartChargeShop.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIPartyInfoWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIPartyListWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIPetInfoWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIPurchaseShopInventory.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIQuestProgress.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIQuestProgressByEtc.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIQuickCommandWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIRegistrationLuckyCoin.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIRenderNumber.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIScrollBar.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUISetItemExplanation.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUISlideWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIStorageInventory.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUISystem.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUITextBox.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUITrade.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIUnitedMarketPlaceWindow.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIWindowMenu.cpp">
+      <Filter>MU\NewUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICursedTempleEnter.cpp">
+      <Filter>MU\NewUI\EventMapUI\CursedTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICursedTempleResult.cpp">
+      <Filter>MU\NewUI\EventMapUI\CursedTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICursedTempleSystem.cpp">
+      <Filter>MU\NewUI\EventMapUI\CursedTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewChaosCastleSystem.cpp">
+      <Filter>MU\NewUI\EventMapUI\ChaosCastle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIChaosCastleTime.cpp">
+      <Filter>MU\NewUI\EventMapUI\ChaosCastle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewBloodCastleSystem.cpp">
+      <Filter>MU\NewUI\EventMapUI\BloodCastle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIBloodCastleEnter.cpp">
+      <Filter>MU\NewUI\EventMapUI\BloodCastle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIBloodCastleTime.cpp">
+      <Filter>MU\NewUI\EventMapUI\BloodCastle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIKanturuEvent.cpp">
+      <Filter>MU\NewUI\EventMapUI\KanturuEvent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIEnterDevilSquare.cpp">
+      <Filter>MU\NewUI\EventMapUI\DevilSquare</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICastleWindow.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICatapultWindow.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIGatemanWindow.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIGateSwitchWindow.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIGuardWindow.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUISeigeWarfare.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUISiegeWarBase.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUISiegeWarCommander.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUISiegeWarObserver.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUISiegeWarSoldier.cpp">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUICryWolf.cpp">
+      <Filter>MU\NewUI\EventMapUI\CryWolf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIDoppelGangerFrame.cpp">
+      <Filter>MU\NewUI\EventMapUI\DoppelGanger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIDoppelGangerWindow.cpp">
+      <Filter>MU\NewUI\EventMapUI\DoppelGanger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIEmpireGuardianNPC.cpp">
+      <Filter>MU\NewUI\EventMapUI\EmpireGuardian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIEmpireGuardianTimer.cpp">
+      <Filter>MU\NewUI\EventMapUI\EmpireGuardian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_Shell.cpp">
+      <Filter>MU\ShopUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_UISystem.cpp">
+      <Filter>MU\ShopUI\UIModule\core No. 1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_CheckButton.cpp">
+      <Filter>MU\ShopUI\UIModule\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_RadioButton.cpp">
+      <Filter>MU\ShopUI\UIModule\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_UIFrame.cpp">
+      <Filter>MU\ShopUI\UIModule\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_UIWnd.cpp">
+      <Filter>MU\ShopUI\UIModule\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_CompositedPanel.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_CustomButton.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_CustomCheckButton.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_CustomRadioButton.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_InventoryBox.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ItemModuleView.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ModelView.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_Panel.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_Text.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ToolTipPanel.cpp">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_IMEDevice.cpp">
+      <Filter>MU\ShopUI\InputModule\deviec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_KeyboardDevice.cpp">
+      <Filter>MU\ShopUI\InputModule\deviec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_MouseDevice.cpp">
+      <Filter>MU\ShopUI\InputModule\deviec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_InputSystem.cpp">
+      <Filter>MU\ShopUI\InputModule\core No. 2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ServerProxySystem.cpp">
+      <Filter>MU\ShopUI\ProxyModule\core No. 3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_GameServerProxy.cpp">
+      <Filter>MU\ShopUI\ProxyModule\proxy No. 1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_InputProxy.cpp">
+      <Filter>MU\ShopUI\ProxyModule\proxy No. 1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ShopServerProxy.cpp">
+      <Filter>MU\ShopUI\ProxyModule\proxy No. 1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Text.cpp">
+      <Filter>MU\ShopUI\ImageModule</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\TextBitmap.cpp">
+      <Filter>MU\ShopUI\ImageModule</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ImageUnit.cpp">
+      <Filter>MU\ShopUI\ImageModule</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_GameBuffModule.cpp">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_GamePartyModule.cpp">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_MessageBoxModule.cpp">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_Module.cpp">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ShopLeftModule.cpp">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ShopMiddleModule.cpp">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ShopRightModule.cpp">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ShopTopModule.cpp">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ClientSystem.cpp">
+      <Filter>MU\ShopUI\ClientModule\core No. 4</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_GameTask.cpp">
+      <Filter>MU\ShopUI\ClientModule\task</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_Task.cpp">
+      <Filter>MU\ShopUI\ClientModule\task</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_BuildSystem.cpp">
+      <Filter>MU\ShopUI\ClientModule\info No. 1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ClientInfoBuilder.cpp">
+      <Filter>MU\ShopUI\ClientModule\info No. 1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_GameInfoBuilder.cpp">
+      <Filter>MU\ShopUI\ClientModule\info No. 1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ShopItemInfo.cpp">
+      <Filter>MU\ShopUI\ClientModule\info No. 1\infodata</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_ShopUIInfo.cpp">
+      <Filter>MU\ShopUI\ClientModule\info No. 1\infodata</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_MapProcess.cpp">
+      <Filter>MU\NewMap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GM3rdChangeUp.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GM_kanturu_1st.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GM_Kanturu_2nd.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GM_Kanturu_3rd.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GM_PK_Field.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GM_Raklion.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMAida.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMBattleCastle.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMCryingWolf2nd.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMCrywolf1st.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMDoppelGanger1.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMDoppelGanger2.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMDoppelGanger3.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMDoppelGanger4.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMDuelArena.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMEmpireGuardian1.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMEmpireGuardian2.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMEmpireGuardian3.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMEmpireGuardian4.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMHellas.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMHuntingGround.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMKarutan1.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMNewTown.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMSantaTown.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMSwampOfQuiet.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\GMUnitedMarketPlace.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\TestEventMap.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_CursedTemple.cpp">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_BasePet.cpp">
+      <Filter>MU\NewPet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_PetProcess.cpp">
+      <Filter>MU\NewPet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_PetActionCollecter.cpp">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_PetActionCollecter_Add.cpp">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_PetActionDemon.cpp">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_PetActionRound.cpp">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_PetActionStand.cpp">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\w_PetActionUnicorn.cpp">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\FatigueTimeSystem.cpp">
+      <Filter>MU\InGameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\InGameShopSystem.cpp">
+      <Filter>MU\InGameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\NewUIInGameShop.cpp">
+      <Filter>MU\InGameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PKSystem.cpp">
+      <Filter>MU\InGameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSBuyConfirm.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSBuyPackageItem.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSBuySelectItem.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSCommon.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSDeleteItemConfirm.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSGiftStorageItemInfo.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSSendGift.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSSendGiftConfirm.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSStorageItemInfo.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSUseBuffConfirm.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MsgBoxIGSUseItemConfirm.cpp">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ServerGroup.cpp">
+      <Filter>MU\ServerListSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ServerInfo.cpp">
+      <Filter>MU\ServerListSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ServerListManager.cpp">
+      <Filter>MU\ServerListSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\MultiLanguage.cpp">
+      <Filter>MU\MultiLanguageSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Math\ZzzMathLib.cpp">
+      <Filter>MU\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Time\CTimCheck.cpp">
+      <Filter>MU\time</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Time\Timer.cpp">
+      <Filter>MU\time</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\LauncherHelper\LauncherHelper.cpp">
+      <Filter>MU\LauncherHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Shader\EngineGate.cpp">
+      <Filter>MU\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Shader\GLUtils.cpp">
+      <Filter>MU\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Shader\ModelManager.cpp">
+      <Filter>MU\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Shader\RenderMachine.cpp">
+      <Filter>MU\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Shader\VPManager.cpp">
+      <Filter>MU\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CGFxFontConfigParser.cpp">
+      <Filter>MU\GFx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CGFxProcess.cpp">
+      <Filter>MU\GFx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CGFxInfoPopup.cpp">
+      <Filter>MU\GFx\memberClass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CGFxMainUi.cpp">
+      <Filter>MU\GFx\memberClass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\CGFxSample.cpp">
+      <Filter>MU\GFx\memberClass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\DebugProfiling\Profiler.cpp">
+      <Filter>Utilities\debugprofiling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\DebugProfiling\Profiler_Clock.cpp">
+      <Filter>Utilities\debugprofiling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\DebugProfiling\Profiler_Unit.cpp">
+      <Filter>Utilities\debugprofiling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\DebugCamera\DebugCameraDefault.cpp">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\DebugCamera\DebugCameraFreeControl.cpp">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\DebugCamera\DebugCameraInterface.cpp">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\DebugCamera\DebugCameraManager.cpp">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\DebugCamera\DebugCameraTopView.cpp">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Log\DebugAngel.cpp">
+      <Filter>Utilities\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Log\ErrorReport.cpp">
+      <Filter>Utilities\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Log\muConsoleDebug.cpp">
+      <Filter>Utilities\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Log\WindowsConsole.cpp">
+      <Filter>Utilities\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Memory\MemoryLock.cpp">
+      <Filter>Utilities\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Dump\CrashHandler.cpp">
+      <Filter>Utilities\dump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Dump\CrashReporter.cpp">
+      <Filter>Utilities\dump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Dump\Logger.cpp">
+      <Filter>Utilities\dump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Dump\Uploader.cpp">
+      <Filter>Utilities\dump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\Utilities\Dump\UploaderSftp.cpp">
+      <Filter>Utilities\dump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Leaf\callstackdmp.cpp">
+      <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Leaf\checkintegrity.cpp">
+      <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Leaf\ExceptionHandler.cpp">
+      <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Leaf\html_log.cpp">
+      <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Leaf\peimage.cpp">
+      <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Leaf\stdleaf.cpp">
+      <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Leaf\sysinfo.cpp">
+      <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Leaf\xortrans.cpp">
+      <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Leaf\xstreambuf.cpp">
+      <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Nprotect\npGameGuard.cpp">
+      <Filter>External Object\nprotect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Nprotect\NPGameGuardHandle.cpp">
+      <Filter>External Object\nprotect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ExternalObject\Nprotect\Nprotect.cpp">
+      <Filter>External Object\nprotect</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\BlackWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Button.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CharInfoBalloon.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CharInfoBalloonMng.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CharMakeWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CharSelMainWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CreditWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GaugeBar.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Input.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ItemAddOptioninfo.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\LoadingScene.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\LoginMainWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\LoginWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Observer.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\OneTimePassword.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\OptionWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PersonalShopTitleImp.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PList.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ServerMsgWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ServerSelWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Slider.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Sprite.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\SysMenuWin.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIBaseDef.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIControls.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIDefaultBase.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIGateKeeper.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIGuardsMan.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIGuildInfo.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIGuildMaster.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIJewelHarmony.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIManager.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIMapName.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIMng.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIPopup.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UISenatus.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UIWindows.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Win.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\WinEx.h">
+      <Filter>MU\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\_define.h">
+      <Filter>MU\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\_enum.h">
+      <Filter>MU\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\_GlobalFunctions.h">
+      <Filter>MU\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\_struct.h">
+      <Filter>MU\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\_TextureIndex.h">
+      <Filter>MU\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\_types.h">
+      <Filter>MU\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\resource.h">
+      <Filter>MU\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\stdafx.h">
+      <Filter>MU\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_BuffScriptLoader.h">
+      <Filter>MU\client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_BuffStateSystem.h">
+      <Filter>MU\client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_BuffStateValueControl.h">
+      <Filter>MU\client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_BuffTimeControl.h">
+      <Filter>MU\client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\BaseCls.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\BoneManager.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CameraMove.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CBTMessageBox.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CComGem.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CDirection.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ChangeRingManager.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CKANTURUDirection.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CMVP1stDirection.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CSChaosCastle.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CSEventMatch.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CSItemOption.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CSMapInterface.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CSMapServer.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CSParts.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CSPetSystem.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CSQuest.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CSWaterTerrain.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\DuelMgr.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\DummyAttackProtocol.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Event.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GambleSystem.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GameCensorship.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GIPetManager.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GlobalBitmap.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GlobalPortalSystem.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GlobalText.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GOBoid.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GuildCache.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\HackTest.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\iexplorer.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Local.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MatchEvent.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MixMgr.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MonkSystem.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MoveCommandData.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MovieScene.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\npcBreeder.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\npcCatapult.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\npcGateSwitch.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PartyManager.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PCRoomPoint.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PhysicsManager.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PortalMgr.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ProtectAuto.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ProtectSysKey.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PvPSystem.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\QuestMng.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ReadScript.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ShadowVolume.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\SideHair.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\SimpleModulus.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Singleton.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Slotlimit.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\SMD.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\SocketSystem.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\stringset.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\SummonSystem.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\TextureScript.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UsefulDef.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzAI.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzBMD.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzCharacter.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzInfomation.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzInterface.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzInventory.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzLodTerrain.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\zzzMixInventory.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzObject.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzOpenData.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzOpenglUtil.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzPath.h">
+      <Filter>MU\client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Builder.h">
+      <Filter>MU\client\info</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Buff.h">
+      <Filter>MU\client\info</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_CharacterInfo.h">
+      <Filter>MU\client\info</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ObjectInfo.h">
+      <Filter>MU\client\info</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CreditInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\DialogInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExplanationInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\FilterInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\FilterNameInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ItemInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MovereqInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\QuestInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\SkillInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\SlideInfo.h">
+      <Filter>MU\client\info\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\InfoHelperFunctions.h">
+      <Filter>MU\client\info\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\interface.h">
+      <Filter>MU\client\info\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Defined_Global.h">
+      <Filter>MU\client\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ImportanceData.h">
+      <Filter>MU\client\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Winmain.h">
+      <Filter>MU\client\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Winmain_New.h">
+      <Filter>MU\client\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Winmain_New_Event.h">
+      <Filter>MU\client\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Winmain_New_Foreign.h">
+      <Filter>MU\client\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Winmain_New_Live.h">
+      <Filter>MU\client\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzScene.h">
+      <Filter>MU\client\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\KeyGenerater.h">
+      <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\proc.h">
+      <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\StreamPacketEngine.h">
+      <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\wsctlc.h">
+      <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\wsctlc_addon.h">
+      <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\WSclient.h">
+      <Filter>MU\network\proxy\receive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\wsclientinline.h">
+      <Filter>MU\network\proxy\send</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\DSPlaySound.h">
+      <Filter>MU\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\DSwaveIO.h">
+      <Filter>MU\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\DSWavRead.h">
+      <Filter>MU\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\SkillEffectMgr.h">
+      <Filter>MU\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzEffect.h">
+      <Filter>MU\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\DIMouse.h">
+      <Filter>MU\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ZzzTexture.h">
+      <Filter>MU\graphic\2D\2d_resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUI3DRenderMng.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIBase.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIBattleSoccerScore.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIBuffWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIButton.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICharacterInfoWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIChatInputBox.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIChatLogWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICommandWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICommon.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICommonMessageBox.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICustomMessageBox.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIDuelWatchMainFrameWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIDuelWatchUserListWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIDuelWatchWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIDuelWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIExchangeLuckyCoin.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIFriendWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIGensRanking.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIGoldBowmanLena.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIGoldBowmanWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIGroup.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIGuildInfoWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIGuildMakeWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIHelpWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIHeroPositionInfo.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIHotKey.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIInventoryCtrl.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIItemEnduranceInfo.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIItemExplanationWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIItemMng.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUILuckyItemWnd.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIMainFrameWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIManager.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIMasterLevel.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIMessageBox.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIMiniMap.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIMixInventory.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIMoveCommandWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIMyInventory.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIMyQuestInfoWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIMyShopInventory.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUINameWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUINPCDialogue.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUINPCMenu.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUINPCQuest.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUINPCShop.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIOptionWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIPartChargeShop.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIPartyInfoWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIPartyListWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIPetInfoWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIPurchaseShopInventory.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIQuestProgress.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIQuestProgressByEtc.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIQuickCommandWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIRegistrationLuckyCoin.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIRenderNumber.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIScrollBar.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUISetItemExplanation.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUISlideWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIStorageInventory.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUISystem.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUITextBox.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUITrade.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIUnitedMarketPlaceWindow.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIWindowMenu.h">
+      <Filter>MU\NewUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICursedTempleEnter.h">
+      <Filter>MU\NewUI\EventMapUI\CursedTemple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICursedTempleResult.h">
+      <Filter>MU\NewUI\EventMapUI\CursedTemple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICursedTempleSystem.h">
+      <Filter>MU\NewUI\EventMapUI\CursedTemple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewChaosCastleSystem.h">
+      <Filter>MU\NewUI\EventMapUI\ChaosCastle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIChaosCastleTime.h">
+      <Filter>MU\NewUI\EventMapUI\ChaosCastle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewBloodCastleSystem.h">
+      <Filter>MU\NewUI\EventMapUI\BloodCastle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIBloodCastleEnter.h">
+      <Filter>MU\NewUI\EventMapUI\BloodCastle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIBloodCastleTime.h">
+      <Filter>MU\NewUI\EventMapUI\BloodCastle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIKanturuEvent.h">
+      <Filter>MU\NewUI\EventMapUI\KanturuEvent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIEnterDevilSquare.h">
+      <Filter>MU\NewUI\EventMapUI\DevilSquare</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICastleWindow.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICatapultWindow.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIGatemanWindow.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIGateSwitchWindow.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIGuardWindow.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUISeigeWarfare.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUISiegeWarBase.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUISiegeWarCommander.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUISiegeWarObserver.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUISiegeWarSoldier.h">
+      <Filter>MU\NewUI\EventMapUI\SiegeWar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUICryWolf.h">
+      <Filter>MU\NewUI\EventMapUI\CryWolf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIDoppelGangerFrame.h">
+      <Filter>MU\NewUI\EventMapUI\DoppelGanger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIDoppelGangerWindow.h">
+      <Filter>MU\NewUI\EventMapUI\DoppelGanger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIEmpireGuardianNPC.h">
+      <Filter>MU\NewUI\EventMapUI\EmpireGuardian</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIEmpireGuardianTimer.h">
+      <Filter>MU\NewUI\EventMapUI\EmpireGuardian</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Shell.h">
+      <Filter>MU\ShopUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_structs.h">
+      <Filter>MU\ShopUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_UIdefines.h">
+      <Filter>MU\ShopUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_UISystem.h">
+      <Filter>MU\ShopUI\UIModule\core No. 1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_UIType.h">
+      <Filter>MU\ShopUI\UIModule\core No. 1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_CheckButton.h">
+      <Filter>MU\ShopUI\UIModule\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_RadioButton.h">
+      <Filter>MU\ShopUI\UIModule\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_UIEvent.h">
+      <Filter>MU\ShopUI\UIModule\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_UIFrame.h">
+      <Filter>MU\ShopUI\UIModule\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_UIWnd.h">
+      <Filter>MU\ShopUI\UIModule\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_CompositedPanel.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_CustomButton.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_CustomCheckButton.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_CustomRadioButton.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_InventoryBox.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ItemModuleView.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ModelView.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Panel.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Text.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ToolTipPanel.h">
+      <Filter>MU\ShopUI\UIModule\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\stlutl.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_build.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Color.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Coord.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_EventPublisher.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Matrix.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ObjectPool.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Quaternion.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Rect.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Vector3D.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_WindowMessageHandler.h">
+      <Filter>MU\ShopUI\UtilModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_IMEDevice.h">
+      <Filter>MU\ShopUI\InputModule\deviec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_KeyboardDevice.h">
+      <Filter>MU\ShopUI\InputModule\deviec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_MouseDevice.h">
+      <Filter>MU\ShopUI\InputModule\deviec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_InputMessageHandler.h">
+      <Filter>MU\ShopUI\InputModule\core No. 2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_InputSystem.h">
+      <Filter>MU\ShopUI\InputModule\core No. 2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_InputTypes.h">
+      <Filter>MU\ShopUI\InputModule\core No. 2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_TypeDevice.h">
+      <Filter>MU\ShopUI\InputModule\core No. 2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ServerProxy.h">
+      <Filter>MU\ShopUI\ProxyModule\core No. 3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ServerProxySystem.h">
+      <Filter>MU\ShopUI\ProxyModule\core No. 3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_GameServerProxy.h">
+      <Filter>MU\ShopUI\ProxyModule\proxy No. 1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_InputProxy.h">
+      <Filter>MU\ShopUI\ProxyModule\proxy No. 1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ShopServerProxy.h">
+      <Filter>MU\ShopUI\ProxyModule\proxy No. 1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Text.h">
+      <Filter>MU\ShopUI\ImageModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\TextBitmap.h">
+      <Filter>MU\ShopUI\ImageModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ImageUnit.h">
+      <Filter>MU\ShopUI\ImageModule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_GameBuffModule.h">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_GamePartyModule.h">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_MessageBoxModule.h">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Module.h">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ShopLeftModule.h">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ShopMiddleModule.h">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ShopRightModule.h">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ShopTopModule.h">
+      <Filter>MU\ShopUI\ClientModule\module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ClientSystem.h">
+      <Filter>MU\ShopUI\ClientModule\core No. 4</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_GameTask.h">
+      <Filter>MU\ShopUI\ClientModule\task</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_Task.h">
+      <Filter>MU\ShopUI\ClientModule\task</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_BuildSystem.h">
+      <Filter>MU\ShopUI\ClientModule\info No. 1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ClientInfoBuilder.h">
+      <Filter>MU\ShopUI\ClientModule\info No. 1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_GameInfoBuilder.h">
+      <Filter>MU\ShopUI\ClientModule\info No. 1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ShopItemInfo.h">
+      <Filter>MU\ShopUI\ClientModule\info No. 1\infodata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_ShopUIInfo.h">
+      <Filter>MU\ShopUI\ClientModule\info No. 1\infodata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_BaseMap.h">
+      <Filter>MU\NewMap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_MapHeaders.h">
+      <Filter>MU\NewMap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_MapProcess.h">
+      <Filter>MU\NewMap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GM3rdChangeUp.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GM_Kanturu_1st.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GM_Kanturu_2nd.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GM_Kanturu_3rd.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GM_PK_Field.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GM_Raklion.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMAida.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMBattleCastle.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMCryingWolf2nd.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMCrywolf1st.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMDoppelGanger1.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMDoppelGanger2.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMDoppelGanger3.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMDoppelGanger4.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMDuelArena.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMEmpireGuardian1.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMEmpireGuardian2.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMEmpireGuardian3.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMEmpireGuardian4.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMGmArea.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMHellas.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMHuntingGround.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMKarutan1.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMNewTown.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMSantaTown.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMSwampOfQuiet.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\GMUnitedMarketPlace.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\TestEventMap.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_CursedTemple.h">
+      <Filter>MU\NewMap\MapExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_BasePet.h">
+      <Filter>MU\NewPet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_PetAction.h">
+      <Filter>MU\NewPet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_PetProcess.h">
+      <Filter>MU\NewPet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_PetActionCollecter.h">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_PetActionCollecter_Add.h">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_PetActionDemon.h">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_PetActionRound.h">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_PetActionStand.h">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\w_PetActionUnicorn.h">
+      <Filter>MU\NewPet\ActionExpress</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\FatigueTimeSystem.h">
+      <Filter>MU\InGameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\InGameShopSystem.h">
+      <Filter>MU\InGameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\NewUIInGameShop.h">
+      <Filter>MU\InGameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\PKSystem.h">
+      <Filter>MU\InGameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSBuyConfirm.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSBuyPackageItem.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSBuySelectItem.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSCommon.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSDeleteItemConfirm.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSGiftStorageItemInfo.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSSendGift.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSSendGiftConfirm.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSStorageItemInfo.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSUseBuffConfirm.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MsgBoxIGSUseItemConfirm.h">
+      <Filter>MU\InGameShop\MessageBox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\BannerInfo.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\BannerInfoList.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\BannerListManager.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\FTPFileDownLoader.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\Include.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\ListManager.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\ShopCategory.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\ShopCategoryList.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\ShopList.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\ShopListManager.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\ShopPackage.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\ShopPackageList.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\ShopProduct.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\ShopProductList.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\StringMethod.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\StringToken.h">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\DownloadInfo.h">
+      <Filter>MU\InGameShop\Include\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\FileDownloader.h">
+      <Filter>MU\InGameShop\Include\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\FTPConnecter.h">
+      <Filter>MU\InGameShop\Include\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\HTTPConnecter.h">
+      <Filter>MU\InGameShop\Include\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\IConnecter.h">
+      <Filter>MU\InGameShop\Include\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\IDownloaderStateEvent.h">
+      <Filter>MU\InGameShop\Include\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\Include.h">
+      <Filter>MU\InGameShop\Include\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\PathMethod\Path.h">
+      <Filter>MU\InGameShop\Include\Interface\PathMethod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\WZResult\ErrorCodeDefine.h">
+      <Filter>MU\InGameShop\Include\Interface\WZResult</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Link\Common\Header\ShopListManager\interface\WZResult\WZResult.h">
+      <Filter>MU\InGameShop\Include\Interface\WZResult</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ServerGroup.h">
+      <Filter>MU\ServerListSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ServerInfo.h">
+      <Filter>MU\ServerListSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ServerListManager.h">
+      <Filter>MU\ServerListSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\MultiLanguage.h">
+      <Filter>MU\MultiLanguageSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Math\ZzzMathLib.h">
+      <Filter>MU\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Time\CTimCheck.h">
+      <Filter>MU\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Time\Timer.h">
+      <Filter>MU\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\LauncherHelper\LauncherHelper.h">
+      <Filter>MU\LauncherHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Shader\EngineGate.h">
+      <Filter>MU\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Shader\GLUtils.h">
+      <Filter>MU\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Shader\ModelManager.h">
+      <Filter>MU\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Shader\RenderMachine.h">
+      <Filter>MU\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Shader\VPManager.h">
+      <Filter>MU\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CGFxFontConfigParser.h">
+      <Filter>MU\GFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CGFxProcess.h">
+      <Filter>MU\GFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CGFxInfoPopup.h">
+      <Filter>MU\GFx\memberClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CGFxMainUi.h">
+      <Filter>MU\GFx\memberClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\CGFxSample.h">
+      <Filter>MU\GFx\memberClass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugProfiling\Profiler.h">
+      <Filter>Utilities\debugprofiling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugProfiling\Profiler_Clock.h">
+      <Filter>Utilities\debugprofiling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugProfiling\Profiler_Define.h">
+      <Filter>Utilities\debugprofiling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugProfiling\Profiler_FileIO_.h">
+      <Filter>Utilities\debugprofiling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugProfiling\Profiler_Unit.h">
+      <Filter>Utilities\debugprofiling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugProfiling\Profiler_util_.h">
+      <Filter>Utilities\debugprofiling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugCamera\DebugCameraDefault.h">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugCamera\DebugCameraDefine.h">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugCamera\DebugCameraFreeControl.h">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugCamera\DebugCameraInterface.h">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugCamera\DebugCameraManager.h">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\DebugCamera\DebugCameraTopView.h">
+      <Filter>Utilities\debugcamera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Log\DebugAngel.h">
+      <Filter>Utilities\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Log\ErrorReport.h">
+      <Filter>Utilities\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Log\muConsoleDebug.h">
+      <Filter>Utilities\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Log\WindowsConsole.h">
+      <Filter>Utilities\log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Memory\HashTable.h">
+      <Filter>Utilities\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Memory\MemoryLock.h">
+      <Filter>Utilities\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Debug\DebugArray_.h">
+      <Filter>Utilities\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Debug\debugSingleton_.h">
+      <Filter>Utilities\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Dump\CrashHandler.h">
+      <Filter>Utilities\dump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Dump\CrashReporter.h">
+      <Filter>Utilities\dump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Dump\Logger.h">
+      <Filter>Utilities\dump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Dump\Uploader.h">
+      <Filter>Utilities\dump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\Utilities\Dump\UploaderSftp.h">
+      <Filter>Utilities\dump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\callstackdmp.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\checkintegrity.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\ExceptionHandler.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\html_log.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\peimage.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\rdtsc.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\regkey.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\stdleaf.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\sysinfo.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\xortrans.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Leaf\xstreambuf.h">
+      <Filter>External Object\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\ResourceGuard\MuRGReport.h">
+      <Filter>External Object\ResourceGuard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\ResourceGuard\ResourceGuard.h">
+      <Filter>External Object\ResourceGuard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\ResourceGuard\RGReportConsole.h">
+      <Filter>External Object\ResourceGuard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\ResourceGuard\RGReportObj.h">
+      <Filter>External Object\ResourceGuard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Nprotect\npGameGuard.h">
+      <Filter>External Object\nprotect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Nprotect\NPGameGuardHandle.h">
+      <Filter>External Object\nprotect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Nprotect\Nprotect.h">
+      <Filter>External Object\nprotect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkAtom.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkBounce.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkByteData.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkBz2.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkCert.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkCertStore.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkCgi.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkCharset.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkCkSettings.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkCompression.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkCreateCS.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkCrypt2.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkCsp.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkDh.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkDsa.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkEmail.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkEmailBundle.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkFtp2.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkGzip.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkHtmlToText.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkHtmlToXml.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkHttp.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkHttpRequest.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkHttpResponse.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkImap.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkKeyContainer.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkMailboxes.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkMailMan.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkMessageSet.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkMht.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkMime.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkNtlm.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkPrivateKey.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkPublicKey.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkRar.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkRarEntry.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkRsa.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkRss.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkSFtp.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkSFtpDir.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkSFtpFile.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkSocket.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkSpider.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkSsh.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkSshKey.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkSshTunnel.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkString.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkStringArray.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkTar.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkUnixCompress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkUpload.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkXml.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkXmp.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkZip.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkZipCrc.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\C_CkZipEntry.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\Chilkat_C.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkAesInterop.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkAtom.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkAtomProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkAtomW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkBounce.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkBounceW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkByteData.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkBz2.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkBz2Progress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkBz2W.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCache.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCacheW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCert.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCertChain.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCertChainW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCertCollection.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCertCollectionW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCertStore.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCertStoreW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCertW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCgi.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCharset.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCharsetW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCompression.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCompressionW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCreateCS.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCreateCSW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCrypt.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCrypt2.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCrypt2Progress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCrypt2W.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCSP.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCspW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCsv.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkCsvW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkDh.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkDhProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkDhW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkDirTree.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkDkim.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkDkimProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkDsa.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkDsaProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkDsaW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkEmail.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkEmailBundle.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkEmailBundleW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkEmailW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkFileAccess.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkFileAccessW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkFileList.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkFileListW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkFtp.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkFtp2.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkFtp2W.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkFtpProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkGzip.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkGzipProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkGzipW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHtmlToText.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHtmlToTextW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHtmlToXml.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHtmlToXmlW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHttp.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHttpProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHttpRequest.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHttpRequestW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHttpResponse.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHttpResponseW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkHttpW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkIcon.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkImap.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkImapProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkImapW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkKeyContainer.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkKeyContainerW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMailboxes.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMailboxesW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMailMan.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMailManW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMailProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMessageSet.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMessageSetW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMht.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMhtProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMhtW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMime.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkMimeW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkNtlm.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkNtlmW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkObject.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkObjectArray.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkOmaDrm.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkOmaDrmW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkPfx.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkPfxW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkPrivateKey.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkPrivateKeyW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkPublicKey.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkPublicKeyW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkRar.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkRarEntry.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkRarEntryW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkRarW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkRsa.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkRsaW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkRss.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkRssProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkRssW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkService.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkServiceW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSettings.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSFtp.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSFtpDir.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSFtpDirW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSFtpFile.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSFtpFileW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSFtpProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSFtpW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSocket.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSocketProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSocketW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSocksProxy.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSocksProxyProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSocksProxyW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSpider.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSpiderProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSpiderW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSsh.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSshKey.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSshKeyW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSshProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSshTunnel.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSshTunnelW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkSshW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkString.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkStringArray.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkStringArrayW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkTar.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkTarProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkTarW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkUnixCompress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkUnixCompressW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkUpload.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkUploadW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkXml.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkXmlW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkXmp.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkXmpW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkZip.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkZipCrc.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkZipEntry.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkZipEntryW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkZipProgress.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\CkZipW.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\FileTime.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\int64.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExternalObject\Chilkat\SystemTime.h">
+      <Filter>External Object\Chilkat</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="script\Mu_Chs.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+    <None Include="script\Mu_Eng.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+    <None Include="script\Mu_Jpn.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+    <None Include="script\Mu_Kor_Blue.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+    <None Include="script\Mu_Kor_Red.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+    <None Include="script\Mu_Kor_Red_Test.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+    <None Include="script\Mu_Phi.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+    <None Include="script\Mu_Tai.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+    <None Include="script\Mu_Tha.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+    <None Include="script\Mu_Vie.py">
+      <Filter>External Object\ResourceGuard\Script</Filter>
+    </None>
+  </ItemGroup>
+</Project>
