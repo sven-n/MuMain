@@ -11,11 +11,7 @@
 
 bool leaf::CreateDirectoryIncSub(const std::string& path) {
 	
-#ifdef _VS2008PORTING
 	for(int i=1; i<(int)path.size(); i++) {
-#else // _VS2008PORTING
-	for(int i=1; i<path.size(); i++) {
-#endif // _VS2008PORTING
 		if(path[i] == '/' || path[i] == '\\') {
 			std::string subpath = path.substr(0, i+1/* length */);
 			
@@ -167,11 +163,7 @@ void leaf::ExchangeExt(IN const std::string& in_filepath, IN const std::string& 
 bool leaf::CompareFilePath(IN const std::string& path1, IN const std::string& path2, size_t size)
 {
 	bool bIdentity = true;
-#ifdef _VS2008PORTING
 	for(int i=0; i<(int)size; i++) {
-#else // _VS2008PORTING
-	for(int i=0; i<size; i++) {
-#endif // _VS2008PORTING
 		if((path1[i] == '\\' || path1[i] == '/') && 
 			(path2[i] == '\\' || path2[i] == '/')) continue;
 		if(_tolower(path1[i]) != _tolower(path2[i])) {

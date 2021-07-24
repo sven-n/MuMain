@@ -883,7 +883,7 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
 
 #if SELECTED_LANGUAGE == LANGUAGE_ENGLISH && defined(LDS_MOD_EVENTCHERRYBLOSSOM_FORENG)
 			g_pRenderText->SetTextColor(255, 255, 255, 255);
-			unicode::_sprintf( szText, GlobalText[2565] );		// 황금 벚꽃가지 255개
+			unicode::_sprintf( szText, GlobalText[2565] );
 			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+2*13, szText, 160.0f, 0, RT3_SORT_LEFT);
 			
 			g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -923,14 +923,14 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
 	case SEASON3A::MIXTYPE_ATTACH_SOCKET:
 		g_pRenderText->SetBgColor(0, 0, 0, 0);
 		g_pRenderText->SetTextColor(200, 200, 200, 255);
-		unicode::_sprintf( szText, GlobalText[2674] );	// "장착할 소켓 선택"
+		unicode::_sprintf( szText, GlobalText[2674] );
 		g_pRenderText->RenderText(fPos_x, fPos_y+280+0*13, szText, 160.0f, 0, RT3_SORT_CENTER);
 		m_SocketListBox.Render();
 		break;
 	case SEASON3A::MIXTYPE_DETACH_SOCKET:
 		g_pRenderText->SetBgColor(0, 0, 0, 0);
 		g_pRenderText->SetTextColor(200, 200, 200, 255);
-		unicode::_sprintf( szText, GlobalText[2675] );	// "파괴할 소켓 선택"
+		unicode::_sprintf( szText, GlobalText[2675] );
 		g_pRenderText->RenderText(fPos_x, fPos_y+280+0*13, szText, 160.0f, 0, RT3_SORT_CENTER);
 		m_SocketListBox.Render();
 		break;
@@ -955,32 +955,24 @@ bool CNewUIMixInventory::Mix()
 	DWORD dwGold	= CharacterMachine->Gold;
 	int	  nMixZen	= g_MixRecipeMgr.GetReqiredZen();
 
-#ifdef LEM_FIX_MIXREQUIREZEN	// Rtn_MixRequireZen 호출 [lem.2010.7.29]
+#ifdef LEM_FIX_MIXREQUIREZEN	// Rtn_MixRequireZen 
 	nMixZen = Rtn_MixRequireZen( nMixZen, g_nChaosTaxRate );
 #endif	// LEM_FIX_MIXREQUIREZEN
 
-
-#ifdef _VS2008PORTING
-	if ( nMixZen > (int)dwGold)	// 조합에 충분한 젠이 있는가
-#else // _VS2008PORTING
-	if ( nMixZen > dwGold)	// 조합에 충분한 젠이 있는가
-#endif // _VS2008PORTING
-
+	if ( nMixZen > (int)dwGold)
     {
-		// 젠이 부족합니다.
 		g_pChatListBox->AddText("", GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
 		return false;
 	}
 
-	if (!g_MixRecipeMgr.IsReadyToMix())	// 조합할 재료가 다 올라와 있는가
+	if (!g_MixRecipeMgr.IsReadyToMix())
 	{
         unicode::t_char szText[100];
-        unicode::_sprintf (szText, GlobalText[580], GlobalText[591]);	// 재료가 부족합니다.
+        unicode::_sprintf (szText, GlobalText[580], GlobalText[591]);
 		g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 		return false;
 	}
 
-	// 레벨 제한 검사
 	int iLevel = CharacterAttribute->Level;
 	if (iLevel < g_MixRecipeMgr.GetCurRecipe()->m_iRequiredLevel)
 	{
@@ -988,37 +980,32 @@ bool CNewUIMixInventory::Mix()
 		unicode::t_char szText2[100];
 		g_MixRecipeMgr.GetCurRecipeName(szText2, 1);
 		wsprintf (szText, GlobalText[2347], g_MixRecipeMgr.GetCurRecipe()->m_iRequiredLevel, szText2);	
-		// %d 레벨 이상부터 해당 조합이 가능합니다.
 		g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 		return false;
 	}
 
-	// 조합 결과물을 담을 인벤 빈공간 체크
-	if (g_MixRecipeMgr.GetCurRecipe()->m_iWidth != -1 &&	// -1이면 빈공간 검사 안함
+	if (g_MixRecipeMgr.GetCurRecipe()->m_iWidth != -1 &&
 		g_pMyInventory->FindEmptySlot(g_MixRecipeMgr.GetCurRecipe()->m_iWidth,
 		g_MixRecipeMgr.GetCurRecipe()->m_iHeight) == -1)
 	{
-		// 빈공간이 부족합니다.
 		g_pChatListBox->AddText("", GlobalText[581], SEASON3B::TYPE_ERROR_MESSAGE);
 		return false;
 	}
 
 #ifdef ADD_SOCKET_MIX
-	// 소켓 아이템 조합시 선택가능한 소켓인가
 	if (g_MixRecipeMgr.GetMixInventoryType() == SEASON3A::MIXTYPE_ATTACH_SOCKET)
 	{
 		int iSelectedLine = m_SocketListBox.GetLineNum() - m_SocketListBox.SLGetSelectLineNum();
 
 		for (int i = 0; i < m_SocketListBox.GetLineNum(); ++i)
 		{
-			BYTE bySocketSeedID = g_MixRecipeMgr.GetFirstItemSocketSeedID(i);	// 소켓아이템의 i번째 소켓의 시드ID
+			BYTE bySocketSeedID = g_MixRecipeMgr.GetFirstItemSocketSeedID(i);
 			if (bySocketSeedID != SOCKET_EMPTY)
 			{
-				BYTE bySeedSphereID = g_MixRecipeMgr.GetSeedSphereID(0);	// 장착할 시드스피어의 시드ID
+				BYTE bySeedSphereID = g_MixRecipeMgr.GetSeedSphereID(0);
 				if (bySocketSeedID == bySeedSphereID)
 				{
-					// 같은 종류의 시드 스피어를 장착할 수 없다
-					g_pChatListBox->AddText("", GlobalText[2683], SEASON3B::TYPE_ERROR_MESSAGE);	// "같은 종류의 시드스피어는 장비할 수 없습니다."
+					g_pChatListBox->AddText("", GlobalText[2683], SEASON3B::TYPE_ERROR_MESSAGE);
 					return false;
 				}
 			}
@@ -1026,15 +1013,13 @@ bool CNewUIMixInventory::Mix()
 
 		if (m_SocketListBox.SLGetSelectLineNum() == 0)
 		{
-			// 소켓을 선택해야 합니다.
-			g_pChatListBox->AddText("", GlobalText[2676], SEASON3B::TYPE_ERROR_MESSAGE);	// "장착할 소켓을 선택해야 합니다."
+			g_pChatListBox->AddText("", GlobalText[2676], SEASON3B::TYPE_ERROR_MESSAGE);
 			return false;
 		}
 		else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
 			|| g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) != SOCKET_EMPTY)
 		{
-			// 장착 할 수 없는 소켓입니다.
-			g_pChatListBox->AddText("", GlobalText[2677], SEASON3B::TYPE_ERROR_MESSAGE);	// "이미 장착되어 있습니다."
+			g_pChatListBox->AddText("", GlobalText[2677], SEASON3B::TYPE_ERROR_MESSAGE);
 			return false;
 		}
 
@@ -1045,15 +1030,13 @@ bool CNewUIMixInventory::Mix()
 		int iSelectedLine = m_SocketListBox.GetLineNum() - m_SocketListBox.SLGetSelectLineNum();
 		if (m_SocketListBox.SLGetSelectLineNum() == 0)
 		{
-			// 소켓을 선택해야 합니다.
-			g_pChatListBox->AddText("", GlobalText[2678], SEASON3B::TYPE_ERROR_MESSAGE);	// "파괴할 소켓을 선택해야 합니다."
+			g_pChatListBox->AddText("", GlobalText[2678], SEASON3B::TYPE_ERROR_MESSAGE);
 			return false;
 		}
 		else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
 			|| g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) == SOCKET_EMPTY)
 		{
-			// 장착 할 수 없는 소켓입니다.
-			g_pChatListBox->AddText("", GlobalText[2679], SEASON3B::TYPE_ERROR_MESSAGE);	// "파괴할 시드스피어가 없습니다."
+			g_pChatListBox->AddText("", GlobalText[2679], SEASON3B::TYPE_ERROR_MESSAGE);
 			return false;
 		}
 		g_MixRecipeMgr.SetMixSubType(iSelectedLine);
@@ -1063,13 +1046,12 @@ bool CNewUIMixInventory::Mix()
 #ifdef LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
 	if (g_MixRecipeMgr.GetTotalChaosCharmCount() > 0 && g_MixRecipeMgr.GetTotalCharmCount() > 0 )
 	{
-		// 3286 "카오스조합부적과 행운의부적은 동시에 사용이 불가능 합니다."
 		g_pChatListBox->AddText("", GlobalText[3286], SEASON3B::TYPE_ERROR_MESSAGE);
 		return FALSE;
 	}
 #endif //LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
 
-	if (CNewUIInventoryCtrl::GetPickedItem() == NULL)	// 들고있는 아이템이 없으면 조합 실행
+	if (CNewUIInventoryCtrl::GetPickedItem() == NULL)
 	{
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMixCheckMsgBoxLayout));
 		return true;
@@ -1153,11 +1135,7 @@ void CNewUIMixInventory::CheckMixInventory()
 {
 	g_MixRecipeMgr.ResetMixItemInventory();
 	ITEM * pItem = NULL;
-#ifdef _VS2008PORTING
 	for (int i = 0; i < (int)m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#else // _VS2008PORTING
-	for (int i = 0; i < m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#endif // _VS2008PORTING
 	{
 		pItem = m_pNewInventoryCtrl->GetItem(i);
 		g_MixRecipeMgr.AddItemToMixItemInventory(pItem);
@@ -1180,11 +1158,8 @@ void CNewUIMixInventory::RenderMixEffect()
 	VPManager::Disable();
 #endif //MR0
 	EnableAlphaBlend();
-#ifdef _VS2008PORTING
+
 	for (int i = 0; i < (int)m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#else // _VS2008PORTING
-	for (int i = 0; i < m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#endif // _VS2008PORTING
 	{
 		int iWidth = ItemAttribute[m_pNewInventoryCtrl->GetItem(i)->Type].Width;
 		int iHeight = ItemAttribute[m_pNewInventoryCtrl->GetItem(i)->Type].Height;

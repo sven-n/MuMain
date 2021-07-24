@@ -463,8 +463,6 @@ extern BYTE Serial[SIZE_PROTOCOLSERIAL+1];
 #ifdef LDS_MODIFY_CHAR_LENGTH_USERPASSWORD	// 비밀번호 자릿수 10->12로 변경 사항
 
 
-
-#ifdef _VS2008PORTING
 #define SendRequestLogIn( p_lpszID, p_lpszPassword)\
 {\
 	pre_send( g_hInst);\
@@ -494,41 +492,10 @@ extern BYTE Serial[SIZE_PROTOCOLSERIAL+1];
 	g_pChatListBox->AddText("",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
 	hanguo_check3();\
 }
-#else // _VS2008PORTING
-#define SendRequestLogIn( p_lpszID, p_lpszPassword)\
-{\
-	pre_send( g_hInst);\
-	LogIn = 1;\
-	strcpy(LogInID, ( p_lpszID));\
-	CurrentProtocolState = REQUEST_LOG_IN;\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF1);\
-	spe << ( BYTE)0x01;\
-	char lpszID[MAX_ID_SIZE+1];\
-	char lpszPass[MAX_PASSWORD_SIZE+1];\
-	ZeroMemory( lpszID, MAX_ID_SIZE+1);\
-	ZeroMemory( lpszPass, MAX_PASSWORD_SIZE+1);\
-	memcpy( lpszID, p_lpszID, MAX_ID_SIZE );\
-	memcpy( lpszPass, p_lpszPassword, MAX_PASSWORD_SIZE);\
-	BuxConvert(( BYTE*)lpszID,MAX_ID_SIZE);\
-	BuxConvert(( BYTE*)lpszPass,MAX_PASSWORD_SIZE);\
-	spe.AddData( lpszID, MAX_ID_SIZE);\
-	spe.AddData( lpszPass, MAX_PASSWORD_SIZE);\
-	spe << GetTickCount();\
-	for(int i=0;i<SIZE_PROTOCOLVERSION;i++)\
-	spe << ( BYTE)( Version[i]-(i+1));\
-	for(i=0;i<SIZE_PROTOCOLSERIAL;i++)\
-	spe << Serial[i];\
-	spe.Send( TRUE);\
-	g_pChatListBox->AddText("",GlobalText[472],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	g_pChatListBox->AddText("",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	hanguo_check3();\
-}
-#endif // _VS2008PORTING
+
 
 #else	// LDS_MODIFY_CHAR_LENGTH_USERPASSWORD
 
-#ifdef _VS2008PORTING
 #ifdef LDK_MOD_PASSWORD_LENGTH_20
 //글로벌 포털용
 #define SendRequestLogIn( p_lpszID, p_lpszPassword)\
@@ -591,70 +558,6 @@ extern BYTE Serial[SIZE_PROTOCOLSERIAL+1];
 	hanguo_check3();\
 }
 #endif //LDK_MOD_PASSWORD_LENGTH_20
-#else // _VS2008PORTING
-#ifdef LDK_MOD_PASSWORD_LENGTH_20
-//글로벌 포털용
-#define SendRequestLogIn( p_lpszID, p_lpszPassword)\
-{\
-	pre_send( g_hInst);\
-	LogIn = 1;\
-	strcpy(LogInID, ( p_lpszID));\
-	CurrentProtocolState = REQUEST_LOG_IN;\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF1);\
-	spe << ( BYTE)0x01;\
-	char lpszID[MAX_ID_SIZE+1];\
-	char lpszPass[MAX_PASSWORD_SIZE+1];\
-	ZeroMemory( lpszID, MAX_ID_SIZE+1);\
-	ZeroMemory( lpszPass, MAX_PASSWORD_SIZE+1);\
-	strncpy(lpszID, p_lpszID, MAX_ID_SIZE);\
-	strncpy(lpszPass, p_lpszPassword, MAX_PASSWORD_SIZE);\
-	BuxConvert(( BYTE*)lpszID,MAX_ID_SIZE);\
-	BuxConvert(( BYTE*)lpszPass,MAX_PASSWORD_SIZE);\
-	spe.AddData( lpszID, MAX_ID_SIZE);\
-	spe.AddData( lpszPass, MAX_PASSWORD_SIZE);\
-	spe << GetTickCount();\
-	for(int i=0;i<SIZE_PROTOCOLVERSION;i++)\
-		spe << ( BYTE)( Version[i]-(i+1));\
-	for(i=0;i<SIZE_PROTOCOLSERIAL;i++)\
-		spe << Serial[i];\
-	spe.Send( TRUE);\
-	g_pChatListBox->AddText("",GlobalText[472],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	g_pChatListBox->AddText("",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	hanguo_check3();\
-}
-#else //LDK_MOD_PASSWORD_LENGTH_20
-#define SendRequestLogIn( p_lpszID, p_lpszPassword)\
-{\
-	pre_send( g_hInst);\
-	LogIn = 1;\
-	strcpy(LogInID, ( p_lpszID));\
-	CurrentProtocolState = REQUEST_LOG_IN;\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF1);\
-	spe << ( BYTE)0x01;\
-	char lpszID[MAX_ID_SIZE];\
-	char lpszPass[MAX_ID_SIZE];\
-	ZeroMemory( lpszID, MAX_ID_SIZE);\
-	ZeroMemory( lpszPass, MAX_ID_SIZE);\
-	strcpy( lpszID, p_lpszID);\
-	strcpy( lpszPass, ( p_lpszPassword));\
-	BuxConvert(( BYTE*)lpszID,MAX_ID_SIZE);\
-	BuxConvert(( BYTE*)lpszPass,MAX_ID_SIZE);\
-	spe.AddData( lpszID, MAX_ID_SIZE);\
-	spe.AddData( lpszPass, MAX_ID_SIZE);\
-	spe << GetTickCount();\
-	for(int i=0;i<SIZE_PROTOCOLVERSION;i++)\
-	spe << ( BYTE)( Version[i]-(i+1));\
-	for(i=0;i<SIZE_PROTOCOLSERIAL;i++)\
-	spe << Serial[i];\
-	spe.Send( TRUE);\
-	g_pChatListBox->AddText("",GlobalText[472],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	g_pChatListBox->AddText("",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	hanguo_check3();\
-}
-#endif //LDK_MOD_PASSWORD_LENGTH_20
-#endif // _VS2008PORTING
 
 #endif	// LDS_MODIFY_CHAR_LENGTH_USERPASSWORD
 
@@ -1178,7 +1081,7 @@ extern DWORD g_dwLatestMagicTick;
 #ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
 #ifdef KJH_ADD_CREATE_SERIAL_NUM_AT_ATTACK_SKILL
 #ifndef _DEBUG
-#ifdef _VS2008PORTING
+
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #define SendRequestMagic( p_Type, p_Key)\
 {\
@@ -1238,67 +1141,7 @@ extern DWORD g_dwLatestMagicTick;
 	}\
 }
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#else // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-    if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || p_Type==263 || p_Type==261 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))\
-	{\
-		g_DummyAttackChecker->AddSkillCount();\
-		if( g_DummyAttackChecker->GetSkillCount() >= g_DummyAttackChecker->GetDummyProtocolNextSeq() )\
-		{\
-			pre_send( g_hInst);\
-			CStreamPacketEngine spe2;\
-			spe2.Init( 0xC1, 0x19);\
-			DWORD dwDummy;\
-			g_DummyAttackChecker->MakeDummyProtocol((LPBYTE)&dwDummy);\
-			spe2 << (DWORD)dwDummy << (BYTE)(0) << (BYTE)(0);\
-			spe2.Send( TRUE);\
-			hanguo_check3();\
-			g_DummyAttackChecker->InitSkillCount();\
-			g_DummyAttackChecker->AddSkillCount();\
-		}\
-		pre_send( g_hInst);\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC1, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << (BYTE)(0) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff) << (BYTE)g_DummyAttackChecker->GetSerial();\
-		spe.Send( TRUE);\
-		hanguo_check3();\
-	}\
-}
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-    if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))\
-	{\
-		g_DummyAttackChecker->AddSkillCount();\
-		if( g_DummyAttackChecker->GetSkillCount() >= g_DummyAttackChecker->GetDummyProtocolNextSeq() )\
-		{\
-			pre_send( g_hInst);\
-			CStreamPacketEngine spe2;\
-			spe2.Init( 0xC1, 0x19);\
-			DWORD dwDummy;\
-			g_DummyAttackChecker->MakeDummyProtocol((LPBYTE)&dwDummy);\
-			spe2 << (DWORD)dwDummy << (BYTE)(0) << (BYTE)(0);\
-			spe2.Send( TRUE);\
-			hanguo_check3();\
-			g_DummyAttackChecker->InitSkillCount();\
-			g_DummyAttackChecker->AddSkillCount();\
-		}\
-		pre_send( g_hInst);\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC1, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << (BYTE)(0) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff) << (BYTE)g_DummyAttackChecker->GetSerial();\
-		spe.Send( TRUE);\
-		hanguo_check3();\
-	}\
-}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#endif // _VS2008PORTING
+
 #else // _DEBUG
 __forceinline void SendRequestMagic(int Type,int Key)
 {
@@ -1483,19 +1326,12 @@ __forceinline void SendRequestMagic(int Type,int Key)
 {
 	if( !IsCanBCSkill(Type) )
 		return;
-#ifdef _VS2008PORTING
+
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL		// 다크사이드 스킬 딜레이 걸리면 안됨
 	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || Type==263 || Type==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#else // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || Type==263 || Type==261 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#endif // _VS2008PORTING
 	{
 		g_DummyAttackChecker->AddSkillCount();
 		if( g_DummyAttackChecker->GetSkillCount() >= g_DummyAttackChecker->GetDummyProtocolNextSeq() )
@@ -1535,7 +1371,6 @@ __forceinline void SendRequestMagic(int Type,int Key)
 #endif // KJH_ADD_CREATE_SERIAL_NUM_AT_ATTACK_SKILL
 #else // KJH_ADD_DUMMY_SKILL_PROTOCOL
 #ifndef _DEBUG
-#ifdef _VS2008PORTING
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #define SendRequestMagic( p_Type, p_Key)\
 {\
@@ -1567,39 +1402,7 @@ __forceinline void SendRequestMagic(int Type,int Key)
 	}\
 }
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#else // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-    if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || p_Type==263 || p_Type==261 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))\
-	{\
-		pre_send( g_hInst);\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC1, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << (BYTE)(0) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send( TRUE);\
-		hanguo_check3();\
-	}\
-}
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-    if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))\
-	{\
-		pre_send( g_hInst);\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC1, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << (BYTE)(0) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send( TRUE);\
-		hanguo_check3();\
-	}\
-}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#endif // _VS2008PORTING
+
 #else // _DEBUG
 __forceinline void SendRequestMagic(int Type,int Key)
 {
@@ -1639,7 +1442,7 @@ __forceinline void SendRequestMagic(int Type,int Key)
 #endif // KJH_ADD_DUMMY_SKILL_PROTOCOL
 #else // KJH_MOD_ATTACK_PROTOCOL_FOR_PROTECT_HACK
 #ifndef _DEBUG
-#ifdef _VS2008PORTING
+
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #define SendRequestMagic( p_Type, p_Key)\
 {\
@@ -1671,57 +1474,18 @@ __forceinline void SendRequestMagic(int Type,int Key)
 	}\
 }
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#else // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-    if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || p_Type==263 || p_Type==261 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))\
-	{\
-		pre_send( g_hInst);\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC1, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send( TRUE);\
-		hanguo_check3();\
-	}\
-}
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-    if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))\
-	{\
-		pre_send( g_hInst);\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC1, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send( TRUE);\
-		hanguo_check3();\
-	}\
-}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#endif // _VS2008PORTING
+
 #else // _DEBUG
 __forceinline void SendRequestMagic(int Type,int Key)
 {
 	if( !IsCanBCSkill(Type) )
 		return;
-#ifdef _VS2008PORTING
+
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || Type==263 || Type==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#else // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || Type==263 || Type==261 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-    if(!FindText2(Hero->ID,"webzen") && ( Type==40 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#endif // _VS2008PORTING
 	{
 		pre_send( g_hInst);
 		g_dwLatestMagicTick = GetTickCount();

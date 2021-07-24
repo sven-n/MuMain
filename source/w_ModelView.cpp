@@ -104,11 +104,7 @@ namespace
 				ip->bySocketOption[i] = bySocketOption[i];	// 서버에서 받은 내용 백업
 			}
 
-#ifdef _VS2008PORTING
 			for (int i = 0; i < MAX_SOCKETS; ++i)
-#else // _VS2008PORTING
-			for (i = 0; i < MAX_SOCKETS; ++i)
-#endif // _VS2008PORTING
 			{
 				if (bySocketOption[i] == 0xFF)		// 소켓이 막힘 (DB상에는 0x00 으로 되어있음)
 				{
@@ -375,12 +371,10 @@ int ModelView::SetPhotoPose(int iCurrentAni, int iMoveDir)
 		AT_CHEER1, AT_UNKNOWN1, AT_WIN1, AT_SMILE1, AT_SLEEP1, AT_COLD1, AT_AGAIN1, AT_RESPECT1, 
 		AT_SALUTE1, AT_GOODBYE1, AT_MOVE1, AT_RUSH1,AT_SIT1, AT_POSE1, AT_HEALING1, AT_ATTACK1
 	};
-#ifdef _VS2008PORTING
+
 	int iCurrentAniArray = 0;
+
 	for (iCurrentAniArray = 0; iCurrentAniArray < MAX_POSE_NUM; ++iCurrentAniArray)
-#else // _VS2008PORTING
-	for (int iCurrentAniArray = 0; iCurrentAniArray < MAX_POSE_NUM; ++iCurrentAniArray)
-#endif // _VS2008PORTING
 	{
 		if (iCurrentAni == siPose[iCurrentAniArray]) break;
 	}

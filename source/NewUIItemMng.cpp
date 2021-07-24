@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // NewUIItemMng.cpp: implementation of the CNewUIItemMng class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -12,9 +12,6 @@
 #endif	// SOCKET_SYSTEM
 
 using namespace SEASON3B;
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUIItemMng::CNewUIItemMng() 
 {
@@ -94,34 +91,30 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLe
 
 		for (int i = 0; i < MAX_SOCKETS; ++i)
 		{
-			pNewItem->bySocketOption[i] = pbySocketOptions[i];	// 서버에서 받은 내용 백업
+			pNewItem->bySocketOption[i] = pbySocketOptions[i];
 		}
 
-#ifdef _VS2008PORTING
 		for (int i = 0; i < MAX_SOCKETS; ++i)
-#else // _VS2008PORTING
-		for (i = 0; i < MAX_SOCKETS; ++i)
-#endif // _VS2008PORTING
 		{
-			if (pbySocketOptions[i] == 0xFF)		// 소켓이 막힘 (DB상에는 0x00 으로 되어있음)
+			if (pbySocketOptions[i] == 0xFF)
 			{
 				pNewItem->SocketCount = i;
 				break;
 			}
-			else if (pbySocketOptions[i] == 0xFE)	// 소켓이 비어있음 (DB상에는 0xFF 으로 되어있음)
+			else if (pbySocketOptions[i] == 0xFE)
 			{
 				pNewItem->SocketSeedID[i] = SOCKET_EMPTY;
 			}
-			else	// 0x00~0xF9 까지 소켓 고유번호로 사용, MAX_SOCKET_OPTION(50)단위로 나누어 고유번호로 표시 (DB상에는 0x01~0xFA로 되어있음)
+			else
 			{
 				pNewItem->SocketSeedID[i] = pbySocketOptions[i] % SEASON4A::MAX_SOCKET_OPTION;
 				pNewItem->SocketSphereLv[i] = int(pbySocketOptions[i] / SEASON4A::MAX_SOCKET_OPTION) + 1;
 			}
 		}
 		
-  		if (g_SocketItemMgr.IsSocketItem(pNewItem))	// 소켓 아이템이면
+  		if (g_SocketItemMgr.IsSocketItem(pNewItem))
 		{
-			pNewItem->SocketSeedSetOption = byOptionHarmony;	// 조화의보석옵션값으로 시드세트옵션을 표현함
+			pNewItem->SocketSeedSetOption = byOptionHarmony;
 			pNewItem->Jewel_Of_Harmony_Option = 0;
 			pNewItem->Jewel_Of_Harmony_OptionLevel = 0;
 		}
@@ -140,20 +133,20 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLe
 #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 	if( ((byOption380&0x02) >> 1) > 0 )
 	{
-		pNewItem->bPeriodItem = true;		// 기간제 아이템
+		pNewItem->bPeriodItem = true;
 	}
 	else 
 	{
-		pNewItem->bPeriodItem = false;		// 일반 아이템
+		pNewItem->bPeriodItem = false;
 	}
 
 	if( ((byOption380&0x04) >> 2) > 0 )
 	{
-		pNewItem->bExpiredPeriod = true;	// 기간만료
+		pNewItem->bExpiredPeriod = true;
 	}
 	else 
 	{
-		pNewItem->bExpiredPeriod = false;	// 기간내 이거나, 일반아이템
+		pNewItem->bExpiredPeriod = false;
 	}
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
@@ -173,10 +166,9 @@ ITEM* SEASON3B::CNewUIItemMng::DuplicateItem(ITEM* pItem)
 {
 	ITEM* pNewItem = new ITEM;
 	memcpy(pNewItem, pItem, sizeof(ITEM));
-	pNewItem->Key = GenerateItemKey();	//. 키를 생성한다.
+	pNewItem->Key = GenerateItemKey();
 	pNewItem->RefCount = 1;
 
-	// 모든 아이템을 관리하는 listItem에도 추가 합니다. 메모리 관리 차원
 #ifdef LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
 	m_listItem.push_back(pNewItem);
 #endif // LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
@@ -224,7 +216,7 @@ void SEASON3B::CNewUIItemMng::DeleteDuplicatedItem(ITEM* pItem)
 		DeleteItem( pItem );
 #endif // LDS_FIX_MEMORYLEAK_0908_DUPLICATEITEM
 		
-#ifndef LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS	// !!주의 #ifndef
+#ifndef LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
 		SAFE_DELETE(pItem);
 #endif // LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
 	}
@@ -271,7 +263,7 @@ void SEASON3B::CNewUIItemMng::Update()
 DWORD SEASON3B::CNewUIItemMng::GenerateItemKey()
 {
 	DWORD dwAvailableItemKey = FindAvailableKeyIndex(m_dwAvailableKeyStream);
-	if(dwAvailableItemKey >= 0x8F000000)	//. 범위 초과시 재검색
+	if(dwAvailableItemKey >= 0x8F000000)
 	{
 		m_dwAvailableKeyStream = 0;
 		m_dwAlternate++;
@@ -288,11 +280,11 @@ DWORD SEASON3B::CNewUIItemMng::FindAvailableKeyIndex(DWORD dwSeed)
 		for(; li != m_listItem.end(); li++)
 		{
 			ITEM* pItem = (*li);
-			if(pItem->Key == dwSeed+1)	//. 있다면
-				return FindAvailableKeyIndex(dwSeed+1);	//. 다시 검색
+			if(pItem->Key == dwSeed+1)
+				return FindAvailableKeyIndex(dwSeed+1);
 		}
 	}
-	return dwSeed+1; //. 없으면 리턴
+	return dwSeed+1;
 }
 
 WORD SEASON3B::CNewUIItemMng::ExtractItemType(BYTE* pbyItemPacket)
@@ -302,6 +294,5 @@ WORD SEASON3B::CNewUIItemMng::ExtractItemType(BYTE* pbyItemPacket)
 
 void SEASON3B::CNewUIItemMng::SetItemAttr(ITEM* pItem, BYTE byLevel, BYTE byOption1, BYTE byOptionEx)
 {
-	//. 나중에 여기로 옮기쟈!
 	ItemConvert(pItem, byLevel, byOption1, byOptionEx);
 }

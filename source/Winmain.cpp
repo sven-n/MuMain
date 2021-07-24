@@ -780,7 +780,7 @@ DWORD GetCheckSum( WORD wKey)
 	wKey = DecryptCheckSumKey( wKey);
 
 #ifdef KJH_MOD_RESOURCE_GUARD
-	// 파일 열기
+
 	char lpszFile[MAX_PATH];
 
 #ifdef _TEST_SERVER
@@ -860,14 +860,14 @@ Pos_SelfCheck01:
 BOOL GetFileVersion( char *lpszFileName, WORD *pwVersion)
 {
 	DWORD dwHandle;
-	DWORD dwLen = GetFileVersionInfoSize( lpszFileName, &dwHandle);	// 사이즈 얻기
+	DWORD dwLen = GetFileVersionInfoSize( lpszFileName, &dwHandle);
 	if ( dwLen <= 0)
 	{
 		return ( FALSE);
 	}
 
 	BYTE *pbyData = new BYTE [dwLen];
-	if ( !GetFileVersionInfo( lpszFileName, dwHandle, dwLen, pbyData))	// 실제 정보 얻기
+	if ( !GetFileVersionInfo( lpszFileName, dwHandle, dwLen, pbyData))
 	{
 		delete [] pbyData;
 		return ( FALSE);
@@ -875,7 +875,7 @@ BOOL GetFileVersion( char *lpszFileName, WORD *pwVersion)
 
 	VS_FIXEDFILEINFO *pffi;
 	UINT uLen;
-	if ( !VerQueryValue( pbyData, "\\", ( LPVOID*)&pffi, &uLen))	// 버젼값 얻기
+	if ( !VerQueryValue( pbyData, "\\", ( LPVOID*)&pffi, &uLen))
 	{
 		delete [] pbyData;
 		return ( FALSE);
@@ -890,10 +890,8 @@ BOOL GetFileVersion( char *lpszFileName, WORD *pwVersion)
 	return ( TRUE);
 }
 
-
 extern PATH     *path;
 
-//윈도우 죽이는 함수
 void DestroyWindow()
 {
 	//. save volume level
@@ -946,9 +944,6 @@ void DestroyWindow()
 		::DeleteObject((HGDIOBJ)g_hInGameShopFont);
 #endif //PBG_ADD_INGAMESHOP_FONT
 
-	//////////////////////////////////////////////////////////////////////////
-    //  메모리 해제
-
 #ifdef YDG_MOD_PROTECT_AUTO_V4_R3
 	SEASON3B::CMoveCommandWindowEncrypt::DeleteKey();
 #endif	// YDG_MOD_PROTECT_AUTO_V4_R3
@@ -956,23 +951,19 @@ void DestroyWindow()
 	CProtectAuto::Destroy();
 #endif // CSK_MOD_PROTECT_AUTO_V1
 	
-
-    //  캐릭터 해제.
 	ReleaseCharacters();
 
-    //  길찾기 메모리 해제.
     if ( path!=NULL )
     {
 	    delete path;
     }
 	SAFE_DELETE(GateAttribute);
-    //  스킬 정보 해제.
+
 	for ( int i = 0; i < MAX_SKILLS; ++i)
 	{
 	}
 	SAFE_DELETE(SkillAttribute);
 
-    //  주인공 캐릭터 정보 해제.
 	SAFE_DELETE(CharacterMachine);
 
     DeleteWaterTerrain ();
@@ -983,17 +974,13 @@ void DestroyWindow()
 	{
 		DeleteObjects();
 
-		//  Object 데이터 해제.
-#ifdef _VS2008PORTING
+		// Object.
 		for(int i=MODEL_LOGO;i<MAX_MODELS;i++)
-#else // _VS2008PORTING
-		for(i=MODEL_LOGO;i<MAX_MODELS;i++)
-#endif // _VS2008PORTING
 		{
 			Models[i].Release();
 		}
 
-		//  모든 Bitmap 데이터 해제.
+		// Bitmap
 		Bitmaps.UnloadAllImages();
 	}
 
@@ -1042,7 +1029,6 @@ void DestroyWindow()
 
 	g_ErrorReport.Write( "Destroy" );
 	 
-	// 종료
     KillProtect();
 	HWND shWnd = FindWindow(NULL, "MuPlayer");
 	if(shWnd)
@@ -1053,20 +1039,19 @@ void DestroyWindow()
 	
 #ifdef NDEBUG
 #ifndef FOR_WORK
-	int nOldVal; // 값이 들어갈 필요가 없음
-	SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, g_iScreenSaverOldValue, NULL, 0);  // 스크린세이버 복구
-    SystemParametersInfo(SPI_SCREENSAVERRUNNING, 0, &nOldVal, 0);  // 단축키를 쓰게 함
+	int nOldVal;
+	SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, g_iScreenSaverOldValue, NULL, 0);
+    SystemParametersInfo(SPI_SCREENSAVERRUNNING, 0, &nOldVal, 0);
 #endif
 #endif
 }
 void DestroySound()
 {
-	//  모든 Sound Buffer 해제.
 	for(int i=0;i<MAX_BUFFER;i++)
 		ReleaseBuffer(i);
-	//  
-	FreeDirectSound();	//. 효과음
-	wzAudioDestroy();	//. BGM
+
+	FreeDirectSound();
+	wzAudioDestroy();
 }
 
 int g_iInactiveTime = 0;
@@ -1089,14 +1074,12 @@ BOOL ReCreateGLWithWindow(int uiPixelFormat);
 BOOL DestroyWindowWithGL();
 #endif // LDS_ADD_MULTISAMPLEANTIALIASING
 
-//  쇼핑몰을 보여준다.
 //extern bool showShoppingMall;
 
 #if SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
 BOOL g_bTaiwanIMEDouble = FALSE;
 #endif	// SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
 
-//윈도우 메세지 처리 함수
 LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
     switch (msg)
@@ -1385,13 +1368,8 @@ Pos_Wm_Move_MinimizedNotEnabled:
 	{
 	case WM_MOUSEMOVE:
 		{
-#ifdef _VS2008PORTING
 			MouseX = (float)LOWORD(lParam) / g_fScreenRate_x;
 			MouseY = (float)HIWORD(lParam) / g_fScreenRate_y;
-#else // _VS2008PORTING
-			MouseX = short(lParam) / g_fScreenRate_x;
-			MouseY = short(lParam>>16) / g_fScreenRate_y;
-#endif // _VS2008PORTING
 			if(MouseX < 0) 
 				MouseX = 0;
 			if(MouseX > 640) 
@@ -1404,7 +1382,6 @@ Pos_Wm_Move_MinimizedNotEnabled:
 		break;
 
 #ifdef LDK_ADD_SCALEFORM
-	//우선 순위 변경해야될수 있음
 	}
 	// Pass events to GFx
 	bool pbNoFurtherProcessing = false;
@@ -2454,12 +2431,7 @@ BOOL UpdateMuExe( void)
 		return ( FALSE);
 	}
 
-	// mu.exe 수정
-#ifdef _VS2008PORTING
 	for (int i = 0; i < 4; ++i)
-#else // _VS2008PORTING
-	for ( i = 0; i < 4; ++i)
-#endif // _VS2008PORTING
 	{
 		if ( bNewFileFound[i] && !UpdateFile( lpszNewMuFile[i], lpszDestFile[i]))
 		{
@@ -2512,7 +2484,6 @@ BOOL UpdateMuExe( void)
 		strcat( lpszStr, " /t");
 #endif //_TEST_SERVER
 		
-		// 3. 실행
 		WinExec(lpszStr, SW_SHOW);
 		return ( FALSE);
 	}
@@ -2525,22 +2496,17 @@ char g_lpszCmdURL[50];
 BOOL GetConnectServerInfo( PSTR szCmdLine, char *lpszURL, WORD *pwPort)
 {
 	char lpszTemp[256] = {0, };
-	if( Util_CheckOption( szCmdLine, 'y', lpszTemp)){
+	if( Util_CheckOption( szCmdLine, 'y', lpszTemp))
+	{
 		BYTE bySuffle[] = { 0x0C, 0x07, 0x03, 0x13 };
-#ifdef _VS2008PORTING
+
 		for(int i=0; i<(int)strlen(lpszTemp); i++)
-#else // _VS2008PORTING
-		for(int i=0; i<strlen(lpszTemp); i++)
-#endif // _VS2008PORTING
 			lpszTemp[i] -= bySuffle[i%4];
 		strcpy(lpszURL, lpszTemp);
 
-		if( Util_CheckOption( szCmdLine, 'z', lpszTemp)) {
-#ifdef _VS2008PORTING
+		if( Util_CheckOption( szCmdLine, 'z', lpszTemp)) 
+		{
 			for(int j=0; j<(int)strlen(lpszTemp); j++)
-#else // _VS2008PORTING
-			for(int j=0; j<strlen(lpszTemp); j++)
-#endif // _VS2008PORTING
 				lpszTemp[j] -= bySuffle[j%4];
 			*pwPort = atoi( lpszTemp);
 		}

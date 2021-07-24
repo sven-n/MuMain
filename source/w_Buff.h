@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // w_Buff.h: interface for the Buff class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_W_BUFF_H__E827A2BA_5AD5_4576_A530_C14C1472F89A__INCLUDED_)
@@ -31,7 +31,6 @@ public:
 
 public:
 	void RegisterBuff( eBuffState buffstate );
-#ifdef _VS2008PORTING
 	void RegisterBuff( std::list<eBuffState> buffstate );
 	void UnRegisterBuff( eBuffState buffstate );
 	void UnRegisterBuff( std::list<eBuffState> buffstate );
@@ -39,16 +38,6 @@ public:
 	bool isBuff();
 	bool isBuff( eBuffState buffstate );
 	const eBuffState isBuff( std::list<eBuffState> buffstatelist );
-#else // _VS2008PORTING
-	void RegisterBuff( list<eBuffState> buffstate );
-	void UnRegisterBuff( eBuffState buffstate );
-	void UnRegisterBuff( list<eBuffState> buffstate );
-
-	bool isBuff();
-	bool isBuff( eBuffState buffstate );
-	const eBuffState isBuff( list<eBuffState> buffstatelist );
-#endif // _VS2008PORTING
-
 	void TokenBuff( eBuffState curbufftype );
 
 public:

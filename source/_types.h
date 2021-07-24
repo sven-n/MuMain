@@ -52,11 +52,7 @@ namespace unicode
 	inline int _strcmp(const char *string1, const char *string2)
 	{ return strcmp(string1, string2); }
 	inline char* _strstr(const char* string, const char* strCharSet)
-#ifdef _VS2008PORTING
 	{ return const_cast<char*>(strstr(string, strCharSet)); }
-#else // _VS2008PORTING
-	{ return strstr(string, strCharSet); }
-#endif // _VS2008PORTING
 
 	inline int _sprintf(char* buffer, const char* format, ...)
 	{ 	

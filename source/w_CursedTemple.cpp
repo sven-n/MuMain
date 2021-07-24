@@ -949,11 +949,8 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					CreateEffect(MODEL_CURSEDTEMPLE_STATUE_PART1,vWorldPos,o->Angle,Light,0,o,0,0);	// ตนต้
 				}
 				Vector(0.5f,0.5f,0.5f,Light);
-#ifdef _VS2008PORTING
+
 				for ( int i = 0; i < 160; ++i)
-#else // _VS2008PORTING
-				for ( i = 0; i < 160; ++i)
-#endif // _VS2008PORTING
 				{
 					vWorldPos[0] = vRelativePos[0] + rand()%140-70;
 					vWorldPos[1] = vRelativePos[1] + rand()%140-70;

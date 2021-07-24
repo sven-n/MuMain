@@ -30,18 +30,9 @@ CSideHair::~CSideHair()
 
 void CSideHair::Create( vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD *b, OBJECT *o, bool SkipTga)
 {
-	// 0. 빛 방향 정하기
-	//m_vLight[0] = -1.f; m_vLight[1] = 0.03f;m_vLight[2] = -1.f;
-	//VectorCopy( CameraPosition, m_vLight);
 	VectorSubtract( Hero->Object.Position, CameraPosition, m_vLight);
 	VectorNormalize( m_vLight);
 
-	// 1-2. 테두리를 위한 공간 할당, Mesh 별 테두리 따기
-/*	if ( !GetReadyToCreate( ppVertexTransformed, b, o, SkipTga))
-	{
-		return;
-	}*/
-//---------------
 	if ( o->Alpha < 0.01f)
 	{
 		return;
@@ -53,7 +44,6 @@ void CSideHair::Create( vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD 
 		return;
 	}
 
-	// 1. 테두리를 위한 공간 할당
 	int iNumTriangles = 0;
 	for ( int i = 1; i < 2; ++i)
 	{
@@ -61,7 +51,6 @@ void CSideHair::Create( vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD 
 		{
 			continue;
 		}
-		// Tga 그림은 통과 시킴
 		if(Bitmaps[b->IndexTexture[i]].Components == 4)
 		{
      		if(SkipTga) continue;
@@ -70,18 +59,14 @@ void CSideHair::Create( vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD 
 	}
 	m_iNumEdge = 0;
 	m_pEdges = new St_Edges[iNumTriangles*3];
-	// 2. Mesh 별 테두리 따기
-#ifdef _VS2008PORTING
+
 	for ( int i = 1; i < 2; ++i)
-#else // _VS2008PORTING
-	for ( i = 1; i < 2; ++i)
-#endif // _VS2008PORTING
 	{
 		if ( nHiddenMesh == i || nBlendMesh == i)
 		{
 			continue;
 		}
-		// Tga 그림은 통과 시킴
+
 		bool Tga = false;
 		if(Bitmaps[b->IndexTexture[i]].Components == 4)
 		{
@@ -90,8 +75,6 @@ void CSideHair::Create( vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD 
 		}
 		DeterminateSilhouette( i, ppVertexTransformed, b->Meshs[i].NumTriangles, b->Meshs[i].Triangles,Tga);
 	}
-
-//---------------
 }
 
 void CSideHair::Destroy( void)
@@ -121,14 +104,12 @@ void CSideHair::RenderLine( vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
 {
 	vec3_t p1,p2,d;
 
-	// 텍스쳐 좌표 구하기
 	glColor3f( 1.f, 1.f, 1.f);
     VectorSubtract(v2,v1,d);
 	float fLength = VectorLength(d);
 	float fTextureMove = 0.0f;
 	fTextureMove = ( 50.0f - fLength) * 0.5f / 50.0f;
 
-	// 두 끝점 구하기
 	VectorCopy(v1,p1);
 	VectorCopy(v2,p2);
     VectorSubtract(p2,p1,d);
@@ -161,7 +142,6 @@ void CSideHair::RenderLine( vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
     glTexCoord2f(1.f,1.f-fTextureMove);glVertex3f(p2[0],p2[1],p2[2]+Scale);
     glTexCoord2f(1.f,0.f+fTextureMove);glVertex3f(p1[0],p1[1],p1[2]+Scale);
 	glEnd();*/
-	// 수직인거 하나만 그리기
 	vec3_t vOrtho;
 	CrossProduct( m_vLight, d, vOrtho);
 	VectorNormalize( vOrtho);

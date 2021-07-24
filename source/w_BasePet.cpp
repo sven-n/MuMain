@@ -27,11 +27,7 @@ PetObjectPtr PetObject::Make()
 }
 
 PetObject::PetObject():
-#ifdef _VS2008PORTING
 m_moveType(eAction_Stand),
-#else // _VS2008PORTING
-m_moveType(ActionType::eAction_Stand),
-#endif // _VS2008PORTING
 #ifdef LDK_MOD_PETPROCESS_SYSTEM
 m_oldMoveType(eAction_End),
 #endif //LDK_MOD_PETPROCESS_SYSTEM
@@ -286,12 +282,7 @@ bool PetObject::UpdateMove( DWORD tick, bool bForceRender )
 	ActionMap::iterator iter = m_actionMap.find(m_moveType);
 	if( iter == m_actionMap.end() )
 	{
-		//action ¾øÀ½
-#ifdef _VS2008PORTING
 		m_moveType = eAction_Stand;
-#else // _VS2008PORTING
-		m_moveType = ActionType::eAction_Stand;
-#endif // _VS2008PORTING
 		return FALSE;
 	}
 

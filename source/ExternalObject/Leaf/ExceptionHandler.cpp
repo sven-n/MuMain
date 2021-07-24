@@ -464,11 +464,7 @@ size_t CDmpFileLoader::GetNumOfModules() const
 { return m_listModule.size(); }
 const DMPMODULEINFO* CDmpFileLoader::GetModuleInfo(int index) const
 {
-#ifdef _VS2008PORTING
 	if(index >= 0 && index < (int)GetNumOfModules())
-#else // _VS2008PORTING
-	if(index >= 0 && index < GetNumOfModules())
-#endif // _VS2008PORTING
 		return m_listModule[index];
 	return NULL;
 }

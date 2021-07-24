@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // NewUIMainFrameWindow.cpp: implementation of the CNewUIMainFrameWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -223,33 +223,18 @@ bool SEASON3B::CNewUIMainFrameWindow::Render()
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// 틀 렌더링
 	RenderFrame();
 
-	// HotKey 아이템들 갯수 렌더링
 	m_pNewUI3DRenderMng->RenderUI2DEffect(ITEMHOTKEYNUMBER_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
 
-	// Skill 아이콘 렌더링
 	g_pSkillList->RenderCurrentSkillAndHotSkillList();
 
-	// Skill 설명시에 AlphaTest가 꺼지는 것 같음.
 	EnableAlphaTest();
-
-	// Life, Mana 렌더링
 	RenderLifeMana();
-
-	// SD 게이지 렌더링
 	RenderGuageSD();
-
-	// AG 게이지 렌더링
 	RenderGuageAG();
-
-	// 버튼 렌더링
 	RenderButtons();
-
-	// 경험치 렌더링
 	RenderExperience();
-
 	DisableAlphaBlend();
 
 	return true;
@@ -279,10 +264,9 @@ bool SEASON3B::CNewUIMainFrameWindow::IsVisible() const
 
 void SEASON3B::CNewUIMainFrameWindow::RenderFrame()
 {
-	float width, height;	// 이미지 실제 넓이, 높이 값
-	float x, y;				// 이미지 위치 x, y 값
+	float width, height;
+	float x, y;
 	
-	// MainFrame 틀 먼저 렌더링
 	width = 256.f; height = 51.f;
 	x = 0.f; y = 480.f - height;
 	SEASON3B::RenderImage(IMAGE_MENU_1, x, y, width, height);
@@ -321,7 +305,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 		wMana = min(max(0, CharacterAttribute->Mana), wManaMax);
 	}
 
-	// 생명력 수치가 20%보다 낮으면 심장소리 내주는 센스
 	if(wLifeMax > 0)
 	{
 		if(wLife > 0 && (wLife / (float)wLifeMax) < 0.2f)
@@ -330,18 +313,8 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 		}
 	}
 
-	// 나눗셈 예외처리
-#ifdef _VS2008PORTING
 	float fLife = 0.f;
-	float fMana = 0.f;	// 확률
-#else // _VS2008PORTING
-	float fLife, fMana;	// 확률
-#endif // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK
-	//초기화 되지 않는 값사용
-	fLife =0;
-	fMana =0;
-#endif //PBG_ADD_NEWCHAR_MONK
+	float fMana = 0.f;
 
 	if(wLifeMax > 0)
 	{
@@ -352,8 +325,8 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 		fMana = (wManaMax - wMana) / (float)wManaMax;
 	}
 
-	float width, height;	// 이미지 실제 넓이, 높이 값
-	float x, y;				// 이미지 위치 x, y 값
+	float width, height;
+	float x, y;
 	float fY, fH, fV;
 
 	// life
@@ -362,7 +335,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 	height = 39.f; 
 	y = 480.f - 48.f;
 	
-	// 독속성에 맞았으면 녹색에너지 그리고 아니면 빨강에너지 그린다.	
 	fY = y + (fLife * height);
 	fH = height - (fLife * height);
 	fV = fLife;
@@ -377,7 +349,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 
 	SEASON3B::RenderNumber(x+25, 480-18, wLife);
 
-	// life 설명
 	char strTipText[256];
 	if(SEASON3B::CheckMouseIn(x, y, width, height) == true)
 	{
@@ -398,7 +369,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 
 	SEASON3B::RenderNumber(x+30, 480-18, wMana);
 
-	// mana 설명
+	// mana
 	if(SEASON3B::CheckMouseIn(x, y, width, height) == true)
 	{
 		sprintf(strTipText, GlobalText[359], wMana, wManaMax);
@@ -425,12 +396,8 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
 		dwSkillMana = min(dwMaxSkillMana, CharacterAttribute->SkillMana);
 	}
 
-	// 나눗셈 예외처리
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fSkillMana = 0.0f;	// 확률
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fSkillMana;	// 확률
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+	float fSkillMana = 0.0f;
+
 	if(dwMaxSkillMana > 0)
 	{
 		fSkillMana = (dwMaxSkillMana - dwSkillMana) / (float)dwMaxSkillMana;
@@ -473,12 +440,8 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
 		wShield = min (wMaxShield, CharacterAttribute->Shield);
 	}
 	
-	// 나눗셈 예외처리
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fShield = 0.0f;	// 확률
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fShield;	// 확률
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+	float fShield = 0.0f;
+
 	if(wMaxShield > 0)
 	{
 		fShield = (wMaxShield - wShield) / (float)wMaxShield;
@@ -508,15 +471,15 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
 void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 {
 	
-	__int64 wLevel;				// 현재 레벨
-	__int64 dwNexExperience;	// 다음 레벨업 경험치
-	__int64 dwExperience;		// 현재 경험치
+	__int64 wLevel;	
+	__int64 dwNexExperience;
+	__int64 dwExperience;
 	double x, y, width, height;
 
 
 	if(IsMasterLevel(CharacterAttribute->Class) == true)
 	{
-		wLevel = (__int64)Master_Level_Data.nMLevel;	// 현재 마스터 레벨
+		wLevel = (__int64)Master_Level_Data.nMLevel;
 		dwNexExperience = (__int64)Master_Level_Data.lNext_MasterLevel_Experince;
 		dwExperience = (__int64)Master_Level_Data.lMasterLevel_Experince;
 	}
@@ -1876,16 +1839,8 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 	
 	EVENT_STATE PrevEventState = m_EventState;
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-#ifdef _VS2008PORTING
 	for(int i=0; i<MAX_MAGIC; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<MAX_MAGIC; ++i)
-#endif // _VS2008PORTING
 	{
-		// 공성 스킬 제외하고 스킬 타입이 있으면
 		bySkillType = CharacterAttribute->Skill[i];
 
 		if(bySkillType == 0 || ( bySkillType >= AT_SKILL_STUN && bySkillType <= AT_SKILL_REMOVAL_BUFF ))
@@ -1909,12 +1864,10 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 			int iRemainder = iSkillCount % 2;
 			int iQuotient = iSkillCount / 2;
 			
-			// 짝수계열이면
 			if(iRemainder == 0)
 			{
 				x = fOrigX + iQuotient * width;
 			}
-			// 홀수계열이면
 			else
 			{
 				x = fOrigX - (iQuotient + 1) * width;
@@ -1978,9 +1931,6 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 		}
 	}
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
 	if(PrevEventState != m_EventState)
 	{
 		if(m_EventState == EVENT_NONE || m_EventState == EVENT_BTN_HOVER_SKILLLIST)
@@ -1988,15 +1938,10 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 		return false;
 	}
 
-	// 펫 스킬
 	if(Hero->m_pPet != NULL)
 	{
 		x = 353.f; y = 352; width = 32; height = 38;
-#ifdef _VS2008PORTING
 		for(int i=AT_PET_COMMAND_DEFAULT; i<AT_PET_COMMAND_END; ++i)
-#else // _VS2008PORTING
-		for(i=AT_PET_COMMAND_DEFAULT; i<AT_PET_COMMAND_END; ++i)
-#endif // _VS2008PORTING
 		{
 			if(SEASON3B::CheckMouseIn(x, y, width, height) == true)
 			{
@@ -2069,12 +2014,7 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 
 bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
 {
-#ifdef _VS2008PORTING
 	for(int i=0; i<9; ++i)
-#else // _VS2008PORTING
-	int i;
-	for(i=0; i<9; ++i)
-#endif // _VS2008PORTING
 	{
 		if(SEASON3B::IsPress('1' + i))
 		{
@@ -2091,11 +2031,7 @@ bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
 	{
 		if(SEASON3B::IsRepeat(VK_CONTROL))
 		{
-#ifdef _VS2008PORTING
 			for(int i=0; i<9; ++i)
-#else // _VS2008PORTING
-			for(i=0; i<9; ++i)
-#endif // _VS2008PORTING
 			{
 				if(SEASON3B::IsPress('1' + i))
 				{
@@ -2116,11 +2052,7 @@ bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
 
 	if(SEASON3B::IsRepeat(VK_SHIFT))
 	{
-#ifdef _VS2008PORTING
 		for(int i=0; i<4; ++i)
-#else // _VS2008PORTING
-		for(i=0; i<4; ++i)
-#endif // _VS2008PORTING
 		{
 			if(SEASON3B::IsPress('1' + i))
 			{
@@ -2216,7 +2148,6 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
 {
 	if(m_iHotKeySkillType[iHotKey] != -1)
 	{
-		// 펫 스킬 예외처리
 		if(m_iHotKeySkillType[iHotKey] >= AT_PET_COMMAND_DEFAULT && m_iHotKeySkillType[iHotKey] < AT_PET_COMMAND_END)
 		{
 			if(Hero->m_pPet == NULL)
@@ -2224,8 +2155,6 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
 				return;
 			}
 		}
-
-		//  순간이동 법서를 선택하면은 자동 공격이 정지된다.
 
 		WORD wHotKeySkill = CharacterAttribute->Skill[m_iHotKeySkillType[iHotKey]];
 
@@ -2260,7 +2189,6 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
 
 bool SEASON3B::CNewUISkillList::Update()
 {
-	// 현재 사용 중인 스킬 인덱스가 들어가 있는 스킬 아이콘 5개 렌더링
 	if(IsArrayIn(Hero->CurrentSkill) == true)
 	{
 		if(IsArrayUp(Hero->CurrentSkill) == true)
@@ -2273,7 +2201,6 @@ bool SEASON3B::CNewUISkillList::Update()
 		}
 	}
 
-	// 펫이 없는데 현재 스킬이 펫 스킬일 경우 예외 처리
 	if(Hero->m_pPet == NULL)
 	{
 		if(Hero->CurrentSkill >= AT_PET_COMMAND_DEFAULT && Hero->CurrentSkill < AT_PET_COMMAND_END)
@@ -2290,14 +2217,8 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
 	int i;
 	float x, y, width, height;
 	
-	//////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////
-	// lock 사용
 	BYTE bySkillNumber = CharacterAttribute->SkillNumber;
-	//////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////
 	
-	// 스킬 갯수가 1개 이상이면
 	if(bySkillNumber > 0)
 	{
 		int iStartSkillIndex = 1;
@@ -2306,7 +2227,6 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
 			iStartSkillIndex = 6;
 		}
 		
-		// 현재 사용중인 핫키 스킬 5개 렌더링
 		x = 190; y =431; width = 32; height = 38;
 		for(i=0; i<5; ++i)
 		{
@@ -2318,13 +2238,11 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
 				iIndex = 0;
 			}
 			
-			// 비워있는거 예외 처리
 			if(m_iHotKeySkillType[iIndex] == -1)
 			{
 				continue;
 			}
 			
-			// 펫 스킬 예외 처리
 			if(m_iHotKeySkillType[iIndex] >= AT_PET_COMMAND_DEFAULT && m_iHotKeySkillType[iIndex] < AT_PET_COMMAND_END)
 			{
 				if(Hero->m_pPet == NULL)
@@ -2365,7 +2283,6 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
 #endif // KJH_ADD_SKILLICON_RENEWAL
 		}
 		
-		// 현재 사용 중인 스킬 아이콘 렌더링
 		x = 392; y = 437; width = 20; height = 28;
 		
 #ifdef KJH_ADD_SKILLICON_RENEWAL
@@ -2392,17 +2309,10 @@ bool SEASON3B::CNewUISkillList::Render()
 	int i;
 	float x, y, width, height;
 	
-	//////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////
-	// lock 사용
 	BYTE bySkillNumber = CharacterAttribute->SkillNumber;
-	//////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////
-	
-	// 스킬 갯수가 1개 이상이면
+
 	if(bySkillNumber > 0)
 	{
-		// 스킬 리스트 렌더링
 		if(m_bSkillList == true)
 		{
 			x = 385; y = 390; width = 32; height = 38;
@@ -2410,30 +2320,18 @@ bool SEASON3B::CNewUISkillList::Render()
             int iSkillType  = 0;
 			int iSkillCount = 0;
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-			// lock 사용
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
             int iSkillNumber = min(CharacterAttribute->SkillNumber - CharacterAttribute->SkillMasterNumber, 36);
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 			for(i=0; i<MAX_MAGIC; ++i)
 			{
-				// lock 사용
                 iSkillType = CharacterAttribute->Skill[i];
 				
 				if(iSkillType != 0 && (iSkillType < AT_SKILL_STUN || iSkillType > AT_SKILL_REMOVAL_BUFF))
 				{
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-					// lock 사용
                     BYTE bySkillUseType = SkillAttribute[iSkillType].SkillUseType;
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-                    
+                  
                     if(bySkillUseType == SKILL_USE_TYPE_MASTER || bySkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
 					{
                         continue;
@@ -2449,12 +2347,10 @@ bool SEASON3B::CNewUISkillList::Render()
 						int iRemainder = iSkillCount % 2;
 						int iQuotient = iSkillCount / 2;
 
-						// 짝수계열이면
 						if(iRemainder == 0)
 						{
 							x = fOrigX + iQuotient * width;
 						}
-						// 홀수계열이면
 						else
 						{
 							x = fOrigX - (iQuotient + 1) * width;
@@ -2509,15 +2405,10 @@ bool SEASON3B::CNewUISkillList::Render()
 #endif // KJH_ADD_SKILLICON_RENEWAL
 				}
 			}
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
 			RenderPetSkill();
 		}
 	}
 	
-	// 스킬 정보 렌더링
 	if(m_bRenderSkillInfo == true && m_pNewUI3DRenderMng)
 	{
 		m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
@@ -2565,7 +2456,6 @@ void SEASON3B::CNewUISkillList::SetHeroPriorSkill(BYTE bySkill)
 
 void SEASON3B::CNewUISkillList::RenderPetSkill()
 {
-	// 펫이 존재하지 않는다면
 	if(Hero->m_pPet == NULL)
 	{
 		return;
@@ -2632,22 +2522,15 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     }
 
 #ifdef KJH_ADD_SKILLICON_RENEWAL
-	//////////////////////////////////////////////////////////////////////////
-	// 사용할수 없는 스킬일때 처리하는 부분 - 사용할수 없는 스킬 : true
 	bool bCantSkill = false;
 #endif // KJH_ADD_SKILLICON_RENEWAL
-
-	//////////////////////////////////////////////////////////////////////////
-	// 스킬 아이콘 빨갛게 처리하는 부분 - 스킬 리뉴얼 작업으로 이미지를 바꾸는 형태로 변경
 
     BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
 	int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
 
 #ifdef PBG_FIX_SKILL_DEMENDCONDITION
-	//스킬의 스텟요구량 검사후 미달되는것은 빨갛게 처리한다.
  	if( !SKILLCONDITION::DemendConditionCheckSkill( bySkillType ) )
  	{
- 		//스킬의 스텟요구량을 만족안한다면.
 #ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
 #else // KJH_ADD_SKILLICON_RENEWAL
@@ -2656,8 +2539,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	}
 #endif //PBG_FIX_SKILL_DEMENDCONDITION
 
-
-	// 공성 스킬 검사
 	if(IsCanBCSkill(bySkillType) == false)
 	{
 #ifdef KJH_ADD_SKILLICON_RENEWAL

@@ -125,19 +125,12 @@ void CHARACTER::Initialize()
 #endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef _VS2008PORTING
 #if SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	for( int i = 0; i < 32; ++i ) OwnerID[i] = 0;
 #else //SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	for( int i = 0; i < 24; ++i ) OwnerID[i] = 0;
 #endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-#else // _VS2008PORTING
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	for( i = 0; i < 32; ++i ) OwnerID[i] = 0;
-#else //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	for( i = 0; i < 24; ++i ) OwnerID[i] = 0;
-#endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-#endif // _VS2008PORTING
+
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
 #ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL

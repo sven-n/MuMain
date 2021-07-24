@@ -202,11 +202,7 @@ public:
 
 public:
 	bool isMapIndex( ENUM_WORLD type ) {
-#ifdef _VS2008PORTING
 		for( int i = 0; i < (int)m_MapTypes.size(); ++i ) {
-#else // _VS2008PORTING
-		for( int i = 0; i < m_MapTypes.size(); ++i ) {
-#endif // _VS2008PORTING
 			if( type == m_MapTypes[i] ) {
 				return true;
 			}
@@ -215,11 +211,8 @@ public:
 	}
 
 	ENUM_WORLD FindMapIndex( int index = 0 ) {
-#ifdef _VS2008PORTING
+
 		if( m_MapTypes.size() == 0 || index >= (int)m_MapTypes.size() ) return NUM_WD;
-#else // _VS2008PORTING
-		if( m_MapTypes.size() == 0 || index >= m_MapTypes.size() ) return NUM_WD;
-#endif // _VS2008PORTING
 		else return m_MapTypes[index];
 	}
 

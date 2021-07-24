@@ -95,11 +95,7 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 				
 	switch(m_state)
 	{
-#ifdef _VS2008PORTING
 	case eAction_Stand:
-#else // _VS2008PORTING
-	case ActionState::eAction_Stand:
-#endif // _VS2008PORTING
 		{
 			targetPos[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 			targetPos[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);

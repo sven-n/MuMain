@@ -176,7 +176,6 @@ namespace leaf {
 	class tree {
 	public:
 		typedef tree<T>	tree_type;
-#ifdef _VS2008PORTING
 		typedef typename std::allocator<tree_type> allocator;
 		typedef typename allocator::difference_type difference_type;
 		typedef typename allocator::value_type value_type;
@@ -184,27 +183,11 @@ namespace leaf {
 		typedef typename allocator::const_pointer const_pointer;	// const tree<T>*
 		typedef typename allocator::reference reference;	// tree<T>&
 		typedef typename allocator::const_reference const_reference;	// const tree<T>&
-
 		typedef typename std::deque<tree_type>::iterator iterator;
 		typedef typename std::deque<tree_type>::const_iterator const_iterator;
 		typedef typename std::deque<tree_type>::reverse_iterator reverse_iterator;
 		typedef typename std::deque<tree_type>::const_reverse_iterator const_reverse_iterator;
-#else // _VS2008PORTING
-		typedef std::allocator<tree_type> allocator;
-		typedef allocator::difference_type difference_type;
-		typedef allocator::value_type value_type;
-		typedef allocator::pointer pointer;		// tree<T>*
-		typedef allocator::const_pointer const_pointer;	// const tree<T>*
-		typedef allocator::reference reference;	// tree<T>&
-		typedef allocator::const_reference const_reference;	// const tree<T>&
 
-		typedef std::deque<tree_type>::iterator iterator;
-		typedef std::deque<tree_type>::const_iterator const_iterator;
-		typedef std::reverse_iterator<iterator, value_type, reference, pointer, difference_type>
-			reverse_iterator;
-		typedef std::reverse_iterator<const_iterator, value_type, const_reference, const_pointer, difference_type>
-			const_reverse_iterator;
-#endif // _VS2008PORTING
 		
 		tree() : m_parent_ptr(NULL) { ZeroMemory(&m_value, sizeof(T)); }
 		tree(const T& _value) : m_parent_ptr(NULL) { m_value = _value; }

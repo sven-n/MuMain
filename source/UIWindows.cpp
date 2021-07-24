@@ -1460,15 +1460,15 @@ void CUIChatWindow::ConnectToChatServer(const char * pszIP, DWORD dwRoomNumber, 
 	m_dwRoomNumber = dwRoomNumber;
 	BOOL bResult = g_pChatRoomSocketList->AddChatRoomSocket(dwRoomNumber, GetUIID(), pszIP);
 	if (bResult == FALSE) return;
-	// 티켓 문자화
+
 	char szTicketStr[11] = {0};
-#ifdef _VS2008PORTING
+
 	_ultoa_s(dwTicket, szTicketStr, 10);
-#else // _VS2008PORTING
-	ultoa(dwTicket, szTicketStr, 10);
-#endif // _VS2008PORTING
+
 	szTicketStr[10] = '\0';
+
 	BuxConvert((BYTE *)szTicketStr, 10);
+
 	CWsctlc * pSocket = GetCurrentSocket();
 	if (pSocket != NULL)
 		SendRequestCRConnectRoom(pSocket, dwRoomNumber, szTicketStr);
@@ -1604,18 +1604,14 @@ void CUIChatWindow::RenderSub()
 	if (m_iShowType >= 2) m_CloseInviteButton.Render();
 	DisableAlphaBlend();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatWindow::UpdateInvitePalList()
 {
 	g_pFriendList->UpdateFriendList(m_InvitePalListBox.GetFriendList(), NULL);
-	// 방에 있는 이름 제거
-#ifdef _VS2008PORTING
+
 	deque<GUILDLIST_TEXT>::iterator iter;
+
 	for (iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
-#else // _VS2008PORTING
-	for (deque<GUILDLIST_TEXT>::iterator iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
-#endif // _VS2008PORTING
 	{
 		if (strcmp(iter->m_szID, Hero->ID) != 0)
 			m_InvitePalListBox.DeleteText(iter->m_szID);
@@ -1635,7 +1631,6 @@ void CUIChatWindow::UpdateInvitePalList()
 	}
 	m_InvitePalListBox.Scrolling(0);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUIChatWindow::HandleMessage()
 {
@@ -1663,20 +1658,18 @@ BOOL CUIChatWindow::HandleMessage()
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			char	pszText[MAX_CHATROOM_TEXT_LENGTH] = {'\0'};
 			wchar_t *pwszTextUTF16 = new wchar_t[MAX_CHATROOM_TEXT_LENGTH_UTF16];
-			// 텍스트를 UTF-16형식으로 받는다.
+
 			m_TextInputBox.GetText(pwszTextUTF16, MAX_CHATROOM_TEXT_LENGTH_UTF16);
 
 			string strText = "";
 			wstring wstrUTF16 = pwszTextUTF16; 
-			// 필터링을 위해서 ANSI로 변환
+
 			g_pMultiLanguage->ConvertWideCharToStr(strText, wstrUTF16.c_str(), g_pMultiLanguage->GetCodePage());
 			strncpy(pszText, strText.c_str(), strText.length());
 
-			// 필터링
 			if(CheckAbuseFilter(pszText, false))
 				g_pMultiLanguage->ConvertCharToWideStr(wstrUTF16, GlobalText[570]);
 
-			// 서버로 전송하기 위해 UTF-8 형식으로 변환
 			g_pMultiLanguage->ConvertWideCharToStr(strText, wstrUTF16.c_str(), CP_UTF8);
 			strncpy(pszText, strText.c_str(), sizeof pszText);
 			
@@ -1977,19 +1970,15 @@ int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
 		static int siPose[MAX_POSE_NUM] = {
 			AT_STAND1, AT_MOVE1, AT_ATTACK1
 		};
-#ifdef _VS2008PORTING
+
 		int iCurrentAniArray = 0;
+
 		for (int i = 0; i < MAX_POSE_NUM; ++i)
 		{
 			iCurrentAniArray = i;
 			if (iCurrentAni == siPose[i]) break;
 		}
-#else // _VS2008PORTING
-		for (int iCurrentAniArray = 0; iCurrentAniArray < MAX_POSE_NUM; ++iCurrentAniArray)
-		{
-			if (iCurrentAni == siPose[iCurrentAniArray]) break;
-		}
-#endif // _VS2008PORTING
+
 		iCurrentAniArray += iMoveDir;
 		if (iCurrentAniArray < 0) iCurrentAniArray = MAX_POSE_NUM * 100 + iCurrentAniArray;
 		iCurrentAniArray %= MAX_POSE_NUM;
@@ -2003,7 +1992,7 @@ int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
 			AT_CHEER1, AT_UNKNOWN1, AT_WIN1, AT_SMILE1, AT_SLEEP1, AT_COLD1, AT_AGAIN1, AT_RESPECT1, 
 			AT_SALUTE1, AT_GOODBYE1, AT_MOVE1, AT_RUSH1,AT_SIT1, AT_POSE1, AT_HEALING1, AT_ATTACK1
 		};
-#ifdef _VS2008PORTING
+
 		int iCurrentAniArray = 0;
 		for (int i = 0; i < MAX_POSE_NUM; ++i)
 		{
@@ -2011,12 +2000,7 @@ int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
 			if (iCurrentAni == siPose[i]) 
 				break;
 		}
-#else // _VS2008PORTING
-		for (int iCurrentAniArray = 0; iCurrentAniArray < MAX_POSE_NUM; ++iCurrentAniArray)
-		{
-			if (iCurrentAni == siPose[iCurrentAniArray]) break;
-		}
-#endif // _VS2008PORTING
+
 		iCurrentAniArray += iMoveDir;
 		if (iCurrentAniArray < 0) iCurrentAniArray = MAX_POSE_NUM * 100 + iCurrentAniArray;
 		iCurrentAniArray %= MAX_POSE_NUM;
@@ -3018,11 +3002,8 @@ BOOL CUILetterWriteWindow::HandleMessage()
 
 					// 문장처리
 					char szText[1024] = {0};
-#ifdef _VS2008PORTING
+
 					for (int i = 0, j = 0; i <= (int)strlen(szTempText); ++i, ++j)
-#else // _VS2008PORTING
-					for (int i = 0, j = 0; i <= strlen(szTempText); ++i, ++j)
-#endif // _VS2008PORTING
 					{
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 						if (j > MAX_LETTERTEXT_LENGTH || i > MAX_LETTERTEXT_LENGTH) break;		

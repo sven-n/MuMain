@@ -641,11 +641,7 @@ void ReceiveServerList( BYTE *ReceiveBuffer )
 //	DebugAngel_Write( PACKET_SAVE_FILE, "서버갯수 : %d\r\n", ServerNumber);//박종훈
 //$$$$$$$$$$$$$$$$$$$$$$4
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<ServerNumber;i++)
-#else // _VS2008PORTING
-	for(i=0;i<ServerNumber;i++)
-#endif // _VS2008PORTING
 	{
 		LPPRECEIVE_SERVER_LIST Data2 = (LPPRECEIVE_SERVER_LIST)(ReceiveBuffer+Offset);
 
@@ -2013,10 +2009,6 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 	
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 마법리스트, 인밴토리
-///////////////////////////////////////////////////////////////////////////////
-
 void ReceiveMagicList( BYTE *ReceiveBuffer )
 {
 #ifdef PJH_FIX_4_BUGFIX_33
@@ -2025,12 +2017,12 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 #endif //PJH_FIX_4_BUGFIX_33
 	LPPHEADER_MAGIC_LIST_COUNT Data = (LPPHEADER_MAGIC_LIST_COUNT)ReceiveBuffer;
 	int Offset = sizeof(PHEADER_MAGIC_LIST_COUNT);
-	if(Data->Value == 0xFF)         //  하나 지움.
+	if(Data->Value == 0xFF)
 	{	
 		LPPRECEIVE_MAGIC_LIST Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer+Offset);
 		CharacterAttribute->Skill[Data2->Index] = 0;
 	}
-	else if(Data->Value == 0xFE)    //  하나 추가.
+	else if(Data->Value == 0xFE) 
 	{
 		LPPRECEIVE_MAGIC_LIST Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer+Offset);
 		CharacterAttribute->Skill[Data2->Index] = Data2->Type;
@@ -2038,7 +2030,7 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 		CharacterAttribute->SkillLevel[Data2->Index] = Data2->Level;
 #endif
 	}
-    else if ( Data->ListType==0x02 )//  삭제 리스트.
+    else if ( Data->ListType==0x02 )
     {
         for ( int i=0; i<Data->Value; ++i )
         {
@@ -2050,19 +2042,12 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
         }
     }
 	else
-	{	// 전체 리스트
-#ifndef _VS2008PORTING			// #ifndef
-		int i;
-#endif // _VS2008PORTING
-        if ( Data->ListType == 0x00 ) //  추가적인 리스트.
+	{
+        if ( Data->ListType == 0x00 )
         {
 			ZeroMemory( CharacterAttribute->Skill,  MAX_SKILLS * sizeof ( WORD));
         }
-#ifdef _VS2008PORTING
 		for(int i=0; i<Data->Value; i++)
-#else // _VS2008PORTING
-		for(i=0; i<Data->Value; i++)
-#endif // _VS2008PORTING
 		{
 			LPPRECEIVE_MAGIC_LIST Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer+Offset);
 			CharacterAttribute->Skill[Data2->Index] = Data2->Type;
@@ -2073,11 +2058,7 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 		}
         if ( GetBaseClass( Hero->Class )==CLASS_DARK_LORD )
         {
-#ifdef _VS2008PORTING
             for ( int i=0; i<PET_CMD_END; ++i )
-#else // _VS2008PORTING
-            for ( i=0; i<PET_CMD_END; ++i )
-#endif // _VS2008PORTING
             {
                 CharacterAttribute->Skill[AT_PET_COMMAND_DEFAULT+i] = AT_PET_COMMAND_DEFAULT+i;
 #ifdef USE_SKILL_LEVEL
@@ -2111,11 +2092,8 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
     if(Hero->CurrentSkill>=0 && CharacterAttribute->Skill[Hero->CurrentSkill]==0)
 		Hero->CurrentSkill = 0;
 	int Skill = 0;
-#ifdef _VS2008PORTING
+
 	for(int i = 0; i < MAX_SKILLS; i++)
-#else // _VS2008PORTING
-	for(i = 0; i < MAX_SKILLS; i++)
-#endif // _VS2008PORTING
 	{
 		Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
 		if ( Skill>= AT_SKILL_STUN && Skill<=AT_SKILL_REMOVAL_BUFF )
@@ -2124,11 +2102,7 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 			break;
 	}
 #ifdef PJH_FIX_4_BUGFIX_33	
-#ifdef _VS2008PORTING
 	for(int i = 0; i < MAX_SKILLS; i++)
-#else // _VS2008PORTING
-	for(i = 0; i < MAX_SKILLS; i++)
-#endif // _VS2008PORTING
 	{
 		Skill = CharacterAttribute->Skill[i];
 		if((AT_SKILL_POWER_SLASH_UP <= Skill && AT_SKILL_POWER_SLASH_UP+4 >= Skill) || (AT_SKILL_MANY_ARROW_UP <= Skill && AT_SKILL_MANY_ARROW_UP+4 >= Skill))
@@ -2152,12 +2126,7 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 // ReceiveInventory
 BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_EQUIPMENT;i++)
-#else // _VS2008PORTING
-	int i;
-	for(i=0;i<MAX_EQUIPMENT;i++)
-#endif // _VS2008PORTING
 	{
 		CharacterMachine->Equipment[i].Type = -1;
 		CharacterMachine->Equipment[i].Number = 0;
@@ -2184,11 +2153,7 @@ BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 #ifdef LDK_ADD_NEW_PETPROCESS
 	ThePetProcess().DeletePet( Hero );
 #endif //LDK_ADD_NEW_PETPROCESS
-#ifdef _VS2008PORTING
 	for(int i=0;i<Data->Value;i++)
-#else // _VS2008PORTING
-	for(i=0;i<Data->Value;i++)
-#endif // _VS2008PORTING
 	{
 		LPPRECEIVE_INVENTORY Data2 = (LPPRECEIVE_INVENTORY)(ReceiveBuffer+Offset); //LPPRECEIVE_INVENTORY 8byte
 		
@@ -2264,9 +2229,7 @@ void ReceiveTradeInventory( BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_SUBCODE_WORD Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer;
 	int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
-#ifndef _VS2008PORTING			// #ifndef
-	int i;
-#endif // _VS2008PORTING
+
 	if(Data->SubCode == 3)//믹스창 조합 실패
 	{
 		g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
@@ -2284,25 +2247,18 @@ void ReceiveTradeInventory( BYTE *ReceiveBuffer )
     }
 	else
 	{
-#ifdef _VS2008PORTING
 		for(int i=0;i<MAX_SHOP_INVENTORY;i++)
-#else // _VS2008PORTING
-		for(i=0;i<MAX_SHOP_INVENTORY;i++)
-#endif // _VS2008PORTING
 		{
 			ShopInventory[i].Type = -1;
 			ShopInventory[i].Number = 0;
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<Data->Value;i++)
-#else // _VS2008PORTING
-	for(i=0;i<Data->Value;i++)
-#endif // _VS2008PORTING
 	{
 		LPPRECEIVE_INVENTORY Data2 = (LPPRECEIVE_INVENTORY)(ReceiveBuffer+Offset);
 		
-		if(Data->SubCode == 3)//믹스창
+		if(Data->SubCode == 3)
 		{
 			g_pMixInventory->InsertItem(Data2->Index, Data2->Item);
 		}
@@ -2310,9 +2266,8 @@ void ReceiveTradeInventory( BYTE *ReceiveBuffer )
         {
 			g_pMixInventory->InsertItem(Data2->Index, Data2->Item);
         }
-		else//창고,상점
+		else
 		{
-			// 상점, 창고는 Data->SubCode == 0 이다.
 			if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == true)
 			{
 				g_pNPCShop->InsertItem(Data2->Index, Data2->Item);
@@ -2331,19 +2286,11 @@ void ReceiveTradeInventory( BYTE *ReceiveBuffer )
 #endif // CONSOLE_DEBUG
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 채팅
-///////////////////////////////////////////////////////////////////////////////
-
-//int TestOld = 0;
-//int TestNew = 0;
-
 void ReceiveChat( BYTE *ReceiveBuffer )
 {
 	if(SceneFlag == LOG_IN_SCENE)
 	{
 		g_ErrorReport.Write ( "Send Request Server List.\r\n");
-		// 로그인 씬에서 처음으로 접속 서버에 서버 리스트 요구.
 #ifdef PKD_ADD_ENHANCED_ENCRYPTION
 		SendRequestServerList2();
 #else
@@ -2389,11 +2336,8 @@ void ReceiveChat( BYTE *ReceiveBuffer )
 				Text[i] = Data->ChatText[i+1];
 		
 			CHARACTER* pFindGm = NULL;
-#ifdef _VS2008PORTING
+
 			for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-			for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 			{
 				CHARACTER *c = &CharactersClient[i];
 				OBJECT *o = &c->Object;
@@ -2498,7 +2442,6 @@ void ReceiveChatKey( BYTE *ReceiveBuffer )
 	int Key = ((int)(Data->KeyH)<<8) + Data->KeyL;
 	int Index = FindCharacterIndex(Key);
 	
-	// for test
 	if( Hero->GuildStatus == G_MASTER && !strcmp( CharactersClient[Index].ID, "길드 마스터" ) )
 	{
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCGUILDMASTER);
@@ -2530,7 +2473,6 @@ void ReceiveNotice( BYTE *ReceiveBuffer )
 		{
 			g_pChatListBox->AddText("", (char*)Data->Notice, SEASON3B::TYPE_SYSTEM_MESSAGE);
 #ifdef CSK_FREE_TICKET
-			// 칼리마 마석 열린 상태에서 또 사용하면 아무것도 안되는 버그때문에 처리
 			EnableUse = 0;
 #endif // CSK_FREE_TICKET
 		}
@@ -2540,13 +2482,11 @@ void ReceiveNotice( BYTE *ReceiveBuffer )
 			rUIMng.AddServerMsg((char*)Data->Notice);
 		}
 	}
-	// 길드공지
 	else if(Data->Result==2)
 	{
 		char Text[100];
 		sprintf(Text,GlobalText[483],(char *)Data->Notice);
 		CreateNotice(Text,1);
-		// 길드공지 기록
 		g_pGuildInfoWindow->AddGuildNotice((char*)Data->Notice);
 	}
 	else if (Data->Result >= 10 && Data->Result <= 15)
@@ -2561,10 +2501,6 @@ void ReceiveNotice( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x0D받음[ReceiveNotice(%s)]", Data->Notice);
 #endif // CONSOLE_DEBUG
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 이동
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceiveMoveCharacter(BYTE *ReceiveBuffer,int Size)
 {
@@ -2592,7 +2528,7 @@ void ReceiveMoveCharacter(BYTE *ReceiveBuffer,int Size)
 		{
 			c->TargetX = Data->PositionX;
 			c->TargetY = Data->PositionY;
-			if(o->Type == MODEL_MONSTER01+52)	// 야누스
+			if(o->Type == MODEL_MONSTER01+52)
 			{
 				c->PositionX = Data->PositionX;
 				c->PositionY = Data->PositionY;
@@ -2603,12 +2539,12 @@ void ReceiveMoveCharacter(BYTE *ReceiveBuffer,int Size)
 			else if(c->Appear == 0)
 			{
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
-				int iDefaultWall = TW_CHARACTER;	//보통일때는 2이상이면 벽으로 체크
+				int iDefaultWall = TW_CHARACTER;
 
 				if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4
 					&& Key != HeroKey)
 				{
-					iDefaultWall = TW_NOMOVE;	// 도플갱어 몬스터는 유저를 뚫고지나간다
+					iDefaultWall = TW_NOMOVE;
 				}
 
 				if(PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path, 0.0f, iDefaultWall))
@@ -2673,14 +2609,13 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	wsprintf(Text,"맵이동받음(tel)[time : %d]", GetTickCount());
 	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);
 #endif
-    //  아이템 백업.
+
 	SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 	
 	LPPRECEIVE_TELEPORT_POSITION Data = (LPPRECEIVE_TELEPORT_POSITION)ReceiveBuffer;
 	Hero->PositionX = Data->PositionX;
 	Hero->PositionY = Data->PositionY;
 	
-	// 밀리기 수정
 	Hero->JumpTime = 0;
 	
 	OBJECT *o = &Hero->Object;
@@ -5092,12 +5027,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					CreateEffect ( BITMAP_TWLIGHT, Position, o->Angle, Light, 1 );
 					CreateEffect ( BITMAP_TWLIGHT, Position, o->Angle, Light, 2 );
 					
-					
-#ifdef _VS2008PORTING
 					for (int i = 0; i < 2; ++i)
-#else // _VS2008PORTING
-					for (i = 0; i < 2; ++i)
-#endif // _VS2008PORTING
 					{
 						int iNumBones = Models[o->Type].NumBones;
 						Models[o->Type].TransformByObjectBone(vFirePosition, o, rand()%iNumBones);	
@@ -5972,11 +5902,8 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					}
 					
 					VectorCopy(o->Position,Position);
-#ifdef _VS2008PORTING
+
 					for(int i=0;i<8;i++)
-#else // _VS2008PORTING
-					for(i=0;i<8;i++)
-#endif // _VS2008PORTING
 					{
 						Position[0] = (o->Position[0] - 119.f) + (float)(rand()%240); 
 						Position[2] = (o->Position[2] + 49.f) + (float)(rand()%60); 
@@ -6412,11 +6339,8 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					}
 					
 					VectorCopy(o->Position,Position);
-#ifdef _VS2008PORTING
+
 					for(int i=0;i<8;i++)
-#else // _VS2008PORTING
-					for(i=0;i<8;i++)
-#endif // _VS2008PORTING
 					{
 						Position[0] = (o->Position[0] - 119.f) + (float)(rand()%240); 
 						Position[2] = (o->Position[2] + 49.f) + (float)(rand()%60); 
@@ -6580,12 +6504,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					CreateEffect ( BITMAP_TWLIGHT, Position, o->Angle, Light, 1 );
 					CreateEffect ( BITMAP_TWLIGHT, Position, o->Angle, Light, 2 );
 					
-					
-#ifdef _VS2008PORTING
 					for (int i = 0; i < 2; ++i)
-#else // _VS2008PORTING
-					for (i = 0; i < 2; ++i)
-#endif // _VS2008PORTING
 					{
 						int iNumBones = Models[o->Type].NumBones;
 						Models[o->Type].TransformByObjectBone(vFirePosition, o, rand()%iNumBones);	
@@ -8767,12 +8686,7 @@ void ReceiveGuildBeginWar( BYTE *ReceiveBuffer )
 	CreateNotice(Text,1);
 	HeroSoccerTeam = Data->Team;
 	
-#ifdef _VS2008PORTING
 	for(int i=0;i<MARK_EDIT;i++)
-#else // _VS2008PORTING
-	int i;
-	for(i=0;i<MARK_EDIT;i++)
-#endif // _VS2008PORTING
 	{
 		MARK_t *p = &GuildMark[i];
 		char Temp[8+1];
@@ -8787,11 +8701,7 @@ void ReceiveGuildBeginWar( BYTE *ReceiveBuffer )
 	}
 	if(GuildWarIndex >= 0)
 	{
-#ifdef _VS2008PORTING
 		for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-		for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 		{
 			CHARACTER *c = &CharactersClient[i];
 			GuildTeam(c);
@@ -9304,15 +9214,7 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 		//습득했다.
 		if(Data->nSkillNum > -1)
 		{
-			//////////////////////////////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////
-			
-#ifdef _VS2008PORTING
 			for(int i=0; i<MAX_MAGIC; ++i)
-#else // _VS2008PORTING
-			int i = 0;
-			for(i=0; i<MAX_MAGIC; ++i)
-#endif // _VS2008PORTING
 			{
 				switch(Data->nSkillNum)
 				{
@@ -9413,11 +9315,8 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 				}
 			}
 			bool Check_Add = false;
-#ifdef _VS2008PORTING
+
 			for(int i=0; i<MAX_MAGIC; ++i)
-#else // _VS2008PORTING
-			for(i=0; i<MAX_MAGIC; ++i)
-#endif // _VS2008PORTING
 			{
 				if(Data->nSkillNum%5 != 0)
 				{
@@ -9431,11 +9330,7 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 			}
 			if(Check_Add == false)
 			{
-#ifdef _VS2008PORTING
 				for(int i=0; i<MAX_MAGIC; ++i)
-#else // _VS2008PORTING
-				for(i=0; i<MAX_MAGIC; ++i)
-#endif // _VS2008PORTING
 				{
 					if(CharacterAttribute->Skill[i] == 0)
 					{
@@ -10826,11 +10721,8 @@ void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
 		
 		RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE);	//. clear item price table
 		LPGETPSHOPITEM_DATAINFO pShopItem = (LPGETPSHOPITEM_DATAINFO)(ReceiveBuffer+sizeof(GETPSHOPITEMLIST_HEADERINFO));
-#ifdef _VS2008PORTING
+
 		for(int i=0; i<Header->byCount; i++, pShopItem++) 
-#else // _VS2008PORTING
-		for(i=0; i<Header->byCount; i++, pShopItem++) 
-#endif // _VS2008PORTING
 		{
 			if(pShopItem->iItemPrice > 0) 
 			{
@@ -11644,13 +11536,8 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 	g_pMainFrame->ResetSkillHotKey();
 #endif //LDK_ADD_SCALEFORM
 
-#ifdef _VS2008PORTING
 	int iHotKey;
 	for(int i=0; i<10; ++i)
-#else // _VS2008PORTING
-	int iHotKey, i, j;
-	for(i=0; i<10; ++i)
-#endif // _VS2008PORTING
 	{
 #ifdef CSK_FIX_SKILLHOTKEY_PACKET
 		int iIndex = i * 2;
@@ -11665,11 +11552,7 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 		if(iHotKey != 0xff)
 #endif // CSK_FIX_SKILLHOTKEY_PACKET
 		{
-#ifdef _VS2008PORTING
 			for(int j=0; j<MAX_SKILLS; ++j)
-#else // _VS2008PORTING
-			for(j=0; j<MAX_SKILLS; ++j)
-#endif // _VS2008PORTING
 			{
 				if(iHotKey == CharacterAttribute->Skill[j])
 				{

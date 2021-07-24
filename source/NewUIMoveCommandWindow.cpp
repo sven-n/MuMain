@@ -385,11 +385,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
 	DECWRITE(m_iRenderStartTextIndex, 0);
 	DECWRITE(m_iRenderEndTextIndex, DECREAD(m_iRenderStartTextIndex) + DECREAD(m_iTextLine));
 
-#ifdef _VS2008PORTING
 	if( DECREAD(m_iRenderEndTextIndex) > (int)m_listMoveInfoData.size() )
-#else // _VS2008PORTING
-	if( DECREAD(m_iRenderEndTextIndex) > m_listMoveInfoData.size() )
-#endif // _VS2008PORTING
 	{
 		DECWRITE(m_iRenderEndTextIndex, DECREAD(m_iRenderEndTextIndex) - (DECREAD(m_iRenderEndTextIndex)-m_listMoveInfoData.size()));
 	}
@@ -680,7 +676,6 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 		}
 
 		// 필요레벨충족/필요젠충족/pk모드가 아닐때 이동가능
-#ifdef _VS2008PORTING
 #ifdef ASG_FIX_MOVE_WIN_MURDERER1_BUG
 #ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
 		// 기획변경으로 인해 디버프 걸려있을시에만 사용불가능으로변경
@@ -697,24 +692,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 #else	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
 		if( iLevel >= iReqLevel && (int)iZen >= iReqZen && (int)Hero->PK<PVP_MURDERER2
 #endif	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
-#else // _VS2008PORTING
-#ifdef ASG_FIX_MOVE_WIN_MURDERER1_BUG
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-		// 기획변경으로 인해 디버프 걸려있을시에만 사용불가능으로변경
-		// 혼합유료화 섭일 경우 무법자 1단계(5분은 불가)와 상관없이 모두 이동창 사용가능
-		// 혼합유료화일경우 버프와 PVP_MURDERER1이상일경우를 판단하고
-		// 아닐결우는 (int)Hero->PK<PVP_MURDERER1) 결과값에 의해서만 결정을 한다	
-		if(g_PKSystem->GetCanDoMoveCommand() && iLevel >= iReqLevel && iZen >= iReqZen
-#ifdef ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			&& iLevel <= (*li)->_ReqInfo.m_iReqMaxLevel
-#endif	// ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-#else //PBG_ADD_PKSYSTEM_INGAMESHOP
-		if( iLevel >= iReqLevel && iZen >= iReqZen && Hero->PK<PVP_MURDERER1
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
-#else	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
-		if( iLevel >= iReqLevel && iZen >= iReqZen && Hero->PK<PVP_MURDERER2
-#endif	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
-#endif // _VS2008PORTING
+
 #ifdef CSK_LUCKY_SEAL////////////////////////////////////////////////////////////
 #ifdef PBG_MOD_VIEMAPMOVE
 	#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE || defined LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
@@ -1315,11 +1293,7 @@ void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 
 	DECWRITE(m_iRenderEndTextIndex, DECREAD(m_iRenderStartTextIndex) + DECREAD(m_iTextLine));
 	
-#ifdef _VS2008PORTING
 	if( DECREAD(m_iRenderEndTextIndex) > (int)m_listMoveInfoData.size() )
-#else // _VS2008PORTING
-	if( DECREAD(m_iRenderEndTextIndex) > m_listMoveInfoData.size() )
-#endif // _VS2008PORTING
 	{
 		DECWRITE(m_iRenderEndTextIndex, DECREAD(m_iRenderEndTextIndex) - (DECREAD(m_iRenderEndTextIndex)-m_listMoveInfoData.size()));
 	}
@@ -1330,17 +1304,15 @@ void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 
 //---------------------------------------------------------------------------------------------
 // RenderFrame
-// UI Frame을 렌더한다.
+// UI Frame
 void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
 //	CMoveCommandWindowEncrypt enc;
 #endif	// YDG_MOD_PROTECT_AUTO_V4
-	// 배경
 	glColor4f(0.0f, 0.0f, 0.0f, m_fBackgroundAlpha);
 	RenderColor((float)DECREAD(m_Pos.x), (float)DECREAD(m_Pos.y), (float)DECREAD(m_MapNameUISize.x), (float)DECREAD(m_MapNameUISize.y));
 
-	// 닫기버튼 배경색.
 	glColor4f ( 0.6f, 0.f, 0.f, m_fBackgroundAlpha );
 	RenderColor( DECREAD(m_StartMapNamePos.x), DECREAD(m_Pos.y) + DECREAD(m_MapNameUISize.y)-DECREAD(m_iRealFontHeight)-6, DECREAD(m_MapNameUISize.x)-5, DECREAD(m_iRealFontHeight) );
 	
@@ -1348,11 +1320,9 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 
 	EnableAlphaTest();
 
-	// 스크롤바
 	RenderImage(IMAGE_MOVECOMMAND_SCROLL_TOP, DECREAD(m_ScrollBarPos.x), DECREAD(m_ScrollBarPos.y), 
 					MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT );		// TOP
 	
-#ifdef _VS2008PORTING
 #ifdef ASG_FIX_MOVECMD_WIN_SCRBAR
 	int i;
 	for( i=0 ; i<DECREAD(m_iScrollBarMiddleNum) ; i++ )
@@ -1383,20 +1353,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 			MOVECOMMAND_SCROLLBAR_TOP_WIDTH, DECREAD(m_iScrollBarMiddleRemainderPixel) );	// MIDDLE 나머지
 	}
 #endif	// ASG_FIX_MOVECMD_WIN_SCRBAR
-#else // _VS2008PORTING
-	for( int i=0 ; i<DECREAD(m_iScrollBarMiddleNum) ; i++ )
-	{
-		RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, DECREAD(m_ScrollBarPos.x), 
-						DECREAD(m_ScrollBarPos.y)+MOVECOMMAND_SCROLLBAR_TOP_HEIGHT+(i*MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
-						MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT );	// MIDDLE
-	}
-	if( DECREAD(m_iScrollBarMiddleRemainderPixel) > 0 )
-	{
-		RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, DECREAD(m_ScrollBarPos.x), 
-						DECREAD(m_ScrollBarPos.y)+MOVECOMMAND_SCROLLBAR_TOP_HEIGHT+(i*MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
-						MOVECOMMAND_SCROLLBAR_TOP_WIDTH, DECREAD(m_iScrollBarMiddleRemainderPixel) );	// MIDDLE 나머지
-	}
-#endif // _VS2008PORTING
 
 	RenderImage(IMAGE_MOVECOMMAND_SCROLL_BOTTOM, DECREAD(m_ScrollBarPos.x), DECREAD(m_ScrollBarPos.y)+DECREAD(m_iScrollBarHeightPixel)-MOVECOMMAND_SCROLLBAR_TOP_HEIGHT,
 					MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT );		// BOTTOM
@@ -1610,11 +1566,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 			else
 #endif //PBG_ADD_PKSYSTEM_INGAMESHOP
 			itoa((*li)->_ReqInfo.iReqZen, szText, 10);
-#ifdef _VS2008PORTING
 			if( (*li)->_ReqInfo.iReqZen > (int)iZen )
-#else // _VS2008PORTING
-			if( (*li)->_ReqInfo.iReqZen > iZen )
-#endif // _VS2008PORTING
 			{
 				g_pRenderText->SetTextColor(255, 51, 26, DECREAD(m_iTextAlpha));
 			}
@@ -1628,7 +1580,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 		iCurRenderTextIndex++;
 	}	// for ( int i=0 ; i<DECREAD(m_iRenderEndTextIndex) ; i++, li++ )
 
-	// 닫기 버튼
 	g_pRenderText->SetTextColor(255, 255, 255, m_fBackgroundAlpha * 255);
 	g_pRenderText->RenderText(DECREAD(m_MapNameUISize.x)/2, DECREAD(m_Pos.y) + DECREAD(m_MapNameUISize.y)-DECREAD(m_iRealFontHeight)-5, GlobalText[1002], 0 ,0, RT3_WRITE_CENTER);
 	DisableAlphaBlend();
@@ -1674,14 +1625,13 @@ void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 
 	if(DECREAD(m_iWindowOpenCount) >= 10)
 	{
-		// 2731 "지속적인 맵 이동 시도 시 접속이 종료됩니다."
 		SEASON3B::CreateOkMessageBox(GlobalText[2731]);
 		ResetWindowOpenCount();
 	}
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
 #ifdef ASG_ADD_GENS_SYSTEM
-	SetStrifeMap();		// 분쟁 맵 설정.
+	SetStrifeMap();
 #endif	// ASG_ADD_GENS_SYSTEM
 	SettingCanMoveMap();
 
@@ -1693,11 +1643,7 @@ void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 
 	DECWRITE(m_iWheelCounter, 0);
 	
-#ifdef _VS2008PORTING
 	if( DECREAD(m_iRenderEndTextIndex) > (int)m_listMoveInfoData.size() )
-#else // _VS2008PORTING
-	if( DECREAD(m_iRenderEndTextIndex) > m_listMoveInfoData.size() )
-#endif // _VS2008PORTING
 	{
 		DECWRITE(m_iRenderEndTextIndex, DECREAD(m_iRenderEndTextIndex) - (DECREAD(m_iRenderEndTextIndex) - m_listMoveInfoData.size()));
 	}
@@ -2618,17 +2564,13 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
 	m_iRenderEndTextIndex = m_iRenderStartTextIndex+MOVECOMMAND_MAX_RENDER_TEXTLINE;
 #endif // CSK_MOD_PROTECT_AUTO_V1
 
-#ifdef _VS2008PORTING
 	if( m_iRenderEndTextIndex > (int)m_listMoveInfoData.size() )
-#else // _VS2008PORTING
-	if( m_iRenderEndTextIndex > m_listMoveInfoData.size() )
-#endif // _VS2008PORTING
 	{
 		m_iRenderEndTextIndex -= (m_iRenderEndTextIndex-m_listMoveInfoData.size());
 	}
 }
 
-#ifndef CSK_MOD_REMOVE_AUTO_V1_FLAG  // 정리할 때 지워야 하는 소스
+#ifndef CSK_MOD_REMOVE_AUTO_V1_FLAG
 #ifdef CSK_MOD_PROTECT_AUTO_V1
 void SEASON3B::CNewUIMoveCommandWindow::SetNewVersion(bool bNew)
 {
@@ -2640,7 +2582,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsNewVersion()
 	return m_bNewVersion;
 }
 #endif // CSK_MOD_PROTECT_AUTO_V1
-#endif //! CSK_MOD_REMOVE_AUTO_V1_FLAG // 정리할 때 지워야 하는 소스
+#endif //! CSK_MOD_REMOVE_AUTO_V1_FLAG
 
 #ifdef CSK_LUCKY_SEAL
 
@@ -2649,7 +2591,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsLuckySealBuff()
 	if( g_isCharacterBuff((&Hero->Object), eBuff_Seal1)  
 		|| g_isCharacterBuff((&Hero->Object), eBuff_Seal2)   
 		|| g_isCharacterBuff((&Hero->Object), eBuff_Seal3)
-#ifdef LEM_FIX_SEAL_ITEM_MAPMOVE_VIEW	// 누락된 인장 아이템 추가 [lem.2010.7.28]
+#ifdef LEM_FIX_SEAL_ITEM_MAPMOVE_VIEW
 		|| g_isCharacterBuff((&Hero->Object), eBuff_PcRoomSeal1 ) 
 		|| g_isCharacterBuff((&Hero->Object), eBuff_PcRoomSeal2 ) 
 		|| g_isCharacterBuff((&Hero->Object), eBuff_PcRoomSeal3 ) 
@@ -2920,13 +2862,9 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 		}
 		
 		// 필요레벨충족/필요젠충족/pk모드가 아닐때 이동가능
-#ifdef _VS2008PORTING
+
 #ifdef ASG_FIX_MOVE_WIN_MURDERER1_BUG
 #ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-		// 기획변경으로 인해 디버프 걸려있을시에만 사용불가능으로변경
-		// 혼합유료화 섭일 경우 무법자 1단계(5분은 불가)와 상관없이 모두 이동창 사용가능
-		// 혼합유료화일경우 버프와 PVP_MURDERER1이상일경우를 판단하고
-		// 아닐결우는 (int)Hero->PK<PVP_MURDERER1) 결과값에 의해서만 결정을 한다	
 		if(g_PKSystem->GetCanDoMoveCommand() && iLevel >= iReqLevel && iZen >= iReqZen
 #ifdef ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
 			&& iLevel <= (*li)->_ReqInfo.m_iReqMaxLevel
@@ -2937,24 +2875,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 #else	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
 		if( iLevel >= iReqLevel && (int)iZen >= iReqZen && (int)Hero->PK<PVP_MURDERER2
 #endif	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
-#else // _VS2008PORTING
-#ifdef ASG_FIX_MOVE_WIN_MURDERER1_BUG
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-		// 기획변경으로 인해 디버프 걸려있을시에만 사용불가능으로변경
-		// 혼합유료화 섭일 경우 무법자 1단계(5분은 불가)와 상관없이 모두 이동창 사용가능
-		// 혼합유료화일경우 버프와 PVP_MURDERER1이상일경우를 판단하고
-		// 아닐결우는 (int)Hero->PK<PVP_MURDERER1) 결과값에 의해서만 결정을 한다	
-		if(g_PKSystem->GetCanDoMoveCommand() && iLevel >= iReqLevel && iZen >= iReqZen
-#ifdef ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			&& iLevel <= (*li)->_ReqInfo.m_iReqMaxLevel
-#endif	// ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-#else //PBG_ADD_PKSYSTEM_INGAMESHOP
-		if( iLevel >= iReqLevel && iZen >= iReqZen && Hero->PK<PVP_MURDERER1
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
-#else	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
-		if( iLevel >= iReqLevel && iZen >= iReqZen && Hero->PK<PVP_MURDERER2
-#endif	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
-#endif // _VS2008PORTING
+
 #ifdef CSK_LUCKY_SEAL////////////////////////////////////////////////////////////
 #ifdef PBG_MOD_VIEMAPMOVE
 	#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE || defined LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
@@ -2973,29 +2894,26 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 			ITEM* pEquipedHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 			ITEM* pEquipedWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
 			
-			// 이카루스 일때 예외처리
-			if(strcmp((*li)->_ReqInfo.szMainMapName,GlobalText[55])==0)		// 55 "이카루스"
+			if(strcmp((*li)->_ReqInfo.szMainMapName,GlobalText[55])==0)
 			{
-				// 펜릴/디노란트/군주의망토/날개를 착용해야 이동가능
-				// 변신반지 시리즈 착용시 이동불가
 				if( 
 					(
-					pEquipedHelper->Type == ITEM_HELPER+37 			// 펜릴			
-#ifndef PSW_BUGFIX_ICARUS_MOVE_UNIRIA    // 코드 정리 할것 !!!
-					|| pEquipedHelper->Type == ITEM_HELPER+2		// 유니리아
-#endif //PSW_BUGFIX_ICARUS_MOVE_UNIRIA   // 코드 정리 할것 !!!
-					|| pEquipedHelper->Type == ITEM_HELPER+3		// 디노란트
+					pEquipedHelper->Type == ITEM_HELPER+37		
+#ifndef PSW_BUGFIX_ICARUS_MOVE_UNIRIA
+					|| pEquipedHelper->Type == ITEM_HELPER+2
+#endif //PSW_BUGFIX_ICARUS_MOVE_UNIRIA
+					|| pEquipedHelper->Type == ITEM_HELPER+3
 #ifdef KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
-					|| pEquipedHelper->Type == ITEM_HELPER+4		// 다크호스
+					|| pEquipedHelper->Type == ITEM_HELPER+4
 #endif // KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
-					|| pEquipedWing->Type == ITEM_HELPER+30			// 군주의 망토
+					|| pEquipedWing->Type == ITEM_HELPER+30
 #ifdef ADD_ALICE_WINGS_1		 
 					|| (pEquipedWing->Type >= ITEM_WING+36 && pEquipedWing->Type <= ITEM_WING+43)			
 #else	// ADD_ALICE_WINGS_1
 					|| (pEquipedWing->Type >= ITEM_WING+36 && pEquipedWing->Type <= ITEM_WING+40) 
 #endif	// ADD_ALICE_WINGS_1
 					|| (pEquipedWing->Type >= ITEM_WING && pEquipedWing->Type <= ITEM_WING+6) 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 					|| ( ITEM_WING+130 <= pEquipedWing->Type && pEquipedWing->Type <= ITEM_WING+134 )
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
@@ -3004,7 +2922,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 					)
 #ifdef KJH_FIX_WOPS_26619_CANMOVE_IKARUS_BY_UNIRIA
-					&& !( pEquipedHelper->Type == ITEM_HELPER+2 )	// 유니리아
+					&& !( pEquipedHelper->Type == ITEM_HELPER+2 )
 #endif // KJH_FIX_WOPS_26619_CANMOVE_IKARUS_BY_UNIRIA
 #ifdef KJH_FIX_MOVE_ICARUS_EQUIPED_PANDA_CHANGE_RING
 					&& ( g_ChangeRingMgr->CheckBanMoveIcarusMap(pEquipedRightRing->Type, pEquipedLeftRing->Type) == false )
@@ -3021,9 +2939,8 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 				}
 			}
 			// 아틀란스 시리즈 일때 예외처리
-			else if(strncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], 8)==0)	// 37 "아틀란스"
+			else if(strncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], 8)==0)
 			{
-				// 유니리아/디노란트를 탄 상태에서는 아틀란스 이동불가
 				if(pEquipedHelper->Type == ITEM_HELPER+2 || pEquipedHelper->Type == ITEM_HELPER+3)
 				{
 					(*li)->_bCanMove = false;
@@ -3034,11 +2951,8 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 				}
 			}
 #ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-			// 669 "로랜협곡"
 			else if(strcmp((*li)->_ReqInfo.szMainMapName,GlobalText[669]) == 0)
 			{
-				// 클라이언트에서 수성측길드, 수성측연합인가 판별할 길이 없다. [2/17/2009 nukun]
-				// 추후 서버와의 연계를 통해 판별루틴을 넣어야 한다. [2/17/2009 nukun]
 				if(m_bCastleOwner == true)
 				{
 					(*li)->_bCanMove = true;
@@ -3052,7 +2966,6 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 #ifdef KJH_MOD_BTS208_CANNOT_MOVE_TO_VULCANUS_IN_NONPVP_SERVER
 			else if( ( g_ServerListManager->IsNonPvP() == true ) && (strcmp((*li)->_ReqInfo.szMainMapName, GlobalText[2686]) == 0) )
 			{
-				// NonPVP 서버에서는 불카누스 이동불가
 				(*li)->_bCanMove = false;
 			}
 #endif // KJH_MOD_BTS208_CANNOT_MOVE_TO_VULCANUS_IN_NONPVP_SERVER
@@ -3071,10 +2984,8 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 				
 				if(strcmp((*li)->_ReqInfo.szMainMapName, strNewMapName) == 0)
 				{
-					// PC방인지 안닌지
 					if(CPCRoomPtSys::Instance().IsPCRoom() == true 
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-						// 파란복주머니 사용했을때 가능
 						|| g_pBlueLuckyBagEvent->IsEnableBlueLuckyBag() == true
 #endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 						)
@@ -3092,7 +3003,6 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW
 		}
 #ifdef ASG_ADD_GENS_SYSTEM
-		// 이동 가능한 지역이고 분쟁 지역이고 겐스에 가입되어 있지 않다면 이동 불가.
 		if ((*li)->_bCanMove && (*li)->_bStrife && 0 == Hero->m_byGensInfluence)
 			(*li)->_bCanMove = false;
 #endif	// ASG_ADD_GENS_SYSTEM
@@ -3134,9 +3044,9 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 //	{
 #ifdef KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 		if( m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED && m_icurMoveScrBtnPixelperStep > 0 )
-#else // KJH_FIX_MOVECOMMAND_WINDOW_SIZE			// 정리할때 지워야 하는 소스
+#else // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 		if( m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED && m_iHeightByMoveStep > 0 )
-#endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE			// 정리할때 지워야 하는 소스
+#endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 		{
 			//MoveScrollBtn(MouseY-m_iMousePosY);
 			int iMoveValue = MouseY-m_iMousePosY;
@@ -3185,10 +3095,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 		SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 	}
 
-	// 맵 정보 셋팅
 	SettingCanMoveMap();
 
-	// 맵 이동창에 마우스를 올렸을때 계산
 	if( CheckMouseIn( m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y ) )
 	{
 #ifdef KJH_FIX_MOVECOMMAND_WINDOW_SIZE
@@ -3199,14 +3107,12 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 			if (!g_pProtectAuto->IsNewVersion());
 			else
 #endif	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V2
-			// 오토마우스 작동중이면 가끔 휠기능 먹통되게 수정 
 			if(g_pProtectAuto->IsStartAuto() == true && rand()%10 == 0)
 			{
 				MouseWheel = 0;
 			}
 #endif // CSK_MOD_PROTECT_AUTO_V2
 #ifdef YDG_MOD_PROTECT_AUTO_V3
-			// 휠 3회~7회 조작시 1회 먹통 되도록
 #ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
 			if (!g_pProtectAuto->IsNewVersion());
 			else
@@ -3221,8 +3127,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 				}
 			}
 #endif	// YDG_MOD_PROTECT_AUTO_V3
-			
-			// 휠버튼 처리
 			if( MouseWheel > 0 )
 			{
 				ScrollUp(m_icurMoveScrBtnPixelperStep);
@@ -3233,7 +3137,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 			}
 
 #ifdef YDG_MOD_PROTECT_AUTO_V6
-			// 랜덤확률로 2번 스크롤 되게 한다 (오토방지)
 			if (m_iWheelCounter >= 3 && rand()%6 == 0)
 			{
 				if( MouseWheel > 0 )
@@ -3288,7 +3191,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 			}
 			iX = m_StartMapNamePos.x;
 			iY = m_StartMapNamePos.y + ( m_iRealFontHeight * iCurRenderTextIndex );
-			// 어느 맵이름이 선택되었나 (마우스를 올렸냐?)
 			if( CheckMouseIn( iX, iY, m_MapNameUISize.x-22, m_iRealFontHeight ) )
 			{
 				if( (*li)->_bCanMove == true )
@@ -3324,18 +3226,15 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 #endif // CSK_MOD_PROTECT_AUTO_V2	
 
 #ifdef LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
-						// 현재 위치하고 있는 맵이나 이동하려는 맵이 다른 서버에 존재(로랜협곡, 로랜시장)
 						if (IsTheMapInDifferentServer(World, (*li)->_ReqInfo.index))
 						{
 							SaveOptions();
 						}
 #endif //LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
 						
-						// 맵 이동 패킷 날림
 #ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
 						SendRequestMoveMap(g_pMoveCommandWindow->GetMoveCommandKey(), (*li)->_ReqInfo.index);
 #else	// YDG_ADD_MOVE_COMMAND_PROTOCOL
-						// 260 "/이동"
 						std::string strChat = GlobalText[260];
 						strChat += ' ';
 						strChat += (*li)->_ReqInfo.szMainMapName;
@@ -3353,7 +3252,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 
 			iCurRenderTextIndex++;
 			
-			// 닫기버튼
 			if( SEASON3B::IsRelease(VK_LBUTTON)  
 #ifdef CSK_MOD_MOVE_COMMAND_WINDOW
 				&& CheckMouseIn( 3, m_Pos.y + m_MapNameUISize.y-m_iRealFontHeight-6, m_MapNameUISize.x-5, m_iRealFontHeight ))
@@ -3618,11 +3516,7 @@ void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 	m_iRenderEndTextIndex = m_iRenderStartTextIndex + MOVECOMMAND_MAX_RENDER_TEXTLINE;
 #endif // CSK_MOD_PROTECT_AUTO_V1
 	
-#ifdef _VS2008PORTING
 	if( m_iRenderEndTextIndex > (int)m_listMoveInfoData.size() )
-#else // _VS2008PORTING
-	if( m_iRenderEndTextIndex > m_listMoveInfoData.size() )
-#endif // _VS2008PORTING
 	{
 		m_iRenderEndTextIndex -= (m_iRenderEndTextIndex-m_listMoveInfoData.size());
 	}
@@ -3761,7 +3655,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 #endif	// YDG_MOD_PROTECT_AUTO_V3
 	g_pRenderText->RenderText(m_StartUISubjectName.x, m_StartUISubjectName.y, GlobalText[933], 0 ,0, RT3_WRITE_CENTER);
 
-	// 구분제목
 	g_pRenderText->SetFont(g_hFont);
 #ifdef YDG_MOD_PROTECT_AUTO_V3
 #ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3

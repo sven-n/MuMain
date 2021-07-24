@@ -381,37 +381,37 @@ void CPersonalShopTitleImp::RevisionPosition()
 		(*mi_x).second->GetBoxPos(pos);
 		(*mi_x).second->GetBoxSize(size);
 		if(pos.x < 0) pos.x = 0;
-#ifdef _VS2008PORTING
 		if((unsigned int)pos.x >= WindowWidth-(unsigned int)size.cx) pos.x = WindowWidth-(size.cx+4);
 		if(pos.y < 0) pos.y = 0;
 		if((unsigned int)pos.y >= WindowHeight-(unsigned int)size.cy) pos.y = WindowHeight-size.cy;
-#else // _VS2008PORTING
-		if(pos.x >= WindowWidth-size.cx) pos.x = WindowWidth-(size.cx+4);
-		if(pos.y < 0) pos.y = 0;
-		if(pos.y >= WindowHeight-size.cy) pos.y = WindowHeight-size.cy;
-#endif // _VS2008PORTING
 		(*mi_x).second->SetBoxPos(pos);
 	}
 }
 void CPersonalShopTitleImp::CheckKeyIntegrity()
 {
 	type_drawobj_map::iterator mi = m_listShopTitleDrawObj.begin();
-	for(; mi != m_listShopTitleDrawObj.end();){
+
+	for(; mi != m_listShopTitleDrawObj.end();)
+	{
 		CHARACTER* pPlayer = (*mi).first;
 		CShopTitleDrawObj* pDrawObj = (*mi).second;
-		if(pPlayer->Key != pDrawObj->GetKey()) {		//. 오류 자동수정
+
+		if(pPlayer->Key != pDrawObj->GetKey()) 
+		{
 			delete pDrawObj;
 			mi = m_listShopTitleDrawObj.erase(mi);
 			g_ErrorReport.Write("@ CheckKeyIntegrity - player key-value dismatch(id : %s, server's key : %d, client array's key : %d) \n", 
 				pPlayer->ID, pDrawObj->GetKey(), pPlayer->Key);
 		}
-		else if(pPlayer->Object.Kind != KIND_PLAYER) {
+		else if(pPlayer->Object.Kind != KIND_PLAYER) 
+		{
 			delete pDrawObj;
 			mi = m_listShopTitleDrawObj.erase(mi);
 			g_ErrorReport.Write("@ CheckKeyIntegrity - player type invalid(id : %s, server's key : %d, client array's key : %d) \n", 
 				pPlayer->ID, pDrawObj->GetKey(), pPlayer->Key);
 		}
-		else {
+		else 
+		{
 			mi++;
 		}
 	}

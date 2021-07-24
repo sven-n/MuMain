@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // GlobalPortalSystem.h: interface for the GlobalPortalSystem class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_GLOBALPORTALSYSTEM_H__CF0EA9D0_8E05_4094_9284_E3BAEC47BE40__INCLUDED_)
@@ -31,10 +31,10 @@ public:
 
 	void Initialize();
 
-	void SetPathToRegistry(HKEY* hKey);	// 레지스트리에 경로 남기기
+	void SetPathToRegistry(HKEY* hKey);
 	
-	bool SetAuthInfo();			// 인증정보 획득
-	bool ResetAuthInfo();		// 인증정보 갱신
+	bool SetAuthInfo();
+	bool ResetAuthInfo();
 
 	const char* GetAuthID() { return m_Id; }
 

@@ -259,11 +259,7 @@ void CNewUIGensRanking::RenderTexts()
 
 	int _TextNextLineCnt = ::DivideStringByPixel(&_szText[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, _szTempText, 140, true, '#');
 	_TextNextLineCnt += _TextLineCnt;
-#ifdef _VS2008PORTING
 	for (int i=_TextLineCnt; i<_TextNextLineCnt; ++i)
-#else // _VS2008PORTING
-	for (i=_TextLineCnt; i<_TextNextLineCnt; ++i)
-#endif // _VS2008PORTING
 		g_pRenderText->RenderText(_x+20,  _y+(i*_fHeight),  _szText[i-_TextLineCnt], _fWidth, 0, RT3_SORT_LEFT);
 #endif // KJW_FIX_GENS_WINDOW_OPEN
 }

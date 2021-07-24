@@ -102,20 +102,11 @@ public:
 
 #endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 
-
-#ifdef _VS2008PORTING
 typedef struct tagMU_POINTF
 {
 	float x;
 	float y;
 } MU_POINTF;
-#else // _VS2008PORTING
-typedef struct tagPOINTF
-{
-	float x;
-	float y;
-} POINTF;
-#endif // _VS2008PORTING
 
 typedef struct tagSIZEF
 {

@@ -1,11 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 그래픽 툴 Max의 플러그인에서 저장한 *.smd파일을 읽어들인 데이타를
-// 컨버트하여 *.bmd로 변환함
-// *.smd에는 쓸데없는 정보가 많아서 최적화 시킨 *.bmd로 변환하는 것임
-//
-// *** 함수 레벨: 1
-///////////////////////////////////////////////////////////////////////////////
-//#ifdef CONVERT 
 
 #include "stdafx.h"
 #include <ctype.h>
@@ -22,16 +15,9 @@ struct
 
 void FixupSMD()
 {
-#ifndef _VS2008PORTING
-	int i,j;
-#endif // _VS2008PORTING
 	Skeleton_t  *s = &NodeGroup.Skeleton;
 	NodeGroup_t *ng = &NodeGroup;
-#ifdef _VS2008PORTING
 	for(int i=0;i<ng->NodeNum;i++)
-#else // _VS2008PORTING
-	for(i=0;i<ng->NodeNum;i++)
-#endif // _VS2008PORTING
 	{
        	Node_t *n = &ng->Node[i];
 
@@ -67,17 +53,10 @@ void FixupSMD()
 	}
 
     TriangleGroup_t *tg = &TriangleGroup;
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<tg->TriangleNum;i++)
-#else // _VS2008PORTING
-	for(i=0;i<tg->TriangleNum;i++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
 		for(int j=0;j<3;j++)
-#else // _VS2008PORTING
-		for(j=0;j<3;j++)
-#endif // _VS2008PORTING
 		{
 			SMDVertex_t *v = &tg->Vertex[i][j];
 			vec3_t p;
@@ -94,11 +73,8 @@ void FixupSMD()
 
 	SMDMeshGroup_t *mg = &MeshGroup;
 	mg->MeshNum = 0;
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MESH_MAX;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MESH_MAX;i++)
-#endif // _VS2008PORTING
 	{
       	SMDMesh_t *m = &mg->Mesh[i];
 		m->VertexNum = 0;
@@ -107,13 +83,8 @@ void FixupSMD()
 		m->TriangleNum = 0;
 	}
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<tg->TriangleNum;i++)
-#else // _VS2008PORTING
-    for(i=0;i<tg->TriangleNum;i++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
 		int MeshNum = 0;
 		for(int k=0;k<mg->MeshNum;k++)
 		{
@@ -131,43 +102,13 @@ void FixupSMD()
 			strcpy(mg->Texture[MeshNum].FileName,tg->TextureName[i]);
 			mg->MeshNum++;
 		}
-#else // _VS2008PORTING
-		bool FindMesh = false;
-		for(int k=0;k<mg->MeshNum;k++)
-		{
-			if(strcmp(tg->TextureName[i],mg->Texture[k].FileName)==NULL)
-			{
-				FindMesh = true;
-				break;
-			}
-		}
-		int MeshNum = 0;
-		if(FindMesh == true) 
-		{
-			MeshNum = k;
-		}
-		else
-		{
-			MeshNum = mg->MeshNum;
-			mg->Mesh[MeshNum].Texture = mg->MeshNum;
-			strcpy(mg->Texture[MeshNum].FileName,tg->TextureName[i]);
-			mg->MeshNum++;
-		}
-#endif // _VS2008PORTING
-      	SMDMesh_t *m = &mg->Mesh[MeshNum];
 
-#ifdef _VS2008PORTING
+		SMDMesh_t *m = &mg->Mesh[MeshNum];
+
 		for(int j=0;j<3;j++)
-#else // _VS2008PORTING
-		for(j=0;j<3;j++)
-#endif // _VS2008PORTING
 		{
      		SMDVertex_t *v = &tg->Vertex[i][j];
-#ifdef _VS2008PORTING
 			int k = m->VertexNum-1;
-#else // _VS2008PORTING
-			k = m->VertexNum-1;
-#endif // _VS2008PORTING
 			if(k >= 0)
 			{
 				for(k; k>=0; k--)
@@ -484,5 +425,3 @@ void SMD2BMDAnimation(int ID,bool LockPosition)
 
 	bmd->NumActions++;
 }
-
-//#endif CONVERT

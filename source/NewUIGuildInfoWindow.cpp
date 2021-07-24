@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // NewUIGuildInfoWindow.cpp: implementation of the CNewUIGuildInfoWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -22,9 +22,6 @@ char DeleteID[100];
 
 extern CUIPopup* g_pUIPopup;
 extern MARK_t GuildMark[MAX_MARKS];
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 using namespace SEASON3B;
 
@@ -45,7 +42,6 @@ void RenderText( char* text, int x, int y, int sx, int sy, DWORD color, DWORD ba
 
 int SEASON3B::CNewUIGuildInfoWindow::GetGuildMemberIndex( char* szName )
 {
-	// 캐릭터명으로 길드에서의 인덱스를 구한다.
 	for( int i=0 ; i<g_nGuildMemberCount ; ++i )
 	{
 		if( GuildList[i].Name && !strcmp( GuildList[i].Name, szName ) )
@@ -96,17 +92,12 @@ bool SEASON3B::CNewUIGuildInfoWindow::Create(CNewUIManager* pNewUIMng, int x, in
 	m_Button[BUTTON_GET_POSITION].SetPos( m_Pos.x+3, m_Pos.y+360 );
 	m_Button[BUTTON_FREE_POSITION].SetPos( m_Pos.x+64, m_Pos.y+360 );
 	m_Button[BUTTON_GET_OUT].SetPos( m_Pos.x+125, m_Pos.y+360 );
-	//1307 "직책"
 	m_Button[BUTTON_GET_POSITION].ChangeText(GlobalText[1307]);
-	//1308 "해제"
 	m_Button[BUTTON_FREE_POSITION].ChangeText(GlobalText[1308]);
-	//1309 "방출"
 	m_Button[BUTTON_GET_OUT].ChangeText(GlobalText[1309]);
 
-	// 닫기 버튼
 	m_BtnExit.ChangeButtonImgState(true, IMAGE_GUILDINFO_EXIT_BTN, false);
 	m_BtnExit.ChangeButtonInfo( m_Pos.x+13, m_Pos.y+392, 36, 29 );
-	// 1002 "닫기"
 	m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
 	
 	Show(false);
@@ -229,7 +220,6 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
 		m_EventState = EVENT_NONE;
 		return false;
 	}
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_GUILDINFO);
@@ -238,7 +228,6 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
 	}
 
 	if(m_EventState == EVENT_SCROLL_BTN_DOWN && SEASON3B::IsRelease(VK_LBUTTON))
-	//스크롤 포인트 엘버튼 체크해제
 	{
 		m_EventState = EVENT_NONE;
 		return false;
@@ -246,19 +235,16 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
 
 	if(m_nCurrentTab == 0)
 	{
-		// 길드 탈퇴 버튼(일반 길드원일 결우), 길드 해체 버튼(길드마스터일 경우)
 		if( m_Button[BUTTON_GUILD_OUT].UpdateMouseEvent() )
 		{
 			if( Hero->GuildStatus == G_MASTER )
 			{
-				// 연합마스터라면..
 				if( !strcmp( GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName ) )
 				{
 					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildOutPerson));
 				}
 				else
 				{
-					// 길드해체 메세지박스
 					DeleteIndex = GetGuildMemberIndex( Hero->ID );
 					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildBreakMsgBoxLayout));
 				}
@@ -272,21 +258,18 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
 	}
 	else if(m_nCurrentTab == 1)
 	{
-		if( m_Button[BUTTON_GET_OUT].UpdateMouseEvent() )//방출.
+		if( m_Button[BUTTON_GET_OUT].UpdateMouseEvent() )
 		{
 			if( Hero->GuildStatus == G_MASTER )
 			{
 				if( GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText() )
 				{
-					// 길마를 제외한 길드원 대상
 					if( pText->m_GuildStatus != G_MASTER )
 					{
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 #else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-						// 방출하시겠습니까?
 						GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText();
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-						// 방출 할 멤버 인덱스 기억
 						if( GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText() )
 						{
 							DeleteIndex = GetGuildMemberIndex( pText->m_szID );
@@ -302,25 +285,22 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
 			{
 				if( Hero->GuildStatus == G_MASTER )
 				{
-				// 길마를 제외한 길드원 대상
-				if( pText->m_GuildStatus != G_MASTER )
-				{
-					if( GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText() )
+					if( pText->m_GuildStatus != G_MASTER )
 					{
-						AppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
-						DeleteIndex = GetGuildMemberIndex( pText->m_szID );
-						SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuild_ToPerson_PositionLayout));
+						if( GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText() )
+						{
+							AppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
+							DeleteIndex = GetGuildMemberIndex( pText->m_szID );
+							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuild_ToPerson_PositionLayout));
+						}
 					}
-				}
 				}
 			}
 		}
-		// 길드원 - 해제 버튼
 		else if( m_Button[BUTTON_FREE_POSITION].UpdateMouseEvent() )
 		{
 			if( GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText() )
 			{
-				// 부길마나 배틀마스터만 대상
 				if( pText->m_GuildStatus == G_SUB_MASTER || pText->m_GuildStatus == G_BATTLE_MASTER )
 				{
 					if( GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText() )
@@ -331,8 +311,6 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
 						SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuildPerson_Cancel_Position_MsgBoxLayout), &pMsgBox);
 						if(pMsgBox != NULL)
 						{
-							// 1367 "'%s'님을"
-							// 1368 "직위해제 하시겠습니까?"
 							unicode::t_char strText[256];
 							unicode::_sprintf(strText, GlobalText[1367], pText->m_szID);
 							pMsgBox->AddMsg(strText);
@@ -345,29 +323,26 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
 	}
 	else if(m_nCurrentTab == 2)
 	{
-		if(m_Button[BUTTON_UNION_CREATE].UpdateMouseEvent())//연합길드 방출
+		if(m_Button[BUTTON_UNION_CREATE].UpdateMouseEvent())
 		{
 			if( Hero->GuildStatus == G_MASTER )
 			{
 				if( UNIONGUILD_TEXT* pText = m_UnionListBox.GetSelectedText() )
 				{
-					// 자기 길드가 아닐 경우..
 					if( strcmp( pText->szName, GuildMark[Hero->GuildMarkIndex].GuildName ) )
 					{
-						// 방출 할 길드명 기억
 						strcpy( DeleteID, pText->szName );
 						SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CUnionGuild_Break_MsgBoxLayout));
 					}
 				}
 			}
 		}
-		else if(m_Button[BUTTON_UNION_OUT].UpdateMouseEvent())//연합길드 해제
+		else if(m_Button[BUTTON_UNION_OUT].UpdateMouseEvent())
 		{
 			if( Hero->GuildStatus == G_MASTER )
 			{
 				if( !strcmp( GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName ) )
 				{
-					// 연합마스터는 연합해체를 할 수 없습니다.
 					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CUnionGuild_Out_MsgBoxLayout));
 				}
 				else
@@ -469,14 +444,13 @@ bool SEASON3B::CNewUIGuildInfoWindow::Render()
 	EnableAlphaTest();
 	glColor4f(1.f, 1.f, 1.f, 1.f);
 
-	// 프레임틀 렌더링
 	RenderFrame();
 
-	if( Hero->GuildStatus == G_NONE )	// 길드와 아무관련 없으면 
+	if( Hero->GuildStatus == G_NONE )
 	{
 		RenderNoneGuild();
 	}
-	else	// 길드와 관련이 있으면
+	else
 	{
 		RenderTabButton();
 
@@ -505,7 +479,6 @@ bool SEASON3B::CNewUIGuildInfoWindow::Render()
 
 void SEASON3B::CNewUIGuildInfoWindow::RenderFrame()
 {
-	// 메인프레임 렌더링
 	RenderImage(IMAGE_GUILDINFO_BACK, m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, GUILDINFO_HEIGHT);
 	RenderImage(IMAGE_GUILDINFO_TOP, m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, 64.f);
 	RenderImage(IMAGE_GUILDINFO_LEFT, m_Pos.x, m_Pos.y+64, 21.f, 320.f);
@@ -521,20 +494,17 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderNoneGuild()
 
 	unicode::t_char Text[128];
 	memset(&Text, 0, sizeof(unicode::t_char)*128);
-	sprintf(Text, GlobalText[180]); // "길  드"
+	sprintf(Text, GlobalText[180]);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+15, Text, 190, 0, RT3_SORT_CENTER );
 
 	g_pRenderText->SetFont(g_hFont);
-	// 185 "가입하고 싶은 길드의 마스터와"
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[185]);
 	ptOrigin.y += 15;
-	// 186 "마주본 상태에서 /길드 라고"
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[186]);
 	ptOrigin.y += 15;
-	// 187 "입력하시면 길드에 가입됨."
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[187]);
 	
 	m_BtnExit.Render();	
@@ -542,9 +512,9 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderNoneGuild()
 
 void SEASON3B::CNewUIGuildInfoWindow::RenderTabButton()
 {
-	RenderImage(IMAGE_GUILDINFO_TAB_LIST,m_Pos.x+12,m_Pos.y+68,166.f,22.f);	//탭버튼
+	RenderImage(IMAGE_GUILDINFO_TAB_LIST,m_Pos.x+12,m_Pos.y+68,166.f,22.f);
 	int Tab_Pos = m_nCurrentTab * 55;
-	RenderImage(IMAGE_GUILDINFO_TAB_POINT,m_Pos.x+12+Tab_Pos,m_Pos.y+68,56.f,22.f);	//탭버튼
+	RenderImage(IMAGE_GUILDINFO_TAB_POINT,m_Pos.x+12+Tab_Pos,m_Pos.y+68,56.f,22.f);
 }
 
 void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
@@ -552,7 +522,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 //////////////////////////////////////////////폰트부분
 	char Text[300];
 	POINT ptOrigin;
-	sprintf( Text, GlobalText[180]); //"길  드"
+	sprintf( Text, GlobalText[180]);
 	RenderText( Text, m_Pos.x, m_Pos.y+12, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 	ptOrigin.x = m_Pos.x+35;
 	ptOrigin.y = m_Pos.y+48;
@@ -567,7 +537,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 	{
 		glColor4f( 1.f, 1.f, 1.f, 1.f );
 	}
-	sprintf( Text, GlobalText[180]); //"길  드"
+	sprintf( Text, GlobalText[180]);
 	RenderText( Text, m_Pos.x+13+(0*55), m_Pos.y+76, 55, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 	glColor4f( 0.6f, 0.6f, 0.6f, 1.f );
 
@@ -575,7 +545,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 	{
 		glColor4f( 1.f, 1.f, 1.f, 1.f );
 	}
-	sprintf( Text, GlobalText[1330]); //"길드원"
+	sprintf( Text, GlobalText[1330]);
 	RenderText( Text, m_Pos.x+13+(1*55), m_Pos.y+76, 55, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 	glColor4f( 0.6f, 0.6f, 0.6f, 1.f );
 
@@ -584,52 +554,44 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 	{
 		glColor4f( 1.f, 1.f, 1.f, 1.f );
 	}
-	sprintf( Text, GlobalText[1352]); //"길드원"
+	sprintf( Text, GlobalText[1352]);
 	RenderText( Text, m_Pos.x+13+(2*55), m_Pos.y+76, 55, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 	glColor4f( 0.6f, 0.6f, 0.6f, 1.f );
-	//1323
 
 	if( m_nCurrentTab == 0 ) 
 	{
 		m_Button[BUTTON_GUILD_OUT].SetPos( m_Pos.x+100, m_Pos.y+350 );
 		if(Hero->GuildStatus == G_MASTER)
 		{
-			// 188 "해체"
 			m_Button[BUTTON_GUILD_OUT].ChangeText(GlobalText[188]);
 		}
 		else
 		{
-			// 189 "탈퇴"
 			m_Button[BUTTON_GUILD_OUT].ChangeText(GlobalText[189]);
 		}
 
-		sprintf( Text, GlobalText[1323]); //"길드공지"
+		sprintf( Text, GlobalText[1323]);
 		RenderText( Text, m_Pos.x + 22, m_Pos.y+249, 40, 0, _ARGB( 255,255, 185, 1), 0x00000000, RT3_SORT_CENTER );
 
 
-		/////////길드공지 찍는다.
 		m_GuildNotice.SetSize( 160, 80 );
 		m_GuildNotice.SetPosition( m_Pos.x + 15, m_Pos.y+264+m_GuildNotice.GetHeight() );
 		m_GuildNotice.Render();
 
 		int Nm_Loc = m_Pos.y+169;
-		// 1332 "생성일"
 		sprintf( Text,"%s :", GlobalText[1332]);
 		RenderText( Text, m_Pos.x + 22, Nm_Loc, 40, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT );
 		Nm_Loc+=13;
 
-		// 1256 "길드점수 : %d"
 		sprintf( Text, GlobalText[1256],GuildTotalScore);
 		RenderText( Text, m_Pos.x + 22, Nm_Loc, 80, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT );
 
-		// 1362 "길드인원 : %d/%d명"
 		Nm_Loc+=13;
 		if(Hero->GuildStatus == G_MASTER)
 		{
 			int Class = GetBaseClass ( CharacterAttribute->Class );
 			if ( Class == CLASS_DARK_LORD )
 			{
-				// 2005.4.28 마직막 계산 부분 /100 에서 /10 으로 고침
 				int nCount = CharacterAttribute->Level/10+CharacterAttribute->Charisma/10;
 				if( nCount > 80 )	
 					nCount = 80;
@@ -643,14 +605,11 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 		}
 		else
 		{
-			// 1310 "길드인원 : %d명"
 			sprintf( Text, GlobalText[1310], g_nGuildMemberCount );
 		}
 		RenderText( Text, m_Pos.x + 22, Nm_Loc, 80, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT );
 
 		Nm_Loc += 13;
-		// 1321 "적대길드"
-		// 1361 "없음"
 		sprintf( Text, "%s : %s", GlobalText[1321], m_RivalGuildName[0] ? m_RivalGuildName : GlobalText[1361] );
 		RenderText( Text, m_Pos.x + 22, Nm_Loc, 0, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT );
 	}
@@ -661,8 +620,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 		RenderText((char*)GlobalText[1307],m_Pos.x + 89, m_Pos.y + 112, 40, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT );
 		RenderText((char*)GlobalText[1022],m_Pos.x + 126, m_Pos.y + 112, 40, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT );
 
-
-		/////////길드공지 찍는다.
 		m_GuildMember.SetSize( 160, 420 );
 		m_GuildMember.SetPosition( m_Pos.x + 13, m_Pos.y+123 +m_GuildMember.GetHeight() );
 		m_GuildMember.Render();
@@ -674,9 +631,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 		glColor4f( 1.f, 1.f, 1.f, 1.f );
 		m_Button[BUTTON_UNION_CREATE].SetPos( m_Pos.x+30, m_Pos.y+230 );
 		m_Button[BUTTON_UNION_OUT].SetPos( m_Pos.x+100, m_Pos.y+230 );
-		// 1422 "연합방출"
 		m_Button[BUTTON_UNION_CREATE].ChangeText(GlobalText[1422]);
-		// 1324 "연합해체"
 		m_Button[BUTTON_UNION_OUT].ChangeText(GlobalText[1324]);
 		if( GuildMark[Hero->GuildMarkIndex].UnionName[0] != NULL )
 		{
@@ -708,20 +663,13 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
 	RenderBitmap( BITMAP_GUILD, m_Pos.x+74, m_Pos.y+106, 39, 39 );
 
 
-#ifdef _VS2008PORTING
 	for(int x=m_Pos.x+12; x<m_Pos.x+12+166; x++)
-#else // _VS2008PORTING
-	for(x=m_Pos.x+12; x<m_Pos.x+12+166; x++)
-#endif // _VS2008PORTING
 	{
 		RenderImage(IMAGE_GUILDINFO_TOP_PIXEL, x, m_Pos.y+159, 1, 14);
 		RenderImage(IMAGE_GUILDINFO_BOTTOM_PIXEL, x, m_Pos.y+159+56, 1, 14);
 	}
-#ifdef _VS2008PORTING
+
 	for(int y=m_Pos.y+159; y<m_Pos.y+159 +65; y++)
-#else // _VS2008PORTING
-	for(y=m_Pos.y+159; y<m_Pos.y+159 +65; y++)
-#endif // _VS2008PORTING
 	{
 		RenderImage(IMAGE_GUILDINFO_LEFT_PIXEL, m_Pos.x+10, y, 14, 1);
 		RenderImage(IMAGE_GUILDINFO_RIGHT_PIXEL, m_Pos.x+167, y, 14, 1);
@@ -735,21 +683,15 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
 	glColor4ub(0, 0, 0, 255);
 	RenderColor(m_Pos.x+11, m_Pos.y+260, 165, 84);
 	EndRenderColor();
-#ifdef _VS2008PORTING
+
 	for(int x=m_Pos.x+12; x<m_Pos.x+12+165; x++)
-#else // _VS2008PORTING
-	for(x=m_Pos.x+12; x<m_Pos.x+12+165; x++)
-#endif // _VS2008PORTING
 	{
 		if(x > 73)
 		RenderImage(IMAGE_GUILDINFO_TOP_PIXEL, x, m_Pos.y+260, 1, 14);
 		RenderImage(IMAGE_GUILDINFO_BOTTOM_PIXEL, x, m_Pos.y+260+74, 1, 14);
 	}
-#ifdef _VS2008PORTING
+
 	for(int y=m_Pos.y+260; y<m_Pos.y+260 +82; y++)
-#else // _VS2008PORTING
-	for(y=m_Pos.y+260; y<m_Pos.y+260 +82; y++)
-#endif // _VS2008PORTING
 	{
 		RenderImage(IMAGE_GUILDINFO_LEFT_PIXEL, m_Pos.x+10, y, 14, 1);
 		RenderImage(IMAGE_GUILDINFO_RIGHT_PIXEL, m_Pos.x+167, y, 14, 1);
@@ -757,10 +699,10 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
 	RenderImage(IMAGE_GUILDINFO_TOP_RIGHT, m_Pos.x+167, m_Pos.y+260, 14, 14);
 	RenderImage(IMAGE_GUILDINFO_BOTTOM_LEFT, m_Pos.x+10, m_Pos.y+334, 14, 14);
 	RenderImage(IMAGE_GUILDINFO_BOTTOM_RIGHT, m_Pos.x+167, m_Pos.y+334, 14, 14);
-	RenderImage(IMAGE_GUILDINFO_TAB_HEAD,m_Pos.x+11,m_Pos.y+237,63.f,25.f);	//탭버튼
+	RenderImage(IMAGE_GUILDINFO_TAB_HEAD,m_Pos.x+11,m_Pos.y+237,63.f,25.f);
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	//. 스크롤바 틀
+
 	RenderImage(IMAGE_GUILDINFO_SCROLL_TOP, m_Pos.x+167, 
 		262, 7, 3);
 		
@@ -791,7 +733,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
 		}
 	}
 
-	// 스크롤 버튼
 	if (m_EventState == EVENT_SCROLL_BTN_DOWN) 
 		glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
 	else 
@@ -811,7 +752,7 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderScrollBar()
 	float fRenderPosX = 0, fRenderPosY = 0- 200;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	//. 스크롤바 틀
+
 	RenderImage(IMAGE_GUILDINFO_SCROLL_TOP, m_Pos.x+170, 
 		125, 7, 3);
 	
@@ -855,17 +796,11 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Info()
 {
 	POINT ptOrigin = { m_Pos.x+15, m_Pos.y+98 };
 
-	// 내가 길마이고 길드연합 가입하지 않았다면
 	if( GuildMark[Hero->GuildMarkIndex].UnionName[0] == NULL )
 	{
 		ptOrigin.x += 10;
 		ptOrigin.y += 8;
 
-		// 1257 "길드연합을 맺고 싶은 길드의" 
-		// 1258 "길드마스터와 마주보고"
-		// 1259 "/연합 이라고 입력하거나"
-		// 1260 "커맨드창의 길드연합버튼을"
-		// 1261 "이용하여 연합을 합니다."
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
 		g_pRenderText->SetBgColor(0);
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1257]);
@@ -878,13 +813,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Info()
 		ptOrigin.y += 15;
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1261]);
 
-		
-		// 1262 "상대방이 길드연합이 아니라면"
-		// 1263 "상대방을 연합의 주체로"
-		// 1264 "길드연합을 생성합니다."
-		// 1265 "상대방이 길드연합이라면"
-		// 1266 "상대방의 연합에 가입을"
-		// 1267 "요청합니다."
 		ptOrigin.y += 25;
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1262]);
 		ptOrigin.y += 15;
@@ -963,7 +891,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Enum()
 	RenderImage(IMAGE_GUILDINFO_BOTTOM_LEFT, m_Pos.x+8, m_Pos.y+347, 14, 14);
 	RenderImage(IMAGE_GUILDINFO_BOTTOM_RIGHT, m_Pos.x+168, m_Pos.y+347, 14, 14);
 
-	// 길드마스터이면
 	if(IsGuildMaster())
 	{
 		m_Button[BUTTON_GET_POSITION].Render();
@@ -1114,25 +1041,25 @@ void SEASON3B::CNewUIGuildInfoWindow::ReceiveGuildRelationShip( BYTE byRelationS
 			if( m_MessageInfo.s_byRelationShipRequestType == 0x01 )	// Join
 			{
 #if SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-				sprintf( szText[0], GlobalText[1280] );					// 1280 "%s 님으로부터 길드연합"
-				sprintf( szText[1], GlobalText[1281], pPlayer->ID );	// 1281 "가입 요청이 들어왔습니다."
-				sprintf( szText[2], GlobalText[1283] );					// 1283 "수락하시겠습니까?"
+				sprintf( szText[0], GlobalText[1280] );
+				sprintf( szText[1], GlobalText[1281], pPlayer->ID );
+				sprintf( szText[2], GlobalText[1283] );
 #else
-				sprintf( szText[0], GlobalText[1280], pPlayer->ID );	// 1280 "%s 님으로부터 길드연합"
-				sprintf( szText[1], GlobalText[1281] );					// 1281 "가입 요청이 들어왔습니다."
-				sprintf( szText[2], GlobalText[1283] );					// 1283 "수락하시겠습니까?"
+				sprintf( szText[0], GlobalText[1280], pPlayer->ID );
+				sprintf( szText[1], GlobalText[1281] );	
+				sprintf( szText[2], GlobalText[1283] );	
 #endif // SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 			}
 			else										// Break Off
 			{
 #if SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-				sprintf( szText[0], GlobalText[1280] );					// 1280 "%s 님으로부터 길드연합"
-				sprintf( szText[1], GlobalText[1282], pPlayer->ID );	// 1282 "탈퇴 요청이 들어왔습니다."
-				sprintf( szText[2], GlobalText[1283] );					// 1283 "수락하시겠습니까?"
+				sprintf( szText[0], GlobalText[1280] );
+				sprintf( szText[1], GlobalText[1282], pPlayer->ID );
+				sprintf( szText[2], GlobalText[1283] );
 #else
-				sprintf( szText[0], GlobalText[1280], pPlayer->ID );	// 1280 "%s 님으로부터 길드연합"
-				sprintf( szText[1], GlobalText[1282] );					// 1282 "탈퇴 요청이 들어왔습니다."
-				sprintf( szText[2], GlobalText[1283] );					// 1283 "수락하시겠습니까?"
+				sprintf( szText[0], GlobalText[1280], pPlayer->ID );
+				sprintf( szText[1], GlobalText[1282] );
+				sprintf( szText[2], GlobalText[1283] );
 #endif // SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 			}
 		}
@@ -1140,15 +1067,15 @@ void SEASON3B::CNewUIGuildInfoWindow::ReceiveGuildRelationShip( BYTE byRelationS
 		{
 			if( m_MessageInfo.s_byRelationShipRequestType == 0x01 )	// Join
 			{
-				sprintf( szText[0], GlobalText[1284], pPlayer->ID );	// 1284 "%s 님으로부터 적대길드"
-				sprintf( szText[1], GlobalText[1286] );				// 1286 "수락 요청이 들어왔습니다."
-				sprintf( szText[2], GlobalText[1283] );				// 1283 "수락하시겠습니까?"
+				sprintf( szText[0], GlobalText[1284], pPlayer->ID );
+				sprintf( szText[1], GlobalText[1286] );
+				sprintf( szText[2], GlobalText[1283] );
 			}
 			else
 			{
-				sprintf( szText[0], GlobalText[1284], pPlayer->ID );	// 1284 "%s 님으로부터 적대길드"
-				sprintf( szText[1], GlobalText[1285] );				// 1285 "해제 요청이 들어왔습니다."
-				sprintf( szText[2], GlobalText[1283] );				// 1283 "수락하시겠습니까?"
+				sprintf( szText[0], GlobalText[1284], pPlayer->ID );
+				sprintf( szText[1], GlobalText[1285] );
+				sprintf( szText[2], GlobalText[1283] );
 			}
 		}
 

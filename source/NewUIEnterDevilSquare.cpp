@@ -355,11 +355,7 @@ void CNewUIEnterDevilSquare::OpenningProcess()
 	// 캐슬 입장 버튼 텍스트
 	unicode::t_char sztext[255] = {0, };
 
-#ifdef _VS2008PORTING
 	for( int i=0 ; i<MAX_ENTER_GRADE-1 ; i++)
-#else // _VS2008PORTING
-	for( i=0 ; i<MAX_ENTER_GRADE-1 ; i++)
-#endif // _VS2008PORTING
 	{
 		unicode::_sprintf( sztext, GlobalText[ 645 ], i+1
 			, m_iDevilSquareLimitLevel[ (iLimitLVIndex*(MAX_ENTER_GRADE))+i ][ 0 ]

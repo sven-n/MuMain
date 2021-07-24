@@ -3700,13 +3700,8 @@ int SEASON3B::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwCol
 	bool bLoop = true;
 	while(bLoop)
 	{
-#ifdef _VS2008PORTING
 		int prev_offset = 0;
 		for(int cur_offset = 0; cur_offset<(int)strRemainText.size(); )
-#else // _VS2008PORTING
-		int cur_offset = 0, prev_offset = 0;
-		for(; cur_offset<strRemainText.size(); )
-#endif // _VS2008PORTING
 		{
 			prev_offset = cur_offset;
 			size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str()+cur_offset));
@@ -3786,15 +3781,12 @@ void SEASON3B::CDialogMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 	
-	// 메세지박스 중간부분(3줄이상)
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	if(m_MsgDataList.size() > 2)
 	{
@@ -3806,7 +3798,6 @@ void SEASON3B::CDialogMsgBox::RenderFrame()
 		}
 	}
 
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -3817,7 +3808,6 @@ void SEASON3B::CDialogMsgBox::RenderTexts()
 
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
 	for(; vi != m_MsgDataList.end(); vi++)
@@ -4252,13 +4242,8 @@ int SEASON3B::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMs
 	bool bLoop = true;
 	while(bLoop)
 	{
-#ifdef _VS2008PORTING
 		int prev_offset = 0;
 		for(int cur_offset = 0; cur_offset<(int)strRemainText.size(); )
-#else // _VS2008PORTING
-		int cur_offset = 0, prev_offset = 0;
-		for(; cur_offset<strRemainText.size(); )
-#endif // _VS2008PORTING
 		{
 			prev_offset = cur_offset;
 			size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str()+cur_offset));

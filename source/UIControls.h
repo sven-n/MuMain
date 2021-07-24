@@ -322,11 +322,7 @@ public:
 	virtual void SLSetSelectLine(int iLineNum);					// 선택 라인 (1~라인수) , 0: 선택 없음
 	virtual void SLSelectPrevLine(int iLineNum = 1);			// 이전 라인으로 이동 (-)
 	virtual void SLSelectNextLine(int iLineNum = 1);			// 다음 라인으로 이동 (+)
-#ifdef _VS2008PORTING
 	virtual typename deque<T>::iterator SLGetSelectLine();		// 현재 라인 데이터 얻기
-#else // _VS2008PORTING
-	virtual deque<T>::iterator SLGetSelectLine();				// 현재 라인 데이터 얻기
-#endif // _VS2008PORTING
 
 	virtual int SLGetSelectLineNum() { return m_iSelectLineNum; }
 
@@ -347,11 +343,7 @@ protected:
 
 protected:
 	deque<T> m_TextList;
-#ifdef _VS2008PORTING
 	typename deque<T>::iterator m_TextListIter;
-#else // _VS2008PORTING
-	deque<T>::iterator m_TextListIter;
-#endif // _VS2008PORTING
 
 	BOOL m_bUseSelectLine;				// 라인 선택 가능여부
 	BOOL m_bPressCursorKey;				// 키 입력 처리용a
@@ -466,11 +458,8 @@ public:
 	int GetColumnPos_x(UINT uiColumnNum)
 	{
 		int iResult = 0;
-#ifdef _VS2008PORTING
+
 		for (unsigned int i = 0; i < uiColumnNum; ++i)
-#else // _VS2008PORTING
-		for (int i = 0; i < uiColumnNum; ++i)
-#endif // _VS2008PORTING
 		{
 			iResult += m_iColumnWidth[i];
 		}
@@ -526,11 +515,7 @@ public:
 	int GetColumnPos_x(UINT uiColumnNum)
 	{
 		int iResult = 0;
-#ifdef _VS2008PORTING
 		for (unsigned int i = 0; i < uiColumnNum; ++i)
-#else // _VS2008PORTING
-		for (int i = 0; i < uiColumnNum; ++i)
-#endif // _VS2008PORTING
 		{
 			iResult += m_iColumnWidth[i];
 		}

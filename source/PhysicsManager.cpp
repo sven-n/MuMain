@@ -541,17 +541,12 @@ BOOL CPhysicsCloth::Create( OBJECT *o, int iBone, float fxPos, float fyPos, floa
 		break;
 	}
 
-#ifdef _VS2008PORTING
 	for ( int j = 0; j < m_iNumVer; ++j )
-#else // _VS2008PORTING
-	for ( j = 0; j < m_iNumVer; ++j)
-#endif // _VS2008PORTING
 	{
 		for ( int i = 0; i < m_iNumHor; ++i)
 		{
 			vec3_t vTemp;
 			int iVertex = m_iNumHor * j + i;
-			// 상하 연결
 			if ( j < m_iNumVer - 1)
 			{
 				float fDist = m_pVertices[iVertex].GetDistance( &m_pVertices[iVertex+m_iNumHor], &vTemp);
@@ -559,17 +554,14 @@ BOOL CPhysicsCloth::Create( OBJECT *o, int iBone, float fxPos, float fyPos, floa
 			}
 			if ( i < m_iNumHor - 1)
 			{
-				// 좌우 연결
 				float fDist = m_pVertices[iVertex].GetDistance( &m_pVertices[iVertex+1], &vTemp);
 				SetLink( iLink++, iVertex, iVertex + 1, fDist*0.8f, fDist, PLS_SPRING | PLS_LOOSEDISTANCE);
 
-				// 우하
 				if ( j < m_iNumVer - 1)
 				{
 					float fDist = m_pVertices[iVertex].GetDistance( &m_pVertices[iVertex+1+m_iNumHor], &vTemp);
 					SetLink( iLink++, iVertex, iVertex+1+m_iNumHor, fDist*0.8f, fDist, byCrossLinkStyle);
 				}
-				// 우상
 				if ( j > 1)
 				{
 					float fDist = m_pVertices[iVertex].GetDistance( &m_pVertices[iVertex+1-m_iNumHor], &vTemp);
@@ -609,13 +601,13 @@ void CPhysicsCloth::SetFixedVertices( float Matrix[3][4])
 		float fUnitWidth = m_fUnitWidth;
 		switch ( PCT_MASK_SHAPE_EXT & m_dwType)
 		{
-		case PCT_SHORT_SHOULDER:
-			fWidth *= RATE_SHORT_SHOULDER;
-			fUnitWidth = fWidth / ( float)( m_iNumHor - 1);
-			break;
-		case PCT_CYLINDER:
-			bCylinder = true;
-			break;
+			case PCT_SHORT_SHOULDER:
+				fWidth *= RATE_SHORT_SHOULDER;
+				fUnitWidth = fWidth / ( float)( m_iNumHor - 1);
+				break;
+			case PCT_CYLINDER:
+				bCylinder = true;
+				break;
 		}
 
 		vec3_t vPos = { ( fUnitWidth * ( float)iVertex) - 0.5f * fWidth, 10.0f, 0.0f};
@@ -634,32 +626,30 @@ void CPhysicsCloth::SetFixedVertices( float Matrix[3][4])
 
 		switch(PCT_MASK_SHAPE_EXT2 & m_dwType) 
 		{
-		case PCT_SHAPE_HALLOWEEN:
-			vPos[0] += 5.f;
-			vPos[1] += 10.f;	
-			break;
+			case PCT_SHAPE_HALLOWEEN:
+				vPos[0] += 5.f;
+				vPos[1] += 10.f;	
+				break;
 		}
 
 		switch ( PCT_MASK_SHAPE & m_dwType)
 		{
-		case PCT_CURVED:
-			float fMove = 2.0f * ( float)fabs( ( float)iVertex/(float)( m_iNumHor-1) - 0.5f);
-			vPos[1] -= 10.0f * fMove * fMove;
-			break;
-		}
-		// bone 을 통한 변환 준비 작업
-		{
-			vec3_t vTemp;
-			memcpy( vTemp, vPos, sizeof ( vec3_t));
-			vPos[0] = vTemp[2];
-			vPos[1] = -vTemp[1];
-			vPos[2] = vTemp[0];
+			case PCT_CURVED:
+				float fMove = 2.0f * ( float)fabs( ( float)iVertex/(float)( m_iNumHor-1) - 0.5f);
+				vPos[1] -= 10.0f * fMove * fMove;
+				break;
 		}
 
+		vec3_t vTemp;
+		memcpy( vTemp, vPos, sizeof ( vec3_t));
+		vPos[0] = vTemp[2];
+		vPos[1] = -vTemp[1];
+		vPos[2] = vTemp[0];
+
 		vec3_t vPos2;
-		Models[m_oOwner->Type].TransformPosition(Matrix,vPos,vPos2,true);	// 기본 TM의 위치점을 물리 연산된 위치점에 더해주는 부분.
-		m_pVertices[iVertex].Init( vPos2[0], vPos2[1], vPos2[2], TRUE);		// 기본 TM의 위치점을 물리 버텍스로 대입.
-	}	// 모든 물리 버텍스에 TM의 위치만 대입.
+		Models[m_oOwner->Type].TransformPosition(Matrix,vPos,vPos2,true);
+		m_pVertices[iVertex].Init( vPos2[0], vPos2[1], vPos2[2], TRUE);
+	}
 }
 
 void CPhysicsCloth::SetLink( int iLink, int iVertex1, int iVertex2, float fDistanceSmall, float fDistanceLarge, BYTE byStyle)
@@ -686,7 +676,7 @@ BOOL CPhysicsCloth::Move2( float fTime, int iCount)
 
 BOOL CPhysicsCloth::Move( float fTime)
 {
-	switch ( PCT_MASK_ELASTIC & m_dwType)	// m_dwType
+	switch ( PCT_MASK_ELASTIC & m_dwType)
     {
 	case PCT_RUBBER2:
         m_fWind = ((rand()%m_byWindMax+m_byWindMin)/100.f);
@@ -711,9 +701,8 @@ BOOL CPhysicsCloth::Move( float fTime)
     CPhysicsManager::s_vWind[0] = m_fWind * sinf( (180.0f+m_oOwner->Angle[2])*Q_PI/180.0f);
 	CPhysicsManager::s_vWind[1] = -m_fWind * cosf( (180.0f+m_oOwner->Angle[2])*Q_PI/180.0f);
 
-	// 최종 계산
 	MoveVertices( fTime);
-	// 늘어남 방지
+
 	if ( !PreventFromStretching())
 	{
 		return ( FALSE);
@@ -739,10 +728,8 @@ void CPhysicsCloth::InitForces( void)
 
 void CPhysicsCloth::MoveVertices( float fTime)
 {
-	// 1. 힘 초기화
 	InitForces();
 
-	// 2. 상호작용
 	for ( int iLink = 0; iLink < m_iNumLink; ++iLink)
 	{
 		St_PhysicsLink *pLink = &m_pLink[iLink];
@@ -750,7 +737,6 @@ void CPhysicsCloth::MoveVertices( float fTime)
 		{
 			CPhysicsVertex *pVertex1 = &m_pVertices[pLink->m_nVertices[0]];
 			CPhysicsVertex *pVertex2 = &m_pVertices[pLink->m_nVertices[1]];
-			// 탄성력
 			vec3_t vDistance;
 			float fDistance = max( 0.001f, pVertex1->GetDistance( pVertex2, &vDistance));
 			if ( fDistance > pLink->m_fDistance[1]+0.01f)
@@ -792,7 +778,6 @@ void CPhysicsCloth::MoveVertices( float fTime)
 		}
 	}
 
-	// 3. TM의 위치점만 물리 버텍스로 적용 즉, "이동" 처리만
 	SetFixedVertices( m_oOwner->BoneTransform[m_iBone]);
 	for ( int iVertex = 0; iVertex < m_iNumVertices; ++iVertex)
 	{
@@ -803,7 +788,6 @@ void CPhysicsCloth::MoveVertices( float fTime)
 BOOL CPhysicsCloth::PreventFromStretching( void)
 {
 #ifdef ADD_COLLISION
-	// 충돌 정보 이동
 	CNode<CPhysicsCollision*> *pHead = m_lstCollision.FindHead();
 	for ( ; pHead; pHead = m_lstCollision.GetNext( pHead))
 	{
@@ -823,9 +807,8 @@ BOOL CPhysicsCloth::PreventFromStretching( void)
 		pCollision->SetPosition( vPos2[0], vPos2[1], vPos2[2]);
 	}
 #endif
-	// 충돌 처리
 	ProcessCollision();
-	// 가로,대각선 늘어남 방지 ( 가까이 붙이기)
+
 	for ( int iLink = 0; iLink < m_iNumLink; ++iLink)
 	{
 		St_PhysicsLink *pLink = &m_pLink[iLink];
@@ -845,12 +828,8 @@ BOOL CPhysicsCloth::PreventFromStretching( void)
 			m_pVertices[iVertex].DoOneTimeMove();
 		}
 	}
-	// 늘어남 방지 강제
-#ifdef _VS2008PORTING
+
 	for ( int iLink = 0; iLink < m_iNumLink; ++iLink)
-#else // _VS2008PORTING
-	for ( iLink = 0; iLink < m_iNumLink; ++iLink)
-#endif // _VS2008PORTING
 	{
 		St_PhysicsLink *pLink = &m_pLink[iLink];
 		if ( pLink->m_nVertices[1] >= m_iNumHor &&
@@ -874,7 +853,7 @@ void CPhysicsCloth::Render( vec3_t *pvColor, int iLevel)
 #ifdef MR0
 	VPManager::Disable();
 #endif //MR0
-	// 점들 위치 얻기
+
 	vec3_t *pvRenderPos = new vec3_t [m_iNumVertices];
 
 	for ( int j = 0; j < m_iNumVer; ++j)
@@ -992,7 +971,6 @@ void CPhysicsCloth::Render( vec3_t *pvColor, int iLevel)
 
 	delete [] pvRenderPos;
 
-	// 충돌 구 표시
 #ifdef RENDER_COLLISION
 	RenderCollisions();
 #endif
@@ -1114,7 +1092,6 @@ void CPhysicsCloth::Render_MappingOption(	BMD& b, int iMesh,
 
 	vec3_t	v3VertexColorResult;
 	
-	//. 칼라셋팅
 	if( TRUE == bVertexColorProcessMappingFunc )
 	{
 		PartObjectColor(b.m_iBMDSeqID, fMeshAlpha, fBright, v3VertexColorResult, (iRenderFlag&RENDER_EXTRA) ? true : false );
@@ -1124,7 +1101,6 @@ void CPhysicsCloth::Render_MappingOption(	BMD& b, int iMesh,
 		VectorCopy( v3VertexColor, v3VertexColorResult )
 	}
 
-	// 점들 위치 얻기
 	vec3_t *pvRenderPos = new vec3_t [m_iNumVertices];
 
 	for ( int j = 0; j < m_iNumVer; ++j)

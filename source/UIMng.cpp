@@ -992,11 +992,7 @@ void CUIMng::Update(double dDeltaTick)
 		}
 	}
  
-#ifdef _VS2008PORTING
 	for(int i = 0; i < nlist; ++i)
-#else // _VS2008PORTING
-	for(i = 0; i < nlist; ++i)
-#endif // _VS2008PORTING
 	{
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		apTempWin[i]->Update();

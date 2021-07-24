@@ -54,15 +54,12 @@ DWORD CUIGuardsMan::GetMyMarkCount()
 
 	SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
 	ITEM * pItem = NULL;
-#ifdef _VS2008PORTING
+
 	for (int i = 0; i < (int)pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#else // _VS2008PORTING
-	for (int i = 0; i < pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#endif // _VS2008PORTING
 	{
 		pItem = pNewInventoryCtrl->GetItem(i);
 		int nItemLevel = (pItem->Level>>3)&15;
-		if( pItem->Type == ITEM_POTION+21 && nItemLevel == 3 )	// 성주의표식
+		if( pItem->Type == ITEM_POTION+21 && nItemLevel == 3 )
         {
 	        dwResult += pItem->Durability;
         }
@@ -75,15 +72,12 @@ int CUIGuardsMan::GetMyMarkSlotIndex()
 {
 	SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
 	ITEM * pItem = NULL;
-#ifdef _VS2008PORTING
+
 	for (int i = 0; i < (int)pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#else // _VS2008PORTING	
-	for (int i = 0; i < pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#endif // _VS2008PORTING
 	{
 		pItem = pNewInventoryCtrl->GetItem(i);
 		int nItemLevel = (pItem->Level>>3)&15;
-		if( pItem->Type == ITEM_POTION+21 && nItemLevel == 3 )	// 성주의표식
+		if( pItem->Type == ITEM_POTION+21 && nItemLevel == 3 )
         {
 	        return pItem->y * COLUMN_INVENTORY + pItem->x;
         }

@@ -1,9 +1,5 @@
 //*****************************************************************************
 // File: NewUINPCQuest.cpp
-//
-// Desc: implementation of the NewUINPCQuest class.
-//
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
 
 #include "stdafx.h"
@@ -21,10 +17,6 @@ extern int g_iCurrentDialogScript;
 
 using namespace SEASON3B;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CNewUINPCQuest::CNewUINPCQuest()
 {
 	m_pNewUIMng = NULL;
@@ -37,13 +29,6 @@ CNewUINPCQuest::~CNewUINPCQuest()
 	Release();
 }
 
-//*****************************************************************************
-// 함수 이름 : Create()
-// 함수 설명 : NPC 퀘스트 창 생성.
-// 매개 변수 : pNewUIMng	: CNewUIManager 오브젝트 주소.
-//			   x			: x 좌표.
-//			   y			: y 좌표.
-//*****************************************************************************
 bool CNewUINPCQuest::Create(CNewUIManager* pNewUIMng,
 							CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y)
 {
@@ -61,12 +46,10 @@ bool CNewUINPCQuest::Create(CNewUIManager* pNewUIMng,
 
 	LoadImages();
 
-	// 퀘스트 처리 버튼.
 	m_btnComplete.ChangeText(GlobalText[699]);
 	m_btnComplete.ChangeButtonImgState(true, IMAGE_NPCQUEST_BTN_COMPLETE, true);
 	m_btnComplete.ChangeButtonInfo(x + 41, y + 355, 108, 29);
 
-	// 닫기 버튼.
 	m_btnClose.ChangeButtonImgState(true, IMAGE_NPCQUEST_BTN_CLOSE);
 	m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
 	m_btnClose.ChangeToolTipText(GlobalText[1002], true);
@@ -76,10 +59,6 @@ bool CNewUINPCQuest::Create(CNewUIManager* pNewUIMng,
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Release()
-// 함수 설명 : 창 Release.
-//*****************************************************************************
 void CNewUINPCQuest::Release()
 {
 	UnloadImages();
@@ -97,21 +76,12 @@ void CNewUINPCQuest::Release()
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : SetPos()
-// 함수 설명 : 창 위치 지정.
-//*****************************************************************************
 void CNewUINPCQuest::SetPos(int x, int y)
 {
 	m_Pos.x = x;
 	m_Pos.y = y;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateMouseEvent()
-// 함수 설명 : 마우스 이벤트 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool CNewUINPCQuest::UpdateMouseEvent()
 {
 	if (ProcessBtns())
@@ -120,18 +90,12 @@ bool CNewUINPCQuest::UpdateMouseEvent()
 	if (UpdateSelTextMouseEvent())
 		return false;
 
-	// 창 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, NPCQUEST_WIDTH, NPCQUEST_HEIGHT))
 		return false;
 
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateSelTextMouseEvent()
-// 함수 설명 : 선택문 마우스 이벤트 처리.
-// 반환 값	 : 처리 했으면 true.
-//*****************************************************************************
 bool CNewUINPCQuest::UpdateSelTextMouseEvent()
 {
 	BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
@@ -160,17 +124,16 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
             {
 				int nAnswer
 					= g_DialogScript[g_iCurrentDialogScript].m_iReturnForAnswer[iButtonPush];
-			    // 서버에 보내기
-			    if (1 == nAnswer)        //  다음 진행.
+
+			    if (1 == nAnswer)
 					bErrorMessage = g_csQuest.ProcessNextProgress();
-                else if (2 == nAnswer)   //  창을 닫는다.
+                else if (2 == nAnswer)
 					g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCQUEST);
-                else if (3 == nAnswer)   //  퀘스트 완료 신청.
+                else if (3 == nAnswer)
                     SendRequestQuestState(byCurQuestIndex, 1);
 
                 ::PlayBuffer(SOUND_INTERFACE01);
 
-                // 다음 연결
 				int nNextDialogIndex
 					= g_DialogScript[g_iCurrentDialogScript].m_iLinkForAnswer[iButtonPush];
 			    if (0 < nNextDialogIndex && !bErrorMessage)
@@ -184,11 +147,6 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
 	return false;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateKeyEvent()
-// 함수 설명 : 키보드 입력 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool CNewUINPCQuest::UpdateKeyEvent()
 {
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST) == true)
@@ -205,21 +163,11 @@ bool CNewUINPCQuest::UpdateKeyEvent()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Update()
-// 함수 설명 : 기타 매 프레임 일어나는 이벤트 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool CNewUINPCQuest::Update()
 {
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Render()
-// 함수 설명 : 창 렌더.
-// 반환 값	 : true면 성공.
-//*****************************************************************************
 bool CNewUINPCQuest::Render()
 {
 	::EnableAlphaTest();
@@ -233,11 +181,9 @@ bool CNewUINPCQuest::Render()
 
 	if (QUEST_ING == byCurQuestState)
 	{
-	// 구분 선.
 		RenderImage(IMAGE_NPCQUEST_LINE, m_Pos.x+1, m_Pos.y+325, 188.f, 21.f);
 
-		// 아이템 및 몬스터 이름 개수 텍스트 렌더.
-		if (RenderItemMobText())	// 퀘스트 수행 조건을 만족 하는가?
+		if (RenderItemMobText())
 		{
 			m_btnComplete.UnLock();
 			m_btnComplete.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
@@ -278,10 +224,6 @@ bool CNewUINPCQuest::Render()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderBackImage()
-// 함수 설명 : 창 바탕 이미지 렌더.
-//*****************************************************************************
 void CNewUINPCQuest::RenderBackImage()
 {
 	RenderImage(IMAGE_NPCQUEST_BACK,
@@ -298,10 +240,6 @@ void CNewUINPCQuest::RenderBackImage()
 	RenderImage(IMAGE_NPCQUEST_LINE, m_Pos.x+1, m_Pos.y+220, 188.f, 21.f);
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderText()
-// 함수 설명 : 텍스트 렌더.
-//*****************************************************************************
 void CNewUINPCQuest::RenderText()
 {
 	BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
@@ -310,7 +248,6 @@ void CNewUINPCQuest::RenderText()
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetBgColor(0);
 
-// NPC 이름.
 	g_pRenderText->SetTextColor(150, 255, 240, 255);
 	if ((Hero->Class == CLASS_DARK_LORD || Hero->Class == CLASS_DARK
 #ifdef PBG_ADD_NEWCHAR_MONK
@@ -325,7 +262,6 @@ void CNewUINPCQuest::RenderText()
 			g_csQuest.GetNPCName(byCurQuestIndex), NPCQUEST_WIDTH, 0,
 			RT3_SORT_CENTER);
 
-// 퀘스트 이름.
 	g_pRenderText->SetTextColor(200, 220, 255, 255);
 	if ((Hero->Class != CLASS_DARK_LORD && Hero->Class != CLASS_DARK
 #ifdef PBG_ADD_NEWCHAR_MONK
@@ -336,7 +272,6 @@ void CNewUINPCQuest::RenderText()
 		g_pRenderText->RenderText(m_Pos.x, m_Pos.y+29,
 			g_csQuest.getQuestTitle(), NPCQUEST_WIDTH, 0, RT3_SORT_CENTER);
 
-// 퀘스트 내용.
 	g_pRenderText->SetTextColor(255, 230, 210, 255);
 	int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
     int xPos = m_Pos.x+NPCQUEST_WIDTH/2;
@@ -348,7 +283,6 @@ void CNewUINPCQuest::RenderText()
 		yPos += 18;
 	}
 
-// 선택문.
     if (byCurQuestState != QUEST_ING)
         yPos = m_Pos.y+250;
 
@@ -356,11 +290,7 @@ void CNewUINPCQuest::RenderText()
 
 	g_pRenderText->SetFont(g_hFontBold);
 
-#ifdef _VS2008PORTING
 	for (int j = 0; j < g_iNumAnswer; ++j)
-#else // _VS2008PORTING
-	for (j = 0; j < g_iNumAnswer; ++j)
-#endif // _VS2008PORTING
 	{
 		if (iButtonOn == j && abs(m_Pos.x + NPCQUEST_WIDTH/2 - MouseX) <= NPCQUEST_WIDTH/2)
 			g_pRenderText->SetTextColor(255, 0, 0, 255);
@@ -376,14 +306,8 @@ void CNewUINPCQuest::RenderText()
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : GetKillMobCount()
-// 함수 설명 : 진행 중인 아이템 또는 몬스터 이름과 개수 텍스트 렌더.
-// 반환 값	 : 퀘스트 요구 만족시 true. 
-//*****************************************************************************
 bool CNewUINPCQuest::RenderItemMobText()
 {
-	// 퀘스트가 요구하는 아이템 수 또는 몬스터 kill수가 만족하는지 여부.
 	bool bCompletion = true;
 
 	unicode::t_char szTemp[128];
@@ -432,7 +356,6 @@ bool CNewUINPCQuest::RenderItemMobText()
 				if (int(pQuest->QuestAct[i].byItemNum) <= nKillMobCount)
 				{
 					g_pRenderText->SetTextColor(223, 191, 103, 255);
-					// UI에선 퀘스트 요구 몬스터 개수를 넘지 말아야 함.
 					nKillMobCount = int(pQuest->QuestAct[i].byItemNum);
 				}
 				else
@@ -456,10 +379,6 @@ bool CNewUINPCQuest::RenderItemMobText()
 	return bCompletion;
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderItem3D()
-// 함수 설명 : 퀘스트 완료에 필요한 아이템 렌더.
-//*****************************************************************************
 void CNewUINPCQuest::RenderItem3D()
 {
 	BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
@@ -504,19 +423,11 @@ void CNewUINPCQuest::Render3D()
 bool CNewUINPCQuest::IsVisible() const
 { return CNewUIObj::IsVisible(); }
 
-//*****************************************************************************
-// 함수 이름 : GetLayerDepth()
-// 함수 설명 : 창의 레이어값을 얻음.
-//*****************************************************************************
 float CNewUINPCQuest::GetLayerDepth()
 {
 	return 3.1f;
 }
 
-//*****************************************************************************
-// 함수 이름 : LoadImages()
-// 함수 설명 : 이미지 리소스 로드.
-//*****************************************************************************
 void CNewUINPCQuest::LoadImages()
 {
 	LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_NPCQUEST_BACK, GL_LINEAR);
@@ -531,10 +442,6 @@ void CNewUINPCQuest::LoadImages()
 	LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_NPCQUEST_BTN_CLOSE, GL_LINEAR);
 }
 
-//*****************************************************************************
-// 함수 이름 : LoadImages()
-// 함수 설명 : 이미지 리소스 삭제.
-//*****************************************************************************
 void CNewUINPCQuest::UnloadImages()
 {
 	DeleteBitmap(IMAGE_NPCQUEST_BTN_CLOSE);
@@ -549,31 +456,17 @@ void CNewUINPCQuest::UnloadImages()
 	DeleteBitmap(IMAGE_NPCQUEST_BACK);
 }
 
-//*****************************************************************************
-// 함수 이름 : ProcessOpening()
-// 함수 설명 : 창을 열 때 처리.
-//*****************************************************************************
 void CNewUINPCQuest::ProcessOpening()
 {
 	g_csQuest.ShowQuestNpcWindow();
 }
 
-//*****************************************************************************
-// 함수 이름 : ProcessClosing()
-// 함수 설명 : 창을 닫을 때 처리.
-// 반환 값	 : true 면 닫기 성공.
-//*****************************************************************************
 bool CNewUINPCQuest::ProcessClosing()
 {
 	SendExitInventory();
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : ProcessBtns()
-// 함수 설명 : 버튼 아이템 이벤트 처리.
-// 반환 값	 : 처리 했으면 true.
-//*****************************************************************************
 bool CNewUINPCQuest::ProcessBtns()
 {
 	if (m_btnClose.UpdateMouseEvent())
@@ -586,7 +479,7 @@ bool CNewUINPCQuest::ProcessBtns()
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCQUEST);
 		return true;
 	}
-	else if (g_csQuest.BeQuestItem())	// 퀘스트 완료 조건을 갖었는가?
+	else if (g_csQuest.BeQuestItem())
 	{
 		if (m_btnComplete.UpdateMouseEvent())
 		{

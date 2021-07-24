@@ -588,11 +588,7 @@ size_t SEASON3B::CNewUIInventoryCtrl::GetNumberOfItems()
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::GetItem(int iIndex)
 {
-#ifdef _VS2008PORTING
 	if(iIndex < 0 || iIndex >= (int)m_vecItem.size())
-#else // _VS2008PORTING
-	if(iIndex < 0 || iIndex >= m_vecItem.size())
-#endif // _VS2008PORTING
 		return NULL;
 	return m_vecItem[iIndex];
 }
@@ -1799,11 +1795,7 @@ void SEASON3B::CNewUIInventoryCtrl::DeletePickedItem()
 		CNewUIInventoryCtrl* pOwner = ms_pPickedItem->GetOwnerInventory();
 		if(pOwner)
 		{
-#ifdef _VS2008PORTING
 			pOwner->SetEventState(CNewUIInventoryCtrl::EVENT_NONE);
-#else // _VS2008PORTING
-			pOwner->SetEventState(CNewUIInventoryCtrl::EVENT_STATE::EVENT_NONE);
-#endif // _VS2008PORTING
 		}
 	}
 
@@ -1822,23 +1814,15 @@ void SEASON3B::CNewUIInventoryCtrl::BackupPickedItem()
 			
 			DeletePickedItem();
 		}
-		/* CNewUIInventoryCtrl를 사용하지 않는 예외 */
-		/* ITEM::ex_src_type 값으로 구분한다. (ITEM구조체 참조) */
 		else if(pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
 		{
 			ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[pItemObj->lineal_pos];
 			memcpy(pEquipmentItemSlot, pItemObj, sizeof(ITEM));		//. 캐릭터 버퍼로 복사
-			//. 장착효과 생성
-			
-			// 해외팀의 펫 들었다 놨다 여러번 반복할때 문제로 작업 했다가,
-			// 국내팀의 착용중인 아이템 들었다 놨다 여러번 반복 할때도 같은 문제가 발생.
-			// 추후에 문제가 발견되지 않는다면 제거가 되어야 함.
-// 주석 임시삭제@@@@@
+
 // #if !defined(LDK_FIX_RECALL_CREATEEQUIPPINGEFFECT) && !defined(LDS_FIX_RECALL_CREATEEQUIPPINGEFFECT) 
 			g_pMyInventory->CreateEquippingEffect(pEquipmentItemSlot);
 // #endif //LDK_FIX_RECALL_CREATEEQUIPPINGEFFECT
 #ifdef PBG_FIX_DARKPET_RENDER
-			// 다크스피릿
 			if (pEquipmentItemSlot->Type == ITEM_HELPER+5
 #ifdef YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH
 				&& !InChaosCastle()

@@ -1,25 +1,14 @@
-// GlobalPortalSystem.cpp: implementation of the GlobalPortalSystem class.
-//
-//////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "GlobalPortalSystem.h"
 
 #ifdef LDK_ADD_GLOBAL_PORTAL_SYSTEM
 
-//////////////////////////////////////////////////////////////////////
-// Sington Instance
-//////////////////////////////////////////////////////////////////////
-
 GlobalPortalSystem& GlobalPortalSystem::Instance()
 {
 	static GlobalPortalSystem m_GlobalPortalSys;
 	return m_GlobalPortalSys;
 }
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 GlobalPortalSystem::~GlobalPortalSystem()
 {
@@ -37,7 +26,6 @@ void GlobalPortalSystem::Initialize()
 
 void GlobalPortalSystem::SetPathToRegistry(	HKEY* hKey )
 {
-	// 레지스트리에 경로 남기기.
 	char szCurrentDir[256];
 	ZeroMemory(szCurrentDir, sizeof(szCurrentDir));
 	GetCurrentDirectory(256, szCurrentDir);
@@ -61,7 +49,6 @@ bool GlobalPortalSystem::SetAuthInfo()
 	strcat(strGameName, "MU");
 
  	WLAUTH_INFO AuthInfo = {0};
-//  공유메모리에 저장되어 있는 정보를 읽어올 구조체를 할당?? 필요없음인듯
 // 	StringCbPrintf(m_AuthInfo.id, sizeof(m_AuthInfo.id), _T("%s"), strUserID);
 // 	RtlCopyMemory(&m_AuthInfo.key, (void*)strAuthCode, sizeof(m_AuthInfo.key));
 

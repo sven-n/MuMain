@@ -530,35 +530,24 @@ void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
 
         BYTE TextNum = 0;
         BYTE SkipNum = 0;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
         BYTE setIndex = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
         sprintf(TextList[TextNum], "\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
         sprintf(TextList[TextNum], "\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
         sprintf(TextList[TextNum], "\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
 
-		// 소켓 세트 옵션
-        sprintf (TextList[TextNum], GlobalText[2657]);	// "세트 소켓 옵션"
+        sprintf (TextList[TextNum], GlobalText[2657]);
 		TextListColor[TextNum] = TEXT_COLOR_PURPLE;
 		TextBold[TextNum] = true;
 		TextNum++;
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		char szOptionText[64] = { 0, };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		char szOptionValueText[16] = { 0, };
 		SOCKET_OPTION_INFO * pInfo = NULL;
 		for (std::deque<DWORD>::iterator iter = m_EquipSetBonusList.begin(); iter != m_EquipSetBonusList.end(); ++iter)
 		{
 			pInfo = &m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][*iter];
-#ifdef YDG_FIX_SCRIPT_LEVEL_VALUE
 			CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
-#else	// YDG_FIX_SCRIPT_LEVEL_VALUE
-			CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue, 1.0f);
-#endif	// YDG_FIX_SCRIPT_LEVEL_VALUE
 			sprintf(TextList[TextNum], "%s %s", pInfo->m_szOptionName, szOptionValueText);
 			TextListColor[TextNum] = TEXT_COLOR_BLUE;
 			TextBold[TextNum] = false;
@@ -577,7 +566,6 @@ void CSocketItemMgr::CheckSocketSetOption()
 {
 	m_EquipSetBonusList.clear();
 
-	// 장비 아이템을 검사해서 소켓 개수를 모은다.
 	int iSeedSum[6] = { 0, 0, 0, 0, 0, 0 };
 	ITEM * pItem = NULL;
 	SOCKET_OPTION_INFO * pInfo = NULL;
@@ -595,8 +583,6 @@ void CSocketItemMgr::CheckSocketSetOption()
 		}
 	}
 
-	// 소켓 세트 여부를 검사한다.
-#ifdef _VS2008PORTING
 	for (int i = 0; i < m_iNumEquitSetBonusOptions; ++i)
 	{
 		int icnt = 0;
@@ -610,19 +596,6 @@ void CSocketItemMgr::CheckSocketSetOption()
 
 		m_EquipSetBonusList.push_back(m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][i].m_iOptionID);
 	}
-#else // _VS2008PORTING
-	for (i = 0; i < m_iNumEquitSetBonusOptions; ++i)
-	{
-		BYTE * pbySetTest = m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][i].m_bySocketCheckInfo;
-		for (int j = 0; j < 6; ++j)
-		{
-			if (iSeedSum[j] < pbySetTest[j]) break;
-		}
-		if (j < 6) continue;
-
-		m_EquipSetBonusList.push_back(m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][i].m_iOptionID);
-	}
-#endif // _VS2008PORTING
 }
 
 int CSocketItemMgr::GetSocketOptionValue(const ITEM * pItem, int iSocketIndex)
@@ -652,7 +625,7 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 {
 	memset(&m_StatusBonus, 0, sizeof(SOCKET_OPTION_STATUS_BONUS));
 #ifdef YDG_FIX_SOCKET_BALANCE_PATCH
-	m_StatusBonus.m_fDefenceRateBonus = 1.0f;	// 방성율 초기화 1.0f
+	m_StatusBonus.m_fDefenceRateBonus = 1.0f;
 #endif	// YDG_FIX_SOCKET_BALANCE_PATCH
 
 	ITEM * pItem = NULL;
@@ -680,8 +653,8 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 
 				switch(pInfo->m_iOptionID)
 				{
-				case SOPT_ATTACK_N_MAGIC_DAMAGE_BONUS_BY_LEVEL:		// "(레벨별)공격력/마력증가"
-				case SOPT_ATTACK_N_MAGIC_DAMAGE_BONUS:		// "공격력/마력증가"
+				case SOPT_ATTACK_N_MAGIC_DAMAGE_BONUS_BY_LEVEL:
+				case SOPT_ATTACK_N_MAGIC_DAMAGE_BONUS:
 					m_StatusBonus.m_iAttackDamageMinBonus += iBonus;
 					m_StatusBonus.m_iAttackDamageMaxBonus += iBonus;
 #ifdef YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
@@ -689,34 +662,34 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 					m_StatusBonus.m_iMagicPowerMaxBonus += iBonus;
 #endif	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 					break;
-				case SOPT_ATTACK_SPEED_BONUS:			// "공격속도증가"
+				case SOPT_ATTACK_SPEED_BONUS:
 					m_StatusBonus.m_iAttackSpeedBonus += iBonus;
 					break;
-				case SOPT_ATTACT_N_MAGIC_DAMAGE_MAX_BONUS:	// "최대공격력/마력증가"
+				case SOPT_ATTACT_N_MAGIC_DAMAGE_MAX_BONUS:
 					m_StatusBonus.m_iAttackDamageMaxBonus += iBonus;
 #ifdef YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 					m_StatusBonus.m_iMagicPowerMaxBonus += iBonus;
 #endif	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 					break;
-				case SOPT_ATTACK_N_MAGIC_DAMAGE_MIN_BONUS:	// "최소공격력/마력증가"
+				case SOPT_ATTACK_N_MAGIC_DAMAGE_MIN_BONUS:
 					m_StatusBonus.m_iAttackDamageMinBonus += iBonus;
 #ifdef YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 					m_StatusBonus.m_iMagicPowerMinBonus += iBonus;
 #endif	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 					break;
 #ifdef YDG_FIX_SOCKET_BALANCE_PATCH
-// 				case SOPT_DECREASE_AG_USE:				// "AG소모량감소"
+// 				case SOPT_DECREASE_AG_USE:
 #else YDG_FIX_SOCKET_BALANCE_PATCH
-				case SOPT_SKILL_DAMAGE_BONUS:			// "스킬공격력증가"
+				case SOPT_SKILL_DAMAGE_BONUS:
 					m_StatusBonus.m_iSkillAttackDamageBonus += iBonus;
 					break;
-				case SOPT_ATTACK_RATE_BONUS:			// "공격성공율증가"
+				case SOPT_ATTACK_RATE_BONUS:
 					m_StatusBonus.m_iAttackRateBonus += iBonus;
 					break;
-				case SOPT_PVP_ATTACK_RATE_BONUS:		// "대인공격성공율증가"
+				case SOPT_PVP_ATTACK_RATE_BONUS:
 					m_StatusBonus.m_iPvPAttackRateBonus += iBonus;
 					break;
-				case SOPT_MAGIC_POWER_BONUS:			// "마력증가"
+				case SOPT_MAGIC_POWER_BONUS:
 #ifdef YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 					m_StatusBonus.m_iMagicPowerMinBonus += iBonus;
 					m_StatusBonus.m_iMagicPowerMaxBonus += iBonus;
@@ -726,32 +699,32 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 					break;
 #endif	// YDG_FIX_SOCKET_BALANCE_PATCH
 
-				case SOPT_DEFENCE_RATE_BONUS:			// "방어성공율증가"
+				case SOPT_DEFENCE_RATE_BONUS:
 #ifdef YDG_FIX_SOCKET_BALANCE_PATCH
 					m_StatusBonus.m_fDefenceRateBonus *= 1.0f + iBonus * 0.01f;
 #else	// YDG_FIX_SOCKET_BALANCE_PATCH
 					m_StatusBonus.m_iDefenceRateBonus += iBonus;
 #endif	// YDG_FIX_SOCKET_BALANCE_PATCH
 					break;
-				case SOPT_DEFENCE_BONUS:				// "방어력증가"
+				case SOPT_DEFENCE_BONUS:
 					m_StatusBonus.m_iDefenceBonus += iBonus;
 					break;
-				case SOPT_SHIELD_DEFENCE_BONUS:			// "방패방어력증가"
+				case SOPT_SHIELD_DEFENCE_BONUS:
 					m_StatusBonus.m_iShieldDefenceBonus += iBonus;
 					break;
-// 				case SOPT_DECREASE_DAMAGE:				// "데미지감소"
-// 				case SOPT_REFLECT_DAMAGE:				// "데미지반사"
+// 				case SOPT_DECREASE_DAMAGE:
+// 				case SOPT_REFLECT_DAMAGE:
 
-// 				case SOPT_MONSTER_DEATH_LIFE_BONUS:		// "몬스터사망시생명증가"
-// 				case SOPT_MONSTER_DEATH_MANA_BONUS:		// "몬스터사망시마나증가"
+// 				case SOPT_MONSTER_DEATH_LIFE_BONUS:
+// 				case SOPT_MONSTER_DEATH_MANA_BONUS:
 #ifdef YDG_FIX_SOCKET_BALANCE_PATCH
-				case SOPT_SKILL_DAMAGE_BONUS:			// "스킬공격력증가"
+				case SOPT_SKILL_DAMAGE_BONUS:
 					m_StatusBonus.m_iSkillAttackDamageBonus += iBonus;
 					break;
-				case SOPT_ATTACK_RATE_BONUS:			// "공격성공율증가"
+				case SOPT_ATTACK_RATE_BONUS:
 					m_StatusBonus.m_iAttackRateBonus += iBonus;
 					break;
-// 				case SOPT_INCREASE_ITEM_DURABILITY:		// "아이템내구도증가"
+// 				case SOPT_INCREASE_ITEM_DURABILITY:
 #endif	// YDG_FIX_SOCKET_BALANCE_PATCH
 // 				case SOPT_SD_USE_RATE_BONUS:			// "SD감소율상승" -> PvP시 피 대신 SD가 깎이는 비율을 늘여준다
 // 				case SOPT_IGNORE_SD_RATE_BONUS:			// "공격시SD무시확률상승"
@@ -861,28 +834,14 @@ void CSocketItemMgr::OpenSocketItemScript(const unicode::t_char * szFileName)
 	}
 #endif	// YDG_FIX_SCRIPT_LEVEL_VALUE
 	
-	fclose(fp);
+	fclose(fp); 
 
-	// 검사할 소켓장비 세트옵션 개수를 구한다. (스크립트 라인수)
-#ifdef _VS2008PORTING
 	for (int i = 0; i < MAX_SOCKET_OPTION; ++i)
 	{
 		m_iNumEquitSetBonusOptions = i;
 		BYTE * pbySetTest = m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][i].m_bySocketCheckInfo;
 		if (pbySetTest[0] + pbySetTest[1] + pbySetTest[2] + pbySetTest[3] + pbySetTest[4] + pbySetTest[5] == 0) break;
 	}
-#else // _VS2008PORTING
-#ifdef YDG_FIX_SCRIPT_LEVEL_VALUE
-	for (int i = 0; i < MAX_SOCKET_OPTION; ++i)
-#else	// YDG_FIX_SCRIPT_LEVEL_VALUE
-	for (i = 0; i < MAX_SOCKET_OPTION; ++i)
-#endif	// YDG_FIX_SCRIPT_LEVEL_VALUE
-	{
-		BYTE * pbySetTest = m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][i].m_bySocketCheckInfo;
-		if (pbySetTest[0] + pbySetTest[1] + pbySetTest[2] + pbySetTest[3] + pbySetTest[4] + pbySetTest[5] == 0) break;
-	}
-	m_iNumEquitSetBonusOptions = i;
-#endif // _VS2008PORTING
 }
 
 #endif	// SOCKET_SYSTEM

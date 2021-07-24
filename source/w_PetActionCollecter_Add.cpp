@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // w_PetActionCollecter.cpp: implementation of the PetActionStand class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -14,10 +14,6 @@
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 PetActionCollecterAddPtr PetActionCollecterAdd::Make()
 {
 	PetActionCollecterAddPtr temp( new PetActionCollecterAdd );
@@ -27,23 +23,16 @@ PetActionCollecterAddPtr PetActionCollecterAdd::Make()
 PetActionCollecterAdd::PetActionCollecterAdd()
 {
 	m_isRooting = false;
-
 	m_dwSendDelayTime = 0;
 	m_dwRootingTime = 0;
 	m_dwRoundCountDelay = 0;
-#ifdef _VS2008PORTING
 	m_state = eAction_Stand;
-#else // _VS2008PORTING
-	m_state = ActionState::eAction_Stand;
-#endif // _VS2008PORTING
-
 	m_fRadWidthStand = 0.0f;
 	m_fRadWidthGet = 0.0f;
 }
 
 PetActionCollecterAdd::~PetActionCollecterAdd()
 {
-
 }
 
 bool PetActionCollecterAdd::Release( OBJECT* obj, CHARACTER *Owner )
@@ -66,19 +55,11 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 
 	FindZen(obj);
 
-#ifdef _VS2008PORTING
 	if( eAction_Stand == m_state && m_isRooting )
 	{
 		m_state = eAction_Move;
 	}
-#else // _VS2008PORTING
-	if( ActionState::eAction_Stand == m_state && m_isRooting )
- 	{
-		m_state = ActionState::eAction_Move;
-	}
-#endif // _VS2008PORTING
 
-	//------------------------------------------//
 	float FlyRange = 10.0f;
 	vec3_t targetPos, Range, Direction;
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -95,27 +76,18 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 	float Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 	if( Distance > SEARCH_LENGTH*3)
 	{
-		//맵 이동시 ...
 		obj->Position[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 		obj->Position[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 		
 		VectorCopy ( obj->Owner->Angle, obj->Angle );
 
-#ifdef _VS2008PORTING
 		m_state = eAction_Stand;
-#else // _VS2008PORTING
-		m_state = ActionState::eAction_Stand;
-#endif // _VS2008PORTING
 		m_isRooting = false;
 	}
 				
 	switch(m_state)
 	{
-#ifdef _VS2008PORTING
 	case eAction_Stand:
-#else // _VS2008PORTING
-	case ActionState::eAction_Stand:
-#endif // _VS2008PORTING
 		{
 			targetPos[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 			targetPos[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
@@ -144,20 +116,12 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 		}
 		break;
 
-#ifdef _VS2008PORTING
 	case eAction_Move:
-#else // _VS2008PORTING
-	case ActionState::eAction_Move:
-#endif // _VS2008PORTING
 		{
 			if( !m_isRooting )
 			{
 				m_isRooting = false;
-#ifdef _VS2008PORTING
 				m_state = eAction_Return;
-#else // _VS2008PORTING
-				m_state = ActionState::eAction_Return;
-#endif // _VS2008PORTING
 				break;
 			}
 
@@ -189,31 +153,19 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 			{
 				m_dwSendDelayTime = GetTickCount();
 				m_dwRootingTime = GetTickCount();
-#ifdef _VS2008PORTING
 				m_state = eAction_Get;
-#else // _VS2008PORTING
-				m_state = ActionState::eAction_Get;
-#endif // _VS2008PORTING
 			}
 		}
 		break;
 
-#ifdef _VS2008PORTING
-	case eAction_Get: //줍는 행동
-#else // _VS2008PORTING
-	case ActionState::eAction_Get: //줍는 행동
-#endif // _VS2008PORTING
+	case eAction_Get:
 
 		{
 			if(	!m_isRooting || SEARCH_LENGTH < Distance || CompTimeControl(3000, m_dwRootingTime))
 			{
 				m_isRooting = false;
 				m_dwRootingTime = GetTickCount();
-#ifdef _VS2008PORTING
 				m_state = eAction_Return;
-#else // _VS2008PORTING
-				m_state = ActionState::eAction_Return;
-#endif // _VS2008PORTING
 				break;
 			}
 
@@ -235,11 +187,7 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 		}
 		break;
 
-#ifdef _VS2008PORTING
 	case eAction_Return:
-#else // _VS2008PORTING
-	case ActionState::eAction_Return:
-#endif // _VS2008PORTING
 		{
 			targetPos[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 			targetPos[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
@@ -267,11 +215,7 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 
 			if(	0 == Speed || CompTimeControl(3000, m_dwRootingTime) )
 			{
-#ifdef _VS2008PORTING
 				m_state = eAction_Stand;
-#else // _VS2008PORTING
-				m_state = ActionState::eAction_Stand;
-#endif // _VS2008PORTING
 			}
 		}
 		break;
@@ -331,11 +275,7 @@ bool PetActionCollecterAdd::Sound( OBJECT* obj, CHARACTER *Owner, int targetKey,
 	
 	switch(m_state)
  	{
-#ifdef _VS2008PORTING
 	case eAction_Return:
-#else // _VS2008PORTING
-	case ActionState::eAction_Return:
-#endif // _VS2008PORTING
 		PlayBuffer(SOUND_DROP_GOLD01);
  		break;
  	}
@@ -403,19 +343,12 @@ bool PetActionCollecterAdd::CompTimeControl(const DWORD& dwCompTime, DWORD& dwTi
 PetActionCollecterSkeleton::PetActionCollecterSkeleton()
 {
 	m_isRooting = false;
-
 	m_dwSendDelayTime = 0;
 	m_dwRootingTime = 0;
 	m_dwRoundCountDelay = 0;
-#ifdef _VS2008PORTING
 	m_state = eAction_Stand;
-#else // _VS2008PORTING
-	m_state = ActionState::eAction_Stand;
-#endif // _VS2008PORTING
-
 	m_fRadWidthStand = 0.0f;
 	m_fRadWidthGet = 0.0f;
-
 	m_bIsMoving = FALSE;
 }
 

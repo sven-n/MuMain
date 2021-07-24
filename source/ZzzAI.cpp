@@ -56,11 +56,8 @@ float CreateAngle(float x1,float y1,float x2,float y2)
 
 int TurnAngle(int iTheta, int iHeading, int maxTURN)
 {
-#ifdef _VS2008PORTING
 	int iChange = 0;
-#else // _VS2008PORTING
-	int iChange;
-#endif // _VS2008PORTING
+
 	int Delta = abs(iTheta-iHeading);
 	if (iTheta > iHeading) 
 	{

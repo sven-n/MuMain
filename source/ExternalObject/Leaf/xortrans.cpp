@@ -52,12 +52,11 @@ void CCyclicXorTrans::JumbleKeyTable()
 		
 		xstreambuf xResult;
 		int count = 0;
-#ifdef _VS2008PORTING
-		while(count < (int)size) {
-#else // _VS2008PORTING
-		while(count < size) {
-#endif // _VS2008PORTING
-			if(count % 2 == 0) {
+
+		while(count < (int)size) 
+		{
+			if(count % 2 == 0) 
+			{
 				xResult.write(pbyKeyTable + (size-(count/2)-1), 1);
 			}
 			else {
@@ -97,11 +96,8 @@ bool CCyclicXorTrans::Trans(const void* src, size_t size, void* dest, DWORD dwSt
 	DWORD* pdwDest = (DWORD*)dest;
 
 	int iHead;
-#ifdef _VS2008PORTING
+
 	for(iHead = 0; iHead<(int)size/4; iHead++)
-#else // _VS2008PORTING
-	for(iHead = 0; iHead<size/4; iHead++)
-#endif // _VS2008PORTING
 		pdwDest[iHead] = pdwSrc[iHead] ^ pdwKeyTable[(dwStreamKey+iHead)%KeyTableSize];
 
 	// Tail
@@ -112,11 +108,8 @@ bool CCyclicXorTrans::Trans(const void* src, size_t size, void* dest, DWORD dwSt
 	BYTE* pbyDest = (BYTE*)dest + iHead*4;
 
 	int iTail;
-#ifdef _VS2008PORTING
+
 	for(iTail = 0; iTail<(int)size%4; iTail++)
-#else // _VS2008PORTING
-	for(iTail = 0; iTail<size%4; iTail++)
-#endif // _VS2008PORTING
 		pbyDest[iTail] = pbySrc[iTail] ^ pbyKeyTable[(dwStreamKey+iHead*4+iTail)%KeyTableSize];
 
 	return true;
@@ -143,11 +136,8 @@ bool CCyclicXorTrans::Trans(const void* src, size_t size, xstreambuf& out, DWORD
 	DWORD* pdwSrc = (DWORD*)src;
 
 	int iHead;
-#ifdef _VS2008PORTING
+
 	for(iHead = 0; iHead<(int)size/4; iHead++)
-#else // _VS2008PORTING
-	for(iHead = 0; iHead<size/4; iHead++)
-#endif // _VS2008PORTING
 		out << (DWORD)(pdwSrc[iHead] ^ pdwKeyTable[(dwStreamKey+iHead)%KeyTableSize]);
 
 	// Tail
@@ -157,11 +147,7 @@ bool CCyclicXorTrans::Trans(const void* src, size_t size, xstreambuf& out, DWORD
 	BYTE* pbySrc = (BYTE*)src + iHead*4;
 
 	int iTail;
-#ifdef _VS2008PORTING
 	for(iTail = 0; iTail<(int)size%4; iTail++)
-#else // _VS2008PORTING
-	for(iTail = 0; iTail<size%4; iTail++)
-#endif // _VS2008PORTING
 		out << (BYTE)(pbySrc[iTail] ^ pbyKeyTable[(dwStreamKey+iHead*4+iTail)%KeyTableSize]);
 
 	return true;

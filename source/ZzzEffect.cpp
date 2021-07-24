@@ -608,17 +608,11 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				  vec3_t Light,int SubType,OBJECT *Owner,short PKKey,WORD SkillIndex,WORD Skill,WORD SkillSerialNum,
 				  float Scale, short int sTargetIndex )
 {
-#ifdef _VS2008PORTING
+
 	for(int icntEffect=0;icntEffect<MAX_EFFECTS;icntEffect++)
-#else // _VS2008PORTING
-	for(int i=0;i<MAX_EFFECTS;i++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
+
 		OBJECT *o = &Effects[icntEffect];
-#else // _VS2008PORTING
-		OBJECT *o = &Effects[i];
-#endif // _VS2008PORTING
 
 #ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
 		// 스킬 이펙트면 스킬이펙트 구조의 메모리를 사용한다
@@ -1316,11 +1310,8 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 						Vector(1.0f, 0.4f, 0.2f, vLight);
 						VectorCopy(o->Position, vPosition);
 						vPosition[2] = RequestTerrainHeight ( vPosition[0], vPosition[1] ) + 10;
-#ifdef _VS2008PORTING
+
 						for (int i = 0; i < 3; ++i)
-#else // _VS2008PORTING
-						for (i = 0; i < 3; ++i)
-#endif // _VS2008PORTING
 							CreateEffect(MODEL_KNIGHT_PLANCRACK_A, vPosition, o->Angle, vLight, 1, o, 0, 0, 0, 0, rand()%4*0.1f+1.0f);
 					}
 					else if(o->SubType == 2)
@@ -1332,11 +1323,8 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 						Vector(1.0f, 0.4f, 0.2f, vLight);
 						VectorCopy(o->Position, vPosition);
 						vPosition[2] = RequestTerrainHeight ( vPosition[0], vPosition[1] ) + 10;
-#ifdef _VS2008PORTING
+
 						for (int i = 0; i < 3; ++i)
-#else // _VS2008PORTING
-						for (i = 0; i < 3; ++i)
-#endif // _VS2008PORTING
 							CreateEffect(MODEL_KNIGHT_PLANCRACK_A, o->Position, o->Angle, vLight, 1, o, 0, 0, 0, 0, rand()%4*0.1f+0.5f);
 					}
 				}

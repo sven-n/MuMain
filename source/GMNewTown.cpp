@@ -1153,9 +1153,6 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 
 	vec3_t vPos, vRelative, Light;
 	float fLumi, fScale;
-#ifndef _VS2008PORTING			// #ifndef
-	int i;
-#endif // _VS2008PORTING
 
 	switch(pObject->Type)
 	{

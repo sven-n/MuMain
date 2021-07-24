@@ -160,11 +160,7 @@ void CNewUILuckyItemWnd::RenderMixEffect()
 	VPManager::Disable();
 #endif //MR0
 	EnableAlphaBlend();
-#ifdef _VS2008PORTING
 	for (int i = 0; i < (int)m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#else // _VS2008PORTING
-		for (int i = 0; i < m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#endif // _VS2008PORTING
 		{
 			int iWidth = ItemAttribute[m_pNewInventoryCtrl->GetItem(i)->Type].Width;
 			int iHeight = ItemAttribute[m_pNewInventoryCtrl->GetItem(i)->Type].Height;

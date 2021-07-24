@@ -172,11 +172,8 @@ const DWORD Buff::GetBuffSize()
 
 const eBuffState Buff::GetBuff( int iterindex )
 {
-#ifdef _VS2008PORTING
+
 	if( iterindex >= (int)GetBuffSize() ) return eBuffNone;
-#else // _VS2008PORTING
-	if( iterindex >= GetBuffSize() ) return eBuffNone;
-#endif // _VS2008PORTING
 	
 	int i = 0;
 	

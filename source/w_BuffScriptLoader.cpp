@@ -124,11 +124,7 @@ bool BuffScriptLoader::Load(const string& pchFileName)
 		{
 			BYTE *pSeek = Buffer;
 
-#ifdef _VS2008PORTING
 			for( DWORD i = 0;i < listsize; i++ )			
-#else // _VS2008PORTING
-			for( int i = 0;i < listsize; i++ )
-#endif // _VS2008PORTING
 			{
 				_BUFFINFO tempbuffinfo;
 

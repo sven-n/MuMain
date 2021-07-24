@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // NewUIQuickCommandWindow.cpp: implementation of the CNewUIQuickCommandWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -8,10 +8,6 @@
 #include "DSPlaySound.h"
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUIQuickCommandWindow::CNewUIQuickCommandWindow()
 {
@@ -71,11 +67,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
 
 	POINT pt = { m_Pos.x, m_Pos.y+38 };
 
-#ifdef YDG_ADD_NEW_DUEL_UI
 	for(int i = 0; i < 5; ++i)
-#else	// YDG_ADD_NEW_DUEL_UI
-	for(int i=0; i<4; ++i)
-#endif	// YDG_ADD_NEW_DUEL_UI
 	{
 		if(CheckMouseIn(pt.x, pt.y, 112, 19) == true)
 		{
@@ -90,7 +82,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
 	{
 		switch(m_iSelectedIndex)
 		{
-		case 0:		// 거래
+		case 0:
 			{
 				CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
 				g_pCommandWindow->CommandTrade(pCha);
@@ -99,7 +91,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
 				return false;
 			}
 			break;
-		case 1:		// 구매
+		case 1:
 			{
 				CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
 				g_pCommandWindow->CommandPurchase(pCha);
@@ -108,7 +100,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
 				return false;
 			}
 			break;
-		case 2:		// 파티
+		case 2:
 			{
 				CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
 				g_pCommandWindow->CommandParty(pCha->Key);
@@ -117,7 +109,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
 				return false;
 			}
 			break;
-		case 3:		// 따라가기
+		case 3:
 			{
 				g_pCommandWindow->CommandFollow(m_iSelectedCharacterIndex);
 				CloseQuickCommand();
@@ -125,8 +117,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
 				return false;
 			}
 			break;
-#ifdef YDG_ADD_NEW_DUEL_UI
-		case 4:		// 결투
+		case 4:
 			{
 				CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
 				g_pCommandWindow->CommandDual(pCha);
@@ -135,15 +126,10 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
 				return false;
 			}
 			break;
-#endif	// YDG_ADD_NEW_DUEL_UI
 		}
 	}
 
-#ifdef YDG_ADD_NEW_DUEL_UI
 	if(CheckMouseIn(m_Pos.x, m_Pos.y+30, 112, 110) == false)
-#else	// YDG_ADD_NEW_DUEL_UI
-	if(CheckMouseIn(m_Pos.x, m_Pos.y+30, 112, 90) == false)
-#endif	// YDG_ADD_NEW_DUEL_UI
 	{
 		m_iSelectedIndex = -1;
 
@@ -154,11 +140,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
 		}
 	}
 
-#ifdef YDG_ADD_NEW_DUEL_UI
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, 112, 140))
-#else	// YDG_ADD_NEW_DUEL_UI
-	if(CheckMouseIn(m_Pos.x, m_Pos.y, 112, 120))
-#endif	// YDG_ADD_NEW_DUEL_UI
 	{
 		return false;
 	}
@@ -187,10 +169,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::Update()
 	if(m_iSelectedCharacterIndex >= 0)
 	{
 		CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];	
-		
-		// 대소문자 구분함 
-		// 만약 아이디가 틀려진 경우 사라지게 예외처리
-		// 죽었거나, 플레이어가 아니면
+
 		if(strcmp(pCha->ID, m_strID) != 0	
 			|| pCha->Object.Live == false
 			|| pCha->Object.Kind != KIND_PLAYER)
@@ -198,7 +177,6 @@ bool SEASON3B::CNewUIQuickCommandWindow::Update()
 			CloseQuickCommand();
 		}
 
-		// 거리 계산해서 3타일 이상되면 사라지게 처리
 		float fPos_x = pCha->Object.Position[0] - Hero->Object.Position[0];
 		float fPos_y = pCha->Object.Position[1] - Hero->Object.Position[1];
 		float fDistance = sqrtf((fPos_x * fPos_x) + (fPos_y * fPos_y));
@@ -239,53 +217,28 @@ void SEASON3B::CNewUIQuickCommandWindow::RenderFrame()
 {
 	float x, y, width, height;
 	
-#ifdef YDG_ADD_NEW_DUEL_UI
 	x = m_Pos.x; y = m_Pos.y; width = 112.f; height = 140;
-#else	// YDG_ADD_NEW_DUEL_UI
-	x = m_Pos.x; y = m_Pos.y; width = 112.f; height = 120;
-#endif	// YDG_ADD_NEW_DUEL_UI
-	// 바탕
+
 	RenderImage(IMAGE_QUICKCOMMAND_BACK, x, y, width, height);
 
-	// 상단
 	y = m_Pos.y;
 	RenderImage(IMAGE_QUICKCOMMAND_FRAME_UP, m_Pos.x, y, 112.f, 45.f);
 	y += 45.f;
 
-	// 중단
-#ifdef YDG_ADD_NEW_DUEL_UI
 	for(int i = 0; i < 3; ++i)
-#else	// YDG_ADD_NEW_DUEL_UI
-	for(int i=0; i<2; ++i)
-#endif	// YDG_ADD_NEW_DUEL_UI
 	{
 		RenderImage(IMAGE_QUICKCOMMAND_FRAME_MIDDLE, m_Pos.x, y, 112.f, 15.f);
 		y += 15.f;
 	}
-#ifdef YDG_ADD_NEW_DUEL_UI
-	// 15의 배수로 크기를 늘리는게 적절하지 않아 어중간한 길이를 맞춤 -> 추후 더 추가되면 조정 필요;
+
 	RenderImage(IMAGE_QUICKCOMMAND_FRAME_MIDDLE, m_Pos.x, y, 112.f, 5.f);
 	y += 5.f;
-#endif	// YDG_ADD_NEW_DUEL_UI
 
-	// 하단
 	RenderImage(IMAGE_QUICKCOMMAND_FRAME_DOWN, m_Pos.x, y, 112.f, 45.f);
 
-	// 라인
 	y = m_Pos.y + 55.f;
-#ifdef YDG_ADD_NEW_DUEL_UI
-#ifdef _VS2008PORTING
+
 	for(int i = 0; i < 4; ++i)
-#else // _VS2008PORTING
-	for(i = 0; i < 4; ++i)
-#endif // _VS2008PORTING
-#else	// YDG_ADD_NEW_DUEL_UI
-#ifdef _VS2008PORTING
-	for(int i=0; i<3; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<3; ++i)
-#endif // _VS2008PORTING
-#endif	// YDG_ADD_NEW_DUEL_UI
 	{
 		RenderImage(IMAGE_QUICKCOMMAND_LINE, m_Pos.x + 15.f, y, 82.f, 2.f);
 		y += 19.f;
@@ -298,7 +251,6 @@ void SEASON3B::CNewUIQuickCommandWindow::RenderContents()
 	g_pRenderText->SetTextColor(0, 255, 0, 255);
 	g_pRenderText->SetBgColor(0);
 
-	// ID부분
 	int y = m_Pos.y + 14;
 	g_pRenderText->RenderText(m_Pos.x, y, m_strID, 112, 0, RT3_SORT_CENTER);
 	y += 30;
@@ -306,17 +258,8 @@ void SEASON3B::CNewUIQuickCommandWindow::RenderContents()
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-	// 944 "파티"
-	// 943 "거래"
-	// 1124 "구매"
-	// 948 "따라가기"
-#ifdef YDG_ADD_NEW_DUEL_UI
 	int iGlobalText[] = { 943, 1124, 944, 948, 949 };
 	for(int i = 0; i < 5; ++i)
-#else	// YDG_ADD_NEW_DUEL_UI
-	int iGlobalText[4] = { 943, 1124, 944, 948 };
-	for(int i=0; i<4; ++i)
-#endif	// YDG_ADD_NEW_DUEL_UI
 	{
 		if(m_iSelectedIndex == i)
 		{

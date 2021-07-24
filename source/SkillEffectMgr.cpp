@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // SkillEffectMgr.cpp: implementation of the CSkillEffectMgr class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -12,15 +12,9 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 
-#ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
-
 CSkillEffectMgr g_SkillEffects;
 
 void MoveEffect( OBJECT *o, int iIndex);
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CSkillEffectMgr::CSkillEffectMgr()
 {
@@ -43,27 +37,26 @@ BOOL CSkillEffectMgr::IsSkillEffect(int Type,vec3_t Position,vec3_t Angle,
 				  vec3_t Light,int SubType,OBJECT *Owner,short PKKey,WORD SkillIndex,WORD Skill,WORD SkillSerialNum,
 				  float Scale, short int sTargetIndex )
 {
-	// 플레이어 스킬만
 	if (Owner != &Hero->Object)
 		return FALSE;
 
 	switch (Type)
 	{
-	case BITMAP_BOSS_LASER:		// 아쿠아플래쉬 (법사)
-	case MODEL_SKILL_BLAST:		// 블래스트 (법사)
-	case MODEL_DARK_SCREAM:		// 파이어스크림 (다크로드)
-	case BITMAP_SWORD_FORCE:	// 블러드어택 (마검사)
+	case BITMAP_BOSS_LASER:
+	case MODEL_SKILL_BLAST:
+	case MODEL_DARK_SCREAM:
+	case BITMAP_SWORD_FORCE:
 		return TRUE;
-	case MODEL_SKILL_INFERNO:	// 인페르노 (법사)
+	case MODEL_SKILL_INFERNO:
 		if(SubType < 2) return TRUE;
 		break;
-	case MODEL_CIRCLE:			// 헬파이어 (법사)
+	case MODEL_CIRCLE:
 		if (SubType == 0) return TRUE;
 		break;
-	case BITMAP_FLAME:			// 불기둥 (법사)
+	case BITMAP_FLAME:
 		if ( SubType==0 ) return TRUE;
 		break;
-	case MODEL_STORM:			// 회오리 (법사)
+	case MODEL_STORM:
 		if ( SubType==0 ) return TRUE;
 		break;
 
@@ -95,17 +88,9 @@ BOOL CSkillEffectMgr::IsSkillEffect(int Type,vec3_t Position,vec3_t Angle,
 
 OBJECT * CSkillEffectMgr::CreateEffect()
 {
-#ifdef _VS2008PORTING
 	for(int icntEffect=0;icntEffect<MAX_SKILL_EFFECTS;icntEffect++)
-#else // _VS2008PORTING
-	for(int i=0;i<MAX_SKILL_EFFECTS;i++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
 		OBJECT *o = &m_SkillEffects[icntEffect];
-#else // _VS2008PORTING
-		OBJECT *o = &m_SkillEffects[i];
-#endif // _VS2008PORTING
 		if(!o->Live)
 		{
 			return o;
@@ -216,5 +201,3 @@ void CSkillEffectMgr::MoveEffects()
 		}
 	}
 }
-
-#endif	// YDG_MOD_SEPARATE_EFFECT_SKILLS

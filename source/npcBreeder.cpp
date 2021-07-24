@@ -1,7 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  npcBreeder.cpp
-//  
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include <process.h>
@@ -17,33 +15,17 @@
 #include "ZzzCharacter.h"
 #include "ZzzTexture.h"
 #include "wsclientinline.h"
-
 #include "npcBreeder.h"
-
-#ifdef PET_SYSTEM
 #include "GIPetManager.h"
-#endif// PET_SYSTEM
 
-///////////////////////////////////////
-//  Extern.
-///////////////////////////////////////
+
 extern  int SrcInventoryIndex;
 
-///////////////////////////////////////
-//  npcBreeder
-///////////////////////////////////////
 namespace npcBreeder
 {
-    //////////////////////////////////////////////////////////////////////////
-    //  원하는 팻의 생명회복을 위한 젠을 계산한다.
-    //////////////////////////////////////////////////////////////////////////
     int     CalcRecoveryZen ( BYTE type, char* Text )
     {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-		ITEM* ip = NULL;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
         ITEM* ip;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 		g_pMyInventory->SetRepairEnableLevel(false);
         
@@ -53,7 +35,6 @@ namespace npcBreeder
             ip = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
             if ( ip->Type!=ITEM_HELPER+4 )
             {
-				// 1229 "팻을 장착하지 않았습니다."
                 sprintf ( Text, GlobalText[1229] );
                 return -1;
             }
@@ -63,7 +44,6 @@ namespace npcBreeder
             ip = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
             if ( ip->Type!=ITEM_HELPER+5 )
             {
-				// 1229 "팻을 장착하지 않았습니다."
                 sprintf ( Text, GlobalText[1229] );
                 return -1;
             }
@@ -105,7 +85,6 @@ namespace npcBreeder
             Gold = ConvertRepairGold( dwValue, ip->Durability, maxDurability, ip->Type, Text );
         }
 #ifndef KJH_FIX_REPAIR_DARKLOAD_PET_DURABILITY_ZERO
-        //  완전히 생명이 없을때.
         if ( ip->Durability==0 )
         {
             Gold *= 2;
@@ -123,11 +102,7 @@ namespace npcBreeder
                 char  Text2[100];
 				memset(Text2, 0, sizeof(char) * 100);
 
-#ifdef _VS2008PORTING
 				if ( (int)CharacterMachine->Gold<Gold )
-#else // _VS2008PORTING
-                if ( CharacterMachine->Gold<Gold )
-#endif // _VS2008PORTING
                 {
 	                ConvertGold ( Gold-CharacterMachine->Gold, Text);
                     sprintf ( Text2, GlobalText[1231], Text );
@@ -153,11 +128,7 @@ namespace npcBreeder
         char Text[100];
         int Gold = CalcRecoveryZen ( type, Text );
 
-#ifdef _VS2008PORTING
 		if ( (int)CharacterMachine->Gold>=Gold && Gold!=-1 )
-#else // _VS2008PORTING
-        if ( CharacterMachine->Gold>=Gold && Gold!=-1 )
-#endif // _VS2008PORTING
         {
             switch ( type )
             {
@@ -169,9 +140,7 @@ namespace npcBreeder
 				SendRequestRepair ( EQUIPMENT_WEAPON_LEFT, Gold );
                 break;
             }
-#ifdef PET_SYSTEM
             giPetManager::InitItemBackup ();
-#endif// PET_SYSTEM
         }
 	}
 }

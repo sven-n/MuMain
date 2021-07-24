@@ -1172,11 +1172,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 						return false;
 					}
 				}
-#ifdef _VS2008PORTING
 				for(int i=0; i<nBottomSections; i++)
-#else // _VS2008PORTING
-				for(i=0; i<nBottomSections; i++)
-#endif // _VS2008PORTING
 				{
 					if( SEASON3B::CheckMouseIn(0, ptResizingBtn.y+RESIZING_BTN_HEIGHT+((i+1)*SCROLL_MIDDLE_PART_HEIGHT*3), 
 						640, RESIZING_BTN_HEIGHT+SCROLL_MIDDLE_PART_HEIGHT*3) )
@@ -1340,13 +1336,8 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
 	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 	if(TextExtentWidth > MaxFirstLineWidth)	//. 잘라야 하는가?
 	{
-#ifdef _VS2008PORTING
 		int prev_offset = 0;
 		for(int cur_offset = 0; cur_offset<(int)strText.size(); )	
-#else // _VS2008PORTING
-		int cur_offset = 0, prev_offset = 0;
-		for(; cur_offset<strText.size(); )
-#endif // _VS2008PORTING
 		{
 			prev_offset = cur_offset;
 			size_t offset = _mbclen((const unsigned char*)(strText.c_str()+cur_offset));

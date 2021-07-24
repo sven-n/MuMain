@@ -1,5 +1,5 @@
-// NewUIKanturu2ndEnterNpc.cpp: implementation of the CNewUIKanturu2ndEnterNpc class.
-//
+//////////////////////////////////////////////////////////////////////
+// NewUIKanturu2ndEnterNpc.cpp: implementation of the CNewUIKanturu2ndEnterNpc class. 
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -13,17 +13,11 @@
 #include "GM_Kanturu_3rd.h"
 #include "CDirection.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 SEASON3B::CNewUIKanturu2ndEnterNpc::CNewUIKanturu2ndEnterNpc()
 {	
 	m_pNewUIMng = NULL;
 	m_Pos.x = m_Pos.y = 0;
-
 	m_pNpcObject = NULL;
-
 	m_dwRefreshTime = 0;
 	m_dwRefreshButtonGapTime = 0;
 
@@ -86,8 +80,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::SetPos(int x, int y)
 
 bool SEASON3B::CNewUIKanturu2ndEnterNpc::UpdateMouseEvent()
 {
-	// 버튼 마우스이벤트 처리
-	if(BtnProcess() == true)	// 처리가 완료 되었다면
+	if(BtnProcess() == true)
 	{
 		return false;
 	}
@@ -119,7 +112,6 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::Update()
 {
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC) == true)
 	{
-		// 자동 정보 갱신 업데이트
 		if(timeGetTime() - m_dwRefreshTime > KANTURU2ND_REFRESH_GAPTIME)
 		{
 			SendRequestKanturu3rdInfo();
@@ -135,7 +127,6 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::Render()
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// 프레임을 그린다.
 	RenderFrame();
 
 	RenderTexts();
@@ -145,7 +136,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::Render()
 	return true;
 }
 
-float SEASON3B::CNewUIKanturu2ndEnterNpc::GetLayerDepth()	//. 5.0f
+float SEASON3B::CNewUIKanturu2ndEnterNpc::GetLayerDepth()
 {
 	return 10.1f;
 }
@@ -180,19 +171,19 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::CreateMessageBox(BYTE btResult)
 	unicode::t_char strMessage[256];
 	if(btResult == POPUP_FAILED || btResult == POPUP_FAILED2)
 	{
-		unicode::_strcpy(strMessage, GlobalText[2170]);	// "입장에 실패하였습니다."
+		unicode::_strcpy(strMessage, GlobalText[2170]);
 	}
 	else if(btResult == POPUP_UNIRIA)
 	{
-		unicode::_strcpy(strMessage, GlobalText[569]);	// "유니리아를 타고는 이동할수 없습니다."
+		unicode::_strcpy(strMessage, GlobalText[569]);
 	}
 	else if(btResult == POPUP_CHANGERING)
 	{
-		unicode::_strcpy(strMessage, GlobalText[2175]);	// "변신반지를 착용하고는 이동할 수 없습니다."
+		unicode::_strcpy(strMessage, GlobalText[2175]);
 	}
 	else if(btResult == POPUP_NOT_HELPER)
 	{
-		unicode::_strcpy(strMessage, GlobalText[2176]);	// "디노란트, 다크호스, 펜릴을 타거나 날개나 망토를 착용하여야 이동 가능합니다." 
+		unicode::_strcpy(strMessage, GlobalText[2176]);
 	}
 	else
 	{
@@ -210,18 +201,15 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
 		return;
 	}
 
-	// 메세지 박스가 없어야 연다.
 	if(g_MessageBox->IsEmpty() == false)
 	{
 		return;
 	}
 
-	//정보 갱신전에 초기화
 	Initialize();
 
 	m_byState = btState;
 
-	// 입장하기 버튼 처리
 	if(btEnter == 1)
 	{
 		m_BtnEnter.UnLock();
@@ -235,21 +223,20 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
 		m_BtnEnter.ChangeTextColor(RGBA(100, 100, 100, 255));
 	}
 	
-	// 텍스트 세팅
 	if(btState == KANTURU_STATE_TOWER)
 	{
 		if(btDetailState == KANTURU_TOWER_REVITALIXATION || btDetailState == KANTURU_TOWER_NOTIFY)
 		{
-			unicode::_strcpy(m_strSubject, GlobalText[2149]);	// "정제의 탑으로 이동 가능합니다."
-			unicode::_strcpy(m_strStateText[0], GlobalText[2150]);	// "정제의 탑으로 갈 수 있는 통로가 개방되어 있습니다."
-			unicode::_sprintf(m_strStateText[1], GlobalText[2151], iRemainTime/3600); // "%d 시간뒤에 정제의 탑으로 가는 통로가 폐쇄될 예정입니다."
+			unicode::_strcpy(m_strSubject, GlobalText[2149]);
+			unicode::_strcpy(m_strStateText[0], GlobalText[2150]);
+			unicode::_sprintf(m_strStateText[1], GlobalText[2151], iRemainTime/3600);
 			m_iStateTextNum = 2;
 		}
 		else
 		{
-			unicode::_strcpy(m_strSubject, GlobalText[2174]); // "정제의 탑 입장이 통제됩니다."
-			unicode::_strcpy(m_strStateText[0], GlobalText[2160]); // "정제의 탑으로 가기 위해서는 나이트메어의 힘에 잠식된 마야와 마야를 조종하고 있는 나이트메어를 쓰러트려 길을 열어야 합니다."
-			unicode::_strcpy(m_strStateText[1], GlobalText[2161]); // "마야의 안정성과 보안 유지를 위해 출입이 제한되어있습니다. 수석 연구원 용으로 발급된 '문스톤 펜던트'가 필요합니다."
+			unicode::_strcpy(m_strSubject, GlobalText[2174]);
+			unicode::_strcpy(m_strStateText[0], GlobalText[2160]);
+			unicode::_strcpy(m_strStateText[1], GlobalText[2161]);
 			m_iStateTextNum = 2;
 		}
 	}
@@ -259,32 +246,32 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
 			&& btDetailState != KANTURU_MAYA_DIRECTION_STANBY2
 			&& btDetailState != KANTURU_MAYA_DIRECTION_STANBY3)
 		{
-			unicode::_strcpy(m_strSubject, GlobalText[2152]);	// "현재 마야와의 전투가 진행중입니다."
-			unicode::_sprintf(m_strStateText[0], GlobalText[2153], btUserCount);	// "%d명이 정제의 탑으로 통하는 길을 열기 위해 전투를 벌이고 있습니다. ..... (생략)"
+			unicode::_strcpy(m_strSubject, GlobalText[2152]);
+			unicode::_sprintf(m_strStateText[0], GlobalText[2153], btUserCount);
 		}
 		else
 		{
-			unicode::_strcpy(m_strSubject, GlobalText[2163]);	// "탑으로 가는 길을 열기 위해 더 많은 사람이 필요 합니다."
+			unicode::_strcpy(m_strSubject, GlobalText[2163]);
 
 			if(btDetailState == KANTURU_MAYA_DIRECTION_STANBY1)
 			{
 				if(btUserCount < 15)
 				{
-					unicode::_strcpy(m_strStateText[0], GlobalText[2164]);	// "지금 입장하실 수 있습니다."
+					unicode::_strcpy(m_strStateText[0], GlobalText[2164]);
 				}
 				else if(btUserCount == 15)
 				{
-					unicode::_strcpy(m_strStateText[0], GlobalText[2172]);	// "15인이 이미 입장해 있기 때문에 더 이상 입장 할 수 없습니다."
+					unicode::_strcpy(m_strStateText[0], GlobalText[2172]);
 				}
 				else
 				{
 					if(m_BtnEnter.IsLock() == false)
 					{
-						unicode::_strcpy(m_strStateText[0], GlobalText[2164]);	// "지금 입장하실 수 있습니다."
+						unicode::_strcpy(m_strStateText[0], GlobalText[2164]);
 					}
 					else
 					{
-						unicode::_strcpy(m_strStateText[0], GlobalText[2172]);	// "15인이 이미 입장해 있기 때문에 더 이상 입장 할 수 없습니다."
+						unicode::_strcpy(m_strStateText[0], GlobalText[2172]);
 					}
 				}
 				m_iStateTextNum = 1;
@@ -293,13 +280,13 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
 			{
 				if(btUserCount < 15)
 				{
-					unicode::_sprintf(m_strStateText[0], GlobalText[2165], btUserCount);	// "나이트메어가 마야의 왼손에 대한 제어권을 상실하였습니다. 그러나 그 과정에서 피해가 발생하여 현재 %d명이 살아남았습니다."
-					unicode::_sprintf(m_strStateText[1], GlobalText[2167], 15-btUserCount);	// "앞으로 %d명의 힘이 더 필요합니다."
+					unicode::_sprintf(m_strStateText[0], GlobalText[2165], btUserCount);
+					unicode::_sprintf(m_strStateText[1], GlobalText[2167], 15-btUserCount);
 					m_iStateTextNum = 2;
 				}
 				else if(btUserCount == 15)
 				{
-					unicode::_strcpy(m_strStateText[0], GlobalText[2168]);	// "나이트메어가 마야의 왼손에 대한 제어권을 상실하였습니다."
+					unicode::_strcpy(m_strStateText[0], GlobalText[2168]);
 					m_iStateTextNum = 1;
 				}
 				
@@ -308,13 +295,13 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
 			{
 				if(btUserCount < 15)
 				{
-					unicode::_sprintf(m_strStateText[0], GlobalText[2166], btUserCount);	// "나이트메어가 마야의 오른손에 대한 제어권을 상실하였습니다. 그러나 그 과정에서 피해가 발생하여 현재 %d명이 살아남았습니다."
-					unicode::_sprintf(m_strStateText[1], GlobalText[2167], 15-btUserCount);	// "앞으로 %d명의 힘이 더 필요합니다."
+					unicode::_sprintf(m_strStateText[0], GlobalText[2166], btUserCount);
+					unicode::_sprintf(m_strStateText[1], GlobalText[2167], 15-btUserCount);
 					m_iStateTextNum = 2;
 				}
 				else if(btUserCount == 15)
 				{
-					unicode::_strcpy(m_strStateText[0], GlobalText[2168]);	// "나이트메어가 마야의 오른손에 대한 제어권을 상실하였습니다."
+					unicode::_strcpy(m_strStateText[0], GlobalText[2168]);
 					m_iStateTextNum = 1;
 				}
 			}
@@ -322,7 +309,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
 			{
 				if(m_BtnEnter.IsLock() == false)
 				{
-					unicode::_strcpy(m_strStateText[0], GlobalText[2164]);	// "지금 입장하실 수 있습니다."
+					unicode::_strcpy(m_strStateText[0], GlobalText[2164]);
 
 					m_iStateTextNum = 1;
 				}
@@ -332,19 +319,19 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
 		if(btDetailState == KANTURU_MAYA_DIRECTION_NOTIFY || btDetailState == KANTURU_MAYA_DIRECTION_MONSTER1 || btDetailState == KANTURU_MAYA_DIRECTION_MAYA1
 			|| btDetailState == KANTURU_MAYA_DIRECTION_END_MAYA1 || btDetailState == KANTURU_MAYA_DIRECTION_ENDCYCLE_MAYA1)
 		{
-			unicode::_sprintf(m_strStateText[1], GlobalText[2154], btUserCount);	// "현재 %d명이 마야의 왼손과 전투중입니다."
+			unicode::_sprintf(m_strStateText[1], GlobalText[2154], btUserCount);
 			m_iStateTextNum = 2;
 		}
 		else if(btDetailState == KANTURU_MAYA_DIRECTION_MONSTER2 || btDetailState == KANTURU_MAYA_DIRECTION_MAYA2
 			|| btDetailState == KANTURU_MAYA_DIRECTION_END_MAYA2 || btDetailState == KANTURU_MAYA_DIRECTION_ENDCYCLE_MAYA2)
 		{
-			unicode::_sprintf(m_strStateText[1], GlobalText[2155], btUserCount);	// "현재 %d명이 마야의 오른손과 전투중입니다."
+			unicode::_sprintf(m_strStateText[1], GlobalText[2155], btUserCount);
 			m_iStateTextNum = 2;
 		}
 		else if(btDetailState == KANTURU_MAYA_DIRECTION_MONSTER3 || btDetailState == KANTURU_MAYA_DIRECTION_MAYA3
 			|| btDetailState == KANTURU_MAYA_DIRECTION_END_MAYA3 || btDetailState == KANTURU_MAYA_DIRECTION_ENDCYCLE_MAYA3)
 		{
-			unicode::_sprintf(m_strStateText[1], GlobalText[2156], btUserCount);	// "현재 %d명이 마야의 양손과 전투중입니다."
+			unicode::_sprintf(m_strStateText[1], GlobalText[2156], btUserCount);
 			m_iStateTextNum = 2;
 		}
 		else if(btDetailState == KANTURU_MAYA_DIRECTION_NONE || btDetailState == KANTURU_MAYA_DIRECTION_END
@@ -355,32 +342,31 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
 	}
 	else if(btState == KANTURU_STATE_NIGHTMARE_BATTLE)
 	{
-		unicode::_strcpy(m_strSubject, GlobalText[2152]);	// "현재 마야와의 전투가 진행중입니다."
-		unicode::_sprintf(m_strStateText[0], GlobalText[2153], btUserCount);	// "%d명이 정제의 탑으로 통하는 길을 열기 위해 전투를 벌이고 있습니다. ..... (생략)"
-		unicode::_sprintf(m_strStateText[1], GlobalText[2157], btUserCount);	// "현재 %d명이 나이트메어와 전투중입니다."
+		unicode::_strcpy(m_strSubject, GlobalText[2152]);
+		unicode::_sprintf(m_strStateText[0], GlobalText[2153], btUserCount);
+		unicode::_sprintf(m_strStateText[1], GlobalText[2157], btUserCount);
 		m_iStateTextNum = 2;
 	}
 	else if(btState == KANTURU_STATE_STANDBY)
 	{
-		unicode::_strcpy(m_strSubject, GlobalText[2158]);	// "곧 보스전이 개시됩니다."
+		unicode::_strcpy(m_strSubject, GlobalText[2158]);
 		if(btDetailState == 1)	// STANBY_START
 		{
-			unicode::_sprintf(m_strStateText[0], GlobalText[2159], iRemainTime/60); // "나이트메어의 힘이 마야를 잠식하고 있습니다. 그로 인해 정제의 탑 내부가 불안정한 상태이기에 %d 분동안 입장이 통제됩니다."
+			unicode::_sprintf(m_strStateText[0], GlobalText[2159], iRemainTime/60);
 		}
 		else // STANBY_NONE || STANBY_NOTIFY || STANBY_END || STANBY_ENDCYCLE
 		{
-			unicode::_sprintf(m_strStateText[0], GlobalText[2162]); // "잠시 후 마야가 있는 곳으로 접근이 가능합니다."
+			unicode::_sprintf(m_strStateText[0], GlobalText[2162]);
 		}
-		unicode::_sprintf(m_strStateText[1], GlobalText[2160]); // "정제의 탑으로 가기 위해서는 나이트메어의 힘에 잠식된 마야와 마야를 조종하고 있는 나이트메어를 쓰러트려 길을 열어야 합니다."
-		unicode::_sprintf(m_strStateText[2], GlobalText[2161]); // "마야의 안정성과 보안 유지를 위해 출입이 제한되어있습니다. 수석 연구원 용으로 발급된 '문스톤 펜던트'가 필요합니다."
+		unicode::_sprintf(m_strStateText[1], GlobalText[2160]);
+		unicode::_sprintf(m_strStateText[2], GlobalText[2161]);
 		m_iStateTextNum = 3;
 	}
 	else
 	{
-		unicode::_strcpy(m_strSubject, GlobalText[2170]);	// "입장에 실패하였습니다."
+		unicode::_strcpy(m_strSubject, GlobalText[2170]);
 	}
 
-	// UI 창이 안열려있다면 연다.
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC) == false)
 	{
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
@@ -396,7 +382,6 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
 	m_bNpcAnimation = false;
 	SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_STOP);
 
-	// 이펙트 제거
 	DeleteJoint(BITMAP_JOINT_ENERGY, NULL);
 
 	g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
@@ -434,7 +419,6 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::UnloadImages()
 
 void SEASON3B::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
 {
-	// 2148 "정보갱신"
 	m_BtnRefresh.ChangeText(GlobalText[2148]);
 	m_BtnRefresh.ChangeTextBackColor(RGBA(255, 255, 255, 0));
 	m_BtnRefresh.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
@@ -442,7 +426,6 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
 	m_BtnRefresh.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 	m_BtnRefresh.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 
-	// 2147 "입장하기"
 	m_BtnEnter.ChangeText(GlobalText[2147]);
 	m_BtnEnter.ChangeTextBackColor(RGBA(255, 255, 255, 0));
 	m_BtnEnter.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
@@ -450,7 +433,6 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
 	m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 	m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 
-	// 1002 "닫기"
 	m_BtnClose.ChangeText(GlobalText[1002]);
 	m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
 	m_BtnClose.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
@@ -461,7 +443,6 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
 
 bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 {
-	// 자동갱신 버튼 업데이트
 	if(m_BtnRefresh.IsLock() == true)
 	{
 		if(timeGetTime() - m_dwRefreshButtonGapTime > KANTURU2ND_REFRESHBUTTON_GAPTIME)
@@ -489,7 +470,6 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 		{
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
 
-			// 정제의 탑 상태일때는 검사 안해도 된다.
 			if(m_byState == KANTURU_STATE_TOWER)
 			{
 				SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
@@ -497,21 +477,18 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 				return true;
 			}
 			
-			// 예외 처리
 			ITEM *pItemHelper, *pItemRingLeft, *pItemRingRight, *pItemWing;
 			pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 			pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
 			pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 			pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
 			
-			// 유니리아를 탄 경우
 			if(pItemHelper->Type == ITEM_HELPER+2)	
 			{
 				CreateMessageBox(POPUP_UNIRIA);
 				return true;
 			}
 			
-			// 변신반지 착용한 경우
 			if(g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) 
 				|| g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
 			{
@@ -519,23 +496,22 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 				return true;
 			}
 			
-			// 날개, 망토, 디노란트, 펜릴, 다크호스이 없는 경우
-			if(	!((pItemWing->Type >= ITEM_WING+0 && pItemWing->Type <= ITEM_WING+6)	// 날개
+			if(	!((pItemWing->Type >= ITEM_WING+0 && pItemWing->Type <= ITEM_WING+6)
 #ifdef ADD_ALICE_WINGS_1
-				|| (pItemWing->Type >= ITEM_WING+36 && pItemWing->Type <= ITEM_WING+43)	// 3차 날개, 소환술사 날개.
+				|| (pItemWing->Type >= ITEM_WING+36 && pItemWing->Type <= ITEM_WING+43)
 #else	// ADD_ALICE_WINGS_1
-				|| (pItemWing->Type >= ITEM_WING+36 && pItemWing->Type <= ITEM_WING+40 )	// 3차 날개들
+				|| (pItemWing->Type >= ITEM_WING+36 && pItemWing->Type <= ITEM_WING+40 )
 #endif	// ADD_ALICE_WINGS_1
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 				|| ( ITEM_WING+130 <= pItemWing->Type && pItemWing->Type <= ITEM_WING+134 )
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
-				|| pItemHelper->Type == ITEM_HELPER+3	// 디노란트
-				|| pItemHelper->Type == ITEM_HELPER+4	// 다크호스
-				|| pItemWing->Type == ITEM_HELPER+30	// 망토
-				|| pItemHelper->Type == ITEM_HELPER+37	// 펜릴
+				|| pItemHelper->Type == ITEM_HELPER+3
+				|| pItemHelper->Type == ITEM_HELPER+4
+				|| pItemWing->Type == ITEM_HELPER+30
+				|| pItemHelper->Type == ITEM_HELPER+37
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-				|| (pItemWing->Type >= ITEM_WING+49 && pItemWing->Type <= ITEM_WING+50 )	// 레이지파이터 날개
-				|| (pItemWing->Type == ITEM_WING+135)	// 작은 무인의 망토
+				|| (pItemWing->Type >= ITEM_WING+49 && pItemWing->Type <= ITEM_WING+50 )
+				|| (pItemWing->Type == ITEM_WING+135)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 				) )
 			{
@@ -543,15 +519,14 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 				return true;
 			}
 			
-			// 문스톤펜던트
-			if(pItemRingLeft->Type == ITEM_HELPER+38 || pItemRingRight->Type == ITEM_HELPER+38)	// 문스톤펜던트
+			if(pItemRingLeft->Type == ITEM_HELPER+38 || pItemRingRight->Type == ITEM_HELPER+38)
 			{
 				SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
 				m_bNpcAnimation = true;
 			}
 			else
 			{
-				CreateMessageBox(POPUP_NOT_MUNSTONE);	// 문스톤펜던트 아이템이 없음.
+				CreateMessageBox(POPUP_NOT_MUNSTONE);
 				return true;
 			}
 			
@@ -573,15 +548,12 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = m_Pos.x; y = m_Pos.y + 2.f, width = KANTURU2ND_ENTER_WINDOW_WIDTH - MSGBOX_BACK_BLANK_WIDTH; height = KANTURU2ND_ENTER_WINDOW_HEIGHT - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(IMAGE_KANTURU2ND_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = m_Pos.x; y = m_Pos.y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(IMAGE_KANTURU2ND_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = m_Pos.x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<10; ++i)
 	{
@@ -589,7 +561,6 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = m_Pos.x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(IMAGE_KANTURU2ND_BOTTOM, x, y, width, height);
 }
@@ -603,7 +574,6 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderButtons()
 
 void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderTexts()
 {
-	// 제목 텍스트 렌더링
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetTextColor(0xFF49B0FF);
 	g_pRenderText->SetBgColor(0);
@@ -621,14 +591,10 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderTexts()
 	
 	iTextY += 20;
 	
-	// 세부 상태 렌더링
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(0xFF61F191);
-#ifdef _VS2008PORTING
+
 	for(int i=0; i<m_iStateTextNum; i++)
-#else // _VS2008PORTING
-	for(i=0; i<m_iStateTextNum; i++)
-#endif // _VS2008PORTING
 	{
 		iLine = SeparateTextIntoLines(m_strStateText[i], strTemp[0], 3, 52);
 		for(int j=0; j<iLine; j++)
@@ -644,11 +610,6 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderTexts()
 		ZeroMemory(strTemp[i], sizeof(strTemp[i]));
 	}
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
 
 SEASON3B::CNewUIKanturuInfoWindow::CNewUIKanturuInfoWindow()
 {
@@ -728,10 +689,8 @@ bool SEASON3B::CNewUIKanturuInfoWindow::Render()
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// 프레임을 그린다.
 	RenderFrame();
 
-	// 정보 렌더링
 	RenderInfo();
 	
 	return true;
@@ -747,7 +706,6 @@ void SEASON3B::CNewUIKanturuInfoWindow::RenderInfo()
 	g_pRenderText->SetFont(g_hFontBold);
 
 	unicode::t_char strText[256];
-	// 2180 "현재인원 :  %d"
 	unicode::_sprintf(strText, GlobalText[2180], UserCount);
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->SetTextColor(134, 134, 199, 255);
@@ -757,24 +715,20 @@ void SEASON3B::CNewUIKanturuInfoWindow::RenderInfo()
 		|| g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA2
 		|| g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA3)
 	{
-		// 2182 "남은몬스터 : 보스"
 		g_pRenderText->RenderText(m_Pos.x+10, m_Pos.y+35, GlobalText[2182]);
 	}
 	else
 	{
-		// 2183 "남은몬스터 :  %d"
 		unicode::_sprintf(strText, GlobalText[2183], MonsterCount);
 		g_pRenderText->RenderText(m_Pos.x+10, m_Pos.y+35, strText);
 	}
 
-	// 시간
 	int iCurrentTime = (GetTickCount() - m_dwSyncTime) / 1000;
 	int iPastSecond = m_iSecond - iCurrentTime;
 
 	m_iMinute = iPastSecond / 60;
 	int iSecond;
 	
-	// 서버로 부터 60초 이하의 값이 올때를 대비한 예외 처리
 	if(m_iMinute <= 0)	
 	{
 		iSecond = 0;

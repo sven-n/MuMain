@@ -572,11 +572,8 @@ void BMD::Transform(float (*BoneMatrix)[3][4],vec3_t BoundingBoxMin,vec3_t Bound
 			if(Translate)
 				VectorAdd(vp,BodyOrigin,vp);
 		}
-#ifdef _VS2008PORTING
+
 		for(int j=0;j<m->NumNormals;j++)
-#else // _VS2008PORTING
-		for(j=0;j<m->NumNormals;j++)
-#endif // _VS2008PORTING
 		{
 			Normal_t *sn = &m->Normals[j];
 			float    *tn = NormalTransform[i][j];
@@ -3880,11 +3877,7 @@ void BMD::Release()
 		}
 	}
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<NumActions;i++)
-#else // _VS2008PORTING
-	for(i=0;i<NumActions;i++)
-#endif // _VS2008PORTING
 	{
        	Action_t *a = &Actions[i];
      	if(a->LockPositions)
@@ -3895,11 +3888,7 @@ void BMD::Release()
 
 	if(Meshs)
 	{
-#ifdef _VS2008PORTING
 		for(int i=0;i<NumMeshs;i++)
-#else // _VS2008PORTING
-		for(i=0;i<NumMeshs;i++)
-#endif // _VS2008PORTING
 		{
        		Mesh_t *m = &Meshs[i];
 
@@ -4016,11 +4005,7 @@ void BMD::FindNearTriangle( void)
 				pTriangle[iTri].EdgeTriangleIndex[i] = -1;
 			}
 		}
-#ifdef _VS2008PORTING
 		for (int iTri = 0; iTri < iNumTriangles; ++iTri)
-#else // _VS2008PORTING
-		for ( iTri = 0; iTri < iNumTriangles; ++iTri)
-#endif // _VS2008PORTING
 		{
 #ifdef LDS_OPTIMIZE_FORLOADING
 			// 각 Triangle 별로 Triangle이 보유한 각 3변에 인접한 Triangle들의 
@@ -5451,11 +5436,8 @@ void BMD::CreateBoundingBox()
 		}
 		BoundingVertices[i] = 0;
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<NumMeshs;i++)
-#else // _VS2008PORTING
-	for(i=0;i<NumMeshs;i++)
-#endif // _VS2008PORTING
 	{
        	Mesh_t *m = &Meshs[i];
 		for(int j=0;j<m->NumVertices;j++)
@@ -5469,11 +5451,7 @@ void BMD::CreateBoundingBox()
 			BoundingVertices[v->Node]++;
 		}
 	}
-#ifdef _VS2008PORTING
 	for(int i=0;i<NumBones;i++)
-#else // _VS2008PORTING
-	for(i=0;i<NumBones;i++)
-#endif // _VS2008PORTING
 	{
 		Bone_t *b = &Bones[i];
 		if(BoundingVertices[i]) 

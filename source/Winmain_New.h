@@ -134,7 +134,6 @@
 //#define KWAK_ADD_TYPE_TEMPLATE_INBOUNDS					// InBounds 템플릿 추가
 //#define KWAK_ADD_DEFINE_UTIL							// 비트 연산 외 디파인 추가
 
-#ifdef _VS2008PORTING
 	//#define	KWAK_FIX_KEY_STATE_RUNTIME_ERR					// vs2008 키 인풋 런타임 에러 수정(2010.10.29)
 	//#define KWAK_FIX_CHARACTER_SKILL_RUNTIME_ERR			// 캐릭터 스킬 아이콘 Rendering 런타임 에러 수정(2010.10.29)
 	//#define KWAK_FIX_COMPILE_LEVEL4_WARNING					// vs2008 컴파일 옵션 Lv4의 워닝 수정(2010.11.1)
@@ -143,7 +142,7 @@
 
 	// - 김재우
 	//#define KJW_FIX_SOCKET_BONUS_BIT_OPERATION				// VS2008로 .빌드시 발생하는 비트연산 오류수정( int -> __int64 ) (10.9.16)
-#endif
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //## [다음 패치때 들어갈 디파인]
@@ -244,10 +243,8 @@
 	//#define MOD_INGAMESHOP_HEIGHT_MODIFY					// 인게임샵 height 수정(2010.09.15)
 #endif //_TEST_SERVER
 
-#ifdef _VS2008PORTING
 	#define ASG_FIX_MOVECMD_WIN_SCRBAR						// 이동명령창 스크롤바 제일하단 배경 안나오는 버그(10.09.15)
 	#define LJH_FIX_RUNTIME_ERROR_WHEN_RENDERING_DROPPED_ITEMNAME	// 바닥에 떨어진 아이템의 이름을 렌더링할때 런타임에러 수정(10.09.15)
-#endif // _VS2008PORTING
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------------------------
@@ -318,13 +315,11 @@
 	#endif //LDK_ADD_SCALEFORM
 #endif //_TEST_SERVER
 
-#ifdef _VS2008PORTING	// VS2008 포팅 작업중 버그수정
 	#define KJH_FIX_ITEMHOTKEYINFO_CASTING					// 아이템 핫키정보 하위캐스팅 문제	
 	#define KJH_FIX_TALK_SANTATOWN_NPC						// 산타마을에서 NPC와 대화하지 못하는 버그 수정
 	#define KJH_FIX_CONTRIBUTIONPOINT_CASTING				// 기여도포인트 하위캐스팅 
 	#define KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING	// 아이템정보 전송요청중 아이템정보 하위 캐스팅문제
 	#define LJH_FIX_DEREFERENCE_VECTOR_ITER_FOR_DELETED_UI_OBJ		// 벡터 CNewUIObj값을 삭제한 후 iterator를 역참조함으로써 생기는 버그 수정(10.09.03)
-#endif //_VS2008PORTING
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------------------------

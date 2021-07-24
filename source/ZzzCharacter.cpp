@@ -592,12 +592,8 @@ void SetPlayerWalk(CHARACTER *c)
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 
 		}
-#ifdef _VS2008PORTING
-		for(int i=PLAYER_RUN;i<=PLAYER_RUN_RIDE_WEAPON;i++)             //  유니를 타고서 공격.
-#else // _VS2008PORTING
-		for(i=PLAYER_RUN;i<=PLAYER_RUN_RIDE_WEAPON;i++)             //  유니를 타고서 공격.
-#endif // _VS2008PORTING
 
+		for(int i=PLAYER_RUN;i<=PLAYER_RUN_RIDE_WEAPON;i++)
 		{
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)			// 모델링사이즈에 따른 조정
@@ -982,36 +978,24 @@ void SetPlayerWalk(CHARACTER *c)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 에니메이션 설정(공격 동작)
-///////////////////////////////////////////////////////////////////////////////
-
 //extern bool EnableEdit;
 extern int CurrentSkill;
 int AttackHand = 0;
 
 void SetAttackSpeed()
 {
-	// 공격속도 구하는 공식
+
 	float AttackSpeed1 = CharacterAttribute->AttackSpeed * 0.004f;	// 기사, 일반공격
 	float MagicSpeed1  = CharacterAttribute->MagicSpeed * 0.004f;	// 요정
 	float MagicSpeed2  = CharacterAttribute->MagicSpeed * 0.002f;	// 법사
 
-#ifndef _VS2008PORTING			// #ifndef
-	int i;
-#endif // _VS2008PORTING
-	// 주먹공격
  	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_FIST].PlaySpeed = 0.6f + AttackSpeed1;
-	// 일반공격
-#ifdef _VS2008PORTING
+
 	for(int i=PLAYER_ATTACK_SWORD_RIGHT1; i<=PLAYER_ATTACK_RIDE_CROSSBOW; i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_ATTACK_SWORD_RIGHT1; i<=PLAYER_ATTACK_RIDE_CROSSBOW; i++)
-#endif // _VS2008PORTING
 	{
    		Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.25f + AttackSpeed1;
 	}
-	//스킬공격
+
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD1].PlaySpeed = 0.30f + AttackSpeed1; // 내려찍기
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD2].PlaySpeed = 0.30f + AttackSpeed1; // 찌르기
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD3].PlaySpeed = 0.27f + AttackSpeed1; // 올려치기
@@ -1033,29 +1017,16 @@ void SetAttackSpeed()
 
 	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_TWO_HAND_SWORD_TWO].PlaySpeed = 0.25f + AttackSpeed1;	// 파워슬래쉬
 
-	//활공격
-#ifdef _VS2008PORTING
 	for(int i=PLAYER_ATTACK_BOW;i<=PLAYER_ATTACK_FLY_CROSSBOW;i++)
 		Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.30f + AttackSpeed1;
 	for(int i=PLAYER_ATTACK_RIDE_BOW;i<=PLAYER_ATTACK_RIDE_CROSSBOW;i++)
 		Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.30f + AttackSpeed1;
-#else // _VS2008PORTING
-	for(i=PLAYER_ATTACK_BOW;i<=PLAYER_ATTACK_FLY_CROSSBOW;i++)
-	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.30f + AttackSpeed1;
-	for(i=PLAYER_ATTACK_RIDE_BOW;i<=PLAYER_ATTACK_RIDE_CROSSBOW;i++)
-	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.30f + AttackSpeed1;
-#endif // _VS2008PORTING
-	//요정마법
+
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_ELF1].PlaySpeed = 0.25f + MagicSpeed1;
 
-	//일반마법
-#ifdef _VS2008PORTING
 	for(int i=PLAYER_SKILL_HAND1; i<=PLAYER_SKILL_WEAPON2; i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_SKILL_HAND1; i<=PLAYER_SKILL_WEAPON2; i++)
-#endif // _VS2008PORTING
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.29f + MagicSpeed2;
-	//기타마법
+
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_TELEPORT].PlaySpeed = 0.30f + MagicSpeed2; // 순간이동
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_FLASH   ].PlaySpeed = 0.40f + MagicSpeed2; // 아쿠아플래쉬
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_INFERNO ].PlaySpeed = 0.60f + MagicSpeed2; // 인페르노
@@ -1069,7 +1040,6 @@ void SetAttackSpeed()
 	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_RIDE_ATTACK_FLASH].PlaySpeed = 0.40f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_RIDE_ATTACK_MAGIC].PlaySpeed = 0.3f + MagicSpeed2;
 
-	//^ 펜릴 공속 관련(중요 : 공격 속도와 관련)
 	Models[MODEL_PLAYER].Actions[PLAYER_FENRIR_ATTACK].PlaySpeed				= 0.25f + AttackSpeed1;
 	Models[MODEL_PLAYER].Actions[PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE].PlaySpeed = 0.2f + AttackSpeed1;
 	Models[MODEL_PLAYER].Actions[PLAYER_FENRIR_ATTACK_DARKLORD_SWORD].PlaySpeed	= 0.25f + AttackSpeed1;
@@ -1081,12 +1051,7 @@ void SetAttackSpeed()
 	Models[MODEL_PLAYER].Actions[PLAYER_FENRIR_ATTACK_ONE_SWORD].PlaySpeed		= 0.25f + AttackSpeed1;
 	Models[MODEL_PLAYER].Actions[PLAYER_FENRIR_ATTACK_BOW].PlaySpeed			= 0.30f + AttackSpeed1;
 	
-	// 활로 하늘로 향하는 공격
-#ifdef _VS2008PORTING
 	for ( int i=PLAYER_ATTACK_BOW_UP; i<=PLAYER_ATTACK_RIDE_CROSSBOW_UP; ++i )
-#else // _VS2008PORTING
-	for ( i=PLAYER_ATTACK_BOW_UP; i<=PLAYER_ATTACK_RIDE_CROSSBOW_UP; ++i )
-#endif // _VS2008PORTING
 	{
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.30f + AttackSpeed1;
 	}
@@ -2055,11 +2020,8 @@ void AttackEffect(CHARACTER *c)
 			{	// 지역공격
 				vec3_t Angle = { 0.0f, 0.0f, 0.0f};
 				int iCount = 36;
-#ifdef _VS2008PORTING
+
 				for (int i = 0; i < iCount; ++i)
-#else // _VS2008PORTING
-				for ( i = 0; i < iCount; ++i)
-#endif // _VS2008PORTING
 				{
 					//Angle[2] = ( float)i * 10.0f;
 					Angle[0] = ( float)( rand() % 360);
@@ -2159,11 +2121,7 @@ void AttackEffect(CHARACTER *c)
 				}
 				if(c->AttackTime == 14)
 				{
-#ifdef _VS2008PORTING
 					for(int i=0;i<18;i++)
-#else // _VS2008PORTING
-					for(i=0;i<18;i++)
-#endif // _VS2008PORTING
 					{
 						VectorCopy(o->Angle,Angle);
 						Angle[2] += i*20.f;
@@ -2222,11 +2180,7 @@ void AttackEffect(CHARACTER *c)
 			{
 				if(( c->Skill) == AT_SKILL_BOSS)
 				{
-#ifdef _VS2008PORTING
 					for(i=0;i<18;i++)
-#else // _VS2008PORTING
-					for(i=0;i<18;i++)
-#endif // _VS2008PORTING
 					{
 						VectorCopy(o->Angle,Angle);
 						Angle[2] += i*20.f;
@@ -2250,11 +2204,8 @@ void AttackEffect(CHARACTER *c)
 				VectorCopy(o->Position,p);p[2] += 50.f;
 				Luminosity = (15-c->AttackTime)*0.1f;
 				Vector(Luminosity*0.3f,Luminosity*0.6f,Luminosity*1.f,Light);
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<9;i++)
-#else // _VS2008PORTING
-				for(i=0;i<9;i++)
-#endif // _VS2008PORTING
 				{
 					Angle[2] += 40.f;
 					CreateEffect(BITMAP_BOSS_LASER,p,Angle,Light);
@@ -2287,11 +2238,7 @@ void AttackEffect(CHARACTER *c)
 		{
 			if(c->AttackTime == 1)
 			{
-#ifdef _VS2008PORTING
 				for(int i=0;i<18;i++)
-#else // _VS2008PORTING
-				for(i=0;i<18;i++)
-#endif // _VS2008PORTING
 				{
 					Vector(0.f,0.f,i*20.f,Angle);
 					CreateEffect(MODEL_FIRE,o->Position,Angle,o->Light,1,o);
@@ -2324,11 +2271,7 @@ void AttackEffect(CHARACTER *c)
 		}
 		break;
 	case 45://물고기
-#ifdef _VS2008PORTING
 		for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-		for(i=0;i<4;i++)
-#endif // _VS2008PORTING
 		{
 			Vector((float)(rand()%32-16),(float)(rand()%32-16),(float)(rand()%32-16),p);
 			b->TransformPosition(o->BoneTransform[2],p,Position,true);
@@ -2498,11 +2441,8 @@ void AttackEffect(CHARACTER *c)
 			case 46://인어
 				if(c->AttackTime == 1)
 					PlayBuffer(SOUND_EVIL);
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-				for(i=0;i<4;i++)
-#endif // _VS2008PORTING
 				{
 					int Hand = 0;
 					if(i>=2) Hand = 1;
@@ -2515,11 +2455,8 @@ void AttackEffect(CHARACTER *c)
 			case 37://데빌
 				if(c->AttackTime == 1)
 					PlayBuffer(SOUND_EVIL);
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-				for(i=0;i<4;i++)
-#endif // _VS2008PORTING
 				{
 					int Hand = 0;
 					if(i>=2) Hand = 1;
@@ -2534,11 +2471,8 @@ void AttackEffect(CHARACTER *c)
 					if(c->AttackTime == 1)
 						PlayBuffer(SOUND_THUNDER01);
 					float fAngle = (float)(45.f-(c->AttackTime*3+(int)WorldTime/10)%90)+180.f;
-#ifdef _VS2008PORTING
+
 					for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-					for(i=0;i<4;i++)
-#endif // _VS2008PORTING
 					{
 						b->TransformPosition(o->BoneTransform[c->Weapon[i%2].LinkBone],p,Position,true);
 						Vector(0.f,0.f,fAngle,Angle);
@@ -2594,11 +2528,8 @@ void AttackEffect(CHARACTER *c)
 			case 37://데빌
 				if(c->AttackTime == 1)
 					PlayBuffer(SOUND_EVIL);
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-				for(i=0;i<4;i++)
-#endif // _VS2008PORTING
 				{
 					int Hand = 0;
 					if(i>=2) Hand = 1;
@@ -2608,12 +2539,9 @@ void AttackEffect(CHARACTER *c)
 					CreateParticle(BITMAP_FIRE,Position,o->Angle,o->Light);
 				}
 				break;
-			case 34://저주받은 법사
-#ifdef _VS2008PORTING
+			case 34:
+
 				for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-				for(i=0;i<4;i++)
-#endif // _VS2008PORTING
 				{
 					int Hand = 0;
 					if(i>=2) Hand = 1;
@@ -2625,11 +2553,7 @@ void AttackEffect(CHARACTER *c)
 				}
 				break;
 			case 48://리자드킹
-#ifdef _VS2008PORTING
 				for(int i=0;i<6;i++)
-#else // _VS2008PORTING
-				for(i=0;i<6;i++)
-#endif // _VS2008PORTING
 				{
 					int Hand = 0;
 					if(i>=3) Hand = 1;
@@ -4791,9 +4715,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
             SetPlayerDie(c);
         }
 	}
-#ifndef _VS2008PORTING				// #ifndef
-	int i;
-#endif // _VS2008PORTING
+
 	vec3_t p,Position;
 	vec3_t Light;
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
@@ -4809,11 +4731,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 		vec3_t pos1, pos2;
 
 		Vector(0.f,0.f,0.f,p);
-#ifdef _VS2008PORTING
 		for( int i=0; i < b->NumBones; ++i)
-#else // _VS2008PORTING
-		for( i=0; i < b->NumBones; ++i)
-#endif // _VS2008PORTING
 		{
             if ( !b->Bones[i].Dummy )
             {
@@ -5009,11 +4927,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
                 vec3_t Angle = { 0.0f, 0.0f, 0.0f};
 			    int iCount = 36;
 				
-#ifdef _VS2008PORTING
 				for ( int i = 0; i < iCount; ++i)
-#else // _VS2008PORTING
-				for ( i = 0; i < iCount; ++i)
-#endif // _VS2008PORTING
 				{
 					Angle[0] = -10.f;
 					Angle[1] = 0.f;
@@ -5256,11 +5170,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 				TargetPosition[1] = (float)(c->SkillY+0.5f)*TERRAIN_SCALE;
 				TargetPosition[2] = RequestTerrainHeight(TargetPosition[0],TargetPosition[1]);
 
-#ifdef _VS2008PORTING
 				for( int i=0; i<10; ++i )
-#else // _VS2008PORTING
-				for( i=0; i<10; ++i )
-#endif // _VS2008PORTING
 				{
 					Pos[0] = TargetPosition[0];
 					Pos[1] = TargetPosition[1];
@@ -5404,11 +5314,8 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 			vec3_t Position;
 			VectorCopy(o->Position,Position);
 			Position[2] += 100.f;
-#ifdef _VS2008PORTING
+
 			for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-			for(i=0;i<4;i++)
-#endif // _VS2008PORTING
 			{
 				vec3_t Angle;
 				Vector(0.f,0.f,i*90.f,Angle);
@@ -5439,11 +5346,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 			OBJECT* p_o[MAX_FENRIR_SKILL_MONSTER_NUM];
 			int iMonsterNum = 0;
 
-#ifdef _VS2008PORTING
 			for(int i=0; i<MAX_CHARACTERS_CLIENT; i++)
-#else // _VS2008PORTING
-			for(i=0; i<MAX_CHARACTERS_CLIENT; i++)
-#endif // _VS2008PORTING
 			{
 				p_temp_c = &CharactersClient[i];	
 
@@ -5730,11 +5633,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 			{
                 if ( to->Type != MODEL_MONSTER01+7 )
                 {
-#ifdef _VS2008PORTING
 					for(int i=0; i<10; i++)
-#else // _VS2008PORTING
-				    for(i=0; i<10; i++)
-#endif // _VS2008PORTING
 				    {
 					    Vector(to->Position[0]+(float)(rand()%64-32),to->Position[1]+(float)(rand()%64-32),to->Position[2]+(float)(rand()%64+90),Position);
 					    CreateParticle(BITMAP_BLOOD+1,Position,o->Angle,Light);
@@ -5744,11 +5643,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
                 //  성문, 크리스탈 타격시 효과 처리.
                 if ( to->Type==MODEL_MONSTER01+60 )  //  석관.
                 {
-#ifdef _VS2008PORTING
 					for(int i=0;i<5;i++)
-#else // _VS2008PORTING
-				    for(i=0;i<5;i++)
-#endif // _VS2008PORTING
                     {
                         if ( (rand()%2)==0 )
                         {
@@ -7890,11 +7785,8 @@ void MoveCharactersClient()
 		}
 	}
 #endif //ANTIHACKING_ENABLE
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 	{
 		MoveCharacterClient(&CharactersClient[i]);
 	}

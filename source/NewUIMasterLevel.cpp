@@ -354,11 +354,8 @@ int Point_R = 0,Point_Tot = 0;
 		}
 	}
 	Render_Scroll();
-#ifdef _VS2008PORTING
+
 	for(int Skill = 0; Skill < 4; Skill++)
-#else // _VS2008PORTING
-	for(Skill = 0; Skill < 4; Skill++)
-#endif // _VS2008PORTING
 	{
 		int Count = 220/(SKILL_ICON_DATA_HEIGHT - Wid);
 		int StartY = (m_Loc[Skill]/Count);
@@ -469,11 +466,7 @@ int Point_R = 0,Point_Tot = 0;
 						}
 
 						int StartText = 2;
-#ifdef _VS2008PORTING
 						int ib = 0;
-#else // _VS2008PORTING
-						ib = 0;
-#endif // _VS2008PORTING
 						int Set_Master = 0,Num_Master = 0;
 						int Add_Tex = 0;
 
@@ -990,11 +983,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterLevel ( const char* filename )
 				memcpy(&Master_Skill_Data[i],pSeek,5);
 				pSeek += 5;
 			}
-#ifdef _VS2008PORTING
 			for(int i=0;i<MAX_MASTER;i++)
-#else // _VS2008PORTING
-			for(i=0;i<MAX_MASTER;i++)
-#endif // _VS2008PORTING
 			{
 				BuxConvert(pSeek,Size);
 				memcpy(&(m_MasterLevel[i]),pSeek,Size);
@@ -1118,7 +1107,6 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 	for(int i = 0; i< 4; i++)
 	{
 		if(m_EventState[i] == EVENT_SCROLL_BTN_DOWN && SEASON3B::IsRelease(VK_LBUTTON))
-		//스크롤 포인트 엘버튼 체크해제
 		{
 			m_EventState[i] = EVENT_NONE;
 			return false;
@@ -1213,7 +1201,6 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 					{
 						int Before_Skill = m_MasterLevel[GetJob + Skill].Ability[sy - 1][sx]%10000;
 
-#ifdef _VS2008PORTING
 						int icntMagic = 0;
 						for(int i=0; i<MAX_MAGIC; ++i)
 						{
@@ -1225,23 +1212,11 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 						}
 						if(icntMagic == MAX_MAGIC)
 							continue;
-#else // _VS2008PORTING
-						for(i=0; i<MAX_MAGIC; ++i)
-						{
-							if(CharacterAttribute->Skill[i] == (Before_Skill + 4))
-							{
-								break;
-							}
-						}
-						if(i == MAX_MAGIC)
-							continue;
-#endif // _VS2008PORTING
 					}
 					else
 					if(sx > 0 && (m_MasterLevel[GetJob + Skill].Ability[sy][sx - 1]/10000) == 2)
 					{
 						int Before_Skill = m_MasterLevel[GetJob + Skill].Ability[sy][sx - 1]%10000;
-#ifdef _VS2008PORTING
 						int icntMagic = 0;
 						for(int i=0; i<MAX_MAGIC; ++i)
 						{
@@ -1253,23 +1228,11 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 						}
 						if(icntMagic == MAX_MAGIC)
 							continue;
-#else // _VS2008PORTING
-						for(i=0; i<MAX_MAGIC; ++i)
-						{
-							if(CharacterAttribute->Skill[i] == (Before_Skill + 4))
-							{
-								break;
-							}
-						}
-						if(i == MAX_MAGIC)
-							continue;
-#endif // _VS2008PORTING
 					}
 					else
 					if(sx < (m_MasterLevel[GetJob + Skill].Width - 1) && (m_MasterLevel[GetJob + Skill].Ability[sy][sx + 1]/10000) == 4)
 					{
 						int Before_Skill = m_MasterLevel[GetJob + Skill].Ability[sy][sx + 1]%10000;
-#ifdef _VS2008PORTING
 						int icntMagic = 0;
 						for(int i=0; i<MAX_MAGIC; ++i)
 						{
@@ -1281,17 +1244,6 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 						}
 						if(icntMagic == MAX_MAGIC)
 							continue;
-#else // _VS2008PORTING
-						for(i=0; i<MAX_MAGIC; ++i)
-						{
-							if(CharacterAttribute->Skill[i] == (Before_Skill + 4))
-							{
-								break;
-							}
-						}
-						if(i == MAX_MAGIC)
-							continue;
-#endif // _VS2008PORTING
 					}
 					PlayBuffer(SOUND_CLICK01);
 
@@ -1300,17 +1252,8 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 					{
 						int Cur_Skill = Skill_Num;
 						int Get_Magic = -1;
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
-
-
-
-#ifdef _VS2008PORTING
 						for(int i=0; i<MAX_MAGIC; ++i)
-#else // _VS2008PORTING
-						for(i=0; i<MAX_MAGIC; ++i)
-#endif // _VS2008PORTING
 						{
 							if((CharacterAttribute->Skill[i] + 1) > Cur_Skill && (CharacterAttribute->Skill[i] + 1) < (Cur_Skill + 5))
 							{
@@ -1332,11 +1275,8 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 						if(Get_Skill == false)
 						{
 							Get_Skill = true;
-#ifdef _VS2008PORTING
+
 							for(int i=0; i<MAX_MAGIC; ++i)
-#else // _VS2008PORTING
-							for(i=0; i<MAX_MAGIC; ++i)
-#endif // _VS2008PORTING
 							{
 								if(CharacterAttribute->Skill[i] == (Cur_Skill + 4))
 								{
@@ -1351,10 +1291,6 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 							}
 						}
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-
 						if(Get_Skill == true)
 						{
 							int Point_R = 0,Point_Tot = 0,Point_Before = 0,Before_Line = 0;
@@ -1366,11 +1302,7 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 									Point_Before += Master_Skill_Data[sy - 1][sax];
 									Point_R += Master_Skill_Data[sy][sax];
 								}
-#ifdef _VS2008PORTING
 								for(int sax = 0; sax < m_MasterLevel[GetJob + Skill].Width; sax++)
-#else // _VS2008PORTING
-								for(sax = 0; sax < m_MasterLevel[GetJob + Skill].Width; sax++)
-#endif // _VS2008PORTING
 								{
 									int Skill_Number = m_MasterLevel[GetJob + Skill].Ability[sy-1][sax];
 

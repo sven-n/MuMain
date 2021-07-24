@@ -15,56 +15,36 @@
 #pragma warning( disable : 4237 )
 #pragma warning( disable : 4305 )
 #pragma warning( disable : 4503 ) 
-#ifdef _VS2008PORTING
-	#pragma warning( disable : 4819 )
-	#pragma warning( disable : 4505 )		// 참조 되지 않은 지역 함수를 제거
-	#pragma warning( disable : 4100 )		// 참조 되지 않은 정식 매개 변수
-	#pragma warning( disable : 4127 )		// 조건식이 상수임
-	#pragma warning( disable : 4702 )		// 접근할 수 없는 코드
-	//#pragma warning( disable : 4018 )
-	//#pragma warning( disable : 4482 )
-	//#pragma warning( disable : 4700 )
-	//#pragma warning( disable : 4748 )
-	//#pragma warning( disable : 4786 )	// GlobalBitmap.h 에서 옮겨옴
-#endif // _VS2008PORTING
+
+#pragma warning( disable : 4819 )
+#pragma warning( disable : 4505 )
+#pragma warning( disable : 4100 )
+#pragma warning( disable : 4127 )
+#pragma warning( disable : 4702 )
+//#pragma warning( disable : 4018 )
+//#pragma warning( disable : 4482 )
+//#pragma warning( disable : 4700 )
+//#pragma warning( disable : 4748 )
+//#pragma warning( disable : 4786 )
 
 #pragma once
 
 // Exclude rarely-used stuff from Windows headers
 #define WIN32_LEAN_AND_MEAN	
 
-#ifdef _VS2008PORTING
 
-	#ifndef POINTER_64
-		#define POINTER_64
-	#endif // POINTER_64
+#ifndef POINTER_64
+	#define POINTER_64
+#endif // POINTER_64
 	
-	#ifndef _USE_32BIT_TIME_T
-		#define _USE_32BIT_TIME_T
-	#endif //_USE_32BIT_TIME_T
+#ifndef _USE_32BIT_TIME_T
+	#define _USE_32BIT_TIME_T
+#endif //_USE_32BIT_TIME_T
 
-	// _VS2008PORTING에서 안전성이 강화된 CRT함수 사용 권고 warning 해제
-	// (언젠가는 새로운 함수로 필히 변경하여야 한다.!!!)
-	#define _CRT_SECURE_NO_DEPRECATE
-	#define _CRT_NONSTDC_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_NONSTDC_NO_DEPRECATE
 
-	// Debug Iterator 끄는 디파인 - Debug에서만 돌아감.
-// 	#undef _HAS_ITERATOR_DEBUGGING
-// 	#define _HAS_ITERATOR_DEBUGGING 0
-
-// #ifdef _DEBUG
-// 	// Checked Iterator 끄는 디파인 - Debug/Release 모두돌아감(Release에서는 off)
-// 	#undef _SECURE_SCL
-// 	#define _SECURE_SCL 0
-// #endif // _DEBUG
-#endif // _VS2008PORTING
-
-#ifdef _VS2008PORTING
-//===================================================================
-// 불러올 파일들은 경고 수준 3으로 한다
-//===================================================================
 #pragma warning( push, 3 )
-#endif // _VS2008PORTING
 
 #include <windows.h>
 #ifndef KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
@@ -86,12 +66,7 @@
 #include <stdarg.h>
 #include <conio.h>
 
-//zzzai file cpp 에서 가져 왔음..안 사용해도 됨..
-//#include <iostream.h>
-
-// 라이브러리 꼬이는거 방지.
-//stl
-#ifdef _DEBUG		// Debug모드
+#ifdef _DEBUG
 #include <string>
 #include <list>
 #include <map>
@@ -99,7 +74,7 @@
 #include <algorithm>
 #include <vector>
 #include <queue>
-#else // _DEBUG		// Release모드
+#else // _DEBUG		// Release
 #ifdef _MT			
 #undef _MT
 #include <string>
@@ -121,19 +96,14 @@
 #endif // _MT
 #endif // _DEBUG
 
-#ifdef _VS2008PORTING
-//===================================================================
-// 이 후 파일들은 프로젝트 옵션에 따른다
-//===================================================================
 #pragma warning( pop )
-#endif // _VS2008PORTING
 
 #include <boost/smart_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/format.hpp>
 #include <boost/any.hpp>
 #include <boost/array.hpp>
-// vc 버그로 쓸때가 있으면 그 파일 위에다가 걸어주도록 하자.
+
 //#include <boost/tokenizer.hpp>
 #include <boost/pool/object_pool.hpp>
 
@@ -201,7 +171,6 @@ using namespace boost;
 #else // KJH_MOD_LIBRARY_LINK_EACH_NATION
 #if SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	#include "Winmain_New_Foreign.h"
-// mix 파일 유동적으로 바꾸면 옮길것...
 #endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
 #endif // KJH_MOD_LIBRARY_LINK_EACH_NATION
 
