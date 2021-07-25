@@ -93,7 +93,6 @@ void SaveImage(int HeaderSize,char *Ext,char *filename,BYTE *PakBuffer,int Size)
 	memcpy(Header,PakBuffer,HeaderSize);
 
 	char NewFileName[256];
-#ifdef _VS2008PORTING
 	int iTextcnt = 0;
 	for(int i=0;i<(int)strlen(filename);i++)
 	{
@@ -102,14 +101,6 @@ void SaveImage(int HeaderSize,char *Ext,char *filename,BYTE *PakBuffer,int Size)
 		if(filename[i]=='.') break;
 	}
 	NewFileName[iTextcnt+1] = NULL;
-#else // _VS2008PORTING
-	for(int i=0;i<(int)strlen(filename);i++)
-	{
-		NewFileName[i] = filename[i];
-		if(filename[i]=='.') break;
-	}
-	NewFileName[i+1] = NULL;
-#endif // _VS2008PORTING
 	strcat(NewFileName,Ext);
 	char SaveFileName[256];
 	strcpy(SaveFileName,"Data\\");
@@ -141,7 +132,6 @@ bool OpenJpegBuffer(char *filename,float *BufferFloat)
 	char FileName[256];
 
 	char NewFileName[256];
-#ifdef _VS2008PORTING
 	int iTextcnt = 0;
 	for(int i=0;i<(int)strlen(filename);i++)
 	{
@@ -150,14 +140,6 @@ bool OpenJpegBuffer(char *filename,float *BufferFloat)
 		if(filename[i]=='.') break;
 	}
 	NewFileName[iTextcnt+1] = NULL;
-#else // _VS2008PORTING
-	for(int i=0;i<(int)strlen(filename);i++)
-	{
-		NewFileName[i] = filename[i];
-		if(filename[i]=='.') break;
-	}
-	NewFileName[i+1] = NULL;
-#endif // _VS2008PORTING
 	strcpy(FileName,"Data\\");
     strcat(FileName,NewFileName);
 	strcat(FileName,"OZJ");

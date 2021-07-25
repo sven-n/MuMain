@@ -10693,24 +10693,19 @@ void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
 {
 	LPGETPSHOPITEMLIST_HEADERINFO Header = (LPGETPSHOPITEMLIST_HEADERINFO)ReceiveBuffer;
 	if(Header->byResult == 0x01) 
-	{	//. 리스트 받아오기 성공
-		// 창고를 열어놨으면 닫는다.
+	{	
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
 		{
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_STORAGE);
 		}
-		//. bugfix by soyaviper 2005/03/16
+
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY))
 		{
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
 		}
 		
-		//. Seller 초기화
 		g_PersonalShopSeller.Initialize();
 
-#ifndef _VS2008PORTING		// #ifndef
-		int i;
-#endif // _VS2008PORTING
 		unicode::t_string temp = (char*)Header->szShopTitle;
 		g_pPurchaseShopInventory->ChangeTitleText( temp );
 		g_pPurchaseShopInventory->GetInventoryCtrl()->RemoveAllItems();
@@ -10735,7 +10730,7 @@ void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
 #ifdef CONSOLE_DEBUG
 				g_ConsoleDebug->Write(MCD_ERROR, "[ReceivePersonalShopItemList]Item Cound : %d, Item Index : %d, Item Price : %d", Header->byCount, i, pShopItem->iItemPrice);
 #endif // CONSOLE_DEBUG	
-				//. 가격이 이상하면 창을 닫아버린다
+
 				g_ErrorReport.Write("@ ReceivePersonalShopItemList - item price less than zero(%d)\n", pShopItem->iItemPrice);
 				
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -10746,7 +10741,6 @@ void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
 			}
 		}
 		
-		//. Seller 설정
 		int key = MAKEWORD(Header->byIndexL, Header->byIndexH);
 		int index = FindCharacterIndex(key);
 		
@@ -10761,7 +10755,7 @@ void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
 				g_pChatListBox->AddText("", GlobalText[1120], SEASON3B::TYPE_ERROR_MESSAGE);
 			}	
 			break;
-		case 0x04:	//. 아이템 블럭계정
+		case 0x04:
 		default:
 			g_ErrorReport.Write("@ [Fault] ReceivePersonalShopItemList (result : %d)\n", Header->byResult);
 		}
@@ -10825,7 +10819,7 @@ void ReceivePurchaseItem(BYTE* ReceiveBuffer)
 			g_pMyInventory->InsertItem( myinvenitemindex, Header->byItemInfo );
 		}
 		else 
-		{	//. 그외의 상황일때
+		{	
 			RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE);
 			int myinvenitemindex = Header->byPos - MAX_EQUIPMENT_INDEX;
 			g_pMyInventory->InsertItem( myinvenitemindex, Header->byItemInfo );
@@ -10843,22 +10837,19 @@ void ReceivePurchaseItem(BYTE* ReceiveBuffer)
 		{
 		case 0x07:
 			{
-				// 423 "젠이 부족합니다."
 				g_pChatListBox->AddText("", GlobalText[423], SEASON3B::TYPE_ERROR_MESSAGE);
 			}
 			break;
 		case 0x08:
 			{
-				// 375 "인벤토리가 꽉찼습니다."
 				g_pChatListBox->AddText("", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
 				
 			}
 			break;
-		case 0x09:	//. 아이템 블럭계정
+		case 0x09:
 		default:
 			g_ErrorReport.Write("@ [Fault] ReceivePurchaseItem (result : %d)\n", Header->byResult);
 		}
-		//. 구입실패
 		SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 	}
 }
@@ -10870,7 +10861,6 @@ void NotifySoldItem(BYTE* ReceiveBuffer)
 	strncpy(szId, (char*)Header->szId, MAX_ID_SIZE);
 	szId[MAX_ID_SIZE]= '\0';
 	
-	//. 화면에 팔렸음을 알려준다.
 	char Text[100];
 	sprintf(Text, GlobalText[1122], szId);
 	g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
@@ -10878,7 +10868,6 @@ void NotifySoldItem(BYTE* ReceiveBuffer)
 
 void NotifyClosePersonalShop(BYTE* ReceiveBuffer)
 {
-	//. 상대방이 상점을 종료시켰음을 알려준다
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 #else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPCLOSEPSHOP_RESULTINFO Header = (LPCLOSEPSHOP_RESULTINFO)ReceiveBuffer;

@@ -1,9 +1,8 @@
+//////////////////////////////////////////////////////////////////////
 // NewUIMoveCommandWindow.cpp: implementation of the CNewUIMoveCommandWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
 #include "NewUIMoveCommandWindow.h"
 #include "NewUISystem.h"
 #include "ZzzInterface.h"
@@ -38,7 +37,6 @@ using namespace SEASON3B;
 
 namespace 
 {
-	//로드 할때 처리 하자...
 #ifdef LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
 #ifdef ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
 	const int MapNameCount = 30;
@@ -758,7 +756,6 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 					(*li)->_bCanMove = false;
 				}
 			}
-			// 아틀란스 시리즈 일때 예외처리
 			else if(strncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], 8)==0)	// 37 "아틀란스"
 			{
 				// 유니리아/디노란트를 탄 상태에서는 아틀란스 이동불가
@@ -771,7 +768,6 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 					(*li)->_bCanMove = true;
 				}
 			}
-			// 669 "로랜협곡"
 			else if(strcmp((*li)->_ReqInfo.szMainMapName,GlobalText[669]) == 0)
 			{
 				// 클라이언트에서 수성측길드, 수성측연합인가 판별할 길이 없다. [2/17/2009 nukun]
@@ -790,16 +786,14 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 				(*li)->_bCanMove = true;
 			}	
 
-			// 칼리마검사
 			for(int i=0; i<8; ++i)
 			{
 				char strNewMapName[64];
-				// 58 "칼리마"
+
 				sprintf(strNewMapName, "%s%d", GlobalText[58], i);
 				
 				if(strcmp((*li)->_ReqInfo.szMainMapName, strNewMapName) == 0)
 				{
-					// PC방인지 안닌지
 					if(CPCRoomPtSys::Instance().IsPCRoom() == true 
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 						// 파란복주머니 사용했을때 가능
@@ -819,17 +813,12 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 			}
 		}
 #ifdef ASG_ADD_GENS_SYSTEM
-	// 이동 가능한 지역이고 분쟁 지역이고 겐스에 가입되어 있지 않다면 이동 불가.
 		if ((*li)->_bCanMove && (*li)->_bStrife && 0 == Hero->m_byGensInfluence)
 			(*li)->_bCanMove = false;
 #endif	// ASG_ADD_GENS_SYSTEM
 	}
-	//----------------------------------------------
-	//----------------------------------------------
 }
 
-//---------------------------------------------------------------------------------------------
-// BtnProcess
 bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 {
 	int iX, iY;
@@ -1079,8 +1068,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 	return false;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateMouseEvent
 bool SEASON3B::CNewUIMoveCommandWindow::UpdateMouseEvent()
 {
 	// 버튼 처리
@@ -1099,8 +1086,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::UpdateMouseEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateKeyEvent
 bool SEASON3B::CNewUIMoveCommandWindow::UpdateKeyEvent()
 {
 	if( IsVisible() )
@@ -1115,8 +1100,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::UpdateKeyEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Update
 bool SEASON3B::CNewUIMoveCommandWindow::Update()
 {
 	if( !IsVisible() )
@@ -1129,8 +1112,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::Update()
  	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// ScrollUp
 void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -1169,8 +1150,6 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// ScrollDown
 void SEASON3B::CNewUIMoveCommandWindow::ScrollDown(int iMoveValue)
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -1214,8 +1193,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue
 #ifdef YDG_MOD_PROTECT_AUTO_V4
 //	CMoveCommandWindowEncrypt enc;
 #endif	// YDG_MOD_PROTECT_AUTO_V4
-	// 마우스 스크롤 이후 변경돼는 변수들은 이 함수에서 모두 계산해 준다.
-	// 다른곳에서 처리하다가 꼬일수 있음...
 
 	// DownScroll
 	if( bSign == true )
@@ -1281,8 +1258,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue
 	return;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateScrolling
 void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -1302,9 +1277,6 @@ void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 #endif	// YDG_MOD_PROTECT_AUTO_V4_R2
 }
 
-//---------------------------------------------------------------------------------------------
-// RenderFrame
-// UI Frame
 void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -1396,8 +1368,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 #endif	// YDG_MOD_PROTECT_AUTO_V4_R2
 }
 
-//---------------------------------------------------------------------------------------------
-// Render
 bool SEASON3B::CNewUIMoveCommandWindow::Render()
 {
 	EnableAlphaTest();
@@ -1591,15 +1561,11 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// GetLayerDepth
 float SEASON3B::CNewUIMoveCommandWindow::GetLayerDepth()
 {
 	return 6.4f;
 }
 
-//---------------------------------------------------------------------------------------------
-// OpenningProcess
 void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -1669,15 +1635,11 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsCastleOwner()
 }
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
-//---------------------------------------------------------------------------------------------
-// ClosingProcess
 void SEASON3B::CNewUIMoveCommandWindow::ClosingProcess()
 {
 
 }
 
-//---------------------------------------------------------------------------------------------
-// LoadImages
 void SEASON3B::CNewUIMoveCommandWindow::LoadImages()
 {
 	LoadBitmap("Interface\\newui_scrollbar_up.tga", IMAGE_MOVECOMMAND_SCROLL_TOP);
@@ -1687,8 +1649,6 @@ void SEASON3B::CNewUIMoveCommandWindow::LoadImages()
 	LoadBitmap("Interface\\newui_scroll_off.tga", IMAGE_MOVECOMMAND_SCROLLBAR_OFF, GL_LINEAR);
 }
 
-//---------------------------------------------------------------------------------------------
-// UnloadImages
 void CNewUIMoveCommandWindow::UnloadImages()
 {
 	DeleteBitmap(IMAGE_MOVECOMMAND_SCROLL_TOP);
@@ -1697,8 +1657,6 @@ void CNewUIMoveCommandWindow::UnloadImages()
 	DeleteBitmap(IMAGE_MOVECOMMAND_SCROLLBAR_ON);
 	DeleteBitmap(IMAGE_MOVECOMMAND_SCROLLBAR_OFF);
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 #ifdef YDG_MOD_PROTECT_AUTO_V4_R3
 #define CREATE_KEY_ADDRESS(s1, s2, s3, s4) ((DWORD *)((s1^0x12) << 24 | (s2^0x39) << 16 | (s3^0x1A) << 8 | (s4^0x68)))
@@ -2062,7 +2020,6 @@ void CMoveCommandWindowEncrypt::DecryptWindowPos()
 #endif	// YDG_MOD_PROTECT_AUTO_V4
 
 #ifdef LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
-// 로랜 협곡이나 로랜시장처럼 맵이 다른 서버에 존재 하는지 여부
 BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const
 {
 	BOOL bInOtherServer = FALSE;
@@ -2117,159 +2074,6 @@ int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const char *pszMapName)
 }
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #else	// YDG_ADD_ENC_MOVE_COMMAND_WINDOW
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIMoveCommandWindow::CNewUIMoveCommandWindow()
 {
@@ -2337,8 +2141,6 @@ CNewUIMoveCommandWindow::~CNewUIMoveCommandWindow()
 	Release();
 }
 
-//---------------------------------------------------------------------------------------------
-// Create
 bool SEASON3B::CNewUIMoveCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
 	if( NULL == pNewUIMng )
@@ -2364,8 +2166,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::Create(CNewUIManager* pNewUIMng, int x, 
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Release
 void SEASON3B::CNewUIMoveCommandWindow::Release()
 {
 	UnloadImages();
@@ -2377,8 +2177,6 @@ void SEASON3B::CNewUIMoveCommandWindow::Release()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// SetPos
 void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -2446,11 +2244,9 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
 	m_MapNameUISize.y = 60 + (m_iRealFontHeight * MOVECOMMAND_MAX_RENDER_TEXTLINE);
 #endif // CSK_MOD_PROTECT_AUTO_V1
 	
-	// UI제목 시작위치
 	m_StartUISubjectName.x = m_Pos.x + m_MapNameUISize.x / 2;
 	m_StartUISubjectName.y = m_Pos.y + 4;
 
-	// 맵 이름 시작위치
 	m_StartMapNamePos.x = m_Pos.x + 2;
 #ifdef CSK_MOD_PROTECT_AUTO_V1
 	m_StartMapNamePos.y = m_Pos.y + 38 + m_iTopSpace;
@@ -2459,19 +2255,12 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
 #endif // CSK_MOD_PROTECT_AUTO_V1
 	
 #ifdef ASG_ADD_GENS_SYSTEM
-	// 분쟁지역
 	m_StrifePos.y = m_StartMapNamePos.y;
 #endif	// ASG_ADD_GENS_SYSTEM
 
-	// 맵이름 위치
 	m_MapNamePos.y = m_StartMapNamePos.y;
-
-	// 요구레벨
 	m_ReqLevelPos.y = m_StartMapNamePos.y;
-
-	// 요구젠
 	m_ReqZenPos.y = m_StartMapNamePos.y;
-
 	m_ScrollBarPos.x = m_Pos.x + m_MapNameUISize.x - 14;
 #ifdef CSK_MOD_MOVE_COMMAND_WINDOW
 	m_ScrollBarPos.y = m_StartMapNamePos.y - MOVECOMMAND_SCROLLBAR_TOP_HEIGHT;
@@ -2502,29 +2291,21 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
 	m_iCurPage = 1;
 	
 #ifdef KJH_FIX_MOVECOMMAND_WINDOW_SIZE
-	// 스크롤바가 이동해야할 칸의 전체 갯수
 #ifdef CSK_MOD_PROTECT_AUTO_V1
 	m_iTotalMoveScrBtnperStep = m_listMoveInfoData.size() - m_iTextLine;
 #else // CSK_MOD_PROTECT_AUTO_V1
 	m_iTotalMoveScrBtnperStep = m_listMoveInfoData.size() - MOVECOMMAND_MAX_RENDER_TEXTLINE;
 #endif // CSK_MOD_PROTECT_AUTO_V1
-	// 스크롤바가 이동해야할 칸의 나머지 갯수
 	m_iRemainMoveScrBtnperStep		= m_iTotalMoveScrBtnperStep;
-	// 스크롤바가 이동해야할 전체 픽셀값
 	m_iTotalMoveScrBtnPixel			= m_iScrollBarHeightPixel-MOVECOMMAND_SCROLLBTN_HEIGHT;	
-	// 스크롤바가 이동해야할 나머지 픽셀값
 	m_iRemainMoveScrBtnPixel		= m_iTotalMoveScrBtnPixel;								
-	// 스크롤바가 이동하는 한칸당 최소 픽셀
 	m_iMinMoveScrBtnPixelperStep	= m_iTotalMoveScrBtnPixel/m_iTotalMoveScrBtnperStep;	
-	// 스크롤바가 이동하는 한칸당 최대 픽셀
 	m_iMaxMoveScrBtnPixelperStep	= m_iMinMoveScrBtnPixelperStep+1;						
-	// 스크롤바가 이동해야하는 한칸당 최대픽셀의 갯수
 	m_iTotalNumMaxMoveScrBtnperStep		= m_iTotalMoveScrBtnPixel-(m_iTotalMoveScrBtnperStep*m_iMinMoveScrBtnPixelperStep);		
-	// 스크롤바가 이동해야하는 한칸당 최대픽셀의 갯수
 	m_iTotalNumMinMoveScrBtnperStep		= m_iTotalMoveScrBtnperStep - m_iTotalNumMaxMoveScrBtnperStep;
 	m_icurMoveScrBtnPixelperStep	= m_iMaxMoveScrBtnPixelperStep;
 	m_iAcumMoveMouseScrollPixel = 0;
-#else // KJH_FIX_MOVECOMMAND_WINDOW_SIZE			// 정리할때 지워야 하는 소스
+#else // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 
 #ifdef CSK_MOD_PROTECT_AUTO_V1
 	m_iNumMoveStep = m_listMoveInfoData.size() - m_iTextLine;
@@ -2731,7 +2512,6 @@ extern  int  ServerSelectHi;
 extern  int  ServerLocalSelect;
 #endif // KJH_ADD_SERVER_LIST_SYSTEM
 
-// 분쟁 맵 설정.
 void SEASON3B::CNewUIMoveCommandWindow::SetStrifeMap()
 {
 	std::list<CMoveCommandData::MOVEINFODATA*>::iterator li;
@@ -3007,12 +2787,8 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 			(*li)->_bCanMove = false;
 #endif	// ASG_ADD_GENS_SYSTEM
 	}
-	//----------------------------------------------
-	//----------------------------------------------
 }
 
-//---------------------------------------------------------------------------------------------
-// BtnProcess
 bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 {
 	int iX, iY;
@@ -3155,7 +2931,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 		if( m_iHeightByMoveStep > 0 )
 		{
 #ifdef CSK_MOD_PROTECT_AUTO_V1
-			// 오토마우스 작동중이면 가끔 휠기능 먹통되게 수정 
 // 			if(g_pProtectAuto->IsStartAuto() == true && rand()%10 == 0)
 // 			{
 // 				MouseWheel = 0;
@@ -3172,7 +2947,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 				ScrollDown(m_iHeightByMoveStep);
 			}
 		}
-#endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE			// 정리할때 지워야 하는 소스
+#endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 
 		MouseWheel = 0;
 
@@ -3267,12 +3042,9 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 	return false;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateMouseEvent
 bool SEASON3B::CNewUIMoveCommandWindow::UpdateMouseEvent()
 {
-	// 버튼 처리
-	if( true == BtnProcess() )	// 처리가 완료 되었다면
+	if( true == BtnProcess() )
 		return false;
 
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -3287,8 +3059,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::UpdateMouseEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateKeyEvent
 bool SEASON3B::CNewUIMoveCommandWindow::UpdateKeyEvent()
 {
 	if( IsVisible() )
@@ -3303,8 +3073,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::UpdateKeyEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Update
 bool SEASON3B::CNewUIMoveCommandWindow::Update()
 {
 	if( !IsVisible() )
@@ -3317,8 +3085,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::Update()
  	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// ScrollUp
 void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -3362,7 +3128,6 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
  	m_ScrollBtnPos.y -= iMoveValue;
 #endif //LDK_FIX_MOVEWINDOW_SCROLL_BUG
 
-	// 예외처리
 	if( m_ScrollBtnPos.y <= m_ScrollBarPos.y || MouseY < m_ScrollBarPos.y+(MOVECOMMAND_SCROLLBTN_HEIGHT/2))
 	{
 		m_ScrollBtnPos.y = m_ScrollBarPos.y;
@@ -3370,8 +3135,6 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
 #endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 }
 
-//---------------------------------------------------------------------------------------------
-// ScrollDown
 void SEASON3B::CNewUIMoveCommandWindow::ScrollDown(int iMoveValue)
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -3410,7 +3173,6 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollDown(int iMoveValue)
 	}
 #else // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 	m_ScrollBtnPos.y += iMoveValue;
-	// 	// 예외처리
 	if( m_ScrollBtnPos.y >= m_ScrollBarPos.y+m_iScrollBarHeightPixel-MOVECOMMAND_SCROLLBTN_HEIGHT
 			 || MouseY > m_ScrollBarPos.y+m_iScrollBarHeightPixel-(MOVECOMMAND_SCROLLBTN_HEIGHT/2))
 	{
@@ -3425,12 +3187,10 @@ void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue
 #ifdef YDG_MOD_PROTECT_AUTO_V4
 	CMoveCommandWindowEncrypt enc;
 #endif	// YDG_MOD_PROTECT_AUTO_V4
-	// 마우스 스크롤 이후 변경돼는 변수들은 이 함수에서 모두 계산해 준다.
-	// 다른곳에서 처리하다가 꼬일수 있음...
 
-	// DownScroll
+	
 	if( bSign == true )
-	{
+	{ // DownScroll
 		if( m_iRemainMoveScrBtnperStep > 0)
 		{	
 
@@ -3448,9 +3208,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue
 				m_icurMoveScrBtnPixelperStep = m_iMinMoveScrBtnPixelperStep;
 			}
 
-
-			
-			// 아직 스크롤할 값이 남아있으면 재귀호출
 			if( piScrollValue >= m_icurMoveScrBtnPixelperStep )
 			{
 				RecursiveCalcScroll(piScrollValue, piMovePixel, bSign);
@@ -3461,9 +3218,8 @@ void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue
 			(*piMovePixel) = piScrollValue;
 		}
 	}
-	// UpScroll
 	else
-	{
+	{ // UpScroll
 		if( m_iRemainMoveScrBtnperStep < m_iTotalMoveScrBtnperStep )
 		{		
 			m_iRemainMoveScrBtnperStep++;
@@ -3480,7 +3236,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue
 				m_icurMoveScrBtnPixelperStep = m_iMinMoveScrBtnPixelperStep;
 			}
 
-			// 아직 스크롤할 값이 남아있으면 재귀호출
 			if( (-piScrollValue) >= m_icurMoveScrBtnPixelperStep )
 			{
 				RecursiveCalcScroll(piScrollValue, piMovePixel, bSign);
@@ -3496,8 +3251,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue
 }
 #endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 
-//---------------------------------------------------------------------------------------------
-// UpdateScrolling
 void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -3522,15 +3275,11 @@ void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// RenderFrame
-// UI Frame을 렌더한다.
 void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
 	CMoveCommandWindowEncrypt enc;
 #endif	// YDG_MOD_PROTECT_AUTO_V4
-	// 배경
 #ifdef CSK_MOD_PROTECT_AUTO_V1
 	glColor4f(0.0f, 0.0f, 0.0f, m_fBackgroundAlpha);
 #else // CSK_MOD_PROTECT_AUTO_V1
@@ -3539,7 +3288,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 	
 	RenderColor((float)m_Pos.x, (float)m_Pos.y, (float)m_MapNameUISize.x, (float)m_MapNameUISize.y);
 
-	// 닫기버튼 배경색.
 #ifdef YDG_MOD_PROTECT_AUTO_V3
 #ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
 	if (!g_pProtectAuto->IsNewVersion())
@@ -3573,7 +3321,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 	RenderImage(IMAGE_MOVECOMMAND_SCROLL_TOP, m_ScrollBarPos.x, m_ScrollBarPos.y, 
 					MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT );		// TOP
 	
-#ifdef _VS2008PORTING
 #ifdef ASG_FIX_MOVECMD_WIN_SCRBAR
 	int i;
 	for( i=0 ; i<m_iScrollBarMiddleNum ; i++ )
@@ -3604,20 +3351,7 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 			MOVECOMMAND_SCROLLBAR_TOP_WIDTH, m_iScrollBarMiddleRemainderPixel );	// MIDDLE 나머지
 	}
 #endif	// ASG_FIX_MOVECMD_WIN_SCRBAR
-#else // _VS2008PORTING
-	for( int i=0 ; i<m_iScrollBarMiddleNum ; i++ )
-	{
-		RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, m_ScrollBarPos.x, 
-						m_ScrollBarPos.y+MOVECOMMAND_SCROLLBAR_TOP_HEIGHT+(i*MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
-						MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT );	// MIDDLE
-	}
-	if( m_iScrollBarMiddleRemainderPixel > 0 )
-	{
-		RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, m_ScrollBarPos.x, 
-						m_ScrollBarPos.y+MOVECOMMAND_SCROLLBAR_TOP_HEIGHT+(i*MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
-						MOVECOMMAND_SCROLLBAR_TOP_WIDTH, m_iScrollBarMiddleRemainderPixel );	// MIDDLE 나머지
-	}
-#endif // _VS2008PORTING
+
 
 	RenderImage(IMAGE_MOVECOMMAND_SCROLL_BOTTOM, m_ScrollBarPos.x, m_ScrollBarPos.y+m_iScrollBarHeightPixel-MOVECOMMAND_SCROLLBAR_TOP_HEIGHT,
 					MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT );		// BOTTOM
@@ -3674,8 +3408,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 	g_pRenderText->RenderText(m_ReqZenPos.x, m_StartUISubjectName.y+20, GlobalText[936], 0 ,0, RT3_WRITE_CENTER);
 }
 
-//---------------------------------------------------------------------------------------------
-// Render
 bool SEASON3B::CNewUIMoveCommandWindow::Render()
 {
 	EnableAlphaTest();
@@ -3715,7 +3447,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 		iY = m_StartMapNamePos.y + ( m_iRealFontHeight * iCurRenderTextIndex );
 
 		iReqLevel = (*li)->_ReqInfo.iReqLevel;
-		// 마검사/다크로드일때 필요레벨을 계산
 		if ( (GetBaseClass(CharacterAttribute->Class)==CLASS_DARK || GetBaseClass(CharacterAttribute->Class)==CLASS_DARK_LORD
 #ifdef PBG_ADD_NEWCHAR_MONK
 				|| GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
@@ -3723,7 +3454,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 				) 
 			&& (iReqLevel != 400)
 #ifdef LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
-			&& (iReqLevel != 1)	// 1인경우 나누면 0이 되버리므로 1은 제외.
+			&& (iReqLevel != 1)	
 #endif // LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
 			 )
 		{
@@ -3731,11 +3462,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 			char strNewMapName[64];
 			bool bKalima = false;
 			
-			// 칼리마1부터 칼리마6까지는 필요레벨 - 20 이고
-			// 칼리마7은 필요레벨 그대로
 			for(int i=0; i<8; ++i)
 			{
-				// 58 "칼리마"
 				sprintf(strNewMapName, "%s%d", GlobalText[58], i);
 				
 				if(strcmp((*li)->_ReqInfo.szMainMapName, strNewMapName) == 0)
@@ -3872,11 +3600,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 			else
 #endif //PBG_ADD_PKSYSTEM_INGAMESHOP
 			itoa((*li)->_ReqInfo.iReqZen, szText, 10);
-#ifdef _VS2008PORTING
 			if( (*li)->_ReqInfo.iReqZen > (int)iZen )
-#else // _VS2008PORTING
-			if( (*li)->_ReqInfo.iReqZen > iZen )
-#endif // _VS2008PORTING
 			{
 #ifdef CSK_MOD_PROTECT_AUTO_V1
 				g_pRenderText->SetTextColor(255, 51, 26, m_iTextAlpha);
@@ -3919,15 +3643,11 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// GetLayerDepth
 float SEASON3B::CNewUIMoveCommandWindow::GetLayerDepth()
 {
 	return 6.4f;
 }
 
-//---------------------------------------------------------------------------------------------
-// OpenningProcess
 void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 {
 #ifdef YDG_MOD_PROTECT_AUTO_V4
@@ -3974,11 +3694,7 @@ void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 	m_iWheelCounter = 0;
 #endif	// YDG_MOD_PROTECT_AUTO_V3
 	
-#ifdef _VS2008PORTING
 	if( m_iRenderEndTextIndex > (int)m_listMoveInfoData.size() )
-#else // _VS2008PORTING
-	if( m_iRenderEndTextIndex > m_listMoveInfoData.size() )
-#endif // _VS2008PORTING
 	{
 		m_iRenderEndTextIndex -= (m_iRenderEndTextIndex-m_listMoveInfoData.size());
 	}
@@ -4004,15 +3720,11 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsCastleOwner()
 }
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
-//---------------------------------------------------------------------------------------------
-// ClosingProcess
 void SEASON3B::CNewUIMoveCommandWindow::ClosingProcess()
 {
 
 }
 
-//---------------------------------------------------------------------------------------------
-// LoadImages
 void SEASON3B::CNewUIMoveCommandWindow::LoadImages()
 {
 	LoadBitmap("Interface\\newui_scrollbar_up.tga", IMAGE_MOVECOMMAND_SCROLL_TOP);
@@ -4022,8 +3734,6 @@ void SEASON3B::CNewUIMoveCommandWindow::LoadImages()
 	LoadBitmap("Interface\\newui_scroll_off.tga", IMAGE_MOVECOMMAND_SCROLLBAR_OFF, GL_LINEAR);
 }
 
-//---------------------------------------------------------------------------------------------
-// UnloadImages
 void CNewUIMoveCommandWindow::UnloadImages()
 {
 	DeleteBitmap(IMAGE_MOVECOMMAND_SCROLL_TOP);
@@ -4032,8 +3742,6 @@ void CNewUIMoveCommandWindow::UnloadImages()
 	DeleteBitmap(IMAGE_MOVECOMMAND_SCROLLBAR_ON);
 	DeleteBitmap(IMAGE_MOVECOMMAND_SCROLLBAR_OFF);
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 #ifdef CSK_MOD_PROTECT_AUTO_V1
 
@@ -4064,7 +3772,6 @@ void CNewUIMoveCommandWindowNew::OpenningProcess()
 #endif // CSK_MOD_PROTECT_AUTO_V1
 
 #ifdef LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
-// 로랜 협곡이나 로렌시장처럼 맵이 다른 서버에 존재 하는지 여부
 BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const
 {
 	BOOL bInOtherServer = FALSE;
@@ -4080,7 +3787,7 @@ BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex,
 		break;
 	}
 	
-	// 도착지역 (movereq index)
+	// (movereq index)
 	switch(iToMapIndex)
 	{
 	case 24:	// 로렌협곡
@@ -4096,8 +3803,6 @@ BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex,
 #endif //LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-// movereq에서 맵의 이름(자국어 또는 영어)에 맞는 index를 반환한다.
-// 만약, NULL값이 넘어오거나 맵의 이름을 찾지 못했을 경우 -1을 반환.
 int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const char *pszMapName)
 {
 	if (pszMapName == NULL)

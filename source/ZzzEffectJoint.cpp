@@ -693,11 +693,8 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                         VectorCopy ( o->StartPosition, Position );
 						
                         AngleMatrix(o->Angle,Matrix);
-#ifdef _VS2008PORTING
+
                         for ( int i=0; i<(o->MaxTails-1); i++ )
-#else // _VS2008PORTING
-                        for ( i=0; i<(o->MaxTails-1); i++ )
-#endif // _VS2008PORTING
                         {
                             if ( o->Target==NULL )
                             {
@@ -1214,11 +1211,8 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							VectorCopy ( o->StartPosition, Position );
 							
 							AngleMatrix(o->Angle,Matrix);
-#ifdef _VS2008PORTING
+
 							for ( int i=0; i<(o->MaxTails-1); i++ )
-#else // _VS2008PORTING
-							for ( i=0; i<(o->MaxTails-1); i++ )
-#endif // _VS2008PORTING
 							{
 								if ( o->Target==NULL )
 								{
@@ -1267,11 +1261,8 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							VectorCopy ( o->StartPosition, Position );
 							
 							AngleMatrix(o->Angle,Matrix);
-#ifdef _VS2008PORTING
+
 							for ( int i=0; i<(o->MaxTails-1); i++ )
-#else // _VS2008PORTING
-							for ( i=0; i<(o->MaxTails-1); i++ )
-#endif // _VS2008PORTING
 							{
 								if ( o->Target==NULL )
 								{
@@ -1295,18 +1286,12 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						}
 						break;
 					case 15:
-#ifndef _VS2008PORTING				// #ifndef
-						int j;
-#endif // _VS2008PORTING
 						o->RenderFace = 0;
 						o->LifeTime = 80;
 						o->MaxTails = 0;
 						o->MultiUse = 0;
-#ifdef _VS2008PORTING
+
 						for(int j=0; j<MAX_CHARACTERS_CLIENT; j++ )
-#else // _VS2008PORTING
-						for(j=0; j<MAX_CHARACTERS_CLIENT; j++ )
-#endif // _VS2008PORTING
 						{
 							CHARACTER *tc = &CharactersClient[j];
 							OBJECT    *to = &tc->Object;
@@ -1358,7 +1343,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						Models[MODEL_PLAYER].TransformPosition(o->Target->BoneTransform[33],BitePosition,o->TargetPosition,true);
 						break;
 					// ChainLighting
-					case 22:	// 라이트닝 효과
+					case 22:
 					case 23:
 					case 24:
 						o->LifeTime = 15;
@@ -1366,7 +1351,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						o->MaxTails = 30;
 						o->Velocity = 20.f;
 						break;
-					case 25:		// 몬스터 주위에 전기가 지글지글
+					case 25:
 						{
 							o->LifeTime = 20;
 							o->MaxTails = 8;
@@ -1389,7 +1374,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						break;
 #endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 #ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-					case 33:			// 16: 기간틱스톰 번개와 동일하나 색만 변경
+					case 33:
 						Vector( 0.3f, 0.3f, 1.0f, o->Light );
 						o->Velocity = 20.f+(float)(rand()%10);
 						o->LifeTime = rand()%2+2;
@@ -1397,9 +1382,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 #endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
                 }
 				break;
-				
-				/////////////////////////////////////////////////////////////////////////////////////////////////////////
-				
+							
             case BITMAP_JOINT_THUNDER+1:
 				o->Scale    = Scale;
                 o->TexType  = BITMAP_JOINT_THUNDER;
@@ -1997,27 +1980,24 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->StartPosition[2] = ( TargetPosition[2] - o->Position[2] ) / o->MaxTails;
 					
                     AngleMatrix(o->Angle,Matrix);
-#ifdef _VS2008PORTING
-                    for ( int i=0; i<o->MaxTails; i++ )
-#else // _VS2008PORTING
-                    for ( i=0; i<o->MaxTails; i++ )
-#endif // _VS2008PORTING
+
+					for ( int i=0; i<o->MaxTails; i++ )
                     {
                         VectorAdd ( o->Position, o->StartPosition, o->Position );
                         CreateTail ( o, Matrix );
                     }
                 }
-				else if ( o->SubType == 11 )	// 홀리 사이트 보우 화살 효과.
+				else if ( o->SubType == 11 )
 				{
 					Vector(0.2f,0.2f,1.0f,o->Light);
-					o->MultiUse = 0;	// 어떤 것은 더 빨리 터지게 하기
-					o->LifeTime = 30;	// 어떤 것은 더 빨리 터지게 하기
+					o->MultiUse = 0;
+					o->LifeTime = 30;
 					o->MaxTails = 15;
 					o->Direction[0] = ( float)( rand() % 3000);
 					o->Scale        = 30.f;
 				}
 #ifdef CRYINGWOLF_2NDMVP
-				else if(o->SubType==25)		//. 발람 관통 스킬효과
+				else if(o->SubType==25)
 				{
 					Vector(0.9f,0.4f,0.6f,o->Light);
 					o->MultiUse = 0;
@@ -2027,7 +2007,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Scale        = 30.f;
 				}
 #endif // CRYINGWOLF_2NDMVP
-                else if(o->SubType==13)         //  위로 올라가는 빛줄기.(연하고 천천히)
+                else if(o->SubType==13)
                 {
                     o->Direction[2] = (float)(rand()%20+35);
                     o->Scale    = Scale;
@@ -2067,10 +2047,9 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     }
                     VectorCopy ( o->Position, o->StartPosition );
                 }
-				// 타입 43, 44는 버프 전용 이펙트이므로 절대 다른 사람이 사용하지 마세요!!!!!!
 				else if(o->SubType == 43)
 				{
-					o->LifeTime = 100;	// 무한대
+					o->LifeTime = 100;
 					o->MaxTails = 0;
 					o->m_bCreateTails = false;
 				}
@@ -2082,11 +2061,11 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->m_bCreateTails = true;
 					o->Direction[2] = (float)(rand()%2+2);	
 				}
-				else if ( o->SubType == 45 || o->SubType == 46)	// 수정
+				else if ( o->SubType == 45 || o->SubType == 46)
 				{
 					Vector(0.2f,0.2f,1.0f,o->Light);
-					o->MultiUse = rand()%10;	// 어떤 것은 더 빨리 터지게 하기
-					o->LifeTime = 30 + o->MultiUse;	// 어떤 것은 더 빨리 터지게 하기
+					o->MultiUse = rand()%10;
+					o->LifeTime = 30 + o->MultiUse;
 					o->MaxTails = 15;
 					o->Direction[0] = ( float)( rand() % 3000);
 					o->Scale        = 30.f;
@@ -2156,7 +2135,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							Vector(Scale*1.5f,0.f,0.f,o->Direction);
 							break;
 							
-						case 4: //  제자리에서.
+						case 4:
 							{
 								o->RenderType = RENDER_TYPE_ALPHA_BLEND_MINUS;
 								o->LifeTime = 0;
@@ -2170,11 +2149,8 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 								o->StartPosition[2] = ( TargetPosition[2] - o->Position[2] ) / o->MaxTails;
 								
 								AngleMatrix(o->Angle,Matrix);
-#ifdef _VS2008PORTING
+
 								for ( int i=0; i<o->MaxTails; i++ )
-#else // _VS2008PORTING
-								for ( i=0; i<o->MaxTails; i++ )
-#endif // _VS2008PORTING
 								{
 									VectorAdd ( o->Position, o->StartPosition, o->Position );
 									CreateTail ( o, Matrix );
@@ -2182,7 +2158,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							}
 							break;
 							
-						case 5://  움직여서 타켓위치로 찾아 이동한다.  .  ( 속이빈 띠 )
+						case 5:
 							Vector ( 1.f, 1.f, 1.f, o->Light );
 							o->RenderType = RENDER_TYPE_ALPHA_BLEND_OTHER;
 							o->RenderFace = RENDER_FACE_TWO;
@@ -2192,7 +2168,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							o->byOnlyOneRender = 2;
 							break;
 							
-						case 6://  움직여서 타켓을 찾아 움직인다. 타켓은 Object.  ( 속이빈 띠 )
+						case 6:
 							Vector ( 1.f, 1.f, 1.f, o->Light );
 							o->RenderType = RENDER_TYPE_ALPHA_BLEND_OTHER;
 							o->Scale    = Scale;
@@ -2209,19 +2185,12 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							o->Velocity = 10.f;
 							o->TexType  = BITMAP_FLARE;
 							o->Direction[0] = 15.f;
-							
-#ifdef _VS2008PORTING
 							o->Position[0] = TargetPosition[0] + (float)cos((float)(rand()%360))*40;
 							o->Position[1] = TargetPosition[1] - (float)sin((float)(rand()%360))*40;
-#else // _VS2008PORTING
-							o->Position[0] = TargetPosition[0] + (float)cos(rand()%360)*40;
-							o->Position[1] = TargetPosition[1] - (float)sin(rand()%360)*40;
-#endif // _VS2008PORTING
 							VectorCopy ( o->Position, o->StartPosition );
 							break;
-							
-						case 8: //  자신의 부모를 따라서 움직인다. ( 높이 값은 고정되어있다. )
-						case 9: //  자신의 부모를 따라서 움직인다. 
+						case 8:
+						case 9:
 							o->RenderFace = RENDER_FACE_TWO;
 						case 10:
 						case 11:
@@ -2260,7 +2229,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							}
 							break;
 							
-						case 12://  움직여서 타켓을 찾아 움직인다. 타켓은 Object.  ( 속이빈 띠 )
+						case 12:
 							Vector ( 0.6f, 0.2f, 0.8f, o->Light );
 							o->RenderType = RENDER_TYPE_ALPHA_BLEND_OTHER;
 							o->Scale    = Scale;
@@ -2268,7 +2237,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							o->Velocity = 70.f;
 							break;
 #ifdef CRYINGWOLF_2NDMVP
-						case 13:// 12와 같은 녹색
+						case 13:
 							Vector(0.7f, 0.7f, 0.3f, o->Light);
 							o->RenderType = RENDER_TYPE_ALPHA_BLEND_OTHER;
 							o->Scale    = Scale;
@@ -2346,7 +2315,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                 }
                 VectorCopy(TargetPosition,o->TargetPosition);
                 break;
-            case BITMAP_JOINT_FORCE:    //  검기.
+            case BITMAP_JOINT_FORCE:
                 if ( o->SubType==0 
 #ifdef PJH_FIX_BLOOD_ATTCK
 					|| o->SubType==10 
@@ -2453,7 +2422,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Velocity = 10.f;
 					o->LifeTime = 20;
 				}
-				else if( o->SubType==8 )	// SubType : 7 번 참조
+				else if( o->SubType==8 )	// SubType : 7
                 {
 					o->LifeTime = 20;
                     o->m_bCreateTails = false;
@@ -2473,7 +2442,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 //					Vector(1.f,1.f,1.f,o->Light);
                 }
 #ifdef LDS_ADD_EFFECT_FIRESCREAM_FOR_MONSTER
-				else if( o->SubType==20 )	// SubType : 7 번 참조
+				else if( o->SubType==20 )	// SubType : 7
 				{
 					o->Scale    = Scale;
 					o->Velocity = 8.f;
@@ -2524,7 +2493,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 				
 			case BITMAP_PIERCING:
                 o->m_bCreateTails = false;
-                if ( o->SubType==0 )       //  스트롱 피어.
+                if ( o->SubType==0 )
                 {
 					o->LifeTime = 10;
 					o->MaxTails = 30;
@@ -2544,7 +2513,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					
 					VectorCopy ( o->Position, o->StartPosition );
                 }
-                else if ( o->SubType==1 )       //  롱피어 어택.
+                else if ( o->SubType==1 )
                 {
                     o->LifeTime = 10;
                     o->bTileMapping = TRUE;
@@ -2566,7 +2535,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     VectorCopy ( o->Position, o->StartPosition );
                 }
 				break;
-				/////////////////////////////////////////////////////////////////////////////////////////////
             case BITMAP_FLARE_FORCE:
                 o->LifeTime = 20;
                 o->m_bCreateTails = false;
@@ -2579,10 +2547,10 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                 Vector ( 0.f, 0.f, 0.f, o->TargetPosition );
 				Vector ( 1.f, 0.8f, 1.f, o->Light );
                 VectorCopy ( o->Position, o->StartPosition );
-                o->Weapon = 0;  //  딜레이.
+                o->Weapon = 0;
 				
                 if ( o->SubType>=1 && o->SubType<=4 
-					|| (o->SubType >= 11 && o->SubType <= 13)	//^ 펜릴 이펙트 관련
+					|| (o->SubType >= 11 && o->SubType <= 13)
 					)
                 {
                     o->TexType = BITMAP_JOINT_THUNDER;
@@ -2591,19 +2559,18 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->TargetPosition[1] = 180.f;
                     o->Weapon = rand()%3+2;
                     if ( o->SubType==2 || o->SubType==4 
-						|| (o->SubType >= 11 && o->SubType <= 13)	//^ 펜릴 이펙트 관련
+						|| (o->SubType >= 11 && o->SubType <= 13)
 						)
                     {
-						//^ 펜릴 이펙트 관련
 						switch(o->SubType) 
 						{
-						case 11:	// 검정
+						case 11:
 							Vector ( 0.7f, 1.0f, 0.7f, o->Light );
 							break;
-						case 12:	// 빨강
+						case 12:
 							Vector ( 1.0f, 0.6f, 0.6f, o->Light );
 							break;
-						case 13:	// 파랑
+						case 13:
 							Vector ( 0.7f, 0.7f, 1.0f, o->Light );
 							break;
 						}
@@ -2650,7 +2617,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->TexType = BITMAP_JOINT_THUNDER;
                 }
                 break;
-				///////////////////////////////////////////////////////////////////////////////////////////////////////
             case BITMAP_FLASH:
                 if ( o->SubType<=3 || o->SubType==5 )
                 {
@@ -2709,12 +2675,11 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                 }
 				else if( o->SubType==6)
 				{
-					//땅 위로 웨이브하는 전류
 					o->Scale	= Scale;
 					o->MaxTails = 30;
 					o->LifeTime = 25;
 					o->Weapon = o->LifeTime;
-					o->Velocity = (float)(70 + rand()%3) * Q_PI / 180; //고유 발사각
+					o->Velocity = (float)(70 + rand()%3) * Q_PI / 180;
 					
 					Vector( 0.8f, 0.8f, 1.0f, o->Light);
 					Vector( 0.f, -(40.f + (float)(rand() % 4)), sinf(o->Velocity) * 10.f, o->Direction);
@@ -2752,7 +2717,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						{
 							o->RenderType = RENDER_TYPE_ALPHA_BLEND;
 							
-							// o->Target : 소스 오브젝트
+							// o->Target
 							if( rand()%2 == 0)
 							{
 								o->Angle[2] += 90.f;
@@ -2763,13 +2728,13 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							}
 							
 							VectorCopy(TargetPosition, o->TargetPosition);
-							o->Angle[0] += (float)((rand()%100)-50);				// 방향 : -140 ~ 140
-							o->Angle[1] += (float)((rand()%100)-50);				// 방향 : -140 ~ 140
-							o->Angle[2] += (float)((rand()%100)-50);				// 방향 : -140 ~ 140
-							o->Velocity = (float)(1+((float)(rand()%10)*0.2f));		// 속도 : 20 ~ 40
-							o->LifeTime = (float)(30+(rand()%20-10));				// 라이프타임 : 20 ~ 30
-							o->Scale    = Scale+(float)((rand()%60-30));			// 스케일 : Scale-30 ~ Scale+30
-							o->MaxTails = (float)(20+(rand()%10-5));				// 테일 : 5 ~ 15
+							o->Angle[0] += (float)((rand()%100)-50);				// -140 ~ 140
+							o->Angle[1] += (float)((rand()%100)-50);				// -140 ~ 140
+							o->Angle[2] += (float)((rand()%100)-50);				// -140 ~ 140
+							o->Velocity = (float)(1+((float)(rand()%10)*0.2f));		// 20 ~ 40
+							o->LifeTime = (float)(30+(rand()%20-10));				// 20 ~ 30
+							o->Scale    = Scale+(float)((rand()%60-30));			// Scale-30 ~ Scale+30
+							o->MaxTails = (float)(20+(rand()%10-5));				// 5 ~ 15
 						}
 						break;	
 					}
@@ -3121,19 +3086,13 @@ else Angle[2] = TurnAngle2(Angle[2],0.f,FarAngle(Angle[2],0.f)*0.5f);
 LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam);
 
 
-#ifdef _VS2008PORTING
 void MoveJoint( JOINT *o, int iIndex)
-#else // _VS2008PORTING
-void MoveJoint( JOINT *o, int i)
-#endif // _VS2008PORTING
 {
 	float Height;
 	vec3_t Light;
 	float Luminosity;
 	vec3_t Position,p;
-#ifndef _VS2008PORTING				// #ifndef
-	int j;
-#endif // _VS2008PORTING
+
 	float Distance;
 	float dx = o->Position[0]-o->TargetPosition[0];
 	float dy = o->Position[1]-o->TargetPosition[1];
@@ -3278,7 +3237,7 @@ void MoveJoint( JOINT *o, int i)
 			case 23:
 			case 25:
 #ifdef ADD_SOCKET_ITEM
-			case 47:				// 데들리스태프 잔상
+			case 47:
 #endif // ADD_SOCKET_ITEM
 				VectorCopy(o->Target->EyeRight, o->Position);
 				break;
@@ -4063,11 +4022,7 @@ void MoveJoint( JOINT *o, int i)
             if ( o->SubType!=13 || o->LifeTime>28 )
             {
 				vec3_t vRot;
-#ifdef _VS2008PORTING
 				GetMagicScrew( iIndex, vRot);
-#else // _VS2008PORTING
-				GetMagicScrew( i, vRot);
-#endif // _VS2008PORTING
 				VectorScale( vRot, 50.f, vRot);
 				VectorAdd( o->Position, vRot, o->Position);
 				Vector(1.0f,0.5f,0.1f,Light);
@@ -4259,7 +4214,7 @@ void MoveJoint( JOINT *o, int i)
 			Vector(1,1,1,Light);
 			vec3_t Position;
 			VectorCopy(o->Position,Position);
-			o->PKKey += 30;	    //  가속도
+			o->PKKey += 30;
 			
 			if (o->LifeTime < 35)
 			{
@@ -4271,11 +4226,8 @@ void MoveJoint( JOINT *o, int i)
 					Position[1] += cosf(o->Angle[2]) * (40.0f - o->PKKey * 0.1f);
 					Position[2] = 350;
 					vec3_t Angle;
-#ifdef _VS2008PORTING
+
 					for (int i = 0; i < 2; ++i)
-#else // _VS2008PORTING
-					for (i = 0; i < 2; ++i)
-#endif // _VS2008PORTING
 					{
 						Vector ( 0.f, 0.f, i*3.f, Angle );
 						CreateJoint(BITMAP_JOINT_SPIRIT,Position,Position,Angle,14,NULL,0.9f);
@@ -4309,7 +4261,7 @@ void MoveJoint( JOINT *o, int i)
 			vec3_t Position;
 			VectorCopy(o->Position,Position);
 			
-			o->Angle[0] = (float)o->LifeTime;	// 임시로 -_-
+			o->Angle[0] = (float)o->LifeTime;
 			CreateParticle(BITMAP_WATERFALL_5,o->Position,o->Angle,o->Light,4);
 			o->Position[0] += cosf(o->Angle[2]) * 30.0f;
 			o->Position[1] += sinf(o->Angle[2]) * 30.0f;
@@ -4322,11 +4274,8 @@ void MoveJoint( JOINT *o, int i)
 			
 			if (o->LifeTime == 100)//% 10 == 0)
 			{
-#ifdef _VS2008PORTING
+
 				for (int i = 0; i < 120; ++i)
-#else // _VS2008PORTING
-				for (i = 0; i < 120; ++i)
-#endif // _VS2008PORTING
 				{
 					Vector ( 0.f, 0.f, i*3.f, Angle );
                     CreateJoint(BITMAP_JOINT_SPIRIT,Position,o->Position,Angle,16,NULL,0.9f);
@@ -4530,7 +4479,7 @@ void MoveJoint( JOINT *o, int i)
 #endif // CSK_LUCKY_SEAL
 		}
 		if ( 2 == o->SubType)
-		{	// 기 모으기
+		{
 			if ( !o->Target || !o->Target->Live)
 			{
 				o->Target = NULL;
@@ -4541,27 +4490,17 @@ void MoveJoint( JOINT *o, int i)
 			float fRate2 = 1.0f - fRate1;
 			
 			vec3_t MagicPos;
-#ifdef _VS2008PORTING
 			GetMagicScrew( iIndex*17721, MagicPos, 1.4f);
-#else // _VS2008PORTING
-			GetMagicScrew( i*17721, MagicPos, 1.4f);
-#endif // _VS2008PORTING
 			VectorScale( MagicPos, 300.0f, MagicPos);
 			VectorAdd( MagicPos, o->TargetPosition, MagicPos);
 			vec3_t TargetPos;
 			VectorCopy( o->Target->m_vPosSword, TargetPos);
 			//TargetPos[2] += 120.0f;
-#ifdef _VS2008PORTING
+
 			for ( int i = 0; i < 3; ++i)
 			{
 				o->Position[i] = fRate2 * TargetPos[i] + fRate1 * MagicPos[i];
 			}
-#else // _VS2008PORTING
-			for ( int ii = 0; ii < 3; ++ii)
-			{
-				o->Position[ii] = fRate2 * TargetPos[ii] + fRate1 * MagicPos[ii];
-			}
-#endif // _VS2008PORTING
 		}
 		else if ( o->SubType==3 )
         {
@@ -4601,7 +4540,7 @@ void MoveJoint( JOINT *o, int i)
 				o->Light[2] = o->Target->Light[2]*fAlpha;
             }
         }
-        else if ( o->SubType==5 || o->SubType==6 || o->SubType==7 )       //  배틀 마스터 마법 해제 효과
+        else if ( o->SubType==5 || o->SubType==6 || o->SubType==7 )
         {
             for ( int i=0; i<3; ++i )
             {
@@ -4744,11 +4683,8 @@ void MoveJoint( JOINT *o, int i)
 				}
 				VectorCopy(o->Target->Owner->Position, o->StartPosition);
 				VectorCopy(o->Target->Position, o->TargetPosition);
-#ifdef _VS2008PORTING
+
 				for(int j=o->NumTails-1;j>=0;j--)
-#else // _VS2008PORTING
-				for(j=o->NumTails-1;j>=0;j--)
-#endif // _VS2008PORTING
 				{
 					for(int k=0;k<4;k++)
 						VectorAdd( o->Tails[j][k], o->StartPosition, o->Tails[j][k]);
@@ -4768,11 +4704,7 @@ void MoveJoint( JOINT *o, int i)
 				|| o->SubType == 16 
 				)
 			{
-#ifdef _VS2008PORTING
 				for(int j=o->NumTails-1;j>=0;j--)
-#else // _VS2008PORTING
-				for(j=o->NumTails-1;j>=0;j--)
-#endif // _VS2008PORTING
 				{
 					for(int k=0;k<4;k++)
 						VectorAdd( o->Tails[j][k], o->TargetPosition, o->Tails[j][k]);
@@ -4780,11 +4712,7 @@ void MoveJoint( JOINT *o, int i)
 			}
 			int iFrame = MoveSceneFrame;
 			
-#ifdef _VS2008PORTING
 			iFrame = ( ( iIndex % 2) ? iFrame : -iFrame) + iIndex * 53731;
-#else // _VS2008PORTING
-			iFrame = ( ( i % 2) ? iFrame : -iFrame) + i * 53731;
-#endif // _VS2008PORTING
 			
 			vec3_t vDir, vDirTemp;
 			// 굴리기
@@ -4924,11 +4852,7 @@ void MoveJoint( JOINT *o, int i)
 		
 		//^ 펜릴 이펙트 관련
 	case MODEL_FENRIR_SKILL_THUNDER:
-#ifdef _VS2008PORTING
 		for(int j=0; j<o->MaxTails; j++)
-#else // _VS2008PORTING
-		for(j=0; j<o->MaxTails; j++)
-#endif // _VS2008PORTING
 		{
 			if ( o->Target)
 			{
@@ -4980,11 +4904,8 @@ void MoveJoint( JOINT *o, int i)
 		
     case BITMAP_BLUR+1:
 	case BITMAP_JOINT_LASER+1:
-#ifdef _VS2008PORTING
+
 		for(int j=0;j<o->MaxTails;j++)
-#else // _VS2008PORTING
-		for(j=0;j<o->MaxTails;j++)
-#endif // _VS2008PORTING
 		{
 			if( o->SubType==2 )
 			{
@@ -5078,11 +4999,7 @@ void MoveJoint( JOINT *o, int i)
             break;
         }
 		
-#ifdef _VS2008PORTING
         for(int j=0; j<o->MaxTails; j++)
-#else // _VS2008PORTING
-        for(j=0; j<o->MaxTails; j++)
-#endif // _VS2008PORTING
 		{
 			if( o->SubType == 15 ) 
 				break;
@@ -5383,11 +5300,8 @@ void MoveJoint( JOINT *o, int i)
 			vec3_t Angle;
 			VectorCopy ( o->StartPosition, Position );
 			Position[2] += 100.f;
-#ifdef _VS2008PORTING
+
 			for ( int i=0; i<o->MultiUse; ++i )
-#else // _VS2008PORTING
-			for ( i=0; i<o->MultiUse; ++i )
-#endif // _VS2008PORTING
 			{
 				if ( (i%15)==0 )
 				{
@@ -5429,11 +5343,8 @@ void MoveJoint( JOINT *o, int i)
                 Position[2] = o->TargetPosition[2];
 				
                 VectorCopy( o->StartPosition, o->Position );
-#ifdef _VS2008PORTING
+
                 for(int j=0;j<o->MaxTails;j++)
-#else // _VS2008PORTING
-                for(j=0;j<o->MaxTails;j++)
-#endif // _VS2008PORTING
 				{
 					Distance = MoveHumming(o->Position,o->Angle,Position,(float)(rand()%80+60.f));
 					
@@ -5493,11 +5404,8 @@ void MoveJoint( JOINT *o, int i)
             }
             VectorSubtract ( o->TargetPosition, o->Position, Position );
             VectorScale ( Position, 0.2f, Position );
-#ifdef _VS2008PORTING
-            for ( int i=o->MaxTails-5; i<o->MaxTails-1; ++i )
-#else // _VS2008PORTING
-            for ( i=o->MaxTails-5; i<o->MaxTails-1; ++i )
-#endif // _VS2008PORTING
+
+            for (int i=o->MaxTails-5; i<o->MaxTails-1; ++i ) 
             {
                 VectorAdd ( o->Position, Position, o->Position );
                 o->Position[0] += rand()%20-10;
@@ -5514,7 +5422,6 @@ void MoveJoint( JOINT *o, int i)
                 o->Light[2] /= 1.2f;
             }
 			
-            //  번개 마지막 위치에 불빛을 나타낸다.
             if ( o->SubType==2 )
             {
                 Vector ( o->Light[0]*0.5f, o->Light[1]*0.6f, o->Light[2], Light );
@@ -5544,11 +5451,8 @@ void MoveJoint( JOINT *o, int i)
 				
                 VectorSubtract ( o->TargetPosition, o->Position, Position );
                 VectorScale ( Position, o->StartPosition[0], Position );        //  반복된 이동 간격 Vector.
-#ifdef _VS2008PORTING
+
                 for ( int i=0; i<o->TargetIndex[0]; ++i )
-#else // _VS2008PORTING
-                for ( i=0; i<o->TargetIndex[0]; ++i )
-#endif // _VS2008PORTING
                 {
 					CreateTail ( o, Matrix );
                     VectorAdd ( o->Position, Position, o->Position );
@@ -5561,11 +5465,8 @@ void MoveJoint( JOINT *o, int i)
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
                 VectorSubtract ( o->TargetPosition, o->Position, Position );
                 VectorScale ( Position, o->StartPosition[1], Position );        //  2번째 반복되는 이동 간격 Vector.
-#ifdef _VS2008PORTING
+
                 for ( int i=o->TargetIndex[0]; i<o->TargetIndex[1]; ++i )
-#else // _VS2008PORTING
-                for ( i=o->TargetIndex[0]; i<o->TargetIndex[1]; ++i )
-#endif // _VS2008PORTING
                 {
                     VectorAdd ( o->Position, Position, o->Position );
 					CreateTail ( o, Matrix );
@@ -5600,11 +5501,8 @@ void MoveJoint( JOINT *o, int i)
 			}
 			VectorSubtract ( o->TargetPosition, o->Position, Position );
 			VectorScale ( Position, 0.2f, Position );
-#ifdef _VS2008PORTING
+
 			for ( int i=o->MaxTails-5; i<o->MaxTails-1; ++i )
-#else // _VS2008PORTING
-			for ( i=o->MaxTails-5; i<o->MaxTails-1; ++i )
-#endif // _VS2008PORTING
 			{
 				VectorAdd ( o->Position, Position, o->Position );
 				o->Position[0] += rand()%10-5;
@@ -5632,11 +5530,8 @@ void MoveJoint( JOINT *o, int i)
 			}
 			VectorSubtract ( o->TargetPosition, o->Position, Position );
 			VectorScale ( Position, 0.2f, Position );
-#ifdef _VS2008PORTING
+
 			for ( int i=o->MaxTails-5; i<o->MaxTails-1; ++i )
-#else // _VS2008PORTING
-			for ( i=o->MaxTails-5; i<o->MaxTails-1; ++i )
-#endif // _VS2008PORTING
 			{
 				VectorAdd ( o->Position, Position, o->Position );
 				o->Position[1] += rand()%20-10;
@@ -5664,11 +5559,8 @@ void MoveJoint( JOINT *o, int i)
 			}
 			VectorSubtract ( o->TargetPosition, o->Position, Position );
 			VectorScale ( Position, 0.2f, Position );
-#ifdef _VS2008PORTING
+
 			for ( int i=o->MaxTails-5; i<o->MaxTails-1; ++i )
-#else // _VS2008PORTING
-			for ( i=o->MaxTails-5; i<o->MaxTails-1; ++i )
-#endif // _VS2008PORTING
 			{
 				VectorAdd ( o->Position, Position, o->Position );
 				o->Position[0] += rand()%20-10;
@@ -5700,11 +5592,8 @@ void MoveJoint( JOINT *o, int i)
 				VectorCopy ( o->Position, o->TargetPosition );
 			}
 			VectorCopy ( o->StartPosition, o->Position );
-#ifdef _VS2008PORTING
+
 			for ( int i=0; i<o->MaxTails-5; i++ )
-#else // _VS2008PORTING
-			for ( i=0; i<o->MaxTails-5; i++ )
-#endif // _VS2008PORTING
 			{
 				int iScale = 1;
 				VectorAdd(o->Position,p2,o->Position);
@@ -6045,11 +5934,7 @@ void MoveJoint( JOINT *o, int i)
 			
 			int iFrame = MoveSceneFrame;
 			
-#ifdef _VS2008PORTING
 			iFrame = ( ( iIndex % 2) ? iFrame : -iFrame) + iIndex * 53731;
-#else // _VS2008PORTING
-			iFrame = ( ( i % 2) ? iFrame : -iFrame) + i * 53731;
-#endif // _VS2008PORTING
 			
 			vec3_t vDir, vDirTemp;
 			// 굴리기
@@ -6137,7 +6022,6 @@ void MoveJoint( JOINT *o, int i)
 			float fLastTarget;
 			for ( int k = 0; k < 3; ++k)
 			{
-#ifdef _VS2008PORTING
 				if ( o->SubType==11 )
 					fLastTarget = ( 100.f - fPos) * ( o->Target->StartPosition[k] + 25.f * cosf( ( float)( iIndex * 51231 + k * 3711 + iFrame/10) * 0.01f));
 #ifdef CRYINGWOLF_2NDMVP
@@ -6147,17 +6031,6 @@ void MoveJoint( JOINT *o, int i)
 				else
 					fLastTarget = ( 100.f - fPos) * ( o->Target->Position[k] + 25.f * cosf( ( float)( iIndex * 51231 + k * 3711 + iFrame/10) * 0.01f));
 				o->Position[k] = ( fPos * o->Position[k] + fLastTarget) * 0.01f;
-#else // _VS2008PORTING
-                if ( o->SubType==11 )
-					fLastTarget = ( 100.f - fPos) * ( o->Target->StartPosition[k] + 25.f * cosf( ( float)( i * 51231 + k * 3711 + iFrame/10) * 0.01f));
-#ifdef CRYINGWOLF_2NDMVP
-				else if (o->SubType==25)
-					fLastTarget = ( 100.f - fPos) * ( o->Target->StartPosition[k] + 25.f * cosf( ( float)( i * 51231 + k * 3711 + iFrame/10) * 0.01f));
-#endif // CRYINGWOLF_2NDMVP
-                else
-					fLastTarget = ( 100.f - fPos) * ( o->Target->Position[k] + 25.f * cosf( ( float)( i * 51231 + k * 3711 + iFrame/10) * 0.01f));
-				o->Position[k] = ( fPos * o->Position[k] + fLastTarget) * 0.01f;
-#endif // _VS2008PORTING
 			}
             if ( o->SubType!=11 
 #ifdef CRYINGWOLF_2NDMVP
@@ -6231,11 +6104,8 @@ void MoveJoint( JOINT *o, int i)
         else if ( o->SubType==9 )
         {
             AngleMatrix(o->Angle,Matrix);
-#ifdef _VS2008PORTING
+
             for ( int i=0; i<o->MaxTails; i++ )
-#else // _VS2008PORTING
-            for ( i=0; i<o->MaxTails; i++ )
-#endif // _VS2008PORTING
             {
                 VectorAdd ( o->Position, o->StartPosition, o->Position );
                 CreateTail ( o, Matrix );
@@ -6660,11 +6530,7 @@ void MoveJoint( JOINT *o, int i)
             pos[0] /= 3.f; pos[1] /= 3.f; pos[2] /= 3.f;
             //Angle[1] += o->Velocity - 90;
 			
-#ifdef _VS2008PORTING
             for( int j=0; j<3; j++ )
-#else // _VS2008PORTING
-			for( j=0; j<3; j++ )
-#endif // _VS2008PORTING
 			{
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				Angle[1] += 30.f;
@@ -6694,11 +6560,7 @@ void MoveJoint( JOINT *o, int i)
             pos[0] /= 3.f; pos[1] /= 3.f; pos[2] /= 3.f;
             //Angle[1] += o->Velocity - 90;
 			
-#ifdef _VS2008PORTING
             for( int j=0; j<3; j++ )
-#else // _VS2008PORTING
-				for( j=0; j<3; j++ )
-#endif // _VS2008PORTING
 				{
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					Angle[1] += 30.f;
@@ -6730,11 +6592,7 @@ void MoveJoint( JOINT *o, int i)
                 pos[0] /= 3.f; pos[1] /= 3.f; pos[2] /= 3.f;
                 Angle[1] += o->Velocity - 90;
 				
-#ifdef _VS2008PORTING
                 for( int j=0; j<3; j++ )
-#else // _VS2008PORTING
-                for( j=0; j<3; j++ )
-#endif // _VS2008PORTING
                 {
                     Angle[1] += 30.f;
                     VectorAdd( o->TargetPosition, pos, o->TargetPosition );
@@ -6764,17 +6622,13 @@ void MoveJoint( JOINT *o, int i)
         }
         break;
 		
-    case BITMAP_JOINT_FORCE:    //  검기.
+    case BITMAP_JOINT_FORCE:
 #ifdef PJH_FIX_BLOOD_ATTCK
         if ( o->SubType==10 || o->SubType==8)
         {
-            //  범위 검사로 데미지.
 			Vector(0.f,-145.f,0.f,p);
-#ifdef _VS2008PORTING
+
             for( int j=0; j<8; ++j )
-#else // _VS2008PORTING
-            for( j=0; j<8; ++j )
-#endif // _VS2008PORTING
             {
                 if( o->NumTails<o->MaxTails-1)
                 {
@@ -6793,14 +6647,14 @@ void MoveJoint( JOINT *o, int i)
                             CreateParticle(BITMAP_FIRE,o->Position,o->Angle,o->Light,0);
                         }
                         
-                        CreateJoint(BITMAP_JOINT_THUNDER,Light,o->Position,o->Angle,3,NULL,rand()%10+5.f,5,10); //  전기 
-                        CreateJoint(BITMAP_JOINT_THUNDER,Light,o->Position,o->Angle,3,NULL,rand()%8+4.f,5,10); //  전기 
+                        CreateJoint(BITMAP_JOINT_THUNDER,Light,o->Position,o->Angle,3,NULL,rand()%10+5.f,5,10); 
+                        CreateJoint(BITMAP_JOINT_THUNDER,Light,o->Position,o->Angle,3,NULL,rand()%8+4.f,5,10);
                     }
 					else
 					if ( o->SubType==8 )
 					{
-                        CreateJoint(BITMAP_JOINT_THUNDER,o->Position,o->Position,o->Angle,3,NULL,rand()%10+5.f,5,10); //  전기 
-                        CreateJoint(BITMAP_JOINT_THUNDER,o->Position,o->Position,o->Angle,3,NULL,rand()%8+4.f,5,10); //  전기 
+                        CreateJoint(BITMAP_JOINT_THUNDER,o->Position,o->Position,o->Angle,3,NULL,rand()%10+5.f,5,10);
+                        CreateJoint(BITMAP_JOINT_THUNDER,o->Position,o->Position,o->Angle,3,NULL,rand()%8+4.f,5,10);
 					}
                 }
                 if ( o->SubType==10 )
@@ -6851,13 +6705,9 @@ void MoveJoint( JOINT *o, int i)
 #endif //PJH_FIX_BLOOD_ATTCK
         if ( o->SubType==0 )
         {
-            //  범위 검사로 데미지.
 			Vector(0.f,-145.f,0.f,p);
-#ifdef _VS2008PORTING
-            for( int j=0; j<8; ++j )
-#else // _VS2008PORTING
-            for( j=0; j<8; ++j )
-#endif // _VS2008PORTING
+
+			for( int j=0; j<8; ++j )
             {
                 if( o->NumTails<o->MaxTails-1)
                 {
@@ -7001,11 +6851,8 @@ void MoveJoint( JOINT *o, int i)
 			if ( o->LifeTime>16 )
 			{
 				AngleMatrix ( o->Angle, Matrix );
-#ifdef _VS2008PORTING
+
 				for ( int i=0; i<10; ++i )
-#else // _VS2008PORTING
-				for ( i=0; i<10; ++i )
-#endif // _VS2008PORTING
 				{
 					CreateTail ( o, Matrix );
 					
@@ -7021,11 +6868,8 @@ void MoveJoint( JOINT *o, int i)
 			if ( o->Skill==0 || o->LifeTime>3 )
 			{
 				AngleMatrix ( o->Angle, Matrix );
-#ifdef _VS2008PORTING
+
 				for ( int i=0; i<5; ++i )
-#else // _VS2008PORTING
-				for ( i=0; i<5; ++i )
-#endif // _VS2008PORTING
 				{
 					CreateTail ( o, Matrix );
 					
@@ -7048,11 +6892,8 @@ void MoveJoint( JOINT *o, int i)
 			if ( o->LifeTime>9 )
 			{
 				AngleMatrix ( o->Angle, Matrix );
-#ifdef _VS2008PORTING
+
 				for ( int i=0; i<30; ++i )
-#else // _VS2008PORTING
-				for ( i=0; i<30; ++i )
-#endif // _VS2008PORTING
 				{
 					CreateTail ( o, Matrix );
 					
@@ -7089,7 +6930,6 @@ void MoveJoint( JOINT *o, int i)
 			o->Light[2] /= 1.4f;
         }
 		break;
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////
     case BITMAP_FLARE_FORCE:
         if ( o->SubType==5 || o->SubType==6 || o->SubType==7 )
         {
@@ -7108,11 +6948,8 @@ void MoveJoint( JOINT *o, int i)
                 int MaxTails = min ( o->MaxTails, o->Weapon );
                 o->MaxTails = MaxTails;
                 o->TargetPosition[1] = o->TargetPosition[2];
-#ifdef _VS2008PORTING
+
                 for ( int i=0; i<MaxTails; ++i )
-#else // _VS2008PORTING
-                for ( i=0; i<MaxTails; ++i )
-#endif // _VS2008PORTING
                 {
 					VectorRotate ( Direction, o->Target->BoneTransform[o->MultiUse], Position );
 					VectorAdd ( o->StartPosition, Position, o->StartPosition );
@@ -7177,10 +7014,10 @@ void MoveJoint( JOINT *o, int i)
                 o->MultiUse += 2;
             }
             else if ( o->SubType>=1 && o->SubType<=4 
-				|| (o->SubType >= 11 && o->SubType <= 13)	//^ 펜릴 이펙트 관련
+				|| (o->SubType >= 11 && o->SubType <= 13)
 				)
             {
-                if ( o->Weapon<=0 ) //  딜레이.
+                if ( o->Weapon<=0 )
                 {
                     vec3_t Angle;
                     for ( int i=1; i<o->MultiUse; ++i )
@@ -7195,7 +7032,7 @@ void MoveJoint( JOINT *o, int i)
                         {
                             o->TargetPosition[1] -= 20.f;
                         }
-						else if(o->SubType >= 11 || o->SubType <= 13)	//^ 펜릴 이펙트 관련
+						else if(o->SubType >= 11 || o->SubType <= 13)
 						{
 							o->TargetPosition[1] -= 20.f;
 						}
@@ -7227,13 +7064,13 @@ void MoveJoint( JOINT *o, int i)
                 }
                 else
                 {
-                    o->Weapon--;    //  딜레이.
+                    o->Weapon--;
                 }
             }
         }
         
         if ( (o->SubType>=0 && o->SubType<=4 
-			|| (o->SubType >= 11 && o->SubType <= 13)	//^ 펜릴 이펙트 관련
+			|| (o->SubType >= 11 && o->SubType <= 13)
 			) && o->LifeTime<10 )
         {
             o->Light[0] /= 1.3f;
@@ -7241,8 +7078,8 @@ void MoveJoint( JOINT *o, int i)
             o->Light[2] /= 1.3f;
         }
         break;
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-    case BITMAP_FLASH:      //  ! 하늘에서 내려오는 섬광.
+
+    case BITMAP_FLASH:
         if ( o->SubType<=3 || o->SubType==5 )
         {
             //  회전하는 것들.
@@ -7272,19 +7109,17 @@ void MoveJoint( JOINT *o, int i)
                 {
                     if ( o->SubType<2 )
                     {
-                        //  ! 부모가 있을 경우. 마법을 제거한다.
                         if ( o->Target!=NULL )
                         {
-                            //  ! 몸의 부스러기를 떨어뜨린다.
                             BMD* b = &Models[MODEL_SHADOW_BODY];
                             b->Animation ( BoneTransform, 0.f, 0.f, 0, o->Target->Angle, o->Target->HeadAngle, false, true );
 							b->Transform ( BoneTransform, o->Target->BoundingBoxMin, o->Target->BoundingBoxMax, &o->Target->OBB, false );
 							
-                            if ( o->SubType==0 )        //  석화 마법 제거.
+                            if ( o->SubType==0 )
                             {
                                 b->RenderMeshEffect ( 0, MODEL_SKIN_SHELL );
                             }
-                            else if ( o->SubType==1 )   //  투명 마법 제거.
+                            else if ( o->SubType==1 )
                             {
                                 b->RenderMeshEffect ( 0, MODEL_SKIN_SHELL, 1 );
                             }
@@ -7361,7 +7196,6 @@ void MoveJoint( JOINT *o, int i)
 			
 			if ( (o->Weapon - o->LifeTime) < 10 )
 			{
-				//처음 부분은 스케일
 				CreateParticle(BITMAP_EXPLOTION+1,o->StartPosition,o->Angle,o->Light, 0, 3.f);
 				o->Scale = 100.f;
 			}
@@ -7374,7 +7208,6 @@ void MoveJoint( JOINT *o, int i)
 			if(o->Position[2] <= height)
 			{
 				vec3_t tPos;
-				//지면에 닿으면 이펙트와 함께 방향 반전
 				VectorCopy(o->Position, tPos);
 				CreateJoint(BITMAP_JOINT_THUNDER,o->Position,o->Position,o->Angle,4,NULL,60.f);
 				Vector(1.f, 1.f, 1.f, Light);
@@ -7411,7 +7244,7 @@ void MoveJoint( JOINT *o, int i)
 					
 					o->Velocity += 2.f;
 					
-					if ( o->LifeTime<10 )
+					if ( o->LifeTime < 10 )
 					{
 						o->Light[0] /= 1.2f;
 						o->Light[1] /= 1.2f;
@@ -7538,11 +7371,7 @@ void MoveJoint( JOINT *o, int i)
         case BITMAP_FLARE_BLUE:
 			if ( o->SubType == 4 || o->SubType == 12)
 			{
-#ifdef _VS2008PORTING
 				MoveJoint( o, iIndex );
-#else // _VS2008PORTING
-				MoveJoint( o, i);
-#endif // _VS2008PORTING
 			}
 			break;
 		}

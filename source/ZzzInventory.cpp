@@ -284,11 +284,7 @@ int RenderTextList(int sx,int sy,int TextNum,int Tab, int iSort = RT3_SORT_CENTE
 		sx -= (TextWidth+Tab)*640/WindowWidth/2;
 	}
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<TextNum;i++)
-#else // _VS2008PORTING
-	for(i=0;i<TextNum;i++)
-#endif // _VS2008PORTING
 	{
 		g_pRenderText->SetTextColor(0xffffffff);
 		
@@ -443,11 +439,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 		glEnable(GL_TEXTURE_2D);
 	}
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<TextNum;i++)
-#else // _VS2008PORTING
-	for(i=0;i<TextNum;i++)
-#endif // _VS2008PORTING
 	{
      	if(TextBold[i])
 		{
@@ -750,12 +742,7 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 	if(iCount == MAX_CLASS)
 		return;
 
-	// 사용클래스 텍스트 입력
-#ifdef _VS2008PORTING
 	for(int i=0; i<MAX_CLASS; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<MAX_CLASS; ++i)
-#endif // _VS2008PORTING
 	{
 		BYTE byRequireClass = pItem->RequireClass[i];
 
@@ -1349,11 +1336,7 @@ void ConvertGold(double dGold, unicode::t_char* szText, int iDecimals /*= 0*/)
 	while( iCipherCnt > 0 )
 	{
 		dwValueTemp = (DWORD)dGold;
-#ifdef _VS2008PORTING
 		dwValueTemp = (dwValueTemp%(int)pow(10.f,(float)iCipherCnt))/(int)pow(10.f,(float)(iCipherCnt-3));
-#else // _VS2008PORTING
-		dwValueTemp = (dwValueTemp%(int)pow(10,iCipherCnt))/(int)pow(10,(iCipherCnt-3));
-#endif // _VS2008PORTING
 		unicode::_sprintf(szTemp, ",%03d", dwValueTemp);
 		strcat(szText, szTemp);
 		iCipherCnt = iCipherCnt - 3;
@@ -1362,11 +1345,7 @@ void ConvertGold(double dGold, unicode::t_char* szText, int iDecimals /*= 0*/)
 	// 소수점 아랫 자리 
 	if( iDecimals > 0 )
 	{
-#ifdef _VS2008PORTING
 		dwValueTemp = (int)(dGold*pow(10.f,(float)iDecimals))%(int)pow(10.f, (float)iDecimals);
-#else // _VS2008PORTING
-		dwValueTemp = (int)(dGold*pow(10,iDecimals))%(int)pow(10, iDecimals);
-#endif // _VS2008PORTING
 		unicode::_sprintf(szTemp, ".%d", dwValueTemp);
 		strcat(szText, szTemp);
 	}
@@ -1637,11 +1616,7 @@ void RepairAllGold ( void )
 	}
 
 	ITEM * pItem = NULL;
-#ifdef _VS2008PORTING
 	for(int i = 0; i < (int)(g_pMyInventory->GetInventoryCtrl()->GetNumberOfItems()); ++i)
-#else // _VS2008PORTING
-	for(i = 0; i < g_pMyInventory->GetInventoryCtrl()->GetNumberOfItems(); ++i)
-#endif // _VS2008PORTING
 	{
 		pItem = g_pMyInventory->GetInventoryCtrl()->GetItem(i);
 
@@ -2746,11 +2721,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		if( ip->lExpireTime == 0 )
 			return;
 
-#ifdef _VS2008PORTING
 		ExpireTime = localtime((time_t*)&(ip->lExpireTime));
-#else // _VS2008PORTING
-		ExpireTime = localtime(&(ip->lExpireTime));
-#endif // _VS2008PORTING
 	}
 #endif	// KJH_ADD_PERIOD_ITEM_SYSTEM
 	
@@ -2993,11 +2964,8 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 				sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 				
 				DWORD gold = CharacterMachine->Gold;
-#ifdef _VS2008PORTING
+
 				if((int)gold < price && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE) 
-#else // _VS2008PORTING
-				if(gold < price && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE) 
-#endif // _VS2008PORTING
 				{
 					TextListColor[TextNum] = TEXT_COLOR_RED;
 					TextBold[TextNum] = true;
@@ -5987,11 +5955,8 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		// 935 "레벨제한"
 		// 936 "요구젠"
 		sprintf(TextList[TextNum],"%s %s    %s      %s    ",GlobalText[1147], GlobalText[368], GlobalText[935], GlobalText[936] ); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-#ifdef _VS2008PORTING
+
         for ( int i=0; i<6; i++ )
-#else // _VS2008PORTING
-        for ( i=0; i<6; i++ )
-#endif // _VS2008PORTING
         {
             int Zen = g_iChaosCastleZen[i];
 
@@ -6408,13 +6373,8 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
         }
     }
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_RESISTANCE;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_RESISTANCE;i++)
-#endif // _VS2008PORTING
 	{
-        //  마법 저항력.
 		if(p->Resistance[i])
 		{
 			sprintf(TextList[TextNum],GlobalText[72],GlobalText[48+i],Level+1);
@@ -6717,11 +6677,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 
 			sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 
-#ifdef _VS2008PORTING
 			for( int i = 0; i < (int)Text380.size(); ++i )
-#else // _VS2008PORTING
-			for( int i = 0; i < Text380.size(); ++i )
-#endif // _VS2008PORTING
 			{
 #ifdef YDG_FIX_380ITEM_OPTION_TEXT_SD_PERCENT_MISSING
 				strncpy(TextList[TextNum], Text380[i].c_str(), 100);
@@ -6805,11 +6761,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 
     //  특수 기능.
 	int iMana;
-#ifdef _VS2008PORTING
 	for(int i=0;i<ip->SpecialNum;i++)
-#else // _VS2008PORTING
-	for(i=0;i<ip->SpecialNum;i++)
-#endif // _VS2008PORTING
 	{
 #ifdef LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR
 		if( ITEM_HELPER+109 <= ip->Type  && ITEM_HELPER+115 >= ip->Type )
@@ -10876,7 +10828,6 @@ int GetScreenWidth()
 
 void ClearInventory()
 {
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_EQUIPMENT;i++)
 	{
 		CharacterMachine->Equipment[i].Type = -1;
@@ -10892,24 +10843,6 @@ void ClearInventory()
 		ShopInventory[i].Type = -1;
 		ShopInventory[i].Number = 0;
 	}
-#else // _VS2008PORTING
-	int i;
-	for(i=0;i<MAX_EQUIPMENT;i++)
-	{
-	    CharacterMachine->Equipment[i].Type = -1;
-	    CharacterMachine->Equipment[i].Number = 0;
-	}
-	for(i=0;i<MAX_INVENTORY;i++)
-	{
-		Inventory[i].Type = -1;
-		Inventory[i].Number = 0;
-	}
-	for(i=0;i<MAX_SHOP_INVENTORY;i++)
-	{
-		ShopInventory[i].Type = -1;
-		ShopInventory[i].Number = 0;
-	}
-#endif // _VS2008PORTING
 
 	COMGEM::Init();
 }
@@ -16341,11 +16274,8 @@ int CheckMouseOnKeyPad( void)
 	}
 	// Ok, Cancel ( 11 - 12)
 	int yTop = WindowY + iButtonTop + 2 * 40 + 5;
-#ifdef _VS2008PORTING
+
 	for ( int i = 0; i < 2; ++i)
-#else // _VS2008PORTING
-	for ( i = 0; i < 2; ++i)
-#endif // _VS2008PORTING
 	{
 		int xLeft = WindowX + 52 + i * 78;
 		if ( xLeft <= MouseX && MouseX < xLeft + 70 &&
@@ -16510,8 +16440,6 @@ void OpenPersonalShopMsgWnd(int iMsgType)
 }
 bool IsCorrectShopTitle(const char* szShopTitle)
 {
-	//  공백을 제거한 문자열을 만든다.
-#ifdef _VS2008PORTING
 	int j=0;
 	char TmpText[2048];
 	for( int i=0; i<(int)strlen(szShopTitle); ++i )
@@ -16525,21 +16453,6 @@ bool IsCorrectShopTitle(const char* szShopTitle)
 	TmpText[j] = 0;
 
 	for( int i=0;i<AbuseFilterNumber;i++ )
-#else // _VS2008PORTING
-    int i, j;
-    char TmpText[2048];
-    for( i=0, j=0; i<(int)strlen(szShopTitle); ++i )
-    {
-        if ( szShopTitle[i]!=32 )
-        {
-            TmpText[j] = szShopTitle[i];
-            j++;
-        }
-    }
-    TmpText[j] = 0;
-
-	for( i=0;i<AbuseFilterNumber;i++)
-#endif // _VS2008PORTING
 	{
 		if(FindText(TmpText,AbuseFilter[i]))
 		{
@@ -16549,11 +16462,8 @@ bool IsCorrectShopTitle(const char* szShopTitle)
 	
 	int len = strlen(szShopTitle);
 	int count = 0;
-#ifdef _VS2008PORTING
+
 	for(int i=0; i<len; i++)
-#else // _VS2008PORTING
-	for(i=0; i<len; i++)
-#endif // _VS2008PORTING
 	{
 		if(szShopTitle[i] == 0x20) { 
 			count++; 
@@ -16837,11 +16747,7 @@ unsigned int MarkColor[16];
 void CreateGuildMark( int nMarkIndex, bool blend )
 {
 	BITMAP_t *b = &Bitmaps[BITMAP_GUILD];
-#ifdef _VS2008PORTING
 	int Width,Height;
-#else // _VS2008PORTING
-	int i,j,Width,Height;
-#endif // _VS2008PORTING
 	Width  = (int)b->Width;
 	Height = (int)b->Height;
 	BYTE *Buffer = b->Buffer;
@@ -16851,11 +16757,7 @@ void CreateGuildMark( int nMarkIndex, bool blend )
         alpha = 0;
     }
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<16;i++)
-#else // _VS2008PORTING
-	for(i=0;i<16;i++)
-#endif // _VS2008PORTING
 	{
 		switch(i)
 		{
@@ -16878,7 +16780,7 @@ void CreateGuildMark( int nMarkIndex, bool blend )
 		}
 	}
 	BYTE *MarkBuffer = GuildMark[nMarkIndex].Mark;
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<Height;i++)
 	{
 		for(int j=0;j<Width;j++)
@@ -16888,17 +16790,7 @@ void CreateGuildMark( int nMarkIndex, bool blend )
 			MarkBuffer++;
 		}
 	}
-#else // _VS2008PORTING
-	for(i=0;i<Height;i++)
-	{
-		for(j=0;j<Width;j++)
-		{
-			*((unsigned int *)(Buffer)) = MarkColor[MarkBuffer[0]];
-			Buffer += 4;
-			MarkBuffer++;
-		}
-	}
-#endif // _VS2008PORTING
+
 	glBindTexture(GL_TEXTURE_2D,b->TextureNumber);
 
     glTexImage2D(GL_TEXTURE_2D,0,b->Components,Width,Height,0,GL_RGBA,GL_UNSIGNED_BYTE,b->Buffer);
@@ -16910,11 +16802,9 @@ void CreateCastleMark ( int Type, BYTE* buffer, bool blend )
     if ( buffer==NULL ) return;
 
 	BITMAP_t *b = &Bitmaps[Type];
-#ifdef _VS2008PORTING
+
 	int Width,Height;
-#else // _VS2008PORTING
-	int i,j,Width,Height;
-#endif // _VS2008PORTING
+
 	Width  = (int)b->Width;
 	Height = (int)b->Height;
 	BYTE* Buffer = b->Buffer;
@@ -16925,11 +16815,7 @@ void CreateCastleMark ( int Type, BYTE* buffer, bool blend )
         alpha = 0;
     }
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<16;i++)
-#else // _VS2008PORTING
-	for(i=0;i<16;i++)
-#endif // _VS2008PORTING
 	{
 		switch(i)
 		{
@@ -16954,7 +16840,7 @@ void CreateCastleMark ( int Type, BYTE* buffer, bool blend )
 	BYTE MarkBuffer[32*32];
 
     int offset = 0;
-#ifdef _VS2008PORTING
+
 	for ( int i=0; i<32; ++i )
 	{
 		for ( int j=0; j<32; ++j )
@@ -16963,28 +16849,13 @@ void CreateCastleMark ( int Type, BYTE* buffer, bool blend )
 			MarkBuffer[j+(i*32)] = buffer[offset];
 		}
 	}
-#else // _VS2008PORTING
-    for ( i=0; i<32; ++i )
-    {
-        for ( j=0; j<32; ++j )
-        {
-            offset = (j/4)+((i/4)*8);
-            MarkBuffer[j+(i*32)] = buffer[offset];
-        }
-    }
-#endif // _VS2008PORTING
 
     offset = 0;
     int offset2 = 0;
-#ifdef _VS2008PORTING
+
 	for ( int i=0; i<Height; ++i )
 	{
 		for ( int j=0; j<Width; ++j )
-#else // _VS2008PORTING
-    for ( i=0; i<Height; ++i )
-	{
-        for ( j=0; j<Width; ++j )
-#endif // _VS2008PORTING
 		{
             if ( j>=(Width/2-16) && j<(Width/2+16) && i>=(Height/2-16) && i<(Height/2+16) )
             {
@@ -17017,16 +16888,14 @@ void RenderGuildColor(float x,float y,int SizeX,int SizeY,int Index)
 	RenderBitmap(BITMAP_INVENTORY+18,x-1,y-1,(float)SizeX+2,(float)SizeY+2,0.f,0.f,SizeX/32.f,SizeY/30.f);
 
 	BITMAP_t *b = &Bitmaps[BITMAP_GUILD];
-#ifdef _VS2008PORTING
+
 	int Width,Height;
-#else // _VS2008PORTING
-	int i,j,Width,Height;
-#endif // _VS2008PORTING
+
 	Width  = (int)b->Width;
 	Height = (int)b->Height;
 	BYTE *Buffer = b->Buffer;
 	unsigned int Color = MarkColor[Index];
-#ifdef _VS2008PORTING
+
 	if(Index==0)
 	{
 		for(int i=0;i<Height;i++)
@@ -17062,43 +16931,7 @@ void RenderGuildColor(float x,float y,int SizeX,int SizeY,int Index)
 			}
 		}
 	}
-#else // _VS2008PORTING
-	if(Index==0)
-	{
-		for(i=0;i<Height;i++)
-		{
-			for(j=0;j<Width;j++)
-			{
-				*((unsigned int *)(Buffer)) = 255<<24;
-				Buffer += 4;
-			}
-		}
-		Color = (255<<24)+(128<<16)+(128<<8)+(128);
-     	Buffer = b->Buffer;
-		for(i=0;i<8;i++)
-		{
-			*((unsigned int *)(Buffer)) = Color;
-			Buffer += 8*4+4;
-		}
-     	Buffer = b->Buffer+7*4;
-		for(i=0;i<8;i++)
-		{
-			*((unsigned int *)(Buffer)) = Color;
-			Buffer += 8*4-4;
-		}
-	}
-	else
-	{
-		for(i=0;i<Height;i++)
-		{
-			for(j=0;j<Width;j++)
-			{
-				*((unsigned int *)(Buffer)) = Color;
-				Buffer += 4;
-			}
-		}
-	}
-#endif // _VS2008PORTING
+
 	glBindTexture(GL_TEXTURE_2D,b->TextureNumber);
 
     glTexImage2D(GL_TEXTURE_2D,0,b->Components,Width,Height,0,GL_RGBA,GL_UNSIGNED_BYTE,b->Buffer);
@@ -17440,11 +17273,7 @@ const bool ChangeCodeItem( ITEM* ip, BYTE* itemdata )
 			ip->bySocketOption[i] = bySocketOption[i];	// 서버에서 받은 내용 백업
 		}
 
-#ifdef _VS2008PORTING
 		for (int i = 0; i < MAX_SOCKETS; ++i)
-#else // _VS2008PORTING
-		for (i = 0; i < MAX_SOCKETS; ++i)
-#endif // _VS2008PORTING
 		{
 			if (bySocketOption[i] == 0xFF)		// 소켓이 막힘 (DB상에는 0x00 으로 되어있음)
 			{

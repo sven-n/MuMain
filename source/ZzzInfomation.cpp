@@ -2810,11 +2810,8 @@ int ItemValue(ITEM *ip,int goldType)
 		) ) || Type==13 || Type==15 ) )//12(날개,구슬) 13(사탄,반지) 15(법서), 디노란트 제외.
 	{
 		Gold = 100+Level2*Level2*Level2;
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<ip->SpecialNum;i++)
-#else // _VS2008PORTING
-		for(i=0;i<ip->SpecialNum;i++)
-#endif // _VS2008PORTING
 		{
 			switch(ip->Special[i])
 			{

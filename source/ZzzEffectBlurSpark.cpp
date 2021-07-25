@@ -71,7 +71,7 @@ void AddBlur(BLUR *b,vec3_t p1,vec3_t p2,vec3_t Light,int Type)
 }
 
 
-// SubType : 한캐릭터 안에서의 식별자로 사용
+// SubType
 void CreateBlur(CHARACTER *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bool Short,int SubType)
 {
 	for(int i=0;i<MAX_BLURS;i++)
@@ -81,16 +81,12 @@ void CreateBlur(CHARACTER *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bool 
 		{
 			if(SubType > 0 && b->SubType != SubType)
 				continue;
-            //  보간을 한다.
 			AddBlur(b,p1,p2,Light,Type);
             return;
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_BLURS;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_BLURS;i++)
-#endif // _VS2008PORTING
 	{
 		BLUR *b = &Blur[i];
 		if(!b->Live)
@@ -322,17 +318,9 @@ void CreateObjectBlur(OBJECT *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bo
 
 	// 2. 같은 계열이 없으면 신규 블루어 추가.
 #ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_OBJECTBLURS;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_OBJECTBLURS;i++)
-#endif // _VS2008PORTING
 #else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_BLURS;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_BLURS;i++)
-#endif // _VS2008PORTING
 #endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	{
 		// 2-1. 빈자리 하나 찾아서 신규 생성.
@@ -712,20 +700,9 @@ float DeltaTime = 0.1f;
 
 void CreateFlag()
 {
-#ifndef _VS2008PORTING				// #ifndef
-	int i,j;
-#endif // _VS2008PORTING
-#ifdef _VS2008PORTING
 	for(int i=0;i<FLAG_HEIGHT;i++)
-#else // _VS2008PORTING
-	for(i=0;i<FLAG_HEIGHT;i++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
 		for(int j=0;j<FLAG_WIDTH;j++)
-#else // _VS2008PORTING
-		for(j=0;j<FLAG_WIDTH;j++)
-#endif // _VS2008PORTING
 		{
 			int index = i*FLAG_WIDTH+j;
 			physics_vertex *v = &flag_vertex[index];
@@ -753,17 +730,10 @@ void CreateFlag()
 			if(i+1 <= FLAG_HEIGHT-1) {v->link[v->link_num] = (i+1)*FLAG_WIDTH+(j  );v->link_num++;}
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<FLAG_HEIGHT-1;i++)
-#else // _VS2008PORTING
-	for(i=0;i<FLAG_HEIGHT-1;i++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
 		for(int j=0;j<FLAG_WIDTH-1;j++)
-#else // _VS2008PORTING
-		for(j=0;j<FLAG_WIDTH-1;j++)
-#endif // _VS2008PORTING
 		{
 			physics_face *f = &flag_face[i*(FLAG_WIDTH-1)+j];
 			int index = i*FLAG_WIDTH+j;
@@ -792,18 +762,10 @@ void AnimationFlag()
 	Gravity[1] = 0.f;
 	Gravity[2] = 0.f;
 
-#ifdef _VS2008PORTING				
+	
 	for(int i=2;i<FLAG_HEIGHT;i++)
-#else // _VS2008PORTING
-	int i,j,k;
-	for(i=2;i<FLAG_HEIGHT;i++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
 		for (int j = 0; j < FLAG_WIDTH; ++j)
-#else // _VS2008PORTING
-		for ( j = 0; j < FLAG_WIDTH; ++j)
-#endif // _VS2008PORTING
 		{
 			int index = i*FLAG_WIDTH+j;
 			physics_vertex *v = &flag_vertex[index];
@@ -832,11 +794,7 @@ void AnimationFlag()
 				}
 			}
 			
-#ifdef _VS2008PORTING
 			for(int k=0;k<v->link_num;k++)
-#else // _VS2008PORTING
-			for(k=0;k<v->link_num;k++)
-#endif // _VS2008PORTING
 			{
 				physics_vertex *v1 = &flag_vertex[index];
 				physics_vertex *v2 = &flag_vertex[v->link[k]];
@@ -861,17 +819,10 @@ void AnimationFlag()
 			}
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=2;i<FLAG_HEIGHT;i++)
-#else // _VS2008PORTING
-	for(i=2;i<FLAG_HEIGHT;i++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
 		for(int j=0;j<FLAG_WIDTH;j++)
-#else // _VS2008PORTING
-		for(j=0;j<FLAG_WIDTH;j++)
-#endif // _VS2008PORTING
 		{
 			int index = i*FLAG_WIDTH+j;
 			physics_vertex *v = &flag_vertex[index];
@@ -884,12 +835,7 @@ void AnimationFlag()
 
 void RenderFlagFace(OBJECT *o,int x,int y,vec3_t Light,int Tex1,int Tex2)
 {
-#ifdef _VS2008PORTING
     int n=4;
-#else // _VS2008PORTING
-    int i,n=4;
-#endif // _VS2008PORTING
-
     float su = (float)x/6.f;
     float sv = (float)y/9.f;
 	float TexCoord[4][2];
@@ -902,15 +848,10 @@ void RenderFlagFace(OBJECT *o,int x,int y,vec3_t Light,int Tex1,int Tex2)
 	TexCoord[3][0] = su+1.f/6.f;
 	TexCoord[3][1] = sv;
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-    float minz = 65536.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+    float minz = 65536.f; //louis
 	physics_face *f = &flag_face[y*(FLAG_WIDTH-1)+x];
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<n;i++)
-#else // _VS2008PORTING
-	for(i=0;i<n;i++)
-#endif // _VS2008PORTING
 	{
 		int vlist = f->vlist[i];
      	physics_vertex *v = &flag_vertex[vlist];
@@ -919,11 +860,8 @@ void RenderFlagFace(OBJECT *o,int x,int y,vec3_t Light,int Tex1,int Tex2)
 
 	BindTexture(Tex2);
 	glBegin(GL_QUADS);
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<n;i++)
-#else // _VS2008PORTING
-	for(i=0;i<n;i++)
-#endif // _VS2008PORTING
 	{
 		int vlist = f->vlist[i];
      	physics_vertex *v = &flag_vertex[vlist];
@@ -938,11 +876,8 @@ void RenderFlagFace(OBJECT *o,int x,int y,vec3_t Light,int Tex1,int Tex2)
 
 	BindTexture(Tex1);
 	glBegin(GL_QUADS);
-#ifdef _VS2008PORTING
+
 	for(int i=n-1;i>=0;i--)
-#else // _VS2008PORTING
-	for(i=n-1;i>=0;i--)
-#endif // _VS2008PORTING
 	{
 		int vlist = f->vlist[i];
      	physics_vertex *v = &flag_vertex[vlist];
@@ -958,18 +893,10 @@ void RenderFlagFace(OBJECT *o,int x,int y,vec3_t Light,int Tex1,int Tex2)
 
 void RenderFlag(OBJECT *o,vec3_t Light,int Tex1,int Tex2)
 {
-#ifdef _VS2008PORTING
+
     for(int y=0;y<FLAG_HEIGHT-1;y++)
-#else // _VS2008PORTING
-    int x,y;
-    for(y=0;y<FLAG_HEIGHT-1;y++)
-#endif // _DEBUG
 	{
-#ifdef _VS2008PORTING
 		for(int x=0;x<FLAG_WIDTH-1;x++)
-#else // _VS2008PORTING
-		for(x=0;x<FLAG_WIDTH-1;x++)
-#endif // _VS2008PORTING
         {
          	physics_face *f = &flag_face[y*(FLAG_WIDTH-1)+x];
             FaceNormalize(flag_vertex[f->vlist[0]].p,
@@ -978,22 +905,12 @@ void RenderFlag(OBJECT *o,vec3_t Light,int Tex1,int Tex2)
 				f->normal);
         }
 	}
-#ifdef _VS2008PORTING
     for(int y=0;y<FLAG_HEIGHT;y++)
-#else // _VS2008PORTING
-    for(y=0;y<FLAG_HEIGHT;y++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
 		for(int x=0;x<FLAG_WIDTH;x++)
-#else // _VS2008PORTING
-		for(x=0;x<FLAG_WIDTH;x++)
-#endif // _VS2008PORTING
         {
          	physics_vertex *v = &flag_vertex[y*FLAG_WIDTH+x];
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			float num = 0.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			if(y<FLAG_HEIGHT-1 && x<FLAG_WIDTH-1) 
 			{
 				VectorCopy(flag_face[y*(FLAG_WIDTH-1)+x].normal,v->normal);
@@ -1007,17 +924,9 @@ void RenderFlag(OBJECT *o,vec3_t Light,int Tex1,int Tex2)
         }
 	}
 
-#ifdef _VS2008PORTING
     for(int y=0;y<FLAG_HEIGHT-1;y++)
-#else // _VS2008PORTING
-    for(y=0;y<FLAG_HEIGHT-1;y++)
-#endif // _VS2008PORTING
 	{
-#ifdef _VS2008PORTING
 		for(int x=0;x<FLAG_WIDTH-1;x++)
-#else // _VS2008PORTING
-		for(x=0;x<FLAG_WIDTH-1;x++)
-#endif // _VS2008PORTING
         {
 			RenderFlagFace(o,x,y,Light,Tex1,Tex2);
         }

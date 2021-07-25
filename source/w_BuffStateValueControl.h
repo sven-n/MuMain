@@ -7,10 +7,6 @@
 
 #pragma once
 
-#ifdef KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-#include "_types.h"
-#endif // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-
 BoostSmartPointer( BuffStateValueControl );
 
 class BuffStateValueControl  

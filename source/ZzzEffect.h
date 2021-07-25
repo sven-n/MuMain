@@ -151,11 +151,7 @@ void CreateTail(JOINT *o,float Matrix[3][4], float ScaleX, float ScaleY );
 void CreateTailAxis(JOINT *o, float Matrix[3][4], BYTE axis = 0);
 void CreateTailAxis(JOINT *o, float Matrix[3][4], float ScaleX, float ScaleY, BYTE axis = 0);
 
-#ifdef _VS2008PORTING
 void MoveJoint( JOINT *o, int iIndex);
-#else // _VS2008PORTING
-void MoveJoint( JOINT *o, int i);
-#endif // _VS2008PORTING
 void MoveJoints();
 void RenderJoints( BYTE bRenderOneMore=0 );
 

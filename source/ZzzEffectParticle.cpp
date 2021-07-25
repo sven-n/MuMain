@@ -4237,22 +4237,16 @@ void MoveParticles()
 		g_vParticleWindVelo[i] += ( rand() % 2001 - 1000) * ( 0.001f * 0.6f);
 		g_vParticleWindVelo[i] = max( -.6f, min( g_vParticleWindVelo[i], .6f));
 	}
-#ifdef _VS2008PORTING
+
 	for ( int i = 0; i < 2; ++i)
-#else // _VS2008PORTING
-	for ( i = 0; i < 2; ++i)
-#endif // _VS2008PORTING
 	{
 		g_vParticleWind[i] += g_vParticleWindVelo[i];
 		g_vParticleWind[i] = max( -1.7f, min( g_vParticleWind[i], 1.7f));
 	}
 
     int count = 0;
-#ifdef _VS2008PORTING
+
 	for( int i=0;i<MAX_PARTICLES;i++)
-#else // _VS2008PORTING
-	for( i=0;i<MAX_PARTICLES;i++)
-#endif // _VS2008PORTING
 	{
 		PARTICLE *o = &Particles[i];
 	

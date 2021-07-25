@@ -222,7 +222,6 @@ int OpenTerrainAttribute(char *FileName)
 	
 	for(int i=0;i<256*256;i++)
 	{
-#ifdef _VS2008PORTING
 		WORD wWall = TerrainWall[i];
 		//Wall = ( Wall ^ ( Wall & 8)) | ( (TerrainWall[i]&4) << 1);
 		//Wall = ( Wall ^ ( Wall & 4)) | ( (TerrainWall[i]&8) >> 1);
@@ -231,15 +230,6 @@ int OpenTerrainAttribute(char *FileName)
 
 		if((BYTE)TerrainWall[i] >= 128)
 			Error = true;
-#else // _VS2008PORTING
-		BYTE Wall = TerrainWall[i];
-		//Wall = ( Wall ^ ( Wall & 8)) | ( (TerrainWall[i]&4) << 1);
-		//Wall = ( Wall ^ ( Wall & 4)) | ( (TerrainWall[i]&8) >> 1);
-		TerrainWall[i] = Wall;
-
-		if(TerrainWall[i] >= 128)
-			Error = true;
-#endif // _VS2008PORTING
 	}
 	if(Error)
 	{
@@ -684,7 +674,7 @@ bool OpenTerrainHeight(char *filename)
 	char FileName[256];
 
 	char NewFileName[256];
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<(int)strlen(filename);i++)
 	{
 		NewFileName[i] = filename[i];
@@ -692,14 +682,6 @@ bool OpenTerrainHeight(char *filename)
 		if(filename[i]=='.') 
 			break;
 	}
-#else // _VS2008PORTING
-	for(int i=0;i<(int)strlen(filename);i++)
-	{
-		NewFileName[i] = filename[i];
-		if(filename[i]=='.') break;
-	}
-	NewFileName[i+1] = NULL;
-#endif // _VS2008PORTING
 	strcpy(FileName,"Data\\");
     strcat(FileName,NewFileName);
 	strcat(FileName,"OZB");
@@ -723,11 +705,7 @@ bool OpenTerrainHeight(char *filename)
 	fclose(fp);
 	memcpy(BMPHeader,Buffer,Index);
 
-#ifdef _VS2008PORTING
     for(int i=0;i<256;i++)
-#else // _VS2008PORTING
-    for(i=0;i<256;i++)
-#endif // _VS2008PORTING
 	{
 		unsigned char *src = &Buffer[Index+i*256];
 		float *dst = &BackTerrainHeight[i*256];
@@ -772,11 +750,8 @@ void SaveTerrainHeight(char *name)
 
     FILE *fp = fopen(name,"wb");
 	fwrite(BMPHeader,1080,1,fp);
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<256;i++) fwrite(Buffer+(255-i)*256,256,1,fp);
-#else // _VS2008PORTING
-	for(i=0;i<256;i++) fwrite(Buffer+(255-i)*256,256,1,fp);
-#endif // _VS2008PORTING
 #ifdef KJH_FIX_ARRAY_DELETE
 	SAFE_DELETE_ARRAY(Buffer);
 #else // KJH_FIX_ARRAY_DELETE
@@ -789,22 +764,14 @@ bool OpenTerrainHeightNew(const char* strFilename)
 {
 	char FileName[256];
 	char NewFileName[256];
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<(int)strlen(strFilename);i++)
 	{
 		NewFileName[i] = strFilename[i];
 		NewFileName[i+1] = NULL;
 		if(strFilename[i]=='.') break;
 	}
-#else // _VS2008PORTING
-	for(int i=0;i<(int)strlen(strFilename);i++)
-	{
-		NewFileName[i] = strFilename[i];
-		if(strFilename[i]=='.') break;
-	}
 
-	NewFileName[i+1] = NULL;
-#endif // _VS2008PORTING
 	strcpy(FileName,"Data\\");
     strcat(FileName,NewFileName);
 	strcat(FileName,"OZB");
@@ -825,11 +792,7 @@ bool OpenTerrainHeightNew(const char* strFilename)
 	memcpy(&header, &pbyData[dwCurPos], sizeof(BITMAPFILEHEADER)); dwCurPos += sizeof(BITMAPFILEHEADER);
 	memcpy(&bmiHeader, &pbyData[dwCurPos], sizeof(BITMAPINFOHEADER)); dwCurPos += sizeof(BITMAPINFOHEADER);
 
-#ifdef _VS2008PORTING
     for(int i=0; i<TERRAIN_SIZE*TERRAIN_SIZE; ++i)
-#else // _VS2008PORTING
-    for(i=0; i<TERRAIN_SIZE*TERRAIN_SIZE; ++i)
-#endif // _VS2008PORTING
 	{
 		BYTE* pbysrc = &pbyData[dwCurPos + i * 3];
 		DWORD dwHeight = 0;
@@ -1264,11 +1227,8 @@ inline void Interpolation(int mx,int my)
 		TerrainVertex30[i] = (TerrainVertex[3][i]+TerrainVertex[0][i])*0.5f;
 		TerrainVertex02[i] = (TerrainVertex[0][i]+TerrainVertex[2][i])*0.5f;
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-	for(i=0;i<2;i++)
-#endif // _VS2008PORTING
 	{
 		TerrainTextureCoord01[i] = (TerrainTextureCoord[0][i]+TerrainTextureCoord[1][i])*0.5f;
 		TerrainTextureCoord12[i] = (TerrainTextureCoord[1][i]+TerrainTextureCoord[2][i])*0.5f;
@@ -2930,34 +2890,24 @@ void RenderSky()
 	vec3_t p,Position;
 	float Num = 20.f;
 	vec3_t LightTable[21];
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<=Num;i++)
-#else // _VS2008PORTING
-	int i;
-	for(i=0;i<=Num;i++)
-#endif // _VS2008PORTING
 	{
 		Vector(((float)i-Num*0.5f)*(Width/Num),CameraViewFar*0.99f,0.f,p);
 		VectorRotate(p,Matrix,Position);
 		VectorAdd(CameraPosition,Position,Position);
 		RequestTerrainLight(Position[0],Position[1],LightTable[i]);
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=1;i<=(int)Num;i++)
-#else // _VS2008PORTING
-	for(i=1;i<=(int)Num;i++)
-#endif // _VS2008PORTING
 	{
 		if(LightTable[i][0]<=0.f)
 		{
 			Vector(0.f,0.f,0.f,LightTable[i-1]);
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=(int)Num-1;i>=0;i--)
-#else // _VS2008PORTING
-	for(i=(int)Num-1;i>=0;i--)
-#endif // _VS2008PORTING
 	{
 		if(LightTable[i][0]<=0.f)
 		{

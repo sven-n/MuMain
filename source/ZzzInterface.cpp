@@ -471,10 +471,6 @@ void RenderIME_Status ()
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// 입력창 랜더링
-///////////////////////////////////////////////////////////////////////////////
-
 void RenderInputText(int x,int y,int Index,int Gold)
 {
 	if (g_iChatInputType == 1) 
@@ -490,7 +486,6 @@ void RenderInputText(int x,int y,int Index,int Gold)
 		char Text[256];
 		if(InputTextHide[Index]==1)
 		{
-#ifdef _VS2008PORTING
 			int iTextSize = 0;
 			for(unsigned int i=0;i<strlen(InputText[Index]);i++)
 			{
@@ -498,15 +493,9 @@ void RenderInputText(int x,int y,int Index,int Gold)
 				iTextSize = i;
 			}
 			Text[iTextSize] = NULL;
-#else // _VS2008PORTING
-			for(unsigned int i=0;i<strlen(InputText[Index]);i++)
-				Text[i] = '*';
-			Text[i] = NULL;
-#endif // _VS2008PORTING
 		}
 		else if(InputTextHide[Index]==2)
 		{
-#ifdef _VS2008PORTING
 			int iTextSize = 0;
 			for(unsigned int i=0;i<7;i++)
 			{
@@ -519,13 +508,6 @@ void RenderInputText(int x,int y,int Index,int Gold)
 				iTextSize = i;
 			}
 			Text[iTextSize] = NULL;
-#else // _VS2008PORTING
-			for(unsigned int i=0;i<7;i++)
-				Text[i] = InputText[Index][i];
-			for(i=7;i<strlen(InputText[Index]);i++)
-				Text[i] = '*';
-			Text[i] = NULL;
-#endif // _VS2008PORTING
 		}
 		else
 		{
@@ -556,9 +538,6 @@ void RenderInputText(int x,int y,int Index,int Gold)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 윈도우 텍스트를 텍스트 텍스쳐에 그리는 함수
-///////////////////////////////////////////////////////////////////////////////
 extern int  AlphaBlendType;	// OpenGLUtil.cpp 에서 쓰는 알파 타입
 
 void RenderTipText(int sx, int sy, const char* Text)
@@ -834,8 +813,6 @@ void CutText(const char* Text,char *Text1,char *Text2,int Length)
 		j += _mbclen( ( unsigned char*)&( Text[j]));	// 한글이면 2, 아니면 1 을 리턴
 	}
 
-// 잘라서 저장
-#ifdef _VS2008PORTING
 	int iTextSize = 0;
 	for(int j=0;j<Cut;j++)
 	{
@@ -849,14 +826,6 @@ void CutText(const char* Text,char *Text1,char *Text2,int Length)
 		iTextSize = j;
 	}
 	Text1[iTextSize-Cut+1] = NULL;
-#else // _VS2008PORTING
-	for(j=0;j<Cut;j++)
-		Text2[j] = Text[j];
-	Text2[j] = NULL;
-	for(j=Cut;j<Length;j++)
-		Text1[j-Cut] = Text[j];
-	Text1[j-Cut] = NULL;
-#endif // _VS2008PORTING
 
 }
 
@@ -1458,11 +1427,8 @@ void CreateChat(char *ID,const char* Text,CHARACTER *Owner,int Flag, int SetColo
 			return;
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_CHAT;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CHAT;i++)
-#endif // _VS2008PORTING
 	{
 		CHAT *c = &Chat[i];
 		if(c->IDLifeTime<=0 && c->LifeTime[0]<=0)
@@ -1523,12 +1489,8 @@ int CreateChat(char *ID,const char* Text,OBJECT* Owner,int Flag, int SetColor)
 void AssignChat(char *ID,const char* Text,int Flag)
 {
 	CHARACTER *Chater = NULL;
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-	int i;
-	for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 	{
 		CHARACTER *c = &CharactersClient[i];
 		OBJECT *o = &c->Object;
@@ -1542,11 +1504,8 @@ void AssignChat(char *ID,const char* Text,int Flag)
 			}
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 	{
 		CHARACTER *c = &CharactersClient[i];
 		OBJECT *o = &c->Object;
@@ -4876,15 +4835,10 @@ bool CheckCommand(char *Text, bool bMacroText )
 	}
 #endif // YDG_MOD_CHECK_PROTECT_AUTO_FLAG
 	
-#ifndef _VS2008PORTING			// #ifndef
-	int i;
-#endif // _VS2008PORTING
-	
     if( bMacroText==false && LogOut == false )
     {
 		//거래
 		char Name[256];
-#ifdef _VS2008PORTING
 		int iTextSize=0;
 		for(int i=0;i<256 && Text[i] != ' ' && Text[i] != '\0';i++)
 		{
@@ -4892,11 +4846,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 			iTextSize = i;
 		}
 		Name[iTextSize] = NULL;
-#else // _VS2008PORTING
-		for(int i=0;i<256 && Text[i] != ' ' && Text[i] != '\0';i++)
-			Name[i] = Text[i];
-		Name[i] = NULL;
-#endif // _VS2008PORTING
 
 		if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
 		{
@@ -4941,11 +4890,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 						SendRequestTrade(CharactersClient[SelectedCharacter].Key);
 					}
 				}
-#ifdef _VS2008PORTING
 				else for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-				else for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 				{
 					CHARACTER *c = &CharactersClient[i];
 					OBJECT *o = &c->Object;
@@ -5065,11 +5010,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 			}
 			else 
 			{
-#ifdef _VS2008PORTING
 				for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-				for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 				{
 					CHARACTER *c = &CharactersClient[i];
 					if(strlen(szId) > 0 && c->Object.Live)
@@ -5153,11 +5094,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 						SendRequestDuelStart(c->Key, c->ID);
 					}
 				}
-#ifdef _VS2008PORTING
 				else for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-				else for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 				{
 					CHARACTER *c = &CharactersClient[i];
 					OBJECT *o = &c->Object;
@@ -5224,11 +5161,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 					abs(( c->PositionY)-( Hero->PositionY))<=1)
 					SendRequestGuild(CharactersClient[SelectedCharacter].Key);
 			}
-#ifdef _VS2008PORTING
 			else for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-			else for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 			{
 				CHARACTER *c = &CharactersClient[i];
 				OBJECT *o = &c->Object;
@@ -5291,11 +5224,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 					}
 				}
 			}
-#ifdef _VS2008PORTING
 			else for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-			else for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 			{
 				CHARACTER *c = &CharactersClient[i];
 				OBJECT *o = &c->Object;
@@ -5353,11 +5282,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 					abs(( c->PositionY)-( Hero->PositionY))<=1)
 					SendRequestParty(CharactersClient[SelectedCharacter].Key);
 			}
-#ifdef _VS2008PORTING
 			else for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-			else for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 			{
 				CHARACTER *c = &CharactersClient[i];
 				OBJECT *o = &c->Object;	
@@ -5390,12 +5315,8 @@ bool CheckCommand(char *Text, bool bMacroText )
 			}
 		}
 #endif // CSK_ADD_GM_ABILITY
-		//매크로 등록
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<10;i++)
-#else // _VS2008PORTING
-		for(i=0;i<10;i++)
-#endif // _VS2008PORTING
 		{
 			char Name[256];
 			if(i!=9)
@@ -5409,7 +5330,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 				{
 					return  false;
 				}
-#ifdef _VS2008PORTING
+
 				int iTextSize = 0;
 				for(int j=3;j<(int)strlen(Text);j++)
 				{
@@ -5417,11 +5338,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 					iTextSize = j;
 				}
 				MacroText[i][iTextSize-3] = NULL;
-#else // _VS2008PORTING
-				for(int j=3;j<(int)strlen(Text);j++)
-					MacroText[i][j-3] = Text[j];
-				MacroText[i][j-3] = NULL;
-#endif // _VS2008PORTING
 				PlayBuffer(SOUND_CLICK01);
 				return true;
 			}
@@ -5441,7 +5357,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 	{
 		// 이름 파악
 		char Name[256];
-#ifdef _VS2008PORTING
+
 		int iTextSize=0;
 		for(int i=0;i<256 && Text[i] != ' ' && Text[i] != '\0';i++)
 		{
@@ -5449,11 +5365,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 			iTextSize = i;
 		}
 		Name[iTextSize] = NULL;
-#else // _VS2008PORTING
-		for(int i=0;i<256 && Text[i] != ' ' && Text[i] != '\0';i++)
-			Name[i] = Text[i];
-		Name[i] = NULL;
-#endif // _VS2008PORTING
 
 		// 260 "/이동"
 		if(strcmp(Name, GlobalText[260]) == 0 || stricmp(Name, "/move") == 0)
@@ -5473,12 +5384,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 		return TRUE;
 #endif //LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG
 
-//아이템 정보
-#ifdef _VS2008PORTING
 	for(int i=0; i<16*MAX_ITEM_INDEX; ++i)	
-#else // _VS2008PORTING
-	for(i=0; i<16*MAX_ITEM_INDEX; ++i)
-#endif // _VS2008PORTING
 	{
 		ITEM_ATTRIBUTE *p = &ItemAttribute[i];
 		
@@ -6798,11 +6704,8 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 						}
 						
 						VectorCopy(o->Position,Position);
-#ifdef _VS2008PORTING
+
 						for(int i=0;i<8;i++)
-#else // _VS2008PORTING
-						for(i=0;i<8;i++)
-#endif // _VS2008PORTING
 						{
 							Position[0] = (o->Position[0] - 119.f) + (float)(rand()%240); 
 							Position[2] = (o->Position[2] + 49.f) + (float)(rand()%60); 
@@ -11708,12 +11611,7 @@ Pos_SelfCheck01:
 
 int SelectItem()
 {
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_ITEMS;i++)
-#else // _VS2008PORTING
-	int i;
-	for(i=0;i<MAX_ITEMS;i++)
-#endif // _VS2008PORTING
 	{
 		OBJECT *o = &Items[i].Object;
 		if(o->Live && o->Visible)
@@ -11724,11 +11622,8 @@ int SelectItem()
 	}
 	//InitCollisionDetectLineToFace();
 	float Luminosity = 1.5f;
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_ITEMS;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_ITEMS;i++)
-#endif // _VS2008PORTING
 	{
 		OBJECT *o = &Items[i].Object;
 		if(o->Live && o->Visible)
@@ -11759,12 +11654,7 @@ int SelectCharacter(BYTE Kind)
 	if(SceneFlag == CHARACTER_SCENE)
 		Main = false;
 	
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-	int i;
-	for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 	{
 		CHARACTER *c = &CharactersClient[i];
 		OBJECT *o = &c->Object;
@@ -11799,11 +11689,8 @@ int SelectCharacter(BYTE Kind)
 	Vector(0.8f,0.8f,0.8f,Light);
 	int iSelected = -1;
 	float fNearestDist = 1000000000000.0f;
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 	{
 		CHARACTER *c = &CharactersClient[i];
 		OBJECT *o = &c->Object;
@@ -11943,11 +11830,7 @@ int SelectOperate()
 	if( IsBattleCastleStart() && World == WD_30BATTLECASTLE )
 		return -1;
 	
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_OPERATES;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_OPERATES;i++)
-#endif // _VS2008PORTING
 	{
 		OPERATE *n = &Operates[i];
 		OBJECT *o = n->Owner;
@@ -12884,9 +12767,6 @@ void RenderTournamentInterface()
 	float x = 0.0f,y = 0.0f;
 	char t_Str[20];
 	strcpy(t_Str, "");
-#ifndef _VS2008PORTING			// #ifndef
-	int i;
-#endif // _VS2008PORTING
 	
 	//시간 렌더링
 	if( g_wtMatchTimeLeft.m_Time)
@@ -12944,11 +12824,8 @@ void RenderTournamentInterface()
 	int yPos = WindowY;
 	RenderBitmap(BITMAP_INTERFACE+22,(float)WindowX,(float)yPos,(float)Width,(float)5,0.f,0.f,Width/512.f,5.f/8.f);
 	yPos += 5;
-#ifdef _VS2008PORTING
+
 	for(int i = 0; i < 5; ++i)
-#else // _VS2008PORTING
-	for(i = 0; i < 5; ++i)
-#endif // _VS2008PORTING
 	{
 		RenderBitmap(BITMAP_INTERFACE+21, WindowX, (float)yPos, 
 			Width, 40.f, 0.f, 0.0f, 213.f/256.f, 40.f/64.f);
@@ -13143,11 +13020,8 @@ void RenderBooleans()
 			ci->y = ScreenY-ci->Height;
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_CHAT;i++)		//. Bubble sorting
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CHAT;i++)		//. Bubble sorting
-#endif // _VS2008PORTING
 	{
 		CHAT *ci = &Chat[i];
 		if(ci->IDLifeTime>0 || ci->LifeTime[0]>0)
@@ -13169,28 +13043,17 @@ void RenderBooleans()
 			}
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_CHAT;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CHAT;i++)
-#endif // _VS2008PORTING
 	{
 		CHAT *ci = &Chat[i];
 		if(ci->IDLifeTime>0 || ci->LifeTime[0]>0)
 		{
 			//. Fit to screen
-#ifdef _VS2008PORTING
 			if(ci->x < 0) ci->x = 0;
 			if(ci->x >= (int)WindowWidth-ci->Width) ci->x = WindowWidth-ci->Width;
 			if(ci->y < 0) ci->y = 0;
-			if(ci->y >= (int)WindowHeight-ci->Height) ci->y = WindowHeight-ci->Height;
-#else // _VS2008PORTING
-			if(ci->x < 0) ci->x = 0;
-			if(ci->x >= WindowWidth-ci->Width) ci->x = WindowWidth-ci->Width;
-			if(ci->y < 0) ci->y = 0;
-			if(ci->y >= WindowHeight-ci->Height) ci->y = WindowHeight-ci->Height;
-#endif // _VS2008PORTING
-			
+			if(ci->y >= (int)WindowHeight-ci->Height) ci->y = WindowHeight-ci->Height;	
 			RenderBoolean(ci->x,ci->y,ci);
 		}
 	}
@@ -13379,7 +13242,6 @@ void RenderCursor()
 
 void BackSelectModel()
 {
-#ifdef _VS2008PORTING
 	for(int i=1;i<20;i++)
 	{
 		if(SelectModel-i < 0)
@@ -13390,21 +13252,6 @@ void BackSelectModel()
 			break;
 		}
 	}
-#else // _VS2008PORTING
-	bool Success = false;
-	for(int i=1;i<20;i++)
-	{
-		if(SelectModel-i < 0)
-			break;
-		if(Models[SelectModel-i].NumMeshs > 0)
-		{
-			Success = true;
-			break;
-		}
-	}
-	if(Success)
-		SelectModel -= i;
-#endif // _VS2008PORTING
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -13413,7 +13260,6 @@ void BackSelectModel()
 
 void ForwardSelectModel()
 {
-#ifdef _VS2008PORTING
 	for(int i=1;i<20;i++)
 	{
 		if(Models[SelectModel+i].NumMeshs > 0)
@@ -13422,19 +13268,6 @@ void ForwardSelectModel()
 			break;
 		}
 	}
-#else // _VS2008PORTING
-	bool Success = false;
-	for(int i=1;i<20;i++)
-	{
-		if(Models[SelectModel+i].NumMeshs > 0)
-		{
-			Success = true;
-			break;
-		}
-	}
-	if(Success)
-		SelectModel += i;
-#endif // _VS2008PORTING
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -385,8 +385,6 @@ bool CheckAbuseFilter(char *Text, bool bCheckSlash)
 		}
 	}
 
-    //  공백을 제거한 문자열을 만든다.
-#ifdef _VS2008PORTING
 	int icntText = 0;
 	char TmpText[2048];
 	for( int i=0; i<(int)strlen(Text); ++i )
@@ -398,25 +396,8 @@ bool CheckAbuseFilter(char *Text, bool bCheckSlash)
 		}
 	}
 	TmpText[icntText] = 0;
-#else // _VS2008PORTING
-    int i, j;
-    char TmpText[2048];
-    for( i=0, j=0; i<(int)strlen(Text); ++i )
-    {
-        if ( Text[i]!=32 )
-        {
-            TmpText[j] = Text[i];
-            j++;
-        }
-    }
-    TmpText[j] = 0;
-#endif // _VS2008PORTING
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<AbuseFilterNumber;i++)
-#else // _VS2008PORTING
-	for( i=0;i<AbuseFilterNumber;i++)
-#endif // _VS2008PORTING
 	{
         if(FindText(TmpText,AbuseFilter[i]))
 		{
@@ -428,8 +409,6 @@ bool CheckAbuseFilter(char *Text, bool bCheckSlash)
 
 bool CheckAbuseNameFilter(char *Text)
 {
-    //  공백을 제거한 문자열을 만든다.
-#ifdef _VS2008PORTING
 	int icntText = 0;
 	char TmpText[256];
 	for( int i=0; i<(int)strlen(Text); ++i )
@@ -441,25 +420,8 @@ bool CheckAbuseNameFilter(char *Text)
 		}
 	}
 	TmpText[icntText] = 0;
-#else // _VS2008PORTING
-    int i, j;
-    char TmpText[256];
-    for( i=0, j=0; i<(int)strlen(Text); ++i )
-    {
-        if ( Text[i]!=32 )
-        {
-            TmpText[j] = Text[i];
-            j++;
-        }
-    }
-    TmpText[j] = 0;
-#endif // _VS2008PORTING
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<AbuseNameFilterNumber;i++)
-#else // _VS2008PORTING
-	for( i=0;i<AbuseNameFilterNumber;i++)
-#endif // _VS2008PORTING
 	{
 		if(FindText(TmpText,AbuseNameFilter[i]))
 		{
@@ -469,16 +431,7 @@ bool CheckAbuseNameFilter(char *Text)
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 계정 또는 케릭터이름 입력시 특수문자 체크하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 bool CheckSpecialText(char *Text);	// Local.cpp 에 있음
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 계정 또는 케릭터이름 입력시 쓰면 않되는 문자 체크하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 bool CheckName()
 {
@@ -1036,11 +989,8 @@ BOOL ShowCheckBox( int num, int index, int message )
 
 			g_iNumLineMessageBoxCustom += SeparateTextIntoLines( tBuf, 
 				tLines[g_iNumLineMessageBoxCustom], 2, 30);
-#ifdef _VS2008PORTING
+
 			for(int t = 0; t < 2; ++t) strcpy(g_lpszMessageBoxCustom[t], tLines[t]);
-#else // _VS2008PORTING
-			for(t = 0; t < 2; ++t) strcpy(g_lpszMessageBoxCustom[t], tLines[t]);
-#endif // _VS2008PORTING
 
 			sprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1810], COMGEM::m_iValue);
 			++g_iNumLineMessageBoxCustom;
@@ -1054,11 +1004,8 @@ BOOL ShowCheckBox( int num, int index, int message )
 
 			g_iNumLineMessageBoxCustom += SeparateTextIntoLines( tBuf, 
 				tLines[g_iNumLineMessageBoxCustom], 2, 30);
-#ifdef _VS2008PORTING
+
 			for(int t = 0; t < 2; ++t) strcpy(g_lpszMessageBoxCustom[t], tLines[t]);
-#else // _VS2008PORTING
-			for(t = 0; t < 2; ++t) strcpy(g_lpszMessageBoxCustom[t], tLines[t]);
-#endif // _VS2008PORTING
 
 			sprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1814], COMGEM::m_iValue);
 			++g_iNumLineMessageBoxCustom;
@@ -1173,11 +1120,8 @@ void MoveCamera()
 		}
 		CurrentCameraNumber = 1;
 		CurrentCameraWalkType = 1;
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<3;i++)
-#else // _VS2008PORTING
-		for(i=0;i<3;i++)
-#endif // _VS2008PORTING
 		{
 			CurrentCameraWalkDelta[i  ] = (CameraWalk[CurrentCameraNumber*6+i  ]-CurrentCameraPosition[i])/128;
 			CurrentCameraWalkDelta[i+3] = (CameraWalk[CurrentCameraNumber*6+i+3]-CurrentCameraAngle   [i])/128;
@@ -1359,11 +1303,8 @@ void CreateCharacterScene()
 	for(int i=0;i<MAX_MAGIC;i++)
 #endif // KWAK_FIX_CHARACTER_SKILL_RUNTIME_ERR
 		CharacterAttribute->Skill[i] = 0;
-#ifdef _VS2008PORTING
+
 	for(int i=EQUIPMENT_WEAPON_RIGHT;i<EQUIPMENT_HELPER;i++)
-#else // _VS2008PORTING
-	for(i=EQUIPMENT_WEAPON_RIGHT;i<EQUIPMENT_HELPER;i++)
-#endif // _VS2008PORTING
 		CharacterMachine->Equipment[i].Level = 0;
 
 	g_pNewUISystem->HideAll();
@@ -1381,11 +1322,8 @@ void CreateCharacterScene()
 	InputIndex = 0;
     InputTextWidth = 90;
     InputNumber = 1;
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_WHISPER;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_WHISPER;i++)
-#endif // _VS2008PORTING
 	{
 		g_pChatListBox->AddText("", "", SEASON3B::TYPE_WHISPER_MESSAGE);
 	}
@@ -1629,11 +1567,8 @@ bool NewRenderCharacterScene(HDC hDC)
 
 	CHARACTER* pCha = NULL;
 	OBJECT* pObj = NULL;
-#ifdef _VS2008PORTING
+
 	for(int i=0; i<5; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<5; ++i)
-#endif // _VS2008PORTING
 	{
 		pCha = &CharactersClient[i];
 		pObj = &pCha->Object;

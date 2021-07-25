@@ -135,7 +135,6 @@ inline int MapFileEncrypt( BYTE *pbyDst, BYTE *pbySrc, int iSize)
 	BYTE byMapXorKey[16] = { 0xD1, 0x73, 0x52, 0xF6, 0xD2, 0x9A, 0xCB, 0x27,
 							0x3E, 0xAF, 0x59, 0x31, 0x37, 0xB3, 0xE7, 0xA2};
 
-#ifdef _VS2008PORTING
 	WORD wMapKey = 0x5E;
 	for ( int i = 0; i < iSize; ++i)
 	{
@@ -144,15 +143,6 @@ inline int MapFileEncrypt( BYTE *pbyDst, BYTE *pbySrc, int iSize)
 		wMapKey = pbyDst[i] + 0x3D;
 		wMapKey = wMapKey & 0xFF;
 	}
-#else // _VS2008PORTING
-	BYTE byMapKey = 0x5E;
-	for ( int i = 0; i < iSize; ++i)
-	{
-		pbyDst[i] = ( pbySrc[i] + byMapKey) ^ byMapXorKey[i%16];
-
-		byMapKey = pbyDst[i] + 0x3D;
-	}
-#endif // _VS2008PORTING
 	
 	return ( iSize);
 }
@@ -166,7 +156,6 @@ inline int MapFileDecrypt( BYTE *pbyDst, BYTE *pbySrc, int iSize)
 	BYTE byMapXorKey[16] = { 0xD1, 0x73, 0x52, 0xF6, 0xD2, 0x9A, 0xCB, 0x27,
 							0x3E, 0xAF, 0x59, 0x31, 0x37, 0xB3, 0xE7, 0xA2};
 
-#ifdef _VS2008PORTING
 	WORD wMapKey = 0x5E;
 	for ( int i = 0; i < iSize; ++i)
 	{
@@ -174,15 +163,6 @@ inline int MapFileDecrypt( BYTE *pbyDst, BYTE *pbySrc, int iSize)
 		wMapKey = pbySrc[i] + 0x3D;
 		wMapKey = wMapKey & 0xFF;
 	}
-#else // _VS2008PORTING
-	
-	BYTE byMapKey = 0x5E;
-	for ( int i = 0; i < iSize; ++i)
-	{
-		pbyDst[i] = ( pbySrc[i] ^ byMapXorKey[i%16]) - byMapKey;
-		byMapKey = pbySrc[i] + 0x3D;
-	}
-#endif // _VS2008PORTING
 	return ( iSize);
 }
 

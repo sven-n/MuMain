@@ -2078,11 +2078,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 #ifdef CRYINGWOLF_2NDMVP
 				if(o->SubType == 1)
 				{
-#ifdef _VS2008PORTING
 					for ( int i=0; i<3; ++i )
-#else // _VS2008PORTING
-					for ( i=0; i<3; ++i )
-#endif // _VS2008PORTING
 					{
 						if ( i==1 )
 							CreateJoint(BITMAP_FLARE,o->StartPosition,o->StartPosition,Angle,25,o,50.f,-1,1);
@@ -2094,11 +2090,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				else 
 #endif // CRYINGWOLF_2NDMVP
 				{
-#ifdef _VS2008PORTING
 					for ( int i=0; i<4; ++i )
-#else // _VS2008PORTING
-					for ( i=0; i<4; ++i )
-#endif // _VS2008PORTING
 					{
 						if ( i==1 )
 							CreateJoint(BITMAP_FLARE,o->StartPosition,o->StartPosition,Angle,11,o,50.f,-1,1);
@@ -3529,36 +3521,26 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					Vector(1.0f, 1.0f, 1.0f, vLight);
 					for( int i=0 ; i<60 ; i++)
 					{
-						// ÆÛÁö´Â°Å
 						CreateParticle(BITMAP_SPARK+1, o->Position, o->Angle, vLight, 27 );
 					}				
-#ifdef _VS2008PORTING
+
 					for( int i=0 ; i<30 ; i++ )
-#else // _VS2008PORTING
-					for( i=0 ; i<30 ; i++ )
-#endif // _VS2008PORTING
 					{
-						// ÆÛÁ®¼­ ¶³¾îÁö´Â°Å
 						CreateParticle(BITMAP_SPARK+1, o->Position, o->Angle, vLight, 28 );
 					}
 					
-					// ¹øÂ½
 					Vector(o->Position[0]+(rand()%100-50), o->Position[1]+(rand()%100-50),
 						o->Position[2], Position);
 					CreateSprite(BITMAP_DS_SHOCK, Position, rand()%10*0.1f+1.5f, o->Light, o);
 
-					// º°
-#ifdef _VS2008PORTING
+
 					for( int i=0 ; i<60 ; i++ )
-#else // _VS2008PORTING
-					for( i=0 ; i<60 ; i++ )
-#endif // _VS2008PORTING
 					{
 						Vector(0.3f+(rand()%700)*0.001f, 0.3f+(rand()%700)*0.001f, 0.3f+(rand()%700)*0.001f, vLight);
 						CreateParticle(BITMAP_SHINY, o->Position, o->Angle, vLight, 6 );
 					}
 
-					if (o->SubType == 1)	// Å©¸®½º¸¶½º ÆøÁ×
+					if (o->SubType == 1)
 					{
 						CreateEffect(MODEL_HALLOWEEN_CANDY_STAR, o->Position, o->Angle, vLight, 1);
 						CreateEffect(rand()%4+MODEL_XMAS_EVENT_BOX, o->Position, o->Angle, vLight, 0, o);
@@ -3568,7 +3550,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					PlayBuffer(SOUND_XMAS_FIRECRACKER,o);
 				}
 				break;
-			case BITMAP_FIRECRACKER0003:	// »õ ÆøÁ× Æø¹ß ¾Ö´Ï
+			case BITMAP_FIRECRACKER0003:
 				{
 					o->LifeTime = 15;
 					o->Angle[2] = rand()%360;
@@ -3677,11 +3659,8 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				    VectorRotate(p3,Matrix,p2);
 				    VectorAdd(Position,p2,Pos);
                     VectorCopy ( o->Angle, Angle );
-#ifdef _VS2008PORTING
+
                     for ( int i=0; i<20; ++i )
-#else // _VS2008PORTING
-                    for ( i=0; i<20; ++i )
-#endif // _VS2008PORTING
                     {
                         Angle[0] = o->Angle[0] + rand()%20+5;
                         Angle[1] += i*18;
@@ -7515,11 +7494,8 @@ void CreateBomb3(vec3_t vPos, int iSubType)
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
  	CreateParticle(BITMAP_MAGIC+1,vBombPos,vAngle,vLight,0,1.0f);
 	Vector(1.0f,0.6f,0.2f,vLight);
-#ifdef _VS2008PORTING
+
 	for (int i = 0; i < 3; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i < 3; ++i)
-#endif // _VS2008PORTING
 	{
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		if(fScale!=1.0f)
@@ -7537,19 +7513,12 @@ void CreateBomb3(vec3_t vPos, int iSubType)
 		nParCnt = 20;
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#ifdef _VS2008PORTING
+
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	for (int i = 0; i < nParCnt; ++i)
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
 	for (int i = 0; i < 5; ++i)
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#else // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-	for (i = 0; i < nParCnt; ++i)
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-	for (i = 0; i < 5; ++i)
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#endif // _VS2008PORTING
 	{
 		CreateParticle(BITMAP_SPARK,vBombPos,vAngle,vLight,2);
 	}
@@ -7790,11 +7759,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 {
 	vec3_t Light;
 	vec3_t Angle;
-#ifdef _VS2008PORTING
 	int Index;
-#else // _VS2008PORTING
-	int j,Index;
-#endif // _VS2008PORTING
 	vec3_t p,Position;
 	float Matrix[3][4];
 	float Height;
@@ -9581,11 +9546,8 @@ void MoveEffect( OBJECT *o, int iIndex)
             VectorCopy ( o->StartPosition, b->BodyOrigin );
             b->TransformPosition(o->Owner->BoneTransform[33],p,o->Position,true);
         }
-#ifdef _VS2008PORTING
-        for( int j=0; j<3; ++j )
-#else // _VS2008PORTING
-        for( j=0; j<3; ++j )
-#endif // _VS2008PORTING
+
+		for( int j=0; j<3; ++j )
         {
             Vector(0.f,120.f,0.f,p);
 #ifdef CSK_ADD_MAP_ICECITY	
@@ -9602,7 +9564,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 
             if( o->SubType==1 )
             {
-                //  Àü±â.
                 if((o->LifeTime%2)==0)
                 {
 				    CreateJoint(BITMAP_JOINT_THUNDER,Position,o->Position,Angle,3,NULL,10.f,10,10);
@@ -9615,7 +9576,6 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
             else if( o->SubType==2 )
             {
-                //  Àü±â.
                 if((o->LifeTime%2)==0)
                 {
 				    CreateJoint(BITMAP_JOINT_THUNDER,Position,o->Position,Angle,3,NULL,10.f,10,10);
@@ -9790,11 +9750,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 	case BITMAP_FLAME:
         if ( o->SubType==0 )
         {
-#ifdef _VS2008PORTING
             for(int j=0;j<6;j++)
-#else // _VS2008PORTING
-            for(j=0;j<6;j++)
-#endif // _VS2008PORTING
             {
                 Vector((float)(rand()%50-25),(float)(rand()%50-25),0.f,Position);
                 VectorAdd(Position,o->Position,Position);
@@ -9811,11 +9767,7 @@ void MoveEffect( OBJECT *o, int iIndex)
         }
         else if ( o->SubType==1 || o->SubType==2 )
         {
-#ifdef _VS2008PORTING
             for ( int j=0; j<18; j++ )
-#else // _VS2008PORTING
-            for ( j=0; j<18; j++ )
-#endif // _VS2008PORTING
             {
                 Vector ( 0.f, 250.f, 0.f, p );
 				Vector ( 0.f, 0.f, j*20.f, Angle );
@@ -9830,13 +9782,9 @@ void MoveEffect( OBJECT *o, int iIndex)
                     CreateParticle ( BITMAP_FIRE+3, Position, o->Angle, Light, 13, 2.5f );
             }
         }
-		else if ( o->SubType==3)	//. ºÒ°ñ·½ °ø°Ý
+		else if ( o->SubType==3)
 		{
-#ifdef _VS2008PORTING
 			for(int j=0;j<3;j++)
-#else // _VS2008PORTING
-			for(j=0;j<3;j++)
-#endif // _VS2008PORTING
             {
 				CreateParticle(BITMAP_FLAME,o->Position,o->Angle,Light, 6);
 				Vector((float)(rand()%10-5),(float)(rand()%10-5),40.f,Position);
@@ -9855,11 +9803,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 		else if(o->SubType==4)
 		{
 			o->Scale += 20.f;
-#ifdef _VS2008PORTING
             for ( int j=0; j<18; j++ )
-#else // _VS2008PORTING
-            for ( j=0; j<18; j++ )
-#endif // _VS2008PORTING
             {
                 Vector ( 0.f, 150.f - o->Scale, 0.f, p );
 				Vector ( 0.f, 0.f, j*20.f, Angle );
@@ -9887,9 +9831,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 		}
 #endif //LDS_ADD_EMPIRE_GUARDIAN
 		break;
-
-//------------------------------------------------------------------------------------------------------------
-
 #ifdef CSK_RAKLION_BOSS
 	case MODEL_RAKLION_BOSS_CRACKEFFECT:
 		if(o->SubType == 0)
@@ -9897,18 +9838,12 @@ void MoveEffect( OBJECT *o, int iIndex)
 			o->Alpha -= 0.03f;
 		}
 		break;
-
-//------------------------------------------------------------------------------------------------------------	
-
 	case MODEL_RAKLION_BOSS_MAGIC:
 		if(o->SubType == 0)
 		{
 			o->Alpha -= 0.03f;
 		}
 		break;
-
-//------------------------------------------------------------------------------------------------------------
-
 	case BITMAP_FIRE_HIK2_MONO:
 		if(o->SubType == 0)
 		{
@@ -9929,11 +9864,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 		}
 		else if(o->SubType == 1)
 		{
-#ifdef _VS2008PORTING
 			for ( int j=0; j<9; j++ )
-#else // _VS2008PORTING
-			for ( j=0; j<9; j++ )
-#endif // _VS2008PORTING
             {
                 Vector ( 0.f, 250.f, 0.f, p );
 				Vector ( 0.f, 0.f, j*40.f, Angle );
@@ -9958,20 +9889,13 @@ void MoveEffect( OBJECT *o, int iIndex)
 			o->Scale += 0.03f;
 		}
 		break;
-
 #endif // CSK_RAKLION_BOSS	
-
-//------------------------------------------------------------------------------------------------------------
-		
 	case BITMAP_FIRE_RED:
 		Vector((float)(rand()%32-16),(float)(rand()%32-16),0.f,Position);
 		VectorAdd(Position,o->Position,Position);
 		Vector ( 1.0f, 0.4f, 0.4f, Light );
 		CreateParticle(BITMAP_FIRE_RED, Position, o->Angle, Light, 0, o->Scale);
 		break;	
-
-//------------------------------------------------------------------------------------------------------------
-
 	case BITMAP_SPARK+1:
 		{
 		vec3_t Position;
@@ -9979,11 +9903,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 		float Luminosity = o->LifeTime*0.1f;
       	Vector(Luminosity,Luminosity,Luminosity,Light);
 		float Scale = 6.f;
-#ifdef _VS2008PORTING
 		for(int j=0;j<18;j++)
-#else // _VS2008PORTING
-		for(j=0;j<18;j++)
-#endif // _VS2008PORTING
 		{
 			Position[2] += Scale*4.f;
 			if(j == 0)
@@ -9993,9 +9913,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 		}
 		break;
 		}
-
-//------------------------------------------------------------------------------------------------------------
-
 	case BITMAP_ENERGY:
 		if(o->SubType == 0)
 		{
@@ -10008,9 +9925,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			CheckTargetRange(o);
 		}
 		break;
-
-//------------------------------------------------------------------------------------------------------------
-		
 		case MODEL_LIGHTNING_ORB:
 			{
 				float fRot = (WorldTime*0.0006f) * 360.0f;
@@ -10031,7 +9945,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f, vLight, o, (float)(rand()%360));
 					CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f, vLight, o, (float)(rand()%360));
 					
-					// ÀÜ»ó
 					Vector(0.4f, 0.4f, 1.5f, vLight);
 					CreateParticle(BITMAP_MAGIC, o->Position, o->Angle, vLight, 0, 1.f);
 					for(int i=0; i<3; ++i)
@@ -10039,7 +9952,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 						CreateParticle(BITMAP_SPARK+1, o->Position, o->Angle, o->Light, 13, 1.0f);
 					}
 					
-					// Æø¹ß °Ë»ç
 					CheckTargetRange(o);
 				}
 				else if(o->SubType == 1)
@@ -10059,7 +9971,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 						CreateSprite(BITMAP_ENERGY, o->Position, 4.0f, o->Light, o, fRot);
 					}
 					
-					// ½ºÆÄÅ¬ Æ¢±â´Â°Å
 					if(o->LifeTime >= 15)
 					{
 						for(int i=0; i<5; ++i)
@@ -10075,21 +9986,17 @@ void MoveEffect( OBJECT *o, int iIndex)
 						CreateParticle(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 0, 0.3f);
 						CreateParticle(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 0, 0.3f);
 					}
-					
-					// ¹ø°³
+
 					Vector(0.2f, 0.2f, 1.0f, vLight);
 					for(int i=0; i<2; ++i)
 					{
 						CreateEffect(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 3, o);
-						
 					}
 					
-					// ¿¬±â
 					if(o->LifeTime <= 5)
 					{
 						for(int i=0; i<2; ++i)
 						{
-							// »ö±ò °íÁ¤
 							CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 40);
 						}
 					}
@@ -10109,7 +10016,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				case 1:
 				case 2:
 					{	
-						OBJECT* pSourceObj = o->Owner;						// ½ÃÀüÀÚÀÇ ¿ÀºêÁ§Æ®
+						OBJECT* pSourceObj = o->Owner;
 						CHARACTER* pTargetChar = &CharactersClient[FindCharacterIndex(o->m_sTargetIndex)];
 						OBJECT* pTargetObj = &pTargetChar->Object;
 						
@@ -10133,13 +10040,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 								break;							
 						}
 
-						// ½ÃÀüÀÚ -> ¸ó½ºÅÍ Ã¼ÀÎ¶óÀÌÆ®´×
 						if( o->SubType == 0)
 						{				
-							// o : ÀÌÆåÆ® ¿ÀºêÁ§Æ®
-							VectorCopy ( pSourceObj->Position, pSourceModel->BodyOrigin );		// °»½ÅÇØÁÖ¾î¾ß ÇÑ´Ù.
+							VectorCopy ( pSourceObj->Position, pSourceModel->BodyOrigin );
 							
-							// ¿ÞÆÈ
 							Vector( 0.4f, 0.4f, 1.0f, vLight);
 							pSourceModel->TransformPosition( pSourceObj->BoneTransform[37], vRelativePos, vPos, true);	
 							Vector(-60.f,0.f, pSourceObj->Angle[2], vAngle);
@@ -10149,7 +10053,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 							CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight );
 							CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight );
 
-							// ¿À¸¥ÆÈ
 							pSourceModel->TransformPosition( pSourceObj->BoneTransform[28], vRelativePos, vPos, true);
 							Vector(-60.f,0.f, pSourceObj->Angle[2], vAngle);
 							CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight );
@@ -10167,20 +10070,17 @@ void MoveEffect( OBJECT *o, int iIndex)
 							VectorCopy( pTargetObj->Position, vTargetPos );
 							vTargetPos[2] += 80.0f;
 							//Vector(0.f, 0.f, 0.f, vAngle);
-							// ¸ó½ºÅÍ -> ¸ó½ºÅÍ Ã¼ÀÎ ¶óÀÌÆ®´×
 							CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, pTargetObj->Angle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight );
 							CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, pTargetObj->Angle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight );
 						}
-						
-						
-						// Å¸°Ù ÀÌÆÑÆ®
+
 						if( o->LifeTime == 15 )
 						{
 							int iNumBones = pTargetModel->NumBones;
 							float fRandom;
 							for( int i=0 ; i<iNumBones ; i++)
 							{
-								VectorCopy ( pTargetObj->Position, pTargetModel->BodyOrigin );		// °»½ÅÇØÁÖ¾î¾ß ÇÑ´Ù.
+								VectorCopy ( pTargetObj->Position, pTargetModel->BodyOrigin );
 								pTargetModel->TransformPosition( pTargetObj->BoneTransform[i], vRelativePos, vPos, true );
 					
 								Vector( 0.2f, 0.2f, 0.8f, vLight );
@@ -10194,8 +10094,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 			break;
 			
-			
-		case MODEL_ALICE_DRAIN_LIFE:			// Drain Life (µå·¹ÀÎ ¶óÀÌÇÁ)
+		case MODEL_ALICE_DRAIN_LIFE:
 			{
 				int iNumBones = 0;
 
@@ -10207,14 +10106,12 @@ void MoveEffect( OBJECT *o, int iIndex)
 				BMD *pSourceModel = &Models[pSourceObj->Type];
 				BMD *pTargetModel = &Models[pTargetObj->Type];
 
-				// °ø°ÝÀÚ³ª Å¸°ÙÀÌ ¾ø°Å³ª, Á×¾úÀ»¶§´Â break!!
 				if( pSourceObj == NULL || pTargetObj == NULL ||
 					pSourceObj->Live == false || pTargetObj->Live ==false )
 				{
 					break;
 				}
 
-				// ¸öÀÇ ÆÄÆ¼Å¬»ý¼º ·£´ý°ª ¼³Á¤
 				int iRandom = rand()%10;
 				int iCnt = 0;
 				switch( iRandom )
@@ -10237,7 +10134,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					break;
 				}
 				
-				// ½ºÅ³ ½ÃÀüÀÚ ÀÌÆÑÆ®
 				for( int i=0 ; i<iCnt ; i++ )
 				{
 					VectorCopy( pSourceObj->Position, vSourcePos );
@@ -10248,7 +10144,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					CreateParticle(BITMAP_LIGHT+2, vSourcePos, pSourceObj->Angle, vLight, 7, 1.8f);
 				}
 				
-				// Å¸°Ù ÀÌÆÑÆ®
 				if( o->LifeTime <= 60 )
 				{
 					for( int i=0 ; i<iCnt ; i++ )
@@ -10264,9 +10159,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				
 				if( o->LifeTime <= 70 && o-> LifeTime >=66 )
 				{
-					// µå·¹ÀÎ ¶óÀÌÇÁ °í½ºÆ®»ý¼º ·£´ý°ª ¼³Á¤
-					// 5ÇÁ·¹ÀÓ¿¡ °ÉÃÄ 0,1,2,3°³ »ý¼º
-					// 0 - 10% / 1 - 30% / 2- 40% / 3 - 20%
 					int iRandom = rand()%10;
 					int iCnt2 = 0;
 					switch( iRandom )
@@ -10294,13 +10186,11 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 					float fMatrix[3][4];
 					vec3_t vDir;
-					// ·£´ý°ª¿¡ µû¶ó °í½ºÆ® ÀÌÆÑÆ® »ý¼º
 					for( int i=0 ; i<iCnt2 ; i++)
 					{							
 						VectorCopy(pSourceObj->Position, pSourceModel->BodyOrigin );
 						pSourceModel->TransformPosition( pSourceObj->BoneTransform[18], vRelativePos, vSourcePos, true );
-						
-						// Ä³¸¯ÅÍÀÇ ¹æÇâÀ» ±¸ÇÑ´Ù.
+
 						AngleMatrix( pSourceObj->Angle, fMatrix );			
 						vDir[0] = fMatrix[0][1];
 						vDir[1] = fMatrix[1][1];
@@ -10319,8 +10209,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 						CreateJoint( BITMAP_DRAIN_LIFE_GHOST, vSourcePos, vTargetPos, o->Angle, 0, pSourceObj, 40.f, 0, 0, 0, -1, vLight );
 					}
 				}	
-				
-				// Å¸°Ù ¸ó½ºÅÍÀÇ ÀÌÆåÆ®
+
 				if( o->LifeTime == 64 )
 				{				
 					VectorCopy(pSourceObj->Position, pSourceModel->BodyOrigin );
@@ -10330,7 +10219,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					
 					for( int i=0 ; i<iNumBones ; i++)
 					{
-						VectorCopy ( pTargetObj->Position, pTargetModel->BodyOrigin );		// °»½ÅÇØÁÖ¾î¾ß ÇÑ´Ù.
+						VectorCopy ( pTargetObj->Position, pTargetModel->BodyOrigin );
 						pTargetModel->TransformPosition( pTargetObj->BoneTransform[i], vRelativePos, vTargetPos, true);
 						
 						Vector( 0.4f, 0.4f, 0.8f, vLight );
@@ -10340,7 +10229,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 						{
 							VectorCopy( pSourceObj->Position, vSourcePos );
 							vSourcePos[2] += 80.0f;
-							// ¸ó½ºÅÍ·ÎºÎÅÍ Èí¼öÇÏ´Â ¿¡³ÊÁö ÀÌÆÑÆ®
 							Vector( 1.0f, 0.0f, 0.1f, vLight );
 							CreateJoint( BITMAP_JOINT_ENERGY, vTargetPos, vSourcePos, pTargetObj->Angle, 45, pSourceObj, 10.0f, -1, 0, 0, -1, vLight);
 						}
@@ -10354,7 +10242,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			{
 				if(o->SubType == 0 || o->SubType == 1 || o->SubType == 2)
 				{
-					// °øÅëºÎºÐ
 					if(o->Owner == NULL || o->Owner->Live == false)
 					{
 						o->Live = false;
@@ -10385,16 +10272,14 @@ void MoveEffect( OBJECT *o, int iIndex)
 					{
 						o->Angle[2] -= 8.f;
 					}
-					// È¸Àü¼Óµµ
 					
 					o->Scale += 0.035f;
 
 					float fRot = (WorldTime*0.0006f) * 360.0f;
 					vec3_t vLight;
 
-					// °¢°¢ ¼­ºêÅ¸ÀÔº°·Î ´Ù¸¥ ºÎºÐ
 					// flare01
-					if(o->SubType == 0)		// ½½¸³
+					if(o->SubType == 0)
 					{
 						Vector(0.8f*o->Alpha, 0.1f*o->Alpha, 0.9f*o->Alpha, vLight);
 					}
@@ -10402,7 +10287,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					{
 						Vector(1.0f*o->Alpha, 1.0f*o->Alpha, 1.0f*o->Alpha, vLight);
 					}
-					else if(o->SubType == 2)		// ½ðÁî
+					else if(o->SubType == 2)
 					{
 						Vector(0.8f*o->Alpha, 0.5f*o->Alpha, 0.2f*o->Alpha, vLight);
 					}
@@ -10559,11 +10444,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 				CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f * fScale, vLight, o, (float)(rand()%360));
 				CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f * fScale, vLight, o, (float)(rand()%360));
 				
-				// ÀÜ»ó
 				Vector(1.0f, 0.3f, 0.3f, vLight);
 				CreateParticle(BITMAP_MAGIC, o->Position, o->Angle, vLight, 0, 1.f * fScale);
 
-				// ±¸¿¡ Àü±â
 				vec3_t vPos, vLightFlare, vRelative;
 				Vector(1.0f, 0.7f, 0.4f, vLight);
 				Vector(1.0f, 0.2f, 0.1f, vLightFlare);
@@ -10574,22 +10457,18 @@ void MoveEffect( OBJECT *o, int iIndex)
 						o->Position[2]+(rand()%70-35)*1.0f, vPos);
 					CreateSprite(BITMAP_LIGHT, vPos, 2.2f, vLightFlare, pObject);
 					if (rand()%3 > 0) continue;
-					CreateParticle(BITMAP_LIGHTNING_MEGA1+rand()%3,vPos,pObject->Angle,vLight,0, fScale);	// Àü±â
+					CreateParticle(BITMAP_LIGHTNING_MEGA1+rand()%3,vPos,pObject->Angle,vLight,0, fScale);
 				}
 
-				// ¸ö¿¡ Àü±â
 				Vector(1.0f, 0.5f, 0.4f, vLight);
-#ifdef _VS2008PORTING
+
 				for (int i = 0; i < 2; ++i)
-#else // _VS2008PORTING
-				for (i = 0; i < 2; ++i)
-#endif // _VS2008PORTING
 				{
 					fScale = (float)(rand()%60+22)*0.01f*1.0f;
 					int iBone = rand() % 41;
 					Vector((rand()%30-15)*1.0f, (rand()%30-15)*1.0f, (rand()%30-15)*1.0f, vRelative);
 					pOwnerModel->TransformByObjectBone(vPos, pOwner, iBone, vRelative);
-					CreateParticle(BITMAP_LIGHTNING_MEGA1+rand()%3,vPos,pObject->Angle,vLight,0, fScale);	// Àü±â
+					CreateParticle(BITMAP_LIGHTNING_MEGA1+rand()%3,vPos,pObject->Angle,vLight,0, fScale);
 				}
 
 				float Height = RequestTerrainHeight(o->Position[0],o->Position[1]);
@@ -10608,7 +10487,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				BMD * pOwnerModel = &Models[pOwner->Type];
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-				// Àü±â
 				float fScale = 0.8f;
 				vec3_t vPos, vLightFlare;
 				Vector(1.0f, 0.7f, 0.4f, vLight);
@@ -10626,11 +10504,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 				vec3_t vAngle, vDirection, vPosition;
 				float fAngle;
 				Vector(1.0f, 0.0f, 0.0f, vLight);
-#ifdef _VS2008PORTING
+
 				for (int i = 0; i < 6; ++i)
-#else // _VS2008PORTING
-				for (i = 0; i < 6; ++i)
-#endif // _VS2008PORTING
 				{
 					fScale = (float)(rand()%60+22)*0.01f*1.0f;
 					Vector(0.f, rand()%400, 0.f, vDirection );
@@ -10647,22 +10522,17 @@ void MoveEffect( OBJECT *o, int iIndex)
 				VectorCopy(o->Position, vPosition);
 				vPosition[2] = RequestTerrainHeight(vPosition[0],vPosition[1])+10;
 
-				// µ¶ ¿¬±â ÀÌÆåÆ®
 				Vector(1.0f, 0.0f, 0.0f, vLight);
-#ifdef _VS2008PORTING
+
 				for(int i=0; i<2; i++)
-#else // _VS2008PORTING
-				for(i=0; i<2; i++)
-#endif // _VS2008PORTING
 					CreateParticle(BITMAP_SMOKE, vPosition, o->Angle, vLight, 58);
 
-				// ¿¬±â
 				if (rand()%2 == 0)
 				{
 					Vector(1.0f, 0.0f, 0.0f, vLight);
 					CreateParticle(BITMAP_SMOKE,vPosition,o->Angle,vLight,54,2.8f);
 				}
-				// µ¹
+
 				CreateEffect(MODEL_STONE1+rand()%2,vPosition,o->Angle,vLight,13,o);
 			}
 			else if(o->SubType == 2)
@@ -10676,7 +10546,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					Vector(0.0f, 0.0f, 0.0f, vRelativePos);
 					for( int i=0 ; i<iNumBones ; i++)
 					{
-						VectorCopy ( o->Owner->Position, pTargetModel->BodyOrigin );		// °»½ÅÇØÁÖ¾î¾ß ÇÑ´Ù.
+						VectorCopy ( o->Owner->Position, pTargetModel->BodyOrigin );
 						pTargetModel->TransformPosition( o->Owner->BoneTransform[i], vRelativePos, vPos, true );
 			
 						Vector(0.8f, 0.0f, 0.0f, vLight);
@@ -10689,16 +10559,14 @@ void MoveEffect( OBJECT *o, int iIndex)
 						if (rand()%5 == 0)
 						{
 							fRandom = (float)(rand()%70+22)*0.01f*1.0f;
-							CreateParticle(BITMAP_LIGHTNING_MEGA1+rand()%3,vPos,vAngle,vLight,0, fRandom);	// Àü±â
+							CreateParticle(BITMAP_LIGHTNING_MEGA1+rand()%3,vPos,vAngle,vLight,0, fRandom);
 						}
 					}
 
-					// µ¶ ¿¬±â ÀÌÆåÆ®
 					Vector(1.0f, 0.0f, 0.0f, vLight);
 					//for(i=0; i<2; i++)
 						CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 58);
 
-					// ¿¬±â
 					if (rand()%4 == 0)
 					{
 						Vector(1.0f, 0.0f, 0.0f, vLight);
@@ -10768,7 +10636,6 @@ void MoveEffect( OBJECT *o, int iIndex)
             else 
                 o->LifeTime = 0;
 
-            //  Åõ¸íÀÏ¶§ º¸Á¶°è¿­ È¿°ú´Â º¸ÀÌÁö ¾Ê´Â´Ù.
 			if( g_isCharacterBuff(o->Owner, eBuff_Cloaking ) ) break;
 
             o->Velocity ++;
@@ -10825,7 +10692,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			CreateParticle(BITMAP_SHINY+4,Position,o->Angle,Light);
 			CreateParticle(BITMAP_EXPLOTION,Position,o->Angle,Light);
       		if(o->Owner == &Hero->Object)
-	       		AttackCharacterRange(o->Skill,o->Position,150.f,o->Weapon,o->PKKey);//Å¬¶óÀÌ¾ðÆ®¸¶¹ýÃ³¸®
+	       		AttackCharacterRange(o->Skill,o->Position,150.f,o->Weapon,o->PKKey);
 			o->Live = false;
 		}
 		VectorCopy(o->Position,o->EyeLeft);
@@ -10889,7 +10756,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             o->Gravity += 0.8f*o->Scale*30.f;
             o->Position[2] += o->Gravity;
         }
-        else if ( o->SubType==5 )   //  È¸Àü, ½ÂÃµ ÀÎÆä¸£³ë.
+        else if ( o->SubType==5 )
         {
             o->Position[2] += 2.f;
             o->Angle[2] += 20.f;
@@ -11047,11 +10914,7 @@ void MoveEffect( OBJECT *o, int iIndex)
         }
         else
         {
-#ifdef _VS2008PORTING
             for(int j=0;j<4;j++)
-#else // _VS2008PORTING
-            for(j=0;j<4;j++)
-#endif // _VS2008PORTING
             {
                 Vector((float)(rand()%60+60-90),0.f,(float)(rand()%30+90),Angle);
                 VectorAdd(Angle,o->Angle,Angle);
@@ -11123,7 +10986,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				CreateEffect(MODEL_STONE1+rand()%2,Position,o->Angle,o->Light,0);
 			}
 
-			/* µû·Î VisualÃ³¸® ÇÏ´Â ºÎºÐÀÌ ¾ø¾î¼­ ÀÓ½Ã·Î ¿©±â¼­ ¼ÂÆÃ */
 			BMD* pModel = &Models[o->Type];
 			pModel->Animation(BoneTransform,o->AnimationFrame,o->PriorAnimationFrame,o->PriorAction,o->Angle,o->HeadAngle,false,false);
 			Vector(1.f, 1.f, 1.f, Light);
@@ -11149,7 +11011,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             Vector ( 0.f, 0.f, 0.f, Angle );
             Vector ( 0.f, 0.f, 0.f, p );
 
-            if ( o->LifeTime==11 )   //  µë¼º µë¼º ±Õ¿­µé.
+            if ( o->LifeTime==11 )
             {
                 vec3_t  light;
 				Vector( 1.f, 1.f, 1.f, light );
@@ -11157,7 +11019,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 				if(o->Kind != 3) 
 				{
-					//. ºÎ¸ð¿ÀÇÁÁ§Æ®°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î Á¶±Ý ÀÌµ¿
 					Vector(-25.f,-80.f,0.f,p);
 					AngleMatrix(o->Owner->Angle,Matrix);
 					VectorRotate(p,Matrix,Position);	
@@ -11183,17 +11044,11 @@ void MoveEffect( OBJECT *o, int iIndex)
                 o->StartPosition[2] = RequestTerrainHeight( o->StartPosition[0], o->StartPosition[1] ) + AddHeight;
                 AddHeight = 3.f;
 
-	            //  Áß¾Ó¿¡ Æø¹ß.
                 CreateParticle(BITMAP_EXPLOTION,o->StartPosition,Angle,light,0,0.5f);
 
                 if ( o->Kind==0 )
                 {
-                    //  ¼è ÆÄÆí.
-#ifdef _VS2008PORTING
                     for(int j=0;j<8;j++)
-#else // _VS2008PORTING
-                    for(j=0;j<8;j++)
-#endif // _VS2008PORTING
                     {
                         Vector((float)(rand()%60-60.f),0.f,(float)(rand()%30+90),Angle);
                         VectorAdd(Angle,o->Angle,Angle);
@@ -11206,26 +11061,21 @@ void MoveEffect( OBJECT *o, int iIndex)
                 }
                 Vector( 0.f, 0.f, 0.f, Angle);
 
-                //  
                 if ( o->Kind==0 )
                     CreateEffect(MODEL_WAVE,o->StartPosition,Angle,o->Light);
 
-                //  ÀÚ½ÅÀÇ À§Ä¡¿¡¼­ÀÇ ±Õ¿­.
                 o->StartPosition[2] -= 27;
-				
 
-				//ÆÄ¶õ»ö
 				if(o->Owner != NULL)
 				{
 					if(o->Owner->Type != MODEL_MONSTER01+95)
 					{
-						CreateEffect(MODEL_SKILL_FURY_STRIKE+3,o->StartPosition,Angle,o->Light,0,o,scale);  //  Å« ±Õ¿­.
-						CreateEffect(MODEL_SKILL_FURY_STRIKE+1,o->StartPosition,Angle,o->Light,0,o,scale);  //  Å« ±Õ¿­.
-						CreateEffect(MODEL_SKILL_FURY_STRIKE+2,o->StartPosition,Angle,o->Light,0,o,scale);  //  Å« ±Õ¿­.
+						CreateEffect(MODEL_SKILL_FURY_STRIKE+3,o->StartPosition,Angle,o->Light,0,o,scale);
+						CreateEffect(MODEL_SKILL_FURY_STRIKE+1,o->StartPosition,Angle,o->Light,0,o,scale);
+						CreateEffect(MODEL_SKILL_FURY_STRIKE+2,o->StartPosition,Angle,o->Light,0,o,scale);
 					}
 				}
 
-                //  ´Ù¼¸ Å×µÎ¸®.
                 for ( int i=0; i<5; ++i )
                 {
                     Vector(0.f,(float)(rand()%150+100),0.f,p);
@@ -11257,7 +11107,7 @@ void MoveEffect( OBJECT *o, int iIndex)
                     }
                 }
             }
-            else if ( o->LifeTime==10 )  //  ¿¬¼ÓÀûÀÎ ±Õ¿­µé.
+            else if ( o->LifeTime==10 )
             {
                 for ( int j=0; j<5; ++j )
                 {
@@ -11267,11 +11117,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 
                 int count = 0;
                 int random;
-#ifdef _VS2008PORTING
-                for ( int j=0; j<4; ++j )
-#else // _VS2008PORTING
-                for ( j=0; j<4; ++j )
-#endif // _VS2008PORTING
+
+				for ( int j=0; j<4; ++j )
                 {
                     Vector(0.f,rand()%15+85.f,0.f,p);
 
@@ -11345,11 +11192,8 @@ void MoveEffect( OBJECT *o, int iIndex)
                         }
                         pos[0] += rand()%30+20;
                         pos[2] += rand()%500-250;
-#ifdef _VS2008PORTING
-                        for ( int i=0; i<4; ++i )
-#else // _VS2008PORTING
-                        for ( i=0; i<4; ++i )
-#endif // _VS2008PORTING
+
+						for ( int i=0; i<4; ++i )
                         {
                             position[0] = pos[0]; position[1] = pos[1];
                             position[2] = pos[2]-(i*30);
@@ -11428,7 +11272,7 @@ void MoveEffect( OBJECT *o, int iIndex)
         }
 
         o->BlendMeshTexCoordU = -(float)o->LifeTime*0.01f;
-				//ÆÄ¶õ»ö
+
 				if(o->Owner != NULL)
 					if(o->Owner->Type == MODEL_MONSTER01+95)
 					{
@@ -11481,7 +11325,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 
         o->BlendMeshTexCoordU = -(float)o->LifeTime*0.01f;
 
-				//ÆÄ¶õ»ö
 				if(o->Owner != NULL)
 					if(o->Owner->Type == MODEL_MONSTER01+95)
 					{
@@ -11522,7 +11365,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 
         o->BlendMeshTexCoordU = -(float)o->LifeTime*0.01f;
 
-				//ÆÄ¶õ»ö
 				if(o->Owner != NULL)
 					if(o->Owner->Type == MODEL_MONSTER01+95)
 					{
@@ -11669,11 +11511,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			VectorRotate ( Go, Matrix, Position );
 			VectorAdd ( Position, o->Position, Position );
 
-#ifdef _VS2008PORTING
 			for(int j=0;j<6;j++)
-#else // _VS2008PORTING
-			for(j=0;j<6;j++)
-#endif // _VS2008PORTING
 			{
       			CreateParticle(BITMAP_SMOKE,Position,Angle,o->Light,25);
 			}
@@ -11686,12 +11524,10 @@ void MoveEffect( OBJECT *o, int iIndex)
     	o->BlendMeshLight = o->LifeTime*0.1f;
         o->BlendMeshTexCoordU = -(float)o->LifeTime*0.2f;
 		//VectorAdd(o->Position,o->Direction,o->Position);
-#ifdef _VS2008PORTING
+
 		for(int j=0;j<4;j++)
-#else // _VS2008PORTING
-		for(j=0;j<4;j++)
-#endif // _VS2008PORTING
       		CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,o->Light,3);
+
 		Vector(Luminosity*0.3f,Luminosity*0.6f,Luminosity,Light);
 		AddTerrainLight(o->Position[0],o->Position[1],Light,3,PrimaryTerrainLight);
 
@@ -12025,7 +11861,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					o->Light[1] /= 1.17f;
 					o->Light[2] /= 1.17f;
 					
-					// ¿¬±â ¹ß»ý
 					vec3_t vPos;
 					VectorCopy(o->Position, vPos);
 					vPos[2] += 100.f;
@@ -12047,7 +11882,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					o->Light[1] /= 1.17f;
 					o->Light[2] /= 1.17f;
 					
-					// ¿¬±â ¹ß»ý
 					vec3_t vPos;
 					VectorCopy(o->Position, vPos);
 					vPos[2] += 100.f;
@@ -12055,7 +11889,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 			}
 			break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	case MODEL_CIRCLE:
       	o->BlendMeshLight = o->LifeTime*0.1f;
 		if ( o->SubType==1 )
@@ -12123,7 +11956,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}			
 		}
 		break;
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	case MODEL_CIRCLE_LIGHT:
         if ( o->SubType!=3 && o->SubType!=4 )
 		{
@@ -12279,7 +12111,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 	case MODEL_METEO1:
 	case MODEL_METEO2:
 	case MODEL_BOSS_ATTACK:
-	case MODEL_EFFECT_SAPITRES_ATTACK_2:			// »çÇÇÆ®·¹½º °¡½Ã »ç¹æÀ¸·Î ³¯¶ó°¡±â
+	case MODEL_EFFECT_SAPITRES_ATTACK_2:
 		if ( o->SubType==0 || o->SubType==10 || o->SubType==12)
 		{
 			VectorAdd(o->Position,o->Direction,o->Position);
@@ -12361,7 +12193,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 	case MODEL_NARCONDRA_STONE2:
 	case MODEL_NARCONDRA_STONE3:
 #endif	// ASG_ADD_KARUTAN_MONSTERS
-		if (o->SubType == 0)	// ¾óÀ½ ÆÄÆí
+		if (o->SubType == 0)
 		{
 			o->HeadAngle[2] -= o->Gravity;
 
@@ -12384,7 +12216,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				o->Alpha -= 0.1f;
 			}
 			
-			// ¿¬±â »Ñ¸®±â
 			if (rand()%30 == 0)
 				CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,o->Light);
 		}
@@ -12409,7 +12240,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				
 				Vector(0.0f,0.6f,1.f,Light);
 				Vector(0.f,0.f,0.f,Angle);
-				// ½ºÄÉÀÏ ¾È¸ÔÀ½
+
 				CreateEffect(MODEL_SKILL_INFERNO, o->Position, Angle, Light, 2, o);
 				
 				Vector(0.2f, 0.4f, 0.8f, Light);
@@ -12455,7 +12286,7 @@ void MoveEffect( OBJECT *o, int iIndex)
         CheckTargetRange(o);
 		break;
 	case MODEL_WOOSISTONE:
-		if (o->SubType == 1)	// µ¹ ÆÄÆí
+		if (o->SubType == 1)
 		{
 			o->HeadAngle[2] -= o->Gravity;
 
@@ -12478,7 +12309,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				o->Alpha -= 0.1f;
 			}
 		}
-		else	// µ¹ µ¢ÀÌ
+		else
 		{
 			o->Direction[2] -= 2.0f;
 		    CheckTargetRange(o);
@@ -12537,10 +12368,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 		        }
             }
 
-            //  ²¿¸®¿¡ ºÒ³ª°Ô ÇÑ´Ù.
             CreateParticle ( BITMAP_FIRE, o->Position, o->Angle, Light, 5, 1.2f );
 
-            Vector(Luminosity,Luminosity*0.3f,Luminosity*0.1f,Light);   //  ºÓÀº»ö.
+            Vector(Luminosity,Luminosity*0.3f,Luminosity*0.1f,Light);
             AddTerrainLight(o->Position[0],o->Position[1],Light,4,PrimaryTerrainLight);
         }
 		break;
@@ -12552,16 +12382,15 @@ void MoveEffect( OBJECT *o, int iIndex)
 	case MODEL_CUNDUN_PART6:
 	case MODEL_CUNDUN_PART7:
 	case MODEL_CUNDUN_PART8:
-	case MODEL_MONSTER01+64:	// ÁøÂ¥ÄïµÐ
-		// ÄïµÐ Á¶°¢ ÁÂÇ¥¸ÂÃß´Â ÄÚµå -_-
+	case MODEL_MONSTER01+64:
 		switch(o->SubType)
 		{
-		case 1:	// ¸ö
+		case 1:
 			o->Alpha -= 0.01f;
 			break;
-		case 2:	// Åõ±¸
-		case 3:	// °©¿Ê
-			if (o->LifeTime < 250+50+(34-o->Skill)*5)	// °©¿Ê ¶³±¸±â
+		case 2:
+		case 3:
+			if (o->LifeTime < 250+50+(34-o->Skill)*5)
 			{
 				//RenderMeshEffect
 				if (o->Position[2] > 350)//o->StartPosition[2])
@@ -12609,7 +12438,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					o->Direction[0] = 0;
 					o->Direction[1] = 0;
 					o->Direction[2] = -3.0f;
-					// ³Ñ¾îÁö±â
+
 					if (o->HeadAngle[0] == 0)
 					{
 						if (o->Angle[0] > -30)
@@ -12640,7 +12469,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					}
 				}
 			}
-			else	// »ç¶óÁö´Â È¿°ú
+			else
 			{
 				if (o->SubType != 2 && o->LifeTime > 200+50+135)
 				{
@@ -12667,7 +12496,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 			}
 			break;
-		case 4:	// ¸Á¶Ç
+		case 4:
 			if (o->LifeTime < 140)
 			{
 				o->Alpha -= 0.01f;
@@ -12688,7 +12517,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				o->AnimationFrame = 0;
 			}
 			break;
-		case 5:	// Ä¡¸¶
+		case 5:
 			if (o->LifeTime < 150)
 			{
 				o->Alpha -= 0.01f;
@@ -12931,14 +12760,12 @@ void MoveEffect( OBJECT *o, int iIndex)
 
         Vector ( 0.f, o->Velocity, 0.f, o->Direction );
 		Vector ( Luminosity*0.1f, Luminosity*0.3f, Luminosity*0.6f, Light );
-#ifdef _VS2008PORTING
+
         for ( int j=0; j<4; j++ )
-#else // _VS2008PORTING
-        for ( j=0; j<4; j++ )
-#endif // _VS2008PORTING
         {
             CreateParticle ( BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 1 );
         }
+
 		AddTerrainLight ( o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight );
         break;
 
@@ -12949,11 +12776,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 			VectorCopy(o->Position,Position);
 			Position[2] += 80;
 			CreateParticle(BITMAP_EXPLOTION,Position,o->Angle,Light);
-#ifdef _VS2008PORTING
+
 			for(int j=0;j<6;j++)
-#else // _VS2008PORTING
-			for(j=0;j<6;j++)
-#endif // _VS2008PORTING
 			{
 				CreateEffect(MODEL_STONE1+rand()%2,o->Position,o->Angle,o->Light);
 			}
@@ -13046,7 +12870,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 		if(o->SubType==1)
 		{
 			o->Angle[1] += 60.f;
-			//. o->TargetÀÌ ¼ÂÆÃµÇ¾î¾ß ÀÛµ¿ÇÑ´Ù.
+
 			if(o->LifeTime==13)
 				CreateEffect(MODEL_PIERCING,o->Position,o->Angle,o->Light,3,o);
 			CheckClientArrow(o);
@@ -13080,7 +12904,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 		Vector(Luminosity*0.8f,Luminosity*0.5f,Luminosity*0.2f,Light);
 		AddTerrainLight(o->Position[0],o->Position[1],Light,2,PrimaryTerrainLight);
 
-        //  ¶¥À¸·Î ¶³¾îÁö´Â È­»ì.
         if ( o->SubType==3 || o->SubType==4 )
         {
             if ( o->SubType==3 )
@@ -13131,7 +12954,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 		if(o->Type==MODEL_ARROW_NATURE)
 		{
 #ifdef CRYINGWOLF_2NDMVP
-			if(o->SubType==1) {	//. ¸ó½ºÅÍ °­·Â µ¶È­»ì
+			if(o->SubType==1) {
 				Vector(0.1f,0.4f,0.1f, Light);
 				CreateSprite(BITMAP_LIGHTNING+1,o->Position,0.3f,Light,o,(int)WorldTime*0.1f);
 				CreateSprite(BITMAP_LIGHTNING+1,o->Position,0.7f,Light,o,-(int)WorldTime*0.1f);
@@ -13324,7 +13147,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			CheckClientArrow(o);
 		}
 		break;
-	case MODEL_ARROW_RING:	//$ ¿äÁ¤È­»ì
+	case MODEL_ARROW_RING:
 		{
 			VectorCopy ( o->Position, o->EyeLeft );
 			Vector(0.0f, 1.0f, 0.1f, o->Light);
@@ -13359,7 +13182,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			{
 				CreateBomb(o->Position,true);
 				if(o->Owner==&Hero->Object && o->SubType!=99)
-					AttackCharacterRange(o->Skill,o->Position,100.f,o->Weapon,o->PKKey);//Å¬¶óÀÌ¾ðÆ®¸¶¹ýÃ³¸®
+					AttackCharacterRange(o->Skill,o->Position,100.f,o->Weapon,o->PKKey);
 			}
 			
 			Vector(Luminosity*0.6f,Luminosity*0.8f,Luminosity*0.8f,Light);
@@ -13370,7 +13193,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 #ifdef ADD_SOCKET_ITEM
 	case MODEL_ARROW_DARKSTINGER:
 		{
-			// ²À ÇØÁÖ¾î¾ß ÇÔ(¾ÈÇÏ¸é µ¥¹ÌÁö °è»ê ¾È‰Î)	
 			CheckClientArrow(o);
 			
 			BMD *pModel = &Models[o->Type];
@@ -13383,8 +13205,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			pModel->Animation( BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);	
 			pModel->TransformByObjectBone( vPos, o, 0 );
 			
-			// ¿ÀºêÁ§Æ®ÀÇ Æ÷Áö¼Ç UpdateºÎºÐÀÌ ¹Ø¿¡ ÀÖ±â ¶§¹®¿¡
-			// ÀÌÆÑÆ®ÀÇ Æ÷Áö¼ÇÀ» ¿øÇÏ´Â À§Ä¡¿¡ ºÙÀÌ·Á¸é Æ÷Áö¼Ç°è»êÀ» ¹Ì¸® ÇØÁÖ¾î¾ß ÇÑ´Ù. (-0-)
 			float Matrix[3][4];
 			vec3_t Angle;
 			vec3_t Position;
@@ -13704,7 +13524,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				o->Live = false;
 			}
 		}
-        else if ( o->SubType==5 )//  ÅëÅëº¼.
+        else if ( o->SubType==5 )
         {
             o->Position[2] += o->Gravity;
             o->Gravity -= 2.f;
@@ -13753,7 +13573,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
         }
 
-        if ( o->SubType==5 )    //  ÅëÅëº¼.
+        if ( o->SubType==5 )
         {
 			o->HiddenMesh = 0;
 			o->BlendMeshLight = 0.f;
@@ -13832,16 +13652,16 @@ void MoveEffect( OBJECT *o, int iIndex)
 	case MODEL_WARCRAFT:
 		VectorCopy(o->Owner->Position,o->Position);
 		break;
-	case BITMAP_FIRECRACKERRISE:	// ¹ß»ç´ë
+	case BITMAP_FIRECRACKERRISE:
 		if ( 0 == ( o->LifeTime % 5) && ( 0 == ( rand() % 3)))
-		{	// ÆøÁ× ¹ß»ç
+		{
 			CreateEffect(BITMAP_FIRECRACKER,o->Position,o->Angle,o->Light);
 		}
 		break;
 	case BITMAP_FIRECRACKER:
 		//VectorAdd(o->Position,o->Direction,o->Position);
 		if ( 1 == o->LifeTime)
-		{	// ÆøÁ× ÅÍÁø´Ù
+		{
 			int iSubType = rand()%30;
 			Vector((rand()%3)*.3f+.4f,(rand()%4)*.1f,.0f,Light);
 			//for ( int j = 0; j < 200; ++j)
@@ -13856,7 +13676,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 		AddTerrainLight(o->Position[0],o->Position[1],Light,1,PrimaryTerrainLight);
 		break;
 #ifdef YDG_ADD_FIRECRACKER_ITEM
-	case BITMAP_FIRECRACKER0001:	// »õ ÆøÁ× ¹ß»ç´ë
+	case BITMAP_FIRECRACKER0001:
 		{
 			if (o->LifeTime == 1 || o->LifeTime == 9 || o->LifeTime == 17
 				|| o->LifeTime == 24 || o->LifeTime == 31)
@@ -13867,11 +13687,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 		}
 		break;
-	case BITMAP_FIRECRACKER0002:	// »õ ÆøÁ×
+	case BITMAP_FIRECRACKER0002:
 		{
 			if (rand()%5 == 0)
 			{
-				// Æø¹ß ¾Ö´Ï
 				vec3_t vLight;
 				Vector(0.3f+(rand()%700)*0.001f, 0.3f+(rand()%700)*0.001f, 0.3f+(rand()%700)*0.001f, vLight);
 				Vector(o->Position[0]+(rand()%300-150), o->Position[1]+(rand()%300-150),
@@ -13881,7 +13700,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 		}
 		break;
-	case BITMAP_FIRECRACKER0003:	// »õ ÆøÁ× Æø¹ß ¾Ö´Ï
+	case BITMAP_FIRECRACKER0003:
 		{
 			int iFrame;
 			if (o->LifeTime > 15 - 8)
@@ -13891,7 +13710,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 				if (iFrame == 2)
 				{
-// 					// ¹øÂ½
 // 					CreateSprite(BITMAP_DS_SHOCK, o->Position, o->Scale*1.5f, o->Light, o);
 				}
 			}
@@ -13984,20 +13802,13 @@ void MoveEffect( OBJECT *o, int iIndex)
 #ifdef TAMAJJANG
     case MODEL_TAMAJJANG:
         {
-            //  0: Á¦ÀÚ¸®.
-            //  1: °È´Â´Ù ( ¸ñÀ» ³»¹Ð°í )
-            //  2: °È´Â´Ù ( ¸ñÀ» ³Ö°í )
-            //  3: ¹°¼Ó¿¡ ¼û¾ú´Ù°¡ ´Ù½Ã ³ª¿À°í ¹Ýº¹.
-
-            //  ¾ÆÆ²¶õ½º.
             if ( World==WD_7ATLANSE )
             {
                 o->LifeTime = 10;
             }
-            //  ·Î·£½Ã¾Æ.
             else if ( World==WD_0LORENCIA )
             {
-                if ( o->AI==0 )         //  Á¦ÀÚ¸®.
+                if ( o->AI==0 )
                 {
                     if ( o->LifeTime<10 )
                     {
@@ -14043,7 +13854,7 @@ void MoveEffect( OBJECT *o, int iIndex)
                         }
                     }
                 }
-                else if ( o->AI==1 )    //  Á¦ÀÚ¸®
+                else if ( o->AI==1 )
                 {
                     if ( o->LifeTime<10 )
                     {
@@ -14089,7 +13900,7 @@ void MoveEffect( OBJECT *o, int iIndex)
                         }
                     }
                 }
-                else if ( o->AI==2 )    //  °È´Â´Ù.
+                else if ( o->AI==2 )
                 {
                     o->LifeTime = 10;
 
@@ -14134,7 +13945,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 
                     PlayBuffer ( SOUND_HUMAN_WALK_SWIM );
                 }
-                else if ( o->AI==3 )    //  »ç¶óÁø´Ù.
+                else if ( o->AI==3 )
                 {
                     o->Position[2] -= 5.f;
                 }
@@ -14176,7 +13987,7 @@ void MoveEffect( OBJECT *o, int iIndex)
         }
         break;
 
-    case MODEL_GATE:    //  ºí·¯µåÄ³½½ ¼º¹®.
+    case MODEL_GATE:
     case MODEL_GATE+1:
 		VectorAdd(o->Position,o->Direction,o->Position);
 		VectorScale(o->Direction,0.9f,o->Direction);
@@ -14205,7 +14016,7 @@ void MoveEffect( OBJECT *o, int iIndex)
         }
         break;
 
-    case MODEL_STONE_COFFIN:    //  ºí·¯µåÄ³½½ ¼ºÀÚÀÇ ¼®»ó.
+    case MODEL_STONE_COFFIN:
     case MODEL_STONE_COFFIN+1:
         VectorAdd(o->Position,o->Direction,o->Position);
         VectorScale(o->Direction,0.9f,o->Direction);
@@ -14371,7 +14182,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 		    }
 		    o->BlendMeshLight /= 1.4f;
 		}
-		else if ( o->SubType==1 )       //  ½ºÆ®·Õ ÇÇ¾î.
+		else if ( o->SubType==1 )
 		{
 			o->Scale += o->Gravity;
 			o->Gravity+= 0.07f;
@@ -14418,7 +14229,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             o->Angle[1] += 45.f;
 		}
 		break;
-	case MODEL_AIR_FORCE:	    //  °ø±â ÀúÇ× È¿°ú.
+	case MODEL_AIR_FORCE:
         if ( o->Owner==NULL )
         {
             o->Live = false;
@@ -14443,7 +14254,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             VectorAdd ( o->Position, Position, o->Position );
         }
 		break;
-    case MODEL_PIERCING2:         //  ½ºÆ®·Õ ÇÇ¾î.
+    case MODEL_PIERCING2:
 		AngleMatrix(o->Angle,Matrix);
 		VectorRotate(o->Direction,Matrix,Position);
 //		VectorAdd(o->Position,Position,o->Position);
@@ -14480,18 +14291,14 @@ void MoveEffect( OBJECT *o, int iIndex)
 	case MODEL_DEASULER:
 		{
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				float	fEPSILON = 0.000001f;					// ¹Ì¼¼°ª.	
-				float	fRateAlpha_EraseOver = 0.7f;			// ¾ËÆÄ Àû¿ë ½ÃÁ¡.
+				float	fEPSILON = 0.000001f;	
+				float	fRateAlpha_EraseOver = 0.7f;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				vec3_t	v3RotateAngleRelative;
-				o->Visible = true;		// MoveEffect¿¡¼­ CreateEffect½Ã °£È¤ Move¸¦ Å¸Áö ¾Ê°í ±×¸°´Â °ÍÀ» ¹æÁö.
+				o->Visible = true;
 
-				// 2. ÇÁ·¹ÀÓ RATE %
 				float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
 
-				// 3. º¸°£ ¹Ý¿µ.
-				// ========================================================================================>
-				// 4. (1) º¸°£ ¹Ý¿µ. - Angle
 				if( o->m_Interpolates.m_vecInterpolatesAngle.size() > 0 )
 				{
 					o->m_Interpolates.GetAngleCurrent(v3RotateAngleRelative ,fCurrentRate);		
@@ -14501,40 +14308,27 @@ void MoveEffect( OBJECT *o, int iIndex)
 					o->Angle[2] = v3RotateAngleRelative[2] + o->HeadAngle[2];
 				}
 				
-				// 6. (2) º¸°£ ¹Ý¿µ. - Position
 				if( o->m_Interpolates.m_vecInterpolatesPos.size() > 0 )
 				{
 					o->m_Interpolates.GetPosCurrent(o->Position,fCurrentRate);
 				}
 
-				// 8. (3) º¸°£ ¹Ý¿µ. - Scale
 				if( o->m_Interpolates.m_vecInterpolatesScale.size() > 0 )
 				{
 					o->m_Interpolates.GetScaleCurrent(o->Scale,fCurrentRate);
 				}
 
-				// 9. (4) º¸°£ ¹Ý¿µ. - Alpha
 				if( o->m_Interpolates.m_vecInterpolatesScale.size() > 0 )
 				{
 					o->m_Interpolates.GetAlphaCurrent(o->Alpha,fCurrentRate);
 				}
-				// 3. º¸°£ ¹Ý¿µ.
-				// ========================================================================================<
 
-
-				// °Ë±â Ãâ·Â Á¤ÀÇ.
-				// ========================================================================================>
-
-				// °Ë±â ¹üÀ§ Á¤ÀÇ.
 				float fRateBlurStart, fRateBlurEnd, fRateShadowStart, fRateShadowEnd, fRateJointStart, fRateJointEnd;
 				fRateBlurStart = fRateBlurEnd = 0.0f;
 				fRateShadowStart = fRateShadowEnd = 0.0f;
 				fRateJointStart = fRateJointEnd = 0.0f;
 				fRateBlurStart = 0.0f; fRateBlurEnd = 0.90f;
 
-				// °Ë±â ¹üÀ§ Á¤ÀÇ.
-
-				// °Ë±â Å×½ºÆ®¿ë
 				int		iTYPESWORDFORCE = 0;		// 1: FORCE OF SWORD 
 				int		iTYPESWORDSHADOW = 0;		// 1: SHADOW SWORD 
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -14544,8 +14338,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				iTYPESWORDFORCE = 1;
 				iTYPESWORDSHADOW = 0;
 
-				// ½Ç °Ë±â EFFECT Á¤ÀÇ.
-				
 				if( iTYPESWORDFORCE==1 )
 				{
 					if( fCurrentRate > fRateBlurStart && fCurrentRate < fRateBlurEnd )
@@ -14567,7 +14359,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 							SETLIMITS( fStartRate, 1.0f, 0.0f );
 							SETLIMITS( fEndRate, 1.0f, 0.0f );
 
-							vec3_t	*arrEachBonePos;	// ÇöÀç ¸ðµ¨ÀÇ °¢ BoneµéÀÇ À§Ä¡°ª.
+							vec3_t	*arrEachBonePos;
 							arrEachBonePos		= new vec3_t[b->NumBones];							
 							
 							vec3_t v3CurBlurAngle, v3CurBlurPos;
@@ -14582,13 +14374,13 @@ void MoveEffect( OBJECT *o, int iIndex)
 							{
 								iBone01 = 4;
 								iBone02 = 2;
-								iBlurIdentity = 113;				// ÀÓÀÇÀÇ °Ë±â ½Äº°ÀÚ¸¦ ºÎ¿©.
+								iBlurIdentity = 113;
 							}
 							else
 							{
 								iBone01 = 5;
 								iBone02 = 1;
-								iBlurIdentity = 114;				// ÀÓÀÇÀÇ °Ë±â ½Äº°ÀÚ¸¦ ºÎ¿©.
+								iBlurIdentity = 114;
 							}
 							iTypeBlur = 10;
 
@@ -14626,7 +14418,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 											
 											CreateParticle(BITMAP_FIRE+2,vPosition,o->Angle,o->Light,17, 1.35f);
 											
-											// È¿°ú : ³­¼öÁö¿ª¿¡ ¹ø°³È¿°ú
 											Vector((float)(rand()%360),0.f,(float)(rand()%360),vAngle);
 											AngleMatrix(vAngle,matRandomRotation);
 											VectorRotate(vRandomDir,matRandomRotation,vRandomDirPosition);
@@ -14697,7 +14488,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 		}
 		break;
-    case MODEL_PIER_PART:       //  ·ÕÇÇ¾î ¾îÅÃ.
+    case MODEL_PIER_PART:
         if ( o->SubType==0 )
         {
             if ( o->Owner!=NULL )
@@ -14850,10 +14641,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 				o->Scale -= 0.1f;
 				o->Angle[2] += 15.f;
 			}
-			else if( o->SubType == 3 )		// ¸¶·ÂÁõ´ë(¸¶¹ý»ç) ½ºÅ³¿¡¼­ »ç¿ë
+			else if( o->SubType == 3 )
 			{
-				// o->PKKey : Ä®¶óºñÀ²
-				// o->EyeRight : ±âÁØÄ®¶ó
 				VectorCopy( o->Owner->Position, o->Position );
 				o->Scale -= 0.15f;
 				o->Angle[2] += 10.f;
@@ -14957,8 +14746,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 #ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 		else if( o->SubType == 14 )
 		{
-			// o->PKKey : Ä®¶óºñÀ²
-			// o->EyeRight : ±âÁØÄ®¶ó
 			VectorCopy( o->Owner->Position, o->Position );
 			o->Scale -= 0.15f;
 			if( o->LifeTime >= 20 )
@@ -15010,9 +14797,6 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
         }
         break;
-
-//------------------------------------------------------------------------------------------------------------------------
-
 #ifdef CSK_RAKLION_BOSS
 		case BITMAP_DAMAGE_01_MONO:
 			if(o->SubType == 0)
@@ -15070,9 +14854,6 @@ void MoveEffect( OBJECT *o, int iIndex)
                 }
             }
             break;
-
-//------------------------------------------------------------------------------------------------------------------------
-
         case BITMAP_JOINT_THUNDER+1:
             if ( o->LifeTime<5 && o->LifeTime%2==0 && o->SubType==0 )
             {
@@ -15211,7 +14992,7 @@ void MoveEffect( OBJECT *o, int iIndex)
         case MODEL_MONSTER01+77:
             if ( o->SubType==0 )
             {
-                if ( o->LifeTime%5==0 )   //  ¼ºº®¿¡¼­ ¶³¾îÁö´Â µ¹¹«´õ±â.
+                if ( o->LifeTime%5==0 )
                 {
                     VectorCopy ( o->Position, Position );
                 
@@ -15285,7 +15066,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			break;
         case MODEL_FLY_BIG_STONE1:
             {
-                if ( o->SubType==2 )   //  ¶³¾îÁö´Â µ¹.
+                if ( o->SubType==2 )
                 {
                     o->Position[2] -= o->Gravity;
                     o->Gravity += 1.9f;
@@ -15418,10 +15199,8 @@ void MoveEffect( OBJECT *o, int iIndex)
                                 CreateEffect ( BITMAP_CRATER, o->Position, o->Angle, o->Light );
                                 PlayBuffer ( SOUND_BC_CATAPULT_HIT, o );
 
-                                //  Æ¯Á¤ ¿ÀºêÁ§Æ®¿Í Ãæµ¹À» °Ë»çÇÑ´Ù.
                                 battleCastle::CollisionEffectToObject ( o, 350.f, 250.f, true );
                                 
-                                //  Ãæµ¹½Ã ¾Ö´Ï¸ÞÀÌ¼Ç Çö»ó.
                                 if ( o->SubType==88 && o->Owner==NULL )
                                 {
                                     battleCastle::CollisionHeroCharacter ( o->Position, 350.f, PLAYER_HIGH_SHOCK );
@@ -15452,7 +15231,6 @@ void MoveEffect( OBJECT *o, int iIndex)
                         }
                         else
                         {
-                            //  Æ¯Á¤ ¿ÀºêÁ§Æ®¿Í Ãæµ¹À» °Ë»çÇÑ´Ù.
                             bool collision;
                             if ( o->SubType==1 )
                             {
@@ -15574,7 +15352,6 @@ void MoveEffect( OBJECT *o, int iIndex)
                             CreateEffect ( BITMAP_CRATER, o->Position, o->Angle, o->Light );
                             PlayBuffer ( SOUND_BC_CATAPULT_HIT, o );
 
-                            //  Ãæµ¹½Ã ¾Ö´Ï¸ÞÀÌ¼Ç Çö»ó.
                             if ( o->SubType==88 && o->Owner==NULL )
                             {
                                 battleCastle::CollisionHeroCharacter ( o->Position, 350.f, PLAYER_HIGH_SHOCK );
@@ -15663,7 +15440,8 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
     
             o->Alpha = o->LifeTime/10.f;
-			if( o->Type == MODEL_GOLEM_STONE) {		//. °ñ·½ÆÄÆí	
+			if( o->Type == MODEL_GOLEM_STONE) 
+			{	
 				if(rand()%4==0) {
 					CreateParticle ( BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, 2.8f);
 					CreateParticle ( BITMAP_SMOKE, o->Position, o->Angle, Light, 21 , 1.8f);
@@ -15672,7 +15450,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 					CreateParticle ( BITMAP_SMOKE+1, o->Position, o->Angle, Light );
 				}
 			}
-			else if (o->Type == MODEL_BIG_STONE_PART1 && o->SubType == 2) {	//. µ¶°ñ·½ ÆÄÆí
+			else if (o->Type == MODEL_BIG_STONE_PART1 && o->SubType == 2) 
+			{
 				if ( (rand()%10)==0 ) {
 					Vector(0.2f,0.5f,0.35f, Light);
 					o->Position[2] = Height;
@@ -15731,8 +15510,6 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
             o->BlendMeshTexCoordU = WorldTime*0.0005f;
             break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//^ Ææ¸± ÀÌÆåÆ® °ü·Ã
 		case MODEL_FENRIR_THUNDER:
 			if(o->SubType == 0)
 			{
@@ -15867,22 +15644,22 @@ void MoveEffect( OBJECT *o, int iIndex)
 			{
 				o->Angle[0] += 0.1f;
 
-				if(o->SubType == 1)	// »¡°­
+				if(o->SubType == 1)
 				{
 					o->Light[1] -= 0.05f;
 					o->Light[2] -= 0.05f;
 				}
-				else if(o->SubType == 2)	// ÆÄ¶û
+				else if(o->SubType == 2)
 				{
 					o->Light[0] -= 0.05f;
 					o->Light[1] -= 0.05f;
 				}
-				else if(o->SubType == 3)	// °ËÁ¤
+				else if(o->SubType == 3)
 				{
 					o->Light[0] -= 0.05f;
 					o->Light[2] -= 0.05f;
 				}
-				else if(o->SubType == 4)	// ³ë¶û
+				else if(o->SubType == 4)
 				{
 					o->Light[2] -= 0.05f;
 				}
@@ -15892,7 +15669,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 				if(timeGetTime() - o->m_dwTime > 200)
 				{
-					o->m_iAnimation++;	// ¿¡´Ï¸ÞÀÌ¼Ç Å°°ª
+					o->m_iAnimation++;
 					if(o->m_iAnimation > 4)
 						o->Live = false;
 					o->m_dwTime = timeGetTime();
@@ -15927,7 +15704,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 						o->m_dwTime = timeGetTime();	
 					}
 
-					if(o->m_iAnimation == 0)	// Ãà¼Ò
+					if(o->m_iAnimation == 0)
 					{
 						o->Scale -= 0.015f;
 						if(o->Scale <= 0.0f)
@@ -15935,7 +15712,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 							o->Scale = 0.0f;
 						}
 					}
-					else	// È®´ë
+					else
 					{
 						o->Scale += 0.02f;
 						if(o->Scale >= 1.2f)
@@ -15965,7 +15742,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 			}
 			break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
         case MODEL_TOWER_GATE_PLANE:
             o->LifeTime = 100;
             if ( o->Owner!=NULL && o->Live==true )
@@ -16040,7 +15816,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
             break;
 
-        case MODEL_SKIN_SHELL:  //  ½ºÅ² ÆÄÆí.
+        case MODEL_SKIN_SHELL:
             VectorAdd ( o->Position, o->Direction, o->Position );
             VectorScale ( o->Direction, 0.9f, o->Direction );
             o->Position[2] += o->Gravity;
@@ -16435,7 +16211,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 			}
 			break;
-		case MODEL_EFFECT_SAPITRES_ATTACK:		// »çÇÇÆ®·¹½º °¡½Ã°ø°Ý
+		case MODEL_EFFECT_SAPITRES_ATTACK:
 			{
 				if( o->LifeTime%6 == 0 )
 				{
@@ -16446,7 +16222,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 			}
 			break;
-		case MODEL_EFFECT_SAPITRES_ATTACK_1:	// »çÇÇÆ®·¹½º °¡½Ã »ç¹æÀ¸·Î ³¯¸®±â
+		case MODEL_EFFECT_SAPITRES_ATTACK_1:
 			{
 				if( o->SubType == 0 )
 				{
@@ -16470,7 +16246,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}		 
 			}
 			break;
-		case MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1:	// ½ã´õ³×ÀÌÇÉ ½ã´õ ¿¡³ÊÁöº¼
+		case MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1:
 			{
 				if( o->SubType == 0 )
 				{
@@ -16504,7 +16280,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					vPos[2] = vPos[2] + ((rand()%(iOffsetPos/2))-((iOffsetPos*0.5f) * 0.5f));
 					if( o->LifeTime >= 4 )
 					{
-						// ÀÓ½ÃÀû
 						o->Scale = (0.8f+((float)(rand()%10)*0.1f));
 						vPos[0] += (3.0f*((float)(rand()%40)-20));
 						vPos[1] += (3.0f*((float)(rand()%40)-20));
@@ -16526,10 +16301,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 #ifdef CSK_EVENT_CHERRYBLOSSOM
 		case MODEL_EFFECT_SKURA_ITEM:
 			{
-#ifdef KJH_ADD_09SUMMER_EVENT
 				if( (o->SubType == 0) || (o->SubType == 1))
 				{
-#endif // KJH_ADD_09SUMMER_EVENT
 					if( o->Owner->Live && o->Live )
 					{
 						vec3_t vRelativePos, vtaWorldPos, vLight1, vLight2;
@@ -16549,27 +16322,23 @@ void MoveEffect( OBJECT *o, int iIndex)
 						
 						b->Animation(BoneTransform,o->AnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);
 						
-						// ¿ÞÂÊ
 						b->TransformPosition(BoneTransform[1], vRelativePos, vtaWorldPos, false);
 						CreateSprite(BITMAP_SHINY+1, vtaWorldPos, 1.8f, o->Light, o, +WorldTime*0.08f);
-						for(int i=0; i<7; ++i) {
+						for(int i=0; i<7; ++i) 
+						{
 							CreateParticle(BITMAP_SHINY+1, vtaWorldPos, o->Angle, o->Light, 5, 0.8f, o);
 							CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand()%7 == 3 ? vLight2 : vLight1, 0, 0.5f);
 						}
 						
-						// ¿À¸¥ÂÊ
 						b->TransformPosition(BoneTransform[2], vRelativePos, vtaWorldPos, false);
 						CreateSprite(BITMAP_SHINY+1, vtaWorldPos, 1.8f, o->Light, o, -WorldTime*0.08f);
-#ifdef _VS2008PORTING
-						for(int i=0; i<7; ++i) {
-#else // _VS2008PORTING
-						for(i=0; i<7; ++i) {
-#endif // _VS2008PORTING
+
+						for(int i=0; i<7; ++i) 
+						{
 							CreateParticle(BITMAP_SHINY+1, vtaWorldPos, o->Angle, o->Light, 5, 0.8f, o);
 							CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand()%7 == 3 ? vLight2 : vLight1, 0, 0.5f);
 						}
 							
-						// ¸¶Áö¸· ³¡³ª´Â ÀÌÆåÆ®
 						if( o->LifeTime == 30 || o->LifeTime == 15 || o->LifeTime == 4 )
 						{
 							vec3_t vAngle;
@@ -16590,13 +16359,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 								
 							vtaWorldPos[2] += rand()%110+50;
 								
-#ifdef KJH_ADD_09SUMMER_EVENT
 							Vector(0.7f, 0.71f, 1.0f,vLight1);
 							Vector(0.8f, 0.85f, 1.0f, vLight2);
-#else // KJH_ADD_09SUMMER_EVENT
-							Vector(0.8f, 0.6f, 0.6f,vLight1);
-							Vector(1.f, 0.6f, 0.8f, vLight2);
-#endif // KJH_ADD_09SUMMER_EVENT
 								
 							for(int k=0; k<70; ++k) 
 							{
@@ -16610,7 +16374,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 							Vector(1.f, 0.6f, 0.8f, vLight2);
 							CreateParticle(BITMAP_SHOCK_WAVE, vtaWorldPos, vAngle, vLight2, 4, 0.005f);
 								
-							// Æø¹ß ½ÃÀÛÁ¡
 							characterBMD->Animation(o->Owner->BoneTransform,o->Owner->AnimationFrame,
 								o->Owner->PriorAnimationFrame,o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
 							characterBMD->TransformPosition(o->Owner->BoneTransform[20], vRelativePos, vtaWorldPos, false);
@@ -16625,9 +16388,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 							
 						b->PlayAnimation( &o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity/3.f, o->Position, o->Angle );
 					}
-#ifdef KJH_ADD_09SUMMER_EVENT
 				}
-#endif // KJH_ADD_09SUMMER_EVENT
 			}
 			break;
 #endif //CSK_EVENT_CHERRYBLOSSOM
@@ -16654,10 +16415,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 						if(o->LifeTime == 23)
 						{
 							Vector(0.3f, 0.3f, 1.0f, vLight);
-							// ³¯Ä«·Î¿î ºû ¸ð¾ç ÀÌÆåÆ® ¹ß»ý
 							CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
 							CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
-
 							CreateEffect(MODEL_KNIGHT_PLANCRACK_A, o->Position, o->Angle, vLight, 0, o, 0, 0, 0, 0, 1.2f);
 
 							vec3_t vDir, vPos, vAngle;
@@ -16719,11 +16478,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 							Vector(0.5f, 0.5f, 1.f, vLight);
 
 							Vector(0.3f, 0.3f, 1.0f, vLight);
-							// ³¯Ä«·Î¿î ºû ¸ð¾ç ÀÌÆåÆ® ¹ß»ý
 							CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 2.f);
 							CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 1.f);
-
-							// ¹Ù´Ú¿¡ Å« °¡¶óÁü ÀÌÆåÆ® ¹ß»ý
 							CreateEffect(MODEL_RAKLION_BOSS_CRACKEFFECT, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 0.2f);
 
 							vec3_t vPos,vResult;
@@ -16783,18 +16539,12 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 			}
-			break;
-
-//--------------------------------------------------------------------------------------------------------------------------------	
-			
+			break;	
 		case MODEL_NIGHTWATER_01:
 			{
 				o->Alpha -= 0.04f;
 			}
 			break;	
-
-//--------------------------------------------------------------------------------------------------------------------------------		
-
 		case MODEL_KNIGHT_PLANCRACK_A:
 			if (o->SubType == 0)
 			{
@@ -16817,9 +16567,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 			break;	
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef YDG_ADD_SKILL_FLAME_STRIKE
 	case MODEL_EFFECT_FLAME_STRIKE:
 		{
@@ -16881,11 +16628,11 @@ void MoveEffect( OBJECT *o, int iIndex)
 						pOwnerModel->Animation(BoneTransform, 
 							fOwnerAnimationFrame, (int)fOwnerAnimationFrame - 1, 
 							pOwner->PriorAction, pOwner->Angle, pOwner->HeadAngle,false,false);
-						pOwnerModel->RotationPosition(BoneTransform[33], p, p);	// ParentMatrix Àü¿ªº¯¼ö »ý¼º¿ë
+						pOwnerModel->RotationPosition(BoneTransform[33], p, p);	// ParentMatrix
 						
 						pModel->Animation(BoneTransform,fAnimationFrame,
 							(int)fAnimationFrame - 1,pObject->PriorAction,
-							pObject->Angle,pObject->HeadAngle,true,true);	// BoneTransform Àü¿ªº¯¼ö »ý¼º
+							pObject->Angle,pObject->HeadAngle,true,true);	// BoneTransform
 						
 						if (fOwnerAnimationFrame >= Start_Frame && fOwnerAnimationFrame <= End_Frame)
 						{
@@ -16910,20 +16657,18 @@ void MoveEffect( OBJECT *o, int iIndex)
 		break;
 #endif	// YDG_ADD_SKILL_FLAME_STRIKE
 		
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER		// ¸¶·ÂÁõ´ë
+#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	case MODEL_SWELL_OF_MAGICPOWER:
 		{
 			if( o->SubType == 0)
 			{
-				// ¿ÀºêÁ§Æ®°¡ ÇÃ·¹ÀÌ¾î°¡ ¾Æ´Ò½Ã¿¡´Â break!! (º»³Ñ¹ö¸¦ »ç¿ëÇÏ±â ¶§¹®¿¡ À§Çè!!)
 				if( o->Owner->Type != MODEL_PLAYER )
 					break;
 
-				BMD* pModel = &Models[o->Owner->Type];	// ÄÉ¸¯ÅÍ ¸ðµ¨
+				BMD* pModel = &Models[o->Owner->Type];
 				VectorCopy( o->Owner->Position, o->Position );
 				vec3_t vLight, vPos;
 
-				// ¹Ù´Ú¸é È¿°ú
 				Vector( 0.4f, 0.3f, 0.9f, vLight );
 				if( o->LifeTime == 45 || o->LifeTime == 35 || o->LifeTime == 25 )
 				{
@@ -16932,7 +16677,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					CreateEffect( BITMAP_TWLIGHT, o->Position, o->Angle, vLight, 3, o, -1, 0, 0, 0, 6.0f );
 				}
 				
-				// ¿Â¸ö¿¡ ºû³ª´Â È¿°ú
 				Vector( 0.7f, 0.3f, 0.9f, vLight );
 				if( o->LifeTime <= 20 )
 				{
@@ -16947,7 +16691,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					}
 				}
 				
-				// ¼Õ¿¡ ºÙ´Â ÀÌÆÑÆ®
 				Vector( 0.2f, 0.2f, 0.9f, vLight );
 				if( o->LifeTime == 45 )
 				{
@@ -16957,7 +16700,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					CreateEffect( MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 37/*º»³Ñ¹ö*/);
 				}
 
-				// µ¹±â
 				if (o->LifeTime >= 30)
 				{
 					Vector( 0.3f, 0.2f, 0.9f, vLight );
@@ -16972,11 +16714,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 		{
 			if( o->SubType == 0)
 			{
-				// ¿ÀºêÁ§Æ®°¡ ÇÃ·¹ÀÌ¾î°¡ ¾Æ´Ò½Ã¿¡´Â break!! (º»³Ñ¹ö¸¦ »ç¿ëÇÏ±â ¶§¹®¿¡ À§Çè!!)
 				if( o->Owner->Type != MODEL_PLAYER )
 					break;
 
-				BMD* pModel = &Models[o->Owner->Type];	// ÄÉ¸¯ÅÍ ¸ðµ¨
+				BMD* pModel = &Models[o->Owner->Type];
 				vec3_t vPos;
 				pModel->TransformByObjectBone( vPos, o->Owner, o->PKKey );
 				VectorCopy( vPos, o->Position );
@@ -16988,17 +16729,14 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 			else if( o->SubType == 1 )
 			{
-				// ¿ÀºêÁ§Æ®°¡ ÇÃ·¹ÀÌ¾î°¡ ¾Æ´Ò½Ã¿¡´Â break!! (º»³Ñ¹ö¸¦ ¶§¹®¿¡ À§Çè!!)
 				if( o->Owner->Type != MODEL_PLAYER )
 					break;
 
-				BMD* pModel = &Models[o->Owner->Type];	// ÄÉ¸¯ÅÍ ¸ðµ¨
+				BMD* pModel = &Models[o->Owner->Type];
 				vec3_t vPos;
 				pModel->TransformByObjectBone( vPos, o->Owner, o->PKKey );
 				VectorCopy( vPos, o->Position );
 				
-
-				// Å©±â ´Ã¾ú´Ù°¡ ÁÙ¾ú´Ù°¡.
 				if( o->LifeTime >= 15 )
 				{
 					o->Scale *= 1.05f;
@@ -17008,11 +16746,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 					o->Scale *= 0.95f;
 				}
 
-
 				CreateSprite( BITMAP_LIGHT, o->Position, o->Scale, o->Light, o->Owner );
 				CreateSprite( BITMAP_LIGHT, o->Position, o->Scale*0.8f, o->Light, o->Owner );
 
-				// ÀÌÆÑÆ® Á×À»¶§ Èñ¹ÌÇØ Áö¸é¼­...
 				if( o->LifeTime <= 10 )
 				{
 					o->Alpha *= 0.95f;
@@ -17022,12 +16758,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 			else if( o->SubType == 2 )
 			{
 				vec3_t vRelativePos;
-				BMD* b = &Models[o->Owner->Type];	// ÄÉ¸¯ÅÍ ¸ðµ¨
-				// ¿ÀºêÁ§Æ®°¡ ÇÃ·¹ÀÌ¾î°¡ ¾Æ´Ò½Ã¿¡´Â break!! (º»³Ñ¹ö¸¦ ¶§¹®¿¡ À§Çè!!)
+				BMD* b = &Models[o->Owner->Type];
 				if( o->Owner->Type != MODEL_PLAYER )
 					break;
 
-				// Å©±â ´Ã¾ú´Ù°¡ ÁÙ¾ú´Ù°¡.
 				if( o->LifeTime > 15 )
 				{
 					o->Scale *= 0.9f;
@@ -17059,7 +16793,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				CreateSprite( BITMAP_LIGHT, o->Position, o->Scale, o->Light, o->Owner );
 				CreateSprite( BITMAP_LIGHT, o->Position, o->Scale*0.8f, o->Light, o->Owner );
 
-				// ÀÌÆÑÆ® Á×À»¶§ Èñ¹ÌÇØ Áö¸é¼­...
 				if( o->LifeTime <= 10 )
 				{
 					o->Alpha *= 0.95f;
@@ -17092,9 +16825,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 				
 // MoveEffect() ¿¡¼­ CreateSprite()°¡ ±ôºý°Å¸®´Â ¹®Á¦·Î RenderEffects() ¿¡¼­ È£ÃâÇØ ÁÖ¾úÀ½.
-// ¿øÀÎÀ» Ã£¾Æº¸ÀÚ!!!!!
 //------------------------------------------------------------------------------------------
-// 				// ÇÃ·¹ÀÌ¾îÀÏ¶§ ÀÌÆÑÆ® »ç¿ë. (º»³Ñ¹ö¸¦ »ç¿ëÇÏ±â ¶§¹®¿¡À§Çè!!!) 
 // 				BMD* pModel = &Models[o->Owner->Type];
 // 				if ( o->Owner->Type == MODEL_PLAYER)
 // 				{
@@ -17382,7 +17113,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 				else
 				{
-					//Á¤ÇØÁø ½Ã°£ÀÌ Áö³ª¸é ¿òÁ÷ÀÎ´Ù.
 					if(o->Gravity == 0.0f)
 					{
 						o->Gravity = 0.1f;
@@ -17401,21 +17131,21 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 			}
 			break;
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE01:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 1
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE02:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 2
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE03:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 3
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE04:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 4
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE05:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 5
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE06:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 6
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE07:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 7
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE08:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 8
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE09:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 9
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE11:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 7
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE12:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 8
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE13:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 9
-		case MODEL_STATUE_CRUSH_EFFECT_PIECE01:	//¼®»ó ÆÄ±« ÀÌÆåÆ® Á¶°¢ 1
-		case MODEL_STATUE_CRUSH_EFFECT_PIECE02:	//¼®»ó ÆÄ±« ÀÌÆåÆ® Á¶°¢ 2
-		case MODEL_STATUE_CRUSH_EFFECT_PIECE03:	//¼®»ó ÆÄ±« ÀÌÆåÆ® Á¶°¢ 3
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE01:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE02:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE03:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE04:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE05:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE06:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE07:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE08:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE09:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE11:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE12:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE13:
+		case MODEL_STATUE_CRUSH_EFFECT_PIECE01:
+		case MODEL_STATUE_CRUSH_EFFECT_PIECE02:
+		case MODEL_STATUE_CRUSH_EFFECT_PIECE03:
 			{
 				o->HeadAngle[2] -= o->Gravity;
 				VectorCopy(o->Light,Light);
@@ -17468,8 +17198,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 			}
 			break;
-		case MODEL_STATUE_CRUSH_EFFECT_PIECE04:	//¼®»ó ÆÄ±« ÀÌÆåÆ® Á¶°¢ 4 ÀÜÇØ
-		case MODEL_DOOR_CRUSH_EFFECT_PIECE10:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 7 ÀÜÇØ
+		case MODEL_STATUE_CRUSH_EFFECT_PIECE04:
+		case MODEL_DOOR_CRUSH_EFFECT_PIECE10:
 			{
 				o->LifeTime -= 1;
 
@@ -17488,24 +17218,18 @@ void MoveEffect( OBJECT *o, int iIndex)
 		case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
 		case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:	
 		{
-			if (o->SubType == 0)		// ±×³É ±×¸®±â
+			if (o->SubType == 0)
 			{
 			}
-			else if ( o->SubType==1 )	// Attack01(ÀÏ¹Ý°ø°Ý), Attack02(ºí·¯µå¾îÅÃ), Attack03(ÇÁ·¹ÀÓ½ºÆ®¶óÀÌÅ©)
+			else if ( o->SubType==1 )
 			{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				float	fEPSILON = 0.000001f;					// ¹Ì¼¼°ª.	
-				float	fRateAlpha_EraseOver = 0.7f;			// ¾ËÆÄ Àû¿ë ½ÃÁ¡.
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+				float	fEPSILON = 0.000001f;
+				float	fRateAlpha_EraseOver = 0.7f;
 				vec3_t	v3RotateAngleRelative;
-				o->Visible = true;		// MoveEffect¿¡¼­ CreateEffect½Ã °£È¤ Move¸¦ Å¸Áö ¾Ê°í ±×¸°´Â °ÍÀ» ¹æÁö.
+				o->Visible = true;
 
-				// 2. ÇÁ·¹ÀÓ RATE %
 				float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
 
-				// 3. º¸°£ ¹Ý¿µ.
-				// ========================================================================================>
-				// 4. (1) º¸°£ ¹Ý¿µ. - Angle
 				if( o->m_Interpolates.m_vecInterpolatesAngle.size() > 0 )
 				{
 					o->m_Interpolates.GetAngleCurrent(v3RotateAngleRelative ,fCurrentRate);		
@@ -17515,30 +17239,24 @@ void MoveEffect( OBJECT *o, int iIndex)
 					o->Angle[2] = v3RotateAngleRelative[2] + o->HeadAngle[2];
 				}
 				
-				// 6. (2) º¸°£ ¹Ý¿µ. - Position
+				// 6. Position
 				if( o->m_Interpolates.m_vecInterpolatesPos.size() > 0 )
 				{
 					o->m_Interpolates.GetPosCurrent(o->Position,fCurrentRate);
 				}
 
-				// 8. (3) º¸°£ ¹Ý¿µ. - Scale
+				// 8. Scale
 				if( o->m_Interpolates.m_vecInterpolatesScale.size() > 0 )
 				{
 					o->m_Interpolates.GetScaleCurrent(o->Scale,fCurrentRate);
 				}
 
-				// 9. (4) º¸°£ ¹Ý¿µ. - Alpha
+				// 9. Alpha
 				if( o->m_Interpolates.m_vecInterpolatesScale.size() > 0 )
 				{
 					o->m_Interpolates.GetAlphaCurrent(o->Alpha,fCurrentRate);
 				}
-				// 3. º¸°£ ¹Ý¿µ.
-				// ========================================================================================<
 
-				// °Ë±â Ãâ·Â Á¤ÀÇ.
-				// ========================================================================================>
-
-				// °Ë±â ¹üÀ§ Á¤ÀÇ.
 				float fRateBlurStart, fRateBlurEnd, fRateShadowStart, fRateShadowEnd, fRateJointStart, fRateJointEnd;
 				fRateBlurStart = fRateBlurEnd = 0.0f;
 				fRateShadowStart = fRateShadowEnd = 0.0f;
@@ -17547,7 +17265,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				{
 				case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
 					{
-						// PlayBuffer ( SOUND_ATTACK_FIRE_BUST_EXP ); // ÀÓ½Ã»ç¿îµå
+						// PlayBuffer ( SOUND_ATTACK_FIRE_BUST_EXP );
 						fRateBlurStart = 0.1f; fRateBlurEnd = 0.90f;
 					}
 					break;
@@ -17585,31 +17303,29 @@ void MoveEffect( OBJECT *o, int iIndex)
 					}
 					break;
 				}
-				// °Ë±â ¹üÀ§ Á¤ÀÇ.
 
-				// °Ë±â Å×½ºÆ®¿ë
 				int		iTYPESWORDFORCE = 0;		// 1: FORCE OF SWORD 
 				int		iTYPESWORDSHADOW = 0;		// 1: SHADOW SWORD 
 				int		iTYPESWORDJOINT = 0;		// 1: JOINT OF SWORD
 
 				switch( o->Type )
 				{
-				case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:			// ÇÃ·¹ÀÓ½ºÆ®¶óÀÌÅ©
+				case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
 					{
 						iTYPESWORDFORCE = 1;
 						iTYPESWORDSHADOW = 0;
 					}
 					break;
 				case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:	
-				case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK2 : ºí·¯µå¾îÅÃ
+				case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK2
 				case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK2
 					{
 						iTYPESWORDFORCE = 1;
 						iTYPESWORDSHADOW = 0;
 					}
 					break;
-				case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK1 : ÀÏ¹Ý°ø°Ý
-				case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK1 : ÀÏ¹Ý°ø°Ý
+				case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK1
+				case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK1
 					{
 						iTYPESWORDFORCE = 0;
 						iTYPESWORDSHADOW = 1;
@@ -17639,7 +17355,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 							SETLIMITS( fStartRate, 1.0f, 0.0f );
 							SETLIMITS( fEndRate, 1.0f, 0.0f );
 
-							vec3_t	*arrEachBonePos;	// ÇöÀç ¸ðµ¨ÀÇ °¢ BoneµéÀÇ À§Ä¡°ª.
+							vec3_t	*arrEachBonePos;
 							arrEachBonePos		= new vec3_t[b->NumBones];							
 							
 							vec3_t v3CurBlurAngle, v3CurBlurPos;
@@ -17665,7 +17381,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 								{
 									iAccess = iBlurAccessTimeAttk02;
 									iBone01 = 3, iBone02 = 12;
-									iBlurIdentity = 113;				// ÀÓÀÇÀÇ °Ë±â ½Äº°ÀÚ¸¦ ºÎ¿©.
+									iBlurIdentity = 113;
 									//iTypeBlur = 2;
 									iTypeBlur = 13;
 								}
@@ -17674,7 +17390,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 								{
 									iAccess = iBlurAccessTimeAttk02;
 									iBone01 = 13, iBone02 = 1;
-									iBlurIdentity = 119;				// ÀÓÀÇÀÇ °Ë±â ½Äº°ÀÚ¸¦ ºÎ¿©.
+									iBlurIdentity = 119;
 									//iTypeBlur = 2;
 									iTypeBlur = 13;
 								}
@@ -17683,7 +17399,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 								{
 									iAccess = iBlurAccessTimeAttk01;
 									iBone01 = 4, iBone02 = 6;
-									iBlurIdentity = 133;				// ÀÓÀÇÀÇ °Ë±â ½Äº°ÀÚ¸¦ ºÎ¿©.
+									iBlurIdentity = 133;
 									iTypeBlur = 10;
 								}
 								break;	
@@ -17691,15 +17407,15 @@ void MoveEffect( OBJECT *o, int iIndex)
 								{
 									iAccess = iBlurAccessTimeAttk01;
 									iBone01 = 4, iBone02 = 6;
-									iBlurIdentity = 122;				// ÀÓÀÇÀÇ °Ë±â ½Äº°ÀÚ¸¦ ºÎ¿©.
+									iBlurIdentity = 122;
 									iTypeBlur = 10;
 								}
 								break;
-							case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:	// MainSword´Â FrameStrike·Î ´ëÃ¼µÈ´Ù.
+							case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
 								{
 									iAccess = iBlurAccessTimeAttk04;
 									iBone01 = 4, iBone02 = 9;
-									iBlurIdentity = 155;				// ÀÓÀÇÀÇ °Ë±â ½Äº°ÀÚ¸¦ ºÎ¿©.
+									iBlurIdentity = 155;
 									iTypeBlur = 2;
 								}
 								break;
@@ -17751,7 +17467,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 											
 											CreateParticle(BITMAP_FIRE,vPosition,o->Angle,o->Light,5, 1.35f);
 											
-											// È¿°ú : ³­¼öÁö¿ª¿¡ ¹ø°³È¿°ú
 											Vector((float)(rand()%360),0.f,(float)(rand()%360),vAngle);
 											AngleMatrix(vAngle,matRandomRotation);
 											VectorRotate(vRandomDir,matRandomRotation,vRandomDirPosition);
@@ -17788,7 +17503,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 											arrEachBonePos[iBone02], 
 											vLightBlur, iTypeBlur, false, iBlurIdentity, 3);
 										
-										// ºí·¯µå ¾îÅÃ ÈÄ±â ÀÌÆåÆ® ºÎºÐ
 										if( o->Type == MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_ || 
 											o->Type == MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_ )
 										{
@@ -17811,7 +17525,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 											
 											CreateParticle(BITMAP_FIRE,vPosition,o->Angle,o->Light,0);
 											
-											// È¿°ú : ³­¼öÁö¿ª¿¡ ¹ø°³È¿°ú
 											Vector((float)(rand()%360),0.f,(float)(rand()%360),vAngle);
 											AngleMatrix(vAngle,matRandomRotation);
 											VectorRotate(vRandomDir,matRandomRotation,vRandomDirPosition);
@@ -17863,18 +17576,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 				{
 					if( fCurrentRate > fRateJointStart && fCurrentRate < fRateJointEnd )
 					{
-						// °¢ °Ëº°·Î JOINT »ý¼º
 						CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 20, o, 160.f, 40 );
 					}
 				}
 				
-				// ½Ç °Ë±â EFFECT Á¤ÀÇ.
-				// °Ë±â Ãâ·Â Á¤ÀÇ ¿Ï·á.
-				// ========================================================================================<
-
-
-				// - 20. POST EFFECT Ã³¸® : ¸Ê ¹Ù´ÚÀ§ LIGHT COLOR
-				// ========================================================================================>
 				switch(o->Type)
 				{
 					case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
@@ -17914,28 +17619,28 @@ void MoveEffect( OBJECT *o, int iIndex)
 					break;
 					case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
 					{
-						// 3. °Ë µîÀå½Ã¿¡ APPEAR EFFECTµé
+						// 3. APPEAR EFFECT
 						if( fCurrentRate >= 0.0f && fCurrentRate <= 0.6f )
 						{
-							o->Visible = true;		// MoveEffect¿¡¼­ CreateEffect½Ã °£È¤ Move¸¦ Å¸Áö ¾Ê°í ±×¸°´Â °ÍÀ» ¹æÁö.
+							o->Visible = true;		// MoveEffect CreateEffect
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 							const int iNumUnitBone = 11;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 							BMD*	b = &Models[o->Type];
-							vec3_t	*arrEachBonePos;			// ÇöÀç ¸ðµ¨ÀÇ °¢ BoneµéÀÇ À§Ä¡°ª.
+							vec3_t	*arrEachBonePos;
 							vec3_t	v3LightModify;
 
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 							int		arriBoneIdxCur [] = {10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 							
-							// 1. BonePosition Particle Ã³¸®
+							// 1. BonePosition Particle
 							arrEachBonePos = new vec3_t[b->NumBones];
 
 
 							// - APPEAR WITH FIRE EFFECT
 							vec3_t	vRelativePos, vAngle;
-							vec3_t	v3CurrentHighHierarchyNodePos;		// »óÀ§ ¸ðµ¨ÀÇ ATTACH º» À§Ä¡°ª.
+							vec3_t	v3CurrentHighHierarchyNodePos;
 							
 							Vector(4.f, 0.f, 0.0f, vRelativePos);
 							VectorCopy(o->Angle,vAngle);
@@ -17943,20 +17648,20 @@ void MoveEffect( OBJECT *o, int iIndex)
 							BMD *pBMDSwordModel = &Models[o->Type]; 					
 							BMD *pOwnerModel = &Models[o->Owner->Type];
 
-							int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		// °¢ ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ °¡ÀÌ¿ÂÀÇ º» INDEX. 
+							int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };
 							int iBoneIdx = arrBoneIdxs[o->Type-MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
 							
 							pBMDSwordModel->AnimationTransformWithAttachHighModel( o->Owner, pOwnerModel, iBoneIdx, 
 													v3CurrentHighHierarchyNodePos, arrEachBonePos );
 							
-							// - µîÀå END EFFECT Á¤ÀÇ
+							// - END EFFECT
 							vec3_t	v3LightTerrain;
 							Vector(0.9f, 0.4f, 0.1f, v3LightTerrain);
 							
 							AddTerrainLight(o->Position[0],o->Position[1],v3LightTerrain,2,PrimaryTerrainLight);							
 							
 							{
-								Vector( 1.0f, 1.0f, 1.0f, v3LightModify );		// ºÓÀº»ö °è¿­
+								Vector( 1.0f, 1.0f, 1.0f, v3LightModify );
 							
 								for( int j = 0; j < 11; ++j )
 								{
@@ -17973,7 +17678,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					break;
 					case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
 					{
-						// ÇÃ·¹ÀÓ½ºÆ®¶óÀÌÅ© µîÀå½Ã È­¸é»ó¿¡ ºÒ²É Å¸¿À¸£´Â ÀÌÆåÆ®.
 						if( fCurrentRate >= 0.0f && fCurrentRate <= 0.5f )
 						{
 							// - APPEAR WITH FIRE EFFECT
@@ -17983,7 +17687,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 							float	fParamBasis = 100.0f, fParamUnit = 50.0f;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-							// 1. BonePosition Particle Ã³¸®
+							// 1. BonePosition Particle
 							BMD	*b = &Models[o->Type];
 							vec3_t* arrEachBonePos = new vec3_t[b->NumBones];
 
@@ -18006,8 +17710,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 							delete [] arrEachBonePos;
 						}
 							
-
-						// - ¸Ê»ó¿¡ °Ë±âCOLOR ºñÁÖ¾ó ·»´õ¸µ.
 						vec3_t	v3LightTerrain;
 						Vector(0.9f, 0.4f, 0.1f, v3LightTerrain);
 						
@@ -18015,11 +17717,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					}
 					break;	
 				}
-				// - 20. POST EFFECT Ã³¸®
-				// ========================================================================================<
-
-				// - 24. END EFFECT Ã³¸®
-				// ========================================================================================>
 				switch( o->Type )
 				{
 				case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
@@ -18049,7 +17746,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 						}
 					}
 					break;	
-				case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:	// ¸ÞÀÎ½º¿öµå´Â ÇÁ·¹ÀÓ½ºÆ®¶óÀÌÅ©¸¦ È£Ãâ
+				case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
 					{
 						if(o->LifeTime==1)
 						{
@@ -18060,20 +17757,14 @@ void MoveEffect( OBJECT *o, int iIndex)
 					}
 					break;
 				}
-				// - 24. END EFFECT Ã³¸®
-				// ========================================================================================<
-
-				// - 28. SOUND Ã³¸®
-				// ========================================================================================>
 				switch(o->Type)
 				{
 				case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
 				case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
 					{
-						// 28-1. ºí·¯µå ¾îÅÃ : Ã¹ ÇÁ·¹ÀÓ µé¾î°¥¶§ ÇÑ¹ø¸¸ È£ÃâÇÑ´Ù.
 						if( o->LifeTime == o->ExtState -1 )
 						{
-							//PlayBuffer( SOUND_ASSASSIN );		// Ä® ³¯¶ó°¡´Â »ç¿îµå
+							//PlayBuffer( SOUND_ASSASSIN );
 							PlayBuffer( SOUND_BLOODATTACK );
 						}
 					}
@@ -18081,42 +17772,37 @@ void MoveEffect( OBJECT *o, int iIndex)
 				case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:					
 				case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
 					{
-						// 28-2. ÀÏ¹Ý °ø°Ý : Ã¹ ÇÁ·¹ÀÓ µé¾î°¥¶§ ÇÑ¹ø¸¸ È£ÃâÇÑ´Ù.
 						if( o->LifeTime == o->ExtState -1 )
 						{
 							PlayBuffer( SOUND_ATTACK01+4 );
-							//PlayBuffer( SOUND_ASSASSIN );		// Ä® ³¯¶ó°¡´Â »ç¿îµå
+							//PlayBuffer( SOUND_ASSASSIN );
 						}
 					}
 					break;
 				case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
 					{
-						// 28-3. ÇÃ·¹ÀÓ½ºÆ®¶óÀÌÅ© : Ã¹ ÇÁ·¹ÀÓ µé¾î°¥¶§ ÇÑ¹ø¸¸ È£ÃâÇÑ´Ù.
 						if( o->LifeTime == o-> ExtState - 5 )
 						{
-							PlayBuffer( SOUND_SKILL_FLAME_STRIKE );	// ÇÃ·¹ÀÓ½ºÆ®¶óÀÌÅ© »ç¿îµå
+							PlayBuffer( SOUND_SKILL_FLAME_STRIKE );
 						}
 					}
 					break;
 				}
 				
 			}
-			else if( o->SubType==3 )	// ±â°£Æ½½ºÅè ÀÌÆåÆ®
+			else if( o->SubType==3 )
 			{
-				o->Visible = true;		// MoveEffect¿¡¼­ CreateEffect½Ã °£È¤ Move¸¦ Å¸Áö ¾Ê°í ±×¸°´Â °ÍÀ» ¹æÁö.
+				o->Visible = true;		// MoveEffect
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				float	fEPSILON = 0.000001f;					// ¹Ì¼¼°ª.	
-				float	fRateAlpha_EraseOver = 0.7f;			// ¾ËÆÄ Àû¿ë ½ÃÁ¡.
+				float	fEPSILON = 0.000001f;
+				float	fRateAlpha_EraseOver = 0.7f;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				vec3_t	v3RotateAngleRelative;
 
-				// 2. ÇÁ·¹ÀÓ RATE %
+				// 2. RATE %
 				float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
 
-
-				// 3. º¸°£ ¹Ý¿µ.
-				// ========================================================================================>
-				// 4. (1) º¸°£ ¹Ý¿µ. - Angle
+				// 4. Angle
 				if( o->m_Interpolates.m_vecInterpolatesAngle.size() > 0 )
 				{
 					o->m_Interpolates.GetAngleCurrent(v3RotateAngleRelative ,fCurrentRate);		
@@ -18126,28 +17812,24 @@ void MoveEffect( OBJECT *o, int iIndex)
 					o->Angle[2] = v3RotateAngleRelative[2] + o->HeadAngle[2];
 				}
 				
-				// 6. (2) º¸°£ ¹Ý¿µ. - Position
+				// 6. Position
 				if( o->m_Interpolates.m_vecInterpolatesPos.size() > 0 )
 				{
 					o->m_Interpolates.GetPosCurrent(o->Position,fCurrentRate);
 				}
 
-				// 8. (3) º¸°£ ¹Ý¿µ. - Scale
+				// 8. Scale
 				if( o->m_Interpolates.m_vecInterpolatesScale.size() > 0 )
 				{
 					o->m_Interpolates.GetScaleCurrent(o->Scale,fCurrentRate);
 				}
 
-				// 9. (4) º¸°£ ¹Ý¿µ. - Alpha
+				// 9. Alpha
 				if( o->m_Interpolates.m_vecInterpolatesAlpha.size() > 0 )
 				{
 					o->m_Interpolates.GetAlphaCurrent(o->Alpha,fCurrentRate);
 				}
-				// 3. º¸°£ ¹Ý¿µ.
-				// ========================================================================================<
 
-				// - 20. POST EFFECT Ã³¸®
-				// ========================================================================================>
 				switch(o->Type)
 				{
 					case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
@@ -18155,7 +17837,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
 					case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
 					{
-						// - °¢SWORDº° POSTEFFECT ÀÏ½Ã º¸·ù.
+						// - SWORD POSTEFFECT
 						if(o->LifeTime==0)
 						{
 							OBJECT	*oHighHier = o->Owner;
@@ -18171,7 +17853,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 								11, o->Owner,-1,0,0,0,o->Scale );
 						}
 						
-						// - ¸Ê ¹Ù´ÚÀ§ COLOR.
+						// - COLOR.
 						vec3_t	v3LightTerrain;
 						Vector(0.0f, 0.2f, 0.9f, v3LightTerrain);
 						AddTerrainLight(o->Position[0],o->Position[1],v3LightTerrain,2,PrimaryTerrainLight);
@@ -18181,7 +17863,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					{
 						if( o->LifeTime == 40)
 						{
-							// --------------------------------------------------- ±â°£Æ½ ÀÌÆåÆ®
 							vec34_t Matrix;
 							vec3_t vAngle, vDirection, vPosition, vLight;
 							float fAngle;
@@ -18199,7 +17880,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 								CreateEffect(BITMAP_JOINT_THUNDER, vPosition, o->Angle, vLight, 1);
 							}
 
-							// --------------------------------------------------- Ãß°¡ ÀÌÆåÆ®
 							Vector ( 1.f, 1.f, 1.f, vLight );
 							VectorCopy(o->Light, vPosition);
 							//Vector(0.0f, -250.0f, 0.0f, vPosition );
@@ -18215,7 +17895,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 								CreateEffect ( MODEL_STONE2, vPosition,o->Angle,vLight );
 							}
 							
-							// ¿¬±â ÀÌÆåÆ®
 							vec3_t	v3Pos;
 							int		iLimitPos = 200;
 
@@ -18267,7 +17946,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					break;
 				}
 				
-				// - 24. END EFFECT Ã³¸® : ±â°£Æ½½ºÅè
+				// - 24. END EFFECT
 				// ========================================================================================>		
 				if( o->LifeTime == 15 )
 				{
@@ -18279,13 +17958,13 @@ void MoveEffect( OBJECT *o, int iIndex)
 				{
 					EarthQuake = (float)(rand()%2-2)*0.5f;
 				}
-				// - 24. END EFFECT Ã³¸® : ±â°£Æ½½ºÅè
+				// - 24. END EFFECT
 				// ========================================================================================<
 
-				// - 28. SOUND Ã³¸® ºÎºÐ : ±â°£Æ½½ºÅè
+				// - 28. SOUND
 				if( o->LifeTime == o->ExtState )
 				{
-					PlayBuffer( SOUND_ASSASSIN );		// Ä® ³¯¶ó°¡´Â »ç¿îµå
+					PlayBuffer( SOUND_ASSASSIN );
 				}
 
 				if( o->LifeTime == o->ExtState /2 + 2 )
@@ -18295,29 +17974,29 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 				if( o->LifeTime == (o->ExtState /2) + 5  )
 				{
-					PlayBuffer( SOUND_FURY_STRIKE2 );	// Ä® ²ÈÈ÷´Â »ç¿îµå
+					PlayBuffer( SOUND_FURY_STRIKE2 );
 				}
 			}
-			else if( o->SubType==11 )		// END EFFECT ·»´õ¸µ
+			else if( o->SubType==11 )		// END EFFECT
 			{
-				// 2. ÇÁ·¹ÀÓ RATE %
+				// 2. RATE %
 				float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
 
-				// 9. (4) º¸°£ ¹Ý¿µ. - Alpha
+				// 9. Alpha
 				if( o->m_Interpolates.m_vecInterpolatesScale.size() > 0 )
 				{
 					o->m_Interpolates.GetAlphaCurrent(o->Alpha,fCurrentRate);
 				}
 				
-				// 13. °Ë µîÀå½Ã¿¡ APPEAR EFFECTµé
+				// 13. APPEAR EFFECTµé
 				if( fCurrentRate >= 0.0f && fCurrentRate <= 0.5f )
 				{
-					o->Visible = true;		// MoveEffect¿¡¼­ CreateEffect½Ã °£È¤ Move¸¦ Å¸Áö ¾Ê°í ±×¸°´Â °ÍÀ» ¹æÁö.
+					o->Visible = true;		// MoveEffect­ CreateEffect
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					const int iNumUnitBone = 11;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					BMD*	b = &Models[o->Type];
-					vec3_t	*arrEachBonePos;			// ÇöÀç ¸ðµ¨ÀÇ °¢ BoneµéÀÇ À§Ä¡°ª.
+					vec3_t	*arrEachBonePos;
 					vec3_t	v3LightModify;
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					int		arriBoneIdx[5][11] = {	{ 2, 3, 13, 12, 5, 6, 1, 8, 9, 10, 4 }, 
@@ -18329,13 +18008,13 @@ void MoveEffect( OBJECT *o, int iIndex)
 					int		*arriBoneIdxCur = arriBoneIdx[iOffset];
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					
-					// 1. BonePosition Particle Ã³¸®
+					// 1. BonePosition Particle
 					arrEachBonePos = new vec3_t[b->NumBones];
 
 
 					// - APPEAR WITH FIRE EFFECT
 					vec3_t	vRelativePos, vAngle;
-					vec3_t	v3CurrentHighHierarchyNodePos;		// »óÀ§ ¸ðµ¨ÀÇ ATTACH º» À§Ä¡°ª.
+					vec3_t	v3CurrentHighHierarchyNodePos;
 					
 					Vector(4.f, 0.f, 0.0f, vRelativePos);
 					VectorCopy(o->Angle,vAngle);
@@ -18343,13 +18022,12 @@ void MoveEffect( OBJECT *o, int iIndex)
 					BMD *pBMDSwordModel = &Models[o->Type]; 					
 					BMD *pOwnerModel = &Models[o->Owner->Type];
 
-					int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		// °¢ ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ °¡ÀÌ¿ÂÀÇ º» INDEX. 
+					int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		//INDEX. 
 					int iBoneIdx = arrBoneIdxs[o->Type-MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
 					
 					pBMDSwordModel->AnimationTransformWithAttachHighModel( o->Owner, pOwnerModel, iBoneIdx, 
 											v3CurrentHighHierarchyNodePos, arrEachBonePos );
 					
-					// - µîÀå END EFFECT Á¤ÀÇ
 					vec3_t	v3LightTerrain;
 					Vector(0.9f, 0.4f, 0.1f, v3LightTerrain);
 					
@@ -18360,7 +18038,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
 					case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
 						{
-// 							Vector( 1.0f, 0.4f, 0.3f, v3LightModify );		// ÆÄ¶õ»ö °è¿­.
+// 							Vector( 1.0f, 0.4f, 0.3f, v3LightModify );
 // 							
 // 							for( int j = 0; j < 11; ++j )
 // 							{
@@ -18383,7 +18061,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
 					case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
 						{
-							Vector( 0.3f, 0.4f, 1.0f, v3LightModify );		// ÆÄ¶õ»ö °è¿­.
+							Vector( 0.3f, 0.4f, 1.0f, v3LightModify );
 							
 							for( int j = 0; j < 11; ++j )
 							{
@@ -18396,7 +18074,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 						break;
 					case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
 						{
-							Vector( 1.0f, 1.0f, 1.0f, v3LightModify );		// ºÓÀº»ö °è¿­
+							Vector( 1.0f, 1.0f, 1.0f, v3LightModify );
 						
 							for( int j = 0; j < 11; ++j )
 							{
@@ -18413,39 +18091,39 @@ void MoveEffect( OBJECT *o, int iIndex)
 						}
 						break;
 					}
-					// 3. °Ë µîÀå½Ã¿¡ APPEAR EFFECTµé
+					// 3. APPEAR EFFECT
 					
 					delete [] arrEachBonePos;
 				}	// if( fCurrentRate >= 0.0f && fCurrentRate <= 0.01f )
 				// 
 
 
-				// 2. ALpha °¡°¨¼è Ã³¸® - º¸°£¹ý
+				// 2. ALpha
 				if( o->m_Interpolates.m_vecInterpolatesAlpha.size() > 0 )
 				{
 					o->m_Interpolates.GetAlphaCurrent(o->Alpha,fCurrentRate);
 				}
 			} // else if( o->SubType==11 )
-			else if( o->SubType==12 )		// END EFFECT ·»´õ¸µ - ±â°£Æ½½ºÅè¸¸ ÇØ´ç.
+			else if( o->SubType==12 )		// END EFFECT
 			{
-				// 2. ÇÁ·¹ÀÓ RATE %
+				// 2. RATE %
 				float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
 
-				// 9. (4) º¸°£ ¹Ý¿µ. - Alpha
+				// 9. (4) Alpha
 				if( o->m_Interpolates.m_vecInterpolatesScale.size() > 0 )
 				{
 					o->m_Interpolates.GetAlphaCurrent(o->Alpha,fCurrentRate);
 				}
 				
-				// 3. °Ë µîÀå½Ã¿¡ APPEAR EFFECTµé
+				// 3. APPEAR EFFECTµé
 				if( fCurrentRate >= 0.0f && fCurrentRate <= 0.6f )
 				{
-					o->Visible = true;		// MoveEffect¿¡¼­ CreateEffect½Ã °£È¤ Move¸¦ Å¸Áö ¾Ê°í ±×¸°´Â °ÍÀ» ¹æÁö.
+					o->Visible = true;		// MoveEffect CreateEffect
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					const int iNumUnitBone = 11;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					BMD*	b = &Models[o->Type];
-					vec3_t	*arrEachBonePos;			// ÇöÀç ¸ðµ¨ÀÇ °¢ BoneµéÀÇ À§Ä¡°ª.
+					vec3_t	*arrEachBonePos;			// Bone
 					vec3_t	v3LightModify;
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					int		arriBoneIdx[5][11] = {	{ 2, 3, 13, 12, 5, 6, 1, 8, 9, 10, 4 }, 
@@ -18457,13 +18135,13 @@ void MoveEffect( OBJECT *o, int iIndex)
 					int		*arriBoneIdxCur = arriBoneIdx[iOffset];
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					
-					// 1. BonePosition Particle Ã³¸®
+					// 1. BonePosition Particle
 					arrEachBonePos = new vec3_t[b->NumBones];
 
 
 					// - APPEAR WITH FIRE EFFECT
 					vec3_t	vRelativePos, vAngle;
-					vec3_t	v3CurrentHighHierarchyNodePos;		// »óÀ§ ¸ðµ¨ÀÇ ATTACH º» À§Ä¡°ª.
+					vec3_t	v3CurrentHighHierarchyNodePos;		//ATTACH
 					
 					Vector(4.f, 0.f, 0.0f, vRelativePos);
 					VectorCopy(o->Angle,vAngle);
@@ -18471,19 +18149,19 @@ void MoveEffect( OBJECT *o, int iIndex)
 					BMD *pBMDSwordModel = &Models[o->Type]; 					
 					BMD *pOwnerModel = &Models[o->Owner->Type];
 
-					int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		// °¢ ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ °¡ÀÌ¿ÂÀÇ º» INDEX. 
+					int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		//INDEX. 
 					int iBoneIdx = arrBoneIdxs[o->Type-MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
 					
 					pBMDSwordModel->AnimationTransformWithAttachHighModel( o->Owner, pOwnerModel, iBoneIdx, 
 											v3CurrentHighHierarchyNodePos, arrEachBonePos );
 					
-					// - µîÀå END EFFECT Á¤ÀÇ
+					// EFFECT
 					vec3_t	v3LightTerrain;
 					Vector(0.9f, 0.4f, 0.1f, v3LightTerrain);
 					
 					AddTerrainLight(o->Position[0],o->Position[1],v3LightTerrain,2,PrimaryTerrainLight);
 
-// 					// CASE 1		: Yellow°è¿­. ¸ÞÀÎ½º¿öµå Çü½Ä ÀÌÆåÆ® 
+// 					// CASE 1		: Yellow
 // 					{
 // 						Vector(1.0f, 1.0f, 1.0f, v3LightModify);
 // 						for( int j = 0; j < 11; ++j )
@@ -18495,9 +18173,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 // 						}
 // 					}
 			
-					// CASE 2		: Blue°è¿­. 
+					// CASE 2		: Blue
 					{
-						Vector( 0.3f, 0.4f, 1.0f, v3LightModify );		// ÆÄ¶õ»ö °è¿­.
+						Vector( 0.3f, 0.4f, 1.0f, v3LightModify );
 						for( int j = 0; j < 11; ++j )
 						{
 							if( rand()%2 == 0 )
@@ -18507,9 +18185,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 						}
 					}
 			
-// 					// CASE 3		: Red-Yellow °è¿­
+// 					// CASE 3		: Red-Yellow
 // 					{
-// 						Vector( 1.0f, 1.0f, 1.0f, v3LightModify );		// ºÓÀº»ö °è¿­
+// 						Vector( 1.0f, 1.0f, 1.0f, v3LightModify );
 // 						for( int j = 0; j < 11; ++j )
 // 						{
 // 							if( rand()%20 == 0 )
@@ -18518,22 +18196,22 @@ void MoveEffect( OBJECT *o, int iIndex)
 // 							}
 // 						}
 // 					}
-					// 3. °Ë µîÀå½Ã¿¡ APPEAR EFFECTµé
+					// 3. APPEAR EFFECT
 					
 					delete [] arrEachBonePos;
 				}	// if( fCurrentRate >= 0.0f && fCurrentRate <= 0.01f )
 				// 
 
 
-				// 2. ALpha °¡°¨¼è Ã³¸® - º¸°£¹ý
+				// 2. ALpha
 				if( o->m_Interpolates.m_vecInterpolatesAlpha.size() > 0 )
 				{
 					o->m_Interpolates.GetAlphaCurrent(o->Alpha,fCurrentRate);
 				}
 			} // else if( o->SubType==11 )
-			else if( o->SubType == 20 )		// Æ¯Á¤ °ËÀÇ R,T,S¸¸À¸·Î ÇØ´ç À§Ä¡¿¡¼­ Àû´çÈ÷ ±×¸®°í ALPHA »©±â¸¸.
+			else if( o->SubType == 20 )		//ALPHA
 			{
-				o->Visible = true;		// MoveEffect¿¡¼­ CreateEffect½Ã °£È¤ Move¸¦ Å¸Áö ¾Ê°í ±×¸°´Â °ÍÀ» ¹æÁö.
+				o->Visible = true;		// MoveEffect CreateEffect Move
 				//float	fRateStatic = 0.6f;
 				float	fCurrentRate = (float)(o->LifeTime) / (float)(o->ExtState);
 				vec3_t	v3RotateAngleRelative;
@@ -18544,9 +18222,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 // 				LInterpolationF( o->Alpha, 0.0f, o->Distance, fRateCurrent );
 
 				// NEW METHOD
-				// 3. º¸°£ ¹Ý¿µ.
+				// 3. 
 				// ========================================================================================>
-				// 4. (1) º¸°£ ¹Ý¿µ. - Angle
+				// 4. (1) Angle
 				if( o->m_Interpolates.m_vecInterpolatesAngle.size() > 0 )
 				{
 					o->m_Interpolates.GetAngleCurrent(v3RotateAngleRelative ,fCurrentRate);		
@@ -18556,25 +18234,23 @@ void MoveEffect( OBJECT *o, int iIndex)
 					o->Angle[2] = v3RotateAngleRelative[2];
 				}
 				
-				// 6. (2) º¸°£ ¹Ý¿µ. - Position
+				// 6. Position
 				if( o->m_Interpolates.m_vecInterpolatesPos.size() > 0 )
 				{
 					o->m_Interpolates.GetPosCurrent(o->Position,fCurrentRate);
 				}
 				
-				// 8. (3) º¸°£ ¹Ý¿µ. - Scale
+				// 8. Scale
 				if( o->m_Interpolates.m_vecInterpolatesScale.size() > 0 )
 				{
 					o->m_Interpolates.GetScaleCurrent(o->Scale,fCurrentRate);
 				}
 				
-				// 9. (4) º¸°£ ¹Ý¿µ. - Alpha
+				// 9. Alpha
 				if( o->m_Interpolates.m_vecInterpolatesAlpha.size() > 0 )
 				{
 					o->m_Interpolates.GetAlphaCurrent(o->Alpha,fCurrentRate);
 				}
-				// 3. º¸°£ ¹Ý¿µ.
-				// ========================================================================================<
 			}
 		}
 
@@ -18601,7 +18277,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 						if(o->LifeTime == 23)
 						{
 							Vector(0.3f, 0.3f, 1.0f, vLight);
-							// ³¯Ä«·Î¿î ºû ¸ð¾ç ÀÌÆåÆ® ¹ß»ý
 							//CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
 							//CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
 
@@ -18669,11 +18344,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 							Vector(0.5f, 0.5f, 1.f, vLight);
 
 							Vector(0.3f, 0.3f, 1.0f, vLight);
-							// ³¯Ä«·Î¿î ºû ¸ð¾ç ÀÌÆåÆ® ¹ß»ý
 							CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, o->Scale * 1.1f);
 							CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, o->Scale * 1.2f);
-
-							// ¹Ù´Ú¿¡ Å« °¡¶óÁü ÀÌÆåÆ® ¹ß»ý
 							CreateEffect(MODEL_RAKLION_BOSS_CRACKEFFECT, o->Position, o->Angle, vLight, 
 								0, o, -1, 0, 0, 0, o->Scale * 0.4f);
 
@@ -18755,7 +18427,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}break;
 #endif // KJH_ADD_09SUMMER_EVENT
 #ifdef KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
-			case MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2:		// Á¦±¹¼öÈ£±º ¹æÆÐº´ °ø°Ý2 ÀÌÆÑÆ®
+			case MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2:
 				{
 					if( o->LifeTime <= 18 )
 					{
@@ -19321,7 +18993,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 						BMD* b = &Models[o->Owner->Type];
 						vec3_t Position;
 
-						//¿¬±â ÇÇ¾î¿À¸£´Â°Í
 						if(g_isCharacterBuff(o->Owner, eBuff_Att_up_Ourforces))
 						{
 							if(o->LifeTime%2==0)
@@ -20006,7 +19677,6 @@ void RenderFuryStrike(OBJECT *o)
 
         Vector(0.f,100.f,0.f,p);
 		
-        //  ¹«±â¸¦ ³ªÅ¸³»ÁØ´Ù.
 		int Type = o->Owner->Weapon+MODEL_SWORD;
 		BMD *b = &Models[Type];
 		b->CurrentAction = 0;
@@ -20091,10 +19761,10 @@ void RenderEffects ( bool bRenderBlendMesh )
 			{
                 if ( bRenderBlendMesh )
                 {
-                    if ( o->BlendMesh==-1 || o->BlendMesh<-2 ) continue;            //  ºí·£µù µÇÁö ¾Ê´Â ¿ÀºêÁ§Æ®´Â ÂïÁö ¾Ê´Â´Ù.
+                    if ( o->BlendMesh==-1 || o->BlendMesh<-2 ) continue;
                     const BMD& b = Models[o->Type];
-                    if ( b.NumMeshs<o->BlendMesh ) continue;                        //  ºí·£µù µÇ´Â ¿ÀºêÁ§Æ®°¡ ¿ø·¡ ¿ÀºêÁ§Æ®º¸´Ù Å©¸é ÂïÁö ¾Ê´Â´Ù.
-                    //if ( (o->Position[2]+o->BoundingBoxMax[2])<350.f ) continue;    //  ¹° ±âº» ³ôÀÌº¸´Ù 
+                    if ( b.NumMeshs<o->BlendMesh ) continue;
+                    //if ( (o->Position[2]+o->BoundingBoxMax[2])<350.f ) continue;
                 }
 
 
@@ -20112,8 +19782,8 @@ void RenderEffects ( bool bRenderBlendMesh )
 #ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 				case MODEL_DESAIR:
 #endif //SKILL_DEBUG
-				case MODEL_GHOST:			//  ¾ÆÀÌ´Ù À¯·É ¹Ú½º
-				case MODEL_TREE_ATTACK:		//  ¾ÆÀÌ´Ù µ¥¾²Æ®¸® °ø°Ý¿ë ³ª¹«
+				case MODEL_GHOST:
+				case MODEL_TREE_ATTACK:
 					RenderObject(o);
 					break;
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
@@ -20160,7 +19830,7 @@ void RenderEffects ( bool bRenderBlendMesh )
 				case MODEL_MAYASTONE4:
 				case MODEL_MAYASTONE5:
 				case MODEL_MAYASTONEFIRE:
-				case MODEL_BUTTERFLY01:		//. ¹ÝµðºÒ ¹Ú½º : 2004/11/05
+				case MODEL_BUTTERFLY01:
 					RenderObject(o);
 					break;
                 case 9:
@@ -20205,7 +19875,7 @@ void RenderEffects ( bool bRenderBlendMesh )
 						if(o->SubType == 0)
 						{
 							vec3_t vLight;
-							// ´Þ ÁÖÀ§ ºû (Shockwave)
+							// (Shockwave)
 							Vector(0.6f, 0.8f, 0.6f, vLight);
 							o->m_iAnimation++;
 							CreateSprite( BITMAP_SHOCK_WAVE, o->Position, 0.8f, vLight, o, -(o->m_iAnimation*3.f));
@@ -20308,12 +19978,9 @@ void RenderEffects ( bool bRenderBlendMesh )
 						BMD* pModel = &Models[o->Type];
 						vec3_t vPos, vLight;
 						
-					// ¶ó±Û µîÀÇ ºû.
 						const int nBoneCount = 6;
 						int nBone[nBoneCount] = { 54, 55, 56, 57, 58, 59 };
 						Vector(0.2f, 0.3f, 1.0f, vLight);
-						// ¾Ö´Ï¸ÞÀÌ¼ÇÀÌ ÀÖ´Â ¸ðµ¨¿¡¼­ º»À§Ä¡¸¦ ±¸ÇÏ±â À§ÇØ¼­´Â ¾Æ·¡¿Í °°ÀÌ
-						//°­Á¦ÀûÀ¸·Î ¾Ö´Ï¸ÞÀÌ¼Ç ÇÔ¼ö¸¦ È£Ãâ.
 						pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame,
 							o->PriorAction, o->Angle, o->HeadAngle, false, false);
 						for (int i = 0; i < nBoneCount; ++i)
@@ -20322,7 +19989,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 							CreateSprite(BITMAP_SHINY+6, vPos, o->Scale * 0.3f, vLight, NULL);
 						}
 
-					// ¶ó±ÛÀÌ »Ñ¸®´Â ¿¬±â.
 						if (rand()%5 == 0)
 						{
 							int nBones = Models[o->Type].NumBones;
@@ -20356,7 +20022,7 @@ void RenderEffects ( bool bRenderBlendMesh )
                     break;
 				case BITMAP_BOSS_LASER:
 				case BITMAP_BOSS_LASER+1:
-				case BITMAP_BOSS_LASER+2://ÀÌ¹ÌÁö ¾øÀ½
+				case BITMAP_BOSS_LASER+2:
 					{
 						vec3_t Position;
 						VectorCopy(o->Position,Position);
@@ -20403,9 +20069,9 @@ void RenderEffects ( bool bRenderBlendMesh )
 					}
 					break;
 
-                case MODEL_GATE:            //  ºí·¯µåÄ³½½ ¼º¹®.
+                case MODEL_GATE:
                 case MODEL_GATE+1:
-                case MODEL_STONE_COFFIN:    //  ºí·¯µåÄ³½½ ¼ºÀÚÀÇ ¼®»ó.
+                case MODEL_STONE_COFFIN:
                 case MODEL_STONE_COFFIN+1:
 				case MODEL_STAFF+8:
                 case MODEL_CLOUD:
@@ -20421,10 +20087,10 @@ void RenderEffects ( bool bRenderBlendMesh )
 				case MODEL_WAVE_FORCE:
 	      			RenderObject(o);
 					break;
-				case MODEL_MAGIC_CAPSULE2:	// ¹ý»ç - ¹æ¾î¸·
+				case MODEL_MAGIC_CAPSULE2:
 					RenderObject(o);
 					break;
-				case MODEL_AIR_FORCE :	//  °ø±â ÀúÇ× È¿°ú.
+				case MODEL_AIR_FORCE:
                 case MODEL_PIER_PART:
 					RenderObject(o);
                     break;
@@ -20444,7 +20110,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 					RenderObject(o);
 					break;
 #endif // CRYINGWOLF_2NDMVP
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 case MODEL_TOWER_GATE_PLANE:
                     RenderObject ( o );
  
@@ -20458,8 +20123,6 @@ void RenderEffects ( bool bRenderBlendMesh )
                 case BATTLE_CASTLE_WALL4:
                     RenderObject ( o );
                     break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				//^ Ææ¸± ÀÌÆåÆ® °ü·Ã
 				case MODEL_FENRIR_THUNDER:
 						RenderObject(o);
 					break;
@@ -20501,7 +20164,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 #endif //MR0
 					}
 					break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				case MODEL_CUNDUN_PART1:
 				case MODEL_CUNDUN_PART2:
 				case MODEL_CUNDUN_PART3:
@@ -20510,7 +20172,7 @@ void RenderEffects ( bool bRenderBlendMesh )
 				case MODEL_CUNDUN_PART6:
 				case MODEL_CUNDUN_PART7:
 				case MODEL_CUNDUN_PART8:
-				case MODEL_MONSTER01+64:	// ÁøÂ¥ÄïµÐ
+				case MODEL_MONSTER01+64:
 				case MODEL_CUNDUN_DRAGON_HEAD:
 				case MODEL_CUNDUN_PHOENIX:
 				case MODEL_CUNDUN_GHOST:
@@ -20597,8 +20259,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 					}
 					break;
 
-//------------------------------------------------------------------------------------------------------------	
-
 #ifdef CSK_RAKLION_BOSS
 
 				case MODEL_RAKLION_BOSS_CRACKEFFECT:
@@ -20606,9 +20266,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						RenderObject(o);
 					}
 					break;
-
-//------------------------------------------------------------------------------------------------------------		
-
 				case MODEL_RAKLION_BOSS_MAGIC:
 					{
 						RenderObject(o);
@@ -20640,21 +20297,17 @@ void RenderEffects ( bool bRenderBlendMesh )
 				}
 				break;
 #endif //PBG_ADD_CHARACTERSLOT
-//------------------------------------------------------------------------------------------------------------	
 				case MODEL_MOVE_TARGETPOSITION_EFFECT:
 					{
 						RenderObject( o );
 					}
 					break;
-//------------------------------------------------------------------------------------------------------------	
 				case MODEL_EFFECT_SAPITRES_ATTACK_1:
 				case MODEL_EFFECT_SAPITRES_ATTACK_2:
 					{
 						RenderObject( o );
 					}
 					break;
-//--------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef CSK_EVENT_CHERRYBLOSSOM
 				//case MODEL_EFFECT_SKURA_ITEM:
 					//{
@@ -20662,10 +20315,7 @@ void RenderEffects ( bool bRenderBlendMesh )
 					//}
 					//break;
 #endif //CSK_EVENT_CHERRYBLOSSOM
-
-
-//--------------------------------------------------------------------------------------------------------------------------------
-					
+			
 #ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 				case MODEL_BLOW_OF_DESTRUCTION:
 					{
@@ -20693,10 +20343,7 @@ void RenderEffects ( bool bRenderBlendMesh )
 							}
 						}
 					}
-					break;
-
-//--------------------------------------------------------------------------------------------------------------------------------	
-					
+					break;	
 				case MODEL_NIGHTWATER_01:
 				case MODEL_KNIGHT_PLANCRACK_A:
 				case MODEL_KNIGHT_PLANCRACK_B:
@@ -20705,9 +20352,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 					}
 					break;	
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION	
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef YDG_ADD_SKILL_FLAME_STRIKE
 				case MODEL_EFFECT_FLAME_STRIKE:
 					{
@@ -20787,14 +20431,12 @@ void RenderEffects ( bool bRenderBlendMesh )
 					{
 						if( o->SubType == 0 )
 						{
-							// ÇÃ·¹ÀÌ¾îÀÏ¶§ ÀÌÆÑÆ® »ç¿ë. (º»³Ñ¹ö¸¦ »ç¿ëÇÏ±â ¶§¹®¿¡À§Çè!!!) 
 							BMD* pModel = &Models[o->Owner->Type];
 							vec3_t vPos, vDLight;
 							if ( o->Owner->Type != MODEL_PLAYER )
 								break;
 							
-							// ¿Â¸ö¿¡ ºû³ª´Â È¿°ú
-							float fLumi = (absf((sinf( WorldTime*0.001f )))+0.2f)*0.5f;	// ÆäÀÌµåÀÎ/¾Æ¿ô
+							float fLumi = (absf((sinf( WorldTime*0.001f )))+0.2f)*0.5f;
 // 							if( fLumi >= 0.5f)
 // 							{
 // 								fLumi = 0.5f;
@@ -20817,23 +20459,23 @@ void RenderEffects ( bool bRenderBlendMesh )
 					}
 					break;
 
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE01:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 1
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE02:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 2
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE03:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 3
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE04:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 4
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE05:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 5
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE06:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 6
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE07:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 7
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE08:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 8
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE09:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 9
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE10:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 7
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE11:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 7
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE12:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 8
-				case MODEL_DOOR_CRUSH_EFFECT_PIECE13:	//¼º¹® ÆÄ±« ÀÌÆåÆ® Á¶°¢ 9
-				case MODEL_STATUE_CRUSH_EFFECT_PIECE01:	//¼®»ó ÆÄ±« ÀÌÆåÆ® Á¶°¢ 1
-				case MODEL_STATUE_CRUSH_EFFECT_PIECE02:	//¼®»ó ÆÄ±« ÀÌÆåÆ® Á¶°¢ 2
-				case MODEL_STATUE_CRUSH_EFFECT_PIECE03:	//¼®»ó ÆÄ±« ÀÌÆåÆ® Á¶°¢ 3
-				case MODEL_STATUE_CRUSH_EFFECT_PIECE04:	//¼®»ó ÆÄ±« ÀÌÆåÆ® Á¶°¢ 4
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE01:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE02:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE03:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE04:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE05:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE06:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE07:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE08:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE09:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE10:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE11:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE12:
+				case MODEL_DOOR_CRUSH_EFFECT_PIECE13:
+				case MODEL_STATUE_CRUSH_EFFECT_PIECE01:
+				case MODEL_STATUE_CRUSH_EFFECT_PIECE02:
+				case MODEL_STATUE_CRUSH_EFFECT_PIECE03:
+				case MODEL_STATUE_CRUSH_EFFECT_PIECE04:
 					{
 						RenderObject(o);
 					}
@@ -20847,23 +20489,21 @@ void RenderEffects ( bool bRenderBlendMesh )
 				case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
 					{
 //						RenderObject(o);
-						// 1. °¢ °¡ÀÌ¿ÂÀÇ ½º¿öµåµéÀÇ Attach ¹× Render
+						// 1. Attach Render
 						BMD *pBMDSwordModel = &Models[o->Type]; 
 						
-						vec3_t			*arrEachBoneTranslations;			// ÇöÀç ¸ðµ¨ÀÇ °¢ BoneµéÀÇ À§Ä¡°ª.
-						vec3_t			v3CurrentHighHierarchyNodePos;		// »óÀ§ ¸ðµ¨ÀÇ ATTACH º» À§Ä¡°ª.
+						vec3_t			*arrEachBoneTranslations;
+						vec3_t			v3CurrentHighHierarchyNodePos;
 
-						// 1-1. »óÀ§ ¸ðµ¨ °¡ÀÌ¿ÂÀÎ °æ¿ì¸¸ °¡ÀÌ¿ÂÀÇ BoneÀ» °¡Á®¿Í¼­ ±×¸®µµ·Ï ÇÑ´Ù.
-						if( true == o->ChromeEnable )		// 1-1. ÀÏ¹Ý ¸ðµ¨ ·»´õÀÇ °æ¿ì : »ó¼Ó°ü°è Ã³¸®¸¦ ÇØÁØ´Ù.
+						if( true == o->ChromeEnable )
 						{
 							arrEachBoneTranslations = new vec3_t[pBMDSwordModel->NumBones];
 
 							BMD *pOwnerModel = &Models[o->Owner->Type];
 							
-							int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		// °¢ ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ °¡ÀÌ¿ÂÀÇ º» INDEX. 
+							int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		//INDEX. 
 							int iBoneIdx = arrBoneIdxs[o->Type-MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-							// 1-1-1. o¸¦ »óÀ§ ¸ðµ¨·Î oÀÇ Æ¯Á¤ º»¿¡ ÇöÀç ¸ðµ¨pBMDSwordModelÀ» attach ÇÏ¿© Vertexµé¿¡ Àû¿ëÇÏ¿© ÁØ´Ù.
-							//		µ¿½Ã¿¡ attach ÇÒ À§Ä¡°ª(arg4)°ú ÇöÀç ¸ðµ¨pBMDSwordModelÀÇ °¢ º»º° TranslationµéÀ» OutÇÑ´Ù.
+							// 1-pBMDSwordModel attach Vertex
 #ifdef LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
 							pBMDSwordModel->AnimationTransformWithAttachHighModel_usingGlobalTM( o->Owner, pOwnerModel, iBoneIdx, 
 													v3CurrentHighHierarchyNodePos, arrEachBoneTranslations, true );
@@ -20872,7 +20512,7 @@ void RenderEffects ( bool bRenderBlendMesh )
 													v3CurrentHighHierarchyNodePos, arrEachBoneTranslations );
 #endif // LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
 						}
-	 					else	// »ó¼Ó°ü°è Ã³¸®¸¦ ÇÏÁö ¾Ê´Â´Ù.
+	 					else
 	 					{
 							pBMDSwordModel->BodyHeight = 0.f;
 							pBMDSwordModel->ContrastEnable = o->ContrastEnable;
@@ -20911,8 +20551,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 
 						if( o->SubType != 20 )
 						{
-							// 2. ¸ðµç °¡ÀÌ¿ÂÀÇ °ËÀÇ ±âº» EFFECT Á¤ÀÇ
-							// 2-1. ±âº» Effect Á¤ÀÇ
 							vec3_t	vRelative, vLight;
 							vec3_t	vPos_SwordEffectRed01, 
 								vPos_SwordEffectRed02, 
@@ -20926,17 +20564,17 @@ void RenderEffects ( bool bRenderBlendMesh )
 								vPos_SwordEffectEdge08,
 								vPos_SwordEffectEdge09;
 							float	fLumi1, fLumi2;
-							int		arrBoneIdxs_SwordEffectRed01[]	= { 2,	9,	1,	3,	10 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ MainEffect01 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectRed02[]	= { 3,	10, 2,	10, 11 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ MainEffect02 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectEdge01[] = { 13, 13, 3,	4,	1 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ EdgeEffect01 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectEdge02[] = { 12, 6,	4,	12, 2 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ EdgeEffect02 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectEdge03[] = { 5,	1,	5,	2,	3 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ EdgeEffect03 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectEdge04[] = { 6,	7,	6,	9,	4 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ EdgeEffect04 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectEdge05[] = { 1,	2,	12,	5,	5 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ EdgeEffect05 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectEdge06[] = { 8,	4,	8,	7,	6 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ EdgeEffect06 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectEdge07[] = { 9,	3,	9,	6,	7 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ EdgeEffect07 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectEdge08[] = { 10, 11, 10, 8,	8 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ EdgeEffect08 BoneINDEX. 
-							int		arrBoneIdxs_SwordEffectEdge09[] = { 4,	8,	7,	1,	9 };	// SWORD ¸ðµ¨º° ÂüÁ¶ÇØ¾ßÇÒ EdgeEffect09 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectRed01[]	= { 2,	9,	1,	3,	10 };	// SWORD MainEffect01 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectRed02[]	= { 3,	10, 2,	10, 11 };	// SWORD MainEffect02 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectEdge01[] = { 13, 13, 3,	4,	1 };	// SWORD EdgeEffect01 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectEdge02[] = { 12, 6,	4,	12, 2 };	// SWORD EdgeEffect02 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectEdge03[] = { 5,	1,	5,	2,	3 };	// SWORD EdgeEffect03 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectEdge04[] = { 6,	7,	6,	9,	4 };	// SWORD EdgeEffect04 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectEdge05[] = { 1,	2,	12,	5,	5 };	// SWORD EdgeEffect05 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectEdge06[] = { 8,	4,	8,	7,	6 };	// SWORD EdgeEffect06 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectEdge07[] = { 9,	3,	9,	6,	7 };	// SWORD EdgeEffect07 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectEdge08[] = { 10, 11, 10, 8,	8 };	// SWORD EdgeEffect08 BoneINDEX. 
+							int		arrBoneIdxs_SwordEffectEdge09[] = { 4,	8,	7,	1,	9 };	// SWORD EdgeEffect09 BoneINDEX. 
 							//MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_  
 							//MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_ 
 							//MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_
@@ -20964,7 +20602,7 @@ void RenderEffects ( bool bRenderBlendMesh )
 							// 2-2. ±âº» Jewel Effect // 
 							Vector( fLumi1 * 1.0f, fLumi1 * 0.4f, fLumi1 * 0.1f, vLight );
 							
-							//			if( MODEL_MONSTER01+164 == o->Owner->Type )	// 2-3-1. ÀÏ¹Ý ¸ðµ¨ ·»´õÀÇ °æ¿ì
+							//			if( MODEL_MONSTER01+164 == o->Owner->Type )	// 2-3-1.
 							{
 								VectorCopy( arrEachBoneTranslations[iBoneIdx_SwordEffectMain01] , vPos_SwordEffectRed01 );
 								VectorCopy( arrEachBoneTranslations[iBoneIdx_SwordEffectMain02] , vPos_SwordEffectRed02 );
@@ -21155,16 +20793,12 @@ void RenderEffects ( bool bRenderBlendMesh )
 					}
 					break;
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-//--------------------------------------------------------------------------------------------------------------------------------
-
 				default:
 					if(o->Type>=MODEL_SKILL_BEGIN && o->Type<MODEL_SKILL_END)
 					{
 						RenderObject(o);
 					}
 					break;
-
-//--------------------------------------------------------------------------------------------------------------------------------	
 				}
 			}
 		}
@@ -21220,9 +20854,9 @@ void RenderAfterEffects ( bool bRenderBlendMesh )
 			{
                 if ( bRenderBlendMesh )
                 {
-                    if ( o->BlendMesh==-1 || o->BlendMesh<-2 ) continue;            //  ºí·£µù µÇÁö ¾Ê´Â ¿ÀºêÁ§Æ®´Â ÂïÁö ¾Ê´Â´Ù.
+                    if ( o->BlendMesh==-1 || o->BlendMesh<-2 ) continue;
                     const BMD& b = Models[o->Type];
-                    if ( b.NumMeshs<o->BlendMesh ) continue;                        //  ºí·£µù µÇ´Â ¿ÀºêÁ§Æ®°¡ ¿ø·¡ ¿ÀºêÁ§Æ®º¸´Ù Å©¸é ÂïÁö ¾Ê´Â´Ù.
+                    if ( b.NumMeshs<o->BlendMesh ) continue;
                 }
 
 				switch ( o->Type)
@@ -21329,9 +20963,6 @@ void RenderEffectShadows()
 					}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
                     break;
-
-//-------------------------------------------------------------------------------------------------------------------------------------------
-
 				case BITMAP_MAGIC+1:
 					Luminosity = 1.f;
 					if(o->LifeTime < 5)
@@ -21442,9 +21073,6 @@ void RenderEffectShadows()
 						CreateEffect(BITMAP_MAGIC+1,o->Position,o->Angle,o->Light,9,o->Owner);
 					}
 					break;
-
-//-----------------------------------------------------------------------------------------------------		
-
 #ifdef CSK_RAKLION_BOSS
 
 				case BITMAP_FIRE_HIK2_MONO:
@@ -21547,13 +21175,13 @@ void RenderEffectShadows()
 					if (o->SubType == 0)
 					{
 						vec3_t vLight;
-						// ¹Ù±ù ¹®¾ç.
+
 						Vector(0.6f*o->Alpha, 0.9f*o->Alpha, 1.0f*o->Alpha, vLight);
 						RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight, 45.f);
-						// ¾ÈÂÊ ¹®¾ç.
+
 						Vector(0.6f*o->AlphaTarget, 0.9f*o->AlphaTarget, 1.0f*o->AlphaTarget, vLight);
 						RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], 0.8f, 0.8f, vLight, 45.f);
-						// °¡¿îµ¥ ÀÌÆåÆ®.
+
 						Vector(0.2f*o->AlphaTarget, 0.8f*o->AlphaTarget, 1.0f*o->AlphaTarget, vLight);
 						RenderTerrainAlphaBitmap(BITMAP_LIGHT, o->Position[0], o->Position[1], 2.0f, 2.0f, vLight);
 						RenderTerrainAlphaBitmap(BITMAP_LIGHT, o->Position[0], o->Position[1], 2.0f, 2.0f, vLight);
@@ -21564,13 +21192,13 @@ void RenderEffectShadows()
 					if (o->SubType == 0)
 					{
 						vec3_t vLight;
-						// ¹Ù±ù ¹®¾ç.
+
 						Vector(1.0f*o->Alpha, 0.3f*o->Alpha, 0.2f*o->Alpha, vLight);
 						RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale*1.6f, o->Scale*1.6f, vLight);
-						// ¾ÈÂÊ ¹®¾ç.
+
 						Vector(1.0f*o->AlphaTarget, 0.3f*o->AlphaTarget, 0.2f*o->AlphaTarget, vLight);
 						RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], 1.15f, 1.15f, vLight);
-						// °¡¿îµ¥ ÀÌÆåÆ®.
+
 						Vector(1.0f*o->AlphaTarget, 1.0f*o->AlphaTarget, 1.0f*o->AlphaTarget, vLight);
 						RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], 1.8f, 1.8f, vLight);
 						Vector(1.0f*o->AlphaTarget, 0.0f*o->AlphaTarget, 0.0f*o->AlphaTarget, vLight);
@@ -21583,9 +21211,9 @@ void RenderEffectShadows()
 
 				case BITMAP_FLAME:
 #ifdef LDS_ADD_EMPIRE_GUARDIAN
-					if(o->SubType!=3 && o->SubType!=6 )	// 1.ºÒ°ñ·½ °ø°ÝÈ¿°ú, 2.Á¦±¹¼öÈ£±º È­¸é»ó¿¡ ¹ý»çºÒ±âµÕ È¿°ú½Ã Á¦¿Ü
+					if(o->SubType!=3 && o->SubType!=6 )
 #else // LDS_ADD_EMPIRE_GUARDIAN
-					if(o->SubType!=3)	// ºÒ°ñ·½ °ø°ÝÈ¿°ú¿¡¼­´Â Á¦¿Ü
+					if(o->SubType!=3)
 #endif // LDS_ADD_EMPIRE_GUARDIAN
 					{
 						Luminosity = (float)(rand()%4+8)*0.1f;
@@ -21593,17 +21221,12 @@ void RenderEffectShadows()
 						RenderTerrainAlphaBitmap(BITMAP_FLAME,o->Position[0],o->Position[1],2.f,2.f,Light,-o->Angle[2]);
 					}
 					break;
-
-//-------------------------------------------------------------------------------------------------------------------------------------------
-
 				case BITMAP_LIGHTNING+1:
 					o->Scale += 0.2f;
 					Luminosity = (float)(o->LifeTime)*0.1f;
 					Vector(Luminosity,Luminosity,Luminosity,Light);
 					RenderTerrainAlphaBitmap(BITMAP_LIGHTNING+1,o->Position[0],o->Position[1],o->Scale,o->Scale,Light,-o->Angle[2]);
 					break;
-
-//-------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 				case BITMAP_TWLIGHT:
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
@@ -21624,8 +21247,6 @@ void RenderEffectShadows()
                     }
                     break;
 	
-//-------------------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef CSK_RAKLION_BOSS
 				case BITMAP_DAMAGE_01_MONO:
 					if(o->SubType == 0)
@@ -21641,15 +21262,10 @@ void RenderEffectShadows()
 					break;
 #endif // CSK_RAKLION_BOSS
 
-//------------------------------------------------------------------------------------------------------------------------------------	
-		
                 case BITMAP_CRATER:
 		            EnableAlphaTest ();
                     RenderTerrainAlphaBitmap( o->Type, o->Position[0], o->Position[1], o->StartPosition[0], o->StartPosition[1], o->Light );
                     break;
-
-//------------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 				case MODEL_BLOW_OF_DESTRUCTION:
 					if(o->SubType == 0)
@@ -21668,9 +21284,6 @@ void RenderEffectShadows()
 					}
 					break;
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION	
-
-//------------------------------------------------------------------------------------------------------------------------------------	
-
 #ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 				case BITMAP_CHROME_ENERGY2:
 		            EnableAlphaBlend();
@@ -21678,7 +21291,6 @@ void RenderEffectShadows()
                     break;
 #endif	// YDG_ADD_SKILL_GIGANTIC_STORM
 
-//------------------------------------------------------------------------------------------------------------------------------------
 				case BITMAP_TARGET_POSITION_EFFECT1:
 					{
 						if( o->SubType == 0 )

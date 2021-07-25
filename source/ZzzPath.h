@@ -277,12 +277,8 @@ inline bool PATH::FindPath( int xStart, int yStart, int xEnd, int yEnd, bool bEr
 			m_btOpenNodes.RemoveAll();
 			return ( GeneratePath( xStart, yStart, xTest, yTest));
 		}
-		// d) 주변의 8 방향을 검색 리스트에 추가
-#ifdef _VS2008PORTING
+
 		for (int i = 0; i < 8; i++)
-#else // _VS2008PORTING
-		for ( i = 0; i < 8; i++)
-#endif // _VS2008PORTING
 		{
 			int xNew = xTest + s_iDir[i][0];
 			int yNew = yTest + s_iDir[i][1];
@@ -371,18 +367,10 @@ inline void PATH::SetEndNodes( bool bErrorCheck, int iWall, int xEnd, int yEnd, 
         		g_ErrorReport.Write( "잘못된 위치인덱스 : %d \r\n", iEndIndex);
             }
 		}
-		// 그 좌측과 우측은 거리 계산해서 세팅
-#ifdef _VS2008PORTING
+
 		for ( int i = -iDistance; i < -xRange; i++)
-#else // _VS2008PORTING
-		for ( i = -iDistance; i < -xRange; i++)
-#endif // _VS2008PORTING
 		{
-#ifdef _VS2008PORTING
 			if ( ( float)sqrt( (float)(i * i + j * j)) < fDistance)
-#else // _VS2008PORTING
-			if ( ( float)sqrt( i * i + j * j) < fDistance)
-#endif // _VS2008PORTING
 			{
 				int iEndIndex = GetIndex( xEnd + i, yEnd + j);
 				if ( iEndIndex>=0 && iEndIndex<(m_iSize) )

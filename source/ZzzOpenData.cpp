@@ -294,10 +294,6 @@ void AccessModel(int Type,char *Dir,char *FileName,int i)
 #endif // DO_PROFILING_FOR_LOADING
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 모델링 데이타 전체를 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void OpenPlayers()
 {
 #ifdef DO_PROFILING_FOR_LOADING
@@ -307,10 +303,6 @@ void OpenPlayers()
 	ModelsDump = new BMD [MAX_MODELS+1024];
 	Models = ModelsDump + ( rand() % 1024);
 	ZeroMemory( Models, MAX_MODELS * sizeof ( BMD));
-
-#ifndef _VS2008PORTING			// #ifndef
-	int i;
-#endif // _VS2008PORTING
 
 #ifdef 	USE_PLAYERTEST_BMD
 	AccessModel(MODEL_PLAYER,"Data\\Player\\","PlayerTest");
@@ -332,19 +324,14 @@ void OpenPlayers()
 		SendMessage(g_hWnd,WM_DESTROY,0,0);
 	}
 
-#ifdef _VS2008PORTING
 	for (int i = 0; i < MAX_CLASS; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i < MAX_CLASS; ++i)
-#endif // _VS2008PORTING
 	{
-	// 기본 스킨 모델 데이타
 		AccessModel(MODEL_BODY_HELM  +i, "Data\\Player\\", "HelmClass" , i+1);
 		AccessModel(MODEL_BODY_ARMOR +i, "Data\\Player\\", "ArmorClass", i+1);
 		AccessModel(MODEL_BODY_PANTS +i, "Data\\Player\\", "PantClass" , i+1);
 		AccessModel(MODEL_BODY_GLOVES+i, "Data\\Player\\", "GloveClass", i+1);
 		AccessModel(MODEL_BODY_BOOTS +i, "Data\\Player\\", "BootClass" , i+1);
-	// 2차 전직 스킨 모델 데이타
+
 		if (CLASS_DARK != i && CLASS_DARK_LORD != i
 #ifdef PBG_ADD_NEWCHAR_MONK
 			&& (CLASS_RAGEFIGHTER != i)
@@ -357,7 +344,7 @@ void OpenPlayers()
     		AccessModel(MODEL_BODY_GLOVES+MAX_CLASS+i, "Data\\Player\\", "GloveClass2", i+1);
     		AccessModel(MODEL_BODY_BOOTS +MAX_CLASS+i, "Data\\Player\\", "BootClass2" , i+1);
 		}
-	// 3차 전직 스킨 모델 데이타
+
 		AccessModel(MODEL_BODY_HELM  +(MAX_CLASS*2)+i, "Data\\Player\\", "HelmClass3" , i+1);
     	AccessModel(MODEL_BODY_ARMOR +(MAX_CLASS*2)+i, "Data\\Player\\", "ArmorClass3", i+1);
     	AccessModel(MODEL_BODY_PANTS +(MAX_CLASS*2)+i, "Data\\Player\\", "PantClass3" , i+1);
@@ -365,11 +352,7 @@ void OpenPlayers()
     	AccessModel(MODEL_BODY_BOOTS +(MAX_CLASS*2)+i, "Data\\Player\\", "BootClass3" , i+1);
 	}
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<10;i++)
-#else // _VS2008PORTING
-	for(i=0;i<10;i++)
-#endif // _VS2008PORTING
 	{
 		AccessModel(MODEL_HELM  +i,"Data\\Player\\","HelmMale" ,i+1);
 		AccessModel(MODEL_ARMOR +i,"Data\\Player\\","ArmorMale",i+1);
@@ -377,11 +360,8 @@ void OpenPlayers()
 		AccessModel(MODEL_GLOVES+i,"Data\\Player\\","GloveMale",i+1);
 		AccessModel(MODEL_BOOTS +i,"Data\\Player\\","BootMale" ,i+1);
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<5;i++)
-#else // _VS2008PORTING
-	for(i=0;i<5;i++)
-#endif // _VS2008PORTING
 	{
 		AccessModel(MODEL_HELM  +i+10,"Data\\Player\\","HelmElf",i+1);
 		AccessModel(MODEL_ARMOR +i+10,"Data\\Player\\","ArmorElf",i+1);
@@ -407,13 +387,8 @@ void OpenPlayers()
 	AccessModel ( MODEL_MASK_HELM+8, "Data\\Player\\", "MaskHelmMale", 9 );
 	AccessModel ( MODEL_MASK_HELM+9, "Data\\Player\\", "MaskHelmMale", 10 );
 
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {   
-        //  다크 피닉스 ~ 선더 블레이드.
 		if ( 18+i==20 )
 		{
 			AccessModel( MODEL_HELM  +17+i, "Data\\Player\\", "HelmMaleTest", 18+i );
@@ -442,14 +417,9 @@ void OpenPlayers()
 		}
 	}
 
-    //  추가 장비들.
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
-        if ( i!=2 ) //  2은 마검사.
+        if ( i!=2 )
         {
             AccessModel( MODEL_HELM+21+i, "Data\\Player\\", "HelmMale", 22+i );
         }
@@ -459,12 +429,7 @@ void OpenPlayers()
 		AccessModel( MODEL_BOOTS+21+i, "Data\\Player\\", "BootMale", 22+i );
     }
 
-    //  다크로드
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
 		AccessModel( MODEL_HELM  +25+i, "Data\\Player\\", "HelmMale", 26+i );
 		AccessModel( MODEL_ARMOR +25+i, "Data\\Player\\", "ArmorMale",26+i );
@@ -473,12 +438,7 @@ void OpenPlayers()
 		AccessModel( MODEL_BOOTS +25+i, "Data\\Player\\", "BootMale", 26+i );
     }
 
-	//(차례대로) 흑기사, 흑마법사, 요정, 마검사, 다크로드 추가 세트갑옷
-#ifdef _VS2008PORTING
 	for(int i = 0; i < 5; ++i)
-#else // _VS2008PORTING
-	for(i = 0; i < 5; ++i)
-#endif // _VS2008PORTING
 	{
 		AccessModel( MODEL_ARMOR +29+i, "Data\\Player\\", "HDK_ArmorMale",i+1);
 		AccessModel( MODEL_PANTS +29+i, "Data\\Player\\", "HDK_PantMale",i+1);
@@ -486,18 +446,12 @@ void OpenPlayers()
 		AccessModel( MODEL_BOOTS +29+i, "Data\\Player\\", "HDK_BootMale",i+1);
 	}
 
-	//마검사는 제외하고 투구도 추가
 	AccessModel( MODEL_HELM +29, "Data\\Player\\", "HDK_HelmMale", 1);
 	AccessModel( MODEL_HELM +30, "Data\\Player\\", "HDK_HelmMale", 2);
 	AccessModel( MODEL_HELM +31, "Data\\Player\\", "HDK_HelmMale", 3);
 	AccessModel( MODEL_HELM +33, "Data\\Player\\", "HDK_HelmMale", 5);
 	
-	//$ 크라이울프 세트갑옷 모델 데이타
-#ifdef _VS2008PORTING
 	for(int i = 0; i < 5; ++i)
-#else // _VS2008PORTING
-	for(i = 0; i < 5; ++i)
-#endif // _VS2008PORTING
 	{
 		AccessModel( MODEL_ARMOR +34+i, "Data\\Player\\", "CW_ArmorMale",i+1);
 		AccessModel( MODEL_PANTS +34+i, "Data\\Player\\", "CW_PantMale",i+1);
@@ -511,12 +465,7 @@ void OpenPlayers()
 	AccessModel( MODEL_HELM +36, "Data\\Player\\", "CW_HelmMale", 3);
 	AccessModel( MODEL_HELM +38, "Data\\Player\\", "CW_HelmMale", 5);
 	
-	// 바이올렌윈드 ~ 이터널윙 세트
-#ifdef _VS2008PORTING
     for (int i = 0; i < 6; ++i)
-#else // _VS2008PORTING
-    for (i = 0; i < 6; ++i)
-#endif // _VS2008PORTING
     {
 		::AccessModel(MODEL_HELM  +39+i, "Data\\Player\\", "HelmMale", 40+i);
 		::AccessModel(MODEL_ARMOR +39+i, "Data\\Player\\", "ArmorMale",40+i);
@@ -525,12 +474,7 @@ void OpenPlayers()
 		::AccessModel(MODEL_BOOTS +39+i, "Data\\Player\\", "BootMale", 40+i);
     }
 
-	// 소환술사용 넝쿨, 실크 시리즈 모델.
-#ifdef _VS2008PORTING
 	for (int i = 0; i < MODEL_ITEM_COMMON_NUM; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i < MODEL_ITEM_COMMON_NUM; ++i)
-#endif // _VS2008PORTING
 	{
 		::AccessModel(MODEL_HELM2  +i, "Data\\Player\\", "HelmElfC" , i+1);
 		::AccessModel(MODEL_ARMOR2 +i, "Data\\Player\\", "ArmorElfC", i+1);
@@ -540,34 +484,15 @@ void OpenPlayers()
 	}
 
 #ifdef ADD_SOCKET_ITEM
-	// 45 "티탄(흑기사)"
-	// 46 "브레이브(흑기사)"
-	// 47 "팬텀(마검사)"
-	// 48 "디스트로이(마검사)"
-	// 49 "세라핌(요정)"
-	// 50 "디바인(요정)"
-	// 51 "패왕(다크로드)"
-	// 52 "하데스(흑마법사)"
-	// 53 "서큐버스(소환술사)"
-	
-	// 투구
-#ifdef _VS2008PORTING
+
 	for(int i=45 ; i<=53 ; i++)
-#else // _VS2008PORTING
-	for( i=45 ; i<=53 ; i++)
-#endif // _VS2008PORTING
 	{
 		if( i==47 || i== 48)
-			continue;		// 마검사투구제외
+			continue;
 		AccessModel( MODEL_HELM+i, "Data\\Player\\", "HelmMale", i+1);
 	} // for()
 	
-	// 갑옷/바지/장갑/부츠
-#ifdef _VS2008PORTING
 	for(int i=45 ; i<=53 ; i++)
-#else // _VS2008PORTING
-	for( i=45 ; i<=53 ; i++)
-#endif // _VS2008PORTING
 	{	
 		AccessModel(MODEL_ARMOR+i, "Data\\Player\\", "ArmorMale", i+1);
 		AccessModel(MODEL_PANTS+i, "Data\\Player\\", "PantMale", i+1);
@@ -577,24 +502,17 @@ void OpenPlayers()
 #endif // ADD_SOCKET_ITEM
 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-#ifdef _VS2008PORTING
+
 	for (int i = 0; i<MODEL_ITEM_COMMONCNT_RAGEFIGHTER; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i<MODEL_ITEM_COMMONCNT_RAGEFIGHTER; ++i)
-#endif // _VS2008PORTING
 	{
 		::AccessModel(MODEL_HELM_MONK  +i, "Data\\Player\\", "HelmMonk" , i+1);
 		::AccessModel(MODEL_ARMOR_MONK +i, "Data\\Player\\", "ArmorMonk", i+1);
 		::AccessModel(MODEL_PANTS_MONK +i, "Data\\Player\\", "PantMonk" , i+1);
 		::AccessModel(MODEL_BOOTS_MONK +i, "Data\\Player\\", "BootMonk" , i+1);
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0; i<3; ++i)
-#else //_VS2008PORTING
-	for(i=0; i<3; ++i)
-#endif //_VS2008PORTING
 	{
-		// 몽크 장갑이 없다
 		::AccessModel(MODEL_HELM  +59+i, "Data\\Player\\", "HelmMale", 60+i);
 		::AccessModel(MODEL_ARMOR +59+i, "Data\\Player\\", "ArmorMale",60+i);
 		::AccessModel(MODEL_PANTS +59+i, "Data\\Player\\", "PantMale", 60+i);
@@ -602,32 +520,22 @@ void OpenPlayers()
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
-	// 한번 생성해야 중간에 바뀌는 것 방지할 수 있다.
 	{
 		CPhysicsClothMesh *pCloth = new CPhysicsClothMesh [1];
 		pCloth[0].Create( &Hero->Object, 2, 17, 0.0f, 0.0f, 0.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL, BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_PANTS+18);
 		delete [] pCloth;
 	}
 
-
-#ifdef _VS2008PORTING
 	for(int i=0;i<1;i++)
-#else // _VS2008PORTING
-	for(i=0;i<1;i++)
-#endif // _VS2008PORTING
       	AccessModel(MODEL_SHADOW_BODY+i,"Data\\Player\\","Shadow",i+1);
 
 	Models[MODEL_PLAYER].BoneHead    = 20;
 	Models[MODEL_PLAYER].BoneFoot[0] = 6;
 	Models[MODEL_PLAYER].BoneFoot[1] = 13;
 	
-	//에니메이션 속도 설정
-#ifdef _VS2008PORTING
 	for(int i=PLAYER_STOP_MALE;i<=PLAYER_STOP_RIDE_WEAPON;i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_STOP_MALE;i<=PLAYER_STOP_RIDE_WEAPON;i++)
-#endif // _VS2008PORTING
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.28f;
+
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_SWORD         ].PlaySpeed = 0.26f;
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_TWO_HAND_SWORD].PlaySpeed = 0.24f;
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_SPEAR		   ].PlaySpeed = 0.24f;
@@ -641,12 +549,9 @@ void OpenPlayers()
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_WAND].PlaySpeed = 0.13f;
 #endif	// YDG_FIX_ALICE_ANIMATIONS
 
-#ifdef _VS2008PORTING
 	for(int i=PLAYER_WALK_MALE;i<=PLAYER_RUN_RIDE_WEAPON;i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_WALK_MALE;i<=PLAYER_RUN_RIDE_WEAPON;i++)
-#endif // _VS2008PORTING
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.3f;
+
 #ifdef YDG_FIX_ALICE_ANIMATIONS
 	Models[MODEL_PLAYER].Actions[PLAYER_WALK_WAND].PlaySpeed = 0.44f;
 	Models[MODEL_PLAYER].Actions[PLAYER_RUN_WAND].PlaySpeed = 0.76f;
@@ -657,24 +562,15 @@ void OpenPlayers()
     Models[MODEL_PLAYER].Actions[PLAYER_WALK_SWIM].PlaySpeed = 0.35f;
     Models[MODEL_PLAYER].Actions[PLAYER_RUN_SWIM ].PlaySpeed = 0.35f;
 
-#ifdef _VS2008PORTING
 	for(int i=PLAYER_DEFENSE1;i<=PLAYER_SHOCK;i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_DEFENSE1;i<=PLAYER_SHOCK;i++)
-#endif // _VS2008PORTING
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.32f;
-#ifdef _VS2008PORTING
+
 	for(int i=PLAYER_DIE1;i<=PLAYER_DIE2;i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_DIE1;i<=PLAYER_DIE2;i++)
-#endif // _VS2008PORTING
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.45f;
-#ifdef _VS2008PORTING
+
 	for(int i=PLAYER_SIT1;i<MAX_PLAYER_ACTION;i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_SIT1;i<MAX_PLAYER_ACTION;i++)
-#endif // _VS2008PORTING
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.4f;
+
 	Models[MODEL_PLAYER].Actions[PLAYER_SHOCK              ].PlaySpeed = 0.4f;
 	Models[MODEL_PLAYER].Actions[PLAYER_SEE1               ].PlaySpeed = 0.28f;
 	Models[MODEL_PLAYER].Actions[PLAYER_SEE_FEMALE1        ].PlaySpeed = 0.28f;
@@ -721,28 +617,17 @@ void OpenPlayers()
 	Models[MODEL_PLAYER].Actions[PLAYER_IDLE1_DARKHORSE].PlaySpeed          = 1.0f;
 	Models[MODEL_PLAYER].Actions[PLAYER_IDLE2_DARKHORSE].PlaySpeed          = 1.0f;	
 	
-	//^ 펜릴 캐릭터 에니메이션 속도 설정
-#ifdef _VS2008PORTING
 	for(int i=PLAYER_FENRIR_ATTACK; i<=PLAYER_FENRIR_WALK_ONE_LEFT; i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_FENRIR_ATTACK; i<=PLAYER_FENRIR_WALK_ONE_LEFT; i++)
-#endif // _VS2008PORTING
 	{
 		Models[MODEL_PLAYER].Actions[i].PlaySpeed		= 0.45f;
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=PLAYER_FENRIR_RUN; i<=PLAYER_FENRIR_RUN_ONE_LEFT_ELF; i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_FENRIR_RUN; i<=PLAYER_FENRIR_RUN_ONE_LEFT_ELF; i++)
-#endif // _VS2008PORTING
 	{
 		Models[MODEL_PLAYER].Actions[i].PlaySpeed		= 0.71f;	
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=PLAYER_FENRIR_STAND; i<=PLAYER_FENRIR_STAND_ONE_LEFT; i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_FENRIR_STAND; i<=PLAYER_FENRIR_STAND_ONE_LEFT; i++)
-#endif // _VS2008PORTING
 	{
 		Models[MODEL_PLAYER].Actions[i].PlaySpeed		= 0.4f;
 	}
@@ -756,45 +641,34 @@ void OpenPlayers()
     Models[MODEL_PLAYER].Actions[PLAYER_HIGH_SHOCK].PlaySpeed         = 0.3f;
 
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-#ifdef _VS2008PORTING
+
 	for(int i=PLAYER_RAGE_FENRIR; i<=PLAYER_RAGE_FENRIR_ATTACK_RIGHT; i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_RAGE_FENRIR; i<=PLAYER_RAGE_FENRIR_ATTACK_RIGHT; i++)
-#endif // _VS2008PORTING
 	{
 		if(i>=PLAYER_RAGE_FENRIR_TWO_SWORD && i<= PLAYER_RAGE_FENRIR_ONE_LEFT)
 			Models[MODEL_PLAYER].Actions[i].PlaySpeed		= 0.225f;
 		else
 			Models[MODEL_PLAYER].Actions[i].PlaySpeed		= 0.45f;
 	}
-#ifdef _VS2008PORTING
 	for(int i=PLAYER_RAGE_FENRIR_STAND_TWO_SWORD; i<=PLAYER_RAGE_FENRIR_STAND_ONE_LEFT; i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_RAGE_FENRIR_STAND_TWO_SWORD; i<=PLAYER_RAGE_FENRIR_STAND_ONE_LEFT; i++)
-#endif // _VS2008PORTING
 	{
 		Models[MODEL_PLAYER].Actions[i].PlaySpeed		= 0.2f;
 	}
 	Models[MODEL_PLAYER].Actions[PLAYER_RAGE_FENRIR_STAND].PlaySpeed = 0.21f;
-#ifdef _VS2008PORTING
+
 	for(int i=PLAYER_RAGE_FENRIR_RUN; i<=PLAYER_RAGE_FENRIR_RUN_ONE_LEFT; i++)
-#else // _VS2008PORTING
-	for(i=PLAYER_RAGE_FENRIR_RUN; i<=PLAYER_RAGE_FENRIR_RUN_ONE_LEFT; i++)
-#endif // _VS2008PORTING
 	{
 		Models[MODEL_PLAYER].Actions[i].PlaySpeed		= 0.355f;
 	}
 	Models[MODEL_PLAYER].Actions[PLAYER_RAGE_UNI_RUN].PlaySpeed = 0.3f;
-#ifndef PBG_FIX_NEWCHAR_MONK_UNIANI		//정리시에 삭제할 소스
+#ifndef PBG_FIX_NEWCHAR_MONK_UNIANI
 	Models[MODEL_PLAYER].Actions[PLAYER_RAGE_UNI_ATTACK_ONE_RIGHT].PlaySpeed = 0.2f;
-#endif //PBG_FIX_NEWCHAR_MONK_UNIANI	//정리시에 삭제할 소스
+#endif //PBG_FIX_NEWCHAR_MONK_UNIANI
 	Models[MODEL_PLAYER].Actions[PLAYER_RAGE_UNI_STOP_ONE_RIGHT].PlaySpeed = 0.18f;
 
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_RAGEFIGHTER].PlaySpeed = 0.16f;
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 	SetAttackSpeed();
 	
-	// GM 변신반지 캐릭터 모델 로딩
 	AccessModel(MODEL_GM_CHARACTER, "Data\\Skill\\", "youngza");
 
 #ifdef DO_PROFILING_FOR_LOADING
@@ -802,48 +676,34 @@ void OpenPlayers()
 #endif // DO_PROFILING_FOR_LOADING
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 텍스쳐 전체를 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void OpenPlayerTextures()
 {
 #ifdef DO_PROFILING_FOR_LOADING
 	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENPLAYERTEXTURES, PROFILING_LOADING_OPENPLAYERTEXTURES );
 #endif // DO_PROFILING_FOR_LOADING
 
-	LoadBitmap("Player\\skin_barbarian_01.jpg",BITMAP_SKIN  );//  흑마법사.
-	LoadBitmap("Player\\level_man022.jpg"     ,BITMAP_SKIN+1);//  1차 변신 흑마법사.
-	LoadBitmap("Player\\skin_wizard_01.jpg"   ,BITMAP_SKIN+2);//  흑기사
-	LoadBitmap("Player\\level_man01.jpg"      ,BITMAP_SKIN+3);//  1차 변신 흑기사.
-	LoadBitmap("Player\\skin_archer_01.jpg"   ,BITMAP_SKIN+4);//  요정
-	LoadBitmap("Player\\level_man033.jpg"     ,BITMAP_SKIN+5);//  1차 변신 요정.
-   	LoadBitmap("Player\\skin_special_01.jpg"  ,BITMAP_SKIN+6);//  마검사.
-	LoadBitmap("Player\\level_man02.jpg"      ,BITMAP_SKIN+8);//  다크로드.
-	LoadBitmap("Player\\hair_r.jpg"       ,BITMAP_HAIR);//  다크로드용 머리카락.
+	LoadBitmap("Player\\skin_barbarian_01.jpg",BITMAP_SKIN  );
+	LoadBitmap("Player\\level_man022.jpg"     ,BITMAP_SKIN+1);
+	LoadBitmap("Player\\skin_wizard_01.jpg"   ,BITMAP_SKIN+2);
+	LoadBitmap("Player\\level_man01.jpg"      ,BITMAP_SKIN+3);
+	LoadBitmap("Player\\skin_archer_01.jpg"   ,BITMAP_SKIN+4);
+	LoadBitmap("Player\\level_man033.jpg"     ,BITMAP_SKIN+5);
+   	LoadBitmap("Player\\skin_special_01.jpg"  ,BITMAP_SKIN+6);
+	LoadBitmap("Player\\level_man02.jpg"      ,BITMAP_SKIN+8);
+	LoadBitmap("Player\\hair_r.jpg"       ,BITMAP_HAIR);
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-	LoadBitmap("Player\\LevelClass107.jpg"   ,BITMAP_SKIN+12);//  레이지파이터
-	LoadBitmap("Player\\LevelClass207.jpg"   ,BITMAP_SKIN+13);//  템플나이트
-	LoadBitmap("Player\\LevelClass207_1.jpg" ,BITMAP_SKIN+14);//  템플나이트갑옷스킨 
+	LoadBitmap("Player\\LevelClass107.jpg"   ,BITMAP_SKIN+12);
+	LoadBitmap("Player\\LevelClass207.jpg"   ,BITMAP_SKIN+13);
+	LoadBitmap("Player\\LevelClass207_1.jpg" ,BITMAP_SKIN+14);
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
-#ifdef _VS2008PORTING
 	int nIndex;
-	// 기본 스킨 모델 텍스쳐
-	for (int j = 0; j < 3; ++j)		// 한 클래스 당 총 3개의 직종.
+
+	for (int j = 0; j < 3; ++j)
 	{
 		for (int i = 0; i < MAX_CLASS; ++i)
-#else // _VS2008PORTING
-	int i, j, nIndex;
-	// 기본 스킨 모델 텍스쳐
-	for (j = 0; j < 3; ++j)		// 한 클래스 당 총 3개의 직종.
-	{
-		for (i = 0; i < MAX_CLASS; ++i)
-#endif // _VS2008PORTING
-
 		{
 			nIndex = MAX_CLASS*j+i;
-			// 마검사와 다크로드 2차 직업은 없음.
 			if (1 == j && (CLASS_DARK == i || CLASS_DARK_LORD == i
 #ifdef PBG_ADD_NEWCHAR_MONK
 				|| (CLASS_RAGEFIGHTER == i)
@@ -859,11 +719,7 @@ void OpenPlayerTextures()
 		}
 	}
 
-#ifdef _VS2008PORTING
 	for ( int i=0; i<17; i++ )
-#else // _VS2008PORTING
-	for ( i=0; i<17; i++ )
-#endif // _VS2008PORTING
 	{
 		OpenTexture(MODEL_HELM+i  ,"Player\\");
 		OpenTexture(MODEL_ARMOR+i ,"Player\\");
@@ -872,14 +728,9 @@ void OpenPlayerTextures()
 		OpenTexture(MODEL_BOOTS+i ,"Player\\");
 	}
 
-    //  추가 장비들.
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
-        if ( i!=2 ) //   3은 마검사
+        if ( i!=2 )
         {
             OpenTexture ( MODEL_HELM+21+i, "Player\\" );
         }
@@ -889,11 +740,7 @@ void OpenPlayerTextures()
 		OpenTexture ( MODEL_BOOTS+21+i,  "Player\\" );
     }
 
-#ifdef _VS2008PORTING
 	for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-	for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
 	{
 		OpenTexture ( MODEL_HELM  +25+i, "Player\\" );
 		OpenTexture ( MODEL_ARMOR +25+i, "Player\\" );
@@ -902,14 +749,9 @@ void OpenPlayerTextures()
 		OpenTexture ( MODEL_BOOTS +25+i, "Player\\" );
 	}
 
-#ifdef _VS2008PORTING
     for( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {   
-        //  다크 피닉스 ~ 선더 블레이드.
-	    OpenTexture(MODEL_HELM  +17+i, "Player\\");    //  
+	    OpenTexture(MODEL_HELM  +17+i, "Player\\");
 	    OpenTexture(MODEL_ARMOR +17+i, "Player\\");
 	    OpenTexture(MODEL_PANTS +17+i, "Player\\");
 	    OpenTexture(MODEL_GLOVES+17+i, "Player\\");
@@ -933,12 +775,7 @@ void OpenPlayerTextures()
 		LoadBitmap("Item\\dl_redwings03.tga",BITMAP_ROBE+10);	// 제왕의 망토 (다크3차) 어깨 천
 	}
 
-	//(차례대로) 흑기사, 흑마법사, 요정, 마검사, 다크로드 추가 세트갑옷
-#ifdef _VS2008PORTING
 	for(int i = 0; i < 5; ++i)
-#else // _VS2008PORTING
-	for(i = 0; i < 5; ++i)
-#endif // _VS2008PORTING
 	{
 		OpenTexture( MODEL_ARMOR+29+i, "Player\\" );
 		OpenTexture( MODEL_PANTS+29+i, "Player\\" );
@@ -950,12 +787,7 @@ void OpenPlayerTextures()
 	OpenTexture( MODEL_HELM+31, "Player\\");
 	OpenTexture( MODEL_HELM+33, "Player\\");
 
-	//$ 크라이울프 아이템 텍스쳐
-#ifdef _VS2008PORTING
 	for(int i = 0; i < 5; ++i)
-#else // _VS2008PORTING
-	for(i = 0; i < 5; ++i)
-#endif // _VS2008PORTING
 	{
 		OpenTexture( MODEL_ARMOR+34+i,	"Player\\" );
 		OpenTexture( MODEL_PANTS+34+i,	"Player\\" );
@@ -968,12 +800,8 @@ void OpenPlayerTextures()
 	OpenTexture( MODEL_HELM+38, "Player\\");
 
 	char szFileName[64];
-	// 바이올렌윈드 ~ 이터널윙 세트
-#ifdef _VS2008PORTING
+
 	for (int i = 0; i < 6; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i < 6; ++i)
-#endif // _VS2008PORTING
 	{
 		::OpenTexture(MODEL_HELM  +39+i, "Player\\" );
 		::OpenTexture(MODEL_ARMOR +39+i, "Player\\" );
@@ -981,31 +809,24 @@ void OpenPlayerTextures()
 		::OpenTexture(MODEL_GLOVES+39+i, "Player\\" );
 		::OpenTexture(MODEL_BOOTS +39+i, "Player\\" );
 
-	// 인벤토리용 텍스처.
 		::sprintf(szFileName, "Player\\InvenArmorMale%d.tga", 40+i);
 		::LoadBitmap(szFileName, BITMAP_INVEN_ARMOR+i);
 		::sprintf(szFileName, "Player\\InvenPantsMale%d.tga", 40+i);
 		::LoadBitmap(szFileName, BITMAP_INVEN_PANTS+i);
 	}
 
-// 소켓아이템 스킨텍스쳐 (인벤에서렌더하는 스킨부분을 제외한 텍스쳐, 텍스쳐 교체함)
 #ifdef ADD_SOCKET_ITEM
-	::sprintf(szFileName, "Player\\Item312_Armoritem.tga");		// 디바인셋트 (요정)
+	::sprintf(szFileName, "Player\\Item312_Armoritem.tga");
 	::LoadBitmap(szFileName, BITMAP_SKIN_ARMOR_DEVINE);
 	::sprintf(szFileName, "Player\\Item312_Pantitem.tga");
 	::LoadBitmap(szFileName, BITMAP_SKIN_PANTS_DEVINE);
-	::sprintf(szFileName, "Player\\SkinClass706_upperitem.tga");	// 서큐버스셋트 (소환술사)
+	::sprintf(szFileName, "Player\\SkinClass706_upperitem.tga");
 	::LoadBitmap(szFileName, BITMAP_SKIN_ARMOR_SUCCUBUS);
 	::sprintf(szFileName, "Player\\SkinClass706_loweritem.tga");
 	::LoadBitmap(szFileName, BITMAP_SKIN_PANTS_SUCCUBUS);
 #endif // ADD_SOCKET_ITEM
 
-	// 소환술사용 넝쿨, 실크 시리즈 모델 텍스처.
-#ifdef _VS2008PORTING
 	for (int i = 0; i < MODEL_ITEM_COMMON_NUM; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i < MODEL_ITEM_COMMON_NUM; ++i)
-#endif // _VS2008PORTING
 	{
 		::OpenTexture(MODEL_HELM2  +i, "Player\\");
 		::OpenTexture(MODEL_ARMOR2 +i, "Player\\");
@@ -1015,22 +836,8 @@ void OpenPlayerTextures()
 	}
 
 #ifdef ADD_SOCKET_ITEM
-	// 45 "티탄(흑기사)"
-	// 46 "브레이브(흑기사)"
-	// 47 "팬텀(마검사)"
-	// 48 "디스트로이(마검사)"
-	// 49 "세라핌(요정)"
-	// 50 "디바인(요정)"
-	// 51 "패왕(다크로드)"
-	// 52 "하데스(흑마법사)"
-	// 53 "서큐버스(소환술사)"
 	
-	// 투구
-#ifdef _VS2008PORTING
 	for(int i=45 ; i<=53 ; i++)
-#else // _VS2008PORTING
-	for( i=45 ; i<=53 ; i++)
-#endif // _VS2008PORTING
 	{
 		if( i==47 || i== 48)
 			continue;		// 마검사투구제외
@@ -1038,12 +845,7 @@ void OpenPlayerTextures()
 		OpenTexture( MODEL_HELM+i, "Player\\" );
 	} // for()
 	
-	// 갑옷/바지/장갑/부츠
-#ifdef _VS2008PORTING
 	for(int i=45 ; i<=53 ; i++)
-#else // _VS2008PORTING
-	for( i=45 ; i<=53 ; i++)
-#endif // _VS2008PORTING
 	{
 		OpenTexture(MODEL_ARMOR+i, "Player\\" );
 		OpenTexture(MODEL_PANTS+i, "Player\\" );
@@ -1052,26 +854,18 @@ void OpenPlayerTextures()
 	} // for()
 #endif // ADD_SOCKET_ITEM
 
-	// GM 변신반지 캐릭터 모델 로딩
 	OpenTexture(MODEL_GM_CHARACTER, "Skill\\");
 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-#ifdef _VS2008PORTING
 	for (int i = 0; i<MODEL_ITEM_COMMONCNT_RAGEFIGHTER; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i<MODEL_ITEM_COMMONCNT_RAGEFIGHTER; ++i)
-#endif // _VS2008PORTING
 	{
 		::OpenTexture(MODEL_HELM_MONK  +i, "Player\\");
 		::OpenTexture(MODEL_ARMOR_MONK +i, "Player\\");
 		::OpenTexture(MODEL_PANTS_MONK +i, "Player\\");
 		::OpenTexture(MODEL_BOOTS_MONK +i, "Player\\");
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0; i<3; ++i)
-#else //_VS2008PORTING
-	for(i=0; i<3; ++i)
-#endif //_VS2008PORTING
 	{
 		::OpenTexture(MODEL_HELM  +59+i, "Player\\");
 		::OpenTexture(MODEL_ARMOR +59+i, "Player\\");
@@ -1085,28 +879,17 @@ void OpenPlayerTextures()
 #endif // DO_PROFILING_FOR_LOADING
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 모델링 데이타 전체를 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void OpenItems()
 {
 #ifdef DO_PROFILING_FOR_LOADING
 	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENITEMS, PROFILING_LOADING_OPENITEMS );
 #endif // DO_PROFILING_FOR_LOADING
 
-#ifndef _VS2008PORTING				// #ifndef
-	int i;
-#endif // _VS2008PORTING
+    //////////////////////////////////////////////////////////////////////////
+    //  MODEL_SWORD
+    //////////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////////
-    //  검. MODEL_SWORD
-    //////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
-    for(int i=0;i<17;i++)
-#else // _VS2008PORTING
-    for(i=0;i<17;i++)
-#endif // _VS2008PORTING
+	for(int i=0;i<17;i++)
       	AccessModel(MODEL_SWORD+i ,"Data\\Item\\","Sword" ,i+1);    //  검.
 
     AccessModel(MODEL_SWORD+17 ,"Data\\Item\\","Sword" ,18);    //  다크브레이커.
@@ -1118,138 +901,105 @@ void OpenItems()
 	AccessModel ( MODEL_SWORD+31, "Data\\Item\\", "Sword", 32 );	//	마검사 마법검.
 
 	//////////////////////////////////////////////////////////////////////////
-	//	도끼. MODEL_AXE
+	//	MODEL_AXE
 	//////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<9;i++)
-#else // _VS2008PORTING
-	for(i=0;i<9;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_AXE+i   ,"Data\\Item\\","Axe"   ,i+1);    //  도끼.
+      	AccessModel(MODEL_AXE+i   ,"Data\\Item\\","Axe"   ,i+1);
 
 	//////////////////////////////////////////////////////////////////////////
-	//	둔기. MODEL_MACE
+	//	MODEL_MACE
 	//////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<7;i++)
-#else // _VS2008PORTING
-	for(i=0;i<7;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_MACE+i  ,"Data\\Item\\","Mace"  ,i+1);    //  둔기.
-	AccessModel ( MODEL_MACE+7, "Data\\Item\\", "Mace", 8 );		//	요정 둔기.
+      	AccessModel(MODEL_MACE+i  ,"Data\\Item\\","Mace"  ,i+1);
+
+	AccessModel ( MODEL_MACE+7, "Data\\Item\\", "Mace", 8);
 
 	// MODEL_MACE+8,9,10,11,12
-#ifdef _VS2008PORTING
 	for(int i=0; i<5; i++)
-#else // _VS2008PORTING
-	for(i=0; i<5; i++)
-#endif // _VS2008PORTING
-		AccessModel( MODEL_MACE+8+i, "Data\\Item\\", "Mace", 9+i);		// 다크로드 추가무기
+		AccessModel( MODEL_MACE+8+i, "Data\\Item\\", "Mace", 9+i);
 	
-	// 다크로드 절대 셉터
 	AccessModel( MODEL_MACE+13, "Data\\Item\\", "Saint");
 
 	//////////////////////////////////////////////////////////////////////////
-	//	창. MODEL_SPEAR
+	//	MODEL_SPEAR
 	//////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<10;i++)
-#else // _VS2008PORTING
-	for(i=0;i<10;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_SPEAR+i ,"Data\\Item\\","Spear" ,i+1);    //  창.
-	AccessModel ( MODEL_SPEAR+10, "Data\\Item\\", "Spear", 11 );	//	기사 창.
+      	AccessModel(MODEL_SPEAR+i ,"Data\\Item\\","Spear" ,i+1);
+
+	AccessModel ( MODEL_SPEAR+10, "Data\\Item\\", "Spear", 11 );
 
 	//////////////////////////////////////////////////////////////////////////
-	//	방패. MODEL_SHIELD
+	//	MODEL_SHIELD
 	//////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<15;i++)
-#else // _VS2008PORTING
-	for(i=0;i<15;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_SHIELD+i,"Data\\Item\\","Shield",i+1);    //  방패.
-	AccessModel ( MODEL_SHIELD+15, "Data\\Item\\", "Shield", 16 );	//	법사방패.
-	AccessModel ( MODEL_SHIELD+16, "Data\\Item\\", "Shield", 17 );	//	요정방패.
+      	AccessModel(MODEL_SHIELD+i,"Data\\Item\\","Shield",i+1);
+
+	AccessModel ( MODEL_SHIELD+15, "Data\\Item\\", "Shield", 16 );
+	AccessModel ( MODEL_SHIELD+16, "Data\\Item\\", "Shield", 17 );
 
     //////////////////////////////////////////////////////////////////////////
-    //  지팡이. MODEL_STAFF
+    //  MODEL_STAFF
     //////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
+
     for(int i=0;i<9;i++)
-#else // _VS2008PORTING
-    for(i=0;i<9;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_STAFF+i ,"Data\\Item\\","Staff" ,i+1);    //  지팡이.
-    AccessModel( MODEL_STAFF+9, "Data\\Item\\", "Staff", 10 );       //  악령의 지팡이.
-    AccessModel(MODEL_STAFF+10 ,"Data\\Item\\","Staff" ,11);        //  대천사의 절대지팡이.
-    AccessModel(MODEL_STAFF+11 ,"Data\\Item\\","Staff" ,12);        //  쿤둔의 지팡이
-#ifdef _VS2008PORTING
+      	AccessModel(MODEL_STAFF+i ,"Data\\Item\\","Staff" ,i+1);
+
+    AccessModel( MODEL_STAFF+9, "Data\\Item\\", "Staff", 10 );
+    AccessModel(MODEL_STAFF+10 ,"Data\\Item\\","Staff" ,11);
+    AccessModel(MODEL_STAFF+11 ,"Data\\Item\\","Staff" ,12);
+
 	for (int i = 14; i <= 20; ++i)
-#else // _VS2008PORTING
-	for (i = 14; i <= 20; ++i)
-#endif // _VS2008PORTING
-		::AccessModel(MODEL_STAFF+i, "Data\\Item\\", "Staff", i+1);	// 소환술사 스틱.
+		::AccessModel(MODEL_STAFF+i, "Data\\Item\\", "Staff", i+1);
 
     //////////////////////////////////////////////////////////////////////////
-    //  활. MODEL_BOW
+    //  MODEL_BOW
     //////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
-	for(int i=0;i<7;i++)
-#else // _VS2008PORTING
-	for(i=0;i<7;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_BOW+i   ,"Data\\Item\\","Bow"   ,i+1);    //  활.
-#ifdef _VS2008PORTING
-	for(int i=0;i<7;i++)
-#else // _VS2008PORTING
-	for(i=0;i<7;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_BOW+i+8 ,"Data\\Item\\","CrossBow",i+1);  //  석궁.
-   	AccessModel(MODEL_BOW+7 ,"Data\\Item\\","Arrows",1);            //  화살.
-   	AccessModel(MODEL_BOW+15,"Data\\Item\\","Arrows",2);            //  석궁 화살.
-   	AccessModel(MODEL_BOW+16,"Data\\Item\\","CrossBow",17);         //  세인트 석궁.
-    AccessModel( MODEL_BOW+17, "Data\\Item\\", "Bow", 18 );    //  음속 보우.
-    AccessModel(MODEL_BOW+18 ,"Data\\Item\\","Bow" ,19);        //  대천사의 석궁.
-	AccessModel(MODEL_BOW+19, "Data\\Item\\", "CrossBow", 20 );	//	초절대 석궁.
-	AccessModel(MODEL_BOW+20, "Data\\Item\\", "Bow", 20 );	//	요정 추가활.
 
-    
+	for(int i=0;i<7;i++)
+      	AccessModel(MODEL_BOW+i   ,"Data\\Item\\","Bow"   ,i+1);
+
+	for(int i=0;i<7;i++)
+      	AccessModel(MODEL_BOW+i+8 ,"Data\\Item\\","CrossBow",i+1);
+
+   	AccessModel(MODEL_BOW+7 ,"Data\\Item\\","Arrows",1); 
+   	AccessModel(MODEL_BOW+15,"Data\\Item\\","Arrows",2);
+   	AccessModel(MODEL_BOW+16,"Data\\Item\\","CrossBow",17);
+    AccessModel( MODEL_BOW+17, "Data\\Item\\", "Bow", 18 );
+    AccessModel(MODEL_BOW+18 ,"Data\\Item\\","Bow" ,19);
+	AccessModel(MODEL_BOW+19, "Data\\Item\\", "CrossBow", 20 );
+	AccessModel(MODEL_BOW+20, "Data\\Item\\", "Bow", 20 );
+
     //////////////////////////////////////////////////////////////////////////
-    //  목걸이/반지. MODEL_HELPER
+    //  MODEL_HELPER
     //////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
+
     for(int i=0;i<3;i++)
-#else // _VS2008PORTING
-    for(i=0;i<3;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_HELPER+i,"Data\\Player\\","Helper",i+1);  //  사탄. 천사. 유니리아. (등).
-#ifdef _VS2008PORTING
+      	AccessModel(MODEL_HELPER+i,"Data\\Player\\","Helper",i+1);
+
 	for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-	for(i=0;i<2;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_HELPER+i+8,"Data\\Item\\","Ring"  ,i+1);  //  얼음반지. 독반지.
+      	AccessModel(MODEL_HELPER+i+8,"Data\\Item\\","Ring"  ,i+1);
 
 	g_ChangeRingMgr->LoadItemModel();
    	
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-	for(i=0;i<2;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_HELPER+i+12,"Data\\Item\\","Necklace"  ,i+1); //  목걸이.
-    AccessModel( MODEL_HELPER+3, "Data\\Player\\", "Helper", 4 );		//  디노란트의 뿔.
-    AccessModel( MODEL_HELPER+4, "Data\\Item\\", "DarkHorseHorn" );     //  다크호스의 뿔
-    AccessModel( MODEL_HELPER+31,"Data\\Item\\", "DarkHorseSoul" );     //  다크호스의 영혼.
+      	AccessModel(MODEL_HELPER+i+12,"Data\\Item\\","Necklace"  ,i+1);
+
+    AccessModel( MODEL_HELPER+3, "Data\\Player\\", "Helper", 4 );
+    AccessModel( MODEL_HELPER+4, "Data\\Item\\", "DarkHorseHorn" );
+    AccessModel( MODEL_HELPER+31,"Data\\Item\\", "DarkHorseSoul" );
 #ifdef PET_SYSTEM
-    AccessModel( MODEL_HELPER+5, "Data\\Item\\", "SpiritBill" );        //  다크스피릿
+    AccessModel( MODEL_HELPER+5, "Data\\Item\\", "SpiritBill" );
 #endif// PET_SYSTEM
 #ifdef DARK_WOLF
-    AccessModel( MODEL_HELPER+6, "Data\\Item\\", "DarkWolfTooth" );     //  다크울프의 이빨.
+    AccessModel( MODEL_HELPER+6, "Data\\Item\\", "DarkWolfTooth" );
 #endif// DARK_WOLF
 
-    AccessModel( MODEL_HELPER+21, "Data\\Item\\", "FireRing" );          //  불의반지"	
+    AccessModel( MODEL_HELPER+21, "Data\\Item\\", "FireRing" );	
     AccessModel( MODEL_HELPER+22, "Data\\Item\\", "GroundRing" );        //  땅의반지"	
     AccessModel( MODEL_HELPER+23, "Data\\Item\\", "WindRing" );          //  바람의반지"	
     AccessModel( MODEL_HELPER+24, "Data\\Item\\", "ManaRing" );          //  마법의반지"	
@@ -1271,14 +1021,12 @@ void OpenItems()
 	AccessModel( MODEL_HELPER+37, "Data\\Item\\", "FR_6" );     // 펜릴의 뿔피리
 
 #ifdef CSK_FREE_TICKET
-	// 자유입장권 아이템 모델 로딩
 	AccessModel(MODEL_HELPER+46, "Data\\Item\\partCharge1\\", "entrancegray");	// 데빌스퀘어 자유입장권(회색)
 	AccessModel(MODEL_HELPER+47, "Data\\Item\\partCharge1\\", "entrancered");	// 블러드캐슬 자유입장권(빨간색)
 	AccessModel(MODEL_HELPER+48, "Data\\Item\\partCharge1\\", "entrancebleu");	// 칼리마 자유입장권(파란색)
 #endif // CSK_FREE_TICKET
 	
 #ifdef CSK_CHAOS_CARD
-	// 카오스카드 아이템 모델 로딩
 	AccessModel(MODEL_POTION+54, "Data\\Item\\partCharge1\\", "juju");	// 카오스카드
 #endif // CSK_CHAOS_CARD
 
@@ -1301,7 +1049,6 @@ void OpenItems()
 #endif //CSK_LUCKY_CHARM
 	
 #ifdef CSK_RARE_ITEM
-	// 희귀아이템 모델 로딩
 	AccessModel(MODEL_POTION+58, "Data\\Item\\partCharge1\\", "expensiveitem01");
 	AccessModel(MODEL_POTION+59, "Data\\Item\\partCharge1\\", "expensiveitem02a");
 	AccessModel(MODEL_POTION+60, "Data\\Item\\partCharge1\\", "expensiveitem02b");
@@ -1327,7 +1074,6 @@ void OpenItems()
 	char	szPC6Path[24];
 	sprintf( szPC6Path, "Data\\Item\\partCharge6\\" );
 
-	// 날개 조합 100% 부적
 	AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_KNIGHT_1_CHARM, szPC6Path, "amulet_satan");	// - 사탄 날개부적/기사용 1차 날개            
 	AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_MAGICIAN_1_CHARM, szPC6Path, "amulet_sky");	// - 천공 날개부적/법사용 1차 날개            
 	AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_ELF_1_CHARM, szPC6Path, "amulet_elf");			// - 요정 날개부적/요정용 1차 날개            
@@ -1503,20 +1249,11 @@ void OpenItems()
 	AccessModel(MODEL_POTION+68, "Data\\Item\\", "Deye");			// 심연의눈동자
 	
 #ifdef ADD_SEED_SPHERE_ITEM
-	// 소켓 아이템 재료 (시드, 스피어, 시드스피어)
-#ifdef _VS2008PORTING
 	for (int i = 0; i < 6; ++i)
-		AccessModel(MODEL_WING+60+i, "Data\\Item\\", "s30_seed");	// 시드 6종
+		AccessModel(MODEL_WING+60+i, "Data\\Item\\", "s30_seed");
 	for (int i = 0; i < 5; ++i)
-		AccessModel(MODEL_WING+70+i, "Data\\Item\\", "s30_sphere_body", i + 1);	// 스피어 5종
+		AccessModel(MODEL_WING+70+i, "Data\\Item\\", "s30_sphere_body", i + 1);
 	for (int i = 0; i < 5; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i < 6; ++i)
-		AccessModel(MODEL_WING+60+i, "Data\\Item\\", "s30_seed");	// 시드 6종
-	for (i = 0; i < 5; ++i)
-		AccessModel(MODEL_WING+70+i, "Data\\Item\\", "s30_sphere_body", i + 1);	// 스피어 5종
-	for (i = 0; i < 5; ++i)
-#endif // _VS2008PORTING
 	{
 		for (int j = 0; j < 6; ++j)
 			AccessModel(MODEL_WING+100+i*6+j, "Data\\Item\\", "s30_sphere", i + 1);	// 시드스피어 30종
@@ -1576,77 +1313,53 @@ void OpenItems()
 #endif	// ASG_ADD_CHARGED_CHANNEL_TICKET
 
     //////////////////////////////////////////////////////////////////////////
-    //  물약/보석. MODEL_POTION.
+    //  MODEL_POTION.
     //////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
+
     for(int i=0;i<7;i++)
-#else // _VS2008PORTING
-    for(i=0;i<7;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_POTION+i,"Data\\Item\\","Potion",i+1);    //  물약.
-   	AccessModel(MODEL_POTION+8 ,"Data\\Item\\","Antidote",1);       //  해독약.
-   	AccessModel(MODEL_POTION+9 ,"Data\\Item\\","Beer",1);           //  술.
-   	AccessModel(MODEL_POTION+10,"Data\\Item\\","Scroll",1);         //  마을귀환문서.
-   	AccessModel(MODEL_POTION+11,"Data\\Item\\","MagicBox",1);       //  법서.
-   	AccessModel(MODEL_POTION+12,"Data\\Item\\","Event",1);          //  이벤트.
-#ifdef _VS2008PORTING
+      	AccessModel(MODEL_POTION+i,"Data\\Item\\","Potion",i+1);
+
+   	AccessModel(MODEL_POTION+8 ,"Data\\Item\\","Antidote",1);
+   	AccessModel(MODEL_POTION+9 ,"Data\\Item\\","Beer",1);
+   	AccessModel(MODEL_POTION+10,"Data\\Item\\","Scroll",1);
+   	AccessModel(MODEL_POTION+11,"Data\\Item\\","MagicBox",1);
+   	AccessModel(MODEL_POTION+12,"Data\\Item\\","Event",1);
+
 	for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-	for(i=0;i<2;i++)
-#endif // _VS2008PORTING
         AccessModel(MODEL_POTION+i+13,"Data\\Item\\","Jewel",i+1);
+
     AccessModel(MODEL_POTION+15,"Data\\Item\\","Gold",1);
     AccessModel(MODEL_POTION+16,"Data\\Item\\","Jewel",3);
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<3;i++)
-#else // _VS2008PORTING
-	for(i=0;i<3;i++)
-#endif // _VS2008PORTING
-		AccessModel(MODEL_POTION+17+i,"Data\\Item\\","Devil",i);	// 악마의 광장
-	AccessModel(MODEL_POTION+20,"Data\\Item\\","Drink",0);	        // 사랑의 묘약
+		AccessModel(MODEL_POTION+17+i,"Data\\Item\\","Devil",i);
 
-    AccessModel(MODEL_POTION+21,"Data\\Item\\","ConChip",0);        //  콘칩.
+	AccessModel(MODEL_POTION + 20, "Data\\Item\\", "Drink", 0);
+    AccessModel(MODEL_POTION+21,"Data\\Item\\","ConChip",0);
+    AccessModel(MODEL_POTION+31,"Data\\Item\\","suho",-1);
+	AccessModel(MODEL_HELPER+38,"Data\\Item\\","kanneck2");
+	AccessModel(MODEL_POTION+41,"Data\\Item\\","rs");
+	AccessModel(MODEL_POTION+42,"Data\\Item\\","jos");
+	AccessModel(MODEL_POTION+43,"Data\\Item\\","LowRefineStone");
+	AccessModel(MODEL_POTION+44,"Data\\Item\\","HighRefineStone");
 
-    AccessModel(MODEL_POTION+31,"Data\\Item\\","suho",-1);        //  수호의보석
-	AccessModel(MODEL_HELPER+38,"Data\\Item\\","kanneck2");        //  문스톤 팬던트
-	AccessModel(MODEL_POTION+41,"Data\\Item\\","rs");              //  조화의 보석(원석)
-	AccessModel(MODEL_POTION+42,"Data\\Item\\","jos");             //  조화의 보석(정제)
-	AccessModel(MODEL_POTION+43,"Data\\Item\\","LowRefineStone");         //  하급 제련석
-	AccessModel(MODEL_POTION+44,"Data\\Item\\","HighRefineStone");         //  상급 제련석
+	AccessModel(MODEL_POTION+7, "Data\\Item\\","SpecialPotion" );
 
-	AccessModel(MODEL_POTION+7, "Data\\Item\\","SpecialPotion" );   //  축복의 물약, 영혼의 물약.//종훈물약
-
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; ++i )
-#else // _VS2008PORTING
-    for ( i=0; i<4; ++i )
-#endif // _VS2008PORTING
     {
-        AccessModel(MODEL_POTION+23+i, "Data\\Item\\", "Quest", i); //  제왕의 서 ~ 서클.
+        AccessModel(MODEL_POTION+23+i, "Data\\Item\\", "Quest", i);
     }
-    AccessModel(MODEL_POTION+27, "Data\\Item\\", "godesteel" );     //  고대의 금속.
-#ifdef _VS2008PORTING
+    AccessModel(MODEL_POTION+27, "Data\\Item\\", "godesteel" );
+
 	for(int i=0; i<2; i++) 
-#else // _VS2008PORTING
-	for(i=0; i<2; i++) 
-#endif // _VS2008PORTING
 	{
 		AccessModel ( MODEL_POTION+28+i, "Data\\Item\\", "HELLASITEM", i);   //  잃어버린지도, 쿤둔의 표식
 	}
-	//실드 물약
-#ifdef _VS2008PORTING
+
 	for(int i=0; i<3; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<3; ++i)
-#endif // _VS2008PORTING
 		AccessModel ( MODEL_POTION+35+i, "Data\\Item\\", "sdwater", i+1);
 
-	//복합 물약
-#ifdef _VS2008PORTING
 	for(int i=0; i<3; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<3; ++i)
-#endif // _VS2008PORTING
 		AccessModel ( MODEL_POTION+38+i, "Data\\Item\\", "megawater", i+1);
 	
 #ifdef LDK_ADD_INGAMESHOP_GOBLIN_GOLD
@@ -1728,11 +1441,7 @@ void OpenItems()
 	AccessModel(MODEL_POTION+99,"Data\\Item\\XMas\\", "xmasfire", -1);				// 크리스마스 폭죽
 #endif	// YDG_ADD_FIRECRACKER_ITEM
 
-#ifdef _VS2008PORTING
 	for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-	for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
         if ( i<3 )
         {
@@ -1755,11 +1464,8 @@ void OpenItems()
 #endif// CHINA_MOON_CAKE
 
     AccessModel(MODEL_POTION+22, "Data\\Item\\", "jewel", 22);          //  창조의 보석.
-#ifdef _VS2008PORTING
+
     for ( int i=0; i<2; ++i )
-#else // _VS2008PORTING
-    for ( i=0; i<2; ++i )
-#endif // _VS2008PORTING
     {
         AccessModel(MODEL_HELPER+14+i, "Data\\Item\\", "Quest", 4+i);   //  로크의 깃털 ~ 서클.
     }
@@ -1767,43 +1473,22 @@ void OpenItems()
 	AccessModel ( MODEL_EVENT+16,  "Data\\Item\\", "DarkLordSleeve" );              //  군주의 소매.
 	AccessModel ( MODEL_HELPER+30, "Data\\Item\\", "DarkLordRobe" );                //  군주의 망토.
 
-#ifdef _VS2008PORTING
     for(int i=0;i<3;i++)
-#else // _VS2008PORTING
-    for(i=0;i<3;i++)
-#endif // _VS2008PORTING
-      	AccessModel(MODEL_WING+i,"Data\\Item\\","Wing"  ,i+1);      //  날개.
+      	AccessModel(MODEL_WING+i,"Data\\Item\\","Wing"  ,i+1);
 
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
         AccessModel(MODEL_WING+3+i,"Data\\Item\\","Wing"  ,4+i);            //  요정 날개.
     }
 
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
         AccessModel(MODEL_WING+36+i,"Data\\Item\\","Wing"  ,8+i);	// 3차 날개
     }
 	AccessModel ( MODEL_WING+40, "Data\\Item\\", "DarkLordRobe02" );                //  제왕의 망토
-#ifdef ADD_ALICE_WINGS_1
-#ifdef ADD_ALICE_WINGS_2
-#ifdef _VS2008PORTING
+
 	for (int i = 41; i <= 43; ++i)
-#else // _VS2008PORTING
-	for (i = 41; i <= 43; ++i)
-#endif // _VS2008PORTING
-#else	// ADD_ALICE_WINGS_2
-	for (i = 41; i < 43; ++i)
-#endif	// ADD_ALICE_WINGS_2
-		::AccessModel(MODEL_WING+i, "Data\\Item\\", "Wing", i+1);		// 소환술사 날개.
-#endif	// ADD_ALICE_WINGS_1
+		::AccessModel(MODEL_WING+i, "Data\\Item\\", "Wing", i+1);
 
 	AccessModel(MODEL_STAFF+21, "Data\\Item\\", "Book_of_Sahamutt");	// 사하무트의 책
 	AccessModel(MODEL_STAFF+22, "Data\\Item\\", "Book_of_Neil");		// 닐의 책
@@ -1811,20 +1496,12 @@ void OpenItems()
 	AccessModel(MODEL_STAFF+23, "Data\\Item\\", "Book_of_Rargle");		// 라글의 서.
 #endif	// ASG_ADD_SUMMON_RARGLE
 
-#ifdef _VS2008PORTING
 	for(int i=0; i<9; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<9; ++i)
-#endif // _VS2008PORTING
 	{
 		AccessModel(MODEL_ETC+19+i, "Data\\Item\\", "rollofpaper");
 	}
 
-#ifdef _VS2008PORTING
     for(int i=0;i<13;i++)
-#else // _VS2008PORTING
-    for(i=0;i<13;i++)
-#endif // _VS2008PORTING
 	{
 		if ( i+7 != 15)
 	      	AccessModel(MODEL_WING+i+7,"Data\\Item\\","Gem",i+1);
@@ -1846,11 +1523,7 @@ void OpenItems()
 	AccessModel(MODEL_WING+47,"Data\\Item\\","Gem",6);
 #endif	// YDG_ADD_SKILL_FLAME_STRIKE
 
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
         AccessModel ( MODEL_WING+21+i,"Data\\Item\\","SkillScroll" );
     }
@@ -1883,18 +1556,14 @@ void OpenItems()
 	AccessModel(MODEL_EVENT+20,"Data\\Item\\","Crystal");
 #endif // MYSTERY_BEAD
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<19;i++)
-#else // _VS2008PORTING
-	for(i=0;i<19;i++)
-#endif // _VS2008PORTING
       	AccessModel(MODEL_ETC+i,"Data\\Item\\","Book",i+1);
 	
 #ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 	AccessModel(MODEL_ETC+29,"Data\\Item\\","Book",18);
 #endif	// YDG_ADD_SKILL_GIGANTIC_STORM
 
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER	// 마력증대 법서 (기존에 쓰던 법서)
+#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	AccessModel(MODEL_ETC+28,"Data\\Item\\","Book",18);	
 #endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 
@@ -1910,7 +1579,7 @@ void OpenItems()
 	AccessModel(MODEL_BOW+22, "Data\\Item\\", "CW_Bow");		// 요정활
 	AccessModel(MODEL_STAFF+13, "Data\\Item\\", "CW_Staff");	// 흑마법사지팡이
 	
-// 소켓아이템 추가 (Model)
+// (Model)
 #ifdef ADD_SOCKET_ITEM
 	// 검
 	AccessModel(MODEL_SWORD+26, "Data\\Item\\", "Sword_27");	// 플랑베르주
@@ -2078,11 +1747,7 @@ void OpenItems()
 	char	szLuckySetPathName[50]	 = { "" };
 	int		nIndex					 = 62;
 
-#ifdef _VS2008PORTING
 	for( int i=0; i<11; i++ )
-#else // _VS2008PORTING
-	for( i=0; i<11; i++ )
-#endif // _VS2008PORTING
 	{
 		sprintf( szLuckySetPathName, "%s%d\\", szLuckySetPath, nIndex );
 		if( nIndex != 71 )	AccessModel(MODEL_HELM+nIndex,	szLuckySetPathName, szLuckySetFileName[0], i+1);
@@ -2122,13 +1787,7 @@ void OpenItemTextures()
 	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENITEMTEXTURES, PROFILING_LOADING_OPENITEMTEXTURES );
 #endif // DO_PROFILING_FOR_LOADING
 	
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    int i;
-
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
         if ( i<3 )
         {
@@ -2144,20 +1803,12 @@ void OpenItemTextures()
 	OpenTexture( MODEL_EVENT+14, "Item\\" );
 	OpenTexture( MODEL_EVENT+15, "Item\\" );	// 마법사의 반지
 
-#ifdef _VS2008PORTING
     for( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
         OpenTexture( MODEL_WING+3+i, "Item\\" );    //  날개. ( 정령의 날개 ~ 어둠의 날개 ).
     }
 
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
         OpenTexture( MODEL_WING+36+i, "Item\\" );	// 3차 날개
     }
@@ -2165,41 +1816,23 @@ void OpenItemTextures()
 
 	LoadBitmap("Item\\msword01_r.jpg"     ,BITMAP_3RDWING_LAYER    ,GL_LINEAR,GL_REPEAT);	// 마검 3차날개 추가텍스쳐
 
-#ifdef ADD_ALICE_WINGS_1
-#ifdef ADD_ALICE_WINGS_2
-#ifdef _VS2008PORTING
 	for (int i = 41; i <= 43; ++i)
-#else // _VS2008PORTING
-	for (i = 41; i <= 43; ++i)
-#endif // _VS2008PORTING
-#else	// ADD_ALICE_WINGS_2
-	for (i = 41; i < 43; ++i)
-#endif	// ADD_ALICE_WINGS_2
         ::OpenTexture(MODEL_WING+i, "Item\\");    // 소환술사 날개.
-#endif	// ADD_ALICE_WINGS_1
+
 
 #ifdef ASG_ADD_SUMMON_RARGLE
-#ifdef _VS2008PORTING
 	for (int i = 21; i <= 23; ++i)
-#else // _VS2008PORTING
-	for (i = 21; i <= 23; ++i)
-#endif // _VS2008PORTING
 		::OpenTexture(MODEL_STAFF+i, "Item\\");    // 소환술사 책.
 #else	// ASG_ADD_SUMMON_RARGLE
 	OpenTexture ( MODEL_STAFF+21, "Item\\" );		// 사하무트의 책
 	OpenTexture ( MODEL_STAFF+22, "Item\\" );		// 닐의 책
 #endif	// ASG_ADD_SUMMON_RARGLE
 
-	// 양피지 아이템들 텍스쳐
-#ifdef _VS2008PORTING
 	for(int i=0; i<9; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<9; ++i)
-#endif // _VS2008PORTING
 	{
 		OpenTexture(MODEL_ETC+19+i, "Item\\");
 	}
-	// 양피지 아이템에 이펙트 효과 들어가는 파일
+
 	LoadBitmap("Item\\rollofpaper_R.jpg", BITMAP_ROOLOFPAPER_EFFECT_R, GL_LINEAR);
 
     OpenTexture( MODEL_HELPER+4, "Skill\\" );       //  다크호스의 뿔
@@ -2223,11 +1856,7 @@ void OpenItemTextures()
 	OpenTexture( MODEL_HELPER+11, "Item\\" );         //  소환 주문서.
     OpenTexture( MODEL_EVENT+18,  "Monster\\" );      //  라이프 스톤.
 
-#ifdef _VS2008PORTING
     for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-    for(i=0;i<2;i++)
-#endif // _VS2008PORTING
         OpenTexture(MODEL_HELPER+14+i, "Item\\");   //  로크의 깃털 ~ 서클.
 
     OpenTexture( MODEL_SWORD+17, "Item\\" );    //  다크 브레이커.
@@ -2238,20 +1867,14 @@ void OpenItemTextures()
 
     OpenTexture( MODEL_HELPER+3, "Skill\\" );   //  페가시아의 뿔.
 
-#ifdef _VS2008PORTING
     for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-    for(i=0;i<4;i++)
-#endif // _VS2008PORTING
         OpenTexture(MODEL_POTION+23+i, "Item\\");//  제왕의 서 ~ 마법사의 혼.
 
     OpenTexture(MODEL_POTION+27, "Item\\");     //  고대의 금속.
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-	for(i=0;i<2;i++)
-#endif // _VS2008PORTING
-		OpenTexture(MODEL_POTION+28+i, "Item\\");     // 잃어버린 지도, 쿤둔의 표식
+		OpenTexture(MODEL_POTION+28+i, "Item\\");
+
     OpenTexture(MODEL_HELPER+29, "Npc\\");      //  근위병의 갑옷세트.
     OpenTexture( MODEL_SWORD+19, "Item\\" );    //  대천사의 절대검.
     OpenTexture( MODEL_STAFF+10, "Item\\" );    //  대천사의 절대지팡이.
@@ -2263,11 +1886,8 @@ void OpenItemTextures()
 	OpenTexture( MODEL_SHIELD+16, "Item\\" );	//	요정방패.
 	OpenTexture( MODEL_SPEAR+10,  "Item\\" );	//	기사창.
 	OpenTexture( MODEL_MACE+7,	  "Item\\" );	//	요정 둔기.
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<17;i++)
-#else // _VS2008PORTING
-	for( i=0;i<17;i++)
-#endif // _VS2008PORTING
 	{
 		OpenTexture(MODEL_SWORD+i ,"Item\\");
 		OpenTexture(MODEL_AXE+i   ,"Item\\");
@@ -2281,47 +1901,26 @@ void OpenItemTextures()
 		OpenTexture(MODEL_POTION+i,"Item\\");
 		OpenTexture(MODEL_ETC+i   ,"Item\\");
 	}
-#ifdef _VS2008PORTING
+
 	for (int i = 14; i <= 20; ++i)
-#else // _VS2008PORTING
-	for (i = 14; i <= 20; ++i)
-#endif // _VS2008PORTING
 		::OpenTexture(MODEL_STAFF+i, "Item\\");		// 소환술사 스틱.
-#ifdef _VS2008PORTING
+
     for ( int i=21; i<=28; ++i )
-#else // _VS2008PORTING
-    for ( i=21; i<=28; ++i )
-#endif // _VS2008PORTING
         OpenTexture(MODEL_HELPER+i, "Item\\");     //  목걸이, 반지들.
 	//. MODEL_MACE+8,9,10,11
-#ifdef _VS2008PORTING
 	for(int i=0; i<5; i++)
-#else // _VS2008PORTING
-	for( i=0; i<5; i++)
-#endif // _VS2008PORTING
 		OpenTexture(MODEL_MACE+8+i, "Item\\" );		// 다크로드 추가 무기
 
-#ifdef _VS2008PORTING
 	for(int i=0; i<2; i++)
-#else // _VS2008PORTING
-	for(i=0; i<2; i++)
-#endif // _VS2008PORTING
 		OpenTexture(MODEL_SWORD+20+i, "Item\\");	//. 마검사, 흑기사 추가검.
+
 	OpenTexture(MODEL_BOW+20, "Item\\");			//. 요정 추가활
 
-#ifdef _VS2008PORTING
 	for(int i=17;i<21;i++)
-#else // _VS2008PORTING
-	for( i=17;i<21;i++)
-#endif // _VS2008PORTING
 	{
 		OpenTexture(MODEL_WING+i  ,"Item\\");
 	}
-#ifdef _VS2008PORTING
     for ( int i=0; i<4; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<4; i++ )
-#endif // _VS2008PORTING
     {
 		OpenTexture ( MODEL_WING+21+i, "Item\\" );
     }
@@ -2348,11 +1947,7 @@ void OpenItemTextures()
 	OpenTexture( MODEL_ETC+28, "Item\\" );
 #endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 
-#ifdef _VS2008PORTING
 	for( int i=17; i<19; ++i )
-#else // _VS2008PORTING
-	for( i=17; i<19; ++i )
-#endif // _VS2008PORTING
 	{
 		OpenTexture(MODEL_ETC+i, "Item\\" );
 	}
@@ -2375,38 +1970,20 @@ void OpenItemTextures()
 	OpenTexture ( MODEL_EVENT+17,  "Item\\" );  //  중국 이벤트 월병.
 #endif// CHINA_MOON_CAKE
 
-
-
-#ifdef _VS2008PORTING
     for(int i=0;i<3;i++)
-#else // _VS2008PORTING
-    for(i=0;i<3;i++)
-#endif // _VS2008PORTING
 		OpenTexture(MODEL_POTION+17+i	,"Item\\");	// 악마의 광장
 
-#ifdef _VS2008PORTING
     for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-    for(i=0;i<2;i++)
-#endif // _VS2008PORTING
         OpenTexture(MODEL_POTION+20+i, "Item\\"); //  이벤트칩(제나).
 
 #ifdef _PVP_MURDERER_HERO_ITEM
 	OpenTexture(MODEL_POTION+30, "Item\\");		//  머리카락
 #endif	// _PVP_MURDERER_HERO_ITEM
 	
-#ifdef _VS2008PORTING
 	for(int i=0;i<6;++i)
-#else // _VS2008PORTING
-	for(i=0;i<6;++i)
-#endif // _VS2008PORTING
 		OpenTexture(MODEL_POTION+35+i, "Item\\");
 	
-#ifdef _VS2008PORTING
 	for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-	for(i=0;i<2;i++)
-#endif // _VS2008PORTING
         OpenTexture(MODEL_EVENT+i ,"Item\\");
 
     //OpenTexture(MODEL_GOLD01  ,"Data\\Item\\Etc\\");
@@ -2510,11 +2087,7 @@ void OpenItemTextures()
 	
 #ifdef CSK_RARE_ITEM
 	// 희귀아이템 모델 텍스쳐 로딩
-#ifdef _VS2008PORTING
 	for(int i=0; i<5; ++i)
-#else // _VS2008PORTING
-	for(i=0; i<5; ++i)
-#endif // _VS2008PORTING
 	{
 		OpenTexture(MODEL_POTION+58+i, "Item\\partCharge1\\");
 	}
@@ -2754,24 +2327,14 @@ void OpenItemTextures()
 #endif // ADD_SOCKET_ITEM
 
 #ifdef ADD_SEED_SPHERE_ITEM
-	// 소켓 아이템 재료 (시드, 스피어, 시드스피어)
-#ifdef _VS2008PORTING
+
 	for (int i = 0; i < 6; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i < 6; ++i)
-#endif // _VS2008PORTING
 		OpenTexture(MODEL_WING+60+i, "Effect\\");	// 시드 6종
-#ifdef _VS2008PORTING
+
 	for (int i = 0; i < 5; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i < 5; ++i)
-#endif // _VS2008PORTING
 		OpenTexture(MODEL_WING+70+i, "Item\\");		// 스피어 5종
-#ifdef _VS2008PORTING
+
 	for (int i = 0; i < 30; ++i)
-#else // _VS2008PORTING
-	for (i = 0; i < 30; ++i)
-#endif // _VS2008PORTING
 	{
 		OpenTexture(MODEL_WING+100+i, "Effect\\");	// 시드스피어 30종
 		OpenTexture(MODEL_WING+100+i, "Item\\");	// 시드스피어 30종
@@ -2992,11 +2555,7 @@ void OpenItemTextures()
 	char	szLuckySetPathName[50]	 = { "" };
 	int		nIndex					 = 62;
 
-#ifdef _VS2008PORTING
 	for( int i=0; i<11; i++ )
-#else // _VS2008PORTING
-	for( i=0; i<11; i++ )
-#endif // _VS2008PORTING
 	{
 		sprintf( szLuckySetPathName, "%s%d\\", szLuckySetPath, nIndex );
 		if( nIndex != 71 )	OpenTexture(MODEL_HELM+nIndex,	szLuckySetPathName);
@@ -3034,11 +2593,7 @@ void DeleteNpcs()
 	for(int i=MODEL_NPC_BEGIN;i<MODEL_NPC_END;i++)
 		Models[i].Release();
 
-#ifdef _VS2008PORTING
 	for(int i=SOUND_NPC;i<SOUND_NPC_END;i++)
-#else // _VS2008PORTING
-	for(i=SOUND_NPC;i<SOUND_NPC_END;i++)
-#endif // _VS2008PORTING
 		ReleaseBuffer(i);
 }
 
@@ -3050,18 +2605,13 @@ void OpenNpc(int Type)
 {
   	BMD *b = &Models[Type];
 	if(b->NumActions > 0) return;
-#ifndef _VS2008PORTING			// #ifndef
-	int i;
-#endif // _VS2008PORTING
+
 	switch(Type)
 	{
 	case MODEL_MERCHANT_FEMALE:
 		AccessModel(MODEL_MERCHANT_FEMALE,"Data\\Npc\\","Female",1);
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-		for(i=0;i<2;i++)
-#endif // _VS2008PORTING
 		{
 			AccessModel(MODEL_MERCHANT_FEMALE_HEAD  +i,"Data\\Npc\\","FemaleHead"  ,i+1);
 			AccessModel(MODEL_MERCHANT_FEMALE_UPPER +i,"Data\\Npc\\","FemaleUpper" ,i+1);
@@ -3075,11 +2625,8 @@ void OpenNpc(int Type)
 		break;
 	case MODEL_MERCHANT_MAN:
 		AccessModel(MODEL_MERCHANT_MAN   ,"Data\\Npc\\","Man",1);
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-		for(i=0;i<2;i++)
-#endif // _VS2008PORTING
 		{
 			AccessModel(MODEL_MERCHANT_MAN_HEAD  +i,"Data\\Npc\\","ManHead"  ,i+1);
 			AccessModel(MODEL_MERCHANT_MAN_UPPER +i,"Data\\Npc\\","ManUpper" ,i+1);
@@ -3093,11 +2640,8 @@ void OpenNpc(int Type)
 		break;
 	case MODEL_MERCHANT_GIRL:
 		AccessModel(MODEL_MERCHANT_GIRL  ,"Data\\Npc\\","Girl",1);
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-		for(i=0;i<2;i++)
-#endif // _VS2008PORTING
 		{
 			AccessModel(MODEL_MERCHANT_GIRL_HEAD  +i,"Data\\Npc\\","GirlHead"  ,i+1);
 			AccessModel(MODEL_MERCHANT_GIRL_UPPER +i,"Data\\Npc\\","GirlUpper" ,i+1);
@@ -3529,11 +3073,8 @@ void OpenNpc(int Type)
 		break;
 #endif // LEM_ADD_LUCKYITEM
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<b->NumActions;i++)
-#else // _VS2008PORTING
-	for(i=0;i<b->NumActions;i++)
-#endif // _VS2008PORTING
 		b->Actions[i].PlaySpeed = 0.25f;
     //SetTexture(BITMAP_NPC);
 
@@ -3636,18 +3177,10 @@ void DeleteMonsters()
 	for(int i=MODEL_MONSTER01;i<MODEL_MONSTER_END;i++)
 		Models[i].Release();
 
-#ifdef _VS2008PORTING
 	for(int i=SOUND_MONSTER;i<SOUND_MONSTER_END;i++)
-#else // _VS2008PORTING
-	for(i=SOUND_MONSTER;i<SOUND_MONSTER_END;i++)
-#endif // _VS2008PORTING
 		ReleaseBuffer(i);
 
-#ifdef _VS2008PORTING
 	for(int i=SOUND_ELBELAND_RABBITSTRANGE_ATTACK01;i<=SOUND_ELBELAND_ENTERATLANCE01;i++)
-#else // _VS2008PORTING
-	for(i=SOUND_ELBELAND_RABBITSTRANGE_ATTACK01;i<=SOUND_ELBELAND_ENTERATLANCE01;i++)
-#endif // _VS2008PORTING
 		ReleaseBuffer(i);
 }
 
@@ -5696,11 +5229,8 @@ void OpenSkills()
 	AccessModel(MODEL_MAGIC2   ,"Data\\Skill\\","Magic",2);
 	AccessModel(MODEL_STORM    ,"Data\\Skill\\","Storm",1);
 	AccessModel(MODEL_LASER    ,"Data\\Skill\\","Laser",1);
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<3;i++)
-#else // _VS2008PORTING
-	for(i=0;i<3;i++)
-#endif // _VS2008PORTING
       	AccessModel(MODEL_SKELETON1+i,"Data\\Skill\\","Skeleton",i+1);
 
 	// 엘리트 해골전사 모델 데이타 로딩 텍스쳐는 밑에서 자동으로 로딩한다.
@@ -5732,18 +5262,13 @@ void OpenSkills()
 	g_NewYearsDayEvent->LoadModel();
 
 	AccessModel(MODEL_SAW      ,"Data\\Skill\\","Saw",1);
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-	for(i=0;i<2;i++)
-#endif // _VS2008PORTING
       	AccessModel(MODEL_BONE1+i,"Data\\Skill\\","Bone",i+1);
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<3;i++)
-#else // _VS2008PORTING
-	for(i=0;i<3;i++)
-#endif // _VS2008PORTING
       	AccessModel(MODEL_SNOW1+i,"Data\\Skill\\","Snow",i+1);
+
 	AccessModel(MODEL_UNICON       ,"Data\\Skill\\","Rider",1);
     AccessModel ( MODEL_PEGASUS, "Data\\Skill\\", "Rider", 2 );
     AccessModel ( MODEL_DARK_HORSE , "Data\\Skill\\", "DarkHorse" );
@@ -5863,12 +5388,9 @@ void OpenSkills()
 	AccessModel(MODEL_SPEARSKILL      ,"Data\\Skill\\","RidingSpear",1);
 	AccessModel(MODEL_PROTECT      ,"Data\\Skill\\","Protect",1);
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-	for(i=0;i<2;i++)
-#endif // _VS2008PORTING
       	AccessModel(MODEL_BIG_STONE1+i,"Data\\Skill\\","BigStone",i+1);
+
 	AccessModel(MODEL_MAGIC_CIRCLE1,"Data\\Skill\\","MagicCircle",1);
 	AccessModel(MODEL_ARROW_WING   ,"Data\\Skill\\","ArrowWing",1);
 	AccessModel(MODEL_ARROW_BOMB   ,"Data\\Skill\\","ArrowBomb",1);
@@ -5887,11 +5409,7 @@ void OpenSkills()
     AccessModel ( MODEL_STONE_COFFIN+0, "Data\\Object12\\", "StoneCoffin", 1 );
     AccessModel ( MODEL_STONE_COFFIN+1, "Data\\Object12\\", "StoneCoffin", 2 );
 
-#ifdef _VS2008PORTING
     for ( int i=0; i<2; ++i )
-#else // _VS2008PORTING
-    for ( i=0; i<2; ++i )
-#endif // _VS2008PORTING
     {
         OpenTexture ( MODEL_GATE+1, "Monster\\" );
         OpenTexture ( MODEL_STONE_COFFIN+i, "Monster\\" );
@@ -6090,11 +5608,7 @@ void OpenSkills()
 	AccessModel(MODEL_FENRIR_THUNDER, "Data\\Effect\\", "lightning_type01");
 	OpenTexture(MODEL_FENRIR_THUNDER, "Effect\\");
 
-#ifdef _VS2008PORTING
 	for(int i=MODEL_SKILL_BEGIN;i<MODEL_SKILL_END;i++)
-#else // _VS2008PORTING
-	for(i=MODEL_SKILL_BEGIN;i<MODEL_SKILL_END;i++)
-#endif // _VS2008PORTING
 	{
         if( i==MODEL_PIERCING )
         {
@@ -6398,19 +5912,12 @@ void OpenWorldModels()
 		CreateObject ( MODEL_WARP, Pos, Ang );
 		break;
 	case WD_5UNKNOWN:
-#ifdef _VS2008PORTING
 		for(int i=0;i<5;i++)
-#else // _VS2008PORTING
-		for(i=0;i<5;i++)
-#endif // _VS2008PORTING
 			AccessModel(MODEL_BIG_METEO1+i,"Data\\Object6\\","Meteo",i+1);
+
 		AccessModel(MODEL_BOSS_HEAD,"Data\\Object6\\","BossHead",1);
 		AccessModel(MODEL_PRINCESS ,"Data\\Object6\\","Princess",1);
-#ifdef _VS2008PORTING
 		for(int i=MODEL_BIG_METEO1;i<=MODEL_PRINCESS;i++)
-#else // _VS2008PORTING
-		for(i=MODEL_BIG_METEO1;i<=MODEL_PRINCESS;i++)
-#endif // _VS2008PORTING
 			OpenTexture(i,"Object6\\",GL_NEAREST);
 		break;
 	case WD_6STADIUM:
@@ -6421,20 +5928,13 @@ void OpenWorldModels()
 #ifdef YDG_ADD_MAP_DOPPELGANGER3
 	case WD_67DOPPLEGANGER3:
 #endif	// YDG_ADD_MAP_DOPPELGANGER3
-#ifdef _VS2008PORTING
 		for(int i=1;i<9;i++)
-#else // _VS2008PORTING
-		for(i=1;i<9;i++)
-#endif // _VS2008PORTING
 		{
 			AccessModel(MODEL_FISH01+i,"Data\\Object8\\","Fish",i+1);
 			OpenTexture(MODEL_FISH01+i,"Object8\\");
 		}
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<32;i++)
-#else // _VS2008PORTING
-		for(i=0;i<32;i++)
-#endif // _VS2008PORTING
 		{
 			char FileName[100];
 			if(i<10)
@@ -7492,11 +6992,7 @@ void OpenWorldModels()
 
     if ( World!=WD_7ATLANSE )
     {
-#ifdef _VS2008PORTING
 	    for ( int i=0; i<32; i++ )
-#else // _VS2008PORTING
-	    for ( i=0; i<32; i++ )
-#endif // _VS2008PORTING
 	    {
 		    char FileName[100];
 		    if(i<10)
@@ -8968,28 +8464,14 @@ void OpenLogoSceneData()
 
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 계정입력받는 씬에 필요한 데이타 프리하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void ReleaseLogoSceneData()
 {
-#ifdef _VS2008PORTING
 	for (int i = BITMAP_LOG_IN; i <= BITMAP_LOG_IN_END; ++i)
 		::DeleteBitmap(i);
 	for(int i=BITMAP_TEMP;i<BITMAP_TEMP+30;i++)
 		DeleteBitmap(i);
-#else // _VS2008PORTING
-	int i;
-
-	for (i = BITMAP_LOG_IN; i <= BITMAP_LOG_IN_END; ++i)
-		::DeleteBitmap(i);
-	for(i=BITMAP_TEMP;i<BITMAP_TEMP+30;i++)
-     	DeleteBitmap(i);
-#endif // _VS2008PORTING
 
 	DeleteObjects();
-	
 	ClearCharacters();
 }
 
@@ -9018,75 +8500,39 @@ void OpenCharacterSceneData()
 	for(int i=4;i<5;i++)
       	AccessModel(MODEL_LOGO+i,"Data\\Logo\\","Logo",i+1);
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<Class;i++)
-#else // _VS2008PORTING
-	for(i=0;i<Class;i++)
-#endif // _VS2008PORTING
      	AccessModel(MODEL_FACE+i,"Data\\Logo\\","NewFace",i+1);
 	
-#ifdef _VS2008PORTING
 	for(int i=4;i<5;i++)
-#else // _VS2008PORTING
-	for(i=4;i<5;i++)
-#endif // _VS2008PORTING
      	OpenTexture(MODEL_LOGO+i,"Logo\\", GL_REPEAT, GL_LINEAR);
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<Class;i++)
-#else // _VS2008PORTING
-	for(i=0;i<Class;i++)
-#endif // _VS2008PORTING
      	OpenTexture(MODEL_FACE+i,"Logo\\");
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<Class;i++)
-#else // _VS2008PORTING
-	for(i=0;i<Class;i++)
-#endif // _VS2008PORTING
 	{
 		Models[MODEL_FACE+i].Actions[0].PlaySpeed = 0.3f;
 		Models[MODEL_FACE+i].Actions[1].PlaySpeed = 0.3f;
 	}
-	// 소환술사의 숨 쉬는 애니메이션 속도만 다름.
 	Models[MODEL_FACE+CLASS_SUMMONER].Actions[0].PlaySpeed = 0.25f;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 캐릭터 선택하는 씬에 필요한 데이타 프리하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void ReleaseCharacterSceneData()
 {
-#ifdef _VS2008PORTING
 	for (int i = BITMAP_LOG_IN; i <= BITMAP_LOG_IN_END; ++i)
 		::DeleteBitmap(i);
 
 	for(int i=BITMAP_TEMP;i<BITMAP_EXT_LOG_IN + 7;i++)
 		DeleteBitmap(i);
-#else // _VS2008PORTING
-	int i;
-	for (i = BITMAP_LOG_IN; i <= BITMAP_LOG_IN_END; ++i)
-		::DeleteBitmap(i);
-
-	for(i=BITMAP_TEMP;i<BITMAP_EXT_LOG_IN + 7;i++)
-     	DeleteBitmap(i);
-#endif // _VS2008PORTING
 
 	DeleteObjects();
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_CLASS;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CLASS;i++)
-#endif // _VS2008PORTING
 		Models[MODEL_FACE+i].Release();
 
 	ClearCharacters();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 기본적으로 필요한 전반적인 데이타 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
 void OpenBasicData(HDC hDC)
 {
 #ifdef DO_PROFILING_FOR_LOADING
@@ -9097,13 +8543,10 @@ void OpenBasicData(HDC hDC)
 	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_PRELOADS, PROFILING_LOADING_PRELOADS );
 #endif // DO_PROFILING_FOR_LOADING
 
-	CUIMng& rUIMng = CUIMng::Instance();	// 새로 추가된 UI매니저의 인스턴스를 얻음.
+	CUIMng& rUIMng = CUIMng::Instance();
 
 	rUIMng.RenderTitleSceneUI(hDC, 0, 11);
 
-	// =======================================================================================
-	// 1. 기본 Interface 이미지 및 리소스들
-	// =======================================================================================
 	LoadBitmap("Interface\\Cursor.tga"           ,BITMAP_CURSOR  ,GL_LINEAR,GL_CLAMP);
 	LoadBitmap("Interface\\CursorPush.tga"       ,BITMAP_CURSOR+1,GL_LINEAR,GL_CLAMP);
 	LoadBitmap("Interface\\CursorAttack.tga"     ,BITMAP_CURSOR+2,GL_LINEAR,GL_CLAMP);
@@ -9198,7 +8641,7 @@ void OpenBasicData(HDC hDC)
 	}
 #endif //NEW_USER_INTERFACE_RESOURCEFILE
 
-	LoadBitmap("Interface\\CursorID.tga",	BITMAP_INTERFACE_EX+29);        //  추가 커서 아이디.
+	LoadBitmap("Interface\\CursorID.tga",	BITMAP_INTERFACE_EX+29); 
 	LoadBitmap("Interface\\bar.jpg"			,BITMAP_INTERFACE+23);
 	LoadBitmap("Interface\\back1.jpg"			,BITMAP_INTERFACE+24);
 	LoadBitmap("Interface\\back2.jpg"			,BITMAP_INTERFACE+25);
@@ -9219,14 +8662,14 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap( "Effect\\fi01.jpg"		,BITMAP_ADV_SMOKE,  GL_LINEAR, GL_CLAMP );		// GM 3rd ChangeUp, CryingWolf2nd
 	LoadBitmap( "Effect\\fi02.tga"	    ,BITMAP_ADV_SMOKE+1,GL_LINEAR, GL_CLAMP );		// GM 3rd ChangeUp, CryingWolf2nd
 	LoadBitmap( "Effect\\fantaF.jpg"		,BITMAP_TRUE_FIRE,  GL_LINEAR, GL_CLAMP );	// GM Aida, GMBattleCastle, ....
-	LoadBitmap( "Effect\\fantaB.jpg"		,BITMAP_TRUE_BLUE,  GL_LINEAR, GL_CLAMP );  // 
+	LoadBitmap( "Effect\\fantaB.jpg"		,BITMAP_TRUE_BLUE,  GL_LINEAR, GL_CLAMP ); 
 	LoadBitmap( "Effect\\JointSpirit02.jpg" ,BITMAP_JOINT_SPIRIT2  ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap( "Effect\\Piercing.jpg" , BITMAP_PIERCING, GL_LINEAR, GL_REPEAT );    //  
-	LoadBitmap( "Monster\\iui06.jpg",    BITMAP_ROBE+6 );                            //  블루 나이트 머리카락.
-	LoadBitmap( "Effect\\Magic_b.jpg",   BITMAP_MAGIC_EMBLEM );                      //  마법문장.
+	LoadBitmap( "Effect\\Piercing.jpg" , BITMAP_PIERCING, GL_LINEAR, GL_REPEAT );
+	LoadBitmap( "Monster\\iui06.jpg",    BITMAP_ROBE+6 );
+	LoadBitmap( "Effect\\Magic_b.jpg",   BITMAP_MAGIC_EMBLEM );
 	LoadBitmap("Player\\dark3chima3.tga", BITMAP_DARKLOAD_SKIRT_3RD, GL_LINEAR, GL_CLAMP);
     LoadBitmap( "Player\\kaa.tga",       BITMAP_DARK_LOAD_SKIRT,  GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Effect\\ShockWave.jpg", BITMAP_SHOCK_WAVE, GL_LINEAR );             //  
+	LoadBitmap( "Effect\\ShockWave.jpg", BITMAP_SHOCK_WAVE, GL_LINEAR ); 
     LoadBitmap("Effect\\Flame01.jpg"		,BITMAP_FLAME     ,GL_LINEAR,GL_CLAMP);
 	LoadBitmap("Effect\\flare01.jpg"	    ,BITMAP_LIGHT      ,GL_LINEAR,GL_CLAMP);
 	LoadBitmap("Effect\\Magic_Ground1.jpg",BITMAP_MAGIC      ,GL_LINEAR,GL_CLAMP);
@@ -9288,10 +8731,9 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\firehik_mono03.jpg", BITMAP_FIRE_HIK3_MONO, GL_LINEAR, GL_CLAMP);
 #endif // CSK_ADD_MAP_ICECITY
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
-	LoadBitmap("Effect\\clouds3.jpg", BITMAP_RAKLION_CLOUDS, GL_LINEAR, GL_CLAMP);	// 라클리온 아이스워커 공격 이펙트 텍스쳐
+	LoadBitmap("Effect\\clouds3.jpg", BITMAP_RAKLION_CLOUDS, GL_LINEAR, GL_CLAMP);
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 #ifdef ADD_RAKLION_IRON_KNIGHT
-	// 라클리온 몬스터 아이온 나이트
 	LoadBitmap("Monster\\icenightlight.jpg", BITMAP_IRONKNIGHT_BODY_BRIGHT, GL_LINEAR, GL_CLAMP);
 #endif	// ADD_RAKLION_IRON_KNIGHT
 
@@ -9309,7 +8751,7 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Skill\\SwordEff.jpg"	    ,BITMAP_BLUE_BLUR     ,GL_LINEAR,GL_CLAMP);
 	LoadBitmap("Effect\\Impack03.jpg"   ,BITMAP_IMPACT      ,GL_LINEAR,GL_CLAMP);
 	LoadBitmap("Effect\\ScolTail.jpg"  ,BITMAP_SCOLPION_TAIL  ,GL_LINEAR);
-	LoadBitmap( "Effect\\FireSnuff.jpg"       , BITMAP_FIRE_SNUFF,    GL_LINEAR, GL_CLAMP );      //  불씨.
+	LoadBitmap( "Effect\\FireSnuff.jpg"       , BITMAP_FIRE_SNUFF,    GL_LINEAR, GL_CLAMP );
 	LoadBitmap("Effect\\coll.jpg"	,BITMAP_SPOT_WATER,GL_LINEAR, GL_CLAMP );
 	LoadBitmap("Effect\\BowE.jpg"	,BITMAP_DS_EFFECT,GL_LINEAR, GL_CLAMP );
 	LoadBitmap("Effect\\Shockwave.jpg"	,BITMAP_DS_SHOCK,GL_LINEAR, GL_CLAMP );
@@ -9332,13 +8774,13 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\motion_blur_r3.jpg",BITMAP_BLUR+6   ,GL_NEAREST,GL_CLAMP);
 	LoadBitmap("Effect\\gra.jpg",BITMAP_BLUR+7				,GL_NEAREST,GL_CLAMP);
 	LoadBitmap("Effect\\spinmark01.jpg",BITMAP_BLUR+8		,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\flamestani.jpg", BITMAP_BLUR+9		,GL_LINEAR, GL_CLAMP);	// 제린트 공격2번 검기 사용
-	LoadBitmap("Effect\\sword_blur.jpg", BITMAP_BLUR+10		,GL_LINEAR, GL_CLAMP);	// 가이온 제린트 공격 검기 사용
-	LoadBitmap("Effect\\joint_sword_red.jpg", BITMAP_BLUR+11,GL_LINEAR, GL_CLAMP);	// 가이온 공격 검기 사용
-	LoadBitmap("Effect\\motion_blur_r2.jpg", BITMAP_BLUR+12,GL_LINEAR, GL_CLAMP);	// 가이온 공격 검기 사용 2
-	LoadBitmap("Effect\\motion_blur_r3.jpg", BITMAP_BLUR+13,GL_LINEAR, GL_CLAMP);	// 가이온 공격 검기 사용 2
+	LoadBitmap("Effect\\flamestani.jpg", BITMAP_BLUR+9		,GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\sword_blur.jpg", BITMAP_BLUR+10		,GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\joint_sword_red.jpg", BITMAP_BLUR+11,GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\motion_blur_r2.jpg", BITMAP_BLUR+12,GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\motion_blur_r3.jpg", BITMAP_BLUR+13,GL_LINEAR, GL_CLAMP);
 #endif //LDS_ADD_EMPIRE_GUARDIAN
-	LoadBitmap("Effect\\blur02.jpg"       ,BITMAP_BLUR2      ,GL_NEAREST,GL_CLAMP); //	2004/12/13 : 잔상효과 추가 텍스처
+	LoadBitmap("Effect\\blur02.jpg"       ,BITMAP_BLUR2      ,GL_NEAREST,GL_CLAMP);
 	LoadBitmap("Effect\\lightning2.jpg"	,BITMAP_LIGHTNING+1,GL_LINEAR,GL_CLAMP);
 	LoadBitmap("Effect\\Thunder01.jpg"     ,BITMAP_ENERGY        ,GL_LINEAR,GL_REPEAT);
 	LoadBitmap("Effect\\Spark01.jpg"	     ,BITMAP_JOINT_SPARK   ,GL_LINEAR,GL_CLAMP);
@@ -9398,19 +8840,19 @@ void OpenBasicData(HDC hDC)
 #endif // CSK_LUCKY_SEAL
 #endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 
-	LoadBitmap("Item\\nfm03.jpg"			,BITMAP_BLUECHROME,GL_NEAREST,GL_REPEAT);		// 참조 여부 재확인
+	LoadBitmap("Item\\nfm03.jpg"			,BITMAP_BLUECHROME,GL_NEAREST,GL_REPEAT);
 	LoadBitmap("Effect\\flareBlue.jpg"     	,BITMAP_FLARE_BLUE,  GL_LINEAR,GL_CLAMP);
 	LoadBitmap("Effect\\NSkill.jpg"     	,BITMAP_FLARE_FORCE,  GL_LINEAR,GL_CLAMP);
-    LoadBitmap("Effect\\Flare02.jpg"      ,BITMAP_FLARE+1, GL_LINEAR,GL_REPEAT);  //  띄 효과.
-	LoadBitmap("Monster\\King11.jpg", BITMAP_WHITE_WIZARD, GL_LINEAR, GL_CLAMP);	// 백마법사 옷	// 저주받은왕
-	LoadBitmap("Monster\\Kni000.jpg", BITMAP_DEST_ORC_WAR0, GL_LINEAR, GL_CLAMP);	// 파괴의 오크 전사0
-	LoadBitmap("Monster\\Kni011.jpg", BITMAP_DEST_ORC_WAR1, GL_LINEAR, GL_CLAMP);	// 파괴의 오크 전사1
-	LoadBitmap("Monster\\Kni022.jpg", BITMAP_DEST_ORC_WAR2, GL_LINEAR, GL_CLAMP);	// 파괴의 오크 전사2
+    LoadBitmap("Effect\\Flare02.jpg"      ,BITMAP_FLARE+1, GL_LINEAR,GL_REPEAT);
+	LoadBitmap("Monster\\King11.jpg", BITMAP_WHITE_WIZARD, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Monster\\Kni000.jpg", BITMAP_DEST_ORC_WAR0, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Monster\\Kni011.jpg", BITMAP_DEST_ORC_WAR1, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Monster\\Kni022.jpg", BITMAP_DEST_ORC_WAR2, GL_LINEAR, GL_CLAMP);
 	LoadBitmap( "Skill\\pinkWave.jpg"     	, BITMAP_PINK_WAVE,     GL_LINEAR, GL_CLAMP );
 	LoadBitmap( "Effect\\flareRed.jpg"     	, BITMAP_FLARE_RED,     GL_LINEAR, GL_CLAMP );
 	LoadBitmap( "Effect\\Fire05.jpg"		    , BITMAP_FIRE+3,        GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Effect\\Hole.jpg"           , BITMAP_HOLE,          GL_LINEAR, GL_REPEAT );	    //  홀. ( 빨려들어가는 느낌 ).
-//	LoadBitmap( "Monster\\mop011.jpg"        , BITMAP_OTHER_SKIN,    GL_LINEAR, GL_REPEAT );     //  칼리마 작은 기사 몬스터 스킨.
+	LoadBitmap( "Effect\\Hole.jpg"           , BITMAP_HOLE,          GL_LINEAR, GL_REPEAT );
+//	LoadBitmap( "Monster\\mop011.jpg"        , BITMAP_OTHER_SKIN,    GL_LINEAR, GL_REPEAT );
 	LoadBitmap( "Effect\\WATERFALL1.jpg"		, BITMAP_WATERFALL_1,   GL_LINEAR, GL_CLAMP );
 	LoadBitmap( "Effect\\WATERFALL2.jpg"		, BITMAP_WATERFALL_2,   GL_LINEAR, GL_CLAMP );
 	LoadBitmap( "Effect\\WATERFALL3.jpg"	    , BITMAP_WATERFALL_3,   GL_LINEAR, GL_CLAMP );
@@ -9466,42 +8908,41 @@ void OpenBasicData(HDC hDC)
 	*/
 	//m_main_rank
 	//icon_Rank_exp
-	LoadBitmap( "Interface\\BattleSkill.tga"	, BITMAP_INTERFACE_EX+34 );             //  배틀 마스터 스킬 인터페이스.
-	LoadBitmap( "Effect\\Flashing.jpg"        , BITMAP_FLASH, GL_LINEAR, GL_CLAMP );  //  섬광효과.
-	LoadBitmap( "Interface\\senatusmap.jpg"	, BITMAP_INTERFACE_EX+35 );             // 공성맵 전체미니이미지
-	LoadBitmap( "Interface\\gate_button2.jpg"	, BITMAP_INTERFACE_EX+36 );             // 성문버튼(보통)
-	LoadBitmap( "Interface\\gate_button1.jpg"	, BITMAP_INTERFACE_EX+37 );             // 성문버튼(눌림)
-	LoadBitmap( "Interface\\suho_button2.jpg"	, BITMAP_INTERFACE_EX+38 );             // 석상버튼(보통)
-	LoadBitmap( "Interface\\suho_button1.jpg"	, BITMAP_INTERFACE_EX+39 );             // 석상버튼(눌림)
-	LoadBitmap( "Interface\\DoorCL.jpg"	    , BITMAP_INTERFACE_EX+40 );             //  성문 닫침.
-	LoadBitmap( "Interface\\DoorOP.jpg"	    , BITMAP_INTERFACE_EX+41 );             //  성문 열림.
-    //OpenJpeg( "Effect\\FireSnuff.jpg"       , BITMAP_FIRE_SNUFF,    GL_LINEAR, GL_CLAMP );      //  불씨.
-	LoadBitmap( "Object31\\Flag.tga"          , BITMAP_INTERFACE_MAP+0, GL_LINEAR, GL_CLAMP );    //  성 깃발.
-	LoadBitmap( "Interface\\CursorAttack2.tga", BITMAP_CURSOR2 );                                 //  공성전에서의 공격 표시.
-	LoadBitmap( "Effect\\Cratered.tga"	    , BITMAP_CRATER );                      //  폭발 흔적.
-	LoadBitmap( "Effect\\FormationMark.tga"	, BITMAP_FORMATION_MARK );              //  진형 마크.
-    LoadBitmap( "Effect\\Plus.tga"	        , BITMAP_PLUS );                        //  
-	//^ 펜릴 이펙트 관련(텍스쳐)
+	LoadBitmap( "Interface\\BattleSkill.tga"	, BITMAP_INTERFACE_EX+34 );
+	LoadBitmap( "Effect\\Flashing.jpg"        , BITMAP_FLASH, GL_LINEAR, GL_CLAMP );
+	LoadBitmap( "Interface\\senatusmap.jpg"	, BITMAP_INTERFACE_EX+35 );
+	LoadBitmap( "Interface\\gate_button2.jpg"	, BITMAP_INTERFACE_EX+36 ); 
+	LoadBitmap( "Interface\\gate_button1.jpg"	, BITMAP_INTERFACE_EX+37 );
+	LoadBitmap( "Interface\\suho_button2.jpg"	, BITMAP_INTERFACE_EX+38 );
+	LoadBitmap( "Interface\\suho_button1.jpg"	, BITMAP_INTERFACE_EX+39 );
+	LoadBitmap( "Interface\\DoorCL.jpg"	    , BITMAP_INTERFACE_EX+40 ); 
+	LoadBitmap( "Interface\\DoorOP.jpg"	    , BITMAP_INTERFACE_EX+41 );
+    //OpenJpeg( "Effect\\FireSnuff.jpg"       , BITMAP_FIRE_SNUFF,    GL_LINEAR, GL_CLAMP );
+	LoadBitmap( "Object31\\Flag.tga"          , BITMAP_INTERFACE_MAP+0, GL_LINEAR, GL_CLAMP );
+	LoadBitmap( "Interface\\CursorAttack2.tga", BITMAP_CURSOR2 );
+	LoadBitmap( "Effect\\Cratered.tga"	    , BITMAP_CRATER ); 
+	LoadBitmap( "Effect\\FormationMark.tga"	, BITMAP_FORMATION_MARK );
+    LoadBitmap( "Effect\\Plus.tga"	        , BITMAP_PLUS );
 	LoadBitmap("Effect\\eff_lighting.jpg" , BITMAP_FENRIR_THUNDER);
 	LoadBitmap("Effect\\eff_lightinga01.jpg" , BITMAP_FENRIR_FOOT_THUNDER1);
 	LoadBitmap("Effect\\eff_lightinga02.jpg" , BITMAP_FENRIR_FOOT_THUNDER2);
 	LoadBitmap("Effect\\eff_lightinga03.jpg" , BITMAP_FENRIR_FOOT_THUNDER3);
 	LoadBitmap("Effect\\eff_lightinga04.jpg" , BITMAP_FENRIR_FOOT_THUNDER4);
 	LoadBitmap("Effect\\eff_lightinga05.jpg" , BITMAP_FENRIR_FOOT_THUNDER5);
-	LoadBitmap( "Interface\\Progress_Back.jpg",BITMAP_INTERFACE_EX+42 );				// 팝업창용 프로그레스바 배경
-	LoadBitmap( "Interface\\Progress.jpg"     ,BITMAP_INTERFACE_EX+43 );				// 팝업창용 프로그레스바
-	LoadBitmap( "Effect\\Inferno.jpg"         , BITMAP_INFERNO,       GL_LINEAR, GL_CLAMP );      //  화염.
-	LoadBitmap( "Effect\\Lava.jpg"            , BITMAP_LAVA,          GL_LINEAR, GL_CLAMP );      //  용암.
-	LoadBitmap( "Interface\\frame.tga",       BITMAP_INTERFACE_MAP+3 );   //  공성전 지도 틀.
-	LoadBitmap( "Interface\\i_attack.tga",    BITMAP_INTERFACE_MAP+4 );   //  공격 아이콘.
-	LoadBitmap( "Interface\\i_defense.tga",   BITMAP_INTERFACE_MAP+5 );   //  방어 아이콘.
-	LoadBitmap( "Interface\\i_wait.tga",      BITMAP_INTERFACE_MAP+6 );   //  대기 아이콘.
-	LoadBitmap( "Interface\\b_command01.jpg", BITMAP_INTERFACE_MAP+8 );   //  명령창 온.
-	LoadBitmap( "Interface\\b_command02.jpg", BITMAP_INTERFACE_MAP+9 );   //  명령창 오프.
-	LoadBitmap( "Interface\\b_group02.jpg",   BITMAP_INTERFACE_MAP+10);   //  그룹창 온.
-	LoadBitmap( "Interface\\b_zoomout01.jpg", BITMAP_INTERFACE_MAP+11);   //  축소.
-	LoadBitmap( "Interface\\hourglass.tga",   BITMAP_INTERFACE_MAP+7 );   //  시간창.
-	LoadBitmap( "Interface\\dot.tga",         BITMAP_INTERFACE_EX+44 );   //  ●
+	LoadBitmap( "Interface\\Progress_Back.jpg",BITMAP_INTERFACE_EX+42 );
+	LoadBitmap( "Interface\\Progress.jpg"     ,BITMAP_INTERFACE_EX+43 );
+	LoadBitmap( "Effect\\Inferno.jpg"         , BITMAP_INFERNO,       GL_LINEAR, GL_CLAMP );
+	LoadBitmap( "Effect\\Lava.jpg"            , BITMAP_LAVA,          GL_LINEAR, GL_CLAMP );
+	LoadBitmap( "Interface\\frame.tga",       BITMAP_INTERFACE_MAP+3 ); 
+	LoadBitmap( "Interface\\i_attack.tga",    BITMAP_INTERFACE_MAP+4 );
+	LoadBitmap( "Interface\\i_defense.tga",   BITMAP_INTERFACE_MAP+5 );
+	LoadBitmap( "Interface\\i_wait.tga",      BITMAP_INTERFACE_MAP+6 );
+	LoadBitmap( "Interface\\b_command01.jpg", BITMAP_INTERFACE_MAP+8 );
+	LoadBitmap( "Interface\\b_command02.jpg", BITMAP_INTERFACE_MAP+9 );
+	LoadBitmap( "Interface\\b_group02.jpg",   BITMAP_INTERFACE_MAP+10);
+	LoadBitmap( "Interface\\b_zoomout01.jpg", BITMAP_INTERFACE_MAP+11);
+	LoadBitmap( "Interface\\hourglass.tga",   BITMAP_INTERFACE_MAP+7 );
+	LoadBitmap( "Interface\\dot.tga",         BITMAP_INTERFACE_EX+44 );
 	LoadBitmap("Object9\\Impack03.jpg"   ,BITMAP_LIGHT+1      ,GL_LINEAR,GL_CLAMP);
 	LoadBitmap("Monster\\buserbody_r.jpg", BITMAP_BERSERK_EFFECT, GL_LINEAR, GL_CLAMP);
 	LoadBitmap("Monster\\busersword_r.jpg", BITMAP_BERSERK_WP_EFFECT, GL_LINEAR, GL_CLAMP);
@@ -9512,68 +8953,64 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Monster\\prsonass_R.jpg", BITMAP_PRSONA_EFFECT2, GL_LINEAR, GL_CLAMP);
 	LoadBitmap("effect\\water.jpg", BITMAP_TWINTAIL_WATER, GL_LINEAR, GL_CLAMP);
 	LoadBitmap("Effect\\cra_04.jpg"   ,BITMAP_LIGHT+2      ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Impack01.jpg"		,BITMAP_LIGHT+3,	GL_LINEAR,GL_CLAMP);	//$ 크라이울프 마검사검 효과
-	::LoadBitmap("Interface\\message_ok_b_all.tga", BITMAP_BUTTON);		// OK 버튼.
-	::LoadBitmap("Interface\\loding_cancel_b_all.tga", BITMAP_BUTTON+1);   // Cancel 버튼.
-	::LoadBitmap("Interface\\message_close_b_all.tga", BITMAP_BUTTON+2);   // Close 버튼.
-	::LoadBitmap("Interface\\message_back.tga", BITMAP_MESSAGE_WIN);		// 메시지 창.
-	::LoadBitmap("Interface\\delete_secret_number.tga", BITMAP_MSG_WIN_INPUT);// 입력 테두리.
-	::LoadBitmap("Interface\\op1_stone.jpg", BITMAP_SYS_WIN, GL_NEAREST, GL_REPEAT);// 시스템메뉴창 중앙.
-	::LoadBitmap("Interface\\op1_back1.tga", BITMAP_SYS_WIN+1);			// 시스템메뉴창 상.
-	::LoadBitmap("Interface\\op1_back2.tga", BITMAP_SYS_WIN+2);			// 시스템메뉴창 하.
-	::LoadBitmap("Interface\\op1_back3.jpg", BITMAP_SYS_WIN+3, GL_NEAREST, GL_REPEAT);// 시스템메뉴창 좌.
-	::LoadBitmap("Interface\\op1_back4.jpg", BITMAP_SYS_WIN+4, GL_NEAREST, GL_REPEAT);// 시스템메뉴창 우.
-	::LoadBitmap("Interface\\op1_b_all.tga", BITMAP_TEXT_BTN);				// 텍스트 버튼.
-	::LoadBitmap("Interface\\op2_back1.tga", BITMAP_OPTION_WIN);			// 옵션창.
-	::LoadBitmap("Interface\\op2_ch.tga", BITMAP_CHECK_BTN);				// 체크 버튼.
-	::LoadBitmap("Interface\\op2_volume3.tga", BITMAP_SLIDER);				// 슬라이더 썸.
-	::LoadBitmap("Interface\\op2_volume2.jpg", BITMAP_SLIDER+1, GL_NEAREST, GL_REPEAT);// 슬라이더 게이지.
-	::LoadBitmap("Interface\\op2_volume1.tga", BITMAP_SLIDER+2);			// 슬라이더 배경.
-	::LoadBitmap("Effect\\clouds2.jpg", BITMAP_EVENT_CLOUD, GL_LINEAR, GL_CLAMP);			// 소환술사 무기에 쓰임.
+	LoadBitmap("Effect\\Impack01.jpg"		,BITMAP_LIGHT+3,	GL_LINEAR,GL_CLAMP);
+	::LoadBitmap("Interface\\message_ok_b_all.tga", BITMAP_BUTTON);
+	::LoadBitmap("Interface\\loding_cancel_b_all.tga", BITMAP_BUTTON+1);
+	::LoadBitmap("Interface\\message_close_b_all.tga", BITMAP_BUTTON+2);
+	::LoadBitmap("Interface\\message_back.tga", BITMAP_MESSAGE_WIN);
+	::LoadBitmap("Interface\\delete_secret_number.tga", BITMAP_MSG_WIN_INPUT);
+	::LoadBitmap("Interface\\op1_stone.jpg", BITMAP_SYS_WIN, GL_NEAREST, GL_REPEAT);
+	::LoadBitmap("Interface\\op1_back1.tga", BITMAP_SYS_WIN+1);
+	::LoadBitmap("Interface\\op1_back2.tga", BITMAP_SYS_WIN+2);
+	::LoadBitmap("Interface\\op1_back3.jpg", BITMAP_SYS_WIN+3, GL_NEAREST, GL_REPEAT);
+	::LoadBitmap("Interface\\op1_back4.jpg", BITMAP_SYS_WIN+4, GL_NEAREST, GL_REPEAT);
+	::LoadBitmap("Interface\\op1_b_all.tga", BITMAP_TEXT_BTN);
+	::LoadBitmap("Interface\\op2_back1.tga", BITMAP_OPTION_WIN);
+	::LoadBitmap("Interface\\op2_ch.tga", BITMAP_CHECK_BTN);
+	::LoadBitmap("Interface\\op2_volume3.tga", BITMAP_SLIDER);
+	::LoadBitmap("Interface\\op2_volume2.jpg", BITMAP_SLIDER+1, GL_NEAREST, GL_REPEAT);
+	::LoadBitmap("Interface\\op2_volume1.tga", BITMAP_SLIDER+2);
+	::LoadBitmap("Effect\\clouds2.jpg", BITMAP_EVENT_CLOUD, GL_LINEAR, GL_CLAMP);
 	LoadBitmap("Effect\\pin_lights.jpg", BITMAP_PIN_LIGHT, GL_LINEAR, GL_CLAMP);
 #ifdef LDK_ADD_EG_MONSTER_DEASULER
 	LoadBitmap("Monster\\deasuler_cloth.tga", BITMAP_DEASULER_CLOTH, GL_LINEAR, GL_CLAMP);
 #endif //LDK_ADD_EG_MONSTER_DEASULER
 
 #ifdef ADD_SOCKET_ITEM
-	LoadBitmap("Item\\soketmagic_stape02.jpg", BITMAP_SOCKETSTAFF, GL_LINEAR, GL_CLAMP);	// 인베리알스테프 이팩트 텍스쳐
-	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS, GL_LINEAR, GL_CLAMP);			// 룬바스타드, 브레이브소드 이팩트 텍스쳐
+	LoadBitmap("Item\\soketmagic_stape02.jpg", BITMAP_SOCKETSTAFF, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS, GL_LINEAR, GL_CLAMP);
 #endif // ADD_SOCKET_ITEM
 #ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS_FOREIGN, GL_LINEAR, GL_CLAMP);			// 수호 정령 이펙트 텍스쳐
+	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS_FOREIGN, GL_LINEAR, GL_CLAMP);
 #endif //LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 
-	// 타이클 화면에서 로딩 게이지를 1/10만큼 표시.
 	rUIMng.RenderTitleSceneUI(hDC, 1, 11);
 
 #ifdef CSK_FREE_TICKET
-	// 자유입장권 아이템 이펙트 효과 들어갈 텍스쳐 로딩
 	::LoadBitmap("Item\\partCharge1\\entrance_R.jpg", BITMAP_FREETICKET_R, GL_LINEAR, GL_CLAMP);
 #endif // CSK_FREE_TICKET
 #ifdef CSK_CHAOS_CARD
-	// 카오스카드 아이템 이펙트 효과 들어갈 텍스쳐 로딩
 	::LoadBitmap("Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_LINEAR, GL_CLAMP);
 #endif // CSK_CHAOS_CARD
 
 #if SELECTED_LANGUAGE == LANGUAGE_KOREAN
 #ifdef CSK_LUCKY_SEAL
-	::LoadBitmap("Item\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP);// 행운의 인장 (상승의 인장)
-	::LoadBitmap("Item\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP);// 행운의 인장 (풍요의 인장)
-	::LoadBitmap("Item\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP);// 행운의 인장 (유지의 인장)
+	::LoadBitmap("Item\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP);
 #endif //CSK_LUCKY_SEAL
 #else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 #ifdef CSK_LUCKY_SEAL
-	::LoadBitmap("Item\\partCharge1\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP);// 행운의 인장 (상승의 인장)
-	::LoadBitmap("Item\\partCharge1\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP);// 행운의 인장 (풍요의 인장)
-	::LoadBitmap("Item\\partCharge1\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP);// 행운의 인장 (유지의 인장)
+	::LoadBitmap("Item\\partCharge1\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge1\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge1\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP);
 #endif //CSK_LUCKY_SEAL
 #endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 
 #ifdef CSK_LUCKY_CHARM
-	::LoadBitmap("Item\\partCharge1\\bujuck01alpa.jpg", BITMAP_LUCKY_CHARM_EFFECT53, GL_LINEAR, GL_CLAMP);// 행운의 부적
+	::LoadBitmap("Item\\partCharge1\\bujuck01alpa.jpg", BITMAP_LUCKY_CHARM_EFFECT53, GL_LINEAR, GL_CLAMP);
 #endif //CSK_LUCKY_CHARM
 #ifdef CSK_RARE_ITEM
-	// 희귀아이템 이펙트 효과 들어갈 텍스쳐 로딩
 	::LoadBitmap("Item\\partCharge1\\expensiveitem01_R.jpg", BITMAP_RAREITEM1_R, GL_LINEAR, GL_CLAMP);
 	::LoadBitmap("Item\\partCharge1\\expensiveitem02a_R.jpg", BITMAP_RAREITEM2_R, GL_LINEAR, GL_CLAMP);
 	::LoadBitmap("Item\\partCharge1\\expensiveitem02b_R.jpg", BITMAP_RAREITEM3_R, GL_LINEAR, GL_CLAMP);
@@ -9581,29 +9018,27 @@ void OpenBasicData(HDC hDC)
 	::LoadBitmap("Item\\partCharge1\\expensiveitem03b_R.jpg", BITMAP_RAREITEM5_R, GL_LINEAR, GL_CLAMP);
 #endif // CSK_RARE_ITEM
 #if defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
-	::LoadBitmap("Item\\partCharge3\\alicecard_R.tga", BITMAP_CHARACTERCARD_R, GL_LINEAR, GL_CLAMP);	// 캐릭터 카드(소환술사)
+	::LoadBitmap("Item\\partCharge3\\alicecard_R.tga", BITMAP_CHARACTERCARD_R, GL_LINEAR, GL_CLAMP);
 #endif // defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
 #ifdef PBG_ADD_CHARACTERCARD
-	::LoadBitmap("Item\\Ingameshop\\kacama_R.jpg", BITMAP_CHARACTERCARD_R_MA, GL_LINEAR, GL_CLAMP);	// 캐릭터 카드(마검사)
-	::LoadBitmap("Item\\Ingameshop\\kacada_R.jpg", BITMAP_CHARACTERCARD_R_DA, GL_LINEAR, GL_CLAMP);	// 캐릭터 카드(다크로드)
+	::LoadBitmap("Item\\Ingameshop\\kacama_R.jpg", BITMAP_CHARACTERCARD_R_MA, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\Ingameshop\\kacada_R.jpg", BITMAP_CHARACTERCARD_R_DA, GL_LINEAR, GL_CLAMP);
 #endif //PBG_ADD_CHARACTERCARD
 #ifdef PSW_NEW_CHAOS_CARD
-	::LoadBitmap("Item\\partCharge3\\jujug_R.jpg", BITMAP_NEWCHAOSCARD_GOLD_R, GL_LINEAR, GL_CLAMP);	// 카오스카드 골드
-	::LoadBitmap("Item\\partCharge3\\jujul_R.jpg", BITMAP_NEWCHAOSCARD_RARE_R, GL_LINEAR, GL_CLAMP);	// 카오스카드 레어
-	::LoadBitmap("Item\\partCharge3\\jujum_R.jpg", BITMAP_NEWCHAOSCARD_MINI_R, GL_LINEAR, GL_CLAMP);	// 카오스카드 미니
+	::LoadBitmap("Item\\partCharge3\\jujug_R.jpg", BITMAP_NEWCHAOSCARD_GOLD_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge3\\jujul_R.jpg", BITMAP_NEWCHAOSCARD_RARE_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge3\\jujum_R.jpg", BITMAP_NEWCHAOSCARD_MINI_R, GL_LINEAR, GL_CLAMP);
 #endif // PSW_NEW_CHAOS_CARD       
 #ifdef CSK_EVENT_CHERRYBLOSSOM
-	// 벚꽃잎 
 	::LoadBitmap("Effect\\cherryblossom\\sakuras01.jpg", BITMAP_CHERRYBLOSSOM_EVENT_PETAL, GL_LINEAR, GL_CLAMP);
-	// 벚꽃
 	::LoadBitmap("Effect\\cherryblossom\\sakuras02.jpg", BITMAP_CHERRYBLOSSOM_EVENT_FLOWER, GL_LINEAR, GL_CLAMP);
 #endif // CSK_EVENT_CHERRYBLOSSOM
 	::LoadBitmap("Object39\\k_effect_01.JPG", BITMAP_KANTURU_2ND_EFFECT1, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\deathbeamstone_R.jpg", BITMAP_ITEM_EFFECT_DBSTONE_R, GL_LINEAR, GL_CLAMP);	// 데스빔 나이트 불꽃 아이템 이펙트.
-	::LoadBitmap("Item\\hellhorn_R.jpg", BITMAP_ITEM_EFFECT_HELLHORN_R, GL_LINEAR, GL_CLAMP);	// 헬 마이네 뿔 아이템 이펙트.
-	::LoadBitmap("Item\\phoenixfeather_R.tga", BITMAP_ITEM_EFFECT_PFEATHER_R, GL_LINEAR, GL_CLAMP);	// 어둠의 불사조 깃털 아이템 이펙트.
-	::LoadBitmap("Item\\Deye_R.jpg", BITMAP_ITEM_EFFECT_DEYE_R, GL_LINEAR, GL_CLAMP);	// 심연의눈동자 아이템 이펙트.
-	::LoadBitmap("Item\\wing3chaking2.jpg", BITMAP_ITEM_NIGHT_3RDWING_R, GL_LINEAR, GL_CLAMP);	// 흑기사 3차날개 이펙트
+	::LoadBitmap("Item\\deathbeamstone_R.jpg", BITMAP_ITEM_EFFECT_DBSTONE_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\hellhorn_R.jpg", BITMAP_ITEM_EFFECT_HELLHORN_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\phoenixfeather_R.tga", BITMAP_ITEM_EFFECT_PFEATHER_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\Deye_R.jpg", BITMAP_ITEM_EFFECT_DEYE_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\wing3chaking2.jpg", BITMAP_ITEM_NIGHT_3RDWING_R, GL_LINEAR, GL_CLAMP);
 
 	LoadBitmap("NPC\\lumi.jpg", BITMAP_CURSEDTEMPLE_NPC_MESH_EFFECT, GL_LINEAR, GL_CLAMP);
 	LoadBitmap("item\\songko2_R.jpg", BITMAP_CURSEDTEMPLE_HOLYITEM_MESH_EFFECT, GL_LINEAR, GL_CLAMP);
@@ -9616,19 +9051,19 @@ void OpenBasicData(HDC hDC)
 #ifdef ASG_ADD_GENS_SYSTEM
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	string strFileName = "Local\\" + g_strSelectedML + "\\ImgsMapName\\MapNameAddStrife.tga";
-	::LoadBitmap(strFileName.c_str(), BITMAP_INTERFACE_EX+47);	// 맵이름 상단에 나오는 분쟁지역.
+	::LoadBitmap(strFileName.c_str(), BITMAP_INTERFACE_EX+47);
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	::LoadBitmap("Interface\\MapNameAddStrife.tga", BITMAP_INTERFACE_EX+47);	// 맵이름 상단에 나오는 분쟁지역.
+	::LoadBitmap("Interface\\MapNameAddStrife.tga", BITMAP_INTERFACE_EX+47);
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #endif	// ASG_ADD_GENS_SYSTEM
 
 #ifdef ASG_ADD_GENS_MARK
 #ifdef PBG_FIX_GENSREWARDNOTREG
-	::LoadBitmap("Interface\\Gens_mark_D_new.tga", BITMAP_GENS_MARK_DUPRIAN);	// 테섭 적용으로 인한 파일명 변경
+	::LoadBitmap("Interface\\Gens_mark_D_new.tga", BITMAP_GENS_MARK_DUPRIAN);
 	::LoadBitmap("Interface\\Gens_mark_V_new.tga", BITMAP_GENS_MARK_BARNERT);
 #else //PBG_FIX_GENSREWARDNOTREG
-	::LoadBitmap("Interface\\Gens_mark_D.tga", BITMAP_GENS_MARK_DUPRIAN);	// 겐스 듀프리언 마크.
-	::LoadBitmap("Interface\\Gens_mark_V.tga", BITMAP_GENS_MARK_BARNERT);	// 겐스 바네르트 마크.
+	::LoadBitmap("Interface\\Gens_mark_D.tga", BITMAP_GENS_MARK_DUPRIAN);
+	::LoadBitmap("Interface\\Gens_mark_V.tga", BITMAP_GENS_MARK_BARNERT);
 #endif //PBG_FIX_GENSREWARDNOTREG
 #endif	// ASG_ADD_GENS_MARK
 
@@ -9658,7 +9093,7 @@ void OpenBasicData(HDC hDC)
 	#ifdef LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
 		LoadBitmap("Item\\pandabody_R.jpg", BITMAP_PANDABODY_R, GL_LINEAR, GL_CLAMP);
 	#else // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
-		LoadBitmap("Item\\pandabody_R.jpg", BITMAP_PANDABODY_R, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR발생
+		LoadBitmap("Item\\pandabody_R.jpg", BITMAP_PANDABODY_R, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 	#endif // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
 #endif //PJH_ADD_PANDA_CHANGERING
 
@@ -9668,19 +9103,19 @@ void OpenBasicData(HDC hDC)
 		LoadBitmap("Monster\\DGicewalker_R.jpg", BITMAP_DOPPELGANGER_ICEWALKER1, GL_LINEAR, GL_CLAMP);	
 		LoadBitmap("Monster\\Snake1.jpg", BITMAP_DOPPELGANGER_SNAKE01, GL_LINEAR, GL_CLAMP);	
 	#else // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
-		LoadBitmap("Monster\\DGicewalker_body.jpg", BITMAP_DOPPELGANGER_ICEWALKER0, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR발생
-		LoadBitmap("Monster\\DGicewalker_R.jpg", BITMAP_DOPPELGANGER_ICEWALKER1, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR발생
-		LoadBitmap("Monster\\Snake1.jpg", BITMAP_DOPPELGANGER_SNAKE01, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR발생
+		LoadBitmap("Monster\\DGicewalker_body.jpg", BITMAP_DOPPELGANGER_ICEWALKER0, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
+		LoadBitmap("Monster\\DGicewalker_R.jpg", BITMAP_DOPPELGANGER_ICEWALKER1, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
+		LoadBitmap("Monster\\Snake1.jpg", BITMAP_DOPPELGANGER_SNAKE01, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 	#endif // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
 #endif	// YDG_ADD_DOPPELGANGER_MONSTER
 
 #ifdef YDG_ADD_DOPPELGANGER_NPC
 	#ifdef LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
-		LoadBitmap("NPC\\goldboit.jpg", BITMAP_DOPPELGANGER_GOLDENBOX1, GL_LINEAR, GL_CLAMP);	// OPENGL_ERROR발생
-		LoadBitmap("NPC\\goldline.jpg", BITMAP_DOPPELGANGER_GOLDENBOX2, GL_LINEAR, GL_CLAMP);	// OPENGL_ERROR발생
+		LoadBitmap("NPC\\goldboit.jpg", BITMAP_DOPPELGANGER_GOLDENBOX1, GL_LINEAR, GL_CLAMP);	// OPENGL_ERROR
+		LoadBitmap("NPC\\goldline.jpg", BITMAP_DOPPELGANGER_GOLDENBOX2, GL_LINEAR, GL_CLAMP);	// OPENGL_ERROR
 	#else // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
-		LoadBitmap("NPC\\goldboit.jpg", BITMAP_DOPPELGANGER_GOLDENBOX1, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR발생
-		LoadBitmap("NPC\\goldline.jpg", BITMAP_DOPPELGANGER_GOLDENBOX2, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR발생
+		LoadBitmap("NPC\\goldboit.jpg", BITMAP_DOPPELGANGER_GOLDENBOX1, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
+		LoadBitmap("NPC\\goldline.jpg", BITMAP_DOPPELGANGER_GOLDENBOX2, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 	#endif // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
 #endif	// YDG_ADD_DOPPELGANGER_NPC
 
@@ -9695,7 +9130,7 @@ void OpenBasicData(HDC hDC)
 #endif // KJH_ADD_09SUMMER_EVENT
 
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
-	LoadBitmap("Interface\\InGameShop\\ingame_pack_check.tga", BITMAP_IGS_CHECK_BUTTON, GL_LINEAR);		//체크버튼
+	LoadBitmap("Interface\\InGameShop\\ingame_pack_check.tga", BITMAP_IGS_CHECK_BUTTON, GL_LINEAR);
 #endif //PBG_ADD_INGAMESHOPMSGBOX
 #ifdef LDK_ADD_EG_MONSTER_ASSASSINMASTER
 	LoadBitmap("Monster\\AssassinLeader_body_R.jpg"	, BITMAP_ASSASSIN_EFFECT1, GL_LINEAR, GL_CLAMP);
@@ -9715,14 +9150,12 @@ void OpenBasicData(HDC hDC)
 #endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
 	
 #ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-	// 도플갱어, 바르카, 바르카 제7맵 자유입장권 아이템 이펙트 효과 들어갈 텍스쳐 로딩
 	LoadBitmap("Item\\partCharge8\\DoppelCard.jpg", BITMAP_DOPPLEGANGGER_FREETICKET, GL_LINEAR, GL_CLAMP);
 	LoadBitmap("Item\\partCharge8\\BarcaCard.jpg", BITMAP_BARCA_FREETICKET, GL_LINEAR, GL_CLAMP);
 	LoadBitmap("Item\\partCharge8\\Barca7Card.jpg", BITMAP_BARCA7TH_FREETICKET, GL_LINEAR, GL_CLAMP);
 #endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 	
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-	// 오크참, 메이플참, 골든오크참, 골든메이플참 레이어효과
 	LoadBitmap("Item\\ork_cham_R.jpg",				BITMAP_ORK_CHAM_LAYER_R,			GL_LINEAR, GL_CLAMP);
 	//LoadBitmap("Item\\maple_cham_R.jpg",			BITMAP_MAPLE_CHAM_LAYER_R,			GL_LINEAR, GL_CLAMP);
 	LoadBitmap("Item\\goldenork_cham_R.jpg",		BITMAP_GOLDEN_ORK_CHAM_LAYER_R,		GL_LINEAR, GL_CLAMP);
@@ -9767,7 +9200,6 @@ void OpenBasicData(HDC hDC)
 		}
 	#endif // defined RESOURCE_GUARD && !defined FOR_WORK
 #endif // KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
-	// 타이클 화면에서 로딩 게이지를 2/10만큼 표시.
 	rUIMng.RenderTitleSceneUI(hDC, 2, 11);
 
     OpenPlayerTextures();
@@ -9801,7 +9233,7 @@ void OpenBasicData(HDC hDC)
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// 로딩: Dialog 
+// Dialog 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef USE_DIALOGTEST_BMD
 	sprintf(Text, "Data\\Local\\%s\\Dialogtest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
@@ -9811,7 +9243,7 @@ void OpenBasicData(HDC hDC)
 	OpenDialogFile(Text);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// 로딩: Item
+// Item
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef USE_ITEMTEST_BMD
 	sprintf(Text, "Data\\Local\\%s\\ItemTest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
@@ -9821,7 +9253,7 @@ void OpenBasicData(HDC hDC)
 	OpenItemScript(Text);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// 로딩: Movereq
+// Movereq
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef USE_MOVEREQTEST_BMD
 	sprintf(Text, "Data\\Local\\%s\\movereqtest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
@@ -9831,7 +9263,7 @@ void OpenBasicData(HDC hDC)
 	SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// 로딩: NpcName
+// NpcName
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef _TEST_SERVER
 	sprintf(Text, "Data\\Local\\%s\\NpcNameTest_%s.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
@@ -9841,9 +9273,8 @@ void OpenBasicData(HDC hDC)
    	OpenMonsterScript(Text);
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// 로딩: Quest
+// Quest
 ////////////////////////////////////////////////////////////////////////////////////////////////
-//  퀘스트 정보를 읽는다.
 #ifdef USE_QUESTTEST_BMD
 	sprintf(Text, "Data\\Local\\%s\\Questtest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 #else
@@ -9852,7 +9283,7 @@ void OpenBasicData(HDC hDC)
 	g_csQuest.OpenQuestScript (Text);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// 로딩: Skill
+// Skill
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef  USE_SKILLTEST_BMD
 	sprintf(Text, "Data\\Local\\%s\\Skilltest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
@@ -9862,7 +9293,7 @@ void OpenBasicData(HDC hDC)
 	OpenSkillScript(Text);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// 로딩: SocketItem
+// SocketItem
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef USE_SOCKETITEM_TEST_BMD
 	sprintf(Text, "Data\\Local\\%s\\SocketItemTest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
@@ -9872,10 +9303,10 @@ void OpenBasicData(HDC hDC)
 	g_SocketItemMgr.OpenSocketItemScript(Text);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// 로딩: Text
+// Text
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	OpenTextData();		//. Text.bmd, Testtest.bmd를 읽는다.
+	OpenTextData();		//. Text.bmd, Testtest.bmd
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -9906,7 +9337,6 @@ void OpenBasicData(HDC hDC)
 #endif// _TEST_SERVER
    	OpenMonsterScript(Text);
 
-	//  퀘스트 정보를 읽는다.
 #ifdef USE_QUESTTEST_BMD
     g_csQuest.OpenQuestScript ( "Data\\Local\\Questtest.bmd" );
 #else
@@ -10012,7 +9442,6 @@ void OpenBasicData(HDC hDC)
 
 void OpenTextData()
 {
-	//게임내에서 쓰이는 텍스트를 읽어들임
 	char Text[100];
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
@@ -10047,10 +9476,6 @@ void OpenTextData()
 
 	OpenMacro("Data\\Macro.txt");
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 메인씬에서 필요한 데이타 프리하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void ReleaseMainData()
 {
@@ -10284,7 +9709,7 @@ void ConvertSoundFileName( void)
 	{
 		wsprintf( lpszFile[0], "Data\\Sound\\%s", lpszSoundFiles[i][0]);
 		if ( i == 0)
-		{	// 첫파일 a바람.wav 이 존재할때만 한다.
+		{
 			if ( 0xFFFFFFFF == GetFileAttributes( lpszFile[0]))
 			{
 				break;
@@ -10303,15 +9728,12 @@ void ConvertSoundFileName( void)
 		{"던젼.mp3","Dungeon.mp3"}
 	};
 	iCount = sizeof ( lpszBgmFiles) / sizeof ( lpszBgmFiles[0]);
-#ifdef _VS2008PORTING
+
 	for ( int i = 0; i < iCount; ++i)
-#else // _VS2008PORTING
-	for ( i = 0; i < iCount; ++i)
-#endif // _VS2008PORTING
 	{
 		wsprintf( lpszFile[0], "Data\\Music\\%s", lpszBgmFiles[i][0]);
 		if ( i == 0)
-		{	// 첫파일 주점.mp3 이 존재할때만 한다.
+		{
 			if ( 0xFFFFFFFF == GetFileAttributes( lpszFile[0]))
 			{
 				break;

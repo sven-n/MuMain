@@ -591,11 +591,8 @@ void RenderBackLight( OBJECT* o, vec3_t Position, vec3_t Light1, vec3_t Light2 )
 
     glBegin(GL_TRIANGLES);
     glColor3f(Light2[0],Light2[1],Light2[2]);
-#ifdef _VS2008PORTING
-    for ( int i=0; i<iVertex; i++ )
-#else // _VS2008PORTING
-    for ( i=0; i<iVertex; i++ )
-#endif // _VS2008PORTING
+
+	for ( int i=0; i<iVertex; i++ )
     {
         offset = g_backLightIndex[i];
 

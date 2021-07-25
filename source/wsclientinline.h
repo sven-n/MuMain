@@ -1147,19 +1147,11 @@ __forceinline void SendRequestMagic(int Type,int Key)
 {
 	if( !IsCanBCSkill(Type) )
 		return;
-#ifdef _VS2008PORTING
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL		// 다크사이드 스킬 딜레이 걸리면 안됨
 	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || Type==263 || Type==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#else // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || Type==263 || Type==261 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#endif // _VS2008PORTING
 	{
 		g_DummyAttackChecker->AddSkillCount();
 		if( g_DummyAttackChecker->GetSkillCount() >= g_DummyAttackChecker->GetDummyProtocolNextSeq() )
@@ -1200,7 +1192,6 @@ __forceinline void SendRequestMagic(int Type,int Key)
 #endif //_DEBUG
 #else // KJH_ADD_CREATE_SERIAL_NUM_AT_ATTACK_SKILL
 #ifndef _DEBUG
-#ifdef _VS2008PORTING
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #define SendRequestMagic( p_Type, p_Key)\
 {\
@@ -1260,67 +1251,7 @@ __forceinline void SendRequestMagic(int Type,int Key)
 	}\
 }
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#else // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-    if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || p_Type==263 || p_Type==261 ||abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))\
-	{\
-		g_DummyAttackChecker->AddSkillCount();\
-		if( g_DummyAttackChecker->GetSkillCount() >= g_DummyAttackChecker->GetDummyProtocolNextSeq() )\
-		{\
-			pre_send( g_hInst);\
-			CStreamPacketEngine spe2;\
-			spe2.Init( 0xC1, 0x19);\
-			DWORD dwDummy;\
-			g_DummyAttackChecker->MakeDummyProtocol((LPBYTE)&dwDummy);\
-			spe2 << (DWORD)dwDummy << (BYTE)(0);\
-			spe2.Send( TRUE);\
-			hanguo_check3();\
-			g_DummyAttackChecker->InitSkillCount();\
-			g_DummyAttackChecker->AddSkillCount();\
-		}\
-		pre_send( g_hInst);\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC1, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << (BYTE)(0) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send( TRUE);\
-		hanguo_check3();\
-	}\
-}
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-    if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))\
-	{\
-		g_DummyAttackChecker->AddSkillCount();\
-		if( g_DummyAttackChecker->GetSkillCount() >= g_DummyAttackChecker->GetDummyProtocolNextSeq() )\
-		{\
-			pre_send( g_hInst);\
-			CStreamPacketEngine spe2;\
-			spe2.Init( 0xC1, 0x19);\
-			DWORD dwDummy;\
-			g_DummyAttackChecker->MakeDummyProtocol((LPBYTE)&dwDummy);\
-			spe2 << (DWORD)dwDummy << (BYTE)(0);\
-			spe2.Send( TRUE);\
-			hanguo_check3();\
-			g_DummyAttackChecker->InitSkillCount();\
-			g_DummyAttackChecker->AddSkillCount();\
-		}\
-		pre_send( g_hInst);\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC1, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << (BYTE)(0) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send( TRUE);\
-		hanguo_check3();\
-	}\
-}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#endif // _VS2008PORTING
+
 #else // _DEBUG
 __forceinline void SendRequestMagic(int Type,int Key)
 {
@@ -1408,19 +1339,11 @@ __forceinline void SendRequestMagic(int Type,int Key)
 {
 	if( !IsCanBCSkill(Type) )
 		return;
-#ifdef _VS2008PORTING
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || Type==263 || Type==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#else // _VS2008PORTING
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || Type==263 || Type==261 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || abs( GetTickCount() - g_dwLatestMagicTick) > 300 ))
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#endif // _VS2008PORTING
 	{
 		pre_send( g_hInst);
 		g_dwLatestMagicTick = GetTickCount();
@@ -1601,11 +1524,8 @@ __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int C
 	g_ConsoleDebug->Write(MCD_SEND, "[Dummy] - Count : %d/%d, SkillSerial : %d", 
 		g_DummyAttackChecker->GetSkillCount(), g_DummyAttackChecker->GetDummyProtocolNextSeq(), btSkillSerial);
 	g_ConsoleDebug->Write(MCD_NORMAL, "%d %d %d %d %d %d %d", x, y, Serial, Count, HIBYTE(p_Type), LOBYTE(p_Type), btSkillSerial);
-#ifdef _VS2008PORTING
+
 	for (int i=0;i<Count;i++)
-#else // _VS2008PORTING
-	for (i=0;i<Count;i++)
-#endif // _VS2008PORTING
 	{
 		g_ConsoleDebug->Write(MCD_NORMAL, " %d %d %d", SkillSerial, (Key[i]>>8), (Key[i]&0xff));
 	}
@@ -1741,11 +1661,7 @@ __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int C
 #ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_SEND, "0x1D보냄[SendRequestMagicAttack(%d)]", Serial);
 	g_ConsoleDebug->Write(MCD_NORMAL, "%d %d %d %d %d %d", x, y, Serial, Count, HIBYTE(p_Type), LOBYTE(p_Type));
-#ifdef _VS2008PORTING
 	for (int i=0;i<Count;i++)
-#else // _VS2008PORTING
-	for (i=0;i<Count;i++)
-#endif // _VS2008PORTING
 	{
 		g_ConsoleDebug->Write(MCD_NORMAL, " %d %d %d", SkillSerial, (Key[i]>>8), (Key[i]&0xff));
 	}
@@ -3801,12 +3717,6 @@ __forceinline bool SendRequestMixExit()
 	g_pSocketClient = &SocketClient;\
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  팻 시스템.
-//////////////////////////////////////////////////////////////////////////
-#ifdef PET_SYSTEM
-
-//  팻 명령어 변경을 요청한다.
 #define SendRequestPetCommand(PetType, Command, Key )\
 {\
     pre_send( g_hInst);\
@@ -3818,8 +3728,6 @@ __forceinline bool SendRequestMixExit()
 	spe.Send();\
 }
 
-
-//  팻의 정보를 요청한다.
 #define SendRequestPetInfo(PetType, InvType, nPos )\
 {\
     pre_send( g_hInst);\
@@ -3831,14 +3739,6 @@ __forceinline bool SendRequestMixExit()
 	spe.Send();\
 }
 
-
-#endif// PET_SYSTEM
-
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
-#ifdef _VS2008PORTING
 #define SendChangeMServer(lpID, lpChr, iAuth1, iAuth2, iAuth3, iAuth4 )\
 {\
 	pre_send( g_hInst);\
@@ -3866,40 +3766,7 @@ __forceinline bool SendRequestMixExit()
 	spe.Send(TRUE);\
 	hanguo_check3();\
 }
-#else // _VS2008PORTING
-#define SendChangeMServer(lpID, lpChr, iAuth1, iAuth2, iAuth3, iAuth4 )\
-{\
-    pre_send( g_hInst);\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xB1);\
-	spe << ( BYTE)0x01;\
-	char lpszID[MAX_ID_SIZE+2];\
-	char lpszCHR[MAX_ID_SIZE+2];\
-	ZeroMemory( lpszID, MAX_ID_SIZE+2);\
-	ZeroMemory( lpszCHR, MAX_ID_SIZE+2);\
-	strcpy( lpszID, lpID);\
-	strcpy( lpszCHR, lpChr);\
-	BuxConvert(( BYTE*)lpszID,MAX_ID_SIZE+2);\
-	spe.AddData( lpszID, MAX_ID_SIZE+2);\
-	spe.AddData( lpszCHR, MAX_ID_SIZE+2);\
-    spe << (INT)(iAuth1);\
-    spe << (INT)(iAuth2);\
-    spe << (INT)(iAuth3);\
-    spe << (INT)(iAuth4);\
-	spe << GetTickCount();\
-	for(int i=0;i<SIZE_PROTOCOLVERSION;i++)\
-    	spe << ( BYTE)( Version[i]-(i+1));\
-	for(i=0;i<SIZE_PROTOCOLSERIAL;i++)\
-    	spe << Serial[i];\
-    spe.Send(TRUE);\
-    hanguo_check3();\
-}
-#endif // _VS2008PORTING
 
-
-//----------------------------------------------------------------------------
-// CG [0xB2][0x00] 클라이언트가 공성전 상태정보를 요청
-//----------------------------------------------------------------------------
 #define SendRequestBCStatus()\
 {\
     pre_send( g_hInst);\
@@ -3910,7 +3777,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x01] 공성전 등록을 요청
+// CG [0xB2][0x01] 
 //----------------------------------------------------------------------------
 #define SendRequestBCReg()\
 {\
@@ -3922,7 +3789,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x02] 공성전 포기를 요청
+// CG [0xB2][0x02]
 //----------------------------------------------------------------------------
 #define SendRequestBCGiveUp( GiveUp )\
 {\
@@ -3935,7 +3802,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x03] 자신의 길드의 공성등록에 대한 정보를 요청
+// CG [0xB2][0x03] 
 //----------------------------------------------------------------------------
 #define SendRequestBCRegInfo()\
 {\
@@ -3947,7 +3814,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x04] 자신의 길드의 성주의 표식 등록 요청
+// CG [0xB2][0x04]
 //----------------------------------------------------------------------------
 #define SendRequestBCRegMark( ItemPos )\
 {\
@@ -3960,7 +3827,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x05] 수성측 NPC 구매 요청 -> 권한체크, 수성측만 가능 (0xC1)
+// CG [0xB2][0x05]
 //----------------------------------------------------------------------------
 #define SendRequestBCNPCBuy( NPCNumber, NPCIndex )\
 {\
@@ -3974,7 +3841,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x06] 수성측 NPC 수리 요청 -> 권한체크, 수성측만 가능 (0xC1)
+// CG [0xB2][0x06]
 //----------------------------------------------------------------------------
 #define SendRequestBCNPCRepair( NPCNumber, NPCIndex )\
 {\
@@ -3988,7 +3855,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x07] 수성측 NPC 업그레이드 요청 -> 권한체크, 수성측만 가능 (0xC1)
+// CG [0xB2][0x07]
 //----------------------------------------------------------------------------
 #define SendRequestBCNPCUpgrade( NPCNumber, NPCIndex, NPCUpType, NPCUpValue )\
 {\
@@ -4004,7 +3871,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x08] 현재 성의 자금, 세금 정보 요청 -> 권한체크, 수성측만 가능 (0xC1)
+// CG [0xB2][0x08] 
 //----------------------------------------------------------------------------
 #define SendRequestBCGetTaxInfo()\
 {\
@@ -4016,7 +3883,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x09] 현재 성의 세율 변경 요청 -> 권한체크, 수성측만 가능 (0xC1)
+// CG [0xB2][0x09] 
 //----------------------------------------------------------------------------
 #define SendRequestBCChangeTaxRate( TaxType, TaxRate1, TaxRate2, TaxRate3, TaxRate4 )\
 {\
@@ -4030,7 +3897,7 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x10] 현재 성의 자금 출금 요청 -> 권한체크, 수성측만 가능 (0xC1)
+// CG [0xB2][0x10]
 //----------------------------------------------------------------------------
 #define SendRequestBCWithdraw( Money1, Money2, Money3, Money4 )\
 {\

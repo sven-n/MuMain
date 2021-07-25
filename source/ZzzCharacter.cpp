@@ -2382,8 +2382,8 @@ void AttackEffect(CHARACTER *c)
 				    CreateJoint(BITMAP_JOINT_THUNDER,Position,Position,Angle,2,to,50.f);
 				}
 				break;
-            case 73://흑룡.
-			case 75://흑룡2
+            case 73:
+			case 75:
                 if(c->Object.CurrentAction==MONSTER01_ATTACK2)
                 {
                     if(c->AttackTime==13)
@@ -2398,7 +2398,7 @@ void AttackEffect(CHARACTER *c)
                     }
                 }
                 break;
-			case 69://별자리
+			case 69:
 				if ( c->AttackTime==1)
 				{
 					for ( int i = 0; i < 4; ++i)
@@ -2408,12 +2408,8 @@ void AttackEffect(CHARACTER *c)
 					}
 				}
 				break;
-			case 61://빔나이트
-#ifdef _VS2008PORTING
+			case 61:
 				for(int i=0;i<6;i++)
-#else // _VS2008PORTING
-				for(i=0;i<6;i++)
-#endif // _VS2008PORTING
 				{
 					int Hand = 0;
 					if(i>=3) Hand = 1;
@@ -2422,13 +2418,11 @@ void AttackEffect(CHARACTER *c)
 					CreateJoint(BITMAP_JOINT_THUNDER,Position,to->Position,Angle,2,to,50.f);
 					CreateJoint(BITMAP_JOINT_THUNDER,Position,to->Position,Angle,2,to,10.f);
 				}
+
 				if(c->AttackTime == 1)
 					PlayBuffer(SOUND_EVIL);
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<4;i++)
-#else // _VS2008PORTING
-				for(i=0;i<4;i++)
-#endif // _VS2008PORTING
 				{
 					int Hand = 0;
 					if(i>=2) Hand = 1;
@@ -2438,7 +2432,7 @@ void AttackEffect(CHARACTER *c)
 					CreateParticle(BITMAP_FIRE,Position,o->Angle,o->Light);
 				}
 				break;
-			case 46://인어
+			case 46:
 				if(c->AttackTime == 1)
 					PlayBuffer(SOUND_EVIL);
 
@@ -2452,7 +2446,7 @@ void AttackEffect(CHARACTER *c)
 					CreateJoint(BITMAP_BLUR+1,Position,to->Position,Angle,1,to,10.f);
 				}
 				break;
-			case 37://데빌
+			case 37:
 				if(c->AttackTime == 1)
 					PlayBuffer(SOUND_EVIL);
 
@@ -2466,7 +2460,7 @@ void AttackEffect(CHARACTER *c)
 					CreateParticle(BITMAP_FIRE,Position,o->Angle,o->Light);
 				}
 				break;
-			case 66://저주받은 왕
+			case 66:
 				{
 					if(c->AttackTime == 1)
 						PlayBuffer(SOUND_THUNDER01);
@@ -4873,11 +4867,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
             {
                 vec3_t Angle = { 0.0f, 0.0f, 0.0f};
 			    int iCount = 36;
-#ifdef _VS2008PORTING
 			    for ( int i = 0; i < iCount; ++i)
-#else // _VS2008PORTING
-			    for ( i = 0; i < iCount; ++i)
-#endif // _VS2008PORTING
 			    {
 				    Angle[0] = -10.f;
 				    Angle[1] = 0.f;
@@ -4896,7 +4886,6 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
      		PlayBuffer(SOUND_SWELLLIFE);
             break;
 
-		//  배틀마스터 스킬.
         case AT_SKILL_STUN:
 //            CreateEffect ( MODEL_STUN_STONE, o->Position, o->Angle, o->Light, 1 );
 			CreateJoint(BITMAP_FLASH,o->Position,o->Position,o->Angle,7,NULL);
@@ -5403,12 +5392,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 					CreateJoint(MODEL_FENRIR_SKILL_THUNDER, Position, p_to->Position, vAngle, 3+GetFenrirType(c), p_to, 80.f);
 				}
 
-				// 주위에 몬스터
-#ifdef _VS2008PORTING
 				for(int i=0; i<iMonsterNum; i++)
-#else // _VS2008PORTING
-				for(i=0; i<iMonsterNum; i++)
-#endif // _VS2008PORTING
 				{
 					for(int j=0; j<2; j++)
 					{
@@ -5420,7 +5404,6 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 					}
 				}
 				
-				// 번개 흘려주는 효과
 				for(int k=0; k<6; k++)
 				{
 					CalcAddPosition(o, 0.f, 10.f+(rand()%40-20), 130.f, Position);
@@ -5442,10 +5425,10 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 			}
 			break;
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-        case AT_SKILL_ONEFLASH: //  기마검 일섬 스킬.
+        case AT_SKILL_ONEFLASH:
             break;
 
-        case AT_SKILL_BRAND_OF_SKILL:   //  다크로드 스킬의 낙인.
+        case AT_SKILL_BRAND_OF_SKILL:
             Vector ( 0.f, 0.f, 0.f, p );
             Vector ( 1.f, 1.f, 1.f, Light );
             if ( c->Weapon[0].Type!=MODEL_BOW+15 )
@@ -5747,11 +5730,8 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 				break;
 			case AT_SKILL_SLOW:
 				CreateEffect(MODEL_ICE,to->Position,o->Angle,Light);
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<5;i++)
-#else // _VS2008PORTING
-				for(i=0;i<5;i++)
-#endif // _VS2008PORTING
 					CreateEffect(MODEL_ICE_SMALL,to->Position,o->Angle,o->Light);
 
 				if(c->SkillSuccess)
@@ -5793,11 +5773,8 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 				if(o->Type == MODEL_PLAYER)
       				CreateEffect(MODEL_POISON,to->Position,o->Angle,o->Light);
 				Vector(0.4f,0.6f,1.f,Light);
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<10;i++)
-#else // _VS2008PORTING
-				for(i=0;i<10;i++)
-#endif // _VS2008PORTING
 					CreateParticle(BITMAP_SMOKE,to->Position,o->Angle,Light,1);
 
 				if(c->SkillSuccess)
@@ -6232,8 +6209,6 @@ Pos_PreventModifyingSkill2:
 			c->Skill      = 0;	// 스킬 초기화 (박종훈 디버그)
 		}
 		
-		// 현상 : 화면상에 다른케릭이 화오리베기 이후 일반 공격시 잔영 남는 문제
-		// 내용 : 회오리 베기도 스킬 초기화
 #ifdef LDS_FIX_INITSKILL_WHENARFER_AT_SKILL_WHEEL
 		// 회오리 베기 사용후 일반공격시 회오리잔영남지 않기 위해 회오리베기 끝난후 회오리만 스킬 초기화
 		if( c->Skill == AT_SKILL_WHEEL && 
@@ -6271,8 +6246,6 @@ Pos_PreventModifyingSkill3:
     }
     battleCastle::SetBuildTimeLocation ( o );
 
-
-    //  잔상
     CreateWeaponBlur ( c, o, b );
 
     switch(o->Type)
@@ -6282,9 +6255,7 @@ Pos_PreventModifyingSkill3:
 		break;
 	}
 
-#ifdef PET_SYSTEM
     giPetManager::MovePet ( c );
-#endif// PET_SYSTEM
 
 #ifdef USE_SELFCHECKCODE
 	END_OF_FUNCTION( Pos_SelfCheck01);
@@ -6298,10 +6269,6 @@ Pos_SelfCheck01:
 		if( g_isCharacterBuff(o, eBuff_SoulPotion) ) g_CharacterUnRegisterBuff(o, eBuff_SoulPotion );
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터가 지나갈때 땅의 속성(눈, 풀, 흙 등등)에 따라 사운드 출력
-///////////////////////////////////////////////////////////////////////////////
 
 void PlayWalkSound()
 {
@@ -6350,19 +6317,11 @@ void PlayWalkSound()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터가 입은 갑옷이 풀셋인지 체크하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 #ifdef CSK_FIX_WOPS_K28674_ADD_DEFENSE
 
 bool CheckFullSet(CHARACTER *c)
 {
-#ifdef _VS2008PORTING
 	int tmpLevel = 10;
-#else // _VS2008PORTING
-	int  i, tmpLevel = 10;
-#endif // _VS2008PORTING
 	bool Success = true;
     int  start = 5, end = 1;
 
@@ -6380,21 +6339,15 @@ bool CheckFullSet(CHARACTER *c)
 #ifdef PBG_FIX_DEFENSEVALUE_DARK
     if ( GetBaseClass(c->Class)==CLASS_DARK )
     {
-		//마검사는 헬멧이 없다.
         end = EQUIPMENT_ARMOR;
     }
 #endif //PBG_FIX_DEFENSEVALUE_DARK
-	// 넘긴 캐릭터가 자기자신이면
+
 	if(bHero == true)
 	{
-#ifdef _VS2008PORTING
 		for(int i = start; i >= end; i--)
-#else // _VS2008PORTING
-		for(i = start; i >= end; i--)
-#endif // _VS2008PORTING
 		{
 #ifdef PBG_ADD_NEWCHAR_MONK
-			// 레이지 파이터는 장갑을 검사하지 않는다.
 			if((GetBaseClass(c->Class)==CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
 				continue;
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -6410,14 +6363,9 @@ bool CheckFullSet(CHARACTER *c)
 		{
 			int Type = CharacterMachine->Equipment[EQUIPMENT_BOOTS].Type % MAX_ITEM_INDEX;
 			tmpLevel = (CharacterMachine->Equipment[EQUIPMENT_BOOTS].Level >> 3) & 15;
-#ifdef _VS2008PORTING
 			for(int i = start; i >= end; i--)	
-#else // _VS2008PORTING
-			for(i = start; i >= end; i--)
-#endif // _VS2008PORTING
 			{
 #ifdef PBG_ADD_NEWCHAR_MONK
-			// 레이지 파이터는 장갑을 검사하지 않는다.
 				if((GetBaseClass(c->Class)==CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
 					continue;
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -6443,19 +6391,17 @@ bool CheckFullSet(CHARACTER *c)
 			}
 		}
 
-		// 추가 방어력이 적용되는지 검사.
 		g_bAddDefense = true;
-		// 마검사 이면 
+
 		if(GetBaseClass(c->Class)==CLASS_DARK && Success)
 		{
-			//  아틀란스, 선더호크 추방 적용됨.
 			if ( CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+15
 				&& CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+20  
 				&& CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+23
 				&& CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+32
 				&& CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+37 
-				&& CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+47				// 팬텀
-				&& CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+48				// 디스트로이
+				&& CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+47
+				&& CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+48
 				)
 			{
 				g_bAddDefense = false;
@@ -6464,11 +6410,7 @@ bool CheckFullSet(CHARACTER *c)
 	}
 	else
 	{
-#ifdef _VS2008PORTING
 		for(int i=5;i>=end;i--)
-#else // _VS2008PORTING
-		for(i=5;i>=end;i--)
-#endif // _VS2008PORTING
 		{
 			if(c->BodyPart[i].Type==-1 )
 			{
@@ -6481,11 +6423,8 @@ bool CheckFullSet(CHARACTER *c)
 		{
 			int Type = (c->BodyPart[5].Type-MODEL_ITEM)%MAX_ITEM_INDEX;
 			tmpLevel = c->BodyPart[5].Level&0xf;
-#ifdef _VS2008PORTING
+
 			for(int i=5;i>=end;i--)	
-#else // _VS2008PORTING
-			for(i=5;i>=end;i--)
-#endif // _VS2008PORTING
 			{
 				int Level = c->BodyPart[i].Level&0xf;
 				if(Level<9)
@@ -6509,19 +6448,17 @@ bool CheckFullSet(CHARACTER *c)
 			}
 		}
 
-		// 추가 방어력이 적용되는지 검사.
 		g_bAddDefense = true;
-		// 마검사 이면 
+
 		if(GetBaseClass(c->Class)==CLASS_DARK && Success)
 		{
-			//  아틀란스, 선더호크 추방 적용됨.
 			if ( c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+15
 				&& c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+20  
 				&& c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+23
 				&& c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+32
 				&& c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+37 
-				&& c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+47				// 팬텀
-				&& c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+48				// 디스트로이
+				&& c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+47
+				&& c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+48
 				)
 			{
 				g_bAddDefense = false;
@@ -6591,9 +6528,8 @@ bool CheckFullSet(CHARACTER *c)
 		}
 	}
 
-	// 추가 방어력이 적용되는지 검사.
     g_bAddDefense = true;
-	// 마검사 이면 
+
     if(GetBaseClass(c->Class)==CLASS_DARK && Success)
     {
         //  아틀란스, 선더호크 추방 적용됨.
@@ -6617,9 +6553,6 @@ bool CheckFullSet(CHARACTER *c)
 
 #endif // CSK_FIX_WOPS_K28674_ADD_DEFENSE
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터에 관련된 시각적인 효과들 처리(소뿔전사 눈에서 빛나는것 등등)
-///////////////////////////////////////////////////////////////////////////////
 void MoveEye(OBJECT *o,BMD *b,int Right,int Left, int Right2, int Left2, int Right3, int Left3)
 {
 	vec3_t p;
@@ -6693,9 +6626,6 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 		else
 			c->SafeZone = false;
 
-#ifndef _VS2008PORTING				// #ifndef
-        int j;
-#endif // _VS2008PORTING
 		if( !g_isCharacterBuff(o, eDeBuff_Harden) && !g_isCharacterBuff(o, eDeBuff_Stun) 
 			&& !g_isCharacterBuff(o, eDeBuff_Sleep) 
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
@@ -6714,11 +6644,8 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
                 for(int i=0;i<2;i++)
                     if(o->HeadTargetAngle[i] < 0) o->HeadTargetAngle[i] += 360.f;
             }
-#ifdef _VS2008PORTING
+
 			for( int j=0;j<2;j++)
-#else // _VS2008PORTING
-            for( j=0;j<2;j++)
-#endif // _VS2008PORTING
                 o->HeadAngle[j] = TurnAngle2(o->HeadAngle[j],o->HeadTargetAngle[j],FarAngle(o->HeadAngle[j],o->HeadTargetAngle[j])*0.2f);
         }
 
@@ -6742,12 +6669,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 		}
 		if(c->PK < PVP_MURDERER2)
 		{
-            //  무기에 전체적인 광원 넣기.
-#ifdef _VS2008PORTING
 			for(int j=0;j<2;j++)
-#else // _VS2008PORTING
-			for(j=0;j<2;j++)
-#endif // _VS2008PORTING
 			{
 				if(c->Weapon[j].Type==MODEL_SWORD+12)//태양검
 				{
@@ -6785,9 +6707,6 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 				}
 			}
 		}
-#ifndef _VS2008PORTING					// #ifndef
-		int i;
-#endif // _VS2008PORTING
 		Vector(1.f,1.f,1.f,Light);
 		Vector(0.f,0.f,0.f,p);
 		Luminosity = (float)(rand()%8+2)*0.1f;
@@ -6825,20 +6744,14 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 				if ( o->BoneTransform!=NULL )
 				{
 					Vector ( 0.3f, 0.3f, 1.f, Light );
-#ifdef _VS2008PORTING
+
 					for ( int i=0; i<40; i+=2 )
-#else // _VS2008PORTING
-					for ( i=0; i<40; i+=2 )
-#endif // _VS2008PORTING
 					{
                         if ( !b->Bones[i].Dummy && i<b->NumBones )
                         {
 						    b->TransformPosition(o->BoneTransform[i],p,Position,true);
-#ifdef _VS2008PORTING
+
 						    for ( int j=0; j<o->m_bySkillCount+1; ++j )
-#else // _VS2008PORTING
-						    for ( j=0; j<o->m_bySkillCount+1; ++j )
-#endif // _VS2008PORTING
 						    {
 							    CreateParticle( BITMAP_LIGHT, Position, o->Angle, Light, 6, 1.3f+(o->m_bySkillCount*0.08f) );
 						    }
@@ -6851,11 +6764,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 
 			if ( o->CurrentAction == PLAYER_SKILL_HELL )
 			{
-#ifdef _VS2008PORTING
 				for(int i=0;i<10;i++)
-#else // _VS2008PORTING
-				for(i=0;i<10;i++)
-#endif // _VS2008PORTING
 				{
 					b->TransformPosition(o->BoneTransform[rand()%b->NumBones],p,Position,true);
 					CreateParticle(BITMAP_FIRE,Position,o->Angle,Light);
@@ -6885,21 +6794,14 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
             {
                 vec3_t pos1, pos2;
 
-#ifdef _VS2008PORTING
 				for( int i=2; i<5; ++i )
-#else // _VS2008PORTING
-                for( i=2; i<5; ++i )
-#endif // _VS2008PORTING
                 {
                     b->TransformPosition(o->BoneTransform[i],p,pos1,true);
     		        b->TransformPosition(o->BoneTransform[i+1],p,pos2,true);
 			        CreateJoint(BITMAP_JOINT_THUNDER,pos1,pos2,o->Angle,7,NULL,14.f);
                 }
-#ifdef _VS2008PORTING
+
 				for( int i=9; i<11; ++i )
-#else // _VS2008PORTING
-                for( i=9; i<11; ++i )
-#endif // _VS2008PORTING
                 {
                     if( i==9 )
                         b->TransformPosition(o->BoneTransform[2],p,pos1,true);
@@ -6939,15 +6841,15 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 			    CreateJoint(BITMAP_JOINT_THUNDER,pos2,pos1,o->Angle,7,NULL,14.f);
             }
             break;
-        case MODEL_MONSTER01+52://  야누스.
+        case MODEL_MONSTER01+52:
             o->BlendMeshTexCoordU = -(float)((int)(WorldTime)%10000)*0.0004f;
             break;
-        case MODEL_MONSTER01+55://  불사조
+        case MODEL_MONSTER01+55:
             o->BlendMeshTexCoordV = (float)((int)(WorldTime)%10000)*0.0001f;
             break;
-        case MODEL_MONSTER01+54://  흑룡.
+        case MODEL_MONSTER01+54:
             break;
-		case MODEL_MONSTER01+48://저주받은 왕
+		case MODEL_MONSTER01+48:
 			if ( 0 == ( ( int)rand() % 5))
 			{
 				Position[0] = o->Position[0] + ( ( rand() % 21) - 10) * ( ( float)TERRAIN_SIZE / 70);
@@ -6957,10 +6859,10 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 			break;
 
 #ifdef LOREN_RAVINE_EVENT
-		case MODEL_MONSTER01+88://뮤턴트
+		case MODEL_MONSTER01+88:
 #endif
 
-		case MODEL_MONSTER01+45://뮤턴트
+		case MODEL_MONSTER01+45:
 			MoveEye(o,b,8,9);
 			MonsterMoveSandSmoke(o);
 			//MonsterDieSandSmoke(o);
@@ -6971,7 +6873,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
             {
                 char    body[2] = {30,0};
                 char    head = 1;
-                vec3_t  vec[35];    //  본 위치값.
+                vec3_t  vec[35];
                 vec3_t  angle;
                 vec3_t  dist;
                 vec3_t  p;
@@ -6979,7 +6881,6 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
                 Vector(0.f,0.f,0.f,angle);
                 Vector(0.f,0.f,0.f,p);
 
-                //  본들의 위치값을 알아낸다.
                 for ( int i=0; i<35; ++i )
                 {
                     b->TransformPosition(o->BoneTransform[vec_list[i]],p,vec[i],true);
@@ -6987,26 +6888,20 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 
                 char start, end;
                 float scale = 1.0f;
-                //  날개에 불을 붙인다.
-#ifdef _VS2008PORTING
+
 				for (int i=0; i<15; ++i )
-#else // _VS2008PORTING
-                for ( i=0; i<15; ++i )
-#endif // _VS2008PORTING
                 {
                     if ( i>=11 )
                     {
                         scale = 0.5f;
                     }
 
-                    //  왼쪽.
                     start = wingLeft[i][0];
                     end   = wingLeft[i][1];
 
                     dist[0] = MoveHumming(vec[end],angle,vec[start],360.0f);
 				    CreateParticle(BITMAP_FLAME,vec[start],angle,dist,2,scale);
 
-                    //  오른쪽.
                     start = wingRight[i][0];
                     end   = wingRight[i][1];
 
@@ -7014,21 +6909,14 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 				    CreateParticle(BITMAP_FLAME,vec[start],angle,dist,2,scale);
                 }
 
-                //  팔/다리에 불을 붙인다
-#ifdef _VS2008PORTING
                 for ( int i=0; i<4; ++i )
-#else // _VS2008PORTING
-                for ( i=0; i<4; ++i )
-#endif // _VS2008PORTING
                 {
-                    //  왼쪽.
                     start = arm_leg_Left[i][0];
                     end   = arm_leg_Left[i][1];
 
                     dist[0] =MoveHumming(vec[end],angle,vec[start],360.0f);
 				    CreateParticle(BITMAP_FLAME,vec[start],angle,dist,2,0.6f);
 
-                    //  오른쪽.
                     start = arm_leg_Right[i][0];
                     end   = arm_leg_Right[i][1];
 
@@ -7038,14 +6926,12 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 
                 if ( (int)WorldTime%2==0 )
                 {
-                    //  몸통.
                     start = body[0];
                     end   = body[1];
 
                     dist[0] =MoveHumming(vec[end],angle,vec[start],360.0f);
 				    CreateParticle(BITMAP_FLAME,vec[start],angle,dist,2,1.3f);
 
-                    //  머리.
 				    CreateParticle(BITMAP_FLAME,vec[head],angle,dist,3,0.5f);
                 }
 
@@ -7061,13 +6947,11 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 
 			    Vector(Luminosity,Luminosity*0.5f,Luminosity*0.5f,Light);
 			    
-                //  왼쪽팔.
                 b->TransformPosition(o->BoneTransform[55],p,pos,true);
                 b->TransformPosition(o->BoneTransform[62],p,Position,true);
                 MoveHumming(pos,angle,Position,360.0f);
 				CreateParticle(BITMAP_FLAME,Position,angle,Light,1,0.2f);
 			    
-                //  오른팔.
                 b->TransformPosition(o->BoneTransform[70],p,pos,true);
                 b->TransformPosition(o->BoneTransform[77],p,Position,true);
                 MoveHumming(pos,angle,Position,360.0f);
@@ -7077,7 +6961,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 				MonsterDieSandSmoke(o);
             }
 			break;
-		case MODEL_MONSTER01+43://블러드울프
+		case MODEL_MONSTER01+43:
 			MoveEye(o,b,11,12);
 			MonsterMoveSandSmoke(o);
 			//MonsterDieSandSmoke(o);
@@ -7099,15 +6983,15 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
      			MonsterDieSandSmoke(o);
 			}
 			break;
-		case MODEL_MONSTER01+41://아이언휠
+		case MODEL_MONSTER01+41:
 			MoveEye(o,b,8,9);
 			MonsterMoveSandSmoke(o);
 			MonsterDieSandSmoke(o);
 			break;
-		case MODEL_MONSTER01+39://지하거인
+		case MODEL_MONSTER01+39:
 			MoveEye(o,b,28,27);
 			break;
-		case MODEL_MONSTER01+37://히드라
+		case MODEL_MONSTER01+37:
 			if(o->CurrentAction>=MONSTER01_ATTACK1 && o->CurrentAction<=MONSTER01_ATTACK2)
 			{
 				o->BlendMeshLight += 0.1f;
@@ -7121,7 +7005,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 					o->BlendMeshLight = 0.f;
 			}
 			break;
-		case MODEL_MONSTER01+29://
+		case MODEL_MONSTER01+29:
 			o->BlendMesh = 3;
        		o->BlendMeshTexCoordV = -(float)((int)(WorldTime)%1000)*0.001f;
 			if(rand()%2==0)
@@ -7131,13 +7015,13 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 				CreateParticle(BITMAP_FIRE,Position,o->Angle,Light);
 			}
 			break;
-		case MODEL_MONSTER01+27://
+		case MODEL_MONSTER01+27:
        		o->BlendMeshTexCoordV = -(float)((int)(WorldTime)%1000)*0.001f;
 			break;
-		case MODEL_MONSTER01+26://데빌
+		case MODEL_MONSTER01+26:
        		o->BlendMeshTexCoordU = -(float)((int)(WorldTime)%10000)*0.0001f;
 			break;
-		case MODEL_MONSTER01+32://소환
+		case MODEL_MONSTER01+32:
 			Vector(0.f,0.f,0.f,p);
     		Vector(0.6f,1.f,0.8f,Light);
 			if(o->CurrentAction==MONSTER01_ATTACK1)
@@ -7171,26 +7055,19 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 			if(o->CurrentAction==MONSTER01_DIE && o->AnimationFrame < 12.f)
 			{
 				Vector(0.1f,0.8f,0.6f,Light);
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<20;i++)
-#else // _VS2008PORTING
-				for(i=0;i<20;i++)
-#endif // _VS2008PORTING
 				{
 					b->TransformPosition(o->BoneTransform[rand()%b->NumBones],p,Position,true);
 					CreateParticle(BITMAP_FIRE,Position,o->Angle,Light);
 				}
 			}
 			break;
-		case MODEL_MONSTER01+11://고르곤
+		case MODEL_MONSTER01+11:
        		o->BlendMeshLight = (float)(rand()%10)*0.1f;
 			if(c->Level == 2)
 			{
-#ifdef _VS2008PORTING
 				for(int i=0;i<10;i++)
-#else // _VS2008PORTING
-				for(i=0;i<10;i++)
-#endif // _VS2008PORTING
 				{
 					b->TransformPosition(o->BoneTransform[rand()%b->NumBones],p,Position,true);
 					CreateParticle(BITMAP_FIRE,Position,o->Angle,Light);
@@ -7233,8 +7110,6 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 				}
 			}
 			break;
-
-        //  데비아스, 로랜시아 추가 상점 NPC
         case MODEL_DEVIAS_TRADER:
 			Vector(1.f,1.f,1.f,Light);
 			Vector(0.f,5.f,10.f,p);
@@ -7253,7 +7128,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 				}
 			}
 			break;
-		case MODEL_WEDDING_NPC:		// 폭죽판매 NPC
+		case MODEL_WEDDING_NPC:
 			if(o->CurrentAction == 1)
 			{
 #ifdef YDG_ADD_FIRECRACKER_ITEM
@@ -7276,7 +7151,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 #endif	// YDG_ADD_FIRECRACKER_ITEM
 			}
 			break;
-        case MODEL_MONSTER01+2://버지
+        case MODEL_MONSTER01+2:
 			if(o->CurrentAction==MONSTER01_ATTACK1 && o->AnimationFrame<=4.f)
 			{
 				vec3_t Light;
@@ -7315,7 +7190,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
    				CreateParticle(BITMAP_SMOKE+1,Position,o->Angle,Light);
 			}
 			break;
-		case MODEL_MONSTER01+5://자이언트
+		case MODEL_MONSTER01+5:
 			MonsterDieSandSmoke(o);
 			break;
 		case MODEL_MONSTER01+12:
@@ -7327,7 +7202,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 				CreateParticle(BITMAP_SMOKE,Position,o->Angle,o->Light);
 			}
 			break;
-		case MODEL_MONSTER01://소뿔
+		case MODEL_MONSTER01:
 			if(o->CurrentAction==MONSTER01_STOP1 &&
 				(o->AnimationFrame>=15.f&&o->AnimationFrame<=20.f)) Smoke = true;
 			if(o->CurrentAction==MONSTER01_STOP2 &&
@@ -7347,14 +7222,14 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 			break;
 
 #ifdef _PVP_MURDERER_HERO_ITEM
-		case MODEL_MASTER:	// 살인마상점
+		case MODEL_MASTER:
 			if (c->MonsterIndex==227)
 			{
 				Vector(0.5f,0,0,Light);
 				AddTerrainLight(o->Position[0], o->Position[1], Light, 5, PrimaryTerrainLight );
 			}
 			break;
-		case MODEL_HERO_SHOP:	// 영웅상점
+		case MODEL_HERO_SHOP:
 			{
 				Vector(0.3,0.3,1,Light);
 				AddTerrainLight(o->Position[0], o->Position[1], Light, 15, PrimaryTerrainLight );
@@ -7363,21 +7238,21 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 #endif	// _PVP_MURDERER_HERO_ITEM		
         default :
             {
-                if ( MoveHellasMonsterVisual( o, b ) ) break;                       //  헬라스 몬스터들의 비주얼.
-                if ( battleCastle::MoveBattleCastleMonsterVisual( o, b ) ) break;   //  공성전 몬스터들의 비주얼.
-				if ( M31HuntingGround::MoveHuntingGroundMonsterVisual(o, b) ) break;	// 공성 사냥터 몬스터들의 비주얼.
+                if ( MoveHellasMonsterVisual( o, b ) ) break;
+                if ( battleCastle::MoveBattleCastleMonsterVisual( o, b ) ) break;
+				if ( M31HuntingGround::MoveHuntingGroundMonsterVisual(o, b) ) break;
 #ifdef CRYINGWOLF_2NDMVP
-				if ( M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(o, b) ) break;	//. 클라이울프 점령지 몬스터들의 비주얼
+				if ( M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(o, b) ) break;
 #endif // CRYINGWOLF_2NDMVP
 
-				if ( M34CryWolf1st::MoveCryWolf1stMonsterVisual(c, o, b) ) break;	//. 클라이울프 점령지 몬스터들의 비주얼
+				if ( M34CryWolf1st::MoveCryWolf1stMonsterVisual(c, o, b) ) break;
 
-				if ( M33Aida::MoveAidaMonsterVisual(o, b) ) break;						// 아이다 몬스터들의 비주얼.
-				if(M37Kanturu1st::MoveKanturu1stMonsterVisual(c, o, b)) break;	// 칸투루 내부 몬스터 비주얼
-				if(M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(c, o, b)) break;	// 칸투루 내부 몬스터 비주얼
+				if ( M33Aida::MoveAidaMonsterVisual(o, b) ) break;
+				if(M37Kanturu1st::MoveKanturu1stMonsterVisual(c, o, b)) break;
+				if(M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(c, o, b)) break;
 				if ( M39Kanturu3rd::MoveKanturu3rdMonsterVisual(o, b) ) break;
 				if (SEASON3A::CGM3rdChangeUp::Instance().MoveBalgasBarrackMonsterVisual(c, o, b))	break;
-				if( g_NewYearsDayEvent->MoveMonsterVisual (c, o, b) == true) break;	// 설날이벤트 복주머니 몬스터 비주얼
+				if( g_NewYearsDayEvent->MoveMonsterVisual (c, o, b) == true) break;
 				if( g_CursedTemple->MoveMonsterVisual( o, b ) == true ) break;
 				if( SEASON3B::GMNewTown::MoveMonsterVisual( o, b ) == true ) break;
 				if( SEASON3C::GMSwampOfQuiet::MoveMonsterVisual( o, b ) == true ) break;
@@ -7424,7 +7299,6 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 			}
 		}
 
-        //  칼리마 맵에서 Player가 이동 중이다.
         if ( ( o->CurrentAction==PLAYER_RUN_RIDE 
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 			|| o->CurrentAction==PLAYER_RAGE_UNI_RUN
@@ -7453,10 +7327,6 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터에 이동 처리
-///////////////////////////////////////////////////////////////////////////////
-
 float CharacterMoveSpeed(CHARACTER *c)
 {
 	OBJECT *o = &c->Object;
@@ -7472,8 +7342,8 @@ float CharacterMoveSpeed(CHARACTER *c)
 			c->Run = 40;
             Speed  = 8;
 
-#ifndef CSK_FIX_FENRIR_RUN		// 정리할 때 지워야 하는 소스	
-			if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone && !isholyitem )	// 펜릴이고 안전지대가 아니면
+#ifndef CSK_FIX_FENRIR_RUN
+			if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone && !isholyitem )
 			{
 				if(g_bFenrir_Run == FALSE)
 				{
@@ -7481,13 +7351,12 @@ float CharacterMoveSpeed(CHARACTER *c)
 					g_iFenrir_Run = 0;
 				}
 			}
-#endif //! CSK_FIX_FENRIR_RUN	// 정리할 때 지워야 하는 소스
+#endif //! CSK_FIX_FENRIR_RUN
 
 			return Speed;
 		}
 
-		// 펜릴 이동 속도 세팅
-		if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone && !isholyitem )	// 펜릴이고 안전지대가 아니면
+		if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone && !isholyitem )
 		{
 #ifdef CSK_FIX_FENRIR_RUN
 			if(c->Run < FENRIR_RUN_DELAY/2)
@@ -7530,7 +7399,6 @@ float CharacterMoveSpeed(CHARACTER *c)
 			&& ( c->Wing.Type!=-1 || ( c->Helper.Type>=MODEL_HELPER+2 && c->Helper.Type<=MODEL_HELPER+3 ) ) && !c->SafeZone 
 			&& !isholyitem )
 		{
-            //  블래이드 나이트의 드라곤 날개의 이동 속도는 좀더 빠르다.
             if ( c->Wing.Type==MODEL_WING+5
 				|| c->Wing.Type==MODEL_WING+36
 				)
@@ -7601,7 +7469,7 @@ void MoveCharacterPosition(CHARACTER *c)
         else
             o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1])+30.f;
     }
-	if(o->Type==MODEL_MONSTER01+2)//버지
+	if(o->Type==MODEL_MONSTER01+2)
 	{ 
 		o->Position[2] += -absf(sinf(o->Timer))*70.f+70.f;
 	}
@@ -7729,23 +7597,12 @@ void MoveCharactersClient()
 	int iCheck = 0;
 #endif //ANTIHACKING_ENABLE
 	
-#ifndef _VS2008PORTING			// #ifndef
-	int i;
-#endif // _VS2008PORTING
-    //  캐릭터 위치 속성 제거.
-#ifdef _VS2008PORTING
 	for(int i=0;i<TERRAIN_SIZE*TERRAIN_SIZE;i++)		
-#else // _VS2008PORTING
-	for(i=0;i<TERRAIN_SIZE*TERRAIN_SIZE;i++)
-#endif // _VS2008PORTING
 	{
 		if((TerrainWall[i]&TW_CHARACTER)==TW_CHARACTER) TerrainWall[i] -= TW_CHARACTER;
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)		
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 	{
 		CHARACTER *tc = &CharactersClient[i];
 		OBJECT    *to = &tc->Object;
@@ -7800,10 +7657,6 @@ void MoveCharactersClient()
 #endif // DO_PROFILING	
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 어깨의 길드 마크 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 extern float  ParentMatrix[3][4];
 #ifdef PBG_ADD_NEWCHAR_MONK
 void RenderGuild(OBJECT *o,int Type, vec3_t vPos)
@@ -7825,7 +7678,7 @@ void RenderGuild(OBJECT *o,int Type)
 	Angle[0] += 80.f;
 	AngleMatrix(Angle,Matrix);
 	Matrix[0][3] = 20.f;
-	Matrix[1][3] = -5.f;//-4앞뒤
+	Matrix[1][3] = -5.f;
     if ( Type==MODEL_ARMOR+20 && Type!=-1 )
     {
     	Matrix[2][3] = -18.f;//-5
@@ -7849,10 +7702,6 @@ void RenderGuild(OBJECT *o,int Type)
 	glPopMatrix();
     DisableCullFace();
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터에 링크된 오브젝트 랜더링 하는 함수(칼, 날개 등등)
-///////////////////////////////////////////////////////////////////////////////
 
 void RenderBrightEffect(BMD *b,int Bitmap,int Link,float Scale,vec3_t Light,OBJECT *o)
 {
@@ -7882,7 +7731,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 #else	// ADD_ALICE_WINGS_1
 		else if( Type >= MODEL_WING+36 && Type <= MODEL_WING+40 ) return;
 #endif	// ADD_ALICE_WINGS_1
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 		else if( ITEM_WING+130 <= Type && Type <= ITEM_WING+134 ) return;
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
@@ -7891,13 +7740,12 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 	}
 
-    //  일단 추가된 망토는 화면에 출력하지 않는다.
     if ( Type == MODEL_HELPER+30 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (Type == MODEL_WING+49)
 		|| (Type == MODEL_WING+135)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)	// 군주의 망토
+		)
 		return;
 
 #ifdef LDK_ADD_INGAMESHOP_SMALL_WING
@@ -7906,13 +7754,12 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
 
 
-	if (Type >= MODEL_STAFF+21 && Type <= MODEL_STAFF+29)	// 사아무트의 서, 닐의 서
+	if (Type >= MODEL_STAFF+21 && Type <= MODEL_STAFF+29)
 	{
-		return;	// 책은 그리지 않는다
+		return;
 	}
 
-    //  투명상태에서는 링크된 모든 오브젝트를 찍지 않는다.
-	if( g_isCharacterBuff(o, eBuff_Cloaking) ) // 투명상태 
+	if( g_isCharacterBuff(o, eBuff_Cloaking) )
 		return;
 
 	//CopyShadowAngle(f,b);
@@ -7921,9 +7768,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 	b->CurrentAction  = f->CurrentAction;
 	b->BodyHeight     = 0.f;
 
-	// 이부분은 더 생각을 해보자...
-	// 아이템 구조체로 빠지는게 당연하다..
-	// 아이템 구조체에 넣는건 불가능 하다면
 	OBJECT* Object = &g_ItemObject[Type];
 
 	Object->Type    = Type;
@@ -7941,7 +7785,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 #endif // CSK_EVENT_HALLOWEEN_MAP
 	switch (Type)
 	{
-	case MODEL_WING+39:	// 파멸의 날개 (마검사3차) 크기수정
+	case MODEL_WING+39:
 		f->PlaySpeed = 0.15f;
 		break;
 	}
@@ -7949,7 +7793,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
 	if (c->MonsterIndex >= 529 && c->MonsterIndex <= 539)
 	{
-		// 날개, 무기
 		if (World == WD_65DOPPLEGANGER1)
 			RenderType = RENDER_DOPPELGANGER|RENDER_TEXTURE;
 		else
@@ -7964,7 +7807,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 	{
 		vec3_t Angle;
 		float Matrix[3][4];
-		//  블러드캐슬의 성자의 석상에 절대무기 워치하기.
+
 		if ( c->MonsterIndex>=132 && c->MonsterIndex<=134 )
 		{
 			if ( Type==MODEL_STAFF+10 || Type==MODEL_SWORD+19 )
@@ -7994,7 +7837,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			Matrix[2][3] = 0.f;
 		}
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		else if(Type>=MODEL_WING+40)	// 날개 위치 보정
+		else if(Type>=MODEL_WING+40)
 		{
     		Vector(0.f,90.f,0.f,Angle);
 			AngleMatrix(Angle,Matrix);
@@ -8042,7 +7885,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 					Vector(0.f,-90.f,0.f,Angle);
 					AngleMatrix(Angle,Matrix);
 					Matrix[0][3] = 5.f;
-					Matrix[1][3] = -20.f; //앞
+					Matrix[1][3] = -20.f;
 					Matrix[2][3] = 0.f;
 				}break;
 			case MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT:
@@ -8171,7 +8014,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 #ifdef CSK_REF_BACK_RENDERITEM
 			else if(Type >= MODEL_SHIELD && Type < MODEL_SHIELD+MAX_ITEM_INDEX)
 			{
-				if(Type == MODEL_SHIELD+16)	// 엘리멘탈방패
+				if(Type == MODEL_SHIELD+16)
 				{
 					Vector(30.f,0.f,90.f,Angle);
 					AngleMatrix(Angle,Matrix);
@@ -8179,7 +8022,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 					Matrix[1][3] = 0.f;
 					Matrix[2][3] = -20.f;		
 				}
-				else if(Type == MODEL_SHIELD+14 || Type == MODEL_SHIELD+15)	// 전설의방패
+				else if(Type == MODEL_SHIELD+14 || Type == MODEL_SHIELD+15)
 				{
 					Vector(50.f,0.f,90.f,Angle);
 					AngleMatrix(Angle,Matrix);
@@ -8187,7 +8030,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 					Matrix[1][3] = 0.f;
 					Matrix[2][3] = -25.f;	
 				}	
-				else if(Type == MODEL_SHIELD+6)		// 해골방패
+				else if(Type == MODEL_SHIELD+6)
 				{
 					Vector(30.f,0.f,90.f,Angle);
 					AngleMatrix(Angle,Matrix);
@@ -8279,7 +8122,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		Vector(0.f,0.f,WorldTime,Object->Angle);
 	}
 
-    //  무기 애니메이션 제어.
     if( ( c->Skill)==AT_SKILL_PIERCING && 
       ((o->Type==MODEL_PLAYER && o->CurrentAction>=PLAYER_ATTACK_FIST && o->CurrentAction<=PLAYER_RIDE_SKILL)))
     {
@@ -8289,14 +8131,11 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
             f->AnimationFrame      = 3.2f;
         }
     }
-    //  기사. 날개를 차고 마을에 있다.
     if ( ( f->Type>=MODEL_WING+6 && f->Type<=MODEL_WING+6 ) && c->SafeZone ) //  드라곤 날개.
     {
 	    b->CurrentAction  = 1;
     }
 #ifdef ADD_SOCKET_ITEM
-	// 등에 붙은 아이템 애니메이션 추가는 이곳에서!!
-	// 다크스팅거(23)는 등에 link가 되어있을 때 에도 애니메이션이 있습니다.
     if ( !Link || (Type<MODEL_BOW || Type>=MODEL_BOW+MAX_ITEM_INDEX) || Type==MODEL_BOW+23)
 #else ADD_SOCKET_ITEM
     if ( !Link || (Type<MODEL_BOW || Type>=MODEL_BOW+MAX_ITEM_INDEX))
@@ -8312,7 +8151,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 
 #ifdef YDG_FIX_ITEM_EFFECT_POSITION_ERROR
 #ifdef ADD_SOCKET_ITEM
-	// 아이템의 위치 갱신
 	VectorCopy( b->BodyOrigin, Object->Position );
 #endif // ADD_SOCKET_ITEM
 #endif	// YDG_FIX_ITEM_EFFECT_POSITION_ERROR
@@ -8323,7 +8161,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 	if(g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type) && !Link)
 	{
 		float _KnightScale = 0.9f;
-		if(Type == MODEL_MACE+2)		// 기사무기 사용으로 인해 본의 링크위치 변경
+		if(Type == MODEL_MACE+2)
 			b->InterpolationTrans(BoneTransform[0], BoneTransform[2], _KnightScale);
 		b->Transform(BoneTransform,Temp,Temp,&OBB,Translate,_KnightScale);
 	}
@@ -8337,16 +8175,13 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		RenderType | ((c->MonsterIndex==67 || c->MonsterIndex==137)
 		? ( RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
 	
-#ifndef YDG_FIX_ITEM_EFFECT_POSITION_ERROR	// 정리할때 삭제할 부분
+#ifndef YDG_FIX_ITEM_EFFECT_POSITION_ERROR
 #ifdef ADD_SOCKET_ITEM
-	// 아이템의 위치 갱신
+
 	VectorCopy( b->BodyOrigin, Object->Position );
 #endif // ADD_SOCKET_ITEM
-#endif	// YDG_FIX_ITEM_EFFECT_POSITION_ERROR	// 정리할때 삭제할 부분
+#endif	// YDG_FIX_ITEM_EFFECT_POSITION_ERROR
 
-#ifndef _VS2008PORTING			// #ifndef
-	int i;
-#endif // _VS2008PORTING
 	float Luminosity;
 	vec3_t Light;
     Luminosity = (float)(rand()%30+70)*0.005f;
@@ -8359,29 +8194,19 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		if(Type==MODEL_BOW+6)
 		{
     		Vector(Luminosity*0.6f,Luminosity*1.f,Luminosity*0.8f,Light);
-#ifdef _VS2008PORTING
+
 			for(int i=13;i<=18;i++)
-#else // _VS2008PORTING
-			for(i=13;i<=18;i++)
-#endif // _VS2008PORTING
 	     		RenderBrightEffect(b,BITMAP_SHINY+1,i,1.f,Light,o);
 		}
-        else if ( Type==MODEL_BOW+17 )  //  홀리 사이트 보우.
+        else if ( Type==MODEL_BOW+17 )
         {
     		Vector(Luminosity*0.5f,Luminosity*0.5f,Luminosity*0.8f,Light);
-#ifdef _VS2008PORTING
+
 			for(int i=13;i<=18;i++)
 				RenderBrightEffect(b,BITMAP_SHINY+1,i,1.f,Light,o);
 
 			for(int i=5;i<=8;i++)
 				RenderBrightEffect(b,BITMAP_SHINY+1,i,1.f,Light,o);
-#else // _VS2008PORTING
-			for(i=13;i<=18;i++)
-	     		RenderBrightEffect(b,BITMAP_SHINY+1,i,1.f,Light,o);
-
-            for(i=5;i<=8;i++)
-	     		RenderBrightEffect(b,BITMAP_SHINY+1,i,1.f,Light,o);
-#endif // _VS2008PORTING
         }
 		else
 		{
@@ -8390,14 +8215,10 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			RenderBrightEffect(b,BITMAP_SHINY+1,6,1.f,Light,o);
 		}
 		break;
-    case MODEL_STAFF+10:    //  대천사의 절대 지팡이.
+    case MODEL_STAFF+10:
         Vector(Luminosity*1.f,Luminosity*0.3f,Luminosity*0.1f,Light);
 
-#ifdef _VS2008PORTING
         for ( int i=0; i<10; ++i )
-#else // _VS2008PORTING
-        for ( i=0; i<10; ++i )
-#endif // _VS2008PORTING
         {
             vec3_t Light2;
             Vector ( 0.4f, 0.4f, 0.4f, Light2 );
@@ -8510,7 +8331,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_LIGHT,Position,1.0f,Light,o);
 		}
 		break;		
-    case MODEL_STAFF+12:					// 그랜드바이퍼
+    case MODEL_STAFF+12:
         {
 			Vector(0.4f, 0.4f, 0.4f, Light);
 			float fRendomPos = (float)(rand()%60)/20.0f - 1.5f;
@@ -8551,27 +8372,23 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_SHINY+1,Position,1.0f,Light,o, 90.0f + fRotation);
 		}
         break;	
-	case MODEL_SWORD+24:	//$	크라이울프 흑기사검
+	case MODEL_SWORD+24:
 		{
 			// Light
 			Vector(0.6f, 0.6f, 0.6f, Light);
 
-			// 가운데 빛1(조금씩 반짝반짝)
 			Vector(0.f, 0.f, 3.f, p);
 			b->TransformPosition(BoneTransform[2], p, Position, true);
 			CreateSprite(BITMAP_LIGHT+1, Position, 0.45f, Light, o);
 
-			// 가운데 빛2(조금씩 반짝반짝)
 			Vector(0.f, 0.f, -3.f, p);
 			b->TransformPosition(BoneTransform[2], p, Position, true);
 			CreateSprite(BITMAP_LIGHT+1, Position, 0.45f, Light, o);
 
-			// 가운데 shiny1(고정)
 			Vector(0.f, 0.f, 0.f, p);
 			b->TransformPosition(BoneTransform[2], p, Position, true);
 			CreateSprite(BITMAP_SHINY+1, Position, 0.7f, Light, o);
 
-			// 가운데 shiny2(회전, 스케일적용)
 			float fScale = 0.5f + (float)(rand()%100)/180;
 			float fRotation = (WorldTime*0.0006f)*360.0f;
 			Vector(0.f, 0.f, 0.f, p);
@@ -8586,26 +8403,23 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		    CreateSprite(BITMAP_LIGHT, Position, 3.f, Light, o, 0.f);
 		}
 		break;
-	case MODEL_SWORD+25:	//$ 크라이울프 마검사검
+	case MODEL_SWORD+25:
 		{
 			float fLight, fScale, fRotation;
 			static float fPosition = 0.0f;
 			static int iRandom;
 			
-			// 손잡이 빨강빛 (고정)
-			Vector(1.0f, 0.1f, 0.0f, Light);	// 빨강색
+			Vector(1.0f, 0.1f, 0.0f, Light);
 			Vector(0.f, 0.f, 0.f, p);
 			b->TransformPosition(BoneTransform[1],p,Position,true);
 			CreateSprite(BITMAP_LIGHT,Position,1.0f,Light,o);	// flare01.jpg
 
-			// 손잡이 주황색빛 (스케일, 회전, 깜빡)
 			fScale = (float)(rand()%30)/60.0f + 0.2f;
 			fLight = (float)sinf((WorldTime)*0.7f)*0.2f+0.3f;
 			fRotation = (WorldTime*0.0006f)*360.0f;
-			Vector(0.1f+fLight, 0.2f, 0.0f, Light);	// 주황색
+			Vector(0.1f+fLight, 0.2f, 0.0f, Light);
 			CreateSprite(BITMAP_LIGHT+3,Position,fScale,Light,o, fRotation);	// impact01.jpg
 
-			// 불이 위로 흐르는 것(페이드 아웃, 위로 이동)
 			Vector(1.0f-fLight, 0.0f, 0.0f, Light);
 			if(fPosition >= 20.0f)
 			{
@@ -8621,7 +8435,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			Vector(0.1f, 0.1f, 0.1f, Light);
 			CreateSprite(BITMAP_WATERFALL_2, Position, 0.3f, Light, o);
 
-			// Flare01 빛나게 하는거 본 5군데
+			// Flare01
 			fLight = (float)sinf((WorldTime)*0.4f)*0.25f+0.2f;
 			Vector(0.8f+fLight, 0.1f, 0.f, Light);
 			Vector(0.f, 0.f, 0.f, p);
@@ -8631,7 +8445,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				CreateSprite(BITMAP_LIGHT, Position, 1.1f, Light, o);
 			}
 
-			// 스파크 튀기
 			if ( o->CurrentAction==PLAYER_RUN_TWO_HAND_SWORD_TWO && World!=WD_10HEAVEN && rand()%2==0 )
 			{
 				if(!g_Direction.m_CKanturu.IsMayaScene())
@@ -8654,7 +8467,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			}
 		}
 		break;
-	case MODEL_MACE+15:	//$ 다크로드셉터
+	case MODEL_MACE+15:
 		{
 			float fScale;
 			Luminosity = (float)sinf((WorldTime)*0.002f)*0.3f+0.1f;
@@ -8679,9 +8492,8 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
             CreateSprite(BITMAP_LIGHT,Position,1.2f,Light,o);
 		}
 		break;
-	case MODEL_BOW+22:	//$ 요정활
+	case MODEL_BOW+22:
 		{
-			// 빛 
 			float fLight;
 			fLight = (float)sinf((WorldTime)*0.4f)*0.25f;
 			Vector(0.0f, 0.7f, 0.0f, Light);
@@ -8698,7 +8510,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformPosition(BoneTransform[16], p, Position, true);
 			CreateSprite(BITMAP_LIGHT, Position, 1.2f, Light, o);
 
-			// 눈 효과
 			Vector(0.f, 0.f, 0.f, p);
 			Vector(0.3f, 0.9f, 0.2f, Light);
 			if(rand()%2 == 1)
@@ -8714,16 +8525,13 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			}
 		}
 		break;
-	case MODEL_STAFF+13:	//$ 지팡이
+	case MODEL_STAFF+13:
 		{
-#ifndef _VS2008PORTING			// #ifndef
-			int i;
-#endif // _VS2008PORTING
 			float fLight, fScale, fRotation;
 			fLight = (float)sinf((WorldTime)*0.7f)*0.2f+0.3f;
 			Vector(0.f, 0.f, 0.f, p);
 
-			// 9번 본에 flare01
+			// flare01
 			Vector(0.7f, 0.7f, 0.7f, Light);
 			fScale = (float)(rand()%10)/500.0f;
 			b->TransformPosition(BoneTransform[9], p, Position, true);
@@ -8736,27 +8544,24 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformPosition(BoneTransform[9], p, Position, true);
 			CreateSprite(BITMAP_LIGHT, Position, 4.0f+fScale, Light, o);
 			
-			// 9번 본에 shiny02
+			// shiny02
 			Vector(0.4f, 0.5f+fLight, 0.4f, Light);
 			fScale = (float)(rand()%30)/60.0f;
 			fRotation = (WorldTime*0.0004f)*360.0f;
 			b->TransformPosition(BoneTransform[9], p, Position, true);
 			CreateSprite(BITMAP_SHINY+1, Position, 1.2f+fScale, Light, o, -fRotation);
 
-			// 9번 본에 magic_ground1
+			// magic_ground1
 			Vector(0.6f, 1.f, 0.6f, Light);
 			fScale = (float)(rand()%10)/500.0f;
 			fRotation = (WorldTime*0.0006f)*360.0f;
 			b->TransformPosition(BoneTransform[9], p, Position, true);
 			CreateSprite(BITMAP_MAGIC, Position, 0.25f+fScale, Light, o, fRotation);
 
-			// 5, 6, 7, 8번 본에 flare01 , 10, 11, 12, 13
+			// 5, 6, 7, 8 flare01 , 10, 11, 12, 13
 			Vector(0.f, 0.f, 0.f, p);
-#ifdef _VS2008PORTING
+
 			for(int i=0; i<4; ++i)
-#else // _VS2008PORTING
-			for(i=0; i<4; ++i)
-#endif // _VS2008PORTING
 			{
 				Vector(0.1f, 0.8f, 0.1f, Light);
 				b->TransformPosition(BoneTransform[5+i], p, Position, true);
@@ -8770,7 +8575,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformPosition(BoneTransform[4], p, Position, true);
 			CreateSprite(BITMAP_SHINY+1, Position, 0.6f+fScale, Light, o, fRotation);
 
-			// 2번 본 손잡이
 			Vector(0.6f, 1.f, 0.6f, Light);
 			fScale = (float)(rand()%10)/500.0f;
 			fRotation = (WorldTime*0.0006f)*360.0f;
@@ -8788,7 +8592,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_LIGHT, Position, 2.0f+fScale, Light, o);
 		}
 		break;
-    case MODEL_STAFF+11:    //  쿤둔의 지팡이.
+    case MODEL_STAFF+11:
         {
             Luminosity = (float)sinf((WorldTime)*0.002f)*0.3f+0.7f;
             
@@ -8818,7 +8622,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
             CreateSprite(BITMAP_SHINY+1,Position,1.f,Light,o, 360.f-Rotation );
         }
         break;
-    case MODEL_MACE+12:     //  다크로드 셉터 5.
+    case MODEL_MACE+12:
         {
             float Rotation = (float)( rand()%360 );
             Luminosity = (float)sinf((WorldTime)*0.002f)*0.3f+0.7f;
@@ -8833,15 +8637,12 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
             CreateSprite(BITMAP_SHINY+1,Position,1.f,Light,o, 360.f-Rotation );
         }
         break;
-    case MODEL_SWORD+19:    //  대천사의 절대검.
+    case MODEL_SWORD+19:
         Vector(Luminosity*1.f,Luminosity*0.3f,Luminosity*0.1f,Light);
 
         Vector ( 0.f, 0.f, 0.f, p );
-#ifdef _VS2008PORTING
+
         for ( int i=0; i<7; ++i )
-#else // _VS2008PORTING
-        for ( i=0; i<7; ++i )
-#endif // _VS2008PORTING
         {
             vec3_t Light2;
             Vector ( 0.4f, 0.4f, 0.4f, Light2 );
@@ -8868,7 +8669,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			VectorSubtract ( pos, Position, delta );
 		}
         break;
-    case MODEL_BOW+18:      //  대천사의 절대석궁.
+    case MODEL_BOW+18:
         Vector(Luminosity*1.f,Luminosity*0.3f,Luminosity*0.1f,Light);
 /*
         for ( i=0; i<4; ++i )
@@ -8888,11 +8689,8 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
         break;
 	case MODEL_BOW+19:
 		Vector ( 0.f, 0.f, 10.f, p );
-#ifdef _VS2008PORTING
+
         for ( int i=1; i<6; ++i )
-#else // _VS2008PORTING
-        for ( i=1; i<6; ++i )
-#endif // _VS2008PORTING
         {
     		Vector(Luminosity*0.5f,Luminosity*0.5f,Luminosity*0.8f,Light);
 	        b->TransformPosition(BoneTransform[i],p,Position,true);
@@ -8908,7 +8706,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				CreateSprite ( BITMAP_LIGHT, Position, 2.f, Light, o );
         }
 		break;
-	case MODEL_SHIELD+15:	//	법사 방패.
+	case MODEL_SHIELD+15:
 		Vector(Luminosity*0.6f,Luminosity*0.6f,Luminosity*2.f,Light);
 
         Vector ( 15.f, -15.f, 0.f, p );
@@ -8916,7 +8714,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		CreateSprite(BITMAP_SHINY+1,Position,1.5f,Light,o);
 		CreateSprite(BITMAP_LIGHT,Position,Luminosity+1.5f,Light,o);
 		break;
-	case MODEL_MACE+7:	//	요정 추가 둔기.
+	case MODEL_MACE+7:
         Vector(Luminosity*1.f,Luminosity*0.9f,Luminosity*0.f,Light);
 
         Vector ( 0.f, 0.f, 0.f, p );
@@ -9011,7 +8809,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite ( BITMAP_LIGHT, Position, 2.f, Light, o );
 		}
 		break;
-	case MODEL_SWORD+20:	//. 흑기사 추가검
+	case MODEL_SWORD+20:
 		{
 			for(int i=0; i<2; i++) {
 				Vector ( 0.f, 0.f, 0.f, p );
@@ -9024,10 +8822,9 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			}
 		}
 		break;
-	case MODEL_BOW+20:		//. 요정 추가활
+	case MODEL_BOW+20:
 		{
 			float Scale = sinf(WorldTime*0.001f)+1.f;
-			//. 활 방패
 			Vector(Luminosity*3.f,Luminosity,Luminosity,Light);
 			Vector ( 0.f, 0.f, 0.f, p );
 			b->TransformPosition ( BoneTransform[6], p, Position, true );
@@ -9035,7 +8832,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformPosition ( BoneTransform[2], p, Position, true );
 			CreateSprite ( BITMAP_LIGHT, Position, Scale*0.8f, Light, o );
 
-			//. 활 촉
 			float Rotation = sinf ( WorldTime*0.01f )*360;
             Luminosity = sinf( WorldTime*0.001f )*0.3+0.3f;
             Vector ( Luminosity, Luminosity, Luminosity, Light );
@@ -9073,21 +8869,18 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			}
 		}
 		break;
-	case MODEL_SPEAR+10:	//. 드레곤 스피어
+	case MODEL_SPEAR+10:
         Vector(Luminosity*0.2f,Luminosity*0.1f,Luminosity*0.8f,Light);
 		Vector ( 0.f, 0.f, 0.f, p );
-#ifdef _VS2008PORTING
+
 		for ( int i=1; i<9; i++ )
-#else // _VS2008PORTING
-		for ( i=1; i<9; i++ )
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[i],p,Position,true);
 			CreateSprite ( BITMAP_LIGHT, Position, 1.3f, Light, o );
 		}
 		break;
 #ifdef ADD_SOCKET_ITEM
-	case MODEL_SWORD+26:				// 플랑베르주
+	case MODEL_SWORD+26:
 		{
 			Vector( 0.8f, 0.6f, 0.2f, Light );
 			b->TransformByObjectBone(Position, Object, 11 );		// Gold01
@@ -9122,7 +8915,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_LIGHTMARKS, Position, 0.5f, Light, o);
 
 		}break;
-	case MODEL_SWORD+27:				// 소드브레이커
+	case MODEL_SWORD+27:
 		{
 			Vector(0.1f, 0.9f, 0.1f,Light);	
 			
@@ -9141,10 +8934,8 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformByObjectBone(Position, Object, 7);		// Zx07
 			CreateSprite(BITMAP_LIGHTMARKS, Position, 0.3f, Light, o);
 			
-			// 독연기 효과(파티클)
 			for( int i=1 ; i<=7 ; i++ )
 			{
-				// 25% 확률로 생성
 				if( rand()%4 != 0 )
 				{
 					continue;
@@ -9158,9 +8949,9 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				CreateParticle(BITMAP_WATERFALL_4, Position, Object->Angle, Light, 12, 0.5f, Object);
 			}	
 		}break;
-	case MODEL_SWORD+28:				// 룬바스타드
+	case MODEL_SWORD+28:
 		{
-			float fRendomScale = (float)((rand()%15)/30.0f)+0.5f;		// 깜빡깜빡
+			float fRendomScale = (float)((rand()%15)/30.0f)+0.5f;
 			Vector(0.f,0.f,0.f,Position);
 			Vector(0.1f, 0.4f, 0.9f,Light);	
 			b->TransformPosition(BoneTransform[8], Position, p, true);		// Zx01
@@ -9199,7 +8990,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformPosition(BoneTransform[7], Position, p, true);		// Zx06
 			CreateSprite(BITMAP_LIGHTMARKS, p, 0.1f, Light, o);
 		}break;
-	case MODEL_MACE+16:					// 프로스트메이스
+	case MODEL_MACE+16:
 		{	
 			vec3_t vDPos;
 			Vector( 0.5f, 0.8f, 0.5f, Light );
@@ -9227,9 +9018,9 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformByObjectBone( Position, Object, 24 );
 			CreateSprite(BITMAP_SHINY+6, Position, 0.3f, Light, o);
 			CreateSprite(BITMAP_LIGHT, Position, 2.0f, Light, o);
-			CreateSprite(BITMAP_PIN_LIGHT, Position, 0.5f, Light, o, ((int)(WorldTime*0.04f)%360));		// 시계반대방향
-			CreateSprite(BITMAP_PIN_LIGHT, Position, 0.7f, Light, o, -((int)(WorldTime*0.03f)%360));	// 시계방향 
-			CreateSprite(BITMAP_PIN_LIGHT, Position, 0.9f, Light, o, ((int)(WorldTime*0.02f)%360));		// 시계반대방향
+			CreateSprite(BITMAP_PIN_LIGHT, Position, 0.5f, Light, o, ((int)(WorldTime*0.04f)%360));
+			CreateSprite(BITMAP_PIN_LIGHT, Position, 0.7f, Light, o, -((int)(WorldTime*0.03f)%360));
+			CreateSprite(BITMAP_PIN_LIGHT, Position, 0.9f, Light, o, ((int)(WorldTime*0.02f)%360));
 			
 			if( rand()%3 != 0 )
 			{
@@ -9288,12 +9079,12 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformByObjectBone( Position, Object, 23 );
 			CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o);
 		}break;
-	case MODEL_MACE+17:					// 앱솔루트셉터
+	case MODEL_MACE+17:
 		{
 			float fRandomScale;
 			vec3_t vPosZx01, vPosZx02, vLight1, vLight2, vDLight;
 
-			float fLumi = absf((sinf( WorldTime*0.0008f )))*0.8+0.2f;// 페이드인/아웃	
+			float fLumi = absf((sinf( WorldTime*0.0008f )))*0.8+0.2f;	
 			Vector( fLumi*0.6f, fLumi*0.5f, fLumi*0.8f, vDLight);
 
 			Vector(0.6f, 0.5f, 0.8f, vLight1);
@@ -9303,7 +9094,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 
 			if( ((int)WorldTime/100)%10 == 0 )
 			{
-				// 0.3초당 한번씩 바뀐다.
 				Object->m_iAnimation = rand()%100;			
 				Object->EyeRight[0] = (rand()%10-5);
 				Object->EyeRight[1] = (rand()%10-5);
@@ -9312,26 +9102,26 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Object->EyeRight2[1] = (rand()%10-5)*1.2f;
 				Object->EyeRight2[2] = (rand()%10-5)*1.2f;
 			}
-			// Object->m_iAnimation에 값을 저장하여, 1의 자리와 10의자리 두 수로, 두가지의 Random Texture를 생성한다.
+			// Object->m_iAnimation Random Texture
 			int iRandomTexure1, iRandomTexure2;
 			iRandomTexure1 = (Object->m_iAnimation/10)%3;	// 3개
 			iRandomTexure2 = (Object->m_iAnimation)%3;		// 3개
 
 			// Zx01
-			fRandomScale = (float)(rand()%10)/10.0f + 1.0f;		// 깜빡깜빡효과(1.0~2.0)
+			fRandomScale = (float)(rand()%10)/10.0f + 1.0f;		//(1.0~2.0)
 			CreateSprite(BITMAP_LIGHT, vPosZx01, fRandomScale, vLight1, o);
 			CreateSprite(BITMAP_SHINY+1, vPosZx01, 0.5f, vDLight, o);
 			VectorAdd( vPosZx01, Object->EyeRight, vPosZx01 );
 			CreateSprite(BITMAP_LIGHTNING_MEGA1+iRandomTexure1, vPosZx01, (((rand()%11)-20)/100.f)+0.5f, vLight2, o, rand()%380 );
 
 			// Zx02
-			fRandomScale = (float)((rand()%10)/5.0f)+1.5f;		// 깜빡깜빡효과(2.0~3.25)
+			fRandomScale = (float)((rand()%10)/5.0f)+1.5f;		//(2.0~3.25)
 			CreateSprite(BITMAP_LIGHT, vPosZx02, fRandomScale, vLight1, o);
 			CreateSprite(BITMAP_SHINY+1, vPosZx02, 1.0f, vDLight, o);
 			VectorAdd( vPosZx02, Object->EyeRight2, vPosZx02 );
 			CreateSprite(BITMAP_LIGHTNING_MEGA1+iRandomTexure1, vPosZx02, (((rand()%11)-20)/50.f)+0.8f, vLight2, o, rand()%380 );
 		}break;
-	case MODEL_BOW+23:					// 다크스팅거
+	case MODEL_BOW+23:
 		{
 			vec3_t vZX03, vZx04;
 			int iNumCreateFeather = rand()%3;
@@ -9348,7 +9138,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				CreateSprite( BITMAP_LIGHT, Position, 0.8f, Light, Object );
 			}
 
-			// 깃털 날리기
 			if( o->AnimationFrame >= 4.5f && o->AnimationFrame <= 5.0f )
 			{
 				for( int i=0 ; i<iNumCreateFeather ; i++ )
@@ -9362,7 +9151,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			
 
 		}break;
-	case MODEL_STAFF+30:				// 데들리스태프
+	case MODEL_STAFF+30:
 		{
 			Vector( 0.f, 0.f, 0.f, Position);
 			Vector( 0.8f, 0.3f, 0.1f, Light);	
@@ -9379,10 +9168,10 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformPosition(BoneTransform[9], Position, p, true);		// Zx05
 			CreateSprite(BITMAP_LIGHT, p, 0.8f, Light, o);
 			
-			float fLumi = absf((sinf( WorldTime*0.001f )))*0.8f + 0.2f;	// 페이드인/아웃
+			float fLumi = absf((sinf( WorldTime*0.001f )))*0.8f + 0.2f;
 			vec3_t vDLight;
 			Vector( fLumi*0.8f, fLumi*0.1f, fLumi*0.3f, vDLight);
-			float fRendomScale = (float)(rand()%10)/20.0f + 0.8f;		// 깜빡깜빡(0.5~1.25)
+			float fRendomScale = (float)(rand()%10)/20.0f + 0.8f;		// (0.5~1.25)
 			Vector(0.8f, 0.2f, 0.4f, Light);
 			b->TransformPosition(BoneTransform[2], Position, p, true);		// Red01
 			CreateSprite(BITMAP_LIGHT, p, 2.0f, vDLight, o);
@@ -9396,11 +9185,11 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			VectorCopy(p, o->EyeRight);
 			Vector(0.9f, 0.f, 0.f, vColor);
 			CreateJoint(BITMAP_JOINT_ENERGY, p, p, o->Angle, 47, o, 25.f);
-			// 위의 CreateJoint()에는 양손에 같은 무기 두개 장착시 간섭이 생긴다.
-			// 따라서, 아래방식을 사용해야하는데 잘안됌. 일단 임시로 BITMAP_JOINT_ENERGY의 SubType를 하나 늘렸다.
+			// CreateJoint()
+			// BITMAP_JOINT_ENERGY SubType
 			//CreateEffect(MODEL_EFFECT_TRACE, p, o->Angle, vColor, 0, NULL, -1, 0, 0, 0, 20.f);
 		}break;
-	case MODEL_STAFF+31:				// 인베리알스태프
+	case MODEL_STAFF+31:
 		{
 			Vector(0.f,0.f,0.f,Position);
 			Vector(0.3f,0.3f,0.9f,Light);	
@@ -9434,7 +9223,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			Vector(0.7f,0.7f,0.7f,Light);
 			CreateSprite(BITMAP_SHINY+2, p, 2.f, Light, o);
 		}break;
-	case MODEL_STAFF+32:		// 소울브링거
+	case MODEL_STAFF+32:
 		{
 			float fRandomScale;
 			vec3_t vLight1, vLight2;
@@ -9448,9 +9237,9 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_LIGHT, Position, 2.f, Light, o);
 
 			Vector( 0.7f, 0.1f, 0.6f, Light );
-			CreateSprite(BITMAP_SHOCK_WAVE, Position, 0.65f, Light, o, -((int)(WorldTime*0.05f)%360));	// 시계방향회전
-			// 이팩트의 크기값으로 Object->Timer 사용.
-			// 이팩트의 색깔값으로 Object->EyeRight 사용.
+			CreateSprite(BITMAP_SHOCK_WAVE, Position, 0.65f, Light, o, -((int)(WorldTime*0.05f)%360));
+			// Object->Timer 
+			// Object->EyeRight 
 			Object->Timer += 0.01f;
 			if( Object->Timer <= 0.1f || Object->Timer > 0.9f )
 			{
@@ -9464,10 +9253,10 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Object->EyeRight[2] *= 0.95f;
 			}
 
-			CreateSprite( BITMAP_SHOCK_WAVE, Position, Object->Timer, Object->EyeRight, o );		// 점점커진다.
+			CreateSprite( BITMAP_SHOCK_WAVE, Position, Object->Timer, Object->EyeRight, o );
 
 			Vector( 0.9f, 0.5f, 0.2f, Light );
-			fRandomScale = (float)(rand()%5)/25.0f + 0.3f;		// 깜빡깜빡(0.3~0.4)
+			fRandomScale = (float)(rand()%5)/25.0f + 0.3f;		// (0.3~0.4)
 			CreateSprite(BITMAP_LIGHTMARKS, Position, fRandomScale, Light, o);
 
 			b->TransformByObjectBone(Position, Object, 2);		// Zx02
@@ -9478,7 +9267,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_SHINY+6, Position, 0.2f, vLight1, o);
 			CreateSprite(BITMAP_LIGHTMARKS, Position, 0.3f, vLight2, o);
 		}break;
-	case MODEL_SHIELD+17:		// 크림슨글로리
+	case MODEL_SHIELD+17:
 		{
 			vec3_t vDLight;
 			Vector( 0.8f, 0.6f, 0.2f, Light );
@@ -9497,7 +9286,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformByObjectBone(Position, Object, 10);		// Zx09
 			CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o);
 	
-			float fLumi = absf((sinf( WorldTime*0.0005f )));// 페이드인/아웃	
+			float fLumi = absf((sinf( WorldTime*0.0005f )));	
 			Vector( fLumi*1.f, fLumi*1.f, fLumi*1.f, vDLight);
 			b->TransformByObjectBone(Position, Object, 1);		// Zx01
 			CreateSprite(BITMAP_FLARE_RED, Position, 0.5f, vDLight, o);
@@ -9508,28 +9297,27 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 
 
 		}break;
-	case MODEL_SHIELD+18:		// 샐러맨더실드
+	case MODEL_SHIELD+18:
 		{
 			Vector( 0.9f, 0.f, 0.2f, Light );
 			b->TransformByObjectBone(Position, Object, 1);		// Zx01
 			CreateSprite(BITMAP_LIGHT, Position, 2.0f, Light, o);
 			
 			Vector( 1.f, 1.f, 1.f, Light );
-			// 리얼한 불 만들기!!
 			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1, Position, Object->Angle, Light, 0, 0.7f);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1, Position, Object->Angle, Light, 0, 0.7f);
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_CURSEDLICH, Position, Object->Angle, Light, 4, 0.7f);	// 불
+				CreateParticle(BITMAP_FIRE_CURSEDLICH, Position, Object->Angle, Light, 4, 0.7f);
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3, Position, Object->Angle, Light, 0, 0.7);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3, Position, Object->Angle, Light, 0, 0.7);
 				break;
 			}
 		}break;
-	case MODEL_SHIELD+19:		// 프로스트배리어
+	case MODEL_SHIELD+19:
 		{
 // 			float fScale = 1.0f;
 // 
@@ -9575,7 +9363,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		}break;
 #endif // ADD_SOCKET_ITEM
 #ifdef CSK_ADD_ITEM_CROSSSHIELD
-	case MODEL_SHIELD+21:		// 크로스실드
+	case MODEL_SHIELD+21:
 		{
 			vec3_t vPos, vLight;
 			Vector(0.f, 0.f, 0.f, vPos);
@@ -9607,7 +9395,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		break;
 #endif // CSK_ADD_ITEM_CROSSSHIELD
 #ifdef LDK_ADD_GAMBLERS_WEAPONS
-	case MODEL_STAFF+33:		//겜블 레어 지팡이
+	case MODEL_STAFF+33:
 		{
 			vec3_t vPos, vLight;
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
@@ -9652,8 +9440,8 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			Vector(0.0f, 0.0f, 1.0f, vLight);
 			CreateSprite(BITMAP_SHINY+2, vPos, 1.5f, vLight, Object);
 			Vector(0.4f, 0.4f, 1.0f, vLight);
-			CreateSprite(BITMAP_PIN_LIGHT, vPos, 0.7f, vLight, Object, -((int)(WorldTime*0.04f)%360));	// 시계방향 
-			CreateSprite(BITMAP_PIN_LIGHT, vPos, 0.8f, vLight, Object, -((int)(WorldTime*0.03f)%360));	// 시계방향 
+			CreateSprite(BITMAP_PIN_LIGHT, vPos, 0.7f, vLight, Object, -((int)(WorldTime*0.04f)%360));
+			CreateSprite(BITMAP_PIN_LIGHT, vPos, 0.8f, vLight, Object, -((int)(WorldTime*0.03f)%360));
 
 			float quarterAngle, theta, fSize;
 			quarterAngle = Q_PI/180.0f*(int(WorldTime*0.02f)%90);
@@ -9678,7 +9466,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_SHINY+6, vPos, 0.6f, vLight, Object);
 		}
 		break;
-	case MODEL_SPEAR+11:		//겜블 레어 낫
+	case MODEL_SPEAR+11:
 		{
 			vec3_t vPos, vLight;
 
@@ -9710,7 +9498,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_LIGHTMARKS, vPos, 1.0f, vLight, Object);
 
 			Vector(0.4f, 0.6f, 0.9f, vLight);
-			if(int(WorldTime)%14 == 0) //별가루
+			if(int(WorldTime)%14 == 0)
 				CreateParticle(BITMAP_SHINY+6, vPos, o->Angle, vLight, 1 );
 
 			//rx02
@@ -9761,7 +9549,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				CreateSprite(BITMAP_SHOCK_WAVE, vPos, fSize, vLight, Object);
 			}
 
-			//model_bow의 action, frame 에서는 확인할수 없어서 캐릭터의 액션을 확인함...
+			//model_bow action, frame
 			if( o->CurrentAction>=PLAYER_ATTACK_FIST && o->CurrentAction<=PLAYER_RIDE_SKILL )
 			{
 				Vector(0.2f, 0.8f, 0.5f, vLight);
@@ -9777,10 +9565,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 	}
 
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 전체를 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void RenderLight(OBJECT *o,int Texture,float Scale,int Bone,float x,float y,float z)
 {
@@ -9813,14 +9597,8 @@ void RenderEye(OBJECT *o,int Left,int Right,float fSize = 1.0f)
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//  캐릭터를 화면에 표시한다.
-//////////////////////////////////////////////////////////////////////////
-// 
-//* 아이템 Effect는 RenderLinkObject()에서 하자.
 void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 {
-	//  크라이울프 MVP 일때 NPC 안보이게
 	if( g_isCharacterBuff(o, eBuff_CrywolfNPCHide) )
 	{
 		return;
@@ -9830,21 +9608,17 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	if ( Models[o->Type].NumActions==0 ) return;
 
 	bool Translate = true;
-#ifndef _VS2008PORTING		// #ifndef
-	int i;
-#endif // _VS2008PORTING
+
     vec3_t p, Position, Light;
 
-	//  기본 오브젝트를 그린다.
     Vector(0.f, 0.f, 0.f, p);
     Vector(1.f, 1.f, 1.f,Light);
 
 	BYTE byRender = CHARACTER_NONE;
-	
-    //  모델링 데이터에 천 효과 주기
+
 	switch ( c->MonsterIndex)
 	{
-	case 89:   //  마법 해골.
+	case 89:
 	case 95:
 	case 112:
 	case 118:
@@ -9922,7 +9696,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		|| o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA
 #endif //PJH_ADD_PANDA_CHANGERING
 #ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED	// 스켈레톤 변신반지
+		|| o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED
 #endif	// YDG_ADD_SKELETON_CHANGE_RING
 		)
 	{
@@ -9936,7 +9710,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
     if ( byRender==CHARACTER_ANIMATION )
         Calc_ObjectAnimation ( o, Translate, Select );
 
-    //  히어로 그림자만 출력 부분. 먼저 그림자를 RENDER 한다.
     if ( o->Alpha>=0.5f && c->HideShadow==false )
     {
         if ( World!=WD_10HEAVEN && (o->Type==MODEL_PLAYER) && (!(MODEL_HELPER+2<=c->Helper.Type && c->Helper.Type<=MODEL_HELPER+3) || c->SafeZone ) 
@@ -9959,21 +9732,19 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
     if ( byRender==CHARACTER_RENDER_OBJ )
 	{
-		//  기본 오브젝트를 그린다.
 		if(67==c->MonsterIndex || 74==c->MonsterIndex || 75==c->MonsterIndex
 			|| 135==c->MonsterIndex || 136==c->MonsterIndex || 137==c->MonsterIndex
 #ifdef LOREN_RAVINE_EVENT
 			|| 300==c->MonsterIndex || 301==c->MonsterIndex || 302==c->MonsterIndex || 303==c->MonsterIndex
 #endif
 			|| 314==c->MonsterIndex || 315==c->MonsterIndex || 316==c->MonsterIndex || 317==c->MonsterIndex || 318==c->MonsterIndex || 319==c->MonsterIndex
-			) 	// 발록2처리, 메가크러스트2, 흑룡2 색깔바꾸기
+			)
 		{
 			RenderObject ( o, Translate,Select, c->MonsterIndex);
 		}
 		else
 		{
 			if((c->MonsterIndex == 360 && o->CurrentAction == MONSTER01_ATTACK2)) 
-				// 추가하고 싶은 잔상 있으면 몬스터 인덱스와 액션 추가
 			{
 				RenderObject_AfterImage(o, Translate, Select, 0);
 			}
@@ -9992,7 +9763,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		}
 	}
 
-	//  그림자 그리기 ( 플레이어가 아닌 다른 오브젝트들의 그림자를 그린다. )
 	if ( ( 
            o->Type!=MODEL_PLAYER && o->Kind!=KIND_TRAP && 
 		   c->MonsterIndex!=25 && c->MonsterIndex!=22 && c->MonsterIndex!=42 && c->MonsterIndex!=242 && c->MonsterIndex!=59 && c->MonsterIndex!=63 
@@ -10011,13 +9781,11 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                 }
             }
 
-            //  대천사, 대천사의 전령.
             if ( c->MonsterIndex==232 )
                 o->HiddenMesh = 2;
             else if ( c->MonsterIndex==233 )
                 o->HiddenMesh = 2;
 
-            //  블러드캐슬의 석상과 성문가 아닌 것들만 그림자를 넣는다. 케릭터 선택씬의 케릭터 생성시 케릭터들 그림자 안 그린다
             if ( o->Type!=MODEL_MONSTER01+60 && o->Type!=MODEL_MONSTER01+61
 				&& !( o->Type >= MODEL_FACE 
 #ifdef PBG_ADD_NEWCHAR_MONK
@@ -10030,7 +9798,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				RenderPartObject(&c->Object,o->Type,NULL,c->Light,o->Alpha,0,0,0,false,false,Translate);
 				o->EnableShadow = false;
             }
-            //  대천사, 대천사의 전령.
             if ( c->MonsterIndex==232 || c->MonsterIndex==233 )
             {
 				EnableAlphaBlend();
@@ -10048,7 +9815,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                 o->HiddenMesh = -1;
             }
 #ifdef _PVP_MURDERER_HERO_ITEM
-            if ( c->MonsterIndex==228 )			// 영웅상점
+            if ( c->MonsterIndex==228 )
             {
 				EnableAlphaBlend();
                 vec3_t Light;
@@ -10058,7 +9825,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
                 o->HiddenMesh = -1;
             }
-            else if ( c->MonsterIndex==227 )	// 살인마상점
+            else if ( c->MonsterIndex==227 )
             {
 				EnableAlphaBlend();
                 vec3_t Light;
@@ -10086,7 +9853,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		)//발록,황금버지드래곤
 	{
 #ifdef CSK_ADD_GOLDCORPS_EVENT
-		// 바디라이트 백업용 변수
 		vec3_t vBackupBodyLight;
 #endif // CSK_ADD_GOLDCORPS_EVENT
 
@@ -10114,23 +9880,16 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			if(c->MonsterIndex >= 492)
 #endif // KJH_FIX_GOLD_RABBIT_INDEX
 			{
-				// 바디라이트 백업
 				VectorCopy(Models[o->Type].BodyLight, vBackupBodyLight);
-
-				// 새로운 바디라이트 적용
 				Vector(1.f, 0.6f, 0.3f, Models[o->Type].BodyLight);
 			}
 
-			//	황금 그레이트 드래곤 인경우 만 비주얼 이펙트 처리 합니다.
 			if(c->MonsterIndex == 501)
 			{
-				// 바디라이트 백업
 				VectorCopy(Models[o->Type].BodyLight, vBackupBodyLight);
-				
-				// 새로운 바디라이트 적용
 				Vector(1.f, 0.0f, 0.0f, Models[o->Type].BodyLight);
 
-#ifdef LDS_ADD_GOLDCORPS_EVENT_MOD_GREATDRAGON	// 황금 군단의 황금 그레이트 드래곤 비주얼 이펙트. 
+#ifdef LDS_ADD_GOLDCORPS_EVENT_MOD_GREATDRAGON
 				float	fEffectScale = o->Scale * 1.6f;
 				vec3_t	v3EffectLightColor, v3EffectPosition;
 
@@ -10153,7 +9912,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 				Vector(1.0f, 0.8f, 0.1f,v3EffectLightColor);
 
-				// 지정된 본 위치에 리얼한 불 효과 생성. 
 				b->TransformPosition(o->BoneTransform[57],p,v3EffectPosition,true);
 				CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0, 0,fEffectScale);	
 				
@@ -10175,7 +9933,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
       		RenderPartObjectBodyColor(&Models[o->Type],o,o->Type,o->Alpha,RENDER_METAL|RENDER_BRIGHT,Bright);
 		}
 
-		if(c->MonsterIndex==67)	// 발록2
+		if(c->MonsterIndex==67)
 		{
 			RenderPartObjectBodyColor(&Models[o->Type],o,o->Type,o->Alpha,RENDER_CHROME|RENDER_BRIGHT|RENDER_EXTRA,Bright);
 		}
@@ -10185,7 +9943,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		}
 
 #ifdef CSK_ADD_GOLDCORPS_EVENT
-		// 원래 바디라이트로 복원
 #ifdef KJH_FIX_GOLD_RABBIT_INDEX
 		if(c->MonsterIndex >= 493 && c->MonsterIndex <= 502)
 #else // KJH_FIX_GOLD_RABBIT_INDEX
@@ -10196,33 +9953,27 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		}
 #endif // CSK_ADD_GOLDCORPS_EVENT	
 	}
-    else if(c->MonsterIndex==69)//  별자리.
+    else if(c->MonsterIndex==69)
     {
     	float Luminosity = (float)(rand()%30+70)*0.01f;
         Vector(Luminosity*0.8f,Luminosity*0.9f,Luminosity*1.f,Light);
-#ifdef _VS2008PORTING
+
 		for( int i=0; i<9; ++i )
-#else // _VS2008PORTING
-        for( i=0; i<9; ++i )
-#endif // _VS2008PORTING
         {
     		b->TransformPosition(o->BoneTransform[g_chStar[i]],p,Position,true);
 			CreateSprite(BITMAP_LIGHT,Position,0.6f,Light,o);
         }
 
         Vector(Luminosity*0.6f,Luminosity*0.7f,Luminosity*0.8f,Light);
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<3;i++)
-#else // _VS2008PORTING
-		for(i=0;i<3;i++)
-#endif // _VS2008PORTING
 		{
 			Vector((float)(rand()%20-10),(float)(rand()%20-10),(float)(rand()%20-10),p);
 			b->TransformPosition(o->BoneTransform[rand()%b->NumBones],p,Position,true);
            	CreateParticle(BITMAP_SPARK+1,Position,o->Angle,Light,3);
 		}
     }
-    else if(c->MonsterIndex==70)//   비의여왕.
+    else if(c->MonsterIndex==70)
     {
     	b->TransformPosition(o->BoneTransform[20],p,Position,true);
         CreateSprite(BITMAP_LIGHT,Position,0.8f,Light,o);
@@ -10231,7 +9982,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 #ifdef LOREN_RAVINE_EVENT
 		|| c->MonsterIndex==301
 #endif //LOREN_RAVINE_EVENT
-		)	// 야누스
+		)
     {
 		if ( !c->Object.m_pCloth)
 		{
@@ -10251,18 +10002,15 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			pCloth[0].Render();
 		}
     }
-    else if(c->MonsterIndex==73 || c->MonsterIndex==75)//   흑룡.
+    else if(c->MonsterIndex==73 || c->MonsterIndex==75)
     {
         vec3_t pos1, pos2;
 		switch ( c->MonsterIndex)
 		{
 		case 73:
 			Vector(0.1f,0.1f,1.f,Light);
-#ifdef _VS2008PORTING
+
 			for(int i=13; i<27; ++i)
-#else // _VS2008PORTING
-			for(i=13; i<27; ++i)
-#endif // _VS2008PORTING
 			{
     			b->TransformPosition(o->BoneTransform[i],p,Position,true);
 				CreateSprite(BITMAP_LIGHT,Position,0.8f,Light,o);
@@ -10274,11 +10022,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				}
 				VectorCopy( Position, pos1 );
 			}
-#ifdef _VS2008PORTING
+
 			for(int i=52; i<59; ++i)
-#else // _VS2008PORTING
-			for(i=52; i<59; ++i)
-#endif // _VS2008PORTING
 			{
     			b->TransformPosition(o->BoneTransform[i],p,Position,true);
 				CreateSprite(BITMAP_LIGHT,Position,0.8f,Light,o);
@@ -10286,11 +10031,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			break;
 		case 75:
 			Vector(1.f,1.f,1.0f,Light);
-#ifdef _VS2008PORTING
+
 			for(int i=18; i<19; ++i)
-#else // _VS2008PORTING
-			for(i=18; i<19; ++i)
-#endif // _VS2008PORTING
 			{
 				Vector(0.f,0.f,0.f,p);
     			b->TransformPosition(o->BoneTransform[i],p,Position,true);
@@ -10299,17 +10041,16 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			break;
 		}
 
-		int RenderType = ( c->MonsterIndex==73) ? 0 : RENDER_EXTRA;	// 흑룡2 색깔바꾸기
+		int RenderType = ( c->MonsterIndex==73) ? 0 : RENDER_EXTRA;
       	RenderPartObjectBodyColor(&Models[o->Type],o,o->Type,o->Alpha,RENDER_CHROME|RENDER_BRIGHT|RenderType,1.f);
-		// 흑룡 흐르는 효과 더 뿌리기
+
 		if ( c->MonsterIndex==73)
 		{
       		RenderPartObjectBodyColor2(&Models[o->Type],o,o->Type,o->Alpha,RENDER_CHROME2|RENDER_LIGHTMAP|RENDER_BRIGHT,1.f);
 		}
     }
 	else if ( c->MonsterIndex==77)
-	{	// 불사조
-		// 1. 흘리기
+	{	
 		float fSin = 0.5f * ( 1.0f + sinf( ( float)( ( int)WorldTime % 10000) * 0.001f));
 		RenderPartObjectBodyColor(&Models[o->Type],o,o->Type,o->Alpha,RENDER_CHROME|RENDER_BRIGHT,0.3f+fSin*0.7f);
 		fSin = 0.3f * ( 1.0f - fSin) + 0.3f;
@@ -10319,12 +10060,11 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		RenderObject(o,Translate,3,0);
 		o->BlendMesh = -1;
 		memcpy( g_fBoneSave[2], o->BoneTransform[24], 3 * 4 * sizeof ( float));
-		// 2. 탄 여자
 		o->Type++;
 		RenderObject(o,Translate,Select,0);
 		memcpy( g_fBoneSave[0], o->BoneTransform[23], 3 * 4 * sizeof ( float));
 		memcpy( g_fBoneSave[1], o->BoneTransform[14], 3 * 4 * sizeof ( float));
-		// 3. 탄 여자 망토
+
 		if ( !c->Object.m_pCloth)
 		{
 			CPhysicsCloth *pCloth = new CPhysicsCloth [1];
@@ -10350,7 +10090,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
     	RenderPartObjectBodyColor(&Models[o->Type],o,o->Type,o->Alpha,RENDER_METAL|RENDER_BRIGHT,1.f,BITMAP_SHINY+1);
 	}
 
-	if(c->MonsterIndex==42)//쿤둔
+	if(c->MonsterIndex==42)
 	{
 		PART_t *w = &c->Wing;
 		w->Type          = MODEL_BOSS_HEAD;
@@ -10371,7 +10111,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		VectorCopy(TempLight,c->Light);
 		o->Scale         = TempScale;
 	}
-    //  블러드캐슬의 성자의 석상.
     else if ( c->MonsterIndex>=132 && c->MonsterIndex<=134 )
     {
 		PART_t *w = &c->Wing;
@@ -10393,14 +10132,13 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		RenderLinkObject ( 0.f,0.f,0.f,c,w,w->Type,0,0,true,true);
 		o->Scale         = TempScale;
     }
-    //  백색의 마법사
     else if ( c->MonsterIndex==135 )
     {
 		RenderPartObjectBodyColor(&Models[o->Type],o,o->Type,o->Alpha,RENDER_BRIGHT|RENDER_EXTRA,1.0f);
 	}
 	
 #ifdef PRUARIN_EVENT07_3COLORHARVEST
-	if( o->Type == MODEL_MONSTER01+127 )	// 달토끼
+	if( o->Type == MODEL_MONSTER01+127 )
 	{	
 		vec3_t vLight;
 		vec3_t vPos, vRelatedPos;
@@ -10432,69 +10170,48 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					Vector(0.5f, 0.5f, 0.0f, vLight);
  					BoneManager::GetBonePosition(o, "Rabbit_1", vPos);
 
-					// 달
 					Vector(0.7f, 1.0f, 0.6f, vLight);
 					vec3_t vMoonPos;
 					VectorCopy( vPos, vMoonPos );
 					vMoonPos[2] += 28.f;
 					CreateEffect( MODEL_MOONHARVEST_MOON, vMoonPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 0.5f );
 					
-					// 폭발
 					Vector(0.4f, 0.4f, 0.8f, vLight);
 					CreateParticle(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 10, 1.0f);	
 					
-					// 스파크
 					Vector(1.0f, 1.0f, 1.0f, vLight);
 					for( int i=0 ; i<200 ; i++)
 					{
-						// 퍼지는거
 						CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 21 );
 					}				
-#ifdef _VS2008PORTING
+
 					for( int i=0 ; i<150 ; i++ )
-#else // _VS2008PORTING	
-					for( i=0 ; i<150 ; i++ )
-#endif // _VS2008PORTING
 					{
-						// 퍼져서 떨어지는거
 						CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 22 );
 					}
 					Vector(1.0f, 1.0f, 1.0f, vLight);
 					switch(o->SubType)
 					{
-					case 0:		// 감
+					case 0:
 						{
-#ifdef _VS2008PORTING
 							for( int i=0 ; i<10 ; i++ )
-#else // _VS2008PORTING
-							for( i=0 ; i<10 ; i++ )
-#endif // _VS2008PORTING
 							{
 								CreateEffect(MODEL_MOONHARVEST_GAM, vPos, o->Angle, vLight);
 							}
 						}break;
-					case 1:		// 송편
+					case 1:
 						{
-#ifdef _VS2008PORTING
 							for( int i=0 ; i<5 ; i++ )
-#else // _VS2008PORTING
-							for( i=0 ; i<5 ; i++ )
-#endif // _VS2008PORTING
 							{
-								CreateEffect(MODEL_MOONHARVEST_SONGPUEN1, vPos, o->Angle, vLight);		// 녹색
-								CreateEffect(MODEL_MOONHARVEST_SONGPUEN2, vPos, o->Angle, vLight);		// 흰색
+								CreateEffect(MODEL_MOONHARVEST_SONGPUEN1, vPos, o->Angle, vLight);
+								CreateEffect(MODEL_MOONHARVEST_SONGPUEN2, vPos, o->Angle, vLight);
 							}
 						}					
 						break;
 					case 2:
 						{
-#ifdef _VS2008PORTING
 							for( int i=0 ; i<10 ; i++ )
-#else // _VS2008PORTING
-							for( i=0 ; i<10 ; i++ )
-#endif // _VS2008PORTING
 							{
-								// 백설기
 								CreateEffect(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, vPos, o->Angle, vLight);	
 							}
 						}			
@@ -10505,7 +10222,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					
 					if(o->AnimationFrame <= 10.f)
 					{
-						// flare( 힌색 순간 펑!!) - 추가
+						// flare
 						Vector(1.0f, 0.0f, 0.0f, vLight);
 						CreateSprite( BITMAP_LIGHT, vPos, 8.0f, vLight, o );	
 					}
@@ -10602,19 +10319,17 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	}
 #endif //PSW_EVENT_CHERRYBLOSSOMTREE
 
-    //  플레이어의 경우 풀셋인지 검사를 한다.
     bool fullset = false;
     if(o->Type == MODEL_PLAYER)
     {
-		if (c->HideShadow == false)	// 친구에는 풀셋 이펙트 없다.
+		if (c->HideShadow == false)
 		{
 	        fullset = CheckFullSet(c);
 		}
     }
 
-	//  망토
 	bool bCloak = false;
-	// 마검사나 다크로드이면
+
 	if((
 		GetCharacterClass(c->Class)==CLASS_DARK 
 		|| GetBaseClass(c->Class)==CLASS_DARK_LORD
@@ -10623,13 +10338,12 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		) && o->Type==MODEL_PLAYER)
 	{
-		// 변신한 상태가 아니라면 망토 착용을 한다.
 		if(c->Change == false || (c->Change == true && c->Object.Type == MODEL_PLAYER))
 		{
-			bCloak = true; // 망토 착용 true
+			bCloak = true;
 		}
 	}
-	// 데쓰킹이거나 나이트메어이면 망토 true
+
 	if ( c->MonsterIndex==55 || c->MonsterIndex == 361)
 	{
 		bCloak = true;
@@ -10702,7 +10416,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		}
 	}
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
-	if(g_DuelMgr.IsDuelEnabled())	// 결투중이라면
+	if(g_DuelMgr.IsDuelEnabled())
 	{
 #ifdef YDG_FIX_DUEL_SUMMON_CLOAK
 		if (g_DuelMgr.IsDuelPlayer(c, DUEL_ENEMY, FALSE))
@@ -10753,7 +10467,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 	VectorAdd(Light, o->Light, c->Light);
 	if ( o->Type == MODEL_MONSTER01+55)
-	{	// 불사조
+	{
 		Vector( .6f, .6f, .6f, c->Light);
 	}
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
@@ -11108,12 +10822,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 #ifdef PJH_NEW_CHROME
 			int Set_Count = 0; //세트 아이템 카운트.
 #endif //PJH_NEW_CHROME
-			// 장비 입은 모습 각 파트별 렌더링
-#ifdef _VS2008PORTING
 			for(int i=MAX_BODYPART-1; i>=0; i--)
-#else // _VS2008PORTING
-			for(i=MAX_BODYPART-1; i>=0; i--)
-#endif // _VS2008PORTING
 			{
 				PART_t *p = &c->BodyPart[i];
 				if(p->Type != -1)
@@ -11124,16 +10833,13 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 #ifdef PJH_NEW_CHROME
 					int nItemType_n = (Type - MODEL_ITEM) / MAX_ITEM_INDEX;
 					int nItemSubType_n = (Type - MODEL_ITEM) % MAX_ITEM_INDEX;
-					// 스핑크스 시리즈인가?
+
 					if (nItemType_n >= 7 && nItemType_n <= 11 && (nItemSubType_n >= 62 && nItemSubType_n <= 72))
 					{
 						Set_Count = 1;
 					}
 #endif //PJH_NEW_CHROME
 
-
-					// 소환술사는 요정과 같이 입는 넝쿨, 실크 시리즈 모델이 틀
-					//리므로 다음과 같은 예외 처리.
 					if (CLASS_SUMMONER == GetBaseClass(c->Class))
 					{
 						int nItemType = (Type - MODEL_ITEM) / MAX_ITEM_INDEX;
@@ -11162,7 +10868,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 #endif //PBG_ADD_NEWCHAR_MONK
 					b->Skin = GetBaseClass(c->Class)*2 + IsSecondClass(c->Class);
 
-					// 다크로드 투구 썼을때
                     if ( GetBaseClass(c->Class)==CLASS_DARK_LORD && i==BODYPART_HELM )
                     {
                         o->BlendMeshLight = sinf ( WorldTime*0.001f )*0.1f+0.7f;
@@ -11911,11 +11616,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		c->PostMoveProcess_Process();
 #endif // LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 
-#ifdef _VS2008PORTING
 		for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-		for(i=0;i<2;i++)
-#endif // _VS2008PORTING
 		{
 
 			// 회오리 베기를 15프레임 이상 시간동안 오른손 검 미출력을 하기 위해
@@ -12101,9 +11802,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				if(c->PK<PVP_MURDERER2 && c->Level!=4)
 				{
 					bool Success = true;
-#ifndef _VS2008PORTING		// #ifndef
-					int j;
-#endif // _VS2008PORTING
+
 					switch(w->Type)
 					{
 					case MODEL_SWORD+4:
@@ -12127,7 +11826,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                        	Vector(Luminosity,Luminosity,Luminosity,Light);
 						Vector(0.f,-160.f,0.f,Position);
 						break;
-                    case MODEL_SWORD+17:    //  다크 브래이커.
+                    case MODEL_SWORD+17:
      					Success = false;
 						Scale = sinf(WorldTime*0.004f)*10.f+20.f;
                         {
@@ -12147,7 +11846,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                         }
                         break;
 
-                    case MODEL_SWORD+18:    //  선더 블레이드
+                    case MODEL_SWORD+18:
                         {
      						Success = false;
 							
@@ -12162,12 +11861,12 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 							Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone],Position,Position,true);
 
                             Scale = ( Scale*20.f ) + 20.f;
-            				CreateJoint(BITMAP_JOINT_THUNDER,p,Position,o->Angle,10,NULL,Scale); //  전기 
-            				CreateJoint(BITMAP_JOINT_THUNDER,p,Position,o->Angle,10,NULL,Scale); //  전기 
-            				CreateJoint(BITMAP_JOINT_THUNDER,p,Position,o->Angle,10,NULL,Scale); //  전기 
+            				CreateJoint(BITMAP_JOINT_THUNDER,p,Position,o->Angle,10,NULL,Scale);
+            				CreateJoint(BITMAP_JOINT_THUNDER,p,Position,o->Angle,10,NULL,Scale);
+            				CreateJoint(BITMAP_JOINT_THUNDER,p,Position,o->Angle,10,NULL,Scale);
                         }
                         break;
-                    case MODEL_STAFF+9:     //  악령의 지팡이.
+                    case MODEL_STAFF+9:
 						Success = false;
 						Vector(0.f,-120.f,5.f,Position);
 						Vector(Luminosity*0.6f,Luminosity*0.6f,Luminosity*2.f,Light);
@@ -12186,14 +11885,14 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone],Position,p,true);
 						CreateSprite(BITMAP_SHINY+1,p,2.f,Light,o);
 						break;
-					case MODEL_SHIELD+14://전설
+					case MODEL_SHIELD+14:
      					Success = false;
 						Vector(20.f,0.f,0.f,Position);
 						Vector(Luminosity*0.4f,Luminosity*0.6f,Luminosity*1.5f,Light);
 						Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone],Position,p,true);
 						CreateSprite(BITMAP_SHINY+1,p,1.5f,Light,o);
 						break;
-					case MODEL_STAFF+5://전설의지팡이
+					case MODEL_STAFF+5:
      					Success = false;
 						Vector(0.f,-145.f,0.f,Position);
 						Vector(Luminosity*0.4f,Luminosity*0.6f,Luminosity*1.f,Light);
@@ -12201,42 +11900,33 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						CreateSprite(BITMAP_SHINY+1,p,1.5f,Light,o);
 						CreateSprite(BITMAP_LIGHTNING+1,p,0.3f,Light,o);
 						break;
-					case MODEL_STAFF+7://빛의지팡이
+					case MODEL_STAFF+7:
      					Success = false;
 						Vector(Luminosity*0.4f,Luminosity*0.6f,Luminosity*1.f,Light);
                    		RenderBrightEffect(b,BITMAP_SHINY+1,27,2.f,Light,o);
-#ifdef _VS2008PORTING
+
 						for(int j=28;j<=37;j++)
-#else // _VS2008PORTING
-						for(j=28;j<=37;j++)
-#endif // _VS2008PORTING
 						{
                        		RenderBrightEffect(b,BITMAP_LIGHT,j,1.5f,Light,o);
 						}
 						break;
-					case MODEL_STAFF+6://부활의지팡이
+					case MODEL_STAFF+6:
      					Success = false;
 						Vector(0.f,-145.f,0.f,Position);
 						Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone],Position,p,true);
                         Vector(Luminosity*1.f,Luminosity*0.6f,Luminosity*0.4f,Light);
 						CreateSprite(BITMAP_SPARK  ,p,3.f,Light,o);
 						CreateSprite(BITMAP_SHINY+2,p,1.5f,Light,o);
-#ifdef _VS2008PORTING
+
 						for(int j=0;j<4;j++)
-#else // _VS2008PORTING
-						for(j=0;j<4;j++)
-#endif // _VS2008PORTING
 						{
 							Vector((float)(rand()%20-10),(float)(rand()%20-10-90.f),(float)(rand()%20-10),Position);
 							Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone],Position,p,true);
 							CreateParticle(BITMAP_SPARK,p,o->Angle,Light,1);
 						}
                         Vector(Luminosity*1.f,Luminosity*0.2f,Luminosity*0.1f,Light);
-#ifdef _VS2008PORTING
+
 						for(int j=0;j<10;j++)
-#else // _VS2008PORTING
-						for(j=0;j<10;j++)
-#endif // _VS2008PORTING
 						{
 							if(rand()%4 < 3)
 							{
@@ -12246,7 +11936,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 							}
 						}
 						break;
-					case MODEL_STAFF+15:	// 바이올렌윈드스틱.
+					case MODEL_STAFF+15:
      					Success = false;
 						Vector(Luminosity*0.2f,Luminosity*0.3f,Luminosity*1.4f,Light);
 						Vector(0.f,0.f,0.f,Position);
@@ -12255,7 +11945,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						b->TransformPosition(BoneTransform[2],Position,p,true);
 						CreateSprite(BITMAP_SHINY+1,p,0.5f,Light,o,(int)WorldTime*0.1f);
 						break;
-					case MODEL_STAFF+16:	// 레드윙스틱.
+					case MODEL_STAFF+16:
      					Success = false;
 						Vector(Luminosity*1.0f,Luminosity*0.3f,Luminosity*0.4f,Light);
 						Vector(0.f,0.f,0.f,Position);
@@ -12263,28 +11953,22 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						CreateSprite(BITMAP_SHINY+1,p,1.f,Light,o,-(int)WorldTime*0.1f);
 						CreateSprite(BITMAP_SHINY+1,p,1.f,Light,o,-(int)WorldTime*0.13f);
 						break;
-					case MODEL_STAFF+17:	// 에이션트스틱.
+					case MODEL_STAFF+17:
      					Success = false;
 						Scale = absf(sinf(WorldTime*0.002f))*0.2f;
 						Luminosity = absf(sinf(WorldTime*0.002f))*0.4f;
 						Vector(0.5f+Luminosity, 0.2f+Luminosity, 0.9f+Luminosity, Light);
-#ifdef _VS2008PORTING
+
 						for (int j = 1; j <= 4; ++j)
-#else // _VS2008PORTING
-						for (j = 1; j <= 4; ++j)
-#endif // _VS2008PORTING
 							RenderBrightEffect(b,BITMAP_LIGHT,j,Scale+1.0f,Light,o);
 						break;
-					case MODEL_STAFF+18:	// 데모닉스틱.
+					case MODEL_STAFF+18:
      					Success = false;
 						Scale = absf(sinf(WorldTime*0.002f))*0.2f;
 						Luminosity = absf(sinf(WorldTime*0.002f))*0.4f;
 						Vector(0.5f+Luminosity, 0.2f+Luminosity, 0.9f+Luminosity, Light);
-#ifdef _VS2008PORTING
+
 						for (int j = 1; j <= 2; ++j)
-#else // _VS2008PORTING
-						for (j = 1; j <= 2; ++j)
-#endif // _VS2008PORTING
 						{
 							RenderBrightEffect(b,BITMAP_SHINY+1,j,Scale+1.0f,Light,o);
 							RenderBrightEffect(b,BITMAP_LIGHT,j,Scale+1.0f,Light,o);
@@ -12292,21 +11976,19 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						Vector(0.8f+Luminosity, 0.6f+Luminosity, 0.3f+Luminosity, Light);
 						RenderBrightEffect(b,BITMAP_LIGHT,3,Scale+1.0f,Light,o);
 						break;
-					case MODEL_STAFF+19:	// 스톰블리츠스틱.
+					case MODEL_STAFF+19:
      					Success = false;
 						Scale = absf(sinf(WorldTime*0.002f))*0.2f;
 						Luminosity = absf(sinf(WorldTime*0.002f))*0.4f;
 						Vector(0.5f+Luminosity, 0.2f+Luminosity, 0.9f+Luminosity, Light);
-#ifdef _VS2008PORTING
+
 						for (int j = 2; j <= 3; ++j)
-#else // _VS2008PORTING
-						for (j = 2; j <= 3; ++j)
-#endif // _VS2008PORTING
 							RenderBrightEffect(b,BITMAP_LIGHT,j,Scale+1.0f,Light,o);
+
 						Vector(0.8f+Luminosity, 0.6f+Luminosity, 0.3f+Luminosity, Light);
 						RenderBrightEffect(b,BITMAP_SHINY+2,2,Scale+1.0f,Light,o);
 						break;
-					case MODEL_STAFF+20:	// 이터널윙스틱.
+					case MODEL_STAFF+20:
      					Success = false;
 						Vector(1.0f,0.2f,0.1f,Light);
 						Vector(0.f,0.f,0.f,Position);
@@ -12319,7 +12001,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 #ifndef	ASG_ADD_ETERNALWING_STICK_EFFECT
 						CreateParticle(BITMAP_SPARK+1, p, o->Angle, Light, 16, 1.0f);
 #endif	// ASG_ADD_ETERNALWING_STICK_EFFECT
-						// 무기에서 중심으로 밖으로 반복 움직이는 파티클.
+
 						CreateParticle(BITMAP_SPARK+1, p, o->Angle, Light, 23, 1.0f);
 #ifdef ASG_ADD_ETERNALWING_STICK_EFFECT
 						// 떨어지며 바닥에 튕기는 파티클.
@@ -12330,28 +12012,22 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						RenderBrightEffect(b,BITMAP_LIGHT,2,3.0f,Light,o);
 #endif	// ASG_ADD_ETERNALWING_STICK_EFFECT
 						break;
-					case MODEL_BOW+16://
+					case MODEL_BOW+16:
      					Success = false;
 						Vector(Luminosity*0.4f,Luminosity*0.6f,Luminosity*1.f,Light);
-#ifdef _VS2008PORTING
+
 						for(int j=0;j<6;j++)
-#else // _VS2008PORTING
-						for(j=0;j<6;j++)
-#endif // _VS2008PORTING
 						{
 							Vector(0.f,-10.f,-j*20.f,Position);
 							Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone],Position,p,true);
 							CreateSprite(BITMAP_LIGHT,p,2.f,Light,o);
 						}
 						break;
-					case MODEL_MACE+5://칼
+					case MODEL_MACE+5:
      					Success = false;
                         Vector(Luminosity*1.f,Luminosity*0.6f,Luminosity*0.4f,Light);
-#ifdef _VS2008PORTING
+
 						for(int j=0;j<8;j++)
-#else // _VS2008PORTING
-						for(j=0;j<8;j++)
-#endif // _VS2008PORTING
 						{
 							if(rand()%4 < 3)
 							{
@@ -12361,18 +12037,15 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 							}
 						}
 						break;
-					case MODEL_MACE+6://드래곤도끼
+					case MODEL_MACE+6:
      					Success = false;
 						Vector(0.f,-84.f,0.f,Position);
 						Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone],Position,p,true);
 						Scale = sinf(WorldTime*0.004f)*0.3f+0.7f;
                         Vector(Scale*1.f,Scale*0.2f,Scale*0.1f,Light);
 						CreateSprite(BITMAP_SHINY+1,p,Scale+1.5f,Light,o);
-#ifdef _VS2008PORTING
+
 						for(int j=0;j<5;j++)
-#else // _VS2008PORTING
-						for(j=0;j<5;j++)
-#endif // _VS2008PORTING
 						{
 							Vector(0.f,-j*20.f-10.f,0.f,Position);
 							Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone],Position,p,true);
@@ -12382,8 +12055,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						RenderBrightEffect(b,BITMAP_SHINY+1,2,1.f,Light,o);
 						RenderBrightEffect(b,BITMAP_SHINY+1,6,1.f,Light,o);
 						break;
-					case MODEL_BOW+13://석궁
-					case MODEL_BOW+14://석궁
+					case MODEL_BOW+13:
+					case MODEL_BOW+14:
      					Success = false;
 						if(w->Type==MODEL_BOW+13)
 						{
@@ -12393,11 +12066,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						{
 							Vector(Luminosity*0.6f,Luminosity*0.4f,Luminosity*0.2f,Light);
 						}
-#ifdef _VS2008PORTING
+
 						for(int j=0;j<6;j++)
-#else // _VS2008PORTING
-						for(j=0;j<6;j++)
-#endif // _VS2008PORTING
 						{
 							Vector(0.f,-20.f,(float)(-j*20),Position);
 							Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone],Position,p,true);
@@ -12420,10 +12090,9 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	{
 	case MODEL_PLAYER:
 		Vector(0.f,0.f,0.f,p);
-	//  흑마법사 스킨 변화된 후 이마에 빛....
+
 		if ( GetCharacterClass(c->Class) == CLASS_SOULMASTER)	        
         {
-            //  투명일때 보조계열 효과는 보이지 않는다.
 			if( !g_isCharacterBuff(o, eBuff_Cloaking) )
 			{
 				Vector(-4.f,11.f,0.f,p);
@@ -12439,7 +12108,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH	//^ 펜릴 스킬 관련
 			)
 		{
-            //  다크로드 일렉 스트라이크.
 			if ( GetBaseClass(c->Class)==CLASS_DARK_LORD || o->CurrentAction==PLAYER_ATTACK_RIDE_ATTACK_FLASH 
 			|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH	//^ 펜릴 스킬 관련
 				)
@@ -12448,7 +12116,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                 {
                     vec3_t Angle;
                     Vector(1.f,0.f,0.f,Angle);
-                    //  손의 위치에 전기를 모은다.
 		            CreateEffect ( BITMAP_GATHERING, o->Position, o->Angle, o->Light, 2, o );
 
                     PlayBuffer ( SOUND_ELEC_STRIKE_READY );
@@ -12456,14 +12123,11 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
                 if( o->AnimationFrame<2.f )
                 {
-                    //  파티원이 존재하는 클라이언트만 사용을 한다.
                     if ( PartyNumber>0 /*&& rand()%2==0*/ )
                     {
-                        //  일렉스트라이크를 쓰는 캐릭터가 자신의 파티에 존재하는지 검사를 한다.
 						if ( g_pPartyManager->IsPartyMemberChar( c )==false ) 
 							break;
                         
-                        //  그 파티원들의 위치에서 ??가를 발생시킨다.
                         for ( int i=0; i<PartyNumber; ++i )
                         {
                             PARTY_t* p = &Party[i];
@@ -12485,7 +12149,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                 {
                     vec3_t Angle, Light;
 
-					//  발사할때의 파장 이펙트.
     				b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone],p,Position,true);
 
 					Vector ( 0.8f, 0.5f, 1.f, Light );
@@ -12498,7 +12161,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
             }
             else
             {
-				//  투명일때 보조계열 효과는 보이지 않는다.
 				if( g_isCharacterBuff(o, eBuff_Cloaking) )
 				{
 					b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone],p,Position,true);
@@ -12510,7 +12172,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				}
             }
 		}
-		// 현재 에니메이션 동작이 라이트닝오브 스킬 동작이면 이곳에서 이펙트 발생
 		else if(o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB
 				|| o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB_UNI 
 				|| o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB_DINO 
@@ -12524,7 +12185,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			// 27 "Bip01 R Forearm"	
 			b->TransformPosition(o->BoneTransform[27], vRelativePos, vWorldPos, true);
 
-			// 손에 번개 효과
 			Vector(0.2f, 0.2f, 1.0f, vLight);
 			CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
 			CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
@@ -12553,7 +12213,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 			else if(iSkillType == AT_SKILL_ALICE_BLIND)
 			{
-				Vector(1.0f, 1.0f, 1.0f, vLight);	// 검정
+				Vector(1.0f, 1.0f, 1.0f, vLight);
 			}
 			else if(iSkillType == AT_SKILL_ALICE_THORNS)
 			{
@@ -12589,7 +12249,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 			else if(iSkillType == AT_SKILL_ALICE_BLIND)
 			{
-				// 검정 표현하기 위해 SubType 1을 입력
 				CreateSprite(BITMAP_SHINY+5, vWorldPos, 1.0f, vLight, o, fRot, 1);
 				CreateSprite(BITMAP_SHINY+5, vWorldPos, 0.7f, vLight, o, -fRot, 1);	
 			}
@@ -12605,7 +12264,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 			else if(iSkillType == AT_SKILL_ALICE_BLIND)
 			{
-				Vector(1.0f, 1.0f, 1.0f, vLight);	// 검정
+				Vector(1.0f, 1.0f, 1.0f, vLight);
 			}
 			else if(iSkillType == AT_SKILL_ALICE_THORNS)
 			{
@@ -12641,7 +12300,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 			else if(iSkillType == AT_SKILL_ALICE_BLIND)
 			{
-				// 검정 표현하기 위해 SubType 1을 입력
 				CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.7f, vLight, o, (float)(rand()%360), 1);
 				CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.5f, vLight, o, (float)(rand()%360), 1);
 			}
@@ -12657,7 +12315,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 			else if(iSkillType == AT_SKILL_ALICE_BLIND)
 			{
-				Vector(1.0f, 1.0f, 1.0f, vLight);	// 검정색
+				Vector(1.0f, 1.0f, 1.0f, vLight);
 			}
 			else if(iSkillType == AT_SKILL_ALICE_THORNS)
 			{
@@ -12693,29 +12351,22 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 			else if(iSkillType == AT_SKILL_ALICE_BLIND)
 			{
-				// 검정색 계열
 				CreateParticle(BITMAP_LIGHT+2, vWorldPos, o->Angle, vLight, 4, 1.0f);
 				CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, vLight, 5, 0.5f);
 			}
 		}
 		// ChainLighting
-		// 체인라이트닝 스킬
-		// (스킬 시전 후 바로 들어온다.)
 		else if( o->CurrentAction == PLAYER_SKILL_CHAIN_LIGHTNING )
 		{
-			// o : 주인공 오브젝트
-			// 라이트닝 시전 이펙트
 			vec3_t vRelativePos, vWorldPos, vLight;
 			Vector(0.f, 0.f, 0.f, vRelativePos);
-			// 손에서 번개 효과
 			Vector(0.4f,0.4f,0.8f, vLight);
-			// 왼손
+
 			b->TransformPosition(o->BoneTransform[37], vRelativePos, vWorldPos, true);	// "Bip01 L Hand"
 			CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o );
 			CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
 			CreateSprite(BITMAP_LIGHT, vWorldPos, 1.5f, vLight, o, 0.f);
 			
-			// 오른손
 			b->TransformPosition(o->BoneTransform[28], vRelativePos, vWorldPos, true);	// "Bip01 R Hand"
 			CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
 			CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
@@ -12724,14 +12375,9 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 		if( g_isCharacterBuff(o, eBuff_Attack) || g_isCharacterBuff(o, eBuff_HelpNpc) )
 		{
-            //  투명일때 보조계열 효과는 보이지 않는다.
 			if ( !g_isCharacterBuff(o, eBuff_Cloaking) )
             {
-#ifdef _VS2008PORTING
 				for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-			    for(i=0;i<2;i++)
-#endif // _VS2008PORTING
 			    {
 				    Luminosity = (float)(rand()%30+70)*0.01f;
 				    Vector(Luminosity*1.f,Luminosity*0.3f,Luminosity*0.2f,Light);
@@ -12745,13 +12391,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				if ( !SearchJoint( MODEL_SPEARSKILL, o, 4 ) 
 					&& !SearchJoint( MODEL_SPEARSKILL, o, 9 ) )
 				{
-#ifdef _VS2008PORTING
 					for(int i = 0; i < 5; i++)
-#else // _VS2008PORTING
-					for(i = 0; i < 5; i++)
-#endif // _VS2008PORTING
 					{
-						//^ 펜릴 이펙트 관련(요정 방어력향상)
 						CreateJoint( MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0, c->TargetCharacter);
 					}
 				}
@@ -12759,28 +12400,19 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		}
 		else if( g_isCharacterBuff(o, eBuff_Defense) )
 		{
-			// 투명일때 보조계열 효과는 보이지 않는다.
 			if( !g_isCharacterBuff(o, eBuff_Cloaking) )
 			{
 				if(SearchJoint(MODEL_SPEARSKILL, o, 4) == false && SearchJoint(MODEL_SPEARSKILL, o, 9) == false)
 				{
-#ifdef _VS2008PORTING
 					for(int i=0; i<5; ++i)
-#else // _VS2008PORTING
-					for(i=0; i<5; ++i)
-#endif // _VS2008PORTING
 					{
-						//^ 펜릴 이펙트 관련(요정 방어력향상)
 						CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0, c->TargetCharacter);
 					}
 				}
 			}
 		}
 
-//??
 #ifdef CSK_LUCKY_SEAL
-		// 인장 아이템이 사용되었을 때 캐릭터에 표현될 이펙트
-		// 일본은 안 되게 할것
 #if SELECTED_LANGUAGE != LANGUAGE_JAPANESE
 
 		if( g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal1) 
@@ -12931,10 +12563,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 #ifdef KJH_FIX_SWELLOFMAGIC_EFFECT
 #ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-		// 마력증대
 		if(g_isCharacterBuff((&c->Object), eBuff_SwellOfMagicPower))
 		{
-			// 투명이 아닐때만 이팩트사용
 			if( !g_isCharacterBuff((&c->Object), eBuff_Cloaking) )
 			{
 				if( !SearchEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o, 0) )
@@ -12947,31 +12577,29 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		}
 		else
 		{
-			// 버프 이팩트를 끈다.
 			DeleteEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o, 0);
 		}
 #endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 #endif // KJH_FIX_SWELLOFMAGIC_EFFECT
 
 #ifndef GUILD_WAR_EVENT
-        //  카오스캐슬에서는 풀셋 효과를 보여주지않는다.
         if ( InChaosCastle()==false )
 #endif GUILD_WAR_EVENT
         {
             //  세트 옵션 풀세트.
             if ( c->ExtendState )
             {
-#ifdef LDS_FIX_SETITEMEFFECT_WHENFULLSET_SOMEMISSEDEFFECT	// 추가된 1. 두손 무기든 자세, 2. 다크로드 말탄 정지 자세 도 세트 이펙트 적용 하기.				
+#ifdef LDS_FIX_SETITEMEFFECT_WHENFULLSET_SOMEMISSEDEFFECT				
 				if ( (	o->CurrentAction<PLAYER_WALK_MALE ||
 #ifdef YDG_FIX_DARKLORD_SET_EFFECT_WITH_DARKSPIRIT
 					o->CurrentAction==PLAYER_DARKLORD_STAND ||
 #endif	// YDG_FIX_DARKLORD_SET_EFFECT_WITH_DARKSPIRIT
-					o->CurrentAction==PLAYER_STOP_RIDE_HORSE ||						// 다크로드 말타고 정지 자세
+					o->CurrentAction==PLAYER_STOP_RIDE_HORSE ||
 					o->CurrentAction==PLAYER_STOP_TWO_HAND_SWORD_TWO 
 #ifdef PBG_FIX_BUFFSKILLCHAOS
 					|| o->CurrentAction == PLAYER_STOP_RAGEFIGHTER
 #endif //PBG_FIX_BUFFSKILLCHAOS
-					) &&			// 신규 두손검 칼늘어뜨린 자세
+					) &&
 					c->ExtendStateTime>=100 )
 #else	// LDS_FIX_SETITEMEFFECT_WHENFULLSET_SOMEMISSEDEFFECT
 					if ( ( o->CurrentAction<PLAYER_WALK_MALE ) && c->ExtendStateTime>=100 )
@@ -12987,14 +12615,10 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
             if ( fullset )
 			{
                 PartObjectColor(c->BodyPart[5].Type,o->Alpha,0.5f,Light);
-            //  투명일때 보조계열 효과는 보이지 않는다.
+
 			if(!g_isCharacterBuff(o, eBuff_Cloaking))
 			{
-#ifdef _VS2008PORTING
 				for(int i=0;i<2;i++)
-#else // _VS2008PORTING
-				for(i=0;i<2;i++)
-#endif // _VS2008PORTING
 				{
 					b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone],p,Position,true);
 					CreateSprite(BITMAP_LIGHT,Position,1.3f,Light,o);
@@ -13081,7 +12705,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						b->TransformPosition(o->BoneTransform[0],p,Position,true);
 						CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
                     }
-#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT //세트 이펙트 추가
+#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
                     else if ( EquipmentLevelSet==14 )
                     {
 						Vector(0.0f, -20.0f, 50.0f, p);
@@ -13110,7 +12734,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                     VectorCopy ( Light, o->Light );
                 }
 			}
-                //  +10, +11 풀셋 효과.
                 if ( EquipmentLevelSet>9 )
                 {
                     if ( (rand()%20)==0 )//(o->CurrentAction<PLAYER_WALK_MALE || o->CurrentAction>PLAYER_RUN_RIDE_WEAPON) && (rand()%6)==0)
@@ -13160,7 +12783,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                                 CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1 );
                             }
                         }
-#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT //세트 이펙트 추가
+#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
                         else if ( EquipmentLevelSet==14 )
                         {
                             if((MoveSceneFrame%6)==0)
@@ -13191,12 +12814,12 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                                 CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1 );
                             }
                         }
-#endif //LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT //세트 이펙트 추가
+#endif //LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
 
                         VectorCopy ( Light, o->Light );
                     }
 
-	#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT //세트 이펙트 추가
+	#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
 					if ( EquipmentLevelSet==15 )
 					{
 						//left
@@ -13204,14 +12827,14 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						Vector(13.0f, 10.0f, 3.0f, p);
 						b->TransformPosition(o->BoneTransform[20],p,Position,true);
 						VectorCopy(Position, o->EyeLeft);
-						//꼬리
+
 						Vector(0.09f, 0.09f, 0.8f, vColor);
 						CreateJoint(BITMAP_JOINT_ENERGY,Position,o->Position,o->Angle,55,o,6.0f,-1,0,0,-1, vColor);
 						//안광
 						float fRad = (float)sinf((WorldTime)*0.002f);
 						Vector(0.2f, 0.4f, 0.8f, vColor);
 						CreateSprite(BITMAP_SHINY+6, Position, 0.5f*fRad, vColor, o);
-						//안광(+형)
+
 						Vector(0.1f, 0.15f, 1.0f, vColor);
 						CreateSprite(BITMAP_PIN_LIGHT, Position, 1.3f*fRad+0.5f, vColor, o, 100.0f);
 						
@@ -13219,13 +12842,13 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						Vector(13.0f, 10.0f, -3.0f, p);
 						b->TransformPosition(o->BoneTransform[20],p,Position,true);
 						VectorCopy(Position, o->EyeRight);
-						//꼬리
+
 						Vector(0.09f, 0.09f, 0.8f, vColor);
 						CreateJoint(BITMAP_JOINT_ENERGY,Position,o->Position,o->Angle,56,o,6.0f,-1,0,0,-1, vColor);
-						//안광
+
 						Vector(0.2f, 0.4f, 0.8f, vColor);
 						CreateSprite(BITMAP_SHINY+6, Position, 0.5f*fRad, vColor, o);
-						//안광(+형)
+
 						Vector(0.1f, 0.15f, 1.0f, vColor);
 						CreateSprite(BITMAP_PIN_LIGHT, Position, 1.3f*fRad+0.5f, vColor, o, 80.0f);
 					}
@@ -13234,19 +12857,19 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
     		}
         }
 		break;
-	case MODEL_MONSTER01://소뿔전사
+	case MODEL_MONSTER01:
 	case MODEL_MONSTER01+30:
 		if((o->Type==MODEL_MONSTER01&&c->Level==1) || (o->Type==MODEL_MONSTER01+30))
 			RenderEye(o,22,23);
 		break;
-	case MODEL_MONSTER01+52:	// 야누스
+	case MODEL_MONSTER01+52:
 		RenderEye(o,26,27,2.0f);
 		break;
-	case MODEL_MONSTER01+37://히드라
+	case MODEL_MONSTER01+37:
         RenderLight(o,BITMAP_LIGHTNING+1,1.f,63,0.f,0.f,20.f);
         RenderLight(o,BITMAP_SHINY+2    ,4.f,63,0.f,0.f,20.f);
 		break;
-	case MODEL_MONSTER01+34://인어
+	case MODEL_MONSTER01+34:
         RenderLight(o,BITMAP_LIGHTNING+1,0.5f,30,0.f,0.f,-5.f);
         RenderLight(o,BITMAP_LIGHTNING+1,0.5f,39,0.f,0.f,-5.f);
         RenderLight(o,BITMAP_SPARK      ,4.f ,30,0.f,0.f,-5.f);
@@ -13254,7 +12877,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
         RenderLight(o,BITMAP_SHINY+2    ,2.f ,30,0.f,0.f,-5.f);
         RenderLight(o,BITMAP_SHINY+2    ,2.f ,39,0.f,0.f,-5.f);
 		break;
-	case MODEL_MONSTER01+36://용병
+	case MODEL_MONSTER01+36:
 		RenderEye(o,42,43);
         RenderLight(o,BITMAP_SPARK  ,2.f,26,0.f,0.f,0.f);
         RenderLight(o,BITMAP_SPARK  ,2.f,31,0.f,0.f,0.f);
@@ -13265,17 +12888,17 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
         RenderLight(o,BITMAP_SHINY+2,1.f,36,0.f,0.f,0.f);
         RenderLight(o,BITMAP_SHINY+2,1.f,41,0.f,0.f,0.f);
 		break;
-	case MODEL_MONSTER01+33://물고기
+	case MODEL_MONSTER01+33:
         RenderLight(o,BITMAP_SPARK  ,4.f,9,0.f,0.f,5.f);
         RenderLight(o,BITMAP_SHINY+2,3.f,9,0.f,0.f,5.f);
 		break;
-	case MODEL_MIX_NPC://조합상인
+	case MODEL_MIX_NPC:
         RenderLight(o,BITMAP_LIGHT,1.5f,32,0.f,0.f,0.f);
 		break;
     case MODEL_NPC_SEVINA:
         RenderLight(o,BITMAP_LIGHT,2.5f,6,0.f,0.f,0.f);
         break;
-	case MODEL_NPC_DEVILSQUARE://카론
+	case MODEL_NPC_DEVILSQUARE:
         {
             Luminosity = (float)sinf((WorldTime)*0.002f)*0.35f+0.65f;
 
@@ -13297,9 +12920,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
             }
         }
 		break;
-	case MODEL_NPC_CASTEL_GATE:	// 성문.
+	case MODEL_NPC_CASTEL_GATE:
 		{
-			// 눈.
 			vec3_t vPos, vRelative;
 			float fLumi, fScale;
 
@@ -13307,29 +12929,24 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			Vector(fLumi*1.0f, fLumi*0.5f, fLumi*0.3f, Light);
 			fScale = fLumi/2.0f;
 
-			// 좌측 눈.
 			Vector(4.0f,  3.0f, -4.0f, vRelative);
 			b->TransformPosition(o->BoneTransform[2], vRelative, vPos, true);
 
 			CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
 			CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
 
-			// 우측 눈.
 			Vector(5.0f,  3.0f, 2.0f, vRelative);
 			b->TransformPosition(o->BoneTransform[4], vRelative, vPos, true);
 
 			CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
 			CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
 
-			// 보스맵 입구 대문 NPC 입에서 나오는 불.
 			if (rand() % 4 == 0)
 			{
-				// 위치 조정.
 				Vector(-20.0f, 10.0f, 0.0f, vRelative);
 				b->TransformPosition(
 					o->BoneTransform[3], vRelative, vPos, true);
 
-				// 방향 조정.
 				vec3_t Angle;
 				VectorCopy(o->Angle, Angle);
 				Angle[0] += 120.0f;
@@ -13343,7 +12960,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		
 		}
 		break;
-	case MODEL_MONSTER01+28://쉐도우
+	case MODEL_MONSTER01+28:
 		Vector(0.f,0.f,0.f,p);
 		Luminosity = 1.f;
 		if(c->Level == 0)
@@ -13355,11 +12972,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			Vector(Luminosity*1.f,Luminosity*0.4f,Luminosity*0.f,Light);
 			Vector(Luminosity*0.2f,Luminosity*0.7f,Luminosity*0.1f,Light);
 		}
-#ifdef _VS2008PORTING
+
 		for(int i=0;i<b->NumBones;i++)
-#else // _VS2008PORTING
-		for(i=0;i<b->NumBones;i++)
-#endif // _VS2008PORTING
 		{
 			if(!b->Bones[i].Dummy)
 			{
@@ -13448,15 +13062,11 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 	if (GetBaseClass(c->Class) == CLASS_SUMMONER)
 	{
-		PART_t *w = &c->Weapon[1];	// 소환술사 왼손 소환서 체크
+		PART_t *w = &c->Weapon[1];
 		g_SummonSystem.MoveEquipEffect(c, w->Type, w->Level, w->Option1);
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  모든 캐릭터들을 화면에 표현한다.
-//////////////////////////////////////////////////////////////////////////
 void RenderCharactersClient()
 {
 #ifdef DO_PROFILING
@@ -13566,15 +13176,10 @@ void RenderCharactersClient()
 #endif // DO_PROFILING
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 수호천사길드머리위에 이펙트
-///////////////////////////////////////////////////////////////////////////////
 void RenderProtectGuildMark(CHARACTER * c)
 {
-	// 수호길드일때만..
 	if( c->GuildType == GT_ANGEL )
 	{
-		// 5초마다 한번씩 보여준다.
 		if( c->ProtectGuildMarkWorldTime == 0 || WorldTime - c->ProtectGuildMarkWorldTime > 5000.0f)
 		{
 			OBJECT * o = &c->Object;
@@ -13583,10 +13188,6 @@ void RenderProtectGuildMark(CHARACTER * c)
 		}
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 특정키에 해당하는 케릭터를 제외한 케릭터들을 지우는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void ClearCharacters(int Key)
 {
@@ -13607,19 +13208,13 @@ void ClearCharacters(int Key)
 					b->Live = false;
 			}
 		}
-#ifdef PET_SYSTEM
+
         DeletePet ( c );
-#endif// PET_SYSTEM
-		// 망토 제거
 		DeleteCloth( c, o);
         DeleteParts ( c );
 	}
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 특정키에 해당하는 케릭터를 지우는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void DeleteCharacter(int Key)
 {
@@ -13639,9 +13234,7 @@ void DeleteCharacter(int Key)
 				if(b->Live && b->Owner == o)
 					b->Live = false;
 			}
-#ifdef PET_SYSTEM
             DeletePet ( c );
-#endif// PET_SYSTEM
 			DeleteCloth( c, o);
             DeleteParts ( c );
 			return;
@@ -13649,10 +13242,6 @@ void DeleteCharacter(int Key)
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  캐릭터를 지운다.
-//////////////////////////////////////////////////////////////////////////
 void DeleteCharacter ( CHARACTER* c, OBJECT* o )
 {
     o->Live = false;
@@ -13672,11 +13261,6 @@ void DeleteCharacter ( CHARACTER* c, OBJECT* o )
     DeleteParts ( c );
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 특정키에 해당하는 케릭터를 찾아 인덱스를 리턴하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 int FindCharacterIndex(int Key)
 {
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
@@ -13690,10 +13274,6 @@ int FindCharacterIndex(int Key)
 	return MAX_CHARACTERS_CLIENT;
 }       
 
-
-//////////////////////////////////////////////////////////////////////////
-//  특정 몬스터 인덱스를 갖는 캐릭터를 찾아 인덱스를 리턴하는 함수.
-//////////////////////////////////////////////////////////////////////////
 int FindCharacterIndexByMonsterIndex ( int Type )
 {
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
@@ -13707,8 +13287,6 @@ int FindCharacterIndexByMonsterIndex ( int Type )
 	return MAX_CHARACTERS_CLIENT;
 }
 
-
-//  블러드캐슬의 퀘스트 아이템 습득했나?
 int HangerBloodCastleQuestItem (int Key)
 {
     int index = MAX_CHARACTERS_CLIENT;
@@ -13724,7 +13302,6 @@ int HangerBloodCastleQuestItem (int Key)
 	return index;
 }
 
-//  맵의 모든 캐릭터에게 하나의 행동을 명령한다.
 void SetAllAction ( int Action )
 {
 	for ( int i=0; i<MAX_CHARACTERS_CLIENT; i++ )
@@ -13738,10 +13315,6 @@ void SetAllAction ( int Action )
 	}
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 제거 함수
-///////////////////////////////////////////////////////////////////////////////
 void ReleaseCharacters(void)
 {
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
@@ -13753,10 +13326,7 @@ void ReleaseCharacters(void)
 			delete[] o->BoneTransform;
 			o->BoneTransform = NULL;
 		}
-#ifdef PET_SYSTEM
         DeletePet ( c );
-#endif// PET_SYSTEM
-		// 망토 제거
 		DeleteCloth( c, o);
         DeleteParts ( c );
 	}
@@ -13766,19 +13336,12 @@ void ReleaseCharacters(void)
 		delete[] o->BoneTransform;
 		o->BoneTransform = NULL;
 	}
-#ifdef PET_SYSTEM
     DeletePet ( &CharacterView );
-#endif// PET_SYSTEM
-    // 망토 제거
     DeleteCloth( &CharacterView, o);
     DeleteParts ( &CharacterView );
 
 	BoneManager::UnregisterAll();
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 생성 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsigned char PositionY,float Rotation)
 {
@@ -13796,13 +13359,11 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 	}
     c->m_pParts = NULL;
 
-#ifdef PET_SYSTEM
 #ifdef YDG_FIX_MEMORY_LEAK_0905_2ND
 	giPetManager::DeletePet(c);
 #else	// YDG_FIX_MEMORY_LEAK_0905_2ND
     c->m_pPet = NULL;
 #endif	// YDG_FIX_MEMORY_LEAK_0905_2ND
-#endif// PET_SYSTEM
 
 	int Index = TERRAIN_INDEX_REPEAT(( c->PositionX),( c->PositionY));
 	if((TerrainWall[Index]&TW_SAFEZONE)==TW_SAFEZONE)
@@ -13851,10 +13412,10 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 	c->m_byGensInfluence = 0;
 #endif	// ASG_ADD_GENS_SYSTEM
 	
-	c->GuildStatus		= -1;		// 길드내에서의 직책
-	c->GuildType		= 0;		// 길드종류
+	c->GuildStatus		= -1;
+	c->GuildType		= 0;
 	c->ProtectGuildMarkWorldTime = 0.0f;
-	c->GuildRelationShip= 0;	    // 길드관계
+	c->GuildRelationShip= 0;
     c->GuildSkill = AT_SKILL_STUN;
     c->BackupCurrentSkill = 255;
     c->GuildMasterKillCount = 0;
@@ -13900,14 +13461,10 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 	c->MonsterIndex     = -1;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;
-	
-
-	// 스킬 정보 초기화
 	c->Skill = 0;
 	c->AttackTime = 0;
 	c->TargetCharacter = -1;
 	c->AttackFlag = ATTACK_FAIL;
-	// 장비 초기화
 	c->Weapon[0].Type = -1;
 	c->Weapon[0].Level = 0;
 	c->Weapon[1].Type = -1;
@@ -13941,45 +13498,45 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 	case MODEL_PLAYER:
       	Vector( 40.f, 40.f,120.f,o->BoundingBoxMax);
 		break;
-    case MODEL_MONSTER01+70:    //  카오스캐슬.
+    case MODEL_MONSTER01+70:
     case MODEL_MONSTER01+71:
     case MODEL_MONSTER01+72:
       	Vector( 40.f, 40.f,120.f,o->BoundingBoxMax);
         break;
-	case MODEL_MONSTER01+2://버지
-	case MODEL_MONSTER01+6://유충
-	case MODEL_MONSTER01+9://거미
-	case MODEL_MONSTER01+20://고리전갈
-	case MODEL_MONSTER01+19://고불린
-	case MODEL_MONSTER01+17://웜
+	case MODEL_MONSTER01+2:
+	case MODEL_MONSTER01+6:
+	case MODEL_MONSTER01+9:
+	case MODEL_MONSTER01+20:
+	case MODEL_MONSTER01+19:
+	case MODEL_MONSTER01+17:
       	Vector( 50.f, 50.f,80.f,o->BoundingBoxMax);
 		break;
-	case MODEL_MONSTER01+11://고르곤
-	case MODEL_MONSTER01+31://드래곤
-	case MODEL_MONSTER01+39://타이탄
-	case MODEL_MONSTER01+42://탄탈로스
-	case MODEL_MONSTER01+44://빔나이트
+	case MODEL_MONSTER01+11:
+	case MODEL_MONSTER01+31:
+	case MODEL_MONSTER01+39:
+	case MODEL_MONSTER01+42:
+	case MODEL_MONSTER01+44:
       	Vector( 70.f, 70.f,250.f,o->BoundingBoxMax);
 		break;
-	case MODEL_MONSTER01+37://히드라
+	case MODEL_MONSTER01+37:
       	Vector( 100.f, 100.f,150.f,o->BoundingBoxMax);
 		break;
-    case MODEL_MONSTER01+61://성문.
+    case MODEL_MONSTER01+61:
 	    Vector(-120.f,-120.f,0.f  ,o->BoundingBoxMin);
       	Vector( 100.f, 100.f,300.f,o->BoundingBoxMax);
         break;
-    case MODEL_MONSTER01+60://크리스탈석상.
+    case MODEL_MONSTER01+60:
     	Vector(-90.f,-50.f,0.f  ,o->BoundingBoxMin);
       	Vector( 90.f, 50.f,200.f,o->BoundingBoxMax);
         break;
 #ifdef CSK_ADD_MAP_ICECITY
-	case MODEL_MONSTER01+150:	// 세루판 (보스몬스터)
+	case MODEL_MONSTER01+150:
 		Vector(-150.f,-150.f,0.f  ,o->BoundingBoxMin);
 		Vector( 150.f, 150.f,400.f,o->BoundingBoxMax);
         break;
-	case MODEL_MONSTER01+151:	// 거대 거미알
-	case MODEL_MONSTER01+152:	// 거대 거미알
-	case MODEL_MONSTER01+153:	// 거대 거미알
+	case MODEL_MONSTER01+151:
+	case MODEL_MONSTER01+152:
+	case MODEL_MONSTER01+153:
 		Vector(-100.f,-100.f,0.f  ,o->BoundingBoxMin);
 		Vector( 100.f, 100.f,200.f,o->BoundingBoxMax);
 		break;
@@ -13994,50 +13551,49 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 	case MODEL_LITTLESANTA+6:
 	case MODEL_LITTLESANTA+7:
 		{
-			// 리틀산타NPC
 			Vector(-160.f,-60.f,-20.f, o->BoundingBoxMin);
 			Vector( 10.f, 80.f,50.f, o->BoundingBoxMax);
 		}
 		break;
 #endif //PBG_ADD_LITTLESANTA_NPC
 #ifdef PBG_ADD_PKFIELD
-	case MODEL_MONSTER01+157:		//좀비 투사
+	case MODEL_MONSTER01+157:
 		{
 			Vector(-100.f,-70.f,0.f  ,o->BoundingBoxMin);
 			Vector( 100.f, 70.f,150.f,o->BoundingBoxMax);
 		}
 		break;
-	case MODEL_MONSTER01+158:		//되살아난 검투사
+	case MODEL_MONSTER01+158:
 		{
 			Vector(-100.f,-100.f,50.f ,o->BoundingBoxMin);
 			Vector( 100.f, 100.f,150.f,o->BoundingBoxMax);
 		}
 		break;
-	case MODEL_MONSTER01+159:		//잿더미 도살자
+	case MODEL_MONSTER01+159:
 		{
 			Vector(-100.f,-100.f,0.f  ,o->BoundingBoxMin);
 			Vector( 100.f, 100.f,180.f,o->BoundingBoxMax);
 		}
 		break;
-	case MODEL_MONSTER01+160:		//피의 암살자
+	case MODEL_MONSTER01+160:
 		{
 			Vector(-80.f,-80.f,0.f ,o->BoundingBoxMin);
 			Vector( 80.f, 80.f,130.f,o->BoundingBoxMax);
 		}
 		break;
-	case MODEL_MONSTER01+161:		//잔혹한 피의 암살자
+	case MODEL_MONSTER01+161:
 		{
 			Vector(-80.f,-80.f,0.f ,o->BoundingBoxMin);
 			Vector( 80.f, 80.f,130.f,o->BoundingBoxMax);
 		}
 		break;
-	case MODEL_MONSTER01+162:		//불타는 용암거인
+	case MODEL_MONSTER01+162:
 		{
 			Vector(-100.f,-80.f,50.f ,o->BoundingBoxMin);
 			Vector( 100.f, 70.f,280.f,o->BoundingBoxMax);
 		}
 		break;
-	case MODEL_MONSTER01+163:		//포악한 용암거인
+	case MODEL_MONSTER01+163:
 		{
 			Vector(-100.f,-80.f,50.f ,o->BoundingBoxMin);
 			Vector( 100.f, 70.f,280.f,o->BoundingBoxMax);
@@ -14057,12 +13613,7 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 	o->BoneTransform = new vec34_t [Models[Type].NumBones];
 	hanguo_check2();
 	
-#ifdef _VS2008PORTING
 	for(int i=0;i<2;i++)
-#else // _VS2008PORTING	
-	int i;
-	for(i=0;i<2;i++)
-#endif // _VS2008PORTING
 	{
 		c->Weapon[i].Type = -1;
 		c->Weapon[i].Level = 0;
@@ -14071,11 +13622,8 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 		c->Weapon[i].m_iID = GenID();
 #endif //MR0
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_BODYPART;i++)		
-#else // _VS2008PORTING
-	for(i=0;i<MAX_BODYPART;i++)
-#endif // _VS2008PORTING
 	{
 		c->BodyPart[i].Type = -1;
 		c->BodyPart[i].Level = 0;
@@ -14103,86 +13651,78 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 	c->Item            = -1;
 
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef _VS2008PORTING
 #if SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	for( int i = 0; i < 32; ++i ) c->OwnerID[i] = 0;
 #else //SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	for( int i = 0; i < 24; ++i ) c->OwnerID[i] = 0;
 #endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-#else // _VS2008PORTING
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	for( i = 0; i < 32; ++i ) c->OwnerID[i] = 0;
-#else //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	for( i = 0; i < 24; ++i ) c->OwnerID[i] = 0;
-#endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-#endif // _VS2008PORTING
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 	
 	o->BlendMesh = -1;
 	o->BlendMeshLight = 1.f;
 	switch(Type)
 	{
-    case MODEL_MONSTER01+70:    //  카오스캐슬.
+    case MODEL_MONSTER01+70:
     case MODEL_MONSTER01+71:
     case MODEL_MONSTER01+72:
 		c->Weapon[0].LinkBone = 33; 
 		c->Weapon[1].LinkBone = 42;
         break;
-	case MODEL_MONSTER01+57:	// 붉은해골
+	case MODEL_MONSTER01+57:
 		c->Weapon[0].LinkBone = 30;
 		c->Weapon[1].LinkBone = 39;
 		break;
-	case MODEL_MONSTER01+59:	// 흑해골
+	case MODEL_MONSTER01+59:
 		c->Weapon[0].LinkBone = 33;
 		c->Weapon[1].LinkBone = 20;
 		break;
-	case MODEL_MONSTER01+60:    //  석상.
+	case MODEL_MONSTER01+60:
 		c->Weapon[0].LinkBone = 1;
 		c->Weapon[1].LinkBone = 1;
 		break;
-	case MODEL_MONSTER01+55:	// 불사조
+	case MODEL_MONSTER01+55:
 		c->Weapon[0].LinkBone = 27;
 		c->Weapon[1].LinkBone = 18;
 		break;
-	case MODEL_MONSTER01+52:	// 야누스
+	case MODEL_MONSTER01+52:
 		c->Weapon[0].LinkBone = 36;
 		c->Weapon[1].LinkBone = 45;
 		break;
-	case MODEL_MONSTER01+53:	// 이카루스
+	case MODEL_MONSTER01+53:
 		c->Weapon[0].LinkBone = 30;
 		c->Weapon[1].LinkBone = 39;
 		break;
-	case MODEL_MONSTER01+46:	// 오크 궁수
+	case MODEL_MONSTER01+46:
 		c->Weapon[0].LinkBone = 39;
 		c->Weapon[1].LinkBone = 39;
 		break;
-	case MODEL_MONSTER01+47:	// 오크 대장
+	case MODEL_MONSTER01+47:
 		c->Weapon[0].LinkBone = 27;
 		c->Weapon[1].LinkBone = 38;
 		break;
-	case MODEL_MONSTER01+48:	// 저주받은 왕
+	case MODEL_MONSTER01+48:
 		c->Weapon[0].LinkBone = 32;
 		c->Weapon[1].LinkBone = 43;
 		break;
-	case MODEL_MONSTER01+44:///
+	case MODEL_MONSTER01+44:
 		c->Weapon[0].LinkBone = 55;
 		c->Weapon[1].LinkBone = 70;
 		break;
-	case MODEL_MONSTER01+42:///
+	case MODEL_MONSTER01+42:
 		c->Weapon[0].LinkBone = 43;
 		break;
-	case MODEL_MONSTER01+41:///
+	case MODEL_MONSTER01+41:
 		c->Weapon[0].LinkBone = 23;
 		break;
-	case MODEL_MONSTER01+36://리자드킹
+	case MODEL_MONSTER01+36:
 		c->Weapon[0].LinkBone = 52;
 		c->Weapon[1].LinkBone = 65;
 		break;
-	case MODEL_MONSTER01+35://발키리
+	case MODEL_MONSTER01+35:
 		c->Weapon[0].LinkBone = 30;
 		c->Weapon[1].LinkBone = 39;
 		break;
-	case MODEL_MONSTER01+34://인어
+	case MODEL_MONSTER01+34:
 		c->Weapon[0].LinkBone = 30;
 		c->Weapon[1].LinkBone = 39;
 		break;
@@ -14259,19 +13799,9 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 생성 함수(같은 키의 케릭터가 존재할때는 중복해서 생성하고
-// 같은 키의 케릭터가 없을때는 새로 생성함)
-///////////////////////////////////////////////////////////////////////////////
-
 CHARACTER *CreateCharacter(int Key,int Type,unsigned char PositionX,unsigned char PositionY,float Rotation)
 {
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-	int i;
-	for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 	{
 		CHARACTER *c = &CharactersClient[i];
 		OBJECT *o = &c->Object;
@@ -14282,28 +13812,18 @@ CHARACTER *CreateCharacter(int Key,int Type,unsigned char PositionX,unsigned cha
             return c;
 		}
 	}
-#ifdef _VS2008PORTING
+
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#else // _VS2008PORTING
-	for(i=0;i<MAX_CHARACTERS_CLIENT;i++)
-#endif // _VS2008PORTING
 	{
 		CHARACTER *c = &CharactersClient[i];
 		OBJECT *o = &c->Object;
 		if(!o->Live)
 		{
 			BoneManager::UnregisterBone(c);
-
-#ifdef PET_SYSTEM
             DeletePet ( c );
-#endif// PET_SYSTEM
-			// 망토 제거
 			DeleteCloth( c, o);
             DeleteParts ( c );
-
-			// 생성
 			CreateCharacterPointer(c,Type,PositionX,PositionY,Rotation);
-
 			g_CharacterClearBuff(o);
 			c->Key = Key;
             return c;
@@ -14313,10 +13833,6 @@ CHARACTER *CreateCharacter(int Key,int Type,unsigned char PositionX,unsigned cha
 	return &CharactersClient[MAX_CHARACTERS_CLIENT];
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 캐릭터의 클래스에 따라 크기 설정
-///////////////////////////////////////////////////////////////////////////////
-
 void SetCharacterScale(CHARACTER *c)
 {
 	if(c->Change) 
@@ -14324,7 +13840,7 @@ void SetCharacterScale(CHARACTER *c)
 
     if(c->BodyPart[BODYPART_HELM].Type==MODEL_HELM ||
 		c->BodyPart[BODYPART_HELM].Type==MODEL_HELM+2 ||
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 헬멧 스캐일 예외처리
+#ifdef LEM_ADD_LUCKYITEM
 		c->BodyPart[BODYPART_HELM].Type==MODEL_HELM+63 ||
 		c->BodyPart[BODYPART_HELM].Type==MODEL_HELM+68 ||
 		c->BodyPart[BODYPART_HELM].Type==MODEL_HELM+65 ||
@@ -14411,19 +13927,13 @@ void SetCharacterScale(CHARACTER *c)
 #endif //PJH_NEW_SERVER_SELECT_MAP
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 클래스와 장비에 따라 케릭터 세팅
-///////////////////////////////////////////////////////////////////////////////
-
 void SetCharacterClass(CHARACTER *c)
 {
-	// 플레이어가 아니면 리턴
 	if(c->Object.Type != MODEL_PLAYER)
 	{
 		return;
 	}
 	
-	// 무기 좌, 우, 날개, 헬퍼
 	ITEM *p = CharacterMachine->Equipment;
 
 	if(p[EQUIPMENT_WEAPON_RIGHT].Type == -1)
@@ -14473,14 +13983,11 @@ void SetCharacterClass(CHARACTER *c)
 	c->Wing.Level = (p[EQUIPMENT_WING].Level>>3)&15;
 	c->Helper.Level = (p[EQUIPMENT_HELPER].Level>>3)&15;
 
-	// 캐릭터 에니메이션 설정
 	bool Success = true;
 
-	// 카오스 캐슬이면 실패
     if ( InChaosCastle() == true )
         Success = false;
 
-	// 특정 행동을 하고 있으면 실패
 	if(c->Object.CurrentAction>=PLAYER_SIT1 && c->Object.CurrentAction<=PLAYER_POSE_FEMALE1)
 	{
 		Success = false;
@@ -14490,13 +13997,11 @@ void SetCharacterClass(CHARACTER *c)
 		Success = false;
 	}
 
-	// 성공이면 캐릭터의 정지 에니메이션 설정한다.
 	if(Success)
 	{
         SetPlayerStop(c);
 	}
 
-	// 변신한 상태이면 리턴
 #ifndef KJH_FIX_WOPS_K27082_REFRASH_STAT_EQUIPED_TRANSFORM_RING				// #ifndef
 	if(c->Change)
 	{
@@ -14504,7 +14009,6 @@ void SetCharacterClass(CHARACTER *c)
 	}
 #endif // KJH_FIX_WOPS_K27082_REFRASH_STAT_EQUIPED_TRANSFORM_RING
 
-	// 핼멧, 
     if(p[EQUIPMENT_HELM].Type == -1)
     {
 		c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM+GetSkinModelIndex(c->Class);
@@ -14570,23 +14074,16 @@ void SetCharacterClass(CHARACTER *c)
     ChangeChaosCastleUnit ( c );
 #endif //GUILD_WAR_EVENT
     
-	// 캐릭터의 클래스에 맞쳐서 스케일을 설정
     SetCharacterScale(c);
 
-    // 캐릭터가 자기자신이면
     if(c == Hero)
     {
-        //  세트 장비 검사.
         CheckFullSet(Hero);
     }
 
-	// 캐릭터의 장비가 갱신되었다면 장비들 수치 다시 전부 계산
     CharacterMachine->CalculateAll();
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  변신을 한다.
-//////////////////////////////////////////////////////////////////////////
 void SetChangeClass(CHARACTER *c)
 {
 	if(c->Object.Type != MODEL_PLAYER) 
@@ -14645,15 +14142,12 @@ DWORD GetGuildRelationShipTextColor( BYTE GuildRelationShip )
 {
 	DWORD dwColor = 0;
 
-	// 길드관계없음
 	if( GuildRelationShip == GR_NONE )
-		dwColor  = (255<<24)+(255<<16)+(230<<8)+(230);	// 흰색
-	// 적대관계
+		dwColor  = (255<<24)+(255<<16)+(230<<8)+(230);
 	else if(GuildRelationShip == GR_RIVAL || GuildRelationShip == GR_RIVALUNION )
 		dwColor = (255<<24)+(0<<16)+(30<<8)+(255);
-	// 우호관계
 	else
-		dwColor  = (255<<24)+(0<<16)+(255<<8)+(200);		// 노랑
+		dwColor  = (255<<24)+(0<<16)+(255<<8)+(200);
 
 	return dwColor;
 }
@@ -14662,15 +14156,12 @@ DWORD GetGuildRelationShipBGColor( BYTE GuildRelationShip )
 {
 	DWORD dwColor = 0;
 
-	// 길드관계없음
 	if( GuildRelationShip == GR_NONE )
     	dwColor = (150<<24)+(50<<16)+(30<<8)+(10);
-	// 적대관계
 	else if(GuildRelationShip == GR_RIVAL || GuildRelationShip == GR_RIVALUNION )
 		dwColor = (150<<24)+(0<<16)+(0<<8)+(0);
-	// 우호관계
 	else
-		dwColor = (150<<24)+(80<<16)+(50<<8)+(20);		// 푸른색
+		dwColor = (150<<24)+(80<<16)+(50<<8)+(20);
 
 	return dwColor;
 }
@@ -14687,10 +14178,6 @@ CHARACTER* FindCharacterByID( char* szName )
 	}
 	return NULL;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 패킷상의 아이템 레벨(실제보다 단계가 적음)을 실제 아이템 레벨로 변환
-///////////////////////////////////////////////////////////////////////////////
 
 int LevelConvert(BYTE Level)
 {
@@ -14713,37 +14200,25 @@ int LevelConvert(BYTE Level)
 	return 0;
 }
 
-//엘프 요정 NPC를 생성한다.
 void MakeElfHelper(CHARACTER* c)
 {
 	OBJECT* o = &c->Object;
 	c->Wing.Type = MODEL_WING + 3;
-
-	//12레벨 수호세트
 	c->BodyPart[BODYPART_HELM  ].Type = MODEL_HELM + 24;
 	c->BodyPart[BODYPART_ARMOR ].Type = MODEL_ARMOR + 24;
 	c->BodyPart[BODYPART_PANTS ].Type = MODEL_PANTS + 24;
 	c->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 24;
 	c->BodyPart[BODYPART_BOOTS ].Type = MODEL_BOOTS + 24;
-
 	c->BodyPart[BODYPART_HELM  ].Level = 13;
 	c->BodyPart[BODYPART_ARMOR ].Level = 13;
 	c->BodyPart[BODYPART_PANTS ].Level = 13;
 	c->BodyPart[BODYPART_GLOVES].Level = 13;
 	c->BodyPart[BODYPART_BOOTS ].Level = 13;
 
-	//좀 크게
 	o->Scale = 1.f;
-	
-	//떠 있게 한다.
 	o->CurrentAction = PLAYER_STOP_FLY;
-
 	o->BoundingBoxMax[2] += 70.f;
 }
-
-//////////////////////////////////////////////////////////////////////////
-//Item 인덱스 확장
-//////////////////////////////////////////////////////////////////////////
 
 void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT * pHelper)
 {
@@ -14764,9 +14239,8 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	short ExtType = 0;
 
-	//오른손 무기 체크
 	Type = Equipment[0];
-	ExtType = Equipment[11]&240;	// 11번째 byte 사위 4bit는 오른손 무기 엑설런트 옵션 판별
+	ExtType = Equipment[11]&240;
 	ExtType = (ExtType<<4) | Type;
 #ifdef YDG_FIX_VIEWPORT_HAND_CHECK
 	if(ExtType == 0x0FFF)
@@ -14783,9 +14257,8 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 		c->Weapon[0].Type = MODEL_SWORD + ExtType;
 	}
 
-	//왼손 무기 체크
 	Type = Equipment[1];
-	ExtType = Equipment[12]&240;	// 12번째 byte 사위 4bit는 오른손 무기 엑설런트 옵션 판별
+	ExtType = Equipment[12]&240;
 	ExtType = (ExtType<<4) | Type;
 #ifdef YDG_FIX_VIEWPORT_HAND_CHECK
 	if(ExtType == 0x0FFF)
@@ -14799,7 +14272,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
     }
 	else
     {
-		//다크 스피릿은 왼손무기 일 수 있다. 
 #ifdef PET_SYSTEM
         if ( GetBaseClass(c->Class)==CLASS_DARK_LORD && ((MODEL_STAFF+5)-MODEL_SWORD)==ExtType)
         {
@@ -14912,14 +14384,13 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 		c->Wing.Type = MODEL_WING + Type;
 	}
 
-	// 3차 날개 아이템 세팅
 	Type = (Equipment[15] >> 2) & 0x07;
 	if(Type > 0)
 	{
 #ifdef ADD_ALICE_WINGS_2
 		switch (Type)
 		{
-		case 6:		c->Wing.Type = MODEL_WING+43;	break;	// 차원의 날개.
+		case 6:		c->Wing.Type = MODEL_WING+43;	break;
 		default:	c->Wing.Type = MODEL_WING+35+Type;
 		}
 #else	// ADD_ALICE_WINGS_2
@@ -14927,22 +14398,21 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 #endif	// ADD_ALICE_WINGS_2
 	}
 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING	// 작은 날개
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	Type = (Equipment[16] >> 5);
 	if(Type > 0)
 	{
 		switch (Type)
 		{
-		case 0x01: c->Wing.Type = MODEL_WING+130;	break;	// 작은 군주의 망토.
-		case 0x02: c->Wing.Type = MODEL_WING+131;	break;	// 작은 재앙의 날개.
-		case 0x03: c->Wing.Type = MODEL_WING+132;	break;	// 작은 요정의 날개.
-		case 0x04: c->Wing.Type = MODEL_WING+133;	break;	// 작은 천공의 날개.
-		case 0x05: c->Wing.Type = MODEL_WING+134;	break;	// 작은 사탄의 날개.
+		case 0x01: c->Wing.Type = MODEL_WING+130;	break;
+		case 0x02: c->Wing.Type = MODEL_WING+131;	break;
+		case 0x03: c->Wing.Type = MODEL_WING+132;	break;
+		case 0x04: c->Wing.Type = MODEL_WING+133;	break;
+		case 0x05: c->Wing.Type = MODEL_WING+134;	break;
 		}
 	}
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-    //  헬퍼.
 	if (pHelper == NULL)
 	{
    		DeleteBug(o);
@@ -14954,11 +14424,11 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 	{
 		pHelper->Live = false;
 	}
-	Type = Equipment[4]&3; // 4번째 인덱스는 날개쪽에서도 사용
-	if(Type == 3) // 4번째 byte가 0000 0011이고
+	Type = Equipment[4]&3;
+	if(Type == 3)
 	{
-        Type = Equipment[9]&0x01; // 9번째 인덱스가 0000 0001이면 디노란트
-        if ( Type==1 )  // 디노란트
+        Type = Equipment[9]&0x01;
+        if ( Type==1 )
         {
     		c->Helper.Type = MODEL_HELPER+3;
 			if (pHelper == NULL)
@@ -14973,10 +14443,10 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
             c->Helper.ExtOption = 0;
         }
 	}
-    else // 4번째 byte가 0000 0011이 아니면 수호천사, 사탄, 유니리아등 세팅
+    else
 	{
 #if defined LDK_ADD_NEW_PETPROCESS // && defined LDK_ADD_PC4_GUARDIAN 
-		BYTE _temp = Equipment[15]&0xE0; // 데몬32, 수호천사64
+		BYTE _temp = Equipment[15]&0xE0;
 
 		if( 32 == _temp || 64 == _temp 
 #ifdef LDK_ADD_RUDOLPH_PET
@@ -14989,7 +14459,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 			|| 160 == _temp
 #endif //LDK_ADD_CS7_UNICORN_PET
 #ifdef YDG_ADD_SKELETON_PET
-			|| 96 == _temp		// 스켈레톤 펫
+			|| 96 == _temp
 #endif	// YDG_ADD_SKELETON_PET
 			)
 		{
@@ -15008,7 +14478,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 			case 160: _type = 106; break;
 #endif //LDK_ADD_CS7_UNICORN_PET
 #ifdef YDG_ADD_SKELETON_PET
-			case 96: _type = 123; break;	// 스켈레톤 펫
+			case 96: _type = 123; break;
 #endif	// YDG_ADD_SKELETON_PET
 			}
 
@@ -15048,8 +14518,8 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 		}
 	}
 
-    Type = Equipment[11]&0x01; // 11번째 byte가 0000 0001이면 다크호스
-    if ( Type==1 )  // 다크호스.
+    Type = Equipment[11]&0x01;
+    if ( Type==1 ) 
     {
 		c->Helper.Type = MODEL_HELPER+4;
 		if (pHelper == NULL)
@@ -15058,29 +14528,28 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 			CreateBugSub( MODEL_DARK_HORSE, o->Position,o,pHelper);
     }
 
-	//^ 펜릴 아이템 관련
-	Type = Equipment[11]&0x04;	// 11번째 byte가 0000 0100이면 펜릴
-	if(Type == 4)	// 펜릴
+	Type = Equipment[11]&0x04;
+	if(Type == 4)
 	{
 		c->Helper.Type = MODEL_HELPER+37;
 
-		Type = Equipment[15]&3;	// 15번째 byte를 비교해서
+		Type = Equipment[15]&3;
 
-		int iFenrirType = Equipment[16]&1; // 16번째 byte가 1이면 환영 펜릴이다.
+		int iFenrirType = Equipment[16]&1;
 		if(iFenrirType == 1)
 		{
 			Type = 0x04;
 		}
 		
-		c->Helper.Option1 = Type;	// Option1 변수에 옵션값 대입
-		if(Type == 0x01)	// 0000 0001 이면 검정 펜릴
+		c->Helper.Option1 = Type;
+		if(Type == 0x01)
 		{
 			if (pHelper == NULL)
 				CreateBug(MODEL_FENRIR_BLACK, o->Position, o);
 			else
 				CreateBugSub(MODEL_FENRIR_BLACK, o->Position, o, pHelper);
 		}
-		else if(Type == 0x02)	// 0000 0010 이면 파란 펜릴
+		else if(Type == 0x02)
 		{
 			if (pHelper == NULL)
 				CreateBug(MODEL_FENRIR_BLUE, o->Position, o);
@@ -15094,7 +14563,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 			else
 				CreateBugSub(MODEL_FENRIR_GOLD, o->Position, o, pHelper);
 		}
-		else	// 이외의 값이면 빨간 펜릴
+		else
 		{
 			if (pHelper == NULL)
 				CreateBug(MODEL_FENRIR_RED, o->Position, o);
@@ -15130,7 +14599,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 	if(c->Change) 
 		return;
 
-	//투구
 	ExtType = (Equipment[2]>>4)+((Equipment[8]>>7)&1)*16 +(Equipment[12]&15)*32;
     if(ExtType == 0x1FF)
 	{
@@ -15141,7 +14609,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 		c->BodyPart[BODYPART_HELM].Type = MODEL_HELM+ExtType;
 	}
 
-	//갑옷
 	ExtType = (Equipment[2]&15)+((Equipment[8]>>6)&1)*16 +((Equipment[13]>>4)&15)*32;
 	if(ExtType == 0x1FF)
 	{
@@ -15152,7 +14619,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 		c->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR+ExtType;
 	}
 	
-	//바지
 	ExtType = (Equipment[3]>>4)+((Equipment[8]>>5)&1)*16 +(Equipment[13]&15)*32;
 	if(ExtType == 0x1FF)
 	{
@@ -15163,7 +14629,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 		c->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS+ExtType;
 	}
 	
-	//장갑
 	ExtType = (Equipment[3]&15)+((Equipment[8]>>4)&1)*16 +((Equipment[14]>>4)&15)*32;
 	if(ExtType == 0x1FF)
 	{
@@ -15174,7 +14639,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 		c->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES+ExtType;
 	}
 	
-	//신발
 	ExtType = (Equipment[4]>>4)+((Equipment[8]>>3)&1)*16 +(Equipment[14]&15)*32;
 	if(ExtType == 0x1FF)
 	{
@@ -15217,24 +14681,18 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 	SetCharacterScale(c);	
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 몬스터 생성
-///////////////////////////////////////////////////////////////////////////////
-
 extern int HeroIndex;
 
 void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 {
 	OBJECT *o;
-#ifdef _DEBUG	// 임시
-    int iRealType = Type;		//. 임의로 몬스터를 띄우고 싶다면 각자의 몬스터생성 함수 안에서 임의로 지정
-	//Type = 310;				//. 여기서 지정해도됨
+#ifdef _DEBUG
+    int iRealType = Type;
+	//Type = 310;
 #endif	// _DEBUG
 
-
-    //  블러드캐슬에 몬스터에게 크기 설정.
 	int nCastle = BLOODCASTLE_NUM + (World - WD_11BLOODCASTLE_END );
-	if(nCastle > 0 && nCastle <= BLOODCASTLE_NUM)		//. 블러드 캐슬일경우
+	if(nCastle > 0 && nCastle <= BLOODCASTLE_NUM)
 	{
 		if(Type >= 84 && Type <= 143 )
 		{
@@ -15258,7 +14716,7 @@ void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 #ifdef _DEBUG
 		Type = iRealType;
 		char szMonsterIndex[16];
-		sprintf(szMonsterIndex, "(%d)", Type);	//. 실제 몬스터 인덱스 출력
+		sprintf(szMonsterIndex, "(%d)", Type);
 		strcat(c->ID, szMonsterIndex);
 #endif // _DEBUG
 		c->MonsterIndex = Type;
@@ -15285,7 +14743,6 @@ void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 		if(Type == 367
 		|| Type == 371
 #ifdef CSK_CHAOS_CARD
-		// 카오스카드마스터 NPC 
 		|| Type == 375
 #endif // CSK_CHAOS_CARD		
 		|| Type == 376 || Type == 377
@@ -15300,13 +14757,12 @@ void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 #ifdef PRUARIN_EVENT07_3COLORHARVEST
 		|| Type == 414
 #endif // PRUARIN_EVENT07_3COLORHARVEST
-		|| Type == 415 || Type == 416 || Type == 417	// 실비아 레아 마르세 강제로 NPC 설정
+		|| Type == 415 || Type == 416 || Type == 417
 #ifdef CSK_EVENT_CHERRYBLOSSOM
-		// 벚꽃의정령 NPC
 		|| Type == 450
 #endif //CSK_EVENT_CHERRYBLOSSOM
 #ifdef ADD_SOCKET_MIX
-		|| Type == 452 || Type == 453	// 시드 마스터, 시드 연구가 강제로 NPC 설정
+		|| Type == 452 || Type == 453
 #endif	// ADD_SOCKET_MIX
 #ifdef PSW_ADD_RESET_CHARACTER_POINT
 		|| Type == 464
@@ -15318,40 +14774,40 @@ void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 		|| Type == 467
 #endif //LDK_ADD_SNOWMAN_NPC
 #ifdef PBG_ADD_LITTLESANTA_NPC
-		|| Type == 468 || Type == 469 || Type == 470	//리틀 산타 NPC 1~8
+		|| Type == 468 || Type == 469 || Type == 470	//NPC 1~8
 		|| Type == 471 || Type == 472 || Type == 473
 		|| Type == 474 || Type == 475
 #endif //PBG_ADD_LITTLESANTA_NPC
 #ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-		|| Type == 478									//델가도
+		|| Type == 478
 #endif //KJH_PBG_ADD_SEVEN_EVENT_2008
 #ifdef YDG_ADD_NEW_DUEL_NPC
-		|| Type == 479			// 결투장 문지기 타이투스 강제로 NPC 설정
+		|| Type == 479
 #endif	// YDG_ADD_NEW_DUEL_NPC
 #ifdef LDK_ADD_GAMBLE_NPC_MOSS
-		|| Type == 492			// 겜블러 모스
+		|| Type == 492
 #endif //LDK_ADD_GAMBLE_NPC_MOSS
 #ifdef YDG_ADD_DOPPELGANGER_NPC
-		|| Type == 540		// 루가드
-		|| Type == 541		// 보상상자
-		|| Type == 542		// 최종보상상자
+		|| Type == 540
+		|| Type == 541
+		|| Type == 542
 #endif	// YDG_ADD_DOPPELGANGER_NPC
 #ifdef LDS_ADD_EG_4_MONSTER_JELINT
-		|| Type == 522		// 보좌관 제린트 npc
+		|| Type == 522
 #endif //LDS_ADD_EG_4_MONSTER_JELINT
 #ifdef ASG_ADD_GENS_NPC
-		|| Type == 543 || Type == 544	// 겐스 듀프리언 집사, 겐스 바네르트 집사
+		|| Type == 543 || Type == 544
 #endif	// ASG_ADD_GENS_NPC
 #ifdef LDS_ADD_NPC_UNITEDMARKETPLACE
-		|| Type == 545		// 크리스틴
-		|| Type == 546		// 라울
-		|| Type == 547		// 줄리아
+		|| Type == 545
+		|| Type == 546
+		|| Type == 547
 #endif // LDS_ADD_NPC_UNITEDMARKETPLACE
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
-		|| Type == 566 || Type == 567 || Type == 568	// 길드관리인 테르시아, 신녀 베이나, 떠돌이상인 자이로
+		|| Type == 566 || Type == 567 || Type == 568
 #endif	// ASG_ADD_TIME_LIMIT_QUEST_NPC
 #ifdef ASG_ADD_KARUTAN_NPC
-		|| Type == 577 || Type == 578	// 잡화상인 레이나, 무기상인 볼로
+		|| Type == 577 || Type == 578
 #endif	// ASG_ADD_KARUTAN_NPC
 #ifdef LEM_ADD_LUCKYITEM
 		|| Type == 579
@@ -15361,7 +14817,7 @@ void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 				o->Kind = KIND_NPC;	
 			}
 #ifdef PBG_ADD_PKFIELD
-		if(Type >= 480 && Type <= 491)					//PK FIELD관련 몬스터
+		if(Type >= 480 && Type <= 491)
 		{
 			o->Kind = KIND_MONSTER;
 		}
@@ -15377,7 +14833,7 @@ void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 
 CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 {
-#ifdef _DEBUG	// 임시
+#ifdef _DEBUG
 // 	int iRealType = Type;		//. 임의로 몬스터를 띄우고 싶다면 각자의 몬스터생성 함수 안에서 임의로 지정
 // 	Type = (rand()%2 == 0 ? 476 : 466);
 //	Type = 511;
@@ -15564,7 +15020,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
     case 166 :
     case 168 :
     case 170 :
-    case 172 :  //  카오스 캐슬에 나오는 대천사의 근위병. ( 기사 )
+    case 172 :
 	case 426:
         {
 		    OpenMonsterModel(70);
@@ -15584,7 +15040,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
     case 167 :
     case 169 :
     case 171 :
-    case 173 :  //  카오스 캐슬에 나오는 대천사의 근위병. ( 궁수 )
+    case 173 :
 	case 427:
         {
             int randType = 0;
@@ -15613,7 +15069,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
             }
         }
         break;
-    case 89:   //  마법 해골.
+    case 89:
     case 95:
     case 112:
     case 118:
@@ -15628,7 +15084,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 1.2f;
 		strcpy(c->ID,"마법해골");
         break;
-    case 131 :   //  성문.
+    case 131 :
     	OpenMonsterModel(61);
 		c = CreateCharacter(Key,MODEL_MONSTER01+61,PositionX,PositionY);
         c->m_bFixForm = true;
@@ -15636,7 +15092,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
         c->Object.EnableShadow = false;
 		strcpy(c->ID,"성문");
         break;
-    case 132 :   //  성자의석관
+    case 132 :
     	OpenMonsterModel(60);
 		c = CreateCharacter(Key,MODEL_MONSTER01+60,PositionX,PositionY);
         c->m_bFixForm = true;
@@ -15660,12 +15116,12 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
         c->Object.EnableShadow = false;
 		strcpy(c->ID,"성자의석관");
         break;
-	case 84 :	//. 오크전사대장1
-	case 90 :	//. 오크전사대장2
-	case 96 :	//. 오크전사대장3
-	case 113 :	//. 오크전사대장4
-	case 119 :	//. 오크전사대장5
-	case 125 :	//. 오크전사대장6
+	case 84 :
+	case 90 :
+	case 96 :
+	case 113 :
+	case 119 :
+	case 125 :
     case 138:
 	case 428:
 		OpenMonsterModel(47);
@@ -15673,12 +15129,12 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 1.1f;
 		o = &c->Object;
 		break;
-	case 85 :	//. 오크궁수대장1
-	case 91 :	//. 오크궁수대장2
-	case 97 :	//. 오크궁수대장3
-	case 114 :	//. 오크궁수대장4
-	case 120 :	//. 오크궁수대장5
-	case 126 :	//. 오크궁수대장6
+	case 85 :
+	case 91 :
+	case 97 :
+	case 114 :
+	case 120 :
+	case 126 :
     case 139:
 	case 429:
     	OpenMonsterModel(46);
@@ -15688,12 +15144,12 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Weapon[1].Level = 1;
 		o = &c->Object;
 		break;
-	case 86 :	//. 흑해골전사1
-	case 92 :	//. 흑해골전사2
-	case 98 :	//. 흑해골전사3
-	case 115 :	//. 흑해골전사4
-	case 121 :	//. 흑해골전사5
-	case 127 :	//. 흑해골전사6
+	case 86 :
+	case 92 :
+	case 98 :
+	case 115 :
+	case 121 :
+	case 127 :
     case 140:
 	case 430:
     	OpenMonsterModel(59);
@@ -15705,12 +15161,12 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 1.0f;
 		strcpy(c->ID,"흑해골전사");
         break;
-    case 87 :	//. 자이언트오거1
-	case 93 :	//. 자이언트오거2
-	case 99 :	//. 자이언트오거3
-	case 116 :	//. 자이언트오거4
-	case 122 :	//. 자이언트오거5
-	case 128 :	//. 자이언트오거6
+    case 87 :
+	case 93 :
+	case 99 :
+	case 116 :
+	case 122 :
+	case 128 :
     case 141:
 	case 431:
     	OpenMonsterModel(58);
@@ -15718,12 +15174,12 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 0.8f;
 		strcpy(c->ID,"자이언트오우거");
         break;
-    case 88 :	//. 붉은해골기사1
-	case 94 :	//. 붉은해골기사2
-	case 111 :	//. 붉은해골기사3
-	case 117 :	//. 붉은해골기사4
-	case 123 :	//. 붉은해골기사5
-	case 129 :	//. 붉은해골기사6
+    case 88 :
+	case 94 :
+	case 111 :
+	case 117 :
+	case 123 :
+	case 129 :
     case 142:
 	case 432:
     	OpenMonsterModel(57);
@@ -15740,7 +15196,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
         break;
 
 #ifdef USE_EVENT_ELDORADO
-	case 78:	// 황금 고블린
+	case 78:
     	OpenMonsterModel(19);
 		c = CreateCharacter(Key,MODEL_MONSTER01+19,PositionX,PositionY);
 		c->Weapon[0].Type = MODEL_AXE;
@@ -15748,13 +15204,13 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 0.8f;
 		strcpy(c->ID,"고블린");
 		break;
-	case 79:	// 골드 데르콘
+	case 79:
     	OpenMonsterModel(31);
 		c = CreateCharacter(Key,MODEL_MONSTER01+31,PositionX,PositionY);
 		strcpy(c->ID,"드래곤");
 		c->Object.Scale = 0.9f;
 		break;
-	case 80://리자드킹
+	case 80:
     	OpenMonsterModel(36);
 		c = CreateCharacter(Key,MODEL_MONSTER01+36,PositionX,PositionY);
 		c->Object.Scale = 1.4f;

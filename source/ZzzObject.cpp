@@ -2283,11 +2283,8 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 								// 퍼지는거
 								CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 27 );
 							}				
-#ifdef _VS2008PORTING
+
 							for( int i=0 ; i<20 ; i++ )
-#else // _VS2008PORTING
-							for( i=0 ; i<20 ; i++ )
-#endif // _VS2008PORTING
 							{
 								// 퍼져서 떨어지는거
 								CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 28 );
@@ -2299,22 +2296,16 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 							CreateSprite(BITMAP_DS_SHOCK, Position, rand()%10*0.1f+1.5f, o->Light, o);
 
 							// 별
-#ifdef _VS2008PORTING
+
 							for(int i=0 ; i<60 ; i++ )
-#else // _VS2008PORTING
-							for( i=0 ; i<60 ; i++ )
-#endif // _VS2008PORTING
 							{
 								Vector(0.3f+(rand()%700)*0.001f, 0.3f+(rand()%700)*0.001f, 0.3f+(rand()%700)*0.001f, vLight);
 								CreateParticle(BITMAP_SHINY, vPos, o->Angle, vLight, 9 );
 							}
 
 							vPos[2] += 50;
-#ifdef _VS2008PORTING
+
 							for (int i = 0; i < 3; ++i)
-#else // _VS2008PORTING
-							for ( i = 0; i < 3; ++i)
-#endif // _VS2008PORTING
 							{
 								CreateEffect(MODEL_HALLOWEEN_CANDY_STAR, vPos, o->Angle, vLight, 1);
 								CreateEffect(rand()%4+MODEL_XMAS_EVENT_BOX, vPos, o->Angle, vLight, 0, o);
@@ -3132,11 +3123,7 @@ void RenderObjectVisual(OBJECT *o)
 	vec3_t p,Position;
 	vec3_t Light;
   	float Luminosity = (float)(rand()%30+70)*0.01f;
-#ifdef _VS2008PORTING
 	int Bitmap;
-#else // _VS2008PORTING
-	int i,Bitmap;
-#endif // _VS2008PORTING
 	float Scale;
 	float Rotation;
 	Vector ( 0.f, 0.f, 0.f, p );
@@ -3258,11 +3245,8 @@ void RenderObjectVisual(OBJECT *o)
 			CreateSprite(BITMAP_LIGHTNING+1,Position,1.f,Light,o,-Rotation);
 
 			Vector(1.f,1.f,1.f,Light);
-#ifdef _VS2008PORTING
+
 			for(int i=61;i<=65;i++)
-#else // _VS2008PORTING
-			for(i=61;i<=65;i++)
-#endif // _VS2008PORTING
 			{
         		b->TransformPosition(BoneTransform[i],p,Position);
        			CreateSprite(BITMAP_LIGHT,Position,1.f,Light,o);
@@ -3276,11 +3260,8 @@ void RenderObjectVisual(OBJECT *o)
 			if(rand()%8==0)
 			{
 				vec3_t Angle;
-#ifdef _VS2008PORTING
+
 				for(int i=0;i<8;i++)
-#else // _VS2008PORTING
-				for(i=0;i<8;i++)
-#endif // _VS2008PORTING
 				{
 					Vector((float)(rand()%60+60),90.f+50.f,(float)(rand()%30),Angle);
 					CreateJoint(BITMAP_JOINT_SPARK,Position,Position,Angle);
@@ -5642,11 +5623,7 @@ void DeleteObjects()
 		Models[i].Release();
 	}
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<16;i++)
-#else // _VS2008PORTING
-	for(i=0;i<16;i++)
-#endif // _VS2008PORTING
 	{
 		for(int j=0;j<16;j++)
 		{
@@ -5668,16 +5645,11 @@ void DeleteObjects()
 		}
 	}
 
-#ifdef _VS2008PORTING
 	for(int i=BITMAP_MAPTILE;i<=BITMAP_RAIN_CIRCLE;i++)
-#else // _VS2008PORTING
-	for(i=BITMAP_MAPTILE;i<=BITMAP_RAIN_CIRCLE;i++)
-#endif // _VS2008PORTING
 	{
      	DeleteBitmap(i);
 	}
 
-#ifdef _VS2008PORTING
 	for(int i=0;i<MAX_SPRITES;i++)
 		Sprites[i].Live = false;
 	for(int i=0;i<MAX_BOIDS;i++)
@@ -5696,32 +5668,7 @@ void DeleteObjects()
 		Operates[i].Live = false;
 	for(int i=0;i<MAX_EFFECTS;i++)
 		Effects[i].Live = false;
-#else // _VS2008PORTING
-	for(i=0;i<MAX_SPRITES;i++)
-		Sprites[i].Live = false;
-	for(i=0;i<MAX_BOIDS;i++)
-		Boids[i].Live = false;
-	for(i=0;i<MAX_FISHS;i++)
-		Fishs[i].Live = false;
-	for(i=0;i<MAX_LEAVES;i++)
-		Leaves[i].Live = false;
-	for(i=0;i<MAX_PARTICLES;i++)
-		Particles[i].Live = false;
-	for(i=0;i<MAX_POINTS;i++)
-		Points[i].Live = false;
-	for(i=0;i<MAX_JOINTS;i++)
-		Joints[i].Live = false;
-	for(i=0;i<MAX_OPERATES;i++)
-		Operates[i].Live = false;
-	for(i=0;i<MAX_EFFECTS;i++)
-		Effects[i].Live = false;
-#endif // _VS2008PORTING
-
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 월드의 배경 오브젝트 타일 단위로 지우는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void DeleteObjectTile(int x,int y)
 {
@@ -9913,11 +9860,7 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 		b->RenderMesh(3, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
 		int iAnimationFrame = (int)o->AnimationFrame;
-#ifdef _VS2008PORTING
 		static int iPriorAnimationFrame = 0;
-#else // _VS2008PORTING
-		static iPriorAnimationFrame = 0;
-#endif // _VS2008PORTING
 		iPriorAnimationFrame = iAnimationFrame;
 	}
 #endif //PJH_ADD_PANDA_CHANGERING
@@ -9926,11 +9869,7 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 
 		int iAnimationFrame = (int)o->AnimationFrame;
-#ifdef _VS2008PORTING
 		static int iPriorAnimationFrame = 0;
-#else // _VS2008PORTING
-		static iPriorAnimationFrame = 0;
-#endif // _VS2008PORTING
 
 		if(o->CurrentAction == PLAYER_SANTA_1)
 		{
@@ -9947,11 +9886,7 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 					CreateEffect(iEffectType, vPos, o->Angle, o->Light);
 					CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, o->Light, 20, 1.f);
 				}
-#ifdef _VS2008PORTING
 				for(int i=0; i<5; ++i)
-#else // _VS2008PORTING
-				for(i=0; i<5; ++i)
-#endif // _VS2008PORTING
 				{
 					CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 20, 1.f);
 				}
@@ -11729,9 +11664,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
     }
     else if( o->Type==MODEL_WING+6 )    //  마검사 ( 어둠의 날개 ).
     {
-#ifndef _VS2008PORTING			// #ifndef
-        int     i;
-#endif // _VS2008PORTING
         vec3_t  posCenter, p, Position, Light;
         float   Scale = sinf(WorldTime*0.004f)*0.3f+0.3f;
 
@@ -11741,12 +11673,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 
         Vector ( 0.f, 0.f, 0.f, p );
 
-        //  왼쪽.
-#ifdef _VS2008PORTING
         for ( int i=0; i<5; ++i )
-#else // _VS2008PORTING
-        for ( i=0; i<5; ++i )
-#endif // _VS2008PORTING
         {
             b->TransformPosition(BoneTransform[22-i],p,posCenter,true);
             b->TransformPosition(BoneTransform[30-i],p,Position,true);
@@ -11755,12 +11682,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		    CreateSprite( BITMAP_FLARE_BLUE,posCenter,Scale/28.f,Light,o );
         }
 
-        //  오른쪽.
-#ifdef _VS2008PORTING
         for ( int i=0; i<5; ++i )
-#else // _VS2008PORTING
-        for ( i=0; i<5; ++i )
-#endif // _VS2008PORTING
         {
             b->TransformPosition(BoneTransform[7-i],p,posCenter,true);
             b->TransformPosition(BoneTransform[11+i],p,Position,true);
@@ -11797,11 +11719,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		int iBoneThunder[] = { 11, 21, 29, 63, 81, 89 };
 		if(rand()%2 == 0)
 		{
-#ifdef _VS2008PORTING
 			for(int i=0; i<6; ++i)
-#else // _VS2008PORTING
-			for(i=0; i<6; ++i)
-#endif // _VS2008PORTING
 			{
 				b->TransformPosition(BoneTransform[iBoneThunder[i]], vRelativePos, vPos, true);
 				if(rand()%20 == 0)
@@ -11820,11 +11738,8 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 							49, 45 };
 
 		fScale = absf(sinf(WorldTime*0.003f))*0.2f;
-#ifdef _VS2008PORTING
+
 		for(int i=0; i<22; ++i)
-#else // _VS2008PORTING
-		for(i=0; i<22; ++i)
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[iBoneLight[i]],vRelativePos,vPos,true);
 			if(iBoneLight[i] == 12 || iBoneLight[i] == 64 || iBoneLight[i] == 98 || iBoneLight[i] == 52)
@@ -11859,21 +11774,15 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		Vector ( 0.1f, 0.1f, 0.9f, Light );
 		//int iGreenFlarePos[] = { 23, 22, 24, 34, 5, 31, 14, 12, 27, 8, 6, 7, 16, 13, 56, 37, 58, 40, 39, 38 };
 		int iGreenFlarePos[] = { 22, 23, 25, 29, 30, 28, 32, 13, 16, 14, 12, 9, 7, 6, 57, 58, 40, 39 };
-#ifdef _VS2008PORTING
+
 		for (int i = 0; i < 18; ++i)
-#else // _VS2008PORTING
-		for (i = 0; i < 18; ++i)
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[iGreenFlarePos[i]],p,Position,true);
 			CreateSprite(BITMAP_LIGHT,Position,Scale+1.5f,Light,o);
 		}
 		int iGreenFlarePos2[] = { 56, 38, 51, 45 };
-#ifdef _VS2008PORTING
+
 		for (int i = 0; i < 4; ++i)
-#else // _VS2008PORTING
-		for (i = 0; i < 4; ++i)
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[iGreenFlarePos2[i]],p,Position,true);
 			CreateSprite(BITMAP_LIGHT,Position,Scale+0.5f,Light,o);
@@ -11897,11 +11806,8 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		// 초록 불빛
 		Vector ( 0.0f + Luminosity, 0.5f + Luminosity, 0.0f + Luminosity, Light );
 		int iGreenFlarePos[] = { 4, 9, 13, 14, 26, 32, 31, 33 };
-#ifdef _VS2008PORTING
+
 		for (int i = 0; i < 8; ++i)
-#else // _VS2008PORTING
-		for (i = 0; i < 8; ++i)
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[iGreenFlarePos[i]],p,Position,true);
 			CreateSprite(BITMAP_LIGHT,Position,1.3f,Light,o);
@@ -11944,41 +11850,29 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 							18, 27, 59, 50,
 							17, 26, 58, 49 };
 		int iNumParticle = 1;
-#ifdef _VS2008PORTING
+
 		for (int i = 0; i < 6; ++i)
-#else // _VS2008PORTING
-		for (i = 0; i < 6; ++i)
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[iSparkPos[i]],p,Position,true);
 			for (int j = 0; j < iNumParticle; ++j)
 				CreateParticle(BITMAP_CHROME_ENERGY2,Position,o->Angle,Light, 0, 0.1f);
 		}
-#ifdef _VS2008PORTING
+
 		for (int i = 6; i < 18; ++i)
-#else // _VS2008PORTING
-		for (i = 6; i < 18; ++i)
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[iSparkPos[i]],p,Position,true);
 			for (int j = 0; j < iNumParticle; ++j)
 				CreateParticle(BITMAP_CHROME_ENERGY2,Position,o->Angle,Light, 0, 0.3f);
 		}
-#ifdef _VS2008PORTING
+
 		for (int i = 18; i < 30; ++i)
-#else // _VS2008PORTING
-		for (i = 18; i < 30; ++i)
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[iSparkPos[i]],p,Position,true);
 			for (int j = 0; j < iNumParticle; ++j)
 				CreateParticle(BITMAP_CHROME_ENERGY2,Position,o->Angle,Light, 0, 0.5f);
 		}
-#ifdef _VS2008PORTING
+
 		for (int i = 30; i < 38; ++i)
-#else // _VS2008PORTING
-		for (i = 30; i < 38; ++i)
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[iSparkPos[i]],p,Position,true);
 			for (int j = 0; j < iNumParticle; ++j)
@@ -11996,7 +11890,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		// 노란색 불빛
 		Vector ( (1.0f + Luminosity)/2.f, (0.7f + Luminosity)/2.f, (0.2f + Luminosity)/2.f, Light );
 		int iFlarePos0[] = { 7, 30, 31, 43, 8, 20 };
-#ifdef _VS2008PORTING
+
 		int icnt;
 		for (icnt = 0; icnt < 2; ++icnt)
 		{
@@ -12009,27 +11903,12 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			b->TransformPosition(BoneTransform[iFlarePos0[icnt]],p,Position,true);
 			CreateSprite(BITMAP_FLARE,Position,Scale+0.5f,Light,o);
 		}
-#else // _VS2008PORTING
-		for (int i = 0; i < 2; ++i)
-		{
-			b->TransformPosition(BoneTransform[iFlarePos0[i]],p,Position,true);
-			CreateSprite(BITMAP_FLARE,Position,Scale+2.0f,Light,o);
-		}
-		Vector ( (1.0f + Luminosity)/4.f, (0.7f + Luminosity)/4.f, (0.2f + Luminosity)/4.f, Light );
-		for (; i < 6; ++i)
-		{
-			b->TransformPosition(BoneTransform[iFlarePos0[i]],p,Position,true);
-			CreateSprite(BITMAP_FLARE,Position,Scale+0.5f,Light,o);
-		}
-#endif // _VS2008PORTING
+
 		// 보라색 불빛
 		Vector ( (0.5f + Luminosity)/2.f, (0.1f + Luminosity)/2.f, (0.4f + Luminosity)/2.f, Light );
 		int iGreenFlarePos[] = { 29, 38, 42, 19, 15, 6 };
-#ifdef _VS2008PORTING
+
 		for (int i = 0; i < 6; ++i)
-#else // _VS2008PORTING
-		for (i = 0; i < 6; ++i)
-#endif // _VS2008PORTING
 		{
 			b->TransformPosition(BoneTransform[iGreenFlarePos[i]],p,Position,true);
 			CreateSprite(BITMAP_FLARE,Position,Scale+2.0f,Light,o);
