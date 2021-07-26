@@ -104,7 +104,8 @@ void CCallStackDump::Dump()
 	
 	Dump(&ct);
 }
-void CCallStackDump::Clear() {
+void CCallStackDump::Clear() 
+{
 	type_framevect::iterator fvi = m_listFrame.begin();
 	for(; fvi != m_listFrame.end(); fvi++)
 		delete (*fvi);

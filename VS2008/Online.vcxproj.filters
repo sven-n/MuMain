@@ -1409,6 +1409,12 @@
     <ClCompile Include="..\source\ExternalObject\Nprotect\Nprotect.cpp">
       <Filter>External Object\nprotect</Filter>
     </ClCompile>
+    <ClCompile Include="BannerInfo.cpp">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClCompile>
+    <ClCompile Include="StringTokem.cpp">
+      <Filter>MU\InGameShop\Include</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\BlackWin.h">

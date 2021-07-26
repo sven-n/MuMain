@@ -16273,7 +16273,6 @@ void MovePersonalShop()
 		int ButtonX = g_ptPersonalShop.x + 30, ButtonY = g_ptPersonalShop.y + 396;
 		if(MouseX>=ButtonX && MouseX<ButtonX+Width && MouseY>=ButtonY && MouseY<ButtonY+Height && MouseLButtonPush)
 		{
-			//. 개설 패킷 날리기
 			MouseLButtonPush = false;
 			if(!IsExistUndecidedPrice() && strlen(g_szPersonalShopTitle) > 0) 
 			{
@@ -16294,8 +16293,8 @@ void MovePersonalShop()
 		}
 		
 		ButtonX = g_ptPersonalShop.x + 105;
-		if(MouseX>=ButtonX && MouseX<ButtonX+Width && MouseY>=ButtonY && MouseY<ButtonY+Height && MouseLButtonPush){
-			//. 패점 패킷 날리기
+		if(MouseX>=ButtonX && MouseX<ButtonX+Width && MouseY>=ButtonY && MouseY<ButtonY+Height && MouseLButtonPush)
+		{
 			MouseLButtonPush = false;
 			if(g_bEnablePersonalShop) 
 			{

@@ -661,9 +661,8 @@
       <OutputFile>.\tmp/Global_Debug/Online.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "$(ProjectDir)..\$(TargetFileName)" "$(OutDir)$(TargetFileName)"
-
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Blue Real Server Release|Win32'">
@@ -2055,6 +2054,8 @@
     </ClCompile>
     <ClCompile Include="..\source\ZzzTexture.cpp" />
     <ClCompile Include="..\source\_GlobalFunctions.cpp" />
+    <ClCompile Include="BannerInfo.cpp" />
+    <ClCompile Include="StringTokem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Link\Common\Header\ShopListManager\BannerInfo.h" />

@@ -1,10 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// 패킷 주거나 받는 함수들 모아놓은 곳
-// 업데이트시 이곳이 많이 추가됨
-//
-// *** 함수 레벨: 2
-///////////////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
 #include "UIManager.h"
 #include "GuildCache.h"
@@ -521,7 +514,6 @@ bool Teleport = false;
 int BuyCost = 0;
 
 int  EnableUse = 0;
-//인터페이스에서의 연타 방지(10으로 세팅하고 패킷보내고 리퀘스트를 받는위치에서 0으로 다시 세팅-0이면 쓸수있다.)
 
 int SendGetItem = -1;
 int SendDropItem = -1;
@@ -585,13 +577,6 @@ void InitGuildWar()
 BOOL Util_CheckOption( char *lpszCommandLine, unsigned char cOption, char *lpszString);
 
 
-///////////////////////////////////////////////////////////////////////////////
-// 아래부터는 패킷 받는 함수들임
-///////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////
-// 서버 리스트 받기
-///////////////////////////////////////////////////////////////////////////////
 #ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
 extern int  ServerLocalSelect;
 #endif // KJH_ADD_SERVER_LIST_SYSTEM
@@ -6671,8 +6656,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 	return ( TRUE);
 }
 
-// ChainLightning (체인 라이트닝)
-// 엘리스 체인라이트닝 스킬 시전후 서버로 부터 받는 패킷
+// ChainLightning
 void ReceiveChainMagic( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_CHAIN_MAGIC pPacketData = (LPPRECEIVE_CHAIN_MAGIC)ReceiveBuffer;
@@ -6854,7 +6838,6 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 		g_pMainFrame->SetGetExp_Wide(Exp);	
 #endif //LDK_ADD_SCALEFORM
 
-		// 경험치 누적 (레벨업시에는 레벨업 패킷에서 경험치를 셋팅하고, 여기서는 경험치가 0이 들어온다.)
 		Master_Level_Data.lMasterLevel_Experince += Exp;
 	}
 	else
@@ -6871,7 +6854,6 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 		g_pMainFrame->SetGetExp(Exp);
 #endif //LDK_ADD_SCALEFORM
 
-		// 경험치 누적 (레벨업시에는 레벨업 패킷에서 경험치를 셋팅하고, 여기서는 경험치가 0이 들어온다.)
 		CharacterAttribute->Experience += Exp;	
 	}
 	
@@ -6946,7 +6928,6 @@ BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 		g_pMainFrame->SetGetExp_Wide(Exp);	
 #endif //LDK_ADD_SCALEFORM
 
-		// 경험치 누적 (레벨업시에는 레벨업 패킷에서 경험치를 셋팅하고, 여기서는 경험치가 0이 들어온다.)
 		Master_Level_Data.lMasterLevel_Experince += Exp;
 	}
 	else
@@ -6963,7 +6944,6 @@ BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 		g_pMainFrame->SetGetExp(Exp);	
 #endif //LDK_ADD_SCALEFORM
 
-		// 경험치 누적 (레벨업시에는 레벨업 패킷에서 경험치를 셋팅하고, 여기서는 경험치가 0이 들어온다.)
 		CharacterAttribute->Experience += Exp;	
 	}
 	
@@ -8330,7 +8310,6 @@ void ReceivePartyResult( BYTE *ReceiveBuffer )
 	}
 }
 
-//파티 가입이나 탈퇴시에 들어오는 패킷
 void ReceivePartyList( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_PARTY_LISTS Data = (LPPRECEIVE_PARTY_LISTS)ReceiveBuffer;
@@ -8359,7 +8338,6 @@ void ReceivePartyList( BYTE *ReceiveBuffer )
 #endif // CONSOLE_DEBUG
 }
 
-// 파티가 되어있을때 항상들어오는 패킷
 void ReceivePartyInfo( BYTE *ReceiveBuffer )
 {
     LPPRECEIVE_PARTY_INFOS Data = (LPPRECEIVE_PARTY_INFOS)ReceiveBuffer;
@@ -8385,8 +8363,6 @@ void ReceivePartyInfo( BYTE *ReceiveBuffer )
     }
 }
 
-
-// 사용안하는 패킷
 void ReceivePartyLeave( BYTE *ReceiveBuffer )
 {
 	PartyNumber = 0;
@@ -8870,7 +8846,7 @@ void ReceiveGuildAssign( BYTE *ReceiveBuffer )
 			strcpy( szTemp, GlobalText[1376] );
 			break;
 		default:
-			assert( !"잘못된 길드직책 패킷(0xE1)" );
+			assert( !"Packet(0xE1)" );
 			break;
 		}
 	}
@@ -8891,7 +8867,7 @@ void ReceiveGuildAssign( BYTE *ReceiveBuffer )
 			strcpy( szTemp, GlobalText[1327] );
 			break;
 		default:
-			assert( !"잘못된 길드직책 패킷(0xE1)" );
+			assert( !"Packet(0xE1)" );
 			break;
 		}
 	}
@@ -8992,7 +8968,7 @@ void ReceiveGuildRelationShipResult( BYTE *ReceiveBuffer )
 			break;
 #endif	// ASG_ADD_GENS_SYSTEM
 		default:
-			assert( !"잘못된 길드관계결과 패킷(0xE6)" );
+			assert( !"Packet (0xE6)" );
 			break;
 		}
 	}
@@ -12641,13 +12617,6 @@ void ReceiveWTBattleSoccerGoalIn(BYTE* ReceiveBuffer)
 	CreateEffect(BITMAP_FIRECRACKERRISE,Position,Angle,Light);*/
 } //월드 토너먼트용 결과 디스플레이
 
-
-//////////////////////////////////////////////////////////////////////////
-//  분산 서버를 위한 맵 서버 이동 패킷.
-//////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
-//  맵이동을 위한 서버 정보 받기.
 void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
 {
     LPPHEADER_MAP_CHANGESERVER_INFO Data = (LPPHEADER_MAP_CHANGESERVER_INFO)ReceiveBuffer;
@@ -13002,7 +12971,7 @@ void ReceiveTaxInfo( BYTE* ReceiveBuffer )
 	}
 	else
 	{
-		assert( !"잘못된 세율정보 패킷(0xB2(0x1A))" );
+		assert( !"Packet (0xB2(0x1A))" );
 	}
 }
 
@@ -14116,7 +14085,7 @@ void ReceivePCRoomPointInfo(BYTE* ReceiveBuffer)
 
 #ifndef KJH_DEL_PC_ROOM_SYSTEM				// #ifndef
 #ifndef CSK_MOD_MOVE_COMMAND_WINDOW		// 정리할 때 지워야 하는 소스
-	rPCRoomPtSys.SetPCRoom();	// 이 패킷을 받는 다면 PC방임.
+	rPCRoomPtSys.SetPCRoom();
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW	// 정리할 때 지워야 하는 소스
 
 	// PC방 포인트 정보 입력
@@ -14461,7 +14430,7 @@ void ProtocolCompiler( CWsctlc *pSocketClient, int iTranslation, int iParam)
 				bEncrypted = TRUE;
 				
 				if ( iSize < 0)
-				{	// 잘못된 패킷
+				{
 					SendHackingChecked( 0x06, 0);
 					g_byPacketSerialRecv++;
 					continue;
@@ -14482,7 +14451,7 @@ void ProtocolCompiler( CWsctlc *pSocketClient, int iTranslation, int iParam)
 				{
 					g_byPacketSerialRecv++;
 				}
-				// 패킷 완성
+
 				if ( ReceiveBuffer[0] == 0xC3)
 				{
 					LPPBMSG_HEADER pHeader = (LPPBMSG_HEADER)&( byDec[1]);
@@ -14672,7 +14641,6 @@ bool ReceiveRequestExChangeLuckyCoin(BYTE* ReceiveBuffer)
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CExchangeLuckyCoinInvenErrMsgBoxLayout));
 		}break;
 	default:
-		//패킷정보가 잘못됨
 		return false;
 	}
 
@@ -14718,7 +14686,7 @@ bool ReceiveEnterDoppelGangerEvent(BYTE* ReceiveBuffer)
 			pMsgBox->Initialize(GlobalText[3028], szText);
 		}break;
 #endif // KJH_MOD_ENTER_EVENTMAP_ERROR_MSG
-	default:	// 패킷정보가 잘못됨
+	default:
 		return false;
 	}
 
@@ -14989,7 +14957,7 @@ bool ReceiveEnterEmpireGuardianEvent(BYTE* ReceiveBuffer)
 		}break;
 #endif // KJH_MOD_ENTER_EVENTMAP_ERROR_MSG
 
-	default:	// 패킷정보가 잘못됨
+	default:
 		return false;
 	}
 	
@@ -16966,7 +16934,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
             }
         }
         break;
-    case 0xB1:  //  맵서버 이동을 위한 패킷 받음.
+    case 0xB1:
         {
 			int subcode;
 			if( ReceiveBuffer[0] == 0xC1 )

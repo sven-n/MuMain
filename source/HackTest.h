@@ -179,7 +179,6 @@ public:
 	// 죽은 몬스터 수
 	int m_iDieMonsterCount;
 
-	// 공격패킷 날린 수
 	int m_iSendClientAttackPacket;
 
 	// 스킬별로 카운트 수

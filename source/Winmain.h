@@ -100,9 +100,6 @@
 	#define ENABLE_EDIT				// 시스템 메세지
 	#define ENABLE_EDIT2			// 방향키로 이동
 	//#define ACC_PACKETSIZE		// 전송되는 패킷 사이즈 계산
-	#if SELECTED_LANGUAGE == LANGUAGE_KOREAN	// 한국 버전에서만 작동하며, 해외버전에서는 boost new 와 충돌 발생합니다. (2009.01.05)
-		#define USE_CRT_DEBUG			// 메모리 누수 디버깅
-	#endif // SELECTED_LANGUAGE == LANGUAGE_KOREAN
 	//#define PK_ATTACK_TESTSERVER_LOG		// 테섭에 PK 관련 공격쪽 로그남기는 작업(2007.04.25)
 #endif // _DEBUG
 

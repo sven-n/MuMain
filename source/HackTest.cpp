@@ -688,7 +688,7 @@ void CHackTest::EndSkill()
 
 	g_ConsoleDebugLog->log("몬스터 죽은 수 : %d\n", m_SkillLog.m_iDieMonsterCount);
 
-	g_ConsoleDebugLog->log("클라이언트에서 판별하는 공격패킷 보낸 횟수 : %d\n", m_SkillLog.m_iSendClientAttackPacket);
+	g_ConsoleDebugLog->log("Attack Packet send: %d\n", m_SkillLog.m_iSendClientAttackPacket);
 	
 	HackLog::SkillAttackMap::iterator it = m_SkillLog.m_SkillAttackCountList.begin();
 	for(; it != m_SkillLog.m_SkillAttackCountList.end(); ++it)

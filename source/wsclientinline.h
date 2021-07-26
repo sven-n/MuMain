@@ -18,7 +18,7 @@
 extern ItemAddOptioninfo*			g_pItemAddOptioninfo;
 #ifdef _DEBUG
 #define SAVE_PACKET
-#define PACKET_SAVE_FILE	"패킷.txt"
+#define PACKET_SAVE_FILE	"PacketList.txt"
 #include "./ExternalObject/leaf/stdleaf.h"
 #endif
 #ifdef CSK_LH_DEBUG_CONSOLE
@@ -124,7 +124,6 @@ __forceinline bool FindText2(char *Text,char *Token,bool First=false)
 
 extern CWsctlc * g_pSocketClient;
 
-// 패킷 보내는 함수
 __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bForceC4 = FALSE)
 {
 #ifdef SAVE_PACKET
@@ -145,9 +144,9 @@ __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bF
 	BYTE byBuffer[MAX_SPE_BUFFERSIZE_];
 	memcpy( byBuffer, buf, len);
 	byBuffer[len] = rand() % 256;
-	// 암호화 해서 보내기
+
 	int iSkip = ( byBuffer[0] == 0xC1) ? 2 : 3;
-	// 시리얼을 추가해서 패킷 복사가 안되게 하기
+
 	byBuffer[iSkip - 1] = g_byPacketSerialSend++;
 	--iSkip;
 

@@ -1246,8 +1246,7 @@ void StartGame(
 #ifdef PJH_CHARACTER_RENAME
 	if(IsConnect == false)
 	{
-		//캐릭터 리네임 패킷을 서버에 보내는걸로 바꿔야 한다.
-		//CharactersClient[SelectedHero].Class 클래스
+		//CharactersClient[SelectedHero].Class
 		SendRequestCheckChangeName(CharactersClient[SelectedHero].ID);
 	}
 	else

@@ -1547,10 +1547,6 @@ void MoveChat()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 패킷 디버깅 정보 출력하는 함수(작업시 가끔 임시로 사용함)
-///////////////////////////////////////////////////////////////////////////////
-
 BYTE DebugText[10][256];
 int  DebugTextLength[10];
 char DebugTextCount = 0;
@@ -5078,7 +5074,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 						abs(( c->PositionX)-( Hero->PositionX))<=1 &&
 						abs(( c->PositionY)-( Hero->PositionY))<=1){
 						
-						//. 결투시작요청 패킷 날리기
 						SendRequestDuelStart(c->Key, c->ID);
 					}
 				}
@@ -5093,8 +5088,8 @@ bool CheckCommand(char *Text, bool bMacroText )
 					{
 						BYTE Dir1 = (BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8;
 						BYTE Dir2 = (BYTE)((Hero->Object.Angle[2]+22.5f)/360.f*8.f+1.f)%8;
-						if(abs(Dir1-Dir2)==4) {
-							//. 결투시작요청 패킷 날리기
+						if(abs(Dir1-Dir2)==4) 
+						{
 							SendRequestDuelStart(c->Key, c->ID);
 							break;
 						}
@@ -5122,7 +5117,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 			if(g_bEnableDuel)	//. 자신이 결투중일때만 해지가능
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 			{
-				//. 결투해지요청 패킷 날리기
 				SendRequestDuelEnd();
 			}
 		}

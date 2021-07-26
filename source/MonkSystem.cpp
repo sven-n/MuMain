@@ -349,8 +349,8 @@ bool CMonkSystem::SetRepeatedly(int _Damage, int _DamageType, bool _Double, bool
 		{
 			if(m_nRepeatedlyCnt == MAX_REPEATEDLY-1)
 			{
-				m_nRepeatedlyCnt = MAX_REPEATEDLY-1;	//강제로 끝패킷이 들어올때까지 넘긴다
-				return false;							// 4연타중 끝 패킷 정보 이상
+				m_nRepeatedlyCnt = MAX_REPEATEDLY-1;
+				return false;
 			}
 		}
 

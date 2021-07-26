@@ -181,7 +181,7 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 #ifdef LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
 				if(&Hero->Object == obj->Owner)
 #endif //LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
-					//1000ms 마다 패킷 보냄
+					//1000ms
 					SendRequestGetItem(m_RootItem.itemIndex);
 			}	
 		}
@@ -501,7 +501,7 @@ bool PetActionCollecterSkeleton::Move( OBJECT* obj, CHARACTER *Owner, int target
 #ifdef LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
 				if(&Hero->Object == obj->Owner)
 #endif //LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
-					//1000ms 마다 패킷 보냄
+					//1000ms
 					SendRequestGetItem(m_RootItem.itemIndex);
 			}
 		}

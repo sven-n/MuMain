@@ -6003,7 +6003,6 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 				break;
 				
 			// ChainLighting	
-			// 서버로부터 패킷을 받은 후 에 들어온다.
 #ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+1:
@@ -7492,7 +7491,6 @@ void MoveMonsterClient(CHARACTER *c,OBJECT *o)
 		}
 		else
 		{
-			// 몬스터가 길찾기로 이동 도중에 공격 패킷이 오면 공격 행동 무시되고 계속 걸어가는 애니메이션 나오던 버그 수정(좀 더 수정 필요)
 			if(o->Type == MODEL_MONSTER01+121 && (o->CurrentAction == MONSTER01_ATTACK1
 				|| o->CurrentAction == MONSTER01_ATTACK2
 				|| o->CurrentAction == MONSTER01_ATTACK3
