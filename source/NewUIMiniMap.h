@@ -1,16 +1,14 @@
+//////////////////////////////////////////////////////////////////////
 // NewUIGuildInfoWindow.h: interface for the CNewUIGuildInfoWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #include "NewUIBase.h"
 #include "NewUIManager.h"
-//#include "NewUIButton.h"
 #include "NewUIMainFrameWindow.h"
 #include "NewUIChatLogWindow.h"
 #include "NewUIMyInventory.h"
-//#include "ZzzCharacter.h"
 
 #ifdef PJH_ADD_MINIMAP
 namespace SEASON3B
@@ -42,7 +40,7 @@ namespace SEASON3B
 		
 	private:
 		unicode::t_string		m_TooltipText;
-		HFONT					m_hToolTipFont;			// Ãß°¡ : Pruarin(07.08.03)
+		HFONT					m_hToolTipFont;
 		DWORD					m_TooltipTextColor;
 
 		CNewUIManager*			m_pNewUIMng;

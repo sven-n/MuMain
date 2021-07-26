@@ -1,24 +1,13 @@
 #ifndef __WINMAIN_H__
 #define __WINMAIN_H__
 
-
-//!! 패치시 주석 처리 해야 함
-/*-------------------- 프로그램 mode 설정 ----------------------------------------------*/
-#define FOR_LAST_TEST			// 최종 테스트 용 버전 (스탯 올리기 쉽게)
-#define FOR_WORK				// 사내 작업용 버젼 (Alt-Tab 가능)
-#define FOR_HACKING				// 해킹팀용 버젼 (클라이언트 복수 실행 가능)
+#define FOR_LAST_TEST
+#define FOR_WORK
+#define FOR_HACKING
 /*--------------------------------------------------------------------------------------*/
 
-//////////// 중요!!!!! - 이혁재 //////////////////////////////////////////////////////////////////////////////////
-//	- 앞으로 테섭 패치는 항시 이 디파인 다 켜줍시다. ^^ 이유는 아래있는 파일의 수정 패치만 있을시				//
-//	  exe 파일을 만들 필요가 없어지고 데이터만 패치가 가능해지면 서버 또한 패치가 필요 없어지기 때문입니다 ^^	//
-//    항시 켜 둡시다.																							//
-//////////// 중요!!!!! - 이혁재 //////////////////////////////////////////////////////////////////////////////////
-
-
-//테섭시에는 MuTest.ini를 읽도록 켜 주어야 한다. 
-#ifdef _TEST_SERVER	// 중요!!!!! - 이혁재 위에 내용 읽어 주세요
-	#define USE_MUTEST_INI	//MuTest 호출(테섭 게임가드실행)-> 항상 킨다.
+#ifdef _TEST_SERVER
+	#define USE_MUTEST_INI
 	#define USE_TEXTTEST_BMD
 	#define USE_ITEMTEST_BMD
 	#define USE_SKILLTEST_BMD
@@ -34,7 +23,6 @@
 	#define USE_HARMONYJEWELOPTION_BMD
 	#define USE_NOTSMELTING_BMD
 	#define USE_ITEMADDOPTION_BMD
-	#define USE_MIXTEST_BMD
 	#define USE_MASTERTREE_BMD
 	#define USE_SOCKETITEM_TEST_BMD
 	#define USE_PET_TEST_BMD
@@ -45,19 +33,15 @@
 	#define USE_MINIMAPTEST_BMD
 #endif //_TEST_SERVER
 
-/*-------------------- 국가 선택 -------------------------------------------------------*/
-
-// 지원하는 언어 정의
-#define LANGUAGE_KOREAN			( 0 )	// 한국어
-#define LANGUAGE_ENGLISH		( 1 )	// 영어
-#define LANGUAGE_TAIWANESE		( 2 )	// 대만어
-#define LANGUAGE_CHINESE		( 3 )	// 중국어
-#define LANGUAGE_JAPANESE		( 4 )	// 일본어
-#define LANGUAGE_THAILAND		( 5 )	// 태국어
-#define LANGUAGE_PHILIPPINES	( 6 )	// 필리핀
-#define LANGUAGE_VIETNAMESE		( 7 )	// 베트남
+#define LANGUAGE_KOREAN			( 0 )
+#define LANGUAGE_ENGLISH		( 1 )
+#define LANGUAGE_TAIWANESE		( 2 )
+#define LANGUAGE_CHINESE		( 3 )
+#define LANGUAGE_JAPANESE		( 4 )
+#define LANGUAGE_THAILAND		( 5 )
+#define LANGUAGE_PHILIPPINES	( 6 )
+#define LANGUAGE_VIETNAMESE		( 7 )
 #define NUM_LANGUAGE			( 8 )
-// 여기서 언어 선택
 
 //#ifdef KJH_MOD_LIBRARY_LINK_EACH_NATION
 //----------------------------------------------------------------------------- Kor

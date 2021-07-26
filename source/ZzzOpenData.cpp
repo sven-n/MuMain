@@ -1,10 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// 로딩화면시 모든 데이타 파일을 읽어들이는 함수
-// 배경, 모델링, 텍스쳐, 사운드, 이미지 등등
-//
-// *** 함수 레벨: 4
-///////////////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
 #include "UIControls.h"
 #include "ZzzOpenglUtil.h"
@@ -74,11 +67,7 @@ extern BOOL g_bUseChatListBox;
 
 bool Flip           = false;
 
-///////////////////////////////////////////////////////////////////////////////
-// 모델링 데이타에서 텍스쳐 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
-
-void OpenTexture(int Model,char *SubFolder, int Wrap, int Type,bool Check)	/* Check: 사용안함!! */
+void OpenTexture(int Model,char *SubFolder, int Wrap, int Type,bool Check)
 {
 #ifdef DO_PROFILING_FOR_LOADING
 	if( g_pProfilerForLoading )
@@ -1531,14 +1520,12 @@ void OpenItems()
 #ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 	AccessModel ( MODEL_WING+48,"Data\\Item\\","SkillScroll" );
 #endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-#ifdef HELLOWIN_EVENT
 	AccessModel( MODEL_POTION+45,"Data\\Item\\","hobakhead");
 	AccessModel( MODEL_POTION+46,"Data\\Item\\","hellowinscroll");
 	AccessModel( MODEL_POTION+47,"Data\\Item\\","hellowinscroll");
 	AccessModel( MODEL_POTION+48,"Data\\Item\\","hellowinscroll");
 	AccessModel( MODEL_POTION+49,"Data\\Item\\","Gogi");
 	AccessModel( MODEL_POTION+50,"Data\\Item\\","pumpkincup");
-#endif //HELLOWIN_EVENT
 #ifdef GIFT_BOX_EVENT
 	AccessModel( MODEL_POTION+32,"Data\\Item\\","giftbox_bp");
 	AccessModel( MODEL_POTION+33,"Data\\Item\\","giftbox_br");
@@ -2010,14 +1997,12 @@ void OpenItemTextures()
 	OpenTexture(MODEL_BOW+21, "Item\\");
 	OpenTexture(MODEL_STAFF+12, "Item\\");
 
-#ifdef HELLOWIN_EVENT
 	OpenTexture(MODEL_POTION+45, "Item\\");
 	OpenTexture(MODEL_POTION+46, "Item\\");
 	OpenTexture(MODEL_POTION+47, "Item\\");
 	OpenTexture(MODEL_POTION+48, "Item\\");
 	OpenTexture(MODEL_POTION+49, "Item\\");
 	OpenTexture(MODEL_POTION+50, "Item\\");
-#endif //HELLOWIN_EVENT
 #ifdef GIFT_BOX_EVENT
 	OpenTexture(MODEL_POTION+32, "Item\\");
 	OpenTexture(MODEL_POTION+33, "Item\\");
@@ -7178,15 +7163,9 @@ void OpenWorldModels()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 월드 바닥 데이타 읽어들이는 함수(게임에서 월드 이동시 로딩)
-///////////////////////////////////////////////////////////////////////////////
-
 void OpenWorld(int Map)
 {
 	if(Map == 32 && World == 32)
-	//데빌스퀘어(5,6)추가시에 맵번호 33은 데빌스퀘어(1,2,3,4)하고 동일한 맵이고 맵번호만 
-	//바뀌어서 오는경우이다. 그래서 맵번호 10번(데빌스퀘어(1,2,3,4))으로 강제로 맞춰준다.
 	{
 		Map = World = 9;
 	}
@@ -7302,14 +7281,12 @@ void OpenWorld(int Map)
 
     if ( battleCastle::InBattleCastle() )
     {
-        if ( battleCastle::IsBattleCastleStart() ) //  공성시.
+        if ( battleCastle::IsBattleCastleStart() )
         {
-            //  속성.
 	        sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld*10+2 );
         }
-        else                        //  수성시.
+        else
         {
-            //  속성.
 	        sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld );
         }
     }
@@ -7443,7 +7420,6 @@ void OpenWorld(int Map)
 		return;
 	}
 
-	// 지형 높이값 로딩
 	sprintf(FileName,"%s\\TerrainHeight.bmp",WorldName);
 	if(IsTerrainHeightExtMap(World) == true)
 	{

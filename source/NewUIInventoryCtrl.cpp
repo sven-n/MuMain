@@ -1659,13 +1659,11 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
 			glColor3f(1.f,0.9f,0.7f);
 			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
 		}
-#ifdef HELLOWIN_EVENT
 		else if(pItem->Type>=ITEM_POTION+46 && pItem->Type<=ITEM_POTION+50 && pItem->Durability > 1)
 		{
 			glColor3f(1.f,0.9f,0.7f);
 			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
 		}
-#endif // HELLOWIN_EVENT
 		else if(pItem->Type>=ITEM_POTION+35 && pItem->Type<=ITEM_POTION+40 && pItem->Durability > 1)
 		{
 			glColor3f(1.f,0.9f,0.7f);

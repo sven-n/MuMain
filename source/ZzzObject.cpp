@@ -6291,7 +6291,7 @@ void ItemAngle(OBJECT *o)
 		o->Angle[2] = 45.0f;
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-#ifdef HELLOWIN_EVENT
+
 	else if ( o->Type==MODEL_POTION+45)
 	{
 		o->Scale = 0.9f;
@@ -6315,7 +6315,7 @@ void ItemAngle(OBJECT *o)
 		o->Angle[0] = 0.f;
 		o->Angle[2] = 90.f;
 	}
-#endif //HELLOWIN_EVENT
+
 #ifdef GIFT_BOX_EVENT
 	else if ( o->Type>=MODEL_POTION+32 && o->Type<=MODEL_POTION+34)
 	{
@@ -7180,12 +7180,10 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 		}
 	}
 
-#ifdef HELLOWIN_EVENT
 	if ( Type >= ITEM_POTION+46 && Type <= ITEM_POTION+48)
 	{
 		o->Type = MODEL_ITEM+Type;
 	}
-#endif // HELLOWIN_EVENT
 
 #ifdef GIFT_BOX_EVENT
 	if ( Type >= ITEM_POTION+32 && Type <= ITEM_POTION+34)
@@ -8035,10 +8033,6 @@ void PartObjectColor3(int Type,float Alpha,float Bright,vec3_t Light,bool ExtraM
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 하나의 몸체를 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 {
 	int		nIndex;
@@ -8047,28 +8041,15 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 	nIndex = int((o->Type+1-MODEL_ITEM)/ 512.0f);
 	nNum = (o->Type-MODEL_ITEM)%512;
 
-#ifdef YDG_FIX_ELSEIF_BLOCK_BREAK_AT_RENDER_PART_OBJECT_BODY_FUNC
-	BOOL bIsNotRendered = FALSE;	// if구문을 둘로 쪼개기 위해 검사하기 위한 변수, 처음에 안그리면 TRUE처리
-#endif	// YDG_FIX_ELSEIF_BLOCK_BREAK_AT_RENDER_PART_OBJECT_BODY_FUNC
-	if((Type==MODEL_ARMOR+15 || Type==MODEL_GLOVES+15 || Type==MODEL_PANTS+15 || Type==MODEL_BOOTS+15)   //  아틀란스 갑옷 효과.
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
-		&& !(RenderType & RENDER_DOPPELGANGER)
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
-	)
+
+	BOOL bIsNotRendered = FALSE;
+
+	if((Type==MODEL_ARMOR+15 || Type==MODEL_GLOVES+15 || Type==MODEL_PANTS+15 || Type==MODEL_BOOTS+15))
 	{
 		b->RenderBody(RENDER_TEXTURE|RENDER_CHROME,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,BITMAP_CHROME+1);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 	}
-#ifndef YDG_ADD_DOPPELGANGER_MONSTER
-	// Test
-	else if( Type==MODEL_HELM+1)
-	{
-		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, -1);
-	}
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
-#
-
-    else if ( Type==MODEL_ARMOR+20 || Type==MODEL_GLOVES+20 || Type==MODEL_PANTS+20 || Type==MODEL_BOOTS+20 )	// 선더호크 갑옷 효과
+    else if ( Type==MODEL_ARMOR+20 || Type==MODEL_GLOVES+20 || Type==MODEL_PANTS+20 || Type==MODEL_BOOTS+20 )
     {
 		vec3_t Light;
 		VectorCopy(b->BodyLight, Light);
@@ -8077,14 +8058,14 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 		VectorCopy(Light, b->BodyLight);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
     }
-    else if( Type==MODEL_WING+6 )    //  마검사 ( 어둠의 날개 ).
+    else if( Type==MODEL_WING+6 )
     {
         Vector(0.8f,0.6f,1.f,b->BodyLight);
 		b->RenderBody(RENDER_BRIGHT|RENDER_CHROME,o->Alpha,o->BlendMesh,0.5f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,BITMAP_CHROME+1);
 		Vector(1.f,1.f,1.f,b->BodyLight);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
     }	
-	else if(Type == MODEL_WING+36)	// 흑기사 3차 날개
+	else if(Type == MODEL_WING+36)
 	{
 		Vector(1.f,0.7f,0.5f,b->BodyLight);
 		glColor3fv(b->BodyLight);
@@ -8132,48 +8113,44 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 			b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		}
 	}
-#ifdef ADD_ALICE_WINGS_1
-	else if (Type == MODEL_WING+42)	// 절망의날개(소환술사 2차 날개)
+	else if (Type == MODEL_WING+42)
 	{
 		Vector(1.f,1.f,1.f,b->BodyLight);
 		glColor3fv(b->BodyLight);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderMesh(1, RENDER_TEXTURE|RENDER_BRIGHT|RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 	}
-#endif	// ADD_ALICE_WINGS_1
-#ifdef ADD_ALICE_WINGS_2
-	else if (Type == MODEL_WING+43)	// 차원의날개(소환술사 3차 날개)
+	else if (Type == MODEL_WING+43)
 	{
 		Vector(1.f,1.f,1.f,b->BodyLight);
 		glColor3fv(b->BodyLight);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderMesh(1, RENDER_BRIGHT|RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 	}
-#endif	// ADD_ALICE_WINGS_2
-    else if ( Type==MODEL_SWORD+19 )	// 대천사의 절대검 효과
+    else if ( Type==MODEL_SWORD+19 )
     {
 		b->RenderMesh(0,RENDER_TEXTURE|RENDER_METAL,Alpha,0,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(0,RENDER_LIGHTMAP|RENDER_TEXTURE,Alpha,0,o->BlendMeshLight,o->BlendMeshTexCoordU,WorldTime*0.0001f,BITMAP_CHROME);
 		b->RenderMesh(1,RENDER_TEXTURE,Alpha,0,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
     }
-    else if ( Type==MODEL_STAFF+10 )	// 대천사의 절대 지팡이 효과
+    else if ( Type==MODEL_STAFF+10 )
     {
 		b->RenderMesh(0,RENDER_TEXTURE|RENDER_METAL,Alpha,0,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(0,RENDER_LIGHTMAP|RENDER_TEXTURE,1.f,0,o->BlendMeshLight,o->BlendMeshTexCoordU,-WorldTime*0.0001f,BITMAP_CHROME);
 		b->RenderMesh(1,RENDER_TEXTURE,Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
     }				    
-    else if ( Type==MODEL_BOW+18 )	// 대천사의 절대 석궁 효과
+    else if ( Type==MODEL_BOW+18 )
     {
 		b->RenderMesh(0,RENDER_TEXTURE|RENDER_METAL,Alpha,0,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(0,RENDER_LIGHTMAP|RENDER_TEXTURE,1.f,0,o->BlendMeshLight,o->BlendMeshTexCoordU,-WorldTime*0.0001f,BITMAP_CHROME);
 		b->RenderMesh(1,RENDER_TEXTURE,Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
     }
-	else if ( Type==MODEL_MACE+13 ) // 대천사의 절대 셉터 효과
+	else if ( Type==MODEL_MACE+13 )
 	{
 		b->RenderMesh(0,RENDER_TEXTURE,Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(0,RENDER_LIGHTMAP|RENDER_TEXTURE,Alpha,0,o->BlendMeshLight,o->BlendMeshTexCoordU,-WorldTime*0.0001f,BITMAP_CHROME);
 	}
-	else if ( Type==MODEL_BOW+19 )	// 그레이트 레인 석궁 효과
+	else if ( Type==MODEL_BOW+19 )
 	{
 		vec3_t Light;
 		VectorCopy(b->BodyLight, Light);
@@ -8226,12 +8203,12 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 		b->RenderMesh(2,RENDER_TEXTURE|RENDER_BRIGHT,1.f,2,o->BlendMeshLight,WorldTime*0.0001f,-WorldTime*0.0005f);
 		b->EndRender();
 	}
-	else if ( Type==MODEL_SPEAR+10 )	// 드라곤스피어 효과
+	else if ( Type==MODEL_SPEAR+10 )
 	{
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderMesh(1,RENDER_TEXTURE,1.f,1,o->BlendMeshLight,WorldTime*0.0001f,WorldTime*0.0005f);
 	}
-	else if ( Type==MODEL_MACE+7 )	// 엘리멘탈 메이스 효과
+	else if ( Type==MODEL_MACE+7 )
 	{
 		vec3_t Light;
 		VectorCopy(b->BodyLight, Light);
@@ -8242,19 +8219,19 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
         Vector(Light[0]*Luminosity,Light[0]*Luminosity,Light[0]*Luminosity,b->BodyLight);
 		b->RenderMesh(2,RENDER_TEXTURE,1.f,2,o->BlendMeshLight,time,-WorldTime*0.0005f);
 	}
-    else if ( Type==MODEL_HELPER+4 )    //  다크호스 아이템.
+    else if ( Type==MODEL_HELPER+4 )
     {
 		b->RenderBody ( RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 		Vector ( 0.8f, 0.4f, 0.1f, b->BodyLight );
 		b->RenderBody ( RENDER_BRIGHT|RENDER_CHROME, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
     }
-    else if ( Type==MODEL_HELPER+5 )    //  다크스피릿 아이템.
+    else if ( Type==MODEL_HELPER+5 )
     {
 		b->RenderBody ( RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 		Vector ( 0.3f, 0.8f, 1.f, b->BodyLight );
 		b->RenderMesh ( 0, RENDER_BRIGHT|RENDER_CHROME, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
     }
-	else if ( Type==MODEL_MACE+8 )		//. 다크로드아이템01
+	else if ( Type==MODEL_MACE+8 )
 	{
         o->BlendMeshLight = sinf( WorldTime*0.001f )*0.6f+0.4f;
 		b->BeginRender(1.f);
@@ -8262,7 +8239,7 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
         b->RenderMesh ( 0, RENDER_TEXTURE, Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 		b->EndRender();
 	}
-	else if ( Type==MODEL_MACE+9 )		//. 다크로드아이템02
+	else if ( Type==MODEL_MACE+9 )
 	{
 		b->RenderBody ( RENDER_TEXTURE, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 		Vector ( 0.1f, 0.3f, 1.f, b->BodyLight );
@@ -8275,9 +8252,8 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 		b->RenderMesh ( 1, RENDER_TEXTURE, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, WorldTime*0.0003f, BITMAP_CHROME );
 	}
 #ifdef ADD_SOCKET_ITEM
-	else if( Type == MODEL_SWORD+26 )	// 플랑베르주
+	else if( Type == MODEL_SWORD+26 )
 	{
-		// 전체 렌더링
 		//b->RenderBody( RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5 );	
 
 		b->RenderMesh( 0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );	
@@ -9113,22 +9089,13 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 		}
 	}
 #endif //PBG_ADD_SECRETITEM
-#ifdef YDG_FIX_ELSEIF_BLOCK_BREAK_AT_RENDER_PART_OBJECT_BODY_FUNC
 	else
 	{
 		bIsNotRendered = TRUE;
 	}
-	// if-else가 너무 많아서 쪼갰음
-	// 이 위로 else 추가하지 마세요!!!!!
-	if (bIsNotRendered == FALSE);	// 이미 그린 이미지는 그리지 않는다.
-#endif	// YDG_FIX_ELSEIF_BLOCK_BREAK_AT_RENDER_PART_OBJECT_BODY_FUNC
-#ifdef ADD_SOCKET_ITEM
-	// 디바인(요정)/서큐버스(소환술사) 갑옷과 바지는 인벤토리에서Render는 Texture를 교체한다.
-	// - 이 아이템들은 메시가 나누어져있지 않았기 때문 
-	//   예전과같이 메시를 나누기에는 폴리곤이 너무 복잡하게 나눠져야하기 때문에 
-	//   하나의 메시로 만들고 인벤토리에서 텍스쳐를 교체 하는방법으로 처리
 
-	// 디바인 갑옷/바지, 서큐버스 갑옷/바지
+	if (bIsNotRendered == FALSE);
+#ifdef ADD_SOCKET_ITEM
 	else if ( Type==MODEL_ARMOR+50 || Type==MODEL_PANTS+50 || Type==MODEL_ARMOR+53 || Type==MODEL_PANTS+53)
 	{
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -9145,7 +9112,7 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 		}
 		if (b->HideSkin)
 		{
-			::glColor3fv(b->BodyLight);	// 인벤토리 창에서 +효과 적용.
+			::glColor3fv(b->BodyLight);
 			b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, nTexture);
 			for (int i = 1; i < b->NumMeshs; ++i)
 			{

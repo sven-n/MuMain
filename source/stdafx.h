@@ -132,7 +132,7 @@ using namespace std;//iosteam이랑 겹쳐서...
 using namespace boost;
 
 //patch
-//winmain 함수들은 전부 옮겨가자
+//winmain
 #include "Winmain.h"
 #include "Winmain_New.h"
 #include "Winmain_New_Live.h"

@@ -96,10 +96,6 @@ void CreateFire(int Type,OBJECT *o,float x,float y,float z)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 주인공이 지나갈때 해골 구르는 효과 생성(로스트 타워에서 쓰임)
-///////////////////////////////////////////////////////////////////////////////
-
 void CheckSkull(OBJECT *o)
 {
 	vec3_t Position;
@@ -130,11 +126,6 @@ void CheckSkull(OBJECT *o)
 	VectorAdd(o->Angle,o->HeadAngle,o->Angle);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 월드에 날아다니는 낙엽, 먼지 효과 처리
-///////////////////////////////////////////////////////////////////////////////
-// 악마의 광장 비
-//////////////////////////////////////////////////////////////////////////
 bool CreateDevilSquareRain ( PARTICLE* o, int Index )
 {
 	if ( InDevilSquare() == false 
@@ -181,9 +172,6 @@ bool CreateDevilSquareRain ( PARTICLE* o, int Index )
     return true;
 }
 
-
-//  카오스 캐슬 비
-//////////////////////////////////////////////////////////////////////////
 bool CreateChaosCastleRain ( PARTICLE* o, int Index )
 {
     if ( InChaosCastle()==false ) return false;
@@ -225,8 +213,6 @@ bool CreateChaosCastleRain ( PARTICLE* o, int Index )
 }
 
 
-//  로랜시아 날리는 낙엽잎.
-//////////////////////////////////////////////////////////////////////////
 bool CreateLorenciaLeaf ( PARTICLE* o )
 {
     if ( World!=WD_0LORENCIA ) return false;
@@ -249,9 +235,6 @@ bool CreateLorenciaLeaf ( PARTICLE* o )
     return true;
 }
 
-
-//  천공에 날리는 빛.
-//////////////////////////////////////////////////////////////////////////
 bool CreateHeavenRain ( PARTICLE* o, int index )
 {
     if ( World!=WD_10HEAVEN ) return false;
@@ -273,20 +256,13 @@ bool CreateHeavenRain ( PARTICLE* o, int index )
     return true;
 }
 
-
-//  데비아스의 눈.
-//////////////////////////////////////////////////////////////////////////
 bool CreateDeviasSnow ( PARTICLE* o )
 {
     if ( World!=WD_2DEVIAS ) return false;
 
     o->Type = BITMAP_LEAF1;
     o->Scale = 5.f;
-#ifdef DEVIAS_XMAS_EVENT
-	if(rand()%5 == 0)
-#else // DEVIAS_XMAS_EVENT
 	if(rand()%10 == 0)
-#endif // DEVIAS_XMAS_EVENT
 	{
 		o->Type = BITMAP_LEAF2;
 		o->Scale = 10.f;
@@ -304,8 +280,6 @@ bool CreateDeviasSnow ( PARTICLE* o )
     return true;
 }
 
-//  아틀란스 날리는 효과.
-//////////////////////////////////////////////////////////////////////////
 bool CreateAtlanseLeaf ( PARTICLE*o )
 {
     if ( World!=WD_3NORIA && World!=WD_7ATLANSE ) return false;
@@ -329,8 +303,6 @@ bool CreateAtlanseLeaf ( PARTICLE*o )
 }
 
 
-//  악마의 광장 비
-//////////////////////////////////////////////////////////////////////////
 bool MoveDevilSquareRain ( PARTICLE* o )
 {
     if ( InDevilSquare() == false 
@@ -357,8 +329,6 @@ bool MoveDevilSquareRain ( PARTICLE* o )
 }
 
 
-//  카오스 캐슬 비.
-//////////////////////////////////////////////////////////////////////////
 bool MoveChaosCastleRain ( PARTICLE* o )
 {
     if ( InChaosCastle()==false ) return false;
@@ -377,9 +347,6 @@ bool MoveChaosCastleRain ( PARTICLE* o )
     return true;
 }
 
-
-//  천공, 로랜시아
-//////////////////////////////////////////////////////////////////////////
 bool MoveHeavenRain ( PARTICLE* o )
 {
     if ( World!=WD_0LORENCIA && World!=WD_10HEAVEN ) return false;
@@ -417,9 +384,6 @@ bool MoveHeavenRain ( PARTICLE* o )
     return true;
 }
 
-
-//  기타 효과.
-//////////////////////////////////////////////////////////////////////////
 void MoveEtcLeaf ( PARTICLE* o )
 {
 	float Height = RequestTerrainHeight(o->Position[0],o->Position[1]);
@@ -441,15 +405,8 @@ void MoveEtcLeaf ( PARTICLE* o )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  윌드에 날아다니는 낙엽, 먼지, 비, 누등의 효과 처리.
-//////////////////////////////////////////////////////////////////////////
 bool MoveLeaves()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_LEAVES, PROFILING_MOVE_LEAVES );
-#endif // DO_PROFILING
 	int iMaxLeaves = ( InDevilSquare() == true ) ? MAX_LEAVES : 80;
 
     if( World==WD_10HEAVEN )
@@ -488,13 +445,6 @@ bool MoveLeaves()
 	RainPosition += 20;
 	RainPosition %= 2000;
 
-#ifdef DEVIAS_XMAS_EVENT
-	if(World == WD_2DEVIAS)
-	{
-		iMaxLeaves = MAX_LEAVES_DOUBLE;
-	}
-#endif // DEVIAS_XMAS_EVENT
-	
 	for(int i=0;i<iMaxLeaves;i++)
 	{
 		PARTICLE *o = &Leaves[i];
@@ -547,22 +497,12 @@ bool MoveLeaves()
             MoveEtcLeaf ( o );
 		}
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_LEAVES );
-#endif // DO_PROFILING	
 	return true;
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 void RenderLeaves()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_LEAVES, PROFILING_RENDER_LEAVES );
-#endif // DO_PROFILING
-
     if(World==WD_2DEVIAS || World==WD_7ATLANSE || World==WD_10HEAVEN
 #ifdef CSK_ADD_MAP_ICECITY
 		|| IsIceCity()
@@ -661,8 +601,5 @@ void RenderLeaves()
 			}
 		}
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_LEAVES );
-#endif // DO_PROFILING
 }
 

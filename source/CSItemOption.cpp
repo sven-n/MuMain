@@ -456,13 +456,11 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
             if ( itemOption.byRequireClass[2]==1 && Class==CLASS_ELF    ) RequireClass = 1;
             if ( itemOption.byRequireClass[2]==2 && Class==CLASS_ELF    && ExClass ) RequireClass = 1;
             if ( itemOption.byRequireClass[3]==1 && Class==CLASS_DARK   ) RequireClass = 1;
-#ifdef PJH_ADD_SET_NEWJOB
             if ( itemOption.byRequireClass[3]==1 && Class==CLASS_DARK && ExClass) RequireClass = 1;
             if ( itemOption.byRequireClass[4]==1 && Class==CLASS_DARK_LORD ) RequireClass = 1;
 			if ( itemOption.byRequireClass[4]==1 && Class==CLASS_DARK_LORD && ExClass) RequireClass = 1;
             if ( itemOption.byRequireClass[5]==1 && Class==CLASS_SUMMONER ) RequireClass = 1;
 			if ( itemOption.byRequireClass[5]==1 && Class==CLASS_SUMMONER && ExClass) RequireClass = 1;
-#endif //PJH_ADD_SET_NEWJOB
 #ifdef PBG_ADD_NEWCHAR_MONK
 			if ( itemOption.byRequireClass[6]==1 && Class==CLASS_RAGEFIGHTER ) RequireClass = 1;
 			if ( itemOption.byRequireClass[6]==1 && Class==CLASS_RAGEFIGHTER && ExClass) RequireClass = 1;
@@ -1536,15 +1534,10 @@ int CSItemOption::GetSetItmeCount( const ITEM* pselecteditem )
 	for( int j = 0; j < MAX_ITEM; j++ )
 	{
 		ITEM_SET_TYPE& temptype = m_ItemSetType[j];
-#ifdef PJH_ADD_SET_NEWJOB
 		for(int i = 0; i < 2; i++)
-#endif //PJH_ADD_SET_NEWJOB
 		{
-#ifdef PJH_ADD_SET_NEWJOB
 			BYTE tempsubtype = temptype.byOption[i];
-#else
-		BYTE tempsubtype = temptype.byOption[(pselecteditem->ExtOption%0x04)-1];
-#endif //PJH_ADD_SET_NEWJOB
+
 			if( subtype == tempsubtype )
 			{
 				setitemcount++;
@@ -1562,9 +1555,7 @@ bool CSItemOption::isFullseteffect( const ITEM* pselecteditem )
 	ITEM_SET_TYPE& selectedItemType = m_ItemSetType[pselecteditem->Type];
 	BYTE selectedItemOption = selectedItemType.byOption[(pselecteditem->ExtOption%0x04)-1];
 	ITEM_SET_OPTION& selecteditemoption = m_ItemSetOption[selectedItemOption];
-#ifdef PJH_ADD_SET_NEWJOB
 	int	Cmp_Buff[10] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-#endif //PJH_ADD_SET_NEWJOB
 	
 	for( int i = 0; i < MAX_EQUIPMENT; i++ )
 	{
@@ -1572,7 +1563,6 @@ bool CSItemOption::isFullseteffect( const ITEM* pselecteditem )
 
 		if( p )
 		{
-#ifdef PJH_ADD_SET_NEWJOB
 			bool Continue_Set = false;
 			for(int ipjh = 0; ipjh < mysetitemcount; ipjh++)
 			{
@@ -1584,16 +1574,14 @@ bool CSItemOption::isFullseteffect( const ITEM* pselecteditem )
 			}
 			if(Continue_Set == true)
 				continue;
-#endif //#ifdef PJH_ADD_SET_NEWJOB
+
 			ITEM_SET_TYPE& myitemSType = m_ItemSetType[p->Type];
 			BYTE myItemOption = myitemSType.byOption[(p->ExtOption%0x04)-1];
 			ITEM_SET_OPTION& setOption = m_ItemSetOption[myItemOption];
 
 			if ( strcmp( selecteditemoption.strSetName, setOption.strSetName ) == NULL )
 			{
-#ifdef PJH_ADD_SET_NEWJOB
 				Cmp_Buff[mysetitemcount] = p->Type;
-#endif //#ifdef PJH_ADD_SET_NEWJOB
 				mysetitemcount++;
 			}
 		}
@@ -1633,7 +1621,7 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
     BYTE    count1  = 0;
 
     BYTE    byLimitOptionNum;
-#ifdef PJH_ADD_SET_NEWJOB
+
 	if(m_bySetOptionANum > 0)
 		byLimitOptionNum = m_bySetOptionANum-m_bySameSetItem;//m_bySetOptionANum-1;
 	else
@@ -1641,9 +1629,6 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 
 	if(m_bySetOptionBNum > 0)
 		byLimitOptionNum += m_bySetOptionBNum-m_bySameSetItem;//m_bySetOptionANum-1;
-#else
-	byLimitOptionNum = m_bySetOptionANum-m_bySameSetItem;//m_bySetOptionANum-1;
-#endif
 
 #ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 
@@ -1696,7 +1681,7 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 #endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 
 	
-#endif //PJH_ADD_SET_NEWJOB
+#endif //PJH_ADD_SET_NEWJOB 
 	sprintf ( TextList[TNum], "\n" ); TNum += 1;
     sprintf ( TextList[TNum], "%s %s", GlobalText[1089], GlobalText[159] );
     TextListColor[TNum] = TEXT_COLOR_YELLOW; 
@@ -1706,12 +1691,11 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 	sprintf(TextList[TNum],"\n");TNum++;
 
 	bool isfulloption = isFullseteffect( ip );
-#ifdef PJH_ADD_SET_NEWJOB
+
 	if( isfulloption )
 	{
 		byLimitOptionNum = 13;
 	}
-#endif //#ifdef PJH_ADD_SET_NEWJOB
 
 
 #ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
@@ -1746,37 +1730,29 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
         }
         else if ( i<8 )
         {
-#ifdef PJH_ADD_SET_NEWJOB
 			if(((ip->ExtOption%0x04)-1) == 0)
-#endif //PJH_ADD_SET_NEWJOB
 			{
 				option1 = setOption.byExtOption[i-6];
 				value1  = setOption.byExtOptionValue[i-6];
 			}
-#ifdef PJH_ADD_SET_NEWJOB
 			else
 			{
 				option2 = setOption.byExtOption[i-6];
 				value2  = setOption.byExtOptionValue[i-6];
 			}
-#endif //PJH_ADD_SET_NEWJOB
         }
         else
         {
-#ifdef PJH_ADD_SET_NEWJOB
 			if(((ip->ExtOption%0x04)-1) == 0)
-#endif //PJH_ADD_SET_NEWJOB
 			{
 				option1 = setOption.byFullOption[i-8];
 				value1  = setOption.byFullOptionValue[i-8];
 			}
-#ifdef PJH_ADD_SET_NEWJOB
 			else
 			{
 				option2 = setOption.byFullOption[i-8];
 				value2  = setOption.byFullOptionValue[i-8];
 			}
-#endif //PJH_ADD_SET_NEWJOB
 
 			if( isfulloption )
 			{

@@ -4326,13 +4326,12 @@ void MoveJoint( JOINT *o, int iIndex)
 #ifdef ASG_ADD_SUMMON_RARGLE
 		else if (o->SubType == 24)
 		{
-#ifdef YDG_FIX_RARGLE_CRASH
 			if (o->Target == NULL || o->Target->Live == false)
 			{
 				o->Live = false;
 				break;
 			}
-#endif	// YDG_FIX_RARGLE_CRASH
+
 			vec3_t vPos;
 			VectorCopy(o->TargetPosition, vPos);
 			vPos[2] += 80.f;

@@ -103,7 +103,7 @@ bool M34CryWolf1st::IsCryWolf1stMVPStatePeace()
 
 void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfState)
 {
-	if( m_OccupationState == btOccupationState && m_CrywolfState == btCrywolfState ) // 같은 값이면 리턴시킨다
+	if( m_OccupationState == btOccupationState && m_CrywolfState == btCrywolfState )
 		return;
 
 	m_CrywolfState = btCrywolfState;

@@ -2696,7 +2696,6 @@ bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
 	return true;
 }
 
-//  스킬에 따른 애니메이션을 제어한다.
 bool CharacterAnimation(CHARACTER* c, OBJECT* o)
 {
     bool Play;
@@ -2743,7 +2742,7 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
 		{
 			switch ( o->Type )
 			{
-			case MODEL_MONSTER01+64 :	// 진짜 쿤둔
+			case MODEL_MONSTER01+64:
 				if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 6)
 					PlaySpeed *= 4.0f;
 				break;
@@ -2760,7 +2759,7 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
 				break;
 			}
 		}
-		if( o->Type == MODEL_MONSTER01+87)	//. 사냥터 보스
+		if( o->Type == MODEL_MONSTER01+87)
 		{
 			if(o->CurrentAction == MONSTER01_DIE)
 				PlaySpeed /= 2.f;
@@ -2812,7 +2811,6 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
     return Play;
 }
 
-
 int GetHandOfWeapon( OBJECT* o)
 {
 	int Hand = 0;
@@ -2825,7 +2823,6 @@ int GetHandOfWeapon( OBJECT* o)
 	return ( Hand);
 }
 
-
 bool AttackStage(CHARACTER* c, OBJECT* o)
 {
 	// 무기 위치 얻기
@@ -2836,14 +2833,12 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
     g_iLimitAttackTime = 15;
     switch ( iSkill)
     {
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_BLOW_UP:
 	case AT_SKILL_BLOW_UP+1:
 	case AT_SKILL_BLOW_UP+2:
 	case AT_SKILL_BLOW_UP+3:
 	case AT_SKILL_BLOW_UP+4:
-#endif	//PJH_SEASON4_MASTER_RANK4
-	case AT_SKILL_ONETOONE:	// 기사 일대일 스킬
+	case AT_SKILL_ONETOONE:
 		{
 			BMD *b = &Models[o->Type];
 
@@ -3701,10 +3696,6 @@ void HeroAttributeCalc ( CHARACTER* c )
 
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  NPC 채팅표시 처리
-//////////////////////////////////////////////////////////////////////////
 void OnlyNpcChatProcess ( CHARACTER* c, OBJECT* o )
 {
     if ( o->Kind==KIND_NPC && (rand()%2)==0 )
@@ -3715,29 +3706,17 @@ void OnlyNpcChatProcess ( CHARACTER* c, OBJECT* o )
         case MODEL_MERCHANT_GIRL :  
             if ( battleCastle::InBattleCastle()==false )
             {
-#ifdef BATTLE_SOCCER_ADD_NPC_DIALOG
-				CreateChat ( c->ID, GlobalText[2052], c ); 
-#else
 				CreateChat ( c->ID, GlobalText[1974], c ); 
-#endif
             }
             break;
         case MODEL_ELF_WIZARD :
-#ifdef BATTLE_SOCCER_ADD_NPC_DIALOG
-			CreateChat ( c->ID, GlobalText[2051], c ); 
-#else
 			CreateChat ( c->ID, GlobalText[1975], c ); 
-#endif
 			break;
         case MODEL_MASTER :         
 #ifdef _PVP_MURDERER_HERO_ITEM
 			if (c->MonsterIndex != 227)	// 카오 상인
 #endif	// _PVP_MURDERER_HERO_ITEM
-#ifdef BATTLE_SOCCER_ADD_NPC_DIALOG
-				CreateChat ( c->ID, GlobalText[2053], c ); 
-#else
 				CreateChat ( c->ID, GlobalText[1976], c ); 
-#endif
 				break;
 		case MODEL_PLAYER:
 			if (c->MonsterIndex == 257) // 엘프 도우미
@@ -14484,16 +14463,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 
 			c->Helper.Type = MODEL_HELPER + _type;
 
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#ifdef LDK_FIX_NOT_CREATE_NEW_PET
-			if( ( _type != 64 && _type != 65 ) || ( CHARACTER_SCENE == SceneFlag || c == Hero ) )
-#else //LDK_FIX_NOT_CREATE_NEW_PET
-			if( CHARACTER_SCENE == SceneFlag || c == Hero )
-#endif //LDK_FIX_NOT_CREATE_NEW_PET
-#endif //SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-			{
-				ThePetProcess().CreatePet(ITEM_HELPER+_type, c->Helper.Type, o->Position, c);
-			}
+			ThePetProcess().CreatePet(ITEM_HELPER+_type, c->Helper.Type, o->Position, c);
 		}
 		else
 #endif //defined LDK_ADD_NEW_PETPROCESS // && defined LDK_ADD_PC4_GUARDIAN

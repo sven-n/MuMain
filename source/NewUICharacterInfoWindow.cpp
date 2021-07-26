@@ -1203,10 +1203,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				&& (iType != ITEM_ARMOR+23) 
 				&& (iType != ITEM_ARMOR+32)
 				&& (iType != ITEM_ARMOR+37)
-#ifdef KJH_FIX_EQUIPED_FULL_SOCKETITEM_APPLY_TO_STAT
 				&& (iType != ITEM_ARMOR+47)
 				&& (iType != ITEM_ARMOR+48)
-#endif // KJH_FIX_EQUIPED_FULL_SOCKETITEM_APPLY_TO_STAT
 				)
             {
                 bDexSuccess = false;
@@ -1264,13 +1262,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 	for(int j=0; j<MAX_EQUIPMENT; ++j)
 	{
-		// memorylock 사용
+		// memorylock
 		int TempLevel = (CharacterMachine->Equipment[j].Level>>3)&15;
 		if( TempLevel >= CharacterMachine->Equipment[j].Jewel_Of_Harmony_OptionLevel )
 		{
 			StrengthenCapability SC;
 
-			// memorylock 사용
+			// memorylock
 			g_pUIJewelHarmonyinfo->GetStrengthenCapability( &SC, &CharacterMachine->Equipment[j], 2 );
 
 			if( SC.SI_isSD )
@@ -1318,7 +1316,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	if(bDexSuccess)
 	{
-		// memorylock 사용
+		// memorylock
 		if(CharacterAttribute->SuccessfulBlocking > 0)
 		{
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
@@ -1333,9 +1331,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				CharacterAttribute->SuccessfulBlocking,(CharacterAttribute->SuccessfulBlocking) / 10);
 			}
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
-			unicode::_sprintf(strBlocking, GlobalText[206], 
-				t_adjdef + maxdefense + iChangeRingAddDefense,
-				CharacterAttribute->SuccessfulBlocking,
+			unicode::_sprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,CharacterAttribute->SuccessfulBlocking,
 #ifdef YDG_FIX_INVALID_SET_DEFENCE_RATE_BONUS
 				(CharacterAttribute->SuccessfulBlocking) / 10
 #else	// YDG_FIX_INVALID_SET_DEFENCE_RATE_BONUS
@@ -1346,11 +1342,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		}
 		else
 		{
-			// 207 "방 어 력: %d (+%d)"
-          	unicode::_sprintf(strBlocking, GlobalText[207],
-				t_adjdef + maxdefense + iChangeRingAddDefense,
-				(t_adjdef + iChangeRingAddDefense) / 10
-				);
+          	unicode::_sprintf(strBlocking, GlobalText[207],	t_adjdef + maxdefense + iChangeRingAddDefense,(t_adjdef + iChangeRingAddDefense) / 10);
 		}
 	}
 	else
@@ -1409,12 +1401,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strBlocking);
 
-	//  공격 속도.
-	// memorylock 사용
+	// memorylock
 	WORD wAttackSpeed = CLASS_WIZARD == iBaseClass || CLASS_SUMMONER == iBaseClass
 		? CharacterAttribute->MagicSpeed : CharacterAttribute->AttackSpeed;
-	
-	// 64 "공격속도: %d"
+
     unicode::_sprintf(strBlocking, GlobalText[64], wAttackSpeed);
 	iY += 13;
 
@@ -1481,17 +1471,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strBlocking);
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////////
-	//							체력										//
-	//////////////////////////////////////////////////////////////////////////
 
 	g_pRenderText->SetFont(g_hFontBold);
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
 	WORD wVitality;
 	// memorylock 사용

@@ -2078,7 +2078,7 @@ bool CheckAttack()
 	CHARACTER *c = &CharactersClient[SelectedCharacter];
 		
 #ifndef GUILD_WAR_EVENT
-	//  캐릭터를 공격할수 있게한다.
+
 	if ( InChaosCastle()==true && c!=Hero )
 	{
 		return true;
@@ -2086,7 +2086,7 @@ bool CheckAttack()
 #endif //GUILD_WAR_EVENT
 #ifdef PBG_ADD_PKFIELD
 #ifdef ASG_ADD_GENS_SYSTEM
-	// 분쟁지역이고, 선택된 캐릭터가 타캐릭터이고, 같은 겐스가 아닌가?
+
 	else if(::IsStrifeMap(World) && c != Hero && c->m_byGensInfluence != Hero->m_byGensInfluence)
 #else	// ASG_ADD_GENS_SYSTEM
 	else if(IsPKField() && c!=Hero)
@@ -2094,14 +2094,11 @@ bool CheckAttack()
 	{	
 		if(g_pCommandWindow->GetMouseCursor( ) == CURSOR_IDSELECT)	
 		{
-			//커맨트 키 눌렀을때는..D키..
 			return false;
 		}
 #ifdef PBG_FIX_PKFIELD_ATTACK
 #ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		//===================================================================
-		// ALT 키 눌렸을때..
-		//===================================================================
+
 		if(SEASON3B::IsPress(VK_MENU) == TRUE)
 		{
 			return false;
@@ -2473,21 +2470,12 @@ int	getTargetCharacterKey ( CHARACTER* c, int selected )
 			return -1;
 	}
 #ifdef PBG_ADD_PKFIELD
-#ifdef ASG_ADD_GENS_SYSTEM
-	// 분쟁지역이고, 선택된 캐릭터가 타캐릭터이고, 같은 겐스가 아닌가?
 	else if(::IsStrifeMap(World) && sc != Hero && sc->m_byGensInfluence != Hero->m_byGensInfluence
 #ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		&& SEASON3B::IsPress(VK_MENU) == TRUE)
 #else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		&& HIBYTE(GetAsyncKeyState(VK_MENU))!=128)
 #endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-#else	// ASG_ADD_GENS_SYSTEM
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	else if(IsPKField() && sc!=Hero && SEASON3B::IsPress(VK_MENU) == FALSE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	else if(IsPKField() && sc!=Hero && HIBYTE(GetAsyncKeyState(VK_MENU))!=128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-#endif	// ASG_ADD_GENS_SYSTEM
 	{
 		if(sc->GuildRelationShip == GR_NONE && !g_pPartyManager->IsPartyMember(SelectedCharacter))
 		{
@@ -6003,7 +5991,6 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 		}
 		break;
 		
-#ifdef HELLOWIN_EVENT
 	case AT_SKILL_HELLOWIN_EVENT_1:
 	case AT_SKILL_HELLOWIN_EVENT_2:
 	case AT_SKILL_HELLOWIN_EVENT_3:
@@ -6046,7 +6033,6 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 		break;
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 		
-#endif//HELLOWIN_EVENT
 	case AT_SKILL_HEAL_UP:
 	case AT_SKILL_HEAL_UP+1:
 	case AT_SKILL_HEAL_UP+2:
@@ -8808,7 +8794,6 @@ void Attack(CHARACTER *c)
 					}
 					break;
 					
-#ifdef HELLOWIN_EVENT
 				case AT_SKILL_HELLOWIN_EVENT_1:
 				case AT_SKILL_HELLOWIN_EVENT_2:
 				case AT_SKILL_HELLOWIN_EVENT_3:
@@ -8845,7 +8830,6 @@ void Attack(CHARACTER *c)
 					break;
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 					
-#endif//HELLOWIN_EVENT
 				case AT_SKILL_HEAL_UP:
 				case AT_SKILL_HEAL_UP+1:
 				case AT_SKILL_HEAL_UP+2:
@@ -11185,7 +11169,6 @@ void MoveHero()
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}
 		
-	// 맵 이동구역 체크
 	CheckGate();
 		
 #ifdef USE_SELFCHECKCODE
@@ -11200,7 +11183,7 @@ void MoveHero()
 				if(!EnableFastInput)
 				{
 #ifdef FOR_HACKING
-					//  자동 따라가기.
+
 #ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
 					if( (SEASON3B::IsRepeat(VK_CONTROL) == TRUE) && (SEASON3B::IsRepeat(VK_MENU) == TRUE) )
 #else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
@@ -11847,18 +11830,11 @@ int SelectOperate()
 	return -1;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 월드상의 모든 케릭터, 아이템, 오브젝트 중에 하나를 셀렉트하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void SelectObjects()
 {
     BYTE CKind_1, CKind_2;
-	//  자동 공격 설정시.   ( 배틀 싸커에서는 안됨 ).
-    if (
-		g_pOption->IsAutoAttack()
-		&& World != WD_6STADIUM 
-		&& InChaosCastle()==false )
+
+    if (g_pOption->IsAutoAttack() && World != WD_6STADIUM && InChaosCastle()==false )
     {
 		if ( SelectedCharacter<0 || SelectedCharacter>=MAX_CHARACTERS_CLIENT+1 )
 		{
@@ -11869,16 +11845,12 @@ void SelectObjects()
 		{
 			CHARACTER* sc = &CharactersClient[SelectedCharacter];
 			 
-			// 이경우에는 모두 선택한 캐릭터를 초기화한다.
-			// 선택한 캐릭터가 죽는다
-			// 선택한 캐릭터가 몬스터가 아니다
 			if(sc->Dead > 0	|| sc->Object.Kind != KIND_MONSTER)
 			{
 				SelectedCharacter = -1;
 				Attacking = -1;
 			}
 			
-			//  자동 공격중.
 			if ( Attacking!=-1 )
 			{
 				if ( MouseLButton || MouseLButtonPush || MouseRButton || MouseRButtonPush || Hero->Dead>0 )
@@ -11901,10 +11873,8 @@ void SelectObjects()
 	SelectedItem      = -1;
 	SelectedNpc       = -1;
 	SelectedOperate   = -1;
-	if(!MouseOnWindow
-		&& false == g_pNewUISystem->CheckMouseUse()	/* NewUI용 마우스 체크 */
-		&& SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429)
-		)
+
+	if(!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429))
 	{
 #ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		if(SEASON3B::IsPress(VK_MENU) == TRUE)
@@ -11938,17 +11908,13 @@ void SelectObjects()
 		}
 		else
 		{
-            //  기본.
             CKind_1 = KIND_MONSTER | KIND_EDIT;
             CKind_2 = KIND_PLAYER;
 			
-            //  요정일 경우에만 스킬을 검사한다.
             if ( GetBaseClass(Hero->Class) == CLASS_ELF || GetBaseClass(Hero->Class)==CLASS_WIZARD )
             {
-                //  스킬 정보를 얻어온다.
 				int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
 				
-                //  치료/방어력증가/공격력증가.
 #ifdef KJH_FIX_WOPS_K33479_SELECT_CHARACTER_TO_HEAL
                 if ( ((Skill>=AT_SKILL_HEALING) && (Skill<=AT_SKILL_ATTACK))
 					|| ((AT_SKILL_HEAL_UP <= Skill) && (Skill <= AT_SKILL_HEAL_UP+4))
@@ -11979,14 +11945,13 @@ void SelectObjects()
                     CKind_2 = KIND_MONSTER | KIND_EDIT;
                 }
             }
-			// 파티리스트에서 캐릭터 선택이 됐는가?			
+			
 			if( g_pPartyListWindow && g_pPartyListWindow->GetSelectedCharacter() != -1)
 			{
 				g_pPartyManager->SearchPartyMember( );
 			}
 			else
 			{
-				//  자동 공격을 위한.
 				if ( SelectedCharacter==-1 )
 				{
 					SelectedCharacter = SelectCharacter( CKind_1 );
@@ -12034,9 +11999,6 @@ void SelectObjects()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  스킬로 스킬핫키를 찾는 함수.
-//////////////////////////////////////////////////////////////////////////
 int FindHotKey(int Skill)
 {
     int SkillIndex = 0;
@@ -12053,11 +12015,6 @@ int FindHotKey(int Skill)
     return SkillIndex;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 화면상의 모든 인터페이스 작동시키는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 extern int   CheckX;
 extern int   CheckY;
 extern int   CheckSkill;
@@ -12066,7 +12023,7 @@ void SendMacroChat(char *Text)
 {
 	if(!CheckCommand(Text, true))
 	{
-		if( ( Hero->Helper.Type<MODEL_HELPER+2 || Hero->Helper.Type>MODEL_HELPER+4 ) || Hero->SafeZone)	// 타고 있는 상태에서는 행동취하는 포즈 할 수 없다.
+		if( ( Hero->Helper.Type<MODEL_HELPER+2 || Hero->Helper.Type>MODEL_HELPER+4 ) || Hero->SafeZone)
 			CheckChatText(Text);
 		if(CheckAbuseFilter(Text))
 			SendChat(GlobalText[570]);
@@ -12254,24 +12211,16 @@ void MoveInterface()
 #ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		if(InChaosCastle() == FALSE)
 		{
-			//===================================================================
-			// ALT 키를 누른 상태이면
-			//===================================================================
 			if(SEASON3B::IsRepeat(VK_MENU) == TRUE)
 			{
 				for(int i = 0; i < 9; i++)
 				{
-					//===================================================================
-					// 1~9까지 누른 상태이면..
-					//===================================================================
 					if(SEASON3B::IsPress('1' + i) == TRUE)
 					{
 						SendMacroChat(MacroText[i]);
 					}
 				}
-				//===================================================================
-				// 0을 누르면..
-				//===================================================================
+
 				if(SEASON3B::IsPress('0') == TRUE)
 				{
 					SendMacroChat(MacroText[9]);
@@ -12281,16 +12230,16 @@ void MoveInterface()
 #else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
         if ( InChaosCastle()==false )
         {
-			if(HIBYTE(GetAsyncKeyState(VK_MENU)))	// ALT 키를 누르고
+			if(HIBYTE(GetAsyncKeyState(VK_MENU)))
 			{
 				for(int i=0;i<9;i++)
 				{
-					if(HIBYTE(GetAsyncKeyState('1'+i)))	// 1~9까지
+					if(HIBYTE(GetAsyncKeyState('1'+i)))
 					{
 						SendMacroChat(MacroText[i]);
 					}
 				}
-				if(HIBYTE(GetAsyncKeyState('0'))) // 0이면 
+				if(HIBYTE(GetAsyncKeyState('0')))
 				{
 					SendMacroChat(MacroText[9]);
 				}
@@ -12303,7 +12252,6 @@ void MoveInterface()
 	if(Hero->Dead == 0)
 	{
 #ifdef LDK_ADD_SCALEFORM
-		//gfxui 사용시 기존 ui 사용 안함
 		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
 		{
 			g_pMainFrame->UseHotKeyItemRButton();
@@ -12611,10 +12559,6 @@ void RenderInterface(bool Render)
 #endif // DO_PROFILING
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-//  게임 화면 앞에 나오는 효과. ( 먼지, 등등. )
-///////////////////////////////////////////////////////////////////////////////
 void RenderOutSides()
 {
 	if(World == WD_8TARKAN)
@@ -12650,19 +12594,16 @@ void RenderOutSides()
 	{
 		SEASON3C::GMSwampOfQuiet::RenderBaseSmoke();
 	}
-#ifdef CSK_ADD_MAP_ICECITY
 	else if(IsIceCity())
 	{
 		g_Raklion.RenderBaseSmoke();
 	}
-#endif // CSK_ADD_MAP_ICECITY
 	else
     {
         battleCastle::RenderBaseSmoke ();
     }
 
 #ifdef LDK_ADD_MAPPROCESS_RENDERBASESMOKE_FUNC
-	// 안개, 천둥 처리
 	TheMapProcess().RenderFrontSideVisual();
 #endif //LDK_ADD_MAPPROCESS_RENDERBASESMOKE_FUNC
 

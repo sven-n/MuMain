@@ -136,33 +136,14 @@ bool SEASON3B::CNewUIMiniMap::Render()
 {
 	float Rot = 45.f;
 
-
 	if(m_bSuccess == false)
 		return m_bSuccess;
-
 
 	EnableAlphaTest();
 	RenderColor(0,0,640,430,0.85f,1);
 	DisableAlphaBlend();
 	EnableAlphaTest();
 	glColor4f(1.f, 1.f, 1.f, 1.f);
-
-/*
-	if(MouseWheel > 0)
-	{
-		m_MiniPos++;
-		if(m_MiniPos >= 6)
-			m_MiniPos--;
-	}
-	if(MouseWheel < 0)
-	{
-		m_MiniPos--;
-		if(m_MiniPos < 0)
-			m_MiniPos++;
-	}
-	if(MouseWheel != 0)
-		MouseWheel = 0;
-*/
 
 	float Ty = (float)(((float)Hero->PositionX/256.f)*m_Lenth[m_MiniPos].y);
 	float Tx = (float)(((float)Hero->PositionY/256.f)*m_Lenth[m_MiniPos].x);
@@ -189,18 +170,11 @@ bool SEASON3B::CNewUIMiniMap::Render()
 
 			if(m_Mini_Map_Data[i].Kind == 1) //npc
 			{
-#ifdef KJW_FIX_CRYWOLF_NPC_MINIMAP_RENDER
-				if(!(World == 34 && m_OccupationState > 0) 
-					|| (m_Mini_Map_Data[i].Location[0] == 228 && m_Mini_Map_Data[i].Location[1] == 48 && World == 34)
-					|| (m_Mini_Map_Data[i].Location[0] == 62 && m_Mini_Map_Data[i].Location[1] == 239 && World == 34) )
+				if(!(World == WD_34CRYWOLF_1ST && m_OccupationState > 0) || (m_Mini_Map_Data[i].Location[0] == 228 && m_Mini_Map_Data[i].Location[1] == 48 && World == WD_34CRYWOLF_1ST))
 					RenderPointRotate(IMAGE_MINIMAP_INTERFACE+5,Tx1, Ty1,NpcWidth,NpcWidth,m_Lenth[m_MiniPos].x - Tx, m_Lenth[m_MiniPos].y - Ty, m_Lenth[m_MiniPos].x,m_Lenth[m_MiniPos].y,Rot,Rot_Loc,17.5f/32.f,17.5f/32.f,i);
-#else // KJW_FIX_CRYWOLF_NPC_MINIMAP_RENDER
-				if(!(World == 34 && m_OccupationState > 0) || (m_Mini_Map_Data[i].Location[0] == 228 && m_Mini_Map_Data[i].Location[1] == 48 && World == 34))
-					RenderPointRotate(IMAGE_MINIMAP_INTERFACE+5,Tx1, Ty1,NpcWidth,NpcWidth,m_Lenth[m_MiniPos].x - Tx, m_Lenth[m_MiniPos].y - Ty, m_Lenth[m_MiniPos].x,m_Lenth[m_MiniPos].y,Rot,Rot_Loc,17.5f/32.f,17.5f/32.f,i);
-#endif // KJW_FIX_CRYWOLF_NPC_MINIMAP_RENDER
 			}
 			else
-			if(m_Mini_Map_Data[i].Kind == 2) //Æ÷ÅÐ
+			if(m_Mini_Map_Data[i].Kind == 2)
 				RenderPointRotate(IMAGE_MINIMAP_INTERFACE+4,Tx1, Ty1,NpcWidthP,NpcWidthP,m_Lenth[m_MiniPos].x - Tx, m_Lenth[m_MiniPos].y - Ty, m_Lenth[m_MiniPos].x,m_Lenth[m_MiniPos].y,Rot,Rot_Loc,17.5f/32.f,17.5f/32.f,100 + i);
 		}
 		else

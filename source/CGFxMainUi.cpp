@@ -2301,7 +2301,6 @@ void CGFxMainUi::RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOp
 		{
 			Scale = 0.002f;
 		}
-#ifdef HELLOWIN_EVENT
 		//할로윈각도
 		else
 			if ( Type==MODEL_POTION+45 || Type==MODEL_POTION+49)
@@ -2321,7 +2320,6 @@ void CGFxMainUi::RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOp
 						//			Position[1] += 0.05f;
 						//   			Vector(0.f,ObjectSelect.Angle[1],0.f,ObjectSelect.Angle);
 					}
-#endif //HELLOWIN_EVENT
 #ifdef GIFT_BOX_EVENT
 					else
 						if ( Type>=MODEL_POTION+32 && Type<=MODEL_POTION+34)

@@ -3176,12 +3176,10 @@ int ItemValue(ITEM *ip,int goldType)
 #endif	// ADD_PCROOM_POINT_SYSTEM
 #endif // KJH_DEL_PC_ROOM_SYSTEM
 
-#ifdef HELLOWIN_EVENT
 	if(ip->Type >= ITEM_POTION+45 && ip->Type <= ITEM_POTION+50)
 	{
 		Gold = ip->Durability*50;
 	}
-#endif // HELLOWIN_EVENT
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
 	switch (ip->Type)
@@ -4692,7 +4690,7 @@ void CHARACTER_MACHINE::CalculateDamage()
         }
     }
 #ifdef PSW_SCROLL_ITEM
-	if(g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll3))  // 분노의 스크롤
+	if(g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll3)) 
 	{
 			ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 74);
 			Character.AttackDamageMinRight += Item_data.m_byValue1;
@@ -4700,9 +4698,8 @@ void CHARACTER_MACHINE::CalculateDamage()
 			Character.AttackDamageMinLeft  += Item_data.m_byValue1;
 			Character.AttackDamageMaxLeft  += Item_data.m_byValue1;
 	}
-#endif// PSW_SCROLL_ITEM
-#ifdef HELLOWIN_EVENT
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2)) // 잭오랜턴의 분노
+#endif //PSW_SCROLL_ITEM
+	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2)) 
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 47);
 		Character.AttackDamageMinRight += Item_data.m_byValue1;
@@ -4710,9 +4707,8 @@ void CHARACTER_MACHINE::CalculateDamage()
 		Character.AttackDamageMinLeft  += Item_data.m_byValue1;
 		Character.AttackDamageMaxLeft  += Item_data.m_byValue1;
 	}
-#endif //HELLOWIN_EVENT
 #ifdef CSK_EVENT_CHERRYBLOSSOM
-	if(g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal))  // 벚꽃꽃잎
+	if(g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal)) 
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 87);
 		Character.AttackDamageMinRight += Item_data.m_byValue1;
@@ -4833,7 +4829,6 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 #endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
 		)
     {
-        //  내구력에 따른 공격력 감소.
         ITEM_ATTRIBUTE *p = &ItemAttribute[Equipment[EQUIPMENT_WING].Type];
         ITEM *ipWing = &Equipment[EQUIPMENT_WING];
         percent = CalcDurabilityPercent(ipWing->Durability,p->Durability,ipWing->Level,0);//ipWing->Option1);
@@ -4850,7 +4845,6 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         Character.MagicDamageMax += DamageMax;
     }
 
-	// 오른손 옵션 검사
     if ( Right->Type!=-1 && Right->Durability!=0
 #ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
 		&& IsRequireEquipItem( Right )
@@ -4860,8 +4854,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         ITEM_ATTRIBUTE *p = &ItemAttribute[Right->Type];
         percent = CalcDurabilityPercent(Right->Durability,p->Durability,Right->Level,Right->Option1,Right->ExtOption);
         DamageMin = 0; DamageMax = 0;
-		//	마검사 마법검
-		// 추가공격력 옵션 (마검사용검은 추가공격력옵션이 추가마력도 올려준다.)
+
 		if ( Right->Type==ITEM_SWORD+21 
 			|| Right->Type==ITEM_SWORD+31 
 			|| Right->Type==ITEM_SWORD+23
@@ -4883,7 +4876,6 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 		Character.MagicDamageMin += DamageMin - (WORD)(DamageMin*percent);
 		Character.MagicDamageMax += DamageMax - (WORD)(DamageMax*percent);
 
-		// 액설런트 옵션
         PlusSpecial(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_LEVEL,Right);
 		PlusSpecial(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_LEVEL,Right);
 		PlusSpecialPercent(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_PERCENT,Right,2);
@@ -4891,14 +4883,13 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 	}
 
 #ifdef PBG_FIX_SHIELD_MAGICDAMAGE
-	// 왼손 옵션 검사
     if ( Left->Type!=-1 && Left->Durability!=0
 #ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
 		&& IsRequireEquipItem( Left )
 #endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE	
 		)
 	{
-		// 소환술사의 왼손은 CalculateCurseDamage()에서 계산 
+		// CalculateCurseDamage()
 		if (CLASS_SUMMONER != GetBaseClass(Character.Class))	
 		{
 			ITEM_ATTRIBUTE *p = &ItemAttribute[Left->Type];
@@ -4907,9 +4898,6 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 			
 			if( Left->Type >= ITEM_SWORD && Left->Type < ITEM_SHIELD )
 			{
-				//	마검사 마법검
-				// 추가공격력 옵션 (마검사용검은 추가공격력옵션이 추가마력도 올려준다.)
-				// (다른마검사용검은 두손검이라 검사할 팰요가 없다)
 				if ( Left->Type==ITEM_SWORD+28 ) 
 				{
 					PlusSpecial(&DamageMin,AT_IMPROVE_DAMAGE,Left);
@@ -4921,14 +4909,13 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 					PlusSpecial(&DamageMax,AT_IMPROVE_MAGIC,Left);
 				}
 				
-				if (GetBaseClass(Character.Class) != CLASS_DARK	// 마검사의 왼손 무기는 마력에 영향을 주지 못한다 (엑옵제외)
+				if (GetBaseClass(Character.Class) != CLASS_DARK
 					)
 				{
 					Character.MagicDamageMin += DamageMin - (WORD)(DamageMin*percent);
 					Character.MagicDamageMax += DamageMax - (WORD)(DamageMax*percent);
 				}
 				
-				// 액설런트 옵션
 				PlusSpecial(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_LEVEL,Left);
 				PlusSpecial(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_LEVEL,Left);
 				PlusSpecialPercent(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_PERCENT,Left,2);
@@ -5553,14 +5540,12 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 		Character.MagicSpeed += Item_data.m_byValue1;
 	}
 #endif// PSW_SCROLL_ITEM
-#ifdef HELLOWIN_EVENT
 	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin1))	// 잭오랜턴의 축복
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 46);
 		Character.AttackSpeed += Item_data.m_byValue1;
 		Character.MagicSpeed += Item_data.m_byValue1;
 	}
-#endif //HELLOWIN_EVENT
 #ifdef PBG_ADD_SANTABUFF
 	if(g_isCharacterBuff((&Hero->Object), eBuff_QuickOfSanta))	//산타의 신속
 	{
@@ -5836,13 +5821,11 @@ void CHARACTER_MACHINE::CalculateDefense()
 		Character.Defense += (WORD)Item_data.m_byValue1;
 	}
 #endif// PSW_SCROLL_ITEM
-#ifdef HELLOWIN_EVENT
 	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin3)) // 잭오랜턴의 외침
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 48);
 		Character.Defense += (WORD)Item_data.m_byValue1;
 	}
-#endif //HELLOWIN_EVENT
 #ifdef PBG_ADD_SANTABUFF
 	if(g_isCharacterBuff((&Hero->Object), eBuff_BlessingOfXmax))	//크리스마스의 축복
 	{

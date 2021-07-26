@@ -37,9 +37,7 @@ void CMixItem::Reset()
 	m_b380AddedItem = FALSE;
 	m_bFenrirAddedItem = FALSE;
 	m_bIsCharmItem = FALSE;
-#ifdef PSW_ADD_MIX_CHAOSCHARM
 	m_bIsChaosCharmItem = FALSE;
-#endif //PSW_ADD_MIX_CHAOSCHARM	
 #ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
 	m_bIsJewelItem = FALSE;
 #endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
@@ -101,29 +99,24 @@ void CMixItem::SetItem(ITEM * pItem, DWORD dwMixValue)
 	if (pItem->Type == ITEM_HELPER+37 && pItem->Option1 != 0)
 		m_bFenrirAddedItem = TRUE;
 
-	if (pItem->Type == ITEM_POTION+53)	// 행운의 부적인지 검사
+	if (pItem->Type == ITEM_POTION+53)
 		m_bIsCharmItem = TRUE;
 
-#ifdef PSW_ADD_MIX_CHAOSCHARM
-	if( pItem->Type == ITEM_POTION+96 )  //  카오스 부적인지 검사
+	if( pItem->Type == ITEM_POTION+96 )
 		m_bIsChaosCharmItem = TRUE;
-#endif //PSW_ADD_MIX_CHAOSCHARM
 
-#ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
-	if(pItem->Type == ITEM_WING+15		// 혼돈의보석
-		|| pItem->Type == ITEM_WING+30		// 축복의보석 묶음
-		|| pItem->Type == ITEM_WING+31		// 영혼의보석 묶음
-		|| pItem->Type == ITEM_POTION+13	// 축복의보석
-		|| pItem->Type == ITEM_POTION+14	// 영혼의보석
-		|| pItem->Type == ITEM_POTION+16	// 생명의보석
-		|| pItem->Type == ITEM_POTION+22	// 창조의보석
-		|| pItem->Type == ITEM_POTION+31	// 수호보석
-		|| pItem->Type == ITEM_POTION+42	// 조화의보석
-		)	// 보석 아이템인지 검사 (축,영,혼,창,생,조,수,석묶음)
+	if(pItem->Type == ITEM_WING+15
+		|| pItem->Type == ITEM_WING+30
+		|| pItem->Type == ITEM_WING+31
+		|| pItem->Type == ITEM_POTION+13
+		|| pItem->Type == ITEM_POTION+14
+		|| pItem->Type == ITEM_POTION+16
+		|| pItem->Type == ITEM_POTION+22
+		|| pItem->Type == ITEM_POTION+31
+		|| pItem->Type == ITEM_POTION+42
+		)	
 		m_bIsJewelItem = TRUE;
-#endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
 
-#ifdef ADD_SOCKET_MIX
 	m_bySocketCount = pItem->SocketCount;
 	if (m_bySocketCount > 0)	// 소켓 아이템인지 검사
 	{
@@ -133,12 +126,9 @@ void CMixItem::SetItem(ITEM * pItem, DWORD dwMixValue)
 			m_bySocketSeedID[i] = pItem->SocketSeedID[i];
 			m_bySocketSphereLv[i] = pItem->SocketSphereLv[i];
 		}
-#ifdef YDG_FIX_SOCKETITEM_ISNOT_380ITEM
 		m_dwSpecialItem ^= RCP_SP_ADD380ITEM;	// 소켓아이템은 380 아이템이 아니다
-#endif	// YDG_FIX_SOCKETITEM_ISNOT_380ITEM
 	}
 	m_bySeedSphereID = g_SocketItemMgr.GetSeedShpereSeedID(pItem);
-#endif	// ADD_SOCKET_MIX
 
 	if (pItem->Jewel_Of_Harmony_Option > 0)
 	{
@@ -317,24 +307,21 @@ BOOL CMixRecipes::IsMixSource(ITEM * pItem)
 		}
 	}
 
-#ifdef PSW_ADD_MIX_CHAOSCHARM
-	if( IsChaosCharmItem(mixitem)) {
-		if ((GetCurRecipe() == NULL || GetCurRecipe()->m_bCharmOption == 'A')
-			&& m_wTotalChaosCharmCount < 1) 
+	if( IsChaosCharmItem(mixitem)) 
+	{
+		if ((GetCurRecipe() == NULL || GetCurRecipe()->m_bCharmOption == 'A') && m_wTotalChaosCharmCount < 1) 
 		{
 			return TRUE;
 		}
 	}
-#endif //PSW_ADD_MIX_CHAOSCHARM
 
 	for (std::vector<MIX_RECIPE *>::iterator iter = m_Recipes.begin(); iter != m_Recipes.end(); ++iter)
 	{
-		// 조합 방법의 각 상황을 기준으로 비교
 		for (int j = 0; j < (*iter)->m_iNumMixSoruces; ++j)
 		{
 			if (m_wTotalCharmBonus > 0 && (*iter)->m_bCharmOption != 'A')
 			{
-				continue;	// 행운의 부적이 올라가 있을때는 행운의 부적 사용불가 조합을 할 수 없다.
+				continue;
 			}
 			if (CheckItem((*iter)->m_MixSources[j], mixitem)
 				&& !((*iter)->m_bMixOption == 'B' && IsChaosItem(mixitem))
@@ -342,7 +329,7 @@ BOOL CMixRecipes::IsMixSource(ITEM * pItem)
 				&& !((*iter)->m_bMixOption == 'D' && IsFenrirAddedItem(mixitem))
 				&& !((*iter)->m_bMixOption == 'E' && !IsUpgradableItem(mixitem))
 				&& !((*iter)->m_bMixOption == 'G' && !IsSourceOfRefiningStone(mixitem))
-				)	// 조합 방법 재료중 하나라도 포함되나
+				)
 			{
 				return TRUE;
 			}
@@ -417,7 +404,7 @@ int CMixRecipes::CheckRecipe(int iNumMixItems, CMixItem * pMixItems)	// 아이템 �
 BOOL CMixRecipes::CheckRecipeSub(std::vector<MIX_RECIPE *>::iterator iter, int iNumMixItems, CMixItem * pMixItems)
 {
 	BOOL bFind = FALSE;
-	int iMixRecipeTest[MAX_MIX_SOURCES];	// 조합 재료별로 아이템 일치 수
+	int iMixRecipeTest[MAX_MIX_SOURCES];
 	memset(iMixRecipeTest, 0, sizeof(int) * MAX_MIX_SOURCES);
 
 #ifdef ADD_SOCKET_MIX
@@ -426,17 +413,15 @@ BOOL CMixRecipes::CheckRecipeSub(std::vector<MIX_RECIPE *>::iterator iter, int i
 #endif // KJW_FIX_SOCKET_INFORMATION
 #endif	// ADD_SOCKET_MIX
 
-	// 조합 방법의 각 상황을 기준으로 인벤을 뒤져 같은게 없으면 실패, 있으면 인벤에서 지우고 계속 비교한다
 	for (int j = 0; j < (*iter)->m_iNumMixSoruces; ++j)
 	{
 		if (!IsOptionItem((*iter)->m_MixSources[j])) bFind = FALSE;
 		for (int i = 0; i < iNumMixItems; ++i)
 		{
-			// 재료가 일치하고, 잔량이 있고, 현재 조합 재료별 일치수와 이 재료의 잔량이 최대 재료수보다 적을경우에
 			if (CheckItem((*iter)->m_MixSources[j], pMixItems[i]) && pMixItems[i].m_iTestCount > 0 &&
 				(*iter)->m_MixSources[j].m_iCountMax >= iMixRecipeTest[j] + pMixItems[i].m_iTestCount
 #ifdef YDG_FIX_SOCKET_ATTACH_CONDITION
-				&& !((*iter)->m_bMixOption == 'H' && IsSourceOfAttachSeedSphereToArmor(pMixItems[i]))	// 소켓장착시 스피어종류 제한
+				&& !((*iter)->m_bMixOption == 'H' && IsSourceOfAttachSeedSphereToArmor(pMixItems[i]))
 				&& !((*iter)->m_bMixOption == 'I' && IsSourceOfAttachSeedSphereToWeapon(pMixItems[i]))
 #endif	// YDG_FIX_SOCKET_ATTACH_CONDITION
 				)
@@ -444,20 +429,19 @@ BOOL CMixRecipes::CheckRecipeSub(std::vector<MIX_RECIPE *>::iterator iter, int i
 				if (pMixItems[i].m_iTestCount >= (*iter)->m_MixSources[j].m_iCountMax)
 				{
 					iMixRecipeTest[j] += (*iter)->m_MixSources[j].m_iCountMax;
-					pMixItems[i].m_iTestCount -= (*iter)->m_MixSources[j].m_iCountMax;	// 최대치만큼 있으면 최대치를 빼준다.
+					pMixItems[i].m_iTestCount -= (*iter)->m_MixSources[j].m_iCountMax;
 				}
 				else
 				{
 					iMixRecipeTest[j] += pMixItems[i].m_iTestCount;
-					pMixItems[i].m_iTestCount = 0;	// 아니면 있는만큼 다 빼낸다.
+					pMixItems[i].m_iTestCount = 0;
 				}
-				bFind = TRUE;	// 아이템을 찾았다
+				bFind = TRUE;
 				if (j == 0)
 				{
-					m_iFirstItemLevel = pMixItems[i].m_iLevel;	// 첫번째 아이템이면 아이템의 레벨 저장
+					m_iFirstItemLevel = pMixItems[i].m_iLevel;
 					m_iFirstItemType = pMixItems[i].m_sType;
-#ifdef ADD_SOCKET_MIX
-					m_byFirstItemSocketCount = pMixItems[i].m_bySocketCount;	// 첫번째 아이템이면 소켓 정보 저장
+					m_byFirstItemSocketCount = pMixItems[i].m_bySocketCount;
 					if (m_byFirstItemSocketCount > 0)
 					{
 						for (int k = 0; k < MAX_SOCKETS; ++k)
@@ -466,35 +450,32 @@ BOOL CMixRecipes::CheckRecipeSub(std::vector<MIX_RECIPE *>::iterator iter, int i
 							m_byFirstItemSocketSphereLv[k] = pMixItems[i].m_bySocketSphereLv[k];
 						}
 					}
-#endif	// ADD_SOCKET_MIX
 				}
 			}
 		}
-		if (bFind == FALSE || (*iter)->m_MixSources[j].m_iCountMin > iMixRecipeTest[j])		// 필요한 아이템을 못찾거나 재료가 모자르면 실패
+		if (bFind == FALSE || (*iter)->m_MixSources[j].m_iCountMin > iMixRecipeTest[j])	
 		{
 			return FALSE;
 		}
 	}
-	// 남은 재료가 있으면 안된다.
+
 	for (int i = 0; i < iNumMixItems; ++i)
 	{
 		if (pMixItems[i].m_iTestCount > 0)
 		{
-			if (pMixItems[i].m_bIsCharmItem && (*iter)->m_bCharmOption == 'A');	// 행운의 부적은 있어도 상관없다.
+			if (pMixItems[i].m_bIsCharmItem && (*iter)->m_bCharmOption == 'A');
 			else
-#ifdef PSW_ADD_MIX_CHAOSCHARM
-			if(pMixItems[i].m_bIsChaosCharmItem && (*iter)->m_bChaosCharmOption == 'A'); // 카오스 부적은 있어도 상관없다.
+			if(pMixItems[i].m_bIsChaosCharmItem && (*iter)->m_bChaosCharmOption == 'A');
 			else
-#endif //PSW_ADD_MIX_CHAOSCHARM
-				return FALSE;	// 해당 조합에 필요없는 아이템이 있다.
+				return FALSE;
 		}
 	}
-	return TRUE;	// 아이템이 정확하게 존재한다.
+	return TRUE;
 }
 
 int CMixRecipes::CheckRecipeSimilarity(int iNumMixItems, CMixItem * pMixItems)
 {
-	if (iNumMixItems == 0 && m_Recipes.size() == 1)	// 조합 방법이 하나뿐일때는 아이템을 올리지 않아도 무조건 보여준다.
+	if (iNumMixItems == 0 && m_Recipes.size() == 1)
 	{
 		m_iMostSimilarMixIndex = 1;
 		for (int i = 0; i < (*m_Recipes.begin())->m_iNumMixSoruces; ++i)
@@ -504,27 +485,26 @@ int CMixRecipes::CheckRecipeSimilarity(int iNumMixItems, CMixItem * pMixItems)
 		return m_iMostSimilarMixIndex;
 	}
 
-	int iMostSimiliarRecipe = 0;	// 가장 유사한 조합법 인덱스
-	int iMostSimiliarityPoint = 0;	// 가장 유사한 조합법 유사도 점수
+	int iMostSimiliarRecipe = 0;
+	int iMostSimiliarityPoint = 0;
 	memset(m_iMostSimilarMixSourceTest, 0, sizeof(int) * MAX_MIX_SOURCES);
 	memset(m_iMixSourceTest, 0, sizeof(int) * MAX_MIX_SOURCES);
 
-	int iSimilarityPoint;			// 유사도 점수
+	int iSimilarityPoint;
 	for (std::vector<MIX_RECIPE *>::iterator iter = m_Recipes.begin(); iter != m_Recipes.end(); ++iter)
 	{
 		memset(m_iMixSourceTest, 0, sizeof(int) * MAX_MIX_SOURCES);
 		for (int i = 0; i < (*iter)->m_iNumMixSoruces; ++i)
-			m_iMixSourceTest[i] = (*iter)->m_MixSources[i].m_iCountMax;	// 조합법 충족 검사용 카운트 변수를 초기화
+			m_iMixSourceTest[i] = (*iter)->m_MixSources[i].m_iCountMax;
 
 		for (int i = 0; i < iNumMixItems; ++i)
-			pMixItems[i].m_iTestCount = pMixItems[i].m_iCount;	// 검사용 카운트 변수를 초기화
+			pMixItems[i].m_iTestCount = pMixItems[i].m_iCount;
 
 		iSimilarityPoint = CheckRecipeSimilaritySub(iter, iNumMixItems, pMixItems);
-		if (iSimilarityPoint == 1 && m_Recipes.size() > 1) iSimilarityPoint = 0;	// 혼석만 있는경우 무시
+		if (iSimilarityPoint == 1 && m_Recipes.size() > 1) iSimilarityPoint = 0;
 		if (iSimilarityPoint > iMostSimiliarityPoint ||
 			(iSimilarityPoint == iMostSimiliarityPoint && iSimilarityPoint > 0 && m_iCurMixIndex == (*iter)->m_iMixIndex + 1))
 		{
-			// 잘못된 아이템이 있으면 무시해야한다.
 			iMostSimiliarityPoint = iSimilarityPoint;
 			iMostSimiliarRecipe = (*iter)->m_iMixIndex + 1;
 			memset(m_iMostSimilarMixSourceTest, 0, sizeof(int) * MAX_MIX_SOURCES);
@@ -542,31 +522,28 @@ int CMixRecipes::CheckRecipeSimilaritySub(std::vector<MIX_RECIPE *>::iterator it
 {
 	int iFindTotalPoint = 0;
 	int iFindPoint = 0;
-	// 조합 방법의 각 상황을 기준으로 인벤을 뒤져 같은게 있으면 유사도 반환
+
 	for (int j = 0; j < (*iter)->m_iNumMixSoruces; ++j)
 	{
 		for (int i = 0; i < iNumMixItems; ++i)
 		{
 			if (CheckItem((*iter)->m_MixSources[j], pMixItems[i]) && pMixItems[i].m_iTestCount > 0
-#ifdef YDG_FIX_SOCKET_ATTACH_CONDITION
-				&& !((*iter)->m_bMixOption == 'H' && IsSourceOfAttachSeedSphereToArmor(pMixItems[i]))	// 소켓장착시 스피어종류 제한
+				&& !((*iter)->m_bMixOption == 'H' && IsSourceOfAttachSeedSphereToArmor(pMixItems[i]))
 				&& !((*iter)->m_bMixOption == 'I' && IsSourceOfAttachSeedSphereToWeapon(pMixItems[i]))
-#endif	// YDG_FIX_SOCKET_ATTACH_CONDITION
-				)	// 조합 방법
+				)
 			{
-				if (IsChaosJewel(pMixItems[i])) iFindPoint = 1;	// 혼석은 1점
- 				else if ((*iter)->m_MixSources[j].m_iCountMax < pMixItems[i].m_iTestCount) iFindPoint = 1;	// 갯수가 조합법보다 많으면 0점
-				else if (j == 0) iFindPoint = 10;	// 첫번째가 일치하면 유사도 보너스 10점
-				else if (j == 1) iFindPoint = 5;	// 두번째가 일치하면 유사도 보너스 5점
-				//else if (IsOptionItem((*iter)->m_MixSources[j])) iFindPoint = 2;	// 옵션 아이템은 0점
-				else iFindPoint = 3;	// 나머지는 2점
+				if (IsChaosJewel(pMixItems[i])) iFindPoint = 1;
+ 				else if ((*iter)->m_MixSources[j].m_iCountMax < pMixItems[i].m_iTestCount) iFindPoint = 1;
+				else if (j == 0) iFindPoint = 10;
+				else if (j == 1) iFindPoint = 5;
+				else iFindPoint = 3;
 
 				iFindTotalPoint += iFindPoint;
 
  				if (pMixItems[i].m_iTestCount > 0 && m_iMixSourceTest[j] > 0)
 				{
 					m_iMixSourceTest[j] -= pMixItems[i].m_iTestCount;
-					pMixItems[i].m_iTestCount -= (*iter)->m_MixSources[j].m_iCountMax;	// 최대치를 빼준다.
+					pMixItems[i].m_iTestCount -= (*iter)->m_MixSources[j].m_iCountMax;
 				}
 			}
 		}
@@ -575,13 +552,11 @@ int CMixRecipes::CheckRecipeSimilaritySub(std::vector<MIX_RECIPE *>::iterator it
 	{
 		if (pMixItems[i].m_iTestCount > 0)
 		{
-			if (pMixItems[i].m_bIsCharmItem && (*iter)->m_bCharmOption == 'A');	// 행운의 부적은 있어도 상관없다.
+			if (pMixItems[i].m_bIsCharmItem && (*iter)->m_bCharmOption == 'A');
 			else
-#ifdef PSW_ADD_MIX_CHAOSCHARM
-			if (pMixItems[i].m_bIsChaosCharmItem && (*iter)->m_bChaosCharmOption == 'A'); // 카오스 부적은 있어도 상관없다.
+			if (pMixItems[i].m_bIsChaosCharmItem && (*iter)->m_bChaosCharmOption == 'A');
 			else
-#endif //PSW_ADD_MIX_CHAOSCHARM
-				return 0;	// 해당 조합에 필요없는 아이템이 있다.
+				return 0;
 		}
 	}
 	return iFindTotalPoint;
@@ -921,11 +896,10 @@ void CMixRecipes::CalcCharmBonusRate(int iNumMixItems, CMixItem * pMixItems)
 	m_wTotalCharmBonus = 0;
 	for (int i = 0; i < iNumMixItems; ++i)
 	{
-		if (pMixItems[i].m_bIsCharmItem == TRUE) m_wTotalCharmBonus += pMixItems[i].m_iCount;	// 행운의 부적 확률 합
+		if (pMixItems[i].m_bIsCharmItem == TRUE) m_wTotalCharmBonus += pMixItems[i].m_iCount;
 	}
 }
 
-#ifdef PSW_ADD_MIX_CHAOSCHARM
 void CMixRecipes::CalcChaosCharmCount(int iNumMixItems, CMixItem * pMixItems)
 {
 	m_wTotalChaosCharmCount = 0;
@@ -934,9 +908,7 @@ void CMixRecipes::CalcChaosCharmCount(int iNumMixItems, CMixItem * pMixItems)
 		if (pMixItems[i].m_bIsChaosCharmItem == TRUE) m_wTotalChaosCharmCount += 1;
 	}
 }
-#endif //PSW_ADD_MIX_CHAOSCHARM
 
-// 조합시 성공 확률 계산
 void CMixRecipes::CalcMixRate(int iNumMixItems, CMixItem * pMixItems)
 {
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
@@ -1209,12 +1181,10 @@ BOOL CMixRecipes::IsCharmItem(CMixItem & rSource)
 	return rSource.m_bIsCharmItem;
 }
 
-#ifdef PSW_ADD_MIX_CHAOSCHARM
 BOOL CMixRecipes::IsChaosCharmItem(CMixItem & rSource)
 {
 	return rSource.m_bIsChaosCharmItem;
 }
-#endif //PSW_ADD_MIX_CHAOSCHARM
 
 #ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
 BOOL CMixRecipes::IsJewelItem(CMixItem & rSource)

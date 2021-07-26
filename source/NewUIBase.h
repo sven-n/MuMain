@@ -31,9 +31,6 @@ namespace SEASON3B
 		CNewUIObj() : m_hRelatedWnd(NULL), m_bRender(true), m_bUpdate(true) {}
 		virtual ~CNewUIObj() {}
 
-		//. 설정하면, 설정된 윈도우에 포커스가 있을 때만 UpdateKeyEvent 함수 호출
-		//. 설정하지 않으면(Default), g_hWnd에 포커스가 있을 때만 UpdateKeyEvent 함수 호출
-		//. NewUIManager::UpdateKeyEvent 참조
 		void SetRelatedWnd(HWND hWnd = g_hWnd) 
 		{ 
 			m_hRelatedWnd = hWnd; 

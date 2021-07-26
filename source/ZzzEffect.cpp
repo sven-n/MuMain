@@ -290,8 +290,6 @@ void CreateForce ( OBJECT* o, vec3_t Pos )
 #ifdef YDG_ADD_SKILL_FLAME_STRIKE
 void EffectDestructor(OBJECT *o)
 {
-	// 이펙트가 사라질때 호출되는 함수 - 지저분한 이펙트 잔여물 제거용
-	// DeleteEffect와 LifeTime < 0일때만 자동 호출됨 (MoveEffect에서 자체 Life=false한 이펙트는 여기로 들어오지 않는다)
 	switch(o->Type)
 	{
 	case MODEL_EFFECT_FLAME_STRIKE:
@@ -299,14 +297,12 @@ void EffectDestructor(OBJECT *o)
 		RemoveObjectBlurs(o, 2);
 		RemoveObjectBlurs(o, 3);
 		break;
-#ifdef YDG_FIX_RARGLE_CRASH
 	case MODEL_SUMMONER_SUMMON_LAGUL:
 		for (int i = 48; i <= 53; ++i)
 		{
 			DeleteJoint(BITMAP_JOINT_ENERGY, o, i);
 		}
 		break;
-#endif	// YDG_FIX_RARGLE_CRASH
 	}
 
 	o->Live = false;
@@ -330,7 +326,7 @@ void TerminateOwnerEffectObject( int iOwnerObjectType )
 		
 #ifdef LDS_FIX_PETDESTRUCTOR_TERMINATE_EFFECTOWNER_ADD_TYPE
 		if( o->Owner != NULL &&
-			o->Type == MODEL_AIR_FORCE &&			// 다크 스피릿 공격:돌진 Effect::MODEL_AIR_FORCE에 대한 Dangling 현상 방지.
+			o->Type == MODEL_AIR_FORCE &&
 			o->Owner->Type == iOwnerObjectType )
 #else // LDS_FIX_PETDESTRUCTOR_TERMINATE_EFFECTOWNER_ADD_TYPE
 		if( o->Owner != NULL && o->Owner->Type == iOwnerObjectType )
