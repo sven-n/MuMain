@@ -34,7 +34,7 @@ CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
 	if(leaf::OpenConsoleWindow("Mu Debug Console Window"))
 	{
 		leaf::ActivateCloseButton(false);
-		leaf::ShowConsole(false);
+		leaf::ShowConsole(true);
 		m_bInit = true;
 		
 		g_ErrorReport.Write("Mu Debug Console Window Init - completed(Handle:0x%00000008X)\r\n", leaf::GetConsoleWndHandle());

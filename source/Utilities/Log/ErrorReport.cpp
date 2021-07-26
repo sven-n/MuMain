@@ -205,7 +205,7 @@ char* CErrorReport::CheckHeadToCut( char *lpszBuffer, DWORD dwNumber)
 
 BOOL CErrorReport::WriteFile( HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 {
-	m_iKey = Xor_ConvertBuffer( lpBuffer, nNumberOfBytesToWrite, m_iKey);
+	//m_iKey = Xor_ConvertBuffer( lpBuffer, nNumberOfBytesToWrite, m_iKey);
 	return ( ::WriteFile( hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped));
 }
 
@@ -217,7 +217,7 @@ void CErrorReport::WriteDebugInfoStr( char *lpszToWrite)
 		WriteFile( m_hFile, lpszToWrite, strlen( lpszToWrite), &dwNumber, NULL);
 
 		if ( dwNumber == 0)
-		{	// 이상이 있으면 다시 연다
+		{
 			CloseHandle( m_hFile);
 			Create( m_lpszFileName);
 		}

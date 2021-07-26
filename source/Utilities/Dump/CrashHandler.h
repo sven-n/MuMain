@@ -60,7 +60,6 @@ public:
 		bool bWriteCrashLog);
 	~CCrashHandler();
 
-	LONG							HandleException(PEXCEPTION_POINTERS pExInfo);
 	LONG							HandleException(PEXCEPTION_POINTERS pExInfo, PVOID pExceptionAddress, DWORD dwExceptionCode);
 	BOOL							AddFile(LPCTSTR szFilename);
 	void							WriteCrashLog(LPCTSTR szFormat, ...);

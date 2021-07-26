@@ -4457,16 +4457,12 @@ void Scene(HDC hDC)
 	SendCrcOfFunction( 12, 16, Attack, 0x7329);
 #endif //USE_SELFCHECKCODE
 
-	// 윈팅 방지 코드
 	_asm { jmp Pos_NoMouseTimeCheck2 }
 	_asm { __emit 0xFF }
 	_asm { __emit 0x15 }
 Pos_NoMouseTimeCheck2:
 	if ( g_iNoMouseTime > 31)
 	{	// g_iNoMouseTime 체크를 건너뛰게 조작한 경우
-#if _DEBUG
-		_asm { int 3 }
-#endif //_DEBUG
 		SendHackingChecked( 0x02, 0);
 		FAKE_CODE( Pos_NoMouse_KillWindow);
 Pos_NoMouse_KillWindow:

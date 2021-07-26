@@ -41,9 +41,6 @@
 #include "CSMapInterface.h"
 #include "./ExternalObject/leaf/ExceptionHandler.h"
 #include "./Utilities/Dump/CrashReporter.h"
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-#include "iexplorer.h"
-#endif //SELECTED_LANGUAGE == LANGUAGE_CHINESE
 #ifdef PROTECT_SYSTEMKEY
 	#include "ProtectSysKey.h"
 #endif // PROTECT_SYSTEMKEY
@@ -2810,7 +2807,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		return false;
 	}
 
-#ifdef LEM_ADD_GAMECHU	// 게임츄 유저 데이타 셋팅
+#ifdef LEM_ADD_GAMECHU
 	#ifdef FOR_WORK
 		g_ErrorReport.Write( " ! [Gamechu] - GCCertification.dll Loading-- \n");
 	#endif // FOR_WORK

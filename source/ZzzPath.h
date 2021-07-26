@@ -4,10 +4,6 @@
 	extern bool g_bShowPath;
 #endif // CSK_DEBUG_MAP_PATHFINDING
 
-#ifdef _DEBUG
-	//#define SAVE_PATH_TIME
-#endif
-
 #include <math.h>
 #include "BaseCls.h"
 #include "./Utilities/Log/ErrorReport.h"
@@ -28,7 +24,6 @@ private:
 	int m_iSize;
 	WORD* m_pbyMap;
 
-	// 찾은 길 정보
 private:
 	int m_iNumPath;
 	BYTE m_xPath[MAX_COUNT_PATH];
@@ -167,13 +162,6 @@ inline int PATH::GetNewNodeToTest( void)
 		pResult = pNode;
 		pNode = m_btOpenNodes.GetLeft( pNode);
 	}
-
-#if _DEBUG
-	if ( !pResult)
-	{
-		return ( -1);
-	}
-#endif // _DEBUG
 
 	return ( m_btOpenNodes.RemoveNode( pResult));
 }

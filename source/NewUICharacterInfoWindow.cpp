@@ -1451,17 +1451,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strBlocking);
 
-	//	대인전 방성률
 	if( itemoption380Defense != 0 || iDefenseRate != 0 )
 	{
-		// 2110 "대인 방어율: %d (+%d)"
-		// memorylock 사용
 		unicode::_sprintf(strBlocking, GlobalText[2110], CharacterAttribute->SuccessfulBlockingPK + Add_Dfe, itemoption380Defense + iDefenseRate);
 	}
 	else
 	{
-		// 2045 "대인 방어율: %d"
-		// memorylock 사용
 		unicode::_sprintf(strBlocking, GlobalText[2045], CharacterAttribute->SuccessfulBlockingPK + Add_Dfe);
 	}
 
@@ -1475,9 +1470,9 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	g_pRenderText->SetFont(g_hFontBold);
 
 	WORD wVitality;
-	// memorylock 사용
+
 	wVitality = CharacterAttribute->Vitality+ CharacterAttribute->AddVitality;
-	// memorylock 사용
+
 #ifdef PSW_SECRET_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3) )
 	{

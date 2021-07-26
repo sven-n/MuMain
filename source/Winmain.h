@@ -121,7 +121,6 @@
 
 #ifdef _DEBUG
 
-	//$ 콘솔 디버그
 	#define CSK_LH_DEBUG_CONSOLE			// 콘솔로 디버깅 정보 남기는 처리(2007.03.20)
 	#ifdef CSK_LH_DEBUG_CONSOLE
 		#define CONSOLE_DEBUG				// 콘솔로 디버깅 정보 출력(2007.03.20)

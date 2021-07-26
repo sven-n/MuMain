@@ -112,7 +112,6 @@ void OpenTexture(int Model,char *SubFolder, int Wrap, int Type,bool Check)
 
 		if(pModel->IndexTexture[i] == BITMAP_UNKNOWN)
 		{
-			//. 없다면, 같은이름의 텍스쳐를 찾는다.
 			BITMAP_t* pBitmap = Bitmaps.FindTextureByName(pTexture->FileName);
 			if(pBitmap)
 			{
@@ -122,9 +121,6 @@ void OpenTexture(int Model,char *SubFolder, int Wrap, int Type,bool Check)
 			else
 			{
 #ifdef LDS_OPTIMIZE_FORLOADING
-				// 상위 FindTextureByName 함수 내부 std::map(namemap)에서 검색이 안되는 경우가 
-				// 간혹 발생 하며, 이에 명확한 검색을 위하여 FindTextureByName_Linear 함수를 통해
-				// stricmp 로 명확한 비교를 하여준다.
 				pBitmap = Bitmaps.FindTextureByName_Linear(pTexture->FileName);
 				if( pBitmap )
 				{

@@ -29,7 +29,7 @@ DWORD WINAPI InternetOpenUrlThread(LPVOID vThreadParm)
 // EXCEPTION_CONTINUE_SEARCH		Proceed with normal execution of UnhandledExceptionFilter.
 LONG WINAPI CustomUnhandledExceptionHandler(PEXCEPTION_POINTERS pExInfo)
 {
-	return g_hCrash->HandleException(pExInfo);
+	return g_hCrash->HandleException(pExInfo, 0, UNEXPECTED_ERROR);
 }
 
 // Invalid parameter handler set with _set_invalid_parameter_handler()
@@ -204,11 +204,6 @@ void CCrashHandler::Destroyer()
 	delete m_pUploader;
 
 	::DeleteFile(_T("errMsg.txt"));
-}
-
-LONG CCrashHandler::HandleException(PEXCEPTION_POINTERS pExInfo)
-{
-	return HandleException(pExInfo, pExInfo->ExceptionRecord->ExceptionAddress, pExInfo->ExceptionRecord->ExceptionCode);
 }
 
 LONG CCrashHandler::HandleException(PEXCEPTION_POINTERS pExInfo, PVOID pExceptionAddress, DWORD dwExceptionCode)

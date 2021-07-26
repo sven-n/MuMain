@@ -72,5 +72,5 @@ LONG Crash::HandleException(PVOID pExceptionAddress, DWORD dwExceptionCode)
 
 LONG Crash::HandleExceptionWithInfo(PEXCEPTION_POINTERS pExInfo)
 {
-	return g_hCrash->HandleException(pExInfo);
+	return g_hCrash->HandleException(pExInfo, 0, UNEXPECTED_ERROR);
 }
