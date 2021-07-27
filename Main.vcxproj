@@ -115,6 +115,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Chinese Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -330,7 +331,7 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Global Release|Win32'">
-    <OutDir>.\tmp\</OutDir>
+    <OutDir>$(SolutionDir)build\bin\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>.\tmp\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(DXSDK_DIR)DXSDK61\Include;$(IncludePath)</IncludePath>
@@ -1099,7 +1100,7 @@
       <ObjectFileName>$(OutDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(OutDir)</ProgramDataBaseFileName>
       <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
-      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformation>false</BrowseInformation>
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -1117,7 +1118,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;jpeglib.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;Jpeglib.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(ProjectDir)..\main.exe</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -1550,7 +1551,6 @@
     <ClCompile Include="source\CSQuest.cpp" />
     <ClCompile Include="source\CSWaterTerrain.cpp" />
     <ClCompile Include="source\DialogInfo.cpp" />
-    <ClCompile Include="source\DImouse.cpp" />
     <ClCompile Include="source\DSplaysound.cpp" />
     <ClCompile Include="source\DSwaveIO.cpp" />
     <ClCompile Include="source\DuelMgr.cpp" />
@@ -2040,7 +2040,6 @@
     <ClInclude Include="source\CSWaterTerrain.h" />
     <ClInclude Include="source\Defined_Global.h" />
     <ClInclude Include="source\DialogInfo.h" />
-    <ClInclude Include="source\DIMouse.h" />
     <ClInclude Include="source\DSPlaySound.h" />
     <ClInclude Include="source\DSwaveIO.h" />
     <ClInclude Include="source\DSWavRead.h" />

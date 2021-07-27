@@ -20,7 +20,6 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "DIMouse.h"
 #include "wsclientinline.h"
 #include "ZzzScene.h"
 #include "./Utilities/Log/ErrorReport.h"
@@ -10968,7 +10967,7 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
             ip->ExtOption  = Item[4];   //  세트 타입.
 			ip->Number     = 1;
 			ip->option_380 = false;
-			byte b = ( ( (Item[5] & 0x08) << 4) >>7);
+			BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
 			ip->option_380 = b;
 			ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;//옵션 종류
 			ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;//옵션 레벨( 값이 아님 )
@@ -11083,7 +11082,7 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 					ip->x          = InventoryIndex%8;
 					ip->y          = InventoryIndex/8;
 					ip->option_380 = false;
-					byte b = ( ( (Item[5] & 0x08) << 4) >>7);
+					BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
 					ip->option_380 = b;
 					ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;//옵션 종류
 					ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;//옵션 레벨( 값이 아님 )
@@ -11128,7 +11127,7 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 					ip->x          = InventoryIndex%8;
 					ip->y          = InventoryIndex/8;
 					ip->option_380 = false;
-					byte b = ( ( (Item[5] & 0x08) << 4) >>7);
+					BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
 					ip->option_380 = b;
 					ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;//옵션 종류
 					ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;//옵션 레벨( 값이 아님 )
@@ -11171,7 +11170,7 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 				ip->x          = InventoryIndex%8;
 				ip->y          = InventoryIndex/8;
 				ip->option_380 = false;
-				byte b = ( ( (Item[5] & 0x08) << 4) >>7);
+				BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
 				ip->option_380 = b;
 				ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;//옵션 종류
 				ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;//옵션 레벨( 값이 아님 )

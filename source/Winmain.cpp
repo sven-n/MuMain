@@ -27,7 +27,6 @@
 #include "ZzzInventory.h"
 #include "zzzLodTerrain.h"
 #include "DSPlaySound.h"
-#include "DIMouse.h"
 #include "wsclientinline.h"
 #include "Resource.h"
 #include <imm.h>

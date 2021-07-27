@@ -22,7 +22,6 @@
 #include "ZzzEffect.h"
 #include "ZzzAI.h"
 #include "DSPlaySound.h"
-#include "DIMouse.h"
 #include "wsclientinline.h"
 #include "SMD.h"
 #include "Local.h"

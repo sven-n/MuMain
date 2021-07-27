@@ -9,3 +9,9 @@
 *.idb
 *.pdb
 *.log
+*.pch
+*.recipe
+*.bsc
+*\.pch
+/*.pch
+*.iobj

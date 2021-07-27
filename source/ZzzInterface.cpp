@@ -23,7 +23,6 @@
 #include "ZzzScene.h"
 #include "ZzzPath.h"
 #include "DSPlaySound.h"
-#include "DIMouse.h"
 #include "wsclientinline.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "MatchEvent.h"

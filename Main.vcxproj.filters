@@ -626,9 +626,6 @@
     <ClCompile Include="source\zzzeffectsprite.cpp">
       <Filter>MU\effect</Filter>
     </ClCompile>
-    <ClCompile Include="source\DImouse.cpp">
-      <Filter>MU\input</Filter>
-    </ClCompile>
     <ClCompile Include="source\ZzzTexture.cpp">
       <Filter>MU\graphic\2D\2d_resource</Filter>
     </ClCompile>
@@ -1641,9 +1638,6 @@
     </ClInclude>
     <ClInclude Include="source\ZzzEffect.h">
       <Filter>MU\effect</Filter>
-    </ClInclude>
-    <ClInclude Include="source\DIMouse.h">
-      <Filter>MU\input</Filter>
     </ClInclude>
     <ClInclude Include="source\ZzzTexture.h">
       <Filter>MU\graphic\2D\2d_resource</Filter>
