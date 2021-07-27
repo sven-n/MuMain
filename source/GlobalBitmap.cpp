@@ -552,9 +552,6 @@ BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
 	}
 	if(NULL == pBitmap)	//. 없는 인덱스라면
 	{
-#ifdef _DEBUG
-		__asm { int 3 }		//. 디버깅 하세요!!
-#endif // _DEBUG
 		static BITMAP_t s_Error;
 		memset(&s_Error, 0, sizeof(BITMAP_t));
 		strcpy(s_Error.FileName, "CGlobalBitmap::GetTexture Error!!!");

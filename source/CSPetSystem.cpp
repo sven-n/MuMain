@@ -749,9 +749,13 @@ void    CSPetDarkSpirit::RenderPet ( int PetState )
     CHARACTER* c = &m_PetCharacter;
     OBJECT* o    = &c->Object;
 
+    if (c == nullptr || o == nullptr) {
+        return;
+    }
+
 #ifdef PBG_FIX_DARKPET_RENDER
 	if(m_pPetInfo)
-		o->WeaponLevel = m_pPetInfo->m_wLevel;
+		o->WeaponLevel = static_cast<BYTE>(m_pPetInfo->m_wLevel & 0xFF);
 #endif //PBG_FIX_DARKPET_RENDER
 	if ( o->Live )
 	{
