@@ -792,7 +792,7 @@ __forceinline void SendChat(const char* Text)
 	CStreamPacketEngine spe;
 	spe.Init( 0xC1, 0x00);
 	spe.AddData( Hero->ID, MAX_ID_SIZE);
-	spe.AddData( (void*)Text, min( strlen( Text) + 1, MAX_CHAT_SIZE));
+	spe.AddData( (void*)Text, (WORD)min( strlen( Text) + 1, MAX_CHAT_SIZE));
 	spe.Send();
 	hanguo_check10();
 }
