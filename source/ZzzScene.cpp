@@ -205,7 +205,7 @@ bool EnableEdit    = false;
 
 int g_iLengthAuthorityCode = iLengthAuthorityCode[SELECTED_LANGUAGE];
 
-char *szServerIpAddress = lpszServerIPAddresses[SELECTED_LANGUAGE];
+char *szServerIpAddress = "192.168.0.104";
 //char *szServerIpAddress = "210.181.89.215";
 WORD g_ServerPort = 44405;
 

@@ -248,7 +248,8 @@ void OpenFilterFile(char *FileName)
 	DWORD dwCheckSum;
 	fread(&dwCheckSum,sizeof ( DWORD),1,fp);
 	fclose(fp);
-	if ( dwCheckSum != GenerateCheckSum2( Buffer, Size*MAX_FILTERS, 0x3E7D))
+
+	/*if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_FILTERS, 0x3E7D))
 	{
 		char Text[256];
     	sprintf(Text,"%s - File corrupted.",FileName);
@@ -256,7 +257,7 @@ void OpenFilterFile(char *FileName)
 		MessageBox(g_hWnd,Text,NULL,MB_OK);
 		SendMessage(g_hWnd,WM_DESTROY,0,0);
 	}
-	else
+	else*/
 	{
 		BYTE *pSeek = Buffer;
 		for(int i=0;i<MAX_FILTERS;i++)

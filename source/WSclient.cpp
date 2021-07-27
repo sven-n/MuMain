@@ -317,8 +317,8 @@ BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"hFUPBTbYehR2KgZj"};
 #elif SELECTED_LANGUAGE == LANGUAGE_ENGLISH		// ±Û·Î¹ú
 //-----------------------------------> »ç³» ¼­¹ö ¹öÁ¯
 //2010.01.20 º»¼· (¾È»ó±Ô)
-BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '1'+4, '3'+5};
-BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"FtpGR9XLWaiwEmho"};
+BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '4'+3, '0'+4, '5'+5};
+BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"TbYehR2hFUPBKgZj"};
 //-----------------------------------------------------------------------------------
 //2010.10.28 º»¼· (±èÀç¿ì)
 //BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '3'+4, '4'+5};
