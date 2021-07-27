@@ -98,7 +98,7 @@ namespace
 	const int MapNameCount = 6;
 #endif // LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
 
-	const string MapName[MapNameCount] = {
+	const std::string MapName[MapNameCount] = {
 		"Lorencia",
 		"Noria",
 		"Elbeland",
@@ -111,7 +111,7 @@ namespace
 	};
 #endif //LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
 
-	const bool IsLuckySeal( const string& name ) 
+	const bool IsLuckySeal( const std::string& name )
 	{
 		if( name.size() != 0 ) {
 			for( int i = 0; i < MapNameCount; ++i)  {
@@ -2403,7 +2403,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsLuckySealBuff()
 	return false;
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove( const string& src )
+bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove( const std::string& src )
 {
 	if( Hero->Object.Kind == KIND_PLAYER 
 		&& Hero->Object.Type == MODEL_PLAYER 
@@ -2429,8 +2429,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove( const string& src )
 #endif	// YDG_MOD_PROTECT_AUTO_V4
 	if( IsLuckySealBuff() == false ) {
 		char lpszStr1[1024]; char* lpszStr2 = NULL;
-		if(src.find( GlobalText[260] ) != string::npos) {
-			string temp = GlobalText[260];
+		if(src.find( GlobalText[260] ) != std::string::npos) {
+			std::string temp = GlobalText[260];
 			temp += ' ';
 			wsprintf( lpszStr1, src.c_str() );	
 			lpszStr2 = strtok( lpszStr1, temp.c_str() );
@@ -2447,8 +2447,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove( const string& src )
 			}
 			return false;
 		}
-		else if(src.find( "/move" ) != string::npos) {
-			string temp = "/move";
+		else if(src.find( "/move" ) != std::string::npos) {
+			std::string temp = "/move";
 			temp += ' ';
 			wsprintf( lpszStr1, src.c_str() );	
 #ifdef PBG_WOPS_MOVE_MAPNAME_JAPAN

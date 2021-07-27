@@ -94,9 +94,6 @@ SEASON3B::CNewUISystem::CNewUISystem()
 #ifdef YDG_ADD_NEW_DUEL_UI
 	m_pNewDuelWatchWindow = NULL;
 #endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-	m_pNewInGameShop = NULL;
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef YDG_ADD_DOPPELGANGER_UI
 	m_pNewDoppelGangerWindow = NULL;
 	m_pNewDoppelGangerFrame = NULL;
@@ -528,11 +525,6 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	if(m_pNewDuelWatchUserListWindow->Create(m_pNewUIMng, 640-57, 480-51) == false)
 		return false;
 #endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-	m_pNewInGameShop = new CNewUIInGameShop;
-	if(m_pNewInGameShop->Create(m_pNewUIMng, 0, 0) == false)
-		return false;
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
 #ifdef YDG_ADD_DOPPELGANGER_UI
 	m_pNewDoppelGangerWindow = new CNewUIDoppelGangerWindow;
@@ -703,10 +695,6 @@ void SEASON3B::CNewUISystem::UnloadMainSceneInterface()
 	SAFE_DELETE(m_pNewDuelWatchUserListWindow);
 #endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
 #endif	// YDG_FIX_MEMORY_LEAK_0905
-	
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-	SAFE_DELETE(m_pNewInGameShop);
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
 #ifdef YDG_ADD_DOPPELGANGER_UI
 	SAFE_DELETE(m_pNewDoppelGangerWindow);
@@ -798,11 +786,6 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		return;
 	}
 #endif //NEW_USER_INTERFACE_SHELL
-#ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-	// 인게임샵이 열렸으면 모든 창을 막는다
-	if(g_pInGameShop->IsInGameShop())
-		return;
-#endif //PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 	if(m_pNewUIMng) 
 	{
 		if(dwKey == SEASON3B::INTERFACE_FRIEND)
@@ -1264,28 +1247,6 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 			g_pQuestProgressByEtc->ProcessOpening();
 		}
 #endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		else if(dwKey == SEASON3B::INTERFACE_INGAMESHOP)
-		{
-#ifdef FOR_WORK
-			DebugAngel_Write("InGameShopStatue.Txt", "CallStack - CNewUISystem.Show()\r\n");
-#endif // FOR_WORK
-			HideAll();
-			g_pInGameShop->OpeningProcess();
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-#ifndef KJH_MOD_SHOP_SCRIPT_DOWNLOAD				// #ifndef - 정리할 때 지워야 하는 소스
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
-#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-			}
-#else //LDK_ADD_SCALEFORM
-#ifndef KJH_MOD_SHOP_SCRIPT_DOWNLOAD				// #ifndef - 정리할 때 지워야 하는 소스
-			g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
-#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-#endif //LDK_ADD_SCALEFORM
-		}
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef LDK_ADD_EMPIREGUARDIAN_UI
 		else if( dwKey == SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC )
 		{
@@ -1741,20 +1702,6 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 			m_pNewDuelWatchUserListWindow->ClosingProcess();
 		}
 #endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		else if(dwKey == SEASON3B::INTERFACE_INGAMESHOP)
-		{
-			g_pInGameShop->ClosingProcess();
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, false);
-			}
-#else //LDK_ADD_SCALEFORM
-			g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, false);
-#endif //LDK_ADD_SCALEFORM
-		}
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef YDG_ADD_DOPPELGANGER_UI
 		else if( dwKey == SEASON3B::INTERFACE_DOPPELGANGER_NPC )
 		{
@@ -2756,12 +2703,6 @@ CNewUIDuelWatchUserListWindow* SEASON3B::CNewUISystem::GetUI_pNewDuelWatchUserLi
 	return m_pNewDuelWatchUserListWindow;
 }
 #endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-CNewUIInGameShop* SEASON3B::CNewUISystem::GetUI_pNewInGameShop() const
-{
-	return m_pNewInGameShop;
-}
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
 #ifdef YDG_ADD_DOPPELGANGER_UI
 CNewUIDoppelGangerWindow* SEASON3B::CNewUISystem::GetUI_pNewDoppelGangerWindow() const

@@ -53,7 +53,7 @@ ItemAddOptioninfo::~ItemAddOptioninfo()
 
 }
 
-const bool ItemAddOptioninfo::OpenItemAddOptionInfoFile( const string& filename )
+const bool ItemAddOptioninfo::OpenItemAddOptionInfoFile( const std::string& filename )
 {
 	FILE *fp = ::fopen( filename.c_str(), "rb" );
 	if ( fp != NULL )
@@ -96,14 +96,14 @@ const bool ItemAddOptioninfo::OpenItemAddOptionInfoFile( const string& filename 
 //#define 7  SD 자동회복
 //#define 8  SD 회복량 증가
 
-void ItemAddOptioninfo::GetItemAddOtioninfoText( std::vector<string>& outtextlist, int type )
+void ItemAddOptioninfo::GetItemAddOtioninfoText( std::vector<std::string>& outtextlist, int type )
 {
 	int optiontype = 0;
 	int optionvalue = 0;
 
 	for( int i = 0; i < 2; ++i )
 	{
-		string text;
+		std::string text;
 		char TempText[100];
 
 		if( i == 0 )

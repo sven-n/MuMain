@@ -7,7 +7,6 @@
 #include "GCCertification.h"
 
 #include <string>
-using namespace std;
 
 #ifdef LEM_ADD_GAMECHU
 

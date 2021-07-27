@@ -10,7 +10,7 @@
 #ifdef KJH_MOD_LIBRARY_LINK_EACH_NATION
 #include <ISharemem.h>
 #else // KJH_MOD_LIBRARY_LINK_EACH_NATION
-#include "ShareMemory/ISharemem.h"
+#include "ISharemem.h"
 #endif // KJH_MOD_LIBRARY_LINK_EACH_NATION
 
 #ifdef LDK_ADD_GLOBAL_PORTAL_SYSTEM

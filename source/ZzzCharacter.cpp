@@ -4954,7 +4954,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 				VectorCopy ( o->Position, Position );
 				Position[2] += 100.f;
 
-				list<eBuffState> bufflist;
+				std::list<eBuffState> bufflist;
 				
 				//debuff
 				bufflist.push_back( eDeBuff_Poison ); 

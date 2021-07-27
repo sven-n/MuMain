@@ -79,9 +79,6 @@
 #include "NewUIDuelWatchMainFrameWindow.h"
 #include "NewUIDuelWatchUserListWindow.h"
 #endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-#include "NewUIInGameShop.h"
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef YDG_ADD_DOPPELGANGER_UI
 #include "NewUIDoppelGangerWindow.h"
 #include "NewUIDoppelGangerFrame.h"
@@ -263,9 +260,6 @@ namespace SEASON3B
 		CNewUIDuelWatchMainFrameWindow*	m_pNewDuelWatchMainFrameWindow;
 		CNewUIDuelWatchUserListWindow* m_pNewDuelWatchUserListWindow;
 #endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		CNewUIInGameShop* m_pNewInGameShop;
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef YDG_ADD_DOPPELGANGER_UI
 		CNewUIDoppelGangerWindow*		m_pNewDoppelGangerWindow;
 		CNewUIDoppelGangerFrame*		m_pNewDoppelGangerFrame;
@@ -376,9 +370,6 @@ namespace SEASON3B
 		CNewUIDuelWatchMainFrameWindow*	GetUI_pNewDuelWatchMainFrame() const;
 		CNewUIDuelWatchUserListWindow* GetUI_pNewDuelWatchUserList() const;
 #endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		CNewUIInGameShop* GetUI_pNewInGameShop() const;
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef YDG_ADD_DOPPELGANGER_UI
 		CNewUIDoppelGangerWindow*	GetUI_pNewDoppelGangerWindow() const;
 		CNewUIDoppelGangerFrame*	GetUI_pNewDoppelGangerFrame() const;

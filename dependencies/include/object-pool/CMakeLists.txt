@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
+project (object-pool-lib)
+add_subdirectory (src)
+add_subdirectory (src/example)
+add_subdirectory (src/unitTests)

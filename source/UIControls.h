@@ -39,8 +39,6 @@ BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight, int CoordType
 #define ID_UICEDIT 0x0001
 #define SLIDEHELP_TIMER 1003
 
-using namespace std;
-
 enum UISTATES
 {
 	UISTATE_NORMAL = 0, UISTATE_RESIZE, UISTATE_SCROLL, UISTATE_HIDE,
@@ -217,7 +215,7 @@ public:
 	void SendUIMessage(int iMessage, int iParam1, int iParam2);
 	void GetUIMessage();
 protected:
-	deque<UI_MESSAGE> m_MessageList;
+	std::deque<UI_MESSAGE> m_MessageList;
 	UI_MESSAGE m_WorkMessage;			// 현재 처리할 메시지 저장용
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -316,13 +314,13 @@ public:
 
 	virtual void ResetCheckedLine(BOOL bFlag = FALSE);			// 라인 체크 초기화
 	virtual BOOL HaveCheckedLine();								// 체크된 라인이 있나
-	virtual int GetCheckedLines(deque<T*> * pSelectLineList);	// 체크된 라인들 얻기
+	virtual int GetCheckedLines(std::deque<T*> * pSelectLineList);	// 체크된 라인들 얻기
 	virtual int GetLineNum() { return (m_bUseMultiline == TRUE ? m_RenderTextList.size() : m_TextList.size()); }
 
 	virtual void SLSetSelectLine(int iLineNum);					// 선택 라인 (1~라인수) , 0: 선택 없음
 	virtual void SLSelectPrevLine(int iLineNum = 1);			// 이전 라인으로 이동 (-)
 	virtual void SLSelectNextLine(int iLineNum = 1);			// 다음 라인으로 이동 (+)
-	virtual typename deque<T>::iterator SLGetSelectLine();		// 현재 라인 데이터 얻기
+	virtual typename std::deque<T>::iterator SLGetSelectLine();		// 현재 라인 데이터 얻기
 
 	virtual int SLGetSelectLineNum() { return m_iSelectLineNum; }
 
@@ -342,15 +340,15 @@ protected:
 	virtual void CalcLineNum() {}								// 줄 수 재계산 (멀티라인에서 사용)
 
 protected:
-	deque<T> m_TextList;
-	typename deque<T>::iterator m_TextListIter;
+	std::deque<T> m_TextList;
+	typename std::deque<T>::iterator m_TextListIter;
 
 	BOOL m_bUseSelectLine;				// 라인 선택 가능여부
 	BOOL m_bPressCursorKey;				// 키 입력 처리용a
 	int m_iSelectLineNum;				// 선택된 라인 번호
 
 	BOOL m_bUseMultiline;		// 멀티라인 사용
-	deque<T> m_RenderTextList;	// 출력용 (m_TextList 에서 가져온다)
+	std::deque<T> m_RenderTextList;	// 출력용 (m_TextList 에서 가져온다)
 
 	int m_iMaxLineCount;	// 최대 데이터수
 	int m_iCurrentRenderEndLine;
@@ -450,7 +448,7 @@ public:
 	virtual void DeleteText(const char* pszID);
 	virtual void SetNumRenderLine(int iLine);
 	GUILDLIST_TEXT * GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
-	deque<GUILDLIST_TEXT> & GetFriendList() { m_bForceEditList = TRUE; return m_TextList; }
+	std::deque<GUILDLIST_TEXT> & GetFriendList() { m_bForceEditList = TRUE; return m_TextList; }
 	void SetLayout(int iType) { m_iLayoutType = iType; }
 	const char* GetNameByNumber(BYTE byNumber);
 	void SetColumnWidth(UINT uiColumnNum, int iWidth) { if (uiColumnNum < 4) m_iColumnWidth[uiColumnNum] = iWidth; }
@@ -508,7 +506,7 @@ public:
 	virtual void DeleteText(DWORD dwLetterID);
 	virtual void SetNumRenderLine(int iLine);
 	LETTERLIST_TEXT * GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
-	deque<LETTERLIST_TEXT> & GetLetterList() { m_bForceEditList = TRUE; return m_TextList; }
+	std::deque<LETTERLIST_TEXT> & GetLetterList() { m_bForceEditList = TRUE; return m_TextList; }
 	
 	void SetColumnWidth(UINT uiColumnNum, int iWidth) { if (uiColumnNum < 4) m_iColumnWidth[uiColumnNum] = iWidth; }
 	int GetColumnWidth(UINT uiColumnNum) { return (uiColumnNum < 4 ? m_iColumnWidth[uiColumnNum] : 0); }
@@ -834,7 +832,7 @@ public:
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef multimap<int, RENDER_TEXT_DATA, less<int> > RTMap;
+typedef std::multimap<int, RENDER_TEXT_DATA, std::less<int> > RTMap;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 class CUIRenderTextOriginal : public IUIRenderText
 {
@@ -1052,9 +1050,9 @@ private:
 	void RemoveHistory(BOOL bClear);	// 저장개수 초과된 히스토리 제거
 	BOOL m_bHistoryMode;
 	char m_szTempText[MAX_TEXT_LENGTH + 1];				// 입력 중이던 라인 임시저장
-	deque<char*> m_HistoryList;
-	deque<char*>::iterator m_CurrentHistoryLine;
-	deque<char*>::iterator m_HistoryListIter;
+	std::deque<char*> m_HistoryList;
+	std::deque<char*>::iterator m_CurrentHistoryLine;
+	std::deque<char*>::iterator m_HistoryListIter;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1122,7 +1120,7 @@ struct SLIDE_QUEUE_DATA
 	BOOL m_bLastData;
 };
 
-typedef multimap<DWORD, SLIDE_QUEUE_DATA, less<DWORD> > SLIDE_QUEUE;
+typedef std::multimap<DWORD, SLIDE_QUEUE_DATA, std::less<DWORD> > SLIDE_QUEUE;
 
 class CUISlideHelp : public CUIControl
 {
@@ -1149,7 +1147,7 @@ public:
 
 	SLIDE_QUEUE m_SlideQueue;
 	SLIDE_QUEUE::iterator m_SlideQueueIter;
-	list <DWORD> m_RemoveQueueList;
+	std::list <DWORD> m_RemoveQueueList;
 
 protected:
 	void SlideMove();
@@ -1202,8 +1200,8 @@ protected:
 	int m_iCreateDelay;
 	int m_iLevelCap[SLIDE_LEVEL_MAX];
 	int m_iTextNumber[SLIDE_LEVEL_MAX];
-	list<char*> m_SlideTextList[SLIDE_LEVEL_MAX];
-	list<char*>::iterator m_SlideTextListIter;
+	std::list<char*> m_SlideTextList[SLIDE_LEVEL_MAX];
+	std::list<char*>::iterator m_SlideTextListIter;
 	float m_fHelpSlideSpeed;
 };
 

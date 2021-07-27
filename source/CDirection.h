@@ -17,9 +17,6 @@
 #include "CMVP1stDirection.h"
 #include "CKANTURUDirection.h"
 
-
-using namespace std;
-
 class CDirection : public Singleton <CDirection>
 {
 private:
@@ -40,7 +37,7 @@ private:
 	bool	m_bStateCheck;					// LHJ - 시작,끝 연출을 위해 카메라 처음 위치값을 한번만 넘겨주기 위해
 
 public:
-	vector<DirectionMonster> stl_Monster;
+	std::vector<DirectionMonster> stl_Monster;
 
 	bool	m_bOrderExit;					// LHJ - 강제 종료 체크
 	int		m_iTimeSchedule;				// LHJ - 연출 순서

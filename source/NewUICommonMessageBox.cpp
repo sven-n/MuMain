@@ -1260,7 +1260,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderButtons()
 bool SEASON3B::CServerLostMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK, 10.f))
 		return false;
@@ -1287,7 +1287,7 @@ CALLBACK_RESULT SEASON3B::CServerLostMsgBoxLayout::OkBtnDown(class CNewUIMessage
 bool SEASON3B::CGuildRequestMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
@@ -1323,7 +1323,7 @@ CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::CancelBtnDown(class CNewUIM
 bool SEASON3B::CGuildFireMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1351,7 +1351,7 @@ CALLBACK_RESULT SEASON3B::CGuildFireMsgBoxLayout::OkBtnDown(class CNewUIMessageB
 bool SEASON3B::CMapEnterWerwolfMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1411,7 +1411,7 @@ CALLBACK_RESULT SEASON3B::CMapEnterWerwolfMsgBoxLayout::OkBtnDown(class CNewUIMe
 bool CMapEnterGateKeeperMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1458,7 +1458,7 @@ CALLBACK_RESULT CMapEnterGateKeeperMsgBoxLayout::OkBtnDown(class CNewUIMessageBo
 bool SEASON3B::CPartyMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1494,7 +1494,7 @@ CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::CancelBtnDown(class CNewUIMessageB
 bool SEASON3B::CTradeMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1534,7 +1534,7 @@ CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::CancelBtnDown(class CNewUIMessageB
 bool SEASON3B::CTradeAlertMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1574,7 +1574,7 @@ CALLBACK_RESULT SEASON3B::CTradeAlertMsgBoxLayout::CancelBtnDown(class CNewUIMes
 bool SEASON3B::CGuildWarMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, 15.f))
 		return false;
@@ -1612,7 +1612,7 @@ CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::CancelBtnDown(class CNewUIMessa
 bool SEASON3B::CBattleSoccerMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, 15.f))
 		return false;
@@ -1650,7 +1650,7 @@ CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::CancelBtnDown(class CNewUIM
 bool SEASON3B::CServerImmigrationErrorMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -1673,7 +1673,7 @@ CALLBACK_RESULT SEASON3B::CServerImmigrationErrorMsgBoxLayout::OkBtnDown(class C
 bool SEASON3B::CPersonalshopCreateMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1713,7 +1713,7 @@ CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::CancelBtnDown(class C
 bool SEASON3B::CFenrirRepairMsgBoxLayout::SetLayout()
 {
 	CFenrirRepairMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1789,7 +1789,7 @@ bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
 {
 	extern int g_iCancelSkillTarget;
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1837,7 +1837,7 @@ bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
 {
 	extern int g_iCancelSkillTarget;
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1885,7 +1885,7 @@ CALLBACK_RESULT SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::CancelBtnDown(class 
 bool SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -1925,7 +1925,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout::CancelBtnDown(c
 bool SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -1954,7 +1954,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::OkBtnDown(clas
 bool SEASON3B::CGemIntegrationDisjointCheckMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;	
@@ -1994,7 +1994,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointCheckMsgBoxLayout::CancelBtnDow
 bool SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -2025,7 +2025,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::OkBtnDown(c
 bool SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2073,7 +2073,7 @@ CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::CancelBtnDown(class
 bool SEASON3B::CPCRoomItemGiveLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2110,7 +2110,7 @@ CALLBACK_RESULT SEASON3B::CPCRoomItemGiveLayout::CancelBtnDown(class CNewUIMessa
 bool SEASON3B::CHarvestEventLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2148,7 +2148,7 @@ CALLBACK_RESULT SEASON3B::CHarvestEventLayout::CancelBtnDown(class CNewUIMessage
 bool SEASON3B::CWhiteAngelEventLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2185,7 +2185,7 @@ CALLBACK_RESULT SEASON3B::CWhiteAngelEventLayout::CancelBtnDown(class CNewUIMess
 bool  SEASON3B::CLuckyItemMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2251,7 +2251,7 @@ CALLBACK_RESULT SEASON3B::CLuckyItemMsgBoxLayout::CancelBtnDown(class CNewUIMess
 bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2313,7 +2313,7 @@ CALLBACK_RESULT SEASON3B::CMixCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessa
 bool SEASON3B::CUseReviveCharmMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2350,7 +2350,7 @@ CALLBACK_RESULT SEASON3B::CUseReviveCharmMsgBoxLayout::CancelBtnDown(class CNewU
 bool SEASON3B::CUsePortalCharmMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2386,7 +2386,7 @@ CALLBACK_RESULT SEASON3B::CUsePortalCharmMsgBoxLayout::CancelBtnDown(class CNewU
 bool SEASON3B::CReturnPortalCharmMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2423,7 +2423,7 @@ bool SEASON3B::CDuelCreateErrorMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -2448,7 +2448,7 @@ bool SEASON3B::CDuelWatchErrorMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -2476,7 +2476,7 @@ bool SEASON3B::CDoppelGangerMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -2499,7 +2499,7 @@ bool SEASON3B::CGuildRelationShipMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2539,7 +2539,7 @@ bool SEASON3B::CCastleMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2606,7 +2606,7 @@ bool SEASON3B::CSiegeLevelMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -2631,7 +2631,7 @@ bool SEASON3B::CSiegeGiveUpMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2666,7 +2666,7 @@ bool SEASON3B::CGatemanMoneyMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -2690,7 +2690,7 @@ bool SEASON3B::CGatemanFailMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -2714,7 +2714,7 @@ CALLBACK_RESULT SEASON3B::CGatemanFailMsgBoxLayout::OkBtnDown(class CNewUIMessag
 bool SEASON3B::CQuestGiveUpMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2750,7 +2750,7 @@ CALLBACK_RESULT SEASON3B::CQuestGiveUpMsgBoxLayout::CancelBtnDown(class CNewUIMe
 bool SEASON3B::CQuestCountLimitMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -2780,7 +2780,7 @@ CALLBACK_RESULT SEASON3B::CQuestCountLimitMsgBoxLayout::OkBtnDown(class CNewUIMe
 bool SEASON3B::CCanNotUseWordMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -2799,7 +2799,7 @@ bool SEASON3B::CCanNotUseWordMsgBoxLayout::SetLayout()
 bool SEASON3B::CHighValueItemCheckMsgBoxLayout::SetLayout()
 {
 	CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2876,7 +2876,7 @@ CALLBACK_RESULT SEASON3B::CHighValueItemCheckMsgBoxLayout::CancelBtnDown(class C
 bool SEASON3B::CUseFruitMsgBoxLayout::SetLayout()
 {
 	CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -2952,7 +2952,7 @@ CALLBACK_RESULT SEASON3B::CUseFruitMsgBoxLayout::CancelBtnDown(class CNewUIMessa
 bool SEASON3B::CUsePartChargeFruitMsgBoxLayout::SetLayout()
 {
 	CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -3023,7 +3023,7 @@ CALLBACK_RESULT SEASON3B::CUsePartChargeFruitMsgBoxLayout::CancelBtnDown(class C
 bool SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::SetLayout()
 {
 	CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -3138,7 +3138,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::CancelBtnDown
 bool SEASON3B::CPersonalShopItemBuyMsgBoxLayout::SetLayout()
 {
 	CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -3189,7 +3189,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::CancelBtnDown(class 
 bool SEASON3B::CPCRoomPointItemBuyMsgBoxLayout::SetLayout()
 {
 	CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -3239,7 +3239,7 @@ CALLBACK_RESULT SEASON3B::CPCRoomPointItemBuyMsgBoxLayout::CancelBtnDown(class C
 bool SEASON3B::COsbourneMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -3268,7 +3268,7 @@ CALLBACK_RESULT SEASON3B::COsbourneMsgBoxLayout::OkBtnDown(class CNewUIMessageBo
 bool SEASON3B::CGuildOutPerson::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -3293,7 +3293,7 @@ CALLBACK_RESULT SEASON3B::CGuildOutPerson::OkBtnDown(class CNewUIMessageBoxBase*
 bool SEASON3B::CGuildBreakMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -3334,7 +3334,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakMsgBoxLayout::CancelBtnDown(class CNewUIMes
 bool SEASON3B::CGuildPerson_Get_Out::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -3374,7 +3374,7 @@ CALLBACK_RESULT SEASON3B::CGuildPerson_Get_Out::CancelBtnDown(class CNewUIMessag
 bool SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -3407,7 +3407,7 @@ CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::CancelBtnDo
 bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
@@ -3527,7 +3527,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Result_Set_Temple::OkBtnDown(class CNewUIMes
 bool SEASON3B::CCry_Wolf_Ing_Set_Temple::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
@@ -3551,7 +3551,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Ing_Set_Temple::OkBtnDown(class CNewUIMessag
 bool SEASON3B::CCry_Wolf_Destroy_Set_Temple::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
@@ -3575,7 +3575,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Destroy_Set_Temple::OkBtnDown(class CNewUIMe
 bool SEASON3B::CCry_Wolf_Wat_Set_Temple1::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
@@ -3599,7 +3599,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Wat_Set_Temple1::OkBtnDown(class CNewUIMessa
 bool SEASON3B::CCry_Wolf_Dont_Set_Temple1::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
@@ -3624,7 +3624,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Dont_Set_Temple1::OkBtnDown(class CNewUIMess
 bool SEASON3B::CCry_Wolf_Dont_Set_Temple::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
@@ -3648,7 +3648,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Dont_Set_Temple::OkBtnDown(class CNewUIMessa
 bool SEASON3B::CCry_Wolf_Set_Temple1::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
@@ -3672,7 +3672,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Set_Temple1::OkBtnDown(class CNewUIMessageBo
 bool SEASON3B::CCry_Wolf_Set_Temple::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
@@ -3698,7 +3698,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Set_Temple::OkBtnDown(class CNewUIMessageBox
 bool SEASON3B::CMaster_Level_Interface::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
@@ -3745,7 +3745,7 @@ CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::OkBtnDown(class CNewUIMessage
 bool SEASON3B::CCry_Wolf_Get_Temple::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
@@ -3806,7 +3806,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::OkBtnDown(class CNewUIMessageBox
 bool SEASON3B::CUnionGuild_Break_MsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
@@ -3847,7 +3847,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::OkBtnDown(class CNewUI
 bool SEASON3B::CUnionGuild_Out_MsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return false;
@@ -3872,7 +3872,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Out_MsgBoxLayout::OkBtnDown(class CNewUIMe
 bool SEASON3B::CUseSantaInvitationMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return FALSE;
@@ -3919,7 +3919,7 @@ CALLBACK_RESULT SEASON3B::CUseSantaInvitationMsgBoxLayout::CancelBtnDown(class C
 bool CSantaTownLeaveMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return FALSE;
@@ -3956,7 +3956,7 @@ CALLBACK_RESULT CSantaTownLeaveMsgBoxLayout::CancelBtnDown(class CNewUIMessageBo
 bool CSantaTownSantaMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return FALSE;
@@ -3992,7 +3992,7 @@ CALLBACK_RESULT CSantaTownSantaMsgBoxLayout::CancelBtnDown(class CNewUIMessageBo
 bool SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return FALSE;
@@ -4020,7 +4020,7 @@ CALLBACK_RESULT SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::OkBtnDown(class CNewU
 bool SEASON3B::CRegistOverLuckyCoinMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return FALSE;
@@ -4044,7 +4044,7 @@ CALLBACK_RESULT SEASON3B::CRegistOverLuckyCoinMsgBoxLayout::OkBtnDown(class CNew
 bool SEASON3B::CExchangeLuckyCoinMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return FALSE;
@@ -4073,7 +4073,7 @@ CALLBACK_RESULT SEASON3B::CExchangeLuckyCoinMsgBoxLayout::OkBtnDown(class CNewUI
 bool SEASON3B::CExchangeLuckyCoinInvenErrMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return FALSE;
@@ -4098,7 +4098,7 @@ CALLBACK_RESULT SEASON3B::CExchangeLuckyCoinInvenErrMsgBoxLayout::OkBtnDown(clas
 bool SEASON3B::CGambleBuyMsgBoxLayout::SetLayout()
 {
 	CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return false;
@@ -4154,7 +4154,7 @@ CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::CancelBtnDown(class CNewUIMess
 bool SEASON3B::CEmpireGuardianMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return FALSE;
@@ -4181,7 +4181,7 @@ CALLBACK_RESULT SEASON3B::CEmpireGuardianMsgBoxLayout::OkBtnDown(class CNewUIMes
 bool SEASON3B::CUnitedMarketPlaceMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
 		return FALSE;
@@ -4202,7 +4202,7 @@ CALLBACK_RESULT SEASON3B::CUnitedMarketPlaceMsgBoxLayout::OkBtnDown(class CNewUI
 bool SEASON3B::CBuffUseOverlapMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return FALSE;
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return FALSE;

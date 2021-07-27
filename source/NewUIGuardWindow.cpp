@@ -50,7 +50,7 @@ bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	LoadImages();
 
-	list<unicode::t_string> ltext;
+	std::list<unicode::t_string> ltext;
 	ltext.push_back(GlobalText[1448]);
 	ltext.push_back(GlobalText[1439]);
 	ltext.push_back(GlobalText[1449]);
@@ -173,7 +173,7 @@ bool CNewUIGuardWindow::Render()
 	
 	RenderFrame();
 	
-	static list<unicode::t_string> ltext;
+	static std::list<unicode::t_string> ltext;
 	if( m_eTimeType == CASTLESIEGE_STATE_REGSIEGE )
 	{
 		ltext.push_back(GlobalText[1448]);

@@ -12,7 +12,6 @@
 #include "ServerGroup.h"
 
 #ifdef ASG_ADD_SERVER_LIST_SCRIPTS
-using namespace std;
 
 #define SLM_MAX_SERVER_NAME_LENGTH	32		// 서버 이름 길이
 #define SLM_MAX_SERVER_COUNT		15		// 서버군 내의 서버 개수
@@ -24,10 +23,10 @@ struct SServerGroupInfo
 	BYTE	m_byPos;							// 서버군 위치(좌:0, 우:1, 하:2)
 	BYTE	m_bySequence;						// 서버군 순서
 	BYTE	m_abyNonPVP[SLM_MAX_SERVER_COUNT];	// NonPVP 서버인가?(서버군에서 각각 서버의 NonPVP 설정)
-	string	m_strDescript;						// 서버군 설명 문자열
+	std::string	m_strDescript;						// 서버군 설명 문자열
 };
 
-typedef map<WORD, SServerGroupInfo> ServerListScriptMap;
+typedef std::map<WORD, SServerGroupInfo> ServerListScriptMap;
 #endif	// ASG_ADD_SERVER_LIST_SCRIPTS
 
 typedef std::map<int, CServerGroup*>	type_mapServerGroup;

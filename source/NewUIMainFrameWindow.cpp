@@ -36,9 +36,6 @@
 #ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 #include "./Time/CTimCheck.h"
 #endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#include "InGameShopSystem.h"
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -938,68 +935,6 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
 			}
 		}
 #endif //NEW_USER_INTERFACE_SHELL
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		else if(m_BtnCShop.UpdateMouseEvent() == true)
-		{
-			// 인게임샵이 열리면 안돼는 상태
-			if(g_pInGameShop->IsInGameShopOpen() == false)
-				return false;
-
-#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-			// 스크립트 다운로드
-			if( g_InGameShopSystem->IsScriptDownload() == true )
-			{
-				if( g_InGameShopSystem->ScriptDownload() == false )
-					return false;
-			}
-			
-			// 배너 다운로드
-			if( g_InGameShopSystem->IsBannerDownload() == true )
-			{
-#ifdef KJH_FIX_INGAMESHOP_INIT_BANNER
-				if( g_InGameShopSystem->BannerDownload() == true )
-				{
-					// 배너 초기화
-					g_pInGameShop->InitBanner(g_InGameShopSystem->GetBannerFileName(), g_InGameShopSystem->GetBannerURL());
-				}
-#else // KJH_FIX_INGAMESHOP_INIT_BANNER
-				g_InGameShopSystem->BannerDownload();
-#endif // KJH_FIX_INGAMESHOP_INIT_BANNER
-			}
-#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-			
-			if( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == false)
-			{
-				// 샵 Open 요청중 상태가 아니면 
-				if( g_InGameShopSystem->GetIsRequestShopOpenning() == false )		
-				{
-					SendRequestIGS_CashShopOpen(0);		// 샵 Open요청
-					g_InGameShopSystem->SetIsRequestShopOpenning(true);
-
-#ifdef LDK_ADD_SCALEFORM
-					if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-					{
-#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-						g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
-#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-					}
-#else //LDK_ADD_SCALEFORM
-#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-					g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
-#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-#endif //LDK_ADD_SCALEFORM
-
-				}
-			}
-			else
-			{
-				SendRequestIGS_CashShopOpen(1);		// 샵 Close요청
-				g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
-			}		
-
-			return true;
-		}
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	}
 
 	return false;
@@ -1146,7 +1081,7 @@ bool SEASON3B::CNewUIItemHotKey::UpdateKeyEvent()
 #ifdef PSW_SECRET_ITEM
 		if( ( pItem->Type>=ITEM_POTION+78 && pItem->Type<=ITEM_POTION+82 ) )
 		{
-			list<eBuffState> secretPotionbufflist;
+			std::list<eBuffState> secretPotionbufflist;
 			secretPotionbufflist.push_back( eBuff_SecretPotion1 );
 			secretPotionbufflist.push_back( eBuff_SecretPotion2 );
 			secretPotionbufflist.push_back( eBuff_SecretPotion3 );

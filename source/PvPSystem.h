@@ -1,4 +1,3 @@
-using namespace std;
 
 #ifdef _PVP_BLOCK_PVP_CHAR
 bool CanJoinServer(int PK);

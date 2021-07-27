@@ -130,19 +130,17 @@ struct SRequestRewardText
 	ITEM*	m_pItem;
 };
 
-using namespace std;
-
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
-typedef map<DWORD, SNPCDialogue> NPCDialogueMap;
+typedef std::map<DWORD, SNPCDialogue> NPCDialogueMap;
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
-typedef map<DWORD, SQuestProgress> QuestProgressMap;
+typedef std::map<DWORD, SQuestProgress> QuestProgressMap;
 #ifdef ASG_MOD_QUEST_WORDS_SCRIPTS
-typedef map<int, string> QuestWordsMap;
+typedef std::map<int, std::string> QuestWordsMap;
 #else	// ASG_MOD_QUEST_WORDS_SCRIPTS
 typedef map<int, SQuestWords> QuestWordsMap;
 #endif	// ASG_MOD_QUEST_WORDS_SCRIPTS
-typedef map<DWORD, SQuestRequestReward> QuestRequestRewardMap;
-typedef list<DWORD> DWordList;
+typedef std::map<DWORD, SQuestRequestReward> QuestRequestRewardMap;
+typedef std::list<DWORD> DWordList;
 
 class CQuestMng  
 {
@@ -154,7 +152,7 @@ protected:
 	QuestWordsMap			m_mapQuestWords;		// 퀘스트 대사(대사 번호로 검색)
 	QuestRequestRewardMap	m_mapQuestRequestReward;// 퀘스트 요구 사항, 보상(퀘스트 인덱스로 검색)
 
-	map<WORD, bool>			m_mapEPRequestRewardState;	// 퀘스트 요구 사항이 있는 QS가 진행중인지 아닌지 여부(EP 번호로 검색)
+	std::map<WORD, bool>			m_mapEPRequestRewardState;	// 퀘스트 요구 사항이 있는 QS가 진행중인지 아닌지 여부(EP 번호로 검색)
 							//퀘스트 확인 버튼 누르기 전까지는 true, 누른 후 부터 false로 세팅 됨.
 
 	int		m_nNPCIndex;			// 현재 선택된 NPC 인덱스.

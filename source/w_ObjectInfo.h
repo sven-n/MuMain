@@ -62,8 +62,8 @@ public:
 	
 
 public:
-	typedef vector<INTERPOLATE_FACTOR>		VEC_INTERPOLATES;
-	typedef vector<INTERPOLATE_FACTOR_F>	VEC_INTERPOLATES_F;
+	typedef std::vector<INTERPOLATE_FACTOR>		VEC_INTERPOLATES;
+	typedef std::vector<INTERPOLATE_FACTOR_F>	VEC_INTERPOLATES_F;
 	VEC_INTERPOLATES						m_vecInterpolatesAngle;
 	VEC_INTERPOLATES						m_vecInterpolatesPos;
 	VEC_INTERPOLATES_F						m_vecInterpolatesScale;

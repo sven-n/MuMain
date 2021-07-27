@@ -76,8 +76,8 @@ private:
 	PetObject();
 	
 public:
-	typedef map< ActionType, BoostWeak_Ptr(PetAction) > ActionMap;
-	typedef map< ActionType, float > SpeedMap;
+	typedef std::map< ActionType, BoostWeak_Ptr(PetAction) > ActionMap;
+	typedef std::map< ActionType, float > SpeedMap;
 
 private:
 	ActionMap m_actionMap;

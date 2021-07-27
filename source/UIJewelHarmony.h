@@ -136,7 +136,7 @@ public:
 	
 private:
 	JewelHarmonyInfo();
-	const bool OpenJewelHarmonyInfoFile( const string& filename );
+	const bool OpenJewelHarmonyInfoFile( const std::string& filename );
 
 private:
 	HARMONYJEWELOPTION		m_OptionData[MAXHARMONYJEWELOPTIONTYPE][MAXHARMONYJEWELOPTIONINDEX];
@@ -149,6 +149,6 @@ const HARMONYJEWELOPTION& JewelHarmonyInfo::GetHarmonyJewelOptionInfo( int type,
 }
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-extern string g_strSelectedML;
+extern std::string g_strSelectedML;
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #endif // !defined(AFX_UIREFINERY_H__29D29488_91BA_4EB6_AEE3_F936A9C872EE__INCLUDED_)

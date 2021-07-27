@@ -39,7 +39,7 @@ bool SaveTerrainAttribute(char *FileName, int iMapNumber);
 void AddTerrainAttribute ( int x, int y, BYTE att );
 void SubTerrainAttribute ( int x, int y, BYTE att );
 void AddTerrainAttributeRange ( int x, int y, int dx, int dy, BYTE att, BYTE Add=0 );
-void SetTerrainWaterState( list<int>& terrainIndex, int state = 0 );
+void SetTerrainWaterState(std::list<int>& terrainIndex, int state = 0 );
 void CreateGround(int Type,int x,int y,float Angle);
 void DeleteGround(int x,int y);
 void RenderGrounds();

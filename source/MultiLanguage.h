@@ -22,7 +22,7 @@ private:
 	CMultiLanguage()	{ ms_Singleton = this; };				
 
 public:
-	CMultiLanguage(string strSelectedML);
+	CMultiLanguage(std::string strSelectedML);
 	~CMultiLanguage()	{ ms_Singleton = 0; };
 
 	BYTE GetLanguage();				// Getters
@@ -30,10 +30,10 @@ public:
 	int GetNumByteForOneCharUTF8();
 
 	BOOL IsCharUTF8(const char* pszText);
-	int	 ConvertCharToWideStr(wstring& wstrDest, LPCSTR lpString);
-	int  ConvertWideCharToStr(string& strDest, LPCWSTR lpwString, int iConversionType = CP_UTF8);
-	void ConvertANSIToUTF8OrViceVersa(string& strDest, LPCSTR lpString);
-	int	 GetClosestBlankFromCenter(const wstring wstrTarget); 
+	int	 ConvertCharToWideStr(std::wstring& wstrDest, LPCSTR lpString);
+	int  ConvertWideCharToStr(std::string& strDest, LPCWSTR lpwString, int iConversionType = CP_UTF8);
+	void ConvertANSIToUTF8OrViceVersa(std::string& strDest, LPCSTR lpString);
+	int	 GetClosestBlankFromCenter(const std::wstring wstrTarget);
 	
 	WPARAM ConvertFulltoHalfWidthChar(DWORD wParam);
 	// wrapper functions 

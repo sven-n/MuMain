@@ -46,7 +46,7 @@ namespace SEASON3B
 }
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-extern string g_strSelectedML;
+extern std::string g_strSelectedML;
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 #endif // !defined(AFX_NEWUISLIDEWINDOW_H__9A5B5D3E_1F9A_4778_8DC7_5367287F45AC__INCLUDED_)

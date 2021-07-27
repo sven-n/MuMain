@@ -191,7 +191,7 @@ void CUIManager::CloseAll()
 	g_pUIPopup->CancelPopup();
 }
 
-bool CUIManager::CloseInterface( list<DWORD>& dwInterfaceFlag, DWORD dwExtraData )
+bool CUIManager::CloseInterface(std::list<DWORD>& dwInterfaceFlag, DWORD dwExtraData )
 {
 	return true;
 }
@@ -253,7 +253,7 @@ bool CUIManager::IsCanOpen( DWORD dwInterfaceFlag )
 	return true;
 }
 
-void CUIManager::GetInterfaceAll( list<DWORD>& outflag )
+void CUIManager::GetInterfaceAll(std::list<DWORD>& outflag )
 {
 	for ( DWORD flag = INTERFACE_FRIEND; flag < INTERFACE_MAX_COUNT; ++flag )
 	{
@@ -261,16 +261,16 @@ void CUIManager::GetInterfaceAll( list<DWORD>& outflag )
 	}
 }
 
-void CUIManager::GetInsertInterface( list<DWORD>& outflag, DWORD insertflag )
+void CUIManager::GetInsertInterface(std::list<DWORD>& outflag, DWORD insertflag )
 {
 	outflag.push_back( insertflag );
 }
 
-void CUIManager::GetDeleteInterface( list<DWORD>& outflag, DWORD deleteflag )
+void CUIManager::GetDeleteInterface(std::list<DWORD>& outflag, DWORD deleteflag )
 {
-	for ( list<DWORD>::iterator iter = outflag.begin(); iter != outflag.end(); )
+	for (std::list<DWORD>::iterator iter = outflag.begin(); iter != outflag.end(); )
 	{
-		list<DWORD>::iterator Tempiter = iter;
+		std::list<DWORD>::iterator Tempiter = iter;
 		++iter;
 		DWORD Tempflag = *Tempiter;
 
@@ -296,7 +296,7 @@ bool CUIManager::Open( DWORD dwInterface, DWORD dwExtraData )
 	if( LogOut == true) 
 		return false;
 	
-	list<DWORD> closeinterfaceflag;
+	std::list<DWORD> closeinterfaceflag;
 	// 자기자신은 제외한 모든 인터페이스
 	GetInterfaceAll( closeinterfaceflag );
 	GetDeleteInterface( closeinterfaceflag, dwInterface );
@@ -399,7 +399,7 @@ bool CUIManager::Close( DWORD dwInterface, DWORD dwExtraData )
 			bool bResult = true;
 			if( bResult )
 			{
-				list<DWORD> closeinterfaceflag;
+				std::list<DWORD> closeinterfaceflag;
 
 				GetInsertInterface( closeinterfaceflag, INTERFACE_TRADE );
 				GetInsertInterface( closeinterfaceflag, INTERFACE_STORAGE );
@@ -413,7 +413,7 @@ bool CUIManager::Close( DWORD dwInterface, DWORD dwExtraData )
 				bResult = CloseInterface( closeinterfaceflag, dwExtraData );
 				if( bResult )
 				{
-					list<DWORD> closeflag;
+					std::list<DWORD> closeflag;
 					GetInsertInterface( closeflag, dwInterface );
 					CloseInterface( closeflag, dwExtraData );
 				}
@@ -428,12 +428,12 @@ bool CUIManager::Close( DWORD dwInterface, DWORD dwExtraData )
 	case INTERFACE_NPCSHOP:
 	case INTERFACE_GUARDSMAN:
 		{
-			list<DWORD> closeinterfaceflag;
+		std::list<DWORD> closeinterfaceflag;
 			GetInsertInterface( closeinterfaceflag, dwInterface );
 			bool bResult = CloseInterface( closeinterfaceflag, dwExtraData );
 			if( bResult )
 			{
-				list<DWORD> closeflag;
+				std::list<DWORD> closeflag;
 				GetInsertInterface( closeflag, INTERFACE_INVENTORY );
 				CloseInterface( closeflag, dwExtraData );
 			}
@@ -441,7 +441,7 @@ bool CUIManager::Close( DWORD dwInterface, DWORD dwExtraData )
 		break;
 	default:
 		{
-			list<DWORD> closeinterfaceflag;
+			std::list<DWORD> closeinterfaceflag;
 			GetInsertInterface( closeinterfaceflag, dwInterface );	
 			CloseInterface( closeinterfaceflag, dwExtraData );
 		}

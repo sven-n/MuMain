@@ -59,8 +59,8 @@ int CutStr(const char* pszSrcText, char * pTextOut, const int iTargetPixelWidth,
 
 	int iConversionType = (g_pMultiLanguage->IsCharUTF8(pszSrcText)) ? CP_UTF8 : g_pMultiLanguage->GetCodePage();
 
-	wstring wstrUTF16 = L""; 
-	string strText = "";
+	std::wstring wstrUTF16 = L"";
+	std::string strText = "";
 	g_pMultiLanguage->ConvertCharToWideStr(wstrUTF16, pszSrcText);
 	int iCharIndex = 0, iLineIndex = 0;
 	int iScreenRatePixelWidth = iTargetPixelWidth*g_fScreenRate_x-5;				// 타겟 픽셀 길이를 스크린에 따라 유동적으로 바꾼다.(-5은 여백을 남기기 위함)
@@ -83,7 +83,7 @@ int CutStr(const char* pszSrcText, char * pTextOut, const int iTargetPixelWidth,
 			// 빈칸이 있을 경우 바로 전 빈칸까지 
 			// 빈칸이 없을 경우 바로 전의 글자까지 UTF-8로 변환한 후 저장
 			int iPosLastSpace = wstrUTF16.find_last_of(L" ", iCharIndex);
-			iCharIndex = (iPosLastSpace == wstring::npos) ? iCharIndex-1 : iPosLastSpace;
+			iCharIndex = (iPosLastSpace == std::wstring::npos) ? iCharIndex-1 : iPosLastSpace;
 
 			g_pMultiLanguage->ConvertWideCharToStr(strText, (wstrUTF16.substr(0, iCharIndex+1)).c_str(), iConversionType);
 			strncpy(pTextOut, strText.c_str(), iOutStrLength);
@@ -356,7 +356,7 @@ void CUIMessage::GetUIMessage()
 {
 	if (m_MessageList.empty()) return;
 
-	deque<UI_MESSAGE>::iterator msgiter = m_MessageList.begin();
+	std::deque<UI_MESSAGE>::iterator msgiter = m_MessageList.begin();
 	m_WorkMessage.m_iMessage = msgiter->m_iMessage;
 	m_WorkMessage.m_iParam1 = msgiter->m_iParam1;
 	m_WorkMessage.m_iParam2 = msgiter->m_iParam2;
@@ -728,7 +728,7 @@ void CUITextListBox<T>::Clear()
 template <class T>
 void CUITextListBox<T>::ResetCheckedLine(BOOL bFlag)
 {
-	deque<T>::iterator EndIter = m_TextList.end();
+	std::deque<T>::iterator EndIter = m_TextList.end();
 	for (m_TextListIter = m_TextList.begin(); m_TextListIter != EndIter; ++m_TextListIter)
 	{
 		m_TextListIter->m_bIsSelected = bFlag;
@@ -738,7 +738,7 @@ void CUITextListBox<T>::ResetCheckedLine(BOOL bFlag)
 template <class T>
 BOOL CUITextListBox<T>::HaveCheckedLine()
 {
-	deque<T>::iterator EndIter = m_TextList.end();
+	std::deque<T>::iterator EndIter = m_TextList.end();
 	for (m_TextListIter = m_TextList.begin(); m_TextListIter != EndIter; ++m_TextListIter)
 	{
 		if (m_TextListIter->m_bIsSelected == TRUE) return TRUE;
@@ -747,10 +747,10 @@ BOOL CUITextListBox<T>::HaveCheckedLine()
 }
 
 template <class T>
-int CUITextListBox<T>::GetCheckedLines(deque<T*> * pSelectLineList)
+int CUITextListBox<T>::GetCheckedLines(std::deque<T*> * pSelectLineList)
 {
 	int iSelectLineNum = 0;
-	deque<T>::iterator EndIter = m_TextList.end();
+	std::deque<T>::iterator EndIter = m_TextList.end();
 	for (m_TextListIter = m_TextList.begin(); m_TextListIter != EndIter; ++m_TextListIter)
 	{
 		if (m_TextListIter->m_bIsSelected == TRUE)
@@ -799,7 +799,7 @@ void CUITextListBox<T>::SLSelectNextLine(int iLineNum)
 
 template <class T>
 
-typename deque<T>::iterator CUITextListBox<T>::SLGetSelectLine()
+typename std::deque<T>::iterator CUITextListBox<T>::SLGetSelectLine()
 {
 	if (m_TextList.empty())
 	{
@@ -809,7 +809,7 @@ typename deque<T>::iterator CUITextListBox<T>::SLGetSelectLine()
 	else if (m_iSelectLineNum == 0) return m_TextList.end();
 
 	int iLineCount = 1;
-	for (deque<T>::iterator resultIter = m_TextList.begin(); resultIter != m_TextList.end(); ++resultIter, ++iLineCount)
+	for (std::deque<T>::iterator resultIter = m_TextList.begin(); resultIter != m_TextList.end(); ++resultIter, ++iLineCount)
 	{
 		if (iLineCount == m_iSelectLineNum) return resultIter;
 	}
@@ -1721,7 +1721,7 @@ void CUISimpleChatListBox::CalcLineNum()
 	}
 
 	m_RenderTextList.clear();
-	deque<WHISPER_TEXT>::reverse_iterator iter;
+	std::deque<WHISPER_TEXT>::reverse_iterator iter;
 	for (iter = m_TextList.rbegin(); iter != m_TextList.rend(); ++iter)
 	{
 		AddTextToRenderList(iter->m_szID, iter->m_szText, iter->m_iType, iter->m_iColor);
@@ -1993,7 +1993,7 @@ void CUIChatPalListBox::MakeTitleText(char * pszTitleText)
 {
 	if (pszTitleText == NULL || m_TextList.empty() == TRUE) return;
 	int iNameNum = 0;
-	deque<GUILDLIST_TEXT>::reverse_iterator riter;
+	std::deque<GUILDLIST_TEXT>::reverse_iterator riter;
 	for (riter = m_TextList.rbegin(); riter != m_TextList.rend(); ++riter)
 	{
 		if (strncmp(riter->m_szID, Hero->ID, MAX_ID_SIZE) != 0)
@@ -2717,7 +2717,7 @@ void CUILetterTextListBox::CalcLineNum()
 	}
 
 	m_RenderTextList.clear();
-	deque<LETTER_TEXT>::reverse_iterator iter;
+	std::deque<LETTER_TEXT>::reverse_iterator iter;
 	for (iter = m_TextList.rbegin(); iter != m_TextList.rend(); ++iter)
 	{
 		// 텍스트 만들기
@@ -3791,7 +3791,7 @@ void CUITextInputBox::SetText(const char * pszText)
 		return ;
 	}
 	
-	wstring wstrText;
+	std::wstring wstrText;
 	g_pMultiLanguage->ConvertCharToWideStr(wstrText, pszText);
 	
 	if (wstrText.length() > MAX_TEXT_LENGTH) return;
@@ -5138,11 +5138,11 @@ void CUISlideHelp::AddSlide(int iLoopCount, int iLoopDelay, const char * pszText
 
 		if (iType == 1)	// 긴급 메시지
 		{
-			m_SlideQueue.insert(pair<DWORD, SLIDE_QUEUE_DATA>(0, slidedata));
+			m_SlideQueue.insert(std::pair<DWORD, SLIDE_QUEUE_DATA>(0, slidedata));
 		}
 		else
 		{
-			m_SlideQueue.insert(pair<DWORD, SLIDE_QUEUE_DATA>(m_dwCurrentSecond + i * iLoopDelay, slidedata));
+			m_SlideQueue.insert(std::pair<DWORD, SLIDE_QUEUE_DATA>(m_dwCurrentSecond + i * iLoopDelay, slidedata));
 		}
 	}
 }

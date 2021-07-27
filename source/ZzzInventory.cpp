@@ -3897,7 +3897,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 #endif	// ASG_ADD_LEAP_OF_CONTROL_TOOLTIP_TEXT
 
-		string timetext;
+		std::string timetext;
 		g_StringTime( Item_data.m_Time, timetext, true );
 		sprintf(TextList[TextNum], timetext.c_str() );
 		TextListColor[TextNum] = TEXT_COLOR_PURPLE;
@@ -4412,7 +4412,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 
-		string timetext;
+		std::string timetext;
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 		g_StringTime( Item_data.m_Time, timetext, true );
 		sprintf(TextList[TextNum], timetext.c_str() );
@@ -4427,7 +4427,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 
-		string timetext;
+		std::string timetext;
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 		g_StringTime( Item_data.m_Time, timetext, true );
 		sprintf(TextList[TextNum], timetext.c_str() );
@@ -4442,7 +4442,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 
-		string timetext;
+		std::string timetext;
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 		g_StringTime( Item_data.m_Time, timetext, true );
 		sprintf(TextList[TextNum], timetext.c_str() );
@@ -6641,7 +6641,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 
 	if( ip->option_380 != 0 )
 	{
-		std::vector<string> Text380;
+		std::vector<std::string> Text380;
 
 		if( g_pItemAddOptioninfo )
 		{
@@ -15141,11 +15141,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 #ifdef PBG_ADD_ITEMRESIZE
 	int ScreenPos_X=0, ScreenPos_Y=0;
 	Projection(Position,&ScreenPos_X, &ScreenPos_Y);
-	if(g_pInGameShop->IsInGameShopRect(ScreenPos_X, ScreenPos_Y))
-	{
-		o->Scale = Scale * g_pInGameShop->GetRateScale();
-	}
-	else
 #endif //PBG_ADD_ITEMRESIZE
 #ifdef NEW_USER_INTERFACE
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP) == true) {
@@ -15231,22 +15226,6 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		}
 	}
 
-#ifdef PBG_ADD_ITEMRESIZE	
-	// 인게임샵 위치 재조정
-	if(g_pInGameShop->IsInGameShopRect(sx, sy))
-	{
-		// 인게임샵 좌표 조정
-		g_pInGameShop->SetConvertInvenCoord(Type,Width,Height);
-		// 인게임샵 스케일 조정
-		g_pInGameShop->SetRateScale(Type);
-
-		// 인벤의 사이즈조절값을 인게임샵으로 적용
-		sx += g_pInGameShop->GetConvertPos().x;
-		sy += g_pInGameShop->GetConvertPos().y;
-		Width = g_pInGameShop->GetConvertSize().x;
-		Height = g_pInGameShop->GetConvertSize().y;
-	}
-#endif //PBG_ADD_ITEMRESIZE
 	if(Type>=ITEM_SWORD && Type<ITEM_SWORD+MAX_ITEM_INDEX)
 	{
 		sx += Width*0.8f;

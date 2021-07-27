@@ -30,8 +30,6 @@
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 
-using namespace std;
-
 
 //////////////////////////////////////////////////////////////////////////
 //  EXTERN.
@@ -45,7 +43,7 @@ extern	int  TextBold[30];
 //  Global Variable
 //////////////////////////////////////////////////////////////////////////
 static  CSWaterTerrain* g_pCSWaterTerrain = NULL;
-static  queue<ObjectDescript> g_qObjDes;
+static  std::queue<ObjectDescript> g_qObjDes;
 
 static  const BYTE  ACTION_DESTROY_PHY_DEF = 33;
 static  const BYTE  ACTION_DESTROY_DEF = 34;

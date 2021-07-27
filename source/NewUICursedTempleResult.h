@@ -108,7 +108,7 @@ namespace SEASON3B
 		void Destroy();
 
 	private:
-		typedef list<CursedTempleGameResult>  CT_GameResult_list;
+		typedef std::list<CursedTempleGameResult>  CT_GameResult_list;
 
 	private:
 		CT_GameResult_list		m_AlliedTeamGameResult;

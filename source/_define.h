@@ -1,16 +1,9 @@
 #pragma once
 
-#ifdef KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-#include <boost/smart_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/format.hpp>
-#include <boost/any.hpp>
-#include <boost/array.hpp>
-#include <boost/pool/object_pool.hpp>
-#endif // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
+#include <memory>
 
-#define BoostSmart_Ptr( classname )  std::tr1::shared_ptr<classname>
-#define BoostWeak_Ptr( classname )   std::tr1::weak_ptr<classname>
+#define BoostSmart_Ptr( classname )  std::shared_ptr<classname>
+#define BoostWeak_Ptr( classname )   std::weak_ptr<classname>
 
 #define BoostSmartPointer(classname) \
     class classname; \

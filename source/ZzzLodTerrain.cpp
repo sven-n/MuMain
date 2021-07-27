@@ -292,7 +292,7 @@ void AddTerrainAttributeRange ( int x, int y, int dx, int dy, BYTE att, BYTE Add
     }
 }
 
-void SetTerrainWaterState( list<int>& terrainIndex, int state )
+void SetTerrainWaterState(std::list<int>& terrainIndex, int state )
 {
 	if( state == 0 )
 	{
@@ -307,9 +307,9 @@ void SetTerrainWaterState( list<int>& terrainIndex, int state )
 	}
 	else
 	{
-		for ( list<int>::iterator iter = terrainIndex.begin(); iter != terrainIndex.end(); )
+		for (std::list<int>::iterator iter = terrainIndex.begin(); iter != terrainIndex.end(); )
 		{
-			list<int>::iterator curiter = iter;
+			std::list<int>::iterator curiter = iter;
 			++iter;
 			int index = *curiter;
 			TerrainWall[index] = TW_WATER;

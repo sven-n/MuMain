@@ -81,7 +81,7 @@ void CNewUIPetInfoWindow::Release()
 void CNewUIPetInfoWindow::InitButtons( )
 {
 	// 탭버튼 Text설정
-	list<unicode::t_string> ltext;
+	std::list<unicode::t_string> ltext;
 	
 	ltext.push_back( GlobalText[1187] );		// "다크호스"
 	ltext.push_back( GlobalText[1214] );		// "다크스피릿"

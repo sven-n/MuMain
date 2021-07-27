@@ -9022,7 +9022,7 @@ void OpenBasicData(HDC hDC)
 
 #ifdef ASG_ADD_GENS_SYSTEM
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	string strFileName = "Local\\" + g_strSelectedML + "\\ImgsMapName\\MapNameAddStrife.tga";
+	std::string strFileName = "Local\\" + g_strSelectedML + "\\ImgsMapName\\MapNameAddStrife.tga";
 	::LoadBitmap(strFileName.c_str(), BITMAP_INTERFACE_EX+47);
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	::LoadBitmap("Interface\\MapNameAddStrife.tga", BITMAP_INTERFACE_EX+47);

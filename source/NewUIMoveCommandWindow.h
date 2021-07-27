@@ -450,7 +450,7 @@ namespace SEASON3B
 
 #ifdef CSK_LUCKY_SEAL
 		bool IsLuckySealBuff();
-		bool IsMapMove( const string& src );
+		bool IsMapMove( const std::string& src );
 #endif //CSK_LUCKY_SEAL
 	
 #ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL

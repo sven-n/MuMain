@@ -589,7 +589,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 		for (int i = 0; i < MAX_CHAT_SIZE_UTF16; i++)
 			szReceivedChat[i] = g_pMultiLanguage->ConvertFulltoHalfWidthChar(szReceivedChat[i]);
 
-		wstring wstrText = L"";
+		std::wstring wstrText = L"";
 		
 		// 특수 명령은 채팅모드 무시
 		if (szReceivedChat[0] != 0x002F)
@@ -610,7 +610,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 		// delete memory
 		delete [] szReceivedChat;
 
-		string strText;
+		std::string strText;
 		// 각종 함수를 이용하기 위해서 ANSI로 변환
 		g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), g_pMultiLanguage->GetCodePage());
 		strncpy(szChatText, strText.c_str(), sizeof szChatText);

@@ -275,7 +275,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
 // 길드원들의 위치 랜더
 void SEASON3B::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
 {
-	vector<VisibleUnitLocation>::iterator   UnitIterator;
+	std::vector<VisibleUnitLocation>::iterator   UnitIterator;
 	POINT Pos;
 	memset(&Pos, 0, sizeof(POINT));
 	

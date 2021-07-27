@@ -309,16 +309,18 @@ void SEASON3B::CNewUICursedTempleSystem::LoadImages()
 	//gametime
 	LoadBitmap("Interface\\newui_ctgametimeframe.tga",		IMAGE_CURSEDTEMPLESYSTEM_GAMETIME,		GL_LINEAR);
 
+	char buff[100];
+
 	//score
 	for ( int i = 0; i < 10; ++i )
 	{
-		string filename = ( format( "Interface\\newui_ctscorealliednum%1%.tga" ) % i ).str();
-		LoadBitmap(filename.c_str(), IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_NUMBER+i,		GL_LINEAR);
+		std::sprintf(buff, "Interface\\newui_ctscorealliednum%d.tga", i);
+		LoadBitmap(buff, IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_NUMBER+i,		GL_LINEAR);
 	}
 	for ( int j = 0; j < 10; ++j )
 	{
-		string filename = ( format( "Interface\\newui_ctscoreillusionnum%1%.tga" ) % j ).str();
-		LoadBitmap(filename.c_str(), IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_NUMBER+j,		GL_LINEAR);
+		std::sprintf(buff, "Interface\\newui_ctscoreillusionnum%d.tga", j);
+		LoadBitmap(buff, IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_NUMBER+j,		GL_LINEAR);
 	}
 	LoadBitmap("Interface\\newui_ctscorevs0.tga",			IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS0,		GL_LINEAR);
 	LoadBitmap("Interface\\newui_ctscorevs1.tga",			IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS1,		GL_LINEAR);
@@ -516,15 +518,15 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckInventoryHolyItem( CHARACTER *c )
 
 bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc( DWORD npcindex, DWORD npckey )
 {
-	list<DWORD>				progressnpcindexlist;
+	std::list<DWORD>				progressnpcindexlist;
 	progressnpcindexlist.push_back( HolyItemNpc );
 	progressnpcindexlist.push_back( AlliedHolyItemBoxNpc );
 	progressnpcindexlist.push_back( IllusionHolyItemBoxNpc );
 
-	for( list<DWORD>::iterator iter = progressnpcindexlist.begin(); 
+	for(std::list<DWORD>::iterator iter = progressnpcindexlist.begin();
 							  iter != progressnpcindexlist.end();)
 	{
-		list<DWORD>::iterator curiter = iter;
+		std::list<DWORD>::iterator curiter = iter;
 		++iter;
 		DWORD progressnpcindex = *curiter;
 

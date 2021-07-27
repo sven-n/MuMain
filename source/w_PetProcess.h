@@ -69,9 +69,9 @@ BoostSmartPointer(PetProcess);
 class PetProcess  
 {
 public:
-	typedef list< BoostSmart_Ptr(PetObject) > PetList;
-	typedef map< int, BoostSmart_Ptr(PetAction) > ActionMap;	//actionNum, actionClass
-	typedef map< int, BoostSmart_Ptr(PetInfo) > InfoMap;		//PetType, PetInfo
+	typedef std::list< BoostSmart_Ptr(PetObject) > PetList;
+	typedef std::map< int, BoostSmart_Ptr(PetAction) > ActionMap;	//actionNum, actionClass
+	typedef std::map< int, BoostSmart_Ptr(PetInfo) > InfoMap;		//PetType, PetInfo
 
 public:
 	static PetProcessPtr Make();

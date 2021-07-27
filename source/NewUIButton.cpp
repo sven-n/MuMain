@@ -252,7 +252,7 @@ void SEASON3B::CNewUIButton::RegisterButtonState( BUTTON_STATE eventstate, int i
 	btinfo.s_ImgIndex     = imgindex;
 	btinfo.s_BTstate      = btstate;
 
-	m_ButtonInfo.insert(make_pair(eventstate, btinfo));
+	m_ButtonInfo.insert(std::make_pair(eventstate, btinfo));
 }
 
 void SEASON3B::CNewUIButton::UnRegisterButtonState()
@@ -593,7 +593,7 @@ void CNewUIRadioButton::RegisterButtonState( BUTTON_STATE eventstate, int imgind
 	btinfo.s_ImgIndex     = imgindex;
 	btinfo.s_BTstate      = btstate;
 
-	m_RadioButtonInfo.insert(make_pair(eventstate, btinfo));
+	m_RadioButtonInfo.insert(std::make_pair(eventstate, btinfo));
 }
 
 void CNewUIRadioButton::UnRegisterButtonState()
@@ -996,9 +996,9 @@ void CNewUIRadioGroupButton::ChangeRadioButtonInfo( bool iswidth, int x, int y, 
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-void CNewUIRadioGroupButton::ChangeRadioText( list<unicode::t_string>& textlist )
+void CNewUIRadioGroupButton::ChangeRadioText(std::list<unicode::t_string>& textlist )
 {
-	list<unicode::t_string>::iterator textiter = textlist.begin();
+	std::list<unicode::t_string>::iterator textiter = textlist.begin();
 
 	for( RadioButtonList::iterator iter = m_RadioList.begin(); iter != m_RadioList.end(); )
 	{
@@ -1006,7 +1006,7 @@ void CNewUIRadioGroupButton::ChangeRadioText( list<unicode::t_string>& textlist 
 		++iter;
 		CNewUIRadioButton* button = (*curiter);
 
-		list<unicode::t_string>::iterator curtextiter = textiter;
+		std::list<unicode::t_string>::iterator curtextiter = textiter;
 		++textiter;
 		unicode::t_string text = (*curtextiter);
 

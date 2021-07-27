@@ -109,7 +109,7 @@
 	#include "./ExternalObject/Nprotect/NPGameGuardHandle.h"
 #endif //PBG_MOD_GAMEGUARD_HANDLE
 
-#include "ThemidaInclude.h"
+#include <ThemidaInclude.h>
 
 #ifdef _DEBUG
 	#include "./Shader/VPManager.h"
@@ -267,7 +267,7 @@ BOOL g_bUseWindowMode = TRUE;
 char Mp3FileName[256];
 
 #pragma comment(lib, "wzAudio.lib")
-#include "wzAudio.h"
+#include <wzAudio.h>
 
 void StopMp3(char *Name, BOOL bEnforce)
 {
@@ -2031,7 +2031,7 @@ int	g_iRenderTextType = 0;
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 // 다국어 지원 런쳐에서 선택된 언어
 char g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = {'\0'};
-string g_strSelectedML = "";
+std::string g_strSelectedML = "";
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 //int 파일 읽는 함수

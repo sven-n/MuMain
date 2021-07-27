@@ -37,7 +37,7 @@ namespace SEASON3B
 		ButtonInfo() : s_ImgIndex(0), s_BTstate(0), s_imgColor(0xffffffff) { }
 	};
 	
-	typedef map<int, ButtonInfo>  ButtonStateMap;
+	typedef std::map<int, ButtonInfo>  ButtonStateMap;
 	
 	class CNewUIBaseButton  
 	{
@@ -400,7 +400,7 @@ namespace SEASON3B
 		void CreateRadioGroup( int radiocount, int imgindex );
 		void ChangeRadioButtonInfo( bool iswidth, int x, int y, int sx, int sy );
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-		void ChangeRadioText( list<unicode::t_string>& textlist );
+		void ChangeRadioText(std::list<unicode::t_string>& textlist );
 		void ChangeFrame( int buttonIndex );
 		void LockButtonindex( int buttonIndex );					// Ãß°¡ : Pruarin(07.09.03)
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
@@ -436,7 +436,7 @@ namespace SEASON3B
 		void Destroy();
 
 	private:
-		typedef list<CNewUIRadioButton*>      RadioButtonList;
+		typedef std::list<CNewUIRadioButton*>      RadioButtonList;
 
 	private:
 		RadioButtonList				m_RadioList;

@@ -223,7 +223,7 @@ public:
 	void AddMapIndex( ENUM_WORLD type ) { if( !isMapIndex( type ) ) m_MapTypes.push_back( type ); }
 
 public:
-	typedef vector<ENUM_WORLD>	WorldVector;
+	typedef std::vector<ENUM_WORLD>	WorldVector;
 
 private:
 	WorldVector		m_MapTypes;

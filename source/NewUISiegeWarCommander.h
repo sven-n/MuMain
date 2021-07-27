@@ -47,7 +47,7 @@ namespace SEASON3B
 		int				m_iCurSelectBtnCommand;
 		bool			m_bMouseInMiniMap;
 
-		vector<VisibleUnitLocation>  m_vGuildMemberLocationBuffer;
+		std::vector<VisibleUnitLocation>  m_vGuildMemberLocationBuffer;
 
 	public:
 		CNewUISiegeWarCommander();

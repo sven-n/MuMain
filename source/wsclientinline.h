@@ -130,7 +130,7 @@ __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bF
 	LPPHEADER_DEFAULT_SUBCODE pData = ( LPPHEADER_DEFAULT_SUBCODE)buf;
 	std::string timeString;
 	leaf::GetTimeString(timeString);
-	DebugAngel_Write( PACKET_SAVE_FILE, "%s Send \t0x%02X 0x%02X (size = %d)\r\n", timeString.c_str(), pData->Header.HeadCode, pData->SubCode, len);
+	DebugAngel_Write((char*)PACKET_SAVE_FILE, "%s Send \t0x%02X 0x%02X (size = %d)\r\n", timeString.c_str(), pData->Header.HeadCode, pData->SubCode, len);
 #endif
 
 	if ( !bEncrypt)
@@ -744,7 +744,7 @@ __forceinline void SendChat(const char* Text)
 	strcpy(ChatText,Text);
 	ChatTime = 70;
 
-    if(FindText2(Hero->ID,"webzen"))
+    if(FindText2(Hero->ID, (char*)"webzen"))
 	{
 		BOOL bReturn = TRUE;
 		char *lspzCommand[2] = { "/", "!"};

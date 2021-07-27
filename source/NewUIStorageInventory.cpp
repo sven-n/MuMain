@@ -12,9 +12,6 @@
 #include "NewUICustomMessageBox.h"
 #include "ZzzInventory.h"
 #include "wsclientinline.h"
-#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-#include "MsgBoxIGSCommon.h"
-#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
 using namespace SEASON3B;
 
@@ -571,13 +568,6 @@ void CNewUIStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInven
 {
 	if (::IsStoreBan(pItemObj))	// 창고에 넣을 수 없는 아이템인가?
 	{
-#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-		// MessageBox
-		CMsgBoxIGSCommon* pMsgBox = NULL;
-		CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
- 		pMsgBox->Initialize(GlobalText[3028], GlobalText[667]);
-#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
-
 		g_pChatListBox->AddText(
 			"", GlobalText[667], SEASON3B::TYPE_ERROR_MESSAGE);
 		SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();

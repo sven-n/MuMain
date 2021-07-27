@@ -25,10 +25,10 @@ public:
 	bool IsBuffTime( eBuffTimeType bufftype );
 
 public:
-	void GetBuffStringTime( eBuffState bufftype, string& timeText );
-	void GetBuffStringTime( DWORD type, string& timeText, bool issecond = true );
+	void GetBuffStringTime( eBuffState bufftype, std::string& timeText );
+	void GetBuffStringTime( DWORD type, std::string& timeText, bool issecond = true );
 	const DWORD GetBuffTime( DWORD type );
-	void GetStringTime( DWORD time, string& timeText, bool isSecond = true );
+	void GetStringTime( DWORD time, std::string& timeText, bool isSecond = true );
 
 public:
 	bool HandleWindowMessage( UINT message, WPARAM wParam, LPARAM lParam, LRESULT& result );
@@ -53,7 +53,7 @@ private:
 
 		BuffTimeInfo() : s_BuffType(eBuffNone), s_CurBuffTime(0), s_EventBuffTime(0) {}
 	};
-	typedef map<DWORD, BuffTimeInfo>		BuffTimeInfoMap;
+	typedef std::map<DWORD, BuffTimeInfo>		BuffTimeInfoMap;
 
 private:
 	BuffTimeInfoMap		m_BuffTimeList;

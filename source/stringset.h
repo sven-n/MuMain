@@ -28,16 +28,15 @@ namespace leaf {
 		TStringSet() {}
 		TStringSet(const TStringSet<T>& _StringSet)
 		{
-			string_map_const_referece _ref = _StringSet.m_mapString;
-			string_map_type::const_iterator mi = _ref.begin();
-			for(; mi != _ref.end(); mi++)
-				Add((*mi).first, (*mi).second);
+			for (auto const [x, key] : _StringSet.m_mapString) {
+				Add(x, key);
+			}
 		}
 		~TStringSet() { RemoveAll(); }
 		
 		bool Add(int key, const T* szString)
 		{
-			string_map_type::iterator mi = m_mapString.find(key);
+			auto mi = m_mapString.find(key);
 			if(mi == m_mapString.end())
 			{
 				m_mapString.insert( string_map_type::value_type(key, szString) );
@@ -47,7 +46,7 @@ namespace leaf {
 		}
 		bool Add(int key, const string_type& strString)
 		{
-			string_map_type::iterator mi = m_mapString.find(key);
+			auto mi = m_mapString.find(key);
 			if(mi == m_mapString.end())
 			{
 				m_mapString.insert( string_map_type::value_type(key, strString) );
@@ -57,7 +56,7 @@ namespace leaf {
 		}
 		bool Remove(int key)
 		{
-			string_map_type::iterator mi = m_mapString.find(key);
+			auto mi = m_mapString.find(key);
 			if(mi != m_mapString.end())
 			{
 				m_mapString.erase(mi);
@@ -70,7 +69,7 @@ namespace leaf {
 		size_t GetCount() { return m_mapString.size(); }
 		int GetKey(int index)
 		{
-			string_map_type::const_iterator mi = m_mapString.begin();
+			auto mi = m_mapString.begin();
 			for(int count=0; mi != m_mapString.end(); mi++, count++)
 				if(count == index)
 					return (*mi).first;
@@ -78,7 +77,7 @@ namespace leaf {
 		}
 		const string_type& GetObj(int index)
 		{
-			string_map_type::const_iterator mi = m_mapString.begin();
+			auto mi = m_mapString.begin();
 			for(int count=0; mi != m_mapString.end(); mi++, count++)
 				if(count == index)
 					return (*mi).second;
@@ -87,14 +86,14 @@ namespace leaf {
 
 		const T* Find(int key)
 		{
-			string_map_type::const_iterator mi = m_mapString.find(key);
+			auto mi = m_mapString.find(key);
 			if(mi != m_mapString.end())
 				return ((*mi).second).c_str();			
 			return NULL;
 		}
 		const string_type& FindObj(int key)
 		{
-			string_map_type::const_iterator mi = m_mapString.find(key);
+			auto mi = m_mapString.find(key);
 			if(mi != m_mapString.end())
 				return (*mi).second;
 			return m_strNone;
@@ -106,7 +105,7 @@ namespace leaf {
 		TStringSet<T>& operator = (const TStringSet<T>& _StringSet)
 		{
 			string_map_const_referece _ref = _StringSet.m_mapString;
-			string_map_type::const_iterator mi = _ref.begin();
+			auto mi = _ref.begin();
 			for(; mi != _ref.end(); mi++)
 				Add((*mi).first, (*mi).second);
 			return *this;

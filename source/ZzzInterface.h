@@ -168,7 +168,7 @@ void MoveBattleSoccerEffect(CHARACTER* c);
 void RenderTournamentInterface();
 
 #ifdef CSK_LUCKY_SEAL
-void GetTime( DWORD time, string& timeText, bool isSecond = true );
+void GetTime( DWORD time, std::string& timeText, bool isSecond = true );
 #endif //CSK_LUCKY_SEAL
 
 extern int   TargetNpc;

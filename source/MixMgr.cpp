@@ -637,7 +637,7 @@ BOOL CMixRecipes::GetRecipeName(MIX_RECIPE * pRecipe, unicode::t_char * pszNameO
 	if (iNameLine > 2 || iNameLine < 1) return FALSE;
 	if (pRecipe->m_bMixOption == 'C')	// 380 옵션
 	{
-		vector<std::string> optionTextlist;
+		std::vector<std::string> optionTextlist;
 		// 380아이템의 타입에 따라 다른 옵션이 붙는다.
 		g_pItemAddOptioninfo->GetItemAddOtioninfoText(optionTextlist, m_iFirstItemType);
 		if (optionTextlist.empty() || bSimilarRecipe)

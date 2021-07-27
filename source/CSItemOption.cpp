@@ -49,8 +49,8 @@ static void BuxConvert(BYTE *Buffer,int Size)
 bool CSItemOption::OpenItemSetScript ( bool bTestServer )
 {
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	string strFileName = "";
-	string strTest = (bTestServer) ? "Test" : "";
+	std::string strFileName = "";
+	std::string strTest = (bTestServer) ? "Test" : "";
 
 	strFileName = "Data\\Local\\ItemSetType" + strTest + ".bmd";
 	if ( !OpenItemSetType(strFileName.c_str()) )		return false;
@@ -498,7 +498,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 			if( false == bFind )
 			{
 				iCurrentSetItemTypeSequence = iSetItemTypeSequence++;
-				m_mapEquippedSetItemName.insert( pair<int, string>(iCurrentSetItemTypeSequence, itemOption.strSetName) );
+				m_mapEquippedSetItemName.insert(std::pair<int, std::string>(iCurrentSetItemTypeSequence, itemOption.strSetName) );
 			}
 			
 #endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
@@ -638,7 +638,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
         for ( int j=0; j<optionCount[i]; ++j )
         {
 #ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-			m_mapEquippedSetItemSequence.insert( pair<BYTE, int>((i*optionCount[0])+j, arruiSetItemTypeSequence[i][j]) );
+			m_mapEquippedSetItemSequence.insert(std::pair<BYTE, int>((i*optionCount[0])+j, arruiSetItemTypeSequence[i][j]) );
 #endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
             m_bySetOptionList[(i*optionCount[0])+j][0] = bySetOptionListTmp[i][j];
             m_bySetOptionList[(i*optionCount[0])+j][1] = bySetOptionListTmp2[i][j];	

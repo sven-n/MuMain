@@ -40,7 +40,7 @@ public:
 	BYTE	s_NoticeType;
 	BYTE	s_ClearType;
 	char	s_BuffDescript[MAX_DESCRIPT_LENGTH];
-	list<string> s_BuffDescriptlist;
+	std::list<std::string> s_BuffDescriptlist;
 };
 
 BoostSmartPointer( BuffScriptLoader );
@@ -51,7 +51,7 @@ public:
 	virtual ~BuffScriptLoader();
 
 private:
-	bool Load(const string& pchFileName);
+	bool Load(const std::string& pchFileName);
 
 public:
 	const BuffInfo GetBuffinfo( eBuffState type ) const;
@@ -66,7 +66,7 @@ private:
 	BuffScriptLoader();
 
 private:
-	typedef map<eBuffState, BuffInfo> BuffInfoMap;
+	typedef std::map<eBuffState, BuffInfo> BuffInfoMap;
 
 private:
 	BuffInfoMap			m_Info;

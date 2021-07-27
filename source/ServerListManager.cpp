@@ -137,7 +137,7 @@ typedef struct _SERVER_GROUP_INFO
 			sServerGroupInfo.m_abyNonPVP[i] = sServerGroupScript.m_abyNonPVP[i];
 		sServerGroupInfo.m_strDescript = szDescript;
 		
-		m_mapServerListScript.insert(make_pair(sServerGroupScript.m_wIndex, sServerGroupInfo));
+		m_mapServerListScript.insert(std::make_pair(sServerGroupScript.m_wIndex, sServerGroupInfo));
 	}
 	
 	::fclose(fp);

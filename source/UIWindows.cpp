@@ -230,7 +230,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const cha
 
 	DWORD dwUIID = pbw->GetUIID();
 
-	m_WindowMap.insert(pair<DWORD, CUIBaseWindow *>(dwUIID, pbw));
+	m_WindowMap.insert(std::pair<DWORD, CUIBaseWindow *>(dwUIID, pbw));
 	m_WindowArrangeList.push_back(dwUIID);
 	if (iWindowType == UIWNDTYPE_CHAT || iWindowType == UIWNDTYPE_CHAT_READY) g_pFriendMenu->AddWindow(dwUIID, pbw);
 
@@ -410,7 +410,7 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
 			}
 			else	// 보이기
 			{
-				for (list<DWORD>::iterator iter = m_HideWindowList.begin(); iter != m_HideWindowList.end(); ++iter)
+				for (std::list<DWORD>::iterator iter = m_HideWindowList.begin(); iter != m_HideWindowList.end(); ++iter)
 				{
 					if (m_WindowMapIter->first == *iter)
 					{
@@ -467,7 +467,7 @@ void CUIWindowMgr::AddWindowFinder(CUIBaseWindow * pWindow)
 {
 	if (pWindow == NULL) return;
 	DWORD dwUIID = pWindow->GetUIID();
-	m_WindowFindMap.insert(pair<DWORD, CUIBaseWindow *>(dwUIID, pWindow));
+	m_WindowFindMap.insert(std::pair<DWORD, CUIBaseWindow *>(dwUIID, pWindow));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -756,7 +756,7 @@ BOOL CUIWindowMgr::LetterReadCheck(DWORD dwLetterID)
 	m_LetterReadMapIter = m_LetterReadMap.find(dwLetterID);
 	if (m_LetterReadMapIter == m_LetterReadMap.end())
 	{
-		m_LetterReadMap.insert(pair<DWORD, DWORD>(dwLetterID, 0));
+		m_LetterReadMap.insert(std::pair<DWORD, DWORD>(dwLetterID, 0));
 		return FALSE;
 	}
 	return TRUE;
@@ -803,7 +803,7 @@ void CUIWindowMgr::RemoveForceTopWindowList(DWORD dwWindowUIID)
 
 BOOL CUIWindowMgr::IsForceTopWindow(DWORD dwWindowUIID)
 {
-	for (list<DWORD>::iterator iter = m_ForceTopWindowList.begin(); iter != m_ForceTopWindowList.end(); ++iter)
+	for (std::list<DWORD>::iterator iter = m_ForceTopWindowList.begin(); iter != m_ForceTopWindowList.end(); ++iter)
 	{
 		if (*iter == dwWindowUIID) return TRUE;
 	}
@@ -1487,7 +1487,7 @@ int CUIChatWindow::AddChatPal(const char * pszID, BYTE Number, BYTE Server)
 {
 	// 중복 방지
 	BOOL bFind = FALSE;
-	for (deque<GUILDLIST_TEXT>::iterator iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
+	for (std::deque<GUILDLIST_TEXT>::iterator iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
 	{
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 #else // KWAK_FIX_COMPILE_LEVEL4_WARNING
@@ -1609,7 +1609,7 @@ void CUIChatWindow::UpdateInvitePalList()
 {
 	g_pFriendList->UpdateFriendList(m_InvitePalListBox.GetFriendList(), NULL);
 
-	deque<GUILDLIST_TEXT>::iterator iter;
+	std::deque<GUILDLIST_TEXT>::iterator iter;
 
 	for (iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
 	{
@@ -1661,8 +1661,8 @@ BOOL CUIChatWindow::HandleMessage()
 
 			m_TextInputBox.GetText(pwszTextUTF16, MAX_CHATROOM_TEXT_LENGTH_UTF16);
 
-			string strText = "";
-			wstring wstrUTF16 = pwszTextUTF16; 
+			std::string strText = "";
+			std::wstring wstrUTF16 = pwszTextUTF16;
 
 			g_pMultiLanguage->ConvertWideCharToStr(strText, wstrUTF16.c_str(), g_pMultiLanguage->GetCodePage());
 			strncpy(pszText, strText.c_str(), strText.length());
@@ -1824,8 +1824,8 @@ const char * CUIChatWindow::GetChatFriend(int * piResult)
 	}
 	else
 	{
-		deque<GUILDLIST_TEXT> & pPalList = m_PalListBox.GetFriendList();
-		for (deque<GUILDLIST_TEXT>::iterator PalListIter = pPalList.begin(); PalListIter != pPalList.end(); ++PalListIter)
+		std::deque<GUILDLIST_TEXT> & pPalList = m_PalListBox.GetFriendList();
+		for (std::deque<GUILDLIST_TEXT>::iterator PalListIter = pPalList.begin(); PalListIter != pPalList.end(); ++PalListIter)
 		{
 			if (strncmp(PalListIter->m_szID, Hero->ID, MAX_ID_SIZE) != 0)
 			{
@@ -2917,8 +2917,8 @@ BOOL CUILetterWriteWindow::HandleMessage()
 					char	szTitle[MAX_LETTER_TITLE_LENGTH]	= {'\0'};
 					char	szTempText[MAX_LETTERTEXT_LENGTH]	= {'\0'};
 
-					string	strTitle = "", strText = "";
-					wstring	wstrTitle = L"", wstrText = L"";
+					std::string	strTitle = "", strText = "";
+					std::wstring	wstrTitle = L"", wstrText = L"";
 					int k = 0;
 
 					m_MailtoInputBox.GetText(szMailto, MAX_ID_SIZE+1);
@@ -3515,7 +3515,7 @@ void CFriendList::ClearFriendList()
 	m_FriendListIter = m_FriendList.begin();
 }
 
-int CFriendList::UpdateFriendList(deque<GUILDLIST_TEXT> & pDestData, const char * pszID)
+int CFriendList::UpdateFriendList(std::deque<GUILDLIST_TEXT> & pDestData, const char * pszID)
 {
 	pDestData.clear();
 	int i = 1, iResult = 0;
@@ -3919,7 +3919,7 @@ BOOL CChatRoomSocketList::AddChatRoomSocket(DWORD dwRoomID, DWORD dwWindowUIID, 
 	}
 
 	//m_ChatRoomSocketList.push_back(CRSocket);
-	m_ChatRoomSocketMap.insert(pair<DWORD, CHATROOM_SOCKET *>(dwRoomID, pCRSocket));
+	m_ChatRoomSocketMap.insert(std::pair<DWORD, CHATROOM_SOCKET *>(dwRoomID, pCRSocket));
 
 	return TRUE;
 }
@@ -3991,7 +3991,7 @@ DWORD CChatRoomSocketList::CreateChatRoomSocketID(DWORD dwRoomID)
 		}
 	};
 	m_bChatRoomSocketStatus[m_bCurrectCreateID] = TRUE;
-	m_ChatRoomSocketStatusMap.insert(pair < DWORD, DWORD > (m_bCurrectCreateID, dwRoomID));
+	m_ChatRoomSocketStatusMap.insert(std::pair < DWORD, DWORD > (m_bCurrectCreateID, dwRoomID));
 	return m_bCurrectCreateID;
 }
 
@@ -4240,7 +4240,7 @@ void CLetterList::ClearLetterList()
 	ClearLetterTextCache();
 }
 
-int CLetterList::UpdateLetterList(deque<LETTERLIST_TEXT> & pDestData, DWORD dwSelectLineNum)
+int CLetterList::UpdateLetterList(std::deque<LETTERLIST_TEXT> & pDestData, DWORD dwSelectLineNum)
 {
 	pDestData.clear();
 	int i = 1, iResult = 0;
@@ -4355,7 +4355,7 @@ BOOL CLetterList::CheckNoReadLetter()
 
 void CLetterList::CacheLetterText(DWORD dwIndex, LPFS_LETTER_TEXT pLetterText)
 {
-	m_LetterCache.insert(pair<DWORD, FS_LETTER_TEXT>(dwIndex, *pLetterText));
+	m_LetterCache.insert(std::pair<DWORD, FS_LETTER_TEXT>(dwIndex, *pLetterText));
 }
 
 LPFS_LETTER_TEXT CLetterList::GetLetterText(DWORD dwIndex)
@@ -4684,10 +4684,10 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
 		{
 			if (m_LetterListBox.HaveCheckedLine() == TRUE)
 			{
-				static deque<LETTERLIST_TEXT *> letterlist;
+				static std::deque<LETTERLIST_TEXT *> letterlist;
 				letterlist.clear();
 				if (m_LetterListBox.GetCheckedLines(&letterlist) == 0) break;
-				for (deque<LETTERLIST_TEXT *>::iterator iter = letterlist.begin(); iter != letterlist.end(); ++iter)
+				for (std::deque<LETTERLIST_TEXT *>::iterator iter = letterlist.begin(); iter != letterlist.end(); ++iter)
 				{
 					SendRequestDeleteLetter((*iter)->m_dwLetterID);
 				}
@@ -5720,7 +5720,7 @@ void CUIFriendMenu::RenderWindowList()
 		}
 		BYTE bAlpha = m_fMenuAlpha * 255;
 
-		for (deque<DWORD>::iterator iter = m_NewChatWindowList.begin(); iter != m_NewChatWindowList.end(); ++iter)
+		for (std::deque<DWORD>::iterator iter = m_NewChatWindowList.begin(); iter != m_NewChatWindowList.end(); ++iter)
 		{
 			if (*iter == *m_WindowListIter)
 			{

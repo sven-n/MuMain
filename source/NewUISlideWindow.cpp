@@ -37,7 +37,7 @@ bool SEASON3B::CNewUISlideWindow::Create(CNewUIManager* pNewUIMng)
 	string strFileName = "Data\\Local\\"+g_strSelectedML+"\\Slidetest_"+g_strSelectedML+".bmd";
 	m_pSlideMgr->OpenSlideTextFile(strFileName.c_str());
 #else // USE_SLIDETEST_BMD
-	string strFileName = "Data\\Local\\"+g_strSelectedML+"\\Slide_"+g_strSelectedML+".bmd";
+	std::string strFileName = "Data\\Local\\"+g_strSelectedML+"\\Slide_"+g_strSelectedML+".bmd";
 	m_pSlideMgr->OpenSlideTextFile(strFileName.c_str());
 #endif // USE_SLIDETEST_BMD
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE

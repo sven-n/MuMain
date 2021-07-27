@@ -96,8 +96,8 @@ namespace SEASON3B
 		CNewUIButton	m_BtnSkillScroll[2];
 		CNewUIButton	m_BtnAlpha;
 		
-		list<int>				m_listBattleSkill;
-		list<int>::iterator		m_iterCurBattleSkill;
+		std::list<int>				m_listBattleSkill;
+		std::list<int>::iterator		m_iterCurBattleSkill;
 
 	public:
 		CNewUISiegeWarBase();

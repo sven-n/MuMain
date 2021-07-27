@@ -90,22 +90,22 @@ void CCreditWin::Create()
 // 일러스트.
 	m_eIllustState = HIDE;
 
-	m_apszIllustPath[0][0] = "Interface\\im1_1.jpg";
-	m_apszIllustPath[0][1] = "Interface\\im1_2.jpg";
-	m_apszIllustPath[1][0] = "Interface\\im2_1.jpg";
-	m_apszIllustPath[1][1] = "Interface\\im2_2.jpg";
-	m_apszIllustPath[2][0] = "Interface\\im3_1.jpg";
-	m_apszIllustPath[2][1] = "Interface\\im3_2.jpg";
-	m_apszIllustPath[3][0] = "Interface\\im4_1.jpg";
-	m_apszIllustPath[3][1] = "Interface\\im4_2.jpg";
-	m_apszIllustPath[4][0] = "Interface\\im5_1.jpg";
-	m_apszIllustPath[4][1] = "Interface\\im5_2.jpg";
-	m_apszIllustPath[5][0] = "Interface\\im6_1.jpg";
-	m_apszIllustPath[5][1] = "Interface\\im6_2.jpg";
-	m_apszIllustPath[6][0] = "Interface\\im7_1.jpg";
-	m_apszIllustPath[6][1] = "Interface\\im7_2.jpg";
-	m_apszIllustPath[7][0] = "Interface\\im8_1.jpg";
-	m_apszIllustPath[7][1] = "Interface\\im8_2.jpg";
+	m_apszIllustPath[0][0] = (char*)"Interface\\im1_1.jpg";
+	m_apszIllustPath[0][1] = (char*)"Interface\\im1_2.jpg";
+	m_apszIllustPath[1][0] = (char*)"Interface\\im2_1.jpg";
+	m_apszIllustPath[1][1] = (char*)"Interface\\im2_2.jpg";
+	m_apszIllustPath[2][0] = (char*)"Interface\\im3_1.jpg";
+	m_apszIllustPath[2][1] = (char*)"Interface\\im3_2.jpg";
+	m_apszIllustPath[3][0] = (char*)"Interface\\im4_1.jpg";
+	m_apszIllustPath[3][1] = (char*)"Interface\\im4_2.jpg";
+	m_apszIllustPath[4][0] = (char*)"Interface\\im5_1.jpg";
+	m_apszIllustPath[4][1] = (char*)"Interface\\im5_2.jpg";
+	m_apszIllustPath[5][0] = (char*)"Interface\\im6_1.jpg";
+	m_apszIllustPath[5][1] = (char*)"Interface\\im6_2.jpg";
+	m_apszIllustPath[6][0] = (char*)"Interface\\im7_1.jpg";
+	m_apszIllustPath[6][1] = (char*)"Interface\\im7_2.jpg";
+	m_apszIllustPath[7][0] = (char*)"Interface\\im8_1.jpg";
+	m_apszIllustPath[7][1] = (char*)"Interface\\im8_2.jpg";
 
 // 텍스트.
 	int nFontSize = 10;

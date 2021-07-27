@@ -92,7 +92,7 @@ void SEASON3B::CNewUIBuffWindow::SetPos(int iScreenWidth)
 	}
 }
 
-void SEASON3B::CNewUIBuffWindow::BuffSort( list<eBuffState>& buffstate )
+void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate )
 {
 	OBJECT* pHeroObject = &Hero->Object;
 
@@ -153,13 +153,13 @@ bool SEASON3B::CNewUIBuffWindow::UpdateMouseEvent()
 	float x = 0.0f, y = 0.0f;
 	int buffwidthcount = 0, buffheightcount = 0;
 
-	list<eBuffState> buffstate;
+	std::list<eBuffState> buffstate;
 	BuffSort( buffstate );
 
-	list<eBuffState>::iterator iter;
+	std::list<eBuffState>::iterator iter;
 	for( iter = buffstate.begin(); iter != buffstate.end(); )
 	{
-		list<eBuffState>::iterator tempiter = iter;
+		std::list<eBuffState>::iterator tempiter = iter;
 		++iter;
 		eBuffState buff = (*tempiter);
 
@@ -282,13 +282,13 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffStatus( BUFF_RENDER renderstate )
 	float x = 0.0f, y = 0.0f;
 	int buffwidthcount = 0, buffheightcount = 0;
 	
-	list<eBuffState> buffstate;
+	std::list<eBuffState> buffstate;
 	BuffSort( buffstate );
 
-	list<eBuffState>::iterator iter;
+	std::list<eBuffState>::iterator iter;
 	for( iter = buffstate.begin(); iter != buffstate.end(); )
 	{
-		list<eBuffState>::iterator tempiter = iter;
+		std::list<eBuffState>::iterator tempiter = iter;
 		++iter;
 		eBuffState buff = (*tempiter);
 		
@@ -431,12 +431,12 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
 	::memset(TextListColor, 0, sizeof(int) * 30);
 	::memset(TextBold, 0, sizeof(int) * 30);
 	
-	list<string> tooltipinfo;
+	std::list<std::string> tooltipinfo;
 	g_BuffToolTipString( tooltipinfo, eBuffType );
 	
-	for( list<string>::iterator iter = tooltipinfo.begin(); iter != tooltipinfo.end(); ++iter )
+	for(std::list<std::string>::iterator iter = tooltipinfo.begin(); iter != tooltipinfo.end(); ++iter )
 	{
-		string& temp = *iter;
+		std::string& temp = *iter;
 		
 		unicode::_sprintf(TextList[TextNum], temp.c_str());
 		
@@ -454,7 +454,7 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
 		TextNum += 1;
 	}
 	
-	string bufftime;
+	std::string bufftime;
 	g_BuffStringTime( eBuffType, bufftime );
 	
 	if( bufftime.size() != 0 )

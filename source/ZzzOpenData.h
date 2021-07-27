@@ -34,5 +34,5 @@ extern int  AbuseFilterNumber;
 extern int  AbuseNameFilterNumber;
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-extern string g_strSelectedML;
+extern std::string g_strSelectedML;
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE

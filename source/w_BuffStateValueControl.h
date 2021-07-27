@@ -27,8 +27,8 @@ public:
 
 public:
 	const BuffStateValueInfo GetValue( eBuffState bufftype );
-	void GetBuffInfoString( list<string>& outstr, eBuffState bufftype );
-	void GetBuffValueString( string& outstr, eBuffState bufftype );
+	void GetBuffInfoString(std::list<std::string>& outstr, eBuffState bufftype );
+	void GetBuffValueString(std::string& outstr, eBuffState bufftype );
 	eBuffValueLoadType CheckValue( eBuffState bufftype );
 
 private:
@@ -38,7 +38,7 @@ private:
 	BuffStateValueControl();
 
 private:
-	typedef map<eBuffState, BuffStateValueInfo>  BuffStateValueMap;
+	typedef std::map<eBuffState, BuffStateValueInfo>  BuffStateValueMap;
 
 private:
 	BuffStateValueMap				m_BuffStateValue;

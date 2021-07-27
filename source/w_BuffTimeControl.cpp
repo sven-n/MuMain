@@ -259,7 +259,7 @@ void BuffTimeControl::RegisterBuffTime( eBuffState bufftype, DWORD curbufftime )
 	buffinfo.s_CurBuffTime   = curbufftime * 1000;	// 정확한 표시를 위해 ms단위로 바꿨음
 	buffinfo.s_EventBuffTime = GetTickCount(); // 버프 시작 시간을 설정한다.
 
-	m_BuffTimeList.insert( make_pair( bufftimetype, buffinfo ) );
+	m_BuffTimeList.insert(std::make_pair( bufftimetype, buffinfo ) );
 	
 	//1초(1000ms)에 한번씩 이벤트 발생
 	::SetTimer(g_hWnd, bufftimetype, 900, NULL);	// 타이머와 미묘한 동기화 때문에 조금 빠르게 설정했음;
@@ -296,7 +296,7 @@ bool BuffTimeControl::UnRegisterBuffTime( eBuffState bufftype )
 	return false;
 }
 
-void BuffTimeControl::GetBuffStringTime( eBuffState bufftype, string& timeText )
+void BuffTimeControl::GetBuffStringTime( eBuffState bufftype, std::string& timeText )
 {
 	for ( BuffTimeInfoMap::iterator iter = m_BuffTimeList.begin(); iter != m_BuffTimeList.end(); ++iter )
 	{
@@ -314,7 +314,7 @@ void BuffTimeControl::GetBuffStringTime( eBuffState bufftype, string& timeText )
 	}
 }
 
-void BuffTimeControl::GetBuffStringTime( DWORD type, string& timeText, bool issecond )
+void BuffTimeControl::GetBuffStringTime( DWORD type, std::string& timeText, bool issecond )
 {
 	BuffTimeInfoMap::iterator iter = m_BuffTimeList.find( type );
 
@@ -347,8 +347,10 @@ const DWORD BuffTimeControl::GetBuffTime( DWORD type )
 #endif // KJH_FIX_WOPS_K22852_ABNORMAL_BUFFTIME
 }
 
-void BuffTimeControl::GetStringTime( DWORD time, string& timeText, bool isSecond )
+void BuffTimeControl::GetStringTime( DWORD time, std::string& timeText, bool isSecond )
 {
+	char buffer[100];
+
 	if( isSecond )
 	{
 		DWORD day     = time/(1440*60);
@@ -358,28 +360,23 @@ void BuffTimeControl::GetStringTime( DWORD time, string& timeText, bool isSecond
 
 		if( day != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4% %5% %6% %7% %8%" ) 
-								% day % GlobalText[2298] 
-								% oClock % GlobalText[2299]
-								% minutes % GlobalText[2300] 
-								% second % GlobalText[2301] ).str();
+			std::sprintf(buffer, "%d %s %d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299],minutes, GlobalText[2300], second, GlobalText[2301]);
+			timeText = buffer;
 		}
 		else if( day == 0 && oClock != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4% %5% %6%" ) 
-								% oClock % GlobalText[2299]
-								% minutes % GlobalText[2300]
-								% second % GlobalText[2301] ).str();
+			std::sprintf(buffer, "%d %s %d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+			timeText = buffer;
 		}
 		else if( day == 0 && oClock == 0 && minutes != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4%" ) 
-								% minutes % GlobalText[2300]
-								% second % GlobalText[2301] ).str();
+			std::sprintf(buffer, "%d %s %d %s", minutes, GlobalText[2300], second, GlobalText[2301]);
+			timeText = buffer;
 		}
 		else if( day == 0 && oClock == 0 && minutes == 0 )
 		{
-			timeText = ( format( "%1%" ) % GlobalText[2308] ).str();			
+			std::sprintf(buffer, "s",GlobalText[2308]);
+			timeText = buffer;
 		}
 	}
 	else
@@ -390,22 +387,18 @@ void BuffTimeControl::GetStringTime( DWORD time, string& timeText, bool isSecond
 
 		if( day != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4% %5% %6%" ) 
-								% day % GlobalText[2298] 
-								% oClock % GlobalText[2299]
-								% minutes % GlobalText[2300] ).str();
+			std::sprintf(buffer, "%d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
+			timeText = buffer;
 		}
 		else if( day == 0 && oClock != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4%" ) 
-								% oClock % GlobalText[2299]
-								% minutes % GlobalText[2300] ).str();
+			std::sprintf(buffer, "%d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300]);
+			timeText = buffer;
 		}
 		else if( day == 0 && oClock == 0 && minutes != 0 )
 		{
-			timeText = ( format( "%1% %2%" ) 
-								% minutes
-								% GlobalText[2300] ).str();
+			std::sprintf(buffer, "%d %s", minutes, GlobalText[2300]);
+			timeText = buffer;
 		}
 	}
 }

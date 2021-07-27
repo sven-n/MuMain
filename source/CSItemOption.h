@@ -56,7 +56,7 @@ private :
 #endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
 
 #ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-	typedef std::map<int, string>	MAP_EQUIPPEDSETITEMNAME;
+	typedef std::map<int, std::string>	MAP_EQUIPPEDSETITEMNAME;
 	typedef std::map<BYTE, int>		MAP_EQUIPPEDSETITEM_SEQUENCE;
 
 	MAP_EQUIPPEDSETITEMNAME			m_mapEquippedSetItemName;
@@ -73,7 +73,7 @@ private:
 
 		for( m_iterESIN = m_mapEquippedSetItemName.begin(); m_iterESIN != m_mapEquippedSetItemName.end(); ++m_iterESIN )
 		{
-			string	strCur;
+			std::string	strCur;
 
 			strCur = m_iterESIN->second;
 			int iSizeCurName = strCur.size();
@@ -319,6 +319,6 @@ public :
 #define g_csItemOption CSItemOption::GetSingleton ()
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-extern string g_strSelectedML;
+extern std::string g_strSelectedML;
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #endif

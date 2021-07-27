@@ -746,17 +746,17 @@ void CutText(const char* Text,char *Text1,char *Text2,int Length)
 	{
 		// 원본 Text를 그냥 반으로 나눌 경우 UTF-8 encoding에 벗어나게 자를수 있으므로 
 		// UTF-16으로 변환시킨 후 반으로 나눈다. 
-		wstring wstrText = L"";
+		std::wstring wstrText = L"";
 		g_pMultiLanguage->ConvertCharToWideStr(wstrText, Text);
 		int iClosestBlankFromCenter = g_pMultiLanguage->GetClosestBlankFromCenter(wstrText);
 
 		// 기준을 가지고 나눈다(기준이 되는 빈칸은 앞줄에 포함시킨다).
-		wstring wstrText1, wstrText2;
-		wstrText1 = wstrText.substr(iClosestBlankFromCenter+1, string::npos);
+		std::wstring wstrText1, wstrText2;
+		wstrText1 = wstrText.substr(iClosestBlankFromCenter+1, std::string::npos);
 		wstrText2 = wstrText.substr(0, iClosestBlankFromCenter+1);
 
 		// 나누어진 UTF-8 형식의 Text들
-		string strText1, strText2;
+		std::string strText1, strText2;
 		g_pMultiLanguage->ConvertWideCharToStr(strText1, wstrText1.c_str(), CP_UTF8);
 		g_pMultiLanguage->ConvertWideCharToStr(strText2, wstrText2.c_str(), CP_UTF8);
 		
@@ -12368,8 +12368,10 @@ extern int  TextListColor[30];
 extern int  TextBold[30];
 
 #ifdef CSK_LUCKY_SEAL
-void GetTime( DWORD time, string& timeText, bool isSecond )
+void GetTime( DWORD time, std::string& timeText, bool isSecond )
 {
+	char buff[100];
+
 	if( isSecond )
 	{
 		DWORD day     = time/(1440*60);
@@ -12379,33 +12381,18 @@ void GetTime( DWORD time, string& timeText, bool isSecond )
 		
 		if( day != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4% %5% %6% %7% %8%" ) 
-				% day 
-				% GlobalText[2298] 
-				% oClock
-				% GlobalText[2299]
-				% minutes
-				% GlobalText[2300] 
-				% second
-				% GlobalText[2301] ).str();
+			sprintf(buff, "%d %s %d %s %d %s %d %s", day,GlobalText[2298],oClock,GlobalText[2299],minutes,GlobalText[2300],second,GlobalText[2301]);
+			timeText = buff;
 		}
 		else if( day == 0 && oClock != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4% %5% %6%" ) 
-				% oClock
-				% GlobalText[2299]
-				% minutes
-				% GlobalText[2300]
-				% second
-				% GlobalText[2301] ).str();
+			sprintf(buff, "%d %s %d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+			timeText = buff;
 		}
 		else if( day == 0 && oClock == 0 && minutes != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4%" ) 
-				% minutes
-				% GlobalText[2300]
-				% second
-				% GlobalText[2301] ).str();
+			sprintf(buff, "%d %s %d %s", minutes, GlobalText[2300], second, GlobalText[2301]);
+			timeText = buff;
 		}
 		else if( day == 0 && oClock == 0 && minutes == 0 )
 		{
@@ -12413,7 +12400,7 @@ void GetTime( DWORD time, string& timeText, bool isSecond )
 		timeText = ( format( "%1% %2%" ) % second
 								% GlobalText[2301] ).str();
 			*/
-			timeText = ( format( "%1%" ) % GlobalText[2308] ).str();			
+			timeText = GlobalText[2308];
 		}
 	}
 	else
@@ -12424,27 +12411,18 @@ void GetTime( DWORD time, string& timeText, bool isSecond )
 		
 		if( day != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4% %5% %6%" ) 
-				% day 
-				% GlobalText[2298] 
-				% oClock
-				% GlobalText[2299]
-				% minutes
-				% GlobalText[2300] ).str();
+			sprintf(buff, "%d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
+			timeText = buff;
 		}
 		else if( day == 0 && oClock != 0 )
 		{
-			timeText = ( format( "%1% %2% %3% %4%" ) 
-				% oClock
-				% GlobalText[2299]
-				% minutes
-				% GlobalText[2300] ).str();
+			sprintf(buff, "%d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300]);
+			timeText = buff;
 		}
 		else if( day == 0 && oClock == 0 && minutes != 0 )
 		{
-			timeText = ( format( "%1% %2%" ) 
-				% minutes
-				% GlobalText[2300] ).str();
+			sprintf(buff, "%d %s", minutes, GlobalText[2300]);
+			timeText = buff;
 		}
 	}
 }

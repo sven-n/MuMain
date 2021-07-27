@@ -32,7 +32,7 @@ public:
 	bool CompTimeControl(const DWORD& dwCompTime, DWORD& dwTime);
 	
 public:
-	typedef list< RootingItem > ItemList;
+	typedef std::list< RootingItem > ItemList;
 	enum ActionState
 	{
 		eAction_Stand		= 0,

@@ -7,7 +7,7 @@
 #include "stdafx.h"
 #include <ddraw.h>
 #include <dinput.h>
-#include <dmusici.h> 
+#include <dmusicc.h>
 #include <windows.h>
 #include <eh.h>
 #include <imagehlp.h>

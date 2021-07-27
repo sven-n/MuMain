@@ -36,7 +36,7 @@
 #ifdef USE_QUESTWORDSTEST_BMD
 #define	QM_QUESTWORDS_FILE			string("Data\\Local\\"+g_strSelectedML+"\\QuestWordstest_"+g_strSelectedML+".bmd").c_str()
 #else
-#define	QM_QUESTWORDS_FILE			string("Data\\Local\\"+g_strSelectedML+"\\QuestWords_"+g_strSelectedML+".bmd").c_str()
+#define	QM_QUESTWORDS_FILE			std::string("Data\\Local\\"+g_strSelectedML+"\\QuestWords_"+g_strSelectedML+".bmd").c_str()
 #endif
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #ifdef USE_QUESTWORDSTEST_BMD
@@ -106,7 +106,7 @@ void CQuestMng::LoadNPCDialogueScript()
 		::memcpy(&dwIndex, abyBuffer, sizeof(DWORD));
 		::memcpy(&sNPCDialogue, abyBuffer + sizeof(DWORD), sizeof(SNPCDialogue));
 
-		m_mapNPCDialogue.insert(make_pair(dwIndex, sNPCDialogue));
+		m_mapNPCDialogue.insert(std::make_pair(dwIndex, sNPCDialogue));
 	}
 	
 	::fclose(fp);
@@ -183,7 +183,7 @@ void CQuestMng::LoadQuestProgressScript()
 		::memcpy(&dwIndex, abyBuffer, sizeof(DWORD));
 		::memcpy(&sQuestProgress, abyBuffer + sizeof(DWORD), sizeof(SQuestProgress));
 
-		m_mapQuestProgress.insert(make_pair(dwIndex, sQuestProgress));
+		m_mapQuestProgress.insert(std::make_pair(dwIndex, sQuestProgress));
 	}
 	
 	::fclose(fp);
@@ -222,7 +222,7 @@ void CQuestMng::LoadQuestWordsScript()
 	SQuestWordsHeader sQuestWordsHeader;
 	char szWords[1024];
 #ifdef ASG_MOD_QUEST_WORDS_SCRIPTS
-	string	strWords;
+	std::string	strWords;
 #else	// ASG_MOD_QUEST_WORDS_SCRIPTS
 	SQuestWords sQuestWords;
 #endif	// ASG_MOD_QUEST_WORDS_SCRIPTS
@@ -236,7 +236,7 @@ void CQuestMng::LoadQuestWordsScript()
 #ifdef ASG_MOD_QUEST_WORDS_SCRIPTS
 		strWords = szWords;
 
-		m_mapQuestWords.insert(make_pair(sQuestWordsHeader.m_nIndex, strWords));
+		m_mapQuestWords.insert(std::make_pair(sQuestWordsHeader.m_nIndex, strWords));
 #else	// ASG_MOD_QUEST_WORDS_SCRIPTS
 		sQuestWords.m_nAction = sQuestWordsHeader.m_nAction;
 		sQuestWords.m_byActCount = sQuestWordsHeader.m_byActCount;
@@ -1136,7 +1136,7 @@ bool CQuestMng::IsEPRequestRewardState(DWORD dwQuestIndex)
 {
 	WORD wEP = HIWORD(dwQuestIndex);
 
-	map<WORD, bool>::const_iterator iter = m_mapEPRequestRewardState.find(wEP);
+	std::map<WORD, bool>::const_iterator iter = m_mapEPRequestRewardState.find(wEP);
 	if (iter == m_mapEPRequestRewardState.end())
 		return false;
 

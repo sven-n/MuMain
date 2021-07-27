@@ -75,7 +75,7 @@ private:
 	MapProcess();
 	
 private:
-	typedef list< BoostSmart_Ptr(BaseMap) >		MapList;
+	typedef std::list< BoostSmart_Ptr(BaseMap) >		MapList;
 	
 private:
 	MapList				m_MapList;

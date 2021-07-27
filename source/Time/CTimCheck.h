@@ -1,8 +1,7 @@
+#pragma once
 
 #include <VECTOR>
 #include "Singleton.h"
-
-using namespace std;
 
 struct TimeCheck
 {
@@ -14,8 +13,8 @@ struct TimeCheck
 class CTimeCheck : public Singleton <CTimeCheck>
 {
 public:
-	vector<TimeCheck> stl_Time;
-	vector<TimeCheck>::iterator stl_Time_I;
+	std::vector<TimeCheck> stl_Time;
+	std::vector<TimeCheck>::iterator stl_Time_I;
 
 	CTimeCheck();
 	virtual ~CTimeCheck();

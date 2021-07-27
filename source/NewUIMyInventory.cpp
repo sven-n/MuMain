@@ -2416,7 +2416,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 #ifdef PSW_SECRET_ITEM             // 강화의 비약
 			else if( ( pItem->Type>=ITEM_POTION+78 && pItem->Type<=ITEM_POTION+82 ) )
 			{
-				list<eBuffState> secretPotionbufflist;
+				std::list<eBuffState> secretPotionbufflist;
 				secretPotionbufflist.push_back( eBuff_SecretPotion1 );
 				secretPotionbufflist.push_back( eBuff_SecretPotion2 );
 				secretPotionbufflist.push_back( eBuff_SecretPotion3 );

@@ -143,6 +143,6 @@ typedef std::wstring	WSTRING;
 #ifdef KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
 	typedef std::map<eBuffState, DWORD>    BuffStateMap;
 #else // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-	typedef map<eBuffState, DWORD>    BuffStateMap;
+	typedef std::map<eBuffState, DWORD>    BuffStateMap;
 #endif // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
 

@@ -183,7 +183,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 					g_pRenderText->SetTextColor(255, 128, 255, 255);
 				}
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				string strIDUTF8 = "";
+				std::string strIDUTF8 = "";
 				g_pMultiLanguage->ConvertANSIToUTF8OrViceVersa(strIDUTF8, (pMsgText->GetID()).c_str());
 				type_string strLine = strIDUTF8 + " : " + pMsgText->GetText();
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
@@ -1293,7 +1293,7 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
 	
 	SIZE TextSize;
 	type_string strIDPart = strID + " : ";
-	wstring wstrUTF16 = L"";
+	std::wstring wstrUTF16 = L"";
 	
 	// 화면에 나오는 문자열 한줄의 길이: 아이디 + (:) + 내용
 	// MaxFirstLineWidth: 아이디 + (:) 의 길이를 뺀 나머지
@@ -1304,7 +1304,7 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
 	g_pMultiLanguage->ConvertCharToWideStr(wstrUTF16, strText.c_str());
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), wstrUTF16.c_str(), wstrUTF16.length(), &TextSize);
 
-	BOOL bSpaceExist = (wstrUTF16.find_last_of(L" ") != wstring::npos) ? TRUE : FALSE;
+	BOOL bSpaceExist = (wstrUTF16.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
 	int iLocToken = wstrUTF16.length(); 
 	
 	//뒤에서부터 오면서 검색

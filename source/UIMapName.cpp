@@ -65,7 +65,7 @@ CUIMapName::~CUIMapName()
 void CUIMapName::InitImgPathMap()
 {
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	string strFolderName = "Local\\" + g_strSelectedML + "\\ImgsMapName\\";
+	std::string strFolderName = "Local\\" + g_strSelectedML + "\\ImgsMapName\\";
 
 	m_mapImgPath[0] = strFolderName + "lorencia.tga";
 	m_mapImgPath[1] = strFolderName + "dungeun.tga";

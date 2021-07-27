@@ -240,8 +240,8 @@ void PetObject::SetActions( ActionType type, BoostWeak_Ptr(PetAction) action, fl
 {
 	if( action.expired() == TRUE ) return;
 	
-	m_actionMap.insert( make_pair( type, action ) );
-	m_speedMap.insert( make_pair( type, speed ) );
+	m_actionMap.insert(std::make_pair( type, action ) );
+	m_speedMap.insert(std::make_pair( type, speed ) );
 }
 
 //////////////////////////////////////////////////////////////////////

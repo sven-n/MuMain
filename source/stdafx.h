@@ -31,11 +31,6 @@
 
 // Exclude rarely-used stuff from Windows headers
 #define WIN32_LEAN_AND_MEAN	
-
-
-#ifndef POINTER_64
-	#define POINTER_64
-#endif // POINTER_64
 	
 #ifndef _USE_32BIT_TIME_T
 	#define _USE_32BIT_TIME_T
@@ -98,15 +93,6 @@
 
 #pragma warning( pop )
 
-#include <boost/smart_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/format.hpp>
-#include <boost/any.hpp>
-#include <boost/array.hpp>
-
-//#include <boost/tokenizer.hpp>
-#include <boost/pool/object_pool.hpp>
-
 //opengl
 #include <gl/gl.h>
 #include <gl/glu.h>
@@ -126,10 +112,6 @@
 #define SAFE_DELETE_ARRAY(p)  { if(p) { delete [] (p);     (p)=NULL; } }
 #define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
 #define DIRECTINPUT_VERSION	0x0800
-
-// namespace
-using namespace std;//iosteamÀÌ¶û °ãÃÄ¼­...
-using namespace boost;
 
 //patch
 //winmain
@@ -169,7 +151,9 @@ using namespace boost;
 #endif
 //-----------------------------------------------------------------------------
 #else // KJH_MOD_LIBRARY_LINK_EACH_NATION
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
+#if _LANGUAGE_ENG
+#include "Defined_Global.h"
+#elif SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	#include "Winmain_New_Foreign.h"
 #endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
 #endif // KJH_MOD_LIBRARY_LINK_EACH_NATION

@@ -1,0 +1,11 @@
+.vs/
+/*.dat
+*.sdf
+.tmp/
+.tmp\
+*.obj
+*.sbr
+*.tlog
+*.idb
+*.pdb
+*.log

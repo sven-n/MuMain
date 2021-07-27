@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////
 CMultiLanguage* CMultiLanguage::ms_Singleton = NULL;
 
-CMultiLanguage::CMultiLanguage(string strSelectedML)
+CMultiLanguage::CMultiLanguage(std::string strSelectedML)
 {
 	ms_Singleton = this;
 
@@ -115,7 +115,7 @@ BOOL CMultiLanguage::IsCharUTF8(const char* pszText)
 // 인자: wstrDest - 변환 된 wstring이 저장될 인자
 //       lpString - 원본 
 // 반환 값: wstring의 length
-int CMultiLanguage::ConvertCharToWideStr(wstring& wstrDest, LPCSTR lpString)
+int CMultiLanguage::ConvertCharToWideStr(std::wstring& wstrDest, LPCSTR lpString)
 {
     wstrDest = L"";
 
@@ -150,7 +150,7 @@ int CMultiLanguage::ConvertCharToWideStr(wstring& wstrDest, LPCSTR lpString)
 // 인자: pszDest - 변환 된 string이 저장될 인자
 //       lpwString - 원본 
 // 반환 값: string의 length
-int CMultiLanguage::ConvertWideCharToStr(string& strDest, LPCWSTR lpwString, int iConversionType)
+int CMultiLanguage::ConvertWideCharToStr(std::string& strDest, LPCWSTR lpwString, int iConversionType)
 {
     strDest = "";
 
@@ -177,9 +177,9 @@ int CMultiLanguage::ConvertWideCharToStr(string& strDest, LPCWSTR lpwString, int
 }
 // 내용: lpString이 ANSI인 경우 UTF-8로 변환해 strDest에 저장
 //       lpString이 UTF-8인 경우 ANSI로 변환해 strDest에 저장
-void CMultiLanguage::ConvertANSIToUTF8OrViceVersa(string& strDest, LPCSTR lpString)
+void CMultiLanguage::ConvertANSIToUTF8OrViceVersa(std::string& strDest, LPCSTR lpString)
 {
-	wstring wstrUTF16 = L"";
+	std::wstring wstrUTF16 = L"";
 	int iDestType = (IsCharUTF8(lpString)) ? CP_ACP : CP_UTF8;
 
 	ConvertCharToWideStr(wstrUTF16, lpString);
@@ -187,14 +187,14 @@ void CMultiLanguage::ConvertANSIToUTF8OrViceVersa(string& strDest, LPCSTR lpStri
 }	
 
 // 내용: wstrTarget이 가지고 있는 빈칸중 중앙에서 가장 가까운 빈칸의 인덱스를 리턴
-int	CMultiLanguage::GetClosestBlankFromCenter(const wstring wstrTarget)
+int	CMultiLanguage::GetClosestBlankFromCenter(const std::wstring wstrTarget)
 {
 	int iLength = wstrTarget.length();
 	
 	// 가장 가까운 space 찾기
 	// 텍스트의 반을 자른다.
-	wstring wstrText1 = wstrTarget.substr(iLength/2, wstring::npos);
-	wstring wstrText2 = wstrTarget.substr(0, iLength/2);
+	std::wstring wstrText1 = wstrTarget.substr(iLength/2, std::wstring::npos);
+	std::wstring wstrText2 = wstrTarget.substr(0, iLength/2);
 	
 	// 앞쪽 텍스트에서 가장 뒤쪽 빈칸과 뒤쪽 텍스트에서 가장 앞쪽 빈칸을 찾는다.
 	int iPosLastBlankFromFirstHalf = wstrText2.find_last_of(L" ");
@@ -202,16 +202,16 @@ int	CMultiLanguage::GetClosestBlankFromCenter(const wstring wstrTarget)
 	int iClosestBlankFromCenter = 0;
 	
 	// 띄어쓰기가 없이 이루어진 텍스트는 그냥 절반으로 자른다.
-	if (iPosLastBlankFromFirstHalf == wstring::npos && iPosFirstBlankFromSecondHalf == wstring::npos)
+	if (iPosLastBlankFromFirstHalf == std::wstring::npos && iPosFirstBlankFromSecondHalf == std::wstring::npos)
 	{
 		iClosestBlankFromCenter = iLength/2;
 	}
 	// 둘 중 하나의 텍스트만 띄어쓰기를 가지고 있을 경우 그 텍스트의 빈칸을 기준으로 나눈다. 
-	else if (iPosLastBlankFromFirstHalf == wstring::npos)
+	else if (iPosLastBlankFromFirstHalf == std::wstring::npos)
 	{
 		iClosestBlankFromCenter = iPosFirstBlankFromSecondHalf+iLength/2;
 	}
-	else if (iPosFirstBlankFromSecondHalf == wstring::npos)
+	else if (iPosFirstBlankFromSecondHalf == std::wstring::npos)
 	{
 		iClosestBlankFromCenter = iPosLastBlankFromFirstHalf;
 	}
@@ -238,7 +238,7 @@ BOOL CMultiLanguage::_GetTextExtentPoint32(HDC hdc, LPCWSTR lpString, int cbStri
 // lpString의 Encoding에 따라 ANSI나 UNICODE용 GetTextExtentPoint32 함수를 호출한다. 
 BOOL CMultiLanguage::_GetTextExtentPoint32(HDC hdc, LPCSTR lpString, int cbString, LPSIZE lpSize)
 {
-	wstring wstrText = L"";
+	std::wstring wstrText = L"";
 	ConvertCharToWideStr(wstrText, lpString);
 	
 	return GetTextExtentPoint32W(hdc, wstrText.c_str(), wstrText.length(), lpSize);
@@ -252,7 +252,7 @@ BOOL CMultiLanguage::_TextOut(HDC hdc, int nXStart, int nYStart, LPCWSTR lpStrin
 
 BOOL CMultiLanguage::_TextOut(HDC hdc, int nXStart, int nYStart, LPCSTR lpString, int cbString)
 {
-	wstring wstrText = L"";
+	std::wstring wstrText = L"";
 	ConvertCharToWideStr(wstrText, lpString);
 	
 	return TextOutW(hdc, nXStart, nYStart, wstrText.c_str(), wstrText.length()); 

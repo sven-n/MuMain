@@ -28,7 +28,7 @@ namespace
 			Buffer[i] ^= wBuxCode[i%3];
 	}
 	
-	void CutTokenString( char* pcCuttoken, list<string>& out )
+	void CutTokenString( char* pcCuttoken, std::list<std::string>& out )
 	{
 		if( unicode::_strlen( pcCuttoken ) == 0 ) return;
 
@@ -73,7 +73,7 @@ BuffScriptLoader::BuffScriptLoader()
 #ifdef _TEST_SERVER
 	string filename = "data/local/"+g_strSelectedML+"/BuffEffecttest_"+g_strSelectedML+".bmd";
 #else //_TEST_SERVER
-	string filename = "data/local/"+g_strSelectedML+"/BuffEffect_"+g_strSelectedML+".bmd";
+	std::string filename = "data/local/"+g_strSelectedML+"/BuffEffect_"+g_strSelectedML+".bmd";
 #endif //_TEST_SERVER
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #ifdef _TEST_SERVER
@@ -94,7 +94,7 @@ BuffScriptLoader::~BuffScriptLoader()
 
 }
 
-bool BuffScriptLoader::Load(const string& pchFileName)
+bool BuffScriptLoader::Load(const std::string& pchFileName)
 {
 	FILE *fp = fopen( pchFileName.c_str(), "rb" );
 
@@ -143,7 +143,7 @@ bool BuffScriptLoader::Load(const string& pchFileName)
 				memcpy( buffinfo.s_BuffDescript, tempbuffinfo.s_BuffDescript, sizeof(char)*MAX_DESCRIPT_LENGTH );
 
 				CutTokenString( buffinfo.s_BuffDescript, buffinfo.s_BuffDescriptlist );
-				m_Info.insert( make_pair( static_cast<eBuffState>(buffinfo.s_BuffIndex), buffinfo ) );
+				m_Info.insert(std::make_pair( static_cast<eBuffState>(buffinfo.s_BuffIndex), buffinfo ) );
 
 				pSeek += structsize;
 			}

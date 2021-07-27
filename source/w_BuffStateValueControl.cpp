@@ -86,7 +86,7 @@ const BuffStateValueControl::BuffStateValueInfo BuffStateValueControl::GetValue(
 			SetValue( bufftype, tempvalueinfo );
 		}
 
-		m_BuffStateValue.insert( make_pair( bufftype, tempvalueinfo ));
+		m_BuffStateValue.insert(std::make_pair( bufftype, tempvalueinfo ));
 	}
 	else
 	{
@@ -96,7 +96,7 @@ const BuffStateValueControl::BuffStateValueInfo BuffStateValueControl::GetValue(
 	return tempvalueinfo;
 }
 
-void BuffStateValueControl::GetBuffInfoString( list<string>& outstr, eBuffState bufftype )
+void BuffStateValueControl::GetBuffInfoString(std::list<std::string>& outstr, eBuffState bufftype )
 {
 	BuffStateValueInfo tempvalueinfo;
 	tempvalueinfo = GetValue( bufftype );
@@ -131,17 +131,20 @@ void BuffStateValueControl::GetBuffInfoString( list<string>& outstr, eBuffState 
 */
 }
 
-void BuffStateValueControl::GetBuffValueString( string& outstr, eBuffState bufftype )
+void BuffStateValueControl::GetBuffValueString(std::string& outstr, eBuffState bufftype )
 {
 	BuffStateValueInfo tempvalueinfo;
 	tempvalueinfo = GetValue( bufftype );
 
+	char buff[60];
+
 	if( tempvalueinfo.s_Value1 != 0 )
 	{
-		outstr = (( format( "+%1%" ) % tempvalueinfo.s_Value1 ).str());
+		sprintf(buff, "%d", tempvalueinfo.s_Value1);
+		outstr = buff;
 	}
 	else
 	{
-		outstr = (( format( "" )).str());
+		outstr =  "";
 	}
 }

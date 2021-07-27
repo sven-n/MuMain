@@ -46,7 +46,7 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	LoadImages();
 
-	list<unicode::t_string> ltext;
+	std::list<unicode::t_string> ltext;
 	ltext.push_back(GlobalText[1589]);
 	ltext.push_back(GlobalText[1590]);
 	ltext.push_back(GlobalText[1591]);

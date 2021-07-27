@@ -302,15 +302,15 @@ public:
 	void AddFriend(const char* pszID, BYTE Number, BYTE Server);	// 친구 추가
 	void RemoveFriend(const char* pszID);						// 친구 삭제
 	void ClearFriendList();
-	int UpdateFriendList(deque<GUILDLIST_TEXT> & pDestData, const char* pszID);
+	int UpdateFriendList(std::deque<GUILDLIST_TEXT> & pDestData, const char* pszID);
 	void UpdateFriendState(const char* pszID, BYTE Number, BYTE Server);
 	void UpdateAllFriendState(BYTE Number, BYTE Server);
 	void Sort(int iType = -1);
 	int GetCurrentSortType() { return m_iCurrentSortType; }
 private:
 	int m_iCurrentSortType;
-	deque<GUILDLIST_TEXT> m_FriendList;
-	deque<GUILDLIST_TEXT>::iterator m_FriendListIter;
+	std::deque<GUILDLIST_TEXT> m_FriendList;
+	std::deque<GUILDLIST_TEXT>::iterator m_FriendListIter;
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -366,11 +366,11 @@ private:
 private:
 	BYTE m_bCurrectCreateID;
 	BYTE m_bChatRoomSocketStatus[256];
-	map<DWORD, DWORD, less<DWORD> > m_ChatRoomSocketStatusMap;
-	map<DWORD, DWORD, less<DWORD> >::iterator m_ChatRoomSocketStatusMapIter;
+	std::map<DWORD, DWORD, std::less<DWORD> > m_ChatRoomSocketStatusMap;
+	std::map<DWORD, DWORD, std::less<DWORD> >::iterator m_ChatRoomSocketStatusMapIter;
 
-	map<DWORD, CHATROOM_SOCKET *, less<DWORD> > m_ChatRoomSocketMap;
-	map<DWORD, CHATROOM_SOCKET *, less<DWORD> >::iterator m_ChatRoomSocketMapIter;
+	std::map<DWORD, CHATROOM_SOCKET *, std::less<DWORD> > m_ChatRoomSocketMap;
+	std::map<DWORD, CHATROOM_SOCKET *, std::less<DWORD> >::iterator m_ChatRoomSocketMapIter;
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -408,7 +408,7 @@ public:
 	void AddLetter(DWORD dwLetterID, const char* pszID, const char* pszText, const char* pszDate, const char* pszTime, BOOL bIsRead);	// 편지 추가
 	void RemoveLetter(DWORD dwLetterID);														// 편지 제거
 	void ClearLetterList();
-	int UpdateLetterList(deque<LETTERLIST_TEXT> & pDestData, DWORD dwSelectLineNum);
+	int UpdateLetterList(std::deque<LETTERLIST_TEXT> & pDestData, DWORD dwSelectLineNum);
 	void Sort(int iType = -1);
 	DWORD GetPrevLetterID(DWORD dwLetterID);
 	DWORD GetNextLetterID(DWORD dwLetterID);
@@ -427,11 +427,11 @@ public:
 
 private:
 	int m_iCurrentSortType;
-	deque<LETTERLIST_TEXT> m_LetterList;
-	deque<LETTERLIST_TEXT>::iterator m_LetterListIter;
+	std::deque<LETTERLIST_TEXT> m_LetterList;
+	std::deque<LETTERLIST_TEXT>::iterator m_LetterListIter;
 	
-	map<DWORD, FS_LETTER_TEXT, less<DWORD> > m_LetterCache;	// 편지 캐시
-	map<DWORD, FS_LETTER_TEXT, less<DWORD> >::iterator m_LetterCacheIter;
+	std::map<DWORD, FS_LETTER_TEXT, std::less<DWORD> > m_LetterCache;	// 편지 캐시
+	std::map<DWORD, FS_LETTER_TEXT, std::less<DWORD> >::iterator m_LetterCacheIter;
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -566,7 +566,7 @@ protected:
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef map<DWORD, CUIBaseWindow *, less<DWORD> > WndMap;
+typedef std::map<DWORD, CUIBaseWindow *, std::less<DWORD> > WndMap;
 
 class CUIWindowMgr : public CUIMessage
 {
@@ -634,14 +634,14 @@ protected:
 	WndMap m_WindowFindMap;					// 번호순 윈도우 (순수 검색용)
 	WndMap m_WindowReadyMap;				// 대기중 윈도우 (대기했다가 m_WindowMap로 이동)
 	WndMap::iterator m_WindowMapIter;
-	list<DWORD> m_WindowArrangeList;		// 윈도우 정렬 순서 리스트 (front->back순서로 앞에 출력된다)
-	list<DWORD>::iterator m_WindowArrangeListIter;
-	list<DWORD>::reverse_iterator m_WindowReverseArrangeListIter;
-	map<DWORD, DWORD, less<DWORD> > m_LetterReadMap;	// 편지 읽기 목록
-	map<DWORD, DWORD, less<DWORD> >::iterator m_LetterReadMapIter;
+	std::list<DWORD> m_WindowArrangeList;		// 윈도우 정렬 순서 리스트 (front->back순서로 앞에 출력된다)
+	std::list<DWORD>::iterator m_WindowArrangeListIter;
+	std::list<DWORD>::reverse_iterator m_WindowReverseArrangeListIter;
+	std::map<DWORD, DWORD, std::less<DWORD> > m_LetterReadMap;	// 편지 읽기 목록
+	std::map<DWORD, DWORD, std::less<DWORD> >::iterator m_LetterReadMapIter;
 	BOOL m_bCurrentHideWindowState;
-	list<DWORD> m_HideWindowList;		// 숨겨진 윈도우 (복원용)
-	list<DWORD> m_ForceTopWindowList;	// 최상위 윈도우 (서버에서)
+	std::list<DWORD> m_HideWindowList;		// 숨겨진 윈도우 (복원용)
+	std::list<DWORD> m_ForceTopWindowList;	// 최상위 윈도우 (서버에서)
 
 	int m_iMainWindowPos_x, m_iMainWindowPos_y;
 	int m_iMainWindowWidth, m_iMainWindowHeight;
@@ -706,21 +706,21 @@ protected:
 
 	void RenderWindowList();
 protected:
-	deque<DWORD> m_WindowList;
-	deque<DWORD>::iterator m_WindowListIter;
-	deque<DWORD>::iterator m_WindowListSelectIter;
+	std::deque<DWORD> m_WindowList;
+	std::deque<DWORD>::iterator m_WindowListIter;
+	std::deque<DWORD>::iterator m_WindowListSelectIter;
 	float m_fLineHeight;
 	int m_iFriendMenuPos_y;
 	int m_iFriendMenuHeight;
 	float m_fMenuAlpha;
 	float m_fMenuAlphaAdd;
-	deque<DWORD> m_NewChatWindowList;
+	std::deque<DWORD> m_NewChatWindowList;
 	BOOL m_bNewMailAlert;
 	int m_iBlinkTemp;
 	int m_iLetterBlink;
 	BOOL m_bHotKey;
-	deque<char*> m_RequestChatWindowList;
-	deque<char*>::iterator m_RequestChatWindowListIter;
+	std::deque<char*> m_RequestChatWindowList;
+	std::deque<char*>::iterator m_RequestChatWindowListIter;
 };
 
 #endif	// __UIWINDOW_H__

@@ -5098,7 +5098,7 @@ void CCherryBlossomMsgBox::RenderButtons()
 bool SEASON3B::CTradeZenMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, INPUTBOX_WIDTH, INPUTBOX_HEIGHT, INPUTBOX_TEXTLIMIT))
@@ -5157,7 +5157,7 @@ CALLBACK_RESULT SEASON3B::CTradeZenMsgBoxLayout::CancelBtnDown(class CNewUIMessa
 bool SEASON3B::CZenReceiptMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, INPUTBOX_WIDTH, INPUTBOX_HEIGHT, INPUTBOX_TEXTLIMIT))
@@ -5230,7 +5230,7 @@ CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::CancelBtnDown(class CNewUIMes
 bool SEASON3B::CZenPaymentMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, INPUTBOX_WIDTH, INPUTBOX_HEIGHT, INPUTBOX_TEXTLIMIT))
@@ -5320,7 +5320,7 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::CancelBtnDown(class CNewUIMes
 bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, INPUTBOX_WIDTH, INPUTBOX_HEIGHT, INPUTBOX_TEXTLIMIT))
@@ -5492,7 +5492,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::CancelBtnDown(clas
 bool SEASON3B::CPersonalShopNameMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_TEXT, INPUT_WIDTH, INPUT_HEIGHT, INPUT_TEXTLIMIT))
@@ -5559,7 +5559,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::CancelBtnDown(class CNe
 bool SEASON3B::CCastleWithdrawMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, INPUTBOX_WIDTH, INPUTBOX_HEIGHT, INPUTBOX_TEXTLIMIT))
@@ -5638,7 +5638,7 @@ CALLBACK_RESULT SEASON3B::CCastleWithdrawMsgBoxLayout::CancelBtnDown(class CNewU
 bool SEASON3B::CPasswordKeyPadMsgBoxLayout::SetLayout()
 {
 	CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(KEYPAD_TYPE_MOVE, 4))
@@ -5719,7 +5719,7 @@ CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::CancelBtnDown(class CNewU
 bool SEASON3B::CStorageLockKeyPadMsgBoxLayout::SetLayout()
 {
 	CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(KEYPAD_TYPE_LOCK_FIRST, 4))
@@ -5783,7 +5783,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockKeyPadMsgBoxLayout::CancelBtnDown(class CN
 bool SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::SetLayout()
 {
 	CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(KEYPAD_TYPE_LOCK_SECOND, 4))
@@ -5869,7 +5869,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown(cla
 bool SEASON3B::CStorageLockMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox) return false;
+	if(0 == pMsgBox) return false;
 
 	int _temp = (g_iLengthAuthorityCode / 10) <= 0 ? 1 : (g_iLengthAuthorityCode / 10);
 	int _width = INPUTBOX_WIDTH * _temp	;
@@ -5944,7 +5944,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::CancelBtnDown(class CNewUIMe
 bool SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
 {
 	CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 #if SELECTED_LANGUAGE == LANGUAGE_CHINESE
@@ -6017,7 +6017,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown(cla
 bool SEASON3B::CStorageUnlockMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox) return false;
+	if(0 == pMsgBox) return false;
 
 	int _temp = (g_iLengthAuthorityCode / 10) <= 0 ? 1 : (g_iLengthAuthorityCode / 10);
 	int _width = INPUTBOX_WIDTH * _temp	;
@@ -6085,7 +6085,7 @@ bool SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
 	extern int g_iLengthAuthorityCode;
 
 	CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 #if SELECTED_LANGUAGE == LANGUAGE_CHINESE
 	if(false == pMsgBox->Create(KEYPAD_TYPE_UNLOCK, 4))
@@ -6155,7 +6155,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::CancelBtnDown(class 
 bool SEASON3B::CUseFruitCheckMsgBoxLayout::SetLayout()
 {
 	CUseFruitCheckMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6169,7 +6169,7 @@ bool SEASON3B::CUseFruitCheckMsgBoxLayout::SetLayout()
 bool SEASON3B::CGemIntegrationMsgBoxLayout::SetLayout()
 {
 	CGemIntegrationMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6181,7 +6181,7 @@ bool SEASON3B::CGemIntegrationMsgBoxLayout::SetLayout()
 bool SEASON3B::CGemIntegrationUnityMsgBoxLayout::SetLayout()
 {
 	CGemIntegrationUnityMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6193,7 +6193,7 @@ bool SEASON3B::CGemIntegrationUnityMsgBoxLayout::SetLayout()
 bool SEASON3B::CGemIntegrationDisjointMsgBoxLayout::SetLayout()
 {
 	CGemIntegrationDisjointMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6205,7 +6205,7 @@ bool SEASON3B::CGemIntegrationDisjointMsgBoxLayout::SetLayout()
 bool SEASON3B::CBloodCastleResultMsgBoxLayout::SetLayout()
 {
 	CBloodCastleResultMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6217,7 +6217,7 @@ bool SEASON3B::CBloodCastleResultMsgBoxLayout::SetLayout()
 bool SEASON3B::CDevilSquareRankMsgBoxLayout::SetLayout()
 {
 	CDevilSquareRankMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6229,7 +6229,7 @@ bool SEASON3B::CDevilSquareRankMsgBoxLayout::SetLayout()
 bool SEASON3B::CChaosCastleResultMsgBoxLayout::SetLayout()
 {
 	CChaosCastleResultMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6243,7 +6243,7 @@ bool SEASON3B::CChaosCastleResultMsgBoxLayout::SetLayout()
 bool SEASON3B::CChaosMixMenuMsgBoxLayout::SetLayout()
 {
 	CChaosMixMenuMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6255,7 +6255,7 @@ bool SEASON3B::CChaosMixMenuMsgBoxLayout::SetLayout()
 bool SEASON3B::CDialogMsgBoxLayout::SetLayout()
 {
 	CDialogMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6267,7 +6267,7 @@ bool SEASON3B::CDialogMsgBoxLayout::SetLayout()
 bool SEASON3B::CCrownSwitchPopLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(3000))
@@ -6282,7 +6282,7 @@ bool SEASON3B::CCrownSwitchPopLayout::SetLayout()
 bool SEASON3B::CCrownSwitchPushLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(3000))
@@ -6297,7 +6297,7 @@ bool SEASON3B::CCrownSwitchPushLayout::SetLayout()
 bool SEASON3B::CCrownSwitchOtherPushLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(3000))
@@ -6309,7 +6309,7 @@ bool SEASON3B::CCrownSwitchOtherPushLayout::SetLayout()
 bool SEASON3B::CSealRegisterStartLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())	// 시간은 이후에 세팅함!
@@ -6321,7 +6321,7 @@ bool SEASON3B::CSealRegisterStartLayout::SetLayout()
 bool SEASON3B::CSealRegisterSuccessLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(3000))
@@ -6336,7 +6336,7 @@ bool SEASON3B::CSealRegisterSuccessLayout::SetLayout()
 bool SEASON3B::CSealRegisterFailLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(3000))
@@ -6348,7 +6348,7 @@ bool SEASON3B::CSealRegisterFailLayout::SetLayout()
 bool SEASON3B::CSealRegisterOtherLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(3000))
@@ -6363,7 +6363,7 @@ bool SEASON3B::CSealRegisterOtherLayout::SetLayout()
 bool SEASON3B::CSealRegisterOtherCampLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(3000))
@@ -6378,7 +6378,7 @@ bool SEASON3B::CSealRegisterOtherCampLayout::SetLayout()
 bool SEASON3B::CCrownDefenseRemoveLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(3000))
@@ -6393,7 +6393,7 @@ bool SEASON3B::CCrownDefenseRemoveLayout::SetLayout()
 bool SEASON3B::CCrownDefenseCreateLayout::SetLayout()
 {
 	CProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(3000))
@@ -6408,7 +6408,7 @@ bool SEASON3B::CCrownDefenseCreateLayout::SetLayout()
 bool SEASON3B::CCursedTempleHolicItemGetLayout::SetLayout()
 {
 	CCursedTempleProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(10000))
@@ -6423,7 +6423,7 @@ bool SEASON3B::CCursedTempleHolicItemGetLayout::SetLayout()
 bool SEASON3B::CCursedTempleHolicItemSaveLayout::SetLayout()
 {
 	CCursedTempleProgressMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create(10000))
@@ -6440,7 +6440,7 @@ bool SEASON3B::CCursedTempleHolicItemSaveLayout::SetLayout()
 bool SEASON3B::CTrainerMenuMsgBoxLayout::SetLayout()
 {
 	CTrainerMenuMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6452,7 +6452,7 @@ bool SEASON3B::CTrainerMenuMsgBoxLayout::SetLayout()
 bool SEASON3B::CTrainerRecoverMsgBoxLayout::SetLayout()
 {
 	CTrainerRecoverMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6466,7 +6466,7 @@ bool SEASON3B::CTrainerRecoverMsgBoxLayout::SetLayout()
 bool SEASON3B::CElpisMsgBoxLayout::SetLayout()
 {
 	CElpisMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6480,7 +6480,7 @@ bool SEASON3B::CElpisMsgBoxLayout::SetLayout()
 bool SEASON3B::CSystemMenuMsgBoxLayout::SetLayout()
 {
 	CSystemMenuMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6494,7 +6494,7 @@ bool SEASON3B::CSystemMenuMsgBoxLayout::SetLayout()
 bool SEASON3B::CDuelMsgBoxLayout::SetLayout()
 {
 	CDuelMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6509,7 +6509,7 @@ bool SEASON3B::CDuelMsgBoxLayout::SetLayout()
 bool SEASON3B::CDuelResultMsgBoxLayout::SetLayout()
 {
 	CDuelResultMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6525,7 +6525,7 @@ bool SEASON3B::CDuelResultMsgBoxLayout::SetLayout()
 bool CCherryBlossomMsgBoxLayout::SetLayout()
 {
 	CCherryBlossomMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	
 	if(false == pMsgBox->Create())
@@ -6541,7 +6541,7 @@ bool CCherryBlossomMsgBoxLayout::SetLayout()
 bool SEASON3B::CSeedMasterMenuMsgBoxLayout::SetLayout()
 {
 	CSeedMasterMenuMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6553,7 +6553,7 @@ bool SEASON3B::CSeedMasterMenuMsgBoxLayout::SetLayout()
 bool SEASON3B::CSeedInvestigatorMenuMsgBoxLayout::SetLayout()
 {
 	CSeedInvestigatorMenuMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6569,7 +6569,7 @@ bool SEASON3B::CSeedInvestigatorMenuMsgBoxLayout::SetLayout()
 bool SEASON3B::CResetCharacterPointMsgBoxLayout::SetLayout()
 {
 	CResetCharacterPointMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	
 	if(false == pMsgBox->Create())
@@ -6584,7 +6584,7 @@ bool SEASON3B::CResetCharacterPointMsgBoxLayout::SetLayout()
 bool SEASON3B::CDelgardoMainMenuMsgBoxLayout::SetLayout()
 {
 	CDelgardoMainMenuMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())
@@ -6598,7 +6598,7 @@ bool SEASON3B::CDelgardoMainMenuMsgBoxLayout::SetLayout()
 bool SEASON3B::CLuckyTradeMenuMsgBoxLayout::SetLayout()
 {
 	CLuckyTradeMenuMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 	
 	if(false == pMsgBox->Create())
@@ -8062,7 +8062,7 @@ CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ExitBtnDown(class CNewUIMe
 bool SEASON3B::CGuildBreakPasswordMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 #ifdef LDK_FIX_AUTHORITYCODE_LENGTH
 	#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH
@@ -8504,7 +8504,7 @@ CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::CancelBtnDown(class CNewUIMe
 bool SEASON3B::CGuild_ToPerson_PositionLayout::SetLayout()
 {
 	CGuild_ToPerson_Position* pMsgBox = GetMsgBox();
-	if(false == pMsgBox)
+	if(0 == pMsgBox)
 		return false;
 
 	if(false == pMsgBox->Create())

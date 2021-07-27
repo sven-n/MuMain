@@ -71,7 +71,7 @@ namespace SEASON3A
 		bool			m_InterfaceState;
 		WORD			m_HolyItemPlayerIndex;
 		eCursedTempleState	m_CursedTempleState;
-		list<int>			m_TerrainWaterIndex;
+		std::list<int>			m_TerrainWaterIndex;
 		WORD				m_AlliedPoint;
 		WORD				m_IllusionPoint;
 		bool				m_ShowAlliedPointEffect;

@@ -9,9 +9,7 @@
 
 #pragma once
 
-using namespace std;
-
-typedef map<int, string> ImgPathMap;
+typedef std::map<int, std::string> ImgPathMap;
 
 class CUIMapName  
 {
@@ -42,7 +40,7 @@ protected:
 };
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-extern string g_strSelectedML;
+extern std::string g_strSelectedML;
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 #endif // !defined(AFX_UIMAPNAME_H__6771C771_B81D_4D5C_8484_63D6961ED6C0__INCLUDED_)

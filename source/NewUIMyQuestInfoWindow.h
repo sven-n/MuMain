@@ -15,7 +15,7 @@
 #include "UIControls.h"
 
 #ifdef ASG_MOD_UI_QUEST_INFO
-typedef list<DWORD> DWordList;
+typedef std::list<DWORD> DWordList;
 #endif	// ASG_MOD_UI_QUEST_INFO
 
 namespace SEASON3B

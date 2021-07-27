@@ -12,13 +12,13 @@
 #ifdef USE_HARMONYJEWELOPTION_BMD
 	#define HARMONYJEWELOPTION_DATA_FILE string("Data\\Local\\"+g_strSelectedML+"\\JewelOfHarmonyOptiontest_"+g_strSelectedML+".bmd").c_str()
 #else //USE_HARMONYJEWELOPION_BMD
-	#define HARMONYJEWELOPTION_DATA_FILE string("Data\\Local\\"+g_strSelectedML+"\\JewelOfHarmonyOption_"+g_strSelectedML+".bmd").c_str()
+	#define HARMONYJEWELOPTION_DATA_FILE std::string("Data\\Local\\"+g_strSelectedML+"\\JewelOfHarmonyOption_"+g_strSelectedML+".bmd").c_str()
 #endif //USE_HARMONYJEWELOPION_BMD
 
 #ifdef USE_NOTSMELTING_BMD
 	#define NOTSMELTING_DATA_FILE string("Data\\Local\\"+g_strSelectedML+"\\JewelOfHarmonySmelttest_"+g_strSelectedML+".bmd").c_str()
 #else //USE_NOTSMELTING_BMD
-	#define NOTSMELTING_DATA_FILE string("Data\\Local\\"+g_strSelectedML+"\\JewelOfHarmonySmelt_"+g_strSelectedML+".bmd").c_str()
+	#define NOTSMELTING_DATA_FILE std::string("Data\\Local\\"+g_strSelectedML+"\\JewelOfHarmonySmelt_"+g_strSelectedML+".bmd").c_str()
 #endif //USE_NOTSMELTING_BMD
 
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
@@ -123,7 +123,7 @@ JewelHarmonyInfo::~JewelHarmonyInfo()
 }
 
 //텍스트 파일을 열어둔다
-const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile( const string& filename )
+const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile( const std::string& filename )
 {
 	FILE *fp = ::fopen( filename.c_str(), "rb" );
 	if ( fp != NULL )

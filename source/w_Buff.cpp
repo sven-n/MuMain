@@ -12,7 +12,7 @@
 namespace
 {
 	//등록후 사용 하세요.
-	void GetTokenBufflist( list<eBuffState>& outtokenbufflist, const eBuffState curbufftype )
+	void GetTokenBufflist(std::list<eBuffState>& outtokenbufflist, const eBuffState curbufftype )
 	{
 		if(curbufftype >= eBuff_CastleRegimentDefense && curbufftype <= eBuff_CastleRegimentAttack3)
 		{
@@ -120,14 +120,14 @@ bool Buff::isBuff( eBuffState buffstate )
 	return false;
 }
 
-const eBuffState Buff::isBuff( list<eBuffState> buffstatelist )
+const eBuffState Buff::isBuff(std::list<eBuffState> buffstatelist )
 {
 	if( !isBuff() ) return eBuffNone;
 
-	for ( list<eBuffState>::iterator iter = buffstatelist.begin(); 
+	for (std::list<eBuffState>::iterator iter = buffstatelist.begin();
 	iter != buffstatelist.end(); )
 	{
-		list<eBuffState>::iterator Tempiter = iter;
+		std::list<eBuffState>::iterator Tempiter = iter;
 		++iter;
 		eBuffState tempbufftype = (*Tempiter);
 
@@ -139,7 +139,7 @@ const eBuffState Buff::isBuff( list<eBuffState> buffstatelist )
 
 void Buff::TokenBuff( eBuffState curbufftype )
 {
-	list<eBuffState> tokenbufflist;
+	std::list<eBuffState> tokenbufflist;
 	// 토큰될 버프 리스트를 얻어 온다.
 	GetTokenBufflist( tokenbufflist, curbufftype );
 	// 리스트에 담겨 있는 버프 리스트를 지운다.
@@ -222,15 +222,15 @@ void Buff::RegisterBuff( eBuffState buffstate )
 	
 	if( iter == m_Buff.end() )
 	{
-		m_Buff.insert( make_pair( buffstate, 1 ) );
+		m_Buff.insert(std::make_pair( buffstate, 1 ) );
 	}
 }
 
-void Buff::RegisterBuff( list<eBuffState> buffstate )
+void Buff::RegisterBuff(std::list<eBuffState> buffstate )
 {
-	for( list<eBuffState>::iterator iter = buffstate.begin(); iter != buffstate.end(); )
+	for(std::list<eBuffState>::iterator iter = buffstate.begin(); iter != buffstate.end(); )
 	{
-		list<eBuffState>::iterator tempiter = iter;
+		std::list<eBuffState>::iterator tempiter = iter;
 		++iter;
 		eBuffState& tempdata = (*tempiter);
 		
@@ -272,11 +272,11 @@ void Buff::UnRegisterBuff( eBuffState buffstate )
 	}
 }
 
-void Buff::UnRegisterBuff( list<eBuffState> buffstate )
+void Buff::UnRegisterBuff(std::list<eBuffState> buffstate )
 {
-	for( list<eBuffState>::iterator iter = buffstate.begin(); iter != buffstate.end(); )
+	for(std::list<eBuffState>::iterator iter = buffstate.begin(); iter != buffstate.end(); )
 	{
-		list<eBuffState>::iterator tempiter = iter;
+		std::list<eBuffState>::iterator tempiter = iter;
 		++iter;
 		eBuffState& tempdata = (*tempiter);
 		

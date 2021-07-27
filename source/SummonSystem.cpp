@@ -350,7 +350,7 @@ void CSummonSystem::CreateEquipEffect_Summon(CHARACTER * pCharacter, int iItemTy
 	if (iter == m_EquipEffectRandom.end())
 	{
 		byRandom = rand()%256;
-		m_EquipEffectRandom.insert(pair<SHORT, BYTE>(pCharacter->Key, byRandom));
+		m_EquipEffectRandom.insert(std::pair<SHORT, BYTE>(pCharacter->Key, byRandom));
 	}
 	else
 	{

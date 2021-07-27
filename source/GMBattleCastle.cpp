@@ -56,7 +56,7 @@ namespace battleCastle
     static  bool    g_bBattleCastleStartBackup = false;
     static  float   g_iMp3PlayTime = 0.f;
 
-    queue<BuildTime>   g_qBuildTimeLocation;
+    std::queue<BuildTime>   g_qBuildTimeLocation;
 
     
     enum

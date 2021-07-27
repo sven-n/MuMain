@@ -76,7 +76,7 @@ protected:
 	// 설정된 플래그 의 창 모두 닫기
 	// 리턴값 : true  : 플래그에 해당되는 모든 창이 닫혔다 (닫혀있던 창은 무시)
 	//			false : 어떤 창이 닫히지 못하는 상황일때..
-	bool CloseInterface( list<DWORD>& dwInterfaceFlag, DWORD dwExtraData=0 );
+	bool CloseInterface(std::list<DWORD>& dwInterfaceFlag, DWORD dwExtraData=0 );
 public:
 	// 초기화
 	void Init();
@@ -102,9 +102,9 @@ public:
 	bool Open( DWORD dwInterface, DWORD dwExtraData=0 );	// 조건을 체크하여 연다.
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	bool Close( DWORD dwInterface, DWORD dwExtraData=0 );	// 조건을 체크하여 닫는다.
-	void GetInterfaceAll( list<DWORD>& outflag );
-	void GetInsertInterface( list<DWORD>& outflag, DWORD insertflag );
-	void GetDeleteInterface( list<DWORD>& outflag, DWORD deleteflag );
+	void GetInterfaceAll(std::list<DWORD>& outflag );
+	void GetInsertInterface(std::list<DWORD>& outflag, DWORD insertflag );
+	void GetDeleteInterface(std::list<DWORD>& outflag, DWORD deleteflag );
 };
 
 
