@@ -76,7 +76,7 @@ protected:
 	void RenderGuildMasterMain();
 
 public:
-	// 길드관계맺기 요청 받음
+	// 길드관계맺기 요청  
 	void ReceiveGuildRelationShip( BYTE byRelationShipType, BYTE byRequestType, BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL );
 
 	virtual BOOL DoMouseAction();

@@ -127,7 +127,7 @@ bool SEASON3B::CNewUIManager::UpdateMouseEvent()
 	{
 		if((*vi)->IsVisible()) 
 		{
-#ifdef LJH_FIX_DEREFERENCE_VECTOR_ITER_FOR_DELETED_UI_OBJ
+
 			CNewUIObj *obj_backup = (*vi);
 			bool bResult = (*vi)->UpdateMouseEvent();
 			
@@ -146,13 +146,7 @@ bool SEASON3B::CNewUIManager::UpdateMouseEvent()
 				m_pActiveMouseUIObj = *vi;
 				return false;
 			}
-#else // LJH_FIX_DEREFERENCE_VECTOR_ITER_FOR_DELETED_UI_OBJ
- 			if(false == (*vi)->UpdateMouseEvent())
- 			{
- 				m_pActiveMouseUIObj = (*vi);
- 				return false;		//. stop calling UpdateMouseEvent functions
- 			}
-#endif // LJH_FIX_DEREFERENCE_VECTOR_ITER_FOR_DELETED_UI_OBJ
+
 		}
 	}
 

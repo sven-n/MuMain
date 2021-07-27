@@ -1231,7 +1231,7 @@ typedef struct {
 	char			szGuildName[MAX_GUILDNAME];
 } PMSG_UNIONLIST, *LPPMSG_UNIONLIST;
 
-// 연합이나 적대길드 요청 받음
+// 연합이나 적대길드 요청  
 typedef struct {
 	PBMSG_HEADER	Header;
 	BYTE			byRelationShipType;			// 관계종류 ( 0x01 : Union, 0x02 : Rival )
@@ -1240,7 +1240,7 @@ typedef struct {
 	BYTE			byTargetUserIndexL;			// 목표유저인덱스L
 } PMSG_GUILD_RELATIONSHIP, *LPPMSG_GUILD_RELATIONSHIP;
 
-// 연합이나 적대길드 요청결과 받음
+// 연합이나 적대길드 요청결과  
 typedef struct {
 	PBMSG_HEADER	Header;
 	BYTE			byRelationShipType;			// 관계종류 ( 0x01 : Union, 0x02 : Rival )
@@ -1257,7 +1257,7 @@ typedef struct {
 	BYTE			byRelationShipType;
 } PMSG_BAN_UNIONGUILD, *LPPMSG_BAN_UNIONGUILD;
 
-// 뷰포트내의 연합정보 변화를 받음
+// 뷰포트내의 연합정보 변화를  
 typedef struct {
 	PWMSG_HEADER	Header;
 	BYTE			byCount;
@@ -1604,7 +1604,7 @@ typedef struct
 } PMSG_ANS_SECEDE_GENS_MEMBER, *LPPMSG_ANS_SECEDE_GENS_MEMBER;
 
 //----------------------------------------------------------------------------
-// GC[0xF8][0x07] 겐스 세력 정보 받음.
+// GC[0xF8][0x07] 겐스 세력 정보  .
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -1621,7 +1621,7 @@ typedef struct
 } PMSG_MSG_SEND_GENS_INFO, *LPPMSG_MSG_SEND_GENS_INFO;
 
 //----------------------------------------------------------------------------
-// GC[0xF8][0x05] 뷰포트 안의 다른 플래이어의 겐스 세력 정보 받음
+// GC[0xF8][0x05] 뷰포트 안의 다른 플래이어의 겐스 세력 정보  
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2213,7 +2213,7 @@ enum CASTLESIEGE_STATE
 typedef struct
 {
 	PREQUEST_DEFAULT_SUBCODE	Header;
-	BYTE		btResult;					// 요청 결과 (0:실패/1:성공/2:성주인없음/3:성정보비정상/4:성길드없어짐) -> 성공이면 길드정보는 확실히 받음
+	BYTE		btResult;					// 요청 결과 (0:실패/1:성공/2:성주인없음/3:성정보비정상/4:성길드없어짐) -> 성공이면 길드정보는 확실히  
 	CHAR		cCastleSiegeState;			// 현재 공성전 상태
 	BYTE		btStartYearH;				// 상태 시작 - 년 (상위 바이트)
 	BYTE		btStartYearL;				// 상태 시작 - 년 (하위 바이트)

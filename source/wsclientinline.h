@@ -2415,10 +2415,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 }
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 
-///////////////////////////////////////////////////////////////////////////////
-// æ∆¿Ã≈€
-///////////////////////////////////////////////////////////////////////////////
-
 __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pItem, int iDstType,int iDstIndex)
 {
 	if(EquipmentItem || NULL == pItem) return false;
@@ -2475,8 +2471,8 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 #endif	// MODIFY_SOCKET_PROTOCOL
 		<< (BYTE)(iDstType&0xff) << (BYTE)(iDstIndex&0xff);
 #else // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
-	spe << ( BYTE)iSrcType << ( BYTE)iSrcIndex << ( BYTE)pItem->Type << ( BYTE)( pItem->Level)
-		<< ( BYTE)( pItem->Durability) << ( BYTE)( pItem->Option1) << ( BYTE)( pItem->ExtOption) 
+	spe << BYTECAST(char, iSrcType) << BYTECAST(char, iSrcIndex) << BYTECAST(char, pItem->Type) << BYTECAST(char, pItem->Level)
+		<< BYTECAST(char,pItem->Durability) << BYTECAST(char,pItem->Option1) << BYTECAST(char,pItem->ExtOption)
 		<< splitType << spareBits
 #ifdef MODIFY_SOCKET_PROTOCOL
 		<< socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
@@ -2824,7 +2820,7 @@ __forceinline void SendRequestMoveMap(DWORD dwBlockKey,WORD wMapIndex)
 	g_ConsoleDebug->Write(MCD_SEND, "0x8E∫∏≥ø[SendRequestMoveMap(%d %d)]", dwBlockKey, wMapIndex);
 #endif // CONSOLE_DEBUG
 #ifdef PJH_DEBUG
-	//g_ConsoleDebug->Write(MCD_SEND, "∏ ¿Ãµø πﬁ¿Ω[time : %d]", GetTickCount());
+	//g_ConsoleDebug->Write(MCD_SEND, "∏ ¿Ãµø  [time : %d]", GetTickCount());
 	char Text[300];
 	wsprintf(Text,"∏ ¿Ãµø∫∏≥ø[time : %d]", GetTickCount());
 	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);

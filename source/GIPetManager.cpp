@@ -747,12 +747,12 @@ namespace giPetManager
 
             if ( Index==0 )
             {
-                ip->SpecialValue[ip->SpecialNum] = (5+(CharacterAttribute->Dexterity/20)+pPetInfo->m_wLevel*2);
+                ip->SpecialValue[ip->SpecialNum] = static_cast<BYTE>((5+(CharacterAttribute->Dexterity/20)+pPetInfo->m_wLevel*2) &0xFF);
                 ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_DEFENCE;ip->SpecialNum++;
             }
             else
             {
-                ip->SpecialValue[Index] = (5+(CharacterAttribute->Dexterity/20)+pPetInfo->m_wLevel*2);
+                ip->SpecialValue[Index] = static_cast<BYTE>((5+(CharacterAttribute->Dexterity/20)+pPetInfo->m_wLevel*2 & 0xFF));
                 ip->Special[Index] = AT_SET_OPTION_IMPROVE_DEFENCE;
             }
         }

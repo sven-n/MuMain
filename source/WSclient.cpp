@@ -595,7 +595,7 @@ void ReceiveServerList( BYTE *ReceiveBuffer )
 		
 		g_ServerListManager->InsertServerGroup(Data2->Index, Data2->Percent);
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4받음[ReceiveServerList(%d %d %d)]", i, Data2->Index, Data2->Percent);
+		g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList(%d %d %d)]", i, Data2->Index, Data2->Percent);
 #endif // CONSOLE_DEBUG		
 		Offset += sizeof(PRECEIVE_SERVER_LIST);
 	}
@@ -859,7 +859,7 @@ void ReceiveServerList( BYTE *ReceiveBuffer )
 #endif	// CONNECT_LIST_FIX
 		
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4받음[ReceiveServerList(%d %d %d)]", i, Data2->Index, Data2->Percent);
+		g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList(%d %d %d)]", i, Data2->Index, Data2->Percent);
 #endif // CONSOLE_DEBUG
 		
 		Offset += sizeof(PRECEIVE_SERVER_LIST);
@@ -952,7 +952,7 @@ fclose(fp);
 #endif // KJH_ADD_SERVER_LIST_SYSTEM
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4받음[ReceiveServerList]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList]");
 #endif // CONSOLE_DEBUG
 }
 void ReceiveServerConnect( BYTE *ReceiveBuffer )
@@ -1265,7 +1265,7 @@ void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
 		CUIMng::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL2);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x01받음[ReceiveCreateCharacter]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x01 [ReceiveCreateCharacter]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -1485,7 +1485,7 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 #endif //NEW_USER_INTERFACE_SHELL
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x02받음[ReceiveServerList(%d)]", Data->Value);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x02 [ReceiveServerList(%d)]", Data->Value);
 #endif // CONSOLE_DEBUG
 	
 	return ( TRUE);
@@ -1509,7 +1509,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	
 #ifdef PJH_DEBUG
 	char Text[300];
-	wsprintf(Text,"맵이동받음(join)[time : %d]", GetTickCount());
+	wsprintf(Text,"맵이동 (join)[time : %d]", GetTickCount());
 	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);
 #endif
 
@@ -1806,7 +1806,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 #endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x03받음[ReceiveJoinMapServer]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveJoinMapServer]");
 #endif // CONSOLE_DEBUG
 	
 #ifdef PJH_DEBUG
@@ -1985,7 +1985,7 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 	g_pNewUISystem->HideAll();
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x04받음[ReceiveRevival]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x04 [ReceiveRevival]");
 #endif // CONSOLE_DEBUG
 	
 }
@@ -2099,7 +2099,7 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 		CharacterAttribute->Skill[Skill_Bool] = 0;
 #endif //#ifdef PJH_FIX_4_BUGFIX_33
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x11받음[ReceiveMagicList]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x11 [ReceiveMagicList]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -2159,7 +2159,7 @@ BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x10받음[ReceiveInventory]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x10 [ReceiveInventory]");
 #endif // CONSOLE_DEBUG
 	
 	return ( TRUE);
@@ -2202,7 +2202,7 @@ void ReceiveDeleteInventory( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x28받음[ReceiveDeleteInventory(%d %d)]", Data->SubCode, Data->Value);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x28 [ReceiveDeleteInventory(%d %d)]", Data->SubCode, Data->Value);
 #endif // CONSOLE_DEBUG
 }
 
@@ -2263,7 +2263,7 @@ void ReceiveTradeInventory( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x31받음[ReceiveTradeInventory]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x31 [ReceiveTradeInventory]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -2479,7 +2479,7 @@ void ReceiveNotice( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x0D받음[ReceiveNotice(%s)]", Data->Notice);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x0D [ReceiveNotice(%s)]", Data->Notice);
 #endif // CONSOLE_DEBUG
 }
 
@@ -2587,7 +2587,7 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	
 #ifdef PJH_DEBUG
 	char Text[300];
-	wsprintf(Text,"맵이동받음(tel)[time : %d]", GetTickCount());
+	wsprintf(Text,"맵이동 (tel)[time : %d]", GetTickCount());
 	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);
 #endif
 
@@ -2775,7 +2775,7 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 #endif //LJH_FIX_NOT_INITIALIZING_BATTLECASTLE_UI
 
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1C받음[ReceiveTeleport(%d)]", Data->Flag);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1C [ReceiveTeleport(%d)]", Data->Flag);
 #endif // CONSOLE_DEBUG
 	
 #ifdef PJH_DEBUG
@@ -3288,7 +3288,7 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x12받음[ReceiveCreatePlayerViewport(%d)]", Data->Value);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x12 [ReceiveCreatePlayerViewport(%d)]", Data->Value);
 #endif // CONSOLE_DEBUG
 }
 
@@ -3420,7 +3420,7 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x45받음[ReceiveCreateTransformViewport(%d)]", Data->Value);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x45 [ReceiveCreateTransformViewport(%d)]", Data->Value);
 #endif // CONSOLE_DEBUG
 }
 
@@ -3544,7 +3544,7 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 		CHARACTER *c = CreateMonster(Type,Data2->PositionX,Data2->PositionY,Key);
 		
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_RECEIVE, "0x13받음[ReceiveCreateMonsterViewport(Type : %d | Key : %d)]", Type, Key);
+		g_ConsoleDebug->Write(MCD_RECEIVE, "0x13 [ReceiveCreateMonsterViewport(Type : %d | Key : %d)]", Type, Key);
 #endif // CONSOLE_DEBUG	
 		
 		if(c == NULL) break;
@@ -3765,7 +3765,7 @@ void ReceiveCreateSummonViewport( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1F받음[ReceiveCreateSummonViewport(%d)]", Data->Value);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1F [ReceiveCreateSummonViewport(%d)]", Data->Value);
 #endif // CONSOLE_DEBUG
 }
 
@@ -4192,7 +4192,7 @@ void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 	c->Hit = Damage;
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x15받음[ReceiveAttackDamage(%d %d)]", AttackPlayer, Damage);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, Damage);
 #endif // CONSOLE_DEBUG
 }
 
@@ -4444,7 +4444,7 @@ void ReceiveAction(BYTE *ReceiveBuffer,int Size)
 	}
 
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x18받음[ReceiveAction(%d)]", Data->Angle);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x18 [ReceiveAction(%d)]", Data->Angle);
 #endif // CONSOLE_DEBUG
 }
 
@@ -4897,7 +4897,7 @@ BOOL ReceiveMonsterSkill(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 	}
 		
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_RECEIVE, "0x69받음[ReceiveMonsterSkill(Skill : %d | SKey : %d |TKey : %d)]", SkillNumber, SourceKey, TargetKey);
+		g_ConsoleDebug->Write(MCD_RECEIVE, "0x69 [ReceiveMonsterSkill(Skill : %d | SKey : %d |TKey : %d)]", SkillNumber, SourceKey, TargetKey);
 #endif // CONSOLE_DEBUG
 		
 		return ( TRUE);
@@ -6018,7 +6018,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x19받음[ReceiveMagic(%d)]", MagicNumber);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x19 [ReceiveMagic(%d)]", MagicNumber);
 #endif // CONSOLE_DEBUG
 	
 	return ( TRUE);
@@ -6646,7 +6646,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 	sc->SkillY = Data->PositionY;
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1E받음[ReceiveMagicContinue(%d)]", MagicNumber);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1E [ReceiveMagicContinue(%d)]", MagicNumber);
 #endif // CONSOLE_DEBUG
 	
 	return ( TRUE);
@@ -6867,7 +6867,7 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x16받음[ReceiveDieExp : %d]", Exp);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x16 [ReceiveDieExp : %d]", Exp);
 #endif // CONSOLE_DEBUG	
 	
 	return ( TRUE);
@@ -7084,7 +7084,7 @@ void ReceiveDie(BYTE *ReceiveBuffer,int Size)
     }
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x17받음[ReceiveDie(%d)]", Key);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x17 [ReceiveDie(%d)]", Key);
 #endif // CONSOLE_DEBUG
 }
 
@@ -7120,7 +7120,7 @@ void ReceiveCreateItemViewport( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x20받음[ReceiveCreateItemViewport]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x20 [ReceiveCreateItemViewport]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -7236,7 +7236,7 @@ void ReceiveGetItem( BYTE *ReceiveBuffer )
     SendGetItem = -1;
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x22받음[ReceiveGetItem(%d)]", Data->Result);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x22 [ReceiveGetItem(%d)]", Data->Result);
 #endif // CONSOLE_DEBUG
 }
 
@@ -7378,7 +7378,7 @@ BOOL ReceiveEquipmentItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x24받음[ReceiveEquipmentItem(%d %d)]", Data->SubCode, Data->Index);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x24 [ReceiveEquipmentItem(%d %d)]", Data->SubCode, Data->Index);
 #endif // CONSOLE_DEBUG
 	
 	return ( TRUE);
@@ -7665,7 +7665,7 @@ void ReceiveBuy( BYTE *ReceiveBuffer )
 	BuyCost = 0;
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x32받음[ReceiveBuy(%d)]", Data->Index);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x32 [ReceiveBuy(%d)]", Data->Index);
 #endif // CONSOLE_DEBUG
 }
 
@@ -7722,7 +7722,7 @@ void ReceiveRepair( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x34받음[ReceiveRepair(%d)]", Data->Gold);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x34 [ReceiveRepair(%d)]", Data->Gold);
 #endif // CONSOLE_DEBUG
 }
 
@@ -7780,7 +7780,7 @@ void ReceiveLevelUp( BYTE *ReceiveBuffer )
     PlayBuffer(SOUND_LEVEL_UP);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x05받음[ReceiveLevelUp]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x05 [ReceiveLevelUp]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -7863,7 +7863,7 @@ void ReceiveLife( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	//g_ConsoleDebug->Write(MCD_RECEIVE, "0x26받음[ReceiveLife]");
+	//g_ConsoleDebug->Write(MCD_RECEIVE, "0x26 [ReceiveLife]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -7904,7 +7904,7 @@ void ReceiveMana( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	//g_ConsoleDebug->Write(MCD_RECEIVE, "0x27받음[ReceiveMana]");
+	//g_ConsoleDebug->Write(MCD_RECEIVE, "0x27 [ReceiveMana]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -8002,7 +8002,7 @@ void ReceiveDurability( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x2A받음[ReceiveDurability(%d %d)]", Data->Value, Data->KeyL);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x2A [ReceiveDurability(%d %d)]", Data->Value, Data->KeyL);
 #endif // CONSOLE_DEBUG
 }
 
@@ -8122,7 +8122,7 @@ void ReceiveTradeResult( BYTE *ReceiveBuffer )
 	g_pTrade->ProcessToReceiveTradeResult(Data);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x37받음[ReceiveTradeResult(%d)]", Data->ID);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x37 [ReceiveTradeResult(%d)]", Data->ID);
 #endif // CONSOLE_DEBUG
 }
 
@@ -8229,9 +8229,9 @@ BOOL ReceiveGGAuth( BYTE *ReceiveBuffer, BOOL bEncrypted)
 	char str[256];
 #ifdef NPROTECT_AUTH2
 	GG_AUTH_DATA* pAuthData = (GG_AUTH_DATA*)(ReceiveBuffer+sizeof(PBMSG_HEADER)+1);
-	wsprintf( str, "ReceiveGGAuth - 요청 받음 %X %X %X %X", pAuthData->dwIndex, pAuthData->dwValue1, pAuthData->dwValue2, pAuthData->dwValue3);
+	wsprintf( str, "ReceiveGGAuth - 요청   %X %X %X %X", pAuthData->dwIndex, pAuthData->dwValue1, pAuthData->dwValue2, pAuthData->dwValue3);
 #else	// NPROTECT_AUTH2
-	wsprintf( str, "ReceiveGGAuth - 요청 받음 %X", Data->Value);
+	wsprintf( str, "ReceiveGGAuth - 요청   %X", Data->Value);
 #endif // NPROTECT_AUTH2
 	g_pChatListBox->AddText("", str, SEASON3B::TYPE_SYSTEM_MESSAGE);
 #endif // _DEBUG
@@ -8255,14 +8255,14 @@ void ReceiveStorageGold( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x81받음[ReceiveStorageGold(%d %d %d)]", Data->Result, Data->StorageGold, Data->Gold);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x81 [ReceiveStorageGold(%d %d %d)]", Data->Result, Data->StorageGold, Data->Gold);
 #endif // CONSOLE_DEBUG
 }
 
 void ReceiveStorageExit( BYTE *ReceiveBuffer )
 {
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x82받음[ReceiveStorageExit]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x82 [ReceiveStorageExit]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -8330,7 +8330,7 @@ void ReceivePartyList( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x42받음[ReceivePartyList(partynum : %d)]", Data->Count);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
 #endif // CONSOLE_DEBUG
 }
 
@@ -8685,7 +8685,7 @@ void ReceiveGuildBeginWar( BYTE *ReceiveBuffer )
 	g_pNewUISystem->Show(SEASON3B::INTERFACE_BATTLE_SOCCER_SCORE);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x62받음[ReceiveGuildBeginWar(%d)]", Data->Team);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x62 [ReceiveGuildBeginWar(%d)]", Data->Team);
 #endif // CONSOLE_DEBUG
 }
 
@@ -9125,7 +9125,7 @@ void Receive_Master_LevelUp( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x51받음[Receive_Master_LevelUp]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x51 [Receive_Master_LevelUp]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -9173,7 +9173,7 @@ void Receive_Master_Level_Exp( BYTE *ReceiveBuffer )
 	Master_Level_Data.wMaxBP			= Data->wMaxSkillMana;
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x50받음[Receive_Master_Level_Exp]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x50 [Receive_Master_Level_Exp]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -9318,7 +9318,7 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 	Master_Level_Data.nMLevelUpMPoint			   = Data->nMLPoint;
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x52받음[Receive_Master_LevelGetSkill]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x52 [Receive_Master_LevelGetSkill]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -9395,7 +9395,7 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 		case 1:				// 1. 이벤트 기간이 아님. 
 			SEASON3B::CreateOkMessageBox(GlobalText[2021]);
 			break;
-		case 2:				// 2. 이미 아이템 지급 받음.
+		case 2:				// 2. 이미 아이템 지급  .
 			SEASON3B::CreateOkMessageBox(GlobalText[2022]);
 			break;
 		case 3:				// 3. 실패 
@@ -9412,7 +9412,7 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 		}
 		else					
 		{
-			// 1 이벤트 기간이 아님. 2  이미 아이템 지급 받음.
+			// 1 이벤트 기간이 아님. 2  이미 아이템 지급  .
 			// 3 실패. 4 지급 자격 없음.
 			SEASON3B::CreateOkMessageBox(GlobalText[2020 + Data->Cmd2]);
 		}
@@ -9741,14 +9741,14 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x86받음[ReceiveMix(%d)]", Data->Index);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x86 [ReceiveMix(%d)]", Data->Index);
 #endif // CONSOLE_DEBUG
 }
 
 void ReceiveMixExit( BYTE *ReceiveBuffer )
 {
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x87받음[ReceiveMixExit]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x87 [ReceiveMixExit]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -10735,7 +10735,7 @@ void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x05받음[ReceivePersonalShopItemList]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x05 [ReceivePersonalShopItemList]");
 #endif // CONSOLE_DEBUG	
 }
 
@@ -11286,7 +11286,7 @@ void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)		// 대화방 개설 요청 결과
 			DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, GlobalText[994]);	// "대화중: "
 			((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char *)szIP, Data->RoomNumber, Data->Ticket);
 		}
-		else if (Data->Type == 1)	// 방에 들어올 대상 (1:1 대화 받음)
+		else if (Data->Type == 1)	// 방에 들어올 대상 (1:1 대화  )
 		{
 			// 중복 채팅 체크
 			DWORD dwUIID = g_pFriendMenu->CheckChatRoomDuplication(szName);
@@ -11311,7 +11311,7 @@ void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)		// 대화방 개설 요청 결과
 				//				g_pChatRoomSocketList->RemoveChatRoomSocket(dwOldRoomNumber);
 			}
 		}
-		else if (Data->Type == 2)	// 방에 들어올 대상 (초대 받음)
+		else if (Data->Type == 2)	// 방에 들어올 대상 (초대  )
 		{
 			DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);	// "대화중: "
 			((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char *)szIP, Data->RoomNumber, Data->Ticket);
@@ -12057,7 +12057,7 @@ void ReceiveQuestLimitResult(BYTE* ReceiveBuffer)
 	}
 }
 
-// 퀘스트 아이템 사용에 의한 EP(에피소드)를 받음.(0xF6 0x04)
+// 퀘스트 아이템 사용에 의한 EP(에피소드)를  .(0xF6 0x04)
 void ReceiveQuestByItemUseEP(BYTE* ReceiveBuffer)
 {
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -12070,7 +12070,7 @@ void ReceiveQuestByItemUseEP(BYTE* ReceiveBuffer)
 }
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
-// 기타 상황의 퀘스트 EP(에피소드)리스트를 받음.(0xF6 0x03)
+// 기타 상황의 퀘스트 EP(에피소드)리스트를  .(0xF6 0x03)
 void ReceiveQuestByEtcEPList(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPCTALK_QUESTLIST pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
@@ -12078,7 +12078,7 @@ void ReceiveQuestByEtcEPList(BYTE* ReceiveBuffer)
 		pData->m_wQuestCount);
 }
 
-// NPC에 의한 EP(에피소드)리스트를 받음.(0xF6 0x0A)
+// NPC에 의한 EP(에피소드)리스트를  .(0xF6 0x0A)
 void ReceiveQuestByNPCEPList(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPCTALK_QUESTLIST pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
@@ -12095,7 +12095,7 @@ void ReceiveQuestByNPCEPList(BYTE* ReceiveBuffer)
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 }
 
-// 선택문이 있는 QS(퀘스트 상태)를 받음.(0xF6 0x0B)
+// 선택문이 있는 QS(퀘스트 상태)를  .(0xF6 0x0B)
 void ReceiveQuestQSSelSentence(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPC_QUESTEXP_INFO pData = (LPPMSG_NPC_QUESTEXP_INFO)ReceiveBuffer;
@@ -12103,7 +12103,7 @@ void ReceiveQuestQSSelSentence(BYTE* ReceiveBuffer)
 	g_QuestMng.SetCurQuestProgress(pData->m_dwQuestIndex);
 }
 
-// 요구, 보상이 있는 QS(퀘스트 상태)를 받음.(0xF6 0x0C)
+// 요구, 보상이 있는 QS(퀘스트 상태)를  .(0xF6 0x0C)
 void ReceiveQuestQSRequestReward(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPC_QUESTEXP_INFO pData = (LPPMSG_NPC_QUESTEXP_INFO)ReceiveBuffer;
@@ -12113,7 +12113,7 @@ void ReceiveQuestQSRequestReward(BYTE* ReceiveBuffer)
 	g_QuestMng.SetEPRequestRewardState(pData->m_dwQuestIndex, true);
 }
 
-// 퀘스트 진행창에서 확인 버튼을 눌렀을 경우 서버에서 응답 받음.(0xF6 0x0D)
+// 퀘스트 진행창에서 확인 버튼을 눌렀을 경우 서버에서 응답  .(0xF6 0x0D)
 // 에피소드가 끝났을 경우(QS가 0xff)에 서버에서 (0xF6 0x0B)도 보냄.
 void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
 {
@@ -12167,7 +12167,7 @@ void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
 	}
 }
 
-// 퀘스트 포기했음을 응답 받음.(0xF6 0x0F)
+// 퀘스트 포기했음을 응답  .(0xF6 0x0F)
 void ReceiveQuestGiveUp(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_GIVEUP pData = (LPPMSG_ANS_QUESTEXP_GIVEUP)ReceiveBuffer;
@@ -12180,7 +12180,7 @@ void ReceiveQuestGiveUp(BYTE* ReceiveBuffer)
 #endif	// ASG_FIX_QUEST_GIVE_UP
 }
 
-// 진행 중인 퀘스트 리스트를 받음.(0xF6 0x1A)
+// 진행 중인 퀘스트 리스트를  .(0xF6 0x1A)
 void ReceiveProgressQuestList(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_PROGRESS_LIST pData = (LPPMSG_ANS_QUESTEXP_PROGRESS_LIST)ReceiveBuffer;
@@ -12188,7 +12188,7 @@ void ReceiveProgressQuestList(BYTE* ReceiveBuffer)
 		int(pData->m_byQuestCount));
 }
 
-// 진행중인 퀘스트 리스트에서 특정 퀘스트의 요구, 보상 정보를 받음.(0xF6 0x1B)
+// 진행중인 퀘스트 리스트에서 특정 퀘스트의 요구, 보상 정보를  .(0xF6 0x1B)
 void ReceiveProgressQuestRequestReward(BYTE* ReceiveBuffer)
 {
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -12213,7 +12213,7 @@ void ReceiveProgressQuestListReady(BYTE* ReceiveBuffer)
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
 #ifdef ASG_ADD_GENS_SYSTEM
-// 겐스 가입 요청 응답 받음.(0xF8 0x02)
+// 겐스 가입 요청 응답  .(0xF8 0x02)
 void ReceiveGensJoining(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_REG_GENS_MEMBER pData = (LPPMSG_ANS_REG_GENS_MEMBER)ReceiveBuffer;
@@ -12221,7 +12221,7 @@ void ReceiveGensJoining(BYTE* ReceiveBuffer)
 		g_pNPCDialogue->ProcessGensJoiningReceive(pData->m_byResult, pData->m_byInfluence);
 }
 
-// 겐스 탈퇴 요청 응답 받음.(0xF8 0x04)
+// 겐스 탈퇴 요청 응답  .(0xF8 0x04)
 void ReceiveGensSecession(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_SECEDE_GENS_MEMBER pData = (LPPMSG_ANS_SECEDE_GENS_MEMBER)ReceiveBuffer;
@@ -12229,7 +12229,7 @@ void ReceiveGensSecession(BYTE* ReceiveBuffer)
 		g_pNPCDialogue->ProcessGensSecessionReceive(pData->m_byResult);
 }
 
-// 겐스 세력 정보 받음.(0xF8 0x07)
+// 겐스 세력 정보  .(0xF8 0x07)
 void ReceivePlayerGensInfluence(BYTE* ReceiveBuffer)
 {
 	LPPMSG_MSG_SEND_GENS_INFO pData = (LPPMSG_MSG_SEND_GENS_INFO)ReceiveBuffer;
@@ -12242,7 +12242,7 @@ void ReceivePlayerGensInfluence(BYTE* ReceiveBuffer)
 #endif //PBG_ADD_GENSRANKING
 }
 
-// 뷰포트 안의 다른 플래이어의 겐스 세력 정보 받음.(0xF8, 0x05)
+// 뷰포트 안의 다른 플래이어의 겐스 세력 정보  .(0xF8, 0x05)
 void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 {
 	LPPMSG_SEND_GENS_MEMBER_VIEWPORT Data = (LPPMSG_SEND_GENS_MEMBER_VIEWPORT)ReceiveBuffer;
@@ -12280,7 +12280,7 @@ void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 #endif	// ASG_ADD_GENS_SYSTEM
 
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
-// NPC UI가 대화로 진행되는 NPC 클릭 때 응답 받음.(0xF9 0x01)
+// NPC UI가 대화로 진행되는 NPC 클릭 때 응답  .(0xF9 0x01)
 void ReceiveNPCDlgUIStart(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_NPC_CLICK pData = (LPPMSG_ANS_NPC_CLICK)ReceiveBuffer;
@@ -12649,7 +12649,7 @@ void ReceiveChangeMapServerResult ( BYTE* ReceiveBuffer )
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0xB1받음[ReceiveChangeMapServerResult]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0xB1 [ReceiveChangeMapServerResult]");
 #endif // CONSOLE_DEBUG	
 }
 
@@ -13680,7 +13680,7 @@ void    ReceiveCatapultFireToMe ( BYTE* ReceiveBuffer )
 
 
 //////////////////////////////////////////////////////////////////////////
-//  공성무기에 공격을 받는다. ( 공격 받는 캐릭터들만 받음 ).
+//  공성무기에 공격을 받는다. ( 공격 받는 캐릭터들만   ).
 //////////////////////////////////////////////////////////////////////////
 /*
 void    ReceiveDamageFrmeCatapult ( BYTE* ReceiveBuffer )
@@ -14072,7 +14072,7 @@ void RecevieKanturu3rdLeftUserandMonsterCount( BYTE* ReceiveBuffer)
 //----------------------------------------------------------------------------
 // PC방 포인트 시스템
 //----------------------------------------------------------------------------
-// PC방 포인트 정보를 받음.
+// PC방 포인트 정보를  .
 void ReceivePCRoomPointInfo(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_GC_PCROOM_POINT_INFO pData = (LPPMSG_ANS_GC_PCROOM_POINT_INFO)ReceiveBuffer;
@@ -14093,7 +14093,7 @@ void ReceivePCRoomPointInfo(BYTE* ReceiveBuffer)
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0xD0 0x04받음[ReceivePCRoomPointInfo(%d | %d)]", pData->nPoint, pData->nMaxPoint);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0xD0 0x04 [ReceivePCRoomPointInfo(%d | %d)]", pData->nPoint, pData->nMaxPoint);
 #endif // CONSOLE_DEBUG
 }
 
@@ -14135,7 +14135,7 @@ void ReceivePCRoomPointUse(BYTE* ReceiveBuffer)
 	}
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0xD0 0x05받음[ReceivePCRoomPointUse(%d)]", pData->byInvenPos);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0xD0 0x05 [ReceivePCRoomPointUse(%d)]", pData->byInvenPos);
 #endif // CONSOLE_DEBUG	
 }
 
@@ -14297,7 +14297,7 @@ void ReceiveCheckSumRequest( BYTE *ReceiveBuffer)
 	SendCheckSum( dwCheckSum );	
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x03받음[ReceiveCheckSumRequest]");
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveCheckSumRequest]");
 #endif // CONSOLE_DEBUG
 }
 
@@ -14354,7 +14354,7 @@ extern int TimeRemain;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// 프로토콜 받음
+// 프로토콜  
 ///////////////////////////////////////////////////////////////////////////////
 
 BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEcrypted);
@@ -15249,7 +15249,7 @@ bool ReceiveEquippingInventoryItem(BYTE* pReceiveBuffer)
 	pItem->Durability = iResult;
 	
 #ifdef CONSOLE_DEBUG
-			g_ConsoleDebug->Write(MCD_RECEIVE, "[0xBF][0x20]받음 [ReceiveEquippingInventoryItem]");
+			g_ConsoleDebug->Write(MCD_RECEIVE, "[0xBF][0x20]  [ReceiveEquippingInventoryItem]");
 #endif // CONSOLE_DEBUG
 
 	return true;
@@ -15590,7 +15590,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 			
 #ifdef CONSOLE_DEBUG
-			g_ConsoleDebug->Write(MCD_RECEIVE, "[0xF3][0x%02x]받음", subcode);
+			g_ConsoleDebug->Write(MCD_RECEIVE, "[0xF3][0x%02x]", subcode);
 #endif // CONSOLE_DEBUG
 			
 			switch( subcode )
@@ -15994,10 +15994,10 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0xE1:	// 길드직책을 임명/변경/해제 결과
 		ReceiveGuildAssign(ReceiveBuffer);
 		break;
-	case 0xE5:	// 길드관계 요청 받음
+	case 0xE5:	// 길드관계 요청  
 		ReceiveGuildRelationShip(ReceiveBuffer);
 		break;
-	case 0xE6:	// 길드관계 요청결과 받음
+	case 0xE6:	// 길드관계 요청결과  
 		ReceiveGuildRelationShipResult(ReceiveBuffer);
 		break;
 	case 0xEB:
@@ -16011,10 +16011,10 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 		}
 		break;
-	case 0x67:	// 길드연합정보 변경 받음
+	case 0x67:	// 길드연합정보 변경  
 		ReceiveUnionViewportNotify(ReceiveBuffer);
 		break;
-	case 0xE9:	// 연합리스트 받음
+	case 0xE9:	// 연합리스트  
 		ReceiveUnionList(ReceiveBuffer);
 		break;
 	case 0xBC:
@@ -16165,32 +16165,32 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				break;
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 			case 0x03:
-				ReceiveQuestByEtcEPList(ReceiveBuffer);		// 기타 상황의 퀘스트 EP(에피소드)리스트를 받음.
+				ReceiveQuestByEtcEPList(ReceiveBuffer);		// 기타 상황의 퀘스트 EP(에피소드)리스트를  .
 				break;
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
 			case 0x04:
-				ReceiveQuestByItemUseEP(ReceiveBuffer);		// 퀘스트 아이템 사용에 의한 EP(에피소드)를 받음.
+				ReceiveQuestByItemUseEP(ReceiveBuffer);		// 퀘스트 아이템 사용에 의한 EP(에피소드)를  .
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 			case 0x0A:
-				ReceiveQuestByNPCEPList(ReceiveBuffer);		// NPC에 의한 EP(에피소드)리스트를 받음.
+				ReceiveQuestByNPCEPList(ReceiveBuffer);		// NPC에 의한 EP(에피소드)리스트를  .
 				break;
 			case 0x0B:
-				ReceiveQuestQSSelSentence(ReceiveBuffer);	// 선택문이 있는 QS(퀘스트 상태)를 받음
+				ReceiveQuestQSSelSentence(ReceiveBuffer);	// 선택문이 있는 QS(퀘스트 상태)를  
 				break;
 			case 0x0C:
-				ReceiveQuestQSRequestReward(ReceiveBuffer);	// 요구, 보상이 있는 QS(퀘스트 상태)를 받음.
+				ReceiveQuestQSRequestReward(ReceiveBuffer);	// 요구, 보상이 있는 QS(퀘스트 상태)를  .
 				break;
 			case 0x0D:
-				ReceiveQuestCompleteResult(ReceiveBuffer);	// 요구, 보상 결과를 받음.
+				ReceiveQuestCompleteResult(ReceiveBuffer);	// 요구, 보상 결과를  .
 				break;
 			case 0x0F:
-				ReceiveQuestGiveUp(ReceiveBuffer);			// 퀘스트 포기했음을 응답 받음.
+				ReceiveQuestGiveUp(ReceiveBuffer);			// 퀘스트 포기했음을 응답  .
 				break;
 			case 0x1A:
-				ReceiveProgressQuestList(ReceiveBuffer);	// 진행 중인 퀘스트 리스트를 받음.
+				ReceiveProgressQuestList(ReceiveBuffer);	// 진행 중인 퀘스트 리스트를  .
 				break;
 			case 0x1B:
-				ReceiveProgressQuestRequestReward(ReceiveBuffer);// 진행중인 퀘스트 리스트에서 특정 퀘스트의 요구, 보상 정보를 받음.
+				ReceiveProgressQuestRequestReward(ReceiveBuffer);// 진행중인 퀘스트 리스트에서 특정 퀘스트의 요구, 보상 정보를  .
 				break;
 #ifdef ASG_FIX_QUEST_PROTOCOL_ADD
 			case 0x20:
@@ -16227,10 +16227,10 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				ReceiveGensSecession(ReceiveBuffer);		// 겐스 탈퇴 요청 응답. 
 				break;
 			case 0x07:
-				ReceivePlayerGensInfluence(ReceiveBuffer);	// 플래이어의 겐스 세력 정보 받음.
+				ReceivePlayerGensInfluence(ReceiveBuffer);	// 플래이어의 겐스 세력 정보  .
 				break;
 			case 0x05:
-				ReceiveOtherPlayerGensInfluenceViewport(ReceiveBuffer);	// 뷰포트 안의 다른 플래이어의 겐스 세력 정보 받음.
+				ReceiveOtherPlayerGensInfluenceViewport(ReceiveBuffer);	// 뷰포트 안의 다른 플래이어의 겐스 세력 정보  .
 				break;
 #ifdef PBG_ADD_GENSRANKING
 			case 0x0A:
@@ -16248,7 +16248,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			switch (Data->SubCode)
 			{
 			case 0x01:
-				ReceiveNPCDlgUIStart(ReceiveBuffer);		// NPC UI가 대화로 진행되는 NPC 클릭 때 응답 받음. 
+				ReceiveNPCDlgUIStart(ReceiveBuffer);		// NPC UI가 대화로 진행되는 NPC 클릭 때 응답  . 
 				break;
 			}
 		}

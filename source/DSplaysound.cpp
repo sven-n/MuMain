@@ -472,7 +472,7 @@ HRESULT PlayBuffer(int Buffer,OBJECT *Object,BOOL bLooped)
     if( FAILED( hr = g_lpDSBuffer[Buffer][BufferChannel[Buffer]]->Play( 0, 0, dwLooped ) ) )
     {
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_ERROR, "사운드 Play 에러 : %d, %d", Buffer, dwLooped);
+		g_ConsoleDebug->Write(MCD_ERROR, "Play Sound: %d, %d", Buffer, dwLooped);
 #endif // CONSOLE_DEBUG
         return hr;
     }

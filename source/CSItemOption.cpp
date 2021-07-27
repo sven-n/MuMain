@@ -1100,7 +1100,7 @@ void CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexter
 void CSItemOption::CheckItemSetOptions ( void )
 {
 	BYTE byOptionList[30] = { 0, };
-    ITEM itemTmp;
+	ITEM* itemTmp = NULL;
 
     memset ( m_bySetOptionList, 0, sizeof( BYTE ) * 16 );
 
@@ -1126,7 +1126,7 @@ void CSItemOption::CheckItemSetOptions ( void )
 #endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
 #endif	//LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
 
-        if ( ( i==EQUIPMENT_WEAPON_LEFT || i==EQUIPMENT_RING_LEFT ) && itemTmp.Type==ip->Type && itemTmp.ExtOption==(ip->ExtOption%0x04) )
+        if (itemTmp ==nullptr || ((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT) && itemTmp->Type == ip->Type && itemTmp->ExtOption == (ip->ExtOption % 0x04)))
         {
             continue;
         }
@@ -1138,8 +1138,8 @@ void CSItemOption::CheckItemSetOptions ( void )
 
         if ( i==EQUIPMENT_WEAPON_RIGHT || i==EQUIPMENT_RING_RIGHT )
         {
-            itemTmp.Type = ip->Type;
-            itemTmp.ExtOption = (ip->ExtOption%0x04);
+            itemTmp->Type = ip->Type;
+            itemTmp->ExtOption = (ip->ExtOption%0x04);
         }
 	}
 
@@ -1232,7 +1232,7 @@ void CSItemOption::CheckItemSetOptions ( void )
             continue;
         }
 
-        if ( ( i==EQUIPMENT_WEAPON_LEFT || i==EQUIPMENT_RING_LEFT ) && itemTmp.Type==ip->Type && itemTmp.ExtOption==(ip->ExtOption%0x04) )
+        if (!itemTmp || (( i==EQUIPMENT_WEAPON_LEFT || i==EQUIPMENT_RING_LEFT ) && itemTmp->Type==ip->Type && itemTmp->ExtOption==(ip->ExtOption%0x04) ))
         {
             continue;
         }
@@ -1244,8 +1244,8 @@ void CSItemOption::CheckItemSetOptions ( void )
 
         if ( i==EQUIPMENT_WEAPON_RIGHT || i==EQUIPMENT_RING_RIGHT )
         {
-            itemTmp.Type = ip->Type;
-            itemTmp.ExtOption = (ip->ExtOption%0x04);
+            itemTmp->Type		= ip->Type;
+            itemTmp->ExtOption	= (ip->ExtOption%0x04);
         }
 	}
 

@@ -3961,7 +3961,7 @@ bool CSantaTownSantaMsgBoxLayout::SetLayout()
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
 		return FALSE;
 
-	//msg는 따로 받음.
+	//msg는 따로  .
 
 	pMsgBox->AddCallbackFunc(CSantaTownSantaMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CSantaTownSantaMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);

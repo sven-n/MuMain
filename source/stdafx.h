@@ -112,6 +112,7 @@
 #define SAFE_DELETE_ARRAY(p)  { if(p) { delete [] (p);     (p)=NULL; } }
 #define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
 #define DIRECTINPUT_VERSION	0x0800
+#define BYTECAST(T,X) static_cast<T>(X & 0xFF)
 
 //patch
 //winmain

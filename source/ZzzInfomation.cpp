@@ -3997,7 +3997,7 @@ bool IsRequireEquipItem(ITEM* pItem)
 	if(pItem->Type == ITEM_HELPER+5 )			// 다크스피릿		   
 	{
 		PET_INFO* pPetInfo = giPetManager::GetPetInfo( pItem );
-		WORD wRequireCharisma = (185+(pPetInfo->m_wLevel*15));
+		WORD wRequireCharisma = static_cast<WORD>((185+pPetInfo->m_wLevel*15) & 0xFFFF);
 		if( wRequireCharisma > wCharisma ) {
 			return false;	//  요구통솔보다 작으면 실패.
 		}
@@ -5162,9 +5162,8 @@ void CHARACTER_MACHINE::CalculateAttackRating()
 	Dexterity= Character.Dexterity+ Character.AddDexterity;
     Charisma = Character.Charisma + Character.AddCharisma;
 
-    //  공격 성공율.
     if ( GetBaseClass( Character.Class )==CLASS_DARK_LORD )
-	    Character.AttackRating  = ((Character.Level*5)+(Dexterity*5)/2)+(Strength/6)+(Charisma/10);
+	    Character.AttackRating  = static_cast<WORD>(((Character.Level*5)+(Dexterity*5)/2)+(Strength/6)+(Charisma/10) & 0xFFFF);
 #ifdef PBG_ADD_NEWCHAR_MONK
 	else if(GetBaseClass( Character.Class )==CLASS_RAGEFIGHTER)
 	{
@@ -5172,7 +5171,7 @@ void CHARACTER_MACHINE::CalculateAttackRating()
 	}
 #endif //PBG_ADD_NEWCHAR_MONK
     else
-	    Character.AttackRating  = ((Character.Level*5)+(Dexterity*3)/2)+(Strength/4);
+	    Character.AttackRating  = static_cast<WORD>((((Character.Level*5)+(Dexterity*3)/2)+(Strength/4)) & 0xFFFF);
 
 	//	세트 옵션을 적용한다.
 	g_csItemOption.PlusSpecial ( &Character.AttackRating, AT_SET_OPTION_IMPROVE_ATTACKING_PERCENT );	//	공격 성공률 증가

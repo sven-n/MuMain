@@ -183,7 +183,7 @@ enum UI_MESSAGE_ENUM
 
 	// 윈도우 메시지
 	UI_MESSAGE_SELECTED,	// 윈도우 선택됨
-	UI_MESSAGE_TEXTINPUT,	// 텍스트 입력 받음
+	UI_MESSAGE_TEXTINPUT,	// 텍스트 입력  
 	UI_MESSAGE_P_MOVE,		// (부모)윈도우가 이동
 	UI_MESSAGE_P_RESIZE,	// (부모)윈도우가 크기조절
 	UI_MESSAGE_BTNLCLICK,	// 버튼 클릭				|클릭된 버튼 ID

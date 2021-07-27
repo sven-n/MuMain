@@ -135,8 +135,8 @@ public:
 public:
 	bool          Live;
 	bool          bBillBoard;
-	bool          m_bCollisionCheck;		//  충돌 체크 할까?
-	bool          m_bRenderShadow;			//  그림자를 찍을까? 말까?
+	bool          m_bCollisionCheck;
+	bool          m_bRenderShadow;
 	bool          EnableShadow;
 	bool		  LightEnable;
 	bool		  m_bActionStart;
@@ -163,15 +163,15 @@ public:
 	BYTE          Teleport;
 	BYTE          Kind;
 	WORD		Skill;
-	BYTE		  m_byNumCloth;				// 천 개수
+	BYTE		  m_byNumCloth;
 	BYTE		  m_byHurtByOneToOne;
 	BYTE          WeaponLevel;
-	BYTE          DamageTime;				//  공격을 받은 충격 시간.
+	BYTE          DamageTime;
 	BYTE          m_byBuildTime;
 	BYTE		  m_bySkillCount;
 	BYTE		m_bySkillSerialNum;
 	BYTE		  Block;
-	void*		  m_pCloth;	// 천 붙이기
+	void*		  m_pCloth;
 
 public:
 	short         ScreenX;
@@ -182,7 +182,7 @@ public:
 public:
 	int			  Type;
 	int           SubType;
-	int			  m_iAnimation;				// 펜릴 발바닥 관련 에니메이션 키값
+	int			  m_iAnimation;
 	int           HiddenMesh;
 	int           LifeTime;
 	int           BlendMesh;
@@ -192,7 +192,7 @@ public:
 	int           LinkBone;
 
 public:
-	DWORD			m_dwTime;				// 펜릴 관련 시간재는 변수로 사용
+	DWORD			m_dwTime;
 	
 public:
 	float         Scale;
@@ -200,7 +200,7 @@ public:
 	float         BlendMeshTexCoordU;
 	float         BlendMeshTexCoordV;
 	float         Timer;
-	float         m_fEdgeScale;				//  외곽선 스케일.	
+	float         m_fEdgeScale;
 	float         Velocity;
 	float		  CollisionRange;
 	float         ShadowScale;
@@ -214,8 +214,8 @@ public:
 public:
 	vec3_t        Light;
 	vec3_t        Direction;
-	vec3_t		  m_vPosSword;				// 칼끝 위치
-	vec3_t		  StartPosition;			// bullet
+	vec3_t		  m_vPosSword;
+	vec3_t		  StartPosition;
 	vec3_t        BoundingBoxMin;
 	vec3_t        BoundingBoxMax;	
 	vec3_t		  m_vDownAngle;
@@ -246,7 +246,7 @@ public:
 	Buff		  m_BuffMap;
 
 public:
-	short int		m_sTargetIndex;			// 체인라이트닝 스킬에서, 다음 타겟 오브젝트의 인덱스를 저장 (Effect 에서 사용)
+	short int		m_sTargetIndex;
 
 #if defined PCROOM_EVENT
 public:

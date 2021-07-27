@@ -1,7 +1,6 @@
-// GM_Raklion.cpp: implementation of the CGM_Raklion class.
-//
 //////////////////////////////////////////////////////////////////////
-
+// GM_Raklion.cpp: implementation of the CGM_Raklion class.
+//////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
 #ifdef CSK_ADD_MAP_ICECITY
@@ -24,10 +23,6 @@
 using namespace SEASON4A;
 
 extern char* g_lpszMp3[NUM_MUSIC];
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CGM_RaklionPtr CGM_Raklion::Make()
 {
@@ -65,8 +60,6 @@ bool CGM_Raklion::CreateObject(OBJECT* o)
 {
 	switch(o->Type)
 	{
-	// 라클리온에서 영웅탑으로 가는 워프 이펙트입니다.
-	// 영웅탑 맵이 들어가면 워프 이펙트 살리면 OK
 	case MODEL_WARP:
 		{
 			/*
@@ -106,7 +99,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 	switch (iType)
 	{
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case 454:	// 아이스 워커
+	case 454:
 		OpenMonsterModel(145);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+145, PosX, PosY);
 		strcpy(pCharacter->ID, "아이스 워커");
@@ -118,7 +111,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 
 #ifdef PJH_GIANT_MAMUD	//cpjh
-	case 455:	// 자이언트 매머드
+	case 455:
 		OpenMonsterModel(146);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+146, PosX, PosY);
 		strcpy(pCharacter->ID, "자이언트 매머드");
@@ -135,19 +128,19 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 #endif //PJH_GIANT_MAMUD
 
 #ifdef ADD_RAKLION_MOB_ICEGIANT
-	case 456:	// 아이스 자이언트
+	case 456:
 		OpenMonsterModel(147);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+147, PosX, PosY);
 		strcpy(pCharacter->ID, "아이스 자이언트");
 		pCharacter->Object.Scale = 1.0f;
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
-		pCharacter->Object.LifeTime = 100;	// 죽는 동작에서 한 번만 실행하기 위해 적절한 변수가 없어서 LifeTime 사용.
+		pCharacter->Object.LifeTime = 100;
 		break;
 #endif	// ADD_RAKLION_MOB_ICEGIANT
 
 #ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN	
-	case 457:	// 쿨러틴
+	case 457:
 		OpenMonsterModel(148);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+148, PosX, PosY);
 		strcpy(pCharacter->ID, "쿨러틴");
@@ -158,7 +151,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 #endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
 
 #ifdef ADD_RAKLION_IRON_KNIGHT
-	case 458:	// 아이언 나이트
+	case 458:
 		OpenMonsterModel(149);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+149, PosX, PosY);
 		strcpy(pCharacter->ID, "아이언 나이트");
@@ -168,7 +161,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		break;
 #endif	// ADD_RAKLION_IRON_KNIGHT
 
-	case 459:	// 세루판 (보스몬스터)
+	case 459:
 		{
 			OpenMonsterModel(150);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+150, PosX, PosY);
@@ -177,19 +170,14 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 			pCharacter->Weapon[0].Type = -1;
 			pCharacter->Weapon[1].Type = -1;
 			
-			// 첫 등장 스킬시 몬스터 생성 되는 거 안보여주기 위해 임시로 위치 변경
-			// 스킬 쓰기전 갱신시켜 줌
 			if(m_byState >= RAKLION_STATE_STANDBY && m_byState <= RAKLION_STATE_READY)
 			{
-#ifdef CONSOLE_DEBUG
-				g_ConsoleDebug->Write(MCD_NORMAL, "보스 높이위치값 1000 설정");
-#endif // CONSOLE_DEBUG	
 				pCharacter->Object.Position[2] = 1000.f;
 				m_bBossHeightMove = true;
 			}
 		}
 		break;
-	case 460:	// 거대 거미알
+	case 460:
 		{
 			OpenMonsterModel(151);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+151, PosX, PosY);
@@ -201,7 +189,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 			pCharacter->Object.m_bRenderShadow = false;
 		}
 		break;
-	case 461:	// 거대 거미알
+	case 461:
 		{
 			OpenMonsterModel(152);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+152, PosX, PosY);
@@ -213,7 +201,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 			pCharacter->Object.m_bRenderShadow = false;
 		}
 		break;
-	case 462:	// 거대 거미알
+	case 462:
 		{
 			OpenMonsterModel(153);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+153, PosX, PosY);
@@ -227,7 +215,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		break;
 
 #ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
-	case 562: // 확장맵 몬스터 : 다크 메머드
+	case 562:
 		{
 			OpenMonsterModel(205);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+205, PosX, PosY);
@@ -244,7 +232,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 			BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_SPAIN_3", 5);
 		}
 		break;
-	case 563: // 확장맵 몬스터 : 다크 자이언트
+	case 563:
 		{
 			OpenMonsterModel(206);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+206, PosX, PosY);
@@ -253,11 +241,11 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 			pCharacter->Object.Scale = 1.1f;
 			pCharacter->Weapon[0].Type = -1;
 			pCharacter->Weapon[1].Type = -1;
-			pCharacter->Object.LifeTime = 100;	// 죽는 동작에서 한 번만 실행하기 위해 적절한 변수가 없어서 LifeTime 사용.
+			pCharacter->Object.LifeTime = 100;
 		}
 		break;
 	
-	case 564: // 확장맵 몬스터 : 다크 쿨러틴
+	case 564:
 		{
 			OpenMonsterModel(207);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+207, PosX, PosY);
@@ -268,7 +256,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 			pCharacter->Weapon[1].Type = -1;
 		}
 		break;
-	case 565: // 확장맵 몬스터 : 다크 아이언 나이트
+	case 565:
 		{
 			OpenMonsterModel(208);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+208, PosX, PosY);
@@ -298,7 +286,7 @@ bool CGM_Raklion::MoveObject(OBJECT* o)
 			return true;
 		}
 		break;
-	case 70:	// 리얼파란불
+	case 70:
 	case 80:
 		{
 			o->HiddenMesh = -2;
@@ -320,7 +308,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 	switch(o->Type)
 	{
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER	
-	case MODEL_MONSTER01+145:	// 아이스워커
+	case MODEL_MONSTER01+145:
 		{			
 			switch( o->CurrentAction )
 			{
@@ -335,16 +323,15 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 						const float ANG_REVISION = 20.0f;
 						
-						// 위치 보정이 필요한 경우 
 						vec3_t v3Pos, v3Ang_, v3BasisPos;
 						
 						//vec3_t v3Dir_, v3Dir;
 						//float  matRotation[3][4];
 						
-						// a. Bipad Header의 위치 값을 가져온다.
+						// a. Bipad Header
 						b->TransformByObjectBone( v3BasisPos, o, 8 );
 						
-						// b. Position 보정 및 최종 Position 산출 부분..
+						// b. Position Position
 						VectorCopy( v3BasisPos, v3Pos );
 						/*
 						VectorCopy( o->Position, v3Pos );
@@ -358,14 +345,10 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 							v3Pos[2] = v3BasisPos[2] + ( v3Dir[2] * OFFSETLEN ); // POS_HEIGHT;
 							v3Pos[2] = v3BasisPos[2] + POS_HEIGHT;				// Position 보정 
 						*/
-						// b. Position 보정 부분..
-						
-						// c. 각도 보정 부분.
+
 						VectorCopy( o->Angle, v3Ang_ );
 						v3Ang_[0] = v3Ang_[0] + ANG_REVISION;
-						// c. 각도 보정 부분.
-						
-						// d. Effect 호출 부분..
+
 						CreateEffect( MODEL_STREAMOFICEBREATH, v3Pos, o->Angle, o->Light, 0, 0, -1, 0, 0, 0, 0.2f, -1 );	
 					}
 				}
@@ -392,8 +375,8 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 		}
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-#ifdef PJH_GIANT_MAMUD	//cpjh
-	case MODEL_MONSTER01+146:	//자이언트 메머드 
+#ifdef PJH_GIANT_MAMUD
+	case MODEL_MONSTER01+146:
 		{
 			float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -460,13 +443,13 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 		}
 		break;
 #endif //PJH_GIANT_MAMUD
-	case MODEL_MONSTER01+147:	// 아이스자이언트
+	case MODEL_MONSTER01+147:
 		{
 
 		}
 		break;
 #ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
-	case MODEL_MONSTER01+148:	// 쿨러틴
+	case MODEL_MONSTER01+148:
 		{
 			if( o->AnimationFrame >= 1.7f && o->AnimationFrame <= 2.0f )
 			{
@@ -513,7 +496,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 					{
 						vec3_t vPos, vLight;
 						
-						// 피효과
 						if(rand()%3 != 0)
 						{
 							for(int i=0; i<b->NumBones; ++i)
@@ -534,7 +516,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 						
 						if(rand()%3 == 0)
 						{
-							// 연기효과
 							VectorCopy(o->Position, vPos);
 							vPos[0] += (float)(rand()%200-100);
 							vPos[1] += (float)(rand()%200-100);
@@ -542,14 +523,12 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 							CreateParticle ( BITMAP_SMOKE,  vPos, o->Angle, vLight, 1, 0.5f );
 							CreateParticle ( BITMAP_SMOKE,  vPos, o->Angle, vLight, 24, 1.25f );
 							
-							// 바닥효과
 							VectorCopy(o->Position, vPos);
 							vPos[0] += (float)(rand()%250-125);
 							vPos[1] += (float)(rand()%250-125);
 							Vector(0.1f, 1.0f, 0.1f, vLight);
 							CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 1.0f);
 							
-							// 스파크
 							Vector(1.0f, 1.0f, 1.0f, vLight);
 							vPos[2] += 50.f;
 							CreateParticle ( BITMAP_SPARK+1,  vPos, o->Angle, vLight, 5, 0.75f );
@@ -563,13 +542,13 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
 #ifdef ADD_RAKLION_IRON_KNIGHT
-	case MODEL_MONSTER01+149:	// 아이언 나이트
+	case MODEL_MONSTER01+149:
 		{
 			
 		}
 		break;
 #endif	// ADD_RAKLION_IRON_KNIGHT
-	case MODEL_MONSTER01+150:	// 세루판 (보스몬스터)
+	case MODEL_MONSTER01+150:
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK1)
 			{
@@ -577,13 +556,11 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
 				if(o->AnimationFrame >= 3.7f && o->AnimationFrame <= 4.f)
 				{
-					// 마법진 효과
 					Vector(0.2f, 0.4f, 1.f, vLight);
 					VectorCopy(o->Position, vPos);
 					vPos[1] += 30.f;
 					CreateEffect(MODEL_RAKLION_BOSS_MAGIC, vPos, o->Angle, vLight, 0, o, -1, 0, 0, 0, 1.5f );
 
-					// 얼음 떨어지는 효과
 					Vector(0.2f, 0.4f, 1.f, vLight);
 					for(int i=0; i<20; ++i)
 					{
@@ -604,16 +581,14 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 			{
 				vec3_t vLight, vPos, vAngle;
 				
-				// 분수효과
 				Vector(0.0f, 0.9f, 0.1f, vLight);
 				b->TransformByObjectBone(vPos, o, 0);
 				CreateParticle ( BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 11, 2.f );
-				// 연기
+
 				CreateParticle ( BITMAP_SMOKE, vPos, o->Angle, vLight, 52, 2.f );
 
 				if(o->AnimationFrame >= 6.8f && o->AnimationFrame <= 7.f)
 				{
-					// 달 5개 발사
 					float Matrix[3][4];
 					vec3_t vDirection, vDirection2;
 					VectorCopy(o->Position, vPos);
@@ -640,10 +615,8 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 				
 				if(o->AnimationFrame >= 6.6f && o->AnimationFrame <= 7.f)
 				{
-					// 땅에서 퍼지는 효과
 					CreateEffect(BITMAP_DAMAGE_01_MONO, o->Position, o->Angle, vLight, 0);
 
-					// 3군데 불기둥 이펙트
 					for(int i=0; i<3; ++i)
 					{
 						Vector ( 0.f, 200.f, 0.f, vPos );
@@ -654,11 +627,9 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 						CreateEffect(BITMAP_FIRE_HIK2_MONO, vPos2, o->Angle, vLight, 0, o );
 					}
 
-					// 주위에 불기둥
 					Vector(0.0f, 0.0f, 1.f, vLight);
 					CreateEffect(BITMAP_FIRE_HIK2_MONO, o->Position, o->Angle, vLight, 1, o );
 
-					// 땅 갈라지는 효과
 					Vector(0.1f, 0.2f, 1.f, vLight);
 					CreateEffect(MODEL_RAKLION_BOSS_CRACKEFFECT, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 2.f);
 				}
@@ -675,7 +646,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 					
 					for(int i=0; i<1; ++i)
 					{
-						// 큰 얼음 조각들 떨어지는 이펙트
 						VectorCopy(o->Position, vPos);
 						vPos[0] += (rand()%2000 - 1000.f);
 						vPos[1] += (rand()%2000 - 1000.f);
@@ -696,7 +666,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 						
 						CreateEffect(iIndex, vPos, o->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
-						// 큰 돌맹이 떨어지는 이펙트
 						VectorCopy(o->Position, vPos);
 						vPos[0] += (rand()%2000 - 1000.f);
 						vPos[1] += (rand()%2000 - 1000.f);
@@ -715,17 +684,14 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
 				if(o->AnimationFrame >= 5.f && o->AnimationFrame <= 7.f)
 				{
-					// 화면 흔드는 효과
 					EarthQuake = (float)(rand()%4-2)*1.0f;
 					
 					if(o->AnimationFrame >= 5.6f && o->AnimationFrame <= 6.1f)
 					{
 						Vector(0.3f, 0.5f, 1.f, vLight);
 
-						// 땅에서 퍼지는 효과
 						CreateEffect(BITMAP_DAMAGE_01_MONO, o->Position, o->Angle, vLight, 0);
 						
-						// 3군데 불기둥 이펙트
 						for(int i=0; i<3; ++i)
 						{
 							Vector ( 0.f, 200.f, 0.f, vPos );
@@ -736,11 +702,9 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 							CreateEffect(BITMAP_FIRE_HIK2_MONO, vPos2, o->Angle, vLight, 0, o );
 						}
 						
-						// 주위에 불기둥
 						Vector(0.0f, 0.0f, 1.f, vLight);
 						CreateEffect(BITMAP_FIRE_HIK2_MONO, o->Position, o->Angle, vLight, 1, o );
 						
-						// 땅 갈라지는 효과
 						Vector(0.1f, 0.2f, 1.f, vLight);
 						CreateEffect(MODEL_RAKLION_BOSS_CRACKEFFECT, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 2.f);
 
@@ -756,7 +720,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 			{
 				vec3_t vPos, vLight;
 
-				// 피효과
 				if(rand()%3 != 0)
 				{
 					for(int i=0; i<b->NumBones; ++i)
@@ -777,7 +740,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
 				if(rand()%3 == 0)
 				{
-					// 연기효과
 					VectorCopy(o->Position, vPos);
 					vPos[0] += (float)(rand()%400-200);
 					vPos[1] += (float)(rand()%400-200);
@@ -785,21 +747,18 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 					CreateParticle ( BITMAP_SMOKE,  vPos, o->Angle, vLight, 1, 1.f );
 					CreateParticle ( BITMAP_SMOKE,  vPos, o->Angle, vLight, 24, 2.5f );
 					
-					// 바닥효과
 					VectorCopy(o->Position, vPos);
 					vPos[0] += (float)(rand()%500-250);
 					vPos[1] += (float)(rand()%500-250);
 					Vector(0.1f, 1.0f, 0.1f, vLight);
 					CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
 					
-					// 스파크
 					Vector(1.0f, 1.0f, 1.0f, vLight);
 					vPos[2] += 50.f;
 					CreateParticle ( BITMAP_SPARK+1,  vPos, o->Angle, vLight, 5, 1.5f );
 				}
 			}
 			
-			// 광폭화 단계
 			if(m_byDetailState >= BATTLE_OF_SELUPAN_PATTERN_3 && m_byDetailState <= BATTLE_OF_SELUPAN_PATTERN_7)
 			{
 				vec3_t vLight;
@@ -824,12 +783,12 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 					{	
 						vec3_t vPos1, vPos2;
 						b->TransformByObjectBone(vPos1, o, 34);
-						CreateParticle(BITMAP_SMOKE,vPos1,o->Angle,vLight,50,fScale);	// 연기
-						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos1,o->Angle,vLight,0,fScale);	// 3종 연기
+						CreateParticle(BITMAP_SMOKE,vPos1,o->Angle,vLight,50,fScale);
+						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos1,o->Angle,vLight,0,fScale);
 						
 						b->TransformByObjectBone(vPos2, o, 52);
-						CreateParticle(BITMAP_SMOKE,vPos2,o->Angle,vLight,50,fScale);	// 연기
-						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos2,o->Angle,vLight,0,fScale);	// 3종 연기
+						CreateParticle(BITMAP_SMOKE,vPos2,o->Angle,vLight,50,fScale);
+						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos2,o->Angle,vLight,0,fScale);
 
 						if(m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_6 || m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_7)
 						{
@@ -841,9 +800,9 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+151:	// 거대 거미알
-	case MODEL_MONSTER01+152:	// 거대 거미알
-	case MODEL_MONSTER01+153:	// 거대 거미알
+	case MODEL_MONSTER01+151:
+	case MODEL_MONSTER01+152:
+	case MODEL_MONSTER01+153:
 		{
 			if(o->CurrentAction == MONSTER01_DIE && o->AnimationFrame <= 12.f)
 			{
@@ -882,8 +841,8 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;	
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION	// 확장맵 몬스터들
-		case MODEL_MONSTER01+205:	// 다크 자이언트 메머드
+#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
+		case MODEL_MONSTER01+205:
 			{
 				float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -949,12 +908,12 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 				*/
 			}
 			break;
-		case MODEL_MONSTER01+206:	// 다크 자이언트 
+		case MODEL_MONSTER01+206:
 			{
 
 			}
 			break;
-		case MODEL_MONSTER01+207:	// 다크 쿨러틴
+		case MODEL_MONSTER01+207:
 			{
 				if( o->AnimationFrame >= 1.7f && o->AnimationFrame <= 2.0f )
 				{
@@ -1001,7 +960,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 						{
 							vec3_t vPos, vLight;
 							
-							// 피효과
 							if(rand()%3 != 0)
 							{
 								for(int i=0; i<b->NumBones; ++i)
@@ -1022,7 +980,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 							
 							if(rand()%3 == 0)
 							{
-								// 연기효과
 								VectorCopy(o->Position, vPos);
 								vPos[0] += (float)(rand()%200-100);
 								vPos[1] += (float)(rand()%200-100);
@@ -1049,7 +1006,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 				}
 			}
 			break;
-		case MODEL_MONSTER01+208:	// 다크 아이언 나이트
+		case MODEL_MONSTER01+208:
 			{
 
 			}
@@ -1067,16 +1024,16 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 	switch(o->Type)
 	{
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case MODEL_MONSTER01+145:	// 아이스 워커
+	case MODEL_MONSTER01+145:
 		{
 		}
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case MODEL_MONSTER01+146:	// 자이언트 매머드
+	case MODEL_MONSTER01+146:
 		{
 		}
 		break;
-	case MODEL_MONSTER01+147:	// 아이스 자이언트
+	case MODEL_MONSTER01+147:
 #ifdef ADD_RAKLION_MOB_ICEGIANT
 		{
 			float Start_Frame = 3.f;
@@ -1111,40 +1068,38 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 #endif	// ADD_RAKLION_MOB_ICEGIANT	
 		break;
 #ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN	
-	case MODEL_MONSTER01+148:	// 쿨러틴
+	case MODEL_MONSTER01+148:
 		{
 			
 		}
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
 #ifdef ADD_RAKLION_IRON_KNIGHT
-	case MODEL_MONSTER01+149:	// 아이언 나이트
+		case MODEL_MONSTER01+149:
 		{
-			// RenderMonsterVisual() 함수로 옮겼음.
-			// 모든 동작에서 검기가 나오게 하기 위해서
+			// RenderMonsterVisual()
 		}
 		break;
 #endif	// ADD_RAKLION_IRON_KNIGHT
-	case MODEL_MONSTER01+150:	// 세루판 (보스몬스터)
+	case MODEL_MONSTER01+150:
 		{
-			// RenderMonsterVisual() 함수로 옮겼음.
-			// 모든 동작에서 검기가 나오게 하기 위해서
+			// RenderMonsterVisual() 
 		}
 		break;
-	case MODEL_MONSTER01+151:	// 거대 거미알
-	case MODEL_MONSTER01+152:	// 거대 거미알
-	case MODEL_MONSTER01+153:	// 거대 거미알
+	case MODEL_MONSTER01+151:
+	case MODEL_MONSTER01+152:
+	case MODEL_MONSTER01+153:
 		{
 			
 		}
 		break;	
 #ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
-	case MODEL_MONSTER01+205:	// 다크 자이언트 메머드
+	case MODEL_MONSTER01+205:
 		{
 			
 		}
 		break;
-	case MODEL_MONSTER01+206:	// 다크 아이스 자이언트
+	case MODEL_MONSTER01+206:
 		{
 			float Start_Frame = 3.f;
 			float End_Frame = 8.0f;
@@ -1174,14 +1129,14 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 					fAnimationFrame += fSpeedPerFrame;
 				}
 			}
-		} // case MODEL_MONSTER01+456:	// 다크 아이스 자이언트
+		} // case MODEL_MONSTER01+456:
 		break;
-	case MODEL_MONSTER01+208:	// 다크 아이언 나이트
+	case MODEL_MONSTER01+208:
 		{
 			
 		}
 		break;
-	case MODEL_MONSTER01+207:	// 다크 쿨러틴
+	case MODEL_MONSTER01+207:
 		{
 			
 		}
@@ -1213,7 +1168,7 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 	}
 	else if(o->Type == 16)
 	{
-		if(o->AnimationFrame >= 19)	// 대기자세
+		if(o->AnimationFrame >= 19)
 		{
 			SetAction(o, rand()%2);
 		}
@@ -1224,7 +1179,7 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 	}
 	else if(o->Type == 17)
 	{
-		if(o->CurrentAction >= 0 && o->CurrentAction <= 1 && o->AnimationFrame >= 19)	// 대기자세
+		if(o->CurrentAction >= 0 && o->CurrentAction <= 1 && o->AnimationFrame >= 19)
 		{
 			int iAniIndex = rand()%100;
 			
@@ -1624,27 +1579,25 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 #endif	// ADD_RAKLION_IRON_KNIGHT
 	case MODEL_MONSTER01+150:	// 세루판 (보스몬스터)
 		{
-			// 전체
+
 			//b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-	
-			// 왼팔
+
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-			// 몸통
+
 			b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-			// 망토
+
 			b->RenderMesh(2, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-			// 머리카락
+
 			b->RenderMesh(3, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-			// 무기
+
 			b->RenderMesh(4, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-			// 무기 안에 보석
+
 			b->RenderMesh(5, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,5,o->BlendMeshLight,(int)WorldTime%10000*0.0002f,(int)WorldTime%10000*0.0002f,o->HiddenMesh);
 			
-			// 효과 부분
+
 			float fLumi2 = (sinf(WorldTime*0.002f) + 1.f) * 0.5f;
-			// 무기
+
 			b->RenderMesh(4, RENDER_TEXTURE|RENDER_CHROME4|RENDER_BRIGHT, o->Alpha, o->BlendMesh,o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-			// 왼팔
 			b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
 			b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
 			b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
@@ -1652,20 +1605,18 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
 			if(m_byDetailState >= BATTLE_OF_SELUPAN_PATTERN_2)
 			{
-				// 몸통 크롬
 				b->RenderMesh(1, RENDER_TEXTURE|RENDER_CHROME6|RENDER_BRIGHT, o->Alpha, o->BlendMesh,o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_MAGIC_EMBLEM);
 				b->RenderMesh(1, RENDER_TEXTURE|RENDER_CHROME4|RENDER_BRIGHT, o->Alpha, o->BlendMesh,o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 			}
 			
-			// 머리카락
 			b->RenderMesh(3, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+151:	// 거대 거미알
-	case MODEL_MONSTER01+152:	// 거대 거미알
-	case MODEL_MONSTER01+153:	// 거대 거미알
+	case MODEL_MONSTER01+151:
+	case MODEL_MONSTER01+152:
+	case MODEL_MONSTER01+153:
 		{
 			if(o->CurrentAction == MONSTER01_DIE)
 			{
@@ -1735,7 +1686,6 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 					Calc_RenderObject(o, true, false, 0);
 					b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
-					// 발광 효과
 					vec3_t vPos, vLight;
 					float fLumi = (sinf(WorldTime*0.004f) + 1.2f) * 0.5f + 0.1f;
 					Vector(0.1f*fLumi, 0.6f*fLumi, 0.7f*fLumi, vLight);
@@ -1779,7 +1729,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
-	case MODEL_MONSTER01+205:	// 다크 자이언트매머드
+	case MODEL_MONSTER01+205:
 		{
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(1, RENDER_CHROME6|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -1787,7 +1737,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+206:	// 다크 아이스 자이언트
+	case MODEL_MONSTER01+206:
 		{
 			if (o->CurrentAction != MONSTER01_DIE)
 			{
@@ -1805,13 +1755,13 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+207:	// 다크 쿨러틴
+	case MODEL_MONSTER01+207:
 		{
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(1, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		}
 		break;
-	case MODEL_MONSTER01+208:	// 다크 아이언 나이트
+	case MODEL_MONSTER01+208:
 		{
 			if (o->CurrentAction == MONSTER01_DIE)
 			{
@@ -1841,48 +1791,47 @@ bool CGM_Raklion::RenderObjectVisual( OBJECT* o, BMD* b )
 {
 	switch(o->Type)
 	{
-	case 70:		// 리얼파란불박스
+	case 70:
 		{
 			vec3_t vLight;
 			Vector(0.1f, 0.4f, 1.0f, vLight);
-			// 리얼한 불 만들기!!
+
 			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_HIK2_MONO,o->Position,o->Angle,vLight,6,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK2_MONO,o->Position,o->Angle,vLight,6,o->Scale);
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3_MONO,o->Position,o->Angle,vLight,2,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 				break;
 			}
-			// 리얼한 불 만들기!!
-			CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);	// 불
+			CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 
 			return true;
 		}
 		break;
-	case 80:		// 리얼빨간불박스
+	case 80:
 		{
 			vec3_t vLight;
 			Vector(0.7f, 0.2f, 0.1f, vLight);
-			// 리얼한 불 만들기!!
+
 			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_HIK2_MONO,o->Position,o->Angle,vLight,6,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK2_MONO,o->Position,o->Angle,vLight,6,o->Scale);
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3_MONO,o->Position,o->Angle,vLight,2,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 				break;
 			}
 			// 리얼한 불 만들기!!
-			CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);	// 불
+			CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 
 			return true;
 		}
@@ -1899,18 +1848,18 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 	switch(o->Type)
 	{
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case MODEL_MONSTER01+145:	// 아이스워커
+	case MODEL_MONSTER01+145:
 		{
 
 		}
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case MODEL_MONSTER01+146:	// 자이언트 매머드
+	case MODEL_MONSTER01+146:
 		{
 			
 		}
 		break;
-	case MODEL_MONSTER01+147:	// 아이스 자이언트
+	case MODEL_MONSTER01+147:
 #ifdef ADD_RAKLION_MOB_ICEGIANT
 		if (o->CurrentAction == MONSTER01_ATTACK2 && o->AnimationFrame > 7.4f && o->AnimationFrame < 7.7f)
 		{
@@ -1929,7 +1878,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					CreateEffect(MODEL_EFFECT_BROKEN_ICE0+rand()%3,vPos,o->Angle,vLight,0);
 			}
 
-			o->LifeTime = 90;	// 한 번만 실행(적절한 변수가 없어서 o->LifeTime 사용)
+			o->LifeTime = 90;
 			o->m_bRenderShadow = false;
 			
 			Vector(1.0f, 1.0f, 1.0f,vLight);
@@ -1957,9 +1906,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
 #ifdef ADD_RAKLION_IRON_KNIGHT
-	case MODEL_MONSTER01+149:	// 아이언 나이트
+	case MODEL_MONSTER01+149:
 		{
-			// 전 프레임에 검기
 			vec3_t  Light;
 			Vector(1.0f, 1.2f, 2.f, Light);
 
@@ -1999,8 +1947,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				}
 
 				b->TransformByObjectBone(vPos, o, iBones[i]);
-				CreateParticle(BITMAP_SMOKE,vPos,o->Angle,vLight,50,1.0f);	// 연기
-				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,o->Angle,vLight,2,0.8f);	// 3종 연기
+				CreateParticle(BITMAP_SMOKE,vPos,o->Angle,vLight,50,1.0f);
+				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,o->Angle,vLight,2,0.8f);
 			}
 
 			if (o->CurrentAction == MONSTER01_ATTACK2)
@@ -2270,7 +2218,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 	// 			}
 
 				if ( 2 <= c->AttackTime && c->AttackTime <= 8)
-				{	// 기 모으기
+				{
 					for ( int j = 0; j < 3; ++j)
 					{
 						vec3_t CurPos;
@@ -2285,7 +2233,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					}
 				}
 				if ( c->AttackTime <= 8)
-				{	// 기 모일 곳 위치
+				{
 					vec3_t Position2 = { 0.0f, 0.0f, 0.0f};
 					b->TransformPosition(o->BoneTransform[26],Position2,o->m_vPosSword,true);
 
@@ -2294,7 +2242,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					o->m_vPosSword[1] += -fDistance * cosf( o->Angle[2]*Q_PI/180.0f);
 				}
 				if ( 6 <= c->AttackTime && c->AttackTime <= 12)
-				{	// 꼬깔 만들기
+				{
 					vec3_t Position;
 					vec3_t Position2 = { 0.0f, 0.0f, 0.0f};
 
@@ -2342,7 +2290,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+207:	// 다크 쿨러틴
+	case MODEL_MONSTER01+207:
 		{
 
 		}
@@ -2414,7 +2362,7 @@ bool IsIceCity()
 		return true;
 	}
 #ifdef YDG_ADD_MAP_DOPPELGANGER1
-	else if(World == WD_65DOPPLEGANGER1)	// 라클리온 베이스
+	else if(World == WD_65DOPPLEGANGER1)
 	{
 		return true;
 	}
@@ -2432,12 +2380,12 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 	switch(c->MonsterIndex) 
 	{
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case 454:	// 아이스 워커
+	case 454:
 		{
 			if (c->MonsterSkill == 29)
 			{
 				SetAction(o, MONSTER01_ATTACK2);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 			}
 			else
 			{
@@ -2447,12 +2395,12 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 		}
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case 455:	// 자이언트 매머드
+	case 455:
 		{
 			if (c->MonsterSkill == 30)
 			{
 				SetAction(o, MONSTER01_ATTACK2);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 			}
 			else
 			{
@@ -2462,12 +2410,12 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 		}
 		break;
 #ifdef ADD_RAKLION_MOB_ICEGIANT
-	case 456:	// 아이스 자이언트
+	case 456:
 		{
 			if (c->MonsterSkill == 31)
 			{
 				SetAction(o, MONSTER01_ATTACK2);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 			}
 			else
 			{
@@ -2478,12 +2426,12 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 		break;
 #endif	// ADD_RAKLION_MOB_ICEGIANT
 #ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
-	case 457:	// 쿨러틴
+	case 457:
 		{
 			if (c->MonsterSkill == 32)
 			{
 				SetAction(o, MONSTER01_ATTACK2);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 			}
 			else
 			{
@@ -2492,12 +2440,12 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 #endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
-	case 458:	// 아이언 나이트
+	case 458:
 		{
 			if (c->MonsterSkill == 33)
 			{
 				SetAction(o, MONSTER01_ATTACK2);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 			}
 			else
 			{
@@ -2506,26 +2454,26 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-	case 459:	// 세루판 (보스몬스터)
+	case 459:
 		{
 			SetBossMonsterAction(c, o);
 			return true;
 		}
 		break;
-	case 460:	// 거대 거미알
-	case 461:	// 거대 거미알
-	case 462:	// 거대 거미알	
+	case 460:
+	case 461:
+	case 462:
 		{
 			return false;
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
-	case 562:	// 다크 자이언트 메머드
+	case 562:
 		{
 			if (c->MonsterSkill == ATMON_SKILL_EX_DARKMEMUD_ATTACKSKILL)
 			{
 				SetAction(o, MONSTER01_ATTACK2);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 			}
 			else
 			{
@@ -2535,12 +2483,12 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-	case 563:	// 다크 아이스 자이언트
+	case 563:
 		{
 			if (c->MonsterSkill == ATMON_SKILL_EX_DARKGIANT_ATTACKSKILL)
 			{
 				SetAction(o, MONSTER01_ATTACK2);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 			}
 			else
 			{
@@ -2550,12 +2498,12 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-	case 565:	// 다크 아이언 나이트
+	case 565:
 		{
 			if (c->MonsterSkill == ATMON_SKILL_EX_DARKAIONNIGHT_ATTACKSKILL)
 			{
 				SetAction(o, MONSTER01_ATTACK2);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 			}
 			else
 			{
@@ -2565,12 +2513,12 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-	case 564:	// 다크 쿨러틴
+	case 564:
 		{
 			if (c->MonsterSkill == ATMON_SKILL_EX_DARKCOOLERTIN_ATTACKSKILL)
 			{
 				SetAction(o, MONSTER01_ATTACK2);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 			}
 			else
 			{
@@ -2592,60 +2540,36 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
 		|| !(c->MonsterSkill >= 34 && c->MonsterSkill <= 42)
 		|| m_bBossHeightMove == true)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스위치 복구");
-#endif // CONSOLE_DEBUG		
-		// 등장스킬시 위치 복구 시켜줌
 		c->Object.Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
 		m_bBossHeightMove = false;
 	}
 
-	if(c->MonsterSkill == 34)	// 독구슬
+	if(c->MonsterSkill == 34)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : 독구슬");
-#endif // CONSOLE_DEBUG	
 		SetAction(o, MONSTER01_ATTACK2);	
 	}
-	else if(c->MonsterSkill == 35)	// 냉기폭풍
+	else if(c->MonsterSkill == 35)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : 냉기폭풍");
-#endif // CONSOLE_DEBUG		
 		SetAction(o, MONSTER01_ATTACK1);	
 	}
-	else if(c->MonsterSkill == 36)	// 냉기충격
+	else if(c->MonsterSkill == 36)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : 냉기충격");
-#endif // CONSOLE_DEBUG	
 		SetAction(o, MONSTER01_ATTACK3);	
 	}
-	else if(c->MonsterSkill == 37)	// 낙하(등장 스킬)
+	else if(c->MonsterSkill == 37)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : 낙하");
-#endif // CONSOLE_DEBUG		
-		
 		SetAction(o, MONSTER01_APEAR);
 	}
-	else if(c->MonsterSkill == 38)	// 소환
+	else if(c->MonsterSkill == 38)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : 소환");
-#endif // CONSOLE_DEBUG		
 		SetAction(o, MONSTER01_ATTACK4);
 		PlayBuffer(SOUND_RAKLION_SERUFAN_WORD4);
 	}
-	else if(c->MonsterSkill == 39)	// 치료
+	else if(c->MonsterSkill == 39)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : 치료");
-#endif // CONSOLE_DEBUG	
 		SetAction(o, MONSTER01_ATTACK4);
 		PlayBuffer(SOUND_RAKLION_SERUFAN_CURE);
 		
-		// 치료 이펙트
 		vec3_t vLight, vPos, vAngle;
 		Vector(1.f, 1.f, 1.f, vLight);
 		for(int i=0; i<20; ++i)
@@ -2662,25 +2586,17 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
 		CreateEffect(BITMAP_MAGIC+1, o->Position, o->Angle, vLight, 13, o, -1, 0, 0, 0, 8.f);
 		CreateEffect(BITMAP_MAGIC+1, o->Position, o->Angle, vLight, 13, o, -1, 0, 0, 0, 8.f);
 	}
-	else if(c->MonsterSkill == 40) // 얼리기
+	else if(c->MonsterSkill == 40)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : freeze");
-#endif // CONSOLE_DEBUG		
 		SetAction(o, MONSTER01_ATTACK4);
 		PlayBuffer(SOUND_RAKLION_SERUFAN_WORD3);
 	}
-	else if(c->MonsterSkill == 41) // 순간이동
+	else if(c->MonsterSkill == 41)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : 순간이동");
-#endif // CONSOLE_DEBUG	
+
 	}
-	else if(c->MonsterSkill == 42) // 무적
+	else if(c->MonsterSkill == 42)
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : 무적");
-#endif // CONSOLE_DEBUG	
 		SetAction(o, MONSTER01_ATTACK4);
 		
 		vec3_t vLight;
@@ -2690,9 +2606,6 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
 	}
 	else
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "보스스킬 : 기타");
-#endif // CONSOLE_DEBUG		
 		SetAction(o, MONSTER01_ATTACK4);
 	}
 }
@@ -2709,18 +2622,16 @@ bool CGM_Raklion::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 	case 456:
 	case 457:
 	case 458:
-	case 459:	// 세루판 (보스몬스터)
-	case 460:	// 거대 거미알
-	case 461:	// 거대 거미알
-	case 462:	// 거대 거미알
+	case 459:
+	case 460:
+	case 461:
+	case 462:
 		break;
 	}
 
 	return false;
 }
 
-
-// 몬스터 사운드
 bool CGM_Raklion::PlayMonsterSound(OBJECT* o) 
 {
 	if(IsIceCity() == false)
@@ -2758,7 +2669,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 		return true;
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 #ifdef PJH_GIANT_MAMUD
-		case MODEL_MONSTER01+146:	// 자이언트 매머드
+		case MODEL_MONSTER01+146:
 		if( MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 		{
 			PlayBuffer( SOUND_RAKLION_GIANT_MAMUD_ATTACK );
@@ -2779,7 +2690,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 		return true;
 #endif //#ifdef PJH_GIANT_MAMUD
 #ifdef ADD_RAKLION_MOB_ICEGIANT
-	case MODEL_MONSTER01+147:	// 아이스 자이언트
+	case MODEL_MONSTER01+147:
 		if (o->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)
@@ -2794,7 +2705,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 		return true;
 #endif	// ADD_RAKLION_MOB_ICEGIANT
 #ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
-	case MODEL_MONSTER01+148:		// 쿨러틴
+	case MODEL_MONSTER01+148:
 		if( MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 		{
 			PlayBuffer( SOUND_RAKLION_COOLERTIN_ATTACK );
@@ -2820,41 +2731,35 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 	case MODEL_MONSTER01+149:	// 아이언 나이트
 		if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
 		{
-			// 공격
 			PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_ATTACK);
 		}
 		else if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_WALK)
 		{
-			// 숨쉬기
 			PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_MOVE);
 		}
 		else if(o->CurrentAction == MONSTER01_DIE)
 		{
-			// 사망시
 			PlayBuffer(SOUND_MONSTER+154);
 		}
 		return true;
 #endif	// ADD_RAKLION_IRON_KNIGHT
 
-	case MODEL_MONSTER01+150:	// 세루판 (보스몬스터)
+	case MODEL_MONSTER01+150:
 		if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
 		{
-			// 냉기폭풍, 독구슬
 			PlayBuffer(SOUND_RAKLION_SERUFAN_ATTACK1);
 		}
 		else if(o->CurrentAction == MONSTER01_ATTACK3)
 		{
-			// 냉기충격
 			PlayBuffer(SOUND_RAKLION_SERUFAN_ATTACK2);
 		}
 		else if(o->CurrentAction == MONSTER01_DIE)
 		{
-			// 사망시
 			PlayBuffer(SOUND_RAKLION_SERUFAN_WORD2);
 		}
 		return true;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
-		case MODEL_MONSTER01+205:	// 다크 자이언트 매머드
+		case MODEL_MONSTER01+205:
 			if( MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			{
 				PlayBuffer( SOUND_RAKLION_GIANT_MAMUD_ATTACK );
@@ -2871,7 +2776,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 				PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_DEATH);
 			}
 		return true;
-		case MODEL_MONSTER01+206:	// 다크 아이스 자이언트
+		case MODEL_MONSTER01+206:
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
 				if (rand() % 100 == 0)
@@ -2884,24 +2789,21 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 				PlayBuffer(SOUND_RAKLION_ICEGIANT_DEATH);
 			}
 		return true;
-		case MODEL_MONSTER01+208:	// 다크 아이언 나이트
+		case MODEL_MONSTER01+208:
 			if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
 			{
-				// 공격
 				PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_ATTACK);
 			}
 			else if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_WALK)
 			{
-				// 숨쉬기
 				PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_MOVE);
 			}
 			else if(o->CurrentAction == MONSTER01_DIE)
 			{
-				// 사망시
 				PlayBuffer(SOUND_MONSTER+154);
 			}
 		return true;
-		case MODEL_MONSTER01+207:		// 쿨러틴
+		case MODEL_MONSTER01+207:
 			if( MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			{
 				PlayBuffer( SOUND_RAKLION_COOLERTIN_ATTACK );
@@ -2927,7 +2829,6 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 	return false; 
 }
 
-// 오브젝트 사운드
 void CGM_Raklion::PlayObjectSound(OBJECT* o)
 {
 	
@@ -2959,33 +2860,20 @@ void CGM_Raklion::SetState(BYTE byState, BYTE byDetailState)
 		if(m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_2 || m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_3 
 			|| m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_5 || m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_6)
 		{
-			// 광폭화 사운드
 			PlayBuffer(SOUND_RAKLION_SERUFAN_RAGE);
 		}
-		
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "라클리온 세부상태 : %d", m_byDetailState);
-#endif // CONSOLE_DEBUG
 	}
 	else
 	{
 		m_byState = byState;
-		
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "라클리온 상태 : %d", m_byState);
-#endif // CONSOLE_DEBUG	
 
 		if(m_byState == RAKLION_STATE_NOTIFY_1 || m_byState ==RAKLION_STATE_STANDBY)
 		{
-			// 하늘에서 돌맹이 조각 떨어지는 효과음
 			PlayBuffer(SOUND_WIND01);
 		}
 		else if(m_byState == RAKLION_STATE_READY)
 		{
-			// 출현 음성 사운드
 			PlayBuffer(SOUND_RAKLION_SERUFAN_WORD1);
-
-			// 보스전 BGM 시작
 			m_bMusicBossMap = true;
 		}
 		else if(m_byState == RAKLION_STATE_END)
@@ -2993,10 +2881,8 @@ void CGM_Raklion::SetState(BYTE byState, BYTE byDetailState)
 			m_bMusicBossMap = false;
 		}
 		
-		// 보스맵 게이트 설정
 		SetCanGoBossMap();
 		
-		// 보스맵 연출 설정
 		SetEffect();	
 	}
 }
@@ -3005,13 +2891,11 @@ void CGM_Raklion::SetEffect()
 {
 	if(m_byState == RAKLION_STATE_NOTIFY_1)
 	{
-		// 1초간 연출
 		m_Timer.SetTimer(500);
 		m_bVisualEffect = true;
 	}
 	else if(m_byState == RAKLION_STATE_STANDBY)
 	{
-		// 2초간 연출
 		m_Timer.SetTimer(1000);
 		m_bVisualEffect = true;
 	}
@@ -3035,7 +2919,6 @@ void CGM_Raklion::MoveEffect()
 
 			if(m_byState == RAKLION_STATE_STANDBY)
 			{
-				// 화면 흔드는 효과 리셋
 				EarthQuake = 0.f;
 			}
 		}
@@ -3049,9 +2932,6 @@ void CGM_Raklion::MoveEffect()
 	}
 	else
 	{
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_NORMAL, "RAKLION_STATE_NOTIFY_1(예외발생)");
-#endif // CONSOLE_DEBUG		
 		m_Timer.ResetTimer();
 		m_bVisualEffect = false;
 		EarthQuake = 0.f;
@@ -3060,7 +2940,6 @@ void CGM_Raklion::MoveEffect()
 
 void CGM_Raklion::CreateMapEffect()
 {
-	// 거미알이 한마리 남았을 때 공중에서 돌맹이나 얼음이 떨어지는 이펙트 처리 
 	if(m_byState <= RAKLION_STATE_NOTIFY_1)
 	{
 		float fScale = 1.f;
@@ -3069,7 +2948,6 @@ void CGM_Raklion::CreateMapEffect()
 
 		for(int i=0; i<5; ++i)
 		{
-			// 작은 얼음 조각들 떨어지는 이펙트
 			Vector(1.f, 1.0f, 1.0f, vLight);
 			VectorCopy(pObject->Position, vPos);
 			vPos[0] += (rand()%1600 - 800.f);
@@ -3091,7 +2969,6 @@ void CGM_Raklion::CreateMapEffect()
 			
 			CreateEffect(iIndex, vPos, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 			
-			// 작은 돌맹이 떨어지는 이펙트
 			VectorCopy(pObject->Position, vPos);
 			vPos[0] += (rand()%1600 - 800.f);
 			vPos[1] += (rand()%1600 - 800.f);
@@ -3101,7 +2978,6 @@ void CGM_Raklion::CreateMapEffect()
 			fScale = 0.005f + (rand()%10) / 200.0f;
 			CreateEffect(MODEL_FALL_STONE_EFFECT, vPos, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 			
-			// 먼지 떨어지는 효과
 			Vector(0.4f, 0.4f, 0.5f, vLight);
 			fScale = 0.5f + (rand()%10) / 20.0f;
 			for(int k=0; k<3; ++k)
@@ -3115,7 +2991,6 @@ void CGM_Raklion::CreateMapEffect()
 			}
 		}
 	}
-	// 보스알 다 깨지고 보스 연출 전 연출 상태
 	else if(m_byState == RAKLION_STATE_STANDBY)
 	{
 		vec3_t vPos, vLight;
@@ -3123,10 +2998,8 @@ void CGM_Raklion::CreateMapEffect()
 		OBJECT* pObject = &Hero->Object;
 		Vector(0.3f, 0.5f, 1.f, vLight);
 
-		// 화면 흔드는 효과
 		EarthQuake = (float)(rand()%2-2)*0.5f;	
 
-		// 큰 얼음 조각들 떨어지는 이펙트
 		VectorCopy(pObject->Position, vPos);
 		vPos[0] += (rand()%2000 - 1000.f);
 		vPos[1] += (rand()%2000 - 1000.f);
@@ -3147,7 +3020,6 @@ void CGM_Raklion::CreateMapEffect()
 		
 		CreateEffect(iIndex, vPos, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
-		// 큰 돌맹이 떨어지는 이펙트
 		VectorCopy(pObject->Position, vPos);
 		vPos[0] += (rand()%2000 - 1000.f);
 		vPos[1] += (rand()%2000 - 1000.f);

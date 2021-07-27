@@ -8263,9 +8263,9 @@ void SaveOptions()
 		options[23] = 0xFF;
 	}
 #else // KJH_FIX_ITEMHOTKEYINFO_CASTING
-	options[21] = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_Q) - ITEM_POTION;
-	options[22] = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_W) - ITEM_POTION;
-	options[23] = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_E) - ITEM_POTION;
+	options[21] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_Q) - ITEM_POTION) & 0xFF);
+	options[22] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_W) - ITEM_POTION) & 0xFF);
+	options[23] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_E) - ITEM_POTION) & 0xFF);
 #endif // KJH_FIX_ITEMHOTKEYINFO_CASTING
 
 	// 24
@@ -8297,7 +8297,7 @@ void SaveOptions()
 		options[25] = 0xFF;
 	}
 #else // KJH_FIX_ITEMHOTKEYINFO_CASTING
-	options[25] = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_R) - ITEM_POTION;
+	options[25] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_R) - ITEM_POTION) & 0xFF);
 #endif // KJH_FIX_ITEMHOTKEYINFO_CASTING
 
 #ifdef LDK_ADD_SCALEFORM

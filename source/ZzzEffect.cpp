@@ -207,10 +207,6 @@ bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,shor
 #endif //PJH_SEASON4_MASTER_RANK4
 			)
 		{
-#ifdef CONSOLE_DEBUG
-			g_ConsoleDebug->Write(MCD_SEND, "클라이언트에서 판별 스킬번호 : %d", Skill);
-			//g_ConsoleDebugLog->log("클라이언트에서 판별 스킬 : %s[%d]\n", SkillAttribute[Skill].Name, Skill);
-#endif // CONSOLE_DEBUG
 #ifdef CSK_HACK_TEST
 			g_pHackTest->AddAttackCount(Skill);
 #endif // CSK_HACK_TEST
@@ -227,13 +223,6 @@ bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,shor
 			if(Skill != AT_SKILL_MULTI_SHOT)
 #endif //#define PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			{
-#ifdef CONSOLE_DEBUG
-				g_ConsoleDebug->Write(MCD_SEND, "클라이언트에서 판별 스킬번호 : %d", Skill);
-				//g_ConsoleDebugLog->log("클라이언트에서 판별 스킬 : %s[%d]\n", SkillAttribute[Skill].Name, Skill);
-#endif // CONSOLE_DEBUG
-#ifdef CSK_HACK_TEST
-				g_pHackTest->AddAttackCount(Skill);
-#endif // CSK_HACK_TEST
 				SendRequestMagicAttack(Skill,(int)(Position[0]/TERRAIN_SCALE),(int)(Position[1]/TERRAIN_SCALE),Serial,Count,DamageKey,SkillSerialNum);
 			}
 		}
@@ -7272,9 +7261,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 			return;
 		}
 	}
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_ERROR, "이펙트 생성 실패");	
-#endif	// CONSOLE_DEBUG
 }
 
 

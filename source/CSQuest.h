@@ -70,7 +70,7 @@ private :
     QUEST_ATTRIBUTE m_Quest[MAX_QUESTS];        //  퀘스트 정보.
 
     BYTE    m_byQuestList[MAX_QUESTS/4];        //  퀘스트 수행정보.
-	//(0x00:전송 받지 않았음, 0x01:퀘스트를 받음, 0x02:퀘스트 수행 완료, 0x03:아직 퀘스트 진행 안함)
+	//(0x00:전송 받지 않았음, 0x01:퀘스트를  , 0x02:퀘스트 수행 완료, 0x03:아직 퀘스트 진행 안함)
     BYTE    m_byCurrQuestIndex;                 //  현재 퀘스트 인덱스.
     BYTE    m_byCurrQuestIndexWnd;              //  퀘스트창에서의 현재 퀘스트 인덱스.
 

@@ -201,13 +201,10 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
 
 		if( Result )
 		{
-			//레벨에 맞는 월드인덱스를 서버로 보내 준다.
 			SendRequestCursedEnter( static_cast<BYTE>(EnterLevel), static_cast<BYTE>(ItemPos+MAX_EQUIPMENT) );
 		}
 		else
 		{
-			//에러 메세지를 띄운다
-			// 2367 "입장 가능한 등급과 피의 두루마리의 등급이 일치하지 않습니다."
 			g_pChatListBox->AddText("", GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
 		}
 
@@ -216,7 +213,6 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
 
 	if( m_Button[CURSEDTEMPLEENTER_EXIT].UpdateMouseEvent() )
 	{
-		// 나가기 처리를 한다.
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC);
 		return false;
 	}
@@ -253,7 +249,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
 	unicode::t_char Text[100];
 
 	memset(&Text, 0, sizeof(unicode::t_char));
-	// 2358 "환영 사원으로 가고 싶은가?"
+
 	sprintf( Text, GlobalText[2358]);
 	DrawText( Text, m_Pos.x, m_Pos.y+13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, true );
 
@@ -262,7 +258,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
 	if( CheckEnterLevel(enterlevel) )
 	{
 		memset(&Text, 0, sizeof(Text));
-		// 2370 "제 %d 환영 사원"
+
 		sprintf(Text, GlobalText[2370], enterlevel);
 		DrawText(Text, m_Pos.x+3, m_Pos.y+42, 0xffffffff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH-10, false );
 
@@ -272,41 +268,34 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
 
 			if(i == 5)
 			{
-				// 737 "마스터레벨"
 				unicode::_strcpy(Text, GlobalText[737]);
 			}
 			else
 			{
-				// 2371 "%d-%d 레벨"
 				sprintf( Text, GlobalText[2371], EnterMinLevel[i], EnterMaxLevel[i] );
 			}
 
 			if( enterlevel == i+1 )
 			{
 				DisableAlphaBlend();
-				// 2412 "입장 가능"
 				sprintf( Text, "%s %s", Text, GlobalText[2412] );
 				DrawText( Text, m_Pos.x+3, m_Pos.y+67+(i*15), 0xffffffff, 0xff0000ff, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH-10, false );
 				EnableAlphaTest();
 			}
 			else
 			{
-				// 2413 "입장 불가"
 				sprintf( Text, "%s %s", Text, GlobalText[2413] );
 				DrawText( Text, m_Pos.x+3, m_Pos.y+67+(i*15), 0xffffffff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH-10, false );
 			}
 		}
 		
 		memset(&Text, 0, sizeof(char));
-		// 2373 "현재 인원 : %d"
 		sprintf( Text, GlobalText[2373], m_EnterCount);
 		DrawText( Text, m_Pos.x+3, m_Pos.y+70+((EnterLevelCount+1)*15), 0xff0000ff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH-10, false );
 	}
 	else 
 	{
-		//입잘 할 수 없는 레벨 입니다...
 		memset(&Text, 0, sizeof(char));
-		// 2366 "220레벨 이상일 경우에 입장할 수 있습니다."
 		sprintf( Text, GlobalText[2366]);
 		DrawText( Text, m_Pos.x, m_Pos.y+52, 0xff0000ff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, false );
 	}
@@ -316,15 +305,12 @@ void SEASON3B::CNewUICursedTempleEnter::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = CURSEDTEMPLE_ENTER_WINDOW_WIDTH - MSGBOX_BACK_BLANK_WIDTH; height = CURSEDTEMPLE_ENTER_WINDOW_HEIGHT - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<9; ++i)
 	{
@@ -332,11 +318,9 @@ void SEASON3B::CNewUICursedTempleEnter::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 
-	// 라인
 	x = GetPos().x; y = GetPos().y + CURSEDTEMPLE_ENTER_WINDOW_HEIGHT - 77; width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
 }
