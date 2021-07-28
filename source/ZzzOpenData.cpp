@@ -5351,8 +5351,8 @@ void OpenSkills()
 	LoadBitmap("Effect\\pk_mon03_green.jpg", BITMAP_PKMON04, GL_LINEAR, GL_REPEAT);
 	LoadBitmap("Effect\\lavagiantAa_e.jpg", BITMAP_PKMON05, GL_LINEAR, GL_REPEAT);
 	LoadBitmap("Effect\\lavagiantBa_e.jpg", BITMAP_PKMON06, GL_LINEAR, GL_REPEAT);
-	LoadBitmap("Effect\\eff_magma_red.jpg", BITMAP_LAVAGIANT_FOOTPRINT_R, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\eff_magma_violet.jpg", BITMAP_LAVAGIANT_FOOTPRINT_V, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\eff_magma_red.jpg", BITMAP_LAVAGIANT_FOOTPRINT_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\eff_magma_violet.jpg", BITMAP_LAVAGIANT_FOOTPRINT_V, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //PBG_ADD_PKFIELD
 #ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 	LoadBitmap("Effect\\raymond_sword_R.jpg", BITMAP_RAYMOND_SWORD, GL_LINEAR, GL_REPEAT);
@@ -5408,7 +5408,7 @@ void OpenSkills()
 	AccessModel ( MODEL_WATER_WAVE,     "Data\\Skill\\", "seamanFX" );      //	워터웨이브.
 	AccessModel ( MODEL_SKULL,          "Data\\Skill\\", "Skull" );         //	해골.
 	AccessModel ( MODEL_LACEARROW,		"Data\\Skill\\", "LaceArrow");		//	레이스에로우
-	OpenTexture ( MODEL_LACEARROW,      "Item\\", GL_CLAMP );  //	해골.
+	OpenTexture ( MODEL_LACEARROW,      "Item\\", GL_CLAMP_TO_EDGE );  //	해골.
 
 #ifdef TAMAJJANG
     AccessModel( MODEL_TAMAJJANG, "Data\\Skill\\","Tama",1 );
@@ -5480,14 +5480,14 @@ void OpenSkills()
 	OpenTexture (MODEL_ARROW_DRILL, "Skill\\" );			//	초 절대 석궁. 화살.
 	OpenTexture (MODEL_COMBO	  , "Skill\\" );			//	콤보 효과.
 
-	OpenTexture ( MODEL_AIR_FORCE, "Skill\\", GL_CLAMP );   //  공기 저항 효과.
+	OpenTexture ( MODEL_AIR_FORCE, "Skill\\", GL_CLAMP_TO_EDGE );   //  공기 저항 효과.
     OpenTexture ( MODEL_WAVES    , "Skill\\" );             //  스트롱 피어의 파장 효과.
     OpenTexture ( MODEL_PIERCING2, "Skill\\" );             //  스트롱 피어 부품.
     OpenTexture ( MODEL_PIER_PART, "Skill\\" );             //  롱피어 부품.
     OpenTexture ( MODEL_GROUND_STONE,   "Skill\\" );        //  바위.
     OpenTexture ( MODEL_GROUND_STONE2,  "Skill\\" );        //  바위2.
-	OpenTexture ( MODEL_WATER_WAVE,     "Skill\\", GL_CLAMP );  //	워터웨이브.
-	OpenTexture ( MODEL_SKULL,          "Skill\\", GL_CLAMP );  //	해골.
+	OpenTexture ( MODEL_WATER_WAVE,     "Skill\\", GL_CLAMP_TO_EDGE );  //	워터웨이브.
+	OpenTexture ( MODEL_SKULL,          "Skill\\", GL_CLAMP_TO_EDGE );  //	해골.
     OpenTexture ( MODEL_MANY_FLAG,      "Skill\\" );        //  중국 경극에서 사용하는 깃발.
     OpenTexture ( MODEL_WEBZEN_MARK,    "Skill\\" );        //  웹젠마크.
 
@@ -5771,15 +5771,15 @@ void OpenSkills()
 	OpenTexture(MODEL_VOLCANO_STONE, "Effect\\");
 	LoadBitmap("Effect\\force_Pillar.jpg", BITMAP_FORCEPILLAR, GL_LINEAR, GL_REPEAT);
 	LoadBitmap("Effect\\!SwordEff.jpg", BITMAP_SWORDEFF, GL_LINEAR, GL_REPEAT);
-	LoadBitmap("Effect\\Damage1.jpg", BITMAP_DAMAGE1, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\ground_wind.jpg", BITMAP_GROUND_WIND, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\Kwave2.jpg", BITMAP_KWAVE2, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\Damage2.jpg", BITMAP_DAMAGE2, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\volcano_core.jpg", BITMAP_VOLCANO_CORE, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\Damage1.jpg", BITMAP_DAMAGE1, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\ground_wind.jpg", BITMAP_GROUND_WIND, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Kwave2.jpg", BITMAP_KWAVE2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Damage2.jpg", BITMAP_DAMAGE2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\volcano_core.jpg", BITMAP_VOLCANO_CORE, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	AccessModel(MODEL_SHOCKWAVE03, "Data\\Effect\\", "shockwave03");
 	OpenTexture(MODEL_SHOCKWAVE03, "Effect\\");
-	LoadBitmap("Effect\\ground_smoke.tga", BITMAP_GROUND_SMOKE, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\knightSt_blue.jpg", BITMAP_KNIGHTST_BLUE, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\ground_smoke.tga", BITMAP_GROUND_SMOKE, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\knightSt_blue.jpg", BITMAP_KNIGHTST_BLUE, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 #ifdef ASG_ADD_KARUTAN_MONSTERS
 	// 콘드라 돌조각
@@ -5935,17 +5935,17 @@ void OpenWorldModels()
     case WD_8TARKAN:
 		LoadBitmap("Object9\\sand01.jpg"     ,BITMAP_CHROME+2    ,GL_LINEAR,GL_REPEAT);
 		LoadBitmap("Object9\\sand02.jpg"     ,BITMAP_CHROME+3    ,GL_LINEAR,GL_REPEAT);
-        LoadBitmap("Object9\\Impack03.jpg"   ,BITMAP_IMPACT      ,GL_LINEAR,GL_CLAMP);
+        LoadBitmap("Object9\\Impack03.jpg"   ,BITMAP_IMPACT      ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 		AccessModel(MODEL_BUG01+1         ,"Data\\Object9\\","Bug",2);
 		OpenTexture(MODEL_BUG01+1		  ,"Object9\\");
         break;
     case WD_10HEAVEN:
-		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP);
+		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP_TO_EDGE);
         //  구름.
 		AccessModel(MODEL_CLOUD,"Data\\Object11\\","cloud");
 		OpenTexture(MODEL_CLOUD,"Object11\\");
         //  번쩍이는 광원.
-		LoadBitmap("Effect\\cloudLight.jpg" ,BITMAP_CLOUD+1, GL_LINEAR, GL_CLAMP);
+		LoadBitmap("Effect\\cloudLight.jpg" ,BITMAP_CLOUD+1, GL_LINEAR, GL_CLAMP_TO_EDGE);
         break;
 
     case WD_11BLOODCASTLE1:     //  블러드 1캐슬.
@@ -5963,7 +5963,7 @@ void OpenWorldModels()
             for ( int i=0; i<2; ++i )
                 OpenTexture ( MODEL_GATE+i, "Monster\\" );
 			
-			LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP);
+			LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 
             //  효과음.
 		    LoadWaveFile ( SOUND_BLOODCASTLE, "Data\\Sound\\iBloodCastle.wav" , 1 );
@@ -5976,7 +5976,7 @@ void OpenWorldModels()
 
 			LoadBitmap( "Effect\\Map_Smoke1.jpg" ,BITMAP_CHROME+2, GL_LINEAR, GL_REPEAT );
 			LoadBitmap( "Effect\\Map_Smoke2.tga" ,BITMAP_CHROME+3, GL_LINEAR, GL_REPEAT );
-			LoadBitmap("Effect\\mhoujin_R.jpg"  ,BITMAP_MAGIC_CIRCLE, GL_LINEAR, GL_CLAMP);
+			LoadBitmap("Effect\\mhoujin_R.jpg"  ,BITMAP_MAGIC_CIRCLE, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
 			AccessModel(MODEL_ARROW_TANKER	 ,"Data\\Monster\\","arrowstusk");
 			OpenTexture(MODEL_ARROW_TANKER   ,"Monster\\");
@@ -6070,8 +6070,8 @@ void OpenWorldModels()
     case WD_30BATTLECASTLE :
 		LoadBitmap( "Effect\\Map_Smoke1.jpg" ,BITMAP_CHROME+2, GL_LINEAR, GL_REPEAT );
 		LoadBitmap( "Effect\\Map_Smoke2.tga" ,BITMAP_CHROME+3, GL_LINEAR, GL_REPEAT );
-		LoadBitmap( "World31\\Map1.jpg" ,BITMAP_INTERFACE_MAP+1, GL_LINEAR, GL_CLAMP );    //  공성전 지도.
-		LoadBitmap( "World31\\Map2.jpg" ,BITMAP_INTERFACE_MAP+2, GL_LINEAR, GL_CLAMP );    //  공성전 지도.
+		LoadBitmap( "World31\\Map1.jpg" ,BITMAP_INTERFACE_MAP+1, GL_LINEAR, GL_CLAMP_TO_EDGE );    //  공성전 지도.
+		LoadBitmap( "World31\\Map2.jpg" ,BITMAP_INTERFACE_MAP+2, GL_LINEAR, GL_CLAMP_TO_EDGE );    //  공성전 지도.
 
         //  효과음 로딩.
         LoadWaveFile ( SOUND_BC_AMBIENT        ,   "Data\\Sound\\BattleCastle\\aSiegeAmbi.wav", 1, true );      //  배경 효과음 ( 비공성 ).
@@ -6108,10 +6108,10 @@ void OpenWorldModels()
 		AccessModel(MODEL_BUTTERFLY01	 ,"Data\\Object1\\","Butterfly",1);
 		OpenTexture(MODEL_BUTTERFLY01	 ,"Object1\\");
 
-		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP);
-		LoadBitmap("Monster\\bossmap1_R.jpg"	  ,BITMAP_HGBOSS_PATTERN ,GL_LINEAR,GL_CLAMP);
+		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+		LoadBitmap("Monster\\bossmap1_R.jpg"	  ,BITMAP_HGBOSS_PATTERN ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 		LoadBitmap("Monster\\bosswing.tga",BITMAP_HGBOSS_WING  ,GL_NEAREST,GL_REPEAT);
-		LoadBitmap("Skill\\bossrock1_R.JPG" ,BITMAP_FISSURE_FIRE ,GL_LINEAR,GL_CLAMP);
+		LoadBitmap("Skill\\bossrock1_R.JPG" ,BITMAP_FISSURE_FIRE ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 
 		LoadWaveFile ( SOUND_BC_HUNTINGGROUND_AMBIENT,    "Data\\Sound\\w31\\aW31.wav", 1, true );      //  배경 효과음
 
@@ -6155,7 +6155,7 @@ void OpenWorldModels()
 		AccessModel(MODEL_BUG01+1         ,"Data\\Object9\\","Bug",2);
 		OpenTexture(MODEL_BUG01+1		  ,"Object9\\");
 
-		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP);
+		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 
 		LoadWaveFile ( SOUND_AIDA_AMBIENT,    "Data\\Sound\\w34\\aida_ambi.wav", 1, true );      //  배경 효과음
 		//블루골렘
@@ -6207,8 +6207,8 @@ void OpenWorldModels()
 
 #ifdef YDG_ADD_MAP_DOPPELGANGER4
 	case WD_68DOPPLEGANGER4:
-		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD,GL_LINEAR,GL_CLAMP);
-		LoadBitmap("effect\\water.jpg", BITMAP_TWINTAIL_WATER, GL_LINEAR, GL_CLAMP);
+		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD,GL_LINEAR,GL_CLAMP_TO_EDGE);
+		LoadBitmap("effect\\water.jpg", BITMAP_TWINTAIL_WATER, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif	// YDG_ADD_MAP_DOPPELGANGER4
 	case WD_37KANTURU_1ST:
 		AccessModel(MODEL_BUTTERFLY01	 ,"Data\\Object1\\","Butterfly",1);
@@ -6284,10 +6284,10 @@ void OpenWorldModels()
 			AccessModel(MODEL_STORM3		,"Data\\Skill\\","mayatonedo");
 			OpenTexture(MODEL_STORM3		,"Skill\\");
 
-			LoadBitmap("Object39\\k_effect_01.JPG"		, BITMAP_KANTURU_2ND_EFFECT1, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Npc\\khs_kan2gate001.jpg"	, BITMAP_KANTURU_2ND_NPC1, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Npc\\khs_kan2gate003.jpg"	, BITMAP_KANTURU_2ND_NPC2, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Npc\\khs_kan2gate004.jpg"	, BITMAP_KANTURU_2ND_NPC3, GL_LINEAR, GL_CLAMP);
+			LoadBitmap("Object39\\k_effect_01.JPG"		, BITMAP_KANTURU_2ND_EFFECT1, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Npc\\khs_kan2gate001.jpg"	, BITMAP_KANTURU_2ND_NPC1, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Npc\\khs_kan2gate003.jpg"	, BITMAP_KANTURU_2ND_NPC2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Npc\\khs_kan2gate004.jpg"	, BITMAP_KANTURU_2ND_NPC3, GL_LINEAR, GL_CLAMP_TO_EDGE);
 			
 			// 사운드
 			// 환경 사운드
@@ -6320,13 +6320,13 @@ void OpenWorldModels()
 		break;
 	case WD_39KANTURU_3RD:
 		{
-			LoadBitmap("Monster\\nightmare_R.jpg"			, BITMAP_NIGHTMARE_EFFECT1, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Monster\\nightmaresward_R.jpg"	, BITMAP_NIGHTMARE_EFFECT2, GL_LINEAR, GL_CLAMP);
+			LoadBitmap("Monster\\nightmare_R.jpg"			, BITMAP_NIGHTMARE_EFFECT1, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Monster\\nightmaresward_R.jpg"	, BITMAP_NIGHTMARE_EFFECT2, GL_LINEAR, GL_CLAMP_TO_EDGE);
 			LoadBitmap("Monster\\nightmare_cloth.tga"		, BITMAP_NIGHTMARE_ROBE);
-			LoadBitmap("Object40\\maya01_R.jpg"			, BITMAP_MAYA_BODY, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Object40\\Mtowereffe.JPG"			, BITMAP_KANTURU3RD_OBJECT, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Effect\\bluering0001_R.jpg"		, BITMAP_ENERGY_RING, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Effect\\bluewave0001_R.jpg"		, BITMAP_ENERGY_FIELD, GL_LINEAR, GL_CLAMP);
+			LoadBitmap("Object40\\maya01_R.jpg"			, BITMAP_MAYA_BODY, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Object40\\Mtowereffe.JPG"			, BITMAP_KANTURU3RD_OBJECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\bluering0001_R.jpg"		, BITMAP_ENERGY_RING, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\bluewave0001_R.jpg"		, BITMAP_ENERGY_FIELD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
 			AccessModel(MODEL_STORM2		,"Data\\SKill\\","boswind");
 			OpenTexture(MODEL_STORM2		,"SKill\\");
@@ -6392,12 +6392,12 @@ void OpenWorldModels()
 	case WD_45CURSEDTEMPLE_LV5:	
 	case WD_45CURSEDTEMPLE_LV6:
 		{
-			LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Effect\\clud64.jpg", BITMAP_CLUD64, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Effect\\ghosteffect01.jpg", BITMAP_GHOST_CLOUD1, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Effect\\ghosteffect02.jpg", BITMAP_GHOST_CLOUD2, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Effect\\torchfire.jpg", BITMAP_TORCH_FIRE, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Effect\\clouds2.jpg", BITMAP_EVENT_CLOUD, GL_LINEAR, GL_CLAMP);
+			LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\clud64.jpg", BITMAP_CLUD64, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\ghosteffect01.jpg", BITMAP_GHOST_CLOUD1, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\ghosteffect02.jpg", BITMAP_GHOST_CLOUD2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\torchfire.jpg", BITMAP_TORCH_FIRE, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\clouds2.jpg", BITMAP_EVENT_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 			
 			//EFFECT
 			AccessModel(MODEL_FALL_STONE_EFFECT, "Data\\Object47\\", "Stoneeffec");
@@ -6424,9 +6424,9 @@ void OpenWorldModels()
 		}
 		break;
 	case WD_41CHANGEUP3RD_1ST:
-		LoadBitmap("Effect\\clouds.jpg" , BITMAP_CLOUD, GL_LINEAR, GL_CLAMP);
-		LoadBitmap("Effect\\firered.jpg" , BITMAP_FIRE_RED, GL_LINEAR, GL_CLAMP);
-		LoadBitmap("Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP);      //  불씨.
+		LoadBitmap("Effect\\clouds.jpg" , BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
+		LoadBitmap("Effect\\firered.jpg" , BITMAP_FIRE_RED, GL_LINEAR, GL_CLAMP_TO_EDGE);
+		LoadBitmap("Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);      //  불씨.
 		
 		// 배경 효과음.
 		LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE1,			"Data\\Sound\\w42\\cage01.wav", 1);
@@ -6453,9 +6453,9 @@ void OpenWorldModels()
 		LoadWaveFile ( SOUND_CRY1ST_SORAM_DIE,               "Data\\Sound\\w35\\soram_death.wav", 1 );
 		break;
 	case WD_42CHANGEUP3RD_2ND:
-		LoadBitmap("Effect\\clouds.jpg" , BITMAP_CLOUD, GL_LINEAR, GL_CLAMP);
-		LoadBitmap("Effect\\firered.jpg" , BITMAP_FIRE_RED, GL_LINEAR, GL_CLAMP);
-		LoadBitmap("Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP);      //  불씨.
+		LoadBitmap("Effect\\clouds.jpg" , BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
+		LoadBitmap("Effect\\firered.jpg" , BITMAP_FIRE_RED, GL_LINEAR, GL_CLAMP_TO_EDGE);
+		LoadBitmap("Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);      //  불씨.
 
 		// 배경 효과음.
 		LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE1,			"Data\\Sound\\w42\\cage01.wav", 1);
@@ -6490,7 +6490,7 @@ void OpenWorldModels()
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		// 이어서 51번 맵 데이터도 읽는다.
 	case WD_51HOME_6TH_CHAR:
-		LoadBitmap("Effect\\clouds.jpg" , BITMAP_CLOUD, GL_LINEAR, GL_CLAMP);
+		LoadBitmap("Effect\\clouds.jpg" , BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 		LoadBitmap("Effect\\Map_Smoke1.jpg"     ,BITMAP_CHROME+2    ,GL_LINEAR,GL_REPEAT);
 		AccessModel(MODEL_EAGLE			 ,"Data\\Object52\\","sos3bi01");
 		OpenTexture(MODEL_EAGLE			 ,"Object52\\");
@@ -6524,10 +6524,10 @@ void OpenWorldModels()
 #ifdef YDG_ADD_MAP_DOPPELGANGER2
 	case WD_66DOPPLEGANGER2:
 		{
-			LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP);
-			LoadBitmap("Effect\\WATERFALL2.jpg" ,BITMAP_CHROME3 ,GL_LINEAR,GL_CLAMP);
-			LoadBitmap("Effect\\clud64.jpg", BITMAP_CLUD64, GL_LINEAR, GL_CLAMP);
+			LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\WATERFALL2.jpg" ,BITMAP_CHROME3 ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+			LoadBitmap("Effect\\clud64.jpg", BITMAP_CLUD64, GL_LINEAR, GL_CLAMP_TO_EDGE);
 		}
 		break;
 #endif	// YDG_ADD_MAP_DOPPELGANGER2
@@ -6636,10 +6636,10 @@ void OpenWorldModels()
 		break;
 #ifdef YDG_ADD_MAP_DOPPELGANGER1
 	case WD_65DOPPLEGANGER1:	// 라클리온 베이스
-		LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP);
+		LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 		LoadBitmap("Effect\\Map_Smoke1.jpg", BITMAP_CHROME+2, GL_LINEAR, GL_REPEAT);
 		LoadBitmap("Object9\\sand02.jpg", BITMAP_CHROME+3, GL_LINEAR, GL_REPEAT);
-		LoadBitmap("Effect\\Chrome08.jpg", BITMAP_CHROME8, GL_LINEAR, GL_CLAMP);
+		LoadBitmap("Effect\\Chrome08.jpg", BITMAP_CHROME8, GL_LINEAR, GL_CLAMP_TO_EDGE);
 		break;
 #endif	// YDG_ADD_MAP_DOPPELGANGER1
 #ifdef CSK_ADD_MAP_ICECITY
@@ -6647,7 +6647,7 @@ void OpenWorldModels()
 	case WD_58ICECITY_BOSS:	
 		LoadBitmap("Effect\\Map_Smoke1.jpg", BITMAP_CHROME+2, GL_LINEAR, GL_REPEAT);
 		LoadBitmap("Object9\\sand02.jpg", BITMAP_CHROME+3, GL_LINEAR, GL_REPEAT);
-		LoadBitmap("Effect\\Chrome08.jpg", BITMAP_CHROME8, GL_LINEAR, GL_CLAMP);
+		LoadBitmap("Effect\\Chrome08.jpg", BITMAP_CHROME8, GL_LINEAR, GL_CLAMP_TO_EDGE);
 		
 		AccessModel(MODEL_FALL_STONE_EFFECT, "Data\\Object47\\", "Stoneeffec");
 		OpenTexture(MODEL_FALL_STONE_EFFECT, "Object47\\");
@@ -6752,8 +6752,8 @@ void OpenWorldModels()
 		OpenTexture(MODEL_DOOR_CRUSH_EFFECT_PIECE12 ,"Effect\\");
 		OpenTexture(MODEL_DOOR_CRUSH_EFFECT_PIECE13 ,"Effect\\");
 
-		LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP);
-		LoadBitmap("Effect\\flare.jpg", BITMAP_FLARE, GL_LINEAR,GL_CLAMP);
+		LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
+		LoadBitmap("Effect\\flare.jpg", BITMAP_FLARE, GL_LINEAR,GL_CLAMP_TO_EDGE);
 		LoadBitmap("Effect\\Map_Smoke1.jpg", BITMAP_CHROME+2, GL_LINEAR,GL_REPEAT);
 
 		// 날씨 및 환경 사운드
@@ -6840,7 +6840,7 @@ void OpenWorldModels()
 	case WD_80KARUTAN1:
 	case WD_81KARUTAN2:
 		LoadBitmap("Object9\\sand02.jpg", BITMAP_CHROME+3, GL_LINEAR, GL_REPEAT);
-		LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP);
+		LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
 		// 콘드라 죽을 때 이펙트 모델
 		AccessModel(MODEL_CONDRA_ARM_L	, "Data\\Monster\\", "condra_7_arm_left");
@@ -6910,7 +6910,7 @@ void OpenWorldModels()
         AccessModel ( MODEL_ANGEL, "Data\\Player\\", "Angel" );
         OpenTexture ( MODEL_ANGEL, "Npc\\" );
 
-		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD,GL_LINEAR,GL_CLAMP);
+		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD,GL_LINEAR,GL_CLAMP_TO_EDGE);
 
         //  효과음.
 		LoadWaveFile ( SOUND_CHAOSCASTLE, "Data\\Sound\\iChaosCastle.wav" , 1 );
@@ -6919,7 +6919,7 @@ void OpenWorldModels()
     if ( InHellas() )
     {
 		LoadBitmap( "Object25\\water1.tga", BITMAP_MAPTILE, GL_LINEAR, GL_REPEAT,false);
-		LoadBitmap( "Object25\\water2.jpg", BITMAP_MAPTILE+1, GL_NEAREST, GL_CLAMP );
+		LoadBitmap( "Object25\\water2.jpg", BITMAP_MAPTILE+1, GL_NEAREST, GL_CLAMP_TO_EDGE );
 
         // 쿤둔 몸조각
         AccessModel(MODEL_CUNDUN_PART1		 ,"Data\\Monster\\","cd71a",-1);
@@ -7593,26 +7593,26 @@ void OpenWorld(int Map)
 	    LoadBitmap(FileName,BITMAP_MAPGRASS+2,GL_NEAREST,GL_REPEAT,false);
 
         sprintf(FileName,"%s\\leaf01.tga" ,WorldName);
-	    LoadBitmap(FileName,BITMAP_LEAF1          ,GL_NEAREST,GL_CLAMP,false);
+	    LoadBitmap(FileName,BITMAP_LEAF1          ,GL_NEAREST,GL_CLAMP_TO_EDGE,false);
 	    sprintf(FileName,"%s\\leaf01.jpg" ,WorldName);
-	    LoadBitmap(FileName,BITMAP_LEAF1          ,GL_NEAREST,GL_CLAMP,false);
+	    LoadBitmap(FileName,BITMAP_LEAF1          ,GL_NEAREST,GL_CLAMP_TO_EDGE,false);
 	    sprintf(FileName,"%s\\leaf02.jpg" ,WorldName);
-	    LoadBitmap(FileName,BITMAP_LEAF2          ,GL_NEAREST,GL_CLAMP,false);
+	    LoadBitmap(FileName,BITMAP_LEAF2          ,GL_NEAREST,GL_CLAMP_TO_EDGE,false);
 
 		if(M34CryWolf1st::IsCyrWolf1st()==true)
 		{
 			sprintf(FileName,"%s\\rain011.tga" ,"World1");
-			LoadBitmap(FileName,BITMAP_RAIN           ,GL_NEAREST,GL_CLAMP,false);
+			LoadBitmap(FileName,BITMAP_RAIN           ,GL_NEAREST,GL_CLAMP_TO_EDGE,false);
 		}
 		else
 		{
 			sprintf(FileName,"%s\\rain01.tga" ,"World1");
-			LoadBitmap(FileName,BITMAP_RAIN           ,GL_NEAREST,GL_CLAMP,false);
+			LoadBitmap(FileName,BITMAP_RAIN           ,GL_NEAREST,GL_CLAMP_TO_EDGE,false);
 		}
 	    sprintf(FileName,"%s\\rain02.tga" ,"World1");
-	    LoadBitmap(FileName,BITMAP_RAIN_CIRCLE    ,GL_NEAREST,GL_CLAMP,false);
+	    LoadBitmap(FileName,BITMAP_RAIN_CIRCLE    ,GL_NEAREST,GL_CLAMP_TO_EDGE,false);
 	    sprintf(FileName,"%s\\rain03.tga" ,"World10");
-	    LoadBitmap(FileName,BITMAP_RAIN_CIRCLE+1  ,GL_NEAREST,GL_CLAMP,false);
+	    LoadBitmap(FileName,BITMAP_RAIN_CIRCLE+1  ,GL_NEAREST,GL_CLAMP_TO_EDGE,false);
 
 #ifdef LDS_ADD_EMPIRE_GUARDIAN
 		if( IsEmpireGuardian1() || IsEmpireGuardian2() || IsEmpireGuardian3() || IsEmpireGuardian4())		
@@ -8094,9 +8094,9 @@ void OpenFont()
 {
    	InitPath();
 
-    LoadBitmap("Interface\\FontInput.tga"     ,BITMAP_FONT    ,GL_NEAREST,GL_CLAMP);
+    LoadBitmap("Interface\\FontInput.tga"     ,BITMAP_FONT    ,GL_NEAREST,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Interface\\FontTest.tga"      ,BITMAP_FONT+1  );
-	LoadBitmap("Interface\\Hit.tga"			,BITMAP_FONT_HIT,GL_NEAREST,GL_CLAMP);
+	LoadBitmap("Interface\\Hit.tga"			,BITMAP_FONT_HIT,GL_NEAREST,GL_CLAMP_TO_EDGE);
 
 	g_pRenderText->Create(0, g_hDC);	//. 나중에 업그레이드 해서 타입 넘겨줄것
 }
@@ -8519,15 +8519,15 @@ void OpenBasicData(HDC hDC)
 
 	rUIMng.RenderTitleSceneUI(hDC, 0, 11);
 
-	LoadBitmap("Interface\\Cursor.tga"           ,BITMAP_CURSOR  ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\CursorPush.tga"       ,BITMAP_CURSOR+1,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\CursorAttack.tga"     ,BITMAP_CURSOR+2,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\CursorGet.tga"        ,BITMAP_CURSOR+3,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\CursorTalk.tga"       ,BITMAP_CURSOR+4,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\CursorRepair.tga"     ,BITMAP_CURSOR+5,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\CursorLeanAgainst.tga",BITMAP_CURSOR+6,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\CursorSitDown.tga"    ,BITMAP_CURSOR+7,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\CursorDontMove.tga"   ,BITMAP_CURSOR+8,GL_LINEAR,GL_CLAMP);	
+	LoadBitmap("Interface\\Cursor.tga"           ,BITMAP_CURSOR  ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\CursorPush.tga"       ,BITMAP_CURSOR+1,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\CursorAttack.tga"     ,BITMAP_CURSOR+2,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\CursorGet.tga"        ,BITMAP_CURSOR+3,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\CursorTalk.tga"       ,BITMAP_CURSOR+4,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\CursorRepair.tga"     ,BITMAP_CURSOR+5,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\CursorLeanAgainst.tga",BITMAP_CURSOR+6,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\CursorSitDown.tga"    ,BITMAP_CURSOR+7,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\CursorDontMove.tga"   ,BITMAP_CURSOR+8,GL_LINEAR,GL_CLAMP_TO_EDGE);	
 	//interface
 	LoadBitmap("Interface\\ok.jpg"             ,BITMAP_INTERFACE+11);
 	LoadBitmap("Interface\\ok2.jpg"            ,BITMAP_INTERFACE+12);
@@ -8627,137 +8627,137 @@ void OpenBasicData(HDC hDC)
 	// =======================================================================================
 	// 2. Effect Images들
 	// =======================================================================================
-	LoadBitmap("Effect\\Fire01.jpg"		,BITMAP_FIRE      ,GL_LINEAR,GL_CLAMP);			// GM3rdChangeUp, GMCrywolf1st,GMHellas,Kanturu 3rd
-	LoadBitmap("Effect\\Fire02.jpg"		,BITMAP_FIRE+1    ,GL_LINEAR,GL_CLAMP);			// GM3rdChangeUp, GMCrywolf1st,GMHellas,Kanturu 3rd
-	LoadBitmap("Effect\\Fire03.jpg"		,BITMAP_FIRE+2    ,GL_LINEAR,GL_CLAMP);			// GM3rdChangeUp, GMCrywolf1st,GMHellas,Kanturu 3rd
-	LoadBitmap("Effect\\PoundingBall.jpg"		,BITMAP_POUNDING_BALL,GL_LINEAR,GL_CLAMP); // Kanturu 2nd
-	LoadBitmap( "Effect\\fi01.jpg"		,BITMAP_ADV_SMOKE,  GL_LINEAR, GL_CLAMP );		// GM 3rd ChangeUp, CryingWolf2nd
-	LoadBitmap( "Effect\\fi02.tga"	    ,BITMAP_ADV_SMOKE+1,GL_LINEAR, GL_CLAMP );		// GM 3rd ChangeUp, CryingWolf2nd
-	LoadBitmap( "Effect\\fantaF.jpg"		,BITMAP_TRUE_FIRE,  GL_LINEAR, GL_CLAMP );	// GM Aida, GMBattleCastle, ....
-	LoadBitmap( "Effect\\fantaB.jpg"		,BITMAP_TRUE_BLUE,  GL_LINEAR, GL_CLAMP ); 
-	LoadBitmap( "Effect\\JointSpirit02.jpg" ,BITMAP_JOINT_SPIRIT2  ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\Fire01.jpg"		,BITMAP_FIRE      ,GL_LINEAR,GL_CLAMP_TO_EDGE);			// GM3rdChangeUp, GMCrywolf1st,GMHellas,Kanturu 3rd
+	LoadBitmap("Effect\\Fire02.jpg"		,BITMAP_FIRE+1    ,GL_LINEAR,GL_CLAMP_TO_EDGE);			// GM3rdChangeUp, GMCrywolf1st,GMHellas,Kanturu 3rd
+	LoadBitmap("Effect\\Fire03.jpg"		,BITMAP_FIRE+2    ,GL_LINEAR,GL_CLAMP_TO_EDGE);			// GM3rdChangeUp, GMCrywolf1st,GMHellas,Kanturu 3rd
+	LoadBitmap("Effect\\PoundingBall.jpg"		,BITMAP_POUNDING_BALL,GL_LINEAR,GL_CLAMP_TO_EDGE); // Kanturu 2nd
+	LoadBitmap( "Effect\\fi01.jpg"		,BITMAP_ADV_SMOKE,  GL_LINEAR, GL_CLAMP_TO_EDGE );		// GM 3rd ChangeUp, CryingWolf2nd
+	LoadBitmap( "Effect\\fi02.tga"	    ,BITMAP_ADV_SMOKE+1,GL_LINEAR, GL_CLAMP_TO_EDGE );		// GM 3rd ChangeUp, CryingWolf2nd
+	LoadBitmap( "Effect\\fantaF.jpg"		,BITMAP_TRUE_FIRE,  GL_LINEAR, GL_CLAMP_TO_EDGE );	// GM Aida, GMBattleCastle, ....
+	LoadBitmap( "Effect\\fantaB.jpg"		,BITMAP_TRUE_BLUE,  GL_LINEAR, GL_CLAMP_TO_EDGE ); 
+	LoadBitmap( "Effect\\JointSpirit02.jpg" ,BITMAP_JOINT_SPIRIT2  ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap( "Effect\\Piercing.jpg" , BITMAP_PIERCING, GL_LINEAR, GL_REPEAT );
 	LoadBitmap( "Monster\\iui06.jpg",    BITMAP_ROBE+6 );
 	LoadBitmap( "Effect\\Magic_b.jpg",   BITMAP_MAGIC_EMBLEM );
-	LoadBitmap("Player\\dark3chima3.tga", BITMAP_DARKLOAD_SKIRT_3RD, GL_LINEAR, GL_CLAMP);
-    LoadBitmap( "Player\\kaa.tga",       BITMAP_DARK_LOAD_SKIRT,  GL_LINEAR, GL_CLAMP );
+	LoadBitmap("Player\\dark3chima3.tga", BITMAP_DARKLOAD_SKIRT_3RD, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap( "Player\\kaa.tga",       BITMAP_DARK_LOAD_SKIRT,  GL_LINEAR, GL_CLAMP_TO_EDGE );
 	LoadBitmap( "Effect\\ShockWave.jpg", BITMAP_SHOCK_WAVE, GL_LINEAR ); 
-    LoadBitmap("Effect\\Flame01.jpg"		,BITMAP_FLAME     ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\flare01.jpg"	    ,BITMAP_LIGHT      ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Magic_Ground1.jpg",BITMAP_MAGIC      ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Magic_Ground2.jpg",BITMAP_MAGIC+1    ,GL_LINEAR,GL_CLAMP);
+    LoadBitmap("Effect\\Flame01.jpg"		,BITMAP_FLAME     ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\flare01.jpg"	    ,BITMAP_LIGHT      ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Magic_Ground1.jpg",BITMAP_MAGIC      ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Magic_Ground2.jpg",BITMAP_MAGIC+1    ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\Magic_Circle1.jpg",BITMAP_MAGIC+2    ,GL_LINEAR);
 #ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
-	LoadBitmap("Effect\\guild_ring01.jpg", BITMAP_OUR_INFLUENCE_GROUND, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\enemy_ring02.jpg", BITMAP_ENEMY_INFLUENCE_GROUND, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\guild_ring01.jpg", BITMAP_OUR_INFLUENCE_GROUND, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\enemy_ring02.jpg", BITMAP_ENEMY_INFLUENCE_GROUND, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
-	LoadBitmap("Effect\\Spark02.jpg"  	,BITMAP_SPARK     ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Spark03.jpg"  	,BITMAP_SPARK+1   ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\smoke01.jpg"	    ,BITMAP_SMOKE     ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\smoke02.tga"	    ,BITMAP_SMOKE+1   ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\smoke05.tga"	    ,BITMAP_SMOKE+4   ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\blood01.tga"      ,BITMAP_BLOOD     ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\blood.tga"        ,BITMAP_BLOOD+1   ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Explotion01.jpg"  ,BITMAP_EXPLOTION ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\Spark02.jpg"  	,BITMAP_SPARK     ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Spark03.jpg"  	,BITMAP_SPARK+1   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\smoke01.jpg"	    ,BITMAP_SMOKE     ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\smoke02.tga"	    ,BITMAP_SMOKE+1   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\smoke05.tga"	    ,BITMAP_SMOKE+4   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\blood01.tga"      ,BITMAP_BLOOD     ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\blood.tga"        ,BITMAP_BLOOD+1   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Explotion01.jpg"  ,BITMAP_EXPLOTION ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-	LoadBitmap("Skill\\twlighthik01.jpg"  ,BITMAP_TWLIGHT ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Skill\\twlighthik01.jpg"  ,BITMAP_TWLIGHT ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 #ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-	LoadBitmap("Skill\\2line_gost.jpg"  ,BITMAP_2LINE_GHOST ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Skill\\2line_gost.jpg"  ,BITMAP_2LINE_GHOST ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 #endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 #ifdef CSK_RAKLION_BOSS
-	LoadBitmap("Effect\\damage01mono.jpg", BITMAP_DAMAGE_01_MONO, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\damage01mono.jpg", BITMAP_DAMAGE_01_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_RAKLION_BOSS
 #ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-	LoadBitmap("Effect\\SwordEff_mono.jpg", BITMAP_SWORD_EFFECT_MONO, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\SwordEff_mono.jpg", BITMAP_SWORD_EFFECT_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 #ifdef YDG_ADD_SKILL_FLAME_STRIKE
-	LoadBitmap("Effect\\flamestani.jpg", BITMAP_FLAMESTANI, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\flamestani.jpg", BITMAP_FLAMESTANI, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif	// YDG_ADD_SKILL_FLAME_STRIKE
 
-	LoadBitmap("Effect\\Spark.jpg", BITMAP_SPARK+2, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\firehik02.jpg"  ,BITMAP_FIRE_CURSEDLICH ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Monster\\totemgolem_leaf.tga",BITMAP_LEAF_TOTEMGOLEM ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\empact01.jpg"  ,BITMAP_SUMMON_IMPACT ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\loungexflow.jpg" ,BITMAP_SUMMON_SAHAMUTT_EXPLOSION ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\gostmark01.jpg"  , BITMAP_DRAIN_LIFE_GHOST ,GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\mzine_typer2.jpg", BITMAP_MAGIC_ZIN, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\shiny05.jpg", BITMAP_SHINY+6, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\Spark.jpg", BITMAP_SPARK+2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firehik02.jpg"  ,BITMAP_FIRE_CURSEDLICH ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\totemgolem_leaf.tga",BITMAP_LEAF_TOTEMGOLEM ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\empact01.jpg"  ,BITMAP_SUMMON_IMPACT ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\loungexflow.jpg" ,BITMAP_SUMMON_SAHAMUTT_EXPLOSION ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\gostmark01.jpg"  , BITMAP_DRAIN_LIFE_GHOST ,GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\mzine_typer2.jpg", BITMAP_MAGIC_ZIN, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\shiny05.jpg", BITMAP_SHINY+6, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #ifdef ASG_ADD_SKILL_BERSERKER
-	LoadBitmap("Effect\\hikorora.jpg", BITMAP_ORORA, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHT_MARKS, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\hikorora.jpg", BITMAP_ORORA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHT_MARKS, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif	// ASG_ADD_SKILL_BERSERKER
-	LoadBitmap("Effect\\cursorpin01.jpg"  , BITMAP_TARGET_POSITION_EFFECT1 ,GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\cursorpin02.jpg"  , BITMAP_TARGET_POSITION_EFFECT2 ,GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\cursorpin01.jpg"  , BITMAP_TARGET_POSITION_EFFECT1 ,GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\cursorpin02.jpg"  , BITMAP_TARGET_POSITION_EFFECT2 ,GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap( "Effect\\smokelines01.jpg" ,BITMAP_SMOKELINE1, GL_LINEAR, GL_REPEAT );
 	LoadBitmap( "Effect\\smokelines02.jpg" ,BITMAP_SMOKELINE2, GL_LINEAR, GL_REPEAT );
 	LoadBitmap( "Effect\\smokelines03.jpg" ,BITMAP_SMOKELINE3, GL_LINEAR, GL_REPEAT );
 	LoadBitmap( "Effect\\lighting_mega01.jpg" ,BITMAP_LIGHTNING_MEGA1, GL_LINEAR, GL_REPEAT );
 	LoadBitmap( "Effect\\lighting_mega02.jpg" ,BITMAP_LIGHTNING_MEGA2, GL_LINEAR, GL_REPEAT );
 	LoadBitmap( "Effect\\lighting_mega03.jpg" ,BITMAP_LIGHTNING_MEGA3, GL_LINEAR, GL_REPEAT );
-	LoadBitmap("Effect\\firehik01.jpg"  ,BITMAP_FIRE_HIK1 ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\firehik03.jpg"  ,BITMAP_FIRE_HIK3 ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\firehik01.jpg"  ,BITMAP_FIRE_HIK1 ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firehik03.jpg"  ,BITMAP_FIRE_HIK3 ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 #ifdef CSK_ADD_MAP_ICECITY
-	LoadBitmap("Effect\\firehik_mono01.jpg", BITMAP_FIRE_HIK1_MONO, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\firehik_mono02.jpg", BITMAP_FIRE_HIK2_MONO, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\firehik_mono03.jpg", BITMAP_FIRE_HIK3_MONO, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\firehik_mono01.jpg", BITMAP_FIRE_HIK1_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firehik_mono02.jpg", BITMAP_FIRE_HIK2_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firehik_mono03.jpg", BITMAP_FIRE_HIK3_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_ADD_MAP_ICECITY
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
-	LoadBitmap("Effect\\clouds3.jpg", BITMAP_RAKLION_CLOUDS, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\clouds3.jpg", BITMAP_RAKLION_CLOUDS, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 #ifdef ADD_RAKLION_IRON_KNIGHT
-	LoadBitmap("Monster\\icenightlight.jpg", BITMAP_IRONKNIGHT_BODY_BRIGHT, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Monster\\icenightlight.jpg", BITMAP_IRONKNIGHT_BODY_BRIGHT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif	// ADD_RAKLION_IRON_KNIGHT
 
 	g_XmasEvent->LoadXmasEventEffect();
 
 	LoadBitmap("Skill\\younghtest1.tga", BITMAP_GM_HAIR_1);
 	LoadBitmap("Skill\\younghtest3.tga", BITMAP_GM_HAIR_3);
-	LoadBitmap("Skill\\gmmzine.jpg", BITMAP_GM_AURORA, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\explotion01mono.jpg"  ,BITMAP_EXPLOTION_MONO  ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\Success_kantru.tga" ,BITMAP_KANTURU_SUCCESS ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\Failure_kantru.tga" ,BITMAP_KANTURU_FAILED  ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Interface\\MonsterCount.tga"   ,BITMAP_KANTURU_COUNTER ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Clud64.jpg",	BITMAP_CLUD64,	GL_LINEAR,	GL_CLAMP);
-	LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Skill\\SwordEff.jpg"	    ,BITMAP_BLUE_BLUR     ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Impack03.jpg"   ,BITMAP_IMPACT      ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Skill\\gmmzine.jpg", BITMAP_GM_AURORA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\explotion01mono.jpg"  ,BITMAP_EXPLOTION_MONO  ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\Success_kantru.tga" ,BITMAP_KANTURU_SUCCESS ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\Failure_kantru.tga" ,BITMAP_KANTURU_FAILED  ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\MonsterCount.tga"   ,BITMAP_KANTURU_COUNTER ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Clud64.jpg",	BITMAP_CLUD64,	GL_LINEAR,	GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Skill\\SwordEff.jpg"	    ,BITMAP_BLUE_BLUR     ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Impack03.jpg"   ,BITMAP_IMPACT      ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\ScolTail.jpg"  ,BITMAP_SCOLPION_TAIL  ,GL_LINEAR);
-	LoadBitmap( "Effect\\FireSnuff.jpg"       , BITMAP_FIRE_SNUFF,    GL_LINEAR, GL_CLAMP );
-	LoadBitmap("Effect\\coll.jpg"	,BITMAP_SPOT_WATER,GL_LINEAR, GL_CLAMP );
-	LoadBitmap("Effect\\BowE.jpg"	,BITMAP_DS_EFFECT,GL_LINEAR, GL_CLAMP );
-	LoadBitmap("Effect\\Shockwave.jpg"	,BITMAP_DS_SHOCK,GL_LINEAR, GL_CLAMP );
-	LoadBitmap("Effect\\DinoE.jpg"  ,BITMAP_EXPLOTION+1,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Shiny01.jpg"      ,BITMAP_SHINY     ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Shiny02.jpg"     	,BITMAP_SHINY+1   ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Shiny03.jpg"     	,BITMAP_SHINY+2   ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\eye01.jpg"     	,BITMAP_SHINY+3   ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\ring.jpg"     	,BITMAP_SHINY+4   ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Shiny04.jpg", BITMAP_SHINY+5, GL_LINEAR, GL_CLAMP);
+	LoadBitmap( "Effect\\FireSnuff.jpg"       , BITMAP_FIRE_SNUFF,    GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap("Effect\\coll.jpg"	,BITMAP_SPOT_WATER,GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap("Effect\\BowE.jpg"	,BITMAP_DS_EFFECT,GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap("Effect\\Shockwave.jpg"	,BITMAP_DS_SHOCK,GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap("Effect\\DinoE.jpg"  ,BITMAP_EXPLOTION+1,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Shiny01.jpg"      ,BITMAP_SHINY     ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Shiny02.jpg"     	,BITMAP_SHINY+1   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Shiny03.jpg"     	,BITMAP_SHINY+2   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\eye01.jpg"     	,BITMAP_SHINY+3   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\ring.jpg"     	,BITMAP_SHINY+4   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Shiny04.jpg", BITMAP_SHINY+5, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\Chrome01.jpg"     ,BITMAP_CHROME     ,GL_LINEAR,GL_REPEAT);
-	LoadBitmap("Effect\\blur01.jpg"       ,BITMAP_BLUR      ,GL_NEAREST,GL_CLAMP);
+	LoadBitmap("Effect\\blur01.jpg"       ,BITMAP_BLUR      ,GL_NEAREST,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\bab2.jpg"          ,BITMAP_CHROME+1  ,GL_LINEAR,GL_REPEAT);
-	LoadBitmap("Effect\\motion_blur.jpg"  ,BITMAP_BLUR+1     ,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\motion_blur_r.jpg",BITMAP_BLUR+2     ,GL_NEAREST,GL_CLAMP);
+	LoadBitmap("Effect\\motion_blur.jpg"  ,BITMAP_BLUR+1     ,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\motion_blur_r.jpg",BITMAP_BLUR+2     ,GL_NEAREST,GL_CLAMP_TO_EDGE);
 #ifdef PBG_ADD_PKFIELD
-	LoadBitmap("Effect\\motion_mono.jpg",	BITMAP_BLUR+3, GL_NEAREST,GL_CLAMP);
+	LoadBitmap("Effect\\motion_mono.jpg",	BITMAP_BLUR+3, GL_NEAREST,GL_CLAMP_TO_EDGE);
 #endif //PBG_ADD_PKFIELD
 #ifdef LDS_ADD_EMPIRE_GUARDIAN
-	LoadBitmap("Effect\\motion_blur_r3.jpg",BITMAP_BLUR+6   ,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\gra.jpg",BITMAP_BLUR+7				,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\spinmark01.jpg",BITMAP_BLUR+8		,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\flamestani.jpg", BITMAP_BLUR+9		,GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\sword_blur.jpg", BITMAP_BLUR+10		,GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\joint_sword_red.jpg", BITMAP_BLUR+11,GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\motion_blur_r2.jpg", BITMAP_BLUR+12,GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\motion_blur_r3.jpg", BITMAP_BLUR+13,GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\motion_blur_r3.jpg",BITMAP_BLUR+6   ,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\gra.jpg",BITMAP_BLUR+7				,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\spinmark01.jpg",BITMAP_BLUR+8		,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\flamestani.jpg", BITMAP_BLUR+9		,GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\sword_blur.jpg", BITMAP_BLUR+10		,GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\joint_sword_red.jpg", BITMAP_BLUR+11,GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\motion_blur_r2.jpg", BITMAP_BLUR+12,GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\motion_blur_r3.jpg", BITMAP_BLUR+13,GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //LDS_ADD_EMPIRE_GUARDIAN
-	LoadBitmap("Effect\\blur02.jpg"       ,BITMAP_BLUR2      ,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\lightning2.jpg"	,BITMAP_LIGHTNING+1,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\blur02.jpg"       ,BITMAP_BLUR2      ,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\lightning2.jpg"	,BITMAP_LIGHTNING+1,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\Thunder01.jpg"     ,BITMAP_ENERGY        ,GL_LINEAR,GL_REPEAT);
-	LoadBitmap("Effect\\Spark01.jpg"	     ,BITMAP_JOINT_SPARK   ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\Spark01.jpg"	     ,BITMAP_JOINT_SPARK   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\JointThunder01.jpg",BITMAP_JOINT_THUNDER ,GL_LINEAR,GL_REPEAT);
-	LoadBitmap("Effect\\JointSpirit01.jpg" ,BITMAP_JOINT_SPIRIT  ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\JointSpirit01.jpg" ,BITMAP_JOINT_SPIRIT  ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\JointLaser01.jpg"  ,BITMAP_JOINT_ENERGY  ,GL_LINEAR);
 	LoadBitmap("Effect\\JointEnergy01.jpg" ,BITMAP_JOINT_HEALING ,GL_LINEAR);
 	LoadBitmap("Effect\\JointLaser02.jpg"  ,BITMAP_JOINT_LASER+1 ,GL_LINEAR,GL_REPEAT);
@@ -8768,120 +8768,120 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\motion_blur_r2.jpg"  ,BITMAP_JOINT_FORCE ,GL_LINEAR,GL_REPEAT);
     LoadBitmap("Effect\\Fire04.jpg"   ,BITMAP_FIRECRACKER,	GL_LINEAR);
     //  2002/12/04 - 조규하 효과.
-	LoadBitmap("Effect\\Flare.jpg"     	,BITMAP_FLARE,  GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\Flare.jpg"     	,BITMAP_FLARE,  GL_LINEAR,GL_CLAMP_TO_EDGE);
 
-	LoadBitmap("Effect\\Chrome02.jpg"     ,BITMAP_CHROME2,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\Chrome03.jpg"     ,BITMAP_CHROME3,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\Chrome06.jpg"     ,BITMAP_CHROME6,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\Chrome07.jpg"     ,BITMAP_CHROME7,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\energy01.jpg"     ,BITMAP_CHROME_ENERGY,GL_NEAREST,GL_CLAMP);
-	LoadBitmap("Effect\\energy02.jpg"     ,BITMAP_CHROME_ENERGY2,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\Chrome02.jpg"     ,BITMAP_CHROME2,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Chrome03.jpg"     ,BITMAP_CHROME3,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Chrome06.jpg"     ,BITMAP_CHROME6,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Chrome07.jpg"     ,BITMAP_CHROME7,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\energy01.jpg"     ,BITMAP_CHROME_ENERGY,GL_NEAREST,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\energy02.jpg"     ,BITMAP_CHROME_ENERGY2,GL_LINEAR,GL_CLAMP_TO_EDGE);
 
 
 #ifdef DEVIAS_XMAS_EVENT
-	LoadBitmap("Effect\\Chrome08.jpg"		,BITMAP_CHROME8, GL_NEAREST, GL_CLAMP);
+	LoadBitmap("Effect\\Chrome08.jpg"		,BITMAP_CHROME8, GL_NEAREST, GL_CLAMP_TO_EDGE);
 #endif //DEVIAS_XMAS_EVENT
 
 #ifdef PJH_NEW_CHROME
 	LoadBitmap("Effect\\2.jpg"     ,BITMAP_CHROME9,GL_LINEAR,GL_REPEAT);
 #endif //PJH_NEW_CHROME
 #ifdef YDG_ADD_FIRECRACKER_ITEM
-	LoadBitmap("Effect\\firecracker0001.jpg"	,BITMAP_FIRECRACKER0001, GL_NEAREST, GL_CLAMP);
-	LoadBitmap("Effect\\firecracker0002.jpg"	,BITMAP_FIRECRACKER0002, GL_NEAREST, GL_CLAMP);
-	LoadBitmap("Effect\\firecracker0003.jpg"	,BITMAP_FIRECRACKER0003, GL_NEAREST, GL_CLAMP);
-	LoadBitmap("Effect\\firecracker0004.jpg"	,BITMAP_FIRECRACKER0004, GL_NEAREST, GL_CLAMP);
-	LoadBitmap("Effect\\firecracker0005.jpg"	,BITMAP_FIRECRACKER0005, GL_NEAREST, GL_CLAMP);
-	LoadBitmap("Effect\\firecracker0006.jpg"	,BITMAP_FIRECRACKER0006, GL_NEAREST, GL_CLAMP);
-	LoadBitmap("Effect\\firecracker0007.jpg"	,BITMAP_FIRECRACKER0007, GL_NEAREST, GL_CLAMP);
+	LoadBitmap("Effect\\firecracker0001.jpg"	,BITMAP_FIRECRACKER0001, GL_NEAREST, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firecracker0002.jpg"	,BITMAP_FIRECRACKER0002, GL_NEAREST, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firecracker0003.jpg"	,BITMAP_FIRECRACKER0003, GL_NEAREST, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firecracker0004.jpg"	,BITMAP_FIRECRACKER0004, GL_NEAREST, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firecracker0005.jpg"	,BITMAP_FIRECRACKER0005, GL_NEAREST, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firecracker0006.jpg"	,BITMAP_FIRECRACKER0006, GL_NEAREST, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\firecracker0007.jpg"	,BITMAP_FIRECRACKER0007, GL_NEAREST, GL_CLAMP_TO_EDGE);
 #endif	// YDG_ADD_FIRECRACKER_ITEM
 #ifdef LDS_ADD_EMPIRE_GUARDIAN
 #ifdef LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
-	LoadBitmap("Effect\\Shiny05.jpg"     	,BITMAP_SHINY+6   ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\Shiny05.jpg"     	,BITMAP_SHINY+6   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 #else // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
-	LoadBitmap("Effect\\Shiny05.jpg"     	,BITMAP_SHINY+5   ,GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\Shiny05.jpg"     	,BITMAP_SHINY+5   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 #endif // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
 #endif // LDS_ADD_EMPIRE_GUARDIAN
 
 #if SELECTED_LANGUAGE == LANGUAGE_KOREAN
 #ifdef CSK_LUCKY_SEAL
-	LoadBitmap("Effect\\bujuckline.jpg", BITMAP_LUCKY_SEAL_EFFECT, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\bujuckline.jpg", BITMAP_LUCKY_SEAL_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_LUCKY_SEAL
 #else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 #ifdef CSK_LUCKY_SEAL
-	LoadBitmap("Effect\\partCharge1\\bujuckline.jpg", BITMAP_LUCKY_SEAL_EFFECT, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\partCharge1\\bujuckline.jpg", BITMAP_LUCKY_SEAL_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_LUCKY_SEAL
 #endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 
 	LoadBitmap("Item\\nfm03.jpg"			,BITMAP_BLUECHROME,GL_NEAREST,GL_REPEAT);
-	LoadBitmap("Effect\\flareBlue.jpg"     	,BITMAP_FLARE_BLUE,  GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\NSkill.jpg"     	,BITMAP_FLARE_FORCE,  GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Effect\\flareBlue.jpg"     	,BITMAP_FLARE_BLUE,  GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\NSkill.jpg"     	,BITMAP_FLARE_FORCE,  GL_LINEAR,GL_CLAMP_TO_EDGE);
     LoadBitmap("Effect\\Flare02.jpg"      ,BITMAP_FLARE+1, GL_LINEAR,GL_REPEAT);
-	LoadBitmap("Monster\\King11.jpg", BITMAP_WHITE_WIZARD, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Monster\\Kni000.jpg", BITMAP_DEST_ORC_WAR0, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Monster\\Kni011.jpg", BITMAP_DEST_ORC_WAR1, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Monster\\Kni022.jpg", BITMAP_DEST_ORC_WAR2, GL_LINEAR, GL_CLAMP);
-	LoadBitmap( "Skill\\pinkWave.jpg"     	, BITMAP_PINK_WAVE,     GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Effect\\flareRed.jpg"     	, BITMAP_FLARE_RED,     GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Effect\\Fire05.jpg"		    , BITMAP_FIRE+3,        GL_LINEAR, GL_CLAMP );
+	LoadBitmap("Monster\\King11.jpg", BITMAP_WHITE_WIZARD, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\Kni000.jpg", BITMAP_DEST_ORC_WAR0, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\Kni011.jpg", BITMAP_DEST_ORC_WAR1, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\Kni022.jpg", BITMAP_DEST_ORC_WAR2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap( "Skill\\pinkWave.jpg"     	, BITMAP_PINK_WAVE,     GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Effect\\flareRed.jpg"     	, BITMAP_FLARE_RED,     GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Effect\\Fire05.jpg"		    , BITMAP_FIRE+3,        GL_LINEAR, GL_CLAMP_TO_EDGE );
 	LoadBitmap( "Effect\\Hole.jpg"           , BITMAP_HOLE,          GL_LINEAR, GL_REPEAT );
 //	LoadBitmap( "Monster\\mop011.jpg"        , BITMAP_OTHER_SKIN,    GL_LINEAR, GL_REPEAT );
-	LoadBitmap( "Effect\\WATERFALL1.jpg"		, BITMAP_WATERFALL_1,   GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Effect\\WATERFALL2.jpg"		, BITMAP_WATERFALL_2,   GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Effect\\WATERFALL3.jpg"	    , BITMAP_WATERFALL_3,   GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Effect\\WATERFALL4.jpg"	    , BITMAP_WATERFALL_4,   GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Effect\\WATERFALL5.jpg"		, BITMAP_WATERFALL_5,   GL_LINEAR, GL_CLAMP );
+	LoadBitmap( "Effect\\WATERFALL1.jpg"		, BITMAP_WATERFALL_1,   GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Effect\\WATERFALL2.jpg"		, BITMAP_WATERFALL_2,   GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Effect\\WATERFALL3.jpg"	    , BITMAP_WATERFALL_3,   GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Effect\\WATERFALL4.jpg"	    , BITMAP_WATERFALL_4,   GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Effect\\WATERFALL5.jpg"		, BITMAP_WATERFALL_5,   GL_LINEAR, GL_CLAMP_TO_EDGE );
 	/*
-	LoadBitmap("Interface\\in_bar.tga"		, BITMAP_MVP_INTERFACE, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_bar2.jpg"		, BITMAP_MVP_INTERFACE + 1, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_deco.tga"		, BITMAP_MVP_INTERFACE + 2, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main.tga"		, BITMAP_MVP_INTERFACE + 3, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main_icon_bal1.tga"		, BITMAP_MVP_INTERFACE + 4, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main_icon_dl1.tga"		, BITMAP_MVP_INTERFACE + 5, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main_icon_dl2.tga"		, BITMAP_MVP_INTERFACE + 6, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main_number1.tga"		, BITMAP_MVP_INTERFACE + 7, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main_number2.tga"		, BITMAP_MVP_INTERFACE + 8, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main2.tga"		, BITMAP_MVP_INTERFACE + 9, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_failure.tga"		, BITMAP_MVP_INTERFACE + 10, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_success.tga"		, BITMAP_MVP_INTERFACE + 11, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\t_main.tga"		, BITMAP_MVP_INTERFACE + 12, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_b_no1.tga"		, BITMAP_MVP_INTERFACE + 13, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_b_no2.tga"		, BITMAP_MVP_INTERFACE + 14, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_b_no3.tga"		, BITMAP_MVP_INTERFACE + 15, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_b_ok1.tga"		, BITMAP_MVP_INTERFACE + 16, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_b_ok2.tga"		, BITMAP_MVP_INTERFACE + 17, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_b_ok3.tga"		, BITMAP_MVP_INTERFACE + 18, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_b_yes1.tga"		, BITMAP_MVP_INTERFACE + 19, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_b_yes2.tga"		, BITMAP_MVP_INTERFACE + 20, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_b_yes3.tga"		, BITMAP_MVP_INTERFACE + 21, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_main.tga"		, BITMAP_MVP_INTERFACE + 22, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main_number1_1.tga"		, BITMAP_MVP_INTERFACE + 23, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main_number2_1.tga"		, BITMAP_MVP_INTERFACE + 24, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\in_main_number0_2.tga"		, BITMAP_MVP_INTERFACE + 25, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_table.tga"		, BITMAP_MVP_INTERFACE + 26, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_rank.tga"		, BITMAP_MVP_INTERFACE + 27, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_D.tga"		, BITMAP_MVP_INTERFACE + 28, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_C.tga"		, BITMAP_MVP_INTERFACE + 29, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_B.tga"		, BITMAP_MVP_INTERFACE + 30, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_A.tga"		, BITMAP_MVP_INTERFACE + 31, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_S.tga"		, BITMAP_MVP_INTERFACE + 32, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Interface\\in_bar.tga"		, BITMAP_MVP_INTERFACE, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_bar2.jpg"		, BITMAP_MVP_INTERFACE + 1, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_deco.tga"		, BITMAP_MVP_INTERFACE + 2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main.tga"		, BITMAP_MVP_INTERFACE + 3, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main_icon_bal1.tga"		, BITMAP_MVP_INTERFACE + 4, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main_icon_dl1.tga"		, BITMAP_MVP_INTERFACE + 5, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main_icon_dl2.tga"		, BITMAP_MVP_INTERFACE + 6, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main_number1.tga"		, BITMAP_MVP_INTERFACE + 7, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main_number2.tga"		, BITMAP_MVP_INTERFACE + 8, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main2.tga"		, BITMAP_MVP_INTERFACE + 9, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_failure.tga"		, BITMAP_MVP_INTERFACE + 10, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_success.tga"		, BITMAP_MVP_INTERFACE + 11, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\t_main.tga"		, BITMAP_MVP_INTERFACE + 12, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_b_no1.tga"		, BITMAP_MVP_INTERFACE + 13, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_b_no2.tga"		, BITMAP_MVP_INTERFACE + 14, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_b_no3.tga"		, BITMAP_MVP_INTERFACE + 15, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_b_ok1.tga"		, BITMAP_MVP_INTERFACE + 16, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_b_ok2.tga"		, BITMAP_MVP_INTERFACE + 17, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_b_ok3.tga"		, BITMAP_MVP_INTERFACE + 18, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_b_yes1.tga"		, BITMAP_MVP_INTERFACE + 19, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_b_yes2.tga"		, BITMAP_MVP_INTERFACE + 20, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_b_yes3.tga"		, BITMAP_MVP_INTERFACE + 21, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_main.tga"		, BITMAP_MVP_INTERFACE + 22, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main_number1_1.tga"		, BITMAP_MVP_INTERFACE + 23, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main_number2_1.tga"		, BITMAP_MVP_INTERFACE + 24, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\in_main_number0_2.tga"		, BITMAP_MVP_INTERFACE + 25, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_table.tga"		, BITMAP_MVP_INTERFACE + 26, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_rank.tga"		, BITMAP_MVP_INTERFACE + 27, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_D.tga"		, BITMAP_MVP_INTERFACE + 28, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_C.tga"		, BITMAP_MVP_INTERFACE + 29, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_B.tga"		, BITMAP_MVP_INTERFACE + 30, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_A.tga"		, BITMAP_MVP_INTERFACE + 31, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_S.tga"		, BITMAP_MVP_INTERFACE + 32, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	//icon_Rank_0
-	LoadBitmap("Interface\\icon_Rank_0.tga"		, BITMAP_MVP_INTERFACE + 33, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_1.tga"		, BITMAP_MVP_INTERFACE + 34, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_2.tga"		, BITMAP_MVP_INTERFACE + 35, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_3.tga"		, BITMAP_MVP_INTERFACE + 36, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_4.tga"		, BITMAP_MVP_INTERFACE + 37, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_5.tga"		, BITMAP_MVP_INTERFACE + 38, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_6.tga"		, BITMAP_MVP_INTERFACE + 39, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_7.tga"		, BITMAP_MVP_INTERFACE + 40, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_8.tga"		, BITMAP_MVP_INTERFACE + 41, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_9.tga"		, BITMAP_MVP_INTERFACE + 42, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\icon_Rank_exp.tga"		, BITMAP_MVP_INTERFACE + 43, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Interface\\m_main_rank.tga"		, BITMAP_MVP_INTERFACE + 44, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Interface\\icon_Rank_0.tga"		, BITMAP_MVP_INTERFACE + 33, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_1.tga"		, BITMAP_MVP_INTERFACE + 34, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_2.tga"		, BITMAP_MVP_INTERFACE + 35, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_3.tga"		, BITMAP_MVP_INTERFACE + 36, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_4.tga"		, BITMAP_MVP_INTERFACE + 37, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_5.tga"		, BITMAP_MVP_INTERFACE + 38, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_6.tga"		, BITMAP_MVP_INTERFACE + 39, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_7.tga"		, BITMAP_MVP_INTERFACE + 40, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_8.tga"		, BITMAP_MVP_INTERFACE + 41, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_9.tga"		, BITMAP_MVP_INTERFACE + 42, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\icon_Rank_exp.tga"		, BITMAP_MVP_INTERFACE + 43, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Interface\\m_main_rank.tga"		, BITMAP_MVP_INTERFACE + 44, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	*/
 	//m_main_rank
 	//icon_Rank_exp
 	LoadBitmap( "Interface\\BattleSkill.tga"	, BITMAP_INTERFACE_EX+34 );
-	LoadBitmap( "Effect\\Flashing.jpg"        , BITMAP_FLASH, GL_LINEAR, GL_CLAMP );
+	LoadBitmap( "Effect\\Flashing.jpg"        , BITMAP_FLASH, GL_LINEAR, GL_CLAMP_TO_EDGE );
 	LoadBitmap( "Interface\\senatusmap.jpg"	, BITMAP_INTERFACE_EX+35 );
 	LoadBitmap( "Interface\\gate_button2.jpg"	, BITMAP_INTERFACE_EX+36 ); 
 	LoadBitmap( "Interface\\gate_button1.jpg"	, BITMAP_INTERFACE_EX+37 );
@@ -8889,8 +8889,8 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap( "Interface\\suho_button1.jpg"	, BITMAP_INTERFACE_EX+39 );
 	LoadBitmap( "Interface\\DoorCL.jpg"	    , BITMAP_INTERFACE_EX+40 ); 
 	LoadBitmap( "Interface\\DoorOP.jpg"	    , BITMAP_INTERFACE_EX+41 );
-    //OpenJpeg( "Effect\\FireSnuff.jpg"       , BITMAP_FIRE_SNUFF,    GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Object31\\Flag.tga"          , BITMAP_INTERFACE_MAP+0, GL_LINEAR, GL_CLAMP );
+    //OpenJpeg( "Effect\\FireSnuff.jpg"       , BITMAP_FIRE_SNUFF,    GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Object31\\Flag.tga"          , BITMAP_INTERFACE_MAP+0, GL_LINEAR, GL_CLAMP_TO_EDGE );
 	LoadBitmap( "Interface\\CursorAttack2.tga", BITMAP_CURSOR2 );
 	LoadBitmap( "Effect\\Cratered.tga"	    , BITMAP_CRATER ); 
 	LoadBitmap( "Effect\\FormationMark.tga"	, BITMAP_FORMATION_MARK );
@@ -8903,8 +8903,8 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\eff_lightinga05.jpg" , BITMAP_FENRIR_FOOT_THUNDER5);
 	LoadBitmap( "Interface\\Progress_Back.jpg",BITMAP_INTERFACE_EX+42 );
 	LoadBitmap( "Interface\\Progress.jpg"     ,BITMAP_INTERFACE_EX+43 );
-	LoadBitmap( "Effect\\Inferno.jpg"         , BITMAP_INFERNO,       GL_LINEAR, GL_CLAMP );
-	LoadBitmap( "Effect\\Lava.jpg"            , BITMAP_LAVA,          GL_LINEAR, GL_CLAMP );
+	LoadBitmap( "Effect\\Inferno.jpg"         , BITMAP_INFERNO,       GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Effect\\Lava.jpg"            , BITMAP_LAVA,          GL_LINEAR, GL_CLAMP_TO_EDGE );
 	LoadBitmap( "Interface\\frame.tga",       BITMAP_INTERFACE_MAP+3 ); 
 	LoadBitmap( "Interface\\i_attack.tga",    BITMAP_INTERFACE_MAP+4 );
 	LoadBitmap( "Interface\\i_defense.tga",   BITMAP_INTERFACE_MAP+5 );
@@ -8915,17 +8915,17 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap( "Interface\\b_zoomout01.jpg", BITMAP_INTERFACE_MAP+11);
 	LoadBitmap( "Interface\\hourglass.tga",   BITMAP_INTERFACE_MAP+7 );
 	LoadBitmap( "Interface\\dot.tga",         BITMAP_INTERFACE_EX+44 );
-	LoadBitmap("Object9\\Impack03.jpg"   ,BITMAP_LIGHT+1      ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Monster\\buserbody_r.jpg", BITMAP_BERSERK_EFFECT, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Monster\\busersword_r.jpg", BITMAP_BERSERK_WP_EFFECT, GL_LINEAR, GL_CLAMP);
-//	LoadBitmap("Monster\\gigantiscorn_R.jpg", BITMAP_GIGANTIS_EFFECT, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Monster\\bladeeff2_r.jpg", BITMAP_BLADEHUNTER_EFFECT, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Monster\\illumi_R.jpg", BITMAP_TWINTAIL_EFFECT, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Monster\\prsona_R.jpg", BITMAP_PRSONA_EFFECT, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Monster\\prsonass_R.jpg", BITMAP_PRSONA_EFFECT2, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("effect\\water.jpg", BITMAP_TWINTAIL_WATER, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\cra_04.jpg"   ,BITMAP_LIGHT+2      ,GL_LINEAR,GL_CLAMP);
-	LoadBitmap("Effect\\Impack01.jpg"		,BITMAP_LIGHT+3,	GL_LINEAR,GL_CLAMP);
+	LoadBitmap("Object9\\Impack03.jpg"   ,BITMAP_LIGHT+1      ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\buserbody_r.jpg", BITMAP_BERSERK_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\busersword_r.jpg", BITMAP_BERSERK_WP_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+//	LoadBitmap("Monster\\gigantiscorn_R.jpg", BITMAP_GIGANTIS_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\bladeeff2_r.jpg", BITMAP_BLADEHUNTER_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\illumi_R.jpg", BITMAP_TWINTAIL_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\prsona_R.jpg", BITMAP_PRSONA_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\prsonass_R.jpg", BITMAP_PRSONA_EFFECT2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("effect\\water.jpg", BITMAP_TWINTAIL_WATER, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\cra_04.jpg"   ,BITMAP_LIGHT+2      ,GL_LINEAR,GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\Impack01.jpg"		,BITMAP_LIGHT+3,	GL_LINEAR,GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Interface\\message_ok_b_all.tga", BITMAP_BUTTON);
 	::LoadBitmap("Interface\\loding_cancel_b_all.tga", BITMAP_BUTTON+1);
 	::LoadBitmap("Interface\\message_close_b_all.tga", BITMAP_BUTTON+2);
@@ -8942,82 +8942,82 @@ void OpenBasicData(HDC hDC)
 	::LoadBitmap("Interface\\op2_volume3.tga", BITMAP_SLIDER);
 	::LoadBitmap("Interface\\op2_volume2.jpg", BITMAP_SLIDER+1, GL_NEAREST, GL_REPEAT);
 	::LoadBitmap("Interface\\op2_volume1.tga", BITMAP_SLIDER+2);
-	::LoadBitmap("Effect\\clouds2.jpg", BITMAP_EVENT_CLOUD, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\pin_lights.jpg", BITMAP_PIN_LIGHT, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Effect\\clouds2.jpg", BITMAP_EVENT_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\pin_lights.jpg", BITMAP_PIN_LIGHT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #ifdef LDK_ADD_EG_MONSTER_DEASULER
-	LoadBitmap("Monster\\deasuler_cloth.tga", BITMAP_DEASULER_CLOTH, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Monster\\deasuler_cloth.tga", BITMAP_DEASULER_CLOTH, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //LDK_ADD_EG_MONSTER_DEASULER
 
 #ifdef ADD_SOCKET_ITEM
-	LoadBitmap("Item\\soketmagic_stape02.jpg", BITMAP_SOCKETSTAFF, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Item\\soketmagic_stape02.jpg", BITMAP_SOCKETSTAFF, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // ADD_SOCKET_ITEM
 #ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS_FOREIGN, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS_FOREIGN, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 
 	rUIMng.RenderTitleSceneUI(hDC, 1, 11);
 
 #ifdef CSK_FREE_TICKET
-	::LoadBitmap("Item\\partCharge1\\entrance_R.jpg", BITMAP_FREETICKET_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge1\\entrance_R.jpg", BITMAP_FREETICKET_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_FREE_TICKET
 #ifdef CSK_CHAOS_CARD
-	::LoadBitmap("Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_CHAOS_CARD
 
 #if SELECTED_LANGUAGE == LANGUAGE_KOREAN
 #ifdef CSK_LUCKY_SEAL
-	::LoadBitmap("Item\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //CSK_LUCKY_SEAL
 #else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 #ifdef CSK_LUCKY_SEAL
-	::LoadBitmap("Item\\partCharge1\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\partCharge1\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\partCharge1\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge1\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\partCharge1\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\partCharge1\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //CSK_LUCKY_SEAL
 #endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 
 #ifdef CSK_LUCKY_CHARM
-	::LoadBitmap("Item\\partCharge1\\bujuck01alpa.jpg", BITMAP_LUCKY_CHARM_EFFECT53, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge1\\bujuck01alpa.jpg", BITMAP_LUCKY_CHARM_EFFECT53, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //CSK_LUCKY_CHARM
 #ifdef CSK_RARE_ITEM
-	::LoadBitmap("Item\\partCharge1\\expensiveitem01_R.jpg", BITMAP_RAREITEM1_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\partCharge1\\expensiveitem02a_R.jpg", BITMAP_RAREITEM2_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\partCharge1\\expensiveitem02b_R.jpg", BITMAP_RAREITEM3_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\partCharge1\\expensiveitem03a_R.jpg", BITMAP_RAREITEM4_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\partCharge1\\expensiveitem03b_R.jpg", BITMAP_RAREITEM5_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge1\\expensiveitem01_R.jpg", BITMAP_RAREITEM1_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\partCharge1\\expensiveitem02a_R.jpg", BITMAP_RAREITEM2_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\partCharge1\\expensiveitem02b_R.jpg", BITMAP_RAREITEM3_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\partCharge1\\expensiveitem03a_R.jpg", BITMAP_RAREITEM4_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\partCharge1\\expensiveitem03b_R.jpg", BITMAP_RAREITEM5_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_RARE_ITEM
 #if defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
-	::LoadBitmap("Item\\partCharge3\\alicecard_R.tga", BITMAP_CHARACTERCARD_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge3\\alicecard_R.tga", BITMAP_CHARACTERCARD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
 #ifdef PBG_ADD_CHARACTERCARD
-	::LoadBitmap("Item\\Ingameshop\\kacama_R.jpg", BITMAP_CHARACTERCARD_R_MA, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\Ingameshop\\kacada_R.jpg", BITMAP_CHARACTERCARD_R_DA, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\Ingameshop\\kacama_R.jpg", BITMAP_CHARACTERCARD_R_MA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\Ingameshop\\kacada_R.jpg", BITMAP_CHARACTERCARD_R_DA, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //PBG_ADD_CHARACTERCARD
 #ifdef PSW_NEW_CHAOS_CARD
-	::LoadBitmap("Item\\partCharge3\\jujug_R.jpg", BITMAP_NEWCHAOSCARD_GOLD_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\partCharge3\\jujul_R.jpg", BITMAP_NEWCHAOSCARD_RARE_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\partCharge3\\jujum_R.jpg", BITMAP_NEWCHAOSCARD_MINI_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Item\\partCharge3\\jujug_R.jpg", BITMAP_NEWCHAOSCARD_GOLD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\partCharge3\\jujul_R.jpg", BITMAP_NEWCHAOSCARD_RARE_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\partCharge3\\jujum_R.jpg", BITMAP_NEWCHAOSCARD_MINI_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // PSW_NEW_CHAOS_CARD       
 #ifdef CSK_EVENT_CHERRYBLOSSOM
-	::LoadBitmap("Effect\\cherryblossom\\sakuras01.jpg", BITMAP_CHERRYBLOSSOM_EVENT_PETAL, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Effect\\cherryblossom\\sakuras02.jpg", BITMAP_CHERRYBLOSSOM_EVENT_FLOWER, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Effect\\cherryblossom\\sakuras01.jpg", BITMAP_CHERRYBLOSSOM_EVENT_PETAL, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Effect\\cherryblossom\\sakuras02.jpg", BITMAP_CHERRYBLOSSOM_EVENT_FLOWER, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_EVENT_CHERRYBLOSSOM
-	::LoadBitmap("Object39\\k_effect_01.JPG", BITMAP_KANTURU_2ND_EFFECT1, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\deathbeamstone_R.jpg", BITMAP_ITEM_EFFECT_DBSTONE_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\hellhorn_R.jpg", BITMAP_ITEM_EFFECT_HELLHORN_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\phoenixfeather_R.tga", BITMAP_ITEM_EFFECT_PFEATHER_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\Deye_R.jpg", BITMAP_ITEM_EFFECT_DEYE_R, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Item\\wing3chaking2.jpg", BITMAP_ITEM_NIGHT_3RDWING_R, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Object39\\k_effect_01.JPG", BITMAP_KANTURU_2ND_EFFECT1, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\deathbeamstone_R.jpg", BITMAP_ITEM_EFFECT_DBSTONE_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\hellhorn_R.jpg", BITMAP_ITEM_EFFECT_HELLHORN_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\phoenixfeather_R.tga", BITMAP_ITEM_EFFECT_PFEATHER_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\Deye_R.jpg", BITMAP_ITEM_EFFECT_DEYE_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Item\\wing3chaking2.jpg", BITMAP_ITEM_NIGHT_3RDWING_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-	LoadBitmap("NPC\\lumi.jpg", BITMAP_CURSEDTEMPLE_NPC_MESH_EFFECT, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("item\\songko2_R.jpg", BITMAP_CURSEDTEMPLE_HOLYITEM_MESH_EFFECT, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("NPC\\lumi.jpg", BITMAP_CURSEDTEMPLE_NPC_MESH_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("item\\songko2_R.jpg", BITMAP_CURSEDTEMPLE_HOLYITEM_MESH_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("skill\\unitedsoldier_wing.tga", BITMAP_CURSEDTEMPLE_ALLIED_PHYSICSCLOTH);
 	LoadBitmap("skill\\illusionistcloth.tga", BITMAP_CURSEDTEMPLE_ILLUSION_PHYSICSCLOTH);
-	LoadBitmap("effect\\masker.jpg", BITMAP_CURSEDTEMPLE_EFFECT_MASKER, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("effect\\wind01.jpg",BITMAP_CURSEDTEMPLE_EFFECT_WIND, GL_LINEAR, GL_CLAMP );
+	LoadBitmap("effect\\masker.jpg", BITMAP_CURSEDTEMPLE_EFFECT_MASKER, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("effect\\wind01.jpg",BITMAP_CURSEDTEMPLE_EFFECT_WIND, GL_LINEAR, GL_CLAMP_TO_EDGE );
 	::LoadBitmap("Interface\\menu01_new2_SD.jpg" ,BITMAP_INTERFACE_EX+46);
 
 #ifdef ASG_ADD_GENS_SYSTEM
@@ -9042,8 +9042,8 @@ void OpenBasicData(HDC hDC)
 #ifdef CSK_ADD_MAP_ICECITY
 
 #ifdef LDS_FIX_GLPARAM_SWAPMODE_BITMAP
-	LoadBitmap("Monster\\serufanarm_R.jpg", BITMAP_SERUFAN_ARM_R, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Monster\\serufanwand_R.jpg", BITMAP_SERUFAN_WAND_R, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Monster\\serufanarm_R.jpg", BITMAP_SERUFAN_ARM_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Monster\\serufanwand_R.jpg", BITMAP_SERUFAN_WAND_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #else // LDS_FIX_GLPARAM_SWAPMODE_BITMAP
 	LoadBitmap("Monster\\serufanarm_R.jpg", BITMAP_SERUFAN_ARM_R, GL_LINEAR, GL_LINEAR);
 	LoadBitmap("Monster\\serufanwand_R.jpg", BITMAP_SERUFAN_WAND_R, GL_LINEAR, GL_LINEAR);
@@ -9053,8 +9053,8 @@ void OpenBasicData(HDC hDC)
 
 #ifdef YDG_ADD_SANTA_MONSTER
 	#ifdef LDS_FIX_GLPARAM_SWAPMODE_BITMAP
-	LoadBitmap("npc\\santa.jpg", BITMAP_GOOD_SANTA, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("npc\\santa_baggage.jpg", BITMAP_GOOD_SANTA_BAGGAGE, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("npc\\santa.jpg", BITMAP_GOOD_SANTA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("npc\\santa_baggage.jpg", BITMAP_GOOD_SANTA_BAGGAGE, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	#else // LDS_FIX_GLPARAM_SWAPMODE_BITMAP
 	LoadBitmap("npc\\santa.jpg", BITMAP_GOOD_SANTA, GL_LINEAR, GL_LINEAR);
 	LoadBitmap("npc\\santa_baggage.jpg", BITMAP_GOOD_SANTA_BAGGAGE, GL_LINEAR, GL_LINEAR);
@@ -9063,7 +9063,7 @@ void OpenBasicData(HDC hDC)
 
 #ifdef PJH_ADD_PANDA_CHANGERING	
 	#ifdef LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
-		LoadBitmap("Item\\pandabody_R.jpg", BITMAP_PANDABODY_R, GL_LINEAR, GL_CLAMP);
+		LoadBitmap("Item\\pandabody_R.jpg", BITMAP_PANDABODY_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	#else // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
 		LoadBitmap("Item\\pandabody_R.jpg", BITMAP_PANDABODY_R, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 	#endif // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
@@ -9071,9 +9071,9 @@ void OpenBasicData(HDC hDC)
 
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
 	#ifdef LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
-		LoadBitmap("Monster\\DGicewalker_body.jpg", BITMAP_DOPPELGANGER_ICEWALKER0, GL_LINEAR, GL_CLAMP);	
-		LoadBitmap("Monster\\DGicewalker_R.jpg", BITMAP_DOPPELGANGER_ICEWALKER1, GL_LINEAR, GL_CLAMP);	
-		LoadBitmap("Monster\\Snake1.jpg", BITMAP_DOPPELGANGER_SNAKE01, GL_LINEAR, GL_CLAMP);	
+		LoadBitmap("Monster\\DGicewalker_body.jpg", BITMAP_DOPPELGANGER_ICEWALKER0, GL_LINEAR, GL_CLAMP_TO_EDGE);	
+		LoadBitmap("Monster\\DGicewalker_R.jpg", BITMAP_DOPPELGANGER_ICEWALKER1, GL_LINEAR, GL_CLAMP_TO_EDGE);	
+		LoadBitmap("Monster\\Snake1.jpg", BITMAP_DOPPELGANGER_SNAKE01, GL_LINEAR, GL_CLAMP_TO_EDGE);	
 	#else // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
 		LoadBitmap("Monster\\DGicewalker_body.jpg", BITMAP_DOPPELGANGER_ICEWALKER0, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 		LoadBitmap("Monster\\DGicewalker_R.jpg", BITMAP_DOPPELGANGER_ICEWALKER1, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
@@ -9083,8 +9083,8 @@ void OpenBasicData(HDC hDC)
 
 #ifdef YDG_ADD_DOPPELGANGER_NPC
 	#ifdef LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
-		LoadBitmap("NPC\\goldboit.jpg", BITMAP_DOPPELGANGER_GOLDENBOX1, GL_LINEAR, GL_CLAMP);	// OPENGL_ERROR
-		LoadBitmap("NPC\\goldline.jpg", BITMAP_DOPPELGANGER_GOLDENBOX2, GL_LINEAR, GL_CLAMP);	// OPENGL_ERROR
+		LoadBitmap("NPC\\goldboit.jpg", BITMAP_DOPPELGANGER_GOLDENBOX1, GL_LINEAR, GL_CLAMP_TO_EDGE);	// OPENGL_ERROR
+		LoadBitmap("NPC\\goldline.jpg", BITMAP_DOPPELGANGER_GOLDENBOX2, GL_LINEAR, GL_CLAMP_TO_EDGE);	// OPENGL_ERROR
 	#else // LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER
 		LoadBitmap("NPC\\goldboit.jpg", BITMAP_DOPPELGANGER_GOLDENBOX1, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 		LoadBitmap("NPC\\goldline.jpg", BITMAP_DOPPELGANGER_GOLDENBOX2, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
@@ -9093,19 +9093,19 @@ void OpenBasicData(HDC hDC)
 
 #ifdef LDS_ADD_RESOURCE_FLARERED
 	//BITMAP_LIGHT_RED
-	LoadBitmap("effect\\flare01_red.jpg", BITMAP_LIGHT_RED, GL_LINEAR, GL_CLAMP );
+	LoadBitmap("effect\\flare01_red.jpg", BITMAP_LIGHT_RED, GL_LINEAR, GL_CLAMP_TO_EDGE );
 #endif // LDS_ADD_RESOURCE_FLARERED
 
 #ifdef KJH_ADD_09SUMMER_EVENT
-	LoadBitmap("effect\\gra.jpg", BITMAP_GRA, GL_LINEAR, GL_CLAMP );
-	LoadBitmap("effect\\ring_of_gradation.jpg", BITMAP_RING_OF_GRADATION, GL_LINEAR, GL_CLAMP );
+	LoadBitmap("effect\\gra.jpg", BITMAP_GRA, GL_LINEAR, GL_CLAMP_TO_EDGE );
+	LoadBitmap("effect\\ring_of_gradation.jpg", BITMAP_RING_OF_GRADATION, GL_LINEAR, GL_CLAMP_TO_EDGE );
 #endif // KJH_ADD_09SUMMER_EVENT
 
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
 	LoadBitmap("Interface\\InGameShop\\ingame_pack_check.tga", BITMAP_IGS_CHECK_BUTTON, GL_LINEAR);
 #endif //PBG_ADD_INGAMESHOPMSGBOX
 #ifdef LDK_ADD_EG_MONSTER_ASSASSINMASTER
-	LoadBitmap("Monster\\AssassinLeader_body_R.jpg"	, BITMAP_ASSASSIN_EFFECT1, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Monster\\AssassinLeader_body_R.jpg"	, BITMAP_ASSASSIN_EFFECT1, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //LDK_ADD_EG_MONSTER_ASSASSINMASTER
 
 #ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
@@ -9113,39 +9113,39 @@ void OpenBasicData(HDC hDC)
 #endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 
 #ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-	LoadBitmap("Item\\partCharge8\\rareitem_ticket_7_body.jpg", BITMAP_RAREITEM7, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Item\\partCharge8\\rareitem_ticket_8_body.jpg", BITMAP_RAREITEM8, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Item\\partCharge8\\rareitem_ticket_9_body.jpg", BITMAP_RAREITEM9, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Item\\partCharge8\\rareitem_ticket_10_body.jpg", BITMAP_RAREITEM10, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Item\\partCharge8\\rareitem_ticket_11_body.jpg", BITMAP_RAREITEM11, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Item\\partCharge8\\rareitem_ticket_12_body.jpg", BITMAP_RAREITEM12, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Item\\partCharge8\\rareitem_ticket_7_body.jpg", BITMAP_RAREITEM7, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Item\\partCharge8\\rareitem_ticket_8_body.jpg", BITMAP_RAREITEM8, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Item\\partCharge8\\rareitem_ticket_9_body.jpg", BITMAP_RAREITEM9, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Item\\partCharge8\\rareitem_ticket_10_body.jpg", BITMAP_RAREITEM10, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Item\\partCharge8\\rareitem_ticket_11_body.jpg", BITMAP_RAREITEM11, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Item\\partCharge8\\rareitem_ticket_12_body.jpg", BITMAP_RAREITEM12, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
 	
 #ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-	LoadBitmap("Item\\partCharge8\\DoppelCard.jpg", BITMAP_DOPPLEGANGGER_FREETICKET, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Item\\partCharge8\\BarcaCard.jpg", BITMAP_BARCA_FREETICKET, GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Item\\partCharge8\\Barca7Card.jpg", BITMAP_BARCA7TH_FREETICKET, GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Item\\partCharge8\\DoppelCard.jpg", BITMAP_DOPPLEGANGGER_FREETICKET, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Item\\partCharge8\\BarcaCard.jpg", BITMAP_BARCA_FREETICKET, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Item\\partCharge8\\Barca7Card.jpg", BITMAP_BARCA7TH_FREETICKET, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 	
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-	LoadBitmap("Item\\ork_cham_R.jpg",				BITMAP_ORK_CHAM_LAYER_R,			GL_LINEAR, GL_CLAMP);
-	//LoadBitmap("Item\\maple_cham_R.jpg",			BITMAP_MAPLE_CHAM_LAYER_R,			GL_LINEAR, GL_CLAMP);
-	LoadBitmap("Item\\goldenork_cham_R.jpg",		BITMAP_GOLDEN_ORK_CHAM_LAYER_R,		GL_LINEAR, GL_CLAMP);
-	//LoadBitmap("Item\\goldenmaple_cham_R.jpg",	BITMAP_GOLDEN_MAPLE_CHAM_LAYER_R,	GL_LINEAR, GL_CLAMP);
+	LoadBitmap("Item\\ork_cham_R.jpg",				BITMAP_ORK_CHAM_LAYER_R,			GL_LINEAR, GL_CLAMP_TO_EDGE);
+	//LoadBitmap("Item\\maple_cham_R.jpg",			BITMAP_MAPLE_CHAM_LAYER_R,			GL_LINEAR, GL_CLAMP_TO_EDGE);
+	LoadBitmap("Item\\goldenork_cham_R.jpg",		BITMAP_GOLDEN_ORK_CHAM_LAYER_R,		GL_LINEAR, GL_CLAMP_TO_EDGE);
+	//LoadBitmap("Item\\goldenmaple_cham_R.jpg",	BITMAP_GOLDEN_MAPLE_CHAM_LAYER_R,	GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
-	::LoadBitmap("Monster\\BoneSE.jpg", BITMAP_BONE_SCORPION_SKIN_EFFECT, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Monster\\KryptaBall2.jpg", BITMAP_KRYPTA_BALL_EFFECT, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Monster\\bora_golem_effect.jpg", BITMAP_CONDRA_SKIN_EFFECT, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Monster\\bora_golem2_effect.jpg", BITMAP_CONDRA_SKIN_EFFECT2, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Monster\\king_golem01_effect.jpg", BITMAP_NARCONDRA_SKIN_EFFECT, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Monster\\king_golem02_effect.jpg", BITMAP_NARCONDRA_SKIN_EFFECT2, GL_LINEAR, GL_CLAMP);
-	::LoadBitmap("Monster\\king_golem03_effect.jpg", BITMAP_NARCONDRA_SKIN_EFFECT3, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("Monster\\BoneSE.jpg", BITMAP_BONE_SCORPION_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Monster\\KryptaBall2.jpg", BITMAP_KRYPTA_BALL_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Monster\\bora_golem_effect.jpg", BITMAP_CONDRA_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Monster\\bora_golem2_effect.jpg", BITMAP_CONDRA_SKIN_EFFECT2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Monster\\king_golem01_effect.jpg", BITMAP_NARCONDRA_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Monster\\king_golem02_effect.jpg", BITMAP_NARCONDRA_SKIN_EFFECT2, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	::LoadBitmap("Monster\\king_golem03_effect.jpg", BITMAP_NARCONDRA_SKIN_EFFECT3, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif	// ASG_ADD_KARUTAN_MONSTERS
 
 #ifdef ASG_ADD_KARUTAN_NPC
-	::LoadBitmap("NPC\\voloE.jpg", BITMAP_VOLO_SKIN_EFFECT, GL_LINEAR, GL_CLAMP);
+	::LoadBitmap("NPC\\voloE.jpg", BITMAP_VOLO_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif	// ASG_ADD_KARUTAN_NPC
 
 #ifdef DO_PROFILING_FOR_LOADING

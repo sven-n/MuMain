@@ -645,7 +645,30 @@ void WebzenScene(HDC hDC)
 
 	g_ErrorReport.Write( "> Loading ok.\r\n");
 
+#ifndef _DEBUG
 	SceneFlag = LOG_IN_SCENE;	// 서버 선택 씬으로.
+
+#else
+	World = 2;
+	SceneFlag = MAIN_SCENE;
+	SelectedHero = 0;
+	EnableMainRender = true;
+	CameraAngle[2] = -45.0;
+
+	OpenWorld(World);
+
+	// create user
+	CHARACTER* entity = CreateHero(0, 0, 0, 177 * 100.0f + 50.0f, 100 * 100.0f + 50.0f, 0.0);
+
+	entity->GuildMarkIndex = 0;
+
+	entity->PositionX = 177;
+	entity->PositionY = 100;
+
+	entity->Object.Angle[0] = 0.0f;
+	entity->Object.Angle[1] = 0.0f;
+	entity->Object.Angle[2] = 60.0f;
+#endif
 
 #ifdef DO_PROFILING_FOR_LOADING
 	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_TOTAL );
