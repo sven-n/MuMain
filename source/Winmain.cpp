@@ -43,9 +43,8 @@
 #ifdef PROTECT_SYSTEMKEY
 	#include "ProtectSysKey.h"
 #endif // PROTECT_SYSTEMKEY
-#ifdef CONSOLE_DEBUG
-	#include "./Utilities/Log/muConsoleDebug.h"
-#endif // CONSOLE_DEBUG
+#include "./Utilities/Log/muConsoleDebug.h"
+
 
 #ifdef ATTACH_HACKSHIELD
 	#include "HackShield/HShield.h"
@@ -2743,9 +2742,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		g_ErrorReport.WriteLogBegin();
 		g_ErrorReport.AddSeparator();
 		g_ErrorReport.Write( "Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, Language, wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
-#ifdef CONSOLE_DEBUG
+
 		g_ConsoleDebug->Write(MCD_NORMAL, "Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
-#endif // CONSOLE_DEBUG
+
 		g_ErrorReport.WriteCurrentTime();
 		ER_SystemInfo si;
 		ZeroMemory( &si, sizeof ( ER_SystemInfo));

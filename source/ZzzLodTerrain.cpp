@@ -25,10 +25,7 @@
 #include "GMBattleCastle.h"
 #include "CMVP1stDirection.h"
 #include "CDirection.h"
-#ifdef CSK_LH_DEBUG_CONSOLE
 #include "./Utilities/Log/muConsoleDebug.h"
-#endif // CSK_LH_DEBUG_CONSOLE
-// ¸Ê °ü·Ã include
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM

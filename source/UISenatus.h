@@ -99,7 +99,7 @@ public:
 	int GetRecoverLevel( LPPMSG_NPCDBLIST pInfo );		// NPC 의 회복력 레벨을 얻는다.
 	int GetNextAddRecover( LPPMSG_NPCDBLIST pInfo );	// NPC 가 업그레이드될시 증가되는 회복력 를 얻는다.
 
-	// 서버로 요청 보냄
+	// 서버로 요청  
 	void DoGateRepairAction();
 	void DoGateUpgradeHPAction();
 	void DoGateUpgradeDefenseAction();

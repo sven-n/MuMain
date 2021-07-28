@@ -23,7 +23,7 @@ namespace SEASON4A
 		enum RAKLION_STATE			// 라클리온 전체 상태 스케쥴
 		{
 			RAKLION_STATE_IDLE				= 0,	// 라클리온 보스전 대기 상태(항상 대기 상태이다)
-			RAKLION_STATE_NOTIFY_1			= 1,	// 일정량의 거미알이 깨졌다.(클라이언트에 메시지 보냄)
+			RAKLION_STATE_NOTIFY_1			= 1,	// 일정량의 거미알이 깨졌다.(클라이언트에 메시지  )
 			RAKLION_STATE_STANDBY			= 2,	// 보스 출현전 연출을 위한 딜레이
 			RAKLION_STATE_NOTIFY_2			= 3,	// 서버 메시지 출력(세루판이 등장하였습니다.)
 			RAKLION_STATE_READY				= 4,	// 보스전을 준비 - 보스 생성 및 최초 스킬 발동

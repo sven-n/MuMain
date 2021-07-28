@@ -21,9 +21,7 @@ extern ItemAddOptioninfo*			g_pItemAddOptioninfo;
 #define PACKET_SAVE_FILE	"PacketList.txt"
 #include "./ExternalObject/leaf/stdleaf.h"
 #endif
-#ifdef CSK_LH_DEBUG_CONSOLE
 #include "./Utilities/Log/muConsoleDebug.h"
-#endif // CSK_LH_DEBUG_CONSOLE
 #include "NewUISystem.h"
 
 #ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
@@ -367,9 +365,7 @@ __forceinline void SendCheck( void)
 		return;
 	}
 
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_SEND, "SendCheck");
-#endif // CONSOLE_DEBUG
 
 	pre_send( g_hInst);
 	CStreamPacketEngine spe;
@@ -612,9 +608,7 @@ __forceinline void SendRequestLogOut(int Flag)
 	spe << ( BYTE)0x02 << ( BYTE)Flag;
 	spe.Send( TRUE);
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0xF1º¸³¿[SendRequestLogOut]");
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0xF1 [SendRequestLogOut]");
 }
 
 #ifdef LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
@@ -893,7 +887,7 @@ __forceinline void SendCharacterMove(unsigned short Key,float Angle,unsigned cha
 	spe.Send();
 
 #ifdef CONSOLE_DEBUG
-	//g_ConsoleDebug->Write(MCD_SEND, "0x10º¸³¿[SendCharacterMove(%d)]", MoveCount++);
+	//g_ConsoleDebug->Write(MCD_SEND, "0x10 [SendCharacterMove(%d)]", MoveCount++);
 #endif // CONSOLE_DEBUG
 }
 
@@ -958,7 +952,7 @@ __forceinline void SendRequestAttack(int p_Key,int p_Dir)
 			spe2 << (DWORD)dwDummy << (BYTE)(0);
 			spe2.Send();
 #ifdef CONSOLE_DEBUG
-			g_ConsoleDebug->Write(MCD_SEND, "Dummyº¸³¿ - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
+			g_ConsoleDebug->Write(MCD_SEND, "Dummy  - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
 #endif // CONSOLE_DEBUG
 			hanguo_check2();
 			g_DummyAttackChecker->InitSkillCount();
@@ -971,7 +965,7 @@ __forceinline void SendRequestAttack(int p_Key,int p_Dir)
 		spe << ( BYTE)AT_ATTACK1 << ( BYTE)( p_Dir) << ( BYTE)( ( p_Key) >> 8) << ( BYTE)( ( p_Key)&0xff) << (BYTE)btSkillSerial;
 		spe.Send();
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_SEND, "0x15º¸³¿[SendRequestAttack(%d)", p_Key);
+		g_ConsoleDebug->Write(MCD_SEND, "0x15 [SendRequestAttack(%d)", p_Key);
 		g_ConsoleDebug->Write(MCD_SEND, "[Dummy] - Count : %d/%d, SkillSerial : %d", 
 			g_DummyAttackChecker->GetSkillCount(), g_DummyAttackChecker->GetDummyProtocolNextSeq(), btSkillSerial);
 #endif // CONSOLE_DEBUG
@@ -1023,7 +1017,7 @@ __forceinline void SendRequestAttack(int p_Key,int p_Dir)
 			spe2 << (DWORD)dwDummy;
 			spe2.Send();
 #ifdef CONSOLE_DEBUG
-			g_ConsoleDebug->Write(MCD_SEND, "Dummyº¸³¿ - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
+			g_ConsoleDebug->Write(MCD_SEND, "Dummy  - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
 #endif // CONSOLE_DEBUG
 			hanguo_check2();
 			g_DummyAttackChecker->InitSkillCount();
@@ -1035,7 +1029,7 @@ __forceinline void SendRequestAttack(int p_Key,int p_Dir)
 		spe << ( BYTE)AT_ATTACK1 << ( BYTE)( p_Dir) << ( BYTE)( ( p_Key) >> 8) << ( BYTE)( ( p_Key)&0xff);
 		spe.Send();
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_SEND, "0x15º¸³¿[SendRequestAttack(%d)", p_Key);
+		g_ConsoleDebug->Write(MCD_SEND, "0x15 [SendRequestAttack(%d)", p_Key);
 		g_ConsoleDebug->Write(MCD_SEND, "[Dummy] - Count : %d/%d", g_DummyAttackChecker->GetSkillCount(), g_DummyAttackChecker->GetDummyProtocolNextSeq());
 #endif // CONSOLE_DEBUG
 		hanguo_check2();
@@ -1163,7 +1157,7 @@ __forceinline void SendRequestMagic(int Type,int Key)
 			spe2 << (DWORD)dwDummy << (BYTE)(0) << (BYTE)(0);
 			spe2.Send( TRUE);
 #ifdef CONSOLE_DEBUG
-			g_ConsoleDebug->Write(MCD_SEND, "Dummyº¸³¿ - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
+			g_ConsoleDebug->Write(MCD_SEND, "Dummy  - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
 #endif // CONSOLE_DEBUG
 			hanguo_check3();
 			g_DummyAttackChecker->InitSkillCount();
@@ -1180,7 +1174,7 @@ __forceinline void SendRequestMagic(int Type,int Key)
 		spe.Send( TRUE);
 				
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_SEND, "0x19º¸³¿[SendRequestMagic(%d %d)]", Type, Key);
+		g_ConsoleDebug->Write(MCD_SEND, "0x19 [SendRequestMagic(%d %d)]", Type, Key);
 		g_ConsoleDebug->Write(MCD_SEND, "[Dummy] - Count : %d/%d, SkillSerial : %d", 
 			g_DummyAttackChecker->GetSkillCount(), g_DummyAttackChecker->GetDummyProtocolNextSeq(), btSkillSerial);
 #endif // CONSOLE_DEBUG
@@ -1274,7 +1268,7 @@ __forceinline void SendRequestMagic(int Type,int Key)
 			spe2 << (DWORD)dwDummy << (BYTE)(0);
 			spe2.Send( TRUE);
 #ifdef CONSOLE_DEBUG
-			g_ConsoleDebug->Write(MCD_SEND, "Dummyº¸³¿ - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
+			g_ConsoleDebug->Write(MCD_SEND, "Dummy  - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
 #endif // CONSOLE_DEBUG
 			hanguo_check3();
 			g_DummyAttackChecker->InitSkillCount();
@@ -1290,7 +1284,7 @@ __forceinline void SendRequestMagic(int Type,int Key)
 		spe.Send( TRUE);
 				
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_SEND, "0x19º¸³¿[SendRequestMagic(%d %d)]", Type, Key);
+		g_ConsoleDebug->Write(MCD_SEND, "0x19 [SendRequestMagic(%d %d)]", Type, Key);
 		g_ConsoleDebug->Write(MCD_SEND, "[Dummy] - Count : %d/%d]", g_DummyAttackChecker->GetSkillCount(), g_DummyAttackChecker->GetDummyProtocolNextSeq());
 #endif // CONSOLE_DEBUG
 				
@@ -1354,7 +1348,7 @@ __forceinline void SendRequestMagic(int Type,int Key)
 		spe.Send( TRUE);
 			
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_SEND, "0x19º¸³¿[SendRequestMagic(%d %d)]", Type, Key);
+		g_ConsoleDebug->Write(MCD_SEND, "0x19 [SendRequestMagic(%d %d)]", Type, Key);
 #endif // CONSOLE_DEBUG
 			
 		hanguo_check3();
@@ -1418,9 +1412,7 @@ __forceinline void SendRequestMagic(int Type,int Key)
 		spe << ( BYTE)(HIBYTE(p_Type))<<( BYTE)(LOBYTE(p_Type))<< ( BYTE)( Key>>8) << ( BYTE)( Key&0xff);
 		spe.Send( TRUE);
 	
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x19º¸³¿[SendRequestMagic(%d %d)]", Type, Key);
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x19 [SendRequestMagic(%d %d)]", Type, Key);
 
 		hanguo_check3();
 	}
@@ -1497,7 +1489,7 @@ __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int C
 		spe2 << (DWORD)dwDummy << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0);
 		spe2.Send( TRUE);
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_SEND, "Dummyº¸³¿ - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
+		g_ConsoleDebug->Write(MCD_SEND, "Dummy  - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
 #endif // CONSOLE_DEBUG
 		hanguo_check5();
 		g_DummyAttackChecker->InitSkillCount();
@@ -1519,7 +1511,7 @@ __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int C
 	spe.Send( TRUE);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x1Dº¸³¿[SendRequestMagicAttack(%d)]", Serial);
+	g_ConsoleDebug->Write(MCD_SEND, "0x1D [SendRequestMagicAttack(%d)]", Serial);
 	g_ConsoleDebug->Write(MCD_SEND, "[Dummy] - Count : %d/%d, SkillSerial : %d", 
 		g_DummyAttackChecker->GetSkillCount(), g_DummyAttackChecker->GetDummyProtocolNextSeq(), btSkillSerial);
 	g_ConsoleDebug->Write(MCD_NORMAL, "%d %d %d %d %d %d %d", x, y, Serial, Count, HIBYTE(p_Type), LOBYTE(p_Type), btSkillSerial);
@@ -1584,7 +1576,7 @@ __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int C
 		spe2 << (DWORD)dwDummy << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0);
 		spe2.Send( TRUE);
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_SEND, "Dummyº¸³¿ - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
+		g_ConsoleDebug->Write(MCD_SEND, "Dummy  - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
 #endif // CONSOLE_DEBUG
 		hanguo_check5();
 		g_DummyAttackChecker->InitSkillCount();
@@ -1605,7 +1597,7 @@ __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int C
 	spe.Send( TRUE);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "%x º¸³¿[SendRequestMagicAttack(%d)]", PACKET_MAGIC_ATTACK, Serial);
+	g_ConsoleDebug->Write(MCD_SEND, "%x  [SendRequestMagicAttack(%d)]", PACKET_MAGIC_ATTACK, Serial);
 	g_ConsoleDebug->Write(MCD_NORMAL, "[Dummy] - Count : %d/%d]", g_DummyAttackChecker->GetSkillCount(), g_DummyAttackChecker->GetDummyProtocolNextSeq());
 	g_ConsoleDebug->Write(MCD_NORMAL, "%d %d %d %d %d %d", x, y, Serial, Count, HIBYTE(p_Type), LOBYTE(p_Type));
 	for (i=0;i<Count;i++)
@@ -1658,7 +1650,7 @@ __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int C
 	spe.Send( TRUE);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x1Dº¸³¿[SendRequestMagicAttack(%d)]", Serial);
+	g_ConsoleDebug->Write(MCD_SEND, "0x1D [SendRequestMagicAttack(%d)]", Serial);
 	g_ConsoleDebug->Write(MCD_NORMAL, "%d %d %d %d %d %d", x, y, Serial, Count, HIBYTE(p_Type), LOBYTE(p_Type));
 	for (int i=0;i<Count;i++)
 	{
@@ -1734,9 +1726,7 @@ __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int C
 	}
 	spe.Send( TRUE);
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x1Dº¸³¿[SendRequestMagicAttack(%d)]", Serial);
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x1D [SendRequestMagicAttack(%d)]", Serial);
 
 	hanguo_check5();
 }
@@ -1815,7 +1805,7 @@ __forceinline void SendRequestMagicContinue(int Type,int x,int y,int Angle, BYTE
 		spe2 << (DWORD)dwDummy << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) <<(BYTE)(0);
 		spe2.Send( TRUE);
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_SEND, "Dummyº¸³¿ - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
+		g_ConsoleDebug->Write(MCD_SEND, "Dummy  - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
 #endif // CONSOLE_DEBUG
 		hanguo_check6();
 		g_DummyAttackChecker->InitSkillCount();
@@ -1833,7 +1823,7 @@ __forceinline void SendRequestMagicContinue(int Type,int x,int y,int Angle, BYTE
 	spe.Send( TRUE);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x1Eº¸³¿[SendRequestMagicContinue]");
+	g_ConsoleDebug->Write(MCD_SEND, "0x1E [SendRequestMagicContinue]");
 	g_ConsoleDebug->Write(MCD_SEND, "[Dummy] - Count : %d/%d, SkillSerial : %d", 
 		g_DummyAttackChecker->GetSkillCount(), g_DummyAttackChecker->GetDummyProtocolNextSeq(), btSkillSerial);
 #endif // CONSOLE_DEBUG
@@ -1889,7 +1879,7 @@ __forceinline void SendRequestMagicContinue(int Type,int x,int y,int Angle, BYTE
 		spe2 << (DWORD)dwDummy << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0) << (BYTE)(0);
 		spe2.Send( TRUE);
 #ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_SEND, "Dummyº¸³¿ - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
+		g_ConsoleDebug->Write(MCD_SEND, "Dummy  - Count : %d, Value : %d]", g_DummyAttackChecker->GetSkillCount(), dwDummy);
 #endif // CONSOLE_DEBUG
 		hanguo_check6();
 		g_DummyAttackChecker->InitSkillCount();
@@ -1906,7 +1896,7 @@ __forceinline void SendRequestMagicContinue(int Type,int x,int y,int Angle, BYTE
 	spe.Send( TRUE);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x1Eº¸³¿[SendRequestMagicContinue]");
+	g_ConsoleDebug->Write(MCD_SEND, "0x1E [SendRequestMagicContinue]");
 	g_ConsoleDebug->Write(MCD_SEND, "[Dummy] - Count : %d/%d", g_DummyAttackChecker->GetSkillCount(), g_DummyAttackChecker->GetDummyProtocolNextSeq());
 #endif // CONSOLE_DEBUG
 	
@@ -1947,7 +1937,7 @@ __forceinline void SendRequestMagicContinue(int Type,int x,int y,int Angle, BYTE
 	spe.Send( TRUE);
 	
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x1Eº¸³¿[SendRequestMagicContinue]");
+	g_ConsoleDebug->Write(MCD_SEND, "0x1E [SendRequestMagicContinue]");
 #endif // CONSOLE_DEBUG
 	
 	hanguo_check6();
@@ -1987,9 +1977,7 @@ __forceinline void SendRequestMagicContinue(int Type,int x,int y,int Angle, BYTE
 	spe << MakeSkillSerialNumber(pSkillSerial);
 	spe.Send( TRUE);
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x1Eº¸³¿[SendRequestMagicContinue]");
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x1E [SendRequestMagicContinue]");
 
 	hanguo_check6();
 }
@@ -2107,9 +2095,7 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 	spe.Send( TRUE);
 	BuyCost = Cost;
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x32º¸³¿[SendRequestBuy(%d)]", Index);
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x32 [SendRequestBuy(%d)]", Index);
 
 	hanguo_check10();
 }
@@ -2281,7 +2267,7 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     hanguo_check9();\
 }
 
-// Å¬¶ó¿¡¼­ °áÁ¤ÇÏ´Â ¿ä±¸ »çÇ× ¸¸Á·½Ã ÀÌ ÇÁ·ÎÅäÄÝÀ» ¼­¹ö·Î º¸³¿.
+// Å¬¶ó¿¡¼­ °áÁ¤ÇÏ´Â ¿ä±¸ »çÇ× ¸¸Á·½Ã ÀÌ ÇÁ·ÎÅäÄÝÀ» ¼­¹ö·Î  .
 //(¿¹: Æ©Åä¸®¾ó¿¡¼­ 'Ä³¸¯ÅÍ Ã¢À» ¿­¾î¶ó' µîµî.)
 #define SendSatisfyQuestRequestFromClient(dwQuestIndex)\
 {\
@@ -2483,11 +2469,10 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 
 	hanguo_check11();
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x24º¸³¿[SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", 
+	g_ConsoleDebug->Write(MCD_SEND, "0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", 
 		iSrcIndex, iDstIndex, iSrcType, iDstType, (pItem->Type&0x1FFF), 
 		( BYTE)( pItem->Level), ( BYTE)( pItem->Durability));
-#endif // CONSOLE_DEBUG
+
 	return true;
 }
 
@@ -2555,9 +2540,7 @@ __forceinline void SendRequestEquipmentItem(int SrcFlag,int SrcIndex,int DstFlag
 
 	hanguo_check11();
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x24º¸³¿[SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", SrcIndex,DstIndex,SrcFlag,DstFlag, (PickItem.Type&0x1FFF), ( BYTE)( PickItem.Level), ( BYTE)( PickItem.Durability));
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", SrcIndex,DstIndex,SrcFlag,DstFlag, (PickItem.Type&0x1FFF), ( BYTE)( PickItem.Level), ( BYTE)( PickItem.Durability));
 }
 
 extern int  EnableUse;
@@ -2621,9 +2604,7 @@ __forceinline void SendRequestUse(int Index,int Target)
 	else if(Inventory[Index].Type>=ITEM_POTION + 1 && Inventory[Index].Type<=ITEM_POTION + 9)
 		PlayBuffer(SOUND_DRINK01);
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x26º¸³¿[SendRequestUse(%d)]", Index+12);
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x26 [SendRequestUse(%d)]", Index+12);
 }
 #endif //ENABLE_EDIT
 
@@ -2798,7 +2779,7 @@ __forceinline void SendRequestCheckAutoToolResult(DWORD dwKey,BYTE btResult)
 	spe.Send();
 
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x8Aº¸³¿[SendRequestCheckAutoToolResult(%d %d)]", dwKey, btResult);
+	g_ConsoleDebug->Write(MCD_SEND, "0x8A [SendRequestCheckAutoToolResult(%d %d)]", dwKey, btResult);
 #endif // CONSOLE_DEBUG
 }
 #endif	// YDG_MOD_PROTECT_AUTO_V5
@@ -2816,13 +2797,12 @@ __forceinline void SendRequestMoveMap(DWORD dwBlockKey,WORD wMapIndex)
 	spe << ( DWORD)dwBlockKey << ( WORD)wMapIndex;
 	spe.Send();
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x8Eº¸³¿[SendRequestMoveMap(%d %d)]", dwBlockKey, wMapIndex);
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x8E [SendRequestMoveMap(%d %d)]", dwBlockKey, wMapIndex);
+
 #ifdef PJH_DEBUG
 	//g_ConsoleDebug->Write(MCD_SEND, "¸ÊÀÌµ¿  [time : %d]", GetTickCount());
 	char Text[300];
-	wsprintf(Text,"¸ÊÀÌµ¿º¸³¿[time : %d]", GetTickCount());
+	wsprintf(Text,"¸ÊÀÌµ¿ [time : %d]", GetTickCount());
 	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);
 #endif
 }
@@ -2841,9 +2821,7 @@ __forceinline void SendRequestStorageGold(int Flag,int Gold)
 	spe.Send();
 	hanguo_check10();
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x81º¸³¿[SendRequestStorageGold(%d %d)]", Flag, Gold);
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x81 Send [SendRequestStorageGold(%d %d)]", Flag, Gold);
 }
 
 __forceinline bool SendRequestStorageExit()
@@ -2854,14 +2832,12 @@ __forceinline bool SendRequestStorageExit()
 	spe.Send();
 	hanguo_check11();
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x82º¸³¿[SendRequestStorageExit]");
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x82 Send [SendRequestStorageExit]");
 	return true;
 }
 
 #ifdef LDK_MOD_PASSWORD_LENGTH_20
-//±Û·Î¹ú Æ÷ÅÐ¿ë
+
 #define SendStoragePassword( p_byType, p_wPassword, p_ResidentNumber)\
 {\
 	pre_send( g_hInst);\
@@ -3220,15 +3196,9 @@ __forceinline bool SendRequestMixExit()
 	spe.Send();
 	hanguo_check2();
 
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x87º¸³¿[SendRequestMixExit]");
-#endif // CONSOLE_DEBUG
+	g_ConsoleDebug->Write(MCD_SEND, "0x87 [SendRequestMixExit]");
 	return true;
 }
-//////////////////////////////////////////////////////////////////////////
-// º¸¼® Á¶ÇÕ °ü·Ã ÇÔ¼ö
-//////////////////////////////////////////////////////////////////////////
-
 #define SendRequestGemMix( iType, iLevel )\
 {	\
 	pre_send( g_hInst);\
@@ -4807,7 +4777,7 @@ __forceinline bool SendRequestEquippingInventoryItem(int iItemPos, int iValue)
     spe.Send(); 
 
 #ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0xBF, 0x20º¸³¿[SendRequestEquippingInventoryItem(%d, %d)]", iItemPos, iValue);
+	g_ConsoleDebug->Write(MCD_SEND, "0xBF, 0x20 [SendRequestEquippingInventoryItem(%d, %d)]", iItemPos, iValue);
 #endif // CONSOLE_DEBUG
 	return true;
 

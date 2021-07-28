@@ -13,9 +13,7 @@
 #include "VPManager.h"
 #include "ZzzTexture.h"
 #include "./Utilities/Log/ErrorReport.h"
-#ifdef CONSOLE_DEBUG
 #include "./Utilities/Log/muConsoleDebug.h"
-#endif // CONSOLE_DEBUG
 
 namespace EngineGate
 {

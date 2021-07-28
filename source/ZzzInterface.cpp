@@ -53,9 +53,7 @@
 #include "PCRoomPoint.h"
 #endif	// ADD_PCROOM_POINT_SYSTEM
 #endif // KJH_DEL_PC_ROOM_SYSTEM
-#ifdef CSK_LH_DEBUG_CONSOLE
 #include "./Utilities/Log/muConsoleDebug.h"
-#endif // CSK_LH_DEBUG_CONSOLE
 #include "NewUISystem.h"
 #include "w_CursedTemple.h"
 #include "UIControls.h"
@@ -4804,12 +4802,10 @@ bool CheckMacroLimit ( char* Text )
 
 bool CheckCommand(char *Text, bool bMacroText )
 {
-#ifdef CSK_LH_DEBUG_CONSOLE
-	if(g_ConsoleDebug->CheckCommand(Text) == true)
+	if(g_ConsoleDebug->CheckCommand(Text) == true)  
 	{
 		return true;
 	}
-#endif // CSK_LH_DEBUG_CONSOLE
 
 #ifdef YDG_MOD_CHECK_PROTECT_AUTO_FLAG
 	if(g_pProtectAuto->CheckFlag(Text) == true)

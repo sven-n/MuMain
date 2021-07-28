@@ -19,9 +19,7 @@
 #include "zzzinventory.h"
 #include "wsclientinline.h"
 #include "CSQuest.h"
-#ifdef PET_SYSTEM
 #include "GIPetManager.h"
-#endif// PET_SYSTEM
 #include "UsefulDef.h"
 #include "NewUIInventoryCtrl.h"
 

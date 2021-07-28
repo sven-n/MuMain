@@ -15,12 +15,8 @@
 #include "DSPlaySound.h"
 #include "ZzzOpenData.h"
 #include "ZzzLodTerrain.h"
-
 #include "GOBoid.h"
-
-#ifdef _DEBUG
 #include "./Utilities/Log/muConsoleDebug.h"
-#endif // _DEBUG
 
 extern char* g_lpszMp3[NUM_MUSIC];
 

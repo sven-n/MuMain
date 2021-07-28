@@ -20,17 +20,11 @@
 #include "HackTest.h"
 #endif // CSK_HACK_TEST
 
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
-#ifdef CSK_LH_DEBUG_CONSOLE
-
 extern CGlobalBitmap Bitmaps;
 
 CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
 {
+#ifdef CSK_LH_DEBUG_CONSOLE
 	if(leaf::OpenConsoleWindow("Mu Debug Console Window"))
 	{
 		leaf::ActivateCloseButton(false);
@@ -39,29 +33,32 @@ CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
 		
 		g_ErrorReport.Write("Mu Debug Console Window Init - completed(Handle:0x%00000008X)\r\n", leaf::GetConsoleWndHandle());
 	}
+#endif
 }
 
 CmuConsoleDebug::~CmuConsoleDebug()
 {
+#ifdef CSK_LH_DEBUG_CONSOLE
 	leaf::CloseConsoleWindow();
+#endif
 }
 
 CmuConsoleDebug* CmuConsoleDebug::GetInstance()
 {
+#ifdef CSK_LH_DEBUG_CONSOLE
 	static CmuConsoleDebug sInstance;
 	return &sInstance;
+#else
+	return 0;
+#endif 
 }
 
 void CmuConsoleDebug::UpdateMainScene()
 {
+#ifdef CSK_LH_DEBUG_CONSOLE
 	if(m_bInit)
 	{
-		//. 콘솔창 토글
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		if(SEASON3B::IsPress(VK_SHIFT) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		if(HIBYTE(GetAsyncKeyState(VK_SHIFT)) == 128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		{
 			if(PressKey(VK_F7))
 			{
@@ -69,10 +66,12 @@ void CmuConsoleDebug::UpdateMainScene()
 			}
 		}
 	}
+#endif
 }
 
 bool CmuConsoleDebug::CheckCommand(const std::string& strCommand)
 {
+#ifdef CSK_LH_DEBUG_CONSOLE
 	if(!m_bInit)
 		return false;
 
@@ -232,12 +231,13 @@ bool CmuConsoleDebug::CheckCommand(const std::string& strCommand)
 		}
 	}
 #endif // CSK_HACK_TEST
-
+#endif
 	return false;
 }
 
 void CmuConsoleDebug::Write(int iType, const char* pStr, ...)
 {
+#ifdef CONSOLE_DEBUG
 	if(m_bInit)
 	{
 		switch(iType)
@@ -265,13 +265,16 @@ void CmuConsoleDebug::Write(int iType, const char* pStr, ...)
 		
 		std::cout << szBuffer << std::endl;
 	}
+#endif
 }
 
 CmuSimpleLog::CmuSimpleLog(void)
 {
+#ifdef CSK_LH_DEBUG_CONSOLE
 	m_bLogfirst = true;
-	m_strFilename = "클라판별스킬분석로그.txt";
+	m_strFilename = "SimpleLog.txt";
 	m_pFile = NULL;
+#endif
 }
 
 CmuSimpleLog::~CmuSimpleLog(void)
@@ -280,19 +283,22 @@ CmuSimpleLog::~CmuSimpleLog(void)
 
 void CmuSimpleLog::setFilename(const char* strFilename)
 {
+#ifdef CSK_LH_DEBUG_CONSOLE
 	m_strFilename = strFilename;
+#endif
 }
 
 void CmuSimpleLog::log(char *str, ...)
 {
+#ifdef CSK_LH_DEBUG_CONSOLE
 	if(m_bLogfirst) 
 	{
-		m_pFile = fopen(m_strFilename.c_str(), "a");	// 쓰기전용으로
+		m_pFile = fopen(m_strFilename.c_str(), "a");
 		fclose(m_pFile);
 		m_bLogfirst = false;
 	}
 	
-	m_pFile = fopen(m_strFilename.c_str(), "a");	// 읽기 전용으로
+	m_pFile = fopen(m_strFilename.c_str(), "a");
 	
 	va_list ap;
 	
@@ -301,5 +307,6 @@ void CmuSimpleLog::log(char *str, ...)
 	va_end (ap);
 	
 	fclose(m_pFile);
+#endif
 }
-#endif // CSK_LH_DEBUG_CONSOLE
+

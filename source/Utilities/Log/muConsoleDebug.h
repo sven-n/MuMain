@@ -1,14 +1,8 @@
+//////////////////////////////////////////////////////////////////////
 // muDebugHelper.h: interface for the CmuConsoleDebug class.
-//
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_MUDEBUGHELPER_H__B8E3064A_5158_4124_8177_01D96D619220__INCLUDED_)
-#define AFX_MUDEBUGHELPER_H__B8E3064A_5158_4124_8177_01D96D619220__INCLUDED_
-
 #pragma once
-
-#ifdef CSK_LH_DEBUG_CONSOLE
-
 
 enum MSG_TYPE
 {
@@ -46,15 +40,13 @@ public:
 	void log(char *str, ...);
 	
 private:
-	bool m_bLogfirst;		// 로그 시작이냐?
+	bool m_bLogfirst;
 	
-	std::string m_strFilename;	// 파일 이름
+	std::string m_strFilename;
 	
-	FILE *m_pFile;			// 로그 남기는 파일
+	FILE *m_pFile;
 };
 
 #define g_ConsoleDebugLog	CmuSimpleLog::getInstance()
 
-#endif // CSK_LH_DEBUG_CONSOLE
 
-#endif // !defined(AFX_MUDEBUGHELPER_H__B8E3064A_5158_4124_8177_01D96D619220__INCLUDED_)

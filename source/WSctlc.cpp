@@ -281,7 +281,7 @@ int CWsctlc::Connect(char *ip_addr, unsigned short port, DWORD WinMsgNum)
    
 	if ( addr.sin_addr.S_un.S_un_b.s_b1 == 127 && addr.sin_addr.S_un.S_un_b.s_b2 == 0 &&
 		addr.sin_addr.S_un.S_un_b.s_b3 == 0 && addr.sin_addr.S_un.S_un_b.s_b4 == 1)
-	{	// local host 이면 금지
+	{	// local host
 		return ( FALSE);
 	}
 
@@ -349,9 +349,7 @@ int CWsctlc::sSend(SOCKET socket, char *buf, int len)
 
 			if( WSAGetLastError() != WSAEWOULDBLOCK )
 			{
-#ifdef CONSOLE_DEBUG
 				g_ConsoleDebug->Write(MCD_ERROR, "[Send Packet Error] WSAGetLastError() != WSAEWOULDBLOCK");
-#endif // CONSOLE_DEBUG
 				g_ErrorReport.Write("[Send Packet Error] WSAGetLastError() != WSAEWOULDBLOCK\r\n");
 				Close();
 				return FALSE;
@@ -360,9 +358,9 @@ int CWsctlc::sSend(SOCKET socket, char *buf, int len)
 			{
 				if( (m_nSendBufLen+len) > MAX_SENDBUF )
 				{
-#ifdef CONSOLE_DEBUG
+
 					g_ConsoleDebug->Write(MCD_ERROR, "Send Packet Error] SendBuffer Overflow");
-#endif // CONSOLE_DEBUG
+
 					g_ErrorReport.Write("[Send Packet Error] SendBuffer Overflow\r\n");
 					Close();
 					return FALSE;
@@ -513,7 +511,7 @@ int CWsctlc::FDWriteSend()
 	while( m_nSendBufLen > 0 ) 
 	{
 		nResult = send(m_socket, (char*)m_SendBuf+nDx, m_nSendBufLen-nDx, 0);
-		//cLogProc.Add("fd_write %d byte 메시지 보냄 ", nResult);
+		//cLogProc.Add("fd_write %d byte 메시지   ", nResult);
 		if( nResult == SOCKET_ERROR )
 		{
 			if( WSAGetLastError() != WSAEWOULDBLOCK )

@@ -63,9 +63,7 @@ inline int CheckGLError( const char *file, int line)
         }
 		++iLimitGLError;
 
-#ifdef CONSOLE_DEBUG
  		g_ConsoleDebug->Write( MCD_NORMAL, szOutputError );
-#endif // CONSOLE_DEBUG
 		
  		g_ErrorReport.Write( szOutputError );
 #ifdef KWAK_ADD_TRACE_FUNC

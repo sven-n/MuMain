@@ -116,19 +116,9 @@
 #include "GCCertification.h"
 #endif // LEM_ADD_GAMECHU
 
-//////////////////////////////////////////////////////////////////////////
-//  DEFINE.
-//////////////////////////////////////////////////////////////////////////
 #define MAX_DEBUG_MAX 10
 
-
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
-
 extern BYTE m_AltarState[];
-
-///////////////////////////////////////////
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
 
@@ -161,212 +151,15 @@ extern int g_iKeyPadEnable;
 
 extern CUIMapName* g_pUIMapName; // rozy
 
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM		// 정리할때 삭제해야 함
-extern bool g_PetEnableDuel;	// LHJ - 결투중에 다크로드의 다크스피릿이 공격중 인지 판단하는 변수
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM	// 정리할때 삭제해야 함
+#ifndef YDG_ADD_NEW_DUEL_SYSTEM
+extern bool g_PetEnableDuel;
+#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
 MASTER_LEVEL_VALUE	Master_Level_Data;
-//////////////////////////////////////////////////////////////////////////
-//!! 버전과 시리얼
-//////////////////////////////////////////////////////////////////////////
 
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN		// 한국
-#ifdef _ORIGINAL_SERVER
-//********************블루 섭이 아닌 본섭의 경우 해당 한다********************//
-
-//-----------------------------------> 사내 서버 버젼
-//2007.12.07 테섭 (안상규)
-BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '4'+3, '1'+4, '2'+5};
-BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"wpqkf3rcsgkma2vo"};
-//-----------------------------------------------------------------------------------
-//2010.11.04 본섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '8'+3, '0'+4, '4'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"ddf09j3ohDgLr7lS"};
-//-----------------------------------------------------------------------------------
-//2010.11.03 테섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '8'+3, '0'+4, '3'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"llRkkdc0mFw2V79l"};
-//-----------------------------------------------------------------------------------
-//2010.11.02 테섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '8'+3, '0'+4, '2'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"ms8Tglat7ddsFkH2"};
-//-----------------------------------------------------------------------------------
-//2010.10.29 본섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '8'+3, '0'+4, '1'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"l1SwdpfTH9rWh2pn"};
-//-----------------------------------------------------------------------------------
-//2010.10.28 본섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '8'+3, '0'+4, '0'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"jklf3qbw5flfQjs6"};
-//-----------------------------------------------------------------------------------
-//2010.10.27 테섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '7'+3, '5'+4, '2'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"1dfclvlSo2aOJ7ik"};
-//-----------------------------------------------------------------------------------
-//2010.10.21 본섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '7'+3, '5'+4, '1'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"0sa6f5sJkshflEAn"};
-//-----------------------------------------------------------------------------------
-//2010.10.15 테섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '7'+3, '5'+4, '0'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"a5sc0dTmtuk1tslq"};
-//-----------------------------------------------------------------------------------
-//2010.10.05 본섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '7'+3, '4'+4, '8'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"sI8rk9srd4Klakgh"};
-//-----------------------------------------------------------------------------------
-//2010.10.05 테섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '7'+3, '4'+4, '7'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"7C5fS3mklm8eKtvF"};
-//-----------------------------------------------------------------------------------
-#else //_ORIGINAL_SERVER
-//********************블루 섭의 경우 해당 한다********************//
-//본섭 패치와 같은 형태의 버젼 관리로 패치한다
-//국가는 LANGUAGE_KOREAN 이 된다
-//===================================> 블루 사내 서버 버젼
-BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '4'+3, '1'+4, '2'+5};
-BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"wpqkf3rcsgkma2vo"};
-//-----------------------------------------------------------------------------------
-//2010.11.04 블루 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '0'+3, '4'+4, '3'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"skfswk7Lflk12QVE"};
-//-----------------------------------------------------------------------------------
-//2010.10.28 블루 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '0'+3, '4'+4, '2'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"ul7AA3gakAkkAak7"};
-//-----------------------------------------------------------------------------------
-//2010.10.28 블루 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '0'+3, '4'+4, '1'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"gshfkHs29kds4KeA"};
-//-----------------------------------------------------------------------------------
-//2010.10.21 블루 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '0'+3, '4'+4, '0'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"8Rs9Kfqlfseso2kL"};
-//-----------------------------------------------------------------------------------
-//2010.10.07 블루 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '0'+3, '3'+4, '8'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"w0sfeH3okd5ahgr6"};
-//-----------------------------------------------------------------------------------
-#endif //_ORIGINAL_SERVER
-//-------------------------------------------------------------------------------------------------------------
-#elif SELECTED_LANGUAGE == LANGUAGE_TAIWANESE	// 대만
-
-//-----------------------------------> 사내 서버 버젼
-BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1,'0'+2,'2'+3, '1'+4, '8'+5};
-BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"pmdprdwjs0Pwh3wl"};
-//-----------------------------------------------------------------------------------
-//2009.07.22 본섭 (이동근)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '0'+4, '5'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"26NwYW4BIQvIZUEr"};
- //-----------------------------------------------------------------------------------
-//2010.10.11 본섭 (김재우)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '1'+4, '0'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"26NwYwklIQvI23Er"};
-//-------------------------------------------------------------------------------------------------------------
-#elif SELECTED_LANGUAGE == LANGUAGE_JAPANESE	// 일본
-
-//-----------------------------------> 사내 서버 버젼
-//2008.09.09 본섭 (이동근)
-BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '2'+3, '2'+4, '6'+5};
-BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"DeL7QLE08KXTySe7"};
-//-----------------------------------------------------------------------------------
-//2009.07.08 본섭 (김재희)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '0'+4, '9'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"jDivfh58dhQi2Vo8"};
-//-----------------------------------------------------------------------------------
-//2010.08.24 본섭 (이은미)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '2'+4, '8'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"efElef2ERa2eioek"};
-//-----------------------------------------------------------------------------------
-//2010.09.09 본섭 (이은미)
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '2'+4, '9'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"efieef3Eaefeioek"};
-//-----------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------
-
-//-------------------------------------------------------------------------------------------------------------
-#elif SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES	// 필리핀
-
-//-----------------------------------> 사내 서버 버젼
-BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1,'0'+2,'2'+3, '0'+4, '8'+5};
-BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"CCoosSCKNyaalvMD"};
-//-----------------------------------------------------------------------------------
-// BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1,'0'+2,'3'+3, '0'+4, '2'+5};
-// BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"Dhkswjstofh1rka4"};
-//-----------------------------------------------------------------------------------
-
-//-------------------------------------------------------------------------------------------------------------
-#elif SELECTED_LANGUAGE == LANGUAGE_CHINESE		// 중국
-
-//-----------------------------------> 사내 서버 버젼
-BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '0'+4, '6'+5};
-BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"hFUPBTbYehR2KgZj"};
-//-----------------------------------------------------------------------------------
-//2010.11.23 본섭 (이종원)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1,'0'+2,'3'+3, '3'+4, '4'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"fdUiqE28nKN324vH"};
-//-----------------------------------------------------------------------------------
-//2010.09.30 본섭 (깁재우)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1,'0'+2,'3'+3, '1'+4, '6'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"sDjh2908ds2jnvsL"};
-//-----------------------------------------------------------------------------------
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1,'0'+2,'2'+3, '3'+4, '0'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"k5lEopal83udns8h"};
-//-----------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------
-#elif SELECTED_LANGUAGE == LANGUAGE_ENGLISH		// 글로벌
-//-----------------------------------> 사내 서버 버젼
-//2010.01.20 본섭 (안상규)
 BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '4'+3, '0'+4, '5'+5};
 BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"TbYehR2hFUPBKgZj"};
-//-----------------------------------------------------------------------------------
-//2010.10.28 본섭 (김재우)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '3'+4, '4'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"55Hhqervsybr23fM"};
-//-----------------------------------------------------------------------------------
-//2010.10.13 본섭 (김재우)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '3'+4, '2'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"QDjhqwrgd5b7n6s5"};
-//-----------------------------------------------------------------------------------
-//2010.09.30 본섭 (김재우)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '2'+4, '9'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"sDjhqweklr2jnvsL"};
-//-----------------------------------------------------------------------------------
-//2010.09.20 본섭 (이주흥)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '2'+4, '8'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"sDjh2908ds2jnvsL"};
-//-----------------------------------------------------------------------------------
-//2010.06.23 본섭 (이주흥)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '2'+4, '7'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"shF904usjfa9saCS"};
-//-----------------------------------------------------------------------------------
-//2010.06.10 본섭 (이주흥)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '2'+4, '6'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"0skjSAD94sdfjklC"};
-//-----------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------
-#elif SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE	// 베트남
 
-//-----------------------------------> 사내 서버 버젼
-//2009.06.05 본섭 (김재희)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '0'+4, '2'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"uv5VsdivR29GVskQ"};
-//-----------------------------------------------------------------------------------
-//2010.10.15 본섭 (김재우)
-BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '1'+4, '3'+5};
-BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"zoWm4DFgtl3q3th9"};
-//-----------------------------------------------------------------------------------
-//2010.08.31 본섭 (박보근)
-//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '3'+3, '1'+4, '2'+5};
-//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"tlWms5ektl3qhstj"};
-//-----------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------
-#endif //SELECTED_LANGUAGE
-
-
-//////////////////////////////////////////////////////////////////////////
-//  Global Variable.
-//////////////////////////////////////////////////////////////////////////
 CWsctlc     SocketClient;
 CWsctlc*    g_pSocketClient = &SocketClient;
 CSimpleModulus g_SimpleModulusCS;
@@ -405,21 +198,11 @@ int     CurrentProtocolState;
 
 int DirTable[16] = {-1,-1,  0,-1,  1,-1,  1,0,  1,1,  0,1,  -1,1,  -1,0};
 
-#ifdef LDS_MODIFY_CHAR_LENGTH_USERPASSWORD // 비밀번호 자릿수 10->12로 변경 사항
-char    Password[MAX_PASSWORD_SIZE+1];
-#else // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
 char    Password[MAX_ID_SIZE+1];
-#endif // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
-
 char    QuestionID[MAX_ID_SIZE+1];
 char    Question[31];
 
-//////////////////////////////////////////////////////////////////////////
-//  Function
-//////////////////////////////////////////////////////////////////////////
-
 #define FIRST_CROWN_SWITCH_NUMBER	322
-
 
 void AddDebugText(unsigned char *Buffer,int Size)
 {
@@ -454,9 +237,8 @@ BOOL CreateSocket(char *IpAddr, unsigned short Port)
 #endif
 	}
 	g_ErrorReport.Write("[Connect to Server] ip address = %s, port = %d\r\n", IpAddr, Port);
-#ifdef CONSOLE_DEBUG
+
 	g_ConsoleDebug->Write(MCD_NORMAL, "[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
-#endif // CONSOLE_DEBUG
 	
 	SocketClient.Create(g_hWnd, TRUE);
 	if( SocketClient.Connect(IpAddr,Port,WM_ASYNCSELECTMSG) == FALSE )
@@ -514,10 +296,6 @@ int  EnableUse = 0;
 int SendGetItem = -1;
 int SendDropItem = -1;
 
-///////////////////////////////////////////////////////////////////////////////
-// 길드
-///////////////////////////////////////////////////////////////////////////////
-
 int FindGuildName(char *Name)
 {
 	for(int i=0;i<MARK_EDIT;i++)
@@ -538,11 +316,9 @@ void GuildTeam( CHARACTER *c )
 	{
 		c->GuildTeam = 0;
 		
-		// 같은길드일때 초록색으로 세팅
 		if( Hero->GuildMarkIndex!=-1 && c->GuildMarkIndex==Hero->GuildMarkIndex )
 			c->GuildTeam = 1;
 		
-		// 길드워중이라면..
 		if( EnableGuildWar )
 		{
 			if( GuildWarIndex==-1 && GuildWarName[0] )
@@ -573,7 +349,7 @@ void InitGuildWar()
 BOOL Util_CheckOption( char *lpszCommandLine, unsigned char cOption, char *lpszString);
 
 
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
+#ifndef KJH_ADD_SERVER_LIST_SYSTEM
 extern int  ServerLocalSelect;
 #endif // KJH_ADD_SERVER_LIST_SYSTEM
 
@@ -584,339 +360,23 @@ void ReceiveServerList( BYTE *ReceiveBuffer )
 	
 	BYTE Value2 = *(ReceiveBuffer+Offset++);
 
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 	g_ServerListManager->Release();
 
-	g_ServerListManager->SetTotalServer(MAKEWORD(Value2, Data->Value));		// 전체 서버 개수.(서버군 개수가 아님)
+	g_ServerListManager->SetTotalServer(MAKEWORD(Value2, Data->Value));
 	
 	for(int i=0 ; i<g_ServerListManager->GetTotalServer() ; i++)
 	{
 		LPPRECEIVE_SERVER_LIST Data2 = (LPPRECEIVE_SERVER_LIST)(ReceiveBuffer+Offset);
 		
 		g_ServerListManager->InsertServerGroup(Data2->Index, Data2->Percent);
-#ifdef CONSOLE_DEBUG
+
 		g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList(%d %d %d)]", i, Data2->Index, Data2->Percent);
-#endif // CONSOLE_DEBUG		
+
 		Offset += sizeof(PRECEIVE_SERVER_LIST);
 	}
-#else // KJH_ADD_SERVER_LIST_SYSTEM
-
-	ServerNumber = MAKEWORD(Value2, Data->Value);	// 서버 개수.(서버군 개수가 아님)
-	
-	for(int i=0;i<MAX_SERVER_HI;i++)
-	{
-        ServerList[i].Number = 0;
-	}
-	
-#ifdef PJH_USER_VERSION_SERVER_LIST
-//	ServerNumber = 2;
-#endif //#ifdef PJH_USER_VERSION_SERVER_LIST//테스트 지워야함
-
-#ifdef PJH_NEW_SERVER_ADD
-//#ifdef PJH_FINAL_VIEW_SERVER_LIST2	
-//		ServerNumber = 26;//박종훈
-#endif //#ifdef PJH_NEW_SERVER_ADD	
-
-
-//$$$$$$$$$$$$$$$$$$$$$$4
-//	DebugAngel_Write( PACKET_SAVE_FILE, "서버갯수 : %d\r\n", ServerNumber);//박종훈
-//$$$$$$$$$$$$$$$$$$$$$$4
-
-	for(int i=0;i<ServerNumber;i++)
-	{
-		LPPRECEIVE_SERVER_LIST Data2 = (LPPRECEIVE_SERVER_LIST)(ReceiveBuffer+Offset);
-
-		int Server = Data2->Index/20;	// 서버군 번호. 서버군은 20개의 서버를 가질 수 있음.
-
-/*
-		if(i%5 == 0)
-			DebugAngel_Write( PACKET_SAVE_FILE, "          번호 : %d\r\n", Data2->Index);//박종훈
-		else
-			DebugAngel_Write( PACKET_SAVE_FILE, "          번호 : %d", Data2->Index);//박종훈
-*/			
-#ifdef PJH_NEW_SERVER_ADD
-//		Server = i;//박종훈
-#endif //#ifdef PJH_NEW_SERVER_ADD	
-#ifdef PJH_USER_VERSION_SERVER_LIST
-//		Server = 30 + i;
-#endif //#ifdef PJH_USER_VERSION_SERVER_LIST//테스트 지워야함
-#ifdef CONNECT_LIST_FIX
-#ifndef PJH_FINAL_VIEW_SERVER_LIST
-//#ifdef PJH_NEW_SERVER_ADD
-//			if(Server == 13)
-//#else
-			if(Server == 12)
-//#endif //PJH_NEW_SERVER_ADD
-			{
-#ifdef PJH_NEW_SERVER_ADD
-				Server = 29;
-#else
-				Server = 24;
-#endif //#ifdef PJH_NEW_SERVER_ADD
-			strcpy(ServerList[Server].Name,GlobalText[559]);
-			
-			ServerList[Server].Server[ServerList[Server].Number].Index   = Data2->Index;
-			ServerList[Server].Server[ServerList[Server].Number].Percent = Data2->Percent;
-#ifdef _PVP_DYNAMIC_SERVER_TYPE
-			ServerList[Server].Server[ServerList[Server].Number].IsPvPServer = Data2->IsPvPServer;
-#endif	// _PVP_DYNAMIC_SERVER_TYPE
-			ServerList[Server].Number++;
-		}
-		else
-#endif //PJH_FINAL_VIEW_SERVER_LIST
-		{
-			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//서버리스트는 서버로 부터 서버 번호를 받고 번호는 바로 서버의 고유넘버가 된다.
-			//예를 들어 0 을 받으면 마야를 가르키게 돼고 1 을 받으면 위글을 받게됀다.
-			//위의 iServerListMap 에표시를 하고싶다면 (23 - 놓고 싶은 위치의 값) 을 고유서버넘버 번호에 넣어주면됀다.
-			//서버의 고유번호는 enum으로 0부터 시작한다.(@)는 현재는 안쓰이고 있는 서버이다.
-			//마야	  = 0		
-			//위글	  = 1		
-			//바르	  = 2		
-			//카라	  = 3	
-			//라무	  = 4
-			//나칼	  = 5
-			//라사	  = 6
-			//란스	  = 7
-			//타르	  = 8
-			//유즈(@) = 9
-			//모아(@) = 10
-			//루네    = 11
-			//테스트  = 12
-			//이온	  = 13
-			//밀론	  = 14
-			//뮤렌(@) = 15
-			//루가(@) = 16
-			//티탄(@) = 17
-			//엘카(@) = 18
-			//시렌(@) = 19
-			//레알	  = 20
-			//신규1   = 21
-			//신규2   = 22
-			//신규3(@)  = 23
-			//Server_Position = 23 - 놓고 싶은 위치의값;
-			//switch(Server_Position)
-			//case 4 ~ 10 == 왼쪽위에서1번째 ~ 왼쪽위에서7번째.
-			//case 14 ~ 21 == 오른쪽위에서1번째 ~ 오른쪽위에서8번째
-			//text.txt 파일에 540번부터 559번까지가 서버 이름 이다. 
-			//레알서버는 560번을 쓰고있기때문에 1829번에서 가져다 쓰고있다.
-			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-			int iServerListMap[] = { 1, 3, 4, 2, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-#elif SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-			//이혁재 - 일본 요청으로 인한 서버 순서 변경 2005.2.4
-			//int iServerListMap[] = { 1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-			//			int iServerListMap[] = { 1, 3, 2, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-			// 안상규 - 신서버 추가 및 위치 변경. 2007.2.14
-			int iServerListMap[] = { 2, 4, 3, 1, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-#elif defined PJH_FINAL_VIEW_SERVER_LIST
-			int iServerListMap[] = { 2, 3, 4, 5, 6, 7, 8, 9, 14, 0, 0, 15, 1, 16, 17, 0, 0, 0, 0, 0, 20, 18, 19, 0, 24};
-#elif defined PJH_SEMI_FINAL_VIEW_SERVER_LIST	
-			int iServerListMap[] = {  4 ,  5 ,  6 ,  7 ,  8 ,  9 ,  16 , 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 20, 18, 19, 0, 24};
-#elif defined PJH_USER_VERSION_SERVER_LIST
-			int iServerListMap[] = { 2, 3, 4, 5, 6, 7, 8, 9, 14, 0, 0, 15, 1, 16, 17, 0, 0, 0, 0, 0, 20, 18, 19, 0, 24, 30, 31};
-#elif defined PJH_FINAL_VIEW_SERVER_LIST2
-			int iServerListMap[] = {  4 ,  5 ,  6 ,  7 ,  8 ,  9 ,  15 , 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 20, 18, 19, 17, 16};
-//			int iServerListMap[] = { 2, 3, 4, 5, 6, 7, 8, 9, 12, 0, 0, 13, 1, 14, 15, 0, 0, 0, 0, 0, 20, 18, 19, 0, 24, 17, 16};
-#elif defined PJH_NEW_SERVER_ADD
-			int iServerListMap[] = {  4 ,  5 ,  6 ,  7 ,  8 ,  9 ,  15 , 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 20, 18, 19, 17, 16,25};
-#else
-			int iServerListMap[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 20, 15, 16, 17, 18, 11, 12, 13, 19, 21, 22, 23, 24};
-#endif //SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-			
-			int iServerPos = iServerListMap[Server];
-#ifdef PJH_NEW_SERVER_ADD
-			int iServerIndex = 28-iServerPos;
-#elif SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-			int iServerIndex = iServerPos;
-#else
-			int iServerIndex = 23-iServerPos;
-#endif //PJH_NEW_SERVER_ADD
-			
-#if defined PJH_FINAL_VIEW_SERVER_LIST || defined PJH_SEMI_FINAL_VIEW_SERVER_LIST || defined PJH_FINAL_VIEW_SERVER_LIST2 || defined PJH_NEW_SERVER_ADD
-			if(iServerPos == 0)
-			{
-				Offset += sizeof(PRECEIVE_SERVER_LIST);
-				continue;
-			}
-			
-//#ifdef PJH_NEW_SERVER_ADD
-//			if(Server == 13)
-//#else
-			if(Server == 12)
-//#endif //PJH_NEW_SERVER_ADD
-			{
-#ifdef PJH_NEW_SERVER_ADD
-				iServerIndex = 29;
-#else
-				iServerIndex = 24;
-#endif //#ifdef PJH_NEW_SERVER_ADD
-				strcpy(ServerList[iServerIndex].Name,GlobalText[559]);
-			}
-			else
-				if(Server == 21)
-				{
-					strcpy ( ServerList[iServerIndex].Name, GlobalText[1873] );	    //  새로운 서버 생성. ( 로크 ).
-				}
-				else
-					if(Server == 22)
-					{
-						strcpy ( ServerList[iServerIndex].Name, GlobalText[1874] );	    //  새로운 서버 생성. ( 레인 ).
-					}
-					else
-						if ( Server == 20 )
-							strcpy ( ServerList[iServerIndex].Name, GlobalText[1829] );	    //  새로운 서버 생성. ( 레알 ).
-#else	//PJH_FINAL_VIEW_SERVER_LIST
-						if ( Server==19 )
-							strcpy ( ServerList[iServerIndex].Name, GlobalText[552] );	    //  새로운 서버 생성. ( 시렌 ).
-						else if ( Server==20 )
-							strcpy ( ServerList[iServerIndex].Name, GlobalText[1829] );	    //  새로운 서버 생성. ( 레알 ).
-#endif	//PJH_FINAL_VIEW_SERVER_LIST
-#if defined PJH_FINAL_VIEW_SERVER_LIST2 || defined PJH_NEW_SERVER_ADD
-						else if ( Server==23 )
-							strcpy ( ServerList[iServerIndex].Name, GlobalText[1272] );	    //  새로운 서버 생성. ( 실버 ).
-						else if ( Server==24 )
-							strcpy ( ServerList[iServerIndex].Name, GlobalText[1273] );	    //  새로운 서버 생성. ( 스톰 ).
-#endif //PJH_FINAL_VIEW_SERVER_LIST2
-#ifdef PJH_NEW_SERVER_ADD
-						else if ( Server==25 )
-							strcpy ( ServerList[iServerIndex].Name, GlobalText[728] );	    //  새로운 서버 생성. ( 로랜 ).
-#endif //PJH_NEW_SERVER_ADD
-#ifdef PJH_USER_VERSION_SERVER_LIST
-						else
-						if( Server == 30)
-						{
-							iServerIndex = 21;
-							strcpy ( ServerList[iServerIndex].Name, GlobalText[1879] );	    //  시즌 4체험 서버
-						}
-						else
-						if( Server == 31)
-						{
-							iServerIndex = 20;
-							strcpy ( ServerList[iServerIndex].Name, GlobalText[1881] );	    //  사내테스트 서버
-						}
-#endif //PJH_USER_VERSION_SERVER_LIST
-						else
-							strcpy(ServerList[iServerIndex].Name,GlobalText[540+Server]);	// 서버 개수 늘어나면서 바뀜
-						
-						// ServerList[Server].Number는 서버 count.
-						ServerList[iServerIndex].Server[ServerList[iServerIndex].Number].Index   = Data2->Index;
-						ServerList[iServerIndex].Server[ServerList[iServerIndex].Number].Percent = Data2->Percent;
-#ifdef _PVP_DYNAMIC_SERVER_TYPE
-						ServerList[iServerIndex].Server[ServerList[iServerIndex].Number].IsPvPServer = Data2->IsPvPServer;
-#endif	// _PVP_DYNAMIC_SERVER_TYPE
-						ServerList[iServerIndex].Number++;
-		}
-#else	// CONNECT_LIST_FIX
-		if ( Server==12 )
-		{
-			Server = 24;	// 서버 개수 늘어나면서 바뀜
-			strcpy(ServerList[Server].Name,GlobalText[559]);
-			
-			ServerList[Server].Server[ServerList[Server].Number].Index   = Data2->Index;
-			ServerList[Server].Server[ServerList[Server].Number].Percent = Data2->Percent;
-#ifdef _PVP_DYNAMIC_SERVER_TYPE
-			ServerList[Server].Server[ServerList[Server].Number].IsPvPServer = Data2->IsPvPServer;
-#endif	// _PVP_DYNAMIC_SERVER_TYPE
-			ServerList[Server].Number++;
-		}
-		/*
-		else if(Server == 12)
-		{
-		Server = 24;	// 서버 개수 늘어나면서 바뀜
-		strcpy(ServerList[Server].Name,GlobalText[559]);
-		}
-		*/
-		else
-		{
-#if SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-			int iServerListMap[] = { 1, 3, 4, 2, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-			if ( Server < sizeof ( iServerListMap) / sizeof ( int))
-			{
-				Server = iServerListMap[Server];
-			}
-#endif //SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-			int iServerListMap[] = { 2, 3, 0, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-#endif //SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-			
-            if ( Server==19 )
-            {
-				strcpy ( ServerList[23-Server].Name, GlobalText[552] );	    //  새로운 서버 생성. ( 시렌 ).
-            }
-            else
-            {
-                strcpy(ServerList[23-Server].Name,GlobalText[540+Server] );	//  서버 개수 늘어나면서 바뀜
-            }
-			Server = 23-Server;	// 서버 개수 늘어나면서 바뀜
-		}
-		ServerList[Server].Server[ServerList[Server].Number].Index   = Data2->Index;
-		ServerList[Server].Server[ServerList[Server].Number].Percent = Data2->Percent;
-#ifdef _PVP_DYNAMIC_SERVER_TYPE
-		ServerList[Server].Server[ServerList[Server].Number].IsPvPServer = Data2->IsPvPServer;
-#endif	// _PVP_DYNAMIC_SERVER_TYPE
-        ServerList[Server].Number++;
-#endif	// CONNECT_LIST_FIX
-		
-#ifdef CONSOLE_DEBUG
-		g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList(%d %d %d)]", i, Data2->Index, Data2->Percent);
-#endif // CONSOLE_DEBUG
-		
-		Offset += sizeof(PRECEIVE_SERVER_LIST);
-	}
-/*
-//$$$$$$$$$$$$$$$$$$$$$$4	
-fclose(fp);
-//$$$$$$$$$$$$$$$$$$$$$$4	
-*/	
-#ifdef PJH_DEBUG_SERVER_ADD
-#ifdef PJH_VIEW_MAIN_SERVER_LIST
-	//	int iServerListMap[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 20, 15, 16, 17, 18, 11, 12, 13, 19, 21, 22, 23, 24};
-	int iServerListMap[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-	
-	for(i=0;i<MAX_SERVER_HI;i++)
-	{
-        ServerList[i].Number = 0;
-	}
-	
-	for(i = 0; i < 21; i++)
-	{
-		int Server_Num = 23 - iServerListMap[i];
-		
-		
-		if ( i==12 )
-		{
-			Server_Num = 24;	// 서버 개수 늘어나면서 바뀜
-			strcpy(ServerList[Server_Num].Name,GlobalText[559]);
-			
-			ServerList[Server_Num].Server[ServerList[Server_Num].Number].Index   = i;
-			ServerList[Server_Num].Server[ServerList[Server_Num].Number].Percent = 1;
-			ServerList[Server_Num].Number++;
-		}
-		else
-		{
-			if ( i==19 )
-			{
-				strcpy ( ServerList[Server_Num].Name, GlobalText[552] );	    //  새로운 서버 생성. ( 시렌 ).
-			}
-			else if ( i==20 )
-				strcpy ( ServerList[Server_Num].Name, GlobalText[1829] );	    //  새로운 서버 생성. ( 레알 ).
-			else
-			{
-				strcpy(ServerList[Server_Num].Name,GlobalText[540+i] );	//  서버 개수 늘어나면서 바뀜
-			}
-			ServerList[Server_Num].Server[ServerList[Server_Num].Number].Index   = i;
-			ServerList[Server_Num].Server[ServerList[Server_Num].Number].Percent = 1;
-			ServerList[Server_Num].Number++;
-		}
-	}
-#endif //PJH_VIEW_MAIN_SERVER_LIST
-#endif //PJH_DEBUG_SERVER_ADD
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-	
 	
 	CUIMng& rUIMng = CUIMng::Instance();
-	if (!rUIMng.m_CreditWin.IsShow())	// 크레딧이 안보일때만 다시 보여줌.
+	if (!rUIMng.m_CreditWin.IsShow())
 	{
 		rUIMng.ShowWin(&rUIMng.m_ServerSelWin);
 		rUIMng.m_ServerSelWin.UpdateDisplay();
@@ -924,36 +384,8 @@ fclose(fp);
 	}
 	
 	g_ErrorReport.Write ( "Success Receive Server List.\r\n");
-	
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
-#if defined _DEBUG || defined FOR_WORK
-	char lpszTemp[256];
-	if ( Util_CheckOption( GetCommandLine(), 'a', lpszTemp))
-	{
-		int iServer = atoi( lpszTemp);
-		for ( int i = 0; i < ServerList[24].Number; ++i)
-		{
-			if ( ( ServerList[24].Server[i].Index % 20) + 1 == iServer)
-			{
-#ifdef _PVP_DYNAMIC_SERVER_TYPE
-				g_bIsCurrentServerPvP = ServerList[24].Server[i].IsPvPServer;
-#endif	// _PVP_DYNAMIC_SERVER_TYPE
-
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-				SendRequestServerAddress2( ServerList[24].Server[i].Index);
-#else
-				SendRequestServerAddress( ServerList[24].Server[i].Index);
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
-				ServerLocalSelect = ( ServerList[24].Server[i].Index) % 20 + 1;
-			}
-		}
-	}
-#endif
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-	
-#ifdef CONSOLE_DEBUG
+		
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList]");
-#endif // CONSOLE_DEBUG
 }
 void ReceiveServerConnect( BYTE *ReceiveBuffer )
 {
@@ -963,9 +395,9 @@ void ReceiveServerConnect( BYTE *ReceiveBuffer )
 	memcpy(IP,(char*)Data->IP,15);
 	g_ErrorReport.Write("[ReceiveServerConnect]");
 	SocketClient.Close();
-	// 종량업체 처리 여기서
-	if ( CreateSocket(IP,Data->Port))	// 서버에서 응답 시 ReceiveJoinServer()로.
-	{	// 게임서버에 연결중인지 알 수 있게 한다.
+
+	if ( CreateSocket(IP,Data->Port))
+	{
 		g_bGameServerConnected = TRUE;
 #ifdef USE_SELFCHECKCODE
 		g_byNextFuncCrcCheck = 1;
@@ -984,21 +416,14 @@ void ReceiveServerConnectBusy( BYTE *ReceiveBuffer )
 	LPPRECEIVE_SERVER_BUSY Data = ( LPPRECEIVE_SERVER_BUSY)ReceiveBuffer;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	
-	// 사라졌던 서버선택 윈도우를 띄우고 메시지 윈도우를 최상단에 띄움.
 	//	CUIMng::Instance().PopUpMsgWin(RECEIVE_JOIN_SERVER_WAITING);
 	
-	// 그냥 다시 서버리스트를 요구함.
 #ifdef PKD_ADD_ENHANCED_ENCRYPTION
 		SendRequestServerList2();
 #else
 		SendRequestServerList();
 #endif // PKD_ADD_ENHANCED_ENCRYPTION
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 접속, 계정
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceiveJoinServer( BYTE *ReceiveBuffer )
 {
@@ -1015,13 +440,13 @@ void ReceiveJoinServer( BYTE *ReceiveBuffer )
 		
         switch(Data2->Result)
         {
-        case 0x01:	// 게임 서버 접속 성공.
-			rUIMng.ShowWin(&rUIMng.m_LoginWin);		// 로그인 창을 보여줌.
+        case 0x01:
+			rUIMng.ShowWin(&rUIMng.m_LoginWin);
             HeroKey = ((int)(Data2->NumberH)<<8) + Data2->NumberL;
             CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
             break;
 			
-        default:		// 게임 서버 접속 실패.
+        default:
             g_ErrorReport.Write( "Connectting error. ");
             g_ErrorReport.WriteCurrentTime();
 			rUIMng.PopUpMsgWin(MESSAGE_SERVER_LOST);
@@ -1031,7 +456,7 @@ void ReceiveJoinServer( BYTE *ReceiveBuffer )
         {
             if(Version[i]-(i+1) != Data2->Version[i])
             {
-				rUIMng.HideWin(&rUIMng.m_LoginWin);		// 로그인 창을 감춤.
+				rUIMng.HideWin(&rUIMng.m_LoginWin);
 				rUIMng.PopUpMsgWin(MESSAGE_VERSION);
                 g_ErrorReport.Write( "Version dismatch - Join server.\r\n");
 			}
@@ -1110,7 +535,7 @@ void ReceiveChangePassword( BYTE *ReceiveBuffer )
 		break;
 	}
 }
-// 캐릭터 씬에서 선택 가능한 캐릭터들 정보를 받는다.(우히히)
+
 void ReceiveCharacterList( BYTE *ReceiveBuffer )
 {
 	InitGuildWar();
@@ -1119,7 +544,6 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
     
     SetCreateMaxClass ( Data->MaxClass );
 #ifdef PBG_FIX_CHAOSMAPMOVE
-	// ReceiveTeleport를 받지 않는 맵이동은 맵인덱스 업뎃이 안됨
 	if(SceneFlag == CHARACTER_SCENE)
 	{
 		World = WD_74NEW_CHARACTER_SCENE;
@@ -1173,10 +597,9 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
 		Offset += sizeof(PRECEIVE_CHARACTER_LIST);
 	}
 #ifdef PBG_ADD_CHARACTERSLOT
-	// 블루뮤 서버일 경우만 CharacterSlotCount값을 사용한다
+
 	if(BLUE_MU::IsBlueMuServer())
 	{
-		//캐릭터 자리는 생성하지 않는다
 		g_SlotLimit->Init();
 		g_SlotLimit->SetCharacterCnt(Data->CharacterSlotCount);
 		g_SlotLimit->SetSlotPosition();
@@ -1186,31 +609,29 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
 }
 #ifdef PBG_ADD_CHARACTERCARD
 CHARACTER_ENABLE g_CharCardEnable;
-// 국내 전용 캐릭터 카드(소환술사01/다크02/마검04)
+
 void ReceiveCharacterCard_New(BYTE* ReceiveBuffer)
 {
 	LPPHEADER_CHARACTERCARD Data = (LPPHEADER_CHARACTERCARD)ReceiveBuffer;
-	g_CharCardEnable.bCharacterEnable[0] = false;	//마검사
-	g_CharCardEnable.bCharacterEnable[1] = false;	//다크로드
+	g_CharCardEnable.bCharacterEnable[0] = false;
+	g_CharCardEnable.bCharacterEnable[1] = false;
 #ifdef PBG_MOD_BLUE_SUMMONER_ENABLE
-	// 소환술사 캐릭터 카드를 블루에서는 사용하지 않는것으로 기획변경
-	g_CharCardEnable.bCharacterEnable[2] = true;	//소환술사
+	g_CharCardEnable.bCharacterEnable[2] = true;
 #else //PBG_MOD_BLUE_SUMMONER_ENABLE
-	g_CharCardEnable.bCharacterEnable[2] = false;	//소환술사
+	g_CharCardEnable.bCharacterEnable[2] = false;
 #endif //PBG_MOD_BLUE_SUMMONER_ENABLE
 
-	// 마검사 카드가 활성화 되어있다면
 	if((Data->CharacterCard & CLASS_DARK_CARD) == CLASS_DARK_CARD)
 		g_CharCardEnable.bCharacterEnable[0] = true;
-	// 다크로드 카드가 활성화되어있다면
+
 	if((Data->CharacterCard & CLASS_DARK_LORD_CARD) == CLASS_DARK_LORD_CARD)
 		g_CharCardEnable.bCharacterEnable[1] = true;
-	// 소환술사 카드가 활성화 되어있다면
+
 	if((Data->CharacterCard & CLASS_SUMMONER_CARD) == CLASS_SUMMONER_CARD)
 		g_CharCardEnable.bCharacterEnable[2] = true;
 }
 #endif //PBG_ADD_CHARACTERCARD
-// 캐릭터씬에서 캐릭터 생성 요청에 대한 응답.
+
 void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_CREATE_CHARACTER Data = (LPPRECEIVE_CREATE_CHARACTER)ReceiveBuffer;
@@ -1264,41 +685,34 @@ void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
 	else if(Data->Result==2)
 		CUIMng::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL2);
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x01 [ReceiveCreateCharacter]");
-#endif // CONSOLE_DEBUG
 }
 
-// 캐릭터씬에서 캐릭터 삭제 요청에 대한 응답.
 void ReceiveDeleteCharacter( BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 	switch (Data->Value)
 	{
-	case 1:	// 삭제 성공.
-#ifdef LDS_FIX_RESET_CHARACTERDELETED		// 선택 케릭터 삭제시에 실제 클라이언트 상 해당 케릭터 내용 초기화를 해줍니다.
+	case 1:
+#ifdef LDS_FIX_RESET_CHARACTERDELETED
 		INT		iKey;
 		iKey = CharactersClient[SelectedHero].Key;
 		DeleteCharacter( iKey );
 #endif
 		CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_SUCCESS);
 		break;
-	case 0:	// 길드 삭제 불가에 의해
+	case 0:
 		CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_GUILDWARNING);
 		break;
-	case 3:	// 아이템 블럭된 캐릭터
+	case 3:
 		CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_ITEM_BLOCK);
 		break;
-	case 2:	// 주민번호 틀림
+	case 2:
 	default:
 		CUIMng::Instance().PopUpMsgWin(MESSAGE_STORAGE_RESIDENTWRONG);
 		break;
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 로그아웃
-///////////////////////////////////////////////////////////////////////////////
 
 int SummonLife = 0;
 
@@ -1332,34 +746,29 @@ void InitGame()
 	
 	//World = -1;
 	
-	SendExitInventory ();		// 왜 이걸 서버로 보내는지 확인할 것.
+	SendExitInventory ();
 	
 	g_iFollowCharacter = -1;
 	
 	LockInputStatus = false;
 	
-	//  수리.
 	RepairEnable = 0;
 	CheckSkill = -1;
 	
-	//  공지 초기화.
 	ClearNotice ();
 	
-	//  술 효과 초기화.
-
 	CharacterAttribute->Ability = 0;
 	CharacterAttribute->AbilityTime[0] = 0;
 	CharacterAttribute->AbilityTime[1] = 0;
 	CharacterAttribute->AbilityTime[2] = 0;
 	
 #ifdef KJH_FIX_WOPS_K27340_INIT_STORAGE_GOLD
-	// 창고/보유 금액 초기화
 	CharacterMachine->StorageGold	= 0;
 	CharacterMachine->Gold			= 0;
 #endif // KJH_FIX_WOPS_K27340_INIT_STORAGE_GOLD
 
 	
-	g_shEventChipCount = 0;          //  제나개수.
+	g_shEventChipCount = 0;
 	g_shMutoNumber[0]  = -1;
 	g_shMutoNumber[1]  = -1;
 	g_shMutoNumber[2]  = -1;
@@ -1368,7 +777,6 @@ void InitGame()
 	
     matchEvent::ClearMatchInfo();
 	
-	//  파티 정보 초기화.
 	InitPartyList();
 	
 	g_csQuest.clearQuest ();
@@ -1380,7 +788,6 @@ void InitGame()
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 	g_pNewUISystem->Hide( SEASON3B::INTERFACE_DUEL_WINDOW );
 	
-	// UI 매니저 초기화
 	if( g_pUIManager )
 		g_pUIManager->Init();
 	
@@ -1393,9 +800,7 @@ void InitGame()
 	RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_SALE);
 	RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE);
 	
-	g_pNewUIHotKey->SetStateGameOver(false);	
-	
-	// 개인상점 제목 초기화
+	g_pNewUIHotKey->SetStateGameOver(false);
 	g_pMyShopInventory->ResetSubject();
 	g_pChatListBox->ResetFilter();
 
@@ -1413,7 +818,7 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	case 0:
 		SendMessage(g_hWnd, WM_DESTROY, 0, 0);
 		break;
-	case 1://케릭창
+	case 1:
 		if ( !bEncrypted)
 		{
 			GO_DEBUG;
@@ -1441,7 +846,7 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		CurrentProtocolState = REQUEST_JOIN_SERVER;
 		InitGame();
 		break;
-	case 2://서버 선택창
+	case 2:
 		if(SceneFlag == MAIN_SCENE)
 		{
 			CryWolfMVPInit();
@@ -1484,16 +889,10 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	TheShopServerProxy().ShopReset( true );
 #endif //NEW_USER_INTERFACE_SHELL
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x02 [ReceiveServerList(%d)]", Data->Value);
-#endif // CONSOLE_DEBUG
-	
+
 	return ( TRUE);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 시작, 다시 살아날때
-///////////////////////////////////////////////////////////////////////////////
 
 int HeroIndex;
 
@@ -1543,7 +942,6 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		CharacterAttribute->Experience = (int)Data_Exp;
 	}
 	
-	// 다음 레벨 경험치
 	Data_Exp = 0x0000000000000000;
 	Master_Level_Data.lNext_MasterLevel_Experince = 0x0000000000000000;
 	
@@ -1594,11 +992,8 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	CharacterAttribute->AbilityTime[2]= 0;
 	CharacterAttribute->Shield		  = Data->Shield;
 	CharacterAttribute->ShieldMax	  = Data->ShieldMax;
-	
-    //  추가되는 스텟 정보.
     CharacterAttribute->AddPoint		= Data->AddPoint;
     CharacterAttribute->MaxAddPoint		= Data->MaxAddPoint;
-	// 마이너스 스탯 정보
 	CharacterAttribute->wMinusPoint     = Data->wMinusPoint;
     CharacterAttribute->wMaxMinusPoint  = Data->wMaxMinusPoint;
 	
@@ -1613,7 +1008,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	OpenWorld(World);
 
 #ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-	g_bReponsedMoveMapFromServer = TRUE;		// 맵이동 응답 월드로딩OK
+	g_bReponsedMoveMapFromServer = TRUE;
 	LoadingWorld = 30;
 #endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 	
@@ -1654,7 +1049,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 #endif //LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER
 
 	memcpy(c->ID,(char *)CharacterAttribute->Name,MAX_ID_SIZE);
-    //  초기화.
+
     for ( int i=0; i<MAX_EQUIPMENT; ++i )
     {
         CharacterMachine->Equipment[i].Type = -1;
@@ -1669,33 +1064,29 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
     CheckIME_Status(true,0);
 	
 #ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-	g_bReponsedMoveMapFromServer = TRUE;		// 맵이동 응답 월드로딩OK
+	g_bReponsedMoveMapFromServer = TRUE;
 #endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
     LoadingWorld = 30;
     MouseUpdateTime = 0;
     MouseUpdateTimeMax = 6;
-#ifdef PET_SYSTEM
+
     CreatePetDarkSpirit_Now ( Hero );
-#endif// PET_SYSTEM
-    CreateEffect(BITMAP_MAGIC+2,o->Position,o->Angle,o->Light,0,o);
+
+	CreateEffect(BITMAP_MAGIC+2,o->Position,o->Angle,o->Light,0,o);
     o->Alpha = 0.f;
 	
 	g_pNewUISystem->HideAll();
     
-    //  초기화.
-    SelectedItem      = -1;
-    SelectedNpc       = -1;
-    SelectedCharacter = -1;
-    SelectedOperate   = -1;
-    Attacking         = -1;
-    
-    //  수리.
-    RepairEnable = 0;
+    SelectedItem		= -1;
+    SelectedNpc			= -1;
+    SelectedCharacter	= -1;
+    SelectedOperate		= -1;
+    Attacking			= -1;
+    RepairEnable		= 0;
    
     Hero->Movement = false;
     SetPlayerStop(Hero);
-	
-    //  블러드 캐슬의 음악을 제거한다.
+
     if ( InBloodCastle() == false )
     {
         StopBuffer ( SOUND_BLOODCASTLE, true );
@@ -1754,13 +1145,6 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 #endif // KJH_MOD_RESOURCE_GUARD
 #endif // RESOURCE_GUARD && FOR_WORK
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
-#ifndef ASG_FIX_QUEST_PROTOCOL_ADD
-	g_QuestMng.SetQuestIndexByEtcList(NULL, 0);	// 기타 상황에 의한 퀘스트 리스트 초기화.
-	SendRequestProgressQuestList();	// 진행중인 퀘스트 리스트 요청.
-#endif	// ASG_FIX_QUEST_PROTOCOL_ADD
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
-
 	g_pUIMapName->ShowMapName();
 
 #ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
@@ -1772,9 +1156,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	else
 #endif	// YDG_ADD_DOPPELGANGER_EVENT
 	{
-		//텍스트 표시부분 추가
 		char Text[256];
-		// 484 "에 오신것을 환영합니다."
 		
 #ifndef GRAMMAR_VERB
 		sprintf(Text,"%s%s",GetMapName( World),GlobalText[484]);
@@ -1805,9 +1187,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	}
 #endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveJoinMapServer]");
-#endif // CONSOLE_DEBUG
 	
 #ifdef PJH_DEBUG
 	wsprintf(Text,"맵로딩완료(join)[time : %d]", GetTickCount());
@@ -1867,7 +1247,7 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 	int TempGuild = Hero->GuildMarkIndex;
 	
 	CHARACTER *c = &CharactersClient[HeroIndex];
-	// 길드관계는 백업
+
 	BYTE BackUpGuildStatus = c->GuildStatus;
 	BYTE BackUpGuildType = c->GuildType;
 	BYTE BackUpGuildRelationShip = c->GuildRelationShip;
@@ -1916,7 +1296,7 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 		OpenWorld(World);
 
 #ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		g_bReponsedMoveMapFromServer = TRUE;		// 부활 한경우 월드로딩OK
+		g_bReponsedMoveMapFromServer = TRUE;
 		LoadingWorld = 30;
 #endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 		
@@ -1984,9 +1364,7 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 
 	g_pNewUISystem->HideAll();
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x04 [ReceiveRevival]");
-#endif // CONSOLE_DEBUG
 	
 }
 
@@ -2098,9 +1476,9 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 	if(Master_Skill_Bool > -1 && Skill_Bool > -1)
 		CharacterAttribute->Skill[Skill_Bool] = 0;
 #endif //#ifdef PJH_FIX_4_BUGFIX_33
-#ifdef CONSOLE_DEBUG
+
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x11 [ReceiveMagicList]");
-#endif // CONSOLE_DEBUG
+
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -2111,7 +1489,7 @@ BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	{
 		CharacterMachine->Equipment[i].Type = -1;
 		CharacterMachine->Equipment[i].Number = 0;
-        CharacterMachine->Equipment[i].Option1 = 0; //  추가 옵션. ( 액설런트 )
+        CharacterMachine->Equipment[i].Option1 = 0;
 	}
 
 	g_pMyInventory->UnequipAllItems();
@@ -2158,9 +1536,7 @@ BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		Offset += sizeof(PRECEIVE_INVENTORY);
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x10 [ReceiveInventory]");
-#endif // CONSOLE_DEBUG
 	
 	return ( TRUE);
 }
@@ -2201,9 +1577,7 @@ void ReceiveDeleteInventory( BYTE *ReceiveBuffer )
 		EnableUse = 0;
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x28 [ReceiveDeleteInventory(%d %d)]", Data->SubCode, Data->Value);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveTradeInventory( BYTE *ReceiveBuffer )
@@ -2211,14 +1585,14 @@ void ReceiveTradeInventory( BYTE *ReceiveBuffer )
 	LPPHEADER_DEFAULT_SUBCODE_WORD Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer;
 	int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
 
-	if(Data->SubCode == 3)//믹스창 조합 실패
+	if(Data->SubCode == 3)
 	{
 		g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
 		PlayBuffer(SOUND_MIX01);
 		PlayBuffer(SOUND_BREAK01);
 		g_pMixInventory->DeleteAllItems();
 	}
-    else if ( Data->SubCode==5 )    //  조련사 조합 실패
+    else if ( Data->SubCode==5 )
     {
 		g_pChatListBox->AddText( "", GlobalText[1208], SEASON3B::TYPE_ERROR_MESSAGE);
 		PlayBuffer ( SOUND_MIX01 );
@@ -2262,9 +1636,7 @@ void ReceiveTradeInventory( BYTE *ReceiveBuffer )
 		Offset += sizeof(PRECEIVE_INVENTORY);
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x31 [ReceiveTradeInventory]");
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveChat( BYTE *ReceiveBuffer )
@@ -2289,11 +1661,7 @@ void ReceiveChat( BYTE *ReceiveBuffer )
 		char Text[MAX_CHAT_SIZE+1];
 		memset(Text, 0, MAX_CHAT_SIZE+1);
 		
-		if(Data->ChatText[0]=='~'
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-			|| Data->ChatText[0]==']'
-#endif	// SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-			)
+		if(Data->ChatText[0]=='~')
 		{
 			for(int i=0;i<MAX_CHAT_SIZE-1;i++)
 				Text[i] = Data->ChatText[i+1];
@@ -2478,9 +1846,7 @@ void ReceiveNotice( BYTE *ReceiveBuffer )
 		}
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x0D [ReceiveNotice(%s)]", Data->Notice);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveMoveCharacter(BYTE *ReceiveBuffer,int Size)
@@ -2542,9 +1908,7 @@ void ReceiveMoveCharacter(BYTE *ReceiveBuffer,int Size)
 				}
 			}
 
-#ifdef CONSOLE_DEBUG
 			g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
-#endif // CONSOLE_DEBUG
 		}
 	}
 }
@@ -2654,7 +2018,6 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_FRIEND);
 				
                 SetCharacterClass ( Hero );
-				//카오스 캐슬에서는 헬퍼 표시 안함
 				DeleteBug(&Hero->Object);
             }
             if ( InChaosCastle()==false )
@@ -2696,11 +2059,7 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 #endif	// YDG_ADD_DOPPELGANGER_EVENT
 			{
 				char Text[256];
-#ifndef GRAMMAR_VERB
-				sprintf(Text,"%s%s",GetMapName( World),GlobalText[484]);
-#else //GRAMMAR_VERB
 				sprintf(Text,"%s%s",GlobalText[484],GetMapName( World));
-#endif //GRAMMAR_VERB
 			
 				g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 			}
@@ -2708,7 +2067,7 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		SendRequestFinishLoading();
 
 #ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		g_bReponsedMoveMapFromServer = TRUE;			// 텔레포트로 맵이동 월드이동OK
+		g_bReponsedMoveMapFromServer = TRUE;
 #endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 		LoadingWorld = 30;
 
@@ -2737,15 +2096,12 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		o->Alpha = 0.f;
         EnableEvent = 0; //USE_EVENT_ELDORADO
 		
-        //  초기화.
-        SelectedItem      = -1;
-        SelectedNpc       = -1;
-        SelectedCharacter = -1;
-        SelectedOperate   = -1;
-        Attacking         = -1;
-		
-        //  수리.
-        RepairEnable = 0;
+        SelectedItem		= -1;
+        SelectedNpc			= -1;
+        SelectedCharacter	= -1;
+        SelectedOperate		= -1;
+        Attacking			= -1;
+        RepairEnable		= 0;
     }
 	
     Hero->Movement = false;
@@ -2774,20 +2130,10 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	}
 #endif //LJH_FIX_NOT_INITIALIZING_BATTLECASTLE_UI
 
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1C [ReceiveTeleport(%d)]", Data->Flag);
-#endif // CONSOLE_DEBUG
 	
-#ifdef PJH_DEBUG
-	wsprintf(Text,"맵로딩완료(tel)[time : %d]", GetTickCount());
-	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);
-#endif
 	return ( TRUE);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터, 뷰포트
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceiveEquipment( BYTE *ReceiveBuffer )
 {
@@ -2796,7 +2142,6 @@ void ReceiveEquipment( BYTE *ReceiveBuffer )
 	ChangeCharacterExt(FindCharacterIndex(Key),Data->Equipment);
 }
 
-//  화면상의 캐릭터가 장비를 교체했을때 모습이 바뀌는 처리.
 void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 {	
 	LPPCHANGE_CHARACTER Data = (LPPCHANGE_CHARACTER)ReceiveBuffer;
@@ -2804,12 +2149,11 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
     CHARACTER *c = &CharactersClient[FindCharacterIndex(Key)];
 	OBJECT *o = &c->Object;
 	
-	int Type = ConvertItemType(Data->Item); //  아이템 종류.
-	BYTE Level = Data->Item[1]&0xf;         //  레벨.
-    BYTE Option= Data->Item[3]&63;          //  액설런트 아이템.
-    BYTE ExtOption = Data->Item[4];         //  세트 옵션.
+	int Type = ConvertItemType(Data->Item);
+	BYTE Level = Data->Item[1]&0xf;
+    BYTE Option= Data->Item[3]&63;
+    BYTE ExtOption = Data->Item[4];
 	
-    //  장비 부위.
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 #else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
     int maxClass = MAX_CLASS;
@@ -2835,22 +2179,18 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
         {
             c->Weapon[1].Type = -1;
             c->Weapon[1].Option1 = 0;
-#ifdef PET_SYSTEM
 #ifdef KJH_FIX_JP0467_RENDER_DARKLOAD_PET_OTHER_CHARATER
             DeletePet ( c );            
 #else // KJH_FIX_JP0467_RENDER_DARKLOAD_PET_OTHER_CHARATER
             DeletePet ( Hero );            
 #endif // KJH_FIX_JP0467_RENDER_DARKLOAD_PET_OTHER_CHARATER
-#endif// PET_SYSTEM
         }
 		else
 		{
 			c->Weapon[1].Type = MODEL_ITEM + Type;
 			c->Weapon[1].Level = LevelConvert(Level);
             c->Weapon[1].Option1 = Option;
-#ifdef PET_SYSTEM
             CreatePetDarkSpirit_Now ( c );
-#endif// PET_SYSTEM
 			g_SummonSystem.RemoveEquipEffects( c );
 		}
 		break;
@@ -2940,7 +2280,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 #ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 			if (c->Wing.Type == MODEL_WING+39 ||
 				c->Wing.Type==MODEL_HELPER+30 ||
-				c->Wing.Type==MODEL_WING+130 ||   // 추가
+				c->Wing.Type==MODEL_WING+130 ||
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				c->Wing.Type == MODEL_WING+49 ||
 				c->Wing.Type == MODEL_WING+50 ||
@@ -2962,7 +2302,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 #ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 			if (c->Wing.Type == MODEL_WING+39 ||
 				c->Wing.Type==MODEL_HELPER+30 ||
-				c->Wing.Type==MODEL_WING+130 ||   // 추가
+				c->Wing.Type==MODEL_WING+130 ||
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				c->Wing.Type == MODEL_WING+49 ||
 				c->Wing.Type == MODEL_WING+50 ||
@@ -2998,7 +2338,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 			case ITEM_HELPER+2:CreateBug(MODEL_UNICON  ,o->Position,o);break;
 			case ITEM_HELPER+3:CreateBug(MODEL_PEGASUS, o->Position,o);break;
 			case ITEM_HELPER+4:CreateBug(MODEL_DARK_HORSE ,o->Position,o);break;
-			case ITEM_HELPER+37:	// 펜릴 생성	//^ 펜릴 모델 생성
+			case ITEM_HELPER+37:
 				c->Helper.Option1 = Option;
 				if(Option == 0x01)
 				{
@@ -3074,7 +2414,6 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 		Temp[MAX_ID_SIZE] = NULL;
         if(FindText(Temp, "webzen") == false)
 		{
-			// 텔레포트로 인한 캐릭재생성일 경우 길드관련 변수들 백업
 			int Index;
 			short BackUpGuildMarkIndex = -1; 
 			BYTE BackUpGuildStatus = 0;
@@ -3082,13 +2421,13 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 			BYTE BackUpGuildRelationShip = 0;
 			BYTE BackUpGuildMasterKillCount = 0;
             BYTE  EtcPart = 0;
-			// ctlcode 백업
+			// ctlcode
 			BYTE BackupCtlcode = 0;
 			
-			if( (Data2->Class&0x07) == 1 )	// 공간이동이라면.
+			if( (Data2->Class&0x07) == 1 )
 			{
-				Index = FindCharacterIndex(Key);		// 인덱스를 찾아서 저장
-				if( Index != MAX_CHARACTERS_CLIENT )	// 인덱스가 400이 아니라면
+				Index = FindCharacterIndex(Key);
+				if( Index != MAX_CHARACTERS_CLIENT )
 				{
 					BackUpGuildMarkIndex = CharactersClient[Index].GuildMarkIndex;
 					BackUpGuildStatus = CharactersClient[Index].GuildStatus;
@@ -3098,15 +2437,15 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 					BackUpGuildMasterKillCount = CharactersClient[Index].GuildMasterKillCount;
 				}
 
-				if(&CharactersClient[Index] == Hero)	// 자기 자신이면
+				if(&CharactersClient[Index] == Hero)
 				{
 					BackupCtlcode	= CharactersClient[Index].CtlCode;
 				}
 			}
-			else	// 다른 클래스라면
+			else
 			{
 				Index = FindCharacterIndex(Key);
-				if( Index != MAX_CHARACTERS_CLIENT )	// 인덱스가 400이 아니라면
+				if( Index != MAX_CHARACTERS_CLIENT )
 				{
 					BackUpGuildMarkIndex = CharactersClient[Index].GuildMarkIndex;
 					BackUpGuildStatus = CharactersClient[Index].GuildStatus;
@@ -3116,20 +2455,19 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 					EtcPart = CharactersClient[Index].EtcPart;
 				}
 					
-				if(&CharactersClient[Index] == Hero)	// 자기 자신이면
+				if(&CharactersClient[Index] == Hero)
 				{
 					BackupCtlcode	= CharactersClient[Index].CtlCode;
 				}
 			}
 			
-			// 캐릭터 새로 생성
 			CHARACTER *c = CreateCharacter(Key,MODEL_PLAYER,Data2->PositionX,Data2->PositionY,0);
-			DeleteCloth(c, &c->Object);	// 옷감 관련 제거
+			DeleteCloth(c, &c->Object);
 			
 			OBJECT *o = &c->Object;
 			c->Class = ChangeServerClassTypeToClientClassType(Data2->Class);
 			c->Skin = 0;
-			c->PK    = Data2->Path&0xf;		// Data2->Path뒤의 4바이트가 PK레벨
+			c->PK    = Data2->Path&0xf;
 			o->Kind  = KIND_PLAYER;
 				
 #ifdef PK_ATTACK_TESTSERVER_LOG
@@ -3162,7 +2500,6 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 				break;
 			}
 
-			// 위치, 타켓, 각도 입력
 			c->PositionX = Data2->PositionX;
 			c->PositionY = Data2->PositionY;
 #ifdef CSK_FIX_SYNCHRONIZATION
@@ -3175,9 +2512,7 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 			
 			c->Object.Angle[2] = ((float)(Data2->Path>>4)-1.f)*45.f;
 			
-#ifdef CONSOLE_DEBUG
 			g_ConsoleDebug->Write(MCD_RECEIVE, "(RCPV)ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
-#endif // CONSOLE_DEBUG
 				
 			if(CreateFlag)
 			{
@@ -3195,8 +2530,7 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 			{
 				CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 8, o, 20.f );
 			}
-#ifdef LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM // 복원하는 순서를 바꿈
-			// 텔레포트로 인한 캐릭재생성일 경우 길드관련 변수들 복원
+#ifdef LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
 			if( (Data2->Class&0x07) == 1 && Index != MAX_CHARACTERS_CLIENT )
 			{	
 				c->GuildMarkIndex = BackUpGuildMarkIndex;
@@ -3229,7 +2563,6 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 #else
 			ChangeCharacterExt(FindCharacterIndex(Key),Data2->Equipment);
 				
-			// 텔레포트로 인한 캐릭재생성일 경우 길드관련 변수들 복원
 			if( (Data2->Class&0x07) == 1 && Index != MAX_CHARACTERS_CLIENT )
 			{	
 				c->GuildMarkIndex = BackUpGuildMarkIndex;
@@ -3267,15 +2600,13 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 				c->EtcPart = EtcPart;
 			}
 						
-			// 마법 상태 세팅
 			for( int j = 0; j < Data2->s_BuffCount; ++j )
 			{
 				RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
 
 				battleCastle::SettingBattleFormation ( c, static_cast<eBuffState>(Data2->s_BuffEffectState[j]) );
-#ifdef CONSOLE_DEBUG
+
 				g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
-#endif // CONSOLE_DEBUG				
 			}
 
 			if( battleCastle::InBattleCastle() && battleCastle::IsBattleCastleStart() )
@@ -3287,12 +2618,9 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 		Offset += (sizeof(PCREATE_CHARACTER)-(sizeof(BYTE)*(MAX_BUFF_SLOT_INDEX-Data2->s_BuffCount)));
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x12 [ReceiveCreatePlayerViewport(%d)]", Data->Value);
-#endif // CONSOLE_DEBUG
 }
 
-// 변신 반지 착용하면 받는 정보
 void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
@@ -3313,7 +2641,6 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 		int iIndex = FindCharacterIndex(Key);
 		pCha = &CharactersClient[iIndex];
 		
-		// 공성전 관련 백업
 		short sBackUpGuildMarkIndex = -1; 
 		BYTE byBackUpGuildStatus = 0;
 		BYTE byBackUpGuildType = 0;
@@ -3335,20 +2662,15 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 		
         if(FindText(Temp, "webzen") == false)
 		{
-			// 클래스 입력
 			int Class = ChangeServerClassTypeToClientClassType(Data2->Class);
             
-			// 변신할 타입
             WORD Type = ((WORD)(Data2->TypeH)<<8) + Data2->TypeL;
 			
-			// 몬스터 생성
 			CHARACTER *c = CreateMonster(Type,Data2->PositionX,Data2->PositionY,Key);
 			OBJECT *o = &c->Object;
 			
-			if(c->MonsterIndex == 7)	// 자이언트
+			if(c->MonsterIndex == 7)
 			{
-				// 원래 자이언트 몬스터는 스케일이 큰데 왜 자이언트로 변신하면 스케일을
-				// 작게 만들었을까?
 				o->Scale = 0.8f;
 			}
 			
@@ -3364,7 +2686,6 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 			
 			DeleteCloth(c, o);
 			
-			// 공성전 관련 저장
 			c->GuildMarkIndex = sBackUpGuildMarkIndex;
 			c->GuildStatus = byBackUpGuildStatus;
 			c->GuildType = byBackUpGuildType;
@@ -3374,8 +2695,8 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 			c->CtlCode = byBackupCtlcode;
 			c->Class  = Class;
 			c->PK     = Data2->Path&0xf;
-			o->Kind   = KIND_PLAYER;	// 종류를 플레이어로 설정
-			c->Change = true;			// 변신상태 true 설정
+			o->Kind   = KIND_PLAYER;
+			c->Change = true;
 			
 #ifdef PK_ATTACK_TESTSERVER_LOG
 			PrintPKLog(c);
@@ -3385,9 +2706,8 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 			{
 				RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
 				battleCastle::SettingBattleFormation ( c, static_cast<eBuffState>(Data2->s_BuffEffectState[j]) );
-#ifdef CONSOLE_DEBUG
+
 				g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
-#endif // CONSOLE_DEBUG	
 			}
 	
 			c->PositionX = Data2->PositionX;
@@ -3409,7 +2729,6 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 				c->Movement = true;
 			}
 			
-			// 아이디 입력
 			memcpy(c->ID,(char *)Data2->ID,MAX_ID_SIZE);
 			c->ID[MAX_ID_SIZE] = NULL;
 			
@@ -3419,9 +2738,7 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 		Offset += (sizeof(PCREATE_TRANSFORM)-(sizeof(BYTE)*(MAX_BUFF_SLOT_INDEX-Data2->s_BuffCount)));
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x45 [ReceiveCreateTransformViewport(%d)]", Data->Value);
-#endif // CONSOLE_DEBUG
 }
 
 void AppearMonster(CHARACTER *c)
@@ -3429,40 +2746,39 @@ void AppearMonster(CHARACTER *c)
 	OBJECT *o = &c->Object;
 	switch(c->MonsterIndex)
 	{
-	case 44://드래곤
+	case 44:
 		SetAction(o,MONSTER01_STOP2);
 		o->PriorAction = MONSTER01_STOP2;
 		c->Object.Alpha = 1.f;
 		PlayBuffer(SOUND_MONSTER+124);
 		break;
-	case 21://암살자
+	case 21:
 		SetAction(o,MONSTER01_STOP2);
 		o->PriorAction = MONSTER01_STOP2;
 		c->Object.Alpha = 1.f;
 		PlayBuffer(SOUND_ASSASSIN);
 		break;
-	case 53://지하괴물
-	case 54://지하괴물
+	case 53:
+	case 54:
 		c->Appear = 60;
 		SetAction(o,MONSTER01_STOP2);
 		o->PriorAction = MONSTER01_STOP2;
 		c->Object.Alpha = 1.f;
 		//PlayBuffer(SOUND_ASSASSIN);
 		break;
-	case 85 :	//. 오크궁수대장1
-	case 91 :	//. 오크궁수대장2
-	case 97 :	//. 오크궁수대장3
-	case 114 :	//. 오크궁수대장4
-	case 120 :	//. 오크궁수대장5
-	case 126 :	//. 오크궁수대장6
+	case 85 :
+	case 91 :
+	case 97 :
+	case 114 :
+	case 120 :
+	case 126 :
 		PlayBuffer(SOUND_MONSTER+161);
         break;
-		// MVP 몹 소환 될때 효과
 	case 440:
-	case 340:	// 다크엘프
-	case 341:	// 소람
-	case 344:	// 발람
-	case 345:	// 데스 스피릿
+	case 340:
+	case 341:
+	case 344:
+	case 345:
 		{
 			if(g_Direction.m_CMVP.m_iCryWolfState == CRYWOLF_STATE_READY)
 				c->Object.Alpha = 1.0f;
@@ -3473,18 +2789,15 @@ void AppearMonster(CHARACTER *c)
 				vec3_t vPos;
 				Vector(c->Object.Position[0]+20.0f, c->Object.Position[1]+20.0f, c->Object.Position[2], vPos);
 				
-				// 몬스터 소환 효과 - 하늘에서 번개 떨어지기
 				CreateJoint ( BITMAP_JOINT_THUNDER+1, vPos, vPos, c->Object.Angle, 7, NULL, 60.f+rand()%10 );
 				CreateJoint ( BITMAP_JOINT_THUNDER+1, vPos, vPos, c->Object.Angle, 7, NULL, 50.f+rand()%10 );
 				CreateJoint ( BITMAP_JOINT_THUNDER+1, vPos, vPos, c->Object.Angle, 7, NULL, 50.f+rand()%10 );
 				CreateJoint ( BITMAP_JOINT_THUNDER+1, vPos, vPos, c->Object.Angle, 7, NULL, 60.f+rand()%10 );
 				
-				// 몬스터 소환 효과 - 번개 떨어진 지점에 연기 나기
 				CreateParticle ( BITMAP_SMOKE+4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
 				CreateParticle ( BITMAP_SMOKE+4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
 				CreateParticle ( BITMAP_SMOKE+4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
 				
-				// 몬스터 소환 효과 - 몹 나타 나면서 주위에 번개 효과
 				Vector(c->Object.Position[0], c->Object.Position[1], c->Object.Position[2]+120.0f, vPos);
 				CreateJoint(BITMAP_JOINT_THUNDER, c->Object.Position, vPos, c->Object.Angle, 17);
 				CreateJoint(BITMAP_JOINT_THUNDER, c->Object.Position, vPos, c->Object.Angle, 17);
@@ -3515,7 +2828,6 @@ void AppearMonster(CHARACTER *c)
 	}
 }
 
-// 화면에 들어온 몬스터를 생성한다.
 void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
@@ -3537,15 +2849,12 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		
 		int CreateFlag = (Key>>15);
-		// 몬스터가 순간이동 후 나올때 효과를 있는지 없는지
 		int TeleportFlag = (Data2->KeyH&0x40)>>6;
 		
 		Key &= 0x7FFF;
 		CHARACTER *c = CreateMonster(Type,Data2->PositionX,Data2->PositionY,Key);
 		
-#ifdef CONSOLE_DEBUG
 		g_ConsoleDebug->Write(MCD_RECEIVE, "0x13 [ReceiveCreateMonsterViewport(Type : %d | Key : %d)]", Type, Key);
-#endif // CONSOLE_DEBUG	
 		
 		if(c == NULL) break;
 
@@ -3555,9 +2864,7 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 		{
 			RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
 
-#ifdef CONSOLE_DEBUG
 			g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
-#endif // CONSOLE_DEBUG	
 		}
 		
 		float fAngle = 45.0f;
@@ -3578,7 +2885,6 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 
 		c->Object.Angle[2] = ((float)(Data2->Path>>4)-1.f)*fAngle;
 #ifdef PBG_ADD_LITTLESANTA_NPC
-		// 리틀산타의 바라보는 방향을 Z축 90.
 		if(o->Type >= MODEL_LITTLESANTA+1 && o->Type <= MODEL_LITTLESANTA+4)
 		{
 			c->Object.Angle[2] = 90.f;
@@ -3613,13 +2919,12 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 		
         if ( battleCastle::InBattleCastle() && c->MonsterIndex==277 )        
         {
-            //  State값에 따라 행동을 결정한다.
-			if( g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen) )	//  성문이 열려있는 상태.
+			if( g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen) )
 			{
 				SetAction ( &c->Object, 1 );
 				battleCastle::SetCastleGate_Attribute ( Data2->PositionX, Data2->PositionY, 0 );
 			}
-			else														 //  성문이 닫혀있는 상태.
+			else
 			{
 				SetAction ( &c->Object, 0 );
 				battleCastle::SetCastleGate_Attribute ( Data2->PositionX, Data2->PositionY, 1 );
@@ -3629,7 +2934,6 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 		{
             AppearMonster(c);
 		}
-		// 칸투르3차 나이트메어전에서 나이트메어 순간이동 후 나올때 효과
 		else if(World == WD_39KANTURU_3RD && o->Type == MODEL_MONSTER01+121 && TeleportFlag)
 		{
 			vec3_t Light;
@@ -3640,12 +2944,12 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 			PlayBuffer(SOUND_KANTURU_3RD_NIGHTMARE_TELE);
 		}
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
-		int iDefaultWall = TW_CHARACTER;	//보통일때는 2이상이면 벽으로 체크
+		int iDefaultWall = TW_CHARACTER;
 
 		if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4
 			&& Key != HeroKey)
 		{
-			iDefaultWall = TW_NOMOVE;	// 도플갱어 몬스터는 유저를 뚫고지나간다
+			iDefaultWall = TW_NOMOVE;
 		}
 
 		else if(PathFinding2(c->PositionX, c->PositionY, Data2->TargetX, Data2->TargetY, &c->Path, 0.0f, iDefaultWall))
@@ -3658,7 +2962,7 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 #ifdef KJH_FIX_BTS167_MOVE_NPC_IN_VIEWPORT
 		else
 		{
-			c->Movement = false;			// 초기값
+			c->Movement = false;
 		}
 #endif // KJH_FIX_BTS167_MOVE_NPC_IN_VIEWPORT
 
@@ -3679,10 +2983,7 @@ void ReceiveCreateSummonViewport( BYTE *ReceiveBuffer )
 		Key &= 0x7FFF;
 		
         CHARACTER* c;
-#ifdef ADD_ELF_SUMMON
-		// for test
-#endif // ADD_ELF_SUMMON
-        //  칼리마로 통하는 마석의 경우.
+
 		if ( Type>=152 && Type<=158 )
         {
             c = CreateHellGate ( &Data2->ID[0], Key, Type, Data2->PositionX,Data2->PositionY, CreateFlag );
@@ -3700,9 +3001,7 @@ void ReceiveCreateSummonViewport( BYTE *ReceiveBuffer )
 		{
 			RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
 
-#ifdef CONSOLE_DEBUG
 			g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
-#endif // CONSOLE_DEBUG	
 		}
 		
 		c->Object.Angle[2] = ((float)(Data2->Path>>4)-1.f)*45.f;
@@ -3723,22 +3022,11 @@ void ReceiveCreateSummonViewport( BYTE *ReceiveBuffer )
         if ( Type<152 || Type>158 )
         {
             char Temp[100];
-#ifdef GRAMMAR_OF
-			// 글로벌
             strcat(c->ID,GlobalText[485]);
             memcpy(Temp,Data2->ID,MAX_ID_SIZE);
             Temp[MAX_ID_SIZE] = NULL;
             strcat(c->ID,Temp);
-#else // GRAMMAR_OF
-			// 한국
-            strcpy(Temp,c->ID);
-            memcpy(c->ID,Data2->ID,MAX_ID_SIZE);
-            c->ID[MAX_ID_SIZE] = NULL;
-            strcat(c->ID,GlobalText[485]);
-            strcat(c->ID,Temp);
-#endif // GRAMMAR_OF
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
-			// 만든 요정 ID 저장
             memcpy(c->OwnerID,Data2->ID,MAX_ID_SIZE);
             c->OwnerID[MAX_ID_SIZE] = NULL;
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
@@ -3764,9 +3052,7 @@ void ReceiveCreateSummonViewport( BYTE *ReceiveBuffer )
 		Offset += (sizeof(PCREATE_SUMMON)-(sizeof(BYTE)*(MAX_BUFF_SLOT_INDEX-Data2->s_BuffCount)));
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1F [ReceiveCreateSummonViewport(%d)]", Data->Value);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveDeleteCharacterViewport( BYTE *ReceiveBuffer )
@@ -3797,7 +3083,6 @@ void ReceiveDeleteCharacterViewport( BYTE *ReceiveBuffer )
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		Key &= 0x7FFF;
 		
-		// 상점 연 캐릭터가 다른 맵으로 이동하면 구매창 닫는 처리 
 		int iIndex = g_pPurchaseShopInventory->GetShopCharacterIndex();
 		if(iIndex >=0 && iIndex < MAX_CHARACTERS_CLIENT)
 		{
@@ -3828,11 +3113,6 @@ void ReceiveDeleteCharacterViewport( BYTE *ReceiveBuffer )
 		Offset += sizeof(PDELETE_CHARACTER);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 공격
-///////////////////////////////////////////////////////////////////////////////
-
 int AttackPlayer = 0;
 
 void ReceiveDamage( BYTE *ReceiveBuffer )
@@ -3870,7 +3150,6 @@ void ProcessDamageCastle( LPPRECEIVE_ATTACK Data)
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	WORD ShieldDamage	= (((WORD)(Data->ShieldDamageH)<<8) + Data->ShieldDamageL);
 	
-	//데미지를 가지고 표현 형태를 결정
 	int accumDamage = ShieldDamage + Damage;
 	int	rstDamage = -1;
 	float rstScale = 0.8f;
@@ -3957,7 +3236,7 @@ void ProcessDamageCastle( LPPRECEIVE_ATTACK Data)
 		}
 		else
 		{
-			if (c->MonsterIndex == 275);	// 쿤둔의 경우 피격 처리 안함
+			if (c->MonsterIndex == 275);
 			else if(rand()%2==0)
 				SetPlayerShock(c,Damage);
 		}
@@ -3972,12 +3251,10 @@ void ProcessDamageCastle( LPPRECEIVE_ATTACK Data)
 	c->Hit = Damage;
 }
 
-//누군가 얻어맞음
 void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_ATTACK Data = (LPPRECEIVE_ATTACK)ReceiveBuffer;
 
-	//카오스 캐슬에서는 데미지 체계 다르게 처리
 	if(InChaosCastle())
 	{
 		ProcessDamageCastle(Data);
@@ -3994,7 +3271,7 @@ void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 	vec3_t Light;
 	WORD Damage			= (((WORD)(Data->DamageH)<<8) + Data->DamageL);
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-	// DamageType 에서 0~7까지만 사용으로 0x20 0x10비트 사용
+	// DamageType
 	int	 DamageType		= (Data->DamageType)&0x0f;
 	bool bRepeatedly = (Data->DamageType>>4)&0x01;
 	bool bEndRepeatedly = (Data->DamageType>>5)&0x01;
@@ -4052,7 +3329,6 @@ void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 			else
 				CharacterAttribute->Shield -= ShieldDamage;
 			
-			// 방어막 넣을 부분
 			if( g_isCharacterBuff( o, eBuff_PhysDefense ) && o->Type==MODEL_PLAYER )			
 			{
 				CHARACTER *cm = &CharactersClient[AttackPlayer];
@@ -4072,9 +3348,8 @@ void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 		}
 		else
 		{
-			if (c->MonsterIndex == 275)	// 쿤둔의 경우 피격 처리 안함
+			if (c->MonsterIndex == 275)
 			{
-				// 아무처리 안함
 			}
 			else if(rand()%2==0)
 			{
@@ -4191,9 +3466,7 @@ void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 	}
 	c->Hit = Damage;
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, Damage);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveAction(BYTE *ReceiveBuffer,int Size)
@@ -4211,7 +3484,7 @@ void ReceiveAction(BYTE *ReceiveBuffer,int Size)
 	iTargetIndex = FindCharacterIndex(iTargetKey);
 	
     if ( c->Helper.Type==MODEL_HELPER+4 ) return;
-	//if(c->Helper.Type == MODEL_HELPER+37) return;	//^ 펜릴 캐릭터 에니메이션 관련(펜릴 타고 있을때는 안 앉아지게)
+	//if(c->Helper.Type == MODEL_HELPER+37) return;
 	
 	c->Object.Angle[2] = ((float)(Data->Angle)-1.f)*45.f;
 	c->Movement = false;
@@ -4355,28 +3628,28 @@ void ReceiveAction(BYTE *ReceiveBuffer,int Size)
 	case AT_RUSH1:
 		SetAction(o,PLAYER_RUSH1);
 		break;
-	case AT_SCISSORS:	// 가위
+	case AT_SCISSORS:
 		SetAction(o,PLAYER_SCISSORS);
 		break;
-	case AT_ROCK:		// 바위
+	case AT_ROCK:
 		SetAction(o,PLAYER_ROCK);
 		break;
-	case AT_PAPER:		// 보
+	case AT_PAPER:
 		SetAction(o,PLAYER_PAPER);
 		break;
-	case AT_HUSTLE:	// 일본 레슬러 동작 -_-
+	case AT_HUSTLE:
 		SetAction(o,PLAYER_HUSTLE);
 		break;
-	case AT_DAMAGE1:	// 충격혹은 피격동작 (쿤둔포효등)
+	case AT_DAMAGE1:
 		SetAction(&c->Object,MONSTER01_SHOCK);
 		break;
-	case AT_PROVOCATION:	// 덤벼 동작 추가
+	case AT_PROVOCATION:
 		SetAction(o,PLAYER_PROVOCATION);
 		break;
-	case AT_LOOK_AROUND:	// 두리번 동작 추가
+	case AT_LOOK_AROUND:
 		SetAction(o,PLAYER_LOOK_AROUND);
 		break;
-	case AT_CHEERS:			// 만세 동작 추가
+	case AT_CHEERS:
 		SetAction(o,PLAYER_CHEERS);
 		break;
 	case AT_JACK1:
@@ -4443,16 +3716,9 @@ void ReceiveAction(BYTE *ReceiveBuffer,int Size)
 		break;
 	}
 
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x18 [ReceiveAction(%d)]", Data->Angle);
-#endif // CONSOLE_DEBUG
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 마법
-///////////////////////////////////////////////////////////////////////////////
-
-// 스킬을 사용 했을때 생성 되어야 할 버프
 void ReceiveSkillStatus( BYTE *ReceiveBuffer )
 {
 	LPPMSG_VIEWSKILLSTATE Data = (LPPMSG_VIEWSKILLSTATE)ReceiveBuffer;
@@ -4468,7 +3734,6 @@ void ReceiveSkillStatus( BYTE *ReceiveBuffer )
 		
 		if( g_isCharacterBuff( o, bufftype ) )
 		{
-			// 이건 먼지를 모르겠다.
 			if((o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
 				|| MODEL_SMITH || MODEL_NPC_SERBIS || MODEL_MERCHANT_MAN
 				|| MODEL_STORAGE || MODEL_NPC_BREEDER )
@@ -4501,9 +3766,8 @@ void ReceiveSkillStatus( BYTE *ReceiveBuffer )
 				}
 				c->EtcPart = PARTS_WEBZEN;
 			}
-#ifdef CONSOLE_DEBUG
+
 			g_ConsoleDebug->Write(MCD_RECEIVE, "RegisterBuff ID : %s, Buff : %d", c->ID, static_cast<int>(bufftype));
-#endif // CONSOLE_DEBUG
 		}
 	}
 	else // clear
@@ -4517,9 +3781,8 @@ void ReceiveSkillStatus( BYTE *ReceiveBuffer )
 			|| bufftype == eBuff_CastleRegimentAttack2 || bufftype == eBuff_CastleRegimentAttack3 )
 		{
 			battleCastle::DeleteBattleFormation( c, bufftype );
-#ifdef CONSOLE_DEBUG
+
 			g_ConsoleDebug->Write(MCD_RECEIVE, "UnRegisterBuff ID : %s, Buff : %d", c->ID, static_cast<int>(bufftype));
-#endif // CONSOLE_DEBUG	
 		}
 		else if( bufftype == eBuff_GMEffect )
 		{
@@ -4529,7 +3792,6 @@ void ReceiveSkillStatus( BYTE *ReceiveBuffer )
 	
 }
 
-// 스킬을 종료 했을 경우 지워야 할 버프
 void ReceiveMagicFinish( BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_VALUE_KEY Data = (LPPHEADER_DEFAULT_VALUE_KEY)ReceiveBuffer;
@@ -4656,61 +3918,58 @@ void ReceiveMagicFinish( BYTE *ReceiveBuffer )
 	}
 }
 
-// 요정 플레이어의 애니메이션 설정 (요정만 사용)
 void SetPlayerBow(CHARACTER *c)
 {
 #ifdef KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
 	OBJECT *o = &c->Object;
 
-	// 플레이어, 요정, 안전지대가 아니면 return
 	if(o->Type!=MODEL_PLAYER || GetBaseClass(c->Class) != CLASS_ELF || c->SafeZone)
 		return;
 	
-	// 공속계산 셋팅
 	SetAttackSpeed();
 	
 	switch( GetEquipedBowType( c ))
 	{
-	case BOWTYPE_BOW:		// 활
+	case BOWTYPE_BOW:
 		{
 			if( c->Helper.Type == MODEL_HELPER+37 )				
 			{
-				SetAction( &c->Object, PLAYER_FENRIR_ATTACK_BOW );		// 팬릴착용
+				SetAction( &c->Object, PLAYER_FENRIR_ATTACK_BOW );
 			}
 			else if((c->Helper.Type==MODEL_HELPER+2) || (c->Helper.Type==MODEL_HELPER+3))
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_RIDE_BOW );		// 탈것착용
+				SetAction( &c->Object, PLAYER_ATTACK_RIDE_BOW );
 			}
 			else if( c->Wing.Type!=-1 )										
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_FLY_BOW );			// 날개착용
+				SetAction( &c->Object, PLAYER_ATTACK_FLY_BOW );
 			}
 			else
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_BOW );				// 일반활공격
+				SetAction( &c->Object, PLAYER_ATTACK_BOW );
 			}
 		}break;
-	case BOWTYPE_CROSSBOW:	// 석궁
+	case BOWTYPE_CROSSBOW:
 		{
-			if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)	// 팬릴착용
+			if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)
 			{
 				SetAction( &c->Object, PLAYER_FENRIR_ATTACK_CROSSBOW );
 			}
 			else if(( c->Helper.Type==MODEL_HELPER+2) || (c->Helper.Type==MODEL_HELPER+3))
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_RIDE_CROSSBOW );	// 탈것착용
+				SetAction( &c->Object, PLAYER_ATTACK_RIDE_CROSSBOW );
 			}
-			else if( c->Wing.Type!=-1 )										// 날개착용
+			else if( c->Wing.Type!=-1 )
 			{	
 				SetAction( &c->Object, PLAYER_ATTACK_FLY_CROSSBOW );
 			}
 			else
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_CROSSBOW );		// 일반활공격
+				SetAction( &c->Object, PLAYER_ATTACK_CROSSBOW );
 			}
 		}break;
 	}
-#else // KJH_FIX_BOW_ANIMATION_ON_RIDE_PET		// 정리할 때 지워야 하는 소스
+#else // KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
 #ifdef ADD_SOCKET_ITEM
 	// 활
 	switch( GetEquipedBowType( c ))
@@ -4725,8 +3984,8 @@ void SetPlayerBow(CHARACTER *c)
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_BOW );
 			}
-		}break;
-		// 석궁
+		}
+		break;
 	case BOWTYPE_CROSSBOW:
 		{
 			if( (GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
@@ -4737,15 +3996,16 @@ void SetPlayerBow(CHARACTER *c)
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_CROSSBOW );
 			}
-		}break;
+		}
+		break;
 	}
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
+#else // ADD_SOCKET_ITEM
     if((c->Weapon[1].Type>=MODEL_BOW && c->Weapon[1].Type<MODEL_BOW+7) 
 		|| c->Weapon[1].Type==MODEL_BOW+17 
         || c->Weapon[1].Type==MODEL_BOW+20 
 		|| c->Weapon[1].Type==MODEL_BOW+21
 		|| c->Weapon[1].Type==MODEL_BOW+22
-        )	//. 활
+        )
     {
         if(GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
             SetAction(&c->Object,PLAYER_ATTACK_FLY_BOW);
@@ -4753,15 +4013,15 @@ void SetPlayerBow(CHARACTER *c)
             SetAction(&c->Object,PLAYER_ATTACK_BOW);
     }
     else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) || c->Weapon[0].Type==MODEL_BOW+16 || 
-        (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )	//. 석궁
+        (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
     {
         if(GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
             SetAction(&c->Object,PLAYER_ATTACK_FLY_CROSSBOW);
         else
             SetAction(&c->Object,PLAYER_ATTACK_CROSSBOW);
     }
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-#endif // KJH_FIX_BOW_ANIMATION_ON_RIDE_PET	// 정리할 때 지워야 하는 소스
+#endif // ADD_SOCKET_ITEM
+#endif // KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
 }
 
 void SetPlayerHighBow ( CHARACTER* c )
@@ -4770,47 +4030,46 @@ void SetPlayerHighBow ( CHARACTER* c )
 #ifdef KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
 		switch( GetEquipedBowType( c ))
 	{
-	case BOWTYPE_BOW:		// 활
+	case BOWTYPE_BOW:
 		{
 			if( c->Helper.Type == MODEL_HELPER+37 )				
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_RIDE_BOW_UP );		// 팬릴착용
+				SetAction( &c->Object, PLAYER_ATTACK_RIDE_BOW_UP );
 			}
 			else if((c->Helper.Type==MODEL_HELPER+2) || (c->Helper.Type==MODEL_HELPER+3))
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_RIDE_BOW_UP );		// 탈것착용
+				SetAction( &c->Object, PLAYER_ATTACK_RIDE_BOW_UP );
 			}
 			else if( c->Wing.Type!=-1 )										
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_FLY_BOW_UP );			// 날개착용
+				SetAction( &c->Object, PLAYER_ATTACK_FLY_BOW_UP );
 			}
 			else
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_BOW_UP );				// 일반활공격
+				SetAction( &c->Object, PLAYER_ATTACK_BOW_UP );
 			}
 		}break;
-	case BOWTYPE_CROSSBOW:	// 석궁
+	case BOWTYPE_CROSSBOW:
 		{
-			if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)	// 팬릴착용
+			if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_RIDE_CROSSBOW_UP );
 			}
 			else if(( c->Helper.Type==MODEL_HELPER+2) || (c->Helper.Type==MODEL_HELPER+3))
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_RIDE_CROSSBOW_UP );	// 탈것착용
+				SetAction( &c->Object, PLAYER_ATTACK_RIDE_CROSSBOW_UP );
 			}
-			else if( c->Wing.Type!=-1 )										// 날개착용
+			else if( c->Wing.Type!=-1 )
 			{	
 				SetAction( &c->Object, PLAYER_ATTACK_FLY_CROSSBOW_UP );
 			}
 			else
 			{
-				SetAction( &c->Object, PLAYER_ATTACK_CROSSBOW_UP );		// 일반활공격
+				SetAction( &c->Object, PLAYER_ATTACK_CROSSBOW_UP );
 			}
 		}break;
 	}
 #else KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
-	// 활
 	switch( GetEquipedBowType( c ) )
 	{
 	case BOWTYPE_BOW:
@@ -4823,8 +4082,8 @@ void SetPlayerHighBow ( CHARACTER* c )
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_BOW_UP );
 			}
-		}break;
-		// 석궁
+		}
+		break;
 	case BOWTYPE_CROSSBOW:
 		{
 			if( (GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
@@ -4835,15 +4094,16 @@ void SetPlayerHighBow ( CHARACTER* c )
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_CROSSBOW_UP );
 			}
-		}break;
+		}
+		break;
 	}
 #endif // KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
+#else // ADD_SOCKET_ITEM
     if((c->Weapon[1].Type>=MODEL_BOW && c->Weapon[1].Type<MODEL_BOW+7) || c->Weapon[1].Type==MODEL_BOW+17 
         || c->Weapon[1].Type==MODEL_BOW+20 
 		|| c->Weapon[1].Type==MODEL_BOW+21
 		|| c->Weapon[1].Type==MODEL_BOW+22
-        )	//. 활
+        )
     {
         if(GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
             SetAction(&c->Object,PLAYER_ATTACK_FLY_BOW_UP);
@@ -4851,14 +4111,14 @@ void SetPlayerHighBow ( CHARACTER* c )
             SetAction(&c->Object,PLAYER_ATTACK_BOW_UP);
     }
     else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) || c->Weapon[0].Type==MODEL_BOW+16 || 
-        (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )	//. 석궁
+        (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
     {
         if(GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
             SetAction(&c->Object,PLAYER_ATTACK_FLY_CROSSBOW_UP);
         else
             SetAction(&c->Object,PLAYER_ATTACK_CROSSBOW_UP);
     }
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
+#endif // ADD_SOCKET_ITEM
 }
 
 BOOL ReceiveMonsterSkill(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
@@ -4896,9 +4156,7 @@ BOOL ReceiveMonsterSkill(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 		sc->AttackTime = 1;
 	}
 		
-#ifdef CONSOLE_DEBUG
 		g_ConsoleDebug->Write(MCD_RECEIVE, "0x69 [ReceiveMonsterSkill(Skill : %d | SKey : %d |TKey : %d)]", SkillNumber, SourceKey, TargetKey);
-#endif // CONSOLE_DEBUG
 		
 		return ( TRUE);
 }
@@ -5118,7 +4376,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				break;
 				
 			case AT_SKILL_TELEPORT:
-				// 칸투르3차 나이트메어전에서 나이트메어 순간이동 할 때 효과
 				if(World == WD_39KANTURU_3RD && so->Type == MODEL_MONSTER01+121)
 				{
 					vec3_t Light;
@@ -5132,14 +4389,14 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					CreateTeleportBegin(so);
 				break;
 				
-			case AT_SKILL_STRONG_PIER:      //  스트롱피어.
+			case AT_SKILL_STRONG_PIER:
 				if ( (sc->Helper.Type>=MODEL_HELPER+2 && sc->Helper.Type<=MODEL_HELPER+4) && !sc->SafeZone )
 				{
 					SetAction ( so, PLAYER_ATTACK_RIDE_STRIKE );
 				}
 				else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 				{
-					SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);	// 펜릴 타고 있으면 펜릴에 맞는 액션으로
+					SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
 				}
 				else
 				{
@@ -5153,14 +4410,14 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_FIRE_BUST_UP+2:
 			case AT_SKILL_FIRE_BUST_UP+3:
 			case AT_SKILL_FIRE_BUST_UP+4:
-			case AT_SKILL_LONGPIER_ATTACK:  //  파이어버스트
+			case AT_SKILL_LONGPIER_ATTACK:
 				if ( (sc->Helper.Type>=MODEL_HELPER+2 && sc->Helper.Type<=MODEL_HELPER+4) && !sc->SafeZone )
 				{
 					SetAction ( so, PLAYER_ATTACK_RIDE_STRIKE );
 				}
 				else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 				{
-					SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);	// 펜릴 타고 있으면 펜릴에 맞는 액션으로
+					SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
 				}
 				else
 				{
@@ -5223,7 +4480,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				
 			case AT_SKILL_SPEAR:	// 창찌르기
 				if(sc->Helper.Type == MODEL_HELPER+37)
-					SetAction(so, PLAYER_FENRIR_ATTACK_SPEAR);	//^ 펜릴 캐릭터 에니메이션 설정 관련(스킬)
+					SetAction(so, PLAYER_FENRIR_ATTACK_SPEAR);
 				else
 					SetAction(so,PLAYER_ATTACK_SKILL_SPEAR);
 				sc->AttackTime = 1;
@@ -5235,7 +4492,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_BLOW_UP+3:
 			case AT_SKILL_BLOW_UP+4:
 #endif	//PJH_SEASON4_MASTER_RANK4
-			case AT_SKILL_ONETOONE:	// 블로우
+			case AT_SKILL_ONETOONE:
 				SetAction(so,PLAYER_ATTACK_ONETOONE);
 				if( sc != Hero && so->Type == MODEL_PLAYER)
 				{
@@ -5316,7 +4573,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					Angle[2] += 180.f;
 					CreateEffect(MODEL_ICE,to->Position,Angle,to->Light,2,to);
 					
-					//  얼려진 캐릭터는 무조건 정지.
 					tc->Movement = false;
 					SetPlayerStop(tc);
 
@@ -5357,7 +4613,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				sc->AttackTime = 1;
 				break;
 				
-			case AT_SKILL_SPACE_SPLIT :     //  공간 가르기.
+			case AT_SKILL_SPACE_SPLIT: 
 #ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 				if ( (sc->Helper.Type>=MODEL_HELPER+2 && sc->Helper.Type<=MODEL_HELPER+4) && !sc->SafeZone )
 #else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
@@ -5368,7 +4624,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				}
 				else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 				{
-					SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);	//^ 펜릴 캐릭터 에니메이션 관련
+					SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
 				}
 				else
 				{
@@ -5388,7 +4644,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				}
 				else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 				{
-					SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);	//^ 펜릴 캐릭터 에니메이션 관련
+					SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
 				}
 				else
 				{
@@ -5409,18 +4665,18 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					SetAction ( so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 				} 
 				else
-					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)         //  유니를 타고있음.
+					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)
 					{
 						SetAction(so,PLAYER_SKILL_RIDER);
 					}
 					else
-						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )   //  페가시아를 타고있음.
+						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )
 						{
 							SetAction(so,PLAYER_SKILL_RIDER_FLY);
 						}
-						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)	// 펜릴
+						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 						{
-							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);	//^ 펜릴 캐릭터 에니메이션 설정 관련
+							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
 						}
 						else
 						{
@@ -5435,18 +4691,18 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					SetAction ( so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 				} 
 				else
-					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)         //  유니를 타고있음.
+					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)
 					{
 						SetAction(so,PLAYER_SKILL_RIDER);
 					}
 					else
-						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )   //  페가시아를 타고있음.
+						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )
 						{
 							SetAction(so,PLAYER_SKILL_RIDER_FLY);
 						}
-						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)	// 펜릴
+						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 						{
-							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);	//^ 펜릴 캐릭터 에니메이션 설정 관련
+							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
 						}
 						else
 						{
@@ -5466,18 +4722,18 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					SetAction ( so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 				} 
 				else
-					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)         //  유니를 타고있음.
+					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)
 					{
 						SetAction(so,PLAYER_SKILL_RIDER);
 					}
 					else
-						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )   //  페가시아를 타고있음.
+						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )
 						{
 							SetAction(so,PLAYER_SKILL_RIDER_FLY);
 						}
-						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)	// 펜릴
+						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 						{
-							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);	//^ 펜릴 캐릭터 에니메이션 설정 관련
+							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
 						}
 						else
 							SetAction ( so, PLAYER_SKILL_VITALITY );
@@ -5505,18 +4761,18 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					SetAction ( so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 				} 
 				else
-					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)         //  유니를 타고있음.
+					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)
 					{
 						SetAction(so,PLAYER_SKILL_RIDER);
 					}
 					else
-						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )   //  페가시아를 타고있음.
+						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )
 						{
 							SetAction(so,PLAYER_SKILL_RIDER_FLY);
 						}
-						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)	// 펜릴
+						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 						{
-							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);	//^ 펜릴 캐릭터 에니메이션 설정 관련
+							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
 						}
 						else
 							SetAction ( so, PLAYER_ATTACK_REMOVAL );
@@ -5533,18 +4789,18 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					SetAction ( so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 				} 
 				else
-					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)         //  유니를 타고있음.
+					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)
 					{
 						SetAction(so,PLAYER_SKILL_RIDER);
 					}
 					else
-						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )   //  페가시아를 타고있음.
+						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )
 						{
 							SetAction(so,PLAYER_SKILL_RIDER_FLY);
 						}
-						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)	// 펜릴
+						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 						{
-							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);	//^ 펜릴 캐릭터 에니메이션 설정 관련
+							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
 						}
 						else
 							SetAction ( so, PLAYER_SKILL_VITALITY );
@@ -5572,18 +4828,18 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					SetAction ( so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 				} 
 				else
-					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)         //  유니를 타고있음.
+					if( sc->Helper.Type==MODEL_HELPER+2 && !sc->SafeZone)
 					{
 						SetAction(so,PLAYER_SKILL_RIDER);
 					}
 					else
-						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )   //  페가시아를 타고있음.
+						if( sc->Helper.Type==MODEL_HELPER+3 && !sc->SafeZone )
 						{
 							SetAction(so,PLAYER_SKILL_RIDER_FLY);
 						}
-						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)	// 펜릴
+						else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 						{
-							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);	//^ 펜릴 캐릭터 에니메이션 설정 관련
+							SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
 						}
 						else
 							SetAction ( so, PLAYER_SKILL_VITALITY );
@@ -5618,7 +4874,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				}
 				else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 				{
-					SetAction( so, PLAYER_FENRIR_ATTACK_MAGIC);	//^ 펜릴 스킬 관련(캐릭터 에니메이션 설정)
+					SetAction( so, PLAYER_FENRIR_ATTACK_MAGIC);
 				}
 				else
 				{
@@ -5633,7 +4889,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				}
 				else if(sc->Helper.Type == MODEL_HELPER+37 && !sc->SafeZone)
 				{
-					SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT);	//^ 펜릴 캐릭터 에니메이션
+					SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT);
 				}
 				else
 				{
@@ -5651,7 +4907,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_LIFE_UP+2:
 			case AT_SKILL_LIFE_UP+3:
 			case AT_SKILL_LIFE_UP+4:
-			case AT_SKILL_VITALITY:	// 스웰라이프
+			case AT_SKILL_VITALITY:
 				if( !g_isCharacterBuff(to, eBuff_HpRecovery) ) //eBuff_Life
 				{
 					DeleteEffect ( BITMAP_LIGHT, to, 1 );
@@ -5705,12 +4961,12 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_FIRE_SCREAM_UP+3:
 			case AT_SKILL_FIRE_SCREAM_UP+4:
 #endif //PJH_SEASON4_MASTER_RANK4
-			case AT_SKILL_DARK_SCREAM:		//  다크로드 새로운스킬
+			case AT_SKILL_DARK_SCREAM:
 				{
 #ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					if( sc->Helper.Type == MODEL_HELPER+37 )				
 					{
-						SetAction( so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );		// 팬릴착용
+						SetAction( so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );
 					}
 #ifdef PBG_FIX_CHAOTIC_ANIMATION
 					else if((sc->Helper.Type>=MODEL_HELPER+2) && (sc->Helper.Type<=MODEL_HELPER+4))
@@ -5718,15 +4974,15 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					else if((sc->Helper.Type>=MODEL_HELPER+2) || (sc->Helper.Type<=MODEL_HELPER+4))
 #endif //PBG_FIX_CHAOTIC_ANIMATION
 					{
-						SetAction( so, PLAYER_ATTACK_RIDE_STRIKE );		// 탈것착용 (다크호스포함)
+						SetAction( so, PLAYER_ATTACK_RIDE_STRIKE );
 					}
 					else
 					{
-						SetAction( so, PLAYER_ATTACK_STRIKE );				// 일반공격
+						SetAction( so, PLAYER_ATTACK_STRIKE );
 					}
 #else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					if(sc->Helper.Type == MODEL_HELPER+37)
-						SetAction(so,PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);	//^ 펜릴
+						SetAction(so,PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
 					else
 						SetAction ( so, PLAYER_ATTACK_STRIKE );
 #endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
@@ -5783,19 +5039,18 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				{
 					sc->AttackTime = 1;
 					
-					// 동작 설정
 					switch(sc->Helper.Type)
 					{
-					case MODEL_HELPER+2:	// 유니리아
+					case MODEL_HELPER+2:
 						SetAction(so, PLAYER_SKILL_SLEEP_UNI);
 						break;
-					case MODEL_HELPER+3:	// 디노란트
+					case MODEL_HELPER+3:
 						SetAction(so, PLAYER_SKILL_SLEEP_DINO);
 						break;
-					case MODEL_HELPER+37:	// 펜릴	
+					case MODEL_HELPER+37:
 						SetAction(so, PLAYER_SKILL_SLEEP_FENRIR);
 						break;
-					default:	// 기본
+					default:
 						SetAction(so, PLAYER_SKILL_SLEEP);
 						break;
 					}
@@ -5821,7 +5076,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				}
 				break;
 
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER		// 마력증대
+#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 			case AT_SKILL_SWELL_OF_MAGICPOWER:
 				{
 					SetAttackSpeed();
@@ -5850,15 +5105,15 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					{
 						if( sc->Helper.Type == MODEL_HELPER+37 )				
 						{
-							SetAction( &sc->Object, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );		// 팬릴착용
+							SetAction( &sc->Object, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );
 						}
 						else if((sc->Helper.Type>=MODEL_HELPER+2) && (sc->Helper.Type<=MODEL_HELPER+4))
 						{
-							SetAction( &sc->Object, PLAYER_ATTACK_RIDE_STRIKE );		// 탈것착용 (다크호스포함)
+							SetAction( &sc->Object, PLAYER_ATTACK_RIDE_STRIKE );
 						}
 						else
 						{
-							SetAction( &sc->Object, PLAYER_ATTACK_STRIKE );				// 일반공격
+							SetAction( &sc->Object, PLAYER_ATTACK_STRIKE );
 						}
 					}
 					else
@@ -5888,7 +5143,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					{
 						Position[0] = (o->Position[0] - 119.f) + (float)(rand()%240); 
 						Position[2] = (o->Position[2] + 49.f) + (float)(rand()%60); 
-						CreateJoint(BITMAP_2LINE_GHOST,Position,o->Position,o->Angle,0,o,20.f,o->PKKey,0,o->m_bySkillSerialNum);//클라이언트마법처리
+						CreateJoint(BITMAP_2LINE_GHOST,Position,o->Position,o->Angle,0,o,20.f,o->PKKey,0,o->m_bySkillSerialNum);
 					}
 					if(sc==Hero && SelectedCharacter!=-1)
 					{
@@ -6107,16 +5362,16 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
 				switch(sc->Helper.Type)
 				{
-				case MODEL_HELPER+2:	// 유니리아
+				case MODEL_HELPER+2:
 					SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_UNI);
 					break;
-				case MODEL_HELPER+3:	// 디노란트
+				case MODEL_HELPER+3:
 					SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_DINO);
 					break;
-				case MODEL_HELPER+37:	// 펜릴	
+				case MODEL_HELPER+37:
 					SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_FENRIR);
 					break;
-				default:	// 기본
+				default:
 					SetAction(so, PLAYER_ATTACK_SKILL_WHEEL);
 					break;
 				}
@@ -6138,7 +5393,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 #ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					if( sc->Helper.Type == MODEL_HELPER+37 )				
 					{
-						SetAction( so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );		// 팬릴착용
+						SetAction( so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );
 					}
 #ifdef PBG_FIX_CHAOTIC_ANIMATION
 					else if((sc->Helper.Type>=MODEL_HELPER+2) && (sc->Helper.Type<=MODEL_HELPER+4))
@@ -6146,11 +5401,11 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					else if((sc->Helper.Type>=MODEL_HELPER+2) || (sc->Helper.Type<=MODEL_HELPER+4))
 #endif //PBG_FIX_CHAOTIC_ANIMATION
 					{
-						SetAction( so, PLAYER_ATTACK_RIDE_STRIKE );		// 탈것착용 (다크호스포함)
+						SetAction( so, PLAYER_ATTACK_RIDE_STRIKE );
 					}
 					else
 					{
-						SetAction( so, PLAYER_ATTACK_STRIKE );				// 일반공격
+						SetAction( so, PLAYER_ATTACK_STRIKE );
 					}
 #else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					if(sc->Helper.Type == MODEL_HELPER+37)
@@ -6164,7 +5419,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				break;
 				
             case AT_SKILL_THUNDER_STRIKE:
-				if(sc->Helper.Type == MODEL_HELPER+37)	//^ 펜릴
+				if(sc->Helper.Type == MODEL_HELPER+37)
 					SetAction(so,PLAYER_FENRIR_ATTACK_DARKLORD_FLASH);	
 				else
 					SetAction ( so, PLAYER_SKILL_FLASH );
@@ -6174,7 +5429,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_ASHAKE_UP+2:
 			case AT_SKILL_ASHAKE_UP+3:
 			case AT_SKILL_ASHAKE_UP+4:
-            case AT_SKILL_DARK_HORSE:       //  다크홀스 스킬.
+            case AT_SKILL_DARK_HORSE:
                 SetAction ( so, PLAYER_ATTACK_DARKHORSE );
                 PlayBuffer ( SOUND_EARTH_QUAKE );
                 break;
@@ -6188,14 +5443,13 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_ANGER_SWORD_UP+3:
 			case AT_SKILL_ANGER_SWORD_UP+4:
 #endif //PJH_SEASON4_MASTER_RANK4
-            case AT_SKILL_FURY_STRIKE:	// 분노의 일격
+            case AT_SKILL_FURY_STRIKE:
 				SetAction(so,PLAYER_ATTACK_SKILL_FURY_STRIKE);
                 break;
 				
 				//----------------------------------------------------------------------------------------------------
 				
 #ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-				// 흑기사 - 파괴의 일격
 			case AT_SKILL_BLOW_OF_DESTRUCTION:
 				SetAction(so,PLAYER_SKILL_BLOW_OF_DESTRUCTION);
 				break;
@@ -6206,9 +5460,9 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				
 				//----------------------------------------------------------------------------------------------------
 				
-			case AT_SKILL_SPEAR:	// 창찌르기
+			case AT_SKILL_SPEAR:
 				if(sc->Helper.Type == MODEL_HELPER+37)
-					SetAction(so, PLAYER_FENRIR_ATTACK_SPEAR);	//^ 펜릴 스킬 관련
+					SetAction(so, PLAYER_FENRIR_ATTACK_SPEAR);
 				else
 					SetAction(so,PLAYER_ATTACK_SKILL_SPEAR);
 				break;
@@ -6226,16 +5480,16 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
 				switch(sc->Helper.Type)
 				{
-				case MODEL_HELPER+2:	// 유니리아
+				case MODEL_HELPER+2:
 					SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_UNI);
 					break;
-				case MODEL_HELPER+3:	// 디노란트
+				case MODEL_HELPER+3:
 					SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_DINO);
 					break;
-				case MODEL_HELPER+37:	// 펜릴	
+				case MODEL_HELPER+37:
 					SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_FENRIR);
 					break;
-				default:	// 기본
+				default:
 					SetAction(so, PLAYER_ATTACK_SKILL_WHEEL);
 					break;
 				}
@@ -6260,7 +5514,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_BLOW_UP+3:
 			case AT_SKILL_BLOW_UP+4:
 #endif	//PJH_SEASON4_MASTER_RANK4
-            case AT_SKILL_ONETOONE:	// 블로우
+            case AT_SKILL_ONETOONE:
 				SetAction(so,PLAYER_ATTACK_ONETOONE);
                 break;
 				
@@ -6273,7 +5527,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
                 break;
 				
 			case AT_SKILL_PLASMA_STORM_FENRIR:
-				SetAction_Fenrir_Skill(sc, so);	//^ 펜릴 스킬 관련
+				SetAction_Fenrir_Skill(sc, so);
 				break;
 				
 #ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
@@ -6282,7 +5536,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 #ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					if( sc->Helper.Type == MODEL_HELPER+37 )				
 					{
-						SetAction( &sc->Object, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );		// 팬릴착용
+						SetAction( &sc->Object, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );
 					}
 #ifdef PBG_FIX_CHAOTIC_ANIMATION
 					else if((sc->Helper.Type>=MODEL_HELPER+2) && (sc->Helper.Type<=MODEL_HELPER+4))
@@ -6290,15 +5544,15 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					else if((sc->Helper.Type>=MODEL_HELPER+2) || (sc->Helper.Type<=MODEL_HELPER+4))
 #endif //PBG_FIX_CHAOTIC_ANIMATION
 					{
-						SetAction( &sc->Object, PLAYER_ATTACK_RIDE_STRIKE );		// 탈것착용 (다크호스포함)
+						SetAction( &sc->Object, PLAYER_ATTACK_RIDE_STRIKE );
 					}
 					else
 					{
-						SetAction( &sc->Object, PLAYER_ATTACK_STRIKE );				// 일반공격
+						SetAction( &sc->Object, PLAYER_ATTACK_STRIKE );
 					}
 #else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					if(sc->Helper.Type == MODEL_HELPER+37)
-						SetAction(so,PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);	//^ 펜릴
+						SetAction(so,PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
 					else
 						SetAction ( so, PLAYER_ATTACK_STRIKE );
 #endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
@@ -6325,7 +5579,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					{
 						Position[0] = (o->Position[0] - 119.f) + (float)(rand()%240); 
 						Position[2] = (o->Position[2] + 49.f) + (float)(rand()%60); 
-						CreateJoint(BITMAP_2LINE_GHOST,Position,o->Position,o->Angle,0,o,20.f,o->PKKey,0,o->m_bySkillSerialNum);//클라이언트마법처리
+						CreateJoint(BITMAP_2LINE_GHOST,Position,o->Position,o->Angle,0,o,20.f,o->PKKey,0,o->m_bySkillSerialNum);
 					}
 #ifdef PJH_FIX_CAOTIC
 					if(sc==Hero && SelectedCharacter!=-1)
@@ -6501,16 +5755,16 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				{
 					switch(sc->Helper.Type)
 					{
-					case MODEL_HELPER+2:	// 유니리아
+					case MODEL_HELPER+2:
 						SetAction(so, PLAYER_SKILL_LIGHTNING_ORB_UNI);
 						break;
-					case MODEL_HELPER+3:	// 디노란트
+					case MODEL_HELPER+3:
 						SetAction(so, PLAYER_SKILL_LIGHTNING_ORB_DINO);
 						break;
-					case MODEL_HELPER+37:	// 펜릴	
+					case MODEL_HELPER+37:
 						SetAction(so, PLAYER_SKILL_LIGHTNING_ORB_FENRIR);
 						break;
-					default:	// 기본
+					default:
 						SetAction(so, PLAYER_SKILL_LIGHTNING_ORB);
 						break;
 					}
@@ -6527,16 +5781,16 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				{
 					switch(sc->Helper.Type)
 					{
-					case MODEL_HELPER+2:	// 유니리아
+					case MODEL_HELPER+2:
 						SetAction(so, PLAYER_SKILL_DRAIN_LIFE_UNI);
 						break;
-					case MODEL_HELPER+3:	// 디노란트
+					case MODEL_HELPER+3:
 						SetAction(so, PLAYER_SKILL_DRAIN_LIFE_DINO);
 						break;
-					case MODEL_HELPER+37:	// 펜릴	
+					case MODEL_HELPER+37:
 						SetAction(so, PLAYER_SKILL_DRAIN_LIFE_FENRIR);
 						break;
-					default:	// 기본
+					default:
 						SetAction(so, PLAYER_SKILL_DRAIN_LIFE);
 						break;
 					}
@@ -6550,19 +5804,18 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				
 			case AT_SKILL_ALICE_WEAKNESS:
 			case AT_SKILL_ALICE_ENERVATION:
-				// 동작 설정
 				switch(sc->Helper.Type)
 				{
-				case MODEL_HELPER+2:	// 유니리아
+				case MODEL_HELPER+2:
 					SetAction(so, PLAYER_SKILL_SLEEP_UNI);
 					break;
-				case MODEL_HELPER+3:	// 디노란트
+				case MODEL_HELPER+3:
 					SetAction(so, PLAYER_SKILL_SLEEP_DINO);
 					break;
-				case MODEL_HELPER+37:	// 펜릴	
+				case MODEL_HELPER+37:
 					SetAction(so, PLAYER_SKILL_SLEEP_FENRIR);
 					break;
-				default:	// 기본
+				default:
 					SetAction(so, PLAYER_SKILL_SLEEP);
 					break;
 				}
@@ -6587,16 +5840,16 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
 					switch(sc->Helper.Type)
 					{
-					case MODEL_HELPER+2:	// 유니리아
+					case MODEL_HELPER+2:
 						SetAction(so, PLAYER_SKILL_GIGANTICSTORM_UNI);
 						break;
-					case MODEL_HELPER+3:	// 디노란트
+					case MODEL_HELPER+3:
 						SetAction(so, PLAYER_SKILL_GIGANTICSTORM_DINO);
 						break;
-					case MODEL_HELPER+37:	// 펜릴	
+					case MODEL_HELPER+37:
 						SetAction(so, PLAYER_SKILL_GIGANTICSTORM_FENRIR);
 						break;
-					default:	// 기본
+					default:
 						SetAction(so, PLAYER_SKILL_GIGANTICSTORM);
 						break;
 					}
@@ -6645,9 +5898,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 	sc->SkillX = Data->PositionX;
 	sc->SkillY = Data->PositionY;
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1E [ReceiveMagicContinue(%d)]", MagicNumber);
-#endif // CONSOLE_DEBUG
 	
 	return ( TRUE);
 }
@@ -6657,7 +5908,6 @@ void ReceiveChainMagic( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_CHAIN_MAGIC pPacketData = (LPPRECEIVE_CHAIN_MAGIC)ReceiveBuffer;
 	
-	// 주인공 캐릭터
 	CHARACTER* pSourceChar = &CharactersClient[FindCharacterIndex(pPacketData->wUserIndex)];
 	OBJECT* pSourceObject = &pSourceChar->Object;
 	OBJECT* pTempObject = NULL;
@@ -6666,16 +5916,16 @@ void ReceiveChainMagic( BYTE *ReceiveBuffer )
 	
 	switch(pSourceChar->Helper.Type)
 	{
-	case MODEL_HELPER+2:	// 유니리아
+	case MODEL_HELPER+2:
 		SetAction(pSourceObject, PLAYER_SKILL_CHAIN_LIGHTNING_UNI);
 		break;
-	case MODEL_HELPER+3:	// 디노란트
+	case MODEL_HELPER+3:
 		SetAction(pSourceObject, PLAYER_SKILL_CHAIN_LIGHTNING_DINO);
 		break;
-	case MODEL_HELPER+37:	// 펜릴	
+	case MODEL_HELPER+37:
 		SetAction(pSourceObject, PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR);
 		break;
-	default:	// 기본
+	default:
 		SetAction(pSourceObject, PLAYER_SKILL_CHAIN_LIGHTNING);
 		break;
 	}	
@@ -6688,20 +5938,16 @@ void ReceiveChainMagic( BYTE *ReceiveBuffer )
 	for(int i=0 ; i<(int)(pPacketData->byCount) ; i++)
 	{
 		LPPRECEIVE_CHAIN_MAGIC_OBJECT pPacketData2 = (LPPRECEIVE_CHAIN_MAGIC_OBJECT)(ReceiveBuffer+iOffset);
-		// 타겟 인덱스 저장
 		CHARACTER *pTargetChar = &CharactersClient[FindCharacterIndex(pPacketData2->wTargetIndex)];
 		OBJECT *pTargetObject = &pTargetChar->Object;
 		
 		if( pTempObject != pTargetObject && pTargetObject != NULL && pTargetObject->Live == true)
 		{	
-			// 이펙트 바로 생성
-			// 라이트닝 (시작프레임 조절 필요)
 			vec3_t vAngle;
 			Vector( -60.f, 0.f, pSourceObject->Angle[2], vAngle);
 			
 			//SetPlayerStop(pTargetChar);
 			
-			// 라이트닝
 			CreateEffect( MODEL_CHAIN_LIGHTNING, pSourceObject->Position, vAngle, pSourceObject->Light, i, 
 				pTempObject, -1, 0, 0, 0, 0.f, pPacketData2->wTargetIndex );
 		}
@@ -6754,10 +6000,6 @@ void ReceiveMagicPosition(BYTE *ReceiveBuffer,int Size)
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	스킬 Count.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveSkillCount ( BYTE* ReceiveBuffer )
 {
 	LPPRECEIVE_EX_SKILL_COUNT Data = (LPPRECEIVE_EX_SKILL_COUNT)ReceiveBuffer;
@@ -6776,13 +6018,6 @@ void ReceiveSkillCount ( BYTE* ReceiveBuffer )
 	}
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 죽기
-///////////////////////////////////////////////////////////////////////////////
-
-// 내가 죽임
-// 일반경험치
 BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 {
 	if ( !bEncrypted)
@@ -6823,7 +6058,6 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	if(IsMasterLevel(Hero->Class) == true)
 	{
 #ifdef LDK_ADD_SCALEFORM
-		//gfxui 사용시 기존 ui 사용 안함
 		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
 		{
 			g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
@@ -6839,7 +6073,6 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	else
 	{
 #ifdef LDK_ADD_SCALEFORM
-		//gfxui 사용시 기존 ui 사용 안함
 		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
 		{
 			g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
@@ -6873,7 +6106,6 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	return ( TRUE);
 }
 
-// 마스터 레벨일때
 BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 {
 	if ( !bEncrypted)
@@ -6913,7 +6145,6 @@ BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	if(IsMasterLevel(Hero->Class) == true)
 	{
 #ifdef LDK_ADD_SCALEFORM
-		//gfxui 사용시 기존 ui 사용 안함
 		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
 		{
 			g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
@@ -6929,7 +6160,6 @@ BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	else
 	{
 #ifdef LDK_ADD_SCALEFORM
-		//gfxui 사용시 기존 ui 사용 안함
 		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
 		{
 			g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
@@ -6962,7 +6192,6 @@ BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 
 void FallingStartCharacter ( CHARACTER* c, OBJECT* o )
 {
-    //  튕겨서 떨어뜨린다.
     BYTE positionX = (BYTE)(o->Position[0]/TERRAIN_SCALE);
     BYTE positionY = (BYTE)(o->Position[1]/TERRAIN_SCALE);
     int WallIndex = TERRAIN_INDEX_REPEAT( positionX, positionY );
@@ -7010,7 +6239,6 @@ void FallingStartCharacter ( CHARACTER* c, OBJECT* o )
     }
 }
 
-//다른플레이어가 공격해서 케릭터나 몬스터 죽음
 void ReceiveDie(BYTE *ReceiveBuffer,int Size)
 {
 	LPPHEADER_DEFAULT_DIE Data = (LPPHEADER_DEFAULT_DIE)ReceiveBuffer;
@@ -7030,18 +6258,14 @@ void ReceiveDie(BYTE *ReceiveBuffer,int Size)
 	g_pHackTest->ReceiveDie(c, o, SkillType, Key);
 #endif // CSK_HACK_TEST
 	
-	//	죽인 스킬.
-	c->m_byDieType = SkillType;	//	( 0:기본, n:스킬번호 ).
+	c->m_byDieType = SkillType;
 	
-    //  블러드 캐슬에서 죽는 몬스터들을 떨어뜨린다.
     if ( InBloodCastle() == true )
     {
-        //  튕겨서 떨어뜨린다.
         FallingStartCharacter ( c, o );
     }
     else if ( InChaosCastle()==true )
     {
-        //  튕겨서 떨어뜨린다.
         FallingStartCharacter ( c, o );
     }
     else
@@ -7049,13 +6273,12 @@ void ReceiveDie(BYTE *ReceiveBuffer,int Size)
 #ifdef YDG_ADD_CS5_REVIVAL_CHARM
 		if (c == Hero && g_PortalMgr.IsPortalUsable())
 		{
-			g_PortalMgr.SaveRevivePosition();	// 죽을때 위치 저장
+			g_PortalMgr.SaveRevivePosition();
 		}
 #endif	// YDG_ADD_CS5_REVIVAL_CHARM
 
         o->m_bActionStart = false;
-		
-		//	나를 죽인 스킬.
+
 		switch ( SkillType )
 		{
 		case AT_SKILL_BLAST_HELL:
@@ -7083,14 +6306,8 @@ void ReceiveDie(BYTE *ReceiveBuffer,int Size)
 			}
     }
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x17 [ReceiveDie(%d)]", Key);
-#endif // CONSOLE_DEBUG
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 아이템
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceiveCreateItemViewport( BYTE *ReceiveBuffer )
 {
@@ -7109,19 +6326,17 @@ void ReceiveCreateItemViewport( BYTE *ReceiveBuffer )
 			Key = 0;
 		CreateItem(&Items[Key],Data2->Item,Position,CreateFlag);
 		int Type = ConvertItemType(Data2->Item);
-		if(Type==ITEM_POTION+15)//돈
+		if(Type==ITEM_POTION+15)
 		{
 			Offset += sizeof(PCREATE_ITEM);
 		}
-		else//아이템
+		else
 		{
 			Offset += sizeof(PCREATE_ITEM);
 		}
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x20 [ReceiveCreateItemViewport]");
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveDeleteItemViewport( BYTE *ReceiveBuffer )
@@ -7156,57 +6371,23 @@ void ReceiveGetItem( BYTE *ReceiveBuffer )
 			char szMessage[128];
 			int backupGold = CharacterMachine->Gold;
 			CharacterMachine->Gold = (Data->Item[0]<<24) + (Data->Item[1]<<16) + (Data->Item[2]<<8) + (Data->Item[3]);
-#ifdef KJH_FIX_GET_ZEN_SYSTEM_TEXT
+
 			int getGold = CharacterMachine->Gold - backupGold;
 			
 			if( getGold > 0 )
 			{
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-				sprintf(szMessage, "%s %d %s", GlobalText[918], getGold, GlobalText[224]);
-#else //SELECTED_LANGUAGE == LANGUAGE_CHINESE
 				sprintf(szMessage, "%d %s %s", getGold, GlobalText[224], GlobalText[918]);
-#endif // SELECTED_LANGUAGE == LANGUAGE_CHINESE
 				g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
 			}
-#else // KJH_FIX_GET_ZEN_SYSTEM_TEXT
-            //  아이템 space로 자동 먹기
-            if ( Items[ItemKey].Object.Live )
-            {
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-				sprintf(szMessage, "%s %d %s", GlobalText[918], Items[ItemKey].Item.Level, GlobalText[224]);
-#else //SELECTED_LANGUAGE == LANGUAGE_CHINESE
-				sprintf(szMessage, "%d %s %s", Items[ItemKey].Item.Level, GlobalText[224], GlobalText[918]);
-#endif // SELECTED_LANGUAGE == LANGUAGE_CHINESE
-				g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
-			}
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-			else
-			{
-				int getGold = CharacterMachine->Gold - backupGold;
-				
-				if( getGold > 0 )
-				{
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-					sprintf(szMessage, "%s %d %s", GlobalText[918], getGold, GlobalText[224]);
-#else //SELECTED_LANGUAGE == LANGUAGE_CHINESE
-					sprintf(szMessage, "%d %s %s", getGold, GlobalText[224], GlobalText[918]);
-#endif // SELECTED_LANGUAGE == LANGUAGE_CHINESE
-					g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
-				}
-			}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#endif // KJH_FIX_GET_ZEN_SYSTEM_TEXT
 		}
 		else
 		{
-            //  중복되는 아이템. 인벤에 아이템을 넣지 않고, 필드에 있는 아이템을 제거한다.
             if ( Data->Result!=GET_ITEM_MULTI )
             {
 				if(Data->Result >= MAX_EQUIPMENT_INDEX && Data->Result < MAX_MY_INVENTORY_INDEX)
 					g_pMyInventory->InsertItem(Data->Result-MAX_EQUIPMENT_INDEX, Data->Item);
             }
 			
-            //  아이템 space로 자동 먹기.
             char szItem[64] = {0, };
 			int level = (Items[ItemKey].Item.Level>>3)&15;
 			GetItemName(Items[ItemKey].Item.Type, level, szItem);
@@ -7220,10 +6401,9 @@ void ReceiveGetItem( BYTE *ReceiveBuffer )
 			g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);			
         }
 #ifdef FOR_WORK
-		// ★ 아이템 숨기기 -_-
 		Items[ItemKey].Object.Live = false;
 #endif
-		// 아이템 주울때 나오는 소리
+
 		int Type = ConvertItemType(Data->Item);
 		if(Type==ITEM_POTION+13 || Type==ITEM_POTION+14 || Type==ITEM_POTION+16 || Type==ITEM_WING+15 || Type==ITEM_POTION+22 
 			|| Type==INDEX_COMPILED_CELE || Type==INDEX_COMPILED_SOUL || Type==ITEM_POTION+31)
@@ -7235,9 +6415,7 @@ void ReceiveGetItem( BYTE *ReceiveBuffer )
 	}
     SendGetItem = -1;
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x22 [ReceiveGetItem(%d)]", Data->Result);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveDropItem( BYTE *ReceiveBuffer )
@@ -7377,9 +6555,7 @@ BOOL ReceiveEquipmentItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		g_bPacketAfter_EquipmentItem = FALSE;
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x24 [ReceiveEquipmentItem(%d %d)]", Data->SubCode, Data->Index);
-#endif // CONSOLE_DEBUG
 	
 	return ( TRUE);
 }
@@ -7400,7 +6576,7 @@ void ReceiveModifyItem( BYTE *ReceiveBuffer )
 	int iType = ConvertItemType(Data->Item);
 	if(iType == ITEM_POTION+28
 #ifdef YDG_ADD_DOPPELGANGER_ITEM
-		|| iType == ITEM_POTION+111	// 차원의 마경
+		|| iType == ITEM_POTION+111
 #endif	// YDG_ADD_DOPPELGANGER_ITEM
 		)
 	{
@@ -7413,7 +6589,6 @@ void ReceiveModifyItem( BYTE *ReceiveBuffer )
 		PlayBuffer(SOUND_JEWEL01);
 	}
 #endif // LEM_FIX_JP0714_JEWELMIXSOUND_INGAMBLESYSTEM
-	// 사운드 필요시 추가하자.
 	else if(GambleSystem::Instance().IsGambleShop())
 	{
 
@@ -7425,11 +6600,6 @@ void ReceiveModifyItem( BYTE *ReceiveBuffer )
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// NPC와 대화, 사기, 팔기
-///////////////////////////////////////////////////////////////////////////////
-
-//대화 시작
 BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
 	if ( !bEncrypted)
@@ -7444,11 +6614,11 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	
 	switch(Data->Value)
 	{
-	case 2: //  창고.
+	case 2:
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_STORAGE);
 		break;
 		
-	case 3: // 카오스?
+	case 3:
 		g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_GOBLIN_NORMAL);
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
 		//BYTE *pbyChaosRate = ( &Data->Value) + 1;
@@ -7457,19 +6627,19 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		//	iDummyRate[i] = ( int)pbyChaosRate[i];	// 광장표 확률을 서버에서 받으나 사용하지 않고 버림(스크립트사용)
 		break;
 		
-	case 4: // 악마의 광장 가는 창
+	case 4:
 		g_pNewUISystem->Show( SEASON3B::INTERFACE_DEVILSQUARE );
 		break;
 		
-    case 5: // 서버 분할창.
+    case 5:
 		g_pUIManager->Open( ::INTERFACE_SERVERDIVISION );
 		break;
 		
-	case 6:	// 블러드 캐슬 가는 창	
+	case 6:
 		g_pNewUISystem->Show( SEASON3B::INTERFACE_BLOODCASTLE );
 		break;
 		
-    case 7: //  조련사 NPC 조합.
+    case 7:
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CTrainerMenuMsgBoxLayout));
 		break;
 		
@@ -7483,34 +6653,29 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		}
 		break;
 		
-    case 0x0C : //  원로원.
+    case 0x0C:
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_SENATUS);
         break;
 		
-    case 0x0D : //  근위병.
-		SendRequestBCStatus();	// 공성정보 요청
+    case 0x0D:
+		SendRequestBCStatus();
         break;
-	case 0x11:	// 엘피스
+	case 0x11:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CElpisMsgBoxLayout));
-			// 확률을 서버에서 받으나 사용하지 않고 버림(스크립트사용)
-			// 			BYTE *pbyChaosRate = ( &Data->Value) + 1;
-			// 			g_pUIJewelHarmony->SetMixSuccessRate(pbyChaosRate);
 		}
 		break;
-	case 0x12:	// 오스본
+	case 0x12:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::COsbourneMsgBoxLayout));
-			// 확률을 서버에서 받으나 사용하지 않고 버림(스크립트사용)
 			// 			BYTE *pbyChaosRate = ( &Data->Value) + 1;
 			// 			g_pUIJewelHarmony->SetMixSuccessRate(pbyChaosRate);
 		}
 		break;
-	case 0x13:	// 제리든
+	case 0x13:
 		{
 			g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_JERRIDON);
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
-			// 확률을 서버에서 받으나 사용하지 않고 버림(스크립트사용)
 			// 			BYTE *pbyChaosRate = ( &Data->Value) + 1;
 			// 			g_pUIJewelHarmony->SetMixSuccessRate(pbyChaosRate);
 		}
@@ -7524,7 +6689,7 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		}
 		break;
 #ifdef CSK_CHAOS_CARD
-	case 0x15:	// 카오스 카드 믹스창
+	case 0x15:
 		{
 			g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CHAOS_CARD);
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
@@ -7532,7 +6697,7 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		break;
 #endif //CSK_CHAOS_CARD
 #ifdef CSK_EVENT_CHERRYBLOSSOM
-	case 0x16:	// 벚꽃 이벤트 믹스창
+	case 0x16:
 		{
 			g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CHERRYBLOSSOM);
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
@@ -7540,33 +6705,33 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		break;
 #endif //CSK_EVENT_CHERRYBLOSSOM
 #ifdef ADD_SOCKET_MIX
-	case 0x17:	// 시드마스터
+	case 0x17:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSeedMasterMenuMsgBoxLayout));
 		}
 		break;
-	case 0x18:	// 시드연구가
+	case 0x18:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSeedInvestigatorMenuMsgBoxLayout));
 		}
 		break;
 #endif	// ADD_SOCKET_MIX
 #ifdef PSW_ADD_RESET_CHARACTER_POINT
-	case 0x19:	// 스텟 초기화
+	case 0x19:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CResetCharacterPointMsgBoxLayout));
 		}
 		break;
 #endif //PSW_ADD_RESET_CHARACTER_POINT
 #ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-	case 0x20:	// 7주년이벤트 델가도NPC
+	case 0x20:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDelgardoMainMenuMsgBoxLayout));
 		}
 		break;
 #endif //KJH_PBG_ADD_SEVEN_EVENT_2008
 #ifdef YDG_ADD_NEW_DUEL_NPC
-	case 0x21:	// 결투장 문지기 NPC 타이투스
+	case 0x21:
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_DUELWATCH);
 		}
@@ -7581,7 +6746,7 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		break;
 #endif //LDK_ADD_GAMBLE_SYSTEM
 #ifdef YDG_ADD_DOPPELGANGER_PROTOCOLS
-	case 0x23:	// 도플갱어 NPC 루가드
+	case 0x23:
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_DOPPELGANGER_NPC);
 			BYTE * pbtRemainTime = (&Data->Value) + 1;	// 남은 시간
@@ -7590,20 +6755,20 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		break;
 #endif	// YDG_ADD_DOPPELGANGER_PROTOCOLS
 #ifdef LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
-	case 0x24:	// 제린트 npc - 임시 번호
+	case 0x24:
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC);
 		}
 		break;
 #endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 #ifdef LDS_ADD_SERVERPROCESSING_UNITEDMARKETPLACE
-	case 0x25:	// 통합시장 NPC 줄리아
+	case 0x25:
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
 		}
 		break;
 #endif // LDS_ADD_SERVERPROCESSING_UNITEDMARKETPLACE
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 NPC 베리얼
+#ifdef LEM_ADD_LUCKYITEM
 	case 0x26:	
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CLuckyTradeMenuMsgBoxLayout));
@@ -7612,14 +6777,14 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 #endif // LEM_ADD_LUCKYITEM
 	default:
 		{
-			// Data->Value 값이 0이면 NPCSHOP 오픈
+			// Data->Value
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCSHOP);
 		}
 		break;
 	}
     PlayBuffer(SOUND_CLICK01);
     PlayBuffer(SOUND_INTERFACE01);
-#ifndef FOR_WORK		// 창모드에서 마우스 위치 바뀌는것 막았습니다.
+#ifndef FOR_WORK
 #ifdef WINDOWMODE
 	if (g_bUseWindowMode == FALSE)
 	{
@@ -7645,7 +6810,6 @@ void ReceiveBuy( BYTE *ReceiveBuffer )
 		}
 		else
 		{
-			// 잘못된 인덱스가 넘어온 경우다. 서버팀에 문의하세요.!
 #ifdef _DEBUG
 			__asm { int 3 };
 #endif // _DEBUG
@@ -7654,7 +6818,6 @@ void ReceiveBuy( BYTE *ReceiveBuffer )
 		PlayBuffer(SOUND_GET_ITEM01);
 	}
 #ifdef LDK_FIX_RECEIVEBUYSELL_RESULT_254
-	//구매 횟수 이상 버그 .. receivebuy result값이 254면 hideAll(2008.08.11)
 	if( Data->Index == 0xfe )
 	{
 		g_pNewUISystem->HideAll();
@@ -7664,9 +6827,7 @@ void ReceiveBuy( BYTE *ReceiveBuffer )
 #endif //LDK_FIX_RECEIVEBUYSELL_RESULT_254
 	BuyCost = 0;
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x32 [ReceiveBuy(%d)]", Data->Index);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveSell( BYTE *ReceiveBuffer )
@@ -7682,7 +6843,6 @@ void ReceiveSell( BYTE *ReceiveBuffer )
 			g_pChatListBox->AddText(Hero->ID,GlobalText[733], SEASON3B::TYPE_ERROR_MESSAGE);
 		}
 #ifdef LDK_FIX_RECEIVEBUYSELL_RESULT_254
-		//구매 횟수 이상 버그 .. receivebuy result값이 254면 hideAll(2008.08.11)
 		else if( Data->Flag == 0xfe )
 		{
 			g_pNewUISystem->HideAll();
@@ -7721,34 +6881,24 @@ void ReceiveRepair( BYTE *ReceiveBuffer )
         PlayBuffer(SOUND_REPAIR);
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x34 [ReceiveRepair(%d)]", Data->Gold);
-#endif // CONSOLE_DEBUG
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 레벨업
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceiveLevelUp( BYTE *ReceiveBuffer )
 {
-	LPPRECEIVE_LEVEL_UP Data = (LPPRECEIVE_LEVEL_UP)ReceiveBuffer;
-	CharacterAttribute->Level = Data->Level;
-	CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
-	CharacterAttribute->LifeMax = Data->MaxLife;
-	CharacterAttribute->ManaMax = Data->MaxMana;
-	CharacterAttribute->Life    = Data->MaxLife;
-	CharacterAttribute->Mana    = Data->MaxMana;
-	CharacterAttribute->ShieldMax = Data->MaxShield;
-	CharacterAttribute->SkillManaMax = Data->SkillManaMax;
-    
-    //  추가되는 스텟 정보.
+	LPPRECEIVE_LEVEL_UP Data			= (LPPRECEIVE_LEVEL_UP)ReceiveBuffer;
+	CharacterAttribute->Level			= Data->Level;
+	CharacterAttribute->LevelUpPoint	= Data->LevelUpPoint;
+	CharacterAttribute->LifeMax			= Data->MaxLife;
+	CharacterAttribute->ManaMax			= Data->MaxMana;
+	CharacterAttribute->Life			= Data->MaxLife;
+	CharacterAttribute->Mana			= Data->MaxMana;
+	CharacterAttribute->ShieldMax		= Data->MaxShield;
+	CharacterAttribute->SkillManaMax	= Data->SkillManaMax;
     CharacterAttribute->AddPoint		= Data->AddPoint;
     CharacterAttribute->MaxAddPoint		= Data->MaxAddPoint;
-	//	열매 감소 포인트 정보
-	CharacterAttribute->wMinusPoint		= Data->wMinusPoint;		// 현재 감소 포인트
-    CharacterAttribute->wMaxMinusPoint	= Data->wMaxMinusPoint;		// 최대 감소 포인트
+	CharacterAttribute->wMinusPoint		= Data->wMinusPoint;
+    CharacterAttribute->wMaxMinusPoint	= Data->wMaxMinusPoint;
 	
 	unicode::t_char szText[256] = {NULL, };
 	WORD iExp = CharacterAttribute->NextExperince - CharacterAttribute->Experience;
@@ -7761,7 +6911,6 @@ void ReceiveLevelUp( BYTE *ReceiveBuffer )
 
 	if(IsMasterLevel(Hero->Class) == true)
 	{
-		//		OBJECT *o = &Hero->Object;
 		
 		CreateJoint(BITMAP_FLARE,o->Position,o->Position,o->Angle,45,o,80,2);
 		for ( int i=0; i<19; ++i )
@@ -7779,9 +6928,7 @@ void ReceiveLevelUp( BYTE *ReceiveBuffer )
 	}
     PlayBuffer(SOUND_LEVEL_UP);
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x05 [ReceiveLevelUp]");
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveAddPoint( BYTE *ReceiveBuffer )
@@ -7815,10 +6962,6 @@ void ReceiveAddPoint( BYTE *ReceiveBuffer )
 	}
     CharacterMachine->CalculateAll();
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 생명, 마나
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceiveLife( BYTE *ReceiveBuffer )
 {
@@ -7861,10 +7004,6 @@ void ReceiveLife( BYTE *ReceiveBuffer )
 		}
 		break;
 	}
-	
-#ifdef CONSOLE_DEBUG
-	//g_ConsoleDebug->Write(MCD_RECEIVE, "0x26 [ReceiveLife]");
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveMana( BYTE *ReceiveBuffer )
@@ -7902,15 +7041,7 @@ void ReceiveMana( BYTE *ReceiveBuffer )
 		}
 		break;
 	}
-	
-#ifdef CONSOLE_DEBUG
-	//g_ConsoleDebug->Write(MCD_RECEIVE, "0x27 [ReceiveMana]");
-#endif // CONSOLE_DEBUG
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// pk ,내구력, 술사용시, 날씨, 이밴트 발생, 소환에너지
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceivePK( BYTE *ReceiveBuffer )
 {
@@ -7919,9 +7050,6 @@ void ReceivePK( BYTE *ReceiveBuffer )
 	CHARACTER *c = &CharactersClient[FindCharacterIndex(Key)];
     c->PK = Data->PK;
 
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-	g_PKSystem->SetHeroPKState(Hero->PK);
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP	
 #ifdef PK_ATTACK_TESTSERVER_LOG
 	PrintPKLog(c);
 #endif // PK_ATTACK_TESTSERVER_LOG
@@ -7949,11 +7077,7 @@ void ReceivePK( BYTE *ReceiveBuffer )
 		break;
 	case 5:
 		{
-#if SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 			char szTemp[100];
-#else // SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-			char szTemp[32];
-#endif // SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 			
 			sprintf(szTemp, "%s %d%s", GlobalText[490], 1, GlobalText[491]);
 			
@@ -7962,11 +7086,7 @@ void ReceivePK( BYTE *ReceiveBuffer )
 		break;
 	case 6:
 		{
-#if SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 			char szTemp[100];
-#else // SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-			char szTemp[32];
-#endif // SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 			
 			sprintf(szTemp, "%s %d%s", GlobalText[490], 2, GlobalText[491]);
 			
@@ -7976,16 +7096,15 @@ void ReceivePK( BYTE *ReceiveBuffer )
 	}
 }
 
-// 내구도를 서버로 부터 받는 함수
 void ReceiveDurability( BYTE *ReceiveBuffer )
 {
     LPPHEADER_DEFAULT_VALUE_KEY Data = (LPPHEADER_DEFAULT_VALUE_KEY)ReceiveBuffer;
 	
-	if(Data->Value < 12)		//. 착용
+	if(Data->Value < 12)
 	{
 		CharacterMachine->Equipment[Data->Value].Durability = Data->KeyH;
 	}
-	else						//. 소지
+	else
 	{
 		int iItemIndex = Data->Value-MAX_EQUIPMENT_INDEX;
 		ITEM* pItem = g_pMyInventory->FindItem(iItemIndex);
@@ -8001,12 +7120,9 @@ void ReceiveDurability( BYTE *ReceiveBuffer )
 		EnableUse = 0;
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x2A [ReceiveDurability(%d %d)]", Data->Value, Data->KeyL);
-#endif // CONSOLE_DEBUG
 }
 
-//  술 사용시.
 BOOL ReceiveHelperItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
 	if ( !bEncrypted)
@@ -8020,25 +7136,18 @@ BOOL ReceiveHelperItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
    	CharacterAttribute->AbilityTime[Data->Index] = Data->Time*24;
 	switch (Data->Index)
 	{
-	case 0:	// 술
+	case 0:
 		CharacterAttribute->Ability |= ABILITY_FAST_ATTACK_SPEED;
-		
-        //  공격속도 계산.
         CharacterMachine->CalculateAttackSpeed();
 		break;
-	case 1: // 사랑의 묘약
+	case 1:
 		CharacterAttribute->Ability |= ABILITY_PLUS_DAMAGE;
-		
-        //  공격속도 계산.
         CharacterMachine->CalculateDamage();
 		CharacterMachine->CalculateMagicDamage();
 		break;
-		
-    case 2: //  영혼의 물약.
+    case 2:
         CharacterAttribute->Ability |= ABILITY_FAST_ATTACK_SPEED2;
-		
-        //  공격속도 계산.
-        CharacterMachine->CalculateAttackSpeed();
+		CharacterMachine->CalculateAttackSpeed();
         break;
 	}
 	EnableUse = 0;
@@ -8062,22 +7171,22 @@ void ReceiveEvent( BYTE *ReceiveBuffer )
 	
     switch ( Data->m_byNumber )
     {
-    case 1: //  환수 드래곤.
+    case 1:
 		if ( Data->m_byValue ) EnableEvent = 1;
         else               EnableEvent = 0; 
         break;
 #ifdef USE_EVENT_ELDORADO
-    case 3: //  황금 드래곤.
+    case 3:
 		if ( Data->m_byValue ) EnableEvent = 3;
         else               EnableEvent = 0; 
         break;
 #endif
-    case 2: //  타마짱.
+    case 2:
 #ifdef TAMAJJANG
 #if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
         if ( Data->m_byValue )
         {
-            DeleteTamaJjang (); //  타마짱 제거.
+            DeleteTamaJjang ();
             CreateTamaJjang ();
         }
         else
@@ -8096,11 +7205,6 @@ void ReceiveSummonLife( BYTE *ReceiveBuffer )
 	LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 	SummonLife = Data->Value;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 교환
-///////////////////////////////////////////////////////////////////////////////
-
 BOOL ReceiveTrade(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
 	if ( !bEncrypted)
@@ -8121,9 +7225,7 @@ void ReceiveTradeResult( BYTE *ReceiveBuffer )
 	LPPTRADE Data = (LPPTRADE)ReceiveBuffer;
 	g_pTrade->ProcessToReceiveTradeResult(Data);
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x37 [ReceiveTradeResult(%d)]", Data->ID);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveTradeYourInventoryDelete( BYTE *ReceiveBuffer )
@@ -8160,7 +7262,7 @@ void ReceiveTradeYourResult( BYTE *ReceiveBuffer )
 void ReceiveTradeExit( BYTE *ReceiveBuffer )
 {
 	if(EquipmentItem)
-	{	// 장착 후 처리할 수 있게 한다.
+	{
 		if ( !g_bPacketAfter_EquipmentItem)
 		{
 			memcpy( g_byPacketAfter_EquipmentItem, ReceiveBuffer, sizeof ( PHEADER_DEFAULT));
@@ -8178,73 +7280,6 @@ void ReceivePing( BYTE *ReceiveBuffer)
 	SendPing();
 }
 
-#ifdef NP_GAME_GUARD
-#ifdef GG_SERVER_AUTH
-extern  CNPGameLib*  g_pnpGL;     //  nProtect Game Guard Lib.
-BOOL ReceiveGGAuth( BYTE *ReceiveBuffer, BOOL bEncrypted)
-{
-	if ( !bEncrypted)
-	{
-		GO_DEBUG;
-		SendHackingChecked( 0x00, 0xF1);
-		return ( FALSE);
-	}
-	LPPHEADER_DEFAULT_DWORD Data = (LPPHEADER_DEFAULT_DWORD)ReceiveBuffer;
-	if(g_pnpGL) 
-	{
-#ifdef NPROTECT_AUTH2
-		GG_AUTH_DATA* pAuthData = (GG_AUTH_DATA*)(ReceiveBuffer+sizeof(PBMSG_HEADER)+1);
-		g_pnpGL->Auth2(pAuthData);
-#ifdef NP_LOG
-		g_ErrorReport.Write("ReceiveGGAuth() g_pnpGL->Auth2(%x %x %x %x)\r\n",
-			pAuthData->dwIndex, pAuthData->dwValue1, pAuthData->dwValue2, pAuthData->dwValue3);	
-#endif	// NP_LOG
-
-#else // NPROTECT_AUTH2
-		
-#ifdef NP_LOG
-		g_ErrorReport.Write("ReceiveGGAuth() g_pnpGL->Auth(%x)\r\n", Data->Value);	
-#endif	// NP_LOG
-		g_pnpGL->Auth( Data->Value);
-#endif // NPROTECT_AUTH2
-	}
-#ifdef CSK_FIX_GAMEGUARD_CHECK
-	else
-	{
-#ifdef PBG_MOD_GAMEGUARD_HANDLE
-		// 핵프로그램 발생시 클라이언트 바로 종료하지 않는다
-		if(BLUE_MU::IsBlueMuServer())
-		{
-			if(!g_NPGameGuardHandle->IsNPHack())
-				g_NPGameGuardHandle->SetNPHack(true);
-			//g_NPGameGuardHandle->SetCharacterInfo(LogInID,);
-		}
-		else
-#endif //PBG_MOD_GAMEGUARD_HANDLE
-		CloseHack(g_hWnd, true);
-	}
-#endif // CSK_FIX_GAMEGUARD_CHECK
-	
-#ifdef _DEBUG
-	char str[256];
-#ifdef NPROTECT_AUTH2
-	GG_AUTH_DATA* pAuthData = (GG_AUTH_DATA*)(ReceiveBuffer+sizeof(PBMSG_HEADER)+1);
-	wsprintf( str, "ReceiveGGAuth - 요청   %X %X %X %X", pAuthData->dwIndex, pAuthData->dwValue1, pAuthData->dwValue2, pAuthData->dwValue3);
-#else	// NPROTECT_AUTH2
-	wsprintf( str, "ReceiveGGAuth - 요청   %X", Data->Value);
-#endif // NPROTECT_AUTH2
-	g_pChatListBox->AddText("", str, SEASON3B::TYPE_SYSTEM_MESSAGE);
-#endif // _DEBUG
-	
-	return ( TRUE);
-}
-#endif	// GG_SERVER_AUTH
-#endif	// NP_GAME_GUARD
-
-///////////////////////////////////////////////////////////////////////////////
-// 창고
-///////////////////////////////////////////////////////////////////////////////
-
 void ReceiveStorageGold( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_STORAGE_GOLD Data = (LPPRECEIVE_STORAGE_GOLD)ReceiveBuffer;
@@ -8254,16 +7289,12 @@ void ReceiveStorageGold( BYTE *ReceiveBuffer )
 		CharacterMachine->Gold        = Data->Gold;
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x81 [ReceiveStorageGold(%d %d %d)]", Data->Result, Data->StorageGold, Data->Gold);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveStorageExit( BYTE *ReceiveBuffer )
 {
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x82 [ReceiveStorageExit]");
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveStorageStatus( BYTE *ReceiveBuffer )
@@ -8272,10 +7303,6 @@ void ReceiveStorageStatus( BYTE *ReceiveBuffer )
 	
 	g_pStorageInventory->ProcessToReceiveStorageStatus(Data->Value);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 파티
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceiveParty( BYTE *ReceiveBuffer )
 {
@@ -8329,9 +7356,7 @@ void ReceivePartyList( BYTE *ReceiveBuffer )
 		Offset += sizeof(PRECEIVE_PARTY_LIST);
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceivePartyInfo( BYTE *ReceiveBuffer )
@@ -8365,7 +7390,6 @@ void ReceivePartyLeave( BYTE *ReceiveBuffer )
 	g_pChatListBox->AddText("", GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE);
 
 #ifdef LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER	
-	// 파티를 해제했을때 플레이어의 파티 PK레벨 수준을 플레이어의 PK레벨 수준으로 맞춘다.
 	g_PKSystem->SetHeroPartyPKState(Hero->PK);
 #endif //LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER	
 
@@ -8391,43 +7415,33 @@ void ReceivePartyLeave( BYTE *ReceiveBuffer )
 
 void ReceivePartyGetItem ( BYTE* ReceiveBuffer )
 {
-	//9Bit(타입), 스킬, 행운, 옵션, 액설런트, 세트 (차례로)
     LPPRECEIVE_GETITEMINFO_FOR_PARTY Data = (LPPRECEIVE_GETITEMINFO_FOR_PARTY)ReceiveBuffer;
     int Key = ((int)(Data->KeyH )<<8) + Data->KeyL;
     int Index = FindCharacterIndex ( Key );
     CHARACTER* c = &CharactersClient[Index];
     if ( Hero==c ) return;
 	
-    int itemType = Data->ItemInfo&0x01fff;   //  아이템 타입.
+    int itemType = Data->ItemInfo&0x01fff;
     char itemName[100] = { 0, };
     char Text[100] = { 0, };
 	
-    if ( (Data->ItemInfo&0x10000) )      sprintf ( itemName, "%s ", GlobalText[620] );   //  액설런트.
-    else if ( (Data->ItemInfo&0x20000) ) sprintf ( itemName, "%s ", GlobalText[1089] );  //  세트.
+    if ( (Data->ItemInfo&0x10000) )      sprintf ( itemName, "%s ", GlobalText[620] );
+    else if ( (Data->ItemInfo&0x20000) ) sprintf ( itemName, "%s ", GlobalText[1089] );
 	
 	int itemLevel = Data->ItemLevel;
     GetItemName ( itemType, itemLevel, Text );
     strcat ( itemName, Text );
-    if ( (Data->ItemInfo&0x02000) ) strcat ( itemName, GlobalText[176] );    //  스킬.
-    if ( (Data->ItemInfo&0x08000) ) strcat ( itemName, GlobalText[177] );    //  옵션.
-    if ( (Data->ItemInfo&0x04000) ) strcat ( itemName, GlobalText[178] );    //  행운.
+    if ( (Data->ItemInfo&0x02000) ) strcat ( itemName, GlobalText[176] );
+    if ( (Data->ItemInfo&0x08000) ) strcat ( itemName, GlobalText[177] );
+    if ( (Data->ItemInfo&0x04000) ) strcat ( itemName, GlobalText[178] );
 	
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-    sprintf ( Text, "%s %s", GlobalText[918], itemName );   //  획득.
-#else
-    sprintf ( Text, "%s %s", itemName, GlobalText[918] );   //  획득.
-#endif // SELECTED_LANGUAGE == LANGUAGE_CHINESE
+    sprintf ( Text, "%s %s", itemName, GlobalText[918] );
 	
 	g_pChatListBox->AddText(c->ID, Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 길드
-///////////////////////////////////////////////////////////////////////////////
-
 extern int ErrorMessage;
 
-//  길드 가입.
 void ReceiveGuild( BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_KEY Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
@@ -8436,7 +7450,6 @@ void ReceiveGuild( BYTE *ReceiveBuffer )
 	SEASON3B::CNewUICommonMessageBox* pMsgBox;
 	SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildRequestMsgBoxLayout), &pMsgBox);
 	pMsgBox->AddMsg(CharactersClient[FindCharacterIndex(GuildPlayerKey)].ID);
-	// 429 "길드 가입 신청이 왔습니다."
 	pMsgBox->AddMsg(GlobalText[429]);
 }
 
@@ -8454,8 +7467,8 @@ void ReceiveGuildResult( BYTE *ReceiveBuffer )
 	case 6:g_pChatListBox->AddText("", GlobalText[509], SEASON3B::TYPE_ERROR_MESSAGE);break;
 	case 7:g_pChatListBox->AddText("", GlobalText[510], SEASON3B::TYPE_ERROR_MESSAGE);break;
 #ifdef ASG_ADD_GENS_SYSTEM
-	case 0xA1:g_pChatListBox->AddText("", GlobalText[2992], SEASON3B::TYPE_ERROR_MESSAGE);break;// 2992	"길드 마스터가 겐스에 가입이 안되어 있습니다."
-	case 0xA2:g_pChatListBox->AddText("", GlobalText[2995], SEASON3B::TYPE_ERROR_MESSAGE);break;// 2995 "길드 마스터가 다른 겐스에 가입되어 있습니다."
+	case 0xA1:g_pChatListBox->AddText("", GlobalText[2992], SEASON3B::TYPE_ERROR_MESSAGE);break;
+	case 0xA2:g_pChatListBox->AddText("", GlobalText[2995], SEASON3B::TYPE_ERROR_MESSAGE);break;
 #ifdef ASG_MOD_GUILD_RESULT_GENS_MSG
 	case 0xA3:g_pChatListBox->AddText("", GlobalText[2996], SEASON3B::TYPE_ERROR_MESSAGE);break;
 #endif	// ASG_MOD_GUILD_RESULT_GENS_MSG
@@ -8482,7 +7495,7 @@ void ReceiveGuildList( BYTE *ReceiveBuffer )
 		memcpy(p->Name,Data2->ID,MAX_ID_SIZE);
 		p->Name[MAX_ID_SIZE] = NULL;
 		p->Number = Data2->Number;
-		p->Server = ( 0x80 & Data2->CurrentServer) ? ( 0x7F & Data2->CurrentServer) : -1;	// 접속을 안했으면 -1
+		p->Server = ( 0x80 & Data2->CurrentServer) ? ( 0x7F & Data2->CurrentServer) : -1;
 		p->GuildStatus = Data2->GuildStatus;
 		Offset += sizeof(PRECEIVE_GUILD_LIST);
 		g_pGuildInfoWindow->AddGuildMember(p);
@@ -8511,7 +7524,6 @@ void ReceiveGuildLeave( BYTE *ReceiveBuffer )
 			Hero->GuildMarkIndex = -1;
 		}
 		
-		// 길드전중이였을 경우 대비..
 		EnableGuildWar = false;
 		
 		g_nGuildMemberCount = -1;
@@ -8523,7 +7535,6 @@ void ReceiveGuildLeave( BYTE *ReceiveBuffer )
 		g_pMoveCommandWindow->SetCastleOwner(false);
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW
 	}
-	// 길드원 탈퇴시켰을때 목록 갱신 (주민번호묻는과정때문에 탈퇴누르고 바로 요청하면 안되므로 여기서 재갱신)
 	else if( Data->Value == 5 )
 	{
 		SendRequestGuildList();
@@ -8546,10 +7557,10 @@ void ReceiveDeleteGuildViewport( BYTE *ReceiveBuffer )
 	int Index = FindCharacterIndex(Key);
 	CHARACTER *c = &CharactersClient[Index];
 	
-	c->GuildStatus		= -1;		// 길드내에서의 직책
-	c->GuildType		= 0;		// 길드타입
+	c->GuildStatus		= -1;
+	c->GuildType		= 0;
 	c->ProtectGuildMarkWorldTime = 0.0f;
-	c->GuildRelationShip	= 0;	// 길드관계
+	c->GuildRelationShip	= 0;
 	c->GuildMarkIndex = -1;
 	
 	g_nGuildMemberCount = -1;
@@ -8581,10 +7592,6 @@ void ReceiveCreateGuildResult( BYTE *ReceiveBuffer )
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 길드전
-///////////////////////////////////////////////////////////////////////////////
-
 bool EnableGuildWar = false;
 int  GuildWarIndex = -1;
 char GuildWarName[8+1];
@@ -8596,7 +7603,6 @@ int  SoccerTime;
 char SoccerTeamName[2][8+1];
 bool SoccerObserver = false;
 
-//전쟁 선포 메세지
 void ReceiveDeclareWar( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_WAR Data = (LPPRECEIVE_WAR)ReceiveBuffer;
@@ -8604,18 +7610,16 @@ void ReceiveDeclareWar( BYTE *ReceiveBuffer )
 	memcpy(GuildWarName,Data->Name,8);
 	GuildWarName[8] = NULL;
 	
-	// 배틀사커전 신청
 	if(Data->Type == 1)
 	{
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CBattleSoccerMsgBoxLayout));
 	}
-	else	// 길드전 신청
+	else
 	{
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildWarMsgBoxLayout));
 	}
 }
 
-//전쟁 선포 결과
 void ReceiveDeclareWarResult( BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
@@ -8684,9 +7688,7 @@ void ReceiveGuildBeginWar( BYTE *ReceiveBuffer )
 	
 	g_pNewUISystem->Show(SEASON3B::INTERFACE_BATTLE_SOCCER_SCORE);
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x62 [ReceiveGuildBeginWar(%d)]", Data->Team);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveGuildEndWar( BYTE *ReceiveBuffer )
@@ -8708,7 +7710,6 @@ void ReceiveGuildEndWar( BYTE *ReceiveBuffer )
 #endif	//LJH_FIX_NO_MSG_FOR_FORCED_MOVEOUT_FROM_BATTLESOCCER
 	}
 	
-	//길드전 결과가 왔을 때, 초기화한다. 
 	g_wtMatchTimeLeft.m_Time = 0;
 	
 #ifndef GUILD_WAR_EVENT
@@ -8774,28 +7775,24 @@ void ReceiveGuildIDViewport( BYTE *ReceiveBuffer )
 		int Index = FindCharacterIndex(Key);
 		CHARACTER *c = &CharactersClient[Index];
 		
-		c->GuildStatus = Data2->GuildStatus;				// 길드직위
-		c->GuildType = Data2->GuildType;					// 길드타입
-		c->GuildRelationShip = Data2->GuildRelationShip;	// 길드관계
+		c->GuildStatus = Data2->GuildStatus;
+		c->GuildType = Data2->GuildType;
+		c->GuildRelationShip = Data2->GuildRelationShip;
 
 #ifdef CSK_MOD_MOVE_COMMAND_WINDOW
 		g_pMoveCommandWindow->SetCastleOwner((bool)Data2->btCastleOwner);
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW
 		
-		// 길드마크 존재 확인
 		if( g_GuildCache.IsExistGuildMark(GuildKey) )
 			c->GuildMarkIndex = g_GuildCache.GetGuildMarkIndex( GuildKey );
 		else
 		{
-			// 없으면 요청
 			SendRequestGuildInfo(GuildKey);
 			c->GuildMarkIndex = g_GuildCache.MakeGuildMarkIndex( GuildKey );
 		}
         
-		// 길드팀 세팅
 		GuildTeam(c);
-		
-		// 길드장이나 길드원일때 미니맵을 다시 생성한다.
+
 		if( World == WD_30BATTLECASTLE )
 		{
 			if( g_pSiegeWarfare )
@@ -8832,13 +7829,13 @@ void ReceiveGuildAssign( BYTE *ReceiveBuffer )
 	{
 		switch( pData->byType )
 		{
-		case 0x01:		// 임명
+		case 0x01:
 			strcpy( szTemp, GlobalText[1374] );
 			break;
-		case 0x02:		// 변경
+		case 0x02:
 			strcpy( szTemp, GlobalText[1375] );
 			break;
-		case 0x03:		// 해제
+		case 0x03:
 			strcpy( szTemp, GlobalText[1376] );
 			break;
 		default:
@@ -8883,30 +7880,29 @@ void ReceiveGuildRelationShipResult( BYTE *ReceiveBuffer )
 	LPPMSG_GUILD_RELATIONSHIP_RESULT pData = (LPPMSG_GUILD_RELATIONSHIP_RESULT)ReceiveBuffer;
 	if( pData->byResult == 0x01 )
 	{
-		if( pData->byRelationShipType == 0x01 )	// 길드연합
+		if( pData->byRelationShipType == 0x01 )
 		{
 			if ( pData->byRequestType == 0x01 )	
             {
-                strcpy( szTemp, GlobalText[1381] );	// 가입
+                strcpy( szTemp, GlobalText[1381] );
             }
 			else if ( pData->byRequestType == 0x02 )
             {
-                strcpy( szTemp, GlobalText[1382] );	// 탈퇴
+                strcpy( szTemp, GlobalText[1382] );
             }
             else if ( pData->byRequestType == 0x10 )
             {
-                strcpy( szTemp, GlobalText[1635] ); //  공성전시 연합(길드)가입,해체실패.
+                strcpy( szTemp, GlobalText[1635] );
             }
 		}
-		else									// 적대길드
+		else
 		{
-			if( pData->byRequestType == 0x01 )	strcpy( szTemp, GlobalText[1383] );	// 맺기
-			else								strcpy( szTemp, GlobalText[1384] );	// 끊기
+			if( pData->byRequestType == 0x01 )	strcpy( szTemp, GlobalText[1383] );
+			else								strcpy( szTemp, GlobalText[1384] );
 		}
 	}
 	else if( pData->byResult == 0 )
 	{
-		// 1328 "실패했습니다."
 		strcpy( szTemp, GlobalText[1328] );
 	}
 	else
@@ -8914,53 +7910,53 @@ void ReceiveGuildRelationShipResult( BYTE *ReceiveBuffer )
 		switch( pData->byResult )
 		{
 		case GUILD_ANS_UNIONFAIL_BY_CASTLE:
-			strcpy( szTemp, GlobalText[1637] );			// 1637 "공성전으로 인하여 연합기능이 제한됩니다."
+			strcpy( szTemp, GlobalText[1637] );
 			break;
 		case GUILD_ANS_NOTEXIST_PERMISSION:
-			strcpy( szTemp, GlobalText[1386] );			// 1386 "권한이 없습니다."
+			strcpy( szTemp, GlobalText[1386] );
 			break;
 		case GUILD_ANS_EXIST_RELATIONSHIP_UNION:
-			strcpy( szTemp, GlobalText[1250] );			// 1250 "연합 관계 입니다."
+			strcpy( szTemp, GlobalText[1250] );
 			break;
 		case GUILD_ANS_EXIST_RELATIONSHIP_RIVAL:
-			strcpy( szTemp, GlobalText[1251] );			// 1251 "적대 관계 입니다."
+			strcpy( szTemp, GlobalText[1251] );
 			break;
 		case GUILD_ANS_EXIST_UNION:
-			strcpy( szTemp, GlobalText[1252] );			// 1252 "길드연합이 존재 합니다."
+			strcpy( szTemp, GlobalText[1252] );	
 			break;
 		case GUILD_ANS_EXIST_RIVAL:
-			strcpy( szTemp, GlobalText[1253] );			// 1253 "적대길드가 존재 합니다."
+			strcpy( szTemp, GlobalText[1253] );
 			break;
 		case GUILD_ANS_NOTEXIST_UNION:
-			strcpy( szTemp, GlobalText[1254] );			// 1254 "길드연합이 존재하지 않습니다."
+			strcpy( szTemp, GlobalText[1254] );
 			break;
 		case GUILD_ANS_NOTEXIST_RIVAL:
-			strcpy( szTemp, GlobalText[1255] );			// 1255 "적대길드가 존재하지 않습니다."
+			strcpy( szTemp, GlobalText[1255] );
 			break;
 		case GUILD_ANS_NOT_UNION_MASTER:
-			strcpy( szTemp, GlobalText[1333] );			// 1333 "길드연합 마스터가 아닙니다."
+			strcpy( szTemp, GlobalText[1333] );
 			break;
 		case GUILD_ANS_NOT_GUILD_RIVAL:
-			strcpy( szTemp, GlobalText[1329] );			// 1329 "적대길드가 아닙니다."
+			strcpy( szTemp, GlobalText[1329] );
 			break;
 		case GUILD_ANS_CANNOT_BE_UNION_MASTER_GUILD:
-			strcpy( szTemp, GlobalText[1331] );			// 1331 "연합길드생성조건미달"
+			strcpy( szTemp, GlobalText[1331] );
 			break;
 		case GUILD_ANS_EXCEED_MAX_UNION_MEMBER:
-			strcpy( szTemp, GlobalText[1287] );			// 1287 "최대 길드 연합 개수는 7개입니다."
+			strcpy( szTemp, GlobalText[1287] );
 			break;
 		case GUILD_ANS_CANCEL_REQUEST:
-			strcpy( szTemp, GlobalText[1268] );			// 1268 "신청이 취소되었습니다."
+			strcpy( szTemp, GlobalText[1268] );
 			break;
 #ifdef ASG_ADD_GENS_SYSTEM
 		case GUILD_ANS_UNION_MASTER_NOT_GENS:
-			strcpy( szTemp, GlobalText[2991] );			// 2991	"연합 길드 마스터가 겐스 가입이 안되어 있습니다."
+			strcpy( szTemp, GlobalText[2991] );
 			break;
 		case GUILD_ANS_GUILD_MASTER_NOT_GENS:
-			strcpy( szTemp, GlobalText[2992] );			// 2992	"길드 마스터가 겐스에 가입이 안되어 있습니다."
+			strcpy( szTemp, GlobalText[2992] );
 			break;
 		case GUILD_ANS_UNION_MASTER_DISAGREE_GENS:
-			strcpy( szTemp, GlobalText[2993] );			// 2993	"연합 길드 마스터와 다른 겐스에 가입되어 있습니다."
+			strcpy( szTemp, GlobalText[2993] );
 			break;
 #endif	// ASG_ADD_GENS_SYSTEM
 		default:
@@ -8970,7 +7966,6 @@ void ReceiveGuildRelationShipResult( BYTE *ReceiveBuffer )
 	}
 	g_pChatListBox->AddText("", szTemp, SEASON3B::TYPE_SYSTEM_MESSAGE);	
 	
-	// 내가 길드연합에서 탈퇴성공했다면 유니온 정보 초기화
 	int nCharKey = MAKEWORD( pData->byTargetUserIndexL, pData->byTargetUserIndexH );
 	if( nCharKey == HeroKey && pData->byResult == 0x01 && pData->byRelationShipType == 0x01 && pData->byRequestType == 0x02 )
 		GuildMark[Hero->GuildMarkIndex].UnionName[0] = NULL;
@@ -8986,12 +7981,10 @@ void ReceiveBanUnionGuildResult( BYTE *ReceiveBuffer )
 			Sleep(500);
 			SendRequestUnionList();
 		}
-		// 바뀐 연합리스트 요청
 		g_pGuildInfoWindow->UnionGuildClear();
 	}
 	else if( pData->byResult == 0 )
 	{
-		// 1328 "실패했습니다."
 		g_pChatListBox->AddText("", GlobalText[1328], SEASON3B::TYPE_SYSTEM_MESSAGE);	
 	}
 }
@@ -9004,12 +7997,10 @@ void ReceiveUnionViewportNotify( BYTE *ReceiveBuffer )
 	{
 		LPPMSG_UNION_VIEWPORT_NOTIFY pData2 = (LPPMSG_UNION_VIEWPORT_NOTIFY)(ReceiveBuffer+Offset);
 		
-		// 길드정보 갱신
 		int nGuildMarkIndex = g_GuildCache.GetGuildMarkIndex( pData2->nGuildKey );
 		memcpy( GuildMark[nGuildMarkIndex].UnionName, pData2->szUnionName, sizeof(char)*MAX_GUILDNAME );
 		GuildMark[nGuildMarkIndex].UnionName[MAX_GUILDNAME] = NULL;
 		
-		// 캐릭정보 갱신
 		int nCharKey = MAKEWORD( pData2->byKeyL, pData2->byKeyH );
 		
 		int nCharIndex = FindCharacterIndex(nCharKey);
@@ -9124,9 +8115,7 @@ void Receive_Master_LevelUp( BYTE *ReceiveBuffer )
 		}
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x51 [Receive_Master_LevelUp]");
-#endif // CONSOLE_DEBUG
 }
 
 void Receive_Master_Level_Exp( BYTE *ReceiveBuffer )
@@ -9172,9 +8161,7 @@ void Receive_Master_Level_Exp( BYTE *ReceiveBuffer )
 	Master_Level_Data.wMaxShield		= Data->wMaxShield;
 	Master_Level_Data.wMaxBP			= Data->wMaxSkillMana;
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x50 [Receive_Master_Level_Exp]");
-#endif // CONSOLE_DEBUG
 }
 
 void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
@@ -9183,7 +8170,6 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 	
 	if(Data->btResult == 1)
 	{
-		//습득했다.
 		if(Data->nSkillNum > -1)
 		{
 			for(int i=0; i<MAX_MAGIC; ++i)
@@ -9311,15 +8297,11 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 					}
 				}
 			}
-			//////////////////////////////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////
 		}
 	}
 	Master_Level_Data.nMLevelUpMPoint			   = Data->nMLPoint;
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x52 [Receive_Master_LevelGetSkill]");
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveServerCommand( BYTE *ReceiveBuffer )
@@ -9327,10 +8309,10 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 	LPPRECEIVE_SERVER_COMMAND Data = (LPPRECEIVE_SERVER_COMMAND)ReceiveBuffer;
 	switch( Data->Cmd1)
 	{
-	case 2:	// 팡파레 + 폭죽
+	case 2:
 		PlayBuffer(SOUND_MEDAL);
 		break;
-	case 0:	// 폭죽
+	case 0:
 		{
 			vec3_t Position, Angle, Light;
 			Position[0]  = (float)(Data->Cmd2+0.5f)*TERRAIN_SCALE;
@@ -9345,8 +8327,8 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 #endif	// YDG_ADD_FIRECRACKER_ITEM
 		}
 		break;
-	case 1:	// 메시지 박스
-        // Data->Cmd2 : 46번 까지 사용 (추가 상자는 그 뒤로 써주세요)
+	case 1:
+        // Data->Cmd2
 #ifndef LIMIT_CHAOS_MIX
 		if(Data->Cmd2 >= 20)
 		{
@@ -9359,17 +8341,17 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 #endif //LIMIT_CHAOS_MIX
 		break;
 		
-	case 3:	// (레나)이벤트 메시지 박스
+	case 3:
 		SEASON3B::CreateOkMessageBox(GlobalText[710+Data->Cmd2]);
 		break;
 		
 #ifdef LENA_EXCHANGE_ZEN
-    case 4:	// (레나)이벤트 환전 메시지 박스
+    case 4:
 		SEASON3B::CreateOkMessageBox(GlobalText[725+Data->Cmd2]);
         break;
 #endif // LENA_EXCHANGE_ZEN
 		
-	case 5:	// NPC 와의 대화
+	case 5:
 		{
 			SEASON3B::CDialogMsgBox* pMsgBox = NULL;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDialogMsgBoxLayout), &pMsgBox);
@@ -9380,7 +8362,7 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 		}
 		break;
 		
-    case 6: //  서버 분할. ( 0: 길드 해제하고 와라. )
+    case 6:
 		SEASON3B::CreateOkMessageBox(GlobalText[449]);
         break;
 		
@@ -9389,31 +8371,29 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 #ifdef KJH_ADD_NPC_ROURKE_PCROOM_EVENT_MESSAGEBOX
 		switch(Data->Cmd2) 
 		{
-		case 0:				// 0. 아이템을 지급받으시겠습니까?
+		case 0:
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPCRoomItemGiveLayout));
 			break;
-		case 1:				// 1. 이벤트 기간이 아님. 
+		case 1:
 			SEASON3B::CreateOkMessageBox(GlobalText[2021]);
 			break;
-		case 2:				// 2. 이미 아이템 지급  .
+		case 2:
 			SEASON3B::CreateOkMessageBox(GlobalText[2022]);
 			break;
-		case 3:				// 3. 실패 
+		case 3:
 			SEASON3B::CreateOkMessageBox(GlobalText[2023]);
 			break;
-		case 4:				// 4. 지급 자격 없음.
+		case 4:
 			SEASON3B::CreateOkMessageBox(GlobalText[2024]);
 			break;
 		}
 #else // KJH_ADD_NPC_ROURKE_PCROOM_EVENT_MESSAGEBOX
-		if (0 == Data->Cmd2)	// 0 아이템 지급 가능.
+		if (0 == Data->Cmd2)
 		{
 			ShowCheckBox(1, 2020, MESSAGE_PCROOM_EVENT);
 		}
 		else					
 		{
-			// 1 이벤트 기간이 아님. 2  이미 아이템 지급  .
-			// 3 실패. 4 지급 자격 없음.
 			SEASON3B::CreateOkMessageBox(GlobalText[2020 + Data->Cmd2]);
 		}
 #endif // KJH_ADD_NPC_ROURKE_PCROOM_EVENT_MESSAGEBOX
@@ -9424,49 +8404,49 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 		SEASON3B::CreateOkMessageBox(GlobalText[1826]);
 		break;
 		
-	case 14:	// 화이트 앤젤 이벤트
+	case 14:
 		{
 			switch(Data->Cmd2) 
 			{
-			case 0:	// 아이템 지급 대상자가 맞음
+			case 0:
 				SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CWhiteAngelEventLayout));
 				break;
 				
-			case 1:	// 아이템 지급 대상자가 아님
+			case 1:
 				SEASON3B::CreateOkMessageBox(GlobalText[2024]);
 				break;
 				
-			case 2:	// 아이템이 이미 지급되었다.
+			case 2:
 				SEASON3B::CreateOkMessageBox(GlobalText[2022]);
 				break;
 				
-			case 3:	// 에러
+			case 3:
 				SEASON3B::CreateOkMessageBox(GlobalText[2023]);
 				break;
 				
-			case 4:	// 아이템 지급 성공
+			case 4:
 				//ShowCustomMessageBox(GlobalText[858]);
 				break;
 				
-			case 5:	// 아이템 지급 실패
+			case 5:
 				SEASON3B::CreateOkMessageBox(GlobalText[2023]);
 				break;
 			}
 		}
 		break;
 		
-#ifdef PRUARIN_EVENT07_3COLORHARVEST		// 07년도 3COLOR & 추석 이벤트
+#ifdef PRUARIN_EVENT07_3COLORHARVEST
 	case 15:
 		{
 			switch(Data->Cmd2) 
 			{
-			case 0:				// 이미 지급되었습니다.
+			case 0:
 				SEASON3B::CreateOkMessageBox(GlobalText[2022]);
 				break;
-			case 1:				// 아이템을 지급받으시겠습니까?
+			case 1:
 				SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHarvestEventLayout));
 				break;
-			case 2:				// 아이템 지급실패
+			case 2:
 				SEASON3B::CreateOkMessageBox(GlobalText[2023]);
 				break;
 			}
@@ -9481,18 +8461,18 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 
 			switch(Data->Cmd2)
 			{
-			case 0: //최초방문 2588
+			case 0:
 				SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSantaTownSantaMsgBoxLayout), &pMsgBox);
-				pMsgBox->AddMsg(GlobalText[2588]);	// 2588 "산타마을에 어서오세요, 구해주신 보답으로 선물을.... "
+				pMsgBox->AddMsg(GlobalText[2588]);
 				break;
-			case 1: //일반방문 2585
+			case 1:
 				SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSantaTownSantaMsgBoxLayout), &pMsgBox);
-				pMsgBox->AddMsg(GlobalText[2585]);	// 2585 "산타마을에 어서오세요. 선물을 받아가세요"
+				pMsgBox->AddMsg(GlobalText[2585]);
 				break;
-			case 2: //이미 아이템을 받아갔음
+			case 2:
 				SEASON3B::CreateOkMessageBox(GlobalText[2587]);
 				break;
-			case 3: //실패(내부오류)
+			case 3:
 				SEASON3B::CreateOkMessageBox(GlobalText[2023]);
 				break;
 			}
@@ -9501,12 +8481,11 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 #endif //LDK_ADD_SANTA_NPC
 		
 #ifdef LDK_ADD_SNOWMAN_NPC
-	case 17: //데비아스로 이동 하시겠습니까?
+	case 17:
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSantaTownLeaveMsgBoxLayout));
 		break;
 #endif //LDK_ADD_SNOWMAN_NPC
 		
-		//블러드캐슬 텍스트 확장
 	case 47:
 	case 48:
 	case 49:
@@ -9539,7 +8518,7 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 		{
 			WORD Key = ((WORD)(Data->Cmd2)<<8)+Data->Cmd3;
 			Key &= 0x7FFF;
-			int Index = FindCharacterIndex(Key);					// 인덱스를 찾아서 저장
+			int Index = FindCharacterIndex(Key);
 			if( Index >= 0 && Index != MAX_CHARACTERS_CLIENT ) {
 				OBJECT* to = &CharactersClient[Index].Object;
 				if( to != NULL ) {
@@ -9551,7 +8530,7 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 		break;
 #endif //CSK_EVENT_CHERRYBLOSSOM
 #ifdef YDG_ADD_FIRECRACKER_ITEM
-	case 59:	// 크리스마스 폭죽
+	case 59:
 		{
 			vec3_t Position, Angle, Light;
 			Position[0]  = (float)(Data->Cmd2+0.5f)*TERRAIN_SCALE;
@@ -9563,21 +8542,17 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 		}
 #endif	// YDG_ADD_FIRECRACKER_ITEM
 #ifdef YDG_ADD_CS5_REVIVAL_CHARM
-	case 60:	// 부활의 부적 사용 성공
+	case 60:
 		g_PortalMgr.ResetRevivePosition();
 		break;
 #endif	// YDG_ADD_CS5_REVIVAL_CHARM
 #ifdef YDG_ADD_CS5_PORTAL_CHARM
-	case 61:	// 이동의 부적 사용 성공
+	case 61:
 		g_PortalMgr.ResetPortalPosition();
 		break;
 #endif	// YDG_ADD_CS5_PORTAL_CHARM
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 믹스 관련
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceiveMix( BYTE *ReceiveBuffer )
 {
@@ -9585,7 +8560,7 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 	
 	switch(Data->Index)
 	{
-    case 0:	// 실패
+    case 0:
 		{
 #ifdef LEM_ADD_LUCKYITEM
 			if( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct() )
@@ -9605,7 +8580,7 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 			case SEASON3A::MIXTYPE_EXTRACT_SEED:
 			case SEASON3A::MIXTYPE_SEED_SPHERE:
 #endif	// ADD_SOCKET_MIX
-				unicode::_sprintf(szText, GlobalText[594]);		// 조합 실패
+				unicode::_sprintf(szText, GlobalText[594]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
 				// 			case SEASON3A::MIXTYPE_TRAINER:
@@ -9613,33 +8588,33 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 				// 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				// 				break;
 			case SEASON3A::MIXTYPE_OSBOURNE:
-				unicode::_sprintf(szText, GlobalText[2105], GlobalText[2061]);	// 제련 실패
+				unicode::_sprintf(szText, GlobalText[2105], GlobalText[2061]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
 			case SEASON3A::MIXTYPE_JERRIDON:
-				unicode::_sprintf(szText, GlobalText[2105], GlobalText[2062]);	// 환원 실패
+				unicode::_sprintf(szText, GlobalText[2105], GlobalText[2062]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
 			case SEASON3A::MIXTYPE_ELPIS:
-				unicode::_sprintf(szText, GlobalText[2112], GlobalText[2063]);	// 정제 실패
+				unicode::_sprintf(szText, GlobalText[2112], GlobalText[2063]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
 #ifdef PSW_NEW_CHAOS_CARD
 			case SEASON3A::MIXTYPE_CHAOS_CARD:
-				unicode::_sprintf(szText, GlobalText[2112], GlobalText[2265]);	// 카오스 카드 성공
+				unicode::_sprintf(szText, GlobalText[2112], GlobalText[2265]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
 #endif	// PSW_NEW_CHAOS_CARD
 #ifdef CSK_EVENT_CHERRYBLOSSOM
 			case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-				unicode::_sprintf(szText, GlobalText[2112], GlobalText[2560]);	// 벚꽃 조합 성공
+				unicode::_sprintf(szText, GlobalText[2112], GlobalText[2560]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
 #endif	// CSK_EVENT_CHERRYBLOSSOM
 			}
 		}
 		break;
-    case 1:	// 성공
+    case 1:
 		{
 #ifdef LEM_ADD_LUCKYITEM
 			if( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct() )	
@@ -9659,34 +8634,34 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 			case SEASON3A::MIXTYPE_EXTRACT_SEED:
 			case SEASON3A::MIXTYPE_SEED_SPHERE:
 #endif	// ADD_SOCKET_MIX
-				unicode::_sprintf(szText, GlobalText[595]);		// 조합 성공
+				unicode::_sprintf(szText, GlobalText[595]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
 				// 			case SEASON3A::MIXTYPE_TRAINER:
-				// 				unicode::_sprintf(szText, GlobalText[1209]);	// 부활 성공
+				// 				unicode::_sprintf(szText, GlobalText[1209]);
 				// 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				// 				break;
 			case SEASON3A::MIXTYPE_OSBOURNE:
-				unicode::_sprintf(szText, GlobalText[2106], GlobalText[2061]);	// 제련 성공
+				unicode::_sprintf(szText, GlobalText[2106], GlobalText[2061]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
 			case SEASON3A::MIXTYPE_JERRIDON:
-				unicode::_sprintf(szText, GlobalText[2106], GlobalText[2062]);	// 환원 성공
+				unicode::_sprintf(szText, GlobalText[2106], GlobalText[2062]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
 			case SEASON3A::MIXTYPE_ELPIS:
-				unicode::_sprintf(szText, GlobalText[2113], GlobalText[2063]);	// 정제 성공
+				unicode::_sprintf(szText, GlobalText[2113], GlobalText[2063]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
 #ifdef PSW_NEW_CHAOS_CARD
 			case SEASON3A::MIXTYPE_CHAOS_CARD:
-				unicode::_sprintf(szText, GlobalText[2113], GlobalText[2265]);	// 카오스 카드 성공
+				unicode::_sprintf(szText, GlobalText[2113], GlobalText[2265]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
 #endif	// PSW_NEW_CHAOS_CARD
 #ifdef CSK_EVENT_CHERRYBLOSSOM
 			case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-				unicode::_sprintf(szText, GlobalText[2113], GlobalText[2560]);	// 벚꽃 조합 성공
+				unicode::_sprintf(szText, GlobalText[2113], GlobalText[2560]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
 #endif	// CSK_EVENT_CHERRYBLOSSOM
@@ -9699,35 +8674,35 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 			PlayBuffer(SOUND_JEWEL01);
 		}
 		break;
-    case 2:	// 돈없음
+    case 2:
 	case 0x0B:
 		{
 			g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_READY);
 			g_pChatListBox->AddText("", GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
 		}
 		break;
-	case 4:	// 초대권은 레벨 10이상만
+	case 4:
 		SEASON3B::CreateOkMessageBox(GlobalText[649]);
 		g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
 		break;
 		
-	case 9:	// 망토는 레벨 10 이상만
+	case 9:
 		SEASON3B::CreateOkMessageBox(GlobalText[689]);
 		g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
 		break;
 		
-    case 100:    //  조련사 조합 성공.
+    case 100:
 		g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
 		g_pMixInventory->DeleteAllItems();
 		g_pMixInventory->InsertItem(0, Data->Item);
         break;
-	case 3:	// 악마의 열쇠,눈 개수 오류
-	case 5:	// 경품
+	case 3:
+	case 5:
 	case 7:
 	case 8:
 	case 0x0A:
 
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 티켓 교환 실패시 메세지 [lem_2010.9.8]
+#ifdef LEM_ADD_LUCKYITEM
 	case 0x20:
 		if( g_pLuckyItemWnd->GetAct() )	
 		{
@@ -9740,21 +8715,14 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 		break;
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x86 [ReceiveMix(%d)]", Data->Index);
-#endif // CONSOLE_DEBUG
 }
 
 void ReceiveMixExit( BYTE *ReceiveBuffer )
 {
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x87 [ReceiveMixExit]");
-#endif // CONSOLE_DEBUG
 }
 
-//////////////////////////////////////////////////////////////////////////
-//보석 조합 관련 함수
-//////////////////////////////////////////////////////////////////////////
 void ReceiveGemMixResult(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_JEWEL_MIX Data = (LPPMSG_ANS_JEWEL_MIX)ReceiveBuffer;
@@ -9835,9 +8803,6 @@ void ReceiveGemUnMixResult(BYTE* ReceiveBuffer)
 		break;
 	}
 }
-///////////////////////////////////////////////////////////////////////////////
-// 악마의 광장 관련 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void ReceiveMoveToDevilSquareResult( BYTE *ReceiveBuffer )
 {
@@ -9846,29 +8811,29 @@ void ReceiveMoveToDevilSquareResult( BYTE *ReceiveBuffer )
 	LPPHEADER_DEFAULT Data = ( LPPHEADER_DEFAULT)ReceiveBuffer;
 	switch ( Data->Value)
 	{
-	case 0:	// 성공
+	case 0:
 		break;
-	case 1: // 초대권이 없다
+	case 1:
 		SEASON3B::CreateOkMessageBox(GlobalText[677]);
 		break;
 		
-	case 2: // 참여가능 시간이 지났다.
+	case 2:
 		SEASON3B::CreateOkMessageBox(GlobalText[678]);
 		break;
 		
-	case 3: // 레벨 제한 때문에 못간다. ( 내 레벨이 높다. )
+	case 3:
 		SEASON3B::CreateOkMessageBox(GlobalText[686]);
 		break;
 		
-	case 4: // 레벨 제한 때문에 못간다. ( 내 레벨이 낮다. )
+	case 4:
 		SEASON3B::CreateOkMessageBox(GlobalText[687]);
 		break;
 		
-	case 5: // 인원이 꽉 차서 못간다.
+	case 5:
 		SEASON3B::CreateOkMessageBox(GlobalText[679]);
 		break;
 		
-	case 6:	// "살인 상태에서는 악마의 광장에 입장이 불가능합니다."
+	case 6:
 		{
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[2043], GlobalText[39]);
@@ -9881,7 +8846,7 @@ void ReceiveMoveToDevilSquareResult( BYTE *ReceiveBuffer )
 void ReceiveDevilSquareOpenTime( BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = ( LPPHEADER_DEFAULT)ReceiveBuffer;
-	if ( 0 == Data->Value)	// 오픈 시간(분)
+	if ( 0 == Data->Value)
 	{
 		SEASON3B::CreateOkMessageBox(GlobalText[643]);
 	}
@@ -9927,11 +8892,6 @@ void ReceiveDevilSquareRank( BYTE *ReceiveBuffer )
     matchEvent::SetMatchResult ( Data->m_Count, Data->m_MyRank, ( MatchResult*)&Data->m_byRank, Data->m_MyRank );
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 블러드 캐슬 관련 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void ReceiveMoveToEventMatchResult( BYTE *ReceiveBuffer )
 {
 	g_pNewUISystem->HideAll();
@@ -9939,13 +8899,13 @@ void ReceiveMoveToEventMatchResult( BYTE *ReceiveBuffer )
 	LPPHEADER_DEFAULT Data = ( LPPHEADER_DEFAULT)ReceiveBuffer;
 	switch ( Data->Value)
 	{
-	case 0:	// 성공
+	case 0:
 		break;
-	case 1: // 투명망토가 없다
+	case 1:
 		SEASON3B::CreateOkMessageBox(GlobalText[854]);
 		break;
 		
-	case 2: // 참여가능 시간이 지났다.
+	case 2:
         {
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[852], GlobalText[1146]);
@@ -9953,15 +8913,15 @@ void ReceiveMoveToEventMatchResult( BYTE *ReceiveBuffer )
         }
 		break;
 		
-	case 3: // 레벨 제한 때문에 못간다. ( 내 레벨이 높다. )
+	case 3:
 		SEASON3B::CreateOkMessageBox(GlobalText[686]);
 		break;
 		
-	case 4: // 레벨 제한 때문에 못간다. ( 내 레벨이 낮다. )
+	case 4:
 		SEASON3B::CreateOkMessageBox(GlobalText[687]);
 		break;
 		
-	case 5: // 인원이 꽉 차서 못간다.
+	case 5:
         {
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[853], GlobalText[1146], MAX_BLOOD_CASTLE_MEN);
@@ -9969,21 +8929,21 @@ void ReceiveMoveToEventMatchResult( BYTE *ReceiveBuffer )
         }
 		break;
 		
-	case 6:	// 하루에 6번만 입장가능합니다
+	case 6:
 		{
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[867], 6);
 			SEASON3B::CreateOkMessageBox(strText);
 		}
 		break;
-    case 7: //  "살인 상태에서는 블러드캐슬에 입장이 불가능합니다."
+    case 7:
 		{
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[2043], GlobalText[56]);
 			SEASON3B::CreateOkMessageBox(strText);	
 		}
         break;
-    case 8: //  참여가능 시간이 지났다.
+    case 8:
         {
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[852], GlobalText[1147]);
@@ -9991,7 +8951,7 @@ void ReceiveMoveToEventMatchResult( BYTE *ReceiveBuffer )
         }
         break;
 		
-    case 9: //  인원이 꽉 차서 못간다.
+    case 9:
         {
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[853], GlobalText[1147], MAX_CHAOS_CASTLE_MEN);
@@ -10004,9 +8964,9 @@ void ReceiveMoveToEventMatchResult( BYTE *ReceiveBuffer )
 void ReceiveEventZoneOpenTime( BYTE *ReceiveBuffer )
 {
 	LPPHEADER_MATCH_OPEN_VALUE Data = (LPPHEADER_MATCH_OPEN_VALUE)ReceiveBuffer;
-	if (Data->Value == 1)			// 악마의광장 남은시간
+	if (Data->Value == 1)
 	{
-		if ( 0 == Data->KeyH)	// 오픈 시간(분)
+		if ( 0 == Data->KeyH)
 		{
 			SEASON3B::CreateOkMessageBox(GlobalText[643]);
 		}
@@ -10017,7 +8977,7 @@ void ReceiveEventZoneOpenTime( BYTE *ReceiveBuffer )
 			SEASON3B::CreateOkMessageBox(strText);
 		}
 	}
-	else if (Data->Value == 2)	// 블러드캐슬 남은시간
+	else if (Data->Value == 2)
 	{
 		unicode::t_char strText[256];
 		if(0 == Data->KeyH)
@@ -10030,13 +8990,13 @@ void ReceiveEventZoneOpenTime( BYTE *ReceiveBuffer )
 		}
 		SEASON3B::CreateOkMessageBox(strText);
 	}
-    else if ( Data->Value==4 )    //  카오스캐슬 남은 시간.
+    else if ( Data->Value==4 )
     {
 #ifdef KJW_FIX_CHAOSCASTLE_MESSAGE
 #endif // KJW_FIX_CHAOSCASTLE_MESSAGE
 		WORD time = MAKEWORD ( Data->KeyL, Data->KeyH );
         
-        if ( 0 == time )	// 오픈 시간(분)
+        if ( 0 == time )
 		{
 			char szOpenTime1[256] = {0, };
 			char szOpenTime2[256] = {0, };
@@ -10059,44 +9019,23 @@ void ReceiveEventZoneOpenTime( BYTE *ReceiveBuffer )
 		}
 		else
 		{
-		/* 이혁재 - 확인 요망
-		#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		wsprintf ( GlobalText[1154], GlobalText[851], time, GlobalText[1147] );
-		
-		  #else
-			*/
             char Text[256];
             int Hour = (int)(time/60);
             int Mini = (int)(time)-(Hour*60);
 			
 			char szOpenTime[256] = {0, };
-			
-			/*
-			#ifdef PHIL_LANGUAGE_PROBLEM
-			if(Hour != 0) wsprintf ( Text, GlobalText[1167], GlobalText[1147], Hour, Mini );
-			else wsprintf ( Text, GlobalText[851], Mini, GlobalText[1147] );
-			strcpy( GlobalText[1154], Text);
-			#else
-			wsprintf ( GlobalText[1154], GlobalText[1164], Hour );
-			wsprintf ( Text, GlobalText[851], Mini, GlobalText[1147] );
-			strcat ( GlobalText[1154], Text );
-			#endif //PHIL_LANGUAGE_PROBLEM
-			*///??
-			
+				
 			wsprintf ( szOpenTime, GlobalText[1164], Hour );
 			wsprintf ( Text, GlobalText[851], Mini, GlobalText[1147] );
 			strcat ( szOpenTime, Text );
 			
 			GlobalText.Remove(1154);
 			GlobalText.Add(1154, szOpenTime);
-			
-			//#endif// SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-			
+					
 			SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
 			if(pMsgBox)
 			{
-				// 1154 ""
 				pMsgBox->AddMsg(GlobalText[1154]);
 			}
 		}
@@ -10116,9 +9055,6 @@ void ReceiveEventZoneOpenTime( BYTE *ReceiveBuffer )
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  경기장 이동 요청 결과.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveMoveToEventMatchResult2( BYTE *ReceiveBuffer )
 {
 	g_pNewUISystem->HideAll();
@@ -10126,13 +9062,13 @@ void ReceiveMoveToEventMatchResult2( BYTE *ReceiveBuffer )
 	LPPWHEADER_DEFAULT_WORD Data = ( LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	switch ( Data->Value)
 	{
-	case 0:	// 성공
+	case 0:
 		break;
-	case 1: // 알맞는 언데드 마스크 없음.
+	case 1:
 		SEASON3B::CreateOkMessageBox(GlobalText[854]);
 		break;
 		
-	case 2: // 참여가능 시간이 지났다.
+	case 2:
         {
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[852], GlobalText[1147]);
@@ -10140,15 +9076,15 @@ void ReceiveMoveToEventMatchResult2( BYTE *ReceiveBuffer )
         }
 		break;
 		
-	case 3: // 레벨 제한 때문에 못간다. ( 내 레벨이 높다. )
+	case 3:
 		SEASON3B::CreateOkMessageBox(GlobalText[686]);
 		break;
 		
-	case 4: // 레벨 제한 때문에 못간다. ( 내 레벨이 낮다. )
+	case 4:
 		SEASON3B::CreateOkMessageBox(GlobalText[687]);
 		break;
 		
-	case 5: // 인원이 꽉 차서 못간다.
+	case 5:
         {
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[853], GlobalText[1147], MAX_CHAOS_CASTLE_MEN);
@@ -10156,7 +9092,7 @@ void ReceiveMoveToEventMatchResult2( BYTE *ReceiveBuffer )
         }
 		break;
 		
-	case 6:	// 하루에 6번만 입장가능합니다
+	case 6:
 		{
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[867], 6);
@@ -10164,11 +9100,11 @@ void ReceiveMoveToEventMatchResult2( BYTE *ReceiveBuffer )
 		}
 		break;
 		
-    case 7: //  Zen이 부족하여 입장할 수 없습니다.
+    case 7:
 		SEASON3B::CreateOkMessageBox(GlobalText[423]);
         break;
 		
-	case 8: //"살인 상태에서는 카오스 캐슬에 입장이 불가능합니다."
+	case 8:
 		{
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[2043], GlobalText[57]);
@@ -10178,19 +9114,15 @@ void ReceiveMoveToEventMatchResult2( BYTE *ReceiveBuffer )
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  변경되는 속성값을 받는다.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveSetAttribute ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_SET_MAPATTRIBUTE Data = (LPPRECEIVE_SET_MAPATTRIBUTE)ReceiveBuffer;
 
 	g_ErrorReport.Write("Type:%d \r\n", Data->m_byType);
 	
-    //  속성을 채운다.
     switch ( Data->m_byType )
     {
-    case 0: //  범위 속성.
+    case 0:
         {
             if ( InBloodCastle() && Data->m_byMapAttr==TW_NOGROUND )
             {
@@ -10209,15 +9141,15 @@ void ReceiveSetAttribute ( BYTE* ReceiveBuffer )
         }
         break;
 		
-    case 1: //  특정 위치 속성.
+    case 1:
         for ( int i=0; i<Data->m_byCount; ++i )
         {
-            if ( Data->m_byMapSetType )   //  제거.
+            if ( Data->m_byMapSetType )
             {
 				g_ErrorReport.Write("SubTerrainAttribute - count:%d, x:%d, y:%d \r\n", Data->m_byCount, Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
 				SubTerrainAttribute ( Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY, Data->m_byMapAttr );
             }
-            else                    //  추가.
+            else
             {
 				g_ErrorReport.Write("AddTerrainAttribute - count:%d, x:%d, y:%d \r\n", Data->m_byCount, Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
 				AddTerrainAttribute ( Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY, Data->m_byMapAttr );
@@ -10227,9 +9159,6 @@ void ReceiveSetAttribute ( BYTE* ReceiveBuffer )
     }
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  게임 진행 메시지.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveMatchGameCommand ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_MATCH_GAME_STATE Data = (LPPRECEIVE_MATCH_GAME_STATE)ReceiveBuffer;
@@ -10238,7 +9167,7 @@ void ReceiveMatchGameCommand ( BYTE* ReceiveBuffer )
 }
 
 #ifdef YDG_ADD_NEW_DUEL_PROTOCOL
-void ReceiveDuelRequest(BYTE* ReceiveBuffer)	// 결투요청
+void ReceiveDuelRequest(BYTE* ReceiveBuffer)
 {
 	if(g_MessageBox->IsEmpty() == false)
 	{
@@ -10246,7 +9175,7 @@ void ReceiveDuelRequest(BYTE* ReceiveBuffer)	// 결투요청
 	}
 
 	LPPMSG_REQ_DUEL_ANSWER Data = (LPPMSG_REQ_DUEL_ANSWER)ReceiveBuffer;
-	// 아무개님이 결투를 요청했습니다 응하겠습니까 창 띄움
+
 	g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL,Data->bIndexH), Data->szID);
 	
 	if(g_pNewUISystem->IsImpossibleDuelInterface() == true)
@@ -10259,7 +9188,7 @@ void ReceiveDuelRequest(BYTE* ReceiveBuffer)	// 결투요청
 	PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }
 
-void ReceiveDuelStart(BYTE* ReceiveBuffer)	// 결투요청 결과
+void ReceiveDuelStart(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_INVITE Data = (LPPMSG_ANS_DUEL_INVITE)ReceiveBuffer;
 	char szMessage[256];
@@ -10268,41 +9197,37 @@ void ReceiveDuelStart(BYTE* ReceiveBuffer)	// 결투요청 결과
 		g_DuelMgr.EnableDuel(TRUE);
 		g_DuelMgr.SetHeroAsDuelPlayer(DUEL_HERO);
 		g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL,Data->bIndexH), Data->szID);
-		// 912 "%s 님이 결투에 응했습니다."
 		sprintf(szMessage, GlobalText[912], g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
 		g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
 		
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_DUEL_WINDOW);
 		PlayBuffer(SOUND_START_DUEL);
 	}
-	else if (Data->nResult == 15)	// 거부
+	else if (Data->nResult == 15)
 	{
 		g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL,Data->bIndexH), Data->szID);
-		// 913 "%s 님이 결투신청을 거부했습니다."
 		sprintf(szMessage, GlobalText[913], g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
 		g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
 	}
-	else if (Data->nResult == 16)	// 방 더이상 개설 못함
+	else if (Data->nResult == 16)
 	{
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDuelCreateErrorMsgBoxLayout));
 	}
-	else if (Data->nResult == 28)	// 상대방이 레벨 30이하
+	else if (Data->nResult == 28)
 	{
 		g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL,Data->bIndexH), Data->szID);
-		// 2704 "%d레벨 이상의 캐릭터만 결투가 가능합니다."
 		sprintf(szMessage, GlobalText[2704], 30);
 		g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
 	}
-	else if (Data->nResult == 30)	// 젠부족
+	else if (Data->nResult == 30)
 	{
 		g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL,Data->bIndexH), Data->szID);
-		// 1811 "젠이 부족합니다."
 		sprintf(szMessage, GlobalText[1811]);
 		g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
 	}
 }
 
-void ReceiveDuelEnd(BYTE* ReceiveBuffer)	// 결투종료
+void ReceiveDuelEnd(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_EXIT Data = (LPPMSG_ANS_DUEL_EXIT)ReceiveBuffer;
 
@@ -10316,14 +9241,14 @@ void ReceiveDuelEnd(BYTE* ReceiveBuffer)	// 결투종료
 		
 		if(g_wtMatchTimeLeft.m_Type == 2)
 			g_wtMatchTimeLeft.m_Time = 0;
-		g_DuelMgr.EnablePetDuel(FALSE);	// LHJ - 결투 끝날때 다크 스피릿도 공격 못하게 하는 변수
+		g_DuelMgr.EnablePetDuel(FALSE);
 	}
 	else
 	{
 	}
 }
 
-void ReceiveDuelScore(BYTE* ReceiveBuffer)	// 결투자 점수 정보
+void ReceiveDuelScore(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_SCORE_BROADCAST Data = (LPPMSG_DUEL_SCORE_BROADCAST)ReceiveBuffer;
 
@@ -10337,13 +9262,9 @@ void ReceiveDuelScore(BYTE* ReceiveBuffer)	// 결투자 점수 정보
 		g_DuelMgr.SetScore(DUEL_HERO, Data->btDuelScore2);
 		g_DuelMgr.SetScore(DUEL_ENEMY, Data->btDuelScore1);
 	}
-	else
-	{
-		//. 먼가 데이타가 잘못온경우
-	}
 }
 
-void ReceiveDuelHP(BYTE* ReceiveBuffer)	// 결투자 생명 정보
+void ReceiveDuelHP(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_HP_BROADCAST Data = (LPPMSG_DUEL_HP_BROADCAST)ReceiveBuffer;
 
@@ -10361,13 +9282,9 @@ void ReceiveDuelHP(BYTE* ReceiveBuffer)	// 결투자 생명 정보
 		g_DuelMgr.SetSD(DUEL_HERO, Data->btShield2);
 		g_DuelMgr.SetSD(DUEL_ENEMY, Data->btShield1);
 	}
-	else
-	{
-		//. 먼가 데이타가 잘못온경우
-	}
 }
 
-void ReceiveDuelChannelList(BYTE* ReceiveBuffer)	// 결투 채널(관전) 리스트
+void ReceiveDuelChannelList(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_CHANNELLIST Data = (LPPMSG_ANS_DUEL_CHANNELLIST)ReceiveBuffer;
 	for (int i = 0; i < 4; ++i)
@@ -10376,7 +9293,7 @@ void ReceiveDuelChannelList(BYTE* ReceiveBuffer)	// 결투 채널(관전) 리스트
 	}
 }
 
-void ReceiveDuelWatchRequestReply(BYTE* ReceiveBuffer)	// 채널(관전) 요청
+void ReceiveDuelWatchRequestReply(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_JOINCNANNEL Data = (LPPMSG_ANS_DUEL_JOINCNANNEL)ReceiveBuffer;
 	if (Data->nResult == 0)
@@ -10387,13 +9304,12 @@ void ReceiveDuelWatchRequestReply(BYTE* ReceiveBuffer)	// 채널(관전) 요청
 		g_DuelMgr.SetDuelPlayer(DUEL_HERO, MAKEWORD(Data->bIndexL1, Data->bIndexH1), Data->szID1);
 		g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL2, Data->bIndexH2), Data->szID2);
 	}
-	else if (Data->nResult == 16)	// 방 더이상 개설 못함
+	else if (Data->nResult == 16)
 	{
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDuelCreateErrorMsgBoxLayout));
 	}
 	else if (Data->nResult == 27)
 	{
-		// 방 꽉찼음
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDuelWatchErrorMsgBoxLayout));
 	}
 	else
@@ -10401,13 +9317,13 @@ void ReceiveDuelWatchRequestReply(BYTE* ReceiveBuffer)	// 채널(관전) 요청
 	}
 }
 
-void ReceiveDuelWatcherJoin(BYTE* ReceiveBuffer)	// 채널(관전) 입장한 관전자
+void ReceiveDuelWatcherJoin(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_JOINCNANNEL_BROADCAST Data = (LPPMSG_DUEL_JOINCNANNEL_BROADCAST)ReceiveBuffer;
 	g_DuelMgr.AddDuelWatchUser(Data->szID);
 }
 
-void ReceiveDuelWatchEnd(BYTE* ReceiveBuffer)	// 채널(관전) 종료
+void ReceiveDuelWatchEnd(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_LEAVECNANNEL Data = (LPPMSG_ANS_DUEL_LEAVECNANNEL)ReceiveBuffer;
 	if (Data->nResult == 0)
@@ -10419,13 +9335,13 @@ void ReceiveDuelWatchEnd(BYTE* ReceiveBuffer)	// 채널(관전) 종료
 	}
 }
 
-void ReceiveDuelWatcherQuit(BYTE* ReceiveBuffer)	// 채널(관전) 떠난 관전자
+void ReceiveDuelWatcherQuit(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_LEAVECNANNEL_BROADCAST Data = (LPPMSG_DUEL_LEAVECNANNEL_BROADCAST)ReceiveBuffer;
 	g_DuelMgr.RemoveDuelWatchUser(Data->szID);
 }
 
-void ReceiveDuelWatcherList(BYTE* ReceiveBuffer)	// 관전자 리스트(All)
+void ReceiveDuelWatcherList(BYTE* ReceiveBuffer)
 {
 	g_DuelMgr.RemoveAllDuelWatchUser();
 	
@@ -10436,12 +9352,12 @@ void ReceiveDuelWatcherList(BYTE* ReceiveBuffer)	// 관전자 리스트(All)
 	}
 }
 
-void ReceiveDuelResult(BYTE* ReceiveBuffer)	// 결투결과 정보
+void ReceiveDuelResult(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_RESULT_BROADCAST Data = (LPPMSG_DUEL_RESULT_BROADCAST)ReceiveBuffer;
 
 	char szMessage[256];
-	sprintf(szMessage, GlobalText[2689], 10);	// "결투가 종료되었습니다. %d초 후에 마을로 이동됩니다."
+	sprintf(szMessage, GlobalText[2689], 10);
 	g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
 	SEASON3B::CDuelResultMsgBox* lpMsgBox = NULL;
@@ -10453,11 +9369,11 @@ void ReceiveDuelResult(BYTE* ReceiveBuffer)	// 결투결과 정보
 	PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }
 
-void ReceiveDuelRound(BYTE* ReceiveBuffer)	// 라운드 시작/끝 알림
+void ReceiveDuelRound(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_ROUNDSTART_BROADCAST Data = (LPPMSG_DUEL_ROUNDSTART_BROADCAST)ReceiveBuffer;
 
-	if (Data->nFlag == 0)	// 라운드 시작
+	if (Data->nFlag == 0)
 	{
 		g_DuelMgr.SetHP(DUEL_HERO, 100);
 		g_DuelMgr.SetHP(DUEL_ENEMY, 100);
@@ -10465,7 +9381,7 @@ void ReceiveDuelRound(BYTE* ReceiveBuffer)	// 라운드 시작/끝 알림
 		g_DuelMgr.SetSD(DUEL_ENEMY, 100);
 		g_DuelMgr.SetFighterRegenerated(TRUE);
 	}
-	else if (Data->nFlag == 1)	// 라운드 종료
+	else if (Data->nFlag == 1)
 	{
 	}
 }
@@ -10581,7 +9497,7 @@ void ReceiveCreateShopTitleViewport(BYTE* ReceiveBuffer)
 			memcpy(szShopTitle, pShopTitle->szTitle, MAX_SHOPTITLE);
 			szShopTitle[MAX_SHOPTITLE] = '\0';
 			
-			AddShopTitle(key, pPlayer, (const char*)szShopTitle);		//. 제거는 Update에서 자동으로 이루어 진다
+			AddShopTitle(key, pPlayer, (const char*)szShopTitle);
 		}
 	}
 }
@@ -10599,7 +9515,7 @@ void ReceiveShopTitleChange(BYTE* ReceiveBuffer)
 		szShopTitle[MAX_SHOPTITLE] = '\0';
 		
 		if(strncmp(pPlayer->ID, (const char*)Header->szId, MAX_ID_SIZE) == 0)
-			AddShopTitle(key, pPlayer, (const char*)szShopTitle);		//. 제거는 Update에서 자동으로 이루어 진다
+			AddShopTitle(key, pPlayer, (const char*)szShopTitle);
 	}
 }
 
@@ -10609,14 +9525,14 @@ void ReceiveSetPriceResult(BYTE* ReceiveBuffer)
 	
 	if(Header->byResult != 0x01 && g_IsPurchaseShop == PSHOPWNDTYPE_SALE) 
 	{
-		// Header->byResult == 0x06 : 아이템 블럭계정
+		// Header->byResult == 0x06
 		if(SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
 		{
 			SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 		}
-		RemovePersonalItemPrice(MAX_MY_INVENTORY_INDEX+g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);		//. 등록 취소
+		RemovePersonalItemPrice(MAX_MY_INVENTORY_INDEX+g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
 		
-		SendRequestInventory();		//. 혹시 꼬였을지도 모르니 인벤을 새로 받아온다
+		SendRequestInventory();
 		
 		g_ErrorReport.Write("@ [Fault] ReceiveSetPriceResult (result : %d)\n", Header->byResult);
 	}
@@ -10634,7 +9550,7 @@ void ReceiveCreatePersonalShop(BYTE* ReceiveBuffer)
 	}
 	else 
 	{
-		// Header->btResult == 0x03 : 아이템 블럭계정
+		// Header->btResult == 0x03
 		g_ErrorReport.Write("@ [Fault] ReceiveCreatePersonalShop (result : %d)\n", Header->byResult);
 	}
 }
@@ -10649,7 +9565,7 @@ void ReceiveDestroyPersonalShop(BYTE* ReceiveBuffer)
 		{
 			CHARACTER* pPlayer = &CharactersClient[index];
 			if(pPlayer == Hero)
-			{	//. 본인일 경우
+			{
 				g_pMyShopInventory->ChangePersonal( false );
 			}
 			RemoveShopTitle(pPlayer);
@@ -10695,13 +9611,11 @@ void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
 			{
 				int itemindex = pShopItem->byPos - (MAX_EQUIPMENT_INDEX + MAX_INVENTORY);
 				g_pPurchaseShopInventory->InsertItem( itemindex, pShopItem->byItemInfo );
-				AddPersonalItemPrice(pShopItem->byPos, pShopItem->iItemPrice, PSHOPWNDTYPE_PURCHASE);	//. 가격을 등록한다.
+				AddPersonalItemPrice(pShopItem->byPos, pShopItem->iItemPrice, PSHOPWNDTYPE_PURCHASE);
 			}
 			else 
 			{	
-#ifdef CONSOLE_DEBUG
 				g_ConsoleDebug->Write(MCD_ERROR, "[ReceivePersonalShopItemList]Item Cound : %d, Item Index : %d, Item Price : %d", Header->byCount, i, pShopItem->iItemPrice);
-#endif // CONSOLE_DEBUG	
 
 				g_ErrorReport.Write("@ ReceivePersonalShopItemList - item price less than zero(%d)\n", pShopItem->iItemPrice);
 				
@@ -10734,9 +9648,7 @@ void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
 		
 	}
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x05 [ReceivePersonalShopItemList]");
-#endif // CONSOLE_DEBUG	
 }
 
 void ReceiveRefreshItemList(BYTE* ReceiveBuffer)
@@ -10752,12 +9664,11 @@ void ReceiveRefreshItemList(BYTE* ReceiveBuffer)
 		{
 			int itemindex = pShopItem->byPos - (MAX_EQUIPMENT_INDEX + MAX_INVENTORY);
 			g_pPurchaseShopInventory->InsertItem( itemindex, pShopItem->byItemInfo );
-			AddPersonalItemPrice(pShopItem->byPos, pShopItem->iItemPrice, PSHOPWNDTYPE_PURCHASE);	//. 가격을 등록한다.
+			AddPersonalItemPrice(pShopItem->byPos, pShopItem->iItemPrice, PSHOPWNDTYPE_PURCHASE);
 		}
 	}
 	else
 	{
-#ifdef LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM
 		if( Header->byResult == 0x01 )
 		{
 			auto pCurrentInvenCtrl = g_pPurchaseShopInventory->GetInventoryCtrl();
@@ -10769,9 +9680,6 @@ void ReceiveRefreshItemList(BYTE* ReceiveBuffer)
 		{
 			g_ErrorReport.Write("@ [Fault] ReceiveRefreshItemList (result : %d)\n", Header->byResult);
 		}
-#else // LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM
-		g_ErrorReport.Write("@ [Fault] ReceiveRefreshItemList (result : %d)\n", Header->byResult);
-#endif // LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM
 	}
 }
 
@@ -10925,17 +9833,16 @@ void ReceiveDisplayEffectViewport(BYTE* ReceiveBuffer)
 
 int g_iMaxLetterCount = 0;	// 최대 편지 수
 
-// 캐릭터선택씬에서 캐릭터를 선택시에 호출
-void ReceiveFriendList(BYTE* ReceiveBuffer)				// 친구 리스트 받기
+void ReceiveFriendList(BYTE* ReceiveBuffer)
 {
 #ifdef KJH_FIX_WOPS_K29708_SHARE_LETTER
-	g_pWindowMgr->Reset();						// 친구창,창목록,편지리스트 초기화
+	g_pWindowMgr->Reset();
 #else KJH_FIX_WOPS_K29708_SHARE_LETTER
 	g_pFriendList->ClearFriendList();
 	
 #ifdef KJH_FIX_WOPS_K22448_SHARED_CHARACTER_MEMOLIST
-	g_pLetterList->ClearLetterList();			// 편지리스트 초기화
-	g_pWindowMgr->RefreshMainWndLetterList();	// 편지리스트 갱신
+	g_pLetterList->ClearLetterList();
+	g_pWindowMgr->RefreshMainWndLetterList();
 #endif // KJH_FIX_WOPS_K22448_SHARED_CHARACTER_MEMOLIST
 #endif // KJH_FIX_WOPS_K29708_SHARE_LETTER
 	
@@ -10956,7 +9863,7 @@ void ReceiveFriendList(BYTE* ReceiveBuffer)				// 친구 리스트 받기
 	
 	// 채팅 서버 살아남
 	g_pWindowMgr->SetServerEnable(TRUE);
-	if (g_iChatInputType == 0) SendRequestChangeState(2);	// 구버전 채팅 사용 알림
+	if (g_iChatInputType == 0) SendRequestChangeState(2);
 	
 	g_iMaxLetterCount = Header->MaxMemo;
 	
@@ -10964,11 +9871,11 @@ void ReceiveFriendList(BYTE* ReceiveBuffer)				// 친구 리스트 받기
 	{
 		char temp[MAX_TEXT_LENGTH + 1];
 		sprintf(temp, GlobalText[1072], Header->MemoCount, Header->MaxMemo);
-		g_pChatListBox->AddText("", temp, SEASON3B::TYPE_SYSTEM_MESSAGE);	// "편지함에 편지가 %d/%d개 있습니다."
+		g_pChatListBox->AddText("", temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 	}
 }
 
-void ReceiveAddFriendResult(BYTE* ReceiveBuffer)		// 친구 등록 요청 결과
+void ReceiveAddFriendResult(BYTE* ReceiveBuffer)
 {
 	LPFS_FRIEND_RESULT Data = (LPFS_FRIEND_RESULT)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -10979,13 +9886,12 @@ void ReceiveAddFriendResult(BYTE* ReceiveBuffer)		// 친구 등록 요청 결과
 	szText[MAX_ID_SIZE] = '\0';
 	switch(Data->Result)
 	{
-	case 0x00:	// 캐릭터가 없다
-		strcat(szText, GlobalText[1047]);	// "은 존재하지 않는 ID입니다."
+	case 0x00:
+		strcat(szText, GlobalText[1047]);
 		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
 		break;
-	case 0x01:	// 캐릭터 등록 성공
+	case 0x01:
 		{
-			// "양쪽 모두 등록이 되어있지 않을 경우 [오프라인]으로 표시됩니다."
 			g_pChatListBox->AddText("", GlobalText[1075], SEASON3B::TYPE_SYSTEM_MESSAGE);
 			g_pFriendList->AddFriend(szName, 0, Data->Server);
 			g_pFriendList->Sort();
@@ -10993,20 +9899,20 @@ void ReceiveAddFriendResult(BYTE* ReceiveBuffer)		// 친구 등록 요청 결과
 			g_pFriendMenu->UpdateAllChatWindowInviteList();
 		}
 		break;
-	case 0x03:	// 친구 최대수 초과
-		strcpy(szText, GlobalText[1048]);	// "더이상 추가할 수 없습니다. 삭제하고 추가하세요."
+	case 0x03:
+		strcpy(szText, GlobalText[1048]);
 		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
 		break;
-	case 0x04:	// 이미 등록된 친구
-		strcat(szText, GlobalText[1049]);	// "님이 이미 등록되어 있습니다."
+	case 0x04:
+		strcat(szText, GlobalText[1049]);
 		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
 		break;
-	case 0x05:	// 자신을 등록할수 없다
-		strcpy(szText, GlobalText[1050]);	// "자신의 아이디는 등록할 수 없습니다."
+	case 0x05:
+		strcpy(szText, GlobalText[1050]);
 		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
 		break;
-	case 0x06:	// 6레벨 이상만 등록 가능
-		strcpy(szText, GlobalText[1068]);	// "상대방의 레벨이 6 이상이어야 가능합니다."
+	case 0x06:
+		strcpy(szText, GlobalText[1068]);
 		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
 		break;
 	default:
@@ -11014,7 +9920,7 @@ void ReceiveAddFriendResult(BYTE* ReceiveBuffer)		// 친구 등록 요청 결과
 	};
 }
 
-void ReceiveRequestAcceptAddFriend(BYTE* ReceiveBuffer)	// 친구 등록 요청
+void ReceiveRequestAcceptAddFriend(BYTE* ReceiveBuffer)
 {
 	LPFS_ACCEPT_ADD_FRIEND_RESULT Data = (LPFS_ACCEPT_ADD_FRIEND_RESULT)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -11023,7 +9929,7 @@ void ReceiveRequestAcceptAddFriend(BYTE* ReceiveBuffer)	// 친구 등록 요청
 	char szText[MAX_TEXT_LENGTH + 1] = {0};
 	strncpy(szText, (const char *)Data->Name, MAX_ID_SIZE);
 	szText[MAX_ID_SIZE] = '\0';
-	strcat(szText, GlobalText[1051]);	// "님으로 부터 친구 요청이 들어왔습니다."
+	strcat(szText, GlobalText[1051]);
 	
 #ifdef CSK_BUGFIX_NEWFRIEND_ADD
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == false)
@@ -11040,7 +9946,7 @@ void ReceiveRequestAcceptAddFriend(BYTE* ReceiveBuffer)	// 친구 등록 요청
 	PlayBuffer(SOUND_FRIEND_LOGIN_ALERT);
 }
 
-void ReceiveDeleteFriendResult(BYTE* ReceiveBuffer)		// 친구 삭제 요청 결과
+void ReceiveDeleteFriendResult(BYTE* ReceiveBuffer)
 {
 	LPFS_FRIEND_RESULT Data = (LPFS_FRIEND_RESULT)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -11048,10 +9954,10 @@ void ReceiveDeleteFriendResult(BYTE* ReceiveBuffer)		// 친구 삭제 요청 결과
 	szName[MAX_ID_SIZE] = '\0';
 	switch(Data->Result)
 	{
-	case 0x00:	// 삭제 실패
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1052]);	// "삭제하지 못했습니다."
+	case 0x00:
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1052]);
 		break;
-	case 0x01:	// 삭제 성공
+	case 0x01:
 		g_pFriendList->RemoveFriend(szName);
 		g_pWindowMgr->RefreshMainWndPalList();
 		break;
@@ -11060,7 +9966,7 @@ void ReceiveDeleteFriendResult(BYTE* ReceiveBuffer)		// 친구 삭제 요청 결과
 	};
 }
 
-void ReceiveFriendStateChange(BYTE* ReceiveBuffer)		// 친구 상태 변화
+void ReceiveFriendStateChange(BYTE* ReceiveBuffer)
 {
 	LPFS_FRIEND_STATE_CHANGE Data = (LPFS_FRIEND_STATE_CHANGE)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -11068,7 +9974,6 @@ void ReceiveFriendStateChange(BYTE* ReceiveBuffer)		// 친구 상태 변화
 	szName[MAX_ID_SIZE] = '\0';
 	if (Data->Server == 0xFC)
 	{
-		// 채팅 서버 죽음
 		g_pFriendList->UpdateAllFriendState(0, Data->Server);
 		g_pFriendList->Sort();
 		g_pWindowMgr->RefreshMainWndPalList();
@@ -11081,7 +9986,6 @@ void ReceiveFriendStateChange(BYTE* ReceiveBuffer)		// 친구 상태 변화
 	g_pWindowMgr->RefreshMainWndPalList();
 	g_pFriendMenu->UpdateAllChatWindowInviteList();
 	
-	// 채팅 중인것 처리
 	DWORD dwChatRoomUIID = g_pFriendMenu->CheckChatRoomDuplication(szName);
 	if (dwChatRoomUIID > 0)
 	{
@@ -11089,67 +9993,65 @@ void ReceiveFriendStateChange(BYTE* ReceiveBuffer)		// 친구 상태 변화
 		if (pWindow == NULL);
 		else if (Data->Server >= 0xFD/* || Data->Server == 0xFB*/)
 		{
-			// 채팅 방에 있으면 오프라인 표시
 			pWindow->Lock(TRUE);
 		}
 		else
 		{
-			// 채팅방에 있으면 온라인으로 전환
 			pWindow->Lock(FALSE);
 		}
 	}
 }
 
-void ReceiveLetterSendResult(BYTE* ReceiveBuffer)		// 편지 보낸 결과 받기
+void ReceiveLetterSendResult(BYTE* ReceiveBuffer)
 {
 	LPFS_SEND_LETTER_RESULT Data = (LPFS_SEND_LETTER_RESULT)ReceiveBuffer;
 	switch(Data->Result)
 	{
-	case 0x00:	// 보내기 실패
+	case 0x00:
 		if (Data->WindowGuid != 0)
 			((CUILetterWriteWindow *)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1053]);	// "편지를 보내지 못했습니다. 다시 시도해 주십시오."
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1053]);
 		break;
-	case 0x01:	// 보내기 성공
+	case 0x01:
 		{
 			if (Data->WindowGuid != 0)
 				g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, Data->WindowGuid, 0);
 			char temp[MAX_TEXT_LENGTH + 1];
 			sprintf(temp, GlobalText[1046], g_cdwLetterCost);
-			g_pChatListBox->AddText("", temp, SEASON3B::TYPE_SYSTEM_MESSAGE);	// "편지를 보냈습니다."
+			g_pChatListBox->AddText("", temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 		}
 		break;
-	case 0x02:	// 상대방 편지함 꽉참
+	case 0x02:
 		if (Data->WindowGuid != 0)
 			((CUILetterWriteWindow *)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1061]);	// "받는분의 편지함이 꽉 차 편지를 보낼수 없습니다."
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1061]);
 		break;
-	case 0x03:	// 아이디 잘못 넣음
+	case 0x03:
 		if (Data->WindowGuid != 0)
 			((CUILetterWriteWindow *)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1064]);	// "받을 상대가 없거나 편지함이 존재하지 않습니다."
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1064]);
 		break;
-	case 0x04:	// 자기 자신에게는 보낼수 없다
+	case 0x04:
 		if (Data->WindowGuid != 0)
 			((CUILetterWriteWindow *)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1065]);	// "자기 자신에게는 편지를 보낼 수 없습니다."
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1065]);
 		break;
-	case 0x06:	// 6레벨 이상만 등록 가능
+	case 0x06:
 		if (Data->WindowGuid != 0)
 			((CUILetterWriteWindow *)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1068]);	// "상대방의 레벨이 6 이상이어야 가능합니다."
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1068]);
 		break;
-	case 0x07:	// 젠 부족
+	case 0x07:
 		if (Data->WindowGuid != 0)
 			((CUILetterWriteWindow *)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[423]);	// "젠이 부족합니다."
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[423]);
 		break;
 	default:
 		break;
 	};
 }
 
-void ReceiveLetter(BYTE* ReceiveBuffer)					// 편지 받기
+void ReceiveLetter(BYTE* ReceiveBuffer)
 {
 	//g_pLetterList->ClearLetterList();
 	
@@ -11170,15 +10072,15 @@ void ReceiveLetter(BYTE* ReceiveBuffer)					// 편지 받기
 	
 	switch (Data->Read)
 	{
-	case 0x02:	// 읽지않은 새 편지 도착
+	case 0x02:
 		PlayBuffer(SOUND_FRIEND_MAIL_ALERT);
 		g_pFriendMenu->SetNewMailAlert(TRUE);
-		g_pChatListBox->AddText("", GlobalText[1062], SEASON3B::TYPE_SYSTEM_MESSAGE);		// "새 편지가 도착했습니다."
+		g_pChatListBox->AddText("", GlobalText[1062], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		g_pLetterList->AddLetter(Data->Index, szName, szSubject, szDate, szTime, 0x00);
 		g_pLetterList->Sort();
 		break;
-	case 0x00:	// 읽지 않은 편지
-	case 0x01:	// 읽은 편지
+	case 0x00:
+	case 0x01:
 		g_pLetterList->AddLetter(Data->Index, szName, szSubject, szDate, szTime, Data->Read);
 		g_pLetterList->Sort(2);
 		break;
@@ -11190,13 +10092,13 @@ void ReceiveLetter(BYTE* ReceiveBuffer)					// 편지 받기
 	
 	if (g_pLetterList->GetLetterCount() >= g_iMaxLetterCount)
 	{
-		g_pChatListBox->AddText("", GlobalText[1073], SEASON3B::TYPE_SYSTEM_MESSAGE);		// "편지함에 편지가 꽉 찼습니다. 정리해주세요."		
+		g_pChatListBox->AddText("", GlobalText[1073], SEASON3B::TYPE_SYSTEM_MESSAGE);	
 	}
 }
 
 extern int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
-void ReceiveLetterText(BYTE* ReceiveBuffer)				// 편지 내용 받기
+void ReceiveLetterText(BYTE* ReceiveBuffer)
 {
 	LPFS_LETTER_TEXT Data = (LPFS_LETTER_TEXT)ReceiveBuffer;
 	Data->Memo[Data->MemoSize] = '\0';
@@ -11209,7 +10111,7 @@ void ReceiveLetterText(BYTE* ReceiveBuffer)				// 편지 내용 받기
 	g_pWindowMgr->RefreshMainWndLetterList();
 	
 	char tempTxt[MAX_TEXT_LENGTH + 1];
-	sprintf(tempTxt, GlobalText[1054], pLetter->m_szText);	// "편지읽기: %s"
+	sprintf(tempTxt, GlobalText[1054], pLetter->m_szText);
 	DWORD dwUIID = 0;
 	if (g_iLetterReadNextPos_x == UIWND_DEFAULT)
 	{
@@ -11245,15 +10147,15 @@ void ReceiveLetterText(BYTE* ReceiveBuffer)				// 편지 내용 받기
 	pWindow->SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
 }
 
-void ReceiveLetterDeleteResult(BYTE* ReceiveBuffer)		// 편지 삭제 결과 받기
+void ReceiveLetterDeleteResult(BYTE* ReceiveBuffer)
 {
 	LPFS_LETTER_RESULT Data = (LPFS_LETTER_RESULT)ReceiveBuffer;
 	switch(Data->Result)
 	{
-	case 0x00:	// 삭제 실패
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1055]);	// "편지를 삭제하지 못했습니다."
+	case 0x00:
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1055]);
 		break;
-	case 0x01:	// 삭제 성공
+	case 0x01:
 		g_pLetterList->RemoveLetter(Data->Index);
 		g_pLetterList->RemoveLetterTextCache(Data->Index);
 		break;
@@ -11264,7 +10166,7 @@ void ReceiveLetterDeleteResult(BYTE* ReceiveBuffer)		// 편지 삭제 결과 받기
 	g_pWindowMgr->RefreshMainWndLetterList();
 }
 
-void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)		// 대화방 개설 요청 결과
+void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)
 {
 	LPFS_CHAT_CREATE_RESULT Data = (LPFS_CHAT_CREATE_RESULT)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -11275,24 +10177,23 @@ void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)		// 대화방 개설 요청 결과
 	memcpy(szIP, Data->IP, 15);
 	switch(Data->Result)
 	{
-	case 0x00:	// 친구와 더이상 대화를 할 수 없습니다.
+	case 0x00:
 		g_pFriendMenu->RemoveRequestWindow(szName);
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1069]);	// "더 이상 대화를 할 수 없습니다."
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1069]);
 		break;
-	case 0x01:	// 대화방 개설 성공
-		if (Data->Type == 0)	// 방 만든 사람
+	case 0x01:
+		if (Data->Type == 0)
 		{
 			g_pFriendMenu->RemoveRequestWindow(szName);
-			DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, GlobalText[994]);	// "대화중: "
+			DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, GlobalText[994]);
 			((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char *)szIP, Data->RoomNumber, Data->Ticket);
 		}
-		else if (Data->Type == 1)	// 방에 들어올 대상 (1:1 대화  )
+		else if (Data->Type == 1)
 		{
-			// 중복 채팅 체크
 			DWORD dwUIID = g_pFriendMenu->CheckChatRoomDuplication(szName);
 			if (dwUIID == 0)
 			{
-				dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);	// "대화중: "
+				dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);
 				((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char *)szIP, Data->RoomNumber, Data->Ticket);
 				g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
 				g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
@@ -11311,9 +10212,9 @@ void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)		// 대화방 개설 요청 결과
 				//				g_pChatRoomSocketList->RemoveChatRoomSocket(dwOldRoomNumber);
 			}
 		}
-		else if (Data->Type == 2)	// 방에 들어올 대상 (초대  )
+		else if (Data->Type == 2)
 		{
-			DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);	// "대화중: "
+			DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);
 			((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char *)szIP, Data->RoomNumber, Data->Ticket);
 			g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
 			g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
@@ -11321,16 +10222,16 @@ void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)		// 대화방 개설 요청 결과
 				g_pWindowMgr->GetFriendMainWindow()->RemoveWindow(dwUIID);
 		}
 		break;
-	case 0x02:	// 친구와 대화를 할 수 있는 서버가 종료되었습니다.
+	case 0x02:	
 		g_pFriendMenu->RemoveRequestWindow(szName);
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1070]);	// "대화 할 수 있는 서버가 종료되었습니다."
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1070]);
 		break;
 	default:
 		break;
 	};
 }
 
-void ReceiveChatRoomInviteResult(BYTE* ReceiveBuffer)		// 초대 결과 받기
+void ReceiveChatRoomInviteResult(BYTE* ReceiveBuffer)
 {
 	LPFS_CHAT_INVITE_RESULT Data = (LPFS_CHAT_INVITE_RESULT)ReceiveBuffer;
 	CUIChatWindow * pChatWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(Data->WindowGuid);
@@ -11338,9 +10239,8 @@ void ReceiveChatRoomInviteResult(BYTE* ReceiveBuffer)		// 초대 결과 받기
 	
 	switch(Data->Result)
 	{
-	case 0x00:	// 상대가 오프라인 상태
-		//g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, "초대 대상이 오프라인 상태입니다.");
-		pChatWindow->AddChatText(255, GlobalText[1056], 1, 0);	// "오프라인 상태입니다."
+	case 0x00:
+		pChatWindow->AddChatText(255, GlobalText[1056], 1, 0);
 		break;
 	case 0x01:	// 초대 성공
 		if (pChatWindow->GetCurrentInvitePal() != NULL)
@@ -11348,7 +10248,7 @@ void ReceiveChatRoomInviteResult(BYTE* ReceiveBuffer)		// 초대 결과 받기
 			char szText[MAX_TEXT_LENGTH + 1] = {0};
 			strncpy(szText, pChatWindow->GetCurrentInvitePal()->m_szID, MAX_ID_SIZE);
 			szText[MAX_ID_SIZE] = '\0';
-			strcat(szText, GlobalText[1057]);	// "님을 초대하였습니다."
+			strcat(szText, GlobalText[1057]);
 			pChatWindow->AddChatText(255, szText, 1, 0);
 		}
 		else
@@ -11356,31 +10256,30 @@ void ReceiveChatRoomInviteResult(BYTE* ReceiveBuffer)		// 초대 결과 받기
 			assert(!"초대 ID가 없다");
 		}
 		break;
-	case 0x03:	// 꽉차서 초대 불가
-		pChatWindow->AddChatText(255, GlobalText[1074], 1, 0);	// "초대 가능 인원을 초과하였습니다."
+	case 0x03:
+		pChatWindow->AddChatText(255, GlobalText[1074], 1, 0);
 		break;
 	default:
 		break;
 	};
 }
 
-void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, BYTE* ReceiveBuffer)		// 방 접속 결과 받기
+void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
 {
 	LPFS_CHAT_JOIN_RESULT Data = (LPFS_CHAT_JOIN_RESULT)ReceiveBuffer;
 	switch(Data->Result)
 	{
-	case 0x00:	// 인원 꽉참
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1058]);	// "대화방에 사람이 꽉 차서 들어갈 수 없습니다."
+	case 0x00:
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1058]);
 		break;
-	case 0x01:	// 방 참여 성공
-		//((CUIChatWindow *)g_pWindowMgr->GetWindow(dwWindowUIID))->AddChatText("", "대화방에 입장하였습니다.", 3, 0);
+	case 0x01:
 		break;
 	default:
 		break;
 	};
 }
 
-void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, BYTE* ReceiveBuffer)	// 다른 사람 상태 변화
+void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
 {
 	LPFS_CHAT_CHANGE_STATE Data = (LPFS_CHAT_CHANGE_STATE)ReceiveBuffer;
 	CUIChatWindow * pChatWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(dwWindowUIID);
@@ -11393,17 +10292,17 @@ void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, BYTE* ReceiveBuffer)	// 
 	szText[MAX_ID_SIZE] = '\0';
 	switch(Data->Type)
 	{
-	case 0x00:	// 다른 사용자가 접속했다
+	case 0x00:
 		if (pChatWindow->AddChatPal(szName, Data->Index, 0) >= 3)
 		{
-			strcat(szText, GlobalText[1059]);	// "님이 입장하셨습니다."
+			strcat(szText, GlobalText[1059]);
 			pChatWindow->AddChatText(255, szText, 1, 0);
 		}
 		break;
-	case 0x01:	// 다른 사용자가 방을 빠져 나갔다.
+	case 0x01:
 		if (pChatWindow->GetUserCount() >= 3)
 		{
-			strcat(szText, GlobalText[1060]);	// "님이 퇴장하셨습니다."
+			strcat(szText, GlobalText[1060]);
 			pChatWindow->AddChatText(255, szText, 1, 0);
 		}
 		pChatWindow->RemoveChatPal(szName);
@@ -11416,7 +10315,7 @@ void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, BYTE* ReceiveBuffer)	// 
 		pChatWindow->UpdateInvitePalList();
 }
 
-void ReceiveChatRoomUserList(DWORD dwWindowUIID, BYTE* ReceiveBuffer)			// 유저리스트 받기
+void ReceiveChatRoomUserList(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
 {
 	LPFS_CHAT_USERLIST_HEADER Header = (LPFS_CHAT_USERLIST_HEADER)ReceiveBuffer;
 	int iMoveOffset = sizeof(FS_CHAT_USERLIST_HEADER);
@@ -11431,7 +10330,7 @@ void ReceiveChatRoomUserList(DWORD dwWindowUIID, BYTE* ReceiveBuffer)			// 유저�
 	}
 }
 
-void ReceiveChatRoomChatText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)			// 채팅 대화 글 받기
+void ReceiveChatRoomChatText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
 {
 	LPFS_CHAT_TEXT Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
 	CUIChatWindow * pChatWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(dwWindowUIID);
@@ -11450,7 +10349,7 @@ void ReceiveChatRoomChatText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)			// 채팅 
 	if (pChatWindow->GetState() == UISTATE_READY)
 	{
 		g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
-		g_pChatListBox->AddText("", GlobalText[1063], SEASON3B::TYPE_SYSTEM_MESSAGE);	// "메시지가 왔습니다."
+		g_pChatListBox->AddText("", GlobalText[1063], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		pChatWindow->SetState(UISTATE_HIDE);
 		if (g_pWindowMgr->GetFriendMainWindow() != NULL)
 		{
@@ -11464,7 +10363,7 @@ void ReceiveChatRoomChatText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)			// 채팅 
 	pChatWindow->AddChatText(Data->Index, (char *)ChatMsg, 3, 0);
 }
 
-void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)			// 공지사항 글 받기
+void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
 {
 	LPFS_CHAT_TEXT Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
 	Data->Msg[99] = '\0';
@@ -11476,15 +10375,11 @@ void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)			// 공�
 	g_pChatListBox->AddText("", (char *)Data->Msg, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 옵션.
-///////////////////////////////////////////////////////////////////////////////
 void ReceiveOption(BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_OPTION Data = (LPPRECEIVE_OPTION)ReceiveBuffer;
 	
 #ifdef LDK_ADD_SCALEFORM
-	//gfxui 사용시 기존 ui 사용 안함
 	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
 	{
 		g_pMainFrame->ResetSkillHotKey();
@@ -11536,7 +10431,6 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 		}
 	}
 	
-    //  자동공격 설정값.
     if ( (Data->GameOption&AUTOATTACK_ON)==AUTOATTACK_ON )
     {
 		g_pOption->SetAutoAttack(true);
@@ -11555,7 +10449,6 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 		g_pOption->SetWhisperSound(false);
     }
 	
-    //  랜더링 옵션.
     if ( (Data->GameOption&SLIDE_HELP_OFF)==SLIDE_HELP_OFF )
     {
 		g_pOption->SetSlideHelp(false);
@@ -11573,7 +10466,6 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 
 
 #ifdef LDK_ADD_SCALEFORM
-	//gfxui 사용시 기존 ui 사용 안함
 	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
 	{
 #ifdef KJH_FIX_ITEMHOTKEYINFO_CASTING
@@ -11620,7 +10512,6 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 #endif // KJH_FIX_ITEMHOTKEYINFO_CASTING
 #endif //LDK_ADD_SCALEFORM
 	
-	//  채팅창 설정
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 #else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	BYTE wChatListBoxSize = (Data->ChatLogBox >> 4) * 3;
@@ -11654,10 +10545,6 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 #endif //LDK_ADD_SCALEFORM
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 이벤트칩 관련 프로토콜( 제나칩 )
-///////////////////////////////////////////////////////////////////////////////
 void ReceiveEventChipInfomation( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_EVENT_CHIP_INFO Data = (LPPRECEIVE_EVENT_CHIP_INFO)ReceiveBuffer;
@@ -11691,11 +10578,9 @@ void ReceiveEventChipInfomation( BYTE* ReceiveBuffer )
 	}	
 #endif //PSW_EVENT_LENA
 
-	///////////////////////////////정리 필수///////////////////////////////////
-	
 #ifdef FRIEND_EVENT
     g_bEventChipDialogEnable = EVENT_FRIEND;
-#endif// EVENT_FRIEND   임시 코드.
+#endif// EVENT_FRIEND
 	
 #ifdef BLOODCASTLE_2ND_PATCH
 	if ( g_bEventChipDialogEnable==EVENT_SCRATCH_TICKET )
@@ -11717,7 +10602,6 @@ void ReceiveEventChipInfomation( BYTE* ReceiveBuffer )
 		}
 #endif
 
-		///////////////////////////////정리 필수////////////////////////////////////
 }
 
 void ReceiveEventChip( BYTE* ReceiveBuffer)
@@ -11740,10 +10624,7 @@ void ReceiveBuffState( BYTE* ReceiveBuffer )
 
 	if( bufftype == eBuffNone || bufftype >= eBuff_Count ) return;
 	
-	// 토큰 버프류들은 서버에서 삭제 메세지를 받기 때문에 
-	// 버프 추가 메세지에서 절대로 토큰 버프를 삭제 하지 않는다.
-	
-	if(Data->byEffectOption == 0) // 버프 시작
+	if(Data->byEffectOption == 0)
 	{
 		RegisterBuff( bufftype, (&Hero->Object), Data->wEffectTime );
 		
@@ -11752,7 +10633,7 @@ void ReceiveBuffState( BYTE* ReceiveBuffer )
 			g_pChatListBox->AddText("", GlobalText[1828], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		}
 	}
-	else // 버프 종료
+	else
 	{
 		UnRegisterBuff( bufftype, (&Hero->Object) );
 	}
@@ -11775,10 +10656,10 @@ void ReceiveServerImmigration( BYTE *ReceiveBuffer)
 	
 	switch ( Data->Value)
 	{
-	case 0:	// 주민번호 잘못됨
+	case 0:
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CServerImmigrationErrorMsgBoxLayout));
 		break;
-	case 1:	// 서버 내부 오류
+	case 1:
 		SEASON3B::CreateOkMessageBox("서버 이전시 오류 발생 : 문의 바람");
 		break;
 	}
@@ -11792,15 +10673,15 @@ void ReceiveScratchResult ( BYTE* ReceiveBuffer )
 	
 	switch ( Data->m_byIsRegistered)
 	{
-	case 0: //	정상 등록.
-	case 1: //	이미 등록된 시리얼번호.
-	case 2: //	등록 횟수 초과.
-	case 3: //	잘못된 시리얼 번호.	
-	case 4:	//	알수 없는 에러. 
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+	case 4:
 		SEASON3B::CreateOkMessageBox(GlobalText[886+Data->m_byIsRegistered]);
 		break;
 		
-	case 5:	//	이미 등록을 했습니다.
+	case 5:
 		SEASON3B::CreateOkMessageBox(GlobalText[899]);
 		break;
 	}
@@ -11809,7 +10690,7 @@ void ReceiveScratchResult ( BYTE* ReceiveBuffer )
 }
 #endif
 
-void ReceivePlaySoundEffect(BYTE* ReceiveBuffer)	// 효과음 재생
+void ReceivePlaySoundEffect(BYTE* ReceiveBuffer)
 {
 	LPPRECEIVE_PLAY_SOUND_EFFECT Data = (LPPRECEIVE_PLAY_SOUND_EFFECT)ReceiveBuffer;
 	
@@ -11836,31 +10717,22 @@ void ReceiveEventCount ( BYTE* ReceiveBuffer )
     g_csQuest.SetEventCount ( Data->m_wEventType, Data->m_wLeftEnterCount );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 관련.
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 리스트를 받는다.
 void ReceiveQuestHistory ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_QUEST_HISTORY Data = (LPPRECEIVE_QUEST_HISTORY)ReceiveBuffer;
 	
-    //  퀘스트 리스트를 저장한다 
     g_csQuest.setQuestLists ( Data->m_byQuest, Data->m_byCount, Hero->Class );
 }
 
-//  특정 퀘스트 상태 정보 전송.
 void ReceiveQuestState ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_QUEST_STATE Data = (LPPRECEIVE_QUEST_STATE)ReceiveBuffer;
 	
-    //  퀘스트 정보 갱신.
     g_csQuest.setQuestList ( Data->m_byQuestIndex, Data->m_byState );
 	g_pNewUISystem->HideAll();
 	g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCQUEST);
 }
 
-//  특정 퀘스트의 결과를 받는다.
 void ReceiveQuestResult ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_QUEST_RESULT Data = (LPPRECEIVE_QUEST_RESULT)ReceiveBuffer;
@@ -11873,7 +10745,6 @@ void ReceiveQuestResult ( BYTE* ReceiveBuffer )
     }
 }
 
-//  퀘스트의 대한 보상을 받는다.
 void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_QUEST_REPARATION Data = (LPPRECEIVE_QUEST_REPARATION)ReceiveBuffer;
@@ -11884,11 +10755,10 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
 
     switch ( Data->m_byReparation )
     {
-    case 200 :  //  스텟포인트.
+    case 200:
         {
 			CHARACTER *c = &CharactersClient[Index];
 			
-            //  자기 자신만..
             if ( c==Hero )
             {
                 CharacterAttribute->LevelUpPoint += Data->m_byNumber;
@@ -11907,14 +10777,14 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
         }
         break;
 		
-    case 201 :  //  2차 클래스로 전직.
+    case 201:
         {
 			CHARACTER*  c = &CharactersClient[Index];
 			OBJECT*     o = &c->Object;
             vec3_t      Position;
 			
 			BYTE byClass = ChangeServerClassTypeToClientClassType(Data->m_byNumber);
-			if (2 != GetStepClass(byClass))	// 2차 클래스 전직이 아니면 처리하지 않음.
+			if (2 != GetStepClass(byClass))
 				break;
 			
 			c->Class = byClass;
@@ -11940,7 +10810,7 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
         }
         break;
 		
-	case 202 :	//	스텟  포인트 방식 5 --> 6.	스텟 추가.
+	case 202:
 		{
 			CHARACTER*  c = &CharactersClient[Index];
 			OBJECT*     o = &c->Object;
@@ -11966,7 +10836,7 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
 		}
 		break;
 		
-	case 203 :	//	콤보 스킬.
+	case 203:
 		{
 			CHARACTER*  c = &CharactersClient[Index];
 			OBJECT*     o = &c->Object;
@@ -11988,12 +10858,12 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
 		}
 		break;
 		
-	case 204:	// 3차 클래스로 전직.
+	case 204:
 		{
 			CHARACTER* c = &CharactersClient[Index];
 			
 			BYTE byClass = ChangeServerClassTypeToClientClassType(Data->m_byNumber);
-			if (3 != GetStepClass(byClass))	// 3차 클래스가 아니면 처리하지 않음.
+			if (3 != GetStepClass(byClass))
 				break;
 			
 			c->Class = byClass;
@@ -12003,7 +10873,6 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
                 CharacterAttribute->Class = c->Class;
             }
 			
-			//3차전직 효과 출력
 			CreateEffect(MODEL_CHANGE_UP_EFF,c->Object.Position,c->Object.Angle,c->Object.Light,0,&c->Object);
 			CreateEffect(MODEL_CHANGE_UP_NASA,c->Object.Position,c->Object.Angle,c->Object.Light,0,&c->Object);
 			CreateEffect(MODEL_CHANGE_UP_CYLINDER,c->Object.Position,c->Object.Angle,c->Object.Light,0,&c->Object);
@@ -12015,7 +10884,7 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
         }
         break;
 		
-    default :   //  기타.
+    default:
         break;
     }
 }
@@ -12024,25 +10893,12 @@ void ReceiveQuestMonKillInfo(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUEST_MONKILL_INFO pData = (LPPMSG_ANS_QUEST_MONKILL_INFO)ReceiveBuffer;
 	
-	/*BYTE	byResult;		// 결과 0x00:실패(에러)
-	//		0x01:성공 
-	//		0x02:이미 완료한 퀘스트
-	//		0x03:진행중인 퀘스트 아님
-	//		0x04:퀘스트가 없음(퀘스트 번호가 잘못왔음)
-	//		0x05:완료조건이 킬카운트가 아님(클라이언트에서 요청하면 안됨)
-	
-	  BYTE	byQuestIndex;		// 퀘스트 인덱스
-	  int		anKillCountInfo[10];// 몬스터 킬카운트 정보
-	*/
-	//	if (0x01 == pData->byResult || 0x02 == pData->byResult)
-	//	{
 	g_csQuest.SetKillMobInfo(pData->anKillCountInfo);
-	//	}
 }
 
 #ifdef ASG_ADD_NEW_QUEST_SYSTEM
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
-// 서버로 부터 퀘스트 제한 시 응답.(0xF6 0x00)
+
 void ReceiveQuestLimitResult(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_RESULT pData = (LPPMSG_ANS_QUESTEXP_RESULT)ReceiveBuffer;
@@ -12051,13 +10907,13 @@ void ReceiveQuestLimitResult(BYTE* ReceiveBuffer)
 
 	switch (pData->m_byResult)
 	{
-	case QUEST_RESULT_CNT_LIMIT:	// 퀘스트 개수 제한.
+	case QUEST_RESULT_CNT_LIMIT:
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CQuestCountLimitMsgBoxLayout));
 		break;
 	}
 }
 
-// 퀘스트 아이템 사용에 의한 EP(에피소드)를  .(0xF6 0x04)
+
 void ReceiveQuestByItemUseEP(BYTE* ReceiveBuffer)
 {
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -12070,7 +10926,6 @@ void ReceiveQuestByItemUseEP(BYTE* ReceiveBuffer)
 }
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
-// 기타 상황의 퀘스트 EP(에피소드)리스트를  .(0xF6 0x03)
 void ReceiveQuestByEtcEPList(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPCTALK_QUESTLIST pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
@@ -12078,7 +10933,6 @@ void ReceiveQuestByEtcEPList(BYTE* ReceiveBuffer)
 		pData->m_wQuestCount);
 }
 
-// NPC에 의한 EP(에피소드)리스트를  .(0xF6 0x0A)
 void ReceiveQuestByNPCEPList(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPCTALK_QUESTLIST pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
@@ -12087,7 +10941,7 @@ void ReceiveQuestByNPCEPList(BYTE* ReceiveBuffer)
 		g_pNPCDialogue->ProcessQuestListReceive(
 			(DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)), pData->m_wQuestCount);
 #else	// ASG_ADD_UI_NPC_DIALOGUE
-	g_QuestMng.SetNPC(int(pData->m_wNPCIndex)); // NPC 이름 세팅.
+	g_QuestMng.SetNPC(int(pData->m_wNPCIndex));
 #ifdef ASG_ADD_UI_NPC_MENU
 	g_pNPCMenu->SetContents((DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)),
 		pData->m_wQuestCount);
@@ -12095,7 +10949,6 @@ void ReceiveQuestByNPCEPList(BYTE* ReceiveBuffer)
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 }
 
-// 선택문이 있는 QS(퀘스트 상태)를  .(0xF6 0x0B)
 void ReceiveQuestQSSelSentence(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPC_QUESTEXP_INFO pData = (LPPMSG_NPC_QUESTEXP_INFO)ReceiveBuffer;
@@ -12103,18 +10956,14 @@ void ReceiveQuestQSSelSentence(BYTE* ReceiveBuffer)
 	g_QuestMng.SetCurQuestProgress(pData->m_dwQuestIndex);
 }
 
-// 요구, 보상이 있는 QS(퀘스트 상태)를  .(0xF6 0x0C)
 void ReceiveQuestQSRequestReward(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPC_QUESTEXP_INFO pData = (LPPMSG_NPC_QUESTEXP_INFO)ReceiveBuffer;
 	g_QuestMng.SetQuestRequestReward(ReceiveBuffer);
 	g_QuestMng.SetCurQuestProgress(pData->m_dwQuestIndex);
-	// 요구, 보상이 있는 QS(퀘스트 상태)이므로 true.
 	g_QuestMng.SetEPRequestRewardState(pData->m_dwQuestIndex, true);
 }
 
-// 퀘스트 진행창에서 확인 버튼을 눌렀을 경우 서버에서 응답  .(0xF6 0x0D)
-// 에피소드가 끝났을 경우(QS가 0xff)에 서버에서 (0xF6 0x0B)도 보냄.
 void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_COMPLETE pData = (LPPMSG_ANS_QUESTEXP_COMPLETE)ReceiveBuffer;
@@ -12133,21 +10982,17 @@ void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
 #endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 
-		// 퀘스트 진행이 일단락 되었으므로 EPProgress를 false로 초기화.
 		g_QuestMng.SetEPRequestRewardState(pData->m_dwQuestIndex, false);
-		// 진행중인 퀘스트 리스트에서 같은 에피소드인 퀘스트 인덱스 삭제.
 		g_QuestMng.RemoveCurQuestIndexList(pData->m_dwQuestIndex);
 		break;
 
 	case 2:
 #ifdef ASG_MOD_QUEST_OK_BTN_DISABLE
-		// 퀘스트 진행창의 확인 버튼을 비활성화.
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
 			g_pQuestProgress->EnableCompleteBtn(false);
 		else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
 			g_pQuestProgressByEtc->EnableCompleteBtn(false);
 #endif	// ASG_MOD_QUEST_OK_BTN_DISABLE
-		// 2816	"소지금액이 꽉 찼습니다"
 		g_pChatListBox->AddText("", GlobalText[2816], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 
@@ -12159,28 +11004,22 @@ void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
 		else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
 			g_pQuestProgressByEtc->EnableCompleteBtn(false);
 #endif	// ASG_MOD_QUEST_OK_BTN_DISABLE
-		// 375 "인벤토리가 꽉찼습니다."
 		g_pChatListBox->AddText("", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
-		// 374 "확인해 주십시오!"
 		g_pChatListBox->AddText("", GlobalText[374], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 	}
 }
 
-// 퀘스트 포기했음을 응답  .(0xF6 0x0F)
 void ReceiveQuestGiveUp(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_GIVEUP pData = (LPPMSG_ANS_QUESTEXP_GIVEUP)ReceiveBuffer;
 #ifdef ASG_FIX_QUEST_GIVE_UP
-	// 진행중인 퀘스트 리스트에서 해당 퀘스트 삭제.
 	g_QuestMng.RemoveCurQuestIndexList(pData->m_dwQuestGiveUpIndex);
 #else	// ASG_FIX_QUEST_GIVE_UP
-	// 포기한 퀘스트의 인덱스(QS가 0xfe)를 추가하여 진행중인 퀘스트 리스트에서 해당 퀘스트 삭제.
 	g_QuestMng.AddCurQuestIndexList(pData->m_dwQuestGiveUpIndex);
 #endif	// ASG_FIX_QUEST_GIVE_UP
 }
 
-// 진행 중인 퀘스트 리스트를  .(0xF6 0x1A)
 void ReceiveProgressQuestList(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_PROGRESS_LIST pData = (LPPMSG_ANS_QUESTEXP_PROGRESS_LIST)ReceiveBuffer;
@@ -12188,7 +11027,6 @@ void ReceiveProgressQuestList(BYTE* ReceiveBuffer)
 		int(pData->m_byQuestCount));
 }
 
-// 진행중인 퀘스트 리스트에서 특정 퀘스트의 요구, 보상 정보를  .(0xF6 0x1B)
 void ReceiveProgressQuestRequestReward(BYTE* ReceiveBuffer)
 {
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -12202,18 +11040,16 @@ void ReceiveProgressQuestRequestReward(BYTE* ReceiveBuffer)
 }
 
 #ifdef ASG_FIX_QUEST_PROTOCOL_ADD
-// 진행 중인 퀘스트 리스트를 줄 준비가 됨.(0xF6 0x20)
 void ReceiveProgressQuestListReady(BYTE* ReceiveBuffer)
 {
-	g_QuestMng.SetQuestIndexByEtcList(NULL, 0);	// 기타 상황에 의한 퀘스트 리스트 초기화.
-	SendRequestProgressQuestList();	// 진행중인 퀘스트 리스트 요청.
-	SendRequestQuestByEtcEPList();	// 기타 상황에 의한 퀘스트 리스트 요청.
+	g_QuestMng.SetQuestIndexByEtcList(NULL, 0);
+	SendRequestProgressQuestList();
+	SendRequestQuestByEtcEPList();
 }
 #endif	// ASG_FIX_QUEST_PROTOCOL_ADD
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
 #ifdef ASG_ADD_GENS_SYSTEM
-// 겐스 가입 요청 응답  .(0xF8 0x02)
 void ReceiveGensJoining(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_REG_GENS_MEMBER pData = (LPPMSG_ANS_REG_GENS_MEMBER)ReceiveBuffer;
@@ -12221,7 +11057,6 @@ void ReceiveGensJoining(BYTE* ReceiveBuffer)
 		g_pNPCDialogue->ProcessGensJoiningReceive(pData->m_byResult, pData->m_byInfluence);
 }
 
-// 겐스 탈퇴 요청 응답  .(0xF8 0x04)
 void ReceiveGensSecession(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_SECEDE_GENS_MEMBER pData = (LPPMSG_ANS_SECEDE_GENS_MEMBER)ReceiveBuffer;
@@ -12229,7 +11064,6 @@ void ReceiveGensSecession(BYTE* ReceiveBuffer)
 		g_pNPCDialogue->ProcessGensSecessionReceive(pData->m_byResult);
 }
 
-// 겐스 세력 정보  .(0xF8 0x07)
 void ReceivePlayerGensInfluence(BYTE* ReceiveBuffer)
 {
 	LPPMSG_MSG_SEND_GENS_INFO pData = (LPPMSG_MSG_SEND_GENS_INFO)ReceiveBuffer;
@@ -12242,7 +11076,6 @@ void ReceivePlayerGensInfluence(BYTE* ReceiveBuffer)
 #endif //PBG_ADD_GENSRANKING
 }
 
-// 뷰포트 안의 다른 플래이어의 겐스 세력 정보  .(0xF8, 0x05)
 void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 {
 	LPPMSG_SEND_GENS_MEMBER_VIEWPORT Data = (LPPMSG_SEND_GENS_MEMBER_VIEWPORT)ReceiveBuffer;
@@ -12260,14 +11093,13 @@ void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 		c->m_byRankIndex = Data2->m_nGensClass;
 #endif //PBG_ADD_GENSRANKING
 #ifdef PBG_MOD_STRIFE_GENSMARKRENDER
-		// 상대방의 기여도 포인트를 필요로 하게됨
 		c->m_nContributionPoint = Data2->m_nContributionPoint;
 #endif //PBG_MOD_STRIFE_GENSMARKRENDER
 #ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
-		if (::IsStrifeMap(World))	// 분쟁지역인가?
+		if (::IsStrifeMap(World))
 		{
 			vec3_t vTemp = {0.f, 0.f, 0.f};
-			if (Hero->m_byGensInfluence == c->m_byGensInfluence)	// 나와 같은 세력인가?
+			if (Hero->m_byGensInfluence == c->m_byGensInfluence)
 				CreateEffect(BITMAP_OUR_INFLUENCE_GROUND, c->Object.Position, vTemp, vTemp, 0, &c->Object);
 			else
 				CreateEffect(BITMAP_ENEMY_INFLUENCE_GROUND, c->Object.Position, vTemp, vTemp, 0, &c->Object);
@@ -12280,21 +11112,19 @@ void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 #endif	// ASG_ADD_GENS_SYSTEM
 
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
-// NPC UI가 대화로 진행되는 NPC 클릭 때 응답  .(0xF9 0x01)
 void ReceiveNPCDlgUIStart(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_NPC_CLICK pData = (LPPMSG_ANS_NPC_CLICK)ReceiveBuffer;
 	if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE))
 	{
-		g_QuestMng.SetNPC(pData->m_wNPCIndex); // NPC 이름 세팅.
-		g_pNPCDialogue->SetContributePoint(pData->m_dwContributePoint);	// 기여도 세팅.
+		g_QuestMng.SetNPC(pData->m_wNPCIndex);
+		g_pNPCDialogue->SetContributePoint(pData->m_dwContributePoint);
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_NPC_DIALOGUE);
 	}
 }
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 
 #ifdef PBG_ADD_GENSRANKING
-// 보상받기 클릭시에 처리(0xF8 0x08)
 void ReceiveReward(BYTE* ReceiveBuffer)
 {
 	LPPMSG_GENS_REWARD_CODE pData = (LPPMSG_GENS_REWARD_CODE)ReceiveBuffer;
@@ -12303,25 +11133,23 @@ void ReceiveReward(BYTE* ReceiveBuffer)
 		g_pNPCDialogue->ProcessGensRewardReceive(pData->m_byRewardResult);
 }
 #endif //PBG_ADD_GENSRANKING
-//////////////////////////////////////////////////////////////////////////
-//  스테이트 열매.
-//////////////////////////////////////////////////////////////////////////
+
 void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
 {
 	LPPMSG_USE_STAT_FRUIT Data = (LPPMSG_USE_STAT_FRUIT)ReceiveBuffer;
 	
-	BYTE result	= Data->result;			// 결과
-	BYTE fruit	= Data->btFruitType;	// 열매종류
+	BYTE result	= Data->result;
+	BYTE fruit	= Data->btFruitType;
 #ifdef PSW_FRUIT_ITEM
-	WORD point	= Data->btStatValue;	// 스탯값
+	WORD point	= Data->btStatValue;
 #else //PSW_FRUIT_ITEM
-	BYTE point	= Data->btStatValue;	// 스탯값
+	BYTE point	= Data->btStatValue;
 #endif //PSW_FRUIT_ITEM
 	
 	unicode::t_char strText[MAX_GLOBAL_TEXT_STRING];
 	
 	switch(result) {
-	case 0x00:	// 스탯생성 성공
+	case 0x00:
 		if(fruit >=0 && fruit <= 4)
 		{
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -12332,32 +11160,31 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
 			
             switch ( fruit )
             {
-            case 0: //  에너지.
+            case 0:
 				CharacterAttribute->Energy      += point;
                 index = 168;
                 break;
 				
-            case 1: //  체력.
+            case 1:
 				CharacterAttribute->Vitality    += point;
                 index = 169;
                 break;
 				
-            case 2: //  민첩.
+            case 2:
 				CharacterAttribute->Dexterity   += point;
                 index = 167;
                 break;
                 
-            case 3: //  힘.
+            case 3:
 				CharacterAttribute->Strength    += point;
                 index = 166;
                 break;
-			case 4:	//: 통솔
+			case 4:
 				CharacterAttribute->Charisma    += point;
                 index = 1900;
 				break;
             }
 			
-            //  현재 레벨에 추가된 스텟 누적값.
             CharacterAttribute->AddPoint += point;
 			
 			unicode::_sprintf(strText, GlobalText[379], GlobalText[index], point, GlobalText[1412]);
@@ -12365,44 +11192,44 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
 		}
 		break;
 		
-	case 0x01:	// 스탯생성 실패
+	case 0x01:
 		SEASON3B::CreateOkMessageBox(GlobalText[378]);
 		break;
 		
-	case 0x02:	// 열매를 Stat Plus에 사용 불가
+	case 0x02:
 		{
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[1904], GlobalText[1412]);
 			SEASON3B::CreateOkMessageBox(strText);
 		}
 		break;
-	case 0x03:	// 스탯감소 성공
+	case 0x03:
 		if(fruit >=0 && fruit <= 4)
 		{
             int  index;
 			
             switch ( fruit )
             {
-            case 0: //  에너지.
+            case 0:
 				CharacterAttribute->Energy      -= point;
                 index = 168;
                 break;
 				
-            case 1: //  체력.
+            case 1:
 				CharacterAttribute->Vitality    -= point;
                 index = 169;
                 break;
 				
-            case 2: //  민첩.
+            case 2:
 				CharacterAttribute->Dexterity   -= point;
                 index = 167;
                 break;
                 
-            case 3: //  힘.
+            case 3:
 				CharacterAttribute->Strength    -= point;
                 index = 166;
                 break;
-			case 4:	//: 통솔
+			case 4:
 				CharacterAttribute->Charisma    -= point;
                 index = 1900;
 				break;
@@ -12417,11 +11244,11 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
 		}
 		break;
 		
-	case 0x04:	// 스탯감소 실패
+	case 0x04:
 		SEASON3B::CreateOkMessageBox(GlobalText[1906]);
 		break;
 		
-	case 0x05:	// 열매를 Stat Minus에 사용 불가
+	case 0x05:
 		{
 			unicode::t_char strText[128];
 			unicode::_sprintf(strText, GlobalText[1904], GlobalText[1903]);
@@ -12438,65 +11265,62 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
 			
             switch ( fruit )
             {
-            case 0: //  에너지.
+            case 0:
 				CharacterAttribute->Energy      -= point;
                 index = 168;
                 break;
 				
-            case 1: //  체력.
+            case 1:
 				CharacterAttribute->Vitality    -= point;
                 index = 169;
                 break;
 				
-            case 2: //  민첩.
+            case 2:
 				CharacterAttribute->Dexterity   -= point;
                 index = 167;
                 break;
                 
-            case 3: //  힘.
+            case 3:
 				CharacterAttribute->Strength    -= point;
                 index = 166;
                 break;
-			case 4:	//: 통솔
+			case 4:
 				CharacterAttribute->Charisma    -= point;
                 index = 1900;
 				break;
             }
 			
             CharacterAttribute->LevelUpPoint += point;
-			//여기는 포함 시키지 않는다.
-			//마이너스 감소 열매와는 별도임.
-            //CharacterAttribute->wMinusPoint += point;
 			
 			sprintf ( Text, GlobalText[379], GlobalText[index], point, GlobalText[1903] );
 			SEASON3B::CreateOkMessageBox( Text );
 		}
 		break;
-	case 0x07:	// 스탯감소 실패	
-		SEASON3B::CreateOkMessageBox( GlobalText[1906] ); // "감소된 포인트가 없습니다."	
+	case 0x07:
+		SEASON3B::CreateOkMessageBox( GlobalText[1906] );
 		break;
-	case 0x08:	// 열매를 Stat Minus에 사용 불가
+	case 0x08:
 		char Text[MAX_GLOBAL_TEXT_STRING];
 		sprintf ( Text, GlobalText[1904], GlobalText[1903]);
-		SEASON3B::CreateOkMessageBox( Text ); // 1904 "해당 스테이트는 더 이상 %s 시킬 수 없습니다."
+		SEASON3B::CreateOkMessageBox( Text );
 		break;
 #endif //PSW_FRUIT_ITEM
 		
-	case 0x10:	// 아이템을 착용해서 사용 불가능
+	case 0x10:
 		{
 			SEASON3B::CreateOkMessageBox(GlobalText[1909]);
 		}
 		break;
 		
-	case 0x21:	// 생성 최대치까지 사용 했음
+	case 0x21:
 		SEASON3B::CreateOkMessageBox(GlobalText[1911]);
 		break;
 		
-	case 0x25:	// 감소 최대치까지 사용 했음
+	case 0x25:
 		SEASON3B::CreateOkMessageBox(GlobalText[1911]);
 		break;
 		
-	case 0x26:	// 기본값 이하로는 감소 할 수 없음
+	case 0x26:
 		SEASON3B::CreateOkMessageBox(GlobalText[1912]);
 		break;
 	}
@@ -12504,24 +11328,14 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
     EnableUse = 0;
 }
 
-#ifdef PET_SYSTEM
-//////////////////////////////////////////////////////////////////////////
-//  Pet 관련.
-//////////////////////////////////////////////////////////////////////////
-//  서버에서 팻 명령을 받는다.
-//////////////////////////////////////////////////////////////////////////
 void ReceivePetCommand ( BYTE* ReceiveBuffer )
 {
 	LPPRECEIVE_PET_COMMAND Data = ( LPPRECEIVE_PET_COMMAND )ReceiveBuffer;
 	WORD Key = ((WORD)(Data->m_byKeyH)<<8) + Data->m_byKeyL;
-	
-    //  명령을 전달.
+
     giPetManager::SetPetCommand ( Hero, Key, Data->m_byCommand );
 }
 
-
-//  서버에서 공격 명령을 받는다.
-//////////////////////////////////////////////////////////////////////////
 void ReceivePetAttack ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_PET_ATTACK Data = ( LPPRECEIVE_PET_ATTACK )ReceiveBuffer;
@@ -12535,9 +11349,6 @@ void ReceivePetAttack ( BYTE* ReceiveBuffer )
     giPetManager::SetAttack ( sc, Key, Data->m_bySkillType );
 }
 
-
-//  팻의 정보를 받는다.
-//////////////////////////////////////////////////////////////////////////
 void ReceivePetInfo ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_PET_INFO Data = ( LPPRECEIVE_PET_INFO )ReceiveBuffer;
@@ -12553,7 +11364,7 @@ void ReceivePetInfo ( BYTE* ReceiveBuffer )
 
 	giPetManager::SetPetInfo( Data->m_byInvType, Data->m_byPos, &Petinfo );
 
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM										//## 소스정리 대상임.
+#else // KJH_FIX_DARKLOAD_PET_SYSTEM
 #ifdef KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
 
 	PET_INFO Petinfo;
@@ -12572,12 +11383,10 @@ void ReceivePetInfo ( BYTE* ReceiveBuffer )
 
     CharacterMachine->CalculateAll();
 
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM										//## 소스정리 대상임.
+#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 
-#endif// PET_SYSTEM
-
-void ReceiveWTTimeLeft(BYTE* ReceiveBuffer) // 각종 경기 결과와 남은 시간 표시
+void ReceiveWTTimeLeft(BYTE* ReceiveBuffer)
 {
 	LPPMSG_MATCH_TIMEVIEW Data = (LPPMSG_MATCH_TIMEVIEW)ReceiveBuffer;
 	g_wtMatchTimeLeft.m_Time = Data->m_Time;
@@ -12618,11 +11427,10 @@ void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
     LPPHEADER_MAP_CHANGESERVER_INFO Data = (LPPHEADER_MAP_CHANGESERVER_INFO)ReceiveBuffer;
 
 #ifdef LDK_FIX_FULLSERVER_CONNECT_ERROR
-	// 풀서버 맵이동시 클라이언트 락걸림.
 	if( 0 == Data->m_vSvrInfo.m_wMapSvrPort	)
 	{
 #ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		g_bReponsedMoveMapFromServer = TRUE;			// 맵이동으로서버정보받기 월드이동OK
+		g_bReponsedMoveMapFromServer = TRUE;
 #endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 		LoadingWorld = 0;
 
@@ -12638,9 +11446,6 @@ void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
     g_csMapServer.ConnectChangeMapServer( Data->m_vSvrInfo );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  맵서버 이동 요청 결과.
 void ReceiveChangeMapServerResult ( BYTE* ReceiveBuffer )
 {
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -12648,9 +11453,7 @@ void ReceiveChangeMapServerResult ( BYTE* ReceiveBuffer )
     LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0xB1 [ReceiveChangeMapServerResult]");
-#endif // CONSOLE_DEBUG	
 }
 
 
@@ -12660,20 +11463,19 @@ void ReceiveBCStatus( BYTE* ReceiveBuffer )
 	
 	switch( Data->btResult )
 	{
-	case 0x00:	// 실패
-		g_pChatListBox->AddText("", GlobalText[1500], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1500 "성정보실패"
+	case 0x00:
+		g_pChatListBox->AddText("", GlobalText[1500], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 0x01:	// 성공
-	case 0x02:	// 성주인없음
-		// 근위병 인터페이스 열기
+	case 0x01:
+	case 0x02:
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_GUARDSMAN);
 		g_pGuardWindow->SetData( Data );
 		break;
-	case 0x03:	// 성정보비정상
-		g_pChatListBox->AddText("", GlobalText[1501], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1501 "성정보비정상"	
+	case 0x03:
+		g_pChatListBox->AddText("", GlobalText[1501], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 0x04:	// 성길드없어짐
-		g_pChatListBox->AddText("", GlobalText[1502], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1502 "성길드없어짐"
+	case 0x04:
+		g_pChatListBox->AddText("", GlobalText[1502], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
@@ -12685,35 +11487,35 @@ void ReceiveBCReg( BYTE* ReceiveBuffer )
 	switch( Data->btResult )
 	{
 	case 0x00:
-		g_pChatListBox->AddText("", GlobalText[1503], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1503 "공성전 등록 실패"
+		g_pChatListBox->AddText("", GlobalText[1503], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 0x01:
 		g_GuardsMan.SetRegStatus( 1 );
-		g_pChatListBox->AddText("", GlobalText[1504], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1504 "공성전 등록 성공"
+		g_pChatListBox->AddText("", GlobalText[1504], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 0x02:
-		g_pChatListBox->AddText("", GlobalText[1505], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1505 "공성전에 이미 등록되어 있습니다."
+		g_pChatListBox->AddText("", GlobalText[1505], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 0x03:
-		g_pChatListBox->AddText("", GlobalText[1506], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1506 "당신은 수성측 길드입니다."
+		g_pChatListBox->AddText("", GlobalText[1506], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 0x04:
-		g_pChatListBox->AddText("", GlobalText[1507], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1507 "잘못된 길드입니다."
+		g_pChatListBox->AddText("", GlobalText[1507], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 0x05:
-		g_pChatListBox->AddText("", GlobalText[1508], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1508 "길드마스터의 레벨이 부족합니다."
+		g_pChatListBox->AddText("", GlobalText[1508], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 0x06:
-		g_pChatListBox->AddText("", GlobalText[1509], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1509 "소속된 길드가 없습니다."
+		g_pChatListBox->AddText("", GlobalText[1509], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 0x07:
-		g_pChatListBox->AddText("", GlobalText[1510], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1510 "공성전 등록기간이 아닙니다."
+		g_pChatListBox->AddText("", GlobalText[1510], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 0x08:
-		g_pChatListBox->AddText("", GlobalText[1511], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1511 "길드원 수가 부족합니다."
+		g_pChatListBox->AddText("", GlobalText[1511], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	default:
-		assert( !"잘못된 ReceiveBCReg(0xB2,0x01)" );
+		assert( !"ReceiveBCReg(0xB2, 0x01)" );
 		break;
 	}
 }
@@ -12724,20 +11526,20 @@ void ReceiveBCGiveUp( BYTE* ReceiveBuffer )
 	
 	switch( Data->btResult )
 	{
-	case 0x00:	// 실패
-		g_pChatListBox->AddText("", GlobalText[1512], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1512 "공성전 포기가 실패했습니다."
+	case 0x00:
+		g_pChatListBox->AddText("", GlobalText[1512], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 0x01:	// 성공
+	case 0x01:
 		SendRequestBCRegInfo();
 		SendRequestBCDeclareGuildList();
 		g_GuardsMan.SetRegStatus( 0 );
-		g_pChatListBox->AddText("", GlobalText[1513], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1513 "공성전 포기가 성공했습니다."
+		g_pChatListBox->AddText("", GlobalText[1513], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 0x02:	// 등록된길드아님
-		g_pChatListBox->AddText("", GlobalText[1514], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1514 "공성전에 등록된 길드가 아닙니다."
+	case 0x02:
+		g_pChatListBox->AddText("", GlobalText[1514], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 0x03:	// 시간이지났음
-		g_pChatListBox->AddText("", GlobalText[1515], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1515 "공성전 포기 기간이 아닙니다."
+	case 0x03:
+		g_pChatListBox->AddText("", GlobalText[1515], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	default:
 		assert( !"잘못된 ReceiveBCGiveUp(0xB2,0x02)" );
@@ -12751,10 +11553,10 @@ void ReceiveBCRegInfo( BYTE* ReceiveBuffer )
 	
 	switch( Data->btResult )
 	{
-	case 0x00:	// 실패
+	case 0x00:
 		g_GuardsMan.SetRegStatus( 0 );
 		break;
-	case 0x01:	// 성공
+	case 0x01:
 		{
 			g_GuardsMan.SetRegStatus( !Data->btIsGiveUp );
 			DWORD dwMarkCount;
@@ -12766,7 +11568,7 @@ void ReceiveBCRegInfo( BYTE* ReceiveBuffer )
 			g_GuardsMan.SetMarkCount( dwMarkCount );
 		}
 		break;
-	case 0x02:	// 등록된 길드 아님
+	case 0x02:
 		g_GuardsMan.SetRegStatus( 0 );
 		break;
 	}
@@ -12778,10 +11580,10 @@ void ReceiveBCRegMark( BYTE* ReceiveBuffer )
 	
 	switch( Data->btResult )
 	{
-	case 0x00:	// 실패
-		g_pChatListBox->AddText("", GlobalText[1516], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1516 "표식의 등록이 실패했습니다."
+	case 0x00:
+		g_pChatListBox->AddText("", GlobalText[1516], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 0x01:	// 성공
+	case 0x01:
 		{
 			DWORD dwMarkCount;
 			BYTE* pMarkCount = (BYTE*)&dwMarkCount;
@@ -12792,11 +11594,11 @@ void ReceiveBCRegMark( BYTE* ReceiveBuffer )
 			g_GuardsMan.SetMarkCount( dwMarkCount );
 		}
 		break;
-	case 0x02:	// 등록된길드아님
-		g_pChatListBox->AddText("", GlobalText[1517], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1517 "공성전에 참여한 길드가 아닙니다."
+	case 0x02:
+		g_pChatListBox->AddText("", GlobalText[1517], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 0x03:	// 잘못된아이템등록
-		g_pChatListBox->AddText("", GlobalText[1518], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1518 "잘못된 아이템을 등록했습니다."
+	case 0x03:
+		g_pChatListBox->AddText("", GlobalText[1518], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
@@ -12807,19 +11609,19 @@ void ReceiveBCNPCBuy( BYTE* ReceiveBuffer )
 	switch( Data->btResult )
 	{
 	case 0:
-		g_pChatListBox->AddText("", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1519 "구입이 실패했습니다."	
+		g_pChatListBox->AddText("", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 1:
 		g_SenatusInfo.BuyNewNPC(Data->iNpcNumber, Data->iNpcIndex);
 		break;
 	case 2:
-		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1386 "권한이 없습니다."
+		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 3:
-		g_pChatListBox->AddText("", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1520 "구입비용이 모자랍니다."
+		g_pChatListBox->AddText("", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 4:
-		g_pChatListBox->AddText("", GlobalText[1616], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1616 "이미 존재합니다."
+		g_pChatListBox->AddText("", GlobalText[1616], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
@@ -12831,7 +11633,7 @@ void ReceiveBCNPCRepair( BYTE* ReceiveBuffer )
 	{
 	case 0:
 		{
-			g_pChatListBox->AddText("", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1519 "구입이 실패했습니다."
+			g_pChatListBox->AddText("", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		}
 		
 		break;
@@ -12844,10 +11646,10 @@ void ReceiveBCNPCRepair( BYTE* ReceiveBuffer )
 		}
 		break;
 	case 2:
-		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1386 "권한이 없습니다."
+		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 3:
-		g_pChatListBox->AddText("", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1520 "구입비용이 모자랍니다."
+		g_pChatListBox->AddText("", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
@@ -12858,37 +11660,37 @@ void ReceiveBCNPCUpgrade( BYTE* ReceiveBuffer )
 	switch( Data->btResult )
 	{
 	case 0:
-		g_pChatListBox->AddText("", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1519 "구입이 실패했습니다."	
+		g_pChatListBox->AddText("", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 1:
 		{
 			LPPMSG_NPCDBLIST pNPCInfo = NULL;
 			pNPCInfo = g_SenatusInfo.GetNPCInfo( Data->iNpcNumber, Data->iNpcIndex );
-			if( Data->iNpcUpType == 1 )			// 방어력
+			if( Data->iNpcUpType == 1 )
 				pNPCInfo->iNpcDfLevel = Data->iNpcUpValue;
-			else if( Data->iNpcUpType == 2 )	// 회복력
+			else if( Data->iNpcUpType == 2 )
 				pNPCInfo->iNpcRgLevel = Data->iNpcUpValue;
-			else if( Data->iNpcUpType == 3 )	// 내구도
+			else if( Data->iNpcUpType == 3 )
 				pNPCInfo->iNpcHp = pNPCInfo->iNpcMaxHp = Data->iNpcUpValue;
 		}
 		break;
 	case 2:
-		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1386 "권한이 없습니다."
+		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 3:
-		g_pChatListBox->AddText("", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1520 "구입비용이 모자랍니다."
+		g_pChatListBox->AddText("", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 4:
-		g_pChatListBox->AddText("", GlobalText[1521], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1521 "보석이 모자랍니다."
+		g_pChatListBox->AddText("", GlobalText[1521], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 5:
-		g_pChatListBox->AddText("", GlobalText[1522], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1522 "타입이 잘못되었습니다."
+		g_pChatListBox->AddText("", GlobalText[1522], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 6:
-		g_pChatListBox->AddText("", GlobalText[1523], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1523 "요청값이 잘못되었습니다."
+		g_pChatListBox->AddText("", GlobalText[1523], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 7:
-		g_pChatListBox->AddText("", GlobalText[1524], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1524 "NPC가 존재하지 않습니다."
+		g_pChatListBox->AddText("", GlobalText[1524], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
@@ -12899,13 +11701,13 @@ void ReceiveBCGetTaxInfo( BYTE* ReceiveBuffer )
 	switch( Data->btResult )
 	{
 	case 0:
-		g_pChatListBox->AddText("", GlobalText[1525], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1525 "세율정보얻기 실패"
+		g_pChatListBox->AddText("", GlobalText[1525], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 1:
 		g_SenatusInfo.SetTaxInfo( Data );
 		break;
 	case 2:
-		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1386 "권한이 없습니다."
+		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
@@ -12916,10 +11718,10 @@ void ReceiveBCChangeTaxRate( BYTE* ReceiveBuffer )
 	switch( Data->btResult )
 	{
 	case 0:
-		g_pChatListBox->AddText("", GlobalText[1526], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1526 "세율정보변경 실패"		
+		g_pChatListBox->AddText("", GlobalText[1526], SEASON3B::TYPE_SYSTEM_MESSAGE);	
 		break;
 	case 1:
-        if ( Data->btTaxType==3 )   //  사냥터 입장료.
+        if ( Data->btTaxType==3 ) 
         {
 			g_pUIGateKeeper->SetEntranceFee ( (Data->btTaxRate1<<24) | (Data->btTaxRate2<<16) | (Data->btTaxRate3<<8) | (Data->btTaxRate4) );
         }
@@ -12929,7 +11731,7 @@ void ReceiveBCChangeTaxRate( BYTE* ReceiveBuffer )
         }
 		break;
 	case 2:
-		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1386 "권한이 없습니다."
+		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
@@ -12940,13 +11742,13 @@ void ReceiveBCWithdraw( BYTE* ReceiveBuffer )
 	switch( Data->btResult )
 	{
 	case 0:
-		g_pChatListBox->AddText("", GlobalText[1527], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1527 "출금 실패"
+		g_pChatListBox->AddText("", GlobalText[1527], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	case 1:
 		g_SenatusInfo.ChangeCastleMoney( Data );
 		break;
 	case 2:
-		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1386 "권한이 없습니다."
+		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
@@ -12954,12 +11756,11 @@ void ReceiveBCWithdraw( BYTE* ReceiveBuffer )
 void ReceiveTaxInfo( BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_MAPSVRTAXINFO Data = (LPPMSG_ANS_MAPSVRTAXINFO)ReceiveBuffer;
-	// 카오스조합 세율 변경
+
 	if( Data->btTaxType == 1 )
 	{
 		g_nChaosTaxRate = Data->btTaxRate;
 	}
-	// 상점 세율 변경
 	else if( Data->btTaxType == 2 )
 	{
 		g_pNPCShop->SetTaxRate(Data->btTaxRate);
@@ -12967,7 +11768,7 @@ void ReceiveTaxInfo( BYTE* ReceiveBuffer )
 	}
 	else
 	{
-		assert( !"Packet (0xB2(0x1A))" );
+		assert( !"Packet Recv(0xB2(0x1A))" );
 	}
 }
 
@@ -12977,18 +11778,18 @@ void ReceiveHuntZoneEnter ( BYTE* ReceiveBuffer )
 	
     switch ( pData->m_byResult )
     {
-    case 0: //  실패.
+    case 0:
         {
             g_pUIPopup->CancelPopup ();
             g_pUIPopup->SetPopup ( GlobalText[860], 1, 50, POPUP_OK, NULL );
         }
         break;
 		
-    case 1: //  성공.
+    case 1:
         g_pUIGateKeeper->SetPublic ( pData->m_byHuntZoneEnter );
         break;
 		
-    case 2: //  권한이 없습니다.
+    case 2:
         {
             g_pUIPopup->CancelPopup ();
             g_pUIPopup->SetPopup ( GlobalText[1386], 1, 50, POPUP_OK, NULL );
@@ -13004,10 +11805,10 @@ void ReceiveBCNPCList( BYTE* ReceiveBuffer )
 	
 	switch( Data->btResult )
 	{
-	case 0:	// 실패
-		g_pChatListBox->AddText("", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 860 "실패했습니다."
+	case 0:
+		g_pChatListBox->AddText("", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 1:	// 성공
+	case 1:
 		{
 			for( int i=0 ; i<Data->iCount ; ++i )
 			{
@@ -13017,8 +11818,8 @@ void ReceiveBCNPCList( BYTE* ReceiveBuffer )
 			}
 		}
 		break;
-	case 2:	// 권한이없음
-		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1386 "권한이 없습니다."
+	case 2:
+		g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
@@ -13030,10 +11831,10 @@ void ReceiveBCDeclareGuildList( BYTE* ReceiveBuffer )
 	
 	switch( Data->btResult )
 	{
-	case 0:	// 실패
-		g_pChatListBox->AddText("", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 860 "실패했습니다."
+	case 0:
+		g_pChatListBox->AddText("", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 1:	// 성공
+	case 1:
 		{
 			g_pGuardWindow->ClearDeclareGuildList();
 			for( int i=0 ; i<Data->iCount ; ++i )
@@ -13064,10 +11865,10 @@ void ReceiveBCGuildList( BYTE* ReceiveBuffer )
 	
 	switch( Data->btResult )
 	{
-	case 0:	// 실패
-		g_pChatListBox->AddText("", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 860 "실패했습니다."
+	case 0:
+		g_pChatListBox->AddText("", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 1:	// 성공
+	case 1:
 		{
 			g_pGuardWindow->ClearGuildList();
 			for( int i=0 ; i<Data->iCount ; ++i )
@@ -13080,22 +11881,15 @@ void ReceiveBCGuildList( BYTE* ReceiveBuffer )
 			}
 		}
 		break;
-	case 2:	// 기간아님
-		g_pChatListBox->AddText("", GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1609 "아직 확정되지 않았습니다."
+	case 2:
+		g_pChatListBox->AddText("", GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
-	case 3:	// 데이터준비않됨
-		g_pChatListBox->AddText("", GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);	// 1609 "아직 확정되지 않았습니다."
+	case 3:
+		g_pChatListBox->AddText("", GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  성문 관련 프로토콜.
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  성문 레버 선택시 사용가능 여부 및 기타 정보.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveGateState ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_GATE_STATE Data = (LPPRECEIVE_GATE_STATE)ReceiveBuffer;
@@ -13103,42 +11897,33 @@ void ReceiveGateState ( BYTE* ReceiveBuffer )
 	
 	switch( Data->m_byResult )
 	{
-	case 0: //  실패.
+	case 0:
 		break;
 		
-	case 1: //  성공.
+	case 1:
 		npcGateSwitch::DoInterfaceOpen ( Key );
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_GATESWITCH);
 		break;
 		
-	case 2: //  성문이 없음.
+	case 2:
 		break;
 		
-	case 3: //  레버 없음.
+	case 3:
 		break;
 		
-	case 4: //  권한 없음.
+	case 4:
 		break;
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  성문의 열고/닫음.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveGateOperator ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_GATE_OPERATOR Data = (LPPRECEIVE_GATE_OPERATOR)ReceiveBuffer;
     int Key = ((int)(Data->m_byKeyH)<<8) + Data->m_byKeyL;
 	
-    //  성문의 상태 변경.
     npcGateSwitch::ProcessState ( Key, Data->m_byOperator, Data->m_byResult );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  현재 성문의 상태가 변경되어 그 상태를 보여준다.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveGateCurrentState ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_GATE_CURRENT_STATE Data = (LPPRECEIVE_GATE_CURRENT_STATE)ReceiveBuffer;
@@ -13150,7 +11935,6 @@ void ReceiveGateCurrentState ( BYTE* ReceiveBuffer )
 	
     if ( Data->m_byOperator )
     {
-		// 성문 공격중이였다면 취소시킨다.
 		if( Attacking != -1 && SelectedCharacter == Index )
 		{
 			Attacking = -1;
@@ -13163,10 +11947,6 @@ void ReceiveGateCurrentState ( BYTE* ReceiveBuffer )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  왕관 스위치 작동 여부.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveCrownSwitchState ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_SWITCH_PROC pData = (LPPRECEIVE_SWITCH_PROC)ReceiveBuffer;
@@ -13187,7 +11967,7 @@ void ReceiveCrownSwitchState ( BYTE* ReceiveBuffer )
 	
     switch( pData->m_byState )
     {
-    case 0: //  스위치 땜.
+    case 0:
 		{
 			int iSwitchIndex = ((int)(pData->m_byIndexH)<<8) + pData->m_byIndexL;
 			if(iSwitchIndex == FIRST_CROWN_SWITCH_NUMBER)
@@ -13203,11 +11983,11 @@ void ReceiveCrownSwitchState ( BYTE* ReceiveBuffer )
 		}
         break;
 		
-    case 1: //  스위치 작동.
+    case 1:
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCrownSwitchPushLayout));
         break;
 		
-    case 2: //  다른이가 스위치 작동중.
+    case 2:
         {
 			int iKey   = ((int)(pData->m_byKeyH)<<8) + pData->m_byKeyL;
             int iIndex = FindCharacterIndex ( iKey );
@@ -13220,17 +12000,14 @@ void ReceiveCrownSwitchState ( BYTE* ReceiveBuffer )
 			{
 				if(pCha != NULL && pCha->ID != NULL)
 				{
-					// 1486 "%s님께서"
 					unicode::_sprintf(strText, GlobalText[1486], pCha->ID);
 				}
 				else
 				{
-					// 1487 "아무개님께서"
 					unicode::_sprintf(strText, GlobalText[1487]);	
 				}
 				pMsgBox->AddMsg(strText);
 				
-				// 1488 "이미 %s을 누르고 있습니다"
 				unicode::_sprintf(strText, GlobalText[1488], CrownSwitch->ID);
 				pMsgBox->AddMsg(strText);
 			}
@@ -13239,7 +12016,6 @@ void ReceiveCrownSwitchState ( BYTE* ReceiveBuffer )
     }
 }
 
-// 직인 등록중에는 ESC 에 의한 취소는 불가능
 int DenyCrownRegistPopupClose( POPUP_RESULT Result )
 {
 	if( Result & POPUP_RESULT_ESC )
@@ -13247,9 +12023,6 @@ int DenyCrownRegistPopupClose( POPUP_RESULT Result )
 	return 1;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  왕관 직인등록 여부.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveCrownRegist ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CROWN_STATE pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
@@ -13258,16 +12031,13 @@ void ReceiveCrownRegist ( BYTE* ReceiveBuffer )
 	
     switch ( pData->m_byCrownState )
     {
-    case 0: //  직인 등록 시작.
+    case 0:
 		{
-			//  시간 진행바를 생성시킨다.
 			SEASON3B::CProgressMsgBox* pMsgBox = NULL;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSealRegisterStartLayout), &pMsgBox);
 			if(pMsgBox)
 			{
 				unicode::t_char strText[256];
-				// 1980 "%s (누적시간 : %d초)"
-				// 1489 "직인 등록을 시작합니다"
 				int iTime = (pData->m_dwCrownAccessTime/1000);
 				if(iTime >= 59)
 					iTime = 59;
@@ -13278,19 +12048,17 @@ void ReceiveCrownRegist ( BYTE* ReceiveBuffer )
 		}
         break;
 		
-    case 1: //  직인 등록 성공.
+    case 1:
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSealRegisterSuccessLayout));
         break;
 		
-    case 2: //  직인 등록 실패.
+    case 2:
 		{
 			SEASON3B::CProgressMsgBox* pMsgBox = NULL;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSealRegisterFailLayout), &pMsgBox);
 			if(pMsgBox)
 			{
 				unicode::t_char strText[256];
-				// 1980 "%s (누적시간 : %d초)"
-				// 1491 "직인 등록에 실패했습니다"
 				int iTime = (pData->m_dwCrownAccessTime/1000);
 				if(iTime >= 59)
 					iTime = 59;
@@ -13300,7 +12068,7 @@ void ReceiveCrownRegist ( BYTE* ReceiveBuffer )
 		}
         break;
 		
-    case 3: //  다른 사람 사용중.
+    case 3:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSealRegisterOtherLayout));
 		}
@@ -13312,19 +12080,14 @@ void ReceiveCrownRegist ( BYTE* ReceiveBuffer )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  왕관 직인등록 여부.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveCrownState ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CROWN_STATE pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
 	
-    //  이전에 띄어있던 시간바를 없앤다.
     g_pUIPopup->CancelPopup ();
     switch ( pData->m_byCrownState )
     {
-    case 0: //  방어막 해제.
+    case 0:
         {
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCrownDefenseRemoveLayout));	
 			
@@ -13336,7 +12099,7 @@ void ReceiveCrownState ( BYTE* ReceiveBuffer )
         }
         break;
 		
-    case 1: //  방어막 생성.
+    case 1:
         {
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCrownDefenseCreateLayout));
 			
@@ -13348,17 +12111,13 @@ void ReceiveCrownState ( BYTE* ReceiveBuffer )
         }
         break;
 		
-    case 2: //  등록 성공.
+    case 2:
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSealRegisterSuccessLayout));
         
         break;
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  자신의 공/수 참여 속성 알림.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveBattleCastleRegiment ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CROWN_STATE pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
@@ -13368,25 +12127,21 @@ void ReceiveBattleCastleRegiment ( BYTE* ReceiveBuffer )
     case 0:
 		battleCastle::SettingBattleFormation ( Hero, static_cast<eBuffState>(0) );
         return;
-    case 1: //  수성.
+    case 1:
 		battleCastle::SettingBattleFormation(Hero, eBuff_CastleRegimentDefense);
 		break;
-    case 2: //  공성.
+    case 2:
 		battleCastle::SettingBattleFormation ( Hero, eBuff_CastleRegimentAttack1 );
         break;
-	case 3: //  공성.
+	case 3:
 		battleCastle::SettingBattleFormation ( Hero, eBuff_CastleRegimentAttack2 );
 		break;
-	case 4: //  공성.
+	case 4:
 		battleCastle::SettingBattleFormation ( Hero, eBuff_CastleRegimentAttack3 );
 		break;
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//현재 공성전 진행 상태를 알림.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveBattleCasleSwitchInfo( BYTE* ReceiveBuffer )
 {
 	LPRECEIVE_CROWN_SWITCH_INFO pData = (LPRECEIVE_CROWN_SWITCH_INFO)ReceiveBuffer;
@@ -13469,10 +12224,6 @@ bool Delete_Switch()
 	return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  현재 공성전 시작 여부를 알림.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveBattleCastleStart ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CROWN_STATE pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
@@ -13487,22 +12238,17 @@ void ReceiveBattleCastleStart ( BYTE* ReceiveBuffer )
 	}
 	else
 	{
-		// 종료
 		g_pSiegeWarfare->ReleaseSkillUI();
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  공성전 진행 상태 알림.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveBattleCastleProcess ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_BC_PROCESS pData = (LPPRECEIVE_BC_PROCESS)ReceiveBuffer;
 	
     switch ( pData->m_byBasttleCastleState )
     {
-    case 0: //  왕의 직인 등록 시도.
+    case 0:
         {
             char GuildName[8+1];
 			memset(GuildName, 0, 8+1);
@@ -13515,7 +12261,7 @@ void ReceiveBattleCastleProcess ( BYTE* ReceiveBuffer )
         }
         break;
 		
-    case 1: //  중간 승리.
+    case 1:
         {
             char Text[8+1];
 			memset(Text, 0, 8+1);
@@ -13531,11 +12277,7 @@ void ReceiveBattleCastleProcess ( BYTE* ReceiveBuffer )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  마스터 스킬을 위한 KillCount값을 받는다.
-//////////////////////////////////////////////////////////////////////////
-void    ReceiveKillCount ( BYTE* ReceiveBuffer )
+void ReceiveKillCount ( BYTE* ReceiveBuffer )
 {
     LPPWHEADER_DEFAULT_WORD pData = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
     if ( pData->Value==0 )
@@ -13553,11 +12295,7 @@ void    ReceiveKillCount ( BYTE* ReceiveBuffer )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  몬스터의 생성되는 시간을 받는다.
-//////////////////////////////////////////////////////////////////////////
-void    ReceiveBuildTime ( BYTE* ReceiveBuffer )
+void ReceiveBuildTime ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_MONSTER_BUILD_TIME pData = (LPPRECEIVE_MONSTER_BUILD_TIME)ReceiveBuffer;
 	int Key = ((int)(pData->m_byKeyH)<<8) + pData->m_byKeyL;
@@ -13566,14 +12304,9 @@ void    ReceiveBuildTime ( BYTE* ReceiveBuffer )
     CHARACTER* c = &CharactersClient[Index];
     OBJECT* o = &c->Object;
 	
-    //  생성 시간을 얻는다.
     o->m_byBuildTime = pData->m_byBuildTime;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  GC [0xB9][0x02] 성을 차지한 길드 마크.
-//////////////////////////////////////////////////////////////////////////
 void    ReceiveCastleGuildMark ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CASTLE_FLAG pData = (LPPRECEIVE_CASTLE_FLAG)ReceiveBuffer;
@@ -13589,11 +12322,7 @@ void    ReceiveCastleGuildMark ( BYTE* ReceiveBuffer )
     CreateCastleMark ( BITMAP_INTERFACE_MAP, GuildMark ); 
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  GC [0xB9][0x03] 성 사냥터 문지기가 그 사냥터의 여러 정보를 알려준다.
-//////////////////////////////////////////////////////////////////////////
-void    ReceiveCastleHuntZoneInfo ( BYTE* RecevieBuffer )
+void ReceiveCastleHuntZoneInfo ( BYTE* RecevieBuffer )
 {
     LPPRECEIVE_CASTLE_HUNTZONE_INFO pData = (LPPRECEIVE_CASTLE_HUNTZONE_INFO)RecevieBuffer;
 	
@@ -13608,11 +12337,7 @@ void    ReceiveCastleHuntZoneInfo ( BYTE* RecevieBuffer )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  GC [0xB9][0x05] 성 사냥터 입장 결과.
-//////////////////////////////////////////////////////////////////////////
-void    ReceiveCastleHuntZoneResult ( BYTE* ReceiveBuffer )
+void ReceiveCastleHuntZoneResult ( BYTE* ReceiveBuffer )
 {
     LPPRECEVIE_CASTLE_HUNTZONE_RESULT pData = (LPPRECEVIE_CASTLE_HUNTZONE_RESULT)ReceiveBuffer;
 	
@@ -13622,13 +12347,6 @@ void    ReceiveCastleHuntZoneResult ( BYTE* ReceiveBuffer )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  투석기 관련 프로토콜
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  공성 무기 선택 결과.
-//////////////////////////////////////////////////////////////////////////
 void ReceiveCatapultState ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CATAPULT_STATE pData = (LPPRECEIVE_CATAPULT_STATE)ReceiveBuffer;
@@ -13646,11 +12364,7 @@ void ReceiveCatapultState ( BYTE* ReceiveBuffer )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  공성무기를 발사하라는 명령을 받는다.
-//////////////////////////////////////////////////////////////////////////
-void    ReceiveCatapultFire ( BYTE* ReceiveBuffer )
+void ReceiveCatapultFire ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_WEAPON_FIRE pData = (LPPRECEIVE_WEAPON_FIRE)ReceiveBuffer;
     
@@ -13658,19 +12372,14 @@ void    ReceiveCatapultFire ( BYTE* ReceiveBuffer )
     {
         int Key = ((int)(pData->m_byKeyH)<<8) + pData->m_byKeyL;
 		
-        //  공격을 명령한다.
 		g_pCatapultWindow->DoFire(Key, pData->m_byResult, pData->m_byWeaponType, pData->m_byTargetX, pData->m_byTargetY);
     }
-    else if ( pData->m_byResult==0 )    //  실패.
+    else if ( pData->m_byResult==0 )
     {
 		g_pChatListBox->AddText( "", "공성무기 발사 실패했습니다.", SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  공성무기가 자신들에게 발사되었음을 알림.
-//////////////////////////////////////////////////////////////////////////
 void    ReceiveCatapultFireToMe ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_BOMBING_ALERT pData = (LPPRECEIVE_BOMBING_ALERT)ReceiveBuffer;
@@ -13678,10 +12387,6 @@ void    ReceiveCatapultFireToMe ( BYTE* ReceiveBuffer )
 	g_pCatapultWindow->DoFireFixStartPosition(pData->m_byWeaponType, pData->m_byTargetX, pData->m_byTargetY);
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  공성무기에 공격을 받는다. ( 공격 받는 캐릭터들만   ).
-//////////////////////////////////////////////////////////////////////////
 /*
 void    ReceiveDamageFrmeCatapult ( BYTE* ReceiveBuffer )
 {
@@ -13700,7 +12405,6 @@ OBJECT* to = &tc->Object;
   }
 */
 
-//  임시적인 위치의 뷰포트 정보를 받는다. ( 공성 투척기 관련 )
 void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD pData = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
@@ -13716,7 +12420,7 @@ void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
 		
         switch ( pData2->m_byObjType )
         {
-        case 1: //  캐릭터.
+        case 1:
             {
 				CHARACTER* c = CreateCharacter ( Key, MODEL_PLAYER, pData2->m_byPosX, pData2->m_byPosY, 0 );
 				OBJECT* o = &c->Object;
@@ -13746,7 +12450,7 @@ void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
             }
             break;
 			
-        case 2:    //   몬스터.
+        case 2:
         case 3:    //   NPC
             {
                 WORD Type = ((WORD)(pData2->m_byTypeH)<<8) + pData2->m_byTypeL;
@@ -13769,14 +12473,13 @@ void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
 				
                 if ( battleCastle::InBattleCastle() && c->MonsterIndex==277 )        
                 {
-                    //  State값에 따라 행동을 결정한다.
-					
-					if (g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen))  //  성문이 열려있는 상태.
+                    //  State					
+					if (g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen))
 					{
 						SetAction ( &c->Object, 1 );
 						battleCastle::SetCastleGate_Attribute ( pData2->m_byPosX, pData2->m_byPosY, 0 );
 					}
-					else if(g_isNotCharacterBuff((&c->Object))) //  성문이 닫혀있는 상태. 
+					else if(g_isNotCharacterBuff((&c->Object)))
 					{
 						SetAction ( &c->Object, 0 );
 						battleCastle::SetCastleGate_Attribute ( pData2->m_byPosX, pData2->m_byPosY, 1 );
@@ -13790,12 +12493,6 @@ void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
 	}
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////
-//  맵 전략 인터페이스.
-//////////////////////////////////////////////////////////////////////////
-//  맵 데이터 주기적으로 보내달라는 요청 결과값.
 void ReceiveMapInfoResult ( BYTE* ReceiveBuffer )
 {
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -13803,7 +12500,6 @@ void ReceiveMapInfoResult ( BYTE* ReceiveBuffer )
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 }
 
-//  (연합)길드 마스터의 명령을 받는다.
 void ReceiveGuildCommand ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_GUILD_COMMAND  pData = (LPPRECEIVE_GUILD_COMMAND)ReceiveBuffer;
@@ -13815,7 +12511,6 @@ void ReceiveGuildCommand ( BYTE* ReceiveBuffer )
 	}
 }
 
-//  (연합)길드원들의 위치를 받는다.
 void ReceiveGuildMemberLocation ( BYTE* ReceiveBuffer )
 {
 	if( g_pSiegeWarfare->GetCurSiegeWarType() != TYPE_GUILD_COMMANDER )
@@ -13836,8 +12531,6 @@ void ReceiveGuildMemberLocation ( BYTE* ReceiveBuffer )
 	}
 }
 
-
-//  (연합)길드에 포함되는 NPC를 받는다.
 void ReceiveGuildNpcLocation ( BYTE* ReceiveBuffer )
 {
 	if( g_pSiegeWarfare->GetCurSiegeWarType() != TYPE_GUILD_COMMANDER )
@@ -13855,8 +12548,6 @@ void ReceiveGuildNpcLocation ( BYTE* ReceiveBuffer )
 	}
 }
 
-
-//  공성전(기타)중 남은 시간을 사용자들에게 주기적으로 알림.
 void ReceiveMatchTimer ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_MATCH_TIMER pData = (LPPRECEIVE_MATCH_TIMER)ReceiveBuffer;
@@ -13864,15 +12555,12 @@ void ReceiveMatchTimer ( BYTE* ReceiveBuffer )
 	g_pSiegeWarfare->SetTime( pData->m_byHour, pData->m_byMinute );
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	크라이울프 1차 레이드 MVP
-//////////////////////////////////////////////////////////////////////////
 void ReceiveCrywolfInfo ( BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_CRYWOLF_INFO pData = (LPPMSG_ANS_CRYWOLF_INFO)ReceiveBuffer;
 	
-	M34CryWolf1st::CheckCryWolf1stMVP(pData->btOccupationState, pData->btCrywolfState);	// 크라이울프 맵상태와 진행 상태 값
-	g_Direction.m_CMVP.GetCryWolfState(pData->btCrywolfState);	// 연출부분 체크
+	M34CryWolf1st::CheckCryWolf1stMVP(pData->btOccupationState, pData->btCrywolfState);
+	g_Direction.m_CMVP.GetCryWolfState(pData->btCrywolfState);
 	
 }
 
@@ -13880,7 +12568,6 @@ void ReceiveCrywolStateAltarfInfo ( BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_CRYWOLF_STATE_ALTAR_INFO pData = (LPPMSG_ANS_CRYWOLF_STATE_ALTAR_INFO)ReceiveBuffer;
 	
-	// 크라이울프 석상 HP와 크라이울프 제단 상태
 	M34CryWolf1st::CheckCryWolf1stMVPAltarfInfo(pData->iCrywolfStatueHP,
 		pData->btAltarState1,
 		pData->btAltarState2,
@@ -13889,12 +12576,11 @@ void ReceiveCrywolStateAltarfInfo ( BYTE* ReceiveBuffer )
 		pData->btAltarState5);
 }
 
-//제단들의 계약시도시의 답변
 void ReceiveCrywolfAltarContract ( BYTE* ReceiveBuffer )
 {
 	LPPPMSG_ANS_CRYWOLF_ALTAR_CONTRACT pData = (LPPPMSG_ANS_CRYWOLF_ALTAR_CONTRACT)ReceiveBuffer;
 	
-	int Key = ((int)(pData->btObjIndexH)<<8) + pData->btObjIndexL; // 제단 인덱스
+	int Key = ((int)(pData->btObjIndexH)<<8) + pData->btObjIndexL;
 	
 	if(pData->bResult == 0)
 	{
@@ -13904,19 +12590,19 @@ void ReceiveCrywolfAltarContract ( BYTE* ReceiveBuffer )
 		if(level < 260)
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Dont_Set_Temple1));
-			//			M34CryWolf1st::Set_Message_Box(54,0,0);	//"계약 자격이 부족합니다."
-			//			M34CryWolf1st::Set_Message_Box(55,1,0);	//"350레벨 이상만 계약할수 있습니다."
+			//			M34CryWolf1st::Set_Message_Box(54,0,0);
+			//			M34CryWolf1st::Set_Message_Box(55,1,0);
 		}
 		else
 		{
-			//			M34CryWolf1st::Set_Message_Box(58,0,0);	//"잠시후에 다시시도해주세요"
+			//			M34CryWolf1st::Set_Message_Box(58,0,0);
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Wat_Set_Temple1));
 		}
 	}
 	else if(pData->bResult == 1)
 	{
-		//		M34CryWolf1st::Set_Message_Box(3,0,0);	//늑대의 신상을 보호하기 위한 사제로 등록되었습니다.
-		//		M34CryWolf1st::Set_Message_Box(4,1,0);	//사제의 역할을 하는 동안 움직일수 없습니다.
+		//		M34CryWolf1st::Set_Message_Box(3,0,0);
+		//		M34CryWolf1st::Set_Message_Box(4,1,0);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Set_Temple));
 		
 		M34CryWolf1st::Check_AltarState(Key-316,pData->btAltarState);
@@ -13930,18 +12616,15 @@ void ReceiveCrywolfAltarContract ( BYTE* ReceiveBuffer )
 }
 
 void ReceiveCrywolfLifeTime ( BYTE* ReceiveBuffer )
-//크라이울프의 진행시간을 받아옴.
 {
     LPPPMSG_ANS_CRYWOLF_LEFTTIME pData = (LPPPMSG_ANS_CRYWOLF_LEFTTIME)ReceiveBuffer;
 	
-	// 시간, 분 상태 처리
 	M34CryWolf1st::SetTime ( pData->btHour, pData->btMinute );
 	g_pCryWolfInterface->SetTime( (int)(pData->btHour), (int)(pData->btMinute) );
 }
 
 void ReceiveCrywolfTankerHit ( BYTE* ReceiveBuffer )
 {
-	//작업중 - 이혁재
     LPPMSG_NOTIFY_REGION_MONSTER_ATTACK pData = (LPPMSG_NOTIFY_REGION_MONSTER_ATTACK)ReceiveBuffer;
 	
     M34CryWolf1st::DoTankerFireFixStartPosition ( pData->btSourceX, pData->btSourceY, pData->btPointX, pData->btPointY );
@@ -13955,7 +12638,6 @@ void ReceiveCrywolfBenefitPlusChaosRate( BYTE* ReceiveBuffer )
 }
 
 void ReceiveCrywolfBossMonsterInfo( BYTE* ReceiveBuffer)
-//크라이울프 보스 몬스터 출현시 세팅
 {
 	LPPMSG_ANS_CRYWOLF_BOSSMONSTER_INFO pData = (LPPMSG_ANS_CRYWOLF_BOSSMONSTER_INFO)ReceiveBuffer;
 	
@@ -13981,9 +12663,6 @@ void ReceiveCrywolfHeroList( BYTE* ReceiveBuffer)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	칸투르 관련
-//////////////////////////////////////////////////////////////////////////
 void ReceiveKanturu3rdStateInfo(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_KANTURU_STATE_INFO pData = (LPPMSG_ANS_KANTURU_STATE_INFO)ReceiveBuffer;
@@ -13999,7 +12678,6 @@ void ReceiveKanturu3rdEnterBossMap(BYTE* ReceiveBuffer)
 
 void ReceiveKanturu3rdCurrentState( BYTE* ReceiveBuffer)
 {
-	// 칸투르 처음 맵 들어왔을 당시 상태 와 연출 상태
 	LPPMSG_ANS_KANTURU_CURRENT_STATE pData = (LPPMSG_ANS_KANTURU_CURRENT_STATE)ReceiveBuffer;
 	M39Kanturu3rd::Kanturu3rdState(pData->btCurrentState, pData->btCurrentDetailState);
 	M39Kanturu3rd::CheckSuccessBattle(pData->btCurrentState, pData->btCurrentDetailState);
@@ -14007,7 +12685,6 @@ void ReceiveKanturu3rdCurrentState( BYTE* ReceiveBuffer)
 
 void ReceiveKanturu3rdState( BYTE* ReceiveBuffer)
 {
-	// 칸투르 맵 상태 와 연출 상태 갱신
 	LPPMSG_ANS_KANTURU_STATE_CHANGE pData = (LPPMSG_ANS_KANTURU_STATE_CHANGE)ReceiveBuffer;
 	
 	if(M39Kanturu3rd::IsInKanturu3rd())
@@ -14044,14 +12721,12 @@ void ReceiveKanturu3rdState( BYTE* ReceiveBuffer)
 
 void ReceiveKanturu3rdResult( BYTE* ReceiveBuffer)
 {
-	// 칸투르 성공 실패 결과
 	LPPMSG_ANS_KANTURU_BATTLE_RESULT pData = (LPPMSG_ANS_KANTURU_BATTLE_RESULT)ReceiveBuffer;
 	M39Kanturu3rd::Kanturu3rdResult(pData->btResult);
 }
 
 void ReceiveKanturu3rdTimer ( BYTE* ReceiveBuffer )
 {
-	//  공성전(기타)중 남은 시간을 사용자들에게 주기적으로 알림.
     LPPMSG_ANS_KANTURU_BATTLE_SCENE_TIMELIMIT pData = (LPPMSG_ANS_KANTURU_BATTLE_SCENE_TIMELIMIT)ReceiveBuffer;
 	g_pKanturuInfoWindow->SetTime(pData->btTimeLimit);
 }
@@ -14069,10 +12744,7 @@ void RecevieKanturu3rdLeftUserandMonsterCount( BYTE* ReceiveBuffer)
 }
 
 #ifdef ADD_PCROOM_POINT_SYSTEM
-//----------------------------------------------------------------------------
-// PC방 포인트 시스템
-//----------------------------------------------------------------------------
-// PC방 포인트 정보를  .
+
 void ReceivePCRoomPointInfo(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_GC_PCROOM_POINT_INFO pData = (LPPMSG_ANS_GC_PCROOM_POINT_INFO)ReceiveBuffer;
@@ -14080,11 +12752,10 @@ void ReceivePCRoomPointInfo(BYTE* ReceiveBuffer)
 	CPCRoomPtSys& rPCRoomPtSys = CPCRoomPtSys::Instance();
 
 #ifndef KJH_DEL_PC_ROOM_SYSTEM				// #ifndef
-#ifndef CSK_MOD_MOVE_COMMAND_WINDOW		// 정리할 때 지워야 하는 소스
+#ifndef CSK_MOD_MOVE_COMMAND_WINDOW
 	rPCRoomPtSys.SetPCRoom();
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW	// 정리할 때 지워야 하는 소스
+#endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
-	// PC방 포인트 정보 입력
 	rPCRoomPtSys.SetPoint(pData->nPoint, pData->nMaxPoint);
 #endif // KJH_DEL_PC_ROOM_SYSTEM
 
@@ -14092,28 +12763,20 @@ void ReceivePCRoomPointInfo(BYTE* ReceiveBuffer)
 	rPCRoomPtSys.SetPCRoom(pData->bPCBang);
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0xD0 0x04 [ReceivePCRoomPointInfo(%d | %d)]", pData->nPoint, pData->nMaxPoint);
-#endif // CONSOLE_DEBUG
 }
 
 #ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-// PC방 포인트 상점에서 구입시 응답.
+
 void ReceivePCRoomPointUse(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_GC_PCROOM_POINT_USE pData = (LPPMSG_ANS_GC_PCROOM_POINT_USE)ReceiveBuffer;
 	
-	// 결과 0x00:성공, 0x01:안전지대 아님, 0x02:해당위치에 아이템이 없음,
-	//0x03:인벤토리 공간 부족, 0x04:기본 조건 포인트부족,
-	//0x05:PC방 포인트 시스템 대상자가 아님, 0x06:에러,
-	//0x07:상점 사용 가능 시간 초과, 0x08:PC방 포인트 전용 아이템이 아님
-	//0x09:구입 가능한 포인트 부족
 	switch (pData->byResult)
 	{
-	case 0x00:	// 성공.
-		if (pData->byInvenPos != 0xff)	// 인장 구입이 아님.
+	case 0x00:
+		if (pData->byInvenPos != 0xff)
 		{
-			// 아이템 구입.
 			g_pMyInventory->InsertItem(pData->byInvenPos-MAX_EQUIPMENT_INDEX, pData->ItemInfo);
 			
 			PlayBuffer(SOUND_GET_ITEM01);
@@ -14121,16 +12784,15 @@ void ReceivePCRoomPointUse(BYTE* ReceiveBuffer)
 		break;
 		
 	case 0x03:
-		// 375 "인벤토리가 꽉찼습니다."
-		g_pChatListBox->AddText("", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);		// "인벤토리가 꽉 찼습니다."
+		g_pChatListBox->AddText("", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 					
 	case 0x04:
-		g_pChatListBox->AddText("", GlobalText[2333], SEASON3B::TYPE_ERROR_MESSAGE);	// "구입 조건을 확인하세요."
+		g_pChatListBox->AddText("", GlobalText[2333], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 					
 	case 0x09:
-		g_pChatListBox->AddText("", GlobalText[2322], SEASON3B::TYPE_ERROR_MESSAGE);		// "포인트가 부족합니다."
+		g_pChatListBox->AddText("", GlobalText[2322], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 	}
 	
@@ -14139,15 +12801,13 @@ void ReceivePCRoomPointUse(BYTE* ReceiveBuffer)
 #endif // CONSOLE_DEBUG	
 }
 
-// PC방 포인트 상점 오픈 요구에 대한 응답.
 void ReceivePCRoomPointShopOpen(BYTE* ReceiveBuffer)
 {
 	LPPMSG_REQ_PCROOM_POINT_SHOP_OPEN pData = (LPPMSG_REQ_PCROOM_POINT_SHOP_OPEN)ReceiveBuffer;
 	
-	// 결과	0:오픈, 1:안전지대 아님, 2:상점에 아이템 없음, 3:다른 창 사용 중, 4:에러
 	if (0 == pData->byResult)
 	{
-		CPCRoomPtSys::Instance().SetPCRoomPointShopMode();	// PC방 포인트 상점 모드임.
+		CPCRoomPtSys::Instance().SetPCRoomPointShopMode();
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCSHOP);
 	}
 }
@@ -14167,8 +12827,7 @@ void ReceiveCursedTempleEnterInfo( BYTE* ReceiveBuffer )
 void ReceiveCursedTempleEnterResult( BYTE* ReceiveBuffer )
 {
 	LPPMSG_RESULT_ENTER_CURSED_TEMPLE data = (LPPMSG_RESULT_ENTER_CURSED_TEMPLE)ReceiveBuffer;
-	//0 : 성공, 1 : 알맞은 피의 두루마리 없음, 2 : 들어갈수 있는 시간이 아님, 3 : 피의 두루마리는 맞으나 자신의 레벨과 맞지 않음
-	//4 : 인원제한이 넘었음, 5 : 1일 입장제한 횟수를 넘었음, 6 : 입장료가 모자란다., 7 : 카오유저는 입장할 수 없다., 8 : 변신반지를 착용하고 입장할 수 없다.
+
 	if( data->Result == 0 ) 
 	{
 		g_pNewUISystem->HideAll();
@@ -14286,10 +12945,6 @@ void RecevieRaklionUserMonsterCount(BYTE* ReceiveBuffer)
 }
 #endif // CSK_RAKLION_BOSS
 
-///////////////////////////////////////////////////////////////////////////////
-// 해킹 관련
-///////////////////////////////////////////////////////////////////////////////
-
 void ReceiveCheckSumRequest( BYTE *ReceiveBuffer)
 {
 	LPPHEADER_DEFAULT_WORD Data = (LPPHEADER_DEFAULT_WORD)ReceiveBuffer;
@@ -14304,16 +12959,11 @@ void ReceiveCheckSumRequest( BYTE *ReceiveBuffer)
 
 #ifdef NEW_USER_INTERFACE_SERVERMESSAGE
 
-//////////////////////////////////////////////////////////////////////////
-// [캐쉬샵 오픈 요청 결과] 0xF5, 0x02
-//////////////////////////////////////////////////////////////////////////
 void RecevieCashShopInOut( BYTE* ReceiveBuffer )
 {
 	TheShopServerProxy().RecevieShopInOut( ReceiveBuffer );
 }
-//////////////////////////////////////////////////////////////////////////
-// [캐쉬 포인트 잔량 요청 결과] 0xF5, 0x04
-//////////////////////////////////////////////////////////////////////////
+
 void RecevieCashShopCashPoint( BYTE* ReceiveBuffer )
 {
 	TheShopServerProxy().RecevieShopCashPoint( ReceiveBuffer );
@@ -14351,11 +13001,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now);
 
 
 extern int TimeRemain;
-
-///////////////////////////////////////////////////////////////////////////////
-
-// 프로토콜  
-///////////////////////////////////////////////////////////////////////////////
 
 BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEcrypted);
 void TranslateChattingProtocol(DWORD dwWindowUIID, int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEcrypted);
@@ -14404,7 +13049,6 @@ void ProtocolCompiler( CWsctlc *pSocketClient, int iTranslation, int iParam)
 				{
 					LPPBMSG_ENCRYPTED lpHeader = (LPPBMSG_ENCRYPTED)ReceiveBuffer;
 					Size     = lpHeader->Size;
-					// SC 도 시리얼
 
 #ifdef PKD_ADD_ENHANCED_ENCRYPTION
 					iSize = g_SessionCryptorSC.Decrypt( (int)pSocketClient->GetSocket(), byDec + 2, ReceiveBuffer + 2, Size - 2);
@@ -14435,7 +13079,7 @@ void ProtocolCompiler( CWsctlc *pSocketClient, int iTranslation, int iParam)
 				if ( ( g_byPacketSerialRecv) != byDec[2])
 				{
 					bEncrypted = FALSE;
-					g_byPacketSerialRecv = byDec[2];		//. * 문제 발생 의심코드
+					g_byPacketSerialRecv = byDec[2];
 					
 					g_ErrorReport.Write("Decrypt error : g_byPacketSerialRecv(0x%02X), byDec(0x%02X)\r\n", g_byPacketSerialRecv, byDec[2]);
 					g_ErrorReport.Write("Dump : \r\n");
@@ -14496,19 +13140,15 @@ void ProtocolCompiler( CWsctlc *pSocketClient, int iTranslation, int iParam)
 			}
 			DebugAngel_Write( PACKET_SAVE_FILE, "\r\n");
 #endif
-			
-#ifdef CONSOLE_DEBUG
-			//g_ConsoleDebug->Write(MCD_RECEIVE, "[Receive]HeadCode : %02X, Size : %d", HeadCode, Size);
-#endif // CONSOLE_DEBUG
-			
+				
 			switch ( iTranslation)
 			{
-			case 1:	// 채팅용
+			case 1:
 				TranslateChattingProtocol(iParam, HeadCode, ReceiveBuffer, Size, bEncrypted);
 				break;
 			default:
 				if ( !TranslateProtocol( HeadCode, ReceiveBuffer, Size, bEncrypted))
-				{	// 암호화 되어야 하는데 안된 것들
+				{
 					g_ErrorReport.Write( "Strange packet\r\n");
 					g_ErrorReport.HexWrite( ReceiveBuffer, Size);
 				}
@@ -14528,7 +13168,7 @@ void Receive_Change_Name_Result(BYTE *ReceiveBuffer)
 {
 	LPPMSG_CHANGE_NAME_RESULT Data = (LPPMSG_CHANGE_NAME_RESULT)ReceiveBuffer;
 	
-	if(Data->btResult == 0) //성공
+	if(Data->btResult == 0)
 	{
 		::strcpy(CharactersClient[SelectedHero].ID, Data->NewName);
 		::StartGame(true);
@@ -14543,14 +13183,13 @@ void Receive_Check_Change_Name(BYTE *ReceiveBuffer)
 {
 	LPPMSG_ANS_CHECK_CHANGE_NAME Data = (LPPMSG_ANS_CHECK_CHANGE_NAME)ReceiveBuffer;
 	
-	if(Data->btResult == 0)	//캐릭터 이름을 바꿀필요가 없다.
+	if(Data->btResult == 0)
 	{
 		::StartGame(true);
 	}
 	else
-		if(Data->btResult == 1)	//캐릭터 이름을 바꿔야 한다.
+		if(Data->btResult == 1)
 		{
-			//캐릭터 이름바꾸는 ui를 띄워준다.
 			CUIMng& rUIMng = CUIMng::Instance();
 			rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
 			rUIMng.m_CharMakeWin.Set_State(true);
@@ -14559,27 +13198,19 @@ void Receive_Check_Change_Name(BYTE *ReceiveBuffer)
 #endif //PJH_CHARACTER_RENAME
 
 #ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-//////////////////////////////////////////////////////////////////////////
-// [행운의 동전 관련] 0xBF
-//////////////////////////////////////////////////////////////////////////
 
-//등록된 동전 갯수 응답
 bool ReceiveRegistedLuckyCoin(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_GET_COIN_COUNT _pData = (LPPMSG_ANS_GET_COIN_COUNT)ReceiveBuffer;
 	
 	if(_pData->nCoinCnt >= 0)
 	{
-		//0이상으로 응답이 왔다면, 등록된 동전 갯수
 		g_pLuckyCoinRegistration->SetRegistCount(_pData->nCoinCnt);
 		return true;
 	}
-	
-	//이상한 값이 들어왔다면
 	return false;
 }
 
-//동전 등록 응답
 bool ReceiveRegistLuckyCoin(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_REGEIST_COIN _pData = (LPPMSG_ANS_REGEIST_COIN)ReceiveBuffer;
@@ -14588,23 +13219,24 @@ bool ReceiveRegistLuckyCoin(BYTE* ReceiveBuffer)
 	
 	switch(_pData->btResult)
 	{
-	case 0:		// 실패 (행운의 동전부족)
+	case 0:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseRegistLuckyCoinMsgBoxLayout));
-		}break;
-	case 1:		// 성공
+		}
+		break;
+	case 1:
 		{
-			//현재 등록된 동전 갯수
 			g_pLuckyCoinRegistration->SetRegistCount(_pData->nCurCoinCnt);
-		}break;
+		}
+		break;
 #ifdef PBG_MOD_LUCKYCOINEVENT
 	case 100:
 		{
-			//등록된 갯수가 255개가 초과할시
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CRegistOverLuckyCoinMsgBoxLayout));
-		}break;
+		}
+		break;
 #endif //PBG_MOD_LUCKYCOINEVENT
-	default:	// 잘못된 Result값
+	default:
 		return false;
 	}
 
@@ -14620,19 +13252,17 @@ bool ReceiveRequestExChangeLuckyCoin(BYTE* ReceiveBuffer)
 	
 	switch(_pData->btResult)
 	{
-	case 0:	// 실패(행운의동전교환 갯수부족)
+	case 0:
 		{
-			// 실패 메세지 처리
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CExchangeLuckyCoinMsgBoxLayout));
 		}
 		break;
-	case 1:	//성공
+	case 1:
 		{
-			// 성공 후 인벤 닫을시
 			//g_pNewUISystem->Hide(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN);
 			g_pChatListBox->AddText("", GlobalText[1888], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		}break;
-	case 2: // 공간없음
+	case 2:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CExchangeLuckyCoinInvenErrMsgBoxLayout));
 		}break;
@@ -14654,30 +13284,30 @@ bool ReceiveEnterDoppelGangerEvent(BYTE* ReceiveBuffer)
 
 	switch(Data->btResult)
 	{
-	case 0:		// 성공
+	case 0:
 		break;
-	case 1:		// 차원의마경 없음
+	case 1:
 		g_pDoppelGangerWindow->LockEnterButton(TRUE);
 		break;
-	case 2:		// 이미 다른 파티가 사용중
+	case 2:
 		unicode::_sprintf(szText, GlobalText[2864]);
 		g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 		g_pDoppelGangerWindow->LockEnterButton(TRUE);
 		break;
-	case 3:		// 카오유저는 입장할 수 없다.
+	case 3:
 		unicode::_sprintf(szText, GlobalText[2865]);
 		g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 		g_pDoppelGangerWindow->LockEnterButton(TRUE);
 		break;
-	case 4:		// 변신반지를 착용하고 입장할 수 없다.
+	case 4:
 		g_pDoppelGangerWindow->LockEnterButton(FALSE);
 		break;
 #ifdef KJH_MOD_ENTER_EVENTMAP_ERROR_MSG
-	case 5:		// 150레벨 이하
+	case 5:
 		{
 			CMsgBoxIGSCommon* pMsgBox = NULL;
 			char szText[256];
-			sprintf(szText, GlobalText[1123], 150);			// "레벨 150이상부터 이용할 수 있습니다."
+			sprintf(szText, GlobalText[1123], 150);
 			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
 			pMsgBox->Initialize(GlobalText[3028], szText);
 		}break;
@@ -14705,18 +13335,14 @@ bool ReceiveDoppelGangerState(BYTE* ReceiveBuffer)
 
 	switch(Data->btDoppelgangerState)
 	{
-	case 0:		// wait
-		// 사용안함
+	case 0:
 		break;
 	case 1:		// wait->ready
-		// 사용안함
 		break;
 	case 2:		// ready->play
 		{
-			// UI 출력
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_DOPPELGANGER_FRAME);
 
-			// 안내 메시지
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2763], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
@@ -14727,7 +13353,6 @@ bool ReceiveDoppelGangerState(BYTE* ReceiveBuffer)
 		}
 		break;
 	case 3:		// play->end
-		// 사용안함
 		break;
 	}
 
@@ -14740,10 +13365,10 @@ bool ReceiveDoppelGangerIcewalkerState(BYTE* ReceiveBuffer)
 
 	switch(Data->btIceworkerState)
 	{
-	case 0:		// 출현
+	case 0:
 		g_pDoppelGangerFrame->SetIceWalkerMap(TRUE, (float)(22 - Data->btPosIndex) / 22.0f);
 		break;
-	case 1:		// 사라짐
+	case 1:
 		g_pDoppelGangerFrame->SetIceWalkerMap(FALSE, 0);
 		break;
 	}
@@ -14755,7 +13380,6 @@ bool ReceiveDoppelGangerTimePartyState(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_PLAY_INFO Data = (LPPMSG_DOPPELGANGER_PLAY_INFO)ReceiveBuffer;
 
-	// 시간 설정
 	g_pDoppelGangerFrame->SetRemainTime(Data->wRemainSec);
 	g_pDoppelGangerFrame->SetPartyMemberRcvd();
 	LPPMSG_DOPPELGANGER_USER_POS pUserPos = (LPPMSG_DOPPELGANGER_USER_POS)&Data->UserPosData;
@@ -14771,21 +13395,17 @@ bool ReceiveDoppelGangerResult(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_RESULT Data = (LPPMSG_DOPPELGANGER_RESULT)ReceiveBuffer;
 
-#ifdef YDG_MOD_DOPPELGANGER_END_SOUND
 	PlayBuffer(SOUND_CHAOS_END);
-#endif	// YDG_MOD_DOPPELGANGER_END_SOUND
 
 	g_pDoppelGangerFrame->StopTimer(TRUE);
 	g_pDoppelGangerFrame->EnabledDoppelGangerEvent(FALSE);
 
 	switch(Data->btResult)
 	{
-	case 0:		// 성공
+	case 0:
 		{
-			// 남은 시간을 0으로 설정한다
 			g_pDoppelGangerFrame->SetRemainTime(0);
 
-			// 성공 메시지
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2769], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
@@ -14798,17 +13418,15 @@ bool ReceiveDoppelGangerResult(BYTE* ReceiveBuffer)
 // 			pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_BOLD);
 		}
 		break;
-	case 1:		// 실패(죽어서실패_일반)
+	case 1:
 		{
-			// 실패 메시지1
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2766], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 		}
 		break;
-	case 2:		// 실패(방어실패)
+	case 2:
 		{
-			// 실패 메시지2
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2767], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
@@ -14825,7 +13443,6 @@ bool ReceiveDoppelGangerMonsterGoal(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_MONSTER_GOAL Data = (LPPMSG_DOPPELGANGER_MONSTER_GOAL)ReceiveBuffer;
 
-	// 도플갱어 들어온 몬스터 마리수 설정
 	g_pDoppelGangerFrame->SetMaxMonsters(Data->btMaxGoalCnt);
 	g_pDoppelGangerFrame->SetEnteredMonsters(Data->btGoalCnt);
 
@@ -14834,14 +13451,13 @@ bool ReceiveDoppelGangerMonsterGoal(BYTE* ReceiveBuffer)
 #endif	// YDG_ADD_DOPPELGANGER_PROTOCOLS
 
 #ifdef YDG_MOD_PROTECT_AUTO_V5
-// 오토 툴 사용 여부 응답
 bool ReceiveRequestCheckAutoTool(BYTE* ReceiveBuffer)
 {
 	LPPMSG_REQ_HACKTOOL_STATISTICS Data = (LPPMSG_REQ_HACKTOOL_STATISTICS)ReceiveBuffer;
 
 	Data->Filename[MAX_HACKTOOL_FILENAME_LENGTH - 1] = '\0';
 	BOOL bFindAutoTool = g_pProtectAuto->FindAutoTool(Data->Filename);
-	memset(Data->Filename, 0, MAX_HACKTOOL_FILENAME_LENGTH);	// 메모리에 남는것을 막기위해 지워버린다
+	memset(Data->Filename, 0, MAX_HACKTOOL_FILENAME_LENGTH);
 
 	SendRequestCheckAutoToolResult(Data->dwKey, (BYTE)bFindAutoTool);
 
@@ -14850,7 +13466,6 @@ bool ReceiveRequestCheckAutoTool(BYTE* ReceiveBuffer)
 #endif	// YDG_MOD_PROTECT_AUTO_V5
 
 #ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
-// 맵 이동 체크섬 값
 bool ReceiveMoveMapChecksum(BYTE* ReceiveBuffer)
 {
 	LPPMSG_MAPMOVE_CHECKSUM Data = (LPPMSG_MAPMOVE_CHECKSUM)ReceiveBuffer;
@@ -14860,18 +13475,17 @@ bool ReceiveMoveMapChecksum(BYTE* ReceiveBuffer)
 	return true;
 }
 
-// 맵 이동 결과
 bool ReceiveRequestMoveMap(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_MAPMOVE Data = (LPPMSG_ANS_MAPMOVE)ReceiveBuffer;
 
 	if (Data->btResult == 0)
 	{
-		// 이동 성공
+		
 	}
 	else
 	{
-		// 이동 실패
+		
 	}
 
 //	에러번호
@@ -14899,16 +13513,15 @@ bool ReceiveEnterEmpireGuardianEvent(BYTE* ReceiveBuffer)
 	
 	switch(Data->Result)
 	{
-	case 0:		// 0 : 성공
+	case 0:
 		{
 			g_pEmpireGuardianTimer->SetDay((int)Data->Day);
 			g_pEmpireGuardianTimer->SetZone((int)Data->Zone);
 			g_pEmpireGuardianTimer->SetRemainTime(Data->RemainTick);
 			
-			// 모든 날씨 생성은 g_EmpireGuardian1에서 처리함.
 			g_EmpireGuardian1.SetWeather((int)Data->Wheather);
 		}break;
-	case 1:		// 1 : 이미 게임 진행중
+	case 1:
 		{
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
@@ -14918,36 +13531,36 @@ bool ReceiveEnterEmpireGuardianEvent(BYTE* ReceiveBuffer)
 			sprintf(szText,GlobalText[2799], (Data->RemainTick / 60000) );
 			pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 		}break;
-	case 2:		// 2 : 퀘스트 아이템이 부족
+	case 2:
 		{
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2839], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 		}break;
-	case 3:		// 3 : 인원수 초과
+	case 3:
 		{
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2841], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 		}break;
-	case 4:		// 4 : 시간이 남아있음
+	case 4:
 		{
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2842], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 		}break;
-	case 5:		// 5 : 파티 상태일경우만 입장가능합니다.
+	case 5:
 		{
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2843], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 		}break;
 #ifdef KJH_MOD_ENTER_EVENTMAP_ERROR_MSG
-	case 6:		// 6: 150레벨 이상 이용가능
+	case 6:
 		{
 			CMsgBoxIGSCommon* pMsgBox = NULL;
 			char szText[256];
-			sprintf(szText, GlobalText[1123], 150);			// "레벨 150이상부터 이용할 수 있습니다."
+			sprintf(szText, GlobalText[1123], 150);
 			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
 			pMsgBox->Initialize(GlobalText[3028], szText);
 		}break;
@@ -14982,19 +13595,15 @@ bool ReceiveResultEmpireGuardian(BYTE* ReceiveBuffer)
 	
 	switch(Data->Result)
 	{
-	case 0: //실패
+	case 0:
 		{
-			//제국 수호군 요세 공략에
-			//실패하였습니다.
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2803], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 			pMsgBox->AddMsg(GlobalText[2804], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 		}break;
-	case 1: //존 성공
+	case 1:
 		{
-			//제국 수호군 요새 %d차
-			//%d존 성공
 			int day = g_pEmpireGuardianTimer->GetDay();
 			int zone = g_pEmpireGuardianTimer->GetZone();
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
@@ -15005,11 +13614,8 @@ bool ReceiveResultEmpireGuardian(BYTE* ReceiveBuffer)
 			sprintf(szText,"%d%s",zone, GlobalText[2840]);
 			pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 		}break;
-	case 2: //맵 성공
+	case 2:
 		{
-			//제국 수호군 요새 %d차
-			//완료 하였습니다.
-			//보상 경험치 : %d
 			int day = g_pEmpireGuardianTimer->GetDay();
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
@@ -15031,186 +13637,14 @@ bool ReceiveResultEmpireGuardian(BYTE* ReceiveBuffer)
 }
 #endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 
-//////////////////////////////////////////////////////////////////////////
-// 클라이언트 - 서버간의 캐쉬샵 연동 프로토콜
-//////////////////////////////////////////////////////////////////////////
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-
-//----------------------------------------------------------------------------
-// 사용자의 캐쉬 포인트 정보 전달 (0xD2)(0x01)
-bool ReceiveIGS_CashPoint(BYTE* pReceiveBuffer)
-{
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 캐쉬샵 Open 결과 (0xD2)(0x02)
-bool ReceiveIGS_ShopOpenResult(BYTE* pReceiveBuffer)
-{
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 아이템 구매 결과 (0xD2)(0x03)
-bool ReceiveIGS_BuyItem(BYTE* pReceiveBuffer)
-{
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 아이템 선물 결과 (0xD2)(0x04)
-bool ReceiveIGS_SendItemGift(BYTE* pReceiveBuffer)
-{
-	
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 보관함 리스트 카운트 전달 (0xD2)(0x06)
-bool ReceiveIGS_StorageItemListCount(BYTE* pReceiveBuffer)
-{
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 보관함 리스트 전달 (0xD2)(0x0D)
-bool ReceiveIGS_StorageItemList(BYTE* pReceiveBuffer)
-{
-	
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 선물함 리스트 전달 (0xD2)(0x0E)
-bool ReceiveIGS_StorageGiftItemList(BYTE* pReceiveBuffer)
-{
-	
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 캐쉬선물 결과 (0xD2)(0x07)
-bool ReceiveIGS_SendCashGift(BYTE* pReceiveBuffer)
-{
-
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 해당 사용자가 상품의 구매/선물이 가능한지 확인 결과 (0xD2)(0x08)
-bool ReceiveIGS_PossibleBuy(BYTE* pReceiveBuffer)
-{
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 상품 잔여 개수 조회 결과 (0xD2)(0x09)
-bool ReceiveIGS_LeftCountItem(BYTE* pReceiveBuffer)
-{
-	return true;
-}
-
-#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// #ifndef
-//----------------------------------------------------------------------------
-// 보관함 아이템 버리기 결과 (0xD2)(0x0A)
-bool ReceiveIGS_DeleteStorageItem(BYTE* pReceiveBuffer)
-{
-	LPPMSG_CASHSHOP_STORAGE_ITEM_THROW_ANS Data = (LPPMSG_CASHSHOP_STORAGE_ITEM_THROW_ANS)pReceiveBuffer;
-
-	switch( (BYTE)Data->byResult)
-	{
-	case -2: // DB오류
-		{
-			CMsgBoxIGSCommon* pMsgBox = NULL;
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-			pMsgBox->Initialize(GlobalText[2935], GlobalText[2967]);
-		}
-		break;
-	case -1: // 오류
-		{
-			CMsgBoxIGSCommon* pMsgBox = NULL;
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-			pMsgBox->Initialize(GlobalText[2935], GlobalText[2966]);
-		}
-		break;
-	case 0: // 성공
-		{
-			CMsgBoxIGSCommon* pMsgBox = NULL;
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-			pMsgBox->Initialize(GlobalText[2933], GlobalText[2934]);
-
-			g_pInGameShop->DelStorageSelectedItem();		// 현재 선택된 보관함의 Item을 지운다.
-		}
-		break;
-	case 1: // 보관함 버리기 항목이 없음
-		{
-			CMsgBoxIGSCommon* pMsgBox = NULL;
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-			pMsgBox->Initialize(GlobalText[2935], GlobalText[2936]);
-		}
-		break;
-	default:	// 알 수 없는 에러
-		{
-			CMsgBoxIGSCommon* pMsgBox = NULL;
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-			pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);		
-		}
-		break;
-	}
-	
-	return true;
-}
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-
-//----------------------------------------------------------------------------
-// 보관함 아이템 사용 결과 (0xD2)(0x0B)
-bool ReceiveIGS_UseStorageItem(BYTE* pReceiveBuffer)
-{
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 스크립트 업데이트 (0xD2)(0x0C)
-bool ReceiveIGS_UpdateScript(BYTE* pReceiveBuffer)
-{
-
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 이벤트 아이템 리스트 카운트 (0xD2)(0x13)
-bool ReceiveIGS_EventItemlistCnt(BYTE* pReceiveBuffer)
-{
-
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 이벤트 아이템 리스트 (0xD2)(0x14)
-bool ReceiveIGS_EventItemlist(BYTE* pReceiveBuffer)
-{
-
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// 배너 버젼 업데이트 (0xD2)(0x15)
-bool ReceiveIGS_UpdateBanner(BYTE* pReceiveBuffer)
-{
-	return true;
-}
-
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #ifdef PBG_ADD_SECRETBUFF
 bool ReceiveFatigueTime(BYTE* pReceiveBuffer)
 {
 	LPPMSG_FATIGUEPERCENTAGE Data = (LPPMSG_FATIGUEPERCENTAGE)pReceiveBuffer;
 
-	// 피로도 퍼센테이지를 서버로 받는다 1단위로->100%
 	if(g_FatigueTimeSystem->SetFatiguePercentage(Data->btFatiguePercentage))
 	{
-		// 피로도 시스템을 적용하는 서버임
 		g_FatigueTimeSystem->SetIsFatigueSystem(true);
 #ifdef PBG_MOD_STAMINA_UI
 		g_pNewUIStamina->SetCaution(Data->btFatiguePercentage);
@@ -15225,10 +13659,6 @@ bool ReceiveFatigueTime(BYTE* pReceiveBuffer)
 #endif //PBG_ADD_SECRETBUFF
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-//----------------------------------------------------------------------------
-// 인벤 아이템 장착 결과 수신 (0xBF)(0x20)
-// Data->btResult: 254 - 장착, 255 - 해제
-//----------------------------------------------------------------------------
 bool ReceiveEquippingInventoryItem(BYTE* pReceiveBuffer)
 {
 	LPPMSG_ANS_INVENTORY_EQUIPMENT_ITEM Data = (LPPMSG_ANS_INVENTORY_EQUIPMENT_ITEM)pReceiveBuffer;
@@ -15237,14 +13667,12 @@ bool ReceiveEquippingInventoryItem(BYTE* pReceiveBuffer)
 	int iItemPos = (int)Data->btItemPos;
 	iItemPos -= MAX_EQUIPMENT_INDEX;
 	
-	// 정상적인 값(254-장착, 255-해제)이 아니면 return false
 	if (!(iResult == 254 || iResult == 255))
 		return false;
-	// 비정상적이 아이템의 위치 
+
 	if (iItemPos < 0 || iItemPos >= MAX_INVENTORY)
 		return false;
 	
-	// 사용중인 아이템의 내구도 254, 장착해제중인 아이템 255
 	ITEM* pItem = g_pMyInventory->FindItem(iItemPos);
 	pItem->Durability = iResult;
 	
@@ -15258,8 +13686,7 @@ bool ReceiveEquippingInventoryItem(BYTE* pReceiveBuffer)
 
 
 #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-//----------------------------------------------------------------------------
-// 기간제 아이템 리스트 카운트 (0xD2)(0x11)
+
 bool ReceivePeriodItemListCount(BYTE* pReceiveBuffer)
 {
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -15275,11 +13702,11 @@ bool ReceivePeriodItemList(BYTE* pReceiveBuffer)
 {
 	LPPMSG_PERIODITEMEX_ITEMLIST Data = (LPPMSG_PERIODITEMEX_ITEMLIST)pReceiveBuffer;
 
-	if(Data->wItemSlotIndex < MAX_EQUIPMENT_INDEX)		//. 착용
+	if(Data->wItemSlotIndex < MAX_EQUIPMENT_INDEX)
 	{
 		CharacterMachine->Equipment[Data->wItemSlotIndex].lExpireTime = (long)Data->lExpireDate;
 	}
-	else	// 인벤
+	else
 	{
 		ITEM* pItem = g_pMyInventory->FindItem(Data->wItemSlotIndex-MAX_EQUIPMENT_INDEX);
 
@@ -15487,18 +13914,18 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				case 0x11:
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ONLY_OVER_15);
 					break;
-#ifdef LEM_ADD_GAMECHU	// 게임츄 로그인 시도시 잘못된 정보로 인한 접속 실패 오류.
+#ifdef LEM_ADD_GAMECHU
 				case 0x12:
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CONNECT);
 					break;
 #endif // LEM_ADD_GAMECHU
 #ifdef ASG_ADD_CHARGED_CHANNEL_TICKET
-				case 0x40:	// 유료채널 입장 불가.(글로벌 전용)
+				case 0x40:
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL);
 					break;
 #endif	// ASG_ADD_CHARGED_CHANNEL_TICKET
 				case 0xc0:
-				case 0xd0:	// 대만 전용
+				case 0xd0:
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_POINT_DATE);
 					break;
 				case 0xc1:
@@ -15510,29 +13937,29 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_INVALID_IP);
 					break;
 #ifdef ADD_EXPERIENCE_SERVER
-				case 0xb0:	// PC방에서만 접속 가능.
+				case 0xb0:
 					CUIMng::Instance().PopUpMsgWin(MESSAGE_PCROOM_POSSIBLE);
 					break;
 #endif	// ADD_EXPERIENCE_SERVER
 #ifdef LJH_ADD_ONETIME_PASSWORD
-				//(0xF1 / 0x01, 0xA0): OTP 등록 유저
+				//(0xF1 / 0x01, 0xA0): OTP
 				case 0xA0:
 					ShowOTPInputWin();
 					break;
-				//(0xF1 / 0x01, 0xA1): OTP 미등록 유저
+				//(0xF1 / 0x01, 0xA1): OTP
 				case 0xA1:	
 					g_ErrorReport.Write( "this user not register OPT yet.");
 					g_ErrorReport.WriteCurrentTime();
 					CUIMng::Instance().PopUpMsgWin(MESSAGE_OTP_NOT_REGISTERED);
 					break;
-				//(0xF1 / 0x01, 0xA2): OTP 불일치
+				//(0xF1 / 0x01, 0xA2)
 				case 0xA2:	
 					g_ErrorReport.Write( "Incorrect OneTime Password.");
 					g_ErrorReport.WriteCurrentTime();
 					CUIMng::Instance().PopUpMsgWin(MESSAGE_OTP_INCORRECT);
 					break;
-				//(0xF1 / 0x01, 0xA3): 비정상적인 byOTPBtnType값을 보냈다는 서버의 응답  
-				//(0xF1 / 0x01, 0xA4): 유효기간이 지난 OneTime Password
+				//(0xF1 / 0x01, 0xA3):  
+				//(0xF1 / 0x01, 0xA4):
 				case 0xA3:
 				case 0xA4:
 					g_ErrorReport.Write( "Invalid information received.");
@@ -15589,9 +14016,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				subcode = Data->SubCode;
 			}
 			
-#ifdef CONSOLE_DEBUG
-			g_ConsoleDebug->Write(MCD_RECEIVE, "[0xF3][0x%02x]", subcode);
-#endif // CONSOLE_DEBUG
+			g_ConsoleDebug->Write(MCD_RECEIVE, "Recv [0xF3][0x%02x]", subcode);
 			
 			switch( subcode )
 			{
@@ -15649,24 +14074,24 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			case 0x20:
                 ReceiveSummonLife(ReceiveBuffer);
 				break;
-			case 0x22://남은시간
+			case 0x22:
                 ReceiveWTTimeLeft(ReceiveBuffer);
 				break;
 				
-			case 0x24://매치 결과
+			case 0x24:
                 ReceiveWTMatchResult(ReceiveBuffer);
 				break;
 				
-			case 0x25://배틀사커 골인
+			case 0x25:
 				ReceiveWTBattleSoccerGoalIn(ReceiveBuffer);
 				break;
-			case 0x23://점수
+			case 0x23:
                 ReceiveSoccerScore(ReceiveBuffer);
 				break;
-            case 0x30://마법 핫키
+            case 0x30:
                 ReceiveOption(ReceiveBuffer);
                 break;
-			case 0x40:// 서버에서 클라이언트로의 명령어
+			case 0x40:
 				ReceiveServerCommand(ReceiveBuffer);
 				break;
 			case 0x50:
@@ -15725,14 +14150,14 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x02://chat whisper
         ReceiveChatWhisper(ReceiveBuffer);
 		break;
-	case 0x03: // 체크섬 요청
+	case 0x03:
 		ReceiveCheckSumRequest( ReceiveBuffer);
 		break;
-	case 0x0B://
+	case 0x0B:
         AddDebugText(ReceiveBuffer,Size);
         ReceiveEvent(ReceiveBuffer);
 		break;
-	case 0x0C://
+	case 0x0C:
         //AddDebugText(ReceiveBuffer,Size);
         ReceiveChatWhisperResult(ReceiveBuffer);
 		break;
@@ -15937,7 +14362,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
     case 0x44:
         ReceivePartyInfo(ReceiveBuffer);
         break;
-    case 0x46:  //  속성 변경.
+    case 0x46:
         ReceiveSetAttribute(ReceiveBuffer);
         break;
     case 0x47:
@@ -15991,13 +14416,13 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x64:
         ReceiveGuildWarScore(ReceiveBuffer);
 		break;
-	case 0xE1:	// 길드직책을 임명/변경/해제 결과
+	case 0xE1:
 		ReceiveGuildAssign(ReceiveBuffer);
 		break;
-	case 0xE5:	// 길드관계 요청  
+	case 0xE5:
 		ReceiveGuildRelationShip(ReceiveBuffer);
 		break;
-	case 0xE6:	// 길드관계 요청결과  
+	case 0xE6: 
 		ReceiveGuildRelationShipResult(ReceiveBuffer);
 		break;
 	case 0xEB:
@@ -16005,16 +14430,16 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 			switch(Data->SubCode)
 			{
-			case 0x01:	// 연합길드 방출
+			case 0x01:
 				ReceiveBanUnionGuildResult(ReceiveBuffer);
 				break;
 			}
 		}
 		break;
-	case 0x67:	// 길드연합정보 변경  
+	case 0x67: 
 		ReceiveUnionViewportNotify(ReceiveBuffer);
 		break;
-	case 0xE9:	// 연합리스트  
+	case 0xE9:  
 		ReceiveUnionList(ReceiveBuffer);
 		break;
 	case 0xBC:
@@ -16031,7 +14456,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 		}
 		break;		
-    case 0x68:  //  임시 뷰포트 처리.
+    case 0x68:
         ReceivePreviewPort ( ReceiveBuffer );
         break;
 		
@@ -16109,45 +14534,45 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x93:
 		ReceiveDevilSquareRank(ReceiveBuffer);
 		break;
-	case 0x9A://    ...
+	case 0x9A:
 		ReceiveMoveToEventMatchResult(ReceiveBuffer);
 		break;
-    case 0x9B://    이벤트 게임 명령을 받는다.
+    case 0x9B:
         ReceiveMatchGameCommand ( ReceiveBuffer );
         break;
-    case 0x94://    이벤트칩 정보를 받는다.
+    case 0x94:
         ReceiveEventChipInfomation(ReceiveBuffer);
         break;
-    case 0x95://    이벤트칩수.
+    case 0x95:
         ReceiveEventChip(ReceiveBuffer);
         break;
-    case 0x96://    뮤토 번호.
+    case 0x96:
         ReceiveMutoNumber(ReceiveBuffer);
         break;
-	case 0x99:	// 서버 분할 결과
+	case 0x99:
 		ReceiveServerImmigration(ReceiveBuffer);
 		break;
 #ifdef SCRATCH_TICKET
-	case 0x9D:	//	복권 당첨 상품.
+	case 0x9D:
 		ReceiveScratchResult( ReceiveBuffer );
 		break;
 #endif
-	case 0x9E:	//	서버 제공 사운드
+	case 0x9E:
 		ReceivePlaySoundEffect( ReceiveBuffer );
 		break;
-    case 0x9F:  //  이벤트 사용횟수.
+    case 0x9F:
         ReceiveEventCount ( ReceiveBuffer );
         break;
-    case 0xA0://    퀘스트 리스트를 받는다.
+    case 0xA0:
         ReceiveQuestHistory ( ReceiveBuffer );
         break;
-    case 0xA1://    특정 퀘스트 상태 정보를 받는다.
+    case 0xA1:
         ReceiveQuestState ( ReceiveBuffer );
         break;
-    case 0xA2://    특정 퀘스트의 결과를 받는다.    
+    case 0xA2:   
         ReceiveQuestResult ( ReceiveBuffer );
         break;
-    case 0xA3://    퀘스트의 보상를 받는다.
+    case 0xA3:
         ReceiveQuestPrize ( ReceiveBuffer );
         break;
 	case 0xA4:
@@ -16161,40 +14586,40 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			{
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
 			case 0x00:
-				ReceiveQuestLimitResult(ReceiveBuffer);		// 서버로 부터 퀘스트 제한 시 응답.
+				ReceiveQuestLimitResult(ReceiveBuffer);
 				break;
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 			case 0x03:
-				ReceiveQuestByEtcEPList(ReceiveBuffer);		// 기타 상황의 퀘스트 EP(에피소드)리스트를  .
+				ReceiveQuestByEtcEPList(ReceiveBuffer);
 				break;
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
 			case 0x04:
-				ReceiveQuestByItemUseEP(ReceiveBuffer);		// 퀘스트 아이템 사용에 의한 EP(에피소드)를  .
+				ReceiveQuestByItemUseEP(ReceiveBuffer);
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 			case 0x0A:
-				ReceiveQuestByNPCEPList(ReceiveBuffer);		// NPC에 의한 EP(에피소드)리스트를  .
+				ReceiveQuestByNPCEPList(ReceiveBuffer);
 				break;
 			case 0x0B:
-				ReceiveQuestQSSelSentence(ReceiveBuffer);	// 선택문이 있는 QS(퀘스트 상태)를  
+				ReceiveQuestQSSelSentence(ReceiveBuffer);
 				break;
 			case 0x0C:
-				ReceiveQuestQSRequestReward(ReceiveBuffer);	// 요구, 보상이 있는 QS(퀘스트 상태)를  .
+				ReceiveQuestQSRequestReward(ReceiveBuffer);
 				break;
 			case 0x0D:
-				ReceiveQuestCompleteResult(ReceiveBuffer);	// 요구, 보상 결과를  .
+				ReceiveQuestCompleteResult(ReceiveBuffer);
 				break;
 			case 0x0F:
-				ReceiveQuestGiveUp(ReceiveBuffer);			// 퀘스트 포기했음을 응답  .
+				ReceiveQuestGiveUp(ReceiveBuffer);
 				break;
 			case 0x1A:
-				ReceiveProgressQuestList(ReceiveBuffer);	// 진행 중인 퀘스트 리스트를  .
+				ReceiveProgressQuestList(ReceiveBuffer);
 				break;
 			case 0x1B:
-				ReceiveProgressQuestRequestReward(ReceiveBuffer);// 진행중인 퀘스트 리스트에서 특정 퀘스트의 요구, 보상 정보를  .
+				ReceiveProgressQuestRequestReward(ReceiveBuffer);
 				break;
 #ifdef ASG_FIX_QUEST_PROTOCOL_ADD
 			case 0x20:
-				ReceiveProgressQuestListReady(ReceiveBuffer);	// 진행 중인 퀘스트 리스트를 줄 준비가 됨.
+				ReceiveProgressQuestListReady(ReceiveBuffer);
 				break;
 #endif	// ASG_FIX_QUEST_PROTOCOL_ADD
 			}
@@ -16221,20 +14646,20 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			switch (bySubcode)
 			{
 			case 0x02:
-				ReceiveGensJoining(ReceiveBuffer);			// 겐스 가입 요청 응답. 
+				ReceiveGensJoining(ReceiveBuffer);
 				break;
 			case 0x04:
-				ReceiveGensSecession(ReceiveBuffer);		// 겐스 탈퇴 요청 응답. 
+				ReceiveGensSecession(ReceiveBuffer);
 				break;
 			case 0x07:
-				ReceivePlayerGensInfluence(ReceiveBuffer);	// 플래이어의 겐스 세력 정보  .
+				ReceivePlayerGensInfluence(ReceiveBuffer);
 				break;
 			case 0x05:
-				ReceiveOtherPlayerGensInfluenceViewport(ReceiveBuffer);	// 뷰포트 안의 다른 플래이어의 겐스 세력 정보  .
+				ReceiveOtherPlayerGensInfluenceViewport(ReceiveBuffer);
 				break;
 #ifdef PBG_ADD_GENSRANKING
 			case 0x0A:
-				ReceiveReward(ReceiveBuffer);				// 보상받기 요청 응답
+				ReceiveReward(ReceiveBuffer);
 				break;
 #endif //PBG_ADD_GENSRANKING
 			}
@@ -16248,7 +14673,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			switch (Data->SubCode)
 			{
 			case 0x01:
-				ReceiveNPCDlgUIStart(ReceiveBuffer);		// NPC UI가 대화로 진행되는 NPC 클릭 때 응답  . 
+				ReceiveNPCDlgUIStart(ReceiveBuffer); 
 				break;
 			}
 		}
@@ -16273,43 +14698,43 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 			switch ( Data->SubCode )
 			{
-			case 0x01:	// 결투요청 결과
+			case 0x01:
 				ReceiveDuelStart( ReceiveBuffer );
 				break;
-			case 0x02:	// 결투요청
+			case 0x02:
 				ReceiveDuelRequest( ReceiveBuffer );
 				break;
-			case 0x03:	// 결투종료
+			case 0x03:
 				ReceiveDuelEnd( ReceiveBuffer );
 				break;
-			case 0x04:	// 결투자 점수 정보
+			case 0x04:
 				ReceiveDuelScore( ReceiveBuffer );
 				break;
-			case 0x05:	// 결투자 생명 정보
+			case 0x05:
 				ReceiveDuelHP( ReceiveBuffer );
 				break;
-			case 0x06:	// 결투 채널(관전) 리스트
+			case 0x06:
 				ReceiveDuelChannelList( ReceiveBuffer );
 				break;
-			case 0x07:	// 채널(관전) 요청
+			case 0x07:
 				ReceiveDuelWatchRequestReply( ReceiveBuffer );
 				break;
-			case 0x08:	// 채널(관전) 입장한 관전자
+			case 0x08:
 				ReceiveDuelWatcherJoin( ReceiveBuffer );
 				break;
-			case 0x09:	// 채널(관전) 종료
+			case 0x09:
 				ReceiveDuelWatchEnd( ReceiveBuffer );
 				break;
-			case 0x0A:	// 채널(관전) 떠난 관전자
+			case 0x0A:
 				ReceiveDuelWatcherQuit( ReceiveBuffer );
 				break;
-			case 0x0B:	// 관전자 리스트(All)
+			case 0x0B:
 				ReceiveDuelWatcherList( ReceiveBuffer );
 				break;
-			case 0x0C:	// 결투결과 정보
+			case 0x0C:
 				ReceiveDuelResult( ReceiveBuffer );
 				break;
-			case 0x0D:	// 라운드 시작/끝 알림
+			case 0x0D:
 				ReceiveDuelRound( ReceiveBuffer );
 				break;
 			}
@@ -16452,43 +14877,43 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 			switch( subcode )
 			{
-			case 0x00:	// 공성 정보
+			case 0x00:
 				ReceiveBCStatus( ReceiveBuffer );
 				break;
-			case 0x01:	// 공성 등록결과
+			case 0x01:
 				ReceiveBCReg( ReceiveBuffer );
 				break;
-			case 0x02:	// 공성 포기결과
+			case 0x02:
 				ReceiveBCGiveUp( ReceiveBuffer );
 				break;
-			case 0x03:	// 공성 등록정보
+			case 0x03:
 				ReceiveBCRegInfo( ReceiveBuffer );
 				break;
-			case 0x04:	// 표식 등록결과
+			case 0x04:
 				ReceiveBCRegMark( ReceiveBuffer );
 				break;
-			case 0x05:	// 수성측 NPC 구매
+			case 0x05:
 				ReceiveBCNPCBuy( ReceiveBuffer );
 				break;
-			case 0x06:	// 수성측 NPC 수리
+			case 0x06:
 				ReceiveBCNPCRepair( ReceiveBuffer );
 				break;
-			case 0x07:	// 수성측 NPC 강화
+			case 0x07:
 				ReceiveBCNPCUpgrade( ReceiveBuffer );
 				break;
-			case 0x08:	// 현재 성의 자금, 세금 정보 요청 응답 (0xC1)
+			case 0x08:
 				ReceiveBCGetTaxInfo( ReceiveBuffer );
 				break;
-			case 0x09:	// 현재 성의 세율 변경 요청 응답 (0xC1)
+			case 0x09:
 				ReceiveBCChangeTaxRate( ReceiveBuffer );
 				break;
-			case 0x10:	// 현재 성의 자금 출금 요청 응답 (0xC1)
+			case 0x10:
 				ReceiveBCWithdraw( ReceiveBuffer );
 				break;
-			case 0x1A:	// 세율 변경
+			case 0x1A:
 				ReceiveTaxInfo( ReceiveBuffer );
 				break;
-            case 0x1F:  //  문지기 입장요금.
+            case 0x1F:
                 ReceiveHuntZoneEnter( ReceiveBuffer );
                 break;
 				
@@ -16547,19 +14972,19 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 		}
 		break;
 		
-	case 0xB3:	// 수성 NPC 목록
+	case 0xB3:
 		ReceiveBCNPCList( ReceiveBuffer );
 		break;
-	case 0xB4:	// 공성 등록 길드 목록
+	case 0xB4:
 		ReceiveBCDeclareGuildList( ReceiveBuffer );
 		break;
-	case 0xB5:	// 공성 확정 길드 목록
+	case 0xB5:
 		ReceiveBCGuildList( ReceiveBuffer );
 		break;
-    case 0xB6:  //  길드원들의 위치 정보를 알아낸다.
+    case 0xB6:
         ReceiveGuildMemberLocation ( ReceiveBuffer );
         break;
-    case 0xBB:  //  맵에 존재하는 NPC정보를 알아낸다.
+    case 0xBB:
         ReceiveGuildNpcLocation ( ReceiveBuffer );
         break;
     case 0xB7:
@@ -16596,7 +15021,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
         }
         break;
 		
-    case 0xB8:  //  배틀마스터 스킬.
+    case 0xB8:
         {
 			int subcode;
 			if( ReceiveBuffer[0] == 0xC1 )
@@ -16673,16 +15098,16 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			switch(subcode)
 			{
 			case 0x00:
-				ReceiveCrywolfInfo(ReceiveBuffer);  // 크라이울프 맵 상태를 받는다.
+				ReceiveCrywolfInfo(ReceiveBuffer); 
 				break;
 			case 0x02:
-				ReceiveCrywolStateAltarfInfo(ReceiveBuffer);  // 크라이울프 석상 방어막, 제단 상태를 받는다.
+				ReceiveCrywolStateAltarfInfo(ReceiveBuffer);
 				break;
 			case 0x03:
-				ReceiveCrywolfAltarContract(ReceiveBuffer);  // 제단 등록 결과를 받는다.
+				ReceiveCrywolfAltarContract(ReceiveBuffer);
 				break;
 			case 0x04:
-				ReceiveCrywolfLifeTime(ReceiveBuffer);  // 크라이울프 진행 시간에 대한 정보를 받는다.
+				ReceiveCrywolfLifeTime(ReceiveBuffer);
 				break;
 			case 0x0C:
 				ReceiveCrywolfTankerHit(ReceiveBuffer);
@@ -16702,40 +15127,40 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 			break;
 		}
-	case 0xC0:	// 친구 리스트를 받는다.
+	case 0xC0:
 		ReceiveFriendList(ReceiveBuffer);
 		break;
-	case 0xC1:	// 친구 등록 요청 결과를 받는다. (등록한 사람)
+	case 0xC1:
 		ReceiveAddFriendResult(ReceiveBuffer);
 		break;
-	case 0xC2:	// 친구 등록 요청을 받는다. (등록 받은 사람)
+	case 0xC2:
 		ReceiveRequestAcceptAddFriend(ReceiveBuffer);
 		break;
-	case 0xC3:	// 친구 삭제 요청 결과를 받는다.
+	case 0xC3:
 		ReceiveDeleteFriendResult(ReceiveBuffer);
 		break;
-	case 0xC4:	// 친구 친구 상태 변화를 받는다.
+	case 0xC4:
 		ReceiveFriendStateChange(ReceiveBuffer);
 		break;
-	case 0xC5:	// 편지 보낸 결과 받기
+	case 0xC5:
 		ReceiveLetterSendResult(ReceiveBuffer);
 		break;
-	case 0xC6:	// 편지 받기
+	case 0xC6:
 		ReceiveLetter(ReceiveBuffer);
 		break;
-	case 0xC7:	// 편지 내용 받기
+	case 0xC7:
 		ReceiveLetterText(ReceiveBuffer);
 		break;
-	case 0xC8:	// 편지 삭제 결과 받기
+	case 0xC8:
 		ReceiveLetterDeleteResult(ReceiveBuffer);
 		break;
-	case 0xCA:	// 대화방 개설 요청 결과 받기
+	case 0xCA:
 		ReceiveCreateChatRoomResult(ReceiveBuffer);
 		break;
-	case 0xCB:	// 초대 결과 받기
+	case 0xCB:
 		ReceiveChatRoomInviteResult(ReceiveBuffer);
 		break;
-	case 0x2D:	// 모든 버프의 시작과 종료를 알려준다.( 히어로 캐릭터 )
+	case 0x2D:
 		ReceiveBuffState(ReceiveBuffer);
 		break;
 	case 0xD1:
@@ -16753,47 +15178,47 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 			switch(subcode)
 			{
-			case 0x00:		// 칸투르 보스전의 현재 상태 정보 요청에 대한 응답
+			case 0x00:
 				ReceiveKanturu3rdStateInfo(ReceiveBuffer);
 				break;
-			case 0x01:		// 칸투르 보스전 전투맵 입장 요청에 대한 응답
+			case 0x01:
 				ReceiveKanturu3rdEnterBossMap(ReceiveBuffer);
 				break;
-			case 0x02:		// 칸투르 보스전 상태와 그에 따른 연출 관련 상태 정보(맵에 처음 들어갈때 만)
+			case 0x02:
 				ReceiveKanturu3rdCurrentState(ReceiveBuffer);
 				break;
-			case 0x03:		// 칸투르 보스전 상태와 그에 따른 연출 관련 상태 정보
+			case 0x03:
 				ReceiveKanturu3rdState(ReceiveBuffer);
 				break;
-			case 0x04:		// 칸투르 보스전 전투 성공,실패 결과 정보
+			case 0x04:
 				ReceiveKanturu3rdResult(ReceiveBuffer);
 				break;
-			case 0x05:		// 칸투르 전투 제한 시간
+			case 0x05:
 				ReceiveKanturu3rdTimer(ReceiveBuffer);
 				break;
-			case 0x06:		// 칸투르 마야 전체 스킬 정보
+			case 0x06:
 				RecevieKanturu3rdMayaSKill(ReceiveBuffer);
 				break;
-			case 0x07:		// 칸투르 남은 인원 과 몬스터 수 표시
+			case 0x07:
 				RecevieKanturu3rdLeftUserandMonsterCount(ReceiveBuffer);
 				break;
 #ifdef CSK_RAKLION_BOSS
-			case 0x10:		// 유저의 라클리온 보스전의 현재 상태 정보 요청에 대한 응답
+			case 0x10:
 				ReceiveRaklionStateInfo(ReceiveBuffer);
 				break;
-			case 0x11:		// 유저가 라클리온 보스전 전투맵에 입장했을 때 현재 상태를 보낸다.
+			case 0x11:
 				ReceiveRaklionCurrentState(ReceiveBuffer);
 				break;
-			case 0x12:		// 라클리온 보스전 도중 상태가 변했을 때 상태값을 알린다.
+			case 0x12:
 				RecevieRaklionStateChange(ReceiveBuffer);
 				break;
-			case 0x13:		// 라클리온 보스전 전투 성공 / 실패
+			case 0x13:
 				RecevieRaklionBattleResult(ReceiveBuffer);
 				break;
-			case 0x14:		// 라클리온 보스전 광역 공격( 세루판 스킬 사용 )
+			case 0x14:
 				RecevieRaklionWideAreaAttack(ReceiveBuffer);
 				break;
-			case 0x15:		// 라클리온 입장 유저&몬스터 수 디스플레이
+			case 0x15:
 				RecevieRaklionUserMonsterCount(ReceiveBuffer);
 				break;	
 #endif // CSK_RAKLION_BOSS
@@ -16878,13 +15303,10 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				ReceiveChainMagic( ReceiveBuffer );
 				break;
 #ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-				//행운의 동전 프로토콜
 			case 0x0B:
-				//등록된 동전갯수
 				ReceiveRegistedLuckyCoin(ReceiveBuffer);
 				break;
 			case 0x0C:
-			//등록동전
 				ReceiveRegistLuckyCoin(ReceiveBuffer);
 				break;
 			case 0x0D:
@@ -16893,30 +15315,30 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				break;
 #endif //KJH_PBG_ADD_SEVEN_EVENT_2008
 #ifdef YDG_ADD_DOPPELGANGER_PROTOCOLS
-			case 0x0E:	// 도플갱어맵 입장 요청 결과
+			case 0x0E:
 				ReceiveEnterDoppelGangerEvent(ReceiveBuffer);
 				break;
-			case 0x0F:	// 도플갱어 선두 몬스터 위치
+			case 0x0F:
 				ReceiveDoppelGangerMonsterPosition(ReceiveBuffer);
 				break;
-			case 0x10:	// 도플갱어의 상태 전송
+			case 0x10:
 				ReceiveDoppelGangerState(ReceiveBuffer);
 				break;
-			case 0x11:	// 도플갱어의 아이스워커의 상태 전송
+			case 0x11:
 				ReceiveDoppelGangerIcewalkerState(ReceiveBuffer);
 				break;
-			case 0x12:	// 도플갱어의 진행 상태 / 시간 정보 / 파티 위치정보
+			case 0x12:
 				ReceiveDoppelGangerTimePartyState(ReceiveBuffer);
 				break;
-			case 0x13:	// 도플갱어의 결과
+			case 0x13:
 				ReceiveDoppelGangerResult(ReceiveBuffer);
 				break;
-			case 0x14:	// 도플갱어의 결과
+			case 0x14:
 				ReceiveDoppelGangerMonsterGoal(ReceiveBuffer);
 				break;
 #endif	// YDG_ADD_DOPPELGANGER_PROTOCOLS
 #ifdef PBG_ADD_SECRETBUFF
-			case 0x15:	// 피로도 퍼센트
+			case 0x15:
 				ReceiveFatigueTime(ReceiveBuffer);
 				break;
 #endif //PBG_ADD_SECRETBUFF
@@ -16946,9 +15368,9 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 					switch( subcode )
 					{
 #ifdef PBG_ADD_CHARACTERCARD
-					case 0x00: ReceiveCharacterCard_New( ReceiveBuffer );	//소환/마검/다크
+					case 0x00: ReceiveCharacterCard_New( ReceiveBuffer );
 						break;
-#else //PBG_ADD_CHARACTERCARD												//이하 해외 전용
+#else //PBG_ADD_CHARACTERCARD
 					case 0x00: ReceiveCharacterCard( ReceiveBuffer );			break;
 					case 0x01: ReceiveBuyCharacterCard( ReceiveBuffer );		break;
 #endif //PBG_ADD_CHARACTERCARD
@@ -16957,116 +15379,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				break;
 #endif //defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
 				
-#ifdef NEW_USER_INTERFACE_SERVERMESSAGE
-			case 0xF5:
-				{
-					int subcode = 0;
-					
-					if( ReceiveBuffer[0] == 0xC1 )
-					{
-						LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
-						subcode = Data->SubCode;
-					}
-					else
-					{
-						LPPHEADER_DEFAULT_SUBCODE_WORD Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer;
-						subcode = Data->SubCode;
-					}
-					
-					switch( subcode )
-					{
-//#if SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-//					case 0xA1: RecevieCashShopInOut( ReceiveBuffer );			break;
-//#else	// SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-					case 0x02:
-						{
-							RecevieCashShopInOut( ReceiveBuffer );
-						}
-						break;
-//#endif	// SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-					case 0x04: 
-						{
-							RecevieCashShopCashPoint( ReceiveBuffer );
-						}
-						break;
-					case 0x06:
-						{
-							RecevieCashShopItemlist( ReceiveBuffer );
-						}
-						break;
-					case 0x08: RecevieCashShopItemPurchase( ReceiveBuffer );	break;
-					}
-				}
-				break;
-#endif //NEW_USER_INTERFACE_SERVERMESSAGE
-#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-		case 0xD2:		// 인게임샵
-			{
-				PBMSG_HEADER2* Data = (PBMSG_HEADER2*)ReceiveBuffer;
-				switch(Data->m_bySubCode)
-				{
-				case 0x01:
-					ReceiveIGS_CashPoint(ReceiveBuffer);			// 캐시 포인트 결과
-					break;
-				case 0x02:
-					ReceiveIGS_ShopOpenResult(ReceiveBuffer);		// 샵 Open/Close 결과
-					break;
-				case 0x03:
-					ReceiveIGS_BuyItem(ReceiveBuffer);				// 아이템 구매결과	
-					break;
-				case 0x04:
-					ReceiveIGS_SendItemGift(ReceiveBuffer);			// 아이템 선물결과
-					break;
-				case 0x06:
-					ReceiveIGS_StorageItemListCount(ReceiveBuffer);		// 보관함 리스트 카운트 전달
-					break;
-				case 0x07:
-					ReceiveIGS_SendCashGift(ReceiveBuffer);			// 캐시선물 결과
-					break;
-				case 0x08:
-					ReceiveIGS_PossibleBuy(ReceiveBuffer);			// 아이템이 구매/가능한지 결과
-					break;
-				case 0x09:
-					ReceiveIGS_LeftCountItem(ReceiveBuffer);		// 상품잔여 조회갯수 결과
-					break;
-#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT					// #ifndef
-				case 0x0A:
-					ReceiveIGS_DeleteStorageItem(ReceiveBuffer);	// 아이템 버리기 결과
-					break;
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-				case 0x0B:
-					ReceiveIGS_UseStorageItem(ReceiveBuffer);		// 보관함 아이템 사용결과
-					break;
-				case 0x0C:
-					ReceiveIGS_UpdateScript(ReceiveBuffer);			// 스크립트 업데이트
-					break;
-				case 0x0D:
-					ReceiveIGS_StorageItemList(ReceiveBuffer);		// 보관함 리스트 전달
-					break;
-				case 0x0E:
-					ReceiveIGS_StorageGiftItemList(ReceiveBuffer);	// 선물함 리스트 전달
-					break;
-				case 0x13:
-					ReceiveIGS_EventItemlistCnt(ReceiveBuffer);		// 이벤트 아이템 리스트 카운트
-					break;
-				case 0x14:
-					ReceiveIGS_EventItemlist(ReceiveBuffer);		// 이벤트 아이템 리스트
-					break;
-				case 0x15:
-					ReceiveIGS_UpdateBanner(ReceiveBuffer);			// 배너 버젼 업데이트
-					break;
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-				case 0x11:
-					ReceivePeriodItemListCount(ReceiveBuffer);		// 기간제 아이템 리스트 카운트
-					break;	
-				case 0x12:
-					ReceivePeriodItemList(ReceiveBuffer);			// 기간제 아이템 리스트
-					break;
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
-				}
-			}break;
-
-#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		case 0x4A:
 			ReceiveStraightAttack(ReceiveBuffer, Size, bEncrypted);
@@ -17090,19 +15402,19 @@ void TranslateChattingProtocol(DWORD dwWindowUIID, int HeadCode, BYTE *ReceiveBu
 {
 	switch( HeadCode )
 	{
-	case 0x00:	// 방 접속 결과 받기
+	case 0x00:
 		ReceiveChatRoomConnectResult(dwWindowUIID, ReceiveBuffer);
 		break;
-	case 0x01:	// 다른 사람 상태 변화
+	case 0x01:
 		ReceiveChatRoomUserStateChange(dwWindowUIID, ReceiveBuffer);
 		break;
-	case 0x02:	// 유저리스트 받기
+	case 0x02:
 		ReceiveChatRoomUserList(dwWindowUIID, ReceiveBuffer);
 		break;
-	case 0x04:	// 채팅 대화 글 받기
+	case 0x04:
 		ReceiveChatRoomChatText(dwWindowUIID, ReceiveBuffer);
 		break;
-	case 0x0D:	// 공지사항
+	case 0x0D:
 		ReceiveChatRoomNoticeText(dwWindowUIID, ReceiveBuffer);
 		break;
 	default:
@@ -17112,17 +15424,6 @@ void TranslateChattingProtocol(DWORD dwWindowUIID, int HeadCode, BYTE *ReceiveBu
 
 bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )
 {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!! 경고 !!!!!!!!!!!!!!!!!!!!!!!!!!! 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!! 경고 !!!!!!!!!!!!!!!!!!!!!!!!!!! 
-	
-	// return false를 할 경우 buff는 등록 시키지 않는다.
-	// 근대 앞으로는 절대로 이렇게 만들지 말자.
-	// 이 부분들은 예전에 버프를 아껴서 쓰기 위함이다...절대로 여기에 추가 시켜서 작업을 하지 말자.
-	// 추가를 안 하더라도 충분히 다른 방법으로 가능하다.
-	
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!! 경고 !!!!!!!!!!!!!!!!!!!!!!!!!!! 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!! 경고 !!!!!!!!!!!!!!!!!!!!!!!!!!! 
-	
 	if( iserase )
 	{
 		switch(buff)
@@ -17179,10 +15480,8 @@ bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )
 			
 		case eBuff_SoulPotion:
 			{
-				// 제단일 경우만..
 				if(o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
 				{
-					// MVP일때  제단 계약 가능 상태
 					g_CharacterRegisterBuff(o, eBuff_CrywolfAltarEnable);
 					return false;
 				}
@@ -17191,10 +15490,8 @@ bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )
 			
 		case eBuff_CastleGateIsOpen:
 			{
-				// 제단일 경우만..
 				if(o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
 				{
-					// MVP일때  제단 계약 불능 상태
 					g_CharacterRegisterBuff(o, eBuff_CrywolfAltarDisable);
 					return false;
 				}
@@ -17203,10 +15500,8 @@ bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )
 			
 		case eBuff_CastleRegimentDefense:
 			{
-				// 제단일 경우만..
 				if(o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
 				{
-					// MVP일때  제단 계약 된 상태
 					g_CharacterRegisterBuff(o, eBuff_CrywolfAltarContracted);
 					return false;
 				}
@@ -17220,10 +15515,8 @@ bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )
 			
 		case eBuff_CastleRegimentAttack1:
 			{
-				// 제단일 경우만..
 				if(o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
 				{
-					// MVP일때  제단 계약 시도 상태
 					g_CharacterRegisterBuff(o, eBuff_CrywolfAltarAttempt );
 					return false;
 				}
@@ -17236,10 +15529,8 @@ bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )
 			
 		case eBuff_RemovalMagic:
 			{
-				// 제단일 경우만..
 				if(o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
 				{
-					// MVP일때  제단 점령 당한 상태
 					g_CharacterRegisterBuff(o, eBuff_CrywolfAltarOccufied);
 					return false;
 				}
@@ -17258,7 +15549,6 @@ bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )
 	}
 }
 
-// 논리적인 이펙트 처리는 여기서 다 해준다. 버프가 시작할때
 void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 {
 	if(o && o == &Hero->Object)
@@ -17271,10 +15561,8 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_Hellowin4:
 		case eBuff_Hellowin5:
 			{
-				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
 				
-				// 버프 정보 캐릭터에 갱신
 				if( buff == eBuff_Hellowin1 ) 
 				{
 					CharacterMachine->CalculateAttackSpeed();
@@ -17293,7 +15581,6 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_PcRoomSeal2:
 		case eBuff_PcRoomSeal3:
 			{
-				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
 			}
 			break;
@@ -17330,7 +15617,6 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_PartyExpBonus:
 #endif	// YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
 			{
-				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
 			}
 			break;
@@ -17345,22 +15631,26 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_Scroll_Strengthen:
 #endif //PSW_ADD_PC4_SCROLLITEM
 #ifdef YDG_ADD_HEALING_SCROLL
-		case eBuff_Scroll_Healing:	// 치유의 스크롤
+		case eBuff_Scroll_Healing:
 #endif	// YDG_ADD_HEALING_SCROLL
 			{
 				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
 				
-				if( buff == eBuff_EliteScroll1 ) { //  공격속도 계산.
+				if( buff == eBuff_EliteScroll1 ) 
+				{ 
 					CharacterMachine->CalculateAttackSpeed();
 				}
-				else if( buff == eBuff_EliteScroll2 ) { // 방어력 계산
+				else if( buff == eBuff_EliteScroll2 ) 
+				{
 					CharacterMachine->CalculateDefense();
 				}
-				else if( buff == eBuff_EliteScroll3 ) { // 공격력 계산
+				else if( buff == eBuff_EliteScroll3 ) 
+				{
 					CharacterMachine->CalculateDamage();
 				}
-				else if( buff == eBuff_EliteScroll4 ) { // 마력 계산
+				else if( buff == eBuff_EliteScroll4 ) 
+				{
 					CharacterMachine->CalculateMagicDamage();
 				}
 			}
@@ -17371,7 +15661,6 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_SecretPotion4:
 		case eBuff_SecretPotion5:
 			{
-				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
 				
 				CharacterMachine->CalculateAll();
@@ -17383,10 +15672,10 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_CherryBlossom_RiceCake:
 		case eBuff_CherryBlossom_Petal:
 			{
-				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
 				
-				if( buff == eBuff_CherryBlossom_Petal ) { // 공격력 계산
+				if( buff == eBuff_CherryBlossom_Petal ) 
+				{
 					CharacterMachine->CalculateDamage();
 				}
 			}
@@ -17398,13 +15687,13 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
 				
-				if( buff == eBuff_SwellOfMagicPower ) {		// 마력 계산
+				if( buff == eBuff_SwellOfMagicPower ) 
+				{
 					CharacterMachine->CalculateMagicDamage();
 				}
 			}break;
 #endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 #ifdef PBG_ADD_SANTABUFF
-			//산타버프관련.(해외 크리스마스 이벤트)
 		case eBuff_BlessingOfXmax:
 		case eBuff_CureOfSanta:
 		case eBuff_SafeGuardOfSanta:
@@ -17413,69 +15702,49 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_QuickOfSanta:
 		case eBuff_LuckOfSanta:
 			{
-				//버프시간설정.(30분)
 				g_RegisterBuffTime(buff, bufftime);
 
-#ifdef KJH_FIX_TALK_SANTATOWN_NPC
-				char _Temp[256] = {0,};
-#else // KJH_FIX_TALK_SANTATOWN_NPC
 				char _Temp[32] = {0,};
-#endif // KJH_FIX_TALK_SANTATOWN_NPC
-				//버프 공격력+방어력 향상
+
 				if(buff == eBuff_BlessingOfXmax)
 				{
-					// 2591 "공격력과 방어력이 향상 되었습니다."
 					g_pChatListBox->AddText("", GlobalText[2591], SEASON3B::TYPE_SYSTEM_MESSAGE);
-
-					//공격력향상
 					CharacterMachine->CalculateDamage();
-					//방어력향상
 					CharacterMachine->CalculateDefense();
 				}
 				else if(buff == eBuff_StrengthOfSanta)
 				{
-					// 2594 "공격력이 %d만큼 상승 되었습니다."
 					sprintf(_Temp, GlobalText[2594], 30);
 					g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
-					//공격력 향상+30
 					CharacterMachine->CalculateDamage();
 				}
 				else if(buff == eBuff_DefenseOfSanta)
 				{
-					// 2595 "방어력이 %d만큼 상승 되었습니다."
 					sprintf(_Temp, GlobalText[2595], 100);
 					g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
-					//방어력 향상+100
 					CharacterMachine->CalculateDefense();
 				}
 				else if(buff == eBuff_QuickOfSanta)
 				{
-					// 2598 "공격속도가 %d만큼 상승 되었습니다."
 					sprintf(_Temp, GlobalText[2598], 15);
 					g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
-					//공속증+15
 					CharacterMachine->CalculateAttackSpeed();
 				}
 				else if(buff == eBuff_LuckOfSanta)
 				{
-					// 2599 "AG회복속도가 %d만큼 증가 되었습니다."
 					sprintf(_Temp, GlobalText[2599], 10);
 					g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
-
-					//AG회복속도증 서버에서 받아서 처리한다.
 				}
 				else if(buff == eBuff_CureOfSanta)
 				{
-					// 2592 "최대 생명이 %d만큼 향상 되었습니다."
 					sprintf(_Temp, GlobalText[2592], 500);
 					g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				}
 				else if(buff == eBuff_SafeGuardOfSanta)
 				{
-					// 2593 "최대 마나가 %d 만큼 향상 되었습니다."
 					sprintf(_Temp, GlobalText[2593], 500);
 					g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				}
@@ -17483,11 +15752,9 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 			break;
 #endif //PBG_ADD_SANTABUFF
 #ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
-		case eBuff_DuelWatch:	// 관전 버프
+		case eBuff_DuelWatch:
 			{
-				// UI를 모두 닫는다.
 				g_pNewUISystem->HideAll();
-				// 메인프레임을 교체한다.
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_MAINFRAME);
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_BUFF_WINDOW);
 				g_pNewUISystem->Show(SEASON3B::INTERFACE_DUELWATCH_MAINFRAME);
@@ -17503,32 +15770,27 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 			break;
 #endif //PBG_ADD_HONOROFGLADIATORBUFFTIME
 #ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-		case eBuff_StrongCharm:			// 강함의 인장 (PC방 아이템)
+		case eBuff_StrongCharm:
 			{
 				g_RegisterBuffTime(buff, bufftime);
 
-				// 2591 "공격력과 방어력이 향상 되었습니다." // 2591, 2472
 				g_pChatListBox->AddText("", GlobalText[2591], SEASON3B::TYPE_SYSTEM_MESSAGE);
 				
-				//공격력향상
 				CharacterMachine->CalculateDamage();
-				//방어력향상
+
 				CharacterMachine->CalculateDefense();
 			}
 			break;
 #endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
 #ifdef PBG_ADD_SECRETBUFF
-		case eBuff_Vitality_Lowest:				// 활력의 비약(최하급/하급/중급/상급)
+		case eBuff_Vitality_Lowest:
 		case eBuff_Vitality_Low:
 		case eBuff_Vitality_Middle:
 		case eBuff_Vitality_High:
-		case eDeBuff_Fatigue_FirstPenalty:		// 피로도 디버프1
-		case eDeBuff_Fatigue_SecondPenalty:		// 피로도 디버프2
+		case eDeBuff_Fatigue_FirstPenalty:
+		case eDeBuff_Fatigue_SecondPenalty:
 			{
-				// 활력의 버프가 설정되면 피로도 시간을 멈춘다
-				//if(buff != eDeBuff_Fatigue_FirstPenalty && buff != eDeBuff_Fatigue_SecondPenalty)
 				//	g_FatigueTimeSystem->SetIsVitalityBuff(true);
-
 				g_RegisterBuffTime(buff, bufftime);
 			}
 			break;
@@ -17536,17 +15798,14 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 #ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
 		case eDeBuff_MoveCommandWin:
 			{
-				// 혼합유료화 섭일 경우 무법자 1단계(5분은 불가)와 상관없이 모두 이동창 사용가능
 				g_PKSystem->SetMoveBuffState(g_isCharacterBuff((&Hero->Object), eDeBuff_MoveCommandWin));
 			}
 			break;
 #endif //PBG_ADD_PKSYSTEM_INGAMESHOP
 		}
 	}
-	// Hero가 아닌 경우만가 있으면 else를 달아 준다. 있으면 안 된다..-=-;;;
 }
 
-// 논리적인 이펙트 처리는 여기서 다 해준다 버프가 종료 될때
 void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 {
 	if(o && o == &Hero->Object)
@@ -17559,10 +15818,8 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 		case eBuff_Hellowin4:
 		case eBuff_Hellowin5:
 			{
-				// 버프 시간 설정
 				g_UnRegisterBuffTime( buff );
 				
-				// 버프 정보 캐릭터에 갱신
 				if( buff == eBuff_Hellowin1 )
 				{
 					CharacterMachine->CalculateAttackSpeed();
@@ -17590,7 +15847,6 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 		case eBuff_PcRoomSeal2:
 		case eBuff_PcRoomSeal3:
 			{
-				// 버프 시간 설정
 				g_UnRegisterBuffTime( buff );
 			}
 			break;
@@ -17627,7 +15883,6 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 		case eBuff_PartyExpBonus:
 #endif	// YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
 			{
-				// 버프 시간 설정
 				g_UnRegisterBuffTime( buff );
 			}
 			break;
@@ -17642,22 +15897,25 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 		case eBuff_Scroll_Strengthen:
 #endif //PSW_ADD_PC4_SCROLLITEM
 #ifdef YDG_ADD_HEALING_SCROLL
-		case eBuff_Scroll_Healing:	// 치유의 스크롤
+		case eBuff_Scroll_Healing:
 #endif	// YDG_ADD_HEALING_SCROLL
 			{
-				// 버프 시간 설정
 				g_UnRegisterBuffTime( buff );
 				
-				if( buff == eBuff_EliteScroll1 ) { //  공격속도 계산.
+				if( buff == eBuff_EliteScroll1 ) 
+				{
 					CharacterMachine->CalculateAttackSpeed();
 				}
-				else if( buff == eBuff_EliteScroll2 ) { // 방어력 계산
+				else if( buff == eBuff_EliteScroll2 ) 
+				{
 					CharacterMachine->CalculateDefense();
 				}
-				else if( buff == eBuff_EliteScroll3 ) { // 공격력 계산
+				else if( buff == eBuff_EliteScroll3 ) 
+				{
 					CharacterMachine->CalculateDamage();
 				}
-				else if( buff == eBuff_EliteScroll4 ) { // 마력 계산
+				else if( buff == eBuff_EliteScroll4 )
+				{
 					CharacterMachine->CalculateMagicDamage();
 				}
 			}
@@ -17668,7 +15926,6 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 		case eBuff_SecretPotion4:
 		case eBuff_SecretPotion5:
 			{
-				// 버프 시간 설정
 				g_UnRegisterBuffTime( buff );
 				
 				CharacterMachine->CalculateAll();
@@ -17679,10 +15936,10 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 		case eBuff_CherryBlossom_RiceCake:
 		case eBuff_CherryBlossom_Petal:
 			{
-				// 버프 시간 설정
 				g_UnRegisterBuffTime( buff );
 				
-				if( buff == eBuff_CherryBlossom_Petal ) { // 공격력 계산
+				if( buff == eBuff_CherryBlossom_Petal ) 
+				{
 					CharacterMachine->CalculateDamage();
 				}
 			}
@@ -17691,14 +15948,13 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 #ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 		case eBuff_SwellOfMagicPower:
 			{
-				// 버프 시간 설정
 				g_UnRegisterBuffTime( buff );
 				
 				CharacterMachine->CalculateMagicDamage();
-			}break;
+			}
+			break;
 #endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 #ifdef PBG_ADD_SANTABUFF
-		//산타버프관련.(해외 크리스마스 이벤트)
 		case eBuff_BlessingOfXmax:
 		case eBuff_CureOfSanta:
 		case eBuff_SafeGuardOfSanta:
@@ -17707,10 +15963,8 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 		case eBuff_QuickOfSanta:
 		case eBuff_LuckOfSanta:
 			{
-				//버프시간설정제거.
 				g_UnRegisterBuffTime( buff );
 				
-				//버프정보 캐릭터 갱신.
 				if(buff == eBuff_BlessingOfXmax)
 				{
 					CharacterMachine->CalculateDamage();
@@ -17732,9 +15986,8 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 			break;
 #endif //PBG_ADD_SANTABUFF
 #ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
-		case eBuff_DuelWatch:	// 관전 버프
+		case eBuff_DuelWatch:
 			{
-				// 메인프레임을 교체한다.
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUELWATCH_MAINFRAME);
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUELWATCH_USERLIST);
 				g_pNewUISystem->Show(SEASON3B::INTERFACE_MAINFRAME);
@@ -17750,28 +16003,22 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 			break;
 #endif //PBG_ADD_HONOROFGLADIATORBUFFTIME
 #ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-		case eBuff_StrongCharm:					// 강함의 인장 (PC방 아이템)
+		case eBuff_StrongCharm:
 			{
 				g_UnRegisterBuffTime( buff );
-
-				// 공격력과 방어력을 계산하여준다. 
 				CharacterMachine->CalculateDamage();
 				CharacterMachine->CalculateDefense();
 			}
 			break;
 #endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
 #ifdef PBG_ADD_SECRETBUFF
-		case eBuff_Vitality_Lowest:				// 활력의 비약(최하급/하급/중급/상급)
+		case eBuff_Vitality_Lowest:
 		case eBuff_Vitality_Low:
 		case eBuff_Vitality_Middle:
 		case eBuff_Vitality_High:
-		case eDeBuff_Fatigue_FirstPenalty:		// 피로도 디버프1
-		case eDeBuff_Fatigue_SecondPenalty:		// 피로도 디버프2
+		case eDeBuff_Fatigue_FirstPenalty:
+		case eDeBuff_Fatigue_SecondPenalty:
 			{
-				// 활력의 버프가 끝나면 피로도 재설정
-				//if(buff != eDeBuff_Fatigue_FirstPenalty && buff != eDeBuff_Fatigue_SecondPenalty)
-				//	g_FatigueTimeSystem->SetIsVitalityBuff(false);
-
 				g_UnRegisterBuffTime( buff );
 			}
 			break;
@@ -17779,14 +16026,12 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 #ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
 		case eDeBuff_MoveCommandWin:
 			{
-				// 혼합유료화 섭일 경우 무법자 1단계(5분은 불가)와 상관없이 모두 이동창 사용가능
 				g_PKSystem->SetMoveBuffState(g_isCharacterBuff((&Hero->Object), eDeBuff_MoveCommandWin));
 			}
 			break;
 #endif //PBG_ADD_PKSYSTEM_INGAMESHOP
 		}
 	}
-	// Hero가 아닌 경우만가 있으면 else를 달아 준다. 있으면 안 된다..-=-;;;
 }
 
 void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
@@ -17795,7 +16040,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 	{
 	case eBuff_CursedTempleProdection:
 		{
-			// 플레이어 한테만 생기는 이펙트
 			if( o->Type == MODEL_PLAYER )
 			{
 				DeleteEffect( MODEL_CURSEDTEMPLE_PRODECTION_SKILL, o );
@@ -17812,7 +16056,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 		
 	case eBuff_PhysDefense:
 		{
-			// 플레이어 한테만 생기는 이펙트
 			if( o->Type == MODEL_PLAYER )
 			{
 				PlayBuffer(SOUND_SOULBARRIER);
@@ -17891,7 +16134,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 		break;
 	case eBuff_Thorns:	
 		{
-			// 타입 43, 44는 버프 전용 이펙트이므로 절대 다른 사람이 사용하지 마세요!!!!!!
 			vec3_t vLight;
 			Vector(0.9f, 0.6f, 0.1f, vLight);
 			CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 43, o, 50.f, 0, 0, 0, 0, vLight);
@@ -17900,7 +16142,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 		
 	case eDeBuff_Blind:
 		{
-			// 3, 4 타입은 버프 전용 이펙트 다른사람은 절대 사용하지 마세요!!!!!
 			vec3_t vLight;
 			Vector(1.0f, 1.0f, 1.0f, vLight);
 			CreateEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o->Position, o->Angle, vLight, 3, o);
@@ -17909,7 +16150,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 		
 	case eDeBuff_Sleep:
 		{
-			// 3, 4 타입은 버프 전용 이펙트 다른사람은 절대 사용하지 마세요!!!!!
 			vec3_t vLight;
 			Vector(0.7f, 0.1f, 0.9f, vLight);
 			CreateEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o->Position, o->Angle, vLight, 4, o);
@@ -17987,7 +16227,7 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 		}
 		break;
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifndef KJH_FIX_SWELLOFMAGIC_EFFECT				// #ifndef 정리할때 지워야하는 소스
+#ifndef KJH_FIX_SWELLOFMAGIC_EFFECT
 #ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	case eBuff_SwellOfMagicPower:
 		{
@@ -18000,9 +16240,9 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			CreateEffect( MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o->Position, o->Angle, vLight, 0, o );
 		}break;
 #endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#endif // KJH_FIX_SWELLOFMAGIC_EFFECT			// 정리할때 지워야하는 소스
+#endif // KJH_FIX_SWELLOFMAGIC_EFFECT
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
-	case eBuff_Doppelganger_Ascension:	// 도플갱어 승천
+	case eBuff_Doppelganger_Ascension:
 		{
 			//3차전직 효과 출력
 #ifdef YDG_MOD_DOPPELGANGER_END_SOUND
@@ -18075,7 +16315,7 @@ void ClearBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 	case eBuff_Defense:
 		{
 			DeleteJoint(MODEL_SPEARSKILL,o,4);
-			DeleteJoint(MODEL_SPEARSKILL, o, 9);	//^ 펜릴 버그
+			DeleteJoint(MODEL_SPEARSKILL, o, 9);
 		}
 		break;
 		
@@ -18104,17 +16344,15 @@ void ClearBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 	case eBuff_HelpNpc:
 		{
 			DeleteJoint(MODEL_SPEARSKILL, o, 4);
-			DeleteJoint(MODEL_SPEARSKILL, o, 9);	// 조인트 익페트 제거
+			DeleteJoint(MODEL_SPEARSKILL, o, 9);
 		}
 		break;
 		
 	case eBuff_RemovalMagic:
 		{
-			// 이펙트 제거
 			DeleteEffect( BITMAP_LIGHT, o, 2 );
 			DeleteEffect( BITMAP_LIGHT, o, 1 );
 			DeleteEffect( BITMAP_SKULL, o, 0 );
-			// 조인트 이펙트 제거
 			DeleteJoint ( MODEL_SPEARSKILL, o, 4 );
 			DeleteJoint ( MODEL_SPEARSKILL, o, 9 );
 			DeleteJoint ( MODEL_SPEARSKILL, o, 0 );
@@ -18226,12 +16464,11 @@ void ClearBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 #ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	case eBuff_SwellOfMagicPower:
 		{
-			// 버프 이팩트를 끈다.
 			DeleteEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o, 0);
 		}break;
 #endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
-	case eBuff_Doppelganger_Ascension:	// 도플갱어 승천
+	case eBuff_Doppelganger_Ascension:
 		{
 // 			DeleteEffect(BITMAP_JOINT_THUNDER, o, 0);
 		}
@@ -18275,18 +16512,16 @@ void RegisterBuff( eBuffState buff, OBJECT* o, const int bufftime )
 	
 	if( buffclasstype == eBuffClass_Count ) return;
 	
-	// 카오스캐슬이면 자기자신만 Register 되야 한다.
 	if(InChaosCastle() && (o && o != &Hero->Object)) 
 	{
 		return;
 	}
-	// 물리적인 이펙트 부분
+
 	InsertBuffPhysicalEffect( buff, o );
-	// 예외 적인 부분
+
 	if( CheckExceptionBuff( buff, o, false ) )
 	{
 		g_CharacterRegisterBuff(o, buff);
-		// 논리적인 이펙트 부분
 		InsertBuffLogicalEffect( buff, o, bufftime );
 	}
 }
@@ -18297,13 +16532,11 @@ void UnRegisterBuff( eBuffState buff, OBJECT* o )
 	
 	if( buffclasstype == eBuffClass_Count ) return;
 
-	// 물리적인 이펙트 부분
 	ClearBuffPhysicalEffect( buff, o );
-	// 예외 적인 부분
+
 	if( CheckExceptionBuff( buff, o, true ) )
 	{
 		g_CharacterUnRegisterBuff(o, buff);
-		// 논리적인 이펙트 부분
 		ClearBuffLogicalEffect( buff, o );
 	}
 }

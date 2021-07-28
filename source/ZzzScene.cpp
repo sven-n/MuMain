@@ -63,9 +63,7 @@
 	#include "iexplorer.h"
 #endif //ADD_MU_HOMEPAGE
 #include "Event.h"
-#ifdef CSK_LH_DEBUG_CONSOLE
-	#include "./Utilities/Log/muConsoleDebug.h"
-#endif // CSK_LH_DEBUG_CONSOLE
+#include "./Utilities/Log/muConsoleDebug.h"
 #include "MixMgr.h"
 #include "GameCensorship.h"
 #include "GM3rdChangeUp.h"
@@ -1480,9 +1478,7 @@ void NewMoveCharacterScene()
 	g_pProfiler->EndUnit( EPROFILING_MOVE_CHARACTERSCENE_INPUTEVENTS );
 #endif // DO_PROFILING	
 
-#ifdef CSK_LH_DEBUG_CONSOLE
 	g_ConsoleDebug->UpdateMainScene();
-#endif // CSK_LH_DEBUG_CONSOLE
 
 #ifdef DO_PROFILING
 	g_pProfiler->EndUnit( EPROFILING_MOVE_CHARACTERSCENE_TOTAL );
@@ -1808,9 +1804,7 @@ void NewMoveLogInScene()
 		ClearCharacters();
 	}
 
-#ifdef CSK_LH_DEBUG_CONSOLE
 	g_ConsoleDebug->UpdateMainScene();
-#endif // CSK_LH_DEBUG_CONSOLE
 }
 
 bool NewRenderLogInScene(HDC hDC)
@@ -2082,9 +2076,7 @@ void RenderInterfaceEdge()
 
 void LoadingScene(HDC hDC)
 {
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_NORMAL, "LoadingScene_Start");
-#endif // CONSOLE_DEBUG
 
 	CUIMng& rUIMng = CUIMng::Instance();
 	if (!InitLoading)
@@ -2138,14 +2130,8 @@ void LoadingScene(HDC hDC)
 	g_dwPacketInitialTick = ::GetTickCount();
 #endif
 
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_NORMAL, "LoadingScene_End");
-#endif // CONSOLE_DEBUG
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 메인 게임 화면
-///////////////////////////////////////////////////////////////////////////////
 
 float CameraDistanceTarget = 1000.f;
 float CameraDistance = CameraDistanceTarget;
@@ -2605,23 +2591,20 @@ void MoveMainScene()
 #endif // LDS_FIX_NONINITPROGLEM_SKILLHOTKEY
 #endif //LDK_ADD_SCALEFORM
 		
-#ifdef CONSOLE_DEBUG
 		g_ConsoleDebug->Write( MCD_NORMAL, "Join the game with the following character: %s", CharactersClient[SelectedHero].ID);
-#endif // CONSOLE_DEBUG
+
 		g_ErrorReport.Write( "> Character selected <%d> \"%s\"\r\n", SelectedHero+1, CharactersClient[SelectedHero].ID);
 
         InitMainScene = true;
 		
-#ifdef CONSOLE_DEBUG
 		g_ConsoleDebug->Write( MCD_SEND, "SendRequestJoinMapServer");
-#endif // CONSOLE_DEBUG
+
 	    SendRequestJoinMapServer(CharactersClient[SelectedHero].ID);
 
 		CUIMng::Instance().CreateMainScene();	// 메인 씬 UI 생성.
 
 		CameraAngle[2] = -45.f;
 
-		//초기화
 		ClearInput();
 		InputEnable     = false;
 		TabInputEnable  = false;
@@ -2661,9 +2644,7 @@ void MoveMainScene()
 		g_ErrorReport.Write( "> Main Scene init success. ");
 		g_ErrorReport.WriteCurrentTime();
 
-#ifdef CONSOLE_DEBUG
 		g_ConsoleDebug->Write(MCD_NORMAL, "MainScene Init Success");
-#endif // CONSOLE_DEBUG
 	}
 	
 	if(CurrentProtocolState == RECEIVE_JOIN_MAP_SERVER)
@@ -2823,9 +2804,8 @@ void MoveMainScene()
 
 	g_GameCensorship->Update();
 
-#ifdef CSK_LH_DEBUG_CONSOLE
+
 	g_ConsoleDebug->UpdateMainScene();
-#endif // CSK_LH_DEBUG_CONSOLE
 
 #ifdef USE_SELFCHECKCODE
 	END_OF_FUNCTION( Pos_SelfCheck02);

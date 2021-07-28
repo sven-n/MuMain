@@ -3104,21 +3104,18 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
 		{
 			//m_iAcumMoveMouseScrollPixel = 0;
 			RecursiveCalcScroll(m_iAcumMoveMouseScrollPixel, &iMovePixel, false);
-#ifdef CONSOLE_DEBUG
+
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
-#endif // CONSOLE_DEBUG
 			
 			m_ScrollBtnPos.y += iMovePixel;
 			m_iAcumMoveMouseScrollPixel -= iMovePixel;
-#ifdef CONSOLE_DEBUG
+
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);	
 			g_ConsoleDebug->Write(MCD_NORMAL, "iMoveValue : (%d)", -iMoveValue);
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
-			g_ConsoleDebug->Write(MCD_NORMAL, "m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
-#endif // CONSOLE_DEBUG
-			
+			g_ConsoleDebug->Write(MCD_NORMAL, "m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);		
 		}
 	}
 #else // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
@@ -3155,19 +3152,18 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollDown(int iMoveValue)
 		{	
 			//m_iAcumMoveMouseScrollPixel = 0;
 			RecursiveCalcScroll(m_iAcumMoveMouseScrollPixel, &iMovePixel, true);
-#ifdef CONSOLE_DEBUG
+
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);	
-#endif // CONSOLE_DEBUG
+
 			m_iAcumMoveMouseScrollPixel -= iMovePixel;
 			m_ScrollBtnPos.y += iMovePixel;
-#ifdef CONSOLE_DEBUG
+
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);	
 			g_ConsoleDebug->Write(MCD_NORMAL, "iMoveValue : (%d)", iMoveValue);
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
-#endif // CONSOLE_DEBUG
 			
 		}
 	}

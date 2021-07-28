@@ -13,9 +13,7 @@
 #include "CGFxProcess.h"
 #endif //LDK_ADD_SCALEFORM
 
-#ifdef CONSOLE_DEBUG
 #include "./Utilities/Log/muConsoleDebug.h"
-#endif // CONSOLE_DEBUG
 
 #ifdef FOR_WORK
 	#include "./Utilities/Log/DebugAngel.h"

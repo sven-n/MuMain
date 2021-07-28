@@ -215,7 +215,7 @@ bool PetActionUnicorn::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 #ifdef LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
 				if(&Hero->Object == obj->Owner)
 #endif //LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
-					//1000ms 마다 패킷 보냄
+					//1000ms 마다 패킷  
 					SendRequestGetItem(m_RootItem.itemIndex);
 			}	
 			obj->Velocity = m_speed;

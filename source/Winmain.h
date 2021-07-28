@@ -118,22 +118,17 @@
 
 #ifdef _DEBUG
 
-	#define CSK_LH_DEBUG_CONSOLE			// 콘솔로 디버깅 정보 남기는 처리(2007.03.20)
+	#define CSK_LH_DEBUG_CONSOLE
 	#ifdef CSK_LH_DEBUG_CONSOLE
-		#define CONSOLE_DEBUG				// 콘솔로 디버깅 정보 출력(2007.03.20)
+		#define CONSOLE_DEBUG
 	#endif // CSK_LH_DEBUG_CONSOLE
 
-	//$ 맵속성 보는 기능
-	#define CSK_DEBUG_MAP_ATTRIBUTE			// 맵 속성을 게임내에 출력(2008.10.14)
+	#define CSK_DEBUG_MAP_ATTRIBUTE
 
-	//$ 바운딩박스 렌더링 기능
-	#define CSK_DEBUG_RENDER_BOUNDINGBOX		// 바운딩 박스 렌더링(2008.10.28)
+	#define CSK_DEBUG_RENDER_BOUNDINGBOX
 
-	//$ 길찾기노드 보는 기능
-	#define CSK_DEBUG_MAP_PATHFINDING		// 길찾기노드를 게임내에 출력(2008.10.14)
+	#define CSK_DEBUG_MAP_PATHFINDING
 
-	//$ 프로파일링 & 디버깅 카메라	
-	// 프레임이 느려지는 관계로, 프로파일링,카메라 작업을 할때는 local로 작업하시오
 	//#define LDS_ADD_DEBUGINGMODULES	// 내부 Profiling 모드 (결과파일은 RESULT_PROFILING.txt로 저장) 
 
 	#ifdef LDS_ADD_DEBUGINGMODULES

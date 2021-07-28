@@ -30,9 +30,7 @@
 //#include "DSWavRead.h"
 #include "DSPlaySound.h"
 #include "./Utilities/Log/ErrorReport.h"
-#ifdef CONSOLE_DEBUG
 #include "./Utilities/Log/muConsoleDebug.h"
-#endif // CONSOLE_DEBUG
 
 
 //-----------------------------------------------------------------------------
@@ -461,19 +459,15 @@ HRESULT PlayBuffer(int Buffer,OBJECT *Object,BOOL bLooped)
 
     if( NULL == g_lpDSBuffer[Buffer][BufferChannel[Buffer]] )
 	{
-#ifdef CONSOLE_DEBUG
-		//g_ConsoleDebug->Write(MCD_ERROR, "사운드 버퍼 NULL : %d", Buffer);
-#endif // CONSOLE_DEBUG
 		return E_FAIL;
 	}
 
     // Play buffer 
     DWORD dwLooped = bLooped ? DSBPLAY_LOOPING : 0L;
+
     if( FAILED( hr = g_lpDSBuffer[Buffer][BufferChannel[Buffer]]->Play( 0, 0, dwLooped ) ) )
     {
-#ifdef CONSOLE_DEBUG
 		g_ConsoleDebug->Write(MCD_ERROR, "Play Sound: %d, %d", Buffer, dwLooped);
-#endif // CONSOLE_DEBUG
         return hr;
     }
  
