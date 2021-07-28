@@ -149,6 +149,7 @@ typedef struct _Triangle_t3 : public Triangle_t
 	Idas
 */
 //////////////////////////////////////////////////////////////////////////
+#ifdef MR0
 #pragma warning( disable : 4786 )
 #include <vector>
 
@@ -284,6 +285,7 @@ typedef struct  _VBOMesh
 
 }VBOMesh;
 typedef std::vector<VBOMesh> MeshVector;
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -307,8 +309,10 @@ typedef struct _Mesh_t
 
     TextureScript* m_csTScript;
 
+#ifdef MR0
 	EffectScripVec_t	MeshEffectScript;			//Post Effect Struct
 	TempSkinInfoMap_t	MeshAdditionalSkinInfo;		//Temp Skining Infomation
+#endif
 
 	_Mesh_t()
 	{	
@@ -380,7 +384,9 @@ public:
 //////////////////////////////////////////////////////////////////////////
 //VBO Version
 	unsigned int		m_iBMDSeqID;
+#ifdef MR0
 	MeshVector			NewMeshs;
+#endif
 	bool				bLightMap;
 	bool				bOffLight;		//무조건 라이트를 적용시키지 않는다.
 	char				iBillType;		//빌보드 타입
@@ -574,8 +580,10 @@ private:
 	BMD(const BMD& b);
 	BMD& operator=(const BMD& b);
 
+#ifdef MR0
 	//버텍스 확장에 쓰이는 함수
 	void ExtendVertice(Mesh_t* oM, VBOMesh* nM);
+#endif
 
 	// MR0:VBOMesh로 변환 이후 ValidationCheck정보를 화면상에 출력.
 #ifdef LDS_MR0_FORDEBUG_VERIFYCONVERTMESH

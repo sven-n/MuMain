@@ -158,8 +158,8 @@ public:
 	CGlobalBitmap();
 	virtual ~CGlobalBitmap();
 	
-	GLuint LoadImage(const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP);
-	bool LoadImage(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP);
+	GLuint LoadImage(const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+	bool LoadImage(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
 	void UnloadImage(GLuint uiBitmapIndex, bool bForce = false);
 	void UnloadAllImages();
 
@@ -181,8 +181,8 @@ protected:
 	GLuint GenerateTextureIndex();
 	GLuint FindAvailableTextureIndex(GLuint uiSeed);
 
-	bool OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP);
-	bool OpenTga(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP);
+	bool OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+	bool OpenTga(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
 	void SplitFileName(IN const std::string& filepath, OUT std::string& filename, bool bIncludeExt);
 	void SplitExt(IN const std::string& filepath, OUT std::string& ext, bool bIncludeDot);
 	void ExchangeExt(IN const std::string& in_filepath, IN const std::string& ext, OUT std::string& out_filepath);

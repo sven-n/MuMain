@@ -401,7 +401,7 @@ GLuint CGlobalBitmap::LoadImage(const std::string& filename, GLuint uiFilter, GL
 }
 bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
-	unsigned int UICLAMP	= GL_CLAMP;
+	unsigned int UICLAMP	= GL_CLAMP_TO_EDGE;
 	unsigned int UIREPEAT	= GL_REPEAT;
 
 	if( uiWrapMode != UICLAMP && uiWrapMode != UIREPEAT )

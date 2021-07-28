@@ -615,7 +615,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\include\ShopListManager;$(SolutionDir)\dependencies\include\ShopListManager\interface;source;$(SolutionDir)\dependencies\include;$(MU_SDK)\Boost;$(MU_SDK)\DXSDK\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -643,7 +643,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/libpath:""NPGGuard"" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;jpeglib.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;Jpeglib.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;jpeglib.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;Jpeglib.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -1091,7 +1091,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\include\ShopListManager;$(SolutionDir)\dependencies\include\ShopListManager\interface;source;$(SolutionDir)\dependencies\include;$(MU_SDK)\Boost;$(MU_SDK)\DXSDK\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_FOREIGN_NDEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;LDS_PATCH_GLOBAL_100520;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;WIN32;NDEBUG;_WINDOWS;_FOREIGN_NDEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;LDS_PATCH_GLOBAL_100520;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>
       </RuntimeTypeInfo>
@@ -1119,7 +1119,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;jpeglib.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;Jpeglib.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;glew32s.lib;opengl32.lib;glu32.lib;vfw32.lib;dsound.lib;dxguid.lib;jpeglib.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;Jpeglib.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -1723,6 +1723,7 @@
     <ClCompile Include="source\npcGateSwitch.cpp" />
     <ClCompile Include="source\Observer.cpp" />
     <ClCompile Include="source\OneTimePassword.cpp" />
+    <ClCompile Include="source\OpenGL3\Shader\Shader.cpp" />
     <ClCompile Include="source\OptionWin.cpp" />
     <ClCompile Include="source\PartyManager.cpp" />
     <ClCompile Include="source\PCRoomPoint.cpp" />
@@ -2440,6 +2441,7 @@
     <ClInclude Include="source\npcGateSwitch.h" />
     <ClInclude Include="source\Observer.h" />
     <ClInclude Include="source\OneTimePassword.h" />
+    <ClInclude Include="source\OpenGL3\Shader\Shader.h" />
     <ClInclude Include="source\OptionWin.h" />
     <ClInclude Include="source\PartyManager.h" />
     <ClInclude Include="source\PCRoomPoint.h" />

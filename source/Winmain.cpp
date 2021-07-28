@@ -121,6 +121,8 @@
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #include "MultiLanguage.h"
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
+
 ///////////////////////////////////////////
 CUIMercenaryInputBox * g_pMercenaryInputBox = NULL;
 CUITextInputBox * g_pSingleTextInputBox = NULL;
@@ -2570,6 +2572,22 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo )
 	return true;
 }
 
+bool initGLEW()
+{
+	//INIT GLEW (NEEDS WINDOW AND OPENGL CONTEXT)
+	glewExperimental = GL_TRUE;
+
+	//Error
+	if (glewInit() != GLEW_OK)
+	{
+		std::exit(0);
+		return false;
+	}
+
+	return true;
+}
+
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 {
 #ifdef LDK_ADD_SCALEFORM
@@ -2585,22 +2603,22 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #endif
 
 #ifdef MSZ_ADD_CRASH_DUMP_UPLOAD
-	char szIniFilePath[256+20]="";
+	char szIniFilePath[256 + 20] = "";
 	char szCurrentDir[256];
 
 	GetCurrentDirectory(256, szCurrentDir);
 
 	strcpy(szIniFilePath, szCurrentDir);
-	if( szCurrentDir[strlen(szCurrentDir)-1] == '\\' ) 
+	if (szCurrentDir[strlen(szCurrentDir) - 1] == '\\')
 		strcat(szIniFilePath, "config.ini");
 	else strcat(szIniFilePath, "\\config.ini");
 
 	TCHAR szToken1[256] = _T("webzen");
-	TCHAR szHttpUrl[256] = {0, };
-	TCHAR szFtpUrl[256] = {0, };
+	TCHAR szHttpUrl[256] = { 0, };
+	TCHAR szFtpUrl[256] = { 0, };
 	TCHAR szToken2[256] = _T("#@!");
-	TCHAR szFtpID[256] = {0, };
-	TCHAR szFtpPW[256] = {0, };
+	TCHAR szFtpID[256] = { 0, };
+	TCHAR szFtpPW[256] = { 0, };
 	TCHAR szToken3[256] = _T("01");
 	int nFtpPort;
 
@@ -2628,7 +2646,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		0,
 		1,
 		1,
-		NULL, 
+		NULL,
 		true);
 #else
 	leaf::AttachExceptionHandler(ExceptionCallback);
@@ -2658,38 +2676,38 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
 	// "#32770"이란 일반적인 대화상자 ClassName을 말함. 
 	// "MU Auto Update"은 MU 런처를 말함.
-	HWND shWnd = FindWindow( "#32770", "MU Auto Update");
-	if(shWnd)
+	HWND shWnd = FindWindow("#32770", "MU Auto Update");
+	if (shWnd)
 		SendMessage(shWnd, WM_CLOSE, 0, 0);
 
 	// mu.exe 업그레이드 : Mu.exe를 종료한 후에 호출해야만 한다.
-	if ( !UpdateMuExe())
+	if (!UpdateMuExe())
 	{
-		return ( FALSE);
+		return (FALSE);
 	}
 
 	//파라메터 없이 실행시 mu.exe실행
 #ifdef BAN_USE_CMDLINE
 //	WZLAUNCHINFO LaunchInfo;
-	if( false == wzPopLaunchInfo(LaunchInfo) )
+	if (false == wzPopLaunchInfo(LaunchInfo))
 #else	// !BAN_USE_CMDLINE
-	if( strlen( szCmdLine ) < 1 ) 
+	if (strlen(szCmdLine) < 1)
 #endif // BAN_USE_CMDLINE
 	{
 		g_ErrorReport.Write("wzPopLaunchInfo함수가 실패하여, Mu.exe를 다시 실행합니다.");
-		
+
 		// 1. mu.exe 이름
 		char lpszStr[MAX_PATH];
-		strcpy( lpszStr, TextMu);
-		
+		strcpy(lpszStr, TextMu);
+
 		// 2. /t 옵션 붙이기
 #ifdef _TEST_SERVER
-		strcat( lpszStr, " /t");
+		strcat(lpszStr, " /t");
 #endif //_TEST_SERVER
-		
+
 		// 3. 실행
 		WinExec(lpszStr, SW_SHOW);
-		
+
 		return FALSE;
 	}
 #endif	// NDEBUG (RELEASE MODE)
@@ -2706,15 +2724,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	VM_START
 #ifndef _DEBUG	// for release mode
 #ifdef _TEST_SERVER
-	if(!AttachHackShield(7002, "54F49D65DBA5A527"))		//. 테섭(maintest.exe)
-		return FALSE;
+		if (!AttachHackShield(7002, "54F49D65DBA5A527"))		//. 테섭(maintest.exe)
+			return FALSE;
 #else
-	if(!AttachHackShield(7001, "8114A27E5DDA00BA"))		//. 본섭(main.exe)
-		return FALSE;
+		if (!AttachHackShield(7001, "8114A27E5DDA00BA"))		//. 본섭(main.exe)
+			return FALSE;
 #endif // _TEST_SERVER
 #else	// for debug mode
-	if(!AttachHackShield(7003, "8F6E59C3A9E83223"))		//. 디버그용(maindebug.exe)
-		return FALSE;
+		if (!AttachHackShield(7003, "8F6E59C3A9E83223"))		//. 디버그용(maindebug.exe)
+			return FALSE;
 #endif
 	g_ErrorReport.Write("HackShield Launched.\r\n");
 	VM_END
@@ -2722,52 +2740,52 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	{
 		char lpszExeVersion[256] = "unknown";
 
-		char *lpszCommandLine = GetCommandLine();
+		char* lpszCommandLine = GetCommandLine();
 		char lpszFile[MAX_PATH];
 		WORD wVersion[4] = { 0,};
-		if ( GetFileNameOfFilePath( lpszFile, lpszCommandLine))
+		if (GetFileNameOfFilePath(lpszFile, lpszCommandLine))
 		{
-			if ( GetFileVersion( lpszFile, wVersion))
+			if (GetFileVersion(lpszFile, wVersion))
 			{
-				sprintf( lpszExeVersion, "%d.%02d", wVersion[0], wVersion[1]);
-				if ( wVersion[2] > 0)
+				sprintf(lpszExeVersion, "%d.%02d", wVersion[0], wVersion[1]);
+				if (wVersion[2] > 0)
 				{
 					char lpszMinorVersion[2] = "a";
-					lpszMinorVersion[0] += ( wVersion[2] - 1);
-					strcat( lpszExeVersion, lpszMinorVersion);
+					lpszMinorVersion[0] += (wVersion[2] - 1);
+					strcat(lpszExeVersion, lpszMinorVersion);
 				}
 			}
 		}
 
-		g_ErrorReport.Write( "\r\n");
+		g_ErrorReport.Write("\r\n");
 		g_ErrorReport.WriteLogBegin();
 		g_ErrorReport.AddSeparator();
-		g_ErrorReport.Write( "Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, Language, wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+		g_ErrorReport.Write("Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, Language, wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 #ifdef CONSOLE_DEBUG
 		g_ConsoleDebug->Write(MCD_NORMAL, "Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 #endif // CONSOLE_DEBUG
 		g_ErrorReport.WriteCurrentTime();
 		ER_SystemInfo si;
-		ZeroMemory( &si, sizeof ( ER_SystemInfo));
-		GetSystemInfo( &si);
+		ZeroMemory(&si, sizeof(ER_SystemInfo));
+		GetSystemInfo(&si);
 		g_ErrorReport.AddSeparator();
-		g_ErrorReport.WriteSystemInfo( &si);
+		g_ErrorReport.WriteSystemInfo(&si);
 		g_ErrorReport.AddSeparator();
 	}
 
-	// PKD_ADD_BINARY_PROTECTION
-	VM_START
+		// PKD_ADD_BINARY_PROTECTION
+		VM_START
 #if defined (BAN_USE_CMDLINE) && !defined(FOR_HACKING) && defined(NDEBUG)
-	// LauncherHelper에서 넘겨주는 URL과 Port 번호를 사용한다.
-	if(!LaunchInfo.ip.empty()) {
-		strcpy(g_lpszCmdURL, LaunchInfo.ip.c_str());
-		szServerIpAddress = g_lpszCmdURL;
-		g_ServerPort = LaunchInfo.port;
-	}
+		// LauncherHelper에서 넘겨주는 URL과 Port 번호를 사용한다.
+		if (!LaunchInfo.ip.empty()) {
+			strcpy(g_lpszCmdURL, LaunchInfo.ip.c_str());
+			szServerIpAddress = g_lpszCmdURL;
+			g_ServerPort = LaunchInfo.port;
+		}
 #else // !BAN_USE_CMDLINE
-	// mu.exe 에서 넘겨주는 서버 URL 과 Port 번호를 얻어서 쓴다.
-	WORD wPortNumber;	
-	if ( GetConnectServerInfo( szCmdLine, g_lpszCmdURL, &wPortNumber))
+		// mu.exe 에서 넘겨주는 서버 URL 과 Port 번호를 얻어서 쓴다.
+		WORD wPortNumber;
+	if (GetConnectServerInfo(szCmdLine, g_lpszCmdURL, &wPortNumber))
 	{
 		szServerIpAddress = g_lpszCmdURL;
 		g_ServerPort = wPortNumber;
@@ -2775,31 +2793,31 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #endif // BAN_USE_CMDLINE
 	VM_END
 
-	// [크랙방지] main.exe 를 열어놓으면 실행중에 교체가 불가능하다.
-	if ( !OpenMainExe())
+		// [크랙방지] main.exe 를 열어놓으면 실행중에 교체가 불가능하다.
+		if (!OpenMainExe())
+		{
+			return false;
+		}
+
+#if SELECTED_LANGUAGE==LANGUAGE_JAPANESE
+	//  미리 실행된 핵 프로그램을 제거한다.
+	if (KillHackProgram())
 	{
 		return false;
 	}
-
-#if SELECTED_LANGUAGE==LANGUAGE_JAPANESE
-    //  미리 실행된 핵 프로그램을 제거한다.
-    if ( KillHackProgram() )
-    {
-        return false;
-    }
 #endif
 
 	// PKD_ADD_BINARY_PROTECTION
 	VM_START
-	g_SimpleModulusCS.LoadEncryptionKey( "Data\\Enc1.dat");
-	g_SimpleModulusSC.LoadDecryptionKey( "Data\\Dec2.dat");
+		g_SimpleModulusCS.LoadEncryptionKey("Data\\Enc1.dat");
+	g_SimpleModulusSC.LoadDecryptionKey("Data\\Dec2.dat");
 	VM_END
 
-	//init화일 읽기
-	g_ErrorReport.Write( "> To read config.ini.\r\n");
-	if( OpenInitFile() == FALSE )
+		//init화일 읽기
+		g_ErrorReport.Write("> To read config.ini.\r\n");
+	if (OpenInitFile() == FALSE)
 	{
-		g_ErrorReport.Write( "config.ini read error\r\n");
+		g_ErrorReport.Write("config.ini read error\r\n");
 #ifdef ATTACH_HACKSHIELD
 		DetachHackShield();
 #endif // ATTACH_HACKSHIELD
@@ -2807,24 +2825,24 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	}
 
 #ifdef LEM_ADD_GAMECHU
-	#ifdef FOR_WORK
-		g_ErrorReport.Write( " ! [Gamechu] - GCCertification.dll Loading-- \n");
-	#endif // FOR_WORK
+#ifdef FOR_WORK
+	g_ErrorReport.Write(" ! [Gamechu] - GCCertification.dll Loading-- \n");
+#endif // FOR_WORK
 
-	if( !GAMECHU->Load_GamechuDLL( "GCCertification.dll") )
-	{
-	#ifdef FOR_WORK
-		g_ErrorReport.Write( " [Gamechu] GCCertification.dll Failed\0 \n" );		
-	#endif // FOR_WORK
-		return false;
-	}
-	
- 	GAMECHU->Set_GameChuMyData(szCmdLine);
-
-	if( !GAMECHU->Get_GameChuLogin() )
+	if (!GAMECHU->Load_GamechuDLL("GCCertification.dll"))
 	{
 #ifdef FOR_WORK
-		g_ErrorReport.Write( " [GameChu =ErrorMsg] < %s >\n", GAMECHU->Get_Error().c_str() );
+		g_ErrorReport.Write(" [Gamechu] GCCertification.dll Failed\0 \n");
+#endif // FOR_WORK
+		return false;
+	}
+
+	GAMECHU->Set_GameChuMyData(szCmdLine);
+
+	if (!GAMECHU->Get_GameChuLogin())
+	{
+#ifdef FOR_WORK
+		g_ErrorReport.Write(" [GameChu =ErrorMsg] < %s >\n", GAMECHU->Get_Error().c_str());
 #endif // FOR_WORK
 	}
 #endif // LEM_ADD_GAMECHU
@@ -2836,7 +2854,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 #ifdef ANTIHACKING_ENABLE
-	if(!init_hanguo_protect( hInstance))
+	if (!init_hanguo_protect(hInstance))
 	{
 		return FALSE;
 	}
@@ -2844,48 +2862,48 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #ifdef NP_GAME_GUARD
 	// PKD_ADD_BINARY_PROTECTION
 	VM_START
-	g_pnpGL = new CNPGameLib(g_szGameGuard);
+		g_pnpGL = new CNPGameLib(g_szGameGuard);
 
-	if ( !npGameGuard::init() )
-    {
-		g_ErrorReport.Write( "gg init error\r\n");
+	if (!npGameGuard::init())
+	{
+		g_ErrorReport.Write("gg init error\r\n");
 		KillGLWindow();
-		
-		if(g_pnpGL) 
+
+		if (g_pnpGL)
 		{	//. 게임가드 객체가 생성되었다면 해제한다.
 			delete g_pnpGL;
 			g_pnpGL = NULL;
 		}
-        return FALSE;
-    }
+		return FALSE;
+	}
 
-	g_ErrorReport.Write( "> gg init success.\r\n");
+	g_ErrorReport.Write("> gg init success.\r\n");
 	g_ErrorReport.AddSeparator();
 	VM_END
 #endif	// NP_GAME_GUARD
 
-	if (g_iChatInputType == 1)
-		ShowCursor(FALSE);		// 마우스 포인트를 안보이도록
+		if (g_iChatInputType == 1)
+			ShowCursor(FALSE);		// 마우스 포인트를 안보이도록
 
-	g_ErrorReport.Write( "> Enum display settings.\r\n");
+	g_ErrorReport.Write("> Enum display settings.\r\n");
 	DEVMODE DevMode;
 	DEVMODE* pDevmodes;
 	int nModes = 0;
 	while (EnumDisplaySettings(NULL, nModes, &DevMode)) nModes++;
-	pDevmodes = new DEVMODE[nModes+1];		//. 모드리스트 생성
+	pDevmodes = new DEVMODE[nModes + 1];		//. 모드리스트 생성
 	nModes = 0;
 	while (EnumDisplaySettings(NULL, nModes, &pDevmodes[nModes])) nModes++;
 
 	DWORD dwBitsPerPel = 16;
-	for(int n1=0; n1<nModes; n1++)
+	for (int n1 = 0; n1 < nModes; n1++)
 	{
-		if(pDevmodes[n1].dmBitsPerPel == 16 && m_nColorDepth == 0) {
+		if (pDevmodes[n1].dmBitsPerPel == 16 && m_nColorDepth == 0) {
 			dwBitsPerPel = 16; break;
 		}
-		if(pDevmodes[n1].dmBitsPerPel == 24 && m_nColorDepth == 1) {
+		if (pDevmodes[n1].dmBitsPerPel == 24 && m_nColorDepth == 1) {
 			dwBitsPerPel = 24; break;
 		}
-		if(pDevmodes[n1].dmBitsPerPel == 32 && m_nColorDepth == 1) {
+		if (pDevmodes[n1].dmBitsPerPel == 32 && m_nColorDepth == 1) {
 			dwBitsPerPel = 32; break;
 		}
 	}
@@ -2895,42 +2913,46 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	if (g_bUseWindowMode == FALSE)
 #endif	// USER_WINDOW_MODE
 	{
-    	//윈도우를 풀스크린으로 변환	
-		for(int n2=0; n2<nModes; n2++)
+		//윈도우를 풀스크린으로 변환	
+		for (int n2 = 0; n2 < nModes; n2++)
 		{
-			if(pDevmodes[n2].dmPelsWidth==WindowWidth && pDevmodes[n2].dmPelsHeight==WindowHeight && pDevmodes[n2].dmBitsPerPel == dwBitsPerPel)
+			if (pDevmodes[n2].dmPelsWidth == WindowWidth && pDevmodes[n2].dmPelsHeight == WindowHeight && pDevmodes[n2].dmBitsPerPel == dwBitsPerPel)
 			{
-				g_ErrorReport.Write( "> Change display setting %dx%d.\r\n", pDevmodes[n2].dmPelsWidth, pDevmodes[n2].dmPelsHeight);
-				ChangeDisplaySettings(&pDevmodes[n2],0);
+				g_ErrorReport.Write("> Change display setting %dx%d.\r\n", pDevmodes[n2].dmPelsWidth, pDevmodes[n2].dmPelsHeight);
+				ChangeDisplaySettings(&pDevmodes[n2], 0);
 				break;
 			}
 		}
 	}
 #endif //ENABLE_FULLSCREEN
 
-	delete [] pDevmodes;		//. 모드리스트 제거
+	delete[] pDevmodes;		//. 모드리스트 제거
 
-	g_ErrorReport.Write( "> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
+	g_ErrorReport.Write("> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
 
-    //윈도우 생성
-    g_hInst = hInstance;
-    g_hWnd = StartWindow(hInstance,nCmdShow);
-	g_ErrorReport.Write( "> Start window success.\r\n");
+	//윈도우 생성
+	g_hInst = hInstance;
+	g_hWnd = StartWindow(hInstance, nCmdShow);
+	g_ErrorReport.Write("> Start window success.\r\n");
 
-    if ( !CreateOpenglWindow())
+	if (!CreateOpenglWindow())
 	{
 #ifdef ATTACH_HACKSHIELD
 		DetachHackShield();
 #endif // ATTACH_HACKSHIELD
 #ifdef NP_GAME_GUARD
 		//. 게임가드 객체가 생성되었다면 해제한다.
-		if(g_pnpGL)
-		{	
+		if (g_pnpGL)
+		{
 			delete g_pnpGL;
 			g_pnpGL = NULL;
 		}
 #endif // NP_GAME_GUARD
 		return FALSE;
+	}
+
+	if (!initGLEW()) {
+		return false;
 	}
 
 #if defined(_DEBUG)

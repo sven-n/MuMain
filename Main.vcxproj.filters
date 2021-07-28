@@ -176,6 +176,12 @@
     <Filter Include="External Object\Chilkat">
       <UniqueIdentifier>{f66dc144-ca2e-4533-bcde-2ec70682e9af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MU\Portable">
+      <UniqueIdentifier>{fd31bb2d-0d2d-4f6c-8164-6ca3a08ff8ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\Portable\Shader">
+      <UniqueIdentifier>{8c57c105-61f8-4bc4-a9be-6a238377b0e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="source\icon1.ico">
@@ -1156,6 +1162,9 @@
     </ClCompile>
     <ClCompile Include="source\ExternalObject\Nprotect\Nprotect.cpp">
       <Filter>External Object\nprotect</Filter>
+    </ClCompile>
+    <ClCompile Include="source\OpenGL3\Shader\Shader.cpp">
+      <Filter>MU\Portable\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2871,6 +2880,9 @@
     </ClInclude>
     <ClInclude Include="source\w_WindowMessageHandler.h">
       <Filter>MU\common</Filter>
+    </ClInclude>
+    <ClInclude Include="source\OpenGL3\Shader\Shader.h">
+      <Filter>MU\Portable\Shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

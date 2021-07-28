@@ -292,14 +292,14 @@ void SEASON3B::CNewUICursedTempleSystem::LoadImages()
 	LoadBitmap("Interface\\newui_Bt_clearness_illusion.jpg", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPALPBTN, GL_LINEAR );
 
 	//minimapicon
-	LoadBitmap( "Interface\\newui_ctminmap_Relic.tga",			IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HOLYITEM_PC, GL_LINEAR,GL_CLAMP );
-	LoadBitmap( "Interface\\newui_ctminmap_TeamA_box.tga",		IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_HOLYITEM, GL_LINEAR,GL_CLAMP );
-	LoadBitmap( "Interface\\newui_ctminmap_TeamA_member.tga",	IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_PC, GL_LINEAR,GL_CLAMP );
-	LoadBitmap( "Interface\\newui_ctminmap_TeamA_npc.tga",		IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_NPC, GL_LINEAR,GL_CLAMP );
-	LoadBitmap( "Interface\\newui_ctminmap_TeamB_box.tga",		IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_HOLYITEM, GL_LINEAR,GL_CLAMP );
-	LoadBitmap( "Interface\\newui_ctminmap_TeamB_member.tga",	IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_PC, GL_LINEAR,GL_CLAMP );
-	LoadBitmap( "Interface\\newui_ctminmap_TeamB_npc.tga",		IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_NPC, GL_LINEAR,GL_CLAMP );
-	LoadBitmap( "Interface\\newui_ctminmap_Hero.tga",			IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HERO, GL_LINEAR,GL_CLAMP );
+	LoadBitmap( "Interface\\newui_ctminmap_Relic.tga",			IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HOLYITEM_PC, GL_LINEAR,GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Interface\\newui_ctminmap_TeamA_box.tga",		IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_HOLYITEM, GL_LINEAR,GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Interface\\newui_ctminmap_TeamA_member.tga",	IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_PC, GL_LINEAR,GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Interface\\newui_ctminmap_TeamA_npc.tga",		IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_NPC, GL_LINEAR,GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Interface\\newui_ctminmap_TeamB_box.tga",		IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_HOLYITEM, GL_LINEAR,GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Interface\\newui_ctminmap_TeamB_member.tga",	IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_PC, GL_LINEAR,GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Interface\\newui_ctminmap_TeamB_npc.tga",		IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_NPC, GL_LINEAR,GL_CLAMP_TO_EDGE );
+	LoadBitmap( "Interface\\newui_ctminmap_Hero.tga",			IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HERO, GL_LINEAR,GL_CLAMP_TO_EDGE );
 
 	//skill
 	LoadBitmap("Interface\\newui_ctskillframe.tga",		IMAGE_CURSEDTEMPLESYSTEM_SKILLFRAME,		GL_LINEAR);
@@ -745,7 +745,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 {
 #ifdef KJH_ADD_SKILLICON_RENEWAL
 	EnableAlphaTest();
-	glColor4f ( 1.f, 1.f, 1.f, m_Alph );		// 알파값변경
+	glColor4f( 1.f, 1.f, 1.f, m_Alph );		// 알파값변경
 
 	float Width, Height, fU, fV, x, y;
 	int iSkillIndex;
