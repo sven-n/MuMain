@@ -1,38 +1,25 @@
 //*****************************************************************************
 // File: ServerSelWin.h
-//
-// Desc: interface for the CServerSelWin class.
-//		 서버 선택 창 클래스.
-//
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
-
-#if !defined(AFX_SERVERSELWIN_H__E3C0BEAA_B9CF_42C4_964F_A5339999BA7B__INCLUDED_)
-#define AFX_SERVERSELWIN_H__E3C0BEAA_B9CF_42C4_964F_A5339999BA7B__INCLUDED_
-
 #pragma once
 
 #include "Win.h"
-
 #include "Button.h"
 #include "GaugeBar.h"
 #include "WinEx.h"
 
-#define SSW_SERVER_G_MAX	21	// 서버 그룹 최대 개수.
-#define SSW_SERVER_MAX		16	// 그룹내 서버 최대 개수.
-#define SSW_DESC_LINE_MAX	2	// 서버 설명 줄 수.
-#define SSW_DESC_ROW_MAX	83	// 한줄에 최대 글자(byte)수 + 1
+#define SSW_SERVER_G_MAX	21
+#define SSW_SERVER_MAX		16
+#define SSW_DESC_LINE_MAX	2
+#define SSW_DESC_ROW_MAX	83
+#define SSW_LEFT_SERVER_G_MAX	10
+#define SSW_RIGHT_SERVER_G_MAX	10
 
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
-#define SSW_LEFT_SERVER_G_MAX	10	// 좌측 서버 최대 갯수
-#define SSW_RIGHT_SERVER_G_MAX	10	// 우측 서버 최대 갯수
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 
 class CServerGroup;
 
 class CServerSelWin : public CWin
 {
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 private:
 	enum SERVER_SELECT_WIN
 	{
@@ -60,24 +47,10 @@ protected:
 	CServerGroup*	m_pSelectServerGroup;		// 선택된 서버그룹
 	
 	unicode::t_char		m_szDescription[SSW_DESC_LINE_MAX][SSW_DESC_ROW_MAX];	// 서버 설명 문자열.
-#else // KJH_ADD_SERVER_LIST_SYSTEM
-protected:
-	CButton		m_abtnServerG[SSW_SERVER_G_MAX];// 서버 그룹 버튼.
-	CButton		m_abtnServer[SSW_SERVER_MAX];	// 서버 버튼.
-	CGaugeBar	m_agbServer[SSW_SERVER_MAX];	// 서버 혼잡 게이지.
-	CSprite		m_asprDeco[2];					// 장식 스프라이트 좌우.
-	CSprite		m_asprArrow[2];					// 화살표 스프라이트 좌우.
-	CWinEx		m_winDescBg;					// 서버 설명 배경.
-	char		m_aszDesc[SSW_DESC_LINE_MAX][SSW_DESC_ROW_MAX];// 서버 설명 문자열.
-	int			m_nServerGCount;				// 서버 그룹 개수.
-	int			m_nSelServerG;	// 선택된 서버 그룹 인덱스.(-1이면 선택 없음)
-	int			m_anServerListIndex[SSW_SERVER_G_MAX];// 서버 그룹 버튼의 ServerList[] 인덱스.
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 
 public:
 	CServerSelWin();
 	virtual ~CServerSelWin();
-
 	void Create();
 	void SetPosition(int nXCoord, int nYCoord);
 	void UpdateDisplay();
@@ -92,13 +65,7 @@ protected:
 	void ShowDecoSprite();
 	void ShowArrowSprite();
 	void ShowServerBtns();
-
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	void UpdateWhileActive();
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	void UpdateWhileActive(double dDeltaTick);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	void RenderControls();
 };
 
-#endif // !defined(AFX_SERVERSELWIN_H__E3C0BEAA_B9CF_42C4_964F_A5339999BA7B__INCLUDED_)

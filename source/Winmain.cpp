@@ -2385,7 +2385,7 @@ BOOL UpdateMuExe( void)
 {
 	char *lpszNewMuFile[4] = { "mu._xe", "mumsg._ll", "wz_zp._ll", "message._tf"};
 	char *lpszDestFile[4] = { "mu.exe", "mumsg.dll", "wz_zp.dll", "message.wtf"};
-	// mu._xe 가 있는지 검사
+
 	BOOL bAtLeastOne = FALSE;
 	BOOL bNewFileFound[4] = { 0, 0, 0, 0};
 	for ( int i = 0; i < 4; ++i)
@@ -2404,8 +2404,6 @@ BOOL UpdateMuExe( void)
 	{
 		return ( TRUE);
 	}
-
-	// mu.exe 종료되길 기다림
 
 	BOOL bDone = FALSE;
 	DWORD dwStartTickCount = ::GetTickCount();
@@ -2686,15 +2684,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		strcat( lpszStr, " /t");
 #endif //_TEST_SERVER
 		
-		// 3. 실행
 		WinExec(lpszStr, SW_SHOW);
 		
 		return FALSE;
 	}
 #endif	// NDEBUG (RELEASE MODE)
 #endif	// !FOR_HACKING
-
-	// 암호화 시켜놓기 위함
 
 #ifdef WAV_CONVERT
 	ConvertSoundFileName();
@@ -2764,7 +2759,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		g_ServerPort = LaunchInfo.port;
 	}
 #else // !BAN_USE_CMDLINE
-	// mu.exe 에서 넘겨주는 서버 URL 과 Port 번호를 얻어서 쓴다.
 	WORD wPortNumber;	
 	if ( GetConnectServerInfo( szCmdLine, g_lpszCmdURL, &wPortNumber))
 	{
@@ -2774,19 +2768,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #endif // BAN_USE_CMDLINE
 	VM_END
 
-	// [크랙방지] main.exe 를 열어놓으면 실행중에 교체가 불가능하다.
 	if ( !OpenMainExe())
 	{
 		return false;
 	}
-
-#if SELECTED_LANGUAGE==LANGUAGE_JAPANESE
-    //  미리 실행된 핵 프로그램을 제거한다.
-    if ( KillHackProgram() )
-    {
-        return false;
-    }
-#endif
 
 	// PKD_ADD_BINARY_PROTECTION
 	VM_START
@@ -2805,7 +2790,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		return false;
 	}
 
-#ifdef LEM_ADD_GAMECHU
+#ifdef LEM_ADD_GAMECHU 
 	#ifdef FOR_WORK
 		g_ErrorReport.Write( " ! [Gamechu] - GCCertification.dll Loading-- \n");
 	#endif // FOR_WORK

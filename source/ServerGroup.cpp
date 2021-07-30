@@ -1,30 +1,15 @@
-// ServerGroup.cpp: implementation of the CServerGroup class.
-//
-//////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
-
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
-
 #include "ServerGroup.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CServerGroup::CServerGroup()
 {
-	m_iSequence		= 0;				// 서버 순서
-	m_iServerIndex	= 0;				// 서버 고유번호
-	m_iNumServer	= 0;				// 서버 갯수
+	m_iSequence		= 0;
+	m_iServerIndex	= 0;
+	m_iNumServer	= 0;
 	
 	for( int i=0 ; i<MAX_SERVER_LOW ; i++ )
 	{
-#ifdef ASG_MOD_SERVER_LIST_ADD_CHARGED_CHANNEL
 		m_abyNonPvpServer[i] = 0;
-#else	// ASG_MOD_SERVER_LIST_ADD_CHARGED_CHANNEL
-		m_bNonPvpServer[i] = false;	// NonPvP서버
-#endif	// ASG_MOD_SERVER_LIST_ADD_CHARGED_CHANNEL
 	}
 }
 
@@ -94,4 +79,3 @@ CServerInfo* CServerGroup::GetServerInfo(int iSequence)
 	return NULL;
 }
 
-#endif // KJH_ADD_SERVER_LIST_SYSTEM

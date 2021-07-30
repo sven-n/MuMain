@@ -88,9 +88,6 @@
 #endif //_BLUE_SERVER
 
 #if SELECTED_LANGUAGE == LANGUAGE_KOREAN || SELECTED_LANGUAGE == LANGUAGE_JAPANESE || SELECTED_LANGUAGE == LANGUAGE_TAIWANESE || SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-// - 안성민
-// 게임가드 인증 2.5버전(절대 디파인 위치 옮기지 말 것!)
-//	이 디파인이 꺼져 있을 시에는, 게임가드 라이브러리를 051223버전 전으로 덮어써야 함
 #define GAMEGUARD_AUTH25
 #endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN || SELECTED_LANGUAGE == LANGUAGE_JAPANESE
 
@@ -394,7 +391,6 @@
 //		#define NEW_RENDER_EFFECT			
 	#endif //NEW_RENDERING_SYSTEM
 
-	// 2. MR0:보강 된 사항들
 	#define LDS_ADD_RENDERMESHEFFECT_FOR_VBO					// RenderMeshEffect() 함수에 대한 VBO 버전을 추가 합니다. (함수내에서 VBO에서는 허용안되는 WorldVertex접근으로 "치명적 오류" 발생) (09.09.09)
 	#define LDS_MOD_ANIMATIONTRANSFORM_WITHHIGHMODEL			// AnimationTransformWithAttachHighModel함수에서 현재 arrayBone만 필요할 경우는 Transform으로 Bone이 Vertices에 곱하지 않도록 변경. (2009.09.09)
 	#define LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM	// AnimationTransformWithAttachHighModel함수내 TMArray가 Local인 이유로 이후 연산에 TM이 Point를 잃어버리는 현상으로 TM을 Global 으로 변경. (09.09.07)

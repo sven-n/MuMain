@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "CameraMove.h"
+#include "../ProtocolSend.h"
 
 #include "ZzzLodTerrain.h"
 // 
@@ -227,7 +228,10 @@ int CCameraMove::GetDelay(int iTileIndex)
 }
 
 bool CCameraMove::IsCameraMove() const
-{ return (m_dwCameraWalkState == CAMERAWALK_STATE_MOVE); }
+{ 
+	return (m_dwCameraWalkState == CAMERAWALK_STATE_MOVE); 
+}
+
 void CCameraMove::UpdateWayPoint()
 {
 UPDATE_WAY_POINT_ENTRY:
@@ -319,7 +323,8 @@ float CCameraMove::GetCurrentCameraDistanceLevel() const
 
 void CCameraMove::PlayCameraWalk(float StartPos[3], float fStartDistanceLevel)
 {
-	if(m_dwCameraWalkState == CAMERAWALK_STATE_READY) {
+	if(m_dwCameraWalkState == CAMERAWALK_STATE_READY) 
+	{
 		m_dwCameraWalkState = CAMERAWALK_STATE_MOVE;
 		m_CameraStartPos[0] = m_CurrentCameraPos[0] = StartPos[0];
 		m_CameraStartPos[1] = m_CurrentCameraPos[1] = StartPos[1];
@@ -331,7 +336,8 @@ void CCameraMove::PlayCameraWalk(float StartPos[3], float fStartDistanceLevel)
 }
 void CCameraMove::StopCameraWalk(bool bDone)
 {
-	if(m_dwCameraWalkState == CAMERAWALK_STATE_MOVE) {
+	if(m_dwCameraWalkState == CAMERAWALK_STATE_MOVE) 
+	{
 		if(bDone) {
 			m_dwCameraWalkState = CAMERAWALK_STATE_DONE;
 		}
@@ -353,8 +359,11 @@ void CCameraMove::SetCameraWalkState(DWORD dwCameraWalkState)
 {
 	m_dwCameraWalkState = dwCameraWalkState;
 }
+
 DWORD CCameraMove::GetCameraWalkState() const
-{ return m_dwCameraWalkState; }
+{ 
+	return m_dwCameraWalkState; 
+}
 
 void CCameraMove::RenderWayPoint()
 {

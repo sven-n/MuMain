@@ -282,20 +282,12 @@ extern DWORD g_dwLatestFuncCrcCheck;
 		g_dwLatestFuncCrcCheck = GetTickCount();\
 	}\
 }
-
-// ------------ self check 쓸 경우 <<--
 #else
 
 #define END_OF_FUNCTION( pos)	;
 #define SendCrcOfFunction( p_Index, p_Next, p_Function, p_Key)	;
 
 #endif	// USE_SELFCHECKCODE
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 서버 관련
-///////////////////////////////////////////////////////////////////////////////
 
 #define SendRequestServerList()\
 {\
@@ -358,6 +350,8 @@ extern bool First;
 extern int FirstTime;
 extern BOOL g_bGameServerConnected;
 
+#include "../ProtocolSend.h"
+
 __forceinline void SendCheck( void)
 {	
 	if ( !g_bGameServerConnected)
@@ -365,7 +359,11 @@ __forceinline void SendCheck( void)
 		return;
 	}
 
+	gProtocolSend.SendPing();
+
 	g_ConsoleDebug->Write(MCD_SEND, "SendCheck");
+
+	return;
 
 	pre_send( g_hInst);
 	CStreamPacketEngine spe;
@@ -373,7 +371,6 @@ __forceinline void SendCheck( void)
 	DWORD dwTick = GetTickCount();
 	spe.AddNullData( 1);
 	spe << dwTick;
-	//공속
 
 	if(CharacterAttribute->Ability & ABILITY_FAST_ATTACK_SPEED)
 	{
@@ -397,7 +394,6 @@ __forceinline void SendCheck( void)
 	hanguo_check1();
 }
 
-// 체크섬 보내기
 #define SendCheckSum( dwCheckSum)\
 {\
 	pre_send( g_hInst);\

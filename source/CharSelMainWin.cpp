@@ -258,32 +258,6 @@ void CCharSelMainWin::RenderControls()
 	g_pRenderText->SetTextColor(CLRDW_WHITE);
 	g_pRenderText->SetBgColor(0);
 
-#ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
-#ifdef _LANGUAGE_KOR
-	// 경고 문구 텍스트.
-	g_pRenderText->SetTextColor(CLRDW_BR_ORANGE);
-	g_pRenderText->RenderText(
-		int(m_asprBack[CSMW_SPR_INFO].GetXPos() / g_fScreenRate_x),
-		int((m_asprBack[CSMW_SPR_INFO].GetYPos() + 7) / g_fScreenRate_y),
-		GlobalText[m_nWarningText],
-		int(m_asprBack[CSMW_SPR_INFO].GetWidth() / g_fScreenRate_x), 0,
-		RT3_SORT_CENTER);
-#endif // _LANGUAGE_KOR
-#else // KJH_MOD_NATION_LANGUAGE_REDEFINE
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-
-	// 경고 문구 텍스트.
-	g_pRenderText->SetTextColor(CLRDW_BR_ORANGE);
-	g_pRenderText->RenderText(
-		int(m_asprBack[CSMW_SPR_INFO].GetXPos() / g_fScreenRate_x),
-		int((m_asprBack[CSMW_SPR_INFO].GetYPos() + 7) / g_fScreenRate_y),
-		GlobalText[m_nWarningText],
-		int(m_asprBack[CSMW_SPR_INFO].GetWidth() / g_fScreenRate_x), 0,
-		RT3_SORT_CENTER);
-
-#endif	// SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
-
 	if (m_bAccountBlockItem)
 	{
 		g_pRenderText->SetTextColor(0, 0, 0, 255);

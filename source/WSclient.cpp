@@ -64,6 +64,7 @@
 #include "NewUIInventoryCtrl.h"
 #include "w_CursedTemple.h"
 #include "SummonSystem.h"
+#include "../ProtocolSend.h"
 
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
@@ -223,7 +224,7 @@ void AddDebugText(unsigned char *Buffer,int Size)
 	}
 }
 
-BOOL CreateSocket(char *IpAddr, unsigned short Port)
+BOOL CreateSocket(char *IpAddr, unsigned short Port) 
 {
 	BOOL bResult = TRUE;
 	
@@ -239,7 +240,7 @@ BOOL CreateSocket(char *IpAddr, unsigned short Port)
 	g_ErrorReport.Write("[Connect to Server] ip address = %s, port = %d\r\n", IpAddr, Port);
 
 	g_ConsoleDebug->Write(MCD_NORMAL, "[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
-	
+
 	SocketClient.Create(g_hWnd, TRUE);
 	if( SocketClient.Connect(IpAddr,Port,WM_ASYNCSELECTMSG) == FALSE )
 	{
@@ -387,21 +388,23 @@ void ReceiveServerList( BYTE *ReceiveBuffer )
 		
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList]");
 }
-void ReceiveServerConnect( BYTE *ReceiveBuffer )
+void ReceiveServerConnect(BYTE* ReceiveBuffer) //Recebe informação do ConnectServer sobre a sala e envia a conexão para a sala escolhida
 {
 	LPPRECEIVE_SERVER_ADDRESS Data = (LPPRECEIVE_SERVER_ADDRESS)ReceiveBuffer;
 	char IP[16];
-	memset(IP,0,16);
-	memcpy(IP,(char*)Data->IP,15);
+	memset(IP, 0, 16);
+	memcpy(IP, (char*)Data->IP, 15);
 	g_ErrorReport.Write("[ReceiveServerConnect]");
 	SocketClient.Close();
 
-	if ( CreateSocket(IP,Data->Port))
+	if (CreateSocket(IP, Data->Port))
 	{
 		g_bGameServerConnected = TRUE;
-#ifdef USE_SELFCHECKCODE
-		g_byNextFuncCrcCheck = 1;
-#endif
+	}
+
+	if (gProtocolSend.ConnectServer())
+	{
+		//g_bGameServerConnected = TRUE;
 	}
 	
 	char Text[100];

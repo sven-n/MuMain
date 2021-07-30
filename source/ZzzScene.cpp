@@ -645,9 +645,8 @@ void WebzenScene(HDC hDC)
 
 	g_ErrorReport.Write( "> Loading ok.\r\n");
 
-#ifndef _DEBUG
-	SceneFlag = LOG_IN_SCENE;	// 서버 선택 씬으로.
-
+#ifdef _DEBUG
+	SceneFlag = LOG_IN_SCENE;	//
 #else
 	World = 2;
 	SceneFlag = MAIN_SCENE;
@@ -1684,8 +1683,6 @@ bool NewRenderCharacterScene(HDC hDC)
 	return true;
 }
 
-// 로그인 씬 생성.
-// 원래 NewMoveLogInScene()함수 안에 있던 내용 중 초기화 부분임.
 void CreateLogInScene()
 {
 	EnableMainRender = true;
@@ -1698,8 +1695,6 @@ void CreateLogInScene()
 
 	OpenLogoSceneData();
 
-	// 로그인 씬 UI 생성.
-	// 아래 CreateSocket() 에러 처리를 위해 먼저 호출해야함.
 	CUIMng::Instance().CreateLoginScene();
 
 	CurrentProtocolState = REQUEST_JOIN_SERVER;
@@ -1734,7 +1729,6 @@ void CreateLogInScene()
 
 	CCameraMove::GetInstancePtr()->PlayCameraWalk(Hero->Object.Position, 1000);
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-	// 시작위치 랜덤이 아닌 고정으로
 	CCameraMove::GetInstancePtr()->SetTourMode(TRUE, FALSE, 1);
 #else //PJH_NEW_SERVER_SELECT_MAP
 	CCameraMove::GetInstancePtr()->SetTourMode(TRUE, TRUE);
@@ -1763,7 +1757,6 @@ void NewMoveLogInScene()
 		return;
 	}
 #endif // MOVIE_DIRECTSHOW
-	// 크레딧이 보이면 연산하지 않음.
 	if (!CUIMng::Instance().m_CreditWin.IsShow())
 	{
 		InitTerrainLight();
@@ -1789,11 +1782,9 @@ void NewMoveLogInScene()
 		MoveCamera();
 	}
 
-	if (CInput::Instance().IsKeyDown(VK_ESCAPE))	// Esc키를 눌렀는가?
+	if (CInput::Instance().IsKeyDown(VK_ESCAPE))
 	{
 		CUIMng& rUIMng = CUIMng::Instance();
-		// 메시지 창, 로그인 창 등등 보이지 않고
-		//로그인씬 메인 창, 서버 선택창이 보이면.
 		if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_LoginWin.IsShow()
 			|| rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow()
 			|| rUIMng.m_CreditWin.IsShow()
@@ -1801,7 +1792,7 @@ void NewMoveLogInScene()
 			&& rUIMng.m_LoginMainWin.IsShow() && rUIMng.m_ServerSelWin.IsShow()
 			&& rUIMng.IsSysMenuWinShow())
 		{
-			::PlayBuffer(SOUND_CLICK01);	// 클릭 사운드.
+			::PlayBuffer(SOUND_CLICK01);
 			rUIMng.ShowWin(&rUIMng.m_SysMenuWin);
 		}
 	}
@@ -1811,7 +1802,6 @@ void NewMoveLogInScene()
 
 		CCameraMove::GetInstancePtr()->SetTourMode(FALSE);
 
-		//로그인 성공
 		SceneFlag = CHARACTER_SCENE;
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
