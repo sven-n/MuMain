@@ -25,7 +25,6 @@ namespace olc
 {
 	namespace net
 	{
-		namespace asio = boost::asio;
 		// Message
 
 		// Message Header is sent at start of all messages. The template allows us

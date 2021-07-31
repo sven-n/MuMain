@@ -3273,21 +3273,15 @@ void ProcessDebugCamera()
 }
 #endif DO_PROCESS_DEBUGCAMERA
 
+int TimePrior = GetTickCount();
+
 void MainScene(HDC hDC)
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MAINSCENE_TOTAL, PROFILING_MAINSCENE_TOTAL );
-#endif // DO_PROFILING
-
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 	SetEnableMultisample();
 #endif // LDS_ADD_MULTISAMPLEANTIALIASING
 
    	CalcFPS();
-
-#ifdef LEM_ADD_GAMECHU	// 게임츄 웹페이지 로그인 정보 없음- 종료.
-
-#endif // LEM_ADD_GAMECHU
 	
 #ifdef LDK_ADD_GLOBAL_PORTAL_WEBLOGIN_CHECK
 	if( !GlobalPortalSystem::Instance().IsAuthSet() )
@@ -3297,47 +3291,23 @@ void MainScene(HDC hDC)
 	}
 #endif //LDK_ADD_GLOBAL_PORTAL_WEBLOGIN_CHECK
 
-	// 초당 20 고정 프레임을 Unfixed 합니다.
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-	const int TIMEREMAIN_LIMITFIXEDFRAME = 40;
-	const int TIMEREMAIN_LIMITUNFIXEDFRAME = -99999;
-	int iCurrentLimitFrame = TIMEREMAIN_LIMITFIXEDFRAME;
-	
-	if( g_bUnfixedFixedFrame)
-	{
-		iCurrentLimitFrame = TIMEREMAIN_LIMITUNFIXEDFRAME;
-	}
+	int32_t Remain = 0;
 
-	while( TimeRemain >= iCurrentLimitFrame)
-#else // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-    while(TimeRemain >= 40)
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
+	for (Remain = TimeRemain; Remain >= 40; Remain -= 40)
 	{
-//		항상 다음과 같은 순서로 해야함.
-//		1. g_pNewKeyInput->ScanAsyncKeyState();
-//		2. CInput::Instance().Update();
-//		3. CUIMng::Instance().Update(dDeltaTick);
-
 		g_pNewKeyInput->ScanAsyncKeyState();
 
-		// 로그인씬과 캐릭터 선택씬에서만 작동하는 전용 UI.
 		if (LOG_IN_SCENE == SceneFlag || CHARACTER_SCENE == SceneFlag)
 		{
-		// g_pTimer로 이전 프레임과 현재 프레임 간의 시간 계산.
 			double dDeltaTick = g_pTimer->GetTimeElapsed();
-			// DeltaTick 보정
-			// if deltaSeconds is greater than 200ms it's probably due to disk paging or whatever.
-			// we clamp to 200ms, essentially subtracting out the time. 
-			// for important timing stuff like race times and such we will also need to accumulate
-			// this subtracted time and adjust the race time accordingly
 			dDeltaTick = MIN(dDeltaTick, 200.0);
 			g_pTimer->ResetTimer();
 
-			CInput::Instance().Update();			// 인풋 업데이트.
-			CUIMng::Instance().Update(dDeltaTick);	// UI 메니저 업데이트.
+			CInput::Instance().Update();
+			CUIMng::Instance().Update(dDeltaTick);
 		}
 
-		g_dwMouseUseUIID = 0;	//. 초기화
+		g_dwMouseUseUIID = 0;
 
 #ifdef LDK_ADD_SCALEFORM
 		if(GFxProcess::GetInstancePtr()->GetUISelect() == 1)
@@ -3361,7 +3331,6 @@ void MainScene(HDC hDC)
 			break;
 		}
 		
-	
 		for ( int iCount = 0; iCount < 5; ++iCount)
 		{
 			g_PhysicsManager.Move(0.005f);
@@ -3381,68 +3350,11 @@ void MainScene(HDC hDC)
 		WaterTextureNumber++;
 		WaterTextureNumber%=32;
 		MoveSceneFrame++;
+	} 
 
-		// 초당 20 Frame UnFix인경우 While을 한번만 실행 하도록 합니다.
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-		TimeRemain -= 40;
-
-		char Text[100];
-		sprintf(Text,"%d",TestTime++);
-		//SendChat(Text);
-		break;	
-
-#else // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-		TimeRemain -= 40;
-
-		char Text[100];
-		sprintf(Text,"%d",TestTime++);
-		//SendChat(Text);
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-
-#if defined(MSZ_ADD_EXCEPTION_TEST)
-		if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD1) )
-		{
-			RaiseException(WAIT_IO_COMPLETION, 0, 0, NULL);
-		}
-		else if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD2) )
-		{
-			RaiseException(STILL_ACTIVE, 0, 0, NULL);
-		}
-		else if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD3) )
-		{
-			RaiseException(EXCEPTION_DATATYPE_MISALIGNMENT, 0, 0, NULL);
-		}
-		else if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD4) )
-		{
-			RaiseException(EXCEPTION_BREAKPOINT, 0, 0, NULL);
-		}
-		else if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD5) )
-		{
-			RaiseException(EXCEPTION_SINGLE_STEP, 0, 0, NULL);
-		}
-		else if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD6) )
-		{
-			RaiseException(EXCEPTION_FLT_DENORMAL_OPERAND, 0, 0, NULL);
-		}
-		else if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD7) )
-		{
-			RaiseException(EXCEPTION_FLT_DIVIDE_BY_ZERO, 0, 0, NULL);
-		}
-		else if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD8) )
-		{
-			RaiseException(EXCEPTION_FLT_INEXACT_RESULT, 0, 0, NULL);
-		}
-		else if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD9) )
-		{
-			RaiseException(EXCEPTION_FLT_INVALID_OPERATION, 0, 0, NULL);
-		}
-		else if ( SEASON3B::IsRepeat(VK_CONTROL) && SEASON3B::IsPress(VK_NUMPAD0) )
-		{
-			RaiseException(EXCEPTION_FLT_OVERFLOW, 0, 0, NULL);
-		}
-#endif	// defined(MSZ_ADD_EXCEPTION_TEST)
-	} // while(TimeRemain >= 40)
-	if(Destroy) return;
+	if (Destroy) {
+		return;
+	}
 
 	//. 텍스쳐 관리
 	Bitmaps.Manage();
@@ -3549,16 +3461,16 @@ void MainScene(HDC hDC)
 		
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    int TimeRender = 0;
-    int TimePrior = GetTickCount();
+	int32_t DifTimer = 0;
+	uint32_t LastTimeCurrent = TimePrior;
+	TimePrior = GetTickCount();
+
 	bool Success = false;
+
 	if(SceneFlag == LOG_IN_SCENE)
 	{
 		Success = NewRenderLogInScene(hDC);
 	}
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 3, 15, MoveCharacter, 0x21DE);
-#endif
 	else if(SceneFlag == CHARACTER_SCENE)
 	{
 		Success = NewRenderCharacterScene(hDC);
@@ -3569,6 +3481,7 @@ void MainScene(HDC hDC)
 	}
 
 	g_PhysicsManager.Render();
+
 	if(GrabEnable)
 	{
 		SaveScreen();
@@ -3836,20 +3749,12 @@ void MainScene(HDC hDC)
 	}
 #endif // DO_PROCESS_DEBUGCAMERA
 
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 11, 1, MoveJoint, 0x5B02);
-#endif
 	if(Success)
 	{
 		glFlush();
 		SwapBuffers(hDC);
 	}
-	//////////////// 랜더링 끝 //////////////////////////////////////////////////////////
 
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_SCENE_TOTAL );
-#endif // DO_PROFILING
-	
 	// 사용자 의사 결정에 의한 고정 20프레임을 Unfixed 또는 Fixed 할 수 있도록 합니다.
 #if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 
@@ -3962,18 +3867,18 @@ void MainScene(HDC hDC)
  #endif // LDS_MR0_MOD_FIXEDFRAME_DELTA
 	}
 #else // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-    TimeRender = GetTickCount()-TimePrior;
-    while(TimeRender < 40)
-	{
-		TimeRender = GetTickCount()-TimePrior;
-	}
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
+	DifTimer = TimePrior - LastTimeCurrent;
 
-#ifdef _DEBUG
-	TimeRemain += TimeRender * ( g_bTimeTurbo ? 4 : 1);
-#else
-    TimeRemain += TimeRender;
-#endif
+	if (DifTimer < 40)
+	{
+		int32_t dwMilliseconds = 40 - DifTimer;
+		std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds));
+		TimePrior += dwMilliseconds;
+		DifTimer = 40;
+	}
+
+	DifTimer = DifTimer + Remain;
+#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 
 #ifdef _DEBUG
 #ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
@@ -4330,19 +4235,12 @@ void MainScene(HDC hDC)
 		g_iShowGoodLuck += 1000;
 	}
 #endif
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 	SetEnableMultisample();
 #endif // LDS_ADD_MULTISAMPLEANTIALIASING
 
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MAINSCENE_TOTAL );
-#endif // DO_PROFILING
+	TimeRemain = DifTimer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
