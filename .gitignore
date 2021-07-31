@@ -17,3 +17,5 @@
 *.iobj
 .build/
 build/Obj/Main/x86/Global Debug/Main.ilk
+*.txt
+*.jpg

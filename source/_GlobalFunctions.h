@@ -29,55 +29,42 @@ BuffTimeControl& TheBuffTimeControl();
 BuffStateValueControl& TheBuffStateValueControl();
 
 //Character Buff
-// 버프가 있는지 없는지 판단..
 #define g_isNotCharacterBuff( o ) \
 	o->m_BuffMap.isBuff()
 
-// 어떤 버프가 있는지 없는지 판단..( 개당 )
 #define g_isCharacterBuff( o, bufftype ) \
 	o->m_BuffMap.isBuff( bufftype )
 
-// 어떤 버프가 있는지 없는지 판단..( 리스트 )
 #define g_isCharacterBufflist( o, bufftypelist ) \
 	o->m_BuffMap.isBuff( bufftypelist )
 
-// 토큰으로 지워지고 생성이 되는 버프
 #define g_TokenCharacterBuff( o, bufftype ) \
 	o->m_BuffMap.TokenBuff( bufftype )
 
-// 어떤 버프가 충첩 판단..
 #define g_CharacterBuffCount( o, bufftype ) \
 	o->m_BuffMap.GetBuffCount( bufftype )
 
-// 몇개의 버프가 걸려있는지 
 #define g_CharacterBuffSize( o ) \
 	o->m_BuffMap.GetBuffSize()
 
-// 이터 인덱스로 순차적으로 가져 온다.
 #define g_CharacterBuff( o, iterindex ) \
 	o->m_BuffMap.GetBuff( iterindex )
 
-// 버프 등록
 #define g_CharacterRegisterBuff( o, bufftype ) \
 	o->m_BuffMap.RegisterBuff( bufftype )
 
-// 리스트로 버프 등록
 #define g_CharacterRegisterBufflist( o, bufftypelist ) \
 	o->m_BuffMap.RegisterBuff( bufftypelist )
 
-// 버프 해제
 #define g_CharacterUnRegisterBuff( o, bufftype ) \
 	o->m_BuffMap.UnRegisterBuff( bufftype )
 
-// 리스트로 버프 해제
 #define g_CharacterUnRegisterBuffList( o, bufftypelist ) \
 	o->m_BuffMap.UnRegisterBuff( bufftypelist )
 
-// 버프 카피
 #define g_CharacterCopyBuff( outObj, inObj ) \
 	outObj->m_BuffMap.m_Buff = inObj->m_BuffMap.m_Buff
 
-// 전체 버프 해제
 #define g_CharacterClearBuff( o ) \
 	o->m_BuffMap.ClearBuff()
 

@@ -3361,27 +3361,7 @@ void MainScene(HDC hDC)
 			break;
 		}
 		
-#ifdef ADD_MU_HOMEPAGE
-		// LHJ - 창 모드 일때 뮤 홈페이지 열기
-		if(g_bUseWindowMode)
-		{
-#ifdef NDEBUG
-			if(PressKey(VK_F11))	// LHJ - F11키를 누르면 뮤 홈페이지 뜬다
-			{
-#ifdef KJH_FIX_MU_HOMEPAGE_ADDRESS
-#ifdef PBG_FIX_BLUEHOMEPAGE_LINK
-				leaf::OpenExplorer("http://blue.muonline.co.kr/SiteMain.aspx");
-#else //PBG_FIX_BLUEHOMEPAGE_LINK
-				leaf::OpenExplorer("www.muonline.co.kr/sitemain.aspx");
-#endif//PBG_FIX_BLUEHOMEPAGE_LINK
-#else // KJH_FIX_MU_HOMEPAGE_ADDRESS
-				leaf::OpenExplorer("www.muonline.co.kr/GameMain.asp");
-#endif // KJH_FIX_MU_HOMEPAGE_ADDRESS
-			}
-#endif // NDEBUG	
-		}
-#endif //ADD_MU_HOMEPAGE
-		
+	
 		for ( int iCount = 0; iCount < 5; ++iCount)
 		{
 			g_PhysicsManager.Move(0.005f);

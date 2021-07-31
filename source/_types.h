@@ -140,9 +140,6 @@ typedef std::string		STRING;
 typedef wchar_t*		PWCHAR;
 typedef wchar_t			WCHAR;
 typedef std::wstring	WSTRING;
-#ifdef KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-	typedef std::map<eBuffState, DWORD>    BuffStateMap;
-#else // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-	typedef std::map<eBuffState, DWORD>    BuffStateMap;
-#endif // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
+typedef std::map<eBuffState, DWORD>    BuffStateMap;
+
 

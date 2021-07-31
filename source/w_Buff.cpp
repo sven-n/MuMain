@@ -1,17 +1,12 @@
+//////////////////////////////////////////////////////////////////////
 // w_Buff.cpp: implementation of the Buff class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "w_Buff.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 namespace
 {
-	//등록후 사용 하세요.
 	void GetTokenBufflist(std::list<eBuffState>& outtokenbufflist, const eBuffState curbufftype )
 	{
 		if(curbufftype >= eBuff_CastleRegimentDefense && curbufftype <= eBuff_CastleRegimentAttack3)
@@ -33,13 +28,13 @@ namespace
 #else //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 		if(curbufftype >= eBuff_PcRoomSeal1 && curbufftype <= eBuff_PcRoomSeal3)
 		{
-			list<eBuffState> tokenbufflist;	//<<-- 필요없는 것인듯??
+			list<eBuffState> tokenbufflist;
 #endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 			outtokenbufflist.push_back( eBuff_PcRoomSeal1 ); outtokenbufflist.push_back( eBuff_PcRoomSeal2 ); 
 			outtokenbufflist.push_back( eBuff_PcRoomSeal3 );
 		}
 #if defined(ASG_ADD_CS6_ASCENSION_SEAL_MASTER) && defined(ASG_ADD_CS6_WEALTH_SEAL_MASTER)
-		// 아래 if문에서 왜 eBuff_Seal_HpRecovery, eBuff_Seal_MpRecovery를 뺏는지 모르겠음.
+		// eBuff_Seal_HpRecovery, eBuff_Seal_MpRecovery
 		if ((curbufftype >= eBuff_Seal1 && curbufftype <= eBuff_Seal4)
 			|| curbufftype == eBuff_AscensionSealMaster || curbufftype == eBuff_WealthSealMaster)
 		{
@@ -140,11 +135,8 @@ const eBuffState Buff::isBuff(std::list<eBuffState> buffstatelist )
 void Buff::TokenBuff( eBuffState curbufftype )
 {
 	std::list<eBuffState> tokenbufflist;
-	// 토큰될 버프 리스트를 얻어 온다.
 	GetTokenBufflist( tokenbufflist, curbufftype );
-	// 리스트에 담겨 있는 버프 리스트를 지운다.
 	UnRegisterBuff( tokenbufflist );
-	// 바뀔 버프를 등록 한다.
 	RegisterBuff( curbufftype );
 }
 
@@ -193,7 +185,6 @@ const eBuffState Buff::GetBuff( int iterindex )
 	return eBuffNone;
 }
 
-#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
 bool Buff::IsEqualBuffType(IN int iBuffType, OUT unicode::t_char* szBuffName)
 {
 	BuffStateMap::iterator iter = m_Buff.begin();
@@ -213,9 +204,7 @@ bool Buff::IsEqualBuffType(IN int iBuffType, OUT unicode::t_char* szBuffName)
 
 	return false;
 }
-#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
-// 버프 등록
 void Buff::RegisterBuff( eBuffState buffstate )
 {
 	BuffStateMap::iterator iter = m_Buff.find( buffstate );
@@ -238,15 +227,10 @@ void Buff::RegisterBuff(std::list<eBuffState> buffstate )
 	}
 }
 
-// 버프 헤제
 void Buff::UnRegisterBuff( eBuffState buffstate )
 {
 	if( !isBuff() )
 	{
-		// 예외처리를 해줘야 한다.
-		// 없는 버프를 서버에서 지우라고 했을 경우
-		// 클라이언트에서 버프를 절대 지워서는 안된다.
-		//assert(0);
 		return;
 	}
 
@@ -264,10 +248,6 @@ void Buff::UnRegisterBuff( eBuffState buffstate )
 	}
 	else
 	{
-		// 예외처리를 해줘야 한다.
-		// 없는 버프를 서버에서 지우라고 했을 경우
-		// 클라이언트에서 버프를 절대 지워서는 안된다.
-		//assert(0);
 		return;
 	}
 }
