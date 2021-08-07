@@ -19,6 +19,7 @@
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
 #include "./Utilities/Log/muConsoleDebug.h"
+#include "../ProtocolSend.h"
 
 #ifdef LDK_ADD_GLOBAL_PORTAL_SYSTEM
 	#include "GlobalPortalSystem.h"
@@ -407,8 +408,8 @@ void CLoginWin::RequestLogin()
 		#endif // FOR_WORK
 	
 #endif // LEM_ADD_GAMECHU
-
- 			SendRequestLogIn(szID, szPass);
+			//SendRequestLogIn(szID, szPass);
+ 			gProtocolSend.SendRequestLogInNew(szID, szPass);
 		}
 	}
 }
@@ -422,6 +423,7 @@ void CLoginWin::CancelLogin()
 void CLoginWin::ConnectConnectionServer()
 {
 	SocketClient.Close();
+	gProtocolSend.DisconnectServer();
 
 	LogIn = 0;
 	CurrentProtocolState = REQUEST_JOIN_SERVER;

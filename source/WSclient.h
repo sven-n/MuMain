@@ -9,6 +9,7 @@
 #include "SessionCryptor.h"
 #endif // PKD_ADD_ENHANCED_ENCRYPTION
 #include "CSMapServer.h"
+//#include "../ProtocolSend.h"
 
 #define WM_ASYNCSELECTMSG (WM_USER+0)
 
@@ -160,8 +161,8 @@ typedef struct {
 
 //receive Character List 
 typedef struct {
-	PBMSG_HEADER Header;
-	BYTE         SubCode;
+	//PBMSG_HEADER Header;
+	//BYTE         SubCode;
     BYTE         MaxClass;		// 생성할 수 있는 직업 수 - 1.
 	BYTE		 MoveCount;
 	BYTE         Value;			// 생성되어 있는 캐릭터 수.
@@ -658,12 +659,10 @@ typedef struct {
 
 //receive move character
 typedef struct {
-	PBMSG_HEADER  Header;
 	BYTE          KeyH;
 	BYTE          KeyL;
 	BYTE          PositionX;
 	BYTE          PositionY;
-	//BYTE          Path[8];
 	BYTE          Path[1];
 } PMOVE_CHARACTER, * LPPMOVE_CHARACTER;
 
@@ -4055,6 +4054,9 @@ extern DWORD g_dwPacketInitialTick;
 BOOL CreateSocket(char *IpAddr, unsigned short Port);
 void DeleteSocket();
 void ProtocolCompiler( CWsctlc *pSocketClient = &SocketClient, int iTranslation = 0, int iParam = 0);
+void ReceiveCharacterList(BYTE* ReceiveBuffer);
+void ReceiveMovePosition(BYTE* ReceiveBuffer);
+void ReceiveMoveCharacter(BYTE* ReceiveBuffer);
 
 
 void InitGame ();

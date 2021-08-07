@@ -130,7 +130,7 @@ static  float   g_fStopTime = 0.f;
 void RegisterBuff( eBuffState buff, OBJECT* o, const int bufftime = 0 );
 void UnRegisterBuff( eBuffState buff, OBJECT* o );
 
-extern CGuildCache g_GuildCache;
+//extern CGuildCache g_GuildCache;
 
 //--------------------------------------------------------------------------------------------------------------------
 

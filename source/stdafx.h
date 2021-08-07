@@ -26,6 +26,7 @@
 //#pragma warning( disable : 4700 )
 //#pragma warning( disable : 4748 )
 //#pragma warning( disable : 4786 )
+#pragma warning( disable : 28159 )
 
 #pragma once
 

@@ -89,6 +89,9 @@
 #ifdef LDK_ADD_SCALEFORM
 #include "CGFxProcess.h"
 #endif //LDK_ADD_SCALEFORM
+
+#include "../ProtocolSend.h"
+
 //////////////////////////////////////////////////////////////////////////
 //  EXTERN.
 //////////////////////////////////////////////////////////////////////////
@@ -2539,7 +2542,7 @@ void LetHeroStop( CHARACTER * c, BOOL bSetMovementFalse)
 	BYTE PathY[1];
 	PathX[0] = ( Hero->PositionX);
 	PathY[0] = ( Hero->PositionY);
-	SendCharacterMove(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,TargetX,TargetY);
+	gProtocolSend.SendCharacterMoveNew(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,TargetX,TargetY);
 	
 	if (c != NULL && bSetMovementFalse == TRUE) 
 	{
@@ -2560,7 +2563,7 @@ void SetCharacterPos ( CHARACTER* c, BYTE posX, BYTE posY, vec3_t position )
     c->PositionY = PathY[0];
 	
     VectorCopy( position, c->Object.Position );
-	SendCharacterMove(c->Key,c->Object.Angle[2],1,PathX,PathY,PathX[0],PathY[0]);
+	gProtocolSend.SendCharacterMoveNew(c->Key,c->Object.Angle[2],1,PathX,PathY,PathX[0],PathY[0]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2954,7 +2957,8 @@ void UseSkillWarrior( CHARACTER *c, OBJECT *o)
 					)
 				{	
 					// 창 스킬 미끄럼 방지
-					SendPosition( positionX, positionY );
+					//SendPosition( positionX, positionY );
+					gProtocolSend.SendPositionNew( positionX, positionY );
 				}
 			}
 		}
@@ -4634,7 +4638,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 				BYTE PathY[1];
 				PathX[0] = TargetX;
 				PathY[0] = TargetY;
-				SendCharacterMove(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,TargetX,TargetY);
+				gProtocolSend.SendCharacterMoveNew(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,TargetX,TargetY);
 				c->Path.PathNum = 0;
 				if(Pose)
 				{
@@ -4712,7 +4716,7 @@ void SendMove(CHARACTER *c,OBJECT *o)
 	{
 		MouseUpdateTimeMax = 10+(c->Path.PathNum-2)*3;
 	}
-	SendCharacterMove(Hero->Key,o->Angle[2],c->Path.PathNum,&c->Path.PathX[0],&c->Path.PathY[0],TargetX,TargetY);
+	gProtocolSend.SendCharacterMoveNew(Hero->Key,o->Angle[2],c->Path.PathNum,&c->Path.PathX[0],&c->Path.PathY[0],TargetX,TargetY);
 	
 	c->Movement = true;
 	
@@ -6070,7 +6074,7 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 				BYTE PathY[1];
 				PathX[0] = ( c->PositionX);
 				PathY[0] = ( c->PositionY);
-				SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+				gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 				
 				BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 				
@@ -6147,7 +6151,7 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 					BYTE PathY[1];
 					PathX[0] = ( c->PositionX);
 					PathY[0] = ( c->PositionY);
-					SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+					gProtocolSend.SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 							
 					BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 							
@@ -6455,7 +6459,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 					BYTE PathY[1];
 					PathX[0] = ( c->PositionX);
 					PathY[0] = ( c->PositionY);
-					SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+					gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 
                     WORD TKey = 0xffff;
                     if ( g_MovementSkill.m_iTarget!=-1 )
@@ -6580,7 +6584,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 						BYTE PathY[1];
 						PathX[0] = ( c->PositionX);
 						PathY[0] = ( c->PositionY);
-						SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+						gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 						
                         BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 						
@@ -6616,7 +6620,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 						BYTE PathY[1];
 						PathX[0] = ( c->PositionX);
 						PathY[0] = ( c->PositionY);
-						SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+						gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 						
                         BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 						
@@ -6720,7 +6724,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 						BYTE PathY[1];
 						PathX[0] = ( c->PositionX);
 						PathY[0] = ( c->PositionY);
-						SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+						gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 						
                         BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 						
@@ -6751,7 +6755,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 						BYTE PathY[1];
 						PathX[0] = ( c->PositionX);
 						PathY[0] = ( c->PositionY);
-						SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+						gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 						
                         BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 						
@@ -7664,7 +7668,7 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 					BYTE PathY[1];
 					PathX[0] = ( c->PositionX);
 					PathY[0] = ( c->PositionY);
-					SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+					gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 					
 					BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 					
@@ -8860,7 +8864,7 @@ void Attack(CHARACTER *c)
 				BYTE PathY[1];
 				PathX[0] = ( c->PositionX);
 				PathY[0] = ( c->PositionY);
-				SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+				gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 				
 				BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 				
@@ -8936,7 +8940,7 @@ void Attack(CHARACTER *c)
 							BYTE PathY[1];
 							PathX[0] = ( c->PositionX);
 							PathY[0] = ( c->PositionY);
-							SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+							gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 							
 							BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 							
@@ -9213,7 +9217,7 @@ void Attack(CHARACTER *c)
 								BYTE PathY[1];
 								PathX[0] = ( c->PositionX);
 								PathY[0] = ( c->PositionY);
-								SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+								gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
                                 WORD TKey = 0xffff;
                                 if ( g_MovementSkill.m_iTarget!=-1 )
                                 {
@@ -9334,7 +9338,7 @@ void Attack(CHARACTER *c)
 									BYTE PathY[1];
 									PathX[0] = ( c->PositionX);
 									PathY[0] = ( c->PositionY);
-									SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+									gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 									
                                     BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 									
@@ -9370,7 +9374,7 @@ void Attack(CHARACTER *c)
 									BYTE PathY[1];
 									PathX[0] = ( c->PositionX);
 									PathY[0] = ( c->PositionY);
-									SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+									gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 									
                                     BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 									
@@ -9466,7 +9470,7 @@ void Attack(CHARACTER *c)
 									BYTE PathY[1];
 									PathX[0] = ( c->PositionX);
 									PathY[0] = ( c->PositionY);
-									SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+									gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 									
                                     BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 									
@@ -9497,7 +9501,7 @@ void Attack(CHARACTER *c)
 									BYTE PathY[1];
 									PathX[0] = ( c->PositionX);
 									PathY[0] = ( c->PositionY);
-									SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+									gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 									
                                     BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 									
@@ -10374,7 +10378,7 @@ void Attack(CHARACTER *c)
 								BYTE PathY[1];
 								PathX[0] = ( c->PositionX);
 								PathY[0] = ( c->PositionY);
-								SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
+								gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
 								
 								BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 								
@@ -11328,7 +11332,8 @@ void MoveHero()
 							//  요정의 활, 석궁 공격일경우.
 							if( GetEquipedBowType(CharacterMachine->Equipment) != BOWTYPE_NONE )
 							{
-								SendPosition( (c->PositionX), (c->PositionY) );
+								//SendPosition( (c->PositionX), (c->PositionY) );
+								gProtocolSend.SendPositionNew( c->PositionX, c->PositionY );
 							}
 							
 #else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스

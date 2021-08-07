@@ -292,8 +292,8 @@
     <OutDir>$(SolutionDir)build\bin\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\Obj\$(ProjectName)\$(PlatformShortName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Libraries\boost_1_75_0;$(DXSDK_DIR)DXSDK61\Include;C:\Libraries\boost_1_75_0</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Libraries\boost_1_75_0\stage\lib;$(DXSDK_DIR)DXSDK61\Lib;C:\Libraries\boost_1_75_0\stage\lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Libraries\boost_1_75_0;$(DXSDK_DIR)DXSDK61\Include;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Libraries\boost_1_75_0\stage\lib;$(DXSDK_DIR)DXSDK61\Lib;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Blue Real Server Release|Win32'">
     <OutDir>.\tmp\$(Configuration)\</OutDir>
@@ -614,7 +614,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\include\ShopListManager;$(SolutionDir)\dependencies\include\ShopListManager\interface;source;$(SolutionDir)\dependencies\include;$(MU_SDK)\Boost;$(MU_SDK)\DXSDK\Include;%(AdditionalIncludeDirectories);C:\Libraries\boost_1_75_0\boost;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\include\ShopListManager;$(SolutionDir)\dependencies\include\ShopListManager\interface;source;$(SolutionDir)\dependencies\include;$(MU_SDK)\Boost;$(MU_SDK)\DXSDK\Include;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>true</MinimalRebuild>

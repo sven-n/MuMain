@@ -65,6 +65,7 @@
 #include "w_CursedTemple.h"
 #include "SummonSystem.h"
 #include "../ProtocolSend.h"
+//#include "../ProtocolSend.h"
 
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
@@ -131,7 +132,7 @@ extern CUITextInputBox * g_pSingleTextInputBox;
 #endif // SCRATCH_TICKET
 
 extern CChatRoomSocketList * g_pChatRoomSocketList;
-extern CGuildCache g_GuildCache;
+
 ///////////////////////////////////////////
 
 #ifdef _PVP_ADD_MOVE_SCROLL
@@ -260,6 +261,7 @@ BOOL CreateSocket(char *IpAddr, unsigned short Port)
 void DeleteSocket()
 {
 	SocketClient.Close();
+	gProtocolSend.DisconnectServer();
 }
 
 static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
@@ -396,6 +398,7 @@ void ReceiveServerConnect(BYTE* ReceiveBuffer) //Recebe informação do ConnectSer
 	memcpy(IP, (char*)Data->IP, 15);
 	g_ErrorReport.Write("[ReceiveServerConnect]");
 	SocketClient.Close();
+	//gProtocolSend.DisconnectServer();
 
 	if (CreateSocket(IP, Data->Port))
 	{
@@ -475,7 +478,8 @@ void ReceiveJoinServer( BYTE *ReceiveBuffer )
 		if ( Util_CheckOption( GetCommandLine(), 'i', lpszTemp))
 		{
 			g_ErrorReport.Write( "> Try to Login \"%s\"\r\n", m_ID);
-			SendRequestLogIn( m_ID, lpszTemp);			
+			gProtocolSend.SendRequestLogInNew(m_ID, lpszTemp);
+			//SendRequestLogIn(m_ID, lpszTemp);
 		}
 	}
 #endif
@@ -837,11 +841,8 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		CryWolfMVPInit();
 		
 		SceneFlag = CHARACTER_SCENE;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		SendRequestCharactersList();
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+		//SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
+		gProtocolSend.SendRequestCharactersListNew();
 								
 		InitCharacterScene = false;
         InitMainScene = false;
@@ -867,6 +868,7 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		}
 		g_ErrorReport.Write("[ReceiveLogOut]");
 		SocketClient.Close();
+		gProtocolSend.DisconnectServer();
 		ReleaseCharacterSceneData();
 		SceneFlag = LOG_IN_SCENE;
 								
@@ -1852,16 +1854,14 @@ void ReceiveNotice( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x0D [ReceiveNotice(%s)]", Data->Notice);
 }
 
-void ReceiveMoveCharacter(BYTE *ReceiveBuffer,int Size)
+void ReceiveMoveCharacter(BYTE *ReceiveBuffer)
 {
 	LPPMOVE_CHARACTER Data = (LPPMOVE_CHARACTER)ReceiveBuffer;
 	int  Key = ((int)(Data->KeyH)<<8) + Data->KeyL;
     CHARACTER *c = &CharactersClient[FindCharacterIndex(Key)];
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	OBJECT *o = &c->Object;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	if(c->Dead==0)
 	{
 		OBJECT *o = &c->Object;
@@ -1888,7 +1888,6 @@ void ReceiveMoveCharacter(BYTE *ReceiveBuffer,int Size)
 			}
 			else if(c->Appear == 0)
 			{
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 				int iDefaultWall = TW_CHARACTER;
 
 				if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4
@@ -1898,9 +1897,6 @@ void ReceiveMoveCharacter(BYTE *ReceiveBuffer,int Size)
 				}
 
 				if(PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path, 0.0f, iDefaultWall))
-#else	// YDG_ADD_DOPPELGANGER_MONSTER
-				if(PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path))
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 				{
 					c->Movement = true;
 				}
@@ -14171,7 +14167,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
         ReceiveWeather(ReceiveBuffer);
 		break;
 	case PACKET_MOVE: //move character
-        ReceiveMoveCharacter(ReceiveBuffer,Size);
+        ReceiveMoveCharacter(ReceiveBuffer);
 		break;
 	case PACKET_POSITION: //move position
         ReceiveMovePosition(ReceiveBuffer);

@@ -5,26 +5,60 @@
 
 enum class ProtocolHead : uint16_t
 {
-	CLIENT_ACCEPT,
+	CLIENT_ACCEPT,			//Enviado pelo cliente
 	CLIENT_LIVE_CLIENT,
 
-	SERVER_CLIENT_CONNECT,
-	SERVER_CLIENT_DISCONNECT,
+	SERVER_CONNECT,			//Enviado pelo servidor
+	SERVER_DISCONNECT,
 
-	BOTH_PROTOCOL,
+	BOTH_CONNECT_LOGIN,			//Enviado pelo cliente e servidor
+	BOTH_CONNECT_CHARACTER,
+	BOTH_POSITION,
+	BOTH_MOVE,
+	BOTH_ATTACK1,
+	BOTH_ATTACK2,
+	BOTH_ATTACK3,
 };
 
-struct sPlayerDescription
+struct PMSG_CONNECT_ACCOUNT_SEND
 {
-	uint32_t nUniqueID = 0;
-	uint32_t nAvatarID = 0;
+	#pragma pack(1)
+	char account[10];
+	char password[20];
+	DWORD TickCount;
+	BYTE ClientVersion[5];
+	BYTE ClientSerial[16];
+	#pragma pack()
+};
 
-	uint32_t nHealth = 100;
-	uint32_t nAmmo = 20;
-	uint32_t nKills = 0;
-	uint32_t nDeaths = 0;
+struct PMSG_SIMPLE_RESULT_SEND
+{
+	BYTE result;
+};
 
-	float fRadius = 0.5f;
+struct PMSG_POSITION_SEND
+{
+	BYTE x;
+	BYTE y;
+};
+
+struct PMSG_MOVE_SEND
+{
+	BYTE x;
+	BYTE y;
+	BYTE path[8];
+};
+
+struct PMSG_CONNECT_CLIENT_RECV
+{
+	BYTE result;
+	BYTE index[2];
+	BYTE ClientVersion[5];
+};
+
+struct PMSG_SIMPLE_RESULT_RECV
+{
+	BYTE result;
 };
 
 class CustomClient : public olc::net::client_interface<ProtocolHead>
@@ -59,17 +93,44 @@ public:
 		msg.header.id = ProtocolHead::CLIENT_ACCEPT;
 		Send(msg);
 	}
+
+	void DataSend(ProtocolHead head,uint8_t* message, uint16_t size)
+	{
+		olc::net::message<ProtocolHead> lpMsg; 
+
+		lpMsg.header.id = head;
+
+		lpMsg.body.resize(lpMsg.body.size() + size);
+
+		std::memcpy(lpMsg.body.data(), message, size);
+
+		lpMsg.header.size = lpMsg.size();
+
+		Send(lpMsg);
+	}
+
 };
 
 class CProtocolSend
 {
-
 public:
+	CProtocolSend();
 	bool ConnectServer();
-	void SendPing();
+	void DisconnectServer();
+	void SendPingTest();
 	static void RecvMessage();
+	void SendPacket(ProtocolHead head,uint8_t* message, uint16_t size) { SocketConnect->DataSend(head,message,size); }
+	void SendCheckOnline();
+	void SendRequestLogInNew(char* account, char* password);
+	void SendRequestCharactersListNew();
+	void SendPositionNew(uint8_t PosX, uint8_t PosY);
+	void SendCharacterMoveNew(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
+
+	void RecvJoinServerNew(PMSG_CONNECT_CLIENT_RECV* pMsg);
+	void RecvLoginNew(PMSG_SIMPLE_RESULT_RECV* pMsg);
 private:
-	CustomClient SocketConnect;
+	CustomClient* SocketConnect;
+	HANDLE m_ClientAcceptThread;
 	
 }; 
 

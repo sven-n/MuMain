@@ -23,6 +23,7 @@ extern ItemAddOptioninfo*			g_pItemAddOptioninfo;
 #endif
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "NewUISystem.h"
+//#include "../ProtocolSend.h"
 
 #ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
 #include "DummyAttackProtocol.h"
@@ -350,7 +351,7 @@ extern bool First;
 extern int FirstTime;
 extern BOOL g_bGameServerConnected;
 
-#include "../ProtocolSend.h"
+//#include "../ProtocolSend.h"
 
 __forceinline void SendCheck( void)
 {	
@@ -359,7 +360,7 @@ __forceinline void SendCheck( void)
 		return;
 	}
 
-	gProtocolSend.SendPing();
+	//gProtocolSend.SendPingTest();
 
 	g_ConsoleDebug->Write(MCD_SEND, "SendCheck");
 

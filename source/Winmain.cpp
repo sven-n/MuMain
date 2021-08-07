@@ -44,6 +44,7 @@
 	#include "ProtectSysKey.h"
 #endif // PROTECT_SYSTEMKEY
 #include "./Utilities/Log/muConsoleDebug.h"
+#include "../ProtocolSend.h"
 
 
 #ifdef ATTACH_HACKSHIELD
@@ -358,7 +359,9 @@ void CloseHack(HWND shWnd,bool Flag)
 void CheckHack( void)
 {
 	if(FindHack) return;
-	SendCheck();
+	gProtocolSend.SendCheckOnline();
+
+
 #ifndef FOR_HACKING
 #ifdef NDEBUG
 	if(LogIn >= 2)
@@ -1230,6 +1233,7 @@ Pos_UserMemoryHack:
 			}
 #endif // CONSOLE_DEBUG
 			SocketClient.Close();
+			gProtocolSend.DisconnectServer();
 			CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
 			break;
 		}
@@ -1264,6 +1268,7 @@ Pos_UserMemoryHack:
 				
 				//  
 				SocketClient.Close();
+				gProtocolSend.DisconnectServer();
 				
 				DestroySound();
 				

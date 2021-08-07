@@ -98,8 +98,11 @@
 #include "ServerListManager.h"
 #endif // KJH_ADD_SERVER_LIST_SYSTEM
 #ifdef LDK_ADD_SCALEFORM
-#include "CGFxProcess.h"
+#include "CGFxProcess.h" 
 #endif //LDK_ADD_SCALEFORM
+#include "../ProtocolSend.h"
+//#include <chrono>
+//#include <thread>
 
 #ifdef KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
 	#ifdef RESOURCE_GUARD
@@ -148,7 +151,7 @@ float	g_fMULogoAlpha = 0;		// 뮤 로고 알파값
 #ifdef _PVP_ADD_MOVE_SCROLL
     extern CMurdererMove g_MurdererMove;
 #endif	// _PVP_ADD_MOVE_SCROLL
-    extern CGuildCache g_GuildCache;
+   // extern CGuildCache g_GuildCache;
 
 extern float g_fSpecialHeight;
 
@@ -1803,11 +1806,9 @@ void NewMoveLogInScene()
 		CCameraMove::GetInstancePtr()->SetTourMode(FALSE);
 
 		SceneFlag = CHARACTER_SCENE;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		SendRequestCharactersList();
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
+		//SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
+		gProtocolSend.SendRequestCharactersListNew();
 
 #ifdef NP_GAME_GUARD
         npGameGuard::loginID( LogInID );
@@ -2277,7 +2278,7 @@ bool MoveMainCamera()
 			BYTE PathY[1];
 			PathX[0] = (BYTE)(Hero->Object.Position[0]/TERRAIN_SCALE);
 			PathY[0] = (BYTE)(Hero->Object.Position[1]/TERRAIN_SCALE);
-			SendCharacterMove(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,PathX[0],PathY[0]);
+			gProtocolSend.SendCharacterMoveNew(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,PathX[0],PathY[0]);
             Hero->Path.PathNum = 0;
 		}
 	}
@@ -3872,7 +3873,7 @@ void MainScene(HDC hDC)
 	if (DifTimer < 40)
 	{
 		int32_t dwMilliseconds = 40 - DifTimer;
-		std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds));
+		std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds)); 
 		TimePrior += dwMilliseconds;
 		DifTimer = 40;
 	}

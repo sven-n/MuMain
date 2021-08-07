@@ -304,6 +304,7 @@ void PopUpErrorCheckMsgBox(const char* szErrorMsg, bool bForceDestroy)
 	//. 강제종료 루틴 (WM_DESTROY랑 같게)
 	//  
 	SocketClient.Close();
+	//gProtocolSend.DisconnectServer();
 	KillGLWindow();
 	
 #ifdef ANTIHACKING_ENABLE

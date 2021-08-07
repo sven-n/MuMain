@@ -289,28 +289,6 @@ namespace olc
 			}
 
 		public:
-			void ConnectToClient(olc::net::server_interface<T>* server, uint32_t uid = 0)
-			{
-				if (m_nOwnerType == owner::server)
-				{
-					if (m_socket.is_open())
-					{
-						id = uid;
-
-						//ReadHeader();
-
-						// A client has attempted to connect to the server, but we wish
-						// the client to first validate itself, so first write out the
-						// handshake data to be validated
-						WriteValidation();
-
-						// Next, issue a task to sit and wait asynchronously for precisely
-						// the validation data sent back from the client
-						ReadValidation(server);
-					}
-				}
-			}
-
 			void ConnectToServer(const asio::ip::tcp::resolver::results_type& endpoints)
 			{
 				// Only clients can connect to servers
@@ -328,6 +306,10 @@ namespace olc
 								// so wait for that and respond
 								ReadValidation();
 							}
+							else
+							{
+								std::cout << ec.message() << "\n";
+							}
 						});
 				}
 			}
@@ -336,7 +318,19 @@ namespace olc
 			void Disconnect()
 			{
 				if (IsConnected())
+				{
 					asio::post(m_asioContext, [this]() { m_socket.close(); });
+				}
+			}
+
+			void CloseConnection()
+			{
+				if (IsConnected())
+				{
+					m_socket.shutdown(asio::ip::tcp::socket::shutdown_both);
+					m_socket.close();
+				}
+					 
 			}
 
 			bool IsConnected() const
@@ -485,7 +479,7 @@ namespace olc
 						{
 							// Reading form the client went wrong, most likely a disconnect
 							// has occurred. Close the socket and let the system tidy it up later.
-							std::cout << "[" << id << "] Read Header Fail.\n";
+							std::cout << "[" << id << "] Read Header Fail:" << ec.message() << "\n";
 							m_socket.close();
 						}
 					});
@@ -577,6 +571,7 @@ namespace olc
 
 								// Write the result
 								WriteValidation();
+								std::cout << "WriteValidation" << std::endl;
 							}
 						}
 						else
@@ -699,6 +694,17 @@ namespace olc
 
 				// Destroy the connection object
 				m_connection.release();
+			}
+
+			// Disconnect from server
+			void CloseConnection()
+			{
+				// If connection exists, and it's connected then...
+				if (IsConnected())
+				{
+					// ...disconnect from server gracefully
+					m_connection->CloseConnection();
+				}
 			}
 
 			// Check if client is actually connected to a server
