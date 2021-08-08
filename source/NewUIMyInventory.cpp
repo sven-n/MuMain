@@ -24,7 +24,7 @@
 #include "UIGuildInfo.h"
 #include "UIManager.h"
 #include "CSItemOption.h"
-#include "GMHellas.h"
+#include "MapManager.h"
 #ifdef LDK_ADD_NEW_PETPROCESS
 #include "w_PetProcess.h"
 #endif //LDK_ADD_NEW_PETPROCESS
@@ -437,12 +437,12 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 #endif // KJH_FIX_DARKLOAD_PET_SYSTEM								//## 소스정리 대상임.
 	//////////////////////////////////////////////////////////////////////////
 	//  특정 행동이나, 특정 맵에서 장착할수 없는 아이템 체크
-	if (World==WD_7ATLANSE && (pItem->Type >= ITEM_HELPER+2 && pItem->Type <= ITEM_HELPER+3))
+	if (gMapManager.WorldActive==WD_7ATLANSE && (pItem->Type >= ITEM_HELPER+2 && pItem->Type <= ITEM_HELPER+3))
 	{ 
 		//. 아틀란스에서 유니리아, 디노란트, 다크호스 불가
 		return false;
 	}
-	else if(pItem->Type==ITEM_HELPER+2 && World==WD_10HEAVEN)
+	else if(pItem->Type==ITEM_HELPER+2 && gMapManager.WorldActive==WD_10HEAVEN)
 	{
 		//. 천공에서 유니리아 불가
 		return false;
@@ -453,7 +453,7 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 		return false;
 	}
 	// 카오스캐슬에서 장착할 수 없는 아이템
-	else if ( InChaosCastle() || (M34CryWolf1st::Get_State_Only_Elf()
+	else if ( gMapManager.InChaosCastle() || (M34CryWolf1st::Get_State_Only_Elf()
 		&& g_isCharacterBuff((&Hero->Object), eBuff_CrywolfHeroContracted) ) )  // 크라이울프 MVP에서 요정이 제단에 계약 된 상태 일때 착용 할수 없는것
 	{ 
 		//. 카캐에서 유니리아, 디노란트, 다크호스, 다크스피릿, 펜릴 불가
@@ -620,7 +620,7 @@ bool SEASON3B::CNewUIMyInventory::UpdateMouseEvent()
 		}
 #ifdef CSK_FIX_WOPS_K27964_LOSTMAP_POP
 		// 잃어버린지도 환영의사원에서는 못버리게 수정
-		else if(pItemObj && pItemObj->Type == ITEM_POTION+28 && g_CursedTemple->IsCursedTemple() == true)
+		else if(pItemObj && pItemObj->Type == ITEM_POTION+28 && gMapManager.IsCursedTemple() == true)
 		{
 			ResetMouseLButton();
 			return false;
@@ -629,7 +629,7 @@ bool SEASON3B::CNewUIMyInventory::UpdateMouseEvent()
 		
 		// 칼리마맵에서는 잃어버린 지도를 못버립니다.
 		// 던져도 상관없다고 해서 일단 주석으로 처리
-// 		else if(pItemObj && pItemObj->Type == ITEM_POTION+28 && InHellas() == true)
+// 		else if(pItemObj && pItemObj->Type == ITEM_POTION+28 && gMapManager.InHellas() == true)
 // 		{
 // 			// 메세지 추가해줘야 한다.
 // 
@@ -1214,7 +1214,7 @@ void SEASON3B::CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
 	//. 코드 그대로 옮김
 	SetCharacterClass(Hero);
 	OBJECT* pHeroObject = &Hero->Object;
-	if(false == InChaosCastle())
+	if(false == gMapManager.InChaosCastle())
 	{
 		switch(pItem->Type)
 		{
@@ -1959,7 +1959,7 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 				{
 #ifdef KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
 					// 이카루스일때 예외처리
-					if( World == WD_10HEAVEN )		
+					if( gMapManager.WorldActive == WD_10HEAVEN )		
 					{
 						ITEM* pEquippedPetItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 						bool bPicked = true;
@@ -2530,7 +2530,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 			}
 			else if(pItem->Type == ITEM_HELPER+48)	// 칼리마 자유입장권
 			{
-				if(Hero->SafeZone || InHellas()) 
+				if(Hero->SafeZone || gMapManager.InHellas()) 
 				{
 					// 1238 "안전지대에서 사용할 수 없습니다"
 					g_pChatListBox->AddText("", GlobalText[1238], SEASON3B::TYPE_ERROR_MESSAGE);

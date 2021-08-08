@@ -21,21 +21,15 @@ using namespace SEASON3B;
 #include "CSChaosCastle.h"
 #include "wsclientinline.h"
 #include "NewUICustomMessageBox.h"
-
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
+#include "MapManager.h"
 
 extern int g_iChatInputType;
-extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];// ok, cancel // 사용여부, x, y, width, height
+extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
 extern  int g_iActionObjectType;
 extern  int g_iActionWorld;
 extern  int g_iActionTime;
 extern  float g_fActionObjectVelocity;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 CNewChaosCastleSystem::CNewChaosCastleSystem()
 {
 	int iChaosCastleLimitArea1[16] = { 23, 75, 44, 76, 43, 77, 44, 108, 23, 107, 42, 108, 23, 77, 24, 106 };
@@ -54,11 +48,6 @@ CNewChaosCastleSystem::~CNewChaosCastleSystem()
 	
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////
-//  경기 결과에 필요한 값을 저장한다.
-//////////////////////////////////////////////////////////////////////////
 void CNewChaosCastleSystem::SetMatchResult ( const int iNumDevilRank, const int iMyRank, const MatchResult *pMatchResult, const int Success )
 {
     if(iNumDevilRank != 254)
@@ -73,16 +62,11 @@ void CNewChaosCastleSystem::SetMatchResult ( const int iNumDevilRank, const int 
 	SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleResultMsgBoxLayout));
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  SetMatchCommand
-//////////////////////////////////////////////////////////////////////////
 void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_STATE data )
 {
-    //  카오스 캐슬
     switch ( data->m_byPlayState )
     {
-    case 5 :    //  경기 시작.
+    case 5 :
         m_bActionMatch = true;
         m_byCurrCastleLevel = 255;
 		
@@ -90,13 +74,13 @@ void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
         StopBuffer ( SOUND_CHAOS_ENVIR, true );
         PlayBuffer ( SOUND_CHAOSCASTLE, NULL, true );
         break;
-    case 6 :    //  게임 진행중.
+    case 6 :
         SetMatchInfo ( data->m_byPlayState+1, 15*60, data->m_wRemainSec, data->m_wMaxKillMonster, data->m_wCurKillMonster );
         break;
-    case 7 :    //  게임 종료.
+    case 7 :
         clearMatchInfo ();
         StopBuffer ( SOUND_CHAOSCASTLE, true );
-        if ( InChaosCastle()==true )
+        if ( gMapManager.InChaosCastle()==true )
         {
             PlayBuffer ( SOUND_CHAOS_ENVIR, NULL, true );
             PlayBuffer ( SOUND_CHAOS_END );
@@ -108,7 +92,7 @@ void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
         if ( m_byCurrCastleLevel==0 )
         {
             m_byCurrCastleLevel = 1;
-            SetActionObject ( World, 1, 40, 1 );
+            SetActionObject (gMapManager.WorldActive, 1, 40, 1 );
             AddTerrainAttributeRange ( 23,  75, 22,  2, TW_NOGROUND, 1 );
             AddTerrainAttributeRange ( 43,  77,  2, 32, TW_NOGROUND, 1 );
             AddTerrainAttributeRange ( 23, 107, 20,  2, TW_NOGROUND, 1 );
@@ -123,7 +107,7 @@ void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
         if ( m_byCurrCastleLevel==3 )
         {
             m_byCurrCastleLevel = 4;
-            SetActionObject ( World, 1, 40, 1 );
+            SetActionObject ( gMapManager.WorldActive, 1, 40, 1 );
             AddTerrainAttributeRange ( 25,  77, 18,  2, TW_NOGROUND, 1 );
             AddTerrainAttributeRange ( 41,  79,  2, 28, TW_NOGROUND, 1 );
             AddTerrainAttributeRange ( 25, 105, 16,  2, TW_NOGROUND, 1 );
@@ -138,7 +122,7 @@ void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
         if ( m_byCurrCastleLevel==6 )
         {
             m_byCurrCastleLevel = 7;
-            SetActionObject ( World, 1, 40, 1 );
+            SetActionObject ( gMapManager.WorldActive, 1, 40, 1 );
             AddTerrainAttributeRange ( 27,  79, 14,  2, TW_NOGROUND, 1 );
             AddTerrainAttributeRange ( 39,  81,  2, 24, TW_NOGROUND, 1 );
             AddTerrainAttributeRange ( 27, 103, 12,  2, TW_NOGROUND, 1 );
@@ -156,7 +140,7 @@ void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
 void CNewChaosCastleSystem::RenderMatchTimes ( void )
 {
 	//  카운트 다운
-	if ( m_byMatchType > 0 && InChaosCastle() )
+	if ( m_byMatchType > 0 && gMapManager.InChaosCastle() )
 	{
         switch ( m_byMatchType )
         {

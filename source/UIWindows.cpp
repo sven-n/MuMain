@@ -20,19 +20,18 @@
 #include "UIManager.h"
 #include "CSParts.h"
 #include "SummonSystem.h"
+#include "MapManager.h"
 
-extern float g_fScreenRate_x;	// ※
+extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 extern int	 g_iChatInputType;
-extern DWORD g_dwActiveUIID;	// 윈도우가 액션중인가 (이동이나 리사이즈)
-extern DWORD g_dwMouseUseUIID;		// 마우스가 윈도우 위에 있는가 (있으면 윈도우 ID)
+extern DWORD g_dwActiveUIID;
+extern DWORD g_dwMouseUseUIID;
 extern CUITextInputBox * g_pSingleTextInputBox;
 extern CChatRoomSocketList * g_pChatRoomSocketList;
 extern CUITextInputBox * g_pSingleTextInputBox;
-extern DWORD g_dwTopWindow;	// 독점 윈도우 번호
-extern DWORD g_dwKeyFocusUIID;	// 키보드 반응을 받을 UI ID
-
-
+extern DWORD g_dwTopWindow;
+extern DWORD g_dwKeyFocusUIID;
 extern void ReceiveLetterText(BYTE* ReceiveBuffer);
 
 int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
@@ -59,13 +58,11 @@ CUIWindowMgr::CUIWindowMgr()
 	g_iLetterReadNextPos_x = UIWND_DEFAULT;
 	g_iLetterReadNextPos_y = UIWND_DEFAULT;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CUIWindowMgr::~CUIWindowMgr()
 {
 	Reset();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIWindowMgr::Reset()
 {
@@ -1879,21 +1876,18 @@ void CUIPhotoViewer::RenderPhotoCharacter()
 
 	CHARACTER * c = &m_PhotoChar;
 	OBJECT * o = &c->Object;
-	int WorldBackup = World;
-	World = WD_0LORENCIA;
+	int WorldBackup = gMapManager.WorldActive;
+	gMapManager.WorldActive = WD_0LORENCIA;
 	MoveCharacter(c, o);
 	MoveCharacterVisual(c, o);
 	MoveBug(&m_PhotoHelper, TRUE);
-	World = WorldBackup;
+	gMapManager.WorldActive = WorldBackup;
 
-	// 카메라 설정
-// ------------
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
 	glViewport2(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y, m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
 	gluPerspective2(1.f,(float)(m_iWidth * g_fScreenRate_x)/(float)(141 * g_fScreenRate_y), 2000, 20000);//CameraViewNear,CameraViewFar);
-// ------------
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
@@ -1901,35 +1895,31 @@ void CUIPhotoViewer::RenderPhotoCharacter()
 	EnableDepthTest();
 	EnableDepthMask();
 	
-	// 2D 화면 공간으로 이동
 	glRotatef( -90.0f, 1.f, 0.f, 0.f);
 	glRotatef( -90.0f, 0.f, 0.f, 1.f);
 	glTranslatef( -10000.0f, 0.0f, -75.f);
 
-	if(c->Helper.Type == MODEL_HELPER+4) //이혁재 - 편지관련 다크 호스 타고 있을시 케릭터 보여주는 위치 수정
+	if(c->Helper.Type == MODEL_HELPER+4)
 		glTranslatef( -o->Position[0], -o->Position[1], -o->Position[2]-50.0f);
 	else
 		glTranslatef( -o->Position[0], -o->Position[1], -o->Position[2]);
 	
-	// 모델 회전 처리
 	Vector( 0.0f, 0.0f, m_fCurrentAngle, o->Angle);
 
-	glDisable(GL_ALPHA_TEST);	// 수정요망
+	glDisable(GL_ALPHA_TEST);
 	glEnable(GL_TEXTURE_2D);
 	EnableDepthTest();
 	EnableCullFace();
 	EnableDepthMask();
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	bool AlphaTestEnable = false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	TextureEnable   = true;
 	DepthTestEnable = true;
 	CullFaceEnable  = true;
 	DepthMaskEnable = true;
-	glDepthFunc(GL_LEQUAL);//
-	glAlphaFunc(GL_GREATER,0.25f);//
-	glDisable(GL_FOG);//
+	glDepthFunc(GL_LEQUAL);
+	glAlphaFunc(GL_GREATER,0.25f);
+	glDisable(GL_FOG);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	o->Scale = 0.7f * m_fCurrentZoom;
 	m_PhotoHelper.Scale = m_fPhotoHelperScale * m_fCurrentZoom;
@@ -1940,14 +1930,14 @@ void CUIPhotoViewer::RenderPhotoCharacter()
 	if (c->Wing.Type != -1 && m_iSettingAnimation > AT_HEALING1)
 		c->SafeZone = true;
 	else c->SafeZone = false;
-	if (c->Helper.Type == MODEL_HELPER+2)	// 유니리아
+	if (c->Helper.Type == MODEL_HELPER+2)
 		m_PhotoHelper.Position[2] += 10;
-	else if (c->Helper.Type == MODEL_HELPER+3)	// 디노란트
+	else if (c->Helper.Type == MODEL_HELPER+3)
 		m_PhotoHelper.Position[2] += 25;
 	RenderBug(&m_PhotoHelper, TRUE);
-	if (c->Helper.Type == MODEL_HELPER+2)	// 유니리아
+	if (c->Helper.Type == MODEL_HELPER+2)
 		m_PhotoHelper.Position[2] -= 10;
-	else if (c->Helper.Type == MODEL_HELPER+3)	// 디노란트
+	else if (c->Helper.Type == MODEL_HELPER+3)
 		m_PhotoHelper.Position[2] -= 25;
 	RenderCharacter(c,o);
 
@@ -1955,7 +1945,6 @@ void CUIPhotoViewer::RenderPhotoCharacter()
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
-
 	glViewport2(0,0,WindowWidth,WindowHeight);
 }
 
@@ -2009,26 +1998,26 @@ int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
 
 	CHARACTER * c = &m_PhotoChar;
 	OBJECT * o = &c->Object;
-	int WorldBackup = World;
+	int WorldBackup = gMapManager.WorldActive;
 	switch(iCurrentAni)
 	{
 	case AT_STAND1:
-		World = WD_0LORENCIA;
+		gMapManager.WorldActive = WD_0LORENCIA;
    		SetPlayerStop(c);
-		World = WorldBackup;
+		gMapManager.WorldActive = WorldBackup;
 		break;
 	case AT_ATTACK1:
-		World = WD_0LORENCIA;
+		gMapManager.WorldActive = WD_0LORENCIA;
 		SetPlayerAttack(c);
-		World = WorldBackup;
+		gMapManager.WorldActive = WorldBackup;
       	c->AttackTime = 1;
 		c->Object.AnimationFrame = 0;
 		c->TargetCharacter = -1;
 		break;
 	case AT_MOVE1:
-		World = WD_0LORENCIA;
+		gMapManager.WorldActive = WD_0LORENCIA;
 		SetPlayerWalk(c);
-		World = WorldBackup;
+		gMapManager.WorldActive = WorldBackup;
 		break;
 	case AT_SIT1:
 		if(!IsFemale(c->Class))

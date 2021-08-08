@@ -119,66 +119,32 @@ namespace SKILLCONDITION
 			return false;
 		}
 
-		// 제국수호군 맵의 순간이동 계열 스킬은 모두 사용못하도록 합니다.
-#ifdef LDS_FIX_SKILLKEY_DISABLE_WHERE_EG_ALLTELESKILL
-		if( (true == IsEmpireGuardian()) && 
+		if( (true == gMapManager.IsEmpireGuardian()) && 
 			(SkillType == AT_SKILL_TELEPORT_B || SkillType == AT_SKILL_TELEPORT) )
 		{
 			return false;
 		}
-#endif // LDS_FIX_SKILLKEY_DISABLE_WHERE_EG_ALLTELESKILL
-		
-		//에너지 요구치(스크립트내에 0값을 갖는것들)가 없다면 그냥 리턴한다.
+
  		if(SkillAttribute[SkillType].Energy == 0)
  		{
  			return true;
  		}
 
-		// 마스터 스킬 강화의 경우 강화 이전의 스킬의 수치를 그대로 적용한다. - 
-#ifdef KJH_MOD_BTS184_REQUIRE_STAT_WHEN_SPELL_SKILL
 		SkillType = MasterSkillToBaseSkillIndex(SkillType);
-#else // KJH_MOD_BTS184_REQUIRE_STAT_WHEN_SPELL_SKILL
-#ifdef LDS_FIX_MASTERSKILLKEY_DISABLE_OVER_LIMIT_MAGICIAN		
-		if(SkillType >= AT_SKILL_SOUL_UP &&				// 소울 바리어 강화
-			SkillType <= AT_SKILL_SOUL_UP + 5)
-		{
-			SkillType = AT_SKILL_WIZARDDEFENSE;
-		}
-		else if(SkillType >= AT_SKILL_HELL_FIRE_UP &&		// 헬파이어 강화
-			SkillType <= AT_SKILL_HELL_FIRE_UP + 5)
-		{
-			SkillType = AT_SKILL_HELL;
-		}
-		else if(SkillType >= AT_SKILL_EVIL_SPIRIT_UP &&	// 악령 강화 (흑마법사)
-			SkillType <= AT_SKILL_EVIL_SPIRIT_UP + 5)
-		{
-			SkillType = AT_SKILL_EVIL;
-		}
-		else if(SkillType >= AT_SKILL_ICE_UP &&			// 서든 아이스 강화 
-			SkillType <= AT_SKILL_ICE_UP + 5)
-		{
-			SkillType = AT_SKILL_BLAST_FREEZE;
-		}
-#endif // LDS_FIX_MASTERSKILLKEY_DISABLE_OVER_LIMIT_MAGICIAN
-#endif // KJH_MOD_BTS184_REQUIRE_STAT_WHEN_SPELL_SKILL
-
 
 		bool result = true;	
 		
 		DemendConditionInfo BasicCharacterInfo;
 		
-		
 		BasicCharacterInfo.SkillLevel     = SkillAttribute[SkillType].Level;
 		BasicCharacterInfo.SkillStrength  = SkillAttribute[SkillType].Strength;
 		BasicCharacterInfo.SkillDexterity = SkillAttribute[SkillType].Dexterity;
 		BasicCharacterInfo.SkillVitality  = 0;
-		//에너지의 스텟 요구치 계산공식.
 		BasicCharacterInfo.SkillEnergy = (20 + ( SkillAttribute[SkillType].Energy * SkillAttribute[SkillType].Level ) * 0.04);
 		BasicCharacterInfo.SkillCharisma = SkillAttribute[SkillType].Charisma;
 		
 		DemendConditionInfo HeroCharacterInfo;
 		
-		//캐릭터의 각종 스텟의 량을 얻어온다. 캐릭의 스텟+ 각종 장비착용후의 증가량을 합한다.
 		HeroCharacterInfo.SkillLevel     = CharacterMachine->Character.Level; 
 		HeroCharacterInfo.SkillStrength  = CharacterMachine->Character.Strength + CharacterMachine->Character.AddStrength;
 		HeroCharacterInfo.SkillDexterity = CharacterMachine->Character.Dexterity + CharacterMachine->Character.AddDexterity; 
@@ -194,19 +160,13 @@ namespace SKILLCONDITION
 #endif //PBG_FIX_SKILL_DEMENDCONDITION
 
 #if defined PBG_ADD_MU_LOGO || defined LJH_MOD_TO_USE_ISBLUEMUSERVER_FUNC
-// 블루뮤 로고가 들어가면 블루섭 
-//(소스 분리작업으로 디파인으로 블루섭인가 여부를 확인) 
-// 굳이 글로벌변수는 없어도 됨 프로토콜로 관리 할경우
+
 namespace BLUE_MU
 {
 	bool g_bIsBlue_MU_Server = false;
 
-	// 블루뮤서버인지 재확인이 필요할 경우
 	BOOL IsBlueMuServer()
 	{
-#ifdef _BLUE_SERVER
-		g_bIsBlue_MU_Server = true;
-#endif //_BLUE_SERVER
 		return g_bIsBlue_MU_Server;
 	}
 };

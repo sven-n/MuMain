@@ -20,7 +20,7 @@
 #include "HackTest.h"
 #endif // CSK_HACK_TEST
 
-extern CGlobalBitmap Bitmaps;
+//extern CGlobalBitmap Bitmaps;
 
 CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
 {

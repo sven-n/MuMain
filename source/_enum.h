@@ -1298,106 +1298,6 @@ enum
 };
 //object end
 
-//lodterrain start
-enum ENUM_WORLD
-{
-	WD_0LORENCIA = 0,	// 0    로랜시아.
-	WD_1DUNGEON,		// 1    던전.
-	WD_2DEVIAS,			// 2    데비아스.
-	WD_3NORIA,			// 3    노리아.
-	WD_4LOSTTOWER,		// 4    로스트타워.
-	WD_5UNKNOWN,		// 5    
-	WD_6STADIUM,		// 6    배틀싸커 경기장.
-	WD_7ATLANSE,		// 7    아틀란스.
-	WD_8TARKAN,			// 8    타르칸.
-	WD_9DEVILSQUARE,	// 9    악마의 광장.
-	WD_10HEAVEN,        // 10   천공.
-	WD_11BLOODCASTLE1,  // 11   블러드 1캐슬.
-	WD_11BLOODCASTLE_END = WD_11BLOODCASTLE1+6,// 11 + 6   블러드 7캐슬.
-	WD_18CHAOS_CASTLE,          //  18  카오스캐슬.
-	WD_18CHAOS_CASTLE_END = WD_18CHAOS_CASTLE+(CHAOS_NUM-1),
-	WD_24HELLAS,        //  24  헬라스.
-	WD_24HELLAS_END = WD_24HELLAS+(HELLAS_NUM-2),	//6칼리마까지
-	WD_30BATTLECASTLE, 
-	WD_31HUNTING_GROUND = 31,	// 31 공성전 사냥터
-								// 32 악마의 광장 5,6 확장에 쓰임
-	WD_33AIDA			= 33,	// 33 아이다
-	WD_34CRYWOLF_1ST	= 34,	// 34 크라이울프 MVP
-	WD_35CRYWOLF_2ND    = 35,	// 35 크라이울프 2차에 쓰일뻔함(현재 안씀 : 이번호 딴걸로 써도됨)
-	WD_24HELLAS_7		= 36,	// 36 히든 칼리마
-	WD_37KANTURU_1ST	= 37,	// 37 칸투르 1차
-	WD_38KANTURU_2ND	= 38,	// 38 칸투르 2차
-	WD_39KANTURU_3RD	= 39,	// 39 칸투르 3차
-	WD_40AREA_FOR_GM	= 40,	// GM 소환 지역
-	WD_41CHANGEUP3RD_1ST	= 41,	// 41 발가스의 병영
-	WD_42CHANGEUP3RD_2ND	= 42,	// 42 발가스의 안식처
-	WD_45CURSEDTEMPLE_LV1	= 45,	// The event map for the capture the flag
-	WD_45CURSEDTEMPLE_LV2,			// The event map for the capture the flag
-	WD_45CURSEDTEMPLE_LV3,			// The event map for the capture the flag
-	WD_45CURSEDTEMPLE_LV4,			// The event map for the capture the flag
-	WD_45CURSEDTEMPLE_LV5,			// The event map for the capture the flag
-	WD_45CURSEDTEMPLE_LV6,			// The event map for the capture the flag
-	WD_51HOME_6TH_CHAR		= 51,	// 51 신캐릭터 시작맵
-	WD_52BLOODCASTLE_MASTER_LEVEL = 52,
-	WD_53CAOSCASTLE_MASTER_LEVEL = 53,
-	WD_54CHARACTERSCENE = 54,			// 54 새로운 케릭터 씬
-	WD_55LOGINSCENE		= 55,			// 55 새로운 로그인 씬
-	WD_56MAP_SWAMP_OF_QUIET = 56,		// 56 평온의 늪
-#ifdef CSK_ADD_MAP_ICECITY
-	WD_57ICECITY			= 57,		// 57 얼음도시
-	WD_58ICECITY_BOSS		= 58,		// 58 얼음도시 보스맵
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_MAP_SANTA_TOWN
-	WD_62SANTA_TOWN			= 62,		// 62 산타마을
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef PBG_ADD_PKFIELD
-	WD_63PK_FIELD			= 63,		// 63 PK필드
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DUEL_ARENA
-	WD_64DUELARENA			= 64,		// 64 결투장
-#endif	// YDG_ADD_MAP_DUEL_ARENA
-#ifdef YDG_ADD_MAP_DOPPELGANGER1
-	WD_65DOPPLEGANGER1		= 65,		// 65 도플갱어 이벤트 맵 1 (57라클리온베이스)
-#endif	// YDG_ADD_MAP_DOPPELGANGER1
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-	WD_66DOPPLEGANGER2		= 66,		// 66 도플갱어 이벤트 맵 2 (63불카누스베이스)
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-	WD_67DOPPLEGANGER3		= 67,		// 67 도플갱어 이벤트 맵 3 ( 7아틀란스베이스)
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-#ifdef YDG_ADD_MAP_DOPPELGANGER4
-	WD_68DOPPLEGANGER4		= 68,		// 68 도플갱어 이벤트 맵 4 (37칸투르1차베이스)
-#endif	// YDG_ADD_MAP_DOPPELGANGER4
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN1
-	WD_69EMPIREGUARDIAN1	= 69,		// 69 제국 수호군 맵 1 (월, 목 평일맵)
-#endif //LDK_ADD_MAP_EMPIREGUARDIAN1
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN2		
-	WD_70EMPIREGUARDIAN2	= 70,		// 70 제국 수호군 맵 2 (화, 금 평일맵)
-#endif // LDS_ADD_MAP_EMPIREGUARDIAN2
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN3
-	WD_71EMPIREGUARDIAN3	= 71,		// 71 제국 수호군 맵 3 (수, 토 평일맵)
-#endif //LDK_ADD_MAP_EMPIREGUARDIAN3
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN4		
-	WD_72EMPIREGUARDIAN4	= 72,		// 72 제국 수호군 맵 4 (일     주말맵)
-#endif // LDS_ADD_MAP_EMPIREGUARDIAN4
-#ifdef PJH_NEW_SERVER_SELECT_MAP
-	WD_73NEW_LOGIN_SCENE		= 73,	// 74 기본 제국수호군4 맵으로 제작
-	WD_74NEW_CHARACTER_SCENE	= 74,	// 75 기본 제국수호군4 맵으로 제작
-#else //PJH_NEW_SERVER_SELECT_MAP
-	WD_77NEW_LOGIN_SCENE		= 77,	// 77 더 새로운 서버 선택씬
-	WD_78NEW_CHARACTER_SCENE	= 78,	// 78 더 새로운 캐릭터 선택씬
-#endif //PJH_NEW_SERVER_SELECT_MAP
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
-	WD_79UNITEDMARKETPLACE		= 79,	// 79 통합 시장 서버 (로렌시장)
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
-#ifdef ASG_ADD_MAP_KARUTAN
-	WD_80KARUTAN1			= 80,		// 80 칼루탄 1
-	WD_81KARUTAN2			= 81,		// 81 칼루탄 2
-#endif	// ASG_ADD_MAP_KARUTAN
-	NUM_WD
-};
-//lodterrain end
-
 //inventory start
 enum 
 { 
@@ -1689,10 +1589,6 @@ enum
 	PLAYER_PROVOCATION				,
 	PLAYER_LOOK_AROUND				,
 	PLAYER_CHEERS					,
-#ifdef WORLDCUP_ADD
-	PLAYER_KOREA_HANDCLAP			,
-	PLAYER_POINT_DANCE				,
-#endif //WORLDCUP_ADD
 	PLAYER_RUSH1                    ,
 	PLAYER_COME_UP                  ,
 	PLAYER_SHOCK                    ,
@@ -1711,9 +1607,8 @@ enum
 	PLAYER_SANTA_1					,	// 점프 동작
 	PLAYER_SANTA_2					,	// 턴 동작
 	PLAYER_CHANGE_UP				,
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	PLAYER_RECOVER_SKILL			,
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
+
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	PLAYER_SKILL_THRUST				,
 	PLAYER_SKILL_STAMP				,
@@ -2197,10 +2092,6 @@ enum    OptionType
 	AT_PROVOCATION,
 	AT_LOOK_AROUND,
 	AT_CHEERS,
-#ifdef WORLDCUP_ADD
-	AT_HANDCLAP,
-	AT_POINTDANCE,
-#endif
 	AT_JACK1,		// 잭 행동1
 	AT_JACK2,		// 잭 행동2
 	AT_SANTA1_1,		// 산타 행동1

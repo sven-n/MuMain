@@ -15,6 +15,7 @@
 #include "BoneManager.h"
 #include "./Time/CTimCheck.h"
 #include "DSPlaySound.h"
+#include "MapManager.h"
 
 extern unsigned int WindowWidth;		// LHJ - 윈도우 창 넓이
 extern char* g_lpszMp3[NUM_MUSIC];
@@ -34,7 +35,7 @@ int	MonsterCount			 = 0;		// LHJ - 현재 남은 몬스터 수
 
 bool M39Kanturu3rd::IsInKanturu3rd()
 {
-	return (World == WD_39KANTURU_3RD) ? true : false;
+	return (gMapManager.WorldActive == WD_39KANTURU_3RD) ? true : false;
 }
 
 void M39Kanturu3rd::Kanturu3rdInit()
@@ -70,22 +71,22 @@ void M39Kanturu3rd::CheckSuccessBattle(BYTE State, BYTE DetailState)
 
 	KanturuSuccessMapBackup = KanturuSuccessMap;
 
-	if(World != WD_39KANTURU_3RD)
+	if(gMapManager.WorldActive != WD_39KANTURU_3RD)
 		return;
 
 	char FileName[64];
 	char WorldName[32];
-	sprintf ( WorldName, "World%d", World+1 );
+	sprintf ( WorldName, "World%d", gMapManager.WorldActive+1 );
 	
 	//
 	if(KanturuSuccessMap)
 	{
 		PlayBuffer (SOUND_KANTURU_3RD_MAP_SOUND02);
-		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (World+1)*10+1);
+		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive+1)*10+1);
 	}
 	else
 	{
-		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, World+1);
+		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive+1);
 	}
 
 	OpenTerrainAttribute ( FileName );

@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // NewUIInventoryCtrl.cpp: implementation of the CNewUIInventoryCtrl class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -9,22 +9,12 @@
 #include "ZzzInventory.h"
 #include "UIControls.h"
 #include "CComGem.h"
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 #include "GIPetManager.h"
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
-#ifdef KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
 #include "CSItemOption.h"
 #include "SocketSystem.h"
-#endif // KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
-#ifdef YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH
 #include "CSChaosCastle.h"
-#endif	// YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH
-
+#include "MapManager.h"
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUIPickedItem::CNewUIPickedItem()
 {
@@ -1823,7 +1813,7 @@ void SEASON3B::CNewUIInventoryCtrl::BackupPickedItem()
 #ifdef PBG_FIX_DARKPET_RENDER
 			if (pEquipmentItemSlot->Type == ITEM_HELPER+5
 #ifdef YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH
-				&& !InChaosCastle()
+				&& !gMapManager.InChaosCastle()
 #endif	// YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH
 				)
 			{

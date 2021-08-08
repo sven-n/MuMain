@@ -2,7 +2,7 @@
 #define __ZZZTEXTURE_H__
 
 #include "GlobalBitmap.h"
-extern CGlobalBitmap Bitmaps;
+//extern CGlobalBitmap Bitmaps;
 
 extern bool OpenJpegBuffer(char *filename,float *BufferFloat);
 extern bool WriteJpeg(char *filename,int Width,int Height,unsigned char *Buffer,int quality);

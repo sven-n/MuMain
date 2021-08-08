@@ -10,7 +10,7 @@
 #include "zzzOpenData.h"
 #include "ZzzCharacter.h"
 #include "DSPlaySound.h"
-
+#include "MapManager.h"
 #include "GMAida.h"
 #include "BoneManager.h"
 
@@ -19,7 +19,7 @@ DWORD g_MusicStartStamp2 = 0;
 
 bool M33Aida::IsInAida()
 {
-	return (World == WD_33AIDA || World == WD_54CHARACTERSCENE) ? true : false;
+	return (gMapManager.WorldActive == WD_33AIDA || gMapManager.WorldActive == WD_54CHARACTERSCENE) ? true : false;
 }
 
 bool M33Aida::IsInAidaSection2(const vec3_t Position)

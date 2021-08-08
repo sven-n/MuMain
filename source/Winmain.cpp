@@ -970,7 +970,7 @@ void DestroyWindow()
 	if(SceneFlag != MOVIE_SCENE)
 #endif // MOVIE_DIRECTSHOW
 	{
-		DeleteObjects();
+		gMapManager.DeleteObjects();
 
 		// Object.
 		for(int i=MODEL_LOGO;i<MAX_MODELS;i++)

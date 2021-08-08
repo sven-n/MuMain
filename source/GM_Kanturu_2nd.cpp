@@ -18,10 +18,12 @@
 #include "CKanturuDirection.h"
 #include "CDirection.h"
 #include "UIBaseDef.h"
+#include "MapManager.h"
 #include "GM_Kanturu_2nd.h"
 #include "DSPlaySound.h"
 #include "wsclientinline.h"
 #include "ChangeRingManager.h"
+#include "LoadData.h"
 
 
 extern float g_fScreenRate_x;
@@ -304,7 +306,7 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c,OBJECT* o, BMD* b
 				OBJECT *to = &tc->Object;
 				vec3_t vLight;
 
-				if(World == WD_39KANTURU_3RD)
+				if(gMapManager.WorldActive == WD_39KANTURU_3RD)
 				{
 					Vector(0.4f,0.9f,0.6f,vLight);
 					for(int i=0; i<2; i++)
@@ -892,7 +894,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 		break;
 	case MODEL_MONSTER01+115:	// 트윈테일(임시로 번호 지정)
 		{
-			if(World == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
+			if(gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
 			{
 				vec3_t Light;
 				float Scale, Angle;
@@ -1014,7 +1016,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 		break;
 	case MODEL_MONSTER01+116:	// 드레드피어(임시로 번호 지정)
 		{
-			if(World == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
+			if(gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
 			{
 				vec3_t Light;
 				float Scale, Angle;
@@ -1075,7 +1077,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 			float fScale;
 			Vector(1.f, 1.f, 1.f, vLight);
 
-			if(o->CurrentAction != MONSTER01_STOP1 && o->CurrentAction != MONSTER01_DIE && World != WD_39KANTURU_3RD)
+			if(o->CurrentAction != MONSTER01_STOP1 && o->CurrentAction != MONSTER01_DIE && gMapManager.WorldActive != WD_39KANTURU_3RD)
 			{
 				// 날개 주위에서 연기 피어 나는 이펙트
 				if(rand()%3 == 0) 
@@ -1262,7 +1264,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 
 bool M38Kanturu2nd::Is_Kanturu2nd()
 {
-	if(World == WD_38KANTURU_2ND)
+	if(gMapManager.WorldActive == WD_38KANTURU_2ND)
 		return true;
 
 	return false;
@@ -1270,7 +1272,7 @@ bool M38Kanturu2nd::Is_Kanturu2nd()
 
 bool M38Kanturu2nd::Is_Kanturu2nd_3rd()
 {
-	if(World == WD_38KANTURU_2ND || World == WD_39KANTURU_3RD)
+	if(gMapManager.WorldActive == WD_38KANTURU_2ND || gMapManager.WorldActive == WD_39KANTURU_3RD)
 		return true;
 
 	return false;
@@ -1319,7 +1321,7 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 				
 				vec3_t vPos, vRelative;
 				Vector(0.f, 0.f, 0.f, vRelative);
-				if(World == WD_39KANTURU_3RD)
+				if(gMapManager.WorldActive == WD_39KANTURU_3RD)
 				{
 					if(rand()%4 == 0)
 					{
@@ -1387,7 +1389,7 @@ extern char* g_lpszMp3[NUM_MUSIC];
 
 void M38Kanturu2nd::PlayBGM()
 {
-	if(World == WD_38KANTURU_2ND)
+	if(gMapManager.WorldActive == WD_38KANTURU_2ND)
 	{
 		PlayMp3(g_lpszMp3[MUSIC_KANTURU_2ND]);
 	}
@@ -1418,9 +1420,8 @@ void CTrapCanon::Destroy()
 
 void CTrapCanon::Open_TrapCanon()
 {
-	// 트랩형 캐넌
-	AccessModel(MODEL_TRAP_CANON, "Data\\Npc\\", "c_mon");
-	OpenTexture(MODEL_TRAP_CANON, "Npc\\");
+	gLoadData.AccessModel(MODEL_TRAP_CANON, "Data\\Npc\\", "c_mon");
+	gLoadData.OpenTexture(MODEL_TRAP_CANON, "Npc\\");
 }
 
 CHARACTER* CTrapCanon::Create_TrapCanon(int iPosX, int iPosY, int iKey)

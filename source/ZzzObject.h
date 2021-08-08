@@ -2,18 +2,10 @@
 #define ZZZ_OBJECT_H
 
 extern OBJECT_BLOCK ObjectBlock[256];
-
-#ifdef MR0
-extern AUTOOBJ       Butterfles[];
-extern AUTOOBJ       Boids[];
-extern AUTOOBJ       Fishs[];
-#else
 extern OBJECT       Butterfles[];
 extern OBJECT       Boids[];
 extern OBJECT       Fishs[];
-#endif //MR0
 
-extern int World;
 extern float EarthQuake;
 extern bool EnableShadow;
 extern float AmbientShadowAngle;
@@ -28,18 +20,11 @@ void ClearWorld();
 
 void RenderObject(OBJECT *o,bool Translate=false,int Select=0, int ExtraMon=0);
 void RenderObjects();
-
-#ifdef LDK_ADD_14_15_GRADE_ITEM_MODEL
-// 15 레벨 효과 랜더링 하는 함수
 void NextGradeObjectRender(CHARACTER *c);
-#endif //LDK_ADD_14_15_GRADE_ITEM_MODEL
-
-// 잔상 효과 내기 위해서 만든 함수
 void RenderObject_AfterImage(OBJECT* o, bool Translate=false, int Select=0, int ExtraMon=0);
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t *pPart, bool Translate=false, int Select=0, float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-// 캐릭터 다음에 알파오브젝트들 렌더링 하기 위한 함수
 void RenderObject_AfterCharacter(OBJECT *o,bool Translate=false,int Select=0, int ExtraMon=0);
 void Draw_RenderObject_AfterCharacter(OBJECT *o,bool Translate=false,int Select=0, int ExtraMon=0);
 void RenderObjects_AfterCharacter();
@@ -51,7 +36,6 @@ OBJECT *CreateObject(int Type,vec3_t Position,vec3_t Angle,float Scale=1.f);
 bool SaveObjects(char *FileName, int iMapNumber);
 int OpenObjects(char *FileName);
 int OpenObjectsEnc(char *FileName);
-void DeleteObjects();
 void SaveTrapObjects(char *FileName);
 
 

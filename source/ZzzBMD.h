@@ -362,7 +362,6 @@ public:
 	bool          HideSkin;
     float         Velocity;
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-	//애니메이션 255개이상추가로 인한 확장
 	unsigned short CurrentAction;
 	unsigned short PriorAction;
 #else //PBG_ADD_NEWCHAR_MONK_ANI
@@ -375,56 +374,24 @@ public:
     int           renderCount;
 	float		  fTransformedSize;
 	
-//////////////////////////////////////////////////////////////////////////
-//Light Object 지원
 	UIntVector	  LightIDVector;
 
-//////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
-//VBO Version
 	unsigned int		m_iBMDSeqID;
-#ifdef MR0
-	MeshVector			NewMeshs;
-#endif
 	bool				bLightMap;
-	bool				bOffLight;		//무조건 라이트를 적용시키지 않는다.
-	char				iBillType;		//빌보드 타입
+	bool				bOffLight;
+	char				iBillType;
 
-#ifdef LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-	float				m_fRequestScale;	// 사용자 Scale 변환 변수 (Sillouette효과 등 메쉬의 크기를 임시 변환 시 사용)
-#endif // LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-
-#ifdef LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
-	bool				m_bCompletedAlloc;	// 초기화가 완료 되었는지 여부판단
-#endif // LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
+	bool				m_bCompletedAlloc;
 	
-#ifdef LDS_MR0_ADD_SPECIFICMODEL_DOANIMATIONPROCESSING
-	bool				m_bProcessAnimationTMUsingPassedMothod;
-#endif // LDS_MR0_ADD_SPECIFICMODEL_DOANIMATIONPROCESSING
-
-	// MR0:VBOMesh로 변환 이후 ValidationCheck정보를 화면상에 출력 여부 인자를 추가.
-#ifdef LDS_MR0_FORDEBUG_VERIFYCONVERTMESH
-	void				ConvertMesh(bool bOutputRealtimeInfo = false);
-#else // LDS_MR0_FORDEBUG_VERIFYCONVERTMESH
 	void				ConvertMesh();
-#endif // LDS_MR0_FORDEBUG_VERIFYCONVERTMESH
+	void				UploadVBO();
+	void				UnloadVBO();
+	void				DelOldMesh();
 
-	void				UploadVBO();		//VBO에 업로드
-	void				UnloadVBO();		//VBO로부터 로컬 언로드
-	void				DelOldMesh();		//이전 버전 메쉬 구조체를 날린다. 
-
-	//수정사항이 너무 많아서 함수단으로 분기한 BMD 1.2버전의 함수들
 	void				RenderBodyOld(int RenderFlag,float Alpha=1.f,int BlendMesh=-1,float BlendMeshLight=1.f,float BlendMeshTexCoordU=0.f,float BlendMeshTexCoordV=0.f,int HiddenMesh=-1,int Texture=-1);
 	void				RenderBodyShadowOld(int BlendMesh=-1,int HiddenMesh=-1, int StartMeshNumber=-1, int EndMeshNumber=-1);
 	
-#ifdef LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
 	bool				Open2Old(char *DirName,char *FileName, bool bReAlloc = true);
-#else // LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
-	bool				Open2Old(char *DirName,char *FileName);
-#endif // LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
-
-
 	bool				Save2Old(char *DirName,char *FileName);
 
 	BMD() : NumBones(0), NumActions(0), NumMeshs(0), 
@@ -436,32 +403,15 @@ public:
 		bLightMap = false;
 		iBillType = -1;
 		bOffLight = false;
-
-#ifdef LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-		m_fRequestScale = 0.0f;			// 사용자 Scale 변환 변수 초기화 (Sillouette효과 등 메쉬의 크기를 임시 변환 시 사용)
-#endif // LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-
-#ifdef LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
-		m_bCompletedAlloc = false;		// 초기화 대응 변수
-#endif // LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
+		m_bCompletedAlloc = false;
 	}
 
-#ifdef LDS_FIX_MEMORYLEAK_DESTRUCTORFORBMD
-~BMD();		// 메모리 릭 발생으로 소멸자 추가.
-#endif // LDS_FIX_MEMORYLEAK_DESTRUCTORFORBMD
-//////////////////////////////////////////////////////////////////////////
-
+~BMD();
     //utility
     void Init(bool Dummy);
 	bool Open(char *DirName,char *FileName);
 	bool Save(char *DirName,char *FileName);
-
-#ifdef LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
 	bool Open2(char *DirName,char *FileName, bool bReAlloc = true);
-#else // LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
-	bool Open2(char *DirName,char *FileName);
-#endif // LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
-
 	bool Save2(char *DirName,char *FileName);	// 암호화
 	void Release();
     void CreateBoundingBox();

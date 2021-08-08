@@ -23,6 +23,7 @@
 #include "NewUISystem.h"
 #include "NewUIInventoryCtrl.h"
 #include "NewUIMyInventory.h"
+#include "MapManager.h"
 
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
@@ -107,7 +108,7 @@ void CursedTemple::SetInterfaceState( bool state, int subtype )
 
 bool CursedTemple::GetInterfaceState( int type, int subtype )
 {
-	if( !IsCursedTemple() ) return true;
+	if( !gMapManager.IsCursedTemple() ) return true;
 
 	bool result = m_InterfaceState;
 
@@ -162,7 +163,7 @@ bool CursedTemple::IsPartyMember( DWORD selectcharacterindex )
 
 bool CursedTemple::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 {
-	if(!IsCursedTemple())
+	if(!gMapManager.IsCursedTemple())
 		return false;
 
 	//몬스터가 스킬이 두개 이상일 경우 몬스터스킬 파일을 이용해서 스킬을 적용한다.
@@ -310,7 +311,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
 
 bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if(!IsCursedTemple())
+	if(!gMapManager.IsCursedTemple())
 		return false;
 
 	vec3_t p, Light;
@@ -349,14 +350,14 @@ bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 
 bool CursedTemple::CreateObject( OBJECT* o )
 {
-	if(!IsCursedTemple()) return false;
+	if(!gMapManager.IsCursedTemple()) return false;
 
 	return false;
 }
 
 bool CursedTemple::MoveObject( OBJECT* o )
 {
-	if(!IsCursedTemple()) return false;
+	if(!gMapManager.IsCursedTemple()) return false;
 
 #ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 	if (m_bGaugebarEnabled == true && WorldTime - m_fGaugebarCloseTimer > 3000.0f)	// 3초간 게이지 등록 금지
@@ -365,7 +366,7 @@ bool CursedTemple::MoveObject( OBJECT* o )
 	}
 #endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 
-	switch(World)
+	switch(gMapManager.WorldActive)
 	{
 	case WD_45CURSEDTEMPLE_LV1:
 	case WD_45CURSEDTEMPLE_LV2:
@@ -403,7 +404,7 @@ bool CursedTemple::MoveObject( OBJECT* o )
 
 void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
 {
-	if( !IsCursedTemple() ) return;
+	if( !gMapManager.IsCursedTemple() ) return;
 
 	float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
 
@@ -483,7 +484,7 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
 
 bool CursedTemple::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
-	if( !IsCursedTemple() ) return false;
+	if( !gMapManager.IsCursedTemple() ) return false;
 
 	switch(o->Type)
 	{
@@ -503,7 +504,7 @@ bool CursedTemple::MoveMonsterVisual(OBJECT* o, BMD* b)
 
 void CursedTemple::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if( !IsCursedTemple() ) return;
+	if( !gMapManager.IsCursedTemple() ) return;
 
 	switch(o->Type)
 	{
@@ -562,11 +563,11 @@ void CursedTemple::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
 bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 {
-	if( !IsCursedTemple() ) return false;
+	if( !gMapManager.IsCursedTemple() ) return false;
 
 	vec3_t Light;
 
-	switch( World )
+	switch( gMapManager.WorldActive )
 	{
 	case WD_45CURSEDTEMPLE_LV1:
 	case WD_45CURSEDTEMPLE_LV2:
@@ -728,7 +729,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 
 bool CursedTemple::RenderObject_AfterCharacter( OBJECT* o, BMD* b )
 {
-	if( !IsCursedTemple() ) return false;
+	if( !gMapManager.IsCursedTemple() ) return false;
 
 	switch(o->Type)
 	{
@@ -1077,7 +1078,7 @@ bool CursedTemple::IsGaugebarEnabled()
 
 bool CursedTemple::RenderObjectMesh( OBJECT* o, BMD* b, bool ExtraMon )
 {
-	if(!IsCursedTemple()) return false;
+	if(!gMapManager.IsCursedTemple()) return false;
 	
 	switch(o->Type) 
 	{
@@ -1164,12 +1165,12 @@ bool CursedTemple::RenderObjectMesh( OBJECT* o, BMD* b, bool ExtraMon )
 
 void CursedTemple::Process()
 {
-	if( !IsCursedTemple() ) return;
+	if( !gMapManager.IsCursedTemple() ) return;
 }
 
 void CursedTemple::Draw()
 {
-	if( !IsCursedTemple() ) return;
+	if( !gMapManager.IsCursedTemple() ) return;
 }
 
 void CursedTemple::PlayBGM()
@@ -1197,7 +1198,7 @@ void CursedTemple::PlayBGM()
 
 bool CursedTemple::IsHolyItemPickState()
 {
-	if( !IsCursedTemple() ) return false;
+	if( !gMapManager.IsCursedTemple() ) return false;
 
 	if( m_CursedTempleState != eCursedTempleState_Play )
 	{

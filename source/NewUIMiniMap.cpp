@@ -13,9 +13,8 @@
 #include "NewUIGuildInfoWindow.h"
 #include "NewUIButton.h"
 #include "NewUIMyInventory.h"
-#ifdef PJH_FIX_4_BUGFIX_33
 #include "CSitemOption.h"
-#endif //PJH_FIX_4_BUGFIX_33
+#include "MapManager.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -170,7 +169,7 @@ bool SEASON3B::CNewUIMiniMap::Render()
 
 			if(m_Mini_Map_Data[i].Kind == 1) //npc
 			{
-				if(!(World == WD_34CRYWOLF_1ST && m_OccupationState > 0) || (m_Mini_Map_Data[i].Location[0] == 228 && m_Mini_Map_Data[i].Location[1] == 48 && World == WD_34CRYWOLF_1ST))
+				if(!(gMapManager.WorldActive == WD_34CRYWOLF_1ST && m_OccupationState > 0) || (m_Mini_Map_Data[i].Location[0] == 228 && m_Mini_Map_Data[i].Location[1] == 48 && gMapManager.WorldActive == WD_34CRYWOLF_1ST))
 					RenderPointRotate(IMAGE_MINIMAP_INTERFACE+5,Tx1, Ty1,NpcWidth,NpcWidth,m_Lenth[m_MiniPos].x - Tx, m_Lenth[m_MiniPos].y - Ty, m_Lenth[m_MiniPos].x,m_Lenth[m_MiniPos].y,Rot,Rot_Loc,17.5f/32.f,17.5f/32.f,i);
 			}
 			else

@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
+#include "MapManager.h"
 #include "NewUIBloodCastleTime.h"
 #include "NewUISystem.h"
 #include "MatchEvent.h"
@@ -91,7 +91,7 @@ bool CNewUIBloodCastle::Update()
 	
 #ifdef KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT
 	// 블러드 캐슬에서 벗어났을때 초기화
-	if( (g_csMatchInfo == NULL) || (InBloodCastle() == false) )
+	if( (g_csMatchInfo == NULL) || (gMapManager.InBloodCastle() == false) )
 	{
 		Show(false);
 	}

@@ -18,13 +18,7 @@
 #include "ZzzEffect.h"
 #include "zzzScene.h"
 #include "DSPlaySound.h"
-
 #include "GMCrywolf1st.h"
-
-#ifdef ANTIHACKING_ENABLE
-#include "proc.h"
-#endif
-
 #include "ZzzPath.h"
 
 

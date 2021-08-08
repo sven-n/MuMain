@@ -16,6 +16,7 @@
 #include "zzzLodTerrain.h"
 #include "CSWaterTerrain.h"
 #include "GMHellas.h"
+#include "MapManager.h"
 
 extern  float   WorldTime;
 extern  int     MoveSceneFrame;
@@ -31,7 +32,7 @@ void CSWaterTerrain::Init ( void )
 
 void CSWaterTerrain::Update ( void )
 {
-    if ( !InHellas(m_iMapIndex) ) return;
+    if ( !gMapManager.InHellas(m_iMapIndex) ) return;
 
     int WaveX;
     int WaveY; 
@@ -51,7 +52,7 @@ void CSWaterTerrain::Update ( void )
 
 void    CSWaterTerrain::Render ( void )
 {
-    if ( !InHellas(m_iMapIndex) ) return;
+    if ( !gMapManager.InHellas(m_iMapIndex) ) return;
 
     CreateTerrain ( (Hero->PositionX)*2, (Hero->PositionY)*2 );
 

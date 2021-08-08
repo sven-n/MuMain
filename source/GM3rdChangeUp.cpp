@@ -14,7 +14,7 @@
 #include "ZzzOpenData.h"
 #include "ZzzEffect.h"
 #include "CDirection.h"
-
+#include "MapManager.h"
 #include "BoneManager.h"
 #include "dsplaysound.h"
 
@@ -24,9 +24,6 @@
 
 extern char* g_lpszMp3[NUM_MUSIC];
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3A::CGM3rdChangeUp::CGM3rdChangeUp()	: m_nDarkElfAppearance(false)
 {
@@ -38,11 +35,6 @@ SEASON3A::CGM3rdChangeUp::~CGM3rdChangeUp()
 
 }
 
-//*****************************************************************************
-// 함수 이름 : Instance()
-// 함수 설명 : 객체를 단 하나만 생성.
-//			  이 클래스에 접근하기 위한 인터페이스임
-//*****************************************************************************
 SEASON3A::CGM3rdChangeUp& SEASON3A::CGM3rdChangeUp::Instance()
 {
 	static CGM3rdChangeUp s_GM3rdChangeUp;                  
@@ -51,12 +43,12 @@ SEASON3A::CGM3rdChangeUp& SEASON3A::CGM3rdChangeUp::Instance()
 
 bool SEASON3A::CGM3rdChangeUp::IsBalgasBarrackMap()
 {
-	return WD_41CHANGEUP3RD_1ST == World ? true : false;
+	return WD_41CHANGEUP3RD_1ST == gMapManager.WorldActive ? true : false;
 }
 
 bool SEASON3A::CGM3rdChangeUp::IsBalgasRefugeMap()
 {
-	return WD_42CHANGEUP3RD_2ND == World ? true : false;
+	return WD_42CHANGEUP3RD_2ND == gMapManager.WorldActive ? true : false;
 }
 
 bool SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackObject(OBJECT* pObject)
@@ -415,7 +407,7 @@ void SEASON3A::CGM3rdChangeUp::PlayBGM()
 
 CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int PosX, int PosY, int Key)
 {
-	if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap() || InDevilSquare()))
+	if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap() || gMapManager.InDevilSquare()))
 		return NULL;
 
 	CHARACTER* c = NULL;

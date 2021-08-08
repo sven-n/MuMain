@@ -10,17 +10,17 @@
 #include "zzzEffect.h"
 #include "zzzAi.h"
 #include "zzzOpenData.h"
-
+#include "MapManager.h"
 #include "GMCryingWolf2nd.h"
 #include "BoneManager.h"
 
 #ifdef CRYINGWOLF_2NDMVP
 
 bool M34CryingWolf2nd::IsCyringWolf2nd()
-//pjh : 현재 크라이울프2맵에 있는지 여부.(true = 크라이울프 진행,false = 크라이울프 맵이 아니다)
-{ return (World == WD_35CRYWOLF_2ND) ? true : false; }
+{ 
+	return (gMapManager.WorldActive == WD_35CRYWOLF_2ND) ? true : false; 
+}
 
-//. 오브젝트
 bool M34CryingWolf2nd::CreateCryingWolf2ndObject(OBJECT* pObject)
 {
 	if(!IsCyringWolf2nd())
@@ -29,7 +29,6 @@ bool M34CryingWolf2nd::CreateCryingWolf2ndObject(OBJECT* pObject)
 	return true;
 }
 bool M34CryingWolf2nd::MoveCryingWolf2ndObject(OBJECT* pObject)
-//pjh : 크라이울프 2차맵에 있는 오브젝트들의 상태.
 {
 	if(!IsCyringWolf2nd())
 		return false;

@@ -16,6 +16,7 @@
 #include "DSPlaySound.h"
 #include "ZzzOpenData.h"
 #include "ZzzLodTerrain.h"
+#include "MapManager.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
 
@@ -730,7 +731,7 @@ bool CGMDoppelGanger2::CreateFireSpark(PARTICLE* o)
 
 bool IsDoppelGanger2()
 {
-	if(World == WD_66DOPPLEGANGER2)
+	if(gMapManager.WorldActive == WD_66DOPPLEGANGER2)
 	{
 		return true;
 	}

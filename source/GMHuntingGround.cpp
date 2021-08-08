@@ -9,14 +9,14 @@
 #include "zzzAi.h"
 #include "zzzOpenData.h"
 #include "DSPlaySound.h"
-
+#include "MapManager.h"
 #include "GMHuntingGround.h"
 #include "BoneManager.h"
 
 DWORD g_MusicStartStamp = 0;
 
 bool M31HuntingGround::IsInHuntingGround()
-{ return (World == WD_31HUNTING_GROUND) ? true : false; }
+{ return (gMapManager.WorldActive == WD_31HUNTING_GROUND) ? true : false; }
 
 bool M31HuntingGround::IsInHuntingGroundSection2(const vec3_t Position)
 {

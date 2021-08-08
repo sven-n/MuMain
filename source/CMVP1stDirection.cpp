@@ -10,6 +10,7 @@
 #include "ZzzInterface.h"
 #include "CDirection.h"
 #include "CMVP1stDirection.h"
+#include "MapManager.h"
 
 CMVP1STDirection::CMVP1STDirection()
 {
@@ -58,7 +59,7 @@ void CMVP1STDirection::IsCryWolfDirectionTimer()
 
 void CMVP1STDirection::CryWolfDirection()
 {
-	if(World != WD_34CRYWOLF_1ST)
+	if(gMapManager.WorldActive != WD_34CRYWOLF_1ST)
 		return;
 
 	IsCryWolfDirectionTimer();

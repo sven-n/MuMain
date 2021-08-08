@@ -176,6 +176,12 @@
     <Filter Include="External Object\Chilkat">
       <UniqueIdentifier>{f66dc144-ca2e-4533-bcde-2ec70682e9af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MU\Map">
+      <UniqueIdentifier>{5aa75a27-0693-4a7a-8730-3acdb2238b30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\Load">
+      <UniqueIdentifier>{02285ab0-a8d5-4147-8fe1-3212fd290ddd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="source\icon1.ico">
@@ -1159,6 +1165,12 @@
     </ClCompile>
     <ClCompile Include="ProtocolSend.cpp">
       <Filter>MU\network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MapManager.cpp">
+      <Filter>MU\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="source\LoadData.cpp">
+      <Filter>MU\Load</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2880,6 +2892,12 @@
     </ClInclude>
     <ClInclude Include="ProtocolAsio.h">
       <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MapManager.h">
+      <Filter>MU\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="source\LoadData.h">
+      <Filter>MU\Load</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

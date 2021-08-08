@@ -7,6 +7,7 @@
 #include "zzzEffect.h"
 #include "wsclientinline.h"
 #include "ZzzAI.h"
+#include "MapManager.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -326,16 +327,14 @@ void CSummonSystem::CreateEquipEffect_Summon(CHARACTER * pCharacter, int iItemTy
 {
 	OBJECT * pObject = &pCharacter->Object;
 
-	// 캐릭터 선택창에서는 만들지 않는다.
 	if (
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-		World == WD_74NEW_CHARACTER_SCENE
+		gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
 #else //PJH_NEW_SERVER_SELECT_MAP
-		World == WD_78NEW_CHARACTER_SCENE
+		gMapManager.WorldActive == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		) return;
 
-	// 환수 스킬 시전중에는 만들지 않는다.
 	if (pObject->CurrentAction == PLAYER_SKILL_SUMMON || pObject->CurrentAction == PLAYER_SKILL_SUMMON_UNI
 		|| pObject->CurrentAction == PLAYER_SKILL_SUMMON_DINO || pObject->CurrentAction == PLAYER_SKILL_SUMMON_FENRIR)
 	{
@@ -359,26 +358,24 @@ void CSummonSystem::CreateEquipEffect_Summon(CHARACTER * pCharacter, int iItemTy
 
 	switch(iItemType)
 	{
-	case MODEL_STAFF+21:	// 사아무트
+	case MODEL_STAFF+21:
 		if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject, 0) && !pCharacter->SafeZone && sinf(WorldTime*0.0004f+byRandom*0.024f) > 0.3f)
 		{
 			CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject->Position, pObject->Angle, vLight, 0, pObject, -1, byRandom);
 		}
 		break;
-	case MODEL_STAFF+22:	// 닐
+	case MODEL_STAFF+22:
 		if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject, 0) && !pCharacter->SafeZone && sinf(WorldTime*0.0004f+byRandom*0.024f) > 0.3f)
 		{
 			CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject->Position, pObject->Angle, vLight, 0, pObject, -1, byRandom);
 		}
 		break;
-#ifdef ASG_ADD_SUMMON_RARGLE
-	case MODEL_STAFF+23:	// 라글
+	case MODEL_STAFF+23:
 		if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, pObject, 0) && !pCharacter->SafeZone && sinf(WorldTime*0.0004f+byRandom*0.024f) > 0.3f)
 		{
 			CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, pObject->Position, pObject->Angle, vLight, 0, pObject, -1, byRandom);
 		}
 		break;
-#endif	// ASG_ADD_SUMMON_RARGLE
 	default:
 		break;
 	}
@@ -389,9 +386,7 @@ void CSummonSystem::RemoveEquipEffect_Summon(CHARACTER * pCharacter)
 	OBJECT * pObject = &pCharacter->Object;
 	DeleteEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject, 0);
 	DeleteEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject, 0);
-#ifdef ASG_ADD_SUMMON_RARGLE
 	DeleteEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, pObject, 0);
-#endif	// ASG_ADD_SUMMON_RARGLE
 }
 
 void CSummonSystem::CreateDamageOfTimeEffect(int iSkill, OBJECT * pObject)

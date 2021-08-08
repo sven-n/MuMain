@@ -10,6 +10,7 @@
 #include "ZzzInterface.h"
 #include "CDirection.h"
 #include "CKanturuDirection.h"
+#include "MapManager.h"
 
 CKanturuDirection::CKanturuDirection()
 {
@@ -42,7 +43,7 @@ bool CKanturuDirection::IsKanturuDirection()
 
 bool CKanturuDirection::IsMayaScene()
 {
-	if(World == WD_39KANTURU_3RD)
+	if(gMapManager.WorldActive == WD_39KANTURU_3RD)
 	{
 		if(m_iKanturuState == KANTURU_STATE_NIGHTMARE_BATTLE || m_iKanturuState == KANTURU_STATE_TOWER || m_iKanturuState == KANTURU_STATE_END)
 			return false;
@@ -55,7 +56,7 @@ bool CKanturuDirection::IsMayaScene()
 
 bool CKanturuDirection::IsKanturu3rdTimer()
 {
-	if(World == WD_39KANTURU_3RD)
+	if(gMapManager.WorldActive == WD_39KANTURU_3RD)
 	{
 		if(m_iMayaState == KANTURU_MAYA_DIRECTION_MONSTER1 || m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA1)
 			return true;
@@ -99,12 +100,11 @@ void CKanturuDirection::GetKanturuMayaState(BYTE DetailState)
 {
 	m_iMayaState = DetailState;
 
-	if(World != WD_39KANTURU_3RD)
+	if(gMapManager.WorldActive != WD_39KANTURU_3RD)
 		return;
 	
 	switch(m_iMayaState)
 	{
-	// LHJ - 마야 올라오는 연출
 	case KANTURU_MAYA_DIRECTION_NOTIFY:			
 		g_Direction.CloseAllWindows();
 		g_Direction.m_CameraLevel = 5;
@@ -113,7 +113,6 @@ void CKanturuDirection::GetKanturuMayaState(BYTE DetailState)
 		if(!m_bDirectionEnd && !m_bKanturuDirection)
 			m_bKanturuDirection = true;
 		break;
-	// LHJ - 마야 죽는 연출
 	case KANTURU_MAYA_DIRECTION_ENDCYCLE_MAYA3:	
 		g_Direction.CloseAllWindows();
 		g_Direction.m_CameraLevel = 5;
@@ -133,18 +132,18 @@ void CKanturuDirection::GetKanturuNightmareState(BYTE DetailState)
 {
 	m_iNightmareState = DetailState;
 
-	if(World != WD_39KANTURU_3RD)
+	if(gMapManager.WorldActive != WD_39KANTURU_3RD)
 		return;
 
 	switch(m_iNightmareState)
 	{
-	case KANTURU_NIGHTMARE_DIRECTION_NIGHTMARE:	// LHJ - 나이트메어 나오는 연출
+	case KANTURU_NIGHTMARE_DIRECTION_NIGHTMARE:
 		g_Direction.CloseAllWindows();
 		g_Direction.m_CameraLevel = 5;
 		if(!m_bDirectionEnd && !m_bKanturuDirection)
 			m_bKanturuDirection = true;
 		break;
-	case KANTURU_NIGHTMARE_DIRECTION_END:		// LHJ - 성공시 에너지 장벽 없어지는 연출
+	case KANTURU_NIGHTMARE_DIRECTION_END:
 		g_Direction.m_CameraLevel = 5;
 		if(!m_bDirectionEnd && !m_bKanturuDirection)
 			m_bKanturuDirection = true;
@@ -158,7 +157,7 @@ void CKanturuDirection::GetKanturuNightmareState(BYTE DetailState)
 
 void CKanturuDirection::KanturuAllDirection()
 {
-	if(m_bDirectionEnd || World != WD_39KANTURU_3RD) return;
+	if(m_bDirectionEnd || gMapManager.WorldActive != WD_39KANTURU_3RD) return;
 
 	if(m_iMayaState == KANTURU_MAYA_DIRECTION_END)
 		g_Direction.m_bDownHero = true;
@@ -191,7 +190,6 @@ void CKanturuDirection::KanturuMayaDirection()
 	}
 }
 
-// LHJ - 칸투르 마야 올라오는 연출
 void CKanturuDirection::Move1stDirection()
 {
 	if(g_Direction.DirectionCameraMove()) return;
@@ -237,7 +235,6 @@ void CKanturuDirection::Direction1st1()
 	}
 }
 
-// LHJ - 칸투르 마야 터지는 연출
 void CKanturuDirection::Move2ndDirection()
 {
 	if(g_Direction.DirectionCameraMove()) return;
@@ -323,7 +320,6 @@ void CKanturuDirection::KanturuNightmareDirection()
 	}
 }
 
-// LHJ - 칸투르 나이트 메어 나오는 연출
 void CKanturuDirection::Move3rdDirection()
 {
 	if(g_Direction.DirectionCameraMove()) return;
@@ -360,7 +356,6 @@ void CKanturuDirection::Direction3rd1()
 	}
 }
 
-// LHJ - 칸투르 정제의탑 입구의 에너지막 없어지는 연출
 void CKanturuDirection::Move4thDirection()
 {
 	if(g_Direction.DirectionCameraMove()) return;

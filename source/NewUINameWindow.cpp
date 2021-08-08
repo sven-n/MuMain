@@ -13,6 +13,7 @@
 #include "CSChaosCastle.h"
 #include "PersonalShopTitleImp.h"
 #include "MatchEvent.h"
+#include "MapManager.h"
 
 
 using namespace SEASON3B;
@@ -131,7 +132,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
 #endif // CSK_ADD_GM_ABILITY
 	
 #ifndef GUILD_WAR_EVENT
-    if(InChaosCastle() == true)		// 카오스캐슬이고
+    if(gMapManager.InChaosCastle() == true)		// 카오스캐슬이고
     {
         if(FindText(Hero->ID, "webzen") == false)	// 아이디가 webzen이 아니면
         {

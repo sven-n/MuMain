@@ -19,7 +19,7 @@
 #include "CDirection.h"
 #include "UIBaseDef.h"
 #include "DSPlaySound.h"
-// self
+#include "LoadData.h"
 #include "Event.h"
 
 
@@ -39,41 +39,35 @@ CXmasEvent::~CXmasEvent(void)
 
 void CXmasEvent::LoadXmasEvent()
 {
-	// 산타 할아버지
-	AccessModel(MODEL_XMAS_EVENT_CHA_SSANTA, "Data\\Skill\\", "xmassanta");
-	OpenTexture(MODEL_XMAS_EVENT_CHA_SSANTA, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_CHA_SSANTA, "Data\\Skill\\", "xmassanta");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHA_SSANTA, "Skill\\");
 
-	// 눈사람
-	AccessModel(MODEL_XMAS_EVENT_CHA_SNOWMAN, "Data\\Skill\\", "xmassnowman");
-	OpenTexture(MODEL_XMAS_EVENT_CHA_SNOWMAN, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_CHA_SNOWMAN, "Data\\Skill\\", "xmassnowman");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHA_SNOWMAN, "Skill\\");
 
-	// 사슴
-	AccessModel(MODEL_XMAS_EVENT_CHA_DEER, "Data\\Skill\\", "xmassaum");
-	OpenTexture(MODEL_XMAS_EVENT_CHA_DEER, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_CHA_DEER, "Data\\Skill\\", "xmassaum");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHA_DEER, "Skill\\");
 
-	// 크리스마스 이벤트 변신 걸
-	AccessModel(MODEL_XMAS_EVENT_CHANGE_GIRL, "Data\\Skill\\", "santa");
-	OpenTexture(MODEL_XMAS_EVENT_CHANGE_GIRL, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_CHANGE_GIRL, "Data\\Skill\\", "santa");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHANGE_GIRL, "Skill\\");
 
-	// 귀걸이
-	AccessModel(MODEL_XMAS_EVENT_EARRING, "Data\\Skill\\", "ring");
-	OpenTexture(MODEL_XMAS_EVENT_EARRING, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_EARRING, "Data\\Skill\\", "ring");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_EARRING, "Skill\\");
 	
-	// 이펙트용 모델
-	AccessModel(MODEL_XMAS_EVENT_ICEHEART, "Data\\Skill\\", "xmaseicehart");
-	OpenTexture(MODEL_XMAS_EVENT_ICEHEART, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_ICEHEART, "Data\\Skill\\", "xmaseicehart");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_ICEHEART, "Skill\\");
 
-	AccessModel(MODEL_XMAS_EVENT_BOX, "Data\\Skill\\", "xmasebox");
-	OpenTexture(MODEL_XMAS_EVENT_BOX, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_BOX, "Data\\Skill\\", "xmasebox");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_BOX, "Skill\\");
 
-	AccessModel(MODEL_XMAS_EVENT_CANDY, "Data\\Skill\\", "xmasecandy");
-	OpenTexture(MODEL_XMAS_EVENT_CANDY, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_CANDY, "Data\\Skill\\", "xmasecandy");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_CANDY, "Skill\\");
 
-	AccessModel(MODEL_XMAS_EVENT_TREE, "Data\\Skill\\", "xmasetree");
-	OpenTexture(MODEL_XMAS_EVENT_TREE, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_TREE, "Data\\Skill\\", "xmasetree");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_TREE, "Skill\\");
 
-	AccessModel(MODEL_XMAS_EVENT_SOCKS, "Data\\Skill\\", "xmaseyangbal");
-	OpenTexture(MODEL_XMAS_EVENT_SOCKS, "Skill\\");
+	gLoadData.AccessModel(MODEL_XMAS_EVENT_SOCKS, "Data\\Skill\\", "xmaseyangbal");
+	gLoadData.OpenTexture(MODEL_XMAS_EVENT_SOCKS, "Skill\\");
 }
 
 
@@ -87,9 +81,8 @@ void CXmasEvent::LoadXmasEventEffect()
 
 void CXmasEvent::LoadXmasEventItem()
 {
-	// 크리스마스의 별
-	AccessModel(MODEL_POTION+51, "Data\\Item\\", "MagicBox", 2);
-	OpenTexture(MODEL_POTION+51, "Item\\");
+	gLoadData.AccessModel(MODEL_POTION+51, "Data\\Item\\", "MagicBox", 2);
+	gLoadData.OpenTexture(MODEL_POTION+51, "Item\\");
 }
 
 void CXmasEvent::LoadXmasEventSound()
@@ -233,33 +226,26 @@ CNewYearsDayEvent::~CNewYearsDayEvent()
 
 void CNewYearsDayEvent::LoadModel()
 {
-	// 백설기
-	AccessModel(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, "Data\\Monster\\", "sulbeksulki");
-	OpenTexture(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, "Monster\\");
+	gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, "Data\\Monster\\", "sulbeksulki");
+	gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, "Monster\\");
 
-	// 사탕
-	AccessModel(MODEL_NEWYEARSDAY_EVENT_CANDY, "Data\\Monster\\", "sulcandy");
-	OpenTexture(MODEL_NEWYEARSDAY_EVENT_CANDY, "Monster\\");
+	gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_CANDY, "Data\\Monster\\", "sulcandy");
+	gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_CANDY, "Monster\\");
 
-	// 돈
-	AccessModel(MODEL_NEWYEARSDAY_EVENT_MONEY, "Data\\Monster\\", "sulgold");
-	OpenTexture(MODEL_NEWYEARSDAY_EVENT_MONEY, "Monster\\");
+	gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_MONEY, "Data\\Monster\\", "sulgold");
+	gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_MONEY, "Monster\\");
 
-	// 청고추
-	AccessModel(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN, "Data\\Monster\\", "sulgreengochu");
-	OpenTexture(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN, "Monster\\");
+	gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN, "Data\\Monster\\", "sulgreengochu");
+	gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN, "Monster\\");
 
-	// 홍고추
-	AccessModel(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED, "Data\\Monster\\", "sulredgochu");
-	OpenTexture(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED, "Monster\\");
+	gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED, "Data\\Monster\\", "sulredgochu");
+	gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED, "Monster\\");
 
-	// 황금돼지
-	AccessModel(MODEL_NEWYEARSDAY_EVENT_PIG, "Data\\Monster\\", "sulpeg");
-	OpenTexture(MODEL_NEWYEARSDAY_EVENT_PIG, "Monster\\");
+	gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_PIG, "Data\\Monster\\", "sulpeg");
+	gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_PIG, "Monster\\");
 
-	// 윷
-	AccessModel(MODEL_NEWYEARSDAY_EVENT_YUT, "Data\\Monster\\", "sulyutnulre");
-	OpenTexture(MODEL_NEWYEARSDAY_EVENT_YUT, "Monster\\");
+	gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_YUT, "Data\\Monster\\", "sulyutnulre");
+	gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_YUT, "Monster\\");
 }
 
 void CNewYearsDayEvent::LoadSound()

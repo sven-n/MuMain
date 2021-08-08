@@ -1,24 +1,13 @@
 // GlobalBitmap.h: interface for the CGlobalBitmap class.
 //
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_GLOBALBITMAP_H__D28A9680_1E6A_49C8_995B_1E90654A074E__INCLUDED_)
-#define AFX_GLOBALBITMAP_H__D28A9680_1E6A_49C8_995B_1E90654A074E__INCLUDED_
-
 #pragma once
 
-#ifdef KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-#include "gl/gl.h"
-#include "_types.h"
-#else // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
 #pragma warning(disable : 4786)
-#endif // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-
 
 #include <map>
 #include <deque>
 #include <string>
-
 #include <setjmp.h>
 #include "Jpeglib.h"
 #include "./Time/Timer.h"
@@ -117,33 +106,6 @@ class CGlobalBitmap
 	type_bitmap_map	m_mapBitmap;
 	type_index_list m_listNonamedIndex;
 
-#ifdef LDS_OPTIMIZE_FORLOADING
-
-public:
-	// Search를 하는데 std::map 순차적 접근으로 stricmp 로 보다 명확한 검색을 한다.
-	// m_mapBitmap_Namemap 의 FullFileName을 검색한다.
-	BITMAP_t* FindTexture_Linear(const std::string& filename);
-	// m_mapBitmap_Namemap_identity 의 FileName을 검색한다.
-	BITMAP_t* FindTextureByName_Linear(const std::string& name);
-
-private:
-	// string을 모두 소문자로 변환 하여준다.
-	void StringToLower( string &str_ )
-	{
-		unsigned int uiLen = str_.size();
-		for( unsigned int ui_ = 0; ui_ < uiLen; ++ui_ )
-		{
-			str_[ui_] = tolower( str_[ui_] );
-		}
-	}
-
-	// string(FileName)으로 NameMap 검색시 binary Search로 속도 최적화를 위한 std::map의 type 형을 선언한다.
-	typedef std::map<string, BITMAP_t*>	type_bitmap_namemap;
-	
-	type_bitmap_namemap m_mapBitmap_Namemap;			// FileName namemap
-	type_bitmap_namemap m_mapBitmap_Namemap_identity;	// Full FileName namemap
-#endif // LDS_OPTIMIZE_FORLOADING
-	
 	GLuint	m_uiAlternate, m_uiTextureIndexStream;
 	DWORD	m_dwUsedTextureMemory;
 
@@ -192,4 +154,4 @@ protected:
 	static void my_error_exit (j_common_ptr cinfo);
 };
 
-#endif // !defined(AFX_GLOBALBITMAP_H__D28A9680_1E6A_49C8_995B_1E90654A074E__INCLUDED_)
+extern CGlobalBitmap Bitmaps;

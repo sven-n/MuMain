@@ -15,7 +15,7 @@
 #include "MatchEvent.h"
 //#include "CSEventMatch.h"
 //#include "CSChaosCastle.h"
-
+#include "MapManager.h"
 #include "w_CursedTemple.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -27,52 +27,30 @@ namespace   matchEvent
 {
     CSBaseMatch*    g_csMatchInfo = NULL;
 
-//////////////////////////////////////////////////////////////////////////
-//  해당되는 이벤트 경기를 생성한다.
-//////////////////////////////////////////////////////////////////////////
     void    CreateEventMatch ( int iWorld )
     {		
-#ifdef LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE
 		DeleteEventMatch ();
-#endif // LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE
 
-        if ( InBloodCastle() == true )   //  블러드캐슬.
+        if ( gMapManager.InBloodCastle() == true )   //  블러드캐슬.
         {
-#ifndef LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE		// !추후 삭제 ifndef
-			DeleteEventMatch ();
-#endif // LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE
 			g_csMatchInfo = new SEASON3B::CNewBloodCastleSystem;
         }
-        else if ( InChaosCastle()==true )  //  카오스캐슬.
+        else if ( gMapManager.InChaosCastle()==true )  //  카오스캐슬.
         {
-#ifndef LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE		// !추후 삭제 ifndef
-			DeleteEventMatch ();
-#endif // LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE
 			g_csMatchInfo = new SEASON3B::CNewChaosCastleSystem;
         }
-        else if ( InDevilSquare() )//  광장.
+        else if ( gMapManager.InDevilSquare() )//  광장.
         {
-#ifndef LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE		// !추후 삭제 ifndef
-			DeleteEventMatch ();
-#endif // LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE
             g_csMatchInfo = new CSDevilSquareMatch;
         }
-		else if ( g_CursedTemple->IsCursedTemple() )
+		else if ( gMapManager.IsCursedTemple() )
 		{
-#ifndef LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE		// !추후 삭제 ifndef
-			DeleteEventMatch ();
-#endif // LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE
 			g_csMatchInfo = new CCursedTempleMatch;
 		}
-#ifdef YDG_ADD_DOPPELGANGER_EVENT
-		else if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4)
+		else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
 		{
-#ifndef LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE		// !추후 삭제 ifndef
-			DeleteEventMatch ();
-#endif // LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE
 			g_csMatchInfo = new CDoppelGangerMatch;
 		}
-#endif	// YDG_ADD_DOPPELGANGER_EVENT
     }
 
 

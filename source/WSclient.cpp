@@ -52,6 +52,7 @@
 #include "PCRoomPoint.h"
 #endif	// ADD_PCROOM_POINT_SYSTEM
 #include "MixMgr.h"
+#include "MapManager.h"
 
 #ifdef RESOURCE_GUARD
 #include "./ExternalObject/ResourceGuard/MuRGReport.h"
@@ -1005,24 +1006,22 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	CharacterMachine->Gold            = Data->Gold;
 	//CharacterAttribute->SkillMana     = CharacterAttribute->Energy*10+CharacterAttribute->ManaMax*10/6;
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int iPreWorld = World;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	World = Data->Map;
-	OpenWorld(World);
+	int iPreWorld = gMapManager.WorldActive;
+
+	gMapManager.WorldActive = Data->Map;
+	gMapManager.LoadWorld(gMapManager.WorldActive);
 
 #ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 	g_bReponsedMoveMapFromServer = TRUE;
 	LoadingWorld = 30;
 #endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 	
-	if(World == WD_34CRYWOLF_1ST)
+	if(gMapManager.WorldActive == WD_34CRYWOLF_1ST)
 	{
 		SendRequestCrywolfInfo();
 	}
 	
-    matchEvent::CreateEventMatch ( World );
+    matchEvent::CreateEventMatch ( gMapManager.WorldActive );
 	
 	HeroIndex = rand()%MAX_CHARACTERS_CLIENT;
 	CHARACTER *c = &CharactersClient[HeroIndex];
@@ -1036,22 +1035,8 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	c->CtlCode	= Data->CtlCode;
 	o->Kind  = KIND_PLAYER;
    	SetCharacterClass(c);
-#ifdef PK_ATTACK_TESTSERVER_LOG
-	PrintPKLog(c);
-#endif // PK_ATTACK_TESTSERVER_LOG
 
-#ifdef LEM_FIX_AUTOSKILLBAR_SAVE
-	if( !g_bExit )	c->CurrentSkill = Hero->CurrentSkill;
-	else	g_bExit = false;
-#endif	//  [lem_2010.8.18]
 	Hero = c;
-
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-	g_PKSystem->SetHeroPKState(Hero->PK);
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
-#ifdef LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER
-	g_PKSystem->SetHeroPartyPKState(Hero->PKPartyLevel);
-#endif //LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER
 
 	memcpy(c->ID,(char *)CharacterAttribute->Name,MAX_ID_SIZE);
 
@@ -1068,9 +1053,6 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
     LockInputStatus = false;
     CheckIME_Status(true,0);
 	
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-	g_bReponsedMoveMapFromServer = TRUE;
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
     LoadingWorld = 30;
     MouseUpdateTime = 0;
     MouseUpdateTimeMax = 6;
@@ -1092,112 +1074,59 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
     Hero->Movement = false;
     SetPlayerStop(Hero);
 
-    if ( InBloodCastle() == false )
+    if ( gMapManager.InBloodCastle() == false )
     {
         StopBuffer ( SOUND_BLOODCASTLE, true );
     }
 	
-    if ( InChaosCastle() == false )
+    if ( gMapManager.InChaosCastle() == false )
     {
         StopBuffer ( SOUND_CHAOSCASTLE, true );
         StopBuffer ( SOUND_CHAOS_ENVIR, true );
     }
 	
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-	if( IsEmpireGuardian1() == false &&
-		IsEmpireGuardian2() == false &&
-		IsEmpireGuardian3() == false &&
-		IsEmpireGuardian4() == false )
+	if( gMapManager.IsEmpireGuardian1() == false &&
+		gMapManager.IsEmpireGuardian2() == false &&
+		gMapManager.IsEmpireGuardian3() == false &&
+		gMapManager.IsEmpireGuardian4() == false )
 	{
 		StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
 		StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
 		StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
 		StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
 	}
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-
-#if defined RESOURCE_GUARD && !defined FOR_WORK
-
-#ifdef KJH_MOD_RESOURCE_GUARD
-	char szModuleFileName[256];
-	ResourceGuard::CResourceGuard RG101;
-	CMuRGReport MuRGReport;
-	RG101.AddReportObj(&MuRGReport);
-#ifdef _TEST_SERVER
-	sprintf(szModuleFileName, "data\\local\\Gameguardtest.csr");
-#else  // _TEST_SERVER
-	sprintf(szModuleFileName, "data\\local\\Gameguard.csr");
-#endif // _TEST_SERVER
-	if(!RG101.CheckIntegrityResourceChecksumFile(szModuleFileName))
-	{
-		SocketClient.Close();
-		g_ErrorReport.Write("> ResourceGuard Error!!\r\n");
-		return FALSE;
-	}
-#else // KJH_MOD_RESOURCE_GUARD
-	char szModuleFileName[256];
-	GetModuleFileName(NULL, szModuleFileName, 256);
-	ResourceGuard::CResourceGuard RG101;
-	CMuRGReport MuRGReport;
-	RG101.AddReportObj(&MuRGReport);
-	if(!RG101.CheckIntegrityPEFile(szModuleFileName))
-	//if(!RG101.CheckIntegrity(szModuleFileName))			// CheckIntegrityPEFile()로 변경
-	{
-		SocketClient.Close();
-		g_ErrorReport.Write("> ResourceGuard Error!!(%s)\r\n", szModuleFileName);
-		return FALSE;
-	}
-#endif // KJH_MOD_RESOURCE_GUARD
-#endif // RESOURCE_GUARD && FOR_WORK
 
 	g_pUIMapName->ShowMapName();
 
-#ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
 	CreateMyGensInfluenceGroundEffect();
-#endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
 		
-#ifdef YDG_ADD_DOPPELGANGER_EVENT
-		if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4);
+		if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4);
 	else
-#endif	// YDG_ADD_DOPPELGANGER_EVENT
 	{
 		char Text[256];
-		
-#ifndef GRAMMAR_VERB
-		sprintf(Text,"%s%s",GetMapName( World),GlobalText[484]);
-#else //GRAMMAR_VERB
-		sprintf(Text,"%s%s",GlobalText[484],GetMapName( World));
-#endif //GRAMMAR_VERB
+		sprintf(Text,"%s%s",GlobalText[484],gMapManager.GetMapName(gMapManager.WorldActive));
 		
 		g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 	}
 	
-	if( World == WD_30BATTLECASTLE )
+	if( gMapManager.WorldActive == WD_30BATTLECASTLE )
 	{
 		if( g_pSiegeWarfare )
 			g_pSiegeWarfare->CreateMiniMapUI();
 	}
 	
-#ifdef YDG_ADD_DOPPELGANGER_EVENT
-	if( World < WD_65DOPPLEGANGER1 || World > WD_68DOPPLEGANGER4 )
+	if( gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4 )
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_DOPPELGANGER_FRAME);
 	}
-#endif	// YDG_ADD_DOPPELGANGER_EVENT
 
-#ifdef LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
-	if( World < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < World)
+	if( gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_EMPIREGUARDIAN_TIMER);
 	}
-#endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 	
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveJoinMapServer]");
 	
-#ifdef PJH_DEBUG
-	wsprintf(Text,"맵로딩완료(join)[time : %d]", GetTickCount());
-	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);
-#endif
 	return ( TRUE);
 }
 
@@ -1284,7 +1213,7 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 	ClearCharacters(HeroKey);
 	RemoveAllShopTitleExceptHero();
 	
-	if( World >= WD_45CURSEDTEMPLE_LV1 && World <= WD_45CURSEDTEMPLE_LV6 )
+	if( gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6 )
 	{
 		if( !(Data->Map >= WD_45CURSEDTEMPLE_LV1 && Data->Map <= WD_45CURSEDTEMPLE_LV6) )
 		{
@@ -1293,79 +1222,65 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 		}
 	}
 	
-    if(World != Data->Map)
+    if(gMapManager.WorldActive != Data->Map)
 	{
-        int OldWorld = World;
+        int OldWorld = gMapManager.WorldActive;
 		
-		World = Data->Map;
-		OpenWorld(World);
-
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		g_bReponsedMoveMapFromServer = TRUE;
-		LoadingWorld = 30;
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		
-        if ( ( InChaosCastle( OldWorld ) == true && OldWorld!=World ) 
-			|| InChaosCastle() == true )
+		gMapManager.WorldActive = Data->Map;
+		gMapManager.LoadWorld(gMapManager.WorldActive);
+	
+        if ( ( gMapManager.InChaosCastle( OldWorld ) == true && OldWorld!=gMapManager.WorldActive ) 
+			|| gMapManager.InChaosCastle() == true )
         {
             SetCharacterClass ( Hero );
         }
 		
-        if ( InChaosCastle() == false )
+        if ( gMapManager.InChaosCastle() == false )
         {
             StopBuffer ( SOUND_CHAOSCASTLE, true );
             StopBuffer ( SOUND_CHAOS_ENVIR, true );
 		}
 
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-		if( IsEmpireGuardian1() == false &&
-			IsEmpireGuardian2() == false &&
-			IsEmpireGuardian3() == false &&
-			IsEmpireGuardian4() == false )
+		if( gMapManager.IsEmpireGuardian1() == false &&
+			gMapManager.IsEmpireGuardian2() == false &&
+			gMapManager.IsEmpireGuardian3() == false &&
+			gMapManager.IsEmpireGuardian4() == false )
 		{
 			StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
 			StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
 			StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
 			StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
 		}
-#endif //LDS_ADD_EMPIRE_GUARDIAN
 		
-        if ( World==-1 || c->Helper.Type!=MODEL_HELPER+3 || c->SafeZone )
+        if ( gMapManager.WorldActive==-1 || c->Helper.Type!=MODEL_HELPER+3 || c->SafeZone )
         {
             o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1]);
         }
         else
         {
-            if ( World==WD_8TARKAN || World==WD_10HEAVEN )
+            if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN )
                 o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1])+90.f;
             else
                 o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1])+30.f;
         }
 	}
-#ifdef PET_SYSTEM
-    CreatePetDarkSpirit_Now ( c );
-#endif// PET_SYSTEM
+
+	CreatePetDarkSpirit_Now ( c );
     SummonLife = 0;
 	GuildTeam(c);
 	
 	g_pUIMapName->ShowMapName();	// rozy
 
-#ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
 	CreateMyGensInfluenceGroundEffect();
-#endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
 	
-#ifdef YDG_ADD_DOPPELGANGER_EVENT
-	if( World < WD_65DOPPLEGANGER1 || World > WD_68DOPPLEGANGER4 )
+	if( gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4 )
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_DOPPELGANGER_FRAME);
 	}
-#endif	// YDG_ADD_DOPPELGANGER_EVENT
-#ifdef LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
-	if( World < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < World)
+	if( gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_EMPIREGUARDIAN_TIMER);
 	}
-#endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 
 	g_pNewUISystem->HideAll();
 	
@@ -1375,10 +1290,10 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 
 void ReceiveMagicList( BYTE *ReceiveBuffer )
 {
-#ifdef PJH_FIX_4_BUGFIX_33
+
 	int Master_Skill_Bool = -1;
 	int Skill_Bool = -1;
-#endif //PJH_FIX_4_BUGFIX_33
+
 	LPPHEADER_MAGIC_LIST_COUNT Data = (LPPHEADER_MAGIC_LIST_COUNT)ReceiveBuffer;
 	int Offset = sizeof(PHEADER_MAGIC_LIST_COUNT);
 	if(Data->Value == 0xFF)
@@ -1486,8 +1401,6 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 
 }
 
-//-----------------------------------------------------------------------------------------------
-// ReceiveInventory
 BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
 	for(int i=0;i<MAX_EQUIPMENT;i++)
@@ -1511,12 +1424,10 @@ BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	LPPHEADER_DEFAULT_SUBCODE_WORD Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer; //LPPHEADER_DEFAULT_SUBCODE_WORD 6byte
 	int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
 	DeleteBug(&Hero->Object);
-#ifdef PET_SYSTEM
-    giPetManager::DeletePet ( Hero );            
-#endif// PET_SYSTEM
-#ifdef LDK_ADD_NEW_PETPROCESS
+    giPetManager::DeletePet ( Hero );       
+
 	ThePetProcess().DeletePet( Hero );
-#endif //LDK_ADD_NEW_PETPROCESS
+
 	for(int i=0;i<Data->Value;i++)
 	{
 		LPPRECEIVE_INVENTORY Data2 = (LPPRECEIVE_INVENTORY)(ReceiveBuffer+Offset); //LPPRECEIVE_INVENTORY 8byte
@@ -1554,15 +1465,6 @@ void ReceiveDeleteInventory( BYTE *ReceiveBuffer )
 		int itemindex = Data->SubCode;
 		if(itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
 		{
-#ifdef LJH_FIX_BUG_NOT_REMOVED_PET_WITH_1_DUR_WHEN_PLAYER_KILLED
-			SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
-			ITEM* pEquippedItem = &CharacterMachine->Equipment[itemindex];
-
-			if (pPickedItem && pPickedItem->GetItem()->lineal_pos == pEquippedItem->lineal_pos)
-				SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
-#endif //LJH_FIX_BUG_NOT_REMOVED_PET_WITH_1_DUR_WHEN_PLAYER_KILLED
-			
-
 			g_pMyInventory->UnequipItem(itemindex);
 		}
 		else if(itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
@@ -1890,7 +1792,7 @@ void ReceiveMoveCharacter(BYTE *ReceiveBuffer)
 			{
 				int iDefaultWall = TW_CHARACTER;
 
-				if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4
+				if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4
 					&& Key != HeroKey)
 				{
 					iDefaultWall = TW_NOMOVE;
@@ -1948,12 +1850,6 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		return ( FALSE);
 	}
 	
-#ifdef PJH_DEBUG
-	char Text[300];
-	wsprintf(Text,"맵이동 (tel)[time : %d]", GetTickCount());
-	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);
-#endif
-
 	SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 	
 	LPPRECEIVE_TELEPORT_POSITION Data = (LPPRECEIVE_TELEPORT_POSITION)ReceiveBuffer;
@@ -1966,19 +1862,19 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	o->Position[0] = ((float)(Hero->PositionX)+0.5f)*TERRAIN_SCALE;
 	o->Position[1] = ((float)(Hero->PositionY)+0.5f)*TERRAIN_SCALE;
 	
-    if ( World==-1 || Hero->Helper.Type!=MODEL_HELPER+3 || Hero->SafeZone )
+    if ( gMapManager.WorldActive==-1 || Hero->Helper.Type!=MODEL_HELPER+3 || Hero->SafeZone )
     {
         o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1]);
     }
     else
     {
-        if ( World==WD_8TARKAN || World==WD_10HEAVEN )
+        if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN )
             o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1])+90.f;
         else
             o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1])+30.f;
     }
 	
-	if( World >= WD_45CURSEDTEMPLE_LV1 && World <= WD_45CURSEDTEMPLE_LV6 )
+	if( gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6 )
 	{
 		if( !(Data->Map >= WD_45CURSEDTEMPLE_LV1 && Data->Map <= WD_45CURSEDTEMPLE_LV6) )
 		{
@@ -2000,17 +1896,17 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
         ClearItems();
 		ClearCharacters(HeroKey);
 		RemoveAllShopTitleExceptHero();
-		if(World != Data->Map)
+		if(gMapManager.WorldActive != Data->Map)
 		{
-            int OldWorld = World;
+            int OldWorld = gMapManager.WorldActive;
 			
-			World = Data->Map;
-			OpenWorld(World);
+			gMapManager.WorldActive = Data->Map;
+			gMapManager.LoadWorld(gMapManager.WorldActive);
 			
-			if(World == WD_34CRYWOLF_1ST)
+			if(gMapManager.WorldActive == WD_34CRYWOLF_1ST)
 				SendRequestCrywolfInfo();
 			
-            if ( ( InChaosCastle(OldWorld) == true && OldWorld!=World ) || InChaosCastle()==true )
+            if ( ( gMapManager.InChaosCastle(OldWorld) == true && OldWorld!=gMapManager.WorldActive ) || gMapManager.InChaosCastle()==true )
             {
                 PlayBuffer( SOUND_CHAOS_ENVIR, NULL, true );
 				
@@ -2019,79 +1915,67 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
                 SetCharacterClass ( Hero );
 				DeleteBug(&Hero->Object);
             }
-            if ( InChaosCastle()==false )
+            if ( gMapManager.InChaosCastle()==false )
             {
                 StopBuffer ( SOUND_CHAOSCASTLE, true );
                 StopBuffer ( SOUND_CHAOS_ENVIR, true );
             }
 
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-			if( IsEmpireGuardian1() == false &&
-				IsEmpireGuardian2() == false &&
-				IsEmpireGuardian3() == false &&
-				IsEmpireGuardian4() == false )
+			if( gMapManager.IsEmpireGuardian1() == false &&
+				gMapManager.IsEmpireGuardian2() == false &&
+				gMapManager.IsEmpireGuardian3() == false &&
+				gMapManager.IsEmpireGuardian4() == false )
 			{
 				StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_RAIN, true);
 				StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_FOG, true);
 				StopBuffer(SOUND_EMPIREGUARDIAN_WEATHER_STORM, true);
 				StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
 			}
-#endif //LDS_ADD_EMPIRE_GUARDIAN
 
-            matchEvent::CreateEventMatch ( World );
+            matchEvent::CreateEventMatch ( gMapManager.WorldActive );
 			
-            if ( World==-1 || Hero->Helper.Type!=MODEL_HELPER+3 || Hero->SafeZone )
+            if ( gMapManager.WorldActive==-1 || Hero->Helper.Type!=MODEL_HELPER+3 || Hero->SafeZone )
             {
                 o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1]);
             }
             else
             {
-                if ( World==WD_8TARKAN || World==WD_10HEAVEN )
+                if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN )
                     o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1])+90.f;
                 else
                     o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1])+30.f;
             }
 			
-#ifdef YDG_ADD_DOPPELGANGER_EVENT
-			if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4);
+			if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4);
 			else
-#endif	// YDG_ADD_DOPPELGANGER_EVENT
 			{
 				char Text[256];
-				sprintf(Text,"%s%s",GlobalText[484],GetMapName( World));
+				sprintf(Text,"%s%s",GlobalText[484],gMapManager.GetMapName(gMapManager.WorldActive));
 			
 				g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 			}
 		}
 		SendRequestFinishLoading();
 
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		g_bReponsedMoveMapFromServer = TRUE;
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 		LoadingWorld = 30;
 
 		MouseUpdateTime = 0;
 		MouseUpdateTimeMax = 6;
 		
-#ifdef YDG_ADD_DOPPELGANGER_EVENT
-		if( World < WD_65DOPPLEGANGER1 || World > WD_68DOPPLEGANGER4 )
+		if( gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4 )
 		{
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_DOPPELGANGER_FRAME);
 		}
-#endif	// YDG_ADD_DOPPELGANGER_EVENT
-#ifdef LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
-		if( World < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < World)
+		if( gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
 		{
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_EMPIREGUARDIAN_TIMER);
 		}
-#endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 
 		g_pNewUISystem->HideAll();
 		
-#ifdef PET_SYSTEM
         CreatePetDarkSpirit_Now ( Hero );
-#endif// PET_SYSTEM
 		CreateEffect(BITMAP_MAGIC+2,o->Position,o->Angle,o->Light,0,o);
+
 		o->Alpha = 0.f;
         EnableEvent = 0; //USE_EVENT_ELDORADO
 		
@@ -2109,29 +1993,16 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	if(Data->Flag) 
 		g_pUIMapName->ShowMapName();	// rozy
 
-#ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
 	CreateMyGensInfluenceGroundEffect();
-#endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
 	
-	if( battleCastle::InBattleCastle() && battleCastle::IsBattleCastleStart() )
+	if( gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart() )
 	{
 		Hero->EtcPart = iEtcPart;
 	}
 	
-#ifdef LJH_FIX_NOT_INITIALIZING_BATTLECASTLE_UI	
-	if( World == WD_30BATTLECASTLE )
-	{
-		if( g_pSiegeWarfare )
-			g_pSiegeWarfare->CreateMiniMapUI();
-	} else 
-	{
-		g_pSiegeWarfare->InitMiniMapUI();
-	}
-#endif //LJH_FIX_NOT_INITIALIZING_BATTLECASTLE_UI
-
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1C [ReceiveTeleport(%d)]", Data->Flag);
 	
-	return ( TRUE);
+	return (TRUE);
 }
 
 void ReceiveEquipment( BYTE *ReceiveBuffer )
@@ -2153,10 +2024,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
     BYTE Option= Data->Item[3]&63;
     BYTE ExtOption = Data->Item[4];
 	
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
     int maxClass = MAX_CLASS;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	
 	switch(Data->Item[1]>>4)
 	{
@@ -2178,11 +2046,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
         {
             c->Weapon[1].Type = -1;
             c->Weapon[1].Option1 = 0;
-#ifdef KJH_FIX_JP0467_RENDER_DARKLOAD_PET_OTHER_CHARATER
             DeletePet ( c );            
-#else // KJH_FIX_JP0467_RENDER_DARKLOAD_PET_OTHER_CHARATER
-            DeletePet ( Hero );            
-#endif // KJH_FIX_JP0467_RENDER_DARKLOAD_PET_OTHER_CHARATER
         }
 		else
 		{
@@ -2321,10 +2185,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 		{
 			c->Helper.Type = -1;
 			DeleteBug(o);
-#ifdef LDK_ADD_NEW_PETPROCESS
 			ThePetProcess().DeletePet(c, c->Helper.Type, true);
-#endif //LDK_ADD_NEW_PETPROCESS
-
 		}
 		else
 		{
@@ -2356,31 +2217,18 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 					CreateBug(MODEL_FENRIR_RED, o->Position, o);
 				}
 				break;
-#if defined(LDK_ADD_NEW_PETPROCESS) && defined(LDK_ADD_PC4_GUARDIAN)
 			case ITEM_HELPER+64:
 			case ITEM_HELPER+65:
 				{
-#if	SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-					if( CHARACTER_SCENE == SceneFlag || c == Hero )
-#endif	//SELECTED_LANGUAGE == LANGUAGE_JAPANESE
 					{
 						ThePetProcess().CreatePet( Type, c->Helper.Type, o->Position, c );
 					}
 				}
 				break;
-#endif //defined(LDK_ADD_NEW_PETPROCESS) && defined(LDK_ADD_PC4_GUARDIAN) && (SELECTED_LANGUAGE != LANGUAGE_JAPANESE)
-#if defined LDK_ADD_NEW_PETPROCESS && defined LDK_ADD_RUDOLPH_PET
 			case ITEM_HELPER+67:ThePetProcess().CreatePet( Type, c->Helper.Type, o->Position, c );break;
-#endif //defined LDK_ADD_NEW_PETPROCESS && defined LDK_ADD_RUDOLPH_PET
-#if defined LDK_ADD_NEW_PETPROCESS && defined PJH_ADD_PANDA_PET
 			case ITEM_HELPER+80:ThePetProcess().CreatePet( Type, c->Helper.Type, o->Position, c );break;
-#endif //LDK_ADD_NEW_PETPROCESS && defined PJH_ADD_PANDA_PET
-#if defined LDK_ADD_NEW_PETPROCESS && defined LDK_ADD_CS7_UNICORN_PET
 			case ITEM_HELPER+106:ThePetProcess().CreatePet( Type, c->Helper.Type, o->Position, c );break;
-#endif //defined LDK_ADD_NEW_PETPROCESS && defined LDK_ADD_CS7_UNICORN_PET
-#if defined LDK_ADD_NEW_PETPROCESS && defined YDG_ADD_SKELETON_PET
 			case ITEM_HELPER+123:ThePetProcess().CreatePet( Type, c->Helper.Type, o->Position, c );break;
-#endif //defined LDK_ADD_NEW_PETPROCESS && defined YDG_ADD_SKELETON_PET
 			}
 		}
 		break;
@@ -2395,7 +2243,6 @@ void RegisterBuff( eBuffState buff, OBJECT* o, const int bufftime = 0 );
 
 void UnRegisterBuff( eBuffState buff, OBJECT* o );
 
-//  화면에 들어온 캐릭터를 생성한다.
 void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
@@ -2525,7 +2372,7 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 				c->Movement = true;
 			}
 			
-			if ( InHellas() )
+			if ( gMapManager.InHellas() )
 			{
 				CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 8, o, 20.f );
 			}
@@ -2608,7 +2455,7 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 				g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
 			}
 
-			if( battleCastle::InBattleCastle() && battleCastle::IsBattleCastleStart() )
+			if( gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart() )
 			{
 				//g_pSiegeWarfare->InitSkillUI();
 			}
@@ -2841,11 +2688,8 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
         BYTE byBuildTime= (Data2->TypeH&0x70)>>4;
         WORD Type       = ((WORD)(Data2->TypeH&0x03)<<8) + Data2->TypeL;
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		if(Type != 106)
 			int a= 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		
 		int CreateFlag = (Key>>15);
 		int TeleportFlag = (Data2->KeyH&0x40)>>6;
@@ -2883,7 +2727,7 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 		}
 
 		c->Object.Angle[2] = ((float)(Data2->Path>>4)-1.f)*fAngle;
-#ifdef PBG_ADD_LITTLESANTA_NPC
+
 		if(o->Type >= MODEL_LITTLESANTA+1 && o->Type <= MODEL_LITTLESANTA+4)
 		{
 			c->Object.Angle[2] = 90.f;
@@ -2892,21 +2736,16 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 		{
 			c->Object.Angle[2] = 90.f;
 		}
-#endif //PBG_ADD_LITTLESANTA_NPC
-#ifdef LDK_ADD_SANTA_NPC
 		else if(o->Type == MODEL_XMAS2008_SANTA_NPC)
 		{
 			c->Object.Angle[2] = 20.f;
 		}
-#endif //LDK_ADD_SANTA_NPC		
-#ifdef LDS_ADD_NPC_UNITEDMARKETPLACE
 		else if(o->Type == MODEL_UNITEDMARKETPLACE_JULIA)
 		{
 			//c->Object.Angle[2] = 44.0f;
 			c->Object.Angle[2] = 49.0f;
 			//c->Object.Angle[2] = 90.0f;
 		}
-#endif // LDS_ADD_NPC_UNITEDMARKETPLACE
 
 		c->PositionX = Data2->PositionX;
 		c->PositionY = Data2->PositionY;
@@ -2916,7 +2755,7 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
         c->m_byFriend = bMyMob;
         o->m_byBuildTime = byBuildTime;
 		
-        if ( battleCastle::InBattleCastle() && c->MonsterIndex==277 )        
+        if ( gMapManager.InBattleCastle() && c->MonsterIndex==277 )        
         {
 			if( g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen) )
 			{
@@ -2933,7 +2772,7 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 		{
             AppearMonster(c);
 		}
-		else if(World == WD_39KANTURU_3RD && o->Type == MODEL_MONSTER01+121 && TeleportFlag)
+		else if(gMapManager.WorldActive == WD_39KANTURU_3RD && o->Type == MODEL_MONSTER01+121 && TeleportFlag)
 		{
 			vec3_t Light;
 			Vector ( 1.0f, 1.0f, 1.0f, Light );
@@ -2942,28 +2781,23 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 			CreateEffect(BITMAP_SPARK+1,o->Position,o->Angle,Light);
 			PlayBuffer(SOUND_KANTURU_3RD_NIGHTMARE_TELE);
 		}
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
+
 		int iDefaultWall = TW_CHARACTER;
 
-		if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4
+		if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4
 			&& Key != HeroKey)
 		{
 			iDefaultWall = TW_NOMOVE;
 		}
 
 		else if(PathFinding2(c->PositionX, c->PositionY, Data2->TargetX, Data2->TargetY, &c->Path, 0.0f, iDefaultWall))
-#else	// YDG_ADD_DOPPELGANGER_MONSTER
-		else if(PathFinding2(c->PositionX, c->PositionY, Data2->TargetX, Data2->TargetY, &c->Path))
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 		{
 			c->Movement = true;
 		}
-#ifdef KJH_FIX_BTS167_MOVE_NPC_IN_VIEWPORT
 		else
 		{
 			c->Movement = false;
 		}
-#endif // KJH_FIX_BTS167_MOVE_NPC_IN_VIEWPORT
 
 		Offset += (sizeof(PCREATE_MONSTER)-(sizeof(BYTE)*(MAX_BUFF_SLOT_INDEX-Data2->s_BuffCount)));
 	}
@@ -3010,11 +2844,7 @@ void ReceiveCreateSummonViewport( BYTE *ReceiveBuffer )
 		c->TargetY = Data2->PositionY;
 		o->Kind = KIND_PLAYER;
 		c->PK   = Data2->Path&0xf;
-		
-#ifdef PK_ATTACK_TESTSERVER_LOG
-		PrintPKLog(c);
-#endif // PK_ATTACK_TESTSERVER_LOG
-		
+			
 		if(c->PK >= PVP_MURDERER2)
 			c->Level = 1;
 		
@@ -3025,10 +2855,8 @@ void ReceiveCreateSummonViewport( BYTE *ReceiveBuffer )
             memcpy(Temp,Data2->ID,MAX_ID_SIZE);
             Temp[MAX_ID_SIZE] = NULL;
             strcat(c->ID,Temp);
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
             memcpy(c->OwnerID,Data2->ID,MAX_ID_SIZE);
             c->OwnerID[MAX_ID_SIZE] = NULL;
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
         }
 		
 		if(CreateFlag)
@@ -3076,10 +2904,8 @@ void ReceiveDeleteCharacterViewport( BYTE *ReceiveBuffer )
 		}
 		
 		int Key = ((int)(Data2->KeyH)<<8) + Data2->KeyL;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int DeleteFlag = (Key>>15);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 		Key &= 0x7FFF;
 		
 		int iIndex = g_pPurchaseShopInventory->GetShopCharacterIndex();
@@ -3142,11 +2968,8 @@ void ProcessDamageCastle( LPPRECEIVE_ATTACK Data)
 	vec3_t Light;
 	WORD Damage			= (((WORD)(Data->DamageH)<<8) + Data->DamageL);
 	int	 DamageType		= (Data->DamageType)&0x3f;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
     bool bDoubleEnable  = (Data->DamageType>>6)&0x01;
 	bool bComboEnable	= (Data->DamageType>>7)&0x01;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	WORD ShieldDamage	= (((WORD)(Data->ShieldDamageH)<<8) + Data->ShieldDamageL);
 	
 	int accumDamage = ShieldDamage + Damage;
@@ -3254,7 +3077,7 @@ void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_ATTACK Data = (LPPRECEIVE_ATTACK)ReceiveBuffer;
 
-	if(InChaosCastle())
+	if(gMapManager.InChaosCastle())
 	{
 		ProcessDamageCastle(Data);
 		return;
@@ -4221,13 +4044,9 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_MONSTER_SUMMON:
 				SetPlayerAttack ( sc );
 				break;
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 			case AT_SKILL_RECOVER:
 				{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					OBJECT* oh = &Hero->Object;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					OBJECT* o = so;
 					vec3_t Light,Position,P,dp;
 					vec3_t vFirePosition;
@@ -4274,7 +4093,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				}
 				
 				break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 			case AT_SKILL_MONSTER_MAGIC_DEF:
 				sc->AttackTime = 1;
 				g_CharacterRegisterBuff(so, eBuff_PhysDefense);
@@ -4292,21 +4110,17 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_HEAL_UP+3:
 			case AT_SKILL_HEAL_UP+4:
 			case AT_SKILL_HEALING:
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ATT_POWER_UP:
 			case AT_SKILL_ATT_POWER_UP+1:
 			case AT_SKILL_ATT_POWER_UP+2:
 			case AT_SKILL_ATT_POWER_UP+3:
 			case AT_SKILL_ATT_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ATTACK:
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_DEF_POWER_UP:
 			case AT_SKILL_DEF_POWER_UP+1:
 			case AT_SKILL_DEF_POWER_UP+2:
 			case AT_SKILL_DEF_POWER_UP+3:
 			case AT_SKILL_DEF_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_DEFENSE:
 			case AT_SKILL_SUMMON:
 			case AT_SKILL_SUMMON+1:
@@ -4375,7 +4189,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				break;
 				
 			case AT_SKILL_TELEPORT:
-				if(World == WD_39KANTURU_3RD && so->Type == MODEL_MONSTER01+121)
+				if(gMapManager.WorldActive == WD_39KANTURU_3RD && so->Type == MODEL_MONSTER01+121)
 				{
 					vec3_t Light;
 					Vector ( 1.0f, 1.0f, 1.0f, Light );
@@ -4509,7 +4323,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				SetPlayerBow(sc);
 				sc->AttackTime = 1;
 				break;
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			case AT_SKILL_MULTI_SHOT:
 				SetPlayerBow(sc);
 				if( sc != Hero && so->Type == MODEL_PLAYER)
@@ -4518,23 +4331,15 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				}
 				sc->AttackTime = 1;
 				break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC	
-//			case AT_SKILL_GAOTIC:
-//				SetPlayerMagic(sc);
-//				break;
-#endif //
 			case AT_SKILL_BLAST_CROSSBOW4:
 				SetPlayerBow(sc);
 				sc->AttackTime = 1;
 				break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_BLOOD_ATT_UP:
 			case AT_SKILL_BLOOD_ATT_UP+1:
 			case AT_SKILL_BLOOD_ATT_UP+2:
 			case AT_SKILL_BLOOD_ATT_UP+3:
 			case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_REDUCEDEFENSE:
 				if ( sc->SkillSuccess )
 				{
@@ -4613,11 +4418,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				break;
 				
 			case AT_SKILL_SPACE_SPLIT: 
-#ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 				if ( (sc->Helper.Type>=MODEL_HELPER+2 && sc->Helper.Type<=MODEL_HELPER+4) && !sc->SafeZone )
-#else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-				if ( sc->Helper.Type==MODEL_HELPER+4 && !sc->SafeZone )
-#endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 				{
 					SetAction ( so, PLAYER_ATTACK_RIDE_STRIKE );
 				}
@@ -4921,7 +4722,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				break;
 				
 			case AT_SKILL_RIDER:
-				if ( World==WD_8TARKAN || World==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
+				if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
 					SetAction ( so, PLAYER_SKILL_RIDER_FLY );
 				else 
 					SetAction ( so, PLAYER_SKILL_RIDER );
@@ -6198,7 +5999,7 @@ void FallingStartCharacter ( CHARACTER* c, OBJECT* o )
 	
     o->m_bActionStart = false;
 	
-    if ( InChaosCastle()==true && (TerrainWall[WallIndex]&TW_NOGROUND)==TW_NOGROUND )
+    if ( gMapManager.InChaosCastle()==true && (TerrainWall[WallIndex]&TW_NOGROUND)==TW_NOGROUND )
     {
         c->StormTime = 0;
         o->m_bActionStart = true;
@@ -6259,11 +6060,11 @@ void ReceiveDie(BYTE *ReceiveBuffer,int Size)
 	
 	c->m_byDieType = SkillType;
 	
-    if ( InBloodCastle() == true )
+    if ( gMapManager.InBloodCastle() == true )
     {
         FallingStartCharacter ( c, o );
     }
-    else if ( InChaosCastle()==true )
+    else if ( gMapManager.InChaosCastle()==true )
     {
         FallingStartCharacter ( c, o );
     }
@@ -7792,7 +7593,7 @@ void ReceiveGuildIDViewport( BYTE *ReceiveBuffer )
         
 		GuildTeam(c);
 
-		if( World == WD_30BATTLECASTLE )
+		if( gMapManager.WorldActive == WD_30BATTLECASTLE )
 		{
 			if( g_pSiegeWarfare )
 			{
@@ -7812,11 +7613,7 @@ void ReceiveGuildIDViewport( BYTE *ReceiveBuffer )
 void ReceiveGuildInfo( BYTE *ReceiveBuffer )
 {
 	LPPPRECEIVE_GUILDINFO Data = (LPPPRECEIVE_GUILDINFO)ReceiveBuffer;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	g_GuildCache.SetGuildMark( Data->GuildKey, Data->UnionName, Data->GuildName, Data->Mark );
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int Index = g_GuildCache.SetGuildMark( Data->GuildKey, Data->UnionName, Data->GuildName, Data->Mark );
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 }
 
 // 길드직책을 임명/변경/해제 결과
@@ -8861,7 +8658,7 @@ void ReceiveDevilSquareCountDown( BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = ( LPPHEADER_DEFAULT)ReceiveBuffer;
 	
-	if( g_CursedTemple->IsCursedTemple() )
+	if( gMapManager.IsCursedTemple() )
 	{
 		if( Data->Value == TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE
 			|| Data->Value == TYPE_MATCH_CURSEDTEMPLE_GAME_START )
@@ -8871,7 +8668,7 @@ void ReceiveDevilSquareCountDown( BYTE *ReceiveBuffer )
 		}
 	}
 #ifdef YDG_ADD_DOPPELGANGER_EVENT
-	else if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4)
+	else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
 	{
 		if( ((BYTE)(Data->Value + 1) >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && (BYTE)(Data->Value + 1) <= TYPE_MATCH_DOPPELGANGER_CLOSE) || (BYTE)(Data->Value + 1) == TYPE_MATCH_NONE )
 		{
@@ -8991,8 +8788,6 @@ void ReceiveEventZoneOpenTime( BYTE *ReceiveBuffer )
 	}
     else if ( Data->Value==4 )
     {
-#ifdef KJW_FIX_CHAOSCASTLE_MESSAGE
-#endif // KJW_FIX_CHAOSCASTLE_MESSAGE
 		WORD time = MAKEWORD ( Data->KeyL, Data->KeyH );
         
         if ( 0 == time )
@@ -9123,9 +8918,9 @@ void ReceiveSetAttribute ( BYTE* ReceiveBuffer )
     {
     case 0:
         {
-            if ( InBloodCastle() && Data->m_byMapAttr==TW_NOGROUND )
+            if ( gMapManager.InBloodCastle() && Data->m_byMapAttr==TW_NOGROUND )
             {
-                SetActionObject ( World, 36, 0, 1.f );
+                SetActionObject ( gMapManager.WorldActive, 36, 0, 1.f );
             }
 			
             for ( int k=0; k<Data->m_byCount; k++ )
@@ -9811,7 +9606,7 @@ void ReceiveDisplayEffectViewport(BYTE* ReceiveBuffer)
 				
 			case 0x11:
 				{
-					if(!InChaosCastle())
+					if(!gMapManager.InChaosCastle())
 					{
 						CreateEffect(MODEL_SHIELD_CRASH, o->Position, o->Angle, o->Light, 0, o);
 						PlayBuffer(SOUND_SHIELDCLASH);
@@ -11095,7 +10890,7 @@ void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 		c->m_nContributionPoint = Data2->m_nContributionPoint;
 #endif //PBG_MOD_STRIFE_GENSMARKRENDER
 #ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
-		if (::IsStrifeMap(World))
+		if (::IsStrifeMap(gMapManager.WorldActive))
 		{
 			vec3_t vTemp = {0.f, 0.f, 0.f};
 			if (Hero->m_byGensInfluence == c->m_byGensInfluence)
@@ -11151,11 +10946,7 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
 	case 0x00:
 		if(fruit >=0 && fruit <= 4)
 		{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			int index = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
             int  index;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			
             switch ( fruit )
             {
@@ -12470,7 +12261,7 @@ void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
 				
                 c->m_iDeleteTime = 150;
 				
-                if ( battleCastle::InBattleCastle() && c->MonsterIndex==277 )        
+                if ( gMapManager.InBattleCastle() && c->MonsterIndex==277 )        
                 {
                     //  State					
 					if (g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen))
@@ -15587,34 +15378,16 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_Seal2:
 		case eBuff_Seal3:
 		case eBuff_Seal4:
-#ifdef PSW_ADD_PC4_SEALITEM
 		case eBuff_Seal_HpRecovery:
 		case eBuff_Seal_MpRecovery:
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef ASG_ADD_CS6_GUARD_CHARM
 		case eBuff_GuardCharm:
-#endif	// ASG_ADD_CS6_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ITEM_GUARD_CHARM
 		case eBuff_ItemGuardCharm:
-#endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ASCENSION_SEAL_MASTER
 		case eBuff_AscensionSealMaster:
-#endif	// ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-#ifdef ASG_ADD_CS6_WEALTH_SEAL_MASTER
 		case eBuff_WealthSealMaster:
-#endif	// ASG_ADD_CS6_WEALTH_SEAL_MASTER
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 		case eBuff_NewWealthSeal:
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-#ifdef YDG_ADD_CS7_MAX_AG_AURA
 		case eBuff_AG_Addition:
-#endif	// YDG_ADD_CS7_MAX_AG_AURA
-#ifdef YDG_ADD_CS7_MAX_SD_AURA
 		case eBuff_SD_Addition:
-#endif	// YDG_ADD_CS7_MAX_SD_AURA
-#ifdef YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
 		case eBuff_PartyExpBonus:
-#endif	// YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
 			{
 				g_RegisterBuffTime(buff, bufftime);
 			}
@@ -15625,13 +15398,9 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_EliteScroll4:
 		case eBuff_EliteScroll5:
 		case eBuff_EliteScroll6:
-#ifdef PSW_ADD_PC4_SCROLLITEM
 		case eBuff_Scroll_Battle:
 		case eBuff_Scroll_Strengthen:
-#endif //PSW_ADD_PC4_SCROLLITEM
-#ifdef YDG_ADD_HEALING_SCROLL
 		case eBuff_Scroll_Healing:
-#endif	// YDG_ADD_HEALING_SCROLL
 			{
 				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
@@ -15665,8 +15434,6 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 				CharacterMachine->CalculateAll();
 			}
 			break;
-			
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 		case eBuff_CherryBlossom_Liguor:
 		case eBuff_CherryBlossom_RiceCake:
 		case eBuff_CherryBlossom_Petal:
@@ -15679,11 +15446,8 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 				}
 			}
 			break;
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 		case eBuff_SwellOfMagicPower:
 			{
-				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
 				
 				if( buff == eBuff_SwellOfMagicPower ) 
@@ -15691,8 +15455,6 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 					CharacterMachine->CalculateMagicDamage();
 				}
 			}break;
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#ifdef PBG_ADD_SANTABUFF
 		case eBuff_BlessingOfXmax:
 		case eBuff_CureOfSanta:
 		case eBuff_SafeGuardOfSanta:
@@ -15749,8 +15511,6 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 				}
 			}
 			break;
-#endif //PBG_ADD_SANTABUFF
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 		case eBuff_DuelWatch:
 			{
 				g_pNewUISystem->HideAll();
@@ -15760,47 +15520,11 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 				g_pNewUISystem->Show(SEASON3B::INTERFACE_DUELWATCH_USERLIST);
 			}
 			break;
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef PBG_ADD_HONOROFGLADIATORBUFFTIME
 		case eBuff_HonorOfGladiator:
 			{
 				g_RegisterBuffTime(buff, bufftime);
 			}
 			break;
-#endif //PBG_ADD_HONOROFGLADIATORBUFFTIME
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-		case eBuff_StrongCharm:
-			{
-				g_RegisterBuffTime(buff, bufftime);
-
-				g_pChatListBox->AddText("", GlobalText[2591], SEASON3B::TYPE_SYSTEM_MESSAGE);
-				
-				CharacterMachine->CalculateDamage();
-
-				CharacterMachine->CalculateDefense();
-			}
-			break;
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
-#ifdef PBG_ADD_SECRETBUFF
-		case eBuff_Vitality_Lowest:
-		case eBuff_Vitality_Low:
-		case eBuff_Vitality_Middle:
-		case eBuff_Vitality_High:
-		case eDeBuff_Fatigue_FirstPenalty:
-		case eDeBuff_Fatigue_SecondPenalty:
-			{
-				//	g_FatigueTimeSystem->SetIsVitalityBuff(true);
-				g_RegisterBuffTime(buff, bufftime);
-			}
-			break;
-#endif //PBG_ADD_SECRETBUFF
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-		case eDeBuff_MoveCommandWin:
-			{
-				g_PKSystem->SetMoveBuffState(g_isCharacterBuff((&Hero->Object), eDeBuff_MoveCommandWin));
-			}
-			break;
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
 		}
 	}
 }
@@ -15853,34 +15577,16 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 		case eBuff_Seal2:
 		case eBuff_Seal3:
 		case eBuff_Seal4:
-#ifdef PSW_ADD_PC4_SEALITEM
 		case eBuff_Seal_HpRecovery:
 		case eBuff_Seal_MpRecovery:
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef ASG_ADD_CS6_GUARD_CHARM
 		case eBuff_GuardCharm:
-#endif	// ASG_ADD_CS6_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ITEM_GUARD_CHARM
 		case eBuff_ItemGuardCharm:
-#endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ASCENSION_SEAL_MASTER
 		case eBuff_AscensionSealMaster:
-#endif	// ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-#ifdef ASG_ADD_CS6_WEALTH_SEAL_MASTER
 		case eBuff_WealthSealMaster:
-#endif	// ASG_ADD_CS6_WEALTH_SEAL_MASTER
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 		case eBuff_NewWealthSeal:
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-#ifdef YDG_ADD_CS7_MAX_AG_AURA
 		case eBuff_AG_Addition:
-#endif	// YDG_ADD_CS7_MAX_AG_AURA
-#ifdef YDG_ADD_CS7_MAX_SD_AURA
 		case eBuff_SD_Addition:
-#endif	// YDG_ADD_CS7_MAX_SD_AURA
-#ifdef YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
 		case eBuff_PartyExpBonus:
-#endif	// YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
 			{
 				g_UnRegisterBuffTime( buff );
 			}
@@ -15891,13 +15597,9 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 		case eBuff_EliteScroll4:
 		case eBuff_EliteScroll5:
 		case eBuff_EliteScroll6:
-#ifdef PSW_ADD_PC4_SCROLLITEM
 		case eBuff_Scroll_Battle:
 		case eBuff_Scroll_Strengthen:
-#endif //PSW_ADD_PC4_SCROLLITEM
-#ifdef YDG_ADD_HEALING_SCROLL
 		case eBuff_Scroll_Healing:
-#endif	// YDG_ADD_HEALING_SCROLL
 			{
 				g_UnRegisterBuffTime( buff );
 				
@@ -15930,7 +15632,6 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 				CharacterMachine->CalculateAll();
 			}
 			break;
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 		case eBuff_CherryBlossom_Liguor:
 		case eBuff_CherryBlossom_RiceCake:
 		case eBuff_CherryBlossom_Petal:
@@ -15943,8 +15644,6 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 				}
 			}
 			break;
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 		case eBuff_SwellOfMagicPower:
 			{
 				g_UnRegisterBuffTime( buff );
@@ -15952,8 +15651,6 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 				CharacterMachine->CalculateMagicDamage();
 			}
 			break;
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#ifdef PBG_ADD_SANTABUFF
 		case eBuff_BlessingOfXmax:
 		case eBuff_CureOfSanta:
 		case eBuff_SafeGuardOfSanta:
@@ -15983,8 +15680,6 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 				}
 			}
 			break;
-#endif //PBG_ADD_SANTABUFF
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 		case eBuff_DuelWatch:
 			{
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUELWATCH_MAINFRAME);
@@ -15993,42 +15688,11 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 				g_pNewUISystem->Show(SEASON3B::INTERFACE_BUFF_WINDOW);
 			}	
 			break;
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef PBG_ADD_HONOROFGLADIATORBUFFTIME
 		case eBuff_HonorOfGladiator:
 			{
 				g_UnRegisterBuffTime( buff );
 			}
 			break;
-#endif //PBG_ADD_HONOROFGLADIATORBUFFTIME
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-		case eBuff_StrongCharm:
-			{
-				g_UnRegisterBuffTime( buff );
-				CharacterMachine->CalculateDamage();
-				CharacterMachine->CalculateDefense();
-			}
-			break;
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
-#ifdef PBG_ADD_SECRETBUFF
-		case eBuff_Vitality_Lowest:
-		case eBuff_Vitality_Low:
-		case eBuff_Vitality_Middle:
-		case eBuff_Vitality_High:
-		case eDeBuff_Fatigue_FirstPenalty:
-		case eDeBuff_Fatigue_SecondPenalty:
-			{
-				g_UnRegisterBuffTime( buff );
-			}
-			break;
-#endif //PBG_ADD_SECRETBUFF
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-		case eDeBuff_MoveCommandWin:
-			{
-				g_PKSystem->SetMoveBuffState(g_isCharacterBuff((&Hero->Object), eDeBuff_MoveCommandWin));
-			}
-			break;
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
 		}
 	}
 }
@@ -16052,7 +15716,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			}	
 		}
 		break;
-		
 	case eBuff_PhysDefense:
 		{
 			if( o->Type == MODEL_PLAYER )
@@ -16066,7 +15729,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			}
 		}
 		break;
-		
 	case eBuff_AddAG:
 		{
 			DeleteEffect ( BITMAP_LIGHT, o, 2 );
@@ -16093,7 +15755,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			CreateEffect(MODEL_ICE,o->Position,Angle,o->Light,2,o);
 		}
 		break;
-		
 	case eDeBuff_Defense:
 		{
 			vec3_t Light = { 1.0f, 1.f, 1.f};
@@ -16103,7 +15764,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			PlayBuffer(SOUND_BLOODATTACK,o);
 		}
 		break;
-		
 	case eDeBuff_Stun:
 		{
 			DeleteEffect(BITMAP_SKULL,o,5);
@@ -16138,7 +15798,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 43, o, 50.f, 0, 0, 0, 0, vLight);
 		}
 		break;
-		
 	case eDeBuff_Blind:
 		{
 			vec3_t vLight;
@@ -16146,7 +15805,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			CreateEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o->Position, o->Angle, vLight, 3, o);
 		}
 		break;
-		
 	case eDeBuff_Sleep:
 		{
 			vec3_t vLight;
@@ -16154,7 +15812,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			CreateEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o->Position, o->Angle, vLight, 4, o);
 		}
 		break;
-
 	case eDeBuff_AttackDown:
 		{
 			vec3_t vLight;
@@ -16172,8 +15829,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.f);
 		}
 		break;
-		
-#ifdef ASG_ADD_SKILL_BERSERKER
 	case eBuff_Berserker:
 		{
 			vec3_t vLight[2];
@@ -16193,69 +15848,35 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			CreateEffect(BITMAP_LIGHT_MARKS, o->Position, o->Angle, vLight[0], 0, o);
 		}
 		break;
-#endif	// ASG_ADD_SKILL_BERSERKER
-		
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 	case eDeBuff_FlameStrikeDamage:
 		{
 			CreateEffect(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, o->Light, 2, o);
 		}
 		break;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 	case eDeBuff_GiganticStormDamage:
 		{
-#ifdef YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 			DeleteEffect(BITMAP_JOINT_THUNDER, o, 0);
-#endif	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 			CreateEffect(BITMAP_JOINT_THUNDER, o->Position, o->Angle, o->Light, 0, o);
 		}
 		break;
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
 	case eDeBuff_LightningShockDamage:
 		{
 			CreateEffect(MODEL_LIGHTNING_SHOCK, o->Position, o->Angle, o->Light, 2, o);
 		}
 		break;
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 	case eDeBuff_BlowOfDestruction:
 		{
 			CreateEffect(MODEL_ICE, o->Position, o->Angle, o->Light);
 		}
 		break;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifndef KJH_FIX_SWELLOFMAGIC_EFFECT
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-	case eBuff_SwellOfMagicPower:
-		{
-			// 투명이 아닐때만 이팩트사용
-			if( g_isCharacterBuff(o, eBuff_Cloaking) )
-				break;
-
-			vec3_t vLight;
-			Vector(0.7f, 0.2f, 0.9f, vLight);
-			CreateEffect( MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o->Position, o->Angle, vLight, 0, o );
-		}break;
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#endif // KJH_FIX_SWELLOFMAGIC_EFFECT
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 	case eBuff_Doppelganger_Ascension:
 		{
-			//3차전직 효과 출력
-#ifdef YDG_MOD_DOPPELGANGER_END_SOUND
 			PlayBuffer(SOUND_SKILL_BERSERKER);
-#else	// YDG_MOD_DOPPELGANGER_END_SOUND
-			PlayBuffer(SOUND_CHAOS_END);
-#endif	// YDG_MOD_DOPPELGANGER_END_SOUND
 			CreateEffect(MODEL_CHANGE_UP_EFF,o->Position,o->Angle,o->Light,2,o);
 			CreateEffect(MODEL_CHANGE_UP_CYLINDER,o->Position,o->Angle,o->Light,2,o);
 			CreateEffect(MODEL_INFINITY_ARROW3, o->Position, o->Angle, o->Light, 1, o);
 		}
 		break;
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
-#ifdef PBG_ADD_AURA_EFFECT
 	case eBuff_SD_Addition:
 		{
 			DeleteEffect(MODEL_EFFECT_SD_AURA,o);
@@ -16274,7 +15895,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			}
 		}
 		break;
-#endif //PBG_ADD_AURA_EFFECT
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case eBuff_Att_up_Ourforces:
 		{
@@ -16417,8 +16037,6 @@ void ClearBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 		DeleteEffect(BITMAP_SHINY+6, o, 2);
 		DeleteEffect(BITMAP_PIN_LIGHT, o, 2);
 		break;
-		
-#ifdef ASG_ADD_SKILL_BERSERKER
 	case eBuff_Berserker:
 		{
 			for (int i = 0; i < 4; ++i)
@@ -16430,50 +16048,35 @@ void ClearBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			DeleteEffect(BITMAP_LIGHT_MARKS, o);
 		}
 		break;
-#endif	// ASG_ADD_SKILL_BERSERKER
-		
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 	case eDeBuff_FlameStrikeDamage:
 		{
 // 			DeleteEffect(BITMAP_FIRE_CURSEDLICH, o, 2);
 		}
 		break;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 	case eDeBuff_GiganticStormDamage:
 		{
 // 			DeleteEffect(BITMAP_JOINT_THUNDER, o, 0);
 		}
 		break;
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
 	case eDeBuff_LightningShockDamage:
 		{
 // 			DeleteEffect(MODEL_LIGHTNING_SHOCK, o, 2);
 		}
 		break;
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 	case eDeBuff_BlowOfDestruction:
 		{
 
 		}
 		break;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	case eBuff_SwellOfMagicPower:
 		{
 			DeleteEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o, 0);
 		}break;
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 	case eBuff_Doppelganger_Ascension:
 		{
 // 			DeleteEffect(BITMAP_JOINT_THUNDER, o, 0);
 		}
 		break;
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
-#ifdef PBG_ADD_AURA_EFFECT
 	case eBuff_SD_Addition:
 		{
 			DeleteEffect(MODEL_EFFECT_SD_AURA,o);
@@ -16484,7 +16087,6 @@ void ClearBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			DeleteParticle(BITMAP_AG_ADDITION_EFFECT);
 		}
 		break;
-#endif //PBG_ADD_AURA_EFFECT
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case eBuff_Att_up_Ourforces:
 		{
@@ -16511,7 +16113,7 @@ void RegisterBuff( eBuffState buff, OBJECT* o, const int bufftime )
 	
 	if( buffclasstype == eBuffClass_Count ) return;
 	
-	if(InChaosCastle() && (o && o != &Hero->Object)) 
+	if(gMapManager.InChaosCastle() && (o && o != &Hero->Object)) 
 	{
 		return;
 	}

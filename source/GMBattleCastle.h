@@ -1,26 +1,14 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  GMBattleCastle.h
-//  
-//  내  용 : 공성전 맵
-//  
-//  날  짜 : 2004년 10월 11일
-//  
-//  작성자 : 조 규 하
-//  
 //////////////////////////////////////////////////////////////////////////
 #ifndef __GMBATTLECASTLE_H__
 #define __GMBATTLECASTLE_H__
 
-//////////////////////////////////////////////////////////////////////////
-//  Function.
-//////////////////////////////////////////////////////////////////////////
+#include "ZzzBMD.h"
+
 namespace   battleCastle
 {
-    inline  bool    InBattleCastle ( int iMap=World ) { return ( iMap==WD_30BATTLECASTLE ); }
-    //  (공성 2층) 특정 지역의 배경처리. ( 162, 190 ) ~ ( 189, 215 )
     inline  bool    InBattleCastle2 ( vec3_t Position ) { return ( Position[0]>=16100.f && Position[0]<=19000.f && Position[1]>=18900.f && Position[1]<=21700.f ); }
-    //  (공성 불씨) 특정 지역의 배경처리. ( 47, 53 ) ~ ( 148, 239 )
     inline  bool    InBattleCastle3 ( vec3_t Position ) { return ( Position[0]>=4700.f && Position[0]<=14800.f && Position[1]>=5300.f && Position[1]<=23900.f ); }
     bool    IsBattleCastleStart ( void );
     void    SetBattleCastleStart ( bool bResult );

@@ -12,15 +12,10 @@
 #include "UIGuildInfo.h"
 #include "ZzzAI.h"
 #include "w_CursedTemple.h"
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 #include "DuelMgr.h"
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
+#include "MapManager.h"
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUICommandWindow::CNewUICommandWindow()
 {
@@ -832,7 +827,7 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
 		return 3;
 	}
 #ifdef YDG_ADD_DOPPELGANGER_EVENT
-	else if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4)
+	else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
 	{
 		// 도플갱어 맵에서는 결투 신청을 할 수 없다
 		g_pChatListBox->AddText("", GlobalText[2866], SEASON3B::TYPE_ERROR_MESSAGE);	// "해당 지역에서 결투는 불가능합니다."
@@ -840,7 +835,7 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
 	}
 #endif	// YDG_ADD_DOPPELGANGER_EVENT
 #ifdef LDS_ADD_UI_UNITEDMARKETPLACE
-	else if (World == WD_79UNITEDMARKETPLACE)
+	else if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
 	{
 		// 통합시장 맵 내에서는 결투 신청 할 수 없다
 		g_pChatListBox->AddText("", GlobalText[3063], SEASON3B::TYPE_ERROR_MESSAGE);	// "로랜시장 내에서는 결투 신청을 할 수 없습니다."

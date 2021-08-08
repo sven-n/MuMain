@@ -104,7 +104,6 @@ int GetFenrirType(CHARACTER* c);
 // snake
 ///////////////////////////////////////////////////////////////////////////////
 
-extern JOINT     Joints[];
 extern int       EquipmentLevelSet;
 extern bool      g_bAddDefense;
 

@@ -1,13 +1,9 @@
 #ifndef __ZZZ_EFFECT_H__
 #define __ZZZ_EFFECT_H__
 
-#ifdef MR0
-extern AUTOOBJ    Effects[];
-extern AUTOOBJ    Sprites[];
-#else
 extern OBJECT    Effects[];
 extern OBJECT    Sprites[];
-#endif //MR0
+extern JOINT     Joints[];
 
 extern PARTICLE  Particles[];
 extern PARTICLE  Leaves[];

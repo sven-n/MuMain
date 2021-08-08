@@ -18,6 +18,7 @@
 #include "ZzzLodTerrain.h"
 #include "GOBoid.h"
 #include "NewUISystem.h"
+#include "MapManager.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
 extern int GetMp3PlayPosition();
@@ -642,7 +643,7 @@ void CGMDoppelGanger1::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool IsDoppelGanger1()
 {
-	if(World == WD_65DOPPLEGANGER1)
+	if(gMapManager.WorldActive == WD_65DOPPLEGANGER1)
 	{
 		return true;
 	}

@@ -14,6 +14,7 @@
 #include "ZzzCharacter.h"
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
+#include "MapManager.h"
 
 #ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 
@@ -170,7 +171,7 @@ bool CNewUIUnitedMarketPlaceWindow::Render()
 	POINT ptOrigin = { m_Pos.x, m_Pos.y+50 };
 	//char szText[256];
 
-	if( World == WD_79UNITEDMARKETPLACE )
+	if( gMapManager.WorldActive == WD_79UNITEDMARKETPLACE )
 	{
 		g_pRenderText->SetFont(g_hFont);
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+10, GlobalText[3010], 190, 0, RT3_SORT_CENTER);

@@ -15,6 +15,7 @@
 #include "BoneManager.h"
 #include "CMVP1stDirection.h"
 #include "CSChaosCastle.h"
+#include "MapManager.h"
 
 extern void MonsterMoveSandSmoke(OBJECT *o);
 extern void MonsterDieSandSmoke(OBJECT *o);
@@ -95,7 +96,7 @@ int M34CryWolf1st::IsCryWolf1stMVPStart()
 
 bool M34CryWolf1st::IsCryWolf1stMVPStatePeace()
 {
-	if( World == WD_34CRYWOLF_1ST && m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE )
+	if( gMapManager.WorldActive == WD_34CRYWOLF_1ST && m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE )
 		return true;
 
 	return false;
@@ -152,7 +153,7 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
 	char FileName[64];
 	char WorldName[32];
 
-	sprintf ( WorldName, "World%d", World+1 );
+	sprintf ( WorldName, "World%d", gMapManager.WorldActive+1 );
 	
 	switch(m_OccupationState)
 	{
@@ -171,13 +172,13 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
 	switch(m_OccupationState)
 	{
 	case CRYWOLF_OCCUPATION_STATE_PEACE:    // 평화상태
-		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, World+1);
+		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive+1);
 		break;
 	case CRYWOLF_OCCUPATION_STATE_OCCUPIED: // 점령상태
-		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (World+1)*10+1);
+		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive+1)*10+1);
 		break;
 	case CRYWOLF_OCCUPATION_STATE_WAR:		// 전쟁상태
-		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (World+1)*10+2);
+		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive+1)*10+2);
 		break;
 	}
 	OpenTerrainAttribute ( FileName );
@@ -322,7 +323,7 @@ void M34CryWolf1st::ChangeBackGroundMusic(int World)
 
 
 bool M34CryWolf1st::IsCyrWolf1st()
-{ return (World == WD_34CRYWOLF_1ST) ? true : false; }
+{ return (gMapManager.WorldActive == WD_34CRYWOLF_1ST) ? true : false; }
 
 //. 오브젝트
 bool M34CryWolf1st::CreateCryWolf1stObject(OBJECT* o)
@@ -582,7 +583,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b,int ExtraMon)
 //. 몬스터
 CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY, int Key)
 {
-	if(!IsCyrWolf1st() && !(InDevilSquare())) 
+	if(!IsCyrWolf1st() && !(gMapManager.InDevilSquare())) 
 		return NULL;
 
 	CHARACTER* c = NULL;
@@ -1029,7 +1030,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     }
 */	
 //임시로 뺀것 나중에 판단.
-	if(!IsCyrWolf1st() && !(InDevilSquare()))
+	if(!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
 		return false;
 	
 	switch(o->Type)
@@ -1600,7 +1601,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 
 bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if(!IsCyrWolf1st() && !(InDevilSquare()))
+	if(!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
 		return false;
 
 	switch(o->Type)
@@ -2786,8 +2787,6 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 
 	g_pCryWolfInterface->Render(548 + (89.f - nx), 323, nx, 30, (Hp/128.f),0.f,Hp/128.f, 29.f/32.f,9);
 	
-//늑대의 석상 hp를 찍어준다.
-
 	RenderNoticesCryWolf();
 	DisableAlphaBlend();
 	return true;
@@ -2795,9 +2794,8 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 
 
 bool M34CryWolf1st::SetCurrentActionCrywolfMonster(CHARACTER* c, OBJECT* o)
-//크라이울프 몬스터의 행동을 세팅
 {
-	if(!IsCyrWolf1st() && !(InDevilSquare()))
+	if(!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
 		return false;
 
 	switch(c->MonsterIndex)
@@ -2815,14 +2813,12 @@ bool M34CryWolf1st::SetCurrentActionCrywolfMonster(CHARACTER* c, OBJECT* o)
 
 
 void M34CryWolf1st::Set_MyRank(BYTE MyRank,int GettingExp)
-//크라이울프 나의 순위 세팅(내 랭킹,보상받는 경험치양)
 {
 	Rank = MyRank;
 	Exp = GettingExp;
 }
 
 void M34CryWolf1st::Set_WorldRank(BYTE Rank,BYTE Class,int Score,char *szHeroName)
-//전체 참여인원에서의 순위 상위 5명만.(순위,직업,획득점수,캐릭터 네임)
 {
 	HeroScore[Rank] = Score;
 	HeroClass[Rank] = Class;

@@ -18,21 +18,17 @@
 #include "wsclientinline.h"
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
+#include "MapManager.h"
 
 #ifdef PJH_FIX_SPRIT
 #include "GIPetManager.h"
 #endif //PJH_FIX_SPRIT
-#ifndef PBG_MOD_STAMINA_UI
-#ifdef PBG_ADD_SECRETBUFF
-#include "FatigueTimeSystem.h"
-#endif //PBG_ADD_SECRETBUFF
-#endif //PBG_MOD_STAMINA_UI
-#ifdef YDG_ADD_DOPPELGANGER_UI
+
 #include "GMDoppelGanger1.h"
 #include "GMDoppelGanger2.h"
 #include "GMDoppelGanger3.h"
 #include "GMDoppelGanger4.h"
-#endif	// YDG_ADD_DOPPELGANGER_UI
+
 #ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 #include "./Time/CTimCheck.h"
 #endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
@@ -47,7 +43,6 @@ extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 extern int  MouseUpdateTime;
 extern int  MouseUpdateTimeMax;
-extern int World;
 extern int SelectedCharacter;
 extern int Attacking;
 
@@ -75,11 +70,7 @@ void SEASON3B::CNewUIMainFrameWindow::LoadImages()
 {
 	LoadBitmap("Interface\\newui_menu01.jpg", IMAGE_MENU_1, GL_LINEAR);
 	LoadBitmap("Interface\\newui_menu02.jpg", IMAGE_MENU_2, GL_LINEAR);
-#if defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	LoadBitmap("Interface\\partCharge1\\newui_menu03.jpg", IMAGE_MENU_3, GL_LINEAR);
-#else //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
-	LoadBitmap("Interface\\newui_menu03.jpg", IMAGE_MENU_3, GL_LINEAR);
-#endif //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	LoadBitmap("Interface\\newui_menu02-03.jpg", IMAGE_MENU_2_1, GL_LINEAR);
 	LoadBitmap("Interface\\newui_menu_blue.jpg", IMAGE_GAUGE_BLUE, GL_LINEAR);
 	LoadBitmap("Interface\\newui_menu_green.jpg", IMAGE_GAUGE_GREEN, GL_LINEAR);
@@ -88,19 +79,11 @@ void SEASON3B::CNewUIMainFrameWindow::LoadImages()
 	LoadBitmap("Interface\\newui_menu_sd.jpg", IMAGE_GAUGE_SD, GL_LINEAR);
 	LoadBitmap("Interface\\newui_exbar.jpg", IMAGE_GAUGE_EXBAR, GL_LINEAR);
 	LoadBitmap("Interface\\Exbar_Master.jpg", IMAGE_MASTER_GAUGE_BAR, GL_LINEAR);
-#if defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	LoadBitmap("Interface\\partCharge1\\newui_menu_Bt05.jpg", IMAGE_MENU_BTN_CSHOP, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Interface\\partCharge1\\newui_menu_Bt01.jpg", IMAGE_MENU_BTN_CHAINFO, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Interface\\partCharge1\\newui_menu_Bt02.jpg", IMAGE_MENU_BTN_MYINVEN, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Interface\\partCharge1\\newui_menu_Bt03.jpg", IMAGE_MENU_BTN_FRIEND, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Interface\\partCharge1\\newui_menu_Bt04.jpg", IMAGE_MENU_BTN_WINDOW, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#else //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
-	LoadBitmap("Interface\\newui_menu_Bt01.jpg", IMAGE_MENU_BTN_CHAINFO, GL_LINEAR, GL_CLAMP_TO_EDGE);
-	LoadBitmap("Interface\\newui_menu_Bt02.jpg", IMAGE_MENU_BTN_MYINVEN, GL_LINEAR, GL_CLAMP_TO_EDGE);
-	LoadBitmap("Interface\\newui_menu_Bt03.jpg", IMAGE_MENU_BTN_FRIEND, GL_LINEAR, GL_CLAMP_TO_EDGE);
-	LoadBitmap("Interface\\newui_menu_Bt04.jpg", IMAGE_MENU_BTN_WINDOW, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
-
 }
 
 void SEASON3B::CNewUIMainFrameWindow::UnloadImages()
@@ -143,7 +126,6 @@ bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DR
 
 void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
 {	
-#if defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	int x_Next = 489;
 	int y_Next = 480-51;
 	int x_Add = 30;
@@ -155,12 +137,6 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
 	m_BtnCShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 	m_BtnCShop.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 	m_BtnCShop.ChangeToolTipText(GlobalText[2277], true);
-#else //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
-	int x_Next = 488;
-	int y_Next = 480-51;
-	int x_Add = 38;
-	int y_Add = 42;
-#endif //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
 	m_BtnChaInfo.ChangeTextBackColor(RGBA(255,255,255,0));
 	m_BtnChaInfo.ChangeButtonImgState( true, IMAGE_MENU_BTN_CHAINFO, true );
@@ -168,7 +144,6 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
 	x_Next += x_Add;
 	m_BtnChaInfo.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 	m_BtnChaInfo.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-	// 362 "케릭터(C)"
 	m_BtnChaInfo.ChangeToolTipText(GlobalText[362], true);
 
 	m_BtnMyInven.ChangeTextBackColor(RGBA(255,255,255,0));
@@ -177,7 +152,6 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
 	x_Next += x_Add;
 	m_BtnMyInven.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 	m_BtnMyInven.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-	// 363 "장비(I,V)"
 	m_BtnMyInven.ChangeToolTipText(GlobalText[363], true);
 
 	m_BtnFriend.ChangeTextBackColor(RGBA(255,255,255,0));
@@ -186,7 +160,6 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
 	x_Next += x_Add;
 	m_BtnFriend.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 	m_BtnFriend.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-	// 1043 "내친구(F)"
 	m_BtnFriend.ChangeToolTipText(GlobalText[1043], true);
 
 	m_BtnWindow.ChangeTextBackColor(RGBA(255,255,255,0));
@@ -194,7 +167,6 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
 	m_BtnWindow.ChangeButtonInfo(x_Next, y_Next, x_Add, y_Add);	
 	m_BtnWindow.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 	m_BtnWindow.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-	// 1744 "메뉴(U)"
 	m_BtnWindow.ChangeToolTipText(GlobalText[1744], true);
 }
 
@@ -244,14 +216,8 @@ void SEASON3B::CNewUIMainFrameWindow::Render3D()
 
 void SEASON3B::CNewUIMainFrameWindow::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		g_pMainFrame->RenderHotKeyItemCount();
-	}
-#else //LDK_ADD_SCALEFORM
 	g_pMainFrame->RenderHotKeyItemCount();
-#endif //LDK_ADD_SCALEFORM
+
 }
 
 bool SEASON3B::CNewUIMainFrameWindow::IsVisible() const
@@ -891,7 +857,7 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
 		else if(m_BtnFriend.UpdateMouseEvent() == true)
 		{
 #ifdef CSK_FIX_CHAOSFRIENDWINDOW
-			if( InChaosCastle() == true )
+			if( gMapManager.InChaosCastle() == true )
 			{
 				PlayBuffer(SOUND_CLICK01);
 				return true;
@@ -2112,8 +2078,8 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
 
         if ( 
 			g_pOption->IsAutoAttack() == true
-			&& World != WD_6STADIUM 
-			&& InChaosCastle()==false 
+			&& gMapManager.WorldActive != WD_6STADIUM 
+			&& gMapManager.InChaosCastle()==false 
 			&& ( bySkill == AT_SKILL_TELEPORT || bySkill == AT_SKILL_TELEPORT_B ) )
         {
             SelectedCharacter = -1;
@@ -2739,47 +2705,33 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	}
 #endif	// YDG_FIX_BLOCK_STAFF_WHEEL
 
-	if(InChaosCastle() == true)
+	if(gMapManager.InChaosCastle() == true)
 	{
-		//카오스 캐슬에서는 다크스피릿, 다크호스, 디노란트 스킬 등이 사용 불가능
 		if( bySkillType == AT_SKILL_DARK_HORSE || bySkillType == AT_SKILL_RIDER
 			|| (bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_TARGET)
 			||(AT_SKILL_ASHAKE_UP <= bySkillType && bySkillType <= AT_SKILL_ASHAKE_UP+4))
 		{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 			bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-			glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 		}
 	}
 	else
 	{
-		//카오스 캐슬이 아니더라도 죽었으면 스킬 사용 불가능
 		if(bySkillType == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= bySkillType && bySkillType <= AT_SKILL_ASHAKE_UP+4))
 		{
 			BYTE byDarkHorseLife = 0;
 			byDarkHorseLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
 			if(byDarkHorseLife == 0) 
 			{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 				bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-				glColor3f ( 1.f, 0.5f, 0.5f );
-#endif // KJH_ADD_SKILLICON_RENEWAL
 			}
 		}
 	}
 
-	int iCharisma = CharacterAttribute->Charisma+CharacterAttribute->AddCharisma;	// 마이너스 열매 작업
+	int iCharisma = CharacterAttribute->Charisma+CharacterAttribute->AddCharisma;
 
-	if(g_csItemOption.IsDisableSkill(bySkillType, iEnergy, iCharisma))	// 통솔포인트 비교해서 사용 못하는 스킬이면 빨갛게 처리
+	if(g_csItemOption.IsDisableSkill(bySkillType, iEnergy, iCharisma))
 	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
 
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
@@ -2803,38 +2755,25 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	//////////////////////////////////////////////////////////////////////////
 	
-	// 실제 렌더링 하는 곳
 	float fU, fV;
 	int iKindofSkill = 0;
 	
-	
-#ifdef PJH_FIX_4_BUGFIX_33
 	if(g_csItemOption.Special_Option_Check() == false && (bySkillType == AT_SKILL_ICE_BLADE||(AT_SKILL_POWER_SLASH_UP <= bySkillType && AT_SKILL_POWER_SLASH_UP+4 >= bySkillType)))
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	{
 		bCantSkill = true;
 	}
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 
 	if(g_csItemOption.Special_Option_Check(1) == false && (bySkillType == AT_SKILL_CROSSBOW||(AT_SKILL_MANY_ARROW_UP <= bySkillType && AT_SKILL_MANY_ARROW_UP+4 >= bySkillType)))
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(0.5f, 0.5f, 1.f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
-#endif //PJH_FIX_4_BUGFIX_33
-	
 
 #ifdef KJH_ADD_SKILLICON_RENEWAL
-	if(bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_END)    //  팻 명령.
+	if(bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_END)
     {
 		fU = ((bySkillType - AT_PET_COMMAND_DEFAULT) % 8) * width / 256.f;
 		fV = ((bySkillType - AT_PET_COMMAND_DEFAULT) / 8) * height / 256.f;
 		iKindofSkill = KOS_COMMAND;
     }
-    else if(bySkillType == AT_SKILL_PLASMA_STORM_FENRIR)	// 플라즈마 스톰
+    else if(bySkillType == AT_SKILL_PLASMA_STORM_FENRIR)
 	{
 		fU = 4 * width / 256.f;
 		fV = 0.f;

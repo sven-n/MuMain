@@ -8,14 +8,6 @@
 #include "./Utilities/Log/ErrorReport.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 
-#if defined(MR0) & defined(_DEBUG)
-#include "VPManager.h"
-#endif // defined(MR0) & defined(_DEBUG)
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CBitmapCache::CBitmapCache() 
 {
 	memset(m_QuickCache, 0, sizeof(QUICK_CACHE)*NUMBER_OF_QUICK_CACHE);

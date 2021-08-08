@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
+#include "MapManager.h"
 #include "NewUIChaosCastleTime.h"
 #include "NewUISystem.h"
 #include "MatchEvent.h"
@@ -90,7 +90,7 @@ bool CNewUIChaosCastleTime::Update()
 
 #ifdef KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT
 	// 카오스 캐슬에서 벗어났을때 초기화
-	if( InChaosCastle() == false )
+	if( gMapManager.InChaosCastle() == false )
 	{
 		Show(false);
 	}

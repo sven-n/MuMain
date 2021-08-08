@@ -9,27 +9,11 @@
 #include "wsclientinline.h"
 #include "ChangeRingManager.h"
 #include "PCRoomPoint.h"
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-#include "ProtectAuto.h"
-#endif // CSK_MOD_PROTECT_AUTO_V1
-#ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-#include "Event.h"
-#endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-#ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
 #include "KeyGenerater.h"
-#endif	// YDG_ADD_MOVE_COMMAND_PROTOCOL
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-#include "PKSystem.h"
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
-#ifdef ASG_ADD_GENS_SYSTEM
 #include "Local.h"
-#endif	// ASG_ADD_GENS_SYSTEM
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 #include "ServerListManager.h"
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-#ifdef LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
 #include "ZzzOpenData.h"
-#endif //LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
+#include "MapManager.h"
 
 using namespace SEASON3B;
 
@@ -2573,7 +2557,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SetStrifeMap()
 
 void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 {
-	int a = World;
+	int a = gMapManager.WorldActive;
 	//----------------------------------------------
 	//----------------------------------------------
 	DWORD iZen;
@@ -3001,7 +2985,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 #endif // CSK_MOD_PROTECT_AUTO_V2	
 
 #ifdef LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
-						if (IsTheMapInDifferentServer(World, (*li)->_ReqInfo.index))
+						if (IsTheMapInDifferentServer(gMapManager.WorldActive, (*li)->_ReqInfo.index))
 						{
 							SaveOptions();
 						}
@@ -3767,12 +3751,10 @@ void CNewUIMoveCommandWindowNew::OpenningProcess()
 
 #endif // CSK_MOD_PROTECT_AUTO_V1
 
-#ifdef LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
 BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const
 {
 	BOOL bInOtherServer = FALSE;
 	
-	// Ãâ¹ß Áö¿ª (ENUM_WORLD index)
 	switch(iFromMapIndex) 
 	{
 	case WD_30BATTLECASTLE:
@@ -3783,11 +3765,10 @@ BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex,
 		break;
 	}
 	
-	// (movereq index)
 	switch(iToMapIndex)
 	{
-	case 24:	// ·Î·»Çù°î
-	case 44:	// ·Î·»½ÃÀå
+	case 24:
+	case 44:
 		bInOtherServer = TRUE;
 		break;
 	default:
@@ -3796,7 +3777,6 @@ BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex,
 	
 	return bInOtherServer;
 }
-#endif //LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const char *pszMapName)

@@ -2357,12 +2357,12 @@ void CGM_Raklion::RenderBaseSmoke()
 
 bool IsIceCity()
 {
-	if(World >= WD_57ICECITY && World <= WD_58ICECITY_BOSS)
+	if(gMapManager.WorldActive >= WD_57ICECITY && gMapManager.WorldActive <= WD_58ICECITY_BOSS)
 	{
 		return true;
 	}
 #ifdef YDG_ADD_MAP_DOPPELGANGER1
-	else if(World == WD_65DOPPLEGANGER1)
+	else if(gMapManager.WorldActive == WD_65DOPPLEGANGER1)
 	{
 		return true;
 	}
@@ -3033,7 +3033,7 @@ void CGM_Raklion::CreateMapEffect()
 
 void CGM_Raklion::PlayBGM()
 {
-	if(World == WD_57ICECITY)
+	if(gMapManager.WorldActive == WD_57ICECITY)
 	{
 		PlayMp3(g_lpszMp3[MUSIC_RAKLION]);
 	}
@@ -3042,7 +3042,7 @@ void CGM_Raklion::PlayBGM()
 		StopMp3(g_lpszMp3[MUSIC_RAKLION]);
 	}
 
-	if(World == WD_58ICECITY_BOSS && m_bMusicBossMap == true)
+	if(gMapManager.WorldActive == WD_58ICECITY_BOSS && m_bMusicBossMap == true)
 	{
 		PlayMp3(g_lpszMp3[MUSIC_RAKLION_BOSS]);
 	}

@@ -10,6 +10,7 @@
 #include "ZzzInterface.h"
 #include "CDirection.h"
 #include "wsclientinline.h"
+#include "MapManager.h"
 
 static CDirection Direction;
 
@@ -62,9 +63,9 @@ void CDirection::CloseAllWindows()
 
 bool CDirection::IsDirection()
 {
-	if(World == WD_34CRYWOLF_1ST)
+	if(gMapManager.WorldActive == WD_34CRYWOLF_1ST)
 		return m_CMVP.IsCryWolfDirection();			// LHJ - 크라이울프 연출 상태인가 체크
-	else if(World == WD_39KANTURU_3RD)
+	else if(gMapManager.WorldActive == WD_39KANTURU_3RD)
 		return m_CKanturu.IsKanturuDirection();		// LHJ - 칸투르 연출 상태인가 체크
 
 	return false;

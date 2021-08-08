@@ -1,7 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 3D 특수효과 관련 함수
-//
-// *** 함수 레벨: 3
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -18,14 +15,11 @@
 #include "DSPlaySound.h"
 #include "WSClient.h"
 #include "GMCrywolf1st.h"
+#include "MapManager.h"
 
 vec3_t g_vParticleWind = { 0.0f, 0.0f, 0.0f};
 vec3_t g_vParticleWindVelo = { 0.0f, 0.0f, 0.0f};
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 여러가지 파티클 효과 처리
-///////////////////////////////////////////////////////////////////////////////
 
 void HandPosition(PARTICLE *o)
 {
@@ -1956,7 +1950,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					)
 				{
 #ifdef PBG_ADD_PKFIELD
-					if(World == WD_63PK_FIELD)
+					if(gMapManager.WorldActive == WD_63PK_FIELD)
 					{
 						o->LifeTime = 25;
 					}

@@ -513,7 +513,7 @@ void CGMDoppelGanger3::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool IsDoppelGanger3()
 {
-	if(World == WD_67DOPPLEGANGER3)
+	if(gMapManager.WorldActive == WD_67DOPPLEGANGER3)
 	{
 		return true;
 	}

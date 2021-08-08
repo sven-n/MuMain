@@ -1,5 +1,5 @@
+//////////////////////////////////////////////////////////////////////
 // NewBloodCastleSystem.cpp: implementation of the CNewBloodCastleSystem class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -9,12 +9,9 @@
 #include "NewUISystem.h"
 #include "DSPlaySound.h"
 #include "CSChaosCastle.h"
+#include "MapManager.h"
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewBloodCastleSystem::CNewBloodCastleSystem()
 {
@@ -26,9 +23,6 @@ CNewBloodCastleSystem::~CNewBloodCastleSystem()
 
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  경기 결과에 필요한 값을 저장한다.
-//////////////////////////////////////////////////////////////////////////
 void CNewBloodCastleSystem::SetMatchResult ( const int iNumDevilRank, const int iMyRank, const MatchResult *pMatchResult, const int Success )
 {
     if(iNumDevilRank != 255)
@@ -41,23 +35,17 @@ void CNewBloodCastleSystem::SetMatchResult ( const int iNumDevilRank, const int 
 	SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CBloodCastleResultMsgBoxLayout));
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  블러드 캐슬 게임 커멘드 처리.
-//////////////////////////////////////////////////////////////////////////
 void CNewBloodCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_STATE data )
 {                        
-    //  블러드 캐슬.
     switch ( data->m_byPlayState )
     {
-    case 0: //  게임 시작.
+    case 0:
         SetAllAction ( PLAYER_RUSH1 );
         PlayBuffer( SOUND_BLOODCASTLE, NULL, true );
 
-    case 1: //  게임 진행중.
+    case 1:
         SetMatchInfo ( data->m_byPlayState+1, 15*60, data->m_wRemainSec, data->m_wMaxKillMonster, data->m_wCurKillMonster );
 
-        //  절대 퀘스트 아이템.
         if ( data->m_wIndex!=65535 && data->m_byItemType!=255 && data->m_byItemType!=0 )
         {
             WORD Key = data->m_wIndex; 
@@ -73,20 +61,18 @@ void CNewBloodCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
         }
         break;
 
-    case 2: //  게임 종료.
+    case 2:
         clearMatchInfo ();
         StopBuffer ( SOUND_BLOODCASTLE, true );
 
         break;
 
-    case 3: //  성문을 닫는다.
-        //  성문을 연다. ( 테스트 ).
-        SetActionObject ( World, 36, 20, 1.f );
+    case 3:
+        SetActionObject ( gMapManager.WorldActive, 36, 20, 1.f );
         break;
-    case 4: //  블러드 캐슬, 보스 몬스터를 제거, 게임 진행중.
+    case 4:
         SetMatchInfo ( data->m_byPlayState+1, 15*60, data->m_wRemainSec, data->m_wMaxKillMonster, data->m_wCurKillMonster );
 
-        //  절대 퀘스트 아이템.
         if ( data->m_wIndex!=65535 && data->m_byItemType!=255 && data->m_byItemType!=0 )
         {
             WORD Key = data->m_wIndex; 
@@ -104,33 +90,25 @@ void CNewBloodCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
     }
 }
 
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//  경기에 필요한 정보를 표시한다.
-//////////////////////////////////////////////////////////////////////////
 void CNewBloodCastleSystem::RenderMatchTimes ( void )
 {
-	//  카운트 다운
-	if ( m_byMatchType > 0 && InBloodCastle() == true )
+	if ( m_byMatchType > 0 && gMapManager.InBloodCastle() == true )
 	{
         switch ( m_byMatchType )
         {
-            //  블러드 캐슬.
         case 0:
         case 1:
-        case 2: //  몬스터수.
-        case 5: //  보스 몬스터 수.
+        case 2:
+        case 5:
             if ( m_iMatchTime>0 )
             {
-                if( !g_pNewUISystem->IsVisible( SEASON3B::INTERFACE_BLOODCASTLE_TIME ) )
+                if( !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE_TIME ) )
 				{
-					g_pNewUISystem->Show( SEASON3B::INTERFACE_BLOODCASTLE_TIME );
+					g_pNewUISystem->Show(SEASON3B::INTERFACE_BLOODCASTLE_TIME );
 				}
 				
-				g_pBloodCastle->SetTime( m_iMatchTime );
-				g_pBloodCastle->SetKillMonsterStatue( m_iKillMonster, m_iMaxKillMonster );	
+				g_pBloodCastle->SetTime(m_iMatchTime);
+				g_pBloodCastle->SetKillMonsterStatue(m_iKillMonster, m_iMaxKillMonster);	
 				
             }
             break;
@@ -148,10 +126,6 @@ void CNewBloodCastleSystem::RenderMatchTimes ( void )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  경기 결과를 화면에 출력한다.
-//////////////////////////////////////////////////////////////////////////
 void CNewBloodCastleSystem::RenderMatchResult ( void )
 {
 	int x = 640/2;
@@ -165,7 +139,6 @@ void CNewBloodCastleSystem::RenderMatchResult ( void )
 
 	unicode::t_char lpszStr[256] = {NULL, };
 
-	// 축하 메시지
     if ( m_iNumResult )
     {
 		g_pRenderText->RenderText(x,yPos,GlobalText[857], 0, 0, RT3_WRITE_CENTER); 
@@ -183,7 +156,6 @@ void CNewBloodCastleSystem::RenderMatchResult ( void )
 
 	MatchResult *pResult = &m_MatchResult[0];
 
-	//  보상 경험치
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetTextColor(210, 255, 210, 255);
 	unicode::_sprintf( lpszStr, GlobalText[861], pResult->m_dwExp);
@@ -192,14 +164,12 @@ void CNewBloodCastleSystem::RenderMatchResult ( void )
 	
     if ( m_iNumResult )
     {
-		//  보상 젠
 		g_pRenderText->SetTextColor(255, 210, 210, 255);
 		unicode::_sprintf( lpszStr, GlobalText[862], pResult->m_iZen);
 		g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); 
 		yPos += 24;
     }
 
-    //  이벤트 점수
 	g_pRenderText->SetTextColor(210, 210, 255, 255);
 	unicode::_sprintf( lpszStr, GlobalText[863], pResult->m_iScore );
 	g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);

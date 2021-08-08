@@ -101,8 +101,8 @@
 #include "CGFxProcess.h" 
 #endif //LDK_ADD_SCALEFORM
 #include "../ProtocolSend.h"
-//#include <chrono>
-//#include <thread>
+#include "MapManager.h"
+
 
 #ifdef KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
 	#ifdef RESOURCE_GUARD
@@ -1300,12 +1300,12 @@ void CreateCharacterScene()
 	ErrorMessage = NULL;	// ESC 키 눌렀을때 종료 옵션 메뉴 초기화 
 
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-	World = WD_74NEW_CHARACTER_SCENE;
+	gMapManager.WorldActive = WD_74NEW_CHARACTER_SCENE;
 #else //PJH_NEW_SERVER_SELECT_MAP
-	World = WD_78NEW_CHARACTER_SCENE;
+	gMapManager.WorldActive = WD_78NEW_CHARACTER_SCENE;
 #endif //PJH_NEW_SERVER_SELECT_MAP
 
-	OpenWorld(World);
+	gMapManager.LoadWorld(gMapManager.WorldActive);
     OpenCharacterSceneData();
 
     CreateCharacterPointer(&CharacterView,MODEL_FACE+1,0,0);
@@ -1318,22 +1318,15 @@ void CreateCharacterScene()
 
     ClearInventory();
     CharacterAttribute->SkillNumber = 0;
-#ifdef KWAK_FIX_CHARACTER_SKILL_RUNTIME_ERR
-	for(int i = 0; i < MAX_SKILLS; i++)
-#else // KWAK_FIX_CHARACTER_SKILL_RUNTIME_ERR
+
 	for(int i=0;i<MAX_MAGIC;i++)
-#endif // KWAK_FIX_CHARACTER_SKILL_RUNTIME_ERR
 		CharacterAttribute->Skill[i] = 0;
 
 	for(int i=EQUIPMENT_WEAPON_RIGHT;i<EQUIPMENT_HELPER;i++)
 		CharacterMachine->Equipment[i].Level = 0;
 
 	g_pNewUISystem->HideAll();
-#ifdef PBG_ADD_CHARACTERSLOT
-	// 블루뮤 서버일 경우만 CharacterSlotCount값을 사용한다
-	if(BLUE_MU::IsBlueMuServer())
-		g_SlotLimit->CreateSlotLock();
-#endif //PBG_ADD_CHARACTERSLOT
+
 	g_iKeyPadEnable = 0;
 	GuildInputEnable = false;
 	TabInputEnable   = false;
@@ -1352,23 +1345,9 @@ void CreateCharacterScene()
 	HIMC hIMC = ImmGetContext(g_hWnd);
     DWORD Conversion, Sentence;
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int iSelectedLanguage = SELECTED_LANGUAGE;
-	if(iSelectedLanguage == LANGUAGE_JAPANESE)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-    if (SELECTED_LANGUAGE == LANGUAGE_JAPANESE)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-    {
-        Conversion = 0x19;
-        Sentence   = IME_SMODE_PHRASEPREDICT;
-    }
-	else
-	{
-		Conversion = IME_CMODE_NATIVE;
-		Sentence = IME_SMODE_NONE;
-	}
+	Conversion = IME_CMODE_NATIVE;
+	Sentence = IME_SMODE_NONE;
 
-	// IME 상태를 영문으로
 	g_bIMEBlock = FALSE;
 	RestoreIMEStatus();
 	ImmSetConversionStatus(hIMC, Conversion, Sentence);
@@ -1382,14 +1361,8 @@ void CreateCharacterScene()
 
 void NewMoveCharacterScene()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_CHARACTERSCENE_TOTAL, PROFILING_MOVE_CHARACTERSCENE_TOTAL );
-#endif // DO_PROFILING
 	if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_MOVE_CHARACTERSCENE_TOTAL );
-#endif // DO_PROFILING	
 		return;
 	}
 
@@ -1399,11 +1372,6 @@ void NewMoveCharacterScene()
 		CreateCharacterScene();
 	}
     InitTerrainLight();
-
-#ifdef DO_PROFILING
-	MoveInterface_ForProfiling();
-#endif // DO_PROFILING
-
     MoveObjects();
 	MoveBugs();
     MoveCharactersClient();
@@ -1414,9 +1382,7 @@ void NewMoveCharacterScene()
     MoveParticles();
 	MoveBoids();
 
-#ifdef LDK_ADD_NEW_PETPROCESS
 	ThePetProcess().UpdatePets();
-#endif //LDK_ADD_NEW_PETPROCESS
 
     MoveCamera();
 
@@ -1428,11 +1394,6 @@ void NewMoveCharacterScene()
 		::StartGame();
 	}
 #endif
-
-
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_CHARACTERSCENE_INPUTEVENTS, PROFILING_MOVE_CHARACTERSCENE_INPUTEVENTS );
-#endif // DO_PROFILING	
 
 	CInput& rInput = CInput::Instance();
 	CUIMng& rUIMng = CUIMng::Instance();
@@ -1469,9 +1430,6 @@ void NewMoveCharacterScene()
 
 	if (rUIMng.IsCursorOnUI())	// UI 뒤의 캐릭터가 클릭되면 안되므로.
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_MOVE_CHARACTERSCENE_TOTAL );
-#endif // DO_PROFILING	
 		return;
 	}
 
@@ -1481,9 +1439,6 @@ void NewMoveCharacterScene()
 	{
 		if (SelectedCharacter < 0 || SelectedCharacter > 4)
 		{
-#ifdef DO_PROFILING
-			g_pProfiler->EndUnit( EPROFILING_MOVE_CHARACTERSCENE_TOTAL );
-#endif // DO_PROFILING	
 			return;
 		}
 
@@ -1499,45 +1454,23 @@ void NewMoveCharacterScene()
 		rUIMng.m_CharSelMainWin.UpdateDisplay();
 	}
 
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_CHARACTERSCENE_INPUTEVENTS );
-#endif // DO_PROFILING	
-
 	g_ConsoleDebug->UpdateMainScene();
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_CHARACTERSCENE_TOTAL );
-#endif // DO_PROFILING	
 }
 
 bool NewRenderCharacterScene(HDC hDC)
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_CHARACTERSCENE_TOTAL, PROFILING_RENDER_CHARACTERSCENE_TOTAL );
-#endif // DO_PROFILING
-	
 	if(!InitCharacterScene) 
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_RENDER_CHARACTERSCENE_TOTAL );
-#endif // DO_PROFILING
 		return false;
 	}
 	if(CurrentProtocolState < RECEIVE_CHARACTERS_LIST) 
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_RENDER_CHARACTERSCENE_TOTAL );
-#endif // DO_PROFILING
 		return false;
 	}
 
     FogEnable = false;
 	vec3_t pos;
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 	Vector(9758.0f, 18913.0f, 675.0f, pos);
-#else //PJH_NEW_SERVER_SELECT_MAP
-	Vector(23566.0f, 14085.0f, 395.0f, pos);
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
     MoveMainCamera();
 
@@ -1569,7 +1502,7 @@ bool NewRenderCharacterScene(HDC hDC)
 		Vector ( 0.0f, 0.0f, 0.0f, CharactersClient[i].Object.Light );
 	}
 
-	if(SelectedHero!=-1 && o->Live)	// 그리는 순서 때문에 ㅠㅠ
+	if(SelectedHero!=-1 && o->Live)
 	{
 		EnableAlphaBlend();
 		vec3_t Light;
@@ -1579,11 +1512,6 @@ bool NewRenderCharacterScene(HDC hDC)
 		DisableAlphaBlend();
 	}
 
-#ifdef MR0
-	if(EngineGate::IsOn() && g_pMeshMachine->bEnabled())
-		g_pMeshMachine->ProcessLight(HighLight);
-#endif //MR0
-
 	CHARACTER* pCha = NULL;
 	OBJECT* pObj = NULL;
 
@@ -1591,7 +1519,7 @@ bool NewRenderCharacterScene(HDC hDC)
 	{
 		pCha = &CharactersClient[i];
 		pObj = &pCha->Object;
-		if(pCha->Helper.Type == MODEL_HELPER+3)	// 디노란트
+		if(pCha->Helper.Type == MODEL_HELPER+3)
 		{
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 			pObj->Position[2] = 194.5f;
@@ -1620,20 +1548,14 @@ bool NewRenderCharacterScene(HDC hDC)
 	RenderBlurs();
 	RenderJoints();
 	RenderEffects();
-#ifdef LDK_ADD_NEW_PETPROCESS
 	ThePetProcess().RenderPets();
-#endif //LDK_ADD_NEW_PETPROCESS
 	RenderBoids();
-	RenderObjects_AfterCharacter();	// 캐릭터 다음에 알파 오브젝트들 묘사
-
+	RenderObjects_AfterCharacter();
 	CheckSprites();
 
-	if(SelectedHero!=-1 && o->Live)	// 그리는 순서 때문에
+	if(SelectedHero!=-1 && o->Live)
 	{
 		vec3_t vLight;
-		// 오로라 효과
-		//Vector ( 0.3f, 0.2f, 1.f, vLight );
-		//RenderAurora ( BITMAP_MAGIC+1, RENDER_BRIGHT, o->Position[0], o->Position[1], 2.5f, 2.5f, vLight );
 		
 		Vector ( 1.0f, 1.0f, 1.f, vLight );
 		float fLumi = sinf ( WorldTime*0.0015f )*0.3f+0.5f;
@@ -1650,10 +1572,7 @@ bool NewRenderCharacterScene(HDC hDC)
 
 		//CreateParticle(BITMAP_FLARE+1,o->Position,o->Angle,Light,0,0.15f);
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		float Rotation = (int)WorldTime%3600/(float)10.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		Vector ( 0.15f, 0.15f, 0.15f, o->Light );
 		CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 4);
 		CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 5);
@@ -1666,9 +1585,7 @@ bool NewRenderCharacterScene(HDC hDC)
 	RenderParticles();
 	RenderPoints();
 	EndSprite();
-
 	BeginBitmap();
-
 	RenderInfomation();
 
 #ifdef ENABLE_EDIT
@@ -1679,10 +1596,6 @@ bool NewRenderCharacterScene(HDC hDC)
 
 	EndOpengl();
 
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_CHARACTERSCENE_TOTAL );
-#endif // DO_PROFILING
-
 	return true;
 }
 
@@ -1690,11 +1603,11 @@ void CreateLogInScene()
 {
 	EnableMainRender = true;
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-	World = WD_73NEW_LOGIN_SCENE;
+	gMapManager.WorldActive = WD_73NEW_LOGIN_SCENE;
 #else
 	World = WD_77NEW_LOGIN_SCENE;
 #endif //PJH_NEW_SERVER_SELECT_MAP
-	OpenWorld(World);
+	gMapManager.LoadWorld(gMapManager.WorldActive);
 
 	OpenLogoSceneData();
 
@@ -2152,12 +2065,8 @@ float CameraDistance = CameraDistanceTarget;
 
 bool MoveMainCamera()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_MOVEMAINCAMERA, PROFILING_RENDER_MOVEMAINCAMERA );
-#endif // DO_PROFILING
     bool bLockCamera = false;
 
-	
 #ifdef DO_PROCESS_DEBUGCAMERA
 	CameraAngle[0] = fmod( CameraAngle[0], 360.0f );
 	CameraAngle[1] = fmod( CameraAngle[1], 360.0f );
@@ -2166,9 +2075,9 @@ bool MoveMainCamera()
 
 	if (
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-		World == WD_73NEW_LOGIN_SCENE
+		gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
 #else
-		World == WD_77NEW_LOGIN_SCENE
+		gMapManager.WorldActive == WD_77NEW_LOGIN_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		&& CCameraMove::GetInstancePtr()->IsTourMode())
 #ifdef PJH_NEW_SERVER_SELECT_MAP
@@ -2254,18 +2163,18 @@ bool MoveMainCamera()
 			VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);
 		}
 
-        if ( InChaosCastle()==false || !Hero->Object.m_bActionStart	)
+        if ( gMapManager.InChaosCastle()==false || !Hero->Object.m_bActionStart	)
         {
-			if(World == WD_39KANTURU_3RD && Hero->Object.m_bActionStart)
+			if(gMapManager.WorldActive == WD_39KANTURU_3RD && Hero->Object.m_bActionStart)
 			{}
 			else
-            if ( World==-1 || Hero->Helper.Type != MODEL_HELPER+3 || Hero->SafeZone )
+            if ( gMapManager.WorldActive==-1 || Hero->Helper.Type != MODEL_HELPER+3 || Hero->SafeZone )
             {
 				Hero->Object.Position[2] = RequestTerrainHeight(Hero->Object.Position[0],Hero->Object.Position[1]);
             }
             else
             {
-                if ( World==WD_8TARKAN || World==WD_10HEAVEN )
+                if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN )
                     Hero->Object.Position[2] = RequestTerrainHeight(Hero->Object.Position[0],Hero->Object.Position[1])+90.f;
                 else
                     Hero->Object.Position[2] = RequestTerrainHeight(Hero->Object.Position[0],Hero->Object.Position[1])+30.f;
@@ -2296,7 +2205,7 @@ bool MoveMainCamera()
 		CameraPosition[2] = CameraViewFar;
 	}
 #ifdef BATTLE_SOCCER_EVENT
-    else if ( World==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
+    else if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
     {
         vec3_t Position,TransformPosition, Pos;
 		float Matrix[3][4];
@@ -2337,16 +2246,16 @@ bool MoveMainCamera()
         {
             CameraViewFar = 3000.f;
         }
-        else if ( battleCastle::InBattleCastle() && SceneFlag == MAIN_SCENE)
+        else if ( gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
         {
             CameraViewFar = 2500.f;
         }
-		else if (World == WD_51HOME_6TH_CHAR)
+		else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
 		{
-			CameraViewFar = 2800.f * 1.15f;	// 절벽 끝까지 보이도록
+			CameraViewFar = 2800.f * 1.15f;
 		}
 #ifdef PBG_ADD_PKFIELD
- 		else if(IsPKField()
+ 		else if(gMapManager.IsPKField()
 #ifdef YDG_ADD_MAP_DOPPELGANGER2
 			|| IsDoppelGanger2()
 #endif	// YDG_ADD_MAP_DOPPELGANGER2
@@ -2364,10 +2273,10 @@ bool MoveMainCamera()
             switch ( g_shCameraLevel )
             {
             case 0:
-				if(SceneFlag == LOG_IN_SCENE)           // 이혁재 - 로그인 씬 일때 카메라 거리 세팅
+				if(SceneFlag == LOG_IN_SCENE)
 				{
 				}
-				else if(SceneFlag == CHARACTER_SCENE) // 이혁재 - 케릭터 씬 일때 카메라 거리 세팅
+				else if(SceneFlag == CHARACTER_SCENE)
 				{
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 					CameraViewFar = 3500.f;
@@ -2413,22 +2322,14 @@ bool MoveMainCamera()
 			Hero->Object.Position[2] = 300.0f;
 			g_shCameraLevel = g_Direction.GetCameraPosition(Position);
 		}
-#ifdef PBG_ADD_PKFIELD
- 		else if(IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-			|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-			)
+ 		else if(gMapManager.IsPKField()	|| IsDoppelGanger2())
 		{
  			g_shCameraLevel =5;
  		}
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER1
 		else if (IsDoppelGanger1())
 		{
  			g_shCameraLevel =5;
 		}
-#endif	// YDG_ADD_MAP_DOPPELGANGER1
 		else g_shCameraLevel =0;
 
 #ifdef PJH_NEW_SERVER_SELECT_MAP
@@ -2446,7 +2347,7 @@ bool MoveMainCamera()
 		CameraPosition[2] += 200;//700
 		CameraAngle[0] = -80.f;
 #else
-        if ( battleCastle::InBattleCastle()==true )
+        if ( gMapManager.InBattleCastle()==true )
         {
             CameraPosition[2] = 255.f;//700
         }
@@ -2529,13 +2430,13 @@ bool MoveMainCamera()
 		    VectorAdd ( CameraPosition, TransformPosition, CameraPosition );
         }
 	}
-	if(World==5)
+	if(gMapManager.WorldActive==5)
 	{
 		CameraAngle[0] += sinf(WorldTime*0.0005f)*2.f;
 		CameraAngle[1] += sinf(WorldTime*0.0008f)*2.5f;
 	}
 #ifdef BATTLE_SOCCER_EVENT
-    else if ( World==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
+    else if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
     {
         CameraDistanceTarget = 3200.f;
         CameraDistance = CameraDistanceTarget;
@@ -2549,7 +2450,7 @@ bool MoveMainCamera()
 	}
 	else
     {
-        if ( battleCastle::InBattleCastle() )
+        if ( gMapManager.InBattleCastle() )
         {
             CameraDistanceTarget = 1100.f;
             CameraDistance = CameraDistanceTarget;
@@ -2567,43 +2468,14 @@ bool MoveMainCamera()
             }
         }
     }
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_MOVEMAINCAMERA );
-#endif // DO_PROFILING
-
     return bLockCamera;
 }
 
 void MoveMainScene()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_MAINSCENE_TOTAL, PROFILING_MOVE_MAINSCENE_TOTAL );
-#endif // DO_PROFILING
-
-#ifdef CSK_MOD_PROTECT_AUTO_V2
-	g_pProtectAuto->Check();
-#endif // CSK_MOD_PROTECT_AUTO_V2
-	
-#ifdef CSK_HACK_TEST
-	g_pHackTest->Update();
-#endif // CSK_HACK_TEST
-
 	if(!InitMainScene)
 	{
-#ifdef LDK_ADD_SCALEFORM
-		//gfxui 사용시 기존 ui 사용 안함
-		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-		{
-#ifdef LDS_FIX_NONINITPROGLEM_SKILLHOTKEY
-			g_pMainFrame->ResetSkillHotKey();
-#endif // LDS_FIX_NONINITPROGLEM_SKILLHOTKEY
-		}
-#else //LDK_ADD_SCALEFORM
-#ifdef LDS_FIX_NONINITPROGLEM_SKILLHOTKEY
 		g_pMainFrame->ResetSkillHotKey();
-#endif // LDS_FIX_NONINITPROGLEM_SKILLHOTKEY
-#endif //LDK_ADD_SCALEFORM
 		
 		g_ConsoleDebug->Write( MCD_NORMAL, "Join the game with the following character: %s", CharactersClient[SelectedHero].ID);
 
@@ -2634,24 +2506,18 @@ void MoveMainScene()
 		g_GuildNotice[0][0] = '\0';
 		g_GuildNotice[1][0] = '\0';
 	
-		g_pPartyManager->Create();			// 파티메니져
+		g_pPartyManager->Create();
 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 		g_pChatListBox->ClearAll();
-#else // KJH_FIX_UI_CHAT_MESSAGE			// 정리할 때 지워야 하는 소스
-		g_pChatListBox->Clear();
-#endif // KJH_FIX_UI_CHAT_MESSAGE			// 정리할 때 지워야 하는 소스
 
 		g_pSlideHelpMgr->Init();		
-		g_pUIMapName->Init();		// rozy
+		g_pUIMapName->Init();
 
 		g_GuildCache.Reset();
 
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
 		g_PortalMgr.Reset();
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
 
-		ClearAllObjectBlurs();	// 이펙트 초기화
+		ClearAllObjectBlurs();
 		
 		SetFocus(g_hWnd);
 
@@ -2667,23 +2533,12 @@ void MoveMainScene()
 	}
 	if(EnableMainRender == false)
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_MOVE_MAINSCENE_TOTAL );
-#endif // DO_PROFILING
 		return;
 	}
 	//init
 	EarthQuake *= 0.2f;
 
 	InitTerrainLight();
-
-#ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-	g_pBlueLuckyBagEvent->CheckTime();
-#endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-
-#ifdef DO_PROFILING
-	MoveInterface_ForProfiling();
-#endif // DO_PROFILING
 
 #ifdef DO_PROCESS_DEBUGCAMERA
 	MoveInterface_DebugCamera();	
@@ -2694,41 +2549,15 @@ void MoveMainScene()
 	MouseOnWindow = false;
 
 
-	if(!CameraTopViewEnable
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01	// 공성전, 통합시장은 서버 로딩시간이 길어 로딩중 키입력 블럭.
-		&& ( g_bReponsedMoveMapFromServer == TRUE )		// 키입력 막기 : 서버로부터 로딩 월드 응답이 안온 경우만. 
-#else // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		&& LoadingWorld < 30
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT
-		)
+	if(!CameraTopViewEnable	&& LoadingWorld < 30 )
 	{
-#ifdef MOD_MOUSE_Y_CLICK_AREA
-		if(GFxProcess::GetInstancePtr()->GetUISelect() == 1)
-		{
-			if(MouseY>=(int)(480))
-				MouseOnWindow = true;
-		}
-		else
-		{
-			if(MouseY>=(int)(480-48))
-				MouseOnWindow = true;
-		}
-#else //MOD_MOUSE_Y_CLICK_AREA
 		if(MouseY>=(int)(480-48))
 			MouseOnWindow = true;
-#endif //MOD_MOUSE_Y_CLICK_AREA
 
 		g_pPartyManager->Update();
 		g_pNewUISystem->Update();
 		
-		// 윈도우 아닌곳 클릭시
-		if (MouseLButton == true 
-			&& false == g_pNewUISystem->CheckMouseUse() /* NewUI용 마우스 체크 */
-			&& g_dwMouseUseUIID == 0 /* 기존의 UI 마우스 체크 전역 변수 */
-			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHATINPUTBOX) == false
-			)
+		if (MouseLButton == true && false == g_pNewUISystem->CheckMouseUse() && g_dwMouseUseUIID == 0 && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHATINPUTBOX) == false )
 		{
 			g_pWindowMgr->SetWindowsEnable(FALSE);
 			g_pFriendMenu->HideMenu();
@@ -2739,10 +2568,6 @@ void MoveMainScene()
 				SetFocus(g_hWnd);
 			}
 		}
-#ifdef _PVP_ADD_MOVE_SCROLL
-		g_MurdererMove.MurdererMoveCheck();
-#endif	// _PVP_ADD_MOVE_SCROLL
-		
 		MoveInterface();
 		MoveTournamentInterface();
 		if( ErrorMessage != MESSAGE_LOG_OUT )
@@ -2755,39 +2580,27 @@ void MoveMainScene()
     MoveObjects();
     if(!CameraTopViewEnable)
     	MoveItems();
-	if ( ( World==WD_0LORENCIA && HeroTile!=4 ) || 
-         ( World==WD_2DEVIAS && HeroTile!=3 && HeroTile<10 ) 
-		 || World==WD_3NORIA 
-		 || World==WD_7ATLANSE 
-		 || InDevilSquare() == true
-		 || World==WD_10HEAVEN 
-         || InChaosCastle()==true 
-         || battleCastle::InBattleCastle()==true
+	if ( ( gMapManager.WorldActive==WD_0LORENCIA && HeroTile!=4 ) || 
+         ( gMapManager.WorldActive==WD_2DEVIAS && HeroTile!=3 && HeroTile<10 ) 
+		 || gMapManager.WorldActive==WD_3NORIA 
+		 || gMapManager.WorldActive==WD_7ATLANSE 
+		 || gMapManager.InDevilSquare() == true
+		 || gMapManager.WorldActive==WD_10HEAVEN 
+         || gMapManager.InChaosCastle()==true 
+         || gMapManager.InBattleCastle()==true
 		 || M31HuntingGround::IsInHuntingGround()==true
 		 || M33Aida::IsInAida()==true
 		 || M34CryWolf1st::IsCyrWolf1st()==true
-		|| World == WD_42CHANGEUP3RD_2ND
-#ifdef CSK_ADD_MAP_ICECITY
+		|| gMapManager.WorldActive == WD_42CHANGEUP3RD_2ND
 		|| IsIceCity()
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_MAP_SANTA_TOWN
 		|| IsSantaTown()
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef PBG_ADD_PKFIELD
-		|| IsPKField()
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
+		|| gMapManager.IsPKField()
 		|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-		|| IsEmpireGuardian1() 
-		|| IsEmpireGuardian2()
-		|| IsEmpireGuardian3()
-		|| IsEmpireGuardian4()
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
+		|| gMapManager.IsEmpireGuardian1() 
+		|| gMapManager.IsEmpireGuardian2()
+		|| gMapManager.IsEmpireGuardian3()
+		|| gMapManager.IsEmpireGuardian4()
 		|| IsUnitedMarketPlace()
-#endif	// LDS_ADD_MAP_UNITEDMARKETPLACE
 	 )
 	{
         MoveLeaves();
@@ -2800,9 +2613,7 @@ void MoveMainScene()
 	UpdatePersonalShopTitleImp();
 	MoveHero();
     MoveCharactersClient();
-#ifdef LDK_ADD_NEW_PETPROCESS
 	ThePetProcess().UpdatePets();
-#endif //LDK_ADD_NEW_PETPROCESS
     MovePoints();
 	MovePlanes();
 	MoveEffects();
@@ -2818,42 +2629,18 @@ void MoveMainScene()
 
 	g_GameCensorship->Update();
 
-
 	g_ConsoleDebug->UpdateMainScene();
-
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck02);
-Pos_SelfCheck02:
-	;
-#endif
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_MAINSCENE_TOTAL );
-#endif // DO_PROFILING
 }
 
 bool RenderMainScene()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_MAINSCENE_TOTAL, PROFILING_RENDER_MAINSCENE_TOTAL );
-#endif // DO_PROFILING
 	if(EnableMainRender == false)  
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_RENDER_MAINSCENE_TOTAL );
-#endif // DO_PROFILING
 		return false;
 	}
 
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-	if(g_bReponsedMoveMapFromServer != TRUE)		// 서버로부터 월드이동에 대한 응답이 없는 경우.
-#else // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
     if(( LoadingWorld) > 30)
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_RENDER_MAINSCENE_TOTAL );
-#endif // DO_PROFILING
 		return false;
 	}
 
@@ -2864,9 +2651,7 @@ bool RenderMainScene()
     {
         VectorCopy ( Hero->Object.StartPosition, pos );
     }
-#ifdef BATTLE_SOCCER_EVENT
-    else if(World==WD_6STADIUM 
-		&& (FindText(Hero->ID, "webzen") || FindText(Hero->ID, "webzen2")))
+    else if(gMapManager.WorldActive==WD_6STADIUM && (FindText(Hero->ID, "webzen") || FindText(Hero->ID, "webzen2")))
     {
         if(FindText(Hero->ID, "webzen"))
         {
@@ -2880,7 +2665,6 @@ bool RenderMainScene()
         }
         pos[2] = Hero->Object.Position[2];
     }
-#endif// BATTLE_SOCCER_EVENT
     else
     {
 		g_pCatapultWindow->GetCameraPos(pos);
@@ -2897,11 +2681,7 @@ bool RenderMainScene()
 
 	if(CameraTopViewEnable == false)
 	{
-#ifdef MOD_MAINSCENE_HEIGHT
-		Height = 480;
-#else //MOD_MAINSCENE_HEIGHT
 		Height = 480-48;
-#endif //MOD_MAINSCENE_HEIGHT
 	}
 	else
 	{
@@ -2909,27 +2689,27 @@ bool RenderMainScene()
 	}
 
     Width = GetScreenWidth();
-    if(World == WD_0LORENCIA)      
+    if(gMapManager.WorldActive == WD_0LORENCIA)      
 	{
 		glClearColor(10/256.f,20/256.f,14/256.f,1.f);
 	}
-    else if(World == WD_2DEVIAS)
+    else if(gMapManager.WorldActive == WD_2DEVIAS)
 	{
 		glClearColor(0.f/256.f,0.f/256.f,10.f/256.f,1.f);
 	}
-    else if(World == WD_10HEAVEN)
+    else if(gMapManager.WorldActive == WD_10HEAVEN)
 	{
 		glClearColor(3.f/256.f,25.f/256.f,44.f/256.f,1.f);
 	}
-    else if(InChaosCastle() == true)
+    else if(gMapManager.InChaosCastle() == true)
 	{
 		glClearColor(0/256.f,0/256.f,0/256.f,1.f);
 	}
-	else if(World >= WD_45CURSEDTEMPLE_LV1 && World <= WD_45CURSEDTEMPLE_LV6) 
+	else if(gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6) 
 	{
 		glClearColor(9.f/256.f,8.f/256.f,33.f/256.f,1.f);
 	}
-    else if(InHellas() == true)
+    else if(gMapManager.InHellas() == true)
     {
         byWaterMap = 1;
         glClearColor(0.f/256.f,0.f/256.f,0.f/256.f,1.f);
@@ -2939,7 +2719,7 @@ bool RenderMainScene()
 		glClearColor(0/256.f,0/256.f,0/256.f,1.f);
 	}
 
-	BeginOpengl(0,0,Width,Height);		///////////////// BeginOpengl //////////////////////////////////////////////
+	BeginOpengl(0,0,Width,Height);
 
 	CreateFrustrum((float)Width/(float)640, pos);
 #ifdef DYNAMIC_FRUSTRUM
@@ -2951,7 +2731,7 @@ bool RenderMainScene()
 	ProcessDebugCamera();	
 #endif // DO_PROCESS_DEBUGCAMERA
 
-    if ( battleCastle::InBattleCastle() )
+    if ( gMapManager.InBattleCastle() )
     {
         if ( battleCastle::InBattleCastle2( Hero->Object.Position ) )
         {
@@ -2964,211 +2744,110 @@ bool RenderMainScene()
         }
     }
 
-#ifdef MR0
-	if(EngineGate::IsOn() && g_pMeshMachine->bEnabled())
-		g_pMeshMachine->ProcessLight(HighLight, battleCastle::InBattleCastle());
-#endif //MR0
-
 	CreateScreenVector(MouseX,MouseY,MouseTarget);
 
     if ( IsWaterTerrain()==false )
     {
-		if(World==WD_39KANTURU_3RD)
+		if(gMapManager.WorldActive==WD_39KANTURU_3RD)
 		{
 			if(!g_Direction.m_CKanturu.IsMayaScene())
 				RenderTerrain(false);
 		}
 		else
-        //  천공맵에서는 지형을 보여주지 않는다.
-        if(World!=WD_10HEAVEN && World != -1)
+        if(gMapManager.WorldActive!=WD_10HEAVEN && gMapManager.WorldActive != -1)
         {
-#ifdef PBG_ADD_PKFIELD
-			if(IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-				|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-				)
+			if(gMapManager.IsPKField() || IsDoppelGanger2())
 			{
 				RenderObjects();
 			}
-#endif //PBG_ADD_PKFIELD
-#ifndef DONTRENDER_TERRAIN
             RenderTerrain(false);
-#endif // DONTRENDER_TERRAIN
         }
     }
-#ifdef PBG_ADD_PKFIELD
-		if(!IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-			&& !IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-			)
-#endif //PBG_ADD_PKFIELD
-#ifndef DONTRENDER_TERRAIN
-		RenderObjects();            //  오브젝트 묘사.
-#endif // DONTRENDER_TERRAIN
+		if(!gMapManager.IsPKField()	&& !IsDoppelGanger2())
+			RenderObjects();
 
-#ifndef DONTRENDER_TERRAIN
 	RenderEffectShadows();
-   	RenderBoids();              //  
-#endif // DONTRENDER_TERRAIN
+   	RenderBoids(); 
 
-	RenderCharactersClient();   //  캐릭터 묘사.
+	RenderCharactersClient();
 
-	if(EditFlag!=EDIT_NONE)     //  에디터에서만 처리.
+	if(EditFlag!=EDIT_NONE)
 	{
 		RenderTerrain(true);
     }
-    if(!CameraTopViewEnable)    //  아이템 묘사.
+    if(!CameraTopViewEnable)
      	RenderItems();
 
-#ifndef DONTRENDER_TERRAIN	
-   	RenderFishs();                  //  물고기.
-   	RenderBugs();                   //  벌레.
-    RenderLeaves();             //  잎.
-#endif // DONTRENDER_TERRAIN
+   	RenderFishs();
+   	RenderBugs();
+    RenderLeaves();
 
-#ifdef LDK_ADD_NEW_PETPROCESS
-#ifdef LJH_FIX_PET_SHOWN_IN_CHAOS_CASTLE_BUG
-	if (!InChaosCastle())
-#endif //LJH_FIX_PET_SHOWN_IN_CHAOS_CASTLE_BUG
+	if (!gMapManager.InChaosCastle())
 		ThePetProcess().RenderPets();
-#endif //LDK_ADD_NEW_PETPROCESS
 
-	RenderBoids(true);              //
-	RenderObjects_AfterCharacter();	// 캐릭터 다음에 알파 오브젝트들 묘사
+	RenderBoids(true);
+	RenderObjects_AfterCharacter();
 
-    RenderJoints(byWaterMap );      //  연결되는 효과.
-	RenderEffects();                //  이펙트 효과.
-    RenderBlurs();                  //  칼잔상 효과.
-
-#ifdef USE_SHADOWVOLUME
-	ShadowVolumeDoIt();
-
-	BeginBitmap();		///////////////// BeginBitmap //////////////////////////////////////////////
-	RenderShadowToScreen();
-	EndBitmap();		///////////////// EndBitmap //////////////////////////////////////////////
-
-	BeginOpengl(0,0,Width,Height);	///////////////// BeginOpengl //////////////////////////////////////////////
-#endif
-
-    //  2D 처리 내용들.
+    RenderJoints(byWaterMap);
+	RenderEffects();
+    RenderBlurs();
     CheckSprites();
-    BeginSprite();		///////////////// BeginSprite //////////////////////////////////////////////
-#ifndef DONTRENDER_TERRAIN	
-    if((World==WD_2DEVIAS && HeroTile!=3 && HeroTile<10)
-#ifdef CSK_ADD_MAP_ICECITY
-		|| IsIceCity()
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_MAP_SANTA_TOWN
-		|| IsSantaTown()
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef PBG_ADD_PKFIELD
-		|| IsPKField()
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-		|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-		|| IsEmpireGuardian1()
-		|| IsEmpireGuardian2()
-		|| IsEmpireGuardian3()
-		|| IsEmpireGuardian4()
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
-		|| IsUnitedMarketPlace()
-#endif	// LDS_ADD_MAP_UNITEDMARKETPLACE
-		)
-        RenderLeaves();
-#endif // DONTRENDER_TERRAIN
+    BeginSprite();
 
-#ifdef MR0
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(EngineGate::IsOn())
+	if ((gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
+		|| IsIceCity()
+		|| IsSantaTown()
+		|| gMapManager.IsPKField()
+		|| IsDoppelGanger2()
+		|| gMapManager.IsEmpireGuardian1()
+		|| gMapManager.IsEmpireGuardian2()
+		|| gMapManager.IsEmpireGuardian3()
+		|| gMapManager.IsEmpireGuardian4()
+		|| IsUnitedMarketPlace()
+		)
 	{
-		SpriteManager::Toggle(true);
-		RenderSprites();
-		RenderParticles();
-		SpriteManager::RenderAll();
-		SpriteManager::Toggle(false);
+		RenderLeaves();
 	}
-	else
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-	{
-		RenderSprites();
-		RenderParticles();
-	}
-#else // MR0
+
 	RenderSprites();
 	RenderParticles();
-#endif // MR0
 
-    //  물 지형을 찍는다.
     if ( IsWaterTerrain()==false )
     {
-        RenderPoints ( byWaterMap );    //  점수.
+        RenderPoints ( byWaterMap );
     }
 
-    EndSprite();		///////////////// EndSprite //////////////////////////////////////////////
+    EndSprite();
 
 	RenderAfterEffects();
 
-    //  물 지형을 찍는다.
     if(IsWaterTerrain() == true)
     {
         byWaterMap = 2;
 
-#ifdef KJH_FIX_WOPS_K22929_DONOT_RENDER_NOTICE_IN_KALIMA
-		EndOpengl();	///////////////// EndOpengl //////////////////////////////////////////////
-#endif // KJH_FIX_WOPS_K22929_DONOT_RENDER_NOTICE_IN_KALIMA
-		// 새로 시작해준다.
-	    BeginOpengl( 0, 0, Width, Height );	///////////////// BeginOpengl //////////////////////////////////////////////
-        RenderWaterTerrain ();      //  물지형 묘사.
-        RenderJoints(byWaterMap );      //  연결되는 효과.
-        RenderEffects ( true );     //  이펙트 효과.
-        RenderBlurs ();             //  칼잔상 효과.
-
-        //  2D 처리 내용들.
+		EndOpengl();
+	    BeginOpengl(0, 0, Width, Height );
+        RenderWaterTerrain();
+        RenderJoints(byWaterMap );
+        RenderEffects( true );
+        RenderBlurs();
         CheckSprites();
-        BeginSprite();		///////////////// BeginSprite //////////////////////////////////////////////
-#ifndef DONTRENDER_TERRAIN	
-        if(World==WD_2DEVIAS && HeroTile!=3 && HeroTile<10)
-            RenderLeaves();
-#endif // DONTRENDER_TERRAIN
+        BeginSprite();
 
-#ifdef MR0
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-		if(EngineGate::IsOn())
-		{
-			SpriteManager::Toggle(true);
-			RenderSprites(byWaterMap);
-			RenderParticles(byWaterMap);
-			SpriteManager::RenderAll();
-			SpriteManager::Toggle(false);
-		}
-		else
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES	
-		{
-			RenderSprites(byWaterMap);
-			RenderParticles(byWaterMap);			
-		}
-#else // MR0
+        if(gMapManager.WorldActive==WD_2DEVIAS && HeroTile!=3 && HeroTile<10)
+            RenderLeaves();
+
 		RenderSprites(byWaterMap);
 		RenderParticles(byWaterMap);
-#endif //MR0
+        RenderPoints ( byWaterMap );
 
-        RenderPoints ( byWaterMap );    //  점수.
+        EndSprite();
+		EndOpengl();
 
-        EndSprite();	///////////////// EndSprite //////////////////////////////////////////////
-		EndOpengl();	///////////////// EndOpengl //////////////////////////////////////////////
-
-#ifdef KJH_FIX_WOPS_K22929_DONOT_RENDER_NOTICE_IN_KALIMA
-		// 아래 렌더할것들이 남아있으므로 해줘야 한다.
-		BeginOpengl( 0, 0, Width, Height );	///////////////// BeginOpengl //////////////////////////////////////////////
-#endif // KJH_FIX_WOPS_K22929_DONOT_RENDER_NOTICE_IN_KALIMA
+		BeginOpengl( 0, 0, Width, Height );
     }
 
-    if(battleCastle::InBattleCastle())
+    if(gMapManager.InBattleCastle())
     {
         if(battleCastle::InBattleCastle2(Hero->Object.Position))
         {
@@ -3177,22 +2856,18 @@ bool RenderMainScene()
     }
 
     SelectObjects();
-
-	BeginBitmap();		///////////////// BeginBitmap //////////////////////////////////////////////	
-
+	BeginBitmap();	
     RenderObjectDescription();
 	
-
 	if(CameraTopViewEnable == false)
 	{
         RenderInterface(true);
 	}
 	RenderTournamentInterface();
-
 	EndBitmap();						
 	
 	g_pPartyManager->Render();
-	g_pNewUISystem->Render();	//. 2D, 3D 렌더링
+	g_pNewUISystem->Render();
 	
 	BeginBitmap();
 
@@ -3202,42 +2877,14 @@ bool RenderMainScene()
 	RenderDebugWindow();
 #endif //ENABLE_EDIT
 
-#ifdef FOR_DRAMA
-	extern int g_iShowGoodLuck;
-	if ( g_iShowGoodLuck > 0)
-	{
-		g_iShowGoodLuck--;
-		if ( g_iShowGoodLuck % 10 < 5)
-		{
-			g_pRenderText->SetTextColor(128, 128, 0, 255);
-		}
-		else
-		{
-			g_pRenderText->SetTextColor(255, 255, 0, 255);
-		}
-		g_pRenderText->SetFont(g_hFontBig);
-		g_pRenderText->SetBgColor(40, 40, 40, 128);
-		
-		RenderText(250, 200,"다 잘될거야!");
-	}
-#endif // FOR_DRAMA
-
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN	
-	g_GameCensorship->Render();
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-
-	// 칼리마에서 커서가 안보이는 문제때문에
-	EndBitmap();	///////////////// EndBitmap //////////////////////////////////////////////	
-	BeginBitmap();	///////////////// BeginBitmap //////////////////////////////////////////////
+	EndBitmap();
+	BeginBitmap();
 
     RenderCursor();
 
-	EndBitmap();	///////////////// EndBitmap //////////////////////////////////////////////	
-    EndOpengl();	///////////////// EndOpengl //////////////////////////////////////////////	
+	EndBitmap();
+    EndOpengl();
 	
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_MAINSCENE_TOTAL );
-#endif // DO_PROFILING
 	return true;
 }
 
@@ -3258,13 +2905,6 @@ int g_iItemIndex = 0;
 int g_iShowGoodLuck = 0;
 #endif
 
-//#ifdef _DEBUG
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-// 파티션 표시
-extern char g_lpszPartitionName[64];
-#endif //SELECTED_LANGAUGE == LANGUAGE_CHINESE*/
-
-
 void MoveCharacter(CHARACTER *c,OBJECT *o);
 
 #ifdef DO_PROCESS_DEBUGCAMERA
@@ -3284,14 +2924,6 @@ void MainScene(HDC hDC)
 
    	CalcFPS();
 	
-#ifdef LDK_ADD_GLOBAL_PORTAL_WEBLOGIN_CHECK
-	if( !GlobalPortalSystem::Instance().IsAuthSet() )
-	{
-		//g_ErrorReport.Write( "-- 웹페이지 로그인 정보 없음 --> 종료합니다. -- \r\n" );
-		CUIMng::Instance().PopUpMsgWin(MESSAGE_NOT_EXECUTION_WEBSTARTER);
-	}
-#endif //LDK_ADD_GLOBAL_PORTAL_WEBLOGIN_CHECK
-
 	int32_t Remain = 0;
 
 	for (Remain = TimeRemain; Remain >= 40; Remain -= 40)
@@ -3319,15 +2951,15 @@ void MainScene(HDC hDC)
 
 		switch (SceneFlag)
 		{
-		case LOG_IN_SCENE:		// 로그인 씬.
+		case LOG_IN_SCENE:
 			NewMoveLogInScene();
 			break;
 
-		case CHARACTER_SCENE:	// 캐릭터 선택, 생성 씬.
+		case CHARACTER_SCENE:
 			NewMoveCharacterScene();
 			break;
 
-		case MAIN_SCENE:		// 게임 씬.
+		case MAIN_SCENE:
 			MoveMainScene();
 			break;
 		}
@@ -3357,30 +2989,20 @@ void MainScene(HDC hDC)
 		return;
 	}
 
-	//. 텍스쳐 관리
 	Bitmaps.Manage();
 
 	Set3DSoundPosition();
 
-	// 스크린 캡쳐 준비
 	SYSTEMTIME st;
 	GetLocalTime( &st);
 	sprintf( GrabFileName, "Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
 	char Text[256];
 	sprintf(Text,GlobalText[459],GrabFileName);
 	char lpszTemp[64];
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 	wsprintf( lpszTemp, " [%s / %s]", g_ServerListManager->GetSelectServerName(), Hero->ID);
-#else // KJH_ADD_SERVER_LIST_SYSTEM
-	wsprintf( lpszTemp, " [%s / %s]", ServerList[max( 0, min( ServerSelectHi, 30))].Name, Hero->ID);
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 	strcat( Text, lpszTemp);
+	int iCaptureMode = 1;
 
-	// 캡쳐시 문장 표시 부분
-	int iCaptureMode = 1;	// 0 은 문장 없이, 1 은 문장 있게
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-	iCaptureMode = 0;
-#endif
 #ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
 	if(SEASON3B::IsRepeat(VK_SHIFT) == TRUE)
 #else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
@@ -3398,43 +3020,38 @@ void MainScene(HDC hDC)
 #endif // CAMERA_TEST
 	}
 
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_SCENE_TOTAL, PROFILING_RENDER_SCENE_TOTAL );
-#endif // DO_PROFILING
-
-	//////////////// 랜더링 시작 //////////////////////////////////////////////////////////
 #ifdef CAMERA_TEST_FPS
     glClearColor(0.5f,0.5f,0.5f,1.f);
 #else
 
-    if( World==WD_10HEAVEN )
+    if( gMapManager.WorldActive==WD_10HEAVEN )
     {
         glClearColor(3.f/256.f,25.f/256.f,44.f/256.f,1.f);
     }
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-	else if (World == WD_73NEW_LOGIN_SCENE
-		|| World == WD_74NEW_CHARACTER_SCENE)
+	else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
+		|| gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
     {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
     }
 #endif //PJH_NEW_SERVER_SELECT_MAP
-    else if (InHellas(World))
+    else if (gMapManager.InHellas(gMapManager.WorldActive))
     {
         glClearColor(30.f/256.f,40.f/256.f,40.f/256.f,1.f);
     }
-    else if ( InChaosCastle()==true )
+    else if ( gMapManager.InChaosCastle()==true )
     {
         glClearColor ( 0.f, 0.f, 0.f, 1.f );
     }
-    else if ( battleCastle::InBattleCastle() && battleCastle::InBattleCastle2( Hero->Object.Position ) )
+    else if ( gMapManager.InBattleCastle() && battleCastle::InBattleCastle2( Hero->Object.Position ) )
     {
         glClearColor ( 0.f, 0.f, 0.f, 1.f );
     }
-	else if ( World >= WD_45CURSEDTEMPLE_LV1 && World <= WD_45CURSEDTEMPLE_LV6) 
+	else if ( gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6) 
 	{
 		glClearColor(9.f/256.f,8.f/256.f,33.f/256.f,1.f);
 	}
-	else if ( World == WD_51HOME_6TH_CHAR 
+	else if ( gMapManager.WorldActive == WD_51HOME_6TH_CHAR 
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 		|| World == WD_77NEW_LOGIN_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
@@ -3449,7 +3066,7 @@ void MainScene(HDC hDC)
 	}
 #endif //PJH_NEW_SERVER_SELECT_MAP
 #ifdef YDG_ADD_MAP_DOPPELGANGER1
-	else if(World == WD_65DOPPLEGANGER1)
+	else if(gMapManager.WorldActive == WD_65DOPPLEGANGER1)
 	{
 		glClearColor(148.f/256.f,179.f/256.f,223.f/256.f,1.f);	// 배경색 하늘색으로
 	}
@@ -3488,7 +3105,6 @@ void MainScene(HDC hDC)
 		SaveScreen();
 	}
 
-	// 캡쳐시 문장 표시 부분
 	if(GrabEnable && iCaptureMode == 0)
 	{
 		g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);		
@@ -3624,25 +3240,6 @@ void MainScene(HDC hDC)
 		EndBitmap();
 	}
 #endif // #if defined(LDS_FOR_DEVELOPMENT_TESTMODE)
-
-
-#ifdef DO_PROFILING
-	BeginBitmap();
-	{
-		unicode::t_char szDebugText[128];
-		// PROFILING 여부 출력 
-		unicode::_sprintf(szDebugText, "Profiler(f11) : %s", 
-			g_pProfiler->IsProflingNow()==TRUE?TEXT("ON"):TEXT("OFF"));
-		g_pRenderText->SetFont(g_hFontBold);
-		g_pRenderText->SetBgColor(0, 0, 0, 100);
-		g_pRenderText->SetTextColor(255, 255, 255, 200);
-		//g_pRenderText->RenderText(70, 8, szDebugText);
-		g_pRenderText->RenderText(220, 8, szDebugText);
-		g_pRenderText->SetFont(g_hFont);	
-	}
-	EndBitmap();
-#endif // DO_PROFILING
-
 
 #ifdef DO_PROCESS_DEBUGCAMERA
 
@@ -3908,7 +3505,7 @@ void MainScene(HDC hDC)
 
 	if(SceneFlag == MAIN_SCENE)
 	{
-		switch(World)
+		switch(gMapManager.WorldActive)
 		{
 		case WD_0LORENCIA:
 			if(HeroTile==4)
@@ -3991,50 +3588,50 @@ void MainScene(HDC hDC)
 			break;
 #endif	// ASG_ADD_MAP_KARUTAN
 		}
-		if(World != WD_0LORENCIA && World != WD_2DEVIAS && World != WD_3NORIA
+		if(gMapManager.WorldActive != WD_0LORENCIA && gMapManager.WorldActive != WD_2DEVIAS && gMapManager.WorldActive != WD_3NORIA
 #ifdef CSK_ADD_MAP_ICECITY	
-			&& World != WD_58ICECITY_BOSS
+			&& gMapManager.WorldActive != WD_58ICECITY_BOSS
 #endif // CSK_ADD_MAP_ICECITY	
 #ifdef LDS_ADD_SOUND_UNITEDMARKETPLACE
-			&& World != WD_79UNITEDMARKETPLACE
+			&& gMapManager.WorldActive != WD_79UNITEDMARKETPLACE
 #endif // LDS_ADD_SOUND_UNITEDMARKETPLACE
 			)
 		{
 			StopBuffer(SOUND_WIND01,true);
 		}
-		if ( World != WD_0LORENCIA && InDevilSquare() == false
+		if ( gMapManager.WorldActive != WD_0LORENCIA && gMapManager.InDevilSquare() == false
 #ifdef LDS_ADD_SOUND_UNITEDMARKETPLACE
-			 && World != WD_79UNITEDMARKETPLACE
+			 && gMapManager.WorldActive != WD_79UNITEDMARKETPLACE
 #endif // LDS_ADD_SOUND_UNITEDMARKETPLACE
 			)
 		{
 			StopBuffer(SOUND_RAIN01,true);
 		}
-		if(World != WD_1DUNGEON)
+		if(gMapManager.WorldActive != WD_1DUNGEON)
 		{
 			StopBuffer(SOUND_DUNGEON01,true);
 		}
-		if(World != WD_3NORIA)
+		if(gMapManager.WorldActive != WD_3NORIA)
 		{
 			StopBuffer(SOUND_FOREST01,true);
 		}
-		if(World != WD_4LOSTTOWER)
+		if(gMapManager.WorldActive != WD_4LOSTTOWER)
 		{
 			StopBuffer(SOUND_TOWER01,true);
 		}
-		if(World != WD_7ATLANSE)
+		if(gMapManager.WorldActive != WD_7ATLANSE)
 		{
 			StopBuffer(SOUND_WATER01,true);
 		}
-		if(World != WD_8TARKAN)
+		if(gMapManager.WorldActive != WD_8TARKAN)
 		{
 			StopBuffer(SOUND_DESERT01,true);
 		}
-        if(World != WD_10HEAVEN)
+        if(gMapManager.WorldActive != WD_10HEAVEN)
 		{
             StopBuffer(SOUND_HEAVEN01,true);
 		}
-		if(World != WD_51HOME_6TH_CHAR)
+		if(gMapManager.WorldActive != WD_51HOME_6TH_CHAR)
 		{
 			StopBuffer(SOUND_ELBELAND_VILLAGEPROTECTION01, true);
 			StopBuffer(SOUND_ELBELAND_WATERFALLSMALL01, true);
@@ -4053,7 +3650,7 @@ void MainScene(HDC hDC)
 			StopBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, true);
 #endif	// ASG_ADD_MAP_KARUTAN
 
-		if(World==WD_0LORENCIA)
+		if(gMapManager.WorldActive==WD_0LORENCIA)
 		{
 			if(Hero->SafeZone)
 			{
@@ -4068,7 +3665,7 @@ void MainScene(HDC hDC)
 			StopMp3( g_lpszMp3[MUSIC_PUB]);
 			StopMp3( g_lpszMp3[MUSIC_MAIN_THEME]);
 		}
-		if(World==WD_2DEVIAS)	
+		if(gMapManager.WorldActive==WD_2DEVIAS)	
 		{
 			if(Hero->SafeZone)
 			{
@@ -4089,7 +3686,7 @@ void MainScene(HDC hDC)
 			StopMp3( g_lpszMp3[MUSIC_CHURCH]);
 			StopMp3( g_lpszMp3[MUSIC_DEVIAS]);
 		}
-		if(World==WD_3NORIA)
+		if(gMapManager.WorldActive==WD_3NORIA)
 		{
 			if(Hero->SafeZone)
 				PlayMp3( g_lpszMp3[MUSIC_NORIA]);
@@ -4098,7 +3695,7 @@ void MainScene(HDC hDC)
 		{
 			StopMp3( g_lpszMp3[MUSIC_NORIA]);
 		}
-		if(World==WD_1DUNGEON || World==WD_5UNKNOWN)
+		if(gMapManager.WorldActive==WD_1DUNGEON || gMapManager.WorldActive==WD_5UNKNOWN)
 		{
 			PlayMp3( g_lpszMp3[MUSIC_DUNGEON]);
 		}
@@ -4107,140 +3704,93 @@ void MainScene(HDC hDC)
 			StopMp3( g_lpszMp3[MUSIC_DUNGEON]);
 		}
 
-		if(World==WD_7ATLANSE) {
+		if(gMapManager.WorldActive==WD_7ATLANSE) {
 			PlayMp3(g_lpszMp3[MUSIC_ATLANS]);
 		}
 		else {
 			StopMp3(g_lpszMp3[MUSIC_ATLANS]);
 		}
-		if(World==WD_10HEAVEN) {
+		if(gMapManager.WorldActive==WD_10HEAVEN) {
 			PlayMp3(g_lpszMp3[MUSIC_ICARUS]);
 		}
 		else {
 			StopMp3(g_lpszMp3[MUSIC_ICARUS]);
 		}
-		if(World==WD_8TARKAN) {
+		if(gMapManager.WorldActive==WD_8TARKAN) {
 			PlayMp3(g_lpszMp3[MUSIC_TARKAN]);
 		}
 		else {
 			StopMp3(g_lpszMp3[MUSIC_TARKAN]);
 		}
-		if(World==WD_4LOSTTOWER) {
+		if(gMapManager.WorldActive==WD_4LOSTTOWER) {
 			PlayMp3(g_lpszMp3[MUSIC_LOSTTOWER_A]);
 		}
 		else {
 			StopMp3(g_lpszMp3[MUSIC_LOSTTOWER_A]);
 		}
 
-		if(InHellas(World)) {
+		if(gMapManager.InHellas(gMapManager.WorldActive)) {
 			PlayMp3(g_lpszMp3[MUSIC_KALIMA]);
 		}
 		else {
 			StopMp3(g_lpszMp3[MUSIC_KALIMA]);
 		}
 
-		if(World==WD_31HUNTING_GROUND) {
+		if(gMapManager.WorldActive==WD_31HUNTING_GROUND) {
 			PlayMp3(g_lpszMp3[MUSIC_BC_HUNTINGGROUND]);
 		}
 		else {
 			StopMp3(g_lpszMp3[MUSIC_BC_HUNTINGGROUND]);
 		}
 
-		if(World==WD_33AIDA) {
+		if(gMapManager.WorldActive==WD_33AIDA) {
 			PlayMp3(g_lpszMp3[MUSIC_BC_ADIA]);
 		}
 		else {
 			StopMp3(g_lpszMp3[MUSIC_BC_ADIA]);
 		}
 
-		M34CryWolf1st::ChangeBackGroundMusic(World);
-		M39Kanturu3rd::ChangeBackGroundMusic(World);
+		M34CryWolf1st::ChangeBackGroundMusic(gMapManager.WorldActive);
+		M39Kanturu3rd::ChangeBackGroundMusic(gMapManager.WorldActive);
 
-		if (World == WD_37KANTURU_1ST)
+		if (gMapManager.WorldActive == WD_37KANTURU_1ST)
 			PlayMp3(g_lpszMp3[MUSIC_KANTURU_1ST]);
 		else
 			StopMp3(g_lpszMp3[MUSIC_KANTURU_1ST]);
 		M38Kanturu2nd::PlayBGM();
 		SEASON3A::CGM3rdChangeUp::Instance().PlayBGM();
-		if( g_CursedTemple->IsCursedTemple() )
+		if( gMapManager.IsCursedTemple() )
 		{
 			g_CursedTemple->PlayBGM();
 		}
-		if(World==WD_51HOME_6TH_CHAR) {
+		if(gMapManager.WorldActive==WD_51HOME_6TH_CHAR) {
 			PlayMp3(g_lpszMp3[MUSIC_ELBELAND]);
 		}
 		else {
 			StopMp3(g_lpszMp3[MUSIC_ELBELAND]);
 		}
 
-		if(World==WD_56MAP_SWAMP_OF_QUIET) {
+		if(gMapManager.WorldActive==WD_56MAP_SWAMP_OF_QUIET) {
 			PlayMp3(g_lpszMp3[MUSIC_SWAMP_OF_QUIET]);
 		}
 		else {
 			StopMp3(g_lpszMp3[MUSIC_SWAMP_OF_QUIET]);
 		}
 
-#ifdef CSK_ADD_MAP_ICECITY	
+
 		g_Raklion.PlayBGM();
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_MAP_SANTA_TOWN
 		g_SantaTown.PlayBGM();
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef PBG_ADD_PKFIELD
 		g_PKField.PlayBGM();
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER1
 		g_DoppelGanger1.PlayBGM();
-#endif	// YDG_ADD_MAP_DOPPELGANGER1
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 		g_EmpireGuardian1.PlayBGM();
 		g_EmpireGuardian2.PlayBGM();
 		g_EmpireGuardian3.PlayBGM();
 		g_EmpireGuardian4.PlayBGM();
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 		g_UnitedMarketPlace.PlayBGM();
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 #ifdef ASG_ADD_MAP_KARUTAN
 		g_Karutan1.PlayBGM();
 #endif	// ASG_ADD_MAP_KARUTAN
 	}
-
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 21, 10, SkillElf, 0x818F);
-#endif
-
-#ifdef FOR_DRAMA
-	extern int HeroIndex;
-	if ( PressKey( VK_F3))
-	{
-		g_iGemCount += 10000;
-	}
-	if ( g_iGemCount > 0)
-	{
-		for ( int i = 0; i < 30 && g_iGemCount > 0; ++i, --g_iGemCount)
-		{
-			ITEM_t *ip = &Items[g_iItemIndex++];
-			vec3_t Position;
-			memcpy( &Position, &CharactersClient[HeroIndex].Object.Position, sizeof ( vec_t));
-			Position[0]  = (float)(rand() % 21 - 10 + CharactersClient[HeroIndex].PositionX+0.5f)*TERRAIN_SCALE + ( float)( rand() % 201 - 100) * 0.3f;
-			Position[1]  = (float)(rand() % 21 - 10 + CharactersClient[HeroIndex].PositionY+0.5f)*TERRAIN_SCALE + ( float)( rand() % 201 - 100) * 0.3f;
-			CreateItem(ip,MODEL_ITEM+ITEM_POTION+13,0,0,Position,TRUE);
-
-			g_iItemIndex %= MAX_ITEMS;
-			if ( 0 == i)
-			{
-				PlayBuffer(SOUND_JEWEL01,&ip->Object);
-			}
-		}
-		g_iShowGoodLuck += 1000;
-	}
-#endif
-
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-	SetEnableMultisample();
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-
 	TimeRemain = DifTimer;
 }
 
@@ -4258,9 +3808,6 @@ extern GLvoid KillGLWindow(GLvoid);
 
 void Scene(HDC hDC)
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_SCENE_TOTAL, PROFILING_SCENE_TOTAL );
-#endif // DO_PROFILING
 	g_Luminosity = sinf(WorldTime*0.004f)*0.15f+0.6f;
 	switch(SceneFlag)
 	{
@@ -4281,51 +3828,6 @@ void Scene(HDC hDC)
 		MainScene(hDC);
 		break;
 	}
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 6, 3, ProtocolCompiler, 0xDA3F);
-#endif
-
-#ifdef ANTIHACKING_ENABLE
-	// 체크코드
-	int iFrameCount = ( GetTickCount() / 40);
-	if ( g_iPrevFrameCount != iFrameCount)
-	{
-		g_iPrevFrameCount = iFrameCount;
-		g_bNewFrame = TRUE;
-	}
-	else
-	{
-		g_bNewFrame = FALSE;
-	}
-	if ( g_bNewFrame)
-	{
-		switch ( iFrameCount % 150)
-		{
-		case 21:
-			hanguo_check7();
-			break;
-		case 23:
-			hanguo_check8();
-			break;
-		case 57:
-			hanguo_check9();
-			break;
-		case 89:
-			hanguo_check10();
-			break;
-		case 113:
-			hanguo_check11();
-			break;
-		case 137:
-			hanguo_check12();
-			break;
-		}
-	}
-#endif //ANTIHACKING_ENABLE
-
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 12, 16, Attack, 0x7329);
-#endif //USE_SELFCHECKCODE
 
 	_asm { jmp Pos_NoMouseTimeCheck2 }
 	_asm { __emit 0xFF }
@@ -4338,26 +3840,9 @@ Pos_NoMouseTimeCheck2:
 Pos_NoMouse_KillWindow:
 		KillGLWindow();
 	}
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 17, 6, SkillWarrior, 0xAA83);
-#endif
-
-#ifndef PSW_BUGFIX_IME
-	g_bEnterPressed = false;
-#endif //PSW_BUGFIX_IME
-
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_SCENE_TOTAL );
-#endif // DO_PROFILING	
 }
 
-bool	GetTimeCheck(int DelayTime)
+bool GetTimeCheck(int DelayTime)
 {
 	int PresentTime = timeGetTime();
 	

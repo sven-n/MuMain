@@ -17,6 +17,7 @@
 #include "ZzzLodTerrain.h"
 #include "GOBoid.h"
 #include "./Utilities/Log/muConsoleDebug.h"
+#include "LoadData.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
 
@@ -86,8 +87,6 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
 {
 	CHARACTER* pCharacter = g_EmpireGuardian1.CreateMonster(iType, PosX, PosY, Key);
 
-	// 중복 코딩 방지용
-	//g_EmpireGuardian1에 없으면 로딩
 	if(NULL != pCharacter)
 	{
 		return pCharacter;
@@ -102,17 +101,17 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+164, PosX, PosY);
 			strcpy(pCharacter->ID, "가이온 카레인");
 
-			AccessModel(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_left01");
-			AccessModel(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_left02");
-			AccessModel(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_right01");
-			AccessModel(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_right02");
-			AccessModel(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_main01");
+			gLoadData.AccessModel(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_left01");
+			gLoadData.AccessModel(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_left02");
+			gLoadData.AccessModel(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_right01");
+			gLoadData.AccessModel(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_right02");
+			gLoadData.AccessModel(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_,	"Data\\Monster\\", "Boss_Karane_sword_main01");
 
-			OpenTexture( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
-			OpenTexture( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
-			OpenTexture( MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
-			OpenTexture( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
-			OpenTexture( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
+			gLoadData.OpenTexture( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
+			gLoadData.OpenTexture( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
+			gLoadData.OpenTexture( MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
+			gLoadData.OpenTexture( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
+			gLoadData.OpenTexture( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
 
 			//pCharacter->Object.Scale = 1.50f;
 			pCharacter->Object.Scale = 1.40f;
@@ -164,7 +163,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
 
 bool GMEmpireGuardian4::MoveObject(OBJECT* o)
 {
-	if(IsEmpireGuardian4() == false)
+	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 
 	Alpha(o);
@@ -258,7 +257,7 @@ bool GMEmpireGuardian4::MoveObject(OBJECT* o)
 
 bool GMEmpireGuardian4::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
- 	if(IsEmpireGuardian4() == false)
+ 	if(gMapManager.IsEmpireGuardian4() == false)
  		return false;
 	
 	//g_EmpireGuardian1에 character정보 있음
@@ -294,7 +293,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(OBJECT* o, BMD* b)
 // 몬스터(NPC) 프로세서 - 제국 수호군 특화 (Boss gaion이 선택한 케릭터 정보필요로 character* c 인자값 추가.)
 bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if(IsEmpireGuardian4() == false)
+	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 
 	//g_EmpireGuardian1에 character정보 있음
@@ -805,7 +804,7 @@ void GMEmpireGuardian4::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
 bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(IsEmpireGuardian4() == false)
+	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 
 	//g_EmpireGuardian1에 character정보 있음
@@ -912,7 +911,7 @@ switch(o->Type)
 
 bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 {
-	if(IsEmpireGuardian4() == false)
+	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 
 	vec3_t p, Position, Light;
@@ -1162,11 +1161,10 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 157:	// 샹들리에
+	case 157:
 		{
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-			// 프레임 저하로 인해 이펙트 제거
-			if(World == WD_73NEW_LOGIN_SCENE || World == WD_74NEW_CHARACTER_SCENE)
+			if(gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
 				return true;
 #endif //PJH_NEW_SERVER_SELECT_MAP
 
@@ -1491,7 +1489,7 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 void GMEmpireGuardian4::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(IsEmpireGuardian4() == false)
+	if(gMapManager.IsEmpireGuardian4() == false)
 		return;
 	
 	switch(o->Type)
@@ -1525,27 +1523,12 @@ void GMEmpireGuardian4::SetWeather(int weather)
 
 void GMEmpireGuardian4::RenderFrontSideVisual()
 {
-	//안개, 천둥
 	g_EmpireGuardian1.RenderFrontSideVisual();
-}
-
-bool IsEmpireGuardian4()
-{
-	if(World == WD_72EMPIREGUARDIAN4
-#ifdef PJH_NEW_SERVER_SELECT_MAP
-		|| World == WD_73NEW_LOGIN_SCENE
-		|| World == WD_74NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
-		)
-	{
-		return true;
-	}
-	return false;
 }
 
 bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 {
-	if(IsEmpireGuardian4() == false)
+	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 
 	//g_EmpireGuardian1에 PlayMonsterSound정보 있음
@@ -1682,7 +1665,7 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
 bool GMEmpireGuardian4::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if(IsEmpireGuardian4() == false)
+	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 	
 	return false;
@@ -1691,7 +1674,7 @@ bool GMEmpireGuardian4::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 // 몬스터 사운드
 bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o) 
 {
-	if(IsEmpireGuardian4() == false)
+	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 	
 	//g_EmpireGuardian1에 PlayMonsterSound정보 있음
@@ -1793,7 +1776,7 @@ void GMEmpireGuardian4::PlayObjectSound(OBJECT* o)
 
 void GMEmpireGuardian4::PlayBGM()
 {
-	if (IsEmpireGuardian4())
+	if (gMapManager.IsEmpireGuardian4())
 	{
 		PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN4]);
 	}

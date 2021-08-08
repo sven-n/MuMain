@@ -7,14 +7,7 @@
 #ifdef PSW_ADD_MAPSYSTEM
 
 #include "w_MapProcess.h"
-// ¸Ê °ü·Ã include
 #include "w_MapHeaders.h"
-
-extern int World;
-
-//////////////////////////////////////////////////////////////////////
-// extern
-//////////////////////////////////////////////////////////////////////
 
 MapProcessPtr g_MapProcess;
 
@@ -23,10 +16,6 @@ MapProcess& TheMapProcess()
 	assert( g_MapProcess );
 	return *g_MapProcess;
 }
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 MapProcessPtr MapProcess::Make()
 {
@@ -228,7 +217,7 @@ bool MapProcess::LoadMapData()
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				bool result = basemap.lock()->LoadMapData();
 				if( result ) {
 					return true;
@@ -273,7 +262,7 @@ bool MapProcess::MoveObject(OBJECT* o)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				basemap.lock()->PlayObjectSound( o );
 				bool result = basemap.lock()->MoveObject( o );
 				if( result ) {
@@ -298,7 +287,7 @@ bool MapProcess::RenderObjectVisual(OBJECT* o, BMD* b)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				bool result = basemap.lock()->RenderObjectVisual( o, b );
 				if( result ) {
 					return true;
@@ -322,7 +311,7 @@ bool MapProcess::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				bool result = basemap.lock()->RenderObjectMesh( o, b, ExtraMon );
 				if( result ) {
 					return true;
@@ -346,7 +335,7 @@ void MapProcess::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				basemap.lock()->RenderAfterObjectMesh( o, b, ExtraMon );
 			}
 		}
@@ -368,7 +357,7 @@ void MapProcess::RenderFrontSideVisual()
 		
 		if( basemap.expired() == false )
 		{
-			if( basemap.lock()->IsCurrentMap( World ) )
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) )
 			{
 				basemap.lock()->RenderFrontSideVisual();
 			}
@@ -413,7 +402,7 @@ bool MapProcess::MoveMonsterVisual(OBJECT* o, BMD* b)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				bool result = basemap.lock()->MoveMonsterVisual( o, b );
 				if( result ) {
 					return true;
@@ -437,7 +426,7 @@ void MapProcess::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				basemap.lock()->MoveBlurEffect( c, o, b );
 			}
 		}
@@ -457,7 +446,7 @@ bool MapProcess::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				bool result = basemap.lock()->RenderMonsterVisual( c, o, b );
 				if( result ) {
 					return true;
@@ -481,7 +470,7 @@ bool MapProcess::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				bool result = basemap.lock()->AttackEffectMonster( c, o, b );
 				if( result ) {
 					return true;
@@ -505,7 +494,7 @@ bool MapProcess::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				bool result = basemap.lock()->SetCurrentActionMonster( c, o );
 				if( result ) {
 					return true;
@@ -528,7 +517,7 @@ bool MapProcess::PlayMonsterSound(OBJECT* o)
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				bool result = basemap.lock()->PlayMonsterSound( o );
 				if( result ) {
 					return true;
@@ -551,7 +540,7 @@ bool MapProcess::ReceiveMapMessage( BYTE code, BYTE subcode, BYTE* ReceiveBuffer
 		BoostWeak_Ptr(BaseMap) basemap = *tempiter;
 		
 		if( basemap.expired() == false ) {
-			if( basemap.lock()->IsCurrentMap( World ) ) {
+			if( basemap.lock()->IsCurrentMap( gMapManager.WorldActive ) ) {
 				bool result = basemap.lock()->ReceiveMapMessage( code, subcode, ReceiveBuffer );
 				if( result ) {
 					return true;

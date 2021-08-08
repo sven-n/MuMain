@@ -6,13 +6,7 @@
 #include "wsclientinline.h"
 #include "PersonalShopTitleImp.h"
 #include "w_CursedTemple.h"
-#ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V4
-	#include "ProtectAuto.h"
-#endif	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V4
-#ifdef LDK_ADD_SCALEFORM
-#include "CGFxProcess.h"
-#endif //LDK_ADD_SCALEFORM
-
+#include "MapManager.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 
 #ifdef FOR_WORK
@@ -955,7 +949,7 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 #endif //LDK_ADD_SCALEFORM
 		
 			// 환영사원이면
-			if(g_CursedTemple->IsCursedTemple() == true)
+			if(gMapManager.IsCursedTemple() == true)
 			{
 				g_pMyShopInventory->OpenButtonLock();
 			}

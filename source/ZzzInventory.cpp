@@ -32,9 +32,7 @@
 #include "CSChaosCastle.h"
 #include "GMHellas.h"
 #include "npcBreeder.h"
-#ifdef PET_SYSTEM
 #include "GIPetManager.h"
-#endif// PET_SYSTEM
 #include "CSParts.h"
 #include "npcGateSwitch.h"
 #include "GMBattleCastle.h"
@@ -54,22 +52,12 @@
 #include "NewUIInventoryCtrl.h"
 #include "GM3rdChangeUp.h"
 #include "w_CursedTemple.h"
-#ifdef SOCKET_SYSTEM
 #include "SocketSystem.h"
-#endif	// SOCKET_SYSTEM
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
 #include "PortalMgr.h"
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef PBG_ADD_ITEMRESIZE
 #include "NewUISystem.h"
-#endif //PBG_ADD_ITEMRESIZE
-
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 #include "ServerListManager.h"
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 #include <time.h>
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
+#include "MapManager.h"
 
 
 ///////////////////////////////////////////
@@ -78,9 +66,6 @@ extern int g_iChatInputType;
 extern CUIGuildListBox * g_pGuildListBox;
 ////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////
-//  Global Variable
-//////////////////////////////////////////////////////////////////////////
 
 int			g_nTaxRate			= 0;
 
@@ -10977,7 +10962,7 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 			OBJECT *o = &Hero->Object;
 			if(Index==EQUIPMENT_HELPER)
 			{
-                if ( InChaosCastle()==false )
+                if ( gMapManager.InChaosCastle()==false )
                 {
                     switch(Type)
                     {
@@ -16453,195 +16438,11 @@ void RenderInventoryInterface(int StartX,int StartY,int Flag)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 정보창 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
-extern  int  ServerSelectHi;
-extern  int  ServerLocalSelect;
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 파티 리스트창 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
-const char* GetMapName( int iMap)
-{
-	if(iMap == WD_34CRYWOLF_1ST)
-	{
-		return( GlobalText[1851]);
-	}
-	else if( iMap == WD_33AIDA )
-	{
-		return( GlobalText[1850]);
-	}
-	else if( iMap == WD_37KANTURU_1ST )
-	{
-		return( GlobalText[2177]);
-	}
-	else if( iMap == WD_38KANTURU_2ND )
-	{
-		return( GlobalText[2178]);
-	}
-	else if( iMap == WD_39KANTURU_3RD )
-	{
-		return( GlobalText[2179]);
-	}
-	else if( iMap == WD_40AREA_FOR_GM)
-	{
-		return( GlobalText[2324]);
-	}
-	else if( iMap == WD_51HOME_6TH_CHAR)
-	{
-		return( GlobalText[1853]);
-	}
-#ifdef CSK_RAKLION_BOSS
-	else if(iMap == WD_57ICECITY)
-	{
-		return( GlobalText[1855]);	// 1855 "라클리온"
-	}
-	else if(iMap == WD_58ICECITY_BOSS)
-	{
-		return( GlobalText[1856]);	// 1856 "부화장"
-	}
-#endif // CSK_RAKLION_BOSS
-
-	
-    if ( battleCastle::InBattleCastle( iMap )==true )
-    {
-        return ( GlobalText[669] );
-    }
-    if ( iMap == WD_31HUNTING_GROUND )
-    {
-        return ( GlobalText[59] );
-    }
-    if ( InChaosCastle( iMap )==true )
-    {
-        return ( GlobalText[57] );
-    }
-    if ( InHellas( iMap )==true )
-    {
-		if (InHiddenHellas( iMap) == true)
-			return ( GlobalText[1852] );
-        return ( GlobalText[58] );
-    }
-	if ( InBloodCastle( iMap ) == true )
-	{
-		return ( GlobalText[56] );
-	}
-	if ( iMap==WD_10HEAVEN )
-	{
-		return ( GlobalText[55+iMap-WD_10HEAVEN]);
-	}
-	if ( iMap==32 )
-	{
-		return ( GlobalText[39]);
-	}
-	if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
-		return GlobalText[1678];
-	else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasRefugeMap())
-		return GlobalText[1679];
-	if( g_CursedTemple->IsCursedTemple() )
-	{
-		return ( GlobalText[2369] );
-	}
-	if( iMap == WD_51HOME_6TH_CHAR )
-	{
-		return ( GlobalText[1853] );		// 1853 "엘베란드"
-	}
-	if( iMap == WD_56MAP_SWAMP_OF_QUIET )
-	{
-		return ( GlobalText[1854] );		// 1854 "평온의 늪"
-	}
-#ifdef YDG_ADD_MAP_SANTA_TOWN
-	if( iMap == WD_62SANTA_TOWN )
-	{
-		return ( GlobalText[2611] );		// 2611 "산타의 마을"
-	}
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef YDG_ADD_MAP_DUEL_ARENA
-	if( iMap == WD_64DUELARENA)
-	{
-		return ( GlobalText[2703] );		// 2703 "결투장"
-	}
-#endif	// YDG_ADD_MAP_DUEL_ARENA
-#ifdef PBG_ADD_PKFIELD
-	if( iMap == WD_63PK_FIELD)
-	{
-		return (GlobalText[2686]);			// 2686 "불카누스"
-	}
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER1
-	if( iMap == WD_65DOPPLEGANGER1)
-	{
-		return (GlobalText[3057]);
-	}
-#endif	// YDG_ADD_MAP_DOPPELGANGER1
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-	if( iMap == WD_66DOPPLEGANGER2)
-	{
-		return (GlobalText[3057]);
-	}
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-	if( iMap == WD_67DOPPLEGANGER3)
-	{
-		return (GlobalText[3057]);
-	}
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-#ifdef YDG_ADD_MAP_DOPPELGANGER4
-	if( iMap == WD_68DOPPLEGANGER4)
-	{
-		return (GlobalText[3057]);
-	}
-#endif	// YDG_ADD_MAP_DOPPELGANGER4
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN1
-	if( iMap == WD_69EMPIREGUARDIAN1)
-	{
-		return (GlobalText[2806]);
-	}
-#endif //LDK_ADD_MAP_EMPIREGUARDIAN1
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN2
-	if( iMap == WD_70EMPIREGUARDIAN2)
-	{
-		return (GlobalText[2806]);
-	}
-#endif //LDS_ADD_MAP_EMPIREGUARDIAN2
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN3
-	if( iMap == WD_71EMPIREGUARDIAN3)
-	{
-		return (GlobalText[2806]);
-	}
-#endif //LDK_ADD_MAP_EMPIREGUARDIAN3
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN4
-	if( iMap == WD_72EMPIREGUARDIAN4)
-	{
-		return (GlobalText[2806]);
-	}
-#endif //LDS_ADD_MAP_EMPIREGUARDIAN4
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
-	if( iMap == WD_79UNITEDMARKETPLACE )
-	{
-		return (GlobalText[3017]);
-	}
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
-#ifdef ASG_ADD_MAP_KARUTAN
-	if (iMap == WD_80KARUTAN1 || iMap == WD_81KARUTAN2)
-		return (GlobalText[3285]);
-#endif	// ASG_ADD_MAP_KARUTAN
-	
-	return ( GlobalText[30+iMap] );
-}
-
-#ifdef ASG_ADD_GENS_SYSTEM
-// 분쟁지역인가?
 bool IsStrifeMap(int nMapIndex)
 {
 	bool bStrifeMap = false;
 
-	if (BLUE_MU::IsBlueMuServer())	// 부분 유료화 서버인가?
+	if (BLUE_MU::IsBlueMuServer())
 	{
 		ENUM_WORLD aeStrife[5] = { WD_7ATLANSE, WD_33AIDA, WD_37KANTURU_1ST, WD_56MAP_SWAMP_OF_QUIET, WD_63PK_FIELD };
 		int i;
@@ -16654,11 +16455,7 @@ bool IsStrifeMap(int nMapIndex)
 			}
 		}
 	}
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
-	else if (!g_ServerListManager->IsNonPvP())	// PVP 서버인가?
-#else // KJH_ADD_SERVER_LIST_SYSTEM
-	else if (!::IsNonPvpServer(ServerSelectHi, ServerLocalSelect))	// PVP 서버인가?
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
+	else if (!g_ServerListManager->IsNonPvP())
 	{
 		ENUM_WORLD aeStrife[1] = { WD_63PK_FIELD };
 		int i;
@@ -16671,14 +16468,8 @@ bool IsStrifeMap(int nMapIndex)
 			}
 		}
 	}
-
 	return bStrifeMap;
 }
-#endif	// ASG_ADD_GENS_SYSTEM
-
-///////////////////////////////////////////////////////////////////////////////
-// 길드마크 생성하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 unsigned int MarkColor[16];
 

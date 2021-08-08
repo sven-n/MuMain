@@ -37,6 +37,7 @@
 #include "CSQuest.h"
 #include "GIPetManager.h"
 #include "npcBreeder.h"
+#include "MapManager.h"
 
 #ifdef LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
 #include "ZzzEffect.h"
@@ -95,7 +96,7 @@ namespace giPetManager
     {
         DeletePet ( c );
 
-        if ( InChaosCastle()==true ) return;
+        if ( gMapManager.InChaosCastle()==true ) return;
 
         CSPetSystem* pPet = new CSPetDarkSpirit ( c );
         c->m_pPet = (void *)pPet;

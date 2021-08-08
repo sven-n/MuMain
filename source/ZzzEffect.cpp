@@ -22,15 +22,14 @@
 #include "UIManager.h"
 #include "GM_Kanturu_2nd.h"
 #include "CDirection.h"
+#include "MapManager.h"
 #ifdef PRUARIN_EVENT07_3COLORHARVEST
 #include "BoneManager.h"
 #endif // PRUARIN_EVENT07_3COLORHARVEST
 #ifdef CSK_HACK_TEST
 #include "HackTest.h"
 #endif // CSK_HACK_TEST
-#ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
 #include "SkillEffectMgr.h"
-#endif	// YDG_MOD_SEPARATE_EFFECT_SKILLS
 
 PARTICLE  Particles	[MAX_PARTICLES];
 #ifdef DEVIAS_XMAS_EVENT
@@ -43,15 +42,8 @@ JOINT     Joints	[MAX_JOINTS];
 extern int MoveSceneFrame;
 
 BYTE    g_byUpperBoneLocation[7] = { 25, 26, 27, 20, 34, 35, 36 };
-///////////////////////////////////////////////////////////////////////////////
-// 여러가지 이팩트 효과들
-///////////////////////////////////////////////////////////////////////////////
 
-#ifdef MR0
-AUTOOBJ Effects[MAX_EFFECTS];
-#else
 OBJECT Effects[MAX_EFFECTS];
-#endif //MR0
 
 bool CheckCharacterRange(OBJECT *so,float Range,short PKKey, BYTE Kind=0 )
 {
@@ -128,8 +120,7 @@ bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,shor
 	int     DamageKey[5];
     bool    DamageChr = false;
 
-    //  공성전시.
-    if ( battleCastle::InBattleCastle() && battleCastle::IsBattleCastleStart() ) 
+    if ( gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart() ) 
     {
         DWORD att = TERRAIN_ATTRIBUTE ( Position[0], Position[1] );
         if ( (att&TW_NOATTACKZONE)==TW_NOATTACKZONE )
@@ -10882,7 +10873,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 		Vector(1.f,1.f,1.f,Light);
 
         Height = 20.f;
-        if ( InHellas() )
+        if ( gMapManager.InHellas() )
         {
             Height = 60.f;
             Vector((float)(rand()%60+60-90),0.f,(float)(rand()%30+90),Angle);
@@ -10912,7 +10903,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 		Vector(1.f,0.8f,0.6f,Light);
 		CreateSprite(BITMAP_LIGHT,Position,2.f,Light,o);
 
-        if ( InHellas() && (o->LifeTime%4)==0 )
+        if ( gMapManager.InHellas() && (o->LifeTime%4)==0 )
         {
             int PositionX = (int)(o->Position[0]/TERRAIN_SCALE);
             int PositionY = (int)(o->Position[1]/TERRAIN_SCALE);
@@ -11009,7 +11000,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 
                 float AddHeight = 25.f;
 
-                if ( InHellas()==true )
+                if ( gMapManager.InHellas()==true )
                 {
                     if ( o->Kind==0 || o->Kind==2 )
                     {
@@ -11078,7 +11069,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 
                     if ( (wall&TW_NOMOVE)!=TW_NOMOVE && (wall&TW_NOGROUND)!=TW_NOGROUND && (wall&TW_WATER)!=TW_WATER )
                     {
-                        if ( InHellas()==true )
+                        if ( gMapManager.InHellas()==true )
                         {
                             AddHeight = 100.f;
                         }
@@ -11125,7 +11116,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 						if ( (wall&TW_NOMOVE)!=TW_NOMOVE || (wall&TW_NOGROUND)!=TW_NOGROUND || (wall&TW_WATER)!=TW_WATER )
                         {
-                            if ( InHellas()==true )
+                            if ( gMapManager.InHellas()==true )
                                 Pos[i][2] = RequestTerrainHeight( Pos[i][0], Pos[i][1] ) + 100.f;
                             else
                                 Pos[i][2] = RequestTerrainHeight( Pos[i][0], Pos[i][1] ) + 3;
@@ -12792,7 +12783,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             CreateSprite(BITMAP_SHINY+1,o->Position,(float)(rand()%8+8)*0.2f,Light,o,(float)(rand()%360));
         }
 
-        if ( InHellas() )
+        if ( gMapManager.InHellas() )
         {
             if ( o->Owner!=NULL && o->Owner->Owner!=NULL && o->Owner->Owner==(&Hero->Object) )
             {
@@ -13441,7 +13432,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					VectorCopy ( o->HeadAngle, o->Angle );
 				}
                 float AddHeight = 0.f;
-                if ( InHellas() )
+                if ( gMapManager.InHellas() )
                 {
                     AddHeight = 50.f;
                 }
@@ -19700,15 +19691,8 @@ void RenderSkillSpear( OBJECT *o)
 
 void RenderEffects ( bool bRenderBlendMesh )
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_EFFECTS, PROFILING_RENDER_EFFECTS );
-#endif // DO_PROFILING
-	
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
-#ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
 	int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
+
 	for(int i = 0; i < iEffectSize; ++i)
 	{
 		OBJECT *o;
@@ -19720,22 +19704,12 @@ void RenderEffects ( bool bRenderBlendMesh )
 		{
 			o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
 		}
-#else	// YDG_MOD_SEPARATE_EFFECT_SKILLS
-	for(int i=0;i<MAX_EFFECTS;i++)
-	{
 
-		OBJECT *o = &Effects[i];
-#endif	// YDG_MOD_SEPARATE_EFFECT_SKILLS
 		if(o->Live)
 		{
-#ifdef DYNAMIC_FRUSTRUM
-			CFrustrum* pFrus = FindFrustrum(o->m_iID);
-			if(pFrus) pFrus->Test(o->Position, 400.f);
-			else o->Visible = TestFrustrum(o->Position,400.f);
-#else
         	o->Visible = TestFrustrum(o->Position,400.f);
-#endif //DYNAMIC_FRUSTRUM
-			if(World == WD_39KANTURU_3RD)
+
+			if(gMapManager.WorldActive == WD_39KANTURU_3RD)
 				if(o->Type == MODEL_STORM3 || o->Type == MODEL_MAYASTAR)
 					o->Visible = true;
 
@@ -19749,26 +19723,20 @@ void RenderEffects ( bool bRenderBlendMesh )
                     //if ( (o->Position[2]+o->BoundingBoxMax[2])<350.f ) continue;
                 }
 
-
 				switch ( o->Type)
 				{
 				case MODEL_DRAGON:
 				case MODEL_WARP3:
 				case MODEL_WARP2:
 				case MODEL_WARP:
-#ifdef CSK_ADD_MAP_ICECITY
 				case MODEL_WARP6:
 				case MODEL_WARP5:
 				case MODEL_WARP4:
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 				case MODEL_DESAIR:
-#endif //SKILL_DEBUG
 				case MODEL_GHOST:
 				case MODEL_TREE_ATTACK:
 					RenderObject(o);
 					break;
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			case MODEL_MULTI_SHOT1:
 			case MODEL_MULTI_SHOT2:
 			case MODEL_MULTI_SHOT3:
@@ -19779,22 +19747,15 @@ void RenderEffects ( bool bRenderBlendMesh )
 				RenderObject(o);
 			}
 			break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 				case MODEL_STORM:
 
 					if(o->SubType == 3 || o->SubType == 4 || o->SubType == 5 || o->SubType == 6 || o->SubType  == 7)
 					{
-#ifdef MR0
-						VPManager::Disable();
-#endif //MR0
 						vec3_t Light;
 						EnableAlphaBlend();
 						Vector(0.3f, 0.3f, 0.3f, Light);
 						float Rotation = (float)(WorldTime);
 						RenderTerrainAlphaBitmap(BITMAP_POUNDING_BALL,o->Position[0],o->Position[1],2.f,2.f,Light, Rotation);
-#ifdef MR0
-						VPManager::Enable();
-#endif //MR0
 					}
 					else
 						RenderObject(o);
@@ -19850,8 +19811,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 				case MODEL_NEWYEARSDAY_EVENT_YUT:
 					RenderObject(o);
 					break;
-					
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
 				case MODEL_MOONHARVEST_MOON:
 					{
 						if(o->SubType == 0)
@@ -19866,7 +19825,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 							CreateSprite( BITMAP_LIGHT, o->Position, 5.0f, vLight, o , NULL);
 							RenderObject(o);
 						}
-#ifdef CSK_RAKLION_BOSS
 						else if(o->SubType == 1)
 						{
 							CreateSprite( BITMAP_LIGHT, o->Position, 5.0f, o->Light, o , NULL);
@@ -19876,23 +19834,17 @@ void RenderEffects ( bool bRenderBlendMesh )
 							
 							RenderObject(o);
 						}
-#endif // CSK_RAKLION_BOSS
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 						else if(o->SubType == 2)
 						{
 							RenderObject(o);
 						}
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-
 					}
 					break;
-					
 				case MODEL_MOONHARVEST_GAM:
 				case MODEL_MOONHARVEST_SONGPUEN1:
 				case MODEL_MOONHARVEST_SONGPUEN2:
 					RenderObject(o);
 					break;
-#endif // PRUARIN_EVENT07_3COLORHARVEST
 
 				case MODEL_CHANGE_UP_EFF:
 					RenderObject(o);
@@ -20800,7 +20752,6 @@ void RenderAfterEffects ( bool bRenderBlendMesh )
 	if(!g_Direction.m_CKanturu.IsMayaScene())
 		return;
 
-#ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
 	int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
 	for(int i = 0; i < iEffectSize; ++i)
 	{
@@ -20813,22 +20764,11 @@ void RenderAfterEffects ( bool bRenderBlendMesh )
 		{
 			o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
 		}
-#else	// YDG_MOD_SEPARATE_EFFECT_SKILLS
-	for(int i=0;i<MAX_EFFECTS;i++)
-	{
-		OBJECT *o = &Effects[i];
-#endif	// YDG_MOD_SEPARATE_EFFECT_SKILLS
 		if(o->Live && o->m_bRenderAfterCharacter )
 		{
-#ifdef DYNAMIC_FRUSTRUM
-			CFrustrum* pFrus = FindFrustrum(o->m_iID);
-			if(pFrus) pFrus->Test(o->Position, 400.f);
-			else o->Visible = TestFrustrum(o->Position,400.f);
-#else
         	o->Visible = TestFrustrum(o->Position,400.f);
-#endif //DYNAMIC_FRUSTRUM
 
-			if(World == WD_39KANTURU_3RD)
+			if(gMapManager.WorldActive == WD_39KANTURU_3RD)
 				if(o->Type == MODEL_STORM3 || o->Type == MODEL_MAYASTAR)
 					o->Visible = true;
 
@@ -20855,7 +20795,6 @@ void RenderAfterEffects ( bool bRenderBlendMesh )
 
 void RenderEffectShadows()
 {
-#ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
 	int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
 	for(int i = 0; i < iEffectSize; ++i)
 	{
@@ -20868,11 +20807,6 @@ void RenderEffectShadows()
 		{
 			o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
 		}
-#else	// YDG_MOD_SEPARATE_EFFECT_SKILLS
-	for(int i=0;i<MAX_EFFECTS;i++)
-	{
-		OBJECT *o = &Effects[i];
-#endif	// YDG_MOD_SEPARATE_EFFECT_SKILLS
 		if(o->Live)
 		{
 			if(o->Visible)
@@ -21214,9 +21148,9 @@ void RenderEffectShadows()
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
                 case BITMAP_SHOCK_WAVE:
 #ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-					if ( o->Type == BITMAP_SHOCK_WAVE && InHellas() && o->SubType!=6 )
+					if ( o->Type == BITMAP_SHOCK_WAVE && gMapManager.InHellas() && o->SubType!=6 )
 #else // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-                    if ( InHellas() && o->SubType!=6 )
+                    if ( gMapManager.InHellas() && o->SubType!=6 )
 #endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
                     {
                         DisableDepthMask();
@@ -21304,14 +21238,12 @@ void RenderEffectShadows()
 	}
 }
 
-#ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
 void CreateMyGensInfluenceGroundEffect()
 {
 	DeleteEffect(BITMAP_OUR_INFLUENCE_GROUND, &Hero->Object, 0);
-	if (::IsStrifeMap(World))
+	if (::IsStrifeMap(gMapManager.WorldActive))
 	{
 		vec3_t vTemp = {0.f, 0.f, 0.f};
 		CreateEffect(BITMAP_OUR_INFLUENCE_GROUND, Hero->Object.Position, vTemp, vTemp, 0, &Hero->Object);
 	}
 }
-#endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT

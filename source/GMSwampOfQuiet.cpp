@@ -18,6 +18,7 @@
 #include "GMSwampOfQuiet.h"
 #include "GOBoid.h"
 #include "GIPetManager.h"
+#include "MapManager.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -37,7 +38,7 @@ GMSwampOfQuiet::~GMSwampOfQuiet()
 
 bool GMSwampOfQuiet::IsCurrentMap()
 {
-	return (World == WD_56MAP_SWAMP_OF_QUIET);
+	return (gMapManager.WorldActive == WD_56MAP_SWAMP_OF_QUIET);
 }
 
 void GMSwampOfQuiet::RenderBaseSmoke()

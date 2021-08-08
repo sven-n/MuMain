@@ -15,6 +15,7 @@
 #include "GMHellas.h"
 #include "GM3rdChangeUp.h"
 #include "w_CursedTemple.h"
+#include "MapManager.h"
 
 
 using namespace SEASON3B;
@@ -336,10 +337,8 @@ void CNewUIPartyInfoWindow::RenderMemberStatue( int iIndex, PARTY_t* pMember, bo
 	g_pRenderText->SetFont( g_hFont );
 	g_pRenderText->SetTextColor( RGBA( 194, 194, 194, 255 ) );
 
-	// 현재위치의 맵이름
-	g_pRenderText->RenderText( iPosX+10, iPosY+26, GetMapName( pMember->Map ), 70, 0, RT3_SORT_LEFT );
+	g_pRenderText->RenderText( iPosX+10, iPosY+26, gMapManager.GetMapName( pMember->Map ), 70, 0, RT3_SORT_LEFT );
 	
-	// 좌표
 	unicode::_sprintf( szText, "(%d,%d)", pMember->x, pMember->y );
 	g_pRenderText->RenderText( iPosX+85, iPosY+26, szText, 60, 0, RT3_SORT_LEFT);
 
@@ -364,7 +363,7 @@ void CNewUIPartyInfoWindow::RenderMemberStatue( int iIndex, PARTY_t* pMember, bo
 bool CNewUIPartyInfoWindow::LeaveParty( const int iIndex )
 {
 	// 저주받은 사원(?) 에 들어갔을때 는 파티 탈퇴 예외 처리
-	if( !g_CursedTemple->IsCursedTemple() )
+	if( !gMapManager.IsCursedTemple() )
 	{
 		PlayBuffer(SOUND_CLICK01);
 		SendRequestPartyLeave(Party[iIndex].Number);

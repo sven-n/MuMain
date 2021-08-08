@@ -1,23 +1,10 @@
 //////////////////////////////////////////////////////////////////////////
-//  
-//  이  름 : CSPetSystem.
-//
-//  내  용 : 캐릭터가 소환, 한정적 상용이 아닌 팻들의 시스템.
-//           다크로드 ( 다크 스피릿 ),
-//
-//  날  짜 : 2004.03.29.
-//
-//  작성자 : 조 규 하.
-//  
+//  CSPetSystem.
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 
 #ifdef PET_SYSTEM
-
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
-//////////////////////////////////////////////////////////////////////////
 #include "CSPetSystem.h"
 #include "zzzlodterrain.h"
 #include "zzzAi.h"
@@ -34,14 +21,8 @@
 #include "dsplaysound.h"
 #include "wsclientinline.h"
 #include "UIManager.h"
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 #include "DuelMgr.h"
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-
-#ifdef PJH_FIX_SPRIT
-#include "CSItemOption.h"
-#include "GIPetManager.h"
-#endif //PJH_FIX_SPRIT
+#include "MapManager.h"
 
 #ifndef YDG_ADD_NEW_DUEL_SYSTEM		// 정리할때 삭제해야 함
 extern bool g_PetEnableDuel;	// LHJ - 결투중에 다크로드의 다크스피릿이 공격중 인지 판단하는 변수
@@ -488,7 +469,7 @@ void    CSPetDarkSpirit::MovePet ( void )
         int speedRandom = 28;
         int CharacterHeight = 250;    
 
-        if ( m_PetOwner->Helper.Type==ITEM_HELPER+4 || World == WD_55LOGINSCENE)
+        if ( m_PetOwner->Helper.Type==ITEM_HELPER+4 || gMapManager.WorldActive == WD_55LOGINSCENE)
         {
             CharacterHeight = 350;
         }

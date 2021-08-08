@@ -21,6 +21,7 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "w_CursedTemple.h"
+#include "MapManager.h"
 
 extern int TextNum;
 extern char TextList[30][100];
@@ -1157,7 +1158,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
 bool SEASON3B::CNewUICursedTempleSystem::Render()
 {
 	// 환영사원 이벤트 도중 비정상적으로 맵 이동 됐을 경우를 위한 예외 처리
-	if(g_CursedTemple->IsCursedTemple() == false)
+	if(gMapManager.IsCursedTemple() == false)
 	{
 		if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_GAMESYSTEM) == true)
 		{

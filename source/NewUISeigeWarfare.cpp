@@ -11,6 +11,7 @@
 #include "ZzzInventory.h"
 #include "UIGuildInfo.h"
 #include "GMBattleCastle.h"
+#include "MapManager.h"
 
 
 using namespace SEASON3B;
@@ -121,7 +122,7 @@ bool SEASON3B::CNewUISiegeWarfare::Update()
 	if( m_pSiegeWarUI == NULL ) 
 		return true;
 	
-	if( battleCastle::InBattleCastle() && battleCastle::IsBattleCastleStart() == true )
+	if( gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart() == true )
 	{
 		m_iSecond = m_iSecond - (GetTickCount()-m_dwSyncTime);
 		if( m_iSecond <= 0 )
@@ -161,7 +162,7 @@ bool SEASON3B::CNewUISiegeWarfare::Update()
 // Render
 bool SEASON3B::CNewUISiegeWarfare::Render()
 {
-	if( m_pSiegeWarUI == NULL || InBattleCastle() == false )
+	if( m_pSiegeWarUI == NULL || gMapManager.InBattleCastle() == false )
 	{
 		return true;		
 	}

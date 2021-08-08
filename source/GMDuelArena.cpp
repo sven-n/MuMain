@@ -196,7 +196,7 @@ void CGMDuelArena::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool IsDuelArena()
 {
-	if(World == WD_64DUELARENA)
+	if(gMapManager.WorldActive == WD_64DUELARENA)
 	{
 		return true;
 	}

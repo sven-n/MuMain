@@ -12,14 +12,6 @@
 #ifndef __CSCHAOS_CASTLE_H__
 #define __CSCHAOS_CASTLE_H__
 
-//////////////////////////////////////////////////////////////////////////
-//  FUNCTION.
-//////////////////////////////////////////////////////////////////////////
-bool InChaosCastle(int iMap = World);
-bool InBloodCastle(int iMap = World);
-bool InDevilSquare();
-
-
 void    ClearChaosCastleHelper ( CHARACTER* c );
 void    ChangeChaosCastleUnit ( CHARACTER* c );
 bool    CreateChaosCastleObject ( OBJECT* o );

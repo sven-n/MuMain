@@ -22,6 +22,7 @@
 #include "GMAida.h"
 #include "GMCrywolf1st.h"
 #include "GM3rdChangeUp.h"
+#include "MapManager.h"
 // ¸Ê °ü·Ã include
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
@@ -128,14 +129,14 @@ void CheckSkull(OBJECT *o)
 
 bool CreateDevilSquareRain ( PARTICLE* o, int Index )
 {
-	if ( InDevilSquare() == false 
-		&& World != WD_34CRYWOLF_1ST
+	if ( gMapManager.InDevilSquare() == false 
+		&& gMapManager.WorldActive != WD_34CRYWOLF_1ST
 		) 
 	{
 		return false;
 	}
 
-	if(World == WD_34CRYWOLF_1ST && weather != 1)
+	if(gMapManager.WorldActive == WD_34CRYWOLF_1ST && weather != 1)
 		return false;
 
     o->Type = BITMAP_RAIN;
@@ -174,7 +175,7 @@ bool CreateDevilSquareRain ( PARTICLE* o, int Index )
 
 bool CreateChaosCastleRain ( PARTICLE* o, int Index )
 {
-    if ( InChaosCastle()==false ) return false;
+    if ( gMapManager.InChaosCastle()==false ) return false;
 
     o->Type = BITMAP_RAIN;
     o->TurningForce[0] = 1.f;
@@ -215,7 +216,7 @@ bool CreateChaosCastleRain ( PARTICLE* o, int Index )
 
 bool CreateLorenciaLeaf ( PARTICLE* o )
 {
-    if ( World!=WD_0LORENCIA ) return false;
+    if ( gMapManager.WorldActive!=WD_0LORENCIA ) return false;
 
 	o->Type = BITMAP_LEAF1;
 	vec3_t Position;
@@ -237,7 +238,7 @@ bool CreateLorenciaLeaf ( PARTICLE* o )
 
 bool CreateHeavenRain ( PARTICLE* o, int index )
 {
-    if ( World!=WD_10HEAVEN ) return false;
+    if ( gMapManager.WorldActive!=WD_10HEAVEN ) return false;
 
     int Rainly = RainCurrent*MAX_LEAVES/100;
 	if ( index<Rainly )
@@ -258,7 +259,7 @@ bool CreateHeavenRain ( PARTICLE* o, int index )
 
 bool CreateDeviasSnow ( PARTICLE* o )
 {
-    if ( World!=WD_2DEVIAS ) return false;
+    if ( gMapManager.WorldActive!=WD_2DEVIAS ) return false;
 
     o->Type = BITMAP_LEAF1;
     o->Scale = 5.f;
@@ -282,7 +283,7 @@ bool CreateDeviasSnow ( PARTICLE* o )
 
 bool CreateAtlanseLeaf ( PARTICLE*o )
 {
-    if ( World!=WD_3NORIA && World!=WD_7ATLANSE ) return false;
+    if ( gMapManager.WorldActive!=WD_3NORIA && gMapManager.WorldActive!=WD_7ATLANSE ) return false;
 
     o->Type = BITMAP_LEAF1;
 	vec3_t Position;
@@ -305,12 +306,12 @@ bool CreateAtlanseLeaf ( PARTICLE*o )
 
 bool MoveDevilSquareRain ( PARTICLE* o )
 {
-    if ( InDevilSquare() == false 
-		&& World != WD_34CRYWOLF_1ST
+    if ( gMapManager.InDevilSquare() == false 
+		&& gMapManager.WorldActive != WD_34CRYWOLF_1ST
 		) return false;
 
 //	if(o->Type != BITMAP_RAIN)
-	if(World == WD_34CRYWOLF_1ST && weather != 1)
+	if(gMapManager.WorldActive == WD_34CRYWOLF_1ST && weather != 1)
 		return false;
 
 
@@ -331,7 +332,7 @@ bool MoveDevilSquareRain ( PARTICLE* o )
 
 bool MoveChaosCastleRain ( PARTICLE* o )
 {
-    if ( InChaosCastle()==false ) return false;
+    if ( gMapManager.InChaosCastle()==false ) return false;
 
 	VectorAdd(o->Position,o->Velocity,o->Position);
 	float Height = RequestTerrainHeight(o->Position[0],o->Position[1]);
@@ -349,7 +350,7 @@ bool MoveChaosCastleRain ( PARTICLE* o )
 
 bool MoveHeavenRain ( PARTICLE* o )
 {
-    if ( World!=WD_0LORENCIA && World!=WD_10HEAVEN ) return false;
+    if ( gMapManager.WorldActive!=WD_0LORENCIA && gMapManager.WorldActive!=WD_10HEAVEN ) return false;
 
     if(o->Type==BITMAP_RAIN)
 	{
@@ -359,7 +360,7 @@ bool MoveHeavenRain ( PARTICLE* o )
 		{
 			o->Live = false;
 			o->Position[2] = Height+10.f;
-            if( World!=WD_10HEAVEN )
+            if( gMapManager.WorldActive!=WD_10HEAVEN )
 				CreateParticle(BITMAP_RAIN_CIRCLE,o->Position,o->Angle,o->Light);
 		}
 	}
@@ -407,22 +408,22 @@ void MoveEtcLeaf ( PARTICLE* o )
 
 bool MoveLeaves()
 {
-	int iMaxLeaves = ( InDevilSquare() == true ) ? MAX_LEAVES : 80;
+	int iMaxLeaves = ( gMapManager.InDevilSquare() == true ) ? MAX_LEAVES : 80;
 
-    if( World==WD_10HEAVEN )
+    if( gMapManager.WorldActive==WD_10HEAVEN )
     {
         RainTarget = MAX_LEAVES/2;
     }
-    else if ( InChaosCastle()==true )
+    else if ( gMapManager.InChaosCastle()==true )
     {
         RainTarget = MAX_LEAVES/2;
         iMaxLeaves = 80;
     }
-    else if ( battleCastle::InBattleCastle() )
+    else if ( gMapManager.InBattleCastle() )
     {
         iMaxLeaves = 40;
     }
-    else if ( World == WD_55LOGINSCENE )
+    else if ( gMapManager.WorldActive == WD_55LOGINSCENE )
     {
         iMaxLeaves = 80;
     }
@@ -439,7 +440,6 @@ bool MoveLeaves()
 	else if(RainCurrent < RainTarget)
 		RainCurrent++;
 
-	// ¾Ç¸¶ÀÇ ±¤Àå ºñ
 	RainSpeed = (int)sinf(WorldTime*0.001f)*10+30;
     RainAngle = (int)sinf(WorldTime*0.0005f+50.f)*20;
 	RainPosition += 20;
@@ -465,35 +465,21 @@ bool MoveLeaves()
 			if(weather == 2)
 				if(M34CryWolf1st::CreateMist(o)) continue;
 			if ( SEASON3A::CGM3rdChangeUp::Instance().CreateFireSnuff( o ) ) continue;
-#ifdef CSK_ADD_MAP_ICECITY			
 			if(g_Raklion.CreateSnow( o )) continue;
-#endif //CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_MAP_SANTA_TOWN
 			if(g_SantaTown.CreateSnow( o )) continue;
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef PBG_ADD_PKFIELD
 			if(g_PKField.CreateFireSpark(o)) continue;
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
 			if(g_DoppelGanger2.CreateFireSpark(o)) continue;
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 			if(g_EmpireGuardian1.CreateRain(o)) continue;
 			if(g_EmpireGuardian2.CreateRain(o)) continue;
 			if(g_EmpireGuardian3.CreateRain(o)) continue;
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 			if(g_UnitedMarketPlace.CreateRain(o)) continue;
-#endif	// LDS_ADD_MAP_UNITEDMARKETPLACE
 		}
 		else
 		{
             if ( MoveDevilSquareRain( o ) ) continue;
             if ( MoveChaosCastleRain( o ) ) continue;
             if ( MoveHeavenRain( o ) )      continue;
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 			if(g_UnitedMarketPlace.MoveRain(o)) continue;
-#endif	// LDS_ADD_MAP_UNITEDMARKETPLACE
             MoveEtcLeaf ( o );
 		}
 	}
@@ -503,36 +489,24 @@ bool MoveLeaves()
 
 void RenderLeaves()
 {
-    if(World==WD_2DEVIAS || World==WD_7ATLANSE || World==WD_10HEAVEN
-#ifdef CSK_ADD_MAP_ICECITY
+    if(gMapManager.WorldActive==WD_2DEVIAS || gMapManager.WorldActive==WD_7ATLANSE || gMapManager.WorldActive==WD_10HEAVEN
 		|| IsIceCity()
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_MAP_SANTA_TOWN
 		|| IsSantaTown()
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef PBG_ADD_PKFIELD
-		|| IsPKField()
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-		|| IsDoppelGanger2()	// ºÒÄ«´©½º º£ÀÌ½º
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-		|| IsEmpireGuardian1()
-		|| IsEmpireGuardian2()
-		|| IsEmpireGuardian3()
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
+		|| gMapManager.IsPKField()
+		|| IsDoppelGanger2()
+		|| gMapManager.IsEmpireGuardian1()
+		|| gMapManager.IsEmpireGuardian2()
+		|| gMapManager.IsEmpireGuardian3()
 		|| IsUnitedMarketPlace()
-#endif	// LDS_ADD_MAP_UNITEDMARKETPLACE
 		)
         EnableAlphaBlend();
-    else if ( InChaosCastle()==true )
+    else if ( gMapManager.InChaosCastle()==true )
         EnableAlphaTest();
-    else if ( battleCastle::InBattleCastle()==true )
+    else if ( gMapManager.InBattleCastle()==true )
         EnableAlphaBlend();
-    else if ( World == WD_55LOGINSCENE)
+    else if ( gMapManager.WorldActive == WD_55LOGINSCENE)
         EnableAlphaBlend();
-	else if ( World == WD_42CHANGEUP3RD_2ND )
+	else if ( gMapManager.WorldActive == WD_42CHANGEUP3RD_2ND )
         EnableAlphaBlend();
 	else
 	{
@@ -558,7 +532,7 @@ void RenderLeaves()
 			)
 		{
             BindTexture(o->Type);
-			if(World == WD_2DEVIAS 
+			if(gMapManager.WorldActive == WD_2DEVIAS 
 #ifdef CSK_ADD_MAP_ICECITY	
 				|| IsIceCity()
 #endif // CSK_ADD_MAP_ICECITY
@@ -576,13 +550,13 @@ void RenderLeaves()
 				float Matrix[3][4];
 				AngleMatrix(o->Angle,Matrix);
                 
-                if ( InChaosCastle()==true )
+                if ( gMapManager.InChaosCastle()==true )
                     RenderPlane3D ( o->TurningForce[0], o->TurningForce[1], Matrix );
                 else
                 {
 				    if ( o->Type==BITMAP_RAIN )
 					{
-						if(World == WD_34CRYWOLF_1ST)
+						if(gMapManager.WorldActive == WD_34CRYWOLF_1ST)
 						{
 							if(weather == 1)
 								RenderPlane3D ( 1.f, 20.f, Matrix );

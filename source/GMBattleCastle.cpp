@@ -17,6 +17,7 @@
 #include "PhysicsManager.h"
 #include "CSParts.h"
 #include "wsclientinline.h"
+#include "MapManager.h"
 
 #ifdef PET_SYSTEM
 #include "GIPetManager.h"
@@ -77,16 +78,16 @@ namespace battleCastle
         g_bBattleCastleStartBackup = g_bBattleCastleStart;
         g_bBattleCastleStart = bResult;
 
-        if ( /*g_bBattleCastleStart!=g_bBattleCastleStartBackup && */World!=-1 && battleCastle::InBattleCastle() )
+        if ( /*g_bBattleCastleStart!=g_bBattleCastleStartBackup && */ gMapManager.WorldActive!=-1 && gMapManager.InBattleCastle() )
         {
 	        char FileName[64];
 	        char WorldName[32];
 
-	        sprintf ( WorldName, "World%d", World+1 );
+	        sprintf ( WorldName, "World%d", gMapManager.WorldActive+1 );
             if ( g_bBattleCastleStart ) //  傍己矫.
             {
                 //  加己.
-				sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (World+1)*10+2 );
+				sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive+1)*10+2 );
 	            OpenTerrainAttribute ( FileName );
 
                 sprintf ( FileName, "%s\\TerrainLight2.jpg", WorldName );
@@ -95,7 +96,7 @@ namespace battleCastle
             else                        //  荐己矫.
             {
                 //  加己.
-				sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, World+1 );
+				sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive+1 );
 	            OpenTerrainAttribute ( FileName);
 
                 sprintf ( FileName, "%s\\TerrainLight.jpg", WorldName );
@@ -332,7 +333,7 @@ namespace battleCastle
 
     void Init ( void )
     {
-        if ( InBattleCastle()==false ) return;
+        if ( gMapManager.InBattleCastle()==false ) return;
 
         g_byGuardAI = 0;
     	g_iMp3PlayTime = 0;
@@ -364,7 +365,7 @@ namespace battleCastle
     
     bool    SettingBattleFormation ( CHARACTER* c, eBuffState state )
     {
-        if ( InBattleCastle()==false )  return false;
+        if ( gMapManager.InBattleCastle()==false )  return false;
 
         if ( state == eBuff_CastleRegimentAttack1 )
         {
@@ -452,7 +453,7 @@ namespace battleCastle
 
     void    DeleteBattleFormation ( CHARACTER* c, eBuffState state )
     {
-        if ( InBattleCastle()==false )  return;
+        if ( gMapManager.InBattleCastle()==false )  return;
 
 		if( eBuff_CastleRegimentAttack1 != state || eBuff_CastleRegimentAttack2 != state
 			|| eBuff_CastleRegimentAttack3 != state || eBuff_CastleRegimentDefense != state )
@@ -522,7 +523,7 @@ namespace battleCastle
 
     void    CreateBattleCastleCharacter_Visual ( CHARACTER* c, OBJECT* o )
     {
-        if ( InBattleCastle()==false )  return;
+        if ( gMapManager.InBattleCastle()==false )  return;
         if ( IsBattleCastleStart()==false ) return;
 
         if ( o->Visible==false ) return;
@@ -573,7 +574,7 @@ namespace battleCastle
 
     void    RenderBaseSmoke ( void )
     {
-        if ( InBattleCastle()==false ) return;
+        if ( gMapManager.InBattleCastle()==false ) return;
         if ( IsBattleCastleStart()==false ) return;
 
         EnableAlphaTest();
@@ -588,9 +589,9 @@ namespace battleCastle
 
     bool CreateFireSnuff ( PARTICLE* o )
     {
-		if(World != WD_55LOGINSCENE)
+		if(gMapManager.WorldActive != WD_55LOGINSCENE)
 		{
-			if ( InBattleCastle()==false ) return false;
+			if ( gMapManager.InBattleCastle()==false ) return false;
 			if ( IsBattleCastleStart()==false ) return false;
 			if ( InBattleCastle3(Hero->Object.Position)==false ) return false;
 		}
@@ -599,7 +600,7 @@ namespace battleCastle
         o->Scale = rand()%50/100.f+0.5f;
         vec3_t Position;
 
-		if(World == WD_55LOGINSCENE)
+		if(gMapManager.WorldActive == WD_55LOGINSCENE)
 		{
 			Vector( Hero->Object.Position[0]+(float)(rand()%1600-800), Hero->Object.Position[1]+(float)(rand()%1400-500), Hero->Object.Position[2]+(float)(rand()%1000+50), Position );
 		}
@@ -691,7 +692,7 @@ namespace battleCastle
 
     bool MoveBattleCastleObjectSetting ( int& objCount, int object )
     {
-        if ( InBattleCastle()==false ) return false;
+        if ( gMapManager.InBattleCastle()==false ) return false;
 
         DWORD  current = timeGetTime ();
     	double dif     = (double)(current-g_iMp3PlayTime)/CLOCKS_PER_SEC;
@@ -937,7 +938,7 @@ namespace battleCastle
 
     bool MoveBattleCastleObject ( OBJECT* o, int& object, int& visibleObject )
     {
-        if ( InBattleCastle()==false )  return false;
+        if ( gMapManager.InBattleCastle()==false )  return false;
 
         switch ( o->Type )
         {
@@ -997,7 +998,7 @@ namespace battleCastle
 
     bool CreateBattleCastleObject ( OBJECT* o )
     {
-        if ( InBattleCastle()==false ) return false;
+        if ( gMapManager.InBattleCastle()==false ) return false;
 
         switch ( o->Type )
         {
@@ -1064,7 +1065,7 @@ namespace battleCastle
 
     bool    MoveBattleCastleVisual ( OBJECT* o )
     {
-        if ( InBattleCastle()==false ) return false;
+        if ( gMapManager.InBattleCastle()==false ) return false;
 
 		float Luminosity;
 		vec3_t Light;
@@ -1140,7 +1141,7 @@ namespace battleCastle
 
     bool RenderBattleCastleVisual ( OBJECT* o, BMD* b )
     {
-        if ( InBattleCastle()==false ) return false;
+        if ( gMapManager.InBattleCastle()==false ) return false;
 
         vec3_t Light;
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -1197,7 +1198,7 @@ namespace battleCastle
 
     bool    RenderBattleCastleObjectMesh ( OBJECT* o, BMD* b )
     {
-        if ( InBattleCastle()==false )  return false;
+        if ( gMapManager.InBattleCastle()==false )  return false;
 
         if ( o->Type==12 )
         {
@@ -1307,7 +1308,7 @@ namespace battleCastle
 
     CHARACTER* CreateBattleCastleMonster ( int Type, int PositionX, int PositionY, int Key )
     {
-        if ( InBattleCastle()==false ) return NULL;
+        if ( gMapManager.InBattleCastle()==false ) return NULL;
 
         CHARACTER*  c = NULL;
         switch ( Type )
@@ -1547,7 +1548,7 @@ namespace battleCastle
 
     bool    StopBattleCastleMonster ( CHARACTER* c, OBJECT* o )
     {
-        if ( InBattleCastle()==false )  return false;
+        if ( gMapManager.InBattleCastle()==false )  return false;
 
         switch ( c->MonsterIndex )
         {
@@ -1633,7 +1634,7 @@ namespace battleCastle
 
     bool MoveBattleCastleMonster ( CHARACTER* c, OBJECT* o )
     {
-        if ( InBattleCastle()==false )  return false;
+        if ( gMapManager.InBattleCastle()==false )  return false;
 
         switch ( c->MonsterIndex )
         {
@@ -1738,7 +1739,7 @@ namespace battleCastle
 
     bool AttackEffect_BattleCastleMonster ( CHARACTER* c, OBJECT* o, BMD* b )
     {
-        if ( InBattleCastle()==false ) return false;
+        if ( gMapManager.InBattleCastle()==false ) return false;
 
         CHARACTER*  tc = NULL;
         OBJECT*     to = NULL;
@@ -1806,7 +1807,7 @@ namespace battleCastle
     
     bool MoveBattleCastleMonsterVisual ( OBJECT* o, BMD* b )
     {
-        if ( InBattleCastle()==false ) return false;
+        if ( gMapManager.InBattleCastle()==false ) return false;
 
         float  Luminosity;
         vec3_t Light;
@@ -1866,7 +1867,7 @@ namespace battleCastle
 
     bool    RenderBattleCastleMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
     {
-        if ( InBattleCastle()==false ) return false;
+        if ( gMapManager.InBattleCastle()==false ) return false;
 
         vec3_t Position, Light, p;
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -1959,7 +1960,7 @@ namespace battleCastle
 
     bool    RenderBattleCastleMonsterObjectMesh ( OBJECT* o, BMD* b )
     {
-        if ( InBattleCastle()==false ) return false;
+        if ( gMapManager.InBattleCastle()==false ) return false;
 
         bool    success = false;
 
@@ -2088,7 +2089,7 @@ namespace battleCastle
 
     void RenderMonsterHitEffect ( OBJECT* o )
     {
-        if ( InBattleCastle()==false ) return;
+        if ( gMapManager.InBattleCastle()==false ) return;
 
         switch ( o->Type )
         {

@@ -13,7 +13,6 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 
-extern int World;
 extern float EarthQuake;
 
 //////////////////////////////////////////////////////////////////////

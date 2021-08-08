@@ -25,6 +25,7 @@
 #include "GMBattleCastle.h"
 #include "CMVP1stDirection.h"
 #include "CDirection.h"
+#include "MapManager.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
@@ -208,7 +209,7 @@ int OpenTerrainAttribute(char *FileName)
 		Error = true;
 	}
 
-	switch(World)
+	switch(gMapManager.WorldActive)
 	{
 	case WD_0LORENCIA:if(TerrainWall[123*256+135]!=5) Error=true;break;
 	case WD_1DUNGEON:if(TerrainWall[120*256+227]!=4) Error=true;break;
@@ -357,11 +358,11 @@ int OpenTerrainMapping(char *FileName)	//
 
     TerrainGrassEnable = true;
 
-    if ( InChaosCastle()==true )
+    if ( gMapManager.InChaosCastle()==true )
     {
         TerrainGrassEnable = false;
     }
-    if ( battleCastle::InBattleCastle() )
+    if ( gMapManager.InBattleCastle() )
     {
         TerrainGrassEnable = false;
     }
@@ -517,7 +518,7 @@ void CreateTerrainNormal_Part ( int xi, int yi )
 void CreateTerrainLight()
 {
 	vec3_t Light;
-    if ( battleCastle::InBattleCastle() )
+    if ( gMapManager.InBattleCastle() )
     {
         Vector ( 0.5f, -1.f, 1.f, Light );
     }
@@ -650,7 +651,7 @@ unsigned char BMPHeader[1080];
 bool IsTerrainHeightExtMap(int iWorld)
 {
 #ifdef PBG_ADD_PKFIELD
-	if(iWorld == WD_42CHANGEUP3RD_2ND || IsPKField()
+	if(iWorld == WD_42CHANGEUP3RD_2ND || gMapManager.IsPKField()
 #ifdef YDG_ADD_MAP_DOPPELGANGER2
 		|| iWorld == WD_66DOPPLEGANGER2
 #endif	// YDG_ADD_MAP_DOPPELGANGER2
@@ -708,18 +709,14 @@ bool OpenTerrainHeight(char *filename)
 		float *dst = &BackTerrainHeight[i*256];
 		for(int j=0;j<256;j++)
 		{
-			if(World == WD_55LOGINSCENE)
+			if(gMapManager.WorldActive == WD_55LOGINSCENE)
 				*dst = (float)(*src)*3.0f;
 			else
      			*dst = (float)(*src)*1.5f;
 			src++;dst++;
 		}
 	}
-#ifdef KJH_FIX_ARRAY_DELETE
 	SAFE_DELETE_ARRAY(Buffer);
-#else // KJH_FIX_ARRAY_DELETE
-	delete Buffer;
-#endif // KJH_FIX_ARRAY_DELETE
 	return true;
 }
 
@@ -734,7 +731,7 @@ void SaveTerrainHeight(char *name)
 		for(int j=0;j<256;j++)
 		{
 			float Height;
-			if(World == WD_55LOGINSCENE)
+			if(gMapManager.WorldActive == WD_55LOGINSCENE)
 				Height = *src/3.0f;
 			else
 				Height = *src/1.5f;
@@ -749,11 +746,8 @@ void SaveTerrainHeight(char *name)
 	fwrite(BMPHeader,1080,1,fp);
 
 	for(int i=0;i<256;i++) fwrite(Buffer+(255-i)*256,256,1,fp);
-#ifdef KJH_FIX_ARRAY_DELETE
+
 	SAFE_DELETE_ARRAY(Buffer);
-#else // KJH_FIX_ARRAY_DELETE
-	delete Buffer;
-#endif // KJH_FIX_ARRAY_DELETE
 	fclose(fp);
 }
 
@@ -1404,7 +1398,7 @@ inline void VertexBlend3()
 
 void RenderFace(int Texture,int mx,int my)
 {
-	if(World == WD_39KANTURU_3RD)
+	if(gMapManager.WorldActive == WD_39KANTURU_3RD)
 	{
 		if(Texture == 3)
 			EnableAlphaTest();
@@ -1413,7 +1407,7 @@ void RenderFace(int Texture,int mx,int my)
 		else
 		  	DisableAlphaBlend();
 	}
-	else if( World >= WD_45CURSEDTEMPLE_LV1 && World <= WD_45CURSEDTEMPLE_LV6 )
+	else if( gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6 )
 	{
 		if(Texture == 4)
 		{
@@ -1424,7 +1418,7 @@ void RenderFace(int Texture,int mx,int my)
 			DisableAlphaBlend();
 		}
 	}
-	else if(World == WD_51HOME_6TH_CHAR 
+	else if(gMapManager.WorldActive == WD_51HOME_6TH_CHAR 
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 		|| World == WD_77NEW_LOGIN_SCENE 
 		|| World == WD_78NEW_CHARACTER_SCENE
@@ -1440,10 +1434,9 @@ void RenderFace(int Texture,int mx,int my)
 		  	DisableAlphaBlend();
 		}
 	}
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-	else if( World == WD_69EMPIREGUARDIAN1 || World == WD_70EMPIREGUARDIAN2 || World == WD_71EMPIREGUARDIAN3 || World == WD_72EMPIREGUARDIAN4
+	else if( gMapManager.WorldActive == WD_69EMPIREGUARDIAN1 || gMapManager.WorldActive == WD_70EMPIREGUARDIAN2 || gMapManager.WorldActive == WD_71EMPIREGUARDIAN3 || gMapManager.WorldActive == WD_72EMPIREGUARDIAN4
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-			|| World == WD_73NEW_LOGIN_SCENE || World == WD_74NEW_CHARACTER_SCENE 
+			|| gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE 
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		)
 	{
@@ -1456,7 +1449,6 @@ void RenderFace(int Texture,int mx,int my)
 			DisableAlphaBlend();
 		}
 	}
-#endif // LDS_ADD_EMPIRE_GUARDIAN
 #ifdef ASG_ADD_MAP_KARUTAN
 	else if (IsKarutanMap())
 	{
@@ -1552,7 +1544,7 @@ void FaceTexture(int Texture,float xf,float yf,bool Water,bool Scale)
 		float Water2 = 0.f;
 		float Water3 = 0.f;
 		float Water4 = 0.f;
-		if(World == WD_34CRYWOLF_1ST && Texture == 5)
+		if(gMapManager.WorldActive == WD_34CRYWOLF_1ST && Texture == 5)
 		{
 			if(rand()%50 == 0)
 			{
@@ -1563,7 +1555,7 @@ void FaceTexture(int Texture,float xf,float yf,bool Water,bool Scale)
 			}
 		}
 
-		if(World == WD_30BATTLECASTLE && Texture == 5)
+		if(gMapManager.WorldActive == WD_30BATTLECASTLE && Texture == 5)
 			suf -= WaterMove;
 		else
     		suf += WaterMove;
@@ -1613,7 +1605,7 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 			}
 #ifdef PBG_ADD_PKFIELD
 			if(Texture == 11
-				&& (IsPKField()
+				&& (gMapManager.IsPKField()
 #ifdef YDG_ADD_MAP_DOPPELGANGER2
 				|| IsDoppelGanger2()
 #endif	// YDG_ADD_MAP_DOPPELGANGER2
@@ -1629,7 +1621,7 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 			|| TerrainMappingAlpha[TerrainIndex3] > 0.f 
 			|| TerrainMappingAlpha[TerrainIndex4] > 0.f )
         {
-    		if ( (World == WD_7ATLANSE
+    		if ( (gMapManager.WorldActive == WD_7ATLANSE
 #ifdef YDG_ADD_MAP_DOPPELGANGER3
 				|| IsDoppelGanger3()
 #endif	// YDG_ADD_MAP_DOPPELGANGER3
@@ -1659,7 +1651,7 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 			return;
 		}
  		if ( 
-              CurrentLayer == 0 && ( InBloodCastle() == false )
+              CurrentLayer == 0 && ( gMapManager.InBloodCastle() == false )
            )
 		{
 			int Texture = BITMAP_MAPGRASS+TerrainMappingLayer1[TerrainIndex1];
@@ -1670,7 +1662,7 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 				float Height = pBitmap->Height * 2.f;
 				BindTexture(Texture);
 #ifdef PBG_ADD_PKFIELD
-				if(IsPKField()
+				if(gMapManager.IsPKField()
 #ifdef YDG_ADD_MAP_DOPPELGANGER2
 					|| IsDoppelGanger2()
 #endif	// YDG_ADD_MAP_DOPPELGANGER2
@@ -1720,7 +1712,7 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 				glVertex3fv(TerrainVertex[3]);
 				glEnd();
 #ifdef PBG_ADD_PKFIELD
-				if(IsPKField()
+				if(gMapManager.IsPKField()
 #ifdef YDG_ADD_MAP_DOPPELGANGER2
 					|| IsDoppelGanger2()
 #endif	// YDG_ADD_MAP_DOPPELGANGER2
@@ -2076,7 +2068,7 @@ void CreateFrustrum2D(vec3_t Position)
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 #ifdef BATTLE_SOCCER_EVENT
-    if ( World==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
+    if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
     {
         Width = (float)GetScreenWidth()/640.f;
 	    CameraViewFar    = 8500.f;
@@ -2088,7 +2080,7 @@ void CreateFrustrum2D(vec3_t Position)
     else
 #endif// BATTLE_SOCCER_EVENT
     {
-        if ( battleCastle::InBattleCastle() && SceneFlag == MAIN_SCENE)
+        if ( gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
         {
             Width = (float)GetScreenWidth()/640.f;// * 0.1f;
             if ( battleCastle::InBattleCastle2( Hero->Object.Position ) && ( Hero->Object.Position[0]<17100.f || Hero->Object.Position[0]>18300.f ) )
@@ -2108,8 +2100,7 @@ void CreateFrustrum2D(vec3_t Position)
                 WidthNear = 580.f*Width; // 540.f
             }
         }
-#ifdef YDG_ADD_MAP_SANTA_TOWN
-		else if(World == WD_62SANTA_TOWN)	// 산타마을
+		else if(gMapManager.WorldActive == WD_62SANTA_TOWN)	// 산타마을
 		{
 			Width = (float)GetScreenWidth()/640.f * 1.0f;
 	        CameraViewFar    = 2400.f;
@@ -2119,13 +2110,7 @@ void CreateFrustrum2D(vec3_t Position)
 			WidthFar  = 1250.f*Width;
 			WidthNear = 540.f*Width;
 		}
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef PBG_ADD_PKFIELD
-		else if(IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-			|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-			)
+		else if(gMapManager.IsPKField()	|| IsDoppelGanger2())
 		{
 			Width = (float)GetScreenWidth()/640.f;
 			CameraViewFar    = 1700.0f;
@@ -2135,7 +2120,6 @@ void CreateFrustrum2D(vec3_t Position)
 			WidthFar         = 1900.f*Width;
 			WidthNear        = 600.f*Width;
 		}
-#endif //PBG_ADD_PKFIELD
         else
         {
             static  int CameraLevel;
@@ -2177,7 +2161,7 @@ void CreateFrustrum2D(vec3_t Position)
 					CameraViewFar = 2400.f * 10.0f * 0.575995f;
 #endif //PJH_NEW_SERVER_SELECT_MAP
 				}
-				else if(World == WD_39KANTURU_3RD /* && MayaScene */)	// 이혁재 - 칸투르 3차 맵일때
+				else if(gMapManager.WorldActive == WD_39KANTURU_3RD /* && MayaScene */)	// 이혁재 - 칸투르 3차 맵일때
 				{
 					CameraViewFar = 2000.f * 10.0f * 0.115f;
 				}
@@ -2256,25 +2240,17 @@ void CreateFrustrum2D(vec3_t Position)
 	vec3_t Angle;
 	float Matrix[3][4];
 
-#ifdef BATTLE_SOCCER_EVENT
-    if ( World==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
+    if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
     {
 	    Vector ( 0.f, 0.f, -CameraAngle[2], Angle );
     }
     else
-#endif// BATTLE_SOCCER_EVENT
-#ifdef PJH_NEW_SERVER_SELECT_MAP
-	if (World == WD_73NEW_LOGIN_SCENE)
-#else
-	if (World == WD_77NEW_LOGIN_SCENE)
-#endif //PJH_NEW_SERVER_SELECT_MAP
+	if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
     {
 		VectorScale(CameraAngle, -1.0f, Angle);
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 		CCameraMove::GetInstancePtr()->SetFrustumAngle(89.5f);
 		vec3_t _Temp = { CCameraMove::GetInstancePtr()->GetFrustumAngle(), 0.0f, 0.0f};
 		VectorAdd(Angle,_Temp,Angle);
-#endif //PJH_NEW_SERVER_SELECT_MAP
 //		Angle[2] -= 180.0f;
 	}
 	else
@@ -2553,7 +2529,7 @@ void InitTerrainLight()
 #endif	// YDG_FIX_INVALID_TERRAIN_LIGHT
         {
 			int Index = TERRAIN_INDEX(xi,yi);
-			if(World == WD_8TARKAN)
+			if(gMapManager.WorldActive == WD_8TARKAN)
 			{
      			TerrainGrassWind[Index] = sinf(WindSpeed+xf*50.f)*WindScale;
 			}
@@ -2565,7 +2541,7 @@ void InitTerrainLight()
 			}
 #endif	// ASG_ADD_MAP_KARUTAN
 #ifdef CSK_ADD_MAP_ICECITY	
-			else if(World == WD_57ICECITY || World == WD_58ICECITY_BOSS)
+			else if(gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS)
 			{
 				WindScale = 60.f;
 				TerrainGrassWind[Index] = sinf(WindSpeed+xf*50.f)*WindScale;
@@ -2697,7 +2673,7 @@ void RenderTerrainFrustrum(bool EditFlag)
             if(TestFrustrum2D(xf+2.f,yf+2.f,g_fFrustumRange) || CameraTopViewEnable)
 			{
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-				if (World == WD_73NEW_LOGIN_SCENE)
+				if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
 #else
 				if (World == WD_77NEW_LOGIN_SCENE)
 #endif //PJH_NEW_SERVER_SELECT_MAP
@@ -2757,22 +2733,16 @@ void RenderTerrainFrustrum_After(bool EditFlag)
 
 extern int SelectMapping;
 extern void RenderCharactersClient();
-extern void RenderCharactersShadow();
 
-//  지형을 그린다.
 void RenderTerrain(bool EditFlag)
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_TERRAIN, PROFILING_RENDER_TERRAIN );
-#endif // DO_PROFILING	
     if( !EditFlag )
     {
-        if(World == WD_8TARKAN)		// 타르칸이면 
+        if(gMapManager.WorldActive == WD_8TARKAN)
 		{
             WaterMove = (float)((int)(WorldTime)%40000)*0.000025f;
 		}
-		// 3차체인지업 2차맵은 용암속도 느리게
-		else if(World == WD_42CHANGEUP3RD_2ND)
+		else if(gMapManager.WorldActive == WD_42CHANGEUP3RD_2ND)
 		{
 			int iWorldTime = (int)WorldTime;
 			int iRemainder = iWorldTime % 50000;
@@ -2794,25 +2764,18 @@ void RenderTerrain(bool EditFlag)
 		InitCollisionDetectLineToFace();
 	}
 
-    //  지형을 화면에 찍는다.
 	TerrainFlag = TERRAIN_MAP_NORMAL;
     RenderTerrainFrustrum ( EditFlag );
     //  
 	if ( EditFlag && SelectFlag )
 	{
-        //  현재 선택한 커서의 지형 위치를 다시 한번 검색한다.
 		RenderTerrainTile ( SelectXF, SelectYF, (int)SelectXF, (int)SelectYF, 1.f, 1, EditFlag );
 	}
 	if ( !EditFlag )
 	{
 		EnableAlphaTest();
-		if ( TerrainGrassEnable && World != WD_7ATLANSE 
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-			&& !IsDoppelGanger3()
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-			)
+		if ( TerrainGrassEnable && gMapManager.WorldActive != WD_7ATLANSE && !IsDoppelGanger3())
 		{
-			//  지형에 존재하는 잔디를 찍는다.
 			TerrainFlag = TERRAIN_MAP_GRASS;
 			RenderTerrainFrustrum ( EditFlag );
 		}
@@ -2821,23 +2784,16 @@ void RenderTerrain(bool EditFlag)
 		RenderPointers();
 		EnableDepthTest();
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_TERRAIN );
-#endif // DO_PROFILING	
 }
 
 void RenderTerrain_After(bool EditFlag)
 {
-	if(World != WD_39KANTURU_3RD)
+	if(gMapManager.WorldActive != WD_39KANTURU_3RD)
 		return;
 
 	TerrainFlag = TERRAIN_MAP_NORMAL;
 	RenderTerrainFrustrum_After(EditFlag);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// Sky 관련 함수
-///////////////////////////////////////////////////////////////////////////////
 
 OBJECT Sun;
 

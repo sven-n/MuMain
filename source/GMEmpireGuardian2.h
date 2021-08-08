@@ -76,8 +76,6 @@ protected:
 	GMEmpireGuardian2();
 };
 
-extern bool IsEmpireGuardian2();
-
 #endif // LDS_ADD_MAP_EMPIREGUARDIAN2
 
 #endif // !defined(AFX_GMEMPIREGUARDIAN2_H__823C7D40_34C6_4235_9EBD_69026B7F67FD__INCLUDED_)

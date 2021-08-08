@@ -29,6 +29,7 @@
 #include "GMAida.h"
 #include "CDirection.h"
 #include "DSPlaySound.h"
+#include "MapManager.h"
 
 #ifdef MR0
 #include "EngineGate.h"
@@ -104,7 +105,7 @@ bool IsBug(ITEM* pItem)
 //////////////////////////////////////////////////////////////////////////
 bool CreateBugSub ( int Type, vec3_t Position, OBJECT *Owner, OBJECT * o, int SubType, int LinkBone )
 {
-    if ( InChaosCastle()==true ) return false;
+    if ( gMapManager.InChaosCastle()==true ) return false;
 
 	if ( !o->Live )
 	{
@@ -171,7 +172,7 @@ bool CreateBugSub ( int Type, vec3_t Position, OBJECT *Owner, OBJECT * o, int Su
 //////////////////////////////////////////////////////////////////////////
 void CreateBug(int Type,vec3_t Position,OBJECT *Owner,int SubType,int LinkBone)
 {
-    if ( InChaosCastle()==true ) return;
+    if ( gMapManager.InChaosCastle()==true ) return;
 
 	if ( Owner->Type!=MODEL_PLAYER && Type!=MODEL_HELPER )
 		return;
@@ -197,7 +198,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 		if ( SceneFlag==MAIN_SCENE )
         {
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
-			if (World >= WD_65DOPPLEGANGER1 && World <= WD_68DOPPLEGANGER4);
+			if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4);
 			else
 #endif	// YDG_ADD_DOPPELGANGER_MONSTER
       		if ( !o->Owner->Live || o->Owner->Kind!=KIND_PLAYER )
@@ -328,7 +329,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 				
 				//^ 펜릴 이펙트 관련 (걷기나 달리기시 이펙트)
 				Vector ( 1.f, 1.f, 1.f, Light );
-                if ( World==WD_10HEAVEN )	// 천공에서 파동 효과
+                if ( gMapManager.WorldActive==WD_10HEAVEN )	// 천공에서 파동 효과
                 {
                     bool   bWave = false;
                     vec3_t p = { 120.f, 0.f, 32.f };
@@ -361,16 +362,16 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
                         }
                     }
                 }
-                else if ( rand()%3==0 && !InHellas() )	// 바닥에 연기 효과
+                else if ( rand()%3==0 && !gMapManager.InHellas() )	// 바닥에 연기 효과
 				{
 					if( o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking) )			
 					{
 						Vector ( o->Position[0]+(float)(rand()%64-32),
 								 o->Position[1]+(float)(rand()%64-32),
 								 o->Position[2]+(float)(rand()%32-16), Position );
-						if ( World==WD_2DEVIAS ) //  데비아스에서는 눈연기.
+						if ( gMapManager.WorldActive==WD_2DEVIAS ) //  데비아스에서는 눈연기.
 							CreateParticle ( BITMAP_SMOKE, Position, o->Angle, Light );
-						else if ( World!=WD_10HEAVEN )
+						else if ( gMapManager.WorldActive!=WD_10HEAVEN )
 							if(!g_Direction.m_CKanturu.IsMayaScene())
 								CreateParticle ( BITMAP_SMOKE+1, Position, o->Angle, Light );
 					}
@@ -403,7 +404,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 
                 //  이동 행동으로 변경.
 				SetAction ( o, 1 );
-                if ( World==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
+                if ( gMapManager.WorldActive==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
                 {
                     bool   bWave = false;
                     vec3_t p = { 120.f, 0.f, rand()%64-32.f };
@@ -445,7 +446,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
                         }
                     }
                 }
-                else if ( rand()%2==0 && !InHellas() )
+                else if ( rand()%2==0 && !gMapManager.InHellas() )
 				{
 					if( o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking) )			
 					{
@@ -453,9 +454,9 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 								 o->Position[1]+(float)(rand()%64-32),
 								 o->Position[2]+(float)(rand()%32-16), Position );
 						//  데비아스에서는 눈연기.
-						if ( World==WD_2DEVIAS )
+						if ( gMapManager.WorldActive==WD_2DEVIAS )
 							CreateParticle ( BITMAP_SMOKE, Position, o->Angle, Light );
-						else if ( World!=WD_10HEAVEN )
+						else if ( gMapManager.WorldActive!=WD_10HEAVEN )
 							if(!g_Direction.m_CKanturu.IsMayaScene())
 								CreateParticle ( BITMAP_SMOKE+1, Position, o->Angle, Light );
 					}
@@ -494,11 +495,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 						vec3_t p = { 50.f, -4.f, 0.f };
     					b->TransformPosition ( BoneTransform[27], p, Position );
 
-						if ( World==WD_7ATLANSE
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-							|| World==WD_67DOPPLEGANGER3
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-							)
+						if ( gMapManager.WorldActive==WD_7ATLANSE || gMapManager.WorldActive==WD_67DOPPLEGANGER3)
 						{
 							CreateParticle ( BITMAP_BUBBLE, Position, o->Angle, o->Light );
 						}
@@ -581,9 +578,9 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 
             if ( o->Type==MODEL_PEGASUS )
             {
-                if ( World==WD_8TARKAN || World==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
+                if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
                     o->Position[2] -= 10.f;
-                else if ( World!=-1 )
+                else if ( gMapManager.WorldActive!=-1 )
                     o->Position[2] -= 30.f;
             }
 			VectorCopy ( o->Owner->Angle,o->Angle );
@@ -597,7 +594,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
                 //  페가수스.
                 if ( o->Type==MODEL_PEGASUS )
                 {
-                    if ( World==WD_8TARKAN || World==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
+                    if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
                         SetAction ( o, 3 );
                     else
                         SetAction ( o, 2 );
@@ -607,7 +604,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
                     SetAction ( o, 2 );
                 }
 
-				if ( rand()%2==0 && World!=WD_10HEAVEN )
+				if ( rand()%2==0 && gMapManager.WorldActive!=WD_10HEAVEN )
 				{
 					if ( !g_Direction.m_CKanturu.IsMayaScene())
 
@@ -617,7 +614,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 						Vector ( o->Position[0]+(float)(rand()%64-32),
 							 o->Position[1]+(float)(rand()%64-32),
 							 o->Position[2]+(float)(rand()%32-16), Position );
-						if ( World==2 )
+						if ( gMapManager.WorldActive==2 )
 							CreateParticle ( BITMAP_SMOKE, Position, o->Angle, Light );
 						else
 							CreateParticle ( BITMAP_SMOKE+1, Position, o->Angle, Light );
@@ -627,7 +624,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 			}
             else if ( o->Owner->CurrentAction==PLAYER_SKILL_RIDER || o->Owner->CurrentAction==PLAYER_SKILL_RIDER_FLY )
             {
-                if ( World==WD_8TARKAN || World==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
+                if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
                     SetAction ( o, 7 );
                 else
                     SetAction ( o, 6 );
@@ -638,7 +635,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
             {
                 if ( o->Type==MODEL_PEGASUS )
                 {
-                    if ( World==WD_8TARKAN || World==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
+                    if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
                         SetAction ( o, 5 );
                     else
                         SetAction ( o, 4 );
@@ -652,7 +649,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
             {
                 if ( o->Type==MODEL_PEGASUS )
                 {
-                    if ( World==WD_8TARKAN || World==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
+                    if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
                         SetAction ( o, 1 );
                     else
                         SetAction ( o, 0 );
@@ -968,7 +965,7 @@ void DeleteBoids ()
 //  환수 드래곤을 생성한다.
 int CreateDragon ( OBJECT* o, int index )
 {
-    if ( World!=WD_10HEAVEN ) return 0;
+    if ( gMapManager.WorldActive!=WD_10HEAVEN ) return 0;
 
     //  새끼 환수드래곤 날기...ㅋㅋㅋㅋ
 	if ( index<3 )
@@ -1016,7 +1013,7 @@ int CreateDragon ( OBJECT* o, int index )
 			    Hero->Object.Position[2], o->Position );
 
         o->Position[2] = Hero->Object.Position[2];
-        if ( InBloodCastle() == true )
+        if ( gMapManager.InBloodCastle() == true )
         {
             CreateJoint( MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 3, o, 25.0f);
         }
@@ -1035,11 +1032,8 @@ int CreateDragon ( OBJECT* o, int index )
 //  아틀란스 물고기 생성. 
 int CreateAtlanseFish ( OBJECT* o )
 {
-	if ( World!=WD_7ATLANSE
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-		&& World!=WD_67DOPPLEGANGER3
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-		) return 0;
+	if ( gMapManager.WorldActive!=WD_7ATLANSE && gMapManager.WorldActive!=WD_67DOPPLEGANGER3) 
+		return 0;
 
 	if(Hero->Object.Position[1]*0.01f < 128)
 	{
@@ -1189,7 +1183,7 @@ void MoveHeavenBug ( OBJECT* o, int index )
 	if(rand()%5120==0)
 		o->Live = false;
 
-    if ( InBloodCastle() )
+    if ( gMapManager.InBloodCastle() )
     {
         if ( o->LifeTime <= 0 )
 		{
@@ -1302,13 +1296,8 @@ void MoveBoidGroup ( OBJECT* o, int index )
             MoveBoid ( o, index, Boids, MAX_BOIDS );
         AngleMatrix ( o->Angle, o->Matrix );
         vec3_t p,Direction;
-        if ( World==WD_7ATLANSE
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-			|| World==WD_67DOPPLEGANGER3
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-			)
+        if ( gMapManager.WorldActive==WD_7ATLANSE || gMapManager.WorldActive==WD_67DOPPLEGANGER3)
         {
-            //물고기때
             if(o->Timer < 5.f)
             {
                 if ( index<35 )
@@ -1354,7 +1343,7 @@ void MoveBoidGroup ( OBJECT* o, int index )
         {
             FlyDistance = 3000.f;
         }
-		else if (World == WD_51HOME_6TH_CHAR 
+		else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR 
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 			|| World == WD_77NEW_LOGIN_SCENE 
 			|| World == WD_78NEW_CHARACTER_SCENE
@@ -1407,12 +1396,10 @@ void MoveBoids ()
 	{
 		bool bOut = false;
         bool bCreate = true;
-		switch ( World )
+		switch ( gMapManager.WorldActive )
 		{
 		case WD_7ATLANSE:
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
 		case WD_67DOPPLEGANGER3:
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
 			break;
 		case WD_10HEAVEN:
 			if ( i>=13 )
@@ -1421,7 +1408,7 @@ void MoveBoids ()
 			}
 			break;
 		case WD_51HOME_6TH_CHAR:
-			if ( i>=2)	// 0번은 회오리, 1번은 독수리
+			if ( i>=2)
 			{
 				bOut = TRUE;
 			}
@@ -1429,14 +1416,14 @@ void MoveBoids ()
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 		case WD_77NEW_LOGIN_SCENE:
 		case WD_78NEW_CHARACTER_SCENE:
-			if ( i>=20)	// 0번은 회오리, 1번부터 독수리
+			if ( i>=20)
 			{
 				bOut = TRUE;
 			}
 			break;
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		default:
-            if ( InHellas()==true )
+            if ( gMapManager.InHellas()==true )
             {
                 if ( i>1 )
                 {
@@ -1463,7 +1450,7 @@ void MoveBoids ()
 		if ( !o->Live && bCreate )
 		{
 #ifdef USE_EVENT_ELDORADO
-			if ( EnableEvent!=0 )   //  환수드래곤 이밴트
+			if ( EnableEvent!=0 )
 #else
 			if ( EnableEvent )
 #endif
@@ -1496,19 +1483,19 @@ void MoveBoids ()
 						     Hero->Object.Position[2]+300.f, o->Position );
 				}
 			}
-			else if (  World==WD_0LORENCIA 
-					|| World==WD_1DUNGEON 
-					|| World==WD_3NORIA 
-					|| World==WD_4LOSTTOWER 
-					|| World==WD_10HEAVEN 
-					|| ( (World==WD_7ATLANSE
+			else if (  gMapManager.WorldActive==WD_0LORENCIA 
+					|| gMapManager.WorldActive==WD_1DUNGEON 
+					|| gMapManager.WorldActive==WD_3NORIA 
+					|| gMapManager.WorldActive==WD_4LOSTTOWER 
+					|| gMapManager.WorldActive==WD_10HEAVEN 
+					|| ( (gMapManager.WorldActive==WD_7ATLANSE
 #ifdef YDG_ADD_MAP_DOPPELGANGER3
-						|| World==WD_67DOPPLEGANGER3
+						|| gMapManager.WorldActive==WD_67DOPPLEGANGER3
 #endif	// YDG_ADD_MAP_DOPPELGANGER3
 						)  && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) )
-                    || InBloodCastle()
-                    || InHellas()
-					|| (World == WD_51HOME_6TH_CHAR && i < 1 && rand()%500==0 && Hero->SafeZone!=true)	// 0번은 회오리, 1번은 독수리
+                    || gMapManager.InBloodCastle()
+                    || gMapManager.InHellas()
+					|| (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && i < 1 && rand()%500==0 && Hero->SafeZone!=true)	// 0번은 회오리, 1번은 독수리
                 )
 			{
                 int iCreateBoid = 0;
@@ -1527,23 +1514,23 @@ void MoveBoids ()
 				o->AI           = 0;
 				o->CurrentAction= 0;
 
-				if ( World==WD_0LORENCIA )
+				if ( gMapManager.WorldActive==WD_0LORENCIA )
 					o->Type = MODEL_BIRD01;
-				else if ( World==WD_1DUNGEON || World==WD_4LOSTTOWER )
+				else if ( gMapManager.WorldActive==WD_1DUNGEON || gMapManager.WorldActive==WD_4LOSTTOWER )
 					o->Type = MODEL_BAT01;
-				else if ( World==WD_3NORIA )
+				else if ( gMapManager.WorldActive==WD_3NORIA )
 				{
 					o->Type        = MODEL_BUTTERFLY01;
 					o->Velocity    = 0.3f;
 					o->LightEnable = false;
 					Vector(1.f,1.f,1.f,o->Light);
 				}
-                else if ( InBloodCastle() == true )
+                else if ( gMapManager.InBloodCastle() == true )
                 {
                     //  까마귀.
                     o->Type = MODEL_CROW;
                 }
-				else if(World == WD_51HOME_6TH_CHAR)
+				else if(gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
 				{
 					o->Type = MODEL_MAP_TORNADO;
 					o->Velocity = 0.0f;
@@ -1616,7 +1603,7 @@ void MoveBoids ()
 			{
 				b->CurrentAction = o->CurrentAction;
 
-				if (World == WD_51HOME_6TH_CHAR 
+				if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR 
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 					|| World == WD_77NEW_LOGIN_SCENE 
 					|| World == WD_78NEW_CHARACTER_SCENE
@@ -1661,9 +1648,9 @@ void MoveBoids ()
                 //  무리지는 것들.
                 MoveBoidGroup ( o, i );
 
-                if ( o->LifeTime<=0 && (World==WD_7ATLANSE
+                if ( o->LifeTime<=0 && (gMapManager.WorldActive==WD_7ATLANSE
 #ifdef YDG_ADD_MAP_DOPPELGANGER3
-					|| World==WD_67DOPPLEGANGER3
+					|| gMapManager.WorldActive==WD_67DOPPLEGANGER3
 #endif	// YDG_ADD_MAP_DOPPELGANGER3
 					) && TerrainWall[Index]==TW_SAFEZONE )
 				{
@@ -1710,9 +1697,6 @@ void MoveBoids ()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 void RenderBoids ( bool bAfterCharacter )
 {
 #ifdef DO_PROFILING
@@ -1808,10 +1792,10 @@ void RenderBoids ( bool bAfterCharacter )
                 }
 
 #ifndef USE_SHADOWVOLUME
-				if(World != WD_10HEAVEN)
+				if(gMapManager.WorldActive != WD_10HEAVEN)
 				{
 					EnableAlphaTest();
-					if (o->Type == MODEL_EAGLE)	// 독수리
+					if (o->Type == MODEL_EAGLE)
 					{
 						if (o->ShadowScale == 0)
 							glColor4f(0.f,0.f,0.f,0.0f);
@@ -1821,7 +1805,7 @@ void RenderBoids ( bool bAfterCharacter )
 					else
 						glColor4f(0.f,0.f,0.f,0.2f);
 
-					if (World == WD_51HOME_6TH_CHAR && o->Type == MODEL_MAP_TORNADO);	// 회오리 그림자 안그림
+					if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && o->Type == MODEL_MAP_TORNADO);
 					else
 					{
 						VectorCopy(o->Position,Position);
@@ -1833,35 +1817,17 @@ void RenderBoids ( bool bAfterCharacter )
 				}
 #endif
 
-#ifdef MR0
-				ModelManager::SetTargetObject(NULL);
-#endif //MR0
-
 			}
 		}
-		if ( MODEL_SPEARSKILL != o->Type)	// 천공유충
+		if ( MODEL_SPEARSKILL != o->Type)
 		{
 			o->Angle[2] -= 90.f;
 		}
 	}
-#ifdef MR0
-	VPManager::Disable();
-#endif//MR0
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_BOIDS );
-#endif // DO_PROFILING
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 무리지어 움직이는 동물들 처리(게임상의 쥐, 물고기 등등)
-///////////////////////////////////////////////////////////////////////////////
 void RenderFishs()
 {
-#ifdef MR0
-	VPManager::Enable();
-#endif//MR0
 	for(int i=0;i<MAX_FISHS;i++)
 	{
 		OBJECT *o = &Fishs[i];
@@ -1873,18 +1839,13 @@ void RenderFishs()
 			{
 				RenderObject(o);
 
-				//그림자
-#ifndef USE_SHADOWVOLUME
 				if(o->Type==MODEL_FISH01+7 || o->Type==MODEL_FISH01+8)//해파리
 				{
 				}
 				else
 				{
-					if ( World != WD_10HEAVEN)
+					if ( gMapManager.WorldActive != WD_10HEAVEN)
 					{
-#ifdef MR0
-						ModelManager::SetTargetObject(o);
-#endif //MR0
 						EnableAlphaTest();
 						glColor4f(0.f,0.f,0.f,0.2f);
 						BMD *b = &Models[o->Type];
@@ -1893,31 +1854,22 @@ void RenderFishs()
 						Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1]);
 						VectorCopy(Position,b->BodyOrigin);
 						b->RenderBodyShadow();
-#ifdef MR0
-						ModelManager::SetTargetObject(NULL);
-#endif //MR0
 					}
 				}
-#endif
 			}
 		}
 		o->Angle[2] -= 90.f;
 	}
-#ifdef MR0
-	VPManager::Disable();
-#endif//MR0
 }
 
 void MoveFishs()
 {
 	for ( int i=0; i<MAX_FISHS; i++ )
 	{
-		if ( World!=WD_7ATLANSE && World!=WD_8TARKAN 
-            && InHellas()==false 
-			&& World!=WD_34CRYWOLF_1ST
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-			&& World!=WD_67DOPPLEGANGER3
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
+		if ( gMapManager.WorldActive!=WD_7ATLANSE && gMapManager.WorldActive!=WD_8TARKAN 
+            && gMapManager.InHellas()==false 
+			&& gMapManager.WorldActive!=WD_34CRYWOLF_1ST
+			&& gMapManager.WorldActive!=WD_67DOPPLEGANGER3
             )
 		{
 			if ( i>=3 ) continue;
@@ -1931,18 +1883,18 @@ void MoveFishs()
 				    Hero->Object.Position[1]+(float)(rand()%1024-512),
 				    Hero->Object.Position[2],o->Position );
       		int Index = TERRAIN_INDEX_REPEAT((int)(o->Position[0]/TERRAIN_SCALE),(int)(o->Position[1]/TERRAIN_SCALE));
-			if ( ( World==WD_0LORENCIA && TerrainMappingLayer1[Index]==5 ) ||
-				 ( World==WD_1DUNGEON && TerrainWall[Index]<TW_NOGROUND )  ||
-				 ( World==WD_6STADIUM && TerrainWall[Index]<TW_NOGROUND )  ||
-				 ( (World==WD_7ATLANSE
+			if ( ( gMapManager.WorldActive==WD_0LORENCIA && TerrainMappingLayer1[Index]==5 ) ||
+				 ( gMapManager.WorldActive==WD_1DUNGEON && TerrainWall[Index]<TW_NOGROUND )  ||
+				 ( gMapManager.WorldActive==WD_6STADIUM && TerrainWall[Index]<TW_NOGROUND )  ||
+				 ( (gMapManager.WorldActive==WD_7ATLANSE
 #ifdef YDG_ADD_MAP_DOPPELGANGER3
-					|| World==WD_67DOPPLEGANGER3
+					|| gMapManager.WorldActive==WD_67DOPPLEGANGER3
 #endif	// YDG_ADD_MAP_DOPPELGANGER3
 					 ) && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) ) ||
-                 ( InHellas() && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) ) || 
+                 ( gMapManager.InHellas() && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) ) || 
                  ( M33Aida::IsInAida() && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) ) || 
-				 ( (World==WD_8TARKAN 
-				 || World== WD_34CRYWOLF_1ST
+				 ( (gMapManager.WorldActive==WD_8TARKAN 
+				 || gMapManager.WorldActive== WD_34CRYWOLF_1ST
 				 ) && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) ) 
                )
 			{
@@ -1960,7 +1912,7 @@ void MoveFishs()
    				o->Scale       = (float)(rand()%4+4)*0.1f;
                 o->Gravity     = 13;
 				o->bBillBoard  = true;
-				switch(World)
+				switch(gMapManager.WorldActive)
 				{
 				case WD_0LORENCIA:
      				o->Type  = MODEL_FISH01;
@@ -2032,7 +1984,7 @@ void MoveFishs()
 					break;
 				}
 
-                if ( InHellas() )
+                if ( gMapManager.InHellas() )
                 {
      				o->Type = -1;
         			o->Scale    = (float)(rand()%4+8)*0.1f;
@@ -2073,11 +2025,7 @@ void MoveFishs()
 				Vector(o->Velocity*(float)(rand()%4+6),0.f,0.f,Position);
 				VectorRotate(Position,o->Matrix,Direction);
 				VectorAdd(o->Position,Direction,o->Position);
-				if ( World!=7 || InHellas()==false 
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-					|| World!=WD_67DOPPLEGANGER3
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-					)
+				if ( gMapManager.WorldActive!=7 || gMapManager.InHellas()==false || gMapManager.WorldActive!=WD_67DOPPLEGANGER3)
                 {
 					o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1]);
                 }
@@ -2086,7 +2034,7 @@ void MoveFishs()
 				int Index = TERRAIN_INDEX_REPEAT((int)(o->Position[0]/TERRAIN_SCALE),(int)(o->Position[1]/TERRAIN_SCALE));
 
 
-				if ( World==WD_8TARKAN || InHellas() || M33Aida::IsInAida()	)
+				if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.InHellas() || M33Aida::IsInAida()	)
                 {
 					 if ( TerrainWall[Index]==1 || TerrainWall[Index]>=TW_NOGROUND )
                      {
@@ -2099,19 +2047,14 @@ void MoveFishs()
                          if(o->SubType > 0) o->SubType--;
                      }
 
-                     if ( InHellas() && o->LifeTime<=1 )
+                     if ( gMapManager.InHellas() && o->LifeTime<=1 )
                      {
                          o->Live = false;
                      }
                 }
                 else if ( (o->Type==MODEL_FISH01 && TerrainMappingLayer1[Index]!=5) ||
 					 (o->Type==MODEL_RAT01 && TerrainWall[Index]>=TW_NOGROUND) ||
-					 ((World==WD_7ATLANSE
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-						|| World==WD_67DOPPLEGANGER3
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-						 ) && (TerrainWall[Index]==1 || TerrainWall[Index]>=TW_NOGROUND) )
-					)
+					 ((gMapManager.WorldActive==WD_7ATLANSE	|| gMapManager.WorldActive==WD_67DOPPLEGANGER3) && (TerrainWall[Index]==1 || TerrainWall[Index]>=TW_NOGROUND) ))
 				{
 					o->Angle[2] += 180.f;
 					if(o->Angle[2] >= 360.f) o->Angle[2] -= 360.f;

@@ -6,6 +6,7 @@
 #include "NewUIHeroPositionInfo.h"
 #include "NewUISystem.h"
 #include "wsclientinline.h"
+#include "MapManager.h"
 
 using namespace SEASON3B;
 
@@ -158,9 +159,8 @@ bool CNewUIHeroPositionInfo::Render()
 #endif //PJH_ADD_MINIMAP
 
 
-//GetMapName( pMember->Map )
 #ifdef PJH_ADD_MINIMAP
-	unicode::_sprintf( szText, "%s (%d , %d)",  GetMapName( World ), m_CurHeroPosition.x, m_CurHeroPosition.y);
+	unicode::_sprintf( szText, "%s (%d , %d)",  gMapManager.GetMapName(gMapManager.WorldActive), m_CurHeroPosition.x, m_CurHeroPosition.y);
 	g_pRenderText->RenderText( m_Pos.x+10, m_Pos.y+5, szText, WidenX + 20, 13-4, RT3_SORT_CENTER );
 #else
 

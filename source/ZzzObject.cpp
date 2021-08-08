@@ -1,10 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 배경 오브젝트 관련 함수
-// 배경 오브젝트 Open, Save
-// 배경 오브젝트, 파티클, 새, 물고기 등등의 움직임 처리 및 랜더링
-//
-// *** 함수 레벨: 3
-///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
@@ -29,34 +23,24 @@
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "GMHellas.h"
-
+#include "MapManager.h"
 #include "GMBattleCastle.h"
 #include "GMHuntingGround.h"
-#ifdef CRYINGWOLF_2NDMVP
 #include "GMCryingWolf2nd.h"
-#endif // CRYINGWOLF_2NDMVP
 #include "GMAida.h"
 #include "GMCryWolf1st.h"
-
 #include "GM_Kanturu_1st.h"
 #include "UIManager.h"
 #include "GM_Kanturu_2nd.h"
 #include "GM_Kanturu_3rd.h"
 #include "CDirection.h"
-
 #include "CComGem.h"
-
 #include "GM3rdChangeUp.h"
-
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
 #include "BoneManager.h"
-#endif // PRUARIN_EVENT07_3COLORHARVEST
-
 #include "GMNewTown.h"
 #include "w_CursedTemple.h"
 #include "GMSwampOfQuiet.h"
 
-// 맵 관련 include
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM
@@ -64,34 +48,16 @@
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK
 
-//////////////////////////////////////////////////////////////////////////
-//  현재 사용하지 않는 내용.
-//////////////////////////////////////////////////////////////////////////
-#ifdef ANTIHACKING_ENABLE
-#include "proc.h"
-#endif
-
-#ifdef USE_SHADOWVOLUME
-#include "ShadowVolume.h"
-#endif
-//////////////////////////////////////////////////////////////////////////
-
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
 
 int          g_iTotalObj = 0;
 OBJECT_BLOCK ObjectBlock [256];
-#ifdef MR0
-AUTOOBJ		Boids		[MAX_BOIDS];
-AUTOOBJ		Fishs		[MAX_FISHS];
-AUTOOBJ		Butterfles	[MAX_BUTTERFLES];
-#else
 OBJECT       Boids		 [MAX_BOIDS];
 OBJECT       Fishs		 [MAX_FISHS];
 OBJECT       Butterfles  [MAX_BUTTERFLES];
-#endif //MR0 
 OPERATE      Operates    [MAX_OPERATES];
-int   World = -1;
+//int   World = -1;
 float EarthQuake;
 
 
@@ -101,9 +67,6 @@ static  int g_iThunderTime = 0;
         int g_iActionTime  = -1;
         float g_fActionObjectVelocity = -1;
 
-//////////////////////////////////////////////////////////////////////////
-//  오브젝트 연출처리.
-//////////////////////////////////////////////////////////////////////////
 void ClearActionObject ()
 {
     g_iActionObjectType = -1;
@@ -126,16 +89,14 @@ void ActionObject ( OBJECT* o )
     if ( g_iActionObjectType<0 )return;
     if ( g_iActionTime<0 )      return;
 
-    //  연출할 맵.
-    if ( World==g_iActionWorld )
+    if ( gMapManager.WorldActive == g_iActionWorld )
     {
-        //  레벨의 맞추어서 건물을 무너트린다.
         if ( MoveChaosCastleAllObject( o ) ) return;
         {
             vec3_t  Position, Light;
 
             Vector ( 1.f, 1.f, 1.f, Light );
-            if ( o->Type==g_iActionObjectType || o->Type==9 || o->Type==10 )     //  성문 다리 연결.
+            if ( o->Type==g_iActionObjectType || o->Type==9 || o->Type==10 )
             {
                 if ( o->Type==9 )
                 {
@@ -153,7 +114,7 @@ void ActionObject ( OBJECT* o )
                         o->PKKey = 4;
                     }
                 }
-                else if ( o->Type==g_iActionObjectType ) //  성문 다리 연결.
+                else if ( o->Type==g_iActionObjectType )
                 {
                     if ( g_iActionTime==20 )
                     {
@@ -250,10 +211,6 @@ OBJECT *CollisionDetectObjects(OBJECT *PickObject)
 	return Object;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 오브젝트 랜더링
-///////////////////////////////////////////////////////////////////////////////
-
 void BodyLight(OBJECT *o,BMD *b)
 {
 	if ( o->Type == MODEL_MONSTER01+55)
@@ -286,13 +243,9 @@ void BodyLight(OBJECT *o,BMD *b)
 
 extern float BoneScale;
 
-
-//////////////////////////////////////////////////////////////////////////
-//  오브젝트를 화면에 표현하기 위해 애니메이션과 변환을 한다.
-//////////////////////////////////////////////////////////////////////////
 bool Calc_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 {
-    if(InChaosCastle() == true && Hero->Object.m_bActionStart == true)
+    if(gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart == true)
     {
         o->Alpha -= 0.15f;
     }
@@ -310,7 +263,7 @@ bool Calc_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 	b->CurrentAction = o->CurrentAction;
 	VectorCopy(o->Position,b->BodyOrigin);
 
-    if ( o->Type==MODEL_MONSTER01+61 ) //  성문.
+    if ( o->Type==MODEL_MONSTER01+61 )
     {
         vec3_t Position;
 		VectorCopy(o->Position,Position);
@@ -318,7 +271,7 @@ bool Calc_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
         Position[1] += 60.f;
 		VectorCopy(Position,b->BodyOrigin);
     }
-    else if ( o->Type==MODEL_MONSTER01+60 ) //  크리스탈.
+    else if ( o->Type==MODEL_MONSTER01+60 )
     {
         vec3_t Position;
 		VectorCopy(o->Position,Position);
@@ -358,7 +311,7 @@ bool Calc_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 	{
       	b->LightEnable = false;
 			
-	    if(InChaosCastle() == true || o->Kind != KIND_NPC )
+	    if(gMapManager.InChaosCastle() == true || o->Kind != KIND_NPC )
 		{
 			Vector(0.1f,0.01f,0.f,b->BodyLight);
 			if(o->Type == MODEL_MONSTER01+32)
@@ -383,7 +336,7 @@ bool Calc_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 		float Scale = BoneScale;
 	    RenderPartObjectEdge(b, o, RENDER_BRIGHT, Translate, Scale);
 		
-	    if(InChaosCastle() == true || o->Kind != KIND_NPC)
+	    if(gMapManager.InChaosCastle() == true || o->Kind != KIND_NPC)
 		{
 			Vector(0.7f,0.07f,0.f,b->BodyLight);
 			if(o->Type == MODEL_MONSTER01+32)
@@ -424,13 +377,9 @@ bool Calc_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 	return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  오브젝트를 화면에 표현하기 위해 애니메이션을 한다.
-//////////////////////////////////////////////////////////////////////////
 bool Calc_ObjectAnimation ( OBJECT* o, bool Translate, int Select )
 {
-    if ( InChaosCastle()==true && Hero->Object.m_bActionStart )
+    if ( gMapManager.InChaosCastle()==true && Hero->Object.m_bActionStart )
     {
         o->Alpha -= 0.15f;
     }
@@ -456,19 +405,10 @@ bool Calc_ObjectAnimation ( OBJECT* o, bool Translate, int Select )
 	return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 {
 	BMD *b = &Models[o->Type];
 	bool View = true;
-
-
-#ifdef MR0
-	ModelManager::SetTargetObject(o);
-#endif //MR0
 
     if((EditFlag!=EDIT_NONE) || (EditFlag==EDIT_NONE&&o->HiddenMesh!=-2))
 	{
@@ -540,14 +480,14 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
 			return;
 		}
-		if ( World == WD_10HEAVEN)	// 천공
+		if ( gMapManager.WorldActive == WD_10HEAVEN)	// 천공
 		{
 			if ( o->Type==MODEL_MONSTER01+31)
 			{	// 드래곤 검게
 				Vector(0.02f,0.05f,0.15f,b->BodyLight);
 			}
 		}
-		if ( InDevilSquare() )	// 악마의 광장에
+		if ( gMapManager.InDevilSquare() )	// 악마의 광장에
 		{
 			if ( o->Type==MODEL_MONSTER01+18)
 			{	// 아이스퀸 붉게
@@ -734,7 +674,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			float fLuminosity = (float)sinf((WorldTime)*0.0002f)*0.002f;
 			b->RenderMesh(0,RENDER_TEXTURE,0.7f,0,0.35f+fLuminosity,-WorldTime*0.0004f, WorldTime*0.0004f );
 		}
- 		else if ( g_CursedTemple->IsCursedTemple() == true 
+ 		else if ( gMapManager.IsCursedTemple() == true 
 			&& (o->Type == 32 || o->Type == 39 || o->Type == 41 || o->Type == 46 || o->Type == 62
 				|| o->Type == 67 || o->Type == 68 || o->Type == 64 || o->Type == 65 || o->Type == 66 || o->Type == 80) 
 				)
@@ -841,11 +781,9 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			Vector ( 1.f, 1.f, 1.f, b->BodyLight );
       		b->RenderBody ( RENDER_CHROME, 0.5f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU*5.f, o->BlendMeshTexCoordV*2.f, -1, BITMAP_CHROME );
         }
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
         else if ( o->Type==MODEL_DARK_HORSE && o->SubType == 1)
 		{
-			// 도플갱어 다크호스
-			if (World == WD_65DOPPLEGANGER1)
+			if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
 			{
 				//Vector(0.2f, 0.2f, 0.2f, b->BodyLight);
 				o->Alpha = 0.7f;
@@ -857,7 +795,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderBody(RENDER_BRIGHT|RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
 		}
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
         else if ( o->Type==MODEL_DARK_HORSE )
         {
 			Vector(1.f,1.f,1.f,b->BodyLight);
@@ -869,14 +806,13 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			b->RenderMesh(14, RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(15, RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
-				//  그림자 찍는다.
-			if ( World!=WD_10HEAVEN && InHellas()==false )
+			if ( gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas()==false )
 			{
 				if(!g_Direction.m_CKanturu.IsMayaScene())
 				{
 					EnableAlphaTest();
 
-					if ( World==WD_7ATLANSE )
+					if ( gMapManager.WorldActive==WD_7ATLANSE )
 					{
 						glColor4f(0.f,0.f,0.f,0.2f);
 					}
@@ -888,10 +824,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				}
 			}
         }
-		//^ 펜릴 모델 렌더링
-		else if(o->Type == MODEL_FENRIR_BLACK || o->Type == MODEL_FENRIR_BLUE || o->Type == MODEL_FENRIR_RED
-			|| o->Type == MODEL_FENRIR_GOLD
-			)
+		else if(o->Type == MODEL_FENRIR_BLACK || o->Type == MODEL_FENRIR_BLUE || o->Type == MODEL_FENRIR_RED || o->Type == MODEL_FENRIR_GOLD)
 		{
 			vec3_t vLight, vPos, vPosition;
 			float fLuminosity = (float)sinf((WorldTime)*0.002f)*0.2f;
@@ -935,7 +868,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
 					b->RenderMesh ( 1, RENDER_TEXTURE|RENDER_BRIGHT|RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
-					// 턱에서 떨어지는 spark03
 					Vector ( 1.0f, 0.0f, 0.0f, vLight );
 					Vector ( (float)(rand()%10-10)*0.5f, 0.f, (float)(rand()%40-20)*0.5f, vPos );
 					b->TransformPosition ( BoneTransform[14], vPos, vPosition, false );	// 턱
@@ -947,13 +879,13 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			b->EndRender();
 			
 			//^ 펜릴 그림자 렌더링
-			if (World != WD_10HEAVEN && InHellas() == FALSE)
+			if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE)
 			{
 				if(!g_Direction.m_CKanturu.IsMayaScene())
 				{
 					EnableAlphaTest();
 
-					if ( World==WD_7ATLANSE )
+					if ( gMapManager.WorldActive==WD_7ATLANSE )
 					{
 						glColor4f(0.f,0.f,0.f,0.2f);
 					}
@@ -966,7 +898,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				}
 			}
 
-			// 눈에 flare01
 			Vector ( 0.9f+fLuminosity, 0.2f+(fLuminosity*0.5f), 0.1f+(fLuminosity*0.5f), vLight );
 			Vector ( 50.f, 2.f, 11.f, vPos );
 			b->TransformPosition ( BoneTransform[11], vPos, vPosition, false );	// 왼쪽눈
@@ -977,14 +908,12 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			CreateSprite ( BITMAP_LIGHT, vPosition, 0.5f+(fLuminosity*0.1f), vLight, o);
 			CreateSprite ( BITMAP_LIGHT, vPosition, 0.5f+(fLuminosity*0.1f), vLight, o);
 
-			// 입안에 flare01
 			Vector ( 1.0f, 0.3f, 0.2f, vLight );
 			Vector ( 40.f, 15.f, 0.f, vPos );
 			b->TransformPosition ( BoneTransform[13], vPos, vPosition, false );	// 입안
 			CreateSprite ( BITMAP_LIGHT, vPosition, 1.5f, vLight, o);
 			CreateSprite ( BITMAP_LIGHT, vPosition, 1.0f, vLight, o);
 
-			// 몸 주위에 번개
 			int iSubType = 0;
 			if(o->Type == MODEL_FENRIR_RED)
 			{
@@ -1069,7 +998,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
             Vector ( 1.f, 1.f, 1.f, b->BodyLight );
         }
-#ifdef PET_SYSTEM
         else if ( o->Type==MODEL_DARK_SPIRIT )
         {
             glColor3f ( 1.f, 1.f, 1.f );
@@ -1093,14 +1021,14 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
             }
             b->EndRender();
 
-            if ( World!=WD_10HEAVEN && InHellas()==false )
+            if ( gMapManager.WorldActive!=WD_10HEAVEN && gMapManager.InHellas()==false )
             {
 				if(!g_Direction.m_CKanturu.IsMayaScene())
 				{
 					vec3_t Position;
 					EnableAlphaTest();
 
-					if ( World==WD_7ATLANSE )
+					if ( gMapManager.WorldActive==WD_7ATLANSE )
 					{
 						glColor4f(0.f,0.f,0.f,0.2f);
 					}
@@ -1115,7 +1043,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				}
             }
         }
-#endif	// PET_SYSTEM
 #ifdef DARK_WOLF
         else if ( o->Type==MODEL_DARK_WOLF )
         {
@@ -1133,7 +1060,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
             }
             b->EndRender();
 
-            if ( World!=WD_10HEAVEN && InHellas()==false )
+            if ( World!=WD_10HEAVEN && gMapManager.InHellas()==false )
             {
                 vec3_t Position;
 			    EnableAlphaTest();
@@ -1153,7 +1080,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
             }
         }
 #endif// DARK_WOLF	
-		else if(World==WD_0LORENCIA && o->Type==MODEL_WATERSPOUT)//분수대
+		else if(gMapManager.WorldActive==WD_0LORENCIA && o->Type==MODEL_WATERSPOUT)//분수대
 		{
 			b->BeginRender(o->Alpha);
 			b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight);
@@ -1162,7 +1089,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			b->RenderMesh(3,RENDER_TEXTURE,o->Alpha,3,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 			b->EndRender();
 		}
-		else if(World==WD_4LOSTTOWER && (o->Type==23||o->Type==19||o->Type==20||o->Type==3||o->Type==4))
+		else if(gMapManager.WorldActive==WD_4LOSTTOWER && (o->Type==23||o->Type==19||o->Type==20||o->Type==3||o->Type==4))
 		{
 			vec3_t Light,p;
 			float Luminosity;
@@ -1194,18 +1121,15 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
 		}
-        //  특정 맵의 오브젝트에 크롬효과를 준다.
-		else if(World==WD_8TARKAN && (o->Type==81))   //  보석 반짝임.
+		else if(gMapManager.WorldActive==WD_8TARKAN && (o->Type==81))
 		{
 			b->BeginRender(o->Alpha);
 			b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 			b->RenderMesh(0,RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,BITMAP_CHROME);
 			b->EndRender();
 		}
-        else if ( InBloodCastle() == true && ( o->Type==28 || o->Type==29 ) )
+        else if ( gMapManager.InBloodCastle() == true && ( o->Type==28 || o->Type==29 ) )
         {   
-            //  천사들, 천사시종.
-            //  그림자 효과.
 			b->BeginRender(o->Alpha);
       		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->EndRender();
@@ -1222,7 +1146,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			b->RenderBodyShadow(o->BlendMesh,o->HiddenMesh);
             o->HiddenMesh = -1;
         }
-		else if( World == WD_3NORIA && o->Type==MODEL_WARP3)
+		else if( gMapManager.WorldActive == WD_3NORIA && o->Type==MODEL_WARP3)
 		{
 			b->BodyLight[0] = 0.8f;
 			b->BodyLight[1] = 0.8f;
@@ -1232,7 +1156,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			b->RenderMesh ( 0, RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 			b->StreamMesh = -1;
 		}
-		else if( World == WD_55LOGINSCENE && o->Type == 90 )
+		else if( gMapManager.WorldActive == WD_55LOGINSCENE && o->Type == 90 )
 		{
 			b->BodyLight[0] = 1.0f;
 			b->BodyLight[1] = 1.0f;
@@ -1268,7 +1192,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			}
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION	
 
-            //  얼음 괴물, 발키리가 이유없이 투명이 될때 그 값을 보정해준다.
             if ( o->Type==MODEL_MONSTER01+35 || o->Type==MODEL_MONSTER01+15 || o->Type==MODEL_MONSTER01+50 || o->Type==MODEL_MONSTER01+51 )
             {
                 if ( o->Alpha==1.0f && o->BlendMeshLight==0.05f )
@@ -1283,10 +1206,8 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
             else
 			if( M31HuntingGround::RenderHuntingGroundObjectMesh(o, b, ExtraMon) ) {}
 			else
-#ifdef CRYINGWOLF_2NDMVP
 			if( M34CryingWolf2nd::RenderCryingWolf2ndObjectMesh(o, b) ) {}
 			else
-#endif // CRYINGWOLF_2NDMVP
 			if( M33Aida::RenderAidaObjectMesh(o, b, ExtraMon) ) {}
 			else if( M34CryWolf1st::RenderCryWolf1stObjectMesh(o, b, ExtraMon) ) {}
 			else if( M37Kanturu1st::RenderKanturu1stObjectMesh(o, b) ) {}
@@ -1296,9 +1217,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			else if( g_CursedTemple->RenderObjectMesh(o, b, ExtraMon) ) {}
 			else if ( SEASON3B::GMNewTown::RenderObject(o, b, ExtraMon) ) {}
 			else if ( SEASON3C::GMSwampOfQuiet::RenderObject(o, b, ExtraMon) ) {}
-#ifdef PSW_ADD_MAPSYSTEM
 			else if( TheMapProcess().RenderObjectMesh( o, b ) ) {}
-#endif //PSW_ADD_MAPSYSTEM
 			else
 			if(o->Type == MODEL_KALIMA_SHOP)
 			{
@@ -3127,7 +3046,7 @@ void RenderObjectVisual(OBJECT *o)
 	float Scale;
 	float Rotation;
 	Vector ( 0.f, 0.f, 0.f, p );
-	switch ( World )
+	switch ( gMapManager.WorldActive )
 	{
 	case WD_0LORENCIA:
 		switch(o->Type)
@@ -3676,7 +3595,7 @@ void RenderObjects()
 #endif //MR0
 
     float   range = 0.f;
-    if( World==WD_10HEAVEN )
+    if( gMapManager.WorldActive==WD_10HEAVEN )
     {
 	    range = -10.f;
     }
@@ -3692,10 +3611,10 @@ void RenderObjects()
 			OBJECT_BLOCK *ob = &ObjectBlock[i*16+j];
 			ob->Visible = TestFrustrum2D((float)(i*16+8),(float)(j*16+8),-180.f);
 			if(g_Direction.m_CKanturu.IsMayaScene()
-				|| World == WD_51HOME_6TH_CHAR	// 몇몇 오브젝트는 컬링 방지를 위해 강제로 그려준다
+				|| gMapManager.WorldActive == WD_51HOME_6TH_CHAR	// 몇몇 오브젝트는 컬링 방지를 위해 강제로 그려준다
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-				|| World == WD_73NEW_LOGIN_SCENE
-				|| World == WD_74NEW_CHARACTER_SCENE
+				|| gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
+				|| gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
 #else //PJH_NEW_SERVER_SELECT_MAP
 				|| World == WD_77NEW_LOGIN_SCENE
 				|| World == WD_78NEW_CHARACTER_SCENE
@@ -3704,7 +3623,7 @@ void RenderObjects()
 				|| IsIceCity()
 #endif // CSK_ADD_MAP_ICECITY
 #ifdef PBG_ADD_PKFIELD
-				|| IsPKField()
+				|| gMapManager.IsPKField()
 #endif //PBG_ADD_PKFIELD
 #ifdef YDG_ADD_MAP_DOPPELGANGER2
 				|| IsDoppelGanger2()
@@ -3724,7 +3643,7 @@ void RenderObjects()
 						}
 						else 
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-						if(World == WD_73NEW_LOGIN_SCENE)
+						if(gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
 						{
 							float fDistance_x = CameraPosition[0] - o->Position[0];
 							float fDistance_y = CameraPosition[1] - o->Position[1];
@@ -3818,7 +3737,7 @@ void RenderObjects()
 							}
 						}
 #endif //PJH_NEW_SERVER_SELECT_MAP
-						else if((World == WD_51HOME_6TH_CHAR	// 엘베란드
+						else if((gMapManager.WorldActive == WD_51HOME_6TH_CHAR	// 엘베란드
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 							|| World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
@@ -3840,14 +3759,14 @@ void RenderObjects()
 						}
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 						//청박스와 뒷 벽
-						else if((World == WD_74NEW_CHARACTER_SCENE) && (o->Type==129 || o->Type==98))
+						else if((gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE) && (o->Type==129 || o->Type==98))
 						{
  							RenderObject(o);
  							RenderObjectVisual(o);
 						}
 #endif //PJH_NEW_SERVER_SELECT_MAP
 #ifdef CSK_ADD_MAP_ICECITY	
-						else if((World == WD_57ICECITY || World == WD_58ICECITY_BOSS)
+						else if((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS)
 							&& (o->Type == 30 || o->Type == 31) 
 							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
 						{
@@ -3857,7 +3776,7 @@ void RenderObjects()
 						}
 #endif // CSK_ADD_MAP_ICECITY
 #ifdef PBG_ADD_PKFIELD
-						else if(IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68)
+						else if(gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68)
 							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
 						{
 							// 컬링 방지를 위해 강제로 그림
@@ -3896,7 +3815,7 @@ void RenderObjects()
 						{
 							o->Visible = TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,o->CollisionRange+range);
 							// 컬링 방지를 위해 강제로 그린 오브젝트는 그리지 않는다.
-							if ((World == WD_51HOME_6TH_CHAR 
+							if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR 
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 								|| World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
@@ -3904,11 +3823,11 @@ void RenderObjects()
 								((o->Type>=5 && o->Type<=14) || (o->Type>=87 && o->Type<=88) || (o->Type == 4 || o->Type == 129)));
 							else
 #ifdef CSK_ADD_MAP_ICECITY	
-							if((World == WD_57ICECITY || World == WD_58ICECITY_BOSS) && (o->Type == 30 || o->Type == 31 || o->Type == 76));
+							if((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && (o->Type == 30 || o->Type == 31 || o->Type == 76));
 							else
 #endif // CSK_ADD_MAP_ICECITY
 #ifdef PBG_ADD_PKFIELD
-							if((IsPKField()
+							if((gMapManager.IsPKField()
 #ifdef YDG_ADD_MAP_DOPPELGANGER2
 								|| IsDoppelGanger2())
 #else YDG_ADD_MAP_DOPPELGANGER2
@@ -3918,18 +3837,18 @@ void RenderObjects()
 							else
 #endif //PBG_ADD_PKFIELD
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-							if(World == WD_73NEW_LOGIN_SCENE);
+							if(gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE);
 #else
 							if (World == WD_77NEW_LOGIN_SCENE);
 #endif //PJH_NEW_SERVER_SELECT_MAP
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-							else if((World == WD_74NEW_CHARACTER_SCENE) && (o->Type == 129 || o->Type==98));
+							else if((gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE) && (o->Type == 129 || o->Type==98));
 #endif //PJH_NEW_SERVER_SELECT_MAP
 							else
 							if(o->Visible || CameraTopViewEnable)
 							{
 								bool Success = false;
-      							if ( World==WD_2DEVIAS && o->Type==100 )	// 로스트 타워 입구
+      							if ( gMapManager.WorldActive==WD_2DEVIAS && o->Type==100 )	// 로스트 타워 입구
 								{
 									int Level;
 									if ( GetBaseClass(Hero->Class)==CLASS_DARK || GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
@@ -3968,23 +3887,8 @@ void RenderObjects()
 			}
 		}
 	}
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0
 
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_OBJECTS );
-#endif // DO_PROFILING	
 }
-
-#ifdef MR0
-void RenderObject_AfterCharacter(OBJECT *o,bool Translate,int Select, int ExtraMon)
-{
-	if(Calc_RenderObject(o, Translate,Select, ExtraMon))
-		Draw_RenderObject_AfterCharacter(o, Translate, Select, ExtraMon);
-}
-
-#else
 
 void RenderObject_AfterCharacter(OBJECT *o,bool Translate,int Select, int ExtraMon)
 {
@@ -3994,15 +3898,10 @@ void RenderObject_AfterCharacter(OBJECT *o,bool Translate,int Select, int ExtraM
 	}
 	Draw_RenderObject_AfterCharacter(o, Translate, Select, ExtraMon);
 }
-#endif //MR0
 
 void Draw_RenderObject_AfterCharacter(OBJECT *o,bool Translate,int Select, int ExtraMon)
 {
 	BMD *b = &Models[o->Type];
-
-#ifdef MR0
-	ModelManager::SetTargetObject(o);
-#endif //MR0
 
     if ((EditFlag != EDIT_NONE) || (EditFlag==EDIT_NONE && o->HiddenMesh != -2))
 	{
@@ -4014,67 +3913,40 @@ void Draw_RenderObject_AfterCharacter(OBJECT *o,bool Translate,int Select, int E
 		SEASON3B::GMNewTown::RenderObjectAfterCharacter(o, b);
 		SEASON3C::GMSwampOfQuiet::RenderObjectAfterCharacter(o, b);
 
-#ifdef PSW_ADD_MAPSYSTEM
 		TheMapProcess().RenderAfterObjectMesh( o, b );
-#endif //PSW_ADD_MAPSYSTEM
 	}
 
-#ifdef MR0
-	ModelManager::SetTargetObject(NULL);
-#endif //MR0
 }
 
 void RenderObjects_AfterCharacter()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_OBJECTS_AFTERCHARACTER, PROFILING_RENDER_OBJECTS_AFTERCHARACTER );
-#endif // DO_PROFILING
-	// 월드에서 한번 걸러주고
-	if( !(World == WD_37KANTURU_1ST || World == WD_38KANTURU_2ND || World == WD_39KANTURU_3RD
-		|| World == WD_40AREA_FOR_GM
-		|| World == WD_41CHANGEUP3RD_1ST
-		|| World == WD_42CHANGEUP3RD_2ND
-		|| g_CursedTemple->IsCursedTemple()
+	if( !(gMapManager.WorldActive == WD_37KANTURU_1ST || gMapManager.WorldActive == WD_38KANTURU_2ND || gMapManager.WorldActive == WD_39KANTURU_3RD
+		|| gMapManager.WorldActive == WD_40AREA_FOR_GM
+		|| gMapManager.WorldActive == WD_41CHANGEUP3RD_1ST
+		|| gMapManager.WorldActive == WD_42CHANGEUP3RD_2ND
+		|| gMapManager.IsCursedTemple()
 
-		|| World == WD_51HOME_6TH_CHAR 
+		|| gMapManager.WorldActive == WD_51HOME_6TH_CHAR 
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 		|| World == WD_77NEW_LOGIN_SCENE 
 		|| World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
-		|| World == WD_56MAP_SWAMP_OF_QUIET
-#ifdef CSK_ADD_MAP_ICECITY	
+		|| gMapManager.WorldActive == WD_56MAP_SWAMP_OF_QUIET
 		|| IsIceCity()
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef PBG_ADD_PKFIELD
-		|| IsPKField()
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER1
+		|| gMapManager.IsPKField()
 		|| IsDoppelGanger1()
-#endif	// YDG_ADD_MAP_DOPPELGANGER1
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
 		|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
 		|| IsDoppelGanger3()
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-#ifdef YDG_ADD_MAP_DOPPELGANGER4
 		|| IsDoppelGanger4()
-#endif	// YDG_ADD_MAP_DOPPELGANGER4
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 		|| IsUnitedMarketPlace()
-#endif	// LDS_ADD_MAP_UNITEDMARKETPLACE
 #ifdef ASG_ADD_MAP_KARUTAN
 		|| IsKarutanMap()
 #endif	// ASG_ADD_MAP_KARUTAN
 		) )
 		return;
 
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
-	
 	float   range = 0.f;
-    if( World==WD_10HEAVEN )
+    if( gMapManager.WorldActive==WD_10HEAVEN )
     {
 	    range = -10.f;
     }
@@ -4113,20 +3985,14 @@ void RenderObjects_AfterCharacter()
 				}
 			}
 
-			if(World == WD_51HOME_6TH_CHAR	// 몇몇 오브젝트는 컬링 방지를 위해 강제로 그려준다 (aftercharacter)
+			if(gMapManager.WorldActive == WD_51HOME_6TH_CHAR
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 				|| World == WD_77NEW_LOGIN_SCENE
 				|| World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
-#ifdef CSK_ADD_MAP_ICECITY	
 				|| IsIceCity()
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef PBG_ADD_PKFIELD
-				|| IsPKField()
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
+				|| gMapManager.IsPKField()
 				|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
 				)
 			{
 				OBJECT *o  = ob->Head;
@@ -4135,30 +4001,24 @@ void RenderObjects_AfterCharacter()
 				{
 					if(o != NULL)
 					{
-						if(World == WD_51HOME_6TH_CHAR &&
+						if(gMapManager.WorldActive == WD_51HOME_6TH_CHAR &&
 							(o->Type==89)	// 수로의 물
 							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-400.f))	// 컬링 최적화 가능한 부분☆
 						{
 							RenderObject_AfterCharacter(o);
 						}
-#ifdef CSK_ADD_MAP_ICECITY	
-						else if((World == WD_57ICECITY || World == WD_58ICECITY_BOSS) && o->Type == 76 && TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f))
+						else if((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && o->Type == 76 && TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f))
 						{
 							RenderObject_AfterCharacter(o);
 						}
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef PBG_ADD_PKFIELD
-						else if(IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f))
+						else if(gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f))
 						{
 							RenderObject_AfterCharacter(o);
 						}
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
 						else if(IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f))
 						{
 							RenderObject_AfterCharacter(o);
 						}
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
 						if(o->Next == NULL)
 							break;
 						else
@@ -4180,30 +4040,24 @@ void RenderObjects_AfterCharacter()
 						{
 							o->Visible = TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,o->CollisionRange+range);
 							// 컬링 방지를 위해 강제로 그린 오브젝트는 그리지 않는다.
-							if ((World == WD_51HOME_6TH_CHAR
+							if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 								|| World == WD_77NEW_LOGIN_SCENE 
 								|| World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
 								) && (o->Type==89));
 							else
-#ifdef CSK_ADD_MAP_ICECITY	
 							// 컬링 방지를 위해 강제로 그린 오브젝트는 그리지 않는다.
 							if(IsIceCity() && o->Type == 76);
 							else
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef PBG_ADD_PKFIELD
-							if(IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68));
+							if(gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68));
 							else
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
 							if(IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68));
 							else
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
 							if(o->Visible || CameraTopViewEnable)
 							{
 								bool Success = false;
-      							if ( World==WD_2DEVIAS && o->Type==100 )
+      							if ( gMapManager.WorldActive==WD_2DEVIAS && o->Type==100 )
 								{
 									int Level;
 
@@ -4234,24 +4088,14 @@ void RenderObjects_AfterCharacter()
 			}
 		}
 	}
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_OBJECTS_AFTERCHARACTER );
-#endif // DO_PROFILING
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 월드의 배경 오브젝트 처리
-///////////////////////////////////////////////////////////////////////////////
 
 extern int CameraWalkCut;
 extern int CurrentCameraCount;
 
 void MoveObject(OBJECT *o)
 {
-	if(World == 9)
+	if(gMapManager.WorldActive == 9)
 	{
 		if((int)WorldTime%4000 < 1000)
 		if(rand()%100==0)
@@ -4266,7 +4110,7 @@ void MoveObject(OBJECT *o)
 		}
 		PlayBuffer(SOUND_RAIN01,NULL,true);
 	}
-	if(World == 0)
+	if(gMapManager.WorldActive == 0)
 	{
 		if(o->Type==MODEL_HOUSE_WALL01+4 || o->Type==MODEL_HOUSE_WALL01+5)
 		{
@@ -4288,7 +4132,7 @@ void MoveObject(OBJECT *o)
 		}
 #endif	// _PVP_MURDERER_HERO_ITEM
 	}
-	if(World == 2)
+	if(gMapManager.WorldActive == 2)
 	{
 		if(o->Type==81 || o->Type==82 || o->Type==96 || o->Type==98 || o->Type==99)
 		{
@@ -4305,7 +4149,7 @@ void MoveObject(OBJECT *o)
 
 	//	애니메이션 속도 조절.
 	float fSpeed = o->Velocity;
-	if ( World==WD_8TARKAN )	//	타르칸
+	if ( gMapManager.WorldActive==WD_8TARKAN )	//	타르칸
 	{
 		switch ( o->Type )
 		{
@@ -4342,12 +4186,10 @@ void MoveObject(OBJECT *o)
 		}
 	}
 #endif //PJH_NEW_SERVER_SELECT_MAP
-#ifdef CSK_ADD_MAP_ICECITY
 	else if(IsIceCity() && (o->Type == 16 || o->Type == 17 || o->Type == 68))
 	{
 		fSpeed = b->Actions[o->CurrentAction].PlaySpeed;
 	}
-#endif // CSK_ADD_MAP_ICECITY
 #ifdef ASG_ADD_MAP_KARUTAN
 	else if (IsKarutanMap() && (o->Type == 66 || o->Type == 107))
 	{
@@ -4394,7 +4236,7 @@ void MoveObject(OBJECT *o)
 		}
 	}
 	
-    switch(World)
+    switch(gMapManager.WorldActive)
 	{
 	case WD_0LORENCIA:
 		switch(o->Type)
@@ -4836,9 +4678,7 @@ void MoveObject(OBJECT *o)
 					Vector(1.0f, 0.0f, 0.0f, o->Light);
 				}
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				float fTemp1 = sinf(WorldTime*0.001f)*0.2 + 0.6f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				o->BlendMesh = -2;
 				break;
 			}
@@ -4848,9 +4688,7 @@ void MoveObject(OBJECT *o)
         if ( MoveHellasVisual( o )==true ) return;
         if ( battleCastle::MoveBattleCastleVisual( o )==true ) return;
 		if( M31HuntingGround::MoveHuntingGroundObject(o) ) return;
-#ifdef CRYINGWOLF_2NDMVP
 		if( M34CryingWolf2nd::MoveCryingWolf2ndObject(o) ) return;
-#endif // CRYINGWOLF_2NDMVP
 		if( M33Aida::MoveAidaObject(o) ) return;
 		if( M34CryWolf1st::MoveCryWolf1stObject(o) ) return;
 		if (M37Kanturu1st::MoveKanturu1stObject(o))	// 칸투르 1차.
@@ -4861,27 +4699,19 @@ void MoveObject(OBJECT *o)
 		if( g_CursedTemple->MoveObject(o)) return;
 		if( SEASON3B::GMNewTown::MoveObject(o) ) return;
 		if( SEASON3C::GMSwampOfQuiet::MoveObject(o) ) return;
-#ifdef PSW_ADD_MAPSYSTEM
 		if( TheMapProcess().MoveObject( o ) ) return;
-#endif //PSW_ADD_MAPSYSTEM
         break;
     }
 }
 
-
 static  int visibleObject = 0;
 
-//////////////////////////////////////////////////////////////////////////
-//  MoveHeavenThunder
-//  천공의 하늘에 벼락을 친다.
-//////////////////////////////////////////////////////////////////////////
 int MoveHeavenThunder ( void )
 {
     int     objectCount=0;
     float   Luminosity;
     vec3_t  Light;
 
-    //  번개친다.
     if ( (rand()%50)==0 )
     {
         vec3_t  position, Angle;
@@ -4908,9 +4738,7 @@ int MoveHeavenThunder ( void )
 			float Matrix1[3][4];
 			float Matrix2[3][4];
             vec3_t  pos, position, position2, angle;
-#ifdef KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 			vec3_t vTempPos;
-#endif // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 
             Vector(0.f,0.f,-45.f,angle);
 			AngleMatrix(angle,Matrix1);
@@ -4919,70 +4747,43 @@ int MoveHeavenThunder ( void )
             {
             case 0:
                 Vector(-400.f,-1000.f,0.f,position);
-#ifdef KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 				VectorCopy(position, vTempPos);
 				VectorRotate(vTempPos,Matrix1,position);
-#else // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
-			    VectorRotate(position,Matrix1,position);
-#endif // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 				VectorAdd(Hero->Object.Position,position,pos);
-
                 Vector(0.f,0.f,240.f,angle);
 			    AngleMatrix(angle,Matrix2);
 			    Vector(-200.f,-1000.f,0.f,position);
                 break;
-
             case 1:
 			    Vector(-300.f,-400.f,0.f,position);
-#ifdef KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 				VectorCopy(position, vTempPos);
 				VectorRotate(vTempPos,Matrix1,position);
-#else // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
-			    VectorRotate(position,Matrix1,position);
-#endif // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 				VectorSubtract(Hero->Object.Position,position,pos);
-
                 Vector(0.f,0.f,210.f,angle);
 			    AngleMatrix(angle,Matrix2);
 			    Vector(-500.f,-1000.f,0.f,position);
                 break;
-
             case 2:
                 Vector(-200.f,-400.f,0.f,position);
-#ifdef KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 				VectorCopy(position, vTempPos);
 				VectorRotate(vTempPos,Matrix1,position);
-#else // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
-			    VectorRotate(position,Matrix1,position);
-#endif // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 				VectorAdd(Hero->Object.Position,position,pos);
-
                 Vector(0.f,0.f,235.f,angle);
 			    AngleMatrix(angle,Matrix2);
 			    Vector(-1000.f,-1500.f,0.f,position);
                 break;
-
             case 3:
                 Vector(-200.f,400.f,0.f,position);
-#ifdef KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 				VectorCopy(position, vTempPos);
 				VectorRotate(vTempPos,Matrix1,position);
-#else // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
-			    VectorRotate(position,Matrix1,position);
-#endif // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 				VectorAdd(Hero->Object.Position,position,pos);
-
                 Vector(0.f,0.f,200.f,angle);
 			    AngleMatrix(angle,Matrix2);
 			    Vector(-600.f,-1200.f,0.f,position);
                 break;
             }
-#ifdef KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 			VectorCopy(position, vTempPos);
 			VectorRotate(vTempPos,Matrix2,position);
-#else // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
-			VectorRotate(position,Matrix2,position);
-#endif // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
             VectorSubtract(pos,position,position2);
 			VectorAdd(pos,position,position);
             position[2] -= 300.f;
@@ -4996,17 +4797,13 @@ int MoveHeavenThunder ( void )
     return objectCount;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  맵상의 전체적인 효과 설정.
-//////////////////////////////////////////////////////////////////////////
 void MoveObjectSetting ( int& objCount )
 {
-    if ( MoveChaosCastleObjectSetting( objCount, visibleObject ) )                  return;     //  카오스 캐슬.
-    if ( MoveHellasObjectSetting( objCount, visibleObject ) )                       return;     //  헬라스.
-    if ( battleCastle::MoveBattleCastleObjectSetting( objCount, visibleObject ) )   return;     //  공성전.
+    if ( MoveChaosCastleObjectSetting( objCount, visibleObject ) )                  return;
+    if ( MoveHellasObjectSetting( objCount, visibleObject ) )                       return;
+    if ( battleCastle::MoveBattleCastleObjectSetting( objCount, visibleObject ) )   return;
 
-    if( World==WD_10HEAVEN )
+    if( gMapManager.WorldActive==WD_10HEAVEN )
     {
         objCount = MoveHeavenThunder ();
     
@@ -5023,7 +4820,7 @@ void MoveObjectSetting ( int& objCount )
 		}
         return;
     }
-    else if ( InBloodCastle() == true )
+    else if ( gMapManager.InBloodCastle() == true )
     {
         vec3_t Position, Angle;
         vec3_t  Light;
@@ -5043,15 +4840,10 @@ void MoveObjectSetting ( int& objCount )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
-
-void    MoveObjectOnEffect ( OBJECT* o, int& objCount, int& visObject )
+void MoveObjectOnEffect ( OBJECT* o, int& objCount, int& visObject )
 {
     vec3_t  Light;
-    if ( World==WD_10HEAVEN )
+    if ( gMapManager.WorldActive==WD_10HEAVEN )
     {
         visObject++;
         if ( objCount )
@@ -5077,22 +4869,12 @@ void    MoveObjectOnEffect ( OBJECT* o, int& objCount, int& visObject )
     
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  MoveObjects
-//  맵에 존재하는 오브젝트 처리
-//////////////////////////////////////////////////////////////////////////
 void MoveObjects()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_OBJECTS, PROFILING_MOVE_OBJECTS );
-#endif // DO_PROFILING	
     int     objectCount = 0;
 
-    //  맵상의 전체적인 효과 설정.
     MoveObjectSetting ( objectCount );
 
-    //  오브젝트들 처리.
     visibleObject = 0;
 	for(int i=0;i<16;i++)
 	{
@@ -5109,9 +4891,7 @@ void MoveObjects()
 						if(o->Live && o->Visible)
 						{
 							MoveObject(o);
-                            //
                             MoveObjectOnEffect ( o, objectCount, visibleObject );
-                            //  오브젝트 연출.
                             ActionObject ( o );
 						}
 						if(o->Next == NULL) break;
@@ -5127,7 +4907,6 @@ void MoveObjects()
 				{
 					if(o != NULL) 
 					{
-                        //  오브젝트 연출.
                         if ( o->Live )
                         {
                             ActionObject ( o );
@@ -5142,14 +4921,7 @@ void MoveObjects()
 		}
 	}
     g_iActionTime--;
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_OBJECTS );
-#endif // DO_PROFILING	
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 배경 오브젝트 중에 작동되는 오브젝트 설정하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void CreateOperate(OBJECT *Owner)
 {
@@ -5164,10 +4936,6 @@ void CreateOperate(OBJECT *Owner)
 		}
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 월드의 배경 오브젝트 생성하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 OBJECT *CreateObject(int Type,vec3_t Position,vec3_t Angle,float Scale)
 {
@@ -5223,9 +4991,7 @@ OBJECT *CreateObject(int Type,vec3_t Position,vec3_t Angle,float Scale)
 	g_CharacterClearBuff(o);
 	o->CollisionRange      = -30.f;
 	o->Timer               = 0.f;
-#if defined PCROOM_EVENT
 	o->m_bpcroom		   = FALSE;
-#endif //PCROOM_EVENT
 	o->m_bRenderAfterCharacter	=	false;
 	
 	VectorCopy(Position,o->Position);
@@ -5280,7 +5046,7 @@ OBJECT *CreateObject(int Type,vec3_t Position,vec3_t Angle,float Scale)
 			break;
 		}
 	}
-	switch(World)
+	switch(gMapManager.WorldActive)
 	{
 	case WD_0LORENCIA:
 		switch(Type)
@@ -5612,64 +5378,6 @@ void SortInBlockByType()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 월드의 모든 배경 오브젝트 지우는 함수
-///////////////////////////////////////////////////////////////////////////////
-
-void DeleteObjects()
-{
-	for(int i=MODEL_WORLD_OBJECT;i<MAX_WORLD_OBJECTS;i++)
-	{
-		Models[i].Release();
-	}
-
-	for(int i=0;i<16;i++)
-	{
-		for(int j=0;j<16;j++)
-		{
-			OBJECT_BLOCK *ob = &ObjectBlock[i*16+j];
-			OBJECT *o  = ob->Tail;
-			while(1)
-			{
-				if(o != NULL) 
-				{
-					OBJECT *Temp = o->Prior;
-					DeleteObject(o,ob);
-					if(Temp == NULL) break;
-					o = Temp;
-				}
-				else break;
-			}
-			ob->Head = NULL;
-			ob->Tail = NULL;
-		}
-	}
-
-	for(int i=BITMAP_MAPTILE;i<=BITMAP_RAIN_CIRCLE;i++)
-	{
-     	DeleteBitmap(i);
-	}
-
-	for(int i=0;i<MAX_SPRITES;i++)
-		Sprites[i].Live = false;
-	for(int i=0;i<MAX_BOIDS;i++)
-		Boids[i].Live = false;
-	for(int i=0;i<MAX_FISHS;i++)
-		Fishs[i].Live = false;
-	for(int i=0;i<MAX_LEAVES;i++)
-		Leaves[i].Live = false;
-	for(int i=0;i<MAX_PARTICLES;i++)
-		Particles[i].Live = false;
-	for(int i=0;i<MAX_POINTS;i++)
-		Points[i].Live = false;
-	for(int i=0;i<MAX_JOINTS;i++)
-		Joints[i].Live = false;
-	for(int i=0;i<MAX_OPERATES;i++)
-		Operates[i].Live = false;
-	for(int i=0;i<MAX_EFFECTS;i++)
-		Effects[i].Live = false;
-}
-
 void DeleteObjectTile(int x,int y)
 {
 	for(int i=0;i<16;i++)
@@ -5693,10 +5401,6 @@ void DeleteObjectTile(int x,int y)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 월드의 배경 오브젝트 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 int OpenObjects(char *FileName)
 {
     FILE *fp = fopen(FileName,"rb");
@@ -5716,16 +5420,12 @@ int OpenObjects(char *FileName)
 	fclose(fp);
 
 	unsigned char *Data = EncData;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int DataBytes = EncBytes;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	int DataPtr = 0;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	DataPtr+=1;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	BYTE Version = *((BYTE *)(Data+DataPtr));DataPtr+=1;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	int iMapNumber = 0;
 	short Count = *((short *)(Data+DataPtr));DataPtr+=2;
 	for(int i=0;i<Count;i++)
@@ -5740,7 +5440,6 @@ int OpenObjects(char *FileName)
 	}
 	delete [] Data;
 
-//Object 타입으로 렌더링되는 것들은 ID를 미리 설정
 #if defined MR0 || defined OBJECT_ID
 	SortInBlockByType();
 
@@ -5804,37 +5503,16 @@ int OpenObjectsEnc(char *FileName)
 	}
 	delete [] Data;
 
-//Object 타입으로 렌더링되는 것들은 ID를 미리 설정
-#if defined MR0 || defined OBJECT_ID
-	SortInBlockByType();
-
-	for(i=0;i<MAX_SPRITES;i++)
-		Sprites[i].m_iID = GenID();
-	for(i=0;i<MAX_BOIDS;i++)
-		Boids[i].m_iID = GenID();
-	for(i=0;i<MAX_FISHS;i++)
-		Fishs[i].m_iID = GenID();
-	for(i=0;i<MAX_EFFECTS;i++)
-		Effects[i].m_iID = GenID();
-
-#endif //MR0
-
 	fclose(fp);
     return iMapNumber;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 월드의 배경 오브젝트 저장하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 bool SaveObjects(char *FileName, int iMapNumber)
 {
 	FILE *fp = fopen(FileName,"wb");
 	
 	short ObjectCount = 0;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int CounterPoint = 3;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	BYTE Version = 0;
     fwrite(&Version,sizeof(BYTE),1,fp);
 	fwrite(&iMapNumber,1,1,fp);
@@ -5871,7 +5549,6 @@ bool SaveObjects(char *FileName, int iMapNumber)
 
 	fclose(fp);
 
-	// 암호화
 	{
 		fp = fopen(FileName,"rb");
 		fseek(fp,0,SEEK_END);
@@ -5910,8 +5587,8 @@ void SaveTrapObjects(char *FileName)
 			{
 				if(o != NULL) 
 				{
-					if((World==WD_1DUNGEON && (o->Type==39||o->Type==40||o->Type==51)) ||
-						(World==WD_4LOSTTOWER && (o->Type==25)))
+					if((gMapManager.WorldActive==WD_1DUNGEON && (o->Type==39||o->Type==40||o->Type==51)) ||
+						(gMapManager.WorldActive==WD_4LOSTTOWER && (o->Type==25)))
 					{
 						int Type = 0;
 						switch(o->Type)
@@ -5921,7 +5598,7 @@ void SaveTrapObjects(char *FileName)
 						case 51:Type = 102;break;
 						case 25:Type = 103;break;
 						}
-						fprintf(fp,"%4d %4d 0 %4d %4d %4d\n",Type,World,(BYTE)(o->Position[0]/TERRAIN_SCALE),(BYTE)(o->Position[1]/TERRAIN_SCALE),(BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8);
+						fprintf(fp,"%4d %4d 0 %4d %4d %4d\n",Type,gMapManager.WorldActive,(BYTE)(o->Position[0]/TERRAIN_SCALE),(BYTE)(o->Position[1]/TERRAIN_SCALE),(BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8);
 					}
 					if(o->Next == NULL) break;
 					o = o->Next;
@@ -5934,10 +5611,6 @@ void SaveTrapObjects(char *FileName)
 	fclose(fp);
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  구름층을 표현한다.
-//////////////////////////////////////////////////////////////////////////
 OBJECT  g_CloudsLow;
 void    RenderCloudLowLevel ( int index, int Type )
 {
@@ -6033,10 +5706,6 @@ void    RenderCloudLowLevel ( int index, int Type )
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 월드의 모든 아이템 지우는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void ClearItems()
 {
 	for(int i=0;i<MAX_ITEMS;i++)
@@ -6045,10 +5714,6 @@ void ClearItems()
 		o->Live = false;
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 속성 세팅하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void ItemObjectAttribute(OBJECT *o)
 {
@@ -7458,24 +7123,13 @@ void ItemHeight(int Type,BMD *b)
 
 void RenderItems()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_ITEMS, PROFILING_RENDER_ITEMS );
-#endif // DO_PROFILING	
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
 	for(int i=0;i<MAX_ITEMS;i++)
 	{
 		OBJECT *o = &Items[i].Object;
 		if(o->Live)
 		{
-#ifdef DYNAMIC_FRUSTRUM
-			CFrustrum* pFrus = FindFrustrum(o->m_iID);
-			if(pFrus) pFrus->Test(o->Position, 400.f);
-			else o->Visible = TestFrustrum(o->Position,400.f);
-#else
         	o->Visible = TestFrustrum(o->Position,400.f);
-#endif //DYNAMIC_FRUSTRUM
+
 			if(o->Visible)
 			{
 				int Type = o->Type;
@@ -7533,15 +7187,15 @@ void RenderItems()
 
 				vec3_t vBackup;
 				VectorCopy( o->Position, vBackup);
-				if ( World == WD_10HEAVEN)
+				if ( gMapManager.WorldActive == WD_10HEAVEN)
 				{	// 두둥실
 					o->Position[2] += 10.0f * ( float)sinf( ( float)( i * 1237 + WorldTime)*0.002f);
 				}
-				else if ( World == WD_39KANTURU_3RD && g_Direction.m_CKanturu.IsMayaScene())
+				else if ( gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.IsMayaScene())
 				{
 					o->Position[2] += 10.0f * ( float)sinf( ( float)( i * 1237 + WorldTime)*0.002f);
 				}
-                else if ( InHellas()==true )
+                else if ( gMapManager.InHellas()==true )
                 {
 					o->Position[2] = GetWaterTerrain ( o->Position[0], o->Position[1] )+180;
                 }
@@ -7559,18 +7213,7 @@ void RenderItems()
 			}
 		}
 	}
-#ifdef MR0
-	VPManager::Disable();	// ????
-#endif //MR0
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_ITEMS );
-#endif // DO_PROFILING
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 칼라 세팅하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void PartObjectColor(int Type,float Alpha,float Bright,vec3_t Light,bool ExtraMon)
 {
@@ -7904,7 +7547,6 @@ void PartObjectColor(int Type,float Alpha,float Bright,vec3_t Light,bool ExtraMo
 #endif //PJH_NEW_CHROME
 	}
 }
-
 
 void PartObjectColor2(int Type,float Alpha,float Bright,vec3_t Light,bool ExtraMon)
 {
@@ -10903,7 +10545,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 
     if ( o->EnableShadow==true )
     {
-		if(World == 7)
+		if(gMapManager.WorldActive == 7)
 		{
 			EnableAlphaTest();
 			glColor4f(0.f,0.f,0.f,0.2f);
@@ -10921,12 +10563,12 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 #else
         bool bRenderShadow = true;
 
-        if ( InHellas() )
+        if ( gMapManager.InHellas() )
         {
             bRenderShadow = false;
         }
 
-		if ( WD_10HEAVEN == World || o->m_bySkillCount==3 || g_Direction.m_CKanturu.IsMayaScene() )
+		if ( WD_10HEAVEN == gMapManager.WorldActive || o->m_bySkillCount==3 || g_Direction.m_CKanturu.IsMayaScene() )
         {
             bRenderShadow = false;
         }
@@ -10939,42 +10581,20 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		
 		if ( bRenderShadow )
 		{
-            //  그림자를 찍을지, 말지를 결정한다.
-			if ( o->m_bRenderShadow )    //  10FPS이상일 때에만 그림자를 표시한다.
+			if ( o->m_bRenderShadow )
 		    {
-				// MR0 Renderer의 ShadowMiss Define 
-#ifdef LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH		// LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH
-				ModelManager::SetTargetObject(o);
-#endif // LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH
-
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				int iHiddenMesh = o->HiddenMesh;
 
 				if( o->Type == MODEL_MONSTER01+116 )
 				{
 					iHiddenMesh = 2;
 				}
-				else if(o->Type == MODEL_MONSTER01+164 )	// 제국 수호군 가이온 카레인의 날개는 그림자 출력 스킵.
+				else if(o->Type == MODEL_MONSTER01+164 )
 				{
 					iHiddenMesh = 0;
 				}
 				
 				b->RenderBodyShadow(o->BlendMesh,iHiddenMesh);
-				
-#else // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-				if(o->Type == MODEL_MONSTER01+116)
-				{
-					b->RenderBodyShadow(o->BlendMesh, 2);	
-				}
-				else
-				{
-					b->RenderBodyShadow(o->BlendMesh,o->HiddenMesh);
-				}
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-				
-#ifdef LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH		// LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH
-				ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH
             }
 		}
         return;
@@ -11463,7 +11083,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 	else if(o->Type == MODEL_HELPER+17)		//. 블러드본
 	{
 		Vector(.9f,.1f,.1f,b->BodyLight);
-		o->BlendMeshTexCoordU = sinf( World*0.0001f );
+		o->BlendMeshTexCoordU = sinf( gMapManager.WorldActive*0.0001f );
 		o->BlendMeshTexCoordV = -WorldTime*0.0005f;
 		Models[o->Type].StreamMesh = 0;
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,BITMAP_CHROME);
@@ -12187,12 +11807,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 					b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 				}
 		    }
-            //  세트 옵션.
-            else if ( ((ExtOption%0x04)==EXT_A_SET_OPTION || (ExtOption%0x04)==EXT_B_SET_OPTION )
-#ifdef PJH_NEW_CHROME
-				&& ExtOption <= MAX_MODELS
-#endif //PJH_NEW_CHROME
-				)
+            else if ( ((ExtOption%0x04)==EXT_A_SET_OPTION || (ExtOption%0x04)==EXT_B_SET_OPTION ))
             {
 			    Alpha = sinf(WorldTime*0.001f)*0.5f+0.4f;
                 if ( Alpha<=0.01f )
@@ -12217,7 +11832,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 #ifndef CAMERA_TEST
 	else
 	{
-		if(World == 7)
+		if(gMapManager.WorldActive == 7)
 		{
 			EnableAlphaTest();
 			glColor4f(0.f,0.f,0.f,0.2f);
@@ -12235,12 +11850,12 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 #else
         bool bRenderShadow = true;
 
-        if ( InHellas() )
+        if ( gMapManager.InHellas() )
         {
             bRenderShadow = false;
         }
 
-		if ( WD_10HEAVEN == World || o->m_bySkillCount==3 || g_Direction.m_CKanturu.IsMayaScene() )
+		if ( WD_10HEAVEN == gMapManager.WorldActive || o->m_bySkillCount==3 || g_Direction.m_CKanturu.IsMayaScene() )
         {
             bRenderShadow = false;
         }
@@ -12263,14 +11878,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 	}
 #endif
 
-#ifdef MR0
-	ModelManager::SetTargetObject(NULL);
-#endif // MR0
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 선택시 아이템을 테두리를 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 extern float BoneScale;
 
@@ -12293,10 +11901,6 @@ void RenderPartObjectEdge(BMD *b,OBJECT *o,int Flag,bool Translate,float Scale)
 		b->Transform(BoneTransform,o->BoundingBoxMin,o->BoundingBoxMax,&o->OBB);
 	}
 
-#ifdef LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE		// LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-	ModelManager::SetTargetObject(o);
-#endif // LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-	
     if(o->Type == MODEL_WARCRAFT)
     {
     	b->BeginRender(o->Alpha);
@@ -12311,68 +11915,35 @@ void RenderPartObjectEdge(BMD *b,OBJECT *o,int Flag,bool Translate,float Scale)
 	    b->RenderMesh ( 0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
     	b->EndRender();
     }
-	else if(o->Type == MODEL_MONSTER01+114)		// 페르소나 날개 제외
+	else if(o->Type == MODEL_MONSTER01+114)
 	{
 		glColor3fv(b->BodyLight);
 	    b->RenderMesh ( 0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 	    b->RenderMesh ( 1, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 	}
-	else if(o->Type == MODEL_MONSTER01+116)		// 드레드피어 날개 제외
+	else if(o->Type == MODEL_MONSTER01+116)
 	{
 		glColor3fv(b->BodyLight);
 	    b->RenderMesh ( 0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 	    b->RenderMesh ( 1, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 	}
-	else if(o->Type == MODEL_MONSTER01+121)		// 나이트메어 풍차 제외
+	else if(o->Type == MODEL_MONSTER01+121)
 	{
 		glColor3fv(b->BodyLight);
 	    b->RenderMesh ( 0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 	    b->RenderMesh ( 2, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 	    b->RenderMesh ( 3, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 	}
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-	else if(b->m_iBMDSeqID == MODEL_PANTS +18 )	// 그랜드소울바지, 블랙소울바지 // 월드상에 렌더링.	// 실루엣 에지 렌더링
-	{
-		if( o->Type == MODEL_PANTS +18 )	// 모델 자체 인 경우.
-		{
-			b->RenderBody(Flag,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		}
-		else	// 모델이 Hero에 종속된 경우.
-		{
-			b->RenderMesh ( 0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
-			b->RenderMesh ( 1, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
-		}
-	}
-	else if(b->m_iBMDSeqID == MODEL_PANTS +22)	// 그랜드소울바지, 블랙소울바지 // 월드상에 렌더링.
-	{
-		if( o->Type == MODEL_PANTS +22 )	// 모델 자체 인 경우.
-		{
-			b->RenderBody(Flag,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		}
-		else	// 모델이 Hero에 종속된 경우.
-		{
-			b->RenderMesh ( 0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
-			b->RenderMesh ( 1, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
-		}
-	}
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
     else
     {
         b->RenderBody(Flag,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
     }
 	
-#ifdef LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE		// LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-	ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-
 	BoneScale = 1.f;
 }
 
 void RenderPartObjectEdge2(BMD *b, OBJECT* o, int Flag,bool Translate,float Scale, OBB_t* OBB )
 {
-#ifdef MR0
-	ModelManager::SetTargetObject(o);
-#endif //MR0
     vec3_t tmp;
 
 	b->LightEnable = false;
@@ -12382,9 +11953,6 @@ void RenderPartObjectEdge2(BMD *b, OBJECT* o, int Flag,bool Translate,float Scal
 	b->RenderBody(Flag,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 	
 	BoneScale = 1.f;
-#ifdef MR0
-	ModelManager::SetTargetObject(NULL);
-#endif //MR0
 }
 
 void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale )
@@ -12393,10 +11961,6 @@ void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, floa
     Vector( Luminosity*1.f, Luminosity*0.8f, Luminosity*0.3f, b->BodyLight );
 	RenderPartObjectEdge(b,o,Flag,Translate,Scale);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 아이템을 하나를 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void BodyLight(OBJECT *o,BMD *b);
 
@@ -12451,27 +12015,10 @@ void RenderPartObject(OBJECT *o,int Type,void *p2,vec3_t Light,float Alpha,int I
 		}
 		else
 		{
-			// MR0의 경우 PlayerCharacter선택 시 Silhouette의 색감이 어떤 이유로 틀리며 이를 보정합니다.
-#ifdef LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-			// VBO VertexShader 연산의 경우 실루엣(마우스 선택케릭터에 대한 후광 모델 효과) 색 보정이 필요.
-			if(IsHighestVersion() == true)		// GPU 연산
-			{
-				Vector(0.1f,0.08f,0.f,b->BodyLight);
-			}
-			else if(IsHighVersion() == true)	// GPU 연산
-			{
-				Vector(0.1f,0.08f,0.f,b->BodyLight);
-			}
-			else	// Low로 처리 합니다. GPU연산이 없음.
-			{
-				Vector(0.1f,0.03f,0.f,b->BodyLight);
-			}
-#else // LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
 			Vector(0.1f,0.03f,0.f,b->BodyLight);
-#endif // LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
 		}
 
-        if ( InChaosCastle() )
+        if ( gMapManager.InChaosCastle() )
         {
 			Vector(0.1f,0.01f,0.f,b->BodyLight);
 			Scale = 1.f + 0.1f/o->Scale;
@@ -12484,27 +12031,10 @@ void RenderPartObject(OBJECT *o,int Type,void *p2,vec3_t Light,float Alpha,int I
 		}
 		else
 		{
-			// MR0의 경우 PlayerCharacter선택 시 Silhouette의 색감이 어떤 이유로 틀리며 이를 보정합니다.
-#ifdef LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-			// VBO VertexShader 연산의 경우 실루엣(마우스 선택케릭터에 대한 후광 모델 효과) 색 보정이 필요.
-			if(IsHighestVersion() == true)		// GPU 연산
-			{
-				Vector(0.1f,0.08f,0.f,b->BodyLight);
-			}
-			else if(IsHighVersion() == true)	// GPU 연산
-			{
-				Vector(0.1f,0.08f,0.f,b->BodyLight);
-			}
-			else	// Low로 처리 합니다. GPU연산이 없음.
-			{
-				Vector(0.1f,0.03f,0.f,b->BodyLight);
-			}
-#else // #ifdef LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
 			Vector(0.7f,0.2f,0.f,b->BodyLight);
-#endif // #ifdef LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
 		}
 
-        if ( InChaosCastle() )
+        if ( gMapManager.InChaosCastle() )
         {
 			Vector(0.7f,0.07f,0.f,b->BodyLight);
 			Scale = 1.f + 0.04f/o->Scale + 0.02f;
@@ -12522,213 +12052,6 @@ void RenderPartObject(OBJECT *o,int Type,void *p2,vec3_t Light,float Alpha,int I
      	b->Transform(o->BoneTransform,o->BoundingBoxMin,o->BoundingBoxMax,&o->OBB,Translate);
     }
 
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX		// 부분 물리메쉬를 통 물리메쉬 객체로 처리
-	if(p && 
-		(	Type == MODEL_PANTS+18 ||		// 법사 그랜드소울 바지
-			Type == MODEL_PANTS+19 ||
-			Type == MODEL_PANTS+22 )		// 법사 블랙소울 바지
-			)
-	{		
-		if( !p->m_pCloth[0] )
-		{
-			int numCloth = 0;		// 물리 모델 갯수
-			
-			// 1. 통물리 모델 선언
-			CPhysicsCloth *pCloth[2] = { NULL, NULL };
-			
-			switch(Type)
-			{
-			case MODEL_PANTS+18:	// 법사 그랜드소울 바지
-				{
-					numCloth = 1;
-					pCloth[0] = new CPhysicsCloth;
-					pCloth[0]->Create( o, 17, 0.0f, 9.0f, 7.0f, 5, 8, 45.0f, 85.0f, 
-						BITMAP_PANTS_G_SOUL, 
-						BITMAP_PANTS_G_SOUL, 
-						PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, MODEL_PANTS+18, 2 );
-					pCloth[0]->AddCollisionSphere( 0.0f, -15.0f, -20.0f, 30.0f, 2);
-				}
-				break;
-			case MODEL_PANTS+19:
-				{
-					numCloth = 0;
-				}
-				break;
-			case MODEL_PANTS+22:	// 법사 블랙소울 바지
-				{
-					numCloth = 1;
-					pCloth[0] = new CPhysicsCloth;
-					pCloth[0]->Create( o, 17, 0.0f, 9.0f, 7.0f, 7, 5, 50.0f, 100.0f, 
-						BITMAP_PANTS_B_SOUL_PHYSIQMESH, 
-						BITMAP_PANTS_B_SOUL_PHYSIQMESH, 
-						PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER,MODEL_PANTS+18, 2 );
-					pCloth[0]->AddCollisionSphere( 0.0f, -15.0f, -20.0f, 30.0f, 2);
-				}
-				break;
-			}	// switch(Type)
-			
-			p->m_byNumCloth = numCloth;
-			p->m_pCloth[0] = ( void*)pCloth[0];
-			p->m_pCloth[1] = ( void*)pCloth[1];
-		}	
-		else	// if ( !c->Object.m_pCloth)
-		{
-			for ( int i=0; i<p->m_byNumCloth; i++ )
-			{	
-				CPhysicsCloth *pCloth = (CPhysicsCloth*)p->m_pCloth[i];
-				
-				float Flag = 0.005f;
-				if( g_isCharacterBuff(o, eDeBuff_Stun ) 
-					|| g_isCharacterBuff(o, eDeBuff_Sleep ) )
-				{
-					Flag = 0.0f;
-				}
-				
-				if ( pCloth[i].GetOwner() == NULL)	// 지워진 부분이면 그리지 않고 통과한다.
-				{
-					continue;
-				}
-				else
-				{
-					if ( !pCloth[i].Move2( Flag, 5))
-					{
-						DeleteCloth(NULL, o, p);
-					}
-					else	// if ( !pCloth[i].Move2( Flag, 5))
-					{
-						int iPhysiqMesh = -1;
-
-						switch( Type )
-						{
-						case MODEL_PANTS+18:	// 법사 그랜드소울 바지	
-						case MODEL_PANTS+22:	// 법사 블랙소울 바지
-							{
-								iPhysiqMesh = 2;
-							}
-							break;
-						}
-
-						vec3_t		v3LightPhysicMesh;
-						if(g_pOption->GetRenderLevel())
-						{
-							int iItemLevel = (ItemLevel>>3)&15;
-
-							if(iItemLevel < 8 && g_pOption->GetRenderLevel() >= 1)  //  +7
-							{
-								//Vector(Light[0]*0.8f,Light[1]*0.8f,Light[2]*0.8f,b->BodyLight);
-								//RenderPartObjectBody(b,o,Type,Alpha,RenderType);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT,1.f);
-
-								Vector(Light[0]*0.8f,Light[1]*0.8f,Light[2]*0.8f,v3LightPhysicMesh);
-								pCloth[i].Render( &v3LightPhysicMesh);
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME|RENDER_BRIGHT, true, v3LightPhysicMesh, -1, Alpha );
-							}
-							else if(iItemLevel < 9 && g_pOption->GetRenderLevel() >= 1)  //  +8
-							{
-								//Vector(Light[0]*0.8f,Light[1]*0.8f,Light[2]*0.8f,b->BodyLight);
-								//RenderPartObjectBody(b,o,Type,Alpha,RenderType);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT,1.f);
-
-								Vector(Light[0]*0.8f,Light[1]*0.8f,Light[2]*0.8f,v3LightPhysicMesh);
-								pCloth[i].Render( &v3LightPhysicMesh);
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME|RENDER_BRIGHT, true, v3LightPhysicMesh, -1, Alpha );
-							}
-							else if(iItemLevel < 10 && g_pOption->GetRenderLevel() >= 2) //  +9
-							{
-								//Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,b->BodyLight);
-								//RenderPartObjectBody(b,o,Type,Alpha,RenderType);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-
-								Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,v3LightPhysicMesh);
-								pCloth[i].Render( &v3LightPhysicMesh);
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-								//pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-							}
-							else if(iItemLevel < 11 && g_pOption->GetRenderLevel() >= 2) //  +10
-							{
-								//Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,b->BodyLight);
-								//RenderPartObjectBody(b,o,Type,Alpha,RenderType);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-
-								Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,v3LightPhysicMesh);
-								pCloth[i].Render( &v3LightPhysicMesh);
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-								//pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-							}
-							else if(iItemLevel < 12 && g_pOption->GetRenderLevel() >= 3) //  +11
-							{
-								//Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,b->BodyLight);
-								//RenderPartObjectBody(b,o,Type,Alpha,RenderType);
-								//RenderPartObjectBodyColor2(b,o,Type,1.f,RENDER_CHROME2|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-								
-								Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,v3LightPhysicMesh);
-								pCloth[i].Render( &v3LightPhysicMesh);
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME2|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, 1.0f );
-								//pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-							}
-							else if(iItemLevel < 13 && g_pOption->GetRenderLevel() >= 3) //  +12
-							{
-								//Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,b->BodyLight);
-								//RenderPartObjectBody(b,o,Type,Alpha,RenderType);
-								//RenderPartObjectBodyColor2(b,o,Type,1.f,RENDER_CHROME2|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-
-								Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,v3LightPhysicMesh);
-								pCloth[i].Render( &v3LightPhysicMesh);
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME2|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, 1.0f );
-								//pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-							}
-							else if(iItemLevel < 14 && g_pOption->GetRenderLevel() >= 4) //  +13
-							{
-								//Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,b->BodyLight);
-								//RenderPartObjectBody(b,o,Type,Alpha,RenderType);
-								//RenderPartObjectBodyColor2(b,o,Type,1.f,RENDER_CHROME4|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-								//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-
-								Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,v3LightPhysicMesh);
-								pCloth[i].Render( &v3LightPhysicMesh);
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME4|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, 1.0f );
-								//pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, Alpha );
-							}
-							else
-							{
-								//VectorCopy(Light,b->BodyLight);
-								//RenderPartObjectBody(b,o,Type,Alpha,RenderType);
-
-								Vector(Light[0]*0.8f,Light[1]*0.8f,Light[2]*0.8f,v3LightPhysicMesh);
-								pCloth[i].Render( &v3LightPhysicMesh);
-								pCloth[i].Render_MappingOption( *b, iPhysiqMesh, RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA), true, v3LightPhysicMesh, -1, 1.0f );
-							}
-						}	// if(g_pOption->GetRenderLevel())
-
-						// 액설런트 효과에 대한 처리
-						if((Option1&63)>0)
-						{
-							float fLuminosity = sinf(WorldTime*0.002f)*0.5f+0.5f;
-							Vector(fLuminosity,fLuminosity*0.3f,1.f-fLuminosity,v3LightPhysicMesh);
-
-							pCloth[i].Render_MappingOption( *b, iPhysiqMesh, 
-												RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),
-												true, v3LightPhysicMesh, -1, 1.0f, 1.0f, false );
-						}
-
-					}	// if ( !pCloth[i].Move2( Flag, 5))
-
-				}
-			} // for ( int i=0; i<p->m_byNumCloth; i++ )
-		} // if( p->m_pCloth[0] ) 
-	}
-#else // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX	
-    //  장비 아이템에 천효과 붙이기.
 	if(p)
 	{
 		int iCloth = 0;
@@ -12803,26 +12126,11 @@ void RenderPartObject(OBJECT *o,int Type,void *p2,vec3_t Light,float Alpha,int I
 		}
 	}
 
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-
-#ifdef PJH_NEW_CHROME
-	if(ExtOption > MAX_MODELS)
-	{
-		RenderPartObjectEffect(o,Type,Light,Alpha,ItemLevel,Option1,MAX_MODELS + 1,Select,RenderType);
-	}
-	else
-#endif //PJH_NEW_CHROME
-
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!g_CMonkSystem.RageFighterEffect(o, Type))
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	RenderPartObjectEffect(o,Type,Light,Alpha,ItemLevel,Option1,ExtOption,Select,RenderType);
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 동적 그림자 처리(현재는 쓰이지 않음)
-///////////////////////////////////////////////////////////////////////////////
 
 float AmbientShadowAngle = 180.f;
 

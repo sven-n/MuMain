@@ -31,7 +31,6 @@ namespace SEASON3A
 
 	public:
 		bool IsHolyItemPickState();
-		bool IsCursedTemple();
 		bool IsPartyMember( DWORD selectcharacterindex );
 		void ReceiveCursedTempleInfo( BYTE* ReceiveBuffer );
 		void ReceiveCursedTempleState( const eCursedTempleState state );
@@ -81,13 +80,6 @@ namespace SEASON3A
 		float				m_fGaugebarCloseTimer;
 #endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 	};
-
-	inline
-	bool CursedTemple::IsCursedTemple()
-	{
-		extern int World;
-		return ( World >= WD_45CURSEDTEMPLE_LV1 && World <= WD_45CURSEDTEMPLE_LV6) ? true : false;
-	}
 };
 
 #define g_TimeController SEASON3A::TimeController::GetInstance()

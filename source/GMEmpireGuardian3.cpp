@@ -127,7 +127,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
 
 bool GMEmpireGuardian3::MoveObject(OBJECT* o)
 {
-	if(IsEmpireGuardian3() == false)
+	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
 
 	Alpha(o);
@@ -752,7 +752,7 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
 bool GMEmpireGuardian3::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(IsEmpireGuardian3() == false)
+	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
 
 	//g_EmpireGuardian1에 character정보 있음
@@ -766,7 +766,7 @@ bool GMEmpireGuardian3::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 {
-	if(IsEmpireGuardian3() == false)
+	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
 
 	vec3_t p, Position, Light;
@@ -1165,7 +1165,7 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 void GMEmpireGuardian3::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(IsEmpireGuardian3() == false)
+	if(gMapManager.IsEmpireGuardian3() == false)
 		return;
 	
 	switch(o->Type)
@@ -1199,29 +1199,17 @@ void GMEmpireGuardian3::SetWeather(int weather)
 
 bool GMEmpireGuardian3::CreateRain( PARTICLE* o )
 {
-	//비
 	return g_EmpireGuardian1.CreateRain(o);
 }
 
 void GMEmpireGuardian3::RenderFrontSideVisual()
 {
-	//안개, 천둥
 	g_EmpireGuardian1.RenderFrontSideVisual();
-}
-
-bool IsEmpireGuardian3()
-{
-	if(World == WD_71EMPIREGUARDIAN3)
-	{
-		return true;
-	}
-
-	return false;
 }
 
 bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 {
-	if(IsEmpireGuardian3() == false)
+	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
 
 	//g_EmpireGuardian1에 SetCurrentActionMonster정보 있음
@@ -1370,7 +1358,7 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
 bool GMEmpireGuardian3::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if(IsEmpireGuardian3() == false)
+	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
 
 // 	switch(c->MonsterIndex) 
@@ -1383,7 +1371,7 @@ bool GMEmpireGuardian3::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 // 몬스터 사운드
 bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o) 
 {
-	if(IsEmpireGuardian3() == false)
+	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
 
 	//g_EmpireGuardian1에 PlayMonsterSound정보 있음
@@ -1514,7 +1502,7 @@ void GMEmpireGuardian3::PlayObjectSound(OBJECT* o)
 
 void GMEmpireGuardian3::PlayBGM()
 {
-	if (IsEmpireGuardian3())
+	if (gMapManager.IsEmpireGuardian3())
 	{
 		PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN3]);
 	}

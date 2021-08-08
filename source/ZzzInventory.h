@@ -156,7 +156,6 @@ extern char	g_lpszKeyPadInput[2][MAX_KEYPADINPUT + 1];
 //  카오스 조합.
 //////////////////////////////////////////////////////////////////////////
 
-const char* GetMapName( int iMap);
 #ifdef ASG_ADD_GENS_SYSTEM
 bool IsStrifeMap(int nMapIndex);
 #endif	// ASG_ADD_GENS_SYSTEM

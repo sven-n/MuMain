@@ -629,7 +629,7 @@ bool GMUnitedMarketPlace::MoveRain( PARTICLE* o )
 
 bool IsUnitedMarketPlace()
 {
-	if(World == WD_79UNITEDMARKETPLACE)
+	if(gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
 	{
 		return true;
 	}

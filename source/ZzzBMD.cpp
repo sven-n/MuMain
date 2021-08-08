@@ -17,6 +17,7 @@
 #include "ZzzAI.h"
 #include "SMD.h"
 #include "zzzEffect.h"
+#include "MapManager.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 //#include "FillPolygon.h"
 
@@ -502,7 +503,7 @@ void BMD::Transform(float (*BoneMatrix)[3][4],vec3_t BoundingBoxMin,vec3_t Bound
 		{
 			Vector(1.3f,0.f,2.f,Position);
 		}
-        else if ( battleCastle::InBattleCastle() )
+        else if ( gMapManager.InBattleCastle() )
         {
             Vector ( 0.5f, -1.f, 1.f, Position );
             Vector ( 0.f, 0.f, -45.f, ShadowAngle );
@@ -843,7 +844,7 @@ bool BMD::PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigne
 		{
 			fTemp = *AnimationFrame+2; // 케릭터 씬일때
 		}
-		else if(World == WD_39KANTURU_3RD && CurrentAction == MONSTER01_APEAR)
+		else if(gMapManager.WorldActive == WD_39KANTURU_3RD && CurrentAction == MONSTER01_APEAR)
 		{
 			fTemp = *AnimationFrame+1;
 		}
@@ -3682,7 +3683,7 @@ void BMD::RenderBodyShadow(int BlendMesh,int HiddenMesh,int StartMeshNumber, int
     float sx = 2000.f;
     float sy = 4000.f;
 
-    if ( battleCastle::InBattleCastle() )
+    if ( gMapManager.InBattleCastle() )
     {
         sx = 2500.f;
         sy = 4000.f;

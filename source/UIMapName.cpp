@@ -8,7 +8,7 @@
 
 #include "stdafx.h"
 #include "UIMapName.h"
-
+#include "MapManager.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 
@@ -304,27 +304,27 @@ void CUIMapName::ShowMapName()
 	m_dwDeltaTickSum = 0;
 
 	//. GM맵은 맵이름을 출력하지 않는다. 
-	if(World == WD_40AREA_FOR_GM)
+	if(gMapManager.WorldActive == WD_40AREA_FOR_GM)
 	{
 		m_eState = HIDE;
 		return;
 	}
 
-	if (m_nOldWorld != World)
+	if (m_nOldWorld != gMapManager.WorldActive)
 	{
 	// 맵 이름 이미지 교체.
 		char szImgPath[128];
-		::strcpy(szImgPath, m_mapImgPath[World].data());
+		::strcpy(szImgPath, m_mapImgPath[gMapManager.WorldActive].data());
 
 #ifdef LDS_ADD_EMPIRE_GUARDIAN
 		DeleteBitmap(BITMAP_INTERFACE_EX+45);
 #endif	// LDS_ADD_EMPIRE_GUARDIAN
 		LoadBitmap(szImgPath, BITMAP_INTERFACE_EX+45);
 		
-		m_nOldWorld = World;
+		m_nOldWorld = gMapManager.WorldActive;
 
 #ifdef ASG_ADD_GENS_SYSTEM
-		m_bStrife = ::IsStrifeMap(World);
+		m_bStrife = ::IsStrifeMap(gMapManager.WorldActive);
 #endif	// ASG_ADD_GENS_SYSTEM
 	}
 }

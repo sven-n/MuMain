@@ -60,13 +60,8 @@ public:
 	
 private:
 	CGM_PK_Field();
-	
-	// 몬스터 렌더링
 	bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
 };
-
-// pk필드 맵인가
-extern bool IsPKField();
 
 #endif //PBG_ADD_PKFIELD
 

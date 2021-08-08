@@ -7,9 +7,8 @@
 #include "NewUISystem.h"
 #include "wsclientinline.h"
 #include "CSChaosCastle.h"
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #include "ZzzOpenData.h"
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+#include "MapManager.h"
 using namespace SEASON3B;
 
 #ifdef PSW_FIX_INPUTTEXTMACRO
@@ -282,10 +281,10 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 
 #ifdef LDK_FIX_EXCEPTION_SETWHISPERID_NOTMODELPLAYER_INCHAOSCASTLE
 			//채팅창 열고 마우스우클릭시 귀속말id 입력 예외처리(2008.5.7)
-			if(pCha->Object.Kind == KIND_PLAYER && !InChaosCastle()
+			if(pCha->Object.Kind == KIND_PLAYER && !gMapManager.InChaosCastle()
 #ifdef ASG_ADD_GENS_SYSTEM
 				// 분쟁지역에서는 타 세력 플래이어의 이름이 노출시키면 안됨.
-				&& !(::IsStrifeMap(World) && Hero->m_byGensInfluence != pCha->m_byGensInfluence)
+				&& !(::IsStrifeMap(gMapManager.WorldActive) && Hero->m_byGensInfluence != pCha->m_byGensInfluence)
 #endif	// ASG_ADD_GENS_SYSTEM
 				)
 #endif //LDK_FIX_EXCEPTION_SETWHISPERID_NOTMODELPLAYER_INCHAOSCASTLE
@@ -560,12 +559,12 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 	{
 		// 카오스캐슬이고 실제 싸움 시작전에는 채팅창이 열린다.
 		// 실제 이벤트가 시작하면 이벤트 타임 UI 보이기 시작한다.
-		if(InChaosCastle() == true && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME) == false)
+		if(gMapManager.InChaosCastle() == true && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME) == false)
 
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_CHATINPUTBOX);
 		}
-		else if(InChaosCastle() == false)
+		else if(gMapManager.InChaosCastle() == false)
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_CHATINPUTBOX);
 		}
@@ -687,7 +686,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 						int iMapIndex = g_pMoveCommandWindow->GetMapIndexFromMovereq(pszMapName);
 
 						// 현재 위치하고 있는 맵이나 이동하려는 맵이 다른 서버에 존재(로랜협곡, 로랜시장)
-						if (g_pMoveCommandWindow->IsTheMapInDifferentServer(World, iMapIndex))
+						if (g_pMoveCommandWindow->IsTheMapInDifferentServer(gMapManager.WorldActive, iMapIndex))
 						{
 							SaveOptions();
 						}

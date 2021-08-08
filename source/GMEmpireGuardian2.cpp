@@ -139,7 +139,7 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
 
 bool GMEmpireGuardian2::MoveObject(OBJECT* o)
 {
-	if(IsEmpireGuardian2() == false)
+	if(gMapManager.IsEmpireGuardian2() == false)
 		return false;
 	
 	Alpha(o);
@@ -221,7 +221,7 @@ bool GMEmpireGuardian2::MoveObject(OBJECT* o)
 
 bool GMEmpireGuardian2::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
-	if(IsEmpireGuardian2() == false)
+	if(gMapManager.IsEmpireGuardian2() == false)
 		return false;
 	
 	//g_EmpireGuardian1에 character정보 있음
@@ -238,7 +238,7 @@ bool GMEmpireGuardian2::MoveMonsterVisual(OBJECT* o, BMD* b)
 // 몬스터(NPC) 프로세서 - 제국 수호군 특화 (Boss gaion이 선택한 케릭터 정보필요로 character* c 인자값 추가.)
 bool GMEmpireGuardian2::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
- 	if(IsEmpireGuardian2() == false)
+ 	if(gMapManager.IsEmpireGuardian2() == false)
  		return false;
 	
 	//g_EmpireGuardian1에 character정보 있음
@@ -577,7 +577,7 @@ void GMEmpireGuardian2::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
 bool GMEmpireGuardian2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(IsEmpireGuardian2() == false)
+	if(gMapManager.IsEmpireGuardian2() == false)
 		return false;
 
 	//g_EmpireGuardian1에 character정보 있음
@@ -604,7 +604,7 @@ bool GMEmpireGuardian2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool GMEmpireGuardian2::RenderObjectVisual( OBJECT* o, BMD* b )
 {
-	if(IsEmpireGuardian2() == false)
+	if(gMapManager.IsEmpireGuardian2() == false)
 		return false;
 
 	vec3_t p, Position, Light;
@@ -1064,7 +1064,7 @@ bool GMEmpireGuardian2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 void GMEmpireGuardian2::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(IsEmpireGuardian2() == false)
+	if(gMapManager.IsEmpireGuardian2() == false)
 		return;
 
 	switch(o->Type)
@@ -1098,29 +1098,17 @@ void GMEmpireGuardian2::SetWeather(int weather)
 
 bool GMEmpireGuardian2::CreateRain( PARTICLE* o )
 {
-	//비
 	return g_EmpireGuardian1.CreateRain(o);
 }
 
 void GMEmpireGuardian2::RenderFrontSideVisual()
 {
-	//안개, 천둥
 	g_EmpireGuardian1.RenderFrontSideVisual();
-}
-
-bool IsEmpireGuardian2()
-{
-	if(World == WD_70EMPIREGUARDIAN2)
-	{
-		return true;
-	}
-
-	return false;
 }
 
 bool GMEmpireGuardian2::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 {
-	if(IsEmpireGuardian2() == false)
+	if(gMapManager.IsEmpireGuardian2() == false)
 		return false;
 
 	//g_EmpireGuardian1에 SetCurrentActionMonster정보 있음
@@ -1264,7 +1252,7 @@ bool GMEmpireGuardian2::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
 bool GMEmpireGuardian2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if(IsEmpireGuardian2() == false)
+	if(gMapManager.IsEmpireGuardian2() == false)
 		return false;
 
 	switch(c->MonsterIndex) 
@@ -1317,7 +1305,7 @@ bool GMEmpireGuardian2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 // 몬스터 사운드
 bool GMEmpireGuardian2::PlayMonsterSound(OBJECT* o) 
 {
-	if(IsEmpireGuardian2() == false)
+	if(gMapManager.IsEmpireGuardian2() == false)
 		return false;
 
 	//g_EmpireGuardian1에 PlayMonsterSound정보 있음
@@ -1471,7 +1459,7 @@ void GMEmpireGuardian2::PlayObjectSound(OBJECT* o)
 
 void GMEmpireGuardian2::PlayBGM()
 {
-	if (IsEmpireGuardian2())
+	if (gMapManager.IsEmpireGuardian2())
 	{
 		PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN2]);
 	}

@@ -17,7 +17,7 @@
 #include "ZzzLodTerrain.h"
 #include "BoneManager.h"
 #include "PhysicsManager.h"
-
+#include "MapManager.h"
 #include "GOBoid.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
@@ -252,7 +252,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
 
 bool GMEmpireGuardian1::MoveObject(OBJECT* o)
 {
-	if(IsEmpireGuardian1() == false) return false;
+	if(gMapManager.IsEmpireGuardian1() == false) return false;
 
 	Alpha(o);
 	if(o->Alpha < 0.01f) return false;
@@ -334,10 +334,10 @@ bool GMEmpireGuardian1::MoveObject(OBJECT* o)
 
 bool GMEmpireGuardian1::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
-	if(	IsEmpireGuardian1() == false &&
-		IsEmpireGuardian2() == false && 
-		IsEmpireGuardian3() == false &&
-		IsEmpireGuardian4() == false )
+	if(	gMapManager.IsEmpireGuardian1() == false &&
+		gMapManager.IsEmpireGuardian2() == false && 
+		gMapManager.IsEmpireGuardian3() == false &&
+		gMapManager.IsEmpireGuardian4() == false )
 	{
 		return false;
 	}
@@ -405,10 +405,10 @@ bool GMEmpireGuardian1::MoveMonsterVisual(OBJECT* o, BMD* b)
 bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
 	
-	if(	IsEmpireGuardian1() == false &&
-		IsEmpireGuardian2() == false && 
-		IsEmpireGuardian3() == false &&
-		IsEmpireGuardian4() == false )
+	if(	gMapManager.IsEmpireGuardian1() == false &&
+		gMapManager.IsEmpireGuardian2() == false && 
+		gMapManager.IsEmpireGuardian3() == false &&
+		gMapManager.IsEmpireGuardian4() == false )
 	{
 		return false;
 	}
@@ -1425,10 +1425,10 @@ void GMEmpireGuardian1::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
 bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(	IsEmpireGuardian1() == false &&
-		IsEmpireGuardian2() == false && 
-		IsEmpireGuardian3() == false &&
-		IsEmpireGuardian4() == false )
+	if(	gMapManager.IsEmpireGuardian1() == false &&
+		gMapManager.IsEmpireGuardian2() == false && 
+		gMapManager.IsEmpireGuardian3() == false &&
+		gMapManager.IsEmpireGuardian4() == false )
 	{
 		return false;
 	}
@@ -1637,7 +1637,7 @@ bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool GMEmpireGuardian1::RenderObjectVisual( OBJECT* o, BMD* b )
 {
-	if(IsEmpireGuardian1() == false) return false;
+	if(gMapManager.IsEmpireGuardian1() == false) return false;
 
 	vec3_t p, Position, Light;
 	Vector(0.f,30.f,0.f,Position);
@@ -1975,7 +1975,7 @@ bool GMEmpireGuardian1::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			int tileX = int(o->Position[0]/100);
 			int tileY = int(o->Position[1]/100);
 			//위치 강제 이동.
-			switch(World)
+			switch(gMapManager.WorldActive)
 			{
 			case WD_69EMPIREGUARDIAN1:
 				{
@@ -2018,12 +2018,12 @@ bool GMEmpireGuardian1::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 		}
 		return true;
 
-	case MODEL_MONSTER01+184:	// 사자머리 성문
+	case MODEL_MONSTER01+184:
 		{
 			int tileX = int(o->Position[0]/100);
 			int tileY = int(o->Position[1]/100);
 			//위치 강제 이동.
-			switch(World)
+			switch(gMapManager.WorldActive)
 			{
 			case WD_69EMPIREGUARDIAN1:
 				{
@@ -2332,7 +2332,7 @@ bool GMEmpireGuardian1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 void GMEmpireGuardian1::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(IsEmpireGuardian1() == false) return;
+	if(gMapManager.IsEmpireGuardian1() == false) return;
 	
 	switch(o->Type)
 	{
@@ -2360,10 +2360,10 @@ void GMEmpireGuardian1::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool GMEmpireGuardian1::CreateRain( PARTICLE* o )
 {
-	if(	IsEmpireGuardian1() == false &&
-		IsEmpireGuardian2() == false && 
-		IsEmpireGuardian3() == false &&
-		IsEmpireGuardian4() == false )
+	if(	gMapManager.IsEmpireGuardian1() == false &&
+		gMapManager.IsEmpireGuardian2() == false && 
+		gMapManager.IsEmpireGuardian3() == false &&
+		gMapManager.IsEmpireGuardian4() == false )
 	{
 		return false;
 	}
@@ -2447,36 +2447,13 @@ void GMEmpireGuardian1::RenderFrontSideVisual()
 	}
 }
 
-bool IsEmpireGuardian1()
-{
-	if(World == WD_69EMPIREGUARDIAN1)
-	{
-		return true;
-	}
-	return false;
-}
-
-#ifdef LDS_FIX_SKILLKEY_DISABLE_WHERE_EG_ALLTELESKILL
-bool IsEmpireGuardian()
-{
-	if(	IsEmpireGuardian1() == false &&
-		IsEmpireGuardian2() == false && 
-		IsEmpireGuardian3() == false &&
-		IsEmpireGuardian4() == false )
-	{
-		return false;
-	}
-
-	return true;
-}
-#endif // LDS_FIX_SKILLKEY_DISABLE_WHERE_EG_ALLTELESKILL
 
 bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 {
-	if(	IsEmpireGuardian1() == false &&
-		IsEmpireGuardian2() == false && 
-		IsEmpireGuardian3() == false &&
-		IsEmpireGuardian4() == false )
+	if(	gMapManager.IsEmpireGuardian1() == false &&
+		gMapManager.IsEmpireGuardian2() == false && 
+		gMapManager.IsEmpireGuardian3() == false &&
+		gMapManager.IsEmpireGuardian4() == false )
 	{
 		return false;
 	}
@@ -2751,7 +2728,7 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
 bool GMEmpireGuardian1::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if(IsEmpireGuardian1() == false)
+	if(gMapManager.IsEmpireGuardian1() == false)
 		return false;
 
 //  switch(c->MonsterIndex) 
@@ -2764,10 +2741,10 @@ bool GMEmpireGuardian1::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 // 몬스터 사운드
 bool GMEmpireGuardian1::PlayMonsterSound(OBJECT* o) 
 {
-	if(	IsEmpireGuardian1() == false &&
-		IsEmpireGuardian2() == false && 
-		IsEmpireGuardian3() == false &&
-		IsEmpireGuardian4() == false )
+	if(	gMapManager.IsEmpireGuardian1() == false &&
+		gMapManager.IsEmpireGuardian2() == false && 
+		gMapManager.IsEmpireGuardian3() == false &&
+		gMapManager.IsEmpireGuardian4() == false )
 	{
 		return false;
 	}
@@ -2782,7 +2759,7 @@ bool GMEmpireGuardian1::PlayMonsterSound(OBJECT* o)
 
 	switch(o->Type)
 	{	
-	case MODEL_MONSTER01+166:// 부사령관 레이몬드
+	case MODEL_MONSTER01+166:
 		{
 			switch(o->CurrentAction)
 			{
@@ -3096,15 +3073,15 @@ bool GMEmpireGuardian1::PlayMonsterSound(OBJECT* o)
 // 오브젝트 사운드
 void GMEmpireGuardian1::PlayObjectSound(OBJECT* o)
 {
-	if(	IsEmpireGuardian1() == false &&
-		IsEmpireGuardian2() == false && 
-		IsEmpireGuardian3() == false &&
-		IsEmpireGuardian4() == false )
+	if(	gMapManager.IsEmpireGuardian1() == false &&
+		gMapManager.IsEmpireGuardian2() == false && 
+		gMapManager.IsEmpireGuardian3() == false &&
+		gMapManager.IsEmpireGuardian4() == false )
 	{
 		return;
 	}
 
-	if( IsEmpireGuardian4() )
+	if( gMapManager.IsEmpireGuardian4() )
 	{
  		PlayBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, NULL, false);
  		return;
@@ -3150,7 +3127,7 @@ void GMEmpireGuardian1::PlayObjectSound(OBJECT* o)
 
 void GMEmpireGuardian1::PlayBGM()
 {
-	if (IsEmpireGuardian1())
+	if (gMapManager.IsEmpireGuardian1())
 	{
 		PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN1]);
 	}

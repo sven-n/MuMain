@@ -245,7 +245,7 @@ bool CGMSantaTown::CreateSnow( PARTICLE* o )
 
 bool IsSantaTown()
 {
-	if(World == WD_62SANTA_TOWN)
+	if(gMapManager.WorldActive == WD_62SANTA_TOWN)
 	{
 		return true;
 	}

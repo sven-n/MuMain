@@ -1,19 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  CSChaosCastle.cpp
-//
-//  내  용 : 카오스 캐슬 경기.
-//
-//  날  짜 : 2004/04/22
-//
-//  작성자 : 조 규 하.
-//
 //////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
-//////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
 #include "UIWindows.h"
@@ -29,10 +17,8 @@
 #include "CSChaosCastle.h"
 #include "wsclientinline.h"
 #include "NewUICustomMessageBox.h"
+#include "MapManager.h"
 
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
 extern int g_iChatInputType;
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];// ok, cancel // 사용여부, x, y, width, height
 extern  int g_iActionObjectType;
@@ -40,10 +26,6 @@ extern  int g_iActionWorld;
 extern  int g_iActionTime;
 extern  float g_fActionObjectVelocity;
 
-
-//////////////////////////////////////////////////////////////////////////
-//  Global Variable
-//////////////////////////////////////////////////////////////////////////
 //const   int     g_iChaosCastleLimitArea[3][4] = { { 24, 76, 43, 107 }, { 26, 78, 41, 105 }, { 28, 80, 39, 103 } };
 const   int     g_iChaosCastleLimitArea1[16] = { 23, 75, 44, 76, 43, 77, 44, 108, 23, 107, 42, 108, 23, 77, 24, 106 };
 const   int     g_iChaosCastleLimitArea2[16] = { 25, 77, 42, 78, 41, 79, 42, 106, 25, 105, 40, 106, 25, 79, 26, 104 };
@@ -51,35 +33,7 @@ const   int     g_iChaosCastleLimitArea3[16] = { 27, 79, 40, 80, 39, 81, 40, 104
 static  BYTE    g_byCurrCastleLevel = 255;
 static  bool    g_bActionMatch = true;
 
-bool InChaosCastle(int iMap)
-{
-	if((iMap >= WD_18CHAOS_CASTLE && iMap <= WD_18CHAOS_CASTLE_END)|| iMap == WD_53CAOSCASTLE_MASTER_LEVEL)
-	{
-		return true;
-	}
 
-	return false; 
-}
-
-bool InBloodCastle(int iMap)
-{
-	if((iMap >= WD_11BLOODCASTLE1 && iMap <= WD_11BLOODCASTLE_END)|| iMap == WD_52BLOODCASTLE_MASTER_LEVEL)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-bool InDevilSquare()
-{
-	return WD_9DEVILSQUARE == World ? true : false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-//  카오스캐슬에서는 Helper들을 표시하지 않는다. 모두 클리어.
-//////////////////////////////////////////////////////////////////////////
 void    ClearChaosCastleHelper ( CHARACTER* c )
 {
     c->Wing.Type    = -1;
@@ -97,18 +51,12 @@ void    ClearChaosCastleHelper ( CHARACTER* c )
 #endif
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  카오스캐슬에서의 캐릭터 장비 세팅.
-//////////////////////////////////////////////////////////////////////////
 void    ChangeChaosCastleUnit ( CHARACTER* c )
 {
-    if ( InChaosCastle()==false ) return;
+    if ( gMapManager.InChaosCastle()==false ) return;
 
-    //  모든 Helper를 클리어.
     ClearChaosCastleHelper ( c );
 
-	// 친구창 클리어
 	DWORD t_dwUIID = g_pWindowMgr->GetAddFriendWindow();
 	if(t_dwUIID != 0)
 	{
@@ -145,13 +93,9 @@ void    ChangeChaosCastleUnit ( CHARACTER* c )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  카오스 캐슬의 오브젝트 효과.
-//////////////////////////////////////////////////////////////////////////
 bool    MoveChaosCastleObjectSetting ( int& objCount, int object )
 {
-    if ( InChaosCastle()==false ) return false;
+    if ( gMapManager.InChaosCastle()==false ) return false;
 
     if ( (rand()%10)==0 && object )
     {
@@ -173,13 +117,9 @@ bool    MoveChaosCastleObjectSetting ( int& objCount, int object )
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  각각 오브젝트들을 검사후 해당 오브젝트를 찾는다.
-//////////////////////////////////////////////////////////////////////////
 bool    MoveChaosCastleObject ( OBJECT* o, int& object, int& visibleObject )
 {
-    if ( InChaosCastle()==true )
+    if ( gMapManager.InChaosCastle()==true )
     {
         int objectCount = object;
         if ( o->Type==3 )
@@ -210,13 +150,9 @@ bool    MoveChaosCastleObject ( OBJECT* o, int& object, int& visibleObject )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  카오스 캐스 월드의 오브젝트 처리.
-//////////////////////////////////////////////////////////////////////////
 bool    MoveChaosCastleAllObject ( OBJECT* o )
 {
-    if ( InChaosCastle()==false ) return false;
+    if ( gMapManager.InChaosCastle()==false ) return false;
 
     vec3_t Position;
 
@@ -339,7 +275,7 @@ bool    MoveChaosCastleAllObject ( OBJECT* o )
 //////////////////////////////////////////////////////////////////////////
 bool    CreateChaosCastleObject ( OBJECT* o )
 {
-    if ( InChaosCastle()==false ) return false;
+    if ( gMapManager.InChaosCastle()==false ) return false;
 
     switch ( o->Type )
     {
@@ -373,7 +309,7 @@ bool    CreateChaosCastleObject ( OBJECT* o )
 //////////////////////////////////////////////////////////////////////////
 bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
 {
-    if ( InChaosCastle()==false ) return false;
+    if ( gMapManager.InChaosCastle()==false ) return false;
 
     vec3_t p, Position;
 
@@ -564,7 +500,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
 //////////////////////////////////////////////////////////////////////////
 void    RenderTerrainVisual ( int xi, int yi )
 {
-    if ( InChaosCastle()==false || rand()%8 ) return;
+    if ( gMapManager.InChaosCastle()==false || rand()%8 ) return;
 
     const int* Area = NULL;
     bool  InArea = false;

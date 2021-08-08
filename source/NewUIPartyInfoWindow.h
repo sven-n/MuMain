@@ -27,7 +27,6 @@ namespace SEASON3B
 			IMAGE_PARTY_BASE_WINDOW_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	//. newui_item_back03.tga	(190,45)
 			IMAGE_PARTY_BASE_WINDOW_BTN_EXIT = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,		//. newui_exit_00.tga
 			
-			// 테이블 작성
 			IMAGE_PARTY_TABLE_TOP_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,			//. newui_item_table01(L).tga (14,14)
 			IMAGE_PARTY_TABLE_TOP_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,			//. newui_item_table01(R).tga (14,14)
 			IMAGE_PARTY_TABLE_BOTTOM_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,		//. newui_item_table02(L).tga (14,14)
@@ -37,7 +36,6 @@ namespace SEASON3B
 			IMAGE_PARTY_TABLE_LEFT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,		//. newui_item_table03(L).tga (14,1)
 			IMAGE_PARTY_TABLE_RIGHT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,		//. newui_item_table03(R).tga (14,1)
 
-			// 파티
 			IMAGE_PARTY_HPBAR_BACK = BITMAP_PARTY_INFO_BEGIN,		// newui_party_lifebar01.jpg	(151, 8)
 			IMAGE_PARTY_HPBAR,										// newui_party_lifebar02.jpg	(147, 4)
 			IMAGE_PARTY_FLAG,										// newui_party_flag.tga			(10, 12)	
@@ -99,9 +97,6 @@ namespace SEASON3B
 	
 		void RenderMemberStatue( int iIndex, PARTY_t* pMember, bool bExitBtnRender=false );
 		void RenderPartyMiniList( int iIndex, PARTY_t* pMember );
-
-		//const char* GetMapName( int iMap );
-
 	};
 }
 

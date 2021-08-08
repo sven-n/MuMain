@@ -17,7 +17,7 @@
 #include "ZzzOpenData.h"
 #include "ZzzEffect.h"
 #include "CDirection.h"
-
+#include "MapManager.h"
 #include "BoneManager.h"
 #include "dsplaysound.h"
 
@@ -26,14 +26,14 @@
 
 bool M40GMArea::IsGmArea()
 {
-	return (World == WD_40AREA_FOR_GM) ? true : false;
+	return (gMapManager.WorldActive == WD_40AREA_FOR_GM) ? true : false;
 }
 
 using namespace M37Kanturu1st;
 
 bool M37Kanturu1st::IsKanturu1st()
 {
-	return (World == WD_37KANTURU_1ST) ? true : false;
+	return (gMapManager.WorldActive == WD_37KANTURU_1ST) ? true : false;
 }
 
 bool M37Kanturu1st::CreateKanturu1stObject(OBJECT* pObject)
@@ -1451,7 +1451,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 		break;
 		case MODEL_MONSTER01+110:
 		{
-			if(World == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
+			if(gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
 			{
 				vec3_t Light;
 				float Scale, Angle;
@@ -1478,8 +1478,9 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			{
 				if(rand()%10==0)
 				{
-					if(World != WD_39KANTURU_3RD)
+					if(gMapManager.WorldActive != WD_39KANTURU_3RD)
 						CreateParticle ( BITMAP_SMOKE+1, o->Position, o->Angle, o->Light );
+
 					PlayBuffer(SOUND_KANTURU_1ST_BLADE_MOVE1 + rand() % 2);
 				}
 			}

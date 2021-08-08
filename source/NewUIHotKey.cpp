@@ -14,15 +14,8 @@
 #include "ZzzLodTerrain.h"
 #include "wsclientinline.h"
 #include "ZzzEffect.h"
-#ifdef PJH_CHARACTER_RENAME
 #include "UIMng.h"
-#endif //PJH_CHARACTER_RENAME
-#ifdef CSK_HACK_TEST
-#include "HackTest.h"
-#endif // CSK_HACK_TEST
-#ifdef LDK_ADD_SCALEFORM
-#include "CGFxProcess.h"
-#endif //LDK_ADD_SCALEFORM
+#include "MapManager.h"
 
 #ifdef FOR_WORK
 	#include "./Utilities/Log/DebugAngel.h"
@@ -66,20 +59,16 @@ bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
 {
 	extern int SelectedCharacter;
 	
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
-	// 관전 버프시 퀵커맨드창이 열리지 않는다
 	if(g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
 	{
 		return true;
 	}
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
 
-	// 퀵커맨드창 단축버튼
 	if(SelectedCharacter >= 0)
 	{
 		if(SEASON3B::IsRepeat(VK_MENU) && SEASON3B::IsRelease(VK_RBUTTON)
-			&& InChaosCastle() == false						// 카오스캐슬이 아니고
-			&& g_CursedTemple->IsCursedTemple() == false	// 환영사원이 아니면
+			&& gMapManager.InChaosCastle() == false
+			&& gMapManager.IsCursedTemple() == false
 			)
 		{
 			CHARACTER* pCha = &CharactersClient[SelectedCharacter];	
@@ -89,8 +78,6 @@ bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
 				return false;
 			}
 			
-#ifdef KJH_FIX_WOPS_K22844_CHRISTMAS_TRANSFORM_RING_SUMMON_TO_COMMAND
-			// 명령어가 적용되지 말아야 할 캐릭터들
 			if( (pCha->Object.SubType == MODEL_XMAS_EVENT_CHA_DEER)
 				|| (pCha->Object.SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN)
 				|| (pCha->Object.SubType == MODEL_XMAS_EVENT_CHA_SSANTA)
@@ -98,14 +85,10 @@ bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
 			{
 				return false;
 			}
-#endif // KJH_FIX_WOPS_K22844_CHRISTMAS_TRANSFORM_RING_SUMMON_TO_COMMAND
 
-#ifdef ASG_ADD_GENS_SYSTEM
-			// 분쟁지역에서는 타 세력 플래이어의 메뉴가 뜨면 안됨.
-			if (::IsStrifeMap(World) && Hero->m_byGensInfluence != pCha->m_byGensInfluence)
+			if (::IsStrifeMap(gMapManager.WorldActive) && Hero->m_byGensInfluence != pCha->m_byGensInfluence)
 				return false;
-#endif	// ASG_ADD_GENS_SYSTEM
-			// 거리 계산
+
 			float fPos_x = pCha->Object.Position[0] - Hero->Object.Position[0];
 			float fPos_y = pCha->Object.Position[1] - Hero->Object.Position[1];
 			float fDistance = sqrtf((fPos_x * fPos_x) + (fPos_y * fPos_y));
@@ -123,7 +106,6 @@ bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
 			}
 			else
 			{
-				// 1388 "거리가 멀어 사용할 수 없습니다."
 				g_pChatListBox->AddText("", GlobalText[1388], SEASON3B::TYPE_ERROR_MESSAGE);
 				g_pQuickCommand->CloseQuickCommand();
 			}
@@ -147,46 +129,36 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 		}
 	}
 
-	// 게임종료 상태일때는 ESC키를 제외한 단축키가 먹지 않는다.
 	if( m_bStateGameOver == true )
 	{
 		return false;
 	}
 
-#ifdef PJH_ADD_MINIMAP
 	if(SEASON3B::IsPress(VK_TAB) == false && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MINI_MAP) == true)
 	{
 		return false;
 	}
-#endif //PJH_ADD_MINIMAP
 
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
-	// 관전 버프시 ESC키를 제외한 단축키가 먹지 않는다.
 	if(g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
 	{
-		if (SEASON3B::IsPress('M') == true)		// 이동명령만 가능하다 (완전 차단을 위해 아래쪽에서 복사해 왔음: 내용 수정시 아래에 'M'처리도 같이 고쳐야함!)
+		if (SEASON3B::IsPress('M') == true)
 		{
 			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MOVEMAP);
 			PlayBuffer(SOUND_CLICK01);
 		}
 		return false;
 	}
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
 
-	// 스페이스바키 누르면 아이템 자동줍기
 	if(AutoGetItem() == true)
 	{
 		return false;
 	}
 
-	// 인벤토리창 단축키만 먹는 창들
 	if(CanUpdateKeyEventRelatedMyInventory() == true)
 	{
 		if(SEASON3B::IsPress('I') || SEASON3B::IsPress('V'))
 		{
-#ifdef YDG_FIX_NPCSHOP_SELLING_LOCK
 			if (g_pNPCShop->IsSellingItem() == false)
-#endif	// YDG_FIX_NPCSHOP_SELLING_LOCK
 			{
 				g_pNewUISystem->Toggle(SEASON3B::INTERFACE_INVENTORY);
 				PlayBuffer(SOUND_CLICK01);
@@ -201,14 +173,9 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 		return true;
 	}
 
-	//. 모든 인터페이스 단축키 설정
-	if(SEASON3B::IsPress('F'))			// 친구창
+	if(SEASON3B::IsPress('F'))
 	{
-		if(InChaosCastle() == true 
-#ifndef CSK_FIX_CHAOSFRIENDWINDOW		// 정리할 때 지워야 하는 소스	
-			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME) == true
-#endif //! CSK_FIX_CHAOSFRIENDWINDOW	// 정리할 때 지워야 하는 소스
-			)
+		if(gMapManager.InChaosCastle() == true)
 		{
 			return true;
 		}
@@ -219,7 +186,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 		{
 			if(g_pChatListBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
 			{
-				g_pChatListBox->AddText("",GlobalText[1067],SEASON3B::TYPE_SYSTEM_MESSAGE);	// "레벨 6부터 내친구 기능 사용이 가능합니다."
+				g_pChatListBox->AddText("",GlobalText[1067],SEASON3B::TYPE_SYSTEM_MESSAGE);
 			}
 		}
 		else
@@ -230,66 +197,42 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-	else if(SEASON3B::IsPress('I') || SEASON3B::IsPress('V'))	// 인벤토리창
+	else if(SEASON3B::IsPress('I') || SEASON3B::IsPress('V'))
 	{
-#ifdef YDG_FIX_NPCSHOP_SELLING_LOCK
 		if (g_pNPCShop->IsSellingItem() == false)
-#endif	// YDG_FIX_NPCSHOP_SELLING_LOCK
 		{
 			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_INVENTORY);
 			PlayBuffer(SOUND_CLICK01);
 			return false;
 		}
 	}
-	else if(SEASON3B::IsPress('C'))		// 캐릭터정보창
+	else if(SEASON3B::IsPress('C'))
 	{
 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_CHARACTER);
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-	else if(SEASON3B::IsPress('T'))		// 퀘스트창
+	else if(SEASON3B::IsPress('T'))
 	{
 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MYQUEST);
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-	else if(SEASON3B::IsPress('P'))		// 파티창
+	else if(SEASON3B::IsPress('P'))
 	{
 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_PARTY);
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-	else if(SEASON3B::IsPress('G'))		// 길드정보창
+	else if(SEASON3B::IsPress('G'))
 	{
 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_GUILDINFO);
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-
 	else if(SEASON3B::IsPress('A'))
 	{
-
-
-#ifdef DO_PROCESS_DEBUGCAMERA	// 
-		if( EDEBUGCAMERA_NONE == g_pDebugCameraManager->GetActiveCameraMode() )
-		{
-			if(IsMasterLevel( Hero->Class ) == true 
-#ifdef KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT
-				&& GetCharacterClass(Hero->Class) != CLASS_DIMENSIONMASTER			// 2008.06.13 현재는 소환술사 마스터스킬 불가. 풀릴때 define 주석처리
-#endif // KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT
-#ifdef PBG_ADD_NEWCHAR_MONK
-				&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT
-#endif //PBG_ADD_NEWCHAR_MONK
-				)
-			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
-			PlayBuffer(SOUND_CLICK01);
-		}
-#else // DO_PROCESS_DEBUGCAMERA	// 
-
 		if(IsMasterLevel( Hero->Class ) == true 
-#ifdef KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT
-			&& GetCharacterClass(Hero->Class) != CLASS_DIMENSIONMASTER			// 2008.06.13 현재는 소환술사 마스터스킬 불가. 풀릴때 define 주석처리
-#endif // KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT
 #ifdef PBG_ADD_NEWCHAR_MONK
 			&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT				// 현재 마스터 스킬트리 없음
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -297,75 +240,43 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
 		PlayBuffer(SOUND_CLICK01);
 
-#endif // DO_PROCESS_DEBUGCAMERA
-
 		return false;
 	}
-
-	
-#if defined NEW_USER_INTERFACE_SHELL && !defined LDK_MOD_GLOBAL_PORTAL_CASHSHOP_BUTTON_DENY
-	else if(SEASON3B::IsPress('X')) 
-	{
-		if( g_pNewUISystem->IsVisible( SEASON3B::INTERFACE_PARTCHARGE_SHOP ) == false ) 
-		{
-			TheShopServerProxy().SetShopIn();
-			return false;
-		}
-		else 
-		{
-			SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
-			TheShopServerProxy().SetShopOut();
-			return false;
-		}
-	}
-#endif //NEW_USER_INTERFACE_SHELL
-	else if(SEASON3B::IsPress('U'))		// 윈도우메뉴창
+	else if(SEASON3B::IsPress('U'))	
 	{
 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_WINDOW_MENU);
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-	else if(InChaosCastle() == false && SEASON3B::IsPress('D'))		// 커맨드 창
+	else if(gMapManager.InChaosCastle() == false && SEASON3B::IsPress('D'))
 	{
-#ifdef DO_PROCESS_DEBUGCAMERA
-		if( EDEBUGCAMERA_NONE == g_pDebugCameraManager->GetActiveCameraMode() )
+		if (::IsStrifeMap(gMapManager.WorldActive))
 		{
-			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_COMMAND);
-			PlayBuffer(SOUND_CLICK01);
-		}
-#else // DO_PROCESS_DEBUGCAMERA
-#ifdef ASG_ADD_GENS_SYSTEM
-		if (::IsStrifeMap(World))	// 분쟁지역인가?
-		{
-			if (g_pChatListBox->CheckChatRedundancy(GlobalText[2989]) == FALSE)	// 메시지 중복을 막음.(하지만 2라인 이상은 막지못하는 버그가 있음)
-				g_pChatListBox->AddText("", GlobalText[2989], SEASON3B::TYPE_SYSTEM_MESSAGE);	// "분쟁지역에서는 커맨드창이 활성화 되지 않습니다."
+			if (g_pChatListBox->CheckChatRedundancy(GlobalText[2989]) == FALSE)
+				g_pChatListBox->AddText("", GlobalText[2989], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		}
 		else
 		{
-#endif	// ASG_ADD_GENS_SYSTEM
 			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_COMMAND);
 			PlayBuffer(SOUND_CLICK01);
-#ifdef ASG_ADD_GENS_SYSTEM
 		}
-#endif	// ASG_ADD_GENS_SYSTEM
-#endif // DO_PROCESS_DEBUGCAMERA
 		
 		return false;
 	}
-	else if(SEASON3B::IsPress(VK_F1) == true)	// 도움말 창
+	else if(SEASON3B::IsPress(VK_F1) == true)
 	{
 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_HELP);
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-	else if(SEASON3B::IsPress('M') == true)		// 이동 명령 창
+	else if(SEASON3B::IsPress('M') == true)
 	{
 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MOVEMAP);
 		PlayBuffer(SOUND_CLICK01);
 
 		return false;
 	}
-	else if(SEASON3B::IsPress(VK_TAB) == true && battleCastle::InBattleCastle() == true )
+	else if(SEASON3B::IsPress(VK_TAB) == true && gMapManager.InBattleCastle() == true )
 	{
 		g_pNewUISystem->Toggle( SEASON3B::INTERFACE_SIEGEWARFARE );
 		PlayBuffer(SOUND_CLICK01);
@@ -385,28 +296,6 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 	}
 #endif //PJH_ADD_MINIMAP
 
-#ifdef _SHOPDEBUGMODE
-	else if(SEASON3B::IsPress(VK_F8) == true)
-	{
-		TheUISystem().SetDebugKey( TheUISystem().IsDebugKey() ? false : true );
-		return false;
-	}
-#endif //_SHOPDEBUGMODE
-#ifdef CSK_HACK_TEST
-	else if(SEASON3B::IsRepeat(VK_ADD) == true)
-	{
-		g_pHackTest->PlusAttackSpeed();
-	}
-	else if(SEASON3B::IsRepeat(VK_SUBTRACT) == true)
-	{
-		g_pHackTest->MinusAttackSpeed();
-	}
-	else if(SEASON3B::IsPress('Z') == true)
-	{
-		g_pHackTest->FindAllMonster();
-	}
-#endif // CSK_HACK_TEST
-	// 인게임샵 단축키 - 국내만적용
 #ifdef PBG_ADD_GENSRANKING
 	else if(SEASON3B::IsPress('B'))				// 겐스랭킹
 	{

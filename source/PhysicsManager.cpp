@@ -3,47 +3,17 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-
 #include "PhysicsManager.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzCharacter.h"
 #include "zzzEffect.h"
-
-
-#ifdef _DEBUG
-//#define DISABLE_WIND
-#endif
+#include "MapManager.h"
 
 #define RENDER_CLOTH
 #define ADD_COLLISION
 
-#ifdef _DEBUG
-#ifdef ADD_COLLISION
-//#define RENDER_COLLISION
-#endif
-#endif
-
-
-
 #define RATE_SHORT_SHOULDER		( 0.6f)
-
-/*----------------- 남은 과제 -----------------------
-
-1. 입자마다 바람이 가해지는 정도를 달리 할때 random 이 아닌 것으로 해서
-	어느 정도 그 상태가 유지되도록 한다.
-
-2. 미는 힘 줄이기
-
-//-------------------------------------------------*/
-
-
-//--------------------------------------------------------------------
-//
-//                          Physics Vertex
-//
-//--------------------------------------------------------------------
 
 float CPhysicsVertex::s_Gravity = 9.8f;
 float CPhysicsVertex::s_fMass = 0.0025f;			// 조절값 - 입자 질량 ( 탄성력을 받을때 상관)
@@ -682,7 +652,7 @@ BOOL CPhysicsCloth::Move( float fTime)
         m_fWind = ((rand()%m_byWindMax+m_byWindMin)/100.f);
 		break;
     default :
-		if(World == 55)
+		if(gMapManager.WorldActive == 55)
 			m_fWind = (float)(rand()%40+10)/50.0f;
 		else
 		   m_fWind = CPhysicsManager::s_fWind;

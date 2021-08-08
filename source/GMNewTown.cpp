@@ -18,14 +18,12 @@
 #include "GMNewTown.h"
 #include "GOBoid.h"
 #include "GIPetManager.h"
+#include "MapManager.h"
 
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 #include "w_BaseMap.h"
 #include "w_MapHeaders.h"
 #endif //PJH_NEW_SERVER_SELECT_MAP
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 using namespace SEASON3B;
 
@@ -42,18 +40,18 @@ GMNewTown::~GMNewTown()
 
 bool GMNewTown::IsCurrentMap()
 {
-	return (World == WD_51HOME_6TH_CHAR || 
+	return (gMapManager.WorldActive == WD_51HOME_6TH_CHAR || 
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-		World == WD_73NEW_LOGIN_SCENE || World == WD_74NEW_CHARACTER_SCENE
+		gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
 #else
-		World == WD_77NEW_LOGIN_SCENE || World == WD_78NEW_CHARACTER_SCENE
+		gMapManager.WorldActive == WD_77NEW_LOGIN_SCENE || World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		);
 }
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 bool GMNewTown::IsNewMap73_74()
 {
-	return (World == WD_73NEW_LOGIN_SCENE || World == WD_74NEW_CHARACTER_SCENE);
+	return (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE);
 }
 #endif //PJH_NEW_SERVER_SELECT_MAP
 
@@ -116,7 +114,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
 		return g_EmpireGuardian4.MoveObject(pObject);
 #endif //PJH_NEW_SERVER_SELECT_MAP
 
-	if (World == WD_51HOME_6TH_CHAR)
+	if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
 		PlayObjectSound(pObject);
 
 	float Luminosity;
@@ -124,18 +122,18 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
 
 	switch(pObject->Type)
 	{
-	case 0:	// »¡°£ºÒ ¹Ú½º.
+	case 0:
 		Luminosity = (float)(rand() %4 + 3) * 0.1f;
 		Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
 		AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
 		pObject->HiddenMesh = -2;
 		break;
-	case 2:  // ºÐ¼ö¹°
+	case 2:
 		{
 			pObject->BlendMeshTexCoordV += 0.015f;
 		}
 		break;	
-	case 53:  // ÆøÆ÷ 1
+	case 53:
 		{
 			pObject->BlendMeshTexCoordV += 0.015f;
 		}
@@ -143,12 +141,12 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
 	case 54 :
 		pObject->HiddenMesh = -2;
 		break;
-	case 55:  // ÆøÆ÷ 2
+	case 55:
 		{
 			pObject->BlendMeshTexCoordV += 0.015f;
 		}
 		break;	
-	case 56:	// ¹Ù´Ú ±ô¹ÚÀÌ´Â È¿°ú
+	case 56:
 		pObject->BlendMesh = 0;
        	pObject->BlendMeshLight = sinf(WorldTime*0.003f)*0.3f+0.5f;
 		pObject->Velocity = 0.05f;
@@ -156,24 +154,24 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
 	case 60 :
 		pObject->HiddenMesh = -2;
 		break;
-	case 61:	// Çª¸¥ºÒ ¹Ú½º.
+	case 61:
 		Luminosity = (float)(rand() %4 + 3) * 0.1f;
 		Vector(Luminosity * 0.2f, Luminosity * 0.6f, Luminosity, Light);
 		AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
 		pObject->HiddenMesh = -2;
 		break;
-	case 58 :	// ÆøÆ÷ È¿°ú - ¹° ½ñ¾ÆÁü
+	case 58:
 		pObject->HiddenMesh = -2;
 		break;
-	case 59 :	// ÆøÆ÷ È¿°ú - ¹° Æ¦
+	case 59:
 		pObject->HiddenMesh = -2;
 		break;
-	case 89:	// µµ¶û¹°
+	case 89:
 		{
 			pObject->BlendMeshTexCoordV += 0.005f;
 		}
 		break;
-	case 62:	// µ¶¼ö¸® ¹Ú½º
+	case 62:
 		pObject->HiddenMesh = -2;
 		{
 			int iEagleIndex = 1;
@@ -182,7 +180,6 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
 			{
 				if (pObject->SubType == 0)
 				{
-					// ºó ÀÎµ¦½º¸¦ Ã£´Â´Ù (¹«ÇÑ »ý¼ºÀ» À§ÇØ)
 					pObject->SubType = iEagleIndex;
 					while(Boids[pObject->SubType].Live)
 					{
@@ -213,9 +210,9 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
 
 				if (
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-					World == WD_74NEW_CHARACTER_SCENE
+					gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
 #else //PJH_NEW_SERVER_SELECT_MAP
-					World == WD_77NEW_LOGIN_SCENE					
+					gMapManager.WorldActive == WD_77NEW_LOGIN_SCENE					
 					|| World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
 					)

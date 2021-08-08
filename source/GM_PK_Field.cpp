@@ -47,7 +47,7 @@ void CGM_PK_Field::Destroy()
 
 CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 	{
 		return false;
 	}
@@ -196,7 +196,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
 
 void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 		return;
 /////////////////////////////////////////////////////////////////
 //검기 관련 이펙트
@@ -319,7 +319,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 }
 bool CGM_PK_Field::CreateObject(OBJECT* o)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 	{
 		return false;
 	}
@@ -334,7 +334,7 @@ bool CGM_PK_Field::CreateObject(OBJECT* o)
 }
 bool CGM_PK_Field::MoveObject(OBJECT* o)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 	{
 		return false;
 	}
@@ -360,7 +360,7 @@ bool CGM_PK_Field::MoveObject(OBJECT* o)
 
 bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 	{
 		return false;
 	}
@@ -483,7 +483,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 
 bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 	{
 		return false;
 	}
@@ -632,7 +632,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 void CGM_PK_Field::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 		return;
 
 	switch(o->Type)
@@ -650,7 +650,7 @@ void CGM_PK_Field::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 		return false;
 	
 	switch(o->Type)
@@ -742,7 +742,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
 
 bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 	{
 		return false;
 	}
@@ -944,7 +944,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 	{
 		return false;
 	}
@@ -1109,7 +1109,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool CGM_PK_Field::CreateFireSpark(PARTICLE* o)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 	{
 		return false;
 	}
@@ -1137,19 +1137,9 @@ bool CGM_PK_Field::CreateFireSpark(PARTICLE* o)
 	return true;
 }
 
-//PK필드가 맞는가?
-bool IsPKField()
-{
-	if(World == WD_63PK_FIELD)
-	{
-		return true;
-	}
-	return false;
-}
-
 bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
 {
-	if(!IsPKField())
+	if(!gMapManager.IsPKField())
 		return false;
 	
 	float fDis_x, fDis_y;
@@ -1310,7 +1300,7 @@ void CGM_PK_Field::PlayObjectSound(OBJECT* o)
 
 void CGM_PK_Field::PlayBGM()
 {
-	if(IsPKField())
+	if(gMapManager.IsPKField())
 	{
 		PlayMp3(g_lpszMp3[MUSIC_PKFIELD]);
 	}
