@@ -127,9 +127,6 @@
     <Filter Include="MU\LauncherHelper">
       <UniqueIdentifier>{ce7cdc3c-5166-44f3-a6f9-6ea1785e2453}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MU\Shader">
-      <UniqueIdentifier>{3bd1707c-2d35-4348-8d20-06ac12336fc7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MU\GFx">
       <UniqueIdentifier>{aef444d9-3318-4c2c-a7d6-c414f6dba1ba}</UniqueIdentifier>
     </Filter>
@@ -1042,21 +1039,6 @@
     </ClCompile>
     <ClCompile Include="source\LauncherHelper\LauncherHelper.cpp">
       <Filter>MU\LauncherHelper</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Shader\EngineGate.cpp">
-      <Filter>MU\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Shader\GLUtils.cpp">
-      <Filter>MU\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Shader\ModelManager.cpp">
-      <Filter>MU\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Shader\RenderMachine.cpp">
-      <Filter>MU\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Shader\VPManager.cpp">
-      <Filter>MU\Shader</Filter>
     </ClCompile>
     <ClCompile Include="source\CGFxFontConfigParser.cpp">
       <Filter>MU\GFx</Filter>
@@ -2079,21 +2061,6 @@
     </ClInclude>
     <ClInclude Include="source\LauncherHelper\LauncherHelper.h">
       <Filter>MU\LauncherHelper</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Shader\EngineGate.h">
-      <Filter>MU\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Shader\GLUtils.h">
-      <Filter>MU\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Shader\ModelManager.h">
-      <Filter>MU\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Shader\RenderMachine.h">
-      <Filter>MU\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Shader\VPManager.h">
-      <Filter>MU\Shader</Filter>
     </ClInclude>
     <ClInclude Include="source\CGFxFontConfigParser.h">
       <Filter>MU\GFx</Filter>

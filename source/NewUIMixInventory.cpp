@@ -1153,10 +1153,6 @@ void CNewUIMixInventory::RenderMixEffect()
 	{
 		--m_iMixEffectTimer;
 	}
-	
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0
 	EnableAlphaBlend();
 
 	for (int i = 0; i < (int)m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
@@ -1185,9 +1181,6 @@ void CNewUIMixInventory::RenderMixEffect()
 		}
 	}
 	DisableAlphaBlend();
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
 }
 
 

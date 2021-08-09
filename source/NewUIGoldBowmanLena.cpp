@@ -3,11 +3,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 #ifdef PSW_EVENT_LENA
 
 #include "NewUIGoldBowmanLena.h"
@@ -134,19 +129,17 @@ bool CNewUIGoldBowmanLena::UpdateMouseEvent()
 	}
 
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
-	//. Exit1 버튼 (기본처리)
+
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12)) {
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_GOLD_BOWMAN_LENA);
 		return false;
 	}
 
-	//. Exit2 버튼
 	if( m_BtnExit.UpdateMouseEvent() ) {
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_GOLD_BOWMAN_LENA);
 		return false;
 	}
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT)) 
 	{
 		if(SEASON3B::IsPress(VK_RBUTTON)) {
@@ -223,7 +216,7 @@ void CNewUIGoldBowmanLena::RenderTexts()
 	char Text[100];
 	
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, getMonsterName(236) ); // npc Name file "황금의 궁수"
+	sprintf( Text, getMonsterName(236) );
 	RenderText( Text, m_Pos.x, m_Pos.y+15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 	
 	for( int i = 0; i < 3; ++i ) {
@@ -284,28 +277,15 @@ void CNewUIGoldBowmanLena::Render3D()
 	EnableDepthTest();
 	EnableDepthMask();
 
-    //  각종 정보. ( 지니고 있는 이벤트칩, 등록한 이벤트칩수, 생성한 뮤토번호 ).
-    //  이벤트칩 아이템 정보.
     int Type = ITEM_POTION+21;
     int Level= 0;
     float x = 640.f-120.f;
     float y = 200.f;
-
-#ifdef MR0
-	VPManager::Enable();
-#endif//MR0
 	float Width  = (float)ItemAttribute[Type].Width  * INVENTORY_SCALE;
 	float Height = (float)ItemAttribute[Type].Height * INVENTORY_SCALE;
-	//  습득한 제나수
 	RenderItem3D(x,y,Width,Height,Type,Level,0,0,false);
-    //  등록한
     RenderItem3D(x,y+42,Width,Height,Type,Level,0,0,false);
 	
-#ifdef MR0
-	VPManager::Disable();
-#endif//MR0
-
-	// 현재 카메라의 매트릭스를 가지고 MousePosition 업데이트
 	UpdateMousePositionn();
 	
 	glMatrixMode(GL_MODELVIEW);

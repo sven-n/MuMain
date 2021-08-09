@@ -1,11 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 윈도우 관련 함수
-// nProtect를 먼저 실행 시킨 후 윈도우를 생성함
-//
-// *** 함수 레벨: 5
 ///////////////////////////////////////////////////////////////////////////////
-
-
 #include "stdafx.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -46,42 +40,23 @@
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "../ProtocolSend.h"
 
-
-#ifdef ATTACH_HACKSHIELD
-	#include "HackShield/HShield.h"
-	#pragma comment(lib, "HShield.lib")
-	#pragma message("Enable Ahnlab HackShield.")
-#endif // ATTACK_HACKSHIELD
-
 #ifdef BAN_USE_CMDLINE
 	#include "./LauncherHelper/LauncherHelper.h"
 #endif // BAN_USE_CMDLINE
 #include "CBTMessageBox.h"
 #include "./ExternalObject/leaf/regkey.h"
 
-#ifdef NP_GAME_GUARD
-	#include "ExternalObject/Nprotect/npGameGuard.h"
-#endif // NP_GAME_GUARD
-
 #ifdef LDK_ADD_GLOBAL_PORTAL_SYSTEM
 	#include "GlobalPortalSystem.h"
 #endif //LDK_ADD_GLOBAL_PORTAL_SYSTEM
-#ifdef LEM_ADD_GAMECHU	// 헤더파일 인클루드
+#ifdef LEM_ADD_GAMECHU
 	#include <conio.h>
 	#include "GCCertification.h"
 #endif // LEM_ADD_GAMECHU
 
-
 #include "CSChaosCastle.h"
 #include "GMHellas.h"
-
 #include <io.h>
-
-
-#ifdef MR0
-	#include "EngineGate.h"
-#endif //MR0
-
 #include "Input.h"
 #include "./Time/Timer.h"
 #include "UIMng.h"
@@ -109,10 +84,6 @@
 #endif //PBG_MOD_GAMEGUARD_HANDLE
 
 #include <ThemidaInclude.h>
-
-#ifdef _DEBUG
-	#include "./Shader/VPManager.h"
-#endif // _DEBUG
 
 #if defined LDK_ADD_SCALEFORM
 #include "CGFxProcess.h"
@@ -145,53 +116,7 @@ CUIMapName* g_pUIMapName = NULL;		// rozy
 
 int Time_Effect = 0;
 bool ashies = false;
-int weather = rand()%3;	//0 = 맑음,1 = 비오는날,2 = 안개가 낀날.
-
-#ifdef TEENAGER_REGULATION	//청소년자율구규제
-	int Time_Regulation = 0;
-#endif
-
-///////////////////////////////////////////
-
-#ifdef NP_GAME_GUARD
-
-	#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-		#if defined USE_MU_INTERNAL_TEST
-			const char* g_szGameGuard = "MuTestCS25";
-		#elif defined USE_MUTEST_INI
-			const char* g_szGameGuard = "MuTest";
-		#else
-#ifdef GAMEGUARD_BLUEMU_VERSION
-			const char* g_szGameGuard = "MuBlue";
-#else //GAMEGUARD_BLUEMU_VERSION
-			const char* g_szGameGuard = "Mu";
-#endif //GAMEGUARD_BLUEMU_VERSION
-		#endif
-	#elif SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		const char* g_szGameGuard = "MuJP";
-	#elif SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-		const char* g_szGameGuard = "MuEng";
-	#elif SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-		const char* g_szGameGuard = "MuInsrea";
-	#elif SELECTED_LANGUAGE == LANGUAGE_CHINESE
-		#ifndef _TEST_SERVER
-			const char* g_szGameGuard = "MuThe9";
-		#else // _TEST_SERVER
-			const char* g_szGameGuard = "MuThe9Test";
-		#endif// _TEST_SERVER
-	#elif SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-		const char* g_szGameGuard = "MuPH";
-	#elif SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-		#ifdef USE_VIETNAMESE_NPGAME_TEST
-			const char* g_szGameGuard = "MuVNTest";
-		#else //USE_VIETNAMESE_NPGAME_TEST
-			const char* g_szGameGuard = "MuVN";	
-		#endif //USE_VIETNAMESE_NPGAME_TEST
-	#endif	// SELECTED_LANGUAGE == LANGUAGE_KOREAN
-
-	CNPGameLib* g_pnpGL = NULL;
-
-#endif	// NP_GAME_GUARD
+int weather = rand()%3;
 
 HWND      g_hWnd  = NULL;
 HINSTANCE g_hInst = NULL;
@@ -200,13 +125,9 @@ HGLRC     g_hRC   = NULL;
 HFONT     g_hFont = NULL;
 HFONT     g_hFontBold = NULL;
 HFONT     g_hFontBig = NULL;
-HFONT     g_hFixFont = NULL;	// 픽셀 고정 크기 UI의 전용 폰트.
-#ifdef PBG_ADD_INGAMESHOP_FONT
-HFONT     g_hInGameShopFont = NULL;
-#endif //PBG_ADD_INGAMESHOP_FONT
+HFONT     g_hFixFont = NULL;
 
 CTimer*		g_pTimer = NULL;	// performance counter.
-//HFONT     g_hFontSmall = NULL;          //  현재 사용하지 않는 폰트.
 bool      Destroy = false;
 bool      ActiveIME = false;
 
@@ -218,7 +139,6 @@ int       RandomTable[100];
 
 char TextMu[]       = "mu.exe";
 
-
 char *Language       = LanguageName[SELECTED_LANGUAGE];
 
 char *lpszLocale = lpszLocaleName[SELECTED_LANGUAGE];
@@ -227,16 +147,6 @@ CErrorReport g_ErrorReport;
 
 BOOL g_bMinimizedEnabled = FALSE;
 int g_iScreenSaverOldValue = 60*15;
-
-
-// For Debuging - Profiling
-#ifdef DO_PROFILING
-CProfiler *g_pProfiler = 0;
-#endif // DO_PROFILING
-
-#ifdef DO_PROFILING_FOR_LOADING
-CProfiler *g_pProfilerForLoading = 0;
-#endif // DO_PROFILING_FOR_LOADING
 
 // For Debuging - DebugCamera
 #ifdef DO_PROCESS_DEBUGCAMERA
@@ -248,20 +158,12 @@ CDebugCameraManager *g_pDebugCameraManager = 0;
 bool g_bUnfixedFixedFrame = false;
 #endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 
-
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
 extern float g_fScreenRate_x;	// ※
 extern float g_fScreenRate_y;
 
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 BOOL g_bUseWindowMode = TRUE;
 #endif
-
-///////////////////////////////////////////////////////////////////////////////
-// mp3 플레이 하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 char Mp3FileName[256];
 
@@ -286,20 +188,17 @@ void PlayMp3(char *Name, BOOL bEnforce )
 	if(Destroy) return;
     if(!m_MusicOnOff && !bEnforce) return;
 
-	if(strcmp(Name,Mp3FileName) == 0) {
-		return ;
+	if(strcmp(Name,Mp3FileName) == 0) 
+	{
+		return;
 	}
-	else {
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		wzAudioPlay(Name, -1);
-#else
+	else 
+	{
 		wzAudioPlay(Name, 1);
-#endif	// SELECTED_LANGUAGE == LANGUAGE_JAPANESE
 		strcpy(Mp3FileName,Name);
 	}
 }
 
-// 음악이 끝났는가?
 bool IsEndMp3()
 {
 	if (100 == wzAudioGetStreamOffsetRange())
@@ -307,55 +206,15 @@ bool IsEndMp3()
 	return false;
 }
 
-#ifdef YDG_ADD_DOPPELGANGER_SOUND
 int GetMp3PlayPosition()
 {
 	return wzAudioGetStreamOffsetRange();
 }
-#endif	// YDG_ADD_DOPPELGANGER_SOUND
-
-///////////////////////////////////////////////////////////////////////////////
-// Window 관련함수
-///////////////////////////////////////////////////////////////////////////////
 
 bool FindHack = false;
 extern int  LogIn;
 extern char LogInID[];
 
-//핵 프로그램 발견시 윈도우 빠져나가는 함수
-void CloseHack(HWND shWnd,bool Flag)
-{
-#ifdef PBG_MOD_GAMEGUARD_HANDLE
-	if(BLUE_MU::IsBlueMuServer())
-		if(!g_NPGameGuardHandle->CheckDestroyWin())
-			return;
-
-	if(!g_NPGameGuardHandle->GetDestroyMsg())
-	{
-		g_NPGameGuardHandle->SetDestroyMsg(true);
-#ifdef NP_GAME_GUARD
-		npGameGuard::showErrorMessage (g_hWnd, g_NPGameGuardHandle->GetErrorMsgIndex());
-#endif //NP_GAME_GUARD
-	}
-	else
-	{
-		return;
-	}
-#endif //PBG_MOD_GAMEGUARD_HANDLE
-	FindHack = true;
-	char Text[100];
-	sprintf(Text,GlobalText[1],LogInID);
-	MessageBox(g_hWnd,Text,"Error",MB_OK);
-	g_ErrorReport.Write("%s\r\n", Text);
-	SendMessage(g_hWnd,WM_DESTROY,0,0);
-	if(Flag)
-	{
-		SendMessage( shWnd, WM_USER + 10010, 0, 0);
-      	SendMessage(shWnd,WM_CLOSE,0,0);
-	}
-}
-
-//핵 프로그램이 상주 해 있는치 체크하는 함수
 void CheckHack( void)
 {
 	if(FindHack) return;
@@ -900,11 +759,6 @@ void DestroyWindow()
 	regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu\\Config");
 #endif //PBG_ADD_LAUNCHER_BLUE
 	regkey.WriteDword("VolumeLevel", g_pOption->GetVolumeLevel());
-
-
-#ifdef MR0
-	EngineGate::UnInit();
-#endif //MR0
 
 	CUIMng::Instance().Release();
 
@@ -1719,11 +1573,6 @@ bool CreateOpenglWindow()
 	ShowWindow(g_hWnd,SW_SHOW);						// 윈도우를 보이게
 	SetForegroundWindow(g_hWnd);						// 윈도우를 맨 위로
 	SetFocus(g_hWnd);									// 윈도우에 키보드 포커스를 준다.
-
-#if defined(_DEBUG)
-	CheckGLError( __FILE__, __LINE__ );
-#endif // defined(_DEBUG)
-
 	return true;
 }
 
@@ -2922,10 +2771,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		return FALSE;
 	}
 
-#if defined(_DEBUG)
-	CheckGLError( __FILE__, __LINE__ );
-#endif // defined(_DEBUG)
-
 	g_ErrorReport.Write( "> OpenGL init success.\r\n");
 	g_ErrorReport.AddSeparator();
 	g_ErrorReport.WriteOpenGLInfo();
@@ -3119,11 +2964,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	g_pMovieScene = new CMovieScene;
 #endif // MOVIE_DIRECTSHOW
 	
-#ifdef MR0
-	EngineGate::Init();
-#endif //MR0
-/////////////////////////////////////////////
-
 #ifdef NEW_USER_INTERFACE_SHELL
 	g_shell = Shell::Make();
 	g_shell->Initialize( g_hWnd, WindowWidth, WindowHeight );
@@ -3430,12 +3270,4 @@ Pos_SelfCheck01:
 	;
 #endif
 }
-
-#ifdef MR0
-unsigned int GenID()
-{
-	static unsigned int s_iKey = 0;
-	return s_iKey++;
-}
-#endif //MR0
 

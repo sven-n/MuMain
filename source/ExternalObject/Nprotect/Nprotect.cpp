@@ -19,7 +19,6 @@ HINSTANCE m_hNprotectCheckDll;
 NPROTECTCHECKCRC *g_pNprotectCheckCRC;
 
 
-void CloseHack(HWND shWnd,bool Flag);
 BOOL CheckFindhackCrc( void);
 
 

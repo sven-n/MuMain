@@ -399,18 +399,14 @@
 	#define LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM	// AnimationTransformWithAttachHighModel함수내 TMArray가 Local인 이유로 이후 연산에 TM이 Point를 잃어버리는 현상으로 TM을 Global 으로 변경. (09.09.07)
 	#define LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED	// 제린트의 공격 속도 및 검기 시간 범위 재작업 (09.09.08) 
 
-	// - 양대근
 	#define YDG_FIX_DOPPELGANGER_BUTTON_COLOR				// 도플갱어 UI 버튼 잠글때 색 이상한 문제 (2009.08.14)
 	#define YDG_MOD_DOPPELGANGER_END_SOUND					// 도플갱어 종료 사운드 추가 (2009.08.20)
 	#define YDG_MOD_TOURMODE_MAXSPEED						// 투어모드 최고속도 올림 (2009.07.10)
 
-	// - 안상규
 	#define ASG_FIX_QUEST_PROTOCOL_ADD						// 신규 퀘스트 프로토콜 추가.(2009.09.07)
 
-	// - 박보근
 	#define PBG_ADD_NEWLOGO_IMAGECHANGE						// 로딩화면 이미지 변경(09.08.12)
 
-	// - 박종훈
 	#define PJH_NEW_SERVER_SELECT_MAP						// 서버 선택화면 변경(09.08.17)
 
 

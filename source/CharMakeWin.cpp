@@ -702,13 +702,7 @@ void CCharMakeWin::RenderCreateCharacter()
 	}
 #endif //PBG_ADD_NEWCHAR_MONK
 
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
 	RenderCharacter(&CharacterView,o);
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0	
 
 	glViewport2(0,0,WindowWidth,WindowHeight);
 

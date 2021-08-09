@@ -3196,24 +3196,7 @@ void CGFxMainUi::RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOp
 
 		Vector(1.f,1.f,1.f,Light);
 
-#ifdef MR0
-		VPManager::Enable();
-#endif //MR0
-
-#ifdef MR0
-		// Object가 있다면 단지 Lock을 걸고, 없으면 Lock을 걸고 Render 
-		ModelManager::SetTargetObject( o );
-#endif //MR0
-
 		RenderPartObject(o,Type,NULL,Light,alpha,ItemLevel,Option1,ExtOption,true,true,true);
-
-#ifdef MR0
-		ModelManager::SetTargetObject(NULL);
-#endif //MR0
-
-#ifdef MR0
-		VPManager::Disable();
-#endif //MR0
 }
 
 bool CGFxMainUi::RenderModel()

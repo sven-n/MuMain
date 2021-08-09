@@ -3933,17 +3933,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 				}
 				break;
 			}
-
-#ifdef CSK_HACK_TEST
-			static DWORD s_dwTime = 0;
-			DWORD dwCurrentTime = timeGetTime();
-			DWORD dwElpasedTime = dwCurrentTime - s_dwTime;
-#ifdef CONSOLE_DEBUG
-			g_ConsoleDebug->Write(MCD_NORMAL, "gap time : %d", dwElpasedTime);
-#endif // CONSOLE_DEBUG	
-			s_dwTime = dwCurrentTime;
-#endif // CSK_HACK_TEST
-			
+		
 			MouseUpdateTime = MouseUpdateTimeMax;
 			SetPlayerAttack(c);
 			c->AttackTime = 1;
@@ -3957,14 +3947,11 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			PathY[0] = ( c->PositionY);
 			c->TargetCharacter = ActionTarget;
 			int Dir = ((BYTE)((Hero->Object.Angle[2]+22.5f)/360.f*8.f+1.f)%8);
-			// 회오리 베기 이후 일반 공격시에 잔영이 생기지 않도록 함.
-#ifdef LDS_FIX_WHENAFTERSKILL_WHEEL_STILLVISUAL_EFFECT		
 			c->Skill = 0;
-#endif //#ifdef LDS_FIX_WHENAFTERSKILL_WHEEL_STILLVISUAL_EFFECT
 			SendRequestAttack(CharactersClient[ActionTarget].Key, Dir);
 		}
 		break;
-	case MOVEMENT_SKILL:	// MOVEMENT_ATTACK 과 비슷하고 스킬을 쓴 경우임 (대상이 사라진 경우에 대한 체크 주의!!)
+	case MOVEMENT_SKILL:
 		{
 			int iSkill = ( g_MovementSkill.m_bMagic) ? ( CharacterAttribute->Skill[g_MovementSkill.m_iSkill]) : g_MovementSkill.m_iSkill;
 			
@@ -3973,7 +3960,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			{
 			case AT_SKILL_SPEAR:
 				if ( Hero->Helper.Type!=MODEL_HELPER+2 )
-				{	// 창 스킬은 유니를 타야만 한다.
+				{
 					break;
 				}
 #ifdef PJH_SEASON4_MASTER_RANK4
@@ -4326,9 +4313,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 						sprintf(_Temp, GlobalText[2597], 100);
 						g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 					}
-#ifdef CONSOLE_DEBUG
-					//	g_ConsoleDebug->Write(MCD_ERROR, "Park Bo Guen TESTBUFF %d",CharactersClient[TargetNpc].Key);
-#endif // CONSOLE_DEBUG
 				}
 #endif //PBG_ADD_LITTLESANTA_NPC
 #ifdef KJH_PBG_ADD_SEVEN_EVENT_2008

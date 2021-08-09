@@ -457,21 +457,9 @@ bool CGMDoppelGanger3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+191:	// µµÇÃ°»¾î
-#ifdef MR0
-		ModelManager::SetTargetObject(o);
-#endif //MR0
-#ifdef LDS_MR0_FIX_BREAKVISUAL_DOPPELGANGER_CHARACTER
-		if (o->m_bActionStart == FALSE)
-		{
-			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		}
-#endif // LDS_MR0_FIX_BREAKVISUAL_DOPPELGANGER_CHARACTER
+	case MODEL_MONSTER01+191:
 		b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(0,RENDER_CHROME|RENDER_BRIGHT,0.3f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-#ifdef MR0
-		ModelManager::SetTargetObject(NULL);
-#endif // MR0
 		return true;
 		break;
 	}
@@ -486,18 +474,16 @@ void CGMDoppelGanger3::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 	switch(o->Type)
 	{
-#ifdef YDG_ADD_DOPPELGANGER_PORTAL
-	case 19:	// Æ÷Å»
+	case 19:
 	case 20:
 	case 31:
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		break;
-	case 33:	// Æ÷Å» ºû
+	case 33:
 		b->StreamMesh = 0;
 		b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime%10000*0.0001f);
 		b->StreamMesh = -1;
 		break;
-#endif	// YDG_ADD_DOPPELGANGER_PORTAL
 	case 38:
 		{
 			b->BodyLight[0] = min(b->BodyLight[0] * 2.0f, 1.0f);

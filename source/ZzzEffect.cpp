@@ -19964,9 +19964,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						{
 							if(o->SubType == 1)
 							{
-#ifdef MR0
-								VPManager::Disable();
-#endif //MR0
 								o->Angle[2] -= 0.1f;
 								Vector ( 1.0f, 1.0f, 1.0f, o->Light );
 								CreateSprite(BITMAP_FIRE+1,Position,o->Scale,o->Light,o, o->Angle[2]);
@@ -19974,9 +19971,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 								Vector ( 0.2f, 0.0f, 0.0f, o->Light );
 								RenderTerrainAlphaBitmap(BITMAP_SMOKE,Position[0],Position[1],4.0f,4.0f,o->Light,-o->Angle[2]);
 								DisableAlphaBlend();
-#ifdef MR0
-								VPManager::Enable();
-#endif //MR0
 							}
 							else if(o->SubType == 2)
 							{
@@ -20065,22 +20059,13 @@ void RenderEffects ( bool bRenderBlendMesh )
 					break;
 				case MODEL_FENRIR_FOOT_THUNDER:
 				{
-#ifdef MR0
-					VPManager::Disable();
-#endif //MR0
 					EnableAlphaBlend();
 					RenderTerrainAlphaBitmap(BITMAP_FENRIR_FOOT_THUNDER1+(o->m_iAnimation%5), o->Position[0], o->Position[1], 0.6f, 0.6f, o->Light);
 					DisableAlphaBlend();
-#ifdef MR0
-					VPManager::Enable();
-#endif //MR0
 				}
 					break;
 				case MODEL_TWINTAIL_EFFECT:
 					{
-#ifdef MR0
-						VPManager::Disable();
-#endif //MR0
 						if(o->SubType == 0)
 						{
 							EnableAlphaBlend();
@@ -20093,9 +20078,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 							RenderTerrainAlphaBitmap(BITMAP_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, o->Angle[0], o->Alpha);
 							DisableAlphaBlend();
 						}
-#ifdef MR0
-						VPManager::Enable();
-#endif //MR0
 					}
 					break;
 				case MODEL_CUNDUN_PART1:
@@ -20464,10 +20446,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 
 						pBMDSwordModel->LightEnable = true;
 					
-#ifdef MR0
-						ModelManager::SetTargetObject(o);
-#endif // MR0
-
 						Vector( 1.0f, 1.0f, 1.0f, pBMDSwordModel->BodyLight );
 						pBMDSwordModel->RenderMesh ( 0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 
@@ -20478,10 +20456,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						o->Alpha	= 1.0f;
 						pBMDSwordModel->RenderMesh ( 2, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 						o->Alpha	= 1.0f;
-
-#ifdef MR0
-						ModelManager::SetTargetObject(NULL);
-#endif // MR0
 
 						if( o->SubType != 20 )
 						{
@@ -20737,14 +20711,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 			}
 		}
 	}
-
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_EFFECTS );
-#endif // DO_PROFILING
 }
 
 void RenderAfterEffects ( bool bRenderBlendMesh )

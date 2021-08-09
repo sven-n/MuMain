@@ -1,8 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// OpenGL 관련 함수
-// OpenGL 셋팅, OpenGL에서 2D 이미지 처리, 숫자 랜더링 등등
-//
-// *** 함수 레벨: 1
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -13,15 +9,8 @@
 #include "zzzObject.h"
 #include "zzzcharacter.h"
 #include "Zzzinfomation.h"
-#include "./Shader/ModelManager.h"
-#ifdef PJH_ADD_MINIMAP
 #include "NewUISystem.h"
-#endif //PJH_ADD_MINIMAP
 
-
-//////////////////////////////////////////////////////////////////////////
-//  Global Variable.
-//////////////////////////////////////////////////////////////////////////
 int     OpenglWindowX;     
 int     OpenglWindowY;     
 int     OpenglWindowWidth; 
@@ -63,21 +52,6 @@ DWORD		 MouseRButtonPress = 0;
 bool		 MouseRButtonClicking = false;
 #endif // DO_PROCESS_DEBUGCAMERA
 
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-BOOL	g_bActivityProcessMSAA = FALSE;			// MSAA 활성화 여부
-BOOL	g_bSupportedMSAA = FALSE;				// Anti Aliasing을 위한 Multisample 기능 제공 여부
-BOOL	g_bIsNowRecreationingForMSAA = FALSE;	// 현재 MSAA설정을 위한 WindowsDestroy 중인지 여부
-int		g_iMSAALevel = DEFAULT_MSAAVALUE;		// MSAA 단계 x4, x2
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-
-//////////////////////////////////////////////////////////////////////////
-//  Function.
-//////////////////////////////////////////////////////////////////////////
-void CreateWhisper(char *ID,char *Text,int Type);
-///////////////////////////////////////////////////////////////////////////////
-//  ETC util
-///////////////////////////////////////////////////////////////////////////////
-//  쇼핑몰을 보여준다.
 //bool    showShoppingMall = false;
 
 void OpenExploper(char *Name,char *para)
@@ -100,7 +74,6 @@ bool CheckID_HistoryDay ( char* Name, WORD day )
     bool  sameName = false;
     bool  update = true;
 
-    //  계정이름과 날짜를 읽는다. 
     if ( ( fp=fopen( "dconfig.ini", "rb" ) )!=NULL )
     {
         fread ( &num, sizeof( WORD ), 1, fp );
@@ -132,7 +105,6 @@ bool CheckID_HistoryDay ( char* Name, WORD day )
         fclose ( fp );
     }
 
-    //  계정이름을 등록한다.
     if ( update )
     {
         if ( !sameName )
@@ -159,11 +131,6 @@ bool CheckID_HistoryDay ( char* Name, WORD day )
 
     return  update;
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// opengl matrix util
-///////////////////////////////////////////////////////////////////////////////
 
 bool GrabEnable = false;
 char GrabFileName[MAX_PATH];
@@ -223,10 +190,6 @@ void SaveScreen()
 	GrabScreen++;
 	GrabScreen %= 10000;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// opengl matrix util
-///////////////////////////////////////////////////////////////////////////////
 
 float PerspectiveX;
 float PerspectiveY;
@@ -383,14 +346,6 @@ void EndTextureStream()
 
 void EnableDepthTest()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::AddBlenderOption(SpriteManager::ENABLE_DEPTHTEST);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-	
     if(!DepthTestEnable) 
 	{
 		DepthTestEnable = true;
@@ -400,14 +355,6 @@ void EnableDepthTest()
 
 void DisableDepthTest()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::DelBlenderOption(SpriteManager::ENABLE_DEPTHTEST);
-		return;
-	}
-#endif// MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(DepthTestEnable) 
 	{
 		DepthTestEnable = false;
@@ -417,14 +364,6 @@ void DisableDepthTest()
 
 void EnableDepthMask()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::AddBlenderOption(SpriteManager::ENABLE_DEPTHMASK);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(!DepthMaskEnable) 
 	{
 		DepthMaskEnable = true;
@@ -434,14 +373,6 @@ void EnableDepthMask()
 
 void DisableDepthMask()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::DelBlenderOption(SpriteManager::ENABLE_DEPTHMASK);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(DepthMaskEnable) 
 	{
 		DepthMaskEnable = false;
@@ -451,14 +382,6 @@ void DisableDepthMask()
 
 void EnableCullFace()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::AddBlenderOption(SpriteManager::ENABLE_CULL);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(!CullFaceEnable) 
 	{
 		CullFaceEnable = true;
@@ -468,14 +391,6 @@ void EnableCullFace()
 
 void DisableCullFace()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::DelBlenderOption(SpriteManager::ENABLE_CULL);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-	
     if(CullFaceEnable) 
 	{
 		CullFaceEnable = false;
@@ -485,16 +400,6 @@ void DisableCullFace()
 
 void DisableTexture( bool AlphaTest )
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::AddBlenderOption(SpriteManager::ENABLE_DEPTHMASK);
-		SpriteManager::DelBlenderOption(SpriteManager::ENABLE_TEXTURE);
-		if(AlphaTest) SpriteManager::AddBlenderOption(SpriteManager::ENABLE_ALPHATEST);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-	
     EnableDepthMask();
     if ( AlphaTest==true )
     {
@@ -521,17 +426,6 @@ void DisableTexture( bool AlphaTest )
 
 void DisableAlphaBlend()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::SetBlender(SpriteManager::ENABLE_TEXTURE|
-			SpriteManager::ENABLE_CULL|
-			SpriteManager::ENABLE_DEPTHMASK);
-		if(FogEnable) SpriteManager::AddBlenderOption(SpriteManager::ENABLE_FOG);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(AlphaBlendType != 0) 
 	{
 		AlphaBlendType = 0;
@@ -555,19 +449,6 @@ void DisableAlphaBlend()
 
 void EnableAlphaTest(bool DepthMask)
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::SetBlender(SpriteManager::ENABLE_ALPHAMODE|
-			SpriteManager::ENABLE_ALPHAMODE2|
-			SpriteManager::ENABLE_ALPHATEST|
-			SpriteManager::ENABLE_TEXTURE);
-		if(FogEnable) SpriteManager::AddBlenderOption(SpriteManager::ENABLE_FOG);
-		if(DepthMask) SpriteManager::AddBlenderOption(SpriteManager::ENABLE_DEPTHMASK);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(AlphaBlendType != 2)
 	{
 		AlphaBlendType = 2;
@@ -593,16 +474,6 @@ void EnableAlphaTest(bool DepthMask)
 
 void EnableAlphaBlend()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::SetBlender(SpriteManager::ENABLE_ALPHAMODE|
-			SpriteManager::ENABLE_ALPHAMODE3|
-			SpriteManager::ENABLE_TEXTURE);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(AlphaBlendType != 3)
 	{
 		AlphaBlendType = 3;
@@ -627,17 +498,6 @@ void EnableAlphaBlend()
 
 void EnableAlphaBlendMinus()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::SetBlender(SpriteManager::ENABLE_ALPHAMODE|
-			SpriteManager::ENABLE_ALPHAMODE4|
-			SpriteManager::ENABLE_TEXTURE);
-		if(FogEnable) SpriteManager::AddBlenderOption(SpriteManager::ENABLE_FOG);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(AlphaBlendType != 4)
 	{
 		AlphaBlendType = 4;
@@ -662,17 +522,6 @@ void EnableAlphaBlendMinus()
 
 void EnableAlphaBlend2()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::SetBlender(SpriteManager::ENABLE_ALPHAMODE|
-			SpriteManager::ENABLE_ALPHAMODE5|
-			SpriteManager::ENABLE_TEXTURE);
-		if(FogEnable) SpriteManager::AddBlenderOption(SpriteManager::ENABLE_FOG);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(AlphaBlendType != 5)
 	{
 		AlphaBlendType = 5;
@@ -697,17 +546,6 @@ void EnableAlphaBlend2()
 
 void EnableAlphaBlend3()	// 연기등 블랜딩 잘 되도록 (TGA 출력시 유용)
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::SetBlender(SpriteManager::ENABLE_ALPHAMODE|
-			SpriteManager::ENABLE_ALPHAMODE6|
-			SpriteManager::ENABLE_TEXTURE);
-		if(FogEnable) SpriteManager::AddBlenderOption(SpriteManager::ENABLE_FOG);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(AlphaBlendType != 6)
 	{
 		AlphaBlendType = 6;
@@ -756,19 +594,6 @@ void EnableAlphaBlend4()
 
 void EnableLightMap()
 {
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(SpriteManager::IsWorking())
-	{
-		SpriteManager::SetBlender(SpriteManager::ENABLE_ALPHAMODE|
-			SpriteManager::ENABLE_ALPHAMODE1|
-			SpriteManager::ENABLE_CULL|
-			SpriteManager::ENABLE_DEPTHMASK|
-			SpriteManager::ENABLE_TEXTURE);
-		if(FogEnable) SpriteManager::AddBlenderOption(SpriteManager::ENABLE_FOG);
-		return;
-	}
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
-
     if(AlphaBlendType != 1)
 	{
 		AlphaBlendType = 1;
@@ -1179,96 +1004,6 @@ void EndSprite()
 	glPopMatrix();
 }
 
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-unsigned int EncodeColorFromVec(vec4_t ip)
-{
-	unsigned int iRet = 0.f;
-	unsigned char cTmp[4];
-	for(unsigned int i = 0; i < 4; ++i)
-	{
-		if(ip[i] > 1.f) ip[i] = 1.f;
-		else if(ip[i] < 0.f) ip[i] = 0.f;
-		cTmp[i] = (unsigned char)(ip[i]*255);
-	}
-	iRet = unsigned int((cTmp[3]) | (cTmp[2]<<8) | (cTmp[1]<<16) | (cTmp[0]<<24));
-
-	return iRet;
-}
-
-void RenderSprite(int Texture,vec3_t Position,
-				  float Width,float Height,
-				  vec3_t Light,float Rotation,
-				  float u,float v,float uWidth,float vHeight)
-{
-	if(SpriteManager::IsOn())
-	{
-		SpriteManager::RegisterQuad(Texture, Position, Width, Height, Light, Rotation, u, v, uWidth, vHeight);
-	}
-	else
-	{
-		vec3_t p2;
-		VectorTransform(Position,CameraMatrix,p2);
-		float x = p2[0];
-		float y = p2[1];
-		float z = p2[2];
-
-		Width  *= 0.5f;
-		Height *= 0.5f;
-
-		vec3_t p[4];
-		if(Rotation==0)
-		{
-			Vector(x-Width, y-Height, z, p[0]);
-			Vector(x+Width, y-Height, z, p[1]);
-			Vector(x+Width, y+Height, z, p[2]);
-			Vector(x-Width, y+Height, z, p[3]);
-		}
-		else
-		{
-			vec3_t p2[4];
-			Vector(-Width,-Height, z, p2[0]);
-			Vector( Width,-Height, z, p2[1]);
-			Vector( Width, Height, z, p2[2]);
-			Vector(-Width, Height, z, p2[3]);
-			vec3_t Angle;
-			Vector(0.f,0.f,Rotation,Angle);
-			float Matrix[3][4];
-			AngleMatrix(Angle,Matrix);
-			for(int i=0;i<4;i++) 
-			{
-				VectorRotate(p2[i],Matrix,p[i]);
-				p[i][0] += x;
-				p[i][1] += y;
-			}
-		}
-		
-		float c[4][2];
-		TEXCOORD(c[3],u       ,v        );
-		TEXCOORD(c[2],u+uWidth,v        );
-		TEXCOORD(c[1],u+uWidth,v+vHeight);
-		TEXCOORD(c[0],u       ,v+vHeight);
-	
-		BindTexture(Texture);
-		glBegin(GL_QUADS);
-		if(Bitmaps[Texture].Components==3)
-			glColor3fv(Light);
-		else
-		{
-			if(Texture == BITMAP_BLOOD+1 || Texture == BITMAP_FONT_HIT)
-    			glColor4f(Light[0],Light[1],Light[2],1.f);
-			else
-    			glColor4f(Light[0],Light[1],Light[2],Light[0]);
-		}
-		for(int i=0;i<4;i++)
-		{
-			glTexCoord2f(c[i][0],c[i][1]);
-			glVertex3fv(p[i]);
-		}
-		glEnd();
-	}
-}
-
-#else
 void RenderSprite(int Texture,vec3_t Position,float Width,float Height,vec3_t Light,float Rotation,float u,float v,float uWidth,float vHeight)
 {
     BindTexture(Texture);
@@ -1333,7 +1068,6 @@ void RenderSprite(int Texture,vec3_t Position,float Width,float Height,vec3_t Li
 	}
 	glEnd();
 }
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES
 
 void RenderSpriteUV(int Texture,vec3_t Position,float Width,float Height,float (*UV)[2],vec3_t Light[4],float Alpha)
 {

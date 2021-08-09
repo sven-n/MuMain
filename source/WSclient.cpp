@@ -551,13 +551,10 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
 	LPPHEADER_DEFAULT_CHARACTER_LIST Data = (LPPHEADER_DEFAULT_CHARACTER_LIST)ReceiveBuffer;
     
     SetCreateMaxClass ( Data->MaxClass );
-#ifdef PBG_FIX_CHAOSMAPMOVE
-	if(SceneFlag == CHARACTER_SCENE)
-	{
-		World = WD_74NEW_CHARACTER_SCENE;
-	}
-#endif //PBG_FIX_CHAOSMAPMOVE
+
     int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
+
+	g_ConsoleDebug->Write(MCD_RECEIVE, "[ReceiveList Count %d]",Data->Value);
 	
 	for(int i=0;i<Data->Value;i++)
 	{
@@ -565,11 +562,7 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
 		
 		int iClass = ChangeServerClassTypeToClientClassType(Data2->Class);
 		
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		float fPos[2], fAngle = 0.0f;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		float fPos[2], fAngle;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		
 		switch(Data2->Index)
 		{
@@ -586,6 +579,7 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
 		case 3:	fPos[0] = 23019.0f;	fPos[1] = 15443.0f;	fAngle = 25.0f; break;
 		case 4:	fPos[0] = 23211.6f;	fPos[1] = 15467.0f;	fAngle = 0.0f; break;
 #endif //PJH_NEW_SERVER_SELECT_MAP
+		default: return;
 		}
 		
 		CHARACTER *c = CreateHero(Data2->Index,iClass,0,fPos[0],fPos[1],fAngle);
@@ -598,24 +592,11 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
 		
 		ChangeCharacterExt(Data2->Index,Data2->Equipment);
 		
-#ifdef _PVP_BLOCK_PVP_CHAR
-		c->PK = Data2->PvPState;
-#endif	// _PVP_BLOCK_PVP_CHAR
 		c->GuildStatus = Data2->byGuildStatus;
 		Offset += sizeof(PRECEIVE_CHARACTER_LIST);
 	}
-#ifdef PBG_ADD_CHARACTERSLOT
-
-	if(BLUE_MU::IsBlueMuServer())
-	{
-		g_SlotLimit->Init();
-		g_SlotLimit->SetCharacterCnt(Data->CharacterSlotCount);
-		g_SlotLimit->SetSlotPosition();
-	}
-#endif //PBG_ADD_CHARACTERSLOT
 	CurrentProtocolState = RECEIVE_CHARACTERS_LIST;
 }
-#ifdef PBG_ADD_CHARACTERCARD
 CHARACTER_ENABLE g_CharCardEnable;
 
 void ReceiveCharacterCard_New(BYTE* ReceiveBuffer)
@@ -623,11 +604,7 @@ void ReceiveCharacterCard_New(BYTE* ReceiveBuffer)
 	LPPHEADER_CHARACTERCARD Data = (LPPHEADER_CHARACTERCARD)ReceiveBuffer;
 	g_CharCardEnable.bCharacterEnable[0] = false;
 	g_CharCardEnable.bCharacterEnable[1] = false;
-#ifdef PBG_MOD_BLUE_SUMMONER_ENABLE
-	g_CharCardEnable.bCharacterEnable[2] = true;
-#else //PBG_MOD_BLUE_SUMMONER_ENABLE
 	g_CharCardEnable.bCharacterEnable[2] = false;
-#endif //PBG_MOD_BLUE_SUMMONER_ENABLE
 
 	if((Data->CharacterCard & CLASS_DARK_CARD) == CLASS_DARK_CARD)
 		g_CharCardEnable.bCharacterEnable[0] = true;
@@ -638,18 +615,13 @@ void ReceiveCharacterCard_New(BYTE* ReceiveBuffer)
 	if((Data->CharacterCard & CLASS_SUMMONER_CARD) == CLASS_SUMMONER_CARD)
 		g_CharCardEnable.bCharacterEnable[2] = true;
 }
-#endif //PBG_ADD_CHARACTERCARD
 
 void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_CREATE_CHARACTER Data = (LPPRECEIVE_CREATE_CHARACTER)ReceiveBuffer;
 	if(Data->Result==1)
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		float fPos[2], fAngle = 0.0f;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		float fPos[2], fAngle;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		
 		switch(Data->Index)
 		{
@@ -702,11 +674,9 @@ void ReceiveDeleteCharacter( BYTE *ReceiveBuffer )
 	switch (Data->Value)
 	{
 	case 1:
-#ifdef LDS_FIX_RESET_CHARACTERDELETED
 		INT		iKey;
 		iKey = CharactersClient[SelectedHero].Key;
 		DeleteCharacter( iKey );
-#endif
 		CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_SUCCESS);
 		break;
 	case 0:

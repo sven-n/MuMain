@@ -1748,11 +1748,6 @@
     <ClCompile Include="source\ServerListManager.cpp" />
     <ClCompile Include="source\ServerMsgWin.cpp" />
     <ClCompile Include="source\ServerSelWin.cpp" />
-    <ClCompile Include="source\Shader\EngineGate.cpp" />
-    <ClCompile Include="source\Shader\GLUtils.cpp" />
-    <ClCompile Include="source\Shader\ModelManager.cpp" />
-    <ClCompile Include="source\Shader\RenderMachine.cpp" />
-    <ClCompile Include="source\Shader\VPManager.cpp" />
     <ClCompile Include="source\ShadowVolume.cpp" />
     <ClCompile Include="source\SideHair.cpp" />
     <ClCompile Include="source\SkillEffectMgr.cpp" />
@@ -2472,11 +2467,6 @@
     <ClInclude Include="source\ServerListManager.h" />
     <ClInclude Include="source\ServerMsgWin.h" />
     <ClInclude Include="source\ServerSelWin.h" />
-    <ClInclude Include="source\Shader\EngineGate.h" />
-    <ClInclude Include="source\Shader\GLUtils.h" />
-    <ClInclude Include="source\Shader\ModelManager.h" />
-    <ClInclude Include="source\Shader\RenderMachine.h" />
-    <ClInclude Include="source\Shader\VPManager.h" />
     <ClInclude Include="source\ShadowVolume.h" />
     <ClInclude Include="source\SideHair.h" />
     <ClInclude Include="source\SimpleModulus.h" />

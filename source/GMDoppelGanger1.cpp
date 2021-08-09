@@ -591,21 +591,9 @@ bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+191:	// 도플갱어
-#ifdef MR0
-		ModelManager::SetTargetObject(o);
-#endif //MR0
-#ifdef LDS_MR0_FIX_BREAKVISUAL_DOPPELGANGER_CHARACTER
-		if (o->m_bActionStart == FALSE)
-		{
-			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		}
-#endif // LDS_MR0_FIX_BREAKVISUAL_DOPPELGANGER_CHARACTER
+	case MODEL_MONSTER01+191:
 		b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(0,RENDER_CHROME|RENDER_BRIGHT,0.3f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-#ifdef MR0
-		ModelManager::SetTargetObject(NULL);
-#endif // MR0
 		return true;
 		break;
 	}
@@ -620,18 +608,16 @@ void CGMDoppelGanger1::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 	switch(o->Type)
 	{
-#ifdef YDG_ADD_DOPPELGANGER_PORTAL
-	case 19:	// 포탈
+	case 19:
 	case 20:
 	case 31:
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		break;
-	case 33:	// 포탈 빛
+	case 33:
 		b->StreamMesh = 0;
 		b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime%10000*0.0001f);
 		b->StreamMesh = -1;
 		break;
-#endif	// YDG_ADD_DOPPELGANGER_PORTAL
 	case 98:
 		b->RenderMesh ( 0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 		b->RenderMesh ( 0, RENDER_CHROME|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
@@ -653,26 +639,16 @@ bool IsDoppelGanger1()
 
 bool CGMDoppelGanger1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 {
-// 	if(IsDoppelGanger1() == false)
-// 		return false;
-
 	return false;
 }
 
 bool CGMDoppelGanger1::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
-// 	if(IsDoppelGanger1() == false)
-// 		return false;
-	
 	return false;
 }
 
-// 몬스터 사운드
 bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o) 
 {
-// 	if(IsDoppelGanger1() == false)
-// 		return false;
-	
 	float fDis_x, fDis_y;
 	fDis_x = o->Position[0] - Hero->Object.Position[0];
 	fDis_y = o->Position[1] - Hero->Object.Position[1];
@@ -683,7 +659,6 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
 
 	switch(o->Type)
 	{
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case MODEL_MONSTER01+145:		// Ice Walker
 		if( MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 		{
@@ -703,8 +678,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
 			}
 		}
 		return true;
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case MODEL_MONSTER01+190:		// 분노한 도살자
+	case MODEL_MONSTER01+190:
 		{
 			if(MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			{
@@ -716,7 +690,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+189:		// 도살자
+	case MODEL_MONSTER01+189:
 		{
 			if(MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			{
@@ -728,7 +702,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+191:		// 도플갱어
+	case MODEL_MONSTER01+191:
 		{
 			if(MONSTER01_APEAR == o->CurrentAction)
 			{
@@ -745,7 +719,6 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
 	return false; 
 }
 
-// 오브젝트 사운드
 void CGMDoppelGanger1::PlayObjectSound(OBJECT* o)
 {
 

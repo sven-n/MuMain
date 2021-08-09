@@ -30,24 +30,8 @@
 #include "CDirection.h"
 #include "DSPlaySound.h"
 #include "MapManager.h"
-
-#ifdef MR0
-#include "EngineGate.h"
-#endif //MR0
 #include "CameraMove.h"
 
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
-#ifdef ANTIHACKING_ENABLE
-extern BOOL g_bNewFrame;
-#endif //ANTIHACKING_ENABLE
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//  Global Variable
-//////////////////////////////////////////////////////////////////////////
 #ifdef USE_EVENT_ELDORADO
 int EnableEvent = 0;
 #endif
@@ -57,13 +41,6 @@ static  const   BYTE    BOID_DOWN   = 1;
 static  const   BYTE    BOID_GROUND = 2;
 static  const   BYTE    BOID_UP     = 3;
 
-
-//////////////////////////////////////////////////////////////////////////
-//  Function.
-//////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// 작은 동물들 처리(게임상의 수호천사, 사탄, 유니리아 등등)
-///////////////////////////////////////////////////////////////////////////////
 void DeleteBug(OBJECT *Owner)
 {
 	for(int i=0;i<MAX_BUTTERFLES;i++)
@@ -812,44 +789,18 @@ bool RenderBug ( OBJECT* o, bool bForceRender )
 	return TRUE;
 }
 		
-
-//////////////////////////////////////////////////////////////////////////
-//  모든 보조 유닛 출력.
-//////////////////////////////////////////////////////////////////////////
 void RenderBugs()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_BUGS, PROFILING_RENDER_BUGS );
-#endif // DO_PROFILING
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
 	for ( int i=0; i<MAX_BUTTERFLES; i++ )
 	{
 		OBJECT *o = &Butterfles[i];
 		if ( RenderBug(o)==FALSE )
 		{
-#ifdef MR0
-			VPManager::Disable();
-#endif //MR0
-#ifdef DO_PROFILING
-			g_pProfiler->EndUnit( EPROFILING_RENDER_BUGS );
-#endif // DO_PROFILING
 			return;
 		}
 	}
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_BUGS );
-#endif // DO_PROFILING
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  다크호스 스킬 표현.
-//////////////////////////////////////////////////////////////////////////
 void RenderDarkHorseSkill ( OBJECT* o, BMD* b )
 {
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
@@ -885,24 +836,17 @@ void RenderDarkHorseSkill ( OBJECT* o, BMD* b )
     }
     else if ( o->WeaponLevel==19 )
     {
-        //  분노의 일격의 중앙 틈들.
         CreateEffect ( MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 2 );
         o->WeaponLevel = -3;
     }
 }
 
-
-#ifdef LDS_ADD_EG_2_MONSTER_2NDCORP_VERMONT
-//////////////////////////////////////////////////////////////////////////
-//  어스퀘이크 - 다크호스 스킬을 몬스터 스킬로 변환 : 제국 수호군 버몬트
-//////////////////////////////////////////////////////////////////////////
 void RenderSkillEarthQuake ( CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill )
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(c == NULL)	return;
 	if(o == NULL)	return;
 	if(b == NULL)	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
     float  Matrix[3][4];
     vec3_t Angle, p, Position;
 	OBJECT& TargetO = CharactersClient[c->TargetCharacter].Object;
@@ -941,16 +885,7 @@ void RenderSkillEarthQuake ( CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill )
 		o->WeaponLevel = 0;	// 호출되는 이펙트로 종료.
     }
 }
-#endif // LDS_ADD_EG_2_MONSTER_2NDCORP_VERMONT
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 무리지어 움직이는 동물들 처리(게임상의 새, 나비, 박쥐 등등)
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  생성된 Boid들 제거.
-//////////////////////////////////////////////////////////////////////////
 void DeleteBoids ()
 {
 	for ( int i=0; i<MAX_BOIDS; i++ )
@@ -1699,13 +1634,6 @@ void MoveBoids ()
 
 void RenderBoids ( bool bAfterCharacter )
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_BOIDS, PROFILING_RENDER_BOIDS );
-#endif // DO_PROFILING
-
-#ifdef MR0
-	VPManager::Enable();
-#endif//MR0
 	for ( int i=0; i<MAX_BOIDS; i++ )
 	{
 		OBJECT* o = &Boids[i];
@@ -1731,10 +1659,6 @@ void RenderBoids ( bool bAfterCharacter )
 #endif //PJH_NEW_SERVER_SELECT_MAP
 				RenderObject ( o, true );
 				
-#ifdef MR0
-				ModelManager::SetTargetObject(o);
-#endif //MR0
-
 				BMD* b = &Models[o->Type];
 				vec3_t p, Position, Light;
                 switch ( o->Type )
@@ -1772,7 +1696,6 @@ void RenderBoids ( bool bAfterCharacter )
 
 				case MODEL_MAP_TORNADO:
 					{
-						// 회오리 먼지
 						CreateParticle ( BITMAP_CLOUD, o->Position, o->Angle, o->Light, 18, o->Scale, o );
 					}
 					break;

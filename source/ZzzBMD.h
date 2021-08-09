@@ -1,7 +1,6 @@
 #ifndef __ZZZBMD_H__
 #define __ZZZBMD_H__
 
-#include "./Shader/ModelManager.h"
 #include "TextureScript.h"
 
 #define MAX_BONES    200
@@ -14,37 +13,26 @@
 #define RENDER_METAL        0x00000008
 #define RENDER_LIGHTMAP     0x00000010
 #define RENDER_SHADOWMAP    0x00000020
-
 #define RENDER_BRIGHT       0x00000040
 #define RENDER_DARK         0x00000080
-
 #define RENDER_EXTRA        0x00000100
 #define RENDER_CHROME2      0x00000200
 #define RENDER_WAVE			0x00000400
-#define RENDER_CHROME3      0x00000800  //  세트 효과에 사용됨.
-#define RENDER_CHROME4      0x00001000  //  +13 효과에 사용.
+#define RENDER_CHROME3      0x00000800 
+#define RENDER_CHROME4      0x00001000
 #define RENDER_NODEPTH      0x00002000
-#define RENDER_CHROME5      0x00004000  //  은은한 빛을 받는다.
-#define RENDER_OIL          0x00008000  //  기름 같은 느낌
+#define RENDER_CHROME5      0x00004000
+#define RENDER_OIL          0x00008000
 #define RENDER_CHROME6      0x00010000
-#define RENDER_CHROME7      0x00020000	// 칸투르 수정 오브젝트 크롬 효과.
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
-#define RENDER_DOPPELGANGER        0x00040000	// 도플갱어 몬스터 이펙트
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
-#ifdef PJH_NEW_CHROME
-#define RENDER_CHROME8      0x00080000	// 럭키아이템.
-#endif //PJH_NEW_CHROME
-
-
-
+#define RENDER_CHROME7      0x00020000
+#define RENDER_DOPPELGANGER 0x00040000
 #define RENDER_WAVE_EXT		0x10000000
-#define RENDER_BYSCRIPT		0x80000000	//	완전히 외부 스크립트로만 그린다. 
-
+#define RENDER_BYSCRIPT		0x80000000
 #define RNDEXT_WAVE			1
 #define RNDEXT_OIL          2
 #define RNDEXT_RISE			4
 
-#define MAX_MONSTER_SOUND   10//5
+#define MAX_MONSTER_SOUND   10
 
 typedef struct
 {
@@ -143,153 +131,6 @@ typedef struct _Triangle_t3 : public Triangle_t
 	short	   m_ivIndexAdditional[4];
 } Triangle_t3;
 
-//////////////////////////////////////////////////////////////////////////
-/*
-	Vertex buffer Object 를 위한 새 메쉬 구조체
-	Idas
-*/
-//////////////////////////////////////////////////////////////////////////
-#ifdef MR0
-#pragma warning( disable : 4786 )
-#include <vector>
-
-//기본 유닛
-typedef struct  _VertexUnit
-{
-	vec4_t	m_vTex;
-	vec4_t	m_vCor;
-	vec3_t	m_vNorm;
-	vec4_t	m_vPos;
-
-	//GL_T4F_C4F_N3F_V4F
-
-}VertexUnit;
-
-//버텍스 컬러를 쓰지 않는 축약된 유닛
-typedef struct _VertexUnit2
-{
-	vec4_t	m_vTex;
-	vec3_t	m_vNorm;
-	vec3_t	m_vPos;
-
-	//GL_C4F_N3F_V3F 사용
-
-}VertexUnit2;
-
-//텍스쳐좌표와 위치값만을 갖는 축약된 유닛
-typedef struct _VertexUnit3
-{
-	vec4_t	m_vTex;
-	vec4_t	m_vPos;
-
-	//GL_T4F_V4F 사용
-
-}VertexUnit3;
-
-//Vertex Animation 기본 구조
-typedef struct _Point3
-{
-	float x, y, z;
-	_Point3() : x(0.f), y(0.f), z(0.f) {}
-}Point3;
-typedef std::vector<Point3> VertexTrack_t;
-typedef struct _AniTrack_t
-{
-	unsigned int	m_iIndex;		//몇 번 버텍스에 대한 애니메이션 트랙인가
-	VertexTrack_t	m_TrackData;	//해당 버텍스에 대한 트랙
-
-	_AniTrack_t() {
-		m_iIndex = 0;
-		m_TrackData.clear();
-	}
-} AniTrack_t;
-
-class CVertexAnimation
-{
-public:
-	bool			m_bLoop;			//루프되는 애니메이션인가?
-	
-	//Shader Only
-	bool			m_bParametric;		//트랙 없이 특정 쉐이더를 대상으로 갖는 버텍스 애니메이션인가?
-	unsigned int	m_iShaderID;		//쉐이더 ID
-
-	float			m_fSpeed;			//애니메이션 속도
-	unsigned int	m_iModelIdx;		//참조하는 모델의 인덱스
-	std::string		m_strRefModel;		//참조하는 모델의 이름
-	AniTrack_t		m_VertexTrack;		//버텍스 애니메이션
-	
-	CVertexAnimation() : m_bLoop(true), m_bParametric(false), m_iShaderID(0), m_fSpeed(0.f),
-		m_iModelIdx(0) { m_strRefModel = ""; }
-
-	bool			Load(const std::string& fn);
-	bool			Save(const std::string& fn);
-	void			PlayAnimation(bool bRev = false);
-	void			Dump();								//버텍스 버퍼에 업로드
-	void			SetStop();
-};
-typedef std::vector<CVertexAnimation> VertexAniList_t;
-
-
-//Two link 임시 저장을 위한 구조체
-typedef struct _TempSkinInfo_t
-{
-	float	m_fWeight0;
-	int		m_iBone1;
-	float	m_fWeight1;
-}TempSkinInfo_t;
-typedef std::map<int, TempSkinInfo_t> TempSkinInfoMap_t;
-
-//텍스쳐 단위 메쉬
-//(2^16 - 1) 개의 인덱스를 포함한다.
-typedef std::vector<VertexUnit> UnitVector;
-typedef std::vector<VertexUnit2> UnitVector2;
-typedef std::vector<VertexUnit3> UnitVector3;
-typedef struct  _VBOMesh
-{
-	bool			NoneBlendMesh;
-	short			Texture;
-	unsigned int	Vbo;
-	unsigned int	IdxVbo;
-	unsigned int	RealType;			//실제 메쉬의 버텍스 구조
-	TextureScript*	m_csTScript;
-
-	UnitVector		VBuffer;
-	UShortVector	IBuffer;
-
-	ShortVector		BoneContainer;		//본 컨테이너. m_vPos[3]에 들어가는 본 ID는 이 버퍼의 인덱스이다.
-	VertexAniList_t	VertexAniList;		//버텍스 애니메이션 리스트
-	EffectScripVec_t MeshEffectScript;	//Post Effect Struct		
-	
-#ifdef LDS_MR0_MODIFY_DIRECTLYAPPLY_SCALETM_INCLUDESHADER
-	bool			RegisterBone(const float* BoneTransform);
-#else // LDS_MR0_MODIFY_DIRECTLYAPPLY_SCALETM_INCLUDESHADER
-#ifdef LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-	bool			RegisterBone( const float* BoneTransform, 
-								bool bTrans, 
-								vec3_t vTrans, 
-								float fScale, 
-								bool bApplyRequestAbsoluteScale = false, 
-								float fRequestAbsoluteScale = 0.0f );
-#else // LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-	bool			RegisterBone(const float* BoneTransform, bool bTrans, vec3_t vTrans, float fScale);
-#endif // LDS_MR0_MODIFY_TRANSFORMSCALE_FORSILHOUETTE
-#endif // LDS_MR0_MODIFY_DIRECTLYAPPLY_SCALETM_INCLUDESHADER
-
-	bool			RegisterBone(float (*BoneMatrix)[3][4], bool bTrans, vec3_t vTrans, float fScale);
-
-	_VBOMesh() : NoneBlendMesh(true), Texture(0), 
-		Vbo(0), IdxVbo(0), 
-		RealType(GL_T4F_C4F_N3F_V4F),
-		m_csTScript(NULL) { 
-		VBuffer.clear(); IBuffer.clear(); }
-
-}VBOMesh;
-typedef std::vector<VBOMesh> MeshVector;
-#endif
-
-//////////////////////////////////////////////////////////////////////////
-
-
 typedef struct _Mesh_t
 {
     bool          NoneBlendMesh;
@@ -308,11 +149,6 @@ typedef struct _Mesh_t
 	unsigned char *Commands; //ver1.1
 
     TextureScript* m_csTScript;
-
-#ifdef MR0
-	EffectScripVec_t	MeshEffectScript;			//Post Effect Struct
-	TempSkinInfoMap_t	MeshAdditionalSkinInfo;		//Temp Skining Infomation
-#endif
 
 	_Mesh_t()
 	{	
@@ -374,8 +210,6 @@ public:
     int           renderCount;
 	float		  fTransformedSize;
 	
-	UIntVector	  LightIDVector;
-
 	unsigned int		m_iBMDSeqID;
 	bool				bLightMap;
 	bool				bOffLight;
@@ -383,17 +217,6 @@ public:
 
 	bool				m_bCompletedAlloc;
 	
-	void				ConvertMesh();
-	void				UploadVBO();
-	void				UnloadVBO();
-	void				DelOldMesh();
-
-	void				RenderBodyOld(int RenderFlag,float Alpha=1.f,int BlendMesh=-1,float BlendMeshLight=1.f,float BlendMeshTexCoordU=0.f,float BlendMeshTexCoordV=0.f,int HiddenMesh=-1,int Texture=-1);
-	void				RenderBodyShadowOld(int BlendMesh=-1,int HiddenMesh=-1, int StartMeshNumber=-1, int EndMeshNumber=-1);
-	
-	bool				Open2Old(char *DirName,char *FileName, bool bReAlloc = true);
-	bool				Save2Old(char *DirName,char *FileName);
-
 	BMD() : NumBones(0), NumActions(0), NumMeshs(0), 
 		Meshs(NULL), Bones(NULL), Actions(NULL), Textures(NULL), IndexTexture(NULL)
 	{
@@ -412,7 +235,7 @@ public:
 	bool Open(char *DirName,char *FileName);
 	bool Save(char *DirName,char *FileName);
 	bool Open2(char *DirName,char *FileName, bool bReAlloc = true);
-	bool Save2(char *DirName,char *FileName);	// 암호화
+	bool Save2(char *DirName,char *FileName);
 	void Release();
     void CreateBoundingBox();
 
@@ -435,15 +258,15 @@ public:
 #endif // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 
 	void TransformByObjectBone(vec3_t vResultPosition, OBJECT * pObject, int iBoneNumber, vec3_t vRelativePosition = NULL);
-	// 해당 오브젝트의 본의 월드좌표를 얻는다. (vResultPosition = (pObject->BoneTransform[iBoneNumber] * vRelativePosition) + pObject->Position)
+	// (vResultPosition = (pObject->BoneTransform[iBoneNumber] * vRelativePosition) + pObject->Position)
 	void TransformByBoneMatrix(vec3_t vResultPosition, float (*BoneMatrix)[4], vec3_t vWorldPosition = NULL, vec3_t vRelativePosition = NULL);
-	// 해당 본 행렬을 이용해 본의 월드좌표를 얻는다. (vResultPosition = (BoneMatrix * vRelativePosition) + vWorldPosition)
+	// (vResultPosition = (BoneMatrix * vRelativePosition) + vWorldPosition)
     void TransformPosition(float (*Matrix)[4],vec3_t Position,vec3_t WorldPosition,bool Translate=false);
     void RotationPosition(float (*Matrix)[4],vec3_t Position,vec3_t WorldPosition);
 
 #ifdef LDS_ADD_MODEL_ATTACH_SPECIFIC_NODE_
 	public:
-	//typedef vector<vec3_t>		VECVEC3_TS;	// 로컬내 각 노드의 현재 위치점만 반환 하기 위한 변수.
+	//typedef vector<vec3_t>		VECVEC3_TS;
 
 #ifdef LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
 	void AnimationTransformWithAttachHighModel_usingGlobalTM( 
@@ -455,7 +278,6 @@ public:
 				bool bApplyTMtoVertices);
 #endif // LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
 
-	// 자신을 oHighHierarchyModel,b의 n번째 노드위치에 애니메이션 하여 ATTACH 합니다.
 	void AnimationTransformWithAttachHighModel( 
 				OBJECT* oHighHierarchyModel, 
 				BMD* bmdHighHierarchyModel, 
@@ -479,9 +301,6 @@ public:
 	void AnimationTransformOutAllVertices(vec3_t (*outVertexTransform__)[MAX_VERTICES], const OBJECT& oSelf );
 #endif // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 
-    void LinkBone(int Node);
-    void TransformScale(float Scale,bool Link=false);
-    void TransformShadow();
     void Lighting(float *,Light_t *,vec3_t,vec3_t);
     void Chrome(float *,int,vec3_t);
     
@@ -526,31 +345,8 @@ public:
 
 //#endif //USE_SHADOWVOLUME
 private:
-	//복사 불가
 	BMD(const BMD& b);
 	BMD& operator=(const BMD& b);
-
-#ifdef MR0
-	//버텍스 확장에 쓰이는 함수
-	void ExtendVertice(Mesh_t* oM, VBOMesh* nM);
-#endif
-
-	// MR0:VBOMesh로 변환 이후 ValidationCheck정보를 화면상에 출력.
-#ifdef LDS_MR0_FORDEBUG_VERIFYCONVERTMESH
-
-	enum UNVALIDATETYPE	{
-		UT_SUCCESS = 0,
-		UT_IB = 1,
-		UT_VB = 2, 
-		UT_TRANSFORM = 4,
-		UT_END = 8,
-	};
-	
-	void ProcessVerification(MeshVector& CurrentVBOMeshContainer);
-	void UnValidateTypeText( unsigned int uiUnvalidateType, char* szOutText );
-	unsigned int VerifyTotalVBOMESHS( MeshVector& CurrentVBOMeshContainer );
-	unsigned int VerifyCurrentVBOMeshValidate( VBOMesh& CurrentVBOMesh );
-#endif // LDS_MR0_FORDEBUG_VERIFYCONVERTMESH
 };
 
 //extern BMD   Models[];

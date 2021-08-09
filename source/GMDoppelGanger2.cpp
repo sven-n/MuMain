@@ -647,20 +647,8 @@ bool CGMDoppelGanger2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 		}
 		return true;
 	case MODEL_MONSTER01+191:	// 도플갱어
-#ifdef MR0
-		ModelManager::SetTargetObject(o);
-#endif //MR0
-#ifdef LDS_MR0_FIX_BREAKVISUAL_DOPPELGANGER_CHARACTER
-		if (o->m_bActionStart == FALSE)
-		{
-			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		}
-#endif // LDS_MR0_FIX_BREAKVISUAL_DOPPELGANGER_CHARACTER
 		b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(0,RENDER_CHROME|RENDER_BRIGHT,0.3f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-#ifdef MR0
-		ModelManager::SetTargetObject(NULL);
-#endif // MR0
 		return true;
 		break;
 	}

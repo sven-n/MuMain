@@ -12512,16 +12512,8 @@ bool IsWingItem(ITEM* pItem)
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 화면에 오브젝트를 랜더링 하는 함수
-// 오브젝트 위치, 각도 설정
-///////////////////////////////////////////////////////////////////////////////
-
-#ifdef MR0
-AUTOOBJ ObjectSelect;
-#else
 OBJECT ObjectSelect;
-#endif //MR0
+
 void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t Target,int Select,bool PickUp)
 {	
    	int Level = (ItemLevel>>3)&15;
@@ -12533,10 +12525,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	else
       	VectorMA(MousePosition,0.1f,Direction,Position);
 
-	// ObjectSelect 처리 부분 1. 일반 아이템
-	// =====================================================================================
-	// 검류
-	if(Type == MODEL_SWORD+0)	// 크리스
+	if(Type == MODEL_SWORD+0)
 	{
 		Position[0] -= 0.02f;
 		Position[1] += 0.03f;
@@ -12547,12 +12536,12 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	{
     	Vector(0.f,270.f,15.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_SPEAR+0)	// 광선봉
+	else if(Type == MODEL_SPEAR+0)
 	{
 		Position[1] += 0.05f;
 		Vector(0.f,90.f,20.f,ObjectSelect.Angle);
 	}
-	else if( Type==MODEL_BOW+17)    //  뮤즈활.
+	else if( Type==MODEL_BOW+17)
 	{
     	Vector(0.f,90.f,15.f,ObjectSelect.Angle);
 	}
@@ -12589,7 +12578,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[0] += 0.025f;
     	Vector(180.f,0.f,8.f,ObjectSelect.Angle);
 	}
-	else if (Type >= MODEL_STAFF+21 && Type <= MODEL_STAFF+29)	// 사아무트의 서, 닐의 서
+	else if (Type >= MODEL_STAFF+21 && Type <= MODEL_STAFF+29)
 	{
     	Vector(0.f,0.f,0.f,ObjectSelect.Angle);
 	}
@@ -12599,58 +12588,55 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[0] -= 0.01;
     	Vector(180.f,90.f,13.f,ObjectSelect.Angle);
 	}	
-	//$ 크라이울프 아이템
-	else if(Type == MODEL_ARMOR+34)	// 흑기사 갑옷
+	else if(Type == MODEL_ARMOR+34)
 	{
 		Position[1] += 0.03f;
 		Vector(-90.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_HELM+35)	// 흑마법사 헬멧
+	else if(Type == MODEL_HELM+35)
 	{
 		Position[0] -= 0.02f;
 		Position[1] += 0.05f;
 		Vector(-90.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_ARMOR+35)	// 흑마법사 갑옷
+	else if(Type == MODEL_ARMOR+35)
 	{
 		Position[1] += 0.05f;
 		Vector(-90.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_ARMOR+36)	// 요정 갑옷
+	else if(Type == MODEL_ARMOR+36)
 	{
 		Position[1] -= 0.05f;
 		Vector(-90.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_ARMOR+37)	// 다크로드 갑옷
+	else if(Type == MODEL_ARMOR+37)
 	{
 		Position[1] -= 0.05f;
 		Vector(-90.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	// 바이올렌윈드 ~ 이터널윙 헬멧
 	else if (MODEL_HELM+39 <= Type && MODEL_HELM+44 >= Type)
 	{
 		Position[1] -= 0.05f;
 		Vector(-90.f,25.f,0.f,ObjectSelect.Angle);
 	}
-	// 글로리어스 ~ 이터널윙 갑옷
 	else if(MODEL_ARMOR+38 <= Type && MODEL_ARMOR+44 >= Type)
 	{
 		Position[1] -= 0.08f;
 		Vector(-90.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_SWORD+24)	// 흑기사 검
+	else if(Type == MODEL_SWORD+24)
 	{
 		Position[0] -= 0.02f;
 		Position[1] += 0.03f;
     	Vector(180.f,90.f,15.f,ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_MACE+15)	// 다크로드 셉터
+	else if( Type == MODEL_MACE+15)
 	{
 		Position[1] += 0.05f;
     	Vector(180.f,90.f,13.f,ObjectSelect.Angle);
 	}
 #ifdef ADD_SOCKET_ITEM
-	else if(Type == MODEL_BOW+22 || Type == MODEL_BOW+23)	// 요정 활
+	else if(Type == MODEL_BOW+22 || Type == MODEL_BOW+23)
 	{
 		Position[0] -= 0.10f;
 		Position[1] += 0.08f;
@@ -12663,7 +12649,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
     	Vector(180.f,90.f,15.f,ObjectSelect.Angle);
 	}
 #endif // ADD_SOCKET_ITEM
-	else if(Type == MODEL_STAFF+13)	// 흑마법사 지팡이
+	else if(Type == MODEL_STAFF+13)
 	{
 		Position[0] += 0.02f;
 		Position[1] += 0.02f;
@@ -15144,45 +15130,8 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 
     Vector(1.f,1.f,1.f,Light);
 
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
-	
-#ifdef MR0
-	// Object가 있다면 단지 Lock을 걸고, 없으면 Lock을 걸고 Render 
-	ModelManager::SetTargetObject( o );
-#endif //MR0
-
-	//인관
-#ifdef PJH_NEW_CHROME
-	int Set_Count = 0;
-
-	int nItemType = (Type - MODEL_ITEM) / MAX_ITEM_INDEX;
-	int nItemSubType = (Type - MODEL_ITEM) % MAX_ITEM_INDEX;
-	// 스핑크스 시리즈인가?
-	if (nItemType >= 7 && nItemType <= 11 && (nItemSubType >= 62 && nItemSubType <= 72))
-	{
-		Set_Count = 1;
-	}
-
-	if(Set_Count == 1)
-		RenderPartObject(o,Type,NULL,Light,alpha,ItemLevel,Option1,MAX_MODELS+1,true,true,true);
-	else
-#endif //PJH_NEW_CHROME
     RenderPartObject(o,Type,NULL,Light,alpha,ItemLevel,Option1,ExtOption,true,true,true);
-
-#ifdef MR0
-	ModelManager::SetTargetObject(NULL);
-#endif //MR0
-	
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 인밴토리에 아이템을 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,int Option1,int ExtOption,bool PickUp)
 {
@@ -15266,7 +15215,7 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		else if(Type == ITEM_SHIELD+16)
 			sy += Height*0.9f;
 #ifdef CSK_ADD_ITEM_CROSSSHIELD
-		else if(Type == ITEM_SHIELD+21)		// 크로스실드
+		else if(Type == ITEM_SHIELD+21)
 		{
 			sx += Width*0.05f;
 			sy += Height*0.5f;
@@ -15291,7 +15240,7 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		{
 			sy += Height*1.1f;
 		}
-		else if ( Type==ITEM_ARMOR+17 || Type==ITEM_ARMOR+18 || Type==ITEM_ARMOR+20 ) //  블레이드나이트.소울마스터. 선더 마검사.
+		else if ( Type==ITEM_ARMOR+17 || Type==ITEM_ARMOR+18 || Type==ITEM_ARMOR+20 )
 		{
 			sy += Height*0.8f;
 		}
@@ -15309,7 +15258,7 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		sx += Width*0.5f;
 		sy += Height*0.9f;
 	}
-	else if ( Type==ITEM_HELPER+14 && (Level>>3)==1 )    //  군주의 문장.
+	else if ( Type==ITEM_HELPER+14 && (Level>>3)==1 )
 	{
 		sx += Width*0.55f;
 		sy += Height*0.85f;
@@ -15333,23 +15282,23 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 	{
 		switch ( Level>>3 )
 		{
-		case 0: sx += Width*0.5f; sy += Height*0.5f; break; //  대천사의 절대지팡이.
-		case 1: sx += Width*0.7f; sy += Height*0.8f; break; //  대천사의 절대검.
-		case 2: sx += Width*0.7f; sy += Height*0.7f; break; //  대천사의 절대석궁.
+		case 0: sx += Width*0.5f; sy += Height*0.5f; break;
+		case 1: sx += Width*0.7f; sy += Height*0.8f; break;
+		case 2: sx += Width*0.7f; sy += Height*0.7f; break;
 		}
 	}
 	else if( Type == ITEM_HELPER+20 )
 	{
 		switch( Level>>3 )
 		{
-		case 0: sx += Width*0.5f; sy+= Height*0.65f; break;  // 마법사의 반지
-		case 1: // 제왕의 반지
-		case 2: // 전사의 반지
-		case 3: // 영예의 반지.
+		case 0: sx += Width*0.5f; sy+= Height*0.65f; break;
+		case 1:
+		case 2:
+		case 3:
 			sx += Width*0.5f; sy+= Height*0.8f; break;
 		}
 	}
-	else if ( Type==ITEM_HELPER+29 )	//. 근위병의 갑옷세트
+	else if ( Type==ITEM_HELPER+29 )
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
@@ -15359,17 +15308,17 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		sx += Width*0.5f;
 		sy += Height*0.6f;
 	}
-	else if ( Type==ITEM_HELPER+30 )    //  망토.
+	else if ( Type==ITEM_HELPER+30 )
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
 	}
-	else if ( Type==ITEM_HELPER+31 )    //  영혼.
+	else if ( Type==ITEM_HELPER+31 )
 	{
 		sx += Width*0.5f;
 		sy += Height*0.9f;
 	}
-	else if ( Type==ITEM_POTION+7 )//종훈물약
+	else if ( Type==ITEM_POTION+7 )
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
@@ -15387,33 +15336,32 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		case 1: sx += Width*0.5f; sy += Height*0.5f; break;
 		}
 	}
-	//^ 펜릴 인벤토리 위치 조정
-	else if(Type == ITEM_HELPER+32)	// 갑옷 파편
+	else if(Type == ITEM_HELPER+32)
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
 	}
-	else if(Type == MODEL_HELPER+33)	// 여신의 가호
+	else if(Type == MODEL_HELPER+33)
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
 	}
-	else if(Type == MODEL_HELPER+34)	// 맹수의 발톱
+	else if(Type == MODEL_HELPER+34)
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
 	}
-	else if(Type == MODEL_HELPER+35)	// 뿔피리의 조각
+	else if(Type == MODEL_HELPER+35)
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
 	}
-	else if(Type == MODEL_HELPER+36)	// 부러진 뿔피리
+	else if(Type == MODEL_HELPER+36)
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
 	}
-	else if(Type == MODEL_HELPER+37)	// 펜릴의 뿔피리
+	else if(Type == MODEL_HELPER+37)
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
@@ -15428,34 +15376,17 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		sx += Width*0.5f;
 		sy += Height*0.5f;
 	}
-	else if(Type==ITEM_POTION+11 && ((Level>>3) == 3 || (Level>>3) == 13))	// 사랑의 하트, 다크로드의 마음
+	else if(Type==ITEM_POTION+11 && ((Level>>3) == 3 || (Level>>3) == 13))
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
 	}
-#ifdef NEW_YEAR_BAG_EVENT
-	else if ( Type==ITEM_POTION+11 && ( (Level>>3)==14 || (Level>>3)==15 ) )  //  파란, 빨강 복주머니
+	else if ( Type==ITEM_POTION+11 && ( (Level>>3)==14 || (Level>>3)==15 ) )
 	{
 		sx += Width*0.5f;
 		sy += Height*0.8f;
 	}
-#else
-#ifdef CHINA_MOON_CAKE
-	else if ( Type==ITEM_POTION+11 && (Level>>3)==14 )  //  중국 월병.
-	{
-		sx += Width*0.5f;
-		sy += Height*0.5f;
-	}
-#endif// CHINA_MOON_CAKE
-#endif// NEW_YEAR_BAG_EVENT
-#ifdef MYSTERY_BEAD
-	else if(Type==ITEM_WING+26 && (Level>>3) == 0)	//. 신비의구슬
-	{
-		sx += Width*0.5f;
-		sy += Height*0.8f;
-	}
-#endif // MYSTERY_BEAD
-	else if(Type==ITEM_POTION+9 && (Level>>3) == 1)	// 사랑의 올리브
+	else if(Type==ITEM_POTION+9 && (Level>>3) == 1)
 	{
 		sx += Width*0.5f;
 		sy += Height*0.8f;
@@ -15469,12 +15400,10 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 	{
 		switch ( Level>>3 )
 		{
-		case 0: sx += Width*0.5f; sy += Height*0.5f; break; //  레나.
-		case 1: sx += Width*0.4f; sy += Height*0.8f; break; //  스톤.
-#ifdef FRIEND_EVENT
-		case 2: sx += Width*0.4f; sy += Height*0.8f; break; //  우정의 돌.
-#endif	// FRIEND_EVENT
-		case 3: sx += Width*0.5f; sy += Height*0.5f; break; //  성주의표식
+		case 0: sx += Width*0.5f; sy += Height*0.5f; break;
+		case 1: sx += Width*0.4f; sy += Height*0.8f; break;
+		case 2: sx += Width*0.4f; sy += Height*0.8f; break;
+		case 3: sx += Width*0.5f; sy += Height*0.5f; break;
 		}
 	}
 	else if ( Type>=ITEM_POTION+22 && Type<ITEM_POTION+25 )
@@ -15500,14 +15429,7 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		sx += Width*0.5f;
 		sy += Height*0.9f;
 	}
-#ifdef _PVP_MURDERER_HERO_ITEM
-	else if ( Type==ITEM_POTION+30 )	// 징표
-	{
-		sx += Width*0.6f;
-		sy += Height*1.0f;
-	}
-#endif	// _PVP_MURDERER_HERO_ITEM
-	else if(Type==ITEM_POTION+31)	// 수호의보석
+	else if(Type==ITEM_POTION+31)
 	{
 		sx += Width*0.5f;
 		sy += Height*0.5f;
@@ -15517,39 +15439,33 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		sx += Width*0.55f;
 		sy += Height*0.8f;
 	}
-	//  추가되는 날개.
-	else if ( Type==ITEM_WING+3 )   //  정령의 날개.
+	else if ( Type==ITEM_WING+3 )
 	{
 		sx += Width*0.5f;
 		sy += Height*0.45f;
 	}
-	else if ( Type==ITEM_WING+4 )   //  영혼의 날개.
+	else if ( Type==ITEM_WING+4 )
 	{
 		sx += Width*0.5f;
 		sy += Height*0.4f;
 	}
-	else if ( Type==ITEM_WING+5 )   //  드라곤 날개.
+	else if ( Type==ITEM_WING+5 )
 	{
 		sx += Width*0.5f;
 		sy += Height*0.75f;
 	}
-	else if ( Type==ITEM_WING+6 )   //  어둠의 날개.
+	else if ( Type==ITEM_WING+6 )
 	{
 		sx += Width*0.5f;
 		sy += Height*0.55f;
 	}
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-	//행운의 동전
 	else if(Type == ITEM_POTION+100)
 	{
 		sx += Width*0.49f;
 		//sy += Height*0.28f;
 		sy += Height*0.28f;
 	}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-
-
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 인벤토리 위치 조정
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if (COMGEM::Check_Jewel_Com(Type) != COMGEM::NOGEM)
 	{
 		sx += Width*0.55f;
@@ -15566,14 +15482,11 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		sx += Width*0.5f;
 		sy += Height*0.75f;
 	}
-#ifdef PBG_ADD_SANTAINVITATION
-	//산타마을의 초대장.
 	else if( Type == ITEM_HELPER+66 )
 	{
 		sx += Width*1.5f;
 		sy += Height*1.5f;
 	}
-#endif //PBG_ADD_SANTAINVITATION
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type==ITEM_WING+49)
 	{
@@ -15607,7 +15520,7 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 	{
 		RenderObjectScreen(MODEL_EVENT+4,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 2)	// 폭죽/ 마법 주머니.
+	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 2)
 	{
 		RenderObjectScreen(MODEL_EVENT+5,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
@@ -15617,47 +15530,37 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		RenderObjectScreen(MODEL_POTION+11,(7 << 3),Option1,ExtOption,Position,Success,PickUp);
 	}
 #endif	// ANNIVERSARY_EVENT
-	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 3)	// 사랑의 하트
+	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 3)
 	{
 		RenderObjectScreen(MODEL_EVENT+6,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 5)	// 은훈장
+	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 5)
 	{
 		RenderObjectScreen(MODEL_EVENT+8,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 6)	// 금훈장
+	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 6)
 	{
 		RenderObjectScreen(MODEL_EVENT+9,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
 #ifdef USE_EVENT_ELDORADO
-	else if ( Type==ITEM_POTION+11 && 8 <= ( Level>>3) && ( Level>>3) <= 12)	// 엘도라도
+	else if ( Type==ITEM_POTION+11 && 8 <= ( Level>>3) && ( Level>>3) <= 12)
 	{
 		RenderObjectScreen(MODEL_EVENT+10,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
 #endif
-	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 13)	// 다크로드의 마음
+	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 13)
 	{
 		RenderObjectScreen(MODEL_EVENT+6,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-#ifdef NEW_YEAR_BAG_EVENT
-	else if ( Type==ITEM_POTION+11 && ( (Level>>3)==14 || (Level>>3)==15 ) )    //  복주머니
+	else if ( Type==ITEM_POTION+11 && ( (Level>>3)==14 || (Level>>3)==15 ) )
 	{
 		RenderObjectScreen(MODEL_EVENT+5,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-#else
-#ifdef CHINA_MOON_CAKE
-	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 14)	//  중국 월병.
-	{
-		RenderObjectScreen(MODEL_EVENT+17,Level,Option1,ExtOption,Position,Success,PickUp);
-	}
-#endif	//  CHINA_MOON_CAKE
-#endif// NEW_YEAR_BAG_EVENT
-	
-	else if ( Type==ITEM_HELPER+14 && ( Level>>3) == 1)	// 군주의 소매.
+	else if ( Type==ITEM_HELPER+14 && ( Level>>3) == 1)
 	{
 		RenderObjectScreen ( MODEL_EVENT+16, Level, Option1, ExtOption, Position, Success, PickUp );
 	}
-	else if ( Type==ITEM_POTION+9 && ( Level>>3) == 1)	// 사랑의 올리브
+	else if ( Type==ITEM_POTION+9 && ( Level>>3) == 1)
 	{
 		RenderObjectScreen(MODEL_EVENT+7,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
@@ -15666,13 +15569,11 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		switch ( (Level>>3) )
 		{
 		case 1:
-			RenderObjectScreen(MODEL_EVENT+11,Level,Option1,ExtOption,Position,Success,PickUp);   //  스톤.
+			RenderObjectScreen(MODEL_EVENT+11,Level,Option1,ExtOption,Position,Success,PickUp);
 			break;
-#ifdef FRIEND_EVENT
 		case 2:
-			RenderObjectScreen(MODEL_EVENT+11,Level,Option1,ExtOption,Position,Success,PickUp); //  우정의 돌.
+			RenderObjectScreen(MODEL_EVENT+11,Level,Option1,ExtOption,Position,Success,PickUp);
 			break;
-#endif// FRIEND_EVENT
 		case 3:
 			RenderObjectScreen(Type+MODEL_ITEM,Level,Option1,ExtOption,Position,Success,PickUp);
 			break;
@@ -15681,7 +15582,6 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 			break;
 		}
 	}
-
 	else if ( Type ==ITEM_POTION+45)
 	{
 		RenderObjectScreen(MODEL_POTION+45,Level,Option1,ExtOption,Position,Success,PickUp);
@@ -15698,8 +15598,6 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 	{
 		RenderObjectScreen(MODEL_POTION+50,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-
-#ifdef GIFT_BOX_EVENT
 	else if ( Type ==ITEM_POTION+32)
 	{
 		switch ( (Level>>3) )
@@ -15736,43 +15634,18 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 			break;
 		}
 	}
-	
-#endif
-	
-#ifdef MYSTERY_BEAD
-	else if ( Type ==ITEM_WING+26)
-	{
-		switch ( (Level>>3) )
-		{
-		case 0:		//. 신비의 구슬
-			RenderObjectScreen(MODEL_EVENT+19,Level,Option1,ExtOption,Position,Success,PickUp);
-			break;
-		case 1:
-		case 2:
-		case 3:
-			RenderObjectScreen(MODEL_EVENT+20,Level,Option1,ExtOption,Position,Success,PickUp);
-			break;
-		case 4:
-			RenderObjectScreen(MODEL_POTION+11,4<<3,Option1,ExtOption,Position,Success,PickUp);
-			break;
-		case 5:
-			RenderObjectScreen(MODEL_POTION+11,7<<3,Option1,ExtOption,Position,Success,PickUp);
-			break;
-		}
-	}
-#endif // MYSTERY_BEAD
-	else if ( Type==ITEM_HELPER+19)     //  대천사의 절대 무기 시리즈.
+	else if ( Type==ITEM_HELPER+19)
 	{
 		switch ( (Level>>3) )
 		{
 		case 0:
-			RenderObjectScreen(MODEL_STAFF+10,-1,Option1,ExtOption,Position,Success,PickUp);   //  대천사의 절대지팡이.
+			RenderObjectScreen(MODEL_STAFF+10,-1,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		case 1:
-			RenderObjectScreen(MODEL_SWORD+19,-1,Option1,ExtOption,Position,Success,PickUp);   //  대천사의 절대검.
+			RenderObjectScreen(MODEL_SWORD+19,-1,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		case 2:
-			RenderObjectScreen(MODEL_BOW+18,-1,Option1,ExtOption,Position,Success,PickUp);   //  대천사의 절대석궁.
+			RenderObjectScreen(MODEL_BOW+18,-1,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		}
 	}
@@ -15784,7 +15657,7 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 			RenderObjectScreen(Type+MODEL_ITEM,Level,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		case 1:
-			RenderObjectScreen(MODEL_EVENT+12,-1,Option1,ExtOption,Position,Success,PickUp);   //. 영광의 반지
+			RenderObjectScreen(MODEL_EVENT+12,-1,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		}
 	}
@@ -15796,7 +15669,7 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 			RenderObjectScreen(Type+MODEL_ITEM,Level,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		case 1:
-			RenderObjectScreen(MODEL_EVENT+13,-1,Option1,ExtOption,Position,Success,PickUp);   //. 다크스톤
+			RenderObjectScreen(MODEL_EVENT+13,-1,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		}
 	}
@@ -15805,37 +15678,33 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		switch( (Level>>3) )
 		{
 		case 0:
-			RenderObjectScreen(MODEL_EVENT+15,Level,Option1,ExtOption,Position,Success,PickUp);	// 마법사의 반지
+			RenderObjectScreen(MODEL_EVENT+15,Level,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		case 1:
 		case 2: //  전사의 반지.
 		case 3: //  영예의 반지.
-			RenderObjectScreen(MODEL_EVENT+14,Level,Option1,ExtOption,Position,Success,PickUp);	//. 제왕의 반지
+			RenderObjectScreen(MODEL_EVENT+14,Level,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		}
 	}
 	else if ( Type==ITEM_HELPER+11 && (Level>>3)==1 )
 	{
-		RenderObjectScreen ( MODEL_EVENT+18,Level,Option1,ExtOption,Position,Success,PickUp);	//  라이프 스톤.
+		RenderObjectScreen ( MODEL_EVENT+18,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 	else if(Type == ITEM_POTION+100)
 	{
 		bool _Angle;
 		if(g_pLuckyCoinRegistration->GetItemRotation())
 		{
-			//등록창 안에 그려질 아이템
 			_Angle = true;
 		}
 		else
 		{
-			//기타 인벤에 그려질 아이템
 			_Angle = Success;
 		}
 
 		RenderObjectScreen(MODEL_POTION+100,Level,Option1,ExtOption,Position,_Angle,PickUp);	// 행운의 동전
 	}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type == ITEM_ARMOR+59)
 	{
@@ -15992,10 +15861,6 @@ void RenderEqiupmentPart3D(int Index,float sx,float sy,float Width,float Height)
 
 void RenderEqiupment3D()
 {
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
-
 	int StartX = InventoryStartX;
 	int StartY = InventoryStartY;
 	float x,y,Width,Height;
@@ -16052,14 +15917,7 @@ void RenderEqiupment3D()
     InventoryColor(&CharacterMachine->Equipment[EQUIPMENT_RING_LEFT]);
 	RenderEqiupmentPart3D(EQUIPMENT_RING_LEFT,StartX+x,StartY+y,Width,Height);
 
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0	
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 인밴토리 버튼들 처리하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 bool CheckEmptyInventory(ITEM *Inv,int InvWidth,int InvHeight)
 {
@@ -16079,18 +15937,12 @@ bool CheckEmptyInventory(ITEM *Inv,int InvWidth,int InvHeight)
 	return Empty;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//  파티창 인터페이스.
-///////////////////////////////////////////////////////////////////////////////
 void InitPartyList ()
 {
     PartyNumber = 0;
     PartyKey = 0;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  서버 분할 인터페이스.
-//////////////////////////////////////////////////////////////////////////
 void MoveServerDivisionInventory ()
 {
     if ( !g_pUIManager->IsOpen(INTERFACE_SERVERDIVISION) ) return;
@@ -16104,7 +15956,6 @@ void MoveServerDivisionInventory ()
 		MouseOnWindow = true;
     }
 
-    //  동의.
     Width = 16; Height = 16; x = InventoryStartX+25;y = 240;
 	if(MouseX>=x && MouseX<x+Width && MouseY>=y && MouseY<y+Height && MouseLButtonPush )
     {
@@ -16114,7 +15965,6 @@ void MoveServerDivisionInventory ()
         MouseLButton = false;
     }
 
-    //  확인 버튼.
     if ( g_bServerDivisionAccept )
     {
         Width = 120; Height = 24; x = (float)InventoryStartX+35;y = 320;
@@ -16122,16 +15972,13 @@ void MoveServerDivisionInventory ()
         {
             MouseLButtonPush = false;
             MouseLButton = false;
-
             AskYesOrNo =  4;
             OkYesOrNo  = -1;
 
-            //  서버분할 확인창.
             ShowCheckBox(1, 448, MESSAGE_CHECK );
         }
     }
 
-    //  취소.
     Width = 120; Height = 24; x = (float)InventoryStartX+35;y = 350;
 	if(MouseX>=x && MouseX<x+Width && MouseY>=y && MouseY<y+Height && MouseLButtonPush )
     {
@@ -16144,7 +15991,6 @@ void MoveServerDivisionInventory ()
 		g_pUIManager->CloseAll();
     }
     
-    //  닫기 버튼.
     Width=24;Height=24;x=InventoryStartX+25;y=InventoryStartY+395;
 	if(MouseX>=x && MouseX<x+Width && MouseY>=y && MouseY<y+Height)
 	{
@@ -16162,11 +16008,6 @@ void MoveServerDivisionInventory ()
 	}
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-//  창고 잠금/해제를 위한 키패드창
-///////////////////////////////////////////////////////////////////////////////
-
 void HideKeyPad( void)
 {
 	g_iKeyPadEnable = 0;
@@ -16182,7 +16023,7 @@ int CheckMouseOnKeyPad( void)
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	int iButtonTop = 50;
-	// 숫자 ( 0 - 10)
+
 	for ( int i = 0; i < 11; ++i)
 	{
 		int xButton = i % 5;

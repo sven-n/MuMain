@@ -339,11 +339,6 @@ char g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 
 DWORD GenerateCheckSum2( BYTE *pbyBuffer, DWORD dwSize, WORD wKey);
 
-
-///////////////////////////////////////////////////////////////////////////////
-// mp3 배경음악 모두 끄는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void StopMusic()
 {
 	for ( int i = 0; i < NUM_MUSIC; ++i)
@@ -352,28 +347,17 @@ void StopMusic()
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  생성할수 있는 클래스수를 설정한다.
-//////////////////////////////////////////////////////////////////////////
 static BYTE g_byMaxClass = 0;
+
 void SetCreateMaxClass ( BYTE MaxClass )
 {
     g_byMaxClass = MaxClass;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 BYTE GetCreateMaxClass ( void ) 
 { 
     return g_byMaxClass;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 계정 또는 케릭터이름 입력시 욕 필터링하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 bool CheckAbuseFilter(char *Text, bool bCheckSlash)
 {
@@ -847,10 +831,6 @@ void RenderInfomation3D()
 
 	if ( Success )
     {
-#ifdef MR0
-		VPManager::Enable();
-#endif //MR0
-
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
         glLoadIdentity();
@@ -905,10 +885,6 @@ void RenderInfomation3D()
 		
 		// 현재 카메라의 매트릭스를 가지고 MousePosition 업데이트
 		UpdateMousePositionn();
-
-#ifdef MR0
-		VPManager::Disable();
-#endif //MR0
     }
 }
 
@@ -1782,11 +1758,6 @@ bool NewRenderLogInScene(HDC hDC)
 
     MoveMainCamera();
 
-#ifdef MR0
-	if(EngineGate::IsOn() && g_pMeshMachine->bEnabled())
-		g_pMeshMachine->ProcessLight(HighLight);
-#endif //MR0	
-
 	int Width,Height;
 
 	glColor3f(1.f,1.f,1.f);
@@ -1806,24 +1777,14 @@ bool NewRenderLogInScene(HDC hDC)
 	BeginOpengl(0,25,640,430);
 	CreateFrustrum((float)Width/(float)640, pos);
 
-	// 크레딧이 보이면 렌더하지 않음.
 	if (!CUIMng::Instance().m_CreditWin.IsShow())
 	{
 		CameraViewFar = 330.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
 #ifndef PJH_NEW_SERVER_SELECT_MAP
-		// 범위를 다시 설정해야 하므로 걍 제거
 		BeginOpengl();
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		RenderTerrain(false);
 		CameraViewFar = 7000.f;
-
-		// BeginOpengl내부 glPushMatrix의 갯수와 EndOpengl내부 glPopMatrix갯수는 정확히 일치하여야 하는데
-		// 여기서 BeginOpengl이 한개가 남용되어 삭제 합니다. // OpenGL : StackOverFlow 발생
-#ifdef LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
-#else // LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
-		BeginOpengl();
-#endif // LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
-
 		RenderCharactersClient();
 		RenderBugs();
 		RenderObjects();
@@ -1832,43 +1793,13 @@ bool NewRenderLogInScene(HDC hDC)
 		CheckSprites();
 		RenderLeaves();
 		RenderBoids();
-		RenderObjects_AfterCharacter();	// 캐릭터 다음에 알파 오브젝트들 묘사
-#ifdef LDK_ADD_NEW_PETPROCESS
-	ThePetProcess().RenderPets();
-#endif //LDK_ADD_NEW_PETPROCESS
-
-	// BeginOpengl내부 glPushMatrix의 갯수와 EndOpengl내부 glPopMatrix갯수는 정확히 일치하여야 하는데
-	// 여기서 BeginOpengl이 하나 닫혀지는곳이 없어 아래를 추가합니다. // OpenGL : StackOverFlow 발생
-#ifdef LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-		//여기서 호출하면 다음 begin이 호출되지 않는다
-		EndOpengl();
-#endif //PJH_NEW_SERVER_SELECT_MAP
-#endif // LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
+		RenderObjects_AfterCharacter();
+		ThePetProcess().RenderPets();
 	}
 
 	BeginSprite();
-#ifdef MR0
-#ifdef MR0_NEWRENDERING_EFFECTS_SPRITES
-	if(EngineGate::IsOn())
-	{
-		SpriteManager::Toggle(true);
-		RenderSprites();
-		RenderParticles();
-		SpriteManager::RenderAll();
-		SpriteManager::Toggle(false);
-	}
-	else
-#endif //MR0_NEWRENDERING_EFFECTS_SPRITES	
-	{
-		RenderSprites();
-		RenderParticles();
-	}
-#else
 	RenderSprites();
 	RenderParticles();
-#endif //MR0
-	
 	EndSprite();
 	BeginBitmap();
 

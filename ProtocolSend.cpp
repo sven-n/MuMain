@@ -28,12 +28,12 @@ bool CProtocolSend::ConnectServer()
 
 void CProtocolSend::DisconnectServer()
 {
-	if(this->m_ClientAcceptThread != 0)
-	{
-		TerminateThread(this->m_ClientAcceptThread,0);
-		CloseHandle(this->m_ClientAcceptThread);
-		this->m_ClientAcceptThread = 0;
-	}
+	//if(this->m_ClientAcceptThread != 0)
+	//{
+	//	TerminateThread(this->m_ClientAcceptThread,0);
+	//	CloseHandle(this->m_ClientAcceptThread);
+	//	this->m_ClientAcceptThread = 0;
+	//}
 
 	if(this->SocketConnect && this->SocketConnect->IsConnected())
 		this->SocketConnect->Disconnect();

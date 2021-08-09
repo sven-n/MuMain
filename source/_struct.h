@@ -16,18 +16,6 @@ namespace SEASON3B
 	class CNewUIItemMng;
 }
 
-#ifdef MR0
-namespace ModelManager
-{
-	void	SetTargetObject(OBJECT*);	//애니메이션 Binding할 Object 지정
-	void	SetTargetObject_(int iFlag = 0);
-}
-#endif //MR0
-//////////////////////////////////////////////////////////////////////////
-
-//배열로 정의된 부분은 다시 수정을 해야한다.
-//먼저 디파인들을 정리 해서 여기 위에다 링크 걸어두자...
-
 #ifdef CSK_FIX_MONSTERSKILL
 #define MAX_MONSTERSKILL_NUM	10
 #endif // CSK_FIX_MONSTERSKILL
@@ -66,14 +54,6 @@ namespace info
 		BYTE Resistance[MAX_RESISTANCE];
 	};
 	
-#ifndef CSK_FIX_MONSTERSKILL		// 정리할 때 지워야 하는 소스	
-	struct Script_Skill
-	{
-		int Skill_Num[5];
-		int Slot;
-	};
-#endif //! CSK_FIX_MONSTERSKILL		// 정리할 때 지워야 하는 소스
-
 	struct Script_Silde 
 	{
 		typedef std::vector<char*>     SildeVECTOR;
@@ -495,16 +475,6 @@ typedef struct _MASTER_LEVEL_VALUE
 } MASTER_LEVEL_VALUE;
 
 //infomation end
-
-#ifdef MR0
-typedef struct _AUTOOBJ : public OBJECT
-{
-	_AUTOOBJ::_AUTOOBJ() : OBJECT()
-	{
-		m_iID = GenID();
-	}
-}AUTOOBJ;
-#endif //MR0
 
 typedef struct _OBJECT_BLOCK
 {

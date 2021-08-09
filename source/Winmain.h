@@ -488,7 +488,6 @@ extern int m_nColorDepth;
 
 void MouseUpdate();
 extern void CheckHack( void);
-extern void CloseHack(HWND shWnd,bool Flag);
 extern DWORD GetCheckSum( WORD wKey);
 extern void StopMp3(char *Name, BOOL bEnforce=false);
 extern void PlayMp3(char *Name, BOOL bEnforce=false);
@@ -538,24 +537,6 @@ extern void DestroySound();
 	#include <crtdbg.h>
 	#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif // USE_CRT_DEBUG
-
-/*-------------------------------------------------------------------------------------------*/
-
-
-/*----------------------- MR0 ¸ðµâµé --------------------------------------------------*/
-
-#ifdef MR0
-	#ifdef LDS_MR0_FIXED_RIGHT_SHADER_MAXPARAM_VALUE
-		#define MR0_MAX_PARAMETERS			1024
-		#define MR0_MAX_ENV_PARAMETERS		256
-		#define MR0_MAX_LOCAL_PARAMETERS	1024
-	#endif // LDS_MR0_FIXED_RIGHT_SHADER_MAXPARAM_VALUE
-
-	#ifdef LDS_MR0_FIXED_SHADERPARAM_WHICH_MODEL_BREAKED_DUETO_BONE
-		#define NUM_PRERESERVED_PARAM_GPUREGISTER	10
-	#endif // LDS_MR0_FIXED_SHADERPARAM_WHICH_MODEL_BREAKED_DUETO_BONE
-#endif // MR0
-/*-------------------------------------------------------------------------------------------*/
 
 #define FAKE_CODE( pos)\
 	_asm { jmp pos };\

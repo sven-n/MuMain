@@ -2903,21 +2903,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 	}
 #endif
 
-#ifdef MR0
-	ModelManager::SetTargetObject(NULL);
-#endif //MR0
 }
-
-#ifdef MR0
-void RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
-{	
-	if(Calc_RenderObject( o, Translate,Select, ExtraMon))
-	{
-		Draw_RenderObject( o, Translate,Select, ExtraMon);
-	}
-}
-
-#else
 
 void RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 {
@@ -2927,8 +2913,6 @@ void RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
  	}
 	Draw_RenderObject( o, Translate,Select, ExtraMon);
 }
-
-#endif //MR0
 
 void RenderObject_AfterImage(OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
@@ -3587,13 +3571,6 @@ void RenderObjectVisual(OBJECT *o)
 
 void RenderObjects()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_OBJECTS, PROFILING_RENDER_OBJECTS );
-#endif // DO_PROFILING
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
-
     float   range = 0.f;
     if( gMapManager.WorldActive==WD_10HEAVEN )
     {
@@ -3619,15 +3596,9 @@ void RenderObjects()
 				|| World == WD_77NEW_LOGIN_SCENE
 				|| World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
-#ifdef CSK_ADD_MAP_ICECITY	
 				|| IsIceCity()
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef PBG_ADD_PKFIELD
 				|| gMapManager.IsPKField()
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
 				|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
 				)
 			{
 				OBJECT *o  = ob->Head;
@@ -10000,10 +9971,6 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType,float Bright,int Texture)
 #endif // CSK_ADD_GOLDCORPS_EVENT
 {
-#ifdef MR0
-	ModelManager::SetTargetObject(o);
-#endif //MR0
-
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	if(Type >= MODEL_HELM_MONK && Type <= MODEL_BOOTS_MONK + MODEL_ITEM_COMMONCNT_RAGEFIGHTER)
 		Type = g_CMonkSystem.OrginalTypeCommonItemMonk(Type);
@@ -10225,18 +10192,11 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 	{
 		o->HiddenMesh = -1;
 	}
-
-#ifdef MR0
-	ModelManager::SetTargetObject(NULL);
-#endif //MR0
 }
 
 void RenderPartObjectBodyColor2(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType,float Bright,int Texture)
 {
-#ifdef MR0
-	ModelManager::SetTargetObject(o);
-#endif //MR0
-	
+
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	if(Type >= MODEL_HELM_MONK && Type <= MODEL_BOOTS_MONK + MODEL_ITEM_COMMONCNT_RAGEFIGHTER)
 		Type = g_CMonkSystem.OrginalTypeCommonItemMonk(Type);
@@ -10355,16 +10315,11 @@ void RenderPartObjectBodyColor2(BMD *b,OBJECT *o,int Type,float Alpha,int Render
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1,Texture);
 	}
 
-#ifdef MR0
-	ModelManager::SetTargetObject(NULL);
-#endif //MR0
 }
 
 #ifdef LDK_ADD_14_15_GRADE_ITEM_MODEL
-///////////////////////////////////////////////////////////////////////////////
-// 14, 15 레벨 효과 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
-#define MAX_GRADE_OBJ 2 //부위마다 붙는 obj가 추가되면 늘려주세요.
+
+#define MAX_GRADE_OBJ 2
 void NextGradeObjectRender(CHARACTER *c)
 {
 	int weaponIndex;
@@ -10793,23 +10748,19 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 	}
 
-#ifdef MR0
-	ModelManager::SetTargetObject(o);
-#endif // MR0
-
 	if(g_pOption->GetRenderLevel() < 4)
 	{
 		Level = min( Level, g_pOption->GetRenderLevel() * 2 + 5 );
 	}
 
-	if(o->Type==MODEL_SPEAR+9)//발록의낫
+	if(o->Type==MODEL_SPEAR+9)
 	{
 		Vector(0.5f,0.5f,1.5f,b->BodyLight);
 		b->StreamMesh = 0;
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,BITMAP_CHROME);
 		b->StreamMesh = -1;
 	}
-    else if ( o->Type==MODEL_POTION+27 )    //  고대의 금속.
+    else if ( o->Type==MODEL_POTION+27 )
     {
         Vector(1.f,1.f,1.f,b->BodyLight);
 		b->StreamMesh = 0;

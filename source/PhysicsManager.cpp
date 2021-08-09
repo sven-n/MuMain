@@ -820,10 +820,6 @@ BOOL CPhysicsCloth::PreventFromStretching( void)
 
 void CPhysicsCloth::Render( vec3_t *pvColor, int iLevel)
 {
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0
-
 	vec3_t *pvRenderPos = new vec3_t [m_iNumVertices];
 
 	for ( int j = 0; j < m_iNumVer; ++j)
@@ -940,13 +936,6 @@ void CPhysicsCloth::Render( vec3_t *pvColor, int iLevel)
 #endif
 
 	delete [] pvRenderPos;
-
-#ifdef RENDER_COLLISION
-	RenderCollisions();
-#endif
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
 }
 
 void CPhysicsCloth::RenderFace( BOOL bFront, int iTexture, vec3_t *pvRenderPos)
@@ -1056,10 +1045,6 @@ void CPhysicsCloth::Render_MappingOption(	BMD& b, int iMesh,
 											float fMeshAlpha, float fBright,
 											BOOL bVertexColorProcessMappingFunc )
 {
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0
-
 	vec3_t	v3VertexColorResult;
 	
 	if( TRUE == bVertexColorProcessMappingFunc )
@@ -1130,13 +1115,6 @@ void CPhysicsCloth::Render_MappingOption(	BMD& b, int iMesh,
 
 	delete [] pvRenderPos;
 
-	// 충돌 구 표시
-#ifdef RENDER_COLLISION
-	RenderCollisions();
-#endif
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
 }
 #endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 
@@ -1819,30 +1797,10 @@ void CPhysicsClothMesh::Render( vec3_t *pvColor, int iLevel)
 		m_pVertices[iVertex].GetPosition( &vPos);
 		VectorCopy( vPos, VertexTransform[m_iMesh][iVertex]);
 	}
-
-	// 충돌 구 표시
-#ifdef RENDER_COLLISION
-#ifdef MR0
-	VPManager::Disable();
-#endif //MR0
-	RenderCollisions();
-#ifdef MR0
-	VPManager::Enable();
-#endif //MR0
-#endif
 }
-
-
-//--------------------------------------------------------------------
-//
-//                          Physics Manager
-//
-//--------------------------------------------------------------------
-
 
 float CPhysicsManager::s_fWind      = 0.0f;
 vec3_t CPhysicsManager::s_vWind     = { 0.0f, 0.0f, 0.0f};
-
 
 CPhysicsManager::CPhysicsManager()
 {
@@ -1860,12 +1818,10 @@ void CPhysicsManager::Clear( void)
 
 void CPhysicsManager::Move( float fTime)
 {
-	// 바람
 	float fPlus = ( ( rand() % 200) - 100) * 0.001f;
 	CPhysicsManager::s_fWind += fPlus;
 	CPhysicsManager::s_fWind = min( max( -.2f, CPhysicsManager::s_fWind), 1.0f);
 
-	// 리스트처리
 	CNode<CPhysicsCloth*> *pNode = m_lstCloth.FindHead();
 	for ( ; pNode; pNode = m_lstCloth.GetNext( pNode))
 	{
@@ -1875,7 +1831,6 @@ void CPhysicsManager::Move( float fTime)
 
 void CPhysicsManager::Render( void)
 {
-	// 리스트처리
 	CNode<CPhysicsCloth*> *pNode = m_lstCloth.FindHead();
 	for ( ; pNode; pNode = m_lstCloth.GetNext( pNode))
 	{

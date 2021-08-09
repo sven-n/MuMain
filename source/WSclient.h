@@ -153,22 +153,19 @@ typedef struct {
 } PMSG_USE_STAT_FRUIT, * LPPMSG_USE_STAT_FRUIT;
 
 //receive default subcode
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         Value;
 } PHEADER_DEFAULT_SUBCODE, * LPPHEADER_DEFAULT_SUBCODE;
 
 //receive Character List 
-typedef struct {
-	//PBMSG_HEADER Header;
-	//BYTE         SubCode;
-    BYTE         MaxClass;		// 생성할 수 있는 직업 수 - 1.
+typedef struct 
+{
+    BYTE         MaxClass;
 	BYTE		 MoveCount;
-	BYTE         Value;			// 생성되어 있는 캐릭터 수.
-#ifdef PBG_ADD_CHARACTERSLOT
-	BYTE         CharacterSlotCount;	//캐릭터 생성가능 수
-#endif //PBG_ADD_CHARACTERSLOT
+	BYTE         Value;
 } PHEADER_DEFAULT_CHARACTER_LIST, * LPPHEADER_DEFAULT_CHARACTER_LIST;
 
 #ifdef PBG_ADD_CHARACTERCARD
@@ -374,13 +371,7 @@ typedef struct {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         Result;
-	
-#ifdef LDS_MODIFY_CHAR_LENGTH_USERPASSWORD  // 비밀번호 자릿수 10->12로 변경 사항
-	BYTE         Password[MAX_PASSWORD_SIZE];
-#else // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
 	BYTE         Password[MAX_ID_SIZE];
-#endif // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
-	
 } PRECEIVE_CONFIRM_PASSWORD2, * LPPRECEIVE_CONFIRM_PASSWORD2;
 
 //request change password
@@ -388,15 +379,8 @@ typedef struct {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         ID[MAX_ID_SIZE];
-
-#ifdef LDS_MODIFY_CHAR_LENGTH_USERPASSWORD   // 비밀번호 자릿수 10->12로 변경 사항
-	BYTE         OldPassword[MAX_PASSWORD_SIZE];
-	BYTE         NewPassword[MAX_PASSWORD_SIZE];
-#else // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD
 	BYTE         OldPassword[MAX_ID_SIZE];
 	BYTE         NewPassword[MAX_ID_SIZE];
-#endif // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD
-
 	BYTE         ResidentNumber[13];
 } PREQUEST_CHANGE_PASSWORD, * LPPREQUEST_CHANGE_PASSWORD;
 
@@ -405,13 +389,9 @@ typedef struct {
 	BYTE         Index;
 	BYTE         ID[MAX_ID_SIZE];
 	WORD         Level;
-	//BYTE         Level;
 	BYTE		 CtlCode;
 	BYTE         Class;
 	BYTE         Equipment[EQUIPMENT_LENGTH];
-#ifdef _PVP_BLOCK_PVP_CHAR
-	BYTE		 PvPState;
-#endif	// _PVP_BLOCK_PVP_CHAR
     BYTE         byGuildStatus;
 } PRECEIVE_CHARACTER_LIST, * LPPRECEIVE_CHARACTER_LIST;
 
