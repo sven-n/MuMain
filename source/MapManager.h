@@ -1,5 +1,4 @@
 // MapManager.h: interface for the CMapManager class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -79,11 +78,11 @@ public:
 	void Load();
 	void LoadWorld(int Map);
 	void DeleteObjects();
-	bool InChaosCastle(int iMap = 0);
-	bool InBloodCastle(int iMap = 0);
+	bool InChaosCastle(int iMap = -1);
+	bool InBloodCastle(int iMap = -1);
 	bool InDevilSquare();
-	bool InHellas(int iMap = 0);
-	bool InHiddenHellas(int iMap = 0);
+	bool InHellas(int iMap = -1);
+	bool InHiddenHellas(int iMap = -1);
 	bool IsPKField();
 	bool IsCursedTemple();
 	bool IsEmpireGuardian1();
@@ -91,7 +90,7 @@ public:
 	bool IsEmpireGuardian3();
 	bool IsEmpireGuardian4();
 	bool IsEmpireGuardian();
-	bool InBattleCastle(int iMap = 0);
+	bool InBattleCastle(int iMap = -1);
 	const char* GetMapName( int iMap);
 public:
 	int WorldActive;

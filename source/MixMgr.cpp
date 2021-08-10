@@ -74,26 +74,26 @@ void CMixItem::SetItem(ITEM * pItem, DWORD dwMixValue)
 		switch ( pItem->Special[i])
 		{
 		case AT_IMPROVE_MAGIC:
-		case AT_IMPROVE_CURSE:	// 추가 저주력
+		case AT_IMPROVE_CURSE:
 		case AT_IMPROVE_DAMAGE:
 		case AT_IMPROVE_DEFENSE:
 		case AT_IMPROVE_BLOCKING:
-			m_iOption = pItem->SpecialValue[i];		// 추가 공격력 등 옵션
+			m_iOption = pItem->SpecialValue[i];
 			break;
 		case AT_LIFE_REGENERATION:
-			m_iOption = pItem->SpecialValue[i] * 4;		// 생명 자동 회복 옵션 (*4 해서 다른 옵션과 맞춰줌)
+			m_iOption = pItem->SpecialValue[i] * 4;
 			break;
 		case AT_LUCK:
-			m_bMixLuck = TRUE;						// 행운
+			m_bMixLuck = TRUE;
 			break;
 		}
 	}
-	if ((pItem->Option1 & 63) > 0) m_dwSpecialItem |= RCP_SP_EXCELLENT;	// 엑설런트
-	if (pItem->RequireLevel >= 380) m_dwSpecialItem |= RCP_SP_ADD380ITEM;	// 요구 레벨 380 이상인 경우
-	if ((pItem->ExtOption % 0x04) == EXT_A_SET_OPTION || (pItem->ExtOption % 0x04) == EXT_B_SET_OPTION) m_dwSpecialItem |= RCP_SP_SETITEM;	// 세트 아이템
-	m_b380AddedItem = pItem->option_380;					// 380 옵션이 이미 추가된 아이템인지 여부
+	if ((pItem->Option1 & 63) > 0) m_dwSpecialItem |= RCP_SP_EXCELLENT;
+	if (pItem->RequireLevel >= 380) m_dwSpecialItem |= RCP_SP_ADD380ITEM;
+	if ((pItem->ExtOption % 0x04) == EXT_A_SET_OPTION || (pItem->ExtOption % 0x04) == EXT_B_SET_OPTION) m_dwSpecialItem |= RCP_SP_SETITEM;
+	m_b380AddedItem = pItem->option_380;
 
-	if (pItem->Type >= ITEM_SWORD && pItem->Type <= ITEM_BOOTS+MAX_ITEM_INDEX-1)	// 장비 아이템인지 검사
+	if (pItem->Type >= ITEM_SWORD && pItem->Type <= ITEM_BOOTS+MAX_ITEM_INDEX-1)
 		m_bIsEquipment = TRUE;
 
 	if (pItem->Type == ITEM_HELPER+37 && pItem->Option1 != 0)
@@ -118,7 +118,7 @@ void CMixItem::SetItem(ITEM * pItem, DWORD dwMixValue)
 		m_bIsJewelItem = TRUE;
 
 	m_bySocketCount = pItem->SocketCount;
-	if (m_bySocketCount > 0)	// 소켓 아이템인지 검사
+	if (m_bySocketCount > 0)
 	{
 		m_dwSpecialItem |= RCP_SP_SOCKETITEM;
 		for (int i = 0; i < MAX_SOCKETS; ++i)
@@ -126,74 +126,63 @@ void CMixItem::SetItem(ITEM * pItem, DWORD dwMixValue)
 			m_bySocketSeedID[i] = pItem->SocketSeedID[i];
 			m_bySocketSphereLv[i] = pItem->SocketSphereLv[i];
 		}
-		m_dwSpecialItem ^= RCP_SP_ADD380ITEM;	// 소켓아이템은 380 아이템이 아니다
+		m_dwSpecialItem ^= RCP_SP_ADD380ITEM;
 	}
 	m_bySeedSphereID = g_SocketItemMgr.GetSeedShpereSeedID(pItem);
 
 	if (pItem->Jewel_Of_Harmony_Option > 0)
 	{
-		m_dwSpecialItem |= RCP_SP_HARMONY;	// 조화의 보석 제련된 아이템
+		m_dwSpecialItem |= RCP_SP_HARMONY;
 		m_wHarmonyOption = pItem->Jewel_Of_Harmony_Option;
 		m_wHarmonyOptionLevel = pItem->Jewel_Of_Harmony_OptionLevel;
 	}
 
-	switch(pItem->Type)		// 날개인지 검사
+	switch(pItem->Type)
 	{
-	case ITEM_WING:			// 요정날개
-	case ITEM_WING+1:		// 천공날개
-	case ITEM_WING+2:		// 사탄날개
-#ifdef ADD_ALICE_WINGS_1
-	case ITEM_WING+41:		// 재앙의날개
-#endif	// ADD_ALICE_WINGS_1
+	case ITEM_WING:
+	case ITEM_WING+1:
+	case ITEM_WING+2:
+	case ITEM_WING+41:
 		m_bIsWing = TRUE;
 		break;
-	case ITEM_WING+3:		// 정령날개
-	case ITEM_WING+4:		// 영혼날개
-	case ITEM_WING+5:		// 드라곤날개
-	case ITEM_WING+6:		// 암흑날개
-	case ITEM_HELPER+30:	// 군주의 망토
-#ifdef ADD_ALICE_WINGS_1
-	case ITEM_WING+42:		// 절망의날개
-#endif	// ADD_ALICE_WINGS_1
+	case ITEM_WING+3:
+	case ITEM_WING+4:
+	case ITEM_WING+5:
+	case ITEM_WING+6:
+	case ITEM_HELPER+30:
+	case ITEM_WING+42:
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-	case ITEM_WING+49:		// 무인의망토
+	case ITEM_WING+49:
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		m_bIsUpgradedWing = TRUE;
 		break;
-	case ITEM_WING+36:		// 폭풍의날개
-	case ITEM_WING+37:		// 시공의날개
-	case ITEM_WING+38:		// 환영의날개
-	case ITEM_WING+39:		// 파멸의날개
-	case ITEM_WING+40:		// 제왕의망토
-#ifdef ADD_ALICE_WINGS_1
-	case ITEM_WING+43:		// 차원의날개
-#endif	// ADD_ALICE_WINGS_1
+	case ITEM_WING+36:
+	case ITEM_WING+37:
+	case ITEM_WING+38:
+	case ITEM_WING+39:
+	case ITEM_WING+40:
+	case ITEM_WING+43:
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-	case ITEM_WING+50:		//군림의망토
+	case ITEM_WING+50:
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		m_bIs3rdUpgradedWing = TRUE;
 	}
-#ifdef YDG_FIX_WING_MIX_RATE
+
 	if (m_bIsWing || m_bIsUpgradedWing || m_bIs3rdUpgradedWing)
 	{
 		if (m_dwSpecialItem & RCP_SP_EXCELLENT)
-			m_dwSpecialItem ^= RCP_SP_EXCELLENT;	// 날개는 엑템 제외
+			m_dwSpecialItem ^= RCP_SP_EXCELLENT;
 	}
-#endif	// YDG_FIX_WING_MIX_RATE
-	switch(pItem->Type)		// 포개기 가능한 아이템인지 검사
+	switch(pItem->Type)
 	{
-	case ITEM_POTION+3:		// 큰치료물약
-	case ITEM_POTION+38:	// 작은 복합물약
-	case ITEM_POTION+39:	// 중간 복합물약
-	case ITEM_POTION+53:	// 행운의 부적
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-	case ITEM_POTION+88:	// 하얀 벚꽃가지
-	case ITEM_POTION+89:	// 붉은 벚꽃가지
-	case ITEM_POTION+90:	// 황금 벚꽃가지
-#endif	// CSK_EVENT_CHERRYBLOSSOM
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-	case ITEM_POTION+100:	//행운의 동전
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
+	case ITEM_POTION+3:
+	case ITEM_POTION+38:
+	case ITEM_POTION+39:
+	case ITEM_POTION+53:
+	case ITEM_POTION+88:
+	case ITEM_POTION+89:
+	case ITEM_POTION+90:
+	case ITEM_POTION+100:
 		m_bCanStack = TRUE;
 		break;
 	}
@@ -202,20 +191,14 @@ void CMixItem::SetItem(ITEM * pItem, DWORD dwMixValue)
 	if (m_bCanStack == TRUE) m_iCount = m_iDurability;
 	else m_iCount = 1;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int CMixItemInventory::AddItem(ITEM * pItem)
 {
-//#define PJH_REPAIR_MIX  
-#ifdef PJH_REPAIR_MIX
-	BOOL bFind = TRUE;
-#else
 	BOOL bFind = FALSE;
-#endif
 
 	for (int i = 0; i < m_iNumMixItems; ++i)
 	{
-		if (m_MixItems[i] == pItem)	// 중복 아이템
+		if (m_MixItems[i] == pItem)
 		{
 			bFind = TRUE;
 			m_MixItems[i].m_dwMixValue += EvaluateMixItemValue(pItem);
@@ -232,7 +215,6 @@ int CMixItemInventory::AddItem(ITEM * pItem)
 	}
 	if (bFind == FALSE)
 	{
-		// 아이템 추가
 		m_MixItems[m_iNumMixItems++].SetItem(pItem, EvaluateMixItemValue(pItem));
 	}
 
@@ -244,29 +226,28 @@ DWORD CMixItemInventory::EvaluateMixItemValue(ITEM * pItem)
 	DWORD dwMixValue = 0;
 	switch (pItem->Type)
 	{
-	case ITEM_WING+15:		// 혼석
-		dwMixValue = 40000;	//  810000
+	case ITEM_WING+15:
+		dwMixValue = 40000;
 		break;
-	case ITEM_POTION+13:	// 축석
-		dwMixValue = 100000;	//  9000000
+	case ITEM_POTION+13:
+		dwMixValue = 100000;
 		break;
-	case ITEM_POTION+14:	// 영석
-		dwMixValue = 70000;	//  6000000
+	case ITEM_POTION+14:
+		dwMixValue = 70000;
 		break;
-	case ITEM_POTION+22:	// 창석
-		dwMixValue = 450000;	//  36000000
+	case ITEM_POTION+22:
+		dwMixValue = 450000;
 		break;
-	case ITEM_POTION+16:	// 생명의 보석
+	case ITEM_POTION+16:
 		dwMixValue = 0;
 		break;
-	case ITEM_POTION+31:	//  수호보석.
+	case ITEM_POTION+31:
 	default:
 		dwMixValue = ItemValue(pItem, 0);
 		break;
 	}
 	return dwMixValue;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CMixRecipes::Reset()
 {
@@ -294,14 +275,14 @@ BOOL CMixRecipes::IsMixSource(ITEM * pItem)
 	CMixItem mixitem;
 	mixitem.SetItem(pItem, 0);
 
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 환원만 되게 [lem_2010.9.8]
+#ifdef LEM_ADD_LUCKYITEM
 	if( Check_LuckyItem( pItem->Type ) && g_MixRecipeMgr.GetMixInventoryType() != MIXTYPE_JERRIDON )	return FALSE;
 #endif // LEM_ADD_LUCKYITEM
 
-	if (IsCharmItem(mixitem))		// 행운의 부적 아이템
+	if (IsCharmItem(mixitem))
 	{
 		if ((GetCurRecipe() == NULL || GetCurRecipe()->m_bCharmOption == 'A')
-			&& m_wTotalCharmBonus + mixitem.m_iCount <= 10)	// 행운의 부적 확률은 최대 10%로 제한한다
+			&& m_wTotalCharmBonus + mixitem.m_iCount <= 10)
 		{
 			return TRUE;
 		}
@@ -352,45 +333,35 @@ void CMixRecipes::ClearCheckRecipeResult()
 	m_dwSetItemValue = 0;
 	m_iFirstItemLevel = 0;
 	m_iFirstItemType = 0;
-#ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
 	m_dwTotalNonJewelItemValue = 0;
-#endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
-#ifdef ADD_SOCKET_MIX
 	m_byFirstItemSocketCount = 0;
 	for (int i = 0; i < MAX_SOCKETS; ++i)
 	{
 		m_byFirstItemSocketSeedID[i] = SOCKET_EMPTY;
 		m_byFirstItemSocketSphereLv[i] = 0;
 	}
-#endif	// ADD_SOCKET_MIX
 	m_wTotalCharmBonus = 0;
 }
 
-int CMixRecipes::CheckRecipe(int iNumMixItems, CMixItem * pMixItems)	// 아이템 인벤 정보와 조합 방법을 비교하여 결과 반환
+int CMixRecipes::CheckRecipe(int iNumMixItems, CMixItem * pMixItems)
 {
 	m_iCurMixIndex = 0;
-
-#ifdef ADD_SOCKET_MIX
-#ifdef KJW_FIX_SOCKET_INFORMATION
-	m_byFirstItemSocketCount = 0;
-#endif // KJW_FIX_SOCKET_INFORMATION
-#endif	// ADD_SOCKET_MIX
 
 	std::vector<MIX_RECIPE *>::iterator iter;
 	for (iter = m_Recipes.begin(); iter != m_Recipes.end(); ++iter)
 	{
 		for (int i = 0; i < iNumMixItems; ++i)
 		{
-			pMixItems[i].m_iTestCount = pMixItems[i].m_iCount;	// 검사용 카운트 변수를 초기화
+			pMixItems[i].m_iTestCount = pMixItems[i].m_iCount;
 		}
-		if (CheckRecipeSub(iter, iNumMixItems, pMixItems) == TRUE)	// 조합 성공
+		if (CheckRecipeSub(iter, iNumMixItems, pMixItems) == TRUE)
 		{
 			m_iCurMixIndex = (*iter)->m_iMixIndex + 1;
 			EvaluateMixItems(iNumMixItems, pMixItems);
 			CalcCharmBonusRate(iNumMixItems, pMixItems);
-			CalcMixRate(iNumMixItems, pMixItems);	// 조합 성공 확률 계산
-			CalcMixReqZen(iNumMixItems, pMixItems);	// 조합 필요 젠 계산
-			return GetCurRecipe()->m_iMixID;	    // 조합 번호를 반환해야한다
+			CalcMixRate(iNumMixItems, pMixItems);
+			CalcMixReqZen(iNumMixItems, pMixItems);
+			return GetCurRecipe()->m_iMixID;
 		}
 		else
 		{
@@ -406,12 +377,6 @@ BOOL CMixRecipes::CheckRecipeSub(std::vector<MIX_RECIPE *>::iterator iter, int i
 	BOOL bFind = FALSE;
 	int iMixRecipeTest[MAX_MIX_SOURCES];
 	memset(iMixRecipeTest, 0, sizeof(int) * MAX_MIX_SOURCES);
-
-#ifdef ADD_SOCKET_MIX
-#ifndef KJW_FIX_SOCKET_INFORMATION
-	m_byFirstItemSocketCount = 0;
-#endif // KJW_FIX_SOCKET_INFORMATION
-#endif	// ADD_SOCKET_MIX
 
 	for (int j = 0; j < (*iter)->m_iNumMixSoruces; ++j)
 	{
@@ -721,126 +686,108 @@ int CMixRecipes::GetSourceName(int iItemNum, unicode::t_char * pszNameOut, int i
 	unicode::t_char szTempName[100];
 	GetItemName(pMixRecipeItem->m_sTypeMin, pMixRecipeItem->m_iLevelMin, szTempName);
 
-	// 고정 이름 아이템
  	if (pMixRecipeItem->m_sTypeMin == pMixRecipeItem->m_sTypeMax &&
 		(pMixRecipeItem->m_iLevelMin == pMixRecipeItem->m_iLevelMax || (pMixRecipeItem->m_iLevelMin == 0 && pMixRecipeItem->m_iLevelMax == 255)) &&
 		(pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax || (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255)))
 	{
-		// 아이템 내구도
 		if (pMixRecipeItem->m_iDurabilityMin == pMixRecipeItem->m_iDurabilityMax)
 			unicode::_sprintf(szTempName, "%s(%d)", szTempName, pMixRecipeItem->m_iDurabilityMin);
 	}
-	else	// 구간 이름 아이템
+	else
 	{
-		// 아이템 이름
-		if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_ADD380ITEM)
-			unicode::_sprintf(szTempName, GlobalText[2335]);	// "380레벨 아이템"
+			if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_ADD380ITEM)
+			unicode::_sprintf(szTempName, GlobalText[2335]);
 		else if (pMixRecipeItem->m_sTypeMin == 0 && pMixRecipeItem->m_sTypeMax == ITEM_BOOTS+MAX_ITEM_INDEX-1)
-			unicode::_sprintf(szTempName, GlobalText[2336]);	// "장비아이템"
+			unicode::_sprintf(szTempName, GlobalText[2336]);
 		else if (pMixRecipeItem->m_sTypeMin == 0 && pMixRecipeItem->m_sTypeMax == ITEM_HELPER+MAX_ITEM_INDEX-1)
-			unicode::_sprintf(szTempName, GlobalText[2336]);	// "장비아이템" 날개포함
+			unicode::_sprintf(szTempName, GlobalText[2336]);
 		else if (pMixRecipeItem->m_sTypeMin == 0 && pMixRecipeItem->m_sTypeMax == ITEM_STAFF+MAX_ITEM_INDEX-1)
-			unicode::_sprintf(szTempName, GlobalText[2337]);	// "무기아이템"
+			unicode::_sprintf(szTempName, GlobalText[2337]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_SHIELD && pMixRecipeItem->m_sTypeMax == ITEM_BOOTS+MAX_ITEM_INDEX-1)
-			unicode::_sprintf(szTempName, GlobalText[2338]);	// "방어아이템"
+			unicode::_sprintf(szTempName, GlobalText[2338]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_WING && pMixRecipeItem->m_sTypeMax == ITEM_WING+2)
-			unicode::_sprintf(szTempName, GlobalText[2339]);	// "1차날개"
+			unicode::_sprintf(szTempName, GlobalText[2339]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_WING+3 && pMixRecipeItem->m_sTypeMax == ITEM_WING+6)
-			unicode::_sprintf(szTempName, GlobalText[2348]);	// "2차날개"
-#ifdef ADD_ALICE_WINGS_1
+			unicode::_sprintf(szTempName, GlobalText[2348]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_WING+41 && pMixRecipeItem->m_sTypeMax == ITEM_WING+41)
-			unicode::_sprintf(szTempName, GlobalText[2339]);	// "1차날개"
+			unicode::_sprintf(szTempName, GlobalText[2339]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_WING+42 && pMixRecipeItem->m_sTypeMax == ITEM_WING+42)
-			unicode::_sprintf(szTempName, GlobalText[2348]);	// "2차날개"
-#endif	// ADD_ALICE_WINGS_1
+			unicode::_sprintf(szTempName, GlobalText[2348]);
 		else if (pMixRecipeItem->m_sTypeMin == pMixRecipeItem->m_sTypeMax &&
 			(pMixRecipeItem->m_sTypeMin == ITEM_MACE+6 || pMixRecipeItem->m_sTypeMin == ITEM_BOW+6 || pMixRecipeItem->m_sTypeMin == ITEM_STAFF+7))
-			unicode::_sprintf(szTempName, GlobalText[2340]);	// "카오스무기"
-#ifdef ADD_SOCKET_MIX
+			unicode::_sprintf(szTempName, GlobalText[2340]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_WING+60 && pMixRecipeItem->m_sTypeMax == ITEM_WING+65)
-			unicode::_sprintf(szTempName, GlobalText[2680]);	// "시드"
+			unicode::_sprintf(szTempName, GlobalText[2680]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_WING+70 && pMixRecipeItem->m_sTypeMax == ITEM_WING+74)
-			unicode::_sprintf(szTempName, GlobalText[2681]);	// "스피어"
+			unicode::_sprintf(szTempName, GlobalText[2681]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_WING+100 && pMixRecipeItem->m_sTypeMax == ITEM_WING+129)
-			unicode::_sprintf(szTempName, GlobalText[2682]);	// "시드 스피어"
-#ifdef YDG_FIX_SOCKET_ATTACH_CONDITION
+			unicode::_sprintf(szTempName, GlobalText[2682]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_WING+100 && pMixRecipeItem->m_sTypeMax == ITEM_WING+128)
-			unicode::_sprintf(szTempName, "%s (%s)", GlobalText[2682], GlobalText[2684]);	// "시드 스피어 (불,얼음,번개)"
+			unicode::_sprintf(szTempName, "%s (%s)", GlobalText[2682], GlobalText[2684]);
 		else if (pMixRecipeItem->m_sTypeMin == ITEM_WING+101 && pMixRecipeItem->m_sTypeMax == ITEM_WING+129)
-			unicode::_sprintf(szTempName, "%s (%s)", GlobalText[2682], GlobalText[2685]);	// "시드 스피어 (물,바람)"
-#endif	// YDG_FIX_SOCKET_ATTACH_CONDITION
-#endif	// ADD_SOCKET_MIX
+			unicode::_sprintf(szTempName, "%s (%s)", GlobalText[2682], GlobalText[2685]);
 		else
 		{
-			// 이름만 뜯어낸다
 			int iNameLen = unicode::_strlen(szTempName);
 			for (int j = 1; j <= 3 && iNameLen - j - 1 >= 0; ++j)
-				if (szTempName[iNameLen - j] == '+') szTempName[iNameLen - j - 1] = '\0';	// 레벨 잘라버림
+				if (szTempName[iNameLen - j] == '+') szTempName[iNameLen - j - 1] = '\0';
 		}
-		// 아이템 내구도
 		if (pMixRecipeItem->m_iDurabilityMin == pMixRecipeItem->m_iDurabilityMax)
 			unicode::_sprintf(szTempName, "%s(%d)", szTempName, pMixRecipeItem->m_iDurabilityMin);
-		// 아이템 레벨
-		if (pMixRecipeItem->m_iLevelMin == 0 && pMixRecipeItem->m_iLevelMax == 255);	// 모든 레벨 가능
-		else if (pMixRecipeItem->m_iLevelMin == pMixRecipeItem->m_iLevelMax)	// 일정 레벨
+
+		if (pMixRecipeItem->m_iLevelMin == 0 && pMixRecipeItem->m_iLevelMax == 255);
+		else if (pMixRecipeItem->m_iLevelMin == pMixRecipeItem->m_iLevelMax)
 			unicode::_sprintf(szTempName, "%s +%d", szTempName, pMixRecipeItem->m_iLevelMin);
-		else if (pMixRecipeItem->m_iLevelMin == 0)	// max레벨 이하
-			unicode::_sprintf(szTempName, "%s +%d%s", szTempName, pMixRecipeItem->m_iLevelMax, GlobalText[2342]);	// "이하"
-		else if (pMixRecipeItem->m_iLevelMax == 255)	// min레벨 이상
-			unicode::_sprintf(szTempName, "%s +%d%s", szTempName, pMixRecipeItem->m_iLevelMin, GlobalText[2341]);	// "이상"
+		else if (pMixRecipeItem->m_iLevelMin == 0)
+			unicode::_sprintf(szTempName, "%s +%d%s", szTempName, pMixRecipeItem->m_iLevelMax, GlobalText[2342]);
+		else if (pMixRecipeItem->m_iLevelMax == 255)
+			unicode::_sprintf(szTempName, "%s +%d%s", szTempName, pMixRecipeItem->m_iLevelMin, GlobalText[2341]);
 		else
 			unicode::_sprintf(szTempName, "%s +%d~%d", szTempName, pMixRecipeItem->m_iLevelMin, pMixRecipeItem->m_iLevelMax);
-		// 아이템 옵션
-		if (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255);	// 모든 옵션 가능
-		else if (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax)	// 일정 옵션
-			unicode::_sprintf(szTempName, "%s +%d%s", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343]);	// "옵션"
-		else if (pMixRecipeItem->m_iOptionMin == 0)	// max옵션 이하
-			unicode::_sprintf(szTempName, "%s +%d%s%s", szTempName, pMixRecipeItem->m_iOptionMax, GlobalText[2343], GlobalText[2342]);	// "옵션""이하"
-		else if (pMixRecipeItem->m_iOptionMax == 255)	// min옵션 이상
-			unicode::_sprintf(szTempName, "%s +%d%s%s", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343], GlobalText[2341]);	// "옵션""이상"
-		else
-			unicode::_sprintf(szTempName, "%s +%d~%d%s", szTempName, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax, GlobalText[2343]);	// "옵션"
-	}
-	// 아이템 개수
-	if (pMixRecipeItem->m_iCountMin == 0 && pMixRecipeItem->m_iCountMax == 255)	// 모든 개수 가능
-		unicode::_sprintf(szTempName, "%s (%s)", szTempName, GlobalText[2344]);	// "확률증가"
-	else if (pMixRecipeItem->m_iCountMin == pMixRecipeItem->m_iCountMax)	// 일정 개수
-		unicode::_sprintf(szTempName, "%s %d%s", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345]);	// "개"
-	else if (pMixRecipeItem->m_iCountMin == 0)	// max개수 이하
-		unicode::_sprintf(szTempName, "%s %d%s %s", szTempName, pMixRecipeItem->m_iCountMax, GlobalText[2345], GlobalText[2342]);	// "개""이하"
-	else if (pMixRecipeItem->m_iCountMax == 255)	// min개수 이상
-		unicode::_sprintf(szTempName, "%s %d%s %s", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345], GlobalText[2341]);	// "개""이상"
-	else
-		unicode::_sprintf(szTempName, "%s %d~%d%s", szTempName, pMixRecipeItem->m_iCountMin, pMixRecipeItem->m_iCountMax, GlobalText[2345]);	// "개"
 
-	// 엑설런트+세트 접두어
+		if (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255);
+		else if (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax)
+			unicode::_sprintf(szTempName, "%s +%d%s", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343]);
+		else if (pMixRecipeItem->m_iOptionMin == 0)
+			unicode::_sprintf(szTempName, "%s +%d%s%s", szTempName, pMixRecipeItem->m_iOptionMax, GlobalText[2343], GlobalText[2342]);
+		else if (pMixRecipeItem->m_iOptionMax == 255)
+			unicode::_sprintf(szTempName, "%s +%d%s%s", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343], GlobalText[2341]);
+		else
+			unicode::_sprintf(szTempName, "%s +%d~%d%s", szTempName, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax, GlobalText[2343]);
+	}
+
+	if (pMixRecipeItem->m_iCountMin == 0 && pMixRecipeItem->m_iCountMax == 255)
+		unicode::_sprintf(szTempName, "%s (%s)", szTempName, GlobalText[2344]);
+	else if (pMixRecipeItem->m_iCountMin == pMixRecipeItem->m_iCountMax)
+		unicode::_sprintf(szTempName, "%s %d%s", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345]);
+	else if (pMixRecipeItem->m_iCountMin == 0)
+		unicode::_sprintf(szTempName, "%s %d%s %s", szTempName, pMixRecipeItem->m_iCountMax, GlobalText[2345], GlobalText[2342]);
+	else if (pMixRecipeItem->m_iCountMax == 255)
+		unicode::_sprintf(szTempName, "%s %d%s %s", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345], GlobalText[2341]);
+	else
+		unicode::_sprintf(szTempName, "%s %d~%d%s", szTempName, pMixRecipeItem->m_iCountMin, pMixRecipeItem->m_iCountMax, GlobalText[2345]);
+
 	BOOL bPreName = FALSE;
 	if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_EXCELLENT)
 	{
-		unicode::_sprintf(pszNameOut, "%s %s", GlobalText[620], szTempName);	// 엑설런트
+		unicode::_sprintf(pszNameOut, "%s %s", GlobalText[620], szTempName);
 		bPreName = TRUE;
 	}
 	if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_SETITEM)
 	{
-		unicode::_sprintf(pszNameOut, "%s %s", GlobalText[1089], szTempName);	// 세트
+		unicode::_sprintf(pszNameOut, "%s %s", GlobalText[1089], szTempName);
 		bPreName = TRUE;
 	}
 	if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_HARMONY)
 	{
-#ifdef SOCKET_SYSTEM
-		unicode::_sprintf(pszNameOut, "%s %s", GlobalText[1550], szTempName);	// 강화된 아이템
-#else	// SOCKET_SYSTEM
-		unicode::_sprintf(pszNameOut, "%s %s", GlobalText[2061], szTempName);	// 제련된 아이템
-#endif	// SOCKET_SYSTEM
+		unicode::_sprintf(pszNameOut, "%s %s", GlobalText[1550], szTempName);
 		bPreName = TRUE;
 	}
-#ifdef ADD_SOCKET_MIX
 	if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_SOCKETITEM)
 	{
-		unicode::_sprintf(pszNameOut, "%s %s", GlobalText[2650], szTempName);	// 소켓 아이템
+		unicode::_sprintf(pszNameOut, "%s %s", GlobalText[2650], szTempName);
 		bPreName = TRUE;
 	}
-#endif	// ADD_SOCKET_MIX
 	if (bPreName == FALSE)
 	{
 		unicode::_strcpy(pszNameOut ,szTempName);
@@ -852,14 +799,14 @@ int CMixRecipes::GetSourceName(int iItemNum, unicode::t_char * pszNameOut, int i
 		else return MIX_SOURCE_NO;
 	}
 
-	if (m_iMostSimilarMixSourceTest[iItemNum] == 0)	// 재료 일치
+	if (m_iMostSimilarMixSourceTest[iItemNum] == 0)
 		return MIX_SOURCE_YES;
-	else if (m_iMostSimilarMixSourceTest[iItemNum] < pMixRecipeItem->m_iCountMax)	// 옵션 재료 일치 or 부분 일치
+	else if (m_iMostSimilarMixSourceTest[iItemNum] < pMixRecipeItem->m_iCountMax)
 	{
 		if (pMixRecipeItem->m_iCountMin <= 1) return MIX_SOURCE_YES;
 		else return MIX_SOURCE_PARTIALLY;
 	}
-	else	// 재료 없음
+	else
 	{
 		if (pMixRecipeItem->m_iCountMin == 0) return MIX_SOURCE_PARTIALLY;
 		else return MIX_SOURCE_NO;
@@ -874,20 +821,17 @@ void CMixRecipes::EvaluateMixItems(int iNumMixItems, CMixItem * pMixItems)
 	m_dwEquipmentItemValue = 0;
 	m_dwWingItemValue = 0;
 	m_dwSetItemValue = 0;
-#ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
 	m_dwTotalNonJewelItemValue = 0;
-#endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
+
 	for (int i = 0; i < iNumMixItems; ++i)
 	{
-		if (pMixItems[i].m_bMixLuck == TRUE) m_bFindMixLuckItem = TRUE;	// 행운 옵션 확인
-		if (pMixItems[i].m_dwSpecialItem & RCP_SP_EXCELLENT) m_dwExcellentItemValue += pMixItems[i].m_dwMixValue;	// 엑템가격
-		if (pMixItems[i].m_bIsEquipment == TRUE) m_dwEquipmentItemValue += pMixItems[i].m_dwMixValue;	// 무기/방어구 가격
-		if (pMixItems[i].m_bIsWing == TRUE) m_dwWingItemValue += pMixItems[i].m_dwMixValue;	// 날개 가격
-		if (pMixItems[i].m_dwSpecialItem & RCP_SP_SETITEM) m_dwSetItemValue += pMixItems[i].m_dwMixValue;	// 세트아이템 가격
-#ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
-		if (pMixItems[i].m_bIsJewelItem == FALSE) m_dwTotalNonJewelItemValue += pMixItems[i].m_dwMixValue;	// 보석아닌 아이템 전체 가격
-#endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
-		m_dwTotalItemValue += pMixItems[i].m_dwMixValue;	// 전체 가격
+		if (pMixItems[i].m_bMixLuck == TRUE) m_bFindMixLuckItem = TRUE;
+		if (pMixItems[i].m_dwSpecialItem & RCP_SP_EXCELLENT) m_dwExcellentItemValue += pMixItems[i].m_dwMixValue;
+		if (pMixItems[i].m_bIsEquipment == TRUE) m_dwEquipmentItemValue += pMixItems[i].m_dwMixValue;
+		if (pMixItems[i].m_bIsWing == TRUE) m_dwWingItemValue += pMixItems[i].m_dwMixValue;
+		if (pMixItems[i].m_dwSpecialItem & RCP_SP_SETITEM) m_dwSetItemValue += pMixItems[i].m_dwMixValue;
+		if (pMixItems[i].m_bIsJewelItem == FALSE) m_dwTotalNonJewelItemValue += pMixItems[i].m_dwMixValue;
+		m_dwTotalItemValue += pMixItems[i].m_dwMixValue;
 	}
 }
 
@@ -911,10 +855,9 @@ void CMixRecipes::CalcChaosCharmCount(int iNumMixItems, CMixItem * pMixItems)
 
 void CMixRecipes::CalcMixRate(int iNumMixItems, CMixItem * pMixItems)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(iNumMixItems < 0)	return;
 	if(pMixItems == NULL)	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	m_iSuccessRate = 0;
 	if (GetCurRecipe() == NULL) return;
 

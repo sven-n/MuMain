@@ -38,18 +38,16 @@ void CHARACTER::Initialize()
 	Class = 0;
 	Skin = 0;
 	CtlCode = 0;
-	ExtendState = 0;			//  0:無, 1:풀세트아이템
-	EtcPart = 0;				//  기타 부탁 아이템. ( 퀘스트용 )
-	GuildStatus = 0;			//  길드내에서의 직책 ( -1 : NONE, 0 : PERSON, 32 : BATTLE_MASTER, 64 : SUB_MASTER, 128 : MASTER )
-	GuildType = 0;				//  길드종류 일반(0), 수호길드(1)
-	GuildRelationShip = 0;	    //  길드관계 (0x00 : 관계없음, 0x01 : Union, 0x04 Union Master, 0x02 : Rival, 0x08: Rival Union )
-	GuildSkill = 0;             //  배틀 마스터의 길드 스킬.
-	GuildMasterKillCount = 0;   //  배틀 마스터 킬카운트.
-	BackupCurrentSkill = 0;     //  스킬 인덱스 백업.
+	ExtendState = 0;
+	EtcPart = 0;
+	GuildStatus = 0;
+	GuildType = 0;
+	GuildRelationShip = 0;
+	GuildSkill = 0;
+	GuildMasterKillCount = 0;
+	BackupCurrentSkill = 0; 
 	GuildTeam = 0;
-#ifdef ASG_ADD_GENS_SYSTEM
-	m_byGensInfluence = 0;		//	겐스 세력.(0:없음, 1:듀프리언, 2:바네르트)
-#endif	// ASG_ADD_GENS_SYSTEM
+	m_byGensInfluence = 0;
 	PK = 0;
 	AttackFlag = 0;
 	AttackTime = 0;
@@ -58,8 +56,8 @@ void CHARACTER::Initialize()
 	Run = 0;
 	Skill = 0;
 	SwordCount = 0;
-	byExtensionSkill = 0;		//	확장 스킬. ( 0: 없음, 1:기본콤보, 2: 등등등 ).
-	m_byDieType = 0;			//	죽는 형식.
+	byExtensionSkill = 0;
+	m_byDieType = 0;
 	StormTime = 0;
 	JumpTime = 0;
 	TargetX = 0;
@@ -72,16 +70,12 @@ void CHARACTER::Initialize()
 	m_byFriend = 0;
 	MonsterSkill = 0;
 
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	for( int i = 0; i < 32; ++i ) ID[i] = 0;
-#else //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	for( int i = 0; i < 24; ++i ) ID[i] = 0;
-#endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
 
 	Movement = 0;
 	MovementType = 0;
 	CollisionTime = 0;
-	GuildMarkIndex = 0;		// 내가 속한 길드의 길드마크버퍼에서의 인덱스
+	GuildMarkIndex = 0;
 	Key = 0;
 	TargetCharacter = 0;
 
@@ -125,12 +119,7 @@ void CHARACTER::Initialize()
 #endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	for( int i = 0; i < 32; ++i ) OwnerID[i] = 0;
-#else //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	for( int i = 0; i < 24; ++i ) OwnerID[i] = 0;
-#endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
 #ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL

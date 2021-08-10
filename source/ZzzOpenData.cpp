@@ -682,24 +682,20 @@ void OpenPlayerTextures()
 
 void OpenItems()
 {
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENITEMS, PROFILING_LOADING_OPENITEMS );
-#endif // DO_PROFILING_FOR_LOADING
-
     //////////////////////////////////////////////////////////////////////////
     //  MODEL_SWORD
     //////////////////////////////////////////////////////////////////////////
 
 	for(int i=0;i<17;i++)
-      	gLoadData.AccessModel(MODEL_SWORD+i ,"Data\\Item\\","Sword" ,i+1);    //  검.
+      	gLoadData.AccessModel(MODEL_SWORD+i ,"Data\\Item\\","Sword" ,i+1);
 
-    gLoadData.AccessModel(MODEL_SWORD+17 ,"Data\\Item\\","Sword" ,18);    //  다크브레이커.
-    gLoadData.AccessModel(MODEL_SWORD+18 ,"Data\\Item\\","Sword" ,19);    //  선더 브레이드.
-    gLoadData.AccessModel(MODEL_SWORD+19 ,"Data\\Item\\","Sword" ,20);    //  대천사의 절대검.
+    gLoadData.AccessModel(MODEL_SWORD+17 ,"Data\\Item\\","Sword" ,18);
+    gLoadData.AccessModel(MODEL_SWORD+18 ,"Data\\Item\\","Sword" ,19);
+    gLoadData.AccessModel(MODEL_SWORD+19 ,"Data\\Item\\","Sword" ,20);
 
-	gLoadData.AccessModel(MODEL_SWORD+20 ,"Data\\Item\\","Sword" ,21);    // 마검사 추가검
-	gLoadData.AccessModel(MODEL_SWORD+21 ,"Data\\Item\\","Sword" ,22);    // 기사 추가검
-	gLoadData.AccessModel ( MODEL_SWORD+31, "Data\\Item\\", "Sword", 32 );	//	마검사 마법검.
+	gLoadData.AccessModel(MODEL_SWORD+20 ,"Data\\Item\\","Sword" ,21);
+	gLoadData.AccessModel(MODEL_SWORD+21 ,"Data\\Item\\","Sword" ,22);
+	gLoadData.AccessModel ( MODEL_SWORD+31, "Data\\Item\\", "Sword", 32 );
 
 	//////////////////////////////////////////////////////////////////////////
 	//	MODEL_AXE
@@ -793,104 +789,67 @@ void OpenItems()
     gLoadData.AccessModel( MODEL_HELPER+3, "Data\\Player\\", "Helper", 4 );
     gLoadData.AccessModel( MODEL_HELPER+4, "Data\\Item\\", "DarkHorseHorn" );
     gLoadData.AccessModel( MODEL_HELPER+31,"Data\\Item\\", "DarkHorseSoul" );
-#ifdef PET_SYSTEM
     gLoadData.AccessModel( MODEL_HELPER+5, "Data\\Item\\", "SpiritBill" );
-#endif// PET_SYSTEM
-#ifdef DARK_WOLF
-    gLoadData.AccessModel( MODEL_HELPER+6, "Data\\Item\\", "DarkWolfTooth" );
-#endif// DARK_WOLF
 
     gLoadData.AccessModel( MODEL_HELPER+21, "Data\\Item\\", "FireRing" );	
-    gLoadData.AccessModel( MODEL_HELPER+22, "Data\\Item\\", "GroundRing" );        //  땅의반지"	
-    gLoadData.AccessModel( MODEL_HELPER+23, "Data\\Item\\", "WindRing" );          //  바람의반지"	
-    gLoadData.AccessModel( MODEL_HELPER+24, "Data\\Item\\", "ManaRing" );          //  마법의반지"	
-    gLoadData.AccessModel( MODEL_HELPER+25, "Data\\Item\\", "IceNecklace" );       //  얼음의목걸이"
-    gLoadData.AccessModel( MODEL_HELPER+26, "Data\\Item\\", "WindNecklace" );      //  바람의목걸이"
-    gLoadData.AccessModel( MODEL_HELPER+27, "Data\\Item\\", "WaterNecklace" );     //  물의목걸이"	
-    gLoadData.AccessModel( MODEL_HELPER+28, "Data\\Item\\", "AgNecklace" );        //  기술의목걸이"
-    gLoadData.AccessModel( MODEL_HELPER+29, "Data\\Item\\", "EventChaosCastle" );//  근위병의 갑옷세트.
-	gLoadData.AccessModel( MODEL_HELPER+7,  "Data\\Item\\", "Covenant" );          //  용병 계약 문서.
-	gLoadData.AccessModel( MODEL_HELPER+11, "Data\\Item\\", "SummonBook" );        //  소환 주문서.
-    gLoadData.AccessModel( MODEL_EVENT+18,  "Data\\Item\\", "LifeStoneItem" );     //  라이프 스톤.
+    gLoadData.AccessModel( MODEL_HELPER+22, "Data\\Item\\", "GroundRing" );
+    gLoadData.AccessModel( MODEL_HELPER+23, "Data\\Item\\", "WindRing" );
+    gLoadData.AccessModel( MODEL_HELPER+24, "Data\\Item\\", "ManaRing" );
+    gLoadData.AccessModel( MODEL_HELPER+25, "Data\\Item\\", "IceNecklace" );
+    gLoadData.AccessModel( MODEL_HELPER+26, "Data\\Item\\", "WindNecklace" );
+    gLoadData.AccessModel( MODEL_HELPER+27, "Data\\Item\\", "WaterNecklace" );
+    gLoadData.AccessModel( MODEL_HELPER+28, "Data\\Item\\", "AgNecklace" );
+    gLoadData.AccessModel( MODEL_HELPER+29, "Data\\Item\\", "EventChaosCastle" );
+	gLoadData.AccessModel( MODEL_HELPER+7,  "Data\\Item\\", "Covenant" );
+	gLoadData.AccessModel( MODEL_HELPER+11, "Data\\Item\\", "SummonBook" );
+	gLoadData.AccessModel(MODEL_EVENT + 18, "Data\\Item\\", "LifeStoneItem");
 
-	//^ 펜릴 아이템 모델 로딩
-	gLoadData.AccessModel( MODEL_HELPER+32, "Data\\Item\\", "FR_1" );     // 갑옷 파편
-	gLoadData.AccessModel( MODEL_HELPER+33, "Data\\Item\\", "FR_2" );     // 여신의 가호
-	gLoadData.AccessModel( MODEL_HELPER+34, "Data\\Item\\", "FR_3" );     // 맹수의 발톱
-	gLoadData.AccessModel( MODEL_HELPER+35, "Data\\Item\\", "FR_4" );     // 뿔피리 조각
-	gLoadData.AccessModel( MODEL_HELPER+36, "Data\\Item\\", "FR_5" );     // 부러진 뿔피리
-	gLoadData.AccessModel( MODEL_HELPER+37, "Data\\Item\\", "FR_6" );     // 펜릴의 뿔피리
+	gLoadData.AccessModel( MODEL_HELPER+32, "Data\\Item\\", "FR_1" );
+	gLoadData.AccessModel( MODEL_HELPER+33, "Data\\Item\\", "FR_2" );
+	gLoadData.AccessModel( MODEL_HELPER+34, "Data\\Item\\", "FR_3" );
+	gLoadData.AccessModel( MODEL_HELPER+35, "Data\\Item\\", "FR_4" );
+	gLoadData.AccessModel( MODEL_HELPER+36, "Data\\Item\\", "FR_5" );
+	gLoadData.AccessModel( MODEL_HELPER+37, "Data\\Item\\", "FR_6" );
 
-#ifdef CSK_FREE_TICKET
-	gLoadData.AccessModel(MODEL_HELPER+46, "Data\\Item\\partCharge1\\", "entrancegray");	// 데빌스퀘어 자유입장권(회색)
-	gLoadData.AccessModel(MODEL_HELPER+47, "Data\\Item\\partCharge1\\", "entrancered");	// 블러드캐슬 자유입장권(빨간색)
-	gLoadData.AccessModel(MODEL_HELPER+48, "Data\\Item\\partCharge1\\", "entrancebleu");	// 칼리마 자유입장권(파란색)
-#endif // CSK_FREE_TICKET
+	gLoadData.AccessModel(MODEL_HELPER+46, "Data\\Item\\partCharge1\\", "entrancegray");
+	gLoadData.AccessModel(MODEL_HELPER+47, "Data\\Item\\partCharge1\\", "entrancered");
+	gLoadData.AccessModel(MODEL_HELPER+48, "Data\\Item\\partCharge1\\", "entrancebleu");
+	gLoadData.AccessModel(MODEL_POTION+54, "Data\\Item\\partCharge1\\", "juju");
+	gLoadData.AccessModel(MODEL_HELPER+43, "Data\\Item\\partCharge1\\", "monmark01");
+	gLoadData.AccessModel(MODEL_HELPER+44, "Data\\Item\\partCharge1\\", "monmark02");
+	gLoadData.AccessModel(MODEL_HELPER+45, "Data\\Item\\partCharge1\\", "monmark03");
+	gLoadData.AccessModel(MODEL_POTION+53, "Data\\Item\\partCharge1\\", "bujuck01");
 	
-#ifdef CSK_CHAOS_CARD
-	gLoadData.AccessModel(MODEL_POTION+54, "Data\\Item\\partCharge1\\", "juju");	// 카오스카드
-#endif // CSK_CHAOS_CARD
-
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#ifdef CSK_LUCKY_SEAL
-	gLoadData.AccessModel(MODEL_HELPER+43, "Data\\Item\\", "monmark01");	// 해운의 인장 (상승의 인장)
-	gLoadData.AccessModel(MODEL_HELPER+44, "Data\\Item\\", "monmark02");	// 해운의 인장 (풍요의 인장)
-	gLoadData.AccessModel(MODEL_HELPER+45, "Data\\Item\\", "monmark03");	// 해운의 인장 (유지의 인장)
-#endif //CSK_LUCKY_SEAL	
-#else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#ifdef CSK_LUCKY_SEAL
-	gLoadData.AccessModel(MODEL_HELPER+43, "Data\\Item\\partCharge1\\", "monmark01");	// 해운의 인장 (상승의 인장)
-	gLoadData.AccessModel(MODEL_HELPER+44, "Data\\Item\\partCharge1\\", "monmark02");	// 해운의 인장 (풍요의 인장)
-	gLoadData.AccessModel(MODEL_HELPER+45, "Data\\Item\\partCharge1\\", "monmark03");	// 해운의 인장 (유지의 인장)
-#endif //CSK_LUCKY_SEAL	
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-	
-#ifdef CSK_LUCKY_CHARM
-	gLoadData.AccessModel(MODEL_POTION+53, "Data\\Item\\partCharge1\\", "bujuck01");	// 행운의 부적
-#endif //CSK_LUCKY_CHARM
-	
-#ifdef CSK_RARE_ITEM
 	gLoadData.AccessModel(MODEL_POTION+58, "Data\\Item\\partCharge1\\", "expensiveitem01");
 	gLoadData.AccessModel(MODEL_POTION+59, "Data\\Item\\partCharge1\\", "expensiveitem02a");
 	gLoadData.AccessModel(MODEL_POTION+60, "Data\\Item\\partCharge1\\", "expensiveitem02b");
 	gLoadData.AccessModel(MODEL_POTION+61, "Data\\Item\\partCharge1\\", "expensiveitem03a");
 	gLoadData.AccessModel(MODEL_POTION+62, "Data\\Item\\partCharge1\\", "expensiveitem03b");
-#endif // CSK_RARE_ITEM
-	
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 	gLoadData.AccessModel(MODEL_POTION+70, "Data\\Item\\partCharge2\\", "EPotionR");
 	gLoadData.AccessModel(MODEL_POTION+71, "Data\\Item\\partCharge2\\", "EPotionB");
-#endif //PSW_ELITE_ITEM
-	
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 	gLoadData.AccessModel(MODEL_POTION+72, "Data\\Item\\partCharge2\\", "elitescroll_quick");
 	gLoadData.AccessModel(MODEL_POTION+73, "Data\\Item\\partCharge2\\", "elitescroll_depence");
 	gLoadData.AccessModel(MODEL_POTION+74, "Data\\Item\\partCharge2\\", "elitescroll_anger");
 	gLoadData.AccessModel(MODEL_POTION+75, "Data\\Item\\partCharge2\\", "elitescroll_magic");
 	gLoadData.AccessModel(MODEL_POTION+76, "Data\\Item\\partCharge2\\", "elitescroll_strenth");
 	gLoadData.AccessModel(MODEL_POTION+77, "Data\\Item\\partCharge2\\", "elitescroll_mana");
-#endif //PSW_SCROLL_ITEM
 
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING	// 날개 조합 100% 부적
 	char	szPC6Path[24];
 	sprintf( szPC6Path, "Data\\Item\\partCharge6\\" );
 
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_KNIGHT_1_CHARM, szPC6Path, "amulet_satan");	// - 사탄 날개부적/기사용 1차 날개            
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_MAGICIAN_1_CHARM, szPC6Path, "amulet_sky");	// - 천공 날개부적/법사용 1차 날개            
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_ELF_1_CHARM, szPC6Path, "amulet_elf");			// - 요정 날개부적/요정용 1차 날개            
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_SUMMONER_1_CHARM, szPC6Path, "amulet_disaster");// - 재앙 날개부적/소환술사용 1차 날개        
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_DARKLORD_1_CHARM, szPC6Path, "amulet_cloak");	// - 망토 조합부적/다크로드용 1차 날개
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_KNIGHT_1_CHARM, szPC6Path, "amulet_satan");         
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_MAGICIAN_1_CHARM, szPC6Path, "amulet_sky");          
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_ELF_1_CHARM, szPC6Path, "amulet_elf");          
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_SUMMONER_1_CHARM, szPC6Path, "amulet_disaster");       
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_DARKLORD_1_CHARM, szPC6Path, "amulet_cloak");
 
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_KNIGHT_2_CHARM, szPC6Path, "amulet_dragon");	// - 드라곤 날개부적/기사용 2차 날개          
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_MAGICIAN_2_CHARM, szPC6Path, "amulet_soul");	// - 영혼 날개부적/법사용 2차 날개            
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_ELF_2_CHARM, szPC6Path, "amulet_spirit");		// - 정령 날개부적/요정용 2차 날개            
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_SUMMONER_2_CHARM, szPC6Path, "amulet_despair");// - 절망 날개부적/소환술사용 2차 날개        
-	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_DARKKNIGHT_2_CHARM, szPC6Path, "amulet_dark");	// - 암흑 날개부적/마검사용 2차 날개          
-#endif // LDS_ADD_CS6_CHARM_MIX_ITEM_WING
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_KNIGHT_2_CHARM, szPC6Path, "amulet_dragon");         
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_MAGICIAN_2_CHARM, szPC6Path, "amulet_soul");        
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_ELF_2_CHARM, szPC6Path, "amulet_spirit");         
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_SUMMONER_2_CHARM, szPC6Path, "amulet_despair");     
+	gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING+EWS_DARKKNIGHT_2_CHARM, szPC6Path, "amulet_dark");        
 	
-#ifdef PSW_SEAL_ITEM               // 이동 인장
 	gLoadData.AccessModel(MODEL_HELPER+59, "Data\\Item\\partCharge2\\", "sealmove");
-#endif //PSW_SEAL_ITEM
 	
 #ifdef PSW_FRUIT_ITEM              // 리셋 열매
 	gLoadData.AccessModel(MODEL_HELPER+54, "Data\\Item\\partCharge2\\", "resetfruit_power");
@@ -1254,15 +1213,10 @@ void OpenItems()
         }
     }
 	
-	gLoadData.AccessModel( MODEL_EVENT+12, "Data\\Item\\", "QuestItem3RD", 0);		//. 영광의 반지
-	gLoadData.AccessModel( MODEL_EVENT+13, "Data\\Item\\", "QuestItem3RD", 1);		//. 다크스톤
-	gLoadData.AccessModel( MODEL_EVENT+14, "Data\\Item\\", "RingOfLordEvent", 0);		//. 제왕의 반지
-	gLoadData.AccessModel( MODEL_EVENT+15, "Data\\Item\\", "MagicRing", 0);		// 마법사의 반지
-
-#ifdef CHINA_MOON_CAKE
-    //  중국일때만 사용. ( 일단은 다른 나라에서는 사용하지 않으므로 따로 처리하지 않는다. ).
-    gLoadData.AccessModel ( MODEL_EVENT+17, "Data\\Item\\", "MoonCake" );         //  중국 이벤트 월병.
-#endif// CHINA_MOON_CAKE
+	gLoadData.AccessModel( MODEL_EVENT+12, "Data\\Item\\", "QuestItem3RD", 0);
+	gLoadData.AccessModel( MODEL_EVENT+13, "Data\\Item\\", "QuestItem3RD", 1);
+	gLoadData.AccessModel( MODEL_EVENT+14, "Data\\Item\\", "RingOfLordEvent", 0);
+	gLoadData.AccessModel( MODEL_EVENT+15, "Data\\Item\\", "MagicRing", 0);
 
     gLoadData.AccessModel(MODEL_POTION+22, "Data\\Item\\", "jewel", 22);          //  창조의 보석.
 
@@ -1815,7 +1769,6 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_POTION+48, "Item\\");
 	gLoadData.OpenTexture(MODEL_POTION+49, "Item\\");
 	gLoadData.OpenTexture(MODEL_POTION+50, "Item\\");
-#ifdef GIFT_BOX_EVENT
 	gLoadData.OpenTexture(MODEL_POTION+32, "Item\\");
 	gLoadData.OpenTexture(MODEL_POTION+33, "Item\\");
 	gLoadData.OpenTexture(MODEL_POTION+34, "Item\\");
@@ -1823,7 +1776,6 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_EVENT+21, "Item\\");
 	gLoadData.OpenTexture(MODEL_EVENT+22, "Item\\");
 	gLoadData.OpenTexture(MODEL_EVENT+23, "Item\\");
-#endif
 	gLoadData.OpenTexture(MODEL_HELPER+38,"Item\\");        //  문스톤 펜던트
 	gLoadData.OpenTexture(MODEL_POTION+41,"Item\\");        //  조화의 보석(원석)
 	gLoadData.OpenTexture(MODEL_POTION+42,"Item\\");        //  조화의 보석(정제)
@@ -1833,18 +1785,12 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_WING+33, "Item\\");
 	gLoadData.OpenTexture(MODEL_WING+34, "Item\\");
 
-#ifdef MYSTERY_BEAD
-	gLoadData.OpenTexture(MODEL_EVENT+19, "Item\\");
-	gLoadData.OpenTexture(MODEL_EVENT+20, "Item\\");
-#endif // MYSTERY_BEAD
-
 	gLoadData.OpenTexture(MODEL_SWORD+24, "Item\\");	//$ 크라이 울프 흑기사검
 	gLoadData.OpenTexture(MODEL_SWORD+25, "Item\\");	// 마검사검
 	gLoadData.OpenTexture(MODEL_MACE+15, "Item\\");	// 다크로드셉터
 	gLoadData.OpenTexture(MODEL_BOW+22, "Item\\");	// 요정활
 	gLoadData.OpenTexture(MODEL_STAFF+13, "Item\\");	// 흑마법사지팡이
 
-	//^ 펜릴 아이템 텍스쳐 불러들이는 곳
 	gLoadData.OpenTexture(MODEL_HELPER+32, "Item\\");	// 갑옷 파편
 	gLoadData.OpenTexture(MODEL_HELPER+33, "Item\\"); // 여신의 가호
 	gLoadData.OpenTexture(MODEL_HELPER+34, "Item\\"); // 맹수의 발톱
@@ -1852,59 +1798,32 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_HELPER+36, "Item\\"); // 부러진 뿔피리
 	gLoadData.OpenTexture(MODEL_HELPER+37, "Item\\"); // 펜릴의 뿔피리
 
-#ifdef CSK_FREE_TICKET
-	// 아이템 모델 텍스쳐 로딩
-	gLoadData.OpenTexture(MODEL_HELPER+46, "Item\\partCharge1\\"); // 데빌스퀘어 자유입장권
-	gLoadData.OpenTexture(MODEL_HELPER+47, "Item\\partCharge1\\"); // 블러드캐슬 자유입장권
-	gLoadData.OpenTexture(MODEL_HELPER+48, "Item\\partCharge1\\"); // 칼리마 자유입장권
-#endif // CSK_FREE_TICKET
+	gLoadData.OpenTexture(MODEL_HELPER+46, "Item\\partCharge1\\");
+	gLoadData.OpenTexture(MODEL_HELPER+47, "Item\\partCharge1\\");
+	gLoadData.OpenTexture(MODEL_HELPER+48, "Item\\partCharge1\\");
 	
-#ifdef CSK_CHAOS_CARD
-	// 카오스카드 모델 텍스쳐 로딩
-	gLoadData.OpenTexture(MODEL_POTION+54, "Item\\partCharge1\\");	// 카오스카드
-#endif // CSK_CHAOS_CARD
+	gLoadData.OpenTexture(MODEL_POTION+54, "Item\\partCharge1\\");
 
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#ifdef CSK_LUCKY_SEAL
-	gLoadData.OpenTexture(MODEL_HELPER+43, "Item\\");	// 해운의 인장 (상승의 인장)
-	gLoadData.OpenTexture(MODEL_HELPER+44, "Item\\");	// 해운의 인장 (풍요의 인장)
-	gLoadData.OpenTexture(MODEL_HELPER+45, "Item\\");	// 해운의 인장 (유지의 인장)
-#endif //CSK_LUCKY_SEAL
-#else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#ifdef CSK_LUCKY_SEAL
-	gLoadData.OpenTexture(MODEL_HELPER+43, "Item\\partCharge1\\");	// 해운의 인장 (상승의 인장)
-	gLoadData.OpenTexture(MODEL_HELPER+44, "Item\\partCharge1\\");	// 해운의 인장 (풍요의 인장)
-	gLoadData.OpenTexture(MODEL_HELPER+45, "Item\\partCharge1\\");	// 해운의 인장 (유지의 인장)
-#endif //CSK_LUCKY_SEAL
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
+	gLoadData.OpenTexture(MODEL_HELPER+43, "Item\\partCharge1\\");
+	gLoadData.OpenTexture(MODEL_HELPER+44, "Item\\partCharge1\\");
+	gLoadData.OpenTexture(MODEL_HELPER+45, "Item\\partCharge1\\");
 
-#ifdef CSK_LUCKY_CHARM
-	gLoadData.OpenTexture(MODEL_POTION+53, "Item\\partCharge1\\");	// 행운의 부적
-#endif //CSK_LUCKY_CHARM
+	gLoadData.OpenTexture(MODEL_POTION+53, "Item\\partCharge1\\");
 	
 #ifdef CSK_RARE_ITEM
-	// 희귀아이템 모델 텍스쳐 로딩
+
 	for(int i=0; i<5; ++i)
 	{
 		gLoadData.OpenTexture(MODEL_POTION+58+i, "Item\\partCharge1\\");
 	}
-#endif // CSK_RARE_ITEM
-	
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 	gLoadData.OpenTexture(MODEL_POTION+70, "Item\\partCharge2\\");
 	gLoadData.OpenTexture(MODEL_POTION+71, "Item\\partCharge2\\");
-#endif //PSW_ELITE_ITEM
-	
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 	gLoadData.OpenTexture(MODEL_POTION+72, "Item\\partCharge2\\");
 	gLoadData.OpenTexture(MODEL_POTION+73, "Item\\partCharge2\\");
 	gLoadData.OpenTexture(MODEL_POTION+74, "Item\\partCharge2\\");
 	gLoadData.OpenTexture(MODEL_POTION+75, "Item\\partCharge2\\");
 	gLoadData.OpenTexture(MODEL_POTION+76, "Item\\partCharge2\\");
 	gLoadData.OpenTexture(MODEL_POTION+77, "Item\\partCharge2\\");
-#endif //PSW_SCROLL_ITEM
-
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING // 날개 조합 100% 부적 
 	gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING+EWS_KNIGHT_1_CHARM, "Item\\partCharge6\\");	// 사탄 날개부적/기사용 1차 날개        
 	gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING+EWS_MAGICIAN_1_CHARM, "Item\\partCharge6\\");	// 천공 날개부적/법사용 1차 날개        
 	gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING+EWS_ELF_1_CHARM, "Item\\partCharge6\\");		// 요정 날개부적/요정용 1차 날개        
@@ -1918,7 +1837,7 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING+EWS_DARKKNIGHT_2_CHARM, "Item\\partCharge6\\");// 암흑 날개부적/마검사용 2차 날개      
 
 #endif //LDS_ADD_CS6_CHARM_MIX_ITEM_WING
-#ifdef PSW_SEAL_ITEM               // 이동 인장
+#ifdef PSW_SEAL_ITEM 
 	gLoadData.OpenTexture(MODEL_HELPER+59, "Item\\partCharge2\\");
 #endif //PSW_SEAL_ITEM
 	
@@ -6307,10 +6226,8 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\gostmark01.jpg"  , BITMAP_DRAIN_LIFE_GHOST ,GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\mzine_typer2.jpg", BITMAP_MAGIC_ZIN, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\shiny05.jpg", BITMAP_SHINY+6, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#ifdef ASG_ADD_SKILL_BERSERKER
 	LoadBitmap("Effect\\hikorora.jpg", BITMAP_ORORA, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHT_MARKS, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif	// ASG_ADD_SKILL_BERSERKER
 	LoadBitmap("Effect\\cursorpin01.jpg"  , BITMAP_TARGET_POSITION_EFFECT1 ,GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\cursorpin02.jpg"  , BITMAP_TARGET_POSITION_EFFECT2 ,GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap( "Effect\\smokelines01.jpg" ,BITMAP_SMOKELINE1, GL_LINEAR, GL_REPEAT );
@@ -6321,17 +6238,11 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap( "Effect\\lighting_mega03.jpg" ,BITMAP_LIGHTNING_MEGA3, GL_LINEAR, GL_REPEAT );
 	LoadBitmap("Effect\\firehik01.jpg"  ,BITMAP_FIRE_HIK1 ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\firehik03.jpg"  ,BITMAP_FIRE_HIK3 ,GL_LINEAR,GL_CLAMP_TO_EDGE);
-#ifdef CSK_ADD_MAP_ICECITY
 	LoadBitmap("Effect\\firehik_mono01.jpg", BITMAP_FIRE_HIK1_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\firehik_mono02.jpg", BITMAP_FIRE_HIK2_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\firehik_mono03.jpg", BITMAP_FIRE_HIK3_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 	LoadBitmap("Effect\\clouds3.jpg", BITMAP_RAKLION_CLOUDS, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-#ifdef ADD_RAKLION_IRON_KNIGHT
 	LoadBitmap("Monster\\icenightlight.jpg", BITMAP_IRONKNIGHT_BODY_BRIGHT, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif	// ADD_RAKLION_IRON_KNIGHT
 
 	g_XmasEvent->LoadXmasEventEffect();
 
@@ -6363,10 +6274,7 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\bab2.jpg"          ,BITMAP_CHROME+1  ,GL_LINEAR,GL_REPEAT);
 	LoadBitmap("Effect\\motion_blur.jpg"  ,BITMAP_BLUR+1     ,GL_NEAREST,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\motion_blur_r.jpg",BITMAP_BLUR+2     ,GL_NEAREST,GL_CLAMP_TO_EDGE);
-#ifdef PBG_ADD_PKFIELD
 	LoadBitmap("Effect\\motion_mono.jpg",	BITMAP_BLUR+3, GL_NEAREST,GL_CLAMP_TO_EDGE);
-#endif //PBG_ADD_PKFIELD
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 	LoadBitmap("Effect\\motion_blur_r3.jpg",BITMAP_BLUR+6   ,GL_NEAREST,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\gra.jpg",BITMAP_BLUR+7				,GL_NEAREST,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\spinmark01.jpg",BITMAP_BLUR+8		,GL_NEAREST,GL_CLAMP_TO_EDGE);
@@ -6375,7 +6283,6 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\joint_sword_red.jpg", BITMAP_BLUR+11,GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\motion_blur_r2.jpg", BITMAP_BLUR+12,GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\motion_blur_r3.jpg", BITMAP_BLUR+13,GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //LDS_ADD_EMPIRE_GUARDIAN
 	LoadBitmap("Effect\\blur02.jpg"       ,BITMAP_BLUR2      ,GL_NEAREST,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\lightning2.jpg"	,BITMAP_LIGHTNING+1,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\Thunder01.jpg"     ,BITMAP_ENERGY        ,GL_LINEAR,GL_REPEAT);
@@ -6391,7 +6298,6 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Skill\\Skull.jpg"  ,BITMAP_SKULL,GL_NEAREST);
 	LoadBitmap("Effect\\motion_blur_r2.jpg"  ,BITMAP_JOINT_FORCE ,GL_LINEAR,GL_REPEAT);
     LoadBitmap("Effect\\Fire04.jpg"   ,BITMAP_FIRECRACKER,	GL_LINEAR);
-    //  2002/12/04 - 조규하 효과.
 	LoadBitmap("Effect\\Flare.jpg"     	,BITMAP_FLARE,  GL_LINEAR,GL_CLAMP_TO_EDGE);
 
 	LoadBitmap("Effect\\Chrome02.jpg"     ,BITMAP_CHROME2,GL_NEAREST,GL_CLAMP_TO_EDGE);
@@ -6401,15 +6307,6 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\energy01.jpg"     ,BITMAP_CHROME_ENERGY,GL_NEAREST,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\energy02.jpg"     ,BITMAP_CHROME_ENERGY2,GL_LINEAR,GL_CLAMP_TO_EDGE);
 
-
-#ifdef DEVIAS_XMAS_EVENT
-	LoadBitmap("Effect\\Chrome08.jpg"		,BITMAP_CHROME8, GL_NEAREST, GL_CLAMP_TO_EDGE);
-#endif //DEVIAS_XMAS_EVENT
-
-#ifdef PJH_NEW_CHROME
-	LoadBitmap("Effect\\2.jpg"     ,BITMAP_CHROME9,GL_LINEAR,GL_REPEAT);
-#endif //PJH_NEW_CHROME
-#ifdef YDG_ADD_FIRECRACKER_ITEM
 	LoadBitmap("Effect\\firecracker0001.jpg"	,BITMAP_FIRECRACKER0001, GL_NEAREST, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\firecracker0002.jpg"	,BITMAP_FIRECRACKER0002, GL_NEAREST, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\firecracker0003.jpg"	,BITMAP_FIRECRACKER0003, GL_NEAREST, GL_CLAMP_TO_EDGE);
@@ -6417,24 +6314,11 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\firecracker0005.jpg"	,BITMAP_FIRECRACKER0005, GL_NEAREST, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\firecracker0006.jpg"	,BITMAP_FIRECRACKER0006, GL_NEAREST, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\firecracker0007.jpg"	,BITMAP_FIRECRACKER0007, GL_NEAREST, GL_CLAMP_TO_EDGE);
-#endif	// YDG_ADD_FIRECRACKER_ITEM
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-#ifdef LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
-	LoadBitmap("Effect\\Shiny05.jpg"     	,BITMAP_SHINY+6   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
-#else // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
 	LoadBitmap("Effect\\Shiny05.jpg"     	,BITMAP_SHINY+5   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
-#endif // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
-#endif // LDS_ADD_EMPIRE_GUARDIAN
 
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#ifdef CSK_LUCKY_SEAL
-	LoadBitmap("Effect\\bujuckline.jpg", BITMAP_LUCKY_SEAL_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_LUCKY_SEAL
-#else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#ifdef CSK_LUCKY_SEAL
+
+
 	LoadBitmap("Effect\\partCharge1\\bujuckline.jpg", BITMAP_LUCKY_SEAL_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_LUCKY_SEAL
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 
 	LoadBitmap("Item\\nfm03.jpg"			,BITMAP_BLUECHROME,GL_NEAREST,GL_REPEAT);
 	LoadBitmap("Effect\\flareBlue.jpg"     	,BITMAP_FLARE_BLUE,  GL_LINEAR,GL_CLAMP_TO_EDGE);

@@ -70,7 +70,6 @@ void CUIMng::CreateTitleSceneUI()
 
 	m_asprTitle = new CSprite[UIM_TS_MAX];
 
-#ifdef PBG_ADD_NEWLOGO_IMAGECHANGE
 	float _fScaleXTemp = (float)rInput.GetScreenWidth()/1280.0f;
 	float _fScaleYTemp = (float)rInput.GetScreenHeight()/1024.0f;
 
@@ -114,80 +113,28 @@ void CUIMng::CreateTitleSceneUI()
 		false, SPR_SIZING_DATUMS_LT, _fScaleXTemp, _fScaleYTemp);
 	m_asprTitle[UIM_TS_BACK9].SetPosition(1024, 512+119);
 
-#ifdef PBG_ADD_MU_LOGO
-#ifdef PBG_ADD_MUBLUE_LOGO
-	// 블루 뮤
-	m_asprTitle[UIM_TS_MU].Create(167, 168, BITMAP_TITLE+2, 0, NULL, 0, 0,
-		false, SPR_SIZING_DATUMS_LT, _fScaleXTemp, _fScaleXTemp);
-#else //PBG_ADD_MUBLUE_LOGO
+
  	m_asprTitle[UIM_TS_MU].Create(216, 138, BITMAP_TITLE+2, 0, NULL, 0, 0,
 		false, SPR_SIZING_DATUMS_LT, _fScaleXTemp, _fScaleXTemp);
-#endif //PBG_ADD_MUBLUE_LOGO
-#else //PBG_ADD_MU_LOGO
-	m_asprTitle[UIM_TS_MU].Create(106, 49, BITMAP_TITLE+2, 0, NULL, 0, 0,
-		false, SPR_SIZING_DATUMS_LT, _fScaleXTemp, _fScaleXTemp);
-#endif //PBG_ADD_MU_LOGO
+
 	if((float)rInput.GetScreenWidth() == 1280)
-#ifdef PBG_ADD_MU_LOGO
-#ifdef PBG_ADD_MUBLUE_LOGO
-		//블루 뮤
-		m_asprTitle[UIM_TS_MU].SetPosition(640-108, 633+53);
-#else //PBG_ADD_MUBLUE_LOGO
 		m_asprTitle[UIM_TS_MU].SetPosition(640-108, 663+53);
-#endif //PBG_ADD_MUBLUE_LOGO
-#else //PBG_ADD_MU_LOGO
-		m_asprTitle[UIM_TS_MU].SetPosition(1150, 775);
-#endif //PBG_ADD_MU_LOGO
 	else
-#ifdef PBG_ADD_MU_LOGO
-#ifdef PBG_ADD_MUBLUE_LOGO
-		m_asprTitle[UIM_TS_MU].SetPosition(640-83, 633);
-#else //PBG_ADD_MUBLUE_LOGO
 		m_asprTitle[UIM_TS_MU].SetPosition(640-108, 663);
-#endif //PBG_ADD_MUBLUE_LOGO
-#else //PBG_ADD_MU_LOGO
-		m_asprTitle[UIM_TS_MU].SetPosition(1150, 725);
-#endif //PBG_ADD_MU_LOGO
 	
-#else //PBG_ADD_NEWLOGO_IMAGECHANGE
-	m_asprTitle[UIM_TS_BACK0].Create(512, 478, BITMAP_TITLE, 0, NULL, 0, 0,
-		false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
-	m_asprTitle[UIM_TS_BACK0].SetPosition(0, 60);
-
-	m_asprTitle[UIM_TS_BACK1].Create(288, 478, BITMAP_TITLE+1, 0, NULL, 0, 0,
-		false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
-	m_asprTitle[UIM_TS_BACK1].SetPosition(512, 60);
-
-	m_asprTitle[UIM_TS_MU].Create(93, 48, BITMAP_TITLE+2, 0, NULL, 0, 0,
-		false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
-	m_asprTitle[UIM_TS_MU].SetPosition(3, 80);
-#endif //PBG_ADD_NEWLOGO_IMAGECHANGE
-
 	m_asprTitle[UIM_TS_121518].Create(256, 206, BITMAP_TITLE+3, 0, NULL, 0, 0,
 		false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
 	m_asprTitle[UIM_TS_121518].SetPosition(544, 60);
-
-#ifdef LDK_MOD_GLOBAL_PORTAL_LOGO
-	//기본 로고로 재수정.
 	m_asprTitle[UIM_TS_WEBZEN].Create(187, 151, BITMAP_TITLE+4, 0, NULL, 0, 0,
 		false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
 	m_asprTitle[UIM_TS_WEBZEN].SetPosition(307, 225);
-#else //LDK_MOD_GLOBAL_PORTAL_LOGO
-	m_asprTitle[UIM_TS_WEBZEN].Create(342, 152, BITMAP_TITLE+4, 0, NULL, 0, 0,
-		false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
-	m_asprTitle[UIM_TS_WEBZEN].SetPosition(307-77, 225);
-#endif //LDK_MOD_GLOBAL_PORTAL_LOGO
 
 	m_pgbLoding = new CGaugeBar;
 	
 	RECT rc = { 0, 0, 656, 15 };
-	m_pgbLoding->Create(4, 15, BITMAP_TITLE+5, &rc, 0, 0, -1, true, fScaleX,
-		fScaleY);
-#ifdef PBG_ADD_NEWLOGO_IMAGECHANGE
+	m_pgbLoding->Create(4, 15, BITMAP_TITLE+5, &rc, 0, 0, -1, true, fScaleX, fScaleY);
+
 	m_pgbLoding->SetPosition(72, 540);
-#else //PBG_ADD_NEWLOGO_IMAGECHANGE
-	m_pgbLoding->SetPosition(72, 482);
-#endif //PBG_ADD_NEWLOGO_IMAGECHANGE
 	for (int i = 0; i < UIM_TS_MAX; ++i)
 	{
 		m_asprTitle[i].Show();

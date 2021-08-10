@@ -46,14 +46,6 @@
 #include "CBTMessageBox.h"
 #include "./ExternalObject/leaf/regkey.h"
 
-#ifdef LDK_ADD_GLOBAL_PORTAL_SYSTEM
-	#include "GlobalPortalSystem.h"
-#endif //LDK_ADD_GLOBAL_PORTAL_SYSTEM
-#ifdef LEM_ADD_GAMECHU
-	#include <conio.h>
-	#include "GCCertification.h"
-#endif // LEM_ADD_GAMECHU
-
 #include "CSChaosCastle.h"
 #include "GMHellas.h"
 #include <io.h>
@@ -66,7 +58,7 @@
 #include "MovieScene.h"
 #endif // MOVIE_DIRECTSHOW
 #include "GameCensorship.h"
-// 맵 관련 include
+
 #ifdef PSW_ADD_MAPSYSTEM
 	#include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM
@@ -78,10 +70,6 @@
 #ifdef CSK_MOD_PROTECT_AUTO_V1
 	#include "ProtectAuto.h"
 #endif // CSK_MOD_PROTECT_AUTO_V1
-
-#ifdef PBG_MOD_GAMEGUARD_HANDLE
-	#include "./ExternalObject/Nprotect/NPGameGuardHandle.h"
-#endif //PBG_MOD_GAMEGUARD_HANDLE
 
 #include <ThemidaInclude.h>
 
@@ -1308,7 +1296,6 @@ BOOL IsUsingSavage( HINSTANCE hCurrentInst)
 	return ( bResult);
 }
 
-//오픈지엘 윈도우 생성 함수
 bool CreateOpenglWindow()
 {
     PIXELFORMATDESCRIPTOR pfd;
@@ -1320,98 +1307,58 @@ bool CreateOpenglWindow()
     pfd.iPixelType   = PFD_TYPE_RGBA;
     pfd.cColorBits   = 16;
 	pfd.cDepthBits   = 16;
-#ifdef MOD_STENCILBUFFER
-	pfd.cStencilBits = 8;
-#endif //MOD_STENCILBUFFER
-#ifdef USE_SHADOWVOLUME
-	pfd.cStencilBits = 8;
-#endif //USE_SHADOWVOLUME
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	g_hDC = GetDC(g_hWnd);
-	if( !g_hDC )
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	if (!(g_hDC=GetDC(g_hWnd)))							// 디바이스 컨텍스트를 얻는다.
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+	if (!(g_hDC=GetDC(g_hWnd)))
 	{
 		g_ErrorReport.Write( "OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
-		KillGLWindow();								// 디스플레이 리셋
+		KillGLWindow();
 		MessageBox(NULL,GlobalText[4],"OpenGL Get DC Error.",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// 실패
+		return FALSE;
 	}
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	GLuint PixelFormat = ChoosePixelFormat(g_hDC,&pfd);			// 알맞은 픽셀포맷을 찾아서 기억한다.
-	if ( !PixelFormat )	// pdf에 의해 지정된 것과 가장 근접한 픽셀포맷을 선택한다.
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	GLuint PixelFormat;			// 알맞은 픽셀포맷을 찾아서 기억한다.
-	if (!(PixelFormat=ChoosePixelFormat(g_hDC,&pfd)))	// pdf에 의해 지정된 것과 가장 근접한 픽셀포맷을 선택한다.
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+	GLuint PixelFormat;
+
+	if (!(PixelFormat=ChoosePixelFormat(g_hDC,&pfd)))
 	{
 		g_ErrorReport.Write( "OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-		KillGLWindow();								// 디스플레이 리셋
+		KillGLWindow();
 		MessageBox(NULL,GlobalText[4],"OpenGL Choose Pixel Format Error.",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// 실패
+		return FALSE;
 	}
 
-	if(!SetPixelFormat(g_hDC,PixelFormat,&pfd))		// 디바이스 컨텍스트의 픽셀 포맷을 정한다.
+	if(!SetPixelFormat(g_hDC,PixelFormat,&pfd))
 	{
 		g_ErrorReport.Write( "OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-		KillGLWindow();								// 디스플레이 리셋
+		KillGLWindow();
 		MessageBox(NULL,GlobalText[4],"OpenGL Set Pixel Format Error.",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// 실패
+		return FALSE;
 	}
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	g_hRC = wglCreateContext(g_hDC);
-	if ( !g_hRC )				// 디바이스 컨텍스트로 적절한 랜더링 컨텍스트를 만든다.
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	if (!(g_hRC=wglCreateContext(g_hDC)))				// 디바이스 컨텍스트로 적절한 랜더링 컨텍스트를 만든다.
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+	if (!(g_hRC=wglCreateContext(g_hDC)))
 	{
 		g_ErrorReport.Write( "OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
-		KillGLWindow();								// 디스플레이 리셋
+		KillGLWindow();
 		MessageBox(NULL,GlobalText[4],"OpenGL Create Context Error.",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// 실패
+		return FALSE;
 	}
 
-	if(!wglMakeCurrent(g_hDC,g_hRC))					// 랜더링 컨텍스트를 활성화하고 디바이스 컨텍스트와 관련시킨다.
+	if(!wglMakeCurrent(g_hDC,g_hRC))
 	{
 		g_ErrorReport.Write( "OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
-		KillGLWindow();								// 디스플레이 리셋
+		KillGLWindow();
 		MessageBox(NULL,GlobalText[4],"OpenGL Make Current Error.",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// 실패
+		return FALSE;
 	}
 
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-	if( TRUE == g_bActivityProcessMSAA )
-	{
-		int iPixelFormat = 0;
-		
-		g_bSupportedMSAA = InitGLMultisample(g_hInst,g_hWnd,pfd,g_iMSAALevel,iPixelFormat);	// Anti Aliasing을 하기 위한 Multisample 기능 초기화
-
-		if( TRUE == g_bSupportedMSAA )
-		{
-			// Recreation Window, GLWindow
-			ReCreateGLWithWindow(iPixelFormat);
-		}
-	}
-
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-
-	ShowWindow(g_hWnd,SW_SHOW);						// 윈도우를 보이게
-	SetForegroundWindow(g_hWnd);						// 윈도우를 맨 위로
-	SetFocus(g_hWnd);									// 윈도우에 키보드 포커스를 준다.
+	ShowWindow(g_hWnd,SW_SHOW);
+	SetForegroundWindow(g_hWnd);
+	SetFocus(g_hWnd);
 	return true;
 }
 
 HWND StartWindow(HINSTANCE hCurrentInst,int nCmdShow)
 {
-#ifdef PBG_FIX_BLUEHOMEPAGE_LINK
-	char *windowName = "MU BLUE";
-#else //PBG_FIX_BLUEHOMEPAGE_LINK
     char *windowName = "MU";
-#endif //PBG_FIX_BLUEHOMEPAGE_LINK
 
     WNDCLASS wndClass;
     HWND hWnd;
@@ -1427,18 +1374,6 @@ HWND StartWindow(HINSTANCE hCurrentInst,int nCmdShow)
     wndClass.lpszMenuName  = NULL;
     wndClass.lpszClassName = windowName;
     RegisterClass(&wndClass);
-
-
-
-
-
-
-
-
-
-
-
-
 
 #ifdef ENABLE_FULLSCREEN
 	{
@@ -1545,121 +1480,6 @@ HWND StartWindow(HINSTANCE hCurrentInst,int nCmdShow)
     return hWnd;
 }
 
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-BOOL ReCreateGLWithWindow(int iPixelFormat)
-{
-	// ========================================================================== Destroy GLWindows	
-	// ========================================================================== Destroy Windows	
-	DestroyWindowWithGL();	
-
-	// ========================================================================== Creation Windows	
-	g_hWnd = StartWindow(g_hInst, 1);	
-
-
-	// ========================================================================== Creation GLWindows
-	PIXELFORMATDESCRIPTOR pfd;
-	
-	
-    memset(&pfd, 0, sizeof(pfd));
-    pfd.nSize        = sizeof(pfd);
-    pfd.nVersion     = 1;
-    pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType   = PFD_TYPE_RGBA;
-    pfd.cColorBits   = 16;
-	pfd.cDepthBits   = 16;
-#ifdef USE_SHADOWVOLUME
-	pfd.cStencilBits = 8;
-#endif //USE_SHADOWVOLUME
-	
-	if (!(g_hDC=GetDC(g_hWnd)))							// 디바이스 컨텍스트를 얻는다.
-	{
-		g_ErrorReport.Write( "OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
-		KillGLWindow();								// 디스플레이 리셋
-		MessageBox(NULL,GlobalText[4],"OpenGL Get DC Error.",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// 실패
-	}
-	
-	if(!SetPixelFormat(g_hDC,iPixelFormat,&pfd))		// 디바이스 컨텍스트의 픽셀 포맷을 정한다.
-	{
-		g_ErrorReport.Write( "OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-		KillGLWindow();								// 디스플레이 리셋
-		MessageBox(NULL,GlobalText[4],"OpenGL Set Pixel Format Error.",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// 실패
-	}
-
-	if (!(g_hRC=wglCreateContext(g_hDC)))				// 디바이스 컨텍스트로 적절한 랜더링 컨텍스트를 만든다.
-	{
-		g_ErrorReport.Write( "OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
-		KillGLWindow();								// 디스플레이 리셋
-		MessageBox(NULL,GlobalText[4],"OpenGL Create Context Error.",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// 실패
-	}
-
-	if(!wglMakeCurrent(g_hDC,g_hRC))					// 랜더링 컨텍스트를 활성화하고 디바이스 컨텍스트와 관련시킨다.
-	{
-		g_ErrorReport.Write( "OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
-		KillGLWindow();								// 디스플레이 리셋
-		MessageBox(NULL,GlobalText[4],"OpenGL Make Current Error.",MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;								// 실패
-	}
-
-	return TRUE;
-};
-
-BOOL DestroyWindowWithGL ()								// Destroy The OpenGL Window & Release Resources
-{
-	g_bIsNowRecreationingForMSAA = TRUE;
-
-	KillGLWindow();
-
-	DestroyWindow (g_hWnd);									// Destroy The Window
-
-	g_hWnd = 0;												// Zero The Window Handle
-
-	if (g_bUseWindowMode == FALSE)										// Is Window In Fullscreen Mode
-	{
-		ChangeDisplaySettings (NULL,0);									// Switch Back To Desktop Resolution
-		ShowCursor (TRUE);												// Show The Cursor
-	}
-
-	g_bIsNowRecreationingForMSAA = FALSE;
-
-	return TRUE;
-
-// 	g_bIsNowRecreationingForMSAA = TRUE;
-// 	if (g_hWnd != 0)												// Does The Window Have A Handle?
-// 	{	
-// 		if (g_hDC != 0)											// Does The Window Have A Device Context?
-// 		{
-// 			//wglMakeCurrent (g_hDC, 0);							// Set The Current Active Rendering Context To Zero
-// 			wglMakeCurrent (NULL, NULL);							// Set The Current Active Rendering Context To Zero
-// 
-// 			if (g_hRC != 0)										// Does The Window Have A Rendering Context?
-// 			{
-// 				wglDeleteContext (g_hRC);							// Release The Rendering Context
-// 				g_hRC = 0;										// Zero The Rendering Context
-// 			}
-// 			ReleaseDC (g_hWnd, g_hDC);						// Release The Device Context
-// 			g_hDC = 0;											// Zero The Device Context
-// 		}
-// 		DestroyWindow (g_hWnd);									// Destroy The Window
-// 		g_hWnd = 0;												// Zero The Window Handle
-// 	}
-// 	
-// 	if (g_bUseWindowMode == FALSE)										// Is Window In Fullscreen Mode
-// 	{
-// 		ChangeDisplaySettings (NULL,0);									// Switch Back To Desktop Resolution
-// 		ShowCursor (TRUE);												// Show The Cursor
-// 	}
-// 	
-// 	g_bIsNowRecreationingForMSAA = FALSE;
-// 
-// 	return TRUE;														// Return True
-}
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-
-//#ifdef _DEBUG
-
 char m_ID[11];
 char m_Version[11];
 char m_ExeVersion[11];
@@ -1670,12 +1490,10 @@ int	m_nColorDepth;
 int	g_iRenderTextType = 0;
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-// 다국어 지원 런쳐에서 선택된 언어
 char g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = {'\0'};
 std::string g_strSelectedML = "";
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
-//int 파일 읽는 함수
 BOOL OpenInitFile()
 {
 	//char szTemp[50];
@@ -1689,18 +1507,8 @@ BOOL OpenInitFile()
 		strcat(szIniFilePath, "config.ini");
 	else strcat(szIniFilePath, "\\config.ini");
 
-	//GetPrivateProfileString ("LOGIN", "ID", "", m_ID, 11, szIniFilePath);
-#ifdef _TEST_SERVER
-	GetPrivateProfileString ("LOGIN", "TestVersion", "", m_Version, 11, szIniFilePath);
-#else
 	GetPrivateProfileString ("LOGIN", "Version", "", m_Version, 11, szIniFilePath);
-#endif //_TEST_SERVER
-	/*GetPrivateProfileString ("OPTION", "SoundOnOff", "1", szTemp, 10, szIniFilePath);
-	m_SoundOnOff = atoi(szTemp);
-	GetPrivateProfileString ("OPTION", "MusicOnOff", "1", szTemp, 10, szIniFilePath);
-	m_MusicOnOff = atoi(szTemp);
-	GetPrivateProfileString ("OPTION", "Resolution", "0", szTemp, 10, szIniFilePath);
-	m_Resolution = atoi(szTemp);*/
+
 	char *lpszCommandLine = GetCommandLine();
 	char lpszFile[MAX_PATH];
 	if ( GetFileNameOfFilePath( lpszFile, lpszCommandLine))
@@ -1789,36 +1597,6 @@ BOOL OpenInitFile()
 		}
 #endif // USER_WINDOW_MODE
 
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-		dwSize = sizeof(int);
-		if( RegQueryValueEx(hKey, "MSAAONOFF", 0, NULL, (LPBYTE) & g_bActivityProcessMSAA, &dwSize ) != ERROR_SUCCESS)
-		{
-			g_bActivityProcessMSAA = DEFAULT_USINGMSAA;
-		}
-		dwSize = sizeof(int);
-		if( RegQueryValueEx(hKey, "MSAALEVEL", 0, NULL, (LPBYTE) & g_iMSAALevel, &dwSize ) != ERROR_SUCCESS)
-		{
-			g_iMSAALevel = DEFAULT_MSAAVALUE;
-		}
-
-		int arriMSAAValidate [] = { 1, 2, 4 };
-
-		BOOL	bIsValidate = FALSE;
-		for( int i = 0; i < 3; i++ )
-		{
-			if(g_iMSAALevel == arriMSAAValidate[i])
-			{
-				bIsValidate = TRUE;
-				break;
-			}
-		}
-
-		if(bIsValidate != TRUE)
-		{
-			g_iMSAALevel = DEFAULT_MSAAVALUE;
-		}
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		dwSize = MAX_LANGUAGE_NAME_LENGTH;
 		if ( RegQueryValueEx (hKey, "LangSelection", 0, NULL, (LPBYTE)g_aszMLSelection, &dwSize) != ERROR_SUCCESS)
@@ -1827,10 +1605,6 @@ BOOL OpenInitFile()
 		}
 		g_strSelectedML = g_aszMLSelection;
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
-#ifdef LDK_ADD_GLOBAL_PORTAL_SYSTEM
-		GlobalPortalSystem::Instance().SetPathToRegistry(&hKey);
-#endif //LDK_ADD_GLOBAL_PORTAL_SYSTEM
 
 #ifdef ADD_GFX_REG_OPTION
 		//레지스트레에서 ui설정값 확인
@@ -2177,7 +1951,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
 	g_ErrorReport.Write( "> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
 
-    //윈도우 생성
     g_hInst = hInstance;
     g_hWnd = StartWindow(hInstance,nCmdShow);
 	g_ErrorReport.Write( "> Start window success.\r\n");
@@ -2262,7 +2035,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	}
 #endif //LDK_ADD_SCALEFORM
 
-	//다이렉트 사운드 초기화
 	if(m_MusicOnOff)
 	{
 		wzAudioCreate(g_hWnd);
@@ -2272,31 +2044,23 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	if(m_SoundOnOff)
 	{
 		InitDirectSound(g_hWnd);
-		//. g_VolumeLevel 저장한거 읽어들이는 부분 필요
 		leaf::CRegKey regkey;
-#ifdef PBG_ADD_LAUNCHER_BLUE
-		regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu_Blue\\Config");
-#else //PBG_ADD_LAUNCHER_BLUE
 		regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu\\Config");
-#endif //PBG_ADD_LAUNCHER_BLUE
 		DWORD value;
 		if(!regkey.ReadDword("VolumeLevel", value))
 		{
 			value = 5;	//. default setting
 			regkey.WriteDword("VolumeLevel", value);
 		}
-		if(value<0 || value>=10)	//. 볼륨이 범위밖이면 디폴트셋팅으로 바꿔준다
-			value = 5;	//. default setting
+		if(value<0 || value>=10)
+			value = 5;
 		
 		g_pOption->SetVolumeLevel(int(value));
 		SetEffectVolumeLevel(g_pOption->GetVolumeLevel());
 	}
 
-	//해킹 프로그램이 상주해 있는지 체크하는 함수의 타이머 설정
 	SetTimer(g_hWnd, HACK_TIMER, 20*1000, NULL);
 
-	//해킹 방지를 위해서 덤프 메모리 할당
-	//srand(timeGetTime());
 	srand((unsigned)time(NULL));
 	for(int i=0;i<100;i++)
 		RandomTable[i] = rand()%360;
@@ -2304,17 +2068,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	//memorydump[0]
 	RendomMemoryDump = new BYTE [rand()%100+1];
 
-	//////////////////////////////////////////////////////////////////////////
-	// 메모리 할당
 
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-	CProtectAuto::Create();
-	
-#ifdef CSK_MOD_PROTECT_AUTO_V2
-	g_pProtectAuto->CheckAuto();
-#endif // CSK_MOD_PROTECT_AUTO_V2
-#endif // CSK_MOD_PROTECT_AUTO_V1
-	
 	GateAttribute				= new GATE_ATTRIBUTE [MAX_GATES];
 	SkillAttribute				= new SKILL_ATTRIBUTE[MAX_SKILLS];
 
@@ -2336,7 +2090,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     CharacterMachine->Init();
 	Hero = &CharactersClient[0];	
 
-///////////////////////////////////////////
 	if (g_iChatInputType == 1)
 	{
 		 g_pMercenaryInputBox = new CUIMercenaryInputBox;
@@ -2360,21 +2113,17 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
 	g_BuffSystem = BuffStateSystem::Make();
 
-#ifdef PSW_ADD_MAPSYSTEM
 	g_MapProcess = MapProcess::Make();
-#endif //PSW_ADD_MAPSYSTEM
 
-#ifdef LDK_ADD_NEW_PETPROCESS
 	g_petProcess = PetProcess::Make();
-#endif //LDK_ADD_NEW_PETPROCESS
 
 	CUIMng::Instance().Create();
 
 	if (g_iChatInputType == 1)
 	{
-		g_pMercenaryInputBox->Init(g_hWnd);							// 사용하지 않는것 같음
-		g_pSingleTextInputBox->Init(g_hWnd, 200, 20);				// 캐릭터 만드는 창에서 캐릭터 이름 입력
-		g_pSinglePasswdInputBox->Init(g_hWnd, 200, 20, 9, TRUE);	// 캐릭터 지우는 창에서 패스워드 입력
+		g_pMercenaryInputBox->Init(g_hWnd);
+		g_pSingleTextInputBox->Init(g_hWnd, 200, 20);
+		g_pSinglePasswdInputBox->Init(g_hWnd, 200, 20, 9, TRUE);
 		g_pSingleTextInputBox->SetState(UISTATE_HIDE);
 		g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
 
@@ -2392,10 +2141,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #if (defined WINDOWMODE)
 	if (g_bUseWindowMode == FALSE)
 	{
-		int nOldVal; // 값이 들어갈 필요가 없음
-		SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1, &nOldVal, 0);  // 단축키를 못쓰게 함
-		SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);  // 스크린세이버 차단
-		SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300*60, NULL, 0);  // 스크린세이버 차단
+		int nOldVal;
+		SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1, &nOldVal, 0);
+		SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);
+		SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300*60, NULL, 0);
 	}
 #else
 #ifdef NDEBUG
@@ -2466,14 +2215,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     while( 1 )
     {
-#ifdef DO_PROFILING
-		g_pProfiler->BeginTotal( FALSE );	
-#endif // DO_PROFILING
-
-#ifdef DO_PROFILING
-		g_pProfiler->BeginUnit( EPROFILING_PROCESS_TOTAL, PROFILING_PROCESS_TOTAL );
-#endif // DO_PROFILING
-
 #ifdef USE_SELFCHECKCODE
 		if ( TimeRemain >= 40)
 		{
@@ -2494,46 +2235,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         }
      	else 
 		{
-			// 윈팅 방지 코드
-#ifdef NDEBUG
-#ifndef FOR_WORK
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-			if (g_bUseWindowMode == FALSE)
-#endif
-			{
-				// Alt-Tab 해서 백그라운드로 갔는지 체크
-				FAKE_CODE( Pos_NoMouseTimeCheck);
-	Pos_NoMouseTimeCheck:
-				FAKE_CODE( Pos_NoMouseTimeCheck2);
-	Pos_NoMouseTimeCheck2:
-				if ( ++g_iNoMouseTime > 30)
-				{
-					if ( ++g_iInactiveTime > 30)
-					{
-						g_iNoMouseTime = 0;
-						g_iInactiveTime = 0;
-						// 해킹시도
-						if ( !g_bInactiveTimeChecked)
-						{
-							SendHackingChecked( 0x01, 0);
-							g_bInactiveTimeChecked = TRUE;
-						}
-						SetTimer( g_hWnd, WINDOWMINIMIZED_TIMER, 1*1000, NULL);
-						LoadingWorld = 7623421;
-					}
-					else
-					{
-					}
-					if ( !IsIconic( g_hWnd))
-					{
-						g_iInactiveTime = 0;
-						g_iNoMouseTime = 0;
-					}
-				}
-			}
-#endif
-#endif
-
 #ifdef USE_SELFCHECKCODE
 			if ( TimeRemain >= 40)
 			{
@@ -2541,7 +2242,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 			}
 #endif
 
-			//Scene 함수
+			//Scene
 			FAKE_CODE( Pos_ActiveCheck);
 Pos_ActiveCheck:
 #if (defined WINDOWMODE)
@@ -2549,17 +2250,16 @@ Pos_ActiveCheck:
 			{
 				Scene(g_hDC);
 			}
-			else if(g_bWndActive)//박종훈
+			else if(g_bWndActive)
 			{
 		       	Scene(g_hDC);
 			}
 #ifndef FOR_WORK
-			else if (g_bUseWindowMode == FALSE)		// 윈팅 방지 코드
-			{	// 다른 프로그램으로 넘어가지 못하게 한다.
+			else if (g_bUseWindowMode == FALSE)
+			{
 				SetForegroundWindow( g_hWnd);
 				SetFocus(g_hWnd);
 
-				// 윈도우를 최소화시켰다가 되돌려서 포커스 얻기
 				if ( g_iInactiveWarning > 1)
 				{
 					SetTimer( g_hWnd, WINDOWMINIMIZED_TIMER, 1*1000, NULL);
@@ -2576,50 +2276,13 @@ Pos_ActiveCheck:
 			}
 #endif//FOR_WORK
 #else//WINDOWMODE
-			if(g_bWndActive)//박종훈
+			if(g_bWndActive)
 		       	Scene(g_hDC);
 
-#ifdef NDEBUG
-#ifndef FOR_WORK
-			else	// 윈팅 방지 코드
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-			if (g_bUseWindowMode == FALSE)
-#endif
-			{	// 다른 프로그램으로 넘어가지 못하게 한다.
-				SetForegroundWindow( g_hWnd);
-				SetFocus(g_hWnd);
-
-				// 윈도우를 최소화시켰다가 되돌려서 포커스 얻기
-				if ( g_iInactiveWarning > 1)
-				{
-					SetTimer( g_hWnd, WINDOWMINIMIZED_TIMER, 1*1000, NULL);
-					PostMessage(g_hWnd, WM_CLOSE, 0, 0);
-				}
-				else
-				{
-					g_iInactiveWarning++;
-					g_bMinimizedEnabled = TRUE;
-					ShowWindow( g_hWnd, SW_MINIMIZE);
-					g_bMinimizedEnabled = FALSE;
-					ShowWindow( g_hWnd, SW_MAXIMIZE);
-
-				}
-			}
-#endif
-#endif
 #endif	//WINDOWMODE(#else)
 		}
-		//프로토콜 받는 함수
         ProtocolCompiler();
 		g_pChatRoomSocketList->ProtocolCompile();
-
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_PROCESS_TOTAL );
-#endif // DO_PROFILING
-		
-#ifdef DO_PROFILING
-		g_pProfiler->EndTotal();
-#endif // DO_PROFILING
     } // while( 1 )
 
 #ifdef DO_PROCESS_DEBUGCAMERA	

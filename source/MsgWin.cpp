@@ -437,9 +437,6 @@ void CMsgWin::PopUp(int nMsgCode, char* pszMsg)
 		rUIMng.m_CharMakeWin.Set_State();
 		lpszMsg = GlobalText[396];
 		break;
-	case MESSAGE_NOT_EXECUTION_WEBSTARTER:
-		lpszMsg = GlobalText[3117];
-		break;
 	default:
 		m_nMsgCode = -1;
 		return;
@@ -460,9 +457,6 @@ void CMsgWin::ManageOKClick()
 	case MESSAGE_VERSION:
 	case RECEIVE_LOG_IN_FAIL_ERROR:
 	case RECEIVE_LOG_IN_FAIL_VERSION:
-	case MESSAGE_NOT_EXECUTION_WEBSTARTER:
-		::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
-		break;
 	case MESSAGE_INPUT_ID:
 	case RECEIVE_LOG_IN_FAIL_ID:
 	case RECEIVE_LOG_IN_FAIL_ID_CONNECTED:

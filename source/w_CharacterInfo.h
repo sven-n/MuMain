@@ -186,8 +186,8 @@ public:
 	BYTE        Run;
 	WORD		Skill;
 	BYTE        SwordCount;
-	BYTE		byExtensionSkill;		//	확장 스킬. ( 0: 없음, 1:기본콤보, 2: 등등등 ).
-	BYTE		m_byDieType;			//	죽는 형식.
+	BYTE		byExtensionSkill;
+	BYTE		m_byDieType;
 	BYTE		StormTime;
 	BYTE		JumpTime;
 	BYTE        TargetX;
@@ -201,16 +201,12 @@ public:
 	WORD        MonsterSkill; 
 
 
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	char        ID[32];		// 한국이 아니면 ID 32바이트 사용
-#else //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	char        ID[24];		// 한국이면 ID 24바이트 사용
-#endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
+	char        ID[32];
 	char 		Movement;
 	char		MovementType;
 	char		CollisionTime;
 
-	short       GuildMarkIndex;		// 내가 속한 길드의 길드마크버퍼에서의 인덱스
+	short       GuildMarkIndex;
 	SHORT       Key;
 	short   	TargetCharacter;
 
@@ -251,23 +247,12 @@ public:
 
 	void*       m_pParts;
 
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-#ifdef PET_SYSTEM
 	void*       m_pPet;
-#endif// PET_SYSTEM
-	PET_INFO	m_PetInfo[PET_TYPE_END];		// 현재 장착하고있는 펫(다크로드만 사용) - 다크호스/다크스피릿
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM																		//## 소스정리 대상임
-#ifdef PET_SYSTEM
-	void*       m_pPet;
-#endif// PET_SYSTEM
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM																		//## 소스정리 대상임
+	PET_INFO	m_PetInfo[PET_TYPE_END];
+
 	
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	char        OwnerID[32];		// 자신을 소환한 캐릭터의 ID(요정 소환수용) 한국이 아니면 ID 32바이트 사용
-#else //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	char        OwnerID[24];		// 자신을 소환한 캐릭터의 ID(요정 소환수용) 한국이면 ID 24바이트 사용
-#endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
+	char        OwnerID[32];
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 		
 #ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
@@ -278,8 +263,8 @@ public:
 	public:
 #endif // LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 
-	void*		m_pTempParts;	// 케릭터에 임시로 연결될 오브젝트
-	int			m_iTempKey;		// 케릭터에 임시로 가지고 있는 Key값
+	void*		m_pTempParts;
+	int			m_iTempKey;	
 	WORD		m_CursedTempleCurSkill;
 	bool		m_CursedTempleCurSkillPacket;
 	OBJECT	    Object;

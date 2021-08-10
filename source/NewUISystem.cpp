@@ -197,16 +197,12 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	m_pNewItemMng = new CNewUIItemMng;
 
 	m_pNewChatInputBox = new CNewUIChatInputBox;
-#ifdef MOD_CHATINPOTBOX_POSITION
-	//신규ui 채팅창 겹침
-	if(false == m_pNewChatInputBox->Create(m_pNewUIMng, m_pNewChatLogWindow, 0, (GFxProcess::GetInstancePtr()->GetUISelect() == 0 ? 480-51-47 : 480-51-47-15) ))
-#else //MOD_CHATINPOTBOX_POSITION
+
 	if(false == m_pNewChatInputBox->Create(m_pNewUIMng, m_pNewChatLogWindow, 0, 480-51-47))
-#endif //MOD_CHATINPOTBOX_POSITION
 	{
 		return false;
 	}
-	SetFocus(g_hWnd);		//. 메인윈도우로 포커스 초기화
+	SetFocus(g_hWnd);
 
 	m_pNewUIHotKey = new CNewUIHotKey;
 	if(false == m_pNewUIHotKey->Create(m_pNewUIMng))
@@ -769,8 +765,6 @@ bool SEASON3B::CNewUISystem::IsPartChargeShop( DWORD dwKey, bool isMessagebox )
 }
 #endif //NEW_USER_INTERFACE_SHELL
 
-//---------------------------------------------------------------------------------------------
-// Show()
 void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 {
 #ifdef NEW_USER_INTERFACE_SHELL

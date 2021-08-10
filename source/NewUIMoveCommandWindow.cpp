@@ -709,11 +709,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 					|| pEquipedHelper->Type == ITEM_HELPER+4		// 다크호스
 #endif // KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
 					|| pEquipedWing->Type == ITEM_HELPER+30			// 군주의 망토
-#ifdef ADD_ALICE_WINGS_1		 
 					|| (pEquipedWing->Type >= ITEM_WING+36 && pEquipedWing->Type <= ITEM_WING+43)			
-#else	// ADD_ALICE_WINGS_1
-					|| (pEquipedWing->Type >= ITEM_WING+36 && pEquipedWing->Type <= ITEM_WING+40) 
-#endif	// ADD_ALICE_WINGS_1
 					|| (pEquipedWing->Type >= ITEM_WING && pEquipedWing->Type <= ITEM_WING+6) 
 #ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
 					|| ( ITEM_WING+130 <= pEquipedWing->Type && pEquipedWing->Type <= ITEM_WING+134 )

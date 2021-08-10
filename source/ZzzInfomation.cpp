@@ -1085,14 +1085,8 @@ bool IsCepterItem(int iType)
 
 #endif // CSK_FIX_EPSOLUTESEPTER
 
-//////////////////////////////////////////////////////////////////////////
-//	아이템 정보를 입력한다.
-//////////////////////////////////////////////////////////////////////////
 void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 {
-	// Attribute1 - [스킬][레벨][레벨][레벨][레벨][행운][옵션][옵션]
-	// Attribute2 - [----][옵션][엑설][엑설][엑설][엑설][엑설][엑설]
-	// Attribute3 - [이름][----][----][----][세트][세트][세트][세트]
 	ip->Level = Attribute1;
 	int     Level = (Attribute1>>3)&15;
     int     excel = Attribute2&63;
@@ -1100,29 +1094,27 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 	int     excelAddValue = 0;
     bool    bExtOption = false;
 
-    if ( ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )	// 정령의 날개 ~ 암흑의 날개
-		|| ( ip->Type >= ITEM_WING+36 && ip->Type <= ITEM_WING+40 )	// 3차 날개들
-#ifdef ADD_ALICE_WINGS_1
-		|| (ip->Type >= ITEM_WING+42 && ip->Type <= ITEM_WING+43)	// 소환술사 2,3차 날개.
-#endif	// ADD_ALICE_WINGS_1
-		|| ip->Type==ITEM_SWORD+19	// 대천사의 절대검
-		|| ip->Type==ITEM_BOW+18	// 대천사의 절대석궁	
-		|| ip->Type==ITEM_STAFF+10	// 대천사의 절대지팡이
-		|| ip->Type==ITEM_MACE+13	// 대천사의 절대셉터
-		|| ip->Type == ITEM_HELPER+30 // 군주의 망토
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+    if ( ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )
+		|| ( ip->Type >= ITEM_WING+36 && ip->Type <= ITEM_WING+40 )
+		|| (ip->Type >= ITEM_WING+42 && ip->Type <= ITEM_WING+43)
+		|| ip->Type==ITEM_SWORD+19
+		|| ip->Type==ITEM_BOW+18	
+		|| ip->Type==ITEM_STAFF+10
+		|| ip->Type==ITEM_MACE+13
+		|| ip->Type == ITEM_HELPER+30
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 		|| ( ITEM_WING+130 <= ip->Type && ip->Type <= ITEM_WING+134 )
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| (ip->Type >= ITEM_WING+49 && ip->Type <= ITEM_WING+50)	// 레이지파이터날개
-		|| (ip->Type == ITEM_WING+135)	// 작은무인의망토
+		|| (ip->Type >= ITEM_WING+49 && ip->Type <= ITEM_WING+50)
+		|| (ip->Type == ITEM_WING+135)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		) 
     {
         excel = 0;
     }
 	
-    if ( (Attribute3%0x4)==EXT_A_SET_OPTION || (Attribute3%0x4)==EXT_B_SET_OPTION )    //  세트 아이템.
+    if ( (Attribute3%0x4)==EXT_A_SET_OPTION || (Attribute3%0x4)==EXT_B_SET_OPTION )
     {
         excel = 1;
         bExtOption = true;
@@ -1141,23 +1133,21 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 
     int setItemDropLevel = p->Level+30;
 
-	//	액설런트 카오스 아이템의 증가 수치.
-	if ( ip->Type==ITEM_MACE+6 )	// 카오스의 드라곤 도끼
+	if ( ip->Type==ITEM_MACE+6 )
 	{
 		excelAddValue = 15;
 	}
-	else if ( ip->Type==ITEM_BOW+6 )	// 카오스네이쳐보우
+	else if ( ip->Type==ITEM_BOW+6 )
 	{
 		excelAddValue = 30;
 	}
-	else if ( ip->Type==ITEM_STAFF+7 )	// 카오스 번개지팡이
+	else if ( ip->Type==ITEM_STAFF+7 )
 	{
 		excelAddValue = 25;
 	}
 
 	if ( p->DamageMin>0 )
 	{
-        //  액설런트 아이템일 경우.
 		if ( excel>0 )
 		{
 			if ( p->Level )
@@ -1168,27 +1158,24 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 					ip->DamageMin += p->DamageMin*25/p->Level+5;
             }
 		}
-        if ( bExtOption )    //  세트 아이템.
+        if ( bExtOption )
         {
             ip->DamageMin += 5+(setItemDropLevel/40);
         }
-        ip->DamageMin     += (min(9,Level)*3);	// ~ +9아이템
+        ip->DamageMin     += (min(9,Level)*3);
 		switch(Level - 9)
 		{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 6: ip->DamageMin += 9;	// +15 아이템
-		case 5: ip->DamageMin += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 4: ip->DamageMin += 7;	// +13 아이템
-		case 3: ip->DamageMin += 6;	// +12 아이템
-		case 2: ip->DamageMin += 5;	// +11 아이템
-		case 1: ip->DamageMin += 4;	// +10 아이템
+		case 6: ip->DamageMin += 9;
+		case 5: ip->DamageMin += 8;
+		case 4: ip->DamageMin += 7;
+		case 3: ip->DamageMin += 6;
+		case 2: ip->DamageMin += 5;
+		case 1: ip->DamageMin += 4;
 		default: break;
 		};
 	}
 	if ( p->DamageMax>0 )
 	{
-        //  액설런트 아이템일 경우.
 		if ( excel>0 )
 		{
 			if ( p->Level )
@@ -1199,27 +1186,24 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 					ip->DamageMax += p->DamageMin*25/p->Level+5;
             }
 		}
-        if ( bExtOption )    //  세트 아이템.
+        if ( bExtOption )
         {
             ip->DamageMax += 5+(setItemDropLevel/40);
         }
-        ip->DamageMax     += (min(9,Level)*3);	// ~ +9아이템
+        ip->DamageMax     += (min(9,Level)*3);
 		switch ( Level-9 )
 		{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 6: ip->DamageMax += 9;	// +15 아이템
-		case 5: ip->DamageMax += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 4: ip->DamageMax += 7;	// +13 아이템
-		case 3: ip->DamageMax += 6;	// +12 아이템
-		case 2: ip->DamageMax += 5;	// +11 아이템
-		case 1: ip->DamageMax += 4;	// +10 아이템
+		case 6: ip->DamageMax += 9;	// +15
+		case 5: ip->DamageMax += 8;	// +14
+		case 4: ip->DamageMax += 7;	// +13
+		case 3: ip->DamageMax += 6;	// +12
+		case 2: ip->DamageMax += 5;	// +11
+		case 1: ip->DamageMax += 4;	// +10
 		default: break;
 		};
 	}
 	if ( p->MagicPower>0 )
 	{
-        //  액설런트 아이템일 경우.
 		if ( excel>0 )
 		{
 			if ( p->Level )
@@ -1230,32 +1214,25 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 					ip->MagicPower += p->MagicPower*25/p->Level+5;
             }
 		}
-        if ( bExtOption )    //  세트 아이템.
+        if ( bExtOption )
         {
             ip->MagicPower += 2+(setItemDropLevel/60);
         }
-        ip->MagicPower += (min(9,Level)*3);	// ~ +9아이템
+        ip->MagicPower += (min(9,Level)*3);	// ~ +9
 		switch ( Level-9 )
 		{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 6: ip->MagicPower += 9;	// +15 아이템
-		case 5: ip->MagicPower += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 4: ip->MagicPower += 7;	// +13 아이템
-		case 3: ip->MagicPower += 6;	// +12 아이템
-		case 2: ip->MagicPower += 5;	// +11 아이템
-		case 1: ip->MagicPower += 4;	// +10 아이템
+		case 6: ip->MagicPower += 9;	// +15
+		case 5: ip->MagicPower += 8;	// +14
+		case 4: ip->MagicPower += 7;	// +13
+		case 3: ip->MagicPower += 6;	// +12
+		case 2: ip->MagicPower += 5;	// +11
+		case 1: ip->MagicPower += 4;	// +10
 		default: break;
 		};
 		
 		ip->MagicPower /= 2;
 		
-		//  셉터가 아닐 경우에만.
-#ifdef CSK_FIX_EPSOLUTESEPTER
 		if(IsCepterItem(ip->Type) == false)
-#else // CSK_FIX_EPSOLUTESEPTER
-		if ( ip->Type<ITEM_MACE+8 || ip->Type>ITEM_MACE+15 )
-#endif // CSK_FIX_EPSOLUTESEPTER
 		{
             ip->MagicPower += Level*2;
 		}
@@ -1263,34 +1240,26 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 
 	if ( p->SuccessfulBlocking>0 )
 	{
-        //  액설런트 아이템일 경우.
 		if(excel> 0)
 		{
 			if(p->Level)
 				ip->SuccessfulBlocking += p->SuccessfulBlocking*25/p->Level+5;
 		}
-        ip->SuccessfulBlocking += (min(9,Level)*3);	// ~ +9아이템
+        ip->SuccessfulBlocking += (min(9,Level)*3);	// ~ +9
 		switch(Level - 9)
 		{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 6: ip->SuccessfulBlocking += 9;	// +15 아이템
-		case 5: ip->SuccessfulBlocking += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 4: ip->SuccessfulBlocking += 7;	// +13 아이템
-		case 3: ip->SuccessfulBlocking += 6;	// +12 아이템
-		case 2: ip->SuccessfulBlocking += 5;	// +11 아이템
-		case 1: ip->SuccessfulBlocking += 4;	// +10 아이템
+		case 6: ip->SuccessfulBlocking += 9;	// +15
+		case 5: ip->SuccessfulBlocking += 8;	// +14
+		case 4: ip->SuccessfulBlocking += 7;	// +13
+		case 3: ip->SuccessfulBlocking += 6;	// +12
+		case 2: ip->SuccessfulBlocking += 5;	// +11
+		case 1: ip->SuccessfulBlocking += 4;	// +10
 		default: break;
 		};
 	}
 #ifdef PBG_MOD_NEWCHAR_MONK_WING_2
 	if(ip->Type==ITEM_HELPER+30)
 	{
-		////////////////////////////////////////////////////////////////////
-		// 군망옵션기획변경 (인덱스 변경 불가능)
-		// 13인덱스 아이템은 defense 가 없다 군망하나로 확장하기엔 ㅎㅎ
-		// 방어력 : 15 + (망토레벨 * 2) 기타 레벨옵션은 하단 소스확인 요망
-		////////////////////////////////////////////////////////////////////
 		p->Defense = 15;
 		ip->Defense = 15;
 	}
@@ -1300,77 +1269,61 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		if(ip->Type>=ITEM_SHIELD && ip->Type<ITEM_SHIELD+MAX_ITEM_INDEX)
 		{
      		ip->Defense            += Level;
-            if ( bExtOption )    //  세트 아이템.
+            if ( bExtOption )
             {
                 ip->Defense = ip->Defense+(ip->Defense*20/setItemDropLevel+2);
             }
 		}
 		else
 		{
-            //  액설런트 아이템일 경우.
     		if(excel> 0)
 			{
 				if(p->Level)
       				ip->Defense    += p->Defense*12/p->Level+4+p->Level/5;
 			}
-            if ( bExtOption )    //  세트 아이템.
+            if ( bExtOption )
             {
                 ip->Defense = ip->Defense+(ip->Defense*3/setItemDropLevel+2+setItemDropLevel/30);
             }
 
-            //  천공 추가 날개.
-#ifdef ADD_ALICE_WINGS_1
 			if ((ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6) || ip->Type == ITEM_WING+42)
-#else	// ADD_ALICE_WINGS_1
-            if ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )
-#endif	// ADD_ALICE_WINGS_1
             {
-                ip->Defense     += (min(9,Level)*2);	// ~ +9아이템
+                ip->Defense     += (min(9,Level)*2);	// ~ +9
             }
             else if ( ip->Type==ITEM_HELPER+30 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-				|| ip->Type==ITEM_WING+49				// 무인의 망토
+				|| ip->Type==ITEM_WING+49
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				)        //  군주의 망토.
+				)
             {
-                ip->Defense     += ( min( 9, Level )*2 );	// ~ +9아이템
+                ip->Defense     += ( min( 9, Level )*2 );	// ~ +9
             }
-#ifdef ADD_ALICE_WINGS_1
 			else if ((ip->Type >= ITEM_WING+36 && ip->Type <= ITEM_WING+40) || ip->Type == ITEM_WING+43
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				|| (ip->Type == ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 				)	// 3차 날개들
-#else	// ADD_ALICE_WINGS_1
-			else if ( ip->Type >= ITEM_WING+36 && ip->Type <= ITEM_WING+40 )	// 3차 날개들
-#endif	// ADD_ALICE_WINGS_1
 			{
-                ip->Defense     += (min(9,Level)*4);	// ~ +9아이템
+                ip->Defense     += (min(9,Level)*4);	// ~ +9
 			}
             else
             {
-                ip->Defense     += (min(9,Level)*3);	// ~ +9아이템
+                ip->Defense     += (min(9,Level)*3);	// ~ +9
             }
-#ifdef ADD_ALICE_WINGS_1
 			if ((ip->Type >= ITEM_WING+36 && ip->Type <= ITEM_WING+40) || ip->Type == ITEM_WING+43
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-				|| ip->Type == ITEM_WING+50	//군림의망토
+				|| ip->Type == ITEM_WING+50
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				)	// 3차 날개들
-#else	// ADD_ALICE_WINGS_1
-			if ( ip->Type >= ITEM_WING+36 && ip->Type <= ITEM_WING+40 )	// 3차 날개들
-#endif	// ADD_ALICE_WINGS_1
+				)
 			{
 				switch(Level - 9)
 				{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-				case 6: ip->Defense += 10;	// +15 아이템
-				case 5: ip->Defense += 9;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-				case 4: ip->Defense += 8;	// +13 아이템
-				case 3: ip->Defense += 7;	// +12 아이템
-				case 2: ip->Defense += 6;	// +11 아이템
-				case 1: ip->Defense += 5;	// +10 아이템
+				case 6: ip->Defense += 10;	// +15
+				case 5: ip->Defense += 9;	// +14
+				case 4: ip->Defense += 8;	// +13
+				case 3: ip->Defense += 7;	// +12
+				case 2: ip->Defense += 6;	// +11
+				case 1: ip->Defense += 5;	// +10
 				default: break;
 				};
 			}
@@ -1378,14 +1331,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			{
 				switch(Level - 9)
 				{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-				case 6: ip->Defense += 9;	// +15 아이템
-				case 5: ip->Defense += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-				case 4: ip->Defense += 7;	// +13 아이템
-				case 3: ip->Defense += 6;	// +12 아이템
-				case 2: ip->Defense += 5;	// +11 아이템
-				case 1: ip->Defense += 4;	// +10 아이템
+				case 6: ip->Defense += 9;	// +15
+				case 5: ip->Defense += 8;	// +14
+				case 4: ip->Defense += 7;	// +13
+				case 3: ip->Defense += 6;	// +12
+				case 2: ip->Defense += 5;	// +11
+				case 1: ip->Defense += 4;	// +10
 				default: break;
 				};
 			}
@@ -1393,58 +1344,40 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 	}
 	if ( p->MagicDefense>0 )
     {
-        ip->MagicDefense += (min(9,Level)*3);	// ~ +9아이템
+        ip->MagicDefense += (min(9,Level)*3);	// ~ +9
 		switch(Level - 9)
 		{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 6: ip->MagicDefense += 9;	// +15 아이템
-		case 5: ip->MagicDefense += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 4: ip->MagicDefense += 7;	// +13 아이템
-		case 3: ip->MagicDefense += 6;	// +12 아이템
-		case 2: ip->MagicDefense += 5;	// +11 아이템
-		case 1: ip->MagicDefense += 4;	// +10 아이템
+		case 6: ip->MagicDefense += 9;	// +15
+		case 4: ip->MagicDefense += 7;	// +13
+		case 3: ip->MagicDefense += 6;	// +12
+		case 2: ip->MagicDefense += 5;	// +11
+		case 1: ip->MagicDefense += 4;	// +10
 		default: break;
 		};
     }
 
-	////////필요 능력치/////////////////////////////////////////////////////////////////////////////
-	
-	//  일반 아이템일 경우
 	int ItemLevel = p->Level;
-    //  액설런트 아이템일 경우.
     if( excel )	ItemLevel = p->Level + 25;
-	//  세트 아이템일 경우
 	else if( bExtOption ) ItemLevel = p->Level + 30;
 
-	//  요구 레벨.
     int addValue = 4;
-#ifdef ADD_ALICE_WINGS_1
+
 	if ((ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6) || ip->Type == ITEM_WING+42)
-#else	// ADD_ALICE_WINGS_1
-	if ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )
-#endif	// ADD_ALICE_WINGS_1
     {
         addValue = 5;
     }
 
 	if(p->RequireLevel && ((ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING)
-		|| (ip->Type == ITEM_HELPER+37)	//^ 펜릴 아이템 속성 관련
-#ifdef ADD_ALICE_WINGS_1
+		|| (ip->Type == ITEM_HELPER+37)
 		|| (ip->Type >= ITEM_WING+7 && ip->Type <= ITEM_WING+40)
 		|| (ip->Type >= ITEM_WING+43 && ip->Type < ITEM_HELPER)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		&& (ip->Type != ITEM_WING+49)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		))
-#else	// ADD_ALICE_WINGS_1
-		|| (ip->Type >= ITEM_WING+7 && ip->Type <= ITEM_HELPER)))     //레벨
-#endif	// ADD_ALICE_WINGS_1
 		ip->RequireLevel = p->RequireLevel;
 	else if (p->RequireLevel && ((ip->Type >= ITEM_WING && ip->Type <= ITEM_WING+7)
-#ifdef ADD_ALICE_WINGS_1
 		|| (ip->Type >= ITEM_WING+41 && ip->Type <= ITEM_WING+42)
-#endif	// ADD_ALICE_WINGS_1
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (ip->Type == ITEM_WING+49)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
@@ -1468,25 +1401,17 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 
 	if(p->RequireEnergy)  //에너지
 	{
-		if (ip->Type >= ITEM_STAFF+21 && ip->Type <= ITEM_STAFF+29)	// 소환술사 서는 요구에너지가 낮다
+		if (ip->Type >= ITEM_STAFF+21 && ip->Type <= ITEM_STAFF+29)
 		{
 			ip->RequireEnergy = 20+(p->RequireEnergy)*(ItemLevel+Level*1)*3/100;
 		}
 		else
 	
-// p->RequireLevel : 아이템 레벨 요구치
-// p->RequireEnergy : 아이템 에너지 요구치
-// ip->RequireEnergy : 실제 에너지 요구치 (계산된값)
-#ifdef KJH_FIX_LEARN_SKILL_ITEM_REQUIRE_STAT_CALC
-		// 레벨 요구치가 0이면 원래 계산대로 간다.
-		// skill.txt 에서 기존 아이템 레벨요구치를 변경할 수가 없어서, 예외처리 함.
-		// 요구치 계산이 코드에 왜 있어야 하는지 의문.. 고치자!!!!
-		if((p->RequireLevel > 0) && (ip->Type >= ITEM_ETC && ip->Type < ITEM_ETC+MAX_ITEM_INDEX) )	// 법서
+		if((p->RequireLevel > 0) && (ip->Type >= ITEM_ETC && ip->Type < ITEM_ETC+MAX_ITEM_INDEX) )
 		{
 			ip->RequireEnergy = 20+(p->RequireEnergy)*(p->RequireLevel)*4/100;
 		}
 		else
-#endif // KJH_FIX_LEARN_SKILL_ITEM_REQUIRE_STAT_CALC
  
 		{
 			ip->RequireEnergy = 20+(p->RequireEnergy)*(ItemLevel+Level*3)*4/100;
@@ -1497,18 +1422,14 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		ip->RequireEnergy = 0;
 	}
 
-	if(p->RequireCharisma)  //통솔
+	if(p->RequireCharisma)
 		ip->RequireCharisma = 20+(p->RequireCharisma)*(ItemLevel+Level*3)*3/100;
 	else	ip->RequireCharisma = 0;
 
-    //  소환 구슬 요구 에너지값.
     if(ip->Type==ITEM_WING+11)
     {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		WORD Energy = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-        WORD Energy;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
         switch(Level)
         {
 		case 0:Energy = 30;break;
@@ -1527,14 +1448,13 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 
     if ( p->RequireCharisma )
     {
-        //  다크스피릿의 요구 통솔.
         if ( ip->Type==MODEL_HELPER+5 )
             ip->RequireCharisma = (185+(p->RequireCharisma*15));
         else
             ip->RequireCharisma = p->RequireCharisma;
     }
 
-	if ( ip->Type==ITEM_HELPER+10 )//   변신반지
+	if ( ip->Type==ITEM_HELPER+10 )
 	{
 		if ( Level<=2 )
 			ip->RequireLevel = 20;
@@ -1542,7 +1462,6 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			ip->RequireLevel = 50;
 	}
 
-    //  액셀런트.
 	if( (ip->Type >= ITEM_HELM+29 && ip->Type <= ITEM_HELM+33) ||
 		(ip->Type >= ITEM_ARMOR+29 && ip->Type <= ITEM_ARMOR+33) ||
 		(ip->Type >= ITEM_PANTS+29 && ip->Type <= ITEM_PANTS+33) ||
@@ -1561,7 +1480,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		|| ITEM_GLOVES+43 == ip->Type
 		|| ITEM_BOOTS+43 == ip->Type
 #endif	// ASG_ADD_STORMBLITZ_380ITEM
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 요구레벨 예외처리 excel
+#ifdef LEM_ADD_LUCKYITEM
 		|| Check_LuckyItem( ip->Type )
 #endif // LEM_ADD_LUCKYITEM
 		)
@@ -1571,40 +1490,35 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 
 	if ( excel>0 )
 	{
-		if(ip->RequireLevel > 0 && ip->Type != ITEM_HELPER+37)	//^ 펜릴 아이템 속성 관련
+		if(ip->RequireLevel > 0 && ip->Type != ITEM_HELPER+37)
       		ip->RequireLevel += 20;
 	}
 
 	ip->SpecialNum = 0;
-    //  추가 날개.
-#ifdef ADD_ALICE_WINGS_1
+
 	if ((ip->Type >= ITEM_WING+3 && ip->Type <= ITEM_WING+6) || ip->Type == ITEM_WING+42)
-#else	// ADD_ALICE_WINGS_1
-    if ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )
-#endif	// ADD_ALICE_WINGS_1
     {
-        if ( excelWing&0x01 )           //  최대 HP+50증가.
+        if ( excelWing&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 50+Level*5;
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_HP_MAX;ip->SpecialNum++;
         }
-        if ( (excelWing>>1)&0x01 )      //  최대 MP+50증가.
+        if ( (excelWing>>1)&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 50+Level*5;
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_MP_MAX;ip->SpecialNum++;
         }
-        if ( (excelWing>>2)&0x01 )      //  3% 확률로 적에 방어력 무시 공격.     ???  데미지 HP -> MP로 손실.
+        if ( (excelWing>>2)&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 3;
 			ip->Special[ip->SpecialNum] = AT_ONE_PERCENT_DAMAGE;ip->SpecialNum++;
         }
-        //  적용되지 않는 코드.
-        if ( (excelWing>>3)&0x01 )      //  AG 증가.
+        if ( (excelWing>>3)&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 50;
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_AG_MAX;ip->SpecialNum++;
         }
-        if ( (excelWing>>4)&0x01 )      //  공격속도 증가.
+        if ( (excelWing>>4)&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 5;
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_ATTACK_SPEED;ip->SpecialNum++;
@@ -1614,7 +1528,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			|| ip->Type==ITEM_WING+49
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)        //  군주의 망토.
+			)
     {
 #ifndef PBG_MOD_NEWCHAR_MONK_WING_2			//정리할시에 제거할 소스
 		/////////////////////////////////////////////////////////////////////
@@ -1681,15 +1595,11 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		    ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_CHARISMA; ip->SpecialNum++;
         }
     }
-#ifdef ADD_ALICE_WINGS_1
 	else if ((ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40) || ip->Type == ITEM_WING+43
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			|| (ip->Type == ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		)	// 3차 날개
-#else	// ADD_ALICE_WINGS_1
-	else if ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )	// 3차 날개
-#endif	// ADD_ALICE_WINGS_1
     {
         if ( excelWing&0x01 )           //  %5 확률로 적 방어력 무시
         {
@@ -1739,11 +1649,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
      			ip->Special[ip->SpecialNum] = AT_LUCK;ip->SpecialNum++;
 			}
 		}
-#ifdef ADD_ALICE_WINGS_1
 		if ((ip->Type>=ITEM_WING && ip->Type<=ITEM_WING+6) || (ip->Type>=ITEM_WING+41 && ip->Type<=ITEM_WING+42))
-#else	// ADD_ALICE_WINGS_1
-		if(ip->Type>=ITEM_WING && ip->Type<=ITEM_WING+6)
-#endif	// ADD_ALICE_WINGS_1
 		{
    			ip->Special[ip->SpecialNum] = AT_LUCK;ip->SpecialNum++;
 		}
@@ -1755,37 +1661,32 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         {
    			ip->Special[ip->SpecialNum] = AT_LUCK;ip->SpecialNum++;
         }
-#ifdef ADD_ALICE_WINGS_1
 		if (( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40) || ip->Type==ITEM_WING+43
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			|| (ip->Type==ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)	// 3차 날개
-#else	// ADD_ALICE_WINGS_1
-		if ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )	// 3차 날개
-#endif	// ADD_ALICE_WINGS_1
+			)
         {
    			ip->Special[ip->SpecialNum] = AT_LUCK;ip->SpecialNum++;
         }
 	}
-	//옵션3(추가포인트) 1/8 1/10 1/14
+
 	int Option3 = ((Attribute1)&3) + ((Attribute2)&64)/64*4;
 	if(Option3)
 	{
-        //  디노란트.
         if ( ip->Type==ITEM_HELPER+3 )
         {
-            if ( Option3&0x01 )         //  추가 데미지 흡수.
+            if ( Option3&0x01 )
             {
 				ip->SpecialValue[ip->SpecialNum] = 5;
 				ip->Special[ip->SpecialNum] = AT_DAMAGE_ABSORB;ip->SpecialNum++;
             }
-            if ( (Option3>>1)&0x01 )    //  최대 AG +50 증가.
+            if ( (Option3>>1)&0x01 )
             {
 				ip->SpecialValue[ip->SpecialNum] = 50;
 				ip->Special[ip->SpecialNum] = AT_IMPROVE_AG_MAX;ip->SpecialNum++;
             }
-            if ( (Option3>>2)&0x01 )    //  공격 속도 5 증가.
+            if ( (Option3>>2)&0x01 )
             {
    			    ip->SpecialValue[ip->SpecialNum] = 5;
 			    ip->Special[ip->SpecialNum] = AT_IMPROVE_ATTACK_SPEED;ip->SpecialNum++;
@@ -1805,7 +1706,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			if(ip->Type>=ITEM_STAFF && ip->Type<ITEM_STAFF+MAX_ITEM_INDEX)
 		    {
 			    ip->SpecialValue[ip->SpecialNum] = Option3*4;
-				if (ip->Type>=ITEM_STAFF+21 && ip->Type<=ITEM_STAFF+29)	// 소환술사 소환수책.
+				if (ip->Type>=ITEM_STAFF+21 && ip->Type<=ITEM_STAFF+29)
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_CURSE;
 				else
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;
@@ -1824,14 +1725,14 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			    ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE;ip->SpecialNum++;
 			    ip->RequireStrength += Option3*5;
 		    }
-		    if(ip->Type>=ITEM_HELPER+8 && ip->Type<ITEM_HELPER+MAX_ITEM_INDEX && ip->Type!=ITEM_HELPER+30 )//반지,목걸이
+		    if(ip->Type>=ITEM_HELPER+8 && ip->Type<ITEM_HELPER+MAX_ITEM_INDEX && ip->Type!=ITEM_HELPER+30 )
 		    {
-                if ( ip->Type==ITEM_HELPER+24 )    //  마법사의 반지.
+                if ( ip->Type==ITEM_HELPER+24 )
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3;
 			        ip->Special[ip->SpecialNum] = AT_IMPROVE_MAX_MANA;ip->SpecialNum++;
                 }
-                else if ( ip->Type==ITEM_HELPER+28 )    //  기술의 목걸이.
+                else if ( ip->Type==ITEM_HELPER+28 )
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3;
 			        ip->Special[ip->SpecialNum] = AT_IMPROVE_MAX_AG;ip->SpecialNum++;
@@ -1842,28 +1743,24 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
                 }
             }
-	        if(ip->Type==ITEM_WING)//요정
+	        if(ip->Type==ITEM_WING)
 		    {
 			    ip->SpecialValue[ip->SpecialNum] = Option3;
 			    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
 		    }
-#ifdef ADD_ALICE_WINGS_1
-			else if (ip->Type==ITEM_WING+1 || ip->Type==ITEM_WING+41)	//천공, 재앙의날개
-#else	// ADD_ALICE_WINGS_1
-			else if(ip->Type==ITEM_WING+1)//천공
-#endif	// ADD_ALICE_WINGS_1
+			else if (ip->Type==ITEM_WING+1 || ip->Type==ITEM_WING+41)
 		    {
 			    ip->SpecialValue[ip->SpecialNum] = Option3*4;
 			    ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;ip->SpecialNum++;
 		    }
-            else if(ip->Type==ITEM_WING+2)//사탄
+            else if(ip->Type==ITEM_WING+2)
 		    {
 			    ip->SpecialValue[ip->SpecialNum] = Option3*4;
 			    ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
 		    }
-            else if ( ip->Type==ITEM_WING+3 )   //  정령의 날개.
+            else if ( ip->Type==ITEM_WING+3 )
             {
-                if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+                if ( (excelWing>>5)&0x01 )
                 {
 			        ip->SpecialValue[ip->SpecialNum] = Option3;
 			        ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
@@ -1874,9 +1771,9 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
                 }
             }
-            else if ( ip->Type==ITEM_WING+4 )   //  전설의 날개.
+            else if ( ip->Type==ITEM_WING+4 )
             {
-                if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+                if ( (excelWing>>5)&0x01 )
                 {
 			        ip->SpecialValue[ip->SpecialNum] = Option3*4;
 			        ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;ip->SpecialNum++;
@@ -1887,9 +1784,9 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
                 }
             }
-            else if ( ip->Type==ITEM_WING+5 )   //  드라곤의 날개.
+            else if ( ip->Type==ITEM_WING+5 )
             {
-                if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+                if ( (excelWing>>5)&0x01 )
                 {
 			        ip->SpecialValue[ip->SpecialNum] = Option3*4;
 			        ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
@@ -1900,9 +1797,9 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
                 }
             }
-            else if ( ip->Type==ITEM_WING+6 )   //  암흑의 날개.
+            else if ( ip->Type==ITEM_WING+6 )
             {
-                if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+                if ( (excelWing>>5)&0x01 )
                 {
 			        ip->SpecialValue[ip->SpecialNum] = Option3*4;
 			        ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
@@ -1913,7 +1810,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;ip->SpecialNum++;
                 }
             }
-            else if ( ip->Type==ITEM_HELPER+30 ) //  군주의 망토.
+            else if ( ip->Type==ITEM_HELPER+30 )
 			{
 				ip->SpecialValue[ip->SpecialNum] = Option3*4;
 				ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
@@ -1933,25 +1830,23 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 				}
 			}
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-#ifdef ADD_ALICE_WINGS_1
-			else if (ip->Type == ITEM_WING+42)	// 절망의날개.
+			else if (ip->Type == ITEM_WING+42)
 			{
 				ip->SpecialValue[ip->SpecialNum] = Option3*4;
-				if ((excelWing>>5)&0x01)    //  액설런트의 ?번째 bit가 참일때.
+				if ((excelWing>>5)&0x01)
 			        ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;
                 else
 			        ip->Special[ip->SpecialNum] = AT_IMPROVE_CURSE;
 				ip->SpecialNum++;
 			}
-#endif	// ADD_ALICE_WINGS_1
-			else if ( ip->Type==ITEM_WING+36 )   //  폭풍의 날개
+			else if ( ip->Type==ITEM_WING+36 )
 			{
-				if ( (excelWing>>4)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				if ( (excelWing>>4)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
 				}
-				else if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				else if ( (excelWing>>5)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE;ip->SpecialNum++;
@@ -1962,14 +1857,14 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
 				}
 			}
-			else if ( ip->Type==ITEM_WING+37 )   //  시공의 날개
+			else if ( ip->Type==ITEM_WING+37 )
 			{
-				if ( (excelWing>>4)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				if ( (excelWing>>4)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;ip->SpecialNum++;
 				}
-				else if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				else if ( (excelWing>>5)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE;ip->SpecialNum++;
@@ -1980,14 +1875,14 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
 				}
 			}
-			else if ( ip->Type==ITEM_WING+38 )   //  환영의 날개
+			else if ( ip->Type==ITEM_WING+38 )
 			{
-				if ( (excelWing>>4)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				if ( (excelWing>>4)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
 				}
-				else if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				else if ( (excelWing>>5)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE;ip->SpecialNum++;
@@ -1998,14 +1893,14 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
 				}
 			}
-			else if ( ip->Type==ITEM_WING+39 )   //  파멸의 날개
+			else if ( ip->Type==ITEM_WING+39 )
 			{
-				if ( (excelWing>>4)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				if ( (excelWing>>4)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
 				}
-				else if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				else if ( (excelWing>>5)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;ip->SpecialNum++;
@@ -2020,14 +1915,14 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				|| (ip->Type==ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				) //  제왕의 망토
+				)
 			{
- 				if ( (excelWing>>4)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+ 				if ( (excelWing>>4)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
 				}
-				else if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				else if ( (excelWing>>5)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE;ip->SpecialNum++;
@@ -2038,15 +1933,14 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
 				}
 			}
-#ifdef ADD_ALICE_WINGS_2
-			else if (ip->Type == ITEM_WING+43)	// 차원의 날개
+			else if (ip->Type == ITEM_WING+43)
 			{
- 				if ( (excelWing>>4)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+ 				if ( (excelWing>>4)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;ip->SpecialNum++;
 				}
-				else if ( (excelWing>>5)&0x01 )    //  액설런트의 ?번째 bit가 참일때.
+				else if ( (excelWing>>5)&0x01 )
 				{
 					ip->SpecialValue[ip->SpecialNum] = Option3*4;
 					ip->Special[ip->SpecialNum] = AT_IMPROVE_CURSE;ip->SpecialNum++;
@@ -2057,76 +1951,59 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			        ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
 				}
 			}
-#endif	// ADD_ALICE_WINGS_2
         }
     }
-    if ( ip->Type==ITEM_HELPER+4 ) //  다크호스.
+    if ( ip->Type==ITEM_HELPER+4 )
     {
-        //  다크호스 옵션 설정.
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
         giPetManager::SetPetItemConvert( ip, giPetManager::GetPetInfo(ip) );
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM
-        giPetManager::ItemConvert ( ip );
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
     }
 
-    //  방어 관련.
-	if((ip->Type>=ITEM_SHIELD && ip->Type<ITEM_BOOTS+MAX_ITEM_INDEX) ||//방어구
+	if((ip->Type>=ITEM_SHIELD && ip->Type<ITEM_BOOTS+MAX_ITEM_INDEX) ||
 	    (ip->Type>=ITEM_HELPER+8 && ip->Type<=ITEM_HELPER+9)
-       || (ip->Type>=ITEM_HELPER+21 && ip->Type<=ITEM_HELPER+24))       //  추가 반지.
+       || (ip->Type>=ITEM_HELPER+21 && ip->Type<=ITEM_HELPER+24))
 	{
-      	//생명증가
 		if((Attribute2>>5)&1)
 		{
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_LIFE;ip->SpecialNum++;
 		}	
-		//마나증가
 		if((Attribute2>>4)&1)
 		{
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_MANA;ip->SpecialNum++;
 		}	
-		//데미지감소
 		if((Attribute2>>3)&1)
 		{
 			ip->Special[ip->SpecialNum] = AT_DECREASE_DAMAGE;ip->SpecialNum++;
 		}	
-		//데미지반사
 		if((Attribute2>>2)&1)
 		{
 			ip->Special[ip->SpecialNum] = AT_REFLECTION_DAMAGE;ip->SpecialNum++;
 		}	
-		//방어성공율
 		if((Attribute2>>1)&1)
 		{
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_BLOCKING_PERCENT;ip->SpecialNum++;
 		}	
-		//획득젠증가
 		if((Attribute2)&1)
 		{
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_GAIN_GOLD;ip->SpecialNum++;
 		}	
 	}
-    //  공격력 관련.
-	if((ip->Type>=ITEM_SWORD && ip->Type<ITEM_STAFF+MAX_ITEM_INDEX) ||  //  무기.
-       (ip->Type>=ITEM_HELPER+12 && ip->Type<=ITEM_HELPER+13)           //  목걸이.
-       || (ip->Type>=ITEM_HELPER+25 && ip->Type<=ITEM_HELPER+28))       //  추가 목걸이
+	if((ip->Type>=ITEM_SWORD && ip->Type<ITEM_STAFF+MAX_ITEM_INDEX) ||
+       (ip->Type>=ITEM_HELPER+12 && ip->Type<=ITEM_HELPER+13) 
+       || (ip->Type>=ITEM_HELPER+25 && ip->Type<=ITEM_HELPER+28))
 	{
-      	//마나사용량감소
 		if((Attribute2>>5)&1)
 		{
 			ip->Special[ip->SpecialNum] = AT_EXCELLENT_DAMAGE;ip->SpecialNum++;
 		}	
-		if ( (ip->Type>=ITEM_STAFF && ip->Type<ITEM_STAFF+MAX_ITEM_INDEX) ||//지팡이
+		if ( (ip->Type>=ITEM_STAFF && ip->Type<ITEM_STAFF+MAX_ITEM_INDEX) ||
 			 (ip->Type==ITEM_HELPER+12)
-           || ( ip->Type==ITEM_HELPER+25 || ip->Type==ITEM_HELPER+27 ))     //  추가 목걸이.
+           || ( ip->Type==ITEM_HELPER+25 || ip->Type==ITEM_HELPER+27 )) 
 		{
-			//마력증가(레벨)
 			if((Attribute2>>4)&1)
 			{
      			ip->SpecialValue[ip->SpecialNum] = CharacterAttribute->Level/20;
 				ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC_LEVEL;ip->SpecialNum++;
 			}	
-			//마력증가(퍼센트)
 			if((Attribute2>>3)&1)
 			{
 		   		ip->SpecialValue[ip->SpecialNum] = 2;
@@ -2135,31 +2012,26 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		}
 		else
 		{
-			//공격력증가(레벨)
 			if((Attribute2>>4)&1)
 			{
      			ip->SpecialValue[ip->SpecialNum] = CharacterAttribute->Level/20;
 				ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE_LEVEL;ip->SpecialNum++;
 			}	
-			//공격력증가(퍼센트)
 			if((Attribute2>>3)&1)
 			{
 		   		ip->SpecialValue[ip->SpecialNum] = 2;
 				ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE_PERCENT;ip->SpecialNum++;
 			}	
 		}
-		//공격속도
 		if((Attribute2>>2)&1)
 		{
    			ip->SpecialValue[ip->SpecialNum] = 7;
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_ATTACK_SPEED;ip->SpecialNum++;
 		}	
-		//획득생명증가
 		if((Attribute2>>1)&1)
 		{
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_GAIN_LIFE;ip->SpecialNum++;
 		}	
-		//획득마나증가
 		if((Attribute2)&1)
 		{
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_GAIN_MANA;ip->SpecialNum++;
@@ -2170,7 +2042,6 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         switch ( Level )
         {
         case 0:
-            // 마법사의 반지 옵션
             ip->SpecialValue[ip->SpecialNum] = 10;
             ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC_PERCENT;ip->SpecialNum++;
             ip->SpecialValue[ip->SpecialNum] = 10;
@@ -2178,9 +2049,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
             ip->SpecialValue[ip->SpecialNum] = 10;
             ip->Special[ip->SpecialNum] = AT_IMPROVE_ATTACK_SPEED;ip->SpecialNum++;
             break;
-
         case 3:
-            // 마법사의 반지 옵션
             ip->SpecialValue[ip->SpecialNum] = 10;
             ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC_PERCENT;ip->SpecialNum++;
             ip->SpecialValue[ip->SpecialNum] = 10;
@@ -2190,8 +2059,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
             break;
         }
 	}
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
-	if(ip->Type == ITEM_HELPER+107)		// 치명마법반지
+	if(ip->Type == ITEM_HELPER+107)
 	{
         ip->SpecialValue[ip->SpecialNum] = 15;
         ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC_PERCENT;ip->SpecialNum++;
@@ -2200,7 +2068,6 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         ip->SpecialValue[ip->SpecialNum] = 10;
         ip->Special[ip->SpecialNum] = AT_IMPROVE_ATTACK_SPEED;ip->SpecialNum++;
 	}
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
 
 	//part
 	if(ip->Type>=ITEM_BOW && ip->Type<ITEM_BOW+8 || ip->Type==ITEM_BOW+17 )
@@ -2223,20 +2090,10 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		ip->Part = EQUIPMENT_BOOTS;
 	else if(ip->Type>=ITEM_WING && ip->Type<ITEM_WING+7)
 		ip->Part = EQUIPMENT_WING;
-#ifdef ADD_ALICE_WINGS_1
 	else if(ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
-#else	// ADD_ALICE_WINGS_1
-	else if(ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40)
-#endif	// ADD_ALICE_WINGS_1
 		ip->Part = EQUIPMENT_WING;
-#ifdef PET_SYSTEM
 	else if(ip->Type==ITEM_HELPER+5)
 		ip->Part = EQUIPMENT_WEAPON_LEFT;
-#endif// PET_SYSTEM
-#ifdef DARK_WOLF
-    else if ( ip->Type==ITEM_HELPER+6 )
-		ip->Part = EQUIPMENT_WEAPON_LEFT;
-#endif// DARK_WOLF
 	else if(ip->Type>=ITEM_HELPER && ip->Type<ITEM_HELPER+8)
 		ip->Part = EQUIPMENT_HELPER;
     else if((ip->Type>=ITEM_HELPER+8 && ip->Type<ITEM_HELPER+12) || (ip->Type == ITEM_HELPER+20 && Level == 0)
@@ -2257,7 +2114,6 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		ip->Part = -1;
 }
 
-//  아이템 팔기/사기 가격.
 int ItemValue(ITEM *ip,int goldType)
 {
 	if(ip->Type == -1) return 0;
@@ -2266,12 +2122,11 @@ int ItemValue(ITEM *ip,int goldType)
 
 	__int64 Gold = 0;
 
-    //  법서, 구슬 가격 수정.
 	if ( p->iZen!=0 )
 	{
 		Gold = p->iZen;
 		
-		if( goldType )  //  팔기. 수리.
+		if( goldType )
 		{
 			Gold = Gold/3;
 		}
@@ -2313,13 +2168,9 @@ int ItemValue(ITEM *ip,int goldType)
 	if(Excellent)
 		Level2 += 25;
 
-	if(ip->Type==ITEM_BOW+7)        //  석궁 화살.
+	if(ip->Type==ITEM_BOW+7)
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int sellMoney = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-        int sellMoney;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
         switch ( Level )
         {
@@ -2341,13 +2192,9 @@ int ItemValue(ITEM *ip,int goldType)
 		if(p->Durability > 0)
      		Gold = (sellMoney*ip->Durability/p->Durability);//+(170*(Level*2));
 	}
-	else if(ip->Type==ITEM_BOW+15)  //  화살.
+	else if(ip->Type==ITEM_BOW+15)
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int sellMoney = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-        int sellMoney;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
         switch ( Level )
         {
@@ -2373,54 +2220,54 @@ int ItemValue(ITEM *ip,int goldType)
 	{
 		Gold = COMGEM::CalcItemValue(ip);
 	}
-	else if(ip->Type==ITEM_POTION+13)//축복의 보석
+	else if(ip->Type==ITEM_POTION+13)
 	{
     	Gold = 9000000;
 	}
-	else if(ip->Type==ITEM_POTION+14)//영원의 보석
+	else if(ip->Type==ITEM_POTION+14)
 	{
     	Gold = 6000000;
 	}
-	else if(ip->Type==ITEM_WING+15)//혼돈의 보석
+	else if(ip->Type==ITEM_WING+15)
 	{
     	Gold = 810000;
 	}
-    else if(ip->Type==ITEM_POTION+16)// 생명의 보석.
+    else if(ip->Type==ITEM_POTION+16)
     {
         Gold = 45000000;
     }
-    else if(ip->Type==ITEM_POTION+22)// 창조의 보석.
+    else if(ip->Type==ITEM_POTION+22)
     {
         Gold = 36000000;
     }
 #ifdef PBG_ADD_GENSRANKING
-	else if(ip->Type == ITEM_POTION+141)	//빛나는보석함
+	else if(ip->Type == ITEM_POTION+141)
 	{
 		Gold = 224000*3;
 	}
-	else if(ip->Type == ITEM_POTION+142)	//세련된보석함
+	else if(ip->Type == ITEM_POTION+142)
 	{
 		Gold = 182000*3;
 	}
-	else if(ip->Type == ITEM_POTION+143)	//철제보석함
+	else if(ip->Type == ITEM_POTION+143)
 	{
 		Gold = 157000*3;
 	}
-	else if(ip->Type == ITEM_POTION+144)	//낡은보석함
+	else if(ip->Type == ITEM_POTION+144)
 	{
 		Gold = 121000*3;
 	}
 #endif //PBG_ADD_GENSRANKING
 
-    else if(ip->Type==ITEM_HELPER+14)   //  로크의 깃털.
+    else if(ip->Type==ITEM_HELPER+14)
     {
         switch ( Level )
         {
-        case 0: Gold = 180000;  break;  //  로크의 깃털.
-        case 1: Gold = 7500000; break;  //  군주의 문장.
+        case 0: Gold = 180000;  break;
+        case 1: Gold = 7500000; break;
         }
     }
-	else if(ip->Type==ITEM_HELPER+3)	// 디노란트
+	else if(ip->Type==ITEM_HELPER+3)
 	{
         Gold = 960000;
         for(int i=0;i<ip->SpecialNum;i++)
@@ -2435,12 +2282,12 @@ int ItemValue(ITEM *ip,int goldType)
             }
         }
 	}
-    else if(ip->Type==ITEM_HELPER+15)   //  스테이트 증/감 열매.
+    else if(ip->Type==ITEM_HELPER+15)
     {
         Gold = 33000000;
     }
 #ifdef KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-    else if ( ip->Type==ITEM_HELPER+16 || ip->Type==ITEM_HELPER+17 )    //  대천사의 서, 블러드 본.
+    else if ( ip->Type==ITEM_HELPER+16 || ip->Type==ITEM_HELPER+17 )
     {
         switch ( Level )
         {
@@ -2457,7 +2304,7 @@ int ItemValue(ITEM *ip,int goldType)
         }
 	}
 #else // KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-    else if ( ip->Type==ITEM_HELPER+16 || ip->Type==ITEM_HELPER+17 )    //  대천사의 서, 블러드 본.
+    else if ( ip->Type==ITEM_HELPER+16 || ip->Type==ITEM_HELPER+17 )
     {
         switch ( Level )
         {
@@ -2475,7 +2322,7 @@ int ItemValue(ITEM *ip,int goldType)
 		Gold *= 3;   
 	}
 #endif // KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-    else if ( ip->Type==ITEM_HELPER+18 )    //  투명망토.
+    else if ( ip->Type==ITEM_HELPER+18 )
     {
 		Gold = 200000 + 20000 * ( Level - 1);
 		if ( Level == 1)
@@ -2484,67 +2331,47 @@ int ItemValue(ITEM *ip,int goldType)
 		}
         Gold *= 3;
     }
-	else if ( ip->Type==ITEM_POTION+28 )    //  읽어버린 지도.
+	else if ( ip->Type==ITEM_POTION+28 )
 	{
 		Gold = 200000*3;
 	}
-    else if ( ip->Type==ITEM_POTION+29 )    //  쿤둔의 표식.
+    else if ( ip->Type==ITEM_POTION+29 )
     {
         Gold = ( ip->Durability*10000 )*3;
     }
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
-	else if ( ip->Type==ITEM_POTION+111 )    //  차원의마경
+	else if ( ip->Type==ITEM_POTION+111 )
 	{
 		Gold = 200000*3;
 	}
-    else if ( ip->Type==ITEM_POTION+110 )    //  차원의 표식
+    else if ( ip->Type==ITEM_POTION+110 )
     {
         Gold = ( ip->Durability*10000 )*3;
     }
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-#ifdef LDK_ADD_EMPIREGUARDIAN_ITEM
 	else if( ITEM_POTION+102 == ip->Type )
 	{
 		Gold = 10000*3;
 	}
-	else if( ITEM_POTION+109 == ip->Type )	//가이온의명령서, 세크로미콘 
+	else if( ITEM_POTION+109 == ip->Type )
 	{
 		Gold = 10000*3;
 	}
-	else if( ITEM_POTION+101 == ip->Type || ITEM_POTION+103 <= ip->Type && ip->Type <= ITEM_POTION+108 )	//의문의쪽지, 세크로미콘 조각
+	else if( ITEM_POTION+101 == ip->Type || ITEM_POTION+103 <= ip->Type && ip->Type <= ITEM_POTION+108 )
 	{
         Gold = ( ip->Durability*10000 )*3;
 	}
-#endif //LDK_ADD_EMPIREGUARDIAN_ITEM
-#ifdef MYSTERY_BEAD
-	else if ( ip->Type==ITEM_WING+26 )    //  신비의구슬 판매가능
-	{
-		if(Level == 0)
-			Gold = 20000*3;
-	}
-#endif // MYSTERY_BEAD
-    else if ( ip->Type==ITEM_HELPER+29 )    //  근위병세트 ( 카오스 캐슬 입장 아이템 ).
+    else if ( ip->Type==ITEM_HELPER+29 )
     {
         Gold = 5000;
     }
-#ifdef LENA_EXCHANGE_ZEN
-    else if(ip->Type==ITEM_POTION+21)
-	{	//. 0 : 레나, 1 : 스톤, 2 : 우정의돌, 3 : 성주의표식
-		if(Level == 0)
-			Gold = 9000;
-    }
-#endif
 #ifdef BLOODCASTLE_2ND_PATCH
 	else if(ip->Type==ITEM_POTION+21)
-	{	//. 0 : 레나, 1 : 스톤, 2 : 우정의돌, 3 : 성주의표식
+	{
 		if(Level == 0)
 			Gold = 9000;
 		else if(Level == 1)
 			Gold = 9000;
-#ifdef FRIENDLYSTONE_EXCHANGE_ZEN
 		else if(Level == 2)
 			Gold = 3000*3;
-#endif // FRIENDLYSTONE_EXCHANGE_ZEN
 		else if(Level == 3)
 		{
 			Gold = ip->Durability * 3900;
@@ -2552,17 +2379,17 @@ int ItemValue(ITEM *ip,int goldType)
 	}
 #endif // BLOODCASTLE_2ND_PATCH
 #ifdef KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-	else if(ip->Type==ITEM_POTION+17)// 악마의 눈
+	else if(ip->Type==ITEM_POTION+17)
 	{
 		int iValue[8] = {30000, 10000, 50000, 100000, 300000, 500000, 800000, 1000000};
 		Gold = iValue[min( max( 0, Level), 7)];
 	}
-	else if(ip->Type==ITEM_POTION+18)// 악마의 열쇠
+	else if(ip->Type==ITEM_POTION+18)
 	{
 		int iValue[8] = {30000, 15000, 75000, 150000, 450000, 750000, 1200000, 1500000};
 		Gold = iValue[min( max( 0, Level), 7)];
 	}
-	else if(ip->Type==ITEM_POTION+19)// 데블스퀘어 초대권
+	else if(ip->Type==ITEM_POTION+19)
 	{
 		int iValue[8] = {120000, 60000, 84000, 120000, 180000, 240000, 300000, 180000};
 		Gold = iValue[min( max( 0, Level), 7)];
@@ -2800,11 +2627,7 @@ int ItemValue(ITEM *ip,int goldType)
         }
     }
 	else if( ( ( Type==12 && (ip->Type>ITEM_WING+6
-#ifdef ADD_ALICE_WINGS_1
 		&& !(ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
-#else	// ADD_ALICE_WINGS_1
-		&& !( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40)
-#endif	// ADD_ALICE_WINGS_1
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		&& (ip->Type!=ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
@@ -2844,16 +2667,10 @@ int ItemValue(ITEM *ip,int goldType)
 #ifdef LDK_ADD_14_15_GRADE_ITEM_VALUE
 		// 아이템 14 15 판매금액 추가
         case 14:Level2 += 305;break;
-        case 15:Level2 += 365;break; // 한계 가중치 더이상 못올림
+        case 15:Level2 += 365;break;
 #endif //LDK_ADD_14_15_GRADE_ITEM_VALUE
         }
-        //  날개, 망토.
-	    if( ( Type==12 && ip->Type<=ITEM_WING+6) || ip->Type==ITEM_HELPER+30 
-#ifdef ADD_ALICE_WINGS_1
-			|| (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)	// 3차날개, 소환술사 날개.
-#else	// ADD_ALICE_WINGS_1
-			|| ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )	// 3차날개
-#endif	// ADD_ALICE_WINGS_1
+	    if( ( Type==12 && ip->Type<=ITEM_WING+6) || ip->Type==ITEM_HELPER+30 || (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			|| (ip->Type==ITEM_WING+50)	// 레이지 파이터 날개
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
@@ -2865,9 +2682,9 @@ int ItemValue(ITEM *ip,int goldType)
         {
 		    Gold = 100+(40+Level2)*Level2*Level2/8;
         }
-		if(Type>=0 && Type<=6) //무기일때
+		if(Type>=0 && Type<=6)
 		{
-			if(!p->TwoHand) //한손무기일때 80%
+			if(!p->TwoHand)
 				Gold = Gold*80/100;
 		}
 		for(int i=0;i<ip->SpecialNum;i++)
@@ -2886,22 +2703,14 @@ int ItemValue(ITEM *ip,int goldType)
 			case AT_SKILL_MANY_ARROW_UP+3:
 			case AT_SKILL_MANY_ARROW_UP+4:
 			case AT_SKILL_CROSSBOW:
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 			case AT_SKILL_RECOVER:
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 			case AT_SKILL_GAOTIC:
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC			case AT_SKILL_BLAST_POISON:
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			case AT_SKILL_MULTI_SHOT:
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_POWER_SLASH_UP:
 			case AT_SKILL_POWER_SLASH_UP+1:
 			case AT_SKILL_POWER_SLASH_UP+2:
 			case AT_SKILL_POWER_SLASH_UP+3:
 			case AT_SKILL_POWER_SLASH_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ICE_BLADE:
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case AT_SKILL_THRUST:
@@ -2915,13 +2724,10 @@ int ItemValue(ITEM *ip,int goldType)
 			case AT_IMPROVE_DEFENSE:
 			case AT_LIFE_REGENERATION:
                 if ( ( Type==12 && ip->Type<=ITEM_WING+6 )
-#ifdef ADD_ALICE_WINGS_1
-					|| (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)	// 3차날개, 소환술사 날개.
-#else	// ADD_ALICE_WINGS_1
-					|| ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )	// 3차날개
-#endif	// ADD_ALICE_WINGS_1
+
+					|| (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-					|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)	// 레이지파이터날개
+					|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 					)    //  날개.
                 {
@@ -2977,34 +2783,26 @@ int ItemValue(ITEM *ip,int goldType)
 			case AT_IMPROVE_ATTACK_SPEED:  
 				Gold += Gold;
 				break;
-
-                //  디노란트.
             case AT_IMPROVE_EVADE:
 				Gold += Gold;
 				break;
-
-                //  추가 날개.
-            case AT_IMPROVE_HP_MAX :
+	        case AT_IMPROVE_HP_MAX :
             case AT_IMPROVE_MP_MAX :
             case AT_ONE_PERCENT_DAMAGE :  
             case AT_IMPROVE_AG_MAX :
             case AT_DAMAGE_ABSORB : 
-			case AT_DAMAGE_REFLECTION:	// [대상의 공격이 유저에게 명중한 경우] 5% 확률로 적 공격력 50% 돌려줌
-			case AT_RECOVER_FULL_LIFE:	// [대상의 공격이 유저에게 명중한 경우] 5% 확률로 유저 생명 100% 순간 회복
-			case AT_RECOVER_FULL_MANA:	// [대상의 공격이 유저에게 명중한 경우] 5% 확률로 유저 마나 100% 순간 회복
+			case AT_DAMAGE_REFLECTION:
+			case AT_RECOVER_FULL_LIFE:
+			case AT_RECOVER_FULL_MANA:
 				Gold += ( __int64)( ( double)Gold*25/100);
                 break;
 			}
 		}
-#ifdef SOCKET_SYSTEM
-		// 소켓 아이템 가격 보너스
 		Gold += g_SocketItemMgr.CalcSocketBonusItemValue(ip, Gold);
-#endif	// SOCKET_SYSTEM
 	}
 	Gold = min(Gold,3000000000);
 
-#ifdef YDG_FIX_REPAIR_COST_ADJUST_TO_SERVER_SETTING
-	if (goldType == 2)	// 서버 공식과 맞게 수리시에는 끝자리 버린후 계산
+	if (goldType == 2)
 	{
 		if(Gold >= 1000)
 		{
@@ -3015,27 +2813,25 @@ int ItemValue(ITEM *ip,int goldType)
 			Gold = (Gold / 10) * 10;
 		}
 	}
-#endif	// YDG_FIX_REPAIR_COST_ADJUST_TO_SERVER_SETTING
 
-	if( goldType )  //  팔기. 수리.
+	if( goldType )
 	{
 		Gold = Gold/3;
 	}
 
-	//^ 펜릴 아이템 상점 판매 가격(/3 안하기 위해서 이곳에 위치)
-	if(ip->Type == ITEM_HELPER+32)	// 갑옷 파편(겹쳐진 갯수*가격)
+	if(ip->Type == ITEM_HELPER+32)
 		Gold = ip->Durability*50;
-	else if(ip->Type == ITEM_HELPER+33)	// 여신의 가호
+	else if(ip->Type == ITEM_HELPER+33)
 		Gold = ip->Durability*100;
-	else if(ip->Type == ITEM_HELPER+34)	// 맹수의 발톱
+	else if(ip->Type == ITEM_HELPER+34)
 		Gold = ip->Durability*1000;
-	else if(ip->Type == ITEM_HELPER+35)	// 뿔피리 조각
+	else if(ip->Type == ITEM_HELPER+35)
 		Gold = ip->Durability*10000;
-	else if(ip->Type == ITEM_HELPER+36)	// 부러진 뿔피리
+	else if(ip->Type == ITEM_HELPER+36)
 		Gold = 30000;
-	else if(ip->Type == ITEM_HELPER+37)	// 펜릴의 뿔피리
+	else if(ip->Type == ITEM_HELPER+37)
 		Gold = 50000;
-#ifndef KJH_FIX_20080910_NPCSHOP_PRICE		// #ifndef		정리할 때 지워야 하는 소스
+#ifndef KJH_FIX_20080910_NPCSHOP_PRICE		// #ifndef
 #ifdef KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
     else if (ip->Type==ITEM_HELPER+49 || ip->Type==ITEM_HELPER+50 || ip->Type==ITEM_HELPER+51)	// 낡은두루마리, 환영교단의서약, 피의두루마리
     {
@@ -6041,13 +5837,12 @@ void CHARACTER_MACHINE::GetMagicSkillDamage( int iType, int *piMinDamage, int *p
 #endif	// YDG_FIX_MAGIC_DAMAGE_CALC_ORDER
 }
 
-// 저주력 스킬 데미지.
 void CHARACTER_MACHINE::GetCurseSkillDamage(int iType, int *piMinDamage, int *piMaxDamage)
 {
-	if (CLASS_SUMMONER != GetBaseClass(Character.Class))	// 소환술사만 저주력이 필요하다.
+	if (CLASS_SUMMONER != GetBaseClass(Character.Class))
 		return;
 
-	// 소환수 스킬은 저주력과 관련.
+
 	if (AT_SKILL_SUMMON_EXPLOSION <= iType && iType <= AT_SKILL_SUMMON_REQUIEM)
 	{
 		SKILL_ATTRIBUTE *p = &SkillAttribute[iType];
@@ -6072,7 +5867,6 @@ void CHARACTER_MACHINE::GetSkillDamage( int iType, int *piMinDamage, int *piMaxD
 	*piMaxDamage = Damage+Damage/2;
 
     Damage = 0;
-    //  세트 옵션 적용.
     g_csItemOption.ClearListOnOff();
     g_csItemOption.PlusMastery ( &Damage, p->MasteryType );
     g_csItemOption.PlusSpecial ( (WORD*)&Damage,  AT_SET_OPTION_IMPROVE_SKILL_ATTACK );	//	스킬 공격력 증가.
@@ -6091,7 +5885,6 @@ BYTE CHARACTER_MACHINE::GetSkillMasteryType ( int iType )
     return MasteryType;
 }
 
-// 스킬 타입을 넣으면 스킬에 대한 정보등을 넘겨준다.
 void GetSkillInformation( int iType, int iLevel, char *lpszName, int *piMana, int *piDistance, int *piSkillMana)
 {
 
@@ -6145,11 +5938,9 @@ void GetSkillInformation_Energy(int iType, int *piEnergy)
 				*piEnergy = 20 + (p->Energy*p->Level*3/100);
 			}
 
-#ifdef PSW_BUGFIX_CLASS_KNIGHT_REQUIRESKILL
 			if( GetBaseClass ( Hero->Class ) == CLASS_KNIGHT ) {
 				*piEnergy = 10 + (p->Energy*p->Level*4/100);
 			}
-#endif //PSW_BUGFIX_CLASS_KNIGHT_REQUIRESKILL
 		}
 	}
 
@@ -6179,25 +5970,18 @@ void GetSkillInformation_Damage(int iType, int *piDamage)
 
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  스킬의 거리를 알려준다.
-//////////////////////////////////////////////////////////////////////////
 float GetSkillDistance(int Index, CHARACTER* c)
 {
     float Distance = (float)( SkillAttribute[Index].Distance );
 
 	if( Index == AT_SKILL_BLOW_UP + 4 ) 
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		if(Distance != 3)
 			int aaa = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	}
 
     if(c != NULL)
     {
-        // 다크로드의 경우 다크호스를 탔을 경우는 거리 +2를 해준다.
         if(c->Helper.Type == MODEL_HELPER+4)
 		{
             Distance += 2;
@@ -6207,14 +5991,11 @@ float GetSkillDistance(int Index, CHARACTER* c)
     return Distance;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  현재 사용하는 스킬을 발동할수 있는지 검사한다. ( 스킬 딜레이가 없을때 가능 );
-//////////////////////////////////////////////////////////////////////////
-bool    CheckSkillDelay ( int SkillIndex )
+bool CheckSkillDelay ( int SkillIndex )
 {
-	int Skill = CharacterAttribute->Skill[SkillIndex];  //  스킬.
+	int Skill = CharacterAttribute->Skill[SkillIndex];
 
-    int Delay = SkillAttribute[Skill].Delay;            //  스킬 딜레이.
+    int Delay = SkillAttribute[Skill].Delay;
 
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!CheckAttack() && (Skill == AT_SKILL_GIANTSWING || Skill == AT_SKILL_DRAGON_LOWER ||
@@ -6223,7 +6004,6 @@ bool    CheckSkillDelay ( int SkillIndex )
 		return false;
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-    //  스킬 딜레이가 존재하는 스킬.
     if ( Delay>0 )
     {
         if ( CharacterAttribute->SkillDelay[SkillIndex] > 0 )
@@ -6232,7 +6012,7 @@ bool    CheckSkillDelay ( int SkillIndex )
         }
 
 		int iCharisma;
-		GetSkillInformation_Charisma(Skill, &iCharisma);	// 통솔포인트
+		GetSkillInformation_Charisma(Skill, &iCharisma);
 		if(iCharisma > (CharacterAttribute->Charisma + CharacterAttribute->AddCharisma))
 		{
             return false;
@@ -6242,15 +6022,8 @@ bool    CheckSkillDelay ( int SkillIndex )
     }
     return true;
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-//  스킬 딜레이를 계산한다.
-//////////////////////////////////////////////////////////////////////////
-void    CalcSkillDelay ( int time )
+void CalcSkillDelay ( int time )
 {
-
-	//^ 펜릴 스킬 관련(딜레이 계산)
 	int iSkillNumber;
 	iSkillNumber = CharacterAttribute->SkillNumber+2;
 	iSkillNumber = min(iSkillNumber, MAX_SKILLS);
@@ -6266,47 +6039,9 @@ void    CalcSkillDelay ( int time )
             CharacterAttribute->SkillDelay[i] = 0;
         }
     }
-	
-
-#ifdef STATE_LIMIT_TIME
-    if ( g_iWorldStateTime>0 )
-    {
-        g_iWorldStateTime -= time;
-        if ( g_iWorldStateTime<=0 )
-        {
-            if ( ((Hero->Object.State&STATE_FREEZE)==STATE_FREEZE) )
-                Hero->Object.State -= STATE_FREEZE;
-            if ( ((Hero->Object.State&STATE_STUN)==STATE_STUN) )
-                Hero->Object.State -= STATE_STUN;
-            if ( ((Hero->Object.State&STATE_PARALYZE)==STATE_PARALYZE) )
-                Hero->Object.State -= STATE_PARALYZE;
-
-            g_iWorldStateTime = 0;
-        }
-    }
-#endif// STATE_LIMIT_TIME
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  현재 주인공의 상태 마법이 갱신되었는지 설정한다.
-//////////////////////////////////////////////////////////////////////////
-#ifdef STATE_LIMIT_TIME
-void    SetWorldStateTime ( DWORD State, int Time )
-{
-    if ( g_dwWorldStateBack!=State )
-    {
-        g_dwWorldStateBack = State;
-        g_iWorldStateTime = Time;
-    }
-}
-#endif// STATE_LIMIT_TIME
-
-
-//////////////////////////////////////////////////////////////////////////
-//  스킬 딜레이 값을 표시한다.
-//////////////////////////////////////////////////////////////////////////
-void    RenderSkillDelay ( int SkillIndex, int x, int y, int Width, int Height )
+void RenderSkillDelay ( int SkillIndex, int x, int y, int Width, int Height )
 {
     int Delay = CharacterAttribute->SkillDelay[SkillIndex];
     if ( Delay>0 )
@@ -6325,17 +6060,16 @@ void    RenderSkillDelay ( int SkillIndex, int x, int y, int Width, int Height )
     }
 }
 
-// 길마인가
 bool IsGuildMaster()
 {
 	return ( Hero->GuildStatus == G_MASTER );
 }
-// 부길마인가
+
 bool IsSubGuildMaster()
 {
 	return ( Hero->GuildStatus == G_SUB_MASTER );
 }		
-// 배틀마스터인가
+
 bool IsBattleMaster()
 {
 	return ( Hero->GuildStatus == G_BATTLE_MASTER );

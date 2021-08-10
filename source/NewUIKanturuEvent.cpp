@@ -497,14 +497,8 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 			}
 			
 			if(	!((pItemWing->Type >= ITEM_WING+0 && pItemWing->Type <= ITEM_WING+6)
-#ifdef ADD_ALICE_WINGS_1
 				|| (pItemWing->Type >= ITEM_WING+36 && pItemWing->Type <= ITEM_WING+43)
-#else	// ADD_ALICE_WINGS_1
-				|| (pItemWing->Type >= ITEM_WING+36 && pItemWing->Type <= ITEM_WING+40 )
-#endif	// ADD_ALICE_WINGS_1
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 				|| ( ITEM_WING+130 <= pItemWing->Type && pItemWing->Type <= ITEM_WING+134 )
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 				|| pItemHelper->Type == ITEM_HELPER+3
 				|| pItemHelper->Type == ITEM_HELPER+4
 				|| pItemWing->Type == ITEM_HELPER+30

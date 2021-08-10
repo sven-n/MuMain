@@ -2063,9 +2063,7 @@ WORD calcMaxDurability ( const ITEM* ip, ITEM_ATTRIBUTE *p, int Level )
 		( ip->Type!=ITEM_SWORD+19 && ip->Type!=ITEM_BOW+18 && ip->Type!=ITEM_STAFF+10 )
         && ip->Type!=ITEM_HELPER+30   //  군주의 망토.
 		&& ( ip->Type<ITEM_WING+36 || ip->Type>ITEM_WING+40 )	// 3차날개 제외.
-#ifdef ADD_ALICE_WINGS_1
 		&& (ip->Type<ITEM_WING+42 || ip->Type>ITEM_WING+43)	// 소환술사 2,3차날개 제외.
-#endif	// ADD_ALICE_WINGS_1
 		&& ip->Type!=ITEM_MACE+13	// 절대 셉터 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		&& !(ip->Type >= ITEM_WING+49 && ip->Type <= ITEM_WING+50)	//레이지파이터날개
@@ -2322,15 +2320,11 @@ void GetItemName ( int iType, int iLevel, char* Text )
 		else
 			sprintf(Text,"%s +%d",p->Name,iLevel);
     }
-#ifdef ADD_ALICE_WINGS_1
 	else if ((iType>=ITEM_WING+36 && iType<=ITEM_WING+40) || (iType>=ITEM_WING+42 && iType<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (iType == ITEM_WING+50) //군림의망토
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		)	// 폭풍의 날개 ~ 제왕의 망토, 소환술사 2,3차 날개.
-#else	// ADD_ALICE_WINGS_1
-	else if ( iType>=ITEM_WING+36 && iType<=ITEM_WING+40 )  //  폭풍의 날개 ~ 제왕의 망토
-#endif	// ADD_ALICE_WINGS_1
     {
 		if(iLevel==0)
 			sprintf(Text,"%s",p->Name);
@@ -2787,13 +2781,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 
     if ( ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 ) || ip->Type==ITEM_HELPER+30 
 		|| ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )
-#ifdef ADD_ALICE_WINGS_1
 		|| (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)
-#endif	// ADD_ALICE_WINGS_1
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)  //  정령의 날개 ~ 암흑의 날개. 망토, 폭풍의 날개 ~ 제왕의 망토, 소환술사 2,3차 날개.
+		)
     {
 	    if ( Level >= 7 )
 	    {
@@ -2812,17 +2804,13 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 	    }
     }
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 인벤토리 아이템 툴팁 명 색깔
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int nGemType = COMGEM::Check_Jewel( ip->Type );
 	if( nGemType != COMGEM::NOGEM)
 	{
 		Color = TEXT_COLOR_YELLOW;
 	}
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-
-    //  아이템의 가격.
-
-// wani 부분 유료화 아이템도 IsSellingBan 여기에 추가 하였다
 
 	if ( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && !IsSellingBan(ip) )
 	{
@@ -8987,155 +8975,58 @@ bool IsPartChargeItem(ITEM* pItem)
 	default:
 		return false;
 	}
-#else //!defined(PSW_PARTCHARGE_ITEM1) && defined(LDK_ADD_CASHSHOP_FUNC)
-	//해외 유료 아이템 처리 - 차후 한쪽으로 통합하자
-	if(
-#ifdef CSK_FREE_TICKET
-		// 자유 입장권 판매 가격 표시 못하게 예외 처리
-		(pItem->Type >= ITEM_HELPER+46 && pItem->Type <= ITEM_HELPER+48)
-#endif // CSK_FREE_TICKET
-#ifdef CSK_CHAOS_CARD
+#else 
+	if(	(pItem->Type >= ITEM_HELPER+46 && pItem->Type <= ITEM_HELPER+48)
 		|| (pItem->Type == ITEM_POTION+54)
-#endif // CSK_CHAOS_CARD
-#ifdef CSK_RARE_ITEM
-		// 희귀아이템 판매 가격 표시 못하게 예외처리
 		|| (pItem->Type >= ITEM_POTION+58 && pItem->Type <= ITEM_POTION+62)
-#endif // CSK_RARE_ITEM
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-		// 희귀아이템 판매 (7-12) 가격 표시 못하게 예외처리
 		|| (pItem->Type >= ITEM_POTION+145 && pItem->Type <= ITEM_POTION+150)
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-		// 자유 입장권(도플갱어, 바르카, 바르카 제7맵) 판매 가격 표시 못하게 예외 처리
 		|| (pItem->Type >= ITEM_HELPER+125 && pItem->Type <= ITEM_HELPER+127)
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-#ifdef CSK_LUCKY_CHARM
 		|| pItem->Type == ITEM_POTION+53
-#endif //CSK_LUCKY_CHARM
-#ifdef CSK_LUCKY_SEAL
 		|| (pItem->Type >= ITEM_HELPER+43 && pItem->Type <= ITEM_HELPER+45)
-#endif //CSK_LUCKY_SEAL
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 		|| (pItem->Type >= ITEM_POTION+70 && pItem->Type <= ITEM_POTION+71)
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 		|| (pItem->Type >= ITEM_POTION+72 && pItem->Type <= ITEM_POTION+77)
-#endif //PSW_SCROLL_ITEM
-#ifdef PSW_SEAL_ITEM               // 이동 인장
 		|| (pItem->Type == ITEM_HELPER+59)
-#endif //PSW_SEAL_ITEM
-#ifdef PSW_FRUIT_ITEM              // 리셋 열매
 		|| ( pItem->Type >= ITEM_HELPER+54 && pItem->Type <= ITEM_HELPER+58)
-#endif //PSW_FRUIT_ITEM
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
 		|| (pItem->Type >= ITEM_POTION+78 && pItem->Type <= ITEM_POTION+82)
-#endif //PSW_SECRET_ITEM
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
 		|| (pItem->Type == ITEM_HELPER+60)
-#endif //PSW_INDULGENCE_ITEM
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET // 환영의 사원 자유 입장권
 		|| (pItem->Type == ITEM_HELPER+61)
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-#ifdef PSW_CHARACTER_CARD
 		|| (pItem->Type == ITEM_POTION+91)
-#endif // PSW_CHARACTER_CARD
-#ifdef PSW_NEW_CHAOS_CARD      
 		|| (pItem->Type >= ITEM_POTION+92 && pItem->Type <= ITEM_POTION+93)
 		|| (pItem->Type == ITEM_POTION+95)
-#endif //PSW_NEW_CHAOS_CARD
-#ifdef PSW_NEW_ELITE_ITEM
-		|| (pItem->Type == ITEM_POTION+94) // 엘리트 중간 치료 물약
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef PSW_ADD_PC4_SEALITEM
+		|| (pItem->Type == ITEM_POTION+94)
 		|| (pItem->Type >= ITEM_HELPER+62 && pItem->Type <= ITEM_HELPER+63)
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef PSW_ADD_PC4_SCROLLITEM
 		|| (pItem->Type >= ITEM_POTION+97 && pItem->Type <= ITEM_POTION+98)
-#endif //PSW_ADD_PC4_SCROLLITEM
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
 		|| (pItem->Type == ITEM_POTION+96)
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-#ifdef LDK_ADD_PC4_GUARDIAN
 		|| ( pItem->Type == ITEM_HELPER+64 || pItem->Type == ITEM_HELPER+65 )
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
-		|| ( pItem->Type == ITEM_HELPER+69 )	// 부활의 부적
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
-		|| ( pItem->Type == ITEM_HELPER+70 )	// 이동의 부적
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef ASG_ADD_CS6_GUARD_CHARM
-		|| pItem->Type == ITEM_HELPER+81		// 수호의부적
-#endif	// ASG_ADD_CS6_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ITEM_GUARD_CHARM
-		|| pItem->Type == ITEM_HELPER+82		// 아이템보호부적
-#endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM 
-#ifdef ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-		|| pItem->Type == ITEM_HELPER+93		// 상승의인장마스터
-#endif	// ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-#ifdef ASG_ADD_CS6_WEALTH_SEAL_MASTER
-		|| pItem->Type == ITEM_HELPER+94		// 풍요의인장마스터
-#endif	// ASG_ADD_CS6_WEALTH_SEAL_MASTER
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
-		|| pItem->Type == ITEM_HELPER+107		// 치명마법반지
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-#ifdef YDG_ADD_CS7_MAX_AG_AURA
-		|| pItem->Type == ITEM_HELPER+104		// AG증가 오라
-#endif	// YDG_ADD_CS7_MAX_AG_AURA
-#ifdef YDG_ADD_CS7_MAX_SD_AURA
-		|| pItem->Type == ITEM_HELPER+105		// SD증가 오라
-#endif	// YDG_ADD_CS7_MAX_SD_AURA
-#ifdef YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
-		|| pItem->Type == ITEM_HELPER+103		// 파티 경험치 증가 아이템
-#endif	// YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
-		|| pItem->Type == ITEM_POTION+133		// 엘리트 SD회복 물약
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
+		|| ( pItem->Type == ITEM_HELPER+69 )
+		|| ( pItem->Type == ITEM_HELPER+70 )
+		|| pItem->Type == ITEM_HELPER+81
+		|| pItem->Type == ITEM_HELPER+82
+		|| pItem->Type == ITEM_HELPER+93
+		|| pItem->Type == ITEM_HELPER+94
+		|| pItem->Type == ITEM_HELPER+107
+		|| pItem->Type == ITEM_HELPER+104
+		|| pItem->Type == ITEM_HELPER+105
+		|| pItem->Type == ITEM_HELPER+103
+		|| pItem->Type == ITEM_POTION+133
 		|| pItem->Type == ITEM_HELPER+109
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링		// MODEL_HELPER+110
 		|| pItem->Type == ITEM_HELPER+110
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링		// MODEL_HELPER+111
 		|| pItem->Type == ITEM_HELPER+111
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링		// MODEL_HELPER+112
 		|| pItem->Type == ITEM_HELPER+112
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
 		|| pItem->Type == ITEM_HELPER+113
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// 신규 루비(붉은색) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이	// MODEL_HELPER+114
 		|| pItem->Type == ITEM_HELPER+114
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// 신규 사파이어(녹색) 목걸이	// MODEL_HELPER+115
 		|| pItem->Type == ITEM_HELPER+115
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// 신규 사파이어(녹색) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
 		|| pItem->Type == ITEM_POTION+112
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(골드)	// MODEL_POTION+113
 		|| pItem->Type == ITEM_POTION+113
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(골드)	// MODEL_POTION+113
-#ifdef LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-		|| pItem->Type == ITEM_POTION+120 // 고블린금화
-#endif //LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST				// 금색상자
+		|| pItem->Type == ITEM_POTION+120
 		|| pItem->Type == ITEM_POTION+123
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST				// 은색상자
 		|| pItem->Type == ITEM_POTION+124
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX				// 패키지 상자A-F
 		|| pItem->Type == ITEM_POTION+134			
 		|| pItem->Type == ITEM_POTION+135			
 		|| pItem->Type == ITEM_POTION+136			
 		|| pItem->Type == ITEM_POTION+137			
 		|| pItem->Type == ITEM_POTION+138			
 		|| pItem->Type == ITEM_POTION+139			
-#endif //LDK_ADD_INGAMESHOP_PACKAGE_BOX
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
 		|| pItem->Type == ITEM_WING+130
 		|| pItem->Type == ITEM_WING+131			
 		|| pItem->Type == ITEM_WING+132			
@@ -9144,41 +9035,24 @@ bool IsPartChargeItem(ITEM* pItem)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| pItem->Type == ITEM_WING+135
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-		|| pItem->Type == ITEM_HELPER+116			//신규 풍요의 인장
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-#ifdef LDK_ADD_CS7_UNICORN_PET
-		|| pItem->Type == ITEM_HELPER+106			//유니콘 펫
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef ASG_ADD_CHARGED_CHANNEL_TICKET
-		|| pItem->Type == ITEM_HELPER+124			// 유료채널 입장권.
-#endif	// ASG_ADD_CHARGED_CHANNEL_TICKET
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
+		|| pItem->Type == ITEM_HELPER+116
+		|| pItem->Type == ITEM_HELPER+106
+		|| pItem->Type == ITEM_HELPER+124
 		|| pItem->Type == ITEM_POTION+114
 		|| pItem->Type == ITEM_POTION+115
 		|| pItem->Type == ITEM_POTION+116
 		|| pItem->Type == ITEM_POTION+117
 		|| pItem->Type == ITEM_POTION+118
 		|| pItem->Type == ITEM_POTION+119
-#endif // LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
-#ifdef LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
 		|| pItem->Type == ITEM_POTION+126
 		|| pItem->Type == ITEM_POTION+127
 		|| pItem->Type == ITEM_POTION+128
 		|| pItem->Type == ITEM_POTION+129
-#endif // LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
-#ifdef LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
 		|| pItem->Type == ITEM_POTION+130
 		|| pItem->Type == ITEM_POTION+131
 		|| pItem->Type == ITEM_POTION+132
-#endif // LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
 		|| pItem->Type == ITEM_HELPER+121
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-#ifdef YDG_ADD_HEALING_SCROLL
-		|| pItem->Type == ITEM_POTION+140	// 치유의 스크롤
-#endif	// YDG_ADD_HEALING_SCROLL
+		|| pItem->Type == ITEM_POTION+140
 	)
 	{
 		return true;
@@ -9189,66 +9063,50 @@ bool IsPartChargeItem(ITEM* pItem)
 }
 #endif //defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
 
-// 고가아이템 품목 리스트 정리
 bool IsHighValueItem(ITEM* pItem)
 {
-	// 아이템의 레벨을 먼저 구해놓는다.
 	int iLevel = (pItem->Level >> 3) & 15;
 
 	if(
-		pItem->Type == ITEM_HELPER+3 ||		// 디노란트
-		pItem->Type == ITEM_POTION+13 ||	// 축복의 보석
-		pItem->Type == ITEM_POTION+14 ||	// 영혼의 보석
-		pItem->Type == ITEM_POTION+16 ||	// 생명의 보석
-		pItem->Type == ITEM_POTION+22 ||	// 창조의 보석
-		pItem->Type == ITEM_WING+15 ||		// 혼돈의 보석
-		pItem->Type == ITEM_POTION+31 ||	// 수호의 보석
-		pItem->Type == ITEM_WING+30	||		// 축석 조합
-		pItem->Type == ITEM_WING+31	||		// 영석 조합
-		// 날개들
+		pItem->Type == ITEM_HELPER+3 ||
+		pItem->Type == ITEM_POTION+13 ||
+		pItem->Type == ITEM_POTION+14 ||
+		pItem->Type == ITEM_POTION+16 ||
+		pItem->Type == ITEM_POTION+22 ||
+		pItem->Type == ITEM_WING+15 ||
+		pItem->Type == ITEM_POTION+31 ||
+		pItem->Type == ITEM_WING+30	||
+		pItem->Type == ITEM_WING+31	||
         (pItem->Type >= ITEM_WING && pItem->Type <= ITEM_WING+6 ) ||	
-        pItem->Type == ITEM_HELPER+4 ||		// 다크호스의 뿔
-		pItem->Type == ITEM_HELPER+5 ||		// 다크스피릿의 발톱
-		pItem->Type == ITEM_HELPER+30 ||	// 군주의 망토
-#ifdef ADD_ALICE_WINGS_1
-		(pItem->Type >= ITEM_WING+36 && pItem->Type <= ITEM_WING+43 ) ||	// 3차 날개, 소환술사 날개.
-#else	// ADD_ALICE_WINGS_1
-		(pItem->Type >= ITEM_WING+36 && pItem->Type <= ITEM_WING+40 ) ||	// 3차 날개들
-#endif	// ADD_ALICE_WINGS_1
-		// 세트 아이템들
-        ((pItem->ExtOption%0x04) == EXT_A_SET_OPTION || (pItem->ExtOption%0x04) == EXT_B_SET_OPTION ) ||
-		pItem->Type == ITEM_SWORD+19 ||		// 대천사의 절대검
-		pItem->Type == ITEM_STAFF+10 ||		// 대천사의 절대지팡이
-		pItem->Type == ITEM_BOW+18 ||		// 대천사의 절대석궁	
-		pItem->Type == ITEM_MACE+13 ||		// 대천사의 절대셉터
-		pItem->Type == ITEM_HELPER+14 ||	// 로크의 깃털	
-		pItem->Type == ITEM_HELPER+15 ||	// 열매
-		pItem->Type == ITEM_HELPER+19 ||	// 절대지팡이(퀘스트)
-		pItem->Type == ITEM_HELPER+31 ||	// 다크호스의 영혼, 다크스피릿의 영혼
-		// 보석원석, 조화의보석, 하급제련석, 상급제련석
+        pItem->Type == ITEM_HELPER+4 ||
+		pItem->Type == ITEM_HELPER+5 ||
+		pItem->Type == ITEM_HELPER+30 || 
+		(pItem->Type >= ITEM_WING+36 && pItem->Type <= ITEM_WING+43 ) ||
+		((pItem->ExtOption%0x04) == EXT_A_SET_OPTION || (pItem->ExtOption%0x04) == EXT_B_SET_OPTION ) ||
+		pItem->Type == ITEM_SWORD+19 ||
+		pItem->Type == ITEM_STAFF+10 ||
+		pItem->Type == ITEM_BOW+18 ||	
+		pItem->Type == ITEM_MACE+13 ||
+		pItem->Type == ITEM_HELPER+14 ||	
+		pItem->Type == ITEM_HELPER+15 ||
+		pItem->Type == ITEM_HELPER+19 ||
+		pItem->Type == ITEM_HELPER+31 ||
 		(pItem->Type >= ITEM_POTION+41 && pItem->Type <= ITEM_POTION+44) ||
-		// +7레벨 이상의 아이템들
 		(iLevel > 6 && pItem->Type < ITEM_WING) ||
-		(pItem->Option1 & 63) > 0 ||		// 옵션있는 아이템 
-		// 펜릴 관련 아이템
+		(pItem->Option1 & 63) > 0 ||
 		(pItem->Type >= ITEM_HELPER+34 && pItem->Type <= ITEM_HELPER+37)
-		|| pItem->Type == ITEM_HELPER+52	// 콘도르의 불꽃
-		|| pItem->Type == ITEM_HELPER+53	// 콘도르의 깃털
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
+		|| pItem->Type == ITEM_HELPER+52
+		|| pItem->Type == ITEM_HELPER+53
 		|| pItem->Type == ITEM_POTION+121
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST	// 봉인된 은색상자
 		|| pItem->Type == ITEM_POTION+122
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifndef LDS_MOD_INGAMESHOPITEM_POSSIBLETRASH_SILVERGOLDBOX	// 주의 ifndef !! 추후 삭제 // 금색상자, 은색상자는 버리기가 가능하도록 기획 수정. 
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST			// 금색상자
+#ifndef LDS_MOD_INGAMESHOPITEM_POSSIBLETRASH_SILVERGOLDBOX
+#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST
 		|| pItem->Type == ITEM_POTION+123
 #endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST			// 은색상자
+#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST
 		|| pItem->Type == ITEM_POTION+124
 #endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#endif // LDS_MOD_INGAMESHOPITEM_POSSIBLETRASH_SILVERGOLDBOX	// 주의 ifndef !! 추후 삭제 // 금색상자, 은색상자는 버리기가 가능하도록 기획 수정.
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+#endif // LDS_MOD_INGAMESHOPITEM_POSSIBLETRASH_SILVERGOLDBOX
 		|| pItem->Type == ITEM_WING+130
 		|| pItem->Type == ITEM_WING+131
 		|| pItem->Type == ITEM_WING+132
@@ -9257,53 +9115,22 @@ bool IsHighValueItem(ITEM* pItem)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| pItem->Type == ITEM_WING+135
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef PJH_ADD_PANDA_PET
-		|| pItem->Type == ITEM_HELPER+80  //펜더펫
-#endif //PJH_ADD_PANDA_PET
-#ifdef PJH_ADD_PANDA_CHANGERING
-		|| pItem->Type == ITEM_HELPER+76  //펜더변신반지
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-#ifdef LDK_ADD_PC4_GUARDIAN
-		|| pItem->Type == ITEM_HELPER+64  //유료 데몬
-		|| pItem->Type == ITEM_HELPER+65  //유료 수호정령
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(푸른색)링	// MODEL_HELPER+109
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER+122
+		|| pItem->Type == ITEM_HELPER+123
+		|| pItem->Type == ITEM_HELPER+64
+		|| pItem->Type == ITEM_HELPER+65
 		|| pItem->Type == ITEM_HELPER+109
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(푸른색)링	// MODEL_HELPER+109
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// 인게임샾 아이템 // 신규 루비(붉은색)링		// MODEL_HELPER+110
 		|| pItem->Type == ITEM_HELPER+110
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// 인게임샾 아이템 // 신규 루비(붉은색)링		// MODEL_HELPER+110
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ			// 인게임샾 아이템 // 신규 토파즈(주황)링		// MODEL_HELPER+111
 		|| pItem->Type == ITEM_HELPER+111
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ			// 인게임샾 아이템 // 신규 토파즈(주황)링		// MODEL_HELPER+111
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 인게임샾 아이템 // 신규 자수정(보라색)링		// MODEL_HELPER+112
 		|| pItem->Type == ITEM_HELPER+112
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 인게임샾 아이템 // 신규 자수정(보라색)링		// MODEL_HELPER+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY			// 인게임샾 아이템 // 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
 		|| pItem->Type == ITEM_HELPER+113
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY			// 인게임샾 아이템 // 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// 인게임샾 아이템 // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
 		|| pItem->Type == ITEM_HELPER+114
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(푸른색)링	// MODEL_HELPER+109
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115
 		|| pItem->Type == ITEM_HELPER+115
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER			// 인게임샾 아이템 // 신규 키(실버)				// MODEL_POTION+112
 		|| pItem->Type == ITEM_POTION+112
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER			// 인게임샾 아이템 // 신규 키(실버)				// MODEL_POTION+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD				// 인게임샾 아이템 // 신규 키(골드)				// MODEL_POTION+113
 		|| pItem->Type == ITEM_POTION+113
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD				// 인게임샾 아이템 // 신규 키(골드)				// MODEL_POTION+113
-#ifdef LDK_MOD_PREMIUMITEM_SELL
-		|| ( pItem->Type==ITEM_HELPER+20 && iLevel==0) 			// 마법사의 반지
-#endif //LDK_MOD_PREMIUMITEM_SELL
+		|| ( pItem->Type==ITEM_HELPER+20 && iLevel==0)
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 255)	// 장착해제중인 인벤아이템만 고가아이템 설정 및 판매가능
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
@@ -9318,24 +9145,18 @@ bool IsHighValueItem(ITEM* pItem)
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		)
 	{
-#ifdef LDK_FIX_PERIODITEM_SELL_CHECK
 		if(true == pItem->bPeriodItem && false == pItem->bExpiredPeriod)
 		{
 			return false;
 		}
-#endif //LDK_FIX_PERIODITEM_SELL_CHECK
-#ifdef PBG_MOD_PANDAPETRING_NOTSELLING
 		else if(pItem->Type == ITEM_HELPER+80
 			|| pItem->Type == ITEM_HELPER+76
 			|| pItem->Type == ITEM_HELPER+64
 			|| pItem->Type == ITEM_HELPER+65
-#ifdef YDG_MOD_SKELETON_NOTSELLING
-			|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-			|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif // YDG_MOD_SKELETON_NOTSELLING
+			|| pItem->Type == ITEM_HELPER+122
+			|| pItem->Type == ITEM_HELPER+123
 			)
 		{
-			// 기간이 만료되면 고가의 아템 판별 이외엔 판매불가
 			if(true == pItem->bPeriodItem && true == pItem->bExpiredPeriod)
 			{
 				return true;
@@ -9343,14 +9164,12 @@ bool IsHighValueItem(ITEM* pItem)
 			else	
 				return false;
 		}
-#endif //PBG_MOD_PANDAPETRING_NOTSELLING
 		return true;
 	}
 	
 	return false;
 }
 
-// 개인상점 거래금지 아이템 품목(나중에 이 리스트를 기본으로 스크립트작업)
 bool IsPersonalShopBan(ITEM* pItem)
 {
 	if(pItem == NULL)
@@ -9365,107 +9184,56 @@ bool IsPersonalShopBan(ITEM* pItem)
 	}
 #endif // KJH_FIX_PERSONALSHOP_BAN_CASHITEM
 
-#ifdef LEM_FIX_ITEMSET_FROMJAPAN	// 개인상점 가능여부 아이템 목록 [lem_2010.8.19]
-	int nJapanResult = IsItemSet_FromJapan( pItem, eITEM_PERSONALSHOP );
-	if( nJapanResult == 1 )			return true;
-	else if( nJapanResult == 0 )	return false;
-#endif	// LEM_FIX_ITEMSET_FROMJAPAN [lem_2010.8.19]
-#if defined LDK_MOD_ITEM_DROP_TRADE_SHOP_EXCEPTION || defined PBG_MOD_PREMIUMITEM_TRADE_ENDURANCE
-	// 기간제 아이템이 아닐경우 일부 아이템 제한 해제( 기획이 계속 바뀌는 중 ㅡ.ㅡ;;;;;; )
 	if( (!pItem->bPeriodItem) && 
-#ifdef PBG_MOD_PREMIUMITEM_TRADE_ENDURANCE
-#ifndef _BLUE_SERVER						// 블루는 불가능
-		pItem->Type == ITEM_POTION+96 ||	// 카오스부적
-		pItem->Type == ITEM_POTION+54 ||	// 카오스카드
-#endif //_BLUE_SERVER
-#endif //PBG_MOD_PREMIUMITEM_TRADE_ENDURANCE
-		pItem->Type == ITEM_HELPER+64		// 데몬
-		|| pItem->Type == ITEM_HELPER+65	// 수호정령
-		|| pItem->Type == ITEM_HELPER+80	// 팬더펫
-		|| pItem->Type == ITEM_HELPER+76	// 팬더변신반지
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
+		pItem->Type == ITEM_HELPER+64
+		|| pItem->Type == ITEM_HELPER+65
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER+122
+		|| pItem->Type == ITEM_HELPER+123
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 255)	// 비장착일때 개인거래 가능
+		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 255)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-		|| (pItem->Type==ITEM_HELPER+20 && ((pItem->Level >> 3) & 15)==0) 			// 마법사의 반지
+		|| (pItem->Type==ITEM_HELPER+20 && ((pItem->Level >> 3) & 15)==0)
 		)
 	{
 		return false;
 	}		
-#endif //LDK_MOD_ITEM_DROP_TRADE_SHOP_EXCEPTION
 
-// 일본만 엘리트 해골전사 변신반지 기획변경에 의해 설정 변경 (2010.01.21)
-// (땅에 버리기, 유저간 거래, 창고사용, 개인상점 불가능->가능)
-	if(pItem->Type == ITEM_HELPER+38		// 문스톤 팬던트
-#ifndef LJH_MOD_ELITE_SKELETON_WARRIOR_CHANGE_RING_SETTING
-		|| pItem->Type == ITEM_HELPER+39	// 엘리트 해골전사 변신반지
-#endif	//LJH_MOD_ELITE_SKELETON_WARRIOR_CHANGE_RING_SETTING	
-		|| (pItem->Type == ITEM_POTION+21 && ((pItem->Level>>3)&15) != 3)		// 성주의 표식
-		|| ( pItem->Type >= ITEM_POTION+23 && pItem->Type <= ITEM_POTION+26 )   //  퀘스트 아이템
-		|| pItem->Type == ITEM_HELPER+19	// 절대지팡이
+	if(pItem->Type == ITEM_HELPER+38
+		|| pItem->Type == ITEM_HELPER+39
+		|| (pItem->Type == ITEM_POTION+21 && ((pItem->Level>>3)&15) != 3)
+		|| ( pItem->Type >= ITEM_POTION+23 && pItem->Type <= ITEM_POTION+26 )
+		|| pItem->Type == ITEM_HELPER+19
 		|| (pItem->Type == ITEM_POTION+11 && ((pItem->Level>>3)&0x0F) == 13)
-#ifdef CSK_LUCKY_SEAL
 		|| (pItem->Type >= ITEM_HELPER+43 && pItem->Type <= ITEM_HELPER+45)
-#endif //CSK_LUCKY_SEAL
 		|| (pItem->Type == ITEM_HELPER+20 && ((pItem->Level>>3)&15) != 0)
-		|| pItem->Type == ITEM_POTION+65	// 데쓰빔나이트의 불꽃
-		|| pItem->Type == ITEM_POTION+66	// 헬마이네의 뿔
-		|| pItem->Type == ITEM_POTION+67	// 어둠의불사조의 깃털
-		|| pItem->Type == ITEM_POTION+68	// 심연의눈동자
-#if defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
+		|| pItem->Type == ITEM_POTION+65
+		|| pItem->Type == ITEM_POTION+66
+		|| pItem->Type == ITEM_POTION+67
+		|| pItem->Type == ITEM_POTION+68
 		|| IsPartChargeItem(pItem)
-#endif //defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
-#ifdef PBG_ADD_CHARACTERCARD
-		|| pItem->Type == ITEM_HELPER+97	//마검사 캐릭터 카드
-		|| pItem->Type == ITEM_HELPER+98	//다크로드 캐릭터 카드
-		|| pItem->Type == ITEM_POTION+91	//소환술사 캐릭터 카드
-#endif //PBG_ADD_CHARACTERCARD
-#ifdef PBG_ADD_CHARACTERSLOT
-		|| pItem->Type == ITEM_HELPER+99	//캐릭터 슬롯 열쇠
-#endif //PBG_ADD_CHARACTERSLOT
-#ifndef KJH_MOD_CAN_TRADE_PANDA_PET		// 현재 해외용 define
-#ifdef PJH_ADD_PANDA_PET
-		|| pItem->Type == ITEM_HELPER+80	//팬더펫
-#endif //PJH_ADD_PANDA_PET
-#ifdef PJH_ADD_PANDA_CHANGERING
-		|| pItem->Type == ITEM_HELPER+76	//팬더변반
-#endif //PJH_ADD_PANDA_CHANGERING
-#endif // KJH_MOD_CAN_TRADE_PANDA_PET	// 현재 해외용 define
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-#ifndef PBG_MOD_SECRETITEM
-		// 거래 가능하게로 변경
-#ifdef PBG_ADD_SECRETITEM
-		//활력의 비약(최하급/하급/중급/상급)
-		|| (pItem->Type >= ITEM_HELPER+117 && pItem->Type <= ITEM_HELPER+120)
-#endif //PBG_ADD_SECRETITEM
-#endif //PBG_MOD_SECRETITEM
-#ifdef LDS_MOD_CHAOSCHARMITEM_DONOT_TRADE
-		|| (pItem->Type == MODEL_POTION+96)		// 카오스 조합 부적
-#endif // LDS_MOD_CHAOSCHARMITEM_DONOT_TRADE
-#ifdef LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR
-		|| pItem->Type ==ITEM_HELPER+109	// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
-		|| pItem->Type ==ITEM_HELPER+110	// 신규 루비(붉은색)링		// MODEL_HELPER+110
-		|| pItem->Type ==ITEM_HELPER+111	// 신규 토파즈(주황)링		// MODEL_HELPER+111
-		|| pItem->Type ==ITEM_HELPER+112	// 신규 자수정(보라색)링	// MODEL_HELPER+112
-		|| pItem->Type ==ITEM_HELPER+113	// 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
-		|| pItem->Type ==ITEM_HELPER+114	// 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
-		|| pItem->Type ==ITEM_HELPER+115	// 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115	
-#endif // LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR
+		|| pItem->Type == ITEM_HELPER+97
+		|| pItem->Type == ITEM_HELPER+98
+		|| pItem->Type == ITEM_POTION+91
+		|| pItem->Type == ITEM_HELPER+99
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER+122
+		|| pItem->Type == ITEM_HELPER+123
+		|| (pItem->Type == MODEL_POTION+96)
+		|| pItem->Type ==ITEM_HELPER+109
+		|| pItem->Type ==ITEM_HELPER+110
+		|| pItem->Type ==ITEM_HELPER+111
+		|| pItem->Type ==ITEM_HELPER+112
+		|| pItem->Type ==ITEM_HELPER+113
+		|| pItem->Type ==ITEM_HELPER+114
+		|| pItem->Type ==ITEM_HELPER+115
 #ifdef LDK_MOD_INGAMESHOP_WIZARD_RING_PERSONALSHOPBAN
-		|| ( pItem->Type==ITEM_HELPER+20 && ((pItem->Level >> 3) & 15)==0) 			// 마법사의 반지
+		|| ( pItem->Type==ITEM_HELPER+20 && ((pItem->Level >> 3) & 15)==0)
 #endif //LDK_MOD_INGAMESHOP_WIZARD_RING_PERSONALSHOPBAN
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| (pItem->Type >= ITEM_POTION+151 && pItem->Type <= ITEM_POTION+156)	// 시간제 퀘스트 아이템
+		|| (pItem->Type >= ITEM_POTION+151 && pItem->Type <= ITEM_POTION+156)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| g_pMyInventory->IsInvenItem(pItem->Type)
@@ -9481,119 +9249,32 @@ bool IsPersonalShopBan(ITEM* pItem)
 	return false;
 }
 
-// 교환 거래금지 아이템 품목
 bool IsTradeBan(ITEM* pItem)
 {
-#ifdef LEM_FIX_ITEMSET_FROMJAPAN	// 아이템 거래 가능여부 아이템 목록 [lem_2010.8.19]
-	int nJapanResult = IsItemSet_FromJapan( pItem, eITEM_TRADE );
-	if( nJapanResult == 1 )			return true;
-	else if( nJapanResult == 0 )	return false;
-#endif	// LEM_FIX_ITEMSET_FROMJAPAN [lem_2010.8.19]
-
-#ifdef PBG_MOD_PREMIUMITEM_TRADE
-	// 일부 프리미엄 아이템 IsPartChargeItem(pItem)함수내에 포함된 아이템중에
-	// 거래만 풀기 위함으로 예외처리.IsPartChargeItem(pItem)안에서 제거하면 모든게 풀림.
-	// 먼저 걸러내자,단 해외 아이템관련 사항으로 아이템별 예외처리
-#if defined LDK_MOD_ITEM_DROP_TRADE_SHOP_EXCEPTION || defined PBG_MOD_PREMIUMITEM_TRADE_ENDURANCE
-	// 밑의 not defined와 반대 되는 내용( 기획이 계속 바뀌는 중 ㅡ.ㅡ;;;;;; )
-	if( (!pItem->bPeriodItem) && ( 
-#if !defined PBG_MOD_PREMIUMITEM_TRADE_ENDURANCE || defined PBG_MOD_PREMIUMITEM_TRADE_0118
-		// 블루 레드 상관없이 개인거래 가능하도록 기획변경..(10.01.18)
-//#ifndef _BLUE_SERVER						// 블루는 불가능
-		pItem->Type == ITEM_POTION+96 ||	// 카오스부적
-		pItem->Type == ITEM_POTION+54 ||	// 카오스카드
-#ifdef PBG_MOD_PREMIUMITEM_TRADE_0118
-		pItem->Type == ITEM_POTION+53 ||	// 행운의부적
-#endif //PBG_MOD_PREMIUMITEM_TRADE_0118
-//#endif //_BLUE_SERVER
-#endif //!defined PBG_MOD_PREMIUMITEM_TRADE_ENDURANCE || defined PBG_MOD_PREMIUMITEM_TRADE_0118
-		pItem->Type == ITEM_HELPER+64		// 데몬
-		|| pItem->Type == ITEM_HELPER+65	// 수호정령
-		|| pItem->Type == ITEM_HELPER+80	// 팬더펫
-		|| pItem->Type == ITEM_HELPER+76	// 팬더변신반지
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 255)	// 비장착일때 판매 가능 
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-		|| (pItem->Type==ITEM_HELPER+20 && ((pItem->Level >> 3) & 15)==0) 			// 마법사의 반지
-		) )
-	{
-		return false;
-	}		
-#endif //LDK_MOD_ITEM_DROP_TRADE_SHOP_EXCEPTION
-#ifndef LDK_MOD_TRADEBAN_ITEMLOCK_AGAIN // 일부 유료 아이템중 트레이드 가능 불가능 변경(왜이런식으로 일처리를 해야되나....)(09.10.29)
-	if(pItem->Type == ITEM_POTION+96		// 카오스부적
-		|| pItem->Type == ITEM_POTION+54	// 카오스카드
-		|| pItem->Type == ITEM_HELPER+64	// 데몬
-		|| pItem->Type == ITEM_HELPER+65	// 수호정령
-		|| pItem->Type == ITEM_HELPER+80	// 팬더펫
-		|| pItem->Type == ITEM_HELPER+76	// 팬더변신반지
-		)
-	{
-		return false;
-	}		
-#endif //LDK_MOD_TRADEBAN_ITEMLOCK_AGAIN
-#endif //PBG_MOD_PREMIUMITEM_TRADE
-
-// 일본만 엘리트 해골전사 변신반지 기획변경에 의해 설정 변경 (2010.01.21)
-// (땅에 버리기, 유저간 거래, 창고사용, 개인상점 불가능->가능)
-	if(
-		pItem->Type == ITEM_HELPER+38		// 문스톤 팬던트
-#ifndef LJH_MOD_ELITE_SKELETON_WARRIOR_CHANGE_RING_SETTING
-		|| pItem->Type == ITEM_HELPER+39	// 엘리트 해골전사 변신반지
-#endif //LJH_MOD_ELITE_SKELETON_WARRIOR_CHANGE_RING_SETTING
-		|| (pItem->Type == ITEM_POTION+21 && ((pItem->Level>>3)&15) != 3)		// 성주의 표식
-		|| ( pItem->Type >= ITEM_POTION+23 && pItem->Type <= ITEM_POTION+26 )   //  퀘스트 아이템
+	if(pItem->Type == ITEM_HELPER+38
+		|| pItem->Type == ITEM_HELPER+39
+		|| (pItem->Type == ITEM_POTION+21 && ((pItem->Level>>3)&15) != 3)
+		|| ( pItem->Type >= ITEM_POTION+23 && pItem->Type <= ITEM_POTION+26 )
 		|| pItem->Type == ITEM_HELPER+19 
 		|| (pItem->Type == ITEM_POTION+11 && ((pItem->Level>>3)&0x0F) == 13)
-#ifdef CSK_LUCKY_SEAL
 		|| (pItem->Type >= ITEM_HELPER+43 && pItem->Type <= ITEM_HELPER+45)
-#endif //CSK_LUCKY_SEAL
 		|| (pItem->Type == ITEM_HELPER+20 && ((pItem->Level>>3)&15) != 0)
-		|| pItem->Type == ITEM_POTION+64	// 성물
-		|| pItem->Type == ITEM_POTION+65	// 데쓰빔나이트의 불꽃
-		|| pItem->Type == ITEM_POTION+66	// 헬마이네의 뿔
-		|| pItem->Type == ITEM_POTION+67	// 어둠의불사조의 깃털
-		|| pItem->Type == ITEM_POTION+68	// 심연의눈동자
-#if defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
+		|| pItem->Type == ITEM_POTION+64
+		|| pItem->Type == ITEM_POTION+65
+		|| pItem->Type == ITEM_POTION+66
+		|| pItem->Type == ITEM_POTION+67
+		|| pItem->Type == ITEM_POTION+68
 		|| IsPartChargeItem(pItem)
-#endif //defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
-#ifdef PBG_ADD_CHARACTERCARD
-		|| pItem->Type == ITEM_HELPER+97	// 마검사 캐릭터 카드
-		|| pItem->Type == ITEM_HELPER+98	// 다크로드 캐릭터 카드
-		|| pItem->Type == ITEM_POTION+91	// 소환술사 캐릭터 카드
-#endif //PBG_ADD_CHARACTERCARD
-#ifdef PBG_ADD_CHARACTERSLOT
-		|| pItem->Type == ITEM_HELPER+99	// 캐릭터 슬롯 열쇠
-#endif //PBG_ADD_CHARACTERSLOT
-#ifndef KJH_MOD_CAN_TRADE_PANDA_PET		// 현재 해외용 define
-#ifdef PJH_ADD_PANDA_PET
-		|| pItem->Type == ITEM_HELPER+80	// 팬더펫
-#endif //PJH_ADD_PANDA_PET
-#ifdef PJH_ADD_PANDA_CHANGERING
-		|| pItem->Type == ITEM_HELPER+76	//팬더변반
-#endif //PJH_ADD_PANDA_CHANGERING
-#endif // KJH_MOD_CAN_TRADE_PANDA_PET	// 현재 해외용 define
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-#ifndef PBG_MOD_SECRETITEM
-		// 가능하도록 변경
-#ifdef PBG_ADD_SECRETITEM
-		//활력의 비약(최하급/하급/중급/상급)
-		|| (pItem->Type >= ITEM_HELPER+117 && pItem->Type <= ITEM_HELPER+120)
-#endif //PBG_ADD_SECRETITEM
-#endif //PBG_MOD_SECRETITEM
+		|| pItem->Type == ITEM_HELPER+97
+		|| pItem->Type == ITEM_HELPER+98
+		|| pItem->Type == ITEM_POTION+91
+		|| pItem->Type == ITEM_HELPER+99
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER+122
+		|| pItem->Type == ITEM_HELPER+123
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| (pItem->Type >= ITEM_POTION+151 && pItem->Type <= ITEM_POTION+156)	// 시간제 퀘스트 아이템
+		|| (pItem->Type >= ITEM_POTION+151 && pItem->Type <= ITEM_POTION+156)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| g_pMyInventory->IsInvenItem(pItem->Type)
@@ -9603,7 +9284,7 @@ bool IsTradeBan(ITEM* pItem)
 		return true;
 	}
 
-	if( pItem->Type == ITEM_POTION+52)		// GM 선물상자: GM은 거래 가능
+	if( pItem->Type == ITEM_POTION+52)
 	{
 		if( g_isCharacterBuff((&Hero->Object), eBuff_GMEffect) ||	
 			(Hero->CtlCode == CTLCODE_20OPERATOR) || (Hero->CtlCode == CTLCODE_08OPERATOR) )
@@ -9618,46 +9299,29 @@ bool IsTradeBan(ITEM* pItem)
 	return false;
 }
 
-// 개인창고저장 금지 아이템 품목
 bool IsStoreBan(ITEM* pItem)
 {
-#ifdef LEM_FIX_ITEMSET_FROMJAPAN	// 창고저장 가능여부 아이템 목록 [lem_2010.8.19]
-	int nJapanResult = IsItemSet_FromJapan( pItem, eITEM_STORE );
-	if( nJapanResult == 1 )			return true;
-	else if( nJapanResult == 0 )	return false;
-#endif	// LEM_FIX_ITEMSET_FROMJAPAN [lem_2010.8.19]
-
-	if(( pItem->Type >= ITEM_POTION+23 && pItem->Type <= ITEM_POTION+26 )   //  퀘스트 아이템
-		|| (pItem->Type == ITEM_POTION+21 && ((pItem->Level>>3)&15) != 3)		// 성주의 표식
+	if(( pItem->Type >= ITEM_POTION+23 && pItem->Type <= ITEM_POTION+26 )
+		|| (pItem->Type == ITEM_POTION+21 && ((pItem->Level>>3)&15) != 3)
 		|| pItem->Type == ITEM_HELPER+19 
 		|| (pItem->Type == ITEM_POTION+11 && ((pItem->Level>>3)&0x0F) == 13)
-#ifdef CSK_LUCKY_SEAL
 		|| (pItem->Type >= ITEM_HELPER+43 && pItem->Type <= ITEM_HELPER+45)
-#endif //CSK_LUCKY_SEAL
-#ifdef ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-		|| pItem->Type == ITEM_HELPER+93	// 상승의인장마스터
-#endif	// ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-#ifdef ASG_ADD_CS6_WEALTH_SEAL_MASTER
-		|| pItem->Type == ITEM_HELPER+94	// 풍요의인장마스터
-#endif	// ASG_ADD_CS6_WEALTH_SEAL_MASTER
+		|| pItem->Type == ITEM_HELPER+93
+		|| pItem->Type == ITEM_HELPER+94
 		|| (pItem->Type == ITEM_HELPER+20 && ((pItem->Level>>3)&15) != 0)
-		|| pItem->Type == ITEM_POTION+65	// 데쓰빔나이트의 불꽃
-		|| pItem->Type == ITEM_POTION+66	// 헬마이네의 뿔
-		|| pItem->Type == ITEM_POTION+67	// 어둠의불사조의 깃털
-		|| pItem->Type == ITEM_POTION+68	// 심연의눈동자
-#ifdef YDG_FIX_USED_PORTAL_CHARM_STORE_BAN
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
-		|| (pItem->Type == ITEM_HELPER+70 && pItem->Durability == 1)	// 장소 저장한 이동의 부적
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#endif	// YDG_FIX_USED_PORTAL_CHARM_STORE_BAN
+		|| pItem->Type == ITEM_POTION+65
+		|| pItem->Type == ITEM_POTION+66
+		|| pItem->Type == ITEM_POTION+67
+		|| pItem->Type == ITEM_POTION+68
+		|| (pItem->Type == ITEM_HELPER+70 && pItem->Durability == 1)
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| (pItem->Type >= ITEM_POTION+151 && pItem->Type <= ITEM_POTION+156)	// 시간제 퀘스트 아이템
+		|| (pItem->Type >= ITEM_POTION+151 && pItem->Type <= ITEM_POTION+156)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
 #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 		|| (pItem->bPeriodItem == true)
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 254)		// 인벤아이템이 일반아이템으로 설정된 경우(레드) 장착시에는 창고보관 불가 
+		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 254)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		)
 	{
@@ -9669,12 +9333,8 @@ bool IsStoreBan(ITEM* pItem)
 
 	return false;
 }
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.10]-
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 액션 가능 여부 ( 개인상점/ 창고/ 거래/ 버리기/ 판매 )
+
+#ifdef LEM_ADD_LUCKYITEM
 sItemAct Set_ItemActOption( int _nIndex, int _nOption )
 {
 	sItemAct	sItem;
@@ -9769,12 +9429,7 @@ bool IsLuckySetItem( int iType )
 }
 #endif // KJH_FIX_SELL_LUCKYITEM
 
-//----------------------------------------------------------------------------------------
-// Function: 일본에서 카오스 카드를 통해 원래설정의 캐쉬템을 일반템으로 제공하고 있는 아이템.
-// Input   :  ITEM* pItem 
-// Output  : 사용할 수 없다면 FALSE, 사용가능 TRUE
-//------------------------------------------------------------------------[lem_2010.8.19]-
-#ifdef	LEM_FIX_ITEMSET_FROMJAPAN	// IsItemSet_FromJapan 함수[lem_2010.8.19]
+#ifdef	LEM_FIX_ITEMSET_FROMJAPAN
 int IsItemSet_FromJapan( ITEM* _pItem, int _nType )
 {
 	int	bEnAble		= 1;
@@ -9826,108 +9481,43 @@ int IsItemSet_FromJapan( ITEM* _pItem, int _nType )
 }
 #endif
 
-// 버리기 금지 아이템 품목
 bool IsDropBan(ITEM* pItem)
 {
-#ifdef LEM_FIX_ITEMSET_FROMJAPAN	// 버리기 가능여부 아이템 목록 (2010.8.19)
-	int nJapanResult = IsItemSet_FromJapan( pItem, eITEM_DROP );
-	if( nJapanResult == 1 )			return true;
-	else if( nJapanResult == 0 )	return false;
-#endif // LEM_FIX_ITEMSET_FROMJAPAN
-
-#ifdef LDK_MOD_PREMIUMITEM_DROP
-	// * 금,은색 상자와 금,은색 잠긴 상자 모두 버리기가 가능한 기획 요청으로 수정 하였습니다.
-	// 일부 프리미엄 아이템 IsPartChargeItem(pItem)함수내에 포함된 아이템중에
-	// 버리기 풀기 위함으로 예외처리.IsPartChargeItem(pItem)안에서 제거하면 모든게 풀림.
-	// 먼저 걸러내자,단 해외 아이템관련 사항으로 아이템별 예외처리
-
-#ifdef LDK_MOD_ITEM_DROP_TRADE_SHOP_EXCEPTION
-	// 기간제 아이템이 아닐경우 일부 아이템 제한 해제( 기획이 계속 바뀌는 중 ㅡ.ㅡ;;;;;; )
 	if( (!pItem->bPeriodItem) &&
-		( pItem->Type == ITEM_POTION+96		// 카오스부적
-		|| pItem->Type == ITEM_POTION+54	// 카오스카드
-		|| pItem->Type == ITEM_HELPER+64	// 데몬
-		|| pItem->Type == ITEM_HELPER+65	// 수호정령
-		|| pItem->Type == ITEM_HELPER+80	// 팬더펫
-		|| pItem->Type == ITEM_HELPER+76	// 팬더변신반지
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-		|| (pItem->Type==ITEM_HELPER+20 && ((pItem->Level >> 3) & 15)==0) 			// 마법사의 반지
+		( pItem->Type == ITEM_POTION+96
+		|| pItem->Type == ITEM_POTION+54
+		|| pItem->Type == ITEM_HELPER+64
+		|| pItem->Type == ITEM_HELPER+65
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER+122
+		|| pItem->Type == ITEM_HELPER+123
+		|| (pItem->Type==ITEM_HELPER+20 && ((pItem->Level >> 3) & 15)==0)
 		) )
 	{
 		return false;
 	}		
-#endif //LDK_MOD_ITEM_DROP_TRADE_SHOP_EXCEPTION
 
-	if( true == false
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST				// 금색상자
-		|| pItem->Type == ITEM_POTION+123
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST				// 은색상자
-		|| pItem->Type == ITEM_POTION+124
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-		)
+	if( true == false || pItem->Type == ITEM_POTION+123 || pItem->Type == ITEM_POTION+124)
 	{
 		return false;
 	}
-#endif //LDK_MOD_PREMIUMITEM_DROP
 
-	if (( pItem->Type >= ITEM_POTION+23 && pItem->Type <= ITEM_POTION+26 )	//  퀘스트 아이템
-	//이하 3차 체인지업 퀘스트 관련 아이템들은 서버에서 처리.(파티원은 버릴 수 있으므로)
-		|| (pItem->Type >= ITEM_POTION+65 && pItem->Type <= ITEM_POTION+68)	// 데쓰빔나이트의 불꽃, 헬마이네의 뿔, 어둠의불사조의 깃털, 심연의눈동자
-#if defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
+	if (( pItem->Type >= ITEM_POTION+23 && pItem->Type <= ITEM_POTION+26 )
+		|| (pItem->Type >= ITEM_POTION+65 && pItem->Type <= ITEM_POTION+68)
 		|| IsPartChargeItem(pItem)
-#ifdef PBG_FIX_CHARM_MIX_ITEM_WING
-		|| ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN)		//날개 부적들
+		|| ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN)
 			&& (pItem->Type <= ITEM_TYPE_CHARM_MIXWING+EWS_END))
-#endif //PBG_FIX_CHARM_MIX_ITEM_WING
-#endif //defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
-#ifdef PBG_ADD_CHARACTERCARD
-		|| pItem->Type == ITEM_HELPER+97	//마검사 캐릭터 카드
-		|| pItem->Type == ITEM_HELPER+98	//다크로드 캐릭터 카드
-		|| pItem->Type == ITEM_POTION+91	//소환술사 캐릭터 카드
-#endif //PBG_ADD_CHARACTERCARD
-#ifdef PBG_ADD_CHARACTERSLOT
-		|| pItem->Type == ITEM_HELPER+99	//캐릭터 슬롯 열쇠
-#endif //PBG_ADD_CHARACTERSLOT
-#ifdef PJH_ADD_PANDA_PET
-		|| pItem->Type == ITEM_HELPER+80	//캐릭터 슬롯 열쇠
-#endif //PJH_ADD_PANDA_PET
-#ifdef PJH_ADD_PANDA_CHANGERING
-		|| pItem->Type == ITEM_HELPER+76	//팬더변반
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-#ifdef PBG_ADD_SECRETITEM
-		//활력의 비약(최하급/하급/중급/상급)
-		|| (pItem->Type >= ITEM_HELPER+117 && pItem->Type <= ITEM_HELPER+120)
-#endif //PBG_ADD_SECRETITEM
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST			// 인게임샾 아이템 - 봉인된 금색상자
+		|| pItem->Type == ITEM_HELPER+97
+		|| pItem->Type == ITEM_HELPER+98
+		|| pItem->Type == ITEM_POTION+91
+		|| pItem->Type == ITEM_HELPER+99
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER+122
+		|| pItem->Type == ITEM_HELPER+123
 		|| pItem->Type == ITEM_POTION+121
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST		// 인게임샾 아이템 - 봉인된 은색상자
 		|| pItem->Type == ITEM_POTION+122
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifndef PBG_FIX_DROPBAN_GENS
-
-#ifndef LEM_FIX_JP0711_JEWELBOX_DROPFREE
-#ifdef PBG_ADD_GENSRANKING
-		|| (pItem->Type>=ITEM_POTION+141 && pItem->Type<=ITEM_POTION+144)		// 보석함
-#endif //PBG_ADD_GENSRANKING
-#endif // LEM_FIX_JP0711_JEWELBOX_DROPFREE
-
-#endif //PBG_FIX_DROPBAN_GENS
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| (pItem->Type>=ITEM_POTION+151 && pItem->Type<=ITEM_POTION+156)	// 시간제 퀘스트 아이템
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| g_pMyInventory->IsInvenItem(pItem->Type)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
@@ -9942,42 +9532,17 @@ bool IsDropBan(ITEM* pItem)
 	return false;
 }
 
-// 상점판매 금지 아이템 품목 (조만간 스크립트로 빼는 작업 예정 - 김재희)
 bool IsSellingBan(ITEM* pItem)
 {
 	int Level = (pItem->Level>>3)&15;
 
-#ifdef LEM_FIX_ITEMSET_FROMJAPAN	// 상점판매 가능여부 아이템 목록 [lem_2010.8.19]
-	int nJapanResult = IsItemSet_FromJapan( pItem, eITEM_SELL );
-	if( nJapanResult == 1 )			return true;
-	else if( nJapanResult == 0 )	return false;
-#endif
-
-
-#ifdef LDK_MOD_PREMIUMITEM_SELL
-	// 일부 프리미엄 아이템 IsPartChargeItem(pItem)함수내에 포함된 아이템중에
-	// 판매가능 하도록 예외처리.IsPartChargeItem(pItem)안에서 제거하면 모든게 풀림.
-	// 먼저 걸러내자,단 해외 아이템관련 사항으로 아이템별 예외처리
 	if( true == false
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER			// 인게임샾 아이템 // 신규 키(실버)				// MODEL_POTION+112
 		|| pItem->Type ==ITEM_POTION+112
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD				// 인게임샾 아이템 // 신규 키(골드)				// MODEL_POTION+113
 		|| pItem->Type ==ITEM_POTION+113
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
 		|| pItem->Type == ITEM_POTION+121
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST	// 봉인된 은색상자
 		|| pItem->Type == ITEM_POTION+122
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST			// 금색상자
 		|| pItem->Type == ITEM_POTION+123
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST			// 은색상자
 		|| pItem->Type == ITEM_POTION+124
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
 		|| pItem->Type == ITEM_WING+130
 		|| pItem->Type == ITEM_WING+131
 		|| pItem->Type == ITEM_WING+132
@@ -9986,131 +9551,63 @@ bool IsSellingBan(ITEM* pItem)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| pItem->Type == ITEM_WING+135
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef PJH_ADD_PANDA_PET
-		|| pItem->Type == ITEM_HELPER+80  //펜더펫
-#endif //PJH_ADD_PANDA_PET
-#ifdef PJH_ADD_PANDA_CHANGERING
-		|| pItem->Type == ITEM_HELPER+76  //펜더변신반지
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-#ifdef LDK_ADD_PC4_GUARDIAN
-		|| pItem->Type == ITEM_HELPER+64  //유료 데몬
-		|| pItem->Type == ITEM_HELPER+65  //유료 수호정령
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER+122
+		|| pItem->Type == ITEM_HELPER+123
+		|| pItem->Type == ITEM_HELPER+64
+		|| pItem->Type == ITEM_HELPER+65
 		|| pItem->Type ==ITEM_HELPER+109
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링		// MODEL_HELPER+110
 		|| pItem->Type ==ITEM_HELPER+110
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ	// 신규 토파즈(주황)링		// MODEL_HELPER+111
 		|| pItem->Type ==ITEM_HELPER+111
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST	// 신규 자수정(보라색)링	// MODEL_HELPER+112
 		|| pItem->Type ==ITEM_HELPER+112
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY	// 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
 		|| pItem->Type ==ITEM_HELPER+113
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
 		|| pItem->Type ==ITEM_HELPER+114
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115
 		|| pItem->Type ==ITEM_HELPER+115
-#endif //LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability != 254)	// 비장착중인 인벤아이템만 판매가능
+		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability != 254)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-#ifdef KJH_FIX_BTS295_DONT_EXPIRED_WIZARD_RING_RENDER_SELL_PRICE
-		|| ((pItem->Type==ITEM_HELPER+20)&&(Level == 0))	// 마법사의 반지
-#endif // KJH_FIX_BTS295_DONT_EXPIRED_WIZARD_RING_RENDER_SELL_PRICE
-#ifdef KJH_FIX_SELL_EXPIRED_UNICON_PET
-		|| (pItem->Type == ITEM_HELPER+106)			// 유니콘 펫
-#endif // KJH_FIX_SELL_EXPIRED_UNICON_PET
-#ifdef KJH_FIX_SELL_EXPIRED_CRITICAL_WIZARD_RING
-		|| (pItem->Type == ITEM_HELPER+107)			// 치명적인 마법사의 반지
-#endif // KJH_FIX_SELL_EXPIRED_CRITICAL_WIZARD_RING
+		|| ((pItem->Type==ITEM_HELPER+20)&&(Level == 0))
+		|| (pItem->Type == ITEM_HELPER+106)
+		|| (pItem->Type == ITEM_HELPER+107)
 		)
 	{
-#ifdef LDK_FIX_PERIODITEM_SELL_CHECK
 		if(true == pItem->bPeriodItem && true == pItem->bExpiredPeriod)
 		{
-			return false;		// 팔수 있음
+			return false;
 		}
-#else //LDK_FIX_PERIODITEM_SELL_CHECK
-		return false;
-#endif //LDK_FIX_PERIODITEM_SELL_CHECK
 	}
-#endif //LDK_MOD_PREMIUMITEM_SELL
 	
-	if(
-		pItem->Type==ITEM_POTION+11                                  //  행운의 상자는 팔수 없다.
-#ifndef BLOODCASTLE_2ND_PATCH
-		|| ( pItem->Type==ITEM_POTION+21 && Level==1 )                 //  스톤은 아이템을 팔수 없다.
-#endif // BLOODCASTLE_2ND_PATCH
-#ifdef FRIEND_EVENT
-#ifndef FRIENDLYSTONE_EXCHANGE_ZEN
-		|| ( pItem->Type==ITEM_POTION+21 && Level==2 )                 //  우정의 돌은 아이템을 팔수 없다.
-#endif // FRIENDLYSTONE_EXCHANGE_ZEN
-		|| (pItem->Type==ITEM_HELPER+20 && (Level==1 || Level==2) )    //  마법사의 반지 시리즈.
-#endif // FRIEND_EVENT
-#ifdef KJH_FIX_BTS295_DONT_EXPIRED_WIZARD_RING_RENDER_SELL_PRICE
-		|| ((pItem->bPeriodItem==true)&&(pItem->bExpiredPeriod==false)&&(pItem->Type==ITEM_HELPER+20)&&(Level==0))    //  기간이 지나지 않은 마법사의 반지
-		|| (pItem->Type==ITEM_HELPER+20 && (Level==1 || Level==2) )    //  마법사의 반지 시리즈.
-#endif // KJH_FIX_BTS295_DONT_EXPIRED_WIZARD_RING_RENDER_SELL_PRICE
-		|| pItem->Type == ITEM_HELPER+19			// 대천사의 절대 무기 (가짜)도 팔 수 없다.
-		|| (pItem->Type==ITEM_POTION+20 && Level >= 1 && Level <= 5)     //  애니버서리 박스
-#if defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
+	if(pItem->Type==ITEM_POTION+11
+		|| ( pItem->Type==ITEM_POTION+21 && Level==1 )
+		|| ((pItem->bPeriodItem==true)&&(pItem->bExpiredPeriod==false)&&(pItem->Type==ITEM_HELPER+20)&&(Level==0))
+		|| (pItem->Type==ITEM_HELPER+20 && (Level==1 || Level==2) )
+		|| pItem->Type == ITEM_HELPER+19
+		|| (pItem->Type==ITEM_POTION+20 && Level >= 1 && Level <= 5)
 		|| IsPartChargeItem(pItem)
-#ifdef PBG_FIX_CHARM_MIX_ITEM_WING
-		|| ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN)		//날개 부적들
+		|| ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN)
 			&& (pItem->Type <= ITEM_TYPE_CHARM_MIXWING+EWS_END))
-#endif //PBG_FIX_CHARM_MIX_ITEM_WING
-#ifdef PBG_MOD_PANDAPETRING_NOTSELLING
-		|| pItem->Type == ITEM_HELPER+80  //펜더펫
-		|| pItem->Type == ITEM_HELPER+76  //펜더변신반지
-#endif //PBG_MOD_PANDAPETRING_NOTSELLING
-#ifdef YDG_MOD_SKELETON_NOTSELLING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif // YDG_MOD_SKELETON_NOTSELLING
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER+122
+		|| pItem->Type == ITEM_HELPER+123
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-		|| (g_pMyInventory->IsInvenItem(pItem->Type))	// 비장착중인 인벤아이템만 판매가능
+		|| (g_pMyInventory->IsInvenItem(pItem->Type))
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-#ifdef PBG_MOD_SECRETITEM
-		|| (pItem->Type >= ITEM_HELPER+117 && pItem->Type <= ITEM_HELPER+120) // 활력 비약관련
-#endif //PBG_MOD_SECRETITEM
-#ifdef KJH_FIX_SELL_EXPIRED_UNICON_PET
-		|| (pItem->Type == ITEM_HELPER+106)			// 유니콘 펫
-#endif // KJH_FIX_SELL_EXPIRED_UNICON_PET
-#ifdef KJH_FIX_SELL_EXPIRED_CRITICAL_WIZARD_RING
-		|| (pItem->Type == ITEM_HELPER+107)			// 치명적인 마법사의 반지
-#endif // KJH_FIX_SELL_EXPIRED_CRITICAL_WIZARD_RING
-#endif //#if defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| pItem->Type == ITEM_POTION+151	// 1레벨 의뢰서
-		|| pItem->Type == ITEM_POTION+152	// 1레벨 의뢰 완료 확인서
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
+		|| (pItem->Type == ITEM_HELPER+106)
+		|| (pItem->Type == ITEM_HELPER+107)
 #ifdef KJH_FIX_SELL_LUCKYITEM
-		|| ( (IsLuckySetItem(pItem->Type) == true ) && (pItem->Durability > 0) )		// 럭키 아이템의 내구도가 있을때는 팔수 없다.
+		|| ( (IsLuckySetItem(pItem->Type) == true ) && (pItem->Durability > 0) )
 #endif // KJH_FIX_SELL_LUCKYITEM
 		)
 	{
-		return true;		// 팔수 없음
+		return true;
 	}
-#ifndef KJH_FIX_SELL_LUCKYITEM			// #ifndef
 #ifdef LEM_ADD_LUCKYITEM
 	if( Check_ItemAction( pItem, eITEM_SELL ) )	return true;
 #endif // LEM_ADD_LUCKYITEM
-#endif // KJH_FIX_SELL_LUCKYITEM
 
-	return false;			// 팔수 있음
+	return false;
 }
 
 
@@ -10121,122 +9618,66 @@ bool IsRepairBan(ITEM* pItem)
 	{
 		return true;
 	}
-#if defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC) // 유료상점 아이템
-	if( IsPartChargeItem(pItem) == true
-#ifdef PBG_FIX_CHARM_MIX_ITEM_WING
-		|| ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN)		//날개 부적들
-			&& (pItem->Type <= ITEM_TYPE_CHARM_MIXWING+EWS_END))
-#endif //PBG_FIX_CHARM_MIX_ITEM_WING
-		)
+	if( IsPartChargeItem(pItem) == true || ((pItem->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN) && (pItem->Type <= ITEM_TYPE_CHARM_MIXWING+EWS_END)))
 	{
 		return true;
 	}
-#endif //defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
 
-	if(
-		(pItem->Type >= ITEM_POTION+55 && pItem->Type <= ITEM_POTION+57)	// 혼돈의 상자
-		|| pItem->Type == MODEL_HELPER+43		// 상승의인장 
-		|| pItem->Type == MODEL_HELPER+44		// 풍요의인장
-		|| pItem->Type == MODEL_HELPER+45		// 유지의인장
-#ifdef KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
-		|| (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+3)		// 수호천사, 사탄, 유니리아, 디노란트
-#else // KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
-		|| (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+4)		// 수호천사, 사탄, 유니리아, 디노란트, 다크호스의 뿔
-#endif // KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
-		|| pItem->Type == ITEM_BOW+7		// 석궁용화살
-		|| pItem->Type == ITEM_BOW+15		// 화살
-		|| pItem->Type >= ITEM_POTION		// 물약index 전부
-		|| (pItem->Type >= ITEM_WING+7 && pItem->Type <= ITEM_WING+19)		// 구슬들
-		|| (pItem->Type >= ITEM_HELPER+14 && pItem->Type <= ITEM_HELPER+19)	// 로크의깃털, 열매, 대천사의서, 블러드본, 투명망토, 대천사의절대무기
-		|| pItem->Type == ITEM_POTION+21	// 레나
-#ifdef MYSTERY_BEAD
-		|| pItem->Type == ITEM_WING+26		// 신비의 구슬
-#endif // MYSTERY_BEAD	
-#ifndef KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET					// #ifndef
-		|| pItem->Type == ITEM_HELPER+4		// 다크호스의 뿔
-		|| pItem->Type == ITEM_HELPER+5		// 다크스피릿의 뿔
-#endif // KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET					// #ifndef
-		|| pItem->Type == ITEM_HELPER+38	// 문스톤팬던트
-#ifdef LDK_ADD_RUDOLPH_PET
-		|| pItem->Type == ITEM_HELPER+67	//크리스마스 루돌프
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef PJH_ADD_PANDA_PET
-		|| pItem->Type == ITEM_HELPER+80	//팬더펫
-#endif //PJH_ADD_PANDA_PET
-#ifdef PJH_ADD_PANDA_CHANGERING
-		|| pItem->Type == ITEM_HELPER+76	//팬더변반
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET
-		|| pItem->Type == ITEM_HELPER+106	//유니콘
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-		|| pItem->Type == ITEM_POTION+84  // 벚꽃상자
-		|| pItem->Type == ITEM_POTION+85  // 벚꽃술
-		|| pItem->Type == ITEM_POTION+86  // 벚꽃경단
-		|| pItem->Type == ITEM_POTION+87  // 벚꽃잎
-		|| pItem->Type == ITEM_POTION+88  // 흰색 벚꽃
-		|| pItem->Type == ITEM_POTION+89  // 붉은색 벚꽃
-		|| pItem->Type == ITEM_POTION+90  // 노란색 벚꽃
-#endif //CSK_EVENT_CHERRYBLOSSOM
+	if(	(  pItem->Type >= ITEM_POTION+55 && pItem->Type <= ITEM_POTION+57)
+		|| pItem->Type == MODEL_HELPER+43
+		|| pItem->Type == MODEL_HELPER+44
+		|| pItem->Type == MODEL_HELPER+45
+		|| (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+3)
+		|| pItem->Type == ITEM_BOW+7
+		|| pItem->Type == ITEM_BOW+15
+		|| pItem->Type >= ITEM_POTION
+		|| (pItem->Type >= ITEM_WING+7 && pItem->Type <= ITEM_WING+19)
+		|| (pItem->Type >= ITEM_HELPER+14 && pItem->Type <= ITEM_HELPER+19)
+		|| pItem->Type == ITEM_POTION+21
+		|| pItem->Type == ITEM_HELPER+4
+		|| pItem->Type == ITEM_HELPER+5
+		|| pItem->Type == ITEM_HELPER+38
+		|| pItem->Type == ITEM_HELPER+67
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER+122
+		|| pItem->Type == ITEM_HELPER+123
+		|| pItem->Type == ITEM_HELPER+106
+		|| pItem->Type == ITEM_POTION+84
+		|| pItem->Type == ITEM_POTION+85
+		|| pItem->Type == ITEM_POTION+86
+		|| pItem->Type == ITEM_POTION+87
+		|| pItem->Type == ITEM_POTION+88
+		|| pItem->Type == ITEM_POTION+89
+		|| pItem->Type == ITEM_POTION+90
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| g_pMyInventory->IsInvenItem(pItem->Type)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-
-//------------------------------------------------------------------------------
-#ifdef LDK_FIX_USING_ISREPAIRBAN_FUNCTION
-		// 기존에 빠져있던 부분 추가함
-		// 함수를 활용합시다...
-#ifdef DARK_WOLF
-		 || pItem->Type == ITEM_HELPER+6
-#endif// DARK_WOLF
 		|| pItem->Type == ITEM_HELPER+7
 		|| pItem->Type == ITEM_HELPER+10
 		|| pItem->Type == ITEM_HELPER+11
 		|| pItem->Type == ITEM_HELPER+20
 		|| pItem->Type == ITEM_HELPER+29
-		
-		//^ 펜릴 아이템 수리 불가능
 		|| pItem->Type == ITEM_HELPER+32
 		|| pItem->Type == ITEM_HELPER+33
 		|| pItem->Type == ITEM_HELPER+34
 		|| pItem->Type == ITEM_HELPER+35
 		|| pItem->Type == ITEM_HELPER+36
 		|| pItem->Type == ITEM_HELPER+37
-
-		// 피의 두루마리 등 수리 불가능
 		|| pItem->Type == ITEM_HELPER+49
 		|| pItem->Type == ITEM_HELPER+50
 		|| pItem->Type == ITEM_HELPER+51
-
-#ifdef PBG_ADD_SANTAINVITATION		//산타마을의 초대장
-#ifdef YDG_FIX_SANTA_INVITAION_REPAIR
 		|| pItem->Type == ITEM_HELPER+66
-#else	// YDG_FIX_SANTA_INVITAION_REPAIR
-		|| pItem->Type == MODEL_HELPER+66
-#endif	// YDG_FIX_SANTA_INVITAION_REPAIR
-#endif //PBG_ADD_SANTAINVITATION
-
-#endif //LDK_FIX_USING_ISREPAIRBAN_FUNCTION
-//------------------------------------------------------------------------------
-
-#ifdef LDK_ADD_GAMBLE_RANDOM_ICON	// 겜블러 아이콘
 		|| pItem->Type == ITEM_HELPER+71
 		|| pItem->Type == ITEM_HELPER+72
 		|| pItem->Type == ITEM_HELPER+73
 		|| pItem->Type == ITEM_HELPER+74
 		|| pItem->Type == ITEM_HELPER+75
-#endif //LDK_ADD_GAMBLE_RANDOM_ICON
 		)
 	{
 		return true;
 	}
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 수리 제외 [lem_2010.9.8]
+#ifdef LEM_ADD_LUCKYITEM
 	if( Check_ItemAction( pItem, eITEM_REPAIR ) )	return true;
 #endif // LEM_ADD_LUCKYITEM
 	
@@ -10245,37 +9686,33 @@ bool IsRepairBan(ITEM* pItem)
 
 bool IsWingItem(ITEM* pItem)
 {
-	switch(pItem->Type)		// 날개인지 검사
+	switch(pItem->Type)
 	{
-	case ITEM_WING:			// 요정날개
-	case ITEM_WING+1:		// 천공날개
-	case ITEM_WING+2:		// 사탄날개
-	case ITEM_WING+3:		// 정령날개
-	case ITEM_WING+4:		// 영혼날개
-	case ITEM_WING+5:		// 드라곤날개
-	case ITEM_WING+6:		// 암흑날개
-	case ITEM_HELPER+30:	// 군주의 망토
-	case ITEM_WING+36:		// 폭풍의날개
-	case ITEM_WING+37:		// 시공의날개
-	case ITEM_WING+38:		// 환영의날개
-	case ITEM_WING+39:		// 파멸의날개
-	case ITEM_WING+40:		// 제왕의망토
-#ifdef ADD_ALICE_WINGS_1
-	case ITEM_WING+41:		// 재앙의날개
-	case ITEM_WING+42:		// 절망의날개
-	case ITEM_WING+43:		// 차원의날개
-#endif	// ADD_ALICE_WINGS_1
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+	case ITEM_WING:
+	case ITEM_WING+1:
+	case ITEM_WING+2:
+	case ITEM_WING+3:
+	case ITEM_WING+4:
+	case ITEM_WING+5:
+	case ITEM_WING+6:
+	case ITEM_HELPER+30:
+	case ITEM_WING+36:
+	case ITEM_WING+37:
+	case ITEM_WING+38:
+	case ITEM_WING+39:
+	case ITEM_WING+40:
+	case ITEM_WING+41:
+	case ITEM_WING+42:
+	case ITEM_WING+43:
 	case ITEM_WING+130:
 	case ITEM_WING+131:
 	case ITEM_WING+132:
 	case ITEM_WING+133:
 	case ITEM_WING+134:
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-	case ITEM_WING+49:		// 무인의날개
-	case ITEM_WING+50:		// 군림의날개
-	case ITEM_WING+135:		// 작은무인의망토
+	case ITEM_WING+49:
+	case ITEM_WING+50:
+	case ITEM_WING+135:
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		return true;
 	}
@@ -10302,7 +9739,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.03f;
 		Vector(180.f,270.f,15.f,ObjectSelect.Angle);
 	}
-	// 갑옷류
 	else if(Type==MODEL_BOW+7 || Type==MODEL_BOW+15 )
 	{
     	Vector(0.f,270.f,15.f,ObjectSelect.Angle);
@@ -10406,27 +9842,19 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.05f;
     	Vector(180.f,90.f,13.f,ObjectSelect.Angle);
 	}
-#ifdef ADD_SOCKET_ITEM
 	else if(Type == MODEL_BOW+22 || Type == MODEL_BOW+23)
 	{
 		Position[0] -= 0.10f;
 		Position[1] += 0.08f;
     	Vector(180.f,-90.f,15.f,ObjectSelect.Angle);
 	}
-#else // ADD_SOCKET_ITEM
-	else if( Type == MODEL_BOW+22)	// 요정 활
-	{
-		Position[1] += 0.12f;
-    	Vector(180.f,90.f,15.f,ObjectSelect.Angle);
-	}
-#endif // ADD_SOCKET_ITEM
 	else if(Type == MODEL_STAFF+13)
 	{
 		Position[0] += 0.02f;
 		Position[1] += 0.02f;
 		Vector(180.f,90.f,8.f,ObjectSelect.Angle);
 	}
-	else if(Type==MODEL_BOW+20)		//. 요정추가활
+	else if(Type==MODEL_BOW+20)
 	{
 		Vector(180.f,-90.f,15.f,ObjectSelect.Angle);
 	}
@@ -10457,7 +9885,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		{
       		Vector(180.f,270.f,25.f,ObjectSelect.Angle);
 		}
-		// 소켓아이템추가 [Season4]
 	}									
 	else if(Type>=MODEL_SHIELD && Type<MODEL_SHIELD+MAX_ITEM_INDEX)
 	{
@@ -10467,56 +9894,47 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
     {
 		Vector(-90.f,-90.f,0.f,ObjectSelect.Angle);
     }
-    else if ( Type==MODEL_HELPER+4 )    //  다크호스.
+    else if ( Type==MODEL_HELPER+4 ) 
     {
 		Vector(-90.f,-90.f,0.f,ObjectSelect.Angle);
     }
-    else if ( Type==MODEL_HELPER+5 )    //  다크스피릿.
+    else if ( Type==MODEL_HELPER+5 )
     {
 		Vector(-90.f,-35.f,0.f,ObjectSelect.Angle);
     }
-    else if ( Type==MODEL_HELPER+31 )   //  영혼.
+    else if ( Type==MODEL_HELPER+31 )
     {
 		Vector(-90.f,-90.f,0.f,ObjectSelect.Angle);
     }
-    else if ( Type==MODEL_HELPER+30 )   //  망토.    
+    else if ( Type==MODEL_HELPER+30 )    
     {
         Vector ( -90.f, 0.f, 0.f, ObjectSelect.Angle );
     }
-	else if ( Type==MODEL_EVENT+16 )    //  군주의 소매
+	else if ( Type==MODEL_EVENT+16 )
 	{
 		Vector ( -90.f, 0.f, 0.f, ObjectSelect.Angle );
 	}
     else if ( Type==MODEL_HELPER+16 || Type == MODEL_HELPER+17 )
-    {	//. 대천사의서, 블러드본
+    {
 		Vector(270.f,-10.f,0.f,ObjectSelect.Angle);
     }
-	else if ( Type==MODEL_HELPER+18 )	//. 투명망도
+	else if ( Type==MODEL_HELPER+18 )
 	{
 		Vector(290.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if ( Type==MODEL_EVENT+11 )	//. 스톤
+	else if ( Type==MODEL_EVENT+11 )
 	{
-#ifdef FRIEND_EVENT
-        if ( Type==MODEL_EVENT+11 && Level==2 )    //  우정의 돌.
-        {
-    		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
-        }
-        else
-#endif// FRIEND_EVENT
-        {
-            Vector(-90.f, -20.f, -20.f, ObjectSelect.Angle);
-        }
+        Vector(-90.f, -20.f, -20.f, ObjectSelect.Angle);
 	}
-	else if ( Type==MODEL_EVENT+12)		//. 영광의 반지
+	else if ( Type==MODEL_EVENT+12)
 	{
 		Vector(250.f, 140.f, 0.f, ObjectSelect.Angle);
 	}
-	else if (Type==MODEL_EVENT+14)		//. 제왕의 반지
+	else if (Type==MODEL_EVENT+14)
 	{
 		Vector(255.f, 160.f, 0.f, ObjectSelect.Angle);
 	}
-	else if (Type==MODEL_EVENT+15)		// 마법사의 반지
+	else if (Type==MODEL_EVENT+15)
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
@@ -10524,57 +9942,46 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
     {
 		Vector(270.f, 160.f, 20.f, ObjectSelect.Angle);
     }
-	else if ( Type==MODEL_HELPER+29 )	//. 투명망도
+	else if ( Type==MODEL_HELPER+29 )
 	{
 		Vector(290.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	//^ 펜릴 위치, 각도 조절
-	else if(Type == MODEL_HELPER+32)	// 갑옷 파편
+
+	else if(Type == MODEL_HELPER+32)
 	{
 		Position[0] += 0.01f;
 		Position[1] -= 0.03f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_HELPER+33)	// 여신의 가호
+	else if(Type == MODEL_HELPER+33)
 	{
 		Position[1] += 0.02f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_HELPER+34)	// 맹수의 발톱
-	{
-		Position[0] += 0.01f;
-		Position[1] += 0.02f;
-		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
-	}
-	else if(Type == MODEL_HELPER+35)	// 뿔피리 조각
+	else if(Type == MODEL_HELPER+34)
 	{
 		Position[0] += 0.01f;
 		Position[1] += 0.02f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_HELPER+36)	// 부러진 뿔피리
+	else if(Type == MODEL_HELPER+35)
+	{
+		Position[0] += 0.01f;
+		Position[1] += 0.02f;
+		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
+	}
+	else if(Type == MODEL_HELPER+36)
 	{
 		Position[0] += 0.01f;
 		Position[1] += 0.05f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_HELPER+37)	// 펜릴의 뿔피리
+	else if(Type == MODEL_HELPER+37)
 	{
 		Position[0] += 0.01f;
 		Position[1] += 0.04f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#ifdef CSK_PCROOM_ITEM
-	else if(Type >= MODEL_POTION+55 && Type <= MODEL_POTION+57
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| Type >= MODEL_POTION+157 && Type <= MODEL_POTION+159
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		)
-	{
-		Position[1] += 0.02f;
-		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
-	}
-#endif // CSK_PCROOM_ITEM
 	else if(Type == MODEL_HELPER+49)
 	{
 		Position[1] -= 0.04f;
@@ -10590,11 +9997,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] -= 0.02f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_POTION+64
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-			|| Type == MODEL_POTION+153
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		)
+	else if(Type == MODEL_POTION+64)
 	{
 		Position[1] += 0.02f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -10609,66 +10012,51 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.04f;
 		Vector(270.f, 120.f, 0.f, ObjectSelect.Angle);
 	}
-// 	else if(Type == MODEL_WING+36)	// 폭풍의날개(흑기사)
-// 	{
-// 		Position[1] -= 0.35f;
-// 		Vector(270.f,-10.f,0.f,ObjectSelect.Angle);
-// 	}
-	else if(Type == MODEL_WING+37)	// 시공의날개(법사)
+	else if(Type == MODEL_WING+37)
 	{
 		Position[1] += 0.05f;
 		Vector(270.f,-10.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_WING+38)	// 환영의날개(요정)
+	else if(Type == MODEL_WING+38)
 	{
 		Position[1] += 0.05f;
 		Vector(270.f,-10.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_WING+39)	// 파멸의날개(마검)
+	else if(Type == MODEL_WING+39)
 	{
 		Position[1] += 0.08f;
 		Vector(270.f,-10.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_WING+40)	// 제왕의망토(다크로드)
+	else if(Type == MODEL_WING+40)
 	{
 		Position[1] += 0.05f;
 		Vector(270.f,-10.f,0.f,ObjectSelect.Angle);
 	}
-#ifdef ADD_ALICE_WINGS_1
-	else if(Type == MODEL_WING+42)	// 절망의날개(소환술사)
+	else if(Type == MODEL_WING+42)
 	{
 		Position[1] += 0.05f;
 		Vector(270.f,0.f,2.f,ObjectSelect.Angle);
 	}
-#endif	// ADD_ALICE_WINGS_1
-#ifdef CSK_FREE_TICKET
-	// 아이템 위치와 각도 세팅
-	else if(Type == MODEL_HELPER+46)	// 데빌스퀘어 자유입장권
+	else if(Type == MODEL_HELPER+46)
 	{
 		Position[1] -= 0.04f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_HELPER+47)	// 블러드캐슬 자유입장권
+	else if(Type == MODEL_HELPER+47)
 	{
 		Position[1] -= 0.04f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_HELPER+48)	// 칼리마 자유입장권
+	else if(Type == MODEL_HELPER+48)
 	{
 		Position[1] -= 0.04f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);	
 	}
-#endif // CSK_FREE_TICKET
-#ifdef CSK_CHAOS_CARD
-	// 아이템 위치와 각도 세팅
-	else if(Type == MODEL_POTION+54)	// 카오스카드
+	else if(Type == MODEL_POTION+54)
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif // CSK_CHAOS_CARD
-#ifdef CSK_RARE_ITEM
-	// 아이템 위치와 각도세팅
-	else if(Type == MODEL_POTION+58)// 희귀 아이템 티켓( 부분 1차 )
+	else if(Type == MODEL_POTION+58)
 	{
 		Position[1] += 0.07f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -10683,16 +10071,11 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.06f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif // CSK_RARE_ITEM
-#ifdef CSK_LUCKY_CHARM
-	else if( Type == MODEL_POTION+53 )// 행운의 부적
+	else if( Type == MODEL_POTION+53 )
 	{
 		Position[1] += 0.042f;
 		Vector(180.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //CSK_LUCKY_CHARM
-#ifdef CSK_LUCKY_SEAL
-#ifdef PBG_FIX_ITEMANGLE
 	else if( Type == MODEL_HELPER+43 )
 	{
 		Position[1] -= 0.027f;
@@ -10711,191 +10094,129 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[0] += 0.005f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#else //PBG_FIX_ITEMANGLE
-	else if( Type == MODEL_HELPER+43 )// 행운의 인장
-	{
-		Position[1] += 0.082f;
-		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
-	}
-	else if( Type == MODEL_HELPER+44 )
-	{
-		Position[1] += 0.08f;
-		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
-	}
-	else if( Type == MODEL_HELPER+45 )
-	{
-		Position[1] += 0.07f;
-		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
-	}
-#endif //PBG_FIX_ITEMANGLE
-#endif //CSK_LUCKY_SEAL
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 	else if( Type >= MODEL_POTION+70 && Type <= MODEL_POTION+71 )
 	{
 		Position[0] += 0.01f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 	else if( Type >= MODEL_POTION+72 && Type <= MODEL_POTION+77 )
 	{
 		Position[1] += 0.08f;
 		Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_SCROLL_ITEM
-#ifdef PSW_SEAL_ITEM               // 이동 인장
 	else if( Type == MODEL_HELPER+59 )
 	{
 		Position[0] += 0.01f;
 		Position[1] += 0.02f;
 		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_SEAL_ITEM
-#ifdef PSW_FRUIT_ITEM              // 리셋 열매
 	else if( Type >= MODEL_HELPER+54 && Type <= MODEL_HELPER+58 )
 	{
   		Position[1] -= 0.02f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_FRUIT_ITEM
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
 	else if( Type >= MODEL_POTION+78 && Type <= MODEL_POTION+82 )
 	{
 		Position[1] += 0.01f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_SECRET_ITEM
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
 	else if( Type == MODEL_HELPER+60 )
 	{
 		Position[1] -= 0.06f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_INDULGENCE_ITEM
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
-	else if( Type == MODEL_HELPER+61 )// 환영의 사원 자유 입장권
+	else if( Type == MODEL_HELPER+61 )
 	{
 		Position[1] -= 0.04f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-#ifdef PSW_RARE_ITEM
-	else if(Type == MODEL_POTION+83)// 희귀 아이템 티켓( 부분 2차 )
+	else if(Type == MODEL_POTION+83)
 	{
 		Position[1] += 0.06f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_RARE_ITEM
-#ifdef PSW_CHARACTER_CARD 
-	else if(Type == MODEL_POTION+91) // 캐릭터 카드
+	else if(Type == MODEL_POTION+91)
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif // PSW_CHARACTER_CARD
-#ifdef PSW_NEW_CHAOS_CARD
-	else if(Type == MODEL_POTION+92) // 카오스카드 골드
+	else if(Type == MODEL_POTION+92)
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_POTION+93) // 카오스카드 레어
+	else if(Type == MODEL_POTION+93)
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_POTION+95) // 카오스카드 미니
+	else if(Type == MODEL_POTION+95)
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif // PSW_NEW_CHAOS_CARD
-#ifdef PSW_NEW_ELITE_ITEM
-	else if( Type == MODEL_POTION+94 ) // 엘리트 중간 치료 물약
+	else if( Type == MODEL_POTION+94 )
 	{
 		Position[0] += 0.01f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	else if( Type >= MODEL_POTION+84 && Type <= MODEL_POTION+90 )
 	{
-		if( Type == MODEL_POTION+84 )  // 벚꽃상자
+		if( Type == MODEL_POTION+84 )
 		{
 			Position[1] += 0.01f;
 			Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 		}
-		else if( Type == MODEL_POTION+85 )  // 벚꽃술
+		else if( Type == MODEL_POTION+85 )
 		{
 			Position[1] -= 0.01f;
 			Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 		}
-		else if( Type == MODEL_POTION+86 )  // 벚꽃경단
+		else if( Type == MODEL_POTION+86 )
 		{
 			Position[1] += 0.01f;
 			Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 		}
-		else if( Type == MODEL_POTION+87 )  // 벚꽃잎
+		else if( Type == MODEL_POTION+87 )
 		{
 			Position[1] += 0.01f;
 			Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 		}
-		else if( Type == MODEL_POTION+88 )  // 흰색 벚꽃
+		else if( Type == MODEL_POTION+88 )
 		{
 			Position[1] += 0.015f;
 			Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 		}
-		else if( Type == MODEL_POTION+89 )  // 붉은색 벚꽃
+		else if( Type == MODEL_POTION+89 )
 		{
 			Position[1] += 0.015f;
 			Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 		}
-		else if( Type == MODEL_POTION+90 )  // 노란색 벚꽃
+		else if( Type == MODEL_POTION+90 )
 		{
 			Position[1] += 0.015f;
 			Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 		}
 	}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef PSW_ADD_PC4_SEALITEM
 	else if(Type == MODEL_HELPER+62)
 	{
-#ifdef PBG_FIX_ITEMANGLE
 		Position[0] += 0.01f;
 		Position[1] -= 0.03f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
-#else //PBG_FIX_ITEMANGLE
-		Position[0] += 0.01f;
-		Position[1] += 0.08f;
-		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
-#endif //PBG_FIX_ITEMANGLE
 	}
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef PSW_ADD_PC4_SEALITEM
 	else if(Type == MODEL_HELPER+63)
 	{
 		Position[0] += 0.01f;
 		Position[1] += 0.082f;
 		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef PSW_ADD_PC4_SCROLLITEM
 	else if(Type >= MODEL_POTION+97 && Type <= MODEL_POTION+98)
 	{
 		Position[1] += 0.09f;
 		Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PSW_ADD_PC4_SCROLLITEM
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
 	else if( Type == MODEL_POTION+96 ) 
 	{
-#ifdef PBG_FIX_ITEMANGLE
 		Position[1] -= 0.013f;
 		Position[0] += 0.003f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
-#else //PBG_FIX_ITEMANGLE
-		Position[1] += 0.13f;
-		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
-#endif //PBG_FIX_ITEMANGLE
 	}
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-#ifdef LDK_ADD_PC4_GUARDIAN
 	else if( MODEL_HELPER+64 <= Type && Type <= MODEL_HELPER+65 )
 	{
 		switch(Type)
@@ -10909,7 +10230,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		}
 		Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //LDK_ADD_PC4_GUARDIAN
 	else if (Type == MODEL_POTION+65)
 	{
 		Position[1] += 0.05f;
@@ -10925,12 +10245,10 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.11f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	// 엘리트 해골전사 변신반지 각도 조절
-	else if(Type == MODEL_HELPER+39)	// 엘리트 해골전사 변신반지
+	else if(Type == MODEL_HELPER+39)
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#ifdef CSK_LUCKY_SEAL
 	else if( Type == MODEL_HELPER+43 )
 	{
 //		Position[1] += 0.082f;
@@ -10947,8 +10265,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.07f;
 		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //CSK_LUCKY_SEAL
-	// 할로윈 이벤트 변신반지 각도 조절
 	else if(Type == MODEL_HELPER+40)
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -10961,7 +10277,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	// GM 변신반지 각도 조절
 	else if(Type == MODEL_HELPER+42)
 	{
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -10982,7 +10297,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.02f;
 		Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
 	}
-	else if( Type==MODEL_POTION+43 || Type==MODEL_POTION+44 )	// 제련석 인벤토리 위치 조정.
+	else if( Type==MODEL_POTION+43 || Type==MODEL_POTION+44 )
 	{
 		Position[0] -= 0.04f;
 		Position[1] += 0.02f;
@@ -11032,12 +10347,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		//Position[1] += 0.08f;
 		Vector(270.f,-25.f,0.f,ObjectSelect.Angle);
 	}
-#ifdef _PVP_MURDERER_HERO_ITEM
-    else if ( Type==MODEL_POTION+30 )
-    {
-		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
-    }
-#endif// _PVP_MURDERER_HERO_ITEM
 	else if(Type >= MODEL_ETC+19 && Type <= MODEL_ETC+27)
 	{
 		Position[0] += 0.03f;
@@ -11120,13 +10429,13 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.040f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if(Type >= MODEL_HELPER+125 && Type <= MODEL_HELPER+127)	//도플갱어, 바르카, 바르카제7맵 자유입장권
+	else if(Type >= MODEL_HELPER+125 && Type <= MODEL_HELPER+127)
 	{
 		Position[0] += 0.007f;
 		Position[1] -= 0.035f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if (Type == MODEL_HELPER+124)	// 유료채널 입장권.
+	else if (Type == MODEL_HELPER+124)
 	{
 		Position[1] -= 0.04f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -11154,34 +10463,30 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] -= 0.02f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_HELPER+122 )	// 스켈레톤 변신반지
+	else if( Type == MODEL_HELPER+122 )
 	{
 		Position[0] += 0.01f;
 		Position[1] -= 0.035f;
 		Vector(290.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
-
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM	
-	else if( Type == MODEL_HELPER+128 )	// 매조각상
+	else if( Type == MODEL_HELPER+128 )
 	{
 		Position[0] += 0.017f;
 		Position[1] -= 0.053f;
 		Vector(270.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_HELPER+129 )	// 양조각상
+	else if( Type == MODEL_HELPER+129 )
 	{
 		Position[0] += 0.012f;
 		Position[1] -= 0.045f;
 		Vector(270.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_HELPER+134 )	// 편자
+	else if( Type == MODEL_HELPER+134 )
 	{
 		Position[0] += 0.005f;
 		Position[1] -= 0.033f;
 		Vector(270.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	//LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 	else if( Type == MODEL_HELPER+130 )
 	{
 		Position[0] += 0.007f;
@@ -11206,7 +10511,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] -= 0.053f;
 		Vector(270.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	//LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 	else if( Type == MODEL_HELPER+69 )
 	{
 		Position[0] += 0.005f;
@@ -11289,7 +10593,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.07f;
     	Vector(180.f,-90.f,15.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_WING+47)	// 플레임스트라이크 구슬
+	else if(Type == MODEL_WING+47)
 	{
 		Position[0] += 0.005f;
 		Position[1] -= 0.015f;
@@ -11315,14 +10619,12 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[0] += 0.002f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#ifdef PBG_ADD_CHARACTERSLOT
 	else if(Type == MODEL_HELPER+99)
 	{
 		Position[0] += 0.002f;
 		Position[1] += 0.025f;
 		Vector(270.0f, 180.0f, 45.0f, ObjectSelect.Angle);
 	}
-#endif //PBG_ADD_CHARACTERSLOT
 	else if ( Type==MODEL_POTION+110 )
 	{
 		Position[0] += 0.005f;
@@ -11543,48 +10845,42 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 
 	switch (Type)
 	{
-	case MODEL_SWORD+26:		// 플랑베르주
+	case MODEL_SWORD+26:
 		{
-			Position[0] -= 0.02f;				// 가로
-			Position[1] += 0.04f;				// 높이
+			Position[0] -= 0.02f;
+			Position[1] += 0.04f;
 			Vector(180.f,270.f,10.f,ObjectSelect.Angle);
 		}break;
-	case MODEL_SWORD+27:		// 소드브레이커
+	case MODEL_SWORD+27:
 		{
 			Vector(180.f,270.f,15.f,ObjectSelect.Angle);
 		}break;
-	case MODEL_SWORD+28:		// 룬바스타드
+	case MODEL_SWORD+28:
 		{
 			Position[1] += 0.02f;
 			Vector(180.f,270.f,10.f,ObjectSelect.Angle);
 		}break;
-	case MODEL_MACE+16:			// 프로스트메이스
+	case MODEL_MACE+16:
 		{
 			Position[0] -= 0.02f;
 			Vector(180.f,270.f,15.f,ObjectSelect.Angle);
 		}
 		break;
-	case MODEL_MACE+17:			// 앱솔루트셉터
+	case MODEL_MACE+17:
 		{
 			Position[0] -= 0.02f;
 			Position[1] += 0.04f;
 			Vector(180.f,270.f,15.f,ObjectSelect.Angle);
 		}break;
-// 	case MODEL_BOW+23:			// 다크스팅거
-// 		{
-// 			Position[0] -= 0.04f;
-// 			Position[1] += 0.12f;
-// 			Vector(180.f, -90.f, 15.f,ObjectSelect.Angle);
-// 		}break;
-	case MODEL_STAFF+30:			// 데들리스테프
+	case MODEL_STAFF+30:
 		{
 			Vector(180.f,90.f,10.f,ObjectSelect.Angle);
 		}break;
-	case MODEL_STAFF+31:			// 인베리알스테프
+	case MODEL_STAFF+31:
 		{
 			Vector(180.f,90.f,10.f,ObjectSelect.Angle);
 		}break;
-	case MODEL_STAFF+32:			// 소울브링거
+	case MODEL_STAFF+32:
 		{
 			Vector(180.f,90.f,10.f,ObjectSelect.Angle);
 		}break;

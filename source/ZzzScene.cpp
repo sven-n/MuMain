@@ -72,7 +72,6 @@
 #include "PartyManager.h"
 #include "w_CursedTemple.h"
 #include "CameraMove.h"
-// 맵 관련 include
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM
@@ -82,18 +81,6 @@
 #ifdef YDG_ADD_CS5_PORTAL_CHARM
 #include "PortalMgr.h"
 #endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef CSK_HACK_TEST
-#include "HackTest.h"
-#endif // CSK_HACK_TEST
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-#include "ProtectAuto.h"
-#endif // CSK_MOD_PROTECT_AUTO_V1
-#ifdef LDK_ADD_GLOBAL_PORTAL_SYSTEM
-#include "GlobalPortalSystem.h"
-#endif //LDK_ADD_GLOBAL_PORTAL_SYSTEM
-#ifdef PBG_ADD_CHARACTERSLOT
-#include "Slotlimit.h"
-#endif //PBG_ADD_CHARACTERSLOT
 #ifdef KJH_ADD_SERVER_LIST_SYSTEM
 #include "ServerListManager.h"
 #endif // KJH_ADD_SERVER_LIST_SYSTEM
@@ -152,11 +139,6 @@ int  SceneFlag = WEBZEN_SCENE;
 #endif // MOVIE_DIRECTSHOW
 
 int  MoveSceneFrame = 0;
-
-#ifdef ANTIHACKING_ENABLE
-int g_iPrevFrameCount = 0;
-BOOL g_bNewFrame = FALSE;
-#endif //ANTIHACKING_ENABLE
 
 #ifdef _PVP_DYNAMIC_SERVER_TYPE
 BOOL g_bIsCurrentServerPvP = FALSE;
@@ -481,9 +463,6 @@ void WebzenScene(HDC hDC)
 	LoadBitmap("Interface\\lo_webzen_logo.tga", BITMAP_TITLE+4, GL_LINEAR);
 	LoadBitmap("Interface\\lo_lo.jpg", BITMAP_TITLE+5, GL_LINEAR, GL_REPEAT);
 #endif //PBG_ADD_NEWLOGO_IMAGECHANGE
-#ifdef PBG_ENGLISHLOGO_CHANGE
-	LoadBitmap("Interface\\lo_webzen_logo_Eng.tga", BITMAP_TITLE+6, GL_LINEAR);
-#endif //PBG_ENGLISHLOGO_CHANGE
 #ifdef PBG_ADD_NEWLOGO_IMAGECHANGE
 	LoadBitmap("Interface\\lo_back_s5_03.jpg", BITMAP_TITLE+6, GL_LINEAR);
 	LoadBitmap("Interface\\lo_back_s5_04.jpg", BITMAP_TITLE+7, GL_LINEAR);
@@ -1511,15 +1490,6 @@ void CreateLogInScene()
     CreateSocket(szServerIpAddress,g_ServerPort);
     EnableSocket = true;
 
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM		// #ifndef
-	ServerNumber = 0;
-	
-	//초기화
-	ServerSelectHi = -1;
-	ServerSelectLow = -1;
-	ServerConnectCount = 0;
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-	
 	GuildInputEnable = false;
 	TabInputEnable   = false;
 	GoldInputEnable  = false;

@@ -6,89 +6,63 @@
 #ifdef _LANGUAGE_ENG
 
 // [2010.10.28 1.03H+]
-#define LJH_FIX_RUNTIME_ERROR_WHEN_RENDERING_DROPPED_ITEMNAME	// 바닥에 떨어진 아이템의 이름을 렌더링할때 런타임에러 수정(10.09.15)
-#define LEM_FIX_ITEMTOOLTIP_POS									// 인벤토리 아이템 툴팁 위치 수정 [lem.2010.7.28]
-#define PBG_FIX_DROPBAN_GENS									// 버리기 아이템 수정
+#define PBG_FIX_DROPBAN_GENS
 
-#define KJW_FIX_ITEMNAME_ORB_OF_SUMMONING						// 어떠한 소환구슬인지 표시(2010.10.28)
-#define KJW_FIX_ITEMNAME_CRITICAL_SCROLL						// 크리티컬 스크롤 이름 표시 문제(2010.10.28)
-#define KJW_FIX_MYSHOP											// 상점명 16자 제한, 가격 변경, 구매 관련 수정(2010.10.28)
+#define KJW_FIX_ITEMNAME_ORB_OF_SUMMONING
+#define KJW_FIX_ITEMNAME_CRITICAL_SCROLL
+#define KJW_FIX_MYSHOP
 
-#define KJW_FIX_CHAOSCASTLE_MESSAGE								// 다국어(포르투칼, 스페인) 카오스캐슬 남은시간 표시 문제 수정(2010.10.28)
-#define KJW_FIX_QUEST_INFO_DUPLICATE							// 특정 퀘스트가 중복으로 표기되는문제 수정(2010.10.28)
-#define KJW_FIX_GENS_WINDOW_OPEN								// 겐스 정보창 열면 클라이언트 죽는문제(포르투칼, 스페인) & 800*600 (2010.10.28)
+#define KJW_FIX_CHAOSCASTLE_MESSAGE
+#define KJW_FIX_QUEST_INFO_DUPLICATE
+#define KJW_FIX_GENS_WINDOW_OPEN
 
-#define KJW_ADD_NEWUI_SCROLLBAR									// 기본 스크롤바 UI추가(2010.10.28)
-#define KJW_ADD_NEWUI_TEXTBOX									// 기본 텍스트박스 UI추가(2010.10.28)
-#define KJW_ADD_NEWUI_GROUP										// 그룹 UI추가(2010.10.28)
+#define KJW_ADD_NEWUI_SCROLLBAR
+#define KJW_ADD_NEWUI_TEXTBOX
+#define KJW_ADD_NEWUI_GROUP
 
-#define KWAK_ADD_TRACE_FUNC										// Trace 함수 추가 -> 기존 OutPutDebugString 대체함
+#define KWAK_ADD_TRACE_FUNC
 #ifdef _DEBUG
-	#define KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK							// 알트키 누르면 포커싱 잃는 문제
+	#define KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK
 #endif // _DEBUG
 
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << 버그수정 >>
-//----------------------------------------------------------------------------------------------
-// [2010.10.14 글로벌 1.03E+] - 김재우
 
 #define KJW_FIX_SLEEPUP_SKILL_INFO						// 소환술사 마스터레벨 슬립 강화 정보 출력 수정(10.10.01)
 #define KJW_FIX_LOGIN_ID_BLACK_SPACE					// 아이디 입력 부분에 검은색 배경이 연장되는 문제 수정(10.10.01)
 #define KJW_FIX_SLIDE_MOVE								// 슬라이드 움직이는 방식 변경 ( 기존의 방식은 앞에 공백을 집어넣는 형태로 입력 글자수에도 제한을 줌 )(10.10.12)
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------------------------
 // << Season 5-4 >>
-//----------------------------------------------------------------------------------------------
-// [2010.09.30 글로벌 1.03B+] - 이주흥
 
 #define SEASON5_4
 #ifdef  SEASON5_4
 
 	//-----------------------------------------------------------------------------
 	// [ Season 5 - Part 4 ]
-	// - 박종훈
 	#define PJH_ADD_MASTERSKILL								//소환술사 마스터레벨 추가(2010.03.09)
 		#ifdef PJH_ADD_MASTERSKILL								
 		#undef KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT	//해외에 소환술사 마스터스킬 추가(10.05.28)
 	#endif //PJH_ADD_MASTERSKILL								
 
-	// - 안상규
 	#define ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND				// 칸투르 폐허3 분쟁지역화.(10.04.13)
 
-	// - 김재희
 	#define KJH_FIX_POTION_PRICE							// 상점 물약가격 버그수정 (10.04.16)
 	#define KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT			// 비정상적적인 종료시 이벤트맵 초기화 (10.04.20)
-
-	// - 이동근, 이동석
 	#define LDK_LDS_EXTENSIONMAP_HUNTERZONE					// 사냥터 확장 맵 (기존 맵 리뉴얼 및 몬스터, 보스급 몬스터 추가.). (10.02.18)
 
 	#ifdef LDK_LDS_EXTENSIONMAP_HUNTERZONE						
-		// - 이동석
-		// 일반몹들 지역별
 		#define LDS_EXTENSIONMAP_MONSTERS_RAKLION				// 확장 맵내의 일반 몹들. 라클리온 (10.02.18)
 		#define LDS_EXTENSIONMAP_MONSTERS_AIDA					// 확장 맵내의 일반 몹들. 아이다 (10.02.26)
 		#define LDS_EXTENSIONMAP_MONSTERS_KANTUR				// 확장 맵내의 일반 몹들. 칸투르 (10.03.02)
 		#define LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET			// 확장 맵내의 일반 몹들. 평원의늪 (10.03.02)
-
-		// 추가 작업
 		#define LDS_MOD_EXTEND_MAXMODELLIMITS_200TO400			// 기존 몬스터모델 갯수 제한 (MAX_MODEL_MONSTER=200)개를 초과하여 오류 발생으로 (MAX_MODEL_MONSTER=400)설정. (10.03.15)
-
-		// - 이동근
-		// 보스몹 메듀사
 		#define LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA				// 평온의늪 보스 몬스터 메듀사 (10.02.19)
 		#define LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT		// 평온의늪 보스 몬스터 메듀사 눈 잔상 이펙트(10.03.03)
 		#define LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_WAND_EFFECT	// 평온의늪 보스 몬스터 메듀사 지팡이 이펙트(10.03.04)
 		#define LDK_MOD_EVERY_USE_SKILL_CAOTIC					// 카오틱 디세이어 몬스터 사용 가능하도록 수정(10.03.08)
-
-		// 맵 작업
 		#define LDK_FIX_AIDA_OBJ41_UV_FIX						// 아이다맵 41번 obj(빛) uv 값 고정(10.03.16)
 		#define LDK_ADD_AIDA_OBJ77_OBJ78						// 아이다맵 77,78번 obj uv흐름 추가(10.03.18)
 	#endif // LDK_LDS_EXTENSIONMAP_HUNTERZONE
 
-	// - 이주흥
 	#define LJH_ADD_SUPPORTING_MULTI_LANGUAGE					// 다국어지원 (10.05.19)
 	#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		#define LJH_ADD_RESTRICTION_ON_ID						// ID, 길드이름, 캐릭터명은 영어, 숫자, 특수기호만 사용할수 있게 제한(10.09.17)
@@ -125,12 +99,8 @@
 #define KJH_FIX_SELL_EXPIRED_CRITICAL_WIZARD_RING		// 기간지난 치명적인 마법사의 반지 상점판매 가능하게 수정 (10.06.08)
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------------------------
-// << Season 5 - Part 1 ~ Part 3, 부분 유료화 7, 8차 >>
-//----------------------------------------------------------------------------------------------
-// [2010.05.27 글로벌 1.03w] - 김재희
-
+// << Season 5 - Part 1 
 
 #define UPDATE_100527
 #ifdef UPDATE_100527
@@ -250,7 +220,6 @@
 	#define PBG_MOD_PANDAPETRING_NOTSELLING						// 펜더 펫 반지 안팔리게 설정(10.01.11)
 	#define LJH_FIX_EXTENDING_OVER_MAX_TIME_4S_To_10S			// 해외사용자들 일부 사용자에게 캐시샵이 열리지 않아 Max Time을 기존 4초에서 10초로 변경(09.12.17)
 	#define KJH_FIX_INGAMESHOP_SCRIPTDOWN_BUG					// 인게임샵 스크립트 다운로드 버그 (09.12.28)
-	#define PJH_FIX_HELP_LAYER									// 헬프 레이어 최상위로 변경(2009.12.01)
 	#define LDK_FIX_EXPIREDPERIOD_ITEM_EQUIP_WARNING			// 만료된 아이템 작용불가 및 경고 
 	#define LDK_FIX_EQUIPED_EXPIREDPERIOD_RING_EXCEPTION		// 착용중인 만료된 반지 능력치 계산 예외처리(09.12.11)
 	#define LDK_FIX_EQUIPED_EXPIREDPERIOD_AMULET_EXCEPTION		// 착용중인 만료된 목걸이 능력치 계산 예외처리(09.12.11)
@@ -821,96 +790,47 @@
 #endif // ADD_TOTAL_CHARGE_6TH
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << 버그수정 패치 >>
-//----------------------------------------------------------------------------------------------
-// [2010.01.14 글로벌 1.03l] - 안상규
-
-#define LJH_FIX_BUG_CASTING_SKILLS_W_CURSOR_OUT_OF_VIEWPORT	// (국내버그)마우스 오른쪽 버튼 클릭 중 커서가 게임뷰포트를 벗어나 인벤창등에 있을때도 기술을 계속 쓸수 있는 버그 수정(09.12.02)
-#define PBG_MOD_VIEMAPMOVE									// 베트남 이동창 이동의 인장 없이 이동 가능하게 수정(09.12.07) 
-#define LJH_FIX_NO_MSG_FOR_FORCED_MOVEOUT_FROM_BATTLESOCCER	//전투축구중 길드마스터가 아닌 자신이 강제로 경기중 경기장 밖으로 나갔을 때 결과 메세지 출력하지 않음(09.12.28) 
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << 버그수정 패치 >>
-//----------------------------------------------------------------------------------------------
-// [2009.12.10 글로벌 1.03k] - 안상규
-
-#define PBG_FIX_CURSEDTEMPLE_SYSTEMMSG				// 환영의사원 메시지 처리 버그 수정(09.10.22)
-#define PBG_MOD_NONPVPSERVER						// 4번째 서버도 nonpvp서버로 변경(09.11.26)
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << 버그수정 패치 >>
-//----------------------------------------------------------------------------------------------
-// [2009.10.22 글로벌 1.03g] - 박보근
-
-#define YDG_DARK_SPIRIT_CRASH_BECAUSEOF_FIX_MEMORY_LEAK			// 메모리 누수 수정때문에 발생한 다크스피릿 튕기는 현상 임시 수정 (2009.09.02)
-#define LDS_FIX_PETDESTRUCTOR_TERMINATE_EFFECTOWNER_ADD_TYPE	// LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER이후 추가작업. 다크스피릿 공격:돌격(MODEL_AIR_FORCE) Effect사용 도중 펫::다크스피릿 메모리 반환시 뻑나는 문제 FIXED. (09.10.15)
-#define LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER	// 펫 메니저의 펫 종료 될 때마다 펫당 발생하던 메모리릭 FIXED. (YDG_FIX_MEMORY_LEAK_0905) define작업 이후 발생 문제로 메모리 반환된 Pet이 Effect 중일때 발생(Owner로 자신을 넘긴경우만)으로 Effect의 들의 NULL 처리 작업. (09.09.17)
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// [2009.06.25 1.03a]
-
-//#define PBG_ENGLISHLOGO_CHANGE						//글로벌 로고 변경(2008.12.22)[2차 테섭시에 적용예정][리소스 변경됨,테스트중]
+#define LJH_FIX_BUG_CASTING_SKILLS_W_CURSOR_OUT_OF_VIEWPORT
+#define PBG_MOD_VIEMAPMOVE
+#define LJH_FIX_NO_MSG_FOR_FORCED_MOVEOUT_FROM_BATTLESOCCER
+#define PBG_FIX_CURSEDTEMPLE_SYSTEMMSG
+#define PBG_MOD_NONPVPSERVER
+#define YDG_DARK_SPIRIT_CRASH_BECAUSEOF_FIX_MEMORY_LEAK
+#define LDS_FIX_PETDESTRUCTOR_TERMINATE_EFFECTOWNER_ADD_TYPE
+#define LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
 
 // (2009.04.23)
-#define PJH_CHARACTER_RENAME						// 캐릭터명 중복시 캐릭터 이름 변경.
-#define LDK_MOD_GLOBAL_PORTAL_LOGO					// 글로벌 포털 로그 재수정.(09.04.16) - 기본 웹젠 로고
-#define LDK_ADD_GLOBAL_PORTAL_SYSTEM				// 글로벌 포털 클래스 추가.(09.03.18)
+#define PJH_CHARACTER_RENAME
+#define LDK_MOD_GLOBAL_PORTAL_LOGO
 
-#ifndef FOR_WORK			// #ifndef
-	// 실제 업데이트만 적용
-	#define LDK_ADD_GLOBAL_PORTAL_WEBLOGIN_CHECK		// 글로벌 포털 웹로그인 확인 - 공유정보 없으면 클라이언트 종료.(09.04.06)
-	#define LDK_MOD_GLOBAL_PORTAL_LOGIN_ID_INPUT_DENY	// 글로벌 포털 id 입력 거부 - 공유정보 id만 사용함.(09.04.06)
-	#define LDK_MOD_GLOBAL_PORTAL_ID_HIDE				// 글로벌 포털 id -> 시리얼화 *표 표시(2009.04.24)
-#endif //FOR_WORK
-
-//#define LDK_MOD_GLOBAL_PORTAL_CASHSHOP_BUTTON_DENY	// 글로벌 포털 일부섭 유료샵 버튼 비활성화.(09.04.07)
-#define LDK_FIX_MOVEWINDOW_SCROLL_BUG				// 이동창 스크롤버그(2009.04.22)
-#define LDK_MOD_PASSWORD_LENGTH_20					// 패스워드 길이 20자로 수정(2009.04.24)
-#define LDK_MOD_GLOBAL_STORAGELOCK_CHANGE			// 글로벌 포털 창고 주민번호 입력 변경(2009.04.27)
-
-//-----------------------------------------------------------------------------
+//#define LDK_MOD_GLOBAL_PORTAL_CASHSHOP_BUTTON_DENY	// (09.04.07)
+#define LDK_FIX_MOVEWINDOW_SCROLL_BUG				// (2009.04.22)
+#define LDK_MOD_PASSWORD_LENGTH_20					// (2009.04.24)
+#define LDK_MOD_GLOBAL_STORAGELOCK_CHANGE			// (2009.04.27)
 
 #define ADD_CASH_SHOP_5TH
 
 #ifdef ADD_CASH_SHOP_5TH
-	#define LDK_FIX_CS5_HIDE_SEEDLEVEL	// 상점 시드레벨 표시 안함
-	#define YDG_ADD_CS5_REVIVAL_CHARM	// 부활의 부적
-	#define YDG_ADD_CS5_PORTAL_CHARM	// 이동의 부적
+	#define LDK_FIX_CS5_HIDE_SEEDLEVEL
+	#define YDG_ADD_CS5_REVIVAL_CHARM
+	#define YDG_ADD_CS5_PORTAL_CHARM
 #endif	// YDG_ADD_CASH_SHOP_5TH
 
-#define PBG_WOPS_CURSEDTEMPLEBASKET_MOVING			//성물보관함이 움직이는 버그 수정(2008.12.18)
-
-//-----------------------------------------------------------------------------
+#define PBG_WOPS_CURSEDTEMPLEBASKET_MOVING			//(2008.12.18)
 
 #define PSW_PARTCHARGE_ITEM4
 
 #ifdef PSW_PARTCHARGE_ITEM4
-	#define PSW_ADD_PC4_SEALITEM       //  치유, 신성( 체젠, 마젠 ) 인장
-	#define PSW_ADD_PC4_SCROLLITEM     //  전투, 강화( 크리, 액설 데미지 증가 ) 스크롤
-	#define PSW_ADD_PC4_CHAOSCHARMITEM //  카오스 조합 부적
-	#define LDK_ADD_PC4_GUARDIAN		// 수호천사, 사탄
-	#define	LDK_FIX_GUARDIAN_CHANGE_LIFEWORD			// 1차 프리미엄 아이템 (내구력 표기 -> 생명으로 수정)(2009.01.14)
-	#define LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE // lightmarks.jpg, effect #define ADD_SOCKET_ITEM 와 중복 되는것 있음... 
+	#define PSW_ADD_PC4_SEALITEM
+	#define PSW_ADD_PC4_SCROLLITEM
+	#define PSW_ADD_PC4_CHAOSCHARMITEM
+	#define LDK_ADD_PC4_GUARDIAN
+	#define	LDK_FIX_GUARDIAN_CHANGE_LIFEWORD			//(2009.01.14)
+	#define LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 #endif //PSW_PARTCHARGE_ITEM4
 
 
-//-----------------------------------------------------------------------------
-// [ 버그수정 패치 ]
-
-#define PSW_ADD_FOREIGN_HELPWINDOW                  // f1 key를 눌렀을때 도움말중에 이벤트맵 일정표 해외 적용 안하기( 2008.07.08 ) - 해외만 적용
-
-
-//-----------------------------------------------------------------------------
-// [ 부분 유료화 3차 ]
+#define PSW_ADD_FOREIGN_HELPWINDOW
 
 #define PSW_PARTCHARGE_ITEM3
 

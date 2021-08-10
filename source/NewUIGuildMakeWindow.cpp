@@ -284,15 +284,11 @@ void CNewUIGuildMakeWindow::ChangeEditBox(const UISTATES type)
 	m_EditBox->SetText(NULL);
 }
 
-// 손을 좀 더 보자..
-// 글로벌 변수에 뒤죽 박죽...-=-;;;
 bool CNewUIGuildMakeWindow::UpdateGMInfo()
 {
 	m_Button[GUILDMAKEBUTTON_INFO_MAKE].SetPos( m_Pos.x+((190/2)-(108/2)), m_Pos.y+100 );
-	// 1303 "길드 만들기"
 	m_Button[GUILDMAKEBUTTON_INFO_MAKE].ChangeText(GlobalText[1303]);
 
-	//길드 만들겠다는 버튼
 	if( m_Button[GUILDMAKEBUTTON_INFO_MAKE].UpdateMouseEvent() )
 	{
 		SendRequestGuildMaster( TRUE );
@@ -314,15 +310,14 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 {
 	m_EditBox->DoAction();
 
-	// 길드 마크 그리기
 	UpdateEditGuildMark( m_Pos.x, m_Pos.y );
 
 	//button
 	m_Button[GUILDMAKEBUTTON_MARK_LNEXT].SetPos(m_Pos.x+15, m_Pos.y+379);
-	m_Button[GUILDMAKEBUTTON_MARK_LNEXT].ChangeText(GlobalText[1306]); //"이전"
+	m_Button[GUILDMAKEBUTTON_MARK_LNEXT].ChangeText(GlobalText[1306]);
 
 	m_Button[GUILDMAKEBUTTON_MARK_RNEXT].SetPos(m_Pos.x+110, m_Pos.y+379);
-	m_Button[GUILDMAKEBUTTON_MARK_RNEXT].ChangeText(GlobalText[1305]); //"다음"
+	m_Button[GUILDMAKEBUTTON_MARK_RNEXT].ChangeText(GlobalText[1305]);
 
 	if( m_Button[GUILDMAKEBUTTON_MARK_LNEXT].UpdateMouseEvent() )
 	{

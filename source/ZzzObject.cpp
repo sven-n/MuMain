@@ -10801,7 +10801,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 				CreateParticle(BITMAP_CHROME_ENERGY2,Position,o->Angle,Light, 0, 0.7f);
 		}
 	}
-#ifdef ADD_ALICE_WINGS_2
 	else if(Type == MODEL_WING+43)
 	{
 		vec3_t  p, Position, Light;
@@ -10834,7 +10833,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			CreateSprite(BITMAP_FLARE,Position,Scale+2.0f,Light,o);
 		}
 	}
-#endif	// ADD_ALICE_WINGS_2
 
 	if(!o->EnableShadow)
 	{

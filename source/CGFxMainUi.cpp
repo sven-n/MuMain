@@ -1110,13 +1110,11 @@ void CGFxMainUi::RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOp
 		Position[1] += 0.05f;
 		Vector(270.f,-10.f,0.f,ObjectSelect.Angle);
 	}
-#ifdef ADD_ALICE_WINGS_1
 	else if(Type == MODEL_WING+42)	// 절망의날개(소환술사)
 	{
 		Position[1] += 0.05f;
 		Vector(270.f,0.f,2.f,ObjectSelect.Angle);
 	}
-#endif	// ADD_ALICE_WINGS_1
 #ifdef CSK_FREE_TICKET
 	// 아이템 위치와 각도 세팅
 	else if(Type == MODEL_HELPER+46)	// 데빌스퀘어 자유입장권

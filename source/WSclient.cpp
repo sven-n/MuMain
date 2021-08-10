@@ -10068,13 +10068,9 @@ void ReceiveChatRoomChatText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
 	CUIChatWindow * pChatWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(dwWindowUIID);
 	if (pChatWindow == NULL) return;
 	
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	char ChatMsg[MAX_CHATROOM_TEXT_LENGTH] = {'\0'};
 	if (Data->MsgSize >= MAX_CHATROOM_TEXT_LENGTH) return;
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	char ChatMsg[101] = {0};
-	if (Data->MsgSize > 100) return;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 	memcpy(ChatMsg, Data->Msg, Data->MsgSize);
 	BuxConvert((LPBYTE)ChatMsg, Data->MsgSize);
 	
@@ -13447,15 +13443,6 @@ bool ReceivePeriodItemList(BYTE* pReceiveBuffer)
 	return true;
 }
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
-
-#ifdef PBG_MOD_GAMEGUARD_HANDLE
-bool ReceiveGameGuardCharInfo(BYTE* pReceiveBuffer)
-{
-	LPPMSG_GAMEGUARD_HADLE Data = (LPPMSG_GAMEGUARD_HADLE)pReceiveBuffer;
-
-	return true;
-}
-#endif //PBG_MOD_GAMEGUARD_HANDLE
 
 #ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
 bool ReceiveSkillDummySeedValue(BYTE* pReceiveBuffer)

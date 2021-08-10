@@ -97,18 +97,6 @@
 //opengl
 #include <gl/glew.h>
 #include <gl/gl.h>
-//#include <gl/glu.h>
-//#include <GL/glaux.h>
-//#ifdef KJH_MOD_LIBRARY_LINK_EACH_NATION
-//#include <glext.h>
-//#include <wglext.h>
-//#include <glprocs.h>
-
-// #else // KJH_MOD_LIBRARY_LINK_EACH_NATION
-// #include "glext.h"
-// #include "wglext.h"
-// #include "glprocs.h"
-// #endif // KJH_MOD_LIBRARY_LINK_EACH_NATION
 
 //util
 #define SAFE_DELETE(p)  { if(p) { delete (p);     (p)=NULL; } }

@@ -2060,43 +2060,32 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					
 					bool bSuccess = true;
 					
-					// 날개 종류 아이템이 아니면 false
-					if(iType > ITEM_WING+6 // 날개들
-						&& iType != ITEM_HELPER+30	// 군주의 망토
-#ifdef ADD_ALICE_WINGS_1
-						&& !(iType >= ITEM_WING+36 && iType <= ITEM_WING+43)	// 폭풍의 날개 ~ 제왕의 망토, 소환술사 날개
-#else	// ADD_ALICE_WINGS_1
-						&& !( iType >= ITEM_WING+36 && iType <= ITEM_WING+40 )	// 폭풍의 날개 ~ 제왕의 망토
-#endif	// ADD_ALICE_WINGS_1
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+					if(iType > ITEM_WING+6
+						&& iType != ITEM_HELPER+30
+						&& !(iType >= ITEM_WING+36 && iType <= ITEM_WING+43)
 						&& !( ITEM_WING+130 <= iType && iType <= ITEM_WING+134 )
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-						&& !( iType >= ITEM_WING+49 && iType <= ITEM_WING+50 )	// 레이지파이터 날개
-						&& (iType != ITEM_WING+135)	// 작은 무인의 망토
+						&& !( iType >= ITEM_WING+49 && iType <= ITEM_WING+50 )
+						&& (iType != ITEM_WING+135)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 						)
 					{
 						bSuccess = false;
 					}
 					
-					// 화살 종류이면 false
-					if(iType==ITEM_BOW+7 
-						|| iType==ITEM_BOW+15) //화살
+					if(iType==ITEM_BOW+7 || iType==ITEM_BOW+15)
 					{
 						bSuccess = false;
 					}
-					// 축석에 레벨 6이상인 경우. ( 0, 1, 2, 3, 4, 5 ) -> ( 1, 2, 3, 4, 5, 6 )
-					// 영석에 레벨 9이상인 경우  ( 6, 7, 8 ) -> ( 7, 8, 9 )
+
 					if((pPickItem->Type==ITEM_POTION+13 && iLevel >= 6)    
 						|| (pPickItem->Type==ITEM_POTION+14 && iLevel >= 9)) 
 					{	    
 						bSuccess = false;
 					}
 					
-					//^ 펜릴 수리 관련(메세지 박스)
 					if(pPickItem->Type == ITEM_POTION+13 
-						&& iType == ITEM_HELPER+37 && iDurability != 255)	// 펜릴의 뿔피리
+						&& iType == ITEM_HELPER+37 && iDurability != 255)
 					{
 						SEASON3B::CFenrirRepairMsgBox* pMsgBox = NULL;
 						SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CFenrirRepairMsgBoxLayout), &pMsgBox);
@@ -2111,18 +2100,13 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					
 					if(pPickItem->Type==ITEM_POTION+42 )
 					{
-#ifdef SOCKET_SYSTEM
 						if (g_SocketItemMgr.IsSocketItem(pItem))
 						{
-							// 소켓아이템에는 조석을 바를수 없다
 							bSuccess = false;
 						}
 						else
-#endif	// SOCKET_SYSTEM
 						if(pItem->Jewel_Of_Harmony_Option != 0  )
 						{
-							//강화된 아이템은 강화를 못한다..
-							// 환원을 한 다음 다시 강화...
 							bSuccess = false;
 						}
 						else
@@ -2131,7 +2115,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 							
 							if( strengthitem == SI_None )
 							{
-								//검류, 도끼류, 둔기류, 창류, 활/석궁류, 지팡이, 방어구
 								bSuccess = false;
 							}
 						}
@@ -2140,21 +2123,18 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					if(pPickItem->Type == ITEM_POTION+43 
 						|| pPickItem->Type == ITEM_POTION+44 )
 					{
-#ifdef SOCKET_SYSTEM
 						if (g_SocketItemMgr.IsSocketItem(pItem))
 						{
-							// 소켓아이템에는 제련석을 바를수 없다
 							bSuccess = false;
 						}
 						else
-#endif	// SOCKET_SYSTEM
 						if( pItem->Jewel_Of_Harmony_Option == 0 )
 						{
 							bSuccess = false;
 						}
 					}
 
-#ifdef LEM_ADD_LUCKYITEM		// 럭키아이템 보석 조합
+#ifdef LEM_ADD_LUCKYITEM
 					if( Check_LuckyItem( pItem->Type ) )
 					{
 						bSuccess	= false;
@@ -2171,17 +2151,13 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					
 					if(bSuccess)
 					{		
-						// TargetItem의 기준 인덱스를 구한다. (서버에 보내는 Index)
 						int iTargetBaseIndex = m_pNewInventoryCtrl->FindBaseIndexByITEM(pItem);
-						// 들고 있는 보석의 위치, 보석을 조합할 아이템의 위치
 						SendRequestUse(iSourceIndex, MAX_EQUIPMENT_INDEX + iTargetBaseIndex);
-
 						PlayBuffer(SOUND_GET_ITEM01);
 						return true;
 					}
 				}
 			}
-			// 아이템 겹치기
 			else if(iTargetIndex != -1)
 			{
 				ITEM* pItem = m_pNewInventoryCtrl->FindItem(iTargetIndex);
@@ -2212,7 +2188,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				return true;
 			}
 		}
-		// 창고에서 인벤토리로.
 		else if(pPickedItem->GetOwnerInventory() == g_pStorageInventory->GetInventoryCtrl())
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
@@ -2225,8 +2200,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				return true;
 			}
 		}
-
-		// 거래창에서 인벤토리로.
 		else if(pPickedItem->GetOwnerInventory() == g_pTrade->GetMyInvenCtrl())
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
@@ -2241,7 +2214,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 		}
 #ifdef LEM_ADD_LUCKYITEM
 		else if(pPickedItem->GetOwnerInventory() == g_pLuckyItemWnd->GetInventoryCtrl())
-		{	//. 럭키 조합창에서 인벤토리
+		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 			if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
@@ -2253,7 +2226,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 		}
 #endif // LEM_ADD_LUCKYITEM
 		else if(pPickedItem->GetOwnerInventory() == g_pMixInventory->GetInventoryCtrl())
-		{	//. 조합창에서 인벤토리
+		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 			if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
@@ -2298,12 +2271,10 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 	{
 		ResetMouseRButton();
 
-		//. 창고
 		if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
 		{
 			g_pStorageInventory->ProcessMyInvenItemAutoMove();
 		}
-		//. 아이템 사용
 		else if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
 			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)==false
 			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)==false
@@ -2321,99 +2292,41 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 			}
 
 			int iIndex = pItem->x+pItem->y*m_pNewInventoryCtrl->GetNumberOfColumn();
-			if(pItem->Type == ITEM_POTION+10)//마을귀환문서
+			if(pItem->Type == ITEM_POTION+10)
 			{
-				if ( !Teleport)	// 순간이동 중에는 못 쓰게 한다.
+				if ( !Teleport)
 				{	
 					SendRequestUse(iIndex, 0);
 					return true;
 				}
 			}
 
-			//////////////////////////////////////////////////////////////////////////
-			//. 일반 아이템 사용
-			if( (pItem->Type >= ITEM_POTION+0 && pItem->Type <= ITEM_POTION+9)	//. 물약 ~ 술
-			|| (pItem->Type==ITEM_POTION+20 && ((pItem->Level>>3)&15) == 0)	// 사랑의 묘약
+			if( (pItem->Type >= ITEM_POTION+0 && pItem->Type <= ITEM_POTION+9)
+			|| (pItem->Type==ITEM_POTION+20 && ((pItem->Level>>3)&15) == 0)
 			|| (pItem->Type>=ITEM_POTION+35 && pItem->Type <=ITEM_POTION+40)
-			||( pItem->Type>=ITEM_POTION+46 && pItem->Type<=ITEM_POTION+50 )//할로윈 물약
-#ifdef NEW_YEAR_BAG_EVENT
+			||( pItem->Type>=ITEM_POTION+46 && pItem->Type<=ITEM_POTION+50 )
 			|| ( pItem->Type==ITEM_POTION+11 && ((pItem->Level>>3)&15)==14 )
-#endif// NEW_YEAR_BAG_EVENT
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 			|| ( pItem->Type>=ITEM_POTION+70 &&pItem->Type<=ITEM_POTION+71 )
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 			|| ( pItem->Type>=ITEM_POTION+72 &&pItem->Type<=ITEM_POTION+77 )
-#endif //PSW_SCROLL_ITEM
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
 			|| pItem->Type==ITEM_HELPER+60
-#endif //PSW_INDULGENCE_ITEM
-#ifdef PSW_NEW_ELITE_ITEM              // 엘리트 중간 치료 물약
 			|| pItem->Type==ITEM_POTION+94
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 			|| ( pItem->Type>=ITEM_POTION+85 && pItem->Type<=ITEM_POTION+87 )
-#endif //CSK_EVENT_CHERRYBLOSSOM		
-#ifdef PSW_ADD_PC4_SCROLLITEM
 			|| ( pItem->Type>=ITEM_POTION+97 &&pItem->Type<=ITEM_POTION+98 )
-#endif //PSW_ADD_PC4_SCROLLITEM
-#ifdef ASG_ADD_CS6_GUARD_CHARM
-			|| pItem->Type == ITEM_HELPER+81	// 수호의부적
-#endif	// ASG_ADD_CS6_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ITEM_GUARD_CHARM
-			|| pItem->Type == ITEM_HELPER+82	// 아이템보호부적
-#endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
-			|| pItem->Type == ITEM_POTION+133	// 엘리트SD회복물약
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-#ifdef PBG_MOD_SECRETITEM
-			|| (pItem->Type >= ITEM_HELPER+117 && pItem->Type <= ITEM_HELPER+120)	// 활력의비약
-#endif //PBG_MOD_SECRETITEM
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-			|| pItem->Type == ITEM_POTION+151	// 1레벨 의뢰서
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
+			|| pItem->Type == ITEM_HELPER+81
+			|| pItem->Type == ITEM_HELPER+82
+			|| pItem->Type == ITEM_POTION+133
 			)
 			{
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-				// 파란복주머니
 				if(pItem->Type == ITEM_POTION+11 && (pItem->Level >> 3) == 14)
 				{
 					g_pBlueLuckyBagEvent->StartBlueLuckyBag();
 				}
 #endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-#ifdef PBG_MOD_SECRETITEM
-				if(pItem->Type >= ITEM_HELPER+117 && pItem->Type <= ITEM_HELPER+120)
-				{
-					BuffScriptLoader& pBuffInfo = TheBuffInfo();
-					int iBuffType = pBuffInfo.GetBuffType(pItem->Type);
-					unicode::t_char szBuffName[MAX_TEXT_LENGTH] = {0, };
-
-					if(Hero->Object.m_BuffMap.IsEqualBuffType(iBuffType, szBuffName))
-					{
-						SEASON3B::CBuffUseMsgBox* pMsgBox = NULL;
-						SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CBuffUseOverlapMsgBoxLayout), &pMsgBox);
-
-						if(pMsgBox != NULL)
-						{
-							unicode::t_char strText[MAX_TEXT_LENGTH]={0,};
-							unicode::t_string strText_1, strText_2;
-							unicode::_sprintf(strText, GlobalText[3047], ItemAttribute[pItem->Type].Name, szBuffName, ItemAttribute[pItem->Type].Name);
-
-							strText_1 = strText_2 = strText;
-							strText_1 = strText_1.substr(0, strText_1.rfind('#')-1);
-							strText_2 = strText_2.substr(strText_2.rfind('#')+1);
-							strText_1 += strText_2;
-							pMsgBox->AddMsg(strText_1);
-							pMsgBox->SetInvenIndex(iIndex);
-						}
-						return true;
-					}
-				}
-#endif //PBG_MOD_SECRETITEM
 				SendRequestUse(iIndex, 0);
 				return true;
 			}
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
+#ifdef PSW_SECRET_ITEM
 			else if( ( pItem->Type>=ITEM_POTION+78 && pItem->Type<=ITEM_POTION+82 ) )
 			{
 				std::list<eBuffState> secretPotionbufflist;
@@ -2439,11 +2352,11 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				bool result = true;
 				WORD point[5] = { 0, };
 
-				point[0] = CharacterAttribute->Strength + CharacterAttribute->AddStrength;   // 힘
-				point[1] = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity; // 민첩
-				point[2] = CharacterAttribute->Vitality   + CharacterAttribute->AddVitality; // 체력
-				point[3] = CharacterAttribute->Energy   + CharacterAttribute->AddEnergy;     // 에너지
-				point[4] = CharacterAttribute->Charisma   + CharacterAttribute->AddCharisma; // 통찰
+				point[0] = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
+				point[1] = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
+				point[2] = CharacterAttribute->Vitality   + CharacterAttribute->AddVitality;
+				point[3] = CharacterAttribute->Energy   + CharacterAttribute->AddEnergy;
+				point[4] = CharacterAttribute->Charisma   + CharacterAttribute->AddCharisma;
 #ifdef PBG_FIX_RESETFRUIT_CAL
 #ifdef PBG_ADD_NEWCHAR_MONK
 				char nStat[MAX_CLASS][5] =
@@ -2451,17 +2364,16 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				char nStat[6][5] =
 #endif //PBG_ADD_NEWCHAR_MONK
 				{
-					18, 18, 15, 30,	0,	// 흑마법사.
-					28, 20, 25, 10,	0,	// 흑기사.
-					22, 25, 20, 15,	0,	// 요정.
-					26, 26, 26, 26,	0,	// 마검사.
-					26, 20, 20, 15, 25,	// 다크로드.
-					21, 21, 18, 23,	0,	// 소환술사.
+					18, 18, 15, 30,	0,
+					28, 20, 25, 10,	0,
+					22, 25, 20, 15,	0,
+					26, 26, 26, 26,	0,
+					26, 20, 20, 15, 25,
+					21, 21, 18, 23,	0,
 #ifdef PBG_ADD_NEWCHAR_MONK
-					32, 27, 25, 20, 0,  // 레이지파이터
+					32, 27, 25, 20, 0,
 #endif //PBG_ADD_NEWCHAR_MONK
 				};
-				// 기본 스탯까지 계산하여 1000이상의 여유분이 있어야 한다
 				point[pItem->Type-(ITEM_HELPER+54)] -= nStat[GetBaseClass(Hero->Class)][pItem->Type-(ITEM_HELPER+54)];
 #endif //PBG_FIX_RESETFRUIT_CAL
 
@@ -2479,24 +2391,20 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-#ifdef LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD	// 인게임샾 아이템 // 리셋열매5종 // 통솔리셋열매는 다크로드만 사용가능한 메세지 출력.
+#ifdef LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD
 			else if( pItem->Type==ITEM_HELPER+58 && GetBaseClass( Hero->Class )!=CLASS_DARK_LORD )
 			{
-				// 1905 "다크로드만 사용할 수 있습니다."
 				SEASON3B::CreateOkMessageBox(GlobalText[1905]);
 				return true;				
 			}
 #endif // LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD
 #endif //PSW_FRUIT_ITEM
 			//////////////////////////////////////////////////////////////////////////
-			//. 특수 아이템 사용
-			else if ( pItem->Type==ITEM_HELPER+29 ) //  근위병의 갑옷세트.
+			else if ( pItem->Type==ITEM_HELPER+29 )
 			{
 #ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 				if( true == IsUnitedMarketPlace() )
 				{
-					// 3014	"로랜시장에서는 카오스 캐슬에"
-					// 3015	"입장 할 수 없습니다."
 					char	szOutputText[512];
 					sprintf( szOutputText, "%s %s", GlobalText[3014], GlobalText[3015] );
 
@@ -2507,32 +2415,30 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 
 				if(Hero->SafeZone == false)
 				{
-					// 2330 "안전지대에서만 사용 가능합니다."
 					SEASON3B::CreateOkMessageBox(GlobalText[2330]);
 				}
 				else
 				{
 					SendRequestEventZoneOpenTime (4, ((pItem->Level>>3)&15));
-					SetStandbyItemKey(pItem->Key);	//. 요청 대기상태 아이템 설정
+					SetStandbyItemKey(pItem->Key);
 					return true;
 				}
 			}
 #ifdef CSK_FREE_TICKET
-			else if(pItem->Type == ITEM_HELPER+46)	// 데빌스퀘어 자유입장권	
+			else if(pItem->Type == ITEM_HELPER+46)	
 			{
 				BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_DEVILSQUARE);
 				SendRequestEventZoneOpenTime(1, byPossibleLevel);
 			}
-			else if(pItem->Type == ITEM_HELPER+47)	// 블러드캐슬 자유입장권
+			else if(pItem->Type == ITEM_HELPER+47)
 			{
 				BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_BLOODCASTLE);
 				SendRequestEventZoneOpenTime(2, byPossibleLevel);
 			}
-			else if(pItem->Type == ITEM_HELPER+48)	// 칼리마 자유입장권
+			else if(pItem->Type == ITEM_HELPER+48)
 			{
 				if(Hero->SafeZone || gMapManager.InHellas()) 
 				{
-					// 1238 "안전지대에서 사용할 수 없습니다"
 					g_pChatListBox->AddText("", GlobalText[1238], SEASON3B::TYPE_ERROR_MESSAGE);
 				}
 				else 
@@ -2542,111 +2448,82 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 			}
 #endif // CSK_FREE_TICKET
 #ifdef PSW_CURSEDTEMPLE_FREE_TICKET
-			else if(pItem->Type == ITEM_HELPER+61)	// 환영의사원 자유입장권	
+			else if(pItem->Type == ITEM_HELPER+61)
 			{
 				BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_CURSEDTEMPLE);
 				SendRequestEventZoneOpenTime(5, byPossibleLevel);
 			}
 #endif //PSW_CURSEDTEMPLE_FREE_TICKET			
-#ifdef LDS_FIX_INGAMESHOPITEM_PASSCHAOSCASTLE_REQUEST	// 카오스케슬 자유입장권 // 근위병 갑옷 세트와 동일
+#ifdef LDS_FIX_INGAMESHOPITEM_PASSCHAOSCASTLE_REQUEST
 			else if(pItem->Type == ITEM_HELPER+121)
 			{
 				if(Hero->SafeZone == false)
 				{
-					// 2330 "안전지대에서만 사용 가능합니다."
 					SEASON3B::CreateOkMessageBox(GlobalText[2330]);
 				}
 				else
 				{
 					SendRequestEventZoneOpenTime (4, ((pItem->Level>>3)&15));
-					SetStandbyItemKey(pItem->Key);	//. 요청 대기상태 아이템 설정
+					SetStandbyItemKey(pItem->Key);
 					return true;
 				}
 			}
 #endif // LDS_FIX_INGAMESHOPITEM_PASSCHAOSCASTLE_REQUEST
-			else if( pItem->Type==ITEM_HELPER+51 ) //환영의 사원
+			else if( pItem->Type==ITEM_HELPER+51 )
 			{
 				SendRequestEventZoneOpenTime(5, ((pItem->Level>>3)&15));
 				return true;
 			}
-			else if(pItem->Type==ITEM_POTION+19)//악마의 광장 초대권
+			else if(pItem->Type==ITEM_POTION+19)
 			{
 				SendRequestEventZoneOpenTime(1, ((pItem->Level>>3)&15));
 				return true;
 			}
-			else if(pItem->Type==ITEM_HELPER+18)//블러드캐슬 투명망또
+			else if(pItem->Type==ITEM_HELPER+18)
 			{
-#ifdef LJH_FIX_REARRANGE_INVISIBLE_CLOAK_LEVEL_FOR_CHECKING_REMAINING_TIME
-				// 투명망토는 1~8레벨의 아이템만 사용 가능 함
 				if (pItem->Level == 0)
 				{
-					// 잘못된 아이템 입니다. 
 					g_pChatListBox->AddText("", GlobalText[2089], SEASON3B::TYPE_ERROR_MESSAGE);
 				}
 				else
 				{
 					SendRequestEventZoneOpenTime(2, ((pItem->Level>>3)&15)-1);
 				}
-#else  //LJH_FIX_REARRANGE_INVISIBLE_CLOAK_LEVEL_FOR_CHECKING_REMAINING_TIME
-				SendRequestEventZoneOpenTime(2, ((pItem->Level>>3)&15));
-#endif //LJH_FIX_REARRANGE_INVISIBLE_CLOAK_LEVEL_FOR_CHECKING_REMAINING_TIME
 				return true;
 			}
-			else if( (pItem->Type >= ITEM_ETC+0 && pItem->Type < ITEM_ETC+MAX_ITEM_INDEX)//마법책
-				|| (pItem->Type >= ITEM_WING+7 && pItem->Type <= ITEM_WING+14) // 구슬
-				|| (pItem->Type >= ITEM_WING+16 && pItem->Type <= ITEM_WING+19)	// 구슬 
-				|| (pItem->Type == ITEM_WING+20)			//  구슬
+			else if( (pItem->Type >= ITEM_ETC+0 && pItem->Type < ITEM_ETC+MAX_ITEM_INDEX)
+				|| (pItem->Type >= ITEM_WING+7 && pItem->Type <= ITEM_WING+14)
+				|| (pItem->Type >= ITEM_WING+16 && pItem->Type <= ITEM_WING+19)
+				|| (pItem->Type == ITEM_WING+20)
 				|| (pItem->Type >= ITEM_WING+21 && pItem->Type <= ITEM_WING+24)
-				|| (pItem->Type == ITEM_WING+35)	//  다크로드 스크롤
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-				|| (pItem->Type == ITEM_WING+44)	// 파괴의일격 구슬
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
-				|| (pItem->Type == ITEM_WING+47)	// 플레임스트라이크 구슬
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
+				|| (pItem->Type == ITEM_WING+35)
+				|| (pItem->Type == ITEM_WING+44)
+				|| (pItem->Type == ITEM_WING+47)
 				|| (pItem->Type==ITEM_WING+46)
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 				|| (pItem->Type==ITEM_WING+45)
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 				|| (pItem->Type==ITEM_WING+48)
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
-				|| (pItem->Type == ITEM_ETC+29)		// 기간틱스톰 법서
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-				|| ( pItem->Type == ITEM_ETC+28)	// 마력증대 법서
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
+				|| (pItem->Type == ITEM_ETC+29)
+				|| ( pItem->Type == ITEM_ETC+28)
 				)
 			{
 				bool bReadBookGem = true;
-				//	3차 전직 퀘스트(체인지업 마스터리)를 수행한 마스터만 읽을수 있는 법서.
-				if ( (pItem->Type==ITEM_ETC+18)				// 헬버스트 법서
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-					|| (pItem->Type == ITEM_ETC+28)			// 마력증대 법서
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-					|| pItem->Type == ITEM_WING+45			//멀티샷
-#endif //#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-					|| (pItem->Type == ITEM_WING+46)	//회복
-#endif //#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef CSK_FIX_SKILL_ITEM
-					|| (pItem->Type == ITEM_WING+44)	// 파괴의일격 구슬
-#endif //CSK_FIX_SKILL_ITEM
+
+				if ( (pItem->Type==ITEM_ETC+18)
+					|| (pItem->Type == ITEM_ETC+28)	
+					|| pItem->Type == ITEM_WING+45
+					|| (pItem->Type == ITEM_WING+46)
+					|| (pItem->Type == ITEM_WING+44)
 					)
 				{
-					if ( g_csQuest.getQuestState2( QUEST_CHANGE_UP_3 )!=QUEST_END )		// 3차전직(체인지업 마스터리)
+					if ( g_csQuest.getQuestState2( QUEST_CHANGE_UP_3 )!=QUEST_END )
 					
 						bReadBookGem = false;
 				}
 #ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-				if(pItem->Type == ITEM_WING+48)			// 카오틱 
+				if(pItem->Type == ITEM_WING+48)
 				{
 					int Level = CharacterAttribute->Level;
-					if( Level<220 )	//  220레벨이하면 못쓴다.
+					if( Level<220 )
 						bReadBookGem = false;
 				}
 #endif //#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
@@ -2657,9 +2534,9 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
 					Energy	 = CharacterAttribute->Energy   + CharacterAttribute->AddEnergy;  
 					
-					if(CharacterAttribute->Level >= ItemAttribute[pItem->Type].RequireLevel && //레벨제한
+					if(CharacterAttribute->Level >= ItemAttribute[pItem->Type].RequireLevel &&
 						Energy >= pItem->RequireEnergy &&
-						Strength >= pItem->RequireStrength) //필요힘 제한
+						Strength >= pItem->RequireStrength)
 					{
 						SendRequestUse(iIndex, 0);
 					}
@@ -2667,11 +2544,11 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-			else if ( pItem->Type==ITEM_HELPER+15) //  스테이트 열매를 사용한다.
+			else if ( pItem->Type==ITEM_HELPER+15)
 			{
 				int Level = CharacterAttribute->Level;
 				
-				if( Level>=10 )	//  10레벨이상 캐릭터들만 사용 가능.
+				if( Level>=10 )	
 				{
 					bool bEquipmentEmpty = true;	
 					for(int i=0; i<MAX_EQUIPMENT; i++)
@@ -2683,13 +2560,12 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					}
 					int Class = CharacterAttribute->Class;
 					
-					if(bEquipmentEmpty == true)	// 장비를 전부 미착용했으면
+					if(bEquipmentEmpty == true)
 					{
-						if(pItem->Level == 32)	// 통솔열매인가?
+						if(pItem->Level == 32)
 						{
-							if (GetBaseClass(Class) != CLASS_DARK_LORD)		// 캐릭터 클래스가 다크로드 계열이 아닌가?
+							if (GetBaseClass(Class) != CLASS_DARK_LORD)
 							{
-								// 1905 "다크로드만 사용할 수 있습니다."
 								SEASON3B::CreateOkMessageBox(GlobalText[1905]);
 								return true;
 							}
@@ -2698,28 +2574,28 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 						SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseFruitMsgBoxLayout));
 						return true;
 					}
-					else	// 장비를 하나라도 착용하고 있으면
+					else
 					{
 						SEASON3B::CreateOkMessageBox(GlobalText[1909]);
 						return true;
 					}
 				}
-				else	//10레벨이하일때 메세지 박스 출력
+				else
 				{
-					SEASON3B::CreateOkMessageBox(GlobalText[749]); // "캐릭터 레벨 10이상부터 열매를 사용하실 수 있습니다."
+					SEASON3B::CreateOkMessageBox(GlobalText[749]);
 					return true;
 				}
 			}
-			else if( pItem->Type==ITEM_HELPER+11)    //  주문서.
+			else if( pItem->Type==ITEM_HELPER+11)
 			{
 				bool bUse = false;
 				int  Level = (pItem->Level>>3)&15;
 				switch ( Level )
 				{
-				case 0: //  가디언.
+				case 0:
 					bUse = true;
 					break;
-				case 1: //  라이프 스톤.
+				case 1:
 					if ( Hero->GuildStatus!=G_MASTER )
 						bUse = true;
 					break;
@@ -2730,8 +2606,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
-			else if( pItem->Type==ITEM_HELPER+69 )	// 부활의 부적
+			else if( pItem->Type==ITEM_HELPER+69 )
 			{
 				if (g_PortalMgr.IsRevivePositionSaved())
 				{
@@ -2742,21 +2617,19 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					}
 					else
 					{
-						SEASON3B::CreateOkMessageBox(GlobalText[2608]); // "해당 지역에서는 사용할 수 없습니다."
+						SEASON3B::CreateOkMessageBox(GlobalText[2608]);
 					}
 				}
 			}
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
-			else if( pItem->Type==ITEM_HELPER+70)	// 이동의 부적
+			else if( pItem->Type==ITEM_HELPER+70)
 			{
 				if (g_PortalMgr.IsPortalUsable())
 				{
-					if (pItem->Durability == 2)		// 이동 위치 저장
+					if (pItem->Durability == 2)
 					{
 						if (g_PortalMgr.IsPortalPositionSaved())
 						{
-							SEASON3B::CreateOkMessageBox(GlobalText[2610]);	// "이미 활성화 중인 아이템이 있으므로 사용할 수 없습니다."
+							SEASON3B::CreateOkMessageBox(GlobalText[2610]);
 						}
 						else
 						{
@@ -2764,7 +2637,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUsePortalCharmMsgBoxLayout));
 						}
 					}
-					else if (pItem->Durability == 1)	// 이동 위치로 가기
+					else if (pItem->Durability == 1)
 					{
 						SetStandbyItemKey(pItem->Key);
 						SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CReturnPortalCharmMsgBoxLayout));
@@ -2772,17 +2645,14 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				}
 				else
 				{
-					SEASON3B::CreateOkMessageBox(GlobalText[2608]); // "해당 지역에서는 사용할 수 없습니다."
+					SEASON3B::CreateOkMessageBox(GlobalText[2608]);
 				}
 			}
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef PBG_ADD_SANTAINVITATION
-			else if( pItem->Type == ITEM_HELPER + 66 )	//산타마을의 초대장
+			else if( pItem->Type == ITEM_HELPER + 66 )
 			{
 				SetStandbyItemKey(pItem->Key);
 				SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseSantaInvitationMsgBoxLayout));
 			}
-#endif //PBG_ADD_SANTAINVITATION
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 			else if(g_pMyInventory->IsInvenItem(pItem->Type))
@@ -2813,7 +2683,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 			return false;
 		}
 
-		// 수리금지 아이템
 		if(IsRepairBan(pItem) == true)
 		{
 			return false;
@@ -2844,7 +2713,6 @@ bool SEASON3B::CNewUIMyInventory::BtnProcess()
 	POINT ptRepairBtn = { m_Pos.x+49, m_Pos.y+391 };
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);

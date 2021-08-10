@@ -228,9 +228,6 @@
 #define PJH_ADD_SET_NEWJOB							// (2008.03.21)
 #define KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING	// (2010.10.14)
 #define KJH_MOD_RESOURCE_GUARD						// (10.03.10)
-//#define KJH_MOD_LIBRARY_LINK_EACH_NATION			// (10.04.22) ->Remove external link shop
-#define ADD_ALICE_WINGS_2							// (2008.01.08)
-#define	ADD_ALICE_WINGS_1							// (2007.11.23)
 #define ADD_NPC_DEVIN								// (2007.05.21)
 
 //#define NO_MORE_DANCING

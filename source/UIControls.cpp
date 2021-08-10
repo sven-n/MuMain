@@ -428,11 +428,7 @@ BOOL CUIControl::DoAction(BOOL bMessageOnly)
 			DefaultHandleMessage();
 	}
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	DoActionSub();
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	DoActionSub(bMessageOnly);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	if (bMessageOnly == TRUE) return 0;
 	
@@ -3512,39 +3508,26 @@ BOOL ClipboardCheck(HWND hWnd)
 
 LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	CUITextInputBox *pTextInputBox = (CUITextInputBox *)GetWindowLongW(hWnd, GWL_USERDATA);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	CUITextInputBox *pTextInputBox = (CUITextInputBox *)GetWindowLong(hWnd, GWL_USERDATA);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	if (pTextInputBox == NULL) 
 		return 0;
 
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if(	SEASON3B::IsPress(VK_UP) == TRUE
-		|| SEASON3B::IsPress(VK_DOWN) == TRUE
-		|| SEASON3B::IsPress(VK_LEFT) == TRUE
-		|| SEASON3B::IsPress(VK_RIGHT) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 	if (HIBYTE(GetAsyncKeyState(VK_UP)) == 128 
 		|| HIBYTE(GetAsyncKeyState(VK_DOWN)) == 128 
 		|| HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128 
 		|| HIBYTE(GetAsyncKeyState(VK_RIGHT)) == 128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 	{
-		pTextInputBox->m_iCaretBlinkTemp = 0;	// 방향키 눌렀을때 커서 깜박임 처리
+		pTextInputBox->m_iCaretBlinkTemp = 0;
 	}
 
 	switch(msg)
 	{
-#ifdef KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK
 	case WM_SYSKEYDOWN:
 		{
 			return 0;
 		}
 		break;
-#endif // KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK
 	case WM_CHAR:
 		pTextInputBox->m_iCaretBlinkTemp = 0;
         switch(wParam)
@@ -3554,7 +3537,7 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case VK_RETURN:
 			if (g_pFriendMenu->IsHotkeyEnable() == TRUE) 
-				break;	// 단축키 M 사용
+				break;
 			if (pTextInputBox->IsLocked() == TRUE || pTextInputBox->UseMultiline() == TRUE) 
 				break;
 			if (pTextInputBox->GetParentUIID() == 0)
@@ -3886,9 +3869,8 @@ void CUITextInputBox::SetState(int iState)
 		ShowWindow(m_hEditWnd, SW_SHOW);
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CUITextInputBox::GiveFocus(BOOL bSel)
+void CUITextInputBox::GiveFocus(BOOL SelectText)
 {
 	if (m_hEditWnd == NULL) return;
 
@@ -3899,21 +3881,14 @@ void CUITextInputBox::GiveFocus(BOOL bSel)
 	}
 	else
 		SetFocus(m_hEditWnd);
+
 	g_dwKeyFocusUIID = GetUIID();
-	if (bSel == TRUE)
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
-		PostMessageW(m_hEditWnd, EM_SETSEL, ( WPARAM)0, ( LPARAM)-1);	// 전체 선택
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		PostMessage(m_hEditWnd, EM_SETSEL, ( WPARAM)0, ( LPARAM)-1);	// 전체 선택
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE	
+	if (SelectText == TRUE)
+		PostMessageW(m_hEditWnd, EM_SETSEL, ( WPARAM)0, ( LPARAM)-1);
 	else
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
-		PostMessageW(m_hEditWnd, EM_SETSEL, ( WPARAM)-2, ( LPARAM)-1);	// 커서 맨 뒤로
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		PostMessage(m_hEditWnd, EM_SETSEL, ( WPARAM)-2, ( LPARAM)-1);	// 커서 맨 뒤로
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE	
+		PostMessageW(m_hEditWnd, EM_SETSEL, ( WPARAM)-2, ( LPARAM)-1);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void CUITextInputBox::UploadText(int sx,int sy,int Width,int Height)
 {
 	BITMAP_t *b = &Bitmaps[BITMAP_FONT];
@@ -4409,15 +4384,6 @@ BOOL CUITextInputBox::DoMouseAction()
 
 void CUIChatInputBox::Init(HWND hWnd)
 {
-#if defined FOR_WORK || defined USER_WINDOW_MODE || (defined WINDOWMODE)
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-	if (g_bUseWindowMode == TRUE)
-#endif
-	{
-		m_bFocusLose = FALSE;
-		m_iBackupFocus = 0;
-	}
-#endif
 	m_TextInputBox.Init(hWnd, 180, 14, 50);
 	m_TextInputBox.SetPosition(193, 422);
 	m_TextInputBox.SetTextColor(255, 255, 230, 210);
@@ -4433,7 +4399,6 @@ void CUIChatInputBox::Init(HWND hWnd)
 	memset(m_szTempText, 0, MAX_TEXT_LENGTH + 1);
 	SetFocus(g_hWnd);
 
-	// 현재 IME 상태를 저장
 	HIMC hIMC = ImmGetContext(g_hWnd);
 	ImmGetConversionStatus(hIMC, &g_dwBKConv, &g_dwBKSent);
 	ImmReleaseContext(g_hWnd, hIMC);
@@ -4451,25 +4416,6 @@ void CUIChatInputBox::Reset()
 
 void CUIChatInputBox::Render()
 {
-#if defined FOR_WORK || defined USER_WINDOW_MODE ||(defined WINDOWMODE)
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-	if (g_bUseWindowMode == TRUE)
-#endif
-	{
-		if (m_bFocusLose == TRUE)
-		{
-			if (m_iBackupFocus == 1)	// 귓속말
-			{
-				m_BuddyInputBox.GiveFocus();
-			}
-			else	// 기본
-			{
-				m_TextInputBox.GiveFocus();
-			}
-			m_bFocusLose = FALSE;
-		}
-	}
-#endif
 	m_TextInputBox.Render();
 	m_BuddyInputBox.Render();
 }
@@ -4488,12 +4434,6 @@ void CUIChatInputBox::TabMove(int iBoxNumber)
 		m_TextInputBox.GiveFocus();
 		PostMessage(m_TextInputBox.GetHandle(), EM_SETSEL, ( WPARAM)0, ( LPARAM)-1);
 	}
-#if defined FOR_WORK || defined USER_WINDOW_MODE || (defined WINDOWMODE)
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-	if (g_bUseWindowMode == TRUE)
-#endif
-		m_iBackupFocus = iBoxNumber;
-#endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

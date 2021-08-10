@@ -12677,7 +12677,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 			break;
 		}
 	}
-	else	//날개 없음	type == 0
+	else
 	{
 		c->Wing.Type = -1;
         c->Wing.Option1 = 0;
@@ -12689,7 +12689,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
         Type = Equipment[8]&0x07;
         if ( Type!=0 )
         {
-#ifdef ADD_ALICE_WINGS_1
 			switch (Type)
 			{
 			case 5:		c->Wing.Type = MODEL_HELPER+30;	break;	// 망토.
@@ -12697,13 +12696,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 			case 7:		c->Wing.Type = MODEL_WING+42;	break;	// 절망의 날개.
 			default:	c->Wing.Type = MODEL_WING+Type+2;
 			}
-#else	// ADD_ALICE_WINGS_1
-			//  망토. ( 6, 7로 확장 가능 ).
-            if ( Type==5 )
-    		    c->Wing.Type = MODEL_HELPER + 30;
-            else
-    		    c->Wing.Type = MODEL_WING + Type + 2;
-#endif	// ADD_ALICE_WINGS_1
         }
         else
         {
