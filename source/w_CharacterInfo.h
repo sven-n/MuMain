@@ -63,10 +63,6 @@ typedef struct _PART_t
 	BYTE m_byNumCloth;
 	void *m_pCloth[2];	// 아이템에 천붙이기
 
-#if defined MR0 || defined OBJECT_ID
-	unsigned int m_iID;	//Object로 취급
-#endif //MR0
-
 	_PART_t()
 	{
 		Type = 0;
@@ -82,9 +78,6 @@ typedef struct _PART_t
 		m_byNumCloth = 0;
 		m_pCloth[0] = NULL;
 		m_pCloth[1] = NULL;
-#if defined MR0 || defined OBJECT_ID
-		m_iID = 0;	//Object로 취급
-#endif //MR0
 	}
 
 } PART_t;

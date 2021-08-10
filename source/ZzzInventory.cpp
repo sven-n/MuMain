@@ -1,8 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 창 관련 함수
-// 장비창, 거래창, 창고창, 파티창, 길드창 조작 및 랜더링 등등
-//
-// *** 함수 레벨: 3
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -2202,44 +2198,6 @@ void GetItemName ( int iType, int iLevel, char* Text )
         case 1: sprintf ( Text, "%s %s", GlobalText[1214], p->Name ); break;
         }
     }
-#ifdef ANNIVERSARY_EVENT
-    else if ( iType==ITEM_POTION+20 )//  사랑의 묘약
-    {
-        switch ( iLevel )
-        {
-        case 0: sprintf ( Text, "%s", p->Name ); break;
-        case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-			sprintf ( Text, "%s +%d", GlobalText[116], iLevel ); break;     //  애니버서리 박스
-        }
-    }
-#endif	// ANNIVERSARY_EVENT
-#ifdef _PVP_ADD_MOVE_SCROLL
-    else if ( iType==ITEM_POTION+10 )//  이동문서
-    {
-        switch ( iLevel )
-        {
-        case 0: sprintf ( Text, "%s", p->Name ); break;
-        case 1: sprintf ( Text, GlobalText[158], GlobalText[30] ); break;     //  로랜시아
-		case 2: sprintf ( Text, GlobalText[158], GlobalText[33] ); break;     //  노리아
-		case 3: sprintf ( Text, GlobalText[158], GlobalText[32] ); break;     //  데비아스
-		case 4: sprintf ( Text, GlobalText[158], GlobalText[31] ); break;     //  던전
-		case 5: sprintf ( Text, GlobalText[158], GlobalText[37] ); break;     //  아틀란스
-		case 6: sprintf ( Text, GlobalText[158], GlobalText[34] ); break;     //  로스트타워
-		case 7: sprintf ( Text, GlobalText[158], GlobalText[38] ); break;     //  타르칸
-		case 8: sprintf ( Text, GlobalText[158], GlobalText[55] ); break;     //  이카루스
-        }
-    }
-#endif	// _PVP_ADD_MOVE_SCROLL
-#ifdef _PVP_MURDERER_HERO_ITEM
-    else if ( iType==ITEM_POTION+30 )//  영웅살인마징표(pick)
-    {
-		sprintf ( Text, "%s", p->Name );
-    }
-#endif	// _PVP_MURDERER_HERO_ITEM
     else if ( iType==ITEM_POTION+21 )    //  레나. ( 1:스톤).
     {
         switch ( iLevel )
@@ -3041,49 +2999,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 #endif// NEW_YEAR_BAG_EVENT
 		}
 	}
-#ifdef ANNIVERSARY_EVENT
-	else if(ip->Type == ITEM_POTION+20)	//사랑의 묘약
-	{
-		switch(Level)
-		{
-        case 0: sprintf ( TextList[TextNum], "%s", p->Name ); break;
-        case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-			sprintf ( TextList[TextNum], "%s +%d", GlobalText[116], Level );     //  애니버서리 박스
-			break;
-        }
-    }
-#endif	// ANNIVERSARY_EVENT
-#ifdef _PVP_ADD_MOVE_SCROLL
-    else if (ip->Type == ITEM_POTION+10)//  이동문서
-    {
-        switch (Level)
-        {
-        case 0: sprintf ( TextList[TextNum], "%s", p->Name ); break;
-        case 1: sprintf ( TextList[TextNum], GlobalText[158], GlobalText[30] ); break;     //  로랜시아
-		case 2: sprintf ( TextList[TextNum], GlobalText[158], GlobalText[33] ); break;     //  노리아
-		case 3: sprintf ( TextList[TextNum], GlobalText[158], GlobalText[32] ); break;     //  데비아스
-		case 4: sprintf ( TextList[TextNum], GlobalText[158], GlobalText[31] ); break;     //  던전
-		case 5: sprintf ( TextList[TextNum], GlobalText[158], GlobalText[37] ); break;     //  아틀란스
-		case 6: sprintf ( TextList[TextNum], GlobalText[158], GlobalText[34] ); break;     //  로스트타워
-		case 7: sprintf ( TextList[TextNum], GlobalText[158], GlobalText[38] ); break;     //  타르칸
-		case 8: sprintf ( TextList[TextNum], GlobalText[158], GlobalText[55] ); break;     //  이카루스
-        }
-    }
-#endif	// _PVP_ADD_MOVE_SCROLL
-#ifdef _PVP_MURDERER_HERO_ITEM
-    else if ( ip->Type==ITEM_POTION+30 )//  영웅살인마징표(inv)
-    {
-		if (ip->Durability % 100 < 3) Color = TEXT_COLOR_WHITE;
-		else Color = TEXT_COLOR_WHITE;
-
-		sprintf ( TextList[TextNum], "%s", p->Name );
-	}
-#endif	// _PVP_MURDERER_HERO_ITEM
-	else if(ip->Type == ITEM_POTION+12)//이밴트 아이템
+	else if(ip->Type == ITEM_POTION+12)
 	{
 		switch(Level)
 		{
@@ -3092,7 +3008,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		case 2:sprintf(TextList[TextNum],"%s",ChaosEventName[ip->Durability]);break;
 		}
 	}
-    else if ( ip->Type==ITEM_HELPER+15 )//  서클. ( 에너지/체력/민첩/힘/통솔 )
+    else if ( ip->Type==ITEM_HELPER+15 )
     {
         Color = TEXT_COLOR_YELLOW;
         switch ( Level )
@@ -3101,39 +3017,37 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
         case 1:sprintf(TextList[TextNum],"%s %s", GlobalText[169], p->Name );break;
         case 2:sprintf(TextList[TextNum],"%s %s", GlobalText[167], p->Name );break;
         case 3:sprintf(TextList[TextNum],"%s %s", GlobalText[166], p->Name );break;
-		case 4:sprintf(TextList[TextNum],"%s %s", GlobalText[1900], p->Name );break;// 통솔열매
+		case 4:sprintf(TextList[TextNum],"%s %s", GlobalText[1900], p->Name );break;
         }
     }
-    else if ( ip->Type==ITEM_HELPER+14 )//  로크의 깃털.
-    {
-        Color = TEXT_COLOR_YELLOW;
-        switch ( Level )
-        {
-        case 0: sprintf ( TextList[TextNum], "%s", p->Name ); break;            //  로크의 깃털.
-        case 1: sprintf ( TextList[TextNum], "%s", GlobalText[1235] ); break;   //  군주의 소매.
-        }
-    }
-    else if ( ip->Type==ITEM_POTION+21 )    //  레나. ( 1:스톤).
+    else if ( ip->Type==ITEM_HELPER+14 )
     {
         Color = TEXT_COLOR_YELLOW;
         switch ( Level )
         {
         case 0: sprintf ( TextList[TextNum], "%s", p->Name ); break;
-        case 1: sprintf ( TextList[TextNum], GlobalText[810] ); break;      //  스톤.
-#ifdef FRIEND_EVENT
-        case 2: sprintf ( TextList[TextNum], GlobalText[1098] ); break;     //  우정의 돌.
-#endif// FRIEND_EVENT
-        case 3: sprintf ( TextList[TextNum], GlobalText[1290] ); break;     //  성주의표식
+        case 1: sprintf ( TextList[TextNum], "%s", GlobalText[1235] ); break;
         }
     }
-    else if ( ip->Type==ITEM_HELPER+19 )    //  0:대천사의 절대지팡이, 1: 대천사의 절대검, 2: 대천사의 절대석궁 ).
+    else if ( ip->Type==ITEM_POTION+21 )
     {
         Color = TEXT_COLOR_YELLOW;
         switch ( Level )
         {
-        case 0: sprintf ( TextList[TextNum], GlobalText[811] ); break;  //  대천사의 절대 지팡이.
-        case 1: sprintf ( TextList[TextNum], GlobalText[812] ); break;  //  대천사의 절대 검.
-        case 2: sprintf ( TextList[TextNum], GlobalText[817] ); break;  //  대천사의 절대 석궁.
+        case 0: sprintf ( TextList[TextNum], "%s", p->Name ); break;
+        case 1: sprintf ( TextList[TextNum], GlobalText[810] ); break;
+        case 2: sprintf ( TextList[TextNum], GlobalText[1098] ); break;
+        case 3: sprintf ( TextList[TextNum], GlobalText[1290] ); break;
+        }
+    }
+    else if ( ip->Type==ITEM_HELPER+19 )
+    {
+        Color = TEXT_COLOR_YELLOW;
+        switch ( Level )
+        {
+		case 0: sprintf(TextList[TextNum], GlobalText[811]); break;
+		case 1: sprintf(TextList[TextNum], GlobalText[812]); break;
+		case 2: sprintf(TextList[TextNum], GlobalText[817]); break;
         }
     }
 	else if(ip->Type == ITEM_HELPER+20)
@@ -3141,20 +3055,18 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		Color = TEXT_COLOR_YELLOW;
 		switch( Level )
 		{
-		case 0: sprintf( TextList[TextNum], p->Name ); break;	//. 마법사의 반지
-		case 1: sprintf( TextList[TextNum], GlobalText[922] ); break;	//. 제왕의 반지
-        case 2: sprintf( TextList[TextNum], GlobalText[928] ); break;	//. 전사의 반지
-        case 3: sprintf ( TextList[TextNum], GlobalText[929] ); break;  //  영예의 반지.
+		case 0: sprintf( TextList[TextNum], p->Name ); break;
+		case 1: sprintf( TextList[TextNum], GlobalText[922] ); break;
+        case 2: sprintf( TextList[TextNum], GlobalText[928] ); break;
+        case 3: sprintf ( TextList[TextNum], GlobalText[929] ); break;
 		}
 	}
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
-	else if(ip->Type == ITEM_HELPER+107)		// 치명마법반지
+	else if(ip->Type == ITEM_HELPER+107)
 	{
 		Color = TEXT_COLOR_YELLOW;
 		sprintf( TextList[TextNum], p->Name );
 	}
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-    else if ( ip->Type==ITEM_POTION+7 ) //  스패셜 물약.//종훈물약
+    else if ( ip->Type==ITEM_POTION+7 )
     {
         switch ( Level )
         {
@@ -3162,23 +3074,23 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
         case 1: sprintf( TextList[TextNum], GlobalText[1414] ); break;
         }
     }
-    else if ( ip->Type==ITEM_HELPER+7 ) //  계약 문서
+    else if ( ip->Type==ITEM_HELPER+7 )
     {
         switch ( Level )
         {
-        case 0: sprintf( TextList[TextNum], GlobalText[1460] ); break;  //  활 용병.
-        case 1: sprintf( TextList[TextNum], GlobalText[1461] ); break;  //  창 용병.
+        case 0: sprintf( TextList[TextNum], GlobalText[1460] ); break; 
+        case 1: sprintf( TextList[TextNum], GlobalText[1461] ); break; 
         }
     }
-    else if ( ip->Type==ITEM_HELPER+11 )    //  주문서.
+    else if ( ip->Type==ITEM_HELPER+11 )
     {
         switch ( Level )
         {
-        case 0: sprintf( TextList[TextNum], GlobalText[1416] ); break;  //  가디언 주문서.
-        case 1: sprintf( TextList[TextNum], GlobalText[1462] ); break;  //  라이프 스톤 설치.
+        case 0: sprintf( TextList[TextNum], GlobalText[1416] ); break;
+        case 1: sprintf( TextList[TextNum], GlobalText[1462] ); break;
         }
     }
-	else if ( ip->Type==ITEM_POTION+9 ) //  술, 사랑의 올리브
+	else if ( ip->Type==ITEM_POTION+9 )
 	{
 		switch(Level)
 		{
@@ -3186,11 +3098,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		case 1:sprintf(TextList[TextNum],GlobalText[108]);break;
 		}
 	}
-    else if(ip->Type == ITEM_WING+11)//소환구슬
+    else if(ip->Type == ITEM_WING+11)
 	{
 		sprintf(TextList[TextNum],"%s %s",SkillAttribute[30+Level].Name,GlobalText[102]);
 	}
-    else if(ip->Type == ITEM_HELPER+10)//변신반지
+    else if(ip->Type == ITEM_HELPER+10)
 	{
 		for(int i=0;i<MAX_MONSTER;i++)
 		{
@@ -3201,88 +3113,57 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			}
 		}
 	}
-    else if ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )  //  정령의 날개 ~ 어둠의 날개.
+    else if ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )
     {
 		if(Level==0)
 			sprintf(TextList[TextNum],"%s",p->Name);
 		else
 			sprintf(TextList[TextNum],"%s +%d",p->Name,Level);
     }
-#ifdef ADD_ALICE_WINGS_1
 	else if ((ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40) || (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)  //  폭풍의 날개 ~ 제왕의 망토, 소환술사 2,3차 날개
-#else	// ADD_ALICE_WINGS_1
-	else if ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )  //  폭풍의 날개 ~ 제왕의 망토
-#endif	// ADD_ALICE_WINGS_1
+		)
     {
 		if(Level==0)
 			sprintf(TextList[TextNum],"%s",p->Name);
 		else
 			sprintf(TextList[TextNum],"%s +%d",p->Name,Level);
     }
-    else if ( ip->Type==ITEM_HELPER+31 )    //  영혼.
+    else if ( ip->Type==ITEM_HELPER+31 )
     {
         switch ( Level )
         {
-#if SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH
 		case 0: sprintf ( TextList[TextNum], "%s of %s", p->Name, GlobalText[1187] ); break;
         case 1: sprintf ( TextList[TextNum], "%s of %s", p->Name, GlobalText[1214] ); break;
-#else // SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-		// 한국
-        case 0: sprintf ( TextList[TextNum], "%s %s", GlobalText[1187], p->Name ); break;
-        case 1: sprintf ( TextList[TextNum], "%s %s", GlobalText[1214], p->Name ); break;
-#endif // SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH
         }
     }
-    else if ( ip->Type==ITEM_HELPER+30 )      //  군주의 망토.
+    else if ( ip->Type==ITEM_HELPER+30 )
     {
 		if ( Level==0 )
 			sprintf ( TextList[TextNum], "%s", p->Name );
 		else
 			sprintf ( TextList[TextNum], "%s +%d", p->Name, Level );
     }
-    else if ( ip->Type==ITEM_POTION+29 )    //  쿤둔의 표식.
+    else if ( ip->Type==ITEM_POTION+29 )
     {
         sprintf ( TextList[TextNum], GlobalText[1180], Level );
     }
-    else if ( ip->Type==ITEM_POTION+28 )    //  잃어버린 지도.
+    else if ( ip->Type==ITEM_POTION+28 )
     {
         Color = TEXT_COLOR_YELLOW;
         sprintf ( TextList[TextNum], "%s +%d", p->Name, Level );
     }
-#ifdef MYSTERY_BEAD
-	else if( ip->Type==ITEM_WING+26 )		//. 신비의구슬
-	{
-		Color = TEXT_COLOR_YELLOW;
-		switch(Level)
-		{
-		case 0:		//. 신비의구슬
-			sprintf( TextList[TextNum], "%s", p->Name); break;
-		case 1:		//. 빨강수정
-			sprintf( TextList[TextNum], "%s", GlobalText[1831]); break;
-		case 2:		//. 파랑수정
-			sprintf( TextList[TextNum], "%s", GlobalText[1832]); break;
-		case 3:		//. 검은수정
-			sprintf( TextList[TextNum], "%s", GlobalText[1833]); break;
-		case 4:		//. 보물상자
-			sprintf( TextList[TextNum], "%s", GlobalText[1834]); break;
-		case 5:		//. 깜짝선물
-			sprintf( TextList[TextNum], "%s", GlobalText[1838]); break;
-		}
-	}
-#endif // MYSTERY_BEAD
-	else if(ip->Type == ITEM_WING+32)//빨간리본상자.(x-mas이벤트용)
+	else if(ip->Type == ITEM_WING+32)
 	{
 		sprintf(TextList[TextNum], "%s", p->Name);	
 	}
-	else if(ip->Type == ITEM_WING+33)//초록리본상자.(x-mas이벤트용)
+	else if(ip->Type == ITEM_WING+33)
 	{
 		sprintf(TextList[TextNum], "%s", p->Name);	
 	}
-	else if(ip->Type == ITEM_WING+34)//초록리본상자.(x-mas이벤트용)
+	else if(ip->Type == ITEM_WING+34)
 	{
 		sprintf(TextList[TextNum], "%s", p->Name);	
 	}
@@ -3290,45 +3171,45 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 	{
 		sprintf(TextList[TextNum], "%s", p->Name);	
 	}
-	else if(ip->Type >= ITEM_POTION+45 && ip->Type <= ITEM_POTION+50)//할로윈데이 이벤트
+	else if(ip->Type >= ITEM_POTION+45 && ip->Type <= ITEM_POTION+50)
 	{
 		sprintf ( TextList[TextNum], "%s", p->Name );
 	}
 #ifdef GIFT_BOX_EVENT
-	else if(ip->Type == ITEM_POTION+32)//분홍 초콜릿상자.(발렌타인데이 이벤트용)
+	else if(ip->Type == ITEM_POTION+32)
 	{
 		switch(Level)
 		{
-		case 0:		//. 신비의구슬
+		case 0:
 			sprintf( TextList[TextNum], "%s", p->Name); break;
-		case 1:		//. 빨강수정
+		case 1:
 			sprintf( TextList[TextNum], "%s", GlobalText[2012]); break;
 		}
 	}
-	else if(ip->Type == ITEM_POTION+33)//빨간 초콜릿상자.(발렌타인데이 이벤트용)
+	else if(ip->Type == ITEM_POTION+33)
 	{
 		switch(Level)
 		{
-		case 0:		//. 신비의구슬
+		case 0:
 			sprintf( TextList[TextNum], "%s", p->Name); break;
-		case 1:		//. 빨강수정
+		case 1:
 			sprintf( TextList[TextNum], "%s", GlobalText[2013]); break;
 		}
 	}
-	else if(ip->Type == ITEM_POTION+34)//파란 초콜릿상자.(발렌타인데이 이벤트용)
+	else if(ip->Type == ITEM_POTION+34)
 	{
 		switch(Level)
 		{
-		case 0:		//. 신비의구슬
+		case 0:
 			sprintf( TextList[TextNum], "%s", p->Name); break;
-		case 1:		//. 빨강수정
+		case 1:
 			sprintf( TextList[TextNum], "%s", GlobalText[2014]); break;
 		}
 	}
 #endif
 	else if(ip->Type >= ITEM_HELPER+32 && ip->Type <= ITEM_HELPER+37)	
 	{
-		if(ip->Type == ITEM_HELPER+37)	// 펜릴의 뿔피리
+		if(ip->Type == ITEM_HELPER+37)
 		{
 			Color = TEXT_COLOR_BLUE;
 			if((ip->Option1&63) == 0x01)
@@ -3346,14 +3227,14 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			sprintf(TextList[TextNum], "%s", p->Name);	
 		}
 	}
-	else if ( ip->Type==ITEM_SWORD+19 || ip->Type==ITEM_BOW+18 || ip->Type==ITEM_STAFF+10 || ip->Type==ITEM_MACE+13) //	대천사의 절대 무기.
+	else if ( ip->Type==ITEM_SWORD+19 || ip->Type==ITEM_BOW+18 || ip->Type==ITEM_STAFF+10 || ip->Type==ITEM_MACE+13)
 	{
 		if(Level==0)
 			sprintf(TextList[TextNum],"%s",p->Name);
 		else
 			sprintf(TextList[TextNum],"%s +%d",p->Name,Level);
 	}
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 인벤토리 보석 묶음 이름 텍스트
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if( nGemType != COMGEM::NOGEM && nGemType%2 == 1 )
 	{
 		int nGlobalIndex = COMGEM::GetJewelIndex( nGemType , COMGEM::eGEM_NAME );
@@ -3377,29 +3258,23 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		sprintf(TextList[TextNum],"%s",p->Name);
 		Color = TEXT_COLOR_YELLOW;
 	}
-#ifdef ADD_SEED_SPHERE_ITEM
-	else if ((ip->Type >= ITEM_WING+60 && ip->Type <= ITEM_WING+65)	// 시드
-		|| (ip->Type >= ITEM_WING+70 && ip->Type <= ITEM_WING+74)	// 스피어
-		|| (ip->Type >= ITEM_WING+100 && ip->Type <= ITEM_WING+129))	// 시드스피어
+	else if ((ip->Type >= ITEM_WING+60 && ip->Type <= ITEM_WING+65)
+		|| (ip->Type >= ITEM_WING+70 && ip->Type <= ITEM_WING+74)
+		|| (ip->Type >= ITEM_WING+100 && ip->Type <= ITEM_WING+129))
 	{
 		sprintf(TextList[TextNum],"%s",p->Name);
 		Color = TEXT_COLOR_VIOLET;
 	}
-#endif	// ADD_SEED_SPHERE_ITEM
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
-    else if ( ip->Type==ITEM_POTION+111 )    // 차원의마경
+    else if ( ip->Type==ITEM_POTION+111 )
     {
         Color = TEXT_COLOR_YELLOW;
         sprintf ( TextList[TextNum], "%s", p->Name );
     }
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-#ifdef LDK_ADD_EMPIREGUARDIAN_ITEM
 	else if( ITEM_POTION+101 <= ip->Type && ip->Type <= ITEM_POTION+109 )
 	{
         Color = TEXT_COLOR_YELLOW;
         sprintf ( TextList[TextNum], "%s", p->Name );
 	}
-#endif //LDK_ADD_EMPIREGUARDIAN_ITEM
 	else
 	{
 		char TextName[64];
@@ -3431,7 +3306,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 	TextListColor[TextNum] = Color;TextBold[TextNum] = true;TextNum++;
 	sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 
-    if ( ip->Type==ITEM_HELPER+19)    // 0: 대천사의 절대지팡이, 1: 대천사의 절대검, 2: 대천사의 절대석궁 ).
+    if ( ip->Type==ITEM_HELPER+19)
     {
         int iMana;
         int iWeaponSpeed;
@@ -3445,76 +3320,69 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
         sprintf ( TextList[TextNum], GlobalText[815] ); TextBold[TextNum] = false; TextNum++;
         sprintf ( TextList[TextNum], "\n" ); TextBold[TextNum] = false; TextNum++; SkipNum++;
 
-        //  옵션.
         switch ( Level )
         {
-        case 0: //  대천사의 절대지팡이.
-    		sprintf ( TextList[TextNum], "%s: %d ~ %d", GlobalText[42], 107, 110 );  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;    //  공격력.
+        case 0:
+    		sprintf ( TextList[TextNum], "%s: %d ~ %d", GlobalText[42], 107, 110 );  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             iWeaponSpeed  = 20;
             iNeedStrength = 132;
             iNeedDex      = 32;
             break;  
-        case 1: //  대천사의 절대검.
-    		sprintf ( TextList[TextNum], "%s: %d ~ %d", GlobalText[40], 110, 120 );  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;    //  공격력.
+        case 1:
+    		sprintf ( TextList[TextNum], "%s: %d ~ %d", GlobalText[40], 110, 120 );  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             iWeaponSpeed  = 35;
             iNeedStrength = 381;
             iNeedDex      = 149;
             break;
-        case 2: //  대천사의 절대석궁.
-    		sprintf ( TextList[TextNum], "%s: %d ~ %d", GlobalText[41], 120, 140 );  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;    //  공격력.
+        case 2:
+    		sprintf ( TextList[TextNum], "%s: %d ~ %d", GlobalText[41], 120, 140 );  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             iWeaponSpeed  = 35;
             iNeedStrength = 140;
             iNeedDex      = 350;
             break;  
         }
 
-        //  공격 속도.
     	sprintf ( TextList[TextNum], GlobalText[64], iWeaponSpeed ); TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-        //  요구힘.
         sprintf ( TextList[TextNum], GlobalText[73], iNeedStrength );TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-        //  요구 민첩.
         sprintf ( TextList[TextNum], GlobalText[75], iNeedDex );     TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
         sprintf ( TextList[TextNum], "\n" ); TextBold[TextNum] = false; TextNum++; SkipNum++;
-
-        //  행운.
 		sprintf ( TextList[TextNum], GlobalText[87] );     TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
 		sprintf ( TextList[TextNum], GlobalText[94], 20 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
 
-        //  스킬, 액설런트.
         switch ( Level )
         {
-        case 0: //  대천사의 절대지팡이.
+        case 0:
             {
-		        sprintf ( TextList[TextNum], GlobalText[79], 53 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;   //  마력 상승.
-                sprintf ( TextList[TextNum], GlobalText[631] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;   //마력 증가(레벨)
-		        sprintf ( TextList[TextNum], GlobalText[632], 2 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;   //마력 증가(퍼센트)
+		        sprintf ( TextList[TextNum], GlobalText[79], 53 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
+                sprintf ( TextList[TextNum], GlobalText[631] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+		        sprintf ( TextList[TextNum], GlobalText[632], 2 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
             }
             break;  
-        case 1: //  대천사의 절대검.
+        case 1:
             {
                 GetSkillInformation ( AT_SKILL_SWORD4, 1, NULL, &iMana, NULL );
-			    sprintf ( TextList[TextNum], GlobalText[84], iMana ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++; //  돌려치기 스킬.
-                sprintf ( TextList[TextNum], GlobalText[629] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;   //공격력 증가(레벨)
-                sprintf ( TextList[TextNum], GlobalText[630], 2 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;   //공격력 증가(2퍼센트)
+			    sprintf ( TextList[TextNum], GlobalText[84], iMana ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+                sprintf ( TextList[TextNum], GlobalText[629] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+                sprintf ( TextList[TextNum], GlobalText[630], 2 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
             }
             break;
-        case 2: //  대천사의 절대석궁.
+        case 2:
             {
 			    GetSkillInformation ( AT_SKILL_CROSSBOW, 1, NULL, &iMana, NULL );
-			    sprintf ( TextList[TextNum], GlobalText[86], iMana ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++; //  다발스킬.
-                sprintf ( TextList[TextNum], GlobalText[629] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;   //공격력 증가(레벨)
-                sprintf ( TextList[TextNum], GlobalText[630], 2 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;   //공격력 증가(2퍼센트)
+			    sprintf ( TextList[TextNum], GlobalText[86], iMana ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+                sprintf ( TextList[TextNum], GlobalText[629] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+                sprintf ( TextList[TextNum], GlobalText[630], 2 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
            }
             break;  
         }
-        sprintf ( TextList[TextNum], GlobalText[628] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;   //액설런트 데미지 증가
-		sprintf ( TextList[TextNum], GlobalText[633], 7 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;//공격 속도
-		sprintf ( TextList[TextNum], GlobalText[634] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;   //획득 생명력
-		sprintf ( TextList[TextNum], GlobalText[635] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;   //획득 마나
+        sprintf ( TextList[TextNum], GlobalText[628] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+		sprintf ( TextList[TextNum], GlobalText[633], 7 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+		sprintf ( TextList[TextNum], GlobalText[634] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+		sprintf ( TextList[TextNum], GlobalText[635] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
 
     }
 
-    if (ip->Type>=ITEM_POTION+23 && ip->Type<=ITEM_POTION+26 )   //  퀘스트 아이템.
+    if (ip->Type>=ITEM_POTION+23 && ip->Type<=ITEM_POTION+26 )
     {
 		sprintf(TextList[TextNum],GlobalText[730]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -3539,7 +3407,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			TextNum++;
 		}
 	}
-#ifdef CSK_FREE_TICKET
 	else if(ip->Type >= ITEM_HELPER+46 && ip->Type <= ITEM_HELPER+48)
 	{
 		int iMap = 0;
@@ -3554,131 +3421,89 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
 		sprintf(TextList[TextNum], GlobalText[2270]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], "\n");
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // CSK_FREE_TICKET
 
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-	// 자유입장권 아이템 설명
 	else if(ip->Type >= ITEM_HELPER+125 && ip->Type <= ITEM_HELPER+127)
 	{
 		int iMap = 0;
-		if(ip->Type == ITEM_HELPER+125)			// 도플갱어 자유입장권
-			iMap = 3057;	// 3057 "도플갱어"	
-		else if(ip->Type == ITEM_HELPER+126)	// 바르카 자유입장권
-			iMap = 2806;	// 2806 "바르카"
-		else if(ip->Type == ITEM_HELPER+127)	// 바르카 제7맵  자유입장권
-			iMap = 3107;	// 3107 "바르카 제7맵"
+		if(ip->Type == ITEM_HELPER+125)
+			iMap = 3057;
+		else if(ip->Type == ITEM_HELPER+126)
+			iMap = 2806;
+		else if(ip->Type == ITEM_HELPER+127)
+			iMap = 3107;
 		
-		// 2259 "%s 입장시 정해진 횟수만큼 사용할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2259], GlobalText[iMap]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-		// 빈칸 추가
 		sprintf(TextList[TextNum], "\n");
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-
-#ifdef CSK_CHAOS_CARD
-	// 카오스카드 아이템 설명
 	else if(ip->Type == ITEM_POTION+54)
 	{
-		// 2261 "카오스카드 조합을 통해 특별한 아이템을 획득할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2261]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // CSK_CHAOS_CARD
-#ifdef CSK_RARE_ITEM
-	// 희귀아이템 아이템 설명
 	else if(ip->Type >= ITEM_POTION+58 && ip->Type <= ITEM_POTION+62)
 	{
-		// 2269 "축하합니다. 운영팀에 연락한 후 아이템으로 교환할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2269]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // CSK_RARE_ITEM
-#ifdef PSW_RARE_ITEM
-	// 희귀아이템 아이템 설명
 	else if(ip->Type == ITEM_POTION+83 )
 	{
-		// 2269 "축하합니다. 운영팀에 연락한 후 아이템으로 교환할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2269]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // PSW_RARE_ITEM
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-	// 희귀아이템 아이템 설명
 	else if(ip->Type >= ITEM_POTION+145 && ip->Type <= ITEM_POTION+150)
 	{
-		// 2269 "축하합니다. 운영팀에 연락한 후 아이템으로 교환할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2269]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-#ifdef CSK_LUCKY_CHARM
-	else if( ip->Type == ITEM_POTION+53 )// 행운의 부적
+	else if( ip->Type == ITEM_POTION+53 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2250]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //CSK_LUCKY_CHARM
-#ifdef CSK_LUCKY_SEAL
 	else if( ip->Type == ITEM_HELPER+43 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2256]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
-#ifdef LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
-	#if SELECTED_LANGUAGE != LANGUAGE_CHINESE
 		sprintf(TextList[TextNum], GlobalText[2297]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-	#endif //SELECTED_LANGUAGE != LANGUAGE_CHINESE
-#else
-		sprintf(TextList[TextNum], GlobalText[2297]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextBold[TextNum] = false;
-		TextNum++;
-#endif //LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
-
 		sprintf(TextList[TextNum], GlobalText[2567]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2568]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
 
-#endif // SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	}
 	else if( ip->Type == ITEM_HELPER+44 )
 	{
@@ -3686,32 +3511,18 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
-#ifdef LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
-	#if SELECTED_LANGUAGE != LANGUAGE_CHINESE
 		sprintf(TextList[TextNum], GlobalText[2297]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-	#endif //SELECTED_LANGUAGE != LANGUAGE_CHINESE
-#else
-		sprintf(TextList[TextNum], GlobalText[2297]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextBold[TextNum] = false;
-		TextNum++;
-#endif //LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
-
 		sprintf(TextList[TextNum], GlobalText[2567]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
 		sprintf(TextList[TextNum], GlobalText[2568]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif // SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	}
 	else if( ip->Type == ITEM_HELPER+45 )
 	{
@@ -3719,49 +3530,15 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
-#ifdef LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
-	#if SELECTED_LANGUAGE != LANGUAGE_CHINESE
 		sprintf(TextList[TextNum], GlobalText[2297]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-	#endif //SELECTED_LANGUAGE != LANGUAGE_CHINESE
-#else
-		sprintf(TextList[TextNum], GlobalText[2297]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextBold[TextNum] = false;
-		TextNum++;
-#endif //LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
-
 		sprintf(TextList[TextNum], GlobalText[2566]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif // SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	}
-#endif //CSK_LUCKY_SEAL	
-#ifdef CSK_PCROOM_ITEM
-	else if(ip->Type >= ITEM_POTION+55 && ip->Type <= ITEM_POTION+57)
-	{
-		// 571 "바닥에 던지면 돈이나 아이템이 나옴"	// 변경 요망.
-		sprintf(TextList[TextNum],GlobalText[571]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextBold[TextNum] = false;
-		TextNum++;
-	}
-#endif // CSK_PCROOM_ITEM
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	else if(ip->Type == ITEM_HELPER+96)		// 강함의 인장 (PC방 아이템, 일본 6차 컨텐츠)
-	{
-		sprintf(TextList[TextNum],GlobalText[2742]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextBold[TextNum] = false;
-		TextNum++;
-	}
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 	else if(ip->Type >= ITEM_POTION+70 && ip->Type <= ITEM_POTION+71)
 	{
 		sprintf(TextList[TextNum], GlobalText[69], ip->Durability );
@@ -3776,8 +3553,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 	else if(ip->Type >= ITEM_POTION+72 && ip->Type <= ITEM_POTION+77)
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
@@ -3792,8 +3567,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PSW_SCROLL_ITEM
-#ifdef PSW_SEAL_ITEM               // 이동 인장
 	else if(ip->Type == ITEM_HELPER+59)
 	{
 		sprintf(TextList[TextNum], GlobalText[2509]);
@@ -3801,8 +3574,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PSW_SEAL_ITEM
-#ifdef PSW_FRUIT_ITEM              // 리셋 열매
 	else if( ip->Type >= ITEM_HELPER+54 && ip->Type <= ITEM_HELPER+58)
 	{
 		DWORD statpoint = 0;
@@ -3818,14 +3589,13 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 		
-#ifdef LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
 		
 		TextListColor[TextNum] = TEXT_COLOR_DARKRED;
-		sprintf(TextList[TextNum], GlobalText[1908]);	// 1908 "아이템 미착용시 사용가능"
+		sprintf(TextList[TextNum], GlobalText[1908]);
 		TextNum++;
 		
-		if(ip->Type == ITEM_HELPER+58)	// 통솔리셋열매이면?
+		if(ip->Type == ITEM_HELPER+58)
 		{
 			if(GetBaseClass( Hero->Class ) == CLASS_DARK_LORD)
 			{
@@ -3839,10 +3609,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			sprintf(TextList[TextNum],GlobalText[61], GlobalText[24]);
 			TextNum++;
 		}
-#endif // LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD
 	}
-#endif //PSW_FRUIT_ITEM
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
 	else if(ip->Type >= ITEM_POTION+78 && ip->Type <= ITEM_POTION+82)
 	{
 		int index = ip->Type-(ITEM_POTION+78);
@@ -3860,18 +3627,15 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2517]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2518]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 
-#ifdef ASG_ADD_LEAP_OF_CONTROL_TOOLTIP_TEXT
 		if( ip->Type == ITEM_POTION+82 )
 		{
 			sprintf(TextList[TextNum], GlobalText[3115]);
@@ -3879,7 +3643,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			TextBold[TextNum] = false;
 			TextNum++;
 		}
-#endif	// ASG_ADD_LEAP_OF_CONTROL_TOOLTIP_TEXT
 
 		std::string timetext;
 		g_StringTime( Item_data.m_Time, timetext, true );
@@ -3893,8 +3656,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PSW_SECRET_ITEM
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
 	else if(ip->Type == ITEM_HELPER+60)
 	{
 		sprintf(TextList[TextNum], GlobalText[2519]);
@@ -3902,9 +3663,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PSW_INDULGENCE_ITEM
-
-#ifdef PSW_ADD_PC4_SEALITEM
 	else if( ip->Type == ITEM_HELPER+62 )
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
@@ -3913,37 +3671,19 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2569], Item_data.m_byValue2 );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2570] );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH
 		sprintf(TextList[TextNum], GlobalText[2566]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
-	#else
-#ifdef LDK_FIX_PC4_SEALITEM_TOOLTIP_BUG
-		sprintf(TextList[TextNum], GlobalText[2567]);
-		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-		TextBold[TextNum] = false;
-		TextNum++;
 
-		sprintf(TextList[TextNum], GlobalText[2568]);
-		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-		TextBold[TextNum] = false;
-		TextNum++;
-#endif //LDK_FIX_PC4_SEALITEM_TOOLTIP_BUG
-	#endif // SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-#endif	// SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	}
 	else if( ip->Type == ITEM_HELPER+63 )
 	{
@@ -3953,34 +3693,15 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2571], Item_data.m_byValue2 );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2572] );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN && SELECTED_LANGUAGE != LANGUAGE_ENGLISH
-#ifdef LDK_FIX_PC4_SEALITEM_TOOLTIP_BUG
-		sprintf(TextList[TextNum], GlobalText[2567]);
-		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-		TextBold[TextNum] = false;
-		TextNum++;
-
-		sprintf(TextList[TextNum], GlobalText[2568]);
-		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-		TextBold[TextNum] = false;
-		TextNum++;
-#endif //LDK_FIX_PC4_SEALITEM_TOOLTIP_BUG
-#endif	// SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	}
-#endif //PSW_ADD_PC4_SEALITEM
-	
-#ifdef PSW_ADD_PC4_SCROLLITEM
 	else if( ip->Type == ITEM_POTION+97 )
 	{
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -4007,59 +3728,43 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2502]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PSW_ADD_PC4_SCROLLITEM
-
-#ifdef YDG_ADD_HEALING_SCROLL
 	else if (ip->Type == ITEM_POTION+140)
 	{
 		sprintf(TextList[TextNum], GlobalText[92], 3);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2188], 100);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_HEALING_SCROLL
-
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
 	else if( ip->Type == ITEM_POTION+96 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2573]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2574]);
 		TextListColor[TextNum] = TEXT_COLOR_PURPLE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-#ifdef LDK_FIX_CHAOSCHARMITEM_TOOLTIP
 		sprintf(TextList[TextNum], GlobalText[2708]);
 		TextListColor[TextNum] = TEXT_COLOR_PURPLE;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif //LDK_FIX_CHAOSCHARMITEM_TOOLTIP
 	}
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-
-#ifdef LDK_ADD_PC4_GUARDIAN
 	else if( ip->Type == ITEM_HELPER+64 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2575]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
 		sprintf(TextList[TextNum], GlobalText[2576]);
 		TextListColor[TextNum] = TEXT_COLOR_PURPLE;
 		TextBold[TextNum] = false;
@@ -4071,15 +3776,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
 		sprintf(TextList[TextNum], GlobalText[2578]);
 		TextListColor[TextNum] = TEXT_COLOR_PURPLE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_PC4_GUARDIAN
-
-#ifdef LDK_ADD_RUDOLPH_PET
 	else if( ip->Type == ITEM_HELPER+67 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2600]);
@@ -4087,9 +3788,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_RUDOLPH_PET
-
-#ifdef YDG_ADD_SKELETON_PET
 	else if( ip->Type == ITEM_HELPER+123 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2600]);
@@ -4112,9 +3810,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_SKELETON_PET
-
-#ifdef PJH_ADD_PANDA_PET
 	else if( ip->Type == ITEM_HELPER+80 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2746]);
@@ -4130,9 +3825,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PJH_ADD_PANDA_PET
-
-#ifdef LDK_ADD_CS7_UNICORN_PET
 	else if( ip->Type == ITEM_HELPER+106 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2746]);
@@ -4148,52 +3840,35 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_CS7_UNICORN_PET
-	
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
-	else if(ip->Type == ITEM_HELPER+107)		// 치명마법반지
+	else if(ip->Type == ITEM_HELPER+107)
 	{
-		sprintf(TextList[TextNum],GlobalText[926]);	// 수리 불가능
+		sprintf(TextList[TextNum],GlobalText[926]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-
-#ifdef YDG_ADD_CS7_MAX_AG_AURA
-	else if(ip->Type == ITEM_HELPER+104)		// AG증가 오라
+	else if(ip->Type == ITEM_HELPER+104)
 	{
 		sprintf(TextList[TextNum], GlobalText[2968]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_CS7_MAX_AG_AURA
-#ifdef YDG_ADD_CS7_MAX_SD_AURA
-	else if(ip->Type == ITEM_HELPER+105)		// SD증가 오라
+	else if(ip->Type == ITEM_HELPER+105)
 	{
 		sprintf(TextList[TextNum], GlobalText[2969]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_CS7_MAX_SD_AURA
-#ifdef YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
-	else if(ip->Type == ITEM_HELPER+103)		// 파티 경험치 증가 아이템
+	else if(ip->Type == ITEM_HELPER+103)
 	{
-// (일본만)파티 버프 사용시 추가로 얻는 경험치 변경(+190%, 한명 추가시 +10%)(09.11.19)
-#ifdef LJH_MOD_JPN_PARTY_EXP_WITH_PARTY_BUFF
-		sprintf(TextList[TextNum], GlobalText[2970]);
-#else	//LJH_MOD_JPN_PARTY_EXP_WITH_PARTY_BUFF
 		sprintf(TextList[TextNum], GlobalText[2970], 170);
-#endif	//LJH_MOD_JPN_PARTY_EXP_WITH_PARTY_BUFF
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
-	else if( ip->Type == ITEM_HELPER+69 )	// 부활의 부적
+	else if( ip->Type == ITEM_HELPER+69 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2602]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -4211,163 +3886,110 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			TextNum++;
 		}
 	}
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
-	else if( ip->Type == ITEM_HELPER+70 )	// 이동의 부적
+	else if( ip->Type == ITEM_HELPER+70 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2604]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef ASG_ADD_CS6_GUARD_CHARM
-	else if (ip->Type == ITEM_HELPER+81)	// 수호의부적
+	else if (ip->Type == ITEM_HELPER+81)
 	{
-		::sprintf(TextList[TextNum], GlobalText[2714]);
+		sprintf(TextList[TextNum], GlobalText[2714]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum++] = false;
-		::sprintf(TextList[TextNum], GlobalText[2729]);
+		sprintf(TextList[TextNum], GlobalText[2729]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum++] = false;
-#ifdef PBG_MOD_GUARDCHARMTEXT
-		::sprintf(TextList[TextNum], GlobalText[3084]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextBold[TextNum++] = false;
-#endif //PBG_MOD_GUARDCHARMTEXT
-	}
-#endif	// ASG_ADD_CS6_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ITEM_GUARD_CHARM
-	else if (ip->Type == ITEM_HELPER+82)	// 아이템 보호 부적
-	{
-		::sprintf(TextList[TextNum], GlobalText[2715]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextBold[TextNum++] = false;
-		::sprintf(TextList[TextNum], GlobalText[2730]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextBold[TextNum++] = false;
-		::sprintf(TextList[TextNum], GlobalText[2716]);
+		sprintf(TextList[TextNum], GlobalText[3084]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum++] = false;
 	}
-#endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-	else if (ip->Type == ITEM_HELPER+93)	// 상승의인장마스터
+	else if (ip->Type == ITEM_HELPER+82)
 	{
-		::sprintf(TextList[TextNum], GlobalText[2256]);
+		sprintf(TextList[TextNum], GlobalText[2715]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum++] = false;
-#ifdef LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
-	#if SELECTED_LANGUAGE != LANGUAGE_CHINESE
-		::sprintf(TextList[TextNum], GlobalText[2297]);
+		sprintf(TextList[TextNum], GlobalText[2730]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum++] = false;
-	#endif //SELECTED_LANGUAGE != LANGUAGE_CHINESE
-#else
-		::sprintf(TextList[TextNum], GlobalText[2297]);
+		sprintf(TextList[TextNum], GlobalText[2716]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum++] = false;
-#endif //LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
 	}
-#endif	// ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-#ifdef ASG_ADD_CS6_WEALTH_SEAL_MASTER
-	else if (ip->Type == ITEM_HELPER+94)	// 풍요의인장마스터
+	else if (ip->Type == ITEM_HELPER+93)
 	{
-		::sprintf(TextList[TextNum], GlobalText[2257]);
+		sprintf(TextList[TextNum], GlobalText[2256]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum++] = false;
-#ifdef LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
-	#if SELECTED_LANGUAGE != LANGUAGE_CHINESE
-		::sprintf(TextList[TextNum], GlobalText[2297]);
+		sprintf(TextList[TextNum], GlobalText[2297]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum++] = false;
-	#endif //SELECTED_LANGUAGE != LANGUAGE_CHINESE
-#else
-		::sprintf(TextList[TextNum], GlobalText[2297]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextBold[TextNum++] = false;
-#endif //LJW_FIX_CASHSHOPITEM_BUFF_CONTENT_IN_CHANA
 	}
-#endif	// ASG_ADD_CS6_WEALTH_SEAL_MASTER
-
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
-	// 자유입장권 아이템 설명
+	else if (ip->Type == ITEM_HELPER+94)
+	{
+		sprintf(TextList[TextNum], GlobalText[2257]);
+		TextListColor[TextNum] = TEXT_COLOR_BLUE;
+		TextBold[TextNum++] = false;
+		sprintf(TextList[TextNum], GlobalText[2297]);
+		TextListColor[TextNum] = TEXT_COLOR_BLUE;
+		TextBold[TextNum++] = false;
+	}
 	else if(ip->Type == ITEM_HELPER+61)
 	{
-		// 2259 "%s 입장시 정해진 횟수만큼 사용할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2259], GlobalText[2369]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-		// 2270 "입장 가능한 레벨에 맞추어 자동 입장됩니다."
 		sprintf(TextList[TextNum], GlobalText[2270]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-		// 빈칸 추가
 		sprintf(TextList[TextNum], "\n");
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // PSW_CURSEDTEMPLE_FREE_TICKET
-#ifdef PSW_CHARACTER_CARD 
-	else if(ip->Type == ITEM_POTION+91) // 캐릭터 카드
+	else if(ip->Type == ITEM_POTION+91)
 	{
-		// "소환술사 캐릭터를 생성할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2551]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // PSW_CHARACTER_CARD
-#ifdef PSW_NEW_CHAOS_CARD
-	else if(ip->Type == ITEM_POTION+92) // 카오스카드 골드
+	else if(ip->Type == ITEM_POTION+92)
 	{
-		// 2261 "카오스카드 조합을 통해 특별한 아이템을 획득할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2261]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-		// "일반, 고레벨용 아이템 생성"
 		sprintf(TextList[TextNum], GlobalText[2553]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	else if(ip->Type == ITEM_POTION+93) // 카오스카드 레어
+	else if(ip->Type == ITEM_POTION+93)
 	{
-		// 2261 "카오스카드 조합을 통해 특별한 아이템을 획득할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2261]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-		// "이벤트용 아이템 생성"
 		sprintf(TextList[TextNum], GlobalText[2556]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	else if(ip->Type == ITEM_POTION+95) // 카오스카드 미니
+	else if(ip->Type == ITEM_POTION+95)
 	{
-		// 2261 "카오스카드 조합을 통해 특별한 아이템을 획득할 수 있습니다."
 		sprintf(TextList[TextNum], GlobalText[2261]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-		// "초보용 아이템 생성"
 		sprintf(TextList[TextNum], GlobalText[2552]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // PSW_NEW_CHAOS_CARD
-#ifdef PSW_NEW_ELITE_ITEM
 	else if( ip->Type == ITEM_POTION+94 )
 	{
 		sprintf(TextList[TextNum], GlobalText[69], ip->Durability );
@@ -4380,16 +4002,14 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-	else if( ip->Type == ITEM_POTION+84 )  // 벚꽃상자
+	else if( ip->Type == ITEM_POTION+84 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2011] );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	else if( ip->Type == ITEM_POTION+85 )  // 벚꽃술
+	else if( ip->Type == ITEM_POTION+85 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2549] );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -4404,13 +4024,12 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	else if( ip->Type == ITEM_POTION+86 )  // 벚꽃경단
+	else if( ip->Type == ITEM_POTION+86 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2550]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		std::string timetext;
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 		g_StringTime( Item_data.m_Time, timetext, true );
@@ -4419,7 +4038,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	else if( ip->Type == ITEM_POTION+87 )  // 벚꽃잎
+	else if( ip->Type == ITEM_POTION+87)
 	{
 		sprintf(TextList[TextNum], GlobalText[2532]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -4434,65 +4053,52 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	else if( ip->Type == ITEM_POTION+88 )  // 흰색 벚꽃
+	else if( ip->Type == ITEM_POTION+88 )
 	{
 		sprintf(TextList[TextNum], GlobalText[69], ip->Durability );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2534]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2535]);
 		TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	else if( ip->Type == ITEM_POTION+89 )  // 붉은색 벚꽃
+	else if( ip->Type == ITEM_POTION+89 )
 	{
 		sprintf(TextList[TextNum], GlobalText[69], ip->Durability );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2534]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2536]);
 		TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	else if( ip->Type == ITEM_POTION+90 )  // 노란색 벚꽃
+	else if( ip->Type == ITEM_POTION+90 )
 	{
 		sprintf(TextList[TextNum], GlobalText[69], ip->Durability );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[2534]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-		sprintf(TextList[TextNum], GlobalText[2564]);
-		TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
-		TextBold[TextNum] = false;
-		TextNum++;
-#else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 		sprintf(TextList[TextNum], GlobalText[2537]);
 		TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif SELECTED_LANGUAGE == LANGUAGE_KOREAN
+
 	}
-#endif //CSK_EVENT_CHERRYBLOSSOM
 	else if(ip->Type == ITEM_HELPER+49)
 	{
 		sprintf(TextList[TextNum], GlobalText[2397]);
@@ -4521,7 +4127,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}	
-	else if(ip->Type >= ITEM_POTION+65 && ip->Type <= ITEM_POTION+68)	// 데쓰빔나이트의 불꽃, 헬마이네의 뿔, 어둠의불사조의 깃털, 심연의눈동자
+	else if(ip->Type >= ITEM_POTION+65 && ip->Type <= ITEM_POTION+68)
 	{
 		sprintf(TextList[TextNum], GlobalText[730]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -4536,93 +4142,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-	else if(ip->Type >= ITEM_POTION+151 && ip->Type <= ITEM_POTION+156)
-	{
-		switch(ip->Type)
-		{
-		case ITEM_POTION+151:	// 1레벨 의뢰서
-			sprintf(TextList[TextNum], GlobalText[3268]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;
-			TextBold[TextNum] = false;
-			TextNum++;
-			sprintf(TextList[TextNum],GlobalText[3269]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;
-			TextBold[TextNum] = false;
-			TextNum++;
-			sprintf(TextList[TextNum],GlobalText[733]);
-			TextListColor[TextNum] = TEXT_COLOR_RED;
-			TextBold[TextNum] = false;
-			TextNum++;
-			break;
-		case ITEM_POTION+152:	// 1레벨 의뢰 완료 확인서
-			sprintf(TextList[TextNum], GlobalText[3270]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;
-			TextBold[TextNum] = false;
-			TextNum++;
-			sprintf(TextList[TextNum],GlobalText[733]);
-			TextListColor[TextNum] = TEXT_COLOR_RED;
-			TextBold[TextNum] = false;
-			TextNum++;
-			break;
-		case ITEM_POTION+153:	// 스타더스트
-			sprintf(TextList[TextNum], GlobalText[3271]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;
-			TextBold[TextNum] = false;
-			TextNum++;
-			break;
-		case ITEM_POTION+154:	// 칼트석
-			sprintf(TextList[TextNum], GlobalText[3272]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;
-			TextBold[TextNum] = false;
-			TextNum++;
-			break;
-		case ITEM_POTION+155:	// 탄탈로스의 갑옷
-			sprintf(TextList[TextNum], GlobalText[3273]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;
-			TextBold[TextNum] = false;
-			TextNum++;
-			break;
-		case ITEM_POTION+156:	// 잿더미 도살자의 몽둥이
-			sprintf(TextList[TextNum], GlobalText[3274]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;
-			TextBold[TextNum] = false;
-			TextNum++;
-			break;
-		}
-
-		sprintf(TextList[TextNum],GlobalText[731]);
-		TextListColor[TextNum] = TEXT_COLOR_RED;
-		TextBold[TextNum] = false;
-		TextNum++;
-		sprintf(TextList[TextNum],GlobalText[732]);
-		TextListColor[TextNum] = TEXT_COLOR_RED;
-		TextBold[TextNum] = false;
-		TextNum++;
-		
-	}
-	else if(ip->Type == ITEM_POTION+157)	// 초록빛 상자
-	{
-		sprintf(TextList[TextNum], GlobalText[3275]);
-		TextListColor[TextNum] = TEXT_COLOR_WHITE;
-		TextBold[TextNum] = false;
-		TextNum++;
-	}
-	else if(ip->Type == ITEM_POTION+158)	// 붉은빛 상자
-	{
-		sprintf(TextList[TextNum], GlobalText[3276]);
-		TextListColor[TextNum] = TEXT_COLOR_WHITE;
-		TextBold[TextNum] = false;
-		TextNum++;
-	}
-	else if(ip->Type == ITEM_POTION+159)	// 보라빛 상자
-	{
-		sprintf(TextList[TextNum], GlobalText[3277]);
-		TextListColor[TextNum] = TEXT_COLOR_WHITE;
-		TextBold[TextNum] = false;
-		TextNum++;
-	}
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
 	else if(ip->Type == ITEM_HELPER+52)
 	{
 		sprintf(TextList[TextNum], GlobalText[1665]);
@@ -4637,38 +4156,31 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#ifdef ADD_SEED_SPHERE_ITEM
-	else if ((ip->Type >= ITEM_WING+60 && ip->Type <= ITEM_WING+65)	// 시드
-		|| (ip->Type >= ITEM_WING+70 && ip->Type <= ITEM_WING+74)	// 스피어
-		|| (ip->Type >= ITEM_WING+100 && ip->Type <= ITEM_WING+129))	// 시드스피어
+	else if ((ip->Type >= ITEM_WING+60 && ip->Type <= ITEM_WING+65)	|| (ip->Type >= ITEM_WING+70 && ip->Type <= ITEM_WING+74) || (ip->Type >= ITEM_WING+100 && ip->Type <= ITEM_WING+129))
 	{
 		TextNum = g_SocketItemMgr.AttachToolTipForSeedSphereItem(ip, TextNum);
 	}
-#endif	// ADD_SEED_SPHERE_ITEM
-#ifdef LDK_ADD_GAMBLE_RANDOM_ICON
-	else if( ip->Type == ITEM_HELPER+71 || ip->Type == ITEM_HELPER+72 || ip->Type == ITEM_HELPER+73 || ip->Type == ITEM_HELPER+74 ||ip->Type == ITEM_HELPER+75 )	// 겜블러 아이콘
+	else if( ip->Type == ITEM_HELPER+71 || ip->Type == ITEM_HELPER+72 || ip->Type == ITEM_HELPER+73 || ip->Type == ITEM_HELPER+74 ||ip->Type == ITEM_HELPER+75 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2709]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_GAMBLE_RANDOM_ICON
-
 	else if(ip->Type == ITEM_HELPER+38)
 	{
-		sprintf(TextList[TextNum],GlobalText[926]);	// 수리 불가능
+		sprintf(TextList[TextNum],GlobalText[926]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	else if(ip->Type == ITEM_HELPER+20)		//. 제왕의 반지, 마법사의 반지
+	else if(ip->Type == ITEM_HELPER+20)
 	{
         switch ( Level )
         {
         case 0:
             {
-                sprintf(TextList[TextNum],GlobalText[926]);	// 수리 불가능
+                sprintf(TextList[TextNum],GlobalText[926]);
 			    TextListColor[TextNum] = TEXT_COLOR_RED;
 			    TextBold[TextNum] = false;
 			    TextNum++;
@@ -4715,9 +4227,9 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			    TextNum++;
 		    }
             break;
-        case 3:     //  영예의 반지.
+        case 3:
             {
-                sprintf(TextList[TextNum],GlobalText[926]);	// 수리 불가능
+                sprintf(TextList[TextNum],GlobalText[926]);
 			    TextListColor[TextNum] = TEXT_COLOR_RED;
 			    TextBold[TextNum] = false;
 			    TextNum++;
@@ -4725,81 +4237,64 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
             break;
         }
 	}
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING             // (정보출력)날개 조합 100% 성공 부적
-	else if(ip->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN
-			&& ip->Type <= ITEM_TYPE_CHARM_MIXWING+EWS_END)
+	else if(ip->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN && ip->Type <= ITEM_TYPE_CHARM_MIXWING+EWS_END)
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
-#ifdef LDK_FIX_CHARM_MIX_ITEM_WING_TOOLTIP
-		// 아이템이름이 아닌 내용으로 변경 및 빠진 내용 추가
-
-		//"날개 조합 시 원하는 클래스용으로 생성될 수 있도록 해줍니다."
 		sprintf(TextList[TextNum],GlobalText[2717]);
 		TextBold[TextNum] = false;
 		TextNum++;
 		
 		switch (ip->Type)
 		{
-		case ITEM_TYPE_CHARM_MIXWING+EWS_KNIGHT_1_CHARM: //사탄날개부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_KNIGHT_1_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2718], Item_data.m_byValue1);
 			}break;
-		case ITEM_TYPE_CHARM_MIXWING+EWS_MAGICIAN_1_CHARM: //천공날개부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_MAGICIAN_1_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2720], Item_data.m_byValue1);
 			}break;
-		case ITEM_TYPE_CHARM_MIXWING+EWS_ELF_1_CHARM: //요정날개부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_ELF_1_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2722], Item_data.m_byValue1);
 			}break;
-		case ITEM_TYPE_CHARM_MIXWING+EWS_SUMMONER_1_CHARM: //재앙날개부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_SUMMONER_1_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2724], Item_data.m_byValue1);
 			}break;
-		case ITEM_TYPE_CHARM_MIXWING+EWS_DARKLORD_1_CHARM: //망토조합부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_DARKLORD_1_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2727], Item_data.m_byValue1);
 			}break;
-		case ITEM_TYPE_CHARM_MIXWING+EWS_KNIGHT_2_CHARM: //드라곤날개부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_KNIGHT_2_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2719], Item_data.m_byValue1);
 			}break;
-		case ITEM_TYPE_CHARM_MIXWING+EWS_MAGICIAN_2_CHARM: //영혼날개부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_MAGICIAN_2_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2721], Item_data.m_byValue1);
 			}break;
-		case ITEM_TYPE_CHARM_MIXWING+EWS_ELF_2_CHARM: //정령날개부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_ELF_2_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2723], Item_data.m_byValue1);
 			}break;
-		case ITEM_TYPE_CHARM_MIXWING+EWS_SUMMONER_2_CHARM: //절망날개부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_SUMMONER_2_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2725], Item_data.m_byValue1);
 			}break;
-		case ITEM_TYPE_CHARM_MIXWING+EWS_DARKKNIGHT_2_CHARM: //암흑날개부적
+		case ITEM_TYPE_CHARM_MIXWING+EWS_DARKKNIGHT_2_CHARM:
 			{
 				sprintf(TextList[TextNum], GlobalText[2726], Item_data.m_byValue1);
 			}break;
 		}
 
-#else //LDK_FIX_CHARM_MIX_ITEM_WING_TOOLTIP
-
-#ifdef PBG_FIX_CHARM_MIX_ITEM_WING_TOOLTIP
 		sprintf(TextList[TextNum], GlobalText[2732+(ip->Type-(ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN))],
 			Item_data.m_byValue1);
-#else //PBG_FIX_CHARM_MIX_ITEM_WING_TOOLTIP
-		sprintf(TextList[TextNum], GlobalText[2732+(ip->Type-(MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN))],
-			Item_data.m_byValue1);
-#endif //PBG_FIX_CHARM_MIX_ITEM_WING_TOOLTIP
-
-#endif //LDK_FIX_CHARM_MIX_ITEM_WING_TOOLTIP
 
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDS_ADD_CS6_CHARM_MIX_ITEM_WING
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
 	else if( ip->Type == ITEM_POTION+110 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2773]);
@@ -4835,13 +4330,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-#ifdef LDK_ADD_EMPIREGUARDIAN_ITEM
 	else if( ITEM_POTION+101 <= ip->Type && ip->Type <= ITEM_POTION+109 )
 	{
 		switch(ip->Type)
 		{
-		case ITEM_POTION+101: // 의문의쪽지
+		case ITEM_POTION+101:
 			{
 				sprintf ( TextList[TextNum], GlobalText[1181], ip->Durability, 5 ); 
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -4853,7 +4346,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 				TextBold[TextNum] = false;
 				TextNum++;
 			}break;
-		case ITEM_POTION+102: // 가이온의 명령서
+		case ITEM_POTION+102:
 			{
 				sprintf(TextList[TextNum], GlobalText[2784]);
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -4867,8 +4360,9 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;
 				TextBold[TextNum] = false;
 				TextNum++;
-			}break;
-		case ITEM_POTION+103: // 세크로미콘 조각
+			}
+			break;
+		case ITEM_POTION+103:
 		case ITEM_POTION+104: 
 		case ITEM_POTION+105: 
 		case ITEM_POTION+106: 
@@ -4880,7 +4374,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 				TextBold[TextNum] = false;
 				TextNum++;
 			}break;
-		case ITEM_POTION+109: // 세크로미콘
+		case ITEM_POTION+109:
 			{
 				sprintf(TextList[TextNum], GlobalText[2792]);
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -4893,149 +4387,97 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			}break;
 		}
 	}
-#endif //LDK_ADD_EMPIREGUARDIAN_ITEM
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
 	else if( ITEM_HELPER+109 == ip->Type )
 	{
-		// 생명 자동 회복 3%
 		sprintf(TextList[TextNum], GlobalText[92], 3);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-		// 마력 증가 4%
-#ifdef LDS_MOD_MODIFYTEXT_TOPAZRING_SAPIRERING
 		sprintf(TextList[TextNum], GlobalText[3058], 4);
-#else // LDS_MOD_MODIFYTEXT_TOPAZRING_SAPIRERING
-		sprintf(TextList[TextNum], GlobalText[632], 4);
-#endif // LDS_MOD_MODIFYTEXT_TOPAZRING_SAPIRERING
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링		// MODEL_HELPER+110
 	else if( ITEM_HELPER+110 == ip->Type )
 	{
-		// 생명 자동 회복 3%
 		sprintf(TextList[TextNum], GlobalText[92], 3);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-		// 최대 생명력 증가 4%
 		sprintf(TextList[TextNum], GlobalText[622], 4);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY	// 신규 루비(붉은색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링		// MODEL_HELPER+111
 	else if( ITEM_HELPER+111 == ip->Type )
 	{
-		// 생명 자동 회복 3%
 		sprintf(TextList[TextNum], GlobalText[92], 3);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-		// 젠 증가 50%
-#ifdef LDS_MOD_MODIFYTEXT_TOPAZRING_SAPIRERING
 		sprintf(TextList[TextNum], GlobalText[627], 50);
-#else // LDS_MOD_MODIFYTEXT_TOPAZRING_SAPIRERING
-		sprintf(TextList[TextNum], GlobalText[2744], 50);
-#endif // LDS_MOD_MODIFYTEXT_TOPAZRING_SAPIRERING
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링		// MODEL_HELPER+112
 	else if( ITEM_HELPER+112 == ip->Type )
 	{
-		// 생명 자동 회복 3%
 		sprintf(TextList[TextNum], GlobalText[92], 3);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-		// 데미지 감소 4%
 		sprintf(TextList[TextNum], GlobalText[624], 4);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
 	else if( ITEM_HELPER+113 == ip->Type )
 	{
-		// 생명 자동 회복 3%
 		sprintf(TextList[TextNum], GlobalText[92], 3);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-		// 엑설런트 데미지 확률 +10%
 		sprintf(TextList[TextNum], GlobalText[628], 10);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// 신규 루비(붉은색) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이	// MODEL_HELPER+114
 	else if( ITEM_HELPER+114 == ip->Type )
 	{
-		// 생명 자동 회복 3%
 		sprintf(TextList[TextNum], GlobalText[92], 3);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-		// 공격속도+7
 		sprintf(TextList[TextNum], GlobalText[2229], 7);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// 신규 사파이어(녹색) 목걸이	// MODEL_HELPER+115
 	else if( ITEM_HELPER+115 == ip->Type )
 	{
-		// 생명 자동 회복 3%
 		sprintf(TextList[TextNum], GlobalText[92], 3);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-		// 몬스터 죽였을때 획득 마나 증가 +마나/8
 		sprintf(TextList[TextNum], GlobalText[635]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// 신규 사파이어(녹색) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
 	else if( ITEM_POTION+112 == ip->Type )
 	{
-		// 봉인된금색상자와의...
 		sprintf ( TextList[TextNum], GlobalText[2876] ); 
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD		// 신규 키(골드)	// MODEL_POTION+113
 	else if( ITEM_POTION+113 == ip->Type )
 	{
-		// 봉인된금색상자와의...
 		sprintf ( TextList[TextNum], GlobalText[2875] ); 
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD		// 신규 키(골드)	// MODEL_POTION+113
-#ifdef LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-	// 고블린금화
 	else if(ip->Type == ITEM_POTION+120)
 	{
 		sprintf ( TextList[TextNum], GlobalText[2971] ); 
@@ -5043,8 +4485,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
 	else if( ITEM_POTION+121 == ip->Type )
 	{
 		sprintf ( TextList[TextNum], GlobalText[2877] ); 
@@ -5052,8 +4492,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST		// 봉인된 은색상자
 	else if( ITEM_POTION+122 == ip->Type )
 	{
 		sprintf ( TextList[TextNum], GlobalText[2878] );
@@ -5061,8 +4499,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST				// 금색상자
 	else if( ITEM_POTION+123 == ip->Type )
 	{
 		sprintf ( TextList[TextNum], GlobalText[2879] ); 
@@ -5070,8 +4506,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST				// 은색상자
 	else if( ITEM_POTION+124 == ip->Type )
 	{
 		sprintf ( TextList[TextNum], GlobalText[2880] ); 
@@ -5079,8 +4513,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX		// 인게임샾 아이템 // 패키지상자6종			// MODEL_POTION+134~139
 	else if( ITEM_POTION+134 <= ip->Type && ITEM_POTION+139 >= ip->Type )
 	{
 		sprintf ( TextList[TextNum], GlobalText[2972] ); 
@@ -5088,8 +4520,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDK_ADD_INGAMESHOP_PACKAGE_BOX		// 인게임샾 아이템 // 패키지상자6종			// MODEL_POTION+134~139
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 	else if( ITEM_HELPER+116 == ip->Type )
 	{
 		sprintf ( TextList[TextNum], GlobalText[3018] ); 
@@ -5098,48 +4528,33 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
 	else if( ITEM_HELPER+121 == ip->Type )
 	{
 		int iMap = 57;
-
-		// 정해진 횟수만큼 사용할 수 있습니다.
 		sprintf ( TextList[TextNum], GlobalText[2259], GlobalText[iMap] ); 
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
-		
-		// 레벨에 맞추어 자동 입장 됩니다.
 		sprintf ( TextList[TextNum], GlobalText[2270] ); 
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-		// %d번 사용 가능
 		sprintf ( TextList[TextNum], GlobalText[2260], ip->Durability ); 
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-#ifdef ASG_ADD_CHARGED_CHANNEL_TICKET
-	// 유료채널 입장권 설명
 	else if(ip->Type == ITEM_HELPER+124)
 	{
 		sprintf(TextList[TextNum], GlobalText[3116]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-#ifdef ASG_MOD_CHARGED_CHANNEL_TICKET_ADD_DESCRIPTION
 		sprintf(TextList[TextNum], GlobalText[3127]);
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = true;
 		TextNum++;
-#endif	// ASG_MOD_CHARGED_CHANNEL_TICKET_ADD_DESCRIPTION
 	}
-#endif	// ASG_ADD_CHARGED_CHANNEL_TICKET
-#ifdef PBG_ADD_GENSRANKING
 	else if(ip->Type >= ITEM_POTION+141 && ip->Type <= ITEM_POTION+144)
 	{
 		sprintf(TextList[TextNum], GlobalText[571]);
@@ -5147,10 +4562,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PBG_ADD_GENSRANKING
-#ifdef KJH_FIX_BTS251_ELITE_SD_POTION_TOOLTIP
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
-	else if(ip->Type==ITEM_POTION+133)		// 엘리트 SD회복 물약
+	else if(ip->Type==ITEM_POTION+133)
 	{
 		sprintf(TextList[TextNum], GlobalText[69], ip->Durability );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -5162,14 +4574,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-#endif // KJH_FIX_BTS251_ELITE_SD_POTION_TOOLTIP
-
 
 	Color = TEXT_COLOR_YELLOW;
 	sprintf ( TextList[TextNum], "%s", p->Name );
 
-	if(ip->Type == ITEM_POTION+19)//초대장
+	if(ip->Type == ITEM_POTION+19)
 	{
 		sprintf(TextList[TextNum],GlobalText[638]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -5181,10 +4590,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextNum++;
 	}
 
-    //////////////////////////////////////////////////////////////////////////
-    //  옵션.
-    //////////////////////////////////////////////////////////////////////////
-	if(ip->DamageMin)   //  공격력.
+	if(ip->DamageMin)
 	{
 
 		int minindex = 0, maxindex = 0, magicalindex = 0; 
@@ -5209,7 +4615,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 		else if ( ip->Type != ITEM_ETC+5 && ip->Type != ITEM_ETC+14 && ip->Type != ITEM_ETC+15)
 		{	
-			// 일부 법서는 공격력이 없음
 			if ( ip->Type>=ITEM_ETC && ip->Type<ITEM_ETC+MAX_ITEM_INDEX )
 			{
 				int SkillIndex = getSkillIndexByBook( ip->Type );
@@ -5230,7 +4635,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			}
 		}
 		else
-		{	// 공격력 없는 일부법서
+		{
 			TextNum--;
 		}
 
@@ -5257,7 +4662,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			TextNum--;
 		}
 	}
-	if(ip->Defense)     //  방어력.
+	if(ip->Defense)
 	{
 		int maxdefense = 0; 
 
@@ -5287,14 +4692,14 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	if(ip->MagicDefense)//  마법 방어력.
+	if(ip->MagicDefense)
 	{
     	sprintf(TextList[TextNum],GlobalText[66],ip->MagicDefense);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	if(p->SuccessfulBlocking)   //  방어 성공율.
+	if(p->SuccessfulBlocking)
 	{
 		sprintf(TextList[TextNum],GlobalText[67],ip->SuccessfulBlocking);
 		if((ip->Option1&63) > 0)
@@ -5304,64 +4709,21 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	if(p->WeaponSpeed)  //  공격 속도.
+	if(p->WeaponSpeed)
 	{
     	sprintf(TextList[TextNum],GlobalText[64],p->WeaponSpeed);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-	if(p->WalkSpeed)    //  이동 속도.
+	if(p->WalkSpeed)
 	{
     	sprintf(TextList[TextNum],GlobalText[68],p->WalkSpeed);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#ifdef MYSTERY_BEAD
-	if(ip->Type==ITEM_WING+26)
-	{
-		if(Level == 0)	//. 신비의 구슬
-		{
-			sprintf(TextList[TextNum],GlobalText[112]);
-		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],GlobalText[1835]);  
-		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-            sprintf(TextList[TextNum],GlobalText[114]);  
-		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		}
-		else if (Level >= 1 && Level <= 3)	//. 수정들
-		{
-			sprintf(TextList[TextNum],GlobalText[1836]);
-		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],GlobalText[1837]);
-		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],GlobalText[732]);
-		    TextListColor[TextNum] = TEXT_COLOR_RED;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],GlobalText[733]);
-		    TextListColor[TextNum] = TEXT_COLOR_RED;TextBold[TextNum] = false;TextNum++;
-		}
-		else if (Level == 4)	//. 보물상자
-		{
-			sprintf(TextList[TextNum],GlobalText[571]);  
-		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],GlobalText[732]);
-		    TextListColor[TextNum] = TEXT_COLOR_RED;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],GlobalText[733]);
-		    TextListColor[TextNum] = TEXT_COLOR_RED;TextBold[TextNum] = false;TextNum++;
-		}
-		else if (Level == 5)	//. 깜짝선물
-		{
-			sprintf(TextList[TextNum],GlobalText[1839]);  
-		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],GlobalText[732]);
-		    TextListColor[TextNum] = TEXT_COLOR_RED;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],GlobalText[733]);
-		    TextListColor[TextNum] = TEXT_COLOR_RED;TextBold[TextNum] = false;TextNum++;
-		}
-	}
-#endif // MYSTERY_BEAD
-	if(ip->Type >= ITEM_WING+32 && ip->Type <= ITEM_WING+34)//리본상자.(x-mas이벤트용)
+	if(ip->Type >= ITEM_WING+32 && ip->Type <= ITEM_WING+34)
 	{
 		sprintf(TextList[TextNum],GlobalText[571]);
 		switch(ip->Type)
@@ -5417,8 +4779,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 		TextBold[TextNum] = false;TextNum++;
 	}
-#ifdef GIFT_BOX_EVENT
-	if(ip->Type >= ITEM_POTION+32 && ip->Type <= ITEM_POTION+34)//리본상자.(x-mas이벤트용)
+	if(ip->Type >= ITEM_POTION+32 && ip->Type <= ITEM_POTION+34)
 	{
 		sprintf(TextList[TextNum],GlobalText[2011]);
 		switch(ip->Type)
@@ -5447,10 +4808,9 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 		TextBold[TextNum] = false;TextNum++;
 	}
-#endif
-	if(ip->Type==ITEM_POTION+11)//  행운의 상자.
+	if(ip->Type==ITEM_POTION+11)
 	{
-		if( Level==7 )//  천공의 상자.
+		if( Level==7 )
 		{
             sprintf(TextList[TextNum],GlobalText[112]);
 		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
@@ -5459,15 +4819,13 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
             sprintf(TextList[TextNum],GlobalText[114]);  
 		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 		}
-#ifdef NEW_YEAR_BAG_EVENT
-        else if ( Level==14 )   //  파란 복주머니
+        else if ( Level==14 )
         {
             sprintf(TextList[TextNum],GlobalText[1652]);
 		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
             sprintf(TextList[TextNum],GlobalText[1653]);
 		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
         }
-#endif// NEW_YEAR_BAG_EVENT
         else
         {
             sprintf(TextList[TextNum],GlobalText[571]);
@@ -5477,7 +4835,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
-		if (Level == 13)	// 다크로드의 마음
+		if (Level == 13)
 		{
 			sprintf(TextList[TextNum],GlobalText[731]);
 			TextListColor[TextNum] = TEXT_COLOR_RED;
@@ -5488,7 +4846,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 	char tCount = COMGEM::CalcCompiledCount(ip);
 	if(tCount > 0)
 	{
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석 조합 아이템 툴팁 추가
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		int	nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
 		if( nJewelIndex != COMGEM::NOGEM )
 		{
@@ -5519,104 +4877,44 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	}
-	if(ip->Type==ITEM_POTION+13)//  축석
+	if(ip->Type==ITEM_POTION+13)
 	{
 		sprintf(TextList[TextNum],GlobalText[572]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-	if(ip->Type==ITEM_POTION+14)//  영석
+	if(ip->Type==ITEM_POTION+14)
 	{
 		sprintf(TextList[TextNum],GlobalText[573]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-	if(ip->Type==ITEM_POTION+16)//  생명
+	if(ip->Type==ITEM_POTION+16)
 	{
 		sprintf(TextList[TextNum],GlobalText[621]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-	if(ip->Type==ITEM_POTION+17 || ip->Type==ITEM_POTION+18)//악마의 눈, 열쇠
+	if(ip->Type==ITEM_POTION+17 || ip->Type==ITEM_POTION+18)
 	{
 		sprintf(TextList[TextNum],GlobalText[637]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-#ifdef ANNIVERSARY_EVENT
-	if(ip->Type==ITEM_POTION+20 && Level >= 1 && Level <= 5)//애니버서리 박스
-	{
-		sprintf(TextList[TextNum],GlobalText[571]);
-		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-	}
-#endif	// ANNIVERSARY_EVENT
-#ifdef _PVP_ADD_MOVE_SCROLL
-	if(ip->Type==ITEM_POTION+10 && Level >= 1 && Level <= 8)//이동문서
+	if(ip->Type==ITEM_POTION+10 && Level >= 1 && Level <= 8)
 	{
 		sprintf(TextList[TextNum],GlobalText[157], 3);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-#endif	// _PVP_ADD_MOVE_SCROLL
-#ifdef _PVP_MURDERER_HERO_ITEM
-	if(ip->Type==ITEM_POTION+30)	//영웅살인마징표
-	{
-//		ITEM_EX_INFO * pItemExInfo = g_ItemExInfo.GetInfo(wInvenPos);
-		if (pItemExInfo != NULL)	// 정보 이미 받았으면
-		{
-			TextNum--;
-			sprintf(TextList[TextNum],"(%d %s %s)", pItemExInfo->m_wLevel_T, GlobalText[368], pItemExInfo->m_szClass_T);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
-			sprintf(TextList[TextNum], pItemExInfo->m_szDate);
-			TextListColor[TextNum] = TEXT_COLOR_BLUE;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],"%d %s %s", pItemExInfo->m_wLevel, GlobalText[368], pItemExInfo->m_szClass);
-			TextListColor[TextNum] = TEXT_COLOR_BLUE;TextBold[TextNum] = false;TextNum++;
-
-			if (ip->Durability % 100 < 3)	// 영웅
-			{
-				sprintf(TextList[TextNum],"%s %s %s", GlobalText[490], pItemExInfo->m_szName, GlobalText[918]);
-				TextListColor[TextNum] = TEXT_COLOR_BLUE;TextBold[TextNum] = false;TextNum++;
-			}
-			else	// 살인마
-			{
-				sprintf(TextList[TextNum],"%s %s %s", GlobalText[487], pItemExInfo->m_szName, GlobalText[918]);
-				TextListColor[TextNum] = TEXT_COLOR_BLUE;TextBold[TextNum] = false;TextNum++;
-			}
-			sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
-			sprintf(TextList[TextNum],GlobalText[1193], pItemExInfo->m_wRemainTime);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		}
-		else	// 정보가 없으면
-		{
-			sprintf(TextList[TextNum],GlobalText[1190]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-			sprintf(TextList[TextNum],GlobalText[1191]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		}
-		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
-		if (ip->Durability / 100 == 2)
-		{
-			sprintf(TextList[TextNum],GlobalText[1194]);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		}
-		else
-		{
-			sprintf(TextList[TextNum],GlobalText[1195]);
-			TextListColor[TextNum] = TEXT_COLOR_RED;TextBold[TextNum] = false;TextNum++;
-		}
-	}
-#endif	// _PVP_MURDERER_HERO_ITEM
-	if(ip->Type==ITEM_WING+15)  //  혼석.
+	if(ip->Type==ITEM_WING+15)
 	{
 		sprintf(TextList[TextNum],GlobalText[574]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-	if(ip->Type==ITEM_POTION+22)  //  창조의 보석.
+	if(ip->Type==ITEM_POTION+22)
 	{
 		sprintf(TextList[TextNum],GlobalText[619]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-	if(ip->Type==ITEM_POTION+31)  //  수호의 보석.
+	if(ip->Type==ITEM_POTION+31)
 	{
-//		sprintf(TextList[TextNum],GlobalText[1288]);	// 1288 "장비의 드롭방지"
-//		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		sprintf(TextList[TextNum],GlobalText[1289]);	// 1289 "공성을 위한 개체들의 생성과 강화"
+		sprintf(TextList[TextNum],GlobalText[1289]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
 	if(ip->Type==ITEM_HELPER+0) //  
@@ -5626,22 +4924,18 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		sprintf(TextList[TextNum],GlobalText[739], 50);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-	if(ip->Type==ITEM_HELPER+1) //  수호천사/악마.
+	if(ip->Type==ITEM_HELPER+1)
 	{
 		sprintf(TextList[TextNum],GlobalText[576]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-#ifdef ADD_ALICE_WINGS_1
-	if((ip->Type>=ITEM_WING && ip->Type<=ITEM_WING+2) || ip->Type==ITEM_WING+41)//날개
-#else	// ADD_ALICE_WINGS_1
-    if(ip->Type>=ITEM_WING && ip->Type<=ITEM_WING+2)//날개
-#endif	// ADD_ALICE_WINGS_1
+	if((ip->Type>=ITEM_WING && ip->Type<=ITEM_WING+2) || ip->Type==ITEM_WING+41)
 	{
-		sprintf(TextList[TextNum],GlobalText[577],12+Level*2);  //  데미지 몇%증가.
+		sprintf(TextList[TextNum],GlobalText[577],12+Level*2);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		sprintf(TextList[TextNum],GlobalText[578],12+Level*2);  //  데미지 몇%흡수.
+		sprintf(TextList[TextNum],GlobalText[578],12+Level*2);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		sprintf(TextList[TextNum],GlobalText[579]);             //  이동 속도 향상.
+		sprintf(TextList[TextNum],GlobalText[579]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
 	else if( ip->Type == ITEM_HELPER + 38 )
@@ -5669,7 +4963,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		sprintf(TextList[TextNum],GlobalText[2210]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-#ifdef LEM_ADD_LUCKYITEM		// 럭키아이템 보석 설명 텍스트 문구
+#ifdef LEM_ADD_LUCKYITEM
 	else if( ip->Type == ITEM_POTION+160 )
 	{
 		// 연장의 보석
@@ -5683,11 +4977,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
 #endif // LEM_ADD_LUCKYITEM
-#ifdef ADD_ALICE_WINGS_1
 	else if ((ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6) || ip->Type==ITEM_WING+42) //날개
-#else	// ADD_ALICE_WINGS_1
-	else if ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 ) //날개
-#endif	// ADD_ALICE_WINGS_1
     {
 		sprintf(TextList[TextNum],GlobalText[577],32+Level);  //  데미지 몇%증가.
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
@@ -5696,37 +4986,33 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		sprintf(TextList[TextNum],GlobalText[579]);             //  이동 속도 향상.
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
     }
-#ifdef ADD_ALICE_WINGS_1
 	else if ((ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40) || ip->Type==ITEM_WING+43
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| ip->Type==ITEM_WING+50
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		) //3차날개
-#else	// ADD_ALICE_WINGS_1
-	else if ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 ) //3차날개
-#endif	// ADD_ALICE_WINGS_1
+		)
     {
-		sprintf(TextList[TextNum],GlobalText[577],39+Level*2);  //  데미지 몇%증가.
+		sprintf(TextList[TextNum],GlobalText[577],39+Level*2);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 		if ( ip->Type==ITEM_WING+40 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-#ifndef PBG_MOD_NEWCHAR_MONK_WING		//군림의망토 수치 39로 변경
+#ifndef PBG_MOD_NEWCHAR_MONK_WING
 			|| ip->Type==ITEM_WING+50
 #endif //PBG_MOD_NEWCHAR_MONK_WING
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			) // 제왕의망토
+			)
 		{
-			sprintf(TextList[TextNum],GlobalText[578],24+Level*2);  //  데미지 몇%흡수.
+			sprintf(TextList[TextNum],GlobalText[578],24+Level*2);
 		}
-		else	// 폭풍의날개~파멸의날개
+		else
 		{
-			sprintf(TextList[TextNum],GlobalText[578],39+Level*2);  //  데미지 몇%흡수.
+			sprintf(TextList[TextNum],GlobalText[578],39+Level*2);
 		}
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		sprintf(TextList[TextNum],GlobalText[579]);             //  이동 속도 향상.
+		sprintf(TextList[TextNum],GlobalText[579]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
     }
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	else if( ITEM_WING+130 <= ip->Type && 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		ip->Type <= ITEM_WING+135
@@ -5738,13 +5024,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		switch(ip->Type)
 		{
 		case ITEM_WING+130:
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		case ITEM_WING+135:
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 			{
-				sprintf(TextList[TextNum],GlobalText[577],20+Level*2);  //  데미지 몇%증가.
+				sprintf(TextList[TextNum],GlobalText[577],20+Level*2);
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-				sprintf(TextList[TextNum],GlobalText[578],20+Level*2);  //  데미지 몇%흡수.
+				sprintf(TextList[TextNum],GlobalText[578],20+Level*2);
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 			}break;
 		case ITEM_WING+131:
@@ -5752,9 +5036,9 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		case ITEM_WING+133:
 		case ITEM_WING+134:
 			{
-				sprintf(TextList[TextNum],GlobalText[577],12+Level*2);  //  데미지 몇%증가.
+				sprintf(TextList[TextNum],GlobalText[577],12+Level*2);
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-				sprintf(TextList[TextNum],GlobalText[578],12+Level*2);  //  데미지 몇%흡수.
+				sprintf(TextList[TextNum],GlobalText[578],12+Level*2);
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 			}break;
 		}
@@ -5762,33 +5046,32 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
-	else if ( ip->Type==ITEM_HELPER+3 )     //  디노란트.
+	else if ( ip->Type==ITEM_HELPER+3 )
     {
-		sprintf(TextList[TextNum],GlobalText[577],15 );  //  데미지 몇%증가.
+		sprintf(TextList[TextNum],GlobalText[577],15 );
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		sprintf(TextList[TextNum],GlobalText[578],10 );  //  데미지 몇%흡수.
+		sprintf(TextList[TextNum],GlobalText[578],10 );
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
     }
-    else if ( ip->Type==ITEM_HELPER+31 )    //  영혼.
+    else if ( ip->Type==ITEM_HELPER+31 )
     {
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch ( Level )
         {
-        case 0: sprintf ( TextList[TextNum], GlobalText[1215] ); TextNum++; break; //  다크호스.
-        case 1: sprintf ( TextList[TextNum], GlobalText[1216] ); TextNum++; break; //  다크스피릿.
+        case 0: sprintf ( TextList[TextNum], GlobalText[1215] ); TextNum++; break;
+        case 1: sprintf ( TextList[TextNum], GlobalText[1216] ); TextNum++; break;
         }
     }
-    else if ( ip->Type==ITEM_HELPER+14 )    //  로크의 깃털.
+    else if ( ip->Type==ITEM_HELPER+14 )
     {
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch ( Level )
         {
-        case 0: sprintf ( TextList[TextNum], "%s", GlobalText[748] ); TextNum++; break;     //  로크의 깃털.
-        case 1: sprintf ( TextList[TextNum], "%s", GlobalText[1236] );TextNum++; break;     //  군주의 소매.
-        }
+        case 0: sprintf ( TextList[TextNum], "%s", GlobalText[748] ); TextNum++; break;
+        case 1: sprintf ( TextList[TextNum], "%s", GlobalText[1236] );TextNum++; break;        }
     }
 	
-    else if ( ip->Type==ITEM_HELPER+15 ) //  서클. ( 에너지/체력/민첩/힘/통솔 )
+    else if ( ip->Type==ITEM_HELPER+15 )
     {
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch ( Level )
@@ -5811,10 +5094,10 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 		TextNum++;
 		TextListColor[TextNum] = TEXT_COLOR_DARKRED;
-		sprintf(TextList[TextNum], GlobalText[1908]);	// 1908 "아이템 미착용시 사용가능"
+		sprintf(TextList[TextNum], GlobalText[1908]);
 		
 		
-		if(Level == 4)	// 통솔열매이면?
+		if(Level == 4)
 		{
 			TextNum++;
 			TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -5822,19 +5105,19 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
         TextNum++;
     }
-    else if ( ip->Type==ITEM_HELPER+16 )    //  대천사의 서.
+    else if ( ip->Type==ITEM_HELPER+16 )
     {
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
         sprintf ( TextList[TextNum], GlobalText[816] );
         TextNum++;
     }
-    else if ( ip->Type==ITEM_HELPER+17 )    //  블러드 본.
+    else if ( ip->Type==ITEM_HELPER+17 )
     {
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
         sprintf ( TextList[TextNum], GlobalText[816] );
         TextNum++;
     }
-    else if ( ip->Type==ITEM_HELPER+18 )    //  투명망토.
+    else if ( ip->Type==ITEM_HELPER+18 )
     {
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
         sprintf ( TextList[TextNum], GlobalText[814] );
@@ -5850,18 +5133,18 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
     }
-    else if ( ip->Type==ITEM_POTION+7 ) //  스패셜 물약.//종훈물약
+    else if ( ip->Type==ITEM_POTION+7 )
     {
         switch ( Level )
         {
-        case 0:     //  축복의 물약.
+        case 0:
             {
                 sprintf( TextList[TextNum], GlobalText[1417] ); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
                 sprintf( TextList[TextNum], GlobalText[1418] ); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
                 sprintf( TextList[TextNum], GlobalText[1419] ); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
             }
             break;
-        case 1:     //  영혼의 물약.
+        case 1:
             {
                 sprintf( TextList[TextNum], GlobalText[1638] ); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
                 sprintf( TextList[TextNum], GlobalText[1639] ); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
@@ -5870,31 +5153,30 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
             break;
         }
     }
-    else if ( ip->Type==ITEM_HELPER+7 ) //  계약 문서
+    else if ( ip->Type==ITEM_HELPER+7 )
     {
         switch ( Level )
         {
-        case 0: sprintf( TextList[TextNum], GlobalText[1460] ); break;  //  활 용병.
-        case 1: sprintf( TextList[TextNum], GlobalText[1461] ); break;  //  창 용병.
+        case 0: sprintf( TextList[TextNum], GlobalText[1460] ); break;
+        case 1: sprintf( TextList[TextNum], GlobalText[1461] ); break;
         }
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
     }
-    else if ( ip->Type==ITEM_HELPER+11 )    //  주문서.
+    else if ( ip->Type==ITEM_HELPER+11 )
     {
         switch ( Level )
         {
-        case 0: sprintf( TextList[TextNum], GlobalText[1416] ); break;  //  가디언 주문서.
-        case 1: sprintf( TextList[TextNum], GlobalText[1462] ); break;  //  라이프 스톤.
+        case 0: sprintf( TextList[TextNum], GlobalText[1416] ); break;
+        case 1: sprintf( TextList[TextNum], GlobalText[1462] ); break;
         }
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW;
 		TextBold[TextNum] = false;
 		TextNum++;
     }
-    else if ( ip->Type==ITEM_HELPER+29 )    //  근위병의 갑옷세트.
+    else if ( ip->Type==ITEM_HELPER+29 )
     {
-        //  해당 클래스에 맞는 제한 레벨 시작 위치를 찾는다.
         int startIndex = 0;
         if ( GetBaseClass( Hero->Class )==CLASS_DARK || GetBaseClass( Hero->Class )==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
@@ -5908,10 +5190,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
         int HeroLevel = CharacterAttribute->Level;
 
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
-		// 1147 "카오스 캐슬"
-		// 368 "레벨"
-		// 935 "레벨제한"
-		// 936 "요구젠"
 		sprintf(TextList[TextNum],"%s %s    %s      %s    ",GlobalText[1147], GlobalText[368], GlobalText[935], GlobalText[936] ); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
 
         for ( int i=0; i<6; i++ )
@@ -5930,7 +5208,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
             }
             TextBold[TextNum] = false; TextNum++;
         }
-		// 737 "마스터레벨"
 		sprintf(TextList[TextNum], "         %d          %s   %3d,000", 7, GlobalText[737], 1000); 
 		if(IsMasterLevel(Hero->Class) == true)
 		{
@@ -5946,28 +5223,25 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
         sprintf ( TextList[TextNum], "\n" ); 
 		TextNum++; 
 		SkipNum++;
-		// 1157 "오른쪽 클릭으로 입장하세요."
     	sprintf ( TextList[TextNum], GlobalText[1157] );  
 		TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; 
 		TextNum++;
     }
-    else if ( ip->Type==ITEM_POTION+21 )    //  레나. ( 1:스톤).
+    else if ( ip->Type==ITEM_POTION+21 )
     {
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch ( Level )
         {
 #ifndef BLOODCASTLE_2ND_PATCH
-        case 1: sprintf ( TextList[TextNum], GlobalText[813] ); break;      //  스톤.
+        case 1: sprintf ( TextList[TextNum], GlobalText[813] ); break;
 #endif
-#ifdef FRIEND_EVENT
-        case 2: sprintf ( TextList[TextNum], GlobalText[1099] ); break;     //  우정의 돌.
-#endif// FRIEND_EVENT
-        case 3: sprintf ( TextList[TextNum], GlobalText[1291] ); break;     //  1291 "공성등록에 사용"
+        case 2: sprintf ( TextList[TextNum], GlobalText[1099] ); break;
+        case 3: sprintf ( TextList[TextNum], GlobalText[1291] ); break;
 		default: break;
         }
         TextNum++;
     }
-    else if ( ip->Type==ITEM_POTION+28 || ip->Type==ITEM_POTION+29 )    //  잃어버린 지도, 쿤둔의 표식
+    else if ( ip->Type==ITEM_POTION+28 || ip->Type==ITEM_POTION+29 )
     {
         TextNum = RenderHellasItemInfo ( ip, TextNum );
     }
@@ -5986,12 +5260,8 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 	BOOL bDurExist = FALSE;
 	if ( ( p->Durability || p->MagicDur ) && 
          ( (ip->Type<ITEM_WING || ip->Type>=ITEM_HELPER ) && ip->Type<ITEM_POTION ) ||
-           (ip->Type>=ITEM_WING && ip->Type<=ITEM_WING+6)          //  날개 내구력.
-#ifdef ADD_ALICE_WINGS_1
-		|| (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)          //  날개 내구력.
-#else	// ADD_ALICE_WINGS_1
-		|| (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40)          //  날개 내구력.
-#endif	// ADD_ALICE_WINGS_1
+           (ip->Type>=ITEM_WING && ip->Type<=ITEM_WING+6)
+		|| (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
@@ -6000,230 +5270,148 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		bDurExist = TRUE;
 	}
 	if( ( bDurExist || ip->Durability) && 
-		( ip->Type<ITEM_HELPER+14 || ip->Type>ITEM_HELPER+19 )  //  블러드 캐슬 퀘스트 아이템은 내구력을 표시하지 않는다.
-		&& !(ip->Type==ITEM_HELPER+20 && Level == 1)            //  제왕의 반지도 내구력 표시 않함.
-		&& !(ip->Type==ITEM_HELPER+20 && Level == 2)            //  전사의 반지도 내구력 표시 않함.
-		&& !(ip->Type==ITEM_HELPER+29 )                         //  카오스 캐슬 마스트 내구력 표시 않함.
-        && ip->Type!=ITEM_POTION+7 && ip->Type!=ITEM_HELPER+7 && ip->Type!=ITEM_HELPER+11//종훈물약
-		&& ip->Type != ITEM_HELPER+35	//^ 펜릴 아이템 갯수와 생명력 정보 렌더링 관련
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
+		( ip->Type<ITEM_HELPER+14 || ip->Type>ITEM_HELPER+19 )
+		&& !(ip->Type==ITEM_HELPER+20 && Level == 1)
+		&& !(ip->Type==ITEM_HELPER+20 && Level == 2)
+		&& !(ip->Type==ITEM_HELPER+29 )
+        && ip->Type!=ITEM_POTION+7 && ip->Type!=ITEM_HELPER+7 && ip->Type!=ITEM_HELPER+11
+		&& ip->Type != ITEM_HELPER+35
 		&& !(ip->Type >= ITEM_POTION+70 && ip->Type <= ITEM_POTION+71)
-#endif //PSW_ELITE_ITEM            // 엘리트 물약
-#ifdef PSW_FRUIT_ITEM
 		&& !(ip->Type >= ITEM_HELPER+54 && ip->Type <= ITEM_HELPER+58) 
-#endif //PSW_FRUIT_ITEM
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
 		&& !(ip->Type >= ITEM_POTION+78 && ip->Type <= ITEM_POTION+82)
-#endif //PSW_SECRET_ITEM             // 강화의 비약
-#ifdef PBG_ADD_SANTAINVITATION
-		&& !(ip->Type == ITEM_HELPER+66)	//산타마을의 초대장
-#endif //PBG_ADD_SANTAINVITATION
-#ifdef LDK_ADD_GAMBLE_RANDOM_ICON	// 겜블러 아이콘
+		&& !(ip->Type == ITEM_HELPER+66)
 		&& !( ip->Type == ITEM_HELPER+71 || ip->Type == ITEM_HELPER+72 || ip->Type == ITEM_HELPER+73 || ip->Type == ITEM_HELPER+74 || ip->Type == ITEM_HELPER+75 )
-#endif //LDK_ADD_GAMBLE_RANDOM_ICON
-#ifdef PBG_ADD_CHARACTERCARD
-		&& !(ip->Type == ITEM_HELPER+97)	//마검사 캐릭터 카드
-		&& !(ip->Type == ITEM_HELPER+98)	//다크로드 캐릭터 카드
-		&& !(ip->Type == ITEM_POTION+91)	//소환술사 캐릭터 카드
-#endif //PBG_ADD_CHARACTERCARD
-#ifdef PBG_ADD_CHARACTERSLOT
-		&& !(ip->Type == ITEM_HELPER+99)	//캐릭터 슬롯 열쇠
-#endif //PBG_ADD_CHARACTERSLOT
-#ifdef PBG_ADD_SECRETITEM
-		&& !(ip->Type >= ITEM_HELPER+117 && ip->Type <= ITEM_HELPER+120)	//활력의 비약(최하급/하급/중급/상급)
-#endif //PBG_ADD_SECRETITEM
-#ifdef KJH_FIX_BTS251_ELITE_SD_POTION_TOOLTIP
+		&& !(ip->Type == ITEM_HELPER+97)
+		&& !(ip->Type == ITEM_HELPER+98)
+		&& !(ip->Type == ITEM_POTION+91)
+		&& !(ip->Type == ITEM_HELPER+99)
 		&& !(ip->Type==ITEM_POTION+133)
-#endif // KJH_FIX_BTS251_ELITE_SD_POTION_TOOLTIP
-      )  //  내구력.
+      )
 	{
 		int Success = false;
         int arrow = false;
-		if(ip->Type>=ITEM_POTION && ip->Type<=ITEM_POTION+8)    //  물약 갯수.
+		if(ip->Type>=ITEM_POTION && ip->Type<=ITEM_POTION+8)
 		{
           	sprintf(TextList[TextNum],GlobalText[69],ip->Durability);
 			Success = true;
 		}
-		else if(ip->Type == ITEM_POTION+21 && Level == 3 )    //  성주의표식 갯수.
+		else if(ip->Type == ITEM_POTION+21 && Level == 3 )
 		{
           	sprintf(TextList[TextNum],GlobalText[69],ip->Durability);
 			Success = true;
 		}
-		else if(ip->Type==ITEM_BOW+7 || ip->Type==ITEM_BOW+15)  //  화살 갯수.
+		else if(ip->Type==ITEM_BOW+7 || ip->Type==ITEM_BOW+15)
 		{
           	sprintf(TextList[TextNum],GlobalText[69],ip->Durability);
 			Success = true;
             arrow = true;
 		}
-		else if(ip->Type>=ITEM_POTION+35 && ip->Type<=ITEM_POTION+40)    //  물약 갯수.
+		else if(ip->Type>=ITEM_POTION+35 && ip->Type<=ITEM_POTION+40)
 		{
           	sprintf(TextList[TextNum],GlobalText[69],ip->Durability);
 			Success = true;
 		}
-#ifndef KJH_FIX_BTS251_ELITE_SD_POTION_TOOLTIP			// #ifndef
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
-		else if(ip->Type==ITEM_POTION+133)		// 엘리트 SD회복 물약
+		else if(ip->Type==ITEM_POTION+133)
 		{
           	sprintf(TextList[TextNum],GlobalText[69],ip->Durability);
 			Success = true;
 		}
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-#endif // KJH_FIX_BTS251_ELITE_SD_POTION_TOOLTIP
 		else if(ip->Type >= ITEM_POTION+46 && ip->Type <= ITEM_POTION+50)
 		{
 			sprintf(TextList[TextNum],GlobalText[69],ip->Durability);
 			Success = true;
 		}
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		else if(ip->Type >= ITEM_POTION+153 && ip->Type <= ITEM_POTION+156)	// 스타더스트 ~ 잿더미 도살자의 몽둥이
+		else if(ip->Type >= ITEM_POTION+153 && ip->Type <= ITEM_POTION+156)
 		{
-			sprintf(TextList[TextNum],GlobalText[69],ip->Durability);		// 69 "개수: %d"
+			sprintf(TextList[TextNum],GlobalText[69],ip->Durability);
 			Success = true;
 		}
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		//^ 펜릴 갯수 표시
-		else if(ip->Type >= ITEM_HELPER+32 && ip->Type <= ITEM_HELPER+33)	// 펜릴 아이템 갯수
+		else if(ip->Type >= ITEM_HELPER+32 && ip->Type <= ITEM_HELPER+33)
 		{
-			sprintf(TextList[TextNum],GlobalText[1181],ip->Durability, 20);	// "%d개 / %d개"(현재갯수 / 최대)
+			sprintf(TextList[TextNum],GlobalText[1181],ip->Durability, 20);
 			Success = true;
 		}
-		else if(ip->Type == ITEM_HELPER+34)	// 맹수의 발톱
+		else if(ip->Type == ITEM_HELPER+34)
 		{
-			sprintf(TextList[TextNum],GlobalText[1181],ip->Durability, 10);	// "%d개 / %d개"(현재갯수 / 최대)
+			sprintf(TextList[TextNum],GlobalText[1181],ip->Durability, 10);
 			Success = true;
 		}
-		else if(ip->Type == ITEM_HELPER+37)	// 펜릴의 뿔피리
+		else if(ip->Type == ITEM_HELPER+37)
 		{
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-			if( ip->bPeriodItem == false )
-			{
-				sprintf(TextList[TextNum],GlobalText[70],ip->Durability);	// "생명: %d"
-				Success = true;
-			}
-#else // KJH_ADD_PERIOD_ITEM_SYSTEM
-			sprintf(TextList[TextNum],GlobalText[70],ip->Durability);	// "생명: %d"
-			Success = true;
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
-		}
-		else if(ip->Type>=ITEM_HELPER && ip->Type<=ITEM_HELPER+7)   //  생명력.
-		{
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 			if( ip->bPeriodItem == false )
 			{
 				sprintf(TextList[TextNum],GlobalText[70],ip->Durability);
 				Success = true;
 			}
-#else // KJH_ADD_PERIOD_ITEM_SYSTEM
-          	sprintf(TextList[TextNum],GlobalText[70],ip->Durability);
-			Success = true;
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 		}
-        else if(ip->Type == ITEM_HELPER+10)                             //변신반지
+		else if(ip->Type>=ITEM_HELPER && ip->Type<=ITEM_HELPER+7)
+		{
+			if( ip->bPeriodItem == false )
+			{
+				sprintf(TextList[TextNum],GlobalText[70],ip->Durability);
+				Success = true;
+			}
+		}
+        else if(ip->Type == ITEM_HELPER+10)
 		{
           	sprintf(TextList[TextNum],GlobalText[95],ip->Durability);
 			Success = true;
 		}
-#ifdef LDK_FIX_GUARDIAN_CHANGE_LIFEWORD
 		else if(ip->Type == ITEM_HELPER+64 || ip->Type == ITEM_HELPER+65)
 		{
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 			if( ip->bPeriodItem == false )
 			{
-				sprintf(TextList[TextNum],GlobalText[70],ip->Durability);	// "생명: %d"
+				sprintf(TextList[TextNum],GlobalText[70],ip->Durability);
 				Success = true;
 			}
-#else // KJH_ADD_PERIOD_ITEM_SYSTEM
-			sprintf(TextList[TextNum],GlobalText[70],ip->Durability);	// "생명: %d"
-			Success = true;
-#endif // #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 		}
-#endif //LDK_FIX_GUARDIAN_CHANGE_LIFEWORD
-#ifdef YDG_ADD_SKELETON_PET
 		else if(ip->Type == ITEM_HELPER+67 || ip->Type == ITEM_HELPER+80
 			|| ip->Type == ITEM_HELPER+106 ||ip->Type == ITEM_HELPER+123)
 		{
-#ifdef LJH_FIX_IGNORING_EXPIRATION_PERIOD
-			sprintf(TextList[TextNum],GlobalText[70],ip->Durability);	// "생명: %d"
-			Success = true;
-#else  //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 			if( ip->bPeriodItem == false )
 			{
-				sprintf(TextList[TextNum],GlobalText[70],ip->Durability);	// "생명: %d"
+				sprintf(TextList[TextNum],GlobalText[70],ip->Durability);
 				Success = true;
 			}
-#endif //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 		}
-#endif	// YDG_ADD_SKELETON_PET
-#ifdef CSK_FREE_TICKET
-		// 자유입장권 아이템 사용횟수 설명
 		else if(ip->Type >= ITEM_HELPER+46 && ip->Type <= ITEM_HELPER+48)
 		{
-			// 2260 "%d번 사용 가능"
 			sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
 			Success = true;
 		}
-#endif // CSK_FREE_TICKET
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-		// 자유입장권 아이템 사용횟수 설명
 		else if(ip->Type >= ITEM_HELPER+125 && ip->Type <= ITEM_HELPER+127)
 		{
-			// 2260 "%d번 사용 가능"
 			sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
 			
 			if (ip->Type == ITEM_HELPER+126)
 			{
 				TextNum++;
-				// 3105 "월-토요일맵에 입장이 가능합니다"
 				sprintf(TextList[TextNum], GlobalText[3105]);
 			
 			}
 			else if (ip->Type == ITEM_HELPER+127)
 			{
 				TextNum++;
-				// 3106 "일요일맵에 입장이 가능합니다"
 				sprintf(TextList[TextNum], GlobalText[3106]);
 			}
 			Success = true;
 		}
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-#ifdef CSK_LUCKY_CHARM	
-		else if( ip->Type == ITEM_POTION+53 )// 행운의 부적
+		else if( ip->Type == ITEM_POTION+53 )
 		{
-			// 2296 "%d% 조합 성공확률 상승"
 			sprintf(TextList[TextNum], GlobalText[2296], ip->Durability);
 			Success = true;
 		}
-#endif //CSK_LUCKY_CHARM
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
-		// 자유입장권 아이템 사용횟수 설명
 		else if(ip->Type == ITEM_HELPER+61)
 		{
-			// 2260 "%d번 사용 가능"
 			sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
 			Success = true;
 		}
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-		//행운의 동전
 		else if(ip->Type == ITEM_POTION+100)
 		{
-			//69 "개수: %d"
 			sprintf(TextList[TextNum],GlobalText[69],ip->Durability);
 			Success = true;
 		}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef CSK_LUCKY_SEAL
-		/*
-		else if( ip->Type >= ITEM_HELPER+43 && ip->Type <= ITEM_HELPER+45 )
-		{
-		// 2252 "%s %d일 사용 가능"
-		sprintf( TextList[TextNum], "%s %d%s %s", p->Name, ip->Durability, GlobalText[2298], GlobalText[2302] );
-		Success = true;
-		}
-		*/
-#endif //CSK_LUCKY_SEAL
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
-		else if(ip->Type == ITEM_HELPER+70 )	// 이동의 부적
+		else if(ip->Type == ITEM_HELPER+70 )
 		{
 			if (ip->Durability == 2)
 			{
@@ -6244,9 +5432,8 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 				TextNum++;
 			}
 		}
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
 
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 내구도 티켓 제외
+#ifdef LEM_ADD_LUCKYITEM
 		else if( ip->Type >= ITEM_HELPER+135 && ip->Type <= ITEM_HELPER+145 )
 		{
 			sprintf(TextList[TextNum], GlobalText[2261]);
@@ -6258,36 +5445,24 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 #endif // LEM_ADD_LUCKYITEM
 
-        //  내구력이 존재하는 아이템. (장비에 존재하는 아이템).
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-		else if ( (bDurExist) && (ip->bPeriodItem == false) )		// 기간제 아이템은 내구력이 존재하지 않는다.
-#else // KJH_ADD_PERIOD_ITEM_SYSTEM
-		else if ( bDurExist)
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
+		else if ( (bDurExist) && (ip->bPeriodItem == false) )
         {
             int maxDurability = calcMaxDurability ( ip, p, Level );
 
             sprintf(TextList[TextNum],GlobalText[71],ip->Durability, maxDurability);
 			Success = true;
         }
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING	// 정보출력
-		else if( ip->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN 
-				&& ip->Type <= ITEM_TYPE_CHARM_MIXWING+EWS_END ) // 날개 조합 100% 성공 부적
+		else if( ip->Type >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN && ip->Type <= ITEM_TYPE_CHARM_MIXWING+EWS_END )
 		{
-			// 날개 조합 100% 성공 부적
 			sprintf(TextList[TextNum], GlobalText[2732+(ip->Type-(MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN))]);
 			
 			Success = true;
 		}
-#endif //LDS_ADD_CS6_CHARM_MIX_ITEM_WING
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-		else if(ip->Type == ITEM_HELPER+121)		// 아이템 횟수
+		else if(ip->Type == ITEM_HELPER+121)
 		{
-			// 2260 "%d번 사용 가능"
 			sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
 			Success = true;
 		}
-#endif //LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
 
 		if(Success)
 		{
@@ -6298,7 +5473,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
     }
     else
     {
-        if(ip->Type == ITEM_HELPER+10)                             //변신반지
+        if(ip->Type == ITEM_HELPER+10)
 		{
           	sprintf(TextList[TextNum],GlobalText[95],ip->Durability);
 
@@ -6308,20 +5483,16 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
     }
 
-    //  화살일 경우.
     if( ip->Type==ITEM_BOW+7 || ip->Type==ITEM_BOW+15)
 	{
         if ( Level>=1 )
         {
             int value = Level*2+1;
 
-            //  추가 공격력 2%증가.
           	sprintf(TextList[TextNum],GlobalText[577], value );
 			TextListColor[TextNum] = TEXT_COLOR_BLUE;
 			TextBold[TextNum] = false;
 			TextNum++;
-
-            //  추가 공격력 1 증가.
             sprintf(TextList[TextNum],GlobalText[88], 1);
 			TextListColor[TextNum] = TEXT_COLOR_BLUE;
 			TextBold[TextNum] = false;
@@ -6340,7 +5511,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 	}
 
-	if(ip->RequireLevel && ip->Type!=ITEM_HELPER+14 )    //  요구 레벨. ( 로크의 깃털 )
+	if(ip->RequireLevel && ip->Type!=ITEM_HELPER+14 )
 	{
 		sprintf(TextList[TextNum],GlobalText[76],ip->RequireLevel);
 		if(CharacterAttribute->Level < ip->RequireLevel)
@@ -6364,7 +5535,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 	int si_iNeedStrength= 0, si_iNeedDex = 0;
 	bool bRequireStat	= true;
 
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 요구 스텟 표시 제거
+#ifdef LEM_ADD_LUCKYITEM
 	if( Check_LuckyItem( ip->Type ) ) bRequireStat = false;
 #endif // LEM_ADD_LUCKYITEM
 
@@ -6379,26 +5550,25 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			si_iNeedDex      = SC.SI_NB.SI_activity;
 		}
 	}	
-#ifdef ADD_SOCKET_STATUS_BONUS
+
 	if (ip->SocketCount > 0)
 	{
 		for (int i = 0; i < ip->SocketCount; ++i)
 		{
-			if (ip->SocketSeedID[i] == 38)	// 필요힘 감소
+			if (ip->SocketSeedID[i] == 38)
 			{
 				int iReqStrengthDown = g_SocketItemMgr.GetSocketOptionValue(ip, i);
 				si_iNeedStrength += iReqStrengthDown;
 			}
-			else if (ip->SocketSeedID[i] == 39)	// 필요민 감소
+			else if (ip->SocketSeedID[i] == 39)
 			{
 				int iReqDexterityDown = g_SocketItemMgr.GetSocketOptionValue(ip, i);
 				si_iNeedDex += iReqDexterityDown;
 			}
 		}
 	}
-#endif	// ADD_SOCKET_STATUS_BONUS
 
-	if(ip->RequireStrength && bRequireStat ) //  요구힘.
+	if(ip->RequireStrength && bRequireStat )
 	{
 		sprintf(TextList[TextNum],GlobalText[73],ip->RequireStrength - si_iNeedStrength);
 
@@ -6429,7 +5599,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			TextNum++;
 		}
 	}
-	if(ip->RequireDexterity && bRequireStat )//  요구 민첩.
+	if(ip->RequireDexterity && bRequireStat )
 	{
 		sprintf(TextList[TextNum],GlobalText[75],ip->RequireDexterity - si_iNeedDex );
 		WORD Dexterity;
@@ -6484,7 +5654,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 	}
 
-	if(ip->RequireEnergy && bRequireStat )  //  요구 에너지.
+	if(ip->RequireEnergy && bRequireStat )
 	{
    		sprintf(TextList[TextNum],GlobalText[77],ip->RequireEnergy);
 
@@ -6509,7 +5679,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 	}
 
-	if(ip->RequireCharisma && bRequireStat ) //  요구통솔.
+	if(ip->RequireCharisma && bRequireStat )
 	{
 		sprintf(TextList[TextNum],GlobalText[698],ip->RequireCharisma);
 
@@ -6535,25 +5705,21 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 
 	if(IsRequireClassRenderItem(ip->Type))
     {
-        RequireClass(p);    //  요구 클래스.
+        RequireClass(p);
     }
 
-    //  부츠.
 	if(ip->Type>=MODEL_BOOTS-MODEL_ITEM && ip->Type<MODEL_BOOTS+MAX_ITEM_INDEX-MODEL_ITEM)
 	{
-        //  이동 속도 향상.
 		if(Level >= 5)
 		{
 			sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
-			
 			sprintf(TextList[TextNum],GlobalText[78]);
 			TextListColor[TextNum] = TEXT_COLOR_BLUE;TextBold[TextNum] = true;TextNum++;
 		}
 	}
-    //  장갑.
+
 	if(ip->Type>=MODEL_GLOVES-MODEL_ITEM && ip->Type<MODEL_GLOVES+MAX_ITEM_INDEX-MODEL_ITEM)
 	{
-        //  수영 속도 향상.
 		if(Level >= 5)
 		{
 			sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
@@ -6562,20 +5728,16 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			TextListColor[TextNum] = TEXT_COLOR_BLUE;TextBold[TextNum] = true;TextNum++;
 		}
 	}
-    //  지팡이.
 	if ( ( ip->Type>=MODEL_STAFF-MODEL_ITEM && ip->Type<MODEL_STAFF+MAX_ITEM_INDEX-MODEL_ITEM ) 
 		 || ( ip->Type==(MODEL_SWORD+31-MODEL_ITEM) ) 
 		 || ( ip->Type==(MODEL_SWORD+23-MODEL_ITEM) )
 		 || ( ip->Type==(MODEL_SWORD+25-MODEL_ITEM) )
 		 || ( ip->Type==(MODEL_SWORD+21-MODEL_ITEM) )
-#ifdef KJH_FIX_RUNE_BASTARD_SWORD_TOOLTIP
 		 || ( ip->Type==(MODEL_SWORD+28-MODEL_ITEM) )
-#endif // KJH_FIX_RUNE_BASTARD_SWORD_TOOLTIP
 	   )
 	{
 		sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 
-		// 소환술사용 책이면 저주력 아니면 마력.
 		int nText = ITEM_STAFF+21 <= ip->Type && ip->Type <= ITEM_STAFF+29 ? 1691 : 79;
 		::sprintf(TextList[TextNum], GlobalText[nText], ip->MagicPower);
 
@@ -6583,44 +5745,24 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = true;
 		TextNum++;
 	}
-    //  셉터의 팻 공격력 상승 옵션 출력.
-#ifdef CSK_FIX_EPSOLUTESEPTER
 
 	if(IsCepterItem(ip->Type) == true)
-
-#else // CSK_FIX_EPSOLUTESEPTER 
-
-	if ( (ip->Type>=ITEM_MACE+8 && ip->Type<=ITEM_MACE+15) 
-#ifdef KJH_FIX_ABSOLUTE_CEPTER_TOOLTIP
-		|| (ip->Type == ITEM_MACE+17)					// 엡솔루트셉터
-#endif // KJH_FIX_ABSOLUTE_CEPTER_TOOLTIP
-		)
-		
-#endif // CSK_FIX_EPSOLUTESEPTER
     {
 		sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
-
-        //  팻 공격력 상승.
         sprintf(TextList[TextNum],GlobalText[1234],ip->MagicPower);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;TextBold[TextNum] = true;TextNum++;
     }
 
 	if(ip->SpecialNum > 0)
 	{
-#ifdef LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR	// 인게임샾의 반지와 목걸이들은 모두 이미 하드코딩정의 되었습니다.
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int iModelType = ip->Type;
 		int iStartModelType = ITEM_HELPER+109;
 		int iEndModelType = ITEM_HELPER+115;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 		if(!( ITEM_HELPER+109 <= ip->Type  && ITEM_HELPER+115 >= ip->Type ))
 		{
 			sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 		}
-#else // LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR
-		sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
-#endif // LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR
 	}
 
 	if( ip->option_380 != 0 )
@@ -6635,11 +5777,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 
 			for( int i = 0; i < (int)Text380.size(); ++i )
 			{
-#ifdef YDG_FIX_380ITEM_OPTION_TEXT_SD_PERCENT_MISSING
 				strncpy(TextList[TextNum], Text380[i].c_str(), 100);
-#else	// YDG_FIX_380ITEM_OPTION_TEXT_SD_PERCENT_MISSING
-				sprintf(TextList[TextNum], (char*)Text380[i].c_str() );
-#endif	// YDG_FIX_380ITEM_OPTION_TEXT_SD_PERCENT_MISSING
 				TextListColor[TextNum] = TEXT_COLOR_REDPURPLE;TextBold[TextNum] = true;TextNum++;
 			}
 
@@ -6650,16 +5788,14 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 #ifdef PBG_MOD_NEWCHAR_MONK_WING
 	if(ip->Type==ITEM_WING+49)
 	{
-		sprintf(TextList[TextNum],GlobalText[578],15+Level);	// 데미지 몇%흡수
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;				// 옵션위치에 출력요함
+		sprintf(TextList[TextNum],GlobalText[578],15+Level);
+		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextNum++;
 	}
 #endif //PBG_MOD_NEWCHAR_MONK_WING
 #endif //PBG_MOD_NEWCHAR_MONK_WING_2
-#ifdef ADD_SOCKET_ITEM
-	if (g_SocketItemMgr.IsSocketItem(ip));	// 소켓아이템은 조화보석 옵션 출력 안함
+	if (g_SocketItemMgr.IsSocketItem(ip));
 	else
-#endif	// ADD_SOCKET_ITEM
 	if( ip->Jewel_Of_Harmony_Option != 0 )
 	{
 		StrengthenItem type = g_pUIJewelHarmonyinfo->GetItemType( static_cast<int>(ip->Type) );
@@ -6712,19 +5848,15 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 	}
 
-    //  세트 기본 옵션.
 	TextNum = g_csItemOption.RenderDefaultOptionText( ip, TextNum );
 
-    //  특수 기능.
 	int iMana;
 	for(int i=0;i<ip->SpecialNum;i++)
 	{
-#ifdef LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR
 		if( ITEM_HELPER+109 <= ip->Type  && ITEM_HELPER+115 >= ip->Type )
 		{
 			break;
 		}
-#endif // LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR
 
 		GetSkillInformation( ip->Special[i], 1, NULL, &iMana, NULL);
         GetSpecialOptionText ( ip->Type, TextList[TextNum], ip->Special[i], ip->SpecialValue[i], iMana );
@@ -6732,7 +5864,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
        	TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;TextNum++;
 
-        //  행운.
 		if(ip->Special[i] == AT_LUCK)
 		{
 			sprintf(TextList[TextNum],GlobalText[94],ip->SpecialValue[i]);
@@ -6748,8 +5879,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			sprintf(TextList[TextNum], GlobalText[1201] );
      		TextListColor[TextNum] = TEXT_COLOR_DARKRED;TextBold[TextNum] = false;TextNum++;
         }
-#ifdef KJH_FIX_RUNE_BASTARD_SWORD_TOOLTIP
-		// 마검사 검
 		else if ( (ip->Special[i]==AT_IMPROVE_DAMAGE) && 
 					( (ip->Type==ITEM_SWORD+31)
 					|| (ip->Type==ITEM_SWORD+21)
@@ -6763,43 +5892,10 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
        		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 			TextBold[TextNum] = false;TextNum++;
 		}
-#else // KJH_FIX_RUNE_BASTARD_SWORD_TOOLTIP
-		else if ( ip->Type==ITEM_SWORD+31 && ip->Special[i]==AT_IMPROVE_DAMAGE )
-		{
-			sprintf(TextList[TextNum],GlobalText[89],ip->SpecialValue[i]);
-       		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-			TextBold[TextNum] = false;TextNum++;
-		}
-		else if ( ip->Type==ITEM_SWORD+21 && ip->Special[i]==AT_IMPROVE_DAMAGE )
-		{
-			sprintf(TextList[TextNum],GlobalText[89],ip->SpecialValue[i]);
-       		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-			TextBold[TextNum] = false;TextNum++;
-		}
-		else if ( ip->Type==ITEM_SWORD+23 && ip->Special[i]==AT_IMPROVE_DAMAGE )
-		{
-			sprintf(TextList[TextNum],GlobalText[89],ip->SpecialValue[i]);
-       		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-			TextBold[TextNum] = false;TextNum++;
-		}
-		else if(ip->Type == ITEM_SWORD+25 && ip->Special[i]==AT_IMPROVE_DAMAGE)
-		{
-			sprintf(TextList[TextNum],GlobalText[89],ip->SpecialValue[i]);
-       		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-			TextBold[TextNum] = false;TextNum++;	
-		}
-		else if(ip->Type == ITEM_SWORD+28 && ip->Special[i]==AT_IMPROVE_DAMAGE)
-		{
-			sprintf(TextList[TextNum],GlobalText[89],ip->SpecialValue[i]);
-       		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-			TextBold[TextNum] = false;TextNum++;	
-		}
-#endif // KJH_FIX_RUNE_BASTARD_SWORD_TOOLTIP
 	}
 
 	sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 
-	//^ 펜릴 아이템 설명 관련
 	if(ip->Type == ITEM_HELPER+32 || ip->Type == ITEM_HELPER+33)
 	{
 		sprintf(TextList[TextNum], GlobalText[1917]);
@@ -6823,59 +5919,47 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		GetSpecialOptionText ( 0, TextList[TextNum], AT_SKILL_PLASMA_STORM_FENRIR, 0, 0 );
    		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false; TextNum++; SkipNum++;
-		if(ip->Option1 == 0x01)	// 최종 데미지 증가 옵션
+		if(ip->Option1 == 0x01)
 		{
-			sprintf(TextList[TextNum], GlobalText[1860], 10); // 1860 "최종 데미지 %d%% 증가"
+			sprintf(TextList[TextNum], GlobalText[1860], 10);
 			TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 			TextNum++;
 
-			sprintf(TextList[TextNum], GlobalText[579]); // 579 "이동 속도 향상"
+			sprintf(TextList[TextNum], GlobalText[579]);
 			TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 			TextNum++;
 		}
-		else if(ip->Option1 == 0x02) // 최종 데미지 감소 옵션
+		else if(ip->Option1 == 0x02)
 		{
-			sprintf(TextList[TextNum], GlobalText[1861], 10); // 1861 "최종 데미지 %d%% 흡수"
+			sprintf(TextList[TextNum], GlobalText[1861], 10);
 			TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 			TextNum++;
 
-			sprintf(TextList[TextNum], GlobalText[579]); // 579 "이동 속도 향상"
+			sprintf(TextList[TextNum], GlobalText[579]);
 			TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 			TextNum++;
 		}
 		else if(ip->Option1 == 0x04)
 		{
 			WORD wLevel = CharacterAttribute->Level;
-			//1867 "생명 %d 증가"
-			//1868 "마나 %d 증가"
-			//1869 "공격력 %d 증가"
-			//1870 "마력 %d 증가"
-			//1871 "환영사원에서 큰 공적을 세운 영웅들을 위해"
-			//1872 "특별히 제작되었습니다."
 	
 			sprintf(TextList[TextNum], GlobalText[1867], (wLevel / 2)); 
 			TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 			TextNum++;
-
 			sprintf(TextList[TextNum], GlobalText[1868], (wLevel / 2));
 			TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 			TextNum++;
-
 			sprintf(TextList[TextNum], GlobalText[1869], (wLevel / 12));
 			TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 			TextNum++;
-
 			sprintf(TextList[TextNum], GlobalText[1870], (wLevel / 25));
 			TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 			TextNum++;
-
 			sprintf(TextList[TextNum], "\n");
 			TextNum++;
-
 			sprintf(TextList[TextNum], GlobalText[1871], (Hero->Level / 2));
 			TextListColor[TextNum] = TEXT_COLOR_GREEN; 
 			TextNum++;
-
 			sprintf(TextList[TextNum], GlobalText[1872], (Hero->Level / 2));
 			TextListColor[TextNum] = TEXT_COLOR_GREEN; 
 			TextNum++;
@@ -6887,46 +5971,39 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_YELLOW; 
 		TextNum++;
 		
-		if(ip->Option1 == 0x00)	// 업그레이드 안한 펜릴의 뿔피리
+		if(ip->Option1 == 0x00)
 		{
 			sprintf(TextList[TextNum], GlobalText[1929]);
 			TextListColor[TextNum] = TEXT_COLOR_YELLOW; 
 			TextNum++;
 		}
 	}
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
-    else if(ip->Type == ITEM_HELPER+10)	// 일반 변신반지에 경고메시지 추가
+    else if(ip->Type == ITEM_HELPER+10)
 	{
 		sprintf(TextList[TextNum], GlobalText[3088]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
-	// 엘리트 해골전사 변신반지 아이템 설명(방어력 증가와 생명력 증가)
 	else if(ip->Type == ITEM_HELPER+39)
 	{
-		// 방어력 증가
 		char strText[100];
-		sprintf(strText, GlobalText[959], 10);	// 959 "방어력 증가 +%d"
+		sprintf(strText, GlobalText[959], 10);
 		sprintf(TextList[TextNum], "%s%%", strText);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 		TextNum++;
 
-		// 생명력
 		WORD wlevel = CharacterAttribute->Level;
-		sprintf(TextList[TextNum], GlobalText[2225], wlevel);	// 2225 "생명력 +%d"
+		sprintf(TextList[TextNum], GlobalText[2225], wlevel);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 		TextNum++;
 
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
 
 		sprintf(TextList[TextNum], GlobalText[3088]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 	}
 	else if (ip->Type == ITEM_POTION+63)
 	{
@@ -6940,58 +6017,42 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_WHITE; 
 		sprintf(TextList[TextNum], GlobalText[2011]); TextNum++;
 	}
-	// 할로윈 이벤트 변신반지 아이템 설명
 	else if(ip->Type == ITEM_HELPER+40)
 	{
-		sprintf(TextList[TextNum], "%s", GlobalText[2232]);	// 2232 "할로윈 축제를 즐기세요."
+		sprintf(TextList[TextNum], "%s", GlobalText[2232]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 		sprintf(TextList[TextNum], GlobalText[3088]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 		TextNum++;	
 
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
 
 		sprintf(TextList[TextNum], GlobalText[3088]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 	}
-	else if(ip->Type == ITEM_HELPER+41)	// 크리스마스 이벤트 변신반지 설명
+	else if(ip->Type == ITEM_HELPER+41)
 	{
-		// 추가 공격력 +20
-		sprintf(TextList[TextNum], GlobalText[88], 20);	// 88 "추가 공격력 +%d"
+		sprintf(TextList[TextNum], GlobalText[88], 20);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 		TextNum++;
-
-		// 추가 마력 +20
-		sprintf(TextList[TextNum], GlobalText[89], 20);	// 89 "추가 마력 +%d"
+		sprintf(TextList[TextNum], GlobalText[89], 20);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 		TextNum++;
-
-		// 빈칸
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
-
-		sprintf(TextList[TextNum], "%s", GlobalText[2248]);	// 2248 "행복한 크리스마스 보내세요."
+		sprintf(TextList[TextNum], "%s", GlobalText[2248]);
 		TextListColor[TextNum] = TEXT_COLOR_RED; 
 		TextNum++;
-
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
-
 		sprintf(TextList[TextNum], GlobalText[3088]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 	}
-#ifdef PJH_ADD_PANDA_CHANGERING
 	else if( ip->Type == ITEM_HELPER+76 )
 	{
 		sprintf(TextList[TextNum], GlobalText[2743]);
@@ -7006,68 +6067,45 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
-
 		sprintf(TextList[TextNum], GlobalText[3088]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 	}
-#endif //#ifdef PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-	else if(ip->Type == ITEM_HELPER+122)	// 스켈레톤 변신반지
+	else if(ip->Type == ITEM_HELPER+122)
 	{
 		sprintf(TextList[TextNum], GlobalText[3065]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[3066]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
-
 		sprintf(TextList[TextNum], GlobalText[3067]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
 		sprintf(TextList[TextNum], GlobalText[3072]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
 		TextNum++;
-
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
-
 		sprintf(TextList[TextNum], GlobalText[3088]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 	}
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
-	else if(ip->Type == ITEM_POTION+51)	// 크리스마스의별
+	else if(ip->Type == ITEM_POTION+51)
 	{
-		sprintf(TextList[TextNum], "%s", GlobalText[2244]);	// 2244 "바닥에 던지면 폭죽이 터집니다."
+		sprintf(TextList[TextNum], "%s", GlobalText[2244]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 		TextNum++;
 	}
-	else if(ip->Type == ITEM_HELPER+42)	// GM 변신반지 설명
+	else if(ip->Type == ITEM_HELPER+42)
 	{
-		// 976 "얼음속성 스킬 공격력 증가 +%d"			 
-		// 977 "독속성 스킬 공격력 증가 +%d"			 
-		// 978 "번개속성 스킬 공격력 증가 +%d"			 
-		// 979 "불속성 스킬 공격력 증가 +%d"			 
-		// 980 "땅속성 스킬 공격력 증가 +%d"			 
-		// 981 "바람속성 스킬 공격력 증가 +%d"			 
-		// 982 "물속성 스킬 공격력 증가 +%d"
-
 		for(int i=0; i<7; ++i)
 		{
 			sprintf(TextList[TextNum], GlobalText[976+i], 255);
@@ -7075,43 +6113,29 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			TextNum++;
 		}
 
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
-
 		sprintf(TextList[TextNum], GlobalText[3088]);
 		TextListColor[TextNum] = TEXT_COLOR_RED;
 		TextBold[TextNum] = false;
 		TextNum++;
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 	}
-#ifdef PBG_ADD_SANTAINVITATION
-	//산타마을의 초대장.
 	else if(ip->Type == ITEM_HELPER+66)
 	{
-		//2260 "%d"번 사용 가능.
 		TextNum--;
 		sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
  		TextListColor[TextNum] = TEXT_COLOR_RED;
  		TextNum++;
- 		
- 		//2589 마우스 오른쪽 클릭 시 산타마을로 이동가능
  		sprintf(TextList[TextNum], "%s", GlobalText[2589]);
  		TextListColor[TextNum] = TEXT_COLOR_BLUE;
  		TextNum++;
 	}
-#endif //PBG_ADD_SANTAINVITATION
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-	//행운의 동전
 	else if(ip->Type == ITEM_POTION+100)
 	{
-		//1887 "NPC에게 등록하면 다양한 선물을 드립니다."
 		sprintf(TextList[TextNum], GlobalText[1887], ip->Durability);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
  		TextNum++;
 	}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_SKELETON_PET
-	else if( ip->Type == ITEM_HELPER+123 )	// 스켈레톤 펫
+	else if( ip->Type == ITEM_HELPER+123 )
 	{
 		TextNum--; SkipNum--;
 
@@ -7125,7 +6149,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif	// YDG_ADD_SKELETON_PET
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 	else if(g_pMyInventory->IsInvenItem(ip->Type))
 	{
@@ -7257,26 +6280,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextNum++;
 	}
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-#ifdef PBG_MOD_SECRETITEM
-	else if(ip->Type >= ITEM_HELPER+117 && ip->Type <= ITEM_HELPER+120)
-	{
-		TextNum--;		
-		sprintf(TextList[TextNum], GlobalText[3142]);
- 		TextListColor[TextNum] = TEXT_COLOR_WHITE;
- 		TextNum++;
-
-		char _str_dest[4][32] = {"6", "24", "7", "30"};
-		char _str_src[2][32] ={0,};
-		int _index =ip->Type - (ITEM_HELPER+117);
-		int _index_src = (int)(_index/2);
-
-		strcpy(_str_src[_index_src], GlobalText[2299-_index_src]);
-		strcat(_str_dest[_index], _str_src[_index_src]);
-		sprintf(TextList[TextNum], GlobalText[2533], _str_dest[_index]);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextNum++;
-	}
-#endif //PBG_MOD_SECRETITEM
 #ifdef PBG_ADD_NEWCHAR_MONK
     else if(ip->Type == ITEM_HELPER+68)
 	{
@@ -7286,25 +6289,17 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextNum++;
 	}
 #endif //PBG_ADD_NEWCHAR_MONK
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-	if( ip->bPeriodItem == true )		// 기간제 아이템
+
+	if( ip->bPeriodItem == true )
 	{
-		if( ip->bExpiredPeriod == true )		// 기간만료
+		if( ip->bExpiredPeriod == true )
 		{
-#ifdef KJH_FIX_BTS260_PERIOD_ITEM_INFO_TOOLTIP
 			sprintf(TextList[TextNum], GlobalText[3266]);
-#else // KJH_FIX_BTS260_PERIOD_ITEM_INFO_TOOLTIP
-			sprintf(TextList[TextNum], "만료아이템");
-#endif // KJH_FIX_BTS260_PERIOD_ITEM_INFO_TOOLTIP
 			TextListColor[TextNum] = TEXT_COLOR_RED; 	
 		}
 		else
 		{
-#ifdef KJH_FIX_BTS260_PERIOD_ITEM_INFO_TOOLTIP
 			sprintf(TextList[TextNum], GlobalText[3265]);
-#else // KJH_FIX_BTS260_PERIOD_ITEM_INFO_TOOLTIP
-			sprintf(TextList[TextNum], "만료일");
-#endif // KJH_FIX_BTS260_PERIOD_ITEM_INFO_TOOLTIP
 			TextListColor[TextNum] = TEXT_COLOR_ORANGE; 	
 			TextNum++;
 			SkipNum++;
@@ -7316,41 +6311,22 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 
 		TextNum++;
 	}
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
 #ifdef ASG_ADD_NEW_QUEST_SYSTEM
 	if (!bItemTextListBoxUse)
 	{
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
-		// 인벤토리에서 현재 아이템을 검색하여, 장착된 아이템인지 인벤토리에 있는아이템인지 여부를 적용.
-#ifdef LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 		bool bThisisEquippedItem = false;
-#ifdef PBG_FIX_SETITEMTOOLTIP
-		// 세트 아이템 인벤외의 슬롯에서 착용한 아이템과 같은 옵션출력막기위함
-		int _iEquipIndex = g_pMyInventory->GetPointedItemIndex();
-		if((_iEquipIndex != -1) && (_iEquipIndex>=EQUIPMENT_WEAPON_RIGHT && _iEquipIndex<MAX_EQUIPMENT))
-		{
-			bThisisEquippedItem=false;
-		}
-		else
-		{
-			bThisisEquippedItem=true;
-		}
-#else //PBG_FIX_SETITEMTOOLTIP
+
 		//ITEM *pFindItem = SEASON3B::CNewUIInventoryCtrl::FindItemByKey( ip->Key );	// 인벤토리 검색으로 착용 아이템인지 여부 결정.
 		SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
 		ITEM *pFindItem = pNewInventoryCtrl->FindItemByKey( ip->Key );	// 인벤토리 검색으로 착용 아이템인지 여부 결정.
 		(pFindItem==NULL)?bThisisEquippedItem=true:bThisisEquippedItem=false;
-#endif //PBG_FIX_SETITEMTOOLTIP
-		TextNum = g_csItemOption.RenderSetOptionListInItem ( ip, TextNum, bThisisEquippedItem );
-#else // LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
-		TextNum = g_csItemOption.RenderSetOptionListInItem ( ip, TextNum );
-#endif // LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 
-#ifdef SOCKET_SYSTEM
+		TextNum = g_csItemOption.RenderSetOptionListInItem ( ip, TextNum, bThisisEquippedItem );
+
 		TextNum = g_SocketItemMgr.AttachToolTipForSocketItem(ip, TextNum);
-#endif	// SOCKET_SYSTEM
 
 		SIZE TextSize = {0, 0};
 		float fRateY	= g_fScreenRate_y;
@@ -7358,8 +6334,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		int	EmptyLine	= 0;
 		int TextLine	= 0;
 
-		
-#ifdef	LEM_FIX_ITEMTOOLTIP_POS	// 아이템 툴팁 위치 조정 [lem.2010.7.28]
 		for(int i = 0; i < TextNum; ++i)
 		{
 			if(TextList[i][0] == '\0')		break;
@@ -7368,19 +6342,19 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		}
 		fRateY	= fRateY / 1.1f;
 		g_pRenderText->SetFont(g_hFont);
-#endif // LEM_FIX_ITEMTOOLTIP_POS
+
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 		Height = (TextLine * TextSize.cy + EmptyLine * TextSize.cy / 2.0f) / fRateY;
 		
 #ifdef CSK_FIX_ITEMTOOLTIP_POS
 		int iScreenHeight	= 420;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 		int nInvenHeight	= p->Height*INVENTORY_SCALE;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 		sy += INVENTORY_SCALE;
 		if( sy + Height > iScreenHeight)
@@ -7411,23 +6385,16 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 
 	if( isrendertooltip )
 	{
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 		if (bItemTextListBoxUse)
 			RenderTipTextList(sx, sy, TextNum, 0, RT3_SORT_CENTER, STRP_BOTTOMCENTER);
 		else
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 			RenderTipTextList(sx,sy,TextNum,0);
 	}
 }
 
 void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 {
-	// CSK수리금지
-    //  장비 창에 넣을수 있는 아이템의 수리 정보만 보여준다.	
-	//. item filtering
-
 #ifdef LDK_FIX_USING_ISREPAIRBAN_FUNCTION
-	// 있는 함수를 활용합시다...
 	if(IsRepairBan(ip) == true)
 	{
 		return;
@@ -7652,136 +6619,94 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 	}
 #endif //LDK_FIX_USING_ISREPAIRBAN_FUNCTION
 
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING             // 날개 조합 100% 성공 부적
+
 	if( ip->Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN 
 		&& ip->Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END )
 	{
 		return;
 	}
-#endif //LDS_ADD_CS6_CHARM_MIX_ITEM_WING
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
-	if(ip->Type == ITEM_HELPER+107)		// 치명마법반지
+	if(ip->Type == ITEM_HELPER+107)
 	{
 		return;
 	}
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-#ifdef YDG_ADD_CS7_MAX_AG_AURA
-	if(ip->Type == ITEM_HELPER+104)		// AG증가 오라
+	if(ip->Type == ITEM_HELPER+104)
 	{
 		return;
 	}
-#endif	// YDG_ADD_CS7_MAX_AG_AURA
-#ifdef YDG_ADD_CS7_MAX_SD_AURA
-	if(ip->Type == ITEM_HELPER+105)		// SD증가 오라
+	if(ip->Type == ITEM_HELPER+105)
 	{
 		return;
 	}
-#endif	// YDG_ADD_CS7_MAX_SD_AURA
-#ifdef YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
-	if(ip->Type == ITEM_HELPER+103)		// 파티 경험치 증가 아이템
+	if(ip->Type == ITEM_HELPER+103)
 	{
 		return;
 	}
-#endif	// YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
-	if(ip->Type == ITEM_POTION+133)		// 엘리트 SD회복 물약
+	if(ip->Type == ITEM_POTION+133)
 	{
 		return;
 	}
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
 	if(ip->Type == MODEL_HELPER+109)
 	{
 		return;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링		// MODEL_HELPER+110
 	if(ip->Type == MODEL_HELPER+110)
 	{
 		return;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링		// MODEL_HELPER+111
 	if(ip->Type == MODEL_HELPER+111)
 	{
 		return;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링		// MODEL_HELPER+112
 	if(ip->Type == MODEL_HELPER+112)
 	{
 		return;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
 	if(ip->Type == MODEL_HELPER+113)
 	{
 		return;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이	// MODEL_HELPER+114
 	if(ip->Type == MODEL_HELPER+114)
 	{
 		return;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// 신규 사파이어(녹색) 목걸이	// MODEL_HELPER+115
 	if(ip->Type == MODEL_HELPER+115)
 	{
 		return;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
 	if(ip->Type == MODEL_POTION+112)
 	{
 		return;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD		// 신규 키(골드)	// MODEL_POTION+113
 	if(ip->Type == MODEL_POTION+113)
 	{
 		return;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_KEYGOLD		// 신규 키(골드)	// MODEL_POTION+113
-
-#ifdef LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-	// 고블린금화
 	if(ip->Type == ITEM_POTION+120)
 	{
 		return;
 	}
-#endif //LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
 	if(ip->Type == ITEM_POTION+121)
 	{
 		return;
 	}
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST		// 봉인된 은색상자
 	if(ip->Type == ITEM_POTION+122)
 	{
 		return;
 	}
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST				// 금색상자
 	if( ITEM_POTION+123 == ip->Type )
 	{
 		return;
 	}
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST				// 은색상자
 	if( ITEM_POTION+124 == ip->Type )
 	{
 		return;
 	}
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX				// 패키지 상자A-F
 	if( ITEM_POTION+134 <= ip->Type && ip->Type <= ITEM_POTION+139)
 	{
 		return;
 	}
-#endif //LDK_ADD_INGAMESHOP_PACKAGE_BOX
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	if( ITEM_WING+130 <= ip->Type && 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		ip->Type <= ITEM_WING+135
@@ -7793,30 +6718,23 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 		return;
 	}
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
+
 	if( ITEM_POTION+114 <= ip->Type && ip->Type <= ITEM_POTION+119)
 	{
 		return;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
-#ifdef LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
 	if( ITEM_POTION+126 <= ip->Type && ip->Type <= ITEM_POTION+129)
 	{
 		return;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
-#ifdef LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
 	if( ITEM_POTION+130 <= ip->Type && ip->Type <= ITEM_POTION+132)
 	{
 		return;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
 	if( ITEM_HELPER+121 == ip->Type )
 	{
 		return;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
 
 	ITEM_ATTRIBUTE *p = &ItemAttribute[ip->Type];
 	TextNum = 0;
@@ -7829,8 +6747,7 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 	int Level = (ip->Level>>3)&15;
 	int Color;
 
-    //  아이템 색.
-	if(ip->Type==ITEM_POTION+13 || ip->Type==ITEM_POTION+14 || ip->Type==ITEM_WING+15)  //  축복의 보석, 영혼의 보석, 생명의 보석.
+	if(ip->Type==ITEM_POTION+13 || ip->Type==ITEM_POTION+14 || ip->Type==ITEM_WING+15)
 	{
 		Color = TEXT_COLOR_YELLOW;
 	}
@@ -7838,12 +6755,11 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 	{
 		Color = TEXT_COLOR_YELLOW;
 	}
-    //  대천사의 절대무기.
     else if ( ip->Type==ITEM_STAFF+10 || ip->Type==ITEM_SWORD+19 || ip->Type==ITEM_BOW+18 || ip->Type==ITEM_MACE+13)
     {
         Color = TEXT_COLOR_PURPLE;
     }
-	else if(ip->Type==ITEM_POTION+17 || ip->Type==ITEM_POTION+18 || ip->Type==ITEM_POTION+19)	// 데빌스퀘어 관련 아이템
+	else if(ip->Type==ITEM_POTION+17 || ip->Type==ITEM_POTION+18 || ip->Type==ITEM_POTION+19)
 	{
 		Color = TEXT_COLOR_YELLOW;
 	}
@@ -7867,14 +6783,12 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 		}
 	}
 
-    if ( (  ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )    //  정령의 날개 ~ 어둠의 날개.
-         || ip->Type>=ITEM_HELPER+30                            //  군주의 망토.
-		 || ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )// 폭풍의 날개 ~ 제왕의 망토
-#ifdef ADD_ALICE_WINGS_1
-		 || (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)	// 소환술사 2,3차 날개.
-#endif	// ADD_ALICE_WINGS_1
+    if ( (  ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )
+         || ip->Type>=ITEM_HELPER+30
+		 || ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )
+		 || (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		 || (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)	// 레이지파이터날개
+		 || (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
        )  
 	{
@@ -7895,42 +6809,32 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 	    }
     }
 
-	//  수리 비용.
 	if ( ip->Type<ITEM_POTION)
     {
         int maxDurability;
 
 	    sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 
-        //  아이템의 수리 비용.
 	    char Text[100];
 
-        //  내구력이 떨어졌을때. 
-        //  나중에는 그냥 계산으로 처리한다.
         maxDurability = calcMaxDurability ( ip, p, Level );
         if(ip->Durability<maxDurability)
         {
             RepairEnable = 2;
 			
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 			int iGold = ItemValue(ip,2);
 			if( iGold == -1 )
 				return;
             ConvertRepairGold(iGold, ip->Durability, maxDurability, ip->Type, Text);
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM
-            ConvertRepairGold(ItemValue(ip,2),ip->Durability, maxDurability, ip->Type, Text);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 		    sprintf(TextList[TextNum],GlobalText[238],Text);
 
-            TextListColor[TextNum] = Color;//TEXT_COLOR_RED;
+            TextListColor[TextNum] = Color;
         }
         else
         {
             RepairEnable = 1;
-
 		    sprintf(TextList[TextNum],GlobalText[238], "0" );
-
-            TextListColor[TextNum] = Color;//TEXT_COLOR_WHITE;
+            TextListColor[TextNum] = Color;
         }
 	    TextBold[TextNum] = true;
 	    TextNum++;
@@ -7939,12 +6843,11 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
     }
 	sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 
-    //  아이템의 이름.
-    if(ip->Type == ITEM_WING+11)//소환구슬
+    if(ip->Type == ITEM_WING+11)
 	{
 		sprintf(TextList[TextNum],"%s %s",SkillAttribute[30+Level].Name,GlobalText[102]);
 	}
-    else if(ip->Type == ITEM_HELPER+10)//변신반지
+    else if(ip->Type == ITEM_HELPER+10)
 	{
 		for(int i=0;i<MAX_MONSTER;i++)
 		{
@@ -7955,22 +6858,16 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 			}
 		}
 	}
-#ifdef KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
-	// 다크로트 펫 예외처리
-	// 툴팁에 레벨을 표시하지 않는다.
 	else if( (ip->Type==ITEM_HELPER+4) || (ip->Type==ITEM_HELPER+5) )
 	{
 		sprintf(TextList[TextNum],"%s",p->Name);
 	}
-#endif // KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
-    else if ( ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )    //  정령의 날개 ~ 어둠의 날개.
-             || ip->Type>=ITEM_HELPER+30                            //  군주의 망토.
-			 || ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )	// 폭풍의 날개 ~ 제왕의 망토
-#ifdef ADD_ALICE_WINGS_1
-		 || (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)	// 소환술사 2,3차 날개.
-#endif	// ADD_ALICE_WINGS_1
+    else if ( ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 )
+             || ip->Type>=ITEM_HELPER+30
+			 || ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )
+			 || (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)	// 레이지파이터 날개
+			 || (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
             )
     {
@@ -8001,7 +6898,6 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 
 	if ( ip->Type<ITEM_POTION )
     {
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 		if( ip->bPeriodItem == false )
 		{
 			int maxDurability = calcMaxDurability ( ip, p, Level );
@@ -8012,15 +6908,6 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 			TextBold[TextNum] = false;
 			TextNum++;
 		}
-#else // KJH_ADD_PERIOD_ITEM_SYSTEM
-        int maxDurability = calcMaxDurability ( ip, p, Level );
-
-        sprintf(TextList[TextNum],GlobalText[71],ip->Durability, maxDurability);
-
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-		TextBold[TextNum] = false;
-		TextNum++;
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
     }
 
 	sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
@@ -8042,9 +6929,6 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 	RenderTipTextList(sx,sy,TextNum,0);
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	공격력을 계산한다.
-//////////////////////////////////////////////////////////////////////////
 bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
 {
 	int AttackDamageMin;
@@ -8066,28 +6950,12 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
 			break;
 		}
 	}
-#ifdef ADD_SOCKET_ITEM
 	if( GetEquipedBowType( ) == BOWTYPE_CROSSBOW )
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-	if( (r->Type>=ITEM_BOW+8  && r->Type<ITEM_BOW+15)	||
-		(r->Type>=ITEM_BOW+16 && r->Type<ITEM_BOW+17)	||
-		(r->Type>=ITEM_BOW+18 && r->Type<ITEM_BOW+MAX_ITEM_INDEX)
-	  )
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 	{
 		AttackDamageMin = CharacterAttribute->AttackDamageMinRight;
 		AttackDamageMax = CharacterAttribute->AttackDamageMaxRight;
 	}
-#ifdef ADD_SOCKET_ITEM
 	else if( GetEquipedBowType( ) == BOWTYPE_BOW )
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-	else if((l->Type>=ITEM_BOW && l->Type<ITEM_BOW+7) 
-			|| l->Type==ITEM_BOW+17 
-			|| l->Type==ITEM_BOW+20
-			|| l->Type == ITEM_BOW+21
-			|| l->Type == ITEM_BOW+22
-		)
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 	{
 		AttackDamageMin = CharacterAttribute->AttackDamageMinLeft;
 		AttackDamageMax = CharacterAttribute->AttackDamageMaxLeft;
@@ -8097,7 +6965,7 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
 		AttackDamageMin = CharacterAttribute->AttackDamageMinLeft;
 		AttackDamageMax = CharacterAttribute->AttackDamageMaxLeft;
 	}
-	else if(r->Type >= ITEM_STAFF && r->Type < ITEM_SHIELD)	//이혁재 - 데미지 계산 적용 빠진거 수정 지팡이류는 왼쪽(AttackDamageMinLeft)에 데미지 적용되어있음
+	else if(r->Type >= ITEM_STAFF && r->Type < ITEM_SHIELD)
 	{
 		AttackDamageMin = CharacterAttribute->AttackDamageMinLeft;
 		AttackDamageMax = CharacterAttribute->AttackDamageMaxLeft;
@@ -8123,7 +6991,6 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
         if ( ( r->Type>=ITEM_BOW && r->Type<ITEM_BOW+MAX_ITEM_INDEX ) &&
              ( l->Type>=ITEM_BOW && l->Type<ITEM_BOW+MAX_ITEM_INDEX ) )
         {
-            //  ARROW의 LEVEL이 1이상 이면은 공격력 증가. 
             if ( ( l->Type==ITEM_BOW+7 && ((l->Level>>3)&15)>=1 ) || ( r->Type==ITEM_BOW+15 && ((r->Level>>3)&15)>=1 ) )
             {
                 Alpha = true;
@@ -8155,25 +7022,16 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
 	return Alpha;
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 스킬 정보창 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= STRP_NONE*/)
 {
 	char lpszName[256];
 	int  iMinDamage, iMaxDamage;
     int  HeroClass = GetBaseClass ( Hero->Class );
 	int  iMana, iDistance, iSkillMana;
-    int  TextNum = 0;		// Text줄수
-	int  SkipNum = 0;		// 빈Text줄수
+    int  TextNum = 0;
+	int  SkipNum = 0;
 
-#ifdef PET_SYSTEM
-    //  팻 명령어 설명을 한다.
     if ( giPetManager::RenderPetCmdInfo( sx, sy, Type ) ) return;
-#endif// PET_SYSTEM
 
 	int  AttackDamageMin, AttackDamageMax;
 	int  iSkillMinDamage, iSkillMaxDamage;
@@ -8182,7 +7040,6 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
     CharacterMachine->GetMagicSkillDamage( CharacterAttribute->Skill[Type], &iMinDamage, &iMaxDamage);
 	CharacterMachine->GetSkillDamage( CharacterAttribute->Skill[Type], &iSkillMinDamage, &iSkillMaxDamage );
 	
-    //	캐릭터의 공격력을 구한다.
 	GetAttackDamage ( &AttackDamageMin, &AttackDamageMax );	
 
     iSkillMinDamage += AttackDamageMin;
@@ -8206,21 +7063,17 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	TextListColor[TextNum] = TEXT_COLOR_BLUE;TextBold[TextNum] = true;TextNum++;
 	sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 
-	WORD Dexterity;		// 민첩
-	WORD Energy;		// 에너지
+	WORD Dexterity;
+	WORD Energy;
+	WORD Strength;
+	WORD Vitality;
+    WORD Charisma;
 
-	//^ 펜릴 스킬 공격력
-	WORD Strength;		// 힘
-	WORD Vitality;		// 체력
-    WORD Charisma;		// 통솔
-
-	Dexterity= CharacterAttribute->Dexterity+ CharacterAttribute->AddDexterity;
-	Energy	 = CharacterAttribute->Energy   + CharacterAttribute->AddEnergy;  
-
-	//^ 펜릴 스킬 공격력
-	Strength	=	CharacterAttribute->Strength+ CharacterAttribute->AddStrength;
-	Vitality	=	CharacterAttribute->Vitality+ CharacterAttribute->AddVitality;
-	Charisma	=	CharacterAttribute->Charisma+ CharacterAttribute->AddCharisma;
+	Dexterity	= CharacterAttribute->Dexterity+ CharacterAttribute->AddDexterity;
+	Energy		= CharacterAttribute->Energy   + CharacterAttribute->AddEnergy;  
+	Strength	= CharacterAttribute->Strength + CharacterAttribute->AddStrength;
+	Vitality	= CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
+	Charisma	= CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 
 	int skillattackpowerRate = 0;
 
@@ -8246,7 +7099,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	if( rightinfo.SI_isSP )
 	{
 		skillattackpowerRate += rightinfo.SI_SP.SI_skillattackpower;
-		skillattackpowerRate += rightinfo.SI_SP.SI_magicalpower;	// 마력 상승 (오른손에만 지팡이 들 수 있다)
+		skillattackpowerRate += rightinfo.SI_SP.SI_magicalpower;
 	}
 	if( leftinfo.SI_isSP )
 	{
@@ -8257,9 +7110,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	{
         if ( CharacterAttribute->Skill[Type]==AT_SKILL_WIZARDDEFENSE || (AT_SKILL_SOUL_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_SOUL_UP+4))	// 소울바리어
         {
-#ifdef KJH_FIX_WOPS_K29544_SOULBARRIER_UPGRADE_TOOLTIP
 			int iDamageShield;
-			// 소울바리어의 데미지흡수 수치는 투자한 마스터스킬 레벨에 따라 +5%씩 늘어난다.
 			if( CharacterAttribute->Skill[Type]==AT_SKILL_WIZARDDEFENSE )
 			{
 				iDamageShield = (int)(10+(Dexterity/50.f)+(Energy/200.f));
@@ -8268,9 +7119,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 			{
 				iDamageShield = (int)(10+(Dexterity/50.f)+(Energy/200.f)) + ((CharacterAttribute->Skill[Type]-AT_SKILL_SOUL_UP+1)*5);		
 			}
-#else KJH_FIX_WOPS_K29544_SOULBARRIER_UPGRADE_TOOLTIP
-            int iDamageShield = (int)(10+(Dexterity/50.f)+(Energy/200.f));
-#endif // KJH_FIX_WOPS_K29544_SOULBARRIER_UPGRADE_TOOLTIP
+
             int iDeleteMana   = (int)(CharacterAttribute->ManaMax*0.02f);
             int iLimitTime    = (int)(60+(Energy/40.f));
 
@@ -8283,37 +7132,11 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		    sprintf(TextList[TextNum],GlobalText[881],iLimitTime);
 		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
         }
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-		// 예외처리 ( 마력 : %d ~ %d )
-		// 마력증가 스킬은 마력을 렌더하지 않는다.
 		else if( SkillType != AT_SKILL_SWELL_OF_MAGICPOWER 
-#ifdef KJW_FIX_SLEEPUP_SKILL_INFO
-			// 슬립 강화는 마력을 렌더하지 않는다.
 			&& SkillType != AT_SKILL_ALICE_SLEEP
 			&& !(AT_SKILL_ALICE_SLEEP_UP <= SkillType && SkillType <= AT_SKILL_ALICE_SLEEP_UP + 4 )
-#endif // KJW_FIX_SLEEPUP_SKILL_INFO
 			)
-#else // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-        else
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
         {
-#ifdef KWAK_FIX_CHARACTER_SKILL_RUNTIME_ERR
-			int iSkill = (int)CharacterAttribute->Skill[Type];
-			if (!(AT_SKILL_STUN <= iSkill && iSkill <= AT_SKILL_MANA)
-				&& !(AT_SKILL_ALICE_THORNS <= iSkill && iSkill <= AT_SKILL_ALICE_ENERVATION)
-				&& iSkill != AT_SKILL_TELEPORT
-				&& iSkill != AT_SKILL_TELEPORT_B)
-			{
-#ifdef ASG_ADD_SUMMON_RARGLE
-				if (AT_SKILL_SUMMON_EXPLOSION <= iSkill && iSkill <= AT_SKILL_SUMMON_POLLUTION)
-#else	// ASG_ADD_SUMMON_RARGLE
-				if (AT_SKILL_SUMMON_EXPLOSION <= iSkill && iSkill <= AT_SKILL_SUMMON_REQUIEM)
-#endif	// ASG_ADD_SUMMON_RARGLE
-				{
-					CharacterMachine->GetCurseSkillDamage(iSkill, &iMinDamage, &iMaxDamage);
-					sprintf(TextList[TextNum], GlobalText[1692], iMinDamage, iMaxDamage);
-				}
-#else // KWAK_FIX_CHARACTER_SKILL_RUNTIME_ERR
 			BYTE bySkill = CharacterAttribute->Skill[Type];
 			if (!(AT_SKILL_STUN <= bySkill && bySkill <= AT_SKILL_MANA)
 				&& !(AT_SKILL_ALICE_THORNS <= bySkill && bySkill <= AT_SKILL_ALICE_ENERVATION)
@@ -8329,7 +7152,6 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 					CharacterMachine->GetCurseSkillDamage(bySkill, &iMinDamage, &iMaxDamage);
 					sprintf(TextList[TextNum], GlobalText[1692], iMinDamage, iMaxDamage);
 				}
-#endif // KWAK_FIX_CHARACTER_SKILL_RUNTIME_ERR
 				else
 					sprintf(TextList[TextNum],GlobalText[170],iMinDamage + skillattackpowerRate,iMaxDamage + skillattackpowerRate);
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
@@ -8368,57 +7190,53 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
         case AT_SKILL_BLOCKING :
         case AT_SKILL_VITALITY :
         case AT_SKILL_HEALING :
-#ifdef PJH_SEASON4_MASTER_RANK4
-	case AT_SKILL_DEF_POWER_UP:
-	case AT_SKILL_DEF_POWER_UP+1:
-	case AT_SKILL_DEF_POWER_UP+2:
-	case AT_SKILL_DEF_POWER_UP+3:
-	case AT_SKILL_DEF_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
+		case AT_SKILL_DEF_POWER_UP:
+		case AT_SKILL_DEF_POWER_UP+1:
+		case AT_SKILL_DEF_POWER_UP+2:
+		case AT_SKILL_DEF_POWER_UP+3:
+		case AT_SKILL_DEF_POWER_UP+4:
         case AT_SKILL_DEFENSE :
-#ifdef PJH_SEASON4_MASTER_RANK4
-	case AT_SKILL_ATT_POWER_UP:
-	case AT_SKILL_ATT_POWER_UP+1:
-	case AT_SKILL_ATT_POWER_UP+2:
-	case AT_SKILL_ATT_POWER_UP+3:
-	case AT_SKILL_ATT_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
+		case AT_SKILL_ATT_POWER_UP:
+		case AT_SKILL_ATT_POWER_UP+1:
+		case AT_SKILL_ATT_POWER_UP+2:
+		case AT_SKILL_ATT_POWER_UP+3:
+		case AT_SKILL_ATT_POWER_UP+4:
         case AT_SKILL_ATTACK :
-        case AT_SKILL_SUMMON :      // 고블린.
-        case AT_SKILL_SUMMON+1 :    // 돌괴물.
-        case AT_SKILL_SUMMON+2 :    // 암살자.
-        case AT_SKILL_SUMMON+3 :    // 설인대장.
-        case AT_SKILL_SUMMON+4 :    // 다크나이트.
-        case AT_SKILL_SUMMON+5 :    // 발리.
-        case AT_SKILL_SUMMON+6 :    // 솔져.
+        case AT_SKILL_SUMMON :
+        case AT_SKILL_SUMMON+1 :
+        case AT_SKILL_SUMMON+2 :
+        case AT_SKILL_SUMMON+3 :
+        case AT_SKILL_SUMMON+4 :
+        case AT_SKILL_SUMMON+5 :
+        case AT_SKILL_SUMMON+6 :
 #ifdef ADD_ELF_SUMMON
-		case AT_SKILL_SUMMON+7:		// 쉐도우나이트
+		case AT_SKILL_SUMMON+7:
 #endif // ADD_ELF_SUMMON
         case AT_SKILL_IMPROVE_AG:
-        case AT_SKILL_STUN:			//  배틀마스터 스킬.
+        case AT_SKILL_STUN:
         case AT_SKILL_REMOVAL_STUN:
         case AT_SKILL_MANA:
         case AT_SKILL_INVISIBLE:
 		case AT_SKILL_REMOVAL_INVISIBLE:
         case AT_SKILL_REMOVAL_BUFF:
             break;
-        case AT_SKILL_PARTY_TELEPORT:   //  파티원 소환.
-        case AT_SKILL_ADD_CRITICAL:     //  크리티컬 데미지 확률 증가.
+        case AT_SKILL_PARTY_TELEPORT:
+        case AT_SKILL_ADD_CRITICAL:
             break;
 		case AT_SKILL_ASHAKE_UP:
 		case AT_SKILL_ASHAKE_UP+1:
 		case AT_SKILL_ASHAKE_UP+2:
 		case AT_SKILL_ASHAKE_UP+3:
 		case AT_SKILL_ASHAKE_UP+4:
-        case AT_SKILL_DARK_HORSE:   //  다크호스.
+        case AT_SKILL_DARK_HORSE:
 		    sprintf ( TextList[TextNum], GlobalText[1237] );
 		    TextListColor[TextNum] = TEXT_COLOR_DARKRED;TextBold[TextNum] = false;TextNum++;
             break;
         case AT_SKILL_BRAND_OF_SKILL:
             break;
-		case AT_SKILL_PLASMA_STORM_FENRIR:	//^ 펜릴 스킬 공격력
+		case AT_SKILL_PLASMA_STORM_FENRIR:
 #ifdef PBG_FIX_SKILL_RECOVER_TOOLTIP
-		case AT_SKILL_RECOVER:				// 회복스킬
+		case AT_SKILL_RECOVER:
 #endif //PBG_FIX_SKILL_RECOVER_TOOLTIP
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		case AT_SKILL_ATT_UP_OURFORCES:
@@ -8439,24 +7257,24 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		int iSkillDamage;
 		GetSkillInformation_Damage(AT_SKILL_PLASMA_STORM_FENRIR, &iSkillDamage);
 
-		if(HeroClass == CLASS_KNIGHT || HeroClass == CLASS_DARK)	// 기사, 마검
+		if(HeroClass == CLASS_KNIGHT || HeroClass == CLASS_DARK)
 		{
 			iSkillMinDamage = (Strength/3)+(Dexterity/5)+(Vitality/5)+(Energy/7)+iSkillDamage;
 		}
-		else if(HeroClass == CLASS_WIZARD || HeroClass == CLASS_SUMMONER)	// 법사, 소환술사
+		else if(HeroClass == CLASS_WIZARD || HeroClass == CLASS_SUMMONER)
 		{
 			iSkillMinDamage = (Strength/5)+(Dexterity/5)+(Vitality/7)+(Energy/3)+iSkillDamage;
 		}
-		else if(HeroClass == CLASS_ELF)	// 요정
+		else if(HeroClass == CLASS_ELF)
 		{
 			iSkillMinDamage = (Strength/5)+(Dexterity/3)+(Vitality/7)+(Energy/5)+iSkillDamage;
 		}
-		else if(HeroClass == CLASS_DARK_LORD)	// 다크로드
+		else if(HeroClass == CLASS_DARK_LORD)
 		{
 			iSkillMinDamage = (Strength/5)+(Dexterity/5)+(Vitality/7)+(Energy/3)+(Charisma/3)+iSkillDamage;
 		}
 #ifdef PBG_ADD_NEWCHAR_MONK
-		else if(HeroClass == CLASS_RAGEFIGHTER)	//레이지파이터
+		else if(HeroClass == CLASS_RAGEFIGHTER)
 		{
 			iSkillMinDamage = (Strength/5)+(Dexterity/5)+(Vitality/3)+(Energy/7)+iSkillDamage;
 		}
@@ -8485,7 +7303,6 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	case AT_SKILL_HEALING:
 		sprintf(TextList[TextNum],GlobalText[171],Energy/5+5);
 		break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_DEF_POWER_UP:
 	case AT_SKILL_DEF_POWER_UP+1:
 	case AT_SKILL_DEF_POWER_UP+2:
@@ -8493,16 +7310,10 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	case AT_SKILL_DEF_POWER_UP+4:
 		{
 			int Cal = Energy/8+2;
-#ifdef YDG_FIX_MASTERLEVEL_ELF_ATTACK_TOOLTIP
 			sprintf(TextList[TextNum],GlobalText[172],(Cal) + (int)((float)Cal/(float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage/(float)10)));
-#else	// YDG_FIX_MASTERLEVEL_ELF_ATTACK_TOOLTIP
-			sprintf(TextList[TextNum],GlobalText[172],(int)((float)Cal/(float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage/(float)10)));
-#endif	// YDG_FIX_MASTERLEVEL_ELF_ATTACK_TOOLTIP
 		}
 		break;
-#endif //PJH_SEASON4_MASTER_RANK4
-		case AT_SKILL_DEFENSE:sprintf(TextList[TextNum],GlobalText[172],Energy/8+2);break;
-#ifdef PJH_SEASON4_MASTER_RANK4
+	case AT_SKILL_DEFENSE:sprintf(TextList[TextNum],GlobalText[172],Energy/8+2);break;
 	case AT_SKILL_ATT_POWER_UP:
 	case AT_SKILL_ATT_POWER_UP+1:
 	case AT_SKILL_ATT_POWER_UP+2:
@@ -8510,23 +7321,16 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	case AT_SKILL_ATT_POWER_UP+4:
 		{
 			int Cal = Energy/7+3;
-#ifdef YDG_FIX_MASTERLEVEL_ELF_ATTACK_TOOLTIP
 			sprintf(TextList[TextNum],GlobalText[173],(Cal) + (int)((float)Cal/(float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage/(float)10)));
-#else	// YDG_FIX_MASTERLEVEL_ELF_ATTACK_TOOLTIP
-			sprintf(TextList[TextNum],GlobalText[173],(int)((float)Cal/(float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage/(float)10)));
-#endif	// YDG_FIX_MASTERLEVEL_ELF_ATTACK_TOOLTIP
 		}
 	break;
-#endif //PJH_SEASON4_MASTER_RANK4
 		case AT_SKILL_ATTACK :sprintf(TextList[TextNum],GlobalText[173],Energy/7+3);break;
-#ifdef PBG_FIX_SKILL_RECOVER_TOOLTIP
 		case AT_SKILL_RECOVER:
 			{
 				int Cal = Energy/4;
 				sprintf(TextList[TextNum],GlobalText[1782], (int)((float)Cal+(float)CharacterAttribute->Level));
 			}
 		break;
-#endif //PBG_FIX_SKILL_RECOVER_TOOLTIP
 		default:Success = false;
 		}
 		if(Success)
@@ -8535,24 +7339,14 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		}
 	}
 
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-	// 예외처리 ( 사용 가능 거리: %d )
-	// 마력증가스킬은 사용가능거리를 렌더하지 않는다.
 	if( SkillType != AT_SKILL_SWELL_OF_MAGICPOWER )
 	{
 		if(iDistance)
 		{
 			sprintf(TextList[TextNum],GlobalText[174],iDistance);
-			TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;//SkipNum++;
+			TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 		}
 	}
-#else // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-	if(iDistance)
-	{
-		sprintf(TextList[TextNum],GlobalText[174],iDistance);
-		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;//SkipNum++;
-	}
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 
    	sprintf(TextList[TextNum],GlobalText[175],iMana);
 	TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
@@ -8569,36 +7363,29 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		    TextListColor[TextNum] = TEXT_COLOR_DARKRED;TextBold[TextNum] = false;TextNum++;
         }
 
-		// 콤보스킬을 습득했고 레벨이 220이상이면
 		if ( Hero->byExtensionSkill == 1 && CharacterAttribute->Level >= 220 )
 		{
 			if ( ( CharacterAttribute->Skill[Type] >= AT_SKILL_SWORD1 && CharacterAttribute->Skill[Type] <= AT_SKILL_SWORD5 ) 
 				|| CharacterAttribute->Skill[Type]==AT_SKILL_WHEEL || CharacterAttribute->Skill[Type]==AT_SKILL_FURY_STRIKE 
 				|| CharacterAttribute->Skill[Type]==AT_SKILL_ONETOONE 
-#ifdef PJH_SEASON4_MASTER_RANK4
 				|| (AT_SKILL_ANGER_SWORD_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_ANGER_SWORD_UP+4)
 				|| (AT_SKILL_BLOW_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_BLOW_UP+4)
-#endif	//PJH_SEASON4_MASTER_RANK4
 				|| (AT_SKILL_TORNADO_SWORDA_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_TORNADO_SWORDA_UP+4)
 				|| (AT_SKILL_TORNADO_SWORDB_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_TORNADO_SWORDB_UP+4)
 				   )
 			{
-				// 99 "콤보 가능"
 				sprintf(TextList[TextNum], GlobalText[99] );
 				TextListColor[TextNum] = TEXT_COLOR_DARKRED;
 				TextBold[TextNum] = false;
 				TextNum++;
 			}
-#ifdef CSK_FIX_SKILL_BLOWOFDESTRUCTION_COMBO
-			else if(CharacterAttribute->Skill[Type] == AT_SKILL_BLOW_OF_DESTRUCTION)	// 파괴의 일격
+			else if(CharacterAttribute->Skill[Type] == AT_SKILL_BLOW_OF_DESTRUCTION)
 			{
-				// 2115 "콤보 가능(2단계만)"
 				sprintf(TextList[TextNum], GlobalText[2115] );
 				TextListColor[TextNum] = TEXT_COLOR_DARKRED;
 				TextBold[TextNum] = false;
 				TextNum++;
 			}
-#endif // CSK_FIX_SKILL_BLOWOFDESTRUCTION_COMBO)
 		}
     }
 
@@ -8615,10 +7402,8 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
     SkillUseType = SkillAttribute[SkillType].SkillUseType;
     if ( SkillUseType==SKILL_USE_TYPE_BRAND )
     {
-		// 1480 "%s의 스킬을 받은후"
 		sprintf ( TextList[TextNum], GlobalText[1480], SkillAttribute[BrandType].Name );
 		TextListColor[TextNum] = TEXT_COLOR_DARKRED;TextBold[TextNum] = false;TextNum++;
-		// 1481 "%d초동안 사용가능합니다"
         sprintf ( TextList[TextNum], GlobalText[1481], SkillAttribute[BrandType].Damage );
 		TextListColor[TextNum] = TEXT_COLOR_DARKRED;TextBold[TextNum] = false;TextNum++;
     }
@@ -8640,7 +7425,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
         }
 	}
 
-	if(CharacterAttribute->Skill[Type] == AT_SKILL_PLASMA_STORM_FENRIR)	//^ 펜릴 스킬 관련
+	if(CharacterAttribute->Skill[Type] == AT_SKILL_PLASMA_STORM_FENRIR)
 	{
 		sprintf ( TextList[TextNum], GlobalText[1926] );
 		TextListColor[TextNum] = TEXT_COLOR_DARKRED;TextBold[TextNum] = false;TextNum++;
@@ -8648,7 +7433,6 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		TextListColor[TextNum] = TEXT_COLOR_DARKRED;TextBold[TextNum] = false;TextNum++;	
 	}
 
-	//예외적인 로직은 여기로
 	if(CharacterAttribute->Skill[Type] == AT_SKILL_INFINITY_ARROW)
 	{
 		sprintf(TextList[1],lpszName);
@@ -8689,13 +7473,11 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		TextListColor[TextNum] = TEXT_COLOR_DARKRED;TextBold[TextNum] = false;TextNum++;
 	}
 
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	if( SkillType == AT_SKILL_SWELL_OF_MAGICPOWER )
 	{
-		sprintf ( TextList[TextNum], GlobalText[2054] );		// 2054 : "최소 마력 20%상승"
+		sprintf ( TextList[TextNum], GlobalText[2054] );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
 	}
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 
 	SIZE TextSize = {0, 0};	
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
@@ -8713,10 +7495,6 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	RenderTipTextList(sx,sy,TextNum,0, RT3_SORT_CENTER, iRenderPoint);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 바닥에 떨어진 아이템 이름 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOption,bool Sort)
 {
 	char Name[80];
@@ -8727,703 +7505,9 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 255);
 
-#ifdef PBG_FIX_ITEMNAMEINDEX
-	////////////////////////////////////////////////////////////////////////
-	// 아이템 이름 설정에 있어서 메모리 이외의 위치를 읽어들이는 버그가 있음
-	// 방대한? 라인으로 수정하기가 곤란함, 코드 정리위함
-	// item의 name중 특정 색에 대하여만 컬러값 설정하세요	nColorType
-	// 폰트를 달리하고자 할경우	nFontType 설정하세요
-	// 디폴트로 === 컬러 1.0f,1.0f,1.0f === 폰트	g_hFont
-	// 특정 값이 아닐경우 설정하지 마세요^^;;
-	////////////////////////////////////////////////////////////////////////		[10.09.07]
-	int nColorType=0;
-	int nFontType=0;
-	int nGlobalTextIndex = 0;
-
-	////////////////////////////////////////////////////////////////////////
-	// 특정 컬러값사용하는 아이템 추가
-	////////////////////////////////////////////////////////////////////////
-	if(o->Type==MODEL_POTION+15				//금
-		|| (o->Type==MODEL_POTION+13) || (o->Type==MODEL_POTION+14) || (o->Type==MODEL_POTION+16)
-		|| (o->Type==MODEL_WING+15) || (o->Type==MODEL_POTION+22) || (o->Type==MODEL_POTION+31)
-		|| (o->Type==MODEL_HELPER+14) || (o->Type==MODEL_POTION+41) || (o->Type==MODEL_POTION+42)
-		|| (o->Type==MODEL_POTION+43) || (o->Type==MODEL_POTION+44)
-		|| (o->Type==MODEL_COMPILED_CELE) || (o->Type==MODEL_COMPILED_SOUL)
-		|| (o->Type==MODEL_POTION+17 || o->Type==MODEL_POTION+18 || o->Type==MODEL_POTION+19)
-		|| (o->Type == MODEL_POTION+11 && Level==7 )
-		|| ( o->Type==MODEL_HELPER+15 ) || ( o->Type==MODEL_HELPER+31 ) || ( o->Type==MODEL_EVENT+16 )
-		|| (o->Type == MODEL_EVENT+5) || (o->Type == MODEL_EVENT+6 && Level == 13)
-#ifdef MYSTERY_BEAD
-		|| ( o->Type == MODEL_EVENT+19 ) || ( o->Type == MODEL_EVENT+20 ) || (o->Type == MODEL_POTION+11 && Level==4)
-		|| (o->Type == MODEL_POTION+11 && Level==5)
-#endif //MYSTERY_BEAD
-#ifdef CSK_PCROOM_ITEM
-		|| (o->Type == MODEL_POTION+55) || (o->Type == MODEL_POTION+56) || (o->Type == MODEL_POTION+57)
-#endif // CSK_PCROOM_ITEM
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-		|| (o->Type == MODEL_HELPER+96)		// 강함의 인장 (PC방 아이템, 일본 6차 컨텐츠)
-#endif //LDS_ADD_PCROOM_ITEM_JPN_6TH
-		|| (o->Type == ITEM_HELPER+49) || (o->Type == ITEM_HELPER+50) || (o->Type == ITEM_HELPER+51) || (o->Type == MODEL_POTION+64)
-		|| (o->Type>=MODEL_EVENT+11 && o->Type<=MODEL_EVENT+15)
-#ifdef CHINA_MOON_CAKE
-		|| (o->Type==MODEL_EVENT+17)
-#endif// CHINA_MOON_CAKE
-		|| (o->Type==MODEL_POTION+21 && Level == 3)
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-		|| (o->Type == MODEL_POTION+100)
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef PBG_ADD_CHARACTERCARD
-		|| (o->Type == MODEL_HELPER+97 || o->Type == MODEL_HELPER+98 || o->Type == MODEL_POTION+91)
-#endif //PBG_ADD_CHARACTERCARD
-#ifdef PBG_ADD_CHARACTERSLOT
-		|| (o->Type == MODEL_HELPER+99)
-#endif //PBG_ADD_CHARACTERSLOT
-#ifdef PBG_ADD_SECRETITEM
-		|| (o->Type >= MODEL_HELPER+117 && o->Type <= MODEL_HELPER+120)// 활력의비약(최하급/하급/중급/상급)
-#endif //PBG_ADD_SECRETITEM
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
-		|| (o->Type == MODEL_HELPER+109)
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// 신규 루비(붉은색)링		// MODEL_HELPER+110
-		|| (o->Type == MODEL_HELPER+110)
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링		// MODEL_HELPER+111
-		|| (o->Type == MODEL_HELPER+111)
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링		// MODEL_HELPER+112
-		|| (o->Type == MODEL_HELPER+112)
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST	// 신규 자수정(보라색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
-		|| (o->Type == MODEL_HELPER+113)
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY	// 신규 루비(붉은색) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이	// MODEL_HELPER+114
-		|| (o->Type == MODEL_HELPER+114)
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// 신규 사파이어(녹색) 목걸이	// MODEL_HELPER+115
-		|| (o->Type == MODEL_HELPER+115)
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE// 신규 사파이어(녹색) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER		// 신규 키(실버)	// MODEL_POTION+112
-		|| (o->Type == MODEL_POTION+112)
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER		// 신규 키(실버)	// MODEL_POTION+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD			// 신규 키(골드)	// MODEL_POTION+113
-		|| (o->Type == MODEL_POTION+113)
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD		// 신규 키(골드)	// MODEL_POTION+113
-#ifdef LDK_ADD_EMPIREGUARDIAN_ITEM
-		|| ( MODEL_POTION+101 <= o->Type && o->Type <= MODEL_POTION+109 )
-#endif //LDK_ADD_EMPIREGUARDIAN_ITEM
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
-		|| (o->Type == MODEL_POTION+111)	// 차원의 마경
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-#ifdef LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-		|| (o->Type == MODEL_POTION+120)	// 고블린금화
-#endif //LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
-		|| (o->Type == MODEL_POTION+121)
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST		// 봉인된 은색상자
-		|| (o->Type == MODEL_POTION+122)
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST				// 금색상자
-		|| (o->Type == MODEL_POTION+123 )
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST				// 은색상자
-		|| (o->Type == MODEL_POTION+124 )
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX				// 패키지 상자A-F
-		|| ( MODEL_POTION+134 <= o->Type && o->Type <= MODEL_POTION+139 )
-#endif //LDK_ADD_INGAMESHOP_PACKAGE_BOX
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
-		|| ( MODEL_POTION+114 <= o->Type && o->Type <= MODEL_POTION+119 )
-#endif // LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
-#ifdef LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
-		|| ( MODEL_POTION+126 <= o->Type && o->Type <= MODEL_POTION+129 )
-#endif // LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
-#ifdef LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
-		|| ( MODEL_POTION+130 <= o->Type && o->Type <= MODEL_POTION+132 )
-#endif // LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-		|| ( MODEL_HELPER+121==o->Type )
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| (o->Type >= MODEL_POTION+157 && o->Type <= MODEL_POTION+159)
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| ( o->Type==MODEL_WING+25 ) || ( o->Type==MODEL_POTION+28 || o->Type==MODEL_POTION+29 )    //  군주의 표식.
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		|| ( COMGEM::Check_Jewel_Com(o->Type, true) != COMGEM::NOGEM )
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		)
-	{
-		nColorType = 1;			//	glColor3f(1.f,0.8f,0.1f);
-	}
-	else if(o->Type == MODEL_POTION+54
-#ifdef CSK_FREE_TICKET
-		|| o->Type==MODEL_HELPER+46 || o->Type==MODEL_HELPER+47 || o->Type==MODEL_HELPER+48 
-#endif //CSK_FREE_TICKET
-#ifdef CSK_RARE_ITEM
-		|| (o->Type >= MODEL_POTION+58 && o->Type <= MODEL_POTION+62)	// 땅에 떨어진 아이템 이름(실제로는 땅에 떨어지지 않음, 테스트용)
-#endif //CSK_RARE_ITEM
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12	//희귀아이템티켓 7-12
-		|| (o->Type >= MODEL_POTION+145 && o->Type <= MODEL_POTION+150)
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-		|| (o->Type == MODEL_HELPER+125 || o->Type == MODEL_HELPER+126 || o->Type == MODEL_HELPER+127)	//도플갱어 자유입장권
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-#ifdef CSK_LUCKY_CHARM
-		|| ( o->Type == MODEL_POTION+53 )// 행운의 부적
-#endif //CSK_LUCKY_CHARM
-#ifdef CSK_LUCKY_SEAL
-		|| ( o->Type == MODEL_HELPER+43 || o->Type == MODEL_HELPER+44 || o->Type == MODEL_HELPER+45 )
-#endif //CSK_LUCKY_SEAL
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
-		|| (o->Type >= ITEM_POTION+70 && o->Type <= ITEM_POTION+71)
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
-		|| (o->Type >= ITEM_POTION+72 && o->Type <= ITEM_POTION+77)
-#endif //PSW_SCROLL_ITEM
-#ifdef PSW_SEAL_ITEM               // 이동 인장
-		|| (o->Type == ITEM_HELPER+59)
-#endif //PSW_SEAL_ITEM
-#ifdef PSW_FRUIT_ITEM              // 리셋 열매
-		|| ( o->Type >= ITEM_HELPER+54 && o->Type <= ITEM_HELPER+58)
-#endif //PSW_FRUIT_ITEM
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
-		|| (o->Type >= ITEM_POTION+78 && o->Type <= ITEM_POTION+82)
-#endif //PSW_SECRET_ITEM
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
-		|| (o->Type == ITEM_HELPER+60)
-#endif //PSW_INDULGENCE_ITEM
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
-		|| (o->Type == ITEM_HELPER+61)
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-#ifdef PSW_RARE_ITEM
-		|| (o->Type == MODEL_POTION+83)
-#endif //PSW_RARE_ITEM
-#ifdef CSK_LUCKY_SEAL
-		|| ( o->Type == MODEL_HELPER+43 || o->Type == MODEL_HELPER+44 || o->Type == MODEL_HELPER+45 )
-#endif //CSK_LUCKY_SEAL
-#ifdef PSW_CHARACTER_CARD 
-		|| (o->Type == MODEL_POTION+91) // 캐릭터 카드
-#endif //PSW_CHARACTER_CARD
-#ifdef PSW_NEW_CHAOS_CARD
-		|| (o->Type == MODEL_POTION+92 || o->Type == MODEL_POTION+93 || o->Type == MODEL_POTION+95) // 카오스카드 골드
-#endif //PSW_NEW_CHAOS_CARD
-#ifdef PSW_NEW_ELITE_ITEM
-		|| (o->Type == ITEM_POTION+94) // 엘리트 중간 치료 물약
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-		|| ( o->Type>=MODEL_POTION+84 && o->Type<=MODEL_POTION+90)  // 벚꽃상자
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef PSW_ADD_PC4_SEALITEM
-		|| ( o->Type == MODEL_HELPER+62 || o->Type == MODEL_HELPER+63)
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef PSW_ADD_PC4_SCROLLITEM
-		|| ( o->Type == MODEL_POTION+97 ) || ( o->Type == MODEL_POTION+98 )
-#endif //PSW_ADD_PC4_SCROLLITEM
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
-		|| ( o->Type == MODEL_POTION+96 ) 
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-#ifdef LDK_ADD_PC4_GUARDIAN
-		|| ( o->Type == MODEL_HELPER+64 ) || ( o->Type == MODEL_HELPER+65 )
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDK_ADD_RUDOLPH_PET
-		|| ( o->Type == MODEL_HELPER+67 )
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef PJH_ADD_PANDA_PET
-		|| ( o->Type == MODEL_HELPER+80 )
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET
-		|| ( o->Type == MODEL_HELPER+106 )
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef YDG_ADD_SKELETON_PET
-		|| ( o->Type == MODEL_HELPER+123 )	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
-		|| ( o->Type == MODEL_HELPER+68 )
-#endif //LDK_ADD_SNOWMAN_CHANGERING
-#ifdef PJH_ADD_PANDA_CHANGERING
-		|| ( o->Type == MODEL_HELPER+76 )
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| ( o->Type == MODEL_HELPER+122 )	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM	// 매조각상, 양조각상, 편자
-		|| ( o->Type == MODEL_HELPER+128 ) || ( o->Type == MODEL_HELPER+129 ) || ( o->Type == MODEL_HELPER+134 )
-#endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2	// 오크참, 메이플참, 골든오크참, 골든메이플참
-		|| ( o->Type >= MODEL_HELPER+130 && o->Type <= MODEL_HELPER+133)
-#endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-		|| (o->Type >= MODEL_POTION+45 && o->Type <= MODEL_POTION+50)//(발렌타인데이 이벤트용)
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING // (색감) 날개 조합 100% 성공 부적 
-		|| (o->Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN && o->Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END)
-#endif //LDS_ADD_CS6_CHARM_MIX_ITEM_WING
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-		|| ( o->Type == MODEL_HELPER+116 )
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
-		|| ( ITEM_WING+130 <= o->Type && 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		o->Type <= ITEM_WING+135
-#else //PBG_ADD_NEWCHAR_MONK_ITEM
-		o->Type <= ITEM_WING+134 
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef PBG_ADD_GENSRANKING
-		|| (o->Type>=MODEL_POTION+141 && o->Type<=MODEL_POTION+144)		// 보석함
-#endif //PBG_ADD_GENSRANKING
-		)
-	{
-		nColorType = 2;			//	glColor3f(0.9f,0.53f,0.13f);
-	}
-#ifdef LEM_FIX_RENDER_ITEMTOOLTIP_FIELD
-	else if((o->Type == MODEL_WING+7 || o->Type == MODEL_WING+21 || o->Type == MODEL_WING+22 || o->Type == MODEL_WING+23))
-	{
-		nColorType = 3;			//	glColor3f(0.7f,0.7f,0.7f);
-	}
-#endif //LEM_FIX_RENDER_ITEMTOOLTIP_FIELD
-	else if(o->Type == MODEL_WING+32
-#ifdef GIFT_BOX_EVENT
-		|| (o->Type == MODEL_POTION+33 && (Level == 0 || Level == 1)) || (o->Type == MODEL_EVENT+22)
-#endif //GIFT_BOX_EVENT
-		)
-	{
-		nColorType = 4;			//	glColor3f(1.f, 0.3f, 0.3f);
-	}
-	else if(o->Type == MODEL_WING+33)
-	{
-		nColorType = 5;			//	glColor3f(0.3f, 1.0f, 0.3f);
-	}
-	else if(o->Type == MODEL_WING+34
-#ifdef GIFT_BOX_EVENT
-		|| (o->Type == MODEL_POTION+34 && (Level == 0 || Level == 1)) || (o->Type == MODEL_EVENT+23)
-#endif //GIFT_BOX_EVENT	
-		)
-	{
-		nColorType = 6;			//	glColor3f(0.3f, 0.3f, 1.0f);
-	}
-	else if((o->Type == MODEL_POTION+32 && (Level == 0 || Level == 1)) || (o->Type == MODEL_EVENT+21))
-	{
-		nColorType = 7;			//	glColor3f(1.0f, 0.3f, 1.0f);
-	}
-	else if((g_SocketItemMgr.IsSocketItem(o))
-#ifdef ADD_SEED_SPHERE_ITEM
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-		|| (o->Type >= MODEL_WING+60 && o->Type <= MODEL_WING+65)	// 시드
-		|| (o->Type >= MODEL_WING+70 && o->Type <= MODEL_WING+74)	// 스피어
-		|| (o->Type >= MODEL_WING+100 && o->Type <= MODEL_WING+129)	// 시드스피어
-#else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-		|| ((o->Type >= MODEL_WING+60 && o->Type <= MODEL_WING+65)	// 시드
-		|| (o->Type >= MODEL_WING+70 && o->Type <= MODEL_WING+74)	// 스피어
-		|| (o->Type >= MODEL_WING+100 && o->Type <= MODEL_WING+129)	// 시드스피어
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#endif	// ADD_SEED_SPHERE_ITEM
-		)
-	{
-		nColorType = 8;			//	glColor3f(0.7f,0.4f,1.0f);
-	}
-	else if( o->Type == MODEL_HELPER+66)
-	{
-		nColorType = 9;			//	glColor3f(0.6f, 0.4f, 1.0f);
-	}
-	else if(o->Type==MODEL_STAFF+10 || o->Type==MODEL_SWORD+19 || o->Type==MODEL_BOW+18 || o->Type==MODEL_MACE+13)
-	{
-		nColorType = 10;		//	glColor3f(1.f,0.1f,1.f);
-	}
-	else if((ItemOption&63) > 0 && ( o->Type<MODEL_WING+3 || o->Type>MODEL_WING+6 ) && o->Type!=MODEL_HELPER+30 
-		&& ( o->Type<MODEL_WING+36 || o->Type>MODEL_WING+40 )
-#ifdef ADD_ALICE_WINGS_1
-		&& (o->Type<MODEL_WING+42 || o->Type>MODEL_WING+43)
-#endif	// ADD_ALICE_WINGS_1
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		&& !(o->Type>=MODEL_WING+49 && o->Type<=MODEL_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)  //  정령의 날개 ~ 어둠의 날개. 망토. 소환술사 2,3차 날개.
-	{
-		nColorType = 11;		//	glColor3f(0.1f,1.f,0.5f);
-	}
-	else
-	{
-		if(Level >= 7)
-		{
-			nColorType = 1;
-		}
-		else if(((ItemLevel>>7)&1) || ((ItemLevel>>2)&1) || ((ItemLevel>>1)&1) || (ItemLevel&1))
-		{
-			nColorType = 12;
-		}
-		else if(Level == 0)
-		{
-			nColorType = 3;
-		}
-		else if(Level < 3)
-		{
-			nColorType = 13;
-		}
-		else if(Level < 5)
-		{
-			nColorType = 14;
-		}
-		else if(Level < 7)
-		{
-			nColorType = 12;
-		}
-		else
-		{
-			nColorType = 0;
-		}
-	}
-
-	////////////////////////////////////////////////////////////////////////
-	// 특정 폰트값사용하는 아이템 추가
-	////////////////////////////////////////////////////////////////////////
-	if((o->Type==MODEL_POTION+13) || (o->Type==MODEL_POTION+14) || (o->Type==MODEL_POTION+16)
-		|| (o->Type==MODEL_WING+15) || (o->Type==MODEL_POTION+22) || (o->Type==MODEL_POTION+31)
-		|| (o->Type==MODEL_HELPER+14) || (o->Type==MODEL_POTION+41) || (o->Type==MODEL_POTION+42)
-		|| (o->Type==MODEL_POTION+43) || (o->Type==MODEL_POTION+44)
-		|| (o->Type==MODEL_COMPILED_CELE) || (o->Type==MODEL_COMPILED_SOUL)
-		|| (o->Type==MODEL_POTION+17 || o->Type==MODEL_POTION+18 || o->Type==MODEL_POTION+19)
-		)
-	{
-		nFontType=1;				// g_hFontBold
-	}
-
-	switch(nColorType)
-	{
-	case 0:		glColor3f(1.f,1.0f,1.0f);		break;
-	case 1:		glColor3f(1.f,0.8f,0.1f);		break;
-	case 2:		glColor3f(0.9f,0.53f,0.13f);	break;
-	case 3:		glColor3f(0.7f,0.7f,0.7f);		break;
-	case 4:		glColor3f(1.0f,0.3f,0.3f);		break;
-	case 5:		glColor3f(0.3f,1.0f,0.3f);		break;
-	case 6:		glColor3f(0.3f,0.3f,1.0f);		break;
-	case 7:		glColor3f(1.0f,0.3f,1.0f);		break;
-	case 8:		glColor3f(0.7f,0.4f,1.0f);		break;
-	case 9:		glColor3f(0.6f,0.4f,1.0f);		break;
-	case 10:	glColor3f(1.0f,0.1f,1.0f);		break;
-	case 11:	glColor3f(0.1f,1.0f,0.5f);		break;
-	case 12:	glColor3f(0.4f,0.7f,1.0f);		break;
-	case 13:	glColor3f(0.9f,0.9f,0.9f);		break;
-	case 14:	glColor3f(1.0f,0.5f,0.2f);		break;
-	default:	glColor3f(1.0f,1.0f,1.0f);		break;
-	}
-
-	if(nFontType==1)
-	{
-		g_pRenderText->SetFont(g_hFontBold);
-	}
-
-	////////////////////////////////////////////////////////////////////////
-	// 아이템 이름 설정 아이템의 인덱스를 사용해야 함
-	////////////////////////////////////////////////////////////////////////
-	if(o->Type==MODEL_POTION+17 || o->Type==MODEL_POTION+18 || o->Type==MODEL_POTION+19)
-	{	
-		if ( ((ItemLevel>>3)&15) == 0)
-		{
-			sprintf(Name,"%s",ItemAttribute[o->Type-MODEL_ITEM].Name);
-		}
-		else
-		{
-			sprintf(Name,"%s +%d",ItemAttribute[o->Type-MODEL_ITEM].Name,((ItemLevel>>3)&15));
-		}
-	}
-	else if(o->Type == MODEL_POTION+11 && Level==7 )
-	{
-		sprintf (Name, GlobalText[111]); //  천공의 상자.
-	}
-#ifdef ANNIVERSARY_EVENT
-	else if(o->Type == MODEL_POTION+11 && Level >= 1 && Level <= 5)
-	{
-		sprintf(Name,"%s +%d",GlobalText[116], Level);
-	}
-#endif	// ANNIVERSARY_EVENT
-	else if(o->Type == MODEL_POTION+12)//이밴트 아이템
-	{
-		switch(Level)
-		{
-		case 0:sprintf(Name,GlobalText[100]);break;
-		case 1:sprintf(Name,GlobalText[101]);break;
-		case 2:sprintf(Name,GlobalText[104]);break;
-		}
-	}
-	else if ( o->Type==MODEL_HELPER+15 ) //     서클.
-	{
-		switch ( Level )
-		{
-		case 0:sprintf(Name,"%s %s", GlobalText[168], ItemAttribute[o->Type-MODEL_ITEM].Name );break;
-		case 1:sprintf(Name,"%s %s", GlobalText[169], ItemAttribute[o->Type-MODEL_ITEM].Name );break;
-		case 2:sprintf(Name,"%s %s", GlobalText[167], ItemAttribute[o->Type-MODEL_ITEM].Name );break;
-		case 3:sprintf(Name,"%s %s", GlobalText[166], ItemAttribute[o->Type-MODEL_ITEM].Name );break;
-		case 4:sprintf(Name,"%s %s", GlobalText[1900], ItemAttribute[o->Type-MODEL_ITEM].Name );break;
-		}
-	}
-	else if ( o->Type==MODEL_HELPER+31 )    //  영혼.
-	{
-		switch ( Level )
-		{
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-	case 0:sprintf ( Name, "%s of %s", ItemAttribute[o->Type-MODEL_ITEM].Name, GlobalText[1187] ); break;
-	case 1:sprintf ( Name, "%s of %s", ItemAttribute[o->Type-MODEL_ITEM].Name, GlobalText[1214] ); break;
-#else // SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-			// 한국
-	case 0:sprintf ( Name, "%s %s", GlobalText[1187], ItemAttribute[o->Type-MODEL_ITEM].Name ); break;
-	case 1:sprintf ( Name, "%s %s", GlobalText[1214], ItemAttribute[o->Type-MODEL_ITEM].Name ); break;
-#endif // SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-		}
-	}
-	else if ( o->Type==MODEL_EVENT+16 )     //  군주의 소매.
-	{
-		sprintf ( Name, GlobalText[1235] );
-	}
-	else if(o->Type == MODEL_EVENT+4)//성탄의별
-	{
-		sprintf(Name,GlobalText[105]);
-	}
-	else if(o->Type == MODEL_EVENT+5)//폭죽/마법 주머니.
-	{
-#ifdef  NEW_YEAR_BAG_EVENT
-		switch ( Level )
-		{
-		case 14: sprintf(Name,GlobalText[1650]); break;
-		case 15: sprintf(Name,GlobalText[1651]); break;
-		default: sprintf(Name,GlobalText[106]); break;
-		}
-#else // NEW_YEAR_BAG_EVENT
-		sprintf(Name,GlobalText[106]);
-#endif// NEW_YEAR_BAG_EVENT
-	}
-	else if(o->Type == MODEL_EVENT+6)//사랑의 하트
-	{
-		if (Level == 13)	//다크로드의 마음
-		{
-			sprintf(Name,"%s",GlobalText[117]);
-		}
-		else
-		{
-			sprintf(Name,GlobalText[107]);
-		}
-	}
-	else if(o->Type == MODEL_EVENT+7)//사랑의 올리브
-	{
-		sprintf(Name,GlobalText[108]);
-	}
-	else if(o->Type == MODEL_EVENT+8)//은 훈장
-	{
-		sprintf(Name,GlobalText[109]);
-	}
-	else if(o->Type == MODEL_EVENT+9)//금 훈장
-	{
-		sprintf(Name,GlobalText[110]);
-	}
-#ifdef USE_EVENT_ELDORADO
-	else if(o->Type == MODEL_EVENT+10)//엘도라도
-	{
-		sprintf(Name,"%s +%d",GlobalText[115], Level - 7);
-	}
-#endif
-#ifdef _PVP_ADD_MOVE_SCROLL
-	else if (o->Type == MODEL_POTION+10 && Level >= 1 && Level <= 8)//  이동문서
-	{
-		switch (Level)
-		{
-		case 1: sprintf ( Name, GlobalText[158], GlobalText[30] ); break;     //  로랜시아
-		case 2: sprintf ( Name, GlobalText[158], GlobalText[33] ); break;     //  노리아
-		case 3: sprintf ( Name, GlobalText[158], GlobalText[32] ); break;     //  데비아스
-		case 4: sprintf ( Name, GlobalText[158], GlobalText[31] ); break;     //  던전
-		case 5: sprintf ( Name, GlobalText[158], GlobalText[37] ); break;     //  아틀란스
-		case 6: sprintf ( Name, GlobalText[158], GlobalText[34] ); break;     //  로스트타워
-		case 7: sprintf ( Name, GlobalText[158], GlobalText[38] ); break;     //  타르칸
-		case 8: sprintf ( Name, GlobalText[158], GlobalText[55] ); break;     //  이카루스
-		}
-	}
-#endif	// _PVP_ADD_MOVE_SCROLL
-#ifdef MYSTERY_BEAD
-	else if( o->Type == MODEL_EVENT+19 )
-	{
-		sprintf(Name, ItemAttribute[ITEM_WING+26].Name);
-	}
-	else if( o->Type == MODEL_EVENT+20 )
-	{
-		switch(Level)
-		{
-		case 1:		//. 빨강수정
-			strcpy( Name, GlobalText[1831]); break;
-		case 2:		//. 파랑수정
-			strcpy( Name, GlobalText[1832]); break;
-		case 3:		//. 검은수정
-			strcpy( Name, GlobalText[1833]); break;
-		}
-	}
-	else if(o->Type == MODEL_POTION+11 && Level==4)
-	{
-		strcpy(Name, GlobalText[1834]);
-	}
-	else if(o->Type == MODEL_POTION+11 && Level==5)
-	{
-		strcpy(Name, GlobalText[1838]);
-	}
-#endif // MYSTERY_BEAD
-#ifdef GIFT_BOX_EVENT
-	else if(o->Type == MODEL_POTION+32 && Level == 1)
-	{
-		sprintf(Name, GlobalText[2012]);	
-	}
-	else if(o->Type == MODEL_POTION+33 && Level == 1)
-	{
-		sprintf(Name, GlobalText[2013]);	
-	}
-	else if(o->Type == MODEL_POTION+34 && Level == 1)
-	{
-		sprintf(Name, GlobalText[2014]);	
-	}
-	else if(o->Type == MODEL_EVENT+21)
-	{
-		sprintf(Name, GlobalText[2012]);	
-	}
-	else if(o->Type == MODEL_EVENT+22)
-	{
-		sprintf(Name, GlobalText[2013]);	
-	}
-	else if(o->Type == MODEL_EVENT+23)
-	{
-		sprintf(Name, GlobalText[2014]);	
-	}
-#endif //GIFT_BOX_EVENT
-	else if ( o->Type==MODEL_EVENT+11 )
-	{
-#ifdef FRIEND_EVENT
-		if ( Level==2 ) //  우정의 돌.
-		{
-			sprintf ( Name, GlobalText[1098] );  //  우정의 돌/
-		}
-		else
-#endif// FRIEND_EVENT
-		{
-			sprintf ( Name, GlobalText[810] );  //  스톤.
-		}
-	}
-	else if(o->Type==MODEL_EVENT+12)
-	{
-		sprintf ( Name, GlobalText[906] );	//. 영광의 반지
-	}
-	else if(o->Type==MODEL_EVENT+13)
-	{
-		sprintf ( Name, GlobalText[907] );	//. 다크스톤
-	}
-	else if(o->Type==MODEL_EVENT+14)
-	{
-		switch ( Level )
-		{
-		case 2:
-			sprintf( Name, GlobalText[928] );	//. 전사의 반지
-			break;
-		case 3:
-			sprintf( Name, GlobalText[929] );	//. 전사의 반지
-			break;
-		default :
-			sprintf( Name, GlobalText[922] );	//. 제왕의 반지
-			break;
-		}
-	}
-	else if(o->Type==MODEL_EVENT+15)
-	{
-		sprintf( Name, GlobalText[925] );	// 마법사의 반지
-	}
-#ifdef CHINA_MOON_CAKE
-	else if(o->Type==MODEL_EVENT+17)
-	{
-		sprintf( Name, GlobalText[118]);    //  중국 월병.
-	}
-#endif// CHINA_MOON_CAKE
-	else if(o->Type == MODEL_WING+11)//소환구슬
-	{
-		sprintf(Name,"%s %s",SkillAttribute[30+Level].Name,GlobalText[102]);
-	}
-	else if(o->Type == MODEL_HELPER+10)//변신반지
-	{
-		for(int i=0;i<MAX_MONSTER;i++)
-		{
-			if(SommonTable[Level] == MonsterScript[i].Type)
-			{
-				sprintf(Name,"%s %s",MonsterScript[i].Name,GlobalText[103]);
-				break;
-			}
-		}
-	}
-	else if ( o->Type==MODEL_POTION+21 && Level == 3 )    //  성주의표식
-	{
-		sprintf( Name, GlobalText[1290] );
-	}
-	else if ( o->Type==MODEL_POTION+7 ) //  스패셜 물약.//종훈물약
-	{
-		switch ( Level )
-		{
-		case 0: sprintf( Name, GlobalText[1413] ); break;
-		case 1: sprintf( Name, GlobalText[1414] ); break;
-		}
-	}
-	else if ( o->Type==MODEL_HELPER+7 ) //  계약 문서
-	{
-		switch ( Level )
-		{
-		case 0: sprintf( Name, GlobalText[1460] ); break;  //  활 용병.
-		case 1: sprintf( Name, GlobalText[1461] ); break;  //  창 용병.
-		}
-	}
-	else if ( o->Type==MODEL_HELPER+11 )    //  주문서.
-	{
-		switch ( Level )
-		{
-		case 0: sprintf( Name, GlobalText[1416] ); break;  //  가디언 주문서.
-		case 1: sprintf( Name, GlobalText[1462] ); break;  //  라이프 스톤 설치.
-		}
-	}
-	else if ( o->Type==MODEL_EVENT+18 )
-	{
-		sprintf( Name, GlobalText[1462] );  //  라이프 스톤 설치.
-	}
-	else
-	{
-		strcpy(Name, ItemAttribute[o->Type-MODEL_ITEM].Name);
-	}
-
-	char TextName[64]={0,};
-	if ( g_csItemOption.GetSetItemName( TextName, o->Type-MODEL_ITEM, ItemExtOption ) )
-	{
-		glColor3f ( 1.f, 1.f, 1.f );
-		g_pRenderText->SetFont(g_hFontBold);
-		g_pRenderText->SetTextColor(0, 255, 0, 255);
-		g_pRenderText->SetBgColor(60, 60, 200, 255);
-
-		strcat ( TextName, ItemAttribute[o->Type-MODEL_ITEM].Name );
-	}
-	else
-	{
-		strcpy ( TextName, ItemAttribute[o->Type-MODEL_ITEM].Name );
-	}
-
-	if((ItemLevel>>7)&1)
-	{
-		if(o->Type!=MODEL_HELPER+3)
-			strcat(Name,GlobalText[176]);
-		else    //  디노란트.
-		{
-			strcat(Name, " +" );
-			strcat(Name,GlobalText[179]);
-		}
-	}
-	//  옵션.
-	if( (ItemLevel&3) || ((ItemOption>>6)&1) )
-		strcat(Name,GlobalText[177]);
-	//  행운.
-	if((ItemLevel>>2)&1)
-		strcat(Name,GlobalText[178]);
-#else //PBG_FIX_ITEMNAMEINDEX
-
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 	bool bFirstOK = true;
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-	if(o->Type==MODEL_POTION+15)//금
+	if(o->Type==MODEL_POTION+15)
 	{
 		glColor3f(1.f,0.8f,0.1f);
        	sprintf(Name,"%s %d",ItemAttribute[o->Type-MODEL_ITEM].Name,ItemLevel);
@@ -9439,249 +7523,177 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		  || (o->Type==MODEL_POTION+42)
 		  || (o->Type==MODEL_POTION+43)
 		  || (o->Type==MODEL_POTION+44)
-		   ) //  로크의 깃털.
+		   )
 	{
 		g_pRenderText->SetFont(g_hFontBold);
 		glColor3f(1.f,0.8f,0.1f);
        	sprintf(Name,"%s",ItemAttribute[o->Type-MODEL_ITEM].Name);
 	}
-#ifdef KJW_FIX_ITEMNAME_ORB_OF_SUMMONING
 	else if( o->Type == MODEL_WING+11)
 	{
 		glColor3f(0.7f,0.7f,0.7f);
 		sprintf( Name,"%s %s", SkillAttribute[ 30 + Level ].Name, GlobalText[102] );
 	}
-#endif // KJW_FIX_ITEMNAME_ORB_OF_SUMMONING
-#ifdef LEM_FIX_RENDER_ITEMTOOLTIP_FIELD
-	else if(o->Type == MODEL_WING+7)	
-	{
-		glColor3f(0.7f,0.7f,0.7f);
-		sprintf(Name, ItemAttribute[ITEM_WING+7].Name);	
-	}
-	else if(o->Type == MODEL_WING+21)	
-	{
-		glColor3f(0.7f,0.7f,0.7f);
-		sprintf(Name, ItemAttribute[ITEM_WING+21].Name);	
-	}
-	else if(o->Type == MODEL_WING+22)	
-	{
-		glColor3f(0.7f,0.7f,0.7f);
-		sprintf(Name, ItemAttribute[ITEM_WING+22].Name);	
-	}
-	else if(o->Type == MODEL_WING+23)	
-	{
-		glColor3f(0.7f,0.7f,0.7f);
-		sprintf(Name, ItemAttribute[ITEM_WING+23].Name);	
-	}
-#endif	// LEM_FIX_RENDER_ITEMTOOLTIP_FIELD [lem_2010.8.18]
-#ifdef CSK_FREE_TICKET
-	// 땅에 떨어진 아이템 이름(실제로는 땅에 떨어지지 않음, 테스트용)
-	else if(o->Type == MODEL_HELPER+46)	// 데빌스퀘어 자유입장권
+	else if(o->Type == MODEL_HELPER+46)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+46].Name);	
 	}
-	else if(o->Type == MODEL_HELPER+47)	// 블러드캐슬 자유입장권
+	else if(o->Type == MODEL_HELPER+47)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+47].Name);
 	}
-	else if(o->Type == MODEL_HELPER+48)	// 칼리마 자유입장권
+	else if(o->Type == MODEL_HELPER+48)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+48].Name);
 	}
-#endif // CSK_FREE_TICKET
-#ifdef CSK_CHAOS_CARD
-	// 땅에 떨어진 아이템 이름(실제로는 땅에 떨어지지 않음, 테스트용)
-	else if(o->Type == MODEL_POTION+54)	// 카오스카드
+	else if(o->Type == MODEL_POTION+54)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+54].Name);
 	}
-#endif // CSK_CHAOS_CARD
-#ifdef CSK_RARE_ITEM
-	// 땅에 떨어진 아이템 이름(실제로는 땅에 떨어지지 않음, 테스트용)
 	else if(o->Type >= MODEL_POTION+58 && o->Type <= MODEL_POTION+62)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif // CSK_RARE_ITEM
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12	//희귀아이템티켓 7-12
 	else if(o->Type >= MODEL_POTION+145 && o->Type <= MODEL_POTION+150)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-	else if(o->Type == MODEL_HELPER+125)	//도플갱어 자유입장권
+	else if(o->Type == MODEL_HELPER+125)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+125].Name);	
 	}
-	else if(o->Type == MODEL_HELPER+126)	//바르카 자유입장권
+	else if(o->Type == MODEL_HELPER+126)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+126].Name);
 	}
-	else if(o->Type == MODEL_HELPER+127)	//바르카 제7맵 자유입장권
+	else if(o->Type == MODEL_HELPER+127)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+127].Name);
 	}
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-#ifdef CSK_LUCKY_CHARM
-	else if( o->Type == MODEL_POTION+53 )// 행운의 부적
+	else if( o->Type == MODEL_POTION+53 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+53].Name);
 	}
-#endif //CSK_LUCKY_CHARM
-#ifdef CSK_LUCKY_SEAL
 	else if( o->Type == MODEL_HELPER+43 || o->Type == MODEL_HELPER+44 || o->Type == MODEL_HELPER+45 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_HELPER].Name);
 	}
-#endif //CSK_LUCKY_SEAL
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 	else if(o->Type >= ITEM_POTION+70 && o->Type <= ITEM_POTION+71)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 	else if(o->Type >= ITEM_POTION+72 && o->Type <= ITEM_POTION+77)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //PSW_SCROLL_ITEM
-#ifdef PSW_SEAL_ITEM               // 이동 인장
 	else if(o->Type == ITEM_HELPER+59)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //PSW_SEAL_ITEM
-#ifdef PSW_FRUIT_ITEM              // 리셋 열매
 	else if( o->Type >= ITEM_HELPER+54 && o->Type <= ITEM_HELPER+58)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //PSW_FRUIT_ITEM
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
 	else if(o->Type >= ITEM_POTION+78 && o->Type <= ITEM_POTION+82)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //PSW_SECRET_ITEM
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
 	else if(o->Type == ITEM_HELPER+60)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //PSW_INDULGENCE_ITEM
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
 	else if(o->Type == ITEM_HELPER+61)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-#ifdef PSW_RARE_ITEM
 	else if(o->Type == MODEL_POTION+83)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //PSW_RARE_ITEM
-#ifdef CSK_LUCKY_SEAL
 	else if( o->Type == MODEL_HELPER+43 || o->Type == MODEL_HELPER+44 || o->Type == MODEL_HELPER+45 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_HELPER].Name);
 	}
-#endif //CSK_LUCKY_SEAL
-#ifdef PSW_CHARACTER_CARD 
-	else if(o->Type == MODEL_POTION+91) // 캐릭터 카드
+	else if(o->Type == MODEL_POTION+91)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+91].Name);
 	}
-#endif // PSW_CHARACTER_CARD
-#ifdef PSW_NEW_CHAOS_CARD
-	else if(o->Type == MODEL_POTION+92) // 카오스카드 골드
+	else if(o->Type == MODEL_POTION+92)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+92].Name);
 	}
-	else if(o->Type == MODEL_POTION+93) // 카오스카드 레어
+	else if(o->Type == MODEL_POTION+93)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+93].Name);
 	}
-	else if(o->Type == MODEL_POTION+95) // 카오스카드 미니
+	else if(o->Type == MODEL_POTION+95)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+95].Name);
 	}
-#endif // PSW_NEW_CHAOS_CARD
-#ifdef PSW_NEW_ELITE_ITEM
-#ifdef KJW_FIX_ITEMNAME_CRITICAL_SCROLL
-	else if( o->Type == MODEL_POTION + 94 ) // 엘리트 중간 치료 물약
-#else // KJW_FIX_ITEMNAME_CRITICAL_SCROLL
-	else if(o->Type == ITEM_POTION+94) // 엘리트 중간 치료 물약
-#endif // KJW_FIX_ITEMNAME_CRITICAL_SCROLL
+	else if( o->Type == MODEL_POTION + 94 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+94].Name);
 	}
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-	else if( o->Type==MODEL_POTION+84 )  // 벚꽃상자
+	else if( o->Type==MODEL_POTION+84 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+84].Name);
 	}
-	else if( o->Type==MODEL_POTION+85 )  // 벚꽃술
+	else if( o->Type==MODEL_POTION+85 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+85].Name);
 	}
-	else if( o->Type==MODEL_POTION+86 )  // 벚꽃경단
+	else if( o->Type==MODEL_POTION+86 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+86].Name);
 	}
-	else if( o->Type==MODEL_POTION+87 )  // 벚꽃잎
+	else if( o->Type==MODEL_POTION+87 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+87].Name);
 	}
-	else if( o->Type==MODEL_POTION+88 )  // 흰색 벚꽃
+	else if( o->Type==MODEL_POTION+88 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+88].Name);
 	}
-	else if( o->Type==MODEL_POTION+89 )  // 붉은색 벚꽃
+	else if( o->Type==MODEL_POTION+89 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+89].Name);
 	}
-	else if( o->Type==MODEL_POTION+90 )  // 노란색 벚꽃
+	else if( o->Type==MODEL_POTION+90 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+90].Name);
 	}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef PSW_ADD_PC4_SEALITEM
 	else if( o->Type == MODEL_HELPER+62 ) {
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+62].Name);
@@ -9690,8 +7702,6 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+63].Name);
 	}
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef PSW_ADD_PC4_SCROLLITEM
 	else if( o->Type == MODEL_POTION+97 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
@@ -9702,17 +7712,11 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+98].Name);
 	}
-#endif //PSW_ADD_PC4_SCROLLITEM
-
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
 	else if( o->Type == MODEL_POTION+96 ) 
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+96].Name);
 	}
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-
-#ifdef LDK_ADD_PC4_GUARDIAN
 	else if( o->Type == MODEL_HELPER+64 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
@@ -9723,58 +7727,42 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+65].Name);
 	}
-#endif //LDK_ADD_PC4_GUARDIAN
-
-#ifdef LDK_ADD_RUDOLPH_PET
 	else if( o->Type == MODEL_HELPER+67 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+67].Name);
 	}
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef PJH_ADD_PANDA_PET
 	else if( o->Type == MODEL_HELPER+80 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+80].Name);
 	}
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET
 	else if( o->Type == MODEL_HELPER+106 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+106].Name);
 	}
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef YDG_ADD_SKELETON_PET
 	else if( o->Type == MODEL_HELPER+123 )	// 스켈레톤 펫
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+123].Name);
 	}
-#endif	// YDG_ADD_SKELETON_PET
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 	else if( o->Type == MODEL_HELPER+68 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+68].Name);
 	}
-#endif //LDK_ADD_SNOWMAN_CHANGERING
-#ifdef PJH_ADD_PANDA_CHANGERING
 	else if( o->Type == MODEL_HELPER+76 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+76].Name);
 	}
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
 	else if( o->Type == MODEL_HELPER+122 )	// 스켈레톤 변신반지
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+122].Name);
 	}
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM	// 매조각상, 양조각상, 편자
+#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 
 	else if( o->Type == MODEL_HELPER+128 )
 	{
@@ -9792,7 +7780,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		sprintf(Name, ItemAttribute[ITEM_HELPER+134].Name);
 	}
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2	// 오크참, 메이플참, 골든오크참, 골든메이플참
+#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 	else if( o->Type == MODEL_HELPER+130 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
@@ -9837,7 +7825,6 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 	}
 	else if(o->Type==MODEL_POTION+17 || o->Type==MODEL_POTION+18 || o->Type==MODEL_POTION+19)
 	{	
-		// 악마의 눈, 악마의 열쇠, 데빌스퀘어 초대권
 		g_pRenderText->SetFont(g_hFontBold);
 		glColor3f(1.f,0.8f,0.1f);
 		if ( ((ItemLevel>>3)&15) == 0)
@@ -9852,15 +7839,9 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
     else if(o->Type == MODEL_POTION+11 && Level==7 )
     {
 		glColor3f(1.f,0.8f,0.1f);
-        sprintf (Name, GlobalText[111]); //  천공의 상자.
+        sprintf (Name, GlobalText[111]);
     }
-#ifdef ANNIVERSARY_EVENT
-    else if(o->Type == MODEL_POTION+11 && Level >= 1 && Level <= 5)
-    {
-		sprintf(Name,"%s +%d",GlobalText[116], Level);
-    }
-#endif	// ANNIVERSARY_EVENT
-	else if(o->Type == MODEL_POTION+12)//이밴트 아이템
+	else if(o->Type == MODEL_POTION+12)
 	{
 		switch(Level)
 		{
@@ -9869,7 +7850,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		case 2:sprintf(Name,GlobalText[104]);break;
 		}
 	}
-    else if ( o->Type==MODEL_HELPER+15 ) //     서클.
+    else if ( o->Type==MODEL_HELPER+15 )
     {
 		glColor3f(1.f,0.8f,0.1f);
         switch ( Level )
@@ -9881,34 +7862,27 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		case 4:sprintf(Name,"%s %s", GlobalText[1900], ItemAttribute[o->Type-MODEL_ITEM].Name );break;
         }
     }
-    else if ( o->Type==MODEL_HELPER+31 )    //  영혼.
+    else if ( o->Type==MODEL_HELPER+31 )
     {
 		glColor3f(1.f,0.8f,0.1f);
         switch ( Level )
         {
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
 		case 0:sprintf ( Name, "%s of %s", ItemAttribute[o->Type-MODEL_ITEM].Name, GlobalText[1187] ); break;
         case 1:sprintf ( Name, "%s of %s", ItemAttribute[o->Type-MODEL_ITEM].Name, GlobalText[1214] ); break;
-#else // SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-		// 한국
-        case 0:sprintf ( Name, "%s %s", GlobalText[1187], ItemAttribute[o->Type-MODEL_ITEM].Name ); break;
-        case 1:sprintf ( Name, "%s %s", GlobalText[1214], ItemAttribute[o->Type-MODEL_ITEM].Name ); break;
-#endif // SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
         }
     }
-	else if ( o->Type==MODEL_EVENT+16 )     //  군주의 소매.
+	else if ( o->Type==MODEL_EVENT+16 )
 	{
 		glColor3f(1.f,0.8f,0.1f);
 		sprintf ( Name, GlobalText[1235] );
 	}
-	else if(o->Type == MODEL_EVENT+4)//성탄의별
+	else if(o->Type == MODEL_EVENT+4)
 	{
 		sprintf(Name,GlobalText[105]);
 	}
-	else if(o->Type == MODEL_EVENT+5)//폭죽/마법 주머니.
+	else if(o->Type == MODEL_EVENT+5)
 	{
     	glColor3f(1.f,0.8f,0.1f);
-#ifdef  NEW_YEAR_BAG_EVENT
         switch ( Level )
         {
         case 14:
@@ -9923,13 +7897,10 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		    sprintf(Name,GlobalText[106]);
             break;
         }
-#else // NEW_YEAR_BAG_EVENT
-		sprintf(Name,GlobalText[106]);
-#endif// NEW_YEAR_BAG_EVENT
 	}
-	else if(o->Type == MODEL_EVENT+6)//사랑의 하트
+	else if(o->Type == MODEL_EVENT+6)
 	{
-		if (Level == 13)	//다크로드의 마음
+		if (Level == 13)
 		{
 			glColor3f ( 1.f, 0.8f, 0.1f );
 			sprintf(Name,"%s",GlobalText[117]);
@@ -9939,117 +7910,37 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			sprintf(Name,GlobalText[107]);
 		}
 	}
-	else if(o->Type == MODEL_EVENT+7)//사랑의 올리브
+	else if(o->Type == MODEL_EVENT+7)
 	{
 		sprintf(Name,GlobalText[108]);
 	}
-	else if(o->Type == MODEL_EVENT+8)//은 훈장
+	else if(o->Type == MODEL_EVENT+8)
 	{
 		sprintf(Name,GlobalText[109]);
 	}
-	else if(o->Type == MODEL_EVENT+9)//금 훈장
+	else if(o->Type == MODEL_EVENT+9)
 	{
 		sprintf(Name,GlobalText[110]);
 	}
-#ifdef USE_EVENT_ELDORADO
-	else if(o->Type == MODEL_EVENT+10)//엘도라도
+	else if(o->Type == MODEL_EVENT+10)
 	{
 		sprintf(Name,"%s +%d",GlobalText[115], Level - 7);
 	}
-#endif
-#ifdef _PVP_ADD_MOVE_SCROLL
-    else if (o->Type == MODEL_POTION+10 && Level >= 1 && Level <= 8)//  이동문서
-    {
-		glColor3f ( 1.f, 1.f, 1.f );
-        switch (Level)
-        {
-        case 1: sprintf ( Name, GlobalText[158], GlobalText[30] ); break;     //  로랜시아
-		case 2: sprintf ( Name, GlobalText[158], GlobalText[33] ); break;     //  노리아
-		case 3: sprintf ( Name, GlobalText[158], GlobalText[32] ); break;     //  데비아스
-		case 4: sprintf ( Name, GlobalText[158], GlobalText[31] ); break;     //  던전
-		case 5: sprintf ( Name, GlobalText[158], GlobalText[37] ); break;     //  아틀란스
-		case 6: sprintf ( Name, GlobalText[158], GlobalText[34] ); break;     //  로스트타워
-		case 7: sprintf ( Name, GlobalText[158], GlobalText[38] ); break;     //  타르칸
-		case 8: sprintf ( Name, GlobalText[158], GlobalText[55] ); break;     //  이카루스
-        }
-    }
-#endif	// _PVP_ADD_MOVE_SCROLL
-#ifdef _PVP_MURDERER_HERO_ITEM
-    else if ( o->Type==MODEL_POTION+30 )//  영웅살인마징표(wld)
-    {
-		glColor3f ( 1.f, 1.f, 1.f );
-		sprintf(Name, ItemAttribute[o->Type-MODEL_ITEM].Name);
-    }
-#endif	// _PVP_MURDERER_HERO_ITEM
-#ifdef MYSTERY_BEAD
-	else if( o->Type == MODEL_EVENT+19 )
-	{
-		glColor3f ( 1.f, 0.8f, 0.1f );
-		sprintf(Name, ItemAttribute[ITEM_WING+26].Name);
-	}
-	else if( o->Type == MODEL_EVENT+20 )
-	{
-		glColor3f ( 1.f, 0.8f, 0.1f );
-		switch(Level)
-		{
-		case 1:		//. 빨강수정
-			strcpy( Name, GlobalText[1831]); break;
-		case 2:		//. 파랑수정
-			strcpy( Name, GlobalText[1832]); break;
-		case 3:		//. 검은수정
-			strcpy( Name, GlobalText[1833]); break;
-		}
-	}
-	else if(o->Type == MODEL_POTION+11 && Level==4)
-	{
-		glColor3f ( 1.f, 0.8f, 0.1f );
-		strcpy(Name, GlobalText[1834]);
-	}
-	else if(o->Type == MODEL_POTION+11 && Level==5)
-	{
-		glColor3f ( 1.f, 0.8f, 0.1f );
-		strcpy(Name, GlobalText[1838]);
-	}
-#endif // MYSTERY_BEAD
-	else if(o->Type == MODEL_WING+32)//빨간리본상자.(x-mas이벤트용)
+	else if(o->Type == MODEL_WING+32)
 	{
 		glColor3f ( 1.f, 0.3f, 0.3f );
 		sprintf(Name, ItemAttribute[ITEM_WING+32].Name);	
 	}
-	else if(o->Type == MODEL_WING+33)//초록리본상자.(x-mas이벤트용)
+	else if(o->Type == MODEL_WING+33)
 	{
 		glColor3f ( 0.3f, 1.0f, 0.3f );
 		sprintf(Name, ItemAttribute[ITEM_WING+33].Name);	
 	}
-	else if(o->Type == MODEL_WING+34)//초록리본상자.(x-mas이벤트용)
+	else if(o->Type == MODEL_WING+34)
 	{
 		glColor3f ( 0.3f, 0.3f, 1.f );
 		sprintf(Name, ItemAttribute[ITEM_WING+34].Name);	
 	}
-#ifdef CSK_PCROOM_ITEM
-	else if(o->Type == MODEL_POTION+55)
-	{
-		glColor3f ( 1.f, 0.8f, 0.1f );
-		sprintf(Name, ItemAttribute[ITEM_POTION+55].Name);
-	}
-	else if(o->Type == MODEL_POTION+56)
-	{
-		glColor3f ( 1.f, 0.8f, 0.1f );
-		sprintf(Name, ItemAttribute[ITEM_POTION+56].Name);
-	}
-	else if(o->Type == MODEL_POTION+57)
-	{
-		glColor3f ( 1.f, 0.8f, 0.1f );
-		sprintf(Name, ItemAttribute[ITEM_POTION+57].Name);
-	}
-#endif // CSK_PCROOM_ITEM
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	else if(o->Type == MODEL_HELPER+96)		// 강함의 인장 (PC방 아이템, 일본 6차 컨텐츠)
-	{
-		glColor3f ( 1.f, 0.8f, 0.1f );
-		sprintf(Name, ItemAttribute[ITEM_POTION+57].Name);
-	}
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
 	else if(o->Type == ITEM_HELPER+49)
 	{
 		glColor3f ( 1.f, 0.8f, 0.1f );
@@ -10070,57 +7961,50 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		glColor3f ( 1.f, 0.8f, 0.1f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+64].Name);
 	}
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 	else if(o->Type == MODEL_WING+48)//
 	{
-		//혹시?
 		glColor3f ( 1.f, 1.f, 1.f );
 		sprintf(Name, ItemAttribute[ITEM_WING+48].Name);	
 	}
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-	else if(o->Type == MODEL_WING+35)//
+	else if(o->Type == MODEL_WING+35)
 	{
-		//혹시?
 		glColor3f ( 1.f, 1.f, 1.f );
 		sprintf(Name, ItemAttribute[ITEM_WING+35].Name);	
 	}
-	else if(o->Type == MODEL_POTION+45)//분홍 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_POTION+45)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+45].Name);	
 	}
-	else if(o->Type == MODEL_POTION+46)//빨간 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_POTION+46)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+46].Name);	
 	}
-	else if(o->Type == MODEL_POTION+47)//파란 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_POTION+47)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+47].Name);	
 	}
-	else if(o->Type == MODEL_POTION+48)//분홍 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_POTION+48)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+48].Name);		
 	}
-	else if(o->Type == MODEL_POTION+49)//빨간 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_POTION+49)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+49].Name);	
 	}
-	else if(o->Type == MODEL_POTION+50)//파란 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_POTION+50)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_POTION+50].Name);		
 	}
-#ifdef GIFT_BOX_EVENT
-	else if(o->Type == MODEL_POTION+32)//분홍 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_POTION+32)
 	{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int i = MODEL_POTION+32;
 		int k = ITEM_POTION+32;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		if(Level == 0)
 		{
 			glColor3f ( 1.f, 0.3f, 1.f );
@@ -10133,7 +8017,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			sprintf(Name, GlobalText[2012]);	
 		}
 	}
-	else if(o->Type == MODEL_POTION+33)//빨간 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_POTION+33)
 	{
 		if(Level == 0)
 		{
@@ -10147,7 +8031,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			sprintf(Name, GlobalText[2013]);	
 		}
 	}
-	else if(o->Type == MODEL_POTION+34)//파란 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_POTION+34)
 	{
 		if(Level == 0)
 		{
@@ -10161,46 +8045,37 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			sprintf(Name, GlobalText[2014]);	
 		}
 	}
-	else if(o->Type == MODEL_EVENT+21)//분홍 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_EVENT+21)
 	{
 		glColor3f ( 1.f, 0.3f, 1.f );
 		sprintf(Name, GlobalText[2012]);	
 	}
-	else if(o->Type == MODEL_EVENT+22)//빨간 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_EVENT+22)
 	{
 		glColor3f ( 1.0f, 0.3f, 0.3f );
 		sprintf(Name, GlobalText[2013]);	
 	}
-	else if(o->Type == MODEL_EVENT+23)//파란 초코릿상자.(발렌타인데이 이벤트용)
+	else if(o->Type == MODEL_EVENT+23)
 	{
 		glColor3f ( 0.3f, 0.3f, 1.f );
 		sprintf(Name, GlobalText[2014]);	
 	}
-#endif
-
     else if ( o->Type==MODEL_EVENT+11 )
     {
         glColor3f ( 1.f, 0.8f, 0.1f );
-#ifdef FRIEND_EVENT
-        if ( Level==2 ) //  우정의 돌.
         {
-            sprintf ( Name, GlobalText[1098] );  //  우정의 돌/
-        }
-        else
-#endif// FRIEND_EVENT
-        {
-            sprintf ( Name, GlobalText[810] );  //  스톤.
+            sprintf ( Name, GlobalText[810] );
         }
     }
 	else if(o->Type==MODEL_EVENT+12)
 	{
 		glColor3f ( 1.f, 0.8f, 0.1f );
-		sprintf ( Name, GlobalText[906] );	//. 영광의 반지
+		sprintf ( Name, GlobalText[906] );
 	}
 	else if(o->Type==MODEL_EVENT+13)
 	{
 		glColor3f ( 1.f, 0.8f, 0.1f );
-		sprintf ( Name, GlobalText[907] );	//. 다크스톤
+		sprintf ( Name, GlobalText[907] );
 	}
 	else if(o->Type==MODEL_EVENT+14)
 	{
@@ -10208,33 +8083,26 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
         switch ( Level )
         {
         case 2:
-		    sprintf( Name, GlobalText[928] );	//. 전사의 반지
+		    sprintf( Name, GlobalText[928] );
             break;
         case 3:
-		    sprintf( Name, GlobalText[929] );	//. 전사의 반지
+		    sprintf( Name, GlobalText[929] );
             break;
         default :
-		    sprintf( Name, GlobalText[922] );	//. 제왕의 반지
+		    sprintf( Name, GlobalText[922] );
             break;
         }
 	}
 	else if(o->Type==MODEL_EVENT+15)
 	{
 		glColor3f( 1.f, 0.8f, 0.1f );
-		sprintf( Name, GlobalText[925] );	// 마법사의 반지
+		sprintf( Name, GlobalText[925] );
 	}
-#ifdef CHINA_MOON_CAKE
-	else if(o->Type==MODEL_EVENT+17)
-    {
-		glColor3f( 1.f, 0.8f, 0.1f );
-		sprintf( Name, GlobalText[118]);    //  중국 월병.
-    }
-#endif// CHINA_MOON_CAKE
-	else if(o->Type == MODEL_WING+11)//소환구슬
+	else if(o->Type == MODEL_WING+11)
 	{
 		sprintf(Name,"%s %s",SkillAttribute[30+Level].Name,GlobalText[102]);
 	}
-    else if(o->Type == MODEL_HELPER+10)//변신반지
+    else if(o->Type == MODEL_HELPER+10)
 	{
 		for(int i=0;i<MAX_MONSTER;i++)
 		{
@@ -10245,12 +8113,12 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			}
 		}
 	}
-    else if ( o->Type==MODEL_POTION+21 && Level == 3 )    //  성주의표식
+    else if ( o->Type==MODEL_POTION+21 && Level == 3 )
     {
 	    glColor3f ( 1.f, 0.8f, 0.1f );
 		sprintf( Name, GlobalText[1290] );
     }
-    else if ( o->Type==MODEL_POTION+7 ) //  스패셜 물약.//종훈물약
+    else if ( o->Type==MODEL_POTION+7 )
     {
         switch ( Level )
         {
@@ -10258,27 +8126,26 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
         case 1: sprintf( Name, GlobalText[1414] ); break;
         }
     }
-    else if ( o->Type==MODEL_HELPER+7 ) //  계약 문서
+    else if ( o->Type==MODEL_HELPER+7 )
     {
         switch ( Level )
         {
-        case 0: sprintf( Name, GlobalText[1460] ); break;  //  활 용병.
-        case 1: sprintf( Name, GlobalText[1461] ); break;  //  창 용병.
+        case 0: sprintf( Name, GlobalText[1460] ); break;
+        case 1: sprintf( Name, GlobalText[1461] ); break;
         }
     }
-    else if ( o->Type==MODEL_HELPER+11 )    //  주문서.
+    else if ( o->Type==MODEL_HELPER+11 )
     {
         switch ( Level )
         {
-        case 0: sprintf( Name, GlobalText[1416] ); break;  //  가디언 주문서.
-        case 1: sprintf( Name, GlobalText[1462] ); break;  //  라이프 스톤 설치.
+        case 0: sprintf( Name, GlobalText[1416] ); break;
+        case 1: sprintf( Name, GlobalText[1462] ); break;
         }
     }
     else if ( o->Type==MODEL_EVENT+18 )
     {
-        sprintf( Name, GlobalText[1462] );  //  라이프 스톤 설치.
+        sprintf( Name, GlobalText[1462] );
     }
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 	else
 	{
 		bFirstOK = false;
@@ -10286,223 +8153,150 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 
 	if( bFirstOK == false )
 	{
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#ifdef ADD_SEED_SPHERE_ITEM
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-		if ((o->Type >= MODEL_WING+60 && o->Type <= MODEL_WING+65)	// 시드
-			|| (o->Type >= MODEL_WING+70 && o->Type <= MODEL_WING+74)	// 스피어
-		|| (o->Type >= MODEL_WING+100 && o->Type <= MODEL_WING+129))	// 시드스피어
-#else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-	else if ((o->Type >= MODEL_WING+60 && o->Type <= MODEL_WING+65)	// 시드
-		|| (o->Type >= MODEL_WING+70 && o->Type <= MODEL_WING+74)	// 스피어
-		|| (o->Type >= MODEL_WING+100 && o->Type <= MODEL_WING+129))	// 시드스피어
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+		if ((o->Type >= MODEL_WING+60 && o->Type <= MODEL_WING+65)
+			|| (o->Type >= MODEL_WING+70 && o->Type <= MODEL_WING+74)
+		|| (o->Type >= MODEL_WING+100 && o->Type <= MODEL_WING+129))
 	{
 		glColor3f(0.7f,0.4f,1.0f);	// TEXT_COLOR_VIOLET
 		strcpy ( Name, ItemAttribute[o->Type-MODEL_ITEM].Name );
 	}
-#endif	// ADD_SEED_SPHERE_ITEM
-#ifdef PBG_ADD_SANTAINVITATION
-	//산타마을의 초대장.
 	else if( o->Type == MODEL_HELPER+66 )
 	{
 		glColor3f( 0.6f, 0.4f, 1.0f);
 		sprintf(Name, ItemAttribute[ITEM_HELPER+66].Name);
 	}
-#endif //PBG_ADD_SANTAINVITATION
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-	//행운의 동전
 	else if( o->Type == MODEL_POTION+100 )
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[ITEM_POTION+100].Name);
 	}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING // (색감) 날개 조합 100% 성공 부적 
 	else if(o->Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN 
 			&& o->Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END)
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
-#endif //LDS_ADD_CS6_CHARM_MIX_ITEM_WING
-#ifdef PBG_ADD_CHARACTERCARD
-	// 마검 다크 소환술사 카드
 	else if(o->Type == MODEL_HELPER+97 || o->Type == MODEL_HELPER+98 || o->Type == MODEL_POTION+91)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[o->Type].Name);
 	}
-#endif //PBG_ADD_CHARACTERCARD
-#ifdef PBG_ADD_CHARACTERSLOT
 	else if(o->Type == MODEL_HELPER+99)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[ITEM_HELPER+99].Name);
 	}
-#endif //PBG_ADD_CHARACTERSLOT
-#ifdef PBG_ADD_SECRETITEM
-	// 활력의비약(최하급/하급/중급/상급)
-	else if(o->Type >= MODEL_HELPER+117 && o->Type <= MODEL_HELPER+120)
-	{
-		glColor3f(1.0f, 0.8f, 0.1f);
-		sprintf(Name, ItemAttribute[o->Type-MODEL_ITEM].Name);
-	}
-#endif //PBG_ADD_SECRETITEM
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
 	else if(o->Type == MODEL_HELPER+109)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[MODEL_HELPER+109].Name);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링		// MODEL_HELPER+110
 	else if(o->Type == MODEL_HELPER+110)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[MODEL_HELPER+110].Name);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링		// MODEL_HELPER+111
 	else if(o->Type == MODEL_HELPER+111)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[MODEL_HELPER+111].Name);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링		// MODEL_HELPER+112
 	else if(o->Type == MODEL_HELPER+112)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[MODEL_HELPER+112].Name);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
 	else if(o->Type == MODEL_HELPER+113)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[MODEL_HELPER+113].Name);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// 신규 루비(붉은색) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이	// MODEL_HELPER+114
 	else if(o->Type == MODEL_HELPER+114)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[MODEL_HELPER+114].Name);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// 신규 사파이어(녹색) 목걸이	// MODEL_HELPER+115
 	else if(o->Type == MODEL_HELPER+115)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[MODEL_HELPER+115].Name);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// 신규 사파이어(녹색) 목걸이
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
 	else if(o->Type == MODEL_POTION+112)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[MODEL_POTION+112].Name);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD		// 신규 키(골드)	// MODEL_POTION+113
 	else if(o->Type == MODEL_POTION+113)
 	{
 		glColor3f(1.0f, 0.8f, 0.1f);
 		sprintf(Name, ItemAttribute[MODEL_POTION+113].Name);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD		// 신규 키(골드)	// MODEL_POTION+113
 	else
 	{
-        //  액설런트 아이템.
-		//	절대 시리즈
         if ( o->Type==MODEL_STAFF+10 || o->Type==MODEL_SWORD+19 || o->Type==MODEL_BOW+18 || o->Type==MODEL_MACE+13)
         {
             glColor3f(1.f,0.1f,1.f);
         }
-#ifdef SOCKET_SYSTEM
 		else if (g_SocketItemMgr.IsSocketItem(o))
 		{
 			glColor3f(0.7f,0.4f,1.0f);	// TEXT_COLOR_VIOLET
 		}
-#endif	// SOCKET_SYSTEM
         else if((ItemOption&63) > 0 && ( o->Type<MODEL_WING+3 || o->Type>MODEL_WING+6 ) && o->Type!=MODEL_HELPER+30 
 			&& ( o->Type<MODEL_WING+36 || o->Type>MODEL_WING+40 )
-#ifdef ADD_ALICE_WINGS_1
 			&& (o->Type<MODEL_WING+42 || o->Type>MODEL_WING+43)
-#endif	// ADD_ALICE_WINGS_1
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			&& !(o->Type>=MODEL_WING+49 && o->Type<=MODEL_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)  //  정령의 날개 ~ 어둠의 날개. 망토. 소환술사 2,3차 날개.
+			) 
 		{
 			glColor3f(0.1f,1.f,0.5f);
 		}
-#ifdef LDK_ADD_EMPIREGUARDIAN_ITEM
 		else if( MODEL_POTION+101 <= o->Type && o->Type <= MODEL_POTION+109 )
 		{
-			// 의문의쪽지, 가이온의 명령서, 세크로미콘 조각, 세크로미콘
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //LDK_ADD_EMPIREGUARDIAN_ITEM
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
-		else if (o->Type == MODEL_POTION+111)	// 차원의 마경
+		else if (o->Type == MODEL_POTION+111)
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-#ifdef LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-		// 고블린금화
 		else if(o->Type == MODEL_POTION+120)
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
 		else if(o->Type == MODEL_POTION+121)
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST		// 봉인된 은색상자
 		else if(o->Type == MODEL_POTION+122)
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST				// 금색상자
 		else if(o->Type == MODEL_POTION+123 )
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST				// 은색상자
 		else if(o->Type == MODEL_POTION+124 )
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX				// 패키지 상자A-F
 		else if( MODEL_POTION+134 <= o->Type && o->Type <= MODEL_POTION+139 )
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //LDK_ADD_INGAMESHOP_PACKAGE_BOX
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 		else if( o->Type == MODEL_HELPER+116 )
 		{
 			glColor3f ( 0.9f, 0.53f, 0.13f );
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
+
 #ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
 		else if( ITEM_WING+130 <= o->Type && 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
@@ -10516,52 +8310,37 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
+
 		else if( MODEL_POTION+114 <= o->Type && o->Type <= MODEL_POTION+119 )
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
-#ifdef LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
 		else if( MODEL_POTION+126 <= o->Type && o->Type <= MODEL_POTION+129 )
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif // LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
-#ifdef LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
 		else if( MODEL_POTION+130 <= o->Type && o->Type <= MODEL_POTION+132 )
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif // LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
 		else if( MODEL_HELPER+121==o->Type )
 		{
 			glColor3f(1.f,0.8f,0.1f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-#ifdef PBG_ADD_GENSRANKING
-		else if(o->Type>=MODEL_POTION+141 && o->Type<=MODEL_POTION+144)		// 보석함
+		else if(o->Type>=MODEL_POTION+141 && o->Type<=MODEL_POTION+144)
 		{
 		   	glColor3f (0.9f, 0.53f, 0.13f);
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //PBG_ADD_GENSRANKING
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		else if (o->Type >= MODEL_POTION+157 && o->Type <= MODEL_POTION+159)
-		{
-			glColor3f(1.f, 0.8f, 0.1f);
-		}
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		else if ( o->Type==MODEL_WING+25 )      //  군주의 망토.
+		else if ( o->Type==MODEL_WING+25 )
 		{
 		    glColor3f ( 1.f, 0.8f, 0.1f );
 		}
-        else if ( o->Type==MODEL_POTION+28 || o->Type==MODEL_POTION+29 )    //  군주의 표식.
+        else if ( o->Type==MODEL_POTION+28 || o->Type==MODEL_POTION+29 )
         {
 		    glColor3f ( 1.f, 0.8f, 0.1f );
         }
@@ -10614,28 +8393,20 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		{
 			if(o->Type!=MODEL_HELPER+3)
     			strcat(Name,GlobalText[176]);
-			else    //  디노란트.
+			else
             {
                 strcat(Name, " +" );
     			strcat(Name,GlobalText[179]);
             }
 		}
-        //  옵션.
 		if( (ItemLevel&3) || ((ItemOption>>6)&1) )
 			strcat(Name,GlobalText[177]);
-        //  행운.
 		if((ItemLevel>>2)&1)
 			strcat(Name,GlobalText[178]);
 	}
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 	}
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#endif //PBG_FIX_ITEMNAMEINDEX
-#ifdef LJH_FIX_RUNTIME_ERROR_WHEN_RENDERING_DROPPED_ITEMNAME
+
 	GLfloat fCurColor[4] = { 1.f, 1.f, 1.f, 0.0f };
-#else  //LJH_FIX_RUNTIME_ERROR_WHEN_RENDERING_DROPPED_ITEMNAME
-	GLfloat fCurColor[3] = { 1.f, 1.f, 1.f };
-#endif //LJH_FIX_RUNTIME_ERROR_WHEN_RENDERING_DROPPED_ITEMNAME
 	glGetFloatv(GL_CURRENT_COLOR, fCurColor);
 	if(fCurColor[0] < 0.9f || fCurColor[1] < 0.9f || fCurColor[2] < 0.9f)
 		g_pRenderText->SetTextColor(fCurColor[0]*255, fCurColor[1]*255, fCurColor[2]*255, 255);
@@ -12686,7 +10457,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		{
       		Vector(180.f,270.f,25.f,ObjectSelect.Angle);
 		}
-		// 소켓아이템추가 [시즌4]
+		// 소켓아이템추가 [Season4]
 	}									
 	else if(Type>=MODEL_SHIELD && Type<MODEL_SHIELD+MAX_ITEM_INDEX)
 	{
@@ -13222,7 +10993,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	{
 		Vector(270.f+90.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type==MODEL_POTION+12)//이밴트 아이템
+	else if(Type==MODEL_POTION+12)
 	{
 		switch(Level)
 		{
@@ -13231,222 +11002,165 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		case 2:Vector(90.f,0.f,0.f,ObjectSelect.Angle);break;
 		}
 	}
-	else if(Type==MODEL_EVENT+5)            //  폭죽. /마법 주머니.
+	else if(Type==MODEL_EVENT+5)
 	{
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
-#else // SELECTED_LANGUAGE == LANGUAGE_KOREAN
 		Vector(270.f,180.f,0.f,ObjectSelect.Angle);
-#endif // SELECTED_LANGUAGE == LANGUAGE_KOREAN
 	}
-	else if(Type==MODEL_EVENT+6)            //  사랑의 하트
+	else if(Type==MODEL_EVENT+6)
 	{
 		Vector(270.f,90.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type==MODEL_EVENT+7)            //  사랑의 올리브
+	else if(Type==MODEL_EVENT+7)
 	{
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type==MODEL_POTION+20)          //  사랑의 묘약
+	else if(Type==MODEL_POTION+20)
 	{
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-    else if ( Type==MODEL_POTION+27 )    //  고대의 금속.
+    else if ( Type==MODEL_POTION+27 )
     {
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
     }
-	else if ( Type == MODEL_POTION+63 )	// 폭죽
+	else if ( Type == MODEL_POTION+63 )
 	{
 		Position[1] += 0.08f;
 		Vector(-50.f,-60.f,0.f,ObjectSelect.Angle);
 	}
-	else if ( Type == MODEL_POTION+52)	// GM 선물상자
+	else if ( Type == MODEL_POTION+52)
 	{
 		//Position[1] += 0.08f;
 		Vector(270.f,-25.f,0.f,ObjectSelect.Angle);
 	}
 #ifdef _PVP_MURDERER_HERO_ITEM
-    else if ( Type==MODEL_POTION+30 )    // 징표
+    else if ( Type==MODEL_POTION+30 )
     {
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
     }
 #endif// _PVP_MURDERER_HERO_ITEM
-	else if(Type >= MODEL_ETC+19 && Type <= MODEL_ETC+27)	// 양피지들
+	else if(Type >= MODEL_ETC+19 && Type <= MODEL_ETC+27)
 	{
 		Position[0] += 0.03f;
 		Position[1] += 0.03f;
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_WING+7)	// 회오리베기 구슬
+	else if(Type == MODEL_WING+7)
 	{
 		Position[0] += 0.005f;
 		Position[1] -= 0.015f;
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_ARMOR+10)		// 넝쿨갑옷
+	else if(Type == MODEL_ARMOR+10)
 	{
 		Position[1] -= 0.1f;
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_PANTS+10)		// 넝쿨바지
+	else if(Type == MODEL_PANTS+10)
 	{
 		Position[1] -= 0.08f;
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_ARMOR+11)		// 실크갑옷
+	else if(Type == MODEL_ARMOR+11)
 	{
 		Position[1] -= 0.1f;
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type == MODEL_PANTS+11)		// 실크바지
+	else if(Type == MODEL_PANTS+11)
 	{
 		Position[1] -= 0.08f;
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-	else if(Type == MODEL_WING+44)	// 파괴의일격 구슬
+	else if(Type == MODEL_WING+44)
 	{
 		Position[0] += 0.005f;
 		Position[1] -= 0.015f;
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-	else if(Type == MODEL_WING+46
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-										|| Type==MODEL_WING+45
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-		)	// 회복 구슬
+	else if(Type == MODEL_WING+46 || Type==MODEL_WING+45)
 	{
 		Position[0] += 0.005f;
 		Position[1] -= 0.015f;
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
     else
 	{
 		Vector(270.f,-10.f,0.f,ObjectSelect.Angle);
 	}
-#ifdef ADD_SEED_SPHERE_ITEM
-	
-	// if-else if가 128개 넘어가면 컴파일 에러남! 추가할때 이 아래로 추가하던지 아니면 구조를 고쳐야 함 ♤
-	if(Type >= MODEL_WING+60 && Type <= MODEL_WING+65)	// 시드
+
+	if(Type >= MODEL_WING+60 && Type <= MODEL_WING+65)
 	{
 		Vector(10.f,-10.f,10.f,ObjectSelect.Angle);
 	}
-	else if(Type >= MODEL_WING+70 && Type <= MODEL_WING+74)	// 스피어
+	else if(Type >= MODEL_WING+70 && Type <= MODEL_WING+74)
 	{
 		Vector(0.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type >= MODEL_WING+100 && Type <= MODEL_WING+129)	// 시드스피어
+	else if(Type >= MODEL_WING+100 && Type <= MODEL_WING+129)
 	{
 		Vector(0.f,0.f,0.f,ObjectSelect.Angle);
 	}
-#endif	// ADD_SEED_SPHERE_ITEM
-
-#ifdef LDK_ADD_RUDOLPH_PET //루돌프 펫 ... limit 걸림.....
 	else if( Type == MODEL_HELPER+67 )
 	{
 		Position[1] -= 0.05f;
 		Vector(270.f, 40.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef YDG_ADD_SKELETON_PET
-	else if( Type == MODEL_HELPER+123 )	// 스켈레톤 펫
+	else if( Type == MODEL_HELPER+123 )
 	{
 		Position[1] -= 0.05f;
 		Vector(270.f, 40.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_SKELETON_PET
-#ifdef YDG_ADD_HEALING_SCROLL
-	else if(Type == MODEL_POTION+140)	// 치유의 스크롤
+	else if(Type == MODEL_POTION+140)
 	{
 		Position[1] += 0.09f;
 		Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_HEALING_SCROLL
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
 	else if(Type >= MODEL_POTION+145 && Type <= MODEL_POTION+150)
 	{
 		Position[0] += 0.010f;
 		Position[1] += 0.040f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-	else if (Type == MODEL_POTION+151 || Type == MODEL_POTION+152)	// 1레벨 의뢰서, 1레벨 의뢰 완료 확인서
-	{
-		Position[0] += 0.02f;
-		Position[1] += 0.13f;
-		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
-	}
-	else if (Type == MODEL_POTION+155)	// 탄탈로스의 갑옷
-	{
-		Position[1] += 0.120f;
-	}
-	else if (Type == MODEL_POTION+156)	// 잿더미 도살자의 몽둥이
-	{
-		Position[0] += 0.040f;
-		Position[1] += 0.110f;
-		Vector(180.f, 270.f, 15.f, ObjectSelect.Angle);
-	}
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-	// 아이템 위치와 각도 세팅
 	else if(Type >= MODEL_HELPER+125 && Type <= MODEL_HELPER+127)	//도플갱어, 바르카, 바르카제7맵 자유입장권
 	{
 		Position[0] += 0.007f;
 		Position[1] -= 0.035f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-#ifdef ASG_ADD_CHARGED_CHANNEL_TICKET
 	else if (Type == MODEL_HELPER+124)	// 유료채널 입장권.
 	{
 		Position[1] -= 0.04f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //ASG_ADD_CHARGED_CHANNEL_TICKET
-#ifdef PJH_ADD_PANDA_PET 
 	else if( Type == MODEL_HELPER+80 )
 	{
 		Position[1] -= 0.05f;
 		Vector(270.f, 40.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET	//유니콘
 	else if( Type == MODEL_HELPER+106 )
 	{
 		Position[0] += 0.01f;
 		Position[1] -= 0.05f;
 		Vector(255.f, 45.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 	else if( Type == MODEL_HELPER+68 )
 	{
 		Position[0] += 0.02f;
 		Position[1] -= 0.02f;
 		Vector(300.f, 10.f, 20.f, ObjectSelect.Angle);
 	}
-#endif //LDK_ADD_SNOWMAN_CHANGERING
-#ifdef PJH_ADD_PANDA_CHANGERING
 	else if( Type == MODEL_HELPER+76 )
 	{
 //		Position[0] += 0.02f;
 		Position[1] -= 0.02f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
 	else if( Type == MODEL_HELPER+122 )	// 스켈레톤 변신반지
 	{
 		Position[0] += 0.01f;
 		Position[1] -= 0.035f;
 		Vector(290.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
+
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM	
 	else if( Type == MODEL_HELPER+128 )	// 매조각상
 	{
@@ -13468,117 +11182,97 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	}
 #endif	//LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-	else if( Type == MODEL_HELPER+130 )	// 오크참
+	else if( Type == MODEL_HELPER+130 )
 	{
 		Position[0] += 0.007f;
 		Position[1] += 0.005f;
 		Vector(270.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_HELPER+131 )	// 메이플
+	else if( Type == MODEL_HELPER+131 )
 	{
 		Position[0] += 0.017f;
 		Position[1] -= 0.053f;
 		Vector(270.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_HELPER+132 )	// 골든오크참
+	else if( Type == MODEL_HELPER+132 )
 	{
 		Position[0] += 0.007f;
 		Position[1] += 0.045f;
 		Vector(270.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_HELPER+133 )	// 골든메이플
+	else if( Type == MODEL_HELPER+133 )
 	{
 		Position[0] += 0.017f;
 		Position[1] -= 0.053f;
 		Vector(270.f, -20.f, 0.f, ObjectSelect.Angle);
 	}
 #endif	//LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
-	else if( Type == MODEL_HELPER+69 )	// 부활의 부적
+	else if( Type == MODEL_HELPER+69 )
 	{
 		Position[0] += 0.005f;
 		Position[1] -= 0.05f;
 		Vector(270.f, -30.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
-	else if( Type == MODEL_HELPER+70 )	// 이동의 부적
+	else if( Type == MODEL_HELPER+70 )
 	{
 		Position[0] += 0.040f;
 		Position[1] -= 0.000f;
 		Vector(270.f, -0.f, 70.f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef ASG_ADD_CS6_GUARD_CHARM
-	else if (Type == MODEL_HELPER+81)	// 수호의부적
+
+	else if (Type == MODEL_HELPER+81)
 	{
 		Position[0] += 0.005f;
 		Position[1] += 0.035f;
 		Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	// ASG_ADD_CS6_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ITEM_GUARD_CHARM
-	else if (Type == MODEL_HELPER+82)	// 아이템보호부적
+	else if (Type == MODEL_HELPER+82)
 	{
 		Position[0] += 0.005f;
 		Position[1] += 0.035f;
 		Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-	else if (Type == MODEL_HELPER+93)	// 상승의인장마스터
+	else if (Type == MODEL_HELPER+93)
 	{
 		Position[0] += 0.005f;
 		Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	// ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-#ifdef ASG_ADD_CS6_WEALTH_SEAL_MASTER
-	else if (Type == MODEL_HELPER+94)	// 풍요의인장마스터
+	else if (Type == MODEL_HELPER+94)
 	{
 		Position[0] += 0.005f;
 		Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif	// ASG_ADD_CS6_WEALTH_SEAL_MASTER
-#ifdef PBG_ADD_SANTAINVITATION
-	//산타마을의 초대장.
 	else if( Type == MODEL_HELPER+66 )
 	{
 		Position[0] += 0.01f;
 		Position[1] -= 0.05f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif //PBG_ADD_SANTAINVITATION
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-	//행운의 동전
 	else if( Type == MODEL_POTION+100 )
 	{
 		Position[0] += 0.01f;
 		Position[1] -= 0.05f;
 		Vector(0.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_FIRECRACKER_ITEM
-	else if (Type == MODEL_POTION+99)	// 크리스마스 폭죽
+	else if (Type == MODEL_POTION+99)
 	{
 		Position[0] += 0.02f;
 		Position[1] -= 0.03f;
 		//Vector(270.f,0.f,30.f,ObjectSelect.Angle);
 		Vector(290.f,-40.f,0.f,ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_FIRECRACKER_ITEM
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
-	else if( Type == MODEL_STAFF+33 )	// 겜블 레어 지팡이
+	else if( Type == MODEL_STAFF+33 )
 	{
 		Position[0] += 0.02f;
 		Position[1] -= 0.06f;
 		Vector(180.f,90.f,10.f,ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_STAFF+34 )	// 겜블 레어 지팡이(소환술사용)
+	else if( Type == MODEL_STAFF+34 )
 	{
 		Position[1] -= 0.05f;
 		Vector(180.f,90.f,10.f,ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_SPEAR+11 )	// 겜블 레어 낫
+	else if( Type == MODEL_SPEAR+11 )
 	{
 		Position[1] += 0.02f;
 		Vector(180.f,90.f,15.f,ObjectSelect.Angle);
@@ -13595,17 +11289,12 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.07f;
     	Vector(180.f,-90.f,15.f,ObjectSelect.Angle);
 	}
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 	else if(Type == MODEL_WING+47)	// 플레임스트라이크 구슬
 	{
 		Position[0] += 0.005f;
 		Position[1] -= 0.015f;
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef LDK_ADD_GAMBLE_RANDOM_ICON
-	//겜블 상점 아이콘 모델 번호 수정 해야됨
 	else if ( Type==MODEL_HELPER+71 || Type==MODEL_HELPER+72 || Type==MODEL_HELPER+73 || Type==MODEL_HELPER+74 || Type==MODEL_HELPER+75 )
 	{
 		Position[1] += 0.07f;
@@ -13615,32 +11304,17 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 			ObjectSelect.Angle[1] = WorldTime*0.2f;
 		}
 	}
-#endif //LDK_ADD_GAMBLE_RANDOM_ICON
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING	// 날개 조합 100% 성공 부적
-	else if( Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN
-			&& Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END )
+	else if( Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN	&& Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END )
 	{
 		Position[1] -= 0.03f;
 		Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif //LDS_ADD_CS6_CHARM_MIX_ITEM_WING
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	else if(Type == MODEL_HELPER+96)		// 강함의 인장 (PC방 아이템, 일본 6차 컨텐츠)
-	{
-		Position[0] -= 0.001f;
-		Position[1] += 0.028f;
-		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
-	}
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
-#ifdef PBG_ADD_CHARACTERCARD
-	// 마검 다크 소환술사 카드
 	else if(Type == MODEL_HELPER+97 || Type == MODEL_HELPER+98 || Type == MODEL_POTION+91)
 	{
 		Position[1] -= 0.04f;
 		Position[0] += 0.002f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif //PBG_ADD_CHARACTERCARD
 #ifdef PBG_ADD_CHARACTERSLOT
 	else if(Type == MODEL_HELPER+99)
 	{
@@ -13649,89 +11323,62 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Vector(270.0f, 180.0f, 45.0f, ObjectSelect.Angle);
 	}
 #endif //PBG_ADD_CHARACTERSLOT
-#ifdef PBG_ADD_SECRETITEM
-	//활력의비약(최하급/하급/중급/상급)
-	else if(Type >= MODEL_HELPER+117 && Type <= MODEL_HELPER+120)
-	{
-		Position[0] += 0.01f;
-		Position[1] -= 0.05f;
-		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
-	}
-#endif //PBG_ADD_SECRETITEM
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
-	else if ( Type==MODEL_POTION+110 )	// 차원의표식
+	else if ( Type==MODEL_POTION+110 )
 	{
 		Position[0] += 0.005f;
 		Position[1] -= 0.02f;
 	}
-	else if ( Type==MODEL_POTION+111 )	// 차원의마경
+	else if ( Type==MODEL_POTION+111 )
 	{
 		Position[0] += 0.01f;
 		Position[1] -= 0.02f;
 	}
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
 	else if(Type == MODEL_HELPER+107)
 	{
-		// 치명마법반지
 		Position[0] -= 0.0f;
 		Position[1] += 0.0f;
 		Vector(90.0f, 225.0f, 45.0f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-#ifdef YDG_ADD_CS7_MAX_AG_AURA
 	else if(Type == MODEL_HELPER+104)
 	{
-		// AG증가 오라
 		Position[0] += 0.01f;
 		Position[1] -= 0.03f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_CS7_MAX_AG_AURA
-#ifdef YDG_ADD_CS7_MAX_SD_AURA
 	else if(Type == MODEL_HELPER+105)
 	{
-		// SD증가 오라
 		Position[0] += 0.01f;
 		Position[1] -= 0.03f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_CS7_MAX_SD_AURA
-#ifdef YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
 	else if(Type == MODEL_HELPER+103)
 	{
-		// 파티 경험치 증가 아이템
 		Position[0] += 0.01f;
 		Position[1] += 0.01f;
 		Vector(0.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
 	else if(Type == MODEL_POTION+133)
 	{
-		// 엘리트 SD회복 물약
 		Position[0] += 0.01f;
 		Position[1] -= 0.0f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-#ifdef LDK_ADD_EMPIREGUARDIAN_ITEM
 	else if( MODEL_POTION+101 <= Type && Type <= MODEL_POTION+109 )
 	{
 		switch(Type)
 		{
-		case MODEL_POTION+101: // 의문의쪽지
+		case MODEL_POTION+101:
 			{
 				Position[0] += 0.005f;
 				//Position[1] -= 0.02f;
 			}break;
-		case MODEL_POTION+102: // 가이온의 명령서
+		case MODEL_POTION+102:
 			{
 				Position[0] += 0.005f;
 				Position[1] += 0.05f;
 				Vector(0.0f, 0.0f, 30.0f, ObjectSelect.Angle);
 			}break;
-		case MODEL_POTION+103: // 세크로미콘 조각
+		case MODEL_POTION+103:
 		case MODEL_POTION+104: 
 		case MODEL_POTION+105: 
 		case MODEL_POTION+106: 
@@ -13742,7 +11389,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 				Position[1] += 0.05f;
 				Vector(0.0f, 0.0f, 30.0f, ObjectSelect.Angle);
 			}break;
-		case MODEL_POTION+109: // 세크로미콘
+		case MODEL_POTION+109:
 			{
 				Position[0] += 0.005f;
 				Position[1] += 0.05f;
@@ -13750,36 +11397,24 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 			}break;
 		}
 	}
-#endif //LDK_ADD_EMPIREGUARDIAN_ITEM
-#if defined(LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE) || defined(LDS_ADD_INGAMESHOP_ITEM_RINGRUBY) || defined(LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ) || defined(LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST)	// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
-	else if( Type >= MODEL_HELPER+109 && Type <= MODEL_HELPER+112 )	// 사파이어(푸른색)링, 루비(붉은색)링, 토파즈(주황)링, 자수정(보라색)링
+	else if( Type >= MODEL_HELPER+109 && Type <= MODEL_HELPER+112 )
 	{
-		// 신규 사파이어(푸른색)링
 		Position[0] += 0.025f;
 		Position[1] -= 0.035f;
 		Vector(270.0f, 25.0f, 25.0f, ObjectSelect.Angle);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링		// MODEL_HELPER+112
-#if defined(LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY) || defined(LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD) || defined(LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE)
-	else if( Type >= MODEL_HELPER+113 && Type <= MODEL_HELPER+115 )	// 루비(붉은색), 에메랄드(푸른), 사파이어(녹색) 목걸이
+	else if( Type >= MODEL_HELPER+113 && Type <= MODEL_HELPER+115 )
 	{
-		// 루비(붉은색), 에메랄드(푸른), 사파이어(녹색) 목걸이
 		Position[0] += 0.005f;
 		Position[1] -= 0.00f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif // defined(LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY) || defined(LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD) || defined(LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE)	// 루비(붉은색), 에메랄드(푸른), 사파이어(녹색) 목걸이
-#if defined(LDS_ADD_INGAMESHOP_ITEM_KEYSILVER) || defined(LDS_ADD_INGAMESHOP_ITEM_KEYGOLD)
-	else if( Type >= MODEL_POTION+112 && Type <= MODEL_POTION+113 )	// 키(실버), 키(골드)
+	else if( Type >= MODEL_POTION+112 && Type <= MODEL_POTION+113 )
 	{
-		// 키(실버), 키(골드)
  		Position[0] += 0.05f;
  		Position[1] += 0.009f;
 		Vector(270.0f, 180.0f, 45.0f, ObjectSelect.Angle);
 	}
-#endif // defined(LDS_ADD_INGAMESHOP_ITEM_KEYSILVER) || defined(LDS_ADD_INGAMESHOP_ITEM_KEYGOLD)
-#ifdef LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-	// 고블린금화
 	else if( Type == MODEL_POTION+120 )
 	{
 		Position[0] += 0.01f;
@@ -13787,70 +11422,42 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 		
 	}
-#endif //LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX				// 패키지 상자A-F
 	else if( MODEL_POTION+134 <= Type && Type <= MODEL_POTION+139 )
 	{
 		Position[0] += 0.00f;
 		Position[1] += 0.05f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif //LDK_ADD_INGAMESHOP_PACKAGE_BOX
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 	else if( Type == MODEL_HELPER+116 )
 	{
-#ifdef PBG_FIX_ITEMANGLE
+
 		Position[1] -= 0.03f;
 		Position[0] += 0.005f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
-#else //PBG_FIX_ITEMANGLE
-		Position[1] += 0.08f;
-		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
-#endif //PBG_FIX_ITEMANGLE
 	}
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
 	else if( Type >= MODEL_POTION+114 && Type <= MODEL_POTION+119 )
 	{
 		Position[0] += 0.00f;
 		Position[1] += 0.06f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
-#ifdef LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
 	else if( Type >= MODEL_POTION+126 && Type <= MODEL_POTION+129 )
 	{
 		Position[0] += 0.00f;
 		Position[1] += 0.06f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
-#ifdef LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
 	else if( Type >= MODEL_POTION+130 && Type <= MODEL_POTION+132 )
 	{
 		Position[0] += 0.00f;
 		Position[1] += 0.06f;
 		Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
 	else if( Type == MODEL_HELPER+121 )
 	{
 		Position[1] -= 0.04f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX	// 법사 블랙 소울 바지/그랜드소울 바지 // MODEL_PANTS +22 
-	else if( Type == MODEL_PANTS +22 || Type == MODEL_PANTS +18 )
-	{
-		vec3_t		v3Angle;
-		VectorCopy(ObjectSelect.Angle, v3Angle);
-		
-		v3Angle[1] = v3Angle[1] + 10.0f;
-		
-		VectorCopy(v3Angle, ObjectSelect.Angle);
-	}	
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type == MODEL_HELM+59)
 	{
@@ -13900,19 +11507,19 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[0] += 0.005f;
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리 위치 조정
-	else if( Type >= MODEL_HELPER+135 && Type <= MODEL_HELPER+145 ) // 럭키 아이템 티켓
+#ifdef LEM_ADD_LUCKYITEM
+	else if( Type >= MODEL_HELPER+135 && Type <= MODEL_HELPER+145 )
 	{
 		Position[1] += 0.02f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-	else if( Type == MODEL_POTION+160 || Type == MODEL_POTION+161 )	// 상승의 보석, 연장의 보석
+	else if( Type == MODEL_POTION+160 || Type == MODEL_POTION+161 )
 	{
 		Position[1] += 0.05f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
 #endif // LEM_ADD_LUCKYITEM
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석 조합 인벤토리 위치, 각도 조정
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if( COMGEM::Check_Jewel_Com(Type-MODEL_ITEM) != COMGEM::NOGEM)
 	{
 		Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
@@ -13933,14 +11540,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		}
 	}
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	// =====================================================================================/
-	// ObjectSelect 처리 부분 1. 일반 아이템
 
-
-	// ObjectSelect 처리 부분 2. 소켓 아이템
-	// =====================================================================================
-#ifdef ADD_SOCKET_ITEM			
-	// 인벤토리 안의 아이템 위치를 수정(장착된 아이템도 수정됨)
 	switch (Type)
 	{
 	case MODEL_SWORD+26:		// 플랑베르주
@@ -13989,15 +11589,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 			Vector(180.f,90.f,10.f,ObjectSelect.Angle);
 		}break;
 	}
-#endif // ADD_SOCKET_ITEM
-	// =====================================================================================/
-	// ObjectSelect 처리 부분 2. 소켓 아이템
 
-
-	// ObjectSelect 처리 부분 3. 기타 아이템
-	// =====================================================================================
-#ifdef LDK_FIX_CAOS_THUNDER_STAFF_ROTATION
-	//inventory 카오스 번개 지팡이 회전값 이상(2008.08.12)
 	switch(Type)
 	{
 	case MODEL_STAFF+7:
@@ -14005,41 +11597,34 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 			Vector(0.f,0.f,205.f,ObjectSelect.Angle);
 		}break;
 	}
-#endif //LDK_FIX_CAOS_THUNDER_STAFF_ROTATION
-	// =====================================================================================/
-	// ObjectSelect 처리 부분 3. 기타 아이템
 
-
-#ifdef KJH_FIX_20080904_INVENTORY_ITEM_RENDER
 	switch(Type)
 	{
-	case MODEL_WING+8:			// 치료구슬
-	case MODEL_WING+9:			// 방어력향상구슬
-	case MODEL_WING+10:			// 공격력향상구슬
-	case MODEL_WING+11:			// 소환구슬
+	case MODEL_WING+8:
+	case MODEL_WING+9:
+	case MODEL_WING+10:
+	case MODEL_WING+11:
 		{
 			Position[0] += 0.005f;
 			Position[1] -= 0.02f;
-		}break;
-	case MODEL_POTION+21:		// 성주의표식
+		}
+		break;
+	case MODEL_POTION+21:
 		{
 			Position[0] += 0.005f;
 			Position[1] -= 0.005f;
-		}break;
-	case MODEL_POTION+13:		// 축석
-	case MODEL_POTION+14:		// 영석
-	case MODEL_POTION+22:		// 창석
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-	case MODEL_POTION+154:		// 칼트석
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
+		}
+		break;
+	case MODEL_POTION+13:
+	case MODEL_POTION+14:
+	case MODEL_POTION+22:
 		{			
 			Position[0] += 0.005f;
 			Position[1] += 0.015f;
-		}break;
+		}
+		break;
 	}
-#endif // KJH_FIX_20080904_INVENTORY_ITEM_RENDER
 
-	//선택 되었을때...--;;
 	if(1==Select)
 	{
 		ObjectSelect.Angle[1] = WorldTime*0.45f;
@@ -14054,7 +11639,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		)
 		ObjectSelect.Type = MODEL_PLAYER;
-	else if(ObjectSelect.Type==MODEL_POTION+12)//이밴트 아이템
+	else if(ObjectSelect.Type==MODEL_POTION+12)
 	{
 		if(Level==0)
 		{
@@ -14077,7 +11662,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	{
 		b->BodyHeight = -160.f;
 
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리 위치 조정
+#ifdef LEM_ADD_LUCKYITEM
 		if( Check_LuckyItem( Type - MODEL_ITEM ))				b->BodyHeight-=10.0f;
 		if( Type == MODEL_HELM+65 || Type == MODEL_HELM+70 )	Position[0] += 0.04f;
 #endif // LEM_ADD_LUCKYITEM
@@ -14086,7 +11671,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	{
 		b->BodyHeight = -100.f;
 
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리 위치 조정
+#ifdef LEM_ADD_LUCKYITEM
 		if( Check_LuckyItem( Type - MODEL_ITEM ))	b->BodyHeight-=13.0f;
 #endif // LEM_ADD_LUCKYITEM
 	}
@@ -14103,12 +11688,10 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		if(Type>=MODEL_HELM && Type<MODEL_HELM+MAX_ITEM_INDEX)			
 		{
 			Scale = MODEL_HELM+39 <= Type && MODEL_HELM+44 >= Type ? 0.007f : 0.0039f;
-#ifdef LDS_FIX_ELFHELM_CILPIDREI_RESIZE			// 실피드레이 헬멧 SIZE 제대로 적용 하기 위함.
-			if( Type == MODEL_HELM+31)			// 실피드레이 헬멧인경우 scale 값 조정
+			if( Type == MODEL_HELM+31)
 				Scale = 0.007f;
-#endif // LDS_FIX_ELFHELM_CILPIDREI_RESIZE
 
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리 스케일 조정 ( 소환술사HELM )
+#ifdef LEM_ADD_LUCKYITEM
 			if( Type == MODEL_HELM+65 || Type == MODEL_HELM+70 )	Scale = 0.007f;
 #endif // LEM_ADD_LUCKYITEM
 		}
@@ -14120,30 +11703,24 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
       		Scale = 0.0033f;
 		else if(Type>=MODEL_BOOTS && Type<MODEL_BOOTS+MAX_ITEM_INDEX)
       		Scale = 0.0032f;
-#ifndef LDS_FIX_ELFHELM_CILPIDREI_RESIZE	// 정리할 때 지워야 하는 소스	
-		else if( Type == MODEL_HELM+31)				// 실피드레이 헬멧 SIZE 조정 값
-			Scale = 0.007f;
-#endif // LDS_FIX_ELFHELM_CILPIDREI_RESIZE // 정리할 때 지워야 하는 소스
 		else if (Type == MODEL_ARMOR+30)
 			Scale = 0.0035f;
 		else if (Type == MODEL_ARMOR+32)
 			Scale = 0.0035f;
 		else if (Type == MODEL_ARMOR+29)
 			Scale = 0.0033f;
-
-		//$ 크라이울프 아이템(장비)
-		if(Type == MODEL_ARMOR+34)	// 흑기사 갑옷
+		if(Type == MODEL_ARMOR+34)
 			Scale = 0.0032f;
-		else if(Type == MODEL_ARMOR+35)	// 흑마법사 갑옷
+		else if(Type == MODEL_ARMOR+35)
 			Scale = 0.0032f;
-		else if(Type == MODEL_GLOVES+38)	// 마검사 장갑
+		else if(Type == MODEL_GLOVES+38)
 			Scale = 0.0032f;
 	}
 	else
 	{
-        if(Type==MODEL_WING+6)     //  마검사 날개.
+        if(Type==MODEL_WING+6)
             Scale = 0.0015f;
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석 조합 인벤토리 스케일
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		else if( COMGEM::Check_Jewel_Com(Type-MODEL_ITEM) != COMGEM::NOGEM)
 		{
 			Scale = 0.004f;
@@ -14192,14 +11769,12 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 			Scale = 0.001f;
 			Position[1] -= 0.05f;
 		}
-#ifdef ADD_SEED_SPHERE_ITEM
-		else if(Type >= MODEL_WING+60 && Type <= MODEL_WING+65)	// 시드
+		else if(Type >= MODEL_WING+60 && Type <= MODEL_WING+65)
 			Scale = 0.0022f; 
-		else if(Type >= MODEL_WING+70 && Type <= MODEL_WING+74)	// 스피어
+		else if(Type >= MODEL_WING+70 && Type <= MODEL_WING+74)
 			Scale = 0.0017f; 
-		else if(Type >= MODEL_WING+100 && Type <= MODEL_WING+129)	// 시드스피어
+		else if(Type >= MODEL_WING+100 && Type <= MODEL_WING+129)
 			Scale = 0.0017f; 
-#endif	// ADD_SEED_SPHERE_ITEM
 		else if(Type>=MODEL_WING && Type<MODEL_WING+MAX_ITEM_INDEX)
 		{
       			Scale = 0.002f;
@@ -14218,12 +11793,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		if(Type == MODEL_POTION+50)
 		{
 			Scale = 0.001f;
-
-//			Position[1] += 0.05f;
-//   			Vector(0.f,ObjectSelect.Angle[1],0.f,ObjectSelect.Angle);
 		}
-
-#ifdef GIFT_BOX_EVENT
 		else
 		if ( Type>=MODEL_POTION+32 && Type<=MODEL_POTION+34)
 		{
@@ -14241,55 +11811,42 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 				Position[1] += 0.06f;
    			Vector(0.f,ObjectSelect.Angle[1],0.f,ObjectSelect.Angle);
 		}
-#endif
-        else if(Type==MODEL_POTION+21)	// 레나
+        else if(Type==MODEL_POTION+21)
 			Scale = 0.002f;
 		else if(Type == MODEL_BOW+19)
 			Scale = 0.002f;
-        else if(Type==MODEL_EVENT+11)	// 스톤
+        else if(Type==MODEL_EVENT+11)
 			Scale = 0.0015f;
-        else if ( Type==MODEL_HELPER+4 )    //  다크호스
+        else if ( Type==MODEL_HELPER+4 )
 			Scale = 0.0015f;
-        else if ( Type==MODEL_HELPER+5 )    //  다크스피릿.
+        else if ( Type==MODEL_HELPER+5 )
 			Scale = 0.005f;
-        else if ( Type==MODEL_HELPER+30 )   //  망토.    
+        else if ( Type==MODEL_HELPER+30 )    
 			Scale = 0.002f;
-        else if ( Type==MODEL_EVENT+16 )    //  군주의 문장.
+        else if ( Type==MODEL_EVENT+16 )
  			Scale = 0.002f;
-#ifdef MYSTERY_BEAD
-		else if ( Type==MODEL_EVENT+19 )	//. 신비의구슬
-			Scale = 0.0025f;
-#endif // MYSTERY_BEAD
-		else if(Type==MODEL_HELPER+16)	//. 대천사의 서
+		else if(Type==MODEL_HELPER+16)
 			Scale = 0.002f;
-		else if(Type==MODEL_HELPER+17)	//. 블러드본
+		else if(Type==MODEL_HELPER+17)
 			Scale = 0.0018f;
-		else if(Type==MODEL_HELPER+18)	//. 투명망토
+		else if(Type==MODEL_HELPER+18)
 			Scale = 0.0018f;
-#ifdef CSK_FREE_TICKET
-		// 아이템 스케일 정하는 곳
-		else if(Type == MODEL_HELPER+46)	// 데빌스퀘어 자유입장권
+		else if(Type == MODEL_HELPER+46)
 		{
 			Scale = 0.0018f;
 		}
-		else if(Type == MODEL_HELPER+47)	// 블러드캐슬 자유입장권
+		else if(Type == MODEL_HELPER+47)
 		{
 			Scale = 0.0018f;
 		}
-		else if(Type == MODEL_HELPER+48)	// 칼리마 자유입장권
+		else if(Type == MODEL_HELPER+48)
 		{
 			Scale = 0.0018f;
 		}
-#endif // CSK_FREE_TICKET
-#ifdef CSK_CHAOS_CARD
-		// 아이템 스케일 정하는 곳
-		else if(Type == MODEL_POTION+54)	// 카오스카드
+		else if(Type == MODEL_POTION+54)
 		{
 			Scale = 0.0024f;
 		}
-#endif // CSK_CHAOS_CARD
-#ifdef CSK_RARE_ITEM
-		// 아이템 스케일 정하는 곳
 		else if(Type == MODEL_POTION+58)
 		{
 			Scale = 0.0012f;
@@ -14302,148 +11859,110 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		{
 			Scale = 0.0009f;
 		}
-#endif // CSK_RARE_ITEM
-#ifdef CSK_LUCKY_CHARM
-		else if( Type == MODEL_POTION+53 )// 행운의 부적
+		else if( Type == MODEL_POTION+53 )
 		{
 			Scale = 0.00078f;
 		}
-#endif //CSK_LUCKY_CHARM
-#ifdef CSK_LUCKY_SEAL
 		else if( Type == MODEL_HELPER+43 || Type == MODEL_HELPER+44 || Type == MODEL_HELPER+45 )
 		{
 			Scale = 0.0021f;
 		}
-#endif //CSK_LUCKY_SEAL
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 		else if( Type >= MODEL_POTION+70 && Type <= MODEL_POTION+71 )
 		{
 			Scale = 0.0028f;
 		}
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 		else if( Type >= MODEL_POTION+72 && Type <= MODEL_POTION+77 )
 		{
 			Scale = 0.0025f;
 		}
-#endif //PSW_SCROLL_ITEM
-#ifdef PSW_SEAL_ITEM               // 이동 인장
 		else if( Type == MODEL_HELPER+59 )
 		{
 			Scale = 0.0008f;
 		}
-#endif //PSW_SEAL_ITEM
-#ifdef PSW_FRUIT_ITEM              // 리셋 열매
 		else if( Type >= MODEL_HELPER+54 && Type <= MODEL_HELPER+58 )
 		{
 			Scale = 0.004f;
 		}
-#endif //PSW_FRUIT_ITEM
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
 		else if( Type >= MODEL_POTION+78 && Type <= MODEL_POTION+82 )
 		{
 			Scale = 0.0025f;
 		}
-#endif //PSW_SECRET_ITEM
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
 		else if( Type == MODEL_HELPER+60 )
 		{
 			Scale = 0.005f;
 		}
-#endif //PSW_INDULGENCE_ITEM
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
 		else if( Type == MODEL_HELPER+61 )
 		{
 			Scale = 0.0018f;
 		}
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-#ifdef PSW_RARE_ITEM
 		else if(Type == MODEL_POTION+83)
 		{
 			Scale = 0.0009f;
 		}
-#endif //PSW_RARE_ITEM
-#ifdef CSK_LUCKY_SEAL
 		else if( Type == MODEL_HELPER+43 || Type == MODEL_HELPER+44 || Type == MODEL_HELPER+45 )
 		{
 			Scale = 0.0021f;
 		}
-#endif //CSK_LUCKY_SEAL
-#ifdef PSW_CHARACTER_CARD 
-		else if(Type == MODEL_POTION+91) // 캐릭터 카드
+		else if(Type == MODEL_POTION+91)
 		{
 			Scale = 0.0034f;
 		}
-#endif // PSW_CHARACTER_CARD
-#ifdef PSW_NEW_CHAOS_CARD
-		else if(Type == MODEL_POTION+92) // 카오스카드 골드
+		else if(Type == MODEL_POTION+92)
 		{
 			Scale = 0.0024f;
 		}
-		else if(Type == MODEL_POTION+93) // 카오스카드 레어
+		else if(Type == MODEL_POTION+93)
 		{
 			Scale = 0.0024f;
 		}
-		else if(Type == MODEL_POTION+95) // 카오스카드 미니
+		else if(Type == MODEL_POTION+95)
 		{
 			Scale = 0.0024f;
 		}
-#endif // PSW_NEW_CHAOS_CARD
-#ifdef PSW_NEW_ELITE_ITEM
-		else if( Type == MODEL_POTION+94 ) // 엘리트 중간 치료 물약
+		else if( Type == MODEL_POTION+94 )
 		{
 			Scale = 0.0022f;
 		}
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-		else if( Type == MODEL_POTION+84 )  // 벚꽃상자
+		else if( Type == MODEL_POTION+84 )
 		{
 			Scale = 0.0031f;
 		}
-		else if( Type == MODEL_POTION+85 )  // 벚꽃술
+		else if( Type == MODEL_POTION+85 )
 		{
 			Scale = 0.0044f;
 		}
-		else if( Type == MODEL_POTION+86 )  // 벚꽃경단
+		else if( Type == MODEL_POTION+86 )
 		{
 			Scale = 0.0031f;
 		}
-		else if( Type == MODEL_POTION+87 )  // 벚꽃잎
+		else if( Type == MODEL_POTION+87 )
 		{
 			Scale = 0.0061f;
 		}
-		else if( Type == MODEL_POTION+88 )  // 흰색 벚꽃
+		else if( Type == MODEL_POTION+88 )
 		{
 			Scale = 0.0035f;
 		}
-		else if( Type == MODEL_POTION+89 )  // 붉은색 벚꽃
+		else if( Type == MODEL_POTION+89 )
 		{
 			Scale = 0.0035f;
 		}
-		else if( Type == MODEL_POTION+90 )  // 노란색 벚꽃
+		else if( Type == MODEL_POTION+90 )
 		{
 			Scale = 0.0035f;
 		}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef PSW_ADD_PC4_SEALITEM
 		else if(Type >= MODEL_HELPER+62 && Type <= MODEL_HELPER+63)
 		{
 			Scale = 0.002f;
 		}
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef PSW_ADD_PC4_SCROLLITEM
 		else if(Type >= MODEL_POTION+97 && Type <= MODEL_POTION+98)
 		{
 			Scale = 0.003f;
 		}
-#endif //PSW_ADD_PC4_SCROLLITEM	
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
 		else if( Type == MODEL_POTION+96 ) 
 		{
 			Scale = 0.0028f;
 		}
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-#ifdef LDK_ADD_PC4_GUARDIAN
 		else if( MODEL_HELPER+64 == Type || Type == MODEL_HELPER+65 )
 		{
 			switch(Type)
@@ -14452,90 +11971,69 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 			case MODEL_HELPER+65: Scale = 0.0016f; break;
 			}			
 		}
-#endif //LDK_ADD_PC4_GUARDIAN	
-#ifdef LDK_ADD_RUDOLPH_PET
 		else if( Type == MODEL_HELPER+67 )
 		{
 			Scale = 0.0015f;
 		}
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef PJH_ADD_PANDA_PET
 		else if( Type == MODEL_HELPER+80 )
 		{
 			Scale = 0.0020f;
 		}
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 		else if( Type == MODEL_HELPER+68 )
 		{
 			Scale = 0.0026f;
 		}
-#endif //LDK_ADD_SNOWMAN_CHANGERING
-#ifdef PJH_ADD_PANDA_CHANGERING
 		else if( Type == MODEL_HELPER+76 )
 		{
 			Scale = 0.0026f;
 		}
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
-		else if( Type == MODEL_HELPER+69 )	// 부활의 부적
+		else if( Type == MODEL_HELPER+69 )
 		{
 			Scale = 0.0023f;
 		}
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
-		else if( Type == MODEL_HELPER+70 )	// 이동의 부적
+		else if( Type == MODEL_HELPER+70 )
 		{
 			Scale = 0.0018f;
 		}
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef ASG_ADD_CS6_GUARD_CHARM
-		else if (Type == MODEL_HELPER+81)	// 수호의부적
+		else if (Type == MODEL_HELPER+81)
 			Scale = 0.0012f;
-#endif	// ASG_ADD_CS6_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ITEM_GUARD_CHARM 
-		else if (Type == MODEL_HELPER+82)	// 아이템보호부적
+		else if (Type == MODEL_HELPER+82)
 			Scale = 0.0012f;
-#endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM 
-#ifdef ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-		else if (Type == MODEL_HELPER+93)	// 상승의인장마스터
+		else if (Type == MODEL_HELPER+93)
 			Scale = 0.0021f;
-#endif	// ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-#ifdef ASG_ADD_CS6_WEALTH_SEAL_MASTER
-		else if (Type == MODEL_HELPER+94)	// 풍요의인장마스터
+		else if (Type == MODEL_HELPER+94)
 			Scale = 0.0021f;
-#endif	// ASG_ADD_CS6_WEALTH_SEAL_MASTER
-        else if(Type==MODEL_SWORD+19)   //  대천사의 절대검.
+        else if(Type==MODEL_SWORD+19)
         {
             if ( ItemLevel>=0 )
             {
                 Scale = 0.0025f;
             }
-            else    //  퀘스트 아이템.
+            else
             {
                 Scale = 0.001f;
                 ItemLevel = 0;
             }
         }
-        else if(Type==MODEL_STAFF+10)   //  대천사의 절대 지팡이.
+        else if(Type==MODEL_STAFF+10)
         {
             if ( ItemLevel>=0 )
             {
                 Scale = 0.0019f;
             }
-            else    //  퀘스트 아이템.
+            else
             {
                 Scale = 0.001f;
                 ItemLevel = 0;
             }
         }
-        else if(Type==MODEL_BOW+18)     //  대천사의 절대석궁.
+        else if(Type==MODEL_BOW+18)
         {
             if ( ItemLevel>=0 )
             {
                 Scale = 0.0025f;
             }
-            else    //  퀘스트 아이템.
+            else
             {
                 Scale = 0.0015f;
                 ItemLevel = 0;
@@ -14549,25 +12047,23 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		{
 			Scale = 0.0025f;
 		}
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 		else if( Type == MODEL_MACE+18 )
 		{
 			Scale = 0.0024f;
 		}
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-		else if(Type == MODEL_EVENT+12)		//. 영광의 반지
+		else if(Type == MODEL_EVENT+12)
 		{
 			Scale = 0.0012f;
 		}
-		else if(Type == MODEL_EVENT+13)		//. 다크스톤
+		else if(Type == MODEL_EVENT+13)
 		{
 			Scale = 0.0025f;
 		}
-		else if ( Type == MODEL_EVENT+14)	//. 제왕의 반지
+		else if ( Type == MODEL_EVENT+14)
 		{
 			Scale = 0.0028f;
 		}
-		else if ( Type == MODEL_EVENT+15)	// 마법사의 반지
+		else if ( Type == MODEL_EVENT+15)
 		{
 			Scale = 0.0023f;
 		}
@@ -14579,27 +12075,18 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
         {
             Scale = 0.0028f;
         }
-		else if ( Type == MODEL_POTION+63)	// 폭죽
+		else if ( Type == MODEL_POTION+63)
 		{
 			Scale = 0.007f;
 		}
-#ifdef YDG_ADD_FIRECRACKER_ITEM
-		else if ( Type == MODEL_POTION+99)	// 크리스마스 폭죽
+		else if ( Type == MODEL_POTION+99)
 		{
 			Scale = 0.0025f;
 		}
-#endif	// YDG_ADD_FIRECRACKER_ITEM
-
-		else if ( Type == MODEL_POTION+52)	// GM 선물상자
+		else if ( Type == MODEL_POTION+52)
 		{
 			Scale = 0.0014f;
 		}
-#ifdef _PVP_MURDERER_HERO_ITEM
-        else if ( Type==MODEL_POTION+30 )	// 징표
-        {
-            Scale = 0.002f;
-        }
-#endif// _PVP_MURDERER_HERO_ITEM
 		else if( Type==MODEL_HELPER+38 )
 		{
 			Scale = 0.0025f;
@@ -14626,12 +12113,10 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
         {
             Scale = 0.0025f;
         }
-#ifdef CSK_LUCKY_SEAL
 		else if( Type == MODEL_HELPER+43 || Type == MODEL_HELPER+44 || Type == MODEL_HELPER+45 )
 		{
 			Scale = 0.0021f;
 		}
-#endif //CSK_LUCKY_SEAL
         else if ( Type==MODEL_HELPER+7 )
         {
             Scale = 0.0025f;
@@ -14640,28 +12125,27 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
         {
             Scale = 0.0025f;
         }
-		//^ 펜릴 스케일 조절
-		else if(Type == MODEL_HELPER+32)	// 갑옷 파편
+		else if(Type == MODEL_HELPER+32)
 		{
 			Scale = 0.0019f;
 		}
-		else if(Type == MODEL_HELPER+33)	// 여신의 가호
+		else if(Type == MODEL_HELPER+33)
 		{
 			Scale = 0.004f;
 		}
-		else if(Type == MODEL_HELPER+34)	// 맹수의 발톱
+		else if(Type == MODEL_HELPER+34)
 		{
 			Scale = 0.004f;
 		}
-		else if(Type == MODEL_HELPER+35)	// 뿔피리 조각
+		else if(Type == MODEL_HELPER+35)
 		{
 			Scale = 0.004f;
 		}
-		else if(Type == MODEL_HELPER+36)	// 부러진 뿔피리
+		else if(Type == MODEL_HELPER+36)
 		{
 			Scale = 0.007f;
 		}
-		else if(Type == MODEL_HELPER+37)	// 펜릴의 뿔피리
+		else if(Type == MODEL_HELPER+37)
 		{
 			Scale = 0.005f;
 		}
@@ -14669,16 +12153,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		{
 			Scale = 0.0022f;
 		}
-#ifdef CSK_PCROOM_ITEM
-		else if(Type >= MODEL_POTION+55 && Type <= MODEL_POTION+57
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-			|| Type >= MODEL_POTION+157 && Type <= MODEL_POTION+159
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-			)
-		{
-			Scale = 0.0014f;
-		}
-#endif // CSK_PCROOM_ITEM
 		else if(Type == MODEL_HELPER+49)
 		{
 			Scale = 0.0013f;
@@ -14691,11 +12165,7 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		{
 			Scale = 0.003f;
 		}
-		else if(Type == MODEL_POTION+64
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-			|| Type == MODEL_POTION+153
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-			)
+		else if(Type == MODEL_POTION+64)
 		{
 			Scale = 0.003f;
 		}
@@ -14711,71 +12181,49 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 			Scale = 0.005f;
 		else if (Type == MODEL_HELPER+53)
 			Scale = 0.005f; 
-		//$ 크라이울프 아이템(무기)
-		else if(Type == MODEL_SWORD+24)	// 흑기사 검
+		else if(Type == MODEL_SWORD+24)
 		{
 			Scale = 0.0028f;
 		}
-		else if(Type == MODEL_BOW+22)	// 요정활
+		else if(Type == MODEL_BOW+22)
 		{
 			Scale = 0.0020f;
 		}
-#ifdef ADD_SOCKET_ITEM
-		else if( Type == MODEL_BOW+23 )		// 다크스팅거
+		else if( Type == MODEL_BOW+23 )
 		{
 			Scale = 0.0032f;
 		}
-#endif // ADD_SOCKET_ITEM
         else if( Type==MODEL_HELPER+14 || Type==MODEL_HELPER+15 )
         {
             Scale = 0.003f;
         }
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-		//행운의 동전
 		else if(Type == MODEL_POTION+100)
 		{
 			Scale = 0.0040f;
 		}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		else if (Type == MODEL_POTION+156)
-			Scale = 0.0039f;
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
 		else if(Type>=MODEL_POTION && Type<MODEL_POTION+MAX_ITEM_INDEX)
 		{
       		Scale = 0.0035f;
 		}
 		else if(Type>=MODEL_SPEAR && Type<MODEL_SPEAR+MAX_ITEM_INDEX)
         {
-#ifdef LDK_FIX_INVENTORY_SPEAR_SCALE
-			// if문 수정
-			if(Type == MODEL_SPEAR+10)	//. 기사 창
+			if(Type == MODEL_SPEAR+10)
 				Scale = 0.0018f;
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
-			else if( Type == MODEL_SPEAR+11 )	// 겜블 레어 낫
+			else if( Type == MODEL_SPEAR+11 )
 				Scale = 0.0025f;
-#endif //LDK_ADD_GAMBLERS_WEAPONS
 			else
 				Scale = 0.0021f;
-#else //LDK_FIX_INVENTORY_SPEAR_SCALE
-			if(MODEL_SPEAR+10)	//. 기사 창
-				Scale = 0.0018f;
-			else
-				Scale = 0.0021f;
-#endif //LDK_FIX_INVENTORY_SPEAR_SCALE
 		}
 		else if(Type>=MODEL_STAFF && Type<MODEL_STAFF+MAX_ITEM_INDEX)
 		{
-			if (Type >= MODEL_STAFF+14 && Type <= MODEL_STAFF+20)	// 소환술사 스틱.
+			if (Type >= MODEL_STAFF+14 && Type <= MODEL_STAFF+20)
 				Scale = 0.0028f;
-			else if (Type >= MODEL_STAFF+21 && Type <= MODEL_STAFF+29)	// 사아무트의 서, 닐의 서
+			else if (Type >= MODEL_STAFF+21 && Type <= MODEL_STAFF+29)
 				Scale = 0.004f;
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
-			else if( Type == MODEL_STAFF+33 )	// 겜블 레어 지팡이
+			else if( Type == MODEL_STAFF+33 )
 				Scale = 0.0028f;
-			else if( Type == MODEL_STAFF+34 )	// 겜블 레어 지팡이(소환술사용)
+			else if( Type == MODEL_STAFF+34 )
 				Scale = 0.0028f;
-#endif //LDK_ADD_GAMBLERS_WEAPONS
 			else
       			Scale = 0.0022f;
 		}
@@ -14785,81 +12233,53 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
       		Scale = 0.0012f;
 		else if(Type==MODEL_EVENT+6)
       		Scale = 0.0039f;
-		else if(Type==MODEL_EVENT+8)	//  은 훈장
+		else if(Type==MODEL_EVENT+8)
 			Scale = 0.0015f;
-		else if(Type==MODEL_EVENT+9)	//  금 훈장
+		else if(Type==MODEL_EVENT+9)
 			Scale = 0.0019f;
 		else
 		{
 			Scale = 0.0025f;
 		}
 
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING	// 날개 조합 100% 성공 부적
 		if( Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN
 			&& Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END )
 		{
 			Scale = 0.0020f;
 		}
-#endif //LDS_ADD_CS6_CHARM_MIX_ITEM_WING
 
-#ifdef USE_EVENT_ELDORADO
-		if(Type==MODEL_EVENT+10)	//  엘도라도
+		if(Type==MODEL_EVENT+10)
 		{
 			Scale = 0.001f;
 		}
-#endif // USE_EVENT_ELDORADO
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH	// 강함의 인장 (PC방 아이템, 일본 6차 컨텐츠)
-		else if(Type == MODEL_HELPER+96)
-		{
-			Scale = 0.0031f;
-		}	
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH	
-		else if(Type >= MODEL_ETC+19 && Type <= MODEL_ETC+27		// 양피지
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-			|| Type == MODEL_POTION+151 || Type == MODEL_POTION+152	// 1레벨 의뢰서, 1레벨 의뢰 완료 확인서
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-			)
+		else if(Type >= MODEL_ETC+19 && Type <= MODEL_ETC+27)
 		{
 			Scale = 0.0023f;
 		}
-#ifdef PBG_ADD_SANTAINVITATION
 		else if(Type == MODEL_HELPER+66)
 		{
 			Scale = 0.0020f;
 		}
-#endif //PBG_ADD_SANTAINVITATION
-#ifdef YDG_ADD_HEALING_SCROLL
-		else if(Type == MODEL_POTION+140)	// 치유의 스크롤
+		else if(Type == MODEL_POTION+140)
 		{
 			Scale = 0.0026f;
 		}
-#endif	// YDG_ADD_HEALING_SCROLL
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		else if( Type == MODEL_HELPER+122 )	// 스켈레톤 변신반지
+		else if( Type == MODEL_HELPER+122 )
 		{
 			Scale = 0.0033f;
 		}
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-		else if( Type == MODEL_HELPER+123 )	// 스켈레톤 펫
+		else if( Type == MODEL_HELPER+123 )
 		{
 			Scale = 0.0009f;
 		}
-#endif	// YDG_ADD_SKELETON_PET
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
 		else if(Type >= MODEL_POTION+145 && Type <= MODEL_POTION+150)
 		{
 			Scale = 0.0018f;
 		}
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-		// 아이템 스케일 정하는 곳
-		//도플갱어, 바르카, 바르카제7맵 자유입장권
-		else if(Type >= MODEL_HELPER+125 && Type <= MODEL_HELPER+127)	//도플갱어, 바르카, 바르카제7맵 자유입장권
+		else if(Type >= MODEL_HELPER+125 && Type <= MODEL_HELPER+127)
 		{
 			Scale = 0.0013f;
 		}
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM	
 		else if( Type == MODEL_HELPER+128 )		// 매조각상
 		{
@@ -14892,83 +12312,51 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 			Scale = 0.0033f;
 		}
 #endif	//LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-#ifdef LDK_ADD_GAMBLE_RANDOM_ICON
-		//겜블 상점 아이콘 모델 번호 수정 해야됨
 		else if ( Type==MODEL_HELPER+71 || Type==MODEL_HELPER+72 || Type==MODEL_HELPER+73 || Type==MODEL_HELPER+74 || Type==MODEL_HELPER+75 )
 		{
 			Scale = 0.0019f;
 		}
-#endif //LDK_ADD_GAMBLE_RANDOM_ICON
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 		else if( Type == MODEL_BOW+24 )
 		{
 			Scale = 0.0023f;
 		}
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-#ifdef PBG_ADD_CHARACTERCARD
-		//마검 다크 소환술사 카드
 		else if(Type == MODEL_HELPER+97 || Type == MODEL_HELPER+98 || Type == MODEL_POTION+91)
 		{
 			Scale = 0.0028f;
 		}
-#endif //PBG_ADD_CHARACTERCARD
-#ifdef PBG_ADD_CHARACTERSLOT
 		else if(Type == MODEL_HELPER+99)
 		{
 			Scale = 0.0025f;
 		}
-#endif //PBG_ADD_CHARACTERSLOT
-#ifdef PBG_ADD_SECRETITEM
-		//활력의비약(최하급/하급/중급/상급)
-		else if(Type >= MODEL_HELPER+117 && Type <= MODEL_HELPER+120)
-		{
-			// 인벤에 안들어가서 1x2사이즈로 설정
-#ifdef PBG_MOD_SECRETITEM
-			Scale = 0.0022f;
-#else //PBG_MOD_SECRETITEM
-			Scale = 0.0035f;
-#endif //PBG_MOD_SECRETITEM
-		}
-#endif //PBG_ADD_SECRETITEM
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
-		else if (Type == MODEL_POTION+110)	// 차원의표식
+		else if (Type == MODEL_POTION+110)
 		{
 			Scale = 0.004f;
 		}
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
 		else if(Type == MODEL_HELPER+107)
 		{
-			// 치명마법반지
 			Scale = 0.0034f;
 		}
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
-		else if(Type == MODEL_POTION+133)		// 엘리트 SD회복 물약
+		else if(Type == MODEL_POTION+133)
 		{
 			Scale = 0.0030f;
 		}
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-#ifdef YDG_ADD_CS7_MAX_SD_AURA
-		else if(Type == MODEL_HELPER+105)		// SD증가 오라
+		else if(Type == MODEL_HELPER+105)
 		{
 			Scale = 0.002f;
 		}
-#endif	// YDG_ADD_CS7_MAX_SD_AURA
-#ifdef LDK_ADD_EMPIREGUARDIAN_ITEM
 		else if( MODEL_POTION+101 <= Type && Type <= MODEL_POTION+109 )
 		{
 			switch(Type)
 			{
-			case MODEL_POTION+101: // 의문의쪽지
+			case MODEL_POTION+101:
 				{
 					Scale = 0.004f;
 				}break;
-			case MODEL_POTION+102: // 가이온의 명령서
+			case MODEL_POTION+102:
 				{
 					Scale = 0.005f;
 				}break;
-			case MODEL_POTION+103: // 세크로미콘 조각
+			case MODEL_POTION+103:
 			case MODEL_POTION+104: 
 			case MODEL_POTION+105: 
 			case MODEL_POTION+106: 
@@ -14977,84 +12365,60 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 				{
 					Scale = 0.004f;
 				}break;
-			case MODEL_POTION+109: // 세크로미콘
+			case MODEL_POTION+109:
 				{
 					Scale = 0.003f;
 				}break;
 			}
 		}
-#endif //LDK_ADD_EMPIREGUARDIAN_ITEM
-#ifdef LDK_ADD_CS7_UNICORN_PET	//유니콘
 		else if( Type == MODEL_HELPER+106 )
 		{
 			Scale = 0.0015f;
 		}	
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 		else if( Type == MODEL_WING+130 )
 		{
 			Scale = 0.0012f;
 		}
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX // 인게임샾 아이템 // 패키지상자6종			// MODEL_POTION+134~139
 		else if( Type >= MODEL_POTION+134 && Type <= MODEL_POTION+139 )
 		{
 			Scale = 0.0050f;
 		}
-#endif // LDK_ADD_INGAMESHOP_PACKAGE_BOX // 인게임샾 아이템 // 패키지상자6종			// MODEL_POTION+134~139
-#if defined(LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE)||defined(LDS_ADD_INGAMESHOP_ITEM_RINGRUBY)||defined(LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ)||defined(LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST)	
-		else if( Type >= MODEL_HELPER+109 && Type <= MODEL_HELPER+112  )	// 사파이어(푸른색)링,루비(붉은색)링,토파즈(주황)링,자수정(보라색)링
+		else if( Type >= MODEL_HELPER+109 && Type <= MODEL_HELPER+112  )
 		{
 			Scale = 0.0045f;
 		}
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 사파이어(푸른색)링,루비(붉은색)링,토파즈(주황)링,자수정(보라색)링
-#if defined(LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY)||defined(LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD)||defined(LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE)		
-		else if( Type >= MODEL_HELPER+113 && Type <= MODEL_HELPER+115 )		// 루비(붉은색)목걸이, 에메랄드(푸른), 사파이어(녹색) 목걸이
+	
+		else if( Type >= MODEL_HELPER+113 && Type <= MODEL_HELPER+115 )
 		{
 			Scale = 0.0018f;
 		}
-#endif // defined(LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY)||defined(LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD)||defined(LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE) // 루비(붉은색)목걸이, 에메랄드(푸른), 사파이어(녹색) 목걸이
-#if defined(LDS_ADD_INGAMESHOP_ITEM_KEYSILVER) || defined(LDS_ADD_INGAMESHOP_ITEM_KEYGOLD)	// 키(실버), 키(골드)
 		else if( Type >= MODEL_POTION+112 && Type <= MODEL_POTION+113 )
 		{
 			Scale = 0.0032f;
 		}
-#endif // defined(LDS_ADD_INGAMESHOP_ITEM_KEYSILVER) || defined(LDS_ADD_INGAMESHOP_ITEM_KEYGOLD)	// 키(실버), 키(골드)
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 		else if( Type == MODEL_HELPER+116 )
 		{
 			Scale = 0.0021f;
 		}
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
 		else if( Type >= MODEL_POTION+114 && Type <= MODEL_POTION+119 )
 		{
 			Scale = 0.0038f;
 		}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
-#ifdef LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
 		else if( Type >= MODEL_POTION+126 && Type <= MODEL_POTION+129 )
 		{
 			Scale = 0.0038f;
 		}
-#endif // LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
-#ifdef LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
 		else if( Type >= MODEL_POTION+130 && Type <= MODEL_POTION+132 )
 		{
 			Scale = 0.0038f;
 		}
-#endif // LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
 		else if( Type == MODEL_HELPER+121 )
 		{
 			Scale = 0.0018f;
 			//Scale = 1.f;
 		}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-#ifdef ASG_ADD_CHARGED_CHANNEL_TICKET
 		else if(Type == MODEL_HELPER+124)
 			Scale = 0.0018f;
-#endif	// ASG_ADD_CHARGED_CHANNEL_TICKET
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		else if(Type >= MODEL_WING+49 && Type <= MODEL_WING+50)
 		{
@@ -15078,10 +12442,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 			Scale = 0.0039f;
 		}
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		else if (Type == MODEL_POTION+156)
-			Scale = 0.0025f;
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
 #ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리 스케일 설정 [lem_2010.9.7]
 		// LEM_TSET  상승의 보석, 연장의 보석 스케일[lem_2010.9.7]
 		else if(Type >= MODEL_HELPER+135 && Type <= MODEL_HELPER+145)
@@ -15214,13 +12574,11 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 			sy += Height*0.7f;
 		else if(Type == ITEM_SHIELD+16)
 			sy += Height*0.9f;
-#ifdef CSK_ADD_ITEM_CROSSSHIELD
 		else if(Type == ITEM_SHIELD+21)
 		{
 			sx += Width*0.05f;
 			sy += Height*0.5f;
 		}
-#endif // CSK_ADD_ITEM_CROSSSHIELD
 		else
 			sy += Height*0.6f;
 	}
@@ -15524,12 +12882,6 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 	{
 		RenderObjectScreen(MODEL_EVENT+5,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-#ifdef ANNIVERSARY_EVENT
-	else if ( Type==ITEM_POTION+20 && ( Level>>3) >= 1 && ( Level>>3) <= 5)	// 애니버서리 박스
-	{
-		RenderObjectScreen(MODEL_POTION+11,(7 << 3),Option1,ExtOption,Position,Success,PickUp);
-	}
-#endif	// ANNIVERSARY_EVENT
 	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 3)
 	{
 		RenderObjectScreen(MODEL_EVENT+6,Level,Option1,ExtOption,Position,Success,PickUp);
@@ -15681,8 +13033,8 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 			RenderObjectScreen(MODEL_EVENT+15,Level,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		case 1:
-		case 2: //  전사의 반지.
-		case 3: //  영예의 반지.
+		case 2:
+		case 3:
 			RenderObjectScreen(MODEL_EVENT+14,Level,Option1,ExtOption,Position,Success,PickUp);
 			break;
 		}
@@ -15703,7 +13055,7 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 			_Angle = Success;
 		}
 
-		RenderObjectScreen(MODEL_POTION+100,Level,Option1,ExtOption,Position,_Angle,PickUp);	// 행운의 동전
+		RenderObjectScreen(MODEL_POTION+100,Level,Option1,ExtOption,Position,_Angle,PickUp);
 	}
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type == ITEM_ARMOR+59)
@@ -15725,50 +13077,42 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 인밴토리 칼라를 세팅하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void InventoryColor(ITEM *p)
 {
 	switch(p->Color)
 	{
 	case 0:
-		glColor3f(1.f,1.f,1.f);     //  보통 상태.
+		glColor3f(1.f,1.f,1.f);
 		break;
 	case 1:
-		glColor3f(0.8f,0.8f,0.8f);  //  
+		glColor3f(0.8f,0.8f,0.8f);
 		break;
 	case 2:
 		glColor3f(0.6f,0.7f,1.f);
 		break;
 	case 3:
-		glColor3f(1.f,0.2f,0.1f);   //  사용 불가능.
+		glColor3f(1.f,0.2f,0.1f);
 		break;
 	case 4:
 		glColor3f(0.5f,1.f,0.6f);
 		break;
     case 5:
-		glColor4f(0.8f,0.7f,0.f,1.f);  //  내구력 경고. 50%
+		glColor4f(0.8f,0.7f,0.f,1.f);
         break;
     case 6:
-		glColor4f(0.8f,0.5f,0.f,1.f);  //  내구력 경고. 70%
+		glColor4f(0.8f,0.5f,0.f,1.f);
         break;
     case 7:
-		glColor4f(0.8f,0.3f,0.3f,1.f); //  내구력 경고. 80%
+		glColor4f(0.8f,0.3f,0.3f,1.f);
         break;
     case 8:
-		glColor4f(1.0f,0.f,0.f,1.f);    //  내구력 경고. 100%
+		glColor4f(1.0f,0.f,0.f,1.f);
         break;
     case 99:
-		glColor3f(1.f,0.2f,0.1f);       //  거래 창에서 사용.
+		glColor3f(1.f,0.2f,0.1f);
         break;
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 장비창 박스 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void RenderEqiupmentBox()
 {
@@ -15841,10 +13185,6 @@ void RenderEqiupmentBox()
     RenderBitmap(BITMAP_INVENTORY+10,x+StartX,y+StartY,Width,Height,0.f,0.f,Width/32.f,Height/32.f);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 장비창의 아이템 한개 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void RenderEqiupmentPart3D(int Index,float sx,float sy,float Width,float Height)
 {
 	ITEM *p = &CharacterMachine->Equipment[Index];
@@ -15854,10 +13194,6 @@ void RenderEqiupmentPart3D(int Index,float sx,float sy,float Width,float Height)
             RenderItem3D(sx,sy,Width,Height,p->Type,p->Level,p->Option1,p->ExtOption,false);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 장비창의 아이템 모두 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void RenderEqiupment3D()
 {
@@ -16015,7 +13351,6 @@ void HideKeyPad( void)
 
 int CheckMouseOnKeyPad( void)
 {
-	// 1. 틀
 	int Width, Height, WindowX, WindowY;
     Width = 213;Height = 2*5+6*40;WindowX = (640-Width)/2;WindowY = 60+40;//60 220
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -16057,15 +13392,17 @@ bool g_bPadPushed = false;
 
 void MovePersonalShop()
 {
-	if((g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPSALE) || g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPPURCHASE)) && g_iPShopWndType == PSHOPWNDTYPE_SALE)		//. 판매자 모드
+	if((g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPSALE) || g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPPURCHASE)) && g_iPShopWndType == PSHOPWNDTYPE_SALE)
 	{
-		if(g_iPersonalShopMsgType == 1)		//. 상점 타이틀 변경
+		if(g_iPersonalShopMsgType == 1)
 		{
-			if(OkYesOrNo == 1) {				//. Ok
+			if(OkYesOrNo == 1) 
+			{				//. Ok
 				g_iPersonalShopMsgType = 0;
 				OkYesOrNo = -1;
 			}
-			else if(OkYesOrNo == 2) {			//. Cancel
+			else if(OkYesOrNo == 2) 
+			{			//. Cancel
 				g_iPersonalShopMsgType = 0;
 				OkYesOrNo = -1;
 			}
@@ -16106,7 +13443,6 @@ void MovePersonalShop()
 			}
 		}
 
-		//. 상점타이틀 수정
 		Width = 150;
 		ButtonX = g_ptPersonalShop.x + 20;
 		ButtonY = g_ptPersonalShop.y + 65;
@@ -16120,11 +13456,10 @@ void MovePersonalShop()
 void ClosePersonalShop()
 {
 	if(g_iPShopWndType == PSHOPWNDTYPE_PURCHASE) 
-	{	//. 구매자 모드일때
-		//. 내 개인상점 영역을 복구한다.
+	{	
 		memcpy(g_PersonalShopInven, g_PersonalShopBackup, sizeof(ITEM)*MAX_PERSONALSHOP_INVEN);
 		if(IsShopInViewport(Hero)) 
-		{	//. 본인이 상점 개설중일때 상점 타이틀도 복구한다.
+		{
 			std::string title;
 			GetShopTitle(Hero, title);
 			strcpy(g_szPersonalShopTitle, title.c_str());
@@ -16242,25 +13577,19 @@ bool IsCorrectShopTitle(const char* szShopTitle)
 	return true;
 }
 
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM		// 정리할때 삭제해야 함
+#ifndef YDG_ADD_NEW_DUEL_SYSTEM
 void ClearDuelWindow()
 {
 	g_bEnableDuel = false;
 	g_iMyPlayerScore = 0;
 	g_iDuelPlayerScore = 0;
 }
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM	// 정리할때 삭제해야 함
+#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
-///////////////////////////////////////////////////////////////////////////////
-//  인벤토리 처리함수.
-///////////////////////////////////////////////////////////////////////////////
+
 
 extern DWORD g_dwActiveUIID;
-extern DWORD g_dwMouseUseUIID;		// 마우스가 윈도우 위에 있는가 (있으면 윈도우 ID)
-
-///////////////////////////////////////////////////////////////////////////////
-// 인밴토리 백그라운드 그림 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
+extern DWORD g_dwMouseUseUIID;
 
 void RenderInventoryInterface(int StartX,int StartY,int Flag)
 {
@@ -16335,18 +13664,18 @@ void CreateGuildMark( int nMarkIndex, bool blend )
 		case 1 :MarkColor[i] = (255<<24)+(  0<<16)+(  0<<8)+(  0);break;
 		case 2 :MarkColor[i] = (255<<24)+(128<<16)+(128<<8)+(128);break;
 		case 3 :MarkColor[i] = (255<<24)+(255<<16)+(255<<8)+(255);break;
-		case 4 :MarkColor[i] = (255<<24)+(  0<<16)+(  0<<8)+(255);break;//빨
-		case 5 :MarkColor[i] = (255<<24)+(  0<<16)+(128<<8)+(255);break;//
-		case 6 :MarkColor[i] = (255<<24)+(  0<<16)+(255<<8)+(255);break;//노
-		case 7 :MarkColor[i] = (255<<24)+(  0<<16)+(255<<8)+(128);break;//
-		case 8 :MarkColor[i] = (255<<24)+(  0<<16)+(255<<8)+(  0);break;//초
-		case 9 :MarkColor[i] = (255<<24)+(128<<16)+(255<<8)+(  0);break;//
-		case 10:MarkColor[i] = (255<<24)+(255<<16)+(255<<8)+(  0);break;//청
-		case 11:MarkColor[i] = (255<<24)+(255<<16)+(128<<8)+(  0);break;//
-		case 12:MarkColor[i] = (255<<24)+(255<<16)+(  0<<8)+(  0);break;//파
-		case 13:MarkColor[i] = (255<<24)+(255<<16)+(  0<<8)+(128);break;//
-		case 14:MarkColor[i] = (255<<24)+(255<<16)+(  0<<8)+(255);break;//보
-		case 15:MarkColor[i] = (255<<24)+(128<<16)+(  0<<8)+(255);break;//
+		case 4 :MarkColor[i] = (255<<24)+(  0<<16)+(  0<<8)+(255);break;
+		case 5 :MarkColor[i] = (255<<24)+(  0<<16)+(128<<8)+(255);break;
+		case 6 :MarkColor[i] = (255<<24)+(  0<<16)+(255<<8)+(255);break;
+		case 7 :MarkColor[i] = (255<<24)+(  0<<16)+(255<<8)+(128);break;
+		case 8 :MarkColor[i] = (255<<24)+(  0<<16)+(255<<8)+(  0);break;
+		case 9 :MarkColor[i] = (255<<24)+(128<<16)+(255<<8)+(  0);break;
+		case 10:MarkColor[i] = (255<<24)+(255<<16)+(255<<8)+(  0);break;
+		case 11:MarkColor[i] = (255<<24)+(255<<16)+(128<<8)+(  0);break;
+		case 12:MarkColor[i] = (255<<24)+(255<<16)+(  0<<8)+(  0);break;
+		case 13:MarkColor[i] = (255<<24)+(255<<16)+(  0<<8)+(128);break;
+		case 14:MarkColor[i] = (255<<24)+(255<<16)+(  0<<8)+(255);break;
+		case 15:MarkColor[i] = (255<<24)+(128<<16)+(  0<<8)+(255);break;
 		}
 	}
 	BYTE *MarkBuffer = GuildMark[nMarkIndex].Mark;
@@ -16449,10 +13778,6 @@ void CreateCastleMark ( int Type, BYTE* buffer, bool blend )
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// 길드마크 그릴때 칼라 박스 하나 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void RenderGuildColor(float x,float y,int SizeX,int SizeY,int Index)
 {
 	RenderBitmap(BITMAP_INVENTORY+18,x-1,y-1,(float)SizeX+2,(float)SizeY+2,0.f,0.f,SizeX/32.f,SizeY/30.f);
@@ -16508,10 +13833,6 @@ void RenderGuildColor(float x,float y,int SizeX,int SizeY,int Index)
     RenderBitmap(BITMAP_GUILD,x,y,(float)SizeX,(float)SizeY);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 길드 리스트창 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void RenderGuildList(int StartX,int StartY)
 {
 	GuildListStartX = StartX;
@@ -16550,15 +13871,12 @@ void RenderGuildList(int StartX,int StartY)
 		g_pRenderText->RenderText(StartX+20,StartY+65 ,GlobalText[186]);
 		g_pRenderText->RenderText(StartX+20,StartY+80 ,GlobalText[187]);
 	}
-	// 길드공지
 	g_pRenderText->SetBgColor(0, 0, 0, 128);
 	g_pRenderText->SetTextColor(100, 255, 200, 255);
 	g_pRenderText->RenderText(StartX+( int)Width/2,StartY+44,g_GuildNotice[0], 0 ,0, RT3_WRITE_CENTER);
 	g_pRenderText->RenderText(StartX+( int)Width/2,StartY+58,g_GuildNotice[1], 0 ,0, RT3_WRITE_CENTER);
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int yGuildStart = 72;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int Number = g_nGuildMemberCount;
 
 	if(g_nGuildMemberCount >= MAX_GUILD_LINE)
@@ -16568,9 +13886,6 @@ void RenderGuildList(int StartX,int StartY)
 //#define MAX_LENGTH_CMB	( 26)
 #define NUM_LINE_CMB	( 7)
 
-//////////////////////////////////////////////////////////////////////////
-//  서버 분할창.
-//////////////////////////////////////////////////////////////////////////
 void RenderServerDivision ()
 {
     if ( !g_pUIManager->IsOpen(INTERFACE_SERVERDIVISION) ) return;
@@ -16580,17 +13895,14 @@ void RenderServerDivision ()
 	glColor3f ( 1.f, 1.f, 1.f );
     EnableAlphaTest ();
 
-    //  틀.
     InventoryStartX = 640-190;
     InventoryStartY = 0;
     Width = 213;Height = 40;x = (float)InventoryStartX;y = (float)InventoryStartY;
 	RenderInventoryInterface ( (int)x, (int)y, 1 );
 
-	//  버튼.
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->SetTextColor(255, 230, 210, 255);
 
-    //  약관.
 	g_pRenderText->SetFont(g_hFontBold);
     x = InventoryStartX+(190/2.f);
     y = 50;
@@ -16600,7 +13912,6 @@ void RenderServerDivision ()
         y += 20;
     }
 
-    //  동의.
 	g_pRenderText->SetFont(g_hFontBold);
     Width = 16; Height = 16; x = (float)InventoryStartX+25;y = 240;
     if ( g_bServerDivisionAccept )
@@ -16617,12 +13928,10 @@ void RenderServerDivision ()
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(255, 230, 210, 255);
 
-    //  취소.
     Width = 120; Height = 24; x = (float)InventoryStartX+35;y = 350;//(Width/2.f); y = 231;
     RenderBitmap(BITMAP_INTERFACE+10,(float)x,(float)y,(float)Width,(float)Height,0.f,0.f,213.f/256.f);
 	g_pRenderText->RenderText((int)(x+(Width/2)),(int)(y+5),GlobalText[229], 0 ,0, RT3_WRITE_CENTER);
 
-    //  확인.
     Width = 120; Height = 24; x = (float)InventoryStartX+35;y = 320;//(Width/2.f); y = 231;
     if ( g_bServerDivisionAccept )
         glColor3f ( 1.f, 1.f, 1.f );
@@ -16634,25 +13943,16 @@ void RenderServerDivision ()
     glColor3f( 1.f, 1.f, 1.f );
 }
 
-#ifdef CSK_FREE_TICKET
-// 자유입장권에서 입장가능한 레벨을 계산해서 아이템의 레벨을 리턴시켜준다.
 BYTE CaculateFreeTicketLevel(int iType)
 {
-	// 캐릭터 레벨
 	int iChaLevel = CharacterAttribute->Level;
-
-	// 캐릭터 기본 클래스
 	int iChaClass = GetBaseClass(Hero->Class);
-	// 캐릭터 전직 클래스
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int iChaExClass = IsSecondClass(Hero->Class);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	int iItemLevel = 0;
 
 	if(iType == FREETICKET_TYPE_DEVILSQUARE)
 	{
-		// 마검사일 경우
 		if(iChaClass == CLASS_DARK)
 		{
 			if(iChaLevel >= 15 && iChaLevel <= 110)
@@ -16680,7 +13980,6 @@ BYTE CaculateFreeTicketLevel(int iType)
 				iItemLevel = 40;
 			}
 		}
-		// 다른 클래스일 경우
 		else
 		{
 			if(iChaLevel >= 15 && iChaLevel <= 130)
@@ -16708,14 +14007,10 @@ BYTE CaculateFreeTicketLevel(int iType)
 				iItemLevel = 40;
 			}
 		}
-
-		// 바이트 단위로 계산해서 리턴해 준다.
 		return (iItemLevel>>3)&15;
 	}
-	// 블러드캐슬
 	else if(iType == FREETICKET_TYPE_BLOODCASTLE)
 	{
-		// 마검사 경우
 		if(iChaClass == CLASS_DARK)
 		{
 			if(iChaLevel >= 15 && iChaLevel <= 60)
@@ -16747,7 +14042,6 @@ BYTE CaculateFreeTicketLevel(int iType)
 				iItemLevel = 48;
 			}
 		}
-		// 다른클래스 경우
 		else
 		{
 			if(iChaLevel >= 15 && iChaLevel <= 80)
@@ -16779,24 +14073,14 @@ BYTE CaculateFreeTicketLevel(int iType)
 				iItemLevel = 48;
 			}
 		}
-
-#ifdef LJH_FIX_INCORRECT_SCHEDULE_FOR_BC_FREE_TICKET
-		if(IsMasterLevel(Hero->Class))
-			iItemLevel = 56;
-#endif //LJH_FIX_INCORRECT_SCHEDULE_FOR_BC_FREE_TICKET
-
-		// 바이트 단위로 계산해서 리턴해 준다.
 		return (iItemLevel>>3)&15;
 	}
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
 	else if( iType == FREETICKET_TYPE_CURSEDTEMPLE ) {
 		if( g_pCursedTempleEnterWindow->CheckEnterLevel( iItemLevel ) )
 		{
 			return (iItemLevel>>3)&15;
 		}
 	}
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET	
-#ifdef LDS_FIX_INGAMESHOPITEM_PASSCHAOSCASTLE_REQUEST	// 카오스캐슬 자유입장권
 	else if( iType == FREETICKED_TYPE_CHAOSCASTLE ) 
 	{
 		if( g_pCursedTempleEnterWindow->CheckEnterLevel( iItemLevel ) )
@@ -16804,10 +14088,8 @@ BYTE CaculateFreeTicketLevel(int iType)
 			return (iItemLevel>>3)&15;
 		}
 	}
-#endif // LDS_FIX_INGAMESHOPITEM_PASSCHAOSCASTLE_REQUEST
 	return 0;
 }
-#endif // CSK_FREE_TICKET
 
 #ifdef NEW_USER_INTERFACE_UISYSTEM
 const bool ChangeCodeItem( ITEM* ip, BYTE* itemdata )

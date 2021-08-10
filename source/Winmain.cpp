@@ -139,10 +139,6 @@ int       RandomTable[100];
 
 char TextMu[]       = "mu.exe";
 
-char *Language       = LanguageName[SELECTED_LANGUAGE];
-
-char *lpszLocale = lpszLocaleName[SELECTED_LANGUAGE];
-
 CErrorReport g_ErrorReport;
 
 BOOL g_bMinimizedEnabled = FALSE;
@@ -211,74 +207,12 @@ int GetMp3PlayPosition()
 	return wzAudioGetStreamOffsetRange();
 }
 
-bool FindHack = false;
 extern int  LogIn;
 extern char LogInID[];
 
 void CheckHack( void)
 {
-	if(FindHack) return;
 	gProtocolSend.SendCheckOnline();
-
-
-#ifndef FOR_HACKING
-#ifdef NDEBUG
-	if(LogIn >= 2)
-	{
-		HWND shWnd = FindWindow(NULL, "Speed Hack - PCGameHacks.com");
-		if( shWnd )
-		{
-			CloseHack(shWnd,true);
-			return;
-		}
-		shWnd = FindWindow(NULL, "GameHack 2.0");
-		if( shWnd )
-		{
-			CloseHack(shWnd,true);
-			return;
-		}
-		shWnd = FindWindow(NULL, "Game Master v7.00 (Win95 & Win98)");
-		if( shWnd )
-		{
-			CloseHack(shWnd,true);
-			return;
-		}
-		shWnd = FindWindow(NULL, "Game Cheater ArtMoney v6.08");
-		if( shWnd )
-		{
-			CloseHack(shWnd,true);
-			return;
-		}
-		shWnd = FindWindow(NULL, "Game Cheater ArtMoney v6.10");
-		if( shWnd )
-		{
-			CloseHack(shWnd,true);
-			return;
-		}
-		shWnd = FindWindow(NULL, "Game Cheater ArtMoney v6.12");
-		if( shWnd )
-		{
-			CloseHack(shWnd,true);
-			return;
-		}
-		/*shWnd = FindWindow(NULL, "Minimize Hack Tool v1.2");
-		if( shWnd )
-		{
-			CloseHack(shWnd,true);
-			return;
-		}
-		shWnd = FindWindow(NULL, "Minimize Window Hack Tool");
-		if( shWnd )
-		{
-			CloseHack(shWnd,true);
-			return;
-		}*/
-#ifdef USE_NPROTECT
-		FindNprotectWindow();
-#endif //USE_NPROTECT
-	}
-#endif
-#endif
 }
 
 #ifdef ATTACH_HACKSHIELD
@@ -881,7 +815,6 @@ void DestroyWindow()
 
 	g_ErrorReport.Write( "Destroy" );
 	 
-    KillProtect();
 	HWND shWnd = FindWindow(NULL, "MuPlayer");
 	if(shWnd)
 		SendMessage(shWnd, WM_DESTROY, 0, 0);
@@ -920,17 +853,6 @@ int g_iMousePopPosition_y = 0;
 extern int TimeRemain;
 extern bool EnableFastInput;
 void MainScene(HDC hDC);
-
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-BOOL ReCreateGLWithWindow(int uiPixelFormat);
-BOOL DestroyWindowWithGL();
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-
-//extern bool showShoppingMall;
-
-#if SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-BOOL g_bTaiwanIMEDouble = FALSE;
-#endif	// SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
 
 LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
@@ -999,13 +921,7 @@ Pos_ActiveTrue:
 		case HACK_TIMER:
 			// PKD_ADD_BINARY_PROTECTION
 			VM_START
-#ifdef NP_GAME_GUARD
-			npGameGuard::CheckGameMon();
-            SendCheck();
-#else // NP_GAME_GUARD
-			CheckNpmonCrc( hwnd);
 			CheckHack();
-#endif // NP_GAME_GUARD
 			VM_END
 			break;
 		case WINDOWMINIMIZED_TIMER:	// 윈팅 방지 코드
@@ -1114,46 +1030,23 @@ Pos_UserMemoryHack:
 		break;
 	case WM_DESTROY:
 		{
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-			if( g_bIsNowRecreationingForMSAA == FALSE )
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-			{
-				Destroy = true;
-				
-				//  
-				SocketClient.Close();
-				gProtocolSend.DisconnectServer();
-				
-				DestroySound();
-				
-				//DestroyWindow();
-				KillGLWindow();
-				
-#ifdef ANTIHACKING_ENABLE
-				exit_hanguo_protect();
-#endif //ANTIHACKING_ENABLE
-				
-				CloseMainExe();
-				
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-				leaf::OpenExplorer("www.muchina.com/pop.html");
-#endif //SELECTED_LANGUAGE == LANGUAGE_CHINESE
-				
-				PostQuitMessage(0);
-			}
+			Destroy = true;
+			SocketClient.Close();
+			gProtocolSend.DisconnectServer();
+			DestroySound();
+			//DestroyWindow();
+			KillGLWindow();	
+			CloseMainExe();
+			PostQuitMessage(0);
 		}
 		break;
     case WM_SETCURSOR:
         ShowCursor(false);
 		break;
-		// 윈팅 방지 코드
-//---------------------------- 윈도우를 최소화 하는 것을 방지하기
 #if (defined WINDOWMODE)
 	case WM_SIZE:
-		if ( SIZE_MINIMIZED == wParam
-			&& g_bUseWindowMode == FALSE
-			)
-		{	// 외부에서 윈도우를 최소화 시켰다.
+		if ( SIZE_MINIMIZED == wParam && g_bUseWindowMode == FALSE )
+		{
 			if ( !( g_bMinimizedEnabled))
 			{
 				SendHackingChecked( 0x05, 0);
@@ -1322,60 +1215,22 @@ Pos_LButtonUp:
             MouseWheel = (short)HIWORD( wParam)/WHEEL_DELTA;
         }
         break;
-	case WM_IME_NOTIFY:				// IMM 상태 변경
+	case WM_IME_NOTIFY:
 		{
 			if (g_iChatInputType == 1)
 			{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-				int iSelectedLanguage = SELECTED_LANGUAGE;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 				switch (wParam)
 				{
 				case IMN_SETCONVERSIONMODE:
 					if (GetFocus() == g_hWnd)
 					{
-						// 채팅 아닌 상태에서 IME 변경
 						CheckTextInputBoxIME(IME_CONVERSIONMODE);
 					}
-#if SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-					else if (g_bIMEBlock == TRUE)	// 대만 IME 전환 안되는 것 수정
-					{
-						HIMC hIMC = ImmGetContext(g_hWnd);
-						DWORD dwConv, dwSent;
-						ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
-						if (dwSent == 4 || g_bTaiwanIMEDouble == FALSE)
-						{
-							g_bTaiwanIMEDouble = TRUE;
-							break;
-						}
-						g_bIMEBlock = FALSE;
-						if (dwConv != IME_CMODE_ALPHANUMERIC)
-							ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, dwSent);
-						else
-							ImmSetConversionStatus(hIMC, IME_CMODE_NATIVE, dwSent);
-						g_bIMEBlock = TRUE;
-						g_bTaiwanIMEDouble = FALSE;
-						ImmReleaseContext(g_hWnd, hIMC);
-					}
-#endif	// SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
 					break;
 				case IMN_SETSENTENCEMODE:
 					if (GetFocus() == g_hWnd)
 					{
-						// 채팅 아닌 상태에서 IME 변경
 						CheckTextInputBoxIME(IME_SENTENCEMODE);
-					}
-					break;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-				case IMN_SETOPENSTATUS:
-					if(iSelectedLanguage == LANGUAGE_JAPANESE && GetFocus() == g_hWnd)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				case IMN_SETOPENSTATUS:
-					if (SELECTED_LANGUAGE == LANGUAGE_JAPANESE && GetFocus() == g_hWnd)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-					{
-						// 채팅 아닌 상태에서 CONVERSIONMODE 변경 (일본)
-						CheckTextInputBoxIME(IME_CONVERSIONMODE);
 					}
 					break;
 				default:
@@ -1400,38 +1255,12 @@ Pos_LButtonUp:
 #endif //PSW_BUGFIX_IME
     }
 
-#ifdef NEW_USER_INTERFACE_SHELL
-	if( g_shell ) {
-		LRESULT result;
-		TheShell().HandleWindowMessage( msg, wParam, lParam, result );
-	}
-#endif //NEW_USER_INTERFACE_SHELL
-
 	if( g_BuffSystem ) {
 		LRESULT result;
 		TheBuffStateSystem().HandleWindowMessage( msg, wParam, lParam, result );
 	}
-#ifdef PBG_MOD_GAMEGUARD_HANDLE
-	if(BLUE_MU::IsBlueMuServer())
-	{
-		g_NPGameGuardHandle->CheckTime();
-		if(g_NPGameGuardHandle->IsNPHack())
-			CloseHack(g_hWnd, true);
-	}	
-#endif //PBG_MOD_GAMEGUARD_HANDLE
 
-#ifdef USE_SELFCHECKCODE
-	if ( TimeRemain >= 40)
-	{
-		SendCrcOfFunction( 14, 19, GetCheckSum, 0x3A7F);
-	}
-#endif
     return DefWindowProc(hwnd,msg,wParam,lParam);
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
 
 BOOL g_bSavage = FALSE;
@@ -1830,46 +1659,6 @@ BOOL DestroyWindowWithGL ()								// Destroy The OpenGL Window & Release Resour
 #endif // LDS_ADD_MULTISAMPLEANTIALIASING
 
 //#ifdef _DEBUG
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-// 파티션 표시
-extern char g_lpszCmdURL[50];
-char g_lpszPartitionName[64] = "";
-BOOL OpenPartitionInfo( char *lpszFile)
-{
-	g_lpszPartitionName[0] = '\0';
-
-	FILE *fp = fopen(lpszFile,"rt");
-	if(fp == NULL) return ( FALSE);
-
-	char lpszPartition[3][64];
-	for ( int i = 0; i < 50; ++i)
-	{
-		if ( EOF == fscanf( fp, "%s", lpszPartition[0]))
-		{
-			break;
-		}
-		if ( EOF == fscanf( fp, "%s", lpszPartition[1]))
-		{
-			break;
-		}
-		if ( EOF == fscanf( fp, "%s", lpszPartition[2]))
-		{
-			break;
-		}
-
-		if ( 0 == strcmp( g_lpszCmdURL, lpszPartition[1]) &&
-			g_ServerPort == atoi( lpszPartition[2]))
-		{	// 찾았다.
-			strcpy( g_lpszPartitionName, lpszPartition[0]);
-			fclose(fp);
-			return ( TRUE);
-		}
-	}
-	fclose(fp);
-
-	return ( FALSE);
-}
-#endif //SELECTED_LANGAUGE == LANGUAGE_CHINESE*/
 
 char m_ID[11];
 char m_Version[11];
@@ -1946,28 +1735,18 @@ BOOL OpenInitFile()
 		strcpy( m_ExeVersion, m_Version);
 	}
 
-	// 파티션 표시 - ini 읽기
 //#ifdef _DEBUG
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-	OpenPartitionInfo( "partition.inf");
-#endif //SELECTED_LANGAUGE == LANGUAGE_CHINESE*/
 
-	// 초기화
 	m_ID[0] = '\0';
 	m_SoundOnOff = 1;
 	m_MusicOnOff = 1;
 	m_Resolution = 0;
 	m_nColorDepth = 0;
 
-	// 레지스트리 읽기
 	HKEY hKey;
 	DWORD dwDisp;
 	DWORD dwSize;
-#ifdef PBG_ADD_LAUNCHER_BLUE
-	if ( ERROR_SUCCESS == RegCreateKeyEx(HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu_Blue\\Config", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, & hKey, &dwDisp))
-#else //PBG_ADD_LAUNCHER_BLUE
 	if ( ERROR_SUCCESS == RegCreateKeyEx(HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu\\Config", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, & hKey, &dwDisp))
-#endif //PBG_ADD_LAUNCHER_BLUE
 	{
 		dwSize = 11;
 		if ( RegQueryValueEx (hKey, "ID", 0, NULL, (LPBYTE)m_ID, & dwSize) != ERROR_SUCCESS)
@@ -1987,7 +1766,7 @@ BOOL OpenInitFile()
 		if ( RegQueryValueEx (hKey, "Resolution", 0, NULL, (LPBYTE) & m_Resolution, &dwSize) != ERROR_SUCCESS)
 			m_Resolution = 1;
 
-		if (0 == m_Resolution)	// 640*480 모드는 사라졌음.
+		if (0 == m_Resolution)
 			m_Resolution = 1;
 
 	    if ( RegQueryValueEx (hKey, "ColorDepth", 0, NULL, (LPBYTE) & m_nColorDepth, &dwSize) != ERROR_SUCCESS)
@@ -1997,10 +1776,10 @@ BOOL OpenInitFile()
 		dwSize = sizeof ( int);
 		if ( RegQueryValueEx (hKey, "TextOut", 0, NULL, (LPBYTE) & g_iRenderTextType, &dwSize) != ERROR_SUCCESS)
 		{
-			g_iRenderTextType = 0;	// 이건 뭐지? 현재 레지스트리엔 정보가 없음.
+			g_iRenderTextType = 0;
 		}
 
-		g_iChatInputType = 1;	// 이젠 구형은 사용하지 않음.g_iChatInputType은 나중에 모두 삭제 할 것.
+		g_iChatInputType = 1;
 
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 		dwSize = sizeof ( int);
@@ -2050,7 +1829,6 @@ BOOL OpenInitFile()
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 #ifdef LDK_ADD_GLOBAL_PORTAL_SYSTEM
- 		// 레지스트리에 경로 남기기.
 		GlobalPortalSystem::Instance().SetPathToRegistry(&hKey);
 #endif //LDK_ADD_GLOBAL_PORTAL_SYSTEM
 
@@ -2141,7 +1919,7 @@ BOOL UpdateFile( char *lpszOld, char *lpszNew)
 #include <tlhelp32.h>
 
 BOOL KillExeProcess( char *lpszExe)
-{	// NT 4.0 에서 안된다.
+{
 	HANDLE hProcessSnap = NULL; 
     BOOL bRet = FALSE; 
     PROCESSENTRY32 pe32 = { 0 }; 
@@ -2159,11 +1937,6 @@ BOOL KillExeProcess( char *lpszExe)
  
     //  Walk the snapshot of the processes, and for each process, 
     //  display information. 
-
-
-
-
-
 
     if (Process32First(hProcessSnap, &pe32)) 
     {
@@ -2190,154 +1963,6 @@ BOOL KillExeProcess( char *lpszExe)
 
 	return bRet;
 }
-
-
-bool KillHackProgram ( void )
-{
-#if SELECTED_LANGUAGE==LANGUAGE_JAPANESE
-    int     HackNum = 7;
-    LPCSTR  ProcessClassName[7] = { "TWINSPEEDER_DXX", "CNSE", "CNSE", "#32770", "#32770", "#32770", "#32770" };
-    LPCSTR  ProcessWindowName[7]= { "A Speeder", "몝", "Win MU", "琴뒬긴", "SpeederXP v1.60 - Unregistered", "SpeederXP v1.60 - Registered", "SpeederXP v1.60" };
-
-    //  핵프로그램을 제거한다.
-    for ( int i=0; i<HackNum; ++i )
-    {
-        if ( i==3 )
-        {
-	        HWND shWnd = FindWindow( ProcessClassName[i], ProcessWindowName[i] );
-	        if(shWnd)
-            {
-                PostMessage ( shWnd, WM_NCDESTROY, 0, 0 );
-            }
-        }
-        else
-        {
-	        HWND shWnd = FindWindow( ProcessClassName[i], ProcessWindowName[i] );
-	        if(shWnd)
-	        {
-                if ( i>3 )
-                {
-	                char Text[100];
-	                sprintf(Text,GlobalText[1],LogInID);
-	                MessageBox(g_hWnd,Text,"Error",MB_OK);
-
-                    return true;
-                }
-                else
-                {
-                    PostMessage ( shWnd, WM_CLOSE, 0, 0 );
-                }
-	        }
-        }
-    }
-#endif
-    return false;
-}
-
-
-BOOL UpdateMuExe( void)
-{
-	char *lpszNewMuFile[4] = { "mu._xe", "mumsg._ll", "wz_zp._ll", "message._tf"};
-	char *lpszDestFile[4] = { "mu.exe", "mumsg.dll", "wz_zp.dll", "message.wtf"};
-
-	BOOL bAtLeastOne = FALSE;
-	BOOL bNewFileFound[4] = { 0, 0, 0, 0};
-	for ( int i = 0; i < 4; ++i)
-	{
-		WIN32_FIND_DATA wfd;
-		HANDLE hFind = FindFirstFile( lpszNewMuFile[i], &wfd);
-		if ( INVALID_HANDLE_VALUE != hFind)
-		{
-			bAtLeastOne = TRUE;
-			bNewFileFound[i] = TRUE;
-		}
-		FindClose( hFind);
-	}
-
-	if ( !bAtLeastOne)
-	{
-		return ( TRUE);
-	}
-
-	BOOL bDone = FALSE;
-	DWORD dwStartTickCount = ::GetTickCount();
-	while(TRUE) {
-		if(::GetTickCount() - dwStartTickCount > 6000)
-			break;
-		HWND shWnd = FindWindow( "#32770", "MU Auto Update");
-		if(NULL == shWnd) {
-			bDone = TRUE;
-			break;
-		}
-		::Sleep(10);
-	}
-	if ( !bDone)
-	{	// 종료에 실패
-		g_ErrorReport.Write( "Failed to close MU Auto Update window.\r\n");
-		MessageBox( NULL, GlobalText[13], NULL, MB_OK);
-		return ( FALSE);
-	}
-
-	for (int i = 0; i < 4; ++i)
-	{
-		if ( bNewFileFound[i] && !UpdateFile( lpszNewMuFile[i], lpszDestFile[i]))
-		{
-			g_ErrorReport.Write( GlobalText[13]);
-			g_ErrorReport.Write( "\r\n");
-			MessageBox( NULL, GlobalText[13], NULL, MB_OK);
-			return ( FALSE);
-		}
-	}
-
-
-	// mu.exe 실행
-	if ( bNewFileFound[0])
-	{
-		g_ErrorReport.Write( "> ");
-		g_ErrorReport.Write( GlobalText[14]);
-		g_ErrorReport.Write( "\r\n");
-		MessageBox( NULL, GlobalText[14], "Update", MB_OK);
-
-		// 1. mu.exe 이름
-		char lpszStr[MAX_PATH];
-		strcpy( lpszStr, TextMu);
-		
-		// 2. /t 옵션 붙이기
-#ifdef _TEST_SERVER
-		strcat( lpszStr, " /t");
-#endif //_TEST_SERVER
-		
-		// 3. 실행
-		WinExec(lpszStr, SW_SHOW);
-		return ( FALSE);
-	}
-
-// 위에 있는 코드인데 왜 또있을까???
-#ifndef KJH_FIX_SOURCE_CODE_REPEATED				// 정리할때 지워야 하는 소스
-	// mu.exe 실행
-	if ( bNewFileFound[0])
-	{
-		g_ErrorReport.Write( "> ");
-		g_ErrorReport.Write( GlobalText[14]);
-		g_ErrorReport.Write( "\r\n");
-		MessageBox( NULL, GlobalText[14], "Update", MB_OK);
-
-		// 1. mu.exe 이름
-		char lpszStr[MAX_PATH];
-		strcpy( lpszStr, TextMu);
-		
-		// 2. /t 옵션 붙이기
-#ifdef _TEST_SERVER
-		strcat( lpszStr, " /t");
-#endif //_TEST_SERVER
-		
-		WinExec(lpszStr, SW_SHOW);
-		return ( FALSE);
-	}
-#endif // KJH_FIX_SOURCE_CODE_REPEATED				// 정리할때 지워야 하는 소스
-	return ( TRUE);
-}
-
 
 char g_lpszCmdURL[50];
 BOOL GetConnectServerInfo( PSTR szCmdLine, char *lpszURL, WORD *pwPort)
@@ -2377,7 +2002,6 @@ BOOL GetConnectServerInfo( PSTR szCmdLine, char *lpszURL, WORD *pwPort)
 
 extern int TimeRemain;
 BOOL g_bInactiveTimeChecked = FALSE;
-void ConvertSoundFileName( void);
 void MoveObject(OBJECT *o);
 
 bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo )
@@ -2397,18 +2021,6 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo )
 	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " ## End Log\r\n");
 #endif // KJH_LOG_ERROR_DUMP
 
-#ifdef NP_GAME_GUARD
-	if(g_pnpGL) 
-	{	//. 게임가드 객체가 생성되었다면 해제한다.
-		delete g_pnpGL;
-		g_pnpGL = NULL;
-	}
-#endif // NP_GAME_GUARD
-
-#ifdef ATTACH_HACKSHIELD
-	DetachHackShield();
-#endif // ATTACH_HACKSHIELD
-
 #ifdef ENABLE_FULLSCREEN
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 	if (g_bUseWindowMode == FALSE)
@@ -2424,7 +2036,6 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo )
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 {
 #ifdef LDK_ADD_SCALEFORM
-	//가장 처음에 생성 . 필수!!
 	GFxSystem gfxInit;
 #endif //LDK_ADD_SCALEFORM
 
@@ -2435,138 +2046,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-#ifdef MSZ_ADD_CRASH_DUMP_UPLOAD
-	char szIniFilePath[256+20]="";
-	char szCurrentDir[256];
-
-	GetCurrentDirectory(256, szCurrentDir);
-
-	strcpy(szIniFilePath, szCurrentDir);
-	if( szCurrentDir[strlen(szCurrentDir)-1] == '\\' ) 
-		strcat(szIniFilePath, "config.ini");
-	else strcat(szIniFilePath, "\\config.ini");
-
-	TCHAR szToken1[256] = _T("webzen");
-	TCHAR szHttpUrl[256] = {0, };
-	TCHAR szFtpUrl[256] = {0, };
-	TCHAR szToken2[256] = _T("#@!");
-	TCHAR szFtpID[256] = {0, };
-	TCHAR szFtpPW[256] = {0, };
-	TCHAR szToken3[256] = _T("01");
-	int nFtpPort;
-
-	_tcsnset_s(szHttpUrl, 256, 0x00, 256);
-	_tcsnset_s(szFtpUrl, 256, 0x00, 256);
-	sprintf_s(szFtpID, 256, "%s%s", szToken1, szToken3);
-	sprintf_s(szFtpPW, 256, "%s%s%s", szToken1, szToken2, szToken3);
-
-	GetPrivateProfileString(_T("Option"), _T("HTTP_URL"), _T(""), szHttpUrl, 256, szIniFilePath);
-	GetPrivateProfileString(_T("Option"), _T("FTP_URL"), _T(""), szFtpUrl, 256, szIniFilePath);
-	nFtpPort = GetPrivateProfileInt(_T("Option"), _T("FTP_PORT"), 0, szIniFilePath);
-
-	Crash::Install(
-		NULL,
-		ExceptionCallback,
-		1,
-		NULL,
-		MiniDumpNormal,
-		szHttpUrl,
-		szFtpUrl,
-		nFtpPort,
-		szFtpID,
-		szFtpPW,
-		3,
-		0,
-		1,
-		1,
-		NULL, 
-		true);
-#else
 	leaf::AttachExceptionHandler(ExceptionCallback);
-#endif
 
 #ifndef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	OpenTextData();		//. Text.bmd, Testtest.bmd를 읽는다.
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
-#ifndef FOR_HACKING
-#ifdef NDEBUG	// (RELEASE MODE)
-
-#ifdef BAN_USE_CMDLINE
-	WZLAUNCHINFO LaunchInfo;
-#endif
-
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-#ifndef ASG_ADD_MULTI_CLIENT	// 디파인 정리시 삭제. 한국만 적용된 디파인이므로 주의.
-	if (g_bUseWindowMode == TRUE)
-	{
-		CreateMutex(NULL, TRUE, "MuOnline");
-		if (GetLastError() == ERROR_ALREADY_EXISTS)
-			return FALSE;
-	}
-#endif	// ASG_ADD_MULTI_CLIENT
-#endif	// USER_WINDOW_MODE
-
-	// "#32770"이란 일반적인 대화상자 ClassName을 말함. 
-	// "MU Auto Update"은 MU 런처를 말함.
-	HWND shWnd = FindWindow( "#32770", "MU Auto Update");
-	if(shWnd)
-		SendMessage(shWnd, WM_CLOSE, 0, 0);
-
-	// mu.exe 업그레이드 : Mu.exe를 종료한 후에 호출해야만 한다.
-	if ( !UpdateMuExe())
-	{
-		return ( FALSE);
-	}
-
-	//파라메터 없이 실행시 mu.exe실행
-#ifdef BAN_USE_CMDLINE
-//	WZLAUNCHINFO LaunchInfo;
-	if( false == wzPopLaunchInfo(LaunchInfo) )
-#else	// !BAN_USE_CMDLINE
-	if( strlen( szCmdLine ) < 1 ) 
-#endif // BAN_USE_CMDLINE
-	{
-		g_ErrorReport.Write("wzPopLaunchInfo함수가 실패하여, Mu.exe를 다시 실행합니다.");
-		
-		// 1. mu.exe 이름
-		char lpszStr[MAX_PATH];
-		strcpy( lpszStr, TextMu);
-		
-		// 2. /t 옵션 붙이기
-#ifdef _TEST_SERVER
-		strcat( lpszStr, " /t");
-#endif //_TEST_SERVER
-		
-		WinExec(lpszStr, SW_SHOW);
-		
-		return FALSE;
-	}
-#endif	// NDEBUG (RELEASE MODE)
-#endif	// !FOR_HACKING
-
-#ifdef WAV_CONVERT
-	ConvertSoundFileName();
-#endif
-
-#ifdef ATTACH_HACKSHIELD
-	// PKD_ADD_BINARY_PROTECTION
-	VM_START
-#ifndef _DEBUG	// for release mode
-#ifdef _TEST_SERVER
-	if(!AttachHackShield(7002, "54F49D65DBA5A527"))		//. 테섭(maintest.exe)
-		return FALSE;
-#else
-	if(!AttachHackShield(7001, "8114A27E5DDA00BA"))		//. 본섭(main.exe)
-		return FALSE;
-#endif // _TEST_SERVER
-#else	// for debug mode
-	if(!AttachHackShield(7003, "8F6E59C3A9E83223"))		//. 디버그용(maindebug.exe)
-		return FALSE;
-#endif
-	g_ErrorReport.Write("HackShield Launched.\r\n");
-	VM_END
-#endif // ATTACH_HACKSHIELD
 	{
 		char lpszExeVersion[256] = "unknown";
 
@@ -2590,7 +2074,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		g_ErrorReport.Write( "\r\n");
 		g_ErrorReport.WriteLogBegin();
 		g_ErrorReport.AddSeparator();
-		g_ErrorReport.Write( "Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, Language, wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+		g_ErrorReport.Write( "Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, "Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 
 		g_ConsoleDebug->Write(MCD_NORMAL, "Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 
@@ -2638,79 +2122,22 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	if( OpenInitFile() == FALSE )
 	{
 		g_ErrorReport.Write( "config.ini read error\r\n");
-#ifdef ATTACH_HACKSHIELD
-		DetachHackShield();
-#endif // ATTACH_HACKSHIELD
 		return false;
 	}
-
-#ifdef LEM_ADD_GAMECHU 
-	#ifdef FOR_WORK
-		g_ErrorReport.Write( " ! [Gamechu] - GCCertification.dll Loading-- \n");
-	#endif // FOR_WORK
-
-	if( !GAMECHU->Load_GamechuDLL( "GCCertification.dll") )
-	{
-	#ifdef FOR_WORK
-		g_ErrorReport.Write( " [Gamechu] GCCertification.dll Failed\0 \n" );		
-	#endif // FOR_WORK
-		return false;
-	}
-	
- 	GAMECHU->Set_GameChuMyData(szCmdLine);
-
-	if( !GAMECHU->Get_GameChuLogin() )
-	{
-#ifdef FOR_WORK
-		g_ErrorReport.Write( " [GameChu =ErrorMsg] < %s >\n", GAMECHU->Get_Error().c_str() );
-#endif // FOR_WORK
-	}
-#endif // LEM_ADD_GAMECHU
-
-
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	pMultiLanguage = new CMultiLanguage(g_strSelectedML);
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
-#ifdef ANTIHACKING_ENABLE
-	if(!init_hanguo_protect( hInstance))
-	{
-		return FALSE;
-	}
-#endif //ANTIHACKING_ENABLE
-#ifdef NP_GAME_GUARD
-	// PKD_ADD_BINARY_PROTECTION
-	VM_START
-	g_pnpGL = new CNPGameLib(g_szGameGuard);
-
-	if ( !npGameGuard::init() )
-    {
-		g_ErrorReport.Write( "gg init error\r\n");
-		KillGLWindow();
-		
-		if(g_pnpGL) 
-		{	//. 게임가드 객체가 생성되었다면 해제한다.
-			delete g_pnpGL;
-			g_pnpGL = NULL;
-		}
-        return FALSE;
-    }
-
-	g_ErrorReport.Write( "> gg init success.\r\n");
-	g_ErrorReport.AddSeparator();
-	VM_END
-#endif	// NP_GAME_GUARD
-
 	if (g_iChatInputType == 1)
-		ShowCursor(FALSE);		// 마우스 포인트를 안보이도록
+		ShowCursor(FALSE);
 
 	g_ErrorReport.Write( "> Enum display settings.\r\n");
 	DEVMODE DevMode;
 	DEVMODE* pDevmodes;
 	int nModes = 0;
 	while (EnumDisplaySettings(NULL, nModes, &DevMode)) nModes++;
-	pDevmodes = new DEVMODE[nModes+1];		//. 모드리스트 생성
+	pDevmodes = new DEVMODE[nModes+1];
 	nModes = 0;
 	while (EnumDisplaySettings(NULL, nModes, &pDevmodes[nModes])) nModes++;
 
@@ -2746,7 +2173,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	}
 #endif //ENABLE_FULLSCREEN
 
-	delete [] pDevmodes;		//. 모드리스트 제거
+	delete [] pDevmodes;
 
 	g_ErrorReport.Write( "> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
 
@@ -2757,17 +2184,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     if ( !CreateOpenglWindow())
 	{
-#ifdef ATTACH_HACKSHIELD
-		DetachHackShield();
-#endif // ATTACH_HACKSHIELD
-#ifdef NP_GAME_GUARD
-		//. 게임가드 객체가 생성되었다면 해제한다.
-		if(g_pnpGL)
-		{	
-			delete g_pnpGL;
-			g_pnpGL = NULL;
-		}
-#endif // NP_GAME_GUARD
 		return FALSE;
 	}
 
@@ -2780,14 +2196,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
 
-	// PKD_ADD_BINARY_PROTECTION
-	VM_START
-#ifdef NP_GAME_GUARD
-	npGameGuard::SetHwnd( g_hWnd );
-	g_ErrorReport.Write( "> gg connect Window Handle.\r\n");
-	g_ErrorReport.AddSeparator();
-#endif
-	VM_END
 	g_ErrorReport.WriteImeInfo( g_hWnd);
 	g_ErrorReport.AddSeparator();
 	
@@ -2803,33 +2211,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	int nFixFontSize;
 	int iFontSize;
 
-	//폰트 생성
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-	//FontHeight -= 2;
-	iFontSize = - ( FontHeight - 2);
-	//FontHeight += 5;
-	nFixFontSize = - ( nFixFontHeight - 2);
-#else // SELECTED_LANGUAGE == LANGUAGE_JAPANESE
 	iFontSize = FontHeight - 1;
 	nFixFontSize = nFixFontHeight - 1;
-#endif // SELECTED_LANGUAGE == LANGUAGE_JAPANESE
 
-	g_hFont = CreateFont(iFontSize,0,0,0,FW_NORMAL,0,0,0,
-		g_dwCharSet[SELECTED_LANGUAGE],OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-		NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,
-		GlobalText[0][0] ? GlobalText[0] : NULL);
-	g_hFontBold = CreateFont(iFontSize,0,0,0,FW_BOLD,0,0,0,
-		g_dwCharSet[SELECTED_LANGUAGE],OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-		NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,
-		GlobalText[0][0] ? GlobalText[0] : NULL);
-	g_hFontBig = CreateFont(iFontSize*2,0,0,0,FW_BOLD,0,0,0,
-		g_dwCharSet[SELECTED_LANGUAGE],OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-		NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,
-		GlobalText[0][0] ? GlobalText[0] : NULL);
-	g_hFixFont = ::CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0,
-		g_dwCharSet[SELECTED_LANGUAGE], OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-		NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-		GlobalText[18][0] ? GlobalText[18] : NULL);
+	g_hFont		= CreateFont(iFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
+	g_hFontBold = CreateFont(iFontSize,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
+	g_hFontBig	= CreateFont(iFontSize*2,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
+	g_hFixFont	= CreateFont(nFixFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH | FF_DONTCARE,GlobalText[18][0] ? GlobalText[18] : NULL);
+
 #ifdef PBG_ADD_INGAMESHOP_FONT
 	int _FontSize = 12;
 	switch(WindowWidth)
@@ -2854,7 +2243,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		GlobalText[0][0] ? GlobalText[0] : NULL);
 #endif //PBG_ADD_INGAMESHOP_FONT
 	// 텍스트 길이 계산을 위한 부분
-	setlocale( LC_ALL, lpszLocale);
+	setlocale( LC_ALL, "english");
 
 	CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
 
@@ -3246,16 +2635,6 @@ Pos_ActiveCheck:
 	ProtectSysKey::DetachProtectSysKey();
 #endif // !FOR_WORK
 #endif // PROTECT_SYSTEMKEY && NDEBUG
-
-
-#ifdef NP_GAME_GUARD
-	//. 게임가드 객체가 생성되었다면 해제한다.
-	if(g_pnpGL) 
-	{	
-		delete g_pnpGL;
-		g_pnpGL = NULL;
-	}
-#endif // NP_GAME_GUARD
 
 #ifdef MSZ_ADD_CRASH_DUMP_UPLOAD
 	Crash::Uninstall();

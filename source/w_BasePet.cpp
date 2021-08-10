@@ -198,20 +198,10 @@ void PetObject::Render( bool bForceRender )
  			if ( m_obj->Owner->Type!=MODEL_PLAYER ) return;
 #endif LDK_FIX_HIDE_PET_TO_NOT_MODEL_PLAYER
 
-			//State가 10이면 Draw_RenderObject에 공성전 디버프(클럭킹??) 처리하는부분이 있음.. ㅡ.ㅡ;;;	
 			int State = g_isCharacterBuff(m_obj->Owner, eBuff_Cloaking)? 10 : 0;
-
-#ifdef LDS_MR0_FIX_ALLPETOBJECT_RENDERINGPASSEDWAY
-			EngineGate::SetOn( false );		// 기존 방법으로 그리기.
-#endif // LDS_MR0_FIX_ALLPETOBJECT_RENDERINGPASSEDWAY
 
 			RenderObject ( m_obj , FALSE, 0, State);
 
-#ifdef LDS_MR0_FIX_ALLPETOBJECT_RENDERINGPASSEDWAY
-			EngineGate::SetOn( true );
-#endif // LDS_MR0_FIX_ALLPETOBJECT_RENDERINGPASSEDWAY
-			
-			// 순서에 따라서 본좌표 뽑을때 문제 생길수있음...
 			DWORD tick = GetNowTick();
 			CreateEffect( tick, bForceRender );
 		}

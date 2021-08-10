@@ -253,11 +253,6 @@ public:
 	BOOL		m_bpcroom;		// 피씨방 관련 이벤트 전용 NPC 체크 변수
 #endif //PCROOM_EVENT
 
-#if defined MR0 || defined OBJECT_ID
-public:
-	unsigned int  m_iID;
-#endif //MR0
-
 	vec3_t		m_v3PrePos1;
 	vec3_t		m_v3PrePos2;
 

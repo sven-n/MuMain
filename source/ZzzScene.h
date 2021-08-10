@@ -32,7 +32,6 @@ extern int g_iLengthAuthorityCode;
 extern void LogInScene(HDC hDC);
 extern void LoadingScene(HDC hDC);
 extern void Scene(HDC Hdc);
-extern bool CheckSpecialText(char *Text);
 extern bool CheckName();
 void    StartGame(
 #ifdef PJH_CHARACTER_RENAME

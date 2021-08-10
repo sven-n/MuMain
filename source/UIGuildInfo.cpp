@@ -266,40 +266,29 @@ void CUIGuildInfo::CloseMyPopup()
 
 void CUIGuildInfo::DoGuildInfoTabMouseAction()
 {
-	// 길드로그
 	g_dwActiveUIID = m_GuildNoticeListBox.GetUIID();
 	m_GuildNoticeListBox.DoAction();
 	g_dwActiveUIID = 0;
 
-	// 길드 탈퇴 버튼 클릭시..
 	if( m_BreakUpGuildButton.DoMouseAction() )
 	{
 		if( IsGuildMaster() )
 		{
-			// 연합마스터라면..
 			if( !strcmp( GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName ) )
 			{
-				// 1270 "연합마스터는 길드해체를 할 수 없습니다."
 				char szText[50];
 				strcpy( szText, GlobalText[1270] );
 				m_dwPopupID = g_pUIPopup->SetPopup( szText, 1, 50, POPUP_OK, NULL );
 			}
 			else
 			{
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 				char szText[4][100];
-#else
-				char szText[4][50];
-#endif
+
 				strcpy( szText[0], GlobalText[1363] );
 				strcpy( szText[1], GlobalText[1364] );
 				strcpy( szText[2], GlobalText[1365] );
 				strcpy( szText[3], GlobalText[1366] );
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 				m_dwPopupID = g_pUIPopup->SetPopup( &szText[0][0], 4, 100, POPUP_YESNO, ::DoBreakUpGuildAction );
-#else
-				m_dwPopupID = g_pUIPopup->SetPopup( &szText[0][0], 4, 50, POPUP_YESNO, ::DoBreakUpGuildAction );
-#endif
 			}
 		}
 		else
@@ -319,7 +308,6 @@ void CUIGuildInfo::RenderGuildInfoTab()
 {
 	POINT ptOrigin = { GetPosition_x()+15+54, GetPosition_y()+75+29 };
 
-	// 길드마크
 	RenderGoldRect( ptOrigin.x, ptOrigin.y, 53, 53 );
 	ptOrigin.x += 3;	ptOrigin.y += 3;
 	CreateGuildMark( Hero->GuildMarkIndex );
@@ -327,26 +315,22 @@ void CUIGuildInfo::RenderGuildInfoTab()
 
 	char szTemp[64];
 
-	// 길드 생성일
 	ptOrigin.x = GetPosition_x()+15+10;	ptOrigin.y = GetPosition_y()+170;
 	RenderGoldRect( ptOrigin.x, ptOrigin.y, 140, 62 );
 	ptOrigin.x += 5;
 	ptOrigin.y += 8;
 	sprintf( szTemp, "%s :", GlobalText[1332] );
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140*g_fScreenRate_x, 0, RT3_SORT_LEFT);
-	// 길드 점수
 	ptOrigin.y += 13;
 	sprintf( szTemp, GlobalText[1256], GuildTotalScore );
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140*g_fScreenRate_x, 0, RT3_SORT_LEFT);
 	
-	// 길드 인원
 	ptOrigin.y += 13;
 	if( IsGuildMaster() )
 	{
 		int Class = GetBaseClass ( CharacterAttribute->Class );
 	    if ( Class == CLASS_DARK_LORD )
 		{
-			// 2005.4.28 마직막 계산 부분 /100 에서 /10 으로 고침
 			int nCount = CharacterAttribute->Level/10+CharacterAttribute->Charisma/10;
 			if( nCount > 80 )	nCount = 80;
 			sprintf( szTemp, GlobalText[1362], g_nGuildMemberCount, nCount );
@@ -360,12 +344,10 @@ void CUIGuildInfo::RenderGuildInfoTab()
 	}
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140*g_fScreenRate_x, 0, RT3_SORT_LEFT);
 	
-	// 적대길드
 	ptOrigin.y += 13;
 	sprintf( szTemp, "%s : %s", GlobalText[1321], m_szRivalGuildName[0] ? m_szRivalGuildName : GlobalText[1361] );
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140*g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
-	// 길드공지
 	ptOrigin.x -= 5;
 	ptOrigin.y += 33;
 	g_pRenderText->RenderText(ptOrigin.x+5, ptOrigin.y, GlobalText[1323], 136*g_fScreenRate_x, 0, RT3_SORT_LEFT);
@@ -376,14 +358,12 @@ void CUIGuildInfo::RenderGuildInfoTab()
 	m_GuildNoticeListBox.Render();
 	RenderGoldRect( ptOrigin.x, ptOrigin.y-14, 140, 95 );
 
-	// 해체/탈퇴 버튼
 	m_BreakUpGuildButton.SetCaption( IsGuildMaster() ? GlobalText[188] : GlobalText[189] );
 	m_BreakUpGuildButton.Render();
 }
 
 void CUIGuildInfo::DoGuildMemberTabMouseAction()
 {
-	// 길드원리스트 입력처리
 	g_dwActiveUIID = m_GuildMemberListBox.GetUIID();
 	m_GuildMemberListBox.DoAction();
 	g_dwActiveUIID = 0;
@@ -395,12 +375,10 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
 
 	if( IsGuildMaster() )
 	{
-		// 길드원 - 직책 버튼
 		if( m_AppointButton.DoMouseAction() )
 		{
 			if( GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText() )
 			{
-				// 길마를 제외한 길드원 대상
 				if( pText->m_GuildStatus != G_MASTER )
 				{
 					if( GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText() )
@@ -413,21 +391,18 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
 				}
 			}
 		}
-		// 길드원 - 해제 버튼
+
 		if( m_DisbandButton.DoMouseAction() )
 		{
 			if( GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText() )
 			{
-				// 부길마나 배틀마스터만 대상
 				if( pText->m_GuildStatus == G_SUB_MASTER || pText->m_GuildStatus == G_BATTLE_MASTER )
 				{
 					char szText[2][64];
-					// 직위해제하시겠습니까?
 					GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText();
 					sprintf( szText[0], GlobalText[1367], pText->m_szID );
 					strcpy( szText[1], GlobalText[1368] );
 
-					// 직위해제 할 아이디 기억
 					if( GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText() )
 						strcpy( s_szTargetID, pText->m_szID );
 
@@ -435,17 +410,15 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
 				}
 			}
 		}
-		// 길드원 - 방출 버튼
+
 		if( m_FireButton.DoMouseAction() )
 		{
 			if( GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText() )
 			{
-				// 길마를 제외한 길드원 대상
 				if( pText->m_GuildStatus != G_MASTER )
 				{
-					// 방출하시겠습니까?
 					GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText();
-					// 방출 할 멤버 인덱스 기억
+
 					if( GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText() )
 					{
 						s_nTargetFireMemberIndex = GetGuildMemberIndex( pText->m_szID );
@@ -463,11 +436,9 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
 
 void CUIGuildInfo::RenderGuildMemberTab()
 {
-	// 길드원 목록 출력
 	if( g_nGuildMemberCount > 0 )
 		m_GuildMemberListBox.Render();
 
-	// 직책, 해제, 방출 버튼
 	if( IsGuildMaster() )
 	{
 		m_AppointButton.Render();
@@ -480,7 +451,6 @@ int DoBanUnionGuildAction( POPUP_RESULT Result )
 {
 	if( Result == POPUP_RESULT_YES )
 	{
-		// 연합길드 방출 요청
 		SendRequestBanUnionGuild( s_szTargetID );
 	}
 	return 1;
@@ -488,7 +458,6 @@ int DoBanUnionGuildAction( POPUP_RESULT Result )
 
 void CUIGuildInfo::DoGuildUnionMouseAction()
 {
-	// 길드연합 리스트
 	g_dwActiveUIID = m_UnionListBox.GetUIID();
 	m_UnionListBox.DoAction();
 	g_dwActiveUIID = 0;
@@ -501,7 +470,6 @@ void CUIGuildInfo::DoGuildUnionMouseAction()
 			{
 				if( !strcmp( GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName ) )
 				{
-					// 1271 "연합마스터는 연합해체를 할 수 없습니다."
 					char szText[50];
 					strcpy( szText, GlobalText[1271] );
 					m_dwPopupID = g_pUIPopup->SetPopup( szText, 1, 50, POPUP_OK, NULL );
@@ -512,22 +480,16 @@ void CUIGuildInfo::DoGuildUnionMouseAction()
 				}
 			}
 
-			// 연합길드 방출
 			if( m_BanUnionButton.DoMouseAction() )
 			{
 				if( UNIONGUILD_TEXT* pText = m_UnionListBox.GetSelectedText() )
 				{
-					// 자기 길드가 아닐 경우..
 					if( strcmp( pText->szName, GuildMark[Hero->GuildMarkIndex].GuildName ) )
 					{
 						char szText[2][64];
 
-						// 1423 "%s 길드를 연합에서"
 						sprintf( szText[0], GlobalText[1423], pText->szName );
-						// 1369 "방출 하시겠습니까?"
 						strcpy( szText[1], GlobalText[1369] );
-
-						// 방출 할 길드명 기억
 						strcpy( s_szTargetID, pText->szName );
 
 						m_dwPopupID = g_pUIPopup->SetPopup( &szText[0][0], 2, 64, POPUP_YESNO, ::DoBanUnionGuildAction );
@@ -542,7 +504,6 @@ void CUIGuildInfo::RenderGuildUnionTab()
 {
 	POINT ptOrigin = { GetPosition_x()+15, GetPosition_y()+98 };
 
-	// 내가 길마이고 길드연합 가입하지 않았다면
 	if( GuildMark[Hero->GuildMarkIndex].UnionName[0] == NULL )
 	{
 		ptOrigin.x += 10;
@@ -576,7 +537,6 @@ void CUIGuildInfo::RenderGuildUnionTab()
 
 		g_pRenderText->SetTextColor(0xFFFFFFFF);
 	}
-	// 길드연합에 가입해 있다면 길드리스트 보여주기
 	else if( GuildMark[Hero->GuildMarkIndex].UnionName[0] )
 	{
 		ptOrigin.y += 12;
@@ -584,7 +544,6 @@ void CUIGuildInfo::RenderGuildUnionTab()
 		m_UnionListBox.SetPosition( ptOrigin.x, ptOrigin.y+m_GuildNoticeListBox.GetHeight() );
 		m_UnionListBox.Render();
 
-		// 해체/탈퇴버튼
 		if( Hero->GuildStatus == G_MASTER )
 		{
 			if( !strcmp( GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName ) )
@@ -657,7 +616,6 @@ BOOL CUIGuildInfo::DoMouseAction()
 	if( CheckMouseIn( GetPosition_x(), GetPosition_y(), GetWidth(), 256+177 ) )
 		MouseOnWindow = TRUE;
 
-	// 닫기
 	if( MouseLButtonPush && CheckMouseIn( GetPosition_x()+25, GetPosition_y()+395, 24, 24 ) )
 	{
 		MouseLButtonPush = FALSE;
@@ -669,7 +627,6 @@ BOOL CUIGuildInfo::DoMouseAction()
 
 	if( Hero->GuildStatus == G_NONE ) return FALSE;
 
-	// 탭 전환
 	if( MouseLButton )
 	{
 		if( m_nCurrentTab != 0 && CheckMouseIn( GetPosition_x()+15, GetPosition_y()+75, 52, 16 ) )
@@ -696,13 +653,13 @@ BOOL CUIGuildInfo::DoMouseAction()
 
 	switch( m_nCurrentTab )
 	{
-	case 0:	// 길드
+	case 0:
 		DoGuildInfoTabMouseAction();
 		break;
-	case 1:	// 길드원
+	case 1:
 		DoGuildMemberTabMouseAction();
 		break;
-	case 2:	// 길드연합
+	case 2:
 		DoGuildUnionMouseAction();
 		break;
 	default:
@@ -723,7 +680,6 @@ void CUIGuildInfo::Render()
 
 	EnableAlphaTest();
 
-	// 길드
 	ptOrigin.x = GetPosition_x()+35;
 	ptOrigin.y = GetPosition_y()+12;
 	char szTemp[100];
@@ -734,7 +690,6 @@ void CUIGuildInfo::Render()
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, szTemp, 120, 0, RT3_SORT_CENTER);
     
-	// 길드명
 	if( Hero->GuildStatus != G_NONE )
 	{
 		ptOrigin.x = GetPosition_x()+35;
@@ -744,7 +699,6 @@ void CUIGuildInfo::Render()
 		g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, szTemp, 120, 0, RT3_SORT_CENTER);
 	}
 
-	// 길드가입법 출력
 	ptOrigin.x = GetPosition_x()+20;
 	ptOrigin.y = GetPosition_y()+50;
 	if( Hero->GuildStatus == G_NONE )
@@ -758,7 +712,6 @@ void CUIGuildInfo::Render()
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[187]);
 	}
 
-	// 닫기( X ) 버튼
 	glColor4f( 1.f, 1.f, 1.f, 1.f );
 	ptOrigin.x = GetPosition_x()+25;
 	ptOrigin.y = GetPosition_y()+395;
@@ -774,7 +727,6 @@ void CUIGuildInfo::Render()
 	if( Hero->GuildStatus == G_NONE )
 		return;
 
-	// 탭아랫줄 표시
 	ptOrigin.x = GetPosition_x()+15;
 	ptOrigin.y = GetPosition_y()+91;
 	glColor4ub( 146, 144, 141, 255 );
@@ -789,7 +741,6 @@ void CUIGuildInfo::Render()
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-	// 길드 탭표시
 	ptOrigin.x = GetPosition_x()+15;
 	ptOrigin.y = GetPosition_y()+75;
 	if( m_nCurrentTab == 0 ) glColor4f( 1.f, 1.f, 1.f, 1.f );
@@ -798,7 +749,6 @@ void CUIGuildInfo::Render()
 		(float)52, (float)16+( m_nCurrentTab == 0 ? 2 : 0 ), 0.f, 0.f, 48.f/64.f, 15.f/16.f );
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+4-( m_nCurrentTab == 0 ? 1 : 0 ), GlobalText[946], 52, 0, RT3_SORT_CENTER);
 
-	// 길드원 탭표시
 	ptOrigin.x += 54;
 	if( m_nCurrentTab == 1 ) glColor4f( 1.f, 1.f, 1.f, 1.f );
 	else glColor4f( 0.6f, 0.6f, 0.6f, 1.f );
@@ -806,7 +756,6 @@ void CUIGuildInfo::Render()
 		(float)52, (float)16+( m_nCurrentTab == 1 ? 2 : 0 ), 0.f, 0.f, 48.f/64.f, 15.f/16.f );
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+4-( m_nCurrentTab == 1 ? 1 : 0 ), GlobalText[1330], 52, 0, RT3_SORT_CENTER);
 
-	// 길드연합 탭표시
 	ptOrigin.x += 54;
 	if( m_nCurrentTab == 2 ) glColor4f( 1.f, 1.f, 1.f, 1.f );
 	else glColor4f( 0.6f, 0.6f, 0.6f, 1.f );
@@ -816,16 +765,15 @@ void CUIGuildInfo::Render()
 
 	glColor4f( 1.f, 1.f, 1.f, 1.f );
 
-	// 탭 내용 표시
 	switch( m_nCurrentTab )
 	{
-	case 0:	// 길드
+	case 0:
 		RenderGuildInfoTab();
 		break;
-	case 1:	// 길드원
+	case 1:
 		RenderGuildMemberTab();
 		break;
-	case 2:	// 길드연합
+	case 2:
 		RenderGuildUnionTab();
 		break;
 	default:
@@ -858,19 +806,7 @@ void CUIGuildInfo::Close()
 	CloseMyPopup();
 }
 
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//  배틀 마스터 스킬을 위한 함수.
-//////////////////////////////////////////////////////////////////////////
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//  사용 가능한 직책 스킬인가?
-//////////////////////////////////////////////////////////////////////////
-bool    CheckUseMasterSkill ( CHARACTER* c, int Index )
+bool CheckUseMasterSkill ( CHARACTER* c, int Index )
 {
     BYTE GuildStatus = c->GuildStatus;
     BYTE Class       = GetBaseClass ( c->Class );
@@ -891,10 +827,7 @@ bool    CheckUseMasterSkill ( CHARACTER* c, int Index )
     return bUse;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  배틀마스터 스킬을 발동할수 있게 한다.
-//////////////////////////////////////////////////////////////////////////
-void    UseBattleMasterSkill ( void )
+void UseBattleMasterSkill ( void )
 {
 	if ( !(Hero->EtcPart==PARTS_ATTACK_TEAM_MARK 
 		|| Hero->EtcPart==PARTS_ATTACK_TEAM_MARK2

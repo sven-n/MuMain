@@ -535,38 +535,27 @@ void CNewUIMixInventory::RenderFrame()
 		break;
 	}
 
-	// 조합시 필요한 젠 표시
 	switch (g_MixRecipeMgr.GetMixInventoryType())
 	{
 	case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
 	case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
 	case SEASON3A::MIXTYPE_GOBLIN_ADD380:
 	case SEASON3A::MIXTYPE_CASTLE_SENIOR:
-#ifdef YDG_FIX_TRAINER_MIX_DISPLAY_REQUIRED_ZEN
 	case SEASON3A::MIXTYPE_TRAINER:
-#endif	// YDG_FIX_TRAINER_MIX_DISPLAY_REQUIRED_ZEN
 	case SEASON3A::MIXTYPE_JERRIDON:
-#ifdef ADD_SOCKET_MIX
 	case SEASON3A::MIXTYPE_EXTRACT_SEED:
 	case SEASON3A::MIXTYPE_SEED_SPHERE:
 	case SEASON3A::MIXTYPE_ATTACH_SOCKET:
 	case SEASON3A::MIXTYPE_DETACH_SOCKET:
-#endif	// ADD_SOCKET_MIX
 		{
 			unicode::t_char szGoldText[32];
 			unicode::t_char szGoldText2[32];
 
 			ConvertGold(g_MixRecipeMgr.GetReqiredZen(),szGoldText);
 			ConvertChaosTaxGold(g_MixRecipeMgr.GetReqiredZen(),szGoldText2);
-			if (g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetCurRecipe()->m_bRequiredZenType == 'C') //  축복,영혼의 물약은 비용 표시 단위가 다르다
+			if (g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetCurRecipe()->m_bRequiredZenType == 'C')
 			{
-#if SELECTED_LANGUAGE==LANGUAGE_PHILIPPINES
-				// 글로벌, 필리핀
-    			unicode::_sprintf(szText,GlobalText[1636]);
-#else // SELECTED_LANGUAGE==LANGUAGE_PHILIPPINES
-				// 한국
     			unicode::_sprintf(szText,GlobalText[1636],szGoldText2,szGoldText);
-#endif // SELECTED_LANGUAGE==LANGUAGE_PHILIPPINES
 			}
 			else
 			{
@@ -579,12 +568,10 @@ void CNewUIMixInventory::RenderFrame()
 		break;
 	}
 
-	// 조합 가이드 출력 (예상조합+조합재료)
 	fLine_y = 203;
-	int iTextPos_y = 0;			// Render한 다음 개행 규칙
-	if (g_MixRecipeMgr.GetMostSimilarRecipe() != NULL)	// 유사 조합을 찾았으면
+	int iTextPos_y = 0;
+	if (g_MixRecipeMgr.GetMostSimilarRecipe() != NULL)
 	{
-		// 예상조합 이름을 출력
 		g_pRenderText->SetTextColor(220, 220, 220, 255);
 		g_pRenderText->SetBgColor(40, 40, 40, 128);
 		
@@ -592,7 +579,7 @@ void CNewUIMixInventory::RenderFrame()
 		int iTextLines = 0;
 		if (!g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetMostSimilarRecipeName(szTempText[0], 1) == TRUE)
 		{
-			unicode::_sprintf(szText, GlobalText[2334], szTempText[0]);	// "예상 조합: %s"
+			unicode::_sprintf(szText, GlobalText[2334], szTempText[0]);
 #ifdef KJH_FIX_BTS158_TEXT_CUT_ROUTINE
 			iTextLines = CutStr(szText, szTempText[0], 150, 2, 100);
 			
@@ -614,7 +601,6 @@ void CNewUIMixInventory::RenderFrame()
 
 
 		}
-		// 예상조합 재료를 출력
 		int iResult;
 		for (int iLine = 0; iLine < 8; ++iLine)
 		{
@@ -645,45 +631,44 @@ void CNewUIMixInventory::RenderFrame()
 			
 		}
 	}
-	else if (g_MixRecipeMgr.IsMixInit())	// 조합창에 아무 아이템도 올리지 않았다면
+	else if (g_MixRecipeMgr.IsMixInit())
 	{
 		g_pRenderText->SetTextColor(255, 50, 20, 255);
 		g_pRenderText->SetBgColor(40, 40, 40, 128);
 		
-		unicode::_sprintf(szText, GlobalText[2346]);	// "조합 재료를 올려주세요."
+		unicode::_sprintf(szText, GlobalText[2346]);
 		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
 #ifdef KJH_FIX_BTS158_TEXT_CUT_ROUTINE
 		iTextPos_y++;
 #endif // KJH_FIX_BTS158_TEXT_CUT_ROUTINE
 		
 	}
-	else	// 조합할 수 없는 아이템들이 올라왔을때
+	else
 	{
 		g_pRenderText->SetTextColor(255, 50, 20, 255);
 		g_pRenderText->SetBgColor(40, 40, 40, 128);
 
 #ifdef LDK_FIX_CHAR_NUMBER_OVER
 		//해외 글자수가 너무 길어서 두줄로 나눔(2008.08.11)
-		unicode::_sprintf(szText, GlobalText[2334]," ");	// "예상 조합:"
+		unicode::_sprintf(szText, GlobalText[2334]," ");
 		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
 
-		unicode::_sprintf(szText, GlobalText[601]);	// "조합불가"
+		unicode::_sprintf(szText, GlobalText[601]);
 		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y+(++iTextPos_y)*15, szText);
 
 #else //LDK_FIX_CHAR_NUMBER_OVER
 
-		unicode::_sprintf(szText, GlobalText[2334], GlobalText[601]);	// "예상 조합: %s" 조합불가
+		unicode::_sprintf(szText, GlobalText[2334], GlobalText[601]);
 		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
 		
 #endif //LDK_FIX_CHAR_NUMBER_OVER	
 	}
 	
-	// 조합 설명 출력
 	++iTextPos_y;
 	g_pRenderText->SetTextColor(255, 50, 20, 255);
 	g_pRenderText->SetBgColor(40, 40, 40, 128);
 	
-	if (g_MixRecipeMgr.IsReadyToMix())	// 조합 가능 상태에는 스크립트의 조합 설명을 출력
+	if (g_MixRecipeMgr.IsReadyToMix())
 	{
 		if (g_MixRecipeMgr.GetCurRecipeDesc(szText, 1) == TRUE)
 			g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y+(++iTextPos_y)*15, szText);
@@ -693,9 +678,8 @@ void CNewUIMixInventory::RenderFrame()
 			g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y+(++iTextPos_y)*15, szText);
 		
 	}
-	else if (g_MixRecipeMgr.GetMostSimilarRecipe() != NULL)	// 유사 조합을 찾았으면 조합 가이드 출력
+	else if (g_MixRecipeMgr.GetMostSimilarRecipe() != NULL)
 	{
-		// 예상조합의 설명 출력
 		if (g_MixRecipeMgr.GetRecipeAdvice(szText, 1) == TRUE)
 			g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y+(++iTextPos_y)*15, szText);
 		if (g_MixRecipeMgr.GetRecipeAdvice(szText, 2) == TRUE)
@@ -707,7 +691,6 @@ void CNewUIMixInventory::RenderFrame()
 		
 	RenderMixDescriptions(fPos_x, fPos_y);
 
-	// 조합 버튼 표시
 	switch (g_MixRecipeMgr.GetMixInventoryType())
 	{
 	case SEASON3A::MIXTYPE_TRAINER:
@@ -722,20 +705,18 @@ void CNewUIMixInventory::RenderFrame()
 	case SEASON3A::MIXTYPE_ELPIS:
 		m_BtnMix.ChangeToolTipText(GlobalText[2063], true);
 		break;
-#ifdef ADD_SOCKET_MIX
 	case SEASON3A::MIXTYPE_EXTRACT_SEED:
-		m_BtnMix.ChangeToolTipText(GlobalText[2660], true);	// "추 출"
+		m_BtnMix.ChangeToolTipText(GlobalText[2660], true);
 		break;
 	case SEASON3A::MIXTYPE_SEED_SPHERE:
-		m_BtnMix.ChangeToolTipText(GlobalText[2661], true);	// "합 성"
+		m_BtnMix.ChangeToolTipText(GlobalText[2661], true);
 		break;
 	case SEASON3A::MIXTYPE_ATTACH_SOCKET:
-		m_BtnMix.ChangeToolTipText(GlobalText[2662], true);	// "장 착"
+		m_BtnMix.ChangeToolTipText(GlobalText[2662], true);
 		break;
 	case SEASON3A::MIXTYPE_DETACH_SOCKET:
-		m_BtnMix.ChangeToolTipText(GlobalText[2663], true);	// "파 괴"
+		m_BtnMix.ChangeToolTipText(GlobalText[2663], true);
 		break;
-#endif	// ADD_SOCKET_MIX
 	default:
 		m_BtnMix.ChangeToolTipText(GlobalText[591], true);
 		break;
@@ -747,18 +728,16 @@ bool CNewUIMixInventory::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
 
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_MIXINVENTORY);
 	}
 
-	if (GetMixState() == MIX_FINISHED)	// 조합 버튼 무시
+	if (GetMixState() == MIX_FINISHED)
 	{
 		return false;
 	}
 
-	// 조합 버튼
 	if(m_BtnMix.UpdateMouseEvent() == true)
 	{
 		Mix();
@@ -832,7 +811,6 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
 			unicode::_sprintf( szText, GlobalText[2096] );
 			g_pRenderText->RenderText(fPos_x, fPos_y+250+2*13, szText, 160.0f, 0, RT3_SORT_CENTER);
 		break;
-#ifdef PSW_NEW_CHAOS_CARD
 	case SEASON3A::MIXTYPE_CHAOS_CARD:
 		{
 			g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -854,34 +832,14 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
 			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+8*13, szText, 200.0f, 0, RT3_SORT_LEFT);
 		}
 		break;
-#endif	// PSW_NEW_CHAOS_CARD
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
 		{
 			g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-			g_pRenderText->SetTextColor(255, 40, 20, 255);
-			unicode::_sprintf( szText, GlobalText[2223] );
-			g_pRenderText->RenderText(fPos_x, fPos_y+250+0*13, szText, 160.0f, 0, RT3_SORT_CENTER);
-			
-			g_pRenderText->SetTextColor(255, 220, 20, 255);
-			unicode::_sprintf( szText, GlobalText[2565] );
-			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+2*13, szText, 160.0f, 0, RT3_SORT_LEFT);
-			
-			g_pRenderText->SetTextColor(255, 255, 255, 255);
-			unicode::_sprintf( szText, GlobalText[2540] );
-			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+3*13, szText, 180.0f, 0, RT3_SORT_LEFT);
-			
-			g_pRenderText->SetTextColor(255, 255, 255, 255);
-			unicode::_sprintf( szText, GlobalText[2306] );
-			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+4*13, szText, 200.0f, 0, RT3_SORT_LEFT);
-#else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 			g_pRenderText->SetTextColor(255, 40, 20, 255);
 			unicode::_sprintf( szText, GlobalText[2223] );
 			g_pRenderText->RenderText(fPos_x, fPos_y+250+0*13, szText, 160.0f, 0, RT3_SORT_CENTER);
 
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH && defined(LDS_MOD_EVENTCHERRYBLOSSOM_FORENG)
 			g_pRenderText->SetTextColor(255, 255, 255, 255);
 			unicode::_sprintf( szText, GlobalText[2565] );
 			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+2*13, szText, 160.0f, 0, RT3_SORT_LEFT);
@@ -893,33 +851,8 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
 			g_pRenderText->SetTextColor(255, 255, 255, 255);
 			unicode::_sprintf( szText, GlobalText[2306] );
 			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+4*13, szText, 200.0f, 0, RT3_SORT_LEFT);
-#else // SELECTED_LANGUAGE == LANGUAGE_ENGLISH && defined(LDS_MOD_EVENTCHERRYBLOSSOM_FORENG)
-			g_pRenderText->SetTextColor(255, 255, 255, 255);
-			unicode::_sprintf( szText, GlobalText[2546] );		// 하얀 벚꽃가지 10개
-			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+2*13, szText, 160.0f, 0, RT3_SORT_LEFT);
-			
-			g_pRenderText->SetTextColor(255, 40, 20, 255);
-			unicode::_sprintf( szText, GlobalText[2547] );		// 붉은 벚꽃가지 30개
-			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+3*13, szText, 160.0f, 0, RT3_SORT_LEFT);
-			
-			g_pRenderText->SetTextColor(255, 220, 20, 255);
-			unicode::_sprintf( szText, GlobalText[2548] );		// 황금 벚꽃가지 50개
-			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+4*13, szText, 160.0f, 0, RT3_SORT_LEFT);
-			
-			g_pRenderText->SetTextColor(255, 255, 255, 255);
-			unicode::_sprintf( szText, GlobalText[2540] );
-			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+5*13, szText, 180.0f, 0, RT3_SORT_LEFT);
-			
-			g_pRenderText->SetTextColor(255, 255, 255, 255);
-			unicode::_sprintf( szText, GlobalText[2306] );
-			g_pRenderText->RenderText(fPos_x-10, fPos_y+250+6*13, szText, 200.0f, 0, RT3_SORT_LEFT);
-#endif // SELECTED_LANGUAGE == LANGUAGE_ENGLISH && defined(LDS_MOD_EVENTCHERRYBLOSSOM_FORENG)
-
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 		}
 		break;
-#endif	// CSK_EVENT_CHERRYBLOSSOM
-#ifdef ADD_SOCKET_MIX
 	case SEASON3A::MIXTYPE_ATTACH_SOCKET:
 		g_pRenderText->SetBgColor(0, 0, 0, 0);
 		g_pRenderText->SetTextColor(200, 200, 200, 255);
@@ -934,19 +867,16 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
 		g_pRenderText->RenderText(fPos_x, fPos_y+280+0*13, szText, 160.0f, 0, RT3_SORT_CENTER);
 		m_SocketListBox.Render();
 		break;
-#endif	// ADD_SOCKET_MIX
 	default:
 		break;
 	}
 }
 
-#ifdef LEM_FIX_MIXREQUIREZEN	// Rtn_MixRequireZen 함수  [lem.2010.7.29]
 int CNewUIMixInventory::Rtn_MixRequireZen( int _nMixZen, int _nTax )
 {
 	if( _nTax )		_nMixZen += ((LONGLONG)_nMixZen*g_nChaosTaxRate)/100;
 	return _nMixZen;
 }
-#endif	// LEM_FIX_MIXREQUIREZEN
 
 bool CNewUIMixInventory::Mix()
 {
@@ -955,9 +885,7 @@ bool CNewUIMixInventory::Mix()
 	DWORD dwGold	= CharacterMachine->Gold;
 	int	  nMixZen	= g_MixRecipeMgr.GetReqiredZen();
 
-#ifdef LEM_FIX_MIXREQUIREZEN	// Rtn_MixRequireZen 
 	nMixZen = Rtn_MixRequireZen( nMixZen, g_nChaosTaxRate );
-#endif	// LEM_FIX_MIXREQUIREZEN
 
 	if ( nMixZen > (int)dwGold)
     {
@@ -992,7 +920,6 @@ bool CNewUIMixInventory::Mix()
 		return false;
 	}
 
-#ifdef ADD_SOCKET_MIX
 	if (g_MixRecipeMgr.GetMixInventoryType() == SEASON3A::MIXTYPE_ATTACH_SOCKET)
 	{
 		int iSelectedLine = m_SocketListBox.GetLineNum() - m_SocketListBox.SLGetSelectLineNum();
@@ -1041,7 +968,6 @@ bool CNewUIMixInventory::Mix()
 		}
 		g_MixRecipeMgr.SetMixSubType(iSelectedLine);
 	}
-#endif	// ADD_SOCKET_MIX
 
 #ifdef LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
 	if (g_MixRecipeMgr.GetTotalChaosCharmCount() > 0 && g_MixRecipeMgr.GetTotalCharmCount() > 0 )

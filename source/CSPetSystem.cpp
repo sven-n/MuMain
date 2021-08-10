@@ -3,8 +3,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef PET_SYSTEM
 #include "CSPetSystem.h"
 #include "zzzlodterrain.h"
 #include "zzzAi.h"
@@ -24,24 +22,18 @@
 #include "DuelMgr.h"
 #include "MapManager.h"
 
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM		// 정리할때 삭제해야 함
-extern bool g_PetEnableDuel;	// LHJ - 결투중에 다크로드의 다크스피릿이 공격중 인지 판단하는 변수
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM	// 정리할때 삭제해야 함
+#ifndef YDG_ADD_NEW_DUEL_SYSTEM	
+extern bool g_PetEnableDuel;
+#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
 extern  int     MoveSceneFrame;
 extern  float   WorldTime;
 extern	char    TextList[30][100];
 extern	int     TextListColor[30];
 extern	int     TextBold[30];
-extern  float   g_fScreenRate_x;	// ※
+extern  float   g_fScreenRate_x;
 extern  float   g_fScreenRate_y;
 
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 #ifdef YDG_FIX_MEMORY_LEAK_0905
 CSPetSystem::~CSPetSystem()
 {
@@ -54,18 +46,11 @@ void CSPetSystem::CreatePetPointer ( int Type, unsigned char PositionX, unsigned
     CHARACTER*  c = &m_PetCharacter;
 	OBJECT*     o = &c->Object;
 
-    m_PetTarget = NULL;             //  팻 공격 목표.
-    m_byCommand = PET_CMD_DEFAULT;  //  명령상태.
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-	m_pPetInfo	= NULL;				// 펫정보
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
+    m_PetTarget = NULL;
+    m_byCommand = PET_CMD_DEFAULT;
+	m_pPetInfo	= NULL;	
 
 	o->Initialize();
-	
-#if defined MR0 || defined OBJECT_ID
-	if(o->m_iID == 0) o->m_iID = GenID();
-#endif //MR0
-
 	c->PositionX      = PositionX;
 	c->PositionY      = PositionY;
 	c->TargetX      = PositionX;
@@ -110,8 +95,8 @@ void CSPetSystem::CreatePetPointer ( int Type, unsigned char PositionX, unsigned
     c->ExtendState = 0;
     c->ExtendStateTime = 0;
 
-	c->GuildStatus		= -1;	// 길드내에서의 직책
-	c->GuildType		= 0;	// 길드타입
+	c->GuildStatus		= -1;
+	c->GuildType		= 0;
 	c->ProtectGuildMarkWorldTime = 0.0f;
 
 	c->m_byDieType		= 0;
@@ -185,7 +170,7 @@ void CSPetSystem::CreatePetPointer ( int Type, unsigned char PositionX, unsigned
 	c->CollisionTime    = 0;
 	o->CollisionRange   = 200.f;
 	c->Rot              = 0.f;
-	c->Level            = 0;//m_PetInfo.m_wLevel;
+	c->Level            = 0;
 	c->Item             = -1;
 	
 	o->BlendMesh        = -1;
@@ -202,14 +187,11 @@ void CSPetSystem::CreatePetPointer ( int Type, unsigned char PositionX, unsigned
 		c->Weapon[1].LinkBone = 0;
 		break;
 	}
-
-    //  명령어 초기화.
     m_byCommand = PET_CMD_DEFAULT;
 
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM							//## 소스정리 대상임.
-    //  다크스피릿 정보를 얻는다.
+#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM
     SendRequestPetInfo ( 0, 0, EQUIPMENT_WEAPON_LEFT );
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM						//## 소스정리 대상임.
+#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 
 bool CSPetSystem::PlayAnimation ( OBJECT* o )
@@ -323,20 +305,12 @@ void    CSPetDarkSpirit::MovePet ( void )
     BMD* b = &Models[Owner->Type];
     o->WeaponLevel = (BYTE)c->Level;
 
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	if(!g_DuelMgr.IsPetDuelEnabled())
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-	if(!g_PetEnableDuel)
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 	{
 		m_byCommand = 0;
 		CSPetSystem* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
-		SendRequestPetCommand ( pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xffff );	// LHJ - 서버에 펫 공격 안하게 요청함
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
+		SendRequestPetCommand ( pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xffff );
 		g_DuelMgr.EnablePetDuel(TRUE);
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-		g_PetEnableDuel = true;
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 	}
 	
 	if ( c->TargetCharacter >= 0 && c->TargetCharacter<MAX_CHARACTERS_CLIENT )
@@ -384,7 +358,6 @@ void    CSPetDarkSpirit::MovePet ( void )
     {
         if ( o->AI!=PET_STAND && o->AI!=PET_STAND_START )
         {
-            //  주인과의 거리를 계산한다.
 		    float dx = o->Position[0]-Owner->Position[0];
 		    float dy = o->Position[1]-Owner->Position[1];
 		    float Distance = sqrtf(dx*dx+dy*dy);
@@ -402,7 +375,6 @@ void    CSPetDarkSpirit::MovePet ( void )
         SetAI ( PET_FLYING );
     }
 
-    //  애니메이션을 한다.
     Play = PlayAnimation ( o );
     if ( Play==false )
     {
@@ -434,12 +406,10 @@ void    CSPetDarkSpirit::MovePet ( void )
 	    VectorSubtract ( TargetPosition, o->Position, Range );
     }
 
-    //  일반 날기.
     if ( o->AI==PET_FLY || o->AI==PET_FLYING )
     {
         o->m_bActionStart = false;
 
-        //  먼지 발생.
         vec3_t p, Pos, Light;
         Vector ( 0.3f, 0.4f, 0.7f, Light );
         Vector ( 0.f, 0.f, 0.f, p );
@@ -491,7 +461,7 @@ void    CSPetDarkSpirit::MovePet ( void )
 		float Speed = 0;
 	    if ( rand()%speedRandom==0 )
 	    {
-     	    if ( Distance>=FlyRange*FlyRange )  //  주인과 멀리 떨어져있다.
+     	    if ( Distance>=FlyRange*FlyRange )
             {
                 Speed = -(float)(rand()%64+128)*0.1f;
             }
@@ -509,7 +479,7 @@ void    CSPetDarkSpirit::MovePet ( void )
 		    o->Direction[2] = (float)(rand()%64-32)*0.1f;
 	    }
 
-     	if ( o->Direction[1]<-12.f )  //  주인과 멀리 떨어져있다.
+     	if ( o->Direction[1]<-12.f )
         {
             if ( o->AI!=PET_FLYING )
             {
@@ -560,7 +530,6 @@ void    CSPetDarkSpirit::MovePet ( void )
     }
     else if ( o->AI==PET_ATTACK_MAGIC )
     {
-        //  마법 공격을 한다.
         if ( c->TargetCharacter!=-1 )
         {
             CHARACTER* tc = &CharactersClient[c->TargetCharacter];
@@ -579,7 +548,6 @@ void    CSPetDarkSpirit::MovePet ( void )
         VectorCopy ( Owner->Angle, o->Angle );
         o->Angle[2] -= 120.f;
     }
-    //  손에 가기 위한 준비.
     else if ( o->AI==PET_STAND_START )
     {
         vec3_t p, Pos;
@@ -601,8 +569,6 @@ void    CSPetDarkSpirit::MovePet ( void )
             SetAI ( PET_STAND );
         }
     }
-
-    //  공격.
     if ( o->AI>=PET_ATTACK && o->AI<=PET_ATTACK_MAGIC )
     {
         c->AttackTime++;
@@ -611,14 +577,11 @@ void    CSPetDarkSpirit::MovePet ( void )
             c->AttackTime = 15;
         }
     }
-
-    //  사운드 처리.
     if ( (rand()%100)==0 && (MoveSceneFrame%60)==0 )
     {
         PlayBuffer ( SOUND_DSPIRIT_SHOUT, o );
     }
 
-    //  다크스피릿이 사라졌을때의 처리.
     VectorCopy ( m_PetOwner->Object.Position, TargetPosition );
 	VectorSubtract ( TargetPosition, o->Position, Range );
 	float Distance = Range[0]*Range[0]+Range[1]*Range[1];
@@ -634,11 +597,7 @@ void    CSPetDarkSpirit::MovePet ( void )
     }
 }
 
-#ifdef KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
 void CSPetDarkSpirit::CalcPetInformation ( const PET_INFO& Petinfo )
-#else // KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
-void    CSPetDarkSpirit::CalcPetInformation ( BYTE Level, int exp )
-#endif // KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
 {
 #ifndef KJH_FIX_DARKLOAD_PET_SYSTEM
     int Charisma = CharacterAttribute->Charisma+CharacterAttribute->AddCharisma;
@@ -666,23 +625,14 @@ void    CSPetDarkSpirit::CalcPetInformation ( BYTE Level, int exp )
     m_PetInfo.m_wDamageMin  = (180+(m_PetInfo.m_wLevel*15)+(Charisma/8));
     m_PetInfo.m_wAttackSpeed= (20+(m_PetInfo.m_wLevel*4/5)+(Charisma/50));
     m_PetInfo.m_wAttackSuccess = (1000+m_PetInfo.m_wLevel)+(m_PetInfo.m_wLevel*15);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM														//## 소스정리 대상임.
+#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  Pet에 대한 정보 화면에 표시.
-//////////////////////////////////////////////////////////////////////////
 void    CSPetDarkSpirit::RenderPetInventory ( void )
 {
-    //  현재 명령 상태를 화면에 나타낸다.
     RenderCmdType ();
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  Pet을 화면에 출력한다.
-//////////////////////////////////////////////////////////////////////////
 void    CSPetDarkSpirit::RenderPet ( int PetState )
 {
     CHARACTER* c = &m_PetCharacter;
@@ -719,10 +669,6 @@ void    CSPetDarkSpirit::RenderPet ( int PetState )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  레벨업효과.
-//////////////////////////////////////////////////////////////////////////
 void    CSPetDarkSpirit::Eff_LevelUp ( void )
 {
     OBJECT* o    = &m_PetCharacter.Object;
@@ -736,10 +682,6 @@ void    CSPetDarkSpirit::Eff_LevelUp ( void )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  레벨다운 효과.
-//////////////////////////////////////////////////////////////////////////
 void    CSPetDarkSpirit::Eff_LevelDown ( void )
 {
     OBJECT* o    = &m_PetCharacter.Object;
@@ -752,10 +694,6 @@ void    CSPetDarkSpirit::Eff_LevelDown ( void )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  현재 설정된 명령 상태를 보여준다.
-//////////////////////////////////////////////////////////////////////////
 void    CSPetDarkSpirit::RenderCmdType ( void )
 {
     float   x, y, Width, Height;
@@ -769,9 +707,7 @@ void    CSPetDarkSpirit::RenderCmdType ( void )
     {
         PartyWidth = 50.f;
     }
-    if ( (Hero->Helper.Type>=MODEL_HELPER+0 && Hero->Helper.Type<=MODEL_HELPER+4)
-		|| Hero->Helper.Type == MODEL_HELPER+37	//^ 펜릴 인터페이스 관련(다크스피릿 예외)
-		)
+    if ( (Hero->Helper.Type>=MODEL_HELPER+0 && Hero->Helper.Type<=MODEL_HELPER+4) || Hero->Helper.Type == MODEL_HELPER+37)
     {
         PartyWidth += 60.f;
     }
@@ -800,11 +736,7 @@ void    CSPetDarkSpirit::RenderCmdType ( void )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  Pet공격 효과.
-//////////////////////////////////////////////////////////////////////////
-void    CSPetDarkSpirit::AttackEffect ( CHARACTER* c, OBJECT* o )
+void CSPetDarkSpirit::AttackEffect ( CHARACTER* c, OBJECT* o )
 {
     BMD* b = &Models[o->Type];
     vec3_t p, Pos, Light;
@@ -883,5 +815,3 @@ void    CSPetDarkSpirit::AttackEffect ( CHARACTER* c, OBJECT* o )
     }
 }
 
-
-#endif	// PET_SYSTEM

@@ -1,13 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  UIGuildMaster.cpp
-//  
-//  내  용 : NPC 길드마스터 클릭시 보여주는 인터페이스
-//  
-//  날  짜 : 2004년 11월 09일
-//  
-//  작성자 : 강 병 국
-//  
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -20,6 +12,7 @@
 #include "DSPlaySound.h"
 #include "wsclientinline.h"
 #include "NewUICommonMessageBox.h"
+#include "Local.h"
 
 extern CUITextInputBox*	g_pSingleTextInputBox;
 extern int				g_iChatInputType;
@@ -143,18 +136,15 @@ CUIGuildMaster::CUIGuildMaster()
 	m_nCurrMode		= MODE_NONE;
 	m_eCurrStep		= STEP_MAIN;
 
-	// 길드 만들기 버튼
 	m_CreateGuildButton.Init( 1, GlobalText[1303] );
 	m_CreateGuildButton.SetParentUIID( GetUIID() );
 	m_CreateGuildButton.SetSize( 100, 20 );
 
-	// 길드마크 변경 버튼
 	m_EditGuildMarkButton.Init( 2, GlobalText[1304] );
 	m_EditGuildMarkButton.SetParentUIID( GetUIID() );
 	m_EditGuildMarkButton.SetSize( 100, 20 );
 	m_dwEditGuildMarkConfirmPopup = 0;
 
-	// 이전, 다음 버튼
 	m_PreviousButton.Init( 4, GlobalText[1306] );
 	m_PreviousButton.SetParentUIID( GetUIID() );
 	m_PreviousButton.SetPosition( GetPosition_x()+15+30, GetPosition_y()+360 );
@@ -185,11 +175,9 @@ BOOL CUIGuildMaster::IsValidGuildName( const char* szName )
 
 BOOL CUIGuildMaster::IsValidGuildMark()
 {
-	// 길드마크를 그렸는지 검사
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	BOOL bDraw = FALSE;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	for( int i=0;i<64;i++ )
 	{
 		if( GuildMark[MARK_EDIT].Mark[i] != 0 )
@@ -208,7 +196,7 @@ void CUIGuildMaster::StepPrev()
 		{
 			case STEP_CREATE_GUILDINFO:		m_nCurrMode = MODE_NONE;	m_eCurrStep = STEP_MAIN;	break;
 			case STEP_CONFIRM_GUILDINFO:	m_eCurrStep = STEP_CREATE_GUILDINFO;					break;
-			default:						assert( !"잘못된 m_eCurrStep" );		break;
+			default:						assert( !"m_eCurrStep" );		break;
 		}
 		break;
 	case MODE_EDIT_GUILDMARK:
@@ -216,11 +204,11 @@ void CUIGuildMaster::StepPrev()
 		{
 			case STEP_EDIT_GUILD_MARK:		m_nCurrMode = MODE_NONE;	m_eCurrStep = STEP_MAIN;	break;
 			case STEP_CONFIRM_GUILDINFO:	m_eCurrStep = STEP_EDIT_GUILD_MARK;		break;
-			default:						assert( !"잘못된 m_eCurrStep" );		break;
+			default:						assert( !"m_eCurrStep" );		break;
 		}
 		break;
 	default:
-		assert( !"잘못된 m_nCurrMode" );
+		assert( !"m_nCurrMode" );
 		break;
 	}
 }
@@ -234,7 +222,7 @@ void CUIGuildMaster::StepNext()
 		{
 			case STEP_MAIN:					m_eCurrStep = STEP_CREATE_GUILDINFO;	break;
 			case STEP_CREATE_GUILDINFO:		m_eCurrStep = STEP_CONFIRM_GUILDINFO;	break;
-			default:						assert( !"잘못된 m_eCurrStep" );		break;
+			default:						assert( !"Guild Error 1" );		break;
 		}
 		break;
 	case MODE_EDIT_GUILDMARK:
@@ -242,11 +230,11 @@ void CUIGuildMaster::StepNext()
 		{
 			case STEP_MAIN:					m_eCurrStep = STEP_EDIT_GUILD_MARK;		break;
 			case STEP_EDIT_GUILD_MARK:		m_eCurrStep = STEP_CONFIRM_GUILDINFO;	break;
-			default:						assert( !"잘못된 m_eCurrStep" );		break;
+			default:						assert( !"Guild Error 2" );		break;
 		}
 		break;
 	default:
-		assert( !"잘못된 m_nCurrMode" );
+		assert( !"m_nCurrMode" );
 		break;
 	}
 }
@@ -260,10 +248,8 @@ void CUIGuildMaster::CloseMyPopup()
 
 void CUIGuildMaster::DoCreateGuildAction()
 {
-	// 길드마크 편집창 입력처리
 	EditGuildMarkMouseAction( GetPosition_x(), GetPosition_y() );
 
-	// 길드명과 마크 검사하고 다음 단계로..
 	if( m_NextButton.DoMouseAction() )
 	{
 		if( g_iChatInputType == 1 )
@@ -277,15 +263,12 @@ void CUIGuildMaster::DoCreateGuildAction()
 		}
 		else if( CheckSpecialText( InputText[0] ) )
 		{
-			// 391 "특수문자는 사용하실 수 없습니다."
 			SEASON3B::CreateOkMessageBox(GlobalText[391]);
 		}
 		else
 		{
-			// 길드명 검사
 			if( IsValidGuildName( InputText[0] ) )
 			{
-				// 길드마크 검사
 				if( IsValidGuildMark() )
 				{
 					if( g_iChatInputType == 1 )
@@ -301,13 +284,11 @@ void CUIGuildMaster::DoCreateGuildAction()
 				}
 				else
 				{
-					// 426 "길드 마크를 그려주세요."
 					SEASON3B::CreateOkMessageBox(GlobalText[426]);
 				}
 			}
 			else
 			{
-				// 390 "2글자이상 입력해주세요."
 				SEASON3B::CreateOkMessageBox(GlobalText[390]);
 			}
 		}
@@ -315,11 +296,10 @@ void CUIGuildMaster::DoCreateGuildAction()
 		{
 			g_pSingleTextInputBox->SetText( NULL );
 			SaveIMEStatus();
-			g_pSingleTextInputBox->SetState( UISTATE_HIDE );	// 길드 입력창 숨김
+			g_pSingleTextInputBox->SetState( UISTATE_HIDE );
 		}
 	}
 
-	// 이전 단계로..
 	if( m_PreviousButton.DoMouseAction() )
 	{
 		Hero->GuildMarkIndex = -1;
@@ -327,7 +307,7 @@ void CUIGuildMaster::DoCreateGuildAction()
 		{
 			g_pSingleTextInputBox->SetText( NULL );
 			SaveIMEStatus();
-			g_pSingleTextInputBox->SetState( UISTATE_HIDE );	// 길드 입력창 숨김
+			g_pSingleTextInputBox->SetState( UISTATE_HIDE );
 		}
 		memset( InputText[0], 0, MAX_ID_SIZE );
 		InputLength[0] = 0;
@@ -340,16 +320,13 @@ void CUIGuildMaster::RenderCreateGuild()
 {
 	POINT ptOrigin = { GetPosition_x()+25, GetPosition_y()+60 };
 
-	// 입력창바탕 출력
 	RenderBitmap( BITMAP_INVENTORY+11, ptOrigin.x+33, ptOrigin.y-4, 110, 18, 0.f, 0.f, 110.f/128.f, 18.f/32.f );
 
-	// 길드명 출력
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetTextColor(230, 230, 230, 255);
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[182]);
 
-	// 입력창 출력
 	if( g_iChatInputType == 1 )
 	{
 		g_pSingleTextInputBox->SetState( UISTATE_NORMAL );
@@ -357,13 +334,9 @@ void CUIGuildMaster::RenderCreateGuild()
 		g_pSingleTextInputBox->SetBackColor( 0, 0, 0, 0 );
 		g_pSingleTextInputBox->SetTextLimit( 8 );
 		g_pSingleTextInputBox->SetSize( 70, 14 );
-#if SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-		g_pSingleTextInputBox->SetPosition( ptOrigin.x+38+5, ptOrigin.y );
-#else
 		g_pSingleTextInputBox->SetPosition( ptOrigin.x+38, ptOrigin.y );
-#endif
 		g_pSingleTextInputBox->GiveFocus();
-		g_pSingleTextInputBox->Render();	// 길드명 짓기※
+		g_pSingleTextInputBox->Render();
 	}
 	else if( g_iChatInputType == 0 )
 	{
@@ -372,11 +345,9 @@ void CUIGuildMaster::RenderCreateGuild()
 		InputTextWidth = 255;
 	}
 
-	// 길드마크 편집창 출력
 	CreateGuildMark( MARK_EDIT );
 	RenderGuildMark( GetPosition_x(), GetPosition_y() );
 
-	// 이전, 다음 버튼 출력
 	m_PreviousButton.Render();
 	m_NextButton.Render();
 }
@@ -385,7 +356,6 @@ void CUIGuildMaster::DoCreateInfoAction()
 {
 	if( m_NextButton.DoMouseAction() )
 	{
-		// 길드마크 얻기
 		BYTE Mark[32];
 		for( int i=0 ; i<64; i++ )
 		{
@@ -406,7 +376,6 @@ void CUIGuildMaster::DoCreateInfoAction()
 //			SendRequestEditGuildMark( (BYTE*)GuildMark[MARK_EDIT].GuildName, Mark );
 //		}
 
-		// UI 닫기
 		SendRequestGuildMaster( FALSE );
 		Close();
 
@@ -425,7 +394,6 @@ void CUIGuildMaster::RenderCreateInfo()
 	
 	g_pRenderText->SetFont(g_hFont);
 	
-	// 길드 이름
 	char szTemp[128];
 	g_pRenderText->SetBgColor(0);
 	
@@ -434,14 +402,12 @@ void CUIGuildMaster::RenderCreateInfo()
 	ptOrigin.y += 6;
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140, 0, RT3_SORT_CENTER);
 
-	// 길드마크
 	ptOrigin.x += 44;
 	ptOrigin.y += 33;
 	RenderGoldRect( ptOrigin.x, ptOrigin.y, 53.f, 53.f );
 	CreateGuildMark( MARK_EDIT );
 	RenderBitmap( BITMAP_GUILD, ptOrigin.x+3, ptOrigin.y+3, 48, 48 );
 
-	// 이전, 다음 버튼
 	m_PreviousButton.Render();
 	m_NextButton.Render();
 }
@@ -472,30 +438,25 @@ void CUIGuildMaster::RenderEditGuildMark()
 {
 	POINT ptOrigin = { GetPosition_x()+25, GetPosition_y()+60 };
 
-	// 길드 이름
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetTextColor(230, 230, 230, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[182]);
 
-	// 길드명 표시
 	char Text[100];
 	sprintf( Text, "%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore );
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, Text, 140*g_fScreenRate_x, 0, RT3_SORT_CENTER);
 	g_pRenderText->SetFont(g_hFont);
 	
-	// 길드마크 편집창 출력
 	CreateGuildMark( MARK_EDIT );
 	RenderGuildMark( GetPosition_x(), GetPosition_y() );
 
-	// 이전, 다음 버튼
 	m_PreviousButton.Render();
 	m_NextButton.Render();
 }
 
 void CUIGuildMaster::DoGuildMasterMainAction()
 {
-	// 길드 만들기 눌렀을때..
 	if( m_CreateGuildButton.DoMouseAction() )
 	{
 		m_nCurrMode = MODE_CREATE_GUILD;
@@ -503,7 +464,6 @@ void CUIGuildMaster::DoGuildMasterMainAction()
 		GuildInputEnable = TRUE;
 		SendRequestGuildMaster( TRUE );
 	}
-	// 길드마크 변경 눌렀을때..
 	if( m_EditGuildMarkButton.DoMouseAction() )
 	{
 		// 1269 "아직 지원하지 않는 기능입니다."
@@ -518,7 +478,6 @@ void CUIGuildMaster::DoGuildMasterMainAction()
 		m_dwEditGuildMarkConfirmPopup = g_pUIPopup->SetPopup( &szText[0][0], 4, 50, POPUP_YESNO, ::DoEditGuildMarkConfirmAction );*/
 	}
 
-	// 닫기 눌렀을때..
 	if( MouseLButtonPush && CheckMouseIn( GetPosition_x()+25, GetPosition_y()+395, 24, 24 ) )
 	{
 		MouseLButtonPush = FALSE;
@@ -542,25 +501,18 @@ void CUIGuildMaster::RenderGuildMasterMain()
 	if( Hero->GuildStatus != G_NONE )
 	{
 		char Text[100];
-		// 길드명 표시
 		sprintf( Text, "%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore );
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, Text, 140*g_fScreenRate_x, 0, RT3_SORT_CENTER);
-
-		// 버튼활성화
 		m_CreateGuildButton.SetState( UISTATE_DISABLE );
 		m_EditGuildMarkButton.SetState( UISTATE_NORMAL );
 	}
 	else
 	{
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[181] );
-		// 길드 마스터가 되시겠습니까? 표시
-
-		// 버튼활성화
 		m_CreateGuildButton.SetState( UISTATE_NORMAL );
 		m_EditGuildMarkButton.SetState( UISTATE_DISABLE );
 	}
 
-	// 길드 만들기, 길드마크 변경, 클랜 만들기 버튼 출력
 	ptOrigin.x = GetPosition_x()+45;
 	ptOrigin.y += 30;
 	m_CreateGuildButton.SetPosition( ptOrigin.x, ptOrigin.y );
@@ -607,42 +559,30 @@ void CUIGuildMaster::ReceiveGuildRelationShip( BYTE byRelationShipType, BYTE byR
 	{
 		if( m_byRelationShipRequestType == 0x01 )	// Join
 		{
-#if SELECTED_LANGUAGE==LANGUAGE_ENGLISH || SELECTED_LANGUAGE==LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-			sprintf( szText[0], GlobalText[1280] );					// 1280 "%s 님으로부터 길드연합"
-			sprintf( szText[1], GlobalText[1281], pPlayer->ID );	// 1281 "가입 요청이 들어왔습니다."
-			sprintf( szText[2], GlobalText[1283] );					// 1283 "수락하시겠습니까?"
-#else
-			sprintf( szText[0], GlobalText[1280], pPlayer->ID );	// 1280 "%s 님으로부터 길드연합"
-			sprintf( szText[1], GlobalText[1281] );					// 1281 "가입 요청이 들어왔습니다."
-			sprintf( szText[2], GlobalText[1283] );					// 1283 "수락하시겠습니까?"
-#endif //SELECTED_LANGUAGE==LANGUAGE_ENGLISH || SELECTED_LANGUAGE==LANGUAGE_PHILIPPINES
+			sprintf( szText[0], GlobalText[1280] );
+			sprintf( szText[1], GlobalText[1281], pPlayer->ID );
+			sprintf( szText[2], GlobalText[1283] );
 		}
 		else										// Break Off
 		{
-#if SELECTED_LANGUAGE==LANGUAGE_ENGLISH || SELECTED_LANGUAGE==LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-			sprintf( szText[0], GlobalText[1280] );					// 1280 "%s 님으로부터 길드연합"
-			sprintf( szText[1], GlobalText[1282], pPlayer->ID );	// 1282 "탈퇴 요청이 들어왔습니다."
-			sprintf( szText[2], GlobalText[1283] );					// 1283 "수락하시겠습니까?"
-#else
-			sprintf( szText[0], GlobalText[1280], pPlayer->ID );	// 1280 "%s 님으로부터 길드연합"
-			sprintf( szText[1], GlobalText[1282] );					// 1282 "탈퇴 요청이 들어왔습니다."
-			sprintf( szText[2], GlobalText[1283] );					// 1283 "수락하시겠습니까?"
-#endif //SELECTED_LANGUAGE==LANGUAGE_ENGLISH || SELECTED_LANGUAGE==LANGUAGE_PHILIPPINES
+			sprintf( szText[0], GlobalText[1280] );
+			sprintf( szText[1], GlobalText[1282], pPlayer->ID );
+			sprintf( szText[2], GlobalText[1283] );
 		}
 	}
 	else if( m_byRelationShipType == 0x02 )		// Rival
 	{
 		if( m_byRelationShipRequestType == 0x01 )	// Join
 		{
-			sprintf( szText[0], GlobalText[1284], pPlayer->ID );	// 1284 "%s 님으로부터 적대길드"
-			sprintf( szText[1], GlobalText[1286] );				// 1286 "수락 요청이 들어왔습니다."
-			sprintf( szText[2], GlobalText[1283] );				// 1283 "수락하시겠습니까?"
+			sprintf( szText[0], GlobalText[1284], pPlayer->ID );
+			sprintf( szText[1], GlobalText[1286] );
+			sprintf( szText[2], GlobalText[1283] );
 		}
 		else										// Break Off
 		{
-			sprintf( szText[0], GlobalText[1284], pPlayer->ID );	// 1284 "%s 님으로부터 적대길드"
-			sprintf( szText[1], GlobalText[1285] );				// 1285 "해제 요청이 들어왔습니다."
-			sprintf( szText[2], GlobalText[1283] );				// 1283 "수락하시겠습니까?"
+			sprintf( szText[0], GlobalText[1284], pPlayer->ID );
+			sprintf( szText[1], GlobalText[1285] );
+			sprintf( szText[2], GlobalText[1283] );
 		}
 	}
 

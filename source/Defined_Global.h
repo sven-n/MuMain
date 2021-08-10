@@ -7,7 +7,6 @@
 
 // [2010.10.28 1.03H+]
 #define LJH_FIX_RUNTIME_ERROR_WHEN_RENDERING_DROPPED_ITEMNAME	// 바닥에 떨어진 아이템의 이름을 렌더링할때 런타임에러 수정(10.09.15)
-#define LEM_FIX_MIXREQUIREZEN									// Rtn_MixRequireZen 함수  [lem.2010.7.29]
 #define LEM_FIX_ITEMTOOLTIP_POS									// 인벤토리 아이템 툴팁 위치 수정 [lem.2010.7.28]
 #define PBG_FIX_DROPBAN_GENS									// 버리기 아이템 수정
 
@@ -41,7 +40,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------------------------
-// << 시즌 5-4 >>
+// << Season 5-4 >>
 //----------------------------------------------------------------------------------------------
 // [2010.09.30 글로벌 1.03B+] - 이주흥
 
@@ -49,7 +48,7 @@
 #ifdef  SEASON5_4
 
 	//-----------------------------------------------------------------------------
-	// [ 시즌 5 - Part 4 ]
+	// [ Season 5 - Part 4 ]
 	// - 박종훈
 	#define PJH_ADD_MASTERSKILL								//소환술사 마스터레벨 추가(2010.03.09)
 		#ifdef PJH_ADD_MASTERSKILL								
@@ -97,7 +96,7 @@
 	#define YDG_ADD_MOVE_COMMAND_PROTOCOL						// 이동명령 프로토콜 추가(/이동 제거) (2009.04.01) [2009.04.22 테섭]
 
 	//-----------------------------------------------------------------------------
-	// [ 시즌 5 - Part 4 버그수정]
+	// [ Season 5 - Part 4 버그수정]
 	#define LDK_MOD_GUARDIAN_DROP_RESIZE					// 데몬 수호정령 바닥에 놓였을때 사이즈 조정(10.03.04)
 	#define PBG_FIX_SATAN_VALUEINCREASE						// 사탄 착용시 수치 증가 버그 수정(10.04.07)
 	#define PBG_MOD_GUARDCHARMTEXT							// 수호의부적아템 문구수정(10.04.14)
@@ -128,7 +127,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------------------------
-// << 시즌 5 - Part 1 ~ Part 3, 부분 유료화 7, 8차 >>
+// << Season 5 - Part 1 ~ Part 3, 부분 유료화 7, 8차 >>
 //----------------------------------------------------------------------------------------------
 // [2010.05.27 글로벌 1.03w] - 김재희
 
@@ -137,7 +136,7 @@
 #ifdef UPDATE_100527
 
 	//-----------------------------------------------------------------------------
-	// [ 시즌 5 - Part 3 추가 버그수정]
+	// [ Season 5 - Part 3 추가 버그수정]
 	#define KJH_FIX_BTS158_TEXT_CUT_ROUTINE							// UI에 맞게 Text를 자를시 이상현상 수정 (10.05.07)
 	#define KJH_MOD_BTS173_INGAMESHOP_ITEM_STORAGE_PAGE_ZERO_PAGE	// 인게임샵 보관함 아이템이 없을시 0페이지 출력 (10.05.13)
 	#define KJH_FIX_BTS179_INGAMESHOP_STORAGE_UPDATE_WHEN_ITEM_BUY	// 인게임샵 아이템 구입시 선물함 탭에서 보관함 아이템이 갱신되는 버그수정 (10.05.13)
@@ -159,14 +158,14 @@
 	#define ASG_FIX_QUEST_GIVE_UP									// 퀘스트 포기 버그 수정. 퀘스트 상태(QS) 0xfe삭제됨.(10.05.26)
 
 	//-----------------------------------------------------------------------------
-	// [ 시즌 5 - Part 3 추가작업]
+	// [ Season 5 - Part 3 추가작업]
 	#define KJH_MOD_INGAMESHOP_UNITTTYPE_FILED_OF_PRODUCT_SCRIPT	// Product 게임샵 스크립트의 UnitType필드로 단위명 변경 (10.04.22) - 10.03.29일자 인게임샵 라이브러리 적용
 	#define KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// 인게임샵 보관함 페이지 단위 방식으로 변경 (10.04.27)
 	#define KJH_MOD_INGAMESHOP_DOMAIN_EACH_NATION					// 국가별 게임샵 도메인 설정 (10.05.04)
 	#define KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL			// Global 캐시 포인트 시스템. (10.04.19) - 글로벌 전용
 
 	//-----------------------------------------------------------------------------
-	// [ 시즌 5 - Part 3 이후 버그수정]
+	// [ Season 5 - Part 3 이후 버그수정]
 	#define KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT			// 비정상적적인 종료시 이벤트맵 초기화 (10.04.20)
 
 	#define LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM	// 로렌 시장 서버로부터 개인상점 구매이후 ReceiveRefreshPersonalShopItem 받을 때 Error Log 정보를 더 자세히 출력 (10.03.30)
@@ -192,7 +191,7 @@
 
 
 	//-----------------------------------------------------------------------------
-	// [ 시즌 5 - Part 3] - 스킬아이콘 리뉴얼, 미니맵, 아이템 업그레이드(14, 15lv), 겐스 시스템, 로렌시장 (10.04.27)
+	// [ Season 5 - Part 3] - 스킬아이콘 리뉴얼, 미니맵, 아이템 업그레이드(14, 15lv), 겐스 시스템, 로렌시장 (10.04.27)
 	#define SEASON5_PART3
 	#ifdef SEASON5_PART3
 		//------------------------------------------------
@@ -245,7 +244,7 @@
 	#endif // SEASON5_PART3
 
 	//-----------------------------------------------------------------------------
-	// [ 시즌 5 - Part 2 이후 버그수정]
+	// [ Season 5 - Part 2 이후 버그수정]
 
 	#define LJH_MOD_TO_USE_ISBLUEMUSERVER_FUNC					// 블루가 적용되지 않은 국가에서 현재 접속해 있는 서버가 블루인지 판별하기 위해 포함(10.03.17)
 	#define PBG_MOD_PANDAPETRING_NOTSELLING						// 펜더 펫 반지 안팔리게 설정(10.01.11)
@@ -384,11 +383,8 @@
 	//-----------------------------------------------------------------------------
 	// [ Seaso 5 - Part 1]
 
-	// - 이동석
 	#define LDS_ADD_SET_BMDMODELSEQUENCE_					// BMD 클래스의 사용되지 않는 변수인 BmdSequenceID에 BMDSequence 설정. (09.08.05)
 	#define LDS_FIX_MEMORYLEAK_BMDWHICHBONECOUNTZERO		// BoneCount==0 인 BMD들에 대한 BMD Destruct 시점에 발생하는 메모리 릭 FIX. (09.08.13)
-	#define LDS_FIX_MEMORYLEAK_0908_DUPLICATEITEM			// DuplicateItem() 내에 힙 영역에 생성된 Item의 메모리 반환 미처리로 메모리 릭 FIX. (09.08.13)
-	#define LDS_FIX_GLERROR_WRONG_WRAPMODEPARAMETER			// ImageOpen시 WrapMode Param 값이 잘못되어, OpenGLERROR가 뜨며 이에 대한 FIX. (MR0 적용 시 치명적 오류가 발생하므로..) (09.08.18)
 	#define LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER	// 제국 수호군 방패병의 서버로부터의 몬스터 스킬==>Action 연결 작업. (09.08.18)
 	#define LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER_EX	// 방패병의 1번 스킬(44)동작의 기존방식과 다른 방식의 에니메이션 호출 재 수정 (09.08.21)
 	#define LDS_FIX_EG_COLOR_CHANDELIER							// release 모드서만 제국 수호군 주말맵 샹들리에 연기 색 다른 버그 수정 (09.08.21)
@@ -411,13 +407,10 @@
 
 
 	//-----------------------------------------------------------------------------
-	// [ 시즌 5 - Part 1]  - 도플갱어, 제국수호군, 신퀘스트시스템 (09.09.11)
+	// [ Season 5 - Part 1] (09.09.11)
 	#define SEASON5										
 	#ifdef SEASON5
-		//------------------------------------------------
-		// 1. 도플갱어
-		// - 양대근
-		#define YDG_ADD_DOPPELGANGER_EVENT						// 도플갱어 이벤트 (2009.04.22)
+		#define YDG_ADD_DOPPELGANGER_EVENT
 		#ifdef YDG_ADD_DOPPELGANGER_EVENT
 			#define YDG_ADD_MAP_DOPPELGANGER1					// 도플갱어 맵1 (라클리온베이스) (2009.03.22)
 			#define YDG_ADD_MAP_DOPPELGANGER2					// 도플갱어 맵2 (불카누스베이스) (2009.03.22)
@@ -432,12 +425,8 @@
 			#define YDG_ADD_DOPPELGANGER_SOUND					// 도플갱어 사운드 추가 (2009.08.04)
 		#endif	// YDG_ADD_DOPPELGANGER_EVENT
 
-		//------------------------------------------------
-		// 2. 제국수호군
-		// 제국 수호군 파티 - 이동석, 이동근
-		#define LDS_ADD_EMPIRE_GUARDIAN							// 제국 수호군
+		#define LDS_ADD_EMPIRE_GUARDIAN
 		#ifdef LDS_ADD_EMPIRE_GUARDIAN
-			// - 이동석
 			#define LDS_ADD_MAP_EMPIREGUARDIAN2					// 제국 수호군 맵 2   (화,  금)
 			#define LDS_ADD_MAP_EMPIREGUARDIAN4					// 제국 수호군 맵 2   (일	  )
 			#define LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN	// 제국 수호군 맵 4   (일	  )몬스터 월드 보스 가이온 카레인	(504/164)
@@ -448,7 +437,6 @@
 			#define LDS_ADD_EG_2_MONSTER_ARTICLECAPTAIN			// 제국 수호군 맵 2   (화,  금)몬스터 기사단장					(514/174)
 			#define LDS_ADD_EG_2_MONSTER_GRANDWIZARD			// 제국 수호군 맵 2   (화,  금)몬스터 대마법사					(515/176)
 
-			// - 이동근 - 미리 define잡은후 차후 define정리 작업 예정
 			#define LDK_ADD_EG_MONSTER_DEASULER					// 제국 수호군 1군단장 데슬러									(508/168)
 			#define LDK_ADD_EG_MONSTER_DRILLMASTER				// 제국 수호군 제국수호군전투교관
 			#define LDK_ADD_EG_MONSTER_QUARTERMASTER			// 제국 수호군 병참장교
@@ -461,7 +449,6 @@
 			#define LDK_ADD_EG_DOOR_EFFECT						// 제국 수호군 맵 성문 파괴 이펙트
 			#define LDK_ADD_EG_STATUE_EFFECT					// 제국 수호군 맵 석상 파괴 이펙트
 
-			//몬스터 - 공통
 			#define	LDK_ADD_EG_MONSTER_RAYMOND					// 제국 수호군 부사령관 레이몬드 (수, 일)
 			#define LDK_ADD_EG_MONSTER_KNIGHTS					// 제국 수호군 기사단	Imperial Guardian Knights	520 - 181	
 			#define LDK_ADD_EG_MONSTER_GUARD					// 제국 수호군 호위병	Imperial Guardian guard		521 - 182
@@ -469,24 +456,18 @@
 			#define LDS_ADD_EG_MONSTER_GUARDIANDEFENDER			// 제국 수호군 맵 1234(모든요일)몬스터 수호군 방패병			(518/178)
 			#define LDS_ADD_EG_MONSTER_GUARDIANPRIEST			// 제국 수호군 맵 1234(모든요일)몬스터 수호군 치유병			(519/179)
 
-			//맵
 			#define LDK_ADD_MAPPROCESS_RENDERBASESMOKE_FUNC		// MapProcess에 RenderBaseSmoke 처리 함수 추가(09.07.31)
 			#define	LDK_ADD_MAP_EMPIREGUARDIAN1					// 제국 수호군 맵 1 (월, 목)
 			#define	LDK_ADD_MAP_EMPIREGUARDIAN3					// 제국 수호군 맵 3 (수, 토)
 
 			#define LDK_ADD_EMPIRE_GUARDIAN_DOOR_ATTACK			// 제국 수호군 성문은 맵속성무기하고 공격가능하도록함 (09.08.06)
 
-			//UI
 			#define LDK_ADD_EMPIREGUARDIAN_UI					// 제국 수호군 ui
-			//프로토콜
 			#define LDK_ADD_EMPIREGUARDIAN_PROTOCOLS			// 제국 수호군 프로토콜
-			//item
 			#define LDK_ADD_EMPIREGUARDIAN_ITEM					// 제국 수호군 아이템(4종:명령서, 종이쪽지, 세크로미콘, 조각)
 
-			//기타 RESOURCE - 공통사항 
 			#define LDS_ADD_RESOURCE_FLARERED					// FLARE_RED.jpg 효과 추가
 
-			//기타 - 공통사항	
 			#define LDS_ADD_MODEL_ATTACH_SPECIFIC_NODE_			// 특정 모델의 특정 노드에 다른 특정 모델을 ATTACH 하는 함수를 추가합니다. (09.06.12)
 			#define LDS_ADD_INTERPOLATION_VECTOR3				// vec3_t의 보간 함수를 zzzmathlib.h에 추가. (09.06.24)
 			#define LDS_MOD_INCREASE_BITMAPIDXBLURNUMBERS		// BITMAP_BLUR 인덱스 수를 기존4개 에서 실사용갯수인 10개로 늘립니다. (09.07.02)
@@ -495,10 +476,8 @@
 			#define LDS_ADD_MAP_EMPIREGUARDIAN4_MAPEFFECT		// 주말맵의 맵 Effect에 추가되는 파티클, EFFECT들.. 
 			#define LDS_FIX_MEMORYLEAK_DESTRUCTORFORBMD			// BMD의 소멸자로 인한 기존 BMD에서 발생한 memoryleak FIXED.. (2009.08.13)
 
-			// - 박보근
 			#define PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT	// (레이몬드)(치유병)몬스터 이펙트 작업(09.07.02)
 
-			// - 김재희
 			#define KJH_ADD_EG_MONSTER_KATO_EFFECT					// 3군단장 카토 이팩트 (09.07.20)
 			#define KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT		// 수호군 방패병 이팩트 (09.07.31)
 		#endif //LDS_ADD_EMPIRE_GUARDIAN
@@ -521,7 +500,7 @@
 		//------------------------------------------------
 		// 4. 추가	
 
-		// 시즌 5 달토끼 이벤트							
+		// Season 5 달토끼 이벤트							
 		#define KJH_PBG_ADD_SEVEN_EVENT_2008					// 국내 상용화 7주년 이벤트	(달토끼)(2008.10.30) 
 		#define LJH_MOD_POSITION_OF_REGISTERED_LUCKY_COIN		// 행운의 동전 등록 제한 수가 2^31이 됨에 따라 동전이미지와 겹치는 현상 막기위해 수정(2010.02.16)							
 		#define YDG_MOD_SEPARATE_EFFECT_SKILLS					// 스킬 검사하는 이펙트 분리 (블러드 어택 등) (2009.08.10)
@@ -539,7 +518,7 @@
 		#define LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG			// 유저가 채팅메세지를 이용 이동할수 없는 맵에 이동하려 하는지 판정(2009.10.29)
 		#define PBG_FIX_SETOPTION_CALCULATE_SECRET_POTION		// 비약관련 세트 옵션 적용버그(09.11.04)
 				
-		// 시즌 5 3차 본섭버젼 버그 수정
+		// Season 5 3차 본섭버젼 버그 수정
 		#define LJH_FIX_BUG_BUYING_AG_AURA_WHEN_USING_SD_AURA	// SD증가 오라를 하용하는 중 AG오라를 구입할 수 있는 버그 수정(09.11.16)
 		#define PBG_FIX_JELINTNPC_TEXTWIDTH						// 제린트npc ui설정 버그 수정(09.11.10)
 		#define PBG_FIX_STOPBGMSOUND							// 로딩이후 bgm사운드 종료되지 않는 버그 수정(09.11.10)
@@ -662,7 +641,7 @@
 #define ASG_ADD_SERVER_LIST_SCRIPTS						// ServerList.txt 스크립트 추가.(2009.10.29) - 국내의 내용을 미리 당겨 사용.
 #ifdef ASG_ADD_SERVER_LIST_SCRIPTS
 	#define ASG_ADD_SERVER_LIST_SCRIPTS_GLOBAL_TEMP		// 미리 ASG_ADD_SERVER_LIST_SCRIPTS 추가로 인한 버그 수정.(10.03.02) 
-															//시즌5 이후 삭제해도 됨.(BuxConvert() 함수 위치 문제) // 시즌5 업데이트시에 삭제해도 되는것인지 확인 다시 할것.
+															//Season5 이후 삭제해도 됨.(BuxConvert() 함수 위치 문제) // Season5 업데이트시에 삭제해도 되는것인지 확인 다시 할것.
 	#define ASG_MOD_SERVER_LIST_ADD_CHARGED_CHANNEL		// 서버리스트에 유료 채널 추가.(10.02.26) - 현재 글로벌만 적용.
 #endif	//ASG_ADD_SERVER_LIST_SCRIPTS
 #define ASG_FIX_NOT_EXECUTION_WEBSTARTER_MSG			// 웹스타터 미실행 메시지 Text.txt 번호 수정(10.03.03)
@@ -682,12 +661,12 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------------------------
-// << 부분유료화 6차 + 시즌 4.5 >> 
+// << 부분유료화 6차 + Season 4.5 >> 
 //----------------------------------------------------------------------------------------------
 // [2010.02.22 글로벌 1.03o] - 안상규
 
 //-----------------------------------------------------------------------------
-// [ 시즌 4.5 ] 
+// [ Season 4.5 ] 
 //		- PK필드/불카누스/겜블/팬더팻
 #define SEASON4_5										
 #ifdef SEASON4_5
@@ -724,7 +703,7 @@
 	#define PJH_ADD_PANDA_PET						// 펜더 펫
 	#define PJH_ADD_PANDA_CHANGERING				// 펜더 변신반지
 
-	// 시즌 4.5 내부 테섭 버그 수정
+	// Season 4.5 내부 테섭 버그 수정
 	#define ADD_FIX_AFTER_SEASON4_5_TEST
 	#ifdef ADD_FIX_AFTER_SEASON4_5_TEST
 		#define YDG_FIX_PANDA_CHANGERING_PANTS_BUG				// 다크로드 맨몸으로 팬더 변신반지 착용시 바지 보이는 버그 (09.07.21)
@@ -757,13 +736,8 @@
 #endif // SEASON4_5
 
 
-//-----------------------------------------------------------------------------
-// [ 부분 유료화 6차 ]
+#define ASG_FIX_LENA_REGISTRATION
 
-#define ASG_FIX_LENA_REGISTRATION				// 레나 개수 32,767개 이상 등록 가능하도록 수정.
-
-// - 안상규
-// 유료 채널(골드 채널) 관련 디파인. 
 #define ASG_ADD_CHARGED_CHANNEL_TICKET					// 유료 채널 입장권.(2010.02.05) - 글로벌전용
 
 #define ADD_TOTAL_CHARGE_6TH
@@ -1002,35 +976,10 @@
 	#define NEW_USER_INTERFACE_BUILDER
 	#define NEW_USER_INTERFACE_RESOURCEFILE
 	#define NEW_USER_INTERFACE_SERVERMESSAGE
-	#define NEW_USER_INTERFACE_MAINFRAME_BUTTON  // 신규 UI에 상점 버튼 추가		
+	#define NEW_USER_INTERFACE_MAINFRAME_BUTTON	
 
-	// 폰트 크기
-	#define FONTSIZE_KOREAN			12	// 한국어
-	#define FONTSIZE_ENGLISH		12	// 글로벌
-	#define FONTSIZE_TAIWANESE		12	// 대만어
-	#define FONTSIZE_CHINESE		12	// 중국어
-	#define FONTSIZE_JAPANESE		15	// 일본어
-	#define FONTSIZE_THAILAND		12	// 태국어
-	#define FONTSIZE_PHILIPPINES	12	// 필리핀
-	#define FONTSIZE_VIETNAMESE		12	// 베트남
-
-	#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-		#define FONTSIZE_LANGUAGE	( FONTSIZE_KOREAN )
-	#elif SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-		#define FONTSIZE_LANGUAGE	( FONTSIZE_TAIWANESE )
-	#elif SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		#define FONTSIZE_LANGUAGE	( FONTSIZE_JAPANESE )
-	#elif SELECTED_LANGUAGE == LANGUAGE_THAILAND
-		#define FONTSIZE_LANGUAGE	( FONTSIZE_THAILAND )
-	#elif SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-		#define FONTSIZE_LANGUAGE	( FONTSIZE_PHILIPPINES )
-	#elif SELECTED_LANGUAGE == LANGUAGE_CHINESE
-		#define FONTSIZE_LANGUAGE	( FONTSIZE_CHINESE )
-	#elif SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-		#define FONTSIZE_LANGUAGE	( FONTSIZE_ENGLISH )
-	#elif SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-		#define FONTSIZE_LANGUAGE	( FONTSIZE_VIETNAMESE )
-	#endif //SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
+	#define FONTSIZE_ENGLISH		12
+	#define FONTSIZE_LANGUAGE	( FONTSIZE_ENGLISH )
 
 	#ifdef _DEBUG
 		#define _SHOPDEBUGMODE

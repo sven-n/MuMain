@@ -3357,57 +3357,17 @@ BOOL g_bIMEBlock = FALSE;
 void SaveIMEStatus()
 {
 	HIMC hIMC = ImmGetContext(g_hWnd);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int iSelectedLanguage = SELECTED_LANGUAGE;
-	if(iSelectedLanguage == LANGUAGE_JAPANESE)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	if( SELECTED_LANGUAGE == LANGUAGE_JAPANESE )
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	{
-		g_bBKOpenState = ImmGetOpenStatus(hIMC);
-		if (g_bBKOpenState == TRUE)
-		{
-			g_bIMEBlock = FALSE;
-			ImmSetOpenStatus(hIMC, FALSE);
-			g_bIMEBlock = TRUE;
-		}
-	}
-	else
-	{
-		ImmGetConversionStatus(hIMC, &g_dwBKConv, &g_dwBKSent);
-		// IME 상태를 영문으로
-		ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
-	}
+	ImmGetConversionStatus(hIMC, &g_dwBKConv, &g_dwBKSent);
+	ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
 	ImmReleaseContext(g_hWnd, hIMC);
 }
 
 void RestoreIMEStatus()
 {
-	//CreateWhisper("","ime복원",3);
-	// 저장된 IME 상태를 복원
 	HIMC hIMC = ImmGetContext(g_hWnd);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int iSelectedLanguage = SELECTED_LANGUAGE;
-	if(iSelectedLanguage == LANGUAGE_JAPANESE)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	if ( SELECTED_LANGUAGE == LANGUAGE_JAPANESE)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	{
-		if (g_bBKOpenState == TRUE)
-		{
-			g_bIMEBlock = FALSE;
-			ImmSetOpenStatus(hIMC, TRUE);
-			g_bIMEBlock = TRUE;
-		}
-	}
-	else
-	{
-		ImmSetConversionStatus(hIMC, g_dwBKConv, g_dwBKSent);
-	}
+	ImmSetConversionStatus(hIMC, g_dwBKConv, g_dwBKSent);
 	ImmReleaseContext(g_hWnd, hIMC);
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CheckTextInputBoxIME(int iMode)
 {
@@ -3421,31 +3381,19 @@ void CheckTextInputBoxIME(int iMode)
 		}
 
 		HIMC hIMC = ImmGetContext(g_hWnd);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-		int iSelectedLanguage = SELECTED_LANGUAGE;
-		if(iSelectedLanguage == LANGUAGE_JAPANESE)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		if ( SELECTED_LANGUAGE == LANGUAGE_JAPANESE)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		{
-			g_bBKOpenState = ImmGetOpenStatus(hIMC);
-			if (g_bBKOpenState == TRUE)
-				ImmSetOpenStatus(hIMC, FALSE);
-		}
-		else
-		{
-			DWORD dwConv, dwSent;
-			ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
-			if (dwConv != IME_CMODE_ALPHANUMERIC)
-			{
-				g_dwBKConv = dwConv;
 
-				// IME 상태를 영문으로
-				//CreateWhisper("","IMEConv 상태를 영문으로",3);
-				g_bForceIMEConv = TRUE;
-				ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
-			}
+		DWORD dwConv, dwSent;
+		ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
+		if (dwConv != IME_CMODE_ALPHANUMERIC)
+		{
+			g_dwBKConv = dwConv;
+
+			// IME 상태를 영문으로
+			//CreateWhisper("","IMEConv 상태를 영문으로",3);
+			g_bForceIMEConv = TRUE;
+			ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
 		}
+
 		ImmReleaseContext(g_hWnd, hIMC);
 //		g_bForceIMEConv = FALSE;
 	}
@@ -3458,36 +3406,18 @@ void CheckTextInputBoxIME(int iMode)
 		}
 
 		HIMC hIMC = ImmGetContext(g_hWnd);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-		int iSelectedLanguage = SELECTED_LANGUAGE;
-		if(iSelectedLanguage == LANGUAGE_JAPANESE)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		if ( SELECTED_LANGUAGE == LANGUAGE_JAPANESE)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-        {
-			if (ImmGetOpenStatus(hIMC) != g_bBKOpenState)
-				ImmSetOpenStatus(hIMC, g_bBKOpenState);
-		}
-		else
+		DWORD dwConv, dwSent;
+		ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
+		if (dwSent != IME_SMODE_NONE)
 		{
-			DWORD dwConv, dwSent;
-			ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
-			if (dwSent != IME_SMODE_NONE)
-			{
-				g_dwBKSent = dwSent;
-
-				// IME 상태를 영문으로
-				//CreateWhisper("","IMESent 상태를 영문으로",3);
-				g_bForceIMESent = TRUE;
-				ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
-			}
+			g_dwBKSent = dwSent;
+			g_bForceIMESent = TRUE;
+			ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
 		}
 		ImmReleaseContext(g_hWnd, hIMC);
 //		g_bForceIMESent = FALSE;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CUITextInputBox::CUITextInputBox()
 {
@@ -3525,7 +3455,6 @@ CUITextInputBox::CUITextInputBox()
 	m_fScrollBarPos_y = 0;
 	m_fScrollBarClickPos_y = 0;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CUITextInputBox::~CUITextInputBox()
 {
@@ -3552,7 +3481,6 @@ CUITextInputBox::~CUITextInputBox()
 		m_hBitmap = NULL;
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL ClipboardCheck(HWND hWnd)
 {
@@ -3696,9 +3624,8 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_IME_STARTCOMPOSITION:
 	case WM_IME_ENDCOMPOSITION:
 	case WM_IME_NOTIFY:
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
 		pTextInputBox->SetIMEPosition();
-#endif // SELECTED_LANGUAGE != LANGUAGE_KOREAN
+
 		SendMessage(pTextInputBox->GetParentHandle(), msg, wParam, lParam);
 		
 		if (msg == WM_IME_NOTIFY && (pTextInputBox->CheckOption(UIOPTION_SERIALNUMBER) || pTextInputBox->CheckOption(UIOPTION_NUMBERONLY)))
@@ -3706,9 +3633,7 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			switch (wParam)
 			{
 			case IMN_SETOPENSTATUS:
-				//if (SELECTED_LANGUAGE == LANGUAGE_JAPANESE)
 				{
-					// 채팅 아닌 상태에서 CONVERSIONMODE 변경 (일본)
 					CheckTextInputBoxIME(IME_CONVERSIONMODE);
 				}
 				break;
@@ -3716,7 +3641,6 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	default:
-		// 대화 목록 보기!
 		if (PressKey(VK_F5))
 			g_pFriendMenu->ShowMenu(TRUE);
 		break;
@@ -3733,13 +3657,12 @@ void CUITextInputBox::SetIMEPosition()
 {
 	if (m_bIsReady == FALSE || m_hEditWnd == NULL) return;
 
-	int iSetPos_x = m_iPos_x * g_fScreenRate_x + WindowWidth;	// 설정된 x,y
+	int iSetPos_x = m_iPos_x * g_fScreenRate_x + WindowWidth;
 	int iSetPos_y = m_iPos_y * g_fScreenRate_y + WindowHeight;
 
 	int iTargetPos_x = iSetPos_x - m_iRealWindowPos_x - WindowWidth;
 	int iTargetPos_y = iSetPos_y - m_iRealWindowPos_y - WindowHeight;
 
-	// 커서
 	POINT pt = {0,0};
 	GetCaretPos(&pt);
 	iTargetPos_x += pt.x;
@@ -3764,14 +3687,12 @@ void CUITextInputBox::SetIMEPosition()
 	ImmSetCompositionWindow(hIMC, &cpf);
 	ImmReleaseContext(m_hEditWnd, hIMC);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputBox::GetText(char * pszText, int iGetLenght)
 {
 	if (pszText == NULL) return;
 	GetWindowText(m_hEditWnd, pszText, iGetLenght);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 void CUITextInputBox::GetText(wchar_t * pwszText, int iGetLenght)
@@ -3780,12 +3701,11 @@ void CUITextInputBox::GetText(wchar_t * pwszText, int iGetLenght)
 	GetWindowTextW(m_hEditWnd, pwszText, iGetLenght);
 }
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputBox::SetText(const char * pszText)
 {
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
-	if (pszText == NULL)	// 지워라
+	if (pszText == NULL)
 	{
 		SetWindowTextW(m_hEditWnd, L"");
 		return ;
@@ -4109,34 +4029,8 @@ void CUITextInputBox::Render()
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		unicode::_GetTextExtentPoint(m_hMemDC, "Q", 1, &TextSize);
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		m_fCaretHeight = TextSize.cy;		// 현재 해상도 기준으로 사용
+		m_fCaretHeight = TextSize.cy;
 	}
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-	HIMC hIMContext = ImmGetContext(m_hEditWnd);
-	if (hIMContext != NULL)
-	{
-		DWORD dwConv, dwSent;
-		ImmGetConversionStatus(hIMContext, &dwConv, &dwSent);
-		if (dwConv != IME_CMODE_ALPHANUMERIC)
-		{
-			// 한글 마지막 입력 글자 표시
-			char cComText[MAX_TEXT_LENGTH + 1] = {0, };
-			ImmGetCompositionString(hIMContext, GCS_COMPSTR, cComText, MAX_TEXT_LENGTH);
-			SIZE TextSize;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			g_pMultiLanguage->_GetTextExtentPoint32(m_hMemDC, cComText, strlen(cComText), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(m_hMemDC, cComText, strlen(cComText), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			if(TextSize.cx > 0)
-			{
-				m_fCaretWidth = TextSize.cx;
-				m_fCaretHeight = TextSize.cy;
-			}
-		}
-		ImmReleaseContext(m_hEditWnd, hIMContext);
-	}
-#endif	// SELECTED_LANGUAGE == LANGUAGE_KOREAN
 	
 	if (CheckOption(UIOPTION_PAINTBACK))
 	{
@@ -4154,10 +4048,10 @@ void CUITextInputBox::Render()
 	CallWindowProc(m_hOldProc, m_hEditWnd, WM_PAINT, (WPARAM)m_hMemDC, 0);
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
-	const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;		// 폰트 텍스쳐의 가로, 세로 사이즈
-	SIZE RealTextLine = { 0, 0 };		// 현재 해상도 기준 (캐럿포함)
+	const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
+	SIZE RealTextLine = { 0, 0 };
 	
-	if (m_bUseMultiLine == FALSE)	//. 싱글 라인
+	if (m_bUseMultiLine == FALSE)
 	{
 		char TextCheck[MAX_TEXT_LENGTH + 1] = {0, };
 		GetText(TextCheck);
@@ -4256,41 +4150,17 @@ void CUITextInputBox::Render()
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
 		if(GetUseScrollbar())
 #endif //PBG_ADD_INGAMESHOPMSGBOX
-		RenderScrollbar();		// 스크롤바
+		RenderScrollbar();
 	}
 
 	++m_iCaretBlinkTemp;
-	
-#if SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-	if (HaveFocus() == TRUE)	// 조합중인 텍스트 표시
-	{
-		POINT pt;
-		GetCaretPos(&pt);
-
-		HIMC hIMContext = ImmGetContext(m_hEditWnd);
-		if (hIMContext != NULL)
-		{
-			DWORD dwConv, dwSent;
-			ImmGetConversionStatus(hIMContext, &dwConv, &dwSent);
-			if (dwConv != IME_CMODE_ALPHANUMERIC)
-			{
-				char cComText[MAX_TEXT_LENGTH + 1] = {0};
-				ImmGetCompositionString(hIMContext, GCS_COMPSTR, cComText, MAX_TEXT_LENGTH);
-				g_pRenderText->RenderText(m_iPos_x + pt.x / g_fScreenRate_x, m_iPos_y + pt.y / g_fScreenRate_y, cComText);
-			}
-			ImmReleaseContext(m_hEditWnd, hIMContext);
-		}
-	}
-#endif
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputBox::RenderScrollbar()
 {
-	float fScrollPos = GetScrollPos(m_hEditWnd, SB_VERT);	// 스크롤 위치 (0~
-	float fLineNum = SendMessage(m_hEditWnd, EM_GETLINECOUNT, 0, 0);	// 라인수 (1~
-	//m_iNumLines = 15;	// 한화면에 나오는 라인수
+	float fScrollPos = GetScrollPos(m_hEditWnd, SB_VERT);
+	float fLineNum = SendMessage(m_hEditWnd, EM_GETLINECOUNT, 0, 0);
+	//m_iNumLines = 15;
 	float fLineRate = m_iNumLines / fLineNum;
 	float fPosRate = fScrollPos / fLineNum;
 
@@ -4345,7 +4215,6 @@ void CUITextInputBox::SetFont(HFONT hFont)
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SelectObject(m_hMemDC, hFont);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUITextInputBox::DoMouseAction()
 {
@@ -4689,32 +4558,24 @@ void CUIChatInputBox::AddHistory(const char * pszText)
 
 	RemoveHistory(FALSE);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::MoveHistory(int iDegree)
 {
 	if (m_HistoryList.empty() == TRUE) return;
 
-	// 한자 선택 혹은 문자 선택 중에 히스토리 무시
 	HIMC hIMC = ImmGetContext(m_TextInputBox.GetHandle());
 	if (hIMC != NULL)
 	{
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-		DWORD dwConv, dwSent;
-		ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
-		if ((dwConv & IME_CMODE_HANJACONVERT) != 0) 
-			return;
-#else // SELECTED_LANGUAGE == LANGUAGE_KOREAN
 		char cComText[MAX_TEXT_LENGTH + 1] = {0};
 		ImmGetCompositionString(hIMC, GCS_COMPSTR, cComText, MAX_TEXT_LENGTH);
 		if (cComText[0] != '\0') 
 			return;
-#endif // SELECTED_LANGUAGE == LANGUAGE_KOREAN
+
 		ImmReleaseContext(m_TextInputBox.GetHandle(), hIMC);
 	}
 	else return;
 	
-	if (iDegree == 10000)	// 맨 앞으로 이동
+	if (iDegree == 10000)
 	{
 		m_CurrentHistoryLine = m_HistoryList.begin();
 		m_bHistoryMode = FALSE;
@@ -4759,7 +4620,6 @@ void CUIChatInputBox::MoveHistory(int iDegree)
 	SendMessage(m_TextInputBox.GetHandle(), EM_SETSEL, ( WPARAM)10000, ( LPARAM)-1);
 	m_TextInputBox.m_iCaretBlinkTemp = 0;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::RemoveHistory(BOOL bClear)
 {
@@ -4794,8 +4654,6 @@ void CUIChatInputBox::RemoveHistory(BOOL bClear)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void CUILoginInputBox::Init(HWND hWnd)
 {
 	m_TextInputBox.Init(hWnd, 100, 14, 10);
@@ -4811,7 +4669,6 @@ void CUILoginInputBox::Init(HWND hWnd)
 
 	SetFocus(g_hWnd);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIMercenaryInputBox::Init(HWND hWnd)
 {
@@ -4830,7 +4687,7 @@ void CUIMercenaryInputBox::Init(HWND hWnd)
 
 	SetFocus(g_hWnd);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
 CUISlideHelp::CUISlideHelp()
 {
 	m_fMaxMoveSpeed = 2.5f;
@@ -6329,32 +6186,20 @@ void CUIBCDeclareGuildListBox::SetNumRenderLine(int iLine)
 
 void CUIBCDeclareGuildListBox::RenderInterface()
 {
-	// 배경칠
 	EnableAlphaTest();
 	SetLineColor(7, 0.4f);
 	RenderColor(m_iPos_x - 1, m_iPos_y - m_iHeight - 1, m_iWidth + 1, m_iHeight + 2);
-
 	EndRenderColor();
 
-	// 스크롤 바
 	if (GetState() != UISTATE_SCROLL)
 		ComputeScrollBar();
 
 	g_pGuardWindow->RenderScrollBarFrame(m_iPos_x + m_iWidth - 8, m_fScrollBarRange_top, m_fScrollBarRange_bottom - m_fScrollBarRange_top);
 	g_pGuardWindow->RenderScrollBar(m_iPos_x + m_iWidth - 12, m_fScrollBarPos_y, (GetState() == UISTATE_SCROLL && MouseLButtonPush));
-
-	// 길드명
 	g_pRenderText->RenderText(m_iPos_x+5, m_iPos_y - m_iHeight - 12, GlobalText[182] );
-	// 등록수
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-	g_pRenderText->RenderText(m_iPos_x+50, m_iPos_y - m_iHeight - 12, GlobalText[1528] );	// 1528 "등록수"
-#else // SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-	g_pRenderText->RenderText(m_iPos_x+63, m_iPos_y - m_iHeight - 12, GlobalText[1528] );	// 1528 "등록수"
-#endif // SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-	// 진행상태
-	g_pRenderText->RenderText(m_iPos_x+98, m_iPos_y - m_iHeight - 12, GlobalText[1529] );	// 1529 "상태"
-	// 등록순서
-	g_pRenderText->RenderText(m_iPos_x+123, m_iPos_y - m_iHeight - 12, GlobalText[1530] );	// 1530 "등록순"
+	g_pRenderText->RenderText(m_iPos_x+50, m_iPos_y - m_iHeight - 12, GlobalText[1528] );
+	g_pRenderText->RenderText(m_iPos_x+98, m_iPos_y - m_iHeight - 12, GlobalText[1529] );
+	g_pRenderText->RenderText(m_iPos_x+123, m_iPos_y - m_iHeight - 12, GlobalText[1530] );
 }
 
 int CUIBCDeclareGuildListBox::GetRenderLinePos_y(int iLineNumber)
@@ -6368,10 +6213,9 @@ int CUIBCDeclareGuildListBox::GetRenderLinePos_y(int iLineNumber)
 BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
 {
 	char Text[MAX_TEXT_LENGTH + 1] = {0};
-	// 길드명
+
 	sprintf(Text,"%s", m_TextListIter->szName);
 
-	// 자신의 길드만 표시하게 한다
 	if ( (strcmp( GuildMark[Hero->GuildMarkIndex].UnionName, Text )!=NULL && strcmp( GuildMark[Hero->GuildMarkIndex].GuildName, Text )!=NULL) )
 	{
 		return FALSE;
@@ -6398,22 +6242,15 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
 
 	g_pRenderText->RenderText(iPos_x + 2, iPos_y, Text);
 
-	// 등록수
 	sprintf(Text,"%d", m_TextListIter->nCount);
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 	g_pRenderText->RenderText(iPos_x + 70, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-#else
-	g_pRenderText->RenderText(iPos_x + 85, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-#endif //SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
 
-	// 진행상태
 	if( m_TextListIter->byIsGiveUp )
-		sprintf(Text,"%s", GlobalText[1531] );	// 1531 "포기"
+		sprintf(Text,"%s", GlobalText[1531] );
 	else
-		sprintf(Text,"%s", GlobalText[1532] );	// 1532 "진행중"
+		sprintf(Text,"%s", GlobalText[1532] );
 	g_pRenderText->RenderText(iPos_x + 120, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
-	// 등록순서
 	sprintf(Text,"%u", m_TextListIter->bySeqNum);
 	g_pRenderText->RenderText(iPos_x + 140, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
@@ -6421,7 +6258,6 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
 
 	return TRUE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUIBCDeclareGuildListBox::DoLineMouseAction(int iLineNumber)
 {
@@ -6437,14 +6273,9 @@ BOOL CUIBCDeclareGuildListBox::DoLineMouseAction(int iLineNumber)
 	return TRUE;
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CUIBCDeclareGuildListBox::DeleteText(DWORD dwGuildIndex)
 {
 }
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CUIBCGuildListBox::CUIBCGuildListBox()
 {

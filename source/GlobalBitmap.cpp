@@ -840,10 +840,6 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
-		
-#if defined(LDS_MR0_OUTPUT_GLERROR_IN_BITMAPLOAD) && defined(_DEBUG)
-		CheckGLError( __FILE__, __LINE__ );
-#endif // LDS_MR0_OUTPUT_GLERROR_IN_BITMAPLOAD
 	}
 	(void) jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
@@ -1003,18 +999,6 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
-
-#if defined(LDS_MR0_OUTPUT_GLERROR_IN_BITMAPLOAD) && defined(_DEBUG)
-	CheckGLError( __FILE__, __LINE__ );
-#endif // LDS_MR0_OUTPUT_GLERROR_IN_BITMAPLOAD
-
-
-#ifdef DO_PROFILING_FOR_LOADING
-	if( g_pProfilerForLoading )
-	{
-		g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENTGA );
-	}
-#endif // DO_PROFILING_FOR_LOADING
 
 	return true;
 }

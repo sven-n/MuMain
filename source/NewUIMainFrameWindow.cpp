@@ -2626,7 +2626,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	}
 #ifdef KJH_FIX_WOPS_K20674_CHECK_STAT_USE_SKILL
 	// 블러드어택 (마검사) 일때 스텟을 검사하여 요구스텟이 충분치 아니하면 스킬아이콘 빨갛게 처리
-	// 다른스킬도 이와같이 처리 해주어야 한다. (시즌4 본섭 적용 후에 꼭하자!!)
+	// 다른스킬도 이와같이 처리 해주어야 한다. (Season4 본섭 적용 후에 꼭하자!!)
 	if( bySkillType == AT_SKILL_REDUCEDEFENSE
 #ifdef YDG_FIX_BLOCK_STAFF_WHEEL
 		|| (AT_SKILL_BLOOD_ATT_UP <= bySkillType && bySkillType <= AT_SKILL_BLOOD_ATT_UP+4)
@@ -2664,7 +2664,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	
 #ifdef LDK_FIX_CHECK_STAT_USE_SKILL_PIERCING
 	// 아이스에로우 (요정) 일때 스텟을 검사하여 요구스텟이 충분치 아니하면 스킬아이콘 빨갛게 처리
-	// 다른스킬도 이와같이 처리 해주어야 한다. (시즌4 본섭 적용 후에 꼭하자!!)
+	// 다른스킬도 이와같이 처리 해주어야 한다. (Season4 본섭 적용 후에 꼭하자!!)
 	switch( bySkillType )
 	{
 	//case AT_SKILL_PIERCING:

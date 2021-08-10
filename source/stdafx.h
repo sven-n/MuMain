@@ -122,46 +122,7 @@
 #include "Winmain.h"
 #include "Winmain_New.h"
 #include "Winmain_New_Live.h"
-
-#ifdef KJH_MOD_LIBRARY_LINK_EACH_NATION
-//----------------------------------------------------------------------------- Eng
-// Eng
-#if _LANGUAGE_ENG
-	#include "Defined_Global.h"
-//----------------------------------------------------------------------------- Tai
-// Tai
-#elif _LANGUAGE_TAI
-	#include "Winmain_New_Foreign.h"
-//----------------------------------------------------------------------------- Chs
-// Chs
-#elif _LANGUAGE_CHS
-	#include "Winmain_New_Foreign.h"
-//----------------------------------------------------------------------------- Jpn
-// Jpn
-#elif _LANGUAGE_JPN
-	#include "Winmain_New_Foreign.h"
-//----------------------------------------------------------------------------- Tha
-// Tha
-#elif _LANGUAGE_THA
-	#include "Winmain_New_Foreign.h"
-//----------------------------------------------------------------------------- Phi
-// Phi
-#elif _LANGUAGE_PHI
-	#include "Winmain_New_Foreign.h"
-//----------------------------------------------------------------------------- Vie
-// Vie
-#elif _LANGUAGE_VIE
-	#include "Winmain_New_Foreign.h"
-#endif
-//-----------------------------------------------------------------------------
-#else // KJH_MOD_LIBRARY_LINK_EACH_NATION
-#if _LANGUAGE_ENG
 #include "Defined_Global.h"
-#elif SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	#include "Winmain_New_Foreign.h"
-#endif //SELECTED_LANGUAGE != LANGUAGE_KOREAN
-#endif // KJH_MOD_LIBRARY_LINK_EACH_NATION
-
 #include "Winmain_New_Event.h"
 
 //client

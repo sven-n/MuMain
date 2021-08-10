@@ -104,98 +104,33 @@
 #include "MapManager.h"
 
 
-#ifdef KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
-	#ifdef RESOURCE_GUARD
-		#include "./ExternalObject/ResourceGuard/MuRGReport.h"
-		#include "./ExternalObject/ResourceGuard/ResourceGuard.h"
-	#endif // RESOURCE_GUARD
-#endif // KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
+extern CUITextInputBox * g_pSingleTextInputBox;
+extern CUITextInputBox * g_pSinglePasswdInputBox;
+extern int g_iChatInputType;
+extern BOOL g_bUseChatListBox;
+extern DWORD g_dwMouseUseUIID;
+extern DWORD g_dwActiveUIID;
+extern DWORD g_dwKeyFocusUIID;	
+extern CUIMapName* g_pUIMapName;
+extern bool HighLight;
+extern CTimer*	g_pTimer;
 
-//-----------------------------------------------------------------------------------------------
-
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////
-    extern CUITextInputBox * g_pSingleTextInputBox;
-    extern CUITextInputBox * g_pSinglePasswdInputBox;
-    extern int g_iChatInputType;
-    extern BOOL g_bUseChatListBox;
-    extern DWORD g_dwMouseUseUIID;  // 마우스가 윈도우 위에 있는가 (있으면 윈도우 ID)
-    extern DWORD g_dwActiveUIID;	// 현재 작동중인 UI ID
-    extern DWORD g_dwKeyFocusUIID;	
-	extern CUIMapName* g_pUIMapName;	// rozy
-	extern bool HighLight;
-	extern CTimer*	g_pTimer;
-
-#ifdef ADD_MU_HOMEPAGE
-extern BOOL g_bUseWindowMode;
-#endif //ADD_MU_HOMEPAGE
 #ifdef MOVIE_DIRECTSHOW
 	extern CMovieScene* g_pMovieScene;
 #endif // MOVIE_DIRECTSHOW
 	
-// 펜릴 변수 관련
-#ifndef CSK_FIX_FENRIR_RUN		// 정리할 때 지워야 하는 소스	
-BOOL	g_bFenrir_Run = FALSE;
-int		g_iFenrir_Run = 0;
-#endif //! CSK_FIX_FENRIR_RUN	// 정리할 때 지워야 하는 소스
 
 bool	g_bTimeCheck = false;
 int 	g_iBackupTime = 0;
 
-float	g_fMULogoAlpha = 0;		// 뮤 로고 알파값
+float	g_fMULogoAlpha = 0;
 
-///////////////////////////////////////////
 
-#ifdef _PVP_ADD_MOVE_SCROLL
-    extern CMurdererMove g_MurdererMove;
-#endif	// _PVP_ADD_MOVE_SCROLL
    // extern CGuildCache g_GuildCache;
 
 extern float g_fSpecialHeight;
 
-//////////////////////////////////////////////////////////////////////////
-//  Global Variable.
-//////////////////////////////////////////////////////////////////////////
 short   g_shCameraLevel = 0;
-
-#ifdef LDS_MR0_MOD_FIXEDFRAME_DELTA
-typedef std::list<unsigned int>	LISTACCUMULATETIME;
-
-LISTACCUMULATETIME	listAccumulateTime;
-#endif // LDS_MR0_MOD_FIXEDFRAME_DELTA
-
-//////////////////////////////////////////////////////////////////////////
-//  Function.
-//////////////////////////////////////////////////////////////////////////
-
-#ifdef USE_SHADOWVOLUME
-#include "ShadowVolume.h"
-int g_iShadowMode = 0;
-DWORD g_dwShadowModeLatest = 0;
-void ShadowVolumeDoIt( void)
-{
-	if ( PressKey( '~'))
-	{
-		DWORD dwTick = GetTickCount();
-		if ( dwTick - g_dwShadowModeLatest > 300)
-		{
-			g_iShadowMode = ( g_iShadowMode + 1) % 3;
-			g_dwShadowModeLatest = dwTick;
-		}
-	}
-	switch ( g_iShadowMode)
-	{
-	case 0:
-		ShadeWithShadowVolumes();
-		break;
-	case 1:
-		RenderShadowVolumesAsFrame();
-		break;
-	}
-}
-#endif //USE_SHADOWVOLUME
 
 
 /*#ifdef _DEBUG
@@ -204,7 +139,7 @@ bool EnableEdit    = true;
 bool EnableEdit    = false;
 #endif*/
 
-int g_iLengthAuthorityCode = iLengthAuthorityCode[SELECTED_LANGUAGE];
+int g_iLengthAuthorityCode = 20;
 
 char *szServerIpAddress = "192.168.0.104";
 //char *szServerIpAddress = "210.181.89.215";
@@ -415,8 +350,6 @@ bool CheckAbuseNameFilter(char *Text)
 	return false;
 }
 
-bool CheckSpecialText(char *Text);	// Local.cpp 에 있음
-
 bool CheckName()
 {
     if( CheckAbuseNameFilter(InputText[0]) || CheckAbuseFilter(InputText[0]) ||
@@ -478,10 +411,6 @@ void MovieScene(HDC hDC)
 	}
 }
 #endif // MOVIE_DIRECTSHOW
-
-///////////////////////////////////////////////////////////////////////////////
-// 웹젠 로고 나오는 화면
-///////////////////////////////////////////////////////////////////////////////
 
 bool EnableMainRender = false;
 extern int HeroKey;
@@ -635,13 +564,13 @@ void WebzenScene(HDC hDC)
 #ifdef _DEBUG
 	SceneFlag = LOG_IN_SCENE;	//
 #else
-	World = 2;
+	gMapManager.WorldActive = 2;
 	SceneFlag = MAIN_SCENE;
 	SelectedHero = 0;
 	EnableMainRender = true;
 	CameraAngle[2] = -45.0;
 
-	OpenWorld(World);
+	gMapManager.LoadWorld(gMapManager.WorldActive);
 
 	// create user
 	CHARACTER* entity = CreateHero(0, 0, 0, 177 * 100.0f + 50.0f, 100 * 100.0f + 50.0f, 0.0);
@@ -854,12 +783,6 @@ void RenderInfomation3D()
         {
             y = 60+55;
         }
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		if (AskYesOrNo==5)
-		{
-			y = 225;
-		}
-#endif
 
 	    Width=40.f;Height=60.f;
 		int iRenderType = ErrorMessage;
@@ -935,17 +858,12 @@ BOOL ShowCheckBox( int num, int index, int message )
 			case 4:sprintf(Name,"%s", GlobalText[1900] );break;	// 통솔
             }
         }
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		sprintf ( g_lpszMessageBoxCustom[0], "%s", Name );
-#else	// SELECTED_LANGUAGE == LANGUAGE_JAPANESE
 
 		if (message==MESSAGE_USE_STATE2)
 			sprintf ( g_lpszMessageBoxCustom[0], "( %s%s )", Name, GlobalText[1901] );
 		else
 			sprintf ( g_lpszMessageBoxCustom[0], "( %s )", Name );
 		
-#endif	// SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-
         num++;
         for ( int i=1; i<num; ++i )
         {
@@ -2830,12 +2748,6 @@ int TestTime = 0;
 extern int  GrabScreen;
 
 
-#ifdef FOR_DRAMA
-int g_iGemCount = 0;
-int g_iItemIndex = 0;
-int g_iShowGoodLuck = 0;
-#endif
-
 void MoveCharacter(CHARACTER *c,OBJECT *o);
 
 #ifdef DO_PROCESS_DEBUGCAMERA
@@ -3058,7 +2970,6 @@ void MainScene(HDC hDC)
 
 #if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 	BeginBitmap();
-	// 디버그 모드에서만 FPS 찍는 부분
 	unicode::t_char szDebugText[128];
 #if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 	unicode::_sprintf(szDebugText, "FPS : %.1f/%.1f", FPS, g_fFrameEstimate);
@@ -3074,209 +2985,9 @@ void MainScene(HDC hDC)
 	//g_pRenderText->RenderText(10, 40, szDebugText);
 	g_pRenderText->RenderText(10, 26, szDebugText);
 	g_pRenderText->RenderText(10, 36, szMousePos);
-	
-#ifdef CSK_HACK_TEST
-	unicode::_sprintf(szDebugText, "AttackSpeed : %d", g_pHackTest->m_iAttackSpeed);
-	g_pRenderText->RenderText(250, 8, szDebugText);
-#endif // CSK_HACK_TEST
-
-	g_pRenderText->SetFont(g_hFont);
+		g_pRenderText->SetFont(g_hFont);
 	EndBitmap();
 #endif // defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-
-#if defined(MR0) && defined(LDS_FOR_DEVELOPMENT_TESTMODE)
-	BeginBitmap();
-	// 디버그 모드에서만 FPS 찍는 부분
-	unicode::t_char szDebugText_MR0[128];
-	unicode::t_char szShaderQuailtyType[32];
-	
-	switch( g_iUseDriverType )
-	{
-	case GPVER_LOW:
-		{
-			sprintf( szShaderQuailtyType, "GPVER_LOW" );
-		}
-		break;
-	case GPVER_MIDDLE:
-		{
-			sprintf( szShaderQuailtyType, "GPVER_MIDDLE" );
-		}
-		break;
-	case GPVER_HIGH:
-		{
-			sprintf( szShaderQuailtyType, "GPVER_HIGH" );
-		}
-		break;
-	case GPVER_HIGHEST:
-		{
-			sprintf( szShaderQuailtyType, "GPVER_HIGHEST" );
-		}
-		break;
-	default	:
-		{
-
-		}
-		break;
-	}
-
-	unicode::_sprintf(szDebugText_MR0, "RenderMODE : %s", szShaderQuailtyType);
-	g_pRenderText->SetFont(g_hFontBold);
-	g_pRenderText->SetBgColor(0, 0, 0, 100);
-	g_pRenderText->SetTextColor(255, 255, 255, 200);
-	//g_pRenderText->RenderText(70, 8, szDebugText);
-	g_pRenderText->RenderText(10, 16, szDebugText_MR0);
-	g_pRenderText->SetFont(g_hFont);
-	EndBitmap();
-#endif // #if defined(MR0) && defined(LDS_FOR_DEVELOPMENT_TESTMODE)
-
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-	{
-		unicode::t_char szDebugText[128];
-		
-		if( true == g_bUnfixedFixedFrame )
-		{
-			unicode::_sprintf(szDebugText, "UnfixedFrame(ON)");
-		}
-		else
-		{
-			unicode::_sprintf(szDebugText, "UnfixedFrame(OFF)");
-		}
-		BeginBitmap();
-		g_pRenderText->SetFont(g_hFontBold);
-		g_pRenderText->SetBgColor(0, 0, 0, 100);
-		g_pRenderText->SetTextColor(255, 255, 255, 200);
-		//g_pRenderText->RenderText(70, 8, szDebugText);
-		g_pRenderText->RenderText(140, 16, szDebugText);
-		EndBitmap();
-	}
-#endif // #if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-
-
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE)
-	{
-		unicode::t_char szDebugText[128];
-
-#if defined(_DEBUG)
-		unicode::_sprintf(szDebugText, "MODE : DEBUG");
-#else // defined(_DEBUG)
-		unicode::_sprintf(szDebugText, "MODE : RELEASE");
-#endif // defined(_DEBUG)
-		
-		BeginBitmap();
-		g_pRenderText->SetFont(g_hFontBold);
-		g_pRenderText->SetBgColor(0, 0, 0, 100);
-		g_pRenderText->SetTextColor(255, 255, 255, 200);
-		//g_pRenderText->RenderText(70, 8, szDebugText);
-		g_pRenderText->RenderText(250, 16, szDebugText);
-		EndBitmap();
-	}
-#endif // #if defined(LDS_FOR_DEVELOPMENT_TESTMODE)
-
-#ifdef DO_PROCESS_DEBUGCAMERA
-
-	if( g_pDebugCameraManager )
-	{
-		char szDebugCameraMode[32];
-		memset( szDebugCameraMode, 0, sizeof(char) * 32 );
-		
-		EDEBUGCAMERA_TYPE eDebugCameraMode = g_pDebugCameraManager->GetActiveCameraMode();
-		switch( eDebugCameraMode )
-		{
-		case EDEBUGCAMERA_NONE:
-			{
-				sprintf( szDebugCameraMode, "GAME MODE" );
-			}
-			break;
-		case EDEBUGCAMERA_FREECONTROL:
-			{
-				sprintf( szDebugCameraMode, "DEBUG DEFAULT" );
-			}
-			break;
-		case EDEBUGCAMERA_TOPVIEW:
-			{
-				sprintf( szDebugCameraMode, "DEBUG TOPVIEW" );
-			}
-			break;
-		default:
-			{
-				sprintf( szDebugCameraMode, "GAME MODE" );
-			}	
-			break;
-		}
-		
-		BeginBitmap();
-		{
-			unicode::t_char szDebugText[128];
-			// PROFILING 여부 출력 
-			unicode::_sprintf(szDebugText, "DebugCamera(SHIFT+F10),Reset(SHIFT+F9)(SHIFT+w,a,s,d) : %s", szDebugCameraMode );
-			g_pRenderText->SetFont(g_hFontBold);
-			g_pRenderText->SetBgColor(0, 0, 0, 100);
-			g_pRenderText->SetTextColor(255, 255, 255, 200);
-			//g_pRenderText->RenderText(70, 8, szDebugText);
-			g_pRenderText->RenderText(320, 8, szDebugText);
-			g_pRenderText->SetFont(g_hFont);	
-		}
-		EndBitmap();
-
-		/*
-		if( (int)EDEBUGCAMERA_NONE < (int)g_pDebugCameraManager->GetCurrentActivity() && 
-			(int)EDEBUGCAMERA_END > (int)g_pDebugCameraManager->GetCurrentActivity() )
-		{
-			// Debug Camera Position
-			BeginBitmap();
-			{
-				unicode::t_char szDebugText[128];
-				CDebugCameraInterface *pCurDebugCam = g_pDebugCameraManager->GetActiveDebugCamera();
-				
-				// PROFILING 여부 출력 
-				unicode::_sprintf(szDebugText, "DebugCamera Position : %f,%f,%f", 
-					pCurDebugCam->m_vCameraPos[0], 
-					pCurDebugCam->m_vCameraPos[1], 
-					pCurDebugCam->m_vCameraPos[2] );
-				g_pRenderText->SetFont(g_hFontBold);
-				g_pRenderText->SetBgColor(0, 0, 0, 100);
-				g_pRenderText->SetTextColor(255, 255, 255, 200);
-				g_pRenderText->RenderText(320, 28, szDebugText);
-				g_pRenderText->SetFont(g_hFont);	
-			}
-			EndBitmap();
-			
-			BeginBitmap();
-			{
-				unicode::t_char szDebugText[128];
-				CDebugCameraInterface *pCurDebugCam = g_pDebugCameraManager->GetActiveDebugCamera();
-				
-				// PROFILING 여부 출력 
-				unicode::_sprintf(szDebugText, "DebugCamera Angle : %f,%f,%f", 
-					pCurDebugCam->m_vAngle[0], pCurDebugCam->m_vAngle[1], pCurDebugCam->m_vAngle[2] );
-				g_pRenderText->SetFont(g_hFontBold);
-				g_pRenderText->SetBgColor(0, 0, 0, 100);
-				g_pRenderText->SetTextColor(255, 255, 255, 200);
-				g_pRenderText->RenderText(320, 48, szDebugText);
-				g_pRenderText->SetFont(g_hFont);	
-			}
-			EndBitmap();
-			
-			BeginBitmap();
-			{
-				unicode::t_char szDebugText[128];
-				CDebugCameraInterface *pCurDebugCam = g_pDebugCameraManager->GetActiveDebugCamera();
-				
-				// PROFILING 여부 출력 
-				unicode::_sprintf(szDebugText, "DebugCamera LookAt : %f,%f,%f", 
-					pCurDebugCam->m_vLookAt[0], pCurDebugCam->m_vLookAt[1], pCurDebugCam->m_vLookAt[2] );
-				g_pRenderText->SetFont(g_hFontBold);
-				g_pRenderText->SetBgColor(0, 0, 0, 100);
-				g_pRenderText->SetTextColor(255, 255, 255, 200);
-				g_pRenderText->RenderText(320, 68, szDebugText);
-				g_pRenderText->SetFont(g_hFont);	
-			}
-			EndBitmap();
-		}
-
-		*/
-	}
-#endif // DO_PROCESS_DEBUGCAMERA
 
 	if(Success)
 	{
@@ -3284,118 +2995,6 @@ void MainScene(HDC hDC)
 		SwapBuffers(hDC);
 	}
 
-	// 사용자 의사 결정에 의한 고정 20프레임을 Unfixed 또는 Fixed 할 수 있도록 합니다.
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-
-	// * 초당 프레임 계산. 추정치.
-	static unsigned int uiCounting = 0;
-	static unsigned int uiStarttime = 0;
-	static unsigned int uiSumOffsetTime = 0;
-
-	const unsigned int uiCalculatePerMS = 1000;
-
-	unsigned int uiCurrentTime = GetTickCount();
-	unsigned int uiOffsetCurrent = uiCurrentTime-TimePrior;
-
-	if( uiStarttime == 0 )
-	{
-		uiStarttime = uiCurrentTime;
-		uiSumOffsetTime = 0;
-		uiCounting = 0;
-	}
-
-	if( uiOffsetCurrent > 0 )
-	{
-		uiSumOffsetTime += uiOffsetCurrent;
-		++uiCounting;
-	}
-
-	unsigned int uiOffsetSum = uiCurrentTime - uiStarttime;
-
-	if( uiOffsetSum > uiCalculatePerMS && uiSumOffsetTime)
-	{
-		unsigned int uiSumOffsetTime__ = uiSumOffsetTime;
-		unsigned int uiCounting__ = uiCounting;
-
-		g_fFrameEstimate = 1000 / ( uiSumOffsetTime / uiCounting );
-
-		uiStarttime = 0;
-	}
-
-	if( g_fFrameEstimate < 1 )
-	{
-		g_fFrameEstimate = 1;
-	}
-
-
-	// * 고정20프레임 을 사용할지 말지 여부.
-	if(false==g_bUnfixedFixedFrame)	// 20 고정 프레임
-	{
-#ifdef LDS_MR0_MOD_FIXEDFRAME_DELTA
-		const unsigned int MAXTIMESTANDBY = 40;
-		const unsigned int MAXFIXEDFRAME = 20;
-		unsigned int MAXACCUMULATIONSUM = MAXTIMESTANDBY * (MAXFIXEDFRAME - 1);
-
-		if(listAccumulateTime.size() >= 19)
-		{
-			unsigned int uiTimeDeltaAccumulation = 0, uiCurrentTimeDelta = 0;
-			BOOL bCalculateStandbyTime = FALSE;
-
-			LISTACCUMULATETIME::iterator iterTimeDelta;
-
-			for( iterTimeDelta = listAccumulateTime.begin(); iterTimeDelta != listAccumulateTime.end(); ++iterTimeDelta )
-			{
-				uiCurrentTimeDelta = (*iterTimeDelta);
-
-				uiTimeDeltaAccumulation += uiCurrentTimeDelta;
-			}
-
-			unsigned int uiTimeStandBy__ = MAXTIMESTANDBY;
-			int iOffsetTimeDelta = uiTimeDeltaAccumulation - MAXACCUMULATIONSUM;
-
-			if( iOffsetTimeDelta > 0 )
-			{
-				bCalculateStandbyTime = FALSE;	// 들어오는지 재확인.
-			}
-			else
-			{
-				bCalculateStandbyTime = TRUE;
-			}
-			
-			// 한 Tick을 적어도 0.04초로 만듭니다. 
-			if( bCalculateStandbyTime == TRUE )
-			{
-				while(TimeRender < MAXTIMESTANDBY)
-				{
-					TimeRender = GetTickCount()-TimePrior;
-				}
-			}
-
-			while( listAccumulateTime.size() > 19 )
-			{
-				listAccumulateTime.pop_front();
-			}
-		}
-		else
-		{
-			// 한 Tick을 적어도 0.04초로 만듭니다.
-			while(TimeRender < MAXTIMESTANDBY)
-			{
-				TimeRender = GetTickCount()-TimePrior;
-			}
-		}
-		listAccumulateTime.push_back( uiOffsetCurrent );
-		
-#else // LDS_MR0_MOD_FIXEDFRAME_DELTA
-		TimeRender = uiOffsetCurrent;
-		
-		while(TimeRender < 40)
-		{
-			TimeRender = GetTickCount()-TimePrior;
-		}
- #endif // LDS_MR0_MOD_FIXEDFRAME_DELTA
-	}
-#else // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 	DifTimer = TimePrior - LastTimeCurrent;
 
 	if (DifTimer < 40)
@@ -3407,7 +3006,7 @@ void MainScene(HDC hDC)
 	}
 
 	DifTimer = DifTimer + Remain;
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
+
 
 #ifdef _DEBUG
 #ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR

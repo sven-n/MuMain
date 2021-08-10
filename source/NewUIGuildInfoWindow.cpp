@@ -1040,27 +1040,15 @@ void SEASON3B::CNewUIGuildInfoWindow::ReceiveGuildRelationShip( BYTE byRelationS
 		{
 			if( m_MessageInfo.s_byRelationShipRequestType == 0x01 )	// Join
 			{
-#if SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-				sprintf( szText[0], GlobalText[1280] );
-				sprintf( szText[1], GlobalText[1281], pPlayer->ID );
-				sprintf( szText[2], GlobalText[1283] );
-#else
 				sprintf( szText[0], GlobalText[1280], pPlayer->ID );
 				sprintf( szText[1], GlobalText[1281] );	
 				sprintf( szText[2], GlobalText[1283] );	
-#endif // SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 			}
 			else										// Break Off
 			{
-#if SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-				sprintf( szText[0], GlobalText[1280] );
-				sprintf( szText[1], GlobalText[1282], pPlayer->ID );
-				sprintf( szText[2], GlobalText[1283] );
-#else
 				sprintf( szText[0], GlobalText[1280], pPlayer->ID );
 				sprintf( szText[1], GlobalText[1282] );
 				sprintf( szText[2], GlobalText[1283] );
-#endif // SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 			}
 		}
 		else if( m_MessageInfo.s_byRelationShipType == 0x02 )		// Rival

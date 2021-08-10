@@ -157,17 +157,10 @@ void CreateBug(int Type,vec3_t Position,OBJECT *Owner,int SubType,int LinkBone)
 	for ( int i=0; i<MAX_BUTTERFLES; i++ )
 	{
 		OBJECT* o = &Butterfles[i];
-#if defined MR0 || defined OBJECT_ID
-		if(o->m_iID == 0) o->m_iID = GenID();
-#endif //MR0
 		if ( CreateBugSub( Type, Position, Owner, o, SubType, LinkBone )==FALSE ) return;
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  보조유닛 처리.
-//////////////////////////////////////////////////////////////////////////
 bool MoveBug ( OBJECT* o, bool bForceRender )
 {
 	if ( o->Live )

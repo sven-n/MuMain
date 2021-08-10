@@ -831,22 +831,12 @@ void CNewUICastleWindow::RenderTaxManagingTab()
 
 	m_BtnApplyTax.Render();
 
-#if SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-	// 가운데 정렬
 	ptOrigin.y += 53;
 	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1575], 160, 0, RT3_SORT_CENTER );	// 1575 "해당 NPC : 떠돌이 상인, 물약소녀,"
 	ptOrigin.y += 13;
 	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1576], 160, 0, RT3_SORT_CENTER );	// 1576 "마담 ,마법사, 대장장이, 알렉스,"
 	ptOrigin.y += 13;
 	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1577], 160, 0, RT3_SORT_CENTER );	// 1577 "라라요정, 장인, 톰슨켄넬, 무기상"
-#else	// SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-	ptOrigin.y += 53;
-	g_pRenderText->RenderText( ptOrigin.x+32, ptOrigin.y, GlobalText[1575] );	// 1575 "해당 NPC : 떠돌이 상인, 물약소녀,"
-	ptOrigin.y += 13;
-	g_pRenderText->RenderText( ptOrigin.x+32, ptOrigin.y, GlobalText[1576] );	// 1576 "마담 ,마법사, 대장장이, 알렉스,"
-	ptOrigin.y += 13;
-	g_pRenderText->RenderText( ptOrigin.x+32, ptOrigin.y, GlobalText[1577] );	// 1577 "라라요정, 장인, 톰슨켄넬, 무기상"
-#endif	// SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_ENGLISH
 
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetTextColor(0xFF947BBB);

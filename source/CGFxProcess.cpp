@@ -501,7 +501,6 @@ void GFxProcess::GFxProcessEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 		if(temp->IsVisible())
 		{
-			// 사용 중인 GFX만 처리
 			GFxMovieView* pMove = temp->GetMovie();
 
 			bool processedMouseEvent = false;
@@ -540,12 +539,10 @@ void GFxProcess::GFxProcessEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 				processedMouseEvent = true;
 			}
 
-			// 커서 충돌확인
 			//if(processedMouseEvent && pMove->HitTest((Float)mx, (Float)my, GFxMovieView::HitTest_ButtonEvents))
 			if(processedMouseEvent && pMove->HitTest((Float)mx, (Float)my, GFxMovieView::HitTest_ShapesNoInvisible))
 				*pbNoFurtherProcessing = true;
 
-			// keyEvent 발생 확인
 			if(uMsg == WM_SYSKEYDOWN || uMsg == WM_SYSKEYUP || uMsg == WM_KEYDOWN || uMsg == WM_KEYUP || uMsg == WM_CHAR)
 			{
 				ProcessKeyEvent(pMove, uMsg, wParam, lParam);

@@ -822,27 +822,23 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
 	if(iLevel < 30)	// 레벨제한
 	{
 		char szError[48] = "";
-		sprintf(szError, GlobalText[2704], 30);	// "%d레벨 이상의 캐릭터만 결투가 가능합니다."
+		sprintf(szError, GlobalText[2704], 30);
 		g_pChatListBox->AddText("", szError, SEASON3B::TYPE_ERROR_MESSAGE);				
 		return 3;
 	}
-#ifdef YDG_ADD_DOPPELGANGER_EVENT
 	else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
 	{
-		// 도플갱어 맵에서는 결투 신청을 할 수 없다
-		g_pChatListBox->AddText("", GlobalText[2866], SEASON3B::TYPE_ERROR_MESSAGE);	// "해당 지역에서 결투는 불가능합니다."
+		g_pChatListBox->AddText("", GlobalText[2866], SEASON3B::TYPE_ERROR_MESSAGE);
 		return 3;
 	}
-#endif	// YDG_ADD_DOPPELGANGER_EVENT
 #ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 	else if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
 	{
-		// 통합시장 맵 내에서는 결투 신청 할 수 없다
-		g_pChatListBox->AddText("", GlobalText[3063], SEASON3B::TYPE_ERROR_MESSAGE);	// "로랜시장 내에서는 결투 신청을 할 수 없습니다."
+		g_pChatListBox->AddText("", GlobalText[3063], SEASON3B::TYPE_ERROR_MESSAGE);
 		return 3;
 	}
 #endif // LDS_ADD_UI_UNITEDMARKETPLACE
-	else if ( !g_DuelMgr.IsDuelEnabled() )	// 자신이 결투중이 아닐경우 결투가능
+	else if ( !g_DuelMgr.IsDuelEnabled() )
 	{
 		SendRequestDuelStart ( pSelectedCha->Key, pSelectedCha->ID );
 		return 1;
@@ -852,14 +848,14 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
 		SendRequestDuelEnd ();
 		return 2;
 	}
-	else    //  본인이 결투중임.
+	else
 	{
 		g_pChatListBox->AddText("", GlobalText[915], SEASON3B::TYPE_ERROR_MESSAGE);
 		return 3;
 	}
 #else	// YDG_ADD_NEW_DUEL_UI
 #ifdef DUEL_SYSTEM
-	if ( !g_bEnableDuel )	// 자신이 결투중이 아닐경우 결투가능
+	if ( !g_bEnableDuel )
 	{
 		SendRequestDuelStart ( pSelectedCha->Key, pSelectedCha->ID );
 		return 1;

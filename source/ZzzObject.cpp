@@ -472,10 +472,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				Vector ( 1.f, 1.f, 1.f, b->BodyLight );
 				for(int i = 0; i < Models[o->Type].NumMeshs; i++)
 					b->RenderMesh(i,RENDER_BRIGHT|RENDER_CHROME5, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU*8.f, o->BlendMeshTexCoordV*2.f,BITMAP_CHROME2 );
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-				ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
 			}
 
 			return;
@@ -3677,9 +3673,6 @@ void RenderObjects()
 									o->AlphaTarget = 1.0f;
 
 								// 원래는 LightEnable Mesh 이지만, 기존버전과의 Syncronization을 위해 Disable 처리합니다.
-#ifdef LDS_MR0_MODIFY_LOGINSCENE_SHADOWPROBLEM
-								o->LightEnable = false;
-#endif // LDS_MR0_MODIFY_LOGINSCENE_SHADOWPROBLEM
 
 								RenderObject(o);
 								RenderObjectVisual(o);
@@ -3716,20 +3709,10 @@ void RenderObjects()
 							((o->Type>=5 && o->Type<=14) || (o->Type>=87 && o->Type<=88) || (o->Type == 4 || o->Type == 129))	// 절벽, 수로
 							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-400.f))	// 컬링 최적화 가능한 부분☆
 						{
-							// 원래는 LightEnable Mesh 이지만, 기존버전과의 Syncronization을 위해 Disable 처리합니다.
-#ifdef LDS_MR0_MODIFY_LOGINSCENE_SHADOWPROBLEM
-							if( o->Type>=5 && o->Type<=14 )	// 절벽만 안개 텍스쳐와 블랜딩하기 위해 쉐도우 끔.
-							{
-								o->LightEnable = false;	
-							}
-#endif // LDS_MR0_MODIFY_LOGINSCENE_SHADOWPROBLEM
-							
-							// 컬링 방지를 위해 강제로 그림
 							RenderObject(o);
 							RenderObjectVisual(o);
 						}
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-						//청박스와 뒷 벽
 						else if((gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE) && (o->Type==129 || o->Type==98))
 						{
  							RenderObject(o);
@@ -3741,7 +3724,6 @@ void RenderObjects()
 							&& (o->Type == 30 || o->Type == 31) 
 							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
 						{
-							// 컬링 방지를 위해 강제로 그림
 							RenderObject(o);
 							RenderObjectVisual(o);
 						}
@@ -5265,9 +5247,6 @@ OBJECT *CreateObject(int Type,vec3_t Position,vec3_t Angle,float Scale)
         }
         break;
     }
-#if defined MR0 || defined OBJECT_ID
-	if(o->m_iID == 0) o->m_iID = GenID();
-#endif //MR0
 	return o;
 }
 
@@ -5410,20 +5389,6 @@ int OpenObjects(char *FileName)
 		CreateObject(Type,Position,Angle,Scale);
 	}
 	delete [] Data;
-
-#if defined MR0 || defined OBJECT_ID
-	SortInBlockByType();
-
-	for(i=0;i<MAX_SPRITES;i++)
-		Sprites[i].m_iID = GenID();
-	for(i=0;i<MAX_BOIDS;i++)
-		Boids[i].m_iID = GenID();
-	for(i=0;i<MAX_FISHS;i++)
-		Fishs[i].m_iID = GenID();
-	for(i=0;i<MAX_EFFECTS;i++)
-		Effects[i].m_iID = GenID();
-
-#endif //MR0
 
 	fclose(fp);
     return iMapNumber;
@@ -5843,10 +5808,6 @@ void ItemObjectAttribute(OBJECT *o)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 땅에 놓을때 방향 설정하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void ItemAngle(OBJECT *o)
 {
 	Vector(0.f,0.f,-45.f,o->Angle);
@@ -5883,19 +5844,16 @@ void ItemAngle(OBJECT *o)
 		o->Scale = 1.5f;
 		o->Angle[2] = 45.f;
 	}
-	else if(o->Type>=MODEL_ARMOR && o->Type<MODEL_GLOVES+MAX_ITEM_INDEX
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| o->Type == MODEL_POTION+155	// 탄탈로스의 갑옷
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		)
+	else if (o->Type >= MODEL_ARMOR && o->Type < MODEL_GLOVES + MAX_ITEM_INDEX)
+	{
 		o->Angle[0] = 270.f;
+	}
 	else if ( o->Type>=MODEL_WING+32 && o->Type<=MODEL_WING+34)
 	{
 		o->Scale = 0.3f;
 		o->Angle[0] = 0.f;
 		o->Angle[2] = 90.f;
 	}
-#ifdef ADD_SEED_SPHERE_ITEM
 	else if (o->Type >= MODEL_WING+60 && o->Type <= MODEL_WING+65)	// 시드 
 	{
 		o->Angle[0] = 0.f;
@@ -5911,7 +5869,6 @@ void ItemAngle(OBJECT *o)
 		o->Angle[0] = 0.f;
 		o->Scale = 0.6f;
 	}
-#endif	// ADD_SEED_SPHERE_ITEM
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(o->Type == MODEL_WING+49)
 	{
@@ -5951,8 +5908,6 @@ void ItemAngle(OBJECT *o)
 		o->Angle[0] = 0.f;
 		o->Angle[2] = 90.f;
 	}
-
-#ifdef GIFT_BOX_EVENT
 	else if ( o->Type>=MODEL_POTION+32 && o->Type<=MODEL_POTION+34)
 	{
 		o->Scale = 0.7f;
@@ -5965,25 +5920,16 @@ void ItemAngle(OBJECT *o)
 		o->Angle[0] = 0.f;
 		o->Angle[2] = 90.f;
 	}
-#endif //GIFT_BOX_EVENT
-#ifdef CSK_FREE_TICKET
-	// 자유입장권이 땅에 놓일 때 각도와 스케일값 세팅
 	else if(o->Type >= MODEL_HELPER+46 && o->Type <= MODEL_HELPER+48)
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif // CSK_FREE_TICKET
-#ifdef CSK_CHAOS_CARD
-	// 카오스카드 땅에 놓일 때 각도와 스케일값 세팅
 	else if(o->Type == MODEL_POTION+54)
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif // CSK_CHAOS_CARD
-#ifdef CSK_RARE_ITEM
-	// 땅에 놓일 때 각도와 스케일값 세팅
 	else if(o->Type == MODEL_POTION+58)
 	{
 		o->Scale = 0.3f;
@@ -6000,103 +5946,72 @@ void ItemAngle(OBJECT *o)
 		o->Scale = 0.3f;
 		o->Angle[0] = 90.f;
 	}
-#endif // CSK_RARE_ITEM
-#ifdef CSK_LUCKY_CHARM
-	else if( o->Type == MODEL_POTION+53 )// 행운의 부적
+	else if( o->Type == MODEL_POTION+53 )
 	{
 		o->Scale = 0.2f;
 		o->Angle[2] = 90.f;
 	}
-#endif //CSK_LUCKY_CHARM
-#ifdef CSK_LUCKY_SEAL
 	else if( o->Type == MODEL_HELPER+43 || o->Type == MODEL_HELPER+44 || o->Type == MODEL_HELPER+45 )
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif //CSK_LUCKY_SEAL
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 	else if( o->Type >= MODEL_POTION+70 && o->Type <= MODEL_POTION+71 )
 	{
 		o->Scale = 0.6f;
 		o->Angle[2] = 90.f;
 	}
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 	else if( o->Type >= MODEL_POTION+72 && o->Type <= MODEL_POTION+77 )
 	{
 		o->Scale = 0.5f;
 		o->Angle[2] = 90.f;
 	}
-#endif //PSW_SCROLL_ITEM
-#ifdef PSW_SEAL_ITEM               // 이동 인장
 	else if( o->Type == MODEL_HELPER+59 )
 	{
 		o->Scale = 0.2f;
 		o->Angle[2] = 90.f;
 	}
-#endif //PSW_SEAL_ITEM
-#ifdef PSW_FRUIT_ITEM              // 리셋 열매
 	else if( o->Type >= MODEL_HELPER+54 && o->Type <= MODEL_HELPER+58 )
 	{
 		o->Scale = 0.7f;
 		o->Angle[2] = 90.f;
 	}
-#endif //PSW_FRUIT_ITEM
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
 	else if( o->Type >= MODEL_POTION+78 && o->Type <= MODEL_POTION+82 )
 	{
 		o->Scale = 0.5f;
 		o->Angle[2] = 90.f;
 	}
-#endif //PSW_SECRET_ITEM
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
 	else if( o->Type == MODEL_HELPER+60 )
 	{
 		o->Scale = 1.5f;
 		o->Angle[2] = 90.f;
 	}
-#endif //PSW_INDULGENCE_ITEM
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
 	else if( o->Type == MODEL_HELPER+61 )
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-#ifdef PSW_RARE_ITEM
 	else if( o->Type == MODEL_POTION+83)
 	{
 		o->Scale = 0.3f;
 		o->Angle[0] = 90.f;
 	}
-#endif //PSW_RARE_ITEM
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
 	else if(o->Type >= MODEL_POTION+145 && o->Type <= MODEL_POTION+150)
 	{
 		o->Scale = 0.3f;
 		o->Angle[0] = 90.f;
 	}
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-	// 도플갱어, 바르카, 바르카 제7맵 자유입장권
 	else if(o->Type >= MODEL_HELPER+125 && o->Type <= MODEL_HELPER+127)
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 
-#ifdef PSW_CHARACTER_CARD
-	// 카오스카드 땅에 놓일 때 각도와 스케일값 세팅
 	else if(o->Type == MODEL_POTION+91)
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif // PSW_CHARACTER_CARD
-#ifdef PSW_NEW_CHAOS_CARD
-	// 카오스카드 땅에 놓일 때 각도와 스케일값 세팅
 	else if(o->Type == MODEL_POTION+92)
 	{
 		o->Scale = 0.5f;
@@ -6107,123 +6022,85 @@ void ItemAngle(OBJECT *o)
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-	else if(o->Type == MODEL_POTION+95) // 카오스카드 미니
+	else if(o->Type == MODEL_POTION+95)
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif // PSW_NEW_CHAOS_CARD
-#ifdef PSW_NEW_ELITE_ITEM
-	else if( o->Type == MODEL_POTION+94 ) // 엘리트 중간 치료 물약
+	else if( o->Type == MODEL_POTION+94 )
 	{
 		o->Scale = 0.6f;
 		o->Angle[2] = 90.f;
 	}
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-	else if( o->Type == MODEL_POTION+84 )  // 벚꽃상자
+	else if( o->Type == MODEL_POTION+84 )
 	{
 		o->Scale = 0.8f;
 		o->Angle[2] = 90.f;
 	}
-	else if( o->Type == MODEL_POTION+85 )  // 벚꽃술
+	else if( o->Type == MODEL_POTION+85 )
 	{
 		o->Scale = 0.9f;
 		o->Angle[2] = 90.f;
 	}
-	else if( o->Type == MODEL_POTION+86 )  // 벚꽃경단
+	else if( o->Type == MODEL_POTION+86 )
 	{
 		o->Scale = 0.7f;
 		o->Angle[2] = 90.f;
 	}
-	else if( o->Type == MODEL_POTION+87 )  // 벚꽃잎
+	else if( o->Type == MODEL_POTION+87 )
 	{
 		o->Scale = 1.3f;
 		o->Angle[2] = 90.f;
 	}
-	else if( o->Type == MODEL_POTION+88 )  // 흰색 벚꽃
+	else if( o->Type == MODEL_POTION+88 )
 	{
 		o->Scale = 0.7f;
 		o->Angle[0] = 180.f;
 		o->Angle[1] = 180.f;
 		//o->Angle[2] = 90.f;
 	}
-	else if( o->Type == MODEL_POTION+89 )  // 붉은색 벚꽃
+	else if( o->Type == MODEL_POTION+89 )
 	{
 		o->Scale = 0.7f;
 		o->Angle[0] = 30.f;
 		o->Angle[2] = 90.f;
 	}
-	else if( o->Type == MODEL_POTION+90 )  // 노란색 벚꽃
+	else if( o->Type == MODEL_POTION+90 )
 	{
 		o->Scale = 0.7f;
 		o->Angle[0] = 30.f;
 		o->Angle[2] = 90.f;
 	}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef PSW_ADD_PC4_SEALITEM
 	else if(o->Type >= MODEL_HELPER+62 && o->Type <= MODEL_HELPER+63)
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef PSW_ADD_PC4_SCROLLITEM
 	else if(o->Type >= MODEL_POTION+97 && o->Type <= MODEL_POTION+98)
 	{
 		o->Scale = 0.5f;
 		o->Angle[2] = 90.f;
 	}
-#endif //PSW_ADD_PC4_SCROLLITEM
-#ifdef YDG_ADD_HEALING_SCROLL
-	else if(o->Type == MODEL_POTION+140)	// 치유의 스크롤
+	else if(o->Type == MODEL_POTION+140)
 	{
 		o->Scale = 0.5f;
 		o->Angle[2] = 90.f;
 	}
-#endif	// YDG_ADD_HEALING_SCROLL
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
 	else if( o->Type == MODEL_POTION+96 ) 
 	{
 		o->Scale = 0.2f;
 		o->Angle[2] = 90.f;
 	}
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-#ifdef LDK_ADD_PC4_GUARDIAN
 	else if( o->Type >= MODEL_HELPER+64 && o->Type <= MODEL_HELPER+65 )
 	{
-#ifdef LDK_MOD_GUARDIAN_DROP_RESIZE
 		switch(o->Type)
 		{
 		case MODEL_HELPER+64: o->Scale = 0.21f; break;
 		case MODEL_HELPER+65: o->Scale = 0.5f; break;
 		}
-#else //LDK_MOD_GUARDIAN_DROP_RESIZE
-		o->Scale = 1.4f;
-#endif //LDK_MOD_GUARDIAN_DROP_RESIZE
 		o->Angle[2] = 70.f;
 	}
-#endif //LDK_ADD_PC4_GUARDIAN		
-#ifdef CSK_PCROOM_ITEM
-	else if(o->Type >= MODEL_POTION+55 && o->Type <= MODEL_POTION+57
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| o->Type >= MODEL_POTION+157 && o->Type <= MODEL_POTION+159
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		)
-	{
-		o->Angle[0] = 0.f;
-		o->Scale = 0.3f;
-	}
-#endif // CSK_PCROOM_ITEM
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	else if(o->Type == MODEL_HELPER+96)
-	{
-		o->Angle[0] = 90.f;
-		o->Angle[1] = 0.f;
-		o->Angle[2] = 0.f;
-		o->Scale = 1.0f;
-	}
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH	
+	
 	else if(o->Type == MODEL_HELPER+49)
 	{
 		o->Angle[0] = 90.f;
@@ -6240,11 +6117,7 @@ void ItemAngle(OBJECT *o)
 		o->Angle[0] = 90.f;
 		o->Scale = 0.45f;
 	}
-	else if(o->Type == MODEL_POTION+64
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| o->Type == MODEL_POTION+153
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		)
+	else if(o->Type == MODEL_POTION+64)
 	{
 		o->Angle[0] = 0.f;
 		o->Scale = 0.8f;
@@ -6279,150 +6152,111 @@ void ItemAngle(OBJECT *o)
 		o->Angle[2] = -135.f;
 		o->Scale = 0.6f;
 	}
-	else if(o->Type==MODEL_EVENT+4)	// 성탄의별
+	else if(o->Type==MODEL_EVENT+4)
 	{
 		o->Angle[0] = 90.f;
 	}
-	else if(o->Type==MODEL_EVENT+8 || o->Type==MODEL_EVENT+9)	// 은 훈장, 금 훈장
+	else if(o->Type==MODEL_EVENT+8 || o->Type==MODEL_EVENT+9)
 	{
 		o->Angle[0] = 270.f;
 		o->Angle[2] = 45.f;
 	}
-#ifdef USE_EVENT_ELDORADO
-	else if(o->Type==MODEL_EVENT+10)	// 엘도라도
+	else if(o->Type==MODEL_EVENT+10)
 	{
 		o->Scale    = .2f;
 	}
-#endif
-	else if(o->Type==MODEL_EVENT+5)	// 폭죽. 마법 주머니
+	else if(o->Type==MODEL_EVENT+5)
 	{
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-        o->Angle[0] = 0.f;
-        o->Angle[2] = 45.f;
-        o->Scale    = 1.1f;
-#else
 		o->Angle[0] = 90.f;
-#endif
 	}
-#ifdef CHINA_MOON_CAKE
-    else if ( o->Type==MODEL_EVENT+17 )     //  중국 월병.
-    {
-		o->Angle[0] = 270.f;
-		o->Angle[2] = 45.f;
-    }
-#endif// CHINA_MOON_CAKE
-    else if ( o->Type==MODEL_POTION+23 )//  제왕의서.
+    else if ( o->Type==MODEL_POTION+23 )
     {
         o->Angle[1] = 45.f;
         o->Angle[2] = 45.f;
     }
-    else if ( o->Type==MODEL_POTION+24 )//  부러진검.
+    else if ( o->Type==MODEL_POTION+24 )
     {
         o->Angle[2] = 45.f;
     }
-    else if ( ( o->Type>=MODEL_POTION+25 && o->Type<MODEL_POTION+27) || o->Type == MODEL_HELPER+14) //  엘프의눈물, 마법사의혼. 로크의깃털.
+    else if ( ( o->Type>=MODEL_POTION+25 && o->Type<MODEL_POTION+27) || o->Type == MODEL_HELPER+14)
     {
         o->Angle[2] = 45.f;
     }
-	else if(o->Type==MODEL_POTION+17)	// 악마의 눈
+	else if(o->Type==MODEL_POTION+17)
 	{
 		o->Angle[0] = 90.f;
 	}
-	else if(o->Type==MODEL_POTION+63)	// 폭죽
+	else if(o->Type==MODEL_POTION+63)
 	{
 		o->Angle[0] = 70.f;
 		o->Scale = 1.5f;
 	}
-#ifdef YDG_ADD_FIRECRACKER_ITEM
-	else if(o->Type==MODEL_POTION+99)	// 크리스마스 폭죽
+	else if(o->Type==MODEL_POTION+99)
 	{
 		o->Angle[0] = 70.f;
 		o->Angle[2] = 0.f;
 		o->Scale = 1.0f;
 	}
-#endif	// YDG_ADD_FIRECRACKER_ITEM
-	else if(o->Type==MODEL_POTION+52)	// GM 선물상자
+	else if(o->Type==MODEL_POTION+52)
 	{
 		o->Angle[2] = -10.f;
 		o->Scale = 0.4f;
 	}
-	else if(o->Type==MODEL_POTION+18)	// 악마의 열쇠
+	else if(o->Type==MODEL_POTION+18)
 	{
 		o->Angle[0] = o->Angle[2] = 270.f;
 	}
-	else if(o->Type==MODEL_POTION+19)	// 악마의 광장 초대권
+	else if(o->Type==MODEL_POTION+19)
 	{
 		o->Angle[0] = 270.f;
 		o->Angle[2] = 90.f;
 	}
-#ifdef _PVP_MURDERER_HERO_ITEM
-    else if(o->Type==MODEL_POTION+30)	// 머리카락
+	else if(o->Type == MODEL_POTION+29)
 	{
 		o->Angle[0] = 90.f;
 		o->Angle[2] = 70.f;
 	}
-#endif	// _PVP_MURDERER_HERO_ITEM
-	else if(o->Type == MODEL_POTION+29)	//. 쿤둔의 표식
-	{
-		o->Angle[0] = 90.f;
-		o->Angle[2] = 70.f;
-	}
-#ifdef MYSTERY_BEAD
-	else if(o->Type == MODEL_EVENT+19)	//. 신비의 구슬
-	{
-		o->Scale = 0.7f;
-	}
-#endif // MYSTERY_BEAD
-	else if(o->Type == MODEL_EVENT+11)	//. 스톤
+	else if(o->Type == MODEL_EVENT+11)
 	{
 		o->Angle[0] = 115.f;
 		o->Angle[1] = 75.f;
 		o->Angle[2] = 8.f;
 		o->Scale = 0.4f;
 	}
-#ifdef MYSTERY_BEAD
-	else if(o->Type == MODEL_EVENT+20)	//. 수정들
-	{
-		o->Angle[0] = 15.f;
-		o->Angle[1] = 75.f;
-		o->Angle[2] = 98.f;
-		o->Scale = 0.68f;
-	}
-#endif // MYSTERY_BEAD
-	else if(o->Type == MODEL_HELPER+16 || o->Type == MODEL_HELPER+17)	//. 대천사의 서, 블러드 본
+	else if(o->Type == MODEL_HELPER+16 || o->Type == MODEL_HELPER+17)
 	{
 		o->Angle[0] = -45.f;
 		o->Angle[1] = -5.f;
 		o->Angle[2] = 18.f;
 		o->Scale = 0.48f;
 	}
-	else if(o->Type == MODEL_HELPER+18)	//. 투명망토
+	else if(o->Type == MODEL_HELPER+18)
 	{
 		o->Angle[0] = 165.f;
 		o->Angle[1] = -168.f;
 		o->Angle[2] = 198.f;
 		o->Scale = 0.48f;
 	}
-    else if ( o->Type==MODEL_HELPER+30 )//  망토.
+    else if ( o->Type==MODEL_HELPER+30 )
     {
         o->Angle[0] = -45.f;
         o->Angle[1] = 0.f;
         o->Angle[2] = 45.f;
         o->Scale    = 0.5f;
     }
-    else if ( o->Type==MODEL_EVENT+16 ) //  군주의 소매.
+    else if ( o->Type==MODEL_EVENT+16 )
     {
 		o->Angle[2] = 45.f;
         o->Scale    = 0.5f;
     }
-	else if(o->Type==MODEL_EVENT+12)	//. 영광의 반지
+	else if(o->Type==MODEL_EVENT+12)
 	{
 		o->Angle[0] = 160.f;
 		o->Angle[1] = -183.f;
 		o->Angle[2] = 198.f;
 		o->Scale = 0.38f;
 	}
-	else if(o->Type==MODEL_EVENT+13)	//. 다크스톤
+	else if(o->Type==MODEL_EVENT+13)
 	{
 		o->Angle[0] = 160.f;
 		o->Angle[1] = -183.f;
@@ -6434,11 +6268,11 @@ void ItemAngle(OBJECT *o)
 		o->Angle[0] = 270.f;
 		o->Angle[2] = 90.f;
     }
-	else if(o->Type==MODEL_EVENT+7)	// 사랑의 올리브
+	else if(o->Type==MODEL_EVENT+7)
 	{
 		o->Angle[2] = 45.f;
 	}
-	else if(o->Type==MODEL_POTION+20)	// 사랑의 묘약
+	else if(o->Type==MODEL_POTION+20)
 	{
 		o->Angle[2] = 45.f;
 	}
@@ -6446,26 +6280,25 @@ void ItemAngle(OBJECT *o)
     {
 		o->Angle[2] = 20.f;
     }
-	//^ 펜릴 땅에 놓일때 스케일, 각도 조정
-	else if(o->Type == MODEL_HELPER+33)	// 여신의 가호
+	else if(o->Type == MODEL_HELPER+33)
 	{
 		o->Angle[2] = 45.f;
 		o->Scale = 1.2f;
 	}
-	else if(o->Type == MODEL_HELPER+34) // 맹수의 발톱
+	else if(o->Type == MODEL_HELPER+34)
 	{
 		o->Angle[0] = 90.f;
 	}
-	else if(o->Type == MODEL_HELPER+35) // 뿔피리 조각
+	else if(o->Type == MODEL_HELPER+35)
 	{
 		o->Angle[2] = 90.f;
 	}
-	else if(o->Type == MODEL_HELPER+36) // 부러진 뿔피리
+	else if(o->Type == MODEL_HELPER+36)
 	{
 		o->Angle[2] = 90.f;
 		o->Scale = 1.3f;
 	}
-	else if(o->Type == MODEL_HELPER+37)	// 펜릴의 뿔피리
+	else if(o->Type == MODEL_HELPER+37)
 	{
 		o->Angle[2] = 180.f;
 	}
@@ -6486,204 +6319,127 @@ void ItemAngle(OBJECT *o)
 		o->Angle[2] = -15.f;
 		o->Scale = 1.0f;
 	}
-	else if(o->Type >= MODEL_ETC+19 && o->Type <= MODEL_ETC+27
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		|| o->Type == MODEL_POTION+151 || o->Type == MODEL_POTION+152	// 1레벨 의뢰서, 1레벨 의뢰 완료 확인서
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		)
+	else if(o->Type >= MODEL_ETC+19 && o->Type <= MODEL_ETC+27)
 	{
 		o->Angle[0] = 270.f;
 		o->Scale = 0.8f;
 	}
-#ifdef PBG_ADD_SANTAINVITATION
-	//산타마을의 초대장.
 	else if(o->Type == MODEL_HELPER+66 )
 	{
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif //PBG_ADD_SANTAINVITATION
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-	//행운의 동전
 	else if(o->Type == MODEL_POTION+100)
 	{
 		o->Angle[0] = 180.0f;
 	//	o->Angle[2] = 0.0f;
 		o->Scale = 1.0f;
 	}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING	// 날개 조합 100% 성공 부적
-	else if( o->Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN && 
-		o->Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END )
+	else if( o->Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN && o->Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END )
 	{
 		o->Scale = 0.5f;
 		o->Angle[2] = 90.f;
 	}
-#endif // LDS_ADD_CS6_CHARM_MIX_ITEM_WING
-#ifdef PBG_ADD_CHARACTERCARD
-	// 마검 다크 소환술사 카드
 	else if(o->Type == MODEL_HELPER+97 || o->Type == MODEL_HELPER+98 || o->Type == MODEL_POTION+91)
 	{
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif //PBG_ADD_CHARACTERCARD
-#ifdef PBG_ADD_CHARACTERSLOT
 	else if(o->Type == MODEL_HELPER+99)
 	{
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif //PBG_ADD_CHARACTERSLOT
-#ifdef PBG_ADD_SECRETITEM
-	//활력의비약(최하급/하급/중급/상급)
-	else if(o->Type >= MODEL_HELPER+117 && o->Type <= MODEL_HELPER+120)
-	{
-		o->Angle[0] = 270.0f;
-		o->Scale = 1.0f;
-	}
-#endif //PBG_ADD_SECRETITEM
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
-	// 차원의 표식, 차원의 마경
 	else if(o->Type == MODEL_POTION+110 || o->Type == MODEL_POTION+111)
 	{
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
 	else if(o->Type == MODEL_HELPER+107)
 	{
-		// 치명마법반지
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-#ifdef YDG_ADD_CS7_MAX_AG_AURA
 	else if(o->Type == MODEL_HELPER+104)
 	{
-		// AG증가 오라
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// YDG_ADD_CS7_MAX_AG_AURA
-#ifdef YDG_ADD_CS7_MAX_SD_AURA
 	else if(o->Type == MODEL_HELPER+105)
 	{
-		// SD증가 오라
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// YDG_ADD_CS7_MAX_SD_AURA
-#ifdef YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
 	else if(o->Type == MODEL_HELPER+103)
 	{
-		// 파티 경험치 증가 아이템
 		o->Angle[0] = 0.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// YDG_ADD_CS7_PARTY_EXP_BONUS_ITEM
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
 	else if(o->Type == MODEL_POTION+133)
 	{
-		// 엘리트 SD회복 물약
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
 	else if(o->Type == MODEL_HELPER+109)
 	{
-		// 신규 사파이어(푸른색)링
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링		// MODEL_HELPER+110
 	else if(o->Type == MODEL_HELPER+110)
 	{
-		// 신규 루비(붉은색)링
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// 신규 토파즈(주황)링		// MODEL_HELPER+111
 	else if(o->Type == MODEL_HELPER+111)
 	{
-		// 신규 토파즈(주황)링
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 신규 자수정(보라색)링		// MODEL_HELPER+112
 	else if(o->Type == MODEL_HELPER+112)
 	{
-		// 신규 자수정(보라색)링
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
 	else if(o->Type == MODEL_HELPER+113)
 	{
-		// 신규 루비(붉은색) 목걸이
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// 신규 에메랄드(푸른) 목걸이	// MODEL_HELPER+114
 	else if(o->Type == MODEL_HELPER+114)
 	{
-		// 신규 에메랄드(푸른) 목걸이
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// 신규 사파이어(녹색) 목걸이	// MODEL_HELPER+115
 	else if(o->Type == MODEL_HELPER+115)
 	{
-		// 신규 사파이어(녹색) 목걸이
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
 	else if(o->Type == MODEL_POTION+112)
 	{
-		// 신규 키(실버)
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_KEYSILVER	// 신규 키(실버)	// MODEL_POTION+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD	// 신규 키(골드)	// MODEL_POTION+113
 	else if(o->Type == MODEL_POTION+113)
 	{
-		// 신규 키(골드)
 		o->Angle[0] = 270.0f;
 		o->Scale = 1.0f;
 	}
-#endif	// LDS_ADD_INGAMESHOP_ITEM_KEYGOLD	// 신규 키(골드)	// MODEL_POTION+113
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL // 신규 풍요의 인장
 	else if( o->Type == MODEL_HELPER+116 )
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
 	else if( o->Type == MODEL_HELPER+121 )
 	{
 		o->Scale = 0.5f;
 		o->Angle[0] = 90.f;
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-#ifdef YDG_ADD_SKELETON_PET
-	else if (o->Type == MODEL_HELPER+123)	// 스켈레톤펫
+	else if (o->Type == MODEL_HELPER+123)
 	{
 		o->Scale = 0.4f;
 		o->Angle[0] = 30.f;
 	}
-#endif	// YDG_ADD_SKELETON_PET
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(o->Type >= MODEL_HELM+59 && o->Type <= MODEL_HELM+59+2)
 	{
@@ -6703,7 +6459,7 @@ void ItemAngle(OBJECT *o)
 			o->Angle[2] = 90.f - 45.f;
 		}
 	}
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 바닥에 떨어진 아이템 스케일 설정 [lem_2010.9.7]
+#ifdef LEM_ADD_LUCKYITEM
 	else if( o->Type >= MODEL_HELPER+135 && o->Type <= MODEL_HELPER+145 )	// 럭키아이템 티켓
 	{
 		o->Scale = 0.2f;
@@ -6727,10 +6483,6 @@ void ItemAngle(OBJECT *o)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 땅에 놓을때 아이템을 바닥에 생성하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 {
 	int Type = ConvertItemType(Item);
@@ -6744,7 +6496,7 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 		if(CreateFlag)
 			PlayBuffer(SOUND_DROP_GOLD01);
 	}
-	else//아이템
+	else
 	{
 		n->Level	  = Item[1];
 		n->Durability = Item[2];
@@ -6767,13 +6519,10 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 	}
 
 	OBJECT *o = &ip->Object;
-#if defined MR0 || defined OBJECT_ID
-	if(o->m_iID == 0) o->m_iID = GenID();
-#endif //MR0
 	o->Live			  = true;
 	o->Type			  = MODEL_SWORD+Type;
 	o->SubType        = 1;
-	if ( Type == (int)( ITEM_POTION+11))	// 행운의상자/성탄의별/폭죽/마법 주머니./사랑의 하트/금 훈장/은 훈장
+	if ( Type == (int)( ITEM_POTION+11))
 	{
 		switch ( ( n->Level >> 3))
 		{
@@ -6792,7 +6541,6 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 		case 6:
 			o->Type = MODEL_EVENT+9;
 			break;
-#ifdef USE_EVENT_ELDORADO
 		case 8:
 		case 9:
 		case 10:
@@ -6800,28 +6548,18 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 		case 12:
 			o->Type = MODEL_EVENT+10;
 			break;
-#endif
 		case 13:
 			o->Type = MODEL_EVENT+6;
-#ifdef NEW_YEAR_BAG_EVENT
+			break;
 		case 14:
 		case 15:
 			o->Type = MODEL_EVENT+5;
-#else
-    #ifdef CHINA_MOON_CAKE
-		case 14:
-			o->Type = MODEL_EVENT+17;
-    #endif	//  CHINA_MOON_CAKE
-#endif// NEW_YEAR_BAG_EVENT
 		}
 	}
-
 	if ( Type >= ITEM_POTION+46 && Type <= ITEM_POTION+48)
 	{
 		o->Type = MODEL_ITEM+Type;
 	}
-
-#ifdef GIFT_BOX_EVENT
 	if ( Type >= ITEM_POTION+32 && Type <= ITEM_POTION+34)
 	{
 		if( (n->Level >> 3) == 1)
@@ -6830,79 +6568,35 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 			o->Type = MODEL_EVENT+21+Num;
 		}
 	}
-#endif
-#ifdef ANNIVERSARY_EVENT
-	if ( Type == (int)( ITEM_POTION+20))	// 사랑의 묘약
-	{
-		switch ( ( n->Level >> 3))
-		{
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-			o->Type = MODEL_POTION+11;
-			break;
-		}
-	}
-#endif	// ANNIVERSARY_EVENT
-#ifdef MYSTERY_BEAD
-	else if( Type == ITEM_WING+26)
-	{
-		switch ( ( n->Level >> 3))
-		{
-		case 0:		//. 신비의 구슬
-			o->Type = MODEL_EVENT+19;
-			break;
-		case 1:		//. 붉은수정
-			o->Type = MODEL_EVENT+20;
-			break;
-		case 2:		//. 푸른수정
-			o->Type = MODEL_EVENT+20;
-			break;
-		case 3:		//. 검은수정
-			o->Type = MODEL_EVENT+20;
-			break;
-		case 4:		//. 보물상자
-			o->Type = MODEL_POTION+11;
-			break;
-		case 5:
-			o->Type = MODEL_POTION+11;
-			break;
-		}
-	}
-#endif // MYSTERY_BEAD
-    //  0:레나, 1:스톤, 2:우정의 돌
     else if ( Type==(int)(ITEM_POTION+21) )
     {
         switch ( (n->Level>>3) )
         {
-        case 1: //  스톤.
-        case 2: //  우정의 돌.
+        case 1:
+        case 2:
             o->Type = MODEL_EVENT+11;
             break;
         }
     }
-	//. 0:대천사의 절대지팡이. 1:대천사의 절대검, 2:대천사의 절대석궁.
     else if ( Type==(int)(ITEM_HELPER+19) )
     {
         switch ( (n->Level>>3) )
         {
-        case 0: //  대천사의 절대지팡이.
+        case 0:
             o->Type = MODEL_STAFF+10;
             n->Level = 0;
             break;
-        case 1: //  대천사의 절대검.
+        case 1:
             o->Type = MODEL_SWORD+19;
             n->Level = 0;
             break;
-        case 2: //  대천사의 절대석궁.
+        case 2:
             o->Type = MODEL_BOW+18;
             n->Level = 0;
             break;
 		}
 	}
-	else if ( Type==ITEM_POTION+23 )		//. 영광의 반지
+	else if ( Type==ITEM_POTION+23 )
 	{
 		switch( (n->Level>>3) )
 		{
@@ -6911,7 +6605,7 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 			break;
 		}
 	}
-	else if ( Type==ITEM_POTION+24 )		//. 다크스톤
+	else if ( Type==ITEM_POTION+24 )
 	{
 		switch( (n->Level>>3) )
 		{
@@ -6928,15 +6622,13 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 			o->Type = MODEL_EVENT+15;
 			break;
 		case 1:
-#ifdef FRIEND_EVENT
         case 2:
-#endif// FRIEND_EVENT;
         case 3:
 			o->Type = MODEL_EVENT+14;
 			break;
 		}
 	}
-	else if ( Type == (int)( ITEM_POTION+9))	// 사랑의 올리브
+	else if ( Type == (int)( ITEM_POTION+9))
 	{
 		switch ( ( n->Level >> 3))
 		{
@@ -6945,11 +6637,11 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 			break;
 		}
 	}
-    else if ( Type==ITEM_HELPER+14 && (n->Level>>3)==1 )    //  군주의 소매.
+    else if ( Type==ITEM_HELPER+14 && (n->Level>>3)==1 )
     {
         o->Type = MODEL_EVENT+16;
     }
-    else if ( Type==ITEM_HELPER+11 && (n->Level>>3)==1 )    //  라이프 스톤.
+    else if ( Type==ITEM_HELPER+11 && (n->Level>>3)==1 )
     {
         o->Type = MODEL_EVENT+18;
     }
@@ -9751,44 +9443,14 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 		b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_FREETICKET_R);
 	}
 #endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE	// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-	else if( Type == MODEL_PANTS +18 )				// Hero::흑마법사 블랙소울 바지, 그랜드소울 바지 만.
-	{
-		if( o->Type == MODEL_PANTS +18 )
-		{
-			b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-		}
-		else
-		{
-			b->RenderMesh(0,RenderType,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-			b->RenderMesh(1,RenderType,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);		
-		}
 
-//		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-	}
-	else if( Type == MODEL_PANTS +22 )
-	{
-		if( o->Type == MODEL_PANTS +22 )
-		{
-			b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-		}
-		else
-		{
-			b->RenderMesh(0,RenderType,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-			b->RenderMesh(1,RenderType,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);	
-		}
-
-//		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-	}
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-#ifdef PBG_ADD_GENSRANKING
 	else if(Type >= MODEL_POTION+141 && Type <= MODEL_POTION+144)
 	{
 		b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(0,RENDER_BRIGHT|RENDER_CHROME,o->Alpha,0,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(1,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 	}
-#endif //PBG_ADD_GENSRANKING
+
 #ifdef YDG_ADD_SKELETON_CHANGE_RING
 	else if (Type == MODEL_HELPER+122)	// 스켈레톤 변신반지
 	{
@@ -10000,7 +9662,6 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 	else if(iMonsterIndex >= 492 && iMonsterIndex <= 501)
 #endif // KJH_FIX_GOLD_RABBIT_INDEX
 	{
-		// 새로운 바디라이트 적용
 		if(iMonsterIndex == 495)
 		{
 			Vector(1.0f, 0.8f, 0.0f, b->BodyLight);
@@ -10024,7 +9685,7 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 	}
 #endif // CSK_ADD_GOLDCORPS_EVENT
 	else
-	{	//. 칼라셋팅
+	{
 		PartObjectColor(Type,Alpha,Bright,b->BodyLight, (RenderType&RENDER_EXTRA) ? true : false );
 	}
 
@@ -10043,7 +9704,6 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,Texture);
 	else if ( Type>=MODEL_MACE+8 && Type<=MODEL_MACE+13 )
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,Texture);
-#ifdef ADD_SOCKET_ITEM
 	else if( Type == MODEL_SWORD+26 )	// 플랑베르주
 	{
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, 5 );
@@ -10059,28 +9719,23 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 		//* RenderType = RENDER_BRIGHT|RENDER_CHROME
  		b->RenderMesh( 2, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 	}
-	else if( Type == MODEL_STAFF+30 )	// 데들리스태프
+	else if( Type == MODEL_STAFF+30 )
 	{
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1,Texture);
-
-		// 칼날부분
 		o->BlendMesh =1;
 		Vector(1.f, 1.f, 1.f, b->BodyLight);
 		b->RenderMesh( 1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 	}
 	else if( Type == MODEL_STAFF+32 )	// 소울브링거
 	{
-		// 칼날부분 (soketel_soulbringer.jpg)
 		b->RenderMesh( 1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 	}
  	else if( Type == MODEL_SHIELD+19 )	// 프로스트배리어
  	{
- 		// 십자가 부분
  		b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
  	}
 	else if( Type == MODEL_SHIELD+20 )	// 가디언실드
 	{
-		// 불빛이 없는부분
 		b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 	}
 	else if( Type == MODEL_HELM+49 )		// 세라핌 헬름
@@ -10095,14 +9750,10 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 	{
 		b->RenderMesh(2,RenderType,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 	}
-#endif // ADD_SOCKET_ITEM
-#ifdef CSK_ADD_ITEM_CROSSSHIELD
 	else if(Type == MODEL_SHIELD+21)
 	{
 		b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 	}
-#endif // CSK_ADD_ITEM_CROSSSHIELD
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 	else if(Type == MODEL_SPEAR+11)		//겜블 레어 낫
 	{
 		b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
@@ -10124,37 +9775,6 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 	{
 		b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 	}
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-	else if(Type == MODEL_PANTS +18)	// 법사 그랜드소울 바지 렌더 처리	// 인벤토리창 렌더링 // 작업중.
-	{
-		if( o->Type == MODEL_PANTS +18 )
-		{
-			b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-		}
-		else
-		{
-			b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
-			b->RenderMesh( 1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );		
-		}
-
-//		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-	}
-	else if(Type == MODEL_PANTS +22)	// 법사 블랙소울 바지 렌더 처리
-	{
-		if( o->Type == MODEL_PANTS +22 )
-		{
-			b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-		}
-		else
-		{
-			b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
-			b->RenderMesh( 1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );		
-		}
-
-//		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-	}
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type >= MODEL_SWORD+32 && Type <= MODEL_SWORD+34)		// 몽크장비
 	{
@@ -10230,58 +9850,26 @@ void RenderPartObjectBodyColor2(BMD *b,OBJECT *o,int Type,float Alpha,int Render
 	{
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,0,Texture);
 	}
-#ifdef ADD_SOCKET_ITEM
-	else if( Type == MODEL_SWORD+26 )		// 플랑베르주
+	else if( Type == MODEL_SWORD+26 )
 	{
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,5,Texture);
 	}
-	else if( Type == MODEL_SHIELD+19 )	// 프로스트배리어
+	else if( Type == MODEL_SHIELD+19 )
 	{
 		b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 	}
-	else if( Type == MODEL_HELM+49 )		// 세라핌 헬름
+	else if( Type == MODEL_HELM+49 )
 	{
 		b->RenderMesh(0,RenderType,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 	}
-	else if( Type == MODEL_HELM+50 )		// 디바인 헬름
+	else if( Type == MODEL_HELM+50 )
 	{
 		b->RenderMesh(1,RenderType,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 	}
-	else if( Type == MODEL_HELM+53 )		// 서큐버스 헬름
+	else if( Type == MODEL_HELM+53 )
 	{
 		b->RenderMesh(2,RenderType,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 	}
-#endif // ADD_SOCKET_ITEM
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-	else if(Type == MODEL_PANTS +18)	// 법사 그랜드소울 바지 렌더 처리
-	{
-		if( o->Type == MODEL_PANTS +18 )
-		{
-			b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1,Texture);
-		}
-		else
-		{
-			b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
-			b->RenderMesh( 1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );		
-		}
-
-//		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1,Texture);
-	}
-	else if(Type == MODEL_PANTS +22)	// 법사 블랙소울 바지 렌더 처리
-	{
-		if( o->Type == MODEL_PANTS +22 )
-		{
-			b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1,Texture);
-		}
-		else
-		{
-			b->RenderMesh( 0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
-			b->RenderMesh( 1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );	
-		}
-
-//		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1,Texture);
-	}
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type >= MODEL_SWORD+32 && Type <= MODEL_SWORD+34)		// 몽크장비
 	{
@@ -10455,11 +10043,9 @@ void NextGradeObjectRender(CHARACTER *c)
 			{
 			case 15: // +15
 				{
-					// 뿔 링크
 					w->LinkBone = bornIndex[m];
 					RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true);
 
-					// 이펙트
 					b->TransformByBoneMatrix(vPos, BoneTransform[0], o->Position);
 					
 					fLight2 = absf( sinf ( WorldTime*0.01f ));
@@ -10467,12 +10053,8 @@ void NextGradeObjectRender(CHARACTER *c)
 					CreateSprite(BITMAP_MAGIC, vPos, 0.12f, vLight, o);
 					
 					Vector(0.4f, 0.7f, 1.0f, vLight);
-#ifdef LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
-					CreateSprite(BITMAP_SHINY+6, vPos, 0.4f, vLight, o);
-#else // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
 					CreateSprite(BITMAP_SHINY+5, vPos, 0.4f, vLight, o);
-#endif // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
-					
+
 					Vector(0.1f, 0.3f, 1.0f, vLight);
 					CreateSprite(BITMAP_PIN_LIGHT, vPos, 0.6f, vLight, o, 90.0f);
 				}break;
@@ -10482,10 +10064,6 @@ void NextGradeObjectRender(CHARACTER *c)
 	} //for
 }
 #endif //LDK_ADD_14_15_GRADE_ITEM_MODEL
-
-///////////////////////////////////////////////////////////////////////////////
-// 레벨별로 각각 다른 효과로 아이템을 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 extern float g_Luminosity;
 
@@ -10510,12 +10088,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			DisableAlphaBlend();
 			glColor3f(0.f,0.f,0.f);
 		}
-#ifdef USE_SHADOWVOLUME
-		//케릭터
-		//CShadowVolume *pShadowVolume = new CShadowVolume;
-		//pShadowVolume->Create( VertexTransform, b, o);
-		//InsertShadowVolume( pShadowVolume);
-#else
         bool bRenderShadow = true;
 
         if ( gMapManager.InHellas() )
@@ -10533,7 +10105,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
             bRenderShadow = false;
         }
 
-		
 		if ( bRenderShadow )
 		{
 			if ( o->m_bRenderShadow )
@@ -10554,51 +10125,43 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		}
         return;
     }
-#endif
-
 
 	switch(Type)
 	{
-    case MODEL_HELPER+3:Level = 8;break;	// 디노란트
-	// 변신반지 레벨 입력
-	case MODEL_HELPER+39:Level = 13;break;	// 엘리트 해골전사 변신반지
-	case MODEL_HELPER+40:Level = 13;break;	// 할로윈 이벤트 변신반지
-	case MODEL_HELPER+41:Level = 13;break;	// 크리스마스 이벤트 변신반지
-	case MODEL_POTION+51:Level = 13;break;	// 크리스마스의 별
-	case MODEL_HELPER+42:Level = 13;break;	// GM 변신반지 레벨 13
-#ifdef CSK_PCROOM_ITEM
-	//case MODEL_POTION+55:Level = 8;break;
-#endif // CSK_PCROOM_ITEM
-	case MODEL_HELPER+10:Level = 8;break;	// 변신반지
+    case MODEL_HELPER+3:Level = 8;break;
+	case MODEL_HELPER+39:Level = 13;break;
+	case MODEL_HELPER+40:Level = 13;break;
+	case MODEL_HELPER+41:Level = 13;break;
+	case MODEL_POTION+51:Level = 13;break;
+	case MODEL_HELPER+42:Level = 13;break;
+	case MODEL_HELPER+10:Level = 8;break;
     case MODEL_HELPER+30:
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case MODEL_WING+49:
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		Level = 0;break;   // 군주의 망토.
-    case MODEL_EVENT+16: Level = 0;break;   // 군주의 소매.
-	case MODEL_POTION+13:	// 축복의보석
-	case MODEL_POTION+14:	// 영혼의보석
-	case MODEL_POTION+16:	// 생명의보석
-	case MODEL_POTION+31:	// 수호의보석
+		Level = 0;break;
+    case MODEL_EVENT+16: Level = 0;break;
+	case MODEL_POTION+13:
+	case MODEL_POTION+14:
+	case MODEL_POTION+16:
+	case MODEL_POTION+31:
 #ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	case MODEL_WING+136:	// 생명의 보석 묶음
-	case MODEL_WING+138:	// 수호의 보석 묶음
-	case MODEL_WING+141:	// 혼돈의 보석 묶음
+	case MODEL_WING+136:
+	case MODEL_WING+138:
+	case MODEL_WING+141:
 
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case MODEL_COMPILED_CELE:
 	case MODEL_COMPILED_SOUL:
-	case MODEL_WING+15:Level = 8;break;	// 혼돈의보석
+	case MODEL_WING+15:Level = 8;break;
 	case MODEL_WING+36:
 	case MODEL_WING+37:
 	case MODEL_WING+38:
 	case MODEL_WING+39:
 	case MODEL_WING+40:
-#ifdef ADD_ALICE_WINGS_1
 	case MODEL_WING+41:
     case MODEL_WING+42:
     case MODEL_WING+43:
-#endif	// ADD_ALICE_WINGS_1
     case MODEL_WING+3:
     case MODEL_WING+4:
     case MODEL_WING+5:
@@ -10608,27 +10171,19 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case MODEL_WING+50:
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-	case MODEL_WING+2:Level = 0;break;	//날개
-	case MODEL_WING+7:Level = 9;break;	//회오리베기구슬
-	case MODEL_WING+11:Level = 0;break;	//소환구슬
-    case MODEL_WING+12: //스킬구슬
+	case MODEL_WING+2:Level = 0;break;
+	case MODEL_WING+7:Level = 9;break;
+	case MODEL_WING+11:Level = 0;break;
+    case MODEL_WING+12:
     case MODEL_WING+13:
     case MODEL_WING+16:
     case MODEL_WING+17:
     case MODEL_WING+18:
     case MODEL_WING+19:
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-	case MODEL_WING+44:	// 파괴의일격구슬
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-	case MODEL_WING+45:	// 멀티샷 구슬
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-	case MODEL_WING+46:	// 회복 구슬
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
+	case MODEL_WING+44:
+	case MODEL_WING+45:
+	case MODEL_WING+46:
 	case MODEL_WING+47:
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
 		{
 			Level = 9;
 			break;
@@ -10638,10 +10193,10 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		break;
 	case MODEL_POTION+12:
 		Level = 8;
-		break;//이밴트 아이템
-	case MODEL_POTION+17://악마의 눈
-	case MODEL_POTION+18://악마의 열쇠
-	case MODEL_POTION+19://데빌스퀘어 초대권
+		break;
+	case MODEL_POTION+17:
+	case MODEL_POTION+18:
+	case MODEL_POTION+19:
 		{
 			if(Level <= 6)
 			{
@@ -10653,13 +10208,13 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			}
 		}
 		break;
-	case MODEL_POTION+20:Level = 9;break;//사랑의 묘약
-    case MODEL_POTION+22:Level = 8;break;//창조의 보석.
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 창조의 보석 묶음
+	case MODEL_POTION+20:Level = 9;break;
+    case MODEL_POTION+22:Level = 8;break;
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case MODEL_WING+137:Level = 8;break;
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-    case MODEL_POTION+25:Level = 8;break;//엘프의눈물.
-    case MODEL_POTION+26:Level = 8;break;//마법사의혼.
+    case MODEL_POTION+25:Level = 8;break;
+    case MODEL_POTION+26:Level = 8;break;
 #ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case MODEL_WING+139:
 	case MODEL_WING+140:
@@ -10667,22 +10222,22 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 	case MODEL_WING+143:
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case MODEL_POTION+41:
-		Level = 0;break;//조화의보석(원석)
+		Level = 0;break;
 	case MODEL_POTION+42:
-		Level = 0;break;//조화의보석(정제)
+		Level = 0;break;
 	case MODEL_POTION+43:
-		Level = 0;break;//하급 제련석
+		Level = 0;break;
 	case MODEL_POTION+44:
-		Level = 0;break;//상급 제련석
+		Level = 0;break;
 	case MODEL_HELPER+50:
 	case MODEL_POTION+64:
 		Level = 0;break;
 	case MODEL_HELPER+52:
 	case MODEL_HELPER+53:
 		Level = 0;break;
-	case MODEL_EVENT+4:Level = 0;break;//행운의상자/성탄의별
+	case MODEL_EVENT+4:Level = 0;break;
 	case MODEL_EVENT+6:
-		if (Level == 13)	// 다크로드의 마음
+		if (Level == 13)
 		{
 			Level = 13;
 		}
@@ -10690,57 +10245,39 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		{
 			Level = 9;
 		}
-		break;//사랑의 하트
-	case MODEL_EVENT+7:Level = 0;break;//사랑의 올리브
-	case MODEL_EVENT+8:Level = 0;break;//은 훈장
-	case MODEL_EVENT+9:Level = 8;break;//금 훈장
-#ifdef _PVP_ADD_MOVE_SCROLL
-	case MODEL_POTION+10:Level = 0;break;//이동문서
-#endif	// _PVP_ADD_MOVE_SCROLL
-    case MODEL_EVENT+5: //  마법의 주머니/폭죽.
+		break;
+	case MODEL_EVENT+7:Level = 0;break;
+	case MODEL_EVENT+8:Level = 0;break;
+	case MODEL_EVENT+9:Level = 8;break;
+    case MODEL_EVENT+5:
         {
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-            Level = 9;
-#else
             Level = 0;
-#endif
         }
         break;
 #ifdef USE_EVENT_ELDORADO
 	case MODEL_EVENT+10:
 		Level = (Level - 8) * 2 + 1;
-		break;	// 엘도라도
-#endif
-#ifdef ANNIVERSARY_EVENT
-	case MODEL_POTION+11:
-		if (Level >= 1 && Level <= 5) Level = 7;
-        else Level = 9;
 		break;
-#endif	// ANNIVERSARY_EVENT
+#endif
     case MODEL_EVENT+11:
         Level--;
         break;
-	case MODEL_EVENT+12:	//. 영광의 반지
+	case MODEL_EVENT+12:
 		Level = 0;
 		break;
-	case MODEL_EVENT+13:	//. 다크스톤
+	case MODEL_EVENT+13:
 		Level = 0;
 		break;
-	case MODEL_EVENT+14:	//. 제왕의 반지
+	case MODEL_EVENT+14:
 		Level += 7;
 		break;
-	case MODEL_EVENT+15:	// 마법사의 반지
+	case MODEL_EVENT+15:
 		Level = 8;
 		break;
-#ifdef CHINA_MOON_CAKE
-    case MODEL_EVENT+17:
-		Level = 0;
-        break;
-#endif	//  CHINA_MOON_CAKE
 	case MODEL_EVENT:
-	case MODEL_EVENT+1:Level = 8;break;//이밴트 아이템
-    case MODEL_BOW+7: Level>=1?Level=Level*2+1:Level=0;break;   //  추가 공격력 석궁화살.
-    case MODEL_BOW+15:Level>=1?Level=Level*2+1:Level=0;break;   //  추가 공격력 화살.
+	case MODEL_EVENT+1:Level = 8;break;
+    case MODEL_BOW+7: Level>=1?Level=Level*2+1:Level=0;break;
+    case MODEL_BOW+15:Level>=1?Level=Level*2+1:Level=0;break;
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 	case MODEL_HELPER+134:
 		Level = 13;
@@ -10783,13 +10320,9 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		    b->RenderMesh(2, RENDER_BRIGHT|RENDER_CHROME,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,BITMAP_CHROME );
         }
 		b->StreamMesh = -1;
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
         return;
     }
-	else if ( o->Type==MODEL_POTION+63 )    // 폭죽
+	else if ( o->Type==MODEL_POTION+63 )
 	{
 		b->StreamMesh = 0;
         o->BlendMeshLight = 1.f;
@@ -10800,13 +10333,9 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_BRIGHT|RENDER_CHROME,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->StreamMesh = -1;
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
         return;
 	}
-	else if (o->Type == MODEL_POTION+52 )	//. GM 선물상자
+	else if (o->Type == MODEL_POTION+52 )
 	{
 		Vector(1.f,1.f,1.f,b->BodyLight);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
@@ -10814,91 +10343,20 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		Vector(0.1f,0.6f,0.4f,b->BodyLight);
 		o->Alpha = 0.5f;
         b->RenderMesh(0, RENDER_BRIGHT|RENDER_CHROME,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
         return;
 	}
-#ifdef FRIEND_EVENT
-    else if ( o->Type==MODEL_EVENT+11 && Level==1 )    //  우정의 돌.
+    else if ( o->Type==MODEL_EVENT+14 && Level==9 )
     {
         Vector(0.3f,0.8f,1.f,b->BodyLight);
         b->RenderBody(RENDER_TEXTURE,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
         Vector(1.f,0.8f,0.3f,b->BodyLight);
         b->RenderBody(RENDER_BRIGHT|RENDER_CHROME,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
-        return;
-    }
-#endif// FRIEND_EVENT
-#ifdef MYSTERY_BEAD
-	else if ( o->Type==MODEL_EVENT+19)			//. 신비의구슬
-	{
-		Vector(sinf ( WorldTime*0.002f )*0.2f+0.5f,sinf ( WorldTime*0.001f )*0.1f+0.6f,sinf ( WorldTime*0.001f )*0.3f+0.4f,b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-		b->RenderBody(RENDER_BRIGHT|RENDER_CHROME,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-		Vector(0.1f,0.4f,0.1f,b->BodyLight);
-		b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
-        return;
-	}
-	else if( o->Type==MODEL_EVENT+20)			//. 수정들
-	{
-		switch(Level)
-		{
-		case 1:		//. 붉은수정
-			Vector(0.8f,0.2f,0.1f,b->BodyLight);
-			b->RenderBody(RENDER_TEXTURE,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-			b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-			Vector(0.8f,0.2f,0.1f,b->BodyLight);
-			b->RenderBody(RENDER_BRIGHT|RENDER_CHROME,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-			break;
-		case 2:		//. 푸른수정
-			Vector(0.5f,0.4f,0.8f,b->BodyLight);
-			b->RenderBody(RENDER_TEXTURE,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-			b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-			Vector(0.5f,0.4f,0.8f,b->BodyLight);
-			b->RenderBody(RENDER_BRIGHT|RENDER_CHROME,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-			break;
-		case 3:		//. 검은수정
-			Vector(0.2f,0.2f,0.2f,b->BodyLight);
-			b->RenderBody(RENDER_TEXTURE,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-			b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-			Vector(0.4f,0.4f,0.4f,b->BodyLight);
-			b->RenderBody(RENDER_BRIGHT|RENDER_CHROME,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-			break;
-		}
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
-		return;
-	}
-#endif // MYSTERY_BEAD
-    else if ( o->Type==MODEL_EVENT+14 && Level==9 )    //  전사의 반지
-    {
-        Vector(0.3f,0.8f,1.f,b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-        Vector(1.f,0.8f,0.3f,b->BodyLight);
-        b->RenderBody(RENDER_BRIGHT|RENDER_CHROME,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
         return;
     }
     else if ( (o->Type>=MODEL_WING+21 && o->Type<=MODEL_WING+24) 
 		|| o->Type==MODEL_WING+35 
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 		|| (o->Type==MODEL_WING+48)
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-		)    //  다크로드 스크롤.
+		)
     {
 		
     	b->BeginRender(o->Alpha);
@@ -10908,32 +10366,23 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
         o->BlendMeshLight = sinf ( WorldTime*0.001f )*0.5f+0.5f;
         b->RenderMesh ( 1, RENDER_BRIGHT|RENDER_TEXTURE, Alpha, 1, o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
         b->RenderMesh ( 2, RENDER_BRIGHT|RENDER_TEXTURE, Alpha, 2, 1-o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-        b->EndRender();
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
-		
+        b->EndRender();		
         return;
     }
-    else if ( o->Type==MODEL_HELPER+31 )    //  영혼.
+    else if ( o->Type==MODEL_HELPER+31 )
     {
 		b->RenderBody(RENDER_TEXTURE,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
         switch ( Level )
         {
-        case 0: //  다크호스의 영혼.
+        case 0:
             b->RenderMesh ( 0, RENDER_BRIGHT|RENDER_TEXTURE,Alpha, 0,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
             break;
 
-        case 1: //  다크스피릿의 영혼.
+        case 1:
             Vector ( 0.3f, 0.8f, 1.f, b->BodyLight );
             b->RenderMesh ( 0, RENDER_BRIGHT|RENDER_TEXTURE,Alpha, 0, o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
             break;
         }
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
         return;
     }
 	else if(o->Type >= MODEL_POTION && o->Type <= MODEL_POTION+6)
@@ -10941,69 +10390,32 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		if(Level > 0)
 			Level = 7;
 	}
-#ifdef ADD_SEED_SPHERE_ITEM
-	else if ((o->Type >= MODEL_WING+60 && o->Type <= MODEL_WING+65)	// 시드
-		|| (o->Type >= MODEL_WING+70 && o->Type <= MODEL_WING+74)	// 스피어
-		|| (o->Type >= MODEL_WING+100 && o->Type <= MODEL_WING+129))	// 시드스피어
+	else if ((o->Type >= MODEL_WING+60 && o->Type <= MODEL_WING+65)
+		|| (o->Type >= MODEL_WING+70 && o->Type <= MODEL_WING+74)
+		|| (o->Type >= MODEL_WING+100 && o->Type <= MODEL_WING+129))
 	{
 		Level = 0;
 	}
-#endif	// ADD_SEED_SPHERE_ITEM
-#ifdef _PVP_MURDERER_HERO_ITEM
-	else if(o->Type == MODEL_POTION+30)
-	{
-		switch ( Level )
-		{
-
-		case 0 : Vector(0.4f,0.5f,0.5f,b->BodyLight); break;  //  흑마법사
-		case 1 : Vector(0.0f,0.0f,0.0f,b->BodyLight); break;  //  흑기사
-		case 2 : Vector(0.5f,0.4f,0.1f,b->BodyLight); break;  //  요정
-		case 3 : Vector(0.4f,0.06f,0.08f,b->BodyLight); break;  //  마검사
-		case 4 : Vector(0.1f,0.1f,0.1f,b->BodyLight); break;  //  다크로드
-		case 5 : Vector(0.4f,0.5f,0.5f,b->BodyLight); break;  //  소울마스터
-		case 6 : Vector(0.4f,0.2f,0.0f,b->BodyLight); break;  //  블레이드나이트
-		case 7 : Vector(0.7f,0.6f,0.1f,b->BodyLight); break;  //  뮤즈엘프
-		}
-		Level = 0;
-		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		Vector(b->BodyLight[0]*0.5f, b->BodyLight[0]*0.5f, b->BodyLight[0]*0.5f, b->BodyLight);
-		b->RenderBody(RENDER_BRIGHT|RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,1);
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
-		return;
-	}
-#endif	// _PVP_MURDERER_HERO_ITEM
-    else if( o->Type==MODEL_HELPER+15 )     //  스테이트 열매.
+    else if( o->Type==MODEL_HELPER+15 )
     {
         switch ( Level )
         {
-        case 0 : Vector(0.0f,0.5f,1.0f,b->BodyLight); break;  //  에너지.
-        case 1 : Vector(1.0f,0.2f,0.0f,b->BodyLight); break;  //  체력.
-        case 2 : Vector(1.0f,0.8f,0.0f,b->BodyLight); break;  //  민첩.
-        case 3 : Vector(0.6f,0.8f,0.4f,b->BodyLight); break;  //  힘.
+        case 0 : Vector(0.0f,0.5f,1.0f,b->BodyLight); break;
+        case 1 : Vector(1.0f,0.2f,0.0f,b->BodyLight); break;
+        case 2 : Vector(1.0f,0.8f,0.0f,b->BodyLight); break;
+        case 3 : Vector(0.6f,0.8f,0.4f,b->BodyLight); break;
         }
 		b->RenderBody(RENDER_METAL,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,BITMAP_CHROME+1);
 		b->RenderBody(RENDER_BRIGHT|RENDER_CHROME,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,BITMAP_CHROME+1);
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
         return;
     }
-	else if(o->Type == MODEL_EVENT+11)	//. 스톤 효과
+	else if(o->Type == MODEL_EVENT+11)
 	{
 		Vector(0.9f,0.9f,0.9f,b->BodyLight);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderBody(RENDER_CHROME|RENDER_BRIGHT,0.5f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1,BITMAP_CHROME+1);
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
 		return;
 	}
-#ifdef NEW_YEAR_BAG_EVENT
     else if ( Type==MODEL_EVENT+5 && ((ItemLevel>>3)&15)==14 )
     {
 		Vector(0.2f,0.3f,0.5f,b->BodyLight);
@@ -11011,10 +10423,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
         Vector(0.1f,0.3f,1.f,b->BodyLight);
 		b->RenderBody(RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderBody(RENDER_METAL|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
         return;
     }
     else if ( Type==MODEL_EVENT+5 && ((ItemLevel>>3)&15)==15 )
@@ -11024,14 +10432,9 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
         Vector(1.f,0.3f,0.1f,b->BodyLight);
 		b->RenderBody(RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderBody(RENDER_METAL|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
         return;
     }
-#endif// NEW_YEAR_BAG_EVENT
-	else if(o->Type == MODEL_HELPER+17)		//. 블러드본
+	else if(o->Type == MODEL_HELPER+17)
 	{
 		Vector(.9f,.1f,.1f,b->BodyLight);
 		o->BlendMeshTexCoordU = sinf( gMapManager.WorldActive*0.0001f );
@@ -11041,26 +10444,17 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		Models[o->Type].StreamMesh = -1;
 		Vector(.9f,.9f,.9f,b->BodyLight);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
 		return;
 	}
-	else if(o->Type == MODEL_HELPER+18)		//. 투명망토 효과
+	else if(o->Type == MODEL_HELPER+18)
 	{
 		Vector(0.8f, 0.8f, 0.8f,b->BodyLight);
 		float sine = float(sinf(WorldTime*0.002f)*0.3f)+0.7f;
 
 		b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,1.0f,0,sine,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
-
 		return;
 	}
-	else if( o->Type==MODEL_EVENT+12)	// 영광의 반지 효과
+	else if( o->Type==MODEL_EVENT+12)
 	{
         float Luminosity = (float)sinf((WorldTime)*0.002f)*0.35f+0.65f;
         vec3_t p,Position,EffLight;
@@ -11074,18 +10468,14 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 
 		CreateSprite(BITMAP_SPARK+1,Position,Scale,EffLight,o);
 	}
-	else if(o->Type == MODEL_EVENT+6 && Level == 13)	// 다크로드의 마음
+	else if(o->Type == MODEL_EVENT+6 && Level == 13)
 	{
 		Vector(0.4f, 0.6f, 1.0f,b->BodyLight);
 		b->RenderBody(RENDER_COLOR,1.0f,0,1.0f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderBody(RENDER_CHROME|RENDER_BRIGHT,1.0f,0,1.0f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-		ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
 		return;
 	}
-	else if( o->Type==MODEL_EVENT+13 )	//. 다크스톤 효과
+	else if( o->Type==MODEL_EVENT+13 )
 	{
 		float Luminosity = (float)sinf((WorldTime)*0.002f)*0.35f+0.65f;
         vec3_t p,Position,EffLight;
@@ -11102,7 +10492,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 
 		CreateSprite(BITMAP_SPARK+1,Position,Scale,EffLight,o);
 	}
-	else if( o->Type==MODEL_POTION+17 ) //  악마의 눈 효과
+	else if( o->Type==MODEL_POTION+17 )
 	{
         float   sine = (float)sinf(WorldTime*0.002f)*10.f+15.65f;
 
@@ -11114,8 +10504,8 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
         float Luminosity = sine;
 		Vector ( Luminosity/5.0f, Luminosity/5.0f, Luminosity/5.0f, o->Light );
 	}
-	else if(o->Type==MODEL_POTION+18)//악마의 열쇠 효과
-	{	//  오브젝트의 회전 값에 따라서 밝아지는 타이밍이 바뀐다.
+	else if(o->Type==MODEL_POTION+18)
+	{
         float Luminosity = (float)sinf((WorldTime)*0.002f)*0.35f+0.65f;
         vec3_t p,Position,EffLight;
 		Vector ( 0.f, 0.f, 0.f, p );
@@ -11131,7 +10521,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		VectorAdd(Position, o->Position, Position);
 		CreateSprite(BITMAP_SPARK+1,Position,Scale,EffLight,o);
 	}
-	else if(o->Type==MODEL_POTION+19)//악마의 광장 초대권 효과
+	else if(o->Type==MODEL_POTION+19)
 	{
         float Luminosity = (float)sinf((WorldTime)*0.002f)*0.35f+0.65f;
 		vec3_t p,Position,EffLight;
@@ -11148,7 +10538,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		VectorAdd(Position, o->Position, Position);
 		CreateSprite(BITMAP_SPARK+1,Position,Scale,EffLight,o);
 	}
-    else if(o->Type==MODEL_POTION+21)//콘(칩).
+    else if(o->Type==MODEL_POTION+21)
     {
         float Luminosity = (float)sinf((WorldTime)*0.002f)*0.25f+0.75f;
 		vec3_t EffLight;
@@ -11156,19 +10546,19 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
         Vector(Luminosity*1.f,Luminosity*0.5f,Luminosity*0.f,EffLight);
 		CreateSprite(BITMAP_SPARK+1,o->Position,2.5f,EffLight,o);
     }
-    else if( o->Type==MODEL_WING+5 )    //  기사   ( 드라곤 날개 ).
+    else if( o->Type==MODEL_WING+5 )
     {
         o->BlendMeshLight = (float)(sinf(WorldTime*0.001f)+1.f)/4.f;
     }
-    else if( o->Type==MODEL_WING+4 )    //  법사   ( 영혼의 날개 ).
+    else if( o->Type==MODEL_WING+4 )
     {
         o->BlendMeshLight = (float)sinf(WorldTime*0.001f)+1.1f;
     }
-    else if ( Type==MODEL_PANTS+24 || Type==MODEL_HELM+24 )   //. 요정 추가바지
+    else if ( Type==MODEL_PANTS+24 || Type==MODEL_HELM+24 )
     {
         o->BlendMeshLight = sinf( WorldTime*0.001f )*0.4f+0.6f;
     }
-	else if ( o->Type==MODEL_STAFF+11 )                             //  쿤둔 지팡이.
+	else if ( o->Type==MODEL_STAFF+11 )
     {
         o->BlendMeshLight = sinf(WorldTime*0.004f)*0.3f+0.7f;
     }
@@ -11176,7 +10566,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 	{
 		o->BlendMeshLight = 1.f;
 	}
-    else if ( Type==MODEL_POTION+7 )    //  스페셜 물약.//종훈물약
+    else if ( Type==MODEL_POTION+7 )
     {
         switch ( Level )
         {
@@ -11184,7 +10574,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
         case 1: o->HiddenMesh = 0; break;
         }
     }
-    else if ( Type==MODEL_HELPER+7 )    //  계약문서
+    else if ( Type==MODEL_HELPER+7 )
     {
         switch ( Level )
         {
@@ -11192,15 +10582,15 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
         case 1: o->HiddenMesh = 0; break;
         }
     }
-    else if ( Type==MODEL_HELPER+11 )   //  가디언 주문서.
+    else if ( Type==MODEL_HELPER+11 )
     {
         o->HiddenMesh = 1;
     }
-    else if ( Type==MODEL_EVENT+18 )    //  라이프 스톤.
+    else if ( Type==MODEL_EVENT+18 )
     {
         o->BlendMesh = 1;
     }
-    else if( o->Type==MODEL_WING+6 )    //  마검사 ( 어둠의 날개 ).
+    else if( o->Type==MODEL_WING+6 )
     {
         vec3_t  posCenter, p, Position, Light;
         float   Scale = sinf(WorldTime*0.004f)*0.3f+0.3f;
@@ -11229,14 +10619,13 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		    CreateSprite(BITMAP_FLARE_BLUE,posCenter,Scale/28.f,Light,o);
         }
     }
-	else if(Type == MODEL_WING+36)	// 흑기사 3차날개
+	else if(Type == MODEL_WING+36)
 	{
 		vec3_t vRelativePos, vPos, vLight;
 		Vector(0.f, 0.f, 0.f, vRelativePos);
 		Vector(0.f, 0.f, 0.f, vPos);
 		Vector(0.f, 0.f, 0.f, vLight);
 
-		// 연기 이펙트
 		float fLuminosity = absf(sinf(WorldTime*0.0004f))*0.4f;
 		Vector(0.5f + fLuminosity, 0.5f + fLuminosity, 0.5f + fLuminosity, vLight);
 		int iBone[] = { 9, 20, 19, 10, 18,
@@ -11253,7 +10642,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			CreateSprite(BITMAP_CLUD64, vPos, fScale, vLight, o, WorldTime*0.01f, 1);
 		}
 
-		// 번개 이펙트
 		int iBoneThunder[] = { 11, 21, 29, 63, 81, 89 };
 		if(rand()%2 == 0)
 		{
@@ -11268,7 +10656,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			}
 		}
 
-		// 불빛
 		int iBoneLight[] = {64, 61, 69, 77, 86, 
 							98, 97, 99, 104, 103, 
 							105, 12, 8, 17, 26, 
@@ -11292,14 +10679,13 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			}
 		}
 	}
-	else if(Type == MODEL_WING+37)	// 시공날개(법사)
+	else if(Type == MODEL_WING+37)
 	{
 		vec3_t  p, Position, Light;
 		Vector ( 0.f, 0.f, 0.f, p );
 		float Scale = absf(sinf(WorldTime*0.003f))*0.2f;
 		float Luminosity = absf(sinf(WorldTime*0.003f))*0.3f;
 
-		// 흰 불빛
 		Vector ( 0.5f + Luminosity, 0.5f + Luminosity, 0.6f + Luminosity, Light );
 		//int iRedFlarePos[] = { 25, 32, 53, 15, 9, 35 };
 		int iRedFlarePos[] = { 24, 31, 15, 8, 53, 35 };
@@ -11308,7 +10694,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			b->TransformPosition(BoneTransform[iRedFlarePos[i]],p,Position,true);
 			CreateSprite(BITMAP_LIGHT,Position,Scale+1.3f,Light,o);
 		}
-		// 그린블루 불빛
+
 		Vector ( 0.1f, 0.1f, 0.9f, Light );
 		//int iGreenFlarePos[] = { 23, 22, 24, 34, 5, 31, 14, 12, 27, 8, 6, 7, 16, 13, 56, 37, 58, 40, 39, 38 };
 		int iGreenFlarePos[] = { 22, 23, 25, 29, 30, 28, 32, 13, 16, 14, 12, 9, 7, 6, 57, 58, 40, 39 };
@@ -11326,14 +10712,13 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			CreateSprite(BITMAP_LIGHT,Position,Scale+0.5f,Light,o);
 		}
 	}
-	else if(Type == MODEL_WING+38)	// 환영의날개(요정)
+	else if(Type == MODEL_WING+38)
 	{
 		vec3_t  p, Position, Light;
 		Vector ( 0.f, 0.f, 0.f, p );
 		float Scale = absf(sinf(WorldTime*0.002f))*0.2f;
 		float Luminosity = absf(sinf(WorldTime*0.002f))*0.4f;
 
-		// 붉은 불빛
 		Vector ( 0.5f + Luminosity, 0.0f + Luminosity, 0.0f + Luminosity, Light );
 		int iRedFlarePos[] = { 5, 6, 7, 8, 18, 19, 23, 24, 25, 27, 37, 38 };
 		for (int i = 0; i < 12; ++i)
@@ -11341,7 +10726,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			b->TransformPosition(BoneTransform[iRedFlarePos[i]],p,Position,true);
 			CreateSprite(BITMAP_FLARE,Position,Scale+0.6f,Light,o);
 		}
-		// 초록 불빛
+
 		Vector ( 0.0f + Luminosity, 0.5f + Luminosity, 0.0f + Luminosity, Light );
 		int iGreenFlarePos[] = { 4, 9, 13, 14, 26, 32, 31, 33 };
 
@@ -11350,7 +10735,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			b->TransformPosition(BoneTransform[iGreenFlarePos[i]],p,Position,true);
 			CreateSprite(BITMAP_LIGHT,Position,1.3f,Light,o);
 		}
-		// 별가루
+
 		Vector ( 1.0f, 1.0f, 1.0f, Light );
 		float fLumi = (sinf(WorldTime*0.004f) + 1.0f) * 0.05f;
 		Vector(0.8f+fLumi, 0.8f+fLumi, 0.3f+fLumi, Light);
@@ -11363,14 +10748,13 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 5, 0.5f);
 		}
 	}
-	else if(Type == MODEL_WING+39)	// 파멸날개(마검사)
+	else if(Type == MODEL_WING+39)
 	{
 		vec3_t  p, Position, Light;
 		Vector ( 0.f, 0.f, 0.f, p );
 		float Scale = absf(sinf(WorldTime*0.003f))*0.2f;
 		float Luminosity = absf(sinf(WorldTime*0.003f))*0.3f;
 
-		// 흰 불빛
 		Vector ( 0.7f + Luminosity, 0.5f + Luminosity, 0.8f + Luminosity, Light );
 		int iRedFlarePos[] = { 6, 15, 24, 56, 47, 38 };
 		for (int i = 0; i < 6; ++i)
@@ -11378,7 +10762,7 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			b->TransformPosition(BoneTransform[iRedFlarePos[i]],p,Position,true);
 			CreateSprite(BITMAP_LIGHT,Position,Scale+1.5f,Light,o);
 		}
-		// 전기
+
 		Vector ( 0.6f, 0.4f, 0.7f, Light );
 		int iSparkPos[] = { 7, 16, 25, 57, 48, 39,
 							11, 22, 31, 63, 54, 40, 
@@ -11418,14 +10802,13 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		}
 	}
 #ifdef ADD_ALICE_WINGS_2
-	else if(Type == MODEL_WING+43)	//차원의날개(소환술사)
+	else if(Type == MODEL_WING+43)
 	{
 		vec3_t  p, Position, Light;
 		Vector ( 0.f, 0.f, 0.f, p );
 		float Scale = absf(sinf(WorldTime*0.002f))*0.2f;
 		float Luminosity = absf(sinf(WorldTime*0.002f))*0.4f;
 
-		// 노란색 불빛
 		Vector ( (1.0f + Luminosity)/2.f, (0.7f + Luminosity)/2.f, (0.2f + Luminosity)/2.f, Light );
 		int iFlarePos0[] = { 7, 30, 31, 43, 8, 20 };
 
@@ -11442,7 +10825,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			CreateSprite(BITMAP_FLARE,Position,Scale+0.5f,Light,o);
 		}
 
-		// 보라색 불빛
 		Vector ( (0.5f + Luminosity)/2.f, (0.1f + Luminosity)/2.f, (0.4f + Luminosity)/2.f, Light );
 		int iGreenFlarePos[] = { 29, 38, 42, 19, 15, 6 };
 
@@ -11457,18 +10839,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 	if(!o->EnableShadow)
 	{
 		float Luminosity = 1.f;
-#ifdef PJH_NEW_CHROME
-		if(ExtOption > MAX_MODELS)
-		{
-			VectorCopy(Light,b->BodyLight);
-			RenderPartObjectBody(b,o,Type,Alpha,RenderType);
-//			b->RenderBody(RENDER_BRIGHT|RENDER_CHROME8,1.f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh,BITMAP_CHROME9);
-			//-(int)WorldTime%10000*0.0001f
-			Vector(1.f,1.f,1.f,b->BodyLight);
-			b->RenderBody(RENDER_BRIGHT|RENDER_CHROME8,1.f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,(int)WorldTime%10000*0.0003f,o->HiddenMesh,BITMAP_CHROME9);
-		}
-		else
-#endif //PJH_NEW_CHROME
 
 		if( g_isCharacterBuff(o, eBuff_Cloaking) )
         {
@@ -11481,14 +10851,11 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			Vector(Luminosity*0.3f,Luminosity*1.f,Luminosity*1.f,b->BodyLight);
             RenderPartObjectBody(b,o,Type,Alpha,RenderType);
 		}
-
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 		else if(g_isCharacterBuff(o, eDeBuff_BlowOfDestruction))
 		{
 			Vector(Luminosity*0.3f,Luminosity*1.f,Luminosity*1.f,b->BodyLight);
             RenderPartObjectBody(b,o,Type,Alpha,RenderType);
 		}
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 		else if( g_isCharacterBuff(o, eDeBuff_Poison) )
 		{
 			Vector(Luminosity*0.3f,Luminosity*1.f,Luminosity*0.5f,b->BodyLight);
@@ -11506,15 +10873,11 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			Vector(Luminosity*0.3f,Luminosity*0.5f,Luminosity*1.f,b->BodyLight);
             RenderPartObjectBody(b,o,Type,Alpha,RenderType);
 		}
-
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 		else if(g_isCharacterBuff(o, eDeBuff_BlowOfDestruction))
 		{
 			Vector(Luminosity*0.3f,Luminosity*0.5f,Luminosity*1.f,b->BodyLight);
             RenderPartObjectBody(b,o,Type,Alpha,RenderType);
 		}
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-
 		else if (g_isCharacterBuff(o, eDeBuff_Harden) )
         {
 			Vector(Luminosity*0.3f,Luminosity*0.5f,Luminosity*1.f,b->BodyLight);
@@ -11544,11 +10907,8 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 	    		RenderPartObjectBodyColor2(b,o,Type,1.f,RENDER_CHROME4|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
 			}
 			else
-#ifdef CSK_LUCKY_SEAL
 			if( o->Type == MODEL_HELPER+43
-#ifdef ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-				|| o->Type == MODEL_HELPER+93	// 상승의인장마스터
-#endif	// ASG_ADD_CS6_ASCENSION_SEAL_MASTER
+				|| o->Type == MODEL_HELPER+93
 				)
 			{
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
@@ -11560,12 +10920,8 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 	    		RenderPartObjectBodyColor2(b,o,Type,1.f,RENDER_CHROME4|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
 			}
 			else if( o->Type == MODEL_HELPER+44
-#ifdef ASG_ADD_CS6_WEALTH_SEAL_MASTER
-				|| o->Type == MODEL_HELPER+94	// 풍요의인장마스터
-#endif	// ASG_ADD_CS6_WEALTH_SEAL_MASTER
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL // 신규 풍요의 인장
+				|| o->Type == MODEL_HELPER+94
 				|| o->Type == MODEL_HELPER+116
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 				)
 			{
 				Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,b->BodyLight);
@@ -11581,7 +10937,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 	    		RenderPartObjectBodyColor2(b,o,Type,1.f,RENDER_CHROME4|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
 			}	
 			else
-#endif //CSK_LUCKY_SEAL
 			{
 				VectorCopy(Light,b->BodyLight);
 				RenderPartObjectBody(b,o,Type,Alpha,RenderType);
@@ -11603,7 +10958,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		}
 		else if(g_pOption->GetRenderLevel())
         {
-			//인관
 		    if(Level < 8 && g_pOption->GetRenderLevel() >= 1)  //  +7
 		    {
 			    Vector(Light[0]*0.8f,Light[1]*0.8f,Light[2]*0.8f,b->BodyLight);
@@ -11654,7 +11008,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			    RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
 				RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
             }
-#ifdef LDK_ADD_14_15_GRADE_ITEM_RENDERING
             else if(Level < 15 && g_pOption->GetRenderLevel() >= 4) //  +14
             {
 				Vector(Light[0]*0.9f,Light[1]*0.9f,Light[2]*0.9f,b->BodyLight);
@@ -11671,7 +11024,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 				RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
 				RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
             }
-#endif //LDK_ADD_14_15_GRADE_ITEM_RENDERING
             else
             {
 				VectorCopy(Light,b->BodyLight);
@@ -11687,9 +11039,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 
 		if(g_pOption->GetRenderLevel() == 0) 
 		{
-#ifdef LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT		
-			ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MOD_SYNCHRONIZE_SETRARGETOBJECT
 			return;
 		}
         
@@ -11699,14 +11048,8 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
         {
             //  액설런트 아이템. 날개 제외.
 		    if ( (Option1&63)>0 && ( o->Type<MODEL_WING || o->Type>MODEL_WING+6 ) && o->Type!=MODEL_HELPER+30
-#ifdef ADD_ALICE_WINGS_1
 				&& (o->Type<MODEL_WING+36 || o->Type>MODEL_WING+43)
-#else	// ADD_ALICE_WINGS_1
-				&& ( o->Type<MODEL_WING+36 || o->Type>MODEL_WING+40 )
-#endif	// ADD_ALICE_WINGS_1
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
 				&& ( o->Type < MODEL_WING+130 || MODEL_WING+134 < o->Type )
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				&& !(o->Type>=MODEL_WING+49 && o->Type<=MODEL_WING+50)
 				&& (o->Type!=MODEL_WING+135)
@@ -11716,21 +11059,11 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 				Luminosity = sinf(WorldTime*0.002f)*0.5f+0.5f;
 				Vector(Luminosity,Luminosity*0.3f,1.f-Luminosity,b->BodyLight);
 				Alpha = 1.f;
-				// 소환술사 헬멧이 엔벤토리 등에 랜더 시 얼굴, 머리카락이 보여서는 안되므로 다음과 같은 예외 처리.
-				// 소환술사는 머리 오브젝트 구조가 다른 캐릭터와 틀림.
 				if (b->HideSkin && MODEL_HELM+39 <= o->Type && MODEL_HELM+44 >= o->Type)
 				{
-					int anMesh[6] = { 2, 1, 0, 2, 1, 2 };	// 랜더할 텍스처 번호 배열.(바이올렌윈드 ~ 이터널윙 헬멧 순서)
+					int anMesh[6] = { 2, 1, 0, 2, 1, 2 };
 					b->RenderMesh(anMesh[o->Type-(MODEL_HELM+39)], RENDER_TEXTURE|RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 				}
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX	// 액설런트 효과
-				else if( Type == MODEL_PANTS +18 ||	// 그랜드소울 바지 // 액설런트 효과에 대해 뒷덧날은 이미 PhysicManager에서 Render하므로 모델은 Skip 처리.
-						 Type == MODEL_PANTS +22 )	// 블랙소울 바지
-				{
-					b->RenderMesh ( 0, RENDER_TEXTURE|RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
-					b->RenderMesh ( 1, RENDER_TEXTURE|RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );					
-				}
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				else if(Type == MODEL_HELM+59 || Type == MODEL_HELM+60)
 				{
@@ -11768,17 +11101,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
     	    	RenderPartObjectBodyColor2(b,o,Type,Alpha,RENDER_CHROME3|RENDER_BRIGHT,1.f);
             }
         }
-
-#ifdef USE_SHADOWVOLUME
-		if ( World != WD_10HEAVEN)
-		{
-			//케릭터
-			CShadowVolume *pShadowVolume = new CShadowVolume;
-			pShadowVolume->Create( VertexTransform, b, o);
-			InsertShadowVolume( pShadowVolume);
-		}
-#endif
-
 	}
 #ifndef CAMERA_TEST
 	else
@@ -11793,12 +11115,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 			DisableAlphaBlend();
 			glColor3f(0.f,0.f,0.f);
 		}
-#ifdef USE_SHADOWVOLUME
-		//케릭터
-		//CShadowVolume *pShadowVolume = new CShadowVolume;
-		//pShadowVolume->Create( VertexTransform, b, o);
-		//InsertShadowVolume( pShadowVolume);
-#else
         bool bRenderShadow = true;
 
         if ( gMapManager.InHellas() )
@@ -11827,7 +11143,6 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		}
 #endif
 	}
-#endif
 
 }
 

@@ -1,53 +1,35 @@
 //*****************************************************************************
 // File: CreditWin.cpp
-//
-// Desc: implementation of the CCreditWin class.
-//
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
 
 #include "stdafx.h"
 #include "CreditWin.h"
 #include "Input.h"
 #include "UIMng.h"
-
-// PlayBuffer() 함수 사용하기 위한 include.
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "DSPlaySound.h"
-
-// RenderText3() 함수 사용하기 위한 include.
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
-
 #include "Local.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "wsclientinline.h"
 #include "UIControls.h"
 
-#define	CRW_ILLUST_FADE_TIME	2000.0	// 알파 증감값.
-#define	CRW_ILLUST_SHOW_TIME	22000.0	// 보여 주는 시간.
+#define	CRW_ILLUST_FADE_TIME	2000.0
+#define	CRW_ILLUST_SHOW_TIME	22000.0
 
-#define	CRW_TEXT_FADE_TIME		300.0	// 텍스트가 나타나거나 사라지는 시간.
-#define	CRW_NAME_SHOW_TIME		2300.0	// 보여 주는 시간.
+#define	CRW_TEXT_FADE_TIME		300.0
+#define	CRW_NAME_SHOW_TIME		2300.0
 
-// 크레딧 텍스트 정보 파일명.
-#ifdef USE_CREDITTEST_BMD
-#define	CRW_DATA_FILE		"Data\\Local\\credittest.bmd"
-#else
 #define	CRW_DATA_FILE		"Data\\Local\\credit.bmd"
-#endif
 
 extern float g_fScreenRate_x;
 extern char* g_lpszMp3[NUM_MUSIC];
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CCreditWin::CCreditWin() : m_hFont(NULL)
 {
-
 }
 
 CCreditWin::~CCreditWin()
@@ -55,20 +37,13 @@ CCreditWin::~CCreditWin()
 
 }
 
-//*****************************************************************************
-// 함수 이름 : Create()
-// 함수 설명 : 크레딧 창 생성.
-//*****************************************************************************
 void CCreditWin::Create()
 {
 	CInput rInput = CInput::Instance();
 
-// 기본 윈도우.
 	CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
 	CWin::SetBgAlpha(255);	// 불투명임.
 
-// 각 스프라이트.
-	// 800 * 600 가상 스크린 모드를 사용 함.
 	float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
 	float fScaleY = (float)rInput.GetScreenHeight() / 600.0f;
 
@@ -83,13 +58,10 @@ void CCreditWin::Create()
 		m_aSpr[i].SetColor(0, 0, 0);
 	}
 
-// 닫기 버튼.
 	m_btnClose.Create(54, 30, BITMAP_BUTTON+2, 3, 2, 1);
 	CWin::RegisterButton(&m_btnClose);
 
-// 일러스트.
 	m_eIllustState = HIDE;
-
 	m_apszIllustPath[0][0] = (char*)"Interface\\im1_1.jpg";
 	m_apszIllustPath[0][1] = (char*)"Interface\\im1_2.jpg";
 	m_apszIllustPath[1][0] = (char*)"Interface\\im2_1.jpg";
@@ -107,7 +79,6 @@ void CCreditWin::Create()
 	m_apszIllustPath[7][0] = (char*)"Interface\\im8_1.jpg";
 	m_apszIllustPath[7][1] = (char*)"Interface\\im8_2.jpg";
 
-// 텍스트.
 	int nFontSize = 10;
 	switch(rInput.GetScreenWidth())
 	{
@@ -115,31 +86,12 @@ void CCreditWin::Create()
 	case 1024:	nFontSize = 18;	break;
 	case 1280:	nFontSize = 24;	break;
 	}
-#ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
-	m_hFont = ::CreateFont(nFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0,
-		g_dwCharSet, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-		NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-		GlobalText[0][0] ? GlobalText[0] : NULL);
-#else // KJH_MOD_NATION_LANGUAGE_REDEFINE
-	m_hFont = ::CreateFont(nFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0,
-		g_dwCharSet[SELECTED_LANGUAGE], OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-		NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-		GlobalText[0][0] ? GlobalText[0] : NULL);
-#endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
+	m_hFont = CreateFont(nFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0,DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
 
 	LoadText();
-
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	SetPosition();	// 각 컨트롤 위치를 잡아주는 의미에서 호출.
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	SetPosition(0, 0);	// 각 컨트롤 위치를 잡아주는 의미에서 호출.
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+	SetPosition(0, 0);
 }
 
-//*****************************************************************************
-// 함수 이름 : PreRelease()
-// 함수 설명 : 모든 컨트롤 릴리즈.(버튼은 자동 삭제)
-//*****************************************************************************
 void CCreditWin::PreRelease()
 {
 	for (int i = 0; i < CRW_SPR_MAX; ++i)
@@ -152,44 +104,25 @@ void CCreditWin::PreRelease()
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : SetPosition()
-// 함수 설명 : 창 위치 지정.
-// 매개 변수 : nXCoord	: 스크린 X좌표.
-//			   nYCoord	: 스크린 Y좌표.
-//*****************************************************************************
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-void CCreditWin::SetPosition()
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CCreditWin::SetPosition(int nXCoord, int nYCoord)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 {
 	m_aSpr[CRW_SPR_PIC_L].SetPosition(0, 126);
 	m_aSpr[CRW_SPR_PIC_R].SetPosition(400, 126);
 	m_aSpr[CRW_SPR_LOGO].SetPosition(241, 549);
 
-	// 좌측 하단 장식.
-	CInput rInput = CInput::Instance();
-	// 800*600 모드에서 일러스트 밑바닥 Y위치가 527임.
-	int nBaseY = int(527.0f / 600.0f * (float)rInput.GetScreenHeight());
-	m_aSpr[CRW_SPR_DECO].SetPosition(
-		rInput.GetScreenWidth() - m_aSpr[CRW_SPR_DECO].GetWidth(),
-		nBaseY - m_aSpr[CRW_SPR_DECO].GetHeight());
 
-	// 텍스트 가리개.
+	CInput rInput = CInput::Instance();
+
+	int nBaseY = int(527.0f / 600.0f * (float)rInput.GetScreenHeight());
+	m_aSpr[CRW_SPR_DECO].SetPosition(rInput.GetScreenWidth() - m_aSpr[CRW_SPR_DECO].GetWidth(),	nBaseY - m_aSpr[CRW_SPR_DECO].GetHeight());
+
 	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
 		m_aSpr[i].SetPosition(0, 42 * (i - CRW_SPR_TXT_HIDE0));
 
-	// 닫기 버튼.
 	m_btnClose.SetPosition(m_aSpr[CRW_SPR_DECO].GetXPos() + 122,
 		m_aSpr[CRW_SPR_DECO].GetYPos() + 63);
 }
 
-//*****************************************************************************
-// 함수 이름 : Show()
-// 함수 설명 : 창을 보여 주거나 안보이게함.
-// 매개 변수 : bShow	: true이면 보여줌.
-//*****************************************************************************
 void CCreditWin::Show(bool bShow)
 {
 	CWin::Show(bShow);
@@ -205,64 +138,40 @@ void CCreditWin::Show(bool bShow)
 		m_eIllustState = HIDE;
 }
 
-//*****************************************************************************
-// 함수 이름 : CursorInWin()
-// 함수 설명 : 윈도우 영역 안에 마우스 커서가 위치하는가?
-// 매개 변수 : eArea	: 검사할 영역.(win.h의 #define 참조)
-//*****************************************************************************
 bool CCreditWin::CursorInWin(int nArea)
 {
-	if (!CWin::m_bShow)		// 보이지 않는다면 처리하지 않음.
+	if (!CWin::m_bShow)
 		return false;
 
 	switch (nArea)
 	{
 	case WA_MOVE:
-		return false;	// 이동 영역은 없음.(이동을 막음)
+		return false;
 	}
 
 	return CWin::CursorInWin(nArea);
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateWhileActive()
-// 함수 설명 : 액티브일 때의 업데이트.
-// 매개 변수 : dDeltaTick	: 이전 Update()호출 후부터 지금 Update()까지 시간.
-//*****************************************************************************
 void CCreditWin::UpdateWhileActive(double dDeltaTick)
 {
 	if (m_btnClose.IsClick())
 		CloseWin();
 	else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
 	{
-		::PlayBuffer(SOUND_CLICK01);	// 클릭 사운드.
+		::PlayBuffer(SOUND_CLICK01);
 		CloseWin();
 		CUIMng::Instance().SetSysMenuWinShow(false);
 	}
 
-// 텍스트 및 일러스트 나타났다 사라지는 효과 애니메이션.
 	for (int i = 0; i <= CRW_INDEX_NAME; ++i)
 		AnimationText(i, dDeltaTick);
 	AnimationIllust(dDeltaTick);
-	
-	/*
-	if (::IsEndMp3())		// 음악 반복.
-	{
-		::StopMp3(g_lpszMp3[MUSIC_MUTHEME]);
-		::PlayMp3(g_lpszMp3[MUSIC_MUTHEME]);
-	}
-	*/
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderControls()
-// 함수 설명 : 각종 컨트롤 렌더.
-//*****************************************************************************
 void CCreditWin::RenderControls()
 {
-	::glDisable(GL_ALPHA_TEST);	// 일러스트가 알파값이 적을땐 아예 안보이므로.
+	::glDisable(GL_ALPHA_TEST);
 
-	// 장식, 로고 스프라이트.
 	for (int i = 0; i <= CRW_SPR_LOGO; ++i)
 		m_aSpr[i].Render();
 
@@ -273,59 +182,44 @@ void CCreditWin::RenderControls()
 	g_pRenderText->SetTextColor(CLRDW_BR_GRAY);
 	g_pRenderText->SetBgColor(0);
 	
-	// 1번째줄 텍스트.
 	nTextBoxWidth = lScreenWidth / g_fScreenRate_x;
 
 	g_pRenderText->RenderText(0, 20,
-		m_aCredit[m_anTextIndex[CRW_INDEX_DEPARTMENT]].szName,
-		nTextBoxWidth, 0, RT3_SORT_CENTER);
+		m_aCredit[m_anTextIndex[CRW_INDEX_DEPARTMENT]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
 	
-	// 2번째줄 텍스트.
-	g_pRenderText->RenderText(0, 46, m_aCredit[m_anTextIndex[CRW_INDEX_TEAM]].szName,
-		nTextBoxWidth, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(0, 46, m_aCredit[m_anTextIndex[CRW_INDEX_TEAM]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
 
-	// 3번째줄 텍스트.
 	g_pRenderText->SetTextColor(CLRDW_BR_YELLOW);
 	
 	switch (m_nNameCount)
 	{
 	case 1:
-		g_pRenderText->RenderText(0, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(0, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
 		break;
 	case 2:
 		nTextBoxWidth = lScreenWidth / 4 / g_fScreenRate_x;
-		g_pRenderText->RenderText(160, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
-		g_pRenderText->RenderText(320, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(160, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(320, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
 		break;
 	case 3:
 		nTextBoxWidth = lScreenWidth / 3 / g_fScreenRate_x;
-		g_pRenderText->RenderText(0, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
-		g_pRenderText->RenderText(213, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
-		g_pRenderText->RenderText(426, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME2]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(0, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(213, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(426, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME2]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
 		break;
 	case 4:
 		nTextBoxWidth = lScreenWidth / 4 / g_fScreenRate_x;
-		g_pRenderText->RenderText(0, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
-		g_pRenderText->RenderText(160, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
-		g_pRenderText->RenderText(320, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME2]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
-		g_pRenderText->RenderText(480, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME3]].szName,
-			nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(0, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(160, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(320, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME2]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
+		g_pRenderText->RenderText(480, 72, m_aCredit[m_anTextIndex[CRW_INDEX_NAME3]].szName,nTextBoxWidth, 0, RT3_SORT_CENTER);
 		break;
 	}
 
 	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
 		m_aSpr[i].Render();
 
-	::glEnable(GL_ALPHA_TEST);
+	glEnable(GL_ALPHA_TEST);
 
 	CWin::RenderButtons();
 }

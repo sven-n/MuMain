@@ -3202,20 +3202,10 @@ int ItemValue(ITEM *ip,int goldType)
 #ifdef LDK_ADD_GAMBLE_RANDOM_ICON
 	if( ip->Type == ITEM_HELPER+71 || ip->Type == ITEM_HELPER+72 || ip->Type == ITEM_HELPER+73 || ip->Type == ITEM_HELPER+74 ||ip->Type == ITEM_HELPER+75 )	// 겜블러 아이콘
 	{
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH
 		Gold = 2000000;
-#else	// SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-#ifdef LDK_MOD_GAMBLE_SUMMER_SALE_EVENT
-		Gold = 500000; // 여름 이벤트로 50% 세일
-#else //LDK_MOD_GAMBLE_SUMMER_SALE_EVENT
-		Gold = 1000000; //npc 상인에 따라 가격이 변함
-#endif //LDK_MOD_GAMBLE_SUMMER_SALE_EVENT
-#endif	// SELECTED_LANGUAGE == LANGUAGE_ENGLISH
 	}
 #endif //LDK_ADD_GAMBLE_RANDOM_ICON
 	
-    //  다크호스, 다크스피릿은 /3을 하지 않는다.
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 	if( (ip->Type == ITEM_HELPER+4) || (ip->Type == ITEM_HELPER+5) )
 	{		
 		PET_INFO* pPetInfo = giPetManager::GetPetInfo( ip );
@@ -3225,92 +3215,74 @@ int ItemValue(ITEM *ip,int goldType)
 
 		Gold = giPetManager::GetPetItemValue( pPetInfo );
 	}
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM
-    switch ( ip->Type )
-    {
-    case ITEM_HELPER+4 :    //  다크호스.
-        Gold = giPetManager::ItemValue ( PET_TYPE_DARK_HORSE );
-        break;
-
-    case ITEM_HELPER+5 :    //  다크스피릿.
-        Gold = giPetManager::ItemValue ( PET_TYPE_DARK_SPIRIT );
-        break;
-
-#ifdef DARK_WOLF
-    case ITEM_HELPER+6 :    //  다크울프.
-        Gold = giPetManager::ItemValue ( PET_TYPE_DARK_WOLF );
-        break;  
-#endif// DARK_WOLF
-	}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
  
 #ifdef LDK_MOD_PREMIUMITEM_SELL
 	switch(ip->Type)
 	{
 #ifdef LDK_MOD_INGAMESHOP_ITEM_CHANGE_VALUE
-		//가격 변경 후
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER			// 인게임샾 아이템 // 신규 키(실버)				// MODEL_POTION+112
+
+#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER		// MODEL_POTION+112
 	case ITEM_POTION+112:
 #endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD				// 인게임샾 아이템 // 신규 키(골드)				// MODEL_POTION+113
+#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD			// MODEL_POTION+113
 	case ITEM_POTION+113:
 #endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
+#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
 	case ITEM_POTION+121:
 #endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST	// 봉인된 은색상자
+#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
 	case ITEM_POTION+122:
 #endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST			// 금색상자
+#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST
 	case ITEM_POTION+123:
 #endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST			// 은색상자
+#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST
 	case ITEM_POTION+124:
 #endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
 #ifdef PJH_ADD_PANDA_PET
-	case ITEM_HELPER+80:  //펜더펫
+	case ITEM_HELPER+80:
 #endif //PJH_ADD_PANDA_PET
 #ifdef PJH_ADD_PANDA_CHANGERING
-	case ITEM_HELPER+76:  //펜더변신반지
+	case ITEM_HELPER+76:
 #endif //PJH_ADD_PANDA_CHANGERING
 #ifdef LDK_ADD_PC4_GUARDIAN
 	case ITEM_HELPER+64:  //유료 데몬
 	case ITEM_HELPER+65:  //유료 수호정령
 #endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// 신규 사파이어(푸른색)링	// MODEL_HELPER+109
+#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// MODEL_HELPER+109
 	case ITEM_HELPER+109:
 #endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// 신규 루비(붉은색)링		// MODEL_HELPER+110
+#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// MODEL_HELPER+110
 	case ITEM_HELPER+110:
 #endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ	// 신규 토파즈(주황)링		// MODEL_HELPER+111
+#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ	// MODEL_HELPER+111
 	case ITEM_HELPER+111:
 #endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST	// 신규 자수정(보라색)링	// MODEL_HELPER+112
+#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST	// MODEL_HELPER+112
 	case ITEM_HELPER+112:
 #endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY	// 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
+#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY	// MODEL_HELPER+113
 	case ITEM_HELPER+113:
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY			// 인게임샾 아이템 // 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// 인게임샾 아이템 // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
+#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY	// MODEL_HELPER+113
+#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// MODEL_HELPER+114
 	case ITEM_HELPER+114:
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// 인게임샾 아이템 // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115
+#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// MODEL_HELPER+114
+#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// MODEL_HELPER+115
 	case ITEM_HELPER+115:
 		Gold = 1000;
 		break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115		
+#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// MODEL_HELPER+115		
 
 #ifdef YDG_ADD_SKELETON_CHANGE_RING
-	case ITEM_HELPER+122:	// 스켈레톤 변신반지
+	case ITEM_HELPER+122:
 #endif //YDG_ADD_SKELETON_CHANGE_RING
 #ifdef YDG_ADD_SKELETON_PET
-	case ITEM_HELPER+123:	// 스켈레톤 펫
+	case ITEM_HELPER+123:
 		Gold = 2000;
 		break;
 #endif //YDG_ADD_SKELETON_PET
 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	case ITEM_WING+130:
 	case ITEM_WING+131:
 	case ITEM_WING+132:
@@ -3439,65 +3411,43 @@ int ItemValue(ITEM *ip,int goldType)
 	}
 #endif //LDK_MOD_PREMIUMITEM_SELL
 
-	// CSK수리금지
-	// 수리가 안되는 물건들은 여기에 예외처리 함. (goto EXIT_CALCULATE; 로 가야함)
-    //  수리가 필요한 아이템은 그 비용을 뺀 나머지 값이 팔리는 가격이다.
-	//. item filtering
-#ifdef CSK_PCROOM_ITEM
-	if(ip->Type >= ITEM_POTION+55 && ip->Type <= ITEM_POTION+57)
-	{
-		goto EXIT_CALCULATE;
-	}
-#endif // CSK_PCROOM_ITEM
-	
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	if(ip->Type == ITEM_HELPER+96)
-	{
-		goto EXIT_CALCULATE;
-	}
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH	
-
-	if( ip->Type == ITEM_HELPER+10 || ip->Type == ITEM_HELPER+20 || ip->Type == ITEM_HELPER+29
-#ifdef MYSTERY_BEAD
-		|| ip->Type == ITEM_WING+26
-#endif // MYSTERAY_BEAD
-		)
+	if( ip->Type == ITEM_HELPER+10 || ip->Type == ITEM_HELPER+20 || ip->Type == ITEM_HELPER+29)
 		goto EXIT_CALCULATE;
 	if( ip->Type == ITEM_BOW+7 || ip->Type == ITEM_BOW+15 || ip->Type >= ITEM_POTION )
 		goto EXIT_CALCULATE;
-	if( ip->Type >= ITEM_WING+7 && ip->Type <= ITEM_WING+19 )	//. 구슬 필터링
+	if( ip->Type >= ITEM_WING+7 && ip->Type <= ITEM_WING+19 )
 		goto EXIT_CALCULATE;
 	if( (ip->Type >= ITEM_HELPER+14 && ip->Type <= ITEM_HELPER+19) || ip->Type==ITEM_POTION+21 )
 		goto EXIT_CALCULATE;
-	if( ip->Type==ITEM_POTION+7 || ip->Type==ITEM_HELPER+7 || ip->Type==ITEM_HELPER+11 )//종훈물약
+	if( ip->Type==ITEM_POTION+7 || ip->Type==ITEM_HELPER+7 || ip->Type==ITEM_HELPER+11 )
 		goto EXIT_CALCULATE;
 #ifdef KJH_FIX_20080910_NPCSHOP_PRICE
-	if( (ip->Type>=ITEM_HELPER+49) && (ip->Type<=ITEM_HELPER+51))		// 낡은두루마리, 환영교단의서약, 피의두루마리
+	if( (ip->Type>=ITEM_HELPER+49) && (ip->Type<=ITEM_HELPER+51))
 		goto EXIT_CALCULATE;
 #endif // KJH_FIX_20080910_NPCSHOP_PRICE
 
 #ifdef LDK_MOD_PREMIUMITEM_SELL
 	switch(ip->Type)
 	{
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER			// 인게임샾 아이템 // 신규 키(실버)				// MODEL_POTION+112
+#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER				// MODEL_POTION+112
 	case ITEM_POTION+112:	goto EXIT_CALCULATE;
 #endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD				// 인게임샾 아이템 // 신규 키(골드)				// MODEL_POTION+113
+#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD					// MODEL_POTION+113
 	case ITEM_POTION+113:	goto EXIT_CALCULATE;
 #endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
+#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
 	case ITEM_POTION+121:	goto EXIT_CALCULATE;
 #endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST	// 봉인된 은색상자
+#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
 	case ITEM_POTION+122:	goto EXIT_CALCULATE;
 #endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST			// 금색상자
+#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST
 	case ITEM_POTION+123:	goto EXIT_CALCULATE;
 #endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST			// 은색상자
+#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST
 	case ITEM_POTION+124:	goto EXIT_CALCULATE;
 #endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	case ITEM_WING+130:
 	case ITEM_WING+131:
 	case ITEM_WING+132:
@@ -3509,73 +3459,68 @@ int ItemValue(ITEM *ip,int goldType)
 		goto EXIT_CALCULATE;
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef YDG_ADD_SKELETON_CHANGE_RING
-	case ITEM_HELPER+122:	// 스켈레톤 변신반지
+	case ITEM_HELPER+122:
 		goto EXIT_CALCULATE;
 #endif //YDG_ADD_SKELETON_CHANGE_RING
 #ifdef YDG_ADD_SKELETON_PET
-	case ITEM_HELPER+123:	// 스켈레톤 펫
+	case ITEM_HELPER+123:
 		goto EXIT_CALCULATE;
 #endif //YDG_ADD_SKELETON_PET
 #ifdef PJH_ADD_PANDA_PET
-	case ITEM_HELPER+80:  //펜더펫
+	case ITEM_HELPER+80:
 		goto EXIT_CALCULATE;
 #endif //PJH_ADD_PANDA_PET
 #ifdef PJH_ADD_PANDA_CHANGERING
-	case ITEM_HELPER+76:  //펜더변신반지
+	case ITEM_HELPER+76:
 		goto EXIT_CALCULATE;
 #endif //PJH_ADD_PANDA_CHANGERING
 #ifdef LDK_ADD_PC4_GUARDIAN
-	case ITEM_HELPER+64:  //유료 데몬
-	case ITEM_HELPER+65:  //유료 수호정령
+	case ITEM_HELPER+64:
+	case ITEM_HELPER+65:
 		goto EXIT_CALCULATE;
 #endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(푸른색)링	// MODEL_HELPER+109
+#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// MODEL_HELPER+109
 	case ITEM_HELPER+109:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(푸른색)링	// MODEL_HELPER+109
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// 인게임샾 아이템 // 신규 루비(붉은색)링		// MODEL_HELPER+110
+#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// MODEL_HELPER+109
+#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// MODEL_HELPER+110
 	case ITEM_HELPER+110:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// 인게임샾 아이템 // 신규 루비(붉은색)링		// MODEL_HELPER+110
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ			// 인게임샾 아이템 // 신규 토파즈(주황)링		// MODEL_HELPER+111
+#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// MODEL_HELPER+110
+#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// MODEL_HELPER+111
 	case ITEM_HELPER+111:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ			// 인게임샾 아이템 // 신규 토파즈(주황)링		// MODEL_HELPER+111
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 인게임샾 아이템 // 신규 자수정(보라색)링		// MODEL_HELPER+112
+#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// MODEL_HELPER+111
+#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// MODEL_HELPER+112
 	case ITEM_HELPER+112:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 인게임샾 아이템 // 신규 자수정(보라색)링		// MODEL_HELPER+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY			// 인게임샾 아이템 // 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
+#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST	// MODEL_HELPER+112
+#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// MODEL_HELPER+113
 	case ITEM_HELPER+113:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY			// 인게임샾 아이템 // 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// 인게임샾 아이템 // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
+#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY	// MODEL_HELPER+113
+#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// MODEL_HELPER+114
 	case ITEM_HELPER+114:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// 인게임샾 아이템 // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115
+#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// MODEL_HELPER+114
+#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// MODEL_HELPER+115
 	case ITEM_HELPER+115:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
+#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// MODEL_HELPER+115
 	case ITEM_HELPER+128:
 	case ITEM_HELPER+129:
 	case ITEM_HELPER+134:
 		goto EXIT_CALCULATE;
-#endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-	case ITEM_HELPER+130:	// 신규 오크참
-	case ITEM_HELPER+131:	// 신규 메이플참
-	case ITEM_HELPER+132:	// 신규 골든오크참
-	case ITEM_HELPER+133:	// 골든메이플참
+	case ITEM_HELPER+130:
+	case ITEM_HELPER+131:	
+	case ITEM_HELPER+132:
+	case ITEM_HELPER+133:
 		goto EXIT_CALCULATE;
-#endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 	}
 #endif //LDK_MOD_PREMIUMITEM_SELL
 
-	if(goldType==1 && !(ip->Type >= ITEM_HELPER+32 && ip->Type <= ITEM_HELPER+37))	//^ 펜릴 아이템 관련
+	if(goldType==1 && !(ip->Type >= ITEM_HELPER+32 && ip->Type <= ITEM_HELPER+37))
     {
-        //  수리비용을 계산한다.
 //        char Text[100];
         //int repairGold = ConvertRepairGold(Gold,ip->Durability, p->Durability, ip->Type, Text);
 		DWORD maxDurability = calcMaxDurability ( ip, p, Level );
@@ -3597,325 +3542,12 @@ EXIT_CALCULATE:
 	{
 		Gold = (Gold / 10) * 10;
 	}
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 아이템 하나 //  수리비용을 계산한다. ( 제외시키기! )
+#ifdef LEM_ADD_LUCKYITEM
 	if( Check_LuckyItem( ip->Type ) )	Gold = 0;
 #endif // LEM_ADD_LUCKYITEM
 	
 	return (int)Gold;
 }
-
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifndef ASG_PCROOM_POINT_SYSTEM_MODIFY		// 정리시 삭제.
-#ifdef ADD_PCROOM_POINT_SYSTEM
-// 아이템 구입 조건 포인트 얻음.
-int GetItemBuyingTermsPoint(ITEM* pItem)
-{
-	int nPoint = 0;
-
-	return nPoint;
-}
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY	// 정리시 삭제.
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-
-/*	미사용 함수라 주석처리 (양대근)
-int ItemValueOld(ITEM *ip,int goldType)
-{
-	if(ip->Type == -1) return 0;
-
-	ITEM_ATTRIBUTE *p = &ItemAttribute[ip->Type];
-
-	int Gold = 0;
-	int Type = ip->Type / MAX_ITEM_INDEX;
-	int Level = (ip->Level>>3)&15;
-	bool Excellent = false;
-	for(int i=0;i<ip->SpecialNum;i++)
-	{
-		switch(ip->Special[i])
-		{
-		case AT_IMPROVE_LIFE:          
-		case AT_IMPROVE_MANA:          
-		case AT_DECREASE_DAMAGE:       
-		case AT_REFLECTION_DAMAGE:     
-		case AT_IMPROVE_BLOCKING_PERCENT:         
-		case AT_IMPROVE_GAIN_GOLD:     
-		case AT_EXCELLENT_DAMAGE:   
-		case AT_IMPROVE_DAMAGE_LEVEL:  
-		case AT_IMPROVE_DAMAGE_PERCENT:
-		case AT_IMPROVE_MAGIC_LEVEL:   
-		case AT_IMPROVE_MAGIC_PERCENT: 
-		case AT_IMPROVE_ATTACK_SPEED:  
-		case AT_IMPROVE_GAIN_LIFE:     
-		case AT_IMPROVE_GAIN_MANA:     
-			Excellent = true;
-			break;
-		}
-	}
-	int Level2 = p->Level+Level*3;
-	if(Excellent)
-		Level2 += 25;
-
-	if(ip->Type==ITEM_BOW+7)        //  석궁 화살.
-	{
-        int sellMoney;
-
-        switch ( Level )
-        {
-        case    0 :
-            sellMoney = 100;
-            break;
-        case    1 :
-            sellMoney = 1400;
-            break;
-        case    2 :
-            sellMoney = 2200;
-            break;
-        }
-		if(p->Durability > 0)
-     		Gold = (sellMoney*ip->Durability/p->Durability);//+(170*(Level*2));
-	}
-	else if(ip->Type==ITEM_BOW+15)  //  화살.
-	{
-        int sellMoney;
-
-        switch ( Level )
-        {
-        case    0 :
-            sellMoney = 70;
-            break;
-        case    1 :
-            sellMoney = 1200;
-            break;
-        case    2 :
-            sellMoney = 2000;
-            break;
-        }
-		if(p->Durability > 0)
-     		Gold = (sellMoney*ip->Durability/p->Durability);//+(80*(Level*2));
-	}
-	else if(ip->Type==ITEM_POTION+13)//석
-	{
-    	Gold = 100000;
-	}
-	else if(ip->Type==ITEM_POTION+14)//영
-	{
-    	Gold = 70000;
-	}
-	else if(ip->Type==ITEM_WING+15)//혼돈
-	{
-    	Gold = 40000;
-	}
-    else if(ip->Type==ITEM_POTION+16)// 생명의 보석.
-    {
-        Gold = 210000;
-    }
-    else if(ip->Type==ITEM_POTION+22)// 창조의 보석.
-    {
-        Gold = 18000000;
-    }
-    else if(ip->Type==ITEM_HELPER+14)   //  로크의 깃털.
-    {
-        Gold = 180000;
-    }
-	else if(ip->Type==ITEM_HELPER+3)	// 디노란트
-	{
-        Gold = 960000;
-        for(int i=0;i<ip->SpecialNum;i++)
-		{
-			switch(ip->Special[i])
-            {
-			case AT_DAMAGE_ABSORB:  
-            case AT_IMPROVE_AG_MAX:
-            case AT_IMPROVE_ATTACK_SPEED:
-				Gold += 300000;
-				break;
-            }
-        }
-	}
-    else if ( ip->Type==ITEM_HELPER+4 ) //  다크호스
-    {
-        Gold = 33000000;
-    }
-    else if(ip->Type==ITEM_HELPER+15)   //  스테이트 증/감 열매.
-    {
-        Gold = 33000000;
-    }
-#ifdef LENA_EXCHANGE_ZEN
-    else if(ip->Type==ITEM_POTION+21)
-    {
-        Gold = 9000;
-    }
-#endif
-	else if(ip->Type==ITEM_POTION+17)// 악마의 눈
-	{
-		int iValue[5] = { 30000, 15000, 21000, 30000, 45000};
-		Gold = iValue[min( max( 0, Level), 4)];
-	}
-	else if(ip->Type==ITEM_POTION+18)// 악마의 열쇠
-	{
-		int iValue[5] = { 30000, 15000, 21000, 30000, 45000};
-		Gold = iValue[min( max( 0, Level), 4)];
-	}
-	else if(ip->Type==ITEM_POTION+19)// 데블스퀘어 초대권
-	{
-		int iValue[5] = { 120000, 60000, 84000, 120000, 180000};
-		Gold = iValue[min( max( 0, Level), 4)];
-	}
-	else if(ip->Type==ITEM_POTION+9 && Level == 1)// 사랑의 올리브
-	{
-		Gold = 1000;
-	}
-	else if(ip->Type==ITEM_POTION+20)	// 사랑의 묘약
-	{
-		Gold = 900;
-	}
-	else if(p->Value > 0)//물약
-	{
-		Gold = p->Value*p->Value*10/12;
-		if(ip->Type>=ITEM_POTION && ip->Type<=ITEM_POTION+8)
-          	Gold *= ip->Durability;
-	}
-	else if( ( ( Type==12 && ip->Type>ITEM_WING+6) || Type==13 || Type==15 ) )//12(날개,구슬) 13(사탄,반지) 15(법서), 디노란트 제외.
-	{
-		Gold = 100+Level2*Level2*Level2;
-        for(i=0;i<ip->SpecialNum;i++)
-		{
-			switch(ip->Special[i])
-			{
-			case AT_LIFE_REGENERATION:
-				Gold += Gold*ip->SpecialValue[i];
-				break;
-			}
-		}
-	}
-	else
-	{
-		switch(Level)     //+무기일수록 가중치 붙음
-		{
-		case 5:Level2 += 4;break;
-		case 6:Level2 += 10;break;
-		case 7:Level2 += 25;break;
-		case 8:Level2 += 45;break;
-		case 9:Level2 += 65;break;
-		case 10:Level2 += 95;break;	// +10
-		case 11:Level2 += 135;break;
-		}
-        //  날개.
-	    if( ( Type==12 && ip->Type<=ITEM_WING+6) )
-        {
-            Gold = 40000000+((40+Level2)*Level2*Level2*11);
-        }
-        else
-        {
-		    Gold = 100+(40+Level2)*Level2*Level2/8;
-        }
-		if(Type>=0 && Type<=6) //무기일때
-		{
-			if(!p->TwoHand) //한손무기일때 80%
-				Gold = Gold*80/100;
-		}
-        for(int i=0;i<ip->SpecialNum;i++)
-		{
-			switch(ip->Special[i])
-			{
-			case AT_SKILL_BLOCKING:
-			case AT_SKILL_SWORD1:
-			case AT_SKILL_SWORD2:
-			case AT_SKILL_SWORD3:
-			case AT_SKILL_SWORD4:
-			case AT_SKILL_SWORD5:
-			case AT_SKILL_CROSSBOW:
-			case AT_SKILL_ICE_BLADE:
-				Gold += ( int)( ( float)Gold*1.5f);
-				break;
-			case AT_IMPROVE_DAMAGE:
-			case AT_IMPROVE_MAGIC:
-			case AT_IMPROVE_DEFENSE:
-                if ( Type==12 && ip->Type<=ITEM_WING+6 )    //  날개.
-                {
-				    switch(ip->SpecialValue[i])
-				    {
-				    case 4 :Gold += ( int)( ( float)Gold* 3/10);break;
-				    case 8 :Gold += ( int)( ( float)Gold* 6/10);break;
-				    case 12:Gold += ( int)( ( float)Gold*10/10);break;
-				    case 16:Gold += ( int)( ( float)Gold*20/10);break;
-				    }
-                }
-                else
-                {
-				    switch(ip->SpecialValue[i])
-				    {
-				    case 4 :Gold += ( int)( ( float)Gold* 6/10);break;
-				    case 8 :Gold += ( int)( ( float)Gold*14/10);break;
-				    case 12:Gold += ( int)( ( float)Gold*28/10);break;
-				    case 16:Gold += ( int)( ( float)Gold*56/10);break;
-				    }
-                }
-				break;
-			case AT_IMPROVE_BLOCKING:
-				switch(ip->SpecialValue[i])
-				{
-				case 5 :Gold += ( int)( ( float)Gold* 6/10);break;
-				case 10:Gold += ( int)( ( float)Gold*14/10);break;
-				case 15:Gold += ( int)( ( float)Gold*28/10);break;
-				case 20:Gold += ( int)( ( float)Gold*56/10);break;
-				}
-				break;
-			case AT_LUCK:
-				Gold += ( int)( ( float)Gold*25/100);
-				break;
-			case AT_IMPROVE_LIFE:          
-			case AT_IMPROVE_MANA:          
-			case AT_DECREASE_DAMAGE:       
-			case AT_REFLECTION_DAMAGE:     
-			case AT_IMPROVE_BLOCKING_PERCENT:         
-			case AT_IMPROVE_GAIN_GOLD:     
-			case AT_EXCELLENT_DAMAGE:   
-			case AT_IMPROVE_DAMAGE_LEVEL:  
-			case AT_IMPROVE_DAMAGE_PERCENT:
-			case AT_IMPROVE_MAGIC_LEVEL:   
-			case AT_IMPROVE_MAGIC_PERCENT: 
-			case AT_IMPROVE_GAIN_LIFE:     
-			case AT_IMPROVE_GAIN_MANA:     
-            case AT_IMPROVE_HP_MAX :
-            case AT_IMPROVE_MP_MAX :
-            case AT_ONE_PERCENT_DAMAGE :  
-			case AT_IMPROVE_ATTACK_SPEED:  
-            case AT_IMPROVE_AG_MAX :
-            case AT_IMPROVE_EVADE:
-				Gold += Gold;
-				break;
-			}
-		}
-	}
-    if( goldType )  //  팔기. 수리.
-    {
-	    Gold = Gold/3;
-    }
-
-    //  수리가 필요한 아이템은 그 비용을 뺀 나머지 값이 팔리는 가격이다.
-    if(goldType==1 && 
-     ((ip->Type<ITEM_POTION  && ip->Type!=ITEM_HELPER+10) &&
-       ip->Type!=ITEM_BOW+7  && ip->Type!=ITEM_BOW+15      &&
-      (ip->Type<ITEM_WING || ip->Type>ITEM_WING+6) &&   //  날개.
-		ip->Type != ITEM_HELPER+29 &&
-      (ip->Type!=ITEM_HELPER && ip->Type!=ITEM_HELPER+1 && ip->Type!=ITEM_HELPER+2 && ip->Type!=ITEM_HELPER+3 && ip->Type!=ITEM_HELPER+15) ) )
-    {
-        //  수리비용을 계산한다.
-		int maxDurability = calcMaxDurability ( ip, p, Level );
-		float   persent = 1.f - ( (float)ip->Durability / (float)maxDurability);
-        int repairGold = (int)(Gold * 0.6f * persent);
-
-        Gold -= repairGold;
-    }
-
-	if(Gold >= 1000)
-		Gold = Gold/100*100;
-	else if(Gold >= 100)
-		Gold = Gold/10*10;
-	return Gold;
-}
-*/
 
 #ifdef PSW_BUGFIX_REQUIREEQUIPITEM
 
@@ -3929,19 +3561,14 @@ bool IsRequireEquipItem(ITEM* pItem)
 	
 	bool bEquipable = false;
 	
-	///////////////////////////////////장착 가능한 클래스 체크///////////////////////////////////
-	
-	//. 착용 可
 	if( pItemAttr->RequireClass[GetBaseClass(Hero->Class)] ){
 		bEquipable = true; 
 	}
-	//. 마검일 경우 법사, 기사것을 착용 可
 	else if (GetBaseClass(Hero->Class) == CLASS_DARK && pItemAttr->RequireClass[CLASS_WIZARD] 
 		&& pItemAttr->RequireClass[CLASS_KNIGHT]) {
 		bEquipable = true; 
 	}
 	
-	// 전직단계를 검사해서 
 	BYTE byFirstClass = GetBaseClass(Hero->Class);
 	BYTE byStepClass = GetStepClass(Hero->Class);
 	if( pItemAttr->RequireClass[byFirstClass] > byStepClass)
@@ -3951,8 +3578,6 @@ bool IsRequireEquipItem(ITEM* pItem)
 	
 	if(bEquipable == false)
 		return false;
-	
-	///////////////////////////////////요구 능력치 체크///////////////////////////////////////
 	
 	WORD wStrength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
 	WORD wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
@@ -3979,49 +3604,32 @@ bool IsRequireEquipItem(ITEM* pItem)
 	}
 	
 	if ( pItem->RequireStrength - iDecNeedStrength > wStrength )
-		return false;    //  요구힘보다 작으면 실패.
+		return false;
 	if ( pItem->RequireDexterity - iDecNeedDex > wDexterity )
-		return false;    //  요구민첩보다 작으면 실패.
+		return false;
 	if ( pItem->RequireEnergy > wEnergy )
-		return false;    //  요구에너지보다 작으면 실패.
+		return false;
 	if ( pItem->RequireVitality > wVitality )
-		return false;    //  요구체력보다 작으면 실패.
+		return false;
 	if( pItem->RequireCharisma > wCharisma )
-		return false;    //  요구통솔보다 작으면 실패.
+		return false;
 	if( pItem->RequireLevel > wLevel )
-		return false;    //  요구레벨보다 작으면 실패.
+		return false;
 	
-	/////////////////////////////////////////통솔 예외//////////////////////////////////////////
-	
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-	if(pItem->Type == ITEM_HELPER+5 )			// 다크스피릿		   
+	if(pItem->Type == ITEM_HELPER+5 )	   
 	{
 		PET_INFO* pPetInfo = giPetManager::GetPetInfo( pItem );
 		WORD wRequireCharisma = static_cast<WORD>((185+pPetInfo->m_wLevel*15) & 0xFFFF);
 		if( wRequireCharisma > wCharisma ) {
-			return false;	//  요구통솔보다 작으면 실패.
+			return false;
 		}
 	}
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM
-	PET_INFO petInfo;
-	giPetManager::GetPetInfo(petInfo, pItem->Type);
-	WORD wRequireCharisma = (185+(petInfo.m_wLevel*15));		// 이혁재 - 다크호스, 스피릿 요구 통솔적용
 
-	// 이혁재 - 다크 스피릿 일때 요구통솔이 작으면 실패
-	if(pItem->Type == 421 )		   
-	{
-		if( wRequireCharisma > wCharisma ) {
-			return false;	//  요구통솔보다 작으면 실패.
-		}
-	}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
-	
 	return bEquipable;
 }
 
 #endif //PSW_BUGFIX_REQUIREEQUIPITEM
 
-// 추가데미지
 void PlusSpecial(WORD *Value,int Special,ITEM *Item)
 {
 	if(Item->Type == -1) {
@@ -4041,7 +3649,6 @@ void PlusSpecial(WORD *Value,int Special,ITEM *Item)
 	}
 }
 
-// 추가 +% 데미지
 void PlusSpecialPercent(WORD *Value,int Special,ITEM *Item,WORD Percent)
 {
 	if(Item->Type == -1) return;

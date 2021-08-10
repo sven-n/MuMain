@@ -6732,10 +6732,6 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Monster\\AssassinLeader_body_R.jpg"	, BITMAP_ASSASSIN_EFFECT1, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //LDK_ADD_EG_MONSTER_ASSASSINMASTER
 
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-	LoadBitmap("Player\\lower2_15m.tga"  ,BITMAP_PANTS_B_SOUL_PHYSIQMESH ,GL_LINEAR, GL_REPEAT);	
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-
 #ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
 	LoadBitmap("Item\\partCharge8\\rareitem_ticket_7_body.jpg", BITMAP_RAREITEM7, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Item\\partCharge8\\rareitem_ticket_8_body.jpg", BITMAP_RAREITEM8, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -6927,9 +6923,9 @@ void OpenBasicData(HDC hDC)
 #endif // USE_MOVEREQTEST_BMD
 	
 #ifdef _TEST_SERVER
-   	sprintf(Text,     "Data\\Local\\NpcNameTest(%s).txt",Language);
+   	sprintf(Text,     "Data\\Local\\NpcNameTest(%s).txt","Eng");
 #else
-   	sprintf(Text,     "Data\\Local\\NpcName(%s).txt",Language);
+   	sprintf(Text,     "Data\\Local\\NpcName(%s).txt","Eng");
 #endif// _TEST_SERVER
    	OpenMonsterScript(Text);
 
@@ -7041,35 +7037,13 @@ void OpenTextData()
 	char Text[100];
 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef USE_TEXTTEST_BMD
-	sprintf(Text,"Data\\Local\\%s\\Texttest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#else
 	sprintf(Text,"Data\\Local\\%s\\Text_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#endif
+
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef USE_TEXTTEST_BMD
-	sprintf(Text,"Data\\Local\\Texttest.bmd");
-#else
 	sprintf(Text,"Data\\Local\\Text.bmd");
-#endif
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
-	#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-		GlobalText.Load(Text, CGlobalText::LD_SOUTH_KOREA_TEXTS);
-	#elif SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		GlobalText.Load(Text, CGlobalText::LD_JAPAN_A_TEXTS|CGlobalText::LD_FOREIGN_TEXTS);
-	#elif SELECTED_LANGUAGE == LANGUAGE_CHINESE
-		GlobalText.Load(Text, CGlobalText::LD_CHINA_A_TEXTS|CGlobalText::LD_FOREIGN_TEXTS);
-	#elif SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-		GlobalText.Load(Text, CGlobalText::LD_VIETNAM_TEXTS|CGlobalText::LD_FOREIGN_TEXTS);
-	#elif SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-		GlobalText.Load(Text, CGlobalText::LD_PHILIPPINES_TEXTS|CGlobalText::LD_FOREIGN_TEXTS);
-	#elif SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-		GlobalText.Load(Text, CGlobalText::LD_USA_CANADA_TEXTS|CGlobalText::LD_FOREIGN_TEXTS);
-	#elif SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-		GlobalText.Load(Text, CGlobalText::LD_TAIWAN_TEXTS|CGlobalText::LD_FOREIGN_TEXTS);
-	#endif // SELECTED_LANGUAGE == LANGUAGE_KOREAN
-
+	GlobalText.Load(Text, CGlobalText::LD_USA_CANADA_TEXTS|CGlobalText::LD_FOREIGN_TEXTS);
 	OpenMacro("Data\\Macro.txt");
 }
 
@@ -7080,264 +7054,4 @@ void ReleaseMainData()
 	DeleteMonsters();
 	ClearItems();
 	ClearCharacters();
-}
-
-
-void ConvertSoundFileName( void)
-{
-#ifdef WAV_CONVERT
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-	char *lpszSoundFiles[][2] =
-	{
-		{"a바람.wav","aWind.wav"},
-		{"a비.wav","aRain.wav"},
-		{"a던젼.wav","aDungeon.wav"},
-		{"a숲.wav","aForest.wav"},
-		{"a탑.wav","aTower.wav"},
-		{"a물.wav","aWater.wav"},
-		{"p걷기(땅).wav","pWalk(Soil).wav"},
-		{"p걷기(풀).wav","pWalk(Grass).wav"},
-		{"p걷기(눈).wav","pWalk(Snow).wav"},
-		{"p수영.wav","pSwim.wav"},
-		{"a새1.wav","aBird1.wav"}, 
-		{"a새2.wav","aBird2.wav"},
-		{"a박쥐.wav","aBat.wav"},
-		{"a쥐.wav","aMouse.wav"},
-		{"a쇠창살.wav","aGrate.wav"},
-		{"a문.wav","aDoor.wav"},
-		{"a성문.wav","aCastleDoor.wav"},
-		{"e짧은타격1.wav","eShortBlow1.wav"},
-		{"e짧은타격2.wav","eShortBlow2.wav"},
-		{"e짧은타격3.wav","eShortBlow3.wav"}, 
-		{"e타격1.wav","eBlow1.wav"}, 
-		{"e타격2.wav","eBlow2.wav"}, 
-		{"e타격3.wav","eBlow3.wav"}, 
-		{"e타격4.wav","eBlow4.wav"}, 
-		{"e무기휘두르기1.wav","eSwingWeapon1.wav"},
-		{"e무기휘두르기2.wav","eSwingWeapon2.wav"},
-		{"e광선검휘두르기.wav","eSwingLightSword.wav"}, 
-		{"e활.wav","eBow.wav"},
-		{"e석궁.wav","eCrossbow.wav"},
-		{"e믹스.wav","eMix.wav"},
-		{"p마시기.wav","pDrink.wav"},
-		{"p사과먹기.wav","pEatApple.wav"},
-		{"p심장소리.wav","pHeartBeat.wav"},
-		{"p에너지.wav","pEnergy.wav"},
-		{"p남자비명1.wav","pMaleScream1.wav"},
-		{"p남자비명2.wav","pMaleScream2.wav"},
-		{"p남자비명3.wav","pMaleScream3.wav"},
-		{"p남자죽기.wav","pMaleDie.wav"},
-		{"p여자비명1.wav","pFemaleScream1.wav"},
-		{"p여자비명2.wav","pFemaleScream2.wav"},
-		{"p아이템떨어트리기.wav","pDropItem.wav"}, 
-		{"p금화떨어트리기.wav","pDropMoney.wav"}, 
-		{"e보석.wav","eGem.wav"}, 
-		{"p아이템가지기.wav","pGetItem.wav"}, 
-		{"s전사방어.wav","sKnightDefense.wav"},
-		{"s전사내려찍기.wav","sKnightSkill1.wav"},
-		{"s전사찌르기.wav","sKnightSkill2.wav"},
-		{"s전사올려치기.wav","sKnightSkill3.wav"},
-		{"s전사돌려치기.wav","sKnightSkill4.wav"},
-		{"m쉐도우공격1.wav","mShadowAttack1.wav"},
-		{"s토네이도.wav","sTornado.wav"},
-		{"s영혼.wav","sEvil.wav"},
-		{"s마법.wav","sMagic.wav"},
-		{"s헬파이어.wav","sHellFire.wav"},
-		{"s얼음.wav","sIce.wav"},
-		{"s불기둥.wav","sFlame.wav"},
-		{"s아쿠아플래쉬.wav","sAquaFlash.wav"},
-		{"e부서짐.wav","eBreak.wav"}, 
-		{"e폭파.wav","eExplosion.wav"}, 
-		{"e운석떨어지기.wav","eMeteorite.wav"}, 
-		{"e번개.wav","eThunder.wav"}, 
-		{"m해골1.wav","mBone1.wav"},
-		{"m해골2.wav","mBone2.wav"},
-		{"m암살자1.wav","mAssassin1.wav"},
-		{"n대장장이.wav","nBlackSmith.wav"},
-		{"n하프.wav","nHarp.wav"},
-		{"n믹스.wav","nMix.wav"},
-		{"m소뿔1.wav","mBull1.wav"},
-		{"m소뿔2.wav","mBull2.wav"},
-		{"m소뿔공격1.wav","mBullAttack1.wav"},
-		{"m소뿔공격2.wav","mBullAttack2.wav"},
-		{"m소뿔죽기.wav","mBullDie.wav"},
-		{"m하운드1.wav","mHound1.wav"},
-		{"m하운드2.wav","mHound2.wav"},
-		{"m하운드공격1.wav","mHoundAttack1.wav"},
-		{"m하운드공격2.wav","mHoundAttack2.wav"},
-		{"m하운드죽기.wav","mHoundDie.wav"},
-		{"m버지1.wav",    "mBudge1.wav"},
-		{"m버지공격1.wav","mBudgeAttack1.wav"},
-		{"m버지죽기.wav","mBudgeDie.wav"},
-		{"m거미1.wav","mSpider1.wav"},
-		{"m다크나이트1.wav",    "mDarkKnight1.wav"},
-		{"m다크나이트2.wav","mDarkKnight2.wav"},
-		{"m다크나이트공격1.wav","mDarkKnightAttack1.wav"},
-		{"m다크나이트공격2.wav","mDarkKnightAttack2.wav"},
-		{"m다크나이트죽기.wav","mDarkKnightDie.wav"},
-		{"m마법사1.wav",    "mWizard1.wav"},
-		{"m마법사2.wav","mWizard2.wav"},
-		{"m마법사공격1.wav","mWizardAttack1.wav"},
-		{"m마법사공격2.wav","mWizardAttack2.wav"},
-		{"m마법사죽기.wav","mWizardDie.wav"},
-		{"m자이언트1.wav",    "mGiant1.wav"},
-		{"m자이언트2.wav","mGiant2.wav"},
-		{"m자이언트공격1.wav","mGiantAttack1.wav"},
-		{"m자이언트공격2.wav","mGiantAttack2.wav"},
-		{"m자이언트죽기.wav","mGiantDie.wav"},
-		{"m유충1.wav","mLarva1.wav"},
-		{"m유충2.wav","mLarva2.wav"},
-		{"m헬스파이더1.wav",    "mHellSpider1.wav"},
-		{"m헬스파이더공격1.wav","mHellSpiderAttack1.wav"},
-		{"m헬스파이더죽기.wav","mHellSpiderDie.wav"},
-		{"m유령1.wav",    "mGhost1.wav"},
-		{"m유령2.wav","mGhost2.wav"},
-		{"m유령공격1.wav","mGhostAttack1.wav"},
-		{"m유령공격2.wav","mGhostAttack2.wav"},
-		{"m유령죽기.wav","mGhostDie.wav"},
-		{"m오우거1.wav",    "mOgre1.wav"},
-		{"m오우거2.wav","mOgre2.wav"},
-		{"m오우거공격1.wav","mOgreAttack1.wav"},
-		{"m오우거공격2.wav","mOgreAttack2.wav"},
-		{"m오우거죽기.wav","mOgreDie.wav"},
-		{"m마왕1.wav",    "mGorgon1.wav"},
-		{"m마왕2.wav","mGorgon2.wav"},
-		{"m마왕공격1.wav","mGorgonAttack1.wav"},
-		{"m마왕공격2.wav","mGorgonAttack2.wav"},
-		{"m마왕죽기.wav","mGorgonDie.wav"},
-		{"m얼음괴물1.wav",   "mIceMonster1.wav"},
-		{"m얼음괴물2.wav","mIceMonster2.wav"},
-		{"m얼음괴물죽기.wav","mIceMonsterDie.wav"},
-		{"m웜1.wav",   "mWorm1.wav"},
-		{"m웜2.wav","mWorm2.wav"},
-		{"m웜죽기.wav","mWormDie.wav"},
-		{"m호머드1.wav",    "mHomord1.wav"},
-		{"m호머드2.wav","mHomord2.wav"},
-		{"m호머드공격1.wav","mHomordAttack1.wav"},
-		{"m호머드죽기.wav","mHomordDie.wav"},
-		{"m아이스퀸1.wav",    "mIceQueen1.wav"},
-		{"m아이스퀸2.wav","mIceQueen2.wav"},
-		{"m아이스퀸공격1.wav","mIceQueenAttack1.wav"},
-		{"m아이스퀸공격2.wav","mIceQueenAttack2.wav"},
-		{"m아이스퀸죽기.wav","mIceQueenDie.wav"},
-		{"m암살자공격1.wav","mAssassinAttack1.wav"},
-		{"m암살자공격2.wav","mAssassinAttack2.wav"},
-		{"m암살자죽기.wav","mAssassinDie.wav"},
-		{"m설인1.wav",    "mYeti1.wav"},
-		{"m설인2.wav","mYeti2.wav"},
-		{"m설인공격1.wav","mYetiAttack1.wav"},
-		{"m설인죽기.wav","mYetiDie.wav"},
-		{"m고블린1.wav",    "mGoblin1.wav"},
-		{"m고블린2.wav","mGoblin2.wav"},
-		{"m고블린공격1.wav","mGoblinAttack1.wav"},
-		{"m고블린공격2.wav","mGoblinAttack2.wav"},
-		{"m고블린죽기.wav","mGoblinDie.wav"},
-		{"m고리전갈1.wav",    "mScorpion1.wav"},
-		{"m고리전갈2.wav","mScorpion2.wav"},
-		{"m고리전갈공격1.wav","mScorpionAttack1.wav"},
-		{"m고리전갈공격2.wav","mScorpionAttack2.wav"},
-		{"m고리전갈죽기.wav","mScorpionDie.wav"},
-		{"m풍뎅이1.wav",    "mBeetle1.wav"},
-		{"m풍뎅이공격1.wav","mBeetleAttack1.wav"},
-		{"m풍뎅이죽기.wav","mBeetleDie.wav"},
-		{"m헌터1.wav",    "mHunter1.wav"},
-		{"m헌터2.wav","mHunter2.wav"},
-		{"m헌터공격1.wav","mHunterAttack1.wav"},
-		{"m헌터공격2.wav","mHunterAttack2.wav"},
-		{"m헌터죽기.wav","mHunterDie.wav"},
-		{"m숲의괴물1.wav",    "mWoodMon1.wav"},
-		{"m숲의괴물2.wav","mWoodMon2.wav"},
-		{"m숲의괴물공격1.wav","mWoodMonAttack1.wav"},
-		{"m숲의괴물공격2.wav","mWoodMonAttack2.wav"},
-		{"m숲의괴물죽기.wav","mWoodMonDie.wav"},
-		{"m아곤1.wav",    "mArgon1.wav"},
-		{"m아곤2.wav","mArgon2.wav"},
-		{"m아곤공격1.wav","mArgonAttack1.wav"},
-		{"m아곤공격2.wav","mArgonAttack2.wav"},
-		{"m아곤죽기.wav","mArgonDie.wav"},
-		{"m돌괴물1.wav",    "mGolem1.wav"},
-		{"m돌괴물2.wav","mGolem2.wav"},
-		{"m돌괴물공격1.wav","mGolemAttack1.wav"},
-		{"m돌괴물공격2.wav","mGolemAttack2.wav"},
-		{"m돌괴물죽기.wav","mGolemDie.wav"},
-		{"m설인1.wav",    "mYeti1.wav"},
-		{"m사탄공격1.wav","mSatanAttack1.wav"},
-		{"m설인죽기.wav","mYetiDie.wav"},
-		{"m발록1.wav",      "mBalrog1.wav"},
-		{"m발록2.wav","mBalrog2.wav"},
-		{"m마법사공격2.wav","mWizardAttack2.wav"},
-		{"m마왕공격2.wav","mGorgonAttack2.wav"},
-		{"m발록죽기.wav","mBalrogDie.wav"},
-		{"m쉐도우1.wav",    "mShadow1.wav"},
-		{"m쉐도우2.wav","mShadow2.wav"},
-		{"m쉐도우공격1.wav","mShadowAttack1.wav"},
-		{"m쉐도우공격2.wav","mShadowAttack2.wav"},
-		{"m쉐도우죽기.wav","mShadowDie.wav"},
-		{"m설인1.wav",    "mYeti1.wav"},
-		{"m소뿔공격1.wav","mBullAttack1.wav"},
-		{"m설인죽기.wav","mYetiDie.wav"},
-		{"m발리1.wav",    "mBali1.wav"},
-		{"m발리2.wav","mBali2.wav"},
-		{"m발리공격1.wav","mBaliAttack1.wav"},
-		{"m발리공격2.wav","mBaliAttack2.wav"},
-		{"m바하무트1.wav","mBahamut1.wav"},
-		{"m설인1.wav","mYeti1.wav"},
-		{"m베파르1.wav","mBepar1.wav"},
-		{"m베파르2.wav","mBepar2.wav"},
-		{"m발록1.wav","mBalrog1.wav"},
-		{"m발키리1.wav",   "mValkyrie1.wav"},
-		{"m발키리죽기.wav","mValkyrieDie.wav"},
-		{"m리자드킹1.wav","mLizardKing1.wav"},
-		{"m리자드킹2.wav","mLizardKing2.wav"},
-		{"m히드라1.wav",    "mHydra1.wav"},
-		{"m히드라공격1.wav","mHydraAttack1.wav"},
-		{"m소뿔죽기.wav","mBullDie.wav"},
-		{"m헌터2.wav",   "mHunter2.wav"},
-		{"i타이틀.wav",    "iTitle.wav"},
-		{"i버튼움직임.wav","iButtonMove.wav"},
-		{"i버튼클릭.wav","iButtonClick.wav"},
-		{"i버튼에러.wav","iButtonError.wav"},
-		{"i창생성.wav","iCreateWindow.wav"},
-	};
-	char lpszFile[2][MAX_PATH];
-	int iCount = sizeof ( lpszSoundFiles) / sizeof ( lpszSoundFiles[0]);
-	for ( int i = 0; i < iCount; ++i)
-	{
-		wsprintf( lpszFile[0], "Data\\Sound\\%s", lpszSoundFiles[i][0]);
-		if ( i == 0)
-		{
-			if ( 0xFFFFFFFF == GetFileAttributes( lpszFile[0]))
-			{
-				break;
-			}
-		}
-		wsprintf( lpszFile[1], "Data\\Sound\\%s", lpszSoundFiles[i][1]);
-		MoveFile( lpszFile[0], lpszFile[1]);
-	}
-	char *lpszBgmFiles[][2] =
-	{
-		{"주점.mp3","Pub.mp3"},
-		{"뮤테마.mp3","MuTheme.mp3"},
-		{"성당.mp3","Church.mp3"},
-		{"데비아스.mp3","Devias.mp3"},
-		{"노리아.mp3","Noria.mp3"},
-		{"던젼.mp3","Dungeon.mp3"}
-	};
-	iCount = sizeof ( lpszBgmFiles) / sizeof ( lpszBgmFiles[0]);
-
-	for ( int i = 0; i < iCount; ++i)
-	{
-		wsprintf( lpszFile[0], "Data\\Music\\%s", lpszBgmFiles[i][0]);
-		if ( i == 0)
-		{
-			if ( 0xFFFFFFFF == GetFileAttributes( lpszFile[0]))
-			{
-				break;
-			}
-		}
-		wsprintf( lpszFile[1], "Data\\Music\\%s", lpszBgmFiles[i][1]);
-		MoveFile( lpszFile[0], lpszFile[1]);
-	}
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#endif
 }

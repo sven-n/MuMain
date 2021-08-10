@@ -372,7 +372,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
 	if (0 == unicode::_strcmp(ServerList[ServerSelectHi].Name, GlobalText[559]) && ServerLocalSelect >= 10)
 	{
 		// 461 "[%s-%d서버]"
-		// 1699 "시즌2체험(PC방)"
+		// 1699 "Season2체험(PC방)"
 		unicode::_sprintf(strServerName, GlobalText[461], GlobalText[1699], ServerLocalSelect - 9);
 	}
 	else
@@ -1023,17 +1023,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 #endif //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 		}
 #endif	// YDG_ADD_SKELETON_PET
-#ifdef PBG_FIX_SATAN_VALUEINCREASE
-		if(pItemHelper->Type == ITEM_HELPER+1 
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN	//해외에서 기간제 사용시 디파인제거 할것
-			&& !(pItemHelper->bExpiredPeriod)
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-			)
+		if(pItemHelper->Type == ITEM_HELPER+1)
 		{
 			iAttackDamageMin += int(float(iAttackDamageMin) * 0.3f);
 			iAttackDamageMax += int(float(iAttackDamageMax) * 0.3f);
 		}
-#endif //PBG_FIX_SATAN_VALUEINCREASE
 	}
 
     if( iAttackRating > 0 )
@@ -1801,7 +1795,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 #endif //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
 			}
 #endif //LDK_FIX_PC4_GUARDIAN_DEMON_INFO
-#ifdef YDG_ADD_SKELETON_PET
 			if(pItemHelper->Type == ITEM_HELPER+123)	// 스켈레톤 펫
 			{
 #ifdef LJH_FIX_IGNORING_EXPIRATION_PERIOD
@@ -1818,22 +1811,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				}
 #endif //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 			}
-#endif	// YDG_ADD_SKELETON_PET
-#ifdef PBG_FIX_SATAN_VALUEINCREASE
-			if(pItemHelper->Type == ITEM_HELPER+1 
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN		//해외에서 기간제 사용시 디파인제거 할것
-				&& !(pItemHelper->bExpiredPeriod)
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-				)
+			if(pItemHelper->Type == ITEM_HELPER+1)
 			{
 				iMagicDamageMin += int(float(iMagicDamageMin) * 0.3f);
 				iMagicDamageMax += int(float(iMagicDamageMax) * 0.3f);
 			}
-#endif //PBG_FIX_SATAN_VALUEINCREASE
 		}
 
-#ifdef ASG_ADD_SKILL_BERSERKER
-		// 버서커 버프에 걸려 있는가?
 		if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
 		{
 			int nTemp = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
@@ -1841,39 +1825,27 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			iMagicDamageMin += nTemp / 9 * fTemp;
 			iMagicDamageMax += nTemp / 4 * fTemp;
 		}
-#endif	// ASG_ADD_SKILL_BERSERKER
 
-		// 마검사 검
 		if( ( pWeaponRight->Type >= MODEL_STAFF-MODEL_ITEM 
 				&& pWeaponRight->Type < (MODEL_STAFF+MAX_ITEM_INDEX-MODEL_ITEM) ) 
             || pWeaponRight->Type == (MODEL_SWORD+31-MODEL_ITEM)
 			|| pWeaponRight->Type == (MODEL_SWORD+23-MODEL_ITEM)
 			|| pWeaponRight->Type == (MODEL_SWORD+25-MODEL_ITEM)
             || pWeaponRight->Type == (MODEL_SWORD+21-MODEL_ITEM) 
-#ifdef KJH_FIX_RUNE_BASTARD_SWORD_TOOLTIP
 			|| pWeaponRight->Type == (MODEL_SWORD+28-MODEL_ITEM) 
-#endif // KJH_FIX_RUNE_BASTARD_SWORD_TOOLTIP
            )
         {
             float magicPercent = (float)(pWeaponRight->MagicPower)/100;
 
-            //  내구력에 따른 마법 공격력 감소.
             ITEM_ATTRIBUTE *p = &ItemAttribute[pWeaponRight->Type];
             float   percent = CalcDurabilityPercent(pWeaponRight->Durability, p->MagicDur, pWeaponRight->Level, pWeaponRight->Option1, pWeaponRight->ExtOption);
             
             magicPercent = magicPercent - magicPercent*percent;
-			// 215 " 마   력 : %d~%d (+%d)"
-			unicode::_sprintf(strEnergy, GlobalText[215],
-				iMagicDamageMin + maxMg,
-				iMagicDamageMax + maxMg,
-				(int)((iMagicDamageMaxInitial+maxMg)*magicPercent));
+			unicode::_sprintf(strEnergy, GlobalText[215],iMagicDamageMin + maxMg,iMagicDamageMax + maxMg,(int)((iMagicDamageMaxInitial+maxMg)*magicPercent));
         }
 		else
 		{
-			// 216 " 마   력 : %d~%d"
-			unicode::_sprintf(strEnergy, GlobalText[216],
-				iMagicDamageMin + maxMg,
-				iMagicDamageMax + maxMg);
+			unicode::_sprintf(strEnergy, GlobalText[216],iMagicDamageMin + maxMg,iMagicDamageMax + maxMg);
 		}
 
 		iY += 13;
@@ -1885,23 +1857,18 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			g_pRenderText->SetTextColor(255, 0, 240, 255);
 		}
 
-#ifdef PSW_SCROLL_ITEM
 		if( g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll4) )
 		{
 			g_pRenderText->SetTextColor(255, 0, 240, 255);
 		}
-#endif //PSW_SCROLL_ITEM
 
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 		if( g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal) )
 		{
 			g_pRenderText->SetTextColor(255, 0, 240, 255);
 		}
-#endif //CSK_EVENT_CHERRYBLOSSOM		
 		g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + iY, strEnergy);
 	}
 
-	// 저주력 계산.
 	if (iBaseClass == CLASS_SUMMONER)
 	{
 		int iCurseDamageMin = 0;
@@ -1909,8 +1876,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		// memorylock 사용
 		CharacterMachine->GetCurseSkillDamage(CharacterAttribute->Skill[Hero->CurrentSkill], &iCurseDamageMin, &iCurseDamageMax);
 
-#ifdef ASG_ADD_SKILL_BERSERKER
-		// 버서커 버프에 걸려 있는가?
 		if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
 		{
 			int nTemp = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
@@ -1918,139 +1883,73 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			iCurseDamageMin += nTemp / 9 * fTemp;
 			iCurseDamageMax += nTemp / 4 * fTemp;
 		}
-#endif	// ASG_ADD_SKILL_BERSERKER
 
-#ifdef YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK
-		// 만기 체크
 		int iNonExpiredLRingType = -1;
 		int iNonExpiredRRingType = -1;
-#ifdef LJH_FIX_IGNORING_EXPIRATION_PERIOD
-		iNonExpiredLRingType = pItemRingLeft->Type;
-		iNonExpiredRRingType = pItemRingRight->Type;
-#else  //LJH_FIX_IGNORING_EXPIRATION_PERIOD
+
 		if(!pItemRingLeft->bPeriodItem || !pItemRingLeft->bExpiredPeriod)	// 왼손
 		{
 			iNonExpiredLRingType = pItemRingLeft->Type;
 		}
-		if(!pItemRingRight->bPeriodItem || !pItemRingRight->bExpiredPeriod)	// 오른손
+		if(!pItemRingRight->bPeriodItem || !pItemRingRight->bExpiredPeriod)
 		{
 			iNonExpiredRRingType = pItemRingRight->Type;
 		}
-#endif //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 		
 		int maxICurseDamageMin = 0;
 		int maxICurseDamageMax = 0;
 
-#ifdef PJH_ADD_PANDA_CHANGERING
-		// 팬더 변신반지를 착용 (저주력 +30)
 		if(iNonExpiredLRingType == ITEM_HELPER+76 || iNonExpiredRRingType == ITEM_HELPER+76)
 		{
-			// 착용중인 변신 반지들 중 팬더 변신 반지에 의해 가장 높은 저주력 데미지 추가.
-			maxICurseDamageMin = max(maxICurseDamageMin, 30);		// 최소 저주력 데미지
-			maxICurseDamageMax = max(maxICurseDamageMax, 30);		// 최소 저주력 데미지
+			maxICurseDamageMin = max(maxICurseDamageMin, 30);
+			maxICurseDamageMax = max(maxICurseDamageMax, 30);
 		}
-#endif	// PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		if(iNonExpiredLRingType == ITEM_HELPER+122 || iNonExpiredRRingType == ITEM_HELPER+122)	// 스켈레톤 변신반지
+		if(iNonExpiredLRingType == ITEM_HELPER+122 || iNonExpiredRRingType == ITEM_HELPER+122)
 		{
-			// 착용중인 변신 반지들 중 스켈레톤 변신 반지에 의해 가장 높은 저주력 데미지 추가 
-			maxICurseDamageMin = max(maxICurseDamageMin, 40);		// 최소 저주력 데미지
-			maxICurseDamageMax = max(maxICurseDamageMax, 40);		// 최소 저주력 데미지
+			maxICurseDamageMin = max(maxICurseDamageMin, 40);
+			maxICurseDamageMax = max(maxICurseDamageMax, 40);
 		}
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
-		// 최종 구해진 마법공격력에 착용중인 변신 반지들의 데미지 증가 중에 가장 높은 값을 더해준다.
-		iCurseDamageMin += maxICurseDamageMin;	// 최소 저주력 데미지
-		iCurseDamageMax += maxICurseDamageMax;	// 최대 저주력 데미지
 
+		iCurseDamageMin += maxICurseDamageMin;
+		iCurseDamageMax += maxICurseDamageMax;
 
-#else	// YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK	// 소스정리시 삭제할 부분!!!
-#ifdef LJH_FIX_CHANGE_RING_DAMAGE_BUG
-		// 반지에 대한 정보를 얻음
-		pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
-		pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-
-		int maxICurseDamageMin = 0;
-		int maxICurseDamageMax = 0;
-
-#ifdef PJH_ADD_PANDA_CHANGERING
-		// 팬더 변신반지를 착용 (저주력 +30)
-		if(pItemRingLeft->Type == ITEM_HELPER+76 || pItemRingRight->Type == ITEM_HELPER+76)
-		{
-			// 착용중인 변신 반지들 중 팬더 변신 반지에 의해 가장 높은 공격데미지 추가.
-			maxICurseDamageMin = max(maxICurseDamageMin, 30);		// 최소 마력 데미지
-			maxICurseDamageMax = max(maxICurseDamageMax, 30);		// 최소 마력 데미지
-		}
-#endif	// PJH_ADD_PANDA_CHANGERING
-		
-		// 최종 구해진 마법공격력에 착용중인 변신 반지들의 데미지 증가 중에 가장 높은 값을 더해준다.
-		iCurseDamageMin += maxICurseDamageMin;	// 최소 공격 데미지
-		iCurseDamageMax += maxICurseDamageMax;	// 최대 공격 데미지
-
-#endif //LJH_FIX_CHANGE_RING_DAMAGE_BUG
-#endif	// YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK	// 소스정리시 삭제할 부분!!!
-
-#ifdef LDK_FIX_PC4_GUARDIAN_DEMON_INFO
-		// memorylock 사용
 		pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 		if(pItemHelper)
 		{
 			if(pItemHelper->Type == ITEM_HELPER+64)
 			{
-#ifdef LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-				//만료된 기간제 아이템이면 출력 안함
 				if(false == pItemHelper->bExpiredPeriod)
 				{
-					// memorylock 사용
-					iCurseDamageMin += int(float(iCurseDamageMin) * 0.4f);	// 최소 공격 데미지
-					iCurseDamageMax += int(float(iCurseDamageMax) * 0.4f);	// 최대 공격 데미지
+					iCurseDamageMin += int(float(iCurseDamageMin) * 0.4f);
+					iCurseDamageMax += int(float(iCurseDamageMax) * 0.4f);
 				}
-#else //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-				// memorylock 사용
-				iCurseDamageMin += int(float(iCurseDamageMin) * 0.4f);	// 최소 공격 데미지
-				iCurseDamageMax += int(float(iCurseDamageMax) * 0.4f);	// 최대 공격 데미지
-#endif //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
 			}
-#ifdef YDG_ADD_SKELETON_PET
-			if(pItemHelper->Type == ITEM_HELPER+123)	// 스켈레톤 펫
+			if(pItemHelper->Type == ITEM_HELPER+123)
 			{
-#ifdef LJH_FIX_IGNORING_EXPIRATION_PERIOD
-				// memorylock 사용
-				iCurseDamageMin += int(float(iCurseDamageMin) * 0.2f);	// 최소 공격 데미지
-				iCurseDamageMax += int(float(iCurseDamageMax) * 0.2f);	// 최대 공격 데미지
-#else  //LJH_FIX_IGNORING_EXPIRATION_PERIOD
-				//만료된 기간제 아이템이면 출력 안함
 				if(false == pItemHelper->bExpiredPeriod)
 				{
-					// memorylock 사용
-					iCurseDamageMin += int(float(iCurseDamageMin) * 0.2f);	// 최소 공격 데미지
-					iCurseDamageMax += int(float(iCurseDamageMax) * 0.2f);	// 최대 공격 데미지
+					iCurseDamageMin += int(float(iCurseDamageMin) * 0.2f);
+					iCurseDamageMax += int(float(iCurseDamageMax) * 0.2f);
 				}
-#endif //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 			}
-#endif	// YDG_ADD_SKELETON_PET
 		}
-#endif //LDK_FIX_PC4_GUARDIAN_DEMON_INFO
 
-		// 소환술사용 왼손 무기인 책인가?
 		if (ITEM_STAFF+21 <= pWeaponLeft->Type && pWeaponLeft->Type <= ITEM_STAFF+29)
 		{
 			float fCursePercent = (float)(pWeaponLeft->MagicPower)/100;
 
-			//  내구력에 따른 저주력 감소.
 			ITEM_ATTRIBUTE *p = &ItemAttribute[pWeaponLeft->Type];
 			float fPercent = ::CalcDurabilityPercent(pWeaponLeft->Durability,
 				p->MagicDur, pWeaponLeft->Level, pWeaponLeft->Option1,
 				pWeaponLeft->ExtOption);
         
 			fCursePercent -= fCursePercent*fPercent;
-			// 1693 " 저   주   력 : %d ~ %d(+%d)"
 			unicode::_sprintf(strEnergy, GlobalText[1693],
 				iCurseDamageMin, iCurseDamageMax,
 				(int)((iCurseDamageMax)*fCursePercent));
 		}
 		else
 		{
-			// 1694 " 저   주   력 : %d ~ %d"
 			unicode::_sprintf(strEnergy, GlobalText[1694],
 				iCurseDamageMin, iCurseDamageMax);
 		}
@@ -2062,13 +1961,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	iY += 13;
 	if( iBaseClass==CLASS_KNIGHT )
 	{
-		// 582 "스킬 공격력: %d%%"
 		unicode::_sprintf(strEnergy, GlobalText[582], 200+(wEnergy/10));
 		g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
 	}
 	if ( iBaseClass==CLASS_DARK )
 	{
-		// 582 "스킬 공격력: %d%%"
 		unicode::_sprintf(strEnergy,GlobalText[582], 200);
 		g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
 	}
@@ -2090,13 +1987,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	}
 #endif //PBG_ADD_NEWCHAR_MONK
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////////
-	//							통솔										//
-	//////////////////////////////////////////////////////////////////////////
-
 	if(iBaseClass == CLASS_DARK_LORD)
 	{
 		g_pRenderText->SetFont(g_hFontBold);
@@ -2104,12 +1994,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		
         WORD wCharisma;
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-		// memorylock 사용
         wCharisma= CharacterAttribute->Charisma+ CharacterAttribute->AddCharisma;
-		// memorylock 사용
+
 #ifdef PSW_SECRET_ITEM
 		if( g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5) )
 		{
@@ -2117,6 +2003,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		}
 		else
 #endif //PSW_SECRET_ITEM
+
         if(CharacterAttribute->AddCharisma )
         {
 			g_pRenderText->SetTextColor(100, 150, 255, 255);
@@ -2126,12 +2013,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			g_pRenderText->SetTextColor(230, 230, 0, 255);
         }
 		
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
 		unicode::t_char strCharisma[256];
         unicode::_sprintf( strCharisma, "%d", wCharisma );
-		// 1900 "통솔"
 		g_pRenderText->RenderText(m_Pos.x+12, m_Pos.y+HEIGHT_CHARISMA+6, GlobalText[1900], 74, 0, RT3_SORT_CENTER);
 		g_pRenderText->RenderText(m_Pos.x+86, m_Pos.y+HEIGHT_CHARISMA+6, strCharisma, 86, 0, RT3_SORT_CENTER);
 	}

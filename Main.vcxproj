@@ -1574,9 +1574,6 @@
     <ClCompile Include="source\ExternalObject\Leaf\sysinfo.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\xortrans.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp" />
-    <ClCompile Include="source\ExternalObject\Nprotect\npGameGuard.cpp" />
-    <ClCompile Include="source\ExternalObject\Nprotect\NPGameGuardHandle.cpp" />
-    <ClCompile Include="source\ExternalObject\Nprotect\Nprotect.cpp" />
     <ClCompile Include="source\FilterInfo.cpp" />
     <ClCompile Include="source\FilterNameInfo.cpp" />
     <ClCompile Include="source\GambleSystem.cpp" />
@@ -1730,7 +1727,6 @@
     <ClCompile Include="source\npcCatapult.cpp" />
     <ClCompile Include="source\npcGateSwitch.cpp" />
     <ClCompile Include="source\Observer.cpp" />
-    <ClCompile Include="source\OneTimePassword.cpp" />
     <ClCompile Include="source\OptionWin.cpp" />
     <ClCompile Include="source\PartyManager.cpp" />
     <ClCompile Include="source\PCRoomPoint.cpp" />
@@ -2280,9 +2276,6 @@
     <ClInclude Include="source\ExternalObject\Leaf\sysinfo.h" />
     <ClInclude Include="source\ExternalObject\Leaf\xortrans.h" />
     <ClInclude Include="source\ExternalObject\Leaf\xstreambuf.h" />
-    <ClInclude Include="source\ExternalObject\Nprotect\npGameGuard.h" />
-    <ClInclude Include="source\ExternalObject\Nprotect\NPGameGuardHandle.h" />
-    <ClInclude Include="source\ExternalObject\Nprotect\Nprotect.h" />
     <ClInclude Include="source\ExternalObject\ResourceGuard\MuRGReport.h" />
     <ClInclude Include="source\ExternalObject\ResourceGuard\ResourceGuard.h" />
     <ClInclude Include="source\ExternalObject\ResourceGuard\RGReportConsole.h" />
@@ -2446,7 +2439,6 @@
     <ClInclude Include="source\npcCatapult.h" />
     <ClInclude Include="source\npcGateSwitch.h" />
     <ClInclude Include="source\Observer.h" />
-    <ClInclude Include="source\OneTimePassword.h" />
     <ClInclude Include="source\OptionWin.h" />
     <ClInclude Include="source\PartyManager.h" />
     <ClInclude Include="source\PCRoomPoint.h" />
@@ -2533,7 +2525,6 @@
     <ClInclude Include="source\Winmain.h" />
     <ClInclude Include="source\Winmain_New.h" />
     <ClInclude Include="source\Winmain_New_Event.h" />
-    <ClInclude Include="source\Winmain_New_Foreign.h" />
     <ClInclude Include="source\Winmain_New_Live.h" />
     <ClInclude Include="source\WSclient.h" />
     <ClInclude Include="source\wsclientinline.h" />

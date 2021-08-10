@@ -21,9 +21,6 @@
 #include "./Utilities/Memory/MemoryLock.h"
 #include "MatchEvent.h"
 #include "GOBoid.h"
-#ifdef NP_GAME_GUARD
-	#include "ExternalObject/Nprotect/npGameGuard.h"
-#endif // NP_GAME_GUARD
 #ifdef SAVE_PACKET
 #include "./ExternalObject/leaf/stdleaf.h"
 #endif // SAVE_PACKET
@@ -32,9 +29,7 @@
 #include "PvPSystem.h"
 #include "GMHellas.h"
 #include "npcBreeder.h"
-#ifdef PET_SYSTEM
 #include "GIPetManager.h"
-#endif// PET_SYSTEM
 #include "CSMapServer.h"
 #include "GMBattleCastle.h"
 #include "npcGateSwitch.h"
@@ -53,11 +48,6 @@
 #endif	// ADD_PCROOM_POINT_SYSTEM
 #include "MixMgr.h"
 #include "MapManager.h"
-
-#ifdef RESOURCE_GUARD
-#include "./ExternalObject/ResourceGuard/MuRGReport.h"
-#include "./ExternalObject/ResourceGuard/ResourceGuard.h"
-#endif // RESOURCE_GUARD
 #include "UIGuardsMan.h"
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"
@@ -66,7 +56,6 @@
 #include "w_CursedTemple.h"
 #include "SummonSystem.h"
 #include "../ProtocolSend.h"
-//#include "../ProtocolSend.h"
 
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
@@ -3474,21 +3463,6 @@ void ReceiveAction(BYTE *ReceiveBuffer,int Size)
 			PlayBuffer(SOUND_XMAS_TURN);
 		}
 		break;
-		
-#ifdef WORLDCUP_ADD
-#ifndef NO_MORE_DANCING
-	case AT_HANDCLAP:
-		{
-			int Rnd = (int)(rand()%6);
-			SetAction(o,PLAYER_KOREA_HANDCLAP);
-			PlayBuffer(SOUND_WORLDCUP_RND1 + Rnd);
-		}
-		break;
-	case AT_POINTDANCE:
-		SetAction(o,PLAYER_POINT_DANCE);
-		break;
-#endif
-#endif
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_RAGEBUFF_1:
 		{
@@ -6163,11 +6137,7 @@ void ReceiveGetItem( BYTE *ReceiveBuffer )
 			GetItemName(Items[ItemKey].Item.Type, level, szItem);
 			
 			char szMessage[128];
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-			sprintf(szMessage, "%s %s", GlobalText[918], szItem);
-#else
 			sprintf(szMessage, "%s %s", szItem, GlobalText[918]);
-#endif // SELECTED_LANGUAGE == LANGUAGE_CHINESE
 			g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);			
         }
 #ifdef FOR_WORK
@@ -8637,7 +8607,6 @@ void ReceiveDevilSquareCountDown( BYTE *ReceiveBuffer )
 			matchEvent::StartMatchCountDown( Data->Value + 1);
 		}
 	}
-#ifdef YDG_ADD_DOPPELGANGER_EVENT
 	else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
 	{
 		if( ((BYTE)(Data->Value + 1) >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && (BYTE)(Data->Value + 1) <= TYPE_MATCH_DOPPELGANGER_CLOSE) || (BYTE)(Data->Value + 1) == TYPE_MATCH_NONE )
@@ -8645,7 +8614,6 @@ void ReceiveDevilSquareCountDown( BYTE *ReceiveBuffer )
 			matchEvent::StartMatchCountDown((BYTE)(Data->Value + 1));
 		}
 	}
-#endif	// YDG_ADD_DOPPELGANGER_EVENT
 	else
 	{
 		matchEvent::StartMatchCountDown( Data->Value + 1);
@@ -13504,15 +13472,6 @@ bool ReceiveSkillDummySeedValue(BYTE* pReceiveBuffer)
 }
 #endif // KJH_ADD_DUMMY_SKILL_PROTOCOL
 
-#ifdef LJH_ADD_ONETIME_PASSWORD
-void ShowOTPInputWin()
-{
-	CUIMng& rUIMng = CUIMng::Instance();
-	
-	rUIMng.ShowWin(&rUIMng.m_OneTimePasswordWin);		// OneTime Password 입력창을 보여줌
-}
-#endif //LJH_ADD_ONETIME_PASSWORD
-
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 BOOL ReceiveStraightAttack(BYTE *ReceiveBuffer, int Size, BOOL bEncrypted)
 {
@@ -13674,16 +13633,9 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				case 0x11:
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ONLY_OVER_15);
 					break;
-#ifdef LEM_ADD_GAMECHU
-				case 0x12:
-					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CONNECT);
-					break;
-#endif // LEM_ADD_GAMECHU
-#ifdef ASG_ADD_CHARGED_CHANNEL_TICKET
 				case 0x40:
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL);
 					break;
-#endif	// ASG_ADD_CHARGED_CHANNEL_TICKET
 				case 0xc0:
 				case 0xd0:
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_POINT_DATE);
@@ -13696,36 +13648,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				case 0xd2:
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_INVALID_IP);
 					break;
-#ifdef ADD_EXPERIENCE_SERVER
-				case 0xb0:
-					CUIMng::Instance().PopUpMsgWin(MESSAGE_PCROOM_POSSIBLE);
-					break;
-#endif	// ADD_EXPERIENCE_SERVER
-#ifdef LJH_ADD_ONETIME_PASSWORD
-				//(0xF1 / 0x01, 0xA0): OTP
-				case 0xA0:
-					ShowOTPInputWin();
-					break;
-				//(0xF1 / 0x01, 0xA1): OTP
-				case 0xA1:	
-					g_ErrorReport.Write( "this user not register OPT yet.");
-					g_ErrorReport.WriteCurrentTime();
-					CUIMng::Instance().PopUpMsgWin(MESSAGE_OTP_NOT_REGISTERED);
-					break;
-				//(0xF1 / 0x01, 0xA2)
-				case 0xA2:	
-					g_ErrorReport.Write( "Incorrect OneTime Password.");
-					g_ErrorReport.WriteCurrentTime();
-					CUIMng::Instance().PopUpMsgWin(MESSAGE_OTP_INCORRECT);
-					break;
-				//(0xF1 / 0x01, 0xA3):  
-				//(0xF1 / 0x01, 0xA4):
-				case 0xA3:
-				case 0xA4:
-					g_ErrorReport.Write( "Invalid information received.");
-					g_ErrorReport.WriteCurrentTime();
-					CUIMng::Instance().PopUpMsgWin(MESSAGE_OTP_INVALID_INFO);
-#endif //LJH_ADD_ONETIME_PASSWORD
 				}
 				break;
 				case 0x02:
@@ -13863,14 +13785,12 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			case 0x52:
 				Receive_Master_LevelGetSkill(ReceiveBuffer);
 				break;
-#ifdef PJH_CHARACTER_RENAME
 			case 0x15:
 				Receive_Check_Change_Name(ReceiveBuffer);
 				break;
 			case 0x16:
 				Receive_Change_Name_Result(ReceiveBuffer);
 				break;
-#endif //PJH_CHARACTER_RENAME
 			}
 			break;
 		}
@@ -14223,16 +14143,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x71:
 		ReceivePing(ReceiveBuffer);
 		break;
-#ifdef NP_GAME_GUARD
-#ifdef GG_SERVER_AUTH
-	case 0x73:
-		if ( !ReceiveGGAuth(ReceiveBuffer, bEncrypted))
-		{
-			return ( FALSE);
-		}
-		break;
-#endif
-#endif
 	case 0x81:
         ReceiveStorageGold(ReceiveBuffer);
 		break;

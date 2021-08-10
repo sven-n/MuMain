@@ -226,12 +226,6 @@ bool CGMDoppelGanger2::MoveMonsterVisual(OBJECT* o, BMD* b)
 				}
 			}
 		}
-#ifndef LDS_MR0_FIX_BREAKVISUAL_DOPPELGANGER_CHARACTER		// !ÃßÈÄ »èÁ¦ ¿ä¸Á RenderMonsterVisual·Î ¿Å±è
- 		if (o->m_bActionStart == FALSE)
- 		{
- 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
- 		}
-#endif // LDS_MR0_FIX_BREAKVISUAL_DOPPELGANGER_CHARACTER
 		return true;
 	}
 

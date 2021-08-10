@@ -113,7 +113,6 @@ public:
     virtual void    RenderMatchResult ( void );
 };
 
-#ifdef YDG_ADD_DOPPELGANGER_EVENT
 class CDoppelGangerMatch : public CSBaseMatch
 {
 private:
@@ -128,6 +127,5 @@ public:
     virtual void    SetMatchResult ( const int iNumDevilRank, const int iMyRank, const MatchResult *pMatchResult, const int Success=false ) {}
     virtual void    RenderMatchResult ( void ) {}
 };
-#endif	// YDG_ADD_DOPPELGANGER_EVENT
 
 #endif// __CSEVENT_MATCH_H__

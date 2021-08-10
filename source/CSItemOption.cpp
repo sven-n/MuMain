@@ -325,20 +325,7 @@ bool	CSItemOption::GetSetItemName( char* strName, const int iType, const int set
 		if ( itemSType.byOption[setItemType-1]!=255 && itemSType.byOption[setItemType-1]!=0 )
 		{
 			ITEM_SET_OPTION& itemOption = m_ItemSetOption[itemSType.byOption[setItemType-1]];
-
-#ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
-#ifdef _LANGUAGE_JPN
-			memcpy ( strName, itemOption.strSetName, sizeof( char )*64 );
-#else // _LANGUAGE_JPN
 			memcpy ( strName, itemOption.strSetName, sizeof( char )*32 );
-#endif // _LANGUAGE_JPN
-#else // KJH_MOD_NATION_LANGUAGE_REDEFINE
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-            memcpy ( strName, itemOption.strSetName, sizeof( char )*64 );
-#else
-			memcpy ( strName, itemOption.strSetName, sizeof( char )*32 );
-#endif// SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
             int length = strlen ( strName );
             strName[length] = ' ';
             strName[length+1]= 0;
@@ -405,19 +392,8 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
     BYTE    setType = 0;
 
     m_bySameSetItem = 0;
-#ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
-#ifdef _LANGUAGE_JPN
-    ZeroMemory ( m_strSetName, sizeof(char)*2*64 );
-#else // _LANGUAGE_JPN
-    ZeroMemory ( m_strSetName, sizeof(char)*2*32 );
-#endif // _LANGUAGE_JPN
-#else // KJH_MOD_NATION_LANGUAGE_REDEFINE
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-    ZeroMemory ( m_strSetName, sizeof(char)*2*64 );
-#else
-    ZeroMemory ( m_strSetName, sizeof(char)*2*32 );
-#endif// SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
+
+	ZeroMemory ( m_strSetName, sizeof(char)*2*32 );
 
     m_bySetOptionIndex[0] = 0;
     m_bySetOptionIndex[1] = 0;

@@ -5939,7 +5939,6 @@ CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::CancelBtnDown(class CNewUIMe
 	return CALLBACK_BREAK;
 }
 #endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
-//////////////////////////////////////////////////////////////////////////
 
 bool SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
 {
@@ -5947,26 +5946,11 @@ bool SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
 	if(0 == pMsgBox)
 		return false;
 
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-	if(false == pMsgBox->Create(KEYPAD_TYPE_LOCK_FINAL, 4))
-		return false;
-
-	// 694 "새 비밀번호 확인"
-	pMsgBox->AddMsg(GlobalText[694]);
-	// 696 "한번만 더 입력하세요."
-	pMsgBox->AddMsg(GlobalText[696]);
-
-#else // SELECTED_LANGUAGE == LANGUAGE_CHINESE
 	if(false == pMsgBox->Create(KEYPAD_TYPE_LOCK_FINAL, g_iLengthAuthorityCode))
 		return false;
 
-	// 691 "주민등록번호 확인"
 	pMsgBox->AddMsg(GlobalText[691]);
-	// 697 "주민번호 뒷자리를 입력하세요."
 	pMsgBox->AddMsg(GlobalText[697]);
-
-#endif //SELECTED_LANGUAGE == LANGUAGE_CHINESE
-
 	pMsgBox->AddCallbackFunc(CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
@@ -5986,15 +5970,10 @@ CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class C
 
 	if(pMsgBox->GetInputSize() == pMsgBox->GetInputLimit())
 	{
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-		SendStoragePassword( 1, pMsgBox->GetStoragePassword(), (void*)pMsgBox->GetInputText());
-#else //SELECTED_LANGUAGE == LANGUAGE_CHINESE
 		if(pMsgBox->GetStoragePassword() != 0)
 		{
 			SendStoragePassword( 1, pMsgBox->GetStoragePassword(), (void*)pMsgBox->GetInputText());
 		}
-#endif //SELECTED_LANGUAGE == LANGUAGE_CHINESE
-
 		g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
 		return CALLBACK_BREAK;
@@ -6007,13 +5986,10 @@ CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown(cla
 {
 	PlayBuffer(SOUND_CLICK01);
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
 	return CALLBACK_BREAK;
 }
 
-//////////////////////////////////////////////////////////////////////////
 #ifdef LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
-//글로벌 포털용 창고 비번 해제
 bool SEASON3B::CStorageUnlockMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
@@ -6026,13 +6002,9 @@ bool SEASON3B::CStorageUnlockMsgBoxLayout::SetLayout()
 		return false;
 	}
 
-	pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);	// 글로벌은 영문자도 입력 가능해야함.
+	pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
 
-	//-------------------------------------
-
-	// 242 "창고 잠금/해제"
 	pMsgBox->AddMsg(GlobalText[242]);
-	// 697 "주민번호 뒷자리를 입력하세요."
 	pMsgBox->AddMsg(GlobalText[697]);
 
 	pMsgBox->AddCallbackFunc(CStorageUnlockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -6078,7 +6050,6 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::CancelBtnDown(class CNewUI
 	return CALLBACK_BREAK;
 }
 #endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
-//////////////////////////////////////////////////////////////////////////
 
 bool SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
 {
@@ -6087,21 +6058,11 @@ bool SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
 	CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
 	if(0 == pMsgBox)
 		return false;
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-	if(false == pMsgBox->Create(KEYPAD_TYPE_UNLOCK, 4))
-		return false;
-	// 242 "창고 잠금/해제"
-	pMsgBox->AddMsg(GlobalText[242]);
-	// 695 "창고 비밀번호 4자리를 입력하세요."
-	pMsgBox->AddMsg(GlobalText[695]);
-#else // SELECTED_LANGUAGE == LANGUAGE_CHINESE
 	if(false == pMsgBox->Create(KEYPAD_TYPE_UNLOCK, g_iLengthAuthorityCode))
 		return false;
-	// 242 "창고 잠금/해제"
+
 	pMsgBox->AddMsg(GlobalText[242]);
-	// 697 "주민번호 뒷자리를 입력하세요."
 	pMsgBox->AddMsg(GlobalText[697]);
-#endif //SELECTED_LANGUAGE == LANGUAGE_CHINESE
 
 	pMsgBox->AddCallbackFunc(CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CStorageUnlockKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -6120,16 +6081,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(class CNew
 
 	if(pMsgBox->GetInputSize() == pMsgBox->GetInputLimit())
 	{
-		// 잠금해제할 때 비밀번호 Type은 2 
-		// 2번째 인자는 필요없는 데이타
-		// 3번째 인자는 주민등록번호
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-		// 중국은 주민번호 처리 안하고 비번 4자리만
-		int password = atoi( pMsgBox->GetInputText());
-		SendStoragePassword( 2, password, (void*)pMsgBox->GetInputText());
-#else //SELECTED_LANGUAGE == LANGUAGE_CHINESE	
 		SendStoragePassword( 2, 0, (void*)pMsgBox->GetInputText());
-#endif //SELECTED_LANGUAGE == LANGUAGE_CHINESE
 	}
 	else
 	{
@@ -8056,44 +8008,18 @@ CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ExitBtnDown(class CNewUIMe
 
 #endif //PSW_ADD_RESET_CHARACTER_POINT
 
-//////////////////////////////////////////////////////////////////////////
-
-
 bool SEASON3B::CGuildBreakPasswordMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
 	if(0 == pMsgBox)
 		return false;
-#ifdef LDK_FIX_AUTHORITYCODE_LENGTH
-	#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-		int _temp = (g_iLengthAuthorityCode / 10) <= 0 ? 1 : (g_iLengthAuthorityCode / 10);
-		int _width = INPUTBOX_WIDTH * _temp	;
-		if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, _width, INPUTBOX_HEIGHT, g_iLengthAuthorityCode, true))
-			return false;
-	#else //SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-		if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, INPUTBOX_WIDTH, INPUTBOX_HEIGHT, g_iLengthAuthorityCode, true))
-			return false;
-	#endif //SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-		
-#else //LDK_FIX_AUTHORITYCODE_LENGTH
-	#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, INPUTBOX_WIDTH, INPUTBOX_HEIGHT, 8, true))
-			return false;
-	#else //SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, INPUTBOX_WIDTH, INPUTBOX_HEIGHT, 7, true))
-			return false;
-	#endif //SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#endif //LDK_FIX_AUTHORITYCODE_LENGTH
-#if (SELECTED_LANGUAGE == LANGUAGE_TAIWAESE) || (SELECTED_LANGUAGE == LANGUAGE_CHINESE)
-	pMsgBox->SetInputBoxOption(UIOPTION_SERIALNUMBER|UIOPTION_PAINTBACK);	// 중국, 대만은 영문자도 입력 가능해야함.
-#elif (SELECTED_LANGUAGE == LANGUAGE_ENGLISH)
-	pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);	// 글로벌은 영문자도 입력 가능해야함.
-#else //SELECTED_LANGUAGE == LANGUAGE_CHINESE
-	pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY|UIOPTION_PAINTBACK);
-#endif //SELECTED_LANGUAGE == LANGUAGE_CHINESE
 
-	//427 "길드를 탈퇴 하시려면 주민등록".
-	//428 "번호 뒷자리를 입력하셔야 합니다."
+	int _temp = (g_iLengthAuthorityCode / 10) <= 0 ? 1 : (g_iLengthAuthorityCode / 10);
+	int _width = INPUTBOX_WIDTH * _temp	;
+	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, INPUTBOX_TYPE_NUMBER, _width, INPUTBOX_HEIGHT, g_iLengthAuthorityCode, true))
+		return false;
+
+	pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
 	pMsgBox->AddMsg(GlobalText[427]);
 	pMsgBox->AddMsg(GlobalText[428]);
 
@@ -8123,40 +8049,18 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewU
 		return CALLBACK_CONTINUE;
 	}
 
-#ifdef LDK_MOD_PASSWORD_LENGTH_20
-//글로벌 포털용
+
 	unicode::t_char strText[20] = { 0, };
-#else //LDK_MOD_PASSWORD_LENGTH_20
-	unicode::t_char strText[12] = { 0, };
-#endif //LDK_MOD_PASSWORD_LENGTH_20
 	
 	pMsgBox->GetInputBoxText(strText);
 	int iInputTextSize = unicode::_strlen(strText);
 
-#ifdef LDK_FIX_AUTHORITYCODE_LENGTH
-
-#ifdef LDK_MOD_PASSWORD_LENGTH_20
-	// 글로벌은 패스워드로 처리함..
 	if(iInputTextSize > 0)
-#else //LDK_MOD_PASSWORD_LENGTH_20
-	if(iInputTextSize == g_iLengthAuthorityCode)
-#endif //LDK_MOD_PASSWORD_LENGTH_20
-
-#else //LDK_FIX_AUTHORITYCODE_LENGTH
-	#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		// 주민등록번호 뒷자리 8자리
-		if(iInputTextSize == 8)
-	#else //SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		// 주민등록번호 뒷자리 7자리
-		if(iInputTextSize == 7)
-	#endif //SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#endif //LDK_FIX_AUTHORITYCODE_LENGTH
 	{
 		SendRequestGuildLeave(GuildList[DeleteIndex].Name, strText);
 	}
 	else
 	{
-		// 401 "주민등록번호가 일치하지 않습니다."
 		g_pChatListBox->AddText("", GlobalText[401], SEASON3B::TYPE_ERROR_MESSAGE);
 	}
 
@@ -8173,10 +8077,6 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::CancelBtnDown(class C
 
 	return CALLBACK_BREAK;
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-
 
 SEASON3B::CGuild_ToPerson_Position::CGuild_ToPerson_Position()
 {

@@ -29,56 +29,10 @@ extern ItemAddOptioninfo*			g_pItemAddOptioninfo;
 #include "DummyAttackProtocol.h"
 #endif // KJH_ADD_DUMMY_SKILL_PROTOCOL
 
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN		// 한국어
-#define PACKET_MOVE         0xD3
-#define PACKET_POSITION     0xDF
-#define PACKET_MAGIC_ATTACK 0x10
-#define PACKET_ATTACK       0xD7
-#elif SELECTED_LANGUAGE == LANGUAGE_ENGLISH		// 영어
 #define PACKET_MOVE         0xD4
 #define PACKET_POSITION     0x15
 #define PACKET_MAGIC_ATTACK 0xDB
 #define PACKET_ATTACK       0x11
-#elif SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES // 필리핀
-#define PACKET_MOVE         0xDD
-#define PACKET_POSITION     0xDF
-#define PACKET_MAGIC_ATTACK 0x11
-#define PACKET_ATTACK       0xD6 
-#elif SELECTED_LANGUAGE == LANGUAGE_TAIWANESE	// 대만어
-#define PACKET_MOVE         0xD6
-#define PACKET_POSITION     0xDF
-#ifdef SEASON2_5_PACKET_MAGIC_ATTACK
-#define PACKET_MAGIC_ATTACK 0xD2
-#else //SEASON2_5_PACKET_MAGIC_ATTACK
-#define PACKET_MAGIC_ATTACK 0xD0
-#endif //SEASON2_5_PACKET_MAGIC_ATTACK
-#define PACKET_ATTACK       0xDD
-#elif SELECTED_LANGUAGE == LANGUAGE_CHINESE		// 중국어
-#define PACKET_MOVE         0xD7
-#ifdef SEASON2_5_PACKET_POSITION
-#define PACKET_POSITION     0xD2
-#else //SEASON2_5_PACKET_POSITION
-#define PACKET_POSITION     0xD0
-#endif //SEASON2_5_PACKET_POSITION
-#define PACKET_MAGIC_ATTACK 0x1D
-#define PACKET_ATTACK       0xD9
-#elif SELECTED_LANGUAGE == LANGUAGE_JAPANESE	// 일본어
-#define PACKET_MOVE         0x1D
-#define PACKET_POSITION     0xD6
-#define PACKET_MAGIC_ATTACK 0xD7
-#define PACKET_ATTACK       0xDC
-#elif SELECTED_LANGUAGE == LANGUAGE_THAILAND	// 태국어
-#define PACKET_MOVE         0x11
-#define PACKET_POSITION     0xD4
-#define PACKET_MAGIC_ATTACK 0xD9
-#define PACKET_ATTACK       0xD6
-#elif SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE	// 베트남
-#define PACKET_MOVE         0xD9
-#define PACKET_POSITION     0xDC
-#define PACKET_MAGIC_ATTACK 0x1D
-#define PACKET_ATTACK       0x15
-#endif	// SELECTED_LANGUAGE
-
 
 extern CWsctlc SocketClient;
 extern CSimpleModulus g_SimpleModulusCS;
@@ -90,12 +44,8 @@ extern int CurrentProtocolState;
 
 extern int DirTable[16];
 
-// Wsclient.cpp 에 있던 함수들이 인라인 함수로 바뀐 것들
-
 void BuxConvert(BYTE *Buffer,int Size);
 
-
-// 알수없는 링크에러로 여기에 넣음
 __forceinline bool FindText2(char *Text,char *Token,bool First=false)
 {
 	int LengthToken = (int)strlen(Token);
@@ -197,98 +147,10 @@ __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bF
 	}
 }
 
-
 #include "StreamPacketEngine.h"
-
-
-
-#ifdef USE_SELFCHECKCODE
-
-// ------------ self check 쓸 경우 -->>
-
-// 함수 끝 표시
-#define END_OF_FUNCTION( pos)\
-	_asm { jmp pos };\
-	_asm { __emit 0xF1 }\
-	_asm { __emit 0xF2 }\
-	_asm { __emit 0xA3 }\
-	_asm { __emit 0x53 }\
-	_asm { __emit 0x8A }\
-	_asm { __emit 0x72 }
-
-// 함수 정보 얻기
-#ifdef _DEBUG
-#define GetStartOfFunction( Address, Function)\
-{\
-	BYTE *pFunc = ( BYTE*)Function;\
-	DWORD dwValue;\
-	memcpy( &dwValue, pFunc + 1, 4);\
-	dwValue += 5;\
-	Address = ( BYTE*)( ( DWORD)Function + dwValue);\
-}
-#else
-#define GetStartOfFunction( Address, Function)\
-Address = ( BYTE*)Function;
-#endif
-
-// 함수 끝 얻기
-inline BYTE* GetEndOfFunction( BYTE *pbyStart)
-{
-	BYTE byCompare[] = { 0xF1, 0xF2, 0xA3, 0x53, 0x8A, 0x72};
-	int iCompare = 0;
-	for ( BYTE *pbySeek = pbyStart; pbySeek < pbyStart+(1024*128); ++pbySeek)
-	{
-		if ( *pbySeek == byCompare[iCompare])
-		{
-			if ( ++iCompare >= 6)
-			{
-				return ( pbySeek - 5);
-			}
-		}
-		else
-		{
-			iCompare = 0;
-		}
-	}
-	return ( pbySeek);
-}
-
-// CRC 체크
-
-extern BYTE g_byNextFuncCrcCheck;
-extern DWORD g_dwLatestFuncCrcCheck;
-#define DELAY_FOR_FUNCCRCCHECK		( 6000)
-//#define DELAY_FOR_FUNCCRCCHECK		( 1000)
-
-#define SendCrcOfFunction( p_Index, p_Next, p_Function, p_Key)\
-{\
-	if ( g_byNextFuncCrcCheck == p_Index && ( abs( GetTickCount() - g_dwLatestFuncCrcCheck) > DELAY_FOR_FUNCCRCCHECK))\
-	{\
-		BYTE *pFuncPtr;\
-		GetStartOfFunction( pFuncPtr, p_Function);\
-		static DWORD s_dwSize = 0;\
-		if ( 0 == s_dwSize)\
-		{\
-			BYTE *pFuncEnd = GetEndOfFunction( pFuncPtr);\
-			s_dwSize = ( DWORD)pFuncEnd - ( DWORD)pFuncPtr;\
-		}\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC1, 0x72);\
-		spe << ( BYTE)( p_Index);\
-		DWORD dwResult = GenerateCheckSum2( pFuncPtr, s_dwSize, p_Key);\
-		spe << ( DWORD)( dwResult);\
-		spe << ( BYTE)( rand());\
-		spe.Send( TRUE);\
-		g_byNextFuncCrcCheck = p_Next;\
-		g_dwLatestFuncCrcCheck = GetTickCount();\
-	}\
-}
-#else
 
 #define END_OF_FUNCTION( pos)	;
 #define SendCrcOfFunction( p_Index, p_Next, p_Function, p_Key)	;
-
-#endif	// USE_SELFCHECKCODE
 
 #define SendRequestServerList()\
 {\
@@ -552,47 +414,6 @@ extern BYTE Serial[SIZE_PROTOCOLSERIAL+1];
 #endif //LDK_MOD_PASSWORD_LENGTH_20
 
 #endif	// LDS_MODIFY_CHAR_LENGTH_USERPASSWORD
-
-#ifdef LJH_ADD_ONETIME_PASSWORD
-///////////////////////////////////////////////////////////////////////////////
-// OneTime Password 관련
-///////////////////////////////////////////////////////////////////////////////
-#define SendRequestOTP( p_lpszID, p_lpszPW, p_lpszOTP, p_byOTPBtnType)\
-{\
-	pre_send( g_hInst);\
-	LogIn = 1;\
-	strcpy(LogInID, ( p_lpszID));\
-	CurrentProtocolState = REQUEST_LOG_IN;\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF1);\
-	spe << ( BYTE)0x05;\
-	char lpszID[MAX_ID_SIZE];\
-	char lpszPW[MAX_ID_SIZE];\
-	char lpszOTP[MAX_ONETIME_PASSWORD_SIZE];\
-	ZeroMemory( lpszID, MAX_ID_SIZE);\
-	ZeroMemory( lpszPW, MAX_ID_SIZE);\
-	ZeroMemory( lpszOTP, MAX_ONETIME_PASSWORD_SIZE);\
-	strcpy( lpszID, p_lpszID);\
-	strcpy( lpszPW, ( p_lpszPW));\
-	strcpy( lpszOTP, ( p_lpszOTP));\
-	BuxConvert(( BYTE*)lpszID,MAX_ID_SIZE);\
-	BuxConvert(( BYTE*)lpszPW,MAX_ID_SIZE);\
-	BuxConvert(( BYTE*)lpszOTP,MAX_ONETIME_PASSWORD_SIZE);\
-	spe.AddData( lpszID, MAX_ID_SIZE);\
-	spe.AddData( lpszPW, MAX_ID_SIZE);\
-	spe << GetTickCount();\
-	int i = 0;\
-	for(i=0;i<SIZE_PROTOCOLVERSION;i++)\
-	spe << ( BYTE)( Version[i]-(i+1));\
-	for(i=0;i<SIZE_PROTOCOLSERIAL;i++)\
-	spe << Serial[i];\
-	spe << ( BYTE)p_byOTPBtnType;\
-	spe.AddData( lpszOTP, MAX_ONETIME_PASSWORD_SIZE);\
-	spe.Send( TRUE);\
-	g_pChatListBox->AddText("",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	hanguo_check3();\
-}
-#endif //LJH_ADD_ONETIME_PASSWORD
 
 extern bool LogOut;
 
@@ -2730,61 +2551,8 @@ extern int SendDropItem;
 	spe.Send();\
 }
 
-#ifdef NPROTECT_AUTH2
-
-#ifdef NP_GAME_GUARD
-#ifdef GG_SERVER_AUTH
-#define SendAuth( p_dwResult)\
-{\
-	pre_send( g_hInst);\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x73);\
-	spe << ( BYTE)( 0) << ( p_dwResult);\
-	spe.Send( TRUE);\
-}
-#endif
-#endif
-
-#else
-
-#ifdef NP_GAME_GUARD
-#ifdef GG_SERVER_AUTH
-#define SendAuth( p_dwResult)\
-{\
-	pre_send( g_hInst);\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x73);\
-	spe << ( BYTE)( 0) << ( DWORD)( p_dwResult);\
-	spe.Send( TRUE);\
-}
-#endif
-#endif
-
-#endif // NPPROTECT_AUTH2
-
-#ifdef YDG_MOD_PROTECT_AUTO_V5
-///////////////////////////////////////////////////////////////////////////////
-// 오토 실행 여부 검사
-///////////////////////////////////////////////////////////////////////////////
-__forceinline void SendRequestCheckAutoToolResult(DWORD dwKey,BYTE btResult)
-{
-	pre_send( g_hInst);
-	CStreamPacketEngine spe;
-	spe.Init( 0xC1, 0x8A);
-	spe.AddNullData( 1);
-	spe << ( DWORD)dwKey << ( BYTE)btResult;
-	spe.Send();
-
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_SEND, "0x8A [SendRequestCheckAutoToolResult(%d %d)]", dwKey, btResult);
-#endif // CONSOLE_DEBUG
-}
-#endif	// YDG_MOD_PROTECT_AUTO_V5
-
 #ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
-///////////////////////////////////////////////////////////////////////////////
-// 맵 이동 요청
-///////////////////////////////////////////////////////////////////////////////
+
 __forceinline void SendRequestMoveMap(DWORD dwBlockKey,WORD wMapIndex)
 {
 	pre_send( g_hInst);
@@ -2804,10 +2572,6 @@ __forceinline void SendRequestMoveMap(DWORD dwBlockKey,WORD wMapIndex)
 #endif
 }
 #endif	// YDG_ADD_MOVE_COMMAND_PROTOCOL
-
-///////////////////////////////////////////////////////////////////////////////
-// 창고
-///////////////////////////////////////////////////////////////////////////////
 
 __forceinline void SendRequestStorageGold(int Flag,int Gold)
 {
@@ -4618,9 +4382,6 @@ __forceinline bool SendRequestMixExit()
 #endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
 #endif // KJH_FIX_INGAMESHOP_SENDGIFT_ELIXIROFCONTROL
 
-//----------------------------------------------------------------------------
-// 아이템 보관함 리스트 요청 (0xD2)(0x05)
-//----------------------------------------------------------------------------
 #ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 #define SendRequestIGS_ItemStorageList(iPageIndex, szStorageType) \
 { \
@@ -4643,12 +4404,6 @@ __forceinline bool SendRequestMixExit()
 }
 #endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 
-//----------------------------------------------------------------------------
-// 캐시 선물하기 요청 (0xD2)(0x07)
-//----------------------------------------------------------------------------
-// dCashValue - 캐시선물 액수
-// pstrReceiveUserID - 선물받을 ID
-// pstrMessage - 선물 Message
 #define SendRequestIGS_SendCashGift(dCashValue, pstrReceiveUserID, pstrGiftMessage) \
 { \
 	char strReceiveUserID[MAX_ID_SIZE+2]; \
@@ -4667,9 +4422,6 @@ __forceinline bool SendRequestMixExit()
     spe.Send(); \
 }
 
-//----------------------------------------------------------------------------
-// 사용자가 상품의 구매/선물이 가능한지 확인 요청(0xD2)(0x08)
-//----------------------------------------------------------------------------
 #define SendRequestIGS_PossibleBuy() \
 { \
     pre_send(g_hInst); \
@@ -4679,10 +4431,6 @@ __forceinline bool SendRequestMixExit()
     spe.Send(); \
 }
 
-//----------------------------------------------------------------------------
-// 상품 잔여 개수 조회 요청 (0xD2)(0x09)
-//----------------------------------------------------------------------------
-// lPackageSeq - Package SeqIndex
 #define SendRequestIGS_LeftCountItem(lPackageSeq) \
 { \
     pre_send(g_hInst); \
@@ -4693,12 +4441,6 @@ __forceinline bool SendRequestMixExit()
     spe.Send(); \
 }
 
-//----------------------------------------------------------------------------
-// 보관함 아이템 버리기 요청 (0xD2)(0x0A)
-//----------------------------------------------------------------------------
-// lStorageSeq - 보관함 순번
-// lStorageItemSeq - 보관함 Item SeqIndex
-// pstrStorageItemType - C : 캐시, P : 상품
 #define SendRequestIGS_DeleteStorageItem(lStorageSeq, lStorageItemSeq, pstrStorageItemType) \
 { \
     pre_send(g_hInst); \
@@ -4711,12 +4453,6 @@ __forceinline bool SendRequestMixExit()
     spe.Send(); \
 }
 
-//----------------------------------------------------------------------------
-// 보관함 아이템 사용 요청 (0xD2)(0x0B)
-//----------------------------------------------------------------------------
-// lStorageSeq - 보관함 순번
-// lStorageItemSeq - 보관함 Item SeqIndex
-// pstrStorageItemType - C : 캐시, P : 상품
 #define SendRequestIGS_UseStorageItem(lStorageSeq, lStorageItemSeq, wItemCode, pstrStorageItemType) \
 { \
     pre_send(g_hInst); \
@@ -4730,9 +4466,6 @@ __forceinline bool SendRequestMixExit()
     spe.Send(); \
 }
 
-//----------------------------------------------------------------------------
-// 이벤트 아이템 리스트 요청 (0xD2)(0x13)
-//---------------------------------------------------------------------------
 #define SendRequestIGS_EventItemList(lEventCategorySeq) \
 { \
     pre_send(g_hInst); \
@@ -4746,8 +4479,6 @@ __forceinline bool SendRequestMixExit()
 
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 #ifdef PBG_MOD_GAMEGUARD_HANDLE
-//----------------------------------------------------------------------------
-//---------------------------------------------------------------------------
 #define SendRequestNpDisconnect( pTick ) \
 { \
     pre_send(g_hInst); \
@@ -4759,10 +4490,6 @@ __forceinline bool SendRequestMixExit()
 }
 #endif //PBG_MOD_GAMEGUARD_HANDLE
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-//----------------------------------------------------------------------------
-// 인벤 장착 시스템에서 아이템 장착 요청 (0xBF)(0x20)
-// iValue: 254-장착요청, 255-해제요청
-//---------------------------------------------------------------------------
 __forceinline bool SendRequestEquippingInventoryItem(int iItemPos, int iValue)
 { 
 	pre_send(g_hInst); 

@@ -242,9 +242,6 @@
     <ClCompile Include="source\Observer.cpp">
       <Filter>MU\ui</Filter>
     </ClCompile>
-    <ClCompile Include="source\OneTimePassword.cpp">
-      <Filter>MU\ui</Filter>
-    </ClCompile>
     <ClCompile Include="source\OptionWin.cpp">
       <Filter>MU\ui</Filter>
     </ClCompile>
@@ -1136,15 +1133,6 @@
     <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp">
       <Filter>External Object\Leaf</Filter>
     </ClCompile>
-    <ClCompile Include="source\ExternalObject\Nprotect\npGameGuard.cpp">
-      <Filter>External Object\nprotect</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Nprotect\NPGameGuardHandle.cpp">
-      <Filter>External Object\nprotect</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Nprotect\Nprotect.cpp">
-      <Filter>External Object\nprotect</Filter>
-    </ClCompile>
     <ClCompile Include="ProtocolSend.cpp">
       <Filter>MU\network</Filter>
     </ClCompile>
@@ -1199,9 +1187,6 @@
       <Filter>MU\ui</Filter>
     </ClInclude>
     <ClInclude Include="source\Observer.h">
-      <Filter>MU\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="source\OneTimePassword.h">
       <Filter>MU\ui</Filter>
     </ClInclude>
     <ClInclude Include="source\OptionWin.h">
@@ -1589,9 +1574,6 @@
       <Filter>MU\client\core</Filter>
     </ClInclude>
     <ClInclude Include="source\Winmain_New_Event.h">
-      <Filter>MU\client\core</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Winmain_New_Foreign.h">
       <Filter>MU\client\core</Filter>
     </ClInclude>
     <ClInclude Include="source\Winmain_New_Live.h">
@@ -2196,15 +2178,6 @@
     </ClInclude>
     <ClInclude Include="source\ExternalObject\ResourceGuard\RGReportObj.h">
       <Filter>External Object\ResourceGuard</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Nprotect\npGameGuard.h">
-      <Filter>External Object\nprotect</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Nprotect\NPGameGuardHandle.h">
-      <Filter>External Object\nprotect</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Nprotect\Nprotect.h">
-      <Filter>External Object\nprotect</Filter>
     </ClInclude>
     <ClInclude Include="source\ExternalObject\Chilkat\C_CkAtom.h">
       <Filter>External Object\Chilkat</Filter>

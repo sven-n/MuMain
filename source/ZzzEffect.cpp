@@ -20292,17 +20292,9 @@ void RenderEffects ( bool bRenderBlendMesh )
 							BodyLight(pObject, pModel);
 							pModel->BodyScale = pObject->Scale;
 
-#ifdef LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH		// LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH
-							ModelManager::SetTargetObject(o);
-#endif // LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH
-
 							pModel->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,0,pObject->Alpha,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,-1);
 							float fV = (((int)(WorldTime*0.05)%16)/4)*0.25f;
 							pModel->RenderMesh(1,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,1,pObject->Alpha,pObject->BlendMeshTexCoordU, fV );
-
-#ifdef LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH		// LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH
-							ModelManager::SetTargetObject(NULL);
-#endif // LDS_MR0_MODIFY_MISSRENDERSHADOW_MOSTMESH
 						}
 					}
 					break;

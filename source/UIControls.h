@@ -910,11 +910,9 @@ public:
 #define g_pMultiLanguage CMultiLanguage::GetSingletonPtr()
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SaveIMEStatus();		// IME 상태 저장
-void RestoreIMEStatus();	// IME 상태 복원
-void CheckTextInputBoxIME(int iMode);	// IME 설정 바뀔때 처리용 함수 (강제로 영문입력 상태로 바꿔주기 위함)
+void SaveIMEStatus();
+void RestoreIMEStatus();
+void CheckTextInputBoxIME(int iMode);
 
 class CUITextInputBox : public CUIControl
 {
@@ -944,7 +942,7 @@ public:
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	HWND GetHandle() { return m_hEditWnd; }
 	HWND GetParentHandle() { return m_hParentWnd; }
-	BOOL HaveFocus() { return (GetHandle() == GetFocus()); }	// 커서를 가지고 있는가
+	BOOL HaveFocus() { return (GetHandle() == GetFocus()); }
 	BOOL UseMultiline() { return m_bUseMultiLine; }
 	virtual void SetTabTarget(CUITextInputBox * pTabTarget) {  m_pTabTarget = pTabTarget; }
 	CUITextInputBox * GetTabTarget() { return m_pTabTarget; }
@@ -968,16 +966,16 @@ protected:
 
 public:
 	WNDPROC m_hOldProc;
-	int m_iCaretBlinkTemp;		// 커서 깜박임 프레임 체크
+	int m_iCaretBlinkTemp;
 
 protected:
 	HWND m_hParentWnd;
 	HWND m_hEditWnd;
 	HDC m_hMemDC;
 	HBITMAP m_hBitmap;
-	BYTE* m_pFontBuffer;			// 텍스트 저장 버퍼
+	BYTE* m_pFontBuffer;
 
-	CUITextInputBox* m_pTabTarget;	// 탭 눌렀을때 이동될 입력창
+	CUITextInputBox* m_pTabTarget;
 
 	DWORD m_dwTextColor;
 	DWORD m_dwBackColor;
@@ -989,16 +987,14 @@ protected:
 	BOOL m_bPasswordInput;
 	BOOL m_bLock;
 
-	// IME용
 	BOOL m_bIsReady;
 	int m_iRealWindowPos_x;
 	int m_iRealWindowPos_y;
 
-	// 멀티라인용
-	BOOL m_bUseMultiLine;	// 멀티라인 사용
+	BOOL m_bUseMultiLine;
 	BOOL m_bScrollBtnClick;
 	BOOL m_bScrollBarClick;
-	int m_iNumLines;		// 최대 라인
+	int m_iNumLines;
 	float m_fScrollBarWidth;
 	float m_fScrollBarRange_top;
 	float m_fScrollBarRange_bottom;
@@ -1009,7 +1005,6 @@ protected:
 	bool m_bUseScrollbarRender;
 #endif //PBG_ADD_INGAMESHOPMSGBOX
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUIChatInputBox
 {
@@ -1020,16 +1015,16 @@ public:
 	virtual void Init(HWND hWnd);
 	void Reset();
 	void Render();
-	void TabMove(int iBoxNumber);	// 0: 첫번째, 1: 두번째
-	void GetTexts(char* pText, char* pBuddyText);	// 텍스트 가져오기
+	void TabMove(int iBoxNumber);
+	void GetTexts(char* pText, char* pBuddyText);
 	void ClearTexts();
-	void SetText(BOOL bSetText, const char* pText, BOOL bSetBuddyText, const char* pBuddyText);	// 텍스트 설정 (NULL: 지우기)
+	void SetText(BOOL bSetText, const char* pText, BOOL bSetBuddyText, const char* pBuddyText);
 	void SetState(int iState);
 	int GetState() { return m_TextInputBox.GetState(); }
 	void SetFont(HFONT hFont);
 	void SetTextPosition(int iPos_x, int iPos_y) { m_TextInputBox.SetPosition(iPos_x, iPos_y); }
 	void SetBuddyPosition(int iPos_x, int iPos_y) { m_BuddyInputBox.SetPosition(iPos_x, iPos_y); }
-	BOOL HaveFocus() { return (m_TextInputBox.HaveFocus() || m_BuddyInputBox.HaveFocus()); }	// 커서를 가지고 있는가
+	BOOL HaveFocus() { return (m_TextInputBox.HaveFocus() || m_BuddyInputBox.HaveFocus()); }
 	BOOL DoMouseAction();
 #if defined FOR_WORK || defined USER_WINDOW_MODE || (defined WINDOWMODE)
 	void RestoreFocus() { m_bFocusLose = TRUE; }
@@ -1044,18 +1039,16 @@ protected:
 #endif
 
 public:
-	virtual void AddHistory(const char* pszText);	// 히스토리에 추가한다
-	virtual void MoveHistory(int iDegree);		// 히스토리 포인트를 옮긴다
+	virtual void AddHistory(const char* pszText);
+	virtual void MoveHistory(int iDegree);
 private:
-	void RemoveHistory(BOOL bClear);	// 저장개수 초과된 히스토리 제거
+	void RemoveHistory(BOOL bClear);
 	BOOL m_bHistoryMode;
-	char m_szTempText[MAX_TEXT_LENGTH + 1];				// 입력 중이던 라인 임시저장
+	char m_szTempText[MAX_TEXT_LENGTH + 1];
 	std::deque<char*> m_HistoryList;
 	std::deque<char*>::iterator m_CurrentHistoryLine;
 	std::deque<char*>::iterator m_HistoryListIter;
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUILoginInputBox : public CUIChatInputBox
 {
@@ -1071,7 +1064,6 @@ public:
 	virtual void MoveHistory(int iDegree) {}
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUIMercenaryInputBox : public CUIChatInputBox
 {
@@ -1087,7 +1079,6 @@ public:
 	virtual void MoveHistory(int iDegree) {}
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef REVISION_SLIDE_LEVEL_MAX
 #define SLIDE_LEVEL_MAX 10 

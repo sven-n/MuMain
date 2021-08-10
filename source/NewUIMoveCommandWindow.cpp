@@ -2625,33 +2625,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 			}
 		}
 		
-		// 필요레벨충족/필요젠충족/pk모드가 아닐때 이동가능
-
-#ifdef ASG_FIX_MOVE_WIN_MURDERER1_BUG
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-		if(g_PKSystem->GetCanDoMoveCommand() && iLevel >= iReqLevel && iZen >= iReqZen
-#ifdef ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			&& iLevel <= (*li)->_ReqInfo.m_iReqMaxLevel
-#endif	// ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-#else //PBG_ADD_PKSYSTEM_INGAMESHOP
-		if( iLevel >= iReqLevel && (int)iZen >= iReqZen && (int)Hero->PK<PVP_MURDERER1
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
-#else	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
-		if( iLevel >= iReqLevel && (int)iZen >= iReqZen && (int)Hero->PK<PVP_MURDERER2
-#endif	// ASG_FIX_MOVE_WIN_MURDERER1_BUG
-
-#ifdef CSK_LUCKY_SEAL////////////////////////////////////////////////////////////
-#ifdef PBG_MOD_VIEMAPMOVE
-	#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE || defined LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
-			&& IsMapMove( (*li)->_ReqInfo.szSubMapName )
-	#endif //SELECTED_LANGUAGE == LANGUAGE_JAPANESE || defined LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
-#else //PBG_MOD_VIEMAPMOVE
-	#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE || defined LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
-			&& IsMapMove( (*li)->_ReqInfo.szSubMapName )
-	#endif //SELECTED_LANGUAGE == LANGUAGE_JAPANESE || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE || defined LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
-#endif //PBG_MOD_VIEMAPMOVE
-#endif //CSK_LUCKY_SEAL////////////////////////////////////////////////////////////
-			)
+		if( iLevel >= iReqLevel && (int)iZen >= iReqZen && (int)Hero->PK<PVP_MURDERER1)
 		{
 			ITEM* pEquipedRightRing = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 			ITEM* pEquipedLeftRing = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
@@ -2671,11 +2645,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 					|| pEquipedHelper->Type == ITEM_HELPER+4
 #endif // KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
 					|| pEquipedWing->Type == ITEM_HELPER+30
-#ifdef ADD_ALICE_WINGS_1		 
 					|| (pEquipedWing->Type >= ITEM_WING+36 && pEquipedWing->Type <= ITEM_WING+43)			
-#else	// ADD_ALICE_WINGS_1
-					|| (pEquipedWing->Type >= ITEM_WING+36 && pEquipedWing->Type <= ITEM_WING+40) 
-#endif	// ADD_ALICE_WINGS_1
 					|| (pEquipedWing->Type >= ITEM_WING && pEquipedWing->Type <= ITEM_WING+6) 
 #ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 					|| ( ITEM_WING+130 <= pEquipedWing->Type && pEquipedWing->Type <= ITEM_WING+134 )

@@ -1866,201 +1866,110 @@ bool SEASON3B::CNewUIInventoryCtrl::IsOverlayItem(ITEM* pSourceItem, ITEM* pTarg
 
 	if(iSrcType == iTarType)
 	{
-		// 물약, 마나 종류
-		// 축복의물약, 영혼의 물약은 255개까지 겹쳐진다.
-		// 치료물약과 마나 물약은 3개까지 겹쳐진다.
-		if(iSrcType == ITEM_POTION+7 && iTarType == ITEM_POTION+7 
-			&& (iSrcDurability < 250 && iTarDurability < 250)
-			)
+		if(iSrcType == ITEM_POTION+7 && iTarType == ITEM_POTION+7 && (iSrcDurability < 250 && iTarDurability < 250))
 		{
 			return true;
 		}
-		else if((iSrcType >= ITEM_POTION && iSrcType <= ITEM_POTION+8 && iSrcType != ITEM_POTION+7)
-			&& (iTarType >= ITEM_POTION && iTarType <= ITEM_POTION+8 && iTarType != ITEM_POTION+7)
-			&& (iSrcDurability < 3 && iTarDurability < 3)
-			)
+		else if((iSrcType >= ITEM_POTION && iSrcType <= ITEM_POTION+8 && iSrcType != ITEM_POTION+7)	&& (iTarType >= ITEM_POTION && iTarType <= ITEM_POTION+8 && iTarType != ITEM_POTION+7)&& (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-
-		// SD회복물약, 복합물약 종류
-		if((iSrcType >= ITEM_POTION+38 && iSrcType <= ITEM_POTION+40)
-			&& (iTarType >= ITEM_POTION+38 && iTarType <= ITEM_POTION+40)
-			&& (iSrcDurability < 3 && iTarDurability < 3))
+		if((iSrcType >= ITEM_POTION+38 && iSrcType <= ITEM_POTION+40) && (iTarType >= ITEM_POTION+38 && iTarType <= ITEM_POTION+40) && (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-
-		// 석궁용 화살 종류
-		if((iSrcType == ITEM_BOW+7 && iTarType == ITEM_BOW+7)
-			&& (iSrcLevel == iTarLevel))
+		if((iSrcType == ITEM_BOW+7 && iTarType == ITEM_BOW+7) && (iSrcLevel == iTarLevel))
 		{
 			return true;
 		}
-
-		// 화살
-		if((iSrcType == ITEM_BOW+15 && iTarType == ITEM_BOW+15)
-			&& (iSrcLevel == iTarLevel))
+		if((iSrcType == ITEM_BOW+15 && iTarType == ITEM_BOW+15)	&& (iSrcLevel == iTarLevel))
 		{
 			return true;
 		}
-
-		// 쿤둔의 표식
 		if(iSrcType == ITEM_POTION+29 && iTarType == ITEM_POTION+29)
 		{
 			return true;
 		}
-
-		// 펜릴 아이템 관련
-		if((iSrcType >= ITEM_HELPER+32 && iSrcType <= ITEM_HELPER+34)
-			&& (iTarType >= ITEM_HELPER+32 && iTarType <= ITEM_HELPER+34))
+		if((iSrcType >= ITEM_HELPER+32 && iSrcType <= ITEM_HELPER+34) && (iTarType >= ITEM_HELPER+32 && iTarType <= ITEM_HELPER+34))
 		{
 			return true;
 		}
-
-		// 할로윈 이벤트 아이템 관련
-		if((iSrcType >= ITEM_POTION+46 && iSrcType <= ITEM_POTION+50)
-			&& (iTarType >= ITEM_POTION+46 && iTarType <= ITEM_POTION+50)
-			&& (iSrcDurability < 3 && iTarDurability < 3))
+		if((iSrcType >= ITEM_POTION+46 && iSrcType <= ITEM_POTION+50) && (iTarType >= ITEM_POTION+46 && iTarType <= ITEM_POTION+50)	&& (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-#ifdef PSW_ELITE_ITEM
-		//  부분유료화 엘리트 체력 물약. 50개 까지
-		else if(iSrcType == ITEM_POTION+70 && iTarType == ITEM_POTION+70 
-			&& (iSrcDurability < 50 && iTarDurability < 50)
-			)
+		else if(iSrcType == ITEM_POTION+70 && iTarType == ITEM_POTION+70 && (iSrcDurability < 50 && iTarDurability < 50))
 		{
 			return true;
 		}
-
-		//  부분유료화 엘리트 마나 물약. 50개 까지
-		else if(iSrcType == ITEM_POTION+71 && iTarType == ITEM_POTION+71
-			&& (iSrcDurability < 50 && iTarDurability < 50)
-			)
+		else if(iSrcType == ITEM_POTION+71 && iTarType == ITEM_POTION+71 && (iSrcDurability < 50 && iTarDurability < 50))
 		{
 			return true;
 		}
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_ELITE_ITEM
-		//  부분유료화 힘의 비약 3개 까지
-		else if(iSrcType == ITEM_POTION+78 && iTarType == ITEM_POTION+78
-			&& (iSrcDurability < 3 && iTarDurability < 3)
-			)
+		else if(iSrcType == ITEM_POTION+78 && iTarType == ITEM_POTION+78 && (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-		//  부분유료화 민첩의 비약 3개 까지
-		else if(iSrcType == ITEM_POTION+79 && iTarType == ITEM_POTION+79
-			&& (iSrcDurability < 3 && iTarDurability < 3)
-			)
+		else if(iSrcType == ITEM_POTION+79 && iTarType == ITEM_POTION+79 && (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-
-		//  부분유료화 체력의 비약 3개 까지
-		else if(iSrcType == ITEM_POTION+80 && iTarType == ITEM_POTION+80
-			&& (iSrcDurability < 3 && iTarDurability < 3)
-			)
+		else if(iSrcType == ITEM_POTION+80 && iTarType == ITEM_POTION+80 && (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-
-		//  부분유료화 에너지의 비약 3개 까지
-		else if(iSrcType == ITEM_POTION+81 && iTarType == ITEM_POTION+81
-			&& (iSrcDurability < 3 && iTarDurability < 3)
-			)
+		else if(iSrcType == ITEM_POTION+81 && iTarType == ITEM_POTION+81 && (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-
-		//  부분유료화 통솔의 비약 3개 까지
-		else if(iSrcType == ITEM_POTION+82 && iTarType == ITEM_POTION+82
-			&& (iSrcDurability < 3 && iTarDurability < 3)
-			)
+		else if(iSrcType == ITEM_POTION+82 && iTarType == ITEM_POTION+82 && (iSrcDurability < 3 && iTarDurability < 3) )
 		{
 			return true;
 		}
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_NEW_ELITE_ITEM
-		//  부분유료화 엘리트 중간 치료 물약. 50개 까지
-		else if(iSrcType == ITEM_POTION+94 && iTarType == ITEM_POTION+94
-			&& (iSrcDurability < 50 && iTarDurability < 50)
-			)
+		else if(iSrcType == ITEM_POTION+94 && iTarType == ITEM_POTION+94 && (iSrcDurability < 50 && iTarDurability < 50))
 		{
 			return true;
 		}
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-		else if(iSrcType == ITEM_POTION+85 && iTarType == ITEM_POTION+85
-			&& (iSrcDurability < 3 && iTarDurability < 3))
+		else if(iSrcType == ITEM_POTION+85 && iTarType == ITEM_POTION+85 && (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-		else if(iSrcType == ITEM_POTION+86 && iTarType == ITEM_POTION+86
-			&& (iSrcDurability < 3 && iTarDurability < 3))
+		else if(iSrcType == ITEM_POTION+86 && iTarType == ITEM_POTION+86 && (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-		else if(iSrcType == ITEM_POTION+87 && iTarType == ITEM_POTION+87
-			&& (iSrcDurability < 3 && iTarDurability < 3))
+		else if(iSrcType == ITEM_POTION+87 && iTarType == ITEM_POTION+87 && (iSrcDurability < 3 && iTarDurability < 3))
 		{
 			return true;
 		}
-		else if(iSrcType == ITEM_POTION+88 && iTarType == ITEM_POTION+88
-			&& (iSrcDurability < 10 && iTarDurability < 10))
+		else if(iSrcType == ITEM_POTION+88 && iTarType == ITEM_POTION+88 && (iSrcDurability < 10 && iTarDurability < 10))
 		{
 			return true;
 		}
-		else if(iSrcType == ITEM_POTION+89 && iTarType == ITEM_POTION+89
-			&& (iSrcDurability < 30 && iTarDurability < 30))
+		else if(iSrcType == ITEM_POTION+89 && iTarType == ITEM_POTION+89 && (iSrcDurability < 30 && iTarDurability < 30))
 		{
 			return true;
 		}
-		else if(iSrcType == ITEM_POTION+90 && iTarType == ITEM_POTION+90
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-			&& (iSrcDurability < 255 && iTarDurability < 255)
-#else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-			&& (iSrcDurability < 50 && iTarDurability < 50)
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-			)
+		else if(iSrcType == ITEM_POTION+90 && iTarType == ITEM_POTION+90 && (iSrcDurability < 50 && iTarDurability < 50))
 		{
 			return true;
 		}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-		//행운의 동전
 		else if(iSrcType == ITEM_POTION+100 && (iSrcDurability < 255 && iTarDurability < 255))
 		{
 			return true;
 		}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
-		// 차원의 표식 
 		else if(iSrcType == ITEM_POTION+110 && iTarType == ITEM_POTION+110)
 		{
 			return true;
 		}
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-#ifdef LDK_ADD_EMPIREGUARDIAN_ITEM
-		else if(iSrcType == ITEM_POTION+101 && iTarType == ITEM_POTION+101
-			&& (iSrcDurability < 5 && iTarDurability < 5))
+		else if(iSrcType == ITEM_POTION+101 && iTarType == ITEM_POTION+101 && (iSrcDurability < 5 && iTarDurability < 5))
 		{
 			return true;
 		}
-#endif //LDK_ADD_EMPIREGUARDIAN_ITEM
-#ifdef PBG_FIX_SDELITE_OVERLAY
-		else if(iSrcType == ITEM_POTION+133		//엘리트 SD물약 50개까지
-			&& (iSrcDurability < 50 && iTarDurability < 50))
+		else if(iSrcType == ITEM_POTION+133	&& (iSrcDurability < 50 && iTarDurability < 50))
 		{
 			return true;
 		}
-#endif //PBG_FIX_SDELITE_OVERLAY
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		// 스타더스트 ~ 잿더미 도살자의 몽둥이 까지 각각 겹치기 가능
-		else if (iSrcType >= ITEM_POTION+153 && iSrcType <= ITEM_POTION+156)
-			return true;
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
 	}
 
 	return false;

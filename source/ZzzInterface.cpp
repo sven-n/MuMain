@@ -124,8 +124,6 @@ extern char *g_lpszMp3[NUM_MUSIC];
 
 extern vec3_t MousePosition, MouseTarget;
 
-extern DWORD g_dwCharSet[NUM_LANGUAGE];//박종훈디버그
-
 extern void RegisterBuff( eBuffState buff, OBJECT* o, const int bufftime = 0 );
 extern void UnRegisterBuff( eBuffState buff, OBJECT* o );
 
@@ -413,36 +411,17 @@ bool CheckIME_Status (bool change, int mode)
     }
     ::ImmReleaseContext( g_hWnd, data );
 	
-    //  현재 IME 입력 모드.
     g_dwCurrConv = dwConv;
 	
     return   bIme;
 }
 
-//  현재 IME 상태를 화면에 나타낸다.
 void RenderIME_Status ()
 {
     char    Text[100];
     if( (g_dwOldConv&IME_CMODE_NATIVE)==IME_CMODE_NATIVE )
     {
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
         sprintf ( Text, "ENGLISH" );
-#endif // SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES
-#if SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-        sprintf ( Text, "TAIWANESE" );
-#endif // SELECTED_LANGUAGE == LANGUAGE_TAIWANESE
-#if SELECTED_LANGUAGE == LANGUAGE_CHINESE
-        sprintf ( Text, "CHINESE" );
-#endif // SELECTED_LANGUAGE == LANGUAGE_CHINESE
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-        sprintf ( Text, "JAPANESE" );
-#endif // SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-        sprintf ( Text, "KOREAN" );
-#endif // SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#if SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-        sprintf ( Text, "VIETNAMESE" );	//! IME 상태
-#endif // SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
     }
     else
     {
@@ -518,11 +497,9 @@ void RenderInputText(int x,int y,int Index,int Gold)
 		g_pRenderText->RenderText(x,y,Text,InputTextWidth, 0, RT3_SORT_LEFT, &TextSize);
 		Size = &TextSize;
 		
-		// IME 수정
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
 		if(Index==InputIndex)
 			SetPositionIME_Wnd( x+Size->cx, y );
-#endif
+
 		if(Index==InputIndex && (InputFrame++)%2==0)
 		{
 			EnableAlphaTest();
@@ -539,7 +516,7 @@ void RenderInputText(int x,int y,int Index,int Gold)
 	}
 }
 
-extern int  AlphaBlendType;	// OpenGLUtil.cpp 에서 쓰는 알파 타입
+extern int  AlphaBlendType;
 
 void RenderTipText(int sx, int sy, const char* Text)
 {
@@ -654,22 +631,14 @@ void CreateNotice(char *Text,int Color)
         Notice[NoticeCount].Color = Color;
 		strcpy(Notice[NoticeCount++].Text,Temp1);
 	}
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-	NoticeTime = 150;
-#else
 	NoticeTime = 300;
-#endif
 }
 
 void MoveNotices()
 {
 	if(NoticeTime-- <= 0)
 	{
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-		NoticeTime = 150;
-#else
 		NoticeTime = 300;
-#endif
 		CreateNotice("",0);
 	}
 }
@@ -904,19 +873,11 @@ void RenderWhisperID_List ( void )
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 채팅 처리하는 함수들
-///////////////////////////////////////////////////////////////////////////////
-
 typedef struct
 {
-#if SELECTED_LANGUAGE != LANGUAGE_KOREAN
 	char      ID[32];
-#else // SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	char      ID[24];
-#endif // SELECTED_LANGUAGE != LANGUAGE_KOREAN
-	char      Union[30];		// 연합명 + 연합직위
-	char      Guild[30];		// 길드명 + 길드직위
+	char      Union[30];
+	char      Guild[30];
 	char      szShopTitle[16];
 	char      Color;
 	char      GuildColor;
@@ -930,17 +891,9 @@ typedef struct
     vec3_t    Position;
 } CHAT;
 
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 #define MAX_CHAT 120
-#else // SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-#define MAX_CHAT 100
-#endif // SELECTED_LANGUAGE == LANGUAGE_ENGLISH || SELECTED_LANGUAGE == LANGUAGE_PHILIPPINES || SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
 
 CHAT Chat[MAX_CHAT];
-
-///////////////////////////////////////////////////////////////////////////////
-// 말풍선에서 칸 맞추는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void SetBooleanPosition(CHAT *c)
 {
@@ -981,10 +934,10 @@ void SetBooleanPosition(CHAT *c)
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 		Size[0].cx += 3;
-		// 채팅이 2줄이라면
+
 		if(c->LifeTime[1] > 0)
 			c->Width = max( max( max(Size[0].cx,Size[1].cx), max(Size[2].cx,Size[3].cx) ), Size[4].cx );
-		// 채팅이 1줄이라면
+
 		else if(c->LifeTime[0] > 0)
 			c->Width = max( max(Size[0].cx,Size[1].cx), max(Size[3].cx,Size[4].cx) );
 		else
@@ -1009,13 +962,9 @@ void SetBooleanPosition(CHAT *c)
 			}
 			g_pRenderText->SetFont(g_hFont);
 		}
-		c->Width /= g_fScreenRate_x;		//. 640*480 기준으로 변환
+		c->Width /= g_fScreenRate_x;
 		c->Height /= g_fScreenRate_y;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 말풍선 하나를 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void SetPlayerColor(BYTE PK)
 {
@@ -1037,8 +986,7 @@ const int ciSystemColor = 240;
 
 void RenderBoolean(int x,int y,CHAT *c)
 {
-	//  크라이울프 MVP 일때 NPC 안보이게
-	
+
 	if ( g_isCharacterBuff((&c->Owner->Object), eBuff_CrywolfNPCHide ) )
 	{
 		return;
@@ -5462,44 +5410,27 @@ void CheckChatText(char *Text)
 		SetActionClass(c,o,PLAYER_RUSH1,AT_RUSH1);
 		SendRequestAction(AT_RUSH1,((BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8));
 	}
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-	else if(strcmp(Text,GlobalText[780]) == 0)// FindText(Text,GlobalText[780]))	// 가위
-	{
-		SetActionClass(c,o,PLAYER_SCISSORS,AT_SCISSORS);
-		SendRequestAction(AT_SCISSORS,((BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8));
-	}
-	else if(strcmp(Text,GlobalText[781]) == 0)// FindText(Text,GlobalText[781]))	// 바위
-	{
-		SetActionClass(c,o,PLAYER_ROCK,AT_ROCK);
-		SendRequestAction(AT_ROCK,((BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8));
-	}
-	else if(strcmp(Text,GlobalText[782]) == 0)// FindText(Text,GlobalText[782]))	// 보
-	{
-		SetActionClass(c,o,PLAYER_PAPER,AT_PAPER);
-		SendRequestAction(AT_PAPER,((BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8));
-	}
-#endif
-	else if(FindText(Text,GlobalText[783]) || FindText(Text,"hustle"))	// 일본 레슬러 동작
+	else if(FindText(Text,GlobalText[783]) || FindText(Text,"hustle"))
 	{
 		SetActionClass(c,o,PLAYER_HUSTLE,AT_HUSTLE);
 		SendRequestAction(AT_HUSTLE,((BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8));
 	}
-	else if(FindText(Text,GlobalText[291]))	// 덤벼 동작 추가 된거
+	else if(FindText(Text,GlobalText[291]))
 	{
 		SetActionClass(c,o,PLAYER_PROVOCATION,AT_PROVOCATION);
 		SendRequestAction(AT_PROVOCATION,((BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8));
 	}
-	else if(FindText(Text,GlobalText[317]))	// 만세 동작 추가 된것
+	else if(FindText(Text,GlobalText[317]))
 	{
 		SetActionClass(c,o,PLAYER_CHEERS,AT_CHEERS);
 		SendRequestAction(AT_CHEERS,((BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8));
 	}
-	else if(FindText(Text,GlobalText[348]))	// 두리번 동작 추가 된거
+	else if(FindText(Text,GlobalText[348]))
 	{
 		SetActionClass(c,o,PLAYER_LOOK_AROUND,AT_LOOK_AROUND);
 		SendRequestAction(AT_LOOK_AROUND,((BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8));
 	}
-	else if(FindText(Text, GlobalText[2228]))	// 2228 "이마"
+	else if(FindText(Text, GlobalText[2228]))
 	{
 		ITEM* pItem_rr = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 		ITEM* pItem_rl = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
@@ -5521,7 +5452,7 @@ void CheckChatText(char *Text)
 		}
 		
 	}
-	else if(FindText(Text, GlobalText[2243]))	// 2243 "크리스마스"
+	else if(FindText(Text, GlobalText[2243]))
 	{
 		ITEM* pItem_rr = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 		ITEM* pItem_rl = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];

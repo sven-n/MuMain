@@ -554,11 +554,7 @@ void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
 			TextNum++;
 		}
 
-#if SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-		RenderTipTextList( PosX, PosY, TextNum, 140, RT3_SORT_CENTER );	// 소켓 세트옵션창 여백 확장
-#else	// SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-		RenderTipTextList( PosX, PosY, TextNum, 120, RT3_SORT_CENTER );
-#endif	// SELECTED_LANGUAGE == LANGUAGE_ENGLISH
+		RenderTipTextList( PosX, PosY, TextNum, 140, RT3_SORT_CENTER );
 	}
 }
 

@@ -36,24 +36,10 @@ private :
 	ITEM_SET_OPTION	m_ItemSetOption[MAX_SET_OPTION];
 
 	bool	m_bViewOptionList;
-
     BYTE    m_byRenderOptionList;
     BYTE    m_bySelectedItemOption;
-
     BYTE    m_bySameSetItem;
-#ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
-#ifdef _LANGUAGE_JPN
-    char    m_strSetName[2][64];
-#else // _LANGUAGE_JPN
     char    m_strSetName[2][32];
-#endif // _LANGUAGE_JPN
-#else // KJH_MOD_NATION_LANGUAGE_REDEFINE
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-    char    m_strSetName[2][64];
-#else
-    char    m_strSetName[2][32];
-#endif// SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
 
 #ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 	typedef std::map<int, std::string>	MAP_EQUIPPEDSETITEMNAME;
@@ -183,19 +169,8 @@ public :
 
 	void init( void )
 	{
-#ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
-#ifdef _LANGUAGE_JPN
-        memset ( m_strSetName, 0, sizeof( char )*64*2 );
-#else // _LANGUAGE_JPN
         memset ( m_strSetName, 0, sizeof( char )*32*2 );
-#endif // _LANGUAGE_JPN
-#else // KJH_MOD_NATION_LANGUAGE_REDEFINE
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-        memset ( m_strSetName, 0, sizeof( char )*64*2 );
-#else
-        memset ( m_strSetName, 0, sizeof( char )*32*2 );
-#endif// SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
+
 		m_bViewOptionList = false;
         m_byRenderOptionList= 0;
         m_bySelectedItemOption = 0;
@@ -205,12 +180,12 @@ public :
     {
         memset ( m_bySetOptionListOnOff, 0, sizeof( BYTE )* 16 );
     }
-    bool    OpenItemSetScript ( bool bTestServer );						            //  세트 아이템 정보를 읽는다.
+    bool    OpenItemSetScript ( bool bTestServer );
 
 	bool    IsDisableSkill ( int Type, int Energy, int Charisma = 0 );
-    BYTE    IsChangeSetItem ( const int Type, const int SubType );                  //  세트 아이템으로 조합 가능한가?
+    BYTE    IsChangeSetItem ( const int Type, const int SubType );
     WORD    GetMixItemLevel ( const int Type );
-	bool	GetSetItemName ( char* strName, const int iType, const int setType );	//	세트 아이템 이름을 얻는다.
+	bool	GetSetItemName ( char* strName, const int iType, const int setType );
 
 	void	PlusSpecial ( WORD* Value, const int Special );
 	void	PlusSpecialPercent ( WORD* Value, const int Special );
@@ -227,25 +202,17 @@ public :
     bool    GetDefaultOptionText ( const ITEM* ip, char* Text );
     int     RenderDefaultOptionText ( const ITEM* ip, int TextNum );
 
-#ifdef PJH_FIX_4_BUGFIX_33
 	bool    Special_Option_Check(int Kind = 0);
-#endif //#ifdef PJH_FIX_4_BUGFIX_33
-
 	void	CheckItemSetOptions ( void );
 	void	MoveSetOptionList ( const int StartX, const int StartY );
 	void	RenderSetOptionButton ( const int StartX, const int StartY );
 	void	RenderSetOptionList ( const int StartX, const int StartY );
  
 #ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-	// 각 착용중인 아이템별로 출력해야할 세트 추가 옵션리스트의 갯수 제한 수치
+
 	int		m_arLimitSetItemOptionCount[MAX_EQUIPMENT];		
 
-	// 모든 착용중인 아이템 별로 출력해야할 세트 추가 옵션 갯수 Counting
-	// * 주의 : checkItemType 함수 연산 이후 호출 되어야 합니다.
-	void	UpdateCount_SetOptionPerEquippedSetItem( const BYTE* byOptionList,			// 장착 세트아이템 정보
-												int* arLimitSetItemOptionCount,		// 장착 아이템별 출력 옵션 갯수 저장될 반환 변수
-												ITEM* ItemsEquipment				// 현재 장착된 모든 아이템들
-												 )
+	void	UpdateCount_SetOptionPerEquippedSetItem( const BYTE* byOptionList,int* arLimitSetItemOptionCount,ITEM* ItemsEquipment)
 	{
 		for( int iE = 0; iE < MAX_EQUIPMENT_INDEX; ++iE )
 		{
@@ -256,7 +223,6 @@ public :
 		}
 	}
 
-	// checkItemType 함수 연산 이후에 적용된 각 장착 세트 아이템 별 갯수 반환
 	int		GetCurrentTypeSetitemCount( const ITEM &CurItem_, const BYTE* byOptionList )
 	{
 		BYTE bySetType = CurItem_.ExtOption;
@@ -266,7 +232,6 @@ public :
 		ITEM_SET_TYPE& itemSType = m_ItemSetType[CurItem_.Type];
 
 
-		// 총 4번 즉 세트 아이템 종류별 최대 4개 까지만 가능합니다.
 #ifdef YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
 		for (int i = 0; i < 30; i += 3)
 #else	// YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG

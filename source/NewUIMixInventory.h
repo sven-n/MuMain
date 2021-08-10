@@ -104,9 +104,7 @@ namespace SEASON3B
 		bool Mix();
 		void RenderMixEffect();
 
-	#ifdef LEM_FIX_MIXREQUIREZEN
 		int Rtn_MixRequireZen( int _nMixZen, int _nTax );	// 함수헤더 [lem.2010.7.29]
-	#endif	// LEM_FIX_MIXREQUIREZEN
 		
 	};
 }

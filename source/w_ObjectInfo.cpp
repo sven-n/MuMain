@@ -110,10 +110,6 @@ void OBJECT::Initialize()
 	m_bpcroom = false;
 #endif //PCROOM_EVENT
 	
-#if defined MR0 || defined OBJECT_ID
-	m_iID = 0;
-#endif //MR0
-	
 	Live = false;
 	bBillBoard = false;
 	m_bCollisionCheck = false;

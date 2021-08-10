@@ -23,6 +23,7 @@
 #include "ZzzScene.h"
 #include "UIControls.h"
 #include "wsclientinline.h"
+#include "Local.h"
 
 #define	CMW_OK		0
 #define	CMW_CANCEL	1
@@ -450,7 +451,7 @@ SendRequestChangeName( POldName, PNewName )
 			rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
 		else if(::CheckName())
 			rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);
-		else if(::CheckSpecialText(InputText[0]))
+		else if(CheckSpecialText(InputText[0]))
 			rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
 		else
 			SendRequestChangeName( CharactersClient[SelectedHero].ID, InputText[0] );
@@ -469,7 +470,7 @@ SendRequestChangeName( POldName, PNewName )
 			rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
 		else if(::CheckName())
 			rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);
-		else if(::CheckSpecialText(InputText[0]))
+		else if(CheckSpecialText(InputText[0]))
 			rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
 		else
 			SendRequestChangeName( CharactersClient[SelectedHero].ID, InputText[0] );
@@ -486,10 +487,6 @@ SendRequestChangeName( POldName, PNewName )
 	UpdateCreateCharacter();	// 3D 생성 캐릭터 업데이트.
 }
 
-//*****************************************************************************
-// 함수 이름 : RequestCreateCharacter()
-// 함수 설명 : 서버에 생성할 캐릭터를 요청.
-//*****************************************************************************
 void CCharMakeWin::RequestCreateCharacter()
 {
 	if (g_iChatInputType == 1)
@@ -501,7 +498,7 @@ void CCharMakeWin::RequestCreateCharacter()
 		rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
     else if(::CheckName())
 		rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);
-	else if(::CheckSpecialText(InputText[0]))
+	else if(CheckSpecialText(InputText[0]))
 		rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
 	else
 	{

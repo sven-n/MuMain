@@ -214,17 +214,10 @@ protected:
 	int m_iNumLink;
 	St_PhysicsLink *m_pLink;
 
-    //  윈드.
     float   m_fWind;
     BYTE    m_byWindMax;
     BYTE    m_byWindMin;
 
-#ifdef LDS_MR0_ADD_SPECIFICMODEL_DOANIMATIONPROCESSING
-	int		m_iReferenceModelType;
-	int		m_iReferenceMeshSeq;
-#endif // LDS_MR0_ADD_SPECIFICMODEL_DOANIMATIONPROCESSING
-
-	// 정보
 public:
 	OBJECT* GetOwner( void)	{ return ( m_oOwner); }
 
@@ -232,11 +225,7 @@ public:
 protected:
 	float m_fUnitWidth, m_fUnitHeight;
 public:
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-	virtual BOOL Create( OBJECT *o, int iBone, float fxPos, float fyPos, float fzPos, int iNumHor, int iNumVer, float fWidth, float fHeight, int iTexFront, int TexBack, DWORD dwType = 0, int iIdxPhysiqModel = -1, int iReferenceModelType = -1);
-#else // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 	virtual BOOL Create( OBJECT *o, int iBone, float fxPos, float fyPos, float fzPos, int iNumHor, int iNumVer, float fWidth, float fHeight, int iTexFront, int TexBack, DWORD dwType = 0);
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 	virtual void Destroy( void);
 protected:
 	virtual void SetFixedVertices( float Matrix[3][4]);
@@ -260,23 +249,8 @@ protected:
 	void RenderVertex( vec3_t *pvRenderPos, int xVertex, int yVertex);
 	void RenderCollisions( void);
 	
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
-public:
-	void Render_MappingOption(	BMD& b, int iMesh, 
-								int iRenderFlag, BOOL bFront, 
-								vec3_t &v3VertexColor, int iTextureIdx = -1, 
-								float fMeshAlpha = 1.0f, 
-								float fBright = 1.0f,
-								BOOL bVertexColorProcessMappingFunc = true );
-	
-protected:
-	void RenderFaceMappingOptionColor( BMD& b, int iMesh, int iRenderFlag, vec3_t *pvRenderPos, BOOL bFront, vec3_t &v3VertexColor, int iTextureIdx = -1, float fMeshAlpha = 1.0f );
 
-	void RenderVertexMappingOptionAlphaONE( vec3_t *pvRenderPos, int xVertex, int yVertex, float** arrfChromeUV,vec3_t &v3VertexColor );
-	void RenderVertexMappingOptionAlpha( vec3_t *pvRenderPos, int xVertex, int yVertex, float** arrfChromeUV, vec3_t &v3VertexColor, float fVertexAlpha );
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 
-	// 충돌 정보
 protected:
 	CList<CPhysicsCollision*> m_lstCollision;
 public:
@@ -284,13 +258,6 @@ public:
 	void AddCollisionSphere( float fXPos, float fYPos, float fZPos, float fRadius, int iBone);
 	void ProcessCollision( void);
 };
-
-
-//--------------------------------------------------------------------
-//
-//                     Physics Cloth from Mesh
-//
-//--------------------------------------------------------------------
 
 class CPhysicsClothMesh	: public CPhysicsCloth
 {

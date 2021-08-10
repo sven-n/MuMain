@@ -187,7 +187,7 @@ void CUIPopup::Close()
 		{
 			g_pSingleTextInputBox->SetText( NULL );
 			SaveIMEStatus();
-			g_pSingleTextInputBox->SetState( UISTATE_HIDE );	// 길드 입력창 숨김
+			g_pSingleTextInputBox->SetState( UISTATE_HIDE );
 		}
 		else
 			memset( InputText[0], 0, MAX_ID_SIZE );
@@ -203,7 +203,6 @@ void CUIPopup::CancelPopup()
 {
 	if( m_dwPopupID == 0 )	return;
 
-	// 팝업창을 강제로 닫고 부정적인 대답을 보내준다. (PopupResultFuncPointer 리턴값 검사 안함)
 	if( PopupResultFuncPointer )
 	{
 		if( m_PopupType & POPUP_CUSTOM )

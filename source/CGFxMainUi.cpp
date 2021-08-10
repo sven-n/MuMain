@@ -941,7 +941,7 @@ void CGFxMainUi::RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOp
 		{
 			Vector(180.f,270.f,25.f,ObjectSelect.Angle);
 		}
-		// 소켓아이템추가 [시즌4]
+		// 소켓아이템추가 [Season4]
 	}									
 	else if(Type>=MODEL_SHIELD && Type<MODEL_SHIELD+MAX_ITEM_INDEX)
 	{
@@ -1478,36 +1478,32 @@ void CGFxMainUi::RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOp
 		case 2:Vector(90.f,0.f,0.f,ObjectSelect.Angle);break;
 		}
 	}
-	else if(Type==MODEL_EVENT+5)            //  폭죽. /마법 주머니.
+	else if(Type==MODEL_EVENT+5)
 	{
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
-#else // SELECTED_LANGUAGE == LANGUAGE_KOREAN
 		Vector(270.f,180.f,0.f,ObjectSelect.Angle);
-#endif // SELECTED_LANGUAGE == LANGUAGE_KOREAN
 	}
-	else if(Type==MODEL_EVENT+6)            //  사랑의 하트
+	else if(Type==MODEL_EVENT+6)
 	{
 		Vector(270.f,90.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type==MODEL_EVENT+7)            //  사랑의 올리브
+	else if(Type==MODEL_EVENT+7)
 	{
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if(Type==MODEL_POTION+20)          //  사랑의 묘약
+	else if(Type==MODEL_POTION+20)
 	{
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if ( Type==MODEL_POTION+27 )    //  고대의 금속.
+	else if ( Type==MODEL_POTION+27 )
 	{
 		Vector(270.f,0.f,0.f,ObjectSelect.Angle);
 	}
-	else if ( Type == MODEL_POTION+63 )	// 폭죽
+	else if ( Type == MODEL_POTION+63 )
 	{
 		Position[1] += 0.08f;
 		Vector(-50.f,-60.f,0.f,ObjectSelect.Angle);
 	}
-	else if ( Type == MODEL_POTION+52)	// GM 선물상자
+	else if ( Type == MODEL_POTION+52)
 	{
 		//Position[1] += 0.08f;
 		Vector(270.f,-25.f,0.f,ObjectSelect.Angle);
@@ -2069,17 +2065,6 @@ void CGFxMainUi::RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOp
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
 #endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-#ifdef LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX	// 법사 블랙 소울 바지/그랜드소울 바지 // MODEL_PANTS +22 
-	else if( Type == MODEL_PANTS +22 || Type == MODEL_PANTS +18 )
-	{
-		vec3_t		v3Angle;
-		VectorCopy(ObjectSelect.Angle, v3Angle);
-
-		v3Angle[1] = v3Angle[1] + 10.0f;
-
-		VectorCopy(v3Angle, ObjectSelect.Angle);
-	}	
-#endif // LDS_MR0_MOD_PATIALPHYSIQMODEL_PHYSICPROCESS_FIX
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type == MODEL_HELM+59 /*&& Type <= MODEL_HELM+59+5*/)
 	{
@@ -4592,7 +4577,7 @@ bool CGFxMainUi::GetSkillDisable(int slotNum, int* _array)
 	}
 #ifdef KJH_FIX_WOPS_K20674_CHECK_STAT_USE_SKILL
 	// 블러드어택 (마검사) 일때 스텟을 검사하여 요구스텟이 충분치 아니하면 스킬아이콘 빨갛게 처리
-	// 다른스킬도 이와같이 처리 해주어야 한다. (시즌4 본섭 적용 후에 꼭하자!!)
+	// 다른스킬도 이와같이 처리 해주어야 한다. (Season4 본섭 적용 후에 꼭하자!!)
 	if( bySkillType == AT_SKILL_REDUCEDEFENSE
 #ifdef YDG_FIX_BLOCK_STAFF_WHEEL
 		|| (AT_SKILL_BLOOD_ATT_UP <= bySkillType && bySkillType <= AT_SKILL_BLOOD_ATT_UP+4)
@@ -4623,7 +4608,7 @@ bool CGFxMainUi::GetSkillDisable(int slotNum, int* _array)
 
 #ifdef LDK_FIX_CHECK_STAT_USE_SKILL_PIERCING
 	// 아이스에로우 (요정) 일때 스텟을 검사하여 요구스텟이 충분치 아니하면 스킬아이콘 빨갛게 처리
-	// 다른스킬도 이와같이 처리 해주어야 한다. (시즌4 본섭 적용 후에 꼭하자!!)
+	// 다른스킬도 이와같이 처리 해주어야 한다. (Season4 본섭 적용 후에 꼭하자!!)
 	switch( bySkillType )
 	{
 		//case AT_SKILL_PIERCING:

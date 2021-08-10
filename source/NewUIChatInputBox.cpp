@@ -11,36 +11,6 @@
 #include "MapManager.h"
 using namespace SEASON3B;
 
-#ifdef PSW_FIX_INPUTTEXTMACRO
-#ifdef CSK_LUCKY_SEAL////////////////////////////////////////////////////////////		
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-namespace
-{
-	bool CheckLuckySeal( char *Text )
-	{
-		string isLuckychattext = Text;
-		if( isLuckychattext.find( GlobalText[260] ) != string::npos 
-			|| isLuckychattext.find( "/move" ) != string::npos )  
-		{
-			if( g_pMoveCommandWindow->IsMapMove( Text ) == false )
-			{
-				unicode::t_char szText[1024];
-				unicode::_sprintf(szText, GlobalText[2558]);
-				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-
-		return false;
-	}
-};
-#endif //SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#endif //CSK_LUCKY_SEAL////////////////////////////////////////////////////////////
-#endif //PSW_FIX_INPUTTEXTMACRO
-
 SEASON3B::CNewUIChatInputBox::CNewUIChatInputBox() 
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	:	MAX_CHAT_SIZE_UTF16((int)(MAX_CHAT_SIZE/(g_pMultiLanguage->GetNumByteForOneCharUTF8())))
@@ -75,7 +45,6 @@ void SEASON3B::CNewUIChatInputBox::Init()
 
 void SEASON3B::CNewUIChatInputBox::LoadImages()
 {
-	//. Loading Image
 	LoadBitmap("Interface\\newui_chat_back.jpg", IMAGE_INPUTBOX_BACK, GL_LINEAR);
 	LoadBitmap("Interface\\newui_chat_normal_on.jpg", IMAGE_INPUTBOX_NORMAL_ON, GL_LINEAR);
 	LoadBitmap("Interface\\newui_chat_party_on.jpg", IMAGE_INPUTBOX_PARTY_ON, GL_LINEAR);
@@ -644,20 +613,11 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 
 		if(unicode::_strlen(szChatText) != 0)
 		{	
-			if(!CheckCommand(szChatText))		//. 명령어 검사 및 처리
+			if(!CheckCommand(szChatText))
 			{
-#ifdef PSW_FIX_INPUTTEXTMACRO
-#ifdef CSK_LUCKY_SEAL////////////////////////////////////////////////////////////						
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-				if( CheckLuckySeal(szChatText) == false )
-#endif //SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#endif //CSK_LUCKY_SEAL////////////////////////////////////////////////////////////
-#endif //PSW_FIX_INPUTTEXTMACRO
 				{
-					// 필터링
-					if(CheckAbuseFilter(szChatText))		//. 쳇팅 욕 필터
+					if(CheckAbuseFilter(szChatText))
 					{
-						// 570 "사랑해요"
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 						g_pMultiLanguage->ConvertCharToWideStr(wstrText, GlobalText[570]);
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
@@ -665,10 +625,9 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					}
 					
-					//. 귓말일 경우
 					if(m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL 
 						&& unicode::_strlen(szChatText) 
-						&& strlen(szWhisperID) > 0 ) //. 주의!: ID는 ANSI
+						&& strlen(szWhisperID) > 0 )
 					{
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 						g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), CP_UTF8);
@@ -679,13 +638,11 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 						AddWhsprIDHistory(szWhisperID);
 					}
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					// /warp 명령어를 써서 맵 이동 할때 SendRequestMoveMap() 사용
 					else if (strncmp(szChatText, GlobalText[260], strlen(GlobalText[260])) == 0)
 					{
 						char* pszMapName = szChatText + strlen(GlobalText[260])+1;
 						int iMapIndex = g_pMoveCommandWindow->GetMapIndexFromMovereq(pszMapName);
 
-						// 현재 위치하고 있는 맵이나 이동하려는 맵이 다른 서버에 존재(로랜협곡, 로랜시장)
 						if (g_pMoveCommandWindow->IsTheMapInDifferentServer(gMapManager.WorldActive, iMapIndex))
 						{
 							SaveOptions();
@@ -694,7 +651,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 						SendRequestMoveMap(g_pMoveCommandWindow->GetMoveCommandKey(), iMapIndex);
 					}
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					//. 일반 쳇팅일 경우
 					else
 					{	
 						if ( Hero->SafeZone || (Hero->Helper.Type != MODEL_HELPER+2 
@@ -702,7 +658,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 							&& Hero->Helper.Type != MODEL_HELPER+4 
 							&& Hero->Helper.Type != MODEL_HELPER+37) ) 
 						{
-							CheckChatText(szChatText);	//. 사용가능한 이모티콘 체크
+							CheckChatText(szChatText);
 						}
 						
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
@@ -716,17 +672,14 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 				}
 			}
 		}
-		//. 인풋버퍼 클리어
 		m_pChatInputBox->SetText("");
 		m_iCurChatHistory = m_iCurWhisperIDHistory = 0;
 
 		SaveIMEStatus();
 
-		//. 쳇팅창 닫기
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_CHATINPUTBOX);
 		return false;
 	}
-#if SELECTED_LANGUAGE != LANGUAGE_TAIWANESE && SELECTED_LANGUAGE != LANGUAGE_CHINESE
 	if(IsVisible() && m_pChatInputBox->HaveFocus())
 	{
 		if(SEASON3B::IsPress(VK_UP) && false == m_vecChatHistory.empty())
@@ -775,7 +728,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 			return false;
 		}
 	}
-#endif //SELECTED_LANGUAGE != LANGUAGE_TAIWANESE && SELECTED_LANGUAGE != LANGUAGE_CHINESE
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHATINPUTBOX) == true)
 	{
 		if(SEASON3B::IsPress(VK_ESCAPE) == true)

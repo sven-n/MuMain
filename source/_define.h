@@ -291,12 +291,6 @@
 	#define TEXT_COLOR_ORANGE	13
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
-#define KOREAN  0
-#define ENGLISH 1
-
-#define ONE_HAND 0
-#define TWO_HAND 1
-
 ////////////////////////////////////////_inventory end_///////////////////////////////////////////////////////
 
 ////////////////////////////////////////_LodTerrain start_//////////////////////////////////////////////////////
@@ -363,29 +357,9 @@
 
 #define MAX_ID_SIZE			10
 
-#ifdef LDS_MODIFY_CHAR_LENGTH_USERPASSWORD	// 비밀번호 자릿수 10->12로 변경 사항
-	#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-		#define MAX_PASSWORD_SIZE	12
-	#else //한국아닌경우 10자리
-		#define MAX_PASSWORD_SIZE	10
-	#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#endif // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD
-#ifdef LDK_MOD_PASSWORD_LENGTH_20 // 글로벌 포털 비밀번호 20 자리로 변경
-		#define MAX_PASSWORD_SIZE	20
-#endif //LDK_MOD_PASSWORD_LENGTH_20
+#define MAX_PASSWORD_SIZE	20
 
-#ifdef LJH_ADD_ONETIME_PASSWORD 
-#define MAX_ONETIME_PASSWORD_SIZE	6
-#endif //LJH_ADD_ONETIME_PASSWORD
-
-
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#define	CHAR_DEL_LIMIT_LV	180		// 캐릭터 삭제 제한 레벨
-#elif SELECTED_LANGUAGE == LANGUAGE_ENGLISH
-#define CHAR_DEL_LIMIT_LV	300		// 글로벌 캐릭터 삭제 제한 레벨
-#else	//SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-#define	CHAR_DEL_LIMIT_LV	220		// 캐릭터 삭제 제한 레벨
-#endif	//SELECTED_LANGUAGE == LANGUAGE_JAPANESE
+#define CHAR_DEL_LIMIT_LV	300
 
 #define MAX_TEXTS               3000
 #define MAX_GLOBAL_TEXT_STRING	300
@@ -408,52 +382,41 @@
 #define MAX_GIFT_MESSAGE_SIZE	200
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-// #if SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-// 	#define MAX_LENGTH_DIALOG		( 400)
-// #else 
-	#define MAX_LENGTH_DIALOG		( 300)
-// #endif //SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
+
+#define MAX_LENGTH_DIALOG		( 300)
+
 
 #define MAX_ANSWER_FOR_DIALOG	( 10)
 
-// #if SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
-// 	#define MAX_LENGTH_ANSWER		( 128)
-// #else 
-	#define MAX_LENGTH_ANSWER		( 64)
-// #endif //SELECTED_LANGUAGE == LANGUAGE_VIETNAMESE
+#define MAX_LENGTH_ANSWER		( 64)
+
 
 #define MAX_ITEM_TYPE      16
 
-//2005년 7.12일 아이템 인덱스 확장
+
 #define MAX_ITEM_INDEX     512
 
 #define MAX_ITEM           (MAX_ITEM_TYPE*MAX_ITEM_INDEX)
 
-#ifdef PJH_ADD_MINIMAP
 #define MAX_MINI_MAP_DATA	100
-#endif //PJH_ADD_MINIMAP
-#ifdef PJH_ADD_MASTERSKILL
+
 #define	MAX_MASTER		   24
-#else
-#define	MAX_MASTER		   20
-#endif
+
 #define MAX_ITEM_SPECIAL   8
 #define ITEM_LEVEL_NORMAL  4
-#define MAX_QUEST_ITEM     64  //  늘어나면 추가된다.
-#define MAX_EVENT_ITEM     35  //  늘어나면 추가된다.
+#define MAX_QUEST_ITEM     64
+#define MAX_EVENT_ITEM     35
 
-#ifdef SOCKET_SYSTEM
-#define MAX_SOCKETS			5		// 아이템당 최대 소켓수
-#define SOCKET_EMPTY		0xFF	// 빈 소켓
-#endif	// SOCKET_SYSTEM
+#define MAX_SOCKETS			5
+#define SOCKET_EMPTY		0xFF
 
 //item index
-#define ITEM_SWORD		 (0)   //pal,etc
-#define ITEM_AXE		 (1*MAX_ITEM_INDEX)  //ran,dru
-#define ITEM_MACE		 (2*MAX_ITEM_INDEX)  //ran,nec
-#define ITEM_SPEAR		 (3*MAX_ITEM_INDEX)  //ama
-#define ITEM_BOW		 (4*MAX_ITEM_INDEX)  //ama
-#define ITEM_STAFF		 (5*MAX_ITEM_INDEX)  //soc
+#define ITEM_SWORD		 (0)
+#define ITEM_AXE		 (1*MAX_ITEM_INDEX)
+#define ITEM_MACE		 (2*MAX_ITEM_INDEX)
+#define ITEM_SPEAR		 (3*MAX_ITEM_INDEX)
+#define ITEM_BOW		 (4*MAX_ITEM_INDEX)
+#define ITEM_STAFF		 (5*MAX_ITEM_INDEX)
 #define ITEM_SHIELD		 (6*MAX_ITEM_INDEX) 
 #define ITEM_HELM		 (7*MAX_ITEM_INDEX)
 #define ITEM_ARMOR		 (8*MAX_ITEM_INDEX)

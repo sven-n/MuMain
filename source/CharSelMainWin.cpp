@@ -29,20 +29,6 @@ extern float g_fScreenRate_y;
 extern int ServerSelectHi;
 #endif // KJH_ADD_SERVER_LIST_SYSTEM
 
-#ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
-#ifdef TEENAGER_REGULATION
-#define	CSMW_WARNING_TEXT_MAX	3
-#endif // TEENAGER_REGULATION
-#else // KJH_MOD_NATION_LANGUAGE_REDEFINE
-#if (SELECTED_LANGUAGE == LANGUAGE_KOREAN) && defined TEENAGER_REGULATION
-#define	CSMW_WARNING_TEXT_MAX	3	// 경고 문구 개수.
-#endif	// (SELECTED_LANGUAGE == LANGUAGE_KOREAN) && defined TEENAGER_REGULATION
-#endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CCharSelMainWin::CCharSelMainWin()
 {
 
@@ -87,20 +73,6 @@ void CCharSelMainWin::Create()
 			}
 		}
 	}
-
-#ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
-#ifdef TEENAGER_REGULATION
-	// 경고 문구를 CSMW_WARNING_TEXT_MAX개 중에 하나를 랜덤으로 선택함.
-	short anWarningText[CSMW_WARNING_TEXT_MAX] = { 1710, 1739, 1740 };
-	m_nWarningText = anWarningText[::rand() % CSMW_WARNING_TEXT_MAX];
-#endif // TEENAGER_REGULATION
-#else // KJH_MOD_NATION_LANGUAGE_REDEFINE
-#if (SELECTED_LANGUAGE == LANGUAGE_KOREAN) && defined TEENAGER_REGULATION
-	// 경고 문구를 CSMW_WARNING_TEXT_MAX개 중에 하나를 랜덤으로 선택함.
-	short anWarningText[CSMW_WARNING_TEXT_MAX] = { 1710, 1739, 1740 };
-	m_nWarningText = anWarningText[::rand() % CSMW_WARNING_TEXT_MAX];
-#endif	// (SELECTED_LANGUAGE == LANGUAGE_KOREAN) && defined TEENAGER_REGULATION
-#endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
 }
 
 void CCharSelMainWin::PreRelease()
@@ -118,13 +90,11 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
 	int nBtnHeight = m_aBtn[0].GetHeight();
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
-// 좌측 배치.
 	m_aBtn[CSMW_BTN_CREATE].SetPosition(nXCoord, nYCoord);
 	m_aBtn[CSMW_BTN_MENU].SetPosition(nXCoord + nBtnWidth + 1, nYCoord);
 	m_asprBack[CSMW_SPR_INFO].SetPosition(
 		m_aBtn[CSMW_BTN_MENU].GetXPos() + nBtnWidth + 2, nYCoord + 5);
 
-// 우측 배치.
 	int nWinRPosX = nXCoord + CWin::GetWidth();
 	m_asprBack[CSMW_SPR_DECO].SetPosition(
 		nWinRPosX - (m_asprBack[CSMW_SPR_DECO].GetWidth() - 22), nYCoord - 59);
@@ -162,20 +132,7 @@ void CCharSelMainWin::UpdateDisplay()
 {
 	m_aBtn[CSMW_BTN_CREATE].SetEnable(false);
 	int i=0;
-#ifdef PBG_ADD_CHARACTERSLOT
-	if(BLUE_MU::IsBlueMuServer())
-	{
-		for(i = 0; i < g_SlotLimit->GetCharacterCnt(); ++i)
-		{
-			if (!CharactersClient[i].Object.Live)
-			{
-				m_aBtn[CSMW_BTN_CREATE].SetEnable(true);
-				break;
-			}
-		}
-	}
-	else
-#endif //PBG_ADD_CHARACTERSLOT
+
 	for (i = 0; i < 5; ++i)
 	{
 		if (!CharactersClient[i].Object.Live)
@@ -212,19 +169,12 @@ void CCharSelMainWin::UpdateDisplay()
 	{
 		CUIMng& rUIMng = CUIMng::Instance();
 		rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
-#ifdef PJH_CHARACTER_RENAME
 		rUIMng.m_CharMakeWin.Set_State();
-#endif //PJH_CHARACTER_RENAME
 	}
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-void CCharSelMainWin::UpdateWhileActive()
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CCharSelMainWin::UpdateWhileActive(double dDeltaTick)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 {
-	//PJH_DEBUG_SERVER_ADD
 	if (m_aBtn[CSMW_BTN_CONNECT].IsClick())
 		::StartGame();
 	else if (m_aBtn[CSMW_BTN_MENU].IsClick())
@@ -237,9 +187,7 @@ void CCharSelMainWin::UpdateWhileActive(double dDeltaTick)
 	{
 		CUIMng& rUIMng = CUIMng::Instance();
 		rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
-#ifdef PJH_CHARACTER_RENAME
 		rUIMng.m_CharMakeWin.Set_State();
-#endif //PJH_CHARACTER_RENAME
 
 	}
 	else if (m_aBtn[CSMW_BTN_DELETE].IsClick())

@@ -339,7 +339,7 @@ enum
 	MESSAGE_FENRIR_REPAIR		  ,		// 펜릴의 뿔피리를 수리하시겠습니까?
 	MESSAGE_CANCEL_SKILL		  ,		// 스킬을 취소하는 메세지창!
 #ifdef PCROOM_EVENT
-	MESSAGE_PCROOM_EVENT		  ,		// (이벤트라 아직 미확인)
+	MESSAGE_PCROOM_EVENT		  ,
 #endif	// PCROOM_EVENT
 	MESSAGE_WHITEANGEL_EVENT	  ,	    // 화이트앤젤 이벤트	(이벤트라 아직 미확인)
 #ifdef ADD_EXPERIENCE_SERVER
@@ -351,12 +351,6 @@ enum
 #ifdef LDK_ADD_GLOBAL_PORTAL_SYSTEM
 	MESSAGE_NOT_EXECUTION_WEBSTARTER	,	// 웹에서 로그인해주세요. (웹스타터 미실행)
 #endif //LDK_ADD_GLOBAL_PORTAL_SYSTEM
-#ifdef LJH_ADD_ONETIME_PASSWORD
-	MESSAGE_OTP_NOT_REGISTERED		,	// OneTime Password 미등록
-	MESSAGE_OTP_INCORRECT			,	// OneTime Password 불일치 
-	MESSAGE_OTP_NOT_WRITTEN			,	// OneTime Password 미입력 
-	MESSAGE_OTP_INVALID_INFO		,	// 유효기간이 지난 OneTime Password, 또는 기타 에러
-#endif //LJH_ADD_ONETIME_PASSWORD
 };
 
 /*
@@ -535,7 +529,7 @@ enum
 	MODEL_MUGAME			 ,
 	MODEL_LOGOSUN		     ,
 	MODEL_CARD   	         ,
-	MODEL_FACE   	         = MODEL_CARD   	         + 4,	// 캐릭터 선택 씬에 사용되는 캐릭터 상반신 모델.
+	MODEL_FACE   	         = MODEL_CARD   	         + 4,
 	//animal
 	MODEL_BIRD01			 = MODEL_FACE   	         + MAX_CLASS,
 
@@ -553,26 +547,26 @@ enum
 #endif //TAMAJJANG
 	MODEL_CROW               ,
 	MODEL_SHINE              ,
-	MODEL_EAGLE				 ,		// 맵 효과 독수리
-	MODEL_MAP_TORNADO		 ,		// 맵 효과 회오리
-	MODEL_GM_CHARACTER,				// GM 변신반지 모델
-	MODEL_XMAS_EVENT_CHA_SSANTA,	// 산타할아버지
-	MODEL_XMAS_EVENT_CHA_SNOWMAN,	// 눈사람
-	MODEL_XMAS_EVENT_CHA_DEER,		// 사슴
-	MODEL_XMAS_EVENT_CHANGE_GIRL,	// 크리스마스 이벤트 변신걸
-	MODEL_XMAS_EVENT_EARRING,		// 변신걸 귀걸이
-	MODEL_XMAS_EVENT_ICEHEART,		// 얼음하트
-	MODEL_XMAS_EVENT_BOX,			// 박스
-	MODEL_XMAS_EVENT_CANDY,			// 캔디
-	MODEL_XMAS_EVENT_TREE,			// 트리
-	MODEL_XMAS_EVENT_SOCKS,			// 양말
-	MODEL_NEWYEARSDAY_EVENT_BEKSULKI,			// 백설기
-	MODEL_NEWYEARSDAY_EVENT_CANDY,				// 사탕
-	MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN,	// 청고추
-	MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED,		// 홍고추
-	MODEL_NEWYEARSDAY_EVENT_PIG,				// 황금돼지
-	MODEL_NEWYEARSDAY_EVENT_YUT,				// 윷 
-	MODEL_NEWYEARSDAY_EVENT_MONEY,				// 돈
+	MODEL_EAGLE				 ,
+	MODEL_MAP_TORNADO		 ,
+	MODEL_GM_CHARACTER,
+	MODEL_XMAS_EVENT_CHA_SSANTA,
+	MODEL_XMAS_EVENT_CHA_SNOWMAN,
+	MODEL_XMAS_EVENT_CHA_DEER,
+	MODEL_XMAS_EVENT_CHANGE_GIRL,
+	MODEL_XMAS_EVENT_EARRING,
+	MODEL_XMAS_EVENT_ICEHEART,
+	MODEL_XMAS_EVENT_BOX,
+	MODEL_XMAS_EVENT_CANDY,
+	MODEL_XMAS_EVENT_TREE,
+	MODEL_XMAS_EVENT_SOCKS,
+	MODEL_NEWYEARSDAY_EVENT_BEKSULKI,
+	MODEL_NEWYEARSDAY_EVENT_CANDY,
+	MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN,
+	MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED,
+	MODEL_NEWYEARSDAY_EVENT_PIG,
+	MODEL_NEWYEARSDAY_EVENT_YUT,
+	MODEL_NEWYEARSDAY_EVENT_MONEY,
 	
 #ifdef PRUARIN_EVENT07_3COLORHARVEST
 	MODEL_MOONHARVEST_GAM,			// 감
@@ -595,25 +589,15 @@ enum
 #endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
 	MODEL_MOVE_TARGETPOSITION_EFFECT,
 
-	//////////////////////////////////////////////////////////////////////////
-	// MODEL_SKILL_BEGIN ~ MODEL_SKILL_END 까지는 OpenTexture() 함수가 자동 //
-	// 으로 호출되어서 AccessModel() 함수만 호출하면 됨!!!					//
-	//////////////////////////////////////////////////////////////////////////
-	
 	//skill
 	MODEL_SKILL_BEGIN  		 ,	
-	MODEL_DARK_HORSE         ,  //  다크호스.
-#ifdef PET_SYSTEM
-	MODEL_DARK_SPIRIT        ,  //  다크 스피릿.
-#endif// PET_SYSTEM
-#ifdef DARK_WOLF
-	MODEL_DARK_WOLF          ,  //  다크울프.
-#endif// DARK_WOLF
+	MODEL_DARK_HORSE         ,
+	MODEL_DARK_SPIRIT        ,
 	MODEL_ICE		         ,
 	MODEL_FIRE               ,
 	MODEL_POISON             ,
 	MODEL_WOLF               ,
-	MODEL_WARCRAFT           ,  //  마석 ( 헬라스로 가는 포탈 문 ).
+	MODEL_WARCRAFT           ,
 	MODEL_UNICON             ,
 	MODEL_BLOOD              ,
 	MODEL_STONE1             ,
@@ -1933,7 +1917,7 @@ enum ActionSkillType
 	AT_SKILL_SUMMON_POLLUTION = 225,			// 펄루션.
 #endif	// ASG_ADD_SUMMON_RARGLE
 	
-	// 시즌4 신규 스킬
+	// Season4 신규 스킬
 #ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
 	AT_SKILL_LIGHTNING_SHOCK = 230,			// 230 소환술사 라이트닝 쇼크
 #endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
