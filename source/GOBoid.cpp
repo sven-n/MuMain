@@ -181,11 +181,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 		Alpha( o );
 	
 		int     j;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		float   FlyRange = 0.0f;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		float   FlyRange;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		vec3_t  Light, Position;
         vec3_t  TargetPosition;
 		BMD* b = &Models[o->Type];
@@ -193,7 +189,6 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
        	VectorCopy ( o->Owner->Position, TargetPosition );
 		switch ( o->Type )
 		{
-		//^ 펜릴 모델 에니메이션, 속도 설정
 		case MODEL_FENRIR_BLACK:
 		case MODEL_FENRIR_BLUE:
 		case MODEL_FENRIR_RED:
@@ -204,7 +199,6 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 				break;
 			}
 
-			//  순간이동을 할때 펜릴도 같이 이동
             if ( o->Owner->Teleport==TELEPORT_BEGIN || o->Owner->Teleport==TELEPORT )
             {
                 o->Alpha -= 0.1f;

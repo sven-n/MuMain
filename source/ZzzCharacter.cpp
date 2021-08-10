@@ -6698,15 +6698,9 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 	if( o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER )
 	{
 		if( Type >= MODEL_WING && Type <= MODEL_WING+6 ) return;
-#ifdef ADD_ALICE_WINGS_1
 		else if (Type >= MODEL_WING+36 && Type <= MODEL_WING+43)
 			return;
-#else	// ADD_ALICE_WINGS_1
-		else if( Type >= MODEL_WING+36 && Type <= MODEL_WING+40 ) return;
-#endif	// ADD_ALICE_WINGS_1
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 		else if( ITEM_WING+130 <= Type && Type <= ITEM_WING+134 ) return;
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		else if (Type >= MODEL_WING+49 && Type <= MODEL_WING+50) return;
 		else if (Type == MODEL_WING+135) return;
@@ -6721,11 +6715,8 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		)
 		return;
 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	if( ITEM_WING+130 == Type )
 		return;
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-
 
 	if (Type >= MODEL_STAFF+21 && Type <= MODEL_STAFF+29)
 	{
@@ -6757,7 +6748,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		break;
 	}
 
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 	if (c->MonsterIndex >= 529 && c->MonsterIndex <= 539)
 	{
 		if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
@@ -6765,7 +6755,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		else
 			RenderType = RENDER_DOPPELGANGER|RENDER_BRIGHT|RENDER_TEXTURE;
 	}
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 
 	OBB_t OBB;
 	vec3_t p,Position;
@@ -12691,9 +12680,9 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
         {
 			switch (Type)
 			{
-			case 5:		c->Wing.Type = MODEL_HELPER+30;	break;	// ¸ÁÅä.
-			case 6:		c->Wing.Type = MODEL_WING+41;	break;	// Àç¾ÓÀÇ ³¯°³.
-			case 7:		c->Wing.Type = MODEL_WING+42;	break;	// Àý¸ÁÀÇ ³¯°³.
+			case 5:		c->Wing.Type = MODEL_HELPER+30;	break;
+			case 6:		c->Wing.Type = MODEL_WING+41;	break;
+			case 7:		c->Wing.Type = MODEL_WING+42;	break;
 			default:	c->Wing.Type = MODEL_WING+Type+2;
 			}
         }
@@ -12712,15 +12701,11 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 	Type = (Equipment[15] >> 2) & 0x07;
 	if(Type > 0)
 	{
-#ifdef ADD_ALICE_WINGS_2
 		switch (Type)
 		{
 		case 6:		c->Wing.Type = MODEL_WING+43;	break;
 		default:	c->Wing.Type = MODEL_WING+35+Type;
 		}
-#else	// ADD_ALICE_WINGS_2
-		c->Wing.Type = 	MODEL_WING + 35 + Type;
-#endif	// ADD_ALICE_WINGS_2
 	}
 
 #ifdef LDK_ADD_INGAMESHOP_SMALL_WING

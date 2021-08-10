@@ -346,24 +346,14 @@ void OpenPlayers()
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_SPEAR		   ].PlaySpeed = 0.24f;
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_BOW		   ].PlaySpeed = 0.22f;
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_CROSSBOW      ].PlaySpeed = 0.22f;
-#ifdef YDG_FIX_ALICE_ANIMATIONS
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_SUMMONER].PlaySpeed = 0.24f;
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_WAND].PlaySpeed = 0.30f;
-#else	// YDG_FIX_ALICE_ANIMATIONS
-	Models[MODEL_PLAYER].Actions[PLAYER_STOP_SUMMONER].PlaySpeed = 0.16f;
-	Models[MODEL_PLAYER].Actions[PLAYER_STOP_WAND].PlaySpeed = 0.13f;
-#endif	// YDG_FIX_ALICE_ANIMATIONS
 
 	for(int i=PLAYER_WALK_MALE;i<=PLAYER_RUN_RIDE_WEAPON;i++)
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.3f;
 
-#ifdef YDG_FIX_ALICE_ANIMATIONS
 	Models[MODEL_PLAYER].Actions[PLAYER_WALK_WAND].PlaySpeed = 0.44f;
 	Models[MODEL_PLAYER].Actions[PLAYER_RUN_WAND].PlaySpeed = 0.76f;
-#else	// YDG_FIX_ALICE_ANIMATIONS
-    Models[MODEL_PLAYER].Actions[PLAYER_WALK_WAND].PlaySpeed = 0.22f;
-	Models[MODEL_PLAYER].Actions[PLAYER_RUN_WAND].PlaySpeed = 0.42f;
-#endif	// YDG_FIX_ALICE_ANIMATIONS
     Models[MODEL_PLAYER].Actions[PLAYER_WALK_SWIM].PlaySpeed = 0.35f;
     Models[MODEL_PLAYER].Actions[PLAYER_RUN_SWIM ].PlaySpeed = 0.35f;
 
