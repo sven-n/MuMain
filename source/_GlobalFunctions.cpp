@@ -159,20 +159,6 @@ namespace SKILLCONDITION
 };
 #endif //PBG_FIX_SKILL_DEMENDCONDITION
 
-#if defined PBG_ADD_MU_LOGO || defined LJH_MOD_TO_USE_ISBLUEMUSERVER_FUNC
-
-namespace BLUE_MU
-{
-	bool g_bIsBlue_MU_Server = false;
-
-	BOOL IsBlueMuServer()
-	{
-		return g_bIsBlue_MU_Server;
-	}
-};
-#endif //defined PBG_ADD_MU_LOGO || defined LJH_MOD_TO_USE_ISBLUEMUSERVER_FUNC
-
-
 #ifdef KJH_MOD_BTS184_REQUIRE_STAT_WHEN_SPELL_SKILL
 int MasterSkillToBaseSkillIndex(int iMasterSkillIndex)
 {

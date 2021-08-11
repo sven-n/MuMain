@@ -205,9 +205,6 @@ public:
 protected:
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
 	void LoadNPCDialogueScript();
-#ifdef _BLUE_SERVER		//  블루서버에만 적용
-	void DelAnswerAPDPUpBuff();
-#endif // _BLUE_SERVER
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 	void LoadQuestProgressScript();
 	void LoadQuestWordsScript();

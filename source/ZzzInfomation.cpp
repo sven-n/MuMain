@@ -64,10 +64,6 @@ static void BuxConvert(BYTE *Buffer,int Size)
 
 extern int GetMoveReqZenFromMCB(const char * pszTargetName);
 
-///////////////////////////////////////////////////////////////////////////////
-// text
-///////////////////////////////////////////////////////////////////////////////
-
 CGlobalText GlobalText;
 
 void SaveTextFile(char *FileName)
@@ -85,98 +81,6 @@ void SaveTextFile(char *FileName)
 	delete [] Buffer;
 	fclose(fp);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// server list
-///////////////////////////////////////////////////////////////////////////////
-
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM				// #ifndef
-void OpenServerListScript(char *FileName)
-{
-	if((SMDFile=fopen(FileName,"rb")) == NULL)	return;
-	SMDToken Token;
-
-	Token = (*GetToken)();ServerNumber = (int)TokenNumber;
-	for(int i=0;i<ServerNumber;i++)
-	{
-		Token = (*GetToken)();strcpy(ServerList[i].Name,TokenString);
-		Token = (*GetToken)();ServerList[i].Number = (int)TokenNumber;
-	}
-	
-	int NumberHi = 0;
-	int NumberLow = 0;
-	while(true)
-	{
-		SERVER_t *s = &ServerList[NumberHi].Server[NumberLow];
-		Token = (*GetToken)();
-		if(Token == END) break;
-		if(Token == NAME && strcmp("end",TokenString)==NULL) break;
-		strcpy(s->IP,TokenString);
-		Token = (*GetToken)();s->Port = (int)TokenNumber;
-		NumberLow++;
-		if(NumberLow >= ServerList[NumberHi].Number)
-		{
-			NumberHi ++;
-			NumberLow = 0;
-		}
-	}
-	fclose(SMDFile);
-}
-
-void SaveServerListFile(char *FileName)
-{
-	FILE *fp = fopen(FileName,"wb");
-	int Size = sizeof(SERVER_LIST_t);
-	BYTE *Buffer = new BYTE [Size];
-	memcpy(Buffer,&ServerNumber,1);
-	BuxConvert(Buffer,1);
-	fwrite(Buffer,1,1,fp);
-	for(int i=0;i<ServerNumber;i++)
-	{
-		memcpy(Buffer,&ServerList[i],Size);
-		BuxConvert(Buffer,Size);
-		fwrite(Buffer,Size,1,fp);
-	}
-	delete [] Buffer;
-	fclose(fp);
-}
-void OpenServerListFile(char *FileName)
-{
-	FILE *fp = fopen(FileName,"rb");
-	if(fp == NULL)
-	{
-		char Text[256];
-		sprintf(Text,"%s - File not exist.\r\n",FileName);
-		g_ErrorReport.Write( Text);
-		MessageBox(g_hWnd,Text,NULL,MB_OK);
-		SendMessage(g_hWnd,WM_DESTROY,0,0);
-		return;
-	}
-	
-	int Size = sizeof(SERVER_LIST_t);
-	BYTE *Buffer = new BYTE [Size];
-	fread(Buffer,1,1,fp);
-	BuxConvert(Buffer,1);
-	//memcpy(&ServerNumber,Buffer,1);
-	for(int i=0;i<ServerNumber;i++)
-	{
-		fread(Buffer,Size,1,fp);
-		BuxConvert(Buffer,Size);
-		memcpy(&ServerList[i],Buffer,Size);
-	}
-	delete [] Buffer;
-	fclose(fp);
-}
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// filter
-// 현재(10.06.21) 아래 두가지 함수만 사용하고 있음
-//		void OpenFilterFile(char *FileName)
-//		void OpenNameFilterFile(char *FileName)
-///////////////////////////////////////////////////////////////////////////////
 
 char AbuseFilter[MAX_FILTERS][20];
 char AbuseNameFilter[MAX_NAMEFILTERS][20];

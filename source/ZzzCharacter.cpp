@@ -15452,12 +15452,8 @@ int GetEquipedBowType(CHARACTER *pChar)
 	return BOWTYPE_NONE;
 }
 
-// 캐릭터에 장착된 무기가 활/석궁인지를 구별하여 리턴
-//** 캐릭터에 장착된것만 검사
 int GetEquipedBowType( )
 {
-
-	// 활
 	if( (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW+7) &&
 		((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) 
 			&& (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW+MAX_ITEM_INDEX))
@@ -15465,7 +15461,6 @@ int GetEquipedBowType( )
 	{
 		return BOWTYPE_BOW;
 	}
-	// 석궁
 	else if( (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW+15) &&
 			((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_BOW+8) 
 				&& (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW+MAX_ITEM_INDEX)) 
@@ -15473,17 +15468,11 @@ int GetEquipedBowType( )
 	{
 		return BOWTYPE_CROSSBOW;
 	}
-
-
-	// 아무것도 아닐때
 	return BOWTYPE_NONE;
 }
 
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 int GetEquipedBowType_Skill( )
 {
-
-	// 활
 	if( (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW+7) &&
 		((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) 
 			&& (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW+MAX_ITEM_INDEX))
@@ -15492,7 +15481,6 @@ int GetEquipedBowType_Skill( )
 		if(CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_BOW+15)
 			return BOWTYPE_BOW;
 	}
-	// 석궁
 	else if( (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW+15) &&
 			((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_BOW+8) 
 				&& (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW+MAX_ITEM_INDEX)) 
@@ -15501,58 +15489,22 @@ int GetEquipedBowType_Skill( )
 		if(CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOW+7)
 			return BOWTYPE_CROSSBOW;
 	}
-
-
-	// 아무것도 아닐때
 	return BOWTYPE_NONE;
 }
-#endif //#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 
-
-// Item이 활/석궁인지를 구별하여 리턴
-// 활이나 석궁 추가는 이곳에서 꼭 해준다.
 int GetEquipedBowType( ITEM* pItem )
 {	
-	// 활
-#ifdef KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-	if( 
-		((pItem->Type >= ITEM_BOW) && (pItem->Type <= ITEM_BOW+6))
-		|| (pItem->Type == ITEM_BOW+17) 
-		|| ((pItem->Type >= ITEM_BOW+20) && (pItem->Type <= ITEM_BOW+23))
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
-		|| (pItem->Type == ITEM_BOW+24) 
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-		)
-#else KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-	if( (pItem->Type != ITEM_BOW+7) 
-		&& ((pItem->Type >= ITEM_BOW) && (pItem->Type < ITEM_BOW+MAX_ITEM_INDEX)) 
-		)
-#endif // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
+	if(((pItem->Type >= ITEM_BOW) && (pItem->Type <= ITEM_BOW+6)) || (pItem->Type == ITEM_BOW+17) || ((pItem->Type >= ITEM_BOW+20) && (pItem->Type <= ITEM_BOW+23)) || (pItem->Type == ITEM_BOW+24))
 	{
 		return BOWTYPE_BOW;
 	}
-	// 석궁
 	
-#ifdef KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-	else if(  
-			 ((pItem->Type >= ITEM_BOW+8) && (pItem->Type <= ITEM_BOW+14))
-			 || (pItem->Type == ITEM_BOW+16)
-			 || ((pItem->Type >= ITEM_BOW+18) && (pItem->Type <= ITEM_BOW+19))
-			 )
-#else // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-	else if( (pItem->Type != ITEM_BOW+15) 
-			&& ((pItem->Type >= ITEM_BOW+8) && (pItem->Type < ITEM_BOW+MAX_ITEM_INDEX))
-			)
-#endif // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
+	else if(((pItem->Type >= ITEM_BOW+8) && (pItem->Type <= ITEM_BOW+14)) || (pItem->Type == ITEM_BOW+16) || ((pItem->Type >= ITEM_BOW+18) && (pItem->Type <= ITEM_BOW+19)))
 	{
 		return BOWTYPE_CROSSBOW;
 	}
-
-	// 아무것도 아닐때
 	return BOWTYPE_NONE;
 }
-
-#endif // ADD_SOCKET_ITEM
 
 #ifdef KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
 // 날개를 착용 유무 검사.

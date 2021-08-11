@@ -89,15 +89,7 @@
 #ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
 #include "PKSystem.h"
 #endif //PBG_ADD_PKSYSTEM_INGAMESHOP
-#ifdef PBG_ADD_CHARACTERSLOT
-#include "Slotlimit.h"
-#endif //PBG_ADD_CHARACTERSLOT
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 #include "ServerListManager.h"
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-#ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
-#include "DummyAttackProtocol.h"
-#endif // KJH_ADD_DUMMY_SKILL_PROTOCOL
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -340,11 +332,6 @@ void InitGuildWar()
 
 
 BOOL Util_CheckOption( char *lpszCommandLine, unsigned char cOption, char *lpszString);
-
-
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM
-extern int  ServerLocalSelect;
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 
 void ReceiveServerList( BYTE *ReceiveBuffer )
 {

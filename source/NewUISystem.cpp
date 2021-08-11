@@ -1280,15 +1280,6 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		// 버프 윈도우 위치 수정
 		m_pNewBuffWindow->SetPos(iScreenWidth);
 		m_pNewPartyListWindow->SetPos( iScreenWidth );
-
-#ifdef PBG_MOD_STAMINA_UI
-		if(BLUE_MU::IsBlueMuServer())
-		{
-			g_pNewUIStamina->SetPos(640-190*m_pNewUIMng->GetShowUICnt(), 480);
-			g_pNewUIStamina->OpeningProcess();
-			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_STAMINA_GAUGE);
-		}
-#endif //PBG_MOD_STAMINA_UI
 	}
 
 	
@@ -1765,14 +1756,6 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		m_pNewItemEnduranceInfo->SetPos( iScreenWidth );
 		m_pNewBuffWindow->SetPos(iScreenWidth);
 		m_pNewPartyListWindow->SetPos( iScreenWidth );
-#ifdef PBG_MOD_STAMINA_UI
-		if(BLUE_MU::IsBlueMuServer())
-		{
-			g_pNewUIStamina->SetPos(640-190*m_pNewUIMng->GetShowUICnt(), 480);
-			g_pNewUIStamina->ClosingProcess();
-			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_STAMINA_GAUGE);
-		}
-#endif //PBG_MOD_STAMINA_UI
 	}
 }
 

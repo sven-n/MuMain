@@ -1,9 +1,7 @@
 // NewUICharacterInfoWindow.cpp: implementation of the CNewUICharacterInfoWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
 #include "NewUICharacterInfoWindow.h"
 #include "NewUISystem.h"
 #include "CSItemOption.h"
@@ -17,23 +15,10 @@
 #include "UIJewelHarmony.h"
 #include "UIManager.h"
 #include "wsclientinline.h"
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 #include "ServerListManager.h"
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 using namespace SEASON3B;
 
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
-extern int ServerLocalSelect;
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 SEASON3B::CNewUICharacterInfoWindow::CNewUICharacterInfoWindow() 
 {
 	m_pNewUIMng = NULL;
@@ -219,7 +204,6 @@ bool SEASON3B::CNewUICharacterInfoWindow::Update()
 
 void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
 {
-	// 프레임
 	RenderImage(IMAGE_CHAINFO_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
 	RenderImage(IMAGE_CHAINFO_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
 	RenderImage(IMAGE_CHAINFO_LEFT, m_Pos.x, m_Pos.y+64, 21.f, 320.f);
@@ -763,7 +747,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		{
 			if(false == pItemHelper->bExpiredPeriod)
 			{
-				// memorylock 사용
 				iAttackDamageMin += int(float(iAttackDamageMin) * 0.4f);
 				iAttackDamageMax += int(float(iAttackDamageMax) * 0.4f);
 			}
@@ -772,7 +755,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		{
 			if(false == pItemHelper->bExpiredPeriod)
 			{
-				// memorylock 사용
 				iAttackDamageMin += int(float(iAttackDamageMin) * 0.2f);
 				iAttackDamageMax += int(float(iAttackDamageMax) * 0.2f);
 			}
@@ -970,7 +952,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		}
 	}
 
-#ifdef ASG_ADD_SKILL_BERSERKER
 	if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
 	{
 		int nTemp = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
@@ -978,19 +959,16 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		fTemp = MAX(fTemp, 0.1f);
 		t_adjdef -= nTemp / 3 * fTemp;
 	}
-#endif	// ASG_ADD_SKILL_BERSERKER
 
 	int maxdefense = 0; 
 
 	for(int j=0; j<MAX_EQUIPMENT; ++j)
 	{
-		// memorylock
 		int TempLevel = (CharacterMachine->Equipment[j].Level>>3)&15;
 		if( TempLevel >= CharacterMachine->Equipment[j].Jewel_Of_Harmony_OptionLevel )
 		{
 			StrengthenCapability SC;
 
-			// memorylock
 			g_pUIJewelHarmonyinfo->GetStrengthenCapability( &SC, &CharacterMachine->Equipment[j], 2 );
 
 			if( SC.SI_isSD )
@@ -1009,14 +987,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		iChangeRingAddDefense = (t_adjdef + maxdefense) / 10;
 	}
 
-#ifdef PJH_ADD_PANDA_PET
 	if(Hero->Helper.Type == MODEL_HELPER+80)
 		iChangeRingAddDefense += 50;
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_FIX_CS7_UNICORN_PET_INFO
+
 	if(Hero->Helper.Type == MODEL_HELPER+106)
 		iChangeRingAddDefense += 50;
-#endif //LDK_FIX_CS7_UNICORN_PET_INFO
+
 	unicode::t_char strBlocking[256];
 
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
@@ -1053,13 +1029,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				CharacterAttribute->SuccessfulBlocking,(CharacterAttribute->SuccessfulBlocking) / 10);
 			}
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
-			unicode::_sprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,CharacterAttribute->SuccessfulBlocking,
-#ifdef YDG_FIX_INVALID_SET_DEFENCE_RATE_BONUS
-				(CharacterAttribute->SuccessfulBlocking) / 10
-#else	// YDG_FIX_INVALID_SET_DEFENCE_RATE_BONUS
-				(t_adjdef + iChangeRingAddDefense) / 10
-#endif	// YDG_FIX_INVALID_SET_DEFENCE_RATE_BONUS
-				);
+			unicode::_sprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,CharacterAttribute->SuccessfulBlocking,(CharacterAttribute->SuccessfulBlocking) / 10);
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		}
 		else
@@ -1069,11 +1039,9 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	}
 	else
 	{
-		// memorylock 사용
 		if(CharacterAttribute->SuccessfulBlocking > 0)
 		{
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-			// 208 "방어력(율): %d (%d)"
 			if(nAdd_FulBlocking)
 			{
 				unicode::_sprintf(strBlocking, GlobalText[206],t_adjdef + maxdefense + iChangeRingAddDefense,CharacterAttribute->SuccessfulBlocking, nAdd_FulBlocking);
@@ -1123,7 +1091,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strBlocking);
 
-	// memorylock
 	WORD wAttackSpeed = CLASS_WIZARD == iBaseClass || CLASS_SUMMONER == iBaseClass
 		? CharacterAttribute->MagicSpeed : CharacterAttribute->AttackSpeed;
 
@@ -1133,43 +1100,28 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin1)) // 잭오랜턴의 축복
+	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin1))
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
 
-#ifdef PSW_SCROLL_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll1) )
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-#endif //PSW_SCROLL_ITEM
 
-#ifdef LDK_ADD_PC4_GUARDIAN
 	ITEM *phelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER  ];
 	if( phelper->Durability != 0 && 
-		(phelper->Type == ITEM_HELPER+64
-#ifdef YDG_ADD_SKELETON_PET
-		|| phelper->Type == ITEM_HELPER+123		// 스켈레톤 펫
-#endif	// YDG_ADD_SKELETON_PET
-		) )
+		(phelper->Type == ITEM_HELPER+64 || phelper->Type == ITEM_HELPER+123) )
 	{
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		if( IsRequireEquipItem(phelper) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		{
-#ifdef LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-			//만료된 기간제 아이템이면 출력 안함
 			if(false == pItemHelper->bExpiredPeriod)
 			{
 				g_pRenderText->SetTextColor(255, 0, 240, 255);
 			}
-#else //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-			g_pRenderText->SetTextColor(255, 0, 240, 255);
-#endif //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
 		}
 	}
-#endif //LDK_ADD_PC4_GUARDIAN
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strBlocking);
 
@@ -1191,17 +1143,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 	g_pRenderText->SetFont(g_hFontBold);
 
-	WORD wVitality;
+	WORD wVitality = CharacterAttribute->Vitality+ CharacterAttribute->AddVitality;
 
-	wVitality = CharacterAttribute->Vitality+ CharacterAttribute->AddVitality;
-
-#ifdef PSW_SECRET_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3) )
 	{
 		g_pRenderText->SetTextColor(255, 120, 0, 255);
 	}
 	else
-#endif //PSW_SECRET_ITEM
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
 	{
@@ -1232,13 +1180,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	unicode::t_char strVitality[256];
 	unicode::_sprintf(strVitality, "%d", wVitality);
 	g_pRenderText->SetBgColor(0);
-	// 169 "체력"
 	g_pRenderText->RenderText(m_Pos.x+12, m_Pos.y+HEIGHT_VITALITY+6, GlobalText[169], 74, 0, RT3_SORT_CENTER);
 	g_pRenderText->RenderText(m_Pos.x+86, m_Pos.y+HEIGHT_VITALITY+6, strVitality, 86, 0, RT3_SORT_CENTER);
 	
 	g_pRenderText->SetFont(g_hFont);
-	// 211 " 생   명 : %d / %d"
-	// memorylock 사용
+
 	if(IsMasterLevel( Hero->Class ) == true )
 	{
 		unicode::_sprintf(strVitality, GlobalText[211],CharacterAttribute->Life,Master_Level_Data.wMaxLife);
@@ -1249,42 +1195,31 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	}
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin4)) // 잭오랜턴의 음식
+	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin4))
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
 
-#ifdef PSW_SCROLL_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll5) )
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-#endif //PSW_SCROLL_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
+
 	if( g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_RiceCake) )
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef LDK_ADD_PC4_GUARDIAN
+
 	if( phelper->Durability != 0 && phelper->Type == ITEM_HELPER+65 )
 	{
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		if( IsRequireEquipItem(phelper) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		{
-#ifdef LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-			//만료된 기간제 아이템이면 출력 안함
 			if(false == pItemHelper->bExpiredPeriod)
 			{
 				g_pRenderText->SetTextColor(255, 0, 240, 255);
 			}
-#else //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-			g_pRenderText->SetTextColor(255, 0, 240, 255);
-#endif //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
 		}
 	}
-#endif //LDK_ADD_PC4_GUARDIAN
 	g_pRenderText->SetBgColor(0);
 	iY = HEIGHT_VITALITY+24;
 	g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strVitality);
@@ -1298,29 +1233,16 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strVitality);
 	}
 #endif //PBG_ADD_NEWCHAR_MONK
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////////
-	//							에너지										//
-	//////////////////////////////////////////////////////////////////////////
 
 	g_pRenderText->SetFont(g_hFontBold);
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 	
-    WORD wEnergy;
-	// memorylock 사용
-	wEnergy = CharacterAttribute->Energy+ CharacterAttribute->AddEnergy;
-	// memorylock 사용
-#ifdef PSW_SECRET_ITEM
+    WORD wEnergy = CharacterAttribute->Energy+ CharacterAttribute->AddEnergy;
+
 	if( g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4) )
 	{
 		g_pRenderText->SetTextColor(255, 120, 0, 255);
 	}
 	else
-#endif //PSW_SECRET_ITEM
     if(CharacterAttribute->AddEnergy)
     {
 		g_pRenderText->SetTextColor(100, 150, 255, 255);
@@ -1334,13 +1256,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	unicode::_sprintf(strEnergy, "%d", wEnergy);
 
 	g_pRenderText->SetBgColor(0);
-	// 168 "에너지"
 	g_pRenderText->RenderText(m_Pos.x+12, m_Pos.y+HEIGHT_ENERGY+6, GlobalText[168], 74, 0, RT3_SORT_CENTER);
 	g_pRenderText->RenderText(m_Pos.x+86, m_Pos.y+HEIGHT_ENERGY+6, strEnergy, 86, 0, RT3_SORT_CENTER);
 	
 	g_pRenderText->SetFont(g_hFont);
 	
-	// 213 " 마   나 : %d / %d"
 	if(IsMasterLevel( Hero->Class ) == true )
 	{
 		unicode::_sprintf(strEnergy, GlobalText[213], CharacterAttribute->Mana,Master_Level_Data.wMaxMana);
@@ -1351,45 +1271,39 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin5)) // 잭오랜턴의 음료
+	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin5))
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
 
-#ifdef PSW_SCROLL_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll6) )
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-#endif //PSW_SCROLL_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
+
 	if( g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Liguor) )
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-#endif //CSK_EVENT_CHERRYBLOSSOM
+
 	iY = HEIGHT_ENERGY+24;
+
 	g_pRenderText->RenderText(m_Pos.x+18, m_Pos.y+iY, strEnergy);
 
 	if (iBaseClass == CLASS_WIZARD || iBaseClass == CLASS_DARK || iBaseClass == CLASS_SUMMONER)
 	{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int Level = (pWeaponRight->Level>>3)&15;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int iMagicDamageMin;
 		int iMagicDamageMax;
-		// memorylock 사용
+
 		CharacterMachine->GetMagicSkillDamage( CharacterAttribute->Skill[Hero->CurrentSkill], &iMagicDamageMin, &iMagicDamageMax);
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 		int iMagicDamageMinInitial = iMagicDamageMin;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int iMagicDamageMaxInitial = iMagicDamageMax;
 
-#ifdef PJH_SEASON4_MASTER_RANK4
 	iMagicDamageMin += Add_Mana_Min;
 	iMagicDamageMax += Add_Mana_Max;
-#endif //PJH_SEASON4_MASTER_RANK4
-		// memorylock 사용
+
 		if( CharacterAttribute->Ability & ABILITY_PLUS_DAMAGE)
 		{
 			iMagicDamageMin += 10;
@@ -1417,13 +1331,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
 		pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 
-#ifdef YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK
+
 		int iNonExpiredLRingType = -1;
 		int iNonExpiredRRingType = -1;
-#ifdef LJH_FIX_IGNORING_EXPIRATION_PERIOD
-		iNonExpiredLRingType = pItemRingLeft->Type;
-		iNonExpiredRRingType = pItemRingRight->Type;
-#else  //LJH_FIX_IGNORING_EXPIRATION_PERIOD
+
 		if(!pItemRingLeft->bPeriodItem || !pItemRingLeft->bExpiredPeriod)
 		{
 			iNonExpiredLRingType = pItemRingLeft->Type;
@@ -1432,7 +1343,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		{
 			iNonExpiredRRingType = pItemRingRight->Type;
 		}
-#endif //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 
 		int maxIMagicDamageMin = 0;
 		int maxIMagicDamageMax = 0;
@@ -1442,102 +1352,46 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			maxIMagicDamageMin = max(maxIMagicDamageMin, 20);
 			maxIMagicDamageMax = max(maxIMagicDamageMax, 20);
 		}
-#ifdef PJH_ADD_PANDA_CHANGERING
 		if(iNonExpiredLRingType == ITEM_HELPER+76 || iNonExpiredRRingType == ITEM_HELPER+76)
 		{
 			maxIMagicDamageMin = max(maxIMagicDamageMin, 30);
 			maxIMagicDamageMax = max(maxIMagicDamageMax, 30);
 		}
-#endif	// PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
 		if(iNonExpiredLRingType == ITEM_HELPER+122 || iNonExpiredRRingType == ITEM_HELPER+122)
 		{
 			maxIMagicDamageMin = max(maxIMagicDamageMin, 40);
 			maxIMagicDamageMax = max(maxIMagicDamageMax, 40);
 		}
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
 
 		iMagicDamageMin += maxIMagicDamageMin;
 		iMagicDamageMax += maxIMagicDamageMax;
 
-
-#else	// YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK
-#ifdef LJH_FIX_CHANGE_RING_DAMAGE_BUG
-		int maxIMagicDamageMin = 0;
-		int maxIMagicDamageMax = 0;
-
-		if(pItemRingLeft->Type == ITEM_HELPER+41 || pItemRingRight->Type == ITEM_HELPER+41)
-		{
-			maxIMagicDamageMin = max(maxIMagicDamageMin, 20);
-			maxIMagicDamageMax = max(maxIMagicDamageMax, 20);
-		}
-#ifdef PJH_ADD_PANDA_CHANGERING
-		if(pItemRingLeft->Type == ITEM_HELPER+76 || pItemRingRight->Type == ITEM_HELPER+76)
-		{
-			maxIMagicDamageMin = max(maxIMagicDamageMin, 30);
-			maxIMagicDamageMax = max(maxIMagicDamageMax, 30);
-		}
-#endif	// PJH_ADD_PANDA_CHANGERING
-
-		// 최종 구해진 마법공격력에 착용중인 변신 반지들의 데미지 증가 중에 가장 높은 값을 더해준다.
-		iMagicDamageMin += maxIMagicDamageMin;	// 최소 공격 데미지
-		iMagicDamageMax += maxIMagicDamageMax;	// 최대 공격 데미지
-
-#else  //LJH_FIX_CHANGE_RING_DAMAGE_BUG
-		if(pItemRingLeft->Type == ITEM_HELPER+41 || pItemRingRight->Type == ITEM_HELPER+41)
-		{
-			// 최종 구해진 마법공격력에다가 20를 더해준다.
-			iMagicDamageMin += 20;	// 최소 마력 데미지
-			iMagicDamageMax += 20;	// 최대 마력 데미지
-		}
-#endif //LJH_FIX_CHANGE_RING_DAMAGE_BUG
-#endif	// YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK	// 소스정리시 삭제할 부분!!!
-		
-		// memorylock 사용
 		pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 		if(pItemHelper)
 		{
 			if(pItemHelper->Type == ITEM_HELPER+37 && pItemHelper->Option1 == 0x04)
 			{
-				// 환영 펜릴은 마법공격력은 
 				WORD wLevel = CharacterAttribute->Level;
-				// 최종 구해진 마법공격력에다가 (Level/25)를 더해준다.
-				iMagicDamageMin += (wLevel / 25);	// 최소 마력 데미지
-				iMagicDamageMax += (wLevel / 25);	// 최대 마력 데미지
+				iMagicDamageMin += (wLevel / 25);
+				iMagicDamageMax += (wLevel / 25);
 			}
-#ifdef LDK_FIX_PC4_GUARDIAN_DEMON_INFO
+
 			if(pItemHelper->Type == ITEM_HELPER+64)
 			{
-#ifdef LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-				//만료된 기간제 아이템이면 출력 안함
 				if(false == pItemHelper->bExpiredPeriod)
 				{
-					// memorylock 사용
-					iMagicDamageMin += int(float(iMagicDamageMin) * 0.4f);	// 최소 마력 데미지
-					iMagicDamageMax += int(float(iMagicDamageMax) * 0.4f);	// 최대 마력 데미지
+					iMagicDamageMin += int(float(iMagicDamageMin) * 0.4f);
+					iMagicDamageMax += int(float(iMagicDamageMax) * 0.4f);
 				}
-#else //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-				// memorylock 사용
-				iMagicDamageMin += int(float(iMagicDamageMin) * 0.4f);	// 최소 마력 데미지
-				iMagicDamageMax += int(float(iMagicDamageMax) * 0.4f);	// 최대 마력 데미지
-#endif //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
+
 			}
-#endif //LDK_FIX_PC4_GUARDIAN_DEMON_INFO
-			if(pItemHelper->Type == ITEM_HELPER+123)	// 스켈레톤 펫
+			if(pItemHelper->Type == ITEM_HELPER+123)
 			{
-#ifdef LJH_FIX_IGNORING_EXPIRATION_PERIOD
-				// memorylock 사용
-				iMagicDamageMin += int(float(iMagicDamageMin) * 0.2f);	// 최소 마력 데미지
-				iMagicDamageMax += int(float(iMagicDamageMax) * 0.2f);	// 최대 마력 데미지
-#else  //LJH_FIX_IGNORING_EXPIRATION_PERIOD
-				//만료된 기간제 아이템이면 출력 안함
 				if(false == pItemHelper->bExpiredPeriod)
 				{
-					// memorylock 사용
-					iMagicDamageMin += int(float(iMagicDamageMin) * 0.2f);	// 최소 마력 데미지
-					iMagicDamageMax += int(float(iMagicDamageMax) * 0.2f);	// 최대 마력 데미지
+					iMagicDamageMin += int(float(iMagicDamageMin) * 0.2f);
+					iMagicDamageMax += int(float(iMagicDamageMax) * 0.2f);
 				}
-#endif //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 			}
 			if(pItemHelper->Type == ITEM_HELPER+1)
 			{
@@ -1580,7 +1434,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		g_pRenderText->SetBgColor(0);
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-		if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2)) // 잭오랜턴의 분노
+		if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2))
 		{
 			g_pRenderText->SetTextColor(255, 0, 240, 255);
 		}
@@ -1601,7 +1455,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	{
 		int iCurseDamageMin = 0;
 		int iCurseDamageMax = 0;
-		// memorylock 사용
+
 		CharacterMachine->GetCurseSkillDamage(CharacterAttribute->Skill[Hero->CurrentSkill], &iCurseDamageMin, &iCurseDamageMax);
 
 		if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
@@ -1615,7 +1469,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		int iNonExpiredLRingType = -1;
 		int iNonExpiredRRingType = -1;
 
-		if(!pItemRingLeft->bPeriodItem || !pItemRingLeft->bExpiredPeriod)	// 왼손
+		if(!pItemRingLeft->bPeriodItem || !pItemRingLeft->bExpiredPeriod)
 		{
 			iNonExpiredLRingType = pItemRingLeft->Type;
 		}
@@ -1724,13 +1578,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         wCharisma= CharacterAttribute->Charisma+ CharacterAttribute->AddCharisma;
 
-#ifdef PSW_SECRET_ITEM
 		if( g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5) )
 		{
 			g_pRenderText->SetTextColor(255, 120, 0, 255);
 		}
 		else
-#endif //PSW_SECRET_ITEM
 
         if(CharacterAttribute->AddCharisma )
         {
@@ -1834,16 +1686,9 @@ void SEASON3B::CNewUICharacterInfoWindow::UnloadImages()
 
 void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
 {
-
-#ifdef KJH_FIX_WOPS_K28597_EQUIPED_LV10_DEFENSEITEM
 	ResetEquipmentLevel();
-#endif // KJH_FIX_WOPS_K28597_EQUIPED_LV10_DEFENSEITEM
 
-	// 버튼 정도 초기화
 	if(IsMasterLevel(Hero->Class) == true
-#ifdef KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT
-		&& GetCharacterClass(Hero->Class) != CLASS_DIMENSIONMASTER			// 2008.06.13 현재는 소환술사 마스터스킬 불가. 풀릴때 define 주석처리
-#endif // KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT
 #ifdef PBG_ADD_NEWCHAR_MONK
 		&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -1860,38 +1705,24 @@ void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
 		m_BtnMasterLevel.ChangeTextColor(RGBA(100, 100, 100, 255));
 	}
 
-	// 세트 아이템 옵션 클래스 초기화
 	g_csItemOption.init();
-
-	// 내구력이 0이 아니면 계산을 전부 다시 한다.
 
 	if( CharacterMachine->IsZeroDurability() )
 	{
 		CharacterMachine->CalculateAll();
 	}
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
-// 캐릭터 창을 여는 퀘스트일 때 서버로 한 번만 알림.
-	if (g_QuestMng.IsIndexInCurQuestIndexList(0x10009))	// 0x10009가 캐릭터 창을 여는 퀘스트 인덱스.
+	if (g_QuestMng.IsIndexInCurQuestIndexList(0x10009))
 	{
 		if (g_QuestMng.IsEPRequestRewardState(0x10009))
 		{
-#ifdef ASG_MOD_UI_QUEST_INFO
-			g_pMyQuestInfoWindow->UnselectQuestList();	// 퀘스트 정보창의 퀘스트 리스트를 선택하지 않은 상태로.
-#endif	// ASG_MOD_UI_QUEST_INFO
-			SendSatisfyQuestRequestFromClient(0x10009);	// 서버로 캐릭터 정보창이 열렸음을 알림.
-			g_QuestMng.SetEPRequestRewardState(0x10009, false);	// 서버로 한 번만 알리기 위해.
+			g_pMyQuestInfoWindow->UnselectQuestList();
+			SendSatisfyQuestRequestFromClient(0x10009);
+			g_QuestMng.SetEPRequestRewardState(0x10009, false);
 		}
 	}
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 }
 
-#ifdef KJH_FIX_WOPS_K28597_EQUIPED_LV10_DEFENSEITEM
-// 현재 장비된 아이템레벨을 다시 셋팅한다.
-// 캐릭터 정보창 열었을때 호출.
-//* WSClient::ReceiveCreatePlayerViewport() 에서 압축된 레벨 정보를 주인공 케릭터장비 레벨로
-//* 셋팅하기 때문에 맞지 않다. 
-//* 실제 아이템 레벨로 변경해 주어야 한다.
 void SEASON3B::CNewUICharacterInfoWindow::ResetEquipmentLevel()
 {
 	ITEM *pItem = CharacterMachine->Equipment;
@@ -1905,4 +1736,4 @@ void SEASON3B::CNewUICharacterInfoWindow::ResetEquipmentLevel()
 
 	CheckFullSet(Hero);	
 }
-#endif // KJH_FIX_WOPS_K28597_EQUIPED_LV10_DEFENSEITEM
+

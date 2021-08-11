@@ -99,11 +99,7 @@ namespace
 	{
 		if( name.size() != 0 ) {
 			for( int i = 0; i < MapNameCount; ++i)  {
-#ifdef PBG_WOPS_MOVE_MAPNAME_JAPAN
-				if(strcmp(name.c_str(), MapName[i].c_str()) ==0)
-#else //PBG_WOPS_MOVE_MAPNAME_JAPAN
 				if( name == MapName[i]) 
-#endif //PBG_WOPS_MOVE_MAPNAME_JAPAN
 				{
 					return true;
 				}
@@ -514,49 +510,14 @@ DWORD SEASON3B::CNewUIMoveCommandWindow::GetMoveCommandKey()
 #endif	// YDG_ADD_MOVE_COMMAND_PROTOCOL
 
 #ifdef ASG_ADD_GENS_SYSTEM
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
-extern  int  ServerSelectHi;
-extern  int  ServerLocalSelect;
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 
-// 분쟁 맵 설정.
 void SEASON3B::CNewUIMoveCommandWindow::SetStrifeMap()
 {
 	std::list<CMoveCommandData::MOVEINFODATA*>::iterator li;
 
-	if (BLUE_MU::IsBlueMuServer())	// 부분 유료화 서버인가?
+	if (!g_ServerListManager->IsNonPvP())
 	{
-#ifdef ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-		const int c_nStrife = 10;
-		int anStrifeIndex[c_nStrife] = { 11, 12, 13, 25, 27, 28, 29, 33, 42, 45 };	// MoveReq.txt의 맵 인덱스.
-#else	// ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-		int anStrifeIndex[9] = { 11, 12, 13, 25, 27, 28, 29, 33, 42 };	// MoveReq.txt의 맵 인덱스.
-#endif	// ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-		int i;
-		for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); advance(li, 1))
-		{
-			(*li)->_bStrife = false;
-#ifdef ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-			for (i = 0; i < c_nStrife; ++i)
-#else	// ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-			for (i = 0; i < 9; ++i)
-#endif	// ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-			{
-				if ((*li)->_ReqInfo.index == anStrifeIndex[i])
-				{
-					(*li)->_bStrife = true;
-					break;
-				}
-			}
-		}
-	}
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
-	else if (!g_ServerListManager->IsNonPvP())	// PVP 서버인가?
-#else // KJH_ADD_SERVER_LIST_SYSTEM
-	else if (!::IsNonPvpServer(ServerSelectHi, ServerLocalSelect))	// PVP 서버인가?
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-	{
-		int anStrifeIndex[1] = { 42 };							// MoveReq.txt의 맵 인덱스.
+		int anStrifeIndex[1] = { 42 };
 		int i;
 		for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); advance(li, 1))
 		{
@@ -571,7 +532,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SetStrifeMap()
 			}
 		}
 	}
-	else	// NonPVP 서버에서는 분쟁 지역 없음.
+	else
 	{
 		for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); advance(li, 1))
 			(*li)->_bStrife = false;
@@ -581,8 +542,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SetStrifeMap()
 
 void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 {
-	//----------------------------------------------
-	//----------------------------------------------
+
 	DWORD iZen;
 	int iLevel, iReqLevel, iReqZen;
 
@@ -1444,16 +1404,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 #endif	// ASG_ADD_GENS_SYSTEM
 
 			g_pRenderText->RenderText(DECREAD(m_MapNamePos.x), iY, (*li)->_ReqInfo.szMainMapName, 0 ,0, RT3_WRITE_CENTER);
-#ifdef _BLUE_SERVER //  블루서버에만 적용
-#ifdef ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			if (400 == (*li)->_ReqInfo.m_iReqMaxLevel)	// 최대 제한 레벨이 400이면.
-				itoa(iReqLevel, szText, 10);			// 최소 제한 레벨만 표시.
-			else
-				::sprintf(szText, "%d~%d", iReqLevel, (*li)->_ReqInfo.m_iReqMaxLevel);
-#endif	// ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-#else	// _BLUE_SERVER 
 			itoa(iReqLevel, szText, 10);
-#endif	// _BLUE_SERVER 
 			g_pRenderText->RenderText(DECREAD(m_ReqLevelPos.x), iY, szText, 0 ,0, RT3_WRITE_CENTER);
 #ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
 			// 무법자1단계 상태 이상이고 무료섭이라면
@@ -1483,19 +1434,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 				g_pRenderText->RenderText(DECREAD(m_StrifePos.x), iY, GlobalText[2987], 0 ,0, RT3_WRITE_CENTER);	// 2987	"(분쟁)"
 #endif	// ASG_ADD_GENS_SYSTEM
 			g_pRenderText->RenderText(DECREAD(m_MapNamePos.x), iY, (*li)->_ReqInfo.szMainMapName, 0 ,0, RT3_WRITE_CENTER);
-#ifdef _BLUE_SERVER //  블루서버에만 적용
-#ifdef ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			if (400 == (*li)->_ReqInfo.m_iReqMaxLevel)	// 최대 제한 레벨이 400이면.
-				itoa(iReqLevel, szText, 10);			// 최소 제한 레벨만 표시.
-			else
-				::sprintf(szText, "%d~%d", iReqLevel, (*li)->_ReqInfo.m_iReqMaxLevel);
-
-			if (iReqLevel > iLevel || (*li)->_ReqInfo.m_iReqMaxLevel < iLevel)
-				g_pRenderText->SetTextColor(255, 51, 26, DECREAD(m_iTextAlpha));
-			else
-				g_pRenderText->SetTextColor(164, 39, 17, DECREAD(m_iTextAlpha));
-#endif	// ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-#else	// _BLUE_SERVER 
 			itoa(iReqLevel, szText, 10);
 			if( iReqLevel > iLevel )
 			{
@@ -1505,7 +1443,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 			{
 				g_pRenderText->SetTextColor(164, 39, 17, DECREAD(m_iTextAlpha));
 			}
-#endif	// _BLUE_SERVER 
+
 			g_pRenderText->RenderText(DECREAD(m_ReqLevelPos.x), iY, szText, 0 ,0, RT3_WRITE_CENTER);
 #ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
 			// 무법자1단계 상태 이상이고 무료섭이라면
@@ -2486,49 +2424,13 @@ DWORD SEASON3B::CNewUIMoveCommandWindow::GetMoveCommandKey()
 }
 #endif	// YDG_ADD_MOVE_COMMAND_PROTOCOL
 
-#ifdef ASG_ADD_GENS_SYSTEM
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM		// #ifndef
-extern  int  ServerSelectHi;
-extern  int  ServerLocalSelect;
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-
 void SEASON3B::CNewUIMoveCommandWindow::SetStrifeMap()
 {
 	std::list<CMoveCommandData::MOVEINFODATA*>::iterator li;
 
-	if (BLUE_MU::IsBlueMuServer())	// 부분 유료화 서버인가?
+	if (!g_ServerListManager->IsNonPvP())
 	{
-#ifdef ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-		const int c_nStrife = 10;
-		int anStrifeIndex[c_nStrife] = { 11, 12, 13, 25, 27, 28, 29, 33, 42, 45 };	// MoveReq.txt의 맵 인덱스.
-#else	// ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-		int anStrifeIndex[9] = { 11, 12, 13, 25, 27, 28, 29, 33, 42 };	// MoveReq.txt의 맵 인덱스.
-#endif	// ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-		int i;
-		for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); advance(li, 1))
-		{
-			(*li)->_bStrife = false;
-#ifdef ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-			for (i = 0; i < c_nStrife; ++i)
-#else	// ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-			for (i = 0; i < 9; ++i)
-#endif	// ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND
-			{
-				if ((*li)->_ReqInfo.index == anStrifeIndex[i])
-				{
-					(*li)->_bStrife = true;
-					break;
-				}
-			}
-		}
-	}
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
-	else if (!g_ServerListManager->IsNonPvP())	// PVP 서버인가?
-#else // KJH_ADD_SERVER_LIST_SYSTEM
-	else if (!::IsNonPvpServer(ServerSelectHi, ServerLocalSelect))	// PVP 서버인가?
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-	{
-		int anStrifeIndex[1] = { 42 };							// MoveReq.txt의 맵 인덱스.
+		int anStrifeIndex[1] = { 42 };
 		int i;
 		for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); advance(li, 1))
 		{
@@ -2543,19 +2445,17 @@ void SEASON3B::CNewUIMoveCommandWindow::SetStrifeMap()
 			}
 		}
 	}
-	else	// NonPVP 서버에서는 분쟁 지역 없음.
+	else
 	{
 		for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); advance(li, 1))
 			(*li)->_bStrife = false;
 	}
 }
-#endif	// ASG_ADD_GENS_SYSTEM
 
 void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 {
 	int a = gMapManager.WorldActive;
-	//----------------------------------------------
-	//----------------------------------------------
+
 	DWORD iZen;
 	int iLevel, iReqLevel, iReqZen;
 
@@ -2633,32 +2533,19 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 				if( 
 					(
 					pEquipedHelper->Type == ITEM_HELPER+37		
-#ifndef PSW_BUGFIX_ICARUS_MOVE_UNIRIA
-					|| pEquipedHelper->Type == ITEM_HELPER+2
-#endif //PSW_BUGFIX_ICARUS_MOVE_UNIRIA
 					|| pEquipedHelper->Type == ITEM_HELPER+3
-#ifdef KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
 					|| pEquipedHelper->Type == ITEM_HELPER+4
-#endif // KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
 					|| pEquipedWing->Type == ITEM_HELPER+30
 					|| (pEquipedWing->Type >= ITEM_WING+36 && pEquipedWing->Type <= ITEM_WING+43)			
 					|| (pEquipedWing->Type >= ITEM_WING && pEquipedWing->Type <= ITEM_WING+6) 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 					|| ( ITEM_WING+130 <= pEquipedWing->Type && pEquipedWing->Type <= ITEM_WING+134 )
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 					|| (pEquipedWing->Type >= ITEM_WING+49 && pEquipedWing->Type <= ITEM_WING+50)
 					|| (pEquipedWing->Type == ITEM_WING+135)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 					)
-#ifdef KJH_FIX_WOPS_26619_CANMOVE_IKARUS_BY_UNIRIA
 					&& !( pEquipedHelper->Type == ITEM_HELPER+2 )
-#endif // KJH_FIX_WOPS_26619_CANMOVE_IKARUS_BY_UNIRIA
-#ifdef KJH_FIX_MOVE_ICARUS_EQUIPED_PANDA_CHANGE_RING
 					&& ( g_ChangeRingMgr->CheckBanMoveIcarusMap(pEquipedRightRing->Type, pEquipedLeftRing->Type) == false )
-#else // KJH_FIX_MOVE_ICARUS_EQUIPED_PANDA_CHANGE_RING
-					&& ( g_ChangeRingMgr->CheckMoveMap(pEquipedRightRing->Type, pEquipedLeftRing->Type) == false )
-#endif // KJH_FIX_MOVE_ICARUS_EQUIPED_PANDA_CHANGE_RING
 					)
 				{
 					(*li)->_bCanMove = true;
@@ -2668,7 +2555,6 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 					(*li)->_bCanMove = false;
 				}
 			}
-			// 아틀란스 시리즈 일때 예외처리
 			else if(strncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], 8)==0)
 			{
 				if(pEquipedHelper->Type == ITEM_HELPER+2 || pEquipedHelper->Type == ITEM_HELPER+3)
@@ -2743,9 +2629,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 {
 	int iX, iY;
 
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-	CMoveCommandWindowEncrypt enc;
-#endif	// YDG_MOD_PROTECT_AUTO_V4
 	if( CheckMouseIn( m_ScrollBtnPos.x, m_ScrollBtnPos.y, MOVECOMMAND_SCROLLBTN_WIDTH, MOVECOMMAND_SCROLLBTN_HEIGHT ))
 	{	
 		if(IsPress(VK_LBUTTON))
@@ -3037,17 +2920,12 @@ bool SEASON3B::CNewUIMoveCommandWindow::Update()
 
 void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
 {
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-	CMoveCommandWindowEncrypt enc;
-#endif	// YDG_MOD_PROTECT_AUTO_V4
-#ifdef KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 	if( m_iRemainMoveScrBtnperStep < m_iTotalMoveScrBtnperStep )
 	{
 		int iMovePixel = 0;
 		m_iAcumMoveMouseScrollPixel -= iMoveValue;
 		if( (-m_iAcumMoveMouseScrollPixel) < m_icurMoveScrBtnPixelperStep )
 		{
-			// 마우스로 움직인 픽셀이 현재 움직여야 하는 픽셀을 넘지 않으면 움직인 픽셀값만 누적시키고 return;
 			return;
 		}
 		else
@@ -3068,39 +2946,20 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);		
 		}
 	}
-#else // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
-#ifdef LDK_FIX_MOVEWINDOW_SCROLL_BUG
-	m_ScrollBtnPos.y += iMoveValue;
-#else //LDK_FIX_MOVEWINDOW_SCROLL_BUG
- 	m_ScrollBtnPos.y -= iMoveValue;
-#endif //LDK_FIX_MOVEWINDOW_SCROLL_BUG
-
-	if( m_ScrollBtnPos.y <= m_ScrollBarPos.y || MouseY < m_ScrollBarPos.y+(MOVECOMMAND_SCROLLBTN_HEIGHT/2))
-	{
-		m_ScrollBtnPos.y = m_ScrollBarPos.y;
-	}
-#endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 }
 
 void SEASON3B::CNewUIMoveCommandWindow::ScrollDown(int iMoveValue)
 {
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-	CMoveCommandWindowEncrypt enc;
-#endif	// YDG_MOD_PROTECT_AUTO_V4
-#ifdef KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 	if( m_iRemainMoveScrBtnperStep > 0 )
 	{
 		int iMovePixel = 0;
 		m_iAcumMoveMouseScrollPixel += iMoveValue;
 		if( m_iAcumMoveMouseScrollPixel < m_icurMoveScrBtnPixelperStep )
 		{
-			// 마우스로 움직인 픽셀이 현재 움직여야 하는 픽셀을 넘지 않으면 
-			// 움직인 픽셀값만 누적시키고 return;
 			return;
 		}
 		else
 		{	
-			//m_iAcumMoveMouseScrollPixel = 0;
 			RecursiveCalcScroll(m_iAcumMoveMouseScrollPixel, &iMovePixel, true);
 
 			g_ConsoleDebug->Write(MCD_NORMAL, "m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);	
@@ -3117,24 +2976,10 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollDown(int iMoveValue)
 			
 		}
 	}
-#else // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
-	m_ScrollBtnPos.y += iMoveValue;
-	if( m_ScrollBtnPos.y >= m_ScrollBarPos.y+m_iScrollBarHeightPixel-MOVECOMMAND_SCROLLBTN_HEIGHT
-			 || MouseY > m_ScrollBarPos.y+m_iScrollBarHeightPixel-(MOVECOMMAND_SCROLLBTN_HEIGHT/2))
-	{
-		m_ScrollBtnPos.y = m_ScrollBarPos.y+m_iScrollBarHeightPixel-MOVECOMMAND_SCROLLBTN_HEIGHT;
-	}
-#endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 }
 
-#ifdef KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue, OUT int* piMovePixel, bool bSign /* = true */)
 {
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-	CMoveCommandWindowEncrypt enc;
-#endif	// YDG_MOD_PROTECT_AUTO_V4
-
-	
 	if( bSign == true )
 	{ // DownScroll
 		if( m_iRemainMoveScrBtnperStep > 0)
@@ -3195,7 +3040,7 @@ void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue
 
 	return;
 }
-#endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
+
 
 void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 {
@@ -3203,17 +3048,9 @@ void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 	CMoveCommandWindowEncrypt enc;
 #endif	// YDG_MOD_PROTECT_AUTO_V4
 
-#ifdef KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 	m_iRenderStartTextIndex = m_iTotalMoveScrBtnperStep - m_iRemainMoveScrBtnperStep;
-#else // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
-	m_iRenderStartTextIndex = ((m_ScrollBtnPos.y-m_ScrollBarPos.y)/m_iHeightByMoveStep);
-#endif // KJH_FIX_MOVECOMMAND_WINDOW_SIZE
 
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-	m_iRenderEndTextIndex = m_iRenderStartTextIndex + m_iTextLine;
-#else // CSK_MOD_PROTECT_AUTO_V1
 	m_iRenderEndTextIndex = m_iRenderStartTextIndex + MOVECOMMAND_MAX_RENDER_TEXTLINE;
-#endif // CSK_MOD_PROTECT_AUTO_V1
 	
 	if( m_iRenderEndTextIndex > (int)m_listMoveInfoData.size() )
 	{
@@ -3223,65 +3060,19 @@ void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 
 void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 {
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-	CMoveCommandWindowEncrypt enc;
-#endif	// YDG_MOD_PROTECT_AUTO_V4
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-	glColor4f(0.0f, 0.0f, 0.0f, m_fBackgroundAlpha);
-#else // CSK_MOD_PROTECT_AUTO_V1
 	glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-#endif // CSK_MOD_PROTECT_AUTO_V1
 	
 	RenderColor((float)m_Pos.x, (float)m_Pos.y, (float)m_MapNameUISize.x, (float)m_MapNameUISize.y);
 
-#ifdef YDG_MOD_PROTECT_AUTO_V3
-#ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-	if (!g_pProtectAuto->IsNewVersion())
-		glColor4f ( 0.6f, 0.f, 0.f, 1.f );
-	else
-#endif	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-		glColor4f ( 0.6f, 0.f, 0.f, m_fBackgroundAlpha );
-#else	// YDG_MOD_PROTECT_AUTO_V3
 	glColor4f ( 0.6f, 0.f, 0.f, 1.f );
-#endif	// YDG_MOD_PROTECT_AUTO_V3
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-	RenderColor( m_StartMapNamePos.x, m_Pos.y + m_MapNameUISize.y-m_iRealFontHeight-6, m_MapNameUISize.x-5, m_iRealFontHeight );
-#else // CSK_MOD_MOVE_COMMAND_WINDOW
-	RenderColor( m_StartMapNamePos.x, m_MapNameUISize.y-m_iRealFontHeight-6, m_MapNameUISize.x-5, m_iRealFontHeight );
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
-	
-#ifdef YDG_MOD_PROTECT_AUTO_V3
-#ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-	if (!g_pProtectAuto->IsNewVersion())
-		glColor4f ( 1.f, 1.f, 1.f, 1.f );
-	else
-#endif	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-		glColor4f ( 1.f, 1.f, 1.f, m_fBackgroundAlpha );
-#else	// YDG_MOD_PROTECT_AUTO_V3
-	glColor4f ( 1.f, 1.f, 1.f, 1.f );
-#endif	// YDG_MOD_PROTECT_AUTO_V3
 
+	RenderColor( m_StartMapNamePos.x, m_MapNameUISize.y-m_iRealFontHeight-6, m_MapNameUISize.x-5, m_iRealFontHeight );
+
+	glColor4f ( 1.f, 1.f, 1.f, 1.f );
 	EnableAlphaTest();
 
-	// 스크롤바
-	RenderImage(IMAGE_MOVECOMMAND_SCROLL_TOP, m_ScrollBarPos.x, m_ScrollBarPos.y, 
-					MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT );		// TOP
+	RenderImage(IMAGE_MOVECOMMAND_SCROLL_TOP, m_ScrollBarPos.x, m_ScrollBarPos.y, MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT );		// TOP
 	
-#ifdef ASG_FIX_MOVECMD_WIN_SCRBAR
-	int i;
-	for( i=0 ; i<m_iScrollBarMiddleNum ; i++ )
-	{
-		RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, m_ScrollBarPos.x, 
-			m_ScrollBarPos.y+MOVECOMMAND_SCROLLBAR_TOP_HEIGHT+(i*MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
-			MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT );	// MIDDLE
-	}
-	if( m_iScrollBarMiddleRemainderPixel > 0 )
-	{
-		RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, m_ScrollBarPos.x, 
-			m_ScrollBarPos.y+MOVECOMMAND_SCROLLBAR_TOP_HEIGHT+(i*MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
-			MOVECOMMAND_SCROLLBAR_TOP_WIDTH, m_iScrollBarMiddleRemainderPixel );	// MIDDLE 나머지
-	}
-#else	// ASG_FIX_MOVECMD_WIN_SCRBAR
 	int icntText = 0;
 	for( int i=0 ; i<m_iScrollBarMiddleNum ; i++ )
 	{
@@ -3296,13 +3087,10 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 			m_ScrollBarPos.y+MOVECOMMAND_SCROLLBAR_TOP_HEIGHT+(icntText*MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
 			MOVECOMMAND_SCROLLBAR_TOP_WIDTH, m_iScrollBarMiddleRemainderPixel );	// MIDDLE 나머지
 	}
-#endif	// ASG_FIX_MOVECMD_WIN_SCRBAR
-
 
 	RenderImage(IMAGE_MOVECOMMAND_SCROLL_BOTTOM, m_ScrollBarPos.x, m_ScrollBarPos.y+m_iScrollBarHeightPixel-MOVECOMMAND_SCROLLBAR_TOP_HEIGHT,
 					MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT );		// BOTTOM
 
-	// 스크롤바 버튼
 	if( m_bScrollBtnActive == true )
 	{
 		if (m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED) 
@@ -3320,32 +3108,13 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// 제목
+
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0);
-#ifdef YDG_MOD_PROTECT_AUTO_V3
-#ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-	if (!g_pProtectAuto->IsNewVersion())
-		g_pRenderText->SetTextColor(255, 204, 26, 255);
-	else
-#endif	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-		g_pRenderText->SetTextColor(255, 204, 26, m_fBackgroundAlpha * 255);
-#else	// YDG_MOD_PROTECT_AUTO_V3
 	g_pRenderText->SetTextColor(255, 204, 26, 255);
-#endif	// YDG_MOD_PROTECT_AUTO_V3
 	g_pRenderText->RenderText(m_StartUISubjectName.x, m_StartUISubjectName.y, GlobalText[933], 0 ,0, RT3_WRITE_CENTER);
-
 	g_pRenderText->SetFont(g_hFont);
-#ifdef YDG_MOD_PROTECT_AUTO_V3
-#ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-	if (!g_pProtectAuto->IsNewVersion())
-		g_pRenderText->SetTextColor(127, 178, 255, 255);
-	else
-#endif	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-		g_pRenderText->SetTextColor(127, 178, 255, m_fBackgroundAlpha * 255);
-#else	// YDG_MOD_PROTECT_AUTO_V3
 	g_pRenderText->SetTextColor(127, 178, 255, 255);
-#endif	// YDG_MOD_PROTECT_AUTO_V3
 #ifdef ASG_ADD_GENS_SYSTEM
 	g_pRenderText->RenderText(m_StrifePos.x, m_StartUISubjectName.y+20, GlobalText[2988], 0 ,0, RT3_WRITE_CENTER);
 #endif	// ASG_ADD_GENS_SYSTEM
@@ -3371,10 +3140,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 	DWORD iZen = CharacterMachine->Gold;
 	int iReqLevel;
 	char szText[24];
-
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-	CMoveCommandWindowEncrypt enc;
-#endif	// YDG_MOD_PROTECT_AUTO_V4
 
 	int iCurRenderTextIndex = 0;
 	for ( int i=0 ; i<m_iRenderEndTextIndex ; i++, li++ )
@@ -3404,82 +3169,26 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 #endif // LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
 			 )
 		{
-#ifdef CSK_FIX_GM_MOVE
-			char strNewMapName[64];
-			bool bKalima = false;
-			
-			for(int i=0; i<8; ++i)
-			{
-				sprintf(strNewMapName, "%s%d", GlobalText[58], i);
-				
-				if(strcmp((*li)->_ReqInfo.szMainMapName, strNewMapName) == 0)
-				{
-					bKalima = true;
-					break;
-				}
-			}
-			
-			if(bKalima == true)
-			{
-				if(i >= 0 && i <= 6)
-				{
-					iReqLevel = iReqLevel - 20;
-				}
-			}
-			else
-#endif // CSK_FIX_GM_MOVE
-			{
-				iReqLevel = int(float(iReqLevel)*2.f/3.f);
-			}
+			iReqLevel = int(float(iReqLevel)*2.f/3.f);
 		}
 		
 		if( (*li)->_bCanMove == true )
 		{
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-			g_pRenderText->SetTextColor(255, 255, 255, m_iTextAlpha);
-#else // CSK_MOD_PROTECT_AUTO_V1
 			g_pRenderText->SetTextColor(255, 255, 255, 255);
-#endif // CSK_MOD_PROTECT_AUTO_V1
+
 #ifdef ASG_ADD_GENS_SYSTEM
 			if ((*li)->_bStrife)
 				g_pRenderText->RenderText(m_StrifePos.x, iY, GlobalText[2987], 0 ,0, RT3_WRITE_CENTER);	// 2987	"(분쟁)"
 #endif	// ASG_ADD_GENS_SYSTEM
 			g_pRenderText->RenderText(m_MapNamePos.x, iY, (*li)->_ReqInfo.szMainMapName, 0 ,0, RT3_WRITE_CENTER);
-#ifdef _BLUE_SERVER		//  블루서버에만 적용
-#ifdef ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			if (400 == (*li)->_ReqInfo.m_iReqMaxLevel)	// 최대 제한 레벨이 400이면.
-				itoa(iReqLevel, szText, 10);			// 최소 제한 레벨만 표시.
-			else
-				::sprintf(szText, "%d~%d", iReqLevel, (*li)->_ReqInfo.m_iReqMaxLevel);
-#endif	// ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-#else	// _BLUE_SERVER
 			itoa(iReqLevel, szText, 10);
-#endif	// _BLUE_SERVER
 			g_pRenderText->RenderText(m_ReqLevelPos.x, iY, szText, 0 ,0, RT3_WRITE_CENTER);
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-			// 무법자1단계 상태 이상이고 무료섭이라면
-			if(g_PKSystem->IsPKState())
-			{
-				itoa(g_PKSystem->GetReqZen((*li)->_ReqInfo.iReqZen), szText, 10);
-			}
-			else
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
 				itoa((*li)->_ReqInfo.iReqZen, szText, 10);
 			g_pRenderText->RenderText(m_ReqZenPos.x, iY, szText, 0 ,0, RT3_WRITE_CENTER);
 			
-			// 선택맵이름 배경색
 			if( (*li)->_bSelected == true )
 			{
-#ifdef YDG_MOD_PROTECT_AUTO_V3
-#ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-			if (!g_pProtectAuto->IsNewVersion())
 				glColor4f ( 0.8f, 0.8f, 0.1f, 0.6f );
-			else
-#endif	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-				glColor4f ( 0.8f, 0.8f, 0.1f, m_fBackgroundAlpha );
-#else	// YDG_MOD_PROTECT_AUTO_V3
-				glColor4f ( 0.8f, 0.8f, 0.1f, 0.6f );
-#endif	// YDG_MOD_PROTECT_AUTO_V3
 				RenderColor( iX, iY-1, m_MapNameUISize.x-22, m_iRealFontHeight );
 				glColor4f ( 1.f, 1.f, 1.f, 1.f );
 				EnableAlphaTest();
@@ -3487,80 +3196,34 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 		}
 		else
 		{
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-			g_pRenderText->SetTextColor(164, 39, 17, m_iTextAlpha);
-#else // CSK_MOD_PROTECT_AUTO_V1
 			g_pRenderText->SetTextColor(164, 39, 17, 255);
-#endif // CSK_MOD_PROTECT_AUTO_V1
+
 #ifdef ASG_ADD_GENS_SYSTEM
 			if ((*li)->_bStrife)
 				g_pRenderText->RenderText(m_StrifePos.x, iY, GlobalText[2987], 0 ,0, RT3_WRITE_CENTER);	// 2987	"(분쟁)"
 #endif	// ASG_ADD_GENS_SYSTEM
 			g_pRenderText->RenderText(m_MapNamePos.x, iY, (*li)->_ReqInfo.szMainMapName, 0 ,0, RT3_WRITE_CENTER);
-#ifdef _BLUE_SERVER		//  블루서버에만 적용
-#ifdef ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			if (400 == (*li)->_ReqInfo.m_iReqMaxLevel)	// 최대 제한 레벨이 400이면.
-				itoa(iReqLevel, szText, 10);			// 최소 제한 레벨만 표시.
-			else
-				::sprintf(szText, "%d~%d", iReqLevel, (*li)->_ReqInfo.m_iReqMaxLevel);
-			
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-			if (iReqLevel > iLevel || (*li)->_ReqInfo.m_iReqMaxLevel < iLevel)
-				g_pRenderText->SetTextColor(255, 51, 26, m_iTextAlpha);
-			else
-				g_pRenderText->SetTextColor(164, 39, 17, m_iTextAlpha);
-#else  //CSK_MOD_PROTECT_AUTO_V1
-			if (iReqLevel > iLevel || (*li)->_ReqInfo.m_iReqMaxLevel < iLevel)
-				g_pRenderText->SetTextColor(255, 51, 26, 255);
-			else
-				g_pRenderText->SetTextColor(164, 39, 17, 255);
-#endif //CSK_MOD_PROTECT_AUTO_V1
 
-#endif	// ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-#else	// _BLUE_SERVER
 			itoa(iReqLevel, szText, 10);
 			if( iReqLevel > iLevel )
 			{
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-				g_pRenderText->SetTextColor(255, 51, 26, m_iTextAlpha);
-#else // CSK_MOD_PROTECT_AUTO_V1
 				g_pRenderText->SetTextColor(255, 51, 26, 255);
-#endif // CSK_MOD_PROTECT_AUTO_V1
+
 			}
 			else
 			{
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-				g_pRenderText->SetTextColor(164, 39, 17, m_iTextAlpha);
-#else // CSK_MOD_PROTECT_AUTO_V1
 				g_pRenderText->SetTextColor(164, 39, 17, 255);
-#endif // CSK_MOD_PROTECT_AUTO_V1
 			}
-#endif	// _BLUE_SERVER
 			g_pRenderText->RenderText(m_ReqLevelPos.x, iY, szText, 0 ,0, RT3_WRITE_CENTER);
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-			// 무법자1단계 상태 이상이고 무료섭이라면
-			if(g_PKSystem->IsPKState())
-			{
-				itoa(g_PKSystem->GetReqZen((*li)->_ReqInfo.iReqZen), szText, 10);
-			}
-			else
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
+
 			itoa((*li)->_ReqInfo.iReqZen, szText, 10);
 			if( (*li)->_ReqInfo.iReqZen > (int)iZen )
 			{
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-				g_pRenderText->SetTextColor(255, 51, 26, m_iTextAlpha);
-#else // CSK_MOD_PROTECT_AUTO_V1
 				g_pRenderText->SetTextColor(255, 51, 26, 255);
-#endif // CSK_MOD_PROTECT_AUTO_V1	
 			}
 			else
 			{
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-				g_pRenderText->SetTextColor(164, 39, 17, m_iTextAlpha);
-#else // CSK_MOD_PROTECT_AUTO_V1
 				g_pRenderText->SetTextColor(164, 39, 17, 255);
-#endif // CSK_MOD_PROTECT_AUTO_V1	
 			}
 			g_pRenderText->RenderText(m_ReqZenPos.x, iY, szText, 0 ,0, RT3_WRITE_CENTER);
 		}
@@ -3568,24 +3231,9 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 		iCurRenderTextIndex++;
 	}
 
-	// 닫기 버튼
-#ifdef YDG_MOD_PROTECT_AUTO_V3
-#ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-	if (!g_pProtectAuto->IsNewVersion())
-		g_pRenderText->SetTextColor(255, 255, 255, 255);
-	else
-#endif	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V3
-		g_pRenderText->SetTextColor(255, 255, 255, m_fBackgroundAlpha * 255);
-#else	// YDG_MOD_PROTECT_AUTO_V3
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
-#endif	// YDG_MOD_PROTECT_AUTO_V3
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-	g_pRenderText->RenderText(m_MapNameUISize.x/2, m_Pos.y + m_MapNameUISize.y-m_iRealFontHeight-5, GlobalText[1002], 0 ,0, RT3_WRITE_CENTER);
-#else // CSK_MOD_MOVE_COMMAND_WINDOW
 	g_pRenderText->RenderText(m_MapNameUISize.x/2, m_MapNameUISize.y-m_iRealFontHeight-5, GlobalText[1002], 0 ,0, RT3_WRITE_CENTER);
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -3596,33 +3244,10 @@ float SEASON3B::CNewUIMoveCommandWindow::GetLayerDepth()
 
 void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 {
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-	CMoveCommandWindowEncrypt enc;
-#endif	// YDG_MOD_PROTECT_AUTO_V4
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-	if(World != m_iWorldIndex)
-	{
-		m_iWorldIndex = World;
-		ResetWindowOpenCount();
-	}
-
-	m_iPosY_Random = rand()%m_iPosY_Random_Range + m_iPosY_Random_Min;
-	SetPos(m_Pos.x, m_Pos_Start.y + m_iPosY_Random);
-	
-	m_iWindowOpenCount++;
-
-	if(m_iWindowOpenCount >= 10)
-	{
-		// 2731 "지속적인 맵 이동 시도 시 접속이 종료됩니다."
-		SEASON3B::CreateOkMessageBox(GlobalText[2731]);
-		ResetWindowOpenCount();
-	}
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
-#ifdef PBG_FIX_MOVECOMMAND_WINDOW_SCROLL
 	SetPos(m_Pos.x, m_Pos.y);
-#endif //PBG_FIX_MOVECOMMAND_WINDOW_SCROLL
+
 #ifdef ASG_ADD_GENS_SYSTEM
-	SetStrifeMap();		// 분쟁 맵 설정.
+	SetStrifeMap();
 #endif	// ASG_ADD_GENS_SYSTEM
 	SettingCanMoveMap();
 
@@ -3630,41 +3255,13 @@ void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 	m_ScrollBtnPos.y = m_ScrollBtnStartPos.y;
 	m_iRenderStartTextIndex = 0;
 
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-	m_iRenderEndTextIndex = m_iRenderStartTextIndex + m_iTextLine;
-#else // CSK_MOD_PROTECT_AUTO_V1
 	m_iRenderEndTextIndex = m_iRenderStartTextIndex + MOVECOMMAND_MAX_RENDER_TEXTLINE;
-#endif // CSK_MOD_PROTECT_AUTO_V1
 
-#ifdef YDG_MOD_PROTECT_AUTO_V3
-	m_iWheelCounter = 0;
-#endif	// YDG_MOD_PROTECT_AUTO_V3
-	
 	if( m_iRenderEndTextIndex > (int)m_listMoveInfoData.size() )
 	{
 		m_iRenderEndTextIndex -= (m_iRenderEndTextIndex-m_listMoveInfoData.size());
 	}
 }
-
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-void SEASON3B::CNewUIMoveCommandWindow::ResetWindowOpenCount()
-{
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-	CMoveCommandWindowEncrypt enc;
-#endif	// YDG_MOD_PROTECT_AUTO_V4
-	m_iWindowOpenCount = 0;	
-}
-
-void SEASON3B::CNewUIMoveCommandWindow::SetCastleOwner(bool bOwner)
-{
-	m_bCastleOwner = bOwner;
-}
-
-bool SEASON3B::CNewUIMoveCommandWindow::IsCastleOwner()
-{
-	return m_bCastleOwner;
-}
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
 void SEASON3B::CNewUIMoveCommandWindow::ClosingProcess()
 {
@@ -3688,34 +3285,6 @@ void CNewUIMoveCommandWindow::UnloadImages()
 	DeleteBitmap(IMAGE_MOVECOMMAND_SCROLLBAR_ON);
 	DeleteBitmap(IMAGE_MOVECOMMAND_SCROLLBAR_OFF);
 }
-
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-
-
-CNewUIMoveCommandWindowNew::CNewUIMoveCommandWindowNew()
-{
-}
-
-CNewUIMoveCommandWindowNew::~CNewUIMoveCommandWindowNew()
-{
-
-}
-
-void CNewUIMoveCommandWindowNew::OpenningProcess()
-{
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-	CMoveCommandWindowEncrypt enc;
-#endif	// YDG_MOD_PROTECT_AUTO_V4
-	m_iTextAlpha = 150;
-	m_fBackgroundAlpha = 0.4f;
-	m_iTopSpace = rand()%20;
-
-	m_iTextLine = SEASON3B::CNewUIMoveCommandWindow::MOVECOMMAND_MAX_RENDER_TEXTLINE + (rand()%8 - 4);
-		
-	CNewUIMoveCommandWindow::OpenningProcess();
-}
-
-#endif // CSK_MOD_PROTECT_AUTO_V1
 
 BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const
 {
@@ -3744,7 +3313,6 @@ BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex,
 	return bInOtherServer;
 }
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const char *pszMapName)
 {
 	if (pszMapName == NULL)
@@ -3764,5 +3332,5 @@ int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const char *pszMapName)
 	
 	return iMapIndex;
 }
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 #endif	// YDG_ADD_ENC_MOVE_COMMAND_WINDOW

@@ -96,8 +96,6 @@ void RenderLight(OBJECT *o,int Texture,float Scale,int Bone,float x,float y,floa
 void RenderProtectGuildMark(CHARACTER * c);
 
 void MakeElfHelper(CHARACTER * c);
-
-// 펜릴 타입 얻는 함수
 int GetFenrirType(CHARACTER* c);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,52 +109,23 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 				 WORD SkillIndex=0,WORD SkillSerialNum=0, int iChaIndex=-1, const float* vColor = NULL, short int sTargetIndex = -1);
 
 
-// 서버 클래스 
 BYTE ChangeServerClassTypeToClientClassType(const BYTE byServerClassType);
-// 모든 클래스 타입을 얻는다.
 BYTE GetCharacterClass(const BYTE byClass);
-// 2차 전직했는가?
 bool IsSecondClass(const BYTE byClass);
-// 3차 전직했는가?
 bool IsThirdClass(const BYTE byClass);
-// 몇차 전직인가?
 BYTE GetStepClass(const BYTE byClass);
-// 모든 클래스 타입의 이름을 얻는다.
 const unicode::t_char* GetCharacterClassText(const BYTE byClass);
-// 스킨 모델 인덱스를 얻는다.
 BYTE GetSkinModelIndex(const BYTE byClass);
-// 기본클래스 타입을 얻는다.
 inline int GetBaseClass( int iClass)	{ return ( 0x7 & iClass); }
-// 여성캐릭인가?
 inline int IsFemale(int iClass) { return (GetBaseClass(iClass) == CLASS_ELF || GetBaseClass(iClass) == CLASS_SUMMONER); }
 
-#ifdef ADD_SOCKET_ITEM
-// 활과 석궁을 구별해주는 함수
-//** 캐릭터에 장착된 무기를 검색할 때에만 호출하시오!!!
-// -- return값 
-// -- BOWTYPE_BOW : 활, BOWTYPE_CROSSBOW : 석궁, BOWTYPE_NONE : 활/석궁이 아님
-//** *ITEM으로 인자로 받는 함수는 활인지 석궁인지 하나씩 구분을 해야하기 때문에,
-//** 연속적인 인덱스가 아닌이상 이 함수는 위험하다.
-//** 기본적으로 ITEM인자가 캐릭터에 장착되어있는 무기를 검색할때에만 호출하기 바란다.
-//** 되도록이면 인자없는 오버로드된 함수를 사용하라.!!!
 int GetEquipedBowType( CHARACTER *pChar );
 int GetEquipedBowType( ITEM* pItem );
 int GetEquipedBowType( );
-#endif // ADD_SOCKET_ITEM
-
-#ifdef KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
-bool IsEquipedWing();							// 날개를 착용 유무 검사.
-#endif // KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
-
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
+bool IsEquipedWing();
 int GetEquipedBowType_Skill( );
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-
 bool IsMasterLevel(const BYTE byClass);
-
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 BOOL FindHeroSkill(enum ActionSkillType eSkillType); 
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
 
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
 void SetActionBloodAttack(CHARACTER *c, OBJECT* o);

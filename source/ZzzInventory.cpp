@@ -543,152 +543,73 @@ bool IsCanTrade()
 	return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 정보창에서 사용할 수 있는 클래스 찾아내는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 int TextNum = 0;
 int SkipNum = 0;
 
 bool IsRequireClassRenderItem(const short sType)
 {
 	if(
-		sType == ITEM_HELPER+19		// 0: 대천사의 절대지팡이, 1: 대천사의 절대검, 2: 대천사의 절대석궁
-		|| sType == ITEM_HELPER+29	// 근위병의 갑옷세트.
-		|| sType == ITEM_WING+26	// 신비의 구슬
-		|| (sType >= ITEM_WING+30 && sType <= ITEM_WING+31)	// 보석 조합
-		|| (sType >= ITEM_HELPER+43 && sType <= ITEM_HELPER+45)	// 인장 종류
-		|| sType == ITEM_HELPER+10	// 변신반지
-		|| (sType >= ITEM_HELPER+39 && sType <= ITEM_HELPER+42)	// 변신반지류
+		sType == ITEM_HELPER+19
+		|| sType == ITEM_HELPER+29
+		|| sType == ITEM_WING+26
+		|| (sType >= ITEM_WING+30 && sType <= ITEM_WING+31)
+		|| (sType >= ITEM_HELPER+43 && sType <= ITEM_HELPER+45)
+		|| sType == ITEM_HELPER+10
+		|| (sType >= ITEM_HELPER+39 && sType <= ITEM_HELPER+42)
 		|| sType == ITEM_HELPER+37
-		|| sType == ITEM_WING+15	// 혼돈의 보석
-		|| sType == ITEM_WING+32	// 빨간리본의상자
-		|| sType == ITEM_WING+33	// 초록리본의상자
-		|| sType == ITEM_WING+34	// 파란리본의상자
+		|| sType == ITEM_WING+15
+		|| sType == ITEM_WING+32
+		|| sType == ITEM_WING+33
+		|| sType == ITEM_WING+34
 		)
 	{
 		return false;
 	}
 
-	if(
-#ifdef CSK_LUCKY_SEAL
-		(sType >= ITEM_HELPER+43 && sType <= ITEM_HELPER+45)
-#endif //CSK_LUCKY_SEAL	
-#ifdef CSK_FREE_TICKET
+	if((sType >= ITEM_HELPER+43 && sType <= ITEM_HELPER+45)
 		|| (sType >= ITEM_HELPER+46 && sType <= ITEM_HELPER+48)
-#endif // CSK_FREE_TICKET
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 		|| (sType >= ITEM_HELPER+125 && sType <= ITEM_HELPER+127)
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-#ifdef CSK_CHAOS_CARD
 		|| (sType == ITEM_POTION+54)
-#endif // CSK_CHAOS_CARD
-#ifdef CSK_RARE_ITEM
 		|| (sType >= ITEM_POTION+58 && sType <= ITEM_POTION+62)
-#endif // CSK_RARE_ITEM
-#ifdef CSK_LUCKY_CHARM
 		|| (sType == ITEM_POTION+53)
-#endif //CSK_LUCKY_CHARM
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
 		|| (sType >= ITEM_POTION+70 && sType <= ITEM_POTION+71)
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
 		|| (sType >= ITEM_POTION+72 && sType <= ITEM_POTION+77)
-#endif //PSW_SCROLL_ITEM
-#ifdef LDS_ADD_CS6_CHARM_MIX_ITEM_WING	// 날개 조합 100% 성공 부적
 		|| (sType >= ITEM_TYPE_CHARM_MIXWING+EWS_BEGIN 
 			&& sType <= ITEM_TYPE_CHARM_MIXWING+EWS_END)
-#endif // LDS_ADD_CS6_CHARM_MIX_ITEM_WING
-#ifdef PSW_SEAL_ITEM               // 이동 인장
 		|| (sType == ITEM_HELPER+59)
-#endif //PSW_SEAL_ITEM
-#ifdef PSW_FRUIT_ITEM              // 리셋 열매
 		|| ( sType >= ITEM_HELPER+54 && sType <= ITEM_HELPER+58)
-#endif //PSW_FRUIT_ITEM
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
 		||(sType >= ITEM_POTION+78 && sType <= ITEM_POTION+82)
-#endif //PSW_SECRET_ITEM
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
 		|| (sType == ITEM_HELPER+60)
-#endif //PSW_INDULGENCE_ITEM
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET // 환영의 사원 자유 입장권
 		|| (sType == ITEM_HELPER+61)
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-#ifdef PSW_CHARACTER_CARD         // 캐릭터 카드
+#ifdef PSW_CHARACTER_CARD
 		|| (sType == ITEM_POTION+91)
 #endif // PSW_CHARACTER_CARD
-#ifdef PSW_NEW_ELITE_ITEM         // 엘리트 중간 치료 물약
 		|| (sType == ITEM_POTION+94)
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef PSW_NEW_CHAOS_CARD
-		|| (sType >= ITEM_POTION+92 && sType <= ITEM_POTION+93) // 카오스 카드 골드, 레어
-		|| (sType == ITEM_POTION+95)							// 카오스 카드 미니
-#endif // PSW_NEW_CHAOS_CARD
-#ifdef PSW_ADD_PC4_SEALITEM
+		|| (sType >= ITEM_POTION+92 && sType <= ITEM_POTION+93)
+		|| (sType == ITEM_POTION+95)
 		|| ( sType >= ITEM_HELPER+62 && sType <= ITEM_HELPER+63 )
-#endif //PSW_ADD_PC4_SEALITEM
-#ifdef PSW_ADD_PC4_SCROLLITEM
 		|| ( sType >= ITEM_POTION+97 && sType <= ITEM_POTION+98 )
-#endif //PSW_ADD_PC4_SCROLLITEM
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
 		|| (sType == ITEM_POTION+96)
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-#ifdef LDK_ADD_PC4_GUARDIAN
 		|| ( sType == ITEM_HELPER+64 || sType == ITEM_HELPER+65 )
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDK_ADD_RUDOLPH_PET
 		|| ( sType == ITEM_HELPER+67 )
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 		|| ( sType == ITEM_HELPER+68 )
-#endif //LDK_ADD_SNOWMAN_CHANGERING
-#ifdef PJH_ADD_PANDA_CHANGERING
 		|| ( sType == ITEM_HELPER+76 )
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| ( sType == ITEM_HELPER+122 )	// 스켈레톤 변신반지
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
-		|| ( sType == ITEM_HELPER+69 )	// 부활의 부적
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
-		|| ( sType == ITEM_HELPER+70 )	// 이동의 부적
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef LDK_ADD_GAMBLE_RANDOM_ICON
-		|| ( sType == ITEM_HELPER+71 || sType == ITEM_HELPER+72 || sType == ITEM_HELPER+73 || sType == ITEM_HELPER+74 ||sType == ITEM_HELPER+75 )	// 겜블러 아이콘
-#endif //LDK_ADD_GAMBLE_RANDOM_ICON
-#ifdef PJH_ADD_PANDA_PET
+		|| ( sType == ITEM_HELPER+122 )
+		|| ( sType == ITEM_HELPER+69 )
+		|| ( sType == ITEM_HELPER+70 )
+		|| ( sType == ITEM_HELPER+71 || sType == ITEM_HELPER+72 || sType == ITEM_HELPER+73 || sType == ITEM_HELPER+74 ||sType == ITEM_HELPER+75 )
 		|| ( sType == ITEM_HELPER+80 )
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET
 		|| ( sType == ITEM_HELPER+106 )
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef ASG_ADD_CS6_GUARD_CHARM
-		|| sType == ITEM_HELPER+81	// 수호의부적
-#endif	// ASG_ADD_CS6_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ITEM_GUARD_CHARM
-		|| sType == ITEM_HELPER+82	// 아이템보호부적
-#endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM
-#ifdef ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-		|| sType == ITEM_HELPER+93	// 상승의인장마스터
-#endif	// ASG_ADD_CS6_ASCENSION_SEAL_MASTER
-#ifdef ASG_ADD_CS6_WEALTH_SEAL_MASTER
-		|| sType == ITEM_HELPER+94	// 풍요의인장마스터
-#endif	// ASG_ADD_CS6_WEALTH_SEAL_MASTER
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
-		|| sType == ITEM_HELPER+121	// 카오스케슬 자유입장권
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12	// 희귀아이템티켓 7-12
+		|| sType == ITEM_HELPER+81
+		|| sType == ITEM_HELPER+82
+		|| sType == ITEM_HELPER+93
+		|| sType == ITEM_HELPER+94
+		|| sType == ITEM_HELPER+121
 		|| (sType >= ITEM_POTION+145 && sType <= ITEM_POTION+150)
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| g_pMyInventory->IsInvenItem(sType)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-#ifdef KJH_FIX_BTS251_ELITE_SD_POTION_TOOLTIP
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
-		|| (sType==ITEM_POTION+133)		// 엘리트 SD회복 물약
-#endif // YDG_ADD_CS7_ELITE_SD_POTION
-#endif // KJH_FIX_BTS251_ELITE_SD_POTION_TOOLTIP
+		|| (sType==ITEM_POTION+133)
 		)
 	{
 		return false;
@@ -710,7 +631,6 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 	TextListColor[TextNum + 2] = TextListColor[TextNum + 3] = TEXT_COLOR_WHITE;
 	sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
 
-	// 모든 클래스가 사용가능하면 지나친다.
 	int iCount = 0;
 	for(int i=0; i<MAX_CLASS; ++i)
 	{
@@ -744,22 +664,16 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 			{
 				if(byRequireClass == 1)
 				{
-					// 61 "%s 사용 가능"
-					// 20 "흑마법사"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[20]);
 					TextListColor[TextNum] = iTextColor;
 				}
 				else if(byRequireClass == 2)
 				{
-					// 61 "%s 사용 가능"
-					// 25 "소울마스터"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[25]);
 					TextListColor[TextNum] = iTextColor;	
 				}
 				else if(byRequireClass == 3)
 				{
-					// 61 "%s 사용 가능"
-					// 1669 "그랜드마스터"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[1669]);
 					TextListColor[TextNum] = iTextColor;	
 				}
@@ -771,22 +685,16 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 			{
 				if(byRequireClass == 1)
 				{
-					// 61 "%s 사용 가능"
-					// 21 "흑기사"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[21]);
 					TextListColor[TextNum] = iTextColor;
 				}
 				else if(byRequireClass == 2)
 				{
-					// 61 "%s 사용 가능"
-					// 26 "블레이드나이트"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[26]);
 					TextListColor[TextNum] = iTextColor;	
 				}
 				else if(byRequireClass == 3)
 				{
-					// 61 "%s 사용 가능"
-					// 1668 "블레이드마스터"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[1668]);
 					TextListColor[TextNum] = iTextColor;	
 				}
@@ -798,22 +706,16 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 			{	
 				if(byRequireClass == 1)
 				{
-					// 61 "%s 사용 가능"
-					// 22 "요정"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[22]);
 					TextListColor[TextNum] = iTextColor;
 				}
 				else if(byRequireClass == 2)
 				{
-					// 61 "%s 사용 가능"
-					// 27 "뮤즈엘프"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[27]);
 					TextListColor[TextNum] = iTextColor;	
 				}
 				else if(byRequireClass == 3)
 				{
-					// 61 "%s 사용 가능"
-					// 1670 "하이엘프"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[1670]);
 					TextListColor[TextNum] = iTextColor;	
 				}
@@ -825,15 +727,11 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 			{	
 				if(byRequireClass == 1)
 				{
-					// 61 "%s 사용 가능"
-					// 23 "마검사"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[23]);
 					TextListColor[TextNum] = iTextColor;
 				}
 				else if(byRequireClass == 3)
 				{
-					// 61 "%s 사용 가능"
-					// 1671 "듀얼마스터"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[1671]);
 					TextListColor[TextNum] = iTextColor;	
 				}
@@ -845,15 +743,11 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 			{	
 				if(byRequireClass == 1)
 				{
-					// 61 "%s 사용 가능"
-					// 24 "다크로드"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[24]);
 					TextListColor[TextNum] = iTextColor;
 				}
 				else if(byRequireClass == 3)
 				{
-					// 61 "%s 사용 가능"
-					// 1672 "로드엠퍼러"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[1672]);
 					TextListColor[TextNum] = iTextColor;	
 				}
@@ -865,22 +759,16 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 			{	
 				if(byRequireClass == 1)
 				{
-					// 61 "%s 사용 가능"
-					// 1687 "소환술사"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[1687]);
 					TextListColor[TextNum] = iTextColor;
 				}
 				else if(byRequireClass == 2)
 				{
-					// 61 "%s 사용 가능"
-					// 1688 "블러디서머너"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[1688]);
 					TextListColor[TextNum] = iTextColor;	
 				}
 				else if(byRequireClass == 3)
 				{
-					// 61 "%s 사용 가능"
-					// 1689 "디멘션마스터"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[1689]);
 					TextListColor[TextNum] = iTextColor;	
 				}
@@ -911,27 +799,16 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 도움말 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-// 아이템 14 15 도움말 추가(09.12.2)
-const int iMaxLevel = 15;	// 최대 아이템 레벨수
-#else //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-const int iMaxLevel = 13;	// 최대 아이템 레벨수
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-
-const int iMaxColumn = 17;	// 최대 정보 항목
-
+const int iMaxLevel = 15;
+const int iMaxColumn = 17;
 int g_iCurrentItem = -1;
-int g_iItemInfo[iMaxLevel + 1][iMaxColumn];	// 아이템 정보 미리 계산
+int g_iItemInfo[iMaxLevel + 1][iMaxColumn];
 
-void RenderHelpLine(int iColumnType, const char * pPrintStyle, int & TabSpace, const char * pGapText, int Pos_y, int iType)	// ★
+void RenderHelpLine(int iColumnType, const char * pPrintStyle, int & TabSpace, const char * pGapText, int Pos_y, int iType)
 {
     int iCurrMaxLevel = iMaxLevel;
 
-    if ( iType==5 ) //  법서.
+    if ( iType==5 )
         iCurrMaxLevel = 0;
 
 	for (int Level = 0; Level <= iCurrMaxLevel; ++Level)
@@ -954,31 +831,21 @@ void RenderHelpLine(int iColumnType, const char * pPrintStyle, int & TabSpace, c
 
 	if (pGapText == NULL)
 	{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[TextNum - 1], lstrlen(TextList[TextNum - 1]), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), TextList[TextNum - 1], lstrlen(TextList[TextNum - 1]), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	}
 	else 
 	{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), pGapText, lstrlen(pGapText), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), pGapText, lstrlen(pGapText), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	}
 	TabSpace += int(TextSize.cx / g_fScreenRate_x);
-#ifdef CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
-	if(iType == 6)	// 소환술사 서이면
+	if(iType == 6)
 	{
 		TabSpace += 5;	
 	}
-#endif // CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
 	TextNum -= iCurrMaxLevel + 1;
 }
 
-void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y)	// ★ 제목 항목 출력
+void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y)
 {
 	const char* pText = NULL;
 
@@ -1883,10 +1750,6 @@ void RepairAllGold ( void )
 			if(pItem->Type == ITEM_HELPER+97 || pItem->Type == ITEM_HELPER+98 || pItem->Type == ITEM_POTION+91)
 				continue;
 #endif //PBG_ADD_CHARACTERCARD
-#ifdef PBG_ADD_CHARACTERSLOT
-			if(pItem->Type == ITEM_HELPER+99)		// 슬롯카드
-				continue;
-#endif //PBG_ADD_CHARACTERSLOT
 #ifdef PBG_ADD_SECRETITEM
 			if(pItem->Type >= ITEM_HELPER+117 && pItem->Type <= ITEM_HELPER+120)	// 활력의 비약(최하급/하급/중급/상급)
 				continue;
@@ -12882,8 +12745,6 @@ void ClearDuelWindow()
 }
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
-
-
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
 
@@ -12908,20 +12769,7 @@ bool IsStrifeMap(int nMapIndex)
 {
 	bool bStrifeMap = false;
 
-	if (BLUE_MU::IsBlueMuServer())
-	{
-		ENUM_WORLD aeStrife[5] = { WD_7ATLANSE, WD_33AIDA, WD_37KANTURU_1ST, WD_56MAP_SWAMP_OF_QUIET, WD_63PK_FIELD };
-		int i;
-		for (i = 0; i < 5; ++i)
-		{
-			if (aeStrife[i] == nMapIndex)
-			{
-				bStrifeMap = true;
-				break;
-			}
-		}
-	}
-	else if (!g_ServerListManager->IsNonPvP())
+	if (!g_ServerListManager->IsNonPvP())
 	{
 		ENUM_WORLD aeStrife[1] = { WD_63PK_FIELD };
 		int i;

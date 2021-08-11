@@ -56,9 +56,6 @@ namespace SEASON3A
 		bool IsVisible();
 		void SetVisible(bool bVisible);
 		void SetState(DWORD dwState);
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
-		void SetGameState();
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 
 	private:
 		CGameCensorship();

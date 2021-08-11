@@ -77,10 +77,6 @@ void CQuestMng::LoadQuestScript()
 }
 
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
-//*****************************************************************************
-// 함수 이름 : LoadNPCDialogueScript()
-// 함수 설명 : NPC 대화 스크립트 로드.
-//*****************************************************************************
 void CQuestMng::LoadNPCDialogueScript()
 {
 	FILE* fp = ::fopen(QM_NPCDIALOGUE_FILE, "rb");
@@ -110,54 +106,9 @@ void CQuestMng::LoadNPCDialogueScript()
 	}
 	
 	::fclose(fp);
-
-#ifdef _BLUE_SERVER		//  블루서버에만 적용
-	DelAnswerAPDPUpBuff();
-#endif // _BLUE_SERVER
 }
-
-#ifdef _BLUE_SERVER		//  블루서버에만 적용
-//*****************************************************************************
-// 함수 이름 : DelAnswerAPDPUpBuff()
-// 함수 설명 : 선택문의 쉐도우 팬텀 효과(공방업 버프) 제거.
-//			   (쉐도우 팬텀 부대원 NPC의 0번 대화 상태만 검사함)
-//*****************************************************************************
-void CQuestMng::DelAnswerAPDPUpBuff()
-{
-	const DWORD dwNPCIndex = 257;	// 쉐도우 팬텀 부대원 NPC 인덱스.
-	const DWORD dwDlgState = 0;		// 0번 대화 상태.
-	const DWORD dwNPCDlgIndex = dwNPCIndex * 0x10000 + dwDlgState;
-
-	NPCDialogueMap::iterator iter = m_mapNPCDialogue.find(dwNPCDlgIndex);
-	if (iter == m_mapNPCDialogue.end())
-		return;
-
-	bool bLShift = false;
-	int i;
-	for (i = 0; i < QM_MAX_ND_ANSWER; ++i)
-	{
-		if (bLShift)
-		{
-			iter->second.m_anAnswer[(i-1)*2] = iter->second.m_anAnswer[i*2];
-			iter->second.m_anAnswer[(i-1)*2+1] = iter->second.m_anAnswer[i*2+1];
-		}
-		else if (902 == iter->second.m_anAnswer[i*2+1])	// 선택문 결과가 공방업(902)인가?
-			bLShift = true;		// 다음 선택문 부터 이전 선택문으로 카피.
-	}
-
-	if (bLShift)
-	{	// 마지막 선택문은 0으로 초기화.
-		iter->second.m_anAnswer[(i-1)*2] = 0;
-		iter->second.m_anAnswer[(i-1)*2+1] = 0;
-	}
-}
-#endif // _BLUE_SERVER
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 
-//*****************************************************************************
-// 함수 이름 : LoadQuestProgressScript()
-// 함수 설명 : 퀘스트 대사 진행 스크립트 로드.
-//*****************************************************************************
 void CQuestMng::LoadQuestProgressScript()
 {
 	FILE* fp = ::fopen(QM_QUESTPROGRESS_FILE, "rb");

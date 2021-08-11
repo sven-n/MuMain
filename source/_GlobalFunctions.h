@@ -2,15 +2,6 @@
 #define _GLOBAL_FUNCTIONS_H
 
 #include "ZzzScene.h"
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM		// #ifndef
-// 테스트 서버인가?
-inline bool IsTestServer()
-{
-	// 559 "테스트"
-	return 0 == ::strcmp(ServerList[ServerSelectHi].Name, GlobalText[559]) ? true : false;
-}
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-
 #include "w_BuffStateSystem.h"
 
 class BuffStateSystem;
@@ -98,87 +89,6 @@ BuffStateValueControl& TheBuffStateValueControl();
 #define g_BuffStateValueString( outstr, type ) \
 	TheBuffStateValueControl().GetBuffValueString( outstr, type )
 
-#ifdef IMPORTANCE_DATA
-
-#include "ImportanceData.h"
-
-//////////////////////////////////////////////////GateAttribute//////////////////////////////////////////////////////////////
-inline
-const GATE_ATTRIBUTE& TheGateAttRibute_const( int index )
-{
-	if( index <= MAX_GATES ) assert( 0 );
-	return g_ImportanceData.GetGateAttribute( index );
-}
-
-inline
-GATE_ATTRIBUTE&	TheGateAttRibute( int index )
-{
-	if( index <= MAX_GATES ) assert( 0 );
-	return g_ImportanceData.GetGateAttribute( index );
-}	
-
-//////////////////////////////////////////////////SkillAttribute//////////////////////////////////////////////////////////////
-inline
-const SKILL_ATTRIBUTE& TheSkillAttribute_const( int index )
-{
-	if( index <= MAX_SKILLS ) assert( 0 );
-	return g_ImportanceData.GetSkillAttribute( index );
-}	
-
-inline
-SKILL_ATTRIBUTE&	TheSkillAttribute( int index )
-{
-	if( index <= MAX_SKILLS ) assert( 0 );
-	return g_ImportanceData.GetSkillAttribute( index );
-}
-
-//////////////////////////////////////////////////SkillAttribute//////////////////////////////////////////////////////////////
-inline
-const CHARACTER& TheCharacter_const( int index )
-{
-	if( index <= MAX_CHARACTERS_CLIENT ) assert( 0 );
-	return g_ImportanceData.GetCharacterClient( index );
-}	
-
-inline
-CHARACTER&	TheCharacter( int index )
-{
-	if( index <= MAX_CHARACTERS_CLIENT ) assert( 0 );
-	return g_ImportanceData.GetCharacterClient( index );
-}
-
-//////////////////////////////////////////////////CharacterMachine//////////////////////////////////////////////////////////////
-inline
-const CHARACTER_MACHINE& TheCharacterMachine_const()
-{
-	assert( g_ImportanceData.GetCharacterMachine().expired() );
-	return *g_ImportanceData.GetCharacterMachine().lock();
-}
-
-inline
-const CHARACTER_MACHINE& TheCharacterMachine()
-{
-	assert( g_ImportanceData.GetCharacterMachine().expired() );
-	return *g_ImportanceData.GetCharacterMachine().lock();
-}
-
-/////////////////////////////////////////////////CharacterAttribute//////////////////////////////////////////////////////////////
-inline
-const CHARACTER_ATTRIBUTE& TheCharacterAttribute_const()
-{
-	//여기는 expired를 검사 할 필요가 없다.
-	return *g_ImportanceData.GetCharaterAttribute().lock();
-}
-
-inline
-CHARACTER_ATTRIBUTE& TheCharacterAttribute()
-{
-	//여기는 expired를 검사 할 필요가 없다.
-	return *g_ImportanceData.GetCharaterAttribute().lock();
-}
-
-#endif //IMPORTANCE_DATA
-
 inline unsigned long RGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 { return (r)+(g<<8)+(b<<16)+(a<<24); }
 inline unsigned char GetAlpha(unsigned long rgba)
@@ -190,124 +100,20 @@ inline unsigned char GetGreen(unsigned long rgba)
 inline unsigned char GetBlue(unsigned long rgba)
 { return (((rgba) >> 16) & 0xff); }
 
-#ifdef NEW_COMMANDS
-//math
-inline 
-void SinCos( float fRadians, float& fSin, float& fCos ) {
-    float s, c;
-    __asm fld fRadians
-		__asm fsincos
-		__asm fstp c
-		__asm fstp s
-		
-		fSin = s;
-    fCos = c;
-}
-
-inline
-int Min( int fA, int fB ) {
-	return (fA < fB) ? fA : fB;
-}
-
-inline
-int Max( int fA, int fB ) {
-	return (fA > fB) ? fA : fB;
-}
-#endif //NEW_COMMANDS
-
-#ifdef NEW_USER_INTERFACE_FUNCTIONS
-
-#include "w_Shell.h"
-
-class Shell;
-class BuildSystem;
-class ClientInfoBuilder;
-class GameInfoBuilder;
-class ServerProxySystem;
-class InputProxy;
-class GameServerProxy;
-class ShopServerProxy;
-class ClientSystem;
-class input::InputSystem;
-class ui::UISystem;
-
-const string UISHOPFRAMENAME             = "ShopModule";
-const string UIMESSAGEBOXFRAME_NAME      = "MessageBox";
-
-//임시로 선언
-//-.-;;;
-extern ShellPtr			g_shell;
-
-Shell& TheShell();
-
-BuildSystem& TheBuildSystem();
-
-ClientInfoBuilder& TheClientInfoBuilder();
-
-GameInfoBuilder& TheGameInfoBuilder();
-
-ServerProxySystem& TheSerProxySystem();
-
-InputProxy&	TheInputProxy();
-
-GameServerProxy& TheGameServerProxy();
-
-ShopServerProxy& TheShopServerProxy();
-
-input::InputSystem& TheInputSystem();
-
-ui::UISystem& TheUISystem();
-
-ClientSystem& TheClientSystem();
-
-#define MessageBoxMake( messageboxdata ) \
-{ \
-	TheClientSystem().RegisterMessageBoxModule( messageboxdata );\
-}
-
-#define MessageBoxClear \
-{ \
-	TheClientSystem().UnregisterModule( Module::eMessageBox ); \
-	TheUISystem().SubFrame( UIMESSAGEBOXFRAME_NAME ); \
-}
-
-#define ShopMake( type ) \
-{ \
-	TheShopServerProxy().ChangeShopType( type ); \
-	TheClientSystem().RegisterModule( Module::eShop_Top ); \
-	TheClientSystem().RegisterModule( Module::eShop_Left ); \
-	TheClientSystem().RegisterModule( Module::eShop_Middle ); \
-	TheClientSystem().RegisterModule( Module::eShop_Right ); \
-}
-
-#define ShopClear \
-{ \
-	TheClientSystem().UnregisterModule( Module::eShop_Left ); \
-	TheClientSystem().UnregisterModule( Module::eShop_Middle ); \
-	TheClientSystem().UnregisterModule( Module::eShop_Right ); \
-	TheClientSystem().UnregisterModule( Module::eShop_Top ); \
-	TheUISystem().SubFrame( UISHOPFRAMENAME ); \
-}
-
-
-#endif //NEW_USER_INTERFACE_FUNCTIONS
 
 #ifdef PBG_FIX_SKILL_DEMENDCONDITION
 namespace SKILLCONDITION
 {
-	//에너지값을 요구하는 것에만 해당을 한다. 그외는 검사없이 리턴한다.
 	typedef struct DemendConditionInfo
 	{
-		WORD SkillType;			//스킬타입
-	//	char SkillName[100];	//스킬이름
-		
-		// 요구 조건
-		WORD SkillLevel;		//레벨
-		WORD SkillStrength;		//힘
-		WORD SkillDexterity;	//민첩
-		WORD SkillVitality;		//체력
-		WORD SkillEnergy;		//에너지	(현재 요것만 사용한다.)
-		WORD SkillCharisma;		//통솔
+		WORD SkillType;
+	//	char SkillName[100];
+		WORD SkillLevel;
+		WORD SkillStrength;
+		WORD SkillDexterity;
+		WORD SkillVitality;
+		WORD SkillEnergy;
+		WORD SkillCharisma;
 		
 		DemendConditionInfo() : SkillType( 0 ), SkillLevel( 0 ), SkillStrength( 0 ),
 			SkillDexterity( 0 ), SkillVitality( 0 ), SkillEnergy( 0 ), SkillCharisma( 0 )
@@ -329,15 +135,6 @@ namespace SKILLCONDITION
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
 extern bool g_bRenderBoundingBox;
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
-
-#if defined PBG_ADD_MU_LOGO || defined LJH_MOD_TO_USE_ISBLUEMUSERVER_FUNC
-// 블루뮤 로고가 들어가면 블루섭 (소스 분리작업으로 디파인으로 블루섭인가 여부를 확인)
-namespace BLUE_MU
-{
-	BOOL IsBlueMuServer();
-	extern bool g_bIsBlue_MU_Server;
-}
-#endif //defined PBG_ADD_MU_LOGO || defined LJH_MOD_TO_USE_ISBLUEMUSERVER_FUNC
 
 #ifdef KJH_MOD_BTS184_REQUIRE_STAT_WHEN_SPELL_SKILL
 int MasterSkillToBaseSkillIndex(int iMasterSkillIndex);

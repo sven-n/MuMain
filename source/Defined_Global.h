@@ -216,7 +216,6 @@
 	//-----------------------------------------------------------------------------
 	// [ Season 5 - Part 2 이후 버그수정]
 
-	#define LJH_MOD_TO_USE_ISBLUEMUSERVER_FUNC					// 블루가 적용되지 않은 국가에서 현재 접속해 있는 서버가 블루인지 판별하기 위해 포함(10.03.17)
 	#define PBG_MOD_PANDAPETRING_NOTSELLING						// 펜더 펫 반지 안팔리게 설정(10.01.11)
 	#define LJH_FIX_EXTENDING_OVER_MAX_TIME_4S_To_10S			// 해외사용자들 일부 사용자에게 캐시샵이 열리지 않아 Max Time을 기존 4초에서 10초로 변경(09.12.17)
 	#define KJH_FIX_INGAMESHOP_SCRIPTDOWN_BUG					// 인게임샵 스크립트 다운로드 버그 (09.12.28)
@@ -255,19 +254,19 @@
 
 	#define SEASON5_PART2
 	#ifdef SEASON5_PART2
-		#define KJH_PBG_ADD_INGAMESHOP_SYSTEM					// 인게임샵 시스템
+		#define KJH_PBG_ADD_INGAMESHOP_SYSTEM
 		#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-			#define PBG_ADD_INGAMESHOP_UI_MAINFRAME				// 메인프레임 UI(09.04.02)
-			#define PBG_ADD_INGAMESHOP_UI_ITEMSHOP				// 인게임샵 구입공간(09.04.03)
-			#define PBG_ADD_NAMETOPMSGBOX						// 인게임샵 메시지 박스 틀 만들기(09.05.26)
-			#define KJH_ADD_INGAMESHOP_UI_SYSTEM				// 인게임샵 시스템 (09.08.17)
-			#define KJH_ADD_PERIOD_ITEM_SYSTEM					// 기간제 아이템 시스템 (09.09.29)
-			#define PBG_ADD_INGAMESHOPMSGBOX					// 인게임샵관련 메시지 박스(09.06.24)
-			#define PBG_ADD_MSGBACKOPACITY						// 인게임샵 메시지박스창 뒷배경 어둡게 처리(09.07.20)
-			#define PBG_ADD_ITEMRESIZE							// 인게임샵 아이템의 사이즈 변경(09.09.10)
-			#define PBG_FIX_ITEMANGLE							// 모델 랜더시 뒤집힌 아이템 수정(09.10.05)
-			#define PBG_ADD_MU_LOGO								// 새로운 로고 변경(09.10.08)
-			//^#define PBG_ADD_CHARACTERSLOT						// 캐릭터 슬롯아이템(09.05.06) - 글로벌 제외
+			#define PBG_ADD_INGAMESHOP_UI_MAINFRAME
+			#define PBG_ADD_INGAMESHOP_UI_ITEMSHOP
+			#define PBG_ADD_NAMETOPMSGBOX
+			#define KJH_ADD_INGAMESHOP_UI_SYSTEM
+			#define KJH_ADD_PERIOD_ITEM_SYSTEM
+			#define PBG_ADD_INGAMESHOPMSGBOX
+			#define PBG_ADD_MSGBACKOPACITY
+			#define PBG_ADD_ITEMRESIZE
+			#define PBG_FIX_ITEMANGLE
+			#define PBG_ADD_MU_LOGO
+			//^#define PBG_ADD_CHARACTERSLOT					//Add Rf i think
 			#define KJH_DEL_PC_ROOM_SYSTEM						// 피씨방 시스템 삭제 (09.10.22) - 피씨방 접속여부는 남겨둠(class CPCRoomPtSys)
 
 			#define PBG_ADD_CHARACTERCARD								// 캐릭터 카드 (다크로드,마검사 생성 카드) (09.05.04) - 소환술사카드 추가(09.06.04)

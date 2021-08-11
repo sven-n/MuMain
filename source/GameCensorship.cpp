@@ -6,9 +6,6 @@
 #include "GameCensorship.h"
 #include "Local.h"
 
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
-extern int ServerLocalSelect;
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 
@@ -97,61 +94,28 @@ void SEASON3A::CGameCensorship::Render()
 		{
 			for(int i=0; i<SPRITE_COUNT; ++i)
 			{
-#if defined PBG_MOD_GAMECENSORSHIP || defined PBG_MOD_GAMECENSORSHIP_RED
-#ifndef PBG_MOD_GAMECENSORSHIP_RED
-			if(BLUE_MU::IsBlueMuServer())
-#endif //PBG_MOD_GAMECENSORSHIP_RED
-				if(i==SPRITE_12 || i==SPRITE_15
-#ifdef PBG_MOD_GAMECENSORSHIP_RED
-					|| (i == SPRITE_FEAR)
-#endif //PBG_MOD_GAMECENSORSHIP_RED
-					)
-					continue;
-#endif //PBG_MOD_GAMECENSORSHIP
 				m_ImageSprite[i].Render();
 			}
 		}
 		break;
 	case STATE_12:
 		{
-#ifdef PBG_FIX_GAMECENSORSHIP_1215
 			m_ImageSprite[SPRITE_18].Render();
 			m_ImageSprite[SPRITE_VIOLENCE].Render();
 			break;
-#else //PBG_FIX_GAMECENSORSHIP_1215
-#ifdef PBG_MOD_GAMECENSORSHIP
-			if(BLUE_MU::IsBlueMuServer())
-				break;		//여기에 들어올 경우는 없다
-#endif //PBG_MOD_GAMECENSORSHIP
-#endif //PBG_FIX_GAMECENSORSHIP_1215
-			m_ImageSprite[SPRITE_12].Render();
-			m_ImageSprite[SPRITE_FEAR].Render();
-			m_ImageSprite[SPRITE_VIOLENCE].Render();
 		}
 		break;
 	case STATE_15:
 		{
-#ifdef PBG_FIX_GAMECENSORSHIP_1215
 			m_ImageSprite[SPRITE_18].Render();
 			m_ImageSprite[SPRITE_VIOLENCE].Render();
 			break;
-#else //PBG_FIX_GAMECENSORSHIP_1215
-#ifdef PBG_MOD_GAMECENSORSHIP
-			if(BLUE_MU::IsBlueMuServer())
-				break;		//여기에 들어올 경우는 없다
-#endif //PBG_MOD_GAMECENSORSHIP
-#endif //PBG_FIX_GAMECENSORSHIP_1215
-			m_ImageSprite[SPRITE_15].Render();
-			m_ImageSprite[SPRITE_FEAR].Render();
-			m_ImageSprite[SPRITE_VIOLENCE].Render();
 		}
 		break;
 	case STATE_18:
 		{
 			m_ImageSprite[SPRITE_18].Render();
-#ifndef PBG_MOD_GAMECENSORSHIP_RED
 			m_ImageSprite[SPRITE_FEAR].Render();
-#endif //PBG_MOD_GAMECENSORSHIP_RED
 			m_ImageSprite[SPRITE_VIOLENCE].Render();
 		}
 		break;
@@ -236,36 +200,3 @@ void SEASON3A::CGameCensorship::SetState(DWORD dwState)
 		break;
 	}
 }
-
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM				// #ifndef
-void SEASON3A::CGameCensorship::SetGameState()
-{
-	DWORD dwState;
-
-	// 레알서버이면
-	if(strcmp(ServerList[ServerSelectHi].Name, GlobalText[1829]) == 0
-#ifdef PBG_MOD_GAMECENSORSHIP
-		|| BLUE_MU::IsBlueMuServer()
-#endif //PBG_MOD_GAMECENSORSHIP
-		)
-	{
-		dwState = STATE_18;
-	}
-	// 레알서버가 아니고
-	else
-	{
-		// NON_PVP 이면
-		if(IsNonPvpServer( ServerSelectHi, ServerLocalSelect) == TRUE)
-		{
-			dwState = STATE_12;
-		}
-		// PVP 이면
-		else
-		{
-			dwState = STATE_15;
-		}
-	}
-
-	SetState(dwState);
-}
-#endif // KJH_ADD_SERVER_LIST_SYSTEM

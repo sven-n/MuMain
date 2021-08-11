@@ -10,7 +10,6 @@ class OBJECT;
 #include "w_CharacterInfo.h"
 class CHARACTER;
 
-/////////////////////// Predecaration ////////////////////////////////////
 namespace SEASON3B
 {
 	class CNewUIItemMng;
@@ -71,9 +70,9 @@ namespace info
 	
 	struct Script_Credit
 	{
-		BYTE	byClass;				// 줄 위치.(1~3째줄, 0이면 크레딧 끝임.)
-		char	szName[32];	            // 항목(이름, 부서 등) 문자열.
-		//char	szName[CRW_NAME_MAX];	// 항목(이름, 부서 등) 문자열.
+		BYTE	byClass;
+		char	szName[32];
+		//char	szName[CRW_NAME_MAX];
 	};
 
 	struct Script_Movereq
@@ -88,63 +87,40 @@ namespace info
 
 	struct Script_Quest_Class_Act
 	{
-		BYTE    chLive;                 //  해당클래스. 0:해당사항 없음. 1:해당됨.
-		BYTE    byQuestType;            //  퀘스트 종류.
-		WORD    wItemType;				//  아이템 타입 번호 또는 몹 인덱스.
-		BYTE    byItemSubType;          //  아이템.
-		BYTE	byItemLevel;			//	아이템 레벨.
-		BYTE    byItemNum;              //  아이템 수.
-		BYTE    byRequestType;          //  요구 조건 인덱스.
-		BYTE    byRequestClass[MAX_CLASS];		//  해당 클래스.
-		short   shQuestStartText[4];    //  퀘스트 내용 시작. ( 등록전, 등록후, 조건완비, 수행완료 ) 
+		BYTE    chLive;
+		BYTE    byQuestType;
+		WORD    wItemType;
+		BYTE    byItemSubType;
+		BYTE	byItemLevel;
+		BYTE    byItemNum;
+		BYTE    byRequestType;
+		BYTE    byRequestClass[MAX_CLASS];
+		short   shQuestStartText[4];
 	};
 
 	struct Script_Quest_Class_Request
 	{
-		BYTE    byLive;                 //  
-		BYTE    byType;                 //  255는 공통 요구 조건임.
-		WORD    wCompleteQuestIndex;    //  수행 왼료된 퀘스트 인덱스.
-		WORD    wLevelMin;              //  최소 레벨.
-		WORD    wLevelMax;              //  최대 레벨.
-		WORD	wRequestStrength;		//	요구 힘.
-		DWORD   dwZen;                  //  요구 젠.
-		short   shErrorText;            //  
+		BYTE    byLive;
+		BYTE    byType;
+		WORD    wCompleteQuestIndex;
+		WORD    wLevelMin;
+		WORD    wLevelMax;
+		WORD	wRequestStrength;
+		DWORD   dwZen;
+		short   shErrorText;
 	};
 
 	struct Script_Quest
 	{
-		short   shQuestConditionNum;    //  퀘스트 수행 조건 수.
-		short   shQuestRequestNum;      //  퀘스트 요구 조건 수.
-		WORD    wNpcType;              //  NPC타입.
-		char    strQuestName[32];       //  퀘스트 이름.
+		short   shQuestConditionNum;
+		short   shQuestRequestNum;
+		WORD    wNpcType;
+		char    strQuestName[32];
 
-		Script_Quest_Class_Act     QuestAct[MAX_QUEST_CONDITION];        //  수행 조건.
-		Script_Quest_Class_Request QuestRequest[MAX_QUEST_REQUEST];    //  요구 조건.
+		Script_Quest_Class_Act     QuestAct[MAX_QUEST_CONDITION];
+		Script_Quest_Class_Request QuestRequest[MAX_QUEST_REQUEST];
 	};
 };
-
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
-//scene start
-typedef struct
-{
-	char  IP[20];						// 안씀.
-	WORD  Port;							// 안씀.
-	WORD  Index;
-	BYTE  Percent;
-#ifdef _PVP_DYNAMIC_SERVER_TYPE
-	BYTE  IsPvPServer;
-#endif	// _PVP_DYNAMIC_SERVER_TYPE
-} SERVER_t;
-
-typedef struct
-{
-	char     Name[20];
-	BYTE     Number;
-	bool     extServer;					// 안씀.
-	SERVER_t Server[MAX_SERVER_LOW];
-} SERVER_LIST_t;
-//scene end
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 
 //infomation start
 typedef struct

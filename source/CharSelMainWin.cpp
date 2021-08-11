@@ -1,6 +1,5 @@
 //*****************************************************************************
 // File: CharSelMainWin.cpp
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
 
 #include "stdafx.h"
@@ -15,19 +14,10 @@
 #include "UIGuildInfo.h"
 #include "ZzzOpenData.h"
 #include "ZzzOpenglUtil.h"
-
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 #include "ServerListManager.h"
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-#ifdef PBG_ADD_CHARACTERSLOT
-#include "Slotlimit.h"
-#endif //PBG_ADD_CHARACTERSLOT
 
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
-extern int ServerSelectHi;
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 
 CCharSelMainWin::CCharSelMainWin()
 {
@@ -223,17 +213,7 @@ void CCharSelMainWin::DeleteCharacter()
 {
     if (CharactersClient[SelectedHero].GuildStatus != G_NONE)
 		CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_GUILDWARNING);
-#if !defined FOR_WORK && !defined EXP_SERVER_PATCH
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
-	else if((g_ServerListManager->IsTestServer() == false)
-#else // KJH_ADD_SERVER_LIST_SYSTEM
-	else if (!::IsTestServer()
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-		&& CharactersClient[SelectedHero].Level >= CHAR_DEL_LIMIT_LV)
-		CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_WARNING);
-#endif	// FOR_WORK
-	else if (CharactersClient[SelectedHero].CtlCode
-		& (CTLCODE_02BLOCKITEM | CTLCODE_10ACCOUNT_BLOCKITEM))
+	else if (CharactersClient[SelectedHero].CtlCode	& (CTLCODE_02BLOCKITEM | CTLCODE_10ACCOUNT_BLOCKITEM))
 		CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_ID_BLOCK);
 	else
 		CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_CONFIRM);

@@ -81,9 +81,7 @@
 #ifdef YDG_ADD_CS5_PORTAL_CHARM
 #include "PortalMgr.h"
 #endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 #include "ServerListManager.h"
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 #ifdef LDK_ADD_SCALEFORM
 #include "CGFxProcess.h" 
 #endif //LDK_ADD_SCALEFORM
@@ -1059,38 +1057,6 @@ void MoveCamera()
 #endif // DO_PROFILING
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 서버리스트 선택하는 화면
-///////////////////////////////////////////////////////////////////////////////
-
-#ifndef KJH_ADD_SERVER_LIST_SYSTEM			// #ifndef
-SERVER_LIST_t ServerList[MAX_SERVER_HI];
-WORD ServerNumber = 0;		// 서버 총 개수.
-int  ServerSelectHi = -1;
-int  ServerSelectLow = -1;
-int  ServerLocalSelect = -1;
-
-// 서버 그룹 이름으로 서버 그룹 버튼 번호를 리턴.(좌우측 구분) - 구버전 함수.
-int SearchServer(char *Name, bool extServer)
-{
-	int Count = 0;
-	for(int i=0;i<MAX_SERVER_HI;i++)
-	{
-		if(strcmp(ServerList[i].Name,Name)==NULL)
-			return Count;
-		if(ServerList[i].Number > 0 && ServerList[i].extServer==extServer )
-			Count++;
-	}
-	return 0;
-}
-
-int ServerConnectCount = 0;
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-
-///////////////////////////////////////////////////////////////////////////////
-// 계정 입력 받는 화면
-///////////////////////////////////////////////////////////////////////////////
-
 bool MenuCancel         = true;
 bool EnableSocket       = false;
 bool InitLogIn          = false;
@@ -1099,16 +1065,10 @@ bool InitCharacterScene = false;
 bool InitMainScene      = false;
 int  MenuY = 480;
 int  MenuX = -200;
-
-//  계정아이디.
 extern char LogInID[MAX_ID_SIZE+1];
 extern char m_ExeVersion[11];
 
 BOOL Util_CheckOption( char *lpszCommandLine, unsigned char cOption, char *lpszString);
-
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 선택 화면
-///////////////////////////////////////////////////////////////////////////////
 
 extern DWORD g_dwBKConv;
 extern DWORD g_dwBKSent;

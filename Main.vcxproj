@@ -1750,7 +1750,6 @@
     <ClCompile Include="source\SkillInfo.cpp" />
     <ClCompile Include="source\SlideInfo.cpp" />
     <ClCompile Include="source\Slider.cpp" />
-    <ClCompile Include="source\Slotlimit.cpp" />
     <ClCompile Include="source\SMD.cpp" />
     <ClCompile Include="source\SMD2BMD.cpp" />
     <ClCompile Include="source\SocketSystem.cpp" />
@@ -2467,7 +2466,6 @@
     <ClInclude Include="source\SkillInfo.h" />
     <ClInclude Include="source\SlideInfo.h" />
     <ClInclude Include="source\Slider.h" />
-    <ClInclude Include="source\Slotlimit.h" />
     <ClInclude Include="source\SMD.h" />
     <ClInclude Include="source\SocketSystem.h" />
     <ClInclude Include="source\Sprite.h" />

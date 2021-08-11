@@ -521,9 +521,6 @@
     <ClCompile Include="source\SideHair.cpp">
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Slotlimit.cpp">
-      <Filter>MU\client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\SMD.cpp">
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
@@ -1454,9 +1451,6 @@
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Singleton.h">
-      <Filter>MU\client\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Slotlimit.h">
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\SMD.h">

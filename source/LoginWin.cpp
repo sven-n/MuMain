@@ -6,24 +6,18 @@
 #include "LoginWin.h"
 #include "Input.h"
 #include "UIMng.h"
-
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
-
 #include "UIControls.h"
 #include "ZzzScene.h"
-
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "../ProtocolSend.h"
-
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 #include "ServerListManager.h"
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 
 #define	LIW_ACCOUNT		0
 #define	LIW_PASSWORD	1

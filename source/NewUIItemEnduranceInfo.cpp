@@ -659,12 +659,11 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedPetLife( int iX, int iY )
 
 bool SEASON3B::CNewUIItemEnduranceInfo::RenderSummonMonsterLife( int iX, int iY )
 {
-	//소환 몬스터 에너지
     if( SummonLife <= 0)
 		return false;
 	
 	unicode::t_char szText[256] = {NULL, };
-	unicode::_sprintf( szText, GlobalText[356] );				// 356 : 소환몬스터
+	unicode::_sprintf( szText, GlobalText[356] );
 	
 	RenderHPUI( iX, iY, szText, SummonLife, 100 );
 	
@@ -673,60 +672,40 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderSummonMonsterLife( int iX, int iY 
 
 bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow( int iX, int iY )
 {
-	// 활이나 석궁이 장착되어있지 않으면 처리하지 않음
 	if( m_iCurArrowType == ARROWTYPE_NONE )
 		return false;
 
 	unicode::t_char szText[256] = {NULL, };
-	int iNumEquipedArrowDurability = 0;			// 장착된 화살의 갯수
-	int iNumArrowSetInInven = 0;				// 인벤토리에 있는 화살뭉치 갯수
+	int iNumEquipedArrowDurability = 0;
+	int iNumArrowSetInInven = 0;
 
 	if( m_iCurArrowType == ARROWTYPE_BOW )
 	{
-#ifdef BUGFIX_UI_ARROW_NUM
-		// 인벤토리에 있는 화살뭉치 갯수를 구함
 		iNumArrowSetInInven = g_pMyInventory->GetNumItemByType( ARROWTYPE_BOW );
 
-		// 화살이 장착되어있으면 화살의 갯수 계산
 		if(CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_BOW+15)
 		{
 			iNumEquipedArrowDurability = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Durability;
 		}
 				
-		// 화살뭉치가 인벤에도 없고, 장착되어있지도 않으면 렌더하지 않음
 		if( (iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW+15) )
 			return false;
 
 		unicode::_sprintf( szText, GlobalText[351], iNumEquipedArrowDurability, iNumArrowSetInInven );
-#else // BUGFIX_UI_ARROW_NUM
-		iNumEquipedArrowDurability = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Durability;
-		iNumArrowSetInInven = g_pMyInventory->GetNumItemByType( ARROWTYPE_BOW );
-		unicode::_sprintf( szText, GlobalText[351], iNumEquipedArrowDurability, iNumArrowSetInInven );
-#endif // BUGFIX_UI_ARROW_NUM
 	}
 	else if( m_iCurArrowType == ARROWTYPE_CROSSBOW )
 	{
-#ifdef BUGFIX_UI_ARROW_NUM
-		// 인벤토리에 있는 화살뭉치 갯수를 구함
 		iNumArrowSetInInven = g_pMyInventory->GetNumItemByType( ARROWTYPE_CROSSBOW );
 
-		// 화살이 장착되어있으면 화살의 갯수 계산
 		if(CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOW+7)
 		{
 			iNumEquipedArrowDurability = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability;
 		}
 				
-		// 화살뭉치가 인벤에도 없고, 장착되어있지도 않으면 렌더하지 않음
 		if( (iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW+7) )
 			return false;
 
 		unicode::_sprintf( szText, GlobalText[352], iNumEquipedArrowDurability, iNumArrowSetInInven );
-
-#else // BUGFIX_UI_ARROW_NUM
-		iNumEquipedArrowDurability = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability;
-		iNumArrowSetInInven = g_pMyInventory->GetNumItemByType( ARROWTYPE_CROSSBOW );
-		unicode::_sprintf( szText, GlobalText[352], iNumEquipedArrowDurability, iNumArrowSetInInven );
-#endif // BUGFIX_UI_ARROW_NUM
 	}
 	
 	g_pRenderText->SetBgColor( 0, 0, 0, 180 );
@@ -735,103 +714,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow( int iX, int iY )
 	
 	return true;
 }
-
-#ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
-bool SEASON3B::CNewUIItemEnduranceInfo::RenderPCRoomPoint( int iX, int iY )
-{
-#ifdef ADD_PCROOM_POINT_SYSTEM
-#ifndef ASG_PCROOM_POINT_SYSTEM_MODIFY		// 정리시 삭제.
-	// PC방이 아니면 처리하지 않음.
-	if ( CPCRoomPtSys::Instance().IsPCRoom() == false )	
-		return false;
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY	// 정리시 삭제.
-
-	unicode::t_char szText[256] = {NULL, };
-	unicode::_sprintf( szText, GlobalText[2319],
-		CPCRoomPtSys::Instance().GetNowPoint(), 
-		CPCRoomPtSys::Instance().GetMaxPoint() );			// 2319 "PC방 포인트(%d/%d)"
-	
-	g_pRenderText->SetTextColor(255, 128, 255, 255);
-	g_pRenderText->SetBgColor(0, 0, 0, 180);
-
-	g_pRenderText->RenderText( iX, iY, szText, 0, 0, RT3_SORT_LEFT );
-#endif //ADD_PCROOM_POINT_SYSTEM
-	return true;
-}
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-
-#ifdef PBG_ADD_PCROOM_NEWUI
-bool SEASON3B::CNewUIItemEnduranceInfo::RenderPCRoomUI(int _PosX, int _PosY)
-{
-	if(!CPCRoomPtSys::Instance().IsPCRoom())
-		return false;
-
-	EnableAlphaTest();
-	g_pRenderText->SetBgColor( 0, 0, 0, 0 );
-	g_pRenderText->SetTextColor(100, 50, 0, 255);
-	EndRenderColor();
-	glColor4f ( 1.f, 1.f, 1.f, 1.f );
-	RenderImage(IMAGE_PCROOM_UI, _PosX, _PosY, PCROOM_WIDTH, PCROOM_HEIGHT);
-
-	unicode::t_char szText[256] = {0,};
-	unicode::_sprintf(szText, GlobalText[3062]);
-	int _TempPosX=0;
-	// 해상도의 따른 위치조정
-	switch(WindowWidth)
-	{
-	case 800:	_TempPosX = 0; break;
-	case 1024:	_TempPosX = 4; break;
-	case 1280:	_TempPosX = 6; break;
-	default:	_TempPosX = 0; break;
-	}
-
-	g_pRenderText->SetFont(g_hFontBold);
-	g_pRenderText->RenderText(_PosX+_TempPosX, _PosY+PCROOM_HEIGHT*0.4f, szText, 0, 0, RT3_SORT_LEFT);
-	
-	DisableAlphaBlend();
-
-	RenderPCRoomToolTip(_PosX, _PosY);
-
-#ifdef PBG_FIX_PCROOMFONT
-	g_pRenderText->SetFont(g_hFont);
-#endif //PBG_FIX_PCROOMFONT
-
-	return true;
-}
-
-bool SEASON3B::CNewUIItemEnduranceInfo::RenderPCRoomToolTip(int _PosX, int _PosY)
-{
-	if(CheckMouseIn(_PosX, _PosY, PCROOM_WIDTH, PCROOM_HEIGHT))
-	{
-		unicode::t_char _szTempText[256] = {0,};
-		
-		if(BLUE_MU::IsBlueMuServer())
-			unicode::_sprintf(_szTempText, GlobalText[3061]);	//블루 뮤
-		else
-			unicode::_sprintf(_szTempText, GlobalText[3060]);	//레드 뮤
-
-		unicode::t_char _szText[NUM_LINE_CMB][MAX_TEXT_LENGTH]={0,};
-		int _TextLineCnt = ::DivideStringByPixel(&_szText[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, _szTempText, 200, true, '/');
-
-		float _fWidth=150, _fHeight=13;
-		for (int i=0; i<_TextLineCnt; i++)
-		{		
-			EnableAlphaTest();	
-			glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-			RenderColor ((float)_PosX+PCROOM_WIDTH+5, _PosY+(i*_fHeight)-3, _fWidth, _fHeight);
-			glEnable(GL_TEXTURE_2D);
-
-			g_pRenderText->SetBgColor(0, 0, 0, 1.0f);
-			g_pRenderText->SetTextColor(255, 255, 255, 255);
-			g_pRenderText->SetFont(g_hFont);
-			g_pRenderText->RenderText(_PosX+PCROOM_WIDTH+5, _PosY+(i*_fHeight),  _szText[i], _fWidth, 0, RT3_SORT_LEFT);
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			DisableAlphaBlend();
-		}
-	}
-	return true;
-}
-#endif //PBG_ADD_PCROOM_NEWUI
 
 bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance( int ix, int iY )
 {
