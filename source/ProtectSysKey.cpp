@@ -29,7 +29,7 @@ bool CProtectSysKey::AttachProtectSysKey(HINSTANCE hInst, HWND hWnd)
 		// WH_KEYBOARD_LL = 13
 		m_hKeyboardHook = SetWindowsHookEx(13, CProtectSysKey::LowLevelKeyHookProc, hInst, 0);
 		
-		// for Window98
+		// for Window98 9 (lol by louis)
 		if(RegisterHotKey( hWnd, 0, MOD_ALT, VK_TAB))
 			m_hWnd = hWnd;
 
@@ -58,7 +58,6 @@ CProtectSysKey* CProtectSysKey::GetObjPtr()
 	return &s_Instance;
 }
 
-
 LRESULT CALLBACK CProtectSysKey::LowLevelKeyHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	if(nCode == HC_ACTION) {
@@ -70,13 +69,8 @@ LRESULT CALLBACK CProtectSysKey::LowLevelKeyHookProc(int nCode, WPARAM wParam, L
 				PKBDLLHOOKSTRUCT pKBHookStruct = (PKBDLLHOOKSTRUCT)lParam;
 				switch(pKBHookStruct->vkCode)
 				{
-				// LHJ - 윈도우 시작키의 단축인 ESC + Ctrld의 사용을 모하도록 막음 
 				case VK_ESCAPE:
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-					if(SEASON3B::IsRepeat(VK_CONTROL) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 					if(GetAsyncKeyState( VK_CONTROL))
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 						return 1;
 					break;
 				case VK_LWIN:

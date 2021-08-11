@@ -15320,28 +15320,23 @@ bool IsSecondClass(const BYTE byClass)
 
 bool IsThirdClass(const BYTE byClass)
 {
-	BYTE byThirdClass = (byClass >> 4) & 0x01;
-	return byThirdClass;
+	return (((signed int)byClass >> 4) & 1) != 0;;
 }
 
 BYTE GetStepClass(const BYTE byClass)
 {
-	BYTE byStep = 0;
-
 	if(IsThirdClass(byClass))
 	{
-		byStep = 3;
+		return 3;
 	}
 	else if(IsSecondClass(byClass) == true && IsThirdClass(byClass) == false)
 	{
-		byStep = 2;
+		return 2;
 	}
 	else
 	{
-		byStep = 1;
+		return 1;
 	}
-
-	return byStep;
 }
 
 const unicode::t_char* GetCharacterClassText(const BYTE byClass)

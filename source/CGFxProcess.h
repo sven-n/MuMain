@@ -60,7 +60,6 @@ enum KeyModifiers
 	KM_Scroll  = 0x20
 };
 
-//--------------------------------------------------------------------------------------
 // member Class  등록 타입
 enum GFxRegistType
 {
@@ -73,7 +72,6 @@ enum GFxRegistType
 
 	eGFxRegist_MAX_COUNT,
 };
-//--------------------------------------------------------------------------------------
 
 class CGFXBase
 {

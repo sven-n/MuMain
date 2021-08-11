@@ -846,13 +846,8 @@ void UseBattleMasterSkill ( void )
     
     if ( Hero->GuildMasterKillCount >= MaxKillCount )
     {
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		if(SEASON3B::IsPress(VK_SHIFT) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
         if ( HIBYTE( GetAsyncKeyState( VK_SHIFT ) ) )
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
         {
-			//박종훈 직책스킬 추가
 			if(Hero->BackupCurrentSkill == 255)
 			{
 				Hero->BackupCurrentSkill = Hero->CurrentSkill;

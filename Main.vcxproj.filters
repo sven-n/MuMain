@@ -179,6 +179,9 @@
     <Filter Include="MU\Load">
       <UniqueIdentifier>{02285ab0-a8d5-4147-8fe1-3212fd290ddd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MU\Character">
+      <UniqueIdentifier>{40d08960-a0c1-4906-a754-f6b54225859e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="source\icon1.ico">
@@ -450,9 +453,6 @@
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\GlobalBitmap.cpp">
-      <Filter>MU\client\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\GlobalPortalSystem.cpp">
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\GOBoid.cpp">
@@ -1142,6 +1142,9 @@
     <ClCompile Include="source\LoadData.cpp">
       <Filter>MU\Load</Filter>
     </ClCompile>
+    <ClCompile Include="CharacterManager.cpp">
+      <Filter>MU\Character</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\BlackWin.h">
@@ -1370,9 +1373,6 @@
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\GlobalBitmap.h">
-      <Filter>MU\client\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\GlobalPortalSystem.h">
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\GlobalText.h">
@@ -2838,6 +2838,9 @@
     </ClInclude>
     <ClInclude Include="source\LoadData.h">
       <Filter>MU\Load</Filter>
+    </ClInclude>
+    <ClInclude Include="CharacterManager.h">
+      <Filter>MU\Character</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

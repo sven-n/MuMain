@@ -1000,36 +1000,7 @@ BOOL CUITextListBox<T>::DoMouseAction()
 	if (m_bUseSelectLine == TRUE && g_dwKeyFocusUIID == GetUIID())
 	{
 		BOOL bKeyPress = FALSE;
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		if(SEASON3B::IsPress(VK_LEFT) == TRUE)		{}
-		if(SEASON3B::IsPress(VK_RIGHT) == TRUE)		{}
-		if(SEASON3B::IsPress(VK_UP) == TRUE)
-		{
-			bKeyPress = TRUE;
-			if (m_bPressCursorKey == 0)
-			{
-				SendUIMessage(UI_MESSAGE_LISTSELUP, 0, 0);
-				m_bPressCursorKey = 1;
-			}
-			else if (m_bPressCursorKey > 5)
-				SendUIMessage(UI_MESSAGE_LISTSELUP, 0, 0);
-			else
-				++m_bPressCursorKey;
-		}
-		if(SEASON3B::IsPress(VK_DOWN) == TRUE)
-		{
-			bKeyPress = TRUE;
-			if (m_bPressCursorKey == 0)
-			{
-				SendUIMessage(UI_MESSAGE_LISTSELDOWN, 0, 0);
-				m_bPressCursorKey = 1;
-			}
-			else if (m_bPressCursorKey > 5)
-				SendUIMessage(UI_MESSAGE_LISTSELDOWN, 0, 0);
-			else
-				++m_bPressCursorKey;
-		}
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
+
 		if(HIBYTE(GetAsyncKeyState(VK_LEFT ))==128)
 		{
 		}
@@ -1062,13 +1033,12 @@ BOOL CUITextListBox<T>::DoMouseAction()
 			else
 				++m_bPressCursorKey;
 		}
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		if (bKeyPress == FALSE)
 		{
 			m_bPressCursorKey = 0;
 		}
 	}
- 	if(CheckMouseInBox())	// »óÀÚ ¾È
+ 	if(CheckMouseInBox())
 	{
 		if (MouseWheel != 0)
 		{

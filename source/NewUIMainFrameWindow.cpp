@@ -1074,11 +1074,7 @@ bool SEASON3B::CNewUIItemHotKey::UpdateKeyEvent()
 
 int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int iStartItemType = 0, iEndItemType = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int iStartItemType, iEndItemType = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int i, j;
 
 	switch(iType)
@@ -1515,11 +1511,9 @@ void SEASON3B::CNewUISkillList::UnloadImages()
 	DeleteBitmap(IMAGE_COMMAND);
 	DeleteBitmap(IMAGE_SKILLBOX);
 	DeleteBitmap(IMAGE_SKILLBOX_USE);
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	DeleteBitmap(IMAGE_NON_SKILL1);
 	DeleteBitmap(IMAGE_NON_SKILL2);
 	DeleteBitmap(IMAGE_NON_COMMAND);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	DeleteBitmap(IMAGE_SKILL3);
 	DeleteBitmap(IMAGE_NON_SKILL3);
@@ -1535,25 +1529,14 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 	}
 #endif //MOD_SKILLLIST_UPDATEMOUSE_BLOCK
 
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
-	// 관전 버프시 메인 프레임을 사용할 수 없다
 	if(g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
 	{
 		m_bSkillList = false;
 		return true;
 	}
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
-	// lock 사용
-	BYTE bySkillNumber = CharacterAttribute->SkillNumber;	// 스킬 갯수
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	BYTE bySkillMasterNumber = CharacterAttribute->SkillMasterNumber;	// 마스터 스킬 갯수
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
+	BYTE bySkillNumber = CharacterAttribute->SkillNumber;
+	BYTE bySkillMasterNumber = CharacterAttribute->SkillMasterNumber;
 
 	float x, y, width, height;
 
@@ -1564,7 +1547,6 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 		return true;
 	}
 	
-	// 현재 사용중인 스킬
 	x = 385.f; y = 431.f; width = 32.f; height = 38.f;
 	if(m_EventState == EVENT_NONE && MouseLButtonPush == false 
 		&& SEASON3B::CheckMouseIn(x, y, width, height) == true)
@@ -1615,7 +1597,6 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 		return false;
 	}
 	
-	// 현재 리스트에 표현된 5개 스킬
 	x = 222.f; y =431.f; width = 32.f*5.f; height = 38.f;
 	if(m_EventState == EVENT_NONE && MouseLButtonPush == false 
 		&& SEASON3B::CheckMouseIn(x, y, width, height) == true)
@@ -1662,13 +1643,7 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 				continue;
 			}
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-			// lock 사용
 			WORD bySkillType = CharacterAttribute->Skill[m_iHotKeySkillType[iIndex]];
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
 			if(bySkillType == 0 || ( bySkillType >= AT_SKILL_STUN && bySkillType <= AT_SKILL_REMOVAL_BUFF ))
 				continue;
@@ -1695,13 +1670,11 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 					if(m_iRenderSkillInfoType == m_iHotKeySkillType[iIndex])
 					{
 						m_EventState = EVENT_NONE;
-#ifdef CSK_FIX_WOPS_K29010_HELLBUST
 #ifdef PBG_ADD_NEWCHAR_MONK
 						m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 #else //PBG_ADD_NEWCHAR_MONK
 						m_byHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 #endif //PBG_ADD_NEWCHAR_MONK
-#endif // CSK_FIX_WOPS_K29010_HELLBUST
 						Hero->CurrentSkill = m_iHotKeySkillType[iIndex];
 						PlayBuffer(SOUND_CLICK01);
 						return false;
@@ -1726,8 +1699,7 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 		return false;
 	}
 	
-	// 스킬 리스트
-	if(m_bSkillList == false)		//// 아래부터는 스킬 리스트가 있을경우에만 처리 ////
+	if(m_bSkillList == false)
 		return true;
 	
 	WORD bySkillType = 0;
@@ -1816,13 +1788,11 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 		{
 			m_EventState = EVENT_NONE;
 
-#ifdef CSK_FIX_WOPS_K29010_HELLBUST
 #ifdef PBG_ADD_NEWCHAR_MONK
 			m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 #else //PBG_ADD_NEWCHAR_MONK
 			m_byHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 #endif //PBG_ADD_NEWCHAR_MONK
-#endif // CSK_FIX_WOPS_K29010_HELLBUST
 
 			Hero->CurrentSkill = i;
 			m_bSkillList = false;
@@ -2417,164 +2387,80 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		return;
 	}
 
-	if(iIndex >= AT_PET_COMMAND_DEFAULT)    //  팻 명령.
+	if(iIndex >= AT_PET_COMMAND_DEFAULT)
     {
         bySkillType = iIndex;
     }
 
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	bool bCantSkill = false;
-#endif // KJH_ADD_SKILLICON_RENEWAL
 
     BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
 	int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
 
-#ifdef PBG_FIX_SKILL_DEMENDCONDITION
  	if( !SKILLCONDITION::DemendConditionCheckSkill( bySkillType ) )
  	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
-#endif //PBG_FIX_SKILL_DEMENDCONDITION
 
 	if(IsCanBCSkill(bySkillType) == false)
 	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
 	if( g_isCharacterBuff((&Hero->Object), eBuff_AddSkill) && bySkillUseType == SKILL_USE_TYPE_BRAND )
 	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
 
-	if(bySkillType == AT_SKILL_SPEAR 
-		&& ( Hero->Helper.Type<MODEL_HELPER+2 || Hero->Helper.Type>MODEL_HELPER+3 ) 
-		&& Hero->Helper.Type != MODEL_HELPER+37)
+	if(bySkillType == AT_SKILL_SPEAR && ( Hero->Helper.Type<MODEL_HELPER+2 || Hero->Helper.Type>MODEL_HELPER+3 ) && Hero->Helper.Type != MODEL_HELPER+37)
 	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
 
-	if(bySkillType == AT_SKILL_SPEAR 
-		&& (Hero->Helper.Type == MODEL_HELPER+2 || Hero->Helper.Type == MODEL_HELPER+3 
-		|| Hero->Helper.Type == MODEL_HELPER+37))
+	if(bySkillType == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HELPER+2 || Hero->Helper.Type == MODEL_HELPER+3	|| Hero->Helper.Type == MODEL_HELPER+37))
 	{
 		int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 		int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-		if((iTypeL < ITEM_SPEAR || iTypeL >= ITEM_BOW)
-			&& (iTypeR < ITEM_SPEAR || iTypeR >= ITEM_BOW))
+		if((iTypeL < ITEM_SPEAR || iTypeL >= ITEM_BOW) && (iTypeR < ITEM_SPEAR || iTypeR >= ITEM_BOW))
 		{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 			bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-			glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 		}
 	}
 
-	if(bySkillType >= AT_SKILL_BLOCKING && bySkillType <= AT_SKILL_SWORD5 
-		&& (Hero->Helper.Type == MODEL_HELPER+2 || Hero->Helper.Type == MODEL_HELPER+3 || Hero->Helper.Type == MODEL_HELPER+37))
+	if(bySkillType >= AT_SKILL_BLOCKING && bySkillType <= AT_SKILL_SWORD5 && (Hero->Helper.Type == MODEL_HELPER+2 || Hero->Helper.Type == MODEL_HELPER+3 || Hero->Helper.Type == MODEL_HELPER+37))
 	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
 
-	if((bySkillType == AT_SKILL_ICE_BLADE
-#ifdef PJH_SEASON4_MASTER_RANK4
-		||(AT_SKILL_POWER_SLASH_UP <= bySkillType && AT_SKILL_POWER_SLASH_UP+4 >= bySkillType)
-#endif //PJH_SEASON4_MASTER_RANK4
-		)
-		&& (Hero->Helper.Type == MODEL_HELPER+2 || Hero->Helper.Type == MODEL_HELPER+3 || Hero->Helper.Type == MODEL_HELPER+37))
+	if((bySkillType == AT_SKILL_ICE_BLADE ||(AT_SKILL_POWER_SLASH_UP <= bySkillType && AT_SKILL_POWER_SLASH_UP+4 >= bySkillType)) && (Hero->Helper.Type == MODEL_HELPER+2 || Hero->Helper.Type == MODEL_HELPER+3 || Hero->Helper.Type == MODEL_HELPER+37))
 	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
-
-#ifdef PJH_SEASON4_MASTER_RANK4
-	/*
-	else
-	if(bySkillType == AT_SKILL_ICE_BLADE ||(AT_SKILL_POWER_SLASH_UP <= bySkillType && AT_SKILL_POWER_SLASH_UP+4 >= bySkillType))
-	{
-		glColor3f(1.f, 0.5f, 0.5f);
-		for(int j=0;j<2;j++)
-		{
-			if(Hero->Weapon[j].Type==MODEL_SWORD+21||Hero->Weapon[j].Type==MODEL_SWORD+23||Hero->Weapon[j].Type==MODEL_SWORD+28||
-				Hero->Weapon[j].Type==MODEL_SWORD+25||Hero->Weapon[j].Type==MODEL_SWORD+31
-				)	//21 = 데스블레이드,23 = 익스플로전블레이드,25 = 소드댄서,28 = 룬바스타드,31 = 데쓰브로드
-			{
-				glColor3f(1.f, 1.f, 1.f);
-				break;
-			}
-		}
-	}
-	*/
-#endif //PJH_SEASON4_MASTER_RANK4   
-                     
+                   
     int iEnergy = CharacterAttribute->Energy+CharacterAttribute->AddEnergy;
 
-	// 스킬사용시 스텟검사 (에너지만)
     if(g_csItemOption.IsDisableSkill(bySkillType, iEnergy))
 	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-        glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
 
     if(bySkillType == AT_SKILL_PARTY_TELEPORT && PartyNumber <= 0)
     {
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-        glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
     }
 
-#ifdef YDG_ADD_DOPPELGANGER_UI
 	if (bySkillType == AT_SKILL_PARTY_TELEPORT && (IsDoppelGanger1() || IsDoppelGanger2() || IsDoppelGanger3() || IsDoppelGanger4()))
 	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-        glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
-#endif	// YDG_ADD_DOPPELGANGER_UI
 
 	if(bySkillType == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= bySkillType && bySkillType <= AT_SKILL_ASHAKE_UP+4))
 	{
 		BYTE byDarkHorseLife = 0;
 		byDarkHorseLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
-		if(byDarkHorseLife == 0 || Hero->Helper.Type != MODEL_HELPER+4)		// 다크호스의 HP가 0 이거나, 다크호스가 없을때
+		if(byDarkHorseLife == 0 || Hero->Helper.Type != MODEL_HELPER+4)
 		{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 			bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-			if(Hero->Helper.Type != MODEL_HELPER+4)
-				glColor3f(0.5f, 0.5f, 0.5f);
-			else
-				glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
+
 		}
 	}
 #ifdef PJH_FIX_SPRIT
@@ -2595,76 +2481,36 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 #endif // KJH_ADD_SKILLICON_RENEWAL
 	}
 #endif //PJH_FIX_SPRIT
-	if( (bySkillType == AT_SKILL_INFINITY_ARROW)
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-		|| (bySkillType == AT_SKILL_SWELL_OF_MAGICPOWER)
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-		)
+	if( (bySkillType == AT_SKILL_INFINITY_ARROW) || (bySkillType == AT_SKILL_SWELL_OF_MAGICPOWER))
 	{
-#ifdef PJH_FIX_SKILL
 		if(g_csItemOption.IsDisableSkill(bySkillType, iEnergy))
 		{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 			bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-			glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 		}
-#endif //PJH_FIX_SKILL
-		if( ( g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow) )
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-			|| ( g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower) )
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-			)
+		if( ( g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow) )	|| ( g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower)))
 		{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 			bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-			glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 		}
 	}
-#ifdef KJH_FIX_WOPS_K20674_CHECK_STAT_USE_SKILL
-	// 블러드어택 (마검사) 일때 스텟을 검사하여 요구스텟이 충분치 아니하면 스킬아이콘 빨갛게 처리
-	// 다른스킬도 이와같이 처리 해주어야 한다. (Season4 본섭 적용 후에 꼭하자!!)
-	if( bySkillType == AT_SKILL_REDUCEDEFENSE
-#ifdef YDG_FIX_BLOCK_STAFF_WHEEL
-		|| (AT_SKILL_BLOOD_ATT_UP <= bySkillType && bySkillType <= AT_SKILL_BLOOD_ATT_UP+4)
-#endif	// YDG_FIX_BLOCK_STAFF_WHEEL
-		)
+
+	if( bySkillType == AT_SKILL_REDUCEDEFENSE || (AT_SKILL_BLOOD_ATT_UP <= bySkillType && bySkillType <= AT_SKILL_BLOOD_ATT_UP+4))
 	{
 		WORD Strength;
 		const WORD wRequireStrength = 596;
 		Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
 		if(Strength < wRequireStrength)
 		{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 			bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-			glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 		}
-#ifdef YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
 		int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 		int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 		
-		if ( !( iTypeR!=-1 && 
-		( iTypeR<ITEM_STAFF || iTypeR>=ITEM_STAFF+MAX_ITEM_INDEX ) &&
-		( iTypeL<ITEM_STAFF || iTypeL>=ITEM_STAFF+MAX_ITEM_INDEX ) ) )
+		if ( !( iTypeR!=-1 && ( iTypeR<ITEM_STAFF || iTypeR>=ITEM_STAFF+MAX_ITEM_INDEX ) &&	( iTypeL<ITEM_STAFF || iTypeL>=ITEM_STAFF+MAX_ITEM_INDEX ) ) )
 		{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 			bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-			glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 		}
-#endif	// YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
 	}
-#endif //KJH_FIX_WOPS_K20674_CHECK_STAT_USE_SKILL
 	
-#ifdef LDK_FIX_CHECK_STAT_USE_SKILL_PIERCING
-	// 아이스에로우 (요정) 일때 스텟을 검사하여 요구스텟이 충분치 아니하면 스킬아이콘 빨갛게 처리
-	// 다른스킬도 이와같이 처리 해주어야 한다. (Season4 본섭 적용 후에 꼭하자!!)
 	switch( bySkillType )
 	{
 	//case AT_SKILL_PIERCING:
@@ -2675,41 +2521,26 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 			Dexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
 			if(Dexterity < wRequireDexterity)
 			{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 				bCantSkill = true;
-#else // KJH_ADD_SKILLICON_RENEWAL
-				glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 			}
 		}break;
 	}
-#endif //LDK_FIX_CHECK_STAT_USE_SKILL_PIERCING
 
-#ifdef YDG_FIX_BLOCK_STAFF_WHEEL
-	if( bySkillType == AT_SKILL_WHEEL
-		|| (AT_SKILL_TORNADO_SWORDA_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDA_UP+4)
-		|| (AT_SKILL_TORNADO_SWORDB_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDB_UP+4)
+	if( bySkillType == AT_SKILL_WHEEL || (AT_SKILL_TORNADO_SWORDA_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDA_UP+4)	|| (AT_SKILL_TORNADO_SWORDB_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDB_UP+4)
 		)
 	{
 		int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 		int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 		
 		if ( !( iTypeR!=-1 && ( iTypeR<ITEM_STAFF || iTypeR>=ITEM_STAFF+MAX_ITEM_INDEX ) && ( iTypeL<ITEM_STAFF || iTypeL>=ITEM_STAFF+MAX_ITEM_INDEX ) ) )
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		{
 			bCantSkill = true;
 		}
-#else // KJH_ADD_SKILLICON_RENEWAL
-			glColor3f ( 1.f, 0.5f, 0.5f );
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
-#endif	// YDG_FIX_BLOCK_STAFF_WHEEL
 
 	if(gMapManager.InChaosCastle() == true)
 	{
-		if( bySkillType == AT_SKILL_DARK_HORSE || bySkillType == AT_SKILL_RIDER
-			|| (bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_TARGET)
-			||(AT_SKILL_ASHAKE_UP <= bySkillType && bySkillType <= AT_SKILL_ASHAKE_UP+4))
+		if( bySkillType == AT_SKILL_DARK_HORSE || bySkillType == AT_SKILL_RIDER	|| (bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_TARGET) ||(AT_SKILL_ASHAKE_UP <= bySkillType && bySkillType <= AT_SKILL_ASHAKE_UP+4))
 		{
 			bCantSkill = true;
 		}
@@ -2753,7 +2584,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		bCantSkill = true;
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-	//////////////////////////////////////////////////////////////////////////
 	
 	float fU, fV;
 	int iKindofSkill = 0;
@@ -2766,7 +2596,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	if(g_csItemOption.Special_Option_Check(1) == false && (bySkillType == AT_SKILL_CROSSBOW||(AT_SKILL_MANY_ARROW_UP <= bySkillType && AT_SKILL_MANY_ARROW_UP+4 >= bySkillType)))
 		bCantSkill = true;
 
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	if(bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_END)
     {
 		fU = ((bySkillType - AT_PET_COMMAND_DEFAULT) % 8) * width / 256.f;
@@ -2797,14 +2626,12 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		fV = 3 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#ifdef ASG_ADD_SKILL_BERSERKER
 	else if (bySkillType == AT_SKILL_ALICE_BERSERKER)
 	{
 		fU = 10 * width / 256.f;
 		fV = 3 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif	// ASG_ADD_SKILL_BERSERKER
 	else if (bySkillType >= AT_SKILL_ALICE_WEAKNESS && bySkillType <= AT_SKILL_ALICE_ENERVATION)
 	{
 		fU = (bySkillType - AT_SKILL_ALICE_WEAKNESS + 8) * width / 256.f;
@@ -2817,42 +2644,33 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		fV = 3 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#ifdef ASG_ADD_SUMMON_RARGLE
 	else if (bySkillType == AT_SKILL_SUMMON_POLLUTION)
 	{
 		fU = 11 * width / 256.f;
 		fV = 3 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif	// ASG_ADD_SUMMON_RARGLE
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 	else if (bySkillType == AT_SKILL_BLOW_OF_DESTRUCTION)
 	{
 		fU = 7 * width / 256.f;
 		fV = 2 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 	else if (bySkillType == AT_SKILL_GAOTIC)
 	{
 		fU = 3 * width / 256.f;
 		fV = 8 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif //#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	else if (bySkillType == AT_SKILL_RECOVER)
 	{
 		fU = 9 * width / 256.f;
 		fV = 2 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif //#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 	else if (bySkillType == AT_SKILL_MULTI_SHOT)
 	{
-		if (GetEquipedBowType_Skill() == BOWTYPE_NONE)	// 활을 들어야 활성화
+		if (GetEquipedBowType_Skill() == BOWTYPE_NONE)
 		{
 			bCantSkill = true;
 		}
@@ -2861,25 +2679,12 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		fV = 8 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 	else if (bySkillType == AT_SKILL_FLAME_STRIKE)
 	{
-#ifdef YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
 		int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 		int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 		
-		if ( !( iTypeR!=-1 && 
-		( iTypeR<ITEM_STAFF || iTypeR>=ITEM_STAFF+MAX_ITEM_INDEX ) &&
-		( iTypeL<ITEM_STAFF || iTypeL>=ITEM_STAFF+MAX_ITEM_INDEX ) ) )
-#else	// YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
-//		if (!FindHeroSkill(AT_SKILL_ICE_BLADE))	// 파워슬래시가 있어야 활성화
-#ifdef YDG_FIX_MACE_FLAMESTRIKE
-		if (!(Hero->Weapon[0].Type>=MODEL_SWORD+0 && Hero->Weapon[0].Type<MODEL_SPEAR+MAX_ITEM_INDEX))	// 검,도끼,둔기,창을 들어야 활성화
-#else	// YDG_FIX_MACE_FLAMESTRIKE
-		if (!(Hero->Weapon[0].Type>=MODEL_SWORD+0 && Hero->Weapon[0].Type<MODEL_SWORD+MAX_ITEM_INDEX))	// 검을 들어야 활성화
-#endif	// YDG_FIX_MACE_FLAMESTRIKE
-#endif	// YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
+		if ( !( iTypeR!=-1 && ( iTypeR<ITEM_STAFF || iTypeR>=ITEM_STAFF+MAX_ITEM_INDEX ) &&	( iTypeL<ITEM_STAFF || iTypeL>=ITEM_STAFF+MAX_ITEM_INDEX ) ) )
 		{
 			bCantSkill = true;
 		}
@@ -2888,39 +2693,30 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		fV = 8 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 	else if (bySkillType == AT_SKILL_GIGANTIC_STORM)
 	{
 		fU = 2 * width / 256.f;
 		fV = 8 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
 	else if (bySkillType == AT_SKILL_LIGHTNING_SHOCK)
 	{
 		fU = 2 * width / 256.f;
 		fV = 3 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef PJH_ADD_MASTERSKILL
 	else if(AT_SKILL_LIGHTNING_SHOCK_UP <= bySkillType && bySkillType <= AT_SKILL_LIGHTNING_SHOCK_UP+4)
 	{
 		fU = 6 * width / 256.f;
 		fV = 8 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	else if( bySkillType == AT_SKILL_SWELL_OF_MAGICPOWER )
 	{
 		fU = 8 * width / 256.f;
 		fV = 2 * height / 256.f;
 		iKindofSkill = KOS_SKILL2;
 	}
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	else if(bySkillUseType == 4)
 	{
 		fU = (width/256.f) * (Skill_Icon%12);
@@ -2930,9 +2726,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	else if(bySkillType >= AT_SKILL_THRUST)
 	{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		float test = 0.0f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		fU = ((bySkillType - 260) % 12) * width / 256.f;
 		fV = ((bySkillType - 260) / 12) * height / 256.f;
 		iKindofSkill = KOS_SKILL3;
@@ -2976,9 +2769,9 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	if( bCantSkill == true )
 	{
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-		iSkillIndex += 6;		// 이미지 인덱스 순서가 일정하다는것을 전제, 이미지 인덱스를 바꾸면 안됨!!!
+		iSkillIndex += 6;
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
-		iSkillIndex += 5;		// 이미지 인덱스 순서가 일정하다는것을 전제, 이미지 인덱스를 바꾸면 안됨!!!
+		iSkillIndex += 5;
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}
 	
@@ -2987,174 +2780,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		RenderBitmap(iSkillIndex, x, y, width, height, fU, fV, width/256.f, height/256.f);	
 	}
 
-#else // KJH_ADD_SKILLICON_RENEWAL
-
-	if(bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_END)    //  팻 명령.
-    {
-		fU = ((bySkillType - AT_PET_COMMAND_DEFAULT) % 8) * width / 256.f;
-		fV = ((bySkillType - AT_PET_COMMAND_DEFAULT) / 8) * height / 256.f;
-		RenderBitmap(IMAGE_COMMAND, x, y, width, height, fU, fV, width/256.f, height/256.f);
-    }
-    else if(bySkillType == AT_SKILL_PLASMA_STORM_FENRIR)	// 플라즈마 스톰
-	{
-		fU = 4 * width / 256.f;
-		fV = 0.f;
-		RenderBitmap(IMAGE_COMMAND, x, y, width, height, fU, fV, width/256.f, height/256.f);
-	}
-	else if(bySkillType >= AT_SKILL_ALICE_DRAINLIFE && bySkillType <= AT_SKILL_ALICE_THORNS)
-	{
-		fU = ((bySkillType - AT_SKILL_ALICE_DRAINLIFE) % 8) * width / 256.f;
-		fV = 3 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);
-	}
-	else if(bySkillType >= AT_SKILL_ALICE_SLEEP && bySkillType <= AT_SKILL_ALICE_BLIND)
-	{
-		fU = ((bySkillType - AT_SKILL_ALICE_SLEEP + 4) % 8) * width / 256.f;
-		fV = 3 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);
-	}
-#ifdef ASG_ADD_SKILL_BERSERKER
-	else if (bySkillType == AT_SKILL_ALICE_BERSERKER)
-	{
-		fU = 10 * width / 256.f;
-		fV = 3 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif	// ASG_ADD_SKILL_BERSERKER
-	else if (bySkillType >= AT_SKILL_ALICE_WEAKNESS && bySkillType <= AT_SKILL_ALICE_ENERVATION)
-	{
-		fU = (bySkillType - AT_SKILL_ALICE_WEAKNESS + 8) * width / 256.f;
-		fV = 3 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-	else if(bySkillType >= AT_SKILL_SUMMON_EXPLOSION && bySkillType <= AT_SKILL_SUMMON_REQUIEM)
-	{
-		fU = ((bySkillType - AT_SKILL_SUMMON_EXPLOSION + 6) % 8) * width / 256.f;
-		fV = 3 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#ifdef ASG_ADD_SUMMON_RARGLE
-	else if (bySkillType == AT_SKILL_SUMMON_POLLUTION)
-	{
-		fU = 11 * width / 256.f;
-		fV = 3 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif	// ASG_ADD_SUMMON_RARGLE
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-	else if (bySkillType == AT_SKILL_BLOW_OF_DESTRUCTION)
-	{
-		fU = 7 * width / 256.f;
-		fV = 2 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-	else if (bySkillType == AT_SKILL_GAOTIC)
-	{
-		fU = 3 * width / 256.f;
-		fV = 8 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif //#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-	else if (bySkillType == AT_SKILL_RECOVER)
-	{
-		fU = 9 * width / 256.f;
-		fV = 2 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif //#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-	else if (bySkillType == AT_SKILL_MULTI_SHOT)
-	{
-		if (GetEquipedBowType_Skill() == BOWTYPE_NONE)	// 활을 들어야 활성화
-			glColor3f ( 1.f, 0.5f, 0.5f );
-
-		fU = 0 * width / 256.f;
-		fV = 8 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
-	else if (bySkillType == AT_SKILL_FLAME_STRIKE)
-	{
-#ifdef YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
-		int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-		int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-		
-		if ( !( iTypeR!=-1 && 
-		( iTypeR<ITEM_STAFF || iTypeR>=ITEM_STAFF+MAX_ITEM_INDEX ) &&
-		( iTypeL<ITEM_STAFF || iTypeL>=ITEM_STAFF+MAX_ITEM_INDEX ) ) )
-#else	// YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
-//		if (!FindHeroSkill(AT_SKILL_ICE_BLADE))	// 파워슬래시가 있어야 활성화
-#ifdef YDG_FIX_MACE_FLAMESTRIKE
-		if (!(Hero->Weapon[0].Type>=MODEL_SWORD+0 && Hero->Weapon[0].Type<MODEL_SPEAR+MAX_ITEM_INDEX))	// 검,도끼,둔기,창을 들어야 활성화
-#else	// YDG_FIX_MACE_FLAMESTRIKE
-		if (!(Hero->Weapon[0].Type>=MODEL_SWORD+0 && Hero->Weapon[0].Type<MODEL_SWORD+MAX_ITEM_INDEX))	// 검을 들어야 활성화
-#endif	// YDG_FIX_MACE_FLAMESTRIKE
-#endif	// YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
-			glColor3f ( 1.f, 0.5f, 0.5f );
-
-		fU = 1 * width / 256.f;
-		fV = 8 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
-	else if (bySkillType == AT_SKILL_GIGANTIC_STORM)
-	{
-		fU = 2 * width / 256.f;
-		fV = 8 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
-	else if (bySkillType == AT_SKILL_LIGHTNING_SHOCK)
-	{
-		fU = 2 * width / 256.f;
-		fV = 3 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef PJH_ADD_MASTERSKILL
-	else if(AT_SKILL_LIGHTNING_SHOCK_UP <= bySkillType && bySkillType <= AT_SKILL_LIGHTNING_SHOCK_UP+4)
-	{
-		fU = 6 * width / 256.f;
-		fV = 8 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif
-
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-	else if( bySkillType == AT_SKILL_SWELL_OF_MAGICPOWER )
-	{
-		fU = 8 * width / 256.f;
-		fV = 2 * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);	
-	}
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-	else if(bySkillUseType == 4)
-	{
-		fU = (width/256.f) * (Skill_Icon%12);
-		fV = (height/256.f)*((Skill_Icon/12)+4);
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);
-	}
-	else if(bySkillType >= 57)
-    {
-		fU = ((bySkillType - 57) % 8) * width / 256.f;
-		fV = ((bySkillType - 57) / 8) * height / 256.f;
-		RenderBitmap(IMAGE_SKILL2, x, y, width, height, fU, fV, width/256.f, height/256.f);
-    }
-    else
-    {
-		fU = ((bySkillType - 1) % 8) * width / 256.f;
-		fV = ((bySkillType - 1) / 8) * height / 256.f;
-		RenderBitmap(IMAGE_SKILL1, x, y, width, height, fU, fV, width/256.f, height/256.f);
-    }
-#endif // KJH_ADD_SKILLICON_RENEWAL
-
-	// 핫키 번호 렌더링
 	int iHotKey = -1;
 	for(int i=0; i<SKILLHOTKEY_COUNT; ++i)
 	{
@@ -3177,26 +2802,15 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		return;
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
-	//  딜레이 값을 찍는다. (딜레이 값이 없어서 사용하고 있지 않음)
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	if( (bySkillType != AT_SKILL_INFINITY_ARROW) && (bySkillType != AT_SKILL_SWELL_OF_MAGICPOWER))
-#else KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
- 	if(bySkillType != AT_SKILL_INFINITY_ARROW)
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
+
 	{
 		RenderSkillDelay(iIndex, x, y, width, height);
 	}
-	
-#ifndef KJH_ADD_SKILLICON_RENEWAL				// #ifndef
-	glColor3f(1.f, 1.f, 1.f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 }
 
 void SEASON3B::CNewUISkillList::RenderSkillDelay(int iIndex, float x, float y, float width, float height)
 {
-	//////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////
-
     int iSkillDelay = CharacterAttribute->SkillDelay[iIndex];
     if ( iSkillDelay > 0 )
     {
@@ -3211,9 +2825,8 @@ void SEASON3B::CNewUISkillList::RenderSkillDelay(int iIndex, float x, float y, f
 			}
 		}
 #endif //PBG_WOPS_DARKLOAD
-		//////////////////////////////////////////////////////////////////////////
+
         int iSkillMaxDelay = SkillAttribute[iSkillType].Delay;
-		//////////////////////////////////////////////////////////////////////////
 		
         float fPersent = (float)(iSkillDelay/(float)iSkillMaxDelay);
         
@@ -3223,9 +2836,6 @@ void SEASON3B::CNewUISkillList::RenderSkillDelay(int iIndex, float x, float y, f
         RenderColor(x, y+height-fdeltaH, width, fdeltaH);
 		EndRenderColor();
     }
-
-	//////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////
 }
 
 bool SEASON3B::CNewUISkillList::IsSkillListUp()
@@ -3260,7 +2870,6 @@ void SEASON3B::CNewUISkillList::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA
 #endif //LDK_ADD_SCALEFORM
 }
 
-//////////////////////////////////////////////////////////////////////////
 void SEASON3B::CNewUIMainFrameWindow::SetPreExp_Wide(__int64 dwPreExp)
 {
 	m_loPreExp = dwPreExp;

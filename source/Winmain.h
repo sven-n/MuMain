@@ -3,35 +3,7 @@
 
 #define FOR_LAST_TEST
 #define FOR_WORK
-#define FOR_HACKING
 /*--------------------------------------------------------------------------------------*/
-
-#ifdef _TEST_SERVER
-	#define USE_MUTEST_INI
-	#define USE_TEXTTEST_BMD
-	#define USE_ITEMTEST_BMD
-	#define USE_SKILLTEST_BMD
-	#define USE_GATETEST_BMD
-	#define USE_PLAYERTEST_BMD
-	#define USE_QUESTTEST_BMD
-	#define USE_DIALOGTEST_BMD
-	#define USE_SET_ITEMTEST_BMD
-	#define USE_MOVEREQTEST_BMD
-	#define USE_SLIDETEST_BMD
-	#define USE_MONSTERSKILLTEST_BMD
-	#define USE_CREDITTEST_BMD
-	#define USE_HARMONYJEWELOPTION_BMD
-	#define USE_NOTSMELTING_BMD
-	#define USE_ITEMADDOPTION_BMD
-	#define USE_MASTERTREE_BMD
-	#define USE_SOCKETITEM_TEST_BMD
-	#define USE_PET_TEST_BMD
-	#define USE_FILTER_TEST_BMD
-	#define USE_QUESTPROGRESSTEST_BMD
-	#define USE_QUESTWORDSTEST_BMD
-	#define USE_NPCDIALOGUETEST_BMD
-	#define USE_MINIMAPTEST_BMD
-#endif //_TEST_SERVER
 
 #define LANGUAGE_KOREAN			( 0 )
 #define LANGUAGE_ENGLISH		( 1 )

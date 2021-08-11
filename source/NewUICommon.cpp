@@ -156,11 +156,7 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
 
 	for(int key=0; key < 256; key++)
 	{
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		if(GetAsyncKeyState(key) & 0x8000)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		if(HIBYTE(GetAsyncKeyState(key)) & 0x80)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		{
 			if(m_pInputInfo[key].byKeyState == KEY_NONE || m_pInputInfo[key].byKeyState == KEY_RELEASE)
 			{

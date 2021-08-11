@@ -1,3 +1,5 @@
+*.ilk
+*.exe
 .vs/
 /*.dat
 *.sdf
@@ -18,5 +20,3 @@
 .build/
 *.txt
 *.jpg
-*.ilk
-*.exe

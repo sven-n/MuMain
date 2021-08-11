@@ -1300,11 +1300,6 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 {
 	if(m_pNewUIMng) 
 	{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		if(SEASON3B::INTERFACE_MAINFRAME == dwKey)
-			int aaa = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		/* 예외 */
 		if(dwKey == SEASON3B::INTERFACE_FRIEND)
 		{
 #ifdef LDK_ADD_SCALEFORM
@@ -1767,9 +1762,7 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		m_pNewUIMng->ShowInterface(dwKey, false);
 
 		int iScreenWidth = GetScreenWidth();
-		// 아이템 내구도 위치 수정
 		m_pNewItemEnduranceInfo->SetPos( iScreenWidth );
-		// 버프 윈도우 위치 수정
 		m_pNewBuffWindow->SetPos(iScreenWidth);
 		m_pNewPartyListWindow->SetPos( iScreenWidth );
 #ifdef PBG_MOD_STAMINA_UI

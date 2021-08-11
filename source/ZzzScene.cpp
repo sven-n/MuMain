@@ -371,11 +371,7 @@ void MovieScene(HDC hDC)
 		}
 		else
 		{
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-			if(SEASON3B::IsPress(VK_ESCAPE) == TRUE || SEASON3B::IsPress(VK_RETURN) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 			if(HIBYTE(GetAsyncKeyState(VK_ESCAPE))==128 || HIBYTE(GetAsyncKeyState(VK_RETURN))==128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 			{
 				g_pMovieScene->Destroy();
 				SAFE_DELETE(g_pMovieScene);
@@ -694,11 +690,7 @@ void SetEffectVolumeLevel ( int level )
 
 void SetViewPortLevel ( int Wheel )
 {
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if(SEASON3B::IsPress(VK_CONTROL) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
     if ( (HIBYTE( GetAsyncKeyState(VK_CONTROL))==128) )
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
     {
         if ( Wheel>0 )
             g_shCameraLevel--;
@@ -792,13 +784,9 @@ void RenderInfomation3D()
 
 void RenderInfomation()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_INFORMATION, PROFILING_RENDER_INFORMATION );
-#endif // DO_PROFILING
-
 	RenderNotices();
     
-	CUIMng::Instance().Render();	// 윈도우들 렌더.
+	CUIMng::Instance().Render();
 
 #ifdef LDK_ADD_SCALEFORM
 	if(GFxProcess::GetInstancePtr()->GetUISelect() == 1)
@@ -813,9 +801,6 @@ void RenderInfomation()
 	}
 	
     RenderInfomation3D();
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_INFORMATION );
-#endif // DO_PROFILING
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1622,11 +1607,7 @@ bool NewRenderLogInScene(HDC hDC)
 		}
 		else
 		{
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-			if(SEASON3B::IsPress(VK_ESCAPE) == TRUE || SEASON3B::IsPress(VK_RETURN) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 			if(HIBYTE(GetAsyncKeyState(VK_ESCAPE))==128 || HIBYTE(GetAsyncKeyState(VK_RETURN))==128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 			{
 				g_pMovieScene->Destroy();
 				SAFE_DELETE(g_pMovieScene);
@@ -1912,44 +1893,15 @@ bool MoveMainCamera()
 		bool EditMove = false;
 		if( !g_pUIManager->IsInputEnable() )
 		{
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-			if(SEASON3B::IsPress(VK_INSERT) == TRUE)
-				CameraAngle[2] += 15;
-			if(SEASON3B::IsPress(VK_DELETE) == TRUE)
-				CameraAngle[2] -= 15;
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 			if(HIBYTE(GetAsyncKeyState(VK_INSERT))==128)
 				CameraAngle[2] += 15;
 			if(HIBYTE(GetAsyncKeyState(VK_DELETE))==128)
 				CameraAngle[2] -= 15;
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 
 			vec3_t p1,p2;
 			Vector(0.f,0.f,0.f,p1);
 			FLOAT Velocity = sqrtf(TERRAIN_SCALE*TERRAIN_SCALE)*1.25f;
 
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-			if(SEASON3B::IsPress(VK_LEFT) == TRUE) // || (MouseX<=0 && MouseY>=100))
-			{
-				Vector(-Velocity, -Velocity, 0.f, p1);
-				EditMove = true;
-			}
-			if(SEASON3B::IsPress(VK_RIGHT) == TRUE) // || (MouseX>=639 && MouseY>=100))
-			{
-				Vector(Velocity, Velocity, 0.f, p1);
-				EditMove = true;
-			}
-			if(SEASON3B::IsPress(VK_UP) == TRUE) // || (MouseY<=0 && MouseX>=100 && MouseX<540))
-			{
-				Vector(-Velocity, Velocity, 0.f, p1);
-				EditMove = true;
-			}
-			if(SEASON3B::IsPress(VK_DOWN) == TRUE) // || (MouseY>=479))
-			{
-				Vector(Velocity, -Velocity, 0.f, p1);
-				EditMove = true;
-			}
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 			if(HIBYTE(GetAsyncKeyState(VK_LEFT ))==128)// || (MouseX<=0 && MouseY>=100))
 			{
 				Vector(-Velocity, -Velocity, 0.f, p1);
@@ -1970,7 +1922,6 @@ bool MoveMainCamera()
 				Vector(Velocity, -Velocity, 0.f, p1);
 				EditMove = true;
 			}
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 
 			glPushMatrix();
 			glLoadIdentity();
@@ -2708,15 +2659,11 @@ bool RenderMainScene()
 }
 
 int TimeRemain = 40;
-#ifdef _DEBUG
-BOOL g_bTimeTurbo = FALSE;
-#endif
 extern int ChatTime;
 extern int WaterTextureNumber;
 
 int TestTime = 0;
 extern int  GrabScreen;
-
 
 void MoveCharacter(CHARACTER *c,OBJECT *o);
 
@@ -2731,10 +2678,6 @@ int TimePrior = GetTickCount();
 
 void MainScene(HDC hDC)
 {
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-	SetEnableMultisample();
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-
    	CalcFPS();
 	
 	int32_t Remain = 0;
@@ -2816,11 +2759,7 @@ void MainScene(HDC hDC)
 	strcat( Text, lpszTemp);
 	int iCaptureMode = 1;
 
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if(SEASON3B::IsRepeat(VK_SHIFT) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 	if ( HIBYTE( GetAsyncKeyState( VK_SHIFT)))
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 	{
 		iCaptureMode = 1 - iCaptureMode;
 	}
@@ -2977,17 +2916,6 @@ void MainScene(HDC hDC)
 
 	DifTimer = DifTimer + Remain;
 
-
-#ifdef _DEBUG
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if(SEASON3B::IsRepeat(VK_CONTROL) == TRUE && SEASON3B::IsPress(VK_SPACE) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if(HIBYTE(GetAsyncKeyState(VK_CONTROL)) && 128==HIBYTE(GetAsyncKeyState(VK_SPACE)))
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	{
-		g_bTimeTurbo = !g_bTimeTurbo;
-	}
-#endif
 	if(EnableSocket && SceneFlag==MAIN_SCENE)
 	{
 		if( SocketClient.GetSocket()==INVALID_SOCKET)

@@ -1863,21 +1863,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
 	// PKD_ADD_BINARY_PROTECTION
 	VM_START
-#if defined (BAN_USE_CMDLINE) && !defined(FOR_HACKING) && defined(NDEBUG)
-	// LauncherHelper에서 넘겨주는 URL과 Port 번호를 사용한다.
-	if(!LaunchInfo.ip.empty()) {
-		strcpy(g_lpszCmdURL, LaunchInfo.ip.c_str());
-		szServerIpAddress = g_lpszCmdURL;
-		g_ServerPort = LaunchInfo.port;
-	}
-#else // !BAN_USE_CMDLINE
 	WORD wPortNumber;	
 	if ( GetConnectServerInfo( szCmdLine, g_lpszCmdURL, &wPortNumber))
 	{
 		szServerIpAddress = g_lpszCmdURL;
 		g_ServerPort = wPortNumber;
 	}
-#endif // BAN_USE_CMDLINE
 	VM_END
 
 	if ( !OpenMainExe())
@@ -1891,7 +1882,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	g_SimpleModulusSC.LoadDecryptionKey( "Data\\Dec2.dat");
 	VM_END
 
-	//init화일 읽기
 	g_ErrorReport.Write( "> To read config.ini.\r\n");
 	if( OpenInitFile() == FALSE )
 	{
@@ -1899,9 +1889,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		return false;
 	}
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	pMultiLanguage = new CMultiLanguage(g_strSelectedML);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 	if (g_iChatInputType == 1)
 		ShowCursor(FALSE);

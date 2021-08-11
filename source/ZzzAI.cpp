@@ -815,68 +815,19 @@ bool PathFinding2(int sx,int sy,int tx,int ty,PATH_t *a, float fDistance)
 		}
 	}
 
-#ifdef SAVE_PATH_TIME
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if(SEASON3B::IsRepeat(VK_CONTROL) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if( HIBYTE( GetAsyncKeyState( VK_CONTROL)))
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	{
-		int xPos[10] =
-		{
-			1, -2, 3, 2, -3,
-			-1, -3, -2, 3, -2
-		};
-		int yPos[10] =
-		{
-			2, 3, -2, -1, -2,
-			1, 0, 1, -1, 2
-		};
-		DebugUtil_Write("PathTime.txt", "---Start---\r\n");
-		for ( int j = 0; j < 10; j++)
-		{
-			DWORD dwTick = GetTickCount();
-			for( int i = 0; i < 1000; i++)
-			{
-				path->FindPath(sx, sy, sx + xPos[j], sy + yPos[j], true, 2, Value);
-			}
-			dwTick = GetTickCount() - dwTick;
-			DebugUtil_Write("PathTime.txt", "%dms\r\n", dwTick);
-		}
-	}
-#endif // SAVE_PATH_TIME
 
+	int Wall = iDefaultWall;
 
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
-	int Wall = iDefaultWall;//보통일때는 2이상이면 벽으로 체크
-#else	// YDG_ADD_DOPPELGANGER_MONSTER
-	int Wall = TW_CHARACTER;//보통일때는 2이상이면 벽으로 체크
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 	bool Success = path->FindPath(sx, sy, tx, ty, true, Wall, Value, fDistance);
 	if(!Success)
 	{
-		//시작 또는 도착지점이 안전지대일때는 뚫고 감(4이상이면 벽으로 체크)
-		if( ((TerrainWall[TERRAIN_INDEX_REPEAT(sx,sy)]&TW_SAFEZONE) == TW_SAFEZONE || (TerrainWall[TERRAIN_INDEX_REPEAT(tx,ty)]&TW_SAFEZONE) == TW_SAFEZONE)
-			&& (TerrainWall[TERRAIN_INDEX_REPEAT(tx,ty)]&TW_CHARACTER) != TW_CHARACTER )
+		if( ((TerrainWall[TERRAIN_INDEX_REPEAT(sx,sy)]&TW_SAFEZONE) == TW_SAFEZONE || (TerrainWall[TERRAIN_INDEX_REPEAT(tx,ty)]&TW_SAFEZONE) == TW_SAFEZONE) && (TerrainWall[TERRAIN_INDEX_REPEAT(tx,ty)]&TW_CHARACTER) != TW_CHARACTER )
 		{
 			Wall = TW_NOMOVE;
 		}
 
     	Success = path->FindPath(sx, sy, tx, ty, false, Wall, Value, fDistance);
 	}
-
-#ifdef ANTIHACKING_ENABLE
-	// 체크 코드
-	if ( g_bNewFrame)
-	{
-		switch ( GetTickCount() % 15000)
-		{
-		case 5313:
-			hanguo_check6();
-			break;
-		}
-	}
-#endif //ANTIHACKING_ENABLE
 
 	if(Success)
 	{
@@ -902,18 +853,9 @@ bool PathFinding2(int sx,int sy,int tx,int ty,PATH_t *a, float fDistance)
 	return false;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// fps util
-///////////////////////////////////////////////////////////////////////////////
-
 float   DeltaT = 0.1f;
 float   FPS;
 float   WorldTime = 0.f;
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-float	g_fFrameEstimate = 0;
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-
 
 void CalcFPS()
 {

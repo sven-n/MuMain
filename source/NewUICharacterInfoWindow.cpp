@@ -68,49 +68,35 @@ void SEASON3B::CNewUICharacterInfoWindow::SetButtonInfo()
 {
 	unicode::t_char strText[256];
 
-	// 힘 스탯 버튼
 	m_BtnStat[STAT_STRENGTH].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
 	m_BtnStat[STAT_STRENGTH].ChangeButtonInfo( m_Pos.x + 160, m_Pos.y + HEIGHT_STRENGTH+2, 16, 15 );
 
-	// 민첩 스탯 버튼
 	m_BtnStat[STAT_DEXTERITY].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
 	m_BtnStat[STAT_DEXTERITY].ChangeButtonInfo( m_Pos.x + 160, m_Pos.y + HEIGHT_DEXTERITY+2, 16, 15 );
 
-	// 체력 스탯 버튼
 	m_BtnStat[STAT_VITALITY].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
 	m_BtnStat[STAT_VITALITY].ChangeButtonInfo( m_Pos.x + 160, m_Pos.y + HEIGHT_VITALITY+2, 16, 15 );
 
-	// 에너지 스탯 버튼
 	m_BtnStat[STAT_ENERGY].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
 	m_BtnStat[STAT_ENERGY].ChangeButtonInfo( m_Pos.x + 160, m_Pos.y + HEIGHT_ENERGY+2, 16, 15 );
 
-	// 통솔 스탯 버튼
 	m_BtnStat[STAT_CHARISMA].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
 	m_BtnStat[STAT_CHARISMA].ChangeButtonInfo( m_Pos.x + 160, m_Pos.y + HEIGHT_CHARISMA+2, 16, 15 );
 
-	// exit
 	m_BtnExit.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_EXIT, false);
 	m_BtnExit.ChangeButtonInfo( m_Pos.x + 13, m_Pos.y + 392, 36, 29 );
-	// 927 "닫기 (%s)"
 	unicode::_sprintf(strText, GlobalText[927], "C");
 	m_BtnExit.ChangeToolTipText(strText, true);
-
-	// quest
 	m_BtnQuest.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_QUEST, false);
 	m_BtnQuest.ChangeButtonInfo( m_Pos.x + 50, m_Pos.y + 392, 36, 29 );
-	// 1140 "퀘스트"
 	unicode::_sprintf(strText, "%s(%s)", GlobalText[1140], "T");
 	m_BtnQuest.ChangeToolTipText(strText, true);
-
-	// pet
 	m_BtnPet.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_PET, false);
 	m_BtnPet.ChangeButtonInfo( m_Pos.x + 87, m_Pos.y + 392, 36, 29 );
-	// 1217 "Pet"
 	m_BtnPet.ChangeToolTipText(GlobalText[1217], true);
 
 	m_BtnMasterLevel.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_MASTERLEVEL, false);
 	m_BtnMasterLevel.ChangeButtonInfo( m_Pos.x + 124, m_Pos.y + 392, 36, 29 );
-	// 1749 "마스터 스킬 트리(A)"
 	m_BtnMasterLevel.ChangeToolTipText(GlobalText[1749], true);
 }
 
@@ -133,8 +119,7 @@ void SEASON3B::CNewUICharacterInfoWindow::SetPos(int x, int y)
 
 bool SEASON3B::CNewUICharacterInfoWindow::UpdateMouseEvent()
 {
-	// 버튼 마우스이벤트 처리
-	if(BtnProcess() == true)	// 처리가 완료 되었다면
+	if(BtnProcess() == true)
 	{
 		return false;
 	}
@@ -151,14 +136,12 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
 
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_CHARACTER);
 		return true;
 	}
 
-        //  스텟 포인트가 있다.
 	if(CharacterAttribute->LevelUpPoint > 0)
 	{
 		int iBaseClass = GetBaseClass(Hero->Class);
@@ -173,34 +156,10 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 		}
 		for(int i=0; i<iCount; ++i)
 		{
-			// 테섭이거나 체험 서버이거나 FOR_LAST_TEST 디파인 처리 되어 있으면 휠버튼으로 스텟 올리는거 가능하게 처리
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
-			if( g_ServerListManager->IsTestServer() == true
-#else // KJH_ADD_SERVER_LIST_SYSTEM
-			if(IsTestServer() == TRUE
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
-#if defined FOR_LAST_TEST || defined EXP_SERVER_PATCH
-				|| true
-#endif // FOR_LAST_TEST	
-				)
+			if(m_BtnStat[i].UpdateMouseEvent() == true)
 			{
-				POINT ptStatBtn = {0, 0};
-				ptStatBtn = m_BtnStat[i].GetPos();
-				if((SEASON3B::IsRepeat(VK_MBUTTON)  && CheckMouseIn(ptStatBtn.x, ptStatBtn.y, 16, 15))
-					|| m_BtnStat[i].UpdateMouseEvent() == true )
-				{
-					SendRequestAddPoint ( i );
-					return true;	
-				}
-			}
-			else
-			{
-				// 스텟 버튼 클릭하면 스텟 포인트 처리
-				if(m_BtnStat[i].UpdateMouseEvent() == true)
-				{
-					SendRequestAddPoint ( i );
-					return true;
-				}
+				SendRequestAddPoint ( i );
+				return true;
 			}
 		}
 	}
@@ -227,9 +186,6 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 	if(m_BtnMasterLevel.UpdateMouseEvent() == true)
 	{
 		if(IsMasterLevel( Hero->Class ) == true 
-#ifdef KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT
-			&& GetCharacterClass(Hero->Class) != CLASS_DIMENSIONMASTER			// 2008.06.13 현재는 소환술사 마스터스킬 불가. 풀릴때 define 주석처리
-#endif // KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT
 #ifdef PBG_ADD_NEWCHAR_MONK
 			&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -308,26 +264,18 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
 bool SEASON3B::CNewUICharacterInfoWindow::Render()
 {
 	EnableAlphaTest();
-
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-	
 	RenderTexts();
-
 	RenderButtons();
-
 	DisableAlphaBlend();
-
 	return true;
 }
 
 void SEASON3B::CNewUICharacterInfoWindow::RenderTexts()
 {
 	RenderSubjectTexts();
-
 	RenderTableTexts();
-
 	RenderAttribute();
 }
 
@@ -343,75 +291,22 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
 	SetPlayerColor(Hero->PK);
 	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+12, strID, 190, 0, RT3_SORT_CENTER);
 
-#ifdef KJH_ADD_SERVER_LIST_SYSTEM
 	unicode::t_char strServerName[MAX_TEXT_LENGTH];
-#ifdef ASG_MOD_SERVER_LIST_ADD_CHARGED_CHANNEL
+
 	const char* apszGlobalText[4]
 		= { GlobalText[461], GlobalText[460], GlobalText[3130], GlobalText[3131] };
 	sprintf(strServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
 		g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-#else	// ASG_MOD_SERVER_LIST_ADD_CHARGED_CHANNEL
-	if(g_ServerListManager->IsNonPvP() == true)		// NonPvP인가?
-	{
-		sprintf(strServerName, GlobalText[460], 
-			g_ServerListManager->GetSelectServerName(), 
-			g_ServerListManager->GetSelectServerIndex());
-	}
-	else
-	{
-		sprintf(strServerName, GlobalText[461], 
-			g_ServerListManager->GetSelectServerName(), 
-			g_ServerListManager->GetSelectServerIndex());
-	}
-#endif	// ASG_MOD_SERVER_LIST_ADD_CHARGED_CHANNEL
-#else KJH_ADD_SERVER_LIST_SYSTEM
-	unicode::t_char strServerName[256];
-#if defined	ADD_EXPERIENCE_SERVER
-	// 테스트 서버이고, 서버 번호가 10 이상 이면.
-	// 559 "테스트"
-	if (0 == unicode::_strcmp(ServerList[ServerSelectHi].Name, GlobalText[559]) && ServerLocalSelect >= 10)
-	{
-		// 461 "[%s-%d서버]"
-		// 1699 "Season2체험(PC방)"
-		unicode::_sprintf(strServerName, GlobalText[461], GlobalText[1699], ServerLocalSelect - 9);
-	}
-	else
-#elif defined ADD_EVENT_SERVER_NAME
-	// 테스트 서버이고, 서버 번호가 6 이상 이면.
-	// 559 "테스트"
-	if (0 == unicode::_strcmp(ServerList[ServerSelectHi].Name, GlobalText[559]) && ServerLocalSelect >= 6)
-	{
-		// 461 "[%s-%d서버]"
-		// 19 "이벤트"
-		unicode::_sprintf(strServerName, GlobalText[461], GlobalText[19], ServerLocalSelect - 5);
-	}
-	else
-#endif	// ADD_EXPERIENCE_SERVER ||	ADD_EVENT_SERVER_NAME
-	{
-		if(IsNonPvpServer(ServerSelectHi, ServerLocalSelect))
-		{
-			// 460 "[%s-%d(Non-PVP)서버]"
-			unicode::_sprintf(strServerName, GlobalText[460], ServerList[ServerSelectHi].Name, ServerLocalSelect);
-		}
-		else
-		{
-			// 461 "[%s-%d서버]"
-			unicode::_sprintf(strServerName, GlobalText[461], ServerList[ServerSelectHi].Name, ServerLocalSelect);
-		}
-	}	
-#endif // KJH_ADD_SERVER_LIST_SYSTEM
 		
-
     float fAlpha = sinf(WorldTime * 0.001f) + 1.f;
 	g_pRenderText->SetTextColor(255, 255, 255, 127*(2.f-fAlpha));
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y+27, strClassName, 190, 0, RT3_SORT_CENTER); //  캐릭 클래스.
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y+27, strClassName, 190, 0, RT3_SORT_CENTER);
 	g_pRenderText->SetTextColor(255, 255, 255, 127*fAlpha);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y+27, strServerName, 190, 0, RT3_SORT_CENTER);  //  서버명.
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y+27, strServerName, 190, 0, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 {
-	// 레벨
 	unicode::t_char strLevel[32];
 	unicode::t_char strExp[128];
 	unicode::t_char strPoint[128];
@@ -423,13 +318,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 	}
 	else
 	{
-		// 200 "레  벨: %d"
 		unicode::_sprintf(strLevel, GlobalText[200], CharacterAttribute->Level);
-		// 201 "경험치: %u/%u"
 		unicode::_sprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperince);
-		//
 	}
-	if(CharacterAttribute->Level > 9) // 레벨 10 이상일때
+	if(CharacterAttribute->Level > 9)
 	{
 		int iMinus, iMaxMinus;
 		if(CharacterAttribute->wMinusPoint == 0)
@@ -443,16 +335,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 
 		iMaxMinus = -CharacterAttribute->wMaxMinusPoint;
 
-		// 1412 "생성"
-		// 1903 "감소"
 		unicode::_sprintf(strPoint, "%s %d/%d | %s %d/%d", 
 			GlobalText[1412], CharacterAttribute->AddPoint, CharacterAttribute->MaxAddPoint, 
 			GlobalText[1903], iMinus, iMaxMinus);
 	}
-	else	// 레벨 9 이하일때  
+	else 
 	{
-		// 1412 "생성"
-		// 1903 "감소"
 		wsprintf(strPoint, "%s %d/%d | %s %d/%d", GlobalText[1412], 0, 0, GlobalText[1903], 0, 0);
 	}
 	
@@ -461,12 +349,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->RenderText(m_Pos.x+18, m_Pos.y+58, strLevel);
 
-
-	// 레벨업 포인트
 	if(CharacterAttribute->LevelUpPoint > 0)
 	{
 		unicode::t_char strLevelUpPoint[128];
-		// 217 "포인트: %d"
+
 		if(IsMasterLevel(CharacterAttribute->Class) == false || CharacterAttribute->LevelUpPoint > 0)
 		{
 			unicode::_sprintf(strLevelUpPoint, GlobalText[217], CharacterAttribute->LevelUpPoint);
@@ -479,16 +365,14 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 		g_pRenderText->RenderText(m_Pos.x+110, m_Pos.y+58, strLevelUpPoint);
 	}
 	
-	// 경험치
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->RenderText(m_Pos.x+18, m_Pos.y+75, strExp);
 
-	// 생성, 감소 성공 확률 표시
 	int iAddPoint, iMinusPoint;
-	// 생성확률
-	if(CharacterAttribute->AddPoint <= 10)	// 10포인트까지는 무조건 100%
+
+	if(CharacterAttribute->AddPoint <= 10)
 	{
 		iAddPoint = 100;
 	}
@@ -517,8 +401,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 		}
 	}
 
-	// 감소확률
-	if(CharacterAttribute->wMinusPoint <= 10)	// 10포인트까지는 무조건 100%
+	if(CharacterAttribute->wMinusPoint <= 10)
 	{
 		iMinusPoint = 100;
 	}
@@ -550,7 +433,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 
 
 	unicode::t_char strPointProbability[128];
-	// 1907 "생성:%d%%|감소:%d%%"
 	unicode::_sprintf(strPointProbability, GlobalText[1907], iAddPoint, iMinusPoint);
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(76, 197, 254, 255);
@@ -564,28 +446,17 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 
 void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 {
-	//////////////////////////////////////////////////////////////////////////
-	//						         힘										//
-	//////////////////////////////////////////////////////////////////////////
-
 	g_pRenderText->SetFont(g_hFontBold);
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
 	WORD wStrength;
 
-	// memorylock 사용
 	wStrength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
 
-	// memorylock 사용
-#ifdef PSW_SECRET_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1) )
 	{
 		g_pRenderText->SetTextColor(255, 120, 0, 255);
 	}
 	else
-#endif //PSW_SECRET_ITEM
     if(CharacterAttribute->AddStrength)
     {
 		g_pRenderText->SetTextColor(100, 150, 255, 255);
@@ -598,36 +469,25 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	unicode::t_char strStrength[32];
 	unicode::_sprintf(strStrength, "%d", wStrength);
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
 	g_pRenderText->SetBgColor(0);
-	// 166 " 힘 "
 	g_pRenderText->RenderText(m_Pos.x+12, m_Pos.y+HEIGHT_STRENGTH+6, GlobalText[166], 74, 0, RT3_SORT_CENTER);
 	g_pRenderText->RenderText(m_Pos.x+86, m_Pos.y+HEIGHT_STRENGTH+6, strStrength, 86, 0, RT3_SORT_CENTER);
 
-	//  공격력. 율. 계산 부분
 	unicode::t_char strAttakMamage[256];
 	int iAttackDamageMin = 0;
 	int iAttackDamageMax = 0;
 
-	// 함수내부에서 memorylock 사용
 	bool bAttackDamage = GetAttackDamage( &iAttackDamageMin, &iAttackDamageMax );
 
-	int Add_Dex = 0;		//대인공격율추가
-	int Add_Rat = 0;		//공격성공율추가
-	int Add_Dfe = 0;		//대인방어율추가
-	int Add_Att_Max = 0;	//캐릭터공격력추가(max)
-	int Add_Att_Min = 0;	//캐릭터공격력추가(min)
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int Add_Dfe_Rat = 0;	//캐릭터 방어율추가
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int Add_Ch_Dfe = 0;		//캐릭터 방어력추가
-#ifdef PJH_SEASON4_MASTER_RANK4
-	//AT_SKILL_MAX_MANA_UP
+	int Add_Dex = 0;
+	int Add_Rat = 0;
+	int Add_Dfe = 0;
+	int Add_Att_Max = 0;
+	int Add_Att_Min = 0;
+	int Add_Dfe_Rat = 0;
+	int Add_Ch_Dfe = 0;
 	int Add_Mana_Max = 0;
 	int Add_Mana_Min = 0;
-#endif //
 
 	for(int i=0; i < MAX_MAGIC; ++i)
 	{
@@ -665,7 +525,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		{
 			Add_Att_Max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
 		}
-#ifdef PJH_SEASON4_MASTER_RANK4
 		else
 		if(CharacterAttribute->Skill[i] >= AT_SKILL_MAX_ATT_MAGIC_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_ATT_MAGIC_UP + 5)
 		{
@@ -686,34 +545,24 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		{
 			Add_Mana_Min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
 		}
-#endif //PJH_SEASON4_MASTER_RANK4
 		else
 		if(CharacterAttribute->Skill[i] >= AT_SKILL_MIN_ATTACKRATE_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_ATTACKRATE_UP + 5)
 		{
 			Add_Att_Min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
 		}
-		//AT_SKILL_MIN_ATTACKRATE_UP
 	}
 
-
-
-	// memorylock 사용
 	ITEM* pWeaponRight = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
 	ITEM* pWeaponLeft = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
 	
-	// memorylock 사용
     int iAttackRating = CharacterAttribute->AttackRating + Add_Rat;
 	int iAttackRatingPK = CharacterAttribute->AttackRatingPK + Add_Dex;
-#ifdef PJH_SEASON4_MASTER_RANK4
 	iAttackDamageMax += Add_Att_Max;
 	iAttackDamageMin += Add_Att_Min;
-#endif //PJH_SEASON4_MASTER_RANK4
 
 	if( g_isCharacterBuff((&Hero->Object), eBuff_AddAG) ) 
     {
-    	WORD wDexterity;
-		// memorylock 사용
-	    wDexterity = CharacterAttribute->Dexterity+ CharacterAttribute->AddDexterity;
+    	WORD wDexterity = CharacterAttribute->Dexterity+ CharacterAttribute->AddDexterity;
         iAttackRating += wDexterity;
 		iAttackRatingPK += wDexterity;
         if(PartyNumber >= 3)
@@ -726,14 +575,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	if( g_isCharacterBuff((&Hero->Object), eBuff_HelpNpc) )
 	{
 		int iTemp = 0;
-		// memorylock 사용
 		if(CharacterAttribute->Level > 180)
 		{
 			iTemp = (180 / 3) + 45;
 		}
 		else
 		{
-			// memorylock 사용
 			iTemp = (CharacterAttribute->Level / 3) + 45;
 		}
 		
@@ -741,8 +588,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		iAttackDamageMax += iTemp;
 	}
 
-#ifdef ASG_ADD_SKILL_BERSERKER
-	// 버서커 버프에 걸려 있는가?
 	if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
 	{
 		int nTemp = CharacterAttribute->Strength + CharacterAttribute->AddStrength
@@ -751,7 +596,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		iAttackDamageMin += nTemp / 7 * fTemp;
 		iAttackDamageMax += nTemp / 4 * fTemp;
 	}
-#endif	// ASG_ADD_SKILL_BERSERKER
 
 	int iMinIndex = 0, iMaxIndex = 0, iMagicalIndex = 0; 
 
@@ -816,7 +660,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	{
 		StrengthenCapability defenseinfo;
 
-		// memorylock 사용
 		ITEM* pItem = &CharacterMachine->Equipment[k];
 
 		int eqlevel = (pItem->Level>>3)&15;
@@ -837,7 +680,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	
 	for(int j=0 ; j<MAX_EQUIPMENT; ++j)
 	{
-		// memorylock 사용
 		bool is380item = CharacterMachine->Equipment[j].option_380;
 		int i380type  = CharacterMachine->Equipment[j].Type;
 		
@@ -845,10 +687,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		{
 			ITEM_ADD_OPTION item380option;
 			
-			// memorylock 사용
 			item380option = g_pItemAddOptioninfo->GetItemAddOtioninfo( CharacterMachine->Equipment[j].Type );
 
-			//공격력
 			if( item380option.m_byOption1 == 1 )
 			{
 				itemoption380Attack += item380option.m_byValue1;
@@ -859,7 +699,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				itemoption380Attack += item380option.m_byValue2;
 			}
 
-			//방어력
 			if( item380option.m_byOption1 == 3 )
 			{
 				itemoption380Defense += item380option.m_byValue1;
@@ -874,155 +713,70 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 	ITEM *pItemRingLeft, *pItemRingRight;
 	
-	// 크리스마스 변신 반지를 착용하고 있다면 추가 공격력 20을 더해준다.
-	// memorylock 사용
 	pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
 	pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 	if(pItemRingLeft && pItemRingRight)
 	{
-#ifdef YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK
-		// 만기 체크
 		int iNonExpiredLRingType = -1;
 		int iNonExpiredRRingType = -1;
-#ifdef LJH_FIX_IGNORING_EXPIRATION_PERIOD
-		iNonExpiredLRingType = pItemRingLeft->Type;
-		iNonExpiredRRingType = pItemRingRight->Type;
-#else  //LJH_FIX_IGNORING_EXPIRATION_PERIOD
-		if(!pItemRingLeft->bPeriodItem || !pItemRingLeft->bExpiredPeriod)	// 왼손
+		if(!pItemRingLeft->bPeriodItem || !pItemRingLeft->bExpiredPeriod)
 		{
 			iNonExpiredLRingType = pItemRingLeft->Type;
 		}
-		if(!pItemRingRight->bPeriodItem || !pItemRingRight->bExpiredPeriod)	// 오른손
+		if(!pItemRingRight->bPeriodItem || !pItemRingRight->bExpiredPeriod)
 		{
 			iNonExpiredRRingType = pItemRingRight->Type;
 		}
-#endif //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 
-		// 착용중인 변신 반지들의 데미지 증가 중에 가장 높은 값을 저장 
 		int maxIAttackDamageMin = 0;
 		int maxIAttackDamageMax = 0;
 		if(iNonExpiredLRingType == ITEM_HELPER+41 || iNonExpiredRRingType == ITEM_HELPER+41)
 		{
-			// 착용중인 변신 반지들 중 크리스마스 변신 반지에 의해 가장 높은 공격데미지 추가 
 			maxIAttackDamageMin = max(maxIAttackDamageMin, 20);	
 			maxIAttackDamageMax = max(maxIAttackDamageMax, 20);
 		}
-#ifdef PJH_ADD_PANDA_CHANGERING
 		if(iNonExpiredLRingType == ITEM_HELPER+76 || iNonExpiredRRingType == ITEM_HELPER+76)
 		{
-			// 착용중인 변신 반지들 중 팬더 변신 반지에 의해 가장 높은 공격데미지 추가 
 			maxIAttackDamageMin = max(maxIAttackDamageMin, 30);	
 			maxIAttackDamageMax = max(maxIAttackDamageMax, 30);
 		}
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-		if(iNonExpiredLRingType == ITEM_HELPER+122 || iNonExpiredRRingType == ITEM_HELPER+122)	// 스켈레톤 변신반지
+		if(iNonExpiredLRingType == ITEM_HELPER+122 || iNonExpiredRRingType == ITEM_HELPER+122)
 		{
-			// 착용중인 변신 반지들 중 스켈레톤 변신 반지에 의해 가장 높은 공격데미지 추가 
 			maxIAttackDamageMin = max(maxIAttackDamageMin, 40);	
 			maxIAttackDamageMax = max(maxIAttackDamageMax, 40);
 		}
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
 
-		// 최종 구해진 마법공격력에 착용중인 변신 반지들의 데미지 증가 중에 가장 높은 값을 더해준다.
-		iAttackDamageMin += maxIAttackDamageMin;	// 최소 공격 데미지
-		iAttackDamageMax += maxIAttackDamageMax;	// 최대 공격 데미지
-
-
-#else	// YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK	// 소스정리시 삭제할 부분!!!
-#ifdef LJH_FIX_CHANGE_RING_DAMAGE_BUG
-		// 착용중인 변신 반지들의 데미지 증가 중에 가장 높은 값을 저장 
-		int maxIAttackDamageMin = 0;
-		int maxIAttackDamageMax = 0;
-
-		if(pItemRingLeft->Type == ITEM_HELPER+41 || pItemRingRight->Type == ITEM_HELPER+41)
-		{
-			// 착용중인 변신 반지들 중 크리스마스 변신 반지에 의해 가장 높은 공격데미지 추가 
-			maxIAttackDamageMin = max(maxIAttackDamageMin, 20);	
-			maxIAttackDamageMax = max(maxIAttackDamageMax, 20);
-		}
-#ifdef PJH_ADD_PANDA_CHANGERING
-		if(pItemRingLeft->Type == ITEM_HELPER+76 || pItemRingRight->Type == ITEM_HELPER+76)
-		{
-			// 착용중인 변신 반지들 중 팬더 변신 반지에 의해 가장 높은 공격데미지 추가 
-			maxIAttackDamageMin = max(maxIAttackDamageMin, 30);	
-			maxIAttackDamageMax = max(maxIAttackDamageMax, 30);
-		}
-#endif //PJH_ADD_PANDA_CHANGERING
-
-		// 최종 구해진 마법공격력에 착용중인 변신 반지들의 데미지 증가 중에 가장 높은 값을 더해준다.
-		iAttackDamageMin += maxIAttackDamageMin;	// 최소 공격 데미지
-		iAttackDamageMax += maxIAttackDamageMax;	// 최대 공격 데미지
-
-#else	// LJH_FIX_CHANGE_RING_DAMAGE_BUG
-		if(pItemRingLeft->Type == ITEM_HELPER+41 || pItemRingRight->Type == ITEM_HELPER+41)
-		{
-			// 최종 구해진 공격력에다가 20를 더해준다.
-			iAttackDamageMin += 20;	// 최소 공격 데미지
-			iAttackDamageMax += 20;	// 최대 공격 데미지
-		}
-#ifdef PJH_ADD_PANDA_CHANGERING
-		else
-		if(pItemRingLeft->Type == ITEM_HELPER+76 || pItemRingRight->Type == ITEM_HELPER+76)
-		{
-			// 최종 구해진 공격력에다가 20를 더해준다.
-			iAttackDamageMin += 30;	// 최소 공격 데미지
-			iAttackDamageMax += 30;	// 최대 공격 데미지
-		}
-#endif //PJH_ADD_PANDA_CHANGERING
-#endif	// LJH_FIX_CHANGE_RING_DAMAGE_BUG
-#endif	// YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK	// 소스정리시 삭제할 부분!!!
+		iAttackDamageMin += maxIAttackDamageMin;
+		iAttackDamageMax += maxIAttackDamageMax;
 	}
 	
-	// memorylock 사용
 	ITEM *pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 	if(pItemHelper)
 	{
 		if(pItemHelper->Type == ITEM_HELPER+37 && pItemHelper->Option1 == 0x04)
 		{
-			// 환영 펜릴은 공격력은
-			// memorylock 사용
 			WORD wLevel = CharacterAttribute->Level;
-			// 최종 구해진 공격력에다가 (Level/25)를 더해준다.
-			iAttackDamageMin += (wLevel / 12);	// 최소 공격 데미지
-			iAttackDamageMax += (wLevel / 12);	// 최대 공격 데미지
+			iAttackDamageMin += (wLevel / 12);
+			iAttackDamageMax += (wLevel / 12);
 		}
-#ifdef LDK_FIX_PC4_GUARDIAN_DEMON_INFO
 		if(pItemHelper->Type == ITEM_HELPER+64)
 		{
-#ifdef LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-			//만료된 기간제 아이템이면 출력 안함
 			if(false == pItemHelper->bExpiredPeriod)
 			{
 				// memorylock 사용
-				iAttackDamageMin += int(float(iAttackDamageMin) * 0.4f);	// 최소 공격 데미지
-				iAttackDamageMax += int(float(iAttackDamageMax) * 0.4f);	// 최대 공격 데미지
+				iAttackDamageMin += int(float(iAttackDamageMin) * 0.4f);
+				iAttackDamageMax += int(float(iAttackDamageMax) * 0.4f);
 			}
-#else //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-			// memorylock 사용
-			iAttackDamageMin += int(float(iAttackDamageMin) * 0.4f);	// 최소 공격 데미지
-			iAttackDamageMax += int(float(iAttackDamageMax) * 0.4f);	// 최대 공격 데미지
-#endif //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
 		}
-#endif //LDK_FIX_PC4_GUARDIAN_DEMON_INFO
-#ifdef YDG_ADD_SKELETON_PET
-		if(pItemHelper->Type == ITEM_HELPER+123)	// 스켈레톤 펫
+		if(pItemHelper->Type == ITEM_HELPER+123)
 		{
-#ifdef LJH_FIX_IGNORING_EXPIRATION_PERIOD
-			// memorylock 사용
-			iAttackDamageMin += int(float(iAttackDamageMin) * 0.2f);	// 최소 공격 데미지
-			iAttackDamageMax += int(float(iAttackDamageMax) * 0.2f);	// 최대 공격 데미지
-#else  //LJH_FIX_IGNORING_EXPIRATION_PERIOD
-			//만료된 기간제 아이템이면 출력 안함
 			if(false == pItemHelper->bExpiredPeriod)
 			{
 				// memorylock 사용
-				iAttackDamageMin += int(float(iAttackDamageMin) * 0.2f);	// 최소 공격 데미지
-				iAttackDamageMax += int(float(iAttackDamageMax) * 0.2f);	// 최대 공격 데미지
+				iAttackDamageMin += int(float(iAttackDamageMin) * 0.2f);
+				iAttackDamageMax += int(float(iAttackDamageMax) * 0.2f);
 			}
-#endif //LJH_FIX_IGNORING_EXPIRATION_PERIOD
 		}
-#endif	// YDG_ADD_SKELETON_PET
 		if(pItemHelper->Type == ITEM_HELPER+1)
 		{
 			iAttackDamageMin += int(float(iAttackDamageMin) * 0.3f);
@@ -1032,7 +786,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if( iAttackRating > 0 )
     {
-		// 203 "공격력(율): %d~%d (%d)"
 		if( iAttackDamageMin + iMinIndex >= iAttackDamageMax + iMaxIndex )
 		{
 			unicode::_sprintf(strAttakMamage, GlobalText[203], iAttackDamageMax + iMaxIndex, iAttackDamageMax + iMaxIndex, iAttackRating);
@@ -1044,7 +797,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     }
     else
     {
-		// 204 "공 격 력: %d~%d"
 		if( iAttackDamageMin + iMinIndex >= iAttackDamageMax + iMaxIndex )
 		{
 			unicode::_sprintf(strAttakMamage, GlobalText[204], iAttackDamageMax + iMaxIndex, iAttackDamageMax + iMaxIndex);
@@ -1054,9 +806,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			unicode::_sprintf(strAttakMamage, GlobalText[204], iAttackDamageMin + iMinIndex, iAttackDamageMax + iMaxIndex);
 		}
     }
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -1070,24 +819,20 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
 	}
 
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2)) // 잭오랜턴의 분노
+	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2))
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
 
-#ifdef PSW_SCROLL_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll3) )
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-#endif //PSW_SCROLL_ITEM
 
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal) )
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-#endif //CSK_EVENT_CHERRYBLOSSOM
 
 	int iY = HEIGHT_STRENGTH+25;
 	g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+HEIGHT_STRENGTH+25, strAttakMamage);
@@ -1096,12 +841,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     {
 		if( itemoption380Attack != 0 || iAttackPowerRate != 0 )
 		{
-			// 2109 "대인 공격율: %d (+%d)"
 			unicode::_sprintf(strAttakMamage, GlobalText[2109], iAttackRatingPK, itemoption380Attack + iAttackPowerRate );
 		}
 		else
 		{
-			// 2044 "대인 공격율: %d"
 			unicode::_sprintf(strAttakMamage, GlobalText[2044], iAttackRatingPK);
 		}
 
@@ -1109,23 +852,14 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strAttakMamage);	
     }
 
-	//////////////////////////////////////////////////////////////////////////
-	//							민첩성										//
-	//////////////////////////////////////////////////////////////////////////
-
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0);
 
-
-	// 추가 민첩성이 있으면 색깔 다르게
-	// memorylock 사용
-#ifdef PSW_SECRET_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2) )
 	{
 		g_pRenderText->SetTextColor(255, 120, 0, 255);
 	}
 	else
-#endif //PSW_SECRET_ITEM
     if( CharacterAttribute->AddDexterity )
     {
 		g_pRenderText->SetTextColor(100, 150, 255, 255);
@@ -1136,17 +870,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     }
 
 	unicode::t_char strDexterity[32];
-	// 민첩성 계산
-	WORD wDexterity;
-	// 민첩성은 캐릭터의 민첩성에 추가 민첩성을 더해서 계산
-	// memorylock 사용
-	wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
+	WORD wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
 	unicode::_sprintf(strDexterity, "%d", wDexterity);
-	// 1702 "민첩성"
 	g_pRenderText->RenderText(m_Pos.x+12, m_Pos.y+HEIGHT_DEXTERITY+6, GlobalText[1702], 74, 0, RT3_SORT_CENTER);
 	g_pRenderText->RenderText(m_Pos.x+86, m_Pos.y+HEIGHT_DEXTERITY+6, strDexterity, 86, 0, RT3_SORT_CENTER);
 
-	//민첩성 계산 부분 
 	bool bDexSuccess = true;
 	int iBaseClass = GetBaseClass(Hero->Class);
 

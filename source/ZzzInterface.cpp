@@ -263,21 +263,9 @@ void PrintPKLog(CHARACTER* pCha)
 }
 #endif // PK_ATTACK_TESTSERVER_LOG
 
-///////////////////////////////////////////////////////////////////////////////
-// 데빌 스퀘어
-///////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////
-// 키보드 입력 받는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 bool PressKey(int Key)
 {
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if(SEASON3B::IsPress(Key) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
    	if(HIBYTE(GetAsyncKeyState(Key))==128)
-#endif
 	{
 		if(KeyState[Key]==false)
 		{
@@ -288,10 +276,6 @@ bool PressKey(int Key)
 	else KeyState[Key] = false;
 	return false;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 입력창 초기화
-///////////////////////////////////////////////////////////////////////////////
 
 void ClearInput(BOOL bClearWhisperTarget)
 {
@@ -1930,20 +1914,6 @@ bool CheckAttack()
 		return false;
 	}
 		
-#ifdef FOR_HACKING
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if( (SEASON3B::IsPress(VK_CONTROL) == TRUE) && (SEASON3B::IsPress(VK_MENU) == TRUE) )
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	if( HIBYTE(GetAsyncKeyState(VK_CONTROL))==128 && HIBYTE(GetAsyncKeyState(VK_MENU))==128 )
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	{
-		if ( FindText( Hero->ID, "webzen" ) )
-		{
-			return false;
-		}
-	}
-#endif //FOR_HACKING
-
 #ifdef CSK_ADD_GM_ABILITY
 	if(IsGMCharacter() && IsNonAttackGM() == true)
 	{
@@ -1953,134 +1923,76 @@ bool CheckAttack()
 		
 	CHARACTER *c = &CharactersClient[SelectedCharacter];
 		
-#ifndef GUILD_WAR_EVENT
-
 	if ( gMapManager.InChaosCastle()==true && c!=Hero )
 	{
 		return true;
 	}
-#endif //GUILD_WAR_EVENT
-#ifdef PBG_ADD_PKFIELD
-#ifdef ASG_ADD_GENS_SYSTEM
-
 	else if(::IsStrifeMap(gMapManager.WorldActive) && c != Hero && c->m_byGensInfluence != Hero->m_byGensInfluence)
-#else	// ASG_ADD_GENS_SYSTEM
-	else if(gMapManager.IsPKField() && c!=Hero)
-#endif	// ASG_ADD_GENS_SYSTEM
 	{	
 		if(g_pCommandWindow->GetMouseCursor( ) == CURSOR_IDSELECT)	
 		{
 			return false;
 		}
-#ifdef PBG_FIX_PKFIELD_ATTACK
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-
-		if(SEASON3B::IsPress(VK_MENU) == TRUE)
-		{
-			return false;
-		}
-
-		if(SEASON3B::IsPress(VK_CONTROL) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		if(HIBYTE(GetAsyncKeyState(VK_MENU))==128)
 		{
-			//Art키를 눌렀을때..
 			return false;
 		}
 
 		if(HIBYTE(GetAsyncKeyState(VK_CONTROL))==128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		{
-#ifdef PBG_FIX_GUILDWAR_PK
 			if(EnableGuildWar)
 			{
-				if(c->GuildTeam==2 && c!=Hero)	//길드전쟁중에 상대방.
+				if(c->GuildTeam==2 && c!=Hero)
 					return true;
-				else							//길드전쟁중 우리편 및 일반인.
-					return false;				//일반인을 거르기 위해.
+				else
+					return false;
 			}
 			else
-#endif //PBG_FIX_GUILDWAR_PK
-				return true;	//일반 컨트롤로 강제 공격..
+				return true;
 		}
 		else if(strcmp(GuildMark[Hero->GuildMarkIndex].GuildName,GuildMark[c->GuildMarkIndex].GuildName)==NULL)
 		{
-			// 같은 길드
 			if(g_pPartyManager->IsPartyMember(SelectedCharacter))
 			{
-				// 파티 맺으면
 				return false;
 			}
-#ifdef PBG_FIX_GUILDWAR_PK
 			if(EnableGuildWar)
 			{
-				//길드 전쟁중
 				if(c->GuildTeam==2 && c!=Hero)
-					return true;	//여기 걸리면 안됨.
+					return true;
 				else
-					return false;	//같은 길드.
+					return false;
 			}
-#endif //PBG_FIX_GUILDWAR_PK
 			if(c->GuildRelationShip == GR_NONE)
-				return true;		// 일반인들끼리 관계.
+				return true;
 			else
-				return false;		// 적대길드 관계를 제외한 연합길드.
+				return false;
 		}
 		else if((c->GuildRelationShip == GR_UNION) || (c->GuildRelationShip == GR_UNIONMASTER))
 		{
-			return false;			//길드 연합 or 길드 연합 마스터
+			return false;
 		}
-#ifdef PBG_FIX_GUILDWAR_PK
 		else if(EnableGuildWar)
 		{
 			if(c->GuildTeam==2 && c!=Hero)
-				return true;				// 길드 전쟁중에 상대팀
+				return true;
 			else/* if(c->GuildRelationShip == GR_NONE)*/
-				return false;				// 우리팀 및 일반인
+				return false;
 		}
-#endif //PBG_FIX_GUILDWAR_PK
 		else if(g_pPartyManager->IsPartyMember(SelectedCharacter))
 		{
-#ifdef PBG_FIX_GUILDWAR_PK
 			if((c->GuildRelationShip == GR_RIVAL) || (c->GuildRelationShip == GR_RIVALUNION))
 			{
-				return true;			// 적대길드 관계에서 파티를 맺어도
+				return true;
 			}
 			else
-#endif //PBG_FIX_GUILDWAR_PK
-				return false;			// 그외의 파티 관계
+				return false;
 		}
 		else
 		{
 			return true;
 		}
-#else //PBG_FIX_PKFIELD_ATTACK
-		if(((strcmp(GuildMark[Hero->GuildMarkIndex].GuildName,GuildMark[c->GuildMarkIndex].GuildName)==NULL) ||
-		(g_pPartyManager->IsPartyMember(SelectedCharacter)))
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		&& (SEASON3B::IsPress(VK_CONTROL) == TRUE) )
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		&& (HIBYTE(GetAsyncKeyState(VK_CONTROL))==128))
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		{
-			return true;
-		}
-		else if((c->GuildRelationShip == GR_UNION || c->GuildRelationShip == GR_UNIONMASTER) && !g_pPartyManager->IsPartyMember(SelectedCharacter))
-		{
-			return false;
-		}
-		else if((strcmp(GuildMark[Hero->GuildMarkIndex].GuildName,GuildMark[c->GuildMarkIndex].GuildName)!=NULL) && 
-		!g_pPartyManager->IsPartyMember(SelectedCharacter))
-		{
-			return true;
-		}
-		else if(c->GuildRelationShip == GR_NONE && !g_pPartyManager->IsPartyMember(SelectedCharacter))
-		{
-			return true;
-		}
-#endif //PBG_FIX_PKFIELD_ATTACK
 	}
-#endif //PBG_ADD_PKFIELD
 		
 	if( c->Object.Kind == KIND_MONSTER)
 	{
@@ -2092,18 +2004,15 @@ bool CheckAttack()
 		{
 			return false;
 		}
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 		else if(g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
 		{
 			return false;
 		}
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
 		
 		return true;
 	}
 	else if(c->Object.Kind==KIND_PLAYER)
 	{
-		//  공성전시 자신의 진영과 틀리다면 공격할수 있다.
 		if ( battleCastle::IsBattleCastleStart() )
 		{
 			if ( ( Hero->EtcPart==PARTS_ATTACK_KING_TEAM_MARK || Hero->EtcPart==PARTS_ATTACK_TEAM_MARK 
@@ -2175,7 +2084,6 @@ bool CheckAttack()
 			
 		}
 		
-		// 적대길드소속일 경우
 		if( c->GuildRelationShip == GR_RIVAL || c->GuildRelationShip == GR_RIVALUNION )
 		{
 			return true;
@@ -2186,8 +2094,6 @@ bool CheckAttack()
 		{
 			return  false;
 		}
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
-		//	결투중.
 		else if(g_DuelMgr.IsDuelEnabled())
 		{
 			if (g_DuelMgr.IsDuelPlayer(c, DUEL_ENEMY))
@@ -2203,23 +2109,7 @@ bool CheckAttack()
 		{
 			return false;
 		}
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef DUEL_SYSTEM
-		//	결투중.
-		else if( g_bEnableDuel )
-		{
-			if ( c->Key == g_iDuelPlayerIndex && strcmp(c->ID, g_szDuelPlayerID) == 0)
-			{
-				return true;
-			}
-			else 
-			{
-				return false;
-			}
-		}
-#endif // DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-		else if ( EnableGuildWar )  // 길전, 배틀축구.
+		else if ( EnableGuildWar )
 		{
 			if ( c->GuildTeam==2 && c!=Hero ) 
 			{
@@ -2230,23 +2120,8 @@ bool CheckAttack()
 				return false;
 			}
 		}
-		//	카오, 강제 공격.
-#ifndef LDS_MOD_PKSYSTEM_INGAMESHOP_ATTACK_PKLEVEL1	// #ifndef
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-		// 혼합유료화섭일경우 무법자 경고시부터 컨트롤 키를 누르지 않고 공격가능하게
-		else if(g_PKSystem->IsPKState(PVP_CAUTION, c->PK) && c != Hero)	return true;
-		// 일반섭일 경우 다음 else if문 적용
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
-#endif // LDS_MOD_PKSYSTEM_INGAMESHOP_ATTACK_PKLEVEL1
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		else if ( (c->PK >= PVP_MURDERER2) || (SEASON3B::IsPress(VK_CONTROL) == TRUE) && (c != Hero) )
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		else if ( c->PK >= PVP_MURDERER2 || ( HIBYTE(GetAsyncKeyState(VK_CONTROL))==128 && c != Hero ) )
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		{
-#ifdef PK_ATTACK_TESTSERVER_LOG
-			PrintPKLog(c);
-#endif // PK_ATTACK_TESTSERVER_LOG
 			return true;
 		}
 		else if ( gMapManager.IsCursedTemple() && !g_CursedTemple->IsPartyMember( SelectedCharacter ) )
@@ -2258,20 +2133,6 @@ bool CheckAttack()
 			return false;
 		}
 	}
-#ifdef _PVP_ATTACK_GUARD
-	else if (c->Object.Kind==KIND_NPC)
-	{
-		if ( (c->MonsterIndex == 247 || c->MonsterIndex == 249) 
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-			&& (SEASON3B::IsPress(VK_CONTROL) == TRUE) && (c != Hero) || (g_bAutoPvPSetting == TRUE) )
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-			&& ( ( HIBYTE(GetAsyncKeyState(VK_CONTROL))==128 && c!=Hero ) || ( g_bAutoPvPSetting == TRUE ) ) )
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		{
-			return true;
-		}
-	}
-#endif	// _PVP_ATTACK_GUARD
 	else
 	{
 		return false;
@@ -2280,38 +2141,26 @@ bool CheckAttack()
 	return false;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	선택한 캐릭터가 공격 가능 캐릭터일 경우 그 캐릭터의 Key값을 준다.
-//////////////////////////////////////////////////////////////////////////
 int	getTargetCharacterKey ( CHARACTER* c, int selected )
 {
 	if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem()) 
 		return -1;
 
-#ifdef CSK_FIX_ADD_EXEPTION
-	// 캐릭터가 자기자신이 아니거나 selected 인덱스가 범위 밖의 값이면 리턴
 	if(c != Hero || selected < 0 || selected >= MAX_CHARACTERS_CLIENT)
 	{
 		return -1;
 	}
-#else // CSK_FIX_ADD_EXEPTION
-	if ( selected==-1 || c!=Hero ) return -1;
-#endif // CSK_FIX_ADD_EXEPTION
 		
 	CHARACTER *sc = &CharactersClient[selected];
 	
-#ifndef GUILD_WAR_EVENT
-    //  캐릭터를 공격할수 있게한다.
     if ( gMapManager.InChaosCastle()==true )
     {
         return sc->Key;
     }
-#endif //GUILD_WAR_EVENT
 	
 	if ( EnableGuildWar && sc->PK>=PVP_MURDERER2 && sc->GuildMarkIndex!=-1 && strcmp(GuildMark[Hero->GuildMarkIndex].GuildName,GuildMark[sc->GuildMarkIndex].GuildName)==NULL)
 		return  -1;
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
-	//	결투중.
+
 	else if(g_DuelMgr.IsDuelEnabled())
 	{
 		if (g_DuelMgr.IsDuelPlayer(sc, DUEL_ENEMY))
@@ -2319,25 +2168,10 @@ int	getTargetCharacterKey ( CHARACTER* c, int selected )
 		else 
 			return -1;
 	}
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef DUEL_SYSTEM
-	//	결투중.
-	else if( g_bEnableDuel )
-	{
-		if ( sc->Key == g_iDuelPlayerIndex )
-			return sc->Key;
-		else 
-			return -1;
-	}
-#endif // DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-	// 적대상태일때..
     else if ( sc->GuildRelationShip == GR_RIVAL || sc->GuildRelationShip == GR_RIVALUNION )  
 	{
 		return sc->Key;
 	}
-	// 
-	// 길전, 배틀축구.
     else if ( EnableGuildWar )  
 	{
 		if ( sc->GuildTeam==2 && sc!=Hero ) 
@@ -2345,13 +2179,7 @@ int	getTargetCharacterKey ( CHARACTER* c, int selected )
 		else 
 			return -1;
 	}
-#ifdef PBG_ADD_PKFIELD
-	else if(::IsStrifeMap(gMapManager.WorldActive) && sc != Hero && sc->m_byGensInfluence != Hero->m_byGensInfluence
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		&& SEASON3B::IsPress(VK_MENU) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		&& HIBYTE(GetAsyncKeyState(VK_MENU))!=128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
+	else if(::IsStrifeMap(gMapManager.WorldActive) && sc != Hero && sc->m_byGensInfluence != Hero->m_byGensInfluence && HIBYTE(GetAsyncKeyState(VK_MENU))!= 128)
 	{
 		if(sc->GuildRelationShip == GR_NONE && !g_pPartyManager->IsPartyMember(SelectedCharacter))
 		{
@@ -2360,36 +2188,16 @@ int	getTargetCharacterKey ( CHARACTER* c, int selected )
 		else if((strcmp(GuildMark[Hero->GuildMarkIndex].GuildName,GuildMark[c->GuildMarkIndex].GuildName)==NULL) ||
 			g_pPartyManager->IsPartyMember(SelectedCharacter))
 		{
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-			if(SEASON3B::IsPress(VK_CONTROL) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 			if(HIBYTE(GetAsyncKeyState(VK_CONTROL))==128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 				return sc->Key;
 			else 
 				return -1;
 		}
 	}
-#endif //PBG_ADD_PKFIELD
-	//	카오, 강제 공격.
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	else if( (sc->PK >= PVP_MURDERER2) || (SEASON3B::IsPress(VK_CONTROL) == TRUE) && (sc != Hero) )
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 	else if ( sc->PK>=PVP_MURDERER2 || ( HIBYTE(GetAsyncKeyState(VK_CONTROL))==128 && sc!=Hero ) )
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 	{
 		return sc->Key;
 	}
-#ifdef _PVP_ATTACK_GUARD
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	else if( (sc->MonsterIndex == 249) || (SEASON3B::IsPress(VK_CONTROL) == TRUE) && (sc != Hero) )
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	else if ( sc->MonsterIndex == 249 || ( HIBYTE(GetAsyncKeyState(VK_CONTROL))==128 && sc!=Hero ) )
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-	{
-		return sc->Key;
-	}
-#endif	// _PVP_ATTACK_GUARD
 	else if ( gMapManager.IsCursedTemple() )
 	{
 		if( g_CursedTemple->IsPartyMember( selected ) )
@@ -2440,11 +2248,9 @@ void SetCharacterPos ( CHARACTER* c, BYTE posX, BYTE posY, vec3_t position )
 
 bool CastWarriorSkill( CHARACTER *c, OBJECT *o, ITEM *p, int iSkill)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(c == NULL)	return false;
 	if(o == NULL)	return false;
 	if(p == NULL)	return false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	bool Success = false;
 	
     if ( SelectedCharacter<=-1 ) return false;
@@ -2457,35 +2263,26 @@ bool CastWarriorSkill( CHARACTER *c, OBJECT *o, ITEM *p, int iSkill)
 	g_MovementSkill.m_iSkill = iSkill;
 	g_MovementSkill.m_iTarget = SelectedCharacter;
     float Distance = GetSkillDistance( iSkill, c )*1.2f;
-    //  블러드캐슬에서 무기스킬의 거리를 제한한다.
-    if ( ( gMapManager.InBloodCastle() == true ) && ( iSkill>=AT_SKILL_SWORD1 && iSkill<=AT_SKILL_SWORD5 ) )
+
+	if ( ( gMapManager.InBloodCastle() == true ) && ( iSkill>=AT_SKILL_SWORD1 && iSkill<=AT_SKILL_SWORD5 ) )
     {
         Distance = 1.8f;
     }
 	
 	if(CheckTile(c,o,Distance))
-	{	// 가까우면 바로 사용
+	{
 		UseSkillWarrior( c, o);
 		Success = true;
 	}
 	else if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
 	{	
-		// 멀면 걸어가서 사용
 		c->Movement = true;
 		c->MovementType = MOVEMENT_SKILL;
 		Success = true;
-		
-#ifdef CSK_FIX_SYNCHRONIZATION
 		SendMove(c, o);
-#endif // CSK_FIX_SYNCHRONIZATION
 	}
 	
-	return ( Success);
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
+	return (Success);
 }
 
 
@@ -2495,10 +2292,7 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 	if(o->Type == MODEL_PLAYER)
 	{
 		if ( o->CurrentAction==PLAYER_DEFENSE1 ) return false;
-		if ( o->CurrentAction>=PLAYER_ATTACK_SKILL_SWORD1 && o->CurrentAction<=PLAYER_ATTACK_SKILL_SWORD4 
-			|| o->CurrentAction==PLAYER_ATTACK_TWO_HAND_SWORD_TWO 
-			) 
-			return false;
+		if ( o->CurrentAction>=PLAYER_ATTACK_SKILL_SWORD1 && o->CurrentAction<=PLAYER_ATTACK_SKILL_SWORD4 || o->CurrentAction==PLAYER_ATTACK_TWO_HAND_SWORD_TWO ) return false;
 	}
 	else
 	{
@@ -2506,50 +2300,44 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 	}
 	int Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
 	if( Skill == AT_SKILL_RIDER 
-		|| Skill == AT_SKILL_ONETOONE	// 블로우
-#ifdef PJH_SEASON4_MASTER_RANK4
+		|| Skill == AT_SKILL_ONETOONE
 		|| (AT_SKILL_BLOW_UP <= Skill && Skill <= AT_SKILL_BLOW_UP+4)
-#endif	//PJH_SEASON4_MASTER_RANK4
-		// 창찌르기 스킬은 이동수단을 타야한다.
 		|| ( Skill == AT_SKILL_SPEAR && ( Hero->Helper.Type == MODEL_HELPER+2 || Hero->Helper.Type == MODEL_HELPER+3 || Hero->Helper.Type == MODEL_HELPER+4 || Hero->Helper.Type == MODEL_HELPER+37 )) 
 		|| Skill == AT_SKILL_STRONG_PIER 
-		|| Skill == AT_SKILL_LONGPIER_ATTACK // ?? || 파이어버스트
+		|| Skill == AT_SKILL_LONGPIER_ATTACK
 		|| (AT_SKILL_FIRE_BUST_UP <= Skill && Skill <= AT_SKILL_FIRE_BUST_UP+4)
-		|| Skill == AT_SKILL_RUSH           //  돌격.
-		|| Skill == AT_SKILL_ONEFLASH       //  일섬.
-		|| Skill == AT_SKILL_SPACE_SPLIT    //  공간 가르기.
+		|| Skill == AT_SKILL_RUSH
+		|| Skill == AT_SKILL_ONEFLASH
+		|| Skill == AT_SKILL_SPACE_SPLIT
 		)
 	{
 		switch ( Skill)
 		{
-		case AT_SKILL_SPEAR:	// 창찌르기(창류 무기를 들고 있어야 가능)
+		case AT_SKILL_SPEAR:
 			if( !( o->Type==MODEL_PLAYER && Hero->Weapon[0].Type != -1 && 
 				( Hero->Weapon[0].Type >= MODEL_SPEAR && Hero->Weapon[0].Type < MODEL_SPEAR+MAX_ITEM_INDEX ) ) )
 			{
 				return false;
 			}
 			break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 		case AT_SKILL_BLOW_UP:
 		case AT_SKILL_BLOW_UP+1:
 		case AT_SKILL_BLOW_UP+2:
 		case AT_SKILL_BLOW_UP+3:
 		case AT_SKILL_BLOW_UP+4:
-#endif	//PJH_SEASON4_MASTER_RANK4
-		case AT_SKILL_ONETOONE:	// 블로우
+		case AT_SKILL_ONETOONE:
 			if( !( Hero->Weapon[0].Type != -1 && ( Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF+MAX_ITEM_INDEX )))
 			{
 				return false;
 			}
 			break;
-		case AT_SKILL_ONEFLASH:	// 나선베기?
+		case AT_SKILL_ONEFLASH:
 			if( Hero->Weapon[0].Type < MODEL_SWORD || Hero->Weapon[0].Type >= MODEL_SWORD+MAX_ITEM_INDEX )
 			{
 				return false;
 			}
 			break;
 		}
-		// mana 체크
 		int iMana, iSkillMana;
 		GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
 		if(CharacterAttribute->Mana < iMana)
@@ -2562,7 +2350,6 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 			}
 			return false;
 		}
-		// skillmana 부족
 		if(iSkillMana > CharacterAttribute->SkillMana)
 		{
 			return false;
@@ -2624,12 +2411,8 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 	}
 	
 	if(CharacterAttribute->Skill[Hero->CurrentSkill] == AT_SKILL_DARK_SCREAM
-#ifdef PJH_SEASON4_MASTER_RANK4
 		||(AT_SKILL_FIRE_SCREAM_UP <= CharacterAttribute->Skill[Hero->CurrentSkill] && AT_SKILL_FIRE_SCREAM_UP+4 >= CharacterAttribute->Skill[Hero->CurrentSkill])
-#endif //PJH_SEASON4_MASTER_RANK4
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 		|| Skill == AT_SKILL_GAOTIC
-#endif //#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 		)
 	{
 		int iMana;
@@ -2659,11 +2442,6 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 	}
 	
 	return Success;
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
 
 void UseSkillWarrior( CHARACTER *c, OBJECT *o)
@@ -10712,26 +10490,22 @@ void MoveHero()
 	CHARACTER *c = Hero;
 	OBJECT *o = &c->Object;
 	
-	// 3차 전직 동작중이면 리턴
 	if(o->CurrentAction == PLAYER_CHANGE_UP)
 	{
 		return;
 	}
 	
-	// 크라이울프나 칸투르3차 연출중이면 플레이어 멈추게 세팅하고 리턴
 	if(g_Direction.IsDirection())
 	{
 		SetPlayerStop(c);
 		return;
 	}
 	
-	// 뭔가를 선택했고, 크라이울프 히어로 계약상태이면 리턴
 	if(SelectedCharacter != -1 && g_isCharacterBuff((&Hero->Object), eBuff_CrywolfHeroContracted))
 	{
 		return;
 	}
 	
-	// 캐릭터가 죽었거나 스턴스킬이나 슬립스킬에 걸렸으면 리턴
 	if(c->Dead > 0
 		|| g_isCharacterBuff(o, eDeBuff_Stun)
 		|| g_isCharacterBuff(o, eDeBuff_Sleep) ) 
@@ -10739,28 +10513,15 @@ void MoveHero()
 		return;
 	}
 	
-#ifdef LJH_FIX_HERO_MOVES_EVEN_NOT_PRESENT	
-	// 캐릭터가 화면에서 존재하지 않을 경우 (그려지지 않을 때) 움직임을 막는다.
 	if (c->Object.Live == 0)
 		return;
-#endif	//LJH_FIX_HERO_MOVES_EVEN_NOT_PRESENT	
 
-	// 월드 로딩중이면 리턴
 	if(LoadingWorld > 0) 
 	{
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		// 이부분 방어코드 보류..
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-
 		LoadingWorld--;
-#ifdef PBG_FIX_LODING_ACTION
-		// 맵서버LoadingWorld == 9999998 / 맵이동LoadingWorld == 29시 모션초기화는 한번만 호출
 		if(LoadingWorld == 9999998 || LoadingWorld == 29)
-#endif //PBG_FIX_LODING_ACTION
-#ifdef LDK_FIX_MOTION_INTI_AT_THE_LOADINGWORLD
-		// wops 34113 - 월드로딩시 모션 초기화(09.04.14)
+
 		SetPlayerStop(c);
-#endif //LDK_FIX_MOTION_INTI_AT_THE_LOADINGWORLD
 	}
 	if(LoadingWorld > 30) 
 	{
@@ -10845,8 +10606,7 @@ void MoveHero()
 		
 	if(c->Movement)
 	{
-		if ( g_isCharacterBuff(o, eDeBuff_Harden) 
-			|| g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
+		if ( g_isCharacterBuff(o, eDeBuff_Harden) || g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
 		{
 			SetPlayerStop(c);
 		}
@@ -10860,11 +10620,9 @@ void MoveHero()
 				HeroAngle = (int)c->Object.Angle[2];
 				StandTime = 0;
 				
-#ifdef YDG_FIX_LEAN_AGAINST_WALL_WITHOUT_ARROWS
 				if (c->MovementType == MOVEMENT_OPERATE)
 					Action(c,o,false);
 				else
-#endif	// YDG_FIX_LEAN_AGAINST_WALL_WITHOUT_ARROWS
 				if(!CheckArrow() && GetBaseClass(Hero->Class) == CLASS_ELF )
 					SetPlayerStop(Hero);
 				else
@@ -10872,7 +10630,6 @@ void MoveHero()
 			}
 			else
 			{
-				// 크라이 울프 MVP시 요정 계약된 상태에서 움직이면 계약 안된 상태로 적용 함
 				g_CharacterUnRegisterBuff( (&Hero->Object), eBuff_CrywolfHeroContracted );
 				MoveCharacterPosition(c);
 			}
@@ -10915,10 +10672,6 @@ void MoveHero()
 		
 	CheckGate();
 		
-#ifdef USE_SELFCHECKCODE
-		SendCrcOfFunction( 1, 12, WndProc, 0xBB7E);
-#endif
-		
 		if(!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse())
 		{
 			bool Success = false;
@@ -10926,99 +10679,68 @@ void MoveHero()
 			{
 				if(!EnableFastInput)
 				{
-#ifdef FOR_HACKING
-
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-					if( (SEASON3B::IsRepeat(VK_CONTROL) == TRUE) && (SEASON3B::IsRepeat(VK_MENU) == TRUE) )
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
-					if( HIBYTE(GetAsyncKeyState(VK_CONTROL)) && HIBYTE(GetAsyncKeyState(VK_MENU)) )//&& PartyNumber>0 )
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
+					if(MouseLButtonPush)
 					{
-						if ( FindText( Hero->ID, "webzen" ) )
+						MouseLButtonPush = false;
+						Success = true;
+					}
+					if(MouseLButton)
+					{
+						Success = true;
+					}
+						
+					if( ( 
+						g_pOption->IsAutoAttack()
+						&& gMapManager.WorldActive!=WD_6STADIUM 
+						&& gMapManager.InChaosCastle()==false ) 
+						&& ( Attacking==1 && SelectedCharacter!=-1 ) )
+					{
+						Success = true;
+					}
+					
+					if( Success && !g_isCharacterBuff(o, eDeBuff_Stun) && !g_isCharacterBuff(o, eDeBuff_Sleep) )
+					{
+						g_iFollowCharacter = -1;
+							
+						LButtonPressTime = ((WorldTime - LButtonPopTime)/CLOCKS_PER_SEC);
+							
+						if ( LButtonPressTime>=AutoMouseLimitTime )
 						{
-							if(SelectedCharacter!=-1 && MouseLButtonPush )
-							{
-								g_iFollowCharacter = SelectedCharacter;
-								MouseLButtonPush = false;
-								Success = false;
-							}
+							MouseLButtonPush = false;
+							MouseLButton = false;
+							Success = FALSE;
 						}
 					}
 					else
-#endif
 					{
-						if(MouseLButtonPush)
-						{
-							MouseLButtonPush = false;
-							Success = true;
-						}
-						if(MouseLButton)
-						{
-							Success = true;
-						}
-						
-						//  자동공격.   ( 배틀싸커에서는 자동 공격 안됨 )
-						if( ( 
-							g_pOption->IsAutoAttack()
-							&& gMapManager.WorldActive!=WD_6STADIUM 
-							&& gMapManager.InChaosCastle()==false ) 
-							&& ( Attacking==1 && SelectedCharacter!=-1 ) )
-						{
-							Success = true;
-						}
+						LButtonPopTime = WorldTime;
+						LButtonPressTime = 0.f;
 					}
-					
-					//  공격 설정이 되었을때.
-					if( Success 
-						&& !g_isCharacterBuff(o, eDeBuff_Stun) 
-						&& !g_isCharacterBuff(o, eDeBuff_Sleep) )
-						{
-							g_iFollowCharacter = -1;
-							
-							LButtonPressTime = ((WorldTime - LButtonPopTime)/CLOCKS_PER_SEC);
-							
-							if ( LButtonPressTime>=AutoMouseLimitTime )
-							{
-								MouseLButtonPush = false;
-								MouseLButton = false;
-								Success = FALSE;
-							}
-						}
-						else
-						{
-							LButtonPopTime = WorldTime;
-							LButtonPressTime = 0.f;
-						}
 				}
 			}
 			if( g_iFollowCharacter!=-1 )
 			{
-				//if ( FindText( Hero->ID, "webzen" ) )
+				CHARACTER* followCharacter = &CharactersClient[g_iFollowCharacter];
+				if( followCharacter->Object.Live==0 )
 				{
-					CHARACTER* followCharacter = &CharactersClient[g_iFollowCharacter];
-					if( followCharacter->Object.Live==0 )
-					{
-						g_iFollowCharacter = -1;
-					}
-					else
-					{
-						//
-						c->MovementType = MOVEMENT_MOVE;
-						ActionTarget = g_iFollowCharacter;
-						TargetX = (int)(followCharacter->Object.Position[0]/TERRAIN_SCALE);
-						TargetY = (int)(followCharacter->Object.Position[1]/TERRAIN_SCALE);
-						if(PathFinding2(( c->PositionX),( c->PositionY),TargetX,TargetY,&c->Path))
-							SendMove(c,o);
-					}
+					g_iFollowCharacter = -1;
+				}
+				else
+				{
+					//
+					c->MovementType = MOVEMENT_MOVE;
+					ActionTarget = g_iFollowCharacter;
+					TargetX = (int)(followCharacter->Object.Position[0]/TERRAIN_SCALE);
+					TargetY = (int)(followCharacter->Object.Position[1]/TERRAIN_SCALE);
+					if(PathFinding2(( c->PositionX),( c->PositionY),TargetX,TargetY,&c->Path))
+						SendMove(c,o);
 				}
 			}
 			else if ( Success && 
 				( ( o->CurrentAction!=PLAYER_SHOCK && ( o->Teleport!=TELEPORT_BEGIN && o->Teleport!=TELEPORT && o->Alpha>=0.7f ) &&
 				( o->CurrentAction<PLAYER_ATTACK_FIST || o->CurrentAction>PLAYER_RIDE_SKILL )
-#ifdef YDG_FIX_BLOCK_SKILL_MOVE
 				&& ( o->CurrentAction<PLAYER_SKILL_SLEEP || o->CurrentAction>PLAYER_SKILL_LIGHTNING_SHOCK )
 				&& o->CurrentAction!=PLAYER_RECOVER_SKILL
-#endif	// YDG_FIX_BLOCK_SKILL_MOVE
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				&& (o->CurrentAction<PLAYER_SKILL_THRUST || 
 #ifdef PBG_FIX_NEWCHAR_MONK_UNIANI
@@ -11037,21 +10759,18 @@ void MoveHero()
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 				) )
 			{
-				//오른손 무기가 빠질때 왼손무기가 오른손으로 감
 				int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 				int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 				
 				SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
-				// 인벤토리에서 온 것인가?
+
 				if ( !pPickedItem && RightType==-1 &&
 					((LeftType>=ITEM_SWORD && LeftType<ITEM_MACE+MAX_ITEM_INDEX)
 					|| (LeftType>=ITEM_STAFF && LeftType<ITEM_STAFF+MAX_ITEM_INDEX
-					&& !(LeftType >= ITEM_STAFF+21 && LeftType <= ITEM_STAFF+29)	// 소환서는 강제 이동하지 않는다.
+					&& !(LeftType >= ITEM_STAFF+21 && LeftType <= ITEM_STAFF+29)
 					)))	
 					{
-#ifdef PSW_BUGFIX_LEFTWEAPON_MOVE
 						if( g_pMyInventory->IsEquipable(EQUIPMENT_WEAPON_LEFT, &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT]) )
-#endif //PSW_BUGFIX_LEFTWEAPON_MOVE
 						{
 							memcpy(&PickItem,&CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT],sizeof(ITEM));
 							CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type  = -1;
@@ -11065,45 +10784,25 @@ void MoveHero()
 					}
 					MouseUpdateTime = 0;
 					Success = false;
-#ifdef ENABLE_EDIT
-					Success = CheckAttack();
-#else
-					if(!c->SafeZone)//||EnableEdit)
+
+					if(!c->SafeZone)
 					{
 						Success = CheckAttack();
 					}
-#endif //ENABLE_EDIT
+
 					if(Success)
 					{
-						//  요정일 경우.
 						if ( c->Movement && c->MovementType==MOVEMENT_MOVE && GetBaseClass(c->Class)==CLASS_ELF )
 						{
-#ifdef ADD_SOCKET_ITEM
-							
-							//  요정의 활, 석궁 공격일경우.
 							if( GetEquipedBowType(CharacterMachine->Equipment) != BOWTYPE_NONE )
 							{
 								//SendPosition( (c->PositionX), (c->PositionY) );
 								gProtocolSend.SendPositionNew( c->PositionX, c->PositionY );
 							}
-							
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-							int Right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-							int Left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-							
-							//  요정의 활, 석궁 공격일경우.
-							if((Right>=ITEM_BOW+8 && Right<ITEM_BOW+15) || (Right>=ITEM_BOW+16 && Right<ITEM_BOW+MAX_ITEM_INDEX) || 
-								(Left>=ITEM_BOW && Left<ITEM_BOW+7 || Left==ITEM_BOW+17 ) )
-							{
-								SendPosition (( c->PositionX),( c->PositionY));
-							}
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 						}
 						
-						//  기사, 요정, 마법사, 마검사. 기본 공격만 가능.
 						if ( SelectedCharacter >= -1 )
 						{
-							//  자동 공격 시작.
 							Attacking = 1;
 							
 							c->MovementType = MOVEMENT_ATTACK;
@@ -11123,9 +10822,6 @@ void MoveHero()
 								}
 								else
 								{
-#ifdef ADD_SOCKET_ITEM
-									
-									// 활이나 석궁을 장착하고 있을때
 									if( (GetEquipedBowType() != BOWTYPE_NONE) || (c->MonsterIndex == 9) )
 									{
 										if(CheckArrow() == false)
@@ -11138,31 +10834,11 @@ void MoveHero()
 									{
 										SendMove(c,o);
 									}
-									
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-									int Right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-									int Left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-									if ( ( Right>=ITEM_BOW+8 && Right<ITEM_BOW+15 ) || ( Right>=ITEM_BOW+16 && Right<ITEM_BOW+MAX_ITEM_INDEX ) || 
-										( Left>=ITEM_BOW && Left<ITEM_BOW+7 || Left==ITEM_BOW+17 || Left==ITEM_BOW+20
-										|| Left == ITEM_BOW+21 || Left == ITEM_BOW+22 ) || c->MonsterIndex==9 )
-										
-									{
-										if(CheckArrow() == false)
-										{
-											return;
-										}
-										Action(c,o,true);
-									}
-									else
-										SendMove(c,o);
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 								}
 							}
 						}
 					}
-					else if ( SelectedOperate != -1 && ( c->SafeZone || ( c->Helper.Type<MODEL_HELPER+2 || c->Helper.Type>MODEL_HELPER+4 
-						|| c->Helper.Type != MODEL_HELPER+37
-						) ) )
+					else if ( SelectedOperate != -1 && ( c->SafeZone || ( c->Helper.Type<MODEL_HELPER+2 || c->Helper.Type>MODEL_HELPER+4 || c->Helper.Type != MODEL_HELPER+37)))
 					{
 						TargetX = (int)(Operates[SelectedOperate].Owner->Position[0]/TERRAIN_SCALE);
 						TargetY = (int)(Operates[SelectedOperate].Owner->Position[1]/TERRAIN_SCALE);
@@ -11194,7 +10870,7 @@ void MoveHero()
 						TargetNpc = ActionTarget;
 						TargetType = CharactersClient[ActionTarget].Object.Type;
 						TargetAngle = CharactersClient[ActionTarget].Object.Angle[2];
-						// 칸투루 입장 NPC 멀리서도 클릭하면 UI창이 열리게 수정
+
 						if(TargetType == MODEL_KANTURU2ND_ENTER_NPC)
 						{
 							vec3_t vHero, vTarget, vSubstract;
@@ -11235,22 +10911,15 @@ void MoveHero()
 						else
 						{
 							Action(c,o,true);
-							c->MovementType = MOVEMENT_MOVE;	// ★ 집기 2번 발생 안하도록 처리
+							c->MovementType = MOVEMENT_MOVE;
 						}
 					}
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-					else if(SEASON3B::IsPress(VK_SHIFT) == FALSE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 					else if(HIBYTE(GetAsyncKeyState(VK_SHIFT)) != 128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 					{
 						RenderTerrain ( true );
 						bool Success = RenderTerrainTile(SelectXF,SelectYF,(int)SelectXF,(int)SelectYF,1.f,1,true);
-#ifdef LDK_FIX_CHARACTER_UNLIVE_MOUSE_LOCK
+
 						if(Success && c->Object.Live)
-#else //LDK_FIX_CHARACTER_UNLIVE_MOUSE_LOCK
-						if(Success)
-#endif //LDK_FIX_CHARACTER_UNLIVE_MOUSE_LOCK
 						{
 							TargetX = (BYTE)(CollisionPosition[0]/TERRAIN_SCALE);
 							TargetY = (BYTE)(CollisionPosition[1]/TERRAIN_SCALE);
@@ -11271,34 +10940,22 @@ void MoveHero()
 
 							if ( !c->Movement || ( abs( ( c->PositionX) - xPos) < 2 && abs( ( c->PositionY) - yPos) < 2))
 							{	
-								// 실제 위치와 보이는 위치가 크게 차이나지 않을 때만 이동하게 한다.
 								if ( ( ( c->PositionX)!=TargetX || ( c->PositionY)!=TargetY || !c->Movement) &&
 									PathFinding2( ( c->PositionX),( c->PositionY),TargetX,TargetY,&c->Path ) )
 								{
 									c->MovementType = MOVEMENT_MOVE;
 									SendMove ( c, o );
-									// 이동 할 위치 마우스 클릭시 들어옴
 									OBJECT* pHeroObj = &Hero->Object;
 									vec3_t vLight, vPos;
 									Vector( 1.f, 1.f, 0.f, vLight );
 									VectorCopy( CollisionPosition, vPos );
-									DeleteEffect( MODEL_MOVE_TARGETPOSITION_EFFECT );		// 이전 이팩트 지움. (마우스 클릭한곳 마다 모두 이펙트 뿌리게 하려면 주석처리)
+									DeleteEffect( MODEL_MOVE_TARGETPOSITION_EFFECT );
 
-									// 못가는 타일 인덱스 구해서 이펙트를 뿌리지 않는다.
-									// ( 그러나 이팩트가 없어도 케릭터는 이동을 하기때문에 보류 )
-#ifdef KJH_FIX_MOVE_HERO_MOUSE_CLICK_EFFECT
 									int iTerrainIndex = TERRAIN_INDEX( (int)SelectXF, (int)SelectYF );
 									if( (TerrainWall[iTerrainIndex]&TW_NOMOVE) != TW_NOMOVE )
 									{
 										CreateEffect( MODEL_MOVE_TARGETPOSITION_EFFECT, vPos, pHeroObj->Angle, vLight, 0, pHeroObj, -1, 0, 0, 0, 0.6f);
 									}
-#else // KJH_FIX_MOVE_HERO_MOUSE_CLICK_EFFECT
-									// 							int iTerrainIndex = TERRAIN_INDEX( (int)SelectXF, (int)SelectYF );
-									// 							if( (TerrainWall[iTerrainIndex]&TW_NOMOVE) != TW_NOMOVE )
-									// 							{
-									CreateEffect( MODEL_MOVE_TARGETPOSITION_EFFECT, vPos, pHeroObj->Angle, vLight, 0, pHeroObj, -1, 0, 0, 0, 0.6f);														
-									// 							}
-#endif // KJH_FIX_MOVE_HERO_MOUSE_CLICK_EFFECT
 								}
 								else
 								{
@@ -11312,30 +10969,12 @@ void MoveHero()
 		MouseUpdateTime++;
 	}
 	
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 10, 0, MoveEffect, 0x2545);
-#endif
-	
 	Attack(Hero);
 	int Index = ((int)Hero->Object.Position[1]/(int)TERRAIN_SCALE)*256 + ((int)Hero->Object.Position[0]/(int)TERRAIN_SCALE);
 	if(Index < 0) Index = 0;
 	else if(Index > 65535) Index = 65535;
 	HeroTile = TerrainMappingLayer1[Index];
-	
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 20, 5, UseSkillElf, 0x8AC3);
-#endif
-	
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 땅에 놓인 아이템 선택하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 int SelectItem()
 {
@@ -11372,10 +11011,6 @@ int SelectItem()
 	return -1;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 케릭터 선택하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 int SelectCharacter(BYTE Kind)
 {
 	bool Main = true;
@@ -11389,27 +11024,17 @@ int SelectCharacter(BYTE Kind)
 		if ( (Kind&o->Kind)==o->Kind && o->Live && o->Visible && o->Alpha>0.f )
 		{
 			o->LightEnable = true;
-			//케릭터 칼라
 			switch ( c->Level )
 			{
-			case 0:Vector(0.2f,0.2f,0.2f,o->Light);break;   //보통
-			case 1:Vector(-0.4f,-0.4f,-0.4f,o->Light);break;//어두운
-			case 2:Vector(0.2f,-0.6f,-0.6f,o->Light);break; //붉은색
-			case 3:Vector(1.5f,1.5f,1.5f,o->Light);break;   //밝은색
-			case 4:Vector(0.3f,0.2f,-0.5f,o->Light);break;  //소환
+			case 0:Vector(0.2f,0.2f,0.2f,o->Light);break;
+			case 1:Vector(-0.4f,-0.4f,-0.4f,o->Light);break;
+			case 2:Vector(0.2f,-0.6f,-0.6f,o->Light);break;
+			case 3:Vector(1.5f,1.5f,1.5f,o->Light);break;
+			case 4:Vector(0.3f,0.2f,-0.5f,o->Light);break;
 			}
             if ( c->PK>=PVP_MURDERER2 )
 			{
-#ifdef _PVP_MURDERER_HERO_ITEM
-				if(c->MonsterIndex == 227)
-				{
-					Vector(-0.0f,-0.0f,-0.0f,o->Light);	// 카오상인
-				}
-				else
-#endif	// _PVP_MURDERER_HERO_ITEM
-				{
-					Vector(-0.4f,-0.4f,-0.4f,o->Light);
-				}
+				Vector(-0.4f,-0.4f,-0.4f,o->Light);
 			}
 		}
 	}
@@ -11425,7 +11050,6 @@ int SelectCharacter(BYTE Kind)
 		
 		if(o->Live && o->Visible && o->Alpha>0.f && c->Dead==0 && !g_isCharacterBuff(o, eBuff_CrywolfNPCHide))
 			{
-				//  파티 정보도 같이 갱신한다.
 				if ( o->Kind==KIND_PLAYER )		//. bug fixed by soyaviper
 				{
 					for ( int j=0; j<PartyNumber; ++j )
@@ -11448,20 +11072,13 @@ int SelectCharacter(BYTE Kind)
 				if ( Main && c==Hero ) continue;
 #endif// HERO_SELECT
 				
-				//  성문의 경우 열린 상태에서는 선택이 되면 안된다.
 				if ( c->m_bIsSelected==false ) 
 				{
-#ifdef REPAIR_BUG_MAY1
-					if((c->MonsterIndex == 283) && (IsBattleCastleStart()==true) && (o->CurrentAction!=MONSTER01_DIE))//수호석상.
-						c->m_bIsSelected = true;
-					else
-#endif
-						continue;
+					continue;
 				}
 				
 				if ( (Kind&o->Kind)==o->Kind )
 				{
-					// 오브젝트 크기 문제로 타겟 되는 지점이 너무 아래 일때 예외 처리  			
 					if(o->Type == MODEL_SMELTING_NPC)
 					{
 						o->OBB.StartPos[2] += 300.0f;
@@ -11472,7 +11089,6 @@ int SelectCharacter(BYTE Kind)
 					}		
 					else if(o->Type == MODEL_KANTURU2ND_ENTER_NPC)
 					{
-						// NPC 피킹 되는 지점이 더 크게 만들기 위해 예외 처리
 						o->OBB.StartPos[0] -= 100.f;
 						o->OBB.StartPos[2] += 100.0f;
 						o->OBB.XAxis[0] += 100.f;
@@ -11543,7 +11159,6 @@ int SelectOperate()
 			Vector(0.2f,0.2f,0.2f,Light);
 		}
 	}
-	// 공성맵에서 공성중에는 불가능
 	if( IsBattleCastleStart() && gMapManager.WorldActive == WD_30BATTLECASTLE )
 		return -1;
 	
@@ -11610,11 +11225,7 @@ void SelectObjects()
 
 	if(!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429))
 	{
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		if(SEASON3B::IsPress(VK_MENU) == TRUE)
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		if(HIBYTE(GetAsyncKeyState(VK_MENU))==128)
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 		{
 			if(SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
 				SelectedItem = SelectItem();
@@ -11649,31 +11260,14 @@ void SelectObjects()
             {
 				int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
 				
-#ifdef KJH_FIX_WOPS_K33479_SELECT_CHARACTER_TO_HEAL
                 if ( ((Skill>=AT_SKILL_HEALING) && (Skill<=AT_SKILL_ATTACK))
 					|| ((AT_SKILL_HEAL_UP <= Skill) && (Skill <= AT_SKILL_HEAL_UP+4))
-#ifdef PJH_SEASON4_MASTER_RANK4
 					|| ((AT_SKILL_ATT_POWER_UP <= Skill) && (Skill <= AT_SKILL_ATT_POWER_UP+4))
 					|| ((AT_SKILL_DEF_POWER_UP <= Skill) && (Skill <= AT_SKILL_DEF_POWER_UP+4))
-#endif //PJH_SEASON4_MASTER_RANK4
 					|| (Skill==AT_SKILL_TELEPORT_B)
 					|| (Skill==AT_SKILL_WIZARDDEFENSE)
 					|| ((AT_SKILL_SOUL_UP <= Skill) && (Skill <= AT_SKILL_SOUL_UP+4))
 					)
-#else // KJH_FIX_WOPS_K33479_SELECT_CHARACTER_TO_HEAL
-                if ( (Skill>=AT_SKILL_HEALING
-					|| (AT_SKILL_HEAL_UP <= Skill && Skill <= AT_SKILL_HEAL_UP+4)
-					) && (Skill<=AT_SKILL_ATTACK
-#ifdef PJH_SEASON4_MASTER_RANK4
-					|| (AT_SKILL_ATT_POWER_UP <= Skill && Skill <= AT_SKILL_ATT_POWER_UP+4)
-#endif //PJH_SEASON4_MASTER_RANK4
-					)
-					|| Skill==AT_SKILL_TELEPORT_B
-					&& (Skill==AT_SKILL_WIZARDDEFENSE
-					|| (AT_SKILL_SOUL_UP <= Skill && Skill <= AT_SKILL_SOUL_UP+4)
-					)
-					)
-#endif // KJH_FIX_WOPS_K33479_SELECT_CHARACTER_TO_HEAL
                 {
                     CKind_1 = KIND_PLAYER;
                     CKind_2 = KIND_MONSTER | KIND_EDIT;
@@ -11861,51 +11455,18 @@ void MoveInterface_DebugCamera()
 }
 #endif // DO_PROCESS_DEBUGCAMERA
 
-#ifdef DO_PROFILING
-
-// Profiling Key Processing
-void MoveInterface_ForProfiling()
-{
-	if( SEASON3B::IsPress(VK_F11) )
-	{
-		g_pProfiler = g_pProfiler->GetThis_();
-		
-		if( TRUE == g_pProfiler->IsProflingNow() )
-		{
-			g_pProfiler->RequestKillProfiling();
-			g_pProfiler->RequestGenerateResult();
-		}
-		else
-		{
-			g_pProfiler->RequestLiveProfiling();
-		}
-	}
-}
-#else // DO_PROFILING
 void MoveInterface_ForProfiling()
 {
 	return;
 }
-#endif // DO_PROFILING
-
-#ifdef ANTIHACKING_ENABLE
-extern BOOL g_bNewFrame;
-#endif //ANTIHACKING_ENABLE
 
 void MoveInterface()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_INTERFACE, PROFILING_MOVE_INTERFACE );
-#endif // DO_PROFILING
 	if(g_Direction.IsDirection())
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_MOVE_INTERFACE );
-#endif // DO_PROFILING
 		return;
 	}
 	
-	//    길전, 공성전 시에만.
 	if ( battleCastle::IsBattleCastleStart() == true )
 	{
 		if(CharacterAttribute->SkillNumber > 0)
@@ -11914,54 +11475,10 @@ void MoveInterface()
 		}
 	}	
 
-#ifdef ANTIHACKING_ENABLE
-	// 체크 코드
-	if ( g_bNewFrame)
-	{
-		switch ( GetTickCount() % 20000)
-		{
-		case 3127:
-			hanguo_check5();
-			break;
-		case 17321:
-			hanguo_check1();
-			break;
-		case 7992:
-			hanguo_check3();
-			break;
-		}
-	}
-#endif //ANTIHACKING_ENABLE
-	
 	int x,y,Width,Height;
 	
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 16, 18, CastWarriorSkill, 0xC3C9);
-#endif
-	
-	//매크로 출력
 	if(MacroTime == 0)
 	{
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-		if(InChaosCastle() == FALSE)
-		{
-			if(SEASON3B::IsRepeat(VK_MENU) == TRUE)
-			{
-				for(int i = 0; i < 9; i++)
-				{
-					if(SEASON3B::IsPress('1' + i) == TRUE)
-					{
-						SendMacroChat(MacroText[i]);
-					}
-				}
-
-				if(SEASON3B::IsPress('0') == TRUE)
-				{
-					SendMacroChat(MacroText[9]);
-				}
-			}
-		}
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
         if ( gMapManager.InChaosCastle()==false )
         {
 			if(HIBYTE(GetAsyncKeyState(VK_MENU)))
@@ -11979,30 +11496,17 @@ void MoveInterface()
 				}
 			}
         }
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 	}
 	
-	//potion
 	if(Hero->Dead == 0)
 	{
-#ifdef LDK_ADD_SCALEFORM
-		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-		{
-			g_pMainFrame->UseHotKeyItemRButton();
-		}
-#else //LDK_ADD_SCALEFORM
 		g_pMainFrame->UseHotKeyItemRButton();
-#endif //LDK_ADD_SCALEFORM
 	}
 	
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 2, 14, WinMain, 0xE910);
-#endif
 	if( g_pUIManager->IsInputEnable() )
 	{
 			if (g_iChatInputType == 0)
 			{
-				//채팅창
 				Width=190;Height=29;x=186;y=415;
 				if(MouseX>=x && MouseX<x+Width && MouseY>=
 					y && MouseY<y+Height)
@@ -12046,30 +11550,16 @@ void MoveInterface()
 			}
 	}
 	
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_INTERFACE );
-#endif // DO_PROFILING
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  스킬 사용을 위한 조건을 검사한다.
-//////////////////////////////////////////////////////////////////////////
 bool IsCanBCSkill(int Type)
 {
-	// 공성스킬은 제한을 건다.
 	if( Type==44 || Type==45 || Type==46 || Type==57 || Type==73 || Type==74 
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		|| Type == AT_SKILL_OCCUPY
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		)
 	{
-		// 공성맵이 아니거나 공성시작이 아니면 비활성화
 		if( !gMapManager.InBattleCastle() || !battleCastle::IsBattleCastleStart() )
 		{
 			return false;
@@ -12084,7 +11574,6 @@ bool CheckSkillUseCondition ( OBJECT* o, int Type )
 #ifdef LEM_FIX_USER_LOGOUT_SKILL_ENABLE
 	if( g_bExit )		return false;
 #endif	// LEM_FIX_USER_LOGOUT_SKILL_ENABLE [lem_2010.8.18]
-	// 공성 스킬 검사
 	if( IsCanBCSkill(Type) == false )
 	{
 		return false;
@@ -12100,9 +11589,6 @@ bool CheckSkillUseCondition ( OBJECT* o, int Type )
 		return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  스킬 아이콘의 설명.
-//////////////////////////////////////////////////////////////////////////
 extern char TextList[30][100];
 extern int  TextListColor[30];
 extern int  TextBold[30];
@@ -12168,11 +11654,6 @@ void GetTime( DWORD time, std::string& timeText, bool isSecond )
 }
 #endif //CSK_LUCKY_SEAL
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 화면상에 나오는 모든 인터페이스를 랜더링 하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void RenderBar(float x,float y,float Width,float Height,float Bar,bool Disabled,bool clipping)
 {
     if(clipping)
@@ -12228,33 +11709,20 @@ void RenderSwichState()
 	{
 		if(Switch_Info[i].m_bySwitchState > 0)
 		{
-			// 1981 "왕관스위치"
 			sprintf(Buff,"%s%d / %s / %s",GlobalText[1981],i+1,Switch_Info[i].m_szGuildName,Switch_Info[i].m_szUserName);
-					
-					g_pRenderText->SetFont(g_hFont);
-					g_pRenderText->SetTextColor(255, 255, 255, 255);
-					g_pRenderText->SetBgColor(0);
-					g_pRenderText->RenderText(0, 480-85+(i*15), Buff, 640, 0, RT3_SORT_CENTER);
+			g_pRenderText->SetFont(g_hFont);
+			g_pRenderText->SetTextColor(255, 255, 255, 255);
+			g_pRenderText->SetBgColor(0);
+			g_pRenderText->RenderText(0, 480-85+(i*15), Buff, 640, 0, RT3_SORT_CENTER);
 		}
 	}
 }
 
-
-
 void RenderInterface(bool Render)
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_INTERFACE, PROFILING_RENDER_INTERFACE );
-#endif // DO_PROFILING
-
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	
-	//화면 우측상단에 유니리아,다크로드,디노 같은 종류의 텍스트가 깜빡이는것을 방지.
-	
-    //  게임 화면 맨 앞에 나타나는 효과.
     RenderOutSides();
-	
-    //  파티원의 HP.
     RenderPartyHP ();
 	
 	RenderSwichState();
@@ -12265,10 +11733,6 @@ void RenderInterface(bool Render)
 //	M34CryWolf1st::Render_Mvp_Interface();
 	M39Kanturu3rd::RenderKanturu3rdinterface();
 //	M34CryWolf1st::Sub_Interface();
-	
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_INTERFACE );
-#endif // DO_PROFILING
 }
 
 void RenderOutSides()
@@ -12314,10 +11778,7 @@ void RenderOutSides()
     {
         battleCastle::RenderBaseSmoke ();
     }
-
-#ifdef LDK_ADD_MAPPROCESS_RENDERBASESMOKE_FUNC
 	TheMapProcess().RenderFrontSideVisual();
-#endif //LDK_ADD_MAPPROCESS_RENDERBASESMOKE_FUNC
 
 	glColor3f(1.f,1.f,1.f);
 }
@@ -12559,14 +12020,13 @@ void RenderPartyHP ()
 		Projection ( Position, &ScreenX, &ScreenY );
         ScreenX -= (int)(Width/2);
 		
-        //  마우스와 검사를 한다.
 		if((MouseX>=ScreenX && MouseX<ScreenX+Width && MouseY>=ScreenY-2 && MouseY<ScreenY+6))
 		{
 			sprintf ( Text,"HP : %d0%%", p->stepHP );
 			g_pRenderText->SetTextColor(255, 230, 210, 255);
 			g_pRenderText->RenderText(ScreenX, ScreenY-6, Text);
 		}
-        //  10단계로 표현한다. 
+
 		EnableAlphaTest ();
    	    glColor4f ( 0.f, 0.f, 0.f, 0.5f );
 		RenderColor ( (float)(ScreenX+1), (float)(ScreenY+1), Width+4.f, 5.f );
@@ -12581,7 +12041,7 @@ void RenderPartyHP ()
         int stepHP = min ( 10, p->stepHP );
 		
         glColor3f ( 250.f/255.f, 10/255.f, 0.f );
-        for ( int k=0; k<stepHP; ++k )   //  HP를 표시한다.
+        for ( int k=0; k<stepHP; ++k )
         {
 			RenderColor ( (float)(ScreenX+2+(k*4)), (float)(ScreenY+2), 3.f, 2.f );
         }
@@ -12590,10 +12050,6 @@ void RenderPartyHP ()
 	DisableAlphaBlend();
 	glColor3f(1.f,1.f,1.f);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 말풍선들을 자동 쏘팅하여 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void RenderBooleans()
 {
@@ -12610,28 +12066,23 @@ void RenderBooleans()
             {
 				OBJECT *o = &ci->Owner->Object;
 				Vector(o->Position[0],o->Position[1],o->Position[2]+o->BoundingBoxMax[2]+60.f,Position);
-#ifdef PBG_ADD_LITTLESANTA_NPC
-				//npc의 스케일이 조절되면서 기본값의 60.f가 차이가 너무 크다.스케일에 따른 기본값을 적용하자.
-				// float i=60.f;	o->Scale * i를 기본값으로 쓰면 되지않을까??
+
 				if(o->Type >= MODEL_LITTLESANTA && o->Type <= MODEL_LITTLESANTA_END)
 				{
 					Vector(o->Position[0],o->Position[1],o->Position[2]+o->BoundingBoxMax[2]+20.f,Position);
 				}
-#endif //PBG_ADD_LITTLESANTA_NPC
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 				if(o->Type==MODEL_MERCHANT_MAN)
 				{
 					Vector(o->Position[0],o->Position[1],o->Position[2]+o->BoundingBoxMax[2]+20.f,Position);
 				}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-				Projection(Position,&ScreenX,&ScreenY);		//. ScreenX, ScreenY: 640*480 기준
+				Projection(Position,&ScreenX,&ScreenY);
             }
             else
             {
-				Projection(ci->Position,&ScreenX,&ScreenY);	//. ScreenX, ScreenY: 640*480 기준
+				Projection(ci->Position,&ScreenX,&ScreenY);
             }
-			SetBooleanPosition(ci);	//. BoxSize 결정(현재 해상도 기준)
-			ci->x = ScreenX-(ci->Width/2);	//. ci->x, ci->y: 640*480 기준
+			SetBooleanPosition(ci);
+			ci->x = ScreenX-(ci->Width/2);
 			ci->y = ScreenY-ci->Height;
 		}
 	}
@@ -12674,24 +12125,16 @@ void RenderBooleans()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//  인터페이스 내용들.
-///////////////////////////////////////////////////////////////////////////////
 extern int TextNum;
 extern char TextList[30][100];
 extern int  TextListColor[30];
 extern int  TextBold[30];
 extern SIZE Size[30];
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 	시간 관련 내용을 랜더링한다. ( 매크로, 카운트 다운. 등등 )
-///////////////////////////////////////////////////////////////////////////////
-void RenderTimes ()
+void RenderTimes()
 {
 	float x,y,Width,Height;
 	
-	//매크로 입력 시간
     if(MacroTime > 0)
 	{
 		Width=50;Height=2;x=(GetScreenWidth()-Width)/2;y=480-48-40;
@@ -12703,7 +12146,7 @@ void RenderTimes ()
 	}
 	glColor3f(1.f,1.f,1.f);
 	
-    matchEvent::RenderTime ();
+    matchEvent::RenderTime();
 }
 
 extern int g_iKeyPadEnable;
@@ -12728,21 +12171,6 @@ void RenderCursor()
 	}
 	else if(SelectedNpc!=-1)
 	{
-#ifdef _PVP_ATTACK_GUARD
-		if (SelectedCharacter == -1 && SelectedNpc != -1)
-			SelectedCharacter = SelectedNpc;
-		
-		if(CheckAttack() && !MouseOnWindow)
-		{
-#ifdef PK_ATTACK_TESTSERVER_LOG
-			CHARACTER *c = &CharactersClient[SelectedCharacter];
-			g_ErrorReport.Write( "!!!!!!!!!!!!!!!!! PK !!!!!!!!!!!!!!! : ID(%s) PK(%d)  \n", c->ID, c->PK);
-			g_ConsoleDebug->Write(MCD_ERROR, "[CheckAttack1() : ID(%s) PK(%d)\n]", c->ID, c->PK);
-#endif // PK_ATTACK_TESTSERVER_LOG
-			RenderBitmap(BITMAP_CURSOR+2,(float)MouseX-2.f,(float)MouseY-2.f,24.f,24.f);
-		}
-        else
-#endif	// _PVP_ATTACK_GUARD
 			if(M38Kanturu2nd::Is_Kanturu2nd())
 			{
 				RenderBitmap(BITMAP_CURSOR2,(float)MouseX-2.f,(float)MouseY-2.f,24.f,24.f);
@@ -12862,15 +12290,7 @@ void ForwardSelectModel()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 에디터 상에서 키입력 받는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 extern int  EditMonsterNumber;
-
-///////////////////////////////////////////////////////////////////////////////
-// 에디터 기능들
-///////////////////////////////////////////////////////////////////////////////
 
 extern int MonsterKey;
 
@@ -12945,24 +12365,6 @@ void EditObjects()
 					else
 						PickObject->Position[2] += PickObjectHeight;
 				}
-#ifdef KWAK_FIX_KEY_STATE_RUNTIME_ERR
-				if(SEASON3B::IsPress('Q') == TRUE)
-					PickObject->Angle[0] -= 5.f;
-				if(SEASON3B::IsPress('E') == TRUE)
-					PickObject->Angle[0] += 5.f;
-				if(SEASON3B::IsPress('A') == TRUE)
-					PickObject->Angle[2] += 30.f;
-				if(SEASON3B::IsPress('D') == TRUE)
-					PickObject->Angle[2] -= 30.f;
-				if(SEASON3B::IsPress('W') == TRUE)
-					PickObjectHeight += 5.f;
-				if(SEASON3B::IsPress('S') == TRUE)
-					PickObjectHeight -= 5.f;
-				if(SEASON3B::IsPress('R') == TRUE)
-					PickObject->Scale += 0.02f;
-				if(SEASON3B::IsPress('F') == TRUE)
-					PickObject->Scale -= 0.02f;
-#else // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 				if(HIBYTE(GetAsyncKeyState('Q'))==128)
 					PickObject->Angle[0] -= 5.f;
 				if(HIBYTE(GetAsyncKeyState('E'))==128)
@@ -12979,7 +12381,6 @@ void EditObjects()
 					PickObject->Scale += 0.02f;
 				if(HIBYTE(GetAsyncKeyState('F'))==128)
 					PickObject->Scale -= 0.02f;
-#endif // KWAK_FIX_KEY_STATE_RUNTIME_ERR
 				if(MouseX >= 640-100 && MouseY < 100)
 				{
 					DeleteObject(PickObject,&ObjectBlock[PickObject->Block]);
@@ -13157,10 +12558,6 @@ void EditObjects()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 에디터 또는 디버깅을 위해 출력하는 정보들
-///////////////////////////////////////////////////////////////////////////////
-
 int TotalPacketSize = 0;
 int OldTime = timeGetTime();
 extern int MixItemValue;
@@ -13177,13 +12574,6 @@ void RenderDebugWindow()
 		OldTime = timeGetTime();
 		TotalPacketSize = 0;
 	}
-	
-#ifdef ACC_PACKETSIZE
-	
-	DWORD dwTick = GetTickCount() - g_dwPacketInitialTick;
-	sprintf(Text,"Send - %d Byte/s, Recv - %d Byte/s", g_iTotalPacketSend*1000/dwTick, g_iTotalPacketRecv*1000/dwTick);
-	RenderText(0,50,Text);
-#endif //ACC_PACKETSIZE
 	
 #ifdef ENABLE_EDIT
 	char Text[256];
@@ -13239,46 +12629,6 @@ void RenderDebugWindow()
 #endif //ENABLE_EDIT
 }
 
-
-/*
-void RenderRadar()
-{
-BeginBitmap();
-glDisable(GL_TEXTURE_2D);
-glColor3f(0.5f,1.f,0.5f);
-vec3_t Angle;
-float Matrix[3][4];
-Vector(0.f,0.f,CameraAngle[2],Angle);
-AngleMatrix(Angle,Matrix);
-vec3_t p,p1[4],p2;
-p1[0][0] = -128;p1[0][1] = -128;
-p1[1][0] =  128;p1[1][1] = -128;
-p1[2][0] =  128;p1[2][1] =  128;
-p1[3][0] = -128;p1[3][1] =  128;
-glBegin(GL_LINE_LOOP);
-for(int i=0;i<4;i++)
-{
-VectorRotate(p1[i],Matrix,p2);
-glVertex2f(p2[0]+181,WindowHeight+p2[1]-181);
-}
-glEnd();
-Vector(Hero->Object.Position[0]/TERRAIN_SCALE-128.f,Hero->Object.Position[1]/TERRAIN_SCALE-128.f,0.f,p);
-VectorRotate(p,Matrix,p2);
-float x,y;
-x=p2[0]+181;y=WindowHeight+p2[1]-181;
-p1[0][0] = x-14;p1[0][1] = y-10;
-p1[1][0] = x+14;p1[1][1] = y-10;
-p1[2][0] = x+14;p1[2][1] = y+10;
-p1[3][0] = x-14;p1[3][1] = y+10;
-glBegin(GL_LINE_LOOP);
-for(i=0;i<4;i++)
-glVertex2f(p1[i][0],p1[i][1]);
-glEnd();
-glEnable(GL_TEXTURE_2D);
-EndBitmap();
-}
-*/
-
 void MouseRButtonReset()
 {
 	MouseRButtonPop = false;
@@ -13292,17 +12642,10 @@ bool IsGMCharacter()
 	if( ( Hero->Object.Kind == KIND_PLAYER && Hero->Object.Type == MODEL_PLAYER && Hero->Object.SubType == MODEL_GM_CHARACTER )
 		|| ( g_isCharacterBuff((&Hero->Object), eBuff_GMEffect) ) 
 		|| ( Hero->CtlCode & CTLCODE_08OPERATOR )
-#ifdef CSK_FIX_GM_FORTV
-		|| (Hero->CtlCode & CTLCODE_04FORTV)
-#endif // CSK_FIX_GM_FORTV
-#ifdef LDK_FIX_GM_WEBZEN_NAME
-		|| FindText( Hero->ID, "webzen" )
-#endif //LDK_FIX_GM_WEBZEN_NAME
 		|| ( Hero->CtlCode & CTLCODE_20OPERATOR ) )
 	{
 		return true;
 	}
-
 	return false;
 }
 
@@ -13316,15 +12659,6 @@ bool IsNonAttackGM()
 	return false;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 유저가 채팅메세지를 이용 이동할수 없는 맵에 이동하려 하는지 판정
-// parameter: 
-//		char *szChatText - 유저에 의해 입력된 메세지
-// return value:
-//		true - 유저가 채팅메세지를 이용 이동할수 없는 맵에 이동하려고 함
-//		false - 하지 않음
-///////////////////////////////////////////////////////////////////////////////
 #ifdef LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG
 bool IsIllegalMovementByUsingMsg(const char *szChatText)
 {
@@ -13345,38 +12679,30 @@ bool IsIllegalMovementByUsingMsg(const char *szChatText)
 	short pEquipedWingType		= (&CharacterMachine->Equipment[EQUIPMENT_WING])->Type;
 					
 
-	// 날수 없음 (헬퍼 포함) (타크호스, 디노란트, 펜릴은 날 수 있는 헬퍼)
 	if ((pEquipedWingType	== -1				&& pEquipedHelperType != ITEM_HELPER+3 && 
 		 pEquipedHelperType != ITEM_HELPER+37	&& pEquipedHelperType != ITEM_HELPER+4) || 
 		pEquipedHelperType == ITEM_HELPER+2)
 	{
 		bCantFly = true;
 	}
-	// 수영하지 못하는 헬퍼탑승 (유니리아, 디노란트) 
 	if (pEquipedHelperType == ITEM_HELPER+2 || pEquipedHelperType == ITEM_HELPER+3)
 	{
 		bCantSwim = true;
 	}
-	// 변신반지 착용
 	if (g_ChangeRingMgr->CheckMoveMap(pEquipedLeftRingType, pEquipedRightRingType))
 	{
 		bEquipChangeRing = true;
 	}
 
-	
-	// /이동 명령어 실행
 	if ((strstr(szChatTextUpperChars, "/MOVE") != NULL) || 
 		(strlen(GlobalText[260]) > 0 && strstr(szChatTextUpperChars, GlobalText[260]) != NULL))
 	{
-		// list 'm_listMoveInfoData'는 각국언어와 영어로 된 맵 이름을 가지고 있음
-		// szMainMapName -> 각국 언어, szSubMapName -> 영어
 		std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*> m_listMoveInfoData;
 		m_listMoveInfoData = SEASON3B::CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
 		
 		std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*>::iterator li = m_listMoveInfoData.begin();
 		
 
-		// user가 이동하려는 맵이 뮤에서 존재하는 맵 인지 search
 		while (li != m_listMoveInfoData.end())
 		{
 			char cMapNameUpperChars[256];
@@ -13390,15 +12716,12 @@ bool IsIllegalMovementByUsingMsg(const char *szChatText)
 			li++;
 		}
 
-		// user가 이동하려는 맵이 뮤에서 존재하는 맵
 		if (li != m_listMoveInfoData.end())
 		{
-			// 아틀란스로 이동하려고 함	
 			if(stricmp((*li)->_ReqInfo.szMainMapName, GlobalText[37]) == 0)
 			{
 				bMoveAtlans = true;
 			}
-			// 이카루스로 이동하려고 함
 			else if (stricmp((*li)->_ReqInfo.szMainMapName, GlobalText[55]) == 0)
 			{
 				bMoveIcarus = true;
@@ -13406,14 +12729,12 @@ bool IsIllegalMovementByUsingMsg(const char *szChatText)
 		}
 	}
 	
-	// 수영할수 없는데 아틀라스로 이동하려는 명령어를 채팅창에 넣음
 	if (bCantSwim && bMoveAtlans)
 	{
 		g_pChatListBox->AddText("", GlobalText[261], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		return true;
 	}
-	// 날수가 없는데 이카루스로 이동하려는 명령어를 채팅창에 넣음
-	// (변신 반지 착용시 이카루스로 이동할 수 없음)
+
 	if ((bCantFly || bEquipChangeRing) && bMoveIcarus)
 	{
 		g_pChatListBox->AddText("", GlobalText[263], SEASON3B::TYPE_SYSTEM_MESSAGE);
