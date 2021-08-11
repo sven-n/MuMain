@@ -37,9 +37,6 @@
 #ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK
-#ifdef LDK_ADD_SCALEFORM
-#include "CGFxProcess.h"
-#endif //LDK_ADD_SCALEFORM
 #include "CharacterManager.h"
 
 using namespace SEASON3B;
@@ -763,20 +760,7 @@ bool SEASON3B::CNewUIMyInventory::UpdateKeyEvent()
 				if(CanRegisterItemHotKey(pItem->Type) == true)
 				{
 					int iItemLevel = (pItem->Level >> 3) & 15;
-
-#ifdef LDK_ADD_SCALEFORM
-					if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-					{
-						g_pMainFrame->SetItemHotKey(iHotKey, pItem->Type, iItemLevel);
-					}
-					else
-					{
-						GFxProcess::GetInstancePtr()->SetItemHotKey(iHotKey, pItem->Type, iItemLevel);
-					}
-#else //LDK_ADD_SCALEFORM
 					g_pMainFrame->SetItemHotKey(iHotKey, pItem->Type, iItemLevel);
-#endif //LDK_ADD_SCALEFORM
-
 					return false;
 				}
 
@@ -963,19 +947,6 @@ bool SEASON3B::CNewUIMyInventory::IsVisible() const
 
 void SEASON3B::CNewUIMyInventory::OpenningProcess()
 {
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-#ifdef KJH_MODIFY_MYINVENTORY_BTN
-		g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-#endif // KJH_MODIFY_MYINVENTORY_BTN
-	}
-#else //LDK_ADD_SCALEFORM
-#ifdef KJH_MODIFY_MYINVENTORY_BTN
-	g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-#endif // KJH_MODIFY_MYINVENTORY_BTN
-#endif //LDK_ADD_SCALEFORM
-
 	SetRepairMode(false);
 
 	m_MyShopMode = MYSHOP_MODE_OPEN;
@@ -983,7 +954,6 @@ void SEASON3B::CNewUIMyInventory::OpenningProcess()
 
 	WORD wLevel = CharacterAttribute->Level;
 
-	// 수리가능한 레벨인가? 50부터 수리 가능
 	if(wLevel >= 50)
 	{
 		m_bRepairEnableLevel = true;
@@ -993,13 +963,7 @@ void SEASON3B::CNewUIMyInventory::OpenningProcess()
 		m_bRepairEnableLevel = false;	
 	}
 	
-	// 개인상점 레벨 6부터 가능
-	if(wLevel >= 6
-#ifdef LJH_MOD_CANT_OPENNING_PERSONALSHOP_WIN_IN_CURSED_TEMPLE
-		// 개인상점 안되는 조건에 "환영사원에 있을 때" 추가
-		&& !g_CursedTemple->IsCursedTemple()
-#endif //LJH_MOD_CANT_OPENNING_PERSONALSHOP_WIN_IN_CURSED_TEMPLE
-		)
+	if(wLevel >= 6)
 	{
 		m_bMyShopOpen = true;
 		//UnlockMyShopButtonOpen();
@@ -1011,52 +975,29 @@ void SEASON3B::CNewUIMyInventory::OpenningProcess()
 	}
 
 #ifdef ASG_ADD_NEW_QUEST_SYSTEM
-// 장비창을 여는 퀘스트일 때 서버로 한 번만 알림.
-	if (g_QuestMng.IsIndexInCurQuestIndexList(0x1000F))	// 0x1000F가 장비창을 여는 퀘스트 인덱스.
+	if (g_QuestMng.IsIndexInCurQuestIndexList(0x1000F))
 	{
 		if (g_QuestMng.IsEPRequestRewardState(0x1000F))
 		{
-			SendSatisfyQuestRequestFromClient(0x1000F);		// 서버로 장비창이 열렸음을 알림.
-			g_QuestMng.SetEPRequestRewardState(0x1000F, false);	// 서버로 한 번만 알리기 위해.
+			SendSatisfyQuestRequestFromClient(0x1000F);
+			g_QuestMng.SetEPRequestRewardState(0x1000F, false);	
 		}
 	}
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM							//## 소스정리 대상임.
-	//인벤토리를 열 때마다 펫 정보 리셋을 요구한다.
+#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM	
 	if(GetBaseClass(Hero->Class)==CLASS_DARK_LORD)
 	{
 		SendRequestPetInfo ( 0, 0, EQUIPMENT_WEAPON_LEFT );
 		SendRequestPetInfo ( 1, 0, EQUIPMENT_HELPER );
 	}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM						//##소스정리 대상임.
+#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 
 void SEASON3B::CNewUIMyInventory::ClosingProcess()
 {
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-#ifdef KJH_MODIFY_MYINVENTORY_BTN
-		g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-#endif // KJH_MODIFY_MYINVENTORY_BTN
-	}
-#else //LDK_ADD_SCALEFORM
-#ifdef KJH_MODIFY_MYINVENTORY_BTN
-	g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-#endif // KJH_MODIFY_MYINVENTORY_BTN
-#endif //LDK_ADD_SCALEFORM
-
-#ifdef KJH_FIX_WOPS_K29690_PICKED_ITEM_BACKUP
-	// 창이 닫힐때 아이템이 Picked되어있으면 되돌린다.
 	m_pNewInventoryCtrl->BackupPickedItem();
-#endif // KJH_FIX_WOPS_K29690_PICKED_ITEM_BACKUP
-	
-#ifdef LDK_FIX_REPAIR_CURSOR_FREEZE
-	// 창 닫힐때 수리 모드를 완전 해제 한다.
 	RepairEnable = 0;
-#endif //LDK_FIX_REPAIR_CURSOR_FREEZE
-
 	SetRepairMode(false);
 }
 
@@ -1169,8 +1110,6 @@ ITEM* SEASON3B::CNewUIMyInventory::GetStandbyItem()
 
 void SEASON3B::CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
 {
-	//////////////////////////////////////////////////////////////////////////
-	//. 코드 그대로 옮김
 	SetCharacterClass(Hero);
 	OBJECT* pHeroObject = &Hero->Object;
 	if(false == gMapManager.InChaosCastle())
@@ -1195,7 +1134,7 @@ void SEASON3B::CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
 			if(!Hero->SafeZone)
 				CreateEffect(BITMAP_MAGIC+1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
 			break;
-		case ITEM_HELPER+37:	//^ 펜릴 인벤토리에 넣을때 생성및 효과
+		case ITEM_HELPER+37:
 			Hero->Helper.Option1 = pItem->Option1;
 			if(pItem->Option1 == 0x01)
 			{
@@ -1247,23 +1186,12 @@ void SEASON3B::CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
 #endif //defined( LDK_ADD_NEW_PETPROCESS ) && defined( LDK_ADD_CS7_UNICORN_PET )
 
 #if defined( LDK_ADD_NEW_PETPROCESS ) && defined( YDG_ADD_SKELETON_PET )
-		case ITEM_HELPER+123: // 스켈레톤 펫 이름 출력
+		case ITEM_HELPER+123:
 			ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER+123, pHeroObject->Position, Hero);
 			break;
 #endif //defined( LDK_ADD_NEW_PETPROCESS ) && defined( YDG_ADD_SKELETON_PET )
 		}
 	}
-	
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM						//## 소스정리 대상임.
-#ifdef PET_SYSTEM
-	switch (pItem->Type)
-	{
-	case ITEM_HELPER+5:
-		giPetManager::CreatePetDarkSpirit ( Hero );            
-		break;
-	}
-#endif// PET_SYSTEM										
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM					//## 소스정리 대상임.
 #ifdef LJW_FIX_PARTS_ENUM
 	if(Hero->EtcPart<=PARTS_NONE || Hero->EtcPart>=PARTS_LION)
 #else
@@ -1282,37 +1210,17 @@ void SEASON3B::CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
 		}
 	}
 	if (pItem->Type==ITEM_WING+39 || pItem->Type==ITEM_HELPER+30 || 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 		pItem->Type == ITEM_WING+130 ||
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		(pItem->Type >= ITEM_WING+49 && pItem->Type <= ITEM_WING+50) ||
 		(pItem->Type == ITEM_WING+135) ||
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		pItem->Type==ITEM_WING+40)	// 날개 장착시 망토 모양 변경
+		pItem->Type==ITEM_WING+40)
 	{
 		DeleteCloth(Hero, &Hero->Object);
 	}
-	
-	//////////////////////////////////////////////////////////////////////////
 }
-#ifdef PBG_FIX_SKILLHOTKEY
-void SEASON3B::CNewUIMyInventory::ResetSkillofItem(ITEM* pItem)
-{
-	ITEM_ATTRIBUTE* ipattribute = &ItemAttribute[pItem->Type];
-	int SkillIndex = ipattribute->m_bySkillIndex;
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		SkillIndex = g_pMainFrame->GetSkillHotKeyIndex(SkillIndex);
-		g_pMainFrame->SetSkillHotKeyClear(SkillIndex);	
-	}
-#else //LDK_ADD_SCALEFORM
-	SkillIndex = g_pMainFrame->GetSkillHotKeyIndex(SkillIndex);
-	g_pMainFrame->SetSkillHotKeyClear(SkillIndex);	
-#endif //LDK_ADD_SCALEFORM
-}
-#endif //PBG_FIX_SKILLHOTKEY
+
 void SEASON3B::CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
 {
 #ifdef LDK_ADD_NEW_PETPROCESS

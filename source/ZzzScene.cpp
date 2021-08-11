@@ -82,9 +82,6 @@
 #include "PortalMgr.h"
 #endif	// YDG_ADD_CS5_PORTAL_CHARM
 #include "ServerListManager.h"
-#ifdef LDK_ADD_SCALEFORM
-#include "CGFxProcess.h" 
-#endif //LDK_ADD_SCALEFORM
 #include "ProtocolSend.h"
 #include "MapManager.h"
 
@@ -785,13 +782,6 @@ void RenderInfomation()
 	RenderNotices();
     
 	CUIMng::Instance().Render();
-
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 1)
-	{
-		GFxProcess::GetInstancePtr()->GFxRender();
-	}
-#endif //LDK_ADD_SCALEFORM
 
 	if(SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
 	{
@@ -2657,13 +2647,6 @@ void MainScene(HDC hDC)
 		}
 
 		g_dwMouseUseUIID = 0;
-
-#ifdef LDK_ADD_SCALEFORM
-		if(GFxProcess::GetInstancePtr()->GetUISelect() == 1)
-		{
-			GFxProcess::GetInstancePtr()->GFxUpdate(SceneFlag);
-		}
-#endif //LDK_ADD_SCALEFORM
 
 		switch (SceneFlag)
 		{

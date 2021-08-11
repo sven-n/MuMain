@@ -208,18 +208,9 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	if(false == m_pNewUIHotKey->Create(m_pNewUIMng))
 		return false;
 
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		m_pNewMainFrameWindow = new CNewUIMainFrameWindow;
-		if(m_pNewMainFrameWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
-			return false;
-	}
-#else //LDK_ADD_SCALEFORM
 	m_pNewMainFrameWindow = new CNewUIMainFrameWindow;
 	if(m_pNewMainFrameWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
 		return false;
-#endif //LDK_ADD_SCALEFORM
 
 	m_pNewSkillList = new CNewUISkillList;
 	if(m_pNewSkillList->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
@@ -776,14 +767,8 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 	{
 		if(dwKey == SEASON3B::INTERFACE_FRIEND)
 		{
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_FRIEND, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_FRIEND, true);
-#endif //LDK_ADD_SCALEFORM
+
 			m_pNewFriendWindow->OpenMainWnd(640-250, 432-173);
 		}
 		else if(dwKey == SEASON3B::INTERFACE_INVENTORY)
@@ -794,14 +779,8 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 			HideAllGroupC();
 #endif // CSK_FIX_UI_FUNCTIONNAME
 			
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-#endif //LDK_ADD_SCALEFORM
+
 			if(IsVisible(SEASON3B::INTERFACE_CHARACTER))
 			{
 				g_pMyInventory->SetPos(640-190*2, 0);
@@ -819,14 +798,9 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 #else // CSK_FIX_UI_FUNCTIONNAME
 			HideAllGroupC();
 #endif // CSK_FIX_UI_FUNCTIONNAME
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, true);
-			}
-#else //LDK_ADD_SCALEFORM
+
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, true);
-#endif //LDK_ADD_SCALEFORM
+
 			if(IsVisible(SEASON3B::INTERFACE_INVENTORY))
 			{
 				g_pMyInventory->SetPos(640-190*2, 0);
@@ -853,14 +827,7 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 			HideAllGroupC();
 #endif // CSK_FIX_UI_FUNCTIONNAME
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_CHARACTER);
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, true);
-#endif //LDK_ADD_SCALEFORM
 			m_pNewPetInfoWindow->OpenningProcess();
 		}
 		else if(dwKey == SEASON3B::INTERFACE_MYQUEST)
@@ -889,60 +856,26 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 			HideAllGroupA();
 			g_pMixInventory->OpeningProcess();
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-#endif //LDK_ADD_SCALEFORM
 		}
 		else if(dwKey == SEASON3B::INTERFACE_NPCSHOP)
 		{
 			HideAllGroupA();
-			// 인벤토리도 함께 열어야 한다.
-#ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
 			g_pNPCShop->OpenningProcess();
-#endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-#endif //LDK_ADD_SCALEFORM
 		}
 		else if(dwKey == SEASON3B::INTERFACE_STORAGE)
 		{
 			HideAllGroupA();
-			// 인벤토리도 함께 열어야 한다.
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-#endif //LDK_ADD_SCALEFORM
 		}
 		else if(dwKey == SEASON3B::INTERFACE_MYSHOP_INVENTORY)
-		{			// 인벤토리도 함께 열어야 한다.
+		{
 			HideAllGroupA();
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-#endif //LDK_ADD_SCALEFORM
-		
-			// 환영사원이면
 			if(gMapManager.IsCursedTemple() == true)
 			{
 				g_pMyShopInventory->OpenButtonLock();
@@ -969,16 +902,8 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		else if(dwKey == SEASON3B::INTERFACE_TRADE)
 		{
 			HideAllGroupA();
-			// 인벤토리도 함께 열어야 한다.
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-#endif //LDK_ADD_SCALEFORM
 		}
 		else if( dwKey == SEASON3B::INTERFACE_BLOODCASTLE )
 		{
@@ -1008,14 +933,7 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		else if(dwKey == SEASON3B::INTERFACE_WINDOW_MENU)
 		{
 			g_pWindowMenu->OpenningProcess();
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_WINDOW, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_WINDOW, true);
-#endif //LDK_ADD_SCALEFORM
 		}
 		else if(dwKey == SEASON3B::INTERFACE_SENATUS)
 		{
@@ -1123,16 +1041,8 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		}
 #ifdef NEW_USER_INTERFACE_SHELL
 		else if(dwKey == SEASON3B::INTERFACE_PARTCHARGE_SHOP)
-		{
 			m_pNewPartChargeShop->OpeningProcess();
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
-#endif //LDK_ADD_SCALEFORM
 		}
 #endif //NEW_USER_INTERFACE_SHELL
 #ifdef PSW_GOLDBOWMAN
@@ -1154,16 +1064,8 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		{
 			HideAllGroupA();
 			g_pLuckyCoinRegistration->OpeningProcess();
-			//인벤토리와 같이 연다.
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-#endif //LDK_ADD_SCALEFORM
 		}
 		else if(dwKey == SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN)
 		{
@@ -1285,34 +1187,18 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 	
 }
 
-//---------------------------------------------------------------------------------------------
-// Hide()
 void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 {
 	if(m_pNewUIMng) 
 	{
 		if(dwKey == SEASON3B::INTERFACE_FRIEND)
 		{
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_FRIEND, false);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_FRIEND, false);
-#endif //LDK_ADD_SCALEFORM
 			m_pNewFriendWindow->HideAllWindow(TRUE, TRUE);
 		}
 		else if(dwKey == SEASON3B::INTERFACE_CHARACTER)
 		{
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, false);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, false);
-#endif //LDK_ADD_SCALEFORM
 			if(IsVisible(SEASON3B::INTERFACE_MYQUEST))
 			{
 				g_pMyQuestInfoWindow->SetPos(640-190, 0);
@@ -1334,14 +1220,8 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		}
 		else if(dwKey == SEASON3B::INTERFACE_INVENTORY)
 		{
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-#endif //LDK_ADD_SCALEFORM
+
 			if(IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
 			{
 				if(g_pMixInventory->ClosingProcess() == false)
@@ -1381,9 +1261,7 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 			if(IsVisible(SEASON3B::INTERFACE_TRADE))
 			{
 				g_pTrade->ProcessCloseBtn();
-#ifdef PBG_FIX_TRADECLOSE
 				m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_TRADE, false);
-#endif //PBG_FIX_TRADECLOSE
 			}
 #ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 			if(IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION))
@@ -1415,27 +1293,13 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 			{
 				return;
 			}
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-#endif //LDK_ADD_SCALEFORM
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
 		}
 		else if(dwKey == SEASON3B::INTERFACE_NPCSHOP)
 		{
 			g_pNPCShop->ClosingProcess();
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-#endif //LDK_ADD_SCALEFORM
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
 		}
 		else if(dwKey == SEASON3B::INTERFACE_MYSHOP_INVENTORY 
@@ -1455,14 +1319,7 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		{
  			if (!g_pStorageInventory->ProcessClosing())
 				return;
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-#endif //LDK_ADD_SCALEFORM
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
 		}
 		else if( dwKey == SEASON3B::INTERFACE_PET )
@@ -1514,14 +1371,7 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		else if (dwKey == SEASON3B::INTERFACE_TRADE)
 		{
  			g_pTrade->ProcessClosing();
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-#endif //LDK_ADD_SCALEFORM
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
 		}
 		else if(dwKey == SEASON3B::INTERFACE_CATAPULT)
@@ -1538,14 +1388,7 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		}
 		else if(dwKey == SEASON3B::INTERFACE_WINDOW_MENU)
 		{
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_WINDOW, false);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_WINDOW, false);
-#endif //LDK_ADD_SCALEFORM
 		}
 		else if(dwKey == SEASON3B::INTERFACE_OPTION)
 		{
@@ -1611,14 +1454,7 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		else if(dwKey == SEASON3B::INTERFACE_PARTCHARGE_SHOP)
 		{
 			m_pNewPartChargeShop->ClosingProcess();
-#ifdef LDK_ADD_SCALEFORM
-			if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-			{
-				g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, false);
-			}
-#else //LDK_ADD_SCALEFORM
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, false);
-#endif //LDK_ADD_SCALEFORM
 			g_pMyInventory->SetPos(640-190, 0);
 		}
 #endif //NEW_USER_INTERFACE_SHELL

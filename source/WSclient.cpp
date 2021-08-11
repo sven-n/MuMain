@@ -95,9 +95,6 @@
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#ifdef LDK_ADD_SCALEFORM
-#include "CGFxProcess.h"
-#endif //LDK_ADD_SCALEFORM
 #ifdef LEM_ADD_GAMECHU
 #include "GCCertification.h"
 #endif // LEM_ADD_GAMECHU
@@ -5718,32 +5715,14 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 
 	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
-#ifdef LDK_ADD_SCALEFORM
-		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-		{
-			g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
-			g_pMainFrame->SetGetExp_Wide(Exp);	
-		}
-#else //LDK_ADD_SCALEFORM
 		g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
 		g_pMainFrame->SetGetExp_Wide(Exp);	
-#endif //LDK_ADD_SCALEFORM
-
 		Master_Level_Data.lMasterLevel_Experince += Exp;
 	}
 	else
 	{
-#ifdef LDK_ADD_SCALEFORM
-		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-		{
-			g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
-			g_pMainFrame->SetGetExp(Exp);
-		}
-#else //LDK_ADD_SCALEFORM
 		g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
 		g_pMainFrame->SetGetExp(Exp);
-#endif //LDK_ADD_SCALEFORM
-
 		CharacterAttribute->Experience += Exp;	
 	}
 	
@@ -5805,32 +5784,14 @@ BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 
 	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
-#ifdef LDK_ADD_SCALEFORM
-		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-		{
-			g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
-			g_pMainFrame->SetGetExp_Wide(Exp);	
-		}
-#else //LDK_ADD_SCALEFORM
 		g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
 		g_pMainFrame->SetGetExp_Wide(Exp);	
-#endif //LDK_ADD_SCALEFORM
-
 		Master_Level_Data.lMasterLevel_Experince += Exp;
 	}
 	else
 	{
-#ifdef LDK_ADD_SCALEFORM
-		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-		{
-			g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
-			g_pMainFrame->SetGetExp(Exp);	
-		}
-#else //LDK_ADD_SCALEFORM
 		g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
 		g_pMainFrame->SetGetExp(Exp);	
-#endif //LDK_ADD_SCALEFORM
-
 		CharacterAttribute->Experience += Exp;	
 	}
 	
@@ -10007,52 +9968,21 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_OPTION Data = (LPPRECEIVE_OPTION)ReceiveBuffer;
 	
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		g_pMainFrame->ResetSkillHotKey();
-	}
-	else
-	{
-		GFxProcess::GetInstancePtr()->SetSkillClearHotKey();
-	}
-#else //LDK_ADD_SCALEFORM
 	g_pMainFrame->ResetSkillHotKey();
-#endif //LDK_ADD_SCALEFORM
 
 	int iHotKey;
 	for(int i=0; i<10; ++i)
 	{
-#ifdef CSK_FIX_SKILLHOTKEY_PACKET
 		int iIndex = i * 2;
 		iHotKey = MAKEWORD(Data->HotKey[iIndex+1], Data->HotKey[iIndex]);
-#else // CSK_FIX_SKILLHOTKEY_PACKET
-		iHotKey = Data->HotKey[i];
-#endif // CSK_FIX_SKILLHOTKEY_PACKET
 				
-#ifdef CSK_FIX_SKILLHOTKEY_PACKET
 		if(iHotKey != 0xffff)
-#else // CSK_FIX_SKILLHOTKEY_PACKET
-		if(iHotKey != 0xff)
-#endif // CSK_FIX_SKILLHOTKEY_PACKET
 		{
 			for(int j=0; j<MAX_SKILLS; ++j)
 			{
 				if(iHotKey == CharacterAttribute->Skill[j])
 				{
-#ifdef LDK_ADD_SCALEFORM
-					//gfxui 사용시 기존 ui 사용 안함
-					if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-					{
-						g_pMainFrame->SetSkillHotKey(i, j);
-					}
-					else
-					{
-						GFxProcess::GetInstancePtr()->SetSkillHotKey(i == 0 ? 10 : i, j);
-					}
-#else //LDK_ADD_SCALEFORM
 					g_pMainFrame->SetSkillHotKey(i, j);
-#endif //LDK_ADD_SCALEFORM
 					break;
 				}
 			}	
@@ -10092,85 +10022,14 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 	byELevel = (Data->QWERLevel & 0x0000FF00) >> 8;
 	byRLevel = Data->QWERLevel & 0x000000FF;
 
-
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-#ifdef KJH_FIX_ITEMHOTKEYINFO_CASTING
-		if( Data->KeyQWE[0] != 0xFF ) {
-			g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_Q, Data->KeyQWE[0]+ITEM_POTION, byQLevel);
-		}
-
-		if( Data->KeyQWE[1] != 0xFF ) {
-			g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_W, Data->KeyQWE[1]+ITEM_POTION, byWLevel);
-		}
-
-		if( Data->KeyQWE[2] != 0xFF ) {
-			g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_E, Data->KeyQWE[2]+ITEM_POTION, byELevel);
-		}
-#else // KJH_FIX_ITEMHOTKEYINFO_CASTING
-		g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_Q, Data->KeyQWE[0]+ITEM_POTION, byQLevel);
-		g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_W, Data->KeyQWE[1]+ITEM_POTION, byWLevel);
-		g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_E, Data->KeyQWE[2]+ITEM_POTION, byELevel);
-#endif // KJH_FIX_ITEMHOTKEYINFO_CASTING
-	}
-	else
-	{
-		if( Data->KeyQWE[0] != 0xFF )	GFxProcess::GetInstancePtr()->SetItemHotKey(SEASON3B::HOTKEY_Q, Data->KeyQWE[0]+ITEM_POTION, byQLevel);
-		if( Data->KeyQWE[1] != 0xFF )	GFxProcess::GetInstancePtr()->SetItemHotKey(SEASON3B::HOTKEY_W, Data->KeyQWE[1]+ITEM_POTION, byWLevel);
-		if( Data->KeyQWE[2] != 0xFF )	GFxProcess::GetInstancePtr()->SetItemHotKey(SEASON3B::HOTKEY_E, Data->KeyQWE[2]+ITEM_POTION, byELevel);
-	}
-#else //LDK_ADD_SCALEFORM
-#ifdef KJH_FIX_ITEMHOTKEYINFO_CASTING
-	if( Data->KeyQWE[0] != 0xFF ) {
-		g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_Q, Data->KeyQWE[0]+ITEM_POTION, byQLevel);
-	}
-
-	if( Data->KeyQWE[1] != 0xFF ) {
-		g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_W, Data->KeyQWE[1]+ITEM_POTION, byWLevel);
-	}
-
-	if( Data->KeyQWE[2] != 0xFF ) {
-		g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_E, Data->KeyQWE[2]+ITEM_POTION, byELevel);
-	}
-#else // KJH_FIX_ITEMHOTKEYINFO_CASTING
 	g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_Q, Data->KeyQWE[0]+ITEM_POTION, byQLevel);
 	g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_W, Data->KeyQWE[1]+ITEM_POTION, byWLevel);
 	g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_E, Data->KeyQWE[2]+ITEM_POTION, byELevel);
-#endif // KJH_FIX_ITEMHOTKEYINFO_CASTING
-#endif //LDK_ADD_SCALEFORM
 	
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	BYTE wChatListBoxSize = (Data->ChatLogBox >> 4) * 3;
 	BYTE wChatListBoxBackAlpha = Data->ChatLogBox & 0x0F;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	
-#ifdef LDK_ADD_SCALEFORM
-	//gfxui 사용시 기존 ui 사용 안함
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-#ifdef KJH_FIX_ITEMHOTKEYINFO_CASTING
-		if( Data->KeyR != 0xFF ) {
-			g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_R, Data->KeyR+ITEM_POTION, byRLevel);
-		}
-#else // KJH_FIX_ITEMHOTKEYINFO_CASTING
-		g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_R, Data->KeyR+ITEM_POTION, byRLevel);
-#endif // KJH_FIX_ITEMHOTKEYINFO_CASTING
-	}
-	else
-	{
-		if( Data->KeyR != 0xFF ) GFxProcess::GetInstancePtr()->SetItemHotKey(SEASON3B::HOTKEY_R, Data->KeyR+ITEM_POTION, byRLevel);
-	}
-#else //LDK_ADD_SCALEFORM
-#ifdef KJH_FIX_ITEMHOTKEYINFO_CASTING
-	if( Data->KeyR != 0xFF ) {
-		g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_R, Data->KeyR+ITEM_POTION, byRLevel);
-	}
-#else // KJH_FIX_ITEMHOTKEYINFO_CASTING
 	g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_R, Data->KeyR+ITEM_POTION, byRLevel);
-#endif // KJH_FIX_ITEMHOTKEYINFO_CASTING
-#endif //LDK_ADD_SCALEFORM
 }
 
 void ReceiveEventChipInfomation( BYTE* ReceiveBuffer )
@@ -10178,23 +10037,16 @@ void ReceiveEventChipInfomation( BYTE* ReceiveBuffer )
     LPPRECEIVE_EVENT_CHIP_INFO Data = (LPPRECEIVE_EVENT_CHIP_INFO)ReceiveBuffer;
 	
 	g_pNewUISystem->HideAll();
-
 	g_bEventChipDialogEnable = Data->m_byType+1;
-#ifdef ASG_FIX_LENA_REGISTRATION
 	g_shEventChipCount       = Data->m_nChipCount;
-#else	// ASG_FIX_LENA_REGISTRATION
-	g_shEventChipCount       = Data->m_shChipCount;
-#endif	// ASG_FIX_LENA_REGISTRATION
 	
-#ifdef PSW_GOLDBOWMAN		
 	if( g_bEventChipDialogEnable == EVENT_SCRATCH_TICKET )
 	{
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_GOLD_BOWMAN);
 		g_bEventChipDialogEnable = 0;
 	}	
-#endif //PSW_GOLDBOWMAN
 	
-#ifdef PSW_EVENT_LENA		
+
 	if( g_bEventChipDialogEnable == EVENT_LENA )
 	{
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_GOLD_BOWMAN_LENA);
@@ -10204,44 +10056,31 @@ void ReceiveEventChipInfomation( BYTE* ReceiveBuffer )
 			memcpy( g_shMutoNumber, Data->m_shMutoNum, sizeof( short )*3 );
 		}
 	}	
-#endif //PSW_EVENT_LENA
 
-#ifdef FRIEND_EVENT
-    g_bEventChipDialogEnable = EVENT_FRIEND;
-#endif// EVENT_FRIEND
-	
-#ifdef BLOODCASTLE_2ND_PATCH
 	if ( g_bEventChipDialogEnable==EVENT_SCRATCH_TICKET )
-#endif
 		
-#ifdef SCRATCH_TICKET
-		if ( g_bEventChipDialogEnable==EVENT_SCRATCH_TICKET )
-		{
-			ZeroMemory ( g_strGiftName, sizeof( char )*64 );
+
+	if ( g_bEventChipDialogEnable==EVENT_SCRATCH_TICKET )
+	{
+		ZeroMemory ( g_strGiftName, sizeof( char )*64 );
 			
-			ClearInput(FALSE);
-			InputTextMax[0] = 12;
-			InputNumber = 1;
-			InputEnable		= false;
-			GoldInputEnable = false;
-			InputGold		= 0;
-			StorageGoldFlag = 0;
-			g_bScratchTicket= true;
-		}
-#endif
+		ClearInput(FALSE);
+		InputTextMax[0] = 12;
+		InputNumber = 1;
+		InputEnable		= false;
+		GoldInputEnable = false;
+		InputGold		= 0;
+		StorageGoldFlag = 0;
+		g_bScratchTicket= true;
+	}
 
 }
 
 void ReceiveEventChip( BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_EVENT_CHIP Data = (LPPRECEIVE_EVENT_CHIP)ReceiveBuffer;
-#ifdef ASG_FIX_LENA_REGISTRATION
 	if( Data->m_unChipCount != 0xFFFFFFFF )
         g_shEventChipCount = Data->m_unChipCount;
-#else	// ASG_FIX_LENA_REGISTRATION
-    if( Data->m_shChipCount != 0xFFFF )
-        g_shEventChipCount = Data->m_shChipCount;
-#endif	// ASG_FIX_LENA_REGISTRATION
 }
 
 void ReceiveBuffState( BYTE* ReceiveBuffer )

@@ -70,10 +70,6 @@
 
 #include <ThemidaInclude.h>
 
-#if defined LDK_ADD_SCALEFORM
-#include "CGFxProcess.h"
-#endif //LDK_ADD_SCALEFORM
-
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #include "MultiLanguage.h"
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
@@ -681,16 +677,6 @@ void DestroyWindow()
 
 	CUIMng::Instance().Release();
 
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 1)
-	{
-		GFxProcess::GetInstancePtr()->GFxDestroy();
-		GFxProcess* temp = GFxProcess::GetInstancePtr();
- 		delete temp;
- 		temp = NULL;
-	}
-#endif //LDK_ADD_SCALEFORM
-
 #ifdef MOVIE_DIRECTSHOW
 	if(g_pMovieScene)
 	{
@@ -1112,23 +1098,6 @@ Pos_Wm_Move_MinimizedNotEnabled:
 				MouseY = 480;
 		}
 		break;
-
-#ifdef LDK_ADD_SCALEFORM
-	}
-	// Pass events to GFx
-	bool pbNoFurtherProcessing = false;
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 1)
-	{
-		GFxProcess::GetInstancePtr()->GFxProcessEvent(hwnd, msg, wParam, lParam, &pbNoFurtherProcessing);
-	}
-
-	if( pbNoFurtherProcessing )
-		return 0;
-
-	switch(msg)
-	{
-#endif //LDK_ADD_SCALEFORM
-
 	case WM_LBUTTONDOWN:
 		FAKE_CODE( Pos_LButtonDown);
 Pos_LButtonDown:
@@ -1806,16 +1775,7 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo )
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 {
-#ifdef LDK_ADD_SCALEFORM
-	GFxSystem gfxInit;
-#endif //LDK_ADD_SCALEFORM
-
 	MSG msg;
-
-#ifdef USE_CRT_DEBUG
-	//_CrtSetBreakAlloc(67839);
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
 
 	leaf::AttachExceptionHandler(ExceptionCallback);
 
@@ -2000,25 +1960,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,
 		GlobalText[0][0] ? GlobalText[0] : NULL);
 #endif //PBG_ADD_INGAMESHOP_FONT
-	// 텍스트 길이 계산을 위한 부분
+
 	setlocale( LC_ALL, "english");
 
 	CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
 
-	// 새로운 UI시스템 생성
 	g_pNewUISystem->Create();
-
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 1)
-	{
-		if(GFxProcess::GetInstancePtr()->GFxInit())
-		{
-			//error log
-		}
-		
-		GFxProcess::GetInstancePtr()->OnCreateDevice(WindowWidth, WindowHeight, 0, 0, WindowWidth, WindowHeight);
-	}
-#endif //LDK_ADD_SCALEFORM
 
 	if(m_MusicOnOff)
 	{

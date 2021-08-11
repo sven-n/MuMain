@@ -19,9 +19,6 @@
 #ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 #include "w_CursedTemple.h"
 #endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
-#ifdef LDK_ADD_SCALEFORM
-#include "CGFxProcess.h"
-#endif //LDK_ADD_SCALEFORM
 
 extern int DeleteIndex;
 extern int AppointStatus;
@@ -4016,14 +4013,7 @@ int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwC
 
 bool SEASON3B::CProgressMsgBox::Update()
 {
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		g_pMainFrame->UpdateItemHotKey();
-	}
-#else //LDK_ADD_SCALEFORM
 	g_pMainFrame->UpdateItemHotKey();
-#endif //LDK_ADD_SCALEFORM
 
 	DWORD dwTime = timeGetTime();
 	if(dwTime >= m_dwEndTime)
@@ -4299,15 +4289,7 @@ int SEASON3B::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMs
 
 bool SEASON3B::CCursedTempleProgressMsgBox::Update()
 {
-#ifdef LDK_ADD_SCALEFORM
-	//gfxui 사용시 기존 ui 사용 안함
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		g_pMainFrame->UpdateItemHotKey();
-	}
-#else //LDK_ADD_SCALEFORM
 	g_pMainFrame->UpdateItemHotKey();
-#endif //LDK_ADD_SCALEFORM
 	
 	DWORD dwTime = timeGetTime();
 	if(dwTime >= m_dwEndTime)

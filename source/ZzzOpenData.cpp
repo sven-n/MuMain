@@ -49,9 +49,7 @@
 #ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK
-#ifdef LDK_ADD_SCALEFORM
-#include "CGFxProcess.h"
-#endif //LDK_ADD_SCALEFORM
+
 
 ///////////////////////////////////////////
 extern BOOL g_bUseChatListBox;
@@ -5663,33 +5661,16 @@ void OpenMacro(char *FileName)
 	fclose(fp);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 스킬핫키 데이타 저장하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void SaveOptions()
 {
-#ifdef CSK_FIX_SKILLHOTKEY_PACKET
-
 	// 0 ~ 19 skill hotkey
 	BYTE options[30] = { 0x00, };
 
 	int iSkillType = -1;
 	for(int i=0; i<10; ++i)
 	{
-#ifdef LDK_ADD_SCALEFORM
-		//gfxui 사용시 기존 ui 사용 안함
-		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-		{
-			iSkillType = g_pMainFrame->GetSkillHotKey(i);
-		}
-		else 
-		{
-			iSkillType = GFxProcess::GetInstancePtr()->GetSkillHotKey( i == 0 ? 10 : i);
-		}
-#else //LDK_ADD_SCALEFORM
 		iSkillType = g_pMainFrame->GetSkillHotKey(i);
-#endif //LDK_ADD_SCALEFORM
+
 		int iIndex = i * 2;
 		if(iSkillType != -1)
 		{
@@ -5704,8 +5685,6 @@ void SaveOptions()
 		}
 	}
 
-	// 20
-	// 자동공격 On/Off.
 	if( g_pOption->IsAutoAttack() )
 	{
 		options[20] |= AUTOATTACK_ON;
@@ -5715,7 +5694,6 @@ void SaveOptions()
 		options[20] |= AUTOATTACK_OFF;
     }
 
-	// 귓속말 On/Off.
 	if(g_pOption->IsWhisperSound())
 	{
 		options[20] |= WHISPER_SOUND_ON;
@@ -5725,223 +5703,30 @@ void SaveOptions()
 		options[20] |= WHISPER_SOUND_OFF;
     }
 
-	//  랜더링 옵션.
 	if(g_pOption->IsSlideHelp() == false)
 	{
 		options[20] |= SLIDE_HELP_OFF;
     }
 
-	// 21 ~ 23
-	// q, w, e, r 아이템 단축키	
-#ifdef KJH_FIX_ITEMHOTKEYINFO_CASTING
-	int iItemType = 0;
-
-#ifdef LDK_ADD_SCALEFORM
-	//gfxui 사용시 기존 ui 사용 안함
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		iItemType = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_Q);
-	}
-	else 
-	{
-		iItemType = GFxProcess::GetInstancePtr()->GetItemHotKey(SEASON3B::HOTKEY_Q);
-	}
-#else //LDK_ADD_SCALEFORM
-	iItemType = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_Q);
-#endif //LDK_ADD_SCALEFORM
-	if( iItemType != -1 ) {
-		options[21] = static_cast<BYTE>((iItemType - ITEM_POTION) & 0xFF);
-	}
-	else {
-		options[21] = 0xFF;
-	}
-
-#ifdef LDK_ADD_SCALEFORM
-	//gfxui 사용시 기존 ui 사용 안함
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		iItemType = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_W);
-	}
-	else 
-	{
-		iItemType = GFxProcess::GetInstancePtr()->GetItemHotKey(SEASON3B::HOTKEY_W);
-	}
-#else //LDK_ADD_SCALEFORM
-	iItemType = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_W);
-#endif //LDK_ADD_SCALEFORM
-	if( iItemType != -1 ) {
-		options[22] = static_cast<BYTE>((iItemType - ITEM_POTION) & 0xFF);
-	}
-	else {
-		options[22] = 0xFF;
-	}
-
-#ifdef LDK_ADD_SCALEFORM
-	//gfxui 사용시 기존 ui 사용 안함
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		iItemType = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_E);
-	}
-	else 
-	{
-		iItemType = GFxProcess::GetInstancePtr()->GetItemHotKey(SEASON3B::HOTKEY_E);
-	}
-#else //LDK_ADD_SCALEFORM
-	iItemType = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_E);
-#endif //LDK_ADD_SCALEFORM
-	if( iItemType != -1 ) {
-		options[23] = static_cast<BYTE>((iItemType - ITEM_POTION) & 0xFF);
-	}
-	else {
-		options[23] = 0xFF;
-	}
-#else // KJH_FIX_ITEMHOTKEYINFO_CASTING
 	options[21] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_Q) - ITEM_POTION) & 0xFF);
 	options[22] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_W) - ITEM_POTION) & 0xFF);
 	options[23] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_E) - ITEM_POTION) & 0xFF);
-#endif // KJH_FIX_ITEMHOTKEYINFO_CASTING
 
-	// 24
 	BYTE wChatListBoxSize = g_pChatListBox->GetNumberOfLines(g_pChatListBox->GetCurrentMsgType()) / 3;
 	if (g_bUseChatListBox == FALSE) 
 		wChatListBoxSize = 0;
 	BYTE wChatListBoxBackAlpha = g_pChatListBox->GetBackAlpha() * 10;
 	options[24] = wChatListBoxSize << 4 | wChatListBoxBackAlpha;
-
-	// 25 ~ 29
-#ifdef KJH_FIX_ITEMHOTKEYINFO_CASTING
-#ifdef LDK_ADD_SCALEFORM
-	//gfxui 사용시 기존 ui 사용 안함
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		iItemType = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_R);
-	}
-	else 
-	{
-		iItemType = GFxProcess::GetInstancePtr()->GetItemHotKey(SEASON3B::HOTKEY_R);
-	}
-#else //LDK_ADD_SCALEFORM
-	iItemType = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_R);
-#endif //LDK_ADD_SCALEFORM
-	if( iItemType != -1 ) {
-		options[25] = (BYTE)((iItemType - ITEM_POTION) & 0xFF);
-	}
-	else {
-		options[25] = 0xFF;
-	}
-#else // KJH_FIX_ITEMHOTKEYINFO_CASTING
 	options[25] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_R) - ITEM_POTION) & 0xFF);
-#endif // KJH_FIX_ITEMHOTKEYINFO_CASTING
 
-#ifdef LDK_ADD_SCALEFORM
-	//gfxui 사용시 기존 ui 사용 안함
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		options[26] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_Q);
-		options[27] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_W);
-		options[28] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_E);
-		options[29] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_R);
-	}
-	else 
-	{
-		options[26] = GFxProcess::GetInstancePtr()->GetItemHotKeyLevel(SEASON3B::HOTKEY_Q);
-		options[27] = GFxProcess::GetInstancePtr()->GetItemHotKeyLevel(SEASON3B::HOTKEY_W);
-		options[28] = GFxProcess::GetInstancePtr()->GetItemHotKeyLevel(SEASON3B::HOTKEY_E);
-		options[29] = GFxProcess::GetInstancePtr()->GetItemHotKeyLevel(SEASON3B::HOTKEY_R);
-	}
-#else //LDK_ADD_SCALEFORM
+
 	options[26] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_Q);
 	options[27] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_W);
 	options[28] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_E);
 	options[29] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_R);
-#endif //LDK_ADD_SCALEFORM
 
-	//  데이터를 보낸다.
 	SendRequestHotKey (options);
-
-#else // CSK_FIX_SKILLHOTKEY_PACKET
-
-	// 0~9 : hotkey, 
-	// 10 : autoattack/trade, 
-	// 11~13 : qwe key item.
-	// 14 : chat
-	// 15 : r key item
-
-	BYTE options[20] = { 0x00, };
-	
-	int iSkillType = -1;
-	for(int i=0; i<10; ++i)
-	{
-		iSkillType = g_pMainFrame->GetSkillHotKey(i);
-		if(iSkillType != -1)
-		{
-			options[i] = CharacterAttribute->Skill[iSkillType];
-		}
-		else
-		{
-			options[i] = 0xff;
-		}
-	}
-
-    //  자동공격 On/Off.
-	if ( g_pOption->IsAutoAttack() )
-    {
-        options[10] |= AUTOATTACK_ON;
-    }
-    else
-    {
-        options[10] |= AUTOATTACK_OFF;
-    }
-
-    //  귓속말 On/Off.
-	if(g_pOption->IsWhisperSound())
-    {
-        options[10] |= WHISPER_SOUND_ON;
-    }
-    else
-    {
-        options[10] |= WHISPER_SOUND_OFF;
-    }
-
-    //  랜더링 옵션.
-	if(g_pOption->IsSlideHelp() == false)
-    {
-        options[10] |= SLIDE_HELP_OFF;
-    }
-
-	// q, w, e, r 아이템 단축키
-	options[11] = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_Q) - ITEM_POTION;
-	options[12] = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_W) - ITEM_POTION;
-	options[13] = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_E) - ITEM_POTION;
-
-	//  채팅창 설정
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-	BYTE wChatListBoxSize = g_pChatListBox->GetNumberOfLines(g_pChatListBox->GetCurrentMsgType()) / 3;
-#else // KJH_FIX_UI_CHAT_MESSAGE			// 정리할 때 지워야 하는 소스
-	BYTE wChatListBoxSize = g_pChatListBox->GetNumberOfLines() / 3;
-#endif // KJH_FIX_UI_CHAT_MESSAGE			// 정리할 때 지워야 하는 소스
-
-	if (g_bUseChatListBox == FALSE) wChatListBoxSize = 0;
-	BYTE wChatListBoxBackAlpha = g_pChatListBox->GetBackAlpha() * 10;
-
-	options[14] = wChatListBoxSize << 4 | wChatListBoxBackAlpha;
-
-	options[15] = g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_R) - ITEM_POTION;
-	options[16] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_Q);
-	options[17] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_W);
-	options[18] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_E);
-	options[19] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_R);
-
-	//  데이터를 보낸다.
-	SendRequestHotKey (options);
-
-#endif // CSK_FIX_SKILLHOTKEY_PACKET
-
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 계정입력받는 씬에 필요한 데이타 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void OpenLogoSceneData()
 {
@@ -5950,19 +5735,19 @@ void OpenLogoSceneData()
     gLoadData.OpenTexture(MODEL_LOGO+2,"Logo\\",GL_REPEAT, GL_LINEAR);
 #endif //PJH_NEW_SERVER_SELECT_MAP
 	//image
-	::LoadBitmap("Interface\\cha_bt.tga", BITMAP_LOG_IN);				// 서버그룹 버튼.
-	::LoadBitmap("Interface\\server_b2_all.tga", BITMAP_LOG_IN+1);		// 서버 버튼.
-	::LoadBitmap("Interface\\server_b2_loding.jpg", BITMAP_LOG_IN+2);	// 서버 혼잡 게이지.
-	::LoadBitmap("Interface\\server_deco_all.tga", BITMAP_LOG_IN+3);	// 서버그룹 버튼 장식.
-	::LoadBitmap("Interface\\server_menu_b_all.tga", BITMAP_LOG_IN+4);	// 메뉴 버튼.
-	::LoadBitmap("Interface\\server_credit_b_all.tga", BITMAP_LOG_IN+5);// 크레딧 버튼.
-	::LoadBitmap("Interface\\deco.tga", BITMAP_LOG_IN+6);				// 크레딧 버튼 장식.
-	::LoadBitmap("Interface\\login_back.tga", BITMAP_LOG_IN+7);		// 로그인 창 배경.
-	::LoadBitmap("Interface\\login_me.tga", BITMAP_LOG_IN+8);			// 로그인 창 입력 상자.
-	::LoadBitmap("Interface\\server_ex03.tga", BITMAP_LOG_IN+11, GL_NEAREST, GL_REPEAT);		// 서버 설명 배경 중앙.
-	::LoadBitmap("Interface\\server_ex01.tga", BITMAP_LOG_IN+12);		// 서버 설명 배경 상하.
-	::LoadBitmap("Interface\\server_ex02.jpg", BITMAP_LOG_IN+13, GL_NEAREST, GL_REPEAT);		// 서버 설명 배경 좌우.
-	::LoadBitmap("Interface\\cr_mu_lo.tga", BITMAP_LOG_IN+14, GL_LINEAR);// 크레딧 창 하단 뮤 로고.
+	::LoadBitmap("Interface\\cha_bt.tga", BITMAP_LOG_IN);
+	::LoadBitmap("Interface\\server_b2_all.tga", BITMAP_LOG_IN+1);
+	::LoadBitmap("Interface\\server_b2_loding.jpg", BITMAP_LOG_IN+2);
+	::LoadBitmap("Interface\\server_deco_all.tga", BITMAP_LOG_IN+3);
+	::LoadBitmap("Interface\\server_menu_b_all.tga", BITMAP_LOG_IN+4);
+	::LoadBitmap("Interface\\server_credit_b_all.tga", BITMAP_LOG_IN+5);
+	::LoadBitmap("Interface\\deco.tga", BITMAP_LOG_IN+6);
+	::LoadBitmap("Interface\\login_back.tga", BITMAP_LOG_IN+7);
+	::LoadBitmap("Interface\\login_me.tga", BITMAP_LOG_IN+8);
+	::LoadBitmap("Interface\\server_ex03.tga", BITMAP_LOG_IN+11, GL_NEAREST, GL_REPEAT);
+	::LoadBitmap("Interface\\server_ex01.tga", BITMAP_LOG_IN+12);
+	::LoadBitmap("Interface\\server_ex02.jpg", BITMAP_LOG_IN+13, GL_NEAREST, GL_REPEAT);
+	::LoadBitmap("Interface\\cr_mu_lo.tga", BITMAP_LOG_IN+14, GL_LINEAR);
 #ifdef MOVIE_DIRECTSHOW
 	::LoadBitmap("Interface\\movie_b_all.tga", BITMAP_LOG_IN+15);// 동영상 버튼.
 #endif	// MOVIE_DIRECTSHOW

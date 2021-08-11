@@ -1534,11 +1534,6 @@
     <ClCompile Include="source\CBTMessageBox.cpp" />
     <ClCompile Include="source\CComGem.cpp" />
     <ClCompile Include="source\CDirection.cpp" />
-    <ClCompile Include="source\CGFxFontConfigParser.cpp" />
-    <ClCompile Include="source\CGFxInfoPopup.cpp" />
-    <ClCompile Include="source\CGFxMainUi.cpp" />
-    <ClCompile Include="source\CGFxProcess.cpp" />
-    <ClCompile Include="source\CGFxSample.cpp" />
     <ClCompile Include="source\ChangeRingManager.cpp" />
     <ClCompile Include="source\CharacterManager.cpp" />
     <ClCompile Include="source\CharInfoBalloon.cpp" />
@@ -2016,11 +2011,6 @@
     <ClInclude Include="source\CBTMessageBox.h" />
     <ClInclude Include="source\CComGem.h" />
     <ClInclude Include="source\CDirection.h" />
-    <ClInclude Include="source\CGFxFontConfigParser.h" />
-    <ClInclude Include="source\CGFxInfoPopup.h" />
-    <ClInclude Include="source\CGFxMainUi.h" />
-    <ClInclude Include="source\CGFxProcess.h" />
-    <ClInclude Include="source\CGFxSample.h" />
     <ClInclude Include="source\ChangeRingManager.h" />
     <ClInclude Include="source\CharacterManager.h" />
     <ClInclude Include="source\CharInfoBalloon.h" />

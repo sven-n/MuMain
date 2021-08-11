@@ -465,20 +465,14 @@
 			//(!주의!) UI에 3D캐릭터 표현이 추가 되면 원래대로 되돌려야 되므로 정리하지 말 것.
 		#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
-		//#define LDK_ADD_SCALEFORM
 
-		//------------------------------------------------
-		// 4. 추가	
-
-		// Season 5 달토끼 이벤트							
+		// Season 5					
 		#define KJH_PBG_ADD_SEVEN_EVENT_2008					// 국내 상용화 7주년 이벤트	(달토끼)(2008.10.30) 
 		#define LJH_MOD_POSITION_OF_REGISTERED_LUCKY_COIN		// 행운의 동전 등록 제한 수가 2^31이 됨에 따라 동전이미지와 겹치는 현상 막기위해 수정(2010.02.16)							
 		#define YDG_MOD_SEPARATE_EFFECT_SKILLS					// 스킬 검사하는 이펙트 분리 (블러드 어택 등) (2009.08.10)
 		#define ASG_ADD_NEW_DIVIDE_STRING						// 새로운 문장 나누기 기능.(2009.06.08)
 		#define PBG_ADD_DISABLERENDER_BUFF						// 랜더안할 버프 이미지 처리(09.08.10)
 
-		//------------------------------------------------
-		// 5. 해외내부테섭 버그수정
 		#define LDK_FIX_CHARACTER_UNLIVE_MOUSE_LOCK				// 맵이동시 캐릭터 삭제후 이동 불가(09.10.29)
 		#define LDK_FIX_EMPIREGUARDIAN_UI_HOTKEY				// 제국 수호군npc ui창 열려있을때 캐릭창, 인벤창 안열리도록한다(09.10.28)
 		#define LDK_FIX_PETPOSITION_MULTIPLY_OWNERSCALE			// 캐릭터 선택창 에서 캐릭터 크기에 따라 펫위치 수정(09.10.28)
@@ -500,8 +494,6 @@
 	#endif	// SEASON5
 
 
-	//-----------------------------------------------------------------------------
-	// [ 부분 유료화 7차 ] 
 	#define ADD_TOTAL_CHARGE_7TH
 	#ifdef ADD_TOTAL_CHARGE_7TH
 		// - 양대근

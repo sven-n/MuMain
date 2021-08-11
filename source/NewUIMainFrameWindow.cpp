@@ -32,9 +32,6 @@
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#ifdef LDK_ADD_SCALEFORM
-#include "CGFxProcess.h"
-#endif //LDK_ADD_SCALEFORM
 
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
@@ -901,21 +898,10 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
 
 bool SEASON3B::CNewUIMainFrameWindow::UpdateKeyEvent()
 {
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		if(m_ItemHotKey.UpdateKeyEvent() == false)
-		{
-			return false;
-		}
-	}
-#else //LDK_ADD_SCALEFORM
 	if(m_ItemHotKey.UpdateKeyEvent() == false)
 	{
 		return false;
 	}
-#endif //LDK_ADD_SCALEFORM
-
 	return true;
 }
 
@@ -2845,22 +2831,11 @@ void SEASON3B::CNewUISkillList::ResetMouseLButton()
 
 void SEASON3B::CNewUISkillList::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
-#ifdef LDK_ADD_SCALEFORM
-	if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
-	{
-		if(pClass)
-		{
-			CNewUISkillList* pSkillList= (CNewUISkillList*)(pClass);
-			pSkillList->RenderSkillInfo();
-		}
-	}
-#else //LDK_ADD_SCALEFORM
 	if(pClass)
 	{
 		CNewUISkillList* pSkillList= (CNewUISkillList*)(pClass);
 		pSkillList->RenderSkillInfo();
 	}
-#endif //LDK_ADD_SCALEFORM
 }
 
 void SEASON3B::CNewUIMainFrameWindow::SetPreExp_Wide(__int64 dwPreExp)

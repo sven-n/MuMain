@@ -23,7 +23,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,int Level,int Option1,bool Link,bool Translate,int RenderType=0);
 #endif // CSK_REF_BACK_RENDERITEM
 
-
 void RenderCharacter(CHARACTER *c,OBJECT *o,int Select=0);
 void RenderCharactersClient();
 void RenderCharactersServer();
@@ -93,10 +92,6 @@ void RenderProtectGuildMark(CHARACTER * c);
 
 void MakeElfHelper(CHARACTER * c);
 int GetFenrirType(CHARACTER* c);
-
-///////////////////////////////////////////////////////////////////////////////
-// snake
-///////////////////////////////////////////////////////////////////////////////
 
 extern int       EquipmentLevelSet;
 extern bool      g_bAddDefense;

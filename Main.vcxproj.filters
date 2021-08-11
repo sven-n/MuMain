@@ -115,12 +115,6 @@
     <Filter Include="MU\time">
       <UniqueIdentifier>{5dbd88cd-af6b-4dfb-ae40-a22d53483be2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MU\GFx">
-      <UniqueIdentifier>{aef444d9-3318-4c2c-a7d6-c414f6dba1ba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MU\GFx\memberClass">
-      <UniqueIdentifier>{a0c62acb-b23d-4beb-813d-6c1c7b5398a9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Utilities">
       <UniqueIdentifier>{1a7667a9-0f3c-4e7e-b90e-24b53dc23a71}</UniqueIdentifier>
     </Filter>
@@ -1012,21 +1006,6 @@
     </ClCompile>
     <ClCompile Include="source\Time\Timer.cpp">
       <Filter>MU\time</Filter>
-    </ClCompile>
-    <ClCompile Include="source\CGFxFontConfigParser.cpp">
-      <Filter>MU\GFx</Filter>
-    </ClCompile>
-    <ClCompile Include="source\CGFxProcess.cpp">
-      <Filter>MU\GFx</Filter>
-    </ClCompile>
-    <ClCompile Include="source\CGFxInfoPopup.cpp">
-      <Filter>MU\GFx\memberClass</Filter>
-    </ClCompile>
-    <ClCompile Include="source\CGFxMainUi.cpp">
-      <Filter>MU\GFx\memberClass</Filter>
-    </ClCompile>
-    <ClCompile Include="source\CGFxSample.cpp">
-      <Filter>MU\GFx\memberClass</Filter>
     </ClCompile>
     <ClCompile Include="source\Utilities\DebugProfiling\Profiler.cpp">
       <Filter>Utilities\debugprofiling</Filter>
@@ -2019,21 +1998,6 @@
     </ClInclude>
     <ClInclude Include="source\Time\Timer.h">
       <Filter>MU\time</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CGFxFontConfigParser.h">
-      <Filter>MU\GFx</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CGFxProcess.h">
-      <Filter>MU\GFx</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CGFxInfoPopup.h">
-      <Filter>MU\GFx\memberClass</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CGFxMainUi.h">
-      <Filter>MU\GFx\memberClass</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CGFxSample.h">
-      <Filter>MU\GFx\memberClass</Filter>
     </ClInclude>
     <ClInclude Include="source\Utilities\DebugProfiling\Profiler.h">
       <Filter>Utilities\debugprofiling</Filter>
