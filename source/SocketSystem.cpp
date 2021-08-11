@@ -6,6 +6,7 @@
 #include "ZzzCharacter.h"
 #include "WSclient.h"
 #include "UIControls.h"
+#include "CharacterManager.h"
 
 #ifdef SOCKET_SYSTEM
 
@@ -190,7 +191,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
 		{
 			WORD wLevel;
 
-			if(IsMasterLevel(CharacterAttribute->Class) == true)
+			if(gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
 				wLevel = CharacterAttribute->Level + Master_Level_Data.nMLevel;
 			else
 				wLevel = CharacterAttribute->Level;
@@ -201,7 +202,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
 		{
 			WORD wLifeMax;
 
-			if(IsMasterLevel( Hero->Class ) == true )
+			if(gCharacterManager.IsMasterLevel( Hero->Class ) == true )
 				wLifeMax = Master_Level_Data.wMaxLife;
 			else
 				wLifeMax = CharacterAttribute->LifeMax;
@@ -211,7 +212,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
 	case 5:	// E: +최대마나/값
 		{
 			WORD wManaMax;
-			if(IsMasterLevel( Hero->Class ) == true )
+			if(gCharacterManager.IsMasterLevel( Hero->Class ) == true )
 				wManaMax = Master_Level_Data.wMaxMana;
 			else
 				wManaMax = CharacterAttribute->ManaMax;

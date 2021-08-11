@@ -8,6 +8,8 @@
 #include "NewUISystem.h"
 #include "wsclientinline.h"
 #include "ZzzInventory.h"
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 using namespace SEASON3B;
 
@@ -443,7 +445,7 @@ bool CNewUIPartyListWindow::SelectCharacterInPartyList( PARTY_t* pMember )
 		* 0이상 : SelectCharacter값
 	*/
 	
-    int HeroClass = GetBaseClass( Hero->Class );
+    int HeroClass = gCharacterManager.GetBaseClass( Hero->Class );
 	
 	//  (요정, 법사) 에 한해서 가능해진다.
 	if ( HeroClass==CLASS_ELF 

@@ -7,18 +7,17 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzInterface.h"
 #include "UIControls.h"
+#include "CharacterManager.h"
 
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 
 CCharInfoBalloon::CCharInfoBalloon() : m_pCharInfo(NULL)
 {
-
 }
 
 CCharInfoBalloon::~CCharInfoBalloon()
 {
-
 }
 
 void CCharInfoBalloon::Create(CHARACTER* pCharInfo)
@@ -121,5 +120,5 @@ void CCharInfoBalloon::SetInfo()
     case 128:	nText = 1300;	break;
     }
 	sprintf(m_szGuild, "(%s)", GlobalText[nText]);
-	sprintf(m_szClass, "%s %d", GetCharacterClassText(m_pCharInfo->Class), m_pCharInfo->Level);
+	sprintf(m_szClass, "%s %d", gCharacterManager.GetCharacterClassText(m_pCharInfo->Class), m_pCharInfo->Level);
 }

@@ -55,35 +55,25 @@
 #include "GMNewTown.h"
 #include "w_CursedTemple.h"
 #include "SummonSystem.h"
-
+#include "CharacterManager.h"
+#include "SkillManager.h"
 #include "GMSwampOfQuiet.h"
-
-// 맵 관련 include
-#ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
-#endif // PSW_ADD_MAPSYSTEM
-
-#ifdef LDK_ADD_NEW_PETPROCESS
 #include "w_PetProcess.h"
-#endif //LDK_ADD_NEW_PETPROCESS
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 #include "DuelMgr.h"
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
+
 #ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK
 
 //#include "GMEmpireGuardian1.h"
-//--------------------------------------------------------------------------------------------------------------------
 
 CHARACTER *CharactersClient;
 CHARACTER CharacterView;
 CHARACTER *Hero;
 Script_Skill MonsterSkill[MODEL_MONSTER_END];
 extern CKanturuDirection KanturuDirection;
-float g_fBoneSave[10][3][4];	// 임시 저장을 위한 공간
-//  사막 보스 ( 데스 나이트 빔 )몬스터를 위한 인덱스 데이터.
-//  본 위치 인덱스.
+float g_fBoneSave[10][3][4];
 static  char    vec_list[35] = 
 {
      5,  6, 33, 53, 35, 49, 50, 45, 46, 41, 
@@ -229,16 +219,7 @@ void SetPlayerStop(CHARACTER *c)
 			else
 				SetAction(&c->Object,PLAYER_STOP_RIDE_HORSE );
 		}
-        //  다크스피릿 마을에서 정지 상태.
-#ifdef PBG_FIX_DARKSPIRIT_ACTION
-		else if(c->SafeZone && c->m_PetInfo->m_dwPetType == PET_TYPE_DARK_SPIRIT
-#ifdef YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH
-			&& !gMapManager.InChaosCastle()
-#endif	// YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH
-			)
-#else //PBG_FIX_DARKSPIRIT_ACTION
-        else if ( c->SafeZone && c->Weapon[1].Type==MODEL_HELPER+5 )
-#endif //PBG_FIX_DARKSPIRIT_ACTION
+		else if(c->SafeZone && c->m_PetInfo->m_dwPetType == PET_TYPE_DARK_SPIRIT && !gMapManager.InChaosCastle())
         {
             SetAction ( &c->Object, PLAYER_DARKLORD_STAND );
         }
@@ -282,7 +263,7 @@ void SetPlayerStop(CHARACTER *c)
 				}
 				else
 				{	
-					if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+					if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 					{
 						SetAction( &c->Object, PLAYER_STOP_FLY_CROSSBOW );
 					}
@@ -307,9 +288,9 @@ void SetPlayerStop(CHARACTER *c)
                 //  무기가 없거나. 블러듴캐슬이 아닌 안전지대 일때
 			    if ( ( c->Weapon[0].Type==-1 && c->Weapon[1].Type==-1 ) || ( c->SafeZone && ( gMapManager.InBloodCastle() == false ) ) )
 				{
-					if (GetBaseClass(c->Class) == CLASS_ELF)
+					if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
 						SetAction(&c->Object, PLAYER_STOP_FEMALE);
-					else if (GetBaseClass(c->Class) == CLASS_SUMMONER && !gMapManager.InChaosCastle())	// 소환술사는 카오스캐슬에선 남자 애니메이션.
+					else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER && !gMapManager.InChaosCastle())	// 소환술사는 카오스캐슬에선 남자 애니메이션.
 						SetAction(&c->Object, PLAYER_STOP_SUMMONER);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 					else if (GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
@@ -361,19 +342,19 @@ void SetPlayerStop(CHARACTER *c)
 						else
 							SetAction(&c->Object,PLAYER_STOP_SCYTHE);
 					}
-					else if( GetEquipedBowType( c ) == BOWTYPE_BOW )
+					else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_BOW )
 					{
 						SetAction( &c->Object, PLAYER_STOP_BOW );
 					}
-					else if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+					else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 					{
 						SetAction( &c->Object, PLAYER_STOP_CROSSBOW );
 					}
 					else
 					{
-						if (GetBaseClass(c->Class) == CLASS_ELF)
+						if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
 							SetAction(&c->Object, PLAYER_STOP_FEMALE);
-						else if (GetBaseClass(c->Class) == CLASS_SUMMONER)
+						else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER)
 							SetAction(&c->Object, PLAYER_STOP_SUMMONER);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 						else if (GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
@@ -441,7 +422,7 @@ void SetPlayerWalk(CHARACTER *c)
 	else
 	if(!c->SafeZone && c->Run < 40)
 	{
-		if (GetBaseClass(c->Class) == CLASS_DARK || GetBaseClass(c->Class) == CLASS_DARK_LORD 
+		if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
 			|| GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -605,7 +586,7 @@ void SetPlayerWalk(CHARACTER *c)
 				!c->SafeZone && c->Wing.Type!=-1)
 			{
 #ifdef ADD_SOCKET_ITEM
-				if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )	
+				if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )	
 #else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 				if( (c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) ||
 					(c->Weapon[0].Type>=MODEL_BOW+16 && c->Weapon[0].Type<MODEL_BOW+17) || 
@@ -630,9 +611,9 @@ void SetPlayerWalk(CHARACTER *c)
 						SetAction(&c->Object,PLAYER_RUN);
 					else
 					{
-     					if(!IsFemale(c->Class))
+     					if(!gCharacterManager.IsFemale(c->Class))
 							SetAction(&c->Object,PLAYER_WALK_MALE);
-						else if (GetBaseClass(c->Class) == CLASS_SUMMONER && gMapManager.InChaosCastle())
+						else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER && gMapManager.InChaosCastle())
 							SetAction(&c->Object,PLAYER_WALK_MALE);
 						else
 							SetAction(&c->Object,PLAYER_WALK_FEMALE);
@@ -673,18 +654,18 @@ void SetPlayerWalk(CHARACTER *c)
         				else if(c->Weapon[0].Type>=MODEL_SPEAR && c->Weapon[0].Type<MODEL_SPEAR+MAX_ITEM_INDEX)
 							SetAction(&c->Object,PLAYER_WALK_SCYTHE);
 
-						else if( GetEquipedBowType( c ) == BOWTYPE_BOW )
+						else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_BOW )
 						{
 							SetAction( &c->Object, PLAYER_WALK_BOW);
 						}
 						// 석궁
-						else if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+						else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 						{
 							SetAction( &c->Object, PLAYER_WALK_CROSSBOW);
 						}
 						else
 						{
-         					if(!IsFemale(c->Class))
+         					if(!gCharacterManager.IsFemale(c->Class))
 								SetAction(&c->Object,PLAYER_WALK_MALE);
 							else
 								SetAction(&c->Object,PLAYER_WALK_FEMALE);
@@ -733,11 +714,11 @@ void SetPlayerWalk(CHARACTER *c)
 						{
 							SetAction(&c->Object,PLAYER_RUN_SPEAR);
 						}
-						else if( GetEquipedBowType( c ) == BOWTYPE_BOW )
+						else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_BOW )
 						{
 							SetAction( &c->Object, PLAYER_RUN_BOW );
 						}
-						else if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+						else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 						{
 							SetAction( &c->Object, PLAYER_RUN_CROSSBOW );
 						}
@@ -757,7 +738,7 @@ void SetPlayerWalk(CHARACTER *c)
 	PlayMonsterSound(o);
     if(o->Type == MODEL_MONSTER01+27)
      	PlayBuffer(SOUND_BONE2,o);
-    else if ( GetBaseClass(c->Class)==CLASS_DARK_LORD && c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )
+    else if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD && c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )
     {
 		PlayBuffer ( SOUND_RUN_DARK_HORSE_1+rand()%3, o );
     }
@@ -820,26 +801,18 @@ void SetAttackSpeed()
    		Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.25f + AttackSpeed1;
 	}
 
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD1].PlaySpeed = 0.30f + AttackSpeed1; // 내려찍기
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD2].PlaySpeed = 0.30f + AttackSpeed1; // 찌르기
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD3].PlaySpeed = 0.27f + AttackSpeed1; // 올려치기
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD4].PlaySpeed = 0.30f + AttackSpeed1; // 돌려치기
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD5].PlaySpeed = 0.24f + AttackSpeed1; // 베기
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL ].PlaySpeed = 0.24f + AttackSpeed1; // 회오리베기
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL_UNI   ].PlaySpeed = 0.24f + AttackSpeed1;// 회오리베기
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL_DINO  ].PlaySpeed = 0.24f + AttackSpeed1;// 회오리베기
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL_FENRIR].PlaySpeed = 0.24f + AttackSpeed1;// 회오리베기
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
+    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD1].PlaySpeed = 0.30f + AttackSpeed1;
+    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD2].PlaySpeed = 0.30f + AttackSpeed1;
+    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD3].PlaySpeed = 0.27f + AttackSpeed1;
+    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD4].PlaySpeed = 0.30f + AttackSpeed1;
+    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD5].PlaySpeed = 0.24f + AttackSpeed1;
+    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL ].PlaySpeed = 0.24f + AttackSpeed1;
+	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_ONETOONE].PlaySpeed = 0.25f + AttackSpeed1;
+    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SPEAR].PlaySpeed = 0.30f + AttackSpeed1;
+	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_RIDER].PlaySpeed      = 0.3f + AttackSpeed1;	
+	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_RIDER_FLY].PlaySpeed  = 0.3f + AttackSpeed1;
 
-	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_ONETOONE].PlaySpeed = 0.25f + AttackSpeed1;	// 블로우
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SPEAR].PlaySpeed = 0.30f + AttackSpeed1;	// 창찌르기
-
-	// 탈 것 탄 상태
-	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_RIDER].PlaySpeed      = 0.3f + AttackSpeed1;	// 스턴, 스턴제거, 투명, 투명해제, 마나증가, 보조마법 일시제거, 레이드슛	
-	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_RIDER_FLY].PlaySpeed  = 0.3f + AttackSpeed1;	// 스턴, 스턴제거, 투명, 투명해제, 마나증가, 보조마법 일시제거, 레이드슛
-
-	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_TWO_HAND_SWORD_TWO].PlaySpeed = 0.25f + AttackSpeed1;	// 파워슬래쉬
+	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_TWO_HAND_SWORD_TWO].PlaySpeed = 0.25f + AttackSpeed1;
 
 	for(int i=PLAYER_ATTACK_BOW;i<=PLAYER_ATTACK_FLY_CROSSBOW;i++)
 		Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.30f + AttackSpeed1;
@@ -851,11 +824,11 @@ void SetAttackSpeed()
 	for(int i=PLAYER_SKILL_HAND1; i<=PLAYER_SKILL_WEAPON2; i++)
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.29f + MagicSpeed2;
 
-	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_TELEPORT].PlaySpeed = 0.30f + MagicSpeed2; // 순간이동
-	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_FLASH   ].PlaySpeed = 0.40f + MagicSpeed2; // 아쿠아플래쉬
-	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_INFERNO ].PlaySpeed = 0.60f + MagicSpeed2; // 인페르노
-	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_HELL    ].PlaySpeed = 0.50f + MagicSpeed2; // 헬파이어
-	Models[MODEL_PLAYER].Actions[PLAYER_RIDE_SKILL    ].PlaySpeed = 0.30f + MagicSpeed2; // 탈 것 탄 상태에서 쓰는 스킬
+	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_TELEPORT].PlaySpeed = 0.30f + MagicSpeed2;
+	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_FLASH   ].PlaySpeed = 0.40f + MagicSpeed2;
+	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_INFERNO ].PlaySpeed = 0.60f + MagicSpeed2;
+	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_HELL    ].PlaySpeed = 0.50f + MagicSpeed2;
+	Models[MODEL_PLAYER].Actions[PLAYER_RIDE_SKILL    ].PlaySpeed = 0.30f + MagicSpeed2;
 
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_HELL_BEGIN].PlaySpeed			= 0.50f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_STRIKE].PlaySpeed            = 0.25f + AttackSpeed1;
@@ -880,72 +853,46 @@ void SetAttackSpeed()
 	    Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.30f + AttackSpeed1;
 	}
 
-	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_ONE_FLASH].PlaySpeed = 0.4f + AttackSpeed1;	// 기마검 일섬공격
-	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_RUSH].PlaySpeed		= 0.3f + AttackSpeed1;			// 기사 돌격 스킬.
+	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_ONE_FLASH].PlaySpeed = 0.4f + AttackSpeed1;
+	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_RUSH].PlaySpeed		= 0.3f + AttackSpeed1;
 	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_DEATH_CANNON].PlaySpeed = 0.2f + AttackSpeed1;
 	
-	// 슬립
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_SLEEP].PlaySpeed			= 0.3f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_SLEEP_UNI].PlaySpeed		= 0.3f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_SLEEP_DINO].PlaySpeed		= 0.3f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_SLEEP_FENRIR].PlaySpeed	= 0.3f + MagicSpeed2;
 
-	// 라이트닝 오브
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_LIGHTNING_ORB].PlaySpeed			= 0.4f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_LIGHTNING_ORB_UNI].PlaySpeed		= 0.25f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_LIGHTNING_ORB_DINO].PlaySpeed		= 0.25f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_LIGHTNING_ORB_FENRIR].PlaySpeed	= 0.25f + MagicSpeed2;
 
-	// 체인라이트닝
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_CHAIN_LIGHTNING].PlaySpeed		= 0.25f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_CHAIN_LIGHTNING_UNI].PlaySpeed	= 0.15f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_CHAIN_LIGHTNING_DINO].PlaySpeed	= 0.15f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR].PlaySpeed = 0.15f + MagicSpeed2;
 
-	// 드레인라이프
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_DRAIN_LIFE].PlaySpeed			= 0.25f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_DRAIN_LIFE_UNI].PlaySpeed		= 0.25f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_DRAIN_LIFE_DINO].PlaySpeed	= 0.25f + MagicSpeed2;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_DRAIN_LIFE_FENRIR].PlaySpeed	= 0.25f + MagicSpeed2;
 
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
-	// 기간틱스톰
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_GIGANTICSTORM].PlaySpeed = 0.55f + MagicSpeed1;
-	// 프레임스트라이크
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_FLAMESTRIKE].PlaySpeed = 0.69f + MagicSpeed2;
-#endif // YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_GIGANTICSTORM_UNI].PlaySpeed		= 0.55f + MagicSpeed1;
-	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_GIGANTICSTORM_DINO].PlaySpeed		= 0.55f + MagicSpeed1;
-	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_GIGANTICSTORM_FENRIR].PlaySpeed	= 0.55f + MagicSpeed1;
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
-	// 라이트닝쇼크
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_LIGHTNING_SHOCK].PlaySpeed = 0.35f + MagicSpeed2;
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
 
-	// 셔먼
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_SUMMON].PlaySpeed			= 0.25f;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_SUMMON_UNI].PlaySpeed		= 0.25f;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_SUMMON_DINO].PlaySpeed	= 0.25f;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_SUMMON_FENRIR].PlaySpeed	= 0.25f;
 	
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-	// 파괴의 일격
+
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_BLOW_OF_DESTRUCTION].PlaySpeed = 0.3f;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-	// 회복
 	Models[MODEL_PLAYER].Actions[PLAYER_RECOVER_SKILL].PlaySpeed = 0.33f;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER		// 마력증대
-	// 마력증대
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_SWELL_OF_MP].PlaySpeed = 0.2f;		
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 
-	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_FURY_STRIKE].PlaySpeed = 0.38f;		// 분노의일격
-    Models[MODEL_PLAYER].Actions[PLAYER_SKILL_VITALITY].PlaySpeed = 0.34f;					// 스웰라이프
+	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_FURY_STRIKE].PlaySpeed = 0.38f;
+    Models[MODEL_PLAYER].Actions[PLAYER_SKILL_VITALITY].PlaySpeed = 0.34f;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_HELL_START].PlaySpeed = 0.30f;
 	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_TELEPORT].PlaySpeed = 0.28f;
 	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_RIDE_TELEPORT].PlaySpeed = 0.3f;
@@ -978,77 +925,32 @@ void SetPlayerHighBowAttack ( CHARACTER* c )
 		SetAttackSpeed();
 		if( ( c->Helper.Type==MODEL_HELPER+2 || c->Helper.Type==MODEL_HELPER+3 ) && !c->SafeZone)
 		{
-#ifdef ADD_SOCKET_ITEM
-			// 활
-			if( GetEquipedBowType( c ) == BOWTYPE_BOW )
+			if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_BOW )
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_RIDE_BOW_UP );
 			}
 			// 석궁
-			else if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+			else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_RIDE_CROSSBOW_UP );
 			}
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-			if( (c->Weapon[1].Type>=MODEL_BOW && c->Weapon[1].Type<MODEL_BOW+7 ) || c->Weapon[1].Type==MODEL_BOW+17
-				|| c->Weapon[1].Type==MODEL_BOW+20 
-				|| c->Weapon[1].Type==MODEL_BOW+21
-				|| c->Weapon[1].Type==MODEL_BOW+22
-				)
-			{
-				SetAction ( &c->Object, PLAYER_ATTACK_RIDE_BOW_UP );
-			}
-			//. 석궁
-			else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) ||
-					(c->Weapon[0].Type>=MODEL_BOW+16 && c->Weapon[0].Type<MODEL_BOW+17)|| 
-				    (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
-			{
-				SetAction ( &c->Object, PLAYER_ATTACK_RIDE_CROSSBOW_UP );
-			}
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 		}
 		else
 		{
-#ifdef ADD_SOCKET_ITEM
-			// 활
-			if( GetEquipedBowType( c ) == BOWTYPE_BOW )
+			if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_BOW )
 			{
 				if ( c->Wing.Type!=-1 )
 		         	SetAction( &c->Object, PLAYER_ATTACK_FLY_BOW_UP );
 				else
 				    SetAction( &c->Object, PLAYER_ATTACK_BOW_UP );
 			}
-			// 석궁
-			else if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+			else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 			{
 				if ( c->Wing.Type!=-1 )
 		         	SetAction( &c->Object, PLAYER_ATTACK_FLY_CROSSBOW_UP );
 				else
       				SetAction( &c->Object, PLAYER_ATTACK_CROSSBOW_UP );
 			}
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-			if( ( c->Weapon[1].Type>=MODEL_BOW && c->Weapon[1].Type<MODEL_BOW+7  ) || c->Weapon[1].Type==MODEL_BOW+17
-				|| c->Weapon[1].Type==MODEL_BOW+20 
-				|| c->Weapon[1].Type==MODEL_BOW+21
-				|| c->Weapon[1].Type==MODEL_BOW+22
-				)
-			{
-        		if ( c->Wing.Type!=-1 )
-		         	SetAction ( &c->Object, PLAYER_ATTACK_FLY_BOW_UP );
-				else
-				    SetAction ( &c->Object, PLAYER_ATTACK_BOW_UP );
-			}
-			//. 석궁
-			else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) ||
-					(c->Weapon[0].Type>=MODEL_BOW+16 && c->Weapon[0].Type<MODEL_BOW+17)||
-					(c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
-			{
-        		if ( c->Wing.Type!=-1 )
-		         	SetAction ( &c->Object, PLAYER_ATTACK_FLY_CROSSBOW_UP );
-				else
-      				SetAction ( &c->Object, PLAYER_ATTACK_CROSSBOW_UP );
-			}
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 		}
 	}
 	c->SwordCount++;
@@ -1061,54 +963,35 @@ void SetPlayerAttack(CHARACTER *c)
 	{
 		SetAttackSpeed();
 
-		//^ 펜릴 캐릭터 에니메이션 설정(공격 관련)
 		if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)
 		{
 			if(c->Weapon[0].Type>=MODEL_SPEAR && c->Weapon[0].Type<MODEL_SPEAR+5)
-				SetAction(&c->Object, PLAYER_FENRIR_ATTACK_SPEAR);	// 창공격
-#ifdef ADD_SOCKET_ITEM
-			// 활
-			else if( GetEquipedBowType( c ) == BOWTYPE_BOW )
+				SetAction(&c->Object, PLAYER_FENRIR_ATTACK_SPEAR);
+			else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_BOW )
 			{
-				SetAction( &c->Object, PLAYER_FENRIR_ATTACK_BOW );		// 활공격 
+				SetAction( &c->Object, PLAYER_FENRIR_ATTACK_BOW );
 			}
-			// 석궁
-			else if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+			else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 			{
 				SetAction( &c->Object, PLAYER_FENRIR_ATTACK_CROSSBOW );	//석궁공격
 			}
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-			else if( (c->Weapon[1].Type>=MODEL_BOW && c->Weapon[1].Type<MODEL_BOW+7 ) || c->Weapon[1].Type==MODEL_BOW+17
-				|| c->Weapon[1].Type==MODEL_BOW+20 
-				|| c->Weapon[1].Type == MODEL_BOW+21
-				|| c->Weapon[1].Type == MODEL_BOW+22
-				)
-			{
-				SetAction(&c->Object,PLAYER_FENRIR_ATTACK_BOW);	// 활공격 
-			}
-			//. 석궁
-			else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) ||
-					(c->Weapon[0].Type>=MODEL_BOW+16 && c->Weapon[0].Type<MODEL_BOW+17)|| 
-				    (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
-				SetAction(&c->Object,PLAYER_FENRIR_ATTACK_CROSSBOW);	//석궁공격
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 			else
 			{
-				if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)	// 양손무기
+				if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
 					SetAction(&c->Object, PLAYER_FENRIR_ATTACK_TWO_SWORD);
-				else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1) // 왼손 무기
+				else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
 					SetAction(&c->Object, PLAYER_FENRIR_ATTACK_ONE_SWORD);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 				else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1 && (GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 					SetAction(&c->Object, PLAYER_RAGE_FENRIR_ATTACK_RIGHT);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
-				else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1) // 오른손 무기
+				else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
 					SetAction(&c->Object, PLAYER_FENRIR_ATTACK_ONE_SWORD);
-				else	// 맨손
+				else
 					SetAction(&c->Object, PLAYER_FENRIR_ATTACK);
 			}
 
-			if(GetBaseClass(c->Class) == CLASS_DARK_LORD)
+			if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
 			{
 				SetAction( &c->Object, PLAYER_FENRIR_ATTACK_DARKLORD_SWORD);
 			}
@@ -1123,33 +1006,14 @@ void SetPlayerAttack(CHARACTER *c)
 				SetAction(&c->Object,PLAYER_ATTACK_RIDE_SPEAR);
 			else if(c->Weapon[0].Type>=MODEL_SPEAR+5 && c->Weapon[0].Type<MODEL_SPEAR+MAX_ITEM_INDEX)
 				SetAction(&c->Object,PLAYER_ATTACK_RIDE_SCYTHE);
-#ifdef ADD_SOCKET_ITEM
-			// 활
-			else if( GetEquipedBowType( c ) == BOWTYPE_BOW )
+			else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_BOW )
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_RIDE_BOW );
 			}
-			// 석궁
-			else if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+			else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_RIDE_CROSSBOW );
 			}
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-			//. 활
-			else if( (c->Weapon[1].Type>=MODEL_BOW && c->Weapon[1].Type<MODEL_BOW+7 ) || c->Weapon[1].Type==MODEL_BOW+17
-				|| c->Weapon[1].Type==MODEL_BOW+20 
-				|| c->Weapon[1].Type == MODEL_BOW+21
-				|| c->Weapon[1].Type == MODEL_BOW+22
-				)
-			{
-				SetAction(&c->Object,PLAYER_ATTACK_RIDE_BOW);
-			}
-			//. 석궁
-			else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) ||
-					(c->Weapon[0].Type>=MODEL_BOW+16 && c->Weapon[0].Type<MODEL_BOW+17)|| 
-				    (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
-				SetAction(&c->Object,PLAYER_ATTACK_RIDE_CROSSBOW);
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 			else
 			{
 				if(c->Weapon[0].Type == -1)
@@ -1229,55 +1093,25 @@ void SetPlayerAttack(CHARACTER *c)
 					else
 						SetAction(&c->Object,PLAYER_SKILL_WEAPON1+rand()%2);
 				}
-                //  창. ( 찌르는 애니메이션 ).
 				else if(c->Weapon[0].Type==MODEL_SPEAR+1 || c->Weapon[0].Type==MODEL_SPEAR+2)
 					SetAction(&c->Object,PLAYER_ATTACK_SPEAR1);
-                //  창. ( 휘두르기 애니메이션 ).
 				else if(c->Weapon[0].Type>=MODEL_SPEAR && c->Weapon[0].Type<MODEL_SPEAR+MAX_ITEM_INDEX)
 					SetAction(&c->Object,PLAYER_ATTACK_SCYTHE1+c->SwordCount%3);
-#ifdef ADD_SOCKET_ITEM
-				// 활
-				else if( GetEquipedBowType( c ) == BOWTYPE_BOW )
+				else if(gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_BOW )
 				{
 					if(c->Wing.Type!=-1)
 		         		SetAction(&c->Object,PLAYER_ATTACK_FLY_BOW);
 					else
 				    	SetAction(&c->Object,PLAYER_ATTACK_BOW);
 				}
-				// 석궁
-				else if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+				else if(gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 				{
 					if(c->Wing.Type!=-1)
 		         		SetAction(&c->Object,PLAYER_ATTACK_FLY_CROSSBOW);
 					else
       					SetAction(&c->Object,PLAYER_ATTACK_CROSSBOW);
 				}
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-                //  활.
-				else if( ( c->Weapon[1].Type>=MODEL_BOW && c->Weapon[1].Type<MODEL_BOW+7  ) || c->Weapon[1].Type==MODEL_BOW+17
-					|| c->Weapon[1].Type==MODEL_BOW+20 
-					|| c->Weapon[1].Type == MODEL_BOW+21
-					|| c->Weapon[1].Type == MODEL_BOW+22
-					)
-				{
-        			if(c->Wing.Type!=-1)
-		         		SetAction(&c->Object,PLAYER_ATTACK_FLY_BOW);
-					else
-				    	SetAction(&c->Object,PLAYER_ATTACK_BOW);
-				}
-				//. 석궁
-				else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) ||
-						(c->Weapon[0].Type>=MODEL_BOW+16 && c->Weapon[0].Type<MODEL_BOW+17)||
-					    (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
-				{
-        			if(c->Wing.Type!=-1)
-		         		SetAction(&c->Object,PLAYER_ATTACK_FLY_CROSSBOW);
-					else
-      					SetAction(&c->Object,PLAYER_ATTACK_CROSSBOW);
-				}
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 				else 
-                    //  주먹 애니메이션.
 					SetAction(&c->Object,PLAYER_ATTACK_FIST);
 			}
 		}
@@ -1327,9 +1161,7 @@ void SetPlayerAttack(CHARACTER *c)
 			if( SEASON3B::GMNewTown::SetCurrentActionMonster(c,o)==true ) Success = false;
 			if( SEASON3C::GMSwampOfQuiet::SetCurrentActionMonster(c,o)==true ) Success = false;
 
-#ifdef PSW_ADD_MAPSYSTEM
 			if( TheMapProcess().SetCurrentActionMonster( c, o ) == true ) Success = false;
-#endif //PSW_ADD_MAPSYSTEM
 
             if ( Success )
             {
@@ -1342,9 +1174,9 @@ void SetPlayerAttack(CHARACTER *c)
 		}
 	}
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-	if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE);	// 로그인화면에서는 공격사운드가 나오면 안된다
+	if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE);
 #else //PJH_NEW_SERVER_SELECT_MAP
-	if (World == WD_77NEW_LOGIN_SCENE);	// 로그인화면에서는 공격사운드가 나오면 안된다
+	if (World == WD_77NEW_LOGIN_SCENE);
 #endif //PJH_NEW_SERVER_SELECT_MAP
 	else
 	if(c->Object.AnimationFrame==0.f)
@@ -1367,11 +1199,11 @@ void SetPlayerAttack(CHARACTER *c)
 		}
 		else
 		{
-			if( GetEquipedBowType( c ) == BOWTYPE_BOW )
+			if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_BOW )
 			{
 				PlayBuffer( SOUND_BOW01, o );
 			}
-			else if( GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
+			else if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )
 			{
 				PlayBuffer( SOUND_CROSSBOW01, o );
 			}
@@ -1403,7 +1235,7 @@ void SetPlayerMagic(CHARACTER *c)
 		}
 		else
 		{
-			if(IsFemale(c->Class))
+			if(gCharacterManager.IsFemale(c->Class))
 				SetAction(o,PLAYER_SKILL_ELF1);
       		else
 				SetAction(o,PLAYER_SKILL_HAND1+rand()%2);
@@ -1494,9 +1326,9 @@ void SetPlayerShock(CHARACTER *c,int Hit)
 			}
 			else
 			{
-     			if(!IsFemale(c->Class))
+     			if(!gCharacterManager.IsFemale(c->Class))
                 {
-                    if ( GetBaseClass(c->Class)==CLASS_DARK_LORD && rand()%5 )
+                    if (gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD && rand()%5 )
                         PlayBuffer ( SOUND_DARKLORD_PAIN, o );
                     else
     				    PlayBuffer(SOUND_HUMAN_SCREAM01+rand()%3,o);
@@ -1630,9 +1462,9 @@ void SetPlayerDie(CHARACTER *c)
 		    }
 		    else
 		    {
-			    if(!IsFemale(c->Class))
+			    if(!gCharacterManager.IsFemale(c->Class))
                 {
-                    if ( GetBaseClass(c->Class)==CLASS_DARK_LORD )
+                    if (gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD )
              		    PlayBuffer ( SOUND_DARKLORD_DEAD, o );
                     else
              		    PlayBuffer(SOUND_HUMAN_SCREAM04,o);
@@ -1673,7 +1505,6 @@ void AttackEffect(CHARACTER *c)
 	Vector(0.f,0.f,0.f,p);
 	Vector(1.f,1.f,1.f,Light);
 
-    //  헬라스 몬스터 공격 효과.
     if ( gMapManager.InHellas() )
     {
         CHARACTER *tc = NULL;
@@ -1685,7 +1516,6 @@ void AttackEffect(CHARACTER *c)
             to = &tc->Object;
         }
         
-        //  헬라스 몬스터 공격 효과
         if ( AttackEffect_HellasMonster( c, tc, o, to, b )==true )
             return;
     }
@@ -1695,10 +1525,8 @@ void AttackEffect(CHARACTER *c)
         return;
 	if ( M33Aida::AttackEffectAidaMonster(c, o, b)==true )
 		return;
-#ifdef CRYINGWOLF_2NDMVP
 	if ( M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(c, o, b)==true )
 		return;
-#endif // CRYINGWOLF_2NDMVP
 	if(M37Kanturu1st::AttackEffectKanturu1stMonster(c, o, b) == true)
 		return;
 	if(M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(c, o, b) == true)
@@ -1773,8 +1601,8 @@ void AttackEffect(CHARACTER *c)
 #ifdef LOREN_RAVINE_EVENT
 	case 301:
 #endif
-    case 71://메가크러스트
-	case 74://메가크러스트2
+    case 71:
+	case 74:
         if(c->Object.CurrentAction==MONSTER01_ATTACK1 || c->Object.CurrentAction==MONSTER01_ATTACK2)
         {
             if(c->AttackTime==5)
@@ -1784,11 +1612,11 @@ void AttackEffect(CHARACTER *c)
             }
         }
         break;
-    case 72://이카루스.
+    case 72:
 		if( ( c->Skill) == AT_SKILL_BOSS)
 		{
 			if(c->AttackTime == 14)
-			{	// 지역공격
+			{
 				vec3_t Angle = { 0.0f, 0.0f, 0.0f};
 				int iCount = 36;
 
@@ -1806,8 +1634,8 @@ void AttackEffect(CHARACTER *c)
 			}
 		}
         break;
-    case 73://흑룡.
-	case 75://흑룡2
+    case 73:
+	case 75:
         if(c->Object.CurrentAction==MONSTER01_ATTACK1)
         {
             if(c->AttackTime==11)
@@ -1853,11 +1681,11 @@ void AttackEffect(CHARACTER *c)
         }
 
         break;
-	case 77://불사조공격
+	case 77:
 		if( ( c->Skill) == AT_SKILL_BOSS)
 		{
 			if(c->AttackTime == 2 || c->AttackTime == 6)
-			{	// 지역공격
+			{
 				vec3_t Angle = { 0.0f, 0.0f, 0.0f};
 				int iCount = 40;
 				for ( i = 0; i < iCount; ++i)
@@ -1874,8 +1702,8 @@ void AttackEffect(CHARACTER *c)
 			}
 		}
 		break;
-	case 63://데쓰빔나이트
-	case 61://빔나이트
+	case 63:
+	case 61:
 		if(c->MonsterIndex == 63)
 		{
 			if(c->AttackTime == 1)
@@ -1910,7 +1738,7 @@ void AttackEffect(CHARACTER *c)
 			}
 		}
 		break;
-	case 66://저주받은 왕
+	case 66:
 		if( ( c->Skill) == AT_SKILL_BOSS)
 		{
 			if(c->AttackTime == 1)
@@ -1919,9 +1747,9 @@ void AttackEffect(CHARACTER *c)
 			}
 		}
 		break;
-	case 54://  솔져
-	case 57://  아이언휠
-    case 151:// 소환된 솔져
+	case 54:
+	case 57:
+    case 151:
 		if(c->AttackTime == 1)
 		{
 			Vector(60.f,-110.f,0.f,p);
@@ -1938,9 +1766,9 @@ void AttackEffect(CHARACTER *c)
 			}
 		}
 		break;
-	case 53://지하제국
-	case 58://탄타로스
-	case 59://
+	case 53:
+	case 58:
+	case 59:
 		if(c->AttackTime == 1)
 		{
 			CreateInferno(o->Position);
@@ -2393,18 +2221,15 @@ void AttackEffect(CHARACTER *c)
 bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
 {
 
-	if(pCharacter->MonsterIndex == 364)	// 마야 일 때 만 예외 처리
+	if(pCharacter->MonsterIndex == 364)
 	{
 		M39Kanturu3rd::MayaSceneMayaAction(pCharacter->MonsterSkill);
 		return true;
 	}
 
 	int iCheckAttackAni = -1;
-#ifdef CSK_FIX_MONSTERSKILL
+
 	for(int i = 0; i < MAX_MONSTERSKILL_NUM; i++)
-#else // CSK_FIX_MONSTERSKILL
-	for(int i = 0; i < 5; i++)
-#endif // CSK_FIX_MONSTERSKILL
 	{
 		if(	MonsterSkill[pCharacter->MonsterIndex].Skill_Num[i] == pCharacter->MonsterSkill)
 		{
@@ -2434,7 +2259,6 @@ bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
 		case 4:
 			SetAction ( pObject, MONSTER01_ATTACK5 );
 			break;
-#ifdef CSK_FIX_MONSTERSKILL
 		case 5:
 			SetAction ( pObject, MONSTER01_ATTACK5 );
 			break;
@@ -2450,18 +2274,17 @@ bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
 		case 9:
 			SetAction ( pObject, MONSTER01_ATTACK5 );
 			break;
-#endif // CSK_FIX_MONSTERSKILL	
 	}
 
 	pCharacter->MonsterSkill = -1;
 
 
-	if(iCheckAttackAni < 0)		// 찾은 스킬이 없으면 기본 공격 동작(공격동작1)으로 애니메이션 시킨다 
+	if(iCheckAttackAni < 0)
 	{
 		SetAction ( pObject, MONSTER01_ATTACK1 );
 	}
 
-	if(iCheckAttackAni > 4)		// 혹시 모를 iCheckAttackAni값이 이상하게 들어갈 경우 예외 처리
+	if(iCheckAttackAni > 4)
 		return false;
 
 	return true;
@@ -2485,14 +2308,14 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
             PlaySpeed /= 2.f;
         }
         else if ( ( o->CurrentAction==PLAYER_ATTACK_TELEPORT || o->CurrentAction==PLAYER_ATTACK_RIDE_TELEPORT 
-				|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT	//^ 펜릴 캐릭터 에니메이션
+				|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT
 				) && o->AnimationFrame>5.5f )
         {
             PlaySpeed /= 10.f;
         }
-        else if ( GetBaseClass(c->Class)==CLASS_DARK_LORD && 
+        else if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD && 
                   ( o->CurrentAction==PLAYER_SKILL_FLASH || o->CurrentAction==PLAYER_ATTACK_RIDE_ATTACK_FLASH 
-				  || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH	//^ 펜릴 스킬 관련
+				  || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH
 				  ) && ( o->AnimationFrame>1.f && o->AnimationFrame<3.f )
                 )
         {	
@@ -4699,7 +4522,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 					float dx = c->Object.Position[0] - p_temp_c->Object.Position[0]; // 자기와의 거리를 계산한다.
 					float dy = c->Object.Position[1] - p_temp_c->Object.Position[1];
 					float fDistance = sqrtf(dx*dx+dy*dy) / TERRAIN_SCALE;
-					if(fDistance <= GetSkillDistance(AT_SKILL_PLASMA_STORM_FENRIR))
+					if(fDistance <= gSkillManager.GetSkillDistance(AT_SKILL_PLASMA_STORM_FENRIR))
 					{
 						p_o[iMonsterNum] = &p_temp_c->Object;
 						iMonsterNum++;
@@ -4713,7 +4536,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 						float dx = c->Object.Position[0] - p_temp_c->Object.Position[0];
 						float dy = c->Object.Position[1] - p_temp_c->Object.Position[1];
 						float fDistance = sqrtf(dx*dx+dy*dy) / TERRAIN_SCALE;
-						if(fDistance <= GetSkillDistance(AT_SKILL_PLASMA_STORM_FENRIR))
+						if(fDistance <= gSkillManager.GetSkillDistance(AT_SKILL_PLASMA_STORM_FENRIR))
 						{
 							p_o[iMonsterNum] = &p_temp_c->Object;
 							iMonsterNum++;
@@ -4733,7 +4556,6 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 				CHARACTER* p_tc = &CharactersClient[c->m_iFenrirSkillTarget];
 				OBJECT* p_to = &p_tc->Object;
 
-				// 타켓한테
 				for(int j=0; j<2; j++)
 				{
 					CalcAddPosition(o, 0.f, -140.f, 130.f, Position);
@@ -5546,7 +5368,7 @@ bool CheckFullSet(CHARACTER *c)
 	}
 
 #ifdef PBG_FIX_DEFENSEVALUE_DARK
-    if ( GetBaseClass(c->Class)==CLASS_DARK )
+    if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK )
     {
         end = EQUIPMENT_ARMOR;
     }
@@ -5602,7 +5424,7 @@ bool CheckFullSet(CHARACTER *c)
 
 		g_bAddDefense = true;
 
-		if(GetBaseClass(c->Class)==CLASS_DARK && Success)
+		if(gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK && Success)
 		{
 			if ( CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+15
 				&& CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type!=ITEM_ARMOR+20  
@@ -5659,7 +5481,7 @@ bool CheckFullSet(CHARACTER *c)
 
 		g_bAddDefense = true;
 
-		if(GetBaseClass(c->Class)==CLASS_DARK && Success)
+		if(gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK && Success)
 		{
 			if ( c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+15
 				&& c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR+20  
@@ -9197,9 +9019,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 	bool bCloak = false;
 
-	if((
-		GetCharacterClass(c->Class)==CLASS_DARK 
-		|| GetBaseClass(c->Class)==CLASS_DARK_LORD
+	if((gCharacterManager.GetCharacterClass(c->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| GetBaseClass(c->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
@@ -9632,7 +9452,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				{
 					int Type = p->Type;
 
-					if (CLASS_SUMMONER == GetBaseClass(c->Class))
+					if (CLASS_SUMMONER == gCharacterManager.GetBaseClass(c->Class))
 					{
 						int nItemType = (Type - MODEL_ITEM) / MAX_ITEM_INDEX;
 						int nItemSubType = (Type - MODEL_ITEM) % MAX_ITEM_INDEX;
@@ -9658,9 +9478,9 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					}
 					else
 #endif //PBG_ADD_NEWCHAR_MONK
-					b->Skin = GetBaseClass(c->Class)*2 + IsSecondClass(c->Class);
+					b->Skin = gCharacterManager.GetBaseClass(c->Class)*2 + gCharacterManager.IsSecondClass(c->Class);
 
-                    if ( GetBaseClass(c->Class)==CLASS_DARK_LORD && i==BODYPART_HELM )
+                    if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD && i==BODYPART_HELM )
                     {
                         o->BlendMeshLight = sinf ( WorldTime*0.001f )*0.1f+0.7f;
                         if ( i==BODYPART_HELM )
@@ -9747,7 +9567,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	{
 		if ( !c->Object.m_pCloth)
 		{
-            if ( GetBaseClass(c->Class)==CLASS_DARK_LORD )
+            if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD )
             {
 				int numCloth = 4;
 				if (c->Wing.Type == MODEL_WING+40)
@@ -9885,7 +9705,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				CPhysicsCloth *pCloth = new CPhysicsCloth [1];
 
 				if (c->MonsterIndex==55)
-				{	// 데쓰킹
+				{
 					pCloth[0].Create( o, 19, 0.0f, 10.0f, 0.0f, 10, 10, 55.0f, 140.0f, BITMAP_ROBE+2,BITMAP_ROBE+2, PCT_CURVED | PCT_MASK_ALPHA);
 					pCloth[0].AddCollisionSphere( -10.f, -10.0f, -10.0f, 35.0f, 17);
 					pCloth[0].AddCollisionSphere( 10.f, -10.0f, -10.0f, 35.0f, 17);
@@ -9896,7 +9716,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					pCloth[0].Create( o, 2, 0.0f, 0.0f, 0.0f, 6, 6, 180.0f, 100.0f, BITMAP_NIGHTMARE_ROBE,BITMAP_NIGHTMARE_ROBE, PCT_CYLINDER | PCT_MASK_ALPHA);
 				}
                 else
-				{	// 마검
+				{
 					if (c->Wing.Type == MODEL_WING+39)
 					{
 						pCloth[0].Create( o, 19, 0.0f, 15.0f, 0.0f, 10, 10, 120.0f, 120.0f, BITMAP_ROBE+8, BITMAP_ROBE+8, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);	
@@ -9910,7 +9730,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				o->m_byNumCloth = 1;
             }
 		}
-        else if ( GetBaseClass(c->Class)==CLASS_DARK_LORD )
+        else if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD )
         {
             if ( (c->BodyPart[BODYPART_ARMOR].Type != MODEL_BODY_ARMOR+CLASS_DARK_LORD
 				 && c->BodyPart[BODYPART_ARMOR].Type != MODEL_BODY_ARMOR+14	
@@ -9935,7 +9755,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                     o->m_byNumCloth = 4;
                 }
             }
-			else if ( c->BodyPart[BODYPART_ARMOR].Type==MODEL_BODY_ARMOR+14 && o->m_byNumCloth==3 )	// 3차 전직 다크로드
+			else if ( c->BodyPart[BODYPART_ARMOR].Type==MODEL_BODY_ARMOR+14 && o->m_byNumCloth==3 )
             {
 	            if ( o && o->m_pCloth )
 	            {
@@ -9986,24 +9806,16 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
         {
             for ( int i=0; i<o->m_byNumCloth; i++ )
             {
-                if ( GetBaseClass( c->Class )==CLASS_DARK_LORD )
+                if ( gCharacterManager.GetBaseClass( c->Class )==CLASS_DARK_LORD )
                 {
-                    if ( i==2 && (
-						(c->Wing.Type!=MODEL_HELPER+30	// 군주의 망토
-						&& c->Wing.Type!=MODEL_WING+40	// 다크로드 제왕의 망토
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
-						&& c->Wing.Type!=MODEL_WING+130	// 작은 군주의 망토
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-						) && ( CloakLight[0]==1.f && CloakLight[1]==1.f && CloakLight[2]==1.f ) ) ) 
+                    if ( i==2 && ((c->Wing.Type!=MODEL_HELPER+30 && c->Wing.Type!=MODEL_WING+40	&& c->Wing.Type!=MODEL_WING+130) && ( CloakLight[0]==1.f && CloakLight[1]==1.f && CloakLight[2]==1.f ) ) ) 
 					{
 						continue;
 					}
-					// 변신반지 착용하면 다크로드 머리 안보이게 수정
 					if((i >= 0 && i <= 1) && g_ChangeRingMgr->CheckDarkLordHair(c->Object.SubType) == true)
 					{
 						continue;
 					}
-
 					if(i == 3 && g_ChangeRingMgr->CheckDarkLordHair(c->Object.SubType) == true)
 					{
 						continue;
@@ -10547,7 +10359,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	case MODEL_PLAYER:
 		Vector(0.f,0.f,0.f,p);
 
-		if ( GetCharacterClass(c->Class) == CLASS_SOULMASTER)	        
+		if ( gCharacterManager.GetCharacterClass(c->Class) == CLASS_SOULMASTER)	        
         {
 			if( !g_isCharacterBuff(o, eBuff_Cloaking) )
 			{
@@ -10560,13 +10372,9 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				CreateSprite(BITMAP_SHINY+1,Position,scale,Light,NULL);
 			}
         }
-		if ( o->CurrentAction==PLAYER_SKILL_FLASH || o->CurrentAction==PLAYER_ATTACK_RIDE_ATTACK_FLASH 
-			|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH	//^ 펜릴 스킬 관련
-			)
+		if ( o->CurrentAction==PLAYER_SKILL_FLASH || o->CurrentAction==PLAYER_ATTACK_RIDE_ATTACK_FLASH || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH)
 		{
-			if ( GetBaseClass(c->Class)==CLASS_DARK_LORD || o->CurrentAction==PLAYER_ATTACK_RIDE_ATTACK_FLASH 
-			|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH	//^ 펜릴 스킬 관련
-				)
+			if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD || o->CurrentAction==PLAYER_ATTACK_RIDE_ATTACK_FLASH || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH)
             {
                 if( o->AnimationFrame>=1.2f && o->AnimationFrame<1.6f )
                 {
@@ -11487,7 +11295,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 	giPetManager::RenderPet ( c );
 
-	if (GetBaseClass(c->Class) == CLASS_SUMMONER)
+	if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER)
 	{
 		PART_t *w = &c->Weapon[1];
 		g_SummonSystem.MoveEquipEffect(c, w->Type, w->Level, w->Option1);
@@ -12204,7 +12012,7 @@ void SetCharacterScale(CHARACTER *c)
 #endif // LEM_ADD_LUCKYITEM
 		(c->BodyPart[BODYPART_HELM].Type>=MODEL_HELM+10 && c->BodyPart[BODYPART_HELM].Type<=MODEL_HELM+13))
 	{
-		c->BodyPart[BODYPART_HEAD].Type = MODEL_BODY_HELM + GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_HEAD].Type = MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(c->Class);
 	}
 	else
 	{
@@ -12216,7 +12024,7 @@ void SetCharacterScale(CHARACTER *c)
 	{
 		if( c->Skin==0 )
 		{
-			switch(GetBaseClass(c->Class))
+			switch(gCharacterManager.GetBaseClass(c->Class))
 			{
 			case CLASS_WIZARD:    c->Object.Scale = 1.2f;break;
 			case CLASS_KNIGHT:    c->Object.Scale = 1.2f;break;
@@ -12231,7 +12039,7 @@ void SetCharacterScale(CHARACTER *c)
 		}
 		else
 		{
-			switch(GetBaseClass(c->Class))
+			switch(gCharacterManager.GetBaseClass(c->Class))
 			{
 			case CLASS_WIZARD:    c->Object.Scale = 1.2f;break;
 			case CLASS_KNIGHT:    c->Object.Scale = 1.2f;break;
@@ -12250,7 +12058,7 @@ void SetCharacterScale(CHARACTER *c)
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		if( c->Skin==0 )
 		{
-			switch(GetBaseClass(c->Class))
+			switch(gCharacterManager.GetBaseClass(c->Class))
 			{
 			case CLASS_WIZARD:    c->Object.Scale = 0.9f;break;
 			case CLASS_KNIGHT:    c->Object.Scale = 0.9f;break;
@@ -12265,7 +12073,7 @@ void SetCharacterScale(CHARACTER *c)
 		}
 		else
 		{
-			switch(GetBaseClass(c->Class))
+			switch(gCharacterManager.GetBaseClass(c->Class))
 			{
 			case CLASS_WIZARD:    c->Object.Scale = 0.93f;break;
 			case CLASS_KNIGHT:    c->Object.Scale = 0.93f;break;
@@ -12360,7 +12168,7 @@ void SetCharacterClass(CHARACTER *c)
 
     if(p[EQUIPMENT_HELM].Type == -1)
     {
-		c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM+GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(c->Class);
     }
 	else
 	{
@@ -12369,7 +12177,7 @@ void SetCharacterClass(CHARACTER *c)
 
 	if(p[EQUIPMENT_ARMOR].Type == -1)
     {
-		c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR + GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR + gCharacterManager.GetSkinModelIndex(c->Class);
     }
 	else
 	{
@@ -12378,7 +12186,7 @@ void SetCharacterClass(CHARACTER *c)
 
 	if(p[EQUIPMENT_PANTS].Type == -1)
     {
-		c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS + GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS + gCharacterManager.GetSkinModelIndex(c->Class);
     }
 	else
 	{
@@ -12387,7 +12195,7 @@ void SetCharacterClass(CHARACTER *c)
 
 	if(p[EQUIPMENT_GLOVES].Type == -1)
     {
-		c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES + GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES + gCharacterManager.GetSkinModelIndex(c->Class);
     }
 	else
 	{
@@ -12396,7 +12204,7 @@ void SetCharacterClass(CHARACTER *c)
 
 	if(p[EQUIPMENT_BOOTS].Type == -1)
     {
-		c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS + GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS + gCharacterManager.GetSkinModelIndex(c->Class);
     }
 	else
 	{
@@ -12445,7 +12253,7 @@ void SetChangeClass(CHARACTER *c)
 	if(Success)
         SetPlayerStop(c);
 
-	int iSkinModelIndex = GetSkinModelIndex(c->Class);
+	int iSkinModelIndex = gCharacterManager.GetSkinModelIndex(c->Class);
 	if(c->BodyPart[BODYPART_HELM  ].Type >= MODEL_BODY_HELM)
 	{
 		c->BodyPart[BODYPART_HELM  ].Type = MODEL_BODY_HELM+iSkinModelIndex;
@@ -12605,7 +12413,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
     }
 	else
     {
-        if ( GetBaseClass(c->Class)==CLASS_DARK_LORD && ((MODEL_STAFF+5)-MODEL_SWORD)==ExtType)
+        if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD && ((MODEL_STAFF+5)-MODEL_SWORD)==ExtType)
         {
 			ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
 			PET_INFO* pPetInfo = giPetManager::GetPetInfo(pEquipmentItemSlot);
@@ -12708,7 +12516,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 		}
 	}
 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	Type = (Equipment[16] >> 5);
 	if(Type > 0)
 	{
@@ -12721,14 +12528,11 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 		case 0x05: c->Wing.Type = MODEL_WING+134;	break;
 		}
 	}
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 	if (pHelper == NULL)
 	{
    		DeleteBug(o);
-#ifdef LDK_ADD_NEW_PETPROCESS
 		ThePetProcess().DeletePet(c, c->Helper.Type, true);
-#endif //LDK_ADD_NEW_PETPROCESS
 	}
 	else
 	{
@@ -12880,7 +12684,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 	ExtType = (Equipment[2]>>4)+((Equipment[8]>>7)&1)*16 +(Equipment[12]&15)*32;
     if(ExtType == 0x1FF)
 	{
-		c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM + GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(c->Class);
 	}
 	else
 	{
@@ -12890,7 +12694,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 	ExtType = (Equipment[2]&15)+((Equipment[8]>>6)&1)*16 +((Equipment[13]>>4)&15)*32;
 	if(ExtType == 0x1FF)
 	{
-		c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR + GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR + gCharacterManager.GetSkinModelIndex(c->Class);
 	}
 	else
 	{
@@ -12900,7 +12704,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 	ExtType = (Equipment[3]>>4)+((Equipment[8]>>5)&1)*16 +(Equipment[13]&15)*32;
 	if(ExtType == 0x1FF)
 	{
-		c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS + GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS + gCharacterManager.GetSkinModelIndex(c->Class);
 	}
 	else
 	{
@@ -12910,7 +12714,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 	ExtType = (Equipment[3]&15)+((Equipment[8]>>4)&1)*16 +((Equipment[14]>>4)&15)*32;
 	if(ExtType == 0x1FF)
 	{
-		c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES + GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES + gCharacterManager.GetSkinModelIndex(c->Class);
 	}
 	else
 	{
@@ -12920,7 +12724,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
 	ExtType = (Equipment[4]>>4)+((Equipment[8]>>3)&1)*16 +(Equipment[14]&15)*32;
 	if(ExtType == 0x1FF)
 	{
-		c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS+GetSkinModelIndex(c->Class);
+		c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS + gCharacterManager.GetSkinModelIndex(c->Class);
 	}
 	else
 	{
@@ -15069,9 +14873,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 
 	return c;
 }
-///////////////////////////////////////////////////////////////////////////////
-// 서버 선택 씬과, 캐릭터 선택 씬에서 나오는 캐릭터 생성
-///////////////////////////////////////////////////////////////////////////////
 
 CHARACTER *CreateHero(int Index,int Class,int Skin,float x,float y,float Rotate)
 {
@@ -15113,11 +14914,11 @@ CHARACTER *CreateHero(int Index,int Class,int Skin,float x,float y,float Rotate)
 	}
 	else
 	{
-		c->BodyPart[BODYPART_HELM  ].Type = MODEL_BODY_HELM  +GetBaseClass( Class);
-		c->BodyPart[BODYPART_ARMOR ].Type = MODEL_BODY_ARMOR +GetBaseClass( Class);
-		c->BodyPart[BODYPART_PANTS ].Type = MODEL_BODY_PANTS +GetBaseClass( Class);
-		c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES+GetBaseClass( Class);
-		c->BodyPart[BODYPART_BOOTS ].Type = MODEL_BODY_BOOTS +GetBaseClass( Class);
+		c->BodyPart[BODYPART_HELM  ].Type = MODEL_BODY_HELM  + gCharacterManager.GetBaseClass(Class);
+		c->BodyPart[BODYPART_ARMOR ].Type = MODEL_BODY_ARMOR + gCharacterManager.GetBaseClass(Class);
+		c->BodyPart[BODYPART_PANTS ].Type = MODEL_BODY_PANTS + gCharacterManager.GetBaseClass(Class);
+		c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES+ gCharacterManager.GetBaseClass(Class);
+		c->BodyPart[BODYPART_BOOTS ].Type = MODEL_BODY_BOOTS + gCharacterManager.GetBaseClass(Class);
 		c->Weapon[0].Type = -1;
 		c->Weapon[1].Type = -1;
 		c->Wing.Type      = -1;
@@ -15154,406 +14955,7 @@ CHARACTER*  CreateHellGate ( BYTE* ID, int Key, int Index, int x, int y, int Cre
     return portal;
 }
 
-void SaveMonsters(char *FileName)
-{
-	FILE *fp = fopen(FileName,"wt");
-    fprintf(fp,"2\n");
-	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-	{
-		CHARACTER *c = &CharactersClient[i];
-		OBJECT *o = &c->Object;
-		if(o->Live && o->Kind==KIND_EDIT)
-		{
-			fprintf(fp,"%4d %4d 30 %4d %4d -1\n",c->MonsterIndex,gMapManager.WorldActive,(BYTE)(o->Position[0]/TERRAIN_SCALE),(BYTE)(o->Position[1]/TERRAIN_SCALE));
-		}
-	}
-    fprintf(fp,"end\n");
-	fclose(fp);
-}
-
-BYTE ChangeServerClassTypeToClientClassType(const BYTE byServerClassType)
-{
-	BYTE byClass = 0;
-
-	byClass = (((byServerClassType >> 4) & 0x01) << 3) | (byServerClassType >> 5) | (((byServerClassType >> 3 ) & 0x01) << 4) ;
-	
-	return byClass;
-}
-
-BYTE GetCharacterClass(const BYTE byClass)
-{
-	BYTE byCharacterClass = 0;
-	BYTE byFirstClass = byClass & 0x7;
-	BYTE bySecondClass = (byClass >> 3) & 0x01;
-	BYTE byThirdClass = (byClass >> 4) & 0x01;
-	switch(byFirstClass)
-	{
-	case 0:
-		{
-			if(byThirdClass)
-			{
-				byCharacterClass = CLASS_GRANDMASTER;
-			}
-			else if(bySecondClass)
-			{
-				byCharacterClass = CLASS_SOULMASTER;
-			}
-			else
-			{
-				byCharacterClass = CLASS_WIZARD;
-			}
-		}
-		
-		break;
-	case 1:
-		{
-			if(byThirdClass)
-			{
-				byCharacterClass = CLASS_BLADEMASTER;
-			}
-			else if(bySecondClass)
-			{
-				byCharacterClass = CLASS_BLADEKNIGHT;
-			}
-			else
-			{
-				byCharacterClass = CLASS_KNIGHT;
-			}
-		}
-		break;
-	case 2:	
-		{
-			if(byThirdClass)
-			{
-				byCharacterClass = CLASS_HIGHELF;
-			}
-			else if(bySecondClass)
-			{
-				byCharacterClass = CLASS_MUSEELF;
-			}
-			else
-			{
-				byCharacterClass = CLASS_ELF;
-			}
-		}
-		break;
-	case 3:	
-		{
-			if(byThirdClass)
-			{
-				byCharacterClass = CLASS_DUELMASTER;
-			}
-			else
-			{
-				byCharacterClass = CLASS_DARK;
-			}
-		}
-		break;
-	case 4:	
-		{
-			if(byThirdClass)
-			{
-				byCharacterClass = CLASS_LORDEMPEROR;
-			}
-			else
-			{
-				byCharacterClass = CLASS_DARK_LORD;
-			}
-		}
-		break;
-	case 5:	
-		{
-			if (byThirdClass)
-				byCharacterClass = CLASS_DIMENSIONMASTER;
-			else if (bySecondClass)
-				byCharacterClass = CLASS_BLOODYSUMMONER;
-			else
-				byCharacterClass = CLASS_SUMMONER;
-		}
-		break;
-#ifdef PBG_ADD_NEWCHAR_MONK
-	case 6:
-		{
-			if(byThirdClass)
-			{
-				byCharacterClass = CLASS_TEMPLENIGHT;
-			}
-			else
-			{
-				byCharacterClass = CLASS_RAGEFIGHTER;
-			}
-		}
-#endif //PBG_ADD_NEWCHAR_MONK
-	}
-
-	return byCharacterClass;
-}
-
-BYTE GetSkinModelIndex(const BYTE byClass)
-{
-	BYTE bySkinIndex = 0;
-	BYTE byFirstClass = byClass & 0x7;
-	BYTE bySecondClass = (byClass >> 3) & 0x01;
-	BYTE byThirdClass = (byClass >> 4) & 0x01;
-
-	if (byFirstClass == CLASS_WIZARD
-		|| byFirstClass == CLASS_KNIGHT
-		|| byFirstClass == CLASS_ELF
-		|| byFirstClass == CLASS_SUMMONER
-		)
-	{
-		bySkinIndex = byFirstClass + (bySecondClass + byThirdClass) * MAX_CLASS;
-	}
-	else
-	{
-		bySkinIndex = byFirstClass + (byThirdClass * 2) * MAX_CLASS;
-	}
-
-	return bySkinIndex;
-}
-
-bool IsSecondClass(const BYTE byClass)
-{
-	BYTE bySecondClass = (byClass >> 3) & 0x01;
-	return bySecondClass;
-}
-
-bool IsThirdClass(const BYTE byClass)
-{
-	return (((signed int)byClass >> 4) & 1) != 0;;
-}
-
-BYTE GetStepClass(const BYTE byClass)
-{
-	if(IsThirdClass(byClass))
-	{
-		return 3;
-	}
-	else if(IsSecondClass(byClass) == true && IsThirdClass(byClass) == false)
-	{
-		return 2;
-	}
-	else
-	{
-		return 1;
-	}
-}
-
-const unicode::t_char* GetCharacterClassText(const BYTE byClass)
-{
-	BYTE byCharacterClass = GetCharacterClass(byClass);
-
-	if(byCharacterClass == CLASS_WIZARD)
-	{
-		return GlobalText[20];
-	}
-	else if(byCharacterClass == CLASS_SOULMASTER)
-	{
-		return GlobalText[25];
-	}
-	else if(byCharacterClass == CLASS_GRANDMASTER)
-	{
-		return GlobalText[1669];
-	}
-	else if(byCharacterClass == CLASS_KNIGHT)
-	{
-		return GlobalText[21];
-	}
-	else if(byCharacterClass == CLASS_BLADEKNIGHT)
-	{
-		return GlobalText[26];
-	}
-	else if(byCharacterClass == CLASS_BLADEMASTER)
-	{
-		return GlobalText[1668];
-	}
-	else if(byCharacterClass == CLASS_ELF)
-	{
-		return GlobalText[22];
-	}
-	else if(byCharacterClass == CLASS_MUSEELF)
-	{
-		return GlobalText[27];
-	}
-	else if(byCharacterClass == CLASS_HIGHELF)
-	{
-		return GlobalText[1670];
-	}
-	else if(byCharacterClass == CLASS_DARK)
-	{
-		return GlobalText[23];
-	}
-	else if(byCharacterClass == CLASS_DUELMASTER)
-	{
-		return GlobalText[1671];
-	}
-	else if(byCharacterClass == CLASS_DARK_LORD)
-	{
-		return GlobalText[24];
-	}
-	else if(byCharacterClass == CLASS_LORDEMPEROR)
-	{
-		return GlobalText[1672];
-	}
-	else if (byCharacterClass == CLASS_SUMMONER)
-		return GlobalText[1687];
-	else if (byCharacterClass == CLASS_BLOODYSUMMONER)
-		return GlobalText[1688];
-	else if (byCharacterClass == CLASS_DIMENSIONMASTER)
-		return GlobalText[1689];
-#ifdef PBG_ADD_NEWCHAR_MONK
-	else if(byCharacterClass == CLASS_RAGEFIGHTER)
-		return GlobalText[3150];	// 3150 "레이지파이터"
-	else if(byCharacterClass == CLASS_TEMPLENIGHT)
-		return GlobalText[3151];	// 3151 "템플나이트"
-#endif //PBG_ADD_NEWCHAR_MONK
-	return GlobalText[2305];
-}
-
-bool IsMasterLevel(const BYTE byClass)
-{
-	return IsThirdClass(byClass);
-}
-
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
-BOOL FindHeroSkill(enum ActionSkillType eSkillType)
-{
-	for (int i = 0; i < CharacterAttribute->SkillNumber; ++i)
-	{
-		if (CharacterAttribute->Skill[i] == eSkillType)
-		{
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-
-#ifdef ADD_SOCKET_ITEM
-// 캐릭터에 장착된 무기가 활/석궁인지를 구별하여 리턴
-int GetEquipedBowType(CHARACTER *pChar)
-{
-	// 활
-	if( (pChar->Weapon[1].Type != MODEL_BOW+7) 
-		&& ((pChar->Weapon[1].Type >= MODEL_BOW) && (pChar->Weapon[1].Type < MODEL_BOW+MAX_ITEM_INDEX)) 
-		)	
-	{
-		return BOWTYPE_BOW;
-	}
-	// 석궁
-	else if( (pChar->Weapon[0].Type != MODEL_BOW+15)
-			&& ((pChar->Weapon[0].Type >= MODEL_BOW+8) && (pChar->Weapon[0].Type < MODEL_BOW+MAX_ITEM_INDEX))
-		)
-	{
-		return BOWTYPE_CROSSBOW;
-	}
-
-	// 아무것도 아닐때
-	return BOWTYPE_NONE;
-}
-
-int GetEquipedBowType( )
-{
-	if( (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW+7) &&
-		((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) 
-			&& (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW+MAX_ITEM_INDEX))
-		)
-	{
-		return BOWTYPE_BOW;
-	}
-	else if( (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW+15) &&
-			((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_BOW+8) 
-				&& (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW+MAX_ITEM_INDEX)) 
-		)
-	{
-		return BOWTYPE_CROSSBOW;
-	}
-	return BOWTYPE_NONE;
-}
-
-int GetEquipedBowType_Skill( )
-{
-	if( (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW+7) &&
-		((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) 
-			&& (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW+MAX_ITEM_INDEX))
-		)
-	{
-		if(CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_BOW+15)
-			return BOWTYPE_BOW;
-	}
-	else if( (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW+15) &&
-			((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_BOW+8) 
-				&& (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW+MAX_ITEM_INDEX)) 
-		)
-	{
-		if(CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOW+7)
-			return BOWTYPE_CROSSBOW;
-	}
-	return BOWTYPE_NONE;
-}
-
-int GetEquipedBowType( ITEM* pItem )
-{	
-	if(((pItem->Type >= ITEM_BOW) && (pItem->Type <= ITEM_BOW+6)) || (pItem->Type == ITEM_BOW+17) || ((pItem->Type >= ITEM_BOW+20) && (pItem->Type <= ITEM_BOW+23)) || (pItem->Type == ITEM_BOW+24))
-	{
-		return BOWTYPE_BOW;
-	}
-	
-	else if(((pItem->Type >= ITEM_BOW+8) && (pItem->Type <= ITEM_BOW+14)) || (pItem->Type == ITEM_BOW+16) || ((pItem->Type >= ITEM_BOW+18) && (pItem->Type <= ITEM_BOW+19)))
-	{
-		return BOWTYPE_CROSSBOW;
-	}
-	return BOWTYPE_NONE;
-}
-
-#ifdef KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
-// 날개를 착용 유무 검사.
-bool IsEquipedWing( )
-{
-	ITEM* pEquippedItem = &CharacterMachine->Equipment[EQUIPMENT_WING];
-
-	if( (pEquippedItem->Type >= ITEM_WING && pEquippedItem->Type <= ITEM_WING+6) 
-		|| (pEquippedItem->Type >= ITEM_WING+36 && pEquippedItem->Type <= ITEM_WING+43)
-		|| (pEquippedItem->Type == ITEM_HELPER+30)								// 군주의 망토
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
-		|| ( ITEM_WING+130 <= pEquippedItem->Type && pEquippedItem->Type <= ITEM_WING+134 )
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| (pEquippedItem->Type >= ITEM_WING+49 && pEquippedItem->Type <= ITEM_WING+50)	// 레이지파이터날개
-		|| (pEquippedItem->Type == ITEM_WING+135)	//작은 무인의망토
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
-	{
-		return true;
-	}
-
-	return false;
-}
-#endif // KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
-
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-void SetActionBloodAttack(CHARACTER *c, OBJECT* o)
-{
-	switch(c->Helper.Type)
-	{
-	case MODEL_HELPER+2:	// 유니리아
-		SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_UNI);
-		break;
-	case MODEL_HELPER+3:	// 디노란트
-		SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_DINO);
-		break;
-	case MODEL_HELPER+37:	// 펜릴	
-		SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_FENRIR);
-		break;
-	default:	// 기본
-		SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
-		break;
-	}
-}
-#endif // YDG_ADD_SKILL_RIDING_ANIMATIONS
-
-#ifdef YDG_ADD_SANTA_MONSTER
-BOOL PlayMonsterSoundGlobal(OBJECT * pObject)	// 전역 몬스터 사운드 처리용
+BOOL PlayMonsterSoundGlobal(OBJECT * pObject)
 {
 	float fDis_x, fDis_y;
 	fDis_x = pObject->Position[0] - Hero->Object.Position[0];
@@ -15562,10 +14964,9 @@ BOOL PlayMonsterSoundGlobal(OBJECT * pObject)	// 전역 몬스터 사운드 처리용
 
 	if (fDistance > 500.0f) return true;
 
-	// 사운드 처리
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+155:	// 저주받은 산타
+	case MODEL_MONSTER01+155:
 		if (pObject->CurrentAction == MONSTER01_STOP1)
 		{
 // 			if (rand() % 10 == 0)
@@ -15603,7 +15004,6 @@ BOOL PlayMonsterSoundGlobal(OBJECT * pObject)	// 전역 몬스터 사운드 처리용
 		}
 		return TRUE;
 
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 	case MODEL_XMAS2008_SNOWMAN:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
@@ -15629,49 +15029,40 @@ BOOL PlayMonsterSoundGlobal(OBJECT * pObject)	// 전역 몬스터 사운드 처리용
 			}
 		}
 		return TRUE;
-#endif //LDK_ADD_SNOWMAN_CHANGERING
-
-#ifdef YDG_ADD_NEW_DUEL_NPC
-	case MODEL_DUEL_NPC_TITUS:	// 결투장 문지기 타이투스
+	case MODEL_DUEL_NPC_TITUS:
 		if (pObject->CurrentAction == MONSTER01_STOP1)
 		{
 			PlayBuffer(SOUND_DUEL_NPC_IDLE_1);
 		}
 		return TRUE;
-#endif	// YDG_ADD_NEW_DUEL_NPC
-
-#ifdef YDG_ADD_DOPPELGANGER_SOUND
-	case MODEL_DOPPELGANGER_NPC_LUGARD:	// 도플갱어 NPC 루가드
+	case MODEL_DOPPELGANGER_NPC_LUGARD:
 		if (pObject->CurrentAction == MONSTER01_STOP1)
 		{
 			if (rand() % 2 == 0)
 				PlayBuffer(SOUND_DOPPELGANGER_LUGARD_BREATH);
 		}
 		return TRUE;
-	case MODEL_DOPPELGANGER_NPC_BOX:	// 도플갱어 보상 상자
+	case MODEL_DOPPELGANGER_NPC_BOX:
 		if (pObject->CurrentAction == MONSTER01_DIE)
 		{
 			PlayBuffer(SOUND_DOPPELGANGER_JEWELBOX_OPEN);
 		}
 		return TRUE;
-	case MODEL_DOPPELGANGER_NPC_GOLDENBOX:	// 도플갱어 최종보상 상자
+	case MODEL_DOPPELGANGER_NPC_GOLDENBOX:
 		if (pObject->CurrentAction == MONSTER01_DIE)
 		{
 			PlayBuffer(SOUND_DOPPELGANGER_JEWELBOX_OPEN);
 		}
 		return TRUE;
-#endif	// YDG_ADD_DOPPELGANGER_SOUND
 	}
 
 	return FALSE;
 }
-#endif	// YDG_ADD_SANTA_MONSTER
 
 #ifdef CSK_REF_BACK_RENDERITEM
 bool IsBackItem(CHARACTER *c, int iType)
 {
-	// 활이나 석궁이면 붙는다.
-	int iBowType = GetEquipedBowType(c);
+	int iBowType = gCharacterManager.GetEquipedBowType(c);
 	if(iBowType != BOWTYPE_NONE)
 	{
 		return true;

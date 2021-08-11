@@ -1,19 +1,12 @@
 //*****************************************************************************
 // File: CharMakeWin.cpp
-//
-// Desc: implementation of the CCharMakeWin class.
-//
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
 
 #include "stdafx.h"
 #include "CharMakeWin.h"
 #include "Input.h"
 #include "UIMng.h"
-
-// 텍스트 랜더를 위한 #include. ㅜㅜ
 #include "ZzzBMD.h"
-#include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
@@ -24,6 +17,7 @@
 #include "UIControls.h"
 #include "wsclientinline.h"
 #include "Local.h"
+#include "CharacterManager.h"
 
 #define	CMW_OK		0
 #define	CMW_CANCEL	1
@@ -35,18 +29,12 @@ extern CUITextInputBox* g_pSingleTextInputBox;
 
 void MoveCharacterCamera(vec3_t Origin,vec3_t Position,vec3_t Angle);
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CCharMakeWin::CCharMakeWin()
 {
-
 }
 
 CCharMakeWin::~CCharMakeWin()
 {
-
 }
 #ifdef PJH_CHARACTER_RENAME
 void CCharMakeWin::Set_State(bool Set)
@@ -57,8 +45,8 @@ void CCharMakeWin::Set_State(bool Set)
 	{
 		if(SelectedHero >= 0)
 		{
-			m_nSelJob = GetBaseClass(CharactersClient[SelectedHero].Class);
-			switch(GetBaseClass(m_nSelJob))
+			m_nSelJob = gCharacterManager.GetBaseClass(CharactersClient[SelectedHero].Class);
+			switch(gCharacterManager.GetBaseClass(m_nSelJob))
 			{
 			case CLASS_SOULMASTER:
 				m_nSelJob = CLASS_WIZARD;

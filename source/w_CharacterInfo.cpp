@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "w_CharacterInfo.h"
+#include "SkillManager.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -26,7 +27,7 @@ void CHARACTER::Initialize()
 	Blood = false;
 	Ride = false;
 	SkillSuccess = false;
-	m_bFixForm = false;         //  데미지를 맞아도 고정된 형태에서 변경되지 않는 캐릭터.	
+	m_bFixForm = false;	
 	Foot[0] = false;
 	Foot[1] = false;
 	SafeZone = false;
@@ -109,10 +110,7 @@ void CHARACTER::Initialize()
 
 	m_pParts = NULL;
 
-	// 펫 정보
-#ifdef PET_SYSTEM
 	m_pPet = NULL;
-#endif// PET_SYSTEM
 #ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 	InitPetInfo(PET_TYPE_DARK_HORSE);
 	InitPetInfo(PET_TYPE_DARK_SPIRIT);

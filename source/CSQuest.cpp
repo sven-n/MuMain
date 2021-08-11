@@ -22,6 +22,7 @@
 #include "GIPetManager.h"
 #include "UsefulDef.h"
 #include "NewUIInventoryCtrl.h"
+#include "CharacterManager.h"
 
 /*+++++++++++++++++++++++++++++++++++++
     Extern.
@@ -169,18 +170,14 @@ bool    CSQuest::OpenQuestScript ( char* filename )
 	return  TRUE;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 수행정보를 설정한다. ( 처음 서버에서 받는다. )
-//////////////////////////////////////////////////////////////////////////
-void    CSQuest::setQuestLists ( BYTE* byList, int num, int Class )
+void CSQuest::setQuestLists ( BYTE* byList, int num, int Class )
 {
     if ( Class!=-1 )
     {
 		m_bOnce = true;
 		bCheckNPC = false;
 
-        m_byClass   = GetBaseClass( Class );
+        m_byClass   = gCharacterManager.GetBaseClass(Class);
     }
 
     memset ( m_byQuestList, 0, sizeof( BYTE )*(MAX_QUESTS/4) );
@@ -451,7 +448,7 @@ BYTE    CSQuest::getQuestState ( int questIndex )
 }
 
 
-BYTE    CSQuest::getQuestState2 ( int questIndex )
+BYTE CSQuest::getQuestState2 ( int questIndex )
 {
     int  Index;
 	BYTE byCurrState;
@@ -463,17 +460,14 @@ BYTE    CSQuest::getQuestState2 ( int questIndex )
     return byCurrState;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 상태를 검사한다.
-//////////////////////////////////////////////////////////////////////////
-BYTE	CSQuest::CheckQuestState ( BYTE state )
+BYTE CSQuest::CheckQuestState ( BYTE state )
 {
     if ( Hero->Class !=-1 )
     {
 		if(m_bOnce)
 		{
 			m_bOnce		= false;
-			m_byClass   = GetBaseClass( Hero->Class );
+			m_byClass   = gCharacterManager.GetBaseClass( Hero->Class );
 		}
     }
 
@@ -490,9 +484,8 @@ BYTE	CSQuest::CheckQuestState ( BYTE state )
     }
     switch ( m_byCurrState )
     {
-    case QUEST_NO :     //  등록전.
+    case QUEST_NO :
         {
-            //  요구 조건을 검사한다.
             if ( CheckRequestCondition( lpQuest ) )
             {
                 //  해당 퀘스트 대화를 찾는다.

@@ -20,6 +20,8 @@
 #include "DSPlaySound.h"
 #include "GMCrywolf1st.h"
 #include "ZzzPath.h"
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 
 float CreateAngle(float x1,float y1,float x2,float y2)
@@ -349,9 +351,9 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 {
 	if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type !=MODEL_BOW+15 && c->Weapon[1].Type !=MODEL_BOW+7)	// 양손무기
 	{
-		if(GetBaseClass(c->Class) == CLASS_ELF)	// 요정이면
+		if(gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)	// 요정이면
 			SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD_ELF);
-		else if(GetBaseClass(c->Class) == CLASS_DARK)	// 마검사이면
+		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)	// 마검사이면
 			SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD_MAGOM);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		else if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)//레이지파이터이면
@@ -362,9 +364,9 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 	}
 	else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1) // 오른손 무기
 	{
-		if(GetBaseClass(c->Class) == CLASS_ELF)	// 요정이면
+		if(gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)	// 요정이면
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT_ELF);
-		else if(GetBaseClass(c->Class) == CLASS_DARK)	// 마검사이면
+		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)	// 마검사이면
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT_MAGOM);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		else if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)//레이지파이터이면
@@ -377,9 +379,9 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 		SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT_ELF);
 	else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1) // 왼손 무기
 	{
-		if(GetBaseClass(c->Class) == CLASS_ELF)	// 요정이면
+		if(gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)	// 요정이면
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT_ELF);
-		else if(GetBaseClass(c->Class) == CLASS_DARK)	// 마검사이면
+		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)	// 마검사이면
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT_MAGOM);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		else if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)//레이지파이터이면
@@ -392,15 +394,15 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 		SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT_ELF);
 	else	// 맨손
 	{
-		if(GetBaseClass(c->Class) == CLASS_ELF)	// 요정이면
+		if(gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)	// 요정이면
 			SetAction(o, PLAYER_FENRIR_RUN_ELF);
-		else if(GetBaseClass(c->Class) == CLASS_DARK)	// 마검사이면
+		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)	// 마검사이면
 			SetAction(o, PLAYER_FENRIR_RUN_MAGOM);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		else if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)//레이지파이터이면
 			SetAction(o, PLAYER_RAGE_FENRIR_RUN);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
-		else	// 흑기사, 흑마법사, 다크로드
+		else
 			SetAction(o, PLAYER_FENRIR_RUN);
 	}
 }
@@ -894,7 +896,7 @@ void CalcFPS()
     //  매 프레임마다 스킬 딜레이를 계산한다.
     if ( SceneFlag==MAIN_SCENE )
     {
-        CalcSkillDelay ( difTime );
+        gSkillManager.CalcSkillDelay ( difTime );
     }
 }
 

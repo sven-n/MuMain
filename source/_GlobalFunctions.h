@@ -101,44 +101,9 @@ inline unsigned char GetBlue(unsigned long rgba)
 { return (((rgba) >> 16) & 0xff); }
 
 
-#ifdef PBG_FIX_SKILL_DEMENDCONDITION
-namespace SKILLCONDITION
-{
-	typedef struct DemendConditionInfo
-	{
-		WORD SkillType;
-	//	char SkillName[100];
-		WORD SkillLevel;
-		WORD SkillStrength;
-		WORD SkillDexterity;
-		WORD SkillVitality;
-		WORD SkillEnergy;
-		WORD SkillCharisma;
-		
-		DemendConditionInfo() : SkillType( 0 ), SkillLevel( 0 ), SkillStrength( 0 ),
-			SkillDexterity( 0 ), SkillVitality( 0 ), SkillEnergy( 0 ), SkillCharisma( 0 )
-		{
-	//		ZeroMemory( SkillName, 100 );
-		}
-		BOOL operator<=(const DemendConditionInfo& rhs) const
-		{
-			return SkillStrength <= rhs.SkillStrength && SkillDexterity <= rhs.SkillDexterity &&
-			SkillVitality <= rhs.SkillVitality && SkillEnergy <= rhs.SkillEnergy && SkillCharisma <= rhs.SkillCharisma;
-		}
-	}DemendConditionInfo;
-	
-	BOOL skillVScharactorCheck( const DemendConditionInfo& basicInfo, const DemendConditionInfo& heroInfo );
-	BOOL DemendConditionCheckSkill(WORD skilltype);
-}
-#endif //PBG_FIX_SKILL_DEMENDCONDITION
-
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
 extern bool g_bRenderBoundingBox;
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
-
-#ifdef KJH_MOD_BTS184_REQUIRE_STAT_WHEN_SPELL_SKILL
-int MasterSkillToBaseSkillIndex(int iMasterSkillIndex);
-#endif // KJH_MOD_BTS184_REQUIRE_STAT_WHEN_SPELL_SKILL
 
 #ifdef KWAK_ADD_TRACE_FUNC
 inline void __TraceF(const TCHAR* pFmt, ...)

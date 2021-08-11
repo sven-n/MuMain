@@ -5,15 +5,11 @@
 #include "ZzzInventory.h"
 #include "CSItemOption.h"
 #include "UIJewelHarmony.h"
-#ifdef ADD_SOCKET_MIX
 #include "SocketSystem.h"
-#endif	// ADD_SOCKET_MIX
+#include "SkillManager.h"
 
 using namespace SEASON3A;
 
-/*+++++++++++++++++++++++++++++++++++++
-    FUNCTIONS.
-+++++++++++++++++++++++++++++++++++++*/
 static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
 
 static void BuxConvert(BYTE *Buffer,int Size)
@@ -21,11 +17,7 @@ static void BuxConvert(BYTE *Buffer,int Size)
 	for(int i=0;i<Size;i++)
 		Buffer[i] ^= bBuxCode[i%3];
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 CMixRecipeMgr g_MixRecipeMgr;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CMixItem::Reset()
 {

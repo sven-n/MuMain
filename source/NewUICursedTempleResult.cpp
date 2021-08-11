@@ -1,5 +1,4 @@
 // NewUICursedTempleResult.cpp: implementation of the CNewUICursedTempleResult class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -17,10 +16,8 @@
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "UIControls.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#include "SkillManager.h"
+#include "CharacterManager.h"
 
 using namespace SEASON3B;
 
@@ -269,7 +266,7 @@ void SEASON3B::CNewUICursedTempleResult::RenderTextLine( const CursedTempleGameR
 	DrawText( Text, x+56, y, color, backcolor, RT3_SORT_LEFT, 0, false );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*200);
-	unicode::_sprintf( Text, GetCharacterClassText(resultinfo.s_class));
+	sprintf( Text, gCharacterManager.GetCharacterClassText(resultinfo.s_class));
 	DrawText( Text, x+106, y, color, backcolor, RT3_SORT_LEFT, 0, false );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*200);

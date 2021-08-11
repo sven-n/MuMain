@@ -4,14 +4,15 @@
 #include "stdafx.h"
 #include "NewUICharacterInfoWindow.h"
 #include "NewUISystem.h"
+#include "CharacterManager.h"
 #include "CSItemOption.h"
 #include "ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "UIControls.h"
 #include "ZzzInterface.h"
 #include "ZzzScene.h"
-#include "Local.h"
 #include "ZzzInventory.h"
+#include "SkillManager.h"
 #include "UIJewelHarmony.h"
 #include "UIManager.h"
 #include "wsclientinline.h"
@@ -129,7 +130,7 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 
 	if(CharacterAttribute->LevelUpPoint > 0)
 	{
-		int iBaseClass = GetBaseClass(Hero->Class);
+		int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
 		int iCount = 0;
 		if(iBaseClass == CLASS_DARK_LORD)
 		{
@@ -170,7 +171,7 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 
 	if(m_BtnMasterLevel.UpdateMouseEvent() == true)
 	{
-		if(IsMasterLevel( Hero->Class ) == true 
+		if(gCharacterManager.IsMasterLevel( Hero->Class ) == true 
 #ifdef PBG_ADD_NEWCHAR_MONK
 			&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -239,7 +240,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
 	RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x+11, m_Pos.y+HEIGHT_DEXTERITY, 170.f, 21.f);
 	RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x+11, m_Pos.y+HEIGHT_VITALITY, 170.f, 21.f);
 	RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x+11, m_Pos.y+HEIGHT_ENERGY, 170.f, 21.f);
-	if(GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
+	if(gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
 	{
 		RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x+11, m_Pos.y+HEIGHT_CHARISMA, 170.f, 21.f);
 	}
@@ -268,7 +269,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
 	char strID[256];
 	sprintf(strID, "%s", CharacterAttribute->Name);
 	unicode::t_char strClassName[256];
-	unicode::_sprintf(strClassName, "(%s)", GetCharacterClassText(CharacterAttribute->Class));
+	unicode::_sprintf(strClassName, "(%s)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
 	
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(20, 20, 20, 20);
@@ -295,7 +296,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 	unicode::t_char strExp[128];
 	unicode::t_char strPoint[128];
 
-	if(IsMasterLevel(CharacterAttribute->Class) == true)
+	if(gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
 	{
 		unicode::_sprintf(strLevel, GlobalText[1745]);
 		unicode::_sprintf(strExp, "----------");
@@ -337,7 +338,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 	{
 		unicode::t_char strLevelUpPoint[128];
 
-		if(IsMasterLevel(CharacterAttribute->Class) == false || CharacterAttribute->LevelUpPoint > 0)
+		if(gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == false || CharacterAttribute->LevelUpPoint > 0)
 		{
 			unicode::_sprintf(strLevelUpPoint, GlobalText[217], CharacterAttribute->LevelUpPoint);
 		}
@@ -858,7 +859,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	g_pRenderText->RenderText(m_Pos.x+86, m_Pos.y+HEIGHT_DEXTERITY+6, strDexterity, 86, 0, RT3_SORT_CENTER);
 
 	bool bDexSuccess = true;
-	int iBaseClass = GetBaseClass(Hero->Class);
+	int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
 
 	for(int i=EQUIPMENT_HELM; i<=EQUIPMENT_BOOTS; ++i)
 	{
@@ -1185,7 +1186,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	
 	g_pRenderText->SetFont(g_hFont);
 
-	if(IsMasterLevel( Hero->Class ) == true )
+	if(gCharacterManager.IsMasterLevel( Hero->Class ) == true )
 	{
 		unicode::_sprintf(strVitality, GlobalText[211],CharacterAttribute->Life,Master_Level_Data.wMaxLife);
 	}
@@ -1261,7 +1262,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	
 	g_pRenderText->SetFont(g_hFont);
 	
-	if(IsMasterLevel( Hero->Class ) == true )
+	if(gCharacterManager.IsMasterLevel( Hero->Class ) == true )
 	{
 		unicode::_sprintf(strEnergy, GlobalText[213], CharacterAttribute->Mana,Master_Level_Data.wMaxMana);
 	}
@@ -1296,7 +1297,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		int iMagicDamageMin;
 		int iMagicDamageMax;
 
-		CharacterMachine->GetMagicSkillDamage( CharacterAttribute->Skill[Hero->CurrentSkill], &iMagicDamageMin, &iMagicDamageMax);
+		gCharacterManager.GetMagicSkillDamage(CharacterAttribute->Skill[Hero->CurrentSkill], &iMagicDamageMin, &iMagicDamageMax);
 
 		int iMagicDamageMinInitial = iMagicDamageMin;
 		int iMagicDamageMaxInitial = iMagicDamageMax;
@@ -1456,7 +1457,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		int iCurseDamageMin = 0;
 		int iCurseDamageMax = 0;
 
-		CharacterMachine->GetCurseSkillDamage(CharacterAttribute->Skill[Hero->CurrentSkill], &iCurseDamageMin, &iCurseDamageMax);
+		gCharacterManager.GetCurseSkillDamage(CharacterAttribute->Skill[Hero->CurrentSkill], &iCurseDamageMin, &iCurseDamageMax);
 
 		if (g_isCharacterBuff((&Hero->Object), eBuff_Berserker))
 		{
@@ -1602,7 +1603,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 void SEASON3B::CNewUICharacterInfoWindow::RenderButtons()
 {
-	int iBaseClass = GetBaseClass(Hero->Class);
+	int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
 	int iCount = 0;
 	if(iBaseClass == CLASS_DARK_LORD)
 	{
@@ -1688,7 +1689,7 @@ void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
 {
 	ResetEquipmentLevel();
 
-	if(IsMasterLevel(Hero->Class) == true
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true
 #ifdef PBG_ADD_NEWCHAR_MONK
 		&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT
 #endif //PBG_ADD_NEWCHAR_MONK

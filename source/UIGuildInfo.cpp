@@ -1,13 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  UIGuildInfo.cpp
-//  
-//  내  용 : 길드정보 인터페이스 ( G 키 입력시 )
-//  
-//  날  짜 : 2004년 11월 09일
-//  
-//  작성자 : 강 병 국
-//  
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -21,6 +13,7 @@
 #include "CSParts.h"
 #include "wsclientinline.h"
 #include "NewUICommonMessageBox.h"
+#include "CharacterManager.h"
 
 extern float		g_fScreenRate_x;
 extern float		g_fScreenRate_y;
@@ -328,7 +321,7 @@ void CUIGuildInfo::RenderGuildInfoTab()
 	ptOrigin.y += 13;
 	if( IsGuildMaster() )
 	{
-		int Class = GetBaseClass ( CharacterAttribute->Class );
+		int Class = gCharacterManager.GetBaseClass( CharacterAttribute->Class);
 	    if ( Class == CLASS_DARK_LORD )
 		{
 			int nCount = CharacterAttribute->Level/10+CharacterAttribute->Charisma/10;
@@ -809,7 +802,7 @@ void CUIGuildInfo::Close()
 bool CheckUseMasterSkill ( CHARACTER* c, int Index )
 {
     BYTE GuildStatus = c->GuildStatus;
-    BYTE Class       = GetBaseClass ( c->Class );
+    BYTE Class       = gCharacterManager.GetBaseClass ( c->Class );
     bool bUse        = false;
 
 

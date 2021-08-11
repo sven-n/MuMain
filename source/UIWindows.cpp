@@ -21,6 +21,7 @@
 #include "CSParts.h"
 #include "SummonSystem.h"
 #include "MapManager.h"
+#include "CharacterManager.h"
 
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
@@ -2020,109 +2021,109 @@ int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
 		gMapManager.WorldActive = WorldBackup;
 		break;
 	case AT_SIT1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
      		SetAction(&c->Object,PLAYER_SIT1);
 		else
      		SetAction(&c->Object,PLAYER_SIT_FEMALE1);
 		break;
 	case AT_POSE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
     		SetAction(&c->Object,PLAYER_POSE1);
 		else
     		SetAction(&c->Object,PLAYER_POSE_FEMALE1);
 		break;
 	case AT_HEALING1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
     		SetAction(&c->Object,PLAYER_HEALING1);
 		else
     		SetAction(&c->Object,PLAYER_HEALING_FEMALE1);
 		break;
 	case AT_GREETING1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_GREETING1);
 		else
 			SetAction(o,PLAYER_GREETING_FEMALE1);
 		break;
 	case AT_GOODBYE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_GOODBYE1);
 		else
 			SetAction(o,PLAYER_GOODBYE_FEMALE1);
 		break;
 	case AT_CLAP1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_CLAP1);
 		else
 			SetAction(o,PLAYER_CLAP_FEMALE1);
 		break;
 	case AT_GESTURE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_GESTURE1);
 		else
 			SetAction(o,PLAYER_GESTURE_FEMALE1);
 		break;
 	case AT_DIRECTION1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_DIRECTION1);
 		else
 			SetAction(o,PLAYER_DIRECTION_FEMALE1);
 		break;
 	case AT_UNKNOWN1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_UNKNOWN1);
 		else
 			SetAction(o,PLAYER_UNKNOWN_FEMALE1);
 		break;
 	case AT_CRY1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_CRY1);
 		else
 			SetAction(o,PLAYER_CRY_FEMALE1);
 		break;
 	case AT_AWKWARD1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_AWKWARD1);
 		else
 			SetAction(o,PLAYER_AWKWARD_FEMALE1);
 		break;
 	case AT_SEE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_SEE1);
 		else
 			SetAction(o,PLAYER_SEE_FEMALE1);
 		break;
 	case AT_CHEER1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_CHEER1);
 		else
 			SetAction(o,PLAYER_CHEER_FEMALE1);
 		break;
 	case AT_WIN1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_WIN1);
 		else
 			SetAction(o,PLAYER_WIN_FEMALE1);
 		break;
 	case AT_SMILE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_SMILE1);
 		else
 			SetAction(o,PLAYER_SMILE_FEMALE1);
 		break;
 	case AT_SLEEP1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_SLEEP1);
 		else
 			SetAction(o,PLAYER_SLEEP_FEMALE1);
 		break;
 	case AT_COLD1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_COLD1);
 		else
 			SetAction(o,PLAYER_COLD_FEMALE1);
 		break;
 	case AT_AGAIN1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_AGAIN1);
 		else
 			SetAction(o,PLAYER_AGAIN_FEMALE1);
@@ -2238,12 +2239,8 @@ void CUIPhotoViewer::CopyPlayer()
 	}
 
 	int i;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	int maxClass = MAX_CLASS;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
-	// 장비 바뀌었나 체크
 	BOOL bChangeArmor = FALSE;
 	BOOL bChangeWeapon = FALSE;
 	BOOL bChangeWing = FALSE;
@@ -2275,15 +2272,15 @@ void CUIPhotoViewer::CopyPlayer()
 	{
 
 		if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_HELM], &CharacterMachine->Equipment[EQUIPMENT_HELM],
-			MODEL_BODY_HELM+GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+			MODEL_BODY_HELM+gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
 		else if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_ARMOR], &CharacterMachine->Equipment[EQUIPMENT_ARMOR],
-			MODEL_BODY_ARMOR+GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+			MODEL_BODY_ARMOR+gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
 		else if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_PANTS], &CharacterMachine->Equipment[EQUIPMENT_PANTS],
-			MODEL_BODY_PANTS+GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+			MODEL_BODY_PANTS+gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
 		else if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_GLOVES], &CharacterMachine->Equipment[EQUIPMENT_GLOVES],
-			MODEL_BODY_GLOVES+GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+			MODEL_BODY_GLOVES+gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
 		else if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_BOOTS], &CharacterMachine->Equipment[EQUIPMENT_BOOTS],
-			MODEL_BODY_BOOTS+GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+			MODEL_BODY_BOOTS+gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
 		
 		for (i = 0; i < 2; ++i)
 		{
@@ -2335,17 +2332,17 @@ void CUIPhotoViewer::CopyPlayer()
 		{
 			DeleteCloth(&m_PhotoChar, NULL, NULL);
 
-			m_PhotoChar.BodyPart[BODYPART_HEAD].Type = MODEL_BODY_HELM + GetSkinModelIndex(Hero->Class);
+			m_PhotoChar.BodyPart[BODYPART_HEAD].Type = MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(Hero->Class);
 			SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_HELM], &CharacterMachine->Equipment[EQUIPMENT_HELM],
-				MODEL_BODY_HELM+GetSkinModelIndex(Hero->Class));
+				MODEL_BODY_HELM+gCharacterManager.GetSkinModelIndex(Hero->Class));
 			SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_ARMOR], &CharacterMachine->Equipment[EQUIPMENT_ARMOR],
-				MODEL_BODY_ARMOR+GetSkinModelIndex(Hero->Class));
+				MODEL_BODY_ARMOR+gCharacterManager.GetSkinModelIndex(Hero->Class));
 			SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_PANTS], &CharacterMachine->Equipment[EQUIPMENT_PANTS],
-				MODEL_BODY_PANTS+GetSkinModelIndex(Hero->Class));
+				MODEL_BODY_PANTS+gCharacterManager.GetSkinModelIndex(Hero->Class));
 			SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_GLOVES], &CharacterMachine->Equipment[EQUIPMENT_GLOVES],
-				MODEL_BODY_GLOVES+GetSkinModelIndex(Hero->Class));
+				MODEL_BODY_GLOVES+gCharacterManager.GetSkinModelIndex(Hero->Class));
 			SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_BOOTS], &CharacterMachine->Equipment[EQUIPMENT_BOOTS],
-				MODEL_BODY_BOOTS+GetSkinModelIndex(Hero->Class));
+				MODEL_BODY_BOOTS+gCharacterManager.GetSkinModelIndex(Hero->Class));
 			
 			for (i = 0; i < MAX_BODYPART; ++i)
 			{
@@ -2417,33 +2414,27 @@ void CUIPhotoViewer::CopyPlayer()
 void CUIPhotoViewer::SetClass(BYTE byClass)
 {
 	if (m_bIsInitialized == FALSE) return;
-	// 백업
     CHARACTER *c = CharactersClient;
 	CharactersClient = &m_PhotoChar;
-	// 캐릭터 클래스 설정
 	CharactersClient->Class = byClass;
 	SetChangeClass(CharactersClient);
-	// 복원
 	CharactersClient = c;
 }
 
 void CUIPhotoViewer::SetEquipmentPacket(BYTE * pbyEquip)
 {
 	if (m_bIsInitialized == FALSE) return;
-	// 백업
     //CHARACTER *c = CharactersClient;
 	//CharactersClient = &m_PhotoChar;
 
-	// 캐릭터 장비 설정
 	ChangeCharacterExt(0, pbyEquip, &m_PhotoChar, &m_PhotoHelper);
 
-	// 복원
-	//CharactersClient = c;
-
 	m_fPhotoHelperScale = m_PhotoHelper.Scale * 0.7f / Hero->Object.Scale;
+
 	if (m_PhotoChar.Wing.Type != -1 && m_iSettingAnimation > AT_HEALING1)
 		m_PhotoChar.SafeZone = true;
-	else m_PhotoChar.SafeZone = false;
+	else 
+		m_PhotoChar.SafeZone = false;
 }
 
 void CUIPhotoViewer::SetAngle(float fDegree)

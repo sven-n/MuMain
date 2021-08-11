@@ -6,6 +6,7 @@
 #include "NewUIItemEnduranceInfo.h"
 #include "NewUISystem.h"
 #include "wsclientinline.h"
+#include "CharacterManager.h"
 
 #ifdef PJH_FIX_SPRIT
 #include "GIPetManager.h"
@@ -124,8 +125,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 		iNextPosY += (UI_INTERVAL_HEIGHT+PETHP_FRAME_HEIGHT);
 	}
 	
-	// 2. 다크로드 펫 (다크스피릿)
-	if ( GetBaseClass(Hero->Class) == CLASS_DARK_LORD )
+	if ( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD )
     {
 		if( Hero->m_pPet != NULL )
 		{
@@ -136,9 +136,8 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 		}
 	}
 	
-	if( GetBaseClass(Hero->Class) == CLASS_ELF )
-	{	// 3. 엘프 소환 몬스터
-		//소환 몬스터 에너지
+	if( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF )
+	{
 		if( SummonLife > 0)
 		{
 			if( CheckMouseIn( m_UIStartPos.x, iNextPosY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT ) )
@@ -148,7 +147,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 		}
 	}
 
-	// 아이템 내구도
 	bool bRenderRingWarning = false;
 	int	icntItemDurIcon = 0;
 	POINT ItemDurPos = POINT(m_ItemDurUIStartPos);
@@ -157,38 +155,31 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
     {
 		ITEM *pItem = &CharacterMachine->Equipment[i];
 		
-#ifdef KJH_FIX_RENDER_PERIODITEM_DURABILITY
-		// 기간제 아이템이고 기간이 끝나지 않았을 때는 내구도 표시 안함
 		if( (pItem->bPeriodItem == true) && (pItem->bExpiredPeriod == false) )
 		{
 			continue;
 		}
-
-#endif // KJH_FIX_RENDER_PERIODITEM_DURABILITY
 
 		if( i == EQUIPMENT_HELPER )
 		{
 			continue;
 		}
 
-		// 아이템이 존재하지 않는다.
-		
 		if( pItem->Type == -1 )
 		{
 			continue;
 		}
 
-		// 예외
 		if( i == EQUIPMENT_WEAPON_RIGHT )
 		{
-			if( pItem->Type == ITEM_BOW+15 )	// 석궁화살 일때는 내구도 표시안함
+			if( pItem->Type == ITEM_BOW+15 )
 			{
 				continue;
 			}
 		}
 		else if( i == EQUIPMENT_WEAPON_LEFT)
 		{
-			if( pItem->Type == ITEM_BOW+7 )		// 화살 일때는 내구도 표시안함.
+			if( pItem->Type == ITEM_BOW+7 )
 			{
 				continue;
 			}
@@ -196,7 +187,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 		
 		int iLevel = (pItem->Level>>3)&15;
 
-		// 용사/전사의반지 예외처리
 		if( i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
 		{
 			if( pItem->Type == ITEM_HELPER+20 && iLevel == 1 
@@ -210,7 +200,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 		ITEM_ATTRIBUTE *pItemAtt = &ItemAttribute[pItem->Type];
 		int iMaxDurability = calcMaxDurability( pItem, pItemAtt, iLevel );
 	
-		if( pItem->Durability <= iMaxDurability*0.5f )		// 50% 남았을때부터 계산
+		if( pItem->Durability <= iMaxDurability*0.5f )
 		{
 			if( i == EQUIPMENT_RING_RIGHT )
 			{
@@ -274,20 +264,14 @@ bool SEASON3B::CNewUIItemEnduranceInfo::Update()
 	if( !IsVisible() )
 		return true;
 
-	if ( GetBaseClass(Hero->Class)==CLASS_ELF )
+	if ( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_ELF )
     {
-#ifdef ADD_SOCKET_ITEM
-		//** 활/석궁이 장착되어있지 않으면
-		//** 화살/석궁화살이 장착되어도 화살갯수가 표시 안되기 때문에
-		//** 활/석궁이 장착되어있는지를 검사하여야 한다.
 
-		// 화살인 경우
-		if( GetEquipedBowType( ) == BOWTYPE_BOW )
+		if( gCharacterManager.GetEquipedBowType( ) == BOWTYPE_BOW )
 		{
 			m_iCurArrowType = ARROWTYPE_BOW;
 		}
-		// 석궁 화살인 경우
-		else if( GetEquipedBowType( ) == BOWTYPE_CROSSBOW )
+		else if( gCharacterManager.GetEquipedBowType( ) == BOWTYPE_CROSSBOW )
 		{
 		    m_iCurArrowType = ARROWTYPE_CROSSBOW;
 	    }
@@ -295,33 +279,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::Update()
 		{
 			m_iCurArrowType = ARROWTYPE_NONE;
 		}
-
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-	    int iRightBowType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-	    int iLeftBowType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-
-        //  화살일 경우.
-	    if( (iLeftBowType>=ITEM_BOW && iLeftBowType<=ITEM_BOW+6) 
-			|| iLeftBowType==ITEM_BOW+17 
-			|| iLeftBowType==ITEM_BOW+20
-			|| iLeftBowType == ITEM_BOW+21 
-			|| iLeftBowType == ITEM_BOW+22 )
-	    {
-		    m_iCurArrowType = ARROWTYPE_BOW;
-	    }
-        //  석궁 화살일 경우.
-	    else if((iRightBowType>=ITEM_BOW+8 && iRightBowType<=ITEM_BOW+14) 
-					|| iRightBowType==ITEM_BOW+16 
-					|| iRightBowType==ITEM_BOW+18 
-					|| iRightBowType>=ITEM_BOW+19)
-	    {
-		    m_iCurArrowType = ARROWTYPE_CROSSBOW;
-	    }
-		else
-		{
-			m_iCurArrowType = ARROWTYPE_NONE;
-		}
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
     }
 	
 	return true;
@@ -362,7 +319,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 		iNextPosY += (UI_INTERVAL_HEIGHT+10);
 	}
 #endif // KJH_DEL_PC_ROOM_SYSTEM
-	if( GetBaseClass(Hero->Class) == CLASS_ELF )
+	if( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF )
 	{
 		// 2. 엘프 화살갯수
 		if( RenderNumArrow( m_UIStartPos.x, iNextPosY ) )
@@ -386,7 +343,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 	}
 	
 	// 4. 다크로드 펫 (다크스피릿)
-	if ( GetBaseClass(Hero->Class) == CLASS_DARK_LORD )
+	if ( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD )
     {
 		if( RenderEquipedPetLife( m_UIStartPos.x, iNextPosY ) )
 		{
@@ -394,7 +351,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 		}
 	}
 	
-	if( GetBaseClass(Hero->Class) == CLASS_ELF )
+	if( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF )
 	{	// 5. 엘프 소환 몬스터
 		if( RenderSummonMonsterLife( m_UIStartPos.x, iNextPosY ) )
 		{
@@ -728,55 +685,42 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance( int ix, int iY )
 	int iTempImageIndex;
 	bool bRenderRingWarning = false;
 
-	//단계별로 렌더(4단계)
     for ( int i=EQUIPMENT_WEAPON_RIGHT; i<MAX_EQUIPMENT; ++i )
     {
 		ITEM *pItem = &CharacterMachine->Equipment[i];
 
 		iTempImageIndex = m_iItemDurImageIndex[i];
 		
-#ifdef KJH_FIX_RENDER_PERIODITEM_DURABILITY
-		// 기간제 아이템이고 기간이 끝나지 않았을 때는 내구도 표시 안함
 		if( (pItem->bPeriodItem == true) && (pItem->bExpiredPeriod == false) )
 		{
 			continue;
 		}
-#endif // KJH_FIX_RENDER_PERIODITEM_DURABILITY
 
 		if( i == EQUIPMENT_HELPER )
 		{
 			continue;
 		}
 
-		// 아이템이 존재하지 않는다.
 		if( pItem->Type == -1 )
 		{
 			continue;
 		}
 
-		// 예외
 		if( i == EQUIPMENT_WEAPON_RIGHT )
 		{
-			if( pItem->Type == ITEM_BOW+15 )			// 석궁화살 일때는 내구도 표시안함
+			if( pItem->Type == ITEM_BOW+15 )
 			{
 				continue;
 			}
 		}
 		else if( i == EQUIPMENT_WEAPON_LEFT)
 		{
-			// 활을 사용할때는 왼손을 무기내구도 인덱스로 바꿈	
-#ifdef ADD_SOCKET_ITEM
-			if( GetEquipedBowType( pItem ) == BOWTYPE_BOW )
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-			if( pItem->Type >= ITEM_BOW && pItem->Type <= ITEM_BOW+7 
-				|| pItem->Type == ITEM_BOW+17 
-				|| pItem->Type >= ITEM_BOW+20 && pItem->Type <= ITEM_BOW+22 )
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
+			if( gCharacterManager.GetEquipedBowType( pItem ) == BOWTYPE_BOW )
 			{
 				iTempImageIndex = m_iItemDurImageIndex[EQUIPMENT_WEAPON_RIGHT];
 			}
 
-			if( pItem->Type == ITEM_BOW+7 )		// 화살 일때는 내구도 표시안함.
+			if( pItem->Type == ITEM_BOW+7 )
 			{
 				continue;
 			}

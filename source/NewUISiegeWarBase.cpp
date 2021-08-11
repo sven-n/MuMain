@@ -1,5 +1,4 @@
 // NewUISiegeWarBase.cpp: implementation of the CNewUISiegeWarBase class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -10,10 +9,8 @@ using namespace SEASON3B;
 #include "wsclientinline.h"
 #include "GMBattleCastle.h"
 #include "UIGuildInfo.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 SEASON3B::CNewUISiegeWarBase::CNewUISiegeWarBase()
 {
@@ -226,7 +223,7 @@ bool SEASON3B::CNewUISiegeWarBase::InitBattleSkill()
 		{
 			m_listBattleSkill.push_back( AT_SKILL_INVISIBLE );
 			m_listBattleSkill.push_back( AT_SKILL_REMOVAL_INVISIBLE );
-			if( GetBaseClass ( Hero->Class ) == CLASS_DARK_LORD )
+			if( gCharacterManager.GetBaseClass ( Hero->Class ) == CLASS_DARK_LORD )
 			{
 				m_listBattleSkill.push_back( AT_SKILL_REMOVAL_BUFF );
 			}

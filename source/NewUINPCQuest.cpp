@@ -7,6 +7,7 @@
 #include "NewUISystem.h"
 #include "CSQuest.h"
 #include "wsclientinline.h"
+#include "CharacterManager.h"
 
 extern bool bCheckNPC;
 extern int g_iNumLineMessageBoxCustom;
@@ -317,7 +318,7 @@ bool CNewUINPCQuest::RenderItemMobText()
 	g_pRenderText->SetBgColor(0);
 
     QUEST_ATTRIBUTE* pQuest = g_csQuest.GetCurQuestAttribute();
-	int nClass = ::GetBaseClass(Hero->Class);
+	int nClass = gCharacterManager.GetBaseClass(Hero->Class);
 
     for (int i = 0; i < pQuest->shQuestConditionNum; ++i)
     {
@@ -392,7 +393,7 @@ void CNewUINPCQuest::RenderItem3D()
 	const float Height = 27.f;
 
     QUEST_ATTRIBUTE* pQuest = g_csQuest.GetCurQuestAttribute();
-	int nClass = ::GetBaseClass(Hero->Class);
+	int nClass = gCharacterManager.GetBaseClass(Hero->Class);
 
     for (int i = 0; i < pQuest->shQuestConditionNum; ++i)
     {

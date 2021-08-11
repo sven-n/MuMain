@@ -1,12 +1,4 @@
 // NewUIPetInformation.cpp: imp0lementation of the CNewUIPetInfoWindow class.
-//
-//
-// 설  명 : 펫 정보창 인터페이스
-//
-// 작성자 : Pruarin
-//
-// 생성날짜 : 2007.7.11(수)
-//
 ////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -15,26 +7,19 @@
 #include "NewUISystem.h"
 #include "wsclientinline.h"
 #include "GIPetManager.h"
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 using namespace SEASON3B;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 CNewUIPetInfoWindow::CNewUIPetInfoWindow() 
 {
 	m_pNewUIMng = NULL;
 	m_Pos.x = m_Pos.y = 0;
 	m_iNumCurOpenTab = TAB_TYPE_DARKHORSE;
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 	CalcDamage(m_iNumCurOpenTab);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 	m_EventState = EVENT_NONE;
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM										//## 소스정리 대상임.
-	m_bEquipedDarkHorse = false;
-	m_bEquipedDarkSpirit = false;
-	memset( &m_sPetInfo, 0, sizeof(PET_INFO) );
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM									//## 소스정리 대상임.
+
 }
 
 CNewUIPetInfoWindow::~CNewUIPetInfoWindow() 
@@ -42,8 +27,6 @@ CNewUIPetInfoWindow::~CNewUIPetInfoWindow()
 	Release(); 
 }
 
-//---------------------------------------------------------------------------------------------
-// Create
 bool CNewUIPetInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
 	if( NULL == pNewUIMng )
@@ -755,7 +738,7 @@ void CNewUIPetInfoWindow::CalcDamage( int iNumTapButton )
 	case TAB_TYPE_DARKHORSE:
 		{
 			int iSkillDamage[2];
-			CharacterMachine->GetSkillDamage( AT_SKILL_DARK_HORSE, &iSkillDamage[0], &iSkillDamage[1] );
+			gCharacterManager.GetSkillDamage( AT_SKILL_DARK_HORSE, &iSkillDamage[0], &iSkillDamage[1] );
 
 			pPetInfo = Hero->GetEquipedPetInfo(PET_TYPE_DARK_HORSE);
 		    m_aiDamage[0] = pPetInfo->m_wDamageMin+iSkillDamage[0];

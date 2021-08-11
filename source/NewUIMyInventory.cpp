@@ -25,39 +25,24 @@
 #include "UIManager.h"
 #include "CSItemOption.h"
 #include "MapManager.h"
-#ifdef LDK_ADD_NEW_PETPROCESS
 #include "w_PetProcess.h"
-#endif //LDK_ADD_NEW_PETPROCESS
-#ifdef SOCKET_SYSTEM
 #include "SocketSystem.h"
-#endif	// SOCKET_SYSTEM
-#ifdef CSK_FIX_WOPS_K27964_LOSTMAP_POP
 #include "w_CursedTemple.h"
-#endif // CSK_FIX_WOPS_K27964_LOSTMAP_POP
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
 #include "PortalMgr.h"
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 #include "Event.h"
 #endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 #include "GMUnitedMarketPlace.h"
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 #include "ChangeRingManager.h"
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 #ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK
 #ifdef LDK_ADD_SCALEFORM
 #include "CGFxProcess.h"
 #endif //LDK_ADD_SCALEFORM
+#include "CharacterManager.h"
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUIMyInventory::CNewUIMyInventory()
 { 
@@ -282,20 +267,17 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 	if(pItem == NULL)
 		return false;
 	
-	//////////////////////////////////////////////////////////////////////////
-	//. 장착 가능한 클래스 체크
 	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
 	bool bEquipable = false;
-	if( pItemAttr->RequireClass[GetBaseClass(Hero->Class)] )
-		bEquipable = true; //. 착용 可
-	/* 예외 */
-	else if (GetBaseClass(Hero->Class) == CLASS_DARK && pItemAttr->RequireClass[CLASS_WIZARD] 
-		&& pItemAttr->RequireClass[CLASS_KNIGHT])
-		bEquipable = true; //. 마검일 경우 법사, 기사것을 착용 可
+	if( pItemAttr->RequireClass[gCharacterManager.GetBaseClass(Hero->Class)] )
+		bEquipable = true;
 
-	// 전직단계를 검사해서 
-	BYTE byFirstClass = GetBaseClass(Hero->Class);
-	BYTE byStepClass = GetStepClass(Hero->Class);
+	else if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK && pItemAttr->RequireClass[CLASS_WIZARD] 
+		&& pItemAttr->RequireClass[CLASS_KNIGHT])
+		bEquipable = true;
+
+	BYTE byFirstClass = gCharacterManager.GetBaseClass(Hero->Class);
+	BYTE byStepClass = gCharacterManager.GetStepClass(Hero->Class);
 	if( pItemAttr->RequireClass[byFirstClass] > byStepClass)
 	{
 		return false;
@@ -304,21 +286,19 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 	if(bEquipable == false)
 		return false;
 
-	//////////////////////////////////////////////////////////////////////////
-	//. 장착 가능한 슬롯 체크
 	bEquipable = false;
 	if(pItemAttr->m_byItemSlot == iIndex)
-		bEquipable = true; //. 착용 可
-	/* 예외 */
+		bEquipable = true;
+
 	else if(pItemAttr->m_byItemSlot == EQUIPMENT_WEAPON_RIGHT && iIndex == EQUIPMENT_WEAPON_LEFT)
 	{
-		if (GetBaseClass(Hero->Class) == CLASS_KNIGHT || GetBaseClass(Hero->Class) == CLASS_DARK
+		if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK
 #ifdef PBG_ADD_NEWCHAR_MONK
 			|| GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
-			)	// 기사 마검은 그냥 손 위치 무시하고 찰수있다.
+			)
 		{
-			if (!pItemAttr->TwoHand)	// 단, 양손 무기는 오른손에만 장비 가능
+			if (!pItemAttr->TwoHand)
 				bEquipable = true;
 #ifdef PBG_FIX_EQUIP_TWOHANDSWORD
 			else
@@ -328,21 +308,21 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 			}
 #endif //PBG_FIX_EQUIP_TWOHANDSWORD
 		}
-		else if (GetBaseClass(Hero->Class) == CLASS_SUMMONER &&
-			!(pItem->Type >= ITEM_STAFF && pItem->Type <= ITEM_STAFF+MAX_ITEM_INDEX))	// 소환술사는 스틱과 서외에는 그냥 손 위치 무시하고 찰수있다.
+		else if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_SUMMONER &&
+			!(pItem->Type >= ITEM_STAFF && pItem->Type <= ITEM_STAFF+MAX_ITEM_INDEX))
 			bEquipable = true;
 	}
 	else if(pItemAttr->m_byItemSlot == EQUIPMENT_RING_RIGHT && iIndex == EQUIPMENT_RING_LEFT)
 		bEquipable = true;
 
-	if (GetBaseClass(Hero->Class) == CLASS_ELF)
+	if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
 	{
 		//ITEM *r = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
 		ITEM *l = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT ];
 		if (iIndex == EQUIPMENT_WEAPON_RIGHT && l->Type != ITEM_BOW+7
-			&& (l->Type >= ITEM_BOW && l->Type < ITEM_BOW+MAX_ITEM_INDEX))	// 왼손에 활(석궁용화살 제외)이면
+			&& (l->Type >= ITEM_BOW && l->Type < ITEM_BOW+MAX_ITEM_INDEX))
 		{
-			if (pItem->Type != ITEM_BOW+15)	// 오른손에 화살만 장비 가능
+			if (pItem->Type != ITEM_BOW+15)
 				bEquipable = false;
 		}
 	}
@@ -359,8 +339,6 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 	if(bEquipable == false)
 		return false;
 
-	//////////////////////////////////////////////////////////////////////////
-	//. 요구 능력치 체크
 	WORD wStrength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
 	WORD wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
 	WORD wEnergy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
@@ -389,12 +367,12 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 	{
 		for (int i = 0; i < pItem->SocketCount; ++i)
 		{
-			if (pItem->SocketSeedID[i] == 38)	// 필요힘 감소
+			if (pItem->SocketSeedID[i] == 38)
 			{
 				int iReqStrengthDown = g_SocketItemMgr.GetSocketOptionValue(pItem, i);
 				iDecNeedStrength += iReqStrengthDown;
 			}
-			else if (pItem->SocketSeedID[i] == 39)	// 필요민 감소
+			else if (pItem->SocketSeedID[i] == 39)
 			{
 				int iReqDexterityDown = g_SocketItemMgr.GetSocketOptionValue(pItem, i);
 				iDecNeedDex += iReqDexterityDown;
@@ -404,66 +382,47 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 #endif	// ADD_SOCKET_STATUS_BONUS
 
 	if ( pItem->RequireStrength - iDecNeedStrength > wStrength )
-		return false;    //  요구힘보다 작으면 실패.
+		return false;
 	if ( pItem->RequireDexterity - iDecNeedDex > wDexterity )
-		return false;    //  요구민첩보다 작으면 실패.
+		return false;
 	if ( pItem->RequireEnergy > wEnergy )
-		return false;    //  요구에너지보다 작으면 실패.
+		return false;
 	if ( pItem->RequireVitality > wVitality )
-		return false;    //  요구체력보다 작으면 실패.
+		return false;
 	if( pItem->RequireCharisma > wCharisma )
-		return false;    //  요구통솔보다 작으면 실패.
+		return false;
 	if( pItem->RequireLevel > wLevel )
-		return false;    //  요구레벨보다 작으면 실패.
+		return false;
 
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-	if(pItem->Type == ITEM_HELPER+5 )		// 다크스피릿
+	if(pItem->Type == ITEM_HELPER+5 )
 	{
 		PET_INFO* pPetInfo = giPetManager::GetPetInfo( pItem );
 		WORD wRequireCharisma = (185+(pPetInfo->m_wLevel*15));
 		if( wRequireCharisma > wCharisma ) 
-			return false;	//  요구통솔보다 작으면 실패.
+			return false;
 	}
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM								//## 소스정리 대상임.
-	PET_INFO petInfo;
-	giPetManager::GetPetInfo(petInfo, pItem->Type);
-	WORD wRequireCharisma = (185+(petInfo.m_wLevel*15));		// 이혁재 - 다크호스, 스피릿 요구 통솔적용
 
-	if(pItem->Type == 421 )		   // 이혁재 - 다크 스피릿 일때 요구통솔이 작으면 실패
-	{
-		if( wRequireCharisma > wCharisma ) 
-			return false;	//  요구통솔보다 작으면 실패.
-	}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM								//## 소스정리 대상임.
-	//////////////////////////////////////////////////////////////////////////
-	//  특정 행동이나, 특정 맵에서 장착할수 없는 아이템 체크
 	if (gMapManager.WorldActive==WD_7ATLANSE && (pItem->Type >= ITEM_HELPER+2 && pItem->Type <= ITEM_HELPER+3))
 	{ 
-		//. 아틀란스에서 유니리아, 디노란트, 다크호스 불가
 		return false;
 	}
 	else if(pItem->Type==ITEM_HELPER+2 && gMapManager.WorldActive==WD_10HEAVEN)
 	{
-		//. 천공에서 유니리아 불가
 		return false;
 	}
 	else if(pItem->Type==ITEM_HELPER+2 && g_Direction.m_CKanturu.IsMayaScene())
 	{
-		//. 칸투르 보스전에서 유니리아 불가
 		return false;
 	}
-	// 카오스캐슬에서 장착할 수 없는 아이템
 	else if ( gMapManager.InChaosCastle() || (M34CryWolf1st::Get_State_Only_Elf()
-		&& g_isCharacterBuff((&Hero->Object), eBuff_CrywolfHeroContracted) ) )  // 크라이울프 MVP에서 요정이 제단에 계약 된 상태 일때 착용 할수 없는것
+		&& g_isCharacterBuff((&Hero->Object), eBuff_CrywolfHeroContracted) ) )
 	{ 
-		//. 카캐에서 유니리아, 디노란트, 다크호스, 다크스피릿, 펜릴 불가
 		if( (pItem->Type>=ITEM_HELPER+2 && pItem->Type<=ITEM_HELPER+5) || pItem->Type==ITEM_HELPER+37)
 			return false;
 	}
 	else if( ( pItem->Type>=ITEM_HELPER+2 && pItem->Type<=ITEM_HELPER+4 || pItem->Type == ITEM_HELPER+37 )
 		&& Hero->Object.CurrentAction>=PLAYER_SIT1 && Hero->Object.CurrentAction<=PLAYER_SIT_FEMALE2 )
 	{
-		// 캐릭터가 앉아있는 동안은 유니리아, 디노란트, 다크호스, 펜릴 불가
 		return false;
 	}
 
@@ -1611,21 +1570,18 @@ void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 	{
 		if(i == EQUIPMENT_HELM)
 		{
-			if(GetBaseClass(Hero->Class) == CLASS_DARK)
+			if(gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK)
 			{
-				// 마검사는 헬맷 공간 안그림
 				continue;
 			}
 		}
 #ifdef PBG_ADD_NEWCHAR_MONK
-		// 몽크일 경우 장갑을 그리지 않는다
 		if((i == EQUIPMENT_GLOVES) && (GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER))
 			continue;	
 #endif //PBG_ADD_NEWCHAR_MONK
 
 		EnableAlphaTest();
 		
-		//. 스롯 배경 그리기
 		RenderImage(m_EquipmentSlots[i].dwBgImage, m_EquipmentSlots[i].x, m_EquipmentSlots[i].y, 
 			m_EquipmentSlots[i].width, m_EquipmentSlots[i].height);
 		DisableAlphaBlend();
@@ -1953,12 +1909,9 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 			}
 			else
 			{
-				//. 장비창 아이템을 집는다.
 				ITEM* pEquippedItem = &CharacterMachine->Equipment[m_iPointedSlot];
-				if(pEquippedItem->Type >= 0)	//. 슬롯에 아이템이 있다면
+				if(pEquippedItem->Type >= 0)
 				{
-#ifdef KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
-					// 이카루스일때 예외처리
 					if( gMapManager.WorldActive == WD_10HEAVEN )		
 					{
 						ITEM* pEquippedPetItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
@@ -1966,16 +1919,14 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 
 						if( m_iPointedSlot == EQUIPMENT_HELPER || m_iPointedSlot == EQUIPMENT_WING )
 						{
-							// 장비창에서 펫을 집었을때, 날개가 없으면, 못집는다.
-							if( ((m_iPointedSlot == EQUIPMENT_HELPER) && !IsEquipedWing()) )
+							if( ((m_iPointedSlot == EQUIPMENT_HELPER) && !gCharacterManager.IsEquipedWing()) )
 							{
 								bPicked = false;
 							}
-							// 장비창에서 날개를 집었을때, 펫(디노란트,다크호스,펜릴)이 없으면, 못집는다.
 							else if( ((m_iPointedSlot == EQUIPMENT_WING) &&  
-								!((pEquippedPetItem->Type == ITEM_HELPER+3)				// 디노란트
-								|| (pEquippedPetItem->Type == ITEM_HELPER+4)			// 다크호스
-								|| (pEquippedPetItem->Type == ITEM_HELPER+37)))			// 펜릴
+								!((pEquippedPetItem->Type == ITEM_HELPER+3)
+								|| (pEquippedPetItem->Type == ITEM_HELPER+4)
+								|| (pEquippedPetItem->Type == ITEM_HELPER+37)))
 								)
 							{
 								bPicked = false;
@@ -1986,7 +1937,7 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 						{
 							if(CNewUIInventoryCtrl::CreatePickedItem(NULL, pEquippedItem))
 							{	
-								UnequipItem(m_iPointedSlot);	//. 장착된 아이템 해제
+								UnequipItem(m_iPointedSlot);
 							}
 						}
 					}
@@ -1994,15 +1945,9 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 					{
 						if(CNewUIInventoryCtrl::CreatePickedItem(NULL, pEquippedItem))
 						{	
-							UnequipItem(m_iPointedSlot);	//. 장착된 아이템 해제
+							UnequipItem(m_iPointedSlot);
 						}
 					}
-#else // KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS
-					if(CNewUIInventoryCtrl::CreatePickedItem(NULL, pEquippedItem))
-					{	
-						UnequipItem(m_iPointedSlot);	//. 장착된 아이템 해제
-					}
-#endif // KJH_FIX_WOPS_K26606_TRADE_WING_IN_IKARUS	
 				}
 			}
 
@@ -2019,7 +1964,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 		return false;
 	}
 
-	//. 외부에서 인벤토리로
 	CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 	if(m_pNewInventoryCtrl && pPickedItem 
 		&& SEASON3B::IsRelease(VK_LBUTTON)
@@ -2033,12 +1977,9 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 		}
 		if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
 		{	
-			//. 인벤토리에서 인벤토리
-
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 
-			// 보석사용
 			if(pPickItem->Type == ITEM_POTION+13
 				|| pPickItem->Type == ITEM_POTION+14
 				|| pPickItem->Type == ITEM_POTION+16
@@ -2347,7 +2288,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 #endif //PSW_SECRET_ITEM
 #ifdef PSW_FRUIT_ITEM
 			else if( ( pItem->Type>=ITEM_HELPER+54 && pItem->Type<=ITEM_HELPER+57 )
-				|| ( pItem->Type==ITEM_HELPER+58 && GetBaseClass( Hero->Class )==CLASS_DARK_LORD ) )
+				|| ( pItem->Type==ITEM_HELPER+58 && gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD ) )
 			{
 				bool result = true;
 				WORD point[5] = { 0, };
@@ -2374,7 +2315,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					32, 27, 25, 20, 0,
 #endif //PBG_ADD_NEWCHAR_MONK
 				};
-				point[pItem->Type-(ITEM_HELPER+54)] -= nStat[GetBaseClass(Hero->Class)][pItem->Type-(ITEM_HELPER+54)];
+				point[pItem->Type-(ITEM_HELPER+54)] -= nStat[gCharacterManager.GetBaseClass(Hero->Class)][pItem->Type-(ITEM_HELPER+54)];
 #endif //PBG_FIX_RESETFRUIT_CAL
 
 				if(point[pItem->Type-(ITEM_HELPER+54)] < (pItem->Durability*10) ) 
@@ -2392,7 +2333,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				}
 			}
 #ifdef LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD
-			else if( pItem->Type==ITEM_HELPER+58 && GetBaseClass( Hero->Class )!=CLASS_DARK_LORD )
+			else if( pItem->Type==ITEM_HELPER+58 && gCharacterManager.GetBaseClass( Hero->Class )!=CLASS_DARK_LORD )
 			{
 				SEASON3B::CreateOkMessageBox(GlobalText[1905]);
 				return true;				
@@ -2564,7 +2505,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					{
 						if(pItem->Level == 32)
 						{
-							if (GetBaseClass(Class) != CLASS_DARK_LORD)
+							if (gCharacterManager.GetBaseClass(Class) != CLASS_DARK_LORD)
 							{
 								SEASON3B::CreateOkMessageBox(GlobalText[1905]);
 								return true;

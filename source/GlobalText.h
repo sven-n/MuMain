@@ -231,4 +231,6 @@ protected:
 typedef TGlobalText<char>		CGlobalText;
 typedef TGlobalText<wchar_t>	CGlobalTextW;
 
+extern CGlobalText GlobalText;
+
 #endif /* _GLOBALTEXT_H_ */

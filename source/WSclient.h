@@ -9,7 +9,6 @@
 #include "SessionCryptor.h"
 #endif // PKD_ADD_ENHANCED_ENCRYPTION
 #include "CSMapServer.h"
-//#include "../ProtocolSend.h"
 
 #define WM_ASYNCSELECTMSG (WM_USER+0)
 
@@ -2114,19 +2113,12 @@ typedef struct
 #endif// PET_SYSTEM
 
 
-//////////////////////////////////////////////////////////////////////////
-//	
-// From 10. 11 , 안성민
-//
-//////////////////////////////////////////////////////////////////////////
-
-//Type은 0: 배틀사커, 1:길드전, 2:결투
 typedef struct
 {
 	PBMSG_HEADER    m_Header;
 	BYTE			m_subCode;
 	BYTE			m_Type;	
-	WORD			m_Time;		// 경기시간 : 단위(초)- 시작값은 1부터 증가
+	WORD			m_Time;
 }PMSG_MATCH_TIMEVIEW, *LPPMSG_MATCH_TIMEVIEW;
 
 typedef struct
@@ -2135,7 +2127,7 @@ typedef struct
 	BYTE			m_subCode;
 	BYTE			m_Type;
 
-	char			m_MatchTeamName1[MAX_ID_SIZE];	//결투의 경우만 캐릭터이름
+	char			m_MatchTeamName1[MAX_ID_SIZE];
 	WORD			m_Score1;
 
 	char			m_MatchTeamName2[MAX_ID_SIZE];

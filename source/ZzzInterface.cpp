@@ -91,7 +91,9 @@
 #include "CGFxProcess.h"
 #endif //LDK_ADD_SCALEFORM
 
-#include "../ProtocolSend.h"
+#include "ProtocolSend.h"
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 //////////////////////////////////////////////////////////////////////////
 //  EXTERN.
@@ -1549,35 +1551,17 @@ int RenderDebugText(int y)
 	return y;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 인밴토리에서 화살을 찾아 인덱스를 리턴하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
-int SearchArrow ()
+int SearchArrow()
 {
-#ifdef ADD_SOCKET_ITEM	
-	if ( GetBaseClass(CharacterAttribute->Class)==CLASS_ELF )
+	if ( gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_ELF )
     {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int Arrow = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-        int Arrow;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		// 화살인 경우
-#ifdef KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-		if( GetEquipedBowType( ) == BOWTYPE_BOW )
-#else // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-		if( GetEquipedBowType(&(CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT])) == BOWTYPE_BOW )
-#endif // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
+
+		if( gCharacterManager.GetEquipedBowType( ) == BOWTYPE_BOW )
 		{
 			Arrow = ITEM_BOW+15;
 		}
-		// 석궁 화살인 경우
-#ifdef KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-		else if( GetEquipedBowType( ) == BOWTYPE_CROSSBOW )
-#else // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-		else if( GetEquipedBowType(&(CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT])) == BOWTYPE_CROSSBOW )
-#endif // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
+		else if( gCharacterManager.GetEquipedBowType( ) == BOWTYPE_CROSSBOW )
 		{
 			Arrow = ITEM_BOW+7;
 		}
@@ -1585,105 +1569,34 @@ int SearchArrow ()
 		int iIndex = g_pMyInventory->FindItemReverseIndex(Arrow);
 		return iIndex;
 	}
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-	
-    if ( GetBaseClass(CharacterAttribute->Class)==CLASS_ELF )
-    {
-        int Arrow;
-		
-		int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-		int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-		
-		
-        //  화살일 경우.
-		if( (LeftType>=ITEM_BOW && LeftType<ITEM_BOW+7) || LeftType==ITEM_BOW+17 || LeftType==ITEM_BOW+20
-			|| LeftType == ITEM_BOW+21 || LeftType == ITEM_BOW+22 )
-		{
-			Arrow=ITEM_BOW+15;
-		}
-        //  석궁 화살일 경우.
-		else if((RightType>=ITEM_BOW+8 && RightType<ITEM_BOW+15) ||
-			(RightType>=ITEM_BOW+16&& RightType<ITEM_BOW+MAX_ITEM_INDEX ) )
-		{
-			Arrow=ITEM_BOW+7;
-		}
-		
-		int iIndex = g_pMyInventory->FindItemReverseIndex(Arrow);
-		return iIndex;
-    }
-    else
-    {
-    }
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 	return -1;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 인밴토리에서 화살통의 수를 리턴하는 함수
-///////////////////////////////////////////////////////////////////////////////
 int SearchArrowCount()
 {
 	int Count = 0;
-#ifdef ADD_SOCKET_ITEM	
-	if ( GetBaseClass(CharacterAttribute->Class) == CLASS_ELF )
+	if (gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_ELF )
     {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int Arrow = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-        int Arrow;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		
-		// 화살인 경우
-		if( GetEquipedBowType() == BOWTYPE_BOW )
+		if(gCharacterManager.GetEquipedBowType() == BOWTYPE_BOW )
 		{
 			Arrow = ITEM_BOW+15;
 		}
-		// 석궁 화살인 경우
-		else if( GetEquipedBowType() == BOWTYPE_CROSSBOW )
+		else if(gCharacterManager.GetEquipedBowType() == BOWTYPE_CROSSBOW )
 		{
 			Arrow = ITEM_BOW+7;
 		}
-		
 		Count = g_pMyInventory->GetNumItemByType(Arrow);
 	}
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-	
-	
-    if ( GetBaseClass(CharacterAttribute->Class)==CLASS_ELF )
-    {
-        int Arrow;
-		int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-		int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-		
-		
-        //  화살일 경우.
-		if( (LeftType>=ITEM_BOW && LeftType<ITEM_BOW+7) || LeftType==ITEM_BOW+17 || LeftType==ITEM_BOW+20
-			|| LeftType == ITEM_BOW+21 || LeftType == ITEM_BOW+22 )
-		{
-			Arrow=ITEM_BOW+15;
-		}
-        //  석궁 화살일 경우.
-		else if((RightType>=ITEM_BOW+8 && RightType<ITEM_BOW+15) ||
-			(RightType>=ITEM_BOW+16&& RightType<ITEM_BOW+MAX_ITEM_INDEX ) )
-		{
-			Arrow=ITEM_BOW+7;
-		}
-		
-		Count = g_pMyInventory->GetNumItemByType(Arrow);
-    }
-    else
-    {
-    }
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 	return Count;
 }
 
 bool CheckTile(CHARACTER *c,OBJECT *o,float Range)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(c == NULL)	return false;
 	if(o == NULL)	return false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	float dx = o->Position[0]-(TargetX*TERRAIN_SCALE+TERRAIN_SCALE*0.5f);
 	float dy = o->Position[1]-(TargetY*TERRAIN_SCALE+TERRAIN_SCALE*0.5f);
 	
@@ -1692,7 +1605,6 @@ bool CheckTile(CHARACTER *c,OBJECT *o,float Range)
 	{
 		return true;
 	}
-	
 	return false;
 }
 
@@ -1710,17 +1622,9 @@ bool CheckWall(int sx1,int sy1,int sx2,int sy2)
 	
 	int error = 0,count = 0;
     do{
-#ifdef LDK_ADD_EMPIRE_GUARDIAN_DOOR_ATTACK
-		//제국 수호군 성문은 지형속성 무시하고 공격 가능하도록 하자
 		int _type = (SelectedCharacter >= 0 ? CharactersClient[SelectedCharacter].Object.Type : 0);
 		if	( ( _type!=MODEL_MONSTER01+183 && _type!=MODEL_MONSTER01+184 && _type!=MODEL_MONSTER01+186 && _type!=MODEL_MONSTER01+187 )
-			&& ( TerrainWall[Index]>=TW_NOMOVE && (TerrainWall[Index]&TW_ACTION)!=TW_ACTION && (TerrainWall[Index]&TW_HEIGHT)!=TW_HEIGHT && (TerrainWall[Index]&TW_CAMERA_UP)!=TW_CAMERA_UP ) )      //  카메라의 위치를 캐릭터의 중심에서 위로 올린다.
-#else //LDK_ADD_EMPIRE_GUARDIAN_DOOR_ATTACK
-		if ( TerrainWall[Index]>=TW_NOMOVE && (TerrainWall[Index]&TW_ACTION)!=TW_ACTION 
-            && (TerrainWall[Index]&TW_HEIGHT)!=TW_HEIGHT            //  
-            && (TerrainWall[Index]&TW_CAMERA_UP)!=TW_CAMERA_UP      //  카메라의 위치를 캐릭터의 중심에서 위로 올린다.
-			) 
-#endif //LDK_ADD_EMPIRE_GUARDIAN_DOOR_ATTACK
+			&& ( TerrainWall[Index]>=TW_NOMOVE && (TerrainWall[Index]&TW_ACTION)!=TW_ACTION && (TerrainWall[Index]&TW_HEIGHT)!=TW_HEIGHT && (TerrainWall[Index]&TW_CAMERA_UP)!=TW_CAMERA_UP ) )
         {
             return false;
         }
@@ -1748,14 +1652,11 @@ bool CheckAttack_Fenrir(CHARACTER* c)
 	}
 	else if(::IsStrifeMap(gMapManager.WorldActive) && c != Hero && c->m_byGensInfluence != Hero->m_byGensInfluence)
 	{	
-		if(((strcmp(GuildMark[Hero->GuildMarkIndex].GuildName,GuildMark[c->GuildMarkIndex].GuildName)==NULL) ||
-		(g_pPartyManager->IsPartyMember(SelectedCharacter)))
-		&& (HIBYTE(GetAsyncKeyState(VK_CONTROL))==128))
+		if(((strcmp(GuildMark[Hero->GuildMarkIndex].GuildName,GuildMark[c->GuildMarkIndex].GuildName)==NULL) ||	(g_pPartyManager->IsPartyMember(SelectedCharacter))) && (HIBYTE(GetAsyncKeyState(VK_CONTROL))==128))
 		{
 			return true;
 		}
-		else if((strcmp(GuildMark[Hero->GuildMarkIndex].GuildName,GuildMark[c->GuildMarkIndex].GuildName)!=NULL) && 
-		!g_pPartyManager->IsPartyMember(SelectedCharacter))
+		else if((strcmp(GuildMark[Hero->GuildMarkIndex].GuildName,GuildMark[c->GuildMarkIndex].GuildName)!=NULL) && !g_pPartyManager->IsPartyMember(SelectedCharacter))
 		{
 			return true;
 		}
@@ -2262,7 +2163,7 @@ bool CastWarriorSkill( CHARACTER *c, OBJECT *o, ITEM *p, int iSkill)
 	g_MovementSkill.m_bMagic = FALSE;
 	g_MovementSkill.m_iSkill = iSkill;
 	g_MovementSkill.m_iTarget = SelectedCharacter;
-    float Distance = GetSkillDistance( iSkill, c )*1.2f;
+    float Distance = gSkillManager.GetSkillDistance( iSkill, c )*1.2f;
 
 	if ( ( gMapManager.InBloodCastle() == true ) && ( iSkill>=AT_SKILL_SWORD1 && iSkill<=AT_SKILL_SWORD5 ) )
     {
@@ -2339,7 +2240,7 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 			break;
 		}
 		int iMana, iSkillMana;
-		GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
+		gSkillManager.GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
 		if(CharacterAttribute->Mana < iMana)
 		{
 			int Index = g_pMyInventory->FindManaItemIndex();
@@ -2355,7 +2256,7 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 			return false;
 		}
 		
-        if ( !CheckSkillDelay( g_MovementSkill.m_iSkill ) )
+        if ( !gSkillManager.CheckSkillDelay( g_MovementSkill.m_iSkill ) )
         {
             return false;
         }
@@ -2371,7 +2272,7 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 		if(CharacterAttribute->Skill[Hero->CurrentSkill] == p->Special[i])
 		{
 			int iMana;
-			GetSkillInformation( p->Special[i], 1, NULL, &iMana, NULL);
+			gSkillManager.GetSkillInformation( p->Special[i], 1, NULL, &iMana, NULL);
 			if(CharacterAttribute->Mana < iMana)
 			{
 				int Index = g_pMyInventory->FindManaItemIndex();
@@ -2382,7 +2283,7 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 				}
 				continue;
 			}
-            if ( !CheckSkillDelay( Hero->CurrentSkill ) )
+            if ( !gSkillManager.CheckSkillDelay( Hero->CurrentSkill ) )
             {
                 continue;
             }
@@ -2416,7 +2317,7 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 		)
 	{
 		int iMana;
-		GetSkillInformation( CharacterAttribute->Skill[Hero->CurrentSkill], 1, NULL, &iMana, NULL);
+		gSkillManager.GetSkillInformation( CharacterAttribute->Skill[Hero->CurrentSkill], 1, NULL, &iMana, NULL);
 		if(CharacterAttribute->Mana < iMana)
 		{
 			int Index = g_pMyInventory->FindManaItemIndex();
@@ -2428,7 +2329,7 @@ bool SkillWarrior(CHARACTER *c,ITEM *p)
 			return Success;
 		}
 		
-		float Distance = GetSkillDistance( CharacterAttribute->Skill[Hero->CurrentSkill], c );
+		float Distance = gSkillManager.GetSkillDistance( CharacterAttribute->Skill[Hero->CurrentSkill], c );
 		if( CheckTile( c, o, Distance ) )
 		{
 			o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
@@ -2462,52 +2363,45 @@ void UseSkillWarrior( CHARACTER *c, OBJECT *o)
 			else
 				SetAction(o,PLAYER_ATTACK_SKILL_SPEAR);
 			break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 		case AT_SKILL_BLOW_UP:
 		case AT_SKILL_BLOW_UP+1:
 		case AT_SKILL_BLOW_UP+2:
 		case AT_SKILL_BLOW_UP+3:
 		case AT_SKILL_BLOW_UP+4:
-#endif	//PJH_SEASON4_MASTER_RANK4
-		case AT_SKILL_ONETOONE:	// 블로우
+		case AT_SKILL_ONETOONE:
 			SetAction(o,PLAYER_ATTACK_ONETOONE);
 			break;
-        case AT_SKILL_RIDER:    //  디노란트 스킬.
+        case AT_SKILL_RIDER:
 			//		    SendRequestMagic(Skill,CharactersClient[g_MovementSkill.m_iTarget].Key);
             if ( gMapManager.WorldActive==WD_8TARKAN || gMapManager.WorldActive==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
                 SetAction ( o, PLAYER_SKILL_RIDER_FLY );
             else 
                 SetAction ( o, PLAYER_SKILL_RIDER );
             break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 		case AT_SKILL_FIRE_SCREAM_UP:
 		case AT_SKILL_FIRE_SCREAM_UP+1:
 		case AT_SKILL_FIRE_SCREAM_UP+2:
 		case AT_SKILL_FIRE_SCREAM_UP+3:
 		case AT_SKILL_FIRE_SCREAM_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 		case AT_SKILL_DARK_SCREAM:
 			break;
-
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 		case AT_SKILL_GAOTIC:
 			break;
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-        case AT_SKILL_STRONG_PIER:      //  스트롱피어.
+        case AT_SKILL_STRONG_PIER:
 		case AT_SKILL_FIRE_BUST_UP:
 		case AT_SKILL_FIRE_BUST_UP+1:
 		case AT_SKILL_FIRE_BUST_UP+2:
 		case AT_SKILL_FIRE_BUST_UP+3:
 		case AT_SKILL_FIRE_BUST_UP+4:
-        case AT_SKILL_LONGPIER_ATTACK:  //  롱피어어택.
-        case AT_SKILL_SPACE_SPLIT :     //  공간 가르기.
+        case AT_SKILL_LONGPIER_ATTACK:
+        case AT_SKILL_SPACE_SPLIT:
             break;
-        case AT_SKILL_RUSH :			//  기사 관통 스킬.
+        case AT_SKILL_RUSH:
 			SetAction ( o, PLAYER_ATTACK_RUSH );
             break;
 		default:
 			if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)
-				SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);	//^ 펜릴 스킬 관련(캐릭터 에니메이션 설정 관련)
+				SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
 			else
 				SetAction(o,PLAYER_ATTACK_SKILL_SWORD1+g_MovementSkill.m_iSkill-AT_SKILL_SWORD1);
 			break;
@@ -2522,11 +2416,9 @@ void UseSkillWarrior( CHARACTER *c, OBJECT *o)
 	Vector(1.f,1.f,1.f,Light);
 	
     if ( Skill!=AT_SKILL_STRONG_PIER && Skill!=AT_SKILL_LONGPIER_ATTACK 
-		&& Skill!=AT_SKILL_SPACE_SPLIT     //  공간 가르기.
+		&& Skill!=AT_SKILL_SPACE_SPLIT
 		&& Skill!=AT_SKILL_DARK_SCREAM     
-#ifdef PJH_SEASON4_MASTER_RANK4
 		&& !(AT_SKILL_FIRE_SCREAM_UP <= Skill && AT_SKILL_FIRE_SCREAM_UP+4 >= Skill)
-#endif //PJH_SEASON4_MASTER_RANK4
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		&& Skill!=AT_SKILL_THRUST
 		&& Skill!=AT_SKILL_STAMP
@@ -2540,22 +2432,12 @@ void UseSkillWarrior( CHARACTER *c, OBJECT *o)
     VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position,c->TargetPosition);
 	o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
 	
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 	if(Skill != AT_SKILL_GAOTIC)
-#endif //#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 		SendRequestMagic(Skill,CharactersClient[g_MovementSkill.m_iTarget].Key);
 	
-#ifdef LDS_FIX_SYNCRO_HEROATTACK_ACTION_WITH_SERVER
-#else // LDS_FIX_SYNCRO_HEROATTACK_ACTION_WITH_SERVER
-	c->AttackTime = 1;
-#endif // LDS_FIX_SYNCRO_HEROATTACK_ACTION_WITH_SERVER
-	
-    //  블러드캐슬에서 돌려치기류의 무기의 이동 위치 변경.
     if ( ((!g_isCharacterBuff(o, eDeBuff_Harden)) && c->Helper.Type!=MODEL_HELPER+4 )
 			&& Skill != AT_SKILL_DARK_SCREAM 
-#ifdef PJH_SEASON4_MASTER_RANK4
 			&& !(AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP+4)
-#endif //PJH_SEASON4_MASTER_RANK4
 			)
 		{
 			BYTE positionX = (BYTE)(c->TargetPosition[0]/TERRAIN_SCALE);
@@ -2594,16 +2476,12 @@ void UseSkillWarrior( CHARACTER *c, OBJECT *o)
 					&& Skill != AT_SKILL_RIDER 
 					&& Skill != AT_SKILL_STRONG_PIER 
 					&& Skill != AT_SKILL_LONGPIER_ATTACK 
-					&& Skill != AT_SKILL_SPACE_SPLIT		// 공간가르기
-#ifdef PJH_SEASON4_MASTER_RANK4
+					&& Skill != AT_SKILL_SPACE_SPLIT
 					&& !(AT_SKILL_BLOW_UP <= Skill && Skill <= AT_SKILL_BLOW_UP+4)
-#endif	//PJH_SEASON4_MASTER_RANK4
 					&& !(AT_SKILL_FIRE_BUST_UP <= Skill && Skill <= AT_SKILL_FIRE_BUST_UP+4)
 					
 					)
 				{	
-					// 창 스킬 미끄럼 방지
-					//SendPosition( positionX, positionY );
 					gProtocolSend.SendPositionNew( positionX, positionY );
 				}
 			}
@@ -2622,18 +2500,16 @@ void UseSkillWizard( CHARACTER *c, OBJECT *o)
 	switch ( Skill)
 	{
 	case AT_SKILL_SPEAR:
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_BLOW_UP:
 	case AT_SKILL_BLOW_UP+1:
 	case AT_SKILL_BLOW_UP+2:
 	case AT_SKILL_BLOW_UP+3:
 	case AT_SKILL_BLOW_UP+4:
-#endif	//PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_ONETOONE:
 		return;
 	}
 	
-	if(Skill == AT_SKILL_DEATH_CANNON)	//. 마샬포
+	if(Skill == AT_SKILL_DEATH_CANNON)
 	{
 		if(Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF+MAX_ITEM_INDEX)
 			return;
@@ -2679,11 +2555,6 @@ void UseSkillWizard( CHARACTER *c, OBJECT *o)
 		LetHeroStop();
 		break;
 	}
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
 
 void UseSkillElf( CHARACTER *c, OBJECT *o)
@@ -2701,27 +2572,21 @@ void UseSkillElf( CHARACTER *c, OBJECT *o)
 	case AT_SKILL_HEAL_UP+3:
 	case AT_SKILL_HEAL_UP+4:
 	case AT_SKILL_HEALING:
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_ATT_POWER_UP:
 	case AT_SKILL_ATT_POWER_UP+1:
 	case AT_SKILL_ATT_POWER_UP+2:
 	case AT_SKILL_ATT_POWER_UP+3:
 	case AT_SKILL_ATT_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_ATTACK:
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	case AT_SKILL_RECOVER:
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 //#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 //	case AT_SKILL_MULTI_SHOT:
 //#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_DEF_POWER_UP:
 	case AT_SKILL_DEF_POWER_UP+1:
 	case AT_SKILL_DEF_POWER_UP+2:
 	case AT_SKILL_DEF_POWER_UP+3:
 	case AT_SKILL_DEF_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_DEFENSE:
 		SendRequestMagic(Skill,CharactersClient[g_MovementSkill.m_iTarget].Key);
 		SetPlayerMagic(c);
@@ -2752,11 +2617,6 @@ void UseSkillElf( CHARACTER *c, OBJECT *o)
 		SetPlayerHighBowAttack ( c );
         break;
 	}
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
 
 void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
@@ -2784,16 +2644,16 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 			{
 				switch(pCha->Helper.Type)
 				{
-				case MODEL_HELPER+2:	// 유니리아
+				case MODEL_HELPER+2:
 					SetAction(pObj, PLAYER_SKILL_DRAIN_LIFE_UNI);
 					break;
-				case MODEL_HELPER+3:	// 디노란트
+				case MODEL_HELPER+3:
 					SetAction(pObj, PLAYER_SKILL_DRAIN_LIFE_DINO);
 					break;
-				case MODEL_HELPER+37:	// 펜릴	
+				case MODEL_HELPER+37:
 					SetAction(pObj, PLAYER_SKILL_DRAIN_LIFE_FENRIR);
 					break;
-				default:	// 기본
+				default:
 					SetAction(pObj, PLAYER_SKILL_DRAIN_LIFE);
 					break;
 				}
@@ -2802,16 +2662,16 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 			{
 				switch(pCha->Helper.Type)
 				{
-				case MODEL_HELPER+2:	// 유니리아
+				case MODEL_HELPER+2:
 					SetAction(pObj, PLAYER_SKILL_LIGHTNING_ORB_UNI);
 					break;
-				case MODEL_HELPER+3:	// 디노란트
+				case MODEL_HELPER+3:
 					SetAction(pObj, PLAYER_SKILL_LIGHTNING_ORB_DINO);
 					break;
-				case MODEL_HELPER+37:	// 펜릴	
+				case MODEL_HELPER+37:
 					SetAction(pObj, PLAYER_SKILL_LIGHTNING_ORB_FENRIR);
 					break;
-				default:	// 기본
+				default:
 					SetAction(pObj, PLAYER_SKILL_LIGHTNING_ORB);
 					break;
 				}	
@@ -2825,30 +2685,27 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 				0, 0, wTargetKey,0);
 		}
 		break;
-		// ChainLighting
-#ifdef PJH_ADD_MASTERSKILL
 	case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+1:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+2:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+3:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+4:
-#endif
 	case AT_SKILL_ALICE_CHAINLIGHTNING:
 		{
 			LetHeroStop();
 			
 			switch(pCha->Helper.Type)
 			{
-			case MODEL_HELPER+2:	// 유니리아
+			case MODEL_HELPER+2:
 				SetAction(pObj, PLAYER_SKILL_CHAIN_LIGHTNING_UNI);
 				break;
-			case MODEL_HELPER+3:	// 디노란트
+			case MODEL_HELPER+3:
 				SetAction(pObj, PLAYER_SKILL_CHAIN_LIGHTNING_DINO);
 				break;
-			case MODEL_HELPER+37:	// 펜릴	
+			case MODEL_HELPER+37:
 				SetAction(pObj, PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR);
 				break;
-			default:	// 기본
+			default:
 				SetAction(pObj, PLAYER_SKILL_CHAIN_LIGHTNING);
 				break;
 			}	
@@ -2883,46 +2740,41 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 			SendRequestMagic(iSkill, wTargetKey);
 		}
 		break;
-#ifdef ASG_ADD_SKILL_BERSERKER
 	case AT_SKILL_ALICE_BERSERKER:
 		LetHeroStop();
-		// 동작 설정
 		switch(pCha->Helper.Type)
 		{
-		case MODEL_HELPER+2:	// 유니리아
+		case MODEL_HELPER+2:
 			SetAction(pObj, PLAYER_SKILL_SLEEP_UNI);
 			break;
-		case MODEL_HELPER+3:	// 디노란트
+		case MODEL_HELPER+3:
 			SetAction(pObj, PLAYER_SKILL_SLEEP_DINO);
 			break;
-		case MODEL_HELPER+37:	// 펜릴	
+		case MODEL_HELPER+37:
 			SetAction(pObj, PLAYER_SKILL_SLEEP_FENRIR);
 			break;
-		default:	// 기본
+		default:
 			SetAction(pObj, PLAYER_SKILL_SLEEP);
 			break;
 		}
 		SendRequestMagic(iSkill, HeroKey);
 		break;
-#endif	// ASG_ADD_SKILL_BERSERKER
 		case AT_SKILL_ALICE_WEAKNESS:
 		case AT_SKILL_ALICE_ENERVATION:
 			LetHeroStop();
-			SendRequestMagicContinue(iSkill, pCha->PositionX, pCha->PositionY,
-				(BYTE)(pObj->Angle[2]/360.f*256.f), 0, 0, 0xffff, 0);
-			// 동작 설정
+			SendRequestMagicContinue(iSkill, pCha->PositionX, pCha->PositionY,(BYTE)(pObj->Angle[2]/360.f*256.f), 0, 0, 0xffff, 0);
 			switch(pCha->Helper.Type)
 			{
-			case MODEL_HELPER+2:	// 유니리아
+			case MODEL_HELPER+2:
 				SetAction(pObj, PLAYER_SKILL_SLEEP_UNI);
 				break;
-			case MODEL_HELPER+3:	// 디노란트
+			case MODEL_HELPER+3:
 				SetAction(pObj, PLAYER_SKILL_SLEEP_DINO);
 				break;
-			case MODEL_HELPER+37:	// 펜릴	
+			case MODEL_HELPER+37:
 				SetAction(pObj, PLAYER_SKILL_SLEEP_FENRIR);
 				break;
-			default:	// 기본
+			default:
 				SetAction(pObj, PLAYER_SKILL_SLEEP);
 				break;
 			}
@@ -2930,7 +2782,7 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 	}
 }
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-// 레이지 파이터 스킬관련
+
 void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 {
 	int iSkill = g_MovementSkill.m_bMagic ? CharacterAttribute->Skill[g_MovementSkill.m_iSkill] : g_MovementSkill.m_iSkill;
@@ -3299,15 +3151,6 @@ bool UseSkillRagePosition(CHARACTER* pCha)
 }
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
-///////////////////////////////////////////////////////////////////////////////
-// 단축키에 정의된 아이템 사용.
-///////////////////////////////////////////////////////////////////////////////
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 화살 자동 재장전하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void ReloadArrow()
 {
     int Index = SearchArrow();
@@ -3323,7 +3166,7 @@ void ReloadArrow()
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
         bool Success = false;
 		
-		if ( GetBaseClass(CharacterAttribute->Class)==CLASS_ELF && SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL )
+		if (gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_ELF && SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL )
 		{
 			rp = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
 			lp = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
@@ -3332,17 +3175,7 @@ void ReloadArrow()
 			
 		if ( Success )
 		{
-			//  활.
-#ifdef ADD_SOCKET_ITEM
-			if( (GetEquipedBowType( lp ) == BOWTYPE_BOW) && (rp->Type == -1) )
-#else //ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-				if ( ( (lp->Type >= ITEM_BOW && lp->Type < ITEM_BOW+7) 
-					|| lp->Type == ITEM_BOW+17 
-					|| lp->Type == ITEM_BOW+20
-					|| lp->Type == ITEM_BOW+21 
-					|| lp->Type == ITEM_BOW+22 ) 
-					&& rp->Type == -1 )
-#endif // ADD_SOCKET_ITEM			// 정리할 때 지워야 하는 소스
+			if( (gCharacterManager.GetEquipedBowType( lp ) == BOWTYPE_BOW) && (rp->Type == -1) )
 				{
 					ITEM* pItem = g_pMyInventory->FindItem(Index);
 					SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
@@ -3351,17 +3184,10 @@ void ReloadArrow()
 						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, Index+MAX_EQUIPMENT, pItem, REQUEST_EQUIPMENT_INVENTORY, EQUIPMENT_WEAPON_RIGHT);	
 					}
 					g_pMyInventory->DeleteItem(Index);
-					
-					// 250 "화살통을 교체하였습니다."
 					g_pChatListBox->AddText("", GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);	
 				}
-				else // 석궁.
-#ifdef ADD_SOCKET_ITEM
-					if( (GetEquipedBowType( rp ) == BOWTYPE_CROSSBOW) && (lp->Type == -1) )
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-					if ( ( rp->Type>=ITEM_BOW+8 && rp->Type<ITEM_BOW+15 ) ||                             
-						( rp->Type>=ITEM_BOW+16 && rp->Type<ITEM_BOW+MAX_ITEM_INDEX ) && lp->Type==-1)
-#endif // ADD_SOCKET_ITEM	
+				else
+					if((gCharacterManager.GetEquipedBowType( rp ) == BOWTYPE_CROSSBOW) && (lp->Type == -1) )
 				{
 					ITEM* pItem = g_pMyInventory->FindItem(Index);
 					SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
@@ -3370,8 +3196,6 @@ void ReloadArrow()
 						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, Index+MAX_EQUIPMENT, pItem, REQUEST_EQUIPMENT_INVENTORY, EQUIPMENT_WEAPON_LEFT);	
 					}
 					g_pMyInventory->DeleteItem(Index);
-
-					// 250 "화살통을 교체하였습니다."
 					g_pChatListBox->AddText("", GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);
 				}
 		}
@@ -3380,28 +3204,17 @@ void ReloadArrow()
 	{
 		if(g_pChatListBox->CheckChatRedundancy(GlobalText[251]) == FALSE)
 		{
-			// 251 "화살이 없습니다."
 			g_pChatListBox->AddText("", GlobalText[251], SEASON3B::TYPE_ERROR_MESSAGE);
 		}
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 화살이 있는지 확인 후 없으면 재장전
-///////////////////////////////////////////////////////////////////////////////
 
 bool CheckArrow()
 {
 	int Right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
 	int Left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 	
-#ifdef ADD_SOCKET_ITEM
-	// 석궁
-#ifdef KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-	if( GetEquipedBowType( ) == BOWTYPE_CROSSBOW )
-#else // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-	if( GetEquipedBowType(&(CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT])) == BOWTYPE_CROSSBOW )
-#endif // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
+	if(gCharacterManager.GetEquipedBowType( ) == BOWTYPE_CROSSBOW )
 	{
 		if ( (Left!=ITEM_BOW+7) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability <= 0) )
 		{
@@ -3409,12 +3222,7 @@ bool CheckArrow()
 			return false;
 		}
 	}
-	// 활
-#ifdef KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-	else if( GetEquipedBowType( ) == BOWTYPE_BOW )
-#else // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
-	else if( GetEquipedBowType(&(CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT])) == BOWTYPE_BOW )
-#endif // KJH_FIX_RELOAD_ARROW_TO_CROSSBOW
+	else if(gCharacterManager.GetEquipedBowType( ) == BOWTYPE_BOW )
 	{
 		if ( (Right!=ITEM_BOW+15) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Durability <= 0) )
 		{
@@ -3422,40 +3230,11 @@ bool CheckArrow()
 			return false;
 		}
 	}
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-    //  석궁
-	if( (Right >= ITEM_BOW+8 && Right < ITEM_BOW+15) 
-		|| (Right >= ITEM_BOW+16&& Right < ITEM_BOW+17) 
-		|| (Right >= ITEM_BOW+18&& Right < ITEM_BOW+MAX_ITEM_INDEX) )
-	{
-		if ( Left!=ITEM_BOW+7 || CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability<=0 )
-		{
-			ReloadArrow ();
-			return false;
-		}
-	}
-	
-    //  활
-	if ( Left>=ITEM_BOW && Left<ITEM_BOW+7 || Left==ITEM_BOW+17 || Left==ITEM_BOW+20
-		|| Left == ITEM_BOW+21 || Left == ITEM_BOW+22 )
-	{
-		if ( Right!=ITEM_BOW+15 || CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Durability<=0 )
-		{
-			ReloadArrow ();
-			return false;
-		}
-	}
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
 	return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 요정 스킬
-///////////////////////////////////////////////////////////////////////////////
-
 bool SkillElf(CHARACTER *c,ITEM *p)
 {
-    //  무기에 장착된 스킬.
 	OBJECT *o = &c->Object;
 	bool Success = false;
 	for(int i=0;i<p->SpecialNum;i++)
@@ -3466,14 +3245,11 @@ bool SkillElf(CHARACTER *c,ITEM *p)
 		if(CharacterAttribute->Skill[Hero->CurrentSkill] == Spe_Num)
 		{
 			int iMana, iSkillMana;
-			GetSkillInformation( Spe_Num, 1, NULL, &iMana, NULL, &iSkillMana);
+			gSkillManager.GetSkillInformation( Spe_Num, 1, NULL, &iMana, NULL, &iSkillMana);
 			
 			if( g_isCharacterBuff(o, eBuff_InfinityArrow) ) 
 				iMana += CharacterMachine->InfinityArrowAdditionalMana;
 			
-			// 다발 스킬 일때는 iMana가 15이다.
-			// 만약 자기의 마나가 15일 경우 0이 되는 순간 마나약이 먹어지게 수정
-			// 현준형이 다발만 고쳐달라고 요구하였음! 다른 스킬은 15일 경우 0이 되고 0인 순간 누를 경우 먹어짐
 			if(CharacterAttribute->Mana <= iMana)
 			{
 				int Index = g_pMyInventory->FindManaItemIndex();
@@ -3484,16 +3260,16 @@ bool SkillElf(CHARACTER *c,ITEM *p)
 				}
 				continue;
 			}
-			// skillmana 부족
+
 			if(iSkillMana > CharacterAttribute->SkillMana)
 			{
 				return ( FALSE);
 			}
-			if ( !CheckSkillDelay( Hero->CurrentSkill ) )
+			if ( !gSkillManager.CheckSkillDelay( Hero->CurrentSkill ) )
 			{
 				return false;
 			}
-			float Distance = GetSkillDistance( Spe_Num, c );
+			float Distance = gSkillManager.GetSkillDistance( Spe_Num, c );
 			switch(Spe_Num)
 			{
 			case AT_SKILL_MANY_ARROW_UP:
@@ -3554,17 +3330,7 @@ bool SkillElf(CHARACTER *c,ITEM *p)
 		}
 	}
 	return Success;
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 사용자의 인풋에 의해 주인공이 액션을 취하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 int ItemKey = 0;
 int ActionTarget = -1;
 
@@ -3575,56 +3341,28 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 	{
 	case MOVEMENT_ATTACK:
 		{
-			// 무기 타입
 			int Right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			int Left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			
-			// 오른손 무기가 창이면
 			if(Right >= ITEM_SPEAR && Right < ITEM_SPEAR+MAX_ITEM_INDEX)
 			{
 				Range = 2.2f;
 			}
 
-#ifdef ADD_SOCKET_ITEM
-			// 활/석궁 일때
-			if( GetEquipedBowType() != BOWTYPE_NONE )
+			if(gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE )
 			{
 				Range = 6.f;
 			}
-#else // ADD_SOCKET_ITEM
-			//석궁
-			if( (Right>=ITEM_BOW+8  && Right<ITEM_BOW+15)	||
-				(Right>=ITEM_BOW+16 && Right<ITEM_BOW+17 )	||
-				(Right>=ITEM_BOW+18 && Right<ITEM_BOW+MAX_ITEM_INDEX )
-				)
-				Range = 6.f;
-			//활
-			if(Left>=ITEM_BOW && Left<ITEM_BOW+7 || Left==ITEM_BOW+17 || Left==ITEM_BOW+20
-				|| Left == ITEM_BOW+21 || Left == ITEM_BOW+22 )
-				Range = 6.f;
-#endif // ADD_SOCKET_ITEM
-
-#ifndef CSK_FIX_NORMALATTACK_CHECK		// 정리할 때 지워야 하는 소스	
-			//썬더리치 변신
-			if(c->MonsterIndex == 9)
-				Range = 7.f;
-#endif //! CSK_FIX_NORMALATTACK_CHECK	// 정리할 때 지워야 하는 소스
-			
+		
 			if(ActionTarget == -1) 
 				return;
 
 			if(o->Type == MODEL_PLAYER)
 			{
 				if( o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL 
-#ifdef PBG_WOPS_DARKHOSE_ATTACK
-					&& o->CurrentAction != PLAYER_STOP_RIDE_HORSE	// 다크호스타고 정지동작
-					&& o->CurrentAction != PLAYER_STOP_TWO_HAND_SWORD_TWO	// 땅에 끌리는 양손검 정지 동작
-#endif	// PBG_WOPS_DARKHOSE_ATTACK
-#ifdef PBG_FIX_FENRIR_GELENALATTACK
-					&& o->CurrentAction == PLAYER_FENRIR_SKILL_ONE_RIGHT	// 펜릴타고 일반공격
-#endif //PBG_FIX_FENRIR_GELENALATTACK
+					&& o->CurrentAction != PLAYER_STOP_RIDE_HORSE
+					&& o->CurrentAction != PLAYER_STOP_TWO_HAND_SWORD_TWO
+					&& o->CurrentAction == PLAYER_FENRIR_SKILL_ONE_RIGHT
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 					&& o->CurrentAction == PLAYER_RAGE_FENRIR_ONE_RIGHT
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
@@ -3637,7 +3375,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					break;
 			}
 			
-			if ( ActionTarget<=-1 ) 
+			if (ActionTarget<=-1 ) 
 				break;
 			
 			TargetX = (int)(CharactersClient[ActionTarget].Object.Position[0]/TERRAIN_SCALE);
@@ -3647,9 +3385,9 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			{
 				break;
 			}
-			else if ( !CheckTile( c, o, Range))
+			else if (!CheckTile( c, o, Range))
 			{
-				if ( GetBaseClass(c->Class) == CLASS_ELF)
+				if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
 				{	
 					// 요정 활쏘기의 경우 사정거리 밖이면 걸어가게 한다.
 					if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Range))
@@ -3681,7 +3419,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 		{
 			int iSkill = ( g_MovementSkill.m_bMagic) ? ( CharacterAttribute->Skill[g_MovementSkill.m_iSkill]) : g_MovementSkill.m_iSkill;
 			
-            float Distance = GetSkillDistance ( iSkill, c );
+            float Distance = gSkillManager.GetSkillDistance(iSkill,c);
 			switch ( iSkill)
 			{
 			case AT_SKILL_SPEAR:
@@ -3689,16 +3427,14 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 				{
 					break;
 				}
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_BLOW_UP:
 			case AT_SKILL_BLOW_UP+1:
 			case AT_SKILL_BLOW_UP+2:
 			case AT_SKILL_BLOW_UP+3:
 			case AT_SKILL_BLOW_UP+4:
-#endif	//PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ONETOONE:
 			case AT_SKILL_RIDER:
-			case AT_SKILL_SWORD1:	// 기사용 스킬
+			case AT_SKILL_SWORD1:
 			case AT_SKILL_SWORD2:
 			case AT_SKILL_SWORD3:
 			case AT_SKILL_SWORD4:
@@ -3711,10 +3447,10 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			case AT_SKILL_FIRE_BUST_UP+4:
 			case AT_SKILL_LONGPIER_ATTACK:
 			case AT_SKILL_RUSH:
-			case AT_SKILL_SPACE_SPLIT :     //  공간 가르기.
-			case AT_SKILL_ONEFLASH :        //  일섬.
+			case AT_SKILL_SPACE_SPLIT :
+			case AT_SKILL_ONEFLASH :
 				if ( 0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
-				{	// 안죽었을 때만 사용
+				{
 					if ( g_MovementSkill.m_iTarget<=-1 ) break;
 					
 					TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
@@ -3727,13 +3463,12 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					{
 						if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance*1.2f))
 						{	
-							// 멀면 걸어가서 사용
 							c->Movement = true;
 						}
 					}
 				}
 				break;
-			case AT_SKILL_POISON:	// 법사용 스킬
+			case AT_SKILL_POISON:
 			case AT_SKILL_METEO:
 			case AT_SKILL_THUNDER:
 			case AT_SKILL_ENERGYBALL:
@@ -3743,7 +3478,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			case AT_SKILL_JAVELIN:
 			case AT_SKILL_DEATH_CANNON:
 				if ( 0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
-				{	// 안죽었을 때만 사용
+				{
 					if ( g_MovementSkill.m_iTarget<=-1 ) break;
 					
 					TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
@@ -3761,7 +3496,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					{
 						if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
 						{	
-							// 멀면 걸어가서 사용
 							c->Movement = true;
 						}
 					}
@@ -3770,7 +3504,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			case AT_SKILL_DEEPIMPACT:
 			case AT_SKILL_PARALYZE:
 				if( 0 == CharactersClient[g_MovementSkill.m_iTarget].Dead )
-				{	// 안죽었을 때만 사용
+				{
 					if ( g_MovementSkill.m_iTarget<=-1 ) break;
 					
 					TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
@@ -3788,7 +3522,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					{	
 						if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
 						{	
-							// 멀면 걸어가서 사용
 							c->Movement = true;
 						}
 					}
@@ -3800,24 +3533,20 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			case AT_SKILL_HEAL_UP+3:
 			case AT_SKILL_HEAL_UP+4:
 			case AT_SKILL_HEALING:
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ATT_POWER_UP:
 			case AT_SKILL_ATT_POWER_UP+1:
 			case AT_SKILL_ATT_POWER_UP+2:
 			case AT_SKILL_ATT_POWER_UP+3:
 			case AT_SKILL_ATT_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ATTACK:
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_DEF_POWER_UP:
 			case AT_SKILL_DEF_POWER_UP+1:
 			case AT_SKILL_DEF_POWER_UP+2:
 			case AT_SKILL_DEF_POWER_UP+3:
 			case AT_SKILL_DEF_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_DEFENSE:
 				if ( 0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
-				{	// 안죽었을 때만 사용
+				{
 					if ( g_MovementSkill.m_iTarget<=-1 ) break;
 					
 					TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
@@ -3835,19 +3564,16 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					{	
 						if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
 						{	
-							// 멀면 걸어가서 사용
 							c->Movement = true;
 						}
 					}
 				}
 				break;
-#ifdef CSK_FIX_DUEL_N_PK_SKILL
-			case AT_SKILL_REDUCEDEFENSE:	// 블러드어택
+			case AT_SKILL_REDUCEDEFENSE:
 				{
 					AttackKnight(c, iSkill, Distance);
 				}
 				break;
-#endif // CSK_FIX_DUEL_N_PK_SKILL
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case AT_SKILL_THRUST:
 			case AT_SKILL_STAMP:
@@ -3877,7 +3603,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 		}
 		break;
 	case MOVEMENT_GET:
-        //  아이템 space로 자동 먹기.
 		if ( !g_bAutoGetItem )
         {
 			if(CheckTile(c,o,1.5f) == false) 
@@ -3886,7 +3611,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			}
 			MouseUpdateTimeMax = 6;
 		}
-		// ★ 인벤토리 꽉찼는지 체크
 		if (Items[ItemKey].Item.Type == ITEM_POTION+15)
 		{
 			SendRequestGetItem(ItemKey);	// 젠
@@ -3894,12 +3618,10 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 		else if(g_pMyInventory->FindEmptySlot(&Items[ItemKey].Item) == -1)
 		{
 			unicode::t_char Text[256];
-			// 375 "인벤토리가 꽉찼습니다."
 			unicode::_sprintf(Text, GlobalText[375]);
 			
 			g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 			
-			// 아이템 튕기기
 			OBJECT * pItem = &(Items[ItemKey].Object);
 			pItem->Position[2] = RequestTerrainHeight(pItem->Position[0],pItem->Position[1]) + 3.f;
 			pItem->Gravity     = 50.f;
@@ -3923,19 +3645,11 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 		if(TargetNpc != -1)
 		{
 			int npcIndex = 229;
-			
             npcIndex = 226;
-			
-#ifdef _PVP_MURDERER_HERO_ITEM
-			npcIndex = 227;
-#endif	// _PVP_MURDERER_HERO_ITEM
-			
 			npcIndex = 205;
 			
-			// LEM_TEST NPC클릭 [lem_2010.9.7]
 			if(CharactersClient[TargetNpc].MonsterIndex >= npcIndex )
 			{
-                //  카오스 고블린.
 				int level = CharacterAttribute->Level;
                 if ( CharactersClient[TargetNpc].MonsterIndex==238 && level<10 )
                 {
@@ -3944,13 +3658,12 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					g_pChatListBox->AddText( "", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     break;
                 }
-                //  내구력 수리를 위한 상점은 ( 장인, 무기 상인, 한스 )
                 if(CharactersClient[TargetNpc].MonsterIndex==243 || 
 					CharactersClient[TargetNpc].MonsterIndex==246 || 
 					CharactersClient[TargetNpc].MonsterIndex==251 
-					|| CharactersClient[TargetNpc].MonsterIndex == 416 // 레아NPC 상인 수리상점 
+					|| CharactersClient[TargetNpc].MonsterIndex == 416
 #ifdef ASG_ADD_KARUTAN_NPC
-					|| CharactersClient[TargetNpc].MonsterIndex == 578 // 무기상인 볼로 
+					|| CharactersClient[TargetNpc].MonsterIndex == 578
 #endif	// ASG_ADD_KARUTAN_NPC
 					)
                 {
@@ -3966,7 +3679,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYQUEST);
 				}
 				
-                //  퀘스트 리스트를 초기화할까요?
                 if ( g_csQuest.IsInit() )
                 {
                     SendRequestQuestHistory ();
@@ -3978,7 +3690,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					{
 						int Num = CharactersClient[TargetNpc].Object.Type - MODEL_CRYWOLF_ALTAR1;
 						
-						if ((GetBaseClass(Hero->Class)==CLASS_ELF) && M34CryWolf1st::Get_AltarState_State(Num) == false )
+						if ((gCharacterManager.GetBaseClass(Hero->Class)==CLASS_ELF) && M34CryWolf1st::Get_AltarState_State(Num) == false )
 						{
 							BYTE State = (m_AltarState[Num] & 0x0f);
 							if(State > 0)
@@ -3993,7 +3705,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 							//								M34CryWolf1st::Set_Message_Box(53,0,0);	//"제단이 파괴되어 더이상 계약이 불가능합니다."
 						}
 						else
-							if ((GetBaseClass(Hero->Class)==CLASS_ELF) && M34CryWolf1st::Get_AltarState_State(Num) == true )
+							if ((gCharacterManager.GetBaseClass(Hero->Class)==CLASS_ELF) && M34CryWolf1st::Get_AltarState_State(Num) == true )
 							{
 								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Ing_Set_Temple));
 								//							M34CryWolf1st::Set_Message_Box(52,0,0);	//"계약이 진행 중이므로 중복 계약을 할수 없습니다."
@@ -4021,7 +3733,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					
 					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
 				}
-#ifdef PBG_ADD_LITTLESANTA_NPC
 				else if(CharactersClient[TargetNpc].MonsterIndex >= 468 && CharactersClient[TargetNpc].MonsterIndex <= 475)
 				{
 					SendRequestTalk(CharactersClient[TargetNpc].Key);
@@ -4029,37 +3740,28 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					char _Temp[32] = {0,};
 					if(CharactersClient[TargetNpc].MonsterIndex == 470)
 					{
-						// 2596 "체력이 100%회복 되었습니다."
 						sprintf(_Temp, GlobalText[2596], 100);
 						g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 					}
 					else if(CharactersClient[TargetNpc].MonsterIndex == 471)
 					{
-						// 2597 "마나가 100%회복 되었습니다."
 						sprintf(_Temp, GlobalText[2597], 100);
 						g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 					}
 				}
-#endif //PBG_ADD_LITTLESANTA_NPC
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 				else if(CharactersClient[TargetNpc].MonsterIndex == 478)
 				{
 					SendRequestTalk(CharactersClient[TargetNpc].Key);
 				}
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_DOPPELGANGER_NPC
-				else if(CharactersClient[TargetNpc].MonsterIndex == 540)	// 루가드
+				else if(CharactersClient[TargetNpc].MonsterIndex == 540)
 				{
 					SendRequestTalk(CharactersClient[TargetNpc].Key);
 				}
-#endif	// YDG_ADD_DOPPELGANGER_NPC
-#ifdef LDS_ADD_NPC_UNITEDMARKETPLACE
-				else if(CharactersClient[TargetNpc].MonsterIndex == 547)	// 줄리아
+				else if(CharactersClient[TargetNpc].MonsterIndex == 547)
 				{
 					SendRequestTalk(CharactersClient[TargetNpc].Key);
 				}
-#endif // LDS_ADD_NPC_UNITEDMARKETPLACE
-				else if(CharactersClient[TargetNpc].MonsterIndex == 579)	// 줄리아
+				else if(CharactersClient[TargetNpc].MonsterIndex == 579)
 				{
 					SendRequestTalk(CharactersClient[TargetNpc].Key);
 				}
@@ -4094,7 +3796,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 								g_CursedTemple->SetGaugebarEnabled(true);
 							}
 #endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
-							// 로딩바를 표시 해야 하는 엔피씨 추가.
 							g_pCursedTempleWindow->CheckTalkProgressNpc(CharactersClient[TargetNpc].MonsterIndex, 
 								CharactersClient[TargetNpc].Key);
 #ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
@@ -4110,37 +3811,25 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 				//#else
 				//				SendRequestTalk(CharactersClient[TargetNpc].Key);
 				//#endif
-				if(CharactersClient[TargetNpc].MonsterIndex == 229) // 말론 케릭터 선택시 값(229) 비교
+				if(CharactersClient[TargetNpc].MonsterIndex == 229)
 					bCheckNPC = true;
 				else
 					bCheckNPC = false;
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-				if( CharactersClient[TargetNpc].MonsterIndex == 226 )	// 조련사
+
+				if( CharactersClient[TargetNpc].MonsterIndex == 226 )
 				{
 					ITEM* pItem = NULL;
 					
-					// 다크호스가 장착되어있다면
 					pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
+
 					if( pItem->Type == ITEM_HELPER+4 )
 						SendRequestPetInfo( PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER );
 					
 					pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-					// 다크스피릿이 장착되어있다면
+
 					if( pItem->Type == ITEM_HELPER+5 )
 						SendRequestPetInfo( PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT );
 				}
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM													//## 소스정리 대상임.
-#ifdef KJH_FIX_WOPS_K30120_RECORVERY_PET_LIFE
-				if( CharactersClient[TargetNpc].MonsterIndex == 226 )	// 조련사
-				{
-					//  다크스피릿정보를 요청.
-					SendRequestPetInfo ( PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT );
-					//  다크호스 정보를 요청.
-					SendRequestPetInfo ( PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER );
-				}
-#endif // KJH_FIX_WOPS_K30120_RECORVERY_PET_LIFE
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM													//## 소스정리 대상임.
-				
 			}
 			TargetNpc = -1;
 		}
@@ -4207,7 +3896,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			}
 			else if ( gMapManager.InBattleCastle() )
 			{
-				if ( TargetType==77 )   //  왕관뒤의 의자.
+				if ( TargetType==77 )
 				{
 					if ( battleCastle::GetGuildMaster( Hero ) )
 					{
@@ -4245,7 +3934,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			{
 				switch(TargetType)
 				{
-				case 67:	// 기대기 박스
+				case 67:
 					{
 						Pose = true;
 						Hero->Object.Angle[2] = TargetAngle;
@@ -4256,7 +3945,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 #endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 			if(Healing)
 			{
-				if(!IsFemale(c->Class))
+				if(!gCharacterManager.IsFemale(c->Class))
 					SetAction(o,PLAYER_HEALING1);
 				else
 					SetAction(o,PLAYER_HEALING_FEMALE1);
@@ -4272,7 +3961,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 				c->Path.PathNum = 0;
 				if(Pose)
 				{
-					if(!IsFemale(c->Class))
+					if(!gCharacterManager.IsFemale(c->Class))
 						SetAction(o,PLAYER_POSE1);
 					else
 						SetAction(o,PLAYER_POSE_FEMALE1);
@@ -4285,7 +3974,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 						|| c->Helper.Type == MODEL_HELPER+3 || c->Helper.Type == MODEL_HELPER+4))
 						return;
 					
-					if(!IsFemale(c->Class))
+					if(!gCharacterManager.IsFemale(c->Class))
 						SetAction(o,PLAYER_SIT1);
 					else
 						SetAction(o,PLAYER_SIT_FEMALE1);
@@ -4356,8 +4045,7 @@ void SendMove(CHARACTER *c,OBJECT *o)
 #endif
         g_bEventChipDialogEnable  = EVENT_NONE;
 		
-        //  마우스...
-#ifndef FOR_WORK		// 창모드에서 마우스 위치 바뀌는것 막았습니다.
+#ifndef FOR_WORK
 #ifdef WINDOWMODE
 		if (g_bUseWindowMode == FALSE)
 		{
@@ -4376,39 +4064,29 @@ void SendMove(CHARACTER *c,OBJECT *o)
 int StandTime = 0;
 int HeroAngle = 0;
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 제한되는 매크로 검사.
-///////////////////////////////////////////////////////////////////////////////
-
 bool CheckMacroLimit ( char* Text )
 {
     char string[256];
     int  length;
 	
     memcpy( string, Text+3, sizeof( char )*(256-2));
-    //  거래.
     length = strlen(GlobalText[258]);
     if( strcmp( string, GlobalText[258] )==0 || strcmp( string, GlobalText[259] )==0 || stricmp( string, "/trade" )==0 )
     {
         return  true;
     }
-    //  파티.
     if( strcmp( string, GlobalText[256] )==0 || stricmp( string, "/party" )==0 || stricmp( string, "/pt" )==0 )
     {
         return  true;
     }
-    //  길드.
 	if( strcmp( string, GlobalText[254] )==0 || stricmp( string, "/guild" )==0 )
     {
         return  true;
     }
-    //  전쟁.
 	if( strcmp( string, GlobalText[248] )==0 || stricmp( string, "/GuildWar" )==0 )
     {
         return  true;
     }
-    //  전투축구.
 	if( strcmp( string, GlobalText[249] )==0 || stricmp( string, "/BattleSoccer" )==0 )
     {
         return  true;
@@ -4424,16 +4102,8 @@ bool CheckCommand(char *Text, bool bMacroText )
 		return true;
 	}
 
-#ifdef YDG_MOD_CHECK_PROTECT_AUTO_FLAG
-	if(g_pProtectAuto->CheckFlag(Text) == true)
-	{
-		return true;
-	}
-#endif // YDG_MOD_CHECK_PROTECT_AUTO_FLAG
-	
     if( bMacroText==false && LogOut == false )
     {
-		//거래
 		char Name[256];
 		int iTextSize=0;
 		for(int i=0;i<256 && Text[i] != ' ' && Text[i] != '\0';i++)
@@ -4453,9 +4123,8 @@ bool CheckCommand(char *Text, bool bMacroText )
 					
 					return false;
 				}
-				// 분쟁지역에서 /거래 명령 제한
 #ifdef LJH_FIX_UNABLE_TO_TRADE_OR_PURCHASE_IN_TROUBLED_AREAS
-				if (::IsStrifeMap(gMapManager.WorldActive))	// 분쟁지역?
+				if (::IsStrifeMap(gMapManager.WorldActive))
 				{
 					g_pChatListBox->AddText("", GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
 					return false;
@@ -4463,10 +4132,9 @@ bool CheckCommand(char *Text, bool bMacroText )
 #endif //LJH_FIX_UNABLE_TO_TRADE_OR_PURCHASE_IN_TROUBLED_AREAS
 
 				int level = CharacterAttribute->Level;
-				//  거래 레벨 제한.
+
 				if( level < TRADELIMITLEVEL )
 				{
-					//  6레벨 이상 캐릭터부터 "/거래"를 할수 있습니다.
 					g_pChatListBox->AddText("", GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);        	        
 					return true;
 				}
@@ -5067,11 +4735,6 @@ bool FindTextABS(const char* Text,const char* Token,bool First)
 	return false;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 액션을 취하는 함수(인사, 웃기 등등)
-///////////////////////////////////////////////////////////////////////////////
-
 void SetActionClass(CHARACTER *c,OBJECT *o,int Action,int ActionType)
 {
 	if ( ( o->CurrentAction>=PLAYER_STOP_MALE && o->CurrentAction<=PLAYER_STOP_RIDE_WEAPON )
@@ -5082,17 +4745,13 @@ void SetActionClass(CHARACTER *c,OBJECT *o,int Action,int ActionType)
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 		)
 	{
-		if(!IsFemale(c->Class) || (Action>=PLAYER_RESPECT1 && Action<=PLAYER_RUSH1))
+		if(!gCharacterManager.IsFemale(c->Class) || (Action>=PLAYER_RESPECT1 && Action<=PLAYER_RUSH1))
 			SetAction(o,Action);
 		else
 			SetAction(o,Action+1);
 		SendRequestAction(ActionType,((BYTE)((Hero->Object.Angle[2]+22.5f)/360.f*8.f+1.f)%8));
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 입력 텍스트중에서 액션을 취할만한 문자가 있는지 체크하는 함수(히히, ^^ 등등)
-///////////////////////////////////////////////////////////////////////////////
 
 void CheckChatText(char *Text)
 {
@@ -5261,17 +4920,6 @@ void CheckChatText(char *Text)
 	}
 }
 
-#if defined FOR_WORK && defined ENABLE_CHAT_IN_CHAOS
-bool IsManagerID(char* szID)
-{
-	return FindText(szID, "webzen");
-}
-#endif // FOR_WORK && ENABLE_CHAT_IN_CHAOS
-
-///////////////////////////////////////////////////////////////////////////////
-// 마우스 클릭시 타켓점을 구해냄
-///////////////////////////////////////////////////////////////////////////////
-
 bool CheckTarget(CHARACTER *c)
 {
 	if(SelectedCharacter != -1)
@@ -5295,9 +4943,6 @@ bool CheckTarget(CHARACTER *c)
 	return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 마우스 오른쪽 버튼 클릭시 공격하는 함수
-///////////////////////////////////////////////////////////////////////////////
 bool EnableFastInput = false;
 
 WORD g_byLastSkillSerialNumber = 0;
@@ -5307,28 +4952,19 @@ BYTE MakeSkillSerialNumber(BYTE * pSerialNumber)
 	if (pSerialNumber == NULL) return 0;
 	
 	++g_byLastSkillSerialNumber;
-//#ifdef PBG_FIX_DARK_FIRESCREAM_HACKCHECK
-	// 서버쪽 버퍼 클리어를 (100-4)* 3번째에 클리어를 한단다
-	// 한번에 96회 이상을 보내면 된다
-//	if (g_byLastSkillSerialNumber > 100) g_byLastSkillSerialNumber = 1;
-//#else //PBG_FIX_DARK_FIRESCREAM_HACKCHECK
 	if (g_byLastSkillSerialNumber > 50) g_byLastSkillSerialNumber = 1;
-//#endif //PBG_FIX_DARK_FIRESCREAM_HACKCHECK
 	
 	*pSerialNumber = g_byLastSkillSerialNumber;
 	return g_byLastSkillSerialNumber;
 }
 
-#ifdef YDG_FIX_SPLIT_ATTACK_FUNC
 void AttackElf(CHARACTER *c, int Skill, float Distance)
 {
 	OBJECT *o = &c->Object;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-    int ClassIndex = GetBaseClass ( c->Class );
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+    int ClassIndex = gCharacterManager.GetBaseClass ( c->Class );
 
 	int iMana, iSkillMana;
-	GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
+	gSkillManager.GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
 	if( g_isCharacterBuff(o, eBuff_InfinityArrow) ) 
 		iMana += CharacterMachine->InfinityArrowAdditionalMana;
 	if(iMana > CharacterAttribute->Mana)
@@ -5341,28 +4977,25 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 		}
 		return;
 	}
-	// skillmana 부족
+
 	if(iSkillMana > CharacterAttribute->SkillMana)
 	{
 		return;
 	}
-    if ( !CheckSkillDelay( Hero->CurrentSkill ) )
+    if ( !gSkillManager.CheckSkillDelay( Hero->CurrentSkill ) )
     {
         return;
     }
 	
 	int iEnergy;
-	GetSkillInformation_Energy(Skill, &iEnergy);
+	gSkillManager.GetSkillInformation_Energy(Skill, &iEnergy);
 	if(iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy) )
 	{
 		return;
 	}
 	
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	CheckTarget(c);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
     bool Success = CheckTarget(c);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	switch(Skill)
 	{
 	case AT_SKILL_SUMMON:
@@ -5384,20 +5017,7 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 			return;
 			
     case AT_SKILL_PIERCING:
-#ifdef ADD_SOCKET_ITEM
-		// 플레이어가 활이나 석궁을 장착했을 때
-		if( (o->Type == MODEL_PLAYER) && (GetEquipedBowType( Hero ) != BOWTYPE_NONE) )
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-			if( o->Type==MODEL_PLAYER &&
-				(( Hero->Weapon[0].Type>=MODEL_BOW+8  && Hero->Weapon[0].Type<MODEL_BOW+15 ) ||
-				(( Hero->Weapon[1].Type>=MODEL_BOW    && Hero->Weapon[1].Type<MODEL_BOW+7 ) 
-				|| Hero->Weapon[1].Type==MODEL_BOW+17 
-				|| Hero->Weapon[1].Type==MODEL_BOW+20
-				|| Hero->Weapon[1].Type==MODEL_BOW+21
-				|| Hero->Weapon[1].Type==MODEL_BOW+22
-				) ||
-				(  Hero->Weapon[0].Type>=MODEL_BOW+16 && Hero->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX ) ) )
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
+		if( (o->Type == MODEL_PLAYER) && (gCharacterManager.GetEquipedBowType( Hero ) != BOWTYPE_NONE) )
 			{
 				if(!CheckArrow())
 					break;
@@ -5434,11 +5054,9 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 		if ( SelectedCharacter!=-1 && ( Skill==AT_SKILL_HEALING || Skill==AT_SKILL_ATTACK || Skill==AT_SKILL_DEFENSE || CheckAttack() 
 			|| (AT_SKILL_HEAL_UP <= Skill && Skill <= AT_SKILL_HEAL_UP+4)
 			|| Skill==AT_SKILL_DARK_SCREAM
-#ifdef PJH_SEASON4_MASTER_RANK4
 			|| (AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP+4)
 			|| (AT_SKILL_DEF_POWER_UP <= Skill && Skill <= AT_SKILL_DEF_POWER_UP+4)
 			|| (AT_SKILL_ATT_POWER_UP <= Skill && Skill <= AT_SKILL_ATT_POWER_UP+4)
-#endif //PJH_SEASON4_MASTER_RANK4
 			)
 			)
 		{
@@ -5448,9 +5066,7 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 				{
 					c->Movement = true;
 					c->MovementType = MOVEMENT_SKILL;
-#ifdef CSK_FIX_SYNCHRONIZATION
 					SendMove(c, o);
-#endif // CSK_FIX_SYNCHRONIZATION
 				}
 			}
 		}
@@ -5475,21 +5091,17 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 				case AT_SKILL_HEAL_UP+3:
 				case AT_SKILL_HEAL_UP+4:
 				case AT_SKILL_HEALING:
-#ifdef PJH_SEASON4_MASTER_RANK4
 				case AT_SKILL_ATT_POWER_UP:
 				case AT_SKILL_ATT_POWER_UP+1:
 				case AT_SKILL_ATT_POWER_UP+2:
 				case AT_SKILL_ATT_POWER_UP+3:
 				case AT_SKILL_ATT_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 				case AT_SKILL_ATTACK:
-#ifdef PJH_SEASON4_MASTER_RANK4
 				case AT_SKILL_DEF_POWER_UP:
 				case AT_SKILL_DEF_POWER_UP+1:
 				case AT_SKILL_DEF_POWER_UP+2:
 				case AT_SKILL_DEF_POWER_UP+3:
 				case AT_SKILL_DEF_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 				case AT_SKILL_DEFENSE:
 					UseSkillElf( c, o);
 					return;
@@ -5497,28 +5109,10 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 			}
             if(CheckAttack())
             {
-#ifdef ADD_SOCKET_ITEM
-				// 플레이어가 활/석궁을 장착하였고, 해당 스킬시전
-				if( ((Skill==AT_SKILL_PARALYZE) || (Skill==AT_SKILL_DEEPIMPACT))
-					&& ((o->Type == MODEL_PLAYER) && (GetEquipedBowType( Hero ) != BOWTYPE_NONE ))
-					)
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-					if( ( Skill==AT_SKILL_PARALYZE 
-						|| Skill==AT_SKILL_DEEPIMPACT
-						)
-						&& o->Type==MODEL_PLAYER && 
-						(( Hero->Weapon[0].Type>=MODEL_BOW+8  && Hero->Weapon[0].Type<MODEL_BOW+15 ) ||
-						(( Hero->Weapon[1].Type>=MODEL_BOW    && Hero->Weapon[1].Type<MODEL_BOW+7 ) 
-						|| Hero->Weapon[1].Type==MODEL_BOW+17 
-						|| Hero->Weapon[1].Type==MODEL_BOW+20
-						|| Hero->Weapon[1].Type == MODEL_BOW+21
-						|| Hero->Weapon[1].Type == MODEL_BOW+22
-						) ||
-						(  Hero->Weapon[0].Type>=MODEL_BOW+16 && Hero->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX ) ) )
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-					{
-						UseSkillElf ( c, o );
-					}
+				if( ((Skill==AT_SKILL_PARALYZE) || (Skill==AT_SKILL_DEEPIMPACT)) && ((o->Type == MODEL_PLAYER) && (gCharacterManager.GetEquipedBowType( Hero ) != BOWTYPE_NONE )))
+				{
+					UseSkillElf ( c, o );
+				}
             }
 		}
 	}
@@ -5527,7 +5121,6 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 	{
 	case AT_SKILL_INFINITY_ARROW:
 		{
-			//무한화살 상태가 아닌 경우만 쓸 수 있다. 
 			if(g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow)==false)
 			{
 				SendRequestMagic(Skill,HeroKey);
@@ -5553,7 +5146,6 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 		//					SetPlayerMagic(c);
         c->Movement = 0;
 		break;
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	case AT_SKILL_RECOVER:
 		{
 			vec3_t Light,Position,P,dp;
@@ -5568,12 +5160,7 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 			CreateEffect(BITMAP_IMPACT, Position, o->Angle, Light, 0,o);
 			SetAction(o,PLAYER_RECOVER_SKILL);
 
-#ifdef LDK_FIX_USE_RECOVER_TARGET_MONSTER
-			// 회복 스킬 타셋 조건 수정 : 몬스터에게는 사용 못함
 			if(SelectedCharacter > -1 && CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
-#else //LDK_FIX_USE_RECOVER_TARGET_MONSTER
-			if(SelectedCharacter > -1)
-#endif //LDK_FIX_USE_RECOVER_TARGET_MONSTER
 			{
 				SendRequestMagic(Skill,CharactersClient[SelectedCharacter].Key);
 			}
@@ -5584,29 +5171,23 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 			//			UseSkillElf( c, o);
 		}
 		break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-		
 	case AT_SKILL_HEAL_UP:
 	case AT_SKILL_HEAL_UP+1:
 	case AT_SKILL_HEAL_UP+2:
 	case AT_SKILL_HEAL_UP+3:
 	case AT_SKILL_HEAL_UP+4:
 	case AT_SKILL_HEALING:
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_ATT_POWER_UP:
 	case AT_SKILL_ATT_POWER_UP+1:
 	case AT_SKILL_ATT_POWER_UP+2:
 	case AT_SKILL_ATT_POWER_UP+3:
 	case AT_SKILL_ATT_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_ATTACK:
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_DEF_POWER_UP:
 	case AT_SKILL_DEF_POWER_UP+1:
 	case AT_SKILL_DEF_POWER_UP+2:
 	case AT_SKILL_DEF_POWER_UP+3:
 	case AT_SKILL_DEF_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 		//#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 		//	case AT_SKILL_RECOVER:
 		//#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
@@ -5614,20 +5195,15 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 		SendRequestMagic(Skill,HeroKey);
 		SetPlayerMagic(c);
 		return;
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 	case AT_SKILL_MULTI_SHOT:
 		{
-#ifdef KJH_FIX_MULTISHOT_RELOAD_ARROW
-			// 화살자동장착
 			if(!CheckArrow()) 
 				break;
-#endif // KJH_FIX_MULTISHOT_RELOAD_ARROW
 
-			if (GetEquipedBowType_Skill() == BOWTYPE_NONE)	// 활을 들어야 활성화
+			if (gCharacterManager.GetEquipedBowType_Skill() == BOWTYPE_NONE)	// 활을 들어야 활성화
 				return;
 			o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-			
-#ifdef PJH_SEASON4_FIX_MULTI_SHOT
+
 			if( CheckTile( c, o, Distance ) )
 			{
 				BYTE PathX[1];
@@ -5651,7 +5227,6 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 				//									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
 				c->Movement = 0;
 				//c->AttackTime = 15;
-		
 				
 				SetPlayerBow(c);
 				vec3_t Light,Position,P,dp;
@@ -5701,99 +5276,14 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 				CreateEffect(MODEL_BLADE_SKILL, Position, o->Angle, Light, 1, o, Key);
 				PlayBuffer(SOUND_SKILL_MULTI_SHOT);
 			}
-#else	// PJH_SEASON4_FIX_MULTI_SHOT
-
-//박종훈 작업중
-
-				if( CheckTile( c, o, Distance ) )
-				{
-					BYTE PathX[1];
-					BYTE PathY[1];
-					PathX[0] = ( c->PositionX);
-					PathY[0] = ( c->PositionY);
-					gProtocolSend.SendCharacterMove(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
-							
-					BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-							
-					BYTE angle = (BYTE)((((o->Angle[2]+180.f)/360.f)*255.f));
-					WORD TKey = 0xffff;
-					if ( g_MovementSkill.m_iTarget!=-1 )
-					{
-						TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-					}
-					SendRequestMagicContinue(Skill,( c->PositionX),
-						( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
-					SetAttackSpeed();
-					//									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
-					c->Movement = 0;
-					//c->AttackTime = 15;
-					
-							
-					SetPlayerBow(c);
-					vec3_t Light,Position,P,dp,Angle;
-							
-					float Matrix[3][4];
-					Vector(0.f,20.f,0.f,P);
-					AngleMatrix(o->Angle,Matrix);
-					VectorRotate(P,Matrix,dp);
-					VectorAdd(dp,o->Position,Position);
-					Vector(0.4f, 0.6f, 1.f, Light);
-					CreateEffect ( MODEL_MULTI_SHOT3, Position, o->Angle, Light, 0);
-					CreateEffect ( MODEL_MULTI_SHOT3, Position, o->Angle, Light, 0);
-							
-					Vector(0.f,-20.f,0.f,P);
-					Vector(0.f,0.f,0.f,P);
-					AngleMatrix(o->Angle,Matrix);
-					VectorRotate(P,Matrix,dp);
-					VectorAdd(dp,o->Position,Position);
-							
-					CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-					CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-					CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-							
-					Vector(0.f,20.f,0.f,P);
-					AngleMatrix(o->Angle,Matrix);
-					VectorRotate(P,Matrix,dp);
-					VectorAdd(dp,o->Position,Position);
-					CreateEffect ( MODEL_MULTI_SHOT2, Position, o->Angle, Light, 0);
-					CreateEffect ( MODEL_MULTI_SHOT2, Position, o->Angle, Light, 0);
-							
-					Vector(0.f,-120.f,130.f,P);
-					AngleMatrix(o->Angle,Matrix);
-					VectorRotate(P,Matrix,dp);
-					VectorAdd(dp,o->Position,Position);
-					CreateEffect(MODEL_BLADE_SKILL, Position, o->Angle, Light, 1);
-							
-					BYTE Skill = 0;
-					//			CHARACTER *tc;
-					OBJECT *to = NULL;
-							
-					VectorCopy(o->Angle,Angle);
-					CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2] + 8.f;
-					CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2] + 16.f;
-					CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2] - 8.f;
-					CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2] - 16.f;
-					CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2];
-					PlayBuffer(SOUND_SKILL_MULTI_SHOT);
-				}
-#endif //#ifdef PJH_SEASON4_FIX_MULTI_SHOT
 		}
 		break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-		
     case AT_SKILL_IMPROVE_AG:
 		SendRequestMagic(Skill,HeroKey);
 		SetPlayerMagic(c);
 		c->Movement = 0;
         break;
-		
-		//^ 펜릴 스킬 관련
-	case AT_SKILL_PLASMA_STORM_FENRIR:	// (요정)
+	case AT_SKILL_PLASMA_STORM_FENRIR:
 		{
 			if ( CheckAttack() )
 			{
@@ -5803,8 +5293,7 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 			{
 				g_MovementSkill.m_iTarget = -1;
 			}
-			
-			// 대상 지점 상대 좌표 계산
+
 			int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
 			int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
 			if( CheckTile( c, o, Distance ) )
@@ -5815,7 +5304,7 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 				{
 					o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
 					
-					CheckSkillDelay(Hero->CurrentSkill);
+					gSkillManager.CheckSkillDelay(Hero->CurrentSkill);
 					
 					TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
 					c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
@@ -5838,7 +5327,7 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 				if(g_MovementSkill.m_iTarget != -1)
 				{
 					if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance*1.2f))
-					{	// 멀면 걸어가서 사용
+					{
 						c->Movement = true;
 					}
 				}
@@ -5847,39 +5336,26 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 					Attacking = -1;
 				}
 			}
-		}	// case 
+		}
 		break;
-	}	// switch
+	}
 }
 
 void AttackKnight(CHARACTER *c, int Skill, float Distance)
 {
 	OBJECT *o = &c->Object;
-    int ClassIndex = GetBaseClass ( c->Class );
+    int ClassIndex = gCharacterManager.GetBaseClass ( c->Class );
 
-	
-	// 마나와 스킬마나 구해놓는다.
 	int iMana, iSkillMana;
-	GetSkillInformation( Skill, 1, NULL, &iMana, 
+	gSkillManager.GetSkillInformation( Skill, 1, NULL, &iMana, 
 		NULL, &iSkillMana );
 
-#ifdef YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
 	int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 	int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-#endif	// YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
 	
-    // 기사 스킬은 모두 칼을 지니고 있어야한다.
-    // 기사 생명증가는 칼이 없어도 가능.
-    if(
-#ifdef YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
-		( ( iTypeR!=-1 && 
+    if((( iTypeR!=-1 && 
 		( iTypeR<ITEM_STAFF || iTypeR>=ITEM_STAFF+MAX_ITEM_INDEX ) &&
 		( iTypeL<ITEM_STAFF || iTypeL>=ITEM_STAFF+MAX_ITEM_INDEX ) ) 
-#else	// YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
-		( ( Hero->Weapon[0].Type!=-1 && 
-		( Hero->Weapon[0].Type<MODEL_STAFF || Hero->Weapon[0].Type>=MODEL_STAFF+MAX_ITEM_INDEX ) &&
-		( Hero->Weapon[1].Type<MODEL_STAFF || Hero->Weapon[1].Type>=MODEL_STAFF+MAX_ITEM_INDEX ) ) 
-#endif	// YDG_FIX_STAFF_FLAMESTRIKE_IN_CHAOSCASLE
 		|| Skill == AT_SKILL_VITALITY 
 		|| Skill == AT_SKILL_ADD_CRITICAL 
 		|| Skill == AT_SKILL_PARTY_TELEPORT 
@@ -5888,22 +5364,16 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 		|| (AT_SKILL_LIFE_UP <= Skill && Skill <= AT_SKILL_LIFE_UP+4)
 		|| (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP+4)
 		|| Skill == AT_SKILL_BRAND_OF_SKILL
-		|| Skill == AT_SKILL_PLASMA_STORM_FENRIR	// (기사, 다크로드, 마검사) 펜릴 스킬
+		|| Skill == AT_SKILL_PLASMA_STORM_FENRIR
 		|| Skill == AT_SKILL_DARK_SCREAM
-#ifdef PJH_SEASON4_MASTER_RANK4
 		|| (AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP+4)
-#endif //PJH_SEASON4_MASTER_RANK4
-#ifndef YDG_FIX_BLOCK_STAFF_WHEEL		// 정리할때 삭제할 부분
+#ifndef YDG_FIX_BLOCK_STAFF_WHEEL
 		|| Skill == AT_SKILL_WHEEL
 		|| (AT_SKILL_TORNADO_SWORDA_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDA_UP+4)
 		|| (AT_SKILL_TORNADO_SWORDB_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDB_UP+4)
 #endif	// YDG_FIX_BLOCK_STAFF_WHEEL	// 정리할때 삭제할 부분
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 		|| Skill == AT_SKILL_GIGANTIC_STORM
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 		|| Skill == AT_SKILL_GAOTIC
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 		) )
     {
 		bool Success = true;
@@ -5920,14 +5390,14 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 #ifdef YDG_ADD_NEW_DUEL_UI
 		if (Skill==AT_SKILL_PARTY_TELEPORT && g_DuelMgr.IsDuelEnabled())
 		{
-			Success = false;	// 결투중에는 셔먼스킬을 사용할수 없다
+			Success = false;
 		}
 #endif	// YDG_ADD_NEW_DUEL_UI
 		
 #ifdef YDG_ADD_DOPPELGANGER_UI
 		if (Skill==AT_SKILL_PARTY_TELEPORT && (IsDoppelGanger1() || IsDoppelGanger2() || IsDoppelGanger3() || IsDoppelGanger4()))
 		{
-			Success = false;	// 도플갱어 이벤트에서는 셔먼스킬을 사용할수 없다
+			Success = false;
 		}
 #endif	// YDG_ADD_DOPPELGANGER_UI
 		
@@ -5940,12 +5410,11 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 		
 		if( gMapManager.InChaosCastle() )
 		{
-			//카오스 캐슬에서는 다크스피릿, 다크호스, 디노란트 스킬 등이 사용 불가능
 			if( Skill == AT_SKILL_DARK_HORSE 
 				|| (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP+4)
 				|| Skill == AT_SKILL_RIDER
 				|| ( Skill >= AT_PET_COMMAND_DEFAULT && Skill <= AT_PET_COMMAND_TARGET )
-				|| Skill == AT_SKILL_PLASMA_STORM_FENRIR // (기사, 다크로드, 마검사)
+				|| Skill == AT_SKILL_PLASMA_STORM_FENRIR
 				)
 			{
 				Success = false;
@@ -5953,7 +5422,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 		}
 		else
 		{
-			//카오스 캐슬이 아니더라도 죽었으면 스킬 사용 불가능
 			if( Skill == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP+4))
 			{
 				BYTE t_DarkLife = 0;
@@ -5975,21 +5443,21 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 		{
 			Success = false;
 		}
-        if ( Success && !CheckSkillDelay( Hero->CurrentSkill ) )
+        if ( Success && !gSkillManager.CheckSkillDelay( Hero->CurrentSkill ) )
         {
             Success = false;
         }
 		
-		int iEnergy;	// 마이너스 열매 작업
-		GetSkillInformation_Energy(Skill, &iEnergy);
+		int iEnergy;
+		gSkillManager.GetSkillInformation_Energy(Skill, &iEnergy);
 		if(iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy))
 		{
 			Success = false;
 		}
-		if(ClassIndex == CLASS_DARK_LORD)	// 다크로드이면
+		if(ClassIndex == CLASS_DARK_LORD)
 		{
 			int iCharisma;
-			GetSkillInformation_Charisma(Skill, &iCharisma);	// 통솔포인트 
+			gSkillManager.GetSkillInformation_Charisma(Skill, &iCharisma); 
 			if(iCharisma > (CharacterAttribute->Charisma + CharacterAttribute->AddCharisma) )
 			{
 				Success = false;
@@ -5998,7 +5466,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 		
         if ( Success )
         {
-            //  스킬.
             switch(Skill)
             {
 			case AT_SKILL_TORNADO_SWORDA_UP:
@@ -6006,13 +5473,12 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 			case AT_SKILL_TORNADO_SWORDA_UP+2:
 			case AT_SKILL_TORNADO_SWORDA_UP+3:
 			case AT_SKILL_TORNADO_SWORDA_UP+4:
-				
 			case AT_SKILL_TORNADO_SWORDB_UP:
 			case AT_SKILL_TORNADO_SWORDB_UP+1:
 			case AT_SKILL_TORNADO_SWORDB_UP+2:
 			case AT_SKILL_TORNADO_SWORDB_UP+3:
 			case AT_SKILL_TORNADO_SWORDB_UP+4:
-            case AT_SKILL_WHEEL:    //  회오리 베기.
+            case AT_SKILL_WHEEL:
                 o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
 				{
 					BYTE PathX[1];
@@ -6029,39 +5495,20 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                     SendRequestMagicContinue(Skill,( c->PositionX),
                         ( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, TKey, 0);
                     SetAttackSpeed();
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-					switch(c->Helper.Type)
-					{
-					case MODEL_HELPER+2:	// 유니리아
-						SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_UNI);
-						break;
-					case MODEL_HELPER+3:	// 디노란트
-						SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_DINO);
-						break;
-					case MODEL_HELPER+37:	// 펜릴	
-						SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_FENRIR);
-						break;
-					default:	// 기본
-						SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
-						break;
-					}
-#else	// YDG_ADD_SKILL_RIDING_ANIMATIONS
 					SetAction(o,PLAYER_ATTACK_SKILL_WHEEL);
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
+
                     c->Movement = 0;
                 }
                 break;
 #ifdef PJH_SEASON4_MASTER_RANK4
-			case AT_SKILL_BLOOD_ATT_UP:		// 블러드어택강화
+			case AT_SKILL_BLOOD_ATT_UP:
 			case AT_SKILL_BLOOD_ATT_UP+1:
 			case AT_SKILL_BLOOD_ATT_UP+2:
 			case AT_SKILL_BLOOD_ATT_UP+3:
 			case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
-            case AT_SKILL_REDUCEDEFENSE:	// 블러드어택	
+            case AT_SKILL_REDUCEDEFENSE:
                 o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
                 {
-#ifdef PSW_FRUIT_ITEM_CHECK_SKILL
 					WORD Strength;
 					const WORD notStrength = 596;
 					Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
@@ -6069,11 +5516,8 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 					{
 						break;
 					}
-#endif //PSW_FRUIT_ITEM_CHECK_SKILL
 					
-#ifdef PJH_FIX_BLOOD_ATTCK
 					if( CheckTile( c, o, Distance ) )
-#endif //PJH_FIX_BLOOD_ATTCK
                     {
                         BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
 						
@@ -6085,36 +5529,17 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                         SendRequestMagicContinue(Skill,( c->PositionX),
                             ( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), byValue, 0, TKey, 0);
                         SetAttackSpeed();
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-						switch(c->Helper.Type)
-						{
-						case MODEL_HELPER+2:	// 유니리아
-							SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_UNI);
-							break;
-						case MODEL_HELPER+3:	// 디노란트
-							SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_DINO);
-							break;
-						case MODEL_HELPER+37:	// 펜릴	
-							SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_FENRIR);
-							break;
-						default:	// 기본
-							SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
-							break;
-						}
-#else	// YDG_ADD_SKILL_RIDING_ANIMATIONS
+
 						SetAction(o,PLAYER_ATTACK_SKILL_WHEEL);
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
                         c->Movement = 0;
                     }
                 }
                 break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_POWER_SLASH_UP:
 			case AT_SKILL_POWER_SLASH_UP+1:
 			case AT_SKILL_POWER_SLASH_UP+2:
 			case AT_SKILL_POWER_SLASH_UP+3:
 			case AT_SKILL_POWER_SLASH_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4                            
             case AT_SKILL_ICE_BLADE:
                 if ( c->Helper.Type<MODEL_HELPER+2 || c->Helper.Type>MODEL_HELPER+4
 					&& c->Helper.Type != MODEL_HELPER+37
@@ -6169,7 +5594,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                     }
                 }
                 break;
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 			case AT_SKILL_GAOTIC:
                 {
                     o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
@@ -6189,13 +5613,11 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                         if ( g_MovementSkill.m_iTarget!=-1 )
                         {
                             TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-#ifdef PJH_FIX_CAOTIC
 							if(TKey == 0xffff)
 							{
 								CHARACTER *st = &CharactersClient[g_MovementSkill.m_iTarget];
 								TKey = st->Key;
 							}
-#endif //#ifdef PJH_FIX_CAOTIC		
                         }
                         SendRequestMagicContinue(Skill,( c->PositionX),
                             ( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
@@ -6204,16 +5626,12 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                         c->Movement = 0;
 						
 //									SetPlayerMagic(c);
-#ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
+
 						if( c->Helper.Type == MODEL_HELPER+37 )				
 						{
 							SetAction( o, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );		// 팬릴착용
 						}
-#ifdef PBG_FIX_CHAOTIC_ANIMATION
 						else if((c->Helper.Type>=MODEL_HELPER+2) && (c->Helper.Type<=MODEL_HELPER+4))
-#else //PBG_FIX_CHAOTIC_ANIMATION
-						else if((c->Helper.Type>=MODEL_HELPER+2) || (c->Helper.Type<=MODEL_HELPER+4))
-#endif //PBG_FIX_CHAOTIC_ANIMATION
 						{
 							SetAction( o, PLAYER_ATTACK_RIDE_STRIKE );		// 탈것착용 (다크호스포함)
 						}
@@ -6221,12 +5639,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 						{
 							SetAction( o, PLAYER_ATTACK_STRIKE );				// 일반공격
 						}
-#else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-						if(c->Helper.Type == MODEL_HELPER+37)
-							SetAction(o,PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);	//^ 펜릴
-						else
-							SetAction ( o, PLAYER_ATTACK_STRIKE );
-#endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
+
 						vec3_t Light,Position,P,dp;
 						
 						float Matrix[3][4];
@@ -6250,7 +5663,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 							Position[2] = (o->Position[2] + 49.f) + (float)(rand()%60); 
 							CreateJoint(BITMAP_2LINE_GHOST,Position,o->Position,o->Angle,0,o,20.f,o->PKKey,0,o->m_bySkillSerialNum);//클라이언트마법처리
 						}
-#ifdef PJH_FIX_CAOTIC
 						if(c==Hero && SelectedCharacter!=-1)
 						{
 							vec3_t Pos;
@@ -6258,22 +5670,17 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 							VectorCopy(sc->Object.Position,Pos);
 							CreateBomb(Pos,true,6);
 						}
-#endif //PJH_FIX_CAOTIC
-#ifdef YDG_FIX_CAOTIC_SOUND_MISSING
 						PlayBuffer(SOUND_SKILL_CAOTIC);
-#endif	// YDG_FIX_CAOTIC_SOUND_MISSING
                     }
 					else
-					{	// 멀어졌으면 또 걷기
+					{
 						if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
 						{	
-							c->Movement = true;		// 멀면 걸어가서 사용
+							c->Movement = true;
 						}
 					}
                 }
 				break;
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
             case AT_SKILL_FLAME_STRIKE:
                 {
                     o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
@@ -6303,8 +5710,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                     }
                 }
                 break;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
             case AT_SKILL_GIGANTIC_STORM:
                 {
                     o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
@@ -6328,31 +5733,11 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                         SendRequestMagicContinue(Skill,( c->PositionX),
                             ( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
                         SetAttackSpeed();
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-						switch(c->Helper.Type)
-						{
-						case MODEL_HELPER+2:	// 유니리아
-							SetAction(o, PLAYER_SKILL_GIGANTICSTORM_UNI);
-							break;
-						case MODEL_HELPER+3:	// 디노란트
-							SetAction(o, PLAYER_SKILL_GIGANTICSTORM_DINO);
-							break;
-						case MODEL_HELPER+37:	// 펜릴	
-							SetAction(o, PLAYER_SKILL_GIGANTICSTORM_FENRIR);
-							break;
-						default:	// 기본
-							SetAction(o, PLAYER_SKILL_GIGANTICSTORM);
-							break;
-						}
-#else	// YDG_ADD_SKILL_RIDING_ANIMATIONS
 						SetAction(o, PLAYER_SKILL_GIGANTICSTORM);
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
                         c->Movement = 0;
                     }
                 }
                 break;
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-				
             case AT_SKILL_PARTY_TELEPORT:
 				if( gMapManager.IsCursedTemple() 
 					&& !g_pMyInventory->IsItem( ITEM_POTION+64, true ) )
@@ -6371,13 +5756,11 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                 SendRequestMagic ( Skill, HeroKey );
                 c->Movement = 0;
                 break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_FIRE_SCREAM_UP:
 			case AT_SKILL_FIRE_SCREAM_UP+1:
 			case AT_SKILL_FIRE_SCREAM_UP+2:
 			case AT_SKILL_FIRE_SCREAM_UP+3:
 			case AT_SKILL_FIRE_SCREAM_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_DARK_SCREAM:
                 if ( CheckTile( c, o, Distance ) )
                 {
@@ -6397,13 +5780,8 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                         ( c->PositionY), (BYTE)(o->Angle[2]/360.f*256.f), byValue, pos, TKey, 0);
 					
                     SetAttackSpeed();
-                    //  애니메이션 설정.
                     {
-#ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 						if ( (c->Helper.Type>=MODEL_HELPER+2 && c->Helper.Type<=MODEL_HELPER+4) && !c->SafeZone )
-#else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-                        if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )   
-#endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
                         {
                             SetAction ( o, PLAYER_ATTACK_RIDE_STRIKE );
                         }
@@ -6432,8 +5810,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                 if ( c->Helper.Type!=MODEL_HELPER+4 || c->SafeZone ) break;
 				
             case AT_SKILL_THUNDER_STRIKE:
-                // 대상 지점 상대 좌표 계산
-                // 대상 지점 상대 좌표 계산
                 if ( CheckTile( c, o, Distance ) )
                 {
                     int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
@@ -6451,7 +5827,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                         ( c->PositionY), (BYTE)(o->Angle[2]/360.f*256.f), byValue, pos, TKey, 0);
                     SetAttackSpeed();
                     
-                    //  애니메이션 설정.
                     if ( Skill==AT_SKILL_THUNDER_STRIKE )
                     {
                         if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )   
@@ -6484,30 +5859,23 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 			case AT_SKILL_LIFE_UP+2:
 			case AT_SKILL_LIFE_UP+3:
 			case AT_SKILL_LIFE_UP+4:
-            case AT_SKILL_VITALITY:	// 스웰라이프
+            case AT_SKILL_VITALITY:
                 SendRequestMagic(Skill,HeroKey);
 				SetAction(o,PLAYER_SKILL_VITALITY);
                 c->Movement = 0;
                 break;
-				
-				//--------------------------------------------------------------------------------------------------------------------
-				
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ANGER_SWORD_UP:
 			case AT_SKILL_ANGER_SWORD_UP+1:
 			case AT_SKILL_ANGER_SWORD_UP+2:
 			case AT_SKILL_ANGER_SWORD_UP+3:
 			case AT_SKILL_ANGER_SWORD_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4                            
-            case AT_SKILL_FURY_STRIKE:  //  흑기사 - 분노의 일격
+            case AT_SKILL_FURY_STRIKE:
                 {
 					o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
 					
-                    // 대상 지점 상대 좌표 계산
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
                     int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
                     int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
                     if( CheckTile( c, o, Distance ) )
                     {
                         BYTE pos = CalcTargetPos ( o->Position[0], o->Position[1], c->TargetPosition[0],c->TargetPosition[1]);
@@ -6527,11 +5895,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                     }
                 }
                 break;
-				
-				//--------------------------------------------------------------------------------------------------------------------
-				
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-				// 흑기사 - 파괴의 일격
 			case AT_SKILL_BLOW_OF_DESTRUCTION:
 				{
 					o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
@@ -6557,14 +5920,8 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                     }
 				}
 				break;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-				
-				//--------------------------------------------------------------------------------------------------------------------
-				
-				//^ 펜릴 스킬 관련
-			case AT_SKILL_PLASMA_STORM_FENRIR: // (기사, 다크로드, 마검사)
+			case AT_SKILL_PLASMA_STORM_FENRIR:
 				{
-					// 대상 지점 상대 좌표 계산
 					int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
 					int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
 					if( CheckTile( c, o, Distance ) )
@@ -6576,7 +5933,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 						{
 							o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
 							
-							CheckSkillDelay(Hero->CurrentSkill);
+							gSkillManager.CheckSkillDelay(Hero->CurrentSkill);
 							
 							TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
 							c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
@@ -6599,7 +5956,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 						if(g_MovementSkill.m_iTarget != -1)
 						{
 							if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance*1.2f))
-							{	// 멀면 걸어가서 사용
+							{
 								c->Movement = true;
 							}
 						}
@@ -6608,9 +5965,9 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 							Attacking = -1;
 						}
 					}
-				}	// case
+				}
 				break;
-            } // switch
+            }
         }
     }
 }
@@ -6618,12 +5975,12 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 void AttackWizard(CHARACTER *c, int Skill, float Distance)
 {
 	OBJECT *o = &c->Object;
-    int ClassIndex = GetBaseClass ( c->Class );
+    int ClassIndex = gCharacterManager.GetBaseClass ( c->Class );
 
 	int iMana, iSkillMana;
 	if( Skill == AT_SKILL_BLAST_HELL_BEGIN || Skill == AT_SKILL_BLAST_HELL )
 	{
-		GetSkillInformation( AT_SKILL_BLAST_HELL, 1, NULL, &iMana, NULL, &iSkillMana);
+		gSkillManager.GetSkillInformation( AT_SKILL_BLAST_HELL, 1, NULL, &iMana, NULL, &iSkillMana);
 		
         if ( Skill==AT_SKILL_BLAST_HELL )
         {
@@ -6632,11 +5989,11 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 	}
 	else
 	{
-		GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
+		gSkillManager.GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
 	}
 	
-	int iEnergy;	// 마이너스 열매 작업
-	GetSkillInformation_Energy(Skill, &iEnergy);
+	int iEnergy;
+	gSkillManager.GetSkillInformation_Energy(Skill, &iEnergy);
 	if(iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy))
 	{
 		return;
@@ -6652,7 +6009,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 		return;
 	}
 
-	// skillmana 부족
 	if(iSkillMana > CharacterAttribute->SkillMana)
 	{
 		if ( Skill==AT_SKILL_BLAST_HELL_BEGIN || Skill==AT_SKILL_BLAST_HELL )
@@ -6666,7 +6022,7 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 		return;
 	}
 	
-    if ( CheckSkillDelay( Hero->CurrentSkill ) == false)
+    if (gSkillManager.CheckSkillDelay( Hero->CurrentSkill ) == false)
     {
         return;
     }
@@ -6674,7 +6030,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 
 	switch(Skill)
 	{
-		//	헬파2 준비자세.
 	case AT_SKILL_BLAST_HELL_BEGIN:
 		{
 			SendRequestMagic ( Skill, HeroKey );
@@ -6684,8 +6039,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 			c->Movement = 0;
 		}
 		return;
-		
-		//	헬파2 발사.
 	case AT_SKILL_BLAST_HELL:
 		{
 			int iTargetKey = getTargetCharacterKey(c, SelectedCharacter);
@@ -6714,7 +6067,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 			}
 			else
 			{
-                //  파티원인가.
 				if ( !g_pPartyManager->IsPartyMember( SelectedCharacter ) ) 
 						return;
 					
@@ -6736,9 +6088,7 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 							{
 								c->Movement = true;
 								c->MovementType = MOVEMENT_SKILL;
-#ifdef CSK_FIX_SYNCHRONIZATION
 								SendMove(c, o);
-#endif // CSK_FIX_SYNCHRONIZATION
 							}
 						}
 						
@@ -6777,8 +6127,7 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 			c->Movement = 0;
 		}
 		return;
-		//^ 펜릴 스킬 관련
-	case AT_SKILL_PLASMA_STORM_FENRIR:	// (마법사)
+	case AT_SKILL_PLASMA_STORM_FENRIR:
 		{
 			if ( CheckAttack() )
 			{
@@ -6789,7 +6138,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 				g_MovementSkill.m_iTarget = -1;
 			}
 			
-			// 대상 지점 상대 좌표 계산
 			int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
 			int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
 			if( CheckTile( c, o, Distance ) )//&& CheckAttack())
@@ -6800,7 +6148,7 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 				{
 					o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
 					
-					CheckSkillDelay(Hero->CurrentSkill);
+					gSkillManager.CheckSkillDelay(Hero->CurrentSkill);
 					
 					TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
 					c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
@@ -6823,7 +6171,7 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 				if(g_MovementSkill.m_iTarget != -1)
 				{
 					if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance*1.2f ) )
-					{	// 멀면 걸어가서 사용
+					{
 						c->Movement = true;
 					}
 				}
@@ -6834,8 +6182,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 			}
 		}
 		return;
-		
-        //  무기 스킬은 제외.
     case AT_SKILL_BLOCKING :
     case AT_SKILL_SWORD1 :
     case AT_SKILL_SWORD2 :
@@ -6844,10 +6190,8 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
     case AT_SKILL_SWORD5 :
     case AT_SKILL_SPEAR:
 		return;
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-	case AT_SKILL_SWELL_OF_MAGICPOWER:		// 마력증대
+	case AT_SKILL_SWELL_OF_MAGICPOWER:
 		{
-			// 마력증대 스킬시전이 안되어 있을때만 시전가능
 			if(g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower) == false)
 			{
 				SendRequestMagic(Skill, HeroKey);
@@ -6855,7 +6199,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 				c->Movement = 0;
 			}
 		}break;
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 	}
 	
 	if ( SelectedCharacter != -1)
@@ -6881,19 +6224,14 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 			{
 				c->Movement = true;
 				c->MovementType = MOVEMENT_SKILL;
-#ifdef CSK_FIX_SYNCHRONIZATION
 				SendMove(c, o);
-#endif // CSK_FIX_SYNCHRONIZATION
 			}
 		}
 
-		// 아래 스킬들은 클릭 시 스킬 범위 체크 안함.(왜 여기서 하는지...ㅡㅡ;)
 		if (Skill != AT_SKILL_STUN && Skill != AT_SKILL_REMOVAL_STUN
 			&& Skill != AT_SKILL_MANA && Skill != AT_SKILL_INVISIBLE
-			&& Skill != AT_SKILL_REMOVAL_INVISIBLE && Skill != AT_SKILL_PLASMA_STORM_FENRIR	// (마법사)
-#ifdef ASG_ADD_SKILL_BERSERKER
+			&& Skill != AT_SKILL_REMOVAL_INVISIBLE && Skill != AT_SKILL_PLASMA_STORM_FENRIR
 			&& Skill != AT_SKILL_ALICE_BERSERKER
-#endif	// ASG_ADD_SKILL_BERSERKER
 			&& Skill != AT_SKILL_ALICE_WEAKNESS && Skill != AT_SKILL_ALICE_ENERVATION
 			)
 			return;
@@ -6915,31 +6253,19 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 			switch(Skill)
 			{
 			case AT_SKILL_STORM:
-#ifdef PJH_SEASON4_MASTER_RANK4
-			case AT_SKILL_EVIL_SPIRIT_UP:	//악령강화(흑마법사용)
-			case AT_SKILL_EVIL_SPIRIT_UP+1:	//악령강화
-			case AT_SKILL_EVIL_SPIRIT_UP+2:	//악령강화
-			case AT_SKILL_EVIL_SPIRIT_UP+3:	//악령강화
-			case AT_SKILL_EVIL_SPIRIT_UP+4:	//악령강화
-			case AT_SKILL_EVIL_SPIRIT_UP_M:		//악령강화(마검사용)
-			case AT_SKILL_EVIL_SPIRIT_UP_M+1:	//악령강화
-			case AT_SKILL_EVIL_SPIRIT_UP_M+2:	//악령강화
-			case AT_SKILL_EVIL_SPIRIT_UP_M+3:	//악령강화
-			case AT_SKILL_EVIL_SPIRIT_UP_M+4:	//악령강화
-#endif //PJH_SEASON4_MASTER_RANK4
+			case AT_SKILL_EVIL_SPIRIT_UP:
+			case AT_SKILL_EVIL_SPIRIT_UP+1:
+			case AT_SKILL_EVIL_SPIRIT_UP+2:
+			case AT_SKILL_EVIL_SPIRIT_UP+3:
+			case AT_SKILL_EVIL_SPIRIT_UP+4:
+			case AT_SKILL_EVIL_SPIRIT_UP_M:
+			case AT_SKILL_EVIL_SPIRIT_UP_M+1:
+			case AT_SKILL_EVIL_SPIRIT_UP_M+2:
+			case AT_SKILL_EVIL_SPIRIT_UP_M+3:
+			case AT_SKILL_EVIL_SPIRIT_UP_M+4:
 			case AT_SKILL_EVIL:
 				{
-#ifdef CSK_EVIL_SKILL
-					WORD TKey = 0xffff;
-					if ( g_MovementSkill.m_iTarget!=-1 )
-					{
-						TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-					}
-					SendRequestMagicContinue(Skill,(BYTE)(c->TargetPosition[0]/TERRAIN_SCALE),(BYTE)(c->TargetPosition[1]/TERRAIN_SCALE),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, TKey, &o->m_bySkillSerialNum );
-#else // CSK_EVIL_SKILL
 					SendRequestMagicContinue(Skill,( c->PositionX), ( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, 0xffff, &o->m_bySkillSerialNum);
-#endif // CSK_EVIL_SKILL
-					
 					SetPlayerMagic(c);
 				}
 				return;
@@ -6949,7 +6275,7 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 						( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, 0xffff, 0);
 					SetAttackSpeed();
 					
-					if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)	//^ 펜릴 캐릭터 에니메이션 관련(아쿠아플래쉬)
+					if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)
 						SetAction(o,PLAYER_SKILL_FLASH);
 					else
 						SetAction(o,PLAYER_SKILL_FLASH);
@@ -6995,12 +6321,11 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 			}
             if ( SelectedCharacter!=-1 )
             {			
-				//  파티원인가.
 				if ( !g_pPartyManager->IsPartyMember( SelectedCharacter ) ) 
 					return;
 				
 				if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
-				{	// 아이템을 들고 있으면 텔레포트하지 못한다.
+				{
 					return;
 				}
 				
@@ -7036,7 +6361,7 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 							TargetIndex = TERRAIN_INDEX( TargetX, TargetY );
 							
 							Wall = TerrainWall[TargetIndex];
-							//  
+  
 							if ( (Wall&TW_ACTION)==TW_ACTION )
 							{
 								Wall -= TW_ACTION;
@@ -7066,9 +6391,9 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
             }
             return;
 			
-		case AT_SKILL_TELEPORT:	//흑마법사순간이동
+		case AT_SKILL_TELEPORT:
             {
-				if ( SEASON3B::CNewUIInventoryCtrl::GetPickedItem()			// 아이템을 들고 있으면 텔레포트하지 못한다.				
+				if ( SEASON3B::CNewUIInventoryCtrl::GetPickedItem()				
 					|| g_isCharacterBuff(o, eDeBuff_Stun)
 					|| g_isCharacterBuff(o, eDeBuff_Sleep)
 					)
@@ -7076,7 +6401,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 					return;
 				}
 
-#ifdef CSK_FIX_WOPS_K29010_HELLBUST
 #ifdef PBG_ADD_NEWCHAR_MONK
 				WORD byHeroPriorSkill = g_pSkillList->GetHeroPriorSkill();
 #else //PBG_ADD_NEWCHAR_MONK
@@ -7091,7 +6415,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 					Hero->Movement = 0;
 					return;
 				}
-#endif // CSK_FIX_WOPS_K29010_HELLBUST
 
 				bool Success = false;
 				if(o->Type == MODEL_PLAYER)
@@ -7143,7 +6466,7 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 		}
 		
 		int iEnergy;
-		GetSkillInformation_Energy(Skill, &iEnergy);
+		gSkillManager.GetSkillInformation_Energy(Skill, &iEnergy);
 		if(iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy) )
 		{
 			return;
@@ -7155,31 +6478,30 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 		
 		switch(Skill)
 		{
-		case AT_SKILL_ALICE_THORNS:		// 데미지 반사(버프 계열) 유저에게만 사용
+		case AT_SKILL_ALICE_THORNS:
 			{
-				// 아무것도 선택이 안되었으면 자기 자신에게 사용
 				if(SelectedCharacter == -1 || CharactersClient[SelectedCharacter].Object.Kind != KIND_PLAYER)
 				{
 					LetHeroStop();
-					// 동작 설정
+
 					switch(c->Helper.Type)
 					{
-					case MODEL_HELPER+2:	// 유니리아
+					case MODEL_HELPER+2:
 						SetAction(o, PLAYER_SKILL_SLEEP_UNI);
 						break;
-					case MODEL_HELPER+3:	// 디노란트
+					case MODEL_HELPER+3:
 						SetAction(o, PLAYER_SKILL_SLEEP_DINO);
 						break;
-					case MODEL_HELPER+37:	// 펜릴	
+					case MODEL_HELPER+37:
 						SetAction(o, PLAYER_SKILL_SLEEP_FENRIR);
 						break;
-					default:	// 기본
+					default:
 						SetAction(o, PLAYER_SKILL_SLEEP);
 						break;
 					}
 					SendRequestMagic(Skill, HeroKey);
 				}
-				// 죽지 않았거나 플레이어일 경우
+
 				else if(0 == CharactersClient[SelectedCharacter].Dead && CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
 				{	
 					TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
@@ -7194,30 +6516,25 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 						}
 					}
 					else
-					{	// 멀어졌으면 또 걷기
+					{
 						if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
 						{	
-							c->Movement = true;		// 멀면 걸어가서 사용
+							c->Movement = true;
 						}
 					}
 				}
 			}
 			break;
-#ifdef ASG_ADD_SKILL_BERSERKER
 		case AT_SKILL_ALICE_BERSERKER:
-#endif	// ASG_ADD_SKILL_BERSERKER
 		case AT_SKILL_ALICE_WEAKNESS:
 		case AT_SKILL_ALICE_ENERVATION:
 			UseSkillSummon(c, o);
 			break;
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_LIGHTNING_SHOCK_UP:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+1:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+2:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+3:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+4:
-#endif
 		case AT_SKILL_LIGHTNING_SHOCK:
 			{
 				o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
@@ -7246,7 +6563,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 				}
 			}
 			break;
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
 		}
 		
 		if(SelectedCharacter == -1)
@@ -7275,7 +6591,6 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 		case AT_SKILL_ALICE_CHAINLIGHTNING:
 			{
 				c->TargetCharacter = SelectedCharacter;
-				// 안죽었을 때만 사용
 				if(0 == CharactersClient[SelectedCharacter].Dead )
 				{	
 					TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
@@ -7292,10 +6607,10 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 							}
 						}
 						else
-						{	// 멀어졌으면 또 걷기
+						{
 							if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
 							{	
-								c->Movement = true;		// 멀면 걸어가서 사용
+								c->Movement = true;
 							}
 						}
 					}
@@ -7315,24 +6630,17 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 				if(CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
 				{
 					if(gMapManager.InChaosCastle() == true
-						|| gMapManager.IsCursedTemple() == true		// 환영사원
-						|| (gMapManager.InBattleCastle() == true && battleCastle::IsBattleCastleStart() == true) // 공성맵이고 공성전중
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
-						|| g_DuelMgr.IsDuelEnabled()	// 결투중
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-						|| g_bEnableDuel == true	// 결투중
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
+						|| gMapManager.IsCursedTemple() == true
+						|| (gMapManager.InBattleCastle() == true && battleCastle::IsBattleCastleStart() == true)
+						|| g_DuelMgr.IsDuelEnabled()
 						)
 					{
-						// 카오스캐슬이거나 환영사원이거나 공성중이거나 결투중이면 일반사용자도 디버프 스킬을 사용할 수 있다.
 					}
 					else
 					{
 						break;
 					}
 				}
-				
-				// 안죽었을 때만 사용
 				if(0 == CharactersClient[SelectedCharacter].Dead )
 				{	
 					TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
@@ -7349,10 +6657,10 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 							}
 						}
 						else
-						{	// 멀어졌으면 또 걷기
+						{
 							if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
 							{	
-								c->Movement = true;		// 멀면 걸어가서 사용
+								c->Movement = true;
 							}
 						}
 					}
@@ -7366,12 +6674,11 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 void AttackCommon(CHARACTER *c, int Skill, float Distance)
 {
 	OBJECT *o = &c->Object;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-    int ClassIndex = GetBaseClass ( c->Class );
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
+    int ClassIndex = gCharacterManager.GetBaseClass ( c->Class );
 
 	int iMana, iSkillMana;
-	GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
+	gSkillManager.GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
 	
     if ( o->Type==MODEL_PLAYER )
     {
@@ -7390,13 +6697,13 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
 		{
 			Success = false;
 		}
-        if ( Success && !CheckSkillDelay( Hero->CurrentSkill ) )
+        if ( Success && !gSkillManager.CheckSkillDelay( Hero->CurrentSkill ) )
         {
             Success = false;
         }
 		
-		int iEnergy;	// 마이너스 열매 작업
-		GetSkillInformation_Energy(Skill, &iEnergy);
+		int iEnergy;
+		gSkillManager.GetSkillInformation_Energy(Skill, &iEnergy);
 		if(Success && iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy))
 		{
 			Success = false;
@@ -7428,15 +6735,15 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
 					{
 						SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 					} 
-					else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
+					else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)
 					{
 						SetAction(o,PLAYER_SKILL_RIDER);
 					}
-					else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
+					else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )
 					{
 						SetAction(o,PLAYER_SKILL_RIDER_FLY);
 					}
-					else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
+					else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)
 					{
 						SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
 					}
@@ -7466,16 +6773,16 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
 					SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 				} 
 				else
-					if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
+					if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)
 					{
 						SetAction(o,PLAYER_SKILL_RIDER);
 					}
 					else
-						if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
+						if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )
 						{
 							SetAction(o,PLAYER_SKILL_RIDER_FLY);
 						}
-						else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
+						else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)
 						{
 							SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
 						}
@@ -7501,15 +6808,15 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
 			{
 				SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 			} 
-			else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
+			else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)
 			{
 				SetAction(o,PLAYER_SKILL_RIDER);
 			}
-			else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
+			else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )
 			{
 				SetAction(o,PLAYER_SKILL_RIDER_FLY);
 			}
-			else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
+			else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)
 			{
 				SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
 			}
@@ -7534,15 +6841,15 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
 			{
 				SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 			} 
-			else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
+			else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)
 			{
 				SetAction(o,PLAYER_SKILL_RIDER);
 			}
-			else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
+			else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )
 			{
 				SetAction(o,PLAYER_SKILL_RIDER_FLY);
 			}
-			else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
+			else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)
 			{
 				SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
 			}
@@ -7567,15 +6874,15 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
 			{
 				SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 			} 
-			else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
+			else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)
 			{
 				SetAction(o,PLAYER_SKILL_RIDER);
 			}
-			else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
+			else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )
 			{
 				SetAction(o,PLAYER_SKILL_RIDER_FLY);
 			}
-			else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
+			else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)
 			{
 				SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
 			}
@@ -7599,15 +6906,15 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
 			{
 				SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
 			} 
-			else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
+			else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)
 			{
 				SetAction(o,PLAYER_SKILL_RIDER);
 			}
-			else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
+			else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone ) 
 			{
 				SetAction(o,PLAYER_SKILL_RIDER_FLY);
 			}
-			else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
+			else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)
 			{
 				SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
 			}
@@ -7620,8 +6927,6 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
 }
 #endif	// YDG_FIX_SPLIT_ATTACK_FUNC
 
-#ifdef PBG_WOPS_HELBUST
-//헬버스트 시전중에 세트아이템을 제거하여 요구스텟을 떨치는 경우
 bool SkillKeyPush(int Skill)
 {
 	if(Skill == AT_SKILL_BLAST_HELL && MouseLButtonPush)
@@ -7630,12 +6935,9 @@ bool SkillKeyPush(int Skill)
 	}
 	return false;
 }
-#endif //PBG_WOPS_HELBUST
 
 void Attack(CHARACTER *c)
 {
-// 마우스 오른쪽 버튼 클릭 중 커서가 게임뷰포트를 벗어나 인벤창등에 있을때도 기술을 계속 쓸수 있는 버그 수정
-#ifdef LJH_FIX_BUG_CASTING_SKILLS_W_CURSOR_OUT_OF_VIEWPORT
 	if((MouseOnWindow || !SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429)) && MouseLButtonPush) 
 	{
  		MouseRButtonPop = false;
@@ -7645,23 +6947,14 @@ void Attack(CHARACTER *c)
 
 		return;
 	}
-#else	//LJH_FIX_BUG_CASTING_SKILLS_W_CURSOR_OUT_OF_VIEWPORT
-	if(MouseOnWindow) 
-		return;
-#endif	//LJH_FIX_BUG_CASTING_SKILLS_W_CURSOR_OUT_OF_VIEWPORT
 	
-	if( g_isCharacterBuff((&c->Object), eDeBuff_Stun)
-		|| g_isCharacterBuff((&c->Object), eDeBuff_Sleep)	
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
-		|| g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch)
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-		) 
+	if( g_isCharacterBuff((&c->Object), eDeBuff_Stun) || g_isCharacterBuff((&c->Object), eDeBuff_Sleep)	|| g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch)) 
 	{
 		return;
 	}
 	
 	OBJECT *o = &c->Object;
-    int ClassIndex = GetBaseClass ( c->Class );
+    int ClassIndex = gCharacterManager.GetBaseClass ( c->Class );
 	
 	if(o->Teleport == TELEPORT_BEGIN)
 	{
@@ -7675,22 +6968,15 @@ void Attack(CHARACTER *c)
 	bool Success = false;
 	bool CursedTempleSkillSuccess = false;
 	
-	// 현재 스킬
 	int Skill = CharacterAttribute->Skill[Hero->CurrentSkill]; 
 
-	// 스킬 사용 거리
-    float Distance = GetSkillDistance( Skill, c );	
+    float Distance = gSkillManager.GetSkillDistance( Skill, c );	
 
 	if(!EnableFastInput)
 	{
-		//	오른쪽 마우스 프레스.
 		if ( MouseRButtonPress!=0 )
 		{
-#ifdef PBG_WOPS_HELBUST
 			if ( MouseRButtonPop || SkillKeyPush(Skill))
-#else //PBG_WOPS_HELBUST
-			if ( MouseRButtonPop )
-#endif//PBG_WOPS_HELBUST
 			{
 				MouseRButtonPop = false;
 				MouseRButtonPush= false;
@@ -7706,28 +6992,21 @@ void Attack(CHARACTER *c)
 		}
 		else if((MouseRButtonPush || MouseRButton) && !(MouseLButtonPush || MouseLButton) && !c->Movement)
 		{
-			//	헬파2.
 			if ( Skill==AT_SKILL_BLAST_HELL )
 			{
 				if ( o->Teleport!=TELEPORT_END && o->Teleport!=TELEPORT_NONE) return;
-#ifdef YDG_FIX_HELLBUST_SET_ENERGY_BONUS_BUG
 				int iReqEng = 0;
-				GetSkillInformation_Energy(Skill, &iReqEng);
-				if (CharacterAttribute->Energy + CharacterAttribute->AddEnergy < iReqEng) return;	// 헬버스트 요구 에너지 검사
-#endif	// YDG_FIX_HELLBUST_SET_ENERGY_BONUS_BUG
+				gSkillManager.GetSkillInformation_Energy(Skill, &iReqEng);
+				if (CharacterAttribute->Energy + CharacterAttribute->AddEnergy < iReqEng) return;
 				
 				MouseRButtonPress = 1;
 				Hero->Object.m_bySkillCount = 0;
 				Skill = AT_SKILL_BLAST_HELL_BEGIN;
 			}
-#ifdef KJH_FIX_WOPS_K29690_PICKED_ITEM_BACKUP
-			// 창이 닫힐때 아이템이 Picked되어있으면 되돌린다.
 			SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
-#endif // KJH_FIX_WOPS_K29690_PICKED_ITEM_BACKUP
 			MouseRButtonPush = false;
 			Success = true;
 		}
-        //  자동공격.   ( 배틀싸커에서는 안됨 )
         if( 
 			g_pOption->IsAutoAttack()
 			&& gMapManager.WorldActive != WD_6STADIUM 
@@ -7738,7 +7017,6 @@ void Attack(CHARACTER *c)
             Success = true;
         }
 		
-        //  공격 설정이 되었을때.
         if( Success )
         {
 			RButtonPressTime = ((WorldTime - RButtonPopTime)/CLOCKS_PER_SEC);
@@ -7769,9 +7047,6 @@ void Attack(CHARACTER *c)
     {
         g_iFollowCharacter = -1;
 		
-#ifdef PET_SYSTEM
-        //  팻 커맨드 실행일 경우.
-		
 		if( !g_isCharacterBuff((&Hero->Object), eBuff_Cloaking ) )
 			{
 				if( giPetManager::SendPetCommand( c, Hero->CurrentSkill )  == true )
@@ -7779,10 +7054,8 @@ void Attack(CHARACTER *c)
 					return;
 				}
 			}
-#endif// PET_SYSTEM
 			
-			//  스킬 사용을 위한 조건을 검사한다.
-			if( gMapManager.IsCursedTemple() )	// 환영사원인가?
+			if( gMapManager.IsCursedTemple() )
 			{
 				if(g_pCursedTempleWindow->IsCursedTempleSkillKey( SelectedCharacter ))
 				{
@@ -7790,8 +7063,6 @@ void Attack(CHARACTER *c)
 				}
 				else
 				{
-#ifdef LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
-					// 파티원에게 일반 공격이면 Attack을 실행하지 않는다. 
 					if ( g_CursedTemple->IsPartyMember( SelectedCharacter ) == true )
 					{
 						if ( !IsCorrectSkillType_FrendlySkill( Skill ) && !IsCorrectSkillType_Buff( Skill ) )
@@ -7801,18 +7072,14 @@ void Attack(CHARACTER *c)
 					}
 					else
 					{
-						// 비파티원의 경우 친화적 스킬을 어떻게 할 것인지 처리사항.
 						if( IsCorrectSkillType_FrendlySkill(Skill) || IsCorrectSkillType_Buff(Skill) )
 						{
-							// 자기자신이 아니면 적용 하지 않는다.
 							if ( -1 != SelectedCharacter )
 							{
 								return;
 							}
 						}
 					}
-#endif // LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
-					
 					if ( CheckSkillUseCondition( o, Skill )==false ) return;
 				}
 			}
@@ -7824,34 +7091,20 @@ void Attack(CHARACTER *c)
 				}
 			}
 			
-			if (Skill == AT_SKILL_SUMMON_EXPLOSION || Skill == AT_SKILL_SUMMON_REQUIEM
-#ifdef ASG_ADD_SUMMON_RARGLE
-				|| Skill == AT_SKILL_SUMMON_POLLUTION
-#endif	// ASG_ADD_SUMMON_RARGLE
-				)
+			if (Skill == AT_SKILL_SUMMON_EXPLOSION || Skill == AT_SKILL_SUMMON_REQUIEM || Skill == AT_SKILL_SUMMON_POLLUTION)
 			{
 				CheckTarget(c);
-				if ( !CheckTile( c, o, Distance ) )	// 거리 제한
+				if ( !CheckTile( c, o, Distance ) )
 					return;
 			}
     }
 	
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 2, 14, WinMain, 0xE910);
-#endif
-
-
-	//
 	if( Success ) 
 	{
-#ifdef PBG_FIX_SKILL_DEMENDCONDITION
-		//스킬사용이 된경우 스킬의 스텟검사.
- 		if( !SKILLCONDITION::DemendConditionCheckSkill( Skill ) )
+ 		if( !gSkillManager.DemendConditionCheckSkill(Skill))
  		{
- 			//스킬의 스텟요구량을 만족안한다면.사용불가.
 			return;
  		}
-#endif //PBG_FIX_SKILL_DEMENDCONDITION
 	}
     if(Success && c->Dead == 0)
 	{
@@ -7861,20 +7114,14 @@ void Attack(CHARACTER *c)
 		}
 		else if( !c->SafeZone || ( gMapManager.InBloodCastle() == true ) || gMapManager.InChaosCastle() == true )
 		{
-			// 카오스캐슬에서 쓸수있는 마법(버프)은 여기에 예외처리한다.( '!=' 으로 )
-			// 자동 공격중. ( 요정 마법은 적용되지 않는다. )
 			if ( c->SafeZone && Skill!=AT_SKILL_HEALING && Skill!=AT_SKILL_DEFENSE && Skill!=AT_SKILL_ATTACK 
 				&& Skill!=AT_SKILL_WIZARDDEFENSE && Skill!=AT_SKILL_VITALITY 
-#ifdef KJH_FIX_20080910_SPELL_MAGIC_IN_CHAOSCASTLE
-				&& Skill!=AT_SKILL_INFINITY_ARROW					// 인피니티애로우
-				&& Skill!=AT_SKILL_SWELL_OF_MAGICPOWER				// 마력증대
-				&& Skill!=AT_SKILL_RECOVER							// 회복
-				&& Skill!=AT_SKILL_ALICE_BERSERKER					// 버서커
-#endif // KJH_FIX_20080910_SPELL_MAGIC_IN_CHAOSCASTLE
-#ifdef PJH_SEASON4_MASTER_RANK4
+				&& Skill!=AT_SKILL_INFINITY_ARROW
+				&& Skill!=AT_SKILL_SWELL_OF_MAGICPOWER
+				&& Skill!=AT_SKILL_RECOVER
+				&& Skill!=AT_SKILL_ALICE_BERSERKER
 				&& !(AT_SKILL_DEF_POWER_UP <= Skill && Skill <= AT_SKILL_DEF_POWER_UP+4)
 				&& !(AT_SKILL_ATT_POWER_UP <= Skill && Skill <= AT_SKILL_ATT_POWER_UP+4)
-#endif //PJH_SEASON4_MASTER_RANK4
 				&& !(AT_SKILL_SOUL_UP <= Skill && Skill <= AT_SKILL_SOUL_UP+4)
 				&& !(AT_SKILL_HEAL_UP <= Skill && Skill <= AT_SKILL_HEAL_UP+4)
 				&& !(AT_SKILL_LIFE_UP <= Skill && Skill <= AT_SKILL_LIFE_UP+4)
@@ -7887,8 +7134,6 @@ void Attack(CHARACTER *c)
 #endif //PBG_FIX_BUFFSKILLCHAOS
 				)
 				return;
-			
-			//  자동 공격 적용시.   ( 배틀 싸커에서는 안됨 )
 			if (
 				g_pOption->IsAutoAttack()
 				&& gMapManager.WorldActive != WD_6STADIUM 
@@ -7896,14 +7141,12 @@ void Attack(CHARACTER *c)
 			{
 				if( ClassIndex==CLASS_ELF 
 					&& (Skill != AT_SKILL_CROSSBOW 
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 					&& Skill != AT_SKILL_MULTI_SHOT
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 					&& !(AT_SKILL_MANY_ARROW_UP <= Skill && Skill <= AT_SKILL_MANY_ARROW_UP+4)
 					&& Skill != AT_SKILL_BOW 
 					&& Skill != AT_SKILL_PIERCING 
 					&& Skill != AT_SKILL_BLAST_CROSSBOW4 
-					&& Skill != AT_SKILL_PLASMA_STORM_FENRIR	//^ 펜릴 스킬 관련(자동공격)
+					&& Skill != AT_SKILL_PLASMA_STORM_FENRIR
 					) )
 				{
 					Attacking = -1;
@@ -7930,20 +7173,10 @@ void Attack(CHARACTER *c)
 				{
 					Attacking = -1;
 				}
-#ifdef LDK_FIX_BUFFSKILL_AUTOATTACK_CANCLE
 				else if( Skill == AT_SKILL_ALICE_THORNS 
-#ifdef PJH_ADD_MASTERSKILL
-						|| (AT_SKILL_ALICE_SLEEP_UP <= Skill && Skill <= AT_SKILL_ALICE_SLEEP_UP+4)
-#endif
+					|| (AT_SKILL_ALICE_SLEEP_UP <= Skill && Skill <= AT_SKILL_ALICE_SLEEP_UP+4)
 					|| Skill == AT_SKILL_ALICE_BERSERKER || Skill == AT_SKILL_ALICE_SLEEP 
 					|| Skill == AT_SKILL_ALICE_BLIND || Skill == AT_SKILL_ALICE_WEAKNESS || Skill == AT_SKILL_ALICE_ENERVATION )
-#else //LDK_FIX_BUFFSKILL_AUTOATTACK_CANCLE
-				else if(Skill == AT_SKILL_ALICE_SLEEP || Skill == AT_SKILL_ALICE_BLIND || Skill == AT_SKILL_ALICE_BLIND
-#ifdef PJH_ADD_MASTERSKILL
-						|| (AT_SKILL_ALICE_SLEEP_UP <= Skill && Skill <= AT_SKILL_ALICE_SLEEP_UP+4)
-#endif
-				)
-#endif //LDK_FIX_BUFFSKILL_AUTOATTACK_CANCLE
 				{
 					Attacking = -1;
 				}
@@ -8001,41 +7234,32 @@ void Attack(CHARACTER *c)
 					{
 						if ( ClassIndex==CLASS_KNIGHT || ClassIndex==CLASS_DARK || ClassIndex==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-							|| ClassIndex==CLASS_RAGEFIGHTER	//기본 무기 스킬관련
+							|| ClassIndex==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 							)
 						{
-							//  이동수단를 타고 있지 않거나, 창스킬을 쓸때 스킬을 쓸 수 있게 한다.
 							bool bOk = false;
-							if ( c->Helper.Type != MODEL_HELPER+2		// 유니리아
-								&& c->Helper.Type != MODEL_HELPER+3		// 디노란트
-								&& c->Helper.Type != MODEL_HELPER+4		// 다크호스
-								&& c->Helper.Type != MODEL_HELPER+37	// 펜릴
+							if ( c->Helper.Type != MODEL_HELPER+2
+								&& c->Helper.Type != MODEL_HELPER+3
+								&& c->Helper.Type != MODEL_HELPER+4
+								&& c->Helper.Type != MODEL_HELPER+37
 								)
 							{
 								bOk = true;
 							}
 							else
 							{
-								// 이동수단 탔을때 쓸 수 있는 스킬
 								switch ( Skill)
 								{	
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 								case AT_SKILL_GAOTIC:
-#ifndef PBG_FIX_PKFIELD_CAOTIC
-									break;
-#endif //PBG_FIX_PKFIELD_CAOTIC
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-								case AT_SKILL_SPEAR:	// 창찌르기											  
+								case AT_SKILL_SPEAR:										  
 								case AT_SKILL_RIDER:
-#ifdef PJH_SEASON4_MASTER_RANK4
 								case AT_SKILL_BLOW_UP:
 								case AT_SKILL_BLOW_UP+1:
 								case AT_SKILL_BLOW_UP+2:
 								case AT_SKILL_BLOW_UP+3:
 								case AT_SKILL_BLOW_UP+4:
-#endif	//PJH_SEASON4_MASTER_RANK4
-								case AT_SKILL_ONETOONE:	// 블로우
+								case AT_SKILL_ONETOONE:
 								case AT_SKILL_STRONG_PIER:
 								case AT_SKILL_FIRE_BUST_UP:
 								case AT_SKILL_FIRE_BUST_UP+1:
@@ -8050,15 +7274,13 @@ void Attack(CHARACTER *c)
 								case AT_SKILL_ASHAKE_UP+4:
 								case AT_SKILL_DARK_HORSE:
 								case AT_SKILL_THUNDER_STRIKE:
-								case AT_SKILL_SPACE_SPLIT :      //  공간 가르기.
-								case AT_SKILL_PLASMA_STORM_FENRIR:	// (기사, 다크로드, 마검사)
-#ifdef PJH_SEASON4_MASTER_RANK4
+								case AT_SKILL_SPACE_SPLIT :
+								case AT_SKILL_PLASMA_STORM_FENRIR:
 								case AT_SKILL_FIRE_SCREAM_UP:
 								case AT_SKILL_FIRE_SCREAM_UP+1:
 								case AT_SKILL_FIRE_SCREAM_UP+2:
 								case AT_SKILL_FIRE_SCREAM_UP+3:
 								case AT_SKILL_FIRE_SCREAM_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 								case AT_SKILL_DARK_SCREAM:
 									bOk = true;
 									break;
@@ -8099,2254 +7321,40 @@ void Attack(CHARACTER *c)
 					g_MovementSkill.m_iTarget = -1;
 				}
 			}
-#ifdef YDG_FIX_SPLIT_ATTACK_FUNC
-			if ( ClassIndex==CLASS_ELF )	// 요정스킬
+			if (ClassIndex==CLASS_ELF )
 			{
 				AttackElf(c,Skill,Distance);
 			}
-			//  기사용 스킬.
-			if( ClassIndex == CLASS_KNIGHT // 흑기사
-				|| ClassIndex == CLASS_DARK	// 마검사
-				|| ClassIndex == CLASS_DARK_LORD)	// 다크로드			
+			if(ClassIndex == CLASS_KNIGHT || ClassIndex == CLASS_DARK || ClassIndex == CLASS_DARK_LORD)
 			{
 				AttackKnight(c,Skill,Distance);
 			}
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-			if(ClassIndex == CLASS_RAGEFIGHTER) //레이지파이터
+			if(ClassIndex == CLASS_RAGEFIGHTER)
 			{
 				AttackRagefighter(c,Skill,Distance);
 			}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
-			if ( ClassIndex==CLASS_WIZARD		// 흑마법사 이거나
-				|| ClassIndex==CLASS_DARK		// 마검사 이거나
-				|| ClassIndex==CLASS_SUMMONER	// 소환술사 이거나 : 흑마법사와 공통 스킬(운석, 파이어볼, 얼음, 파워웨이브)로 인해 추가.
-				)
+			if ( ClassIndex==CLASS_WIZARD || ClassIndex==CLASS_DARK || ClassIndex==CLASS_SUMMONER)
 			{
 				AttackWizard(c,Skill,Distance);
 			}
-			//  공통으로 사용되는 스킬.
 			if ( (Skill>= AT_SKILL_STUN && Skill<=AT_SKILL_REMOVAL_BUFF ))
 			{
 				AttackCommon(c,Skill,Distance);
 			}
-#else	// YDG_FIX_SPLIT_ATTACK_FUNC
-			if ( ClassIndex==CLASS_ELF )	// 요정스킬
-			{
-				int iMana, iSkillMana;
-				GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
-				if( g_isCharacterBuff(o, eBuff_InfinityArrow) ) 
-					iMana += CharacterMachine->InfinityArrowAdditionalMana;
-				if(iMana > CharacterAttribute->Mana)
-				{
-					int Index = g_pMyInventory->FindManaItemIndex();
-					if(Index != -1)
-					{
-						SendRequestUse(Index, 0);
-					}
-					return;
-				}
-				// skillmana 부족
-				if(iSkillMana > CharacterAttribute->SkillMana)
-				{
-					return;
-				}
-                if ( !CheckSkillDelay( Hero->CurrentSkill ) )
-                {
-                    return;
-                }
-				
-				int iEnergy;
-				GetSkillInformation_Energy(Skill, &iEnergy);
-				if(iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy) )
-				{
-					return;
-				}
-				
-                bool Success = CheckTarget(c);
-				switch(Skill)
-				{
-				case AT_SKILL_SUMMON:
-				case AT_SKILL_SUMMON+1:
-				case AT_SKILL_SUMMON+2:
-				case AT_SKILL_SUMMON+3:
-				case AT_SKILL_SUMMON+4:
-				case AT_SKILL_SUMMON+5:
-				case AT_SKILL_SUMMON+6:
-#ifdef ADD_ELF_SUMMON
-				case AT_SKILL_SUMMON+7:
-#endif // ADD_ELF_SUMMON
-                    if ( World!=WD_10HEAVEN && InChaosCastle()==false )
-						if(!g_Direction.m_CKanturu.IsMayaScene())
-						{
-							SendRequestMagic(Skill,HeroKey);
-							SetPlayerMagic(c);
-						}
-						return;
-						
-                case AT_SKILL_PIERCING:
-#ifdef ADD_SOCKET_ITEM
-					// 플레이어가 활이나 석궁을 장착했을 때
-					if( (o->Type == MODEL_PLAYER) && (GetEquipedBowType( Hero ) != BOWTYPE_NONE) )
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-						if( o->Type==MODEL_PLAYER &&
-							(( Hero->Weapon[0].Type>=MODEL_BOW+8  && Hero->Weapon[0].Type<MODEL_BOW+15 ) ||
-							(( Hero->Weapon[1].Type>=MODEL_BOW    && Hero->Weapon[1].Type<MODEL_BOW+7 ) 
-							|| Hero->Weapon[1].Type==MODEL_BOW+17 
-							|| Hero->Weapon[1].Type==MODEL_BOW+20
-							|| Hero->Weapon[1].Type==MODEL_BOW+21
-							|| Hero->Weapon[1].Type==MODEL_BOW+22
-							) ||
-							(  Hero->Weapon[0].Type>=MODEL_BOW+16 && Hero->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX ) ) )
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-						{
-							if(!CheckArrow())
-								break;
-							if ( CheckTile( c, o, Distance ) )
-							{
-								o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-								
-								WORD TKey = 0xffff;
-								if ( g_MovementSkill.m_iTarget!=-1 )
-								{
-									TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-								}
-								SendRequestMagicContinue(Skill,( c->PositionX),
-									( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0,TKey,0);
-								SetPlayerAttack(c);
-								if(o->Type != MODEL_PLAYER)
-								{
-									CreateArrows(c,o,NULL,FindHotKey(( c->Skill)),0,( c->Skill));
-								}
-							}
-						}
-						break;
-						
-				}
-				if(SelectedCharacter != -1)
-				{
-					ZeroMemory( &g_MovementSkill, sizeof ( g_MovementSkill));
-					g_MovementSkill.m_bMagic = TRUE;
-					g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-					g_MovementSkill.m_iTarget = SelectedCharacter;
-				}
-				if ( !CheckTile( c, o, Distance ) )
-				{
-					if ( SelectedCharacter!=-1 && ( Skill==AT_SKILL_HEALING || Skill==AT_SKILL_ATTACK || Skill==AT_SKILL_DEFENSE || CheckAttack() 
-						|| (AT_SKILL_HEAL_UP <= Skill && Skill <= AT_SKILL_HEAL_UP+4)
-						|| Skill==AT_SKILL_DARK_SCREAM
-#ifdef PJH_SEASON4_MASTER_RANK4
-						|| (AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP+4)
-						|| (AT_SKILL_DEF_POWER_UP <= Skill && Skill <= AT_SKILL_DEF_POWER_UP+4)
-						|| (AT_SKILL_ATT_POWER_UP <= Skill && Skill <= AT_SKILL_ATT_POWER_UP+4)
-#endif //PJH_SEASON4_MASTER_RANK4
-						)
-						)
-					{
-						if(CharactersClient[SelectedCharacter].Object.Kind==KIND_PLAYER)
-						{
-							if(PathFinding2(( c->PositionX),( c->PositionY),
-								TargetX,TargetY,&c->Path, Distance ) )
-							{
-								c->Movement = true;
-								c->MovementType = MOVEMENT_SKILL;
-#ifdef CSK_FIX_SYNCHRONIZATION
-								SendMove(c, o);
-#endif // CSK_FIX_SYNCHRONIZATION
-							}
-						}
-					}
-					
-					if(Skill != AT_SKILL_STUN && Skill != AT_SKILL_REMOVAL_STUN && Skill != AT_SKILL_MANA && Skill != AT_SKILL_INVISIBLE && Skill != AT_SKILL_REMOVAL_INVISIBLE
-						&& Skill != AT_SKILL_PLASMA_STORM_FENRIR
-						)
-						return;
-				}
-				bool Wall = CheckWall(( c->PositionX),( c->PositionY),TargetX,TargetY);
-				if(Wall)
-				{
-					if(SelectedCharacter != -1)
-					{
-						if(CharactersClient[SelectedCharacter].Object.Kind==KIND_PLAYER)
-						{
-							switch(Skill)
-							{
-							case AT_SKILL_HEAL_UP:
-							case AT_SKILL_HEAL_UP+1:
-							case AT_SKILL_HEAL_UP+2:
-							case AT_SKILL_HEAL_UP+3:
-							case AT_SKILL_HEAL_UP+4:
-							case AT_SKILL_HEALING:
-#ifdef PJH_SEASON4_MASTER_RANK4
-							case AT_SKILL_ATT_POWER_UP:
-							case AT_SKILL_ATT_POWER_UP+1:
-							case AT_SKILL_ATT_POWER_UP+2:
-							case AT_SKILL_ATT_POWER_UP+3:
-							case AT_SKILL_ATT_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
-							case AT_SKILL_ATTACK:
-#ifdef PJH_SEASON4_MASTER_RANK4
-							case AT_SKILL_DEF_POWER_UP:
-							case AT_SKILL_DEF_POWER_UP+1:
-							case AT_SKILL_DEF_POWER_UP+2:
-							case AT_SKILL_DEF_POWER_UP+3:
-							case AT_SKILL_DEF_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
-							case AT_SKILL_DEFENSE:
-								UseSkillElf( c, o);
-								return;
-							}
-						}
-                        if(CheckAttack())
-                        {
-#ifdef ADD_SOCKET_ITEM
-							// 플레이어가 활/석궁을 장착하였고, 해당 스킬시전
-							if( ((Skill==AT_SKILL_PARALYZE) || (Skill==AT_SKILL_DEEPIMPACT))
-								&& ((o->Type == MODEL_PLAYER) && (GetEquipedBowType( Hero ) != BOWTYPE_NONE ))
-								)
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-								if( ( Skill==AT_SKILL_PARALYZE 
-									|| Skill==AT_SKILL_DEEPIMPACT
-									)
-									&& o->Type==MODEL_PLAYER && 
-									(( Hero->Weapon[0].Type>=MODEL_BOW+8  && Hero->Weapon[0].Type<MODEL_BOW+15 ) ||
-									(( Hero->Weapon[1].Type>=MODEL_BOW    && Hero->Weapon[1].Type<MODEL_BOW+7 ) 
-									|| Hero->Weapon[1].Type==MODEL_BOW+17 
-									|| Hero->Weapon[1].Type==MODEL_BOW+20
-									|| Hero->Weapon[1].Type == MODEL_BOW+21
-									|| Hero->Weapon[1].Type == MODEL_BOW+22
-									) ||
-									(  Hero->Weapon[0].Type>=MODEL_BOW+16 && Hero->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX ) ) )
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-								{
-									UseSkillElf ( c, o );
-								}
-                        }
-					}
-				}
-				
-				switch(Skill)
-				{
-				case AT_SKILL_INFINITY_ARROW:
-					{
-						//무한화살 상태가 아닌 경우만 쓸 수 있다. 
-						if(g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow)==false)
-						{
-							SendRequestMagic(Skill,HeroKey);
-							if((c->Helper.Type == MODEL_HELPER+37) 
-								|| (c->Helper.Type == MODEL_HELPER+2)
-								|| (c->Helper.Type == MODEL_HELPER+3)
-								|| (c->Helper.Type == MODEL_HELPER+4))
-								SetPlayerMagic(c);
-							else
-								SetAction(o,PLAYER_RUSH1);
-							
-							c->Movement = 0;
-						}
-					}
-					break;
-					
-				case AT_SKILL_HELLOWIN_EVENT_1:
-				case AT_SKILL_HELLOWIN_EVENT_2:
-				case AT_SKILL_HELLOWIN_EVENT_3:
-				case AT_SKILL_HELLOWIN_EVENT_4:
-				case AT_SKILL_HELLOWIN_EVENT_5:
-                    SendRequestMagic ( Skill, HeroKey );
-					//					SetPlayerMagic(c);
-                    c->Movement = 0;
-					break;
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-				case AT_SKILL_RECOVER:
-					{
-						vec3_t Light,Position,P,dp;
-												
-						float Matrix[3][4];
-						
-						Vector(0.f,-220.f,130.f,P);
-						AngleMatrix(o->Angle,Matrix);
-						VectorRotate(P,Matrix,dp);
-						VectorAdd(dp,o->Position,Position);
-						Vector(0.7f, 0.6f, 0.f, Light);
-						CreateEffect(BITMAP_IMPACT, Position, o->Angle, Light, 0,o);
-						SetAction(o,PLAYER_RECOVER_SKILL);
-						if(SelectedCharacter > -1)
-						{
-							SendRequestMagic(Skill,CharactersClient[SelectedCharacter].Key);
-						}
-						else
-						{
-							SendRequestMagic(Skill,HeroKey);
-						}
-						//			UseSkillElf( c, o);
-					}
-					break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-					
-				case AT_SKILL_HEAL_UP:
-				case AT_SKILL_HEAL_UP+1:
-				case AT_SKILL_HEAL_UP+2:
-				case AT_SKILL_HEAL_UP+3:
-				case AT_SKILL_HEAL_UP+4:
-				case AT_SKILL_HEALING:
-#ifdef PJH_SEASON4_MASTER_RANK4
-				case AT_SKILL_ATT_POWER_UP:
-				case AT_SKILL_ATT_POWER_UP+1:
-				case AT_SKILL_ATT_POWER_UP+2:
-				case AT_SKILL_ATT_POWER_UP+3:
-				case AT_SKILL_ATT_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
-				case AT_SKILL_ATTACK:
-#ifdef PJH_SEASON4_MASTER_RANK4
-				case AT_SKILL_DEF_POWER_UP:
-				case AT_SKILL_DEF_POWER_UP+1:
-				case AT_SKILL_DEF_POWER_UP+2:
-				case AT_SKILL_DEF_POWER_UP+3:
-				case AT_SKILL_DEF_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
-					//#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-					//	case AT_SKILL_RECOVER:
-					//#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-				case AT_SKILL_DEFENSE:
-					SendRequestMagic(Skill,HeroKey);
-					SetPlayerMagic(c);
-					return;
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-				case AT_SKILL_MULTI_SHOT:
-					{
-						if (GetEquipedBowType_Skill() == BOWTYPE_NONE)	// 활을 들어야 활성화
-							return;
-						o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-#ifdef PJH_SEASON4_FIX_MULTI_SHOT
-			if( CheckTile( c, o, Distance ) )
-			{
-				BYTE PathX[1];
-				BYTE PathY[1];
-				PathX[0] = ( c->PositionX);
-				PathY[0] = ( c->PositionY);
-				gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
-				
-				BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-				
-				BYTE angle = (BYTE)((((o->Angle[2]+180.f)/360.f)*255.f));
-				WORD TKey = 0xffff;
-				if ( g_MovementSkill.m_iTarget!=-1 )
-				{
-					TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-				}
-
-				SendRequestMagicContinue(Skill,( c->PositionX),
-					( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
-				SetAttackSpeed();
-				//									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
-				c->Movement = 0;
-				//c->AttackTime = 15;
-		
-				
-				SetPlayerBow(c);
-				vec3_t Light,Position,P,dp,Angle;
-				
-				float Matrix[3][4];
-				Vector(0.f,20.f,0.f,P);
-				AngleMatrix(o->Angle,Matrix);
-				VectorRotate(P,Matrix,dp);
-				VectorAdd(dp,o->Position,Position);
-				Vector(0.8f, 0.9f, 1.6f, Light);
-				CreateEffect ( MODEL_MULTI_SHOT3, Position, o->Angle, Light, 0);
-				CreateEffect ( MODEL_MULTI_SHOT3, Position, o->Angle, Light, 0);
-				
-				Vector(0.f,-20.f,0.f,P);
-				Vector(0.f,0.f,0.f,P);
-				AngleMatrix(o->Angle,Matrix);
-				VectorRotate(P,Matrix,dp);
-				VectorAdd(dp,o->Position,Position);
-				
-				CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-				CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-				CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-				
-				Vector(0.f,20.f,0.f,P);
-				AngleMatrix(o->Angle,Matrix);
-				VectorRotate(P,Matrix,dp);
-				VectorAdd(dp,o->Position,Position);
-				CreateEffect ( MODEL_MULTI_SHOT2, Position, o->Angle, Light, 0);
-				CreateEffect ( MODEL_MULTI_SHOT2, Position, o->Angle, Light, 0);
-				
-				Vector(0.f,-120.f,145.f,P);
-				AngleMatrix(o->Angle,Matrix);
-				VectorRotate(P,Matrix,dp);
-				VectorAdd(dp,o->Position,Position);
-
-				short Key = -1;
-                for( int i=0;i<MAX_CHARACTERS_CLIENT;i++ )
-                {
-                    CHARACTER *tc = &CharactersClient[i];
-					if(tc == c)
-					{
-						Key = i;
-						break;
-					}
-				}
-
-				CreateEffect(MODEL_BLADE_SKILL, Position, o->Angle, Light, 1, o, Key);
-				PlayBuffer(SOUND_SKILL_MULTI_SHOT);
-			}
-#else				//PJH_SEASON4_FIX_MULTI_SHOT		
-
-
-						if( CheckTile( c, o, Distance ) )
-						{
-							BYTE PathX[1];
-							BYTE PathY[1];
-							PathX[0] = ( c->PositionX);
-							PathY[0] = ( c->PositionY);
-							gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
-							
-							BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-							
-							BYTE angle = (BYTE)((((o->Angle[2]+180.f)/360.f)*255.f));
-							WORD TKey = 0xffff;
-							if ( g_MovementSkill.m_iTarget!=-1 )
-							{
-								TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-							}
-							SendRequestMagicContinue(Skill,( c->PositionX),
-								( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
-							SetAttackSpeed();
-							//									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
-							c->Movement = 0;
-							//c->AttackTime = 15;
-					
-							
-							SetPlayerBow(c);
-							vec3_t Light,Position,P,dp,Angle;
-							
-							float Matrix[3][4];
-							Vector(0.f,20.f,0.f,P);
-							AngleMatrix(o->Angle,Matrix);
-							VectorRotate(P,Matrix,dp);
-							VectorAdd(dp,o->Position,Position);
-							Vector(0.4f, 0.6f, 1.f, Light);
-							CreateEffect ( MODEL_MULTI_SHOT3, Position, o->Angle, Light, 0);
-							CreateEffect ( MODEL_MULTI_SHOT3, Position, o->Angle, Light, 0);
-							
-							Vector(0.f,-20.f,0.f,P);
-							Vector(0.f,0.f,0.f,P);
-							AngleMatrix(o->Angle,Matrix);
-							VectorRotate(P,Matrix,dp);
-							VectorAdd(dp,o->Position,Position);
-							
-							CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-							CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-							CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-							
-							Vector(0.f,20.f,0.f,P);
-							AngleMatrix(o->Angle,Matrix);
-							VectorRotate(P,Matrix,dp);
-							VectorAdd(dp,o->Position,Position);
-							CreateEffect ( MODEL_MULTI_SHOT2, Position, o->Angle, Light, 0);
-							CreateEffect ( MODEL_MULTI_SHOT2, Position, o->Angle, Light, 0);
-							
-							Vector(0.f,-120.f,130.f,P);
-							AngleMatrix(o->Angle,Matrix);
-							VectorRotate(P,Matrix,dp);
-							VectorAdd(dp,o->Position,Position);
-							CreateEffect(MODEL_BLADE_SKILL, Position, o->Angle, Light, 1);
-							
-							BYTE Skill = 0;
-							//			CHARACTER *tc;
-							OBJECT *to = NULL;
-							
-							VectorCopy(o->Angle,Angle);
-							CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-							o->Angle[2] = Angle[2] + 8.f;
-							CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-							o->Angle[2] = Angle[2] + 16.f;
-							CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-							o->Angle[2] = Angle[2] - 8.f;
-							CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-							o->Angle[2] = Angle[2] - 16.f;
-							CreateArrow(c,o,to,FindHotKey(( o->Skill)),1,0);
-							o->Angle[2] = Angle[2];
-							PlayBuffer(SOUND_SKILL_MULTI_SHOT);
-						}
-#endif //PJH_SEASON4_FIX_MULTI_SHOT
-					}
-					break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-					
-                case AT_SKILL_IMPROVE_AG:
-					SendRequestMagic(Skill,HeroKey);
-					SetPlayerMagic(c);
-					c->Movement = 0;
-                    break;
-					
-					//^ 펜릴 스킬 관련
-				case AT_SKILL_PLASMA_STORM_FENRIR:	// (요정)
-					{
-						if ( CheckAttack() )
-						{
-							g_MovementSkill.m_iTarget = SelectedCharacter;
-						}
-						else
-						{
-							g_MovementSkill.m_iTarget = -1;
-						}
-						
-						// 대상 지점 상대 좌표 계산
-						int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
-						int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
-						if( CheckTile( c, o, Distance ) )
-						{
-							BYTE pos = CalcTargetPos ( o->Position[0], o->Position[1], c->TargetPosition[0],c->TargetPosition[1]);
-							WORD TKey = 0xffff;
-							if(g_MovementSkill.m_iTarget != -1)
-							{
-								o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-								
-								CheckSkillDelay(Hero->CurrentSkill);
-								
-								TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-								c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
-								SendRequestMagicContinue(Skill,( c->PositionX),
-									( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
-								c->Movement = 0;
-								
-								if(o->Type == MODEL_PLAYER)
-								{
-									SetAction_Fenrir_Skill(c, o);
-								}
-							}
-							else
-							{
-								c->m_iFenrirSkillTarget = -1;
-							}
-						}
-						else
-						{
-							if(g_MovementSkill.m_iTarget != -1)
-							{
-								if(PathFinding2(( c->PositionX),( c->PositionY),
-									TargetX,TargetY,&c->Path, Distance*1.2f ) )
-								{	// 멀면 걸어가서 사용
-									c->Movement = true;
-								}
-							}
-							else
-							{
-								Attacking = -1;
-							}
-						}
-					}	// case 
-					break;
-				}	// switch
-			} // if
-			
-            //  기사용 스킬.
-			if( ClassIndex == CLASS_KNIGHT // 흑기사
-				|| ClassIndex == CLASS_DARK	// 마검사
-				|| ClassIndex == CLASS_DARK_LORD )	// 다크로드
-			{
-				
-				// 마나와 스킬마나 구해놓는다.
-				int iMana, iSkillMana;
-				GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana );
-				
-                // 기사 스킬은 모두 칼을 지니고 있어야한다.
-                // 기사 생명증가는 칼이 없어도 가능.
-                if(
-					( ( Hero->Weapon[0].Type!=-1 && 
-					( Hero->Weapon[0].Type<MODEL_STAFF || Hero->Weapon[0].Type>=MODEL_STAFF+MAX_ITEM_INDEX ) &&
-					( Hero->Weapon[1].Type<MODEL_STAFF || Hero->Weapon[1].Type>=MODEL_STAFF+MAX_ITEM_INDEX ) ) 
-					|| Skill == AT_SKILL_VITALITY 
-					|| Skill == AT_SKILL_ADD_CRITICAL 
-					|| Skill == AT_SKILL_PARTY_TELEPORT 
-					|| Skill == AT_SKILL_THUNDER_STRIKE 
-					|| Skill == AT_SKILL_DARK_HORSE
-					|| (AT_SKILL_LIFE_UP <= Skill && Skill <= AT_SKILL_LIFE_UP+4)
-					|| (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP+4)
-					|| Skill == AT_SKILL_BRAND_OF_SKILL
-					|| Skill == AT_SKILL_PLASMA_STORM_FENRIR	// (기사, 다크로드, 마검사) 펜릴 스킬
-					|| Skill == AT_SKILL_DARK_SCREAM
-#ifdef PJH_SEASON4_MASTER_RANK4
-					|| (AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP+4)
-#endif //PJH_SEASON4_MASTER_RANK4
-					|| Skill == AT_SKILL_WHEEL
-					|| (AT_SKILL_TORNADO_SWORDA_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDA_UP+4)
-					|| (AT_SKILL_TORNADO_SWORDB_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDB_UP+4)
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
-					|| Skill == AT_SKILL_GIGANTIC_STORM
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-					|| Skill == AT_SKILL_GAOTIC
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-					) )
-                {
-					bool Success = true;
-					
-                    if ( Skill==AT_SKILL_PARTY_TELEPORT && PartyNumber<=0 )
-                    {
-                        Success = false;
-                    }
-					
-					if( Skill == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP+4))
-					{
-						BYTE t_DarkLife = 0;
-						t_DarkLife  = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
-						if(t_DarkLife == 0) Success = false;
-					}
-					
-					if( InChaosCastle() )
-					{
-						//카오스 캐슬에서는 다크스피릿, 다크호스, 디노란트 스킬 등이 사용 불가능
-						if( Skill == AT_SKILL_DARK_HORSE 
-							|| (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP+4)
-							|| Skill == AT_SKILL_RIDER
-							|| ( Skill >= AT_PET_COMMAND_DEFAULT && Skill <= AT_PET_COMMAND_TARGET )
-							|| Skill == AT_SKILL_PLASMA_STORM_FENRIR // (기사, 다크로드, 마검사)
-							)
-						{
-							Success = false;
-						}
-					}
-					else
-					{
-						//카오스 캐슬이 아니더라도 죽었으면 스킬 사용 불가능
-						if( Skill == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP+4))
-						{
-							BYTE t_DarkLife = 0;
-							t_DarkLife  = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
-							if(t_DarkLife == 0) Success = false;
-						}
-					}
-					
-					if ( iMana>CharacterAttribute->Mana )
-					{
-						int Index = g_pMyInventory->FindManaItemIndex();
-						if(Index != -1)
-						{
-							SendRequestUse(Index, 0);
-						}
-						Success = false;
-					}
-					if ( Success && iSkillMana>CharacterAttribute->SkillMana )
-					{
-						Success = false;
-					}
-                    if ( Success && !CheckSkillDelay( Hero->CurrentSkill ) )
-                    {
-                        Success = false;
-                    }
-					
-					int iEnergy;	// 마이너스 열매 작업
-					GetSkillInformation_Energy(Skill, &iEnergy);
-					if(iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy))
-					{
-						Success = false;
-					}
-					if(ClassIndex == CLASS_DARK_LORD)	// 다크로드이면
-					{
-						int iCharisma;
-						GetSkillInformation_Charisma(Skill, &iCharisma);	// 통솔포인트 
-						if(iCharisma > (CharacterAttribute->Charisma + CharacterAttribute->AddCharisma) )
-						{
-							Success = false;
-						}
-					}
-					
-                    if ( Success )
-                    {
-                        //  스킬.
-                        switch(Skill)
-                        {
-						case AT_SKILL_TORNADO_SWORDA_UP:
-						case AT_SKILL_TORNADO_SWORDA_UP+1:
-						case AT_SKILL_TORNADO_SWORDA_UP+2:
-						case AT_SKILL_TORNADO_SWORDA_UP+3:
-						case AT_SKILL_TORNADO_SWORDA_UP+4:
-							
-						case AT_SKILL_TORNADO_SWORDB_UP:
-						case AT_SKILL_TORNADO_SWORDB_UP+1:
-						case AT_SKILL_TORNADO_SWORDB_UP+2:
-						case AT_SKILL_TORNADO_SWORDB_UP+3:
-						case AT_SKILL_TORNADO_SWORDB_UP+4:
-                        case AT_SKILL_WHEEL:    //  회오리 베기.
-                            o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-							{
-								BYTE PathX[1];
-								BYTE PathY[1];
-								PathX[0] = ( c->PositionX);
-								PathY[0] = ( c->PositionY);
-								gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
-                                WORD TKey = 0xffff;
-                                if ( g_MovementSkill.m_iTarget!=-1 )
-                                {
-                                    TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                }
-                                SendRequestMagicContinue(Skill,( c->PositionX),
-                                    ( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, TKey, 0);
-                                SetAttackSpeed();
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-								switch(c->Helper.Type)
-								{
-								case MODEL_HELPER+2:	// 유니리아
-									SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_UNI);
-									break;
-								case MODEL_HELPER+3:	// 디노란트
-									SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_DINO);
-									break;
-								case MODEL_HELPER+37:	// 펜릴	
-									SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_FENRIR);
-									break;
-								default:	// 기본
-									SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
-									break;
-								}
-#else	// YDG_ADD_SKILL_RIDING_ANIMATIONS
-								SetAction(o,PLAYER_ATTACK_SKILL_WHEEL);
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
-                                c->Movement = 0;
-                            }
-                            break;
-#ifdef PJH_SEASON4_MASTER_RANK4
-						case AT_SKILL_BLOOD_ATT_UP:
-						case AT_SKILL_BLOOD_ATT_UP+1:
-						case AT_SKILL_BLOOD_ATT_UP+2:
-						case AT_SKILL_BLOOD_ATT_UP+3:
-						case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
-                        case AT_SKILL_REDUCEDEFENSE:    
-                            o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-                            {
-#ifdef PSW_FRUIT_ITEM_CHECK_SKILL
-								WORD Strength;
-								const WORD notStrength = 596;
-								Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-								if(Strength < notStrength)
-								{
-									break;
-								}
-#endif //PSW_FRUIT_ITEM_CHECK_SKILL
-								if( CheckTile( c, o, Distance ) )
-                                {
-                                    BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-									
-                                    WORD TKey = 0xffff;
-                                    if ( g_MovementSkill.m_iTarget!=-1 )
-                                    {
-                                        TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                    }
-                                    SendRequestMagicContinue(Skill,( c->PositionX),
-                                        ( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), byValue, 0, TKey, 0);
-                                    SetAttackSpeed();
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-									switch(c->Helper.Type)
-									{
-									case MODEL_HELPER+2:	// 유니리아
-										SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_UNI);
-										break;
-									case MODEL_HELPER+3:	// 디노란트
-										SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_DINO);
-										break;
-									case MODEL_HELPER+37:	// 펜릴	
-										SetAction(o, PLAYER_ATTACK_SKILL_WHEEL_FENRIR);
-										break;
-									default:	// 기본
-										SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
-										break;
-									}
-#else	// YDG_ADD_SKILL_RIDING_ANIMATIONS
-									SetAction(o,PLAYER_ATTACK_SKILL_WHEEL);
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
-                                    c->Movement = 0;
-                                }
-                            }
-                            break;
-#ifdef PJH_SEASON4_MASTER_RANK4
-						case AT_SKILL_POWER_SLASH_UP:
-						case AT_SKILL_POWER_SLASH_UP+1:
-						case AT_SKILL_POWER_SLASH_UP+2:
-						case AT_SKILL_POWER_SLASH_UP+3:
-						case AT_SKILL_POWER_SLASH_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4                            
-                        case AT_SKILL_ICE_BLADE:
-                            if ( c->Helper.Type<MODEL_HELPER+2 || c->Helper.Type>MODEL_HELPER+4
-								&& c->Helper.Type != MODEL_HELPER+37
-								)
-                            {
-								/*
-#ifdef PJH_SEASON4_MASTER_RANK4
-								bool jd = true;
-								for(int j=0;j<2;j++)
-								{
-									if(Hero->Weapon[j].Type==MODEL_SWORD+21||Hero->Weapon[j].Type==MODEL_SWORD+23||Hero->Weapon[j].Type==MODEL_SWORD+28||
-										Hero->Weapon[j].Type==MODEL_SWORD+25||Hero->Weapon[j].Type==MODEL_SWORD+31
-										)	//21 = 데스블레이드,23 = 익스플로전블레이드,25 = 소드댄서,28 = 룬바스타드,31 = 데쓰브로드
-									{
-										jd = false;
-									}
-								}
-								if(jd == true)
-									return;
-#endif //PJH_SEASON4_MASTER_RANK4                            
-*/
-                                o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-                                
-                                if( CheckTile( c, o, Distance ) )
-                                {
-									BYTE PathX[1];
-									BYTE PathY[1];
-									PathX[0] = ( c->PositionX);
-									PathY[0] = ( c->PositionY);
-									gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
-									
-                                    BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-									
-                                    BYTE angle = (BYTE)((((o->Angle[2]+180.f)/360.f)*255.f));
-                                    WORD TKey = 0xffff;
-                                    if ( g_MovementSkill.m_iTarget!=-1 )
-                                    {
-                                        TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                    }
-                                    SendRequestMagicContinue(Skill,( c->PositionX),
-                                        ( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
-                                    SetAttackSpeed();
-									if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)
-									{
-										SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
-									}
-									else
-									{
-										SetAction(o,PLAYER_ATTACK_TWO_HAND_SWORD_TWO);
-									}
-                                    c->Movement = 0;
-                                }
-                            }
-                            break;
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-						case AT_SKILL_GAOTIC:
-                            {
-                                o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-                                
-                                if( CheckTile( c, o, Distance ) )
-                                {
-									BYTE PathX[1];
-									BYTE PathY[1];
-									PathX[0] = ( c->PositionX);
-									PathY[0] = ( c->PositionY);
-									gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
-									
-                                    BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-									
-                                    BYTE angle = (BYTE)((((o->Angle[2]+180.f)/360.f)*255.f));
-                                    WORD TKey = 0xffff;
-                                    if ( g_MovementSkill.m_iTarget!=-1 )
-                                    {
-                                        TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                    }
-                                    SendRequestMagicContinue(Skill,( c->PositionX),
-                                        ( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
-                                    SetAttackSpeed();
-									//									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
-                                    c->Movement = 0;
-									
-//									SetPlayerMagic(c);
-#ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-									if( c->Helper.Type == MODEL_HELPER+37 )				
-									{
-										SetAction( o, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );		// 팬릴착용
-									}
-#ifdef PBG_FIX_CHAOTIC_ANIMATION
-									else if((c->Helper.Type>=MODEL_HELPER+2) && (c->Helper.Type<=MODEL_HELPER+4))
-#else //PBG_FIX_CHAOTIC_ANIMATION
-									else if((c->Helper.Type>=MODEL_HELPER+2) || (c->Helper.Type<=MODEL_HELPER+4))
-#endif //PBG_FIX_CHAOTIC_ANIMATION
-									{
-										SetAction( o, PLAYER_ATTACK_RIDE_STRIKE );		// 탈것착용 (다크호스포함)
-									}
-									else
-									{
-										SetAction( o, PLAYER_ATTACK_STRIKE );				// 일반공격
-									}
-#else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-									if(c->Helper.Type == MODEL_HELPER+37)
-										SetAction(o,PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);	//^ 펜릴
-									else
-										SetAction ( o, PLAYER_ATTACK_STRIKE );
-#endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-									vec3_t Light,Position,P,dp;
-									
-									float Matrix[3][4];
-									Vector(0.f,-20.f,0.f,P);
-									Vector(0.f,0.f,0.f,P);
-									AngleMatrix(o->Angle,Matrix);
-									VectorRotate(P,Matrix,dp);
-									VectorAdd(dp,o->Position,Position);
-									
-									Vector(0.5f, 0.5f, 0.5f, Light);
-									for (int i = 0; i < 5; ++i)
-									{
-										CreateEffect(BITMAP_SHINY+6, Position, o->Angle, Light, 3, o, -1, 0, 0, 0, 0.5f);
-									}
-									
-									VectorCopy(o->Position,Position);
-									for(i=0;i<8;i++)
-									{
-										Position[0] = (o->Position[0] - 119.f) + (float)(rand()%240); 
-										Position[2] = (o->Position[2] + 49.f) + (float)(rand()%60); 
-										CreateJoint(BITMAP_2LINE_GHOST,Position,o->Position,o->Angle,0,o,20.f,o->PKKey,0,o->m_bySkillSerialNum);//클라이언트마법처리
-									}
-#ifdef PJH_FIX_CAOTIC
-					if(c==Hero && SelectedCharacter!=-1)
-					{
-						vec3_t Pos;
-						CHARACTER *st = &CharactersClient[SelectedCharacter];
-						VectorCopy(st->Object.Position,Pos);
-						CreateBomb(Pos,true);
-					}
-#endif //PJH_FIX_CAOTIC
-#ifdef YDG_FIX_CAOTIC_SOUND_MISSING
-									PlayBuffer(SOUND_SKILL_CAOTIC);
-#endif	// YDG_FIX_CAOTIC_SOUND_MISSING
-                                }
-								else
-								{	// 멀어졌으면 또 걷기
-									if(PathFinding2(( c->PositionX), ( c->PositionY),TargetX,TargetY,&c->Path, Distance ) )
-									{	
-										c->Movement = true;		// 멀면 걸어가서 사용
-									}
-								}
-                            }
-							break;
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
-                        case AT_SKILL_FLAME_STRIKE:
-                            {
-                                o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-                                
-                                if( CheckTile( c, o, Distance ) )
-                                {
-									BYTE PathX[1];
-									BYTE PathY[1];
-									PathX[0] = ( c->PositionX);
-									PathY[0] = ( c->PositionY);
-									gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
-									
-                                    BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-									
-                                    BYTE angle = (BYTE)((((o->Angle[2]+180.f)/360.f)*255.f));
-                                    WORD TKey = 0xffff;
-                                    if ( g_MovementSkill.m_iTarget!=-1 )
-                                    {
-                                        TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                    }
-                                    SendRequestMagicContinue(Skill,( c->PositionX),
-                                        ( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
-                                    SetAttackSpeed();
-									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
-                                    c->Movement = 0;
-                                    //c->AttackTime = 15;
-                                }
-                            }
-                            break;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
-                        case AT_SKILL_GIGANTIC_STORM:
-                            {
-                                o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-                                
-                                if( CheckTile( c, o, Distance ) )
-                                {
-									BYTE PathX[1];
-									BYTE PathY[1];
-									PathX[0] = ( c->PositionX);
-									PathY[0] = ( c->PositionY);
-									gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
-									
-                                    BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-									
-                                    BYTE angle = (BYTE)((((o->Angle[2]+180.f)/360.f)*255.f));
-                                    WORD TKey = 0xffff;
-                                    if ( g_MovementSkill.m_iTarget!=-1 )
-                                    {
-                                        TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                    }
-                                    SendRequestMagicContinue(Skill,( c->PositionX),
-                                        ( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
-                                    SetAttackSpeed();
-									SetAction(o, PLAYER_SKILL_GIGANTICSTORM);
-                                    c->Movement = 0;
-                                }
-                            }
-                            break;
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-							
-                        case AT_SKILL_PARTY_TELEPORT:
-							if( g_CursedTemple->IsCursedTemple() 
-								&& !g_pMyInventory->IsItem( ITEM_POTION+64, true ) )
-							{
-								return;
-							}
-                            SendRequestMagic ( Skill, HeroKey );
-                            c->Movement = 0;
-                            break;
-                            
-                        case AT_SKILL_ADD_CRITICAL:
-                            SendRequestMagic ( Skill, HeroKey );
-							c->Movement = 0;
-                            break;
-                        case AT_SKILL_BRAND_OF_SKILL:
-                            SendRequestMagic ( Skill, HeroKey );
-                            c->Movement = 0;
-                            break;
-#ifdef PJH_SEASON4_MASTER_RANK4
-						case AT_SKILL_FIRE_SCREAM_UP:
-						case AT_SKILL_FIRE_SCREAM_UP+1:
-						case AT_SKILL_FIRE_SCREAM_UP+2:
-						case AT_SKILL_FIRE_SCREAM_UP+3:
-						case AT_SKILL_FIRE_SCREAM_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
-						case AT_SKILL_DARK_SCREAM:
-                            if ( CheckTile( c, o, Distance ) )
-                            {
-                                int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
-                                int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
-                                BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-                                
-                                BYTE pos = CalcTargetPos ( o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1] );
-                                WORD TKey = 0xffff;
-                                if ( g_MovementSkill.m_iTarget!=-1 )
-                                {
-                                    TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                }
-                                o->Angle[2] = CreateAngle ( o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1] );
-								CheckClientArrow(o);
-                                SendRequestMagicContinue ( Skill, ( c->PositionX),
-                                    ( c->PositionY), (BYTE)(o->Angle[2]/360.f*256.f), byValue, pos, TKey, 0);
-								
-                                SetAttackSpeed();
-                                //  애니메이션 설정.
-                                {
-#ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-									if ( (c->Helper.Type>=MODEL_HELPER+2 && c->Helper.Type<=MODEL_HELPER+4) && !c->SafeZone )
-#else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-                                    if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )   
-#endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-                                    {
-                                        SetAction ( o, PLAYER_ATTACK_RIDE_STRIKE );
-                                    }
-									else if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)
-									{
-										SetAction ( o, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );
-									}
-                                    else
-                                    {
-                                        SetAction ( o, PLAYER_ATTACK_STRIKE );
-                                    }
-                                }
-                                c->Movement = 0;
-                            }
-                            else
-                            {
-                                Attacking = -1;
-                            }
-							break;
-						case AT_SKILL_ASHAKE_UP:
-						case AT_SKILL_ASHAKE_UP+1:
-						case AT_SKILL_ASHAKE_UP+2:
-						case AT_SKILL_ASHAKE_UP+3:
-						case AT_SKILL_ASHAKE_UP+4:
-                        case AT_SKILL_DARK_HORSE:
-                            if ( c->Helper.Type!=MODEL_HELPER+4 || c->SafeZone ) break;
-							
-                        case AT_SKILL_THUNDER_STRIKE:
-                            // 대상 지점 상대 좌표 계산
-                            // 대상 지점 상대 좌표 계산
-                            if ( CheckTile( c, o, Distance ) )
-                            {
-                                int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
-                                int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
-                                BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-                                
-                                BYTE pos = CalcTargetPos ( o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1] );
-                                WORD TKey = 0xffff;
-                                if ( g_MovementSkill.m_iTarget!=-1 )
-                                {
-                                    TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                }
-                                o->Angle[2] = CreateAngle ( o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1] );
-                                SendRequestMagicContinue ( Skill, ( c->PositionX),
-                                    ( c->PositionY), (BYTE)(o->Angle[2]/360.f*256.f), byValue, pos, TKey, 0);
-                                SetAttackSpeed();
-                                
-                                //  애니메이션 설정.
-                                if ( Skill==AT_SKILL_THUNDER_STRIKE )
-                                {
-                                    if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )   
-                                    {
-                                        SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_FLASH );
-                                    }
-									else if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)
-									{
-										SetAction ( o, PLAYER_FENRIR_ATTACK_DARKLORD_FLASH );
-									}
-                                    else
-                                    {
-                                        SetAction ( o, PLAYER_SKILL_FLASH );
-                                    }
-                                }
-                                else if ( Skill==AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP+4))
-                                {
-                                    SetAction ( o, PLAYER_ATTACK_DARKHORSE );
-                                    PlayBuffer ( SOUND_EARTH_QUAKE );
-                                }
-                                c->Movement = 0;
-                            }
-                            else
-                            {
-                                Attacking = -1;
-                            }
-                            break;
-						case AT_SKILL_LIFE_UP:
-						case AT_SKILL_LIFE_UP+1:
-						case AT_SKILL_LIFE_UP+2:
-						case AT_SKILL_LIFE_UP+3:
-						case AT_SKILL_LIFE_UP+4:
-                        case AT_SKILL_VITALITY:	// 스웰라이프
-                            SendRequestMagic(Skill,HeroKey);
-							SetAction(o,PLAYER_SKILL_VITALITY);
-                            c->Movement = 0;
-                            break;
-							
-							//--------------------------------------------------------------------------------------------------------------------
-							
-#ifdef PJH_SEASON4_MASTER_RANK4
-						case AT_SKILL_ANGER_SWORD_UP:
-						case AT_SKILL_ANGER_SWORD_UP+1:
-						case AT_SKILL_ANGER_SWORD_UP+2:
-						case AT_SKILL_ANGER_SWORD_UP+3:
-						case AT_SKILL_ANGER_SWORD_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4                            
-                        case AT_SKILL_FURY_STRIKE:  //  흑기사 - 분노의 일격
-                            {
-								o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-								
-                                // 대상 지점 상대 좌표 계산
-                                int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
-                                int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
-                                if( CheckTile( c, o, Distance ) )
-                                {
-                                    BYTE pos = CalcTargetPos ( o->Position[0], o->Position[1], c->TargetPosition[0],c->TargetPosition[1]);
-                                    WORD TKey = 0xffff;
-                                    if ( g_MovementSkill.m_iTarget!=-1 )
-                                    {
-                                        TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                    }
-                                    SendRequestMagicContinue(Skill,( c->PositionX),
-                                        ( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, pos, TKey, 0);
-									SetAction(o,PLAYER_ATTACK_SKILL_FURY_STRIKE);
-                                    c->Movement = 0;
-                                }
-                                else
-                                {
-                                    Attacking = -1;
-                                }
-                            }
-                            break;
-							
-							//--------------------------------------------------------------------------------------------------------------------
-							
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-							// 흑기사 - 파괴의 일격
-						case AT_SKILL_BLOW_OF_DESTRUCTION:
-							{
-								o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-								
-                                // 대상 지점 상대 좌표 계산
-                                int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
-                                int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
-                                if( CheckTile( c, o, Distance ) )
-                                {
-                                    BYTE pos = CalcTargetPos ( o->Position[0], o->Position[1], c->TargetPosition[0],c->TargetPosition[1]);
-                                    WORD TKey = 0xffff;
-                                    if ( g_MovementSkill.m_iTarget!=-1 )
-                                    {
-                                        TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                    }
-                                    SendRequestMagicContinue(Skill, TargetX, TargetY, (BYTE)(o->Angle[2]/360.f*256.f), 0, pos, TKey, 0);
-									SetAction(o,PLAYER_SKILL_BLOW_OF_DESTRUCTION);
-                                    c->Movement = 0;
-                                }
-                                else
-                                {
-                                    Attacking = -1;
-                                }
-							}
-							break;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-							
-							//--------------------------------------------------------------------------------------------------------------------
-							
-							//^ 펜릴 스킬 관련
-						case AT_SKILL_PLASMA_STORM_FENRIR: // (기사, 다크로드, 마검사)
-							{
-								// 대상 지점 상대 좌표 계산
-								int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
-								int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
-								if( CheckTile( c, o, Distance ) )
-								{
-									
-									BYTE pos = CalcTargetPos ( o->Position[0], o->Position[1], c->TargetPosition[0],c->TargetPosition[1]);
-									WORD TKey = 0xffff;
-									if(g_MovementSkill.m_iTarget!=-1)
-									{
-										o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-										
-										CheckSkillDelay(Hero->CurrentSkill);
-										
-										TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-										c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
-										SendRequestMagicContinue(Skill,( c->PositionX),
-											( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
-										c->Movement = 0;
-										
-										if(o->Type == MODEL_PLAYER)
-										{
-											SetAction_Fenrir_Skill(c, o);
-										}
-									}
-									else
-									{
-										c->m_iFenrirSkillTarget = -1;
-									}
-								}
-								else
-								{
-									if(g_MovementSkill.m_iTarget!=-1)
-									{
-										if(PathFinding2(( c->PositionX),( c->PositionY),
-											TargetX,TargetY,&c->Path, Distance*1.2f ) )
-										{	// 멀면 걸어가서 사용
-											c->Movement = true;
-										}
-									}
-									else
-									{
-										Attacking = -1;
-									}
-								}
-							}	// case
-							break;
-                        } // switch
-                    }
-                }
-			}
-			if ( ClassIndex==CLASS_WIZARD		// 흑마법사 이거나
-				|| ClassIndex==CLASS_DARK		// 마검사 이거나
-				|| ClassIndex==CLASS_SUMMONER	// 소환술사 이거나 : 흑마법사와 공통 스킬(운석, 파이어볼, 얼음, 파워웨이브)로 인해 추가.
-				)
-			{
-				
-				int iMana, iSkillMana;
-				if( Skill == AT_SKILL_BLAST_HELL_BEGIN || Skill == AT_SKILL_BLAST_HELL )
-				{
-					GetSkillInformation( AT_SKILL_BLAST_HELL, 1, NULL, &iMana, NULL, &iSkillMana);
-					
-                    if ( Skill==AT_SKILL_BLAST_HELL )
-                    {
-						iSkillMana = 0;
-                    }
-				}
-				else
-				{
-					GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
-				}
-				
-				int iEnergy;	// 마이너스 열매 작업
-				GetSkillInformation_Energy(Skill, &iEnergy);
-				if(iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy))
-				{
-					return;
-				}
-				
-				if(iMana > CharacterAttribute->Mana)
-				{
-					int Index = g_pMyInventory->FindManaItemIndex();
-					if(Index != -1)
-					{
-						SendRequestUse(Index, 0);
-					}
-					return;
-				}
-				// skillmana 부족
-				if(iSkillMana > CharacterAttribute->SkillMana)
-				{
-					if ( Skill==AT_SKILL_BLAST_HELL_BEGIN || Skill==AT_SKILL_BLAST_HELL )
-                    {
-						MouseRButtonPop = false;
-						MouseRButtonPush= false;
-						MouseRButton	= false;
-						
-						MouseRButtonPress = 0;
-                    }
-					return;
-				}
-
-                if ( CheckSkillDelay( Hero->CurrentSkill ) == false)
-                {
-                    return;
-                }
-                bool Success = CheckTarget(c);
-				switch(Skill)
-				{
-					//	헬파2 준비자세.
-				case AT_SKILL_BLAST_HELL_BEGIN:
-					{
-						SendRequestMagic ( Skill, HeroKey );
-						
-						SetAttackSpeed();
-						SetAction(o,PLAYER_SKILL_HELL_BEGIN);
-						c->Movement = 0;
-					}
-					return;
-					
-					//	헬파2 발사.
-				case AT_SKILL_BLAST_HELL:
-					{
-						int iTargetKey = getTargetCharacterKey(c, SelectedCharacter);
-						if(iTargetKey == -1) {
-							iTargetKey = HeroKey;
-						}
-						SendRequestMagic(Skill,iTargetKey);
-						
-						SetAttackSpeed();
-						SetAction(o,PLAYER_SKILL_HELL_START);
-						c->Movement = 0;
-					}
-					return;
-				case AT_SKILL_SOUL_UP:
-				case AT_SKILL_SOUL_UP+1:
-				case AT_SKILL_SOUL_UP+2:
-				case AT_SKILL_SOUL_UP+3:
-				case AT_SKILL_SOUL_UP+4:
-				case AT_SKILL_WIZARDDEFENSE:
-					if( SelectedCharacter != -1)
-					{
-						if ( CharactersClient[SelectedCharacter].Object.Kind!=KIND_PLAYER)
-						{
-							Attacking = -1;
-							return;
-						}
-						else
-						{
-                            //  파티원인가.
-							if ( !g_pPartyManager->IsPartyMember( SelectedCharacter ) ) 
-									return;
-								
-								c->TargetCharacter = SelectedCharacter;
-								
-								if ( SelectedCharacter != -1)
-								{
-									ZeroMemory( &g_MovementSkill, sizeof ( g_MovementSkill));
-									g_MovementSkill.m_bMagic = TRUE;
-									g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-									g_MovementSkill.m_iTarget = SelectedCharacter;
-								}
-								
-								if(!CheckTile(c,o, Distance))
-								{
-									if(SelectedCharacter != -1)
-									{
-										if(PathFinding2(( c->PositionX),( c->PositionY),
-											TargetX,TargetY,&c->Path, Distance))
-										{
-											c->Movement = true;
-											c->MovementType = MOVEMENT_SKILL;
-#ifdef CSK_FIX_SYNCHRONIZATION
-											SendMove(c, o);
-#endif // CSK_FIX_SYNCHRONIZATION
-										}
-									}
-									
-									return;
-								}
-								
-								SendRequestMagic(Skill,CharactersClient[g_MovementSkill.m_iTarget].Key);
-						}
-					}
-					else
-					{
-						SendRequestMagic(Skill,HeroKey);
-					}
-					SetPlayerMagic(c);
-					break;
-				case AT_SKILL_HELL_FIRE_UP:
-				case AT_SKILL_HELL_FIRE_UP+1:
-				case AT_SKILL_HELL_FIRE_UP+2:
-				case AT_SKILL_HELL_FIRE_UP+3:
-				case AT_SKILL_HELL_FIRE_UP+4:
-				case AT_SKILL_HELL:
-					{
-						SendRequestMagicContinue(Skill,( c->PositionX),
-							( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, 0xffff, 0);
-						SetAttackSpeed();
-						SetAction(o,PLAYER_SKILL_HELL);
-						c->Movement = 0;
-					}
-					return;
-				case AT_SKILL_INFERNO:
-					{
-						SendRequestMagicContinue(Skill,( c->PositionX),
-							( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, 0xffff, 0);
-						SetAttackSpeed();
-						SetAction(o,PLAYER_SKILL_INFERNO);
-						c->Movement = 0;
-					}
-					return;
-					//^ 펜릴 스킬 관련
-				case AT_SKILL_PLASMA_STORM_FENRIR:	// (마법사)
-					{
-						if ( CheckAttack() )
-						{
-							g_MovementSkill.m_iTarget = SelectedCharacter;
-						}
-						else
-						{
-							g_MovementSkill.m_iTarget = -1;
-						}
-						
-						// 대상 지점 상대 좌표 계산
-						int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
-						int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
-						if( CheckTile( c, o, Distance ) )//&& CheckAttack())
-						{
-							BYTE pos = CalcTargetPos ( o->Position[0], o->Position[1], c->TargetPosition[0],c->TargetPosition[1]);
-							WORD TKey = 0xffff;
-							if ( g_MovementSkill.m_iTarget != -1 )
-							{
-								o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-								
-								CheckSkillDelay(Hero->CurrentSkill);
-								
-								TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
-								c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
-								SendRequestMagicContinue(Skill,( c->PositionX),
-									( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
-								c->Movement = 0;
-								
-								if(o->Type == MODEL_PLAYER)
-								{
-									SetAction_Fenrir_Skill(c, o);
-								}
-							}
-							else
-							{
-								c->m_iFenrirSkillTarget = -1;
-							}
-						}
-						else
-						{
-							if(g_MovementSkill.m_iTarget != -1)
-							{
-								if(PathFinding2(( c->PositionX),( c->PositionY),
-									TargetX,TargetY,&c->Path, Distance*1.2f ) )
-								{	// 멀면 걸어가서 사용
-									c->Movement = true;
-								}
-							}
-							else
-							{
-								Attacking = -1;
-							}
-						}
-					}
-					return;
-					
-                    //  무기 스킬은 제외.
-                case AT_SKILL_BLOCKING :
-                case AT_SKILL_SWORD1 :
-                case AT_SKILL_SWORD2 :
-                case AT_SKILL_SWORD3 :
-                case AT_SKILL_SWORD4 :
-                case AT_SKILL_SWORD5 :
-                case AT_SKILL_SPEAR:
-					return;
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-				case AT_SKILL_SWELL_OF_MAGICPOWER:		// 마력증대
-					{
-						// 마력증대 스킬시전이 안되어 있을때만 시전가능
-						if(g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower) == false)
-						{
-							SendRequestMagic(Skill, HeroKey);
-							
-							c->Movement = 0;
-						}
-					}break;
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-				}
-				
-				if ( SelectedCharacter != -1)
-				{
-					ZeroMemory( &g_MovementSkill, sizeof ( g_MovementSkill));
-					g_MovementSkill.m_bMagic = TRUE;
-					g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-					if ( CheckAttack() )
-					{
-						g_MovementSkill.m_iTarget = SelectedCharacter;
-					}
-					else
-					{
-						g_MovementSkill.m_iTarget = -1;
-					}
-				}
-				
-				if(!CheckTile(c,o, Distance ))
-				{
-					if(SelectedCharacter != -1 && CheckAttack())
-					{
-						if(PathFinding2(( c->PositionX),( c->PositionY),
-							TargetX,TargetY,&c->Path, Distance ))
-						{
-							c->Movement = true;
-							c->MovementType = MOVEMENT_SKILL;
-#ifdef CSK_FIX_SYNCHRONIZATION
-							SendMove(c, o);
-#endif // CSK_FIX_SYNCHRONIZATION
-						}
-					}
-
-					// 아래 스킬들은 클릭 시 스킬 범위 체크 안함.(왜 여기서 하는지...ㅡㅡ;)
-					if (Skill != AT_SKILL_STUN && Skill != AT_SKILL_REMOVAL_STUN
-						&& Skill != AT_SKILL_MANA && Skill != AT_SKILL_INVISIBLE
-						&& Skill != AT_SKILL_REMOVAL_INVISIBLE && Skill != AT_SKILL_PLASMA_STORM_FENRIR	// (마법사)
-#ifdef ASG_ADD_SKILL_BERSERKER
-						&& Skill != AT_SKILL_ALICE_BERSERKER
-#endif	// ASG_ADD_SKILL_BERSERKER
-						&& Skill != AT_SKILL_ALICE_WEAKNESS && Skill != AT_SKILL_ALICE_ENERVATION
-						)
-						return;
-				}
-				
-				bool Wall = CheckWall(( c->PositionX),( c->PositionY),TargetX,TargetY);
-				if(Wall)
-				{
-					if(SelectedCharacter != -1)
-					{
-						if(CheckAttack())
-						{
-							UseSkillWizard( c, o);
-						}
-					}
-					if(Success)
-					{
-						o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-						switch(Skill)
-						{
-						case AT_SKILL_STORM:
-#ifdef PJH_SEASON4_MASTER_RANK4
-						case AT_SKILL_EVIL_SPIRIT_UP:	//악령강화(흑마법사용)
-						case AT_SKILL_EVIL_SPIRIT_UP+1:	//악령강화
-						case AT_SKILL_EVIL_SPIRIT_UP+2:	//악령강화
-						case AT_SKILL_EVIL_SPIRIT_UP+3:	//악령강화
-						case AT_SKILL_EVIL_SPIRIT_UP+4:	//악령강화
-						case AT_SKILL_EVIL_SPIRIT_UP_M:		//악령강화(마검사용)
-						case AT_SKILL_EVIL_SPIRIT_UP_M+1:	//악령강화
-						case AT_SKILL_EVIL_SPIRIT_UP_M+2:	//악령강화
-						case AT_SKILL_EVIL_SPIRIT_UP_M+3:	//악령강화
-						case AT_SKILL_EVIL_SPIRIT_UP_M+4:	//악령강화
-#endif //PJH_SEASON4_MASTER_RANK4
-						case AT_SKILL_EVIL:
-							{
-#ifdef CSK_EVIL_SKILL
-								WORD TKey = 0xffff;
-								if ( g_MovementSkill.m_iTarget!=-1 )
-								{
-									TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-								}
-								SendRequestMagicContinue(Skill,(BYTE)(c->TargetPosition[0]/TERRAIN_SCALE),(BYTE)(c->TargetPosition[1]/TERRAIN_SCALE),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, TKey, &o->m_bySkillSerialNum );
-#else // CSK_EVIL_SKILL
-								SendRequestMagicContinue(Skill,( c->PositionX), ( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, 0xffff, &o->m_bySkillSerialNum);
-#endif // CSK_EVIL_SKILL
-								
-								SetPlayerMagic(c);
-							}
-							return;
-						case AT_SKILL_FLASH:
-							{
-								SendRequestMagicContinue(Skill,( c->PositionX),
-									( c->PositionY),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, 0xffff, 0);
-								SetAttackSpeed();
-								
-								if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)	//^ 펜릴 캐릭터 에니메이션 관련(아쿠아플래쉬)
-									SetAction(o,PLAYER_SKILL_FLASH);
-								else
-									SetAction(o,PLAYER_SKILL_FLASH);
-								
-								c->Movement = 0;
-								StandTime = 0;
-							}
-							return;
-						case AT_SKILL_FLAME:
-							SendRequestMagicContinue(Skill,(BYTE)(c->TargetPosition[0]/TERRAIN_SCALE),(BYTE)(c->TargetPosition[1]/TERRAIN_SCALE),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, 0xffff, 0);
-							SetPlayerMagic(c);
-							return;
-						case AT_SKILL_BLAST_POISON:
-						case AT_SKILL_ICE_UP:
-						case AT_SKILL_ICE_UP+1:
-						case AT_SKILL_ICE_UP+2:
-						case AT_SKILL_ICE_UP+3:
-						case AT_SKILL_ICE_UP+4:
-						case AT_SKILL_BLAST_FREEZE:
-							{
-								WORD TKey = 0xffff;
-								if ( g_MovementSkill.m_iTarget!=-1 )
-								{
-									TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-								}
-								SendRequestMagicContinue(Skill,(BYTE)(c->TargetPosition[0]/TERRAIN_SCALE),(BYTE)(c->TargetPosition[1]/TERRAIN_SCALE),(BYTE)(o->Angle[2]/360.f*256.f), 0, 0, TKey, 0 );
-								SetPlayerMagic(c);
-								c->Movement = 0;
-							}
-							return;
-						}
-					}
-				}
-				if ( ClassIndex==CLASS_WIZARD && Success)
-				{
-					switch(Skill)
-					{
-                    case AT_SKILL_TELEPORT_B:
-						if( g_CursedTemple->IsCursedTemple() 
-							&& !g_pMyInventory->IsItem( ITEM_POTION+64, true ) )
-						{
-							return;
-						}
-                        if ( SelectedCharacter!=-1 )
-                        {
-							//  파티원인가.
-							if ( !g_pPartyManager->IsPartyMember( SelectedCharacter ) ) 
-								return;
-							
-							if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
-							{	// 아이템을 들고 있으면 텔레포트하지 못한다.
-								return;
-							}
-							
-							CHARACTER* tc = &CharactersClient[SelectedCharacter];
-							OBJECT*    to = &tc->Object;
-							bool Success = false;
-							if(to->Type == MODEL_PLAYER)
-							{
-								if(to->CurrentAction != PLAYER_SKILL_TELEPORT)
-									Success = true;
-							}
-							else
-							{
-								if(to->CurrentAction != MONSTER01_SHOCK)
-									Success = true;
-							}
-							if(Success && to->Teleport!=TELEPORT_BEGIN && to->Teleport!=TELEPORT && to->Alpha>=0.7f)
-							{
-								int Wall, indexX, indexY, TargetIndex, count=0;
-								int PositionX = (int)(c->Object.Position[0]/TERRAIN_SCALE);
-								int PositionY = (int)(c->Object.Position[1]/TERRAIN_SCALE);
-								
-								while ( 1 )
-								{
-									indexX = rand()%3;
-									indexY = rand()%3;
-									
-									if ( indexX!=1 || indexY!=1 )
-									{
-										TargetX = (PositionX-1)+indexX;
-										TargetY = (PositionY-1)+indexY;
-										
-										TargetIndex = TERRAIN_INDEX( TargetX, TargetY );
-										
-										Wall = TerrainWall[TargetIndex];
-										//  
-										if ( (Wall&TW_ACTION)==TW_ACTION )
-										{
-											Wall -= TW_ACTION;
-										}
-										if(World == WD_30BATTLECASTLE)
-										{
-											int ax = (Hero->PositionX);
-											int ay = (Hero->PositionY);
-											if ( (ax>=150 && ax<=200) && (ay>=180&& ay<=230))  
-												Wall = 0;
-										}
-										if(Wall == 0) break;
-										
-										count++;
-									}
-									
-									if ( count>10 ) return;
-								}
-								to->Angle[2] = CreateAngle(to->Position[0],to->Position[1],tc->TargetPosition[0],tc->TargetPosition[1]);
-								bool bResult;
-								SendRequestMagicTeleportB(&bResult,tc->Key,TargetX,TargetY);
-								if ( bResult )
-								{
-									SetPlayerTeleport(tc);
-								}
-							}
-                        }
-                        return;
-						
-					case AT_SKILL_TELEPORT:	//흑마법사순간이동
-                        {
-							if ( SEASON3B::CNewUIInventoryCtrl::GetPickedItem()		// 아이템을 들고 있으면 텔레포트하지 못한다.
-								|| g_isCharacterBuff(o, eDeBuff_Stun)
-								|| g_isCharacterBuff(o, eDeBuff_Sleep)
-								)
-							{	
-								return;
-							}
-							bool Success = false;
-							if(o->Type == MODEL_PLAYER)
-							{
-								if(o->CurrentAction != PLAYER_SKILL_TELEPORT)
-									Success = true;
-							}
-							else
-							{
-								if(o->CurrentAction != MONSTER01_SHOCK)
-									Success = true;
-							}
-							if(Success && o->Teleport!=TELEPORT_BEGIN && o->Teleport!=TELEPORT && o->Alpha>=0.7f)
-							{
-								int TargetIndex = TERRAIN_INDEX_REPEAT(TargetX,TargetY);
-                                int Wall = TerrainWall[TargetIndex];
-                                if ( (Wall&TW_ACTION)==TW_ACTION ) Wall -= TW_ACTION;
-                                if ( (Wall&TW_HEIGHT)==TW_HEIGHT ) Wall -= TW_HEIGHT;
-								if(Wall == 0)
-								{
-									o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-									bool bResult;
-									SendRequestMagicTeleport(&bResult,0,TargetX,TargetY);
-									if ( bResult)
-									{
-										if(g_isCharacterBuff(o, eDeBuff_Stun))
-										{
-											UnRegisterBuff( eDeBuff_Stun, o );
-										}
-										
-										if(g_isCharacterBuff(o, eDeBuff_Sleep))
-										{
-											UnRegisterBuff( eDeBuff_Sleep, o );
-										}
-										
-										SetPlayerTeleport(c);
-									}
-								}
-							}
-                        }
-						return;
-					}
-				}
-				else if ( ClassIndex==CLASS_SUMMONER && Success)
-				{
-					if (g_SummonSystem.SendRequestSummonSkill(Skill, c, o) == TRUE)
-					{
-						return;
-					}
-					
-					int iEnergy;
-					GetSkillInformation_Energy(Skill, &iEnergy);
-					if(iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy) )
-					{
-						return;
-					}
-					
-					g_MovementSkill.m_bMagic = TRUE;
-					g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-					g_MovementSkill.m_iTarget = SelectedCharacter;
-					
-					switch(Skill)
-					{
-					case AT_SKILL_ALICE_THORNS:		// 데미지 반사(버프 계열) 유저에게만 사용
-						{
-							// 아무것도 선택이 안되었으면 자기 자신에게 사용
-							if(SelectedCharacter == -1 || CharactersClient[SelectedCharacter].Object.Kind != KIND_PLAYER)
-							{
-								LetHeroStop();
-								// 동작 설정
-								switch(c->Helper.Type)
-								{
-								case MODEL_HELPER+2:	// 유니리아
-									SetAction(o, PLAYER_SKILL_SLEEP_UNI);
-									break;
-								case MODEL_HELPER+3:	// 디노란트
-									SetAction(o, PLAYER_SKILL_SLEEP_DINO);
-									break;
-								case MODEL_HELPER+37:	// 펜릴	
-									SetAction(o, PLAYER_SKILL_SLEEP_FENRIR);
-									break;
-								default:	// 기본
-									SetAction(o, PLAYER_SKILL_SLEEP);
-									break;
-								}
-								SendRequestMagic(Skill, HeroKey);
-							}
-							// 죽지 않았거나 플레이어일 경우
-							else if(0 == CharactersClient[SelectedCharacter].Dead && CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
-							{	
-								TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
-								TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1]/TERRAIN_SCALE);
-								
-								if(CheckTile( c, o, Distance ) && c->SafeZone == false)
-								{
-									bool bNoneWall = CheckWall(( c->PositionX), ( c->PositionY),TargetX,TargetY);
-									if(bNoneWall)
-									{
-										UseSkillSummon(c, o);
-									}
-								}
-								else
-								{	// 멀어졌으면 또 걷기
-									if(PathFinding2(( c->PositionX), ( c->PositionY),TargetX,TargetY,&c->Path, Distance ) )
-									{	
-										c->Movement = true;		// 멀면 걸어가서 사용
-									}
-								}
-							}
-						}
-						break;
-#ifdef ASG_ADD_SKILL_BERSERKER
-					case AT_SKILL_ALICE_BERSERKER:
-#endif	// ASG_ADD_SKILL_BERSERKER
-					case AT_SKILL_ALICE_WEAKNESS:
-					case AT_SKILL_ALICE_ENERVATION:
-						UseSkillSummon(c, o);
-						break;
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef PJH_ADD_MASTERSKILL
-		case AT_SKILL_LIGHTNING_SHOCK_UP:
-		case AT_SKILL_LIGHTNING_SHOCK_UP+1:
-		case AT_SKILL_LIGHTNING_SHOCK_UP+2:
-		case AT_SKILL_LIGHTNING_SHOCK_UP+3:
-		case AT_SKILL_LIGHTNING_SHOCK_UP+4:
-#endif
-					case AT_SKILL_LIGHTNING_SHOCK:
-						{
-							o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
-							
-							if( CheckTile( c, o, Distance ) )
-							{
-								BYTE PathX[1];
-								BYTE PathY[1];
-								PathX[0] = ( c->PositionX);
-								PathY[0] = ( c->PositionY);
-								gProtocolSend.SendCharacterMoveNew(c->Key,o->Angle[2],1,&PathX[0],&PathY[0],TargetX,TargetY);
-								
-								BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-								
-								BYTE angle = (BYTE)((((o->Angle[2]+180.f)/360.f)*255.f));
-								WORD TKey = 0xffff;
-								if ( g_MovementSkill.m_iTarget!=-1 )
-								{
-									TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-								}
-								SendRequestMagicContinue(Skill,( c->PositionX),
-									( c->PositionY),((o->Angle[2]/360.f)*255), byValue, angle, TKey, 0 );
-								SetAttackSpeed();
-								SetAction(o, PLAYER_SKILL_LIGHTNING_SHOCK);
-								c->Movement = 0;
-							}
-						}
-						break;
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
-					}
-					
-					if(SelectedCharacter == -1)
-					{
-						return;
-					}
-					
-					switch(Skill)
-					{
-#ifdef PJH_ADD_MASTERSKILL
-		case AT_SKILL_ALICE_DRAINLIFE_UP:
-		case AT_SKILL_ALICE_DRAINLIFE_UP+1:
-		case AT_SKILL_ALICE_DRAINLIFE_UP+2:
-		case AT_SKILL_ALICE_DRAINLIFE_UP+3:
-		case AT_SKILL_ALICE_DRAINLIFE_UP+4:
-#endif
-					case AT_SKILL_ALICE_DRAINLIFE:
-					case AT_SKILL_ALICE_LIGHTNINGORB:
-#ifdef PJH_ADD_MASTERSKILL
-		case AT_SKILL_ALICE_CHAINLIGHTNING_UP
-		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+1:
-		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+2:
-		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+3:
-		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+4:
-#endif
-					case AT_SKILL_ALICE_CHAINLIGHTNING:
-						{
-							c->TargetCharacter = SelectedCharacter;
-							// 안죽었을 때만 사용
-							if(0 == CharactersClient[SelectedCharacter].Dead )
-							{	
-								TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
-								TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1]/TERRAIN_SCALE);
-								
-								if(CheckAttack() == true)
-								{
-									if(CheckTile( c, o, Distance ) && c->SafeZone == false)
-									{
-										bool bNoneWall = CheckWall(( c->PositionX), ( c->PositionY),TargetX,TargetY);
-										if(bNoneWall)
-										{
-											UseSkillSummon(c, o);
-										}
-									}
-									else
-									{	// 멀어졌으면 또 걷기
-										if(PathFinding2(( c->PositionX), ( c->PositionY),TargetX,TargetY,&c->Path, Distance ) )
-										{	
-											c->Movement = true;		// 멀면 걸어가서 사용
-										}
-									}
-								}
-							}
-						}
-						break;
-#ifdef PJH_ADD_MASTERSKILL
-		case AT_SKILL_ALICE_SLEEP_UP:
-		case AT_SKILL_ALICE_SLEEP_UP+1:
-		case AT_SKILL_ALICE_SLEEP_UP+2:
-		case AT_SKILL_ALICE_SLEEP_UP+3:
-		case AT_SKILL_ALICE_SLEEP_UP+4:
-#endif
-					case AT_SKILL_ALICE_SLEEP:
-					case AT_SKILL_ALICE_BLIND:		
-						{
-							if(CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
-							{
-								if(
-									InChaosCastle() == true							// 카오스캐슬
-									|| g_CursedTemple->IsCursedTemple() == true		// 환영사원
-									|| (gMapManager.InBattleCastle() == true && battleCastle::IsBattleCastleStart() == true) // 공성맵이고 공성전중
-									|| g_bEnableDuel == true	// 결투중
-									)
-								{
-									// 카오스캐슬이거나 환영사원이거나 공성중이거나 결투중이면 일반사용자도 디버프 스킬을 사용할 수 있다.
-								}
-								else
-								{
-									break;
-								}
-							}
-							
-							// 안죽었을 때만 사용
-							if(0 == CharactersClient[SelectedCharacter].Dead )
-							{	
-								TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
-								TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1]/TERRAIN_SCALE);
-								
-								if(CheckAttack() == true)
-								{
-									if(CheckTile( c, o, Distance ) && c->SafeZone == false)
-									{
-										bool bNoneWall = CheckWall(( c->PositionX), ( c->PositionY),TargetX,TargetY);
-										if(bNoneWall)
-										{
-											UseSkillSummon(c, o);
-										}
-									}
-									else
-									{	// 멀어졌으면 또 걷기
-										if(PathFinding2(( c->PositionX), ( c->PositionY),TargetX,TargetY,&c->Path, Distance ) )
-										{	
-											c->Movement = true;		// 멀면 걸어가서 사용
-										}
-									}
-								}
-							}
-						}
-						break;
-					}
-				}
-			}
-			
-            //  공통으로 사용되는 스킬.
-            if ( (Skill>= AT_SKILL_STUN && Skill<=AT_SKILL_REMOVAL_BUFF ))
-            {
-				int iMana, iSkillMana;
-				GetSkillInformation( Skill, 1, NULL, &iMana, NULL, &iSkillMana);
-				
-                if ( o->Type==MODEL_PLAYER )
-                {
-					bool Success = true;
-					
-					if ( iMana>CharacterAttribute->Mana )
-					{
-						int Index = g_pMyInventory->FindManaItemIndex();
-						if(Index != -1)
-						{
-							SendRequestUse(Index, 0);
-						}
-						Success = false;
-					}
-					if ( Success && iSkillMana>CharacterAttribute->SkillMana )
-					{
-						Success = false;
-					}
-                    if ( Success && !CheckSkillDelay( Hero->CurrentSkill ) )
-                    {
-                        Success = false;
-                    }
-					
-					int iEnergy;	// 마이너스 열매 작업
-					GetSkillInformation_Energy(Skill, &iEnergy);
-					if(Success && iEnergy > (CharacterAttribute->Energy + CharacterAttribute->AddEnergy))
-					{
-						Success = false;
-					}
-					
-                    switch ( Skill )
-                    {
-                    case    AT_SKILL_STUN:
-						{
-							//	                        if ( CheckTile( c, o, Distance ) )
-                            {
-                                o->Angle[2] = CreateAngle ( o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1] );
-								
-                                int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
-                                int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
-                                BYTE byValue = GetDestValue( ( c->PositionX), ( c->PositionY), TargetX, TargetY);
-                                
-                                BYTE pos = CalcTargetPos ( o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1] );
-                                WORD TKey = 0xffff;
-                                if ( g_MovementSkill.m_iTarget!=-1 )
-                                {
-                                    TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
-                                }
-                                SendRequestMagicContinue ( Skill, ( c->PositionX),
-                                    ( c->PositionY), (BYTE)(o->Angle[2]/360.f*256.f), byValue, pos, TKey, 0);
-								SetAttackSpeed();
-								
-								if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )
-								{
-									SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
-								} 
-								else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
-								{
-									SetAction(o,PLAYER_SKILL_RIDER);
-								}
-								else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
-								{
-									SetAction(o,PLAYER_SKILL_RIDER_FLY);
-								}
-								else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
-								{
-									SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
-								}
-								else
-								{
-									SetAction ( o, PLAYER_SKILL_VITALITY );
-								}
-								c->Movement = 0;
-							}
-						}
-                        break;
-						
-                    case    AT_SKILL_REMOVAL_STUN:
-						{
-							if(SelectedCharacter == -1)
-							{
-								SendRequestMagic ( Skill, HeroKey );
-							}
-							else
-							{
-								SendRequestMagic(Skill,CharactersClient[SelectedCharacter].Key);
-							}
-							
-							
-							if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )
-							{
-								SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
-							} 
-							else
-								if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
-								{
-									SetAction(o,PLAYER_SKILL_RIDER);
-								}
-								else
-									if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
-									{
-										SetAction(o,PLAYER_SKILL_RIDER_FLY);
-									}
-									else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
-									{
-										SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
-									}
-									else
-									{
-										SetAction ( o, PLAYER_ATTACK_REMOVAL );
-									}
-									c->Movement = 0;
-						}
-                        break;
-						
-                    case    AT_SKILL_MANA:
-                        if(SelectedCharacter == -1)
-						{
-							SendRequestMagic ( Skill, HeroKey );
-						}
-						else
-						{
-							SendRequestMagic(Skill,CharactersClient[SelectedCharacter].Key);
-						}
-						
-						if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )
-						{
-							SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
-						} 
-						else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
-						{
-							SetAction(o,PLAYER_SKILL_RIDER);
-						}
-						else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
-						{
-							SetAction(o,PLAYER_SKILL_RIDER_FLY);
-						}
-						else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
-						{
-							SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
-						}
-						else
-							SetAction ( o, PLAYER_SKILL_VITALITY );
-                        c->Movement = 0;
-                        break;
-						
-                    case    AT_SKILL_INVISIBLE:
-						
-						if(SelectedCharacter == -1)
-						{
-							SendRequestMagic ( Skill, HeroKey );
-						}
-						else
-						{
-#ifdef REPAIR_BUG_MAY1
-							if(CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
-#endif
-								SendRequestMagic(Skill,CharactersClient[SelectedCharacter].Key);
-						}
-						
-						if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )
-						{
-							SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
-						} 
-						else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
-						{
-							SetAction(o,PLAYER_SKILL_RIDER);
-						}
-						else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
-						{
-							SetAction(o,PLAYER_SKILL_RIDER_FLY);
-						}
-						else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
-						{
-							SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
-						}
-						else
-							SetAction ( o, PLAYER_SKILL_VITALITY );
-                        c->Movement = 0;
-                        break;
-						
-                    case    AT_SKILL_REMOVAL_INVISIBLE:
-                        //SendRequestMagic ( Skill, HeroKey );
-						
-						if(SelectedCharacter == -1)
-						{
-							SendRequestMagic ( Skill, HeroKey );
-						}
-						else
-						{
-							SendRequestMagic(Skill,CharactersClient[SelectedCharacter].Key);
-						}
-						
-						if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )
-						{
-							SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
-						} 
-						else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
-						{
-							SetAction(o,PLAYER_SKILL_RIDER);
-						}
-						else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
-						{
-							SetAction(o,PLAYER_SKILL_RIDER_FLY);
-						}
-						else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
-						{
-							SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
-						}
-						else
-							SetAction ( o, PLAYER_ATTACK_REMOVAL );
-                        c->Movement = 0;
-                        break;
-						
-                    case    AT_SKILL_REMOVAL_BUFF:
-						
-                        if(SelectedCharacter == -1)
-						{
-							SendRequestMagic ( Skill, HeroKey );
-						}
-						else
-						{
-							SendRequestMagic(Skill,CharactersClient[SelectedCharacter].Key);
-						}
-						
-						if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )
-						{
-							SetAction ( o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC );
-						} 
-						else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)         //  유니를 타고있음.
-						{
-							SetAction(o,PLAYER_SKILL_RIDER);
-						}
-						else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
-						{
-							SetAction(o,PLAYER_SKILL_RIDER_FLY);
-						}
-						else if(c->Helper.Type==MODEL_HELPER+37 && !c->SafeZone)	// 펜릴 타고 있으면
-						{
-							SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
-						}
-						else
-							SetAction ( o, PLAYER_SKILL_VITALITY );
-                        c->Movement = 0;
-                        break;
-                    }
-                }
-            }
-#endif	// YDG_FIX_SPLIT_ATTACK_FUNC
 		}
 	}
-	
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
 
 
-BOOL g_bWhileMovingZone = FALSE;	// 존 사이를 오가는 중이다.
-DWORD g_dwLatestZoneMoving = 0;	// 가장 최근에 존 사이를 오간 시점
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 현재 좌표가 게이트존 인지 체크해서 게이트존일 경우 이동하는 함수
-///////////////////////////////////////////////////////////////////////////////
+BOOL g_bWhileMovingZone = FALSE;
+DWORD g_dwLatestZoneMoving = 0;
 
 void CheckGate()
 {
-	// 성물을 들고있거나, 환영사원에서 성물을 인벤에 가지고 있으면 맵이동을 하지 못한다.
-	if( ( g_pMyInventory->IsItem( ITEM_POTION+64, true ) ) || 
-		( gMapManager.IsCursedTemple() && g_pMyInventory->IsItem( ITEM_POTION+64, false ) ) )
+	if( ( g_pMyInventory->IsItem( ITEM_POTION+64, true ) ) || ( gMapManager.IsCursedTemple() && g_pMyInventory->IsItem( ITEM_POTION+64, false )))
 	{
 		return;
 	}
@@ -10365,7 +7373,7 @@ void CheckGate()
 					bool Success = false;
 					int Level;
 					
-					if ( GetBaseClass(Hero->Class)==CLASS_DARK || GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
+					if (gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
 						|| GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -10395,17 +7403,15 @@ void CheckGate()
 							) || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type==ITEM_HELPER+3 
 							|| CharacterMachine->Equipment[EQUIPMENT_HELPER].Type==ITEM_HELPER+37
 							|| (CharacterMachine->Equipment[EQUIPMENT_WING].Type>=ITEM_WING+36 && CharacterMachine->Equipment[EQUIPMENT_WING].Type<=ITEM_WING+43)
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 							|| ( ITEM_WING+130 <= CharacterMachine->Equipment[EQUIPMENT_WING].Type && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING+134 )
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 							|| (CharacterMachine->Equipment[EQUIPMENT_WING].Type>=ITEM_WING+49 && CharacterMachine->Equipment[EQUIPMENT_WING].Type<=ITEM_WING+50)
 							|| (CharacterMachine->Equipment[EQUIPMENT_WING].Type==ITEM_WING+135)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 							))
-						{	// 날개나 페가시아를 착용 해야 함
+						{
 							g_pChatListBox->AddText("", GlobalText[263], SEASON3B::TYPE_ERROR_MESSAGE);
-                            //  레벨 제한에 걸리면은 레벨제한을 표시한다.
+
 							if(CharacterAttribute->Level < Level)
 							{
 								char Text[100];
@@ -10413,7 +7419,7 @@ void CheckGate()
 								g_pChatListBox->AddText("", Text, SEASON3B::TYPE_ERROR_MESSAGE);
 							}
 						}
-                        //  이카루스 유니를 차고서는 이동할수 없습니다.
+
                         else if ( ( 62<=i && i<=65) && ( CharacterMachine->Equipment[EQUIPMENT_HELPER].Type==ITEM_HELPER+2) )
                         {
 							g_pChatListBox->AddText("", GlobalText[569], SEASON3B::TYPE_ERROR_MESSAGE);
@@ -10623,7 +7629,7 @@ void MoveHero()
 				if (c->MovementType == MOVEMENT_OPERATE)
 					Action(c,o,false);
 				else
-				if(!CheckArrow() && GetBaseClass(Hero->Class) == CLASS_ELF )
+				if(!CheckArrow() && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF )
 					SetPlayerStop(Hero);
 				else
 					Action(c,o,false);
@@ -10792,9 +7798,9 @@ void MoveHero()
 
 					if(Success)
 					{
-						if ( c->Movement && c->MovementType==MOVEMENT_MOVE && GetBaseClass(c->Class)==CLASS_ELF )
+						if ( c->Movement && c->MovementType==MOVEMENT_MOVE && gCharacterManager.GetBaseClass(c->Class)==CLASS_ELF )
 						{
-							if( GetEquipedBowType(CharacterMachine->Equipment) != BOWTYPE_NONE )
+							if( gCharacterManager.GetEquipedBowType(CharacterMachine->Equipment) != BOWTYPE_NONE )
 							{
 								//SendPosition( (c->PositionX), (c->PositionY) );
 								gProtocolSend.SendPositionNew( c->PositionX, c->PositionY );
@@ -10822,7 +7828,7 @@ void MoveHero()
 								}
 								else
 								{
-									if( (GetEquipedBowType() != BOWTYPE_NONE) || (c->MonsterIndex == 9) )
+									if( (gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE) || (c->MonsterIndex == 9) )
 									{
 										if(CheckArrow() == false)
 										{
@@ -11256,7 +8262,7 @@ void SelectObjects()
             CKind_1 = KIND_MONSTER | KIND_EDIT;
             CKind_2 = KIND_PLAYER;
 			
-            if ( GetBaseClass(Hero->Class) == CLASS_ELF || GetBaseClass(Hero->Class)==CLASS_WIZARD )
+            if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_WIZARD )
             {
 				int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
 				

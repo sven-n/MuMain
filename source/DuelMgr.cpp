@@ -12,6 +12,7 @@
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
 #include "wsclientinline.h"
+#include "CharacterManager.h"
 
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
 
@@ -131,7 +132,7 @@ BOOL CDuelMgr::IsDuelPlayer(CHARACTER * pCharacter, int iPlayerNum)
 #ifdef YDG_FIX_DUEL_SUMMON_CLOAK
 		bIncludeSummon == TRUE &&		// 소환 몬스터도 검사
 #endif	// YDG_FIX_DUEL_SUMMON_CLOAK
-		GetBaseClass(pCharacter->Class) == 0 && strncmp(pCharacter->OwnerID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
+		gCharacterManager.GetBaseClass(pCharacter->Class) == 0 && strncmp(pCharacter->OwnerID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
 	{
 		return TRUE;
 	}

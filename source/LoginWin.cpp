@@ -16,7 +16,7 @@
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
 #include "./Utilities/Log/muConsoleDebug.h"
-#include "../ProtocolSend.h"
+#include "ProtocolSend.h"
 #include "ServerListManager.h"
 
 #define	LIW_ACCOUNT		0

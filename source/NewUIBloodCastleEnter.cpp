@@ -1,5 +1,4 @@
 // NewUIBloodCastleEnter.cpp: implementation of the CNewUIPartyInfo class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -8,12 +7,9 @@
 #include "NewUISystem.h"
 #include "wsclientinline.h"
 #include "NewUICommonMessageBox.h"
+#include "CharacterManager.h"
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIEnterBloodCastle::CNewUIEnterBloodCastle()
 {
@@ -162,9 +158,6 @@ bool CNewUIEnterBloodCastle::UpdateKeyEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// CheckLimitLV
-// 캐릭터 레벨에 따른 입성 레벨을 구한다.
 int CNewUIEnterBloodCastle::CheckLimitLV( int iIndex )
 {
 	int	iVal = 0;
@@ -177,7 +170,7 @@ int CNewUIEnterBloodCastle::CheckLimitLV( int iIndex )
 
 	int iLevel = CharacterAttribute->Level;
 	
-	if(IsMasterLevel( CharacterAttribute->Class ) == false )
+	if(gCharacterManager.IsMasterLevel( CharacterAttribute->Class ) == false )
 	{
 		for(int iCastleLV=0; iCastleLV<MAX_ENTER_GRADE-1; ++iCastleLV)
 		{
@@ -196,8 +189,6 @@ int CNewUIEnterBloodCastle::CheckLimitLV( int iIndex )
 	return iRet;
 }
 
-//---------------------------------------------------------------------------------------------
-// Update
 bool CNewUIEnterBloodCastle::Update()
 {
 	if( !IsVisible() )
@@ -206,8 +197,6 @@ bool CNewUIEnterBloodCastle::Update()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Render
 bool CNewUIEnterBloodCastle::Render()
 {
 	EnableAlphaTest();
@@ -228,28 +217,21 @@ bool CNewUIEnterBloodCastle::Render()
 	g_pRenderText->SetFont( g_hFontBold );
 	g_pRenderText->SetTextColor( 0xFFFFFFFF );
 	g_pRenderText->SetBgColor( 0x00000000 );
-	
-	// UI제목
-	g_pRenderText->RenderText(m_Pos.x+60, m_Pos.y+12, GlobalText[846], 72, 0, RT3_SORT_CENTER);		// "대천사의 전령"
-
+	g_pRenderText->RenderText(m_Pos.x+60, m_Pos.y+12, GlobalText[846], 72, 0, RT3_SORT_CENTER);
 	g_pRenderText->SetFont( g_hFont );
 
-	// 대사
 	char txtline[NUM_LINE_CMB][MAX_LENGTH_CMB];	
-	// "대천사님을 도와주려는 용기가 무척 고맙군. 하지만 조심하게나. 블러드 캐슬은 무서운 곳이야.. 건투를 비네."
 	int tl = SeparateTextIntoLines( GlobalText[832], txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 	for ( int j = 0; j < tl; ++j)
 	{
 		g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+j*20,txtline[j], 190, 0, RT3_SORT_CENTER);
 	}
 		
-	// 입장 버튼
 	for( int i=0 ; i<MAX_ENTER_GRADE ; i++ )
 	{
 		m_BtnEnter[i].Render();
 	}
 
-	// Exit Button
 	m_BtnExit.Render();	
 
 	DisableAlphaBlend();
@@ -257,64 +239,41 @@ bool CNewUIEnterBloodCastle::Render()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// BtnProcess
 bool CNewUIEnterBloodCastle::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
 	
-	// Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide( SEASON3B::INTERFACE_BLOODCASTLE );
 		return true;
 	}
 	
-	// Exit2 버튼 
 	if(m_BtnExit.UpdateMouseEvent() == true)
 	{
 		g_pNewUISystem->Hide( SEASON3B::INTERFACE_BLOODCASTLE );
 		return true;
 	}
 
-	// 블러드 캐슬 입장 버튼
 	if( (m_iNumActiveBtn !=- 1) && (m_BtnEnter[m_iNumActiveBtn].UpdateMouseEvent() == true) )
 	{	
-		// 레벨에 맞는 블러드 캐슬로 입장!!
 		int iItemIndex = -1;
 		
-		// 레벨 0짜리 투명망토는 무조건 입장 가능(사용안함)
-		//iItemIndex = g_pMyInventory->findimteindex( ITEM_HELPER+18, 0 );
-
-		// 투명망토 레벨을 검사
 		iItemIndex = g_pMyInventory->FindItemIndex( ITEM_HELPER+18, m_iNumActiveBtn+1 );
 
-#ifdef CSK_FREE_TICKET
-		// 기존 투명망토를 검사한 후 아이템이 없으면
-		// 블러드캐슬 자유입장권을 검사한다.
 		if(iItemIndex == -1)
 		{
-			iItemIndex = g_pMyInventory->FindItemIndex( ITEM_HELPER+47, -1 ); // 블러드캐슬 자유입장권
+			iItemIndex = g_pMyInventory->FindItemIndex( ITEM_HELPER+47, -1 );
 		}
-#endif // CSK_FREE_TICKET
 
-// 		// 투명망토 + 6짜리 검사
-// 		// 왜 이런 코드가 넣어져 있을까???
-// 		if(m_iNumActiveBtn+1 == 7 && iItemIndex == -1) 
-// 		{
-// 			iItemIndex = g_pMyInventory->FindItemIndex( ITEM_HELPER+18, 6 );;
-// 		}
-		
+	
 		if( iItemIndex > -1)	
 		{
 			SendRequestMoveToEventMatch( m_iNumActiveBtn + 1, MAX_EQUIPMENT+iItemIndex);	
 		}
 		else
 		{	
-			// 투명 망토 유무 검사는 NPC와 대화를 시작 할때 한다.
-			// 따라서, 여기까지 들어오게 되면 투명 망토는 있으나 투명망토의 레벨이 맞지 않을때 이다.
-			// 이 메세지박스 처리 이외에는 WsClient의 ReceiveServerCommand()에서 처리
-			SEASON3B::CreateOkMessageBox(GlobalText[854]);		// "투명 망토의 레벨이 맞지 않습니다."
+			SEASON3B::CreateOkMessageBox(GlobalText[854]);
 		}
 		g_pNewUISystem->Hide( SEASON3B::INTERFACE_BLOODCASTLE );
 	}
@@ -327,11 +286,9 @@ float CNewUIEnterBloodCastle::GetLayerDepth()
 	return 4.1f;
 }
 
-//---------------------------------------------------------------------------------------------
-// OpenningProcess
 void CNewUIEnterBloodCastle::OpenningProcess()
 {
-	SendExitInventory();		// 왜 호출하는지 알아보자!!
+	SendExitInventory();
 
 	for( int i=0 ; i<MAX_ENTER_GRADE ; i++ )
 	{
@@ -340,7 +297,7 @@ void CNewUIEnterBloodCastle::OpenningProcess()
 	}
 
 	int iLimitLVIndex = 0;
-	if( GetBaseClass(Hero->Class)==CLASS_DARK || GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
+	if( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
 		|| GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK

@@ -40,6 +40,7 @@
 #include "GMNewTown.h"
 #include "w_CursedTemple.h"
 #include "GMSwampOfQuiet.h"
+#include "CharacterManager.h"
 
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
@@ -3801,10 +3802,10 @@ void RenderObjects()
 							if(o->Visible || CameraTopViewEnable)
 							{
 								bool Success = false;
-      							if ( gMapManager.WorldActive==WD_2DEVIAS && o->Type==100 )	// 로스트 타워 입구
+      							if ( gMapManager.WorldActive==WD_2DEVIAS && o->Type==100 )
 								{
 									int Level;
-									if ( GetBaseClass(Hero->Class)==CLASS_DARK || GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
+									if ( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
 										|| GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -4014,7 +4015,7 @@ void RenderObjects_AfterCharacter()
 								{
 									int Level;
 
-									if ( GetBaseClass(Hero->Class)==CLASS_DARK || GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
+									if ( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
 										|| GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -6808,7 +6809,7 @@ void RenderItems()
 				}
 				BMD *b = &Models[Type];
 				b->CurrentAction = 0;
-              	b->Skin          = GetBaseClass(Hero->Class);
+              	b->Skin          = gCharacterManager.GetBaseClass(Hero->Class);
              	b->CurrentAction = o->CurrentAction;
 				VectorCopy(o->Position,b->BodyOrigin);
 				ItemHeight(o->Type,b);

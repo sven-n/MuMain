@@ -19,11 +19,8 @@
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "MapManager.h"
-
-#ifdef PJH_FIX_SPRIT
-#include "GIPetManager.h"
-#endif //PJH_FIX_SPRIT
-
+#include "CharacterManager.h"
+#include "SkillManager.h"
 #include "GMDoppelGanger1.h"
 #include "GMDoppelGanger2.h"
 #include "GMDoppelGanger3.h"
@@ -46,9 +43,6 @@ extern int  MouseUpdateTimeMax;
 extern int SelectedCharacter;
 extern int Attacking;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUIMainFrameWindow::CNewUIMainFrameWindow() 
 {
@@ -253,7 +247,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 	WORD wLifeMax, wLife, wManaMax, wMana;
 
 
-	if(IsMasterLevel( Hero->Class ) == true )
+	if(gCharacterManager.IsMasterLevel( Hero->Class ) == true )
 	{
 		wLifeMax = Master_Level_Data.wMaxLife;
 		wLife = min(max(0, CharacterAttribute->Life), wLifeMax);
@@ -347,7 +341,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
 
 	WORD dwMaxSkillMana,dwSkillMana;
 
-	if(IsMasterLevel(Hero->Class) == true)
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
 		
 		dwMaxSkillMana = max(1, Master_Level_Data.wMaxBP);
@@ -390,9 +384,8 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
 	float fY, fH, fV;
     WORD wMaxShield,wShield;
 
-
 	//Master_Level_Data.wMaxShield
-	if(IsMasterLevel(Hero->Class) == true)
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
 		wMaxShield = max (1, Master_Level_Data.wMaxShield);
 		wShield = min (wMaxShield, CharacterAttribute->Shield);
@@ -440,7 +433,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 	double x, y, width, height;
 
 
-	if(IsMasterLevel(CharacterAttribute->Class) == true)
+	if(gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
 	{
 		wLevel = (__int64)Master_Level_Data.nMLevel;
 		dwNexExperience = (__int64)Master_Level_Data.lNext_MasterLevel_Experince;
@@ -453,7 +446,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 		dwExperience = CharacterAttribute->Experience;
 	}
 
-	if(IsMasterLevel(CharacterAttribute->Class) == true)
+	if(gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
 	{
 		x = 0; y = 470; width = 6; height = 4;
 
@@ -2397,7 +2390,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
 	int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
 
- 	if( !SKILLCONDITION::DemendConditionCheckSkill( bySkillType ) )
+ 	if( !gSkillManager.DemendConditionCheckSkill(bySkillType))
  	{
 		bCantSkill = true;
 	}
@@ -2670,7 +2663,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	}
 	else if (bySkillType == AT_SKILL_MULTI_SHOT)
 	{
-		if (GetEquipedBowType_Skill() == BOWTYPE_NONE)
+		if (gCharacterManager.GetEquipedBowType_Skill() == BOWTYPE_NONE)
 		{
 			bCantSkill = true;
 		}

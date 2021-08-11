@@ -55,7 +55,9 @@
 #include "NewUIInventoryCtrl.h"
 #include "w_CursedTemple.h"
 #include "SummonSystem.h"
-#include "../ProtocolSend.h"
+#include "ProtocolSend.h"
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
@@ -536,7 +538,7 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
 	{
 		LPPRECEIVE_CHARACTER_LIST Data2 = (LPPRECEIVE_CHARACTER_LIST)(ReceiveBuffer+Offset);
 		
-		int iClass = ChangeServerClassTypeToClientClassType(Data2->Class);
+		int iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
 		
 		float fPos[2], fAngle = 0.0f;
 		
@@ -625,7 +627,7 @@ void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
 		CreateHero(Data->Index,CharacterView.Class,CharacterView.Skin,fPos[0],fPos[1],fAngle);
 		CharactersClient[Data->Index].Level = Data->Level;
 		
-		int iClass = ChangeServerClassTypeToClientClassType(Data->Class);
+		int iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
 		
 		CharactersClient[Data->Index].Class = iClass;
 		memcpy(CharactersClient[Data->Index].ID,Data->ID,MAX_ID_SIZE);
@@ -885,7 +887,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	Data_Exp <<= 8;
 	Data_Exp |= Data->btMExp8;
 	
-	if(IsMasterLevel(CharacterAttribute->Class) == true)
+	if(gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
 	{
 		Master_Level_Data.lMasterLevel_Experince = Data_Exp;
 	}
@@ -913,7 +915,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	Data_Exp <<= 8;
 	Data_Exp |= Data->btMNextExp8;
 	
-	if(IsMasterLevel(CharacterAttribute->Class) == true)
+	if(gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
 	{
 		Master_Level_Data.lNext_MasterLevel_Experince = Data_Exp;
 	}
@@ -1107,7 +1109,7 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 	Data_Exp |= Data->btMExp8;
 	
 	
-	if(IsMasterLevel(Hero->Class) == true)
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
 		Master_Level_Data.lMasterLevel_Experince = Data_Exp;
 	}
@@ -1281,7 +1283,7 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 #endif
 			Offset += sizeof(PRECEIVE_MAGIC_LIST);
 		}
-        if ( GetBaseClass( Hero->Class )==CLASS_DARK_LORD )
+        if (gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD )
         {
             for ( int i=0; i<PET_CMD_END; ++i )
             {
@@ -2006,7 +2008,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 	case 2:
 		if(Type==0x1FFF)
 		{
-			c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM+GetSkinModelIndex(c->Class);
+			c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM+gCharacterManager.GetSkinModelIndex(c->Class);
 			c->BodyPart[BODYPART_HELM].Level = 0;
 			c->BodyPart[BODYPART_HELM].Option1 = 0;
 			c->BodyPart[BODYPART_HELM].ExtOption = 0;
@@ -2022,7 +2024,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 	case 3:
 		if(Type==0x1FFF)
 		{
-			c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR+GetSkinModelIndex(c->Class);
+			c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR+gCharacterManager.GetSkinModelIndex(c->Class);
 			c->BodyPart[BODYPART_ARMOR].Level = 0;
 			c->BodyPart[BODYPART_ARMOR].Option1 = 0;
 			c->BodyPart[BODYPART_ARMOR].ExtOption= 0;
@@ -2038,7 +2040,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 	case 4:
 		if(Type==0x1FFF)
 		{
-			c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS+GetSkinModelIndex(c->Class);
+			c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS+gCharacterManager.GetSkinModelIndex(c->Class);
 			c->BodyPart[BODYPART_PANTS].Level = 0;
 			c->BodyPart[BODYPART_PANTS].Option1 = 0;
 			c->BodyPart[BODYPART_PANTS].ExtOption = 0;
@@ -2054,7 +2056,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 	case 5:
 		if(Type==0x1FFF)
 		{
-			c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES+GetSkinModelIndex(c->Class);
+			c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES+gCharacterManager.GetSkinModelIndex(c->Class);
 			c->BodyPart[BODYPART_GLOVES].Level = 0;
 			c->BodyPart[BODYPART_GLOVES].Option1 = 0;
 			c->BodyPart[BODYPART_GLOVES].ExtOption = 0;
@@ -2070,7 +2072,7 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 	case 6:
 		if(Type==0x1FFF)
 		{
-			c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS+GetSkinModelIndex(c->Class);
+			c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS+gCharacterManager.GetSkinModelIndex(c->Class);
 			c->BodyPart[BODYPART_BOOTS].Level = 0;
 			c->BodyPart[BODYPART_BOOTS].Option1 = 0;
 			c->BodyPart[BODYPART_BOOTS].ExtOption = 0;
@@ -2086,7 +2088,6 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 	case 7:
 		if(Type==0x1FFF)
 		{
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 			if (c->Wing.Type == MODEL_WING+39 ||
 				c->Wing.Type==MODEL_HELPER+30 ||
 				c->Wing.Type==MODEL_WING+130 ||
@@ -2096,9 +2097,6 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 				c->Wing.Type == MODEL_WING+135||
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 				c->Wing.Type==MODEL_WING+40)
-#else //LDK_ADD_INGAMESHOP_SMALL_WING
-			if (c->Wing.Type == MODEL_WING+39 || c->Wing.Type==MODEL_HELPER+30 || c->Wing.Type==MODEL_WING+40)
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 			{
 				DeleteCloth(c, o);
 			}
@@ -2108,7 +2106,6 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 		{
 			c->Wing.Type = MODEL_ITEM + Type;
 			c->Wing.Level = 0;
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 			if (c->Wing.Type == MODEL_WING+39 ||
 				c->Wing.Type==MODEL_HELPER+30 ||
 				c->Wing.Type==MODEL_WING+130 ||
@@ -2118,9 +2115,6 @@ void ReceiveChangePlayer( BYTE *ReceiveBuffer )
 				c->Wing.Type == MODEL_WING+135||
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM				
 				c->Wing.Type==MODEL_WING+40)
-#else //LDK_ADD_INGAMESHOP_SMALL_WING
-			if (c->Wing.Type == MODEL_WING+39 || c->Wing.Type==MODEL_HELPER+30 || c->Wing.Type==MODEL_WING+40)
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 			{
 				DeleteCloth(c, o);
 			}
@@ -2257,7 +2251,7 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 			DeleteCloth(c, &c->Object);
 			
 			OBJECT *o = &c->Object;
-			c->Class = ChangeServerClassTypeToClientClassType(Data2->Class);
+			c->Class = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
 			c->Skin = 0;
 			c->PK    = Data2->Path&0xf;
 			o->Kind  = KIND_PLAYER;
@@ -2273,19 +2267,19 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 				AddDebugText(ReceiveBuffer,Size);
 				break;
 			case 2:
-				if(!IsFemale(c->Class))
+				if(!gCharacterManager.IsFemale(c->Class))
 					SetAction(o,PLAYER_SIT1);
 				else
 					SetAction(o,PLAYER_SIT_FEMALE1);
 				break;
 			case 3:
-				if(!IsFemale(c->Class))
+				if(!gCharacterManager.IsFemale(c->Class))
 					SetAction(o,PLAYER_POSE1);
 				else
 					SetAction(o,PLAYER_POSE_FEMALE1);
 				break;
 			case 4:
-				if(!IsFemale(c->Class))
+				if(!gCharacterManager.IsFemale(c->Class))
 					SetAction(o,PLAYER_HEALING1);
 				else
 					SetAction(o,PLAYER_HEALING_FEMALE1);
@@ -2454,7 +2448,7 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 		
         if(FindText(Temp, "webzen") == false)
 		{
-			int Class = ChangeServerClassTypeToClientClassType(Data2->Class);
+			int Class = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
             
             WORD Type = ((WORD)(Data2->TypeH)<<8) + Data2->TypeL;
 			
@@ -3280,109 +3274,109 @@ void ReceiveAction(BYTE *ReceiveBuffer,int Size)
 		PlayBuffer(SOUND_SKILL_DEFENSE);
 		break;
 	case AT_SIT1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(&c->Object,PLAYER_SIT1);
 		else
 			SetAction(&c->Object,PLAYER_SIT_FEMALE1);
 		break;
 	case AT_POSE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(&c->Object,PLAYER_POSE1);
 		else
 			SetAction(&c->Object,PLAYER_POSE_FEMALE1);
 		break;
 	case AT_HEALING1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(&c->Object,PLAYER_HEALING1);
 		else
 			SetAction(&c->Object,PLAYER_HEALING_FEMALE1);
 		break;
 	case AT_GREETING1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_GREETING1);
 		else
 			SetAction(o,PLAYER_GREETING_FEMALE1);
 		break;
 	case AT_GOODBYE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_GOODBYE1);
 		else
 			SetAction(o,PLAYER_GOODBYE_FEMALE1);
 		break;
 	case AT_CLAP1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_CLAP1);
 		else
 			SetAction(o,PLAYER_CLAP_FEMALE1);
 		break;
 	case AT_GESTURE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_GESTURE1);
 		else
 			SetAction(o,PLAYER_GESTURE_FEMALE1);
 		break;
 	case AT_DIRECTION1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_DIRECTION1);
 		else
 			SetAction(o,PLAYER_DIRECTION_FEMALE1);
 		break;
 	case AT_UNKNOWN1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_UNKNOWN1);
 		else
 			SetAction(o,PLAYER_UNKNOWN_FEMALE1);
 		break;
 	case AT_CRY1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_CRY1);
 		else
 			SetAction(o,PLAYER_CRY_FEMALE1);
 		break;
 	case AT_AWKWARD1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_AWKWARD1);
 		else
 			SetAction(o,PLAYER_AWKWARD_FEMALE1);
 		break;
 	case AT_SEE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_SEE1);
 		else
 			SetAction(o,PLAYER_SEE_FEMALE1);
 		break;
 	case AT_CHEER1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_CHEER1);
 		else
 			SetAction(o,PLAYER_CHEER_FEMALE1);
 		break;
 	case AT_WIN1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_WIN1);
 		else
 			SetAction(o,PLAYER_WIN_FEMALE1);
 		break;
 	case AT_SMILE1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_SMILE1);
 		else
 			SetAction(o,PLAYER_SMILE_FEMALE1);
 		break;
 	case AT_SLEEP1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_SLEEP1);
 		else
 			SetAction(o,PLAYER_SLEEP_FEMALE1);
 		break;
 	case AT_COLD1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_COLD1);
 		else
 			SetAction(o,PLAYER_COLD_FEMALE1);
 		break;
 	case AT_AGAIN1:
-		if(!IsFemale(c->Class))
+		if(!gCharacterManager.IsFemale(c->Class))
 			SetAction(o,PLAYER_AGAIN1);
 		else
 			SetAction(o,PLAYER_AGAIN_FEMALE1);
@@ -3559,33 +3553,25 @@ void ReceiveMagicFinish( BYTE *ReceiveBuffer )
 	case AT_SKILL_SLOW:
 		UnRegisterBuff( eDeBuff_Freeze, o);
 		break;
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 	case AT_SKILL_BLOW_OF_DESTRUCTION:
 		UnRegisterBuff( eDeBuff_BlowOfDestruction, o);
 		break;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_ATT_POWER_UP:
 	case AT_SKILL_ATT_POWER_UP+1:
 	case AT_SKILL_ATT_POWER_UP+2:
 	case AT_SKILL_ATT_POWER_UP+3:
 	case AT_SKILL_ATT_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_ATTACK:
 		UnRegisterBuff( eBuff_Attack, o);
 		break;
 		//#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 		//	case AT_SKILL_RECOVER:
 		//#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-		
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_DEF_POWER_UP:
 	case AT_SKILL_DEF_POWER_UP+1:
 	case AT_SKILL_DEF_POWER_UP+2:
 	case AT_SKILL_DEF_POWER_UP+3:
 	case AT_SKILL_DEF_POWER_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_DEFENSE:
 		UnRegisterBuff( eBuff_Defense, o);
 		break;
@@ -3618,13 +3604,11 @@ void ReceiveMagicFinish( BYTE *ReceiveBuffer )
     case AT_SKILL_PARALYZE:
 		UnRegisterBuff( eDeBuff_Harden, o);
         break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_BLOOD_ATT_UP:
 	case AT_SKILL_BLOOD_ATT_UP+1:
 	case AT_SKILL_BLOOD_ATT_UP+2:
 	case AT_SKILL_BLOOD_ATT_UP+3:
 	case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_REDUCEDEFENSE:
 		UnRegisterBuff( eDeBuff_Defense, o);
 		break;
@@ -3673,15 +3657,14 @@ void ReceiveMagicFinish( BYTE *ReceiveBuffer )
 
 void SetPlayerBow(CHARACTER *c)
 {
-#ifdef KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
 	OBJECT *o = &c->Object;
 
-	if(o->Type!=MODEL_PLAYER || GetBaseClass(c->Class) != CLASS_ELF || c->SafeZone)
+	if(o->Type!=MODEL_PLAYER || gCharacterManager.GetBaseClass(c->Class) != CLASS_ELF || c->SafeZone)
 		return;
 	
 	SetAttackSpeed();
 	
-	switch( GetEquipedBowType( c ))
+	switch( gCharacterManager.GetEquipedBowType( c ))
 	{
 	case BOWTYPE_BOW:
 		{
@@ -3722,66 +3705,13 @@ void SetPlayerBow(CHARACTER *c)
 			}
 		}break;
 	}
-#else // KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
-#ifdef ADD_SOCKET_ITEM
-	// 활
-	switch( GetEquipedBowType( c ))
-	{
-	case BOWTYPE_BOW:
-		{
-			if( (GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
-			{
-				SetAction( &c->Object, PLAYER_ATTACK_FLY_BOW );
-			}
-			else
-			{
-				SetAction( &c->Object, PLAYER_ATTACK_BOW );
-			}
-		}
-		break;
-	case BOWTYPE_CROSSBOW:
-		{
-			if( (GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
-			{
-				SetAction( &c->Object, PLAYER_ATTACK_FLY_CROSSBOW );
-			}
-			else
-			{
-				SetAction( &c->Object, PLAYER_ATTACK_CROSSBOW );
-			}
-		}
-		break;
-	}
-#else // ADD_SOCKET_ITEM
-    if((c->Weapon[1].Type>=MODEL_BOW && c->Weapon[1].Type<MODEL_BOW+7) 
-		|| c->Weapon[1].Type==MODEL_BOW+17 
-        || c->Weapon[1].Type==MODEL_BOW+20 
-		|| c->Weapon[1].Type==MODEL_BOW+21
-		|| c->Weapon[1].Type==MODEL_BOW+22
-        )
-    {
-        if(GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
-            SetAction(&c->Object,PLAYER_ATTACK_FLY_BOW);
-        else
-            SetAction(&c->Object,PLAYER_ATTACK_BOW);
-    }
-    else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) || c->Weapon[0].Type==MODEL_BOW+16 || 
-        (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
-    {
-        if(GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
-            SetAction(&c->Object,PLAYER_ATTACK_FLY_CROSSBOW);
-        else
-            SetAction(&c->Object,PLAYER_ATTACK_CROSSBOW);
-    }
-#endif // ADD_SOCKET_ITEM
-#endif // KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
 }
 
 void SetPlayerHighBow ( CHARACTER* c )
 {
 #ifdef ADD_SOCKET_ITEM
 #ifdef KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
-		switch( GetEquipedBowType( c ))
+		switch( gCharacterManager.GetEquipedBowType( c ))
 	{
 	case BOWTYPE_BOW:
 		{
@@ -3827,7 +3757,7 @@ void SetPlayerHighBow ( CHARACTER* c )
 	{
 	case BOWTYPE_BOW:
 		{
-			if( (GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
+			if( (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_FLY_BOW_UP );
 			}
@@ -3839,7 +3769,7 @@ void SetPlayerHighBow ( CHARACTER* c )
 		break;
 	case BOWTYPE_CROSSBOW:
 		{
-			if( (GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
+			if( (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
 			{
 				SetAction( &c->Object, PLAYER_ATTACK_FLY_CROSSBOW_UP );
 			}
@@ -3858,7 +3788,7 @@ void SetPlayerHighBow ( CHARACTER* c )
 		|| c->Weapon[1].Type==MODEL_BOW+22
         )
     {
-        if(GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
+        if(gCharacterManager.GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
             SetAction(&c->Object,PLAYER_ATTACK_FLY_BOW_UP);
         else
             SetAction(&c->Object,PLAYER_ATTACK_BOW_UP);
@@ -3866,7 +3796,7 @@ void SetPlayerHighBow ( CHARACTER* c )
     else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) || c->Weapon[0].Type==MODEL_BOW+16 || 
         (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
     {
-        if(GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
+        if(gCharacterManager.GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
             SetAction(&c->Object,PLAYER_ATTACK_FLY_CROSSBOW_UP);
         else
             SetAction(&c->Object,PLAYER_ATTACK_CROSSBOW_UP);
@@ -5786,7 +5716,7 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	c->Movement = false;
 	
 
-	if(IsMasterLevel(Hero->Class) == true)
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
 #ifdef LDK_ADD_SCALEFORM
 		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
@@ -5821,7 +5751,7 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	{
 		
 		char Text[100];
-		if(IsMasterLevel(Hero->Class) == true)
+		if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 		{
 			sprintf(Text,GlobalText[1750],Exp);
 		}
@@ -5873,7 +5803,7 @@ BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	c->Dead = true;
 	c->Movement = false;
 
-	if(IsMasterLevel(Hero->Class) == true)
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
 #ifdef LDK_ADD_SCALEFORM
 		if(GFxProcess::GetInstancePtr()->GetUISelect() == 0)
@@ -5908,7 +5838,7 @@ BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	{
 		char Text[100];
 
-		if(IsMasterLevel(Hero->Class) == true)
+		if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 		{
 			sprintf(Text,GlobalText[1750],Exp);
 		}
@@ -6636,7 +6566,7 @@ void ReceiveLevelUp( BYTE *ReceiveBuffer )
 	
 	OBJECT *o = &Hero->Object;
 
-	if(IsMasterLevel(Hero->Class) == true)
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
 		
 		CreateJoint(BITMAP_FLARE,o->Position,o->Position,o->Angle,45,o,80,2);
@@ -6700,7 +6630,7 @@ void ReceiveLife( BYTE *ReceiveBuffer )
 		CharacterAttribute->Shield = ((WORD)(Data->Life[3])<<8) + Data->Life[4];
 		break;
 	case 0xfe:
-		if(IsMasterLevel(Hero->Class) == true)
+		if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 		{
 			//	Master_Level_Data.wMaxLife			= Data->LifeMax;
 			//	Master_Level_Data.wMaxMana			= Data->ManaMax;
@@ -6743,7 +6673,7 @@ void ReceiveMana( BYTE *ReceiveBuffer )
 		CharacterAttribute->SkillMana = ((WORD)(Data->Life[2])<<8) + Data->Life[3];
 		break;
 	case 0xfe:
-		if(IsMasterLevel(Hero->Class) == true)
+		if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 		{
 			//	Master_Level_Data.wMaxLife			= Data->LifeMax;
 			//	Master_Level_Data.wMaxMana			= Data->ManaMax;
@@ -7829,7 +7759,7 @@ void Receive_Master_LevelUp( BYTE *ReceiveBuffer )
 	
 	OBJECT *o = &Hero->Object;
 	
-	if(IsMasterLevel(Hero->Class) == true)
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
 		CreateJoint(BITMAP_FLARE,o->Position,o->Position,o->Angle,45,o,80,2);
 		for ( int i=0; i<19; ++i )
@@ -9504,7 +9434,7 @@ void ReceiveDisplayEffectViewport(BYTE* ReceiveBuffer)
 				break;
 			case 0x10:	//. Level up
 				{
-					if(IsMasterLevel(pPlayer->Class) == true)
+					if(gCharacterManager.IsMasterLevel(pPlayer->Class) == true)
 					{
 						CreateJoint(BITMAP_FLARE,o->Position,o->Position,o->Angle,45,o,80,2);
 						for ( int i=0; i<19; ++i )
@@ -9538,33 +9468,16 @@ void ReceiveDisplayEffectViewport(BYTE* ReceiveBuffer)
 					}
 				}
 				break;
-#ifdef _PVP_ADD_MOVE_SCROLL
-			case 0x20:	// move
-				{
-					CreateEffect(BITMAP_MAGIC+1,o->Position,o->Angle,o->Light,6,o);
-				}
-				break;
-#endif	// _PVP_ADD_MOVE_SCROLL
 			}	//. end of switch
 		}	//. end of (o->Kind == KIND_PLAYER)
 	}
 }
 
-int g_iMaxLetterCount = 0;	// 최대 편지 수
+int g_iMaxLetterCount = 0;
 
 void ReceiveFriendList(BYTE* ReceiveBuffer)
 {
-#ifdef KJH_FIX_WOPS_K29708_SHARE_LETTER
 	g_pWindowMgr->Reset();
-#else KJH_FIX_WOPS_K29708_SHARE_LETTER
-	g_pFriendList->ClearFriendList();
-	
-#ifdef KJH_FIX_WOPS_K22448_SHARED_CHARACTER_MEMOLIST
-	g_pLetterList->ClearLetterList();
-	g_pWindowMgr->RefreshMainWndLetterList();
-#endif // KJH_FIX_WOPS_K22448_SHARED_CHARACTER_MEMOLIST
-#endif // KJH_FIX_WOPS_K29708_SHARE_LETTER
-	
 	LPFS_FRIEND_LIST_HEADER Header = (LPFS_FRIEND_LIST_HEADER)ReceiveBuffer;
 	int iMoveOffset = sizeof(FS_FRIEND_LIST_HEADER);
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -9855,7 +9768,7 @@ void ReceiveLetterText(BYTE* ReceiveBuffer)
 	}
 	else
 	{
-		pWindow->m_Photo.SetClass(ChangeServerClassTypeToClientClassType(Data->Class));
+		pWindow->m_Photo.SetClass(gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class));
 		pWindow->m_Photo.SetEquipmentPacket(Data->Equipment);
 		pWindow->m_Photo.SetAnimation(Data->PhotoAction + AT_ATTACK1);
 		int iAngle = Data->PhotoDir & 0x3F;
@@ -10498,8 +10411,8 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
 			OBJECT*     o = &c->Object;
             vec3_t      Position;
 			
-			BYTE byClass = ChangeServerClassTypeToClientClassType(Data->m_byNumber);
-			if (2 != GetStepClass(byClass))
+			BYTE byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->m_byNumber);
+			if (2 != gCharacterManager.GetStepClass(byClass))
 				break;
 			
 			c->Class = byClass;
@@ -10577,8 +10490,8 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
 		{
 			CHARACTER* c = &CharactersClient[Index];
 			
-			BYTE byClass = ChangeServerClassTypeToClientClassType(Data->m_byNumber);
-			if (3 != GetStepClass(byClass))
+			BYTE byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->m_byNumber);
+			if (3 != gCharacterManager.GetStepClass(byClass))
 				break;
 			
 			c->Class = byClass;
@@ -12136,7 +12049,7 @@ void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
 				CHARACTER* c = CreateCharacter ( Key, MODEL_PLAYER, pData2->m_byPosX, pData2->m_byPosY, 0 );
 				OBJECT* o = &c->Object;
 				
-				c->Class = ChangeServerClassTypeToClientClassType(pData2->m_byTypeH);
+				c->Class = gCharacterManager.ChangeServerClassTypeToClientClassType(pData2->m_byTypeH);
 				c->Skin = 0;
 				c->PK   = 0;
 				o->Kind = KIND_TMP;
@@ -15403,7 +15316,7 @@ void ClearBuffLogicalEffect( eBuffState buff, OBJECT* o )
 				}
 				else if( buff == eBuff_Hellowin2 )
 				{
-					int iBaseClass = GetBaseClass(Hero->Class);
+					int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
 					
 					if (iBaseClass == CLASS_WIZARD || iBaseClass == CLASS_DARK || iBaseClass == CLASS_SUMMONER)
 					{

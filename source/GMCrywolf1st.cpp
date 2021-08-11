@@ -16,6 +16,8 @@
 #include "CMVP1stDirection.h"
 #include "CSChaosCastle.h"
 #include "MapManager.h"
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 extern void MonsterMoveSandSmoke(OBJECT *o);
 extern void MonsterDieSandSmoke(OBJECT *o);
@@ -2524,7 +2526,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 			wsprintf ( Text, "%s", HeroName[i]);
 			g_pRenderText->RenderText(285, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
 
-			wsprintf(Text, "%s", GetCharacterClassText(HeroClass[i]));
+			wsprintf(Text, "%s", gCharacterManager.GetCharacterClassText(HeroClass[i]));
 
 			g_pRenderText->RenderText(335, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
 			wsprintf ( Text, "%d", HeroScore[i]);

@@ -18,9 +18,10 @@
 #include "wsclientinline.h"
 #include "NewUICustomMessageBox.h"
 #include "MapManager.h"
+#include "CharacterManager.h"
 
 extern int g_iChatInputType;
-extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];// ok, cancel // 사용여부, x, y, width, height
+extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
 extern  int g_iActionObjectType;
 extern  int g_iActionWorld;
 extern  int g_iActionTime;
@@ -68,25 +69,25 @@ void    ChangeChaosCastleUnit ( CHARACTER* c )
 		t_pFW->Close();
 	}
 	
-    int Class = GetBaseClass ( c->Class );
+    int Class = gCharacterManager.GetBaseClass(c->Class);
     
     if ( Class==CLASS_KNIGHT ||  Class==CLASS_DARK || Class==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
 		|| Class == CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
-		)    //  흑기사, 마검사. 다크로드.
+		)
     {
         c->Weapon[0].Type = MODEL_SWORD+16;
         c->Weapon[0].Level= 0;
         c->Weapon[1].Type = MODEL_SWORD+16;
         c->Weapon[1].Level= 0;
     }
-    else if ( Class==CLASS_ELF )                        //  요정.
+    else if ( Class==CLASS_ELF )
     {
         c->Weapon[0].Type = MODEL_BOW+19;
 		c->Weapon[0].Level= 0;
     }
-    else if (Class==CLASS_WIZARD || Class == CLASS_SUMMONER)	//  흑마법사, 소환술사.
+    else if (Class==CLASS_WIZARD || Class == CLASS_SUMMONER)
     {
         c->Weapon[0].Type = MODEL_STAFF+5;
 		c->Weapon[0].Level= 0;

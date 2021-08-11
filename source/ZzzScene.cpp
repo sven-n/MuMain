@@ -85,7 +85,7 @@
 #ifdef LDK_ADD_SCALEFORM
 #include "CGFxProcess.h" 
 #endif //LDK_ADD_SCALEFORM
-#include "../ProtocolSend.h"
+#include "ProtocolSend.h"
 #include "MapManager.h"
 
 

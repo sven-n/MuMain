@@ -18,15 +18,8 @@
 #include "zzzopenglutil.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "zzzLodTerrain.h"
-
-#ifdef ANTIHACKING_ENABLE
-#include "proc.h"
-#endif
 #include "CSItemOption.h"
-#ifdef PET_SYSTEM
 #include "GIPetManager.h"
-#endif// PET_SYSTEM
-
 #include "GMHellas.h"
 #include "CComGem.h"
 #ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
@@ -35,10 +28,10 @@
 #endif	// ADD_PCROOM_POINT_SYSTEM
 #endif // KJH_DEL_PC_ROOM_SYSTEM
 #include "NewUIInventoryCtrl.h"
-#ifdef SOCKET_SYSTEM
 #include "SocketSystem.h"
-#endif	// SOCKET_SYSTEM
 #include "NewUISystem.h"
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 CLASS_ATTRIBUTE     ClassAttribute[MAX_CLASS];
 MONSTER_SCRIPT      MonsterScript [MAX_MONSTER];
@@ -2087,11 +2080,9 @@ int ItemValue(ITEM *ip,int goldType)
         case    2 :
             sellMoney = 2200;
             break;
-#ifdef ASG_ADD_ELF_ARROW_PLUS3
 		case    3 :
             sellMoney = 3000;
             break;
-#endif	// ASG_ADD_ELF_ARROW_PLUS3
         }
 		if(p->Durability > 0)
      		Gold = (sellMoney*ip->Durability/p->Durability);//+(170*(Level*2));
@@ -2111,11 +2102,9 @@ int ItemValue(ITEM *ip,int goldType)
         case    2 :
             sellMoney = 2000;
             break;
-#ifdef ASG_ADD_ELF_ARROW_PLUS3
 		case    3 :
             sellMoney = 2800;
             break;
-#endif	// ASG_ADD_ELF_ARROW_PLUS3
         }
 		if(p->Durability > 0)
      		Gold = (sellMoney*ip->Durability/p->Durability);//+(80*(Level*2));
@@ -2144,7 +2133,6 @@ int ItemValue(ITEM *ip,int goldType)
     {
         Gold = 36000000;
     }
-#ifdef PBG_ADD_GENSRANKING
 	else if(ip->Type == ITEM_POTION+141)
 	{
 		Gold = 224000*3;
@@ -2161,7 +2149,6 @@ int ItemValue(ITEM *ip,int goldType)
 	{
 		Gold = 121000*3;
 	}
-#endif //PBG_ADD_GENSRANKING
 
     else if(ip->Type==ITEM_HELPER+14)
     {
@@ -2190,7 +2177,6 @@ int ItemValue(ITEM *ip,int goldType)
     {
         Gold = 33000000;
     }
-#ifdef KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
     else if ( ip->Type==ITEM_HELPER+16 || ip->Type==ITEM_HELPER+17 )
     {
         switch ( Level )
@@ -2207,25 +2193,6 @@ int ItemValue(ITEM *ip,int goldType)
 			Gold = 0;
         }
 	}
-#else // KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-    else if ( ip->Type==ITEM_HELPER+16 || ip->Type==ITEM_HELPER+17 )
-    {
-        switch ( Level )
-        {
-        case 1: Gold = 5000; break;
-        case 2: Gold = 7000; break;
-        case 3: Gold = 10000; break;
-        case 4: Gold = 13000; break;
-        case 5: Gold = 16000; break;
-        case 6: Gold = 20000; break;
-		case 7: Gold = 25000; break;
-		case 8: Gold = 30000; break;
-		default:
-			Gold = 0;
-        }
-		Gold *= 3;   
-	}
-#endif // KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
     else if ( ip->Type==ITEM_HELPER+18 )
     {
 		Gold = 200000 + 20000 * ( Level - 1);
@@ -2267,7 +2234,6 @@ int ItemValue(ITEM *ip,int goldType)
     {
         Gold = 5000;
     }
-#ifdef BLOODCASTLE_2ND_PATCH
 	else if(ip->Type==ITEM_POTION+21)
 	{
 		if(Level == 0)
@@ -2281,8 +2247,6 @@ int ItemValue(ITEM *ip,int goldType)
 			Gold = ip->Durability * 3900;
 		}
 	}
-#endif // BLOODCASTLE_2ND_PATCH
-#ifdef KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
 	else if(ip->Type==ITEM_POTION+17)
 	{
 		int iValue[8] = {30000, 10000, 50000, 100000, 300000, 500000, 800000, 1000000};
@@ -2298,25 +2262,7 @@ int ItemValue(ITEM *ip,int goldType)
 		int iValue[8] = {120000, 60000, 84000, 120000, 180000, 240000, 300000, 180000};
 		Gold = iValue[min( max( 0, Level), 7)];
 	}
-#else // KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-	else if(ip->Type==ITEM_POTION+17)// 악마의 눈
-	{
-		int iValue[7] = {30000, 15000, 21000, 30000, 45000, 60000, 75000};
-		Gold = iValue[min( max( 0, Level), 6)];
-	}
-	else if(ip->Type==ITEM_POTION+18)// 악마의 열쇠
-	{
-		int iValue[7] = {30000, 15000, 21000, 30000, 45000, 60000, 75000};
-		Gold = iValue[min( max( 0, Level), 6)];
-	}
-	else if(ip->Type==ITEM_POTION+19)// 데블스퀘어 초대권
-	{
-		int iValue[5] = { 120000, 60000, 84000, 120000, 180000};
-		Gold = iValue[min( max( 0, Level), 4)];
-	}
-#endif // KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-#ifdef KJH_FIX_20080910_NPCSHOP_PRICE
-    else if (ip->Type==ITEM_HELPER+49 || ip->Type==ITEM_HELPER+50 || ip->Type==ITEM_HELPER+51)	// 낡은두루마리, 환영교단의서약, 피의두루마리
+    else if (ip->Type==ITEM_HELPER+49 || ip->Type==ITEM_HELPER+50 || ip->Type==ITEM_HELPER+51)
     {
         switch ( Level )
         {
@@ -2330,74 +2276,49 @@ int ItemValue(ITEM *ip,int goldType)
 			Gold = 3000*3;
         }
 	}
-#endif // KJH_FIX_20080910_NPCSHOP_PRICE
 	else if(ip->Type==ITEM_POTION+23 || ip->Type==ITEM_POTION+24 || ip->Type==ITEM_POTION+25 || ip->Type==ITEM_POTION+26
 		|| ip->Type==ITEM_POTION+65 || ip->Type==ITEM_POTION+66 || ip->Type==ITEM_POTION+67 || ip->Type==ITEM_POTION+68
-		)	// 전직 퀘스트 아이템
+		)
 	{
 		Gold = 9000;
 	}
-	else if(ip->Type==ITEM_POTION+9 && Level == 1)// 사랑의 올리브
+	else if(ip->Type==ITEM_POTION+9 && Level == 1)
 	{
 		Gold = 1000;
 	}
-	else if(ip->Type==ITEM_POTION+20)	// 사랑의 묘약
+	else if(ip->Type==ITEM_POTION+20)
 	{
 		Gold = 900;
 	}
-	else if(ip->Type == ITEM_POTION+51)	// 크리스마스의 별
+	else if(ip->Type == ITEM_POTION+51)
 	{
 		Gold = 200000;
 	}
-	else if(ip->Type == ITEM_POTION+63)	// 폭죽
+	else if(ip->Type == ITEM_POTION+63)
 	{
 		Gold = 200000;
 	}
-	else if(ip->Type == ITEM_POTION+52)	// GM 선물상자
+	else if(ip->Type == ITEM_POTION+52)
 	{
 		Gold = 33*3;
 	}
-	else if(ip->Type==ITEM_POTION+10)	// 이동문서
+	else if(ip->Type==ITEM_POTION+10)
 	{
-#ifdef _PVP_ADD_MOVE_SCROLL
-		switch (Level)
-		{
-		case 0: Gold = 750; break;
-		case 1: Gold = GetMoveReqZenFromMCB("Lorencia") * 0.9f; break;		//  로랜시아
-		case 2: Gold = GetMoveReqZenFromMCB("Noria") * 0.9f; break;		//  노리아
-		case 3: Gold = GetMoveReqZenFromMCB("Devias") * 0.9f; break;		//  데비아스
-		case 4: Gold = GetMoveReqZenFromMCB("Dungeon") * 0.9f; break;		//  던전
-		case 5: Gold = GetMoveReqZenFromMCB("Atlans") * 0.9f; break;		//  아틀란스
-		case 6: Gold = GetMoveReqZenFromMCB("LostTower") * 0.9f; break;	//  로스트타워
-		case 7: Gold = GetMoveReqZenFromMCB("Tarkan") * 0.9f; break;		//  타르칸
-		case 8: Gold = GetMoveReqZenFromMCB("Icarus") * 0.9f; break;		//  이카루스
-		default: Gold = 750; break;
-		};
-#else	// _PVP_ADD_MOVE_SCROLL
 		Gold = 750;
-#endif	// _PVP_ADD_MOVE_SCROLL
 	}
-#ifdef _PVP_MURDERER_HERO_ITEM
-	else if(ip->Type==ITEM_POTION+30)	// 영웅살인마징표
-	{
-		Gold = 3000;
-	}
-#endif	// _PVP_MURDERER_HERO_ITEM
-    else if ( ip->Type==ITEM_POTION+31 )// 수호의보석
+    else if ( ip->Type==ITEM_POTION+31 )
     {
         Gold = 60000000;
     }
-    else if ( ip->Type==ITEM_POTION+7 ) //  스패셜 물약.//종훈물약
+    else if ( ip->Type==ITEM_POTION+7 )
     {
         switch ( Level )
         {
-			//2100000
-			//1500000
         case 0: Gold = 900000*ip->Durability; break;
         case 1: Gold = 450000*ip->Durability; break;
         }
     }
-    else if ( ip->Type==ITEM_HELPER+7 ) //  용병.
+    else if ( ip->Type==ITEM_HELPER+7 )
     {
         switch ( Level )
         {
@@ -2445,89 +2366,59 @@ int ItemValue(ITEM *ip,int goldType)
 		}
 		Gold *= ip->Durability;
 	}
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 	else if( ip->Type == ITEM_POTION+100 )
 	{
 		Gold = 100*3;
 		Gold *= ip->Durability;
 	}
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef PBG_FIX_GOLD_CHERRYBLOSSOMTREE
 	else if( ip->Type == ITEM_POTION+90  || ip->Type == ITEM_POTION+85 || ip->Type == ITEM_POTION+86 || ip->Type == ITEM_POTION+87)
 	{
 		Gold = 300;
 		Gold *= ip->Durability;
 	}
-#endif //PBG_FIX_GOLD_CHERRYBLOSSOMTREE
 
 	else if(p->Value > 0)
 	{
 		Gold = p->Value*p->Value*10/12;
 
-#ifdef CSK_FIX_POTION_VALUE
 		if(ip->Type == ITEM_POTION+3 || ip->Type == ITEM_POTION+6)	
 		{
-			// 큰치료물약, 큰마나물약 가격 1500으로 하드코딩으로 바꿔달라고 함
-			// 스크립트로 value 값을 바꾸면 되지만 1500 값이 나올려면 소수점이 들어가서 하드코딩으로 감
 			Gold = 1500;	
 		}
-#endif // CSK_FIX_POTION_VALUE
 
-		if(ip->Type>=ITEM_POTION && ip->Type<=ITEM_POTION+8)	//물약
+		if(ip->Type>=ITEM_POTION && ip->Type<=ITEM_POTION+8)
 		{
 			if(Level > 0)
-#ifdef KJW_FIX_CHINESE_POTION_PRICE
 				Gold *= (__int64)pow((double)2,(double)Level);
-#else // KJW_FIX_CHINESE_POTION_PRICE
-	#ifdef CHINESE_PRICERISE
-				Gold *= (__int64)pow((double)3,(double)Level);
-	#else
-				Gold *= (__int64)pow((double)2,(double)Level);
-	#endif	// CHINESE_PRICERISE
-#endif // KJW_FIX_CHINESE_POTION_PRICE
 
-#ifdef KJH_FIX_POTION_PRICE
 			Gold = Gold/10*10;
 			Gold *= (__int64)ip->Durability;
 
-			if( goldType )  //  팔기. 수리.
+			if( goldType )
             {
 				Gold = Gold/3;
 				Gold = Gold/10*10;
             }
 			return (int)Gold;
-#else // KJH_FIX_POTION_PRICE
-			Gold *= ip->Durability;
-            if( goldType )  //  팔기. 수리.
-            {
-		        Gold = Gold/3;
-            }
-            Gold = Gold/10*10;
-			return (int)Gold;
-#endif // KJH_FIX_POTION_PRICE
 		}
 	}
-	else if (ip->Type==ITEM_HELPER+20)	// 마법사의 반지
+	else if (ip->Type==ITEM_HELPER+20)
 	{
 		if (Level == 0)
-#ifdef LDK_MOD_INGAMESHOP_ITEM_CHANGE_VALUE
 			Gold = 3000;
-#else //LDK_MOD_INGAMESHOP_ITEM_CHANGE_VALUE
-			Gold = 30000;
-#endif //LDK_MOD_INGAMESHOP_ITEM_CHANGE_VALUE
 		else if (Level == 1)
 			Gold = 0;
 	}
-	else if (ip->Type==ITEM_HELPER+52 || ip->Type==ITEM_HELPER+53)	// 콘도르의 깃털,불꽃
+	else if (ip->Type==ITEM_HELPER+52 || ip->Type==ITEM_HELPER+53)
 	{
 		Gold = 3000000;
 	}
-    else if ( ip->Type==ITEM_HELPER+31 )    //  영혼.
+    else if ( ip->Type==ITEM_HELPER+31 )
     {
         switch ( Level )
         {
-        case 0 : Gold = 10000000*3; break;    //  다크호스.
-        case 1 : Gold = 5000000*3;  break;    //  다크스피릿.
+        case 0 : Gold = 10000000*3; break;
+        case 1 : Gold = 5000000*3;  break;
         }
     }
 	else if( ( ( Type==12 && (ip->Type>ITEM_WING+6
@@ -2549,30 +2440,25 @@ int ItemValue(ITEM *ip,int goldType)
 			}
 		}
 	}
-#ifdef YDG_FIX_LUCKY_CHARM_VALUE_TO_0
-	else if (ip->Type == ITEM_POTION+53)	// 행운의부적
+	else if (ip->Type == ITEM_POTION+53)
 	{
 		Gold = 0;
 	}
-#endif	// YDG_FIX_LUCKY_CHARM_VALUE_TO_0
 	else
 	{
-        switch(Level)     //+무기일수록 가중치 붙음
+        switch(Level)
         {
         case 5:Level2 += 4;break;
         case 6:Level2 += 10;break;
         case 7:Level2 += 25;break;
         case 8:Level2 += 45;break;
         case 9:Level2 += 65;break;
-        case 10:Level2 += 95;break;	// +10
+        case 10:Level2 += 95;break;
         case 11:Level2 += 135;break;
         case 12:Level2 += 185;break;
         case 13:Level2 += 245;break;
-#ifdef LDK_ADD_14_15_GRADE_ITEM_VALUE
-		// 아이템 14 15 판매금액 추가
         case 14:Level2 += 305;break;
         case 15:Level2 += 365;break;
-#endif //LDK_ADD_14_15_GRADE_ITEM_VALUE
         }
 	    if( ( Type==12 && ip->Type<=ITEM_WING+6) || ip->Type==ITEM_HELPER+30 || (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
@@ -2735,29 +2621,6 @@ int ItemValue(ITEM *ip,int goldType)
 		Gold = 30000;
 	else if(ip->Type == ITEM_HELPER+37)
 		Gold = 50000;
-#ifndef KJH_FIX_20080910_NPCSHOP_PRICE		// #ifndef
-#ifdef KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-    else if (ip->Type==ITEM_HELPER+49 || ip->Type==ITEM_HELPER+50 || ip->Type==ITEM_HELPER+51)	// 낡은두루마리, 환영교단의서약, 피의두루마리
-    {
-        switch ( Level )
-        {
-        case 1: Gold = 500000; break;
-        case 2: Gold = 600000; break;
-        case 3: Gold = 800000; break;
-        case 4: Gold = 1000000; break;
-        case 5: Gold = 1200000; break;
-        case 6: Gold = 1400000; break;
-		default:
-			Gold = 3000*3;
-        }
-	}
-#else // KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-	else if (ip->Type==ITEM_HELPER+49 || ip->Type==ITEM_HELPER+50 || ip->Type==ITEM_HELPER+51)	// 낡은두루마리,환영교단의서약,피의두루마리
-	{
-		Gold = 3000;
-	}
-#endif // KJH_FIX_WOPS_K26602_NPCSHOP_ITEM_PRICE_AS_MASTERLEVEL
-#endif // KJH_FIX_20080910_NPCSHOP_PRICE		// #ifndef		정리할 때 지워야 하는 소스
 
 #ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
 #ifdef ADD_PCROOM_POINT_SYSTEM
@@ -2881,30 +2744,11 @@ int ItemValue(ITEM *ip,int goldType)
 	{
 		Gold = ip->Durability*50;
 	}
-
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-	switch (ip->Type)
-	{
-	case ITEM_POTION+153:
-	case ITEM_POTION+154:
-	case ITEM_POTION+155:
-	case ITEM_POTION+156:
-		Gold = ip->Durability*1000;
-		break;
-	case ITEM_POTION+157:
-	case ITEM_POTION+158:
-	case ITEM_POTION+159:
-		Gold = 10000;
-		break;
-	}
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM 
 	
-#ifdef LDK_ADD_GAMBLE_RANDOM_ICON
 	if( ip->Type == ITEM_HELPER+71 || ip->Type == ITEM_HELPER+72 || ip->Type == ITEM_HELPER+73 || ip->Type == ITEM_HELPER+74 ||ip->Type == ITEM_HELPER+75 )	// 겜블러 아이콘
 	{
 		Gold = 2000000;
 	}
-#endif //LDK_ADD_GAMBLE_RANDOM_ICON
 	
 	if( (ip->Type == ITEM_HELPER+4) || (ip->Type == ITEM_HELPER+5) )
 	{		
@@ -2916,73 +2760,31 @@ int ItemValue(ITEM *ip,int goldType)
 		Gold = giPetManager::GetPetItemValue( pPetInfo );
 	}
  
-#ifdef LDK_MOD_PREMIUMITEM_SELL
 	switch(ip->Type)
 	{
-#ifdef LDK_MOD_INGAMESHOP_ITEM_CHANGE_VALUE
-
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER		// MODEL_POTION+112
 	case ITEM_POTION+112:
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD			// MODEL_POTION+113
 	case ITEM_POTION+113:
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
 	case ITEM_POTION+121:
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
 	case ITEM_POTION+122:
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST
 	case ITEM_POTION+123:
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST
 	case ITEM_POTION+124:
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef PJH_ADD_PANDA_PET
 	case ITEM_HELPER+80:
-#endif //PJH_ADD_PANDA_PET
-#ifdef PJH_ADD_PANDA_CHANGERING
 	case ITEM_HELPER+76:
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef LDK_ADD_PC4_GUARDIAN
-	case ITEM_HELPER+64:  //유료 데몬
-	case ITEM_HELPER+65:  //유료 수호정령
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// MODEL_HELPER+109
+	case ITEM_HELPER+64:
+	case ITEM_HELPER+65:
 	case ITEM_HELPER+109:
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// MODEL_HELPER+110
 	case ITEM_HELPER+110:
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ	// MODEL_HELPER+111
 	case ITEM_HELPER+111:
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST	// MODEL_HELPER+112
 	case ITEM_HELPER+112:
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY	// MODEL_HELPER+113
 	case ITEM_HELPER+113:
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY	// MODEL_HELPER+113
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// MODEL_HELPER+114
 	case ITEM_HELPER+114:
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// MODEL_HELPER+114
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// MODEL_HELPER+115
 	case ITEM_HELPER+115:
 		Gold = 1000;
 		break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// MODEL_HELPER+115		
-
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
 	case ITEM_HELPER+122:
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
 	case ITEM_HELPER+123:
 		Gold = 2000;
 		break;
-#endif //YDG_ADD_SKELETON_PET
-
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	case ITEM_WING+130:
 	case ITEM_WING+131:
 	case ITEM_WING+132:
@@ -2993,123 +2795,7 @@ int ItemValue(ITEM *ip,int goldType)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		Gold = 80;
 		break;
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-
-#else //LDK_MOD_INGAMESHOP_ITEM_CHANGE_VALUE
-		//가격 변경 전
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER			// 인게임샾 아이템 // 신규 키(실버)				// MODEL_POTION+112
-	case ITEM_POTION+112: Gold = 10000; break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD				// 인게임샾 아이템 // 신규 키(골드)				// MODEL_POTION+113
-	case ITEM_POTION+113: Gold = 10000; break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
-	case ITEM_POTION+121:	Gold = 10000; break;
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST	// 봉인된 은색상자
-	case ITEM_POTION+122:	Gold = 10000; break;
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST			// 금색상자
-	case ITEM_POTION+123:	Gold = 10000; break;
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST			// 은색상자
-	case ITEM_POTION+124:	Gold = 10000; break;
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
-	case ITEM_WING+130:
-	case ITEM_WING+131:
-	case ITEM_WING+132:
-	case ITEM_WING+133:
-	case ITEM_WING+134:
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-	case ITEM_WING+135:
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		Gold = 10000;
-		break;
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef PJH_ADD_PANDA_PET
-	case ITEM_HELPER+80:  //펜더펫
-		Gold = 10000;
-#endif //PJH_ADD_PANDA_PET
-#ifdef PJH_ADD_PANDA_CHANGERING
-	case ITEM_HELPER+76:  //펜더변신반지
-		Gold = 10000;
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-	case ITEM_HELPER+122:	// 스켈레톤 변신반지
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
-	case ITEM_HELPER+123:	// 스켈레톤 펫
-#endif //YDG_ADD_SKELETON_PET
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-	case ITEM_HELPER+128:	// 매조각상
-	case ITEM_HELPER+129:	// 양조각상
-	case ITEM_HELPER+134:	// 편자
-#endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-	case ITEM_HELPER+130:	// 신규 오크참
-	case ITEM_HELPER+131:	// 신규 메이플참
-	case ITEM_HELPER+132:	// 신규 골든오크참
-	case ITEM_HELPER+133:	// 골든메이플참
-#endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-
-#ifdef LDK_ADD_PC4_GUARDIAN
-	case ITEM_HELPER+64:  //유료 데몬
-	case ITEM_HELPER+65:  //유료 수호정령
-		Gold = 10000;
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(푸른색)링	// MODEL_HELPER+109
-	case ITEM_HELPER+109:
-		{
-			Gold = 10000;
-		}
-		break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(푸른색)링	// MODEL_HELPER+109
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// 인게임샾 아이템 // 신규 루비(붉은색)링		// MODEL_HELPER+110
-	case ITEM_HELPER+110:
-		{
-			Gold = 10000;
-		}
-		break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// 인게임샾 아이템 // 신규 루비(붉은색)링		// MODEL_HELPER+110
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ			// 인게임샾 아이템 // 신규 토파즈(주황)링		// MODEL_HELPER+111
-	case ITEM_HELPER+111:
-		{
-			Gold = 10000;
-		}
-		break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ			// 인게임샾 아이템 // 신규 토파즈(주황)링		// MODEL_HELPER+111
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 인게임샾 아이템 // 신규 자수정(보라색)링		// MODEL_HELPER+112
-	case ITEM_HELPER+112:
-		{
-			Gold = 10000;
-		}
-		break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// 인게임샾 아이템 // 신규 자수정(보라색)링		// MODEL_HELPER+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY			// 인게임샾 아이템 // 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
-	case ITEM_HELPER+113:
-		{
-			Gold = 10000;
-		}
-		break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY			// 인게임샾 아이템 // 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// 인게임샾 아이템 // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
-	case ITEM_HELPER+114:
-		{
-			Gold = 10000;
-		}
-		break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// 인게임샾 아이템 // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115
-	case ITEM_HELPER+115:
-		{
-			Gold = 10000;
-		}
-		break;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115		
-#endif //LDK_MOD_INGAMESHOP_ITEM_CHANGE_VALUE
 	}
-#endif //LDK_MOD_PREMIUMITEM_SELL
 
 	if( ip->Type == ITEM_HELPER+10 || ip->Type == ITEM_HELPER+20 || ip->Type == ITEM_HELPER+29)
 		goto EXIT_CALCULATE;
@@ -3121,33 +2807,18 @@ int ItemValue(ITEM *ip,int goldType)
 		goto EXIT_CALCULATE;
 	if( ip->Type==ITEM_POTION+7 || ip->Type==ITEM_HELPER+7 || ip->Type==ITEM_HELPER+11 )
 		goto EXIT_CALCULATE;
-#ifdef KJH_FIX_20080910_NPCSHOP_PRICE
 	if( (ip->Type>=ITEM_HELPER+49) && (ip->Type<=ITEM_HELPER+51))
 		goto EXIT_CALCULATE;
-#endif // KJH_FIX_20080910_NPCSHOP_PRICE
 
-#ifdef LDK_MOD_PREMIUMITEM_SELL
 	switch(ip->Type)
 	{
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER				// MODEL_POTION+112
 	case ITEM_POTION+112:	goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD					// MODEL_POTION+113
+			// MODEL_POTION+113
 	case ITEM_POTION+113:	goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
 	case ITEM_POTION+121:	goto EXIT_CALCULATE;
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
 	case ITEM_POTION+122:	goto EXIT_CALCULATE;
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST
 	case ITEM_POTION+123:	goto EXIT_CALCULATE;
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST
 	case ITEM_POTION+124:	goto EXIT_CALCULATE;
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	case ITEM_WING+130:
 	case ITEM_WING+131:
 	case ITEM_WING+132:
@@ -3157,56 +2828,31 @@ int ItemValue(ITEM *ip,int goldType)
 	case ITEM_WING+135:
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		goto EXIT_CALCULATE;
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
 	case ITEM_HELPER+122:
 		goto EXIT_CALCULATE;
-#endif //YDG_ADD_SKELETON_CHANGE_RING
-#ifdef YDG_ADD_SKELETON_PET
 	case ITEM_HELPER+123:
 		goto EXIT_CALCULATE;
-#endif //YDG_ADD_SKELETON_PET
-#ifdef PJH_ADD_PANDA_PET
 	case ITEM_HELPER+80:
 		goto EXIT_CALCULATE;
-#endif //PJH_ADD_PANDA_PET
-#ifdef PJH_ADD_PANDA_CHANGERING
 	case ITEM_HELPER+76:
 		goto EXIT_CALCULATE;
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef LDK_ADD_PC4_GUARDIAN
 	case ITEM_HELPER+64:
 	case ITEM_HELPER+65:
 		goto EXIT_CALCULATE;
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// MODEL_HELPER+109
 	case ITEM_HELPER+109:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE	// MODEL_HELPER+109
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// MODEL_HELPER+110
 	case ITEM_HELPER+110:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY		// MODEL_HELPER+110
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// MODEL_HELPER+111
 	case ITEM_HELPER+111:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ		// MODEL_HELPER+111
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// MODEL_HELPER+112
 	case ITEM_HELPER+112:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST	// MODEL_HELPER+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY		// MODEL_HELPER+113
 	case ITEM_HELPER+113:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY	// MODEL_HELPER+113
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD	// MODEL_HELPER+114
 	case ITEM_HELPER+114:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// MODEL_HELPER+114
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// MODEL_HELPER+115
 	case ITEM_HELPER+115:
 		goto EXIT_CALCULATE;
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE	// MODEL_HELPER+115
 	case ITEM_HELPER+128:
 	case ITEM_HELPER+129:
 	case ITEM_HELPER+134:
@@ -3217,7 +2863,6 @@ int ItemValue(ITEM *ip,int goldType)
 	case ITEM_HELPER+133:
 		goto EXIT_CALCULATE;
 	}
-#endif //LDK_MOD_PREMIUMITEM_SELL
 
 	if(goldType==1 && !(ip->Type >= ITEM_HELPER+32 && ip->Type <= ITEM_HELPER+37))
     {
@@ -3261,16 +2906,16 @@ bool IsRequireEquipItem(ITEM* pItem)
 	
 	bool bEquipable = false;
 	
-	if( pItemAttr->RequireClass[GetBaseClass(Hero->Class)] ){
+	if( pItemAttr->RequireClass[gCharacterManager.GetBaseClass(Hero->Class)] ){
 		bEquipable = true; 
 	}
-	else if (GetBaseClass(Hero->Class) == CLASS_DARK && pItemAttr->RequireClass[CLASS_WIZARD] 
+	else if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK && pItemAttr->RequireClass[CLASS_WIZARD] 
 		&& pItemAttr->RequireClass[CLASS_KNIGHT]) {
 		bEquipable = true; 
 	}
 	
-	BYTE byFirstClass = GetBaseClass(Hero->Class);
-	BYTE byStepClass = GetStepClass(Hero->Class);
+	BYTE byFirstClass = gCharacterManager.GetBaseClass(Hero->Class);
+	BYTE byStepClass = gCharacterManager.GetStepClass(Hero->Class);
 	if( pItemAttr->RequireClass[byFirstClass] > byStepClass)
 	{
 		return false;
@@ -3405,37 +3050,9 @@ WORD ItemWalkSpeed(ITEM *Item)
 	return WalkSpeed;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// monster
-///////////////////////////////////////////////////////////////////////////////
-
 extern int HeroKey;
 int EditMonsterNumber = 0;
 int MonsterKey = 0;
-
-void OpenMonsters(char *FileName)
-{
-	if((SMDFile=fopen(FileName,"rb")) == NULL)	return;
-	SMDToken Token;
-	Token = (*GetToken)();
-	while(true)
-	{
-		Token = (*GetToken)();int Monster = (int)TokenNumber;
-		if(Token == END) break;
-		if(Token == NAME && strcmp("end",TokenString)==NULL) break;
-		Token = (*GetToken)();
-		Token = (*GetToken)();
-		Token = (*GetToken)();int x = (int)TokenNumber;
-		Token = (*GetToken)();int y = (int)TokenNumber;
-		Token = (*GetToken)();
-		if(MonsterKey == HeroKey) MonsterKey++;
-        CHARACTER *c = CreateMonster(Monster,x,y,MonsterKey++);
-		if(c != NULL)
-			c->Object.Kind = KIND_EDIT;
-	}
-	fclose(SMDFile);
-}
 
 void OpenMonsterScript(char *FileName)
 {
@@ -3456,9 +3073,6 @@ void OpenMonsterScript(char *FileName)
 	fclose(SMDFile);
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  몬스터의 이름을 알아낸다.
-//////////////////////////////////////////////////////////////////////////
 char*   getMonsterName ( int type )
 {
     for ( int i=0; i<MAX_MONSTER; ++i )
@@ -3484,10 +3098,6 @@ void MonsterConvert(MONSTER *m,int Level)
 	m->Attribute.SuccessfulBlocking = c->SuccessfulBlocking/2+c->SuccessfulBlocking/2*(m->Level)/9;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// class
-///////////////////////////////////////////////////////////////////////////////
-
 void CreateClassAttribute(int Class,int Strength,int Dexterity,int Vitality,int Energy,int Life,int Mana,int LevelLife,int LevelMana,int VitalityToLife,int EnergyToMana)
 {
 	CLASS_ATTRIBUTE *c = &ClassAttribute[Class];
@@ -3506,20 +3116,17 @@ void CreateClassAttribute(int Class,int Strength,int Dexterity,int Vitality,int 
 
 void CreateClassAttributes()
 {
-	CreateClassAttribute( 0, 18, 18, 15, 30,	  80, 60,	  1, 2, 1, 2 );	//마법사
-	CreateClassAttribute( 1, 28, 20, 25, 10,	 110, 20,	  2, 1, 2, 1 );	//흑기사
-	CreateClassAttribute( 2, 50, 50, 50, 30,	 110, 30,	 110, 30, 6, 3 );	//요정
-	CreateClassAttribute( 3, 30, 30, 30, 30,	 120, 80,	  1, 1, 2, 2 );	//마기사
-	CreateClassAttribute( 4, 30, 30, 30, 30,	 120, 80,	  1, 1, 2, 2 );	//다크로드
-	CreateClassAttribute( 5, 50, 50, 50, 30,	 110, 30,	 110, 30, 6, 3 );	// 엘리스
+	CreateClassAttribute( 0, 18, 18, 15, 30,	  80, 60,	  1, 2, 1, 2 );
+	CreateClassAttribute( 1, 28, 20, 25, 10,	 110, 20,	  2, 1, 2, 1 );
+	CreateClassAttribute( 2, 50, 50, 50, 30,	 110, 30,	 110, 30, 6, 3 );
+	CreateClassAttribute( 3, 30, 30, 30, 30,	 120, 80,	  1, 1, 2, 2 );
+	CreateClassAttribute( 4, 30, 30, 30, 30,	 120, 80,	  1, 1, 2, 2 );
+	CreateClassAttribute( 5, 50, 50, 50, 30,	 110, 30,	 110, 30, 6, 3 );
 #ifdef PBG_ADD_NEWCHAR_MONK
-	CreateClassAttribute( 6, 32, 27, 25, 20,	 100, 40,	 /*사용안함 => */1, 3, 1, 1);	// 몽크
+	CreateClassAttribute( 6, 32, 27, 25, 20,	 100, 40,	 /*사용안함 => */1, 3, 1, 1);
 #endif //PBG_ADD_NEWCHAR_MONK
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Durability Percent Calc.
-///////////////////////////////////////////////////////////////////////////////
 float CalcDurabilityPercent ( BYTE dur, BYTE maxDur, int Level, int option, int ExtOption )
 {
     int maxDurability = maxDur;
@@ -3535,7 +3142,7 @@ float CalcDurabilityPercent ( BYTE dur, BYTE maxDur, int Level, int option, int 
         }
     }
 
-    if ( (ExtOption%0x04)==EXT_A_SET_OPTION || (ExtOption%0x04)==EXT_B_SET_OPTION )    //  세트 아이템.
+    if ( (ExtOption%0x04)==EXT_A_SET_OPTION || (ExtOption%0x04)==EXT_B_SET_OPTION )
     {
         maxDurability+=20;
     }
@@ -3566,11 +3173,6 @@ float CalcDurabilityPercent ( BYTE dur, BYTE maxDur, int Level, int option, int 
     }
     return 0.f;
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// character machine
-///////////////////////////////////////////////////////////////////////////////
 
 void CHARACTER_MACHINE::Init()
 {
@@ -3645,48 +3247,9 @@ void CHARACTER_MACHINE::CalculateDamage()
 	WORD Vitality = Character.Vitality + Character.AddVitality;
 #endif //PBG_ADD_NEWCHAR_MONK
 
-#ifndef ASG_FIX_PICK_ITEM_FROM_INVEN	// 정리시 삭제.
-	// 아이템을 든 경우
-	SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
-	// 인벤토리에서 온 것인가?
-	if ( pPickedItem && pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
-	{	
-		ITEM* pItemObj = pPickedItem->GetItem();
+    int CharacterClass = gCharacterManager.GetBaseClass ( Character.Class );
 
-		switch ( pPickedItem->GetSourceLinealPos() ) {
-		case EQUIPMENT_WEAPON_RIGHT:
-			Right = pItemObj;
-			break;
-		case EQUIPMENT_WEAPON_LEFT:
-			Left = pItemObj;
-			break;
-		case EQUIPMENT_AMULET:
-			Amulet = pItemObj;
-			break;
-		case EQUIPMENT_RING_RIGHT:
-			RRing = pItemObj;
-			break;
-		case EQUIPMENT_RING_LEFT:
-			LRing = pItemObj;
-			break;
-		}
-	}
-#endif	// ASG_FIX_PICK_ITEM_FROM_INVEN
-
-    int CharacterClass = GetBaseClass ( Character.Class );
-
-    //  내구력이 0이면은 그 장비를 장착했다고 인식하지 않는다.
- #ifdef ADD_SOCKET_ITEM
-     if( ((GetEquipedBowType(Left) == BOWTYPE_BOW) && (Left->Durability != 0))
-		|| ((GetEquipedBowType(Right) == BOWTYPE_CROSSBOW) && (Right->Durability != 0))
-		)
- #else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-    if( (Right->Type>=ITEM_BOW+8  && Right->Type<ITEM_BOW+15 && Right->Durability!=0 ) ||
-		(((Left->Type>=ITEM_BOW   && Left->Type<ITEM_BOW+7 ) || Left->Type==ITEM_BOW+17
-		|| Left->Type==ITEM_BOW+20 || Left->Type==ITEM_BOW+21 || Left->Type==ITEM_BOW+22
-		) && Left->Durability!=0 ) || 
-        (Right->Type>=ITEM_BOW+16 && Right->Type<ITEM_BOW+MAX_ITEM_INDEX && Right->Durability!=0 ) )
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
+     if( ((gCharacterManager.GetEquipedBowType(Left) == BOWTYPE_BOW) && (Left->Durability != 0)) || ((gCharacterManager.GetEquipedBowType(Right) == BOWTYPE_CROSSBOW) && (Right->Durability != 0)))
 	{	
 		Character.AttackDamageMinRight = Dexterity/7 + Strength/14;
 		Character.AttackDamageMaxRight = Dexterity/4 + Strength/8;
@@ -3764,16 +3327,11 @@ void CHARACTER_MACHINE::CalculateDamage()
         }
 	}
 
-    //  날개.
     if ( Equipment[EQUIPMENT_WING].Type!=-1 )
     {
-        //  내구력에 따른 공격력 감소.
         ITEM_ATTRIBUTE *p = &ItemAttribute[Equipment[EQUIPMENT_WING].Type];
-        if ( p->Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE 
-			&& IsRequireEquipItem(&Equipment[EQUIPMENT_WING])
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE
-			)
+		
+		if ( p->Durability!=0 )
         {
             float   percent = CalcDurabilityPercent(Equipment[EQUIPMENT_WING].Durability,p->Durability,Equipment[EQUIPMENT_WING].Level,0,0);//Equipment[EQUIPMENT_WING].Option1);
             
@@ -3791,30 +3349,20 @@ void CHARACTER_MACHINE::CalculateDamage()
         }
     }
 
-	// 오른손
-    //  내구력이 0가 아닐때만 적용.
-	if ( Right->Type!=-1 && Right->Durability!=0
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE 
-		&& IsRequireEquipItem( Right )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE
-		)
+	if ( Right->Type!=-1 && Right->Durability!=0)
 	{
-        //  내구력에 따른 공격력 감소.
         ITEM_ATTRIBUTE *p = &ItemAttribute[Right->Type];
         float   percent = CalcDurabilityPercent(Right->Durability,p->Durability,Right->Level,Right->Option1,Right->ExtOption);
 
-        //  아이템 공격력.
         DamageMin = Right->DamageMin;
         DamageMax = Right->DamageMax;
 
-		// 추가공격력 옵션
 		PlusSpecial(&DamageMin,AT_IMPROVE_DAMAGE,Right);
 		PlusSpecial(&DamageMax,AT_IMPROVE_DAMAGE,Right);
 
         DamageMin = DamageMin - (WORD)(DamageMin*percent);
         DamageMax = DamageMax - (WORD)(DamageMax*percent);
 
-		//	지팡이의 공격력 감소.
 		if ( Right->Type>=ITEM_STAFF && Right->Type<=ITEM_STAFF+MAX_ITEM_INDEX )
 		{
 			Character.AttackDamageMinLeft += (WORD)(DamageMin);
@@ -3826,25 +3374,17 @@ void CHARACTER_MACHINE::CalculateDamage()
 			Character.AttackDamageMaxRight += DamageMax;
 		}
 
-        //  액설런트.
 		PlusSpecial(&Character.AttackDamageMinRight,AT_IMPROVE_DAMAGE_LEVEL,Right);
 		PlusSpecial(&Character.AttackDamageMaxRight,AT_IMPROVE_DAMAGE_LEVEL,Right);
 		PlusSpecialPercent(&Character.AttackDamageMinRight,AT_IMPROVE_DAMAGE_PERCENT,Right,2);
 		PlusSpecialPercent(&Character.AttackDamageMaxRight,AT_IMPROVE_DAMAGE_PERCENT,Right,2);
 	}
 
-	// 왼손
-    if ( Left->Type!=-1 && Left->Durability!=0
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE 
-		&& IsRequireEquipItem( Left )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE	
-		)
+    if ( Left->Type!=-1 && Left->Durability!=0)
 	{
-        //  내구력에 따른 공격력 감소.
         ITEM_ATTRIBUTE *p = &ItemAttribute[Left->Type];
         float   percent = CalcDurabilityPercent(Left->Durability,p->Durability,Left->Level,Left->Option1,Left->ExtOption);
 
-        //  아이템 공격력.
         DamageMin = Left->DamageMin;
         DamageMax = Left->DamageMax;
 
@@ -3854,7 +3394,6 @@ void CHARACTER_MACHINE::CalculateDamage()
         DamageMin = DamageMin - (WORD)(DamageMin*percent);
         DamageMax = DamageMax - (WORD)(DamageMax*percent);
 
-		//	지팡이의 공격력 감소.
 		if ( Left->Type>=ITEM_STAFF && Left->Type<=ITEM_STAFF+MAX_ITEM_INDEX )
 		{
 			Character.AttackDamageMinLeft += (WORD)(DamageMin);
@@ -3873,113 +3412,61 @@ void CHARACTER_MACHINE::CalculateDamage()
 		PlusSpecialPercent(&Character.AttackDamageMaxLeft,AT_IMPROVE_DAMAGE_PERCENT,Left,2);
 	}
 
-    //  불의 목걸이 액설런트 적용.
-    if ( Amulet->Type!=-1 && Amulet->Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE 
-		&& IsRequireEquipItem( Amulet )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE	
-		)
+    if ( Amulet->Type!=-1 && Amulet->Durability!=0)
 	{
-        //  오른손.
 		PlusSpecial(&Character.AttackDamageMinRight,AT_IMPROVE_DAMAGE_LEVEL,Amulet);
 		PlusSpecial(&Character.AttackDamageMaxRight,AT_IMPROVE_DAMAGE_LEVEL,Amulet);
 		PlusSpecialPercent(&Character.AttackDamageMinRight,AT_IMPROVE_DAMAGE_PERCENT,Amulet,2);
 		PlusSpecialPercent(&Character.AttackDamageMaxRight,AT_IMPROVE_DAMAGE_PERCENT,Amulet,2);
 
-        //  왼손.
 		PlusSpecial(&Character.AttackDamageMinLeft,AT_IMPROVE_DAMAGE_LEVEL,Amulet);
 		PlusSpecial(&Character.AttackDamageMaxLeft,AT_IMPROVE_DAMAGE_LEVEL,Amulet);
 		PlusSpecialPercent(&Character.AttackDamageMinLeft,AT_IMPROVE_DAMAGE_PERCENT,Amulet,2);
 		PlusSpecialPercent(&Character.AttackDamageMaxLeft,AT_IMPROVE_DAMAGE_PERCENT,Amulet,2);
 	}
-	// 마법사의 반지
-    if ( RRing->Type!=-1 && RRing->Durability!=0
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE 
-		&& IsRequireEquipItem( RRing )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE	
-		)
+    if ( RRing->Type!=-1 && RRing->Durability!=0)
 	{
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
-        //  오른손.
 		PlusSpecialPercent(&Character.AttackDamageMinRight,AT_IMPROVE_DAMAGE_PERCENT,RRing,RRing->SpecialValue[1]);
 		PlusSpecialPercent(&Character.AttackDamageMaxRight,AT_IMPROVE_DAMAGE_PERCENT,RRing,RRing->SpecialValue[1]);
-
-        //  왼손.
 		PlusSpecialPercent(&Character.AttackDamageMinLeft,AT_IMPROVE_DAMAGE_PERCENT,RRing,RRing->SpecialValue[1]);
 		PlusSpecialPercent(&Character.AttackDamageMaxLeft,AT_IMPROVE_DAMAGE_PERCENT,RRing,RRing->SpecialValue[1]);
-#else	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-        //  오른손.
-		PlusSpecialPercent(&Character.AttackDamageMinRight,AT_IMPROVE_DAMAGE_PERCENT,RRing,10);
-		PlusSpecialPercent(&Character.AttackDamageMaxRight,AT_IMPROVE_DAMAGE_PERCENT,RRing,10);
-
-        //  왼손.
-		PlusSpecialPercent(&Character.AttackDamageMinLeft,AT_IMPROVE_DAMAGE_PERCENT,RRing,10);
-		PlusSpecialPercent(&Character.AttackDamageMaxLeft,AT_IMPROVE_DAMAGE_PERCENT,RRing,10);
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
 	}
-    if ( LRing->Type!=-1 && LRing->Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE 
-		&& IsRequireEquipItem( LRing )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE	
-		)
+    if ( LRing->Type!=-1 && LRing->Durability!=0)
 	{
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
-        //  오른손.
 		PlusSpecialPercent(&Character.AttackDamageMinRight,AT_IMPROVE_DAMAGE_PERCENT,LRing,LRing->SpecialValue[1]);
 		PlusSpecialPercent(&Character.AttackDamageMaxRight,AT_IMPROVE_DAMAGE_PERCENT,LRing,LRing->SpecialValue[1]);
-
-        //  왼손.
 		PlusSpecialPercent(&Character.AttackDamageMinLeft,AT_IMPROVE_DAMAGE_PERCENT,LRing,LRing->SpecialValue[1]);
 		PlusSpecialPercent(&Character.AttackDamageMaxLeft,AT_IMPROVE_DAMAGE_PERCENT,LRing,LRing->SpecialValue[1]);
-#else	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-        //  오른손.
-		PlusSpecialPercent(&Character.AttackDamageMinRight,AT_IMPROVE_DAMAGE_PERCENT,LRing,10);
-		PlusSpecialPercent(&Character.AttackDamageMaxRight,AT_IMPROVE_DAMAGE_PERCENT,LRing,10);
-
-        //  왼손.
-		PlusSpecialPercent(&Character.AttackDamageMinLeft,AT_IMPROVE_DAMAGE_PERCENT,LRing,10);
-		PlusSpecialPercent(&Character.AttackDamageMaxLeft,AT_IMPROVE_DAMAGE_PERCENT,LRing,10);
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
 	}
 
-	//	세트 옵션을 적용한다.
     WORD    Damage = 0;
 	
-	
-#ifdef LDS_FIX_SETITEM_WRONG_CALCULATION_IMPROVEATTACKVALUE		//  세트 옵션 적용 전 적용여부 flag table 을 초기화 한다.
 	memset ( g_csItemOption.m_bySetOptionListOnOff, 0, sizeof( BYTE )* 16 );
-#endif // LDS_FIX_SETITEM_WRONG_CALCULATION_IMPROVEATTACKVALUE
 
-	g_csItemOption.PlusSpecial ( &Damage,  AT_SET_OPTION_IMPROVE_ATTACK_MIN );	//	최소 공격력 증가.
+	g_csItemOption.PlusSpecial ( &Damage,  AT_SET_OPTION_IMPROVE_ATTACK_MIN );
     Character.AttackDamageMinLeft += Damage;
     Character.AttackDamageMinRight+= Damage;
 
     Damage = 0;
-    g_csItemOption.PlusSpecial ( &Damage,  AT_SET_OPTION_IMPROVE_ATTACK_MAX );	//	최대 공격력 증가.
+    g_csItemOption.PlusSpecial ( &Damage,  AT_SET_OPTION_IMPROVE_ATTACK_MAX );
     Character.AttackDamageMaxLeft += Damage;
     Character.AttackDamageMaxRight+= Damage;
 
     Damage = 0;
-	g_csItemOption.PlusSpecialLevel ( &Damage, Dexterity, AT_SET_OPTION_IMPROVE_ATTACK_1 );	//	특정 캐릭터 공격력 증가 민첩성/60		
+	g_csItemOption.PlusSpecialLevel ( &Damage, Dexterity, AT_SET_OPTION_IMPROVE_ATTACK_1 );
     Character.AttackDamageMinRight += Damage;
     Character.AttackDamageMaxRight += Damage;
     Character.AttackDamageMinLeft  += Damage;
     Character.AttackDamageMaxLeft  += Damage;
 	
     Damage = 0;
-	g_csItemOption.PlusSpecialLevel ( &Damage, Strength, AT_SET_OPTION_IMPROVE_ATTACK_2 );	//	특정 캐릭터 공격력 증가 힘/50		    
+	g_csItemOption.PlusSpecialLevel ( &Damage, Strength, AT_SET_OPTION_IMPROVE_ATTACK_2 );	    
     Character.AttackDamageMinRight += Damage;
     Character.AttackDamageMaxRight += Damage;
     Character.AttackDamageMinLeft  += Damage;
     Character.AttackDamageMaxLeft  += Damage;
 
-    //  화살에 붙은 추가 공격력.
-    if ( ( Right->Type>=ITEM_BOW && Right->Type<ITEM_BOW+MAX_ITEM_INDEX ) &&
-         ( Left->Type>=ITEM_BOW && Left->Type<ITEM_BOW+MAX_ITEM_INDEX ) 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE 
-		 && IsRequireEquipItem( Right ) && IsRequireEquipItem( Left ) 
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DAMAGE	
-		 )
+    if ( ( Right->Type>=ITEM_BOW && Right->Type<ITEM_BOW+MAX_ITEM_INDEX ) && ( Left->Type>=ITEM_BOW && Left->Type<ITEM_BOW+MAX_ITEM_INDEX ))
     {
         int LLevel = ((Left->Level>>3)&15);
         int RLevel = ((Right->Level>>3)&15);
@@ -4054,18 +3541,6 @@ void CHARACTER_MACHINE::CalculateDamage()
 
 	}
 #endif //PBG_ADD_SANTABUFF
-
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	if(g_isCharacterBuff((&Hero->Object), eBuff_StrongCharm))	// 강함의 인장 (PC방 아이템)	// 강함의 인장은 공격력 + 50 
-	{
-		int _Temp = 50;
-		
-		Character.AttackDamageMinRight += _Temp;
-		Character.AttackDamageMaxRight += _Temp;
-		Character.AttackDamageMinLeft += _Temp;
-		Character.AttackDamageMaxLeft += _Temp;
-	}
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
 }
 
 void CHARACTER_MACHINE::CalculateCriticalDamage()
@@ -4089,53 +3564,16 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 	Character.MagicDamageMax = Energy/4;
 
 	ITEM* Right  = &Equipment[EQUIPMENT_WEAPON_RIGHT];
-#ifdef KJH_FIX_WOPS_K27580_EQUIPED_SUMMONING_ITEM
 	ITEM* Left	= &Equipment[EQUIPMENT_WEAPON_LEFT];
-#endif // KJH_FIX_WOPS_K27580_EQUIPED_SUMMONING_ITEM
 	ITEM* Amulet = &Equipment[EQUIPMENT_AMULET];
 	ITEM* RRing  = &Equipment[EQUIPMENT_RING_RIGHT];
 	ITEM* LRing  = &Equipment[EQUIPMENT_RING_LEFT];
-
-#ifndef ASG_FIX_PICK_ITEM_FROM_INVEN	// 정리시 삭제.
-	// 아이템을 든 경우
-	SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
-	// 인벤토리에서 온 것인가?
-	if ( pPickedItem && pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
-	{	
-		ITEM* pItemObj = pPickedItem->GetItem();
-		
-		switch ( pPickedItem->GetSourceLinealPos() ) {
-		case EQUIPMENT_WEAPON_RIGHT:
-			Right = pItemObj;
-			break;
-#ifdef KJH_FIX_WOPS_K27580_EQUIPED_SUMMONING_ITEM
-		case EQUIPMENT_WEAPON_LEFT:
-			Left = pItemObj;
-			break;
-#endif // KJH_FIX_WOPS_K27580_EQUIPED_SUMMONING_ITEM
-		case EQUIPMENT_AMULET:
-			Amulet = pItemObj;
-			break;
-		case EQUIPMENT_RING_RIGHT:
-			RRing = pItemObj;
-			break;
-		case EQUIPMENT_RING_LEFT:
-			LRing = pItemObj;
-			break;
-		}
-	}
-#endif	// ASG_FIX_PICK_ITEM_FROM_INVEN
-
     float   percent;
     WORD    DamageMin = 0;
     WORD    DamageMax = 0;
 
 	// 날개
-    if ( Equipment[EQUIPMENT_WING].Type!=-1 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		&& Equipment[EQUIPMENT_WING].Durability!=0 && IsRequireEquipItem( &Equipment[EQUIPMENT_WING] )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		)
+    if ( Equipment[EQUIPMENT_WING].Type!=-1)
     {
         ITEM_ATTRIBUTE *p = &ItemAttribute[Equipment[EQUIPMENT_WING].Type];
         ITEM *ipWing = &Equipment[EQUIPMENT_WING];
@@ -4153,11 +3591,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         Character.MagicDamageMax += DamageMax;
     }
 
-    if ( Right->Type!=-1 && Right->Durability!=0
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		&& IsRequireEquipItem( Right )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE	
-		)
+    if ( Right->Type!=-1 && Right->Durability!=0)
 	{
         ITEM_ATTRIBUTE *p = &ItemAttribute[Right->Type];
         percent = CalcDurabilityPercent(Right->Durability,p->Durability,Right->Level,Right->Option1,Right->ExtOption);
@@ -4167,10 +3601,8 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 			|| Right->Type==ITEM_SWORD+31 
 			|| Right->Type==ITEM_SWORD+23
 			|| Right->Type==ITEM_SWORD+25
-#ifdef KJH_FIX_RUNE_BASTARD_SWORD_TOOLTIP
  			|| Right->Type==ITEM_SWORD+28
-#endif // KJH_FIX_RUNE_BASTARD_SWORD_TOOLTIP
-			) // 이혁재 - 2005.9.5 ITEM_SWORD+23 추가
+			)
 		{
 			PlusSpecial(&DamageMin,AT_IMPROVE_DAMAGE,Right);
 			PlusSpecial(&DamageMax,AT_IMPROVE_DAMAGE,Right);
@@ -4190,15 +3622,10 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 		PlusSpecialPercent(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_PERCENT,Right,2);
 	}
 
-#ifdef PBG_FIX_SHIELD_MAGICDAMAGE
-    if ( Left->Type!=-1 && Left->Durability!=0
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		&& IsRequireEquipItem( Left )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE	
-		)
+    if ( Left->Type!=-1 && Left->Durability!=0)
 	{
 		// CalculateCurseDamage()
-		if (CLASS_SUMMONER != GetBaseClass(Character.Class))	
+		if (CLASS_SUMMONER != gCharacterManager.GetBaseClass(Character.Class))	
 		{
 			ITEM_ATTRIBUTE *p = &ItemAttribute[Left->Type];
 			percent = CalcDurabilityPercent(Left->Durability,p->Durability,Left->Level,Left->Option1,Left->ExtOption);
@@ -4217,8 +3644,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 					PlusSpecial(&DamageMax,AT_IMPROVE_MAGIC,Left);
 				}
 				
-				if (GetBaseClass(Character.Class) != CLASS_DARK
-					)
+				if (gCharacterManager.GetBaseClass(Character.Class) != CLASS_DARK)
 				{
 					Character.MagicDamageMin += DamageMin - (WORD)(DamageMin*percent);
 					Character.MagicDamageMax += DamageMax - (WORD)(DamageMax*percent);
@@ -4231,27 +3657,16 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 			}
 		}
 	}
-#else // PBG_FIX_SHIELD_MAGICDAMAGE
-#ifdef KJH_FIX_WOPS_K27580_EQUIPED_SUMMONING_ITEM
-	// 왼손 옵션 검사
-    if ( Left->Type!=-1 && Left->Durability!=0
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		&& IsRequireEquipItem( Left )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE	
-		)
+
+    if ( Left->Type!=-1 && Left->Durability!=0)
 	{
-		// 소환술사의 왼손은 CalculateCurseDamage()에서 계산 
-		if (CLASS_SUMMONER != GetBaseClass(Character.Class))	
+		if (CLASS_SUMMONER != gCharacterManager.GetBaseClass(Character.Class))	
 		{
 			ITEM_ATTRIBUTE *p = &ItemAttribute[Left->Type];
 			percent = CalcDurabilityPercent(Left->Durability,p->Durability,Left->Level,Left->Option1,Left->ExtOption);
 			DamageMin = 0; DamageMax = 0;
 			
-			//	마검사 마법검
-			// 추가공격력 옵션 (마검사용검은 추가공격력옵션이 추가마력도 올려준다.)
-			// (다른마검사용검은 두손검이라 검사할 팰요가 없다)
-			if ( Right->Type==ITEM_SWORD+28
-				) 
+			if ( Right->Type==ITEM_SWORD+28) 
 			{
 				PlusSpecial(&DamageMin,AT_IMPROVE_DAMAGE,Right);
 				PlusSpecial(&DamageMax,AT_IMPROVE_DAMAGE,Right);
@@ -4262,153 +3677,102 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
 				PlusSpecial(&DamageMax,AT_IMPROVE_MAGIC,Right);
 			}
 			
-#ifdef YDG_FIX_LEFTHAND_MAGICDAMAGE
-			if (GetBaseClass(Character.Class) != CLASS_DARK	// 마검사의 왼손 무기는 마력에 영향을 주지 못한다 (엑옵제외)
+			if (gCharacterManager.GetBaseClass(Character.Class) != CLASS_DARK
 			)
-#endif	// YDG_FIX_LEFTHAND_MAGICDAMAGE
 			{
 				Character.MagicDamageMin += DamageMin - (WORD)(DamageMin*percent);
 				Character.MagicDamageMax += DamageMax - (WORD)(DamageMax*percent);
 			}
 			
-			// 액설런트 옵션
 			PlusSpecial(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_LEVEL,Left);
 			PlusSpecial(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_LEVEL,Left);
 			PlusSpecialPercent(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_PERCENT,Left,2);
 			PlusSpecialPercent(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_PERCENT,Left,2);
 		}
 	}
-#endif // KJH_FIX_WOPS_K27580_EQUIPED_SUMMONING_ITEM
-#endif // PBG_FIX_SHIELD_MAGICDAMAGE
 
-	// 목걸이
-    if ( Amulet->Type!=-1 && Amulet->Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		&& IsRequireEquipItem( Amulet )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE		
-		)
+    if (Amulet->Type!=-1 && Amulet->Durability!=0)
 	{
 		PlusSpecial(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_LEVEL,Amulet);
 		PlusSpecial(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_LEVEL,Amulet);
 		PlusSpecialPercent(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_PERCENT,Amulet,2);
 		PlusSpecialPercent(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_PERCENT,Amulet,2);
 	}
-	// 마법사의 반지
-    if ( RRing->Type!=-1 && RRing->Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		&& IsRequireEquipItem( RRing )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		)
+
+    if (RRing->Type!=-1 && RRing->Durability!=0)
 	{
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
 		PlusSpecialPercent(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_PERCENT,RRing,RRing->SpecialValue[0]);
 		PlusSpecialPercent(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_PERCENT,RRing,RRing->SpecialValue[0]);
-#else	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-		PlusSpecialPercent(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_PERCENT,RRing,10);
-		PlusSpecialPercent(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_PERCENT,RRing,10);
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
 	}
-    if ( LRing->Type!=-1 && LRing->Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		&& IsRequireEquipItem( LRing )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDAMAGE
-		)
+    if ( LRing->Type!=-1 && LRing->Durability!=0)
 	{
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
 		PlusSpecialPercent(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_PERCENT,LRing,LRing->SpecialValue[0]);
 		PlusSpecialPercent(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_PERCENT,LRing,LRing->SpecialValue[0]);
-#else	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-		PlusSpecialPercent(&Character.MagicDamageMin,AT_IMPROVE_MAGIC_PERCENT,LRing,10);
-		PlusSpecialPercent(&Character.MagicDamageMax,AT_IMPROVE_MAGIC_PERCENT,LRing,10);
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
 	}
 
-	//	세트 옵션을 적용한다.
 	WORD MagicDamage = 0;
 
     MagicDamage = 0;
-    g_csItemOption.PlusSpecialLevel ( &MagicDamage, Energy, AT_SET_OPTION_IMPROVE_MAGIC );	//	특정 캐릭터 마력 증가 에너지/70
+    g_csItemOption.PlusSpecialLevel ( &MagicDamage, Energy, AT_SET_OPTION_IMPROVE_MAGIC );
 	Character.MagicDamageMin += MagicDamage;
 	Character.MagicDamageMax += MagicDamage;
 
-#ifdef PSW_SCROLL_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll4) )
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 75);
 		Character.MagicDamageMin += Item_data.m_byValue1;
 		Character.MagicDamageMax += Item_data.m_byValue1;
 	}
-#endif //PSW_SCROLL_ITEM
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2)) // 잭오랜턴의 분노
+	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 47);
 		Character.MagicDamageMin += Item_data.m_byValue1;
 		Character.MagicDamageMax += Item_data.m_byValue1;
 	}
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-	if(g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal))  // 벚꽃꽃잎
+	if(g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal))
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 87);
 		Character.MagicDamageMin += Item_data.m_byValue1;
 		Character.MagicDamageMax += Item_data.m_byValue1;
 	}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-	if(g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower))  // 마력증대
+	if(g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower))
 	{
 		int iAdd_MP = (CharacterAttribute->Energy/9)*0.2f;
 		Character.MagicDamageMin += iAdd_MP;
 	}
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#ifdef ADD_SOCKET_STATUS_BONUS
 	Character.MagicDamageMin += g_SocketItemMgr.m_StatusBonus.m_iSkillAttackDamageBonus;
 	Character.MagicDamageMax += g_SocketItemMgr.m_StatusBonus.m_iSkillAttackDamageBonus;
-#ifdef YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
-	Character.MagicDamageMin += g_SocketItemMgr.m_StatusBonus.m_iMagicPowerMinBonus;
-	Character.MagicDamageMax += g_SocketItemMgr.m_StatusBonus.m_iMagicPowerMaxBonus;
-#else	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 	Character.MagicDamageMin += g_SocketItemMgr.m_StatusBonus.m_iMagicPowerBonus;
 	Character.MagicDamageMax += g_SocketItemMgr.m_StatusBonus.m_iMagicPowerBonus;
-#endif	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
-#endif	// ADD_SOCKET_STATUS_BONUS
-#ifdef YDG_ADD_SANTABUFF_MAGIC_DAMAGE
-	if(g_isCharacterBuff((&Hero->Object), eBuff_StrengthOfSanta))	//산타의 강화
+
+	if(g_isCharacterBuff((&Hero->Object), eBuff_StrengthOfSanta))
 	{
 		int _Temp = 30;
 
 		Character.MagicDamageMin += _Temp;
 		Character.MagicDamageMax += _Temp;
 	}
-#endif //YDG_ADD_SANTABUFF_MAGIC_DAMAGE
 }
 
-// 저주력 데미지 계산.
 void CHARACTER_MACHINE::CalculateCurseDamage()
 {
-	if (CLASS_SUMMONER != GetBaseClass(Character.Class))	// 소환술사만 저주력이 필요하다.
+	if (CLASS_SUMMONER != gCharacterManager.GetBaseClass(Character.Class))
 		return;
 
 	WORD wEnergy = Character.Energy + Character.AddEnergy;  
 	Character.CurseDamageMin = wEnergy / 9;
 	Character.CurseDamageMax = wEnergy / 4;
 
-	// 날개
 	ITEM* pEquipWing = &Equipment[EQUIPMENT_WING];
-    if (pEquipWing->Type != -1
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_CURSEDAMAGE
-		&& IsRequireEquipItem( pEquipWing )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_CURSEDAMAGE		
-		)
+    if (pEquipWing->Type != -1)
     {
         ITEM_ATTRIBUTE* pAttribute = &ItemAttribute[pEquipWing->Type];
 		WORD wDamageMin = 0;
 		WORD wDamageMax = 0;
 
-		// 추가 저주력 계산.
 		::PlusSpecial(&wDamageMin, AT_IMPROVE_CURSE, pEquipWing);
 		::PlusSpecial(&wDamageMax, AT_IMPROVE_CURSE, pEquipWing);
 
-		// 내구력에 따른 공격력 감소.
         float fPercent = ::CalcDurabilityPercent(pEquipWing->Durability,
 			pAttribute->Durability, pEquipWing->Level, 0);
         wDamageMin -= WORD(wDamageMin * fPercent);
@@ -4418,23 +3782,16 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
         Character.CurseDamageMax += wDamageMax;
     }
 
-	// 소환서
 	ITEM* pEquipLeft = &Equipment[EQUIPMENT_WEAPON_LEFT];
-	if (pEquipLeft->Type != -1 && pEquipLeft->Durability != 0
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_CURSEDAMAGE
-		&& IsRequireEquipItem( pEquipLeft )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_CURSEDAMAGE
-		)
+	if (pEquipLeft->Type != -1 && pEquipLeft->Durability != 0)
 	{
         ITEM_ATTRIBUTE* pAttribute = &ItemAttribute[pEquipLeft->Type];
 		WORD wDamageMin = 0;
 		WORD wDamageMax = 0;
 
-		// 추가 저주력 계산.
 		::PlusSpecial(&wDamageMin, AT_IMPROVE_CURSE, pEquipLeft);
 		::PlusSpecial(&wDamageMax, AT_IMPROVE_CURSE, pEquipLeft);
-		
-		// 내구력에 따른 공격력 감소.
+
 		float fPercent = CalcDurabilityPercent(pEquipLeft->Durability,
 			pAttribute->Durability, pEquipLeft->Level, pEquipLeft->Option1,
 			pEquipLeft->ExtOption);
@@ -4442,23 +3799,20 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
         Character.CurseDamageMin += wDamageMin - WORD(wDamageMin * fPercent);
         Character.CurseDamageMax += wDamageMax - WORD(wDamageMax * fPercent);
 
-#ifdef KJH_FIX_WOPS_K27580_EQUIPED_SUMMONING_ITEM
-		// 액설런트 옵션
 		PlusSpecial(&Character.CurseDamageMin,AT_IMPROVE_MAGIC_LEVEL,pEquipLeft);
 		PlusSpecial(&Character.CurseDamageMax,AT_IMPROVE_MAGIC_LEVEL,pEquipLeft);
 		PlusSpecialPercent(&Character.CurseDamageMin,AT_IMPROVE_MAGIC_PERCENT,pEquipLeft,2);
 		PlusSpecialPercent(&Character.CurseDamageMax,AT_IMPROVE_MAGIC_PERCENT,pEquipLeft,2);
-#endif // KJH_FIX_WOPS_K27580_EQUIPED_SUMMONING_ITEM
 	}
-#ifdef YDG_ADD_SANTABUFF_MAGIC_DAMAGE
-	if(g_isCharacterBuff((&Hero->Object), eBuff_StrengthOfSanta))	//산타의 강화
+
+	if(g_isCharacterBuff((&Hero->Object), eBuff_StrengthOfSanta))
 	{
 		int _Temp = 30;
 
 		Character.CurseDamageMin += _Temp;
 		Character.CurseDamageMax += _Temp;
 	}
-#endif //YDG_ADD_SANTABUFF_MAGIC_DAMAGE
+
 }
 
 void CHARACTER_MACHINE::CalculateAttackRating()
@@ -4469,7 +3823,7 @@ void CHARACTER_MACHINE::CalculateAttackRating()
 	Dexterity= Character.Dexterity+ Character.AddDexterity;
     Charisma = Character.Charisma + Character.AddCharisma;
 
-    if ( GetBaseClass( Character.Class )==CLASS_DARK_LORD )
+    if ( gCharacterManager.GetBaseClass( Character.Class )==CLASS_DARK_LORD )
 	    Character.AttackRating  = static_cast<WORD>(((Character.Level*5)+(Dexterity*5)/2)+(Strength/6)+(Charisma/10) & 0xFFFF);
 #ifdef PBG_ADD_NEWCHAR_MONK
 	else if(GetBaseClass( Character.Class )==CLASS_RAGEFIGHTER)
@@ -4480,19 +3834,16 @@ void CHARACTER_MACHINE::CalculateAttackRating()
     else
 	    Character.AttackRating  = static_cast<WORD>((((Character.Level*5)+(Dexterity*3)/2)+(Strength/4)) & 0xFFFF);
 
-	//	세트 옵션을 적용한다.
-	g_csItemOption.PlusSpecial ( &Character.AttackRating, AT_SET_OPTION_IMPROVE_ATTACKING_PERCENT );	//	공격 성공률 증가
+	g_csItemOption.PlusSpecial ( &Character.AttackRating, AT_SET_OPTION_IMPROVE_ATTACKING_PERCENT );
 
-#ifdef ADD_SOCKET_STATUS_BONUS
 	Character.AttackRating += g_SocketItemMgr.m_StatusBonus.m_iAttackRateBonus;
-#endif	// ADD_SOCKET_STATUS_BONUS
 }
 
 void CHARACTER_MACHINE::CalculateAttackRatingPK()
 {
 	WORD Dexterity;
 	Dexterity= Character.Dexterity+ Character.AddDexterity;
-    int CharacterClass = GetBaseClass ( Character.Class );
+    int CharacterClass = gCharacterManager.GetBaseClass ( Character.Class );
 
 	float tmpf = 0.f;
 	switch(CharacterClass)
@@ -4521,28 +3872,22 @@ void CHARACTER_MACHINE::CalculateAttackRatingPK()
 	}
 
 	Character.AttackRatingPK = (WORD)tmpf;
-
-#ifndef YDG_FIX_SOCKET_BALANCE_PATCH
-#ifdef ADD_SOCKET_STATUS_BONUS
-	Character.AttackRatingPK += g_SocketItemMgr.m_StatusBonus.m_iPvPAttackRateBonus;
-#endif	// ADD_SOCKET_STATUS_BONUS
-#endif	// YDG_FIX_SOCKET_BALANCE_PATCH
 }
 
 void CHARACTER_MACHINE::CalculateAttackSpeed()
 {
 	WORD Dexterity;
-	///////////////////////////////////////////// 캐릭터 기본 민첩 계산 /////////////////////////////////////////////
+
 	Dexterity= Character.Dexterity+ Character.AddDexterity;
 
-    int CharacterClass = GetBaseClass ( Character.Class );
+    int CharacterClass = gCharacterManager.GetBaseClass ( Character.Class );
 
-	if ( CharacterClass==CLASS_ELF )    //  요정.
+	if ( CharacterClass==CLASS_ELF )
     {
 		Character.AttackSpeed = Dexterity/50;
         Character.MagicSpeed = Dexterity/50;
     }
-	else if ( CharacterClass==CLASS_KNIGHT || CharacterClass==CLASS_DARK )  //  20 --> 18  기사. 마검사.
+	else if ( CharacterClass==CLASS_KNIGHT || CharacterClass==CLASS_DARK )
     {
         Character.AttackSpeed = Dexterity/15;
         Character.MagicSpeed = Dexterity/20;
@@ -4565,25 +3910,22 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
         Character.MagicSpeed = Dexterity/9;
 	}
 #endif //PBG_ADD_NEWCHAR_MONK
-	else  //  법사.
+	else
     {
         Character.AttackSpeed = Dexterity/20;
         Character.MagicSpeed = Dexterity/10;
     }
-	///////////////////////////////////////////// 캐릭터에 장착한 아이템 /////////////////////////////////////////////
+
 	ITEM *r = &Equipment[EQUIPMENT_WEAPON_RIGHT];
 	ITEM *l = &Equipment[EQUIPMENT_WEAPON_LEFT ];
 	ITEM *g = &Equipment[EQUIPMENT_GLOVES      ];
 	ITEM *rl = &Equipment[EQUIPMENT_RING_LEFT   ];
 	ITEM *rr = &Equipment[EQUIPMENT_RING_RIGHT  ];
-#ifdef LDK_ADD_PC4_GUARDIAN
 	ITEM *phelper = &Equipment[EQUIPMENT_HELPER  ];
-#endif //LDK_ADD_PC4_GUARDIAN
 
 	SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
-	if(pPickedItem && pPickedItem->GetOwnerInventory() == NULL)	// 장비창은 Owner가 NULL이다.
+	if(pPickedItem && pPickedItem->GetOwnerInventory() == NULL)
 	{	
-		// 아이템을 든 경우
 		ITEM* pItem = pPickedItem->GetItem();
 		
 		if( pItem )
@@ -4606,12 +3948,10 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 			case EQUIPMENT_RING_RIGHT:
 				rr = pItem;
 				break;
-
-#ifdef LDK_ADD_PC4_GUARDIAN
 			case EQUIPMENT_HELPER:
 				phelper = pItem;
 				break;
-#endif //LDK_ADD_PC4_GUARDIAN
+
 			}
 		}
 	}
@@ -4621,48 +3961,32 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 	bool Glove		= false;
 	bool RingRight	= false;
 	bool RingLeft	= false;
-#ifdef LDK_ADD_PC4_GUARDIAN
 	bool Helper     = false;
-#endif //LDK_ADD_PC4_GUARDIAN
     if((r->Type!=ITEM_BOW+7 && r->Type!=ITEM_BOW+15 ) && r->Type>=ITEM_SWORD && r->Type<ITEM_STAFF+MAX_ITEM_INDEX) {
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		if( IsRequireEquipItem(r) && r->Durability!=0 )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		{
 			Right = true;
 		}
 	}
 
     if((l->Type!=ITEM_BOW+7 && l->Type!=ITEM_BOW+15 ) && l->Type>=ITEM_SWORD && l->Type<ITEM_STAFF+MAX_ITEM_INDEX) {
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		if( IsRequireEquipItem(l) && l->Durability!=0 )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		{
 			Left = true;
 		}
 	}
 
 	if(g->Durability!=0 && g->Type != -1) {
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		if( IsRequireEquipItem(g) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		{
 			Glove = true;
 		}
 	}
 
-    if ( rl->Durability!=0 &&
-		(rl->Type == ITEM_HELPER+20
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
-		|| rl->Type == ITEM_HELPER+107		// 치명 마법반지
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-		) )
+    if ( rl->Durability!=0 && (rl->Type == ITEM_HELPER+20 || rl->Type == ITEM_HELPER+107))
     {
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		if( IsRequireEquipItem(rl) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		{
-#ifdef LDK_FIX_EQUIPED_EXPIREDPERIOD_RING_EXCEPTION
 			if(false == rl->bPeriodItem || false == rl->bExpiredPeriod)
 			{
 				switch ( rl->Level>>3 )
@@ -4673,28 +3997,13 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 					break;
 				}
 			}
-#else // LDK_FIX_EQUIPED_EXPIREDPERIOD_RING_EXCEPTION
-			switch ( rl->Level>>3 )
-			{
-			case 0:
-			case 3:
-				RingRight = true;
-				break;
-			}
-#endif // LDK_FIX_EQUIPED_EXPIREDPERIOD_RING_EXCEPTION
 		}
     }
 
-    if ( rr->Durability!=0 && (rr->Type == ITEM_HELPER+20
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
-		|| rr->Type == ITEM_HELPER+107		// 치명 마법반지
-#endif	// YDG_ADD_CS7_CRITICAL_MAGIC_RING
-		) ) {
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
+    if ( rr->Durability!=0 && (rr->Type == ITEM_HELPER+20 || rr->Type == ITEM_HELPER+107)) 
+	{
 		if( IsRequireEquipItem(rr) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		{
-#ifdef LDK_FIX_EQUIPED_EXPIREDPERIOD_RING_EXCEPTION
 			if(false == rr->bPeriodItem || false == rr->bExpiredPeriod)
 			{
 				switch ( rr->Level>>3 )
@@ -4705,43 +4014,23 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 					break;
 				}
 			}
-#else // LDK_FIX_EQUIPED_EXPIREDPERIOD_RING_EXCEPTION
-			switch ( rr->Level>>3 )
-			{
-			case 0:
-			case 3:
-				RingLeft = true;
-				break;
-			}
-#endif // LDK_FIX_EQUIPED_EXPIREDPERIOD_RING_EXCEPTION
 		}
     }
 
-#ifdef LDK_ADD_PC4_GUARDIAN
 	if( phelper->Durability != 0 && 
 		(phelper->Type == ITEM_HELPER+64
-#ifdef YDG_ADD_SKELETON_PET
-		|| phelper->Type == ITEM_HELPER+123	// 스켈레톤 펫
-#endif	// YDG_ADD_SKELETON_PET
+		|| phelper->Type == ITEM_HELPER+123
 		)
 		)
 	{
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		if( IsRequireEquipItem(phelper) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_ATTACKSPEED
 		{
-#ifdef LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-			//만료된 기간제 아이템이면 출력 안함
 			if(false == phelper->bPeriodItem || false == phelper->bExpiredPeriod)
 			{
 				Helper = true;
 			}
-#else //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
-			Helper = true;
-#endif //LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO
 		}
 	}
-#endif //LDK_ADD_PC4_GUARDIAN
 
     int RightWeaponSpeed = r->WeaponSpeed;
     int LeftWeaponSpeed  = l->WeaponSpeed;
@@ -4765,13 +4054,13 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
         Character.MagicSpeed += LeftWeaponSpeed;
     }
 	
-	if(RingRight)	// 마법사의 반지 효과
+	if(RingRight)
     {
         Character.AttackSpeed += 10;
         Character.MagicSpeed += 10;
 		CharacterAttribute->Ability |= ABILITY_FAST_ATTACK_RING;
     }
-	else if(RingLeft)	// 마법사의 반지 효과
+	else if(RingLeft)
     {
         Character.AttackSpeed += 10;
         Character.MagicSpeed += 10;
@@ -4782,53 +4071,40 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 		CharacterAttribute->Ability &= (~ABILITY_FAST_ATTACK_RING);
 	}
 
-    //  장갑 속도.
 	if(Glove)
     {
         Character.AttackSpeed += g->WeaponSpeed;
         Character.MagicSpeed += g->WeaponSpeed;
     }
 
-#ifdef LDK_ADD_PC4_GUARDIAN
 	if(Helper)
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_HELPER+64);
         Character.AttackSpeed += Item_data.m_byValue2;
         Character.MagicSpeed += Item_data.m_byValue2;
 	}
-#endif //LDK_ADD_PC4_GUARDIAN
 
-#ifdef YDG_ADD_SKELETON_PET
-	if(Helper)	// 스켈레톤 펫
+	if(Helper)
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_HELPER+123);
         Character.AttackSpeed += Item_data.m_byValue2;
         Character.MagicSpeed += Item_data.m_byValue2;
 	}
-#endif	// YDG_ADD_SKELETON_PET
 
 	if(Character.Ability & ABILITY_FAST_ATTACK_SPEED)
     {
         Character.AttackSpeed += 20;
         Character.MagicSpeed += 20;
     }
-	else if ( Character.Ability&ABILITY_FAST_ATTACK_SPEED2 )	//. 영혼의 물약 공속 증가
+	else if ( Character.Ability&ABILITY_FAST_ATTACK_SPEED2 )
     {
         Character.AttackSpeed += 20;
         Character.MagicSpeed += 20;
     }
-#ifdef LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR
 	ITEM *Amulet = &Equipment[EQUIPMENT_AMULET];
 	
-#ifdef LDK_FIX_EQUIPED_EXPIREDPERIOD_AMULET_EXCEPTION
-	//만료된 기간제 아이템이면 출력 안함
-	if( (false == Amulet->bPeriodItem || false == Amulet->bExpiredPeriod)
-		&& Amulet->Type == ITEM_HELPER + 114 )
-#else //LDK_FIX_EQUIPED_EXPIREDPERIOD_AMULET_EXCEPTION
-	if( Amulet->Type == ITEM_HELPER + 114 )		// AMULETEMERALD
-#endif //LDK_FIX_EQUIPED_EXPIREDPERIOD_AMULET_EXCEPTION
+	if( (false == Amulet->bPeriodItem || false == Amulet->bExpiredPeriod) && Amulet->Type == ITEM_HELPER + 114 )
 	{
-		//공속증가 +7
 		int _Temp = 7;
 		
 		Character.AttackSpeed += _Temp;
@@ -4836,37 +4112,25 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 		//Character.AttackSpeed += Amulet->WeaponSpeed;	// 서버에서 넘어오는 값? 추후 확인사항.
 		//Character.MagicSpeed += Amulet->WeaponSpeed;
 	}
-#endif // LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR
 	
-	///////////////////////////////////////// 캐릭터 상태 ( 버프 ) ///////////////////////////////////////// 
-#ifdef PSW_SCROLL_ITEM
-	if(g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll1))  // 신속의 스크롤
+	if(g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll1))
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 72);
 		Character.AttackSpeed += Item_data.m_byValue1;
 		Character.MagicSpeed += Item_data.m_byValue1;
 	}
-#endif// PSW_SCROLL_ITEM
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin1))	// 잭오랜턴의 축복
+	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin1))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 46);
 		Character.AttackSpeed += Item_data.m_byValue1;
 		Character.MagicSpeed += Item_data.m_byValue1;
 	}
-#ifdef PBG_ADD_SANTABUFF
-	if(g_isCharacterBuff((&Hero->Object), eBuff_QuickOfSanta))	//산타의 신속
+	if(g_isCharacterBuff((&Hero->Object), eBuff_QuickOfSanta))
 	{
-		//공속증가 +15
 		int _Temp = 15;
 		Character.AttackSpeed += _Temp;
 		Character.MagicSpeed += _Temp;
 	}
-#endif //PBG_ADD_SANTABUFF
-
-	///////////////////////////////////////////// 엑셀런트 옵션 ///////////////////////////////////////////// 
-	// 공격 스피드 같은 경우 엑셀런트 옵션에 스피드 증가 옵션이 있으면 서버랑 옵션값이 두배차이 난다.
-	// 서버에서는 아이템을 만들때 엑셀런트 옵션을 더해주고 또 최종 단계의 캐릭터 공속 계산을 할때 더 하므로
-	// 엑셀옵션이 공속 7증가가 있으면 서버는 14 클라 7이 증가 된다.
 	PlusSpecial(&Character.AttackSpeed,AT_IMPROVE_ATTACK_SPEED,&Equipment[EQUIPMENT_WEAPON_RIGHT]);
 	PlusSpecial(&Character.MagicSpeed, AT_IMPROVE_ATTACK_SPEED,&Equipment[EQUIPMENT_WEAPON_RIGHT]);
 	PlusSpecial(&Character.AttackSpeed,AT_IMPROVE_ATTACK_SPEED,&Equipment[EQUIPMENT_WEAPON_LEFT]);
@@ -4875,19 +4139,16 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 	PlusSpecial(&Character.MagicSpeed, AT_IMPROVE_ATTACK_SPEED,&Equipment[EQUIPMENT_AMULET]);
 	PlusSpecial(&Character.AttackSpeed, AT_IMPROVE_ATTACK_SPEED,&Equipment[EQUIPMENT_HELPER]);
 	PlusSpecial(&Character.MagicSpeed, AT_IMPROVE_ATTACK_SPEED,&Equipment[EQUIPMENT_HELPER]);
-	///////////////////////////////////////////// 소켓 아이템 /////////////////////////////////////////////
-#ifdef ADD_SOCKET_STATUS_BONUS
 	Character.AttackSpeed += g_SocketItemMgr.m_StatusBonus.m_iAttackSpeedBonus;
 	Character.MagicSpeed += g_SocketItemMgr.m_StatusBonus.m_iAttackSpeedBonus;
-#endif	// ADD_SOCKET_STATUS_BONUS
-	///////////////////////////////////////////// 소켓 아이템 /////////////////////////////////////////////
+
 }
 
 void CHARACTER_MACHINE::CalculateSuccessfulBlockingPK()
 {
 	WORD Dexterity;
 	Dexterity= Character.Dexterity+ Character.AddDexterity;
-    int CharacterClass = GetBaseClass ( Character.Class );
+    int CharacterClass = gCharacterManager.GetBaseClass ( Character.Class );
 
 	float tmpf = 0.f;
 	switch(CharacterClass)
@@ -4920,24 +4181,20 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlockingPK()
 	hanguo_check3();
 }
 
-// 방어율 계산 함수
 void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
 {
 	WORD Dexterity;
 
-	// 캐릭터의 민첩성 + 추가 민첩성을 구한다.
 	Dexterity= Character.Dexterity+ Character.AddDexterity;
 
-    int CharacterClass = GetBaseClass ( Character.Class );
+    int CharacterClass = gCharacterManager.GetBaseClass ( Character.Class );
 
 	if (CharacterClass==CLASS_ELF || CharacterClass==CLASS_SUMMONER)
 	{
-		// 요정, 소환술사면 구한 민첩성의 / 4 를 입력
         Character.SuccessfulBlocking = Dexterity/4;
 	}
     else if ( CharacterClass==CLASS_DARK_LORD )
 	{
-		// 다크로드면 구한 민첩성의 / 7 를 설정
         Character.SuccessfulBlocking = Dexterity/7;
 	}
 #ifdef PBG_ADD_NEWCHAR_MONK
@@ -4948,17 +4205,11 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
 #endif //PBG_ADD_NEWCHAR_MONK
 	else
 	{
-		// 기사, 흑마법사, 마검은 구한 민첩성의 / 3 를 설정
       	Character.SuccessfulBlocking = Dexterity/3;
 	}
 
-	// 왼쪽 무기가 내구도가 0이 아니라면
 	ITEM* Left = &Equipment[EQUIPMENT_WEAPON_LEFT];
-    if ( Left->Type!=-1 && Left->Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SUCCESSFULBLOCKING
-		&& IsRequireEquipItem( Left )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SUCCESSFULBLOCKING	
-		)
+    if ( Left->Type!=-1 && Left->Durability!=0 )
 	{
         ITEM_ATTRIBUTE* p = &ItemAttribute[Left->Type];
         float percent = CalcDurabilityPercent(Left->Durability,p->Durability,Left->Level,Left->Option1,Left->ExtOption);
@@ -4966,61 +4217,26 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
         WORD SuccessBlocking = 0;
         SuccessBlocking = Left->SuccessfulBlocking - (WORD)(Left->SuccessfulBlocking*percent);
 
-		// 왼쪽 무기의 방어률을 더해주고
 		Character.SuccessfulBlocking += SuccessBlocking;
         
         SuccessBlocking = 0;
         PlusSpecial(&SuccessBlocking,AT_IMPROVE_BLOCKING,Left);
 
-		// 왼쪽 무기에 추가 방어율이 있다면 방어률 더해준다.
         Character.SuccessfulBlocking += SuccessBlocking - (WORD)(SuccessBlocking*percent);
 
-		// 왼쪽 무기에 방어 성공율이 있다면 계산해서 더해준다.
         PlusSpecialPercent(&Character.SuccessfulBlocking,AT_IMPROVE_BLOCKING_PERCENT,Left,10);
 	}
 
-	// 다른 장비들에도 방어 성공율이 있다면 계산해서 더해준다.
-	// 핼멧
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_HELM],10 );
-	// 갑옷
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_ARMOR],10 );
-	// 바지
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_PANTS],10 );
-	// 장갑
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_GLOVES],10 );
-	// 신발
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_BOOTS],10 );
-	// 반지 왼쪽
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_RING_LEFT],10 );
-	// 반지 오른쪽
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_RING_RIGHT],10 );
 	hanguo_check3();
 
-#ifdef ADD_SOCKET_STATUS_BONUS
-
-#ifndef YDG_FIX_SOCKET_SHIELD_BONUS	// 정리할때 삭제해야함
-	// 왼쪽 무기가 내구도가 0이 아니라면
-    if ( Left->Type!=-1 && Left->Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SUCCESSFULBLOCKING
-		&& IsRequireEquipItem( Left )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SUCCESSFULBLOCKING	
-		)
-	{
-		// 방패차고있을때만 적용된다
-		Character.SuccessfulBlocking += g_SocketItemMgr.m_StatusBonus.m_iShieldDefenceBonus;
-	}
-#endif	// YDG_FIX_SOCKET_SHIELD_BONUS
-
-#ifdef YDG_FIX_SOCKET_BALANCE_PATCH
 	Character.SuccessfulBlocking *= g_SocketItemMgr.m_StatusBonus.m_fDefenceRateBonus;
-#else	// YDG_FIX_SOCKET_BALANCE_PATCH
-#ifdef YDG_FIX_SOCKET_ITEM_DEFENCE_RATE_BONUS
-	Character.SuccessfulBlocking *= 1.0f + g_SocketItemMgr.m_StatusBonus.m_iDefenceRateBonus * 0.01f;
-#else	// YDG_FIX_SOCKET_ITEM_DEFENCE_RATE_BONUS
-	Character.SuccessfulBlocking += g_SocketItemMgr.m_StatusBonus.m_iDefenceRateBonus;
-#endif	// YDG_FIX_SOCKET_ITEM_DEFENCE_RATE_BONUS
-#endif	// YDG_FIX_SOCKET_BALANCE_PATCH
-#endif	// ADD_SOCKET_STATUS_BONUS
 }
 
 void CHARACTER_MACHINE::CalculateDefense()
@@ -5030,7 +4246,7 @@ void CHARACTER_MACHINE::CalculateDefense()
 	Dexterity= Character.Dexterity+ Character.AddDexterity;
     Vitality = Character.Vitality + Character.AddVitality;
 
-    int CharacterClass = GetBaseClass ( Character.Class );
+    int CharacterClass = gCharacterManager.GetBaseClass ( Character.Class );
 
 	if ( CharacterClass==CLASS_ELF )
     {
@@ -5056,27 +4272,20 @@ void CHARACTER_MACHINE::CalculateDefense()
 #endif //PBG_ADD_NEWCHAR_MONK
 	else
     {
-		// 마검사 / 몽크
         Character.Defense  = Dexterity/5;
     }
 
     WORD    Defense = 0;
     for( int i=EQUIPMENT_WEAPON_LEFT; i<=EQUIPMENT_WING; ++i )
     {
-        if( Equipment[i].Durability!=0
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DEFENSE	
-			&& IsRequireEquipItem(&Equipment[i])
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DEFENSE
-			)
+        if( Equipment[i].Durability!=0)
         {
             WORD defense = ItemDefense(&Equipment[i]);
 
-            //  내구력에 따른 공격력 감소.
             ITEM_ATTRIBUTE *p = &ItemAttribute[Equipment[i].Type];
             float percent;
             if ( i==EQUIPMENT_WING )
             {
-                //  날개.
                 percent = CalcDurabilityPercent(Equipment[i].Durability,p->Durability,Equipment[i].Level,0);//Equipment[i].Option1);
             }
             else
@@ -5091,7 +4300,6 @@ void CHARACTER_MACHINE::CalculateDefense()
     }
     Character.Defense += Defense;
 
-    //  +10, +11일 경우 추가 방어력.
     if ( g_bAddDefense )
     {
         float addDefense = 0.f;
@@ -5109,32 +4317,27 @@ void CHARACTER_MACHINE::CalculateDefense()
         case 13:
             addDefense = 0.2f;
             break;
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
         case 14:
             addDefense = 0.25f;
             break;
         case 15:
             addDefense = 0.3f;
             break;
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
         }
         Character.Defense += (WORD)(Character.Defense*addDefense);
     }
 
-#ifdef PSW_SCROLL_ITEM
-	if(g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll2))  // 방어의 스크롤
+	if(g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll2))
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 73);
 		Character.Defense += (WORD)Item_data.m_byValue1;
 	}
-#endif// PSW_SCROLL_ITEM
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin3)) // 잭오랜턴의 외침
+	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin3))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 48);
 		Character.Defense += (WORD)Item_data.m_byValue1;
 	}
-#ifdef PBG_ADD_SANTABUFF
-	if(g_isCharacterBuff((&Hero->Object), eBuff_BlessingOfXmax))	//크리스마스의 축복
+	if(g_isCharacterBuff((&Hero->Object), eBuff_BlessingOfXmax))
 	{
 		int _Temp = 0;
 		_Temp = Character.Level / 5 + 50;
@@ -5142,35 +4345,19 @@ void CHARACTER_MACHINE::CalculateDefense()
 		Character.Defense += _Temp;
 	}
 
-	if(g_isCharacterBuff((&Hero->Object), eBuff_DefenseOfSanta))	//산타의 방어
+	if(g_isCharacterBuff((&Hero->Object), eBuff_DefenseOfSanta))
 	{
 		int _Temp = 100;
 		Character.Defense += _Temp;
 	}
-#endif //PBG_ADD_SANTABUFF
 
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	if(g_isCharacterBuff((&Hero->Object), eBuff_StrongCharm))		//강함의 인장(PC방 아이템)
-	{
-		int _Temp = 60;
-		Character.Defense += _Temp;
-	}
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
-
-	//	세트 옵션을 적용한다.
-    g_csItemOption.PlusSpecial ( &Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE );         //	방어력 증가
-
-	g_csItemOption.PlusSpecialLevel ( &Character.Defense, Dexterity, AT_SET_OPTION_IMPROVE_DEFENCE_3 );         //	특정 캐릭터 방어력 증가 민첩성/50	
-	g_csItemOption.PlusSpecialLevel ( &Character.Defense, Vitality, AT_SET_OPTION_IMPROVE_DEFENCE_4 );          //	특정 캐릭터 방어력 증가 체력/40		    
+    g_csItemOption.PlusSpecial ( &Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE );
+	g_csItemOption.PlusSpecialLevel ( &Character.Defense, Dexterity, AT_SET_OPTION_IMPROVE_DEFENCE_3 );
+	g_csItemOption.PlusSpecialLevel ( &Character.Defense, Vitality, AT_SET_OPTION_IMPROVE_DEFENCE_4 );		    
 
     if ( Equipment[EQUIPMENT_WEAPON_LEFT].Type>=ITEM_SHIELD && Equipment[EQUIPMENT_WEAPON_LEFT].Type<ITEM_SHIELD+MAX_ITEM_INDEX )
     {
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DEFENSE
-		if( IsRequireEquipItem( &Equipment[EQUIPMENT_WEAPON_LEFT]) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DEFENSE
-		{
-			g_csItemOption.PlusSpecialPercent ( &Character.Defense, AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE );         //	방패 장비시 방어력 5% 증가
-		}
+		g_csItemOption.PlusSpecialPercent ( &Character.Defense, AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE );
     }
 
     PlusSpecial ( &Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_HELPER] );
@@ -5178,32 +4365,17 @@ void CHARACTER_MACHINE::CalculateDefense()
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| Equipment[EQUIPMENT_WING].Type==ITEM_WING+49
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)   //  망토.
+		)
     {
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_DEFENSE
-		if( IsRequireEquipItem( &Equipment[EQUIPMENT_WING]) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_DEFENSE
-		{
-			PlusSpecial ( &Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_WING] );
-		}
+		PlusSpecial ( &Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_WING] );
     }
 
-#ifdef ADD_SOCKET_STATUS_BONUS
 	Character.Defense += g_SocketItemMgr.m_StatusBonus.m_iDefenceBonus;
-#endif	// ADD_SOCKET_STATUS_BONUS
 
-#ifdef YDG_FIX_SOCKET_SHIELD_BONUS
-	// 왼쪽 무기가 내구도가 0이 아니라면
-    if ( Equipment[EQUIPMENT_WEAPON_LEFT].Type!=-1 && Equipment[EQUIPMENT_WEAPON_LEFT].Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SUCCESSFULBLOCKING
-		&& IsRequireEquipItem( Equipment[EQUIPMENT_WEAPON_LEFT] )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SUCCESSFULBLOCKING	
-		)
+    if ( Equipment[EQUIPMENT_WEAPON_LEFT].Type!=-1 && Equipment[EQUIPMENT_WEAPON_LEFT].Durability!=0)
 	{
-		// 방패차고있을때만 적용된다
 		Character.Defense += Equipment[EQUIPMENT_WEAPON_LEFT].Defense * g_SocketItemMgr.m_StatusBonus.m_iShieldDefenceBonus * 0.01f;
 	}
-#endif	// YDG_FIX_SOCKET_SHIELD_BONUS
 }
 
 void CHARACTER_MACHINE::CalculateMagicDefense()
@@ -5229,34 +4401,21 @@ void CHARACTER_MACHINE::CalculateMagicDefense()
 
 void CHARACTER_MACHINE::CalculateWalkSpeed()
 {
-    if( Equipment[EQUIPMENT_BOOTS].Durability!=0
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_WALKSPEED
-		&& IsRequireEquipItem( &Equipment[EQUIPMENT_BOOTS] )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_WALKSPEED
-		)
+    if(Equipment[EQUIPMENT_BOOTS].Durability!=0)
     {
 	    Character.WalkSpeed  = ItemWalkSpeed(&Equipment[EQUIPMENT_BOOTS]);
     }
 
-    if( Equipment[EQUIPMENT_WING].Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_WALKSPEED
-		&& IsRequireEquipItem( &Equipment[EQUIPMENT_WING] )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_WALKSPEED
-		)
+    if(Equipment[EQUIPMENT_WING].Durability!=0)
     {
 	    Character.WalkSpeed += ItemWalkSpeed(&Equipment[EQUIPMENT_WING]);
     }
 }
 
-//(10+l)*l/4
-//(4+l)*l*l*20
 void CHARACTER_MACHINE::CalculateNextExperince()
 {
-	// 레벨업 했을 경우이니깐
-	// 현재 경험치를 다음경험치로 초기화
-	Character.Experience = Character.NextExperince;
 
-	// 다음 경험치 새로 구해줌
+	Character.Experience = Character.NextExperince;
 	Character.NextExperince = (9+Character.Level)*(Character.Level)*(Character.Level)*10;
 
     if ( Character.Level > 255 )
@@ -5268,18 +4427,13 @@ void CHARACTER_MACHINE::CalculateNextExperince()
 
 void CHARACTER_MACHINE::CalulateMasterLevelNextExperience()
 {
-	// 레벨업 했을 경우이니깐
-	// 현재 경험치를 다음경험치로 초기화
 	Master_Level_Data.lMasterLevel_Experince = Master_Level_Data.lNext_MasterLevel_Experince;
 
-	__int64 iTotalLevel = CharacterAttribute->Level + Master_Level_Data.nMLevel + 1;	// 종합레벨
-	__int64 iTOverLevel = iTotalLevel - 255;		// 255레벨 이상 기준 레벨
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	__int64 iBaseExperience = 0;					// 레벨 초기 경험치
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+	__int64 iTotalLevel = CharacterAttribute->Level + Master_Level_Data.nMLevel + 1;
+	__int64 iTOverLevel = iTotalLevel - 255;
+	__int64 iBaseExperience = 0;
 	
-	__int64 iData_Master =	// A
+	__int64 iData_Master =
 		(
 		(
 		(__int64)9 + (__int64)iTotalLevel
@@ -5298,7 +4452,7 @@ void CHARACTER_MACHINE::CalulateMasterLevelNextExperience()
 		* (__int64)1000
 		);
 
-	Master_Level_Data.lNext_MasterLevel_Experince = ( iData_Master - (__int64)3892250000 ) / (__int64)2;	// B
+	Master_Level_Data.lNext_MasterLevel_Experince = ( iData_Master - (__int64)3892250000 ) / (__int64)2;
 }
 
 bool CHARACTER_MACHINE::IsZeroDurability()
@@ -5317,27 +4471,27 @@ bool CHARACTER_MACHINE::IsZeroDurability()
 #ifdef PSW_SECRET_ITEM
 void CHARACTER_MACHINE::CalculateBasicState()
 {
-	if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1)) // 힘
+	if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 78);
 		Character.AddStrength += (WORD)Item_data.m_byValue1;
 	}
-	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2)) // 민첩
+	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 79);
 		Character.AddDexterity += (WORD)Item_data.m_byValue1;
 	}
-	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3)) // 체력
+	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 80);
 		Character.AddVitality += (WORD)Item_data.m_byValue1;
 	}
-	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4)) // 에너지
+	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 81);
 		Character.AddEnergy += (WORD)Item_data.m_byValue1;
 	}
-	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5)) // 통솔
+	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 82);
 		Character.AddCharisma += (WORD)Item_data.m_byValue1;
@@ -5357,17 +4511,6 @@ void CHARACTER_MACHINE::CalculateBasicState()
 		Character.AddVitality += _AddStat;
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#ifndef YDG_FIX_DOUBLE_SOCKETITEM_BONUS
-#ifdef SOCKET_SYSTEM
-	// 소켓 세트 옵션을 검사한다.
-	g_SocketItemMgr.CheckSocketSetOption();
-	g_SocketItemMgr.CalcSocketStatusBonus();
-	CharacterMachine->Character.AddStrength  += g_SocketItemMgr.m_StatusBonus.m_iStrengthBonus;
-	CharacterMachine->Character.AddDexterity += g_SocketItemMgr.m_StatusBonus.m_iDexterityBonus;
-	CharacterMachine->Character.AddVitality  += g_SocketItemMgr.m_StatusBonus.m_iVitalityBonus;
-	CharacterMachine->Character.AddEnergy    += g_SocketItemMgr.m_StatusBonus.m_iEnergyBonus;
-#endif	// SOCKET_SYSTEM
-#endif	// YDG_FIX_DOUBLE_SOCKETITEM_BONUS
 }
 
 #endif //PSW_SECRET_ITEM
@@ -5380,265 +4523,98 @@ void CHARACTER_MACHINE::getAllAddStateOnlyExValues( int &iAddStrengthExValues,
 												int &iAddEnergyExValues, 
 												int &iAddCharismaExValues )
 {
-	if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1)) // 힘
+	if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 78);
 		iAddStrengthExValues += (WORD)Item_data.m_byValue1;
 	}
-	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2)) // 민첩
+	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 79);
 		iAddDexterityExValues += (WORD)Item_data.m_byValue1;
 	}
-	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3)) // 체력
+	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 80);
 		iAddVitalityExValues += (WORD)Item_data.m_byValue1;
 	}
-	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4)) // 에너지
+	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 81);
 		iAddEnergyExValues += (WORD)Item_data.m_byValue1;
 	}
-	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5)) // 통솔
+	else if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5))
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 82);
 		iAddCharismaExValues += (WORD)Item_data.m_byValue1;
 	}
 	
-#ifdef SOCKET_SYSTEM
-	// 소켓 세트 옵션을 검사한다. 이미 위에서 소켓 아이템 계산 함수를 한번 호출 하였으므로 계산부는 제거.
-	//g_SocketItemMgr.CheckSocketSetOption();
-	//g_SocketItemMgr.CalcSocketStatusBonus();
 	iAddStrengthExValues  += g_SocketItemMgr.m_StatusBonus.m_iStrengthBonus;
 	iAddDexterityExValues += g_SocketItemMgr.m_StatusBonus.m_iDexterityBonus;
 	iAddVitalityExValues  += g_SocketItemMgr.m_StatusBonus.m_iVitalityBonus;
 	iAddEnergyExValues    += g_SocketItemMgr.m_StatusBonus.m_iEnergyBonus;
-#endif	// SOCKET_SYSTEM
 }
 #endif // LDS_FIX_APPLY_BUFF_STATEVALUES_WHEN_CALCULATE_CHARACTERSTATE_WITH_SETITEM
 
-
-
-#ifdef ANTIHACKING_ENABLE
-extern BOOL g_bNewFrame;
-#endif //ANTIHACKING_ENABLE
-
 void CHARACTER_MACHINE::CalculateAll()
 {
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
 
-	// 캐릭터 add 스텟 초기화
-	InitAddValue ();
 
-#ifdef PSW_SECRET_ITEM
-	// 버프 효과가 중에 기본 스텟을 올려 줄것이 있으면 여기서 한다. 
-	// SOCKET_SYSTEM define 추가 되어있음.
 	CalculateBasicState();
-#endif //PSW_SECRET_ITEM
-
-	//	아이템이 갱신되었다면 다시 세트 옵션을 검사한다.
-	//	캐릭터 정보창이 띄어있을때.
 	g_csItemOption.CheckItemSetOptions ();
 	g_csItemOption.ClearListOnOff();
- 
-#else //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM           // 정리 해야 할 코드
-
-#if defined PSW_SECRET_ITEM && defined LDK_FIX_USE_SECRET_ITEM_TO_SETITEM_OPTION_BUG
-	// 비약 적용시 add값 갱신.
-	// 버프 효과가 중에 기본 스텟을 올려 줄것이 있으면 여기서 한다. 
-	// SOCKET_SYSTEM define 추가 되어있음.
-	CalculateBasicState();
-#endif //PSW_SECRET_ITEM
-
-	//	아이템이 갱신되었다면 다시 세트 옵션을 검사한다.
-	//	캐릭터 정보창이 띄어있을때.
-	g_csItemOption.CheckItemSetOptions ();
-	g_csItemOption.ClearListOnOff();
-	// 캐릭터 add 스텟 초기화
 	InitAddValue ();
 
-#ifdef SOCKET_SYSTEM
-	// 소켓 세트 옵션을 검사한다.
 	g_SocketItemMgr.CheckSocketSetOption();
 	g_SocketItemMgr.CalcSocketStatusBonus();
 	CharacterMachine->Character.AddStrength  += g_SocketItemMgr.m_StatusBonus.m_iStrengthBonus;
 	CharacterMachine->Character.AddDexterity += g_SocketItemMgr.m_StatusBonus.m_iDexterityBonus;
 	CharacterMachine->Character.AddVitality  += g_SocketItemMgr.m_StatusBonus.m_iVitalityBonus;
 	CharacterMachine->Character.AddEnergy    += g_SocketItemMgr.m_StatusBonus.m_iEnergyBonus;
-#endif	// SOCKET_SYSTEM
  
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM           // 정리 해야 할 코드
-#ifdef PBG_FIX_SETOPTION_CALCULATE_SECRET_POTION
 	CalculateBasicState();
-#endif //PBG_FIX_SETOPTION_CALCULATE_SECRET_POTION
 
-	// 세트 아이템 들 옵션 적용 부분 시작
-	// ============================================================================== >
-	// 현재 아이템을 착용에 대한 모든 증감 수치 값을 얻어 오며, 이는 
-	// 세트 아이템이 가지고 있는 세트 옵션 과 기본 옵션 스탯 수치도 포함됩니다.
-#ifdef LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
-	WORD	wAddStrength, wAddDexterity, wAddEnergy, wAddVitality,
-		wStrengthResult, wDexterityResult, wEnergyResult, wVitalityResult;
-	wAddStrength = wAddDexterity = wAddEnergy = wAddVitality = 0;
-	wStrengthResult = wDexterityResult = wEnergyResult = wVitalityResult = 0;
+	WORD wAddStrength=0, wAddDexterity=0, wAddEnergy=0, wAddVitality=0,wStrengthResult=0, wDexterityResult=0, wEnergyResult=0, wVitalityResult=0,wAddCharisma = 0, wCharismaResult=0;
 
-	// 세트 옵션 수치에 "통솔" 수치를 반영 합니다.
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	WORD wAddCharisma, wCharismaResult; 
-	wAddCharisma = wCharismaResult = 0;
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	
-	// 세트 옵션 수치로 추가된 추가 스탯 수치만을 가져옵니다.	// 1.버프 능력치 2. 소켓 아이템 능력치 누락
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 	g_csItemOption.getAllAddStateOnlyAddValue( &wAddStrength, &wAddDexterity, &wAddEnergy, &wAddVitality, &wAddCharisma );
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	g_csItemOption.getAllAddStateOnlyAddValue( &wAddStrength, &wAddDexterity, &wAddEnergy, &wAddVitality );
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 	
-	// 세트 아이템들에 대한 아이템 요구 수치 계산전에 
-#ifdef LDS_FIX_APPLY_BUFF_STATEVALUES_WHEN_CALCULATE_CHARACTERSTATE_WITH_SETITEM
-	int iAddStrengthByExValues, iAddDexterityByExValues, 
-		iAddEnergyByExValues, iAddVitalityByExValues, 
-		iAddCharismaExValues;
+	int iAddStrengthByExValues = 0, iAddDexterityByExValues = 0, iAddEnergyByExValues = 0, iAddVitalityByExValues = 0, iAddCharismaExValues = 0;
 
-	iAddStrengthByExValues = iAddDexterityByExValues 
-		= iAddEnergyByExValues = iAddVitalityByExValues = iAddCharismaExValues = 0;
-
-	getAllAddStateOnlyExValues( iAddStrengthByExValues, 
-								iAddDexterityByExValues, 
-								iAddVitalityByExValues, 
-								iAddEnergyByExValues, 
-								iAddCharismaExValues );
+	getAllAddStateOnlyExValues( iAddStrengthByExValues,iAddDexterityByExValues,iAddVitalityByExValues,iAddEnergyByExValues,iAddCharismaExValues);
 
 	wAddStrength	+= iAddStrengthByExValues;
 	wAddDexterity	+= iAddDexterityByExValues;
 	wAddEnergy		+= iAddEnergyByExValues;
 	wAddVitality	+= iAddVitalityByExValues;
-#endif // LDS_FIX_APPLY_BUFF_STATEVALUES_WHEN_CALCULATE_CHARACTERSTATE_WITH_SETITEM
 
-	// 케릭터의 기본 스탯 수치에 추가 스탯 수치를 더하여 스탯이 적용된 결과 스탯 수치를 산출합니다.
 	wStrengthResult		= CharacterMachine->Character.Strength + wAddStrength;
 	wDexterityResult	= CharacterMachine->Character.Dexterity + wAddDexterity;
 	wEnergyResult		= CharacterMachine->Character.Energy + wAddEnergy;
 	wVitalityResult		= CharacterMachine->Character.Vitality + wAddVitality;
 
-	// 다크로드만이 가진 "통솔" 수치 또한 결과 스탯 수치를 산출합니다.
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 	wCharismaResult		= CharacterMachine->Character.Charisma + wAddCharisma;
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 
-	
-	// 세트 최종 반영된 수치값이 아이템 요구수치에 허용되는 수치 인지를 판단하여 
-	// 각 아이템별 스탯 수치를 다시 산출 및 적용 합니다.
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	g_csItemOption.getAllAddOptionStatesbyCompare( &Character.AddStrength, 
-									&Character.AddDexterity, &Character.AddEnergy, &Character.AddVitality, &Character.AddCharisma, 
-									wStrengthResult, wDexterityResult, wEnergyResult, wVitalityResult, wCharismaResult );
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	g_csItemOption.getAllAddOptionStatesbyCompare( &Character.AddStrength, 
-									&Character.AddDexterity, &Character.AddEnergy, &Character.AddVitality,
-									wStrengthResult, wDexterityResult, wEnergyResult, wVitalityResult );
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	
-#else // LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
-	// 셋트 아이템 일반 옵션( 장비에 붙어 있는 옵션 )
-    for ( int i=EQUIPMENT_WEAPON_RIGHT; i<MAX_EQUIPMENT; ++i )
-    {
-    	ITEM* item = &Equipment[i];
-
-        if ( item->Durability<=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-			|| IsRequireEquipItem( item ) == false
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM			
-			) 
-		{
-			continue;
-		}
-
-        WORD Result = 0;
-		// Result*5 = 5를 곱 하는 이유는 기본 단위가 5부터 시작
-        switch ( g_csItemOption.GetDefaultOptionValue( item, &Result ) )
-        {
-        case SET_OPTION_STRENGTH:
-            Character.AddStrength += Result*5;
-            break;
-
-        case SET_OPTION_DEXTERITY:
-            Character.AddDexterity += Result*5;
-            break;
-
-        case SET_OPTION_ENERGY:
-            Character.AddEnergy += Result*5;
-            break;
-
-        case SET_OPTION_VITALITY:
-            Character.AddVitality += Result*5;
-            break;
-        }
-    }
-
-	// 셋트 아이템 셋트 옵션( 셋트 아이템 몇개 이상을 착용 했을 경우 발생 하는 옵션 )
-	g_csItemOption.GetSpecial ( &Character.AddStrength, AT_SET_OPTION_IMPROVE_STRENGTH );	    //	힘 증가
-	g_csItemOption.GetSpecial ( &Character.AddDexterity, AT_SET_OPTION_IMPROVE_DEXTERITY );	    //	민첩성 증가
-	g_csItemOption.GetSpecial ( &Character.AddEnergy, AT_SET_OPTION_IMPROVE_ENERGY );		    //	에너지 증가
-	g_csItemOption.GetSpecial ( &Character.AddVitality, AT_SET_OPTION_IMPROVE_VITALITY );	    //	체력 증가
-	g_csItemOption.GetSpecial ( &Character.AddCharisma, AT_SET_OPTION_IMPROVE_CHARISMA );	    //	통솔 증가
-#endif // LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
-	
-#ifdef YDG_FIX_SETITEM_REQUIRED_STATUS_BUG
-	// 최종 스탯을 적용하기 위해 셋트 아이템 옵션 검사를 한번 더 해준다
-#ifdef YDG_FIX_SETITEM_REQUIRED_STATUS_SECRET_POTION
-#ifndef PBG_FIX_SETOPTION_CALCULATE_SECRET_POTION
-	CalculateBasicState();
-#endif //PBG_FIX_SETOPTION_CALCULATE_SECRET_POTION
-#endif	// YDG_FIX_SETITEM_REQUIRED_STATUS_SECRET_POTION
+	g_csItemOption.getAllAddOptionStatesbyCompare(&Character.AddStrength,&Character.AddDexterity, &Character.AddEnergy, &Character.AddVitality, &Character.AddCharisma,wStrengthResult, wDexterityResult, wEnergyResult, wVitalityResult, wCharismaResult );
 	g_csItemOption.CheckItemSetOptions ();
-#endif	// YDG_FIX_SETITEM_REQUIRED_STATUS_BUG
 
-	// 세트 아이템 들 옵션 적용 부분 끝
-	// ============================================================================== <
-
-    //  망토에 해당되는 통솔을 증가시킨다.
 	if ( (CharacterMachine->Equipment[EQUIPMENT_WING].Type+MODEL_ITEM)==MODEL_HELPER+30)
     {
         PlusSpecial ( &Character.AddCharisma, AT_SET_OPTION_IMPROVE_CHARISMA, &CharacterMachine->Equipment[EQUIPMENT_WING] );
     }
 
-#ifdef	LJH_FIX_NOT_CALCULATED_BUFF
-	// 버프 효과가 중에 기본 스텟을 올려 줄것이 있으면 여기서 한다. 
 	CalculateBasicState();
-#else	//LJH_FIX_NOT_CALCULATED_BUFF
-#ifndef PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM  // 정리 해야 할 코드
-#ifdef PSW_SECRET_ITEM
-#ifndef PBG_FIX_SETOPTION_CALCULATE_SECRET_POTION
-	// 버프 효과가 중에 기본 스텟을 올려 줄것이 있으면 여기서 한다. 
-	CalculateBasicState();
-#endif //PBG_FIX_SETOPTION_CALCULATE_SECRET_POTION
-#endif //PSW_SECRET_ITEM
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM // 정리 해야 할 코드
-#endif	//LJH_FIX_NOT_CALCULATED_BUFF
-
-	///// PSW_BUGFIX_REQUIREEQUIPITEM ////
-	// 장비를 착용 하고 있더라도 장착한 장비의 
-	// 요구 조건이 안 맞을 경우 장착한 
-	// 장비의 효과을 적용 하지 않는다
-
-	CalculateDamage();				// 수정( 셋트 옵션은 빼고 )
-	CalculateMagicDamage();			// 수정( 셋트 옵션은 빼고 )
-	CalculateCurseDamage();			// 수정
-	CalculateAttackRating();		// 수정 할 필요 없음
-	CalculateAttackSpeed();			// 수정
-	CalculateSuccessfulBlocking();  // 수정
-	CalculateDefense();             // 수정
-	CalculateMagicDefense();        // 수정
-	CalculateWalkSpeed();           // 수정
+	CalculateDamage();
+	CalculateMagicDamage();
+	CalculateCurseDamage();
+	CalculateAttackRating();
+	CalculateAttackSpeed();
+	CalculateSuccessfulBlocking();
+	CalculateDefense();
+	CalculateMagicDefense();
+	CalculateWalkSpeed();
 	//CalculateNextExperince();
-	CalculateSuccessfulBlockingPK(); // 수정 할 필요 없음
-	CalculateAttackRatingPK();       // 수정 할 필요 없음
-
-	///// PSW_BUGFIX_REQUIREEQUIPITEM ////
-
+	CalculateSuccessfulBlockingPK();
+	CalculateAttackRatingPK();
 
 	MONSTER_ATTRIBUTE *c   = &Enemy.Attribute;
 	FinalAttackDamageRight = AttackDamageRight - c->Defense;
@@ -5647,22 +4623,6 @@ void CHARACTER_MACHINE::CalculateAll()
 	FinalHitPoint          = EnemyAttackDamage - Character.Defense;
 	FinalAttackRating      = Character.AttackRating - c->SuccessfulBlocking;
 	FinalDefenseRating     = Character.SuccessfulBlocking - c->AttackRating;
-
-#ifdef ANTIHACKING_ENABLE
-	// 체크 코드
-	if ( g_bNewFrame)
-	{
-		switch ( GetTickCount() % 5000)
-		{
-		case 1321:
-			hanguo_check4();
-			break;
-		case 4321:
-			hanguo_check2();
-			break;
-		}
-	}
-#endif //ANTIHACKING_ENABLE
 
 	if(FinalAttackDamageRight < 0)
 		FinalAttackDamageRight = 0;
@@ -5688,293 +4648,4 @@ void CHARACTER_MACHINE::CalculateAll()
 		FinalSuccessDefense = false;
 }
 
-void CHARACTER_MACHINE::GetMagicSkillDamage( int iType, int *piMinDamage, int *piMaxDamage)
-{
-	// 소환수 스킬은 저주력과 관련.
-	if (AT_SKILL_SUMMON_EXPLOSION <= iType && iType <= AT_SKILL_SUMMON_REQUIEM)
-	{
-		*piMinDamage = Character.MagicDamageMin;
-		*piMaxDamage = Character.MagicDamageMax;
-		return;
-	}
 
-
-	SKILL_ATTRIBUTE *p = &SkillAttribute[iType];
-	
-    int Damage = p->Damage;
-
-	*piMinDamage = Character.MagicDamageMin+Damage;
-	*piMaxDamage = Character.MagicDamageMax+Damage+Damage/2;
-
-#ifdef YDG_FIX_MAGIC_DAMAGE_CALC_ORDER
-	Damage = 0;
-	g_csItemOption.PlusSpecial ( (WORD*)&Damage,  AT_SET_OPTION_IMPROVE_MAGIC_POWER );	//	최종 마력 증가
-	if(Damage != 0)
-	{
-		float fratio = 1.f + (float)Damage/100.f;
-		*piMinDamage *= fratio;
-		*piMaxDamage *= fratio;
-	}
-
-    Damage = 0;
-    g_csItemOption.ClearListOnOff();
-    g_csItemOption.PlusMastery ( &Damage, p->MasteryType );
-    g_csItemOption.PlusSpecial ( (WORD*)&Damage,  AT_SET_OPTION_IMPROVE_SKILL_ATTACK );	//	스킬 공격력 증가.
-    *piMinDamage += Damage;
-    *piMaxDamage += Damage;
-#else	// YDG_FIX_MAGIC_DAMAGE_CALC_ORDER
-    Damage = 0;
-    g_csItemOption.ClearListOnOff();
-    g_csItemOption.PlusMastery ( &Damage, p->MasteryType );
-    g_csItemOption.PlusSpecial ( (WORD*)&Damage,  AT_SET_OPTION_IMPROVE_SKILL_ATTACK );	//	스킬 공격력 증가.
-    *piMinDamage += Damage;
-    *piMaxDamage += Damage;
-	
-	Damage = 0;
-	g_csItemOption.PlusSpecial ( (WORD*)&Damage,  AT_SET_OPTION_IMPROVE_MAGIC_POWER );	//	최종 마력 증가
-	if(Damage != 0)
-	{
-		float fratio = 1.f + (float)Damage/100.f;
-		*piMinDamage *= fratio;
-		*piMaxDamage *= fratio;
-	}
-#endif	// YDG_FIX_MAGIC_DAMAGE_CALC_ORDER
-}
-
-void CHARACTER_MACHINE::GetCurseSkillDamage(int iType, int *piMinDamage, int *piMaxDamage)
-{
-	if (CLASS_SUMMONER != GetBaseClass(Character.Class))
-		return;
-
-
-	if (AT_SKILL_SUMMON_EXPLOSION <= iType && iType <= AT_SKILL_SUMMON_REQUIEM)
-	{
-		SKILL_ATTRIBUTE *p = &SkillAttribute[iType];
-		*piMinDamage = Character.CurseDamageMin+p->Damage;
-		*piMaxDamage = Character.CurseDamageMax+p->Damage+p->Damage/2;
-	}
-	else
-	{
-		*piMinDamage = Character.CurseDamageMin;
-		*piMaxDamage = Character.CurseDamageMax;
-	}
-}
-
-void CHARACTER_MACHINE::GetSkillDamage( int iType, int *piMinDamage, int *piMaxDamage)
-{
-
-	SKILL_ATTRIBUTE *p = &SkillAttribute[iType];
-	
-    int Damage = p->Damage;
-
-	*piMinDamage = Damage;
-	*piMaxDamage = Damage+Damage/2;
-
-    Damage = 0;
-    g_csItemOption.ClearListOnOff();
-    g_csItemOption.PlusMastery ( &Damage, p->MasteryType );
-    g_csItemOption.PlusSpecial ( (WORD*)&Damage,  AT_SET_OPTION_IMPROVE_SKILL_ATTACK );	//	스킬 공격력 증가.
-    *piMinDamage += Damage;
-    *piMaxDamage += Damage;
-
-}
-
-BYTE CHARACTER_MACHINE::GetSkillMasteryType ( int iType )
-{
-    BYTE MasteryType = 255;
-    SKILL_ATTRIBUTE* p = &SkillAttribute[iType];
-
-    MasteryType = p->MasteryType;
-
-    return MasteryType;
-}
-
-void GetSkillInformation( int iType, int iLevel, char *lpszName, int *piMana, int *piDistance, int *piSkillMana)
-{
-
-	SKILL_ATTRIBUTE *p = &SkillAttribute[iType];
-	if ( lpszName)
-	{
-#ifdef USE_SKILL_LEVEL
-		if ( iLevel == 0)
-		{
-			strcpy( lpszName, p->Name);
-		}
-		else
-		{
-			sprintf( lpszName, "%s +%d", p->Name, iLevel);
-		}
-#else
-		strcpy( lpszName, p->Name);
-#endif
-	}
-	if ( piMana)
-	{
-		*piMana = p->Mana;
-	}
-	if ( piDistance)
-	{
-		*piDistance = p->Distance;
-	}
-	if (piSkillMana)
-	{
-		*piSkillMana = p->AbilityGuage;
-	}
-
-}
-
-void GetSkillInformation_Energy(int iType, int *piEnergy)
-{
-
-	SKILL_ATTRIBUTE *p = &SkillAttribute[iType];
-
-	if(piEnergy)
-	{
-		if(p->Energy == 0)
-		{
-			*piEnergy = 0;
-		}
-		else
-		{
-			*piEnergy = 20 + (p->Energy*p->Level*4/100);
-
-			if( iType == AT_SKILL_SUMMON_EXPLOSION || iType == AT_SKILL_SUMMON_REQUIEM ){
-				*piEnergy = 20 + (p->Energy*p->Level*3/100);
-			}
-
-			if( GetBaseClass ( Hero->Class ) == CLASS_KNIGHT ) {
-				*piEnergy = 10 + (p->Energy*p->Level*4/100);
-			}
-		}
-	}
-
-}
-
-void GetSkillInformation_Charisma(int iType, int *piCharisma)
-{
-	
-	SKILL_ATTRIBUTE *p = &SkillAttribute[iType];
-
-	if(piCharisma)
-	{
-		*piCharisma = p->Charisma;
-	}
-
-}
-
-void GetSkillInformation_Damage(int iType, int *piDamage)
-{
-	
-	SKILL_ATTRIBUTE *p = &SkillAttribute[iType];
-
-	if(piDamage)
-	{
-		*piDamage = p->Damage;
-	}
-
-}
-
-float GetSkillDistance(int Index, CHARACTER* c)
-{
-    float Distance = (float)( SkillAttribute[Index].Distance );
-
-	if( Index == AT_SKILL_BLOW_UP + 4 ) 
-	{
-		if(Distance != 3)
-			int aaa = 0;
-	}
-
-    if(c != NULL)
-    {
-        if(c->Helper.Type == MODEL_HELPER+4)
-		{
-            Distance += 2;
-		}
-    }
-
-    return Distance;
-}
-
-bool CheckSkillDelay ( int SkillIndex )
-{
-	int Skill = CharacterAttribute->Skill[SkillIndex];
-
-    int Delay = SkillAttribute[Skill].Delay;
-
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-	if(!CheckAttack() && (Skill == AT_SKILL_GIANTSWING || Skill == AT_SKILL_DRAGON_LOWER ||
-		Skill == AT_SKILL_DRAGON_KICK))
-	{
-		return false;
-	}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-    if ( Delay>0 )
-    {
-        if ( CharacterAttribute->SkillDelay[SkillIndex] > 0 )
-        {
-            return false;
-        }
-
-		int iCharisma;
-		GetSkillInformation_Charisma(Skill, &iCharisma);
-		if(iCharisma > (CharacterAttribute->Charisma + CharacterAttribute->AddCharisma))
-		{
-            return false;
-		}
-
-		CharacterAttribute->SkillDelay[SkillIndex] = Delay;
-    }
-    return true;
-}
-void CalcSkillDelay ( int time )
-{
-	int iSkillNumber;
-	iSkillNumber = CharacterAttribute->SkillNumber+2;
-	iSkillNumber = min(iSkillNumber, MAX_SKILLS);
-
-    for ( int i=0; i<iSkillNumber; ++i )
-    {
-		if ( CharacterAttribute->SkillDelay[i] <= 0 ) 
-			continue;
-
-        CharacterAttribute->SkillDelay[i] -= time;
-        if ( CharacterAttribute->SkillDelay[i]<0 )
-        {
-            CharacterAttribute->SkillDelay[i] = 0;
-        }
-    }
-}
-
-void RenderSkillDelay ( int SkillIndex, int x, int y, int Width, int Height )
-{
-    int Delay = CharacterAttribute->SkillDelay[SkillIndex];
-    if ( Delay>0 )
-    {
-        int Type  = CharacterAttribute->Skill[SkillIndex];
-
-        int MaxDelay = SkillAttribute[Type].Delay;
-
-        float Persent = (float)(Delay/(float)MaxDelay);
-        
-        EnableAlphaTest ();
-        glColor4f ( 1.f, 0.5f, 0.5f, 0.5f );
-        float deltaH = Height*Persent;
-        RenderColor ( (float)x, (float)y+Height-deltaH, (float)Width, deltaH );
-        DisableAlphaBlend();
-    }
-}
-
-bool IsGuildMaster()
-{
-	return ( Hero->GuildStatus == G_MASTER );
-}
-
-bool IsSubGuildMaster()
-{
-	return ( Hero->GuildStatus == G_SUB_MASTER );
-}		
-
-bool IsBattleMaster()
-{
-	return ( Hero->GuildStatus == G_BATTLE_MASTER );
-}		

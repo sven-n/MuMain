@@ -1,17 +1,16 @@
 #ifndef __ZZCHARACTER_H__
 #define __ZZCHARACTER_H__
 
+#include "ZzzBMD.h"
+
 extern Script_Skill MonsterSkill[];
 extern CHARACTER *CharactersClient;
 extern CHARACTER CharacterView;
 extern CHARACTER *Hero;
 
-// 길드관계에 따른 텍스트색 얻기
 DWORD GetGuildRelationShipTextColor( BYTE GuildRelationShip );
-// 길드관계에 따른 텍스트배경색 얻기
 DWORD GetGuildRelationShipBGColor( BYTE GuildRelationShip );
 
-// 캐릭터명으로 포인터 얻기
 CHARACTER* FindCharacterByID( char* szName );
 
 void CreateMonsterServer(int Type,vec3_t Position,vec3_t Angle,int Level=0);
@@ -53,7 +52,6 @@ int FindCharacterIndexByMonsterIndex ( int Type );
 
 void DeadCharacterBuff ( OBJECT* o );
 
-//  블러드캐슬.
 int  HangerBloodCastleQuestItem (int Key);
 void SetAllAction ( int Action );
 
@@ -63,8 +61,6 @@ CHARACTER *CreateCharacter(int Key,int Type,unsigned char PositionX,unsigned cha
 CHARACTER *CreateHero(int Key,int Class=0,int Skin=0,float x=0.f,float y=0.f,float Ratate=0.f);
 CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key=0);
 CHARACTER*  CreateHellGate ( BYTE* ID, int Key, int Index, int x, int y, int CreateFlag );
-void OpenMonsters(char *FileName);
-void SaveMonsters(char *FileName);
 
 void SetAttackSpeed();
 void SetPlayerShock(CHARACTER *c,int Hit);
@@ -105,27 +101,8 @@ int GetFenrirType(CHARACTER* c);
 extern int       EquipmentLevelSet;
 extern bool      g_bAddDefense;
 
-void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int SubType=0,OBJECT *Target=NULL,float Scale=10.f,short PK=-1,
-				 WORD SkillIndex=0,WORD SkillSerialNum=0, int iChaIndex=-1, const float* vColor = NULL, short int sTargetIndex = -1);
+void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int SubType=0,OBJECT *Target=NULL,float Scale=10.f,short PK=-1, WORD SkillIndex=0,WORD SkillSerialNum=0, int iChaIndex=-1, const float* vColor = NULL, short int sTargetIndex = -1);
 
-
-BYTE ChangeServerClassTypeToClientClassType(const BYTE byServerClassType);
-BYTE GetCharacterClass(const BYTE byClass);
-bool IsSecondClass(const BYTE byClass);
-bool IsThirdClass(const BYTE byClass);
-BYTE GetStepClass(const BYTE byClass);
-const unicode::t_char* GetCharacterClassText(const BYTE byClass);
-BYTE GetSkinModelIndex(const BYTE byClass);
-inline int GetBaseClass( int iClass)	{ return ( 0x7 & iClass); }
-inline int IsFemale(int iClass) { return (GetBaseClass(iClass) == CLASS_ELF || GetBaseClass(iClass) == CLASS_SUMMONER); }
-
-int GetEquipedBowType( CHARACTER *pChar );
-int GetEquipedBowType( ITEM* pItem );
-int GetEquipedBowType( );
-bool IsEquipedWing();
-int GetEquipedBowType_Skill( );
-bool IsMasterLevel(const BYTE byClass);
-BOOL FindHeroSkill(enum ActionSkillType eSkillType); 
 
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
 void SetActionBloodAttack(CHARACTER *c, OBJECT* o);

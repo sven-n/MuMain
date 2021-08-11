@@ -22,6 +22,7 @@
 #include "ZzzEffect.h"
 #include "w_CursedTemple.h"
 #include "MapManager.h"
+#include "SkillManager.h"
 
 extern int TextNum;
 extern char TextList[30][100];
@@ -1212,7 +1213,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill( CHARACTER* c, OBJ
 		}
 	}
 
-	float Distance = GetSkillDistance( CursedTempleCurSkillType, c );
+	float Distance = gSkillManager.GetSkillDistance(CursedTempleCurSkillType, c );
 
 	bool checktile = true;
 

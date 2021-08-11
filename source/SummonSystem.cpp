@@ -8,10 +8,7 @@
 #include "wsclientinline.h"
 #include "ZzzAI.h"
 #include "MapManager.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#include "SkillManager.h"
 
 CSummonSystem g_SummonSystem;
 
@@ -27,12 +24,9 @@ CSummonSystem::~CSummonSystem()
 
 void CSummonSystem::MoveEquipEffect(CHARACTER * pCharacter, int iItemType, int iItemLevel,int iItemOption1)
 {
-	if (iItemType >= MODEL_STAFF+21 && iItemType <= MODEL_STAFF+29)	// 사아무트의 서, 닐의 서
+	if (iItemType >= MODEL_STAFF+21 && iItemType <= MODEL_STAFF+29)
 	{
-		// 항상 손목링을 보여준다.
 		CreateEquipEffect_WristRing(pCharacter, iItemType, iItemLevel, iItemOption1);
-
-		// 랜덤으로 소환 유령을 보여준다.
 		CreateEquipEffect_Summon(pCharacter, iItemType, iItemLevel, iItemOption1);
 	}
 	else
@@ -52,16 +46,16 @@ void CSummonSystem::SetPlayerSummon(CHARACTER * pCharacter, OBJECT * pObject)
 {
 	switch(pCharacter->Helper.Type)
 	{
-	case MODEL_HELPER+2:	// 유니리아
+	case MODEL_HELPER+2:
 		SetAction(pObject, PLAYER_SKILL_SUMMON_UNI);
 		break;
-	case MODEL_HELPER+3:	// 디노란트
+	case MODEL_HELPER+3:
 		SetAction(pObject, PLAYER_SKILL_SUMMON_DINO);
 		break;
-	case MODEL_HELPER+37:	// 펜릴	
+	case MODEL_HELPER+37:
 		SetAction(pObject, PLAYER_SKILL_SUMMON_FENRIR);
 		break;
-	default:	// 기본
+	default:
 		SetAction(pObject, PLAYER_SKILL_SUMMON);
 		break;
 	}
@@ -99,7 +93,7 @@ BOOL CSummonSystem::SendRequestSummonSkill(int iSkill, CHARACTER * pCharacter, O
 	{
 		iTargetKey = CharactersClient[SelectedCharacter].Key;
 	}
-	if (iTargetKey != -1)	// 타겟이 있으면
+	if (iTargetKey != -1)
 	{
 		CHARACTER * pTargetCharacter = &CharactersClient[SelectedCharacter];
 		TargetX = (int)(pTargetCharacter->Object.Position[0]/TERRAIN_SCALE);
@@ -110,7 +104,7 @@ BOOL CSummonSystem::SendRequestSummonSkill(int iSkill, CHARACTER * pCharacter, O
 	g_MovementSkill.m_iSkill = iSkill;
 	g_MovementSkill.m_iTarget = SelectedCharacter;
 
-	float fDistance = GetSkillDistance( iSkill, pCharacter );
+	float fDistance = gSkillManager.GetSkillDistance( iSkill, pCharacter );
 
 	if( CheckTile( pCharacter, pObject, fDistance ) )
 	{
@@ -131,7 +125,7 @@ BOOL CSummonSystem::SendRequestSummonSkill(int iSkill, CHARACTER * pCharacter, O
 
 void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER * pCharacter, OBJECT * pObject, float fTargetPos_X, float fTargetPos_Y)
 {
-	PART_t * pWeapon = &pCharacter->Weapon[1];	// 소환술사 왼손 소환서
+	PART_t * pWeapon = &pCharacter->Weapon[1];
 	int iSummonLevel = pWeapon->Level;
 	if (iSummonLevel >= 11) iSummonLevel = 2;
 	else if (iSummonLevel >= 7) iSummonLevel = 1;
@@ -141,7 +135,7 @@ void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER * pCharacter, OBJEC
 	{
 	case AT_SKILL_SUMMON_EXPLOSION:
 		{
-			vec3_t vPos;	// 강아지 소환 위치
+			vec3_t vPos;
 			VectorCopy(pObject->Position, vPos);
 			if (rand()%2 == 0) vPos[0] += rand()%300+150;
 			else vPos[0] -= rand()%250+150;

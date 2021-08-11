@@ -4,8 +4,7 @@
 
 #include "stdafx.h"
 #include "CameraMove.h"
-#include "../ProtocolSend.h"
-
+#include "ProtocolSend.h"
 #include "ZzzLodTerrain.h"
 // 
 // #include <gl\gl.h>

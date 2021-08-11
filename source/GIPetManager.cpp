@@ -24,6 +24,7 @@
 #include "npcBreeder.h"
 #include "MapManager.h"
 #include "ZzzEffect.h"
+#include "CharacterManager.h"
 
 extern  bool    SkillEnable;
 extern	char    TextList[30][100];
@@ -102,7 +103,7 @@ namespace giPetManager
 
 	bool SelectPetCommand(void)
 	{
-		if (GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
+		if (gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
 			return false;
 		if (HIBYTE(GetAsyncKeyState(VK_SHIFT)) == 128)
 		{
@@ -210,7 +211,7 @@ namespace giPetManager
 		int  TextNum = 0;
 		int  SkipNum = 0;
 
-		if (GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
+		if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
 		{
 			int cmdType = Type - AT_PET_COMMAND_DEFAULT;
 
@@ -597,7 +598,7 @@ namespace giPetManager
 
 		sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
 
-		if (GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
+		if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
 			TextListColor[TextNum] = TEXT_COLOR_WHITE;
 		else
 			TextListColor[TextNum] = TEXT_COLOR_DARKRED;

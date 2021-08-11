@@ -9,12 +9,9 @@
 #include "NewUICommonMessageBox.h"
 #include "wsclientinline.h"
 #include "ZzzCharacter.h"
+#include "CharacterManager.h"
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIEnterDevilSquare::CNewUIEnterDevilSquare()
 {
@@ -27,8 +24,6 @@ CNewUIEnterDevilSquare::CNewUIEnterDevilSquare()
 	m_dwBtnTextColor[0] = RGBA( 150, 150, 150, 255 );
 	m_dwBtnTextColor[1] = RGBA( 255, 255 ,255, 255 );
 
-	// 블러드캐슬 레벨제한 index
-	// 0~6	일반 클래스
 	m_iDevilSquareLimitLevel[0][0] = 15; m_iDevilSquareLimitLevel[0][1] = 130;
 	m_iDevilSquareLimitLevel[1][0] = 131; m_iDevilSquareLimitLevel[1][1] = 180;
 	m_iDevilSquareLimitLevel[2][0] = 181; m_iDevilSquareLimitLevel[2][1] = 230;
@@ -37,7 +32,6 @@ CNewUIEnterDevilSquare::CNewUIEnterDevilSquare()
 	m_iDevilSquareLimitLevel[5][0] = 331; m_iDevilSquareLimitLevel[5][1] = 400;
 	m_iDevilSquareLimitLevel[6][0] = 0; m_iDevilSquareLimitLevel[6][1] = 0;
 
-	// 7~13 마검사, 다크로드 클래스
 	m_iDevilSquareLimitLevel[7][0] = 15; m_iDevilSquareLimitLevel[7][1] = 110;
 	m_iDevilSquareLimitLevel[8][0] = 111; m_iDevilSquareLimitLevel[8][1] = 160;
 	m_iDevilSquareLimitLevel[9][0] = 161; m_iDevilSquareLimitLevel[9][1] = 210;
@@ -49,18 +43,16 @@ CNewUIEnterDevilSquare::CNewUIEnterDevilSquare()
 
 CNewUIEnterDevilSquare::~CNewUIEnterDevilSquare()
 {
-	Release();			// 꼭 하자!!
+	Release();
 }
 
-//---------------------------------------------------------------------------------------------
-// Create
 bool CNewUIEnterDevilSquare::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
 	if( NULL == pNewUIMng )
 		return false;
 	
 	m_pNewUIMng = pNewUIMng;
-	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_DEVILSQUARE, this );		// 인터페이스 오브젝트 등록
+	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_DEVILSQUARE, this );
 	
 	SetPos(x, y);
 	
@@ -69,7 +61,7 @@ bool CNewUIEnterDevilSquare::Create(CNewUIManager* pNewUIMng, int x, int y)
 	// Exit Button
 	m_BtnExit.ChangeButtonImgState( true, IMAGE_ENTERDS_BASE_WINDOW_BTN_EXIT, false );
 	m_BtnExit.ChangeButtonInfo( m_Pos.x+13, m_Pos.y+392, 36, 29 );		
-	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );	// 1002 "닫기"
+	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );
 	
 	// Enter Button
 	int iVal=0;
@@ -285,9 +277,6 @@ float CNewUIEnterDevilSquare::GetLayerDepth()
 	return 4.0f;
 }
 
-//---------------------------------------------------------------------------------------------
-// CheckLimitLV
-// 캐릭터 레벨에 따른 입성 레벨을 구한다.
 int CNewUIEnterDevilSquare::CheckLimitLV( int iIndex )
 {
 	int	iVal = 0;
@@ -299,13 +288,13 @@ int CNewUIEnterDevilSquare::CheckLimitLV( int iIndex )
 	}
 
 	int iLevel;
-	if(IsMasterLevel( CharacterAttribute->Class ) == true )
+	if(gCharacterManager.IsMasterLevel( CharacterAttribute->Class ) == true )
 		iLevel = Master_Level_Data.nMLevel;
 	else
 	iLevel = CharacterAttribute->Level;
 //Master_Level_Data.nMLevel
 
-	if(IsMasterLevel( CharacterAttribute->Class ) == false )
+	if(gCharacterManager.IsMasterLevel( CharacterAttribute->Class ) == false )
 	{
 		for(int iCastleLV=0; iCastleLV<MAX_ENTER_GRADE-1; ++iCastleLV)
 		{
@@ -338,7 +327,7 @@ void CNewUIEnterDevilSquare::OpenningProcess()
 
 	// 레벨 제한 체크
 	int iLimitLVIndex = 0;
-	if( GetBaseClass(Hero->Class)==CLASS_DARK || GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
+	if( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
 		|| GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK

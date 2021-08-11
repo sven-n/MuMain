@@ -13,30 +13,19 @@
 #include "zzzinventory.h"
 #include "dsplaysound.h"
 #include "CSItemOption.h"
+#include "CharacterManager.h"
 #include "UIControls.h"
 #include "NewUISystem.h"
+#include "SkillManager.h"
 
-/*+++++++++++++++++++++++++++++++++++++
-    Extern.
-+++++++++++++++++++++++++++++++++++++*/
 extern	char TextList[30][100];
 extern	int  TextListColor[30];
 extern	int  TextBold[30];
-extern float g_fScreenRate_x;	// ¡Ø
+extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 
-
-/*+++++++++++++++++++++++++++++++++++++
-    Global.
-+++++++++++++++++++++++++++++++++++++*/
 static  CSItemOption csItemOption;
 
-//static	const	BYTE g_bySetOptionListValue[35] = {  2,  2, 15,  5,  5,  5, 10, 20, 10, 20, 10, 20, 10, 20, 40, 80, 40, 80,  
-//													 5, 10,  5, 60, 50, 70, 20,  3, 50, 40, 10, 10, 10, 10, 10, 10, 10 };
-
-/*+++++++++++++++++++++++++++++++++++++
-    FUNCTIONS.
-+++++++++++++++++++++++++++++++++++++*/
 static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
 
 static void BuxConvert(BYTE *Buffer,int Size)
@@ -44,7 +33,6 @@ static void BuxConvert(BYTE *Buffer,int Size)
 	for(int i=0;i<Size;i++)
 		Buffer[i] ^= bBuxCode[i%3];
 }
-
 
 bool CSItemOption::OpenItemSetScript ( bool bTestServer )
 {
@@ -176,7 +164,7 @@ bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
 	}
 
 #ifdef PSW_BUGFIX_CLASS_KNIGHT_REQUIRESKILL
-	if( GetBaseClass ( Hero->Class ) == CLASS_KNIGHT ) {
+	if( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT ) {
 		SkillEnergy = 10+SkillAttribute[Type].Energy*(SkillAttribute[Type].Level)*4/100;
 	}
 #endif //PSW_BUGFIX_CLASS_KNIGHT_REQUIRESKILL
@@ -375,8 +363,8 @@ void CSItemOption::checkItemType ( BYTE* optionList, const int iType, const int 
 
 void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 {
-    int Class = GetBaseClass ( Hero->Class );
-	int ExClass = IsSecondClass(Hero->Class);
+    int Class = gCharacterManager.GetBaseClass ( Hero->Class );
+	int ExClass = gCharacterManager.IsSecondClass(Hero->Class);
 
 	BYTE    bySetOptionListTmp[2][16];
     BYTE    bySetOptionListTmp2[2][16];

@@ -19,6 +19,7 @@
 #include "GOBoid.h"
 #include "GIPetManager.h"
 #include "MapManager.h"
+#include "SkillManager.h"
 
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 #include "w_BaseMap.h"

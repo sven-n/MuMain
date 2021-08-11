@@ -4,15 +4,10 @@
 #pragma once
 
 #include "GlobalText.h"
-#ifdef KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
-#include "_struct.h"
-#endif // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
 
 ///////////////////////////////////////////////////////////////////////////////
 // filter
 ///////////////////////////////////////////////////////////////////////////////
-
-extern CGlobalText GlobalText;
 
 void OpenTextScriptFile(char *FileName);
 void OpenTextFile(char *FileName);
@@ -156,36 +151,25 @@ public:
 
     void Init();
 	void InitAddValue ();
-    BYTE GetSkillMasteryType ( int iType );
     void SetCharacter(BYTE Class);
 	void InputEnemyAttribute(MONSTER *Enemy);
     bool IsZeroDurability();
 	void CalculateDamage();
     void CalculateCriticalDamage();
     void CalculateMagicDamage();
-	void CalculateCurseDamage();	// 저주력 데미지 계산.
+	void CalculateCurseDamage();
 	void CalculateAttackRating();
 	void CalculateAttackSpeed();
 	void CalculateSuccessfulBlocking();
-	//대인전용 공격 성공률과 방어율만 따로 계산한다.
 	void CalculateAttackRatingPK();
 	void CalculateSuccessfulBlockingPK();
 	void CalculateDefense();
 	void CalculateMagicDefense();
 	void CalculateWalkSpeed();
-	// 레벨업 했을 때 초기 경험치와 다음 경험치를 갱신
 	void CalculateNextExperince();
 	void CalulateMasterLevelNextExperience();
     void CalculateAll();
-
-	// 정보 얻기
-	void GetMagicSkillDamage( int iType, int *piMinDamage, int *piMaxDamage);
-	void GetCurseSkillDamage(int iType, int *piMinDamage, int *piMaxDamage);	// 저주력 스킬 데미지.
-    void GetSkillDamage( int iType, int *piMinDamage, int *piMaxDamage);
-
-#ifdef PSW_SECRET_ITEM
 	void CalculateBasicState();
-#endif //PSW_SECRET_ITEM
 
 #ifdef LDS_FIX_APPLY_BUFF_STATEVALUES_WHEN_CALCULATE_CHARACTERSTATE_WITH_SETITEM
 	void getAllAddStateOnlyExValues( int &iAddStrengthExValues, 
@@ -206,7 +190,6 @@ inline DWORD GenerateCheckSum2( BYTE *pbyBuffer, DWORD dwSize, WORD wKey)
 		DWORD dwTemp;
 		memcpy( &dwTemp, pbyBuffer + dwChecked, sizeof ( DWORD));
 
-		// 1. 단계
 		switch ( ( dwChecked / 4 + wKey) % 2)
 		{
 		case 0:
@@ -216,8 +199,6 @@ inline DWORD GenerateCheckSum2( BYTE *pbyBuffer, DWORD dwSize, WORD wKey)
 			dwResult += dwTemp;
 			break;
 		}
-
-		// 2. 단계
 		if ( 0 == ( dwChecked % 16))
 		{
 			dwResult ^= ( ( dwKey + dwResult) >> ( ( dwChecked / 4) % 8 + 1));
@@ -227,32 +208,7 @@ inline DWORD GenerateCheckSum2( BYTE *pbyBuffer, DWORD dwSize, WORD wKey)
 	return ( dwResult);
 }
 
-
-// skill.
-//  스킬 정보를 얻는다.
-void GetSkillInformation( int iType, int iLevel, char *lpszName, int *piMana, int *piDistance, int *piSkillMana = NULL);
-void GetSkillInformation_Energy(int iType, int *piEnergy);
-void GetSkillInformation_Charisma(int iType, int *piCharisma);
-// 스킬의 거리를 얻는다.
-float GetSkillDistance(int Index, CHARACTER* c=NULL);
-//  스킬 딜레이 값을 계산한다.
-void GetSkillInformation_Damage(int iType, int *piDamage);
-bool CheckSkillDelay ( int SkillIndex );
-void CalcSkillDelay ( int time );
-
-#ifdef STATE_LIMIT_TIME
-void SetWorldStateTime ( DWORD State, int Time );
-#endif// STATE_LIMIT_TIME
-void RenderSkillDelay ( int SkillIndex, int x, int y, int Width, int Height );
-
-bool IsGuildMaster();			// 길마인가
-bool IsSubGuildMaster();		// 부길마인가
-bool IsBattleMaster();			// 배틀마스터인가
-
-#ifdef CSK_FIX_EPSOLUTESEPTER
 bool IsCepterItem(int iType);
-#endif // CSK_FIX_EPSOLUTESEPTER
-
 extern CHARACTER_MACHINE   *CharacterMachine;
 extern CHARACTER_ATTRIBUTE *CharacterAttribute;
 

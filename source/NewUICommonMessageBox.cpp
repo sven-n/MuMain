@@ -20,12 +20,10 @@
 #include "MixMgr.h"
 #include "CSQuest.h"
 #include "NewUICryWolf.h"
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
 #include "PortalMgr.h"
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef LDK_ADD_GAMBLE_SYSTEM
 #include "GambleSystem.h"
-#endif //LDK_ADD_GAMBLE_SYSTEM
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 using namespace SEASON3B;
 
@@ -3472,7 +3470,7 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
 #ifdef LDK_FIX_CRYWOLF_RESULT_FONT_STATE
 		//해외버전 크라이 울프 결과창 폰트 위치 수정(2008.4.30)
 		//차후 변경할수도 있음
-		wsprintf(Text,"%d      %s      %s      %d",i+1,HeroName[i],GetCharacterClassText(HeroClass[i]),HeroScore[i]);
+		wsprintf(Text,"%d      %s      %s      %d",i+1,HeroName[i],gCharacterManager.GetCharacterClassText(HeroClass[i]),HeroScore[i]);
 #else
 		wsprintf(Text,"%d         %s         %s             %d",i+1,HeroName[i],GetCharacterClassText(HeroClass[i]),HeroScore[i]);
 #endif //LDK_FIX_CRYWOLF_RESULT_FONT_STATE

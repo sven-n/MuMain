@@ -23,7 +23,6 @@ extern ItemAddOptioninfo*			g_pItemAddOptioninfo;
 #endif
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "NewUISystem.h"
-//#include "../ProtocolSend.h"
 
 #ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
 #include "DummyAttackProtocol.h"
@@ -212,8 +211,6 @@ extern char LogInID[MAX_ID_SIZE+1];
 extern bool First;
 extern int FirstTime;
 extern BOOL g_bGameServerConnected;
-
-//#include "../ProtocolSend.h"
 
 __forceinline void SendCheck( void)
 {	

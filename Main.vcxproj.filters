@@ -49,15 +49,6 @@
     <Filter Include="MU\network\proxy\send">
       <UniqueIdentifier>{8f14d950-b6dd-4b7f-b92f-798721b1a8a6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MU\sound">
-      <UniqueIdentifier>{bb394fb2-52ff-44d8-b94c-022ca3a635a8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MU\effect">
-      <UniqueIdentifier>{6c987b5a-2e03-4c6a-a301-b2c11ebca53e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MU\input">
-      <UniqueIdentifier>{f42ce68d-c805-4b89-a15f-e46ba93dcca7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MU\graphic">
       <UniqueIdentifier>{279a9f26-baa3-4b5a-9595-9b6c04505f2a}</UniqueIdentifier>
     </Filter>
@@ -124,9 +115,6 @@
     <Filter Include="MU\time">
       <UniqueIdentifier>{5dbd88cd-af6b-4dfb-ae40-a22d53483be2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MU\LauncherHelper">
-      <UniqueIdentifier>{ce7cdc3c-5166-44f3-a6f9-6ea1785e2453}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MU\GFx">
       <UniqueIdentifier>{aef444d9-3318-4c2c-a7d6-c414f6dba1ba}</UniqueIdentifier>
     </Filter>
@@ -181,6 +169,21 @@
     </Filter>
     <Filter Include="MU\Character">
       <UniqueIdentifier>{40d08960-a0c1-4906-a754-f6b54225859e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\Skill">
+      <UniqueIdentifier>{1b93627f-0459-47db-acdb-d438e33ff987}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\Guild">
+      <UniqueIdentifier>{aa6fcfe7-9900-45fd-a583-f58d8f5bfa3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\Sound">
+      <UniqueIdentifier>{bb394fb2-52ff-44d8-b94c-022ca3a635a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\Buff">
+      <UniqueIdentifier>{f42ce68d-c805-4b89-a15f-e46ba93dcca7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\Effect">
+      <UniqueIdentifier>{6c987b5a-2e03-4c6a-a301-b2c11ebca53e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -320,28 +323,7 @@
     <ClCompile Include="source\StdAfx.cpp">
       <Filter>MU\common</Filter>
     </ClCompile>
-    <ClCompile Include="source\w_BuffScriptLoader.cpp">
-      <Filter>MU\client</Filter>
-    </ClCompile>
-    <ClCompile Include="source\w_BuffStateSystem.cpp">
-      <Filter>MU\client</Filter>
-    </ClCompile>
-    <ClCompile Include="source\w_BuffStateValueControl.cpp">
-      <Filter>MU\client</Filter>
-    </ClCompile>
-    <ClCompile Include="source\w_BuffTimeControl.cpp">
-      <Filter>MU\client</Filter>
-    </ClCompile>
     <ClCompile Include="source\Builder.cpp">
-      <Filter>MU\client\info</Filter>
-    </ClCompile>
-    <ClCompile Include="source\w_Buff.cpp">
-      <Filter>MU\client\info</Filter>
-    </ClCompile>
-    <ClCompile Include="source\w_CharacterInfo.cpp">
-      <Filter>MU\client\info</Filter>
-    </ClCompile>
-    <ClCompile Include="source\w_ObjectInfo.cpp">
       <Filter>MU\client\info</Filter>
     </ClCompile>
     <ClCompile Include="source\CreditInfo.cpp">
@@ -585,43 +567,43 @@
       <Filter>MU\network\proxy\receive</Filter>
     </ClCompile>
     <ClCompile Include="source\DSplaysound.cpp">
-      <Filter>MU\sound</Filter>
+      <Filter>MU\Sound</Filter>
     </ClCompile>
     <ClCompile Include="source\DSwaveIO.cpp">
-      <Filter>MU\sound</Filter>
+      <Filter>MU\Sound</Filter>
     </ClCompile>
     <ClCompile Include="source\SkillEffectMgr.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffect.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectBlurSpark.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectFireLeave.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectJoint.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectMagicSkill.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectNoUse.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectParticle.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectPoint.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectPointer.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\zzzeffectsprite.cpp">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzTexture.cpp">
       <Filter>MU\graphic\2D\2d_resource</Filter>
@@ -1031,9 +1013,6 @@
     <ClCompile Include="source\Time\Timer.cpp">
       <Filter>MU\time</Filter>
     </ClCompile>
-    <ClCompile Include="source\LauncherHelper\LauncherHelper.cpp">
-      <Filter>MU\LauncherHelper</Filter>
-    </ClCompile>
     <ClCompile Include="source\CGFxFontConfigParser.cpp">
       <Filter>MU\GFx</Filter>
     </ClCompile>
@@ -1130,17 +1109,44 @@
     <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp">
       <Filter>External Object\Leaf</Filter>
     </ClCompile>
-    <ClCompile Include="ProtocolSend.cpp">
-      <Filter>MU\network</Filter>
-    </ClCompile>
     <ClCompile Include="source\MapManager.cpp">
       <Filter>MU\Map</Filter>
     </ClCompile>
     <ClCompile Include="source\LoadData.cpp">
       <Filter>MU\Load</Filter>
     </ClCompile>
-    <ClCompile Include="CharacterManager.cpp">
+    <ClCompile Include="source\SkillManager.cpp">
+      <Filter>MU\Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ProtocolSend.cpp">
+      <Filter>MU\network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CharacterManager.cpp">
       <Filter>MU\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GuildManager.cpp">
+      <Filter>MU\Guild</Filter>
+    </ClCompile>
+    <ClCompile Include="source\w_BuffScriptLoader.cpp">
+      <Filter>MU\Buff</Filter>
+    </ClCompile>
+    <ClCompile Include="source\w_BuffStateSystem.cpp">
+      <Filter>MU\Buff</Filter>
+    </ClCompile>
+    <ClCompile Include="source\w_BuffStateValueControl.cpp">
+      <Filter>MU\Buff</Filter>
+    </ClCompile>
+    <ClCompile Include="source\w_BuffTimeControl.cpp">
+      <Filter>MU\Buff</Filter>
+    </ClCompile>
+    <ClCompile Include="source\w_CharacterInfo.cpp">
+      <Filter>MU\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="source\w_ObjectInfo.cpp">
+      <Filter>MU\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="source\w_Buff.cpp">
+      <Filter>MU\Buff</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1284,18 +1290,6 @@
     </ClInclude>
     <ClInclude Include="source\stdafx.h">
       <Filter>MU\common</Filter>
-    </ClInclude>
-    <ClInclude Include="source\w_BuffScriptLoader.h">
-      <Filter>MU\client</Filter>
-    </ClInclude>
-    <ClInclude Include="source\w_BuffStateSystem.h">
-      <Filter>MU\client</Filter>
-    </ClInclude>
-    <ClInclude Include="source\w_BuffStateValueControl.h">
-      <Filter>MU\client</Filter>
-    </ClInclude>
-    <ClInclude Include="source\w_BuffTimeControl.h">
-      <Filter>MU\client</Filter>
     </ClInclude>
     <ClInclude Include="source\BaseCls.h">
       <Filter>MU\client\Header Files</Filter>
@@ -1510,15 +1504,6 @@
     <ClInclude Include="source\Builder.h">
       <Filter>MU\client\info</Filter>
     </ClInclude>
-    <ClInclude Include="source\w_Buff.h">
-      <Filter>MU\client\info</Filter>
-    </ClInclude>
-    <ClInclude Include="source\w_CharacterInfo.h">
-      <Filter>MU\client\info</Filter>
-    </ClInclude>
-    <ClInclude Include="source\w_ObjectInfo.h">
-      <Filter>MU\client\info</Filter>
-    </ClInclude>
     <ClInclude Include="source\CreditInfo.h">
       <Filter>MU\client\info\resource</Filter>
     </ClInclude>
@@ -1598,19 +1583,19 @@
       <Filter>MU\network\proxy\send</Filter>
     </ClInclude>
     <ClInclude Include="source\DSPlaySound.h">
-      <Filter>MU\sound</Filter>
+      <Filter>MU\Sound</Filter>
     </ClInclude>
     <ClInclude Include="source\DSwaveIO.h">
-      <Filter>MU\sound</Filter>
+      <Filter>MU\Sound</Filter>
     </ClInclude>
     <ClInclude Include="source\DSWavRead.h">
-      <Filter>MU\sound</Filter>
+      <Filter>MU\Sound</Filter>
     </ClInclude>
     <ClInclude Include="source\SkillEffectMgr.h">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClInclude>
     <ClInclude Include="source\ZzzEffect.h">
-      <Filter>MU\effect</Filter>
+      <Filter>MU\Effect</Filter>
     </ClInclude>
     <ClInclude Include="source\ZzzTexture.h">
       <Filter>MU\graphic\2D\2d_resource</Filter>
@@ -2034,9 +2019,6 @@
     </ClInclude>
     <ClInclude Include="source\Time\Timer.h">
       <Filter>MU\time</Filter>
-    </ClInclude>
-    <ClInclude Include="source\LauncherHelper\LauncherHelper.h">
-      <Filter>MU\LauncherHelper</Filter>
     </ClInclude>
     <ClInclude Include="source\CGFxFontConfigParser.h">
       <Filter>MU\GFx</Filter>
@@ -2821,20 +2803,47 @@
     <ClInclude Include="source\w_WindowMessageHandler.h">
       <Filter>MU\common</Filter>
     </ClInclude>
-    <ClInclude Include="ProtocolSend.h">
-      <Filter>MU\network</Filter>
-    </ClInclude>
-    <ClInclude Include="ProtocolAsio.h">
-      <Filter>MU\network</Filter>
-    </ClInclude>
     <ClInclude Include="source\MapManager.h">
       <Filter>MU\Map</Filter>
     </ClInclude>
     <ClInclude Include="source\LoadData.h">
       <Filter>MU\Load</Filter>
     </ClInclude>
-    <ClInclude Include="CharacterManager.h">
+    <ClInclude Include="source\SkillManager.h">
+      <Filter>MU\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ProtocolAsio.h">
+      <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ProtocolSend.h">
+      <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\CharacterManager.h">
       <Filter>MU\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GuildManager.h">
+      <Filter>MU\Guild</Filter>
+    </ClInclude>
+    <ClInclude Include="source\w_BuffScriptLoader.h">
+      <Filter>MU\Buff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\w_BuffStateSystem.h">
+      <Filter>MU\Buff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\w_BuffStateValueControl.h">
+      <Filter>MU\Buff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\w_BuffTimeControl.h">
+      <Filter>MU\Buff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\w_CharacterInfo.h">
+      <Filter>MU\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="source\w_ObjectInfo.h">
+      <Filter>MU\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="source\w_Buff.h">
+      <Filter>MU\Buff</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -30,6 +30,8 @@
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "MapManager.h"
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -195,7 +197,7 @@ void    SettingHellasColor ( void )
 BYTE    GetHellasLevel ( int Class, int Level )
 {
     int startIndex = 0;
-    if (   GetBaseClass( Class )==CLASS_DARK || GetBaseClass( Class )==CLASS_DARK_LORD   
+    if (gCharacterManager.GetBaseClass( Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Class )==CLASS_DARK_LORD   
 #ifdef PBG_ADD_NEWCHAR_MONK
 		|| GetBaseClass( Class )==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -223,7 +225,7 @@ bool EnableKalima(int Class, int Level, int ItemLevel)
     int startIndex = 0;
 
 	// 마검사나 다크로드
-    if(GetBaseClass( Class ) == CLASS_DARK || GetBaseClass( Class ) == CLASS_DARK_LORD
+    if(gCharacterManager.GetBaseClass( Class ) == CLASS_DARK || gCharacterManager.GetBaseClass( Class ) == CLASS_DARK_LORD
 #ifdef PBG_ADD_NEWCHAR_MONK
 		|| GetBaseClass( Class ) == CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -240,18 +242,13 @@ bool EnableKalima(int Class, int Level, int ItemLevel)
 	return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  읽어버린 지도의 가용 가능여부를 알려준다.
-//////////////////////////////////////////////////////////////////////////
-bool    GetUseLostMap ( bool bDrawAlert )
+bool GetUseLostMap ( bool bDrawAlert )
 {
-	// 캐릭터의 레벨을 얻어온다.
     int Level = CharacterAttribute->Level;
 
     int startIndex = 0;
-	// 마검사나 다크로드는 인덱스를 7부터 시작
-    if(GetBaseClass( Hero->Class )==CLASS_DARK || GetBaseClass( Hero->Class )==CLASS_DARK_LORD  
+
+    if(gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD  
 #ifdef PBG_ADD_NEWCHAR_MONK
 		|| GetBaseClass( Hero->Class )==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -260,20 +257,17 @@ bool    GetUseLostMap ( bool bDrawAlert )
         startIndex = NUM_HELLAS;
     }
 
-    // 캐릭터가 안전지대에 있으면 경고 메시지를 보여준다
     if(bDrawAlert && Hero->SafeZone)
     {
 		g_pChatListBox->AddText("", GlobalText[1238], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
-	// 자신의 레벨이 칼리마이동레벨보다 높으면 사용가능한다.
     if ( Level >= g_iKalimaLevel[startIndex][0] )
 	{
         return true;
 	}
 
-    //  경고 메시지를 보여준다.
     if ( bDrawAlert )
     {
         char Text[100];
@@ -284,20 +278,15 @@ bool    GetUseLostMap ( bool bDrawAlert )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  아이템의 정보를 표시한다.
-//////////////////////////////////////////////////////////////////////////
-int     RenderHellasItemInfo ( ITEM* ip, int textNum )
+int RenderHellasItemInfo ( ITEM* ip, int textNum )
 {
     int TextNum = textNum;
     switch ( ip->Type )
     {
-    case ITEM_POTION+28 :   //  잃어버린 지도.
-        //  해당 클래스에 맞는 제한 레벨 시작 위치를 찾는다.
+    case ITEM_POTION+28:
         {
             int startIndex = 0;
-            if (   GetBaseClass( Hero->Class )==CLASS_DARK || GetBaseClass( Hero->Class )==CLASS_DARK_LORD  
+            if (gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD  
 #ifdef PBG_ADD_NEWCHAR_MONK
 					|| GetBaseClass( Hero->Class )==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -337,7 +326,7 @@ int     RenderHellasItemInfo ( ITEM* ip, int textNum )
         }
         break;
 
-    case ITEM_POTION+29 :   //  쿤둔의 표식.
+    case ITEM_POTION+29 :
         {
             sprintf ( TextList[TextNum], GlobalText[1181], ip->Durability, 5 ); TextNum++;
             if ( ip->Durability>=5 )
@@ -355,14 +344,7 @@ int     RenderHellasItemInfo ( ITEM* ip, int textNum )
     return TextNum;
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  오브젝트 관련.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  오브젝트 설명을 저장한다.
-//////////////////////////////////////////////////////////////////////////
-void    AddObjectDescription ( char* Text, vec3_t position )
+void AddObjectDescription ( char* Text, vec3_t position )
 {
     ObjectDescript QD;
     
@@ -372,11 +354,7 @@ void    AddObjectDescription ( char* Text, vec3_t position )
     g_qObjDes.push ( QD );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  오브젝트 설명을 찍는다.
-//////////////////////////////////////////////////////////////////////////
-void    RenderObjectDescription ( void )
+void RenderObjectDescription ( void )
 {
     glColor3f ( 1.f, 1.f, 1.f );
     while ( !g_qObjDes.empty() )

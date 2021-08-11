@@ -13,12 +13,10 @@
 #include "NewUIGuildInfoWindow.h"
 #include "NewUIButton.h"
 #include "NewUIMyInventory.h"
-#ifdef PJH_FIX_4_BUGFIX_33
 #include "CSitemOption.h"
-#endif //PJH_FIX_4_BUGFIX_33
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#include "CharacterManager.h"
+#include "SkillManager.h"
+
 MASTER_LEVEL_DATA		m_MasterLevel[MAX_MASTER];
 BYTE					Master_Skill_Data[9][5];
 int						JobPoint[4] = {0,0,0,0};
@@ -200,7 +198,7 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
 	int GetJob = -1;
 
 	if(Job == 1)
-		Job = GetCharacterClass(Hero->Class);
+		Job = gCharacterManager.GetCharacterClass(Hero->Class);
 	switch(Job)
 	{
 	case CLASS_WIZARD:
@@ -902,7 +900,7 @@ void SEASON3B::CNewUIMasterLevel::Render_Text()
 	//unicode::_sprintf( lpszStr, GlobalText[20]);
 	int Job = 0;// = GetCharacterClass(Hero->Class);
 
-	switch(GetCharacterClass(Hero->Class))
+	switch(gCharacterManager.GetCharacterClass(Hero->Class))
 	{
 	case CLASS_WIZARD:
 	case CLASS_SOULMASTER:
@@ -1132,7 +1130,7 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 	int GetJob = -1;
 
 	if(Job == 1)
-		Job = GetCharacterClass(Hero->Class);
+		Job = gCharacterManager.GetCharacterClass(Hero->Class);
 	switch(Job)
 	{
 	case CLASS_WIZARD:

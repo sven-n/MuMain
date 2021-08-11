@@ -12,6 +12,7 @@
 #include "MapManager.h"
 #include "GMHuntingGround.h"
 #include "BoneManager.h"
+#include "SkillManager.h"
 
 DWORD g_MusicStartStamp = 0;
 
@@ -25,7 +26,6 @@ bool M31HuntingGround::IsInHuntingGroundSection2(const vec3_t Position)
 	return false;
 }
 
-//. 오브젝트
 bool M31HuntingGround::CreateHuntingGroundObject(OBJECT* pObject)
 {
 	if(!IsInHuntingGround())
@@ -33,9 +33,9 @@ bool M31HuntingGround::CreateHuntingGroundObject(OBJECT* pObject)
 	
 	switch(pObject->Type)
 	{
-	case 27:	//. 연꽃
-	case 54:	//. 용암
-		pObject->Timer = float(rand()%1000) * 0.01f;	//. 동적인 표현을 위한 시드값으로 사용한다.
+	case 27:
+	case 54:
+		pObject->Timer = float(rand()%1000) * 0.01f;
 		break;
 	}
 
@@ -51,7 +51,7 @@ bool M31HuntingGround::MoveHuntingGroundObject(OBJECT* pObject)
 	
 	switch(pObject->Type)
 	{
-	case 1:		//. 반디불 박스(녹색) : 2004/11/05
+	case 1:
 		{
 			int time = timeGetTime()%1024;
 			if(time >= 0 && time < 10) {
@@ -62,7 +62,7 @@ bool M31HuntingGround::MoveHuntingGroundObject(OBJECT* pObject)
 			pObject->HiddenMesh = -2;	//. Hide Object
 		}
 		break;
-	case 44:		//. 반디불 박스(파랑) : 2004/11/05
+	case 44:
 		{
 			int time = timeGetTime()%1024;
 			if(time >= 0 && time < 10) {

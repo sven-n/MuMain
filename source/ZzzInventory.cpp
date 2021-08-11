@@ -54,6 +54,8 @@
 #include "ServerListManager.h"
 #include <time.h>
 #include "MapManager.h"
+#include "CharacterManager.h"
+#include "SkillManager.h"
 
 
 ///////////////////////////////////////////
@@ -75,7 +77,6 @@ int			 GuildPlayerKey = 0;
 int			 SelectMarkColor = 0;
 MARK_t		 GuildMark[MAX_MARKS];
 
-// 파티 관련
 PARTY_t Party[MAX_PARTYS];
 int     PartyNumber = 0;
 int     PartyKey = 0;
@@ -623,8 +624,8 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 	if(pItem == NULL)
 		return;
 
-	BYTE byFirstClass = GetBaseClass(Hero->Class);
-	BYTE byStepClass = GetStepClass(Hero->Class);
+	BYTE byFirstClass = gCharacterManager.GetBaseClass(Hero->Class);
+	BYTE byStepClass = gCharacterManager.GetStepClass(Hero->Class);
 
 	int iTextColor = 0;
 
@@ -1945,37 +1946,26 @@ WORD calcMaxDurability ( const ITEM* ip, ITEM_ATTRIBUTE *p, int Level )
     return  maxDurability;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//	해당 아이템의 이름을 알아낸다.
-//////////////////////////////////////////////////////////////////////////
 void GetItemName ( int iType, int iLevel, char* Text )
 {
 	ITEM_ATTRIBUTE *p = &ItemAttribute[iType];
 
-    //  아이템의 이름.
-    if (iType>=ITEM_POTION+23 && iType<=ITEM_POTION+26 )   //  퀘스트 아이템.
+    if (iType>=ITEM_POTION+23 && iType<=ITEM_POTION+26 )
     {
-		if(iType == ITEM_POTION+23)	//. 제왕의 서, 영광의반지
+		if(iType == ITEM_POTION+23)
 		{
 			switch( iLevel )
 			{
-			case 0: sprintf ( Text, "%s", p->Name ); break;			//	제왕의 서
-			case 1: sprintf ( Text, "%s", GlobalText[906] ); break;	//  영광의 반지
+			case 0: sprintf ( Text, "%s", p->Name ); break;
+			case 1: sprintf ( Text, "%s", GlobalText[906] ); break;
 			}
 		}
-		else if(iType == ITEM_POTION+24)	//. 부러진검, 다크스톤
+		else if(iType == ITEM_POTION+24)
 		{
 			switch( iLevel )
 			{
-			case 0: sprintf ( Text, "%s", p->Name ); break;			//	부러진검.
-			case 1: sprintf ( Text, "%s", GlobalText[907] ); break;	//  다크스톤.
+			case 0: sprintf ( Text, "%s", p->Name ); break;
+			case 1: sprintf ( Text, "%s", GlobalText[907] ); break;
 			}
 		}
 		else
@@ -1983,7 +1973,7 @@ void GetItemName ( int iType, int iLevel, char* Text )
 			sprintf ( Text, "%s", p->Name );
 		}
     }
-	else if(iType == ITEM_POTION+12)//이밴트 아이템
+	else if(iType == ITEM_POTION+12)
 	{
 		switch(iLevel)
 		{
@@ -1992,7 +1982,7 @@ void GetItemName ( int iType, int iLevel, char* Text )
 		case 2:	sprintf ( Text, "%s", ChaosEventName[p->Durability] ); break;
 		}
 	}
-	else if(iType == ITEM_POTION+11)//행운의 상자/성탄의별/폭죽/마법 주머니./사랑의 하트//훈장
+	else if(iType == ITEM_POTION+11)
 	{
 		switch(iLevel)
 		{
@@ -2002,37 +1992,27 @@ void GetItemName ( int iType, int iLevel, char* Text )
 		case 3: sprintf ( Text, "%s", GlobalText[107] ); break;
 		case 5: sprintf ( Text, "%s", GlobalText[109] ); break;
 		case 6: sprintf ( Text, "%s", GlobalText[110] ); break;
-        case 7: sprintf ( Text, "%s", GlobalText[111] ); break; //  천공의 상자.
+        case 7: sprintf ( Text, "%s", GlobalText[111] ); break;
 			break;
-#ifdef USE_EVENT_ELDORADO
 		case 8:
 		case 9:
 		case 10:
 		case 11:
-		case 12:	// 천공의 상자
+		case 12:
 			sprintf(Text,"%s +%d",GlobalText[115], iLevel - 7);
 			break;
-#endif // USE_EVENT_ELDORADO
-		case 13:	// 다크로드의 마음
+		case 13:
 			sprintf(Text, GlobalText[117]); break;
-#ifdef NEW_YEAR_BAG_EVENT
-        case 14:    //  복주머니.
+        case 14:
 			sprintf(Text, GlobalText[1650]); break;
             break;
 
         case 15:
 			sprintf(Text, GlobalText[1651]); break;
             break;
-#else
-    #ifdef CHINA_MOON_CAKE
-        case 14:    //  중국 월병.
-            sprintf(Text,GlobalText[118]); break;
-            break;
-    #endif// CHINA_MOON_CAKE
-#endif// NEW_YEAR_BAG_EVENT
 		}
 	}
-    else if ( iType==ITEM_HELPER+15 )//  서클. ( 에너지/체력/민첩/힘/통솔 )
+    else if ( iType==ITEM_HELPER+15 )
     {
         switch ( iLevel )
         {
@@ -2040,18 +2020,18 @@ void GetItemName ( int iType, int iLevel, char* Text )
         case 1:sprintf(Text,"%s %s", GlobalText[169], p->Name ); break;
         case 2:sprintf(Text,"%s %s", GlobalText[167], p->Name ); break;
         case 3:sprintf(Text,"%s %s", GlobalText[166], p->Name ); break;
-		case 4:sprintf(Text,"%s %s", GlobalText[1900], p->Name ); break;	// 통솔열매
+		case 4:sprintf(Text,"%s %s", GlobalText[1900], p->Name ); break;
         }
     }
-    else if ( iType==ITEM_HELPER+14 )//  로크의 깃털.
+    else if ( iType==ITEM_HELPER+14 )
     {
         switch ( iLevel )
         {
-        case 0: sprintf ( Text, "%s", p->Name ); break;             //  로크의 깃털.
-        case 1: sprintf ( Text, "%s", GlobalText[1235] ); break;    //  군주의 문장.
+        case 0: sprintf ( Text, "%s", p->Name ); break;
+        case 1: sprintf ( Text, "%s", GlobalText[1235] ); break;
         }
     }
-    else if ( iType==ITEM_HELPER+31 )   //  영혼.
+    else if ( iType==ITEM_HELPER+31 )
     {
         switch ( iLevel )
         {
@@ -2059,17 +2039,17 @@ void GetItemName ( int iType, int iLevel, char* Text )
         case 1: sprintf ( Text, "%s %s", GlobalText[1214], p->Name ); break;
         }
     }
-    else if ( iType==ITEM_POTION+21 )    //  레나. ( 1:스톤).
+    else if ( iType==ITEM_POTION+21 )
     {
         switch ( iLevel )
         {
         case 0: sprintf ( Text, "%s", p->Name ); break;
-        case 1: sprintf ( Text, "%s", GlobalText[810] ); break;     //  스톤.
-        case 2: sprintf ( Text, "%s", GlobalText[1098] ); break;    //  우정의 돌.
-        case 3: sprintf ( Text, "%s", GlobalText[1290] ); break;    //  성주의표식
+        case 1: sprintf ( Text, "%s", GlobalText[810] ); break;
+        case 2: sprintf ( Text, "%s", GlobalText[1098] ); break;
+        case 3: sprintf ( Text, "%s", GlobalText[1290] ); break;
         }
     }
-    else if ( iType==ITEM_HELPER+19 )	//  대천사의 절대 무기
+    else if ( iType==ITEM_HELPER+19 )
     {
         sprintf ( Text, "%s", GlobalText[809] );
     }
@@ -2077,13 +2057,13 @@ void GetItemName ( int iType, int iLevel, char* Text )
 	{
 		switch(iLevel)
 		{
-		case 0: sprintf( Text, "%s", p->Name ); break;			//. 마법사의 반지	
-		case 1: sprintf( Text, "%s", GlobalText[922] ); break;	//. 제왕의 반지
-        case 2: sprintf( Text, "%s", GlobalText[928] ); break;	//. 전사의 반지
-        case 3: sprintf( Text, "%s", GlobalText[929] ); break;	//. 전사의 반지
+		case 0: sprintf( Text, "%s", p->Name ); break;
+		case 1: sprintf( Text, "%s", GlobalText[922] ); break;
+        case 2: sprintf( Text, "%s", GlobalText[928] ); break;
+        case 3: sprintf( Text, "%s", GlobalText[929] ); break;
 		}
 	}
-	else if(iType == ITEM_POTION+9)//술, 사랑의 올리브
+	else if(iType == ITEM_POTION+9)
 	{
 		switch(iLevel)
 		{
@@ -2091,47 +2071,23 @@ void GetItemName ( int iType, int iLevel, char* Text )
 		case 1:	sprintf ( Text, "%s", GlobalText[108] ); break;
 		}
 	}
-    else if(iType == ITEM_WING+11)//소환구슬
+    else if(iType == ITEM_WING+11)
 	{
-#ifdef KJW_FIX_ITEMNAME_ORB_OF_SUMMONING
 		sprintf(Text,"%s %s",SkillAttribute[30+iLevel].Name,GlobalText[102]);
-#else // KJW_FIX_ITEMNAME_ORB_OF_SUMMONING
-        sprintf ( Text, "%s %s", GlobalText[738], GlobalText[102] );
-#endif // KJW_FIX_ITEMNAME_ORB_OF_SUMMONING
 	}
-#ifdef MYSTERY_BEAD
-	else if(iType == ITEM_WING+26)
-	{
-		switch(iLevel)
-		{
-		case 0:		//. 신비의구슬
-			strcpy( Text, p->Name); break;
-		case 1:		//. 빨강수정
-			strcpy( Text, GlobalText[1831]); break;
-		case 2:		//. 파랑수정
-			strcpy( Text, GlobalText[1832]); break;
-		case 3:		//. 검은수정
-			strcpy( Text, GlobalText[1833]); break;
-		case 4:		//. 보물상자
-			strcpy( Text, GlobalText[1834]); break;
-		case 5:		//. 깜짝선물
-			strcpy( Text, GlobalText[1838]); break;
-		}
-	}
-#endif // MYSTERY_BEAD
-	else if(iType == ITEM_WING+32)//빨간리본상자.(x-mas이벤트용)
+	else if(iType == ITEM_WING+32)
 	{
 		sprintf(Text, "%s", p->Name);	
 	}
-	else if(iType == ITEM_WING+33)//초록리본상자.(x-mas이벤트용)
+	else if(iType == ITEM_WING+33)
 	{
 		sprintf(Text, "%s", p->Name);	
 	}
-	else if(iType == ITEM_WING+34)//초록리본상자.(x-mas이벤트용)
+	else if(iType == ITEM_WING+34)
 	{
 		sprintf(Text, "%s", p->Name);	
 	}
-	else if(iType == ITEM_WING+35)//파이어스크림
+	else if(iType == ITEM_WING+35)
 	{
 		sprintf(Text, "%s", p->Name);	
 	}
@@ -2140,7 +2096,7 @@ void GetItemName ( int iType, int iLevel, char* Text )
  		sprintf ( Text, "%s", p->Name ); 
 	}
 #ifdef GIFT_BOX_EVENT
-	else if(iType == ITEM_POTION+32)//분홍 초콜릿상자.(발렌타인데이 이벤트용)
+	else if(iType == ITEM_POTION+32)
 	{
 		switch(iLevel)
 		{
@@ -2148,7 +2104,7 @@ void GetItemName ( int iType, int iLevel, char* Text )
  		case 1:	sprintf ( Text, "%s", GlobalText[2012] ); break;
 		}
 	}
-	else if(iType == ITEM_POTION+33)//빨간 초콜릿상자.(발렌타인데이 이벤트용)
+	else if(iType == ITEM_POTION+33)
 	{
 		switch(iLevel)
 		{
@@ -2156,7 +2112,7 @@ void GetItemName ( int iType, int iLevel, char* Text )
 		case 1:	sprintf ( Text, "%s", GlobalText[2013] ); break;
 		}
 	}
-	else if(iType == ITEM_POTION+34)//파란 초콜릿상자.(발렌타인데이 이벤트용)
+	else if(iType == ITEM_POTION+34)
 	{
 		switch(iLevel)
 		{
@@ -2166,7 +2122,7 @@ void GetItemName ( int iType, int iLevel, char* Text )
 	}
 #endif
 
-    else if(iType == ITEM_HELPER+10)//변신반지
+    else if(iType == ITEM_HELPER+10)
 	{
 		for(int i=0;i<MAX_MONSTER;i++)
 		{
@@ -2176,7 +2132,7 @@ void GetItemName ( int iType, int iLevel, char* Text )
 			}
 		}
 	}
-    else if ( iType>=ITEM_WING+3 && iType<=ITEM_WING+6 )  //  정령의 날개 ~ 어둠의 날개.
+    else if ( iType>=ITEM_WING+3 && iType<=ITEM_WING+6 )
     {
 		if(iLevel==0)
 			sprintf(Text,"%s",p->Name);
@@ -2185,16 +2141,16 @@ void GetItemName ( int iType, int iLevel, char* Text )
     }
 	else if ((iType>=ITEM_WING+36 && iType<=ITEM_WING+40) || (iType>=ITEM_WING+42 && iType<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| (iType == ITEM_WING+50) //군림의망토
+		|| (iType == ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)	// 폭풍의 날개 ~ 제왕의 망토, 소환술사 2,3차 날개.
+		)
     {
 		if(iLevel==0)
 			sprintf(Text,"%s",p->Name);
 		else
 			sprintf(Text,"%s +%d",p->Name,iLevel);
     }
-	else if ( iType==ITEM_SWORD+19 || iType==ITEM_BOW+18 || iType==ITEM_STAFF+10 || iType==ITEM_MACE+13) //	대천사의 절대 무기.
+	else if ( iType==ITEM_SWORD+19 || iType==ITEM_BOW+18 || iType==ITEM_STAFF+10 || iType==ITEM_MACE+13)
 	{
 		if(iLevel==0)
 			sprintf(Text,"%s",p->Name);
@@ -2210,20 +2166,18 @@ void GetItemName ( int iType, int iLevel, char* Text )
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if ( iType==INDEX_COMPILED_CELE)
 	{
-		sprintf(Text,"%s +%d", GlobalText[1806], iLevel+1);	// 축복의 보석 묶음
+		sprintf(Text,"%s +%d", GlobalText[1806], iLevel+1);
 	}
 	else if ( iType==INDEX_COMPILED_SOUL)
 	{
-		sprintf(Text,"%s +%d", GlobalText[1807], iLevel+1);	// 영혼의 보석 묶음
+		sprintf(Text,"%s +%d", GlobalText[1807], iLevel+1);
 	}
-#ifdef ADD_SEED_SPHERE_ITEM
-	else if ((iType >= ITEM_WING+60 && iType <= ITEM_WING+65)	// 시드
-		|| (iType >= ITEM_WING+70 && iType <= ITEM_WING+74)	// 스피어
-		|| (iType >= ITEM_WING+100 && iType <= ITEM_WING+129))	// 시드스피어
+	else if ((iType >= ITEM_WING+60 && iType <= ITEM_WING+65)
+		|| (iType >= ITEM_WING+70 && iType <= ITEM_WING+74)
+		|| (iType >= ITEM_WING+100 && iType <= ITEM_WING+129))
 	{
 		sprintf(Text,"%s",p->Name);
 	}
-#endif	// ADD_SEED_SPHERE_ITEM
 #ifdef LJH_FIX_BUG_MISSING_ITEM_NAMES_ITEM_HELPER_7 
     else if ( iType == ITEM_POTION+7 ) //  스패셜 물약.//종훈물약
     {
@@ -2242,10 +2196,6 @@ void GetItemName ( int iType, int iLevel, char* Text )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  아이템 옵션 설명 얻기.
-//////////////////////////////////////////////////////////////////////////
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 void GetSpecialOptionText ( int Type, char* Text, WORD Option, BYTE Value, int iMana )
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -2255,27 +2205,27 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
     switch(Option)
     {
     case AT_SKILL_BLOCKING:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[80], iMana);
         break;
     case AT_SKILL_SWORD1:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[81], iMana);
         break;
     case AT_SKILL_SWORD2:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[82], iMana);
         break;
     case AT_SKILL_SWORD3:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[83], iMana);
         break;
     case AT_SKILL_SWORD4:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[84], iMana);
         break;
     case AT_SKILL_SWORD5:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[85], iMana);
         break;
 	case AT_SKILL_MANY_ARROW_UP:
@@ -2285,22 +2235,22 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
 	case AT_SKILL_MANY_ARROW_UP+4:
 
     case AT_SKILL_CROSSBOW:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[86], iMana);
         break;
     case AT_SKILL_BLAST_CROSSBOW4:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[920], iMana);
         break;
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 	case AT_SKILL_MULTI_SHOT:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[920], iMana);
 		break;
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	case AT_SKILL_RECOVER:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[920], iMana);
 		break;
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
@@ -2312,7 +2262,7 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
 	case AT_SKILL_POWER_SLASH_UP+4:
 #endif //PJH_SEASON4_MASTER_RANK4
     case AT_SKILL_ICE_BLADE:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[98], iMana);
         break;
     case AT_LUCK:
@@ -2386,15 +2336,15 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
         sprintf(Text, GlobalText[746] );
         break;
     case AT_SKILL_RIDER :
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+       gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text, GlobalText[745], iMana  );
         break;
     case AT_SKILL_STRONG_PIER:  //  
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf ( Text, GlobalText[1210], iMana );
         break;
     case AT_SKILL_LONG_SPEAR:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf ( Text, GlobalText[1186], iMana );
         break;
 	case AT_SKILL_ASHAKE_UP:
@@ -2403,11 +2353,11 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
 	case AT_SKILL_ASHAKE_UP+3:
 	case AT_SKILL_ASHAKE_UP+4:
     case AT_SKILL_DARK_HORSE:
-        GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf ( Text, GlobalText[1189], iMana );
         break;
 	case AT_SKILL_PLASMA_STORM_FENRIR:	// 플라즈마 스톰
-		GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+		gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf ( Text, GlobalText[1928], iMana );
 		break;
     case AT_SET_OPTION_IMPROVE_DEFENCE :
@@ -2437,33 +2387,28 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
     case AT_SET_OPTION_IMPROVE_STRENGTH :
         sprintf(Text, GlobalText[985], Value );
         break;
-        
     case AT_SET_OPTION_IMPROVE_DEXTERITY :
         sprintf(Text, GlobalText[986], Value );
         break;
-        
     case AT_SET_OPTION_IMPROVE_VITALITY :
         sprintf(Text, GlobalText[987], Value );
         break;
-        
     case AT_SET_OPTION_IMPROVE_ENERGY :
         sprintf(Text, GlobalText[988], Value );
         break;
-        
     case AT_IMPROVE_MAX_MANA :
         sprintf(Text, GlobalText[1087], Value );
         break;
-        
     case AT_IMPROVE_MAX_AG :
         sprintf(Text, GlobalText[1088], Value );
         break;
-	case AT_DAMAGE_REFLECTION:	// [대상의 공격이 유저에게 명중한 경우] 5% 확률로 적 공격력 50% 돌려줌
+	case AT_DAMAGE_REFLECTION:
 		sprintf(Text, GlobalText[1673], Value );
 		break;
-	case AT_RECOVER_FULL_LIFE:	// [대상의 공격이 유저에게 명중한 경우] 5% 확률로 유저 생명 100% 순간 회복
+	case AT_RECOVER_FULL_LIFE:
 		sprintf(Text, GlobalText[1674], Value );
 		break;
-	case AT_RECOVER_FULL_MANA:	// [대상의 공격이 유저에게 명중한 경우] 5% 확률로 유저 마나 100% 순간 회복
+	case AT_RECOVER_FULL_MANA:
 		sprintf(Text, GlobalText[1675], Value );
 		break;
 	case AT_SKILL_SUMMON_EXPLOSION:
@@ -2472,11 +2417,9 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
 	case AT_SKILL_SUMMON_REQUIEM:
 		sprintf(Text, GlobalText[1696], iMana );
 		break;
-#ifdef ASG_ADD_SUMMON_RARGLE
 	case AT_SKILL_SUMMON_POLLUTION:
 		sprintf(Text, GlobalText[1789], iMana );
 		break;
-#endif	// ASG_ADD_SUMMON_RARGLE
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_SKILL_THRUST:
 		GetSkillInformation( Option, 1, NULL, &iMana, NULL);
@@ -2490,28 +2433,13 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
     }
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////
-//  아이템의 정보 출력.
-//////////////////////////////////////////////////////////////////////////
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemTextListBoxUse)
-#else	// ASG_ADD_NEW_QUEST_SYSTEM
-void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 {
 	if (ip->Type == -1)
 		return;
 
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-	// 기간제 아이템일때 시간계산. (기간제 시간 정보가 오기 전에는 render하지 않는다.)
 	tm* ExpireTime;
-#ifdef KJH_FIX_EXPIRED_PERIODITEM_TOOLTIP
 	if( ip->bPeriodItem == true && ip->bExpiredPeriod == false)
-#else // KJH_FIX_EXPIRED_PERIODITEM_TOOLTIP
-	if( ip->bPeriodItem == true )
-#endif // KJH_FIX_EXPIRED_PERIODITEM_TOOLTIP
 	{
 		_tzset();
 		if( ip->lExpireTime == 0 )
@@ -2519,7 +2447,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 
 		ExpireTime = localtime((time_t*)&(ip->lExpireTime));
 	}
-#endif	// KJH_ADD_PERIOD_ITEM_SYSTEM
 	
 	ITEM_ATTRIBUTE *p = &ItemAttribute[ip->Type];
 	TextNum = 0;
@@ -2531,35 +2458,25 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		TextList[i][0] = NULL;
 	}
 
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-#ifdef PET_SYSTEM
+
 	if ( ip->Type==ITEM_HELPER+4 || ip->Type==ITEM_HELPER+5 ) 
 	{
-#ifdef PBG_FIX_DARKPET_TIPUPDATE
 		BYTE PetType = PET_TYPE_DARK_SPIRIT;
 		if(ip->Type==ITEM_HELPER+4)
 		{
 			PetType = PET_TYPE_DARK_HORSE;
-#ifdef PBG_FIX_PETTIP
+
 			if((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER)
-#endif //PBG_FIX_PETTIP
 				SendRequestPetInfo(PetType, Inventype, EQUIPMENT_HELPER);
 		}
 		else
-#ifdef PBG_FIX_PETTIP
 			if((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
-#endif //PBG_FIX_PETTIP
 			SendRequestPetInfo(PetType, Inventype, EQUIPMENT_WEAPON_LEFT);
-#endif //PBG_FIX_DARKPET_TIPUPDATE
+
 		giPetManager::RenderPetItemInfo( sx, sy, ip, Inventype );
 		return;
 	}
-#endif// PET_SYSTEM
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM											//## 소스정리 대상임.
-#ifdef PET_SYSTEM
-    if ( giPetManager::RenderPetItemInfo( sx, sy, ip, Sell ) ) return;
-#endif// PET_SYSTEM
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM											//## 소스정리 대상임.
+
 
 	sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 
@@ -2567,32 +2484,26 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 	int Color;
 
     //  아이템 색.
-	if(ip->Type==ITEM_POTION+13 || ip->Type==ITEM_POTION+14 || ip->Type==ITEM_WING+15 || ip->Type==ITEM_POTION+31 ||	// 수호의보석
+	if(ip->Type==ITEM_POTION+13 || ip->Type==ITEM_POTION+14 || ip->Type==ITEM_WING+15 || ip->Type==ITEM_POTION+31 ||
 		(COMGEM::isCompiledGem(ip)) ||
-		ip->Type == ITEM_POTION+65 || ip->Type == ITEM_POTION+66 || ip->Type == ITEM_POTION+67 ||	// 데쓰빔나이트의 불꽃, 헬마이네의 뿔, 어둠의불사조의 깃털
-		ip->Type == ITEM_POTION+68 ||	// 심연의눈동자
-		ip->Type==ITEM_HELPER+52 || ip->Type==ITEM_HELPER+53 ||	// 콘돌의 깃털 불꽃
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-		ip->Type==ITEM_POTION+100 ||	//행운의 동전
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef PBG_ADD_GENSRANKING
+		ip->Type == ITEM_POTION+65 || ip->Type == ITEM_POTION+66 || ip->Type == ITEM_POTION+67 ||
+		ip->Type == ITEM_POTION+68 ||
+		ip->Type==ITEM_HELPER+52 || ip->Type==ITEM_HELPER+53 ||
+		ip->Type==ITEM_POTION+100 ||
 		(ip->Type >= ITEM_POTION+141 && ip->Type <= ITEM_POTION+144) ||
-#endif //PBG_ADD_GENSRANKING
-
 #ifdef LEM_ADD_LUCKYITEM
 		(ip->Type >= ITEM_HELPER+135 && ip->Type <= ITEM_HELPER+145) ||
 		(ip->Type == ITEM_POTION+160 || ip->Type == ITEM_POTION+161) ||
 #endif // LEM_ADD_LUCKYITEM
-		ip->Type==ITEM_POTION+16 || ip->Type==ITEM_POTION+22 )  //  축복의 보석 ~ 창조의 보석.
+		ip->Type==ITEM_POTION+16 || ip->Type==ITEM_POTION+22 )
 	{
 		Color = TEXT_COLOR_YELLOW;
 	}
-    //  대천사의 절대무기.
     else if ( ip->Type==ITEM_STAFF+10 || ip->Type==ITEM_SWORD+19 || ip->Type==ITEM_BOW+18 || ip->Type==ITEM_MACE+13)
     {
         Color = TEXT_COLOR_PURPLE;
     }
-	else if(ip->Type==ITEM_POTION+17 || ip->Type==ITEM_POTION+18 || ip->Type==ITEM_POTION+19)	// 데빌스퀘어 관련 아이템
+	else if(ip->Type==ITEM_POTION+17 || ip->Type==ITEM_POTION+18 || ip->Type==ITEM_POTION+19)
 	{
 		Color = TEXT_COLOR_YELLOW;
 	}
@@ -2604,24 +2515,10 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
     {
         Color = TEXT_COLOR_GREEN_BLUE;
     }
-#ifdef _PVP_ADD_MOVE_SCROLL
-    else if( ip->Type==ITEM_POTION+10 )
-    {
-        Color = TEXT_COLOR_WHITE;
-    }
-#endif	// _PVP_ADD_MOVE_SCROLL
-#ifdef _PVP_MURDERER_HERO_ITEM
-    else if( ip->Type==ITEM_POTION+30 )
-    {
-        Color = TEXT_COLOR_WHITE;
-    }
-#endif	// _PVP_MURDERER_HERO_ITEM
-#ifdef SOCKET_SYSTEM
     else if( g_SocketItemMgr.IsSocketItem(ip) )
     {
         Color = TEXT_COLOR_VIOLET;
     }
-#endif	// SOCKET_SYSTEM
 	else if(ip->SpecialNum > 0 && (ip->Option1&63) > 0)
 	{
 		Color = TEXT_COLOR_GREEN;
@@ -3211,7 +3108,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
             break;  
         case 1:
             {
-                GetSkillInformation ( AT_SKILL_SWORD4, 1, NULL, &iMana, NULL );
+                gSkillManager.GetSkillInformation ( AT_SKILL_SWORD4, 1, NULL, &iMana, NULL );
 			    sprintf ( TextList[TextNum], GlobalText[84], iMana ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
                 sprintf ( TextList[TextNum], GlobalText[629] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
                 sprintf ( TextList[TextNum], GlobalText[630], 2 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
@@ -3219,7 +3116,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
             break;
         case 2:
             {
-			    GetSkillInformation ( AT_SKILL_CROSSBOW, 1, NULL, &iMana, NULL );
+			    gSkillManager.GetSkillInformation ( AT_SKILL_CROSSBOW, 1, NULL, &iMana, NULL );
 			    sprintf ( TextList[TextNum], GlobalText[86], iMana ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
                 sprintf ( TextList[TextNum], GlobalText[629] ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
                 sprintf ( TextList[TextNum], GlobalText[630], 2 ); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
@@ -3448,7 +3345,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 		
 		if(ip->Type == ITEM_HELPER+58)
 		{
-			if(GetBaseClass( Hero->Class ) == CLASS_DARK_LORD)
+			if(gCharacterManager.GetBaseClass( Hero->Class ) == CLASS_DARK_LORD)
 			{
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;
 			}
@@ -5029,7 +4926,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
     else if ( ip->Type==ITEM_HELPER+29 )
     {
         int startIndex = 0;
-        if ( GetBaseClass( Hero->Class )==CLASS_DARK || GetBaseClass( Hero->Class )==CLASS_DARK_LORD 
+        if ( gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
 			|| GetBaseClass( Hero->Class )==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -5048,8 +4945,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
             int Zen = g_iChaosCastleZen[i];
 
     		sprintf(TextList[TextNum],"        %d             %3d~%3d     %3d,000", i+1,  g_iChaosCastleLevel[startIndex+i][0],  min( 400, g_iChaosCastleLevel[startIndex+i][1] ),  Zen ); 
-            if ( (HeroLevel>=g_iChaosCastleLevel[startIndex+i][0] && HeroLevel<=g_iChaosCastleLevel[startIndex+i][1])
-				&& IsMasterLevel(Hero->Class) == false)
+            if ( (HeroLevel>=g_iChaosCastleLevel[startIndex+i][0] && HeroLevel<=g_iChaosCastleLevel[startIndex+i][1]) && gCharacterManager.IsMasterLevel(Hero->Class) == false)
             {
                 TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW; 
             }
@@ -5060,7 +4956,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
             TextBold[TextNum] = false; TextNum++;
         }
 		sprintf(TextList[TextNum], "         %d          %s   %3d,000", 7, GlobalText[737], 1000); 
-		if(IsMasterLevel(Hero->Class) == true)
+		if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 		{
 			TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW; 
 		}
@@ -5709,7 +5605,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype)
 			break;
 		}
 
-		GetSkillInformation( ip->Special[i], 1, NULL, &iMana, NULL);
+		gSkillManager.GetSkillInformation( ip->Special[i], 1, NULL, &iMana, NULL);
         GetSpecialOptionText ( ip->Type, TextList[TextNum], ip->Special[i], ip->SpecialValue[i], iMana );
 
        	TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -6765,11 +6661,7 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 
 	SIZE TextSize = {0, 0};
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	int Height = ((TextNum-SkipNum)*TextSize.cy+SkipNum*TextSize.cy/2)*480/WindowHeight;
 	if(sy-Height >= 0)
@@ -6801,12 +6693,12 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
 			break;
 		}
 	}
-	if( GetEquipedBowType( ) == BOWTYPE_CROSSBOW )
+	if( gCharacterManager.GetEquipedBowType( ) == BOWTYPE_CROSSBOW )
 	{
 		AttackDamageMin = CharacterAttribute->AttackDamageMinRight;
 		AttackDamageMax = CharacterAttribute->AttackDamageMaxRight;
 	}
-	else if( GetEquipedBowType( ) == BOWTYPE_BOW )
+	else if( gCharacterManager.GetEquipedBowType( ) == BOWTYPE_BOW )
 	{
 		AttackDamageMin = CharacterAttribute->AttackDamageMinLeft;
 		AttackDamageMax = CharacterAttribute->AttackDamageMaxLeft;
@@ -6828,7 +6720,7 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
 	}
 
 	bool Alpha = false;
-	if ( GetBaseClass(Hero->Class)==CLASS_KNIGHT || GetBaseClass(Hero->Class)==CLASS_DARK )
+	if ( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_KNIGHT || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK )
 	{
 		if ( l->Type>=ITEM_SWORD && l->Type<ITEM_STAFF+MAX_ITEM_INDEX && r->Type>=ITEM_SWORD && r->Type<ITEM_STAFF+MAX_ITEM_INDEX )
 		{
@@ -6837,7 +6729,7 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
 			AttackDamageMax = ((CharacterAttribute->AttackDamageMaxRight*55)/100+(CharacterAttribute->AttackDamageMaxLeft*55)/100);
 		}
 	}
-    else if(GetBaseClass(Hero->Class) == CLASS_ELF )
+    else if(gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF )
     {
         if ( ( r->Type>=ITEM_BOW && r->Type<ITEM_BOW+MAX_ITEM_INDEX ) &&
              ( l->Type>=ITEM_BOW && l->Type<ITEM_BOW+MAX_ITEM_INDEX ) )
@@ -6877,7 +6769,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 {
 	char lpszName[256];
 	int  iMinDamage, iMaxDamage;
-    int  HeroClass = GetBaseClass ( Hero->Class );
+    int  HeroClass = gCharacterManager.GetBaseClass ( Hero->Class );
 	int  iMana, iDistance, iSkillMana;
     int  TextNum = 0;
 	int  SkipNum = 0;
@@ -6888,14 +6780,14 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	int  iSkillMinDamage, iSkillMaxDamage;
 
     int  SkillType = CharacterAttribute->Skill[Type];
-    CharacterMachine->GetMagicSkillDamage( CharacterAttribute->Skill[Type], &iMinDamage, &iMaxDamage);
-	CharacterMachine->GetSkillDamage( CharacterAttribute->Skill[Type], &iSkillMinDamage, &iSkillMaxDamage );
+    gCharacterManager.GetMagicSkillDamage( CharacterAttribute->Skill[Type], &iMinDamage, &iMaxDamage);
+	gCharacterManager.GetSkillDamage( CharacterAttribute->Skill[Type], &iSkillMinDamage, &iSkillMaxDamage );
 	
-	GetAttackDamage ( &AttackDamageMin, &AttackDamageMax );	
+	GetAttackDamage(&AttackDamageMin, &AttackDamageMax);	
 
     iSkillMinDamage += AttackDamageMin;
 	iSkillMaxDamage += AttackDamageMax;
-	GetSkillInformation( CharacterAttribute->Skill[Type], 1, lpszName, &iMana, &iDistance, &iSkillMana);
+	gSkillManager.GetSkillInformation( CharacterAttribute->Skill[Type], 1, lpszName, &iMana, &iDistance, &iSkillMana);
 	
     if ( CharacterAttribute->Skill[Type]==AT_SKILL_STRONG_PIER && Hero->Weapon[0].Type!=-1 )
     {
@@ -7000,7 +6892,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 				if (AT_SKILL_SUMMON_EXPLOSION <= bySkill && bySkill <= AT_SKILL_SUMMON_REQUIEM)
 #endif	// ASG_ADD_SUMMON_RARGLE
 				{
-					CharacterMachine->GetCurseSkillDamage(bySkill, &iMinDamage, &iMaxDamage);
+					gCharacterManager.GetCurseSkillDamage(bySkill, &iMinDamage, &iMaxDamage);
 					sprintf(TextList[TextNum], GlobalText[1692], iMinDamage, iMaxDamage);
 				}
 				else
@@ -7102,11 +6994,10 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
         }
 	}
 
-	//^ 펜릴 스킬 공격력
 	if(CharacterAttribute->Skill[Type] == AT_SKILL_PLASMA_STORM_FENRIR)
 	{
 		int iSkillDamage;
-		GetSkillInformation_Damage(AT_SKILL_PLASMA_STORM_FENRIR, &iSkillDamage);
+		gSkillManager.GetSkillInformation_Damage(AT_SKILL_PLASMA_STORM_FENRIR, &iSkillDamage);
 
 		if(HeroClass == CLASS_KNIGHT || HeroClass == CLASS_DARK)
 		{
@@ -7136,7 +7027,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
 
-    if(GetBaseClass(Hero->Class) == CLASS_ELF)
+    if(gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
 	{
 		bool Success = true;
 		switch(CharacterAttribute->Skill[Type])
@@ -7206,7 +7097,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
    		sprintf(TextList[TextNum],GlobalText[360],iSkillMana);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-    if ( GetBaseClass(Hero->Class) == CLASS_KNIGHT )
+    if ( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT )
     {
         if ( CharacterAttribute->Skill[Type]==AT_SKILL_SPEAR )
         {
@@ -7225,7 +7116,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 				|| (AT_SKILL_TORNADO_SWORDB_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_TORNADO_SWORDB_UP+4)
 				   )
 			{
-				sprintf(TextList[TextNum], GlobalText[99] );
+				sprintf(TextList[TextNum], GlobalText[99]);
 				TextListColor[TextNum] = TEXT_COLOR_DARKRED;
 				TextBold[TextNum] = false;
 				TextNum++;
@@ -7240,14 +7131,13 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		}
     }
 
-    BYTE MasteryType = CharacterMachine->GetSkillMasteryType( CharacterAttribute->Skill[Type] );
+    BYTE MasteryType = gSkillManager.GetSkillMasteryType( CharacterAttribute->Skill[Type] );
     if ( MasteryType!=255 )
     {
         sprintf ( TextList[TextNum], GlobalText[1080+MasteryType] );
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;TextBold[TextNum] = false;TextNum++;
     }
 
-	
     int SkillUseType;
     int BrandType = SkillAttribute[SkillType].SkillBrand;
     SkillUseType = SkillAttribute[SkillType].SkillUseType;
@@ -7267,7 +7157,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		TextListColor[TextNum] = TEXT_COLOR_DARKRED;TextBold[TextNum] = false;TextNum++;
     }
 
-    if ( GetBaseClass(Hero->Class)==CLASS_DARK_LORD )
+    if ( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD )
     {
         if ( CharacterAttribute->Skill[Type]==AT_SKILL_PARTY_TELEPORT && PartyNumber<=0 )
         {
@@ -12289,7 +12179,7 @@ void RenderEqiupmentBox()
 	Width=60.f;Height=40.f;x=115.f;y=46.f;
     InventoryColor(&CharacterMachine->Equipment[EQUIPMENT_WING]);
     RenderBitmap(BITMAP_INVENTORY+14,x+StartX,y+StartY,Width,Height,0.f,0.f,Width/64.f,Height/64.f);
-	if(GetBaseClass(CharacterAttribute->Class)!=CLASS_DARK)
+	if(gCharacterManager.GetBaseClass(CharacterAttribute->Class)!=CLASS_DARK)
 	{
 		//helmet
 		Width=40.f;Height=40.f;x=75.f;y=46.f;
@@ -13090,8 +12980,8 @@ void RenderServerDivision ()
 BYTE CaculateFreeTicketLevel(int iType)
 {
 	int iChaLevel = CharacterAttribute->Level;
-	int iChaClass = GetBaseClass(Hero->Class);
-	int iChaExClass = IsSecondClass(Hero->Class);
+	int iChaClass = gCharacterManager.GetBaseClass(Hero->Class);
+	int iChaExClass = gCharacterManager.IsSecondClass(Hero->Class);
 
 	int iItemLevel = 0;
 

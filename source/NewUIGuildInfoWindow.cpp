@@ -15,6 +15,8 @@
 #include "ZzzInventory.h"
 #include "ZzzInfomation.h"
 #include "wsclientinline.h"
+#include "CharacterManager.h"
+#include "GuildManager.h"
 
 int	DeleteIndex = 0;
 int AppointStatus = 0;
@@ -589,7 +591,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 		Nm_Loc+=13;
 		if(Hero->GuildStatus == G_MASTER)
 		{
-			int Class = GetBaseClass ( CharacterAttribute->Class );
+			int Class = gCharacterManager.GetBaseClass(CharacterAttribute->Class);
 			if ( Class == CLASS_DARK_LORD )
 			{
 				int nCount = CharacterAttribute->Level/10+CharacterAttribute->Charisma/10;
@@ -891,7 +893,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Enum()
 	RenderImage(IMAGE_GUILDINFO_BOTTOM_LEFT, m_Pos.x+8, m_Pos.y+347, 14, 14);
 	RenderImage(IMAGE_GUILDINFO_BOTTOM_RIGHT, m_Pos.x+168, m_Pos.y+347, 14, 14);
 
-	if(IsGuildMaster())
+	if(gGuildManager.IsGuildMaster())
 	{
 		m_Button[BUTTON_GET_POSITION].Render();
 		m_Button[BUTTON_FREE_POSITION].Render();

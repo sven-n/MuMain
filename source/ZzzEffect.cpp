@@ -1,7 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 3D 특수효과 관련 함수
-//
-// *** 함수 레벨: 3
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -23,13 +20,11 @@
 #include "GM_Kanturu_2nd.h"
 #include "CDirection.h"
 #include "MapManager.h"
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
 #include "BoneManager.h"
-#endif // PRUARIN_EVENT07_3COLORHARVEST
-#ifdef CSK_HACK_TEST
-#include "HackTest.h"
-#endif // CSK_HACK_TEST
-#include "SkillEffectMgr.h"
+#include "SkillEffectMgr.h"]
+#include "CharacterManager.h"
+#include "SkillManager.h"
+
 
 PARTICLE  Particles	[MAX_PARTICLES];
 #ifdef DEVIAS_XMAS_EVENT
@@ -110,8 +105,6 @@ bool AddRangeAttack( vec3_t Position, float Range, short PKKey, int DamageKey[],
 	return true;
 }
 
-
-
 bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,short PKKey,WORD SkillSerialNum)
 {
 	int Skill = CharacterAttribute->Skill[Index];
@@ -151,11 +144,7 @@ bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,shor
 		if (Distance <= Range 
 			&& ( o->Kind==KIND_MONSTER || ( o->Kind==KIND_PLAYER && ( c->Key==PKKey || DamageChr ) ) ) )
 		{
-			if ( Skill==AT_SKILL_STORM || Skill==AT_SKILL_EVIL 
-#ifdef PJH_SEASON4_MASTER_RANK4
-				|| (AT_SKILL_EVIL_SPIRIT_UP <= Skill && AT_SKILL_EVIL_SPIRIT_UP+4 >= Skill)
-				|| (AT_SKILL_EVIL_SPIRIT_UP_M <= Skill && AT_SKILL_EVIL_SPIRIT_UP_M+4 >= Skill)
-#endif //PJH_SEASON4_MASTER_RANK4
+			if ( Skill==AT_SKILL_STORM || Skill==AT_SKILL_EVIL || (AT_SKILL_EVIL_SPIRIT_UP <= Skill && AT_SKILL_EVIL_SPIRIT_UP+4 >= Skill) || (AT_SKILL_EVIL_SPIRIT_UP_M <= Skill && AT_SKILL_EVIL_SPIRIT_UP_M+4 >= Skill)
 				)
 			{
 				if ( c->m_bFixForm==false )
@@ -163,20 +152,14 @@ bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,shor
 					c->StormTime = 10;
 				}
 
-#ifdef CSK_RAKLION_BOSS
-				// 세루판 보스와 거미알 몬스터는 악령이나 기타 스킬 타격시 회전되는 현상 막는 처리
 				if(c->MonsterIndex >= 459 && c->MonsterIndex <= 462)
 				{
 					c->StormTime = 0;
 				}
-#endif // CSK_RAKLION_BOSS
-#ifdef LDK_FIX_EG_DOOR_ROTATION_FIXED
-				// 제국 수호군 성문, 석상 스킬타격시 회전 불가
 				else if( 524 <= c->MonsterIndex && c->MonsterIndex <= 528 )
 				{
 					c->StormTime = 0;
 				}
-#endif //LDK_FIX_EG_DOOR_ROTATION_FIXED
 			}
 
             DamageKey[Count++] = c->Key;
@@ -19623,7 +19606,7 @@ void RenderWheelWeapon(OBJECT *o)
 	int Type = o->Owner->Weapon+MODEL_SWORD;
 	BMD *b = &Models[Type];
 	b->CurrentAction = 0;
-	b->Skin          = GetBaseClass(Hero->Class);
+	b->Skin          = gCharacterManager.GetBaseClass(Hero->Class);
 	b->CurrentAction = o->CurrentAction;
 	VectorCopy(o->Position,b->BodyOrigin);
 
@@ -19653,7 +19636,7 @@ void RenderFuryStrike(OBJECT *o)
 		int Type = o->Owner->Weapon+MODEL_SWORD;
 		BMD *b = &Models[Type];
 		b->CurrentAction = 0;
-		b->Skin          = GetBaseClass(Hero->Class);
+		b->Skin          = gCharacterManager.GetBaseClass(Hero->Class);
 		b->CurrentAction = o->CurrentAction;
 		VectorCopy(o->Position,b->BodyOrigin);
 

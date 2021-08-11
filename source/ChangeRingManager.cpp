@@ -10,6 +10,7 @@
 #include "ZzzCharacter.h"
 #include "ChangeRingManager.h"
 #include "LoadData.h"
+#include "CharacterManager.h"
 
 CChangeRingManager::CChangeRingManager()
 {
@@ -24,39 +25,24 @@ CChangeRingManager::~CChangeRingManager()
 void CChangeRingManager::LoadItemModel()
 {
 	gLoadData.AccessModel(MODEL_HELPER+10,"Data\\Item\\","Ring"  ,1);
-
 	gLoadData.AccessModel(MODEL_HELPER+39,"Data\\Item\\","Ring"  ,1);
-
 	gLoadData.AccessModel(MODEL_HELPER+40,"Data\\Item\\","Ring"  ,1);
-
 	gLoadData.AccessModel(MODEL_HELPER+41,"Data\\Item\\","Ring"  ,1);
-
 	gLoadData.AccessModel(MODEL_HELPER+42,"Data\\Item\\","Ring"  ,1);
-
 	gLoadData.AccessModel(MODEL_HELPER+68,"Data\\Item\\xmas\\","xmasring");
-
 	gLoadData.AccessModel(MODEL_HELPER+76,"Data\\Item\\","PandaPetRing");
-
 	gLoadData.AccessModel(MODEL_HELPER+122, "Data\\Item\\", "SkeletonRing");
-
 }
 
 void CChangeRingManager::LoadItemTexture()
 {
 	gLoadData.OpenTexture(MODEL_HELPER+39, "Item\\");
-
 	gLoadData.OpenTexture(MODEL_HELPER+41, "Item\\");
-
 	gLoadData.OpenTexture(MODEL_HELPER+40, "Item\\");
-
 	gLoadData.OpenTexture(MODEL_HELPER+42, "Item\\");
-
 	gLoadData.OpenTexture(MODEL_HELPER+68, "Item\\xmas\\");
-
 	gLoadData.OpenTexture(MODEL_HELPER+76, "Item\\");
-
 	gLoadData.OpenTexture(MODEL_HELPER+122, "Item\\");
-
 }
 
 bool CChangeRingManager::CheckDarkLordHair(int iType)
@@ -98,7 +84,7 @@ bool CChangeRingManager::CheckDarkLordHair(int iType)
 
 bool CChangeRingManager::CheckDarkCloak(int iClass, int iType)
 {
-	if(GetCharacterClass(iClass) == CLASS_DARK)
+	if(gCharacterManager.GetCharacterClass(iClass) == CLASS_DARK)
 	{
 		if(iType == MODEL_HALLOWEEN)
 		{

@@ -14,6 +14,7 @@
 #include "ServerListManager.h"
 #include "ZzzOpenData.h"
 #include "MapManager.h"
+#include "CharacterManager.h"
 
 using namespace SEASON3B;
 
@@ -2481,8 +2482,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 		iReqLevel = (*li)->_ReqInfo.iReqLevel;
 		iReqZen = (*li)->_ReqInfo.iReqZen;
 
-		// 마검사/다크로드일때 필요레벨을 계산(400 레벨은 제외)
-		if( ( GetBaseClass(CharacterAttribute->Class)==CLASS_DARK || GetBaseClass(CharacterAttribute->Class)==CLASS_DARK_LORD 
+		if( ( gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
 				|| GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -3158,7 +3158,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 		iY = m_StartMapNamePos.y + ( m_iRealFontHeight * iCurRenderTextIndex );
 
 		iReqLevel = (*li)->_ReqInfo.iReqLevel;
-		if ( (GetBaseClass(CharacterAttribute->Class)==CLASS_DARK || GetBaseClass(CharacterAttribute->Class)==CLASS_DARK_LORD
+		if ( (gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK_LORD
 #ifdef PBG_ADD_NEWCHAR_MONK
 				|| GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK

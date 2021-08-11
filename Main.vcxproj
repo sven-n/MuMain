@@ -1526,8 +1526,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CharacterManager.cpp" />
-    <ClCompile Include="ProtocolSend.cpp" />
     <ClCompile Include="source\BlackWin.cpp" />
     <ClCompile Include="source\BoneManager.cpp" />
     <ClCompile Include="source\Builder.cpp" />
@@ -1542,6 +1540,7 @@
     <ClCompile Include="source\CGFxProcess.cpp" />
     <ClCompile Include="source\CGFxSample.cpp" />
     <ClCompile Include="source\ChangeRingManager.cpp" />
+    <ClCompile Include="source\CharacterManager.cpp" />
     <ClCompile Include="source\CharInfoBalloon.cpp" />
     <ClCompile Include="source\CharInfoBalloonMng.cpp" />
     <ClCompile Include="source\CharMakeWin.cpp" />
@@ -1610,13 +1609,13 @@
     <ClCompile Include="source\GM_Raklion.cpp" />
     <ClCompile Include="source\GOBoid.cpp" />
     <ClCompile Include="source\GuildCache.cpp" />
+    <ClCompile Include="source\GuildManager.cpp" />
     <ClCompile Include="source\HackTest.cpp" />
     <ClCompile Include="source\ImportanceData.cpp" />
     <ClCompile Include="source\Input.cpp" />
     <ClCompile Include="source\ItemAddOptioninfo.cpp" />
     <ClCompile Include="source\ItemInfo.cpp" />
     <ClCompile Include="source\KeyGenerater.cpp" />
-    <ClCompile Include="source\LauncherHelper\LauncherHelper.cpp" />
     <ClCompile Include="source\LoadData.cpp" />
     <ClCompile Include="source\LoadingScene.cpp" />
     <ClCompile Include="source\Local.cpp" />
@@ -1736,6 +1735,7 @@
     <ClCompile Include="source\PortalMgr.cpp" />
     <ClCompile Include="source\ProtectAuto.cpp" />
     <ClCompile Include="source\ProtectSysKey.cpp" />
+    <ClCompile Include="source\ProtocolSend.cpp" />
     <ClCompile Include="source\PvPSystem.cpp" />
     <ClCompile Include="source\QuestInfo.cpp" />
     <ClCompile Include="source\QuestMng.cpp" />
@@ -1748,6 +1748,7 @@
     <ClCompile Include="source\SideHair.cpp" />
     <ClCompile Include="source\SkillEffectMgr.cpp" />
     <ClCompile Include="source\SkillInfo.cpp" />
+    <ClCompile Include="source\SkillManager.cpp" />
     <ClCompile Include="source\SlideInfo.cpp" />
     <ClCompile Include="source\Slider.cpp" />
     <ClCompile Include="source\SMD.cpp" />
@@ -2006,9 +2007,6 @@
     <ClCompile Include="source\_GlobalFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CharacterManager.h" />
-    <ClInclude Include="ProtocolAsio.h" />
-    <ClInclude Include="ProtocolSend.h" />
     <ClInclude Include="source\BaseCls.h" />
     <ClInclude Include="source\BlackWin.h" />
     <ClInclude Include="source\BoneManager.h" />
@@ -2024,6 +2022,7 @@
     <ClInclude Include="source\CGFxProcess.h" />
     <ClInclude Include="source\CGFxSample.h" />
     <ClInclude Include="source\ChangeRingManager.h" />
+    <ClInclude Include="source\CharacterManager.h" />
     <ClInclude Include="source\CharInfoBalloon.h" />
     <ClInclude Include="source\CharInfoBalloonMng.h" />
     <ClInclude Include="source\CharMakeWin.h" />
@@ -2317,6 +2316,7 @@
     <ClInclude Include="source\GM_Raklion.h" />
     <ClInclude Include="source\GOBoid.h" />
     <ClInclude Include="source\GuildCache.h" />
+    <ClInclude Include="source\GuildManager.h" />
     <ClInclude Include="source\HackTest.h" />
     <ClInclude Include="source\iexplorer.h" />
     <ClInclude Include="source\ImportanceData.h" />
@@ -2326,7 +2326,6 @@
     <ClInclude Include="source\ItemAddOptioninfo.h" />
     <ClInclude Include="source\ItemInfo.h" />
     <ClInclude Include="source\KeyGenerater.h" />
-    <ClInclude Include="source\LauncherHelper\LauncherHelper.h" />
     <ClInclude Include="source\LoadData.h" />
     <ClInclude Include="source\LoadingScene.h" />
     <ClInclude Include="source\Local.h" />
@@ -2448,6 +2447,8 @@
     <ClInclude Include="source\proc.h" />
     <ClInclude Include="source\ProtectAuto.h" />
     <ClInclude Include="source\ProtectSysKey.h" />
+    <ClInclude Include="source\ProtocolAsio.h" />
+    <ClInclude Include="source\ProtocolSend.h" />
     <ClInclude Include="source\PvPSystem.h" />
     <ClInclude Include="source\QuestInfo.h" />
     <ClInclude Include="source\QuestMng.h" />
@@ -2464,6 +2465,7 @@
     <ClInclude Include="source\Singleton.h" />
     <ClInclude Include="source\SkillEffectMgr.h" />
     <ClInclude Include="source\SkillInfo.h" />
+    <ClInclude Include="source\SkillManager.h" />
     <ClInclude Include="source\SlideInfo.h" />
     <ClInclude Include="source\Slider.h" />
     <ClInclude Include="source\SMD.h" />

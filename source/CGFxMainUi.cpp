@@ -4441,15 +4441,12 @@ bool CGFxMainUi::GetSkillDisable(int slotNum, int* _array)
 	int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
 
 #ifdef PBG_FIX_SKILL_DEMENDCONDITION
-	//스킬의 스텟요구량 검사후 미달되는것은 빨갛게 처리한다.
-	if( !SKILLCONDITION::DemendConditionCheckSkill( bySkillType ) )
+	if( !gSkillManager.DemendConditionCheckSkill( bySkillType ) )
 	{
-		//스킬의 스텟요구량을 만족안한다면.
 		bCantSkill = true;
 	}
 #endif //PBG_FIX_SKILL_DEMENDCONDITION
 
-	// 공성 스킬 검사
 	if(IsCanBCSkill(bySkillType) == false)
 	{
 		bCantSkill = true;

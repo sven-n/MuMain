@@ -8,13 +8,13 @@
 #include "NewUICommonMessageBox.h"
 #include "UIBaseDef.h"
 #include "DSPlaySound.h"
-#include "ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "wsclientinline.h"
+#include "CharacterManager.h"
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "UIControls.h"
@@ -116,7 +116,7 @@ void SEASON3B::CNewUICursedTempleEnter::SetButtonInfo()
 
 bool SEASON3B::CNewUICursedTempleEnter::CheckEnterLevel( int& enterlevel )
 {
-	if(IsMasterLevel(Hero->Class) == true)
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true)
 	{
 		enterlevel = 6;
 		return true;

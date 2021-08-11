@@ -16,6 +16,7 @@
 #include "ZzzEffect.h"
 #include "UIMng.h"
 #include "MapManager.h"
+#include "CharacterManager.h"
 
 #ifdef FOR_WORK
 	#include "./Utilities/Log/DebugAngel.h"
@@ -232,7 +233,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 	}
 	else if(SEASON3B::IsPress('A'))
 	{
-		if(IsMasterLevel( Hero->Class ) == true 
+		if(gCharacterManager.IsMasterLevel( Hero->Class ) == true 
 #ifdef PBG_ADD_NEWCHAR_MONK
 			&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT				// 현재 마스터 스킬트리 없음
 #endif //PBG_ADD_NEWCHAR_MONK

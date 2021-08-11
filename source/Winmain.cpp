@@ -38,11 +38,8 @@
 	#include "ProtectSysKey.h"
 #endif // PROTECT_SYSTEMKEY
 #include "./Utilities/Log/muConsoleDebug.h"
-#include "../ProtocolSend.h"
+#include "ProtocolSend.h"
 
-#ifdef BAN_USE_CMDLINE
-	#include "./LauncherHelper/LauncherHelper.h"
-#endif // BAN_USE_CMDLINE
 #include "CBTMessageBox.h"
 #include "./ExternalObject/leaf/regkey.h"
 
