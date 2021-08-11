@@ -2653,11 +2653,6 @@ int ItemValue(ITEM *ip,int goldType)
 			Gold = 24;
 			break;
 	#endif // CSK_PCROOM_ITEM
-	#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-		case ITEM_HELPER+96:		// 강함의 인장
-			Gold = 16;
-			break;
-	#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
 			
 #else	// ADD_EVENT_PCROOM_POINT_HALF
 			
@@ -2685,12 +2680,7 @@ int ItemValue(ITEM *ip,int goldType)
 			Gold = 30;
 			break;
 	  #endif // CSK_PCROOM_ITEM
-	  #ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-		case ITEM_HELPER+96:		// 강함의 인장
-			Gold = 32;
-			break;
-	  #endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
-			
+	
 	#else	// ASG_PCROOM_POINT_SYSTEM_MODIFY	
 	  #ifdef CSK_LUCKY_SEAL	// 해외와 틀림.
 		case ITEM_HELPER+43:
@@ -2714,11 +2704,6 @@ int ItemValue(ITEM *ip,int goldType)
 			Gold = 48;
 			break;
 	  #endif // CSK_PCROOM_ITEM
-	  #ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-		case ITEM_HELPER+96:		// 강함의 인장
-			Gold = 32;
-			break;
-	  #endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
 	
 	#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY
 #endif	// ADD_EVENT_PCROOM_POINT_HALF

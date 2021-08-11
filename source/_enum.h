@@ -2417,9 +2417,6 @@ enum eBuffState
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	eBuff_HonorOfGladiator = 103,		// 검투사의 명예
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	eBuff_StrongCharm = 104,			// 강함의 인장
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
 	eBuff_Doppelganger_Ascension = 105,	// 도플갱어 승천
 #endif	// YDG_ADD_DOPPELGANGER_MONSTER
@@ -2488,9 +2485,6 @@ enum eBuffTimeType
 #ifdef ASG_ADD_CS6_ITEM_GUARD_CHARM
 	eBuffTime_ItemGuardCharm,
 #endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	eBuffTime_ItemStrongCharm,				// 강함의 인장 (PC방 아이템)
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
 #ifdef PBG_ADD_SECRETBUFF
 	eBuffTime_Vitality,
 #endif //PBG_ADD_SECRETBUFF

@@ -494,25 +494,6 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderTabCastle()
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-// 수정사유: 일본의 경우 블러드캐슬과 환영사원의 입장 횟수 제한이 없음.
-#ifdef LJH_ADD_JPN_MODIFYING_QUESTINFO_ABOUT_BC_AND_CT
-	// 868 "%d회 입장가능"
-#ifdef ASG_MOD_UI_QUEST_INFO
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+125, GlobalText[868], 190, 0, RT3_SORT_CENTER);
-#else	// ASG_MOD_UI_QUEST_INFO
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+280, GlobalText[868], 190, 0, RT3_SORT_CENTER);
-#endif	// ASG_MOD_UI_QUEST_INFO
-	
-	// 829 "하루 %d회를 초과하여 입장할 수 없습니다."
-#ifdef ASG_MOD_UI_QUEST_INFO
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+145, GlobalText[829], 190, 0, RT3_SORT_CENTER);
-#else	// ASG_MOD_UI_QUEST_INFO
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+300, GlobalText[829], 190, 0, RT3_SORT_CENTER);
-#endif	// ASG_MOD_UI_QUEST_INFO
-
-
-#else	//LJH_ADD_JPN_MODIFYING_QUESTINFO_ABOUT_BC_AND_CT
-	// 868 "%d회 입장가능"
 	unicode::t_char strText[256];
 	unicode::_sprintf(strText, GlobalText[868], g_csQuest.GetEventCount(2));
 #ifdef ASG_MOD_UI_QUEST_INFO
@@ -528,14 +509,9 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderTabCastle()
 #else	// ASG_MOD_UI_QUEST_INFO
 	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+300, strText, 190, 0, RT3_SORT_CENTER);
 #endif	// ASG_MOD_UI_QUEST_INFO
-#endif	//LJH_ADD_JPN_MODIFYING_QUESTINFO_ABOUT_BC_AND_CT
 }
 
 #ifdef ASG_MOD_UI_QUEST_INFO
-//*****************************************************************************
-// 함수 이름 : RenderTempleInfo()
-// 함수 설명 : (캐슬/템플 탭 선택시)탬플 정보 윈도우 상단에 랜더.
-//*****************************************************************************
 void SEASON3B::CNewUIMyQuestInfoWindow::RenderTempleInfo()
 #else	// ASG_MOD_UI_QUEST_INFO
 void SEASON3B::CNewUIMyQuestInfoWindow::RenderTabTemple()
@@ -556,24 +532,6 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderTabTemple()
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-// 수정사유: 일본의 경우 블러드캐슬과 환영사원의 입장 횟수 제한이 없음.
-#ifdef LJH_ADD_JPN_MODIFYING_QUESTINFO_ABOUT_BC_AND_CT
-	// 868 "%d회 입장가능"
-#ifdef ASG_MOD_UI_QUEST_INFO
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+305, GlobalText[868], 190, 0, RT3_SORT_CENTER);
-#else	// ASG_MOD_UI_QUEST_INFO
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+280, GlobalText[868], 190, 0, RT3_SORT_CENTER);
-#endif	// ASG_MOD_UI_QUEST_INFO
-	
-	// 829 "하루 %d회를 초과하여 입장할 수 없습니다."
-#ifdef ASG_MOD_UI_QUEST_INFO
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+325, GlobalText[829], 190, 0, RT3_SORT_CENTER);
-#else	// ASG_MOD_UI_QUEST_INFO
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+300, GlobalText[829], 190, 0, RT3_SORT_CENTER);
-#endif	// ASG_MOD_UI_QUEST_INFO
-
-#else	//LJH_ADD_JPN_MODIFYING_QUESTINFO_ABOUT_BC_AND_CT
-	// 868 "%d회 입장가능"
 	unicode::t_char strText[256];
 	unicode::_sprintf(strText, GlobalText[868], g_csQuest.GetEventCount(3));
 #ifdef ASG_MOD_UI_QUEST_INFO
@@ -590,7 +548,6 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderTabTemple()
 	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+300, strText, 190, 0, RT3_SORT_CENTER);
 #endif	// ASG_MOD_UI_QUEST_INFO
 
-#endif	//LJH_ADD_JPN_MODIFYING_QUESTINFO_ABOUT_BC_AND_CT
 }
 
 #ifndef ASG_MOD_UI_QUEST_INFO	// 정리시 삭제.

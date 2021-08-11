@@ -135,12 +135,6 @@ eBuffTimeType BuffTimeControl::CheckBuffTimeType( eBuffState bufftype )
 		bufftimetype = eBuffTime_ItemGuardCharm;
 	}
 #endif	// ASG_ADD_CS6_ITEM_GUARD_CHARM
-#ifdef LDS_ADD_PCROOM_ITEM_JPN_6TH
-	else if(bufftype == eBuff_StrongCharm)
-	{
-		bufftimetype = eBuffTime_ItemStrongCharm;
-	}
-#endif // LDS_ADD_PCROOM_ITEM_JPN_6TH
 #ifdef PBG_ADD_SECRETBUFF
 	else if(bufftype >= eBuff_Vitality_Lowest && bufftype <= eBuff_Vitality_High)
 	{
