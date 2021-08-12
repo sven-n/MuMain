@@ -59,62 +59,27 @@
 #include "NewUICursedTempleResult.h"
 #include "NewUICryWolf.h"
 #include "NewUIMasterLevel.h"
-#ifdef NEW_USER_INTERFACE_SHELL
-#include "NewUIPartChargeShop.h"
-#endif //NEW_USER_INTERFACE_SHELL
-#ifdef PSW_GOLDBOWMAN
 #include "NewUIGoldBowmanWindow.h"
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA
 #include "NewUIGoldBowmanLena.h"
-#endif //PSW_EVENT_LENA	
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 #include "NewUIRegistrationLuckyCoin.h"
 #include "NewUIExchangeLuckyCoin.h"
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_NEW_DUEL_UI
 #include "NewUIDuelWatchWindow.h"
-#endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 #include "NewUIDuelWatchMainFrameWindow.h"
 #include "NewUIDuelWatchUserListWindow.h"
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef YDG_ADD_DOPPELGANGER_UI
 #include "NewUIDoppelGangerWindow.h"
 #include "NewUIDoppelGangerFrame.h"
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 #include "NewUIQuestProgress.h"
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 #ifdef ASG_ADD_UI_NPC_MENU
 #include "NewUINPCMenu.h"
 #endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 #include "NewUIQuestProgressByEtc.h"
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 #include "NewUIEmpireGuardianNPC.h"
 #include "NewUIEmpireGuardianTimer.h"
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 #include "NewUINPCDialogue.h"
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef PJH_ADD_MINIMAP
 #include "NewUIMiniMap.h"
-#endif //PJH_ADD_MINIMAP
-#ifdef PBG_MOD_STAMINA_UI
-#include "FatigueTimeSystem.h"
-#endif //PBG_MOD_STAMINA_UI
-#ifdef PBG_ADD_GENSRANKING
 #include "NewUIGensRanking.h"
-#endif //PBG_ADD_GENSRANKING
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 #include "NewUIUnitedMarketPlaceWindow.h"
-//#include "NewUIUnitedMarketPlaceWindow.h"
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #include "MultiLanguage.h"
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #ifdef LEM_ADD_LUCKYITEM
 #include "NewUILuckyItemWnd.h"
 #endif // LEM_ADD_LUCKYITEM
@@ -142,10 +107,6 @@ namespace SEASON3B
 		void Toggle(DWORD dwKey);	//. Show <-> Hide
 		void HideAll();
 		
-#ifdef NEW_USER_INTERFACE_SHELL
-		bool IsPartChargeShop( DWORD dwKey, bool isMessagebox = true );
-#endif //NEW_USER_INTERFACE_SHELL
-	
 		void Enable(DWORD dwKey);
 		void Disable(DWORD dwKey);
 
@@ -167,23 +128,13 @@ namespace SEASON3B
 			
 		static CNewUISystem* GetInstance();
 
-#ifndef CSK_MOD_REMOVE_AUTO_V1_FLAG		// 정리할 때 지워야 하는 소스	
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-		void ToggleMoveCommandWindow();
-#endif // CSK_MOD_PROTECT_AUTO_V1
-#endif //! CSK_MOD_REMOVE_AUTO_V1_FLAG	// 정리할 때 지워야 하는 소스
-
 	protected:
 		CNewUISystem();		//. ban to create instance
 
 		void HideAllGroupA();
 		void HideAllGroupB();
-#ifdef CSK_FIX_UI_FUNCTIONNAME
-		// 어떤 창을 열 때 어떤 창이 열려있고 그 창을 닫아야 할 경우 사용하면 됩니다.
 		void HideGroupBeforeOpenInterface();
-#else // CSK_FIX_UI_FUNCTIONNAME
-		void HideAllGroupC();
-#endif // CSK_FIX_UI_FUNCTIONNAME
+
 
 		/* Interface classes */
 	private:

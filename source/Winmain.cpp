@@ -31,11 +31,10 @@
 #include "PersonalShopTitleImp.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "UIMapName.h"		// rozy
-#include "CSMapInterface.h"
 #include "./ExternalObject/leaf/ExceptionHandler.h"
 #include "./Utilities/Dump/CrashReporter.h"
 #ifdef PROTECT_SYSTEMKEY
-	#include "ProtectSysKey.h"
+	//#include "ProtectSysKey.h"
 #endif // PROTECT_SYSTEMKEY
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "ProtocolSend.h"
@@ -63,10 +62,6 @@
 #ifdef LDK_ADD_NEW_PETPROCESS
 	#include "w_PetProcess.h"
 #endif //LDK_ADD_NEW_PETPROCESS
-
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-	#include "ProtectAuto.h"
-#endif // CSK_MOD_PROTECT_AUTO_V1
 
 #include <ThemidaInclude.h>
 
@@ -696,17 +691,6 @@ void DestroyWindow()
 
 	if(g_hFixFont)
 		::DeleteObject((HGDIOBJ)g_hFixFont);
-#ifdef PBG_ADD_INGAMESHOP_FONT
-	if(g_hInGameShopFont)
-		::DeleteObject((HGDIOBJ)g_hInGameShopFont);
-#endif //PBG_ADD_INGAMESHOP_FONT
-
-#ifdef YDG_MOD_PROTECT_AUTO_V4_R3
-	SEASON3B::CMoveCommandWindowEncrypt::DeleteKey();
-#endif	// YDG_MOD_PROTECT_AUTO_V4_R3
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-	CProtectAuto::Destroy();
-#endif // CSK_MOD_PROTECT_AUTO_V1
 	
 	ReleaseCharacters();
 
@@ -829,34 +813,17 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
     switch (msg)
     {
-#ifdef KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK
 	case WM_SYSKEYDOWN:
 		{
 			return 0;
 		}
 		break;
-#endif // KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK
 
-#if defined PROTECT_SYSTEMKEY && defined NDEBUG
-#ifndef FOR_WORK
-	case WM_SYSCOMMAND:
-		{
-			if(wParam == SC_KEYMENU || wParam == SC_SCREENSAVE)
-			{
-				return 0;
-			}
-		}
-		break;
-#endif // !FOR_WORK
-#endif // PROTECT_SYSTEMKEY && NDEBUG
     case WM_ACTIVATE:
 		if(LOWORD(wParam) == WA_INACTIVE)
 		{
 			FAKE_CODE( Pos_ActiveFalse);
-Pos_ActiveFalse:
-#ifdef ACTIVE_FOCUS_OUT
-			if (g_bUseWindowMode == FALSE)
-#endif	// ACTIVE_FOCUS_OUT
+			Pos_ActiveFalse:
 				g_bWndActive = false;
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 			if (g_bUseWindowMode == TRUE)
@@ -873,9 +840,6 @@ Pos_ActiveFalse:
 				MouseMButtonPush = false;
 				MouseWheel = 0;
 			}
-#ifdef ASG_FIX_ACTIVATE_APP_INPUT
-			g_pNewKeyInput->Init();
-#endif	// ASG_FIX_ACTIVATE_APP_INPUT
 #endif
 		}
 		else
@@ -895,7 +859,7 @@ Pos_ActiveTrue:
 			CheckHack();
 			VM_END
 			break;
-		case WINDOWMINIMIZED_TIMER:	// 윈팅 방지 코드
+		case WINDOWMINIMIZED_TIMER:
 			PostMessage(g_hWnd, WM_CLOSE, 0, 0);
 			break;
 		case CHATCONNECT_TIMER:
@@ -908,28 +872,6 @@ Pos_ActiveTrue:
 					g_pSlideHelpMgr->CreateSlideText();
 			}
 			break;
-#ifdef TEENAGER_REGULATION
-		case WARNING_TIMER:
-			{
-				char dummy_chr[300];
-				Time_Regulation++;
-				if(Time_Regulation > 3)
-					wsprintf(dummy_chr,GlobalText[2035],Time_Regulation);
-				else
-					wsprintf(dummy_chr,GlobalText[2036],Time_Regulation);
-		
-				g_pChatListBox->AddText("", dummy_chr, SEASON3B::TYPE_UNION_MESSAGE);	
-				
-				if(m_pc_wanted == true)
-				{
-					wsprintf(dummy_chr,GlobalText[2227]);
-					g_pChatListBox->AddText("", dummy_chr, SEASON3B::TYPE_UNION_MESSAGE);			
-				}
-
-				g_GameCensorship->SetVisible(true);
-			}
-			break;
-#endif
 		}
 		break;
 	case WM_USER_MEMORYHACK:
@@ -946,7 +888,7 @@ Pos_UserMemoryHack:
 	case WM_ASYNCSELECTMSG :
 		switch( WSAGETSELECTEVENT( lParam ) )
 		{
-		case FD_CONNECT : // 서버에 접속 되었다.
+		case FD_CONNECT :
 			break;
 		case FD_READ :
 			SocketClient.nRecv();
@@ -954,8 +896,7 @@ Pos_UserMemoryHack:
 		case FD_WRITE :
 			SocketClient.FDWriteSend();
 			break;
-		case FD_CLOSE : // 서버와의 접속이 종료되었다.
-			// 3  "서버와의 연결이 끊어졌습니다."
+		case FD_CLOSE :
 			g_pChatListBox->AddText("", GlobalText[3], SEASON3B::TYPE_SYSTEM_MESSAGE);
 			g_ErrorReport.Write("서버와의 접속종료.\r\n");
 #ifdef CONSOLE_DEBUG
@@ -990,11 +931,7 @@ Pos_UserMemoryHack:
 	case WM_PAINT:
 		{
 			PAINTSTRUCT ps ;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-			BeginPaint(hwnd, &ps);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			HDC hDC = BeginPaint(hwnd, &ps);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			EndPaint(hwnd, &ps) ;
 		}
 		return 0;
@@ -1067,17 +1004,6 @@ Pos_Wm_Move_MinimizedNotEnabled:
 			g_pChatRoomSocketList->ProcessSocketMessage(msg - WM_CHATROOMMSG_BEGIN, WSAGETSELECTEVENT(lParam));
 		break;
 	}
-
-#ifdef USE_SELFCHECKCODE
-	if ( TimeRemain >= 40)
-	{
-		SendCrcOfFunction( 4, 9, MainScene, 0x173C);
-	}
-#endif
-	
-	// 윈도우가 활성화 상태가 아니면 메세지 리턴시켜 버린다.
-// 	if(!g_bWndActive)
-//         return DefWindowProc(hwnd,msg,wParam,lParam);
 
 	MouseLButtonDBClick = false;
 	if (MouseLButtonPop == true && (g_iMousePopPosition_x != MouseX || g_iMousePopPosition_y != MouseY)) 
@@ -2106,23 +2032,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #endif // !FOR_WORK
 #endif // PROTECT_SYSTEMKEY && NDEBUG
 	
-#ifdef TEENAGER_REGULATION
-	SetTimer( g_hWnd, WARNING_TIMER, 60*60*1000, NULL);
-//	SetTimer( g_hWnd, WARNING_TIMER, 3*60*1000, NULL);
-	//시간조정
-#endif
-	//메세지 루프
-	//MSG msg;
-
-	// Profiling Initialize 정의
-#ifdef DO_PROFILING
-	g_pProfiler = g_pProfiler->GetThis_();
-	g_pProfiler->Initialize(	TRUE, 
-								"PROFILING_RESULT.txt",
-								EPROFILESORTING_WEIGHT, 
-								EPROFILESORTING_DIRECTION_DESCENDING );	// m_pProfiler->Initialize( TRUE, "PROFILE_RESULT.txt" );
-#endif // DO_PROFILING
-
 #ifdef DO_PROCESS_DEBUGCAMERA
 	g_pDebugCameraManager = g_pDebugCameraManager->GetThis_();
 	
@@ -2221,27 +2130,8 @@ Pos_ActiveCheck:
 	g_pDebugCameraManager->Release();
 #endif // DO_PROCESS_DEBUGCAMERA
 
-#ifdef DO_PROFILING
-	g_pProfiler->Release();
-#endif // DO_PROFILING
-
-#if defined PROTECT_SYSTEMKEY && defined NDEBUG
-#ifndef FOR_WORK
-	ProtectSysKey::DetachProtectSysKey();
-#endif // !FOR_WORK
-#endif // PROTECT_SYSTEMKEY && NDEBUG
-
-#ifdef MSZ_ADD_CRASH_DUMP_UPLOAD
-	Crash::Uninstall();
-#endif
-
 	DestroyWindow();
 
     return msg.wParam;
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
 

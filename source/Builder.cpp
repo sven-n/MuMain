@@ -19,19 +19,12 @@
 
 #include "Builder.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 #ifdef INFO_BUILDER
 
 using namespace info;
 
 static Builder infobuilder;
 
-//여기도 클라이언트 인포 빌더가 지원 해주자...
-//읽어 드러어는 파일과 읽지 않아야 할 파일들을 정리 할 수 있다. 
-//나중에 빼도록 한다.
 namespace
 {
 	const int TEXTFILENAMECOUNT                                    = eInfo_File_Count;

@@ -795,16 +795,7 @@ void InitPath()
     path->SetMapDimensions(256,256,TerrainWall);
 }
 
-
-#ifdef ANTIHACKING_ENABLE
-extern BOOL g_bNewFrame;
-#endif //ANTIHACKING_ENABLE
-
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 bool PathFinding2(int sx,int sy,int tx,int ty,PATH_t *a, float fDistance, int iDefaultWall)
-#else	// YDG_ADD_DOPPELGANGER_MONSTER
-bool PathFinding2(int sx,int sy,int tx,int ty,PATH_t *a, float fDistance)
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 {
 	bool Value = false;
 

@@ -33,7 +33,6 @@
 #include "CSMapServer.h"
 #include "GMBattleCastle.h"
 #include "npcGateSwitch.h"
-#include "CSMapInterface.h"
 #include "CComGem.h"
 #include "UIMapName.h" // rozy
 #include "UIMng.h"
@@ -79,9 +78,6 @@
 #ifdef LDK_ADD_GAMBLE_SYSTEM
 #include "GambleSystem.h"
 #endif //LDK_ADD_GAMBLE_SYSTEM
-#ifdef YDG_MOD_PROTECT_AUTO_V5
-#include "ProtectAuto.h"
-#endif	// YDG_MOD_PROTECT_AUTO_V5
 #ifdef ASG_ADD_NEW_QUEST_SYSTEM
 #include "QuestMng.h"
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
@@ -12913,21 +12909,6 @@ bool ReceiveDoppelGangerMonsterGoal(BYTE* ReceiveBuffer)
 }
 #endif	// YDG_ADD_DOPPELGANGER_PROTOCOLS
 
-#ifdef YDG_MOD_PROTECT_AUTO_V5
-bool ReceiveRequestCheckAutoTool(BYTE* ReceiveBuffer)
-{
-	LPPMSG_REQ_HACKTOOL_STATISTICS Data = (LPPMSG_REQ_HACKTOOL_STATISTICS)ReceiveBuffer;
-
-	Data->Filename[MAX_HACKTOOL_FILENAME_LENGTH - 1] = '\0';
-	BOOL bFindAutoTool = g_pProtectAuto->FindAutoTool(Data->Filename);
-	memset(Data->Filename, 0, MAX_HACKTOOL_FILENAME_LENGTH);
-
-	SendRequestCheckAutoToolResult(Data->dwKey, (BYTE)bFindAutoTool);
-
-	return true;
-}
-#endif	// YDG_MOD_PROTECT_AUTO_V5
-
 #ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
 bool ReceiveMoveMapChecksum(BYTE* ReceiveBuffer)
 {
@@ -13884,11 +13865,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x87:
         ReceiveMixExit(ReceiveBuffer);
 		break;
-#ifdef YDG_MOD_PROTECT_AUTO_V5
-	case 0x8A:
-		ReceiveRequestCheckAutoTool(ReceiveBuffer);
-		break;
-#endif	// YDG_MOD_PROTECT_AUTO_V5
 #ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
 	case 0x8E:
 		{

@@ -4222,10 +4222,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 
 void MoveParticles()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_PARTICLES, PROFILING_MOVE_PARTICLES );
-#endif // DO_PROFILING
-	// ¹Ù¶÷
 	for ( int i = 0; i < 2; ++i)
 	{
 		g_vParticleWindVelo[i] += ( rand() % 2001 - 1000) * ( 0.001f * 0.6f);
@@ -4261,8 +4257,6 @@ void MoveParticles()
 
 			switch(o->Type)
 			{
-//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_EFFECT:
 				if(o->LifeTime >= 10)
 				{
@@ -4296,9 +4290,6 @@ void MoveParticles()
 				}
 				o->Position[2] += o->Gravity;
 				break;
-
-//////////////////////////////////////////////////////////////////////////
-	
 			case BITMAP_FLOWER01:
 			case BITMAP_FLOWER01+1:
 			case BITMAP_FLOWER01+2:
@@ -9645,17 +9636,11 @@ void MoveParticles()
             }
 		}
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_PARTICLES );
-#endif // DO_PROFILING
 }
 
 
 void RenderParticles ( BYTE byRenderOneMore )
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_PARTICLES, PROFILING_RENDER_PARTICLES );
-#endif // DO_PROFILING
 	for(int i=0;i<MAX_PARTICLES;i++)
 	{
 		PARTICLE *o = &Particles[i];
@@ -10074,9 +10059,6 @@ void RenderParticles ( BYTE byRenderOneMore )
 			}
 		}
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_PARTICLES );
-#endif // DO_PROFILING
 }
 
 

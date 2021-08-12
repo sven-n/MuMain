@@ -544,8 +544,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 
 	if(IsVisible() && HaveFocus() && SEASON3B::IsPress(VK_RETURN))
 	{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		//. 쳇 전송
 		char	szChatText[MAX_CHAT_SIZE+1]	= {'\0'};
 		char	szWhisperID[MAX_ID_SIZE+1]	= {'\0'};		
 		wchar_t *szReceivedChat = new wchar_t[MAX_CHAT_SIZE_UTF16];
@@ -553,13 +551,11 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 		m_pChatInputBox->GetText(szReceivedChat, MAX_CHAT_SIZE_UTF16);
 		m_pWhsprIDInputBox->GetText(szWhisperID, MAX_ID_SIZE+1);
 
-		// 전각 영문 알파벳과 기본 기호들을 반각으로 변환
 		for (int i = 0; i < MAX_CHAT_SIZE_UTF16; i++)
 			szReceivedChat[i] = g_pMultiLanguage->ConvertFulltoHalfWidthChar(szReceivedChat[i]);
 
 		std::wstring wstrText = L"";
 		
-		// 특수 명령은 채팅모드 무시
 		if (szReceivedChat[0] != 0x002F)
 		{
 			switch(m_iInputMsgType) {
@@ -575,41 +571,14 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 		}
 		wstrText.append(szReceivedChat);
 
-		// delete memory
 		delete [] szReceivedChat;
 
 		std::string strText;
-		// 각종 함수를 이용하기 위해서 ANSI로 변환
+
 		g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), g_pMultiLanguage->GetCodePage());
 		strncpy(szChatText, strText.c_str(), sizeof szChatText);
 		
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		//. 쳇 전송
-		unicode::t_char szChatText[256];
-		unicode::t_char szChatText2[256];
-		char szWhisperID[32];
-		
-		m_pChatInputBox->GetText(szChatText2, 256);		//. 유니코드: 수정하세요!
-		m_pWhsprIDInputBox->GetText(szWhisperID, 32);
 
-		if (szChatText2[0] == '/')	// 특수 명령은 채팅모드 무시
-		{
-			unicode::_strcpy(szChatText, szChatText2);
-		}
-		else
-		if(m_iInputMsgType == INPUT_PARTY_MESSAGE)
-		{
-			unicode::_sprintf(szChatText, "~%s", szChatText2);
-		}
-		else if(m_iInputMsgType == INPUT_GUILD_MESSAGE)
-		{
-			unicode::_sprintf(szChatText, "@%s", szChatText2);
-		}
-		else
-		{
-			unicode::_strcpy(szChatText, szChatText2);
-		}	
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 		if(unicode::_strlen(szChatText) != 0)
 		{	
@@ -618,26 +587,19 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 				{
 					if(CheckAbuseFilter(szChatText))
 					{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 						g_pMultiLanguage->ConvertCharToWideStr(wstrText, GlobalText[570]);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-						strcpy(szChatText,GlobalText[570]);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					}
 					
 					if(m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL 
 						&& unicode::_strlen(szChatText) 
 						&& strlen(szWhisperID) > 0 )
 					{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 						g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), CP_UTF8);
 						strncpy(szChatText, strText.c_str(), sizeof szChatText);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 						SendChatWhisper(szWhisperID, szChatText);
 						g_pChatListBox->AddText(Hero->ID, szChatText, SEASON3B::TYPE_WHISPER_MESSAGE);
 						AddWhsprIDHistory(szWhisperID);
 					}
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					else if (strncmp(szChatText, GlobalText[260], strlen(GlobalText[260])) == 0)
 					{
 						char* pszMapName = szChatText + strlen(GlobalText[260])+1;
@@ -650,22 +612,15 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 						
 						SendRequestMoveMap(g_pMoveCommandWindow->GetMoveCommandKey(), iMapIndex);
 					}
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					else
 					{	
-						if ( Hero->SafeZone || (Hero->Helper.Type != MODEL_HELPER+2 
-							&& Hero->Helper.Type != MODEL_HELPER+3
-							&& Hero->Helper.Type != MODEL_HELPER+4 
-							&& Hero->Helper.Type != MODEL_HELPER+37) ) 
+						if ( Hero->SafeZone || (Hero->Helper.Type != MODEL_HELPER+2 && Hero->Helper.Type != MODEL_HELPER+3 && Hero->Helper.Type != MODEL_HELPER+4 && Hero->Helper.Type != MODEL_HELPER+37) ) 
 						{
 							CheckChatText(szChatText);
 						}
 						
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 						g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), CP_UTF8);
 						strncpy(szChatText, strText.c_str(), sizeof szChatText);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
 						SendChat(szChatText);
 						AddChatHistory(szChatText);
 					}
@@ -732,7 +687,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 	{
 		if(SEASON3B::IsPress(VK_ESCAPE) == true)
 		{
-			//. 쳇팅창 닫기
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_CHATINPUTBOX);
 
 			PlayBuffer(SOUND_CLICK01);
@@ -746,7 +700,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 
 bool SEASON3B::CNewUIChatInputBox::Update()
 {
-	//. RelatedWnd 셋팅: UpdateKeyEvent를 호출에 관련된 윈도우 핸들 설정
 	if(m_pChatInputBox->HaveFocus() && GetRelatedWnd() != m_pChatInputBox->GetHandle())
 	{
 		SetRelatedWnd(m_pChatInputBox->GetHandle());

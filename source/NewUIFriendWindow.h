@@ -67,7 +67,6 @@ namespace SEASON3B
 		BOOL HaveForceTopWindow() { return m_pFriendWindowMgr->HaveForceTopWindow(); }
 		void RefreshMainWndPalList() { m_pFriendWindowMgr->RefreshMainWndPalList(); }
 
-		// 친구 기능
 		CUIFriendWindow * GetFriendMainWindow() { return m_pFriendWindowMgr->GetFriendMainWindow(); }
 		void SetAddFriendWindow(DWORD dwAddWindowUIID) { m_pFriendWindowMgr->SetAddFriendWindow(dwAddWindowUIID); }
 		DWORD GetAddFriendWindow() { return m_pFriendWindowMgr->GetAddFriendWindow(); }

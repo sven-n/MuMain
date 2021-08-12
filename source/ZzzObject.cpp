@@ -6721,15 +6721,8 @@ void CreateShiny(OBJECT *o)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 처리하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void MoveItems()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_ITEMS, PROFILING_MOVE_ITEMS );
-#endif // DO_PROFILING	
 	for(int i=0;i<MAX_ITEMS;i++)
 	{
 		OBJECT *o = &Items[i].Object;
@@ -6755,15 +6748,7 @@ void MoveItems()
             CreateShiny(o);
 		}
 	}
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_ITEMS );
-#endif // DO_PROFILING
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 땅에 놓을때 땅에서부터의 높이를 처리하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void ItemHeight(int Type,BMD *b)
 {

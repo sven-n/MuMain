@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "wsctlc.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
@@ -10,7 +9,6 @@
 #include "zzzOpenData.h"
 #include "zzzinfomation.h"
 #include "wsclientinline.h"
-#include "wsctlc.h"
 #include "CSMapServer.h"
 
 extern int  LogIn;

@@ -122,21 +122,14 @@ extern int g_iWidthEx;
 void MoveInterface_DebugCamera();
 #endif // DO_PROCESS_DEBUGCAMERA
 
-#ifdef DO_PROFILING
-void MoveInterface_ForProfiling();	
-#endif // DO_PROFILING
 // For DEBUGING
 
 void SelectObjects();
 void RenderInterface(bool);
 void MoveInterface();
 void RenderCursor();
-
-// 화살이 있는지 확인 후 없으면 재장전
 bool CheckArrow();
-// 화살 자동 재장전하는 함수
 void ReloadArrow();	
-// 인벤토리에서 화살통의 수를 리턴하는 함수
 int SearchArrowCount();
 
 int  SelectCharacter();

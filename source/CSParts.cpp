@@ -1,18 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  CSParts.cpp
-//  
-//  내  용 : 캐릭터에 연결되는 오브젝트 처리.
-//  
-//  날  짜 : 2004/09 06
-//
-//  작성자 : 조 규 하.
-//  
 //////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
-//////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
@@ -24,19 +13,11 @@
 #include "zzzEffect.h"
 #include "zzztexture.h"
 #include "GuildCache.h"
-
 #include "zzzlodterrain.h"
 #include "GMBattleCastle.h"
-
 #include "CSParts.h"
 
-//////////////////////////////////////////////////////////////////////////
-//  FUNCTION.
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  CreatePartsFactory 
-//////////////////////////////////////////////////////////////////////////
-void    CreatePartsFactory ( CHARACTER* c )
+void CreatePartsFactory ( CHARACTER* c )
 {
     if ( FindText( c->ID, "webzen" ) || g_isCharacterBuff( (&c->Object), eBuff_GMEffect )
 		|| ((c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR)) )
@@ -50,24 +31,13 @@ void    CreatePartsFactory ( CHARACTER* c )
 
     if ( c->m_pParts==NULL && c->EtcPart!=0 )
     {
-        //  월병 이벤트.
         switch ( c->EtcPart )
         {
-#ifdef CHINA_MOON_CAKE
-        case PARTS_LION :
-            {
-                c->m_pParts = (CSIPartsMDL*)new CSParts ( MODEL_MANY_FLAG, 2 );
-            }
-            break;
-#endif// CHINA_MOON_CAKE
-
         case PARTS_WEBZEN :
             {
                 c->m_pParts = (CSIPartsMDL*)new CSParts ( MODEL_WEBZEN_MARK, 20, true, 70.f, -5.f, 0.f, 0.f, 0.f, 45.f );
             }
             break;
-
-
         case PARTS_ATTACK_TEAM_MARK:
             c->m_pParts = (CSIPartsMDL*)new CSParts2D ( BITMAP_FORMATION_MARK, 0, 20, 120.f, 0.f, 0.f );
             break;
@@ -105,11 +75,7 @@ void    CreatePartsFactory ( CHARACTER* c )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  캐릭터의 파츠를 붙인다.
-//////////////////////////////////////////////////////////////////////////
-void    RenderParts ( CHARACTER* c )
+void RenderParts ( CHARACTER* c )
 {
 	if( g_isCharacterBuff( (&c->Object), eBuff_Cloaking) )
 	{
@@ -137,11 +103,7 @@ void    RenderParts ( CHARACTER* c )
     pParts->IRender ( c );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  DeleteParts
-//////////////////////////////////////////////////////////////////////////
-void    DeleteParts ( CHARACTER* c )
+void DeleteParts ( CHARACTER* c )
 {
     if ( c->m_pParts!=NULL )
     {
@@ -152,15 +114,6 @@ void    DeleteParts ( CHARACTER* c )
 	SAFE_DELETE( c->m_pTempParts );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  CLASS
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  CSParts
-//  
-//  기본적으로 연결되는 부품.
-//////////////////////////////////////////////////////////////////////////
 CSParts::CSParts ( int Type, int BoneNumber, bool bBillBoard, float x, float y, float z, float ax, float ay, float az )
 {
     m_iBoneNumber = BoneNumber;
@@ -202,11 +155,7 @@ CSParts::CSParts ( int Type, int BoneNumber, bool bBillBoard, float x, float y, 
     Vector ( ax, ay, az, m_pObj.Angle );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  IRender
-//////////////////////////////////////////////////////////////////////////
-void    CSParts::IRender ( CHARACTER* c )
+void CSParts::IRender ( CHARACTER* c )
 {
     if ( c==NULL ) return;
 	if ( m_pObj.Alpha<0.01f ) return;
@@ -227,26 +176,16 @@ void    CSParts::IRender ( CHARACTER* c )
 		m_pObj.Angle[2] -= o->HeadAngle[0];
 	}
 
-	//	애니메이션
 	b = &Models[m_pObj.Type];
 	b->CurrentAction = m_pObj.CurrentAction;
 
 	float fSpeed = m_pObj.Velocity;
 	b->PlayAnimation ( &m_pObj.AnimationFrame, &m_pObj.PriorAnimationFrame, &m_pObj.PriorAction, fSpeed, m_pObj.Position, m_pObj.Angle );
 
-    //  화면에 찍는다.
     Vector ( 1.f, 1.f, 1.f, b->BodyLight );
     RenderObject ( &m_pObj, true );
 }
 
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//  CSAnimationParts
-//  
-//  기본적으로 프로그램되는 애니메이션.
-//////////////////////////////////////////////////////////////////////////
 CSAnimationParts::CSAnimationParts ( int Type, int BoneNumber, bool bBillBoard, float x, float y, float z, float ax, float ay, float az )
 {
     m_iBoneNumber = BoneNumber;
@@ -288,15 +227,10 @@ CSAnimationParts::CSAnimationParts ( int Type, int BoneNumber, bool bBillBoard, 
     Vector ( ax, ay, az, m_pObj.Angle );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  애니메이션 처리.
-//////////////////////////////////////////////////////////////////////////
-void    CSAnimationParts::Animation ( CHARACTER* c )
+void CSAnimationParts::Animation ( CHARACTER* c )
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(c == NULL)	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
     BMD*    b = &Models[m_pObj.Type];
 	b->CurrentAction = m_pObj.CurrentAction;
 
@@ -304,11 +238,7 @@ void    CSAnimationParts::Animation ( CHARACTER* c )
 	b->PlayAnimation ( &m_pObj.AnimationFrame, &m_pObj.PriorAnimationFrame, &m_pObj.PriorAction, fSpeed, m_pObj.Position, m_pObj.Angle );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  IRender
-//////////////////////////////////////////////////////////////////////////
-void    CSAnimationParts::IRender ( CHARACTER* c )
+void CSAnimationParts::IRender ( CHARACTER* c )
 {
     if ( c==NULL ) return;
 	if ( m_pObj.Alpha<0.01f ) return;
@@ -324,19 +254,10 @@ void    CSAnimationParts::IRender ( CHARACTER* c )
         VectorCopy ( o->Angle, m_pObj.Angle );
     }
 
-	//	애니메이션
     Animation ( c );
-
-    //  화면에 찍는다.
     RenderObject ( &m_pObj, true );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  CSParts2D
-//  
-//  기본적으로 2D 이미지 연결되는 부품.
-//////////////////////////////////////////////////////////////////////////
 CSParts2D::CSParts2D ( int Type, int SubType, int BoneNumber, float x, float y, float z )
 {
     m_iBoneNumber = BoneNumber;
@@ -350,11 +271,7 @@ CSParts2D::CSParts2D ( int Type, int SubType, int BoneNumber, float x, float y, 
     Vector ( 1.f, 1.f, 1.f, m_pObj.Light );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  IRender
-//////////////////////////////////////////////////////////////////////////
-void    CSParts2D::IRender ( CHARACTER* c )
+void CSParts2D::IRender ( CHARACTER* c )
 {
     if ( c==NULL ) return;
 
@@ -367,7 +284,6 @@ void    CSParts2D::IRender ( CHARACTER* c )
     VectorCopy ( o->Position, m_pObj.Position );
     m_pObj.Position[2] = Position[2];
 
-    //  길드 마스터.
 	if ( ( c->EtcPart==PARTS_ATTACK_TEAM_MARK 
 		|| c->EtcPart==PARTS_ATTACK_TEAM_MARK2 
 		|| c->EtcPart==PARTS_ATTACK_TEAM_MARK3 
@@ -377,7 +293,6 @@ void    CSParts2D::IRender ( CHARACTER* c )
 		) 
 		&& c->GuildStatus==G_MASTER )
     {
-        //  연합길드에 속하지 않은 길드마스터, 연합길드에 속하며 그 길드의 마스터의 경우.
         if ( strcmp( GuildMark[c->GuildMarkIndex].UnionName, GuildMark[c->GuildMarkIndex].GuildName )==NULL || strcmp( GuildMark[c->GuildMarkIndex].UnionName, "" )==NULL )
         {
 			if(c->EtcPart == PARTS_DEFENSE_TEAM_MARK)
@@ -386,7 +301,5 @@ void    CSParts2D::IRender ( CHARACTER* c )
 				bSubType += 3;
         }
     }
-
-	//	화면에 찍는다.
     CreateSprite ( m_pObj.Type, m_pObj.Position, 1.f, m_pObj.Light, NULL, 0, bSubType );
 }

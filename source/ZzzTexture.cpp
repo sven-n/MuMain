@@ -210,14 +210,6 @@ bool LoadBitmap(const char* szFileName, GLuint uiTextureIndex, GLuint uiFilter, 
 bool LoadBitmap(const char* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck)
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 {
-	
-#ifdef DO_PROFILING_FOR_LOADING
-	if( g_pProfilerForLoading )
-	{
-		g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_LOADBITMAP, PROFILING_LOADING_LOADBITMAP );
-	}
-#endif // DO_PROFILING_FOR_LOADING
-
 	char szFullPath[256] = {0, };
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 	if( bFullPath == true )
@@ -244,32 +236,10 @@ bool LoadBitmap(const char* szFileName, GLuint uiTextureIndex, GLuint uiFilter, 
 #else // FOR_WORK
 			PopUpErrorCheckMsgBox(szErrorMsg, true);
 #endif // FOR_WORK
-
-#ifdef DO_PROFILING_FOR_LOADING
-			if( g_pProfilerForLoading )
-			{
-				g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_LOADBITMAP );
-			}
-#endif // DO_PROFILING_FOR_LOADING
-
 			return false;
 		}
-
-#ifdef DO_PROFILING_FOR_LOADING
-		if( g_pProfilerForLoading )
-		{
-			g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_LOADBITMAP );	
-		}
-#endif // DO_PROFILING_FOR_LOADING
 		return true;
 	}
-
-#ifdef DO_PROFILING_FOR_LOADING
-	if( g_pProfilerForLoading )
-	{
-		g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_LOADBITMAP );	
-	}
-#endif // DO_PROFILING_FOR_LOADING
 	return Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode);
 }
 void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
@@ -283,14 +253,12 @@ void PopUpErrorCheckMsgBox(const char* szErrorMsg, bool bForceDestroy)
 
 	if(bForceDestroy)
 	{
-		//. 확인창만 띄우고 강제종료
 #ifdef FOR_WORK
 		MessageBox(g_hWnd, szErrorMsg, "ErrorCheckBox", MB_OK|MB_ICONERROR);
 #endif // FOR_WORK
 	}
 	else
 	{
-		//. 강제종료여부 직접선택
 #ifdef FOR_WORK
 		strcat(szMsg, "\r\n\r\n 프로그램을 계속 실행하시겠습니까?\r\n");
 		int iResult = MessageBox(g_hWnd, szMsg, "ErrorCheckBox", MB_YESNO|MB_ICONERROR);
@@ -300,20 +268,13 @@ void PopUpErrorCheckMsgBox(const char* szErrorMsg, bool bForceDestroy)
 			return;
 		}
 	}
-	
-	//. 강제종료 루틴 (WM_DESTROY랑 같게)
-	//  
+
 	SocketClient.Close();
 	//gProtocolSend.DisconnectServer();
 	KillGLWindow();
 	
-#ifdef ANTIHACKING_ENABLE
-	exit_hanguo_protect();
-#endif //ANTIHACKING_ENABLE
-
 	DestroySound();
 	DestroyWindow();
-
 	CloseMainExe();
 	ExitProcess(0);
 }

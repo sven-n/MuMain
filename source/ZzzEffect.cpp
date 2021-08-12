@@ -19457,10 +19457,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}	
 
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 3, 15, MoveCharacter, 0x21DE);
-#endif
-
 	if(	   
 		o->Type == MODEL_SKILL_WHEEL1 
 		|| o->Type == MODEL_SKILL_WHEEL2
@@ -19529,11 +19525,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 	o->LifeTime--;
 	if(o->LifeTime <= 0)
 	{
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 		EffectDestructor(o);
-#else	// YDG_ADD_SKILL_FLAME_STRIKE
-		o->Live = false;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
 	}
 	else
 	{
@@ -19554,19 +19546,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 			break;
 		}
 	}
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
 
 void MoveEffects()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_EFFECTS, PROFILING_MOVE_EFFECTS );
-#endif // DO_PROFILING
-
 	if(SceneFlag == MAIN_SCENE)
 	{
 		g_pCatapultWindow->SetCameraPos();
@@ -19580,14 +19563,7 @@ void MoveEffects()
 			MoveEffect( o, i);
 		}
 	}
-
-#ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
 	g_SkillEffects.MoveEffects();
-#endif	// YDG_MOD_SEPARATE_EFFECT_SKILLS
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_EFFECTS );
-#endif // DO_PROFILING
 }
 
 void RenderWheelWeapon(OBJECT *o)

@@ -956,35 +956,14 @@ void SEASON3B::CNewUIInventoryCtrl::UpdateProcess()
 
 void SEASON3B::CNewUIInventoryCtrl::Render()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_NEWUIINVENTORY_INVENTORYCTRLRENDER, PROFILING_RENDER_NEWUIINVENTORY_INVENTORYCTRLRENDER );
-#endif // DO_PROFILING
-	//. 배경 그리기
 	int x, y;
 	for(y=0; y<m_nRow; y++)
 	{
 		for(x=0; x<m_nColumn; x++)
 		{
 			int iCurSquareIndex = y*m_nColumn+x;
-#ifdef DEBUG_INVENTORY_BASE_TEST
-			EnableAlphaTest();
-			if(m_iPointedSquareIndex == iCurSquareIndex)
-			{
-				glColor4f(0.3f, 0.9f, 0.4f, 0.9f);
-			}
-			else if(m_pdwItemCheckBox[iCurSquareIndex] > 1)		//. 아이템이 있을경우
-			{
-				glColor4f(0.3f, 0.5f, 0.5f, 0.6f);
-			}
-			else
-			{
-				glColor4f(0.3f, 0.3f, 0.3f, 0.5f);
-			}
-			RenderColor(m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT),
-				INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
-			EndRenderColor();
-#else // DEBUG_INVENTORY_BASE_TEST
-			if(m_pdwItemCheckBox[iCurSquareIndex] > 1)			//. 아이템이 있을경우
+
+			if(m_pdwItemCheckBox[iCurSquareIndex] > 1)
 			{
 				EnableAlphaTest();
 
@@ -1031,69 +1010,12 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 					INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
 				EndRenderColor();
 			}
-#endif // DEBUG_INVENTORY_BASE_TEST
-#ifdef DEBUG_INVENTORY_BASE_TEST
-			//. 테두리
-			EnableAlphaTest();
-			glColor4f(1.0f, 0.0f, 0.0f, 1.f);
-			RenderColor(m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT),
-				INVENTORY_SQUARE_WIDTH, 1);
-			RenderColor(m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT),
-				1, INVENTORY_SQUARE_HEIGHT);
-			RenderColor(m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), m_Pos.y+((y+1)*INVENTORY_SQUARE_HEIGHT),
-				INVENTORY_SQUARE_WIDTH+1, 1);
-			RenderColor(m_Pos.x+((x+1)*INVENTORY_SQUARE_WIDTH), m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT),
-				1, INVENTORY_SQUARE_HEIGHT+1);
-			EndRenderColor();
-#endif // DEBUG_INVENTORY_BASE_TEST
 
 			EnableAlphaTest();
-		// 인벤토리창의 보관하는 부분의 각각의 정사각형 칸 렌더 
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY 
-			ITEM* pItem = NULL;
-			int iItemHeight = 0;
-			
-			if(m_pdwItemCheckBox[iCurSquareIndex] > 1)
-			{
-				pItem = FindItemByKey(m_pdwItemCheckBox[iCurSquareIndex]);
-				iItemHeight = ItemAttribute[pItem->Type].Height;
-			}
-			
-			// 지금 칸에 아이템이 인벤 장착 시스템에 장착되어 있는 아이템이 존재 하지 않으면 일반 정사각형 칸 렌더 
-			if (pItem == NULL || !(pItem->Durability == 254 && g_pMyInventory->IsInvenItem(pItem->Type)))
-			{
-				RenderImage(IMAGE_ITEM_SQUARE, m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), 
-					m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT), 21, 21);
-			}
-			else 
-			{
-				// 1 by 1 짜리 인벤 장착 시스템 배경 정사각형 칸 렌더 
-				if (iItemHeight == 1)
-				{
-					RenderImage(IMAGE_ITEM_SQUARE_FOR_1_BY_1,	m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), 
-						m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT), 21, 21);
-				}
-				// 인벤토리 배경 중 인벤 시스템에서 장착 한 아이템의 아래쪽 사각형 부분 렌더
-				else if (y == m_nRow-1 || pItem == FindItem(x,y-1))
-				{
-					RenderImage(IMAGE_ITEM_SQUARE_BOTTOM_RECT,	m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), 
-						m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT), 21, 21);
-				}
-				// 인벤토리 배경 중 인벤 시스템에서 장착 한 아이템의 위쪽 사각형 부분 렌더
-				else
-				{
-					RenderImage(IMAGE_ITEM_SQUARE_TOP_RECT,		m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), 
-						m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT), 21, 21);
-				}
-			}
-#else  //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-			RenderImage(IMAGE_ITEM_SQUARE, m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), 
-				m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT), 21, 21);
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
+			RenderImage(IMAGE_ITEM_SQUARE, m_Pos.x+(x*INVENTORY_SQUARE_WIDTH),m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT), 21, 21);
 		}
 	}
 
-	//. 프레임 그리기
 	EnableAlphaTest();
 	RenderImage(IMAGE_ITEM_TABLE_TOP_LEFT, m_Pos.x-WND_LEFT_EDGE, m_Pos.y-WND_TOP_EDGE, 14, 14);
 	RenderImage(IMAGE_ITEM_TABLE_TOP_RIGHT, m_Pos.x+m_Size.cx-WND_RIGHT_EDGE, m_Pos.y-WND_TOP_EDGE, 14, 14);
@@ -1111,7 +1033,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 		RenderImage(IMAGE_ITEM_TABLE_RIGHT_PIXEL, m_Pos.x+m_Size.cx-WND_RIGHT_EDGE, y, 14, 1);
 	}
 
-	//. PickedItem 과의 상태 그리기
 	if( ms_pPickedItem )
 	{
 		bool pickitemvisible = ms_pPickedItem->IsVisible();
@@ -1122,7 +1043,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 			ms_pPickedItem->GetRect(rcPickedItem);
 			GetRect(rcInventory);
 			
-			//. PickedItem 영역이 인벤 영역 안으로 들어왔을경우
 			if(IntersectRect(&rcIntersect, &rcPickedItem, &rcInventory))
 			{
 				ITEM* pPickItem = ms_pPickedItem->GetItem();
@@ -1202,122 +1122,54 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 								int iCurSquareIndex = iSquarePosY*m_nColumn+iSquarePosX;
 								if(m_pdwItemCheckBox[iCurSquareIndex] > 1)
 								{
-#ifdef KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
 									bool bSuccess = false;
-#else // KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
-									bool bSuccess = true;
-#endif // KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
 									
 									ITEM* pTargetItem = FindItemByKey(m_pdwItemCheckBox[iCurSquareIndex]);
 									if(pTargetItem)
 									{
 										int	iType = pTargetItem->Type;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 										int	iLevel = (pTargetItem->Level >> 3) & 15;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 										int	iDurability = pTargetItem->Durability;
 										
-										
-#ifdef KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
-										// 축석/영석
 										if((pPickItem->Type==ITEM_POTION+13)    
 											|| (pPickItem->Type==ITEM_POTION+14)) 
 										{	   
 											bSuccess = CanUpgradeItem(pPickItem, pTargetItem);
 										}
-										else if(pPickItem->Type == ITEM_POTION+42 )		// 조화의 보석
+										else if(pPickItem->Type == ITEM_POTION+42 )
 										{
-											// 강화되지 않은 아이템만 강화
-											// 강화된 아이템은 환원을 한 다음 다시 강화...
 											if(pTargetItem->Jewel_Of_Harmony_Option == 0  )
 											{
 												StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType( static_cast<int>(pTargetItem->Type) );
 												
-												// 소켓, 세트아이템은 조화의 보석으로 강화할수 없다.
 												if( (strengthitem != SI_None) && (!g_SocketItemMgr.IsSocketItem(pTargetItem)) 
 													&& ((pTargetItem->ExtOption % 0x04) != EXT_A_SET_OPTION && (pTargetItem->ExtOption % 0x04) != EXT_B_SET_OPTION))
 												{
-													// 검류, 도끼류, 둔기류, 창류, 활/석궁류, 지팡이, 방어구
 													bSuccess = true;
 												}
 											}
 										}
-										else if(pPickItem->Type == ITEM_POTION+43		// 하급제련석
-											|| pPickItem->Type == ITEM_POTION+44 )	// 상급제련석
+										else if(pPickItem->Type == ITEM_POTION+43 || pPickItem->Type == ITEM_POTION+44 )
 										{
-											// 조화의 보석으로 강화한 후 제련
 											if( pTargetItem->Jewel_Of_Harmony_Option != 0 )
 											{
 												bSuccess = true;
 											}
 										}
 
-										//^ 펜릴 수리 관련(메세지 박스)
 										if(pPickItem->Type == ITEM_POTION+13 
-											&& iType == ITEM_HELPER+37 && iDurability != 255)	// 펜릴의 뿔피리
+											&& iType == ITEM_HELPER+37 && iDurability != 255)
 										{
 											bSuccess = true;
 										}
-										
-										// 겹치기 가능한 아이템인가? 
-										if(bSuccess == false && m_pOwner == g_pMyInventory)	// 자기인벤토리에서만 겹치기 가능함
+
+										if(bSuccess == false && m_pOwner == g_pMyInventory)
 										{
 											bSuccess = IsOverlayItem(pPickItem, pTargetItem);
 										}
-#else // KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
-										// 날개가 아니면 false
-										if(IsWingItem(pTargetItem) == false)
-										{
-											bSuccess = false;
-										}
-										// 축석에 레벨 6이상인 경우. ( 0, 1, 2, 3, 4, 5 ) -> ( 1, 2, 3, 4, 5, 6 )
-										// 영석에 레벨 9이상인 경우  ( 6, 7, 8 ) -> ( 7, 8, 9 )
-										if((pPickItem->Type==ITEM_POTION+13 && iLevel <= 6)    
-											|| (pPickItem->Type==ITEM_POTION+14 && (iLevel >= 7 && iLevel <= 9))) 
-										{	    
-											bSuccess = true;
-										}
-										//^ 펜릴 수리 관련(메세지 박스)
-										if(pPickItem->Type == ITEM_POTION+13 
-											&& iType == ITEM_HELPER+37 && iDurability != 255)	// 펜릴의 뿔피리
-										{
-											bSuccess = true;
-										}
-										if(pPickItem->Type == ITEM_POTION+42 )		// 조화의 보석
-										{
-											if(pTargetItem->Jewel_Of_Harmony_Option != 0  )
-											{
-												//강화된 아이템은 강화를 못한다..
-												// 환원을 한 다음 다시 강화...
-												bSuccess = false;
-											}
-											else
-											{
-												StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType( static_cast<int>(pTargetItem->Type) );
-												
-												if( strengthitem == SI_None )
-												{
-													//검류, 도끼류, 둔기류, 창류, 활/석궁류, 지팡이, 방어구
-													bSuccess = false;
-												}
-											}
-										}
-										if(pPickItem->Type == ITEM_POTION+43		// 하급제련석
-											|| pPickItem->Type == ITEM_POTION+44 )	// 상급제련석
-										{
-											if( pTargetItem->Jewel_Of_Harmony_Option == 0 )
-											{
-												bSuccess = false;
-											}
-										}
-										
-										// 겹치기 가능한 아이템인가? 
-										if(bSuccess == false && m_pOwner == g_pMyInventory)	// 자기인벤토리에서만 겹치기 가능함
-										{
-											bSuccess = IsOverlayItem(pPickItem, pTargetItem);
-										}
-#endif // KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
+
 #ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리 내에 아이템이 서로 겹칠 때의 예외처리 [lem_2010.9.8]
 										if( Check_LuckyItem( pTargetItem->Type ) )
 										{
@@ -1357,25 +1209,11 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 					}
 				}
 			}
-#if defined (DEBUG_INVENTORY_BASE_TEST)// || defined (_DEBUG)
-		//. PickedItem 영역 출력
-		EnableAlphaTest();
-		glColor4f(0.8f, 0.4f, 0.8f, 0.9f);
-		RenderColor(rcPickedItem.left, rcPickedItem.top,
-			rcPickedItem.right-rcPickedItem.left, 1);
-		RenderColor(rcPickedItem.left, rcPickedItem.bottom,
-			rcPickedItem.right-rcPickedItem.left, 1);
-		RenderColor(rcPickedItem.left, rcPickedItem.top,
-			1, rcPickedItem.bottom-rcPickedItem.top);
-		RenderColor(rcPickedItem.right, rcPickedItem.top,
-			1, rcPickedItem.bottom-rcPickedItem.top);
-		EndRenderColor();
-#endif // defined (DEBUG_INVENTORY_BASE_TEST) || defined (_DEBUG)
 		}
 	}
 
 #if defined (DEBUG_INVENTORY_BASE_TEST) || defined (_DEBUG)
-	//. 선택 영역 Item Key 출력
+
 	if(m_iPointedSquareIndex != -1 && m_pdwItemCheckBox[m_iPointedSquareIndex] != 0)
 	{
 		g_pRenderText->SetBgColor(0, 0, 0, 255);
@@ -1399,9 +1237,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 		// 부분유료화 상점에서는 갯수 렌더링과 툴팁렌더링을 따로 호출하고 있기 때문에 리턴
 		if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP))
 		{
-#ifdef DO_PROFILING
-			g_pProfiler->EndUnit( EPROFILING_RENDER_NEWUIINVENTORY_INVENTORYCTRLRENDER );
-#endif // DO_PROFILING
 			return;
 		}
 #endif // NEW_USER_INTERFACE_UISYSTEM
@@ -1415,9 +1250,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 			}
 		}
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_NEWUIINVENTORY_INVENTORYCTRLRENDER );
-#endif // DO_PROFILING
 }
 
 void SEASON3B::CNewUIInventoryCtrl::SetPos(int x, int y)
@@ -1462,7 +1294,7 @@ CNewUIObj* SEASON3B::CNewUIInventoryCtrl::GetOwner() const
 bool SEASON3B::CNewUIInventoryCtrl::IsVisible() const
 {
 	if(m_pOwner)
-		return (m_pOwner->IsVisible() && m_bShow);	//. 부모가 있다면 부모의 상태를 따른다.
+		return (m_pOwner->IsVisible() && m_bShow);
 	return m_bShow;
 }
 

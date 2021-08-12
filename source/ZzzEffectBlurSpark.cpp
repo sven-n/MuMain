@@ -108,9 +108,6 @@ void CreateBlur(CHARACTER *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bool 
 
 void MoveBlurs()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_BLURS, PROFILING_MOVE_BLURS );
-#endif // DO_PROFILING
 	for(int i=0;i<MAX_BLURS;i++)
 	{
 		BLUR *b = &Blur[i];
@@ -135,16 +132,10 @@ void MoveBlurs()
 		}
 	}
 	MoveObjectBlurs();
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_BLURS );
-#endif // DO_PROFILING
 }
 
 void RenderBlurs()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_BLURS, PROFILING_RENDER_BLURS );
-#endif // DO_PROFILING
     int Type;
     //DisableCullFace();
 	for(int i=0;i<MAX_BLURS;i++)
@@ -214,10 +205,6 @@ void RenderBlurs()
 		}
 	}
 	RenderObjectBlurs();
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_BLURS );
-#endif // DO_PROFILING
 }
 
 typedef struct

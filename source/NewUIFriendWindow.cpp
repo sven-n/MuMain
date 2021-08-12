@@ -79,7 +79,7 @@ bool SEASON3B::CNewUIFriendWindow::UpdateMouseEvent()
 {
 	if(m_pFriendWindowMgr)
 	{
-		m_pFriendWindowMgr->DoAction();		//. 친구창 안에서 마우스 키처리 발생
+		m_pFriendWindowMgr->DoAction();
 
 		CUIFriendWindow* pMainWnd = m_pFriendWindowMgr->GetFriendMainWindow();
 		if(pMainWnd)
@@ -97,8 +97,6 @@ bool SEASON3B::CNewUIFriendWindow::UpdateMouseEvent()
 			{
 				return false;
 			}
-			
-			// 마우스가 윈도우 위에 있는가 (있으면 윈도우 ID)
 			if(g_dwActiveUIID != 0 || g_dwMouseUseUIID != 0)
 			{
 				return false;

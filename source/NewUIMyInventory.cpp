@@ -773,15 +773,9 @@ bool SEASON3B::CNewUIMyInventory::UpdateKeyEvent()
 
 bool SEASON3B::CNewUIMyInventory::Update()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_UPDATE_NEWUIINVENTORY, PROFILING_UPDATE_NEWUIINVENTORY );
-#endif // DO_PROFILING
 
 	if(m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_UPDATE_NEWUIINVENTORY );
-#endif // DO_PROFILING
 		return false;
 	}
 
@@ -798,51 +792,29 @@ bool SEASON3B::CNewUIMyInventory::Update()
 			}
 		}
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_UPDATE_NEWUIINVENTORY );
-#endif // DO_PROFILING
 	return true;
 }
 
 bool SEASON3B::CNewUIMyInventory::Render()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_NEWUIINVENTORY, PROFILING_RENDER_NEWUIINVENTORY );
-#endif // DO_PROFILING
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-	
 	RenderInventoryDetails();
-
 	RenderSetOption();
-
-#ifdef SOCKET_SYSTEM
 	RenderSocketOption();
-#endif	// SOCKET_SYSTEM
-
 	RenderButtons();
 
 	if(m_pNewInventoryCtrl)
 		m_pNewInventoryCtrl->Render();
 
 	RenderEquippedItem();
-
 	DisableAlphaBlend();
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_NEWUIINVENTORY );
-#endif // DO_PROFILING
-	
 	return true;
 }
 
 void SEASON3B::CNewUIMyInventory::RenderSetOption()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERSETOPTION, PROFILING_RENDER_NEWUIINVENTORY_RENDERSETOPTION );
-#endif // DO_PROFILING
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	if(g_csItemOption.GetSetOptionANum() > 0 || g_csItemOption.GetSetOptionBNum() > 0)
@@ -854,30 +826,19 @@ void SEASON3B::CNewUIMyInventory::RenderSetOption()
 		g_pRenderText->SetTextColor(100, 100, 100, 255);
 	}
 
-	// 989 "세트 옵션"
 	unicode::t_char strText[128];
 	unicode::_sprintf(strText, "[%s]", GlobalText[989]);
-#ifdef SOCKET_SYSTEM
 	g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.2f, m_Pos.y+25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
-#else	// SOCKET_SYSTEM]
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+25, strText, INVENTORY_WIDTH, 0, RT3_SORT_CENTER);
-#endif	// SOCKET_SYSTEM
 
 	if(g_csItemOption.IsViewOptionList() == true)
 	{
 		m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, -1, ITEM_SET_OPTION);
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERSETOPTION );
-#endif // DO_PROFILING
+
 }
 
-#ifdef SOCKET_SYSTEM
 void SEASON3B::CNewUIMyInventory::RenderSocketOption()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERSOCKETOPTION, PROFILING_RENDER_NEWUIINVENTORY_RENDERSOCKETOPTION );
-#endif // DO_PROFILING
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
@@ -899,16 +860,10 @@ void SEASON3B::CNewUIMyInventory::RenderSocketOption()
 	{
 		m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, -1, ITEM_SOCKET_SET_OPTION);
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERSOCKETOPTION );
-#endif // DO_PROFILING
 }
-#endif	// SOCKET_SYSTEM
 
 void SEASON3B::CNewUIMyInventory::Render3D()
 {
-	//. 장착된 무기 렌더링
-
 	for(int i=0; i<MAX_EQUIPMENT_INDEX; i++)
 	{
 		ITEM* pEquippedItem = &CharacterMachine->Equipment[i];
@@ -966,15 +921,12 @@ void SEASON3B::CNewUIMyInventory::OpenningProcess()
 	if(wLevel >= 6)
 	{
 		m_bMyShopOpen = true;
-		//UnlockMyShopButtonOpen();
 	}
 	else
 	{
 		m_bMyShopOpen = false;
-		//LockMyShopButtonOpen();
 	}
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 	if (g_QuestMng.IsIndexInCurQuestIndexList(0x1000F))
 	{
 		if (g_QuestMng.IsEPRequestRewardState(0x1000F))
@@ -983,15 +935,6 @@ void SEASON3B::CNewUIMyInventory::OpenningProcess()
 			g_QuestMng.SetEPRequestRewardState(0x1000F, false);	
 		}
 	}
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
-
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM	
-	if(GetBaseClass(Hero->Class)==CLASS_DARK_LORD)
-	{
-		SendRequestPetInfo ( 0, 0, EQUIPMENT_WEAPON_LEFT );
-		SendRequestPetInfo ( 1, 0, EQUIPMENT_HELPER );
-	}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 
 void SEASON3B::CNewUIMyInventory::ClosingProcess()
@@ -1070,12 +1013,10 @@ void SEASON3B::CNewUIMyInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwPara
 		{
 			g_csItemOption.RenderSetOptionList(pMyInventory->GetPos().x, pMyInventory->GetPos().y);
 		}
-#ifdef SOCKET_SYSTEM
 		else if (dwParamB == ITEM_SOCKET_SET_OPTION)
 		{
 			g_SocketItemMgr.RenderToolTipForSocketSetOption(pMyInventory->GetPos().x, pMyInventory->GetPos().y);
 		}
-#endif	// SOCKET_SYSTEM
 		else
 		{
 			pMyInventory->RenderItemToolTip(dwParamA);
@@ -1158,52 +1099,29 @@ void SEASON3B::CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
 				CreateEffect(BITMAP_MAGIC+1,pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
 			}
 			break;
-#if defined( LDK_ADD_NEW_PETPROCESS ) && defined( LDK_ADD_PC4_GUARDIAN )
 		case ITEM_HELPER+64:
 			ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER+64, pHeroObject->Position, Hero);
 			break;
 		case ITEM_HELPER+65:
 			ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER+65, pHeroObject->Position, Hero);
 			break;
-#endif //defined( LDK_ADD_NEW_PETPROCESS ) && defined( LDK_ADD_PC4_GUARDIAN )
-
-#if defined( LDK_ADD_NEW_PETPROCESS ) && defined( LDK_ADD_RUDOLPH_PET )
-		case ITEM_HELPER+67: //루돌프 펫 이름 출력
+		case ITEM_HELPER+67:
 			ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER+67, pHeroObject->Position, Hero);
 			break;
-#endif //defined( LDK_ADD_NEW_PETPROCESS ) && defined( LDK_ADD_RUDOLPH_PET )
-
-#if defined( LDK_ADD_NEW_PETPROCESS ) && defined( PJH_ADD_PANDA_PET )
-		case ITEM_HELPER+80: //팬더 펫 이름 출력
+		case ITEM_HELPER+80:
 			ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER+80, pHeroObject->Position, Hero);
 			break;
-#endif //defined( LDK_ADD_NEW_PETPROCESS ) && defined( PJH_ADD_PANDA_PET )
-			
-#if defined( LDK_ADD_NEW_PETPROCESS ) && defined( LDK_ADD_CS7_UNICORN_PET )
-		case ITEM_HELPER+106: //유니콘 펫 이름 출력
+		case ITEM_HELPER+106:
 			ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER+106, pHeroObject->Position, Hero);
 			break;
-#endif //defined( LDK_ADD_NEW_PETPROCESS ) && defined( LDK_ADD_CS7_UNICORN_PET )
-
-#if defined( LDK_ADD_NEW_PETPROCESS ) && defined( YDG_ADD_SKELETON_PET )
 		case ITEM_HELPER+123:
 			ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER+123, pHeroObject->Position, Hero);
 			break;
-#endif //defined( LDK_ADD_NEW_PETPROCESS ) && defined( YDG_ADD_SKELETON_PET )
 		}
 	}
-#ifdef LJW_FIX_PARTS_ENUM
-	if(Hero->EtcPart<=PARTS_NONE || Hero->EtcPart>=PARTS_LION)
-#else
 	if(Hero->EtcPart<=0 || Hero->EtcPart>3)
-#endif //LJW_FIX_PARTS_ENUM
 	{
-#ifdef LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
-		// 영예의 반지 착용시 중국 경극 깃발 생성. 단, 내구도가 0일때는 경극 깃발 생성 안함
-		if ( pItem->Type==ITEM_HELPER+20 && (pItem->Level>>3)==3 && pItem->Durability > 0)
-#else
 		if ( pItem->Type==ITEM_HELPER+20 && (pItem->Level>>3)==3 )
-#endif //LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
 		{
 			DeleteParts ( Hero );
 			Hero->EtcPart = PARTS_LION;
@@ -1223,31 +1141,21 @@ void SEASON3B::CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
 
 void SEASON3B::CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
 {
-#ifdef LDK_ADD_NEW_PETPROCESS
 	if( ThePetProcess().IsPet(pItem->Type) == true )
 	{
 		ThePetProcess().DeletePet( Hero, pItem->Type );
 	}
-#endif //LDK_ADD_NEW_PETPROCESS
 	
 	switch(pItem->Type)
 	{
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM				//## 소스정리 대상임.
-	case ITEM_HELPER+5:	// 다크스피릿
-		giPetManager::DeletePet(Hero);
-		return;
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM			//## 소스정리 대상임.
-
-	case ITEM_HELPER+30:	// 군주의망토
-	case ITEM_WING+39:		// 파멸의날개	
-	case ITEM_WING+40:		// 제왕의망토
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
-	case ITEM_WING+130:		// 작은 군주의망토
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
+	case ITEM_HELPER+30:
+	case ITEM_WING+39:	
+	case ITEM_WING+40:
+	case ITEM_WING+130:
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-	case ITEM_WING+49:		// 무인의망토
-	case ITEM_WING+50:		// 군림의망토
-	case ITEM_WING+135:		// 작은무인의 망토
+	case ITEM_WING+49:
+	case ITEM_WING+50:
+	case ITEM_WING+135:
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		DeleteCloth(Hero, &Hero->Object);
 		return;
@@ -1261,120 +1169,86 @@ void SEASON3B::CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
 
 void SEASON3B::CNewUIMyInventory::DeleteEquippingEffect()
 {
-	//////////////////////////////////////////////////////////////////////////
-	//. 코드 그대로 옮김
-	
 	if(Hero->EtcPart < PARTS_ATTACK_TEAM_MARK)
 	{
-#ifdef LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
-		if(Hero->EtcPart == PARTS_LION)	
-		{
-			DeleteParts(Hero);
-			Hero->EtcPart = PARTS_LION;
-		}
-		else 
-		{
-			DeleteParts(Hero);
-			if(Hero->EtcPart >= PARTS_WEBZEN)	
-			{
-				Hero->EtcPart = PARTS_NONE;
-			}
-		}
-		
-#else
 		DeleteParts(Hero);
 		if(Hero->EtcPart > 3)
 		{
 			Hero->EtcPart = 0;
 		}
-#endif //LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
 	}
 
 	SetCharacterClass(Hero);
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 void SEASON3B::CNewUIMyInventory::SetEquipmentSlotInfo()
 {
-	//. 펫
 	m_EquipmentSlots[EQUIPMENT_HELPER].x = m_Pos.x+15;
 	m_EquipmentSlots[EQUIPMENT_HELPER].y = m_Pos.y+44;
 	m_EquipmentSlots[EQUIPMENT_HELPER].width = 46;
 	m_EquipmentSlots[EQUIPMENT_HELPER].height = 46;
 	m_EquipmentSlots[EQUIPMENT_HELPER].dwBgImage = IMAGE_INVENTORY_ITEM_FAIRY;
 
-	//. 투구
 	m_EquipmentSlots[EQUIPMENT_HELM].x = m_Pos.x+75;
 	m_EquipmentSlots[EQUIPMENT_HELM].y = m_Pos.y+44;
 	m_EquipmentSlots[EQUIPMENT_HELM].width = 46;
 	m_EquipmentSlots[EQUIPMENT_HELM].height = 46;
 	m_EquipmentSlots[EQUIPMENT_HELM].dwBgImage = IMAGE_INVENTORY_ITEM_HELM;
 
-	//. 날개
 	m_EquipmentSlots[EQUIPMENT_WING].x = m_Pos.x+120;
 	m_EquipmentSlots[EQUIPMENT_WING].y = m_Pos.y+44;
 	m_EquipmentSlots[EQUIPMENT_WING].width = 61;
 	m_EquipmentSlots[EQUIPMENT_WING].height = 46;
 	m_EquipmentSlots[EQUIPMENT_WING].dwBgImage = IMAGE_INVENTORY_ITEM_WING;
 
-	//. 왼손무기
 	m_EquipmentSlots[EQUIPMENT_WEAPON_LEFT].x = m_Pos.x+135;
 	m_EquipmentSlots[EQUIPMENT_WEAPON_LEFT].y = m_Pos.y+87;
 	m_EquipmentSlots[EQUIPMENT_WEAPON_LEFT].width = 46;
 	m_EquipmentSlots[EQUIPMENT_WEAPON_LEFT].height = 66;
 	m_EquipmentSlots[EQUIPMENT_WEAPON_LEFT].dwBgImage = IMAGE_INVENTORY_ITEM_LEFT;
 
-	//. 갑옷
 	m_EquipmentSlots[EQUIPMENT_ARMOR].x = m_Pos.x+75;
 	m_EquipmentSlots[EQUIPMENT_ARMOR].y = m_Pos.y+87;
 	m_EquipmentSlots[EQUIPMENT_ARMOR].width = 46;
 	m_EquipmentSlots[EQUIPMENT_ARMOR].height = 66;
 	m_EquipmentSlots[EQUIPMENT_ARMOR].dwBgImage = IMAGE_INVENTORY_ITEM_ARMOR;
 
-	//. 오른손 무기
 	m_EquipmentSlots[EQUIPMENT_WEAPON_RIGHT].x = m_Pos.x+15;
 	m_EquipmentSlots[EQUIPMENT_WEAPON_RIGHT].y = m_Pos.y+87;
 	m_EquipmentSlots[EQUIPMENT_WEAPON_RIGHT].width = 46;
 	m_EquipmentSlots[EQUIPMENT_WEAPON_RIGHT].height = 66;
 	m_EquipmentSlots[EQUIPMENT_WEAPON_RIGHT].dwBgImage = IMAGE_INVENTORY_ITEM_RIGHT;
 
-	//. 장갑
 	m_EquipmentSlots[EQUIPMENT_GLOVES].x = m_Pos.x+15;
 	m_EquipmentSlots[EQUIPMENT_GLOVES].y = m_Pos.y+150;
 	m_EquipmentSlots[EQUIPMENT_GLOVES].width = 46;
 	m_EquipmentSlots[EQUIPMENT_GLOVES].height = 46;
 	m_EquipmentSlots[EQUIPMENT_GLOVES].dwBgImage = IMAGE_INVENTORY_ITEM_GLOVES;
 
-	//. 바지
 	m_EquipmentSlots[EQUIPMENT_PANTS].x = m_Pos.x+75;
 	m_EquipmentSlots[EQUIPMENT_PANTS].y = m_Pos.y+150;
 	m_EquipmentSlots[EQUIPMENT_PANTS].width = 46;
 	m_EquipmentSlots[EQUIPMENT_PANTS].height = 46;
 	m_EquipmentSlots[EQUIPMENT_PANTS].dwBgImage = IMAGE_INVENTORY_ITEM_PANTS;
 
-	//. 신발
 	m_EquipmentSlots[EQUIPMENT_BOOTS].x = m_Pos.x+135;
 	m_EquipmentSlots[EQUIPMENT_BOOTS].y = m_Pos.y+150;
 	m_EquipmentSlots[EQUIPMENT_BOOTS].width = 46;
 	m_EquipmentSlots[EQUIPMENT_BOOTS].height = 46;
 	m_EquipmentSlots[EQUIPMENT_BOOTS].dwBgImage = IMAGE_INVENTORY_ITEM_BOOT;
 
-	//. 왼쪽 반지
 	m_EquipmentSlots[EQUIPMENT_RING_LEFT].x = m_Pos.x+114;
 	m_EquipmentSlots[EQUIPMENT_RING_LEFT].y = m_Pos.y+150;
 	m_EquipmentSlots[EQUIPMENT_RING_LEFT].width = 28;
 	m_EquipmentSlots[EQUIPMENT_RING_LEFT].height = 28;
 	m_EquipmentSlots[EQUIPMENT_RING_LEFT].dwBgImage = IMAGE_INVENTORY_ITEM_RING;
 
-	//. 목걸이
 	m_EquipmentSlots[EQUIPMENT_AMULET].x = m_Pos.x+54;
 	m_EquipmentSlots[EQUIPMENT_AMULET].y = m_Pos.y+87;
 	m_EquipmentSlots[EQUIPMENT_AMULET].width = 28;
 	m_EquipmentSlots[EQUIPMENT_AMULET].height = 28;
 	m_EquipmentSlots[EQUIPMENT_AMULET].dwBgImage = IMAGE_INVENTORY_ITEM_NECKLACE;
 
-	//. 오른쪽 반지
 	m_EquipmentSlots[EQUIPMENT_RING_RIGHT].x = m_Pos.x+54;
 	m_EquipmentSlots[EQUIPMENT_RING_RIGHT].y = m_Pos.y+150;
 	m_EquipmentSlots[EQUIPMENT_RING_RIGHT].width = 28;
@@ -1384,20 +1258,17 @@ void SEASON3B::CNewUIMyInventory::SetEquipmentSlotInfo()
 
 void SEASON3B::CNewUIMyInventory::SetButtonInfo()
 {
-	//. 닫기 버튼
 	m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
 	m_BtnExit.ChangeButtonInfo(m_Pos.x+13, m_Pos.y+391, 36, 29);
-	m_BtnExit.ChangeToolTipText(GlobalText[225], true); // 225 "닫기(I,V)"
+	m_BtnExit.ChangeToolTipText(GlobalText[225], true);
 
-	//. 수리 버튼
 	m_BtnRepair.ChangeButtonImgState(true, IMAGE_INVENTORY_REPAIR_BTN, false);
 	m_BtnRepair.ChangeButtonInfo(m_Pos.x+50, m_Pos.y+391, 36, 29);
-	m_BtnRepair.ChangeToolTipText(GlobalText[233], true); // 233 "수리(R)"
+	m_BtnRepair.ChangeToolTipText(GlobalText[233], true);
 
-	// 개인 삼정 버튼
 	m_BtnMyShop.ChangeButtonImgState(true, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, false);
 	m_BtnMyShop.ChangeButtonInfo(m_Pos.x+87, m_Pos.y+391, 36, 29);
-	// 1125 "개인상점열기(S)"
+
 	m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
@@ -1455,25 +1326,15 @@ void SEASON3B::CNewUIMyInventory::UnloadImages()
 
 void SEASON3B::CNewUIMyInventory::RenderFrame()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERFRAME, PROFILING_RENDER_NEWUIINVENTORY_RENDERFRAME );
-#endif // DO_PROFILING
 	RenderImage(IMAGE_INVENTORY_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
 	RenderImage(IMAGE_INVENTORY_BACK_TOP2, m_Pos.x, m_Pos.y, 190.f, 64.f);
 	RenderImage(IMAGE_INVENTORY_BACK_LEFT, m_Pos.x, m_Pos.y+64, 21.f, 320.f);
 	RenderImage(IMAGE_INVENTORY_BACK_RIGHT, m_Pos.x+INVENTORY_WIDTH-21, m_Pos.y+64, 21.f, 320.f);
 	RenderImage(IMAGE_INVENTORY_BACK_BOTTOM, m_Pos.x, m_Pos.y+INVENTORY_HEIGHT-45, 190.f, 45.f);
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERFRAME );
-#endif // DO_PROFILING
 }
 
 void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDEREQUIPEDITEM, PROFILING_RENDER_NEWUIINVENTORY_RENDEREQUIPEDITEM );
-#endif // DO_PROFILING
-
 	for(int i=0; i<MAX_EQUIPMENT_INDEX; i++)
 	{
 		if(i == EQUIPMENT_HELM)
@@ -1512,25 +1373,23 @@ void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 			}
 			
 #ifdef KJH_FIX_RENDER_PERIODITEM_DURABILITY
-			// 기간제 아이템이고 기간이 끝나지 않았을때 색 변화가 없다.
 			if( (pEquipmentItemSlot->bPeriodItem == true) && (pEquipmentItemSlot->bExpiredPeriod == false) )
 				continue;
 #endif // KJH_FIX_RENDER_PERIODITEM_DURABILITY
 			
-			//. 내구도에 따른 색의 변화
 			if(pEquipmentItemSlot->Durability <= 0)
-				glColor4f(1.f,0.f,0.f,0.25f);	//  내구력 경고. 100%
+				glColor4f(1.f,0.f,0.f,0.25f);
 			else if(pEquipmentItemSlot->Durability<=(iMaxDurability*0.2f))
-				glColor4f(1.f,0.15f,0.f,0.25f);	//  내구력 경고. 80%
+				glColor4f(1.f,0.15f,0.f,0.25f);
 			else if(pEquipmentItemSlot->Durability<=(iMaxDurability*0.3f))
-				glColor4f(1.f,0.5f,0.f,0.25f);	//  내구력 경고. 70%
+				glColor4f(1.f,0.5f,0.f,0.25f);
 			else if(pEquipmentItemSlot->Durability<=(iMaxDurability*0.5f))
-				glColor4f(1.f,1.f,0.f,0.25f);	//  내구력 경고. 50%
+				glColor4f(1.f,1.f,0.f,0.25f);
 			else if(IsEquipable(i, pEquipmentItemSlot) == false)
 				glColor4f(1.f,0.f,0.f,0.25f);
 			else
 			{
-				continue;	//. 그리지 않는다.
+				continue;
 			}
 			
 			EnableAlphaTest();
@@ -1548,7 +1407,7 @@ void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 			&& !((GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER) && (m_iPointedSlot == EQUIPMENT_GLOVES))			
 #endif //PBG_ADD_NEWCHAR_MONK
 			)
-		{	//. 장착할 수 없는 아이템 빨간색 표시
+		{
 			glColor4f(0.9f, 0.1f, 0.1f, 0.4f);
 			EnableAlphaTest();
 			RenderColor(m_EquipmentSlots[m_iPointedSlot].x+1, m_EquipmentSlots[m_iPointedSlot].y, 
@@ -1557,23 +1416,14 @@ void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 		}
 	}
 
-
-	//. 툴팁 그리기
 	if(m_iPointedSlot != -1 && m_pNewUI3DRenderMng)
 	{	
 		m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, m_iPointedSlot, 0);
 	}
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDEREQUIPEDITEM );
-#endif // DO_PROFILING
 }
 
 void SEASON3B::CNewUIMyInventory::RenderButtons()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERBUTTONS, PROFILING_RENDER_NEWUIINVENTORY_RENDERBUTTONS );
-#endif // DO_PROFILING
 	EnableAlphaTest();
 
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)==false
@@ -1598,25 +1448,17 @@ void SEASON3B::CNewUIMyInventory::RenderButtons()
 	m_BtnExit.Render();
 
 	DisableAlphaBlend();
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERBUTTONS );
-#endif // DO_PROFILING
 }
 
 void SEASON3B::CNewUIMyInventory::RenderInventoryDetails()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERINVENTORYDETAILS, PROFILING_RENDER_NEWUIINVENTORY_RENDERINVENTORYDETAILS );
-#endif // DO_PROFILING
 	EnableAlphaTest();
 
-	//. 캡션
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->RenderText(m_Pos.x,m_Pos.y+12,GlobalText[223], INVENTORY_WIDTH, 0, RT3_SORT_CENTER);
 
-	//. 젠
 	RenderImage(IMAGE_INVENTORY_MONEY, m_Pos.x+11, m_Pos.y+364, 170.f, 26.f);
 #ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
 #ifdef ADD_PCROOM_POINT_SYSTEM
@@ -1648,47 +1490,32 @@ void SEASON3B::CNewUIMyInventory::RenderInventoryDetails()
 	g_pRenderText->SetFont(g_hFont);
 	
 	DisableAlphaBlend();
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_NEWUIINVENTORY_RENDERINVENTORYDETAILS );
-#endif // DO_PROFILING
 }
 
 bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 {
-	//. 외부에서 장비창으로
-#ifdef KJH_FIX_WOPS_K27261_DISAPPEAR_EQUIPED_ITEM
 	if(m_iPointedSlot != -1 && IsRelease(VK_LBUTTON))
-#else // KJH_FIX_WOPS_K27261_DISAPPEAR_EQUIPED_ITEM
-	if(m_iPointedSlot != -1 && IsPress(VK_LBUTTON))
-#endif // KJH_FIX_WOPS_K27261_DISAPPEAR_EQUIPED_ITEM
 	{
 		CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 		if(pPickedItem)
 		{
 			ITEM* pItemObj = pPickedItem->GetItem();
 
-#ifdef LDK_FIX_EXPIREDPERIOD_ITEM_EQUIP_WARNING
-			// 만료된 아이템 작용불가 및 경고 
 			if( pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
 			{
-				// 2285 "착용할 수 없습니다."
 				g_pChatListBox->AddText("", GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
 				CNewUIInventoryCtrl::BackupPickedItem();
 				
 				ResetMouseLButton();
 				return false;
 			}
-#endif //LDK_FIX_EXPIREDPERIOD_ITEM_EQUIP_WARNING
 			
-			// 장비창에 장비아이템이 들어가 있으면 겹치기 처리 안되게, 서버에게 패킷 안보내는 처리
 			ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[m_iPointedSlot];
 			if(pEquipmentItemSlot && pEquipmentItemSlot->Type != -1)
 			{
 				return true;
 			}
 
-#ifdef YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
-			// 변신반지 중복착용 금지
 			if (g_ChangeRingMgr->CheckChangeRing(pPickedItem->GetItem()->Type))
 			{
 				ITEM * pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
@@ -1696,7 +1523,6 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 
 				if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
 				{
-					// 3089 "다른 변신반지와 동시에 착용할 수 없습니다."
 					g_pChatListBox->AddText("", GlobalText[3089], SEASON3B::TYPE_ERROR_MESSAGE);
 					CNewUIInventoryCtrl::BackupPickedItem();
 					
@@ -1704,7 +1530,6 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 					return false;
 				}
 			}
-#endif	// YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT
 
 			if(IsEquipable(m_iPointedSlot, pItemObj))
 			{
@@ -1718,7 +1543,7 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 					return true;
 				}
 				else if(pPickedItem->GetOwnerInventory() == g_pMixInventory->GetInventoryCtrl())
-				{	// 조합창에서 장비창
+				{
 					int iSourceIndex = pPickedItem->GetSourceLinealPos();
 					int iTargetIndex = m_iPointedSlot;
 
@@ -1727,7 +1552,6 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 					
 					return true;
 				}
-				// 창고에서 장비창으로.
 				else if(pPickedItem->GetOwnerInventory() == g_pStorageInventory->GetInventoryCtrl())
 				{
 					int iSourceIndex = pPickedItem->GetSourceLinealPos();
@@ -1738,7 +1562,6 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 
 					return true;
 				}
-				// 거래창에서 장비창으로.
 				else if(pPickedItem->GetOwnerInventory() == g_pTrade->GetMyInvenCtrl())
 				{
 					int iSourceIndex = pPickedItem->GetSourceLinealPos();
@@ -1749,7 +1572,6 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 
 					return true;
 				}
-				// 개인상점에서 장비창으로
 				else if(pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
 				{
 					int iSourceIndex = pPickedItem->GetSourceLinealPos();
@@ -1760,19 +1582,11 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 
 					return true;
 				}
-				/* CNewUIInventoryCtrl를 사용하지 않는 예외 */
-				/* ITEM::ex_src_type 값으로 구분한다. (ITEM구조체 참조) */
  				else if(pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT && EquipmentItem == false)
-				{	//. 장비창에서 장비창
+				{
 					if(pPickedItem->GetSourceLinealPos() == m_iPointedSlot)
 					{
-						//. 제자리에 놓기
 						CNewUIInventoryCtrl::BackupPickedItem();
-// 주석 임시추가@@@@@
-#if !defined(LDK_FIX_RECALL_CREATEEQUIPPINGEFFECT) && !defined(LDS_FIX_RECALL_CREATEEQUIPPINGEFFECT) 
-						//. 장착효과 생성
-						CreateEquippingEffect(pItemObj);
-#endif //LDK_FIX_RECALL_CREATEEQUIPPINGEFFECT
 					}
 					else
 					{
@@ -1797,12 +1611,10 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 					return true;
 				}
 
-				// 수리금지 아이템
 				if(IsRepairBan(pEquippedItem) == true)
 				{
 					return true;
 				}
-
 
 				if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
 				{

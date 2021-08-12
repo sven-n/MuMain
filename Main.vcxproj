@@ -1547,7 +1547,6 @@
     <ClCompile Include="source\CSChaosCastle.cpp" />
     <ClCompile Include="source\CSEventMatch.cpp" />
     <ClCompile Include="source\CSItemOption.cpp" />
-    <ClCompile Include="source\CSMapInterface.cpp" />
     <ClCompile Include="source\CSMapServer.cpp" />
     <ClCompile Include="source\CSParts.cpp" />
     <ClCompile Include="source\CSPetSystem.cpp" />
@@ -1610,6 +1609,7 @@
     <ClCompile Include="source\Input.cpp" />
     <ClCompile Include="source\ItemAddOptioninfo.cpp" />
     <ClCompile Include="source\ItemInfo.cpp" />
+    <ClCompile Include="source\ItemManager.cpp" />
     <ClCompile Include="source\KeyGenerater.cpp" />
     <ClCompile Include="source\LoadData.cpp" />
     <ClCompile Include="source\LoadingScene.cpp" />
@@ -1728,7 +1728,6 @@
     <ClCompile Include="source\PhysicsManager.cpp" />
     <ClCompile Include="source\PList.cpp" />
     <ClCompile Include="source\PortalMgr.cpp" />
-    <ClCompile Include="source\ProtectAuto.cpp" />
     <ClCompile Include="source\ProtectSysKey.cpp" />
     <ClCompile Include="source\ProtocolSend.cpp" />
     <ClCompile Include="source\PvPSystem.cpp" />
@@ -2024,7 +2023,6 @@
     <ClInclude Include="source\CSChaosCastle.h" />
     <ClInclude Include="source\CSEventMatch.h" />
     <ClInclude Include="source\CSItemOption.h" />
-    <ClInclude Include="source\CSMapInterface.h" />
     <ClInclude Include="source\CSMapServer.h" />
     <ClInclude Include="source\CSParts.h" />
     <ClInclude Include="source\CSPetSystem.h" />
@@ -2315,6 +2313,7 @@
     <ClInclude Include="source\interface.h" />
     <ClInclude Include="source\ItemAddOptioninfo.h" />
     <ClInclude Include="source\ItemInfo.h" />
+    <ClInclude Include="source\ItemManager.h" />
     <ClInclude Include="source\KeyGenerater.h" />
     <ClInclude Include="source\LoadData.h" />
     <ClInclude Include="source\LoadingScene.h" />
@@ -2434,8 +2433,6 @@
     <ClInclude Include="source\PhysicsManager.h" />
     <ClInclude Include="source\PList.h" />
     <ClInclude Include="source\PortalMgr.h" />
-    <ClInclude Include="source\proc.h" />
-    <ClInclude Include="source\ProtectAuto.h" />
     <ClInclude Include="source\ProtectSysKey.h" />
     <ClInclude Include="source\ProtocolAsio.h" />
     <ClInclude Include="source\ProtocolSend.h" />

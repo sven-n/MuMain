@@ -8,11 +8,6 @@
 #ifndef __WSCTLC_H__
 #define __WSCTLC_H__
 
-
-#ifdef ANTIHACKING_ENABLE
-#include "proc.h"
-#endif //ANTIHACKING_ENABLE
-
 #include "./Utilities/Log/ErrorReport.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 

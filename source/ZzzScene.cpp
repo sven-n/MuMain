@@ -147,21 +147,12 @@ CPhysicsManager g_PhysicsManager;
 
 char *g_lpszMp3[NUM_MUSIC] =
 {
-#ifdef KOREAN_WAV_USE
-	"data\\music\\주점.mp3",
-	"data\\music\\뮤테마.mp3",
-	"data\\music\\성당.mp3",
-	"data\\music\\데비아스.mp3",
-	"data\\music\\노리아.mp3",
-	"data\\music\\던젼.mp3",
-#else
 	"data\\music\\Pub.mp3",
 	"data\\music\\Mutheme.mp3",
 	"data\\music\\Church.mp3",
 	"data\\music\\Devias.mp3",
 	"data\\music\\Noria.mp3",
 	"data\\music\\Dungeon.mp3",
-#endif
 	"data\\music\\atlans.mp3",
 	"data\\music\\icarus.mp3",
 	"data\\music\\tarkan.mp3",
@@ -390,90 +381,21 @@ extern int HeroKey;
 
 void WebzenScene(HDC hDC)
 {
-#ifdef KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
-	#if defined RESOURCE_GUARD && !defined FOR_WORK
-		
-		char szModuleFileName[256];
-		ResourceGuard::CResourceGuard RG101;
-		CMuRGReport MuRGReport;
-		RG101.AddReportObj(&MuRGReport);
-	#ifdef _TEST_SERVER
-		sprintf(szModuleFileName, "data\\local\\Gameguardtest.csr");
-	#else  // _TEST_SERVER
-		sprintf(szModuleFileName, "data\\local\\Gameguard.csr");
-	#endif // _TEST_SERVER
-		if(!RG101.CheckIntegrityResourceChecksumFile(szModuleFileName))
-		{
-			g_ErrorReport.Write("> ResourceGuard Error!!\r\n");
-			SendMessage(g_hWnd,WM_DESTROY,0,0);
-		}
-	#endif // defined RESOURCE_GUARD && !defined FOR_WORK
-#endif // KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
-
-
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading = new CProfiler();
-	g_pProfilerForLoading->Initialize( TRUE, 
-										"PROFILING_FOR_LOADING_RESULT.txt",
-										EPROFILESORTING_WEIGHT, 
-										EPROFILESORTING_DIRECTION_DESCENDING );
-	
-	g_pProfilerForLoading->RequestLiveProfiling();
-	g_pProfilerForLoading->BeginTotal( FALSE );
-	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_TOTAL, PROFILING_LOADING_TOTAL );
-#endif // DO_PROFILING_FOR_LOADING
-
-	CUIMng& rUIMng = CUIMng::Instance();	// UI매니저의 인스턴스 얻음.
+	CUIMng& rUIMng = CUIMng::Instance();
 
 	OpenFont();
 	ClearInput();
 
-	// 타이틀 씬에 쓰일 텍스처 로드.
-#ifdef PBG_ADD_NEWLOGO_IMAGECHANGE
-// 테섭과 본섭의 데이터를 달리 두기위해 변경
 	LoadBitmap("Interface\\New_lo_back_01.jpg", BITMAP_TITLE, GL_LINEAR);
 	LoadBitmap("Interface\\New_lo_back_02.jpg", BITMAP_TITLE+1, GL_LINEAR);
-#ifdef PBG_ADD_MU_LOGO
-#ifdef PBG_ADD_MUBLUE_LOGO
-	// 뮤 블루
-	LoadBitmap("Interface\\MU_TITLE_Blue.tga", BITMAP_TITLE+2, GL_LINEAR);
-#else //PBG_ADD_MUBLUE_LOGO
 	LoadBitmap("Interface\\MU_TITLE.tga", BITMAP_TITLE+2, GL_LINEAR);
-#endif //PBG_ADD_MUBLUE_LOGO
-#else //PBG_ADD_MU_LOGO
-	LoadBitmap("Interface\\New_lo_mu_logo.tga", BITMAP_TITLE+2, GL_LINEAR);
-#endif //PBG_ADD_MU_LOGO
 	LoadBitmap("Interface\\lo_121518.tga", BITMAP_TITLE+3, GL_LINEAR);
 	LoadBitmap("Interface\\New_lo_webzen_logo.tga", BITMAP_TITLE+4, GL_LINEAR);
 	LoadBitmap("Interface\\lo_lo.jpg", BITMAP_TITLE+5, GL_LINEAR, GL_REPEAT);
-#else //PBG_ADD_NEWLOGO_IMAGECHANGE
-	LoadBitmap("Interface\\lo_back_01.jpg", BITMAP_TITLE, GL_LINEAR);
-	LoadBitmap("Interface\\lo_back_02.jpg", BITMAP_TITLE+1, GL_LINEAR);
-	LoadBitmap("Interface\\lo_mu_logo.tga", BITMAP_TITLE+2, GL_LINEAR);
-	LoadBitmap("Interface\\lo_121518.tga", BITMAP_TITLE+3, GL_LINEAR);
-	LoadBitmap("Interface\\lo_webzen_logo.tga", BITMAP_TITLE+4, GL_LINEAR);
-	LoadBitmap("Interface\\lo_lo.jpg", BITMAP_TITLE+5, GL_LINEAR, GL_REPEAT);
-#endif //PBG_ADD_NEWLOGO_IMAGECHANGE
-#ifdef PBG_ADD_NEWLOGO_IMAGECHANGE
 	LoadBitmap("Interface\\lo_back_s5_03.jpg", BITMAP_TITLE+6, GL_LINEAR);
 	LoadBitmap("Interface\\lo_back_s5_04.jpg", BITMAP_TITLE+7, GL_LINEAR);
-#ifndef KJH_ADD_EVENT_LOADING_SCENE				// #ifndef
-#ifdef PBG_ADD_MU_LOGO
-#ifdef PBG_ADD_MUBLUE_LOGO
 	if(rand()%100 <= 70)
 	{
-		//새로운 블루 뮤
-		LoadBitmap("Interface\\lo_back_im01_Blue.jpg", BITMAP_TITLE+8, GL_LINEAR);
-		LoadBitmap("Interface\\lo_back_im02_Blue.jpg", BITMAP_TITLE+9, GL_LINEAR);	
-		LoadBitmap("Interface\\lo_back_im03_Blue.jpg", BITMAP_TITLE+10, GL_LINEAR);
-		LoadBitmap("Interface\\lo_back_im04_Blue.jpg", BITMAP_TITLE+11, GL_LINEAR);
-		LoadBitmap("Interface\\lo_back_im05_Blue.jpg", BITMAP_TITLE+12, GL_LINEAR);
-		LoadBitmap("Interface\\lo_back_im06_Blue.jpg", BITMAP_TITLE+13, GL_LINEAR);
-	}
-#else //PBG_ADD_MUBLUE_LOGO
-	if(rand()%100 <= 70)
-	{
-		//새로운 뮤
 		LoadBitmap("Interface\\lo_back_im01.jpg", BITMAP_TITLE+8, GL_LINEAR);
 		LoadBitmap("Interface\\lo_back_im02.jpg", BITMAP_TITLE+9, GL_LINEAR);	
 		LoadBitmap("Interface\\lo_back_im03.jpg", BITMAP_TITLE+10, GL_LINEAR);
@@ -481,12 +403,8 @@ void WebzenScene(HDC hDC)
 		LoadBitmap("Interface\\lo_back_im05.jpg", BITMAP_TITLE+12, GL_LINEAR);
 		LoadBitmap("Interface\\lo_back_im06.jpg", BITMAP_TITLE+13, GL_LINEAR);
 	}
-#endif //PBG_ADD_MUBLUE_LOGO
 	else
-#endif //PBG_ADD_MU_LOGO
-#endif // KJH_ADD_EVENT_LOADING_SCENE
 	{
-		//기존 이미지
 		LoadBitmap("Interface\\lo_back_s5_im01.jpg", BITMAP_TITLE+8, GL_LINEAR);
 		LoadBitmap("Interface\\lo_back_s5_im02.jpg", BITMAP_TITLE+9, GL_LINEAR);	
 		LoadBitmap("Interface\\lo_back_s5_im03.jpg", BITMAP_TITLE+10, GL_LINEAR);
@@ -494,40 +412,28 @@ void WebzenScene(HDC hDC)
 		LoadBitmap("Interface\\lo_back_s5_im05.jpg", BITMAP_TITLE+12, GL_LINEAR);
 		LoadBitmap("Interface\\lo_back_s5_im06.jpg", BITMAP_TITLE+13, GL_LINEAR);
 	}
-#endif //PBG_ADD_NEWLOGO_IMAGECHANGE
 
-	rUIMng.CreateTitleSceneUI();	// 타이틀 씬의 UI 생성.
+	rUIMng.CreateTitleSceneUI();
 	
-	FogEnable = false;				// ?
+	FogEnable = false;
 	
-	// 타이틀 씬 랜더 부분.
 	::EnableAlphaTest();
-	OpenBasicData(hDC);		// 기본 데이터 로딩 및 로딩게이지바 랜더.
+	OpenBasicData(hDC);
 
-
-	
-	// 메인씬에서 사용할 UI 클래스들 생성
 	g_pNewUISystem->LoadMainSceneInterface();
 
 	CUIMng::Instance().RenderTitleSceneUI(hDC, 11, 11);
 
-	// 타이틀 씬이 끝날때 부분.
-	rUIMng.ReleaseTitleSceneUI();	// 타이틀 씬 UI Release.
-	
-	// 타이틀 씬에 쓰인 텍스처 삭제.
-	DeleteBitmap(BITMAP_TITLE);
+	rUIMng.ReleaseTitleSceneUI();
+		DeleteBitmap(BITMAP_TITLE);
    	DeleteBitmap(BITMAP_TITLE+1);
 	DeleteBitmap(BITMAP_TITLE+2);
    	DeleteBitmap(BITMAP_TITLE+3);
 	DeleteBitmap(BITMAP_TITLE+4);
    	DeleteBitmap(BITMAP_TITLE+5);
-#ifdef PBG_ENGLISHLOGO_CHANGE
-	DeleteBitmap(BITMAP_TITLE+6);
-#endif //PBG_ENGLISHLOGO_CHANGE
-#ifdef PBG_ADD_NEWLOGO_IMAGECHANGE
+
 	for(int i=6; i<14; ++i)
 		DeleteBitmap(BITMAP_TITLE+i);
-#endif //PBG_ADD_NEWLOGO_IMAGECHANGE
 
 	g_ErrorReport.Write( "> Loading ok.\r\n");
 
@@ -555,21 +461,7 @@ void WebzenScene(HDC hDC)
 	entity->Object.Angle[2] = 60.0f;
 #endif
 
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_TOTAL );
-	
-	g_pProfilerForLoading->RequestKillProfiling();
-	g_pProfilerForLoading->RequestGenerateResult();
-	
-	g_pProfilerForLoading->EndTotal();
-	
-	g_pProfilerForLoading->Release();
-#endif // DO_PROFILING_FOR_LOADING
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 게임내의 메세지 박스 처리 함수들
-///////////////////////////////////////////////////////////////////////////////
 
 int MenuStateCurrent = MENU_SERVER_LIST;
 int MenuStateNext    = MENU_SERVER_LIST;
@@ -967,15 +859,8 @@ void MoveCharacterCamera(vec3_t Origin,vec3_t Position,vec3_t Angle)
 
 void MoveCamera()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_CAMERA, PROFILING_MOVE_CAMERA );
-#endif // DO_PROFILING
-
 	if (CCameraMove::GetInstancePtr()->IsTourMode())
 	{
-#ifdef DO_PROFILING
-		g_pProfiler->EndUnit( EPROFILING_MOVE_CAMERA );
-#endif // DO_PROFILING
 		return;
 	}
 
@@ -1041,10 +926,6 @@ void MoveCamera()
 	vec3_t Position;
 	Vector(0.f,0.f,0.f,Position);
     MoveCharacterCamera(Position,CurrentCameraPosition,CurrentCameraAngle);
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_CAMERA );
-#endif // DO_PROFILING
 }
 
 bool MenuCancel         = true;
@@ -1475,25 +1356,15 @@ void NewMoveLogInScene()
 	if (!CUIMng::Instance().m_CreditWin.IsShow())
 	{
 		InitTerrainLight();
-
 		MoveObjects();
 		MoveBugs();
 		MoveLeaves();
 		MoveCharactersClient();
-
 		MoveEffects();
 		MoveJoints();
 		MoveParticles();
 		MoveBoids();
-
-#ifdef LDK_ADD_NEW_PETPROCESS
-	ThePetProcess().UpdatePets();
-#endif //LDK_ADD_NEW_PETPROCESS
-
-#ifdef DO_PROFILING
-		MoveInterface_ForProfiling();
-#endif // DO_PROFILING
-
+		ThePetProcess().UpdatePets();
 		MoveCamera();
 	}
 

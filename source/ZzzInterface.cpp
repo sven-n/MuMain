@@ -37,7 +37,6 @@
 #endif// PET_SYSTEM
 #include "CSParts.h"
 #include "GMBattleCastle.h"
-#include "CSMapInterface.h"
 #include "GMCrywolf1st.h"
 #include "UIMapName.h"	// rozy
 #include "GMCrywolf1st.h"
@@ -66,15 +65,9 @@
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM
-#ifdef DO_PROFILING
-#include "Profiler.h"
-#endif // DO_PROFILING
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
 #include "DuelMgr.h"
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-#include "ProtectAuto.h"
-#endif // CSK_MOD_PROTECT_AUTO_V1
 #ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
 #include "PKSystem.h"
 #endif //PBG_ADD_PKSYSTEM_INGAMESHOP

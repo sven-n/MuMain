@@ -688,47 +688,15 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 	}
 	return TRUE;
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-//  모든 보조유닛 처리.
-//////////////////////////////////////////////////////////////////////////
 void MoveBugs ()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_BUGS, PROFILING_MOVE_BUGS );
-#endif // DO_PROFILING
-
 	for(int i=0;i<MAX_BUTTERFLES;i++)
 	{
 		OBJECT *o = &Butterfles[i];
 		if (MoveBug(o) == FALSE) return;
 	}
-#ifdef ANTIHACKING_ENABLE
-	// 체크코드
-	if ( g_bNewFrame)
-	{
-		switch ( GetTickCount() % 5000)
-		{
-		case 3232:
-			hanguo_check1();
-			break;
-		case 1157:
-			hanguo_check2();
-			break;
-		}
-	}
-#endif //ANTIHACKING_ENABLE
-	
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_BUGS );
-#endif // DO_PROFILING
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  보조유닛을 출력한다.
-//////////////////////////////////////////////////////////////////////////
 bool RenderBug ( OBJECT* o, bool bForceRender )
 {
 	if(o->Live)
@@ -741,14 +709,13 @@ bool RenderBug ( OBJECT* o, bool bForceRender )
 				return TRUE;
 
 			if(bForceRender)
-				o->Scale = o->Scale;	//. 알바 - 편지창에서 펫 스케일 조정 가능하게 변경
+				o->Scale = o->Scale;
 			else if(SceneFlag == CHARACTER_SCENE)
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 				o->Scale = 1.2f;
 #else //PJH_NEW_SERVER_SELECT_MAP
 				o->Scale = 1.0f;
 #endif //PJH_NEW_SERVER_SELECT_MAP
-			//^ 펜릴 모델 스케일 안먹는 버그 막는 루틴
 			else if(o->Type != MODEL_FENRIR_BLACK && o->Type != MODEL_FENRIR_BLUE && o->Type != MODEL_FENRIR_RED
 				&& o->Type != MODEL_FENRIR_GOLD
 				) 
@@ -790,10 +757,8 @@ void RenderBugs()
 
 void RenderDarkHorseSkill ( OBJECT* o, BMD* b )
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(o == NULL)	return;
 	if(b == NULL)	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
     float  Matrix[3][4];
     vec3_t Angle, p, Position;
 
@@ -863,13 +828,12 @@ void RenderSkillEarthQuake ( CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill )
 	if ( o->WeaponLevel==iMaxSkill-1 )
     {
 		EarthQuake = (rand()%3-3)*0.7f;
-        //  분노의 일격의 중앙 틈들.
         CreateEffect ( MODEL_SKILL_FURY_STRIKE, TargetO.Position, TargetO.Angle, TargetO.Light, 0, o, -1, 0, 2 );
     }
 	
 	if ( o->WeaponLevel>iMaxSkill )
     {
-		o->WeaponLevel = 0;	// 호출되는 이펙트로 종료.
+		o->WeaponLevel = 0;
     }
 }
 

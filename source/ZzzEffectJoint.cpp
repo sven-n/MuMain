@@ -7341,19 +7341,12 @@ void MoveJoint( JOINT *o, int iIndex)
 				break;
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
     }
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 1, 12, WndProc, 0xBB7E);
-#endif
 	
-    //  자동적으로 꼬리를 생성한다.
     if ( o->m_bCreateTails )
     {
-	
-#ifdef LDK_ADD_EG_MONSTER_DEASULER
 		if(o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54)
 			CreateTail(o,Matrix,true);
 		else
-#endif //LDK_ADD_EG_MONSTER_DEASULER
 			CreateTail(o,Matrix);
     }
 	
@@ -7375,18 +7368,10 @@ void MoveJoint( JOINT *o, int iIndex)
 			break;
 		}
 	}
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
 
 void MoveJoints()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_JOINTS, PROFILING_MOVE_JOINTS );
-#endif // DO_PROFILING
 	for(int i=0;i<MAX_JOINTS;i++)
 	{
 		JOINT *o = &Joints[i];
@@ -7395,17 +7380,10 @@ void MoveJoints()
 			MoveJoint( o, i);
 		}
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_JOINTS );
-#endif // DO_PROFILING
 }
 
 void RenderJoints( BYTE bRenderOneMore )
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_BLURS, PROFILING_RENDER_BLURS );
-#endif // DO_PROFILING
-
 	for ( int i=0; i<MAX_JOINTS; i++ )
 	{
 		JOINT* o = &Joints[i];
@@ -7784,9 +7762,6 @@ void RenderJoints( BYTE bRenderOneMore )
 
 		}
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_BLURS );
-#endif // DO_PROFILING
 }
 
 void GetMagicScrew( int iParam, vec3_t vResult, float fSpeedRate)

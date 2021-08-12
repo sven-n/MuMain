@@ -1,10 +1,5 @@
 // MoveCommandData.h: interface for the CMoveCommandData class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_MOVECOMMANDDATA_H__CE4BD3EF_8287_4206_9913_909F28730A15__INCLUDED_)
-#define AFX_MOVECOMMANDDATA_H__CE4BD3EF_8287_4206_9913_909F28730A15__INCLUDED_
-
 #pragma once
 
 namespace SEASON3B
@@ -18,14 +13,12 @@ namespace SEASON3B
 		typedef struct tagMOVEREQ
 		{
 			int		index;
-			char	szMainMapName[32];		//. Main map name
-			char	szSubMapName[32];		//. Substitute map name
-			int		iReqLevel;				//. required level
-#ifdef ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			int		m_iReqMaxLevel;			// 요구최대레벨
-#endif	// ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			int		iReqZen;				//. required zen
-			int		iGateNum;				//. Gate number
+			char	szMainMapName[32];
+			char	szSubMapName[32];
+			int		iReqLevel;
+			int		m_iReqMaxLevel;
+			int		iReqZen;
+			int		iGateNum;
 		} MOVEREQINFO;
 #pragma pack(pop)
 
@@ -33,26 +26,13 @@ namespace SEASON3B
 		{
 			MOVEREQINFO _ReqInfo;
 			bool		_bCanMove;
-#ifdef ASG_ADD_GENS_SYSTEM
-			bool		_bStrife;			// 분쟁 지역.
-#endif	// ASG_ADD_GENS_SYSTEM
+			bool		_bStrife;
 			bool		_bSelected;
 
 			bool operator==(const int& iIndex) const {int iTempIndex=iIndex; return _ReqInfo.index==iTempIndex;};
 
-		} MOVEINFODATA;
-
-#ifdef YDG_MOD_PROTECT_AUTO_V4_R3
-	public:
-		BYTE m_btKeyAddressBlock2[4];
-#endif	// YDG_MOD_PROTECT_AUTO_V4_R3
-		
+		} MOVEINFODATA;	
 	private:
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-		int							MAX_MOVEREQSIZE;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		const int					MAX_MOVEREQSIZE;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		std::list<MOVEINFODATA*>	m_listMoveInfoData;
 		
 	protected:
@@ -75,4 +55,3 @@ namespace SEASON3B
 	};	
 }
 
-#endif // !defined(AFX_MOVECOMMANDDATA_H__CE4BD3EF_8287_4206_9913_909F28730A15__INCLUDED_)

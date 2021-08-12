@@ -58,10 +58,6 @@ void CreatePoint(vec3_t Position,int Value,vec3_t Color,float scale, bool bMove)
 
 void RenderPoints( BYTE byRenderOneMore )
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_POINTS, PROFILING_RENDER_POINTS );
-#endif // DO_PROFILING
-	
 	EnableAlphaTest();
     DisableDepthTest();
     for(int i=0;i<MAX_POINTS;i++)
@@ -69,11 +65,11 @@ void RenderPoints( BYTE byRenderOneMore )
 		PARTICLE *o = &Points[i];
 		if(o->Live)
 		{
-            if ( byRenderOneMore==1 )            //  수면 아래의 것들만 찍는다.
+            if ( byRenderOneMore==1 )
             {
                 if ( o->Position[2]>350.f ) continue;
             }
-            else if ( byRenderOneMore==2 )       //  수면위의 것들만 찍는다.
+            else if ( byRenderOneMore==2 )
             {
                 if ( o->Position[2]<=300.f ) continue;
             }
@@ -87,17 +83,10 @@ void RenderPoints( BYTE byRenderOneMore )
             RenderNumber(o->Position,o->Type,o->Angle,o->Gravity*0.4f,o->Scale);
 		}
 	}
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_POINTS );
-#endif // DO_PROFILING
 }
 
 void MovePoints()
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_MOVE_POINTS, PROFILING_MOVE_POINTS );
-#endif // DO_PROFILING
 	for(int i=0;i<MAX_POINTS;i++)
 	{
 		PARTICLE *o = &Points[i];
@@ -129,7 +118,4 @@ void MovePoints()
 			}
 		}
 	}
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_MOVE_POINTS );
-#endif // DO_PROFILING
 }

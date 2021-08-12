@@ -39,7 +39,6 @@
 #ifdef CRYINGWOLF_2NDMVP
 #include "GMCryingWolf2nd.h"
 #endif // CRYINGWOLF_2NDMVP
-#include "CSMapInterface.h"
 #include "BoneManager.h"
 #include "GMAida.h"
 #include "GMCryWolf1st.h"
@@ -11793,7 +11792,6 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 		o->BoneTransform = NULL;
 	}
 	o->BoneTransform = new vec34_t [Models[Type].NumBones];
-	hanguo_check2();
 	
 	for(int i=0;i<2;i++)
 	{
@@ -12671,7 +12669,6 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
         }
     }
 
-	hanguo_check1();
 	int Level = ((int)Equipment[5]<<16)+((int)Equipment[6]<<8)+((int)Equipment[7]);
 	c->Weapon  [0              ].Level = LevelConvert((Level>> 0)&7);
 	c->Weapon  [1              ].Level = LevelConvert((Level>> 3)&7);

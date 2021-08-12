@@ -716,27 +716,12 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
 
 bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
-#ifdef DO_PROFILING_FOR_LOADING
-	if( g_pProfilerForLoading )
-	{
-		g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENJPEG, PROFILING_LOADING_OPENJPEG );
-	}
-#endif // DO_PROFILING_FOR_LOADING
-
-	
-
 	std::string filename_ozj;
 	ExchangeExt(filename, "OZJ", filename_ozj);
 
 	FILE* infile = fopen(filename_ozj.c_str(), "rb");
 	if(infile == NULL) 
 	{
-#ifdef DO_PROFILING_FOR_LOADING
-		if( g_pProfilerForLoading )
-		{
-			g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENJPEG );
-		}
-#endif // DO_PROFILING_FOR_LOADING
 		return false;
 	}
 
@@ -750,14 +735,6 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
 	{
 		jpeg_destroy_decompress(&cinfo);
 		fclose(infile);
-
-#ifdef DO_PROFILING_FOR_LOADING
-		if( g_pProfilerForLoading )
-		{
-			g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENJPEG );
-		}
-#endif // DO_PROFILING_FOR_LOADING
-
 		return false;
 	}
 
@@ -844,25 +821,10 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
 	(void) jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 	fclose(infile);
-
-#ifdef DO_PROFILING_FOR_LOADING
-	if( g_pProfilerForLoading )
-	{
-		g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENJPEG );
-	}
-#endif // DO_PROFILING_FOR_LOADING
-
 	return true;
 }
 bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
-#ifdef DO_PROFILING_FOR_LOADING
-	if( g_pProfilerForLoading )
-	{
-		g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENTGA, PROFILING_LOADING_OPENTGA );
-	}
-#endif // DO_PROFILING_FOR_LOADING
-
 	std::string filename_ozt;
 	ExchangeExt(filename, "OZT", filename_ozt);
 
@@ -870,53 +832,27 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
     FILE *fp = fopen(filename_ozt.c_str(), "rb");
     if(fp == NULL)
 	{
-#ifdef DO_PROFILING_FOR_LOADING
-		if( g_pProfilerForLoading )
-		{
-			g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENTGA );
-		}
-#endif // DO_PROFILING_FOR_LOADING
 		return false;
 	}
 
-	// 파일 크기를 얻음.
 	fseek(fp,0,SEEK_END);
 	int Size = ftell(fp);
 	fseek(fp,0,SEEK_SET);
 
-	// 오픈한 파일 내용을 담을 메모리 할당 후 파일을 읽음.
 	unsigned char *PakBuffer = new unsigned char [Size];
 	fread(PakBuffer,1,Size,fp);
 	fclose(fp);
 	
-	// OZT확장자 헤더정보를 읽음.
-	// 인덱스 16(12 + 4)부터.
     int index = 12;
 	index += 4;
-	// 인덱스 16은 이미지 가로크기.
     short nx = *((short *)(PakBuffer+index));index+=2;
-	// 인덱스 18은 이미지 세로크기.
     short ny = *((short *)(PakBuffer+index));index+=2;
-	// 인덱스 20은 이미지 도트의 color bit.(예: 32bit, 16bit)
     char bit = *((char *)(PakBuffer+index));index+=1;
-	index += 1;	// 현재 인덱스는 22.
+	index += 1;
 
-	// 32bit color가 아니거나 이미지 최대 크기를 넘으면 실패.
     if(bit!=32 || nx>MAX_WIDTH || ny>MAX_HEIGHT)
 	{
-#ifdef KJH_FIX_ARRAY_DELETE
 		SAFE_DELETE_ARRAY(PakBuffer);
-#else // KJH_FIX_ARRAY_DELETE
-		delete PakBuffer;
-#endif // KJH_FIX_ARRAY_DELETE
-
-#ifdef DO_PROFILING_FOR_LOADING
-		if( g_pProfilerForLoading )
-		{
-			g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENTGA );
-		}
-#endif // DO_PROFILING_FOR_LOADING
-
 		return false;
 	}
 
@@ -965,22 +901,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
 			dst += pNewBitmap->Components;
         }
 	}
-#ifdef KJH_FIX_ARRAY_DELETE
 	SAFE_DELETE_ARRAY(PakBuffer);
-#else //KJH_FIX_ARRAY_DELETE
-	delete PakBuffer;
-#endif // KJH_FIX_ARRAY_DELETE
-
-#ifdef LDS_OPTIMIZE_FORLOADING
-	std::string strFileName, strFullFileName( pNewBitmap->FileName );
-	
-	StringToLower(strFullFileName);
-	SplitFileName(strFullFileName, strFileName, true);
-	
-	m_mapBitmap_Namemap.insert( type_bitmap_namemap::value_type(strFullFileName, pNewBitmap) );
-	
-	m_mapBitmap_Namemap_identity.insert( type_bitmap_namemap::value_type(strFileName, pNewBitmap) );
-#endif // LDS_OPTIMIZE_FORLOADING
 
 	m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, pNewBitmap));
 	

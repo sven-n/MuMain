@@ -467,10 +467,6 @@ void OpenPlayers()
 
 void OpenPlayerTextures()
 {
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENPLAYERTEXTURES, PROFILING_LOADING_OPENPLAYERTEXTURES );
-#endif // DO_PROFILING_FOR_LOADING
-
 	LoadBitmap("Player\\skin_barbarian_01.jpg",BITMAP_SKIN  );
 	LoadBitmap("Player\\level_man022.jpg"     ,BITMAP_SKIN+1);
 	LoadBitmap("Player\\skin_wizard_01.jpg"   ,BITMAP_SKIN+2);
@@ -559,9 +555,9 @@ void OpenPlayerTextures()
 		LoadBitmap("Player\\Robe02.jpg",BITMAP_ROBE+1);
 		LoadBitmap("Player\\Robe03.tga",BITMAP_ROBE+2);
 		LoadBitmap("Player\\DarklordRobe.tga",BITMAP_ROBE+7);
-		LoadBitmap("Item\\msword03.tga",BITMAP_ROBE+8);		// 파멸의 날개 망토 변신 천
-		LoadBitmap("Item\\dl_redwings02.tga",BITMAP_ROBE+9);	// 제왕의 망토 (다크3차) 등 천
-		LoadBitmap("Item\\dl_redwings03.tga",BITMAP_ROBE+10);	// 제왕의 망토 (다크3차) 어깨 천
+		LoadBitmap("Item\\msword03.tga",BITMAP_ROBE+8);
+		LoadBitmap("Item\\dl_redwings02.tga",BITMAP_ROBE+9);
+		LoadBitmap("Item\\dl_redwings03.tga",BITMAP_ROBE+10);
 	}
 
 	for(int i = 0; i < 5; ++i)
@@ -624,8 +620,6 @@ void OpenPlayerTextures()
 		gLoadData.OpenTexture(MODEL_BOOTS2 +i, "Player\\");
 	}
 
-#ifdef ADD_SOCKET_ITEM
-	
 	for(int i=45 ; i<=53 ; i++)
 	{
 		if( i==47 || i== 48)
@@ -641,7 +635,6 @@ void OpenPlayerTextures()
 		gLoadData.OpenTexture(MODEL_GLOVES+i, "Player\\" );
 		gLoadData.OpenTexture(MODEL_BOOTS+i, "Player\\" );
 	} // for()
-#endif // ADD_SOCKET_ITEM
 
 	gLoadData.OpenTexture(MODEL_GM_CHARACTER, "Skill\\");
 
@@ -662,10 +655,6 @@ void OpenPlayerTextures()
 		gLoadData.OpenTexture(MODEL_BOOTS +59+i, "Player\\");
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENPLAYERTEXTURES );
-#endif // DO_PROFILING_FOR_LOADING
 }
 
 void OpenItems()
@@ -1940,9 +1929,6 @@ void OpenItemTextures()
 	LoadBitmap(szLuckySetPathName, BITMAP_INVEN_PANTS+7);
 #endif // LEM_ADD_LUCKYITEM
 
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENITEMTEXTURES );
-#endif // DO_PROFILING_FOR_LOADING
 }
 
 void DeleteNpcs()
@@ -2006,11 +1992,7 @@ void OpenNpc(int Type)
 		break;
 	case MODEL_SMITH:
 		gLoadData.AccessModel(MODEL_SMITH          ,"Data\\Npc\\","Smith",1);
-#ifdef KOREAN_WAV_USE
-		LoadWaveFile(SOUND_NPC       	 ,"Data\\Sound\\n대장장이.wav",1);
-#else
 		LoadWaveFile(SOUND_NPC       	 ,"Data\\Sound\\nBlackSmith.wav",1);
-#endif
 		break;
 	case MODEL_SCIENTIST:
 		gLoadData.AccessModel(MODEL_SCIENTIST      ,"Data\\Npc\\","Wizard",1);
@@ -2026,11 +2008,7 @@ void OpenNpc(int Type)
 		break;
 	case MODEL_ELF_WIZARD:
 		gLoadData.AccessModel(MODEL_ELF_WIZARD     ,"Data\\Npc\\","ElfWizard",1);
-#ifdef KOREAN_WAV_USE
-		LoadWaveFile(SOUND_NPC        	 ,"Data\\Sound\\n하프.wav",1);
-#else
 		LoadWaveFile(SOUND_NPC        	 ,"Data\\Sound\\nHarp.wav",1);
-#endif
 		break;
 	case MODEL_ELF_MERCHANT:
 		gLoadData.AccessModel(MODEL_ELF_MERCHANT   ,"Data\\Npc\\","ElfMerchant",1);
@@ -2046,11 +2024,7 @@ void OpenNpc(int Type)
 		break;
 	case MODEL_MIX_NPC:
 		gLoadData.AccessModel(MODEL_MIX_NPC        ,"Data\\Npc\\","MixNpc",1);
-#ifdef KOREAN_WAV_USE
-		LoadWaveFile(SOUND_NPC+1       	 ,"Data\\Sound\\n믹스.wav",1);
-#else
 		LoadWaveFile(SOUND_NPC+1       	 ,"Data\\Sound\\nMix.wav",1);
-#endif
 		break;
 	case MODEL_REFINERY_NPC:
 		gLoadData.AccessModel(MODEL_REFINERY_NPC        ,"Data\\Npc\\","os");
@@ -4218,10 +4192,6 @@ void OpenMonsterModels()
 
 void OpenSkills()
 {
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENSKILLS, PROFILING_LOADING_OPENSKILLS );
-#endif // DO_PROFILING_FOR_LOADING
-
 	gLoadData.AccessModel(MODEL_ICE      ,"Data\\Skill\\","Ice",1);
 	gLoadData.AccessModel(MODEL_ICE_SMALL,"Data\\Skill\\","Ice",2);
 	gLoadData.AccessModel(MODEL_FIRE     ,"Data\\Skill\\","Fire",1);
@@ -4238,9 +4208,7 @@ void OpenSkills()
 	for(int i=0;i<3;i++)
       	gLoadData.AccessModel(MODEL_SKELETON1+i,"Data\\Skill\\","Skeleton",i+1);
 
-	// 엘리트 해골전사 모델 데이타 로딩 텍스쳐는 밑에서 자동으로 로딩한다.
 	gLoadData.AccessModel(MODEL_SKELETON_PCBANG, "Data\\Skill\\", "Skeleton", 3);
-	// 할로윈 이벤트 잭 오랜턴 모델 데이타 로딩 텍스쳐는 밑에서 자동으로 로딩한다.
 	gLoadData.AccessModel(MODEL_HALLOWEEN, "Data\\Skill\\", "Jack");
 
 	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_BLUE, "Data\\Skill\\", "hcandyblue");
@@ -4249,11 +4217,9 @@ void OpenSkills()
 	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_YELLOW, "Data\\Skill\\", "hcandyyellow");
 	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_HOBAK, "Data\\Skill\\", "hhobak");
 	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_STAR, "Data\\Skill\\", "hstar");
-	// 잭 오랜턴 모델 머플러 텍스쳐 로딩
 	LoadBitmap("Skill\\jack04.jpg", BITMAP_JACK_1);
 	LoadBitmap("Skill\\jack05.jpg", BITMAP_JACK_2);
 	LoadBitmap("Monster\\iui02.tga",BITMAP_ROBE+3);
-	// NPC머리 호박
 	gLoadData.AccessModel(MODEL_POTION+45, "Data\\Item\\", "hobakhead");
 	gLoadData.OpenTexture(MODEL_POTION+45, "Item\\");
 
@@ -4262,8 +4228,7 @@ void OpenSkills()
 
 	gLoadData.AccessModel(MODEL_WOOSISTONE, "Data\\Skill\\", "woositone");
 	gLoadData.OpenTexture(MODEL_WOOSISTONE, "Skill\\");
-	
-	// 설 이벤트 오브젝트 로딩
+
 	g_NewYearsDayEvent->LoadModel();
 
 	gLoadData.AccessModel(MODEL_SAW      ,"Data\\Skill\\","Saw",1);
@@ -4820,7 +4785,6 @@ void OpenSkills()
 	gLoadData.AccessModel(MODEL_CONDRA_STONE5, "Data\\Monster\\", "condra_7_stone_6" );
 	gLoadData.OpenTexture(MODEL_CONDRA_STONE5, "Monster\\");
 
-	// 나르콘드라 돌조각
 	gLoadData.AccessModel(MODEL_NARCONDRA_STONE, "Data\\Monster\\", "nar_condra_7_stone_1" );
 	gLoadData.OpenTexture(MODEL_NARCONDRA_STONE, "Monster\\");
 	gLoadData.AccessModel(MODEL_NARCONDRA_STONE1, "Data\\Monster\\", "nar_condra_7_stone_2" );
@@ -4830,10 +4794,6 @@ void OpenSkills()
 	gLoadData.AccessModel(MODEL_NARCONDRA_STONE3, "Data\\Monster\\", "nar_condra_7_stone_4" );
 	gLoadData.OpenTexture(MODEL_NARCONDRA_STONE3, "Monster\\");
 #endif	// ASG_ADD_KARUTAN_MONSTERS
-
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENSKILLS );
-#endif // DO_PROFILING_FOR_LOADING
 }
 
 #include "ReadScript.h"
@@ -4858,9 +4818,6 @@ void SaveWorld(int World)
 
 void OpenImages()
 {
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENIMAGES, PROFILING_LOADING_OPENIMAGES );
-#endif // DO_PROFILING_FOR_LOADING
 
 	//skill
 #ifndef KJH_ADD_SKILLICON_RENEWAL				// #ifndef
@@ -4884,112 +4841,12 @@ void OpenImages()
 	LoadBitmap("Interface\\lock_03.jpg" ,BITMAP_INVENTORY_BUTTON+16);
 	LoadBitmap("Interface\\lock_04.jpg" ,BITMAP_INVENTORY_BUTTON+17);
 	LoadBitmap("Interface\\guild.tga",BITMAP_GUILD);
-
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENIMAGES );
-#endif // DO_PROFILING_FOR_LOADING
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 사운드 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void OpenSounds()
 {
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENSOUNDS, PROFILING_LOADING_OPENSOUNDS );
-#endif // DO_PROFILING_FOR_LOADING
-
 	bool Enable3DSound = true;
 
-	//ambient
-#ifdef KOREAN_WAV_USE
-    LoadWaveFile(SOUND_WIND01			,"Data\\Sound\\a바람.wav",1);
-    LoadWaveFile(SOUND_RAIN01			,"Data\\Sound\\a비.wav",1);
-    LoadWaveFile(SOUND_DUNGEON01		,"Data\\Sound\\a던젼.wav",1);
-    LoadWaveFile(SOUND_FOREST01			,"Data\\Sound\\a숲.wav",1);
-    LoadWaveFile(SOUND_TOWER01		    ,"Data\\Sound\\a탑.wav",1);
-    LoadWaveFile(SOUND_WATER01		    ,"Data\\Sound\\a물.wav",1);
-    LoadWaveFile(SOUND_DESERT01		    ,"Data\\Sound\\desert.wav",1);
-    LoadWaveFile(SOUND_HUMAN_WALK_GROUND,"Data\\Sound\\p걷기(땅).wav",2);
-    LoadWaveFile(SOUND_HUMAN_WALK_GRASS	,"Data\\Sound\\p걷기(풀).wav",2);
-    LoadWaveFile(SOUND_HUMAN_WALK_SNOW	,"Data\\Sound\\p걷기(눈).wav",2);
-    LoadWaveFile(SOUND_HUMAN_WALK_SWIM	,"Data\\Sound\\p수영.wav",2);
-
-	LoadWaveFile(SOUND_BIRD01			,"Data\\Sound\\a새1.wav",1,Enable3DSound); 
-    LoadWaveFile(SOUND_BIRD02			,"Data\\Sound\\a새2.wav",1,Enable3DSound);
-    LoadWaveFile(SOUND_BAT01			,"Data\\Sound\\a박쥐.wav",1,Enable3DSound);
-    LoadWaveFile(SOUND_RAT01			,"Data\\Sound\\a쥐.wav",1,Enable3DSound);
-    LoadWaveFile(SOUND_TRAP01			,"Data\\Sound\\a쇠창살.wav",1,Enable3DSound);
-    LoadWaveFile(SOUND_DOOR01			,"Data\\Sound\\a문.wav",1);
-    LoadWaveFile(SOUND_DOOR02			,"Data\\Sound\\a성문.wav",1);
-
-	LoadWaveFile(SOUND_BIRD01			,"Data\\Sound\\aBird1.wav",1,Enable3DSound); 
-    LoadWaveFile(SOUND_BIRD02			,"Data\\Sound\\aBird2.wav",1,Enable3DSound);
-    LoadWaveFile(SOUND_BAT01			,"Data\\Sound\\aBat.wav",1,Enable3DSound);
-    LoadWaveFile(SOUND_RAT01			,"Data\\Sound\\aMouse.wav",1,Enable3DSound);
-    LoadWaveFile(SOUND_TRAP01			,"Data\\Sound\\aGrate.wav",1,Enable3DSound);
-    LoadWaveFile(SOUND_DOOR01			,"Data\\Sound\\aDoor.wav",1);
-    LoadWaveFile(SOUND_DOOR02			,"Data\\Sound\\aCastleDoor.wav",1);
-
-    LoadWaveFile(SOUND_HEAVEN01         ,"Data\\Sound\\aHeaven.wav",1);
-    LoadWaveFile(SOUND_THUNDERS01       ,"Data\\Sound\\aThunder01.wav",1);
-    LoadWaveFile(SOUND_THUNDERS02       ,"Data\\Sound\\aThunder02.wav",1);
-    LoadWaveFile(SOUND_THUNDERS03       ,"Data\\Sound\\aThunder03.wav",1);
-
-	//attack
-    LoadWaveFile(SOUND_BRANDISH_SWORD01 ,"Data\\Sound\\e무기휘두르기1.wav",2); 
-    LoadWaveFile(SOUND_BRANDISH_SWORD02 ,"Data\\Sound\\e무기휘두르기2.wav",2); 
-    LoadWaveFile(SOUND_BRANDISH_SWORD03 ,"Data\\Sound\\e광선검휘두르기.wav",2); 
-    LoadWaveFile(SOUND_BOW01	        ,"Data\\Sound\\e활.wav",2);
-    LoadWaveFile(SOUND_CROSSBOW01	    ,"Data\\Sound\\e석궁.wav",2);
-    LoadWaveFile(SOUND_MIX01	        ,"Data\\Sound\\e믹스.wav",2);
-
-	//player
-    LoadWaveFile(SOUND_DRINK01     	    ,"Data\\Sound\\p마시기.wav",1);
-    LoadWaveFile(SOUND_EAT_APPLE01  	,"Data\\Sound\\p사과먹기.wav",1);
-    LoadWaveFile(SOUND_HEART           	,"Data\\Sound\\p심장소리.wav",1);
-    LoadWaveFile(SOUND_GET_ENERGY      	,"Data\\Sound\\p에너지.wav",1);
-    LoadWaveFile(SOUND_HUMAN_SCREAM01	,"Data\\Sound\\p남자비명1.wav",2); 
-    LoadWaveFile(SOUND_HUMAN_SCREAM02	,"Data\\Sound\\p남자비명2.wav",2);
-    LoadWaveFile(SOUND_HUMAN_SCREAM03	,"Data\\Sound\\p남자비명3.wav",2);
-    LoadWaveFile(SOUND_HUMAN_SCREAM04	,"Data\\Sound\\p남자죽기.wav",2);
-    LoadWaveFile(SOUND_FEMALE_SCREAM01	,"Data\\Sound\\p여자비명1.wav",2); 
-    LoadWaveFile(SOUND_FEMALE_SCREAM02	,"Data\\Sound\\p여자비명2.wav",2);
-
-    LoadWaveFile(SOUND_DROP_ITEM01	    ,"Data\\Sound\\p아이템떨어트리기.wav",1); 
-    LoadWaveFile(SOUND_DROP_GOLD01      ,"Data\\Sound\\p금화떨어트리기.wav",1); 
-    LoadWaveFile(SOUND_JEWEL01	      	,"Data\\Sound\\e보석.wav",1); 
-    LoadWaveFile(SOUND_GET_ITEM01		,"Data\\Sound\\p아이템가지기.wav",1); 
-    //LoadWaveFile(SOUND_SHOUT01    		,"Data\\Sound\\p기합.wav",1); 
-
-	//skill
-    LoadWaveFile(SOUND_SKILL_DEFENSE    ,"Data\\Sound\\s전사방어.wav",1);
-    LoadWaveFile(SOUND_SKILL_SWORD1     ,"Data\\Sound\\s전사내려찍기.wav",1);
-    LoadWaveFile(SOUND_SKILL_SWORD2     ,"Data\\Sound\\s전사찌르기.wav",1);
-    LoadWaveFile(SOUND_SKILL_SWORD3     ,"Data\\Sound\\s전사올려치기.wav",1);
-    LoadWaveFile(SOUND_SKILL_SWORD4     ,"Data\\Sound\\s전사돌려치기.wav",1);
-	LoadWaveFile(SOUND_MONSTER+116      ,"Data\\Sound\\m쉐도우공격1.wav",1);
-
-    LoadWaveFile(SOUND_STORM            ,"Data\\Sound\\s토네이도.wav",2,Enable3DSound);
-    LoadWaveFile(SOUND_EVIL             ,"Data\\Sound\\s영혼.wav",2,Enable3DSound);
-    LoadWaveFile(SOUND_MAGIC            ,"Data\\Sound\\s마법.wav",2,Enable3DSound);
-    LoadWaveFile(SOUND_HELLFIRE         ,"Data\\Sound\\s헬파이어.wav",2,Enable3DSound);
-    LoadWaveFile(SOUND_ICE              ,"Data\\Sound\\s얼음.wav",2,Enable3DSound);
-    LoadWaveFile(SOUND_FLAME            ,"Data\\Sound\\s불기둥.wav",2,Enable3DSound);
-    //LoadWaveFile(SOUND_FLASH            ,"Data\\Sound\\m히드라공격1.wav",2,Enable3DSound);
-    LoadWaveFile(SOUND_FLASH            ,"Data\\Sound\\s아쿠아플래쉬.wav",2,Enable3DSound);
-
-    LoadWaveFile(SOUND_BREAK01	      	,"Data\\Sound\\e부서짐.wav",1,Enable3DSound); 
-    LoadWaveFile(SOUND_EXPLOTION01		,"Data\\Sound\\e폭파.wav",1,Enable3DSound); 
-    LoadWaveFile(SOUND_METEORITE01		,"Data\\Sound\\e운석떨어지기.wav",2,Enable3DSound); 
-    //LoadWaveFile(SOUND_METEORITE02	    ,"Data\\Sound\\e유성.wav",2,Enable3DSound);
-    LoadWaveFile(SOUND_THUNDER01		,"Data\\Sound\\e번개.wav",1,Enable3DSound); 
-
-    LoadWaveFile(SOUND_BONE1	     	,"Data\\Sound\\m해골1.wav",2,Enable3DSound);
-    LoadWaveFile(SOUND_BONE2    		,"Data\\Sound\\m해골2.wav",2,Enable3DSound);
-    LoadWaveFile(SOUND_ASSASSIN		    ,"Data\\Sound\\m암살자1.wav",1,Enable3DSound);
-#else
     LoadWaveFile(SOUND_WIND01			,"Data\\Sound\\aWind.wav",1);
     LoadWaveFile(SOUND_RAIN01			,"Data\\Sound\\aRain.wav",1);
     LoadWaveFile(SOUND_DUNGEON01		,"Data\\Sound\\aDungeon.wav",1);
@@ -5068,9 +4925,7 @@ void OpenSounds()
     LoadWaveFile(SOUND_BONE1	     	,"Data\\Sound\\mBone1.wav",2,Enable3DSound);
     LoadWaveFile(SOUND_BONE2    		,"Data\\Sound\\mBone2.wav",2,Enable3DSound);
     LoadWaveFile(SOUND_ASSASSIN		    ,"Data\\Sound\\mAssassin1.wav",1,Enable3DSound);
-#endif
 
-	////////// 한국/외국 공통영역 /////////////////////////////////////////////////////////
 
 	LoadWaveFile(SOUND_ATTACK01			,"Data\\Sound\\eMeleeHit1.wav",2); 
     LoadWaveFile(SOUND_ATTACK01+1     	,"Data\\Sound\\eMeleeHit2.wav",2); 
@@ -5087,11 +4942,6 @@ void OpenSounds()
     LoadWaveFile(SOUND_MEDAL	        ,"Data\\Sound\\eMedal.wav",1,Enable3DSound);
 	LoadWaveFile(SOUND_PHOENIXEXP		,"Data\\Sound\\ePhoenixExp.wav",1,Enable3DSound);
 //	LoadWaveFile(SOUND_PHOENIXFIRE		,"Data\\Sound\\ePhoenixFire.wav",1,Enable3DSound);
-
-#ifdef TAMAJJANG
-    LoadWaveFile( SOUND_TAMAJJANG1,      "Data\\Sound\\aTamajjang1.wav", 1, Enable3DSound );
-    LoadWaveFile( SOUND_TAMAJJANG2,      "Data\\Sound\\aTamajjang2.wav", 1, Enable3DSound );
-#endif
 
     LoadWaveFile(SOUND_RIDINGSPEAR		,"Data\\Sound\\eRidingSpear.wav",1);
 	LoadWaveFile(SOUND_RAIDSHOOT		,"Data\\Sound\\eRaidShoot.wav",1);
@@ -5147,7 +4997,6 @@ void OpenSounds()
     LoadWaveFile ( SOUND_DSPIRIT_SHOUT,         "Data\\Sound\\DSpirit_Shout.wav", 1 );
     LoadWaveFile ( SOUND_DSPIRIT_RUSH,          "Data\\Sound\\DSpirit_Rush.wav", 3 );
 	
-	//^ 펜릴 사운드 관련
 	LoadWaveFile ( SOUND_FENRIR_RUN_1,		"Data\\Sound\\pW_run-01.wav",	1 );	// 펜릴 달리기 사운드 1
 	LoadWaveFile ( SOUND_FENRIR_RUN_2,      "Data\\Sound\\pW_run-02.wav",	1 );	// 펜릴 달리기 사운드 2
 	LoadWaveFile ( SOUND_FENRIR_RUN_3,      "Data\\Sound\\pW_run-03.wav",	1 );	// 펜릴 달리기 사운드 3
@@ -5160,15 +5009,6 @@ void OpenSounds()
 	LoadWaveFile ( SOUND_FENRIR_DAMAGE_1,   "Data\\Sound\\pWpain2.wav",		1 );	// 펜릴 데미지 사운드 2
 	LoadWaveFile ( SOUND_FENRIR_SKILL,		"Data\\Sound\\pWskill.wav",		1 );	// 펜릴 스킬 사운드
 	LoadWaveFile(SOUND_JEWEL02,				"Data\\Sound\\Jewel_Sound.wav",1);	// 원석 떨어지는 소리
-
-#ifdef WORLDCUP_ADD
-	LoadWaveFile ( SOUND_WORLDCUP_RND1,	"Data\\Sound\\handclap-01.wav",	1 );			
-	LoadWaveFile ( SOUND_WORLDCUP_RND2,	"Data\\Sound\\handclap-02.wav",	1 );		
-	LoadWaveFile ( SOUND_WORLDCUP_RND3,	"Data\\Sound\\handclap-03.wav",	1 );		
-	LoadWaveFile ( SOUND_WORLDCUP_RND4,	"Data\\Sound\\handclap-04.wav",	1 );		
-	LoadWaveFile ( SOUND_WORLDCUP_RND5,	"Data\\Sound\\handclap-05.wav",	1 );		
-	LoadWaveFile ( SOUND_WORLDCUP_RND6,	"Data\\Sound\\handclap-06.wav",	1 );		
-#endif
 
 	LoadWaveFile ( SOUND_KUNDUN_ITEM_SOUND,	"Data\\Sound\\kundunitem.wav",	1 );
 
@@ -5188,10 +5028,10 @@ void OpenSounds()
 #endif // PRUARIN_EVENT07_3COLORHARVEST
 
 //	LoadWaveFile(SOUND_SUMMON_CASTING,		"Data\\Sound\\eSummon.wav"	,1);	// 소환 소리
-	LoadWaveFile(SOUND_SUMMON_SAHAMUTT,		"Data\\Sound\\SE_Ch_summoner_skill05_explosion01.wav"	,1);	// 강아지 소리
-	LoadWaveFile(SOUND_SUMMON_EXPLOSION,	"Data\\Sound\\SE_Ch_summoner_skill05_explosion03.wav"	,1);	// 강아지 폭발 소리
-	LoadWaveFile(SOUND_SUMMON_NEIL,			"Data\\Sound\\SE_Ch_summoner_skill06_requiem01.wav"		,1);	// 닐 소리
-	LoadWaveFile(SOUND_SUMMON_REQUIEM,		"Data\\Sound\\SE_Ch_summoner_skill06_requiem02.wav"		,1);	// 닐 가시 소리
+	LoadWaveFile(SOUND_SUMMON_SAHAMUTT,		"Data\\Sound\\SE_Ch_summoner_skill05_explosion01.wav"	,1);
+	LoadWaveFile(SOUND_SUMMON_EXPLOSION,	"Data\\Sound\\SE_Ch_summoner_skill05_explosion03.wav"	,1);
+	LoadWaveFile(SOUND_SUMMON_NEIL,			"Data\\Sound\\SE_Ch_summoner_skill06_requiem01.wav"		,1);
+	LoadWaveFile(SOUND_SUMMON_REQUIEM,		"Data\\Sound\\SE_Ch_summoner_skill06_requiem02.wav"		,1);
 #ifdef ASG_ADD_SUMMON_RARGLE_SOUND
 	LoadWaveFile(SOUND_SUMMOM_RARGLE, "Data\\Sound\\Rargle.wav", 1);	// 소환수 라글.
 #endif	// ASG_ADD_SUMMON_RARGLE_SOUND
@@ -5263,18 +5103,7 @@ void OpenSounds()
 	LoadWaveFile(SOUND_RAGESKILL_BUFF_1, "Data\\Sound\\Ragefighter\\Rage_Buff_1.wav");
 	LoadWaveFile(SOUND_RAGESKILL_BUFF_2, "Data\\Sound\\Ragefighter\\Rage_Buff_2.wav");
 #endif //PBG_ADD_NEWCHAR_MONK
-
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENSOUNDS );
-#endif // DO_PROFILING_FOR_LOADING
 }
-///////////////////////////////////////////////////////////////////////////////
-// 폰트 DIB 생성하는 함수
-///////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////
-// 폰트 텍스쳐 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 extern int	g_iRenderTextType;
 
@@ -5286,12 +5115,8 @@ void OpenFont()
 	LoadBitmap("Interface\\FontTest.tga"      ,BITMAP_FONT+1  );
 	LoadBitmap("Interface\\Hit.tga"			,BITMAP_FONT_HIT,GL_NEAREST,GL_CLAMP_TO_EDGE);
 
-	g_pRenderText->Create(0, g_hDC);	//. 나중에 업그레이드 해서 타입 넘겨줄것
+	g_pRenderText->Create(0, g_hDC);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 메크로 저장하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void SaveMacro(char *FileName)
 {
@@ -5302,10 +5127,6 @@ void SaveMacro(char *FileName)
 	}
 	fclose(fp);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 메크로 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void OpenMacro(char *FileName)
 {
@@ -5482,14 +5303,6 @@ void ReleaseCharacterSceneData()
 
 void OpenBasicData(HDC hDC)
 {
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_OPENBASICDATA, PROFILING_LOADING_OPENBASICDATA );
-#endif // DO_PROFILING_FOR_LOADING
-
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_PRELOADS, PROFILING_LOADING_PRELOADS );
-#endif // DO_PROFILING_FOR_LOADING
-
 	CUIMng& rUIMng = CUIMng::Instance();
 
 	rUIMng.RenderTitleSceneUI(hDC, 0, 11);
@@ -5905,19 +5718,9 @@ void OpenBasicData(HDC hDC)
 	::LoadBitmap("Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_CHAOS_CARD
 
-#if SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#ifdef CSK_LUCKY_SEAL
-	::LoadBitmap("Item\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP_TO_EDGE);
-	::LoadBitmap("Item\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP_TO_EDGE);
-	::LoadBitmap("Item\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //CSK_LUCKY_SEAL
-#else //SELECTED_LANGUAGE == LANGUAGE_KOREAN
-#ifdef CSK_LUCKY_SEAL
 	::LoadBitmap("Item\\partCharge1\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge1\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge1\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //CSK_LUCKY_SEAL
-#endif //SELECTED_LANGUAGE == LANGUAGE_KOREAN
 
 #ifdef CSK_LUCKY_CHARM
 	::LoadBitmap("Item\\partCharge1\\bujuck01alpa.jpg", BITMAP_LUCKY_CHARM_EFFECT53, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -6084,30 +5887,8 @@ void OpenBasicData(HDC hDC)
 	::LoadBitmap("NPC\\voloE.jpg", BITMAP_VOLO_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif	// ASG_ADD_KARUTAN_NPC
 
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_PRELOADS );
-#endif // DO_PROFILING_FOR_LOADING
-
 	OpenPlayers();
 
-#ifdef KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
-	#if defined RESOURCE_GUARD && !defined FOR_WORK
-		char szModuleFileName[256];
-		ResourceGuard::CResourceGuard RG101;
-		CMuRGReport MuRGReport;
-		RG101.AddReportObj(&MuRGReport);
-	#ifdef _TEST_SERVER
-		sprintf(szModuleFileName, "data\\local\\Gameguardtest.csr");
-	#else  // _TEST_SERVER
-		sprintf(szModuleFileName, "data\\local\\Gameguard.csr");
-	#endif // _TEST_SERVER
-		if(!RG101.CheckIntegrityResourceChecksumFile(szModuleFileName))
-		{
-			g_ErrorReport.Write("> ResourceGuard Error!!\r\n");
-			SendMessage(g_hWnd,WM_DESTROY,0,0);
-		}
-	#endif // defined RESOURCE_GUARD && !defined FOR_WORK
-#endif // KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
 	rUIMng.RenderTitleSceneUI(hDC, 2, 11);
 
     OpenPlayerTextures();
@@ -6128,203 +5909,54 @@ void OpenBasicData(HDC hDC)
     OpenSounds();
 	rUIMng.RenderTitleSceneUI(hDC, 8, 11);
 
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->BeginUnit( EPROFILING_LOADING_POSTLOADS, PROFILING_LOADING_POSTLOADS );
-#endif // DO_PROFILING_FOR_LOADING
-
 	char Text[100];
 
-#ifdef ASG_ADD_SERVER_LIST_SCRIPTS
 	g_ServerListManager->LoadServerListScript();
-#endif	// ASG_ADD_SERVER_LIST_SCRIPTS
 
-
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Dialog 
-////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef USE_DIALOGTEST_BMD
-	sprintf(Text, "Data\\Local\\%s\\Dialogtest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#else
 	sprintf(Text, "Data\\Local\\%s\\Dialog_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#endif//USE_DIALOGTEST_BMD
 	OpenDialogFile(Text);
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Item
-////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef USE_ITEMTEST_BMD
-	sprintf(Text, "Data\\Local\\%s\\ItemTest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#else
 	sprintf(Text, "Data\\Local\\%s\\Item_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#endif
 	OpenItemScript(Text);
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Movereq
-////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef USE_MOVEREQTEST_BMD
-	sprintf(Text, "Data\\Local\\%s\\movereqtest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#else
 	sprintf(Text, "Data\\Local\\%s\\movereq_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#endif // USE_MOVEREQTEST_BMD
 	SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
 	
-////////////////////////////////////////////////////////////////////////////////////////////////
-// NpcName
-////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef _TEST_SERVER
-	sprintf(Text, "Data\\Local\\%s\\NpcNameTest_%s.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#else
 	sprintf(Text, "Data\\Local\\%s\\NpcName_%s.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#endif// _TEST_SERVER
    	OpenMonsterScript(Text);
 	
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Quest
-////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef USE_QUESTTEST_BMD
-	sprintf(Text, "Data\\Local\\%s\\Questtest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#else
 	sprintf(Text, "Data\\Local\\%s\\Quest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#endif//USE_QUESTTEST_BMD
 	g_csQuest.OpenQuestScript (Text);
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Skill
-////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef  USE_SKILLTEST_BMD
-	sprintf(Text, "Data\\Local\\%s\\Skilltest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#else
 	sprintf(Text, "Data\\Local\\%s\\Skill_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#endif
 	OpenSkillScript(Text);
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-// SocketItem
-////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef USE_SOCKETITEM_TEST_BMD
-	sprintf(Text, "Data\\Local\\%s\\SocketItemTest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#else	// USE_SOCKETITEM_TEST_BMD
 	sprintf(Text, "Data\\Local\\%s\\SocketItem_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-#endif	// USE_SOCKETITEM_TEST_BMD
 	g_SocketItemMgr.OpenSocketItemScript(Text);
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Text
-////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	OpenTextData();		//. Text.bmd, Testtest.bmd
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
-#ifdef USE_DIALOGTEST_BMD
-	OpenDialogFile("Data\\Local\\Dialogtest.bmd");
-#else
-	OpenDialogFile("Data\\Local\\Dialog.bmd");
-#endif//USE_DIALOGTEST_BMD
-
-#ifdef USE_ITEMTEST_BMD
-    OpenItemScript ("Data\\Local\\ItemTest.bmd");
-#else
-    OpenItemScript ("Data\\Local\\Item.bmd");
-#endif
-
-#ifdef USE_MOVEREQTEST_BMD
-	SEASON3B::CMoveCommandData::OpenMoveReqScript("Data\\Local\\movereqtest.bmd");
-#else
-	SEASON3B::CMoveCommandData::OpenMoveReqScript("Data\\Local\\movereq.bmd");
-#endif // USE_MOVEREQTEST_BMD
-	
-#ifdef _TEST_SERVER
-   	sprintf(Text,     "Data\\Local\\NpcNameTest(%s).txt","Eng");
-#else
-   	sprintf(Text,     "Data\\Local\\NpcName(%s).txt","Eng");
-#endif// _TEST_SERVER
-   	OpenMonsterScript(Text);
-
-#ifdef USE_QUESTTEST_BMD
-    g_csQuest.OpenQuestScript ( "Data\\Local\\Questtest.bmd" );
-#else
-    g_csQuest.OpenQuestScript ( "Data\\Local\\Quest.bmd" );
-#endif//USE_QUESTTEST_BMD
-
-#ifdef  USE_SKILLTEST_BMD
-	OpenSkillScript("Data\\Local\\Skilltest.bmd");
-#else
-	OpenSkillScript("Data\\Local\\Skill.bmd");
-#endif
-
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
-#ifdef USE_SET_ITEMTEST_BMD
-	g_csItemOption.OpenItemSetScript ( true );
-#else
 	g_csItemOption.OpenItemSetScript ( false );
-#endif// USE_SET_ITEMTEST_BMD
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 	g_QuestMng.LoadQuestScript();
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
-
-
-#ifdef USE_GATETEST_BMD
-	OpenGateScript ("Data\\GateTest.bmd");
-#else
 	OpenGateScript ("Data\\Gate.bmd");
-#endif
-	//OpenGateScript ("Data\\GateTest.bmd");
 
-#ifdef USE_FILTER_TEST_BMD
-	OpenFilterFile ("Data\\Local\\Filtertest.bmd");
-#else //USE_FILTER_TEST_BMD
 	OpenFilterFile ("Data\\Local\\Filter.bmd");
-#endif //USE_FILTER_TEST_BMD
 
 	OpenNameFilterFile ("Data\\Local\\FilterName.bmd");
 
-//#ifdef ADD_MONSTER_SKILL
-#ifdef USE_MONSTERSKILLTEST_BMD
-	OpenMonsterSkillScript ("Data\\Local\\MonsterSkillTest.bmd");
-#else
 	OpenMonsterSkillScript ("Data\\Local\\MonsterSkill.bmd");
-#endif
-//#endif
 
-#ifdef USE_MASTERTREE_BMD
-	g_pMasterLevelInterface->OpenMasterLevel("Data\\Local\\MasterSKillTreetest.bmd");
-#else
 	g_pMasterLevelInterface->OpenMasterLevel("Data\\Local\\MasterSKillTree.bmd");
-#endif  //USE_MASTERTREE_BMD
-
-#ifdef KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
-	#if defined RESOURCE_GUARD && !defined FOR_WORK
-		if(!RG101.CheckIntegrityResourceChecksumFile(szModuleFileName))
-		{
-			g_ErrorReport.Write("> ResourceGuard Error!!\r\n");
-			SendMessage(g_hWnd,WM_DESTROY,0,0);
-		}
-	#endif // defined RESOURCE_GUARD && !defined FOR_WORK
-#endif KJH_ADD_CHECK_RESOURCE_GUARD_BEFORE_LOADING
 
 	rUIMng.RenderTitleSceneUI(hDC, 9, 11);
 
-#ifdef KOREAN_WAV_USE
-	LoadWaveFile(SOUND_TITLE01			,"Data\\Sound\\i타이틀.wav",1); 
-	LoadWaveFile(SOUND_MENU01			,"Data\\Sound\\i버튼움직임.wav",2); 
-	LoadWaveFile(SOUND_CLICK01			,"Data\\Sound\\i버튼클릭.wav",1); 
-	LoadWaveFile(SOUND_ERROR01			,"Data\\Sound\\i버튼에러.wav",1); 
-	LoadWaveFile(SOUND_INTERFACE01		,"Data\\Sound\\i창생성.wav",1);
-#else
 	LoadWaveFile(SOUND_TITLE01			,"Data\\Sound\\iTitle.wav",1); 
 	LoadWaveFile(SOUND_MENU01			,"Data\\Sound\\iButtonMove.wav",2); 
 	LoadWaveFile(SOUND_CLICK01			,"Data\\Sound\\iButtonClick.wav",1); 
 	LoadWaveFile(SOUND_ERROR01			,"Data\\Sound\\iButtonError.wav",1); 
 	LoadWaveFile(SOUND_INTERFACE01		,"Data\\Sound\\iCreateWindow.wav",1);
-#endif
 
     LoadWaveFile(SOUND_REPAIR           ,"Data\\Sound\\iRepair.wav",1);
     LoadWaveFile(SOUND_WHISPER          ,"Data\\Sound\\iWhisper.wav",1);
@@ -6338,14 +5970,6 @@ void OpenBasicData(HDC hDC)
 	LoadWaveFile(SOUND_RING_EVENT_END   ,"Data\\Sound\\iEventEnd.wav",1);
 
 	rUIMng.RenderTitleSceneUI(hDC, 10, 11);
-
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_POSTLOADS );
-#endif // DO_PROFILING_FOR_LOADING
-	
-#ifdef DO_PROFILING_FOR_LOADING
-	g_pProfilerForLoading->EndUnit( EPROFILING_LOADING_OPENBASICDATA );
-#endif // DO_PROFILING_FOR_LOADING
 }
 
 void OpenTextData()

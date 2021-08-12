@@ -1,23 +1,13 @@
 // MoveCommandData.cpp: implementation of the CMoveCommandData class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
 #include "MoveCommandData.h"
 
 using namespace SEASON3B;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
-CMoveCommandData::CMoveCommandData() : MAX_MOVEREQSIZE(36)
+CMoveCommandData::CMoveCommandData()
 {
-#ifdef YDG_MOD_PROTECT_AUTO_V4_R3
-	for (int i = 0; i < 4; ++i)
-		m_btKeyAddressBlock2[i] = 0;
-#endif	// YDG_MOD_PROTECT_AUTO_V4_R3
 }
 
 CMoveCommandData::~CMoveCommandData()

@@ -179,6 +179,9 @@
     <Filter Include="MU\Effect">
       <UniqueIdentifier>{6c987b5a-2e03-4c6a-a301-b2c11ebca53e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MU\Item">
+      <UniqueIdentifier>{54ca1f2b-c45b-4af4-81d7-a5e3e79579c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="source\icon1.ico">
@@ -392,9 +395,6 @@
     <ClCompile Include="source\CSItemOption.cpp">
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\CSMapInterface.cpp">
-      <Filter>MU\client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\CSMapServer.cpp">
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
@@ -452,9 +452,6 @@
     <ClCompile Include="source\MonkSystem.cpp">
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\MoveCommandData.cpp">
-      <Filter>MU\client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\MovieScene.cpp">
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
@@ -477,9 +474,6 @@
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\PortalMgr.cpp">
-      <Filter>MU\client\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ProtectAuto.cpp">
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\ProtectSysKey.cpp">
@@ -552,9 +546,6 @@
       <Filter>MU\client\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\KeyGenerater.cpp">
-      <Filter>MU\network</Filter>
-    </ClCompile>
-    <ClCompile Include="source\WSctlc.cpp">
       <Filter>MU\network</Filter>
     </ClCompile>
     <ClCompile Include="source\WSclient.cpp">
@@ -1127,6 +1118,15 @@
     <ClCompile Include="source\w_Buff.cpp">
       <Filter>MU\Buff</Filter>
     </ClCompile>
+    <ClCompile Include="source\ItemManager.cpp">
+      <Filter>MU\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="source\WSctlc.cpp">
+      <Filter>MU\network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MoveCommandData.cpp">
+      <Filter>MU\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\BlackWin.h">
@@ -1306,9 +1306,6 @@
     <ClInclude Include="source\CSItemOption.h">
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\CSMapInterface.h">
-      <Filter>MU\client\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\CSMapServer.h">
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
@@ -1372,9 +1369,6 @@
     <ClInclude Include="source\MonkSystem.h">
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\MoveCommandData.h">
-      <Filter>MU\client\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\MovieScene.h">
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
@@ -1397,9 +1391,6 @@
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\PortalMgr.h">
-      <Filter>MU\client\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ProtectAuto.h">
       <Filter>MU\client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\ProtectSysKey.h">
@@ -1543,16 +1534,7 @@
     <ClInclude Include="source\KeyGenerater.h">
       <Filter>MU\network</Filter>
     </ClInclude>
-    <ClInclude Include="source\proc.h">
-      <Filter>MU\network</Filter>
-    </ClInclude>
     <ClInclude Include="source\StreamPacketEngine.h">
-      <Filter>MU\network</Filter>
-    </ClInclude>
-    <ClInclude Include="source\wsctlc.h">
-      <Filter>MU\network</Filter>
-    </ClInclude>
-    <ClInclude Include="source\wsctlc_addon.h">
       <Filter>MU\network</Filter>
     </ClInclude>
     <ClInclude Include="source\WSclient.h">
@@ -2808,6 +2790,18 @@
     </ClInclude>
     <ClInclude Include="source\w_Buff.h">
       <Filter>MU\Buff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ItemManager.h">
+      <Filter>MU\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="source\wsctlc.h">
+      <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\wsctlc_addon.h">
+      <Filter>MU\network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MoveCommandData.h">
+      <Filter>MU\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

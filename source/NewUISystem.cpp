@@ -383,22 +383,7 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 		return false;
 	}
 
-#ifdef YDG_ADD_ENC_MOVE_COMMAND_WINDOW
 	m_pNewMoveCommandWindow = new CNewUIMoveCommandWindow;
-#else	// YDG_ADD_ENC_MOVE_COMMAND_WINDOW
-#ifdef CSK_MOD_REMOVE_AUTO_V1_FLAG
-	m_pNewMoveCommandWindow = new CNewUIMoveCommandWindowNew;
-#else // CSK_MOD_REMOVE_AUTO_V1_FLAG
-	m_pNewMoveCommandWindow = new CNewUIMoveCommandWindow;
-#endif // CSK_MOD_REMOVE_AUTO_V1_FLAG
-#endif	// YDG_ADD_ENC_MOVE_COMMAND_WINDOW
-#ifdef YDG_MOD_PROTECT_AUTO_V4
-#ifdef YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V4
-	CMoveCommandWindowEncrypt::Enable(g_pProtectAuto->IsNewVersion());
-#else	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V4
-	CMoveCommandWindowEncrypt::Enable(TRUE);
-#endif	// YDG_MOD_PROTECT_AUTO_FLAG_CHECK_V4
-#endif	// YDG_MOD_PROTECT_AUTO_V4
 	
 	if(m_pNewMoveCommandWindow->Create(m_pNewUIMng, 1, 1) == false)
 		return false;
@@ -1797,32 +1782,16 @@ void SEASON3B::CNewUISystem::HideAllGroupB()
 		}
 	}
 }
-
-#ifdef CSK_FIX_UI_FUNCTIONNAME
 void SEASON3B::CNewUISystem::HideGroupBeforeOpenInterface()
-#else // CSK_FIX_UI_FUNCTIONNAME
-void SEASON3B::CNewUISystem::HideAllGroupC()
-#endif // CSK_FIX_UI_FUNCTIONNAME
 {
-	// 
 	DWORD dwGroupC[] = 
 	{ 
 		SEASON3B::INTERFACE_PARTY,
 		SEASON3B::INTERFACE_COMMAND,
 		SEASON3B::INTERFACE_GUILDINFO,
-		//SEASON3B::INTERFACE_WINDOW_MENU,
-#ifdef KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
-#ifdef PSW_GOLDBOWMAN
 		SEASON3B::INTERFACE_GOLD_BOWMAN,
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA
 		SEASON3B::INTERFACE_GOLD_BOWMAN_LENA,
-#endif //PSW_EVENT_LENA	
-#endif // KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
-#ifdef PBG_ADD_GENSRANKING
 		SEASON3B::INTERFACE_GENSRANKING,
-#endif //PBG_ADD_GENSRANKING
-
 		0, 
 	};
 	
@@ -1835,8 +1804,6 @@ void SEASON3B::CNewUISystem::HideAllGroupC()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// Enable()
 void SEASON3B::CNewUISystem::Enable(DWORD dwKey)
 {
 	if(m_pNewUIMng)
@@ -1845,8 +1812,6 @@ void SEASON3B::CNewUISystem::Enable(DWORD dwKey)
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// Disable()
 void SEASON3B::CNewUISystem::Disable(DWORD dwKey)
 {
 	if(m_pNewUIMng)
@@ -1855,8 +1820,6 @@ void SEASON3B::CNewUISystem::Disable(DWORD dwKey)
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// CheckMouseUse()
 bool SEASON3B::CNewUISystem::CheckMouseUse()
 {
 	if(m_pNewUIMng)
@@ -1867,8 +1830,6 @@ bool SEASON3B::CNewUISystem::CheckMouseUse()
 	return false;
 }
 
-//---------------------------------------------------------------------------------------------
-// CheckKeyUse() 
 bool SEASON3B::CNewUISystem::CheckKeyUse()
 {
 	if(m_pNewUIMng)
@@ -1879,8 +1840,6 @@ bool SEASON3B::CNewUISystem::CheckKeyUse()
 	return false;
 }
 
-//---------------------------------------------------------------------------------------------
-// Update()
 bool SEASON3B::CNewUISystem::Update()
 {
 	if(m_pNewItemMng)
@@ -1897,30 +1856,23 @@ bool SEASON3B::CNewUISystem::Update()
 	return false;
 }
 
-//---------------------------------------------------------------------------------------------
-// Render()
 bool SEASON3B::CNewUISystem::Render()
 {
 	bool bResult = false;
 
-	/******************** 2D 그리기 루틴 ********************/
 	BeginBitmap();
 	if(m_pNewUIMng)
-		bResult = m_pNewUIMng->Render();	/* 안에서 3D도 그린다. CNewUI3DCamera 참고 */
+		bResult = m_pNewUIMng->Render();
 	EndBitmap();
 	
 	return bResult;
 }
 
-//---------------------------------------------------------------------------------------------
-// GetNewUIManager()
 CNewUIManager* SEASON3B::CNewUISystem::GetNewUIManager() const
 { 
 	return m_pNewUIMng; 
 }
 
-//---------------------------------------------------------------------------------------------
-// GetNewUI3DRendererMng()
 CNewUI3DRenderMng* SEASON3B::CNewUISystem::GetNewUI3DRenderMng() const
 { 
 	return m_pNewUI3DRenderMng; 
@@ -1936,10 +1888,10 @@ CNewUIHotKey* SEASON3B::CNewUISystem::GetNewUIHotKey() const
 
 bool SEASON3B::CNewUISystem::IsImpossibleSendMoveInterface()
 {
-	if(IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)				// 조합 관련 창
-		|| IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)	// 칸투르 3차 입구창
+	if(IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
+		|| IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)
 #ifdef LEM_ADD_LUCKYITEM
-		|| IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)				// 조합 관련 창
+		|| IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
 #endif // LEM_ADD_LUCKYITEM
 		)
 	{
@@ -1955,12 +1907,12 @@ bool SEASON3B::CNewUISystem::IsImpossibleTradeInterface()
 {
 	if(IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
 		|| IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)
-		|| IsVisible(SEASON3B::INTERFACE_STORAGE)					// 창고
+		|| IsVisible(SEASON3B::INTERFACE_STORAGE)
 #ifdef NEW_USER_INTERFACE_UISYSTEM
-		|| IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP)			// 부분 유료화 상점 창
+		|| IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP)
 #endif //NEW_USER_INTERFACE_UISYSTEM
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		|| IsVisible(SEASON3B::INTERFACE_INGAMESHOP)				// 인게임샵
+		|| IsVisible(SEASON3B::INTERFACE_INGAMESHOP)
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef LEM_ADD_LUCKYITEM
 		|| IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
@@ -1977,12 +1929,12 @@ bool SEASON3B::CNewUISystem::IsImpossibleDuelInterface()
 {
 	if(IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
 		|| IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)
-		|| IsVisible(SEASON3B::INTERFACE_STORAGE)					// 창고
+		|| IsVisible(SEASON3B::INTERFACE_STORAGE)
 #ifdef NEW_USER_INTERFACE_UISYSTEM
-		|| IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP)			// 부분 유료화 상점 창
+		|| IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP)
 #endif //NEW_USER_INTERFACE_UISYSTEM
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		|| IsVisible(SEASON3B::INTERFACE_INGAMESHOP)				// 인게임샵
+		|| IsVisible(SEASON3B::INTERFACE_INGAMESHOP)
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef LEM_ADD_LUCKYITEM
 		|| IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)				
@@ -2018,23 +1970,12 @@ bool SEASON3B::CNewUISystem::IsImpossibleHideInterface(DWORD dwKey)
 		|| dwKey == SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO
 		|| dwKey == SEASON3B::INTERFACE_BUFF_WINDOW
 		|| (dwKey >= SEASON3B::INTERFACE_3DRENDERING_CAMERA_BEGIN && dwKey <= SEASON3B::INTERFACE_3DRENDERING_CAMERA_END)
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 		|| dwKey == SEASON3B::INTERFACE_DUELWATCH_MAINFRAME
 		|| dwKey == SEASON3B::INTERFACE_DUELWATCH_USERLIST
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef YDG_ADD_DOPPELGANGER_UI
 		|| dwKey == SEASON3B::INTERFACE_DOPPELGANGER_FRAME
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef PSW_GOLDBOWMAN
 		|| dwKey == SEASON3B::INTERFACE_GOLD_BOWMAN
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA		
 		|| dwKey == SEASON3B::INTERFACE_GOLD_BOWMAN_LENA
-#endif //PSW_EVENT_LENA
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 		|| dwKey == SEASON3B::INTERFACE_EMPIREGUARDIAN_TIMER
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-
 		)
 	{
 		return true;
@@ -2047,20 +1988,20 @@ bool SEASON3B::CNewUISystem::IsImpossibleHideInterface(DWORD dwKey)
 
 void SEASON3B::CNewUISystem::UpdateSendMoveInterface()
 {
-	if(IsVisible(SEASON3B::INTERFACE_TRADE))
+	if (IsVisible(SEASON3B::INTERFACE_TRADE))
 	{
 		SendRequestTradeExit();
 		Hide(SEASON3B::INTERFACE_TRADE);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_STORAGE))				// 창고
+	if (IsVisible(SEASON3B::INTERFACE_STORAGE))
 	{
 		Hide(SEASON3B::INTERFACE_STORAGE);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER))
+	if (IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER))
 	{
 		Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_MYQUEST))
+	if (IsVisible(SEASON3B::INTERFACE_MYQUEST))
 	{
 		Hide(SEASON3B::INTERFACE_MYQUEST);
 	}
@@ -2068,73 +2009,66 @@ void SEASON3B::CNewUISystem::UpdateSendMoveInterface()
 	{
 		Hide(SEASON3B::INTERFACE_NPCQUEST);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+	if (IsVisible(SEASON3B::INTERFACE_NPCSHOP))
 	{
 		Hide(SEASON3B::INTERFACE_NPCSHOP);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_GUARDSMAN))
+	if (IsVisible(SEASON3B::INTERFACE_GUARDSMAN))
 	{
 		Hide(SEASON3B::INTERFACE_GUARDSMAN);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_GUARDSMAN))
+	if (IsVisible(SEASON3B::INTERFACE_GUARDSMAN))
 	{
 		Hide(SEASON3B::INTERFACE_GUARDSMAN);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_DEVILSQUARE))
+	if (IsVisible(SEASON3B::INTERFACE_DEVILSQUARE))
 	{
 		Hide(SEASON3B::INTERFACE_DEVILSQUARE);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_BLOODCASTLE))
+	if (IsVisible(SEASON3B::INTERFACE_BLOODCASTLE))
 	{
 		Hide(SEASON3B::INTERFACE_BLOODCASTLE);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC))
+	if (IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC))
 	{
 		Hide(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY))
+	if (IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY))
 	{
 		Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
 	}
-	if(IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY))
+	if (IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY))
 	{
 		Hide(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY);
 	}
-#ifdef YDG_ADD_NEW_DUEL_UI
-	if(IsVisible(SEASON3B::INTERFACE_DUELWATCH))
+	if (IsVisible(SEASON3B::INTERFACE_DUELWATCH))
 	{
 		Hide(SEASON3B::INTERFACE_DUELWATCH);
 	}
-#endif	// YDG_ADD_NEW_DUEL_UI
-#ifdef YDG_ADD_DOPPELGANGER_UI
-	if(IsVisible(SEASON3B::INTERFACE_DOPPELGANGER_NPC))
+	if (IsVisible(SEASON3B::INTERFACE_DOPPELGANGER_NPC))
 	{
 		Hide(SEASON3B::INTERFACE_DOPPELGANGER_NPC);
 	}
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	if (IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE))
+	{
 		Hide(SEASON3B::INTERFACE_NPC_DIALOGUE);
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
+	}
 	if (IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
+	{
 		Hide(SEASON3B::INTERFACE_QUEST_PROGRESS);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
+	}
 #ifdef ASG_ADD_UI_NPC_MENU
 	if (IsVisible(SEASON3B::INTERFACE_NPC_MENU))
 		Hide(SEASON3B::INTERFACE_NPC_MENU);
 #endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 	if (IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
+	{
 		Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
+	}
 	if(IsVisible(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC))
 	{
 		Hide(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC);
 	}
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-#ifdef PBG_MOD_LUCKYCOINEVENT
 	if(IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION))
 	{
 		Hide(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION);
@@ -2143,15 +2077,11 @@ void SEASON3B::CNewUISystem::UpdateSendMoveInterface()
 	{
 		Hide(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN);
 	}
-#endif //PBG_MOD_LUCKYCOINEVENT
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 	if(IsVisible(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA))
 	{
 		Hide(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
 	}
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 }
-
 
 // GetInstance()
 CNewUISystem* SEASON3B::CNewUISystem::GetInstance()
@@ -2159,30 +2089,6 @@ CNewUISystem* SEASON3B::CNewUISystem::GetInstance()
 	static CNewUISystem s_NewUISystem;
 	return &s_NewUISystem;
 }
-
-#ifndef CSK_MOD_REMOVE_AUTO_V1_FLAG		// 정리할 때 지워야 하는 소스	
-#ifdef CSK_MOD_PROTECT_AUTO_V1
-void SEASON3B::CNewUISystem::ToggleMoveCommandWindow()
-{
-	if(m_pNewMoveCommandWindow->IsNewVersion() == false)
-	{
-		SAFE_DELETE( m_pNewMoveCommandWindow );
-		m_pNewMoveCommandWindow = new CNewUIMoveCommandWindowNew;
-		m_pNewMoveCommandWindow->SetNewVersion(true);
-	}
-	else
-	{
-		SAFE_DELETE( m_pNewMoveCommandWindow );
-		m_pNewMoveCommandWindow = new CNewUIMoveCommandWindow;
-		m_pNewMoveCommandWindow->SetNewVersion(false);
-	}
-
-	m_pNewMoveCommandWindow->Create(m_pNewUIMng, 1, 1);
-}
-#endif // CSK_MOD_PROTECT_AUTO_V1
-#endif //! CSK_MOD_REMOVE_AUTO_V1_FLAG	// 정리할 때 지워야 하는 소스
-
-//---------------------------------------------------------------------------------------------
 
 CNewUIChatLogWindow* SEASON3B::CNewUISystem::GetUI_NewChatLogWindow() const
 { 

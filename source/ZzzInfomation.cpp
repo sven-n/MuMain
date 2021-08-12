@@ -1,9 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 게임에 필요한 텍스트로 저장된 여러가지 정보 데이타를 읽어들임
-// 아이템, 스킬, 게이트, 욕 필터링, 몬스터, 케릭터 정보 읽기
-// 공격력, 방어력, 마력 등등 계산 함수
-//
-// *** 함수 레벨: 2
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -3200,7 +3195,6 @@ void CHARACTER_MACHINE::SetCharacter(BYTE Class)
 	Character.ShieldMax = c->Shield;
 
 	InitAddValue ();
-	hanguo_check5();
 
 	for(int j=0;j<MAX_SKILLS;j++)
 	{
@@ -4163,7 +4157,6 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlockingPK()
 #endif //PBG_ADD_NEWCHAR_MONK
 	}
 	Character.SuccessfulBlockingPK = (WORD)tmpf;
-	hanguo_check3();
 }
 
 void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
@@ -4219,7 +4212,6 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_BOOTS],10 );
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_RING_LEFT],10 );
     PlusSpecialPercent ( &Character.SuccessfulBlocking, AT_IMPROVE_BLOCKING_PERCENT, &Equipment[EQUIPMENT_RING_RIGHT],10 );
-	hanguo_check3();
 
 	Character.SuccessfulBlocking *= g_SocketItemMgr.m_StatusBonus.m_fDefenceRateBonus;
 }

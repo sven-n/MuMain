@@ -168,8 +168,6 @@ void CProtocolSend::SendCharacterMoveNew(unsigned short Key, float Angle, unsign
 
 	PMSG_MOVE_SEND pMsg = { 0 };
 
-	pre_send(g_hInst);
-
 	if (PathNum >= MAX_PATH_FIND)
 	{
 		PathNum = MAX_PATH_FIND - 1;

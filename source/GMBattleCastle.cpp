@@ -24,8 +24,6 @@
 #endif// PET_SYSTEM
 
 #include "BoneManager.h"
-#include "CSMapInterface.h"
-
 #include "GMBattleCastle.h"
 
 extern  int     g_iTotalObj;

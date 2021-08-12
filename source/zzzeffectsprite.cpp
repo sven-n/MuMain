@@ -116,10 +116,6 @@ void RenderSprite(OBJECT *o,OBJECT *Owner)
 
 void RenderSprites ( BYTE byRenderOneMore )
 {
-#ifdef DO_PROFILING
-	g_pProfiler->BeginUnit( EPROFILING_RENDER_SPRITES, PROFILING_RENDER_SPRITES );
-#endif // DO_PROFILING
-
 	for(int i=0;i<MAX_SPRITES;i++)
 	{
 		OBJECT *o = &Sprites[i];
@@ -169,10 +165,6 @@ void RenderSprites ( BYTE byRenderOneMore )
             }
 		}
 	}
-
-#ifdef DO_PROFILING
-	g_pProfiler->EndUnit( EPROFILING_RENDER_SPRITES );
-#endif // DO_PROFILING
 }
 
 void CheckSprites()

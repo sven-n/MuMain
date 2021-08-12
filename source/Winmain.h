@@ -38,16 +38,6 @@
 
 	#define CSK_DEBUG_MAP_PATHFINDING
 
-	//#define LDS_ADD_DEBUGINGMODULES	// 내부 Profiling 모드 (결과파일은 RESULT_PROFILING.txt로 저장) 
-
-	#ifdef LDS_ADD_DEBUGINGMODULES
-		#define DO_PROCESS_DEBUGCAMERA	// Main GameScene 내 디버깅용 카메라를 설정 (2008.07.30)
-		//#define LDS_ADD_DEBUGINGMODULES_FOR_PROFILING
-		#ifdef LDS_ADD_DEBUGINGMODULES_FOR_PROFILING
-			#define DO_PROFILING			// PROFILING_RESULT.txt-결과 출력 // 내부 Profiling 모드 적용 여부.  (2008.07.11)
-			//#define DO_PROFILING_FOR_LOADING// PROFILING_FOR_LOADING_RESULT.txt-결과 출력 // Loading시점만 Profiling 모드.  (2008.08.19)
-		#endif // LDS_ADD_DEBUGINGMODULES_FOR_PROFILING
-	#endif // LDS_ADD_DEBUGINGMODULES
 #endif // _DEBUG
 #endif // FOR_WORK
 
@@ -65,27 +55,6 @@
 #define BAN_USE_CMDLINE
 #define NEW_YEAR_BAG_EVENT
 #define GRAMMAR_VERB
-
-#ifndef ANTIHACKING_ENABLE
-	#define hanguo_check1();	{}
-	#define hanguo_check2();	{}
-	#define hanguo_check3();	{}
-	#define hanguo_check4();	{}
-	#define hanguo_check5();	{}
-	#define hanguo_check6();	{}
-	#define hanguo_check7();	{}
-	#define hanguo_check8();	{}
-	#define hanguo_check9();	{}
-	#define hanguo_check10();	{}
-	#define hanguo_check11();	{}
-	#define hanguo_check12();	{}
-	#define	pre_send( g_hInst);	{}
-#endif
-
-/*--------------------------------------------------------------------------------------*/
-
-
-/*----------------------- 이벤트 -------------------------------------------------------*/
 
 //#define CSK_EVENT_HALLOWEEN_MAP	//	할로윈 이벤트 맵 처리(2006.10.09)
 //#define DEVIAS_XMAS_EVENT			//  크리스마스 이벤트 관련 데비아스 맵 및 리소스 수정(2005.12)
@@ -171,19 +140,6 @@ extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();
 extern void DestroySound();
 
-/*-------------------- Macro --------------------*/
-
-/*----------------------- 디버깅용 모듈들 --------------------------------------------------*/
-#ifdef DO_PROFILING
-	#include "Profiler.h"
-	extern CProfiler	*g_pProfiler;
-#endif // DO_PROFILING
-
-#ifdef DO_PROFILING_FOR_LOADING
-	#include "Profiler.h"
-	extern CProfiler	*g_pProfilerForLoading;
-#endif // DO_PROFILING_FOR_LOADING
-
 #ifdef DO_PROCESS_DEBUGCAMERA
 	#include "DebugCameraManager.h"
 	extern CDebugCameraManager *g_pDebugCameraManager;
@@ -199,13 +155,6 @@ extern void DestroySound();
 #else
 #define ExecutionLog	{}
 #endif //_DEBUG
-
-#ifdef USE_CRT_DEBUG				
-	#define _CRTDBG_MAP_ALLOC
-	#include <stdlib.h>
-	#include <crtdbg.h>
-	#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif // USE_CRT_DEBUG
 
 #define FAKE_CODE( pos)\
 	_asm { jmp pos };\

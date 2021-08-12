@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "wsctlc.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"

@@ -2559,25 +2559,24 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		}
 	}
 
-    //  아이템의 이름.
-    if (ip->Type>=ITEM_POTION+23 && ip->Type<=ITEM_POTION+26 )   //  퀘스트 아이템.
+    if (ip->Type>=ITEM_POTION+23 && ip->Type<=ITEM_POTION+26 )
     {
-		if(ip->Type == ITEM_POTION+23)	//. 제왕의 서, 영광의반지
+		if(ip->Type == ITEM_POTION+23)
 		{
 			Color = TEXT_COLOR_YELLOW;
 			switch( Level )
 			{
-			case 0: sprintf ( TextList[TextNum], "%s", p->Name ); break;	//. 제왕의 서
-			case 1: sprintf ( TextList[TextNum], GlobalText[906] ); break;  //  영광의 반지
+			case 0: sprintf ( TextList[TextNum], "%s", p->Name ); break;
+			case 1: sprintf ( TextList[TextNum], GlobalText[906] ); break;
 			}
 		}
-		else if(ip->Type == ITEM_POTION+24)	//. 부러진검, 다크스톤
+		else if(ip->Type == ITEM_POTION+24)
 		{
 			Color = TEXT_COLOR_YELLOW;
 			switch( Level )
 			{
-			case 0: sprintf ( TextList[TextNum], "%s", p->Name ); break;	//. 부러진검
-			case 1: sprintf ( TextList[TextNum], GlobalText[907] ); break;  //  다크스톤
+			case 0: sprintf ( TextList[TextNum], "%s", p->Name ); break;
+			case 1: sprintf ( TextList[TextNum], GlobalText[907] ); break;
 			}
 		}
 		else{
@@ -2585,7 +2584,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 			Color = TEXT_COLOR_YELLOW;
 		}
     }
-	else if(ip->Type == ITEM_POTION+12)//이밴트 아이템
+	else if(ip->Type == ITEM_POTION+12)
 	{
 		switch(Level)
 		{
@@ -2594,7 +2593,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		case 2:sprintf(TextList[TextNum],"%s",ChaosEventName[ip->Durability]);break;
 		}
 	}
-	else if(ip->Type == ITEM_POTION+11)//행운의 상자/성탄의별/폭죽/마법 주머니./사랑의 하트//훈장
+	else if(ip->Type == ITEM_POTION+11)
 	{
 		switch(Level)
 		{
@@ -2604,34 +2603,23 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		case 3:sprintf(TextList[TextNum],GlobalText[107]);break;
 		case 5:sprintf(TextList[TextNum],GlobalText[109]);break;
 		case 6:sprintf(TextList[TextNum],GlobalText[110]);break;
-        case 7:sprintf(TextList[TextNum],GlobalText[111]);break; //  천공의 상자.
-#ifdef USE_EVENT_ELDORADO
+        case 7:sprintf(TextList[TextNum],GlobalText[111]);break;
 		case 8:
 		case 9:
 		case 10:
 		case 11:
-		case 12:	// 천공의 상자
+		case 12:
 			sprintf(TextList[TextNum],"%s +%d",GlobalText[115], Level - 7);
 			break;
-#endif
-		case 13:	// 다크로드의 마음
+		case 13:
 			sprintf(TextList[TextNum],GlobalText[117]);
 			break;
-#ifdef NEW_YEAR_BAG_EVENT
-        case 14:    //  복주머니.
+        case 14:
             sprintf(TextList[TextNum],GlobalText[1650]);
             break;
-
         case 15:
             sprintf(TextList[TextNum],GlobalText[1651]);
             break;
-#else 
-    #ifdef CHINA_MOON_CAKE
-        case 14:    //  중국 월병.
-            sprintf(TextList[TextNum],GlobalText[118]);
-            break;
-    #endif// CHINA_MOON_CAKE
-#endif// NEW_YEAR_BAG_EVENT
 		}
 	}
 	else if(ip->Type == ITEM_POTION+12)
@@ -8549,8 +8537,8 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 				ip->option_380 = false;
 				BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
 				ip->option_380 = b;
-				ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;//옵션 종류
-				ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;//옵션 레벨( 값이 아님 )
+				ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;
+				ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;
 				if(i==0 && j==0)
 					ip->Number = 1;
 				else
@@ -8560,15 +8548,12 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 		}
 	}
 
-	hanguo_check12();
 	if(!First)
 	{
 		if(CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == -1)
     		DeleteBug(&Hero->Object);
-#ifdef PET_SYSTEM
         if ( CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type==-1 )
             giPetManager::DeletePet ( Hero );            
-#endif// PET_SYSTEM
 
         ITEM& rl = CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
         ITEM& rr = CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
@@ -8587,7 +8572,7 @@ bool EquipmentItem = false;
 extern int BuyCost;
 
 #if defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
-// 인게임샵이 들어가지 않은 해외전용 캐시샵에서만 쓰는함수 이므로 이 함수에 더이상 추가하지 마세요!!!!!
+
 bool IsPartChargeItem(ITEM* pItem)
 {
 #if !defined(PSW_PARTCHARGE_ITEM1) && defined(LDK_ADD_CASHSHOP_FUNC)
