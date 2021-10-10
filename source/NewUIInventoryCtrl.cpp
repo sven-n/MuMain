@@ -354,18 +354,11 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 		return true;
 	}
 	
-	// 아이템/펫
-	if( pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+5 
-		|| pItem->Type == ITEM_HELPER+37
-#ifdef LDK_ADD_CS7_UNICORN_PET
-		|| pItem->Type == ITEM_HELPER+106	// 유니콘 펫
-#endif //LDK_ADD_CS7_UNICORN_PET
-	    )
+	if( pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+5 || pItem->Type == ITEM_HELPER+37 || pItem->Type == ITEM_HELPER+106)
 	{
 		return true;
 	}
 	
-	// 날개아이템인가?
 	if(IsWingItem(pItem) == true)
 	{
 		return true;

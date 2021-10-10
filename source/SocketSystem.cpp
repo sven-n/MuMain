@@ -34,15 +34,6 @@ CSocketItemMgr::CSocketItemMgr()
 	m_iNumEquitSetBonusOptions = 0;
 	memset(m_SocketOptionInfo, 0, sizeof(SOCKET_OPTION_INFO) * MAX_SOCKET_OPTION);
 	memset(&m_StatusBonus, 0, sizeof(SOCKET_OPTION_STATUS_BONUS));
-
-// SocketItem.bmd 스크립트 파일은 zzzOpenData에서 읽는다.
-#ifndef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef USE_SOCKETITEM_TEST_BMD
-	OpenSocketItemScript("Data\\Local\\SocketItemTest.bmd");
-#else	// USE_SOCKETITEM_TEST_BMD
-	OpenSocketItemScript("Data\\Local\\SocketItem.bmd");
-#endif	// USE_SOCKETITEM_TEST_BMD
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 }
 
 CSocketItemMgr::~CSocketItemMgr()

@@ -473,7 +473,6 @@
 		#define ASG_ADD_NEW_DIVIDE_STRING						// 새로운 문장 나누기 기능.(2009.06.08)
 		#define PBG_ADD_DISABLERENDER_BUFF						// 랜더안할 버프 이미지 처리(09.08.10)
 
-		#define LDK_FIX_CHARACTER_UNLIVE_MOUSE_LOCK				// 맵이동시 캐릭터 삭제후 이동 불가(09.10.29)
 		#define LDK_FIX_EMPIREGUARDIAN_UI_HOTKEY				// 제국 수호군npc ui창 열려있을때 캐릭창, 인벤창 안열리도록한다(09.10.28)
 		#define LDK_FIX_PETPOSITION_MULTIPLY_OWNERSCALE			// 캐릭터 선택창 에서 캐릭터 크기에 따라 펫위치 수정(09.10.28)
 		#define YDG_FIX_DOPPELGANGER_NPC_WINDOW_SCREEN_SIZE		// 도플갱어 NPC창 열렸을떄 파티창과 겹쳐지는 문제(09.10.28)
@@ -513,7 +512,6 @@
 		#define PBG_ADD_AURA_EFFECT					// AG SD 증가 오라 이펙트
 	#endif //ADD_TOTAL_CHARGE_7TH
 
-	#define KJH_FIX_MOVE_HERO_MOUSE_CLICK_EFFECT			// 캐릭터 이동시 마우스클릭 이팩트가 이동하지 못하는 곳에 렌더되는 버그 수정 (09.03.04) [09.03.19 테섭]
 	#define KJH_FIX_GET_ZEN_SYSTEM_TEXT						// 겜블상점에서 아이템구입시 젠증가 메세지가 나오는 문제. (09.03.18) [09.03.19 테섭]
 	#define KJH_FIX_WOPS_K33695_EQUIPABLE_DARKLOAD_PET_ITEM	// 다크로드가 인벤에 펫을 소유하고 있을때, 툴팁에 착용불가로 나오는 버그수정 (09.04.27)
 	#define KJH_FIX_WOPS_K33479_SELECT_CHARACTER_TO_HEAL	// 캐릭터에게 둘러쌓였을때, 요정의 치료스킬강화이후 캐릭터 선택이 잘 안되어지는 버그수정 (09.04.27)

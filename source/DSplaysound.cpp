@@ -1,9 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// DirectX Sound 예제에서 따옴
-// 싸운드 처리
-// eax처리루틴이 포함되어 있어서 소스가 지저분함
-//
-// *** 함수 레벨: 1
+// DirectX Sound
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
@@ -21,8 +17,6 @@
 #include <mmreg.h>
 #include <dsound.h>
 #include "DSwaveio.h"
-//#include "eax.h"		// For EAX 2.0 support
-//#include "eaxman.h"		// For EAX Manager support
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
@@ -31,17 +25,6 @@
 #include "DSPlaySound.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "./Utilities/Log/muConsoleDebug.h"
-
-
-//-----------------------------------------------------------------------------
-// Function-prototypes
-//-----------------------------------------------------------------------------
-//extern VOID OnEnablePlayUI( HWND hDlg, BOOL bEnable );
-//extern VOID SetFileUI( HWND hDlg, TCHAR* strFileName );
-
-//-----------------------------------------------------------------------------
-// Defines, constants, and global variables
-//-----------------------------------------------------------------------------
 
 bool                    g_EnableSound    = false;
 bool                    g_Enable3DSound  = false;
@@ -54,12 +37,10 @@ LPDIRECTSOUND3DLISTENER g_lpDS3DListener;
 LPDIRECTSOUNDBUFFER     g_lpDSBuffer[MAX_BUFFER][MAX_CHANNEL];
 LPDIRECTSOUND3DBUFFER   g_lpDS3DBuffer[MAX_BUFFER][MAX_CHANNEL];
 
-//CWaveSoundRead*         g_pWaveSoundRead = NULL;
 DWORD                   g_dwBufferBytes;
 
 OBJECT                  *Object3DSound[MAX_BUFFER][MAX_CHANNEL];
 char                    BufferName[MAX_BUFFER][64];
-
 int                     BufferChannel[MAX_BUFFER];
 int                     MaxBufferChannel[MAX_BUFFER];
 bool                    Enable3DSound[MAX_BUFFER];
@@ -80,11 +61,7 @@ HRESULT InitDirectSound( HWND hDlg )
 {
     HRESULT             hr;
     DSBUFFERDESC        dsbdesc;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPDIRECTSOUNDBUFFER lpDSBPrimary = NULL;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-    LPDIRECTSOUNDBUFFER lpDSBPrimary;
-#endif //KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	WAVEFORMATEX        wfx;
 
 	if(g_Enable3DSound)
@@ -164,7 +141,6 @@ HRESULT InitDirectSound( HWND hDlg )
     return S_OK;
 }
 
-//  사운드 사용.
 void    SetEnableSound ( bool b )
 {
     g_EnableSound = b;
@@ -215,8 +191,6 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel , bool
 	if( FAILED(hr = g_lpDS->CreateSoundBuffer(&dsbdSecondary, &g_lpDSBuffer[Buffer][0], NULL )))
 	{
 		g_ErrorReport.Write( "Failed to create Direct Sound buffer [%s]\r\n", strFileName);
-		//MessageBox(g_hWnd,"Failed to create Direct Sound buffer",strFileName,MB_OK);
-		//SendMessage(g_hWnd,WM_DESTROY,0,0);
         delete  wavefile;
 		return 0;
 	}
@@ -224,8 +198,7 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel , bool
     if(Enable)
 	{
 		// Query for a 3D Interface for the buffer
-		if (FAILED(hr = g_lpDSBuffer[Buffer][0]->QueryInterface(IID_IDirectSound3DBuffer, 
-			(LPVOID *)&g_lpDS3DBuffer[Buffer][0])))
+		if (FAILED(hr = g_lpDSBuffer[Buffer][0]->QueryInterface(IID_IDirectSound3DBuffer, (LPVOID *)&g_lpDS3DBuffer[Buffer][0])))
 		{
 			g_ErrorReport.Write( "Failed to query for 3D Interface on Direct Sound buffer [%s]\r\n", strFileName);
 			MessageBox(g_hWnd,"Failed to query for 3D Interface on Direct Sound buffer",NULL,MB_OK);
@@ -282,11 +255,7 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel , bool
 	}
 	
 	// Use the waveIO Class ReadWaveData method to load in the data to where lpPart1 points
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	if (FAILED(hr = wavefile->ReadWaveData((char *)lpPart1, g_dwBufferBytes)))
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	if (!(hr = wavefile->ReadWaveData((char *)lpPart1, g_dwBufferBytes)))
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	{
 		g_ErrorReport.Write( "Failed to read audio data [%s]\r\n", strFileName);
 		printf("Failed to read audio data\n");

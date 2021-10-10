@@ -120,11 +120,11 @@ namespace SEASON3B
 		CNewUI3DRenderMng* GetNewUI3DRenderMng() const;
 		CNewUIHotKey* GetNewUIHotKey() const;
 
-		bool IsImpossibleSendMoveInterface();	// 창이 열렸을 때 캐릭터가 이동 불가능한 창인가?
-		void UpdateSendMoveInterface();			// 창이 열렸을 때 캐릭터가 이동하면 닫히는 창들 업데이트
-		bool IsImpossibleTradeInterface();		// 창이 열렸을 때 거래가 불가능한 창인가?
-		bool IsImpossibleDuelInterface();		// 창이 열렸을 때 결투가 불가능한 창인가?
-		bool IsImpossibleHideInterface(DWORD dwKey);		// 창이 절대 닫히면 안되는 창인가? (예:메인프레임)
+		bool IsImpossibleSendMoveInterface();
+		void UpdateSendMoveInterface();
+		bool IsImpossibleTradeInterface();
+		bool IsImpossibleDuelInterface();
+		bool IsImpossibleHideInterface(DWORD dwKey);
 			
 		static CNewUISystem* GetInstance();
 
@@ -191,60 +191,23 @@ namespace SEASON3B
 		CNewUICursedTempleResult*		m_pNewCursedTempleResultWindow;
 		CNewUICryWolf*					m_pNewCryWolfInterface;
 		CNewUIMasterLevel*				m_pNewMaster_Level_Interface;
-#ifdef NEW_USER_INTERFACE_SHELL
-		CNewUIPartChargeShop*			m_pNewPartChargeShop;
-#endif //NEW_USER_INTERFACE_SHELL
-#ifdef PSW_GOLDBOWMAN
 		CNewUIGoldBowmanWindow*			m_pNewGoldBowman;
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA
 		CNewUIGoldBowmanLena*			m_pNewGoldBowmanLena;
-#endif //PSW_EVENT_LENA		
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 		CNewUIRegistrationLuckyCoin*	m_pNewLuckyCoinRegistration;
 		CNewUIExchangeLuckyCoin*		m_pNewExchangeLuckyCoinWindow;
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_NEW_DUEL_UI
 		CNewUIDuelWatchWindow*			m_pNewDuelWatchWindow;
-#endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 		CNewUIDuelWatchMainFrameWindow*	m_pNewDuelWatchMainFrameWindow;
 		CNewUIDuelWatchUserListWindow* m_pNewDuelWatchUserListWindow;
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef YDG_ADD_DOPPELGANGER_UI
 		CNewUIDoppelGangerWindow*		m_pNewDoppelGangerWindow;
 		CNewUIDoppelGangerFrame*		m_pNewDoppelGangerFrame;
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 		CNewUINPCDialogue*				m_pNewNPCDialogue;
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 		CNewUIQuestProgress*			m_pNewQuestProgress;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
-#ifdef ASG_ADD_UI_NPC_MENU
-		CNewUINPCMenu*					m_pNewNPCMenu;
-#endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		CNewUIQuestProgressByEtc*		m_pNewQuestProgressByEtc;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 		CNewUIEmpireGuardianNPC*	m_pNewEmpireGuardianNPC;
 		CNewUIEmpireGuardianTimer*  m_pNewEmpireGuardianTimer;
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-#ifdef PJH_ADD_MINIMAP
 		CNewUIMiniMap*				m_pNewMiniMap;
-#endif //PJH_ADD_MINIMAP		
-#ifdef PBG_MOD_STAMINA_UI
-		CNewUIStamina*				m_pNewUIStamina;
-#endif //PBG_MOD_STAMINA_UI
-#ifdef PBG_ADD_GENSRANKING
 		CNewUIGensRanking*			m_pNewGensRanking;
-#endif //PBG_ADD_GENSRANKING
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 		CNewUIUnitedMarketPlaceWindow* m_pNewUnitedMarketPlaceWindow;
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 #ifdef LEM_ADD_LUCKYITEM
 		CNewUILuckyItemWnd*			m_pNewUILuckyItemWnd;
 #endif // LEM_ADD_LUCKYITEM
@@ -301,59 +264,24 @@ namespace SEASON3B
 		CNewUICursedTempleResult* GetUI_NewCursedTempleResultWindow() const;
 		CNewUICryWolf* GetUI_NewCryWolfInterface() const;
 		CNewUIMasterLevel*	GetUI_NewMasterLevelInterface() const;
-#ifdef NEW_USER_INTERFACE_SHELL
-		CNewUIPartChargeShop* GetUI_pNewPartChargeShopInterface() const;
-#endif //NEW_USER_INTERFACE_SHEL
-#ifdef PSW_GOLDBOWMAN
 		CNewUIGoldBowmanWindow*	GetUI_pNewGoldBowman() const;
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA
 		CNewUIGoldBowmanLena* GetUI_pNewGoldBowmanLena() const;
-#endif //PSW_EVENT_LENA
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 		CNewUIRegistrationLuckyCoin* GetUI_pNewLuckyCoinRegistration() const;
 		CNewUIExchangeLuckyCoin* GetUI_pNewExchangeLuckyCoin() const;
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_NEW_DUEL_UI
 		CNewUIDuelWatchWindow*	GetUI_pNewDuelWatch() const;
-#endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 		CNewUIDuelWatchMainFrameWindow*	GetUI_pNewDuelWatchMainFrame() const;
 		CNewUIDuelWatchUserListWindow* GetUI_pNewDuelWatchUserList() const;
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#ifdef YDG_ADD_DOPPELGANGER_UI
 		CNewUIDoppelGangerWindow*	GetUI_pNewDoppelGangerWindow() const;
 		CNewUIDoppelGangerFrame*	GetUI_pNewDoppelGangerFrame() const;
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 		CNewUINPCDialogue* GetUI_NewNPCDialogue() const;
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 		CNewUIQuestProgress* GetUI_NewQuestProgress() const;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
-#ifdef ASG_ADD_UI_NPC_MENU
-		CNewUINPCMenu* GetUI_NewNPCMenu() const;
-#endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		CNewUIQuestProgressByEtc* GetUI_NewQuestProgressByEtc() const;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 		CNewUIEmpireGuardianNPC* GetUI_pNewEmpireGuardianNPC() const;
 		CNewUIEmpireGuardianTimer* GetUI_pNewEmpireGuardianTimer() const;
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-#ifdef PJH_ADD_MINIMAP
 		CNewUIMiniMap* GetUI_pNewUIMiniMap() const;
-#endif //PJH_ADD_MINIMAP
-#ifdef PBG_MOD_STAMINA_UI
-		CNewUIStamina* GetUI_pNewUIStamina() const;
-#endif //PBG_MOD_STAMINA_UI
-#ifdef PBG_ADD_GENSRANKING
 		CNewUIGensRanking* GetUI_NewGensRanking() const;
-#endif //PBG_ADD_GENSRANKING
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 		CNewUIUnitedMarketPlaceWindow*	GetUI_pNewUnitedMarketPlaceWindow() const;
 		//CNewUIUnitedMarketPlaceWindow*	GetUI_pNewUnitedMarketPlaceFrame() const;
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 #ifdef LEM_ADD_LUCKYITEM
 		CNewUILuckyItemWnd*	Get_pNewUILuckyItemWnd() const;
 #endif // LEM_ADD_LUCKYITEM

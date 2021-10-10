@@ -181,37 +181,17 @@ char *g_lpszMp3[NUM_MUSIC] =
 	"data\\music\\elbeland.mp3",
 	"data\\music\\login_theme.mp3",
 	"data\\music\\SwampOfCalmness.mp3",
-#ifdef CSK_ADD_MAP_ICECITY	
 	"data\\music\\Raklion.mp3",
 	"data\\music\\Raklion_Hatchery.mp3",
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_MAP_SANTA_TOWN
 	"data\\music\\Santa_Village.mp3",
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef YDG_ADD_MAP_DUEL_ARENA
 	"data\\music\\DuelArena.mp3",
-#endif	// YDG_ADD_MAP_DUEL_ARENA
-#ifdef PBG_ADD_PKFIELD			//BGM음악
 	"data\\music\\PK_Field.mp3",
-#endif //PBG_ADD_PKFIELD
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN1
 	"data\\music\\ImperialGuardianFort.mp3",
-#endif //LDK_ADD_MAP_EMPIREGUARDIAN1
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN2
 	"data\\music\\ImperialGuardianFort.mp3",
-#endif //LDS_ADD_MAP_EMPIREGUARDIAN2
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN3
 	"data\\music\\ImperialGuardianFort.mp3",
-#endif //LDK_ADD_MAP_EMPIREGUARDIAN3
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN4
 	"data\\music\\ImperialGuardianFort.mp3",
-#endif //LDS_ADD_MAP_EMPIREGUARDIAN4
-#ifdef YDG_ADD_DOPPELGANGER_SOUND
 	"data\\music\\iDoppelganger.mp3",
-#endif	// YDG_ADD_DOPPELGANGER_SOUND
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
-	"data\\music\\iDoppelganger.mp3",		// 우선 임시.
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
+	"data\\music\\iDoppelganger.mp3",
 #ifdef ASG_ADD_MAP_KARUTAN
 	"data\\music\\Karutan_A.mp3",
 	"data\\music\\Karutan_B.mp3",
@@ -1795,7 +1775,6 @@ bool MoveMainCamera()
 		CameraPosition[1] = Hero->Object.Position[1];
 		CameraPosition[2] = CameraViewFar;
 	}
-#ifdef BATTLE_SOCCER_EVENT
     else if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
     {
         vec3_t Position,TransformPosition, Pos;
@@ -1826,7 +1805,6 @@ bool MoveMainCamera()
 		CameraPosition[2] += 800.f;
 		CameraAngle[0] = -70.f;
     }
-#endif// BATTLE_SOCCER_EVENT
 	else
 	{
 		int iIndex = TERRAIN_INDEX((Hero->PositionX),(Hero->PositionY));
@@ -2026,14 +2004,12 @@ bool MoveMainCamera()
 		CameraAngle[0] += sinf(WorldTime*0.0005f)*2.f;
 		CameraAngle[1] += sinf(WorldTime*0.0008f)*2.5f;
 	}
-#ifdef BATTLE_SOCCER_EVENT
     else if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
     {
         CameraDistanceTarget = 3200.f;
         CameraDistance = CameraDistanceTarget;
     }
     else
-#endif// BATTLE_SOCCER_EVENT
 	if (CCameraMove::GetInstancePtr()->IsTourMode())
 	{
 		CameraDistanceTarget = 1100.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel() * 0.1f;

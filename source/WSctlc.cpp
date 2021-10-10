@@ -63,10 +63,6 @@ CWsctlc::~CWsctlc()
 	LogPrintOff();
 }
 
-//////////////////////////////////////////////////////////////////////
-// winsock2 DLL을 사용할 준비를 한다.
-// 리턴값 : TRUE(성공), FALSE(DLL초기화실패및 버젼이 낮음)
-//////////////////////////////////////////////////////////////////////
 BOOL CWsctlc::Startup()
 {
 	WORD wVersionRequested;
@@ -315,9 +311,6 @@ int CWsctlc::Connect(char *ip_addr, unsigned short port, DWORD WinMsgNum)
 	return 1;
 }
 
-//////////////////////////////////////////////////////////////////////
-// 데이터를 전송한다.
-//////////////////////////////////////////////////////////////////////
 int CWsctlc::sSend(SOCKET socket, char *buf, int len)
 {	
 	int nResult;
@@ -325,28 +318,12 @@ int CWsctlc::sSend(SOCKET socket, char *buf, int len)
 	
 	int nLeft = len;
 	int nDx=0;
-	/*
-	WSABUF		wsabuf;
-	DWORD		SendByte;
-
-	if( socket == INVALID_SOCKET ) return FALSE;
-
-	wsabuf.buf = buf;
-	wsabuf.len = len;
-
-	WSASend(socket, &wsabuf, 1, &SendByte, 0, NULL, NULL);
-	return TRUE;
-	*/
 	
 	while( 1 ) 
 	{
 		nResult = send(socket, (char*)buf+nDx, len-nDx, 0);
 		if( nResult == SOCKET_ERROR )
 		{
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-				DebugAngel_Write(PACKET_LOG_FILE, "send nResult[%d]\r\n",nResult);
-#endif //PBG_LOG_PACKET_WINSOCKERROR
-
 			if( WSAGetLastError() != WSAEWOULDBLOCK )
 			{
 				g_ConsoleDebug->Write(MCD_ERROR, "[Send Packet Error] WSAGetLastError() != WSAEWOULDBLOCK");

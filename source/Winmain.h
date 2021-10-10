@@ -17,8 +17,6 @@
 
 #define SELECTED_LANGUAGE	( LANGUAGE_ENGLISH )
 
-#define GAMEGUARD_AUTH25
-
 #ifdef _DEBUG
 	#define ENABLE_EDIT
 	#define ENABLE_EDIT2
@@ -52,13 +50,8 @@
 	#define GRAMMAR_OF
 
 
-#define BAN_USE_CMDLINE
-#define NEW_YEAR_BAG_EVENT
-#define GRAMMAR_VERB
-
 //#define CSK_EVENT_HALLOWEEN_MAP	//	할로윈 이벤트 맵 처리(2006.10.09)
 //#define DEVIAS_XMAS_EVENT			//  크리스마스 이벤트 관련 데비아스 맵 및 리소스 수정(2005.12)
-#define STONE_EVENT_DIALOG			// 스톤 이벤트 ( 영석 러쉬 게임, 공짜 경매 이벤트 ).
 //#define LENA_EXCHANGE_ZEN			// 레나 환전 시스템, 주위 : 스톤에서는 켜서는 안된다.
 #define BLOODCASTLE_2ND_PATCH		// 스톤 환전 시스템, 조합관련
 #define USE_EVENT_ELDORADO			// 엘도라도의 상자 이벤트
@@ -74,7 +67,6 @@
 	#define DISABLE_MUTO			// CASTLE_EVENT 시 필요
 #endif
 
-#define BATTLE_SOCCER_EVENT         // 배틀싸커 이벤트.
 #define LOREN_RAVINE_EVENT			// 로랜협곡 이벤트에서 쓰임.
 //#define GUILD_WAR_EVENT           // 길전 이벤트.
 //#define MYSTERY_BEAD				// 신비의 구슬 이벤트
@@ -124,7 +116,6 @@ extern int  m_MusicOnOff;
 extern int  m_Resolution;
 extern int m_nColorDepth;	
 
-void MouseUpdate();
 extern void CheckHack( void);
 extern DWORD GetCheckSum( WORD wKey);
 extern void StopMp3(char *Name, BOOL bEnforce=false);
@@ -139,11 +130,6 @@ extern void CloseMainExe( void);
 extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();
 extern void DestroySound();
-
-#ifdef DO_PROCESS_DEBUGCAMERA
-	#include "DebugCameraManager.h"
-	extern CDebugCameraManager *g_pDebugCameraManager;
-#endif // DO_PROCESS_DEBUGCAMERA
 
 #if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 	extern bool g_bUnfixedFixedFrame;

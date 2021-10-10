@@ -22,8 +22,6 @@ CNewUIEnterBloodCastle::CNewUIEnterBloodCastle()
 	m_dwBtnTextColor[0] = RGBA( 150, 150, 150, 255 );
 	m_dwBtnTextColor[1] = RGBA( 255, 255 ,255, 255 );
 
-	// 블러드캐슬 레벨제한 index
-	// 0~6	일반 클래스
 	m_iBloodCastleLimitLevel[0][0] = 15;  m_iBloodCastleLimitLevel[0][1] = 80;
 	m_iBloodCastleLimitLevel[1][0] = 81;  m_iBloodCastleLimitLevel[1][1] = 130;
 	m_iBloodCastleLimitLevel[2][0] = 131; m_iBloodCastleLimitLevel[2][1] = 180;
@@ -34,7 +32,6 @@ CNewUIEnterBloodCastle::CNewUIEnterBloodCastle()
 	m_iBloodCastleLimitLevel[7][0] = 0;   m_iBloodCastleLimitLevel[7][1] = 0;
 
 
-	// 7~13 마검사, 다크로드 클래스	
 	m_iBloodCastleLimitLevel[8][0]  = 10;  m_iBloodCastleLimitLevel[8][1]  = 60;
 	m_iBloodCastleLimitLevel[9][0]  = 61;  m_iBloodCastleLimitLevel[9][1]  = 110;
 	m_iBloodCastleLimitLevel[10][0] = 111; m_iBloodCastleLimitLevel[10][1] = 160;
@@ -47,7 +44,7 @@ CNewUIEnterBloodCastle::CNewUIEnterBloodCastle()
 
 CNewUIEnterBloodCastle::~CNewUIEnterBloodCastle()
 {
-	Release();			// 꼭 하자!!
+	Release();
 }
 
 //---------------------------------------------------------------------------------------------
@@ -58,7 +55,7 @@ bool CNewUIEnterBloodCastle::Create(CNewUIManager* pNewUIMng, int x, int y)
 		return false;
 	
 	m_pNewUIMng = pNewUIMng;
-	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_BLOODCASTLE, this );		// 인터페이스 오브젝트 등록
+	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_BLOODCASTLE, this );
 	
 	SetPos(x, y);
 	
@@ -67,7 +64,7 @@ bool CNewUIEnterBloodCastle::Create(CNewUIManager* pNewUIMng, int x, int y)
 	// Exit Button
 	m_BtnExit.ChangeButtonImgState( true, IMAGE_ENTERBC_BASE_WINDOW_BTN_EXIT, false );
 	m_BtnExit.ChangeButtonInfo( m_Pos.x+13, m_Pos.y+392, 36, 29 );		
-	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );	// 1002 "닫기"
+	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );
 	
 	// Enter Button
 	int iVal=0;

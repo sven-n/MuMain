@@ -89,31 +89,17 @@ bool SEASON3B::CNewUINameWindow::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// 아이템 이름, 몬스터 이름, 캐릭터 이름
 	RenderName();
-
-	//  매크로 시간, 카운트 다운.
     RenderTimes();
-
-	// 성 이벤트에 대한 UI Render
     matchEvent::RenderMatchTimes ();
-    
-	// 말풍선 자동 정렬함수.
     RenderBooleans();
-
-	// 개인상점 제목 렌더링
 	DrawPersonalShopTitleImp();
-	
 	DisableAlphaBlend();
-	
 	return true;
 }
 
 void SEASON3B::CNewUINameWindow::RenderName()
 {
-#ifdef CSK_ADD_GM_ABILITY
-	// GM 감시 기능이 켜져 있다면
 	if(g_bGMObservation == true)
 	{
 		for(int i=0; i<MAX_CHARACTERS_CLIENT; i++)
@@ -129,14 +115,13 @@ void SEASON3B::CNewUINameWindow::RenderName()
 			}
 		}
 	}
-#endif // CSK_ADD_GM_ABILITY
 	
 #ifndef GUILD_WAR_EVENT
-    if(gMapManager.InChaosCastle() == true)		// 카오스캐슬이고
+    if(gMapManager.InChaosCastle() == true)
     {
-        if(FindText(Hero->ID, "webzen") == false)	// 아이디가 webzen이 아니면
+        if(FindText(Hero->ID, "webzen") == false)
         {
-            if(SelectedNpc != -1 || SelectedCharacter != -1 ) // npc와 캐릭터 이름 안그리게 리턴
+            if(SelectedNpc != -1 || SelectedCharacter != -1 )
 			{
 				return;
 			}
@@ -149,10 +134,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
 		if(SelectedNpc != -1)
 		{
 			CHARACTER *c = &CharactersClient[SelectedNpc];
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			OBJECT *o = &c->Object;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			CreateChat(c->ID,"",c);
 		}
 		else if(SelectedCharacter != -1)
@@ -169,7 +151,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
 				else
 #ifdef ASG_ADD_GENS_SYSTEM
 #ifndef PBG_MOD_STRIFE_GENSMARKRENDER
-				if (!::IsStrifeMap(World) || Hero->m_byGensInfluence == c->m_byGensInfluence)	// 분쟁지역에서는 타 세력 플래이어의 이름이 보이면 안됨.
+				if (!::IsStrifeMap(World) || Hero->m_byGensInfluence == c->m_byGensInfluence)
 #endif //PBG_MOD_STRIFE_GENSMARKRENDER
 #endif	// ASG_ADD_GENS_SYSTEM
 				{

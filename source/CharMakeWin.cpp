@@ -365,11 +365,6 @@ void CCharMakeWin::UpdateDisplay()
 	SelectCreateCharacter();
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateWhileActive()
-// 함수 설명 : 액티브일 때의 업데이트.
-// 매개 변수 : dDeltaTick	: 이전 Update()호출 후부터 지금 Update()까지 시간.
-//*****************************************************************************
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CCharMakeWin::UpdateWhileActive()
 #else // KWAK_FIX_COMPILE_LEVEL4_WARNING
@@ -497,10 +492,6 @@ void CCharMakeWin::RequestCreateCharacter()
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderControls()
-// 함수 설명 : 각종 컨트롤 렌더.
-//*****************************************************************************
 void CCharMakeWin::RenderControls()
 {
 	RenderCreateCharacter();	// 3D 생성 캐릭터 렌더.
@@ -592,7 +583,6 @@ void CCharMakeWin::RenderControls()
 		}
 	}
 
-// 캐릭터 이름 입력부분.
 	g_pRenderText->SetFont(g_hFont);
 	
 	if (g_iChatInputType == 1)
@@ -604,10 +594,6 @@ void CCharMakeWin::RenderControls()
 			0);
 }
 
-//*****************************************************************************
-// 함수 이름 : SelectCreateCharacter()
-// 함수 설명 : 3D 생성 캐릭터 선택.
-//*****************************************************************************
 void CCharMakeWin::SelectCreateCharacter()
 {
 	CharacterView.Class = m_nSelJob;
@@ -616,20 +602,12 @@ void CCharMakeWin::SelectCreateCharacter()
 	SetAction(&CharacterView.Object,1);
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateCreateCharacter()
-// 함수 설명 : 3D 생성 캐릭터 업데이트.
-//*****************************************************************************
 void CCharMakeWin::UpdateCreateCharacter()
 {
 	if (!CharacterAnimation(&CharacterView, &CharacterView.Object))
 		SetAction(&CharacterView.Object,0);
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderCreateCharacter()
-// 함수 설명 : 3D 생성 캐릭터 렌더.
-//*****************************************************************************
 void CCharMakeWin::RenderCreateCharacter()
 {
 	OBJECT *o = &CharacterView.Object;

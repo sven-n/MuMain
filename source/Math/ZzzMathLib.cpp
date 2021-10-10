@@ -1,33 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 3D Vector 관련 수학 함수
-// 수정할 일이 거의 없을것 같음
-//
-// *** 함수 레벨: 1
+// 3D Vector
 ///////////////////////////////////////////////////////////////////////////////
-
-/***
-*
-*	Copyright (c) 1998, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
-*	All Rights Reserved.
-*
-****/
-
-// mathlib.c -- math primitives
-
-//#include "cmdlib.h"
 #include "stdafx.h"
 
 vec3_t vec3_origin = {0,0,0};
-
-/*
-float VectorLength(vec3_t v)
-{
-	return sqrtf (v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-}
-*/
 
 int VectorCompare (vec3_t v1, vec3_t v2)
 {

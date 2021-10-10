@@ -17,18 +17,11 @@ namespace SEASON3B
 
 	enum MESSAGE_TYPE
 	{
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 		TYPE_ALL_MESSAGE = 0,
 		TYPE_CHAT_MESSAGE,
 		TYPE_WHISPER_MESSAGE,
 		TYPE_SYSTEM_MESSAGE,
 		TYPE_ERROR_MESSAGE,
-#else // KJH_FIX_UI_CHAT_MESSAGE		// 정리할 때 지워야 하는 소스
-		TYPE_WHISPER_MESSAGE = 0,
-		TYPE_SYSTEM_MESSAGE,
-		TYPE_ERROR_MESSAGE,
-		TYPE_CHAT_MESSAGE,
-#endif // KJH_FIX_UI_CHAT_MESSAGE		// 정리할 때 지워야 하는 소스
 		TYPE_PARTY_MESSAGE,
 		TYPE_GUILD_MESSAGE,
 		TYPE_UNION_MESSAGE,
@@ -80,27 +73,8 @@ namespace SEASON3B
 	class CNewUIChatLogWindow: public CNewUIObj
 	{
 	public:
-#ifndef KJH_FIX_UI_CHAT_MESSAGE				// #ifndef 정리할 때 지워야 하는 소스
-//-----------------------------------------------------------------------------------------
-		enum SHOW_MESSAGE_FLAG
-		{
-			SHOW_NOTHING = 0,
-			
-			SHOW_SYSTEM_MESSAGE = 0x00000001,
-			SHOW_ERROR_MESSAGE = 0x00000002,
-			SHOW_CHAT_MESSAGE = 0x00000004,
-			SHOW_WHISPER_MESSAGE = 0x00000008,
-			SHOW_PARTY_MESSAGE = 0x00000010,
-			SHOW_GUILD_MESSAGE = 0x00000020,
-			SHOW_UNION_MESSAGE = 0x00000040,
-			SHOW_GM_MESSAGE = 0x00000080,
-
-			SHOW_ALL_MESSAGES = 0xFFFFFFFF
-		};
-//-----------------------------------------------------------------------------------------
-#endif // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
 		enum IMAGE_LIST
-		{	//. max: 8개
+		{
 			IMAGE_SCROLL_TOP = BITMAP_INTERFACE_NEW_CHATLOGWND_BEGIN,	//. newui_scrollbar_up.tga
 			IMAGE_SCROLL_MIDDLE,	//. newui_scrollbar_m.tga
 			IMAGE_SCROLL_BOTTOM,	//. newui_scrollbar_down.tga
@@ -137,35 +111,29 @@ namespace SEASON3B
 			EVENT_RESIZING_BTN_UP,
 		};
 
-		typedef std::basic_string<unicode::t_char, std::char_traits<unicode::t_char>, 
-			std::allocator<unicode::t_char> > type_string;
+		typedef std::basic_string<unicode::t_char, std::char_traits<unicode::t_char>,std::allocator<unicode::t_char> > type_string;
 		typedef std::vector<CMessageText*>	type_vector_msgs;
 		typedef std::vector<type_string>	type_vector_filters;
 
 		CNewUIManager*	m_pNewUIMng;
 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-		type_vector_msgs	m_vecAllMsgs;			// 전체메세지 컨테이너
-		type_vector_msgs	m_VecChatMsgs;			// 일반메세지 컨테이너
-		type_vector_msgs	m_vecWhisperMsgs;		// 귓속말메세지 컨테이너
-		type_vector_msgs	m_vecPartyMsgs;			// 파티메세지 컨테이너
-		type_vector_msgs	m_vecGuildMsgs;			// 길드메세지 컨테이너
-		type_vector_msgs	m_vecUnionMsgs;			// 연합메세지 컨테이너
-		type_vector_msgs	m_VecSystemMsgs;		// 시스템메세지 컨테이너
-		type_vector_msgs	m_vecErrorMsgs;			// 에러메세지 컨테이너
-		type_vector_msgs	m_vecGMMsgs;			// GM메세지 컨테이너
-#else // KJH_FIX_UI_CHAT_MESSAGE
-		type_vector_msgs	m_vecMsgs;				// 전체메세지 컨테이너
-#endif // KJH_FIX_UI_CHAT_MESSAGE
+		type_vector_msgs	m_vecAllMsgs;
+		type_vector_msgs	m_VecChatMsgs;
+		type_vector_msgs	m_vecWhisperMsgs;
+		type_vector_msgs	m_vecPartyMsgs;
+		type_vector_msgs	m_vecGuildMsgs;
+		type_vector_msgs	m_vecUnionMsgs;
+		type_vector_msgs	m_VecSystemMsgs;
+		type_vector_msgs	m_vecErrorMsgs;
+		type_vector_msgs	m_vecGMMsgs;
 		type_vector_filters	m_vecFilters;
 		
 		POINT	m_WndPos, m_ScrollBtnPos;
 		SIZE	m_WndSize;
 		int		m_nShowingLines;
-#ifdef KJH_FIX_UI_CHAT_MESSAGE					
-		MESSAGE_TYPE		m_CurrentRenderMsgType;				// 현재 랜더중인 메세지 타입 
-		bool				m_bShowChatLog;						// 채팅메세지 On/Off
-#endif // KJH_FIX_UI_CHAT_MESSAGE
+				
+		MESSAGE_TYPE		m_CurrentRenderMsgType;
+		bool				m_bShowChatLog;
 		int		m_iCurrentRenderEndLine;
 		int		m_iGrapRelativePosY;
 		float	m_fBackAlpha;
@@ -173,11 +141,6 @@ namespace SEASON3B
 		EVENT_STATE			m_EventState;
 		
 		bool m_bShowFrame;
-#ifndef KJH_FIX_UI_CHAT_MESSAGE					// #ifndef 정리할 때 지워야 하는 소스
-		SHOW_MESSAGE_FLAG m_ShowMessageFlag;
-#endif // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
-		
-		// 메세지를 마우스로 가르키고 있는가?
 		bool m_bPointedMessage;
 		int m_iPointedMessageIndex;
 		
@@ -186,9 +149,7 @@ namespace SEASON3B
 		void UnloadImages();
 
 		bool RenderBackground();
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 		bool RenderMessage( const type_string& MsgText, const POINT& Pos, DWORD dwTextColor, DWORD dwTextBG, HFONT hFont = g_hFont );
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 		bool RenderMessages();
 		bool RenderFrame();
 		
@@ -200,7 +161,6 @@ namespace SEASON3B
 		void Release();
 		
 		void SetPosition(int x, int y);
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 		void AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType = TYPE_ALL_MESSAGE);
 		void RemoveFrontLine(MESSAGE_TYPE MsgType);
 		void Clear(MESSAGE_TYPE MsgType);
@@ -213,13 +173,6 @@ namespace SEASON3B
 
 		void ShowChatLog();
 		void HideChatLog();
-#else // KJH_FIX_UI_CHAT_MESSAGE
-		void AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType);
-		void RemoveFrontLine();
-		void Clear();
-		
-		size_t GetNumberOfLines() const;
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 
 		int GetCurrentRenderEndLine() const;
 		void Scrolling(int nRenderEndLine);
@@ -228,7 +181,7 @@ namespace SEASON3B
 		void ResetFilter();
 		
 		void SetSizeAuto();
-		void SetNumberOfShowingLines(int nShowingLines, OUT LPSIZE lpBoxSize = NULL);	//. 예외처리 포함
+		void SetNumberOfShowingLines(int nShowingLines, OUT LPSIZE lpBoxSize = NULL);
 		size_t GetNumberOfShowingLines() const;
 		void SetBackAlphaAuto();
 		void SetBackAlpha(float fAlpha);
@@ -241,37 +194,24 @@ namespace SEASON3B
 		bool UpdateMouseEvent();
 		bool UpdateKeyEvent();
 		bool Update();
-		bool Render();	// g_pRenderText
+		bool Render();
 
 		float GetLayerDepth();	//. 6.1f
 		float GetKeyEventOrder();	//. 8.0f
 		
-		//. 상위 iSearchLine라인을, 같은 문자열이 있는지 검사한다.
 		bool CheckChatRedundancy(const type_string& strText, int iSearchLine = 1);
-
-#ifndef KJH_FIX_UI_CHAT_MESSAGE					// #ifndef 정리할 때 지워야 하는 소스
-		void ShowMessage(SHOW_MESSAGE_FLAG Flag);
-#endif // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
 
 		void UpdateWndSize();
 		void UpdateScrollPos();
 
 	protected:
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 		type_vector_msgs* GetMsgs(MESSAGE_TYPE MsgType);
 		void ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType);
-#else // KJH_FIX_UI_CHAT_MESSAGE
-		void ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType);
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 		
 		void SeparateText(IN const type_string& strID, IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2);
 
 		bool CheckFilterText(const type_string& strTestText);
 		void AddFilterWord(const type_string& strWord);
-
-#ifndef KJH_FIX_UI_CHAT_MESSAGE					// #ifndef 정리할 때 지워야 하는 소스
-		bool CheckMessageShowFlag(SHOW_MESSAGE_FLAG Flag);
-#endif // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
 	};
 }
 

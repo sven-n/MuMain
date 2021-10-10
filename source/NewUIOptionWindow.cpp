@@ -39,15 +39,10 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
 	
 	m_pNewUIMng = pNewUIMng;
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_OPTION, this);
-	
 	SetPos(x, y);
-	
 	LoadImages();
-
 	SetButtonInfo();
-
 	Show(false);
-
 	return true;
 }
 
@@ -101,7 +96,6 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 	
 	if(CheckMouseIn(m_Pos.x+33-8, m_Pos.y+104, 124+8, 16))
 	{
-		// 휠 버튼으로 볼륨 조절 가능하게 작성
 		int iOldValue = m_iVolumeLevel;
 		if(MouseWheel > 0)
 		{
@@ -181,16 +175,11 @@ bool SEASON3B::CNewUIOptionWindow::Update()
 bool SEASON3B::CNewUIOptionWindow::Render()
 {
 	EnableAlphaTest();
-
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// 프레임을 그린다.
 	RenderFrame();
 	RenderContents();
 	RenderButtons();
-	
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -292,15 +281,10 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0);
-	// 386 "자동 공격"
 	g_pRenderText->RenderText(m_Pos.x+40, m_Pos.y+48, GlobalText[386]);
-	// 387 "귓말 알림음"
 	g_pRenderText->RenderText(m_Pos.x+40, m_Pos.y+70, GlobalText[387]);
-	// 389 "볼륨조절"
 	g_pRenderText->RenderText(m_Pos.x+40, m_Pos.y+92, GlobalText[389]);
-	// 919 "슬라이드 도움말"
 	g_pRenderText->RenderText(m_Pos.x+40, m_Pos.y+132, GlobalText[919]);
-	// 1840 "+효과제한"
 	g_pRenderText->RenderText(m_Pos.x+40, m_Pos.y+154, GlobalText[1840]);
 
 }
@@ -309,7 +293,6 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
 {
 	m_BtnClose.Render();
 
-	// 자동 공격 체크박스
 	if(m_bAutoAttack)
 	{
 		RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x+150, m_Pos.y+43, 15, 15, 0, 0);
@@ -319,7 +302,6 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
 		RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x+150, m_Pos.y+43, 15, 15, 0, 15.f);
 	}
 
-	// 귓속말 알림음 체크박스
 	if(m_bWhisperSound)
 	{
 		RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x+150, m_Pos.y+65, 15, 15, 0, 0);
@@ -329,7 +311,6 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
 		RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x+150, m_Pos.y+65, 15, 15, 0, 15.f);
 	}
 
-	// 슬라이드 도움말 체크박스
 	if(m_bSlideHelp)
 	{
 		RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x+150, m_Pos.y+127, 15, 15, 0, 0);
@@ -339,14 +320,12 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
 		RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x+150, m_Pos.y+127, 15, 15, 0, 15.f);
 	}
 
-	// 볼륨 조절
 	RenderImage(IMAGE_OPTION_VOLUME_BACK, m_Pos.x+33, m_Pos.y+104, 124.f, 16.f);
 	if(m_iVolumeLevel > 0)
 	{
 		RenderImage(IMAGE_OPTION_VOLUME_COLOR, m_Pos.x+33, m_Pos.y+104, 124.f * 0.1f * 	(m_iVolumeLevel), 16.f);
 	}
 
-	// 효과 제한
 	RenderImage(IMAGE_OPTION_EFFECT_BACK, m_Pos.x+25, m_Pos.y+168, 141.f, 29.f);
 	if(m_iRenderLevel >= 0)
 	{

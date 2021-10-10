@@ -86,11 +86,6 @@
 #define SOUND_CHAOS_FALLING        96
 #define SOUND_CHAOS_FALLING_STONE  97
 
-#ifdef TAMAJJANG
-#define SOUND_TAMAJJANG1           101
-#define SOUND_TAMAJJANG2           102
-#endif
-
 #define SOUND_CHANGE_UP            102
 
 #define SOUND_PHOENIXEXP			103

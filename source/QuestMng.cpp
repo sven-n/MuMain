@@ -1,9 +1,5 @@
 //*****************************************************************************
 // File: CQuestMng.cpp
-//
-// Desc: implementation of the CQuestMng class.
-//
-// producer: Ahn Sang-Gyu
 //*****************************************************************************
 
 #include "stdafx.h"
@@ -11,39 +7,17 @@
 #include "./Utilities/Log/ErrorReport.h"
 #include "wsclientinline.h"
 
-#include <crtdbg.h>		// _ASSERT() 사용.
+#include <crtdbg.h>
 
 #ifdef ASG_ADD_NEW_QUEST_SYSTEM
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
-// NPC 대화 스크립트 파일명.
-#ifdef USE_NPCDIALOGUETEST_BMD
-#define	QM_NPCDIALOGUE_FILE			"Data\\Local\\NPCDialoguetest.bmd"
-#else
 #define	QM_NPCDIALOGUE_FILE			"Data\\Local\\NPCDialogue.bmd"
-#endif
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-
-// 퀘스트 진행 스크립트 파일명.
-#ifdef USE_QUESTPROGRESSTEST_BMD
-#define	QM_QUESTPROGRESS_FILE		"Data\\Local\\QuestProgresstest.bmd"
-#else
 #define	QM_QUESTPROGRESS_FILE		"Data\\Local\\QuestProgress.bmd"
-#endif
 
-// 퀘스트 대사 스크립트 파일명.
 #ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef USE_QUESTWORDSTEST_BMD
-#define	QM_QUESTWORDS_FILE			string("Data\\Local\\"+g_strSelectedML+"\\QuestWordstest_"+g_strSelectedML+".bmd").c_str()
-#else
 #define	QM_QUESTWORDS_FILE			std::string("Data\\Local\\"+g_strSelectedML+"\\QuestWords_"+g_strSelectedML+".bmd").c_str()
-#endif
 #else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef USE_QUESTWORDSTEST_BMD
-#define	QM_QUESTWORDS_FILE			"Data\\Local\\QuestWordstest.bmd"
-#else
 #define	QM_QUESTWORDS_FILE			"Data\\Local\\QuestWords.bmd"
-#endif
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 CQuestMng g_QuestMng;
@@ -63,15 +37,9 @@ CQuestMng::~CQuestMng()
 
 }
 
-//*****************************************************************************
-// 함수 이름 : LoadQuestScript()
-// 함수 설명 : 퀘스트 스크립트 로드.
-//*****************************************************************************
 void CQuestMng::LoadQuestScript()
 {
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	LoadNPCDialogueScript();
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 	LoadQuestProgressScript();
 	LoadQuestWordsScript();
 }
@@ -140,10 +108,6 @@ void CQuestMng::LoadQuestProgressScript()
 	::fclose(fp);
 }
 
-//*****************************************************************************
-// 함수 이름 : LoadQuestWordsScript()
-// 함수 설명 : 퀘스트 대사 스크립트 로드.
-//*****************************************************************************
 void CQuestMng::LoadQuestWordsScript()
 {
 	FILE* fp = ::fopen(QM_QUESTWORDS_FILE, "rb");
@@ -200,11 +164,6 @@ void CQuestMng::LoadQuestWordsScript()
 	::fclose(fp);
 }
 
-//*****************************************************************************
-// 함수 이름 : SetQuestRequestReward()
-// 함수 설명 : 요구, 보상 정보 저장.
-// 매개 변수 : pRequestRewardPacket	: 요구, 보상 정보.
-//*****************************************************************************
 void CQuestMng::SetQuestRequestReward(BYTE* pbyRequestRewardPacket)
 {
 	LPPMSG_NPC_QUESTEXP_INFO pRequestRewardPacket
@@ -340,12 +299,6 @@ void CQuestMng::SetQuestRequestReward(BYTE* pbyRequestRewardPacket)
 	m_mapQuestRequestReward[dwQuestIndex] = sRequestReward;
 }
 
-//*****************************************************************************
-// 함수 이름 : GetRequestReward()
-// 함수 설명 : 퀘스트 인덱스의 요구사항, 보상 정보 얻기.
-// 매개 변수 : dwQuestIndex	: 퀘스트 인덱스.
-// 반환 값	 : 퀘스트 인덱스의 요구사항, 보상 정보.
-//*****************************************************************************
 const SQuestRequestReward* CQuestMng::GetRequestReward(DWORD dwQuestIndex)
 {
 	QuestRequestRewardMap::const_iterator iter = m_mapQuestRequestReward.find(dwQuestIndex);
@@ -355,42 +308,22 @@ const SQuestRequestReward* CQuestMng::GetRequestReward(DWORD dwQuestIndex)
 	return &(iter->second);
 }
 
-//*****************************************************************************
-// 함수 이름 : SetNPC()
-// 함수 설명 : NPC 세팅.
-// 매개 변수 : nNPCIndex	: NPC 인덱스.
-//*****************************************************************************
 void CQuestMng::SetNPC(int nNPCIndex)
 {
 	m_nNPCIndex = nNPCIndex;
 	::strcpy(m_szNPCName, ::getMonsterName(nNPCIndex));
 }
 
-//*****************************************************************************
-// 함수 이름 : GetNPCIndex()
-// 함수 설명 : NPC 인덱스 얻기.
-// 반환 값	 : NPC 인덱스.
-//*****************************************************************************
 int CQuestMng::GetNPCIndex()
 {
 	return m_nNPCIndex;
 }
 
-//*****************************************************************************
-// 함수 이름 : GetNPCName()
-// 함수 설명 : NPC 이름 얻기.
-// 반환 값	 : NPC 이름.
-//*****************************************************************************
 char* CQuestMng::GetNPCName()
 {
 	return m_szNPCName;
 }
 
-//*****************************************************************************
-// 함수 이름 : SetCurQuestProgress()
-// 함수 설명 : 상항에 맞는 퀘스트 진행창 세팅.
-// 매개 변수 : dwQuestIndex	: 퀘스트 인덱스.
-//*****************************************************************************
 void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
 {
 	AddCurQuestIndexList(dwQuestIndex);
@@ -432,32 +365,16 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : GetWords()
-// 함수 설명 : 퀘스트 대사 얻기.
-// 매개 변수 : nWordsIndex	: 대사 인덱스.
-// 반환 값	 : 퀘스트 대사.
-//*****************************************************************************
 const char* CQuestMng::GetWords(int nWordsIndex)
 {
 	QuestWordsMap::const_iterator iter = m_mapQuestWords.find(nWordsIndex);
 	if (iter == m_mapQuestWords.end())
 		return NULL;
 
-#ifdef ASG_MOD_QUEST_WORDS_SCRIPTS
 	return iter->second.c_str();
-#else	// ASG_MOD_QUEST_WORDS_SCRIPTS
-	return iter->second.m_strWords.c_str();
-#endif	// ASG_MOD_QUEST_WORDS_SCRIPTS
 }
 
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
-//*****************************************************************************
-// 함수 이름 : GetNPCDlgNPCWords()
-// 함수 설명 : NPC 대화의 NPC 대사 얻기.
-// 매개 변수 : dwDlgState	: 대화 상태 번호.
-// 반환 값	 : NPC 대사.
-//*****************************************************************************
 const char* CQuestMng::GetNPCDlgNPCWords(DWORD dwDlgState)
 {
 	if (0 == m_nNPCIndex)
@@ -472,13 +389,6 @@ const char* CQuestMng::GetNPCDlgNPCWords(DWORD dwDlgState)
 	return GetWords(iter->second.m_nNPCWords);
 }
 
-//*****************************************************************************
-// 함수 이름 : GetNPCDlgAnswer()
-// 함수 설명 : NPC 대화의 선택문 얻기.
-// 매개 변수 : dwDlgState	: 대화 상태 번호.
-//			   nAnswer		: 선택문번호 (0 ~ 9).
-// 반환 값	 : 선택문.
-//*****************************************************************************
 const char* CQuestMng::GetNPCDlgAnswer(DWORD dwDlgState, int nAnswer)
 {
 	if (0 == m_nNPCIndex)
@@ -499,13 +409,6 @@ const char* CQuestMng::GetNPCDlgAnswer(DWORD dwDlgState, int nAnswer)
 	return GetWords(nNowAnswer);
 }
 
-//*****************************************************************************
-// 함수 이름 : GetNPCDlgAnswerResult()
-// 함수 설명 : NPC 대화의 선택문 결과 값 얻기.
-// 매개 변수 : dwDlgState	: 대화 상태 번호.
-//			   nAnswer		: 선택문번호 (0 ~ 9).
-// 반환 값	 : 선택문 결과 값. -1이면 선택문이 없음.
-//*****************************************************************************
 int CQuestMng::GetNPCDlgAnswerResult(DWORD dwDlgState, int nAnswer)
 {
 	if (0 == m_nNPCIndex)
@@ -527,12 +430,6 @@ int CQuestMng::GetNPCDlgAnswerResult(DWORD dwDlgState, int nAnswer)
 }
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 
-//*****************************************************************************
-// 함수 이름 : GetNPCWords()
-// 함수 설명 : 퀘스트 진행의 NPC 대사 얻기.
-// 매개 변수 : dwQuestIndex	: 퀘스트 인덱스.
-// 반환 값	 : NPC 대사.
-//*****************************************************************************
 const char* CQuestMng::GetNPCWords(DWORD dwQuestIndex)
 {
 	QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
@@ -542,12 +439,6 @@ const char* CQuestMng::GetNPCWords(DWORD dwQuestIndex)
 	return GetWords(iter->second.m_nNPCWords);
 }
 
-//*****************************************************************************
-// 함수 이름 : GetPlayerWords()
-// 함수 설명 : 퀘스트 진행의 플래이어 대사 얻기.
-// 매개 변수 : dwQuestIndex	: 퀘스트 인덱스.
-// 반환 값	 : 플래이어 대사.
-//*****************************************************************************
 const char* CQuestMng::GetPlayerWords(DWORD dwQuestIndex)
 {
 	QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
@@ -557,13 +448,6 @@ const char* CQuestMng::GetPlayerWords(DWORD dwQuestIndex)
 	return GetWords(iter->second.m_nPlayerWords);
 }
 
-//*****************************************************************************
-// 함수 이름 : GetAnswer()
-// 함수 설명 : 퀘스트 진행의 선택문 얻기.
-// 매개 변수 : dwQuestIndex	: 퀘스트 인덱스.
-//			   nAnswer		: 선택문번호 (0 ~ 4).
-// 반환 값	 : 선택문.
-//*****************************************************************************
 const char* CQuestMng::GetAnswer(DWORD dwQuestIndex, int nAnswer)
 {
 	_ASSERT(0 <= nAnswer || nAnswer < QM_MAX_ANSWER);
@@ -579,11 +463,6 @@ const char* CQuestMng::GetAnswer(DWORD dwQuestIndex, int nAnswer)
 	return GetWords(nNowAnswer);
 }
 
-//*****************************************************************************
-// 함수 이름 : GetSubject()
-// 함수 설명 : 퀘스트 진행의 퀘스트 인덱스의 제목 얻기.
-// 반환 값	 : 퀘스트 인덱스의 제목.
-//*****************************************************************************
 const char* CQuestMng::GetSubject(DWORD dwQuestIndex)
 {
 	QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
@@ -593,11 +472,6 @@ const char* CQuestMng::GetSubject(DWORD dwQuestIndex)
 	return GetWords(iter->second.m_nSubject);
 }
 
-//*****************************************************************************
-// 함수 이름 : GetSummary()
-// 함수 설명 : 퀘스트 진행의 퀘스트 인덱스의 요약 얻기.
-// 반환 값	 : 퀘스트 인덱스의 요약.
-//*****************************************************************************
 const char* CQuestMng::GetSummary(DWORD dwQuestIndex)
 {
 	QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
@@ -607,44 +481,22 @@ const char* CQuestMng::GetSummary(DWORD dwQuestIndex)
 	return GetWords(iter->second.m_nSummary);
 }
 
-//*****************************************************************************
-// 함수 이름 : IsRequestRewardQS()
-// 함수 설명 : 요구사항, 보상 정보가 있는 QS(Quest State)인가?
-// 매개 변수 : dwQuestIndex	: 퀘스트 인덱스.
-// 반환 값	 : 요구사항, 보상 정보가 있으면 true.
-//*****************************************************************************
 bool CQuestMng::IsRequestRewardQS(DWORD dwQuestIndex)
 {
 	QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
-	_ASSERT(iter != m_mapQuestProgress.end());	// 퀘스트 정보가 존재하여야함.
+	_ASSERT(iter != m_mapQuestProgress.end());
 
-	// 선택문 0번째 값이 0이면 요구사항, 보상 정보가 있는 QS.
 	if (0 == iter->second.m_anAnswer[0])
 		return true;
 	else
 		return false;	
 }
 
-//*****************************************************************************
-// 함수 이름 : GetRequestRewardText()
-// 함수 설명 : 요구사항, 보상 텍스트를 얻음.
-// 매개 변수 : aDest		: SRequestRewardText구조체 배열 이름.
-//			   nDestCount	: SRequestRewardText구조체 배열 개수.
-//			   dwQuestIndex	: 퀘스트 인덱스.
-// 반환 값	 : 요구사항 만족 여부.
-//*****************************************************************************
 bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, DWORD dwQuestIndex)
 {
 	SQuestRequestReward* pRequestReward = &m_mapQuestRequestReward[dwQuestIndex];
 
-	// GlobalText[2809] "요구 사항", GlobalText[2810] "보     상",
-	//GlobalText[3082] "랜덤 보상(%lu가지 지급)"을 출력하기 위해 3줄이 더 필요.
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-	if (pRequestReward->m_byRequestCount + pRequestReward->m_byGeneralRewardCount
-		+ pRequestReward->m_byRandRewardCount + 3 > nDestCount)
-#else	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-	if (pRequestReward->m_byRequestCount + pRequestReward->m_byRewardCount + 2 > nDestCount)
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
+	if (pRequestReward->m_byRequestCount + pRequestReward->m_byGeneralRewardCount + pRequestReward->m_byRandRewardCount + 3 > nDestCount)
 		return false;
 
 	::memset(aDest, 0, sizeof(SRequestRewardText) * nDestCount);
@@ -653,10 +505,9 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 	bool bRequestComplete = true;
 	int i;
 
-// 요구 사항.
 	aDest[nLine].m_hFont = g_hFontBold;
 	aDest[nLine].m_dwColor = ARGB(255, 179, 230, 77);
-	::strcpy(aDest[nLine++].m_szText, GlobalText[2809]);	// 2809 "요구 사항"
+	::strcpy(aDest[nLine++].m_szText, GlobalText[2809]);
 
 	SQuestRequest* pRequestInfo;
 	for (i = 0; i < pRequestReward->m_byRequestCount; ++i, ++nLine)
@@ -673,7 +524,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 		{
 		case QUEST_REQUEST_NONE:
 			aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
-			::strcpy(aDest[nLine].m_szText, GlobalText[1361]);	// 1361 "없음"
+			::strcpy(aDest[nLine].m_szText, GlobalText[1361]);
 			break;
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST

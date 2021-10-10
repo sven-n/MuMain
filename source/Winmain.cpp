@@ -125,11 +125,6 @@ int g_iScreenSaverOldValue = 60*15;
 CDebugCameraManager *g_pDebugCameraManager = 0;
 #endif // DO_PROCESS_DEBUGCAMERA
 
-// For Debuging - Unfix FixedFrame
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-bool g_bUnfixedFixedFrame = false;
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-
 extern float g_fScreenRate_x;	// ※
 extern float g_fScreenRate_y;
 
@@ -517,7 +512,6 @@ DWORD GenerateCheckSum( BYTE *pbyBuffer, DWORD dwSize, WORD wKey)
 		DWORD dwTemp;
 		memcpy( &dwTemp, pbyBuffer + dwChecked, sizeof ( DWORD));
 
-		// 1. 단계
 		switch ( ( dwChecked / 4 + wKey) % 3)
 		{
 		case 0:
@@ -532,7 +526,6 @@ DWORD GenerateCheckSum( BYTE *pbyBuffer, DWORD dwSize, WORD wKey)
 			break;
 		}
 
-		// 2. 단계
 		if ( 0 == ( dwChecked % 4))
 		{
 			dwResult ^= ( ( dwKey + dwResult) >> ( ( dwChecked / 4) % 16 + 3));
@@ -545,8 +538,6 @@ DWORD GenerateCheckSum( BYTE *pbyBuffer, DWORD dwSize, WORD wKey)
 DWORD GetCheckSum( WORD wKey)
 {
 	wKey = DecryptCheckSumKey( wKey);
-
-#ifdef KJH_MOD_RESOURCE_GUARD
 
 	char lpszFile[MAX_PATH];
 
@@ -568,59 +559,10 @@ DWORD GetCheckSum( WORD wKey)
 	ReadFile( hFile, pbyBuffer, dwSize, &dwNumber, 0);
 	CloseHandle( hFile);
 	
-	// 테이블 생성
 	DWORD dwCheckSum = GenerateCheckSum(pbyBuffer, dwSize, wKey);
 	delete [] pbyBuffer;
 	
 	return (dwCheckSum);
-#else // KJH_MOD_RESOURCE_GUARD
-
-	// 파일 열기
-	char lpszFile[MAX_PATH];
-#ifdef _DEBUG
-	strcpy( lpszFile, "main.exe");
-#else // _DEBUG
-	char *lpszCommandLine = GetCommandLine();
-	BOOL bResult = GetFileNameOfFilePath( lpszFile, lpszCommandLine);
-#endif // _DEBUG
-
-	HANDLE hFile;
-#ifdef NDEBUG
-	FAKE_CODE(Pos_WritableCheck);
-Pos_WritableCheck:
-	// 쓰기 가능여부 체크 (main.exe 가 실행중이면 쓰기 가능하지 않다.)
-	hFile = CreateFile( ( char*)lpszFile, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-	if ( INVALID_HANDLE_VALUE != hFile)
-	{
-		// 해킹시도
-		SendHackingChecked( 0x03, 0);
-		return ( 0);
-	}
-#endif // NDEBUG
-
-	hFile = CreateFile( ( char*)lpszFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-	if ( INVALID_HANDLE_VALUE == hFile)
-	{
-		return ( 0);
-	}
-
-	DWORD dwSize = GetFileSize( hFile, NULL);
-	BYTE *pbyBuffer = new BYTE [dwSize];
-	DWORD dwNumber;
-	ReadFile( hFile, pbyBuffer, dwSize, &dwNumber, 0);
-	CloseHandle( hFile);
-
-	// 테이블 생성
-	DWORD dwCheckSum = GenerateCheckSum( pbyBuffer, dwSize, wKey);
-	delete [] pbyBuffer;
-
-	return ( dwCheckSum);
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
-#endif // KJH_MOD_RESOURCE_GUARD
 }
 
 
@@ -663,11 +605,7 @@ void DestroyWindow()
 {
 	//. save volume level
 	leaf::CRegKey regkey;
-#ifdef PBG_ADD_LAUNCHER_BLUE
-	regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu_Blue\\Config");
-#else //PBG_ADD_LAUNCHER_BLUE
 	regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu\\Config");
-#endif //PBG_ADD_LAUNCHER_BLUE
 	regkey.WriteDword("VolumeLevel", g_pOption->GetVolumeLevel());
 
 	CUIMng::Instance().Release();
@@ -751,39 +689,22 @@ void DestroyWindow()
 	SAFE_DELETE(g_pMovieScene);
 #endif // MOVIE_DIRECTSHOW
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SAFE_DELETE(pMultiLanguage);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 	BoostRest( g_BuffSystem );
 
 #ifdef NEW_USER_INTERFACE_SHELL
 	BoostRest( g_shell );
 #endif //NEW_USER_INTERFACE_SHELL
 	
-#ifdef PSW_ADD_MAPSYSTEM
 	BoostRest( g_MapProcess );
-#endif //PSW_ADD_MAPSYSTEM
-
-#ifdef LDK_ADD_NEW_PETPROCESS
 	BoostRest( g_petProcess );
-#endif //LDK_ADD_NEW_PETPROCESS
 
 	g_ErrorReport.Write( "Destroy" );
 	 
 	HWND shWnd = FindWindow(NULL, "MuPlayer");
 	if(shWnd)
 		SendMessage(shWnd, WM_DESTROY, 0, 0);
-#ifdef ATTACH_HACKSHIELD
-	DetachHackShield();
-#endif // ATTACH_HACKSHIELD
-	
-#ifdef NDEBUG
-#ifndef FOR_WORK
-	int nOldVal;
-	SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, g_iScreenSaverOldValue, NULL, 0);
-    SystemParametersInfo(SPI_SCREENSAVERRUNNING, 0, &nOldVal, 0);
-#endif
-#endif
 }
 void DestroySound()
 {
@@ -898,7 +819,6 @@ Pos_UserMemoryHack:
 			break;
 		case FD_CLOSE :
 			g_pChatListBox->AddText("", GlobalText[3], SEASON3B::TYPE_SYSTEM_MESSAGE);
-			g_ErrorReport.Write("서버와의 접속종료.\r\n");
 #ifdef CONSOLE_DEBUG
 			switch(WSAGETSELECTERROR(lParam))
 			{

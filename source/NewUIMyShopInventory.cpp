@@ -36,19 +36,14 @@ using namespace SEASON3B;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-SEASON3B::CNewUIMyShopInventory::CNewUIMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop( false )
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	, MAX_SHOPTITLE_UTF16(min(26, (int)(MAX_SHOPTITLE/g_pMultiLanguage->GetNumByteForOneCharUTF8())))
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+SEASON3B::CNewUIMyShopInventory::CNewUIMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop( false ) , MAX_SHOPTITLE_UTF16(min(26, (int)(MAX_SHOPTITLE/g_pMultiLanguage->GetNumByteForOneCharUTF8())))
 {
 	m_pNewUIMng = NULL;
 	m_pNewInventoryCtrl = NULL;
 	m_Pos.x = m_Pos.y = 0;
 	m_EditBox = NULL;
 	m_Button = NULL;
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 	m_bIsEnableInputValueTextBox = false;
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 
 SEASON3B::CNewUIMyShopInventory::~CNewUIMyShopInventory() 
@@ -81,29 +76,23 @@ bool SEASON3B::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int x, in
 
 	m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonImgState( true, IMAGE_MYSHOPINVENTORY_EXIT_BTN, false );
 	m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonInfo( m_Pos.x+13, m_Pos.y+391, 36, 29 );
-	// 1002 "´Ý±â"
 	m_Button[MYSHOPINVENTORY_EXIT].ChangeToolTipText(GlobalText[1002], true);
 
 	m_Button[MYSHOPINVENTORY_OPEN].ChangeButtonImgState( true, IMAGE_MYSHOPINVENTORY_OPEN, false );
 	m_Button[MYSHOPINVENTORY_OPEN].ChangeButtonInfo( m_Pos.x+53, m_Pos.y+391, 36, 29 );
-	// 1107 "°³¼³"
 	m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1107], true);
 	
 	m_Button[MYSHOPINVENTORY_CLOSE].ChangeButtonImgState( true, IMAGE_MYSHOPINVENTORY_CLOSE, false );
 	m_Button[MYSHOPINVENTORY_CLOSE].ChangeButtonInfo( m_Pos.x+93, m_Pos.y+391, 36, 29 );
-	// 1108 "ÆóÁ¡"
 	m_Button[MYSHOPINVENTORY_CLOSE].ChangeToolTipText(GlobalText[1108], true);
 
 	m_EditBox = new CUITextInputBox;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 #ifdef KJW_FIX_MYSHOP
 	m_EditBox->Init( g_hWnd, 200, 14, iMAX_SHOPTITLE_MULTI - 1 );
 #else // KJW_FIX_MYSHOP
 	m_EditBox->Init( g_hWnd, 200, 14, MAX_SHOPTITLE_UTF16 - 1 );
 #endif // KJW_FIX_MYSHOP
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	m_EditBox->Init(g_hWnd, 200, 14, 26);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_EditBox->SetPosition(m_Pos.x+50, m_Pos.y+55);
 	m_EditBox->SetTextColor(255, 255, 230, 210);
 	m_EditBox->SetBackColor(0, 0, 0, 25);
@@ -167,7 +156,6 @@ void SEASON3B::CNewUIMyShopInventory::SetPos(int x, int y)
 
 void SEASON3B::CNewUIMyShopInventory::GetTitle( unicode::t_string& titletext )
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #ifdef KJW_FIX_MYSHOP
 	wchar_t* pwszTitle = new wchar_t[ iMAX_SHOPTITLE_MULTI ];
 	m_EditBox->GetText( pwszTitle, iMAX_SHOPTITLE_MULTI );
@@ -177,12 +165,6 @@ void SEASON3B::CNewUIMyShopInventory::GetTitle( unicode::t_string& titletext )
 #endif // KJW_FIX_MYSHOP
 	g_pMultiLanguage->ConvertWideCharToStr(titletext, pwszTitle, CP_UTF8);
 	delete [] pwszTitle;
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	char tempText[100];
-	memset(&tempText, 0, sizeof(char)*100);
-	m_EditBox->GetText( tempText );
-	titletext = tempText;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 }
 
 bool SEASON3B::CNewUIMyShopInventory::InsertItem(int iIndex, BYTE* pbyItemPacket)

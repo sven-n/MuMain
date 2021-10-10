@@ -226,19 +226,16 @@ inline bool PATH::FindPath( int xStart, int yStart, int xEnd, int yEnd, bool bEr
 		return false;
 	}
 
-	// 4. 하나씩 검사해보면서 그 주변의 것들을 검색 리스트에 넣는다.
 	int iMaxCount = bErrorCheck ? 500 : 50;
 	for(int iCheckCount = iMaxCount; 0 < m_btOpenNodes.GetCount() && iCheckCount > 0; --iCheckCount)
 	{
-		// a) 새로 검사할 위치 얻기
 		int xTest, yTest;
 		int iIndex = GetNewNodeToTest();
 		GetXYPos( iIndex, &xTest, &yTest);
 
-		// b) 실제 m_piCostToStart 계산
 		m_piCostToStart[iIndex] = ( iCheckCount == iMaxCount) ? 0 : MAX_INT_FORPATH;
 		for ( int i = 0; i < 8; i++)
-		{	// 주변에서 더 가까운 값이 있으면 그 값으로 세팅
+		{
 			int xNear = xTest + s_iDir[i][0];
 			int yNear = yTest + s_iDir[i][1];
 			if ( !CheckXYPos( xNear, yNear))
@@ -248,7 +245,6 @@ inline bool PATH::FindPath( int xStart, int yStart, int xEnd, int yEnd, bool bEr
 			int iNearIndex = GetIndex( xNear, yNear);
 			if ( PATH_TESTED & m_pbyClosed[iNearIndex])
 			{
-				// ** CostToStart 계산 **
 				int iNewCost = m_piCostToStart[iNearIndex] + CalculateCostToStartAddition( s_iDir[i][0], s_iDir[i][1]);
 				if ( iNewCost < m_piCostToStart[iIndex])
 				{
@@ -259,7 +255,7 @@ inline bool PATH::FindPath( int xStart, int yStart, int xEnd, int yEnd, bool bEr
 			}
 		}
 		m_pbyClosed[iIndex] |= PATH_TESTED;
-		// c) 찾은 경우
+
 		if ( PATH_END & m_pbyClosed[iIndex])
 		{
 			m_btOpenNodes.RemoveAll();
@@ -283,7 +279,6 @@ inline bool PATH::FindPath( int xStart, int yStart, int xEnd, int yEnd, bool bEr
 
 			if ( !( PATH_INTESTLIST & m_pbyClosed[iNewIndex]) && iWall > byMapAttribute )
 			{
-				// ** 예상 총비용 계산 **
 				int iNewCost = m_piCostToStart[iIndex] + EstimateCostToGoal( xEnd, yEnd, xNew, yNew);
 				m_btOpenNodes.Add( iNewIndex, iNewCost);
 				m_pbyClosed[iNewIndex] |= PATH_INTESTLIST;
@@ -293,9 +288,8 @@ inline bool PATH::FindPath( int xStart, int yStart, int xEnd, int yEnd, bool bEr
 				m_pyPrev[iNewIndex] = yTest;
 			}
 		}
-		// e) 완료
 		if ( !bErrorCheck)
-		{	// 근처까지 가도 되는 경우, 가장 가까운 위치인지 체크
+		{
 			int iCostToGoal = EstimateCostToGoal( xEnd, yEnd, xTest, yTest);
 			if ( iCostToGoal < iCostToGoalOfNearest)
 			{
@@ -305,14 +299,12 @@ inline bool PATH::FindPath( int xStart, int yStart, int xEnd, int yEnd, bool bEr
 			}
 		}
 	}
-	// 5. 가까운 곳까지라도 간다.
 	if(!bErrorCheck)
 	{
 		m_btOpenNodes.RemoveAll();
 		return ( GeneratePath( xStart, yStart, xNearest, yNearest));
 	}
 
-	// 6. 찾을 수 없는 경우 실패
 	m_btOpenNodes.RemoveAll();
 
 	return false;
@@ -323,7 +315,6 @@ inline void PATH::SetEndNodes( bool bErrorCheck, int iWall, int xEnd, int yEnd, 
 	int iDistance = ( int)fDistance;
 	for ( int j = -iDistance; j <= iDistance; j++)
 	{
-		// 원 내부의 마름모 부분은 무조건 세팅
 		int xRange = iDistance - abs( j);
 		for ( int i = -xRange; i <= 0; i++)
 		{
@@ -338,7 +329,7 @@ inline void PATH::SetEndNodes( bool bErrorCheck, int iWall, int xEnd, int yEnd, 
 			}
             else
             {
-        		g_ErrorReport.Write( "잘못된 위치인덱스 : %d \r\n", iEndIndex);
+        		g_ErrorReport.Write( "Error Path : %d \r\n", iEndIndex);
             }
 			iEndIndex = GetIndex( xEnd - i, yEnd + j);
 
@@ -352,7 +343,7 @@ inline void PATH::SetEndNodes( bool bErrorCheck, int iWall, int xEnd, int yEnd, 
 			}
             else
             {
-        		g_ErrorReport.Write( "잘못된 위치인덱스 : %d \r\n", iEndIndex);
+        		g_ErrorReport.Write( "Error Path : %d \r\n", iEndIndex);
             }
 		}
 
@@ -371,7 +362,7 @@ inline void PATH::SetEndNodes( bool bErrorCheck, int iWall, int xEnd, int yEnd, 
 				}
                 else
                 {
-        		    g_ErrorReport.Write( "잘못된 위치인덱스 : %d \r\n", iEndIndex);
+        		    g_ErrorReport.Write( "Error Path : %d \r\n", iEndIndex);
                 }
 
                 iEndIndex = GetIndex( xEnd - i, yEnd + j);
@@ -385,7 +376,7 @@ inline void PATH::SetEndNodes( bool bErrorCheck, int iWall, int xEnd, int yEnd, 
 				}
                 else
                 {
-        		    g_ErrorReport.Write( "잘못된 위치인덱스 : %d \r\n", iEndIndex);
+        		    g_ErrorReport.Write( "Error Path : %d \r\n", iEndIndex);
                 }
 			}
 		}

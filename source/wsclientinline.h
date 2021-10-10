@@ -18,11 +18,7 @@ extern ItemAddOptioninfo*			g_pItemAddOptioninfo;
 #include "./ExternalObject/leaf/stdleaf.h"
 #endif
 #include "./Utilities/Log/muConsoleDebug.h"
-#include "NewUISystem.h"
-
-#ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
-#include "DummyAttackProtocol.h"
-#endif // KJH_ADD_DUMMY_SKILL_PROTOCOL
+#include "NewUISystem.h" 
 
 #define PACKET_MOVE         0xD4
 #define PACKET_POSITION     0x15
@@ -79,9 +75,6 @@ __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bF
 
 	if ( !bEncrypt)
 	{
-#ifdef ACC_PACKETSIZE
-		g_iTotalPacketSend += len;
-#endif
 		return ( g_pSocketClient->sSend( buf, len));
 	}
 
@@ -96,11 +89,8 @@ __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bF
 
 	PBMSG_ENCRYPTED bc;
 	PWMSG_ENCRYPTED wc;
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-	int iSize = g_SessionCryptorCS.Encrypt( (int)g_pSocketClient->GetSocket(), NULL, byBuffer + iSkip, len - iSkip);
-#else 
+
 	int iSize = g_SimpleModulusCS.Encrypt( NULL, byBuffer + iSkip, len - iSkip);
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
 	
 	if ( iSize < 256 && bForceC4 == FALSE)
 	{
@@ -112,9 +102,6 @@ __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bF
 		g_SimpleModulusCS.Encrypt( bc.byBuffer, byBuffer + iSkip, len - iSkip);
 		assert( iSize < 256);
 
-#ifdef ACC_PACKETSIZE
-		g_iTotalPacketSend += iLength;
-#endif
 		return ( g_pSocketClient->sSend( ( char*)&bc, iLength));
 	}
 	else
@@ -128,9 +115,6 @@ __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bF
 		g_SimpleModulusCS.Encrypt( wc.byBuffer, byBuffer + iSkip, len - iSkip);
 
 		assert( iSize <= MAX_SPE_BUFFERSIZE_);
-#ifdef ACC_PACKETSIZE
-		g_iTotalPacketSend += iLength;
-#endif
 		return ( g_pSocketClient->sSend( ( char*)&wc, iLength));
 	}
 }
@@ -1458,10 +1442,6 @@ __forceinline bool SendRequestStorageExit()
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 
-///////////////////////////////////////////////////////////////////////////////
-// 길드
-///////////////////////////////////////////////////////////////////////////////
-
 #define SendRequestGuildMaster( p_Value)\
 {\
 	CStreamPacketEngine spe;\
@@ -1470,7 +1450,6 @@ __forceinline bool SendRequestStorageExit()
 	spe.Send();\
 }
 
-// 길드생성
 #define SendRequestCreateGuild( GuildType, pGuildName, pGuildMark )\
 {\
 	CStreamPacketEngine spe;\
@@ -1480,7 +1459,7 @@ __forceinline bool SendRequestStorageExit()
 	spe.AddData( (pGuildMark), 32);\
 	spe.Send();\
 }
-// 내 길드종류를 변경
+
 #define SendRequestEditGuildType( GuildType )\
 {\
 	CStreamPacketEngine spe;\
@@ -1488,7 +1467,7 @@ __forceinline bool SendRequestStorageExit()
 	spe << (BYTE)(GuildType);\
 	spe.Send();\
 }
-// 길드관계 요청
+
 #define SendRequestGuildRelationShip( RelationType, RequestType, TargetUserIndexH, TargetUserIndexL )\
 {\
 	CStreamPacketEngine spe;\
@@ -1510,7 +1489,6 @@ __forceinline bool SendRequestStorageExit()
 	g_pChatListBox->AddText("",szTmp,SEASON3B::TYPE_SYSTEM_MESSAGE);\
 }
 
-// 길드관계 응답
 #define SendRequestGuildRelationShipResult( Type, RequestType, Result, TargetUserIndexH, TargetUserIndexL )\
 {\
 	CStreamPacketEngine spe;\
@@ -1522,7 +1500,6 @@ __forceinline bool SendRequestStorageExit()
 	spe << (BYTE)(TargetUserIndexL);\
 	spe.Send();\
 }
-// 연합길드 방출하기
 #define SendRequestBanUnionGuild( GuildName )\
 {\
 	CStreamPacketEngine spe;\
@@ -1531,7 +1508,7 @@ __forceinline bool SendRequestStorageExit()
 	spe.AddData( (GuildName), 8);\
     spe.Send();\
 }
-// 연합리스트 요청
+
 #define SendRequestUnionList()\
 {\
 	CStreamPacketEngine spe;\
@@ -1758,9 +1735,6 @@ __forceinline bool SendRequestMixExit()
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//  자신의 위치의 정당성을 위해 서버에 검사를 요청한다.
-//////////////////////////////////////////////////////////////////////////
 #define SendRequestCheckPosition(byPositionX, byPositionY)\
 {   \
     CStreamPacketEngine spe;\

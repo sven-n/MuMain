@@ -15,9 +15,9 @@ class CMultiLanguage
 private:
 	static CMultiLanguage *ms_Singleton;
 
-	BYTE byLanguage;				// 서버에 사용자가 선택한 언어 보내줌(0:영어, 1:포르투갈어, 2:스페인어)
-	int iCodePage;					// CodePage
-	int iNumByteForOneCharUTF8;		// 그나라의 언어를 UTF-8로 표현하기 위해 필요한 byte 수
+	BYTE byLanguage;
+	int iCodePage;
+	int iNumByteForOneCharUTF8;
 
 	CMultiLanguage()	{ ms_Singleton = this; };				
 

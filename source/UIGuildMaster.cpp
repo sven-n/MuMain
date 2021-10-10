@@ -108,7 +108,6 @@ int DoEditGuildMarkConfirmAction( POPUP_RESULT Result )
 		m_eCurrStep = STEP_EDIT_GUILD_MARK;
 		SendRequestGuildMaster( TRUE );
 
-		// 기존 길드 마크 표시
 		if( Hero->GuildStatus != G_NONE )
 			memcpy( &GuildMark[MARK_EDIT], &GuildMark[Hero->GuildMarkIndex], sizeof(MARK_t) );
 	}
@@ -365,12 +364,10 @@ void CUIGuildMaster::DoCreateInfoAction()
      			Mark[i / 2] += GuildMark[MARK_EDIT].Mark[i];
 		}
 
-		// 길드 생성시
 		if( m_nCurrMode == MODE_CREATE_GUILD )
 		{
 			SendRequestCreateGuild( 0, (BYTE*)GuildMark[MARK_EDIT].GuildName, Mark );
 		}
-		// 길드마크 변경시
 //		else if( m_nCurrMode == MODE_EDIT_GUILDMARK )
 //		{
 //			SendRequestEditGuildMark( (BYTE*)GuildMark[MARK_EDIT].GuildName, Mark );
@@ -521,7 +518,6 @@ void CUIGuildMaster::RenderGuildMasterMain()
 	m_EditGuildMarkButton.SetPosition( ptOrigin.x, ptOrigin.y );
 	m_EditGuildMarkButton.Render();
 
-	// 닫기( X ) 버튼
 	glColor3f( 1.f, 1.f, 1.f );
 	float Width=24.f;float Height=24.f;float x=(float)GetPosition_x()+25;float y=(float)GetPosition_y()+395;
 	RenderBitmap( BITMAP_INVENTORY_BUTTON, x, y, Width, Height, 0.f, 0.f, Width/32.f, Height/32.f );
@@ -687,6 +683,6 @@ void CUIGuildMaster::Close()
 	{
 		g_pSingleTextInputBox->SetText( NULL );
 		SaveIMEStatus();
-		g_pSingleTextInputBox->SetState( UISTATE_HIDE );	// 길드 입력창 숨김
+		g_pSingleTextInputBox->SetState( UISTATE_HIDE );
 	}
 }

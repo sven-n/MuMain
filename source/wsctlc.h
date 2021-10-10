@@ -27,14 +27,14 @@ class CPacketQueue;
 class CWsctlc {
 
 private :
-	HWND   m_hWnd;					// 윈도우 메시지를 처리할 윈도우 핸들
-	BOOL	m_bGame;	// 게임쪽 커넥션인가?
+	HWND   m_hWnd;
+	BOOL	m_bGame;
 
-	int	   m_iMaxSockets;				// 소켓 최대 개수
-	SOCKET m_socket;				// 사용할 소켓 
+	int	   m_iMaxSockets;
+	SOCKET m_socket;
 
-	BYTE   m_SendBuf[MAX_SENDBUF];	//
-	int    m_nSendBufLen;			// 버퍼크기
+	BYTE   m_SendBuf[MAX_SENDBUF];
+	int    m_nSendBufLen;
 
 	BYTE   m_RecvBuf[MAX_RECVBUF];
 	int    m_nRecvBufLen;
@@ -71,19 +71,11 @@ public:
 		int nDx=0;
 		if( m_socket == INVALID_SOCKET ) return FALSE;
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		for( ; ; )
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		while( 1 )
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		{
 			nResult = send(m_socket, (char*)buf+nDx, len-nDx, 0);
 			if( nResult == SOCKET_ERROR )
 			{
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-				DebugAngel_Write(PACKET_LOG_FILE, "ssend nResult[%d]\r\n",nResult);
-#endif //PBG_LOG_PACKET_WINSOCKERROR
-
 				if( WSAGetLastError() != WSAEWOULDBLOCK )
 				{
 					g_ConsoleDebug->Write(MCD_ERROR, "[Send Packet Error] WSAGetLastError() != WSAEWOULDBLOCK");

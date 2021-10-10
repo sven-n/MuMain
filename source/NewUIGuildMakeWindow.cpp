@@ -28,11 +28,8 @@ namespace
 	
 	BOOL IsGuildMark()
 	{
-		// 길드마크를 그렸는지 검사
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		BOOL bDraw = FALSE;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 		for( int i=0;i<64;i++ )
 		{
 			if( GuildMark[MARK_EDIT].Mark[i] != 0 )
@@ -328,7 +325,6 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
 	if( m_Button[GUILDMAKEBUTTON_MARK_RNEXT].UpdateMouseEvent() )
 	{
-		//길드 마크가 있는지 길드명이 있는지 검사
 		char tempText[100];
 		memset(&tempText, 0, sizeof(char)*100);
 
@@ -336,17 +332,14 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
 		if(CheckSpecialText(tempText) == true)
 		{
-			// 391 "특수문자는 사용하실 수 없습니다."
 			SEASON3B::CreateOkMessageBox(GlobalText[391]);
 		}
 		else if( IsGuildName( tempText ) == FALSE)
 		{
-			// 390 "2글자이상 입력해주세요."
 			CreateOkMessageBox(GlobalText[390]);
 		}
 		else if(IsGuildMark() == FALSE)
 		{
-			// 426 "길드 마크를 그려주세요."
 			CreateOkMessageBox(GlobalText[426]);
 		}
 		else

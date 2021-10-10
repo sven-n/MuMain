@@ -906,9 +906,7 @@ public:
 };
 
 #define g_pRenderText CUIRenderText::GetInstance()
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #define g_pMultiLanguage CMultiLanguage::GetSingletonPtr()
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 void SaveIMEStatus();
 void RestoreIMEStatus();

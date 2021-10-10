@@ -1,9 +1,5 @@
 //*****************************************************************************
 // File: NewUIBattleSoccerScore.cpp
-//
-// Desc: implementation of the CNewUIBattleSoccerScore class.
-//
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
 
 #include "stdafx.h"
@@ -17,10 +13,6 @@
 
 using namespace SEASON3B;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 SEASON3B::CNewUIBattleSoccerScore::CNewUIBattleSoccerScore()
 {
 	m_pNewUIMng = NULL;
@@ -32,13 +24,6 @@ SEASON3B::CNewUIBattleSoccerScore::~CNewUIBattleSoccerScore()
 	Release();
 }
 
-//*****************************************************************************
-// 함수 이름 : Create()
-// 함수 설명 : 창 생성.
-// 매개 변수 : pNewUIMng	: CNewUIManager 오브젝트 주소.
-//			   x			: x 좌표.
-//			   y			: y 좌표.
-//*****************************************************************************
 bool SEASON3B::CNewUIBattleSoccerScore::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
 	if (NULL == pNewUIMng)
@@ -56,10 +41,6 @@ bool SEASON3B::CNewUIBattleSoccerScore::Create(CNewUIManager* pNewUIMng, int x, 
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Release()
-// 함수 설명 : 창 Release.
-//*****************************************************************************
 void SEASON3B::CNewUIBattleSoccerScore::Release()
 {
 	UnloadImages();
@@ -71,51 +52,27 @@ void SEASON3B::CNewUIBattleSoccerScore::Release()
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : SetPos()
-// 함수 설명 : 창 위치 지정.
-//*****************************************************************************
 void SEASON3B::CNewUIBattleSoccerScore::SetPos(int x, int y)
 {
 	m_Pos.x = x;
 	m_Pos.y = y;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateMouseEvent()
-// 함수 설명 : 마우스 이벤트 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool SEASON3B::CNewUIBattleSoccerScore::UpdateMouseEvent()
 {
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateKeyEvent()
-// 함수 설명 : 키보드 입력 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool SEASON3B::CNewUIBattleSoccerScore::UpdateKeyEvent()
 {
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Update()
-// 함수 설명 : 기타 매 프레임 일어나는 이벤트 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool SEASON3B::CNewUIBattleSoccerScore::Update()
 {
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Render()
-// 함수 설명 : 창 렌더.
-// 반환 값	 : true면 성공.
-//*****************************************************************************
 bool SEASON3B::CNewUIBattleSoccerScore::Render()
 {
 	::EnableAlphaTest();
@@ -130,20 +87,12 @@ bool SEASON3B::CNewUIBattleSoccerScore::Render()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderBackImage()
-// 함수 설명 : 창 바탕 이미지 렌더.
-//*****************************************************************************
 void SEASON3B::CNewUIBattleSoccerScore::RenderBackImage()
 {
 	RenderImage(IMAGE_BSS_BACK,
 		m_Pos.x, m_Pos.y, float(BSS_WIDTH), float(BSS_HEIGHT));
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderContents()
-// 함수 설명 : 내용 렌더.
-//*****************************************************************************
 void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
 {
 	unicode::t_char szTemp[128];
@@ -195,12 +144,6 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : FindGuildMark()
-// 함수 설명 : 길드명으로 길드 마크를 찾음.
-// 반환 값	 : 길드마크 인덱스.
-// 매개 변수 : pszGuildName	: 길드명.
-//*****************************************************************************
 int SEASON3B::CNewUIBattleSoccerScore::FindGuildMark(char* pszGuildName)
 {
 	for (int i = 0; i < MARK_EDIT; ++i)
@@ -214,28 +157,16 @@ int SEASON3B::CNewUIBattleSoccerScore::FindGuildMark(char* pszGuildName)
 	return 0;
 }
 
-//*****************************************************************************
-// 함수 이름 : GetLayerDepth()
-// 함수 설명 : 창의 레이어값을 얻음.
-//*****************************************************************************
 float SEASON3B::CNewUIBattleSoccerScore::GetLayerDepth()
 {
 	return 1.8f;
 }
 
-//*****************************************************************************
-// 함수 이름 : LoadImages()
-// 함수 설명 : 이미지 리소스 로드.
-//*****************************************************************************
 void SEASON3B::CNewUIBattleSoccerScore::LoadImages()
 {
 	LoadBitmap("Interface\\newui_Figure_ground.tga", IMAGE_BSS_BACK, GL_LINEAR);
 }
 
-//*****************************************************************************
-// 함수 이름 : UnloadImages()
-// 함수 설명 : 이미지 리소스 삭제.
-//*****************************************************************************
 void SEASON3B::CNewUIBattleSoccerScore::UnloadImages()
 {
 	DeleteBitmap(IMAGE_BSS_BACK);

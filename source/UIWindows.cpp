@@ -830,51 +830,49 @@ void CUIWindowMgr::SetServerEnable(BOOL bFlag)
 		}
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void SetLineColor(int iType, float fAlphaRate = 1.0f)
 {
 	GLubyte ubWindowAlpha = 255 * fAlphaRate;
 
 	switch(iType)
 	{
-	case 0:	// 윈도우 테두리 바깥쪽 가장자리 색
+	case 0:
 		glColor4ub(146, 134, 121, ubWindowAlpha);	break;
-	case 1:	// 윈도우 테두리 채움색
+	case 1:
 		glColor4ub(37, 37, 37, ubWindowAlpha);		break;
-	case 2:	// 윈도우 테두리 안쪽 가장자리 색
+	case 2:
 		glColor4ub(106, 97, 88, ubWindowAlpha);		break;
-	case 3:	// 윈도우 배경색
+	case 3:
 		glColor4ub(0, 0, 0, 179 * fAlphaRate);		break;
-	case 4:	// 윈도우 테두리 점 색
+	case 4:
 		glColor4ub(173, 167, 150, ubWindowAlpha);	break;
-	case 5:	// 윈도우 탭&목록 라인 색
+	case 5:
 		glColor4ub(53, 49, 48, ubWindowAlpha);		break;
-	case 6:	// 윈도우 탭 비활성 색
+	case 6:
 		glColor4ub(26, 22, 21, ubWindowAlpha);		break;
-	case 7:	// 윈도우 배경 막음색
+	case 7:
 		glColor4ub(0, 0, 0, 255 * fAlphaRate);		break;
-	case 8:	// 타이틀바 그림자색 밝음 1
+	case 8:
 		glColor4ub(153, 156, 166, ubWindowAlpha);	break;
-	case 9:	// 타이틀바 그림자색 밝음 2
+	case 9:
 		glColor4ub(136, 138, 147, ubWindowAlpha);	break;
-	case 10:	// 타이틀바 그림자색 밝음 3
+	case 10:
 		glColor4ub(83, 85, 93, ubWindowAlpha);		break;
-	case 11:	// 타이틀바 그림자색 어두움 1
+	case 11:
 		glColor4ub(102, 104, 112, ubWindowAlpha);	break;
-	case 12:	// 타이틀바 그림자색 어두움 2
+	case 12:
 		glColor4ub(0, 0, 8, ubWindowAlpha);			break;
-	case 13:	// 타이틀바 그림자색 어두움 3
+	case 13:
 		glColor4ub(0, 0, 0, ubWindowAlpha);			break;
-	case 14:	// 메뉴 분리선
+	case 14:
 		glColor4ub(185, 185, 185, ubWindowAlpha);	break;
-	case 15:	// 팝업 메뉴 외곽선
+	case 15:
 		glColor4ub(194, 194, 194, ubWindowAlpha);	break;
-	case 16:	// 팝업 메뉴 선택 색
+	case 16:
 		glColor4ub(194, 194, 194, ubWindowAlpha);	break;
-	case 17:	// 팝업 메뉴 깜박 색
+	case 17:
 		glColor4ub(209, 188, 134, ubWindowAlpha);	break;
-	case 18:	// 팝업 여러명 색
+	case 18:
 		glColor4ub(205, 209, 133, ubWindowAlpha);	break;
 	default:	break;
 	}
@@ -897,13 +895,10 @@ void RenderWindowHLine(float pos_x, float pos_y, float width)
 	SetLineColor(1);
 	RenderColor(pos_x, pos_y + 1, width, 3.0f);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CUIBaseWindow::CUIBaseWindow()
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	:	MAX_LETTER_TITLE_LENGTH_UTF16((int)(MAX_LETTER_TITLE_LENGTH/g_pMultiLanguage->GetNumByteForOneCharUTF8())),
 		MAX_LETTER_TEXT_LENGTH_UTF16((int)(MAX_LETTERTEXT_LENGTH/g_pMultiLanguage->GetNumByteForOneCharUTF8()))
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 {
 	memset(&m_WorkMessage, 0, sizeof(UI_MESSAGE));
 	m_iMouseClickPos_x = 0;
@@ -921,7 +916,6 @@ CUIBaseWindow::CUIBaseWindow()
 	m_iBackHeight = 0;
 	m_iResizeDir = 0;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CUIBaseWindow::~CUIBaseWindow()
 {
@@ -931,7 +925,6 @@ CUIBaseWindow::~CUIBaseWindow()
 		m_pszTitle = NULL;
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIBaseWindow::Init(const char * pszTitle, DWORD dwParentID)
 {
@@ -941,7 +934,6 @@ void CUIBaseWindow::Init(const char * pszTitle, DWORD dwParentID)
 	SetPosition(50, 50);
 	SetSize(213, 170);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIBaseWindow::SetTitle(const char* pszTitle)
 {
@@ -954,11 +946,9 @@ void CUIBaseWindow::SetTitle(const char* pszTitle)
 	m_pszTitle = new char[strlen(pszTitle)+1+1];
 	strncpy(m_pszTitle, pszTitle, strlen(pszTitle)+1);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 {
-	// 위쪽 라인
 	SetLineColor(0);
 	RenderColor((float)iPos_x,(float)iPos_y,(float)iWidth,(float)1);
 	SetLineColor(1);
@@ -966,7 +956,6 @@ void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 	SetLineColor(2);
 	RenderColor((float)iPos_x,(float)iPos_y + 4,(float)iWidth,(float)1);
 
-	// 아래쪽 라인
 	SetLineColor(2);
 	RenderColor((float)iPos_x,(float)iPos_y + iHeight - 5,(float)iWidth,(float)1);
 	SetLineColor(1);
@@ -974,7 +963,6 @@ void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 	SetLineColor(0);
 	RenderColor((float)iPos_x,(float)iPos_y + iHeight - 1,(float)iWidth,(float)1);
 
-	// 왼쪽 라인
 	SetLineColor(0);
 	RenderColor((float)iPos_x,(float)iPos_y,(float)1,(float)iHeight);
 	SetLineColor(1);
@@ -982,7 +970,6 @@ void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 	SetLineColor(2);
 	RenderColor((float)iPos_x + 4,(float)iPos_y + 1,(float)1,(float)iHeight - 2);
 
-	// 오른쪽 라인
 	SetLineColor(2);
 	RenderColor((float)iPos_x + iWidth - 5,(float)iPos_y + 1,(float)1,(float)iHeight - 2);
 	SetLineColor(1);
@@ -990,7 +977,6 @@ void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 	SetLineColor(0);
 	RenderColor((float)iPos_x + iWidth - 1,(float)iPos_y,(float)1,(float)iHeight);
 
-	// 점 네개
 	SetLineColor(4);
 	RenderColor((float)iPos_x + 2,(float)iPos_y + 2,(float)1,(float)1);
 	RenderColor((float)iPos_x + iWidth - 3,(float)iPos_y + 2,(float)1,(float)1);
@@ -1016,9 +1002,8 @@ void CUIBaseWindow::SetControlButtonColor(int iSelect)
 
 void CUIBaseWindow::Render()
 {
-	// 윈도우를 그린다
 	EnableAlphaTest();
-	// 배경색을 칠한다
+
 	if (m_iOptions == UIWINDOWSTYLE_NULL);
 	else if (CheckOption(UIWINDOWSTYLE_FRAME))
 	{
@@ -1032,7 +1017,6 @@ void CUIBaseWindow::Render()
 	}
 	EndRenderColor();
 
-	// 하위 항목을 그린다
 	g_pRenderText->SetFont(g_hFont);
 	
 	RenderSub();
@@ -1047,7 +1031,6 @@ void CUIBaseWindow::Render()
 		glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
 	if (CheckOption(UIWINDOWSTYLE_FRAME))
 	{
-		// 타이틀 바 배경
 		if (CheckOption(UIWINDOWSTYLE_TITLEBAR))
 		{
 			RenderBitmap(BITMAP_INTERFACE_EX+8,(float)m_iPos_x + 6,(float)m_iPos_y + 5,(float)m_iWidth - 12,(float)15,
@@ -1068,7 +1051,6 @@ void CUIBaseWindow::Render()
 			RenderColor((float)m_iPos_x + m_iWidth - 6,(float)m_iPos_y + 19,(float)1,(float)1);
 		}
 
-		// 프레임을 그린다
 		DrawOutLine(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight);
 		EndRenderColor();
 	}
@@ -1097,28 +1079,28 @@ void CUIBaseWindow::Render()
 		{
 			SetControlButtonColor(1);
 			RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - (CheckOption(UIWINDOWSTYLE_MAXBUTTON) ? 38 : 27),
-				(float)m_iPos_y + 8,(float)9,(float)9, 0.f,0.f,9.f/32.f,9.f/32.f);	// 최소화□
+				(float)m_iPos_y + 8,(float)9,(float)9, 0.f,0.f,9.f/32.f,9.f/32.f);
 		}
 		if (CheckOption(UIWINDOWSTYLE_MAXBUTTON))
 		{
 			SetControlButtonColor(2);
 			if (m_bIsMaximize == FALSE)
 				RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - 27,(float)m_iPos_y + 8,(float)9,(float)9,
-					9.f/32.f,0.f,9.f/32.f,9.f/32.f);	// 최대화
+					9.f/32.f,0.f,9.f/32.f,9.f/32.f);
 			else
 				RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - 27,(float)m_iPos_y + 8,(float)9,(float)9,
-					9.f/32.f,9.f/32.f,9.f/32.f,9.f/32.f);	// 창으로 복원
+					9.f/32.f,9.f/32.f,9.f/32.f,9.f/32.f);
 		}
 		SetControlButtonColor(3);
 		RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - 16,(float)m_iPos_y + 8,(float)9,(float)9,
-			0.f,9.f/32.f,9.f/32.f,9.f/32.f);	// 닫기Ｘ
+			0.f,9.f/32.f,9.f/32.f,9.f/32.f);
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		g_pRenderText->SetFont(g_hFont);
 	}
 	if (CheckOption(UIWINDOWSTYLE_RESIZEABLE))
 	{
 		RenderBitmap(BITMAP_INTERFACE_EX+11,(float)m_iPos_x + m_iWidth - 10,(float)m_iPos_y + m_iHeight - 10,(float)9,(float)9,
-			0.f,0.f,9.f/16.f,9.f/16.f);	// ↖
+			0.f,0.f,9.f/16.f,9.f/16.f);
 	}
 	if (g_pWindowMgr->GetTopWindowUIID() != GetUIID() || !g_pUIManager->IsOpen(INTERFACE_FRIEND))
 	{
@@ -1128,7 +1110,6 @@ void CUIBaseWindow::Render()
 
 	RenderOver();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUIBaseWindow::DoMouseAction()
 {
@@ -1136,7 +1117,7 @@ BOOL CUIBaseWindow::DoMouseAction()
 	if (CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight))
 	{
 		if (CheckOption(UIWINDOWSTYLE_TITLEBAR) &&
-			CheckMouseIn(m_iPos_x + m_iWidth - 16,m_iPos_y + 8, 9, 9))	// 창 닫기
+			CheckMouseIn(m_iPos_x + m_iWidth - 16,m_iPos_y + 8, 9, 9))
 		{
 			m_iControlButtonClick = 3;
 			if (MouseOnWindow == false && MouseLButtonPop == true)
@@ -1149,7 +1130,7 @@ BOOL CUIBaseWindow::DoMouseAction()
 			}
 		}
 		else if (CheckOption(UIWINDOWSTYLE_MAXBUTTON) &&
-			CheckMouseIn(m_iPos_x + m_iWidth - 27,m_iPos_y + 8, 9, 9))	// 창 최대화
+			CheckMouseIn(m_iPos_x + m_iWidth - 27,m_iPos_y + 8, 9, 9))
 		{
 			m_iControlButtonClick = 2;
 			if (MouseOnWindow == false && MouseLButtonPop == true)
@@ -1160,7 +1141,7 @@ BOOL CUIBaseWindow::DoMouseAction()
 		}
 		else if (CheckOption(UIWINDOWSTYLE_MINBUTTON) &&
 			CheckMouseIn(m_iPos_x + m_iWidth - (CheckOption(UIWINDOWSTYLE_MAXBUTTON) ? 38 : 27),
-			m_iPos_y + 8, 9, 9))	// 창 최소화
+			m_iPos_y + 8, 9, 9))
 		{
 			m_iControlButtonClick = 1;
 			if (MouseOnWindow == false && MouseLButtonPop == true)
@@ -1170,7 +1151,7 @@ BOOL CUIBaseWindow::DoMouseAction()
 			}
 		}
 		else if (CheckOption(UIWINDOWSTYLE_RESIZEABLE) && 
-			CheckMouseIn(m_iPos_x, m_iPos_y, 7, 7))	// 크기 조절 좌상
+			CheckMouseIn(m_iPos_x, m_iPos_y, 7, 7))
 		{
 			if (MouseLButton == true && GetState() != UISTATE_RESIZE && g_dwActiveUIID == 0)
 			{
@@ -1183,7 +1164,7 @@ BOOL CUIBaseWindow::DoMouseAction()
 			}
 		}
 		else if (CheckOption(UIWINDOWSTYLE_MOVEABLE) && CheckOption(UIWINDOWSTYLE_TITLEBAR) &&
-			CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, 20))	// 제목 표시줄
+			CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, 20))
 		{
 			if (MouseLButton == true && GetState() != UISTATE_MOVE && g_dwActiveUIID == 0)
 			{
@@ -1194,7 +1175,7 @@ BOOL CUIBaseWindow::DoMouseAction()
 			}
 		}
 		else if (CheckOption(UIWINDOWSTYLE_RESIZEABLE) && 
-			CheckMouseIn(m_iPos_x + m_iWidth - 10, m_iPos_y + m_iHeight - 10, 10, 10))	// 크기 조절
+			CheckMouseIn(m_iPos_x + m_iWidth - 10, m_iPos_y + m_iHeight - 10, 10, 10))
 		{
 			if (MouseLButton == true && GetState() != UISTATE_RESIZE && g_dwActiveUIID == 0)
 			{
@@ -1313,7 +1294,6 @@ BOOL CUIBaseWindow::DoMouseAction()
 
 	return TRUE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIBaseWindow::Maximize()
 {
@@ -1334,14 +1314,13 @@ void CUIBaseWindow::Maximize()
 		m_bIsMaximize = FALSE;
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
 CUIChatWindow::CUIChatWindow()
 	:	m_iShowType(1),
 		m_dwRoomNumber(0)
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	   ,MAX_CHATROOM_TEXT_LENGTH_UTF16((int)(MAX_CHATROOM_TEXT_LENGTH/
 											(g_pMultiLanguage->GetNumByteForOneCharUTF8())))
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 {}
 
 CUIChatWindow::~CUIChatWindow()
@@ -1351,11 +1330,7 @@ CUIChatWindow::~CUIChatWindow()
 
 void CUIChatWindow::Init(const char * pszTitle, DWORD dwParentID)
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	memset(m_szLastText, 0, MAX_CHATROOM_TEXT_LENGTH);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	memset(m_szLastText, 0, MAX_TEXT_LENGTH + 1);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	SetTitle(pszTitle);
 	SetParentUIID(dwParentID);
@@ -1396,29 +1371,24 @@ void CUIChatWindow::Init(const char * pszTitle, DWORD dwParentID)
 	m_TextInputBox.SetParentUIID(GetUIID());
 	m_TextInputBox.SetArrangeType(2, 2, 12);
 	m_TextInputBox.SetState(UISTATE_NORMAL);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_TextInputBox.SetTextLimit(MAX_CHATROOM_TEXT_LENGTH_UTF16-1);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	m_TextInputBox.SetTextLimit(100);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	m_InvitePalListBox.SetParentUIID(GetUIID());
 	m_InvitePalListBox.SetArrangeType(3, 75, 16);
 	m_InvitePalListBox.SetResizeType(2, 75, -16);
 
-	m_InviteButton.Init(1, GlobalText[993]);	// "초대하기"
+	m_InviteButton.Init(1, GlobalText[993]);
 	m_InviteButton.SetParentUIID(GetUIID());
 	m_InviteButton.SetSize(53, 13);
 	m_InviteButton.SetArrangeType(3, 54, 14);
 
-	m_CloseInviteButton.Init(2, GlobalText[993]);	// "초대하기"
+	m_CloseInviteButton.Init(2, GlobalText[993]);
 	m_CloseInviteButton.SetParentUIID(GetUIID());
 	m_CloseInviteButton.SetSize(73, 13);
 	m_CloseInviteButton.SetArrangeType(3, 74, 14);
 
 	m_iPrevWidth = 0;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatWindow::Refresh()
 {
@@ -1429,7 +1399,7 @@ void CUIChatWindow::Refresh()
 	m_CloseInviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
 	m_TextInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
 
-	m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);	// 두번 해줘야 한다 (라인 표시 문제 때문)
+	m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 	m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 	m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 	m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
@@ -1483,14 +1453,11 @@ void CUIChatWindow::DisconnectToChatServer()
 
 int CUIChatWindow::AddChatPal(const char * pszID, BYTE Number, BYTE Server)
 {
-	// 중복 방지
 	BOOL bFind = FALSE;
 	for (std::deque<GUILDLIST_TEXT>::iterator iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		char * n = iter->m_szID;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 		if (strcmp(iter->m_szID, pszID) == 0)
 		{
 			iter->m_Number = Number;
@@ -1503,14 +1470,13 @@ int CUIChatWindow::AddChatPal(const char * pszID, BYTE Number, BYTE Server)
 		m_PalListBox.AddText(pszID, Number, Server);
 
 	char szTitle[128] = {0};
-	strncpy(szTitle, GlobalText[994], strlen(GlobalText[994]));	// "대화중: "
+	strncpy(szTitle, GlobalText[994], strlen(GlobalText[994]));
 	m_PalListBox.MakeTitleText(szTitle);
 	SetTitle(szTitle);
 	g_pWindowMgr->RefreshMainWndChatRoomList();
 
 	if (m_PalListBox.GetLineNum() >= 2)
 	{
-		// 들어오면 잠금 풀기
 		Lock(FALSE);
 	}
 
@@ -1527,12 +1493,12 @@ int CUIChatWindow::AddChatPal(const char * pszID, BYTE Number, BYTE Server)
 
 void CUIChatWindow::RemoveChatPal(const char * pszID)
 {
-	if (m_PalListBox.GetLineNum() > 2)	// 2명 이상일때만 친구 이름 제거
+	if (m_PalListBox.GetLineNum() > 2)
 	{
 		m_PalListBox.DeleteText(pszID);
 
 		char szTitle[128] = {0};
-		strncpy(szTitle, GlobalText[994], strlen(GlobalText[994]));	// "대화중: "
+		strncpy(szTitle, GlobalText[994], strlen(GlobalText[994]));
 		m_PalListBox.MakeTitleText(szTitle);
 		SetTitle(szTitle);
 		g_pWindowMgr->RefreshMainWndChatRoomList();
@@ -1589,7 +1555,6 @@ void CUIChatWindow::RenderSub()
 		RenderWindowVLine((float)(RPos_x(0) + RWidth() - 80), (float)RPos_y(0), (float)RHeight() - 16);
 	}
 
-	// 윈도우를 그린다
 	EnableAlphaTest();
 	SetLineColor(2);
 	RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 16, (float)RWidth(), 1.0f);
@@ -1614,7 +1579,7 @@ void CUIChatWindow::UpdateInvitePalList()
 		if (strcmp(iter->m_szID, Hero->ID) != 0)
 			m_InvitePalListBox.DeleteText(iter->m_szID);
 	}
-	// 오프라인인 이름 제거
+
 	for (iter = m_InvitePalListBox.GetFriendList().begin(); iter != m_InvitePalListBox.GetFriendList().end();)
 	{
 		if (iter->m_Server >= 253)
@@ -1653,7 +1618,6 @@ BOOL CUIChatWindow::HandleMessage()
 		break;
 	case UI_MESSAGE_TEXTINPUT:
 		{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			char	pszText[MAX_CHATROOM_TEXT_LENGTH] = {'\0'};
 			wchar_t *pwszTextUTF16 = new wchar_t[MAX_CHATROOM_TEXT_LENGTH_UTF16];
 
@@ -1671,12 +1635,10 @@ BOOL CUIChatWindow::HandleMessage()
 			g_pMultiLanguage->ConvertWideCharToStr(strText, wstrUTF16.c_str(), CP_UTF8);
 			strncpy(pszText, strText.c_str(), sizeof pszText);
 			
-			// 도배 방지
 			if (strncmp(m_szLastText, pszText, MAX_CHATROOM_TEXT_LENGTH) != 0)
 			{
 				strncpy(m_szLastText, pszText, MAX_CHATROOM_TEXT_LENGTH);
 
-				// 대화 보내기
 				if (pszText[0] != '\0')
 				{
 					CWsctlc * pSocket = GetCurrentSocket();
@@ -1685,46 +1647,21 @@ BOOL CUIChatWindow::HandleMessage()
 						SendRequestCRChatText(pSocket, 0, iSize, pszText);
 				}
 			}
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			char text[256];
-			m_TextInputBox.GetText(text);
-
-			// 필터링
-			if(CheckAbuseFilter(text, false))
-				strcpy(text, GlobalText[570]);
-			// 도배 방지
-			if (strncmp(m_szLastText, text, MAX_TEXT_LENGTH) != 0)
-			{
-				strncpy(m_szLastText, text, MAX_TEXT_LENGTH);
-				// 대화 보내기
-				if (text[0] != '\0')
-				{
-					CWsctlc * pSocket = GetCurrentSocket();
-					int iSize = strlen(text);
-					if (pSocket != NULL)
-						SendRequestCRChatText(pSocket, 0, iSize, text);
-				}
-			}
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 			m_TextInputBox.SetText(NULL);
 			if (m_PalListBox.GetLineNum() < 2)
 			{
-				// 빈방일때 잠그기
 				Lock(TRUE);
 			}
 		}
 		break;
 	case UI_MESSAGE_BTNLCLICK:
 		{
-			if (g_dwTopWindow != 0) break;	// 최상위 창 떴을때 버튼 정지
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
+			if (g_dwTopWindow != 0) break;
 			DWORD dwUIID = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			switch(m_WorkMessage.m_iParam1)
 			{
-			case 1:		// 친구초대
+			case 1:	
 				if (m_iShowType == 1)
 				{
 					m_iShowType = 2;
@@ -1782,7 +1719,6 @@ BOOL CUIChatWindow::HandleMessage()
 	}
 	return FALSE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatWindow::DoActionSub(BOOL bMessageOnly)
 {
@@ -2172,9 +2108,8 @@ CUIPhotoViewer::~CUIPhotoViewer()
 
 void CUIPhotoViewer::Init(int iInitType)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(iInitType < 0)		return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	m_PhotoHelper.Initialize();
 
 	m_PhotoChar.Initialize();
@@ -2515,7 +2450,7 @@ BOOL CUIPhotoViewer::DoMouseAction()
 					g_dwActiveUIID = GetUIID();
 					SetState(UISTATE_SCROLL);
 					m_fRotateClickPos_x = MouseX;
-					SetFocus(g_hWnd);	// 휠 안먹을때 좌클릭
+					SetFocus(g_hWnd);
 				}
 			}
 			else if (MouseRButtonPush)
@@ -2585,7 +2520,6 @@ void CUIPhotoViewer::Render()
 
 	if (o->AnimationFrame < m_iCurrentFrame)
 	{
-		// 동작 바꾸기
 		if (m_bActionRepeatCheck == FALSE && rand() % 4 == 0)
 		{
 			m_bActionRepeatCheck = TRUE;
@@ -2624,17 +2558,12 @@ void CUIPhotoViewer::Render()
 			RenderBitmap(BITMAP_INTERFACE_EX+20,m_iPos_x + 2, m_iPos_y + m_iHeight - 16,15.0f,15.0f,0.f,0.f,15.f/16.f,15.f/16.f);
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-			// 도움말
 			TextNum = 0;
-			sprintf(TextList[TextNum],GlobalText[997]);TextListColor[TextNum]=0;TextBold[TextNum]=false;TextNum++;	// "휠 버튼: 줌인 줌아웃"
-			sprintf(TextList[TextNum],GlobalText[998]);TextListColor[TextNum]=0;TextBold[TextNum]=false;TextNum++;	// "좌측 버튼 클릭: 회전"
-			sprintf(TextList[TextNum],GlobalText[999]);TextListColor[TextNum]=0;TextBold[TextNum]=false;TextNum++;	// "우측 버튼 클릭: 기본"
+			sprintf(TextList[TextNum],GlobalText[997]);TextListColor[TextNum]=0;TextBold[TextNum]=false;TextNum++;
+			sprintf(TextList[TextNum],GlobalText[998]);TextListColor[TextNum]=0;TextBold[TextNum]=false;TextNum++;
+			sprintf(TextList[TextNum],GlobalText[999]);TextListColor[TextNum]=0;TextBold[TextNum]=false;TextNum++;
 			SIZE TextSize;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), "Z", 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), "Z", 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			TextSize.cy /= g_fScreenRate_y;
 			RenderTipTextList(m_iPos_x + m_iWidth / 2, m_iPos_y + m_iHeight - TextNum * (TextSize.cy + 2), TextNum, 0, RT3_SORT_LEFT);
 		}
@@ -2652,11 +2581,7 @@ void CUILetterWriteWindow::Init(const char * pszTitle, DWORD dwParentID)
 	SetOption(UIWINDOWSTYLE_TITLEBAR | UIWINDOWSTYLE_FRAME | UIWINDOWSTYLE_MOVEABLE | UIWINDOWSTYLE_MINBUTTON);
 
 	SIZE size;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1000], lstrlen(GlobalText[1000]), &size);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), GlobalText[1000], lstrlen(GlobalText[1000]), &size);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	size.cx = (size.cx / g_fScreenRate_x) + 0.5f;
 
@@ -2665,11 +2590,7 @@ void CUILetterWriteWindow::Init(const char * pszTitle, DWORD dwParentID)
 	m_MailtoInputBox.SetFont(g_hFont);
 	m_MailtoInputBox.SetOption(UIOPTION_NULL);
 	m_MailtoInputBox.SetBackColor(0, 0, 0, 0);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_MailtoInputBox.SetTextLimit(MAX_ID_SIZE);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	m_MailtoInputBox.SetTextLimit(10);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_MailtoInputBox.SetParentUIID(GetUIID());
 	m_MailtoInputBox.SetArrangeType(0, size.cx, 3);
 	m_MailtoInputBox.SetState(UISTATE_NORMAL);
@@ -2679,22 +2600,14 @@ void CUILetterWriteWindow::Init(const char * pszTitle, DWORD dwParentID)
 	m_TitleInputBox.SetFont(g_hFont);
 	m_TitleInputBox.SetOption(UIOPTION_NULL);
 	m_TitleInputBox.SetBackColor(0, 0, 0, 0);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_TitleInputBox.SetTextLimit(MAX_LETTER_TITLE_LENGTH_UTF16-1);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	m_TitleInputBox.SetTextLimit(32);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_TitleInputBox.SetParentUIID(GetUIID());
 	m_TitleInputBox.SetArrangeType(0, size.cx, 18);
 	m_TitleInputBox.SetState(UISTATE_NORMAL);
 
 	m_TextInputBox.SetMultiline(TRUE);
 	m_TextInputBox.Init(g_hWnd, 238, 135, 50);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_TextInputBox.SetTextLimit(MAX_LETTER_TEXT_LENGTH_UTF16-1);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	m_TextInputBox.SetTextLimit(1000);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_TextInputBox.SetParentUIID(m_dwUIID);
 	m_TextInputBox.SetFont(g_hFont);
 	m_TextInputBox.SetOption(UIOPTION_NULL);
@@ -2746,7 +2659,6 @@ void CUILetterWriteWindow::Init(const char * pszTitle, DWORD dwParentID)
 	m_Photo.SetAnimation(AT_STAND1);
 	m_Photo.SetAngle(90);
 
-	// 사진 항상표시
 	m_iShowType = 1;
 	SetSize(GetWidth() + 120, GetHeight());
 	SetLimitSize(250 + 120, 150);
@@ -2805,7 +2717,6 @@ void CUILetterWriteWindow::RenderSub()
 //		}
 	}
 
-	// 윈도우를 그린다
 	SetLineColor(7);
 	RenderColor((float)RPos_x(0), (float)RPos_y(0), (float)RWidth(), 29.0f);
 	SetLineColor(2);
@@ -2821,11 +2732,7 @@ void CUILetterWriteWindow::RenderSub()
 	SIZE size;
 	
 	g_pRenderText->SetTextColor(230, 220, 200, 255);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1000], lstrlen(GlobalText[1000]), &size);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), GlobalText[1000], lstrlen(GlobalText[1000]), &size);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pRenderText->RenderText(RPos_x(3), RPos_y(3), GlobalText[1000], size.cx/g_fScreenRate_x, 0, RT3_SORT_RIGHT);	// "받는사람:  "
 	g_pRenderText->RenderText(RPos_x(3), RPos_y(18), GlobalText[1005], size.cx/g_fScreenRate_x, 0, RT3_SORT_RIGHT);	// "제목:  "
 
@@ -2848,7 +2755,6 @@ void CUILetterWriteWindow::RenderOver()
 {
 	if (m_iShowType == 1)
 	{
-		// 사진 그리기
 		m_Photo.Render();
 	}
 }
@@ -2877,19 +2783,15 @@ BOOL CUILetterWriteWindow::HandleMessage()
 		break;
 	case UI_MESSAGE_BTNLCLICK:
 		{
-			if (g_dwTopWindow != 0) break;	// 최상위 창 떴을때 버튼 정지
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
+			if (g_dwTopWindow != 0) break;
+
 			DWORD dwUIID = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 			switch(m_WorkMessage.m_iParam1)
 			{
-			case 1:		// 보내기
+			case 1:
 				if (m_bIsSend == FALSE)
 				{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					// ANSI->UTF16으로 변환하지 않음: UTF-8 <=> UTF-16 => ANSI로만 변환
-					// (유저가 입력한 문자가windows의 CP_ACP에서 지원하지 않는 경우 변환 실패)
 					wchar_t	*szTitleUTF16	= new wchar_t[MAX_LETTER_TITLE_LENGTH_UTF16];
 					wchar_t	*szTextUTF16	= new wchar_t[MAX_LETTER_TEXT_LENGTH_UTF16];
 					
@@ -2905,7 +2807,6 @@ BOOL CUILetterWriteWindow::HandleMessage()
 					m_TitleInputBox.GetText(szTitleUTF16, MAX_LETTER_TITLE_LENGTH_UTF16);
 					m_TextInputBox.GetText(szTextUTF16, MAX_LETTER_TEXT_LENGTH_UTF16);
 
-					// 전각 영문 알파벳과 기본 기호들을 반각으로 변환
 					for (k = 0; k < MAX_LETTER_TITLE_LENGTH_UTF16+1; k++)
 						szTitleUTF16[k] = g_pMultiLanguage->ConvertFulltoHalfWidthChar(szTitleUTF16[k]);
 					for (k = 0; k < MAX_LETTER_TEXT_LENGTH_UTF16+1; k++)
@@ -2917,86 +2818,54 @@ BOOL CUILetterWriteWindow::HandleMessage()
 					// delete memory
 					delete [] szTitleUTF16;	delete [] szTextUTF16;
 
-					// 이미 있는 필터 함수를 이용하기 위해서 ANSI로 변환 
 					g_pMultiLanguage->ConvertWideCharToStr(strTitle, wstrTitle.c_str(), g_pMultiLanguage->GetCodePage());
 					g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), g_pMultiLanguage->GetCodePage());
 					strncpy(szTitle, strTitle.c_str(), sizeof szTitle);
 					strncpy(szTempText, strText.c_str(), sizeof szTempText);
 
-					// 필터링
 					if(CheckAbuseFilter(szTitle, false))
 						g_pMultiLanguage->ConvertCharToWideStr(wstrTitle, GlobalText[570]);
 					if(CheckAbuseFilter(szTempText, false))
 						g_pMultiLanguage->ConvertCharToWideStr(wstrText, GlobalText[570]);
 					
-					// 서버 전송을 위해 UTF-8로 변환
 					g_pMultiLanguage->ConvertWideCharToStr(strTitle, wstrTitle.c_str(), CP_UTF8);
 					g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), CP_UTF8);
 					strncpy(szTitle, strTitle.c_str(), sizeof szTitle);
 					strncpy(szTempText, strText.c_str(), sizeof szTempText);
 
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					char szMailto[12] = {0};
-					m_MailtoInputBox.GetText(szMailto, 11);
-					char szTitle[34] = {0};
-					m_TitleInputBox.GetText(szTitle, 33);
-					char szTempText[1024] = {0};
-					m_TextInputBox.GetText(szTempText, 1001);
-
-					// 필터링
-					if(CheckAbuseFilter(szTitle, false))
-					{
-						strcpy(szTitle, GlobalText[570]);
-					}
-					// 필터링
-					if(CheckAbuseFilter(szTempText, false))
-					{
-						strcpy(szTempText, GlobalText[570]);
-					}
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
 					if (szMailto[0] == '\0' || strlen(szMailto) == 0)
 					{
-						// 받는사람 안적음
-						g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1006]);	// "받는 사람을 적어주세요."
+						g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1006]);
 						m_MailtoInputBox.GiveFocus();
 						m_iLastTabIndex = 0;
 						break;
 					}
 					else if (szTitle[0] == '\0' || strlen(szTitle) == 0)
 					{
-						// 제목 안적음
-						g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1007]);	// "제목을 적어주세요."
+						g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1007]);
 						m_TitleInputBox.GiveFocus();
 						m_iLastTabIndex = 1;
 						break;
 					}
 					else if (szTempText[0] == '\0' || strlen(szTempText) == 0)
 					{
-						// 편지 내용 안적음
-						g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1008]);	// "내용을 적어주세요."
+						g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1008]);
 						m_TextInputBox.GiveFocus();
 						m_iLastTabIndex = 2;
 						break;
 					}
 
-					// 문장처리
 					char szText[1024] = {0};
 
 					for (int i = 0, j = 0; i <= (int)strlen(szTempText); ++i, ++j)
 					{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 						if (j > MAX_LETTERTEXT_LENGTH || i > MAX_LETTERTEXT_LENGTH) break;		
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-						if (j > 1000 || i > 1000) break;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 						
 						if (szTempText[i] == '\r')
 						{
 							szText[j] = '\n';
 							if (szTempText[i + 1] == '\n' && szTempText[i + 2] == '\r' && szTempText[i + 3] == '\n')
 							{
-								// 빈 라인
 								szText[++j] = ' ';
 							}
 							++i;
@@ -3007,26 +2876,17 @@ BOOL CUILetterWriteWindow::HandleMessage()
 						}
 					}
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					szText[MAX_LETTERTEXT_LENGTH] = '\0';
 					WORD len = min(MAX_LETTERTEXT_LENGTH, strlen(szText));
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					szText[1000] = '\0';
-					WORD len = strlen(szText);
-					if (len > 1000) len = 1000;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					m_bIsSend = TRUE;
-					// 각도 0~360 -> 0~60 (/6)
-					// 줌 0.80~1.10 -> 0~30 -> 0~3 (/10)
-					// 동작 번호 0~255
 					int iAngle = m_Photo.GetCurrentAngle() / 6;
 					int iZoom = (m_Photo.GetCurrentZoom() * 100.0f - 80 + 5) / 10;
-					BYTE Data1 = (iZoom << 6) & 0xC0 | iAngle & 0x3F;	// 각도와 줌
-					BYTE Data2 = m_Photo.GetCurrentAction() - AT_ATTACK1;	// 동작 번호
+					BYTE Data1 = (iZoom << 6) & 0xC0 | iAngle & 0x3F;
+					BYTE Data2 = m_Photo.GetCurrentAction() - AT_ATTACK1;
 					SendRequestSendLetter(GetUIID(), szMailto, szTitle, Data1, Data2, len, szText);
 				}
 				break;
-			case 2:		// 닫기
+			case 2:
 				if (CloseCheck() == TRUE)
 					g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
 				break;
@@ -3134,17 +2994,17 @@ void CUILetterReadWindow::Init(const char * pszTitle, DWORD dwParentID)
 	m_LetterTextBox.SetArrangeType(2, 0, 20);
 	m_LetterTextBox.SetResizeType(3, 0, -36);
 
-	m_ReplyButton.Init(1, GlobalText[1010]);	// "답장쓰기"
+	m_ReplyButton.Init(1, GlobalText[1010]);
 	m_ReplyButton.SetParentUIID(GetUIID());
 	m_ReplyButton.SetArrangeType(2, 2, 16);
 	m_ReplyButton.SetSize(50, 14);
 
-	m_DeleteButton.Init(2, GlobalText[1011]);	// "삭제"
+	m_DeleteButton.Init(2, GlobalText[1011]);
 	m_DeleteButton.SetParentUIID(GetUIID());
 	m_DeleteButton.SetArrangeType(2, 53, 16);
 	m_DeleteButton.SetSize(50, 14);
 
-	m_CloseButton.Init(3, GlobalText[1002]);	// "닫기"
+	m_CloseButton.Init(3, GlobalText[1002]);
 	m_CloseButton.SetParentUIID(GetUIID());
 	m_CloseButton.SetArrangeType(2, 186, 16);
 	m_CloseButton.SetSize(50, 14);
@@ -3154,12 +3014,12 @@ void CUILetterReadWindow::Init(const char * pszTitle, DWORD dwParentID)
 //	m_PhotoButton.SetArrangeType(2, 186, 16);
 //	m_PhotoButton.SetSize(50, 14);
 
-	m_PrevButton.Init(5, GlobalText[1012]);	// "윗글"
+	m_PrevButton.Init(5, GlobalText[1012]);
 	m_PrevButton.SetParentUIID(GetUIID());
 	m_PrevButton.SetArrangeType(2, 104, 16);
 	m_PrevButton.SetSize(40, 14);
 
-	m_NextButton.Init(6, GlobalText[1013]);	// "아랫글"
+	m_NextButton.Init(6, GlobalText[1013]);
 	m_NextButton.SetParentUIID(GetUIID());
 	m_NextButton.SetArrangeType(2, 145, 16);
 	m_NextButton.SetSize(40, 14);
@@ -3170,7 +3030,6 @@ void CUILetterReadWindow::Init(const char * pszTitle, DWORD dwParentID)
 	m_Photo.SetArrangeType(1, 119, 15);
 	m_Photo.SetResizeType(2, 119, - 15);
 
-	// 사진 보이는 상태
 	m_LetterTextBox.SetResizeType(3, 0 - 120, -36);
 	SetSize(GetWidth() + 120, GetHeight());
 	SetLimitSize(250 + 120, 182);
@@ -3188,7 +3047,7 @@ void CUILetterReadWindow::Refresh()
 	m_NextButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
 	m_Photo.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
 
-	m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);	// 두번 해줘야 한다 (라인 줄 때문)
+	m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 	m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 	m_Photo.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 }
@@ -3233,7 +3092,6 @@ void CUILetterReadWindow::RenderSub()
 
 	if (m_iShowType >= 2)
 	{
-		// 사진 그리기
 		SetLineColor(2);
 		RenderColor((float)(RPos_x(0) + RWidth() - 120), (float)RPos_y(0) + RHeight() - 19, 1, 19);
 		RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 20, (float)RWidth() - 120, 1.0f);
@@ -3248,7 +3106,6 @@ void CUILetterReadWindow::RenderSub()
 		RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 19, (float)RWidth(), 18.0f);
 	}
 
-	// 윈도우를 그린다
 	SetLineColor(2);
 	RenderColor((float)RPos_x(0), (float)RPos_y(14), (float)RWidth(), 1.0f);
 	SetLineColor(7);
@@ -3256,7 +3113,7 @@ void CUILetterReadWindow::RenderSub()
 	EndRenderColor();
 
 	char szMailFrom[256] = {0};
-	sprintf(szMailFrom, GlobalText[1014], m_LetterHead.m_szID, m_LetterHead.m_szDate, m_LetterHead.m_szTime);	// "보낸사람 : %s (%s %s)"
+	sprintf(szMailFrom, GlobalText[1014], m_LetterHead.m_szID, m_LetterHead.m_szDate, m_LetterHead.m_szTime);
 	g_pRenderText->RenderText(RPos_x(3), RPos_y(3), szMailFrom);
 
 	m_ReplyButton.Render();
@@ -3267,7 +3124,6 @@ void CUILetterReadWindow::RenderSub()
 
 	DisableAlphaBlend();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUILetterReadWindow::RenderOver()
 {
@@ -3287,19 +3143,19 @@ BOOL CUILetterReadWindow::HandleMessage()
 		break;
 	case UI_MESSAGE_BTNLCLICK:
 		{
-			if (g_dwTopWindow != 0) break;	// 최상위 창 떴을때 버튼 정지
+			if (g_dwTopWindow != 0) break;
 			DWORD dwUIID = 0;
 			switch(m_WorkMessage.m_iParam1)
 			{
-			case 1:		// 답장쓰기
+			case 1:
 				{
 					char temp[MAX_TEXT_LENGTH + 1];
 					sprintf(temp, GlobalText[1071], g_cdwLetterCost);
-					dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100,100,temp);	// "편지쓰기"
+					dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100,100,temp);
 					if (dwUIID == 0) break;
 					((CUILetterWriteWindow *)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText(m_LetterHead.m_szID);
 					char szMailTitle[MAX_TEXT_LENGTH + 1] = {0};
-					sprintf(szMailTitle, GlobalText[1016], m_LetterHead.m_szText);	// "Re: %s"
+					sprintf(szMailTitle, GlobalText[1016], m_LetterHead.m_szText);
 					char szMailTitleResult[32 + 1] = {0};
 					CutText4(szMailTitle, szMailTitleResult, NULL, 32);
 					((CUILetterWriteWindow *)g_pWindowMgr->GetWindow(dwUIID))->SetMainTitleText(szMailTitleResult);
@@ -3308,7 +3164,7 @@ BOOL CUILetterReadWindow::HandleMessage()
 			case 2:		// 삭제
 				{
 					char tempTxt[MAX_TEXT_LENGTH + 1] = {0};
-					strcat(tempTxt, GlobalText[1017]);	// "편지를 정말로 삭제하시겠습니까?"
+					strcat(tempTxt, GlobalText[1017]);
 					dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, tempTxt, GetUIID());
 				}
 				break;
@@ -3335,12 +3191,11 @@ BOOL CUILetterReadWindow::HandleMessage()
 //					m_PhotoButton.SetCaption(">>");
 //				}
 				break;
-			case 5:		// 이전 편지
+			case 5:
 				{
 					DWORD dwPrevID = g_pLetterList->GetPrevLetterID(m_LetterHead.m_dwLetterID);
 					if (dwPrevID != 0)
 					{
-						// 스크롤도 이동
 						if (g_pWindowMgr->GetFriendMainWindow() != NULL)
 						{
 							g_pWindowMgr->GetFriendMainWindow()->PrevNextCursorMove(g_pLetterList->GetLineNum(dwPrevID));
@@ -3357,7 +3212,6 @@ BOOL CUILetterReadWindow::HandleMessage()
 							}
 							else
 							{
-								// 캐시 사용
 								ReceiveLetterText((BYTE *)g_pLetterList->GetLetterText(dwPrevID));
 							}
 						}
@@ -3377,12 +3231,11 @@ BOOL CUILetterReadWindow::HandleMessage()
 					}
 				}
 				break;
-			case 6:		// 다음 편지
+			case 6:
 				{
 					DWORD dwNextID = g_pLetterList->GetNextLetterID(m_LetterHead.m_dwLetterID);
 					if (dwNextID != 0)
 					{
-						// 스크롤도 이동
 						if (g_pWindowMgr->GetFriendMainWindow() != NULL)
 						{
 							g_pWindowMgr->GetFriendMainWindow()->PrevNextCursorMove(g_pLetterList->GetLineNum(dwNextID));
@@ -3399,7 +3252,6 @@ BOOL CUILetterReadWindow::HandleMessage()
 							}
 							else
 							{
-								// 캐시 사용
 								ReceiveLetterText((BYTE *)g_pLetterList->GetLetterText(dwNextID));
 							}
 						}
@@ -3600,22 +3452,22 @@ void CUIFriendListTabWindow::Init(const char* pszTitle, DWORD dwParentID)
 	m_PalListBox.SetResizeType(3, 0, -39);
 	m_PalListBox.SetLayout(1);
 
-	m_AddFriendButton.Init(1, GlobalText[1018]);	// "친구추가"
+	m_AddFriendButton.Init(1, GlobalText[1018]);
 	m_AddFriendButton.SetParentUIID(GetUIID());
 	m_AddFriendButton.SetArrangeType(2, 2, 17);
 	m_AddFriendButton.SetSize(50, 14);
 
-	m_DelFriendButton.Init(2, GlobalText[1019]);	// "친구삭제"
+	m_DelFriendButton.Init(2, GlobalText[1019]);
 	m_DelFriendButton.SetParentUIID(GetUIID());
 	m_DelFriendButton.SetArrangeType(2, 53, 17);
 	m_DelFriendButton.SetSize(50, 14);
 
-	m_TalkButton.Init(3, GlobalText[1020]);	// "대화하기"
+	m_TalkButton.Init(3, GlobalText[1020]);
 	m_TalkButton.SetParentUIID(GetUIID());
 	m_TalkButton.SetArrangeType(2, 104, 17);
 	m_TalkButton.SetSize(50, 14);
 
-	m_LetterButton.Init(4, GlobalText[1015]);	// "편지쓰기"
+	m_LetterButton.Init(4, GlobalText[1015]);
 	m_LetterButton.SetParentUIID(GetUIID());
 	m_LetterButton.SetArrangeType(2, 155, 17);
 	m_LetterButton.SetSize(50, 14);
@@ -3629,7 +3481,7 @@ void CUIFriendListTabWindow::Refresh()
 	m_LetterButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
 
 	m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-	m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);	// 두번해줘야한다 (줄 계산)
+	m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 	m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 	m_PalListBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
 }
@@ -4064,9 +3916,8 @@ void CUIChatRoomListTabWindow::Init(const char * pszTitle, DWORD dwParentID)
 void CUIChatRoomListTabWindow::Refresh()
 {
 	m_HideAllButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
 	m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-	m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);	// 두번해줘야한다 (표시 줄 개수때문)
+	m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);	
 	m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 	m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
 }
@@ -4493,8 +4344,7 @@ void CUILetterBoxTabWindow::RenderSub()
 
 	EnableAlphaTest();
 	SetLineColor(7);
-	RenderColor((float)RPos_x(0), (float)RPos_y(18 + m_LetterListBox.GetHeight()),
-		(float)RWidth(), (float)RHeight() - m_LetterListBox.GetHeight() - 18);
+	RenderColor((float)RPos_x(0), (float)RPos_y(18 + m_LetterListBox.GetHeight()),(float)RWidth(), (float)RHeight() - m_LetterListBox.GetHeight() - 18);
 	EndRenderColor();
 	DisableAlphaBlend();
 
@@ -4508,7 +4358,6 @@ void CUILetterBoxTabWindow::RenderSub()
 	SetLineColor(2);
 	RenderColor((float)RPos_x(0), (float)RPos_y(17 + m_LetterListBox.GetHeight()), (float)RWidth(), 1.0f);
 
-	// 컬럼 구분 라인
 	RenderColor((float)RPos_x(0) + m_LetterListBox.GetColumnPos_x(1), (float)RPos_y(17), 1.0f, (float)RHeight() - 22 - 17);
 	RenderColor((float)RPos_x(0) + m_LetterListBox.GetColumnPos_x(2), (float)RPos_y(17), 1.0f, (float)RHeight() - 22 - 17);
 	RenderColor((float)RPos_x(0) + m_LetterListBox.GetColumnPos_x(3), (float)RPos_y(17), 1.0f, (float)RHeight() - 22 - 17);
@@ -4522,12 +4371,12 @@ void CUILetterBoxTabWindow::RenderSub()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
 	RenderCheckBox(RPos_x(1), RPos_y(3), m_bCheckAllState);
-	RenderBitmap(BITMAP_INTERFACE_EX+14,RPos_x(1+10), RPos_y(3),13.0f,9.0f,0.f,0.f,13.f/16.f,9.f/32.f);	// v체크
+	RenderBitmap(BITMAP_INTERFACE_EX+14,RPos_x(1+10), RPos_y(3),13.0f,9.0f,0.f,0.f,13.f/16.f,9.f/32.f);
 	
 	if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(1), RPos_y(0), m_LetterListBox.GetColumnWidth(1), 19) == TRUE || g_pLetterList->GetCurrentSortType() == 1)
 	{
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
-		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(1), RPos_y(3), GlobalText[1028]);	// " 보낸사람 "
+		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(1), RPos_y(3), GlobalText[1028]);
 		g_pRenderText->SetTextColor(230, 220, 200, 255);
 	}
 	else
@@ -4538,23 +4387,23 @@ void CUILetterBoxTabWindow::RenderSub()
 	if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(2), RPos_y(0), m_LetterListBox.GetColumnWidth(2), 19) == TRUE || g_pLetterList->GetCurrentSortType() == 2)
 	{
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
-		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), GlobalText[1029]);	// " 받은날짜 "
+		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), GlobalText[1029]);
 		g_pRenderText->SetTextColor(230, 220, 200, 255);
 	}
 	else
 	{
-		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), GlobalText[1029]);	// " 받은날짜 "
+		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), GlobalText[1029]);
 	}
 
 	if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(3), RPos_y(0), m_LetterListBox.GetColumnWidth(3), 19) == TRUE || g_pLetterList->GetCurrentSortType() == 3)
 	{
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
-		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), GlobalText[1030]);	// " 제  목 "
+		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), GlobalText[1030]);
 		g_pRenderText->SetTextColor(230, 220, 200, 255);
 	}
 	else 
 	{
-		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), GlobalText[1030]);	// " 제  목 "
+		g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), GlobalText[1030]);
 	}
 
 	DisableAlphaBlend();
@@ -4580,18 +4429,18 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
 		break;
 	case UI_MESSAGE_BTNLCLICK:
 		{
-			if (g_dwTopWindow != 0) break;	// 최상위 창 떴을때 버튼 정지
+			if (g_dwTopWindow != 0) break;
 			DWORD dwUIID = 0;
 			switch(m_WorkMessage.m_iParam1)
 			{
-			case 1:		// 편지쓰기
+			case 1:
 				{
 					char temp[MAX_TEXT_LENGTH + 1];
 					sprintf(temp, GlobalText[1071], g_cdwLetterCost);
-					dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100,100,temp);	// "편지쓰기"
+					dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100,100,temp);
 				}
 				break;
-			case 2:		// 편지읽기
+			case 2:
 				{
 					if (GetCurrentSelectedLetter() == NULL) break;
 					DWORD dwLetterID = GetCurrentSelectedLetter()->m_dwLetterID;
@@ -4887,7 +4736,6 @@ void CUIFriendWindow::RenderSub()
 //	RenderBitmap(BITMAP_INTERFACE+22, (float)RPos_x(0), (float)RPos_y(0) + 14,
 //		(float)RWidth(), (float)5, 0.f,0.f,213.f/256.f,5.f/8.f);
 
-	// 탭라인
 	SetLineColor(7);
 	RenderColor((float)RPos_x(0), (float)RPos_y(0), (float)RWidth(), (float)20);
 	RenderTabLine(RPos_x(0), RPos_y(2), 53, 19, 3, m_iTabIndex);
@@ -4918,11 +4766,7 @@ void CUIFriendWindow::RenderSub()
 
 		TextLen = lstrlen(m_FriendListWnd.GetTitle());
 		
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_FriendListWnd.GetTitle(), TextLen, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_FriendListWnd.GetTitle(), TextLen, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pRenderText->RenderText(RPos_x(0) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
 			RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_FriendListWnd.GetTitle());
 	}
@@ -4938,13 +4782,8 @@ void CUIFriendWindow::RenderSub()
 		}
 		TextLen = lstrlen(m_LetterBoxWnd.GetTitle());
 		
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_LetterBoxWnd.GetTitle(), TextLen, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_LetterBoxWnd.GetTitle(), TextLen, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		g_pRenderText->RenderText(RPos_x(54) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
-			RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_LetterBoxWnd.GetTitle());
+		g_pRenderText->RenderText(RPos_x(54) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_LetterBoxWnd.GetTitle());
 	}
 	if (m_ChatRoomListWnd.GetTitle() != NULL)
 	{
@@ -4958,23 +4797,13 @@ void CUIFriendWindow::RenderSub()
 		}
 		TextLen = lstrlen(m_ChatRoomListWnd.GetTitle());
 		
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_ChatRoomListWnd.GetTitle(), TextLen, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_ChatRoomListWnd.GetTitle(), TextLen, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		g_pRenderText->RenderText(RPos_x(107) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
-			RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_ChatRoomListWnd.GetTitle());
+		g_pRenderText->RenderText(RPos_x(107) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,	RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_ChatRoomListWnd.GetTitle());
 	}
 
 	g_pRenderText->SetTextColor(230, 220, 200, 255);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1035], strlen(GlobalText[1035]), &TextSize );
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), GlobalText[1035], strlen(GlobalText[1035]), &TextSize );
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	g_pRenderText->RenderText(RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2,
-		RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2,	GlobalText[1035]);	// "대화 거부"
+	g_pRenderText->RenderText(RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2,	GlobalText[1035]);
 	
 	float fCheckBoxPos_x = RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2 - 14;
 	float fCheckBoxPos_y = RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2;
@@ -5005,12 +4834,11 @@ BOOL CUIFriendWindow::HandleMessage()
 	case UI_MESSAGE_YNRETURN:
 		if (m_WorkMessage.m_iParam2 == 1)
 		{
-			// 대화거부
 			if (g_pWindowMgr->GetChatReject() == FALSE)
 			{
-				SendRequestChangeState(0);	// 대화 거부
+				SendRequestChangeState(0);
 				g_pWindowMgr->SetChatReject(TRUE);
-				g_pFriendMenu->CloseAllChatWindow();	// 모든창 닫기
+				g_pFriendMenu->CloseAllChatWindow();
 			}
 		}
 		break;
@@ -5023,8 +4851,6 @@ BOOL CUIFriendWindow::HandleMessage()
 
 void CUIFriendWindow::DoActionSub(BOOL bMessageOnly)
 {
-	//SetTitle("친구");
-
 	if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE);
 	else
 	{
@@ -5189,14 +5015,12 @@ void CUITextInputWindow::RenderSub()
 		m_TextInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
 	}
 
-	// 윈도우를 그린다
 	m_AddButton.Render();
 	m_CancelButton.Render();
 	EnableAlphaTest();
 	m_TextInputBox.Render();
 	DisableAlphaBlend();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputWindow::ReturnText()
 {
@@ -5205,7 +5029,6 @@ void CUITextInputWindow::ReturnText()
 	m_TextInputBox.SetText(NULL);
 	if (pszReturnText[0] == '\0') return;
 
-	assert(m_dwReturnWindowUIID != 0 && "입력창 생성시 부모 id를 넣어야합니다.");
 	g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(), (DWORD)pszReturnText);
 	g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
 }

@@ -2059,15 +2059,9 @@ extern int GetScreenWidth();
 
 void CreateFrustrum2D(vec3_t Position)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	float Width = 0.0f, CameraViewFar = 0.0f, CameraViewNear = 0.0f, CameraViewTarget = 0.0f;
 	float WidthFar = 0.0f, WidthNear = 0.0f;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-    float Width, CameraViewFar, CameraViewNear, CameraViewTarget;
-	float WidthFar, WidthNear;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-#ifdef BATTLE_SOCCER_EVENT
     if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
     {
         Width = (float)GetScreenWidth()/640.f;
@@ -2078,7 +2072,6 @@ void CreateFrustrum2D(vec3_t Position)
         WidthNear        = 540.f*Width;
     }
     else
-#endif// BATTLE_SOCCER_EVENT
     {
         if ( gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
         {
@@ -2100,7 +2093,7 @@ void CreateFrustrum2D(vec3_t Position)
                 WidthNear = 580.f*Width; // 540.f
             }
         }
-		else if(gMapManager.WorldActive == WD_62SANTA_TOWN)	// 산타마을
+		else if(gMapManager.WorldActive == WD_62SANTA_TOWN)
 		{
 			Width = (float)GetScreenWidth()/640.f * 1.0f;
 	        CameraViewFar    = 2400.f;
@@ -2130,62 +2123,46 @@ void CreateFrustrum2D(vec3_t Position)
             switch ( CameraLevel )
             {
             case 0:
-				if(SceneFlag == LOG_IN_SCENE)				// 이혁재 - 로그인 씬 일때 거리 세팅
+				if(SceneFlag == LOG_IN_SCENE)
 				{
 				}
-				else if(SceneFlag == CHARACTER_SCENE)			// 이혁재 - 케릭터 씬 일때 거리 세팅
+				else if(SceneFlag == CHARACTER_SCENE)
 				{
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 					Width = (float)GetScreenWidth()/640.f * 9.1f * 0.404998f;
-#else //PJH_NEW_SERVER_SELECT_MAP
-					Width = (float)GetScreenWidth()/640.f * 10.0f * 0.575995f;
-#endif //PJH_NEW_SERVER_SELECT_MAP
 				}
-				else if(g_Direction.m_CKanturu.IsMayaScene() )			// 이혁재 - 칸투르 3차 맵일때
+				else if(g_Direction.m_CKanturu.IsMayaScene() )
 				{
 					Width = (float)GetScreenWidth()/640.f * 10.0f * 0.115f;
 				}
 				else
 				{
-					Width = (float)GetScreenWidth()/640.f;// * 0.1f;
+					Width = (float)GetScreenWidth()/640.f;
 				}
 
-				if(SceneFlag == LOG_IN_SCENE)				// 이혁재 - 로그인 씬 일때 거리 세팅
+				if(SceneFlag == LOG_IN_SCENE)
 				{
 				}
-				else if(SceneFlag == CHARACTER_SCENE)	// 이혁재 - 케릭터 씬 일때 거리 세팅
+				else if(SceneFlag == CHARACTER_SCENE)
 				{
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 					CameraViewFar = 2000.f * 9.1f * 0.404998f;
-#else //PJH_NEW_SERVER_SELECT_MAP
-					CameraViewFar = 2400.f * 10.0f * 0.575995f;
-#endif //PJH_NEW_SERVER_SELECT_MAP
 				}
-				else if(gMapManager.WorldActive == WD_39KANTURU_3RD /* && MayaScene */)	// 이혁재 - 칸투르 3차 맵일때
+				else if(gMapManager.WorldActive == WD_39KANTURU_3RD)
 				{
 					CameraViewFar = 2000.f * 10.0f * 0.115f;
 				}
 				else
 				{
-	                CameraViewFar    = 2400.f;// * 0.1f;
+	                CameraViewFar    = 2400.f;
 				}
 
 				if(SceneFlag == LOG_IN_SCENE)
 				{
 					Width = (float)GetScreenWidth()/640.f;
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 	                CameraViewFar    = 2400.f * 17.0f*13.0f;
 					CameraViewNear   = 2400.f * 17.0f*0.5f;
 					CameraViewTarget = 2400.f * 17.0f*0.5f;
 					WidthFar  = 5000.f*Width;
 					WidthNear = 300.f*Width;
-#else	// PJH_NEW_SERVER_SELECT_MAP
-	                CameraViewFar    = 2400.f * 17.0f*1.1f;
-					CameraViewNear   = 2400.f * 17.0f*0.5f;//0.22
-					CameraViewTarget = 2400.f * 17.0f*0.48f;//0.47
-					WidthFar  = 6300.f*Width; // 6300 3950.f
-					WidthNear = 690.f*Width; // 690 690.f
-#endif	// PJH_NEW_SERVER_SELECT_MAP
 				}
 				else
 				{
@@ -2267,14 +2244,6 @@ void CreateFrustrum2D(vec3_t Position)
 		FrustrumX[i] = Frustrum[i][0]*0.01f;
 		FrustrumY[i] = Frustrum[i][1]*0.01f;
 	}
-	/*DisableTexture();
-	glColor3f(0.5f,0.5f,0.5f);
-	glBegin(GL_LINE_LOOP);
-	for(i=0;i<4;i++)
-	{
-		glVertex3fv(Frustrum[i]);
-	}
-	glEnd();*/
 }
 
 bool TestFrustrum2D(float x,float y,float Range)

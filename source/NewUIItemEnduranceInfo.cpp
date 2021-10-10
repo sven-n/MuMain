@@ -88,35 +88,20 @@ void SEASON3B::CNewUIItemEnduranceInfo::SetPos( int x )
 	m_ItemDurUIStartPos.y = 140;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateMouseEvent
 bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 {
-	// 버튼 처리
-	if( true == BtnProcess() )	// 처리가 완료 되었다면
+	if( true == BtnProcess() )
 		return false;
 	
-	// UI처리 및 이동 불가
 	int iNextPosY = m_UIStartPos.y;
 	
-	// 사탄, 수호천사, 유니리아, 다크호스, 펜릴
 	if ( Hero->Helper.Type>=MODEL_HELPER && Hero->Helper.Type<=MODEL_HELPER+4
-#ifdef LDK_ADD_PC4_GUARDIAN
-		|| Hero->Helper.Type == MODEL_HELPER+64 //데몬
-		|| Hero->Helper.Type == MODEL_HELPER+65 //수호정령
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDK_ADD_RUDOLPH_PET
-		|| Hero->Helper.Type == MODEL_HELPER+67 //루돌프
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef PJH_ADD_PANDA_PET
-		|| Hero->Helper.Type == MODEL_HELPER+80 //펜더펫
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET
-		|| Hero->Helper.Type == MODEL_HELPER+106//유니콘 펫
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef YDG_ADD_SKELETON_PET
-		|| Hero->Helper.Type == MODEL_HELPER+123	// 스켈레톤 펫
-#endif	// YDG_ADD_SKELETON_PET
+		|| Hero->Helper.Type == MODEL_HELPER+64
+		|| Hero->Helper.Type == MODEL_HELPER+65
+		|| Hero->Helper.Type == MODEL_HELPER+67
+		|| Hero->Helper.Type == MODEL_HELPER+80
+		|| Hero->Helper.Type == MODEL_HELPER+106
+		|| Hero->Helper.Type == MODEL_HELPER+123
 		|| Hero->Helper.Type == MODEL_HELPER+37	)
 	{
 		if( CheckMouseIn( m_UIStartPos.x, iNextPosY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT ) )
@@ -245,20 +230,14 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 
 	
 	}
-
-
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateKeyEvent
 bool SEASON3B::CNewUIItemEnduranceInfo::UpdateKeyEvent()
 {
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Update
 bool SEASON3B::CNewUIItemEnduranceInfo::Update()
 {
 	if( !IsVisible() )
@@ -435,7 +414,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI( int iX, int iY, unicode::t_c
 #ifdef PJH_FIX_SPRIT
 	if(strcmp(pszName,GlobalText[1214]) == 0)
 	{
-	int iCharisma = CharacterAttribute->Charisma+CharacterAttribute->AddCharisma;	// 마이너스 열매 작업
+	int iCharisma = CharacterAttribute->Charisma+CharacterAttribute->AddCharisma;
 	PET_INFO PetInfo;
 	giPetManager::GetPetInfo(PetInfo, 421-PET_TYPE_DARK_SPIRIT);
 	int RequireCharisma = (185+(PetInfo.m_wLevel*15));
@@ -452,7 +431,6 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI( int iX, int iY, unicode::t_c
 	// HPUI_Bar
 	float fLife = ((float)iLife/(float)iMaxLife)*(float)PETHP_BAR_WIDTH;
 	RenderImage( IMAGE_PETHP_BAR, iX+4, iY+PETHP_FRAME_HEIGHT-PETHP_BAR_HEIGHT-4, fLife, PETHP_BAR_HEIGHT );
-	// 이름
 	g_pRenderText->RenderText( iX+(PETHP_FRAME_WIDTH/2), iY+5, pszName, 0, 0, RT3_WRITE_CENTER );
 	
 	DisableAlphaBlend();
@@ -468,11 +446,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip( int iX, int iY, const ITE
 
 	unicode::t_char szText[256] = { NULL, };
 	unicode::_sprintf( szText, "%s (%d/%d)", pItemAtt->Name, pItem->Durability, iMaxDurability );
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	g_pMultiLanguage->_GetTextExtentPoint32( g_pRenderText->GetFontDC(), szText, 1, &TextSize );		// Text Size를 계산한다.
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint( g_pRenderText->GetFontDC(), szText, 1, &TextSize );		// Text Size를 계산한다.
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+	g_pMultiLanguage->_GetTextExtentPoint32( g_pRenderText->GetFontDC(), szText, 1, &TextSize );
 
 	g_pRenderText->SetBgColor( 0, 0, 0, 128 );
 	g_pRenderText->SetFont( g_hFontBold );
@@ -481,7 +455,6 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip( int iX, int iY, const ITE
 
 	int iTooltipWidth = (/*TextSize.cx*/7*iTextlen) / g_fScreenRate_x;
 
-	// 화면 밖으로 넘어가지 않게 처리
 	if( iX+(iTooltipWidth/2) > GetScreenWidth() )
 	{
 		iX = GetScreenWidth() - (iTooltipWidth/2);
@@ -493,24 +466,13 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip( int iX, int iY, const ITE
 
 bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife( int iX, int iY )
 {
- 	// 사탄, 수호천사, 유니리아, 다크호스, 펜릴
  	if ( Hero->Helper.Type>=MODEL_HELPER && Hero->Helper.Type<=MODEL_HELPER+4
-#ifdef LDK_ADD_PC4_GUARDIAN
-		|| Hero->Helper.Type == MODEL_HELPER+64 //데몬
-		|| Hero->Helper.Type == MODEL_HELPER+65 //수호정령
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDK_ADD_RUDOLPH_PET
-		|| Hero->Helper.Type == MODEL_HELPER+67 //루돌프
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef PJH_ADD_PANDA_PET
-		|| Hero->Helper.Type == MODEL_HELPER+80 //펜더
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET
-		|| Hero->Helper.Type == MODEL_HELPER+106 //유니콘 펫
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef YDG_ADD_SKELETON_PET
-		|| Hero->Helper.Type == MODEL_HELPER+123	// 스켈레톤 펫
-#endif	// YDG_ADD_SKELETON_PET
+		|| Hero->Helper.Type == MODEL_HELPER+64
+		|| Hero->Helper.Type == MODEL_HELPER+65
+		|| Hero->Helper.Type == MODEL_HELPER+67
+		|| Hero->Helper.Type == MODEL_HELPER+80
+		|| Hero->Helper.Type == MODEL_HELPER+106
+		|| Hero->Helper.Type == MODEL_HELPER+123
  		|| Hero->Helper.Type == MODEL_HELPER+37	)
  	{
 		unicode::t_char szText[256] = {NULL, };
@@ -519,63 +481,65 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife( int iX, int iY 
  		{
 		case MODEL_HELPER:
 			{
-				unicode::_sprintf( szText, GlobalText[353] );				// 353 : "수호천사"
-			}break;
+				unicode::_sprintf( szText, GlobalText[353] );
+			}
+			break;
 		case MODEL_HELPER+1:
 			{
 				ITEM_ATTRIBUTE *p = &ItemAttribute[Hero->Helper.Type-MODEL_SWORD];	
-				unicode::_sprintf( szText, p->Name );						// 사탄
-			}break;
+				unicode::_sprintf( szText, p->Name );
+			}
+			break;
 		case MODEL_HELPER+2:
 			{
-				unicode::_sprintf( szText,GlobalText[355] );				// 355 : "유니리아"
-			}break;
+				unicode::_sprintf( szText,GlobalText[355] );
+			}
+			break;
 		case MODEL_HELPER+3:
 			{
-				unicode::_sprintf( szText,GlobalText[354] );				// 354 : "디노란트"
-			}break;
+				unicode::_sprintf( szText,GlobalText[354] );
+			}
+			break;
         case MODEL_HELPER+4:
 			{
-				unicode::_sprintf( szText,GlobalText[1187] );				// 1187 : "다크호스"
-            }break;
-		case MODEL_HELPER+37:	//^ 펜릴 정보 화면 오른쪽 위에 표시
+				unicode::_sprintf( szText,GlobalText[1187] );
+            }
+			break;
+		case MODEL_HELPER+37:
 			{
-				unicode::_sprintf( szText, GlobalText[1916] );				// 1916 : "펜릴"
-			}break;
-#ifdef LDK_ADD_PC4_GUARDIAN
-		case MODEL_HELPER+64: //데몬
+				unicode::_sprintf( szText, GlobalText[1916] );
+			}
+			break;
+		case MODEL_HELPER+64:
 			{
 				unicode::_sprintf( szText, ItemAttribute[ITEM_HELPER+64].Name );
-			}break;
-		case MODEL_HELPER+65: //수호정령
+			}
+			break;
+		case MODEL_HELPER+65:
 			{
 				unicode::_sprintf( szText, ItemAttribute[ITEM_HELPER+65].Name );
-			}break;
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDK_ADD_RUDOLPH_PET
-		case MODEL_HELPER+67: //루돌프
+			}
+			break;
+		case MODEL_HELPER+67:
 			{
 				unicode::_sprintf( szText, ItemAttribute[ITEM_HELPER+67].Name );
-			}break;
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef PJH_ADD_PANDA_PET
-		case MODEL_HELPER+80: //팬더
+			}
+			break;
+		case MODEL_HELPER+80:
 			{
 				unicode::_sprintf( szText, ItemAttribute[ITEM_HELPER+80].Name );
-			}break;
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET
-		case MODEL_HELPER+106: //유니콘 펫
+			}
+			break;
+		case MODEL_HELPER+106:
 			{
 				unicode::_sprintf( szText, ItemAttribute[ITEM_HELPER+106].Name );
-			}break;
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef YDG_ADD_SKELETON_PET
-		case MODEL_HELPER+123:	// 스켈레톤 펫
+			}
+			break;
+		case MODEL_HELPER+123:
 			{
 				unicode::_sprintf( szText, ItemAttribute[ITEM_HELPER+123].Name );
-			}break;
-#endif	// YDG_ADD_SKELETON_PET
+			}
+			break;
 		}
 
 		int iLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
@@ -594,7 +558,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedPetLife( int iX, int iY )
 		return false;
 		
 	unicode::t_char szText[256] = {NULL, };
-	unicode::_sprintf( szText, GlobalText[1214] );				// 1214 : 다크스피릿
+	unicode::_sprintf( szText, GlobalText[1214] );
 	
 	int iLife = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability;
 	
@@ -740,7 +704,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance( int ix, int iY )
 		ITEM_ATTRIBUTE *pItemAtt = &ItemAttribute[pItem->Type];
 		int iMaxDurability = calcMaxDurability( pItem, pItemAtt, iLevel );
 
-		// 50% 이상일때 
 		if( pItem->Durability > iMaxDurability*0.5f )		
 		{
 			continue;
@@ -759,20 +722,19 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance( int ix, int iY )
 			bRenderRingWarning = true;
 		}
 		
-		// 단계별 칼라 바꾸기 (4단계)
-		if( pItem->Durability == 0 )							// 0% 남았을때
+		if( pItem->Durability == 0 )
 		{
 			glColor4f( 1.f, 0.0f, 0.f, 0.5f );
 		}
-		else if( pItem->Durability <= iMaxDurability*0.2f )		// 20% 남았을때
+		else if( pItem->Durability <= iMaxDurability*0.2f )
 		{
 			glColor4f( 1.f, 0.2f, 0.0f, 0.5f );
 		}
-		else if( pItem->Durability <= iMaxDurability*0.3f )		// 30% 남았을때
+		else if( pItem->Durability <= iMaxDurability*0.3f )
 		{
 			glColor4f( 1.0f, 0.5f, 0.f, 0.5f );
 		}
-		else if( pItem->Durability <= iMaxDurability*0.5f )		// 50% 남았을때
+		else if( pItem->Durability <= iMaxDurability*0.5f )
 		{
 			glColor4f( 1.f, 1.f, 0.f, 0.5f );
 		}
@@ -807,7 +769,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance( int ix, int iY )
 		}
 	}
 
-	// 아이템 내구도 툴팁
 	if( m_iTooltipIndex != -1 )
 	{
 		ITEM *pItem = &CharacterMachine->Equipment[m_iTooltipIndex];	
@@ -843,8 +804,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance( int ix, int iY )
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// LoadImages
 void SEASON3B::CNewUIItemEnduranceInfo::LoadImages()
 {
 	LoadBitmap("Interface\\newui_Pet_Back.tga", IMAGE_PETHP_FRAME, GL_LINEAR);
@@ -859,13 +818,8 @@ void SEASON3B::CNewUIItemEnduranceInfo::LoadImages()
 	LoadBitmap("Interface\\newui_durable_upper.tga", IMAGE_ITEM_DUR_UPPER, GL_LINEAR);
 	LoadBitmap("Interface\\newui_durable_weapon.tga", IMAGE_ITEM_DUR_WEAPON, GL_LINEAR);
 	LoadBitmap("Interface\\newui_durable_wing.tga",	 IMAGE_ITEM_DUR_WING, GL_LINEAR);
-#ifdef PBG_ADD_PCROOM_NEWUI
-	LoadBitmap("Interface\\newui_PcRoom.tga", IMAGE_PCROOM_UI, GL_LINEAR);
-#endif //PBG_ADD_PCROOM_NEWUI
 }
 
-//---------------------------------------------------------------------------------------------
-// UnloadImages
 void SEASON3B::CNewUIItemEnduranceInfo::UnloadImages()
 {
 	DeleteBitmap( IMAGE_PETHP_FRAME );
@@ -880,7 +834,4 @@ void SEASON3B::CNewUIItemEnduranceInfo::UnloadImages()
 	DeleteBitmap( IMAGE_ITEM_DUR_UPPER );
 	DeleteBitmap( IMAGE_ITEM_DUR_WEAPON );
 	DeleteBitmap( IMAGE_ITEM_DUR_WING );
-#ifdef PBG_ADD_PCROOM_NEWUI
-	DeleteBitmap( IMAGE_PCROOM_UI );
-#endif //PBG_ADD_PCROOM_NEWUI
 }

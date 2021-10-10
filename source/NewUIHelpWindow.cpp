@@ -135,7 +135,6 @@ bool SEASON3B::CNewUIHelpWindow::Render()
 		unicode::_sprintf(TextList[iTextNum], "\n");
 		iTextNum++;
 
-		// 140 "채팅모드 키 사용법"
 		unicode::_strcpy(TextList[iTextNum], GlobalText[140]);
 		TextListColor[iTextNum] = TEXT_COLOR_BLUE;
 		TextBold[iTextNum] = true;

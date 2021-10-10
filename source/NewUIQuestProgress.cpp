@@ -638,10 +638,6 @@ void CNewUIQuestProgress::SetCurNPCWords()
 	m_nSelNPCPage = 0;
 }
 
-//*****************************************************************************
-// 함수 이름 : SetCurPlayerWords()
-// 함수 설명 : 현재 퀘스트 인덱스의 플래이어 대사, 선택문 세팅.
-//*****************************************************************************
 void CNewUIQuestProgress::SetCurPlayerWords()
 {
 	if (0 == m_dwCurQuestIndex)
@@ -650,13 +646,9 @@ void CNewUIQuestProgress::SetCurPlayerWords()
 	::memset(m_aszPlayerWords[0], 0, sizeof(char) * QP_PLAYER_LINE_MAX * QP_WORDS_ROW_MAX);
 	::memset(m_anAnswerLine, 0, sizeof(int) * QM_MAX_ANSWER);
 
-	g_pRenderText->SetFont(g_hFont);	// DivideStringByPixel()함수 전에 폰트를 설정해주어야 함.
-	::DivideStringByPixel(&m_aszPlayerWords[0][0], 2, QP_WORDS_ROW_MAX,
-#ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
-		g_QuestMng.GetPlayerWords(m_dwCurQuestIndex), 160);
-#else	// ASG_MOD_3D_CHAR_EXCLUSION_UI
-		g_QuestMng.GetPlayerWords(m_dwCurQuestIndex), 144);
-#endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
+	g_pRenderText->SetFont(g_hFont);
+
+	::DivideStringByPixel(&m_aszPlayerWords[0][0], 2, QP_WORDS_ROW_MAX,	g_QuestMng.GetPlayerWords(m_dwCurQuestIndex), 160);
 
 	char szAnswer[2 * QP_WORDS_ROW_MAX];
 	const char* pszAnswer;
@@ -664,7 +656,6 @@ void CNewUIQuestProgress::SetCurPlayerWords()
 	int i;
 	for (i = 0; i < QM_MAX_ANSWER; ++i)
 	{
-	// 선택문 앞에 번호 붙이기.
 		::sprintf(szAnswer, "%d.", i + 1);
 		pszAnswer = g_QuestMng.GetAnswer(m_dwCurQuestIndex, i);
 		if (NULL == pszAnswer)
@@ -672,12 +663,7 @@ void CNewUIQuestProgress::SetCurPlayerWords()
 		::strcat(szAnswer, pszAnswer);
 
 	// 행 나누기. 선택문 1개는 최대 2행임.
-		m_anAnswerLine[i] = ::DivideStringByPixel(&m_aszPlayerWords[nPlayerWordsRow][0],
-#ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
-			2, QP_WORDS_ROW_MAX, szAnswer, 160, false);
-#else	// ASG_MOD_3D_CHAR_EXCLUSION_UI
-			2, QP_WORDS_ROW_MAX, szAnswer, 144, false);
-#endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
+		m_anAnswerLine[i] = ::DivideStringByPixel(&m_aszPlayerWords[nPlayerWordsRow][0],2, QP_WORDS_ROW_MAX, szAnswer, 160, false);
 
 		nPlayerWordsRow += m_anAnswerLine[i];
 

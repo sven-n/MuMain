@@ -775,9 +775,7 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 	g_pRenderText->RenderText(m_StartUISubjectName.x, m_StartUISubjectName.y, GlobalText[933], 0 ,0, RT3_WRITE_CENTER);
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(127, 178, 255, 255);
-#ifdef ASG_ADD_GENS_SYSTEM
 	g_pRenderText->RenderText(m_StrifePos.x, m_StartUISubjectName.y+20, GlobalText[2988], 0 ,0, RT3_WRITE_CENTER);
-#endif	// ASG_ADD_GENS_SYSTEM
 	g_pRenderText->RenderText(m_MapNamePos.x, m_StartUISubjectName.y+20, GlobalText[934], 0 ,0, RT3_WRITE_CENTER);
 	g_pRenderText->RenderText(m_ReqLevelPos.x, m_StartUISubjectName.y+20, GlobalText[935], 0 ,0, RT3_WRITE_CENTER);
 	g_pRenderText->RenderText(m_ReqZenPos.x, m_StartUISubjectName.y+20, GlobalText[936], 0 ,0, RT3_WRITE_CENTER);
@@ -836,10 +834,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 		{
 			g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-#ifdef ASG_ADD_GENS_SYSTEM
 			if ((*li)->_bStrife)
-				g_pRenderText->RenderText(m_StrifePos.x, iY, GlobalText[2987], 0 ,0, RT3_WRITE_CENTER);	// 2987	"(ºÐÀï)"
-#endif	// ASG_ADD_GENS_SYSTEM
+				g_pRenderText->RenderText(m_StrifePos.x, iY, GlobalText[2987], 0 ,0, RT3_WRITE_CENTER);
 			g_pRenderText->RenderText(m_MapNamePos.x, iY, (*li)->_ReqInfo.szMainMapName, 0 ,0, RT3_WRITE_CENTER);
 			itoa(iReqLevel, szText, 10);
 			g_pRenderText->RenderText(m_ReqLevelPos.x, iY, szText, 0 ,0, RT3_WRITE_CENTER);
@@ -896,11 +892,6 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 	return true;
 }
 
-float SEASON3B::CNewUIMoveCommandWindow::GetLayerDepth()
-{
-	return 6.4f;
-}
-
 void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 {
 	SetPos(m_Pos.x, m_Pos.y);
@@ -922,6 +913,11 @@ void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 void SEASON3B::CNewUIMoveCommandWindow::ClosingProcess()
 {
 
+}
+
+float SEASON3B::CNewUIMoveCommandWindow::GetLayerDepth()
+{
+	return 8.3f;
 }
 
 void SEASON3B::CNewUIMoveCommandWindow::LoadImages()

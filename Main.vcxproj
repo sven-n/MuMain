@@ -1556,7 +1556,6 @@
     <ClCompile Include="source\DSplaysound.cpp" />
     <ClCompile Include="source\DSwaveIO.cpp" />
     <ClCompile Include="source\DuelMgr.cpp" />
-    <ClCompile Include="source\DummyAttackProtocol.cpp" />
     <ClCompile Include="source\Event.cpp" />
     <ClCompile Include="source\ExplanationInfo.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\callstackdmp.cpp" />
@@ -2034,7 +2033,6 @@
     <ClInclude Include="source\DSwaveIO.h" />
     <ClInclude Include="source\DSWavRead.h" />
     <ClInclude Include="source\DuelMgr.h" />
-    <ClInclude Include="source\DummyAttackProtocol.h" />
     <ClInclude Include="source\Event.h" />
     <ClInclude Include="source\ExplanationInfo.h" />
     <ClInclude Include="source\ExternalObject\Chilkat\Chilkat_C.h" />

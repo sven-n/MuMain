@@ -2167,12 +2167,10 @@ void OpenNpc(int Type)
 		gLoadData.AccessModel ( MODEL_SMELTING_NPC, "Data\\Npc\\", "Elpis" );
 		gLoadData.OpenTexture ( MODEL_SMELTING_NPC, "Npc\\" );
 		break;
-#ifdef ADD_NPC_DEVIN
 	case MODEL_NPC_DEVIN:
 		gLoadData.AccessModel(MODEL_NPC_DEVIN, "Data\\Npc\\", "devin" );
 		gLoadData.OpenTexture(MODEL_NPC_DEVIN, "Npc\\");
 		break;
-#endif	// ADD_NPC_DEVIN
 	case MODEL_NPC_QUARREL:
 		gLoadData.AccessModel(MODEL_NPC_QUARREL, "Data\\Npc\\", "WereQuarrel" );
 		gLoadData.OpenTexture(MODEL_NPC_QUARREL, "Monster\\");
@@ -2221,19 +2219,14 @@ void OpenNpc(int Type)
 		gLoadData.AccessModel(MODEL_ELBELAND_MARCE, "Data\\Npc\\", "marce" );
 		gLoadData.OpenTexture(MODEL_ELBELAND_MARCE, "Npc\\");
 		break;
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	case MODEL_NPC_CHERRYBLOSSOM:
 		gLoadData.AccessModel(MODEL_NPC_CHERRYBLOSSOM, "Data\\Npc\\cherryblossom\\", "cherry_blossom" );
 		gLoadData.OpenTexture(MODEL_NPC_CHERRYBLOSSOM, "Npc\\cherryblossom\\");
 		break;
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef PSW_EVENT_CHERRYBLOSSOMTREE
 	case MODEL_NPC_CHERRYBLOSSOMTREE:
 		gLoadData.AccessModel(MODEL_NPC_CHERRYBLOSSOMTREE, "Data\\Npc\\cherryblossom\\", "sakuratree" );
 		gLoadData.OpenTexture(MODEL_NPC_CHERRYBLOSSOMTREE, "Npc\\cherryblossom\\");
 		break;
-#endif //PSW_EVENT_CHERRYBLOSSOMTREE		
-#ifdef ADD_SOCKET_MIX
 	case MODEL_SEED_MASTER:
 		gLoadData.AccessModel(MODEL_SEED_MASTER, "Data\\Npc\\", "goblinmaster" );
 		gLoadData.OpenTexture(MODEL_SEED_MASTER, "Npc\\");
@@ -2242,9 +2235,6 @@ void OpenNpc(int Type)
 		gLoadData.AccessModel(MODEL_SEED_INVESTIGATOR, "Data\\Npc\\", "seedgoblin" );
 		gLoadData.OpenTexture(MODEL_SEED_INVESTIGATOR, "Npc\\");
 		break;
-#endif	// ADD_SOCKET_MIX
-#ifdef PBG_ADD_LITTLESANTA_NPC
-		//리틀산타 NPC.8개종.
 	case MODEL_LITTLESANTA:
 	case MODEL_LITTLESANTA+1:
 	case MODEL_LITTLESANTA+2:
@@ -2254,13 +2244,11 @@ void OpenNpc(int Type)
 	case MODEL_LITTLESANTA+6:
 	case MODEL_LITTLESANTA+7:
 		{
-			//한개의 모델데이터.
 			gLoadData.AccessModel(MODEL_LITTLESANTA +(Type - MODEL_LITTLESANTA), "Data\\Npc\\", "xmassanta");
 
 			int _index = 9;
 			int _index_end = 14;
 
-			//각기 다른 텍스쳐네임을 갖고있다.순번을 먹인다.
 			Models[Type].Textures->FileName[_index_end] = NULL;
 			for(int i=_index_end-1; i>_index; i--)
 			{
@@ -2271,15 +2259,11 @@ void OpenNpc(int Type)
 			itoa(_temp, _temp2, 10);
 			Models[Type].Textures->FileName[_index] = _temp2[0];
 
-			//8개의 텍스쳐.
 			gLoadData.OpenTexture(MODEL_LITTLESANTA +(Type - MODEL_LITTLESANTA), "Npc\\");
 		}
 		break;
-#endif //PBG_ADD_LITTLESANTA_NPC
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 	case MODEL_XMAS2008_SNOWMAN:
 		{
-			//크리스마스 눈사람 변신 반지 캐릭터 모델
 			gLoadData.AccessModel(MODEL_XMAS2008_SNOWMAN,			"Data\\Item\\xmas\\", "snowman");
 			gLoadData.AccessModel(MODEL_XMAS2008_SNOWMAN_HEAD,	"Data\\Item\\xmas\\", "snowman_die_head_model");
 			gLoadData.AccessModel(MODEL_XMAS2008_SNOWMAN_BODY,	"Data\\Item\\xmas\\", "snowman_die_body");
@@ -2294,57 +2278,39 @@ void OpenNpc(int Type)
 			LoadWaveFile(SOUND_XMAS_SNOWMAN_DEATH_1,	"Data\\Sound\\xmas\\SnowMan_Death01.wav");
 		}
 		break;
-#endif //LDK_ADD_SNOWMAN_CHANGERING
-#ifdef LDK_ADD_SNOWMAN_NPC
 	case MODEL_XMAS2008_SNOWMAN_NPC:
 		gLoadData.AccessModel(MODEL_XMAS2008_SNOWMAN_NPC, "Data\\Npc\\", "snowman" );
 		gLoadData.OpenTexture(MODEL_XMAS2008_SNOWMAN_NPC, "Npc\\");
 		break;
-#endif //LDK_ADD_SNOWMAN_NPC
-#ifdef LDK_ADD_SANTA_NPC
 	case MODEL_XMAS2008_SANTA_NPC:
 		gLoadData.AccessModel(MODEL_XMAS2008_SANTA_NPC, "Data\\Npc\\", "npcsanta" );
 		gLoadData.OpenTexture(MODEL_XMAS2008_SANTA_NPC, "Npc\\");
 		break;
-#endif //LDK_ADD_SANTA_NPC
-#ifdef YDG_ADD_NEW_DUEL_NPC
 	case MODEL_DUEL_NPC_TITUS:
 		gLoadData.AccessModel(MODEL_DUEL_NPC_TITUS, "Data\\Npc\\", "titus" );
 		gLoadData.OpenTexture(MODEL_DUEL_NPC_TITUS, "Npc\\");
 
 		LoadWaveFile(SOUND_DUEL_NPC_IDLE_1, "Data\\Sound\\w64\\GatekeeperTitus.wav");
 		break;
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef LDK_ADD_GAMBLE_NPC_MOSS
 	case MODEL_GAMBLE_NPC_MOSS:
 		gLoadData.AccessModel(MODEL_GAMBLE_NPC_MOSS, "Data\\Npc\\", "gambler_moss" );
 		gLoadData.OpenTexture(MODEL_GAMBLE_NPC_MOSS, "Npc\\");
 		break;
-#endif //LDK_ADD_GAMBLE_NPC_MOSS
-#ifdef YDG_ADD_DOPPELGANGER_NPC
 	case MODEL_DOPPELGANGER_NPC_LUGARD:
 		gLoadData.AccessModel(MODEL_DOPPELGANGER_NPC_LUGARD, "Data\\Npc\\", "Lugard" );
 		gLoadData.OpenTexture(MODEL_DOPPELGANGER_NPC_LUGARD, "Npc\\");
-#ifdef YDG_ADD_DOPPELGANGER_SOUND
 		LoadWaveFile(SOUND_DOPPELGANGER_LUGARD_BREATH, "Data\\Sound\\Doppelganger\\Lugard.wav");
-#endif	// YDG_ADD_DOPPELGANGER_SOUND
 		break;
 	case MODEL_DOPPELGANGER_NPC_BOX:
 		gLoadData.AccessModel(MODEL_DOPPELGANGER_NPC_BOX, "Data\\Npc\\", "DoppelgangerBox" );
 		gLoadData.OpenTexture(MODEL_DOPPELGANGER_NPC_BOX, "Npc\\");
-#ifdef YDG_ADD_DOPPELGANGER_SOUND
 		LoadWaveFile(SOUND_DOPPELGANGER_JEWELBOX_OPEN, "Data\\Sound\\Doppelganger\\treasurebox_open.wav");
-#endif	// YDG_ADD_DOPPELGANGER_SOUND
 		break;
 	case MODEL_DOPPELGANGER_NPC_GOLDENBOX:
 		gLoadData.AccessModel(MODEL_DOPPELGANGER_NPC_GOLDENBOX, "Data\\Npc\\", "DoppelgangerBox" );
 		gLoadData.OpenTexture(MODEL_DOPPELGANGER_NPC_GOLDENBOX, "Npc\\");
-#ifdef YDG_ADD_DOPPELGANGER_SOUND
 		LoadWaveFile(SOUND_DOPPELGANGER_JEWELBOX_OPEN, "Data\\Sound\\Doppelganger\\treasurebox_open.wav");
-#endif	// YDG_ADD_DOPPELGANGER_SOUND
 		break;
-#endif	// YDG_ADD_DOPPELGANGER_NPC
-#ifdef ASG_ADD_GENS_NPC
 	case MODAL_GENS_NPC_DUPRIAN:
 		gLoadData.AccessModel(MODAL_GENS_NPC_DUPRIAN, "Data\\Npc\\", "duprian" );
 		gLoadData.OpenTexture(MODAL_GENS_NPC_DUPRIAN, "Npc\\");
@@ -2353,8 +2319,6 @@ void OpenNpc(int Type)
 		gLoadData.AccessModel(MODAL_GENS_NPC_BARNERT, "Data\\Npc\\", "barnert" );
 		gLoadData.OpenTexture(MODAL_GENS_NPC_BARNERT, "Npc\\");
 		break;
-#endif	// ASG_ADD_GENS_NPC
-#ifdef LDS_ADD_NPC_UNITEDMARKETPLACE
 	case MODEL_UNITEDMARKETPLACE_CHRISTIN:
 		gLoadData.AccessModel(MODEL_UNITEDMARKETPLACE_CHRISTIN, "Data\\Npc\\", "UnitedMarketPlace_christine" );
 		gLoadData.OpenTexture(MODEL_UNITEDMARKETPLACE_CHRISTIN, "Npc\\");
@@ -2367,21 +2331,6 @@ void OpenNpc(int Type)
 		gLoadData.AccessModel(MODEL_UNITEDMARKETPLACE_JULIA, "Data\\Npc\\", "UnitedMarkedPlace_julia" );
 		gLoadData.OpenTexture(MODEL_UNITEDMARKETPLACE_JULIA, "Npc\\");
 		break;
-#endif // LDS_ADD_NPC_UNITEDMARKETPLACE
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
-	case MODEL_TIME_LIMIT_QUEST_NPC_TERSIA:
-		gLoadData.AccessModel(MODEL_TIME_LIMIT_QUEST_NPC_TERSIA, "Data\\Npc\\", "tersia");
-		gLoadData.OpenTexture(MODEL_TIME_LIMIT_QUEST_NPC_TERSIA, "Npc\\");
-		break;
-	case MODEL_TIME_LIMIT_QUEST_NPC_BENA:
-		gLoadData.AccessModel(MODEL_TIME_LIMIT_QUEST_NPC_BENA, "Data\\Npc\\", "bena");
-		gLoadData.OpenTexture(MODEL_TIME_LIMIT_QUEST_NPC_BENA, "Npc\\");
-		break;
-	case MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO:	// 겜블 NPC 모스와 동일.
-		gLoadData.AccessModel(MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO, "Data\\Npc\\", "gambler_moss");
-		gLoadData.OpenTexture(MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO, "Npc\\");
-		break;
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_NPC
 #ifdef ASG_ADD_KARUTAN_NPC
 	case MODEL_KARUTAN_NPC_REINA:	// 로랜시장 NPC 잡화상인 크리스틴과 동일.
 		gLoadData.AccessModel(MODEL_KARUTAN_NPC_REINA, "Data\\Npc\\", "UnitedMarketPlace_christine");
@@ -2408,27 +2357,20 @@ void OpenNpc(int Type)
     if(b->NumMeshs > 0)
     	gLoadData.OpenTexture(Type,"Npc\\");
 
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
-	//변경 속도 지정
 	switch(Type)
 	{
 	case MODEL_XMAS2008_SNOWMAN:
 		Models[Type].Actions[MONSTER01_WALK].PlaySpeed = 0.9f;
 		break;
-#ifdef PJH_ADD_PANDA_CHANGERING
 	case MODEL_PANDA:
 		Models[Type].Actions[MONSTER01_WALK].PlaySpeed = 0.9f;
 		break;
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_DOPPELGANGER_NPC
 	case MODEL_DOPPELGANGER_NPC_BOX:
 		Models[Type].Actions[MONSTER01_DIE].PlaySpeed = 0.1f;
 		break;
 	case MODEL_DOPPELGANGER_NPC_GOLDENBOX:
 		Models[Type].Actions[MONSTER01_DIE].PlaySpeed = 0.1f;
 		break;
-#endif	// YDG_ADD_DOPPELGANGER_NPC
-#ifdef ASG_ADD_GENS_NPC
 	case MODAL_GENS_NPC_DUPRIAN:
 		Models[Type].Actions[MONSTER01_STOP1].PlaySpeed = 0.6f;
 		Models[Type].Actions[MONSTER01_STOP2].PlaySpeed = 0.6f;
@@ -2438,8 +2380,6 @@ void OpenNpc(int Type)
 		Models[Type].Actions[MONSTER01_STOP1].PlaySpeed = 0.3f;
 		Models[Type].Actions[MONSTER01_STOP2].PlaySpeed = 1.2f;
 		Models[Type].Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
-#endif	// ASG_ADD_GENS_NPC
-#ifdef LDS_ADD_NPC_UNITEDMARKETPLACE
 	case MODEL_UNITEDMARKETPLACE_RAUL:
 		Models[Type].Actions[MONSTER01_STOP1].PlaySpeed = 0.5f;
 		Models[Type].Actions[MONSTER01_STOP2].PlaySpeed = 0.5f;
@@ -2458,7 +2398,6 @@ void OpenNpc(int Type)
 		Models[Type].Actions[MONSTER01_STOP2].PlaySpeed = 0.6f;
 		Models[Type].Actions[MONSTER01_WALK].PlaySpeed = 0.5f;
 		break;
-#endif // LDS_ADD_NPC_UNITEDMARKETPLACE
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
 	case MODEL_TIME_LIMIT_QUEST_NPC_TERSIA:
 		Models[Type].Actions[MONSTER01_STOP1].PlaySpeed = 0.35f;
@@ -2472,7 +2411,6 @@ void OpenNpc(int Type)
 		break;
 #endif	// ASG_ADD_KARUTAN_NPC
 	}
-#endif //LDK_ADD_SNOWMAN_CHANGERING
 
 
 //#endif
@@ -4192,31 +4130,31 @@ void OpenMonsterModels()
 
 void OpenSkills()
 {
-	gLoadData.AccessModel(MODEL_ICE      ,"Data\\Skill\\","Ice",1);
+	gLoadData.AccessModel(MODEL_ICE,"Data\\Skill\\","Ice",1);
 	gLoadData.AccessModel(MODEL_ICE_SMALL,"Data\\Skill\\","Ice",2);
-	gLoadData.AccessModel(MODEL_FIRE     ,"Data\\Skill\\","Fire",1);
-	gLoadData.AccessModel(MODEL_POISON   ,"Data\\Skill\\","Poison",1);
-	for(int i=0;i<2;i++)
-     	gLoadData.AccessModel(MODEL_STONE1+i ,"Data\\Skill\\","Stone",i+1);
-	gLoadData.AccessModel(MODEL_CIRCLE   ,"Data\\Skill\\","Circle",1);
+	gLoadData.AccessModel(MODEL_FIRE,"Data\\Skill\\","Fire",1);
+	gLoadData.AccessModel(MODEL_POISON,"Data\\Skill\\","Poison",1);
+	for(int i = 0; i < 2; i++)
+		gLoadData.AccessModel(MODEL_STONE1 + i,"Data\\Skill\\","Stone",i + 1);
+	gLoadData.AccessModel(MODEL_CIRCLE,"Data\\Skill\\","Circle",1);
 	gLoadData.AccessModel(MODEL_CIRCLE_LIGHT,"Data\\Skill\\","Circle",2);
-	gLoadData.AccessModel(MODEL_MAGIC1   ,"Data\\Skill\\","Magic",1);
-	gLoadData.AccessModel(MODEL_MAGIC2   ,"Data\\Skill\\","Magic",2);
-	gLoadData.AccessModel(MODEL_STORM    ,"Data\\Skill\\","Storm",1);
-	gLoadData.AccessModel(MODEL_LASER    ,"Data\\Skill\\","Laser",1);
+	gLoadData.AccessModel(MODEL_MAGIC1,"Data\\Skill\\","Magic",1);
+	gLoadData.AccessModel(MODEL_MAGIC2,"Data\\Skill\\","Magic",2);
+	gLoadData.AccessModel(MODEL_STORM,"Data\\Skill\\","Storm",1);
+	gLoadData.AccessModel(MODEL_LASER,"Data\\Skill\\","Laser",1);
 
-	for(int i=0;i<3;i++)
-      	gLoadData.AccessModel(MODEL_SKELETON1+i,"Data\\Skill\\","Skeleton",i+1);
+	for(int i = 0; i < 3; i++)
+		gLoadData.AccessModel(MODEL_SKELETON1 + i,"Data\\Skill\\","Skeleton",i + 1);
 
-	gLoadData.AccessModel(MODEL_SKELETON_PCBANG, "Data\\Skill\\", "Skeleton", 3);
+	gLoadData.AccessModel(MODEL_SKELETON_PCBANG,"Data\\Skill\\","Skeleton",3);
 	gLoadData.AccessModel(MODEL_HALLOWEEN, "Data\\Skill\\", "Jack");
 
-	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_BLUE, "Data\\Skill\\", "hcandyblue");
-	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_ORANGE, "Data\\Skill\\", "hcandyorange");
-	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_RED, "Data\\Skill\\", "hcandyred");
-	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_YELLOW, "Data\\Skill\\", "hcandyyellow");
-	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_HOBAK, "Data\\Skill\\", "hhobak");
-	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_STAR, "Data\\Skill\\", "hstar");
+	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_BLUE,"Data\\Skill\\","hcandyblue");
+	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_ORANGE,"Data\\Skill\\","hcandyorange");
+	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_RED,"Data\\Skill\\","hcandyred");
+	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_YELLOW,"Data\\Skill\\","hcandyyellow");
+	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_HOBAK,"Data\\Skill\\","hhobak");
+	gLoadData.AccessModel(MODEL_HALLOWEEN_CANDY_STAR,"Data\\Skill\\","hstar");
 	LoadBitmap("Skill\\jack04.jpg", BITMAP_JACK_1);
 	LoadBitmap("Skill\\jack05.jpg", BITMAP_JACK_2);
 	LoadBitmap("Monster\\iui02.tga",BITMAP_ROBE+3);
@@ -4256,27 +4194,15 @@ void OpenSkills()
 	gLoadData.AccessModel(MODEL_FENRIR_GOLD, "Data\\Skill\\", "fenril_gold");
 	gLoadData.OpenTexture(MODEL_FENRIR_BLUE, "Skill\\");
 
-#ifdef PJH_ADD_PANDA_CHANGERING
 	gLoadData.AccessModel(MODEL_PANDA,			"Data\\Item\\", "panda");
 	gLoadData.OpenTexture(MODEL_PANDA,			"Item\\" );
-#endif //PJH_ADD_PANDA_CHANGERING
 
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-	gLoadData.AccessModel(MODEL_SKELETON_CHANGED,			"Data\\Item\\", "trans_skeleton");	// 스켈레톤 변신반지
+	gLoadData.AccessModel(MODEL_SKELETON_CHANGED,			"Data\\Item\\", "trans_skeleton");
 	gLoadData.OpenTexture(MODEL_SKELETON_CHANGED,			"Item\\" );
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
 
 
-#ifdef PET_SYSTEM
     gLoadData.AccessModel ( MODEL_DARK_SPIRIT, "Data\\Skill\\", "DarkSpirit" );
-
 	LoadBitmap( "Skill\\dkthreebody_r.jpg" , BITMAP_MONSTER_SKIN+2, GL_LINEAR, GL_REPEAT );
-    
-#endif// PET_SYSTEM
-
-#ifdef DARK_WOLF
-    gLoadData.AccessModel ( MODEL_DARK_WOLF, "Data\\Skill\\", "DarkWolf" );
-#endif// DARK_WOLF
 
     gLoadData.AccessModel ( MODEL_WARCRAFT,   "Data\\Skill\\", "HellGate" );
     Models[MODEL_WARCRAFT].Actions[0].LockPositions = false;
@@ -4303,36 +4229,25 @@ void OpenSkills()
 	gLoadData.OpenTexture(MODEL_DARK_SCREAM ,"Skill\\");
 	gLoadData.AccessModel(MODEL_DARK_SCREAM_FIRE ,"Data\\Skill\\","darkfirescrem01");
 	gLoadData.OpenTexture(MODEL_DARK_SCREAM_FIRE ,"Skill\\");
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	gLoadData.AccessModel(MODEL_SUMMON		,"Data\\SKill\\","nightmaresum");
 	gLoadData.OpenTexture(MODEL_SUMMON		,"SKill\\");
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 	gLoadData.AccessModel(MODEL_MULTI_SHOT1 ,"Data\\Effect\\","multishot01");
 	gLoadData.OpenTexture(MODEL_MULTI_SHOT1 ,"Effect\\");
 	gLoadData.AccessModel(MODEL_MULTI_SHOT2 ,"Data\\Effect\\","multishot02");
 	gLoadData.OpenTexture(MODEL_MULTI_SHOT2 ,"Effect\\");
 	gLoadData.AccessModel(MODEL_MULTI_SHOT3 ,"Data\\Effect\\","multishot03");
 	gLoadData.OpenTexture(MODEL_MULTI_SHOT3 ,"Effect\\");
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 	gLoadData.AccessModel(MODEL_DESAIR		,"Data\\SKill\\","desair");
 	gLoadData.OpenTexture(MODEL_DESAIR		,"SKill\\");
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 	gLoadData.AccessModel(MODEL_ARROW_RING ,"Data\\Skill\\","CW_Bow_Skill");
 	gLoadData.OpenTexture(MODEL_ARROW_RING ,"Skill\\");
 	
-#ifdef ADD_SOCKET_ITEM
 	gLoadData.AccessModel(MODEL_ARROW_DARKSTINGER, "Data\\Skill\\", "sketbows_arrows");
 	gLoadData.OpenTexture(MODEL_ARROW_DARKSTINGER, "Skill\\");
 	gLoadData.AccessModel(MODEL_FEATHER, "Data\\Skill\\", "darkwing_hetachi");
 	gLoadData.OpenTexture(MODEL_FEATHER, "Skill\\");
-#endif // ADD_SOCKET_ITEM
-#ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 	gLoadData.AccessModel(MODEL_FEATHER_FOREIGN, "Data\\Skill\\", "darkwing_hetachi");
 	gLoadData.OpenTexture(MODEL_FEATHER_FOREIGN, "Skill\\");
-#endif //LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-#ifdef PBG_ADD_PKFIELD
 	LoadBitmap("Effect\\Bugbear_R.jpg", BITMAP_BUGBEAR_R, GL_LINEAR, GL_REPEAT);
 	LoadBitmap("Effect\\pk_mon02_fire.jpg", BITMAP_PKMON01, GL_LINEAR, GL_REPEAT);
 	LoadBitmap("Effect\\pk_mon03_red.jpg" , BITMAP_PKMON02, GL_LINEAR, GL_REPEAT);
@@ -4342,17 +4257,10 @@ void OpenSkills()
 	LoadBitmap("Effect\\lavagiantBa_e.jpg", BITMAP_PKMON06, GL_LINEAR, GL_REPEAT);
 	LoadBitmap("Effect\\eff_magma_red.jpg", BITMAP_LAVAGIANT_FOOTPRINT_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\eff_magma_violet.jpg", BITMAP_LAVAGIANT_FOOTPRINT_V, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //PBG_ADD_PKFIELD
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 	LoadBitmap("Effect\\raymond_sword_R.jpg", BITMAP_RAYMOND_SWORD, GL_LINEAR, GL_REPEAT);
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-#ifdef PBG_ADD_AURA_EFFECT
 	LoadBitmap("Effect\\mist01.jpg", BITMAP_AG_ADDITION_EFFECT, GL_LINEAR, GL_REPEAT);
-#endif //PBG_ADD_AURA_EFFECT
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 	gLoadData.AccessModel(MODEL_ARROW_GAMBLE, "Data\\Skill\\", "gamble_arrows01");
 	gLoadData.OpenTexture(MODEL_ARROW_GAMBLE, "Skill\\");
-#endif //LDK_ADD_GAMBLERS_WEAPONS
 
 	gLoadData.OpenTexture(MODEL_SPEARSKILL		,"Skill\\");
 	gLoadData.AccessModel(MODEL_SPEARSKILL      ,"Data\\Skill\\","RidingSpear",1);
@@ -4370,9 +4278,9 @@ void OpenSkills()
 	gLoadData.AccessModel(MODEL_SKILL_INFERNO,"Data\\Skill\\","Inferno",1);
 	gLoadData.AccessModel(MODEL_ARROW_DOUBLE ,"Data\\Skill\\","ArrowDouble",1);
 
-	gLoadData.AccessModel(MODEL_ARROW_BEST_CROSSBOW, "Data\\Skill\\", "KCross" );	//	절대 석궁. 화살.
-	gLoadData.AccessModel(MODEL_ARROW_DRILL, "Data\\Skill\\", "Carow" );			//	초 절대 석궁. 화살.
-	gLoadData.AccessModel(MODEL_COMBO		 , "Data\\Skill\\", "combo" );			//	콤보 효과.
+	gLoadData.AccessModel(MODEL_ARROW_BEST_CROSSBOW, "Data\\Skill\\", "KCross" );
+	gLoadData.AccessModel(MODEL_ARROW_DRILL, "Data\\Skill\\", "Carow" );
+	gLoadData.AccessModel(MODEL_COMBO		 , "Data\\Skill\\", "combo" );
 
     gLoadData.AccessModel ( MODEL_GATE+0, "Data\\Object12\\", "Gate", 1 );
     gLoadData.AccessModel ( MODEL_GATE+1, "Data\\Object12\\", "Gate", 2 );
@@ -4385,64 +4293,55 @@ void OpenSkills()
         gLoadData.OpenTexture ( MODEL_STONE_COFFIN+i, "Monster\\" );
     }
 
-	gLoadData.AccessModel ( MODEL_AIR_FORCE, "Data\\Skill\\", "AirForce" );       //  공기 저항 효과.
-	gLoadData.AccessModel ( MODEL_WAVES    , "Data\\Skill\\", "m_Waves" );		//	파장 효과.
-	gLoadData.AccessModel ( MODEL_PIERCING2, "Data\\Skill\\", "m_Piercing" );	    //	스트롱 피어 부품.
-	gLoadData.AccessModel ( MODEL_PIER_PART, "Data\\Skill\\", "PierPart" );	    //	롱피어 부품.
-	gLoadData.AccessModel ( MODEL_DARKLORD_SKILL, "Data\\Skill\\", "DarkLordSkill" ); //	다크로드 여러스킬.
-	gLoadData.AccessModel ( MODEL_GROUND_STONE,   "Data\\Skill\\", "groundStone" );   //  바위스킬.
+	gLoadData.AccessModel ( MODEL_AIR_FORCE, "Data\\Skill\\", "AirForce" );
+	gLoadData.AccessModel ( MODEL_WAVES    , "Data\\Skill\\", "m_Waves" );
+	gLoadData.AccessModel ( MODEL_PIERCING2, "Data\\Skill\\", "m_Piercing" );
+	gLoadData.AccessModel ( MODEL_PIER_PART, "Data\\Skill\\", "PierPart" );
+	gLoadData.AccessModel ( MODEL_DARKLORD_SKILL, "Data\\Skill\\", "DarkLordSkill" );
+	gLoadData.AccessModel ( MODEL_GROUND_STONE,   "Data\\Skill\\", "groundStone" );
     Models[MODEL_GROUND_STONE].Actions[0].Loop = false;
-    gLoadData.AccessModel ( MODEL_GROUND_STONE2,  "Data\\Skill\\", "groundStone2" );  //  바위스킬.
+    gLoadData.AccessModel ( MODEL_GROUND_STONE2,  "Data\\Skill\\", "groundStone2" );
     Models[MODEL_GROUND_STONE2].Actions[0].Loop = false;
-	gLoadData.AccessModel ( MODEL_WATER_WAVE,     "Data\\Skill\\", "seamanFX" );      //	워터웨이브.
-	gLoadData.AccessModel ( MODEL_SKULL,          "Data\\Skill\\", "Skull" );         //	해골.
-	gLoadData.AccessModel ( MODEL_LACEARROW,		"Data\\Skill\\", "LaceArrow");		//	레이스에로우
-	gLoadData.OpenTexture ( MODEL_LACEARROW,      "Item\\", GL_CLAMP_TO_EDGE );  //	해골.
+	gLoadData.AccessModel ( MODEL_WATER_WAVE,     "Data\\Skill\\", "seamanFX" );
+	gLoadData.AccessModel ( MODEL_SKULL,          "Data\\Skill\\", "Skull" );
+	gLoadData.AccessModel ( MODEL_LACEARROW,		"Data\\Skill\\", "LaceArrow");
+	gLoadData.OpenTexture ( MODEL_LACEARROW,      "Item\\", GL_CLAMP_TO_EDGE );
 
-#ifdef TAMAJJANG
-    gLoadData.AccessModel( MODEL_TAMAJJANG, "Data\\Skill\\","Tama",1 );
-#endif
-    gLoadData.AccessModel ( MODEL_MANY_FLAG, "Data\\Skill\\", "ManyFlag" );       //  중국 경극에서 사용하는 깃발.
-    gLoadData.AccessModel ( MODEL_WEBZEN_MARK, "Data\\Skill\\", "MuSign" );       //  웹젠마크.
-	gLoadData.AccessModel ( MODEL_STUN_STONE,  "Data\\Skill\\", "GroundCrystal" );        //  돌가르기.
-	gLoadData.AccessModel ( MODEL_SKIN_SHELL,  "Data\\Skill\\", "skinshell" );            //  스킨 파편.
-	gLoadData.AccessModel ( MODEL_MANA_RUNE,   "Data\\Skill\\", "ManaRune" );             //  마나 룬.
-	gLoadData.AccessModel ( MODEL_SKILL_JAVELIN,  "Data\\Skill\\", "Javelin" );           //	표창.
-	gLoadData.AccessModel ( MODEL_ARROW_IMPACT,   "Data\\Skill\\", "ArrowImpact" );       //  강력한 한방.
-	gLoadData.AccessModel ( MODEL_SWORD_FORCE,    "Data\\Skill\\", "SwordForce" );        //  검심.
+    gLoadData.AccessModel ( MODEL_MANY_FLAG, "Data\\Skill\\", "ManyFlag" );
+    gLoadData.AccessModel ( MODEL_WEBZEN_MARK, "Data\\Skill\\", "MuSign" );
+	gLoadData.AccessModel ( MODEL_STUN_STONE,  "Data\\Skill\\", "GroundCrystal" );
+	gLoadData.AccessModel ( MODEL_SKIN_SHELL,  "Data\\Skill\\", "skinshell" );
+	gLoadData.AccessModel ( MODEL_MANA_RUNE,   "Data\\Skill\\", "ManaRune" );
+	gLoadData.AccessModel ( MODEL_SKILL_JAVELIN,  "Data\\Skill\\", "Javelin" );
+	gLoadData.AccessModel ( MODEL_ARROW_IMPACT,   "Data\\Skill\\", "ArrowImpact" );
+	gLoadData.AccessModel ( MODEL_SWORD_FORCE,    "Data\\Skill\\", "SwordForce" );
 
-    gLoadData.AccessModel ( MODEL_FLY_BIG_STONE1,  "Data\\Skill\\", "FlyBigStone1" );     //  투석기가 던지는 돌 ( 공성측 ).
-    gLoadData.AccessModel ( MODEL_FLY_BIG_STONE2,  "Data\\Skill\\", "FlyBigStone2" );     //  투석기가 던지는 돌 ( 수성측 ).
-    gLoadData.AccessModel ( MODEL_BIG_STONE_PART1, "Data\\Skill\\", "FlySmallStone1" );   //  투석기가 던지는 돌 조각1.
-    gLoadData.AccessModel ( MODEL_BIG_STONE_PART2, "Data\\Skill\\", "FlySmallStone2" );   //  투석기가 던지는 돌 조각2.
-    gLoadData.AccessModel ( MODEL_WALL_PART1,      "Data\\Skill\\", "WallStone1" );       //  성벽 파편1.
-    gLoadData.AccessModel ( MODEL_WALL_PART2,      "Data\\Skill\\", "WallStone2" );       //  성벽 파편2.
-    gLoadData.AccessModel ( MODEL_GATE_PART1,      "Data\\Skill\\", "GatePart1" );        //  성문 파편1.
-    gLoadData.AccessModel ( MODEL_GATE_PART2,      "Data\\Skill\\", "GatePart2" );        //  성문 파편2.
-    gLoadData.AccessModel ( MODEL_GATE_PART3,      "Data\\Skill\\", "GatePart3" );        //  성문 파편3.
-    gLoadData.AccessModel ( MODEL_AURORA,          "Data\\Skill\\", "Aurora" );           //  회복 영역.
-    gLoadData.AccessModel ( MODEL_TOWER_GATE_PLANE,"Data\\Skill\\", "TowerGatePlane" );   //  이동 공간.
-	gLoadData.AccessModel ( MODEL_GOLEM_STONE,	"Data\\Skill\\", "golem_stone" );		// 골렘 파편
-	gLoadData.AccessModel ( MODEL_FISSURE,		"Data\\Skill\\", "bossrock" );			// 지반 균열
-	gLoadData.AccessModel ( MODEL_FISSURE_LIGHT,		"Data\\Skill\\", "bossrocklight" );			// 지반 균열 빛
-    gLoadData.AccessModel ( MODEL_PROTECTGUILD, "Data\\Skill\\", "ProtectGuild" );       //  수호천사마크.
+    gLoadData.AccessModel ( MODEL_FLY_BIG_STONE1,  "Data\\Skill\\", "FlyBigStone1" );
+    gLoadData.AccessModel ( MODEL_FLY_BIG_STONE2,  "Data\\Skill\\", "FlyBigStone2" );
+    gLoadData.AccessModel ( MODEL_BIG_STONE_PART1, "Data\\Skill\\", "FlySmallStone1" );
+    gLoadData.AccessModel ( MODEL_BIG_STONE_PART2, "Data\\Skill\\", "FlySmallStone2" );
+    gLoadData.AccessModel ( MODEL_WALL_PART1,      "Data\\Skill\\", "WallStone1" );
+    gLoadData.AccessModel ( MODEL_WALL_PART2,      "Data\\Skill\\", "WallStone2" );
+    gLoadData.AccessModel ( MODEL_GATE_PART1,      "Data\\Skill\\", "GatePart1" );
+    gLoadData.AccessModel ( MODEL_GATE_PART2,      "Data\\Skill\\", "GatePart2" );
+    gLoadData.AccessModel ( MODEL_GATE_PART3,      "Data\\Skill\\", "GatePart3" );
+    gLoadData.AccessModel ( MODEL_AURORA,          "Data\\Skill\\", "Aurora" );
+    gLoadData.AccessModel ( MODEL_TOWER_GATE_PLANE,"Data\\Skill\\", "TowerGatePlane" );
+	gLoadData.AccessModel ( MODEL_GOLEM_STONE,	"Data\\Skill\\", "golem_stone" );
+	gLoadData.AccessModel ( MODEL_FISSURE,		"Data\\Skill\\", "bossrock" );
+	gLoadData.AccessModel ( MODEL_FISSURE_LIGHT,		"Data\\Skill\\", "bossrocklight" );
+    gLoadData.AccessModel ( MODEL_PROTECTGUILD, "Data\\Skill\\", "ProtectGuild" );
 	gLoadData.AccessModel(MODEL_DARK_ELF_SKILL   ,"Data\\Skill\\","elf_skill");
 	gLoadData.AccessModel(MODEL_BALGAS_SKILL   ,"Data\\Skill\\","WaveForce");
 	gLoadData.AccessModel(MODEL_DEATH_SPI_SKILL   ,"Data\\Skill\\","deathsp_eff");
 	Models[MODEL_BALGAS_SKILL].Actions[0].Loop = false;
-
-#ifdef TAMAJJANG
-    gLoadData.OpenTexture(MODEL_TAMAJJANG,"Skill\\");
-#endif
 
 	gLoadData.OpenTexture(MODEL_DARK_ELF_SKILL,"Skill\\");
 	gLoadData.OpenTexture(MODEL_BALGAS_SKILL,"Skill\\");
 	gLoadData.OpenTexture(MODEL_DEATH_SPI_SKILL,"Skill\\");
 
     gLoadData.OpenTexture ( MODEL_DARK_HORSE, "Skill\\" );
-#ifdef PET_SYSTEM
     gLoadData.OpenTexture ( MODEL_DARK_SPIRIT, "Skill\\" );
-#endif// PET_SYSTEM
 
 #ifdef DARK_WOLF
     gLoadData.OpenTexture ( MODEL_DARK_WOLF, "Skill\\" );
@@ -4462,40 +4361,39 @@ void OpenSkills()
 	gLoadData.OpenTexture (MODEL_WAVE_FORCE, "Skill\\" );
 	gLoadData.OpenTexture (MODEL_BLIZZARD, "Skill\\" );
 
-	// 크리스마스 이벤트 오브젝트 로딩
 	g_XmasEvent->LoadXmasEvent();
 
-	gLoadData.OpenTexture(MODEL_ARROW_BEST_CROSSBOW, "Skill\\");
-	gLoadData.OpenTexture (MODEL_ARROW_DRILL, "Skill\\" );			//	초 절대 석궁. 화살.
-	gLoadData.OpenTexture (MODEL_COMBO	  , "Skill\\" );			//	콤보 효과.
+	gLoadData.OpenTexture(MODEL_ARROW_BEST_CROSSBOW,"Skill\\");
+	gLoadData.OpenTexture(MODEL_ARROW_DRILL,"Skill\\");
+	gLoadData.OpenTexture(MODEL_COMBO,"Skill\\");
 
-	gLoadData.OpenTexture ( MODEL_AIR_FORCE, "Skill\\", GL_CLAMP_TO_EDGE );   //  공기 저항 효과.
-    gLoadData.OpenTexture ( MODEL_WAVES    , "Skill\\" );             //  스트롱 피어의 파장 효과.
-    gLoadData.OpenTexture ( MODEL_PIERCING2, "Skill\\" );             //  스트롱 피어 부품.
-    gLoadData.OpenTexture ( MODEL_PIER_PART, "Skill\\" );             //  롱피어 부품.
-    gLoadData.OpenTexture ( MODEL_GROUND_STONE,   "Skill\\" );        //  바위.
-    gLoadData.OpenTexture ( MODEL_GROUND_STONE2,  "Skill\\" );        //  바위2.
-	gLoadData.OpenTexture ( MODEL_WATER_WAVE,     "Skill\\", GL_CLAMP_TO_EDGE );  //	워터웨이브.
-	gLoadData.OpenTexture ( MODEL_SKULL,          "Skill\\", GL_CLAMP_TO_EDGE );  //	해골.
-    gLoadData.OpenTexture ( MODEL_MANY_FLAG,      "Skill\\" );        //  중국 경극에서 사용하는 깃발.
-    gLoadData.OpenTexture ( MODEL_WEBZEN_MARK,    "Skill\\" );        //  웹젠마크.
+	gLoadData.OpenTexture(MODEL_AIR_FORCE,"Skill\\",GL_CLAMP_TO_EDGE);
+	gLoadData.OpenTexture(MODEL_WAVES,"Skill\\");
+	gLoadData.OpenTexture(MODEL_PIERCING2,"Skill\\");
+	gLoadData.OpenTexture(MODEL_PIER_PART,"Skill\\");
+	gLoadData.OpenTexture(MODEL_GROUND_STONE,"Skill\\");
+	gLoadData.OpenTexture(MODEL_GROUND_STONE2,"Skill\\");
+	gLoadData.OpenTexture(MODEL_WATER_WAVE,"Skill\\",GL_CLAMP_TO_EDGE);
+	gLoadData.OpenTexture(MODEL_SKULL,"Skill\\",GL_CLAMP_TO_EDGE);
+	gLoadData.OpenTexture(MODEL_MANY_FLAG,"Skill\\");
+	gLoadData.OpenTexture(MODEL_WEBZEN_MARK,"Skill\\");
 
-    gLoadData.OpenTexture ( MODEL_FLY_BIG_STONE1, "Npc\\" );          //  투석기가 던지는 돌 ( 공성측 ).
-    gLoadData.OpenTexture ( MODEL_FLY_BIG_STONE2, "Skill\\" );        //  투석기가 던지는 돌 ( 수성측 ).
-    gLoadData.OpenTexture ( MODEL_BIG_STONE_PART1,"Skill\\" );        //  투석기가 던지는 돌 조각1.
-    gLoadData.OpenTexture ( MODEL_BIG_STONE_PART2,"Skill\\" );        //  투석기가 던지는 돌 조각2.
-    gLoadData.OpenTexture ( MODEL_WALL_PART1,     "Object31\\" );     //  성벽 파편1.
-    gLoadData.OpenTexture ( MODEL_WALL_PART2,     "Object31\\" );     //  성벽 파편2.
-    gLoadData.OpenTexture ( MODEL_GATE_PART1,     "Monster\\" );      //  성문 파편1. 
-    gLoadData.OpenTexture ( MODEL_GATE_PART2,     "Monster\\" );      //  성문 파편2.
-    gLoadData.OpenTexture ( MODEL_GATE_PART3,     "Monster\\" );      //  성문 파편3.
-    gLoadData.OpenTexture ( MODEL_AURORA,         "Monster\\" );      //  회복 영역.
-    gLoadData.OpenTexture ( MODEL_TOWER_GATE_PLANE,"Skill\\" );       //  이동 공간.
-	gLoadData.OpenTexture ( MODEL_GOLEM_STONE,	"Monster\\" );		// 골렘 파편
-	gLoadData.OpenTexture ( MODEL_FISSURE,	"Skill\\" );			// 지면 균열
-	gLoadData.OpenTexture ( MODEL_FISSURE_LIGHT,	"Skill\\" );			// 지면 균열 빛
-    gLoadData.OpenTexture ( MODEL_SKIN_SHELL, "Effect\\" );           //  스킨 파편.
-    gLoadData.OpenTexture ( MODEL_PROTECTGUILD,    "Item\\" );        //  수호천사마크.
+	gLoadData.OpenTexture(MODEL_FLY_BIG_STONE1,"Npc\\");
+	gLoadData.OpenTexture(MODEL_FLY_BIG_STONE2,"Skill\\");
+	gLoadData.OpenTexture(MODEL_BIG_STONE_PART1,"Skill\\");
+	gLoadData.OpenTexture(MODEL_BIG_STONE_PART2,"Skill\\");
+	gLoadData.OpenTexture(MODEL_WALL_PART1,"Object31\\");
+	gLoadData.OpenTexture(MODEL_WALL_PART2,"Object31\\");
+	gLoadData.OpenTexture(MODEL_GATE_PART1,"Monster\\");
+	gLoadData.OpenTexture(MODEL_GATE_PART2,"Monster\\");
+	gLoadData.OpenTexture(MODEL_GATE_PART3,"Monster\\");
+	gLoadData.OpenTexture(MODEL_AURORA,"Monster\\");
+	gLoadData.OpenTexture(MODEL_TOWER_GATE_PLANE,"Skill\\");
+	gLoadData.OpenTexture(MODEL_GOLEM_STONE,"Monster\\");
+	gLoadData.OpenTexture(MODEL_FISSURE,"Skill\\");
+	gLoadData.OpenTexture(MODEL_FISSURE_LIGHT,"Skill\\");
+	gLoadData.OpenTexture(MODEL_SKIN_SHELL,"Effect\\");
+	gLoadData.OpenTexture(MODEL_PROTECTGUILD,"Item\\");
 
 	gLoadData.AccessModel(MODEL_SKILL_FURY_STRIKE+1,"Data\\Skill\\","EarthQuake",1);
 	gLoadData.AccessModel(MODEL_SKILL_FURY_STRIKE+2,"Data\\Skill\\","EarthQuake",2);
@@ -4513,11 +4411,9 @@ void OpenSkills()
 	gLoadData.AccessModel(MODEL_WAVE_FORCE,"Data\\Skill\\","WaveForce");
 	gLoadData.AccessModel(MODEL_BLIZZARD,"Data\\Skill\\","Blizzard");
 
-	//화살 자동사용 이펙트
 	gLoadData.AccessModel(MODEL_ARROW_AUTOLOAD, "Data\\Skill\\", "arrowsrefill");
 	gLoadData.OpenTexture(MODEL_ARROW_AUTOLOAD, "Effect\\");
 
-	//화살 자동사용 이펙트
 	gLoadData.AccessModel(MODEL_INFINITY_ARROW, "Data\\Skill\\", "arrowsre", 1);
 	gLoadData.OpenTexture(MODEL_INFINITY_ARROW, "Skill\\");
 	gLoadData.AccessModel(MODEL_INFINITY_ARROW1, "Data\\Skill\\", "arrowsre", 2);
@@ -4529,14 +4425,12 @@ void OpenSkills()
 	gLoadData.AccessModel(MODEL_INFINITY_ARROW4, "Data\\Skill\\", "arrowsre", 5);
 	gLoadData.OpenTexture(MODEL_INFINITY_ARROW4, "Skill\\");
 
-	//실드 깨지는 이펙트
 	gLoadData.AccessModel(MODEL_SHIELD_CRASH, "Data\\Effect\\", "atshild");
 	gLoadData.OpenTexture(MODEL_SHIELD_CRASH, "Effect\\");
 
 	gLoadData.AccessModel(MODEL_SHIELD_CRASH2, "Data\\Effect\\", "atshild2");
 	gLoadData.OpenTexture(MODEL_SHIELD_CRASH2, "Effect\\");
 
-	//칸투르 - 아이언라이더 공격 이펙트
 	gLoadData.AccessModel(MODEL_IRON_RIDER_ARROW, "Data\\Effect\\", "ironobj");
 	gLoadData.OpenTexture(MODEL_IRON_RIDER_ARROW, "Effect\\");
 
@@ -4550,28 +4444,23 @@ void OpenSkills()
 	gLoadData.OpenTexture(MODEL_CHANGE_UP_EFF, "Effect\\");
 	Models[MODEL_CHANGE_UP_EFF].Actions[0].PlaySpeed = 0.005f;
 	gLoadData.AccessModel(MODEL_CHANGE_UP_NASA   ,"Data\\Effect\\","changup_nasa");
-	//changup_nasa
+
 	gLoadData.OpenTexture(MODEL_CHANGE_UP_NASA, "Effect\\");
 	gLoadData.AccessModel(MODEL_CHANGE_UP_CYLINDER   ,"Data\\Effect\\","clinderlight");
 	gLoadData.OpenTexture(MODEL_CHANGE_UP_CYLINDER, "Effect\\");
 
-	//성물 표시
 	gLoadData.AccessModel(MODEL_CURSEDTEMPLE_HOLYITEM, "Data\\Skill\\", "eventsungmul");
 	gLoadData.OpenTexture(MODEL_CURSEDTEMPLE_HOLYITEM, "Skill\\");
 
-	//쉴드 표시
 	gLoadData.AccessModel(MODEL_CURSEDTEMPLE_PRODECTION_SKILL, "Data\\Skill\\", "eventshild");
 	gLoadData.OpenTexture(MODEL_CURSEDTEMPLE_PRODECTION_SKILL, "Skill\\");
 
-	//속박 표시
 	gLoadData.AccessModel(MODEL_CURSEDTEMPLE_RESTRAINT_SKILL, "Data\\Skill\\", "eventroofe");
 	gLoadData.OpenTexture(MODEL_CURSEDTEMPLE_RESTRAINT_SKILL, "Skill\\");
 		
-	// 석상 조각1
 	gLoadData.AccessModel ( MODEL_CURSEDTEMPLE_STATUE_PART1, "Data\\Npc\\", "songck1" );
 	gLoadData.OpenTexture ( MODEL_CURSEDTEMPLE_STATUE_PART1, "Npc\\" );
 
-	// 석상 조각2
 	gLoadData.AccessModel ( MODEL_CURSEDTEMPLE_STATUE_PART2, "Data\\Npc\\", "songck2" );
 	gLoadData.OpenTexture ( MODEL_CURSEDTEMPLE_STATUE_PART2, "Npc\\" );
 	
@@ -4588,96 +4477,88 @@ void OpenSkills()
             gLoadData.OpenTexture(i,"Skill\\");
 	}
 
-	//네이쳐보우 꽃입
 	LoadBitmap("Skill\\flower1.tga",BITMAP_FLOWER01);
 	LoadBitmap("Skill\\flower2.tga",BITMAP_FLOWER01+1);
 	LoadBitmap("Skill\\flower3.tga",BITMAP_FLOWER01+2);
 	
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
-	// 추석 이벤트 이펙트 오브젝트 로딩
-	gLoadData.AccessModel(MODEL_MOONHARVEST_GAM, "Data\\Effect\\", "chusukgam" );		// 감
+	gLoadData.AccessModel(MODEL_MOONHARVEST_GAM, "Data\\Effect\\", "chusukgam" );
 	gLoadData.OpenTexture(MODEL_MOONHARVEST_GAM, "Effect\\");
-	gLoadData.AccessModel(MODEL_MOONHARVEST_SONGPUEN1, "Data\\Effect\\", "chusukseung1" );	// 송편 (흰)
+	gLoadData.AccessModel(MODEL_MOONHARVEST_SONGPUEN1, "Data\\Effect\\", "chusukseung1" );
 	gLoadData.OpenTexture(MODEL_MOONHARVEST_SONGPUEN1, "Effect\\");
-	gLoadData.AccessModel(MODEL_MOONHARVEST_SONGPUEN2, "Data\\Effect\\", "chusukseung2" );	// 송편 (녹)
+	gLoadData.AccessModel(MODEL_MOONHARVEST_SONGPUEN2, "Data\\Effect\\", "chusukseung2" );
 	gLoadData.OpenTexture(MODEL_MOONHARVEST_SONGPUEN2, "Effect\\");
-	gLoadData.AccessModel(MODEL_MOONHARVEST_MOON, "Data\\Effect\\", "chysukmoon" );	// 달
+	gLoadData.AccessModel(MODEL_MOONHARVEST_MOON, "Data\\Effect\\", "chysukmoon" );
 	gLoadData.OpenTexture(MODEL_MOONHARVEST_MOON, "Effect\\");
-#endif // PRUARIN_EVENT07_3COLORHARVEST
 	
-	gLoadData.AccessModel(MODEL_ALICE_BUFFSKILL_EFFECT, "Data\\Effect\\", "elshildring" );	// 앨리스 버프 스킬관련 이펙트 모델
+	gLoadData.AccessModel(MODEL_ALICE_BUFFSKILL_EFFECT,"Data\\Effect\\","elshildring");
 	gLoadData.OpenTexture(MODEL_ALICE_BUFFSKILL_EFFECT, "Effect\\");
-	gLoadData.AccessModel(MODEL_ALICE_BUFFSKILL_EFFECT2, "Data\\Effect\\", "elshildring2" );	// 앨리스 버프 스킬관련 이펙트 모델
+	gLoadData.AccessModel(MODEL_ALICE_BUFFSKILL_EFFECT2, "Data\\Effect\\", "elshildring2" );
 	gLoadData.OpenTexture(MODEL_ALICE_BUFFSKILL_EFFECT2, "Effect\\");
 
-	gLoadData.AccessModel(MODEL_SUMMONER_WRISTRING_EFFECT, "Data\\Effect\\", "ringtyperout" );	// 소환서 장비시 손목 이펙트
+	gLoadData.AccessModel(MODEL_SUMMONER_WRISTRING_EFFECT, "Data\\Effect\\", "ringtyperout" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_WRISTRING_EFFECT, "Effect\\");
 	// 소환수 머리
-	gLoadData.AccessModel(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, "Data\\Skill\\", "sahatail" );		// 사하무트 소환 머리
+	gLoadData.AccessModel(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, "Data\\Skill\\", "sahatail" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, "Skill\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_EQUIP_HEAD_NEIL, "Data\\Skill\\", "nillsohwanz" );		// 닐 소환 머리
+	gLoadData.AccessModel(MODEL_SUMMONER_EQUIP_HEAD_NEIL, "Data\\Skill\\", "nillsohwanz" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_EQUIP_HEAD_NEIL, "Skill\\");
 #ifdef ASG_ADD_SUMMON_RARGLE
-	gLoadData.AccessModel(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, "Data\\Skill\\", "lagul_head" );		// 라글 소환 머리
+	gLoadData.AccessModel(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, "Data\\Skill\\", "lagul_head" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, "Skill\\");
 #endif	// ASG_ADD_SUMMON_RARGLE
-	// 시전 이펙트
-	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT1, "Data\\Effect\\", "Suhwanzin1" );		// 소환 시전 이펙트
+
+	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT1, "Data\\Effect\\", "Suhwanzin1" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT1, "Effect\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT11, "Data\\Effect\\", "Suhwanzin11" );		// 소환 시전 이펙트
+	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT11, "Data\\Effect\\", "Suhwanzin11" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT11, "Effect\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT111, "Data\\Effect\\", "Suhwanzin111" );	// 소환 시전 이펙트
+	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT111, "Data\\Effect\\", "Suhwanzin111" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT111, "Effect\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT2, "Data\\Effect\\", "Suhwanzin2" );		// 소환 시전 이펙트
+	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT2, "Data\\Effect\\", "Suhwanzin2" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT2, "Effect\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT22, "Data\\Effect\\", "Suhwanzin22" );		// 소환 시전 이펙트
+	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT22, "Data\\Effect\\", "Suhwanzin22" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT22, "Effect\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT222, "Data\\Effect\\", "Suhwanzin222" );	// 소환 시전 이펙트
+	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT222, "Data\\Effect\\", "Suhwanzin222" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT222, "Effect\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT4, "Data\\Effect\\", "Suhwanzin4" );		// 소환 시전 이펙트
+	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT4, "Data\\Effect\\", "Suhwanzin4" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT4, "Effect\\");
 	// 소환수
-	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_SAHAMUTT, "Data\\Skill\\", "summon_sahamutt" );		// 사하무트
+	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_SAHAMUTT, "Data\\Skill\\", "summon_sahamutt" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_SAHAMUTT, "Skill\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL, "Data\\Skill\\", "summon_neil" );			// 닐
+	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL, "Data\\Skill\\", "summon_neil" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL, "Skill\\");
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL, "Effect\\");
 #ifdef ASG_ADD_SUMMON_RARGLE
-	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_LAGUL, "Data\\Skill\\", "summon_lagul");			// 라글
+	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_LAGUL, "Data\\Skill\\", "summon_lagul");
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_LAGUL, "Skill\\");
 #endif	// ASG_ADD_SUMMON_RARGLE
-	// 소환수 스킬 이펙트
-	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_NIFE1, "Data\\Skill\\", "nelleff_nife01" );		// 닐 스킬 이펙트 칼
+
+	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_NIFE1, "Data\\Skill\\", "nelleff_nife01" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL_NIFE1, "Skill\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_NIFE2, "Data\\Skill\\", "nelleff_nife02" );		// 닐 스킬 이펙트 칼
+	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_NIFE2, "Data\\Skill\\", "nelleff_nife02" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL_NIFE2, "Skill\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_NIFE3, "Data\\Skill\\", "nelleff_nife03" );		// 닐 스킬 이펙트 칼
+	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_NIFE3, "Data\\Skill\\", "nelleff_nife03" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL_NIFE3, "Skill\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_GROUND1, "Data\\Skill\\", "nell_nifegrund01" );	// 닐 스킬 이펙트 바닥면 lv1
+	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_GROUND1, "Data\\Skill\\", "nell_nifegrund01" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL_GROUND1, "Skill\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_GROUND2, "Data\\Skill\\", "nell_nifegrund02" );	// 닐 스킬 이펙트 바닥면 lv2
+	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_GROUND2, "Data\\Skill\\", "nell_nifegrund02" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL_GROUND2, "Skill\\");
-	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_GROUND3, "Data\\Skill\\", "nell_nifegrund03" );	// 닐 스킬 이펙트 바닥면 lv3
+	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_GROUND3, "Data\\Skill\\", "nell_nifegrund03" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL_GROUND3, "Skill\\");
-	gLoadData.AccessModel(MODEL_MOVE_TARGETPOSITION_EFFECT, "Data\\Effect\\", "MoveTargetPosEffect" );	// 이동할위치 이팩트
+	gLoadData.AccessModel(MODEL_MOVE_TARGETPOSITION_EFFECT, "Data\\Effect\\", "MoveTargetPosEffect" );
 	gLoadData.OpenTexture(MODEL_MOVE_TARGETPOSITION_EFFECT, "Effect\\");
-	gLoadData.AccessModel(MODEL_EFFECT_SAPITRES_ATTACK_1, "Data\\Effect\\", "Sapiatttres" );	// 사피트레스 가시날리기
+	gLoadData.AccessModel(MODEL_EFFECT_SAPITRES_ATTACK_1, "Data\\Effect\\", "Sapiatttres" );
 	gLoadData.OpenTexture(MODEL_EFFECT_SAPITRES_ATTACK_1, "Effect\\");
-	gLoadData.AccessModel(MODEL_EFFECT_SAPITRES_ATTACK_2, "Data\\Effect\\", "Sapiatttres2" );	// 사피트레스 사방으로 가시 날리기
+	gLoadData.AccessModel(MODEL_EFFECT_SAPITRES_ATTACK_2, "Data\\Effect\\", "Sapiatttres2" );
 	gLoadData.OpenTexture(MODEL_EFFECT_SAPITRES_ATTACK_2, "Effect\\");
-#ifdef CSK_RAKLION_BOSS
+
 	gLoadData.AccessModel(MODEL_RAKLION_BOSS_CRACKEFFECT, "Data\\Effect\\", "knight_plancrack_grand" );
 	gLoadData.OpenTexture(MODEL_RAKLION_BOSS_CRACKEFFECT, "Effect\\");
 	gLoadData.AccessModel(MODEL_RAKLION_BOSS_MAGIC, "Data\\Effect\\", "serufan_magic" );
 	gLoadData.OpenTexture(MODEL_RAKLION_BOSS_MAGIC, "Effect\\");
 	//Models[MODEL_RAKLION_BOSS_MAGIC].Actions[0].PlaySpeed = 0.005f;
-#endif // CSK_RAKLION_BOSS
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-	// 벚꽃 이벤트 이펙트
+
 	gLoadData.AccessModel(MODEL_EFFECT_SKURA_ITEM, "Data\\Effect\\cherryblossom\\", "Skura_iteam_event" );
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef ADD_RAKLION_IRON_KNIGHT
-	// 라클리온 아이언 나이트 
+
 	gLoadData.AccessModel(MODEL_EFFECT_BROKEN_ICE0, "Data\\Effect\\", "ice_stone00" );
 	gLoadData.OpenTexture(MODEL_EFFECT_BROKEN_ICE0, "Effect\\");
 	gLoadData.AccessModel(MODEL_EFFECT_BROKEN_ICE1, "Data\\Effect\\", "ice_stone01" );
@@ -4686,8 +4567,6 @@ void OpenSkills()
 	gLoadData.OpenTexture(MODEL_EFFECT_BROKEN_ICE2, "Effect\\");
 	gLoadData.AccessModel(MODEL_EFFECT_BROKEN_ICE3, "Data\\Effect\\", "ice_stone03" );
 	gLoadData.OpenTexture(MODEL_EFFECT_BROKEN_ICE3, "Effect\\");
-#endif	// ADD_RAKLION_IRON_KNIGHT
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 	gLoadData.AccessModel(MODEL_NIGHTWATER_01, "Data\\Effect\\", "nightwater01" );
 	gLoadData.OpenTexture(MODEL_NIGHTWATER_01, "Effect\\");
 	gLoadData.AccessModel(MODEL_KNIGHT_PLANCRACK_A, "Data\\Effect\\", "knight_plancrack_a" );
@@ -4696,38 +4575,23 @@ void OpenSkills()
 	gLoadData.AccessModel(MODEL_KNIGHT_PLANCRACK_B, "Data\\Effect\\", "knight_plancrack_b" );
 	gLoadData.OpenTexture(MODEL_KNIGHT_PLANCRACK_B, "Effect\\");
 	Models[MODEL_KNIGHT_PLANCRACK_B].Actions[0].PlaySpeed = 0.3f;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 	gLoadData.AccessModel(MODEL_EFFECT_FLAME_STRIKE, "Data\\Effect\\", "FlameStrike" );
 	gLoadData.OpenTexture(MODEL_EFFECT_FLAME_STRIKE, "Effect\\");
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER	// 마력증대
 	gLoadData.AccessModel(MODEL_SWELL_OF_MAGICPOWER, "Data\\Effect\\", "magic_powerup" );
 	gLoadData.OpenTexture(MODEL_SWELL_OF_MAGICPOWER, "Effect\\");
 	gLoadData.AccessModel(MODEL_ARROWSRE06, "Data\\Effect\\", "arrowsre06" );
 	gLoadData.OpenTexture(MODEL_ARROWSRE06, "Effect\\");
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 	gLoadData.AccessModel(MODEL_DOPPELGANGER_SLIME_CHIP, "Data\\Effect\\", "slime_chip" );
 	gLoadData.OpenTexture(MODEL_DOPPELGANGER_SLIME_CHIP, "Effect\\");
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
-#ifdef KJH_ADD_09SUMMER_EVENT
 	gLoadData.AccessModel(MODEL_EFFECT_UMBRELLA_GOLD, "Data\\Effect\\", "japan_gold01" );
 	gLoadData.OpenTexture(MODEL_EFFECT_UMBRELLA_GOLD, "Effect\\");
-#endif // KJH_ADD_09SUMMER_EVENT
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 	gLoadData.AccessModel(MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE, "Data\\Effect\\", "Karanebos_sword_framestrike" );
 	gLoadData.OpenTexture(MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE, "Effect\\");
 	//Models[MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE].Actions[MONSTER01_STOP1].PlaySpeed = 3.0f;
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-#ifdef LDK_ADD_EG_MONSTER_DEASULER
 	gLoadData.AccessModel(MODEL_DEASULER, "Data\\Monster\\", "deasther_boomerang" );
 	gLoadData.OpenTexture(MODEL_DEASULER, "Monster\\");
-#endif // LDK_ADD_EG_MONSTER_DEASULER
-#ifdef PBG_ADD_AURA_EFFECT
 	gLoadData.AccessModel(MODEL_EFFECT_SD_AURA, "Data\\Effect\\", "shield_up" );
 	gLoadData.OpenTexture(MODEL_EFFECT_SD_AURA, "Effect\\");
-#endif //PBG_ADD_AURA_EFFECT
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	gLoadData.AccessModel(MODEL_WOLF_HEAD_EFFECT, "Data\\Effect\\", "wolf_head_effect" );
 	gLoadData.OpenTexture(MODEL_WOLF_HEAD_EFFECT, "Effect\\");

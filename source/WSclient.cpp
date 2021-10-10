@@ -84,16 +84,10 @@
 #ifdef PBG_ADD_SECRETBUFF
 #include "FatigueTimeSystem.h"
 #endif //PBG_ADD_SECRETBUFF
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-#include "PKSystem.h"
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
 #include "ServerListManager.h"
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#ifdef LEM_ADD_GAMECHU
-#include "GCCertification.h"
-#endif // LEM_ADD_GAMECHU
 
 #define MAX_DEBUG_MAX 10
 
@@ -109,8 +103,6 @@ extern CUITextInputBox * g_pSingleTextInputBox;
 #endif // SCRATCH_TICKET
 
 extern CChatRoomSocketList * g_pChatRoomSocketList;
-
-///////////////////////////////////////////
 
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;
@@ -144,27 +136,11 @@ CWsctlc*    g_pSocketClient = &SocketClient;
 CSimpleModulus g_SimpleModulusCS;
 CSimpleModulus g_SimpleModulusSC;
 
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-CSessionCryptor g_SessionCryptorCS;
-CSessionCryptor g_SessionCryptorSC;
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
-
 BYTE    g_byPacketSerialSend = 0;
 BYTE    g_byPacketSerialRecv = 0;
 
 BOOL    g_bGameServerConnected = FALSE;
 DWORD   g_dwLatestMagicTick = 0;
-
-#ifdef USE_SELFCHECKCODE
-BYTE g_byNextFuncCrcCheck = 1;
-DWORD g_dwLatestFuncCrcCheck = 0;
-#endif
-
-#ifdef ACC_PACKETSIZE
-int g_iTotalPacketRecv = 0;
-int g_iTotalPacketSend = 0;
-DWORD g_dwPacketInitialTick;
-#endif //ACC_PACKETSIZE
 
 PMSG_MATCH_RESULT	g_wtMatchResult;
 PMSG_MATCH_TIMEVIEW	g_wtMatchTimeLeft;
@@ -389,18 +365,8 @@ void ReceiveServerConnect(BYTE* ReceiveBuffer) //Recebe informa豫o do ConnectSer
 
 void ReceiveServerConnectBusy( BYTE *ReceiveBuffer )
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPPRECEIVE_SERVER_BUSY Data = ( LPPRECEIVE_SERVER_BUSY)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	
-	//	CUIMng::Instance().PopUpMsgWin(RECEIVE_JOIN_SERVER_WAITING);
-	
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-		SendRequestServerList2();
-#else
-		SendRequestServerList();
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
+	SendRequestServerList();
 }
 
 void ReceiveJoinServer( BYTE *ReceiveBuffer )
@@ -1231,7 +1197,6 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 
 void ReceiveMagicList( BYTE *ReceiveBuffer )
 {
-
 	int Master_Skill_Bool = -1;
 	int Skill_Bool = -1;
 
@@ -1246,9 +1211,6 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 	{
 		LPPRECEIVE_MAGIC_LIST Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer+Offset);
 		CharacterAttribute->Skill[Data2->Index] = Data2->Type;
-#ifdef USE_SKILL_LEVEL
-		CharacterAttribute->SkillLevel[Data2->Index] = Data2->Level;
-#endif
 	}
     else if ( Data->ListType==0x02 )
     {
@@ -1256,9 +1218,6 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
         {
 			LPPRECEIVE_MAGIC_LIST Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer+Offset);
 			CharacterAttribute->Skill[Data2->Index] = 0;
-#ifdef USE_SKILL_LEVEL
-			CharacterAttribute->SkillLevel[Data2->Index] = 0;
-#endif
         }
     }
 	else
@@ -1271,9 +1230,6 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 		{
 			LPPRECEIVE_MAGIC_LIST Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer+Offset);
 			CharacterAttribute->Skill[Data2->Index] = Data2->Type;
-#ifdef USE_SKILL_LEVEL
-			CharacterAttribute->SkillLevel[Data2->Index] = Data2->Level;
-#endif
 			Offset += sizeof(PRECEIVE_MAGIC_LIST);
 		}
         if (gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD )
@@ -1281,9 +1237,6 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
             for ( int i=0; i<PET_CMD_END; ++i )
             {
                 CharacterAttribute->Skill[AT_PET_COMMAND_DEFAULT+i] = AT_PET_COMMAND_DEFAULT+i;
-#ifdef USE_SKILL_LEVEL
-                CharacterAttribute->SkillLevel[AT_PET_COMMAND_DEFAULT+i] = Data2->Level;
-#endif
             }
         }
 	}
@@ -1321,7 +1274,6 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 		else
 			break;
 	}
-#ifdef PJH_FIX_4_BUGFIX_33	
 	for(int i = 0; i < MAX_SKILLS; i++)
 	{
 		Skill = CharacterAttribute->Skill[i];
@@ -1336,7 +1288,6 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 	}
 	if(Master_Skill_Bool > -1 && Skill_Bool > -1)
 		CharacterAttribute->Skill[Skill_Bool] = 0;
-#endif //#ifdef PJH_FIX_4_BUGFIX_33
 
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x11 [ReceiveMagicList]");
 
@@ -1492,11 +1443,7 @@ void ReceiveChat( BYTE *ReceiveBuffer )
 	if(SceneFlag == LOG_IN_SCENE)
 	{
 		g_ErrorReport.Write ( "Send Request Server List.\r\n");
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-		SendRequestServerList2();
-#else
 		SendRequestServerList();
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
 	}
 	else
 	{
@@ -1538,8 +1485,7 @@ void ReceiveChat( BYTE *ReceiveBuffer )
 			{
 				CHARACTER *c = &CharactersClient[i];
 				OBJECT *o = &c->Object;
-				if( o->Live && o->Kind==KIND_PLAYER && ( g_isCharacterBuff( (&c->Object), eBuff_GMEffect)
-					|| (c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR) ) )
+				if( o->Live && o->Kind==KIND_PLAYER && ( g_isCharacterBuff( (&c->Object), eBuff_GMEffect) || (c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR) ) )
 				{
 					if(strcmp(c->ID,ID) == NULL)
 					{
@@ -1566,8 +1512,7 @@ void ReceiveChat( BYTE *ReceiveBuffer )
 			{
 				CHARACTER *c = &CharactersClient[i];
 				OBJECT *o = &c->Object;
-				if( o->Live && o->Kind==KIND_PLAYER && g_isCharacterBuff((&c->Object), eBuff_GMEffect)
-					|| (c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR) )
+				if( o->Live && o->Kind==KIND_PLAYER && g_isCharacterBuff((&c->Object), eBuff_GMEffect) || (c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR) )
 				{
 					if(strcmp(c->ID,ID) == NULL)
 					{
@@ -1624,11 +1569,7 @@ void ReceiveChatWhisperResult( BYTE *ReceiveBuffer )
 	{
 	case 0:
         { 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 			g_pChatListBox->AddText(ChatWhisperID,GlobalText[482], SEASON3B::TYPE_ERROR_MESSAGE, SEASON3B::TYPE_WHISPER_MESSAGE);
-#else //KJH_FIX_UI_CHAT_MESSAGE	
-			g_pChatListBox->AddText(ChatWhisperID,GlobalText[482], SEASON3B::TYPE_ERROR_MESSAGE);	 
-#endif // KJH_FIX_UI_CHAT_MESSAGE
         }
 	}
 }
@@ -1669,9 +1610,7 @@ void ReceiveNotice( BYTE *ReceiveBuffer )
 		if(CHARACTER_SCENE != SceneFlag)
 		{
 			g_pChatListBox->AddText("", (char*)Data->Notice, SEASON3B::TYPE_SYSTEM_MESSAGE);
-#ifdef CSK_FREE_TICKET
 			EnableUse = 0;
-#endif // CSK_FREE_TICKET
 		}
 		else
 		{
@@ -2248,11 +2187,7 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 			c->Skin = 0;
 			c->PK    = Data2->Path&0xf;
 			o->Kind  = KIND_PLAYER;
-				
-#ifdef PK_ATTACK_TESTSERVER_LOG
-			PrintPKLog(c);
-#endif // PK_ATTACK_TESTSERVER_LOG	
-				
+						
 			switch (Data2->Class&0x07)
 			{
 			case 1:
@@ -2281,13 +2216,8 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 
 			c->PositionX = Data2->PositionX;
 			c->PositionY = Data2->PositionY;
-#ifdef CSK_FIX_SYNCHRONIZATION
 			c->TargetX = Data2->TargetX;
 			c->TargetY = Data2->TargetY;
-#else // CSK_FIX_SYNCHRONIZATION
-			c->TargetX = Data2->PositionX;
-			c->TargetY = Data2->PositionY;
-#endif // CSK_FIX_SYNCHRONIZATION	
 			
 			c->Object.Angle[2] = ((float)(Data2->Path>>4)-1.f)*45.f;
 			
@@ -2477,10 +2407,6 @@ void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
 			o->Kind   = KIND_PLAYER;
 			c->Change = true;
 			
-#ifdef PK_ATTACK_TESTSERVER_LOG
-			PrintPKLog(c);
-#endif // PK_ATTACK_TESTSERVER_LOG	
-
 			for( int j = 0; j < Data2->s_BuffCount; ++j )
 			{
 				RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
@@ -5972,15 +5898,15 @@ void ReceiveDeleteItemViewport( BYTE *ReceiveBuffer )
 	}
 }
 
-static  const   BYTE    NOT_GET_ITEM = 0xff;    //  줏을수 없다.
-static  const   BYTE    GET_ITEM_ZEN = 0xfe;    //  젠을 줏는다.
-static  const   BYTE    GET_ITEM_MULTI=0xfd;    //  중복되는 아이템을 줏는다.
-extern int ItemKey;		// ★ 아이템 숨기기에서 사용할 변수
+static  const   BYTE    NOT_GET_ITEM = 0xff;
+static  const   BYTE    GET_ITEM_ZEN = 0xfe;
+static  const   BYTE    GET_ITEM_MULTI=0xfd;
+extern int ItemKey;
 void ReceiveGetItem( BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_GET_ITEM Data = (LPPRECEIVE_GET_ITEM)ReceiveBuffer;
 	if ( Data->Result==NOT_GET_ITEM )
-	{	// 줏을 수 없다 메시지 표시 필요
+	{
 	}
 	else
 	{
@@ -6133,16 +6059,10 @@ BOOL ReceiveEquipmentItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
 			g_pStorageInventory->ProcessToReceiveStorageItems(Data->Index, Data->Item);
 		}
 		if(Data->SubCode == 3 || (Data->SubCode >= 5 && Data->SubCode <= 8)
-#ifdef CSK_CHAOS_CARD
 			|| (Data->SubCode == 9) 
-#endif //CSK_CHAOS_CARD
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 			|| (Data->SubCode == 10)
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef ADD_SOCKET_MIX
 			|| (Data->SubCode >= REQUEST_EQUIPMENT_EXTRACT_SEED_MIX && Data->SubCode <= REQUEST_EQUIPMENT_DETACH_SOCKET_MIX)
-#endif	// ADD_SOCKET_MIX
-			)	// 모든 조합
+			)
 		{
 			SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 			if(Data->Index >= 0 && Data->Index < MAX_MIX_INVENTORY)
@@ -6188,26 +6108,14 @@ void ReceiveModifyItem( BYTE *ReceiveBuffer )
 	g_pMyInventory->InsertItem(itemindex, Data->Item);
 	
 	int iType = ConvertItemType(Data->Item);
-	if(iType == ITEM_POTION+28
-#ifdef YDG_ADD_DOPPELGANGER_ITEM
-		|| iType == ITEM_POTION+111
-#endif	// YDG_ADD_DOPPELGANGER_ITEM
-		)
+	if(iType == ITEM_POTION+28 || iType == ITEM_POTION+111)
 	{
 		PlayBuffer(SOUND_KUNDUN_ITEM_SOUND);
 	}
-#ifdef LDK_ADD_GAMBLE_SYSTEM
-#ifdef LEM_FIX_JP0714_JEWELMIXSOUND_INGAMBLESYSTEM
-	else if( iType == ITEM_POTION+11 )
-	{
-		PlayBuffer(SOUND_JEWEL01);
-	}
-#endif // LEM_FIX_JP0714_JEWELMIXSOUND_INGAMBLESYSTEM
 	else if(GambleSystem::Instance().IsGambleShop())
 	{
 
 	}
-#endif //LDK_ADD_GAMBLE_SYSTEM
 	else
 	{
 		PlayBuffer(SOUND_JEWEL01);
@@ -6789,26 +6697,9 @@ void ReceiveEvent( BYTE *ReceiveBuffer )
 		if ( Data->m_byValue ) EnableEvent = 1;
         else               EnableEvent = 0; 
         break;
-#ifdef USE_EVENT_ELDORADO
     case 3:
 		if ( Data->m_byValue ) EnableEvent = 3;
         else               EnableEvent = 0; 
-        break;
-#endif
-    case 2:
-#ifdef TAMAJJANG
-#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-        if ( Data->m_byValue )
-        {
-            DeleteTamaJjang ();
-            CreateTamaJjang ();
-        }
-        else
-        {
-            HideTamaJjang();
-        }
-#endif
-#endif
         break;
     }
     DeleteBoids();
@@ -9831,7 +9722,7 @@ void ReceiveChatRoomInviteResult(BYTE* ReceiveBuffer)
 	case 0x00:
 		pChatWindow->AddChatText(255, GlobalText[1056], 1, 0);
 		break;
-	case 0x01:	// 초대 성공
+	case 0x01:
 		if (pChatWindow->GetCurrentInvitePal() != NULL)
 		{
 			char szText[MAX_TEXT_LENGTH + 1] = {0};
@@ -10476,11 +10367,7 @@ void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
 void ReceiveQuestGiveUp(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_GIVEUP pData = (LPPMSG_ANS_QUESTEXP_GIVEUP)ReceiveBuffer;
-#ifdef ASG_FIX_QUEST_GIVE_UP
 	g_QuestMng.RemoveCurQuestIndexList(pData->m_dwQuestGiveUpIndex);
-#else	// ASG_FIX_QUEST_GIVE_UP
-	g_QuestMng.AddCurQuestIndexList(pData->m_dwQuestGiveUpIndex);
-#endif	// ASG_FIX_QUEST_GIVE_UP
 }
 
 void ReceiveProgressQuestList(BYTE* ReceiveBuffer)
@@ -10492,14 +10379,9 @@ void ReceiveProgressQuestList(BYTE* ReceiveBuffer)
 
 void ReceiveProgressQuestRequestReward(BYTE* ReceiveBuffer)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPPMSG_NPC_QUESTEXP_INFO pData = (LPPMSG_NPC_QUESTEXP_INFO)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	g_QuestMng.SetQuestRequestReward(ReceiveBuffer);
-#ifdef ASG_MOD_UI_QUEST_INFO
 	g_pMyQuestInfoWindow->SetSelQuestRequestReward();
-#endif	// ASG_MOD_UI_QUEST_INFO
 }
 
 #ifdef ASG_FIX_QUEST_PROTOCOL_ADD
@@ -10512,7 +10394,7 @@ void ReceiveProgressQuestListReady(BYTE* ReceiveBuffer)
 #endif	// ASG_FIX_QUEST_PROTOCOL_ADD
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
-#ifdef ASG_ADD_GENS_SYSTEM
+
 void ReceiveGensJoining(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_REG_GENS_MEMBER pData = (LPPMSG_ANS_REG_GENS_MEMBER)ReceiveBuffer;
@@ -10531,12 +10413,10 @@ void ReceivePlayerGensInfluence(BYTE* ReceiveBuffer)
 {
 	LPPMSG_MSG_SEND_GENS_INFO pData = (LPPMSG_MSG_SEND_GENS_INFO)ReceiveBuffer;
 	Hero->m_byGensInfluence = pData->m_byInfluence;
-#ifdef PBG_ADD_GENSRANKING
 	Hero->m_byRankIndex = pData->m_nGensClass;
 	g_pNewUIGensRanking->SetContribution(pData->m_nContributionPoint);
 	g_pNewUIGensRanking->SetRanking(pData->m_nRanking);
 	g_pNewUIGensRanking->SetNextContribution(pData->m_nNextContributionPoint);
-#endif //PBG_ADD_GENSRANKING
 }
 
 void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
@@ -10552,13 +10432,8 @@ void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 		CHARACTER *c = &CharactersClient[nIndex];
 		
 		c->m_byGensInfluence = Data2->m_byInfluence;
-#ifdef PBG_ADD_GENSRANKING
 		c->m_byRankIndex = Data2->m_nGensClass;
-#endif //PBG_ADD_GENSRANKING
-#ifdef PBG_MOD_STRIFE_GENSMARKRENDER
 		c->m_nContributionPoint = Data2->m_nContributionPoint;
-#endif //PBG_MOD_STRIFE_GENSMARKRENDER
-#ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
 		if (::IsStrifeMap(gMapManager.WorldActive))
 		{
 			vec3_t vTemp = {0.f, 0.f, 0.f};
@@ -10567,12 +10442,10 @@ void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 			else
 				CreateEffect(BITMAP_ENEMY_INFLUENCE_GROUND, c->Object.Position, vTemp, vTemp, 0, &c->Object);
 		}
-#endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
-		
 		nOffset += sizeof(PMSG_GENS_MEMBER_VIEWPORT_INFO);
 	}
 }
-#endif	// ASG_ADD_GENS_SYSTEM
+
 
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
 void ReceiveNPCDlgUIStart(BYTE* ReceiveBuffer)
@@ -10603,11 +10476,7 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
 	
 	BYTE result	= Data->result;
 	BYTE fruit	= Data->btFruitType;
-#ifdef PSW_FRUIT_ITEM
 	WORD point	= Data->btStatValue;
-#else //PSW_FRUIT_ITEM
-	BYTE point	= Data->btStatValue;
-#endif //PSW_FRUIT_ITEM
 	
 	unicode::t_char strText[MAX_GLOBAL_TEXT_STRING];
 	
@@ -13164,21 +13033,6 @@ bool ReceivePeriodItemList(BYTE* pReceiveBuffer)
 }
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
-#ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
-bool ReceiveSkillDummySeedValue(BYTE* pReceiveBuffer)
-{
-	LPPMSG_SET_ATTACK_PROTOCOL_DUMMY_VALUE Data = (LPPMSG_SET_ATTACK_PROTOCOL_DUMMY_VALUE)pReceiveBuffer;
-	
-#ifdef KJH_ADD_CREATE_SERIAL_NUM_AT_ATTACK_SKILL
-	g_DummyAttackChecker->Initialize((DWORD)Data->dwDummySeedValue, (DWORD)Data->dwAttackSerialSeedValue);
-#else // KJH_ADD_CREATE_SERIAL_NUM_AT_ATTACK_SKILL
-	g_DummyAttackChecker->Initialize((DWORD)Data->dwDummySeedValue);
-#endif // KJH_ADD_CREATE_SERIAL_NUM_AT_ATTACK_SKILL
-
-	return true;
-}
-#endif // KJH_ADD_DUMMY_SKILL_PROTOCOL
-
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 BOOL ReceiveStraightAttack(BYTE *ReceiveBuffer, int Size, BOOL bEncrypted)
 {
@@ -13316,7 +13170,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 					g_ErrorReport.Write( "Version dismatch. - Login\r\n");
 					break;
 				case 0x07:
-				default:	// 성민
+				default:
 					CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CONNECT);
 					break;
 				case 0x08:
@@ -13441,23 +13295,18 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
                 ReceiveAddPoint(ReceiveBuffer);
 				break;
 			case 0x07: //receive damage
-                //AddDebugText(ReceiveBuffer,Size);
                 ReceiveDamage(ReceiveBuffer);
 				break;
 			case 0x08:
-                //AddDebugText(ReceiveBuffer,Size);
                 ReceivePK(ReceiveBuffer);
 				break;
 			case 0x11:
-                //AddDebugText(ReceiveBuffer,Size);
                 ReceiveMagicList(ReceiveBuffer);
 				break;
 			case 0x13:
-                //AddDebugText(ReceiveBuffer,Size);
                 ReceiveEquipment(ReceiveBuffer);
 				break;
 			case 0x14:
-                //AddDebugText(ReceiveBuffer,Size);
                 ReceiveModifyItem(ReceiveBuffer);
 				break;
 			case 0x20:
@@ -13865,7 +13714,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x87:
         ReceiveMixExit(ReceiveBuffer);
 		break;
-#ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
 	case 0x8E:
 		{
 			LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
@@ -13880,20 +13728,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 		}
 		break;
-#endif	// YDG_ADD_MOVE_COMMAND_PROTOCOL
-#ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
-	case 0x8D:
-		{
-			LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
-			switch(Data->SubCode)
-			{
-			case 0x05:
-				ReceiveSkillDummySeedValue(ReceiveBuffer);
-				break;
-			}
-		}
-		break;
-#endif // KJH_ADD_DUMMY_SKILL_PROTOCOL
 	case 0x90:
 		ReceiveMoveToDevilSquareResult(ReceiveBuffer);
 		break;

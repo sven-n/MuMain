@@ -248,11 +248,7 @@ int RenderTextList(int sx,int sy,int TextNum,int Tab, int iSort = RT3_SORT_CENTE
 			g_pRenderText->SetFont(g_hFont);
 		}
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i],lstrlen(TextList[i]),&Size[i]);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), TextList[i],lstrlen(TextList[i]),&Size[i]);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
       	
 		if(TextWidth < Size[i].cx)
 		{
@@ -7351,7 +7347,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+106].Name);
 	}
-	else if( o->Type == MODEL_HELPER+123 )	// 스켈레톤 펫
+	else if( o->Type == MODEL_HELPER+123 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+123].Name);
@@ -7366,7 +7362,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+76].Name);
 	}
-	else if( o->Type == MODEL_HELPER+122 )	// 스켈레톤 변신반지
+	else if( o->Type == MODEL_HELPER+122 )
 	{
 		glColor3f ( 0.9f, 0.53f, 0.13f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+122].Name);
@@ -7906,7 +7902,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 		else if( ITEM_WING+130 <= o->Type && 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			o->Type <= ITEM_WING+135
@@ -8037,10 +8033,6 @@ int GetScreenWidth()
 {
 	int iWidth = 0;
 
-#ifdef MOD_INTERFACE_CAMERAWORK
-	return 640;
-#endif //MOD_INTERFACE_CAMERAWORK
-
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
 		&& (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
@@ -8049,9 +8041,7 @@ int GetScreenWidth()
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY)
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION)
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 #ifdef LEM_ADD_LUCKYITEM
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
 #endif // LEM_ADD_LUCKYITEM
@@ -8060,12 +8050,8 @@ int GetScreenWidth()
 		iWidth = 640 - (190 * 2);
 	}
 	else if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		&& (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST)
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
-#else	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-		&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST)
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 		)
 	{
      	iWidth = 640 - (190 * 2);
@@ -8096,53 +8082,20 @@ int GetScreenWidth()
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT)
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DEVILSQUARE)
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE)
-#ifdef PSW_GOLDBOWMAN
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN)
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN_LENA)
-#endif //PSW_EVENT_LENA	
-#ifdef YDG_ADD_NEW_DUEL_UI
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DUELWATCH)
-#endif	// YDG_ADD_NEW_DUEL_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE)
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_NPC_MENU
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_MENU)
-#endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS)
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
-#endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC)		
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-#ifdef YDG_FIX_DOPPELGANGER_NPC_WINDOW_SCREEN_SIZE
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DOPPELGANGER_NPC)
-#endif	// YDG_FIX_DOPPELGANGER_NPC_WINDOW_SCREEN_SIZE
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
-#ifdef PBG_ADD_GENSRANKING
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GENSRANKING)
-#endif //PBG_ADD_GENSRANKING
 		) 
 	{
         iWidth = 640 - 190;
 	}
-#ifndef ASG_MOD_3D_CHAR_EXCLUSION_UI
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
-	else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
-	{
-		iWidth = 640 - 267;
-	}
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
-#endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 	else
 	{
 		iWidth = 640;
@@ -8150,10 +8103,6 @@ int GetScreenWidth()
 
 	return iWidth;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 인밴토리 전체 초기화
-///////////////////////////////////////////////////////////////////////////////
 
 void ClearInventory()
 {

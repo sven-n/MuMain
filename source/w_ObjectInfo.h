@@ -150,7 +150,6 @@ public:
 public:
 	unsigned char AI;
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI	
-	//애니메이션255개 이상 추가로인한 확장
 	unsigned short CurrentAction;
 	unsigned short PriorAction;
 #else //PBG_ADD_NEWCHAR_MONK_ANI

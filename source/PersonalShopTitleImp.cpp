@@ -469,22 +469,26 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxContent(const std::string& 
 	m_fulltitle = title;
 
 	g_pRenderText->SetFont(g_hFontBold);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(),GlobalText[1104],strlen(GlobalText[1104]), &m_icon);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(),GlobalText[1104],strlen(GlobalText[1104]), &m_icon);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	SeparateShopTitle(title, m_topTitle, m_bottomTitle);
 	CalculateBooleanSize(name, m_topTitle, m_bottomTitle, m_size);
 }
 void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxPos(POINT& pos)
-{ m_pos = pos; }
+{ 
+	m_pos = pos; 
+}
 
 void CPersonalShopTitleImp::CShopTitleDrawObj::GetBoxSize(SIZE& size)
-{ size = m_size; }
+{ 
+	size = m_size; 
+}
+
 void CPersonalShopTitleImp::CShopTitleDrawObj::GetBoxPos(POINT& pos)
-{ pos = m_pos; }
+{ 
+	pos = m_pos; 
+}
+
 void CPersonalShopTitleImp::CShopTitleDrawObj::GetBoxRect(RECT& rect)
 {
 	rect.left = m_pos.x;
@@ -540,10 +544,10 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
 
 	extern float g_fScreenRate_x;
 	extern float g_fScreenRate_y;
-	POINT RenderPos = { m_pos.x/g_fScreenRate_x, m_pos.y/g_fScreenRate_y };	//. 640*480 기준
-	SIZE RenderBoxSize = { m_size.cx/g_fScreenRate_x, m_size.cy/g_fScreenRate_y }; //. 640*480 기준
-	SIZE RenderIconSize = { m_icon.cx/g_fScreenRate_x, m_icon.cy/g_fScreenRate_y }; //. 640*480 기준
-	int iLineHeight = FontHeight/g_fScreenRate_y;	//. 640*480 기준
+	POINT RenderPos = { m_pos.x/g_fScreenRate_x, m_pos.y/g_fScreenRate_y };
+	SIZE RenderBoxSize = { m_size.cx/g_fScreenRate_x, m_size.cy/g_fScreenRate_y };
+	SIZE RenderIconSize = { m_icon.cx/g_fScreenRate_x, m_icon.cy/g_fScreenRate_y };
+	int iLineHeight = FontHeight/g_fScreenRate_y;
 
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(iIconBkColor);
@@ -554,19 +558,21 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
 	g_pRenderText->SetTextColor(iNameTextColor);
 	g_pRenderText->RenderText(RenderPos.x+RenderIconSize.cx, RenderPos.y, m_fullname.c_str(), 
 		RenderBoxSize.cx-RenderIconSize.cx, iLineHeight);
-	RenderPos.y += iLineHeight;	//. 다음줄로
+	RenderPos.y += iLineHeight;
 
 	g_pRenderText->SetFont(g_hFont);
 
 	// Render shop title
-	if( !m_bottomTitle.empty() ){	//. 두줄
+	if( !m_bottomTitle.empty() )
+	{
 		g_pRenderText->SetBgColor(108, 57, 41, 200);
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, m_topTitle.c_str(), RenderBoxSize.cx, iLineHeight);
-		RenderPos.y += iLineHeight;	//. 다음줄로
+		RenderPos.y += iLineHeight;
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, m_bottomTitle.c_str(), RenderBoxSize.cx, iLineHeight);
 	}
-	else if( !m_topTitle.empty() ) {	//. 한줄
+	else if( !m_topTitle.empty() ) 
+	{
 		g_pRenderText->SetBgColor(108, 57, 41, 200);
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, m_topTitle.c_str(), RenderBoxSize.cx, iLineHeight);
@@ -574,64 +580,35 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
 }
 void CPersonalShopTitleImp::CShopTitleDrawObj::SeparateShopTitle(const std::string& title, std::string& topTitle, std::string& bottomTitle)
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
 	char pszTopTitle[MAX_SHOPTITLE] = {'\0'};
 	char pszBottonTitle[MAX_SHOPTITLE] = {'\0'};
 	CutText(title.c_str(), pszBottonTitle, pszTopTitle, title.length());
 
 	topTitle = pszTopTitle;
 	bottomTitle = pszBottonTitle;
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	if(title.size() > 20){
-		int limit = title.size()/2;
-		int offset=0;
-		for(; offset<limit; ){
-			if(title[offset] & 0x80)
-				offset += 2;
-			else
-				offset++;
-		}
-		
-		topTitle.assign(title, 0, offset);
-		bottomTitle.assign(title, offset, title.size()-offset);
-	}
-	else{
-		topTitle = title;
-		bottomTitle = "";
-	}
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 }
 void CPersonalShopTitleImp::CShopTitleDrawObj::CalculateBooleanSize(IN const std::string& name, IN const std::string& topTitle, IN const std::string& bottomTitle, OUT SIZE& size)
 {
 	SIZE text_size[3];
 	g_pRenderText->SetFont(g_hFontBold);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), name.c_str(),name.size(),&text_size[0]);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), name.c_str(),name.size(),&text_size[0]);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pRenderText->SetFont(g_hFont);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), topTitle.c_str(),topTitle.size(),&text_size[1]);
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), bottomTitle.c_str(),bottomTitle.size(),&text_size[2]);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), topTitle.c_str(),topTitle.size(),&text_size[1]);
-	unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), bottomTitle.c_str(),bottomTitle.size(),&text_size[2]);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 	int maxWidth, maxHeight;
 	if( !bottomTitle.empty() )
-	{	//. 두줄이라면
+	{
 		maxWidth = max(text_size[0].cx+m_icon.cx,max(text_size[1].cx,text_size[2].cx));
 		maxHeight = FontHeight*3;
 	}
 	else if( !topTitle.empty() )
-	{		//. 한줄이라면
+	{
 		maxWidth = max(text_size[0].cx+m_icon.cx,text_size[1].cx);
 		maxHeight = FontHeight*2;
 	}
 	else
-	{		//. 아이디만 있는경우?
+	{
 		maxWidth = text_size[0].cx+m_icon.cx;
 		maxHeight = FontHeight;
 	}

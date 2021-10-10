@@ -33,7 +33,6 @@ namespace
 			outtokenbufflist.push_back( eBuff_PcRoomSeal1 ); outtokenbufflist.push_back( eBuff_PcRoomSeal2 ); 
 			outtokenbufflist.push_back( eBuff_PcRoomSeal3 );
 		}
-#if defined(ASG_ADD_CS6_ASCENSION_SEAL_MASTER) && defined(ASG_ADD_CS6_WEALTH_SEAL_MASTER)
 		// eBuff_Seal_HpRecovery, eBuff_Seal_MpRecovery
 		if ((curbufftype >= eBuff_Seal1 && curbufftype <= eBuff_Seal4)
 			|| curbufftype == eBuff_AscensionSealMaster || curbufftype == eBuff_WealthSealMaster)
@@ -42,24 +41,12 @@ namespace
 			outtokenbufflist.push_back(eBuff_Seal2); 
 			outtokenbufflist.push_back(eBuff_Seal3);
 			outtokenbufflist.push_back(eBuff_Seal4);
-#ifdef PSW_ADD_PC4_SEALITEM
 			outtokenbufflist.push_back(eBuff_Seal_HpRecovery); 
 			outtokenbufflist.push_back(eBuff_Seal_MpRecovery);
-#endif //PSW_ADD_PC4_SEALITEM
 			outtokenbufflist.push_back(eBuff_AscensionSealMaster); 
 			outtokenbufflist.push_back(eBuff_WealthSealMaster);
 		}
-#else	// defined(ASG_ADD_CS6_ASCENSION_SEAL_MASTER) && defined(ASG_ADD_CS6_WEALTH_SEAL_MASTER)
-		if(curbufftype >= eBuff_Seal1 && curbufftype <= eBuff_Seal4)
-		{
-			outtokenbufflist.push_back( eBuff_Seal1 ); outtokenbufflist.push_back( eBuff_Seal2 ); 
-			outtokenbufflist.push_back( eBuff_Seal3 ); outtokenbufflist.push_back( eBuff_Seal4 );
-#ifdef PSW_ADD_PC4_SEALITEM
-			outtokenbufflist.push_back( eBuff_Seal_HpRecovery ); 
-			outtokenbufflist.push_back( eBuff_Seal_MpRecovery );
-#endif //PSW_ADD_PC4_SEALITEM
-		}
-#endif	// defined(ASG_ADD_CS6_ASCENSION_SEAL_MASTER) && defined(ASG_ADD_CS6_WEALTH_SEAL_MASTER)
+
 		if(curbufftype >= eBuff_EliteScroll1 && curbufftype <= eBuff_EliteScroll6)
 		{
 			outtokenbufflist.push_back( eBuff_EliteScroll1 ); outtokenbufflist.push_back( eBuff_EliteScroll2 ); 
@@ -238,10 +225,7 @@ void Buff::UnRegisterBuff( eBuffState buffstate )
 	
 	if( iter != m_Buff.end() )
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		DWORD& tempcount = (*iter).second;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		{
 			m_Buff.erase(iter);
 		}

@@ -96,13 +96,10 @@ namespace SEASON3B
 		
 		bool BtnProcess();
 		
-		float GetLayerDepth();
-		
 		virtual void OpenningProcess();
 		void ClosingProcess();
+		float GetLayerDepth();
 
-		void SetNewVersion(bool bNew);
-		bool IsNewVersion();
 		bool IsLuckySealBuff();
 		bool IsMapMove( const std::string& src );
 

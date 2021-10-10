@@ -93,9 +93,7 @@ void COptionWin::SetPosition(int nXCoord, int nYCoord)
 	for (int i = 0; i <= OW_BTN_SLIDE_HELP; ++i)
 		m_aBtn[i].SetPosition(nBtnPosX, nBtnPosBaseTop + i * nBtnGap);
 
-	m_aBtn[OW_BTN_CLOSE].SetPosition(m_winBack.GetXPos()
-		+ (m_winBack.GetWidth() - m_aBtn[OW_BTN_CLOSE].GetWidth()) / 2,
-		m_winBack.GetYPos() + 301);
+	m_aBtn[OW_BTN_CLOSE].SetPosition(m_winBack.GetXPos() + (m_winBack.GetWidth() - m_aBtn[OW_BTN_CLOSE].GetWidth()) / 2, m_winBack.GetYPos() + 301);
 
 //	int nSldPosX = m_winBack.GetXPos()
 //		+ (m_winBack.GetWidth() - m_aSlider[0].GetWidth()) / 2;
@@ -216,12 +214,10 @@ void COptionWin::RenderControls()
 	for (int i = 0; i < OW_SLD_MAX; ++i)	
 	{
 		nTextPosY = int((m_aSlider[i].GetYPos() - 18) / g_fScreenRate_y);
-		g_pRenderText->RenderText(int(m_aSlider[i].GetXPos() / g_fScreenRate_x),
-			nTextPosY, apszSldText[i]);
+		g_pRenderText->RenderText(int(m_aSlider[i].GetXPos() / g_fScreenRate_x),nTextPosY, apszSldText[i]);
 
 		::_itoa(anVal[i], szVal, 10);
-		g_pRenderText->RenderText(int((m_aSlider[i].GetXPos() + 85)/ g_fScreenRate_x),
-			nTextPosY, szVal);
+		g_pRenderText->RenderText(int((m_aSlider[i].GetXPos() + 85)/ g_fScreenRate_x),nTextPosY, szVal);
 		
 		m_aSlider[i].Render();
 	}

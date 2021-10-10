@@ -243,27 +243,19 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 
 	if(SelectedCharacter >= 0)
 	{
-		// 채팅입력창이 열린상태에서는 마우스 오른쪽 클릭으로 캐릭터 선택하면 귓속말에 아이디 입력된다.
 		if(IsVisible() && SEASON3B::IsRelease(VK_RBUTTON))
 		{
 			CHARACTER* pCha = &CharactersClient[SelectedCharacter];	
 
-#ifdef LDK_FIX_EXCEPTION_SETWHISPERID_NOTMODELPLAYER_INCHAOSCASTLE
-			//채팅창 열고 마우스우클릭시 귀속말id 입력 예외처리(2008.5.7)
-			if(pCha->Object.Kind == KIND_PLAYER && !gMapManager.InChaosCastle()
-#ifdef ASG_ADD_GENS_SYSTEM
-				// 분쟁지역에서는 타 세력 플래이어의 이름이 노출시키면 안됨.
-				&& !(::IsStrifeMap(gMapManager.WorldActive) && Hero->m_byGensInfluence != pCha->m_byGensInfluence)
-#endif	// ASG_ADD_GENS_SYSTEM
+			if(pCha->Object.Kind == KIND_PLAYER && !gMapManager.InChaosCastle()	&& !(::IsStrifeMap(gMapManager.WorldActive) && Hero->m_byGensInfluence != pCha->m_byGensInfluence)
+
 				)
-#endif //LDK_FIX_EXCEPTION_SETWHISPERID_NOTMODELPLAYER_INCHAOSCASTLE
 			{
 				SetWhsprID(pCha->ID);
 			}
 		}
 	}
 
-	// 툴팁타입 설정
 	m_iTooltipType = INPUT_TOOLTIP_NOTHING;
 	int i, x;
 	for(i=0; i<9; ++i)
@@ -277,7 +269,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 		}
 	}
 
-	// 채팅 타입 Radio 버튼 처리
 	int iSelectedInputType = -1;
 	for(i=0; i<3; ++i)
 	{
@@ -293,7 +284,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 		return false;
 	}
 
-	// 귓속말 차단 On/Off
 	if(CheckMouseIn(m_WndPos.x+87, m_WndPos.y, 27, 26) == true && SEASON3B::IsRelease(VK_LBUTTON))
 	{
 		m_bBlockWhisper = !m_bBlockWhisper;
@@ -303,12 +293,10 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 
 	if(m_bShowChatLog)
 	{
-		// 시스템 메시지만 출력 On/Off
 		if(CheckMouseIn(m_WndPos.x+114, m_WndPos.y, 27, 26) == true && SEASON3B::IsRelease(VK_LBUTTON))
 		{	
 			m_bOnlySystemMessage = !m_bOnlySystemMessage;
 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 			if(m_bOnlySystemMessage)
 			{
 				m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_SYSTEM_MESSAGE);
@@ -317,16 +305,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 			{
 				m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_ALL_MESSAGE);
 			}
-#else // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
-			if(m_bOnlySystemMessage)
-			{
-				m_pNewUIChatLogWnd->ShowMessage(CNewUIChatLogWindow::SHOW_SYSTEM_MESSAGE);
-			}
-			else
-			{
-				m_pNewUIChatLogWnd->ShowMessage(CNewUIChatLogWindow::SHOW_ALL_MESSAGES);
-			}
-#endif // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
 
 			PlayBuffer(SOUND_CLICK01);
 			return false;
@@ -338,9 +316,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 	{
 		m_bShowChatLog = !m_bShowChatLog;
 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-		// 기능 : 채팅 On/Off
-		// 현재 F2를 눌렀을때 기능과 틀리다. (임시)
 		if(m_bShowChatLog)
 		{
 			m_pNewUIChatLogWnd->ShowChatLog();
@@ -349,31 +324,11 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 		{
 			m_pNewUIChatLogWnd->HideChatLog();
 		}
-#else // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
-		
-		if(m_bShowChatLog)
-		{
-			if(m_bOnlySystemMessage)
-			{
-				m_pNewUIChatLogWnd->ShowMessage(CNewUIChatLogWindow::SHOW_SYSTEM_MESSAGE);
-			}
-			else
-			{
-				m_pNewUIChatLogWnd->ShowMessage(CNewUIChatLogWindow::SHOW_ALL_MESSAGES);
-			}
-		}
-		else
-		{
-			m_pNewUIChatLogWnd->ShowMessage(CNewUIChatLogWindow::SHOW_NOTHING);
-		}
-#endif // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
-
 
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
 
-	// 로그 Frame 출력 On/Off
 	if(CheckMouseIn(m_WndPos.x+173, m_WndPos.y, 27, 26) == true && SEASON3B::IsRelease(VK_LBUTTON))
 	{
 		if(m_pNewUIChatLogWnd->IsShowFrame())
@@ -390,7 +345,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 
 	if(m_pNewUIChatLogWnd->IsShowFrame())
 	{
-		// 로그 프레임 사이즈 변경 버튼
 		if(m_BtnSize.UpdateMouseEvent() == true)
 		{
 			m_pNewUIChatLogWnd->SetSizeAuto();
@@ -400,7 +354,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 			return false;
 		}
 
-		// 로그 프레임 투명도 조절 버튼
 		if(m_BtnTransparency.UpdateMouseEvent() == true)
 		{
 			m_pNewUIChatLogWnd->SetBackAlphaAuto();
@@ -419,40 +372,18 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 
 bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 {
-	// 채팅메세지 (On/Off)
 	if(SEASON3B::IsPress(VK_F2))
 	{
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-		// 현재 F2기능은 전체채팅<->귓말모드 토글기능
-		// 아이콘을 눌렀을때 와 기능이 틀리다.
 		m_bShowMessageElseNormal = !m_bShowMessageElseNormal;
 		
 		if(m_bShowMessageElseNormal)
 		{
-			// 전체 채팅모드
 			m_pNewUIChatLogWnd->ChangeMessage( SEASON3B::TYPE_WHISPER_MESSAGE );
 		}
 		else
 		{
-			// 귓말모드
 			m_pNewUIChatLogWnd->ChangeMessage( SEASON3B::TYPE_ALL_MESSAGE );
 		}
-#else // KJH_FIX_UI_CHAT_MESSAGE
-		m_bShowMessageElseNormal = !m_bShowMessageElseNormal;
-
-		if(m_bShowMessageElseNormal)
-		{
-			int flag = CNewUIChatLogWindow::SHOW_ALL_MESSAGES;
-
-			flag ^= (int)CNewUIChatLogWindow::SHOW_CHAT_MESSAGE;
-
-			m_pNewUIChatLogWnd->ShowMessage((CNewUIChatLogWindow::SHOW_MESSAGE_FLAG)flag);
-		}
-		else	
-		{
-			m_pNewUIChatLogWnd->ShowMessage(CNewUIChatLogWindow::SHOW_ALL_MESSAGES);
-		}
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 
 		PlayBuffer(SOUND_CLICK01);
 		return false;
@@ -460,7 +391,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 	
 	if(SEASON3B::IsPress(VK_F3))
 	{
-		//. 귓속말 아이디 입력창 열기
 		if(m_bWhisperSend == false)
 		{
 			m_bWhisperSend = true;
@@ -523,11 +453,8 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 		}	
 	}
 
-	// 체팅창 열기
 	if( false == IsVisible() && SEASON3B::IsPress(VK_RETURN) )
 	{
-		// 카오스캐슬이고 실제 싸움 시작전에는 채팅창이 열린다.
-		// 실제 이벤트가 시작하면 이벤트 타임 UI 보이기 시작한다.
 		if(gMapManager.InChaosCastle() == true && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME) == false)
 
 		{
@@ -578,8 +505,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 		g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), g_pMultiLanguage->GetCodePage());
 		strncpy(szChatText, strText.c_str(), sizeof szChatText);
 		
-
-
 		if(unicode::_strlen(szChatText) != 0)
 		{	
 			if(!CheckCommand(szChatText))
@@ -590,9 +515,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 						g_pMultiLanguage->ConvertCharToWideStr(wstrText, GlobalText[570]);
 					}
 					
-					if(m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL 
-						&& unicode::_strlen(szChatText) 
-						&& strlen(szWhisperID) > 0 )
+					if(m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && unicode::_strlen(szChatText) && strlen(szWhisperID) > 0 )
 					{
 						g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), CP_UTF8);
 						strncpy(szChatText, strText.c_str(), sizeof szChatText);
@@ -811,15 +734,7 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
 		return;
 
 	unicode::t_char strTooltip[256];
-	// 1681 "일반 채팅 On/Off"
-	// 1682 "파티 채팅 On/Off"
-	// 1683 "길드 채팅 On/Off"
-	// 1684 "귓말 차단 On/Off"
-	// 1685 "시스템 메시지 출력 On/Off"
-	// 1686 "채팅창 배경 출력 On/Off (F5)"
-	// 750 "채팅출력 On/Off (F2)"
-	// 751 "크기조정 (F4)"
-	// 752 "투명도 조정"
+
 	const int iTextIndex[9] = { 1681, 1682, 1683, 1684, 1685, 750, 1686, 751, 752};
 
 	unicode::_sprintf(strTooltip, "%s", GlobalText[iTextIndex[m_iTooltipType]]);
@@ -858,7 +773,6 @@ void SEASON3B::CNewUIChatInputBox::OpenningProcess()
 {
 	m_pChatInputBox->GiveFocus();
 	m_pChatInputBox->SetState(UISTATE_NORMAL);
-	// 인풋버퍼 초기화
 	m_pChatInputBox->SetText("");
 
 	if(m_bWhisperSend == true)
@@ -884,14 +798,13 @@ void SEASON3B::CNewUIChatInputBox::ClosingProcess()
 void SEASON3B::CNewUIChatInputBox::GetChatText(type_string& strText)
 {
 	unicode::t_char szChatText[256];
-	m_pChatInputBox->GetText(szChatText, 256);		//. 유니코드: 수정하세요!
+	m_pChatInputBox->GetText(szChatText, 256);
 	strText = szChatText;
 }
 void SEASON3B::CNewUIChatInputBox::GetWhsprID(type_string& strWhsprID)
 {
 	char szWhisperID[32];
 	m_pWhsprIDInputBox->GetText(szWhisperID, 32);
-	//. 유니코드: 변환루틴 필요!
 	strWhsprID = szWhisperID;
 }
 

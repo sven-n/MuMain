@@ -129,51 +129,38 @@ public:
 	virtual ~CHARACTER();
 
 public:
-	void Initialize();
-	void Destroy();
-
-public:
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-	void InitPetInfo(int iPetType);
-	PET_INFO* GetEquipedPetInfo(int iPetType);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
-	
-	// MoveCharacter함수상에 사용자 지정 내용을 RenderCharacter 함수상에서 사용하고자 함입니다.
-#ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
-
+	void			Initialize();
+	void			Destroy();
+	void			InitPetInfo(int iPetType);
+	PET_INFO*		GetEquipedPetInfo(int iPetType);
 	void			PostMoveProcess_Active( unsigned int uiLimitCount );
 	unsigned int	PostMoveProcess_GetCurProcessCount();
 	bool			PostMoveProcess_IsProcessing();
 	bool			PostMoveProcess_Process();
-
-#endif // LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
-
-public:
-	bool        Blood;
-	bool        Ride;
-	bool        SkillSuccess;
-	BOOL        m_bFixForm;         //  데미지를 맞아도 고정된 형태에서 변경되지 않는 캐릭터.	
-	bool        Foot[2];
-	bool        SafeZone;
-	bool        Change;
-	bool		HideShadow;
-	bool        m_bIsSelected;
-	bool        Decoy;
-
-	BYTE	    Class;
-	BYTE	    Skin;
-	BYTE		CtlCode;
-	BYTE        ExtendState;			//  0:無, 1:풀세트아이템
-	BYTE        EtcPart;				//  기타 부탁 아이템. ( 퀘스트용 )
-	BYTE		GuildStatus;			//  길드내에서의 직책 ( -1 : NONE, 0 : PERSON, 32 : BATTLE_MASTER, 64 : SUB_MASTER, 128 : MASTER )
-	BYTE		GuildType;				//  길드종류 일반(0), 수호길드(1)
-	BYTE		GuildRelationShip;	    //  길드관계 (0x00 : 관계없음, 0x01 : Union, 0x04 Union Master, 0x02 : Rival, 0x08: Rival Union )
-	BYTE        GuildSkill;             //  배틀 마스터의 길드 스킬.
-	BYTE        GuildMasterKillCount;   //  배틀 마스터 킬카운트.
-	BYTE        BackupCurrentSkill;     //  스킬 인덱스 백업.
+	bool			Blood;
+	bool			Ride;
+	bool			SkillSuccess;
+	BOOL			m_bFixForm;
+	bool			Foot[2];
+	bool			SafeZone;
+	bool			Change;
+	bool			HideShadow;
+	bool			m_bIsSelected;
+	bool			Decoy;
+	BYTE			Class;
+	BYTE			Skin;
+	BYTE			CtlCode;
+	BYTE			ExtendState;
+	BYTE			EtcPart;
+	BYTE		GuildStatus;
+	BYTE		GuildType;
+	BYTE		GuildRelationShip;
+	BYTE        GuildSkill;
+	BYTE        GuildMasterKillCount;
+	BYTE        BackupCurrentSkill;
 	BYTE        GuildTeam;
 #ifdef ASG_ADD_GENS_SYSTEM
-	BYTE		m_byGensInfluence;		//	겐스 세력.(0:없음, 1:듀프리언, 2:바네르트)
+	BYTE		m_byGensInfluence;
 #endif	// ASG_ADD_GENS_SYSTEM
 	BYTE        PK;
 #ifdef LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER

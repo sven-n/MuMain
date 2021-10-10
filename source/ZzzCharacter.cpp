@@ -3226,7 +3226,6 @@ void OnlyNpcChatProcess ( CHARACTER* c, OBJECT* o )
     {
         switch ( o->Type )
         {
-#ifndef LIMIT_CHAOS_MIX
         case MODEL_MERCHANT_GIRL :  
             if ( gMapManager.InBattleCastle()==false )
             {
@@ -3237,18 +3236,12 @@ void OnlyNpcChatProcess ( CHARACTER* c, OBJECT* o )
 			CreateChat ( c->ID, GlobalText[1975], c ); 
 			break;
         case MODEL_MASTER :         
-				CreateChat ( c->ID, GlobalText[1976], c ); 
-				break;
+			CreateChat ( c->ID, GlobalText[1976], c ); 
+			break;
 		case MODEL_PLAYER:
 			if (c->MonsterIndex == 257)
 				CreateChat ( c->ID, GlobalText[1827], c );
 			break;
-#ifdef MYSTERY_BEAD
-		case MODEL_MIX_NPC:
-			CreateChat( c->ID, GlobalText[1841], c );
-			break;
-#endif //HELPER_ELF
-#endif //LIMIT_CHAOS_MIX
         }
 
     }
@@ -8454,12 +8447,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		}
 	}
 	else if(o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL
-#ifdef PJH_ADD_PANDA_CHANGERING
 		|| o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
 		|| o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
 		)
 	{
 		if(o->m_iAnimation >= 1)
@@ -9095,13 +9084,11 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	{
 		if (g_DuelMgr.IsDuelPlayer(c, DUEL_ENEMY, FALSE))
 		{
-			// 결투 상대일경우
 			bCloak = true;
 			Vector(1.f,0.2f,0.f,CloakLight);
 		}
 		else if (g_DuelMgr.IsDuelPlayer(c, DUEL_HERO, FALSE))
 		{
-			// 상대편일 경우
 			bCloak = true;
 			Vector(0.f,0.2f,1.f,CloakLight);
 		}
@@ -9275,19 +9262,14 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	{
 		RenderPartObject(&c->Object,o->SubType,NULL,c->Light,o->Alpha,0,0,0,false,false,Translate,Select);
 	}
-#ifdef PJH_ADD_PANDA_CHANGERING
 	else if(o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA)
 	{
 		RenderPartObject(&c->Object,o->SubType,NULL,c->Light,o->Alpha,0,0,0,false,false,Translate,Select);
 	}
-#endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
-	else if(o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED)	// 스켈레톤 변신반지
+	else if(o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED)
 	{
 		RenderPartObject(&c->Object,o->SubType,NULL,c->Light,o->Alpha,0,0,0,false,false,Translate,Select);
 	}
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
-	// 크리스마스 이벤트 변신반지 모델 렌더링
 	else if(o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL)
 	{
 		RenderPartObject(&c->Object,o->SubType,NULL,c->Light,o->Alpha,0,0,0,false,false,Translate,Select);
@@ -9403,7 +9385,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
 		RenderPartObject(&c->Object,o->SubType,NULL,c->Light,o->Alpha,0,0,0,false,false,Translate,Select);
 	}
-	else if(o->Type==MODEL_PLAYER && (o->SubType>=MODEL_SKELETON1&&o->SubType<=MODEL_SKELETON3))//해골씨리즈
+	else if(o->Type==MODEL_PLAYER && (o->SubType>=MODEL_SKELETON1&&o->SubType<=MODEL_SKELETON3))
 	{
         RenderPartObject(&c->Object,o->SubType,NULL,c->Light,o->Alpha,0,0,0,false,false,Translate,Select);
 	}
@@ -9455,13 +9437,11 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					{
 						int nItemType = (Type - MODEL_ITEM) / MAX_ITEM_INDEX;
 						int nItemSubType = (Type - MODEL_ITEM) % MAX_ITEM_INDEX;
-						// 넝쿨, 실크 시리즈인가?
+
 						if (nItemType >= 7 && nItemType <= 11
 							&& (nItemSubType == 10 || nItemSubType == 11))
 						{
-							Type = MODEL_HELM2
-								+ (nItemType - 7) * MODEL_ITEM_COMMON_NUM
-								+ nItemSubType - 10;
+							Type = MODEL_HELM2 + (nItemType - 7) * MODEL_ITEM_COMMON_NUM + nItemSubType - 10;
 						}
 					}
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
@@ -9541,7 +9521,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				CreateGuildMark(c->GuildMarkIndex);
 #ifdef PBG_ADD_NEWCHAR_MONK
 				if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
-				{	// 모델 사이즈로 잡기에는 퀄리티가 떨어짐
+				{
 					vec3_t vPos;
 					if(c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+59
 						|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+60
@@ -9964,14 +9944,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
             PART_t *w = &c->Weapon[i];
 			if ( w->Type!=-1 && w->Type!=MODEL_BOW+7 && w->Type!=MODEL_BOW+15 && w->Type!=MODEL_HELPER+5)
 			{
-				if(o->CurrentAction==PLAYER_ATTACK_BOW || o->CurrentAction==PLAYER_ATTACK_CROSSBOW ||
-         			o->CurrentAction==PLAYER_ATTACK_FLY_BOW || o->CurrentAction==PLAYER_ATTACK_FLY_CROSSBOW)
+				if(o->CurrentAction==PLAYER_ATTACK_BOW || o->CurrentAction==PLAYER_ATTACK_CROSSBOW || o->CurrentAction==PLAYER_ATTACK_FLY_BOW || o->CurrentAction==PLAYER_ATTACK_FLY_CROSSBOW)
 				{
-					// 활을 착용하고 있고 공격을 하면 활의 에니메이션이 되게 해주는 코드
-					// playspeed의 값을 넣어주므로서 에니메이션이 동작하게 해줌
-#ifdef ADD_SOCKET_ITEM
-					// 보우 공격 애니메이션
-					// 다크스팅거(23)는 다른보우와는 다르게 1번이 공격애니메니션 0번이 기본애니메이션이다.
 					if( w->Type == MODEL_BOW+23 )
 					{
 						w->CurrentAction = 1;
@@ -9981,10 +9955,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						w->CurrentAction = 0;
 					}
 					w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_BOW].PlaySpeed;
-#else // ADD_SOCKET_ITEM								// 정리할 때 지워야 하는 소스
-					w->CurrentAction = 0;
-					w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_BOW].PlaySpeed;
-#endif // ADD_SOCKET_ITEM								// 정리할 때 지워야 하는 소스
 				}
 				else if(w->Type==MODEL_MACE+2)
 				{
@@ -10014,27 +9984,22 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					w->CurrentAction = 0;
 					w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
 				}
-#ifdef ADD_SOCKET_ITEM
-				// 기본애니메이션이 있는 무기들
 				else if( w->Type == MODEL_BOW+23 )
 				{	
 					w->CurrentAction = 0;		
 					w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
 				}
-				else if( (w->Type == MODEL_MACE+16)
-					|| (w->Type == MODEL_MACE+17) )
+				else if( (w->Type == MODEL_MACE+16) || (w->Type == MODEL_MACE+17) )
 				{
 					w->CurrentAction = 0;
 					w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
 				}
-#endif // ADD_SOCKET_ITEM
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 				else if( w->Type == MODEL_STAFF+34 )
 				{
 					w->CurrentAction = 0;
 					w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
 				}
-#endif //LDK_ADD_GAMBLERS_WEAPONS
+
 				else
 				{
 					w->CurrentAction       = 0;
@@ -10676,8 +10641,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 		}
 
 #ifdef CSK_LUCKY_SEAL
-#if SELECTED_LANGUAGE != LANGUAGE_JAPANESE
-
 		if( g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal1) 
 		 || g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal2) 
 		 || g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal3)
@@ -10700,7 +10663,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			DeleteJoint(MODEL_SPEARSKILL, o, 10);
 			DeleteJoint(MODEL_SPEARSKILL, o, 11);
 		}
-#endif //SELECTED_LANGUAGE != LANGUAGE_JAPANESE
 
 #endif // CSK_LUCKY_SEAL
 		if(g_isCharacterBuff((&c->Object), eBuff_Thorns))
@@ -12762,10 +12724,6 @@ extern int HeroIndex;
 void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 {
 	OBJECT *o;
-#ifdef _DEBUG
-    int iRealType = Type;
-	//Type = 310;
-#endif	// _DEBUG
 
 	int nCastle = BLOODCASTLE_NUM + (gMapManager.WorldActive - WD_11BLOODCASTLE_END );
 	if(nCastle > 0 && nCastle <= BLOODCASTLE_NUM)
@@ -12789,12 +12747,7 @@ void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 				break;
 			}
 		}
-#ifdef _DEBUG
-		Type = iRealType;
-		char szMonsterIndex[16];
-		sprintf(szMonsterIndex, "(%d)", Type);
-		strcat(c->ID, szMonsterIndex);
-#endif // _DEBUG
+
 		c->MonsterIndex = Type;
 		c->Object.ExtState = 0;
 		c->TargetCharacter = HeroIndex;
@@ -12847,9 +12800,6 @@ void Setting_Monster(CHARACTER *c,int Type,int PositionX,int PositionY)
 		|| Type == 545
 		|| Type == 546
 		|| Type == 547
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
-		|| Type == 566 || Type == 567 || Type == 568
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_NPC
 #ifdef ASG_ADD_KARUTAN_NPC
 		|| Type == 577 || Type == 578
 #endif	// ASG_ADD_KARUTAN_NPC
@@ -13007,14 +12957,14 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 	}
 #endif // KJH_ADD_09SUMMER_EVENT
 
-#ifdef PSW_ADD_MAPSYSTEM
+
 	c = TheMapProcess().CreateMonster( Type, PositionX, PositionY, Key );
 	if(c != NULL)
 	{
 		Setting_Monster(c, Type, PositionX, PositionY);
 		return c;
 	}
-#endif //PSW_ADD_MAPSYSTEM
+
 	switch(Type)
 	{
 	case 224:
@@ -13257,12 +13207,12 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Weapon[0].Type = MODEL_STAFF+7;
 		c->Weapon[0].Option1 = 63;
 		break;
-	case 81://인어
+	case 81:
     	OpenMonsterModel(34);
 		c = CreateCharacter(Key,MODEL_MONSTER01+34,PositionX,PositionY);
 		c->Object.Scale = 1.f;
 		break;
-	case 82:	// 데블 탄탈로스
+	case 82:
     	OpenMonsterModel(42);
 		c = CreateCharacter(Key,MODEL_MONSTER01+42,PositionX,PositionY);
 		c->Object.BlendMesh = 2;
@@ -13274,7 +13224,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,2,o,30.f);
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,3,o,30.f);
 		break;
-	case 83:	// 골드휠
+	case 83:
     	OpenMonsterModel(41);
 		c = CreateCharacter(Key,MODEL_MONSTER01+41,PositionX,PositionY);
 		c->Object.Scale = 1.4f;
@@ -13286,19 +13236,19 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,3,o,30.f);
 		break;
 #endif
-    case 68:    //  깃털괴물.
+    case 68:
     	OpenMonsterModel(49);
 		c = CreateCharacter(Key,MODEL_MONSTER01+49,PositionX,PositionY);
 		c->Object.Scale = 1.4f;
         break;
 
-    case 69:    //  별자리.
+    case 69:
     	OpenMonsterModel(50);
 		c = CreateCharacter(Key,MODEL_MONSTER01+50,PositionX,PositionY);
 		c->Object.Scale = 1.f;
         c->Object.BlendMesh = 0;
         break;
-    case 70:    //  비의여왕.
+    case 70:
     	OpenMonsterModel(51);
 		c = CreateCharacter(Key,MODEL_MONSTER01+51,PositionX,PositionY);
 		c->Object.Scale = 1.3f;
@@ -13311,8 +13261,8 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 	case 301:
 #endif
 
-    case 71:    //  야누스.
-	case 74:	//  야누스2
+    case 71:
+	case 74:
     	OpenMonsterModel(52);
 		c = CreateCharacter(Key,MODEL_MONSTER01+52,PositionX,PositionY);
 		if ( 71 == Type)
@@ -13336,7 +13286,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		//Models[MODEL_MONSTER01+52].StreamMesh = 1;
         break;
 
-    case 72:    //  이카루스.
+    case 72:
     	OpenMonsterModel(53);
 		c = CreateCharacter(Key,MODEL_MONSTER01+53,PositionX,PositionY);
 		c->Object.Scale = 1.45f;
@@ -13344,8 +13294,8 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Weapon[0].Level = 5;
         break;
 
-    case 73:    //  흑룡.
-	case 75://흑룡2
+    case 73:
+	case 75:
     	OpenMonsterModel(54);
 		c = CreateCharacter(Key,MODEL_MONSTER01+54,PositionX,PositionY);
         c->m_bFixForm = true;
@@ -13363,7 +13313,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
         Models[c->Object.Type].Meshs[3].NoneBlendMesh = true;
         Models[c->Object.Type].Meshs[4].NoneBlendMesh = true;
         break;
-	case 77:	// 불사조
+	case 77:
 		{
     		OpenMonsterModel(55);
 			OpenMonsterModel(56);
@@ -13373,7 +13323,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 			Models[MODEL_MONSTER01+55].StreamMesh = 0;
 		}
 		break;
-	case 64://오크 궁수 (46, 47, 48)
+	case 64:
     	OpenMonsterModel(46);
 		c = CreateCharacter(Key,MODEL_MONSTER01+46,PositionX,PositionY);
 		c->Object.Scale = 1.2f;
@@ -13382,7 +13332,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		o = &c->Object;
 		o->HiddenMesh = 1;
 		break;
-	case 137:	// 오크 궁수
+	case 137:
     	OpenMonsterModel(46);
 		c = CreateCharacter(Key,MODEL_MONSTER01+46,PositionX,PositionY);
 		c->Object.Scale = 1.2f;
@@ -13391,22 +13341,22 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		o = &c->Object;
 		o->HiddenMesh = 1;
 		break;
-	case 65:	//오크 대장
+	case 65:
     	OpenMonsterModel(47);
 		c = CreateCharacter(Key,MODEL_MONSTER01+47,PositionX,PositionY);
 		c->Object.Scale = 1.3f;
 		o = &c->Object;
 		o->HiddenMesh = 2;
 		break;
-	case 136:	// 오크 병사
+	case 136:
     	OpenMonsterModel(47);
 		c = CreateCharacter(Key,MODEL_MONSTER01+47,PositionX,PositionY);
 		c->Object.Scale = 1.3f;
 		o = &c->Object;
 		o->HiddenMesh = 2;
 		break;
-	case 66:	//저주받은 왕
-	case 135:	// 백색의 마법사
+	case 66:
+	case 135:
     	OpenMonsterModel(48);
 		c = CreateCharacter(Key,MODEL_MONSTER01+48,PositionX,PositionY);
 		c->Object.Scale = 1.7f;
@@ -13414,14 +13364,14 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		break;
 
 #ifdef YDG_ADD_SANTA_MONSTER
-	case 466:	// 저주받은 고블린
+	case 466:
     	OpenMonsterModel(156);
 		c = CreateCharacter(Key,MODEL_MONSTER01+156,PositionX,PositionY);
 		c->Object.Scale = 0.9f;
 		strcpy(c->ID,"저주받은 고블린");
 		o = &c->Object;
 		break;
-	case 476:	// 저주받은 산타
+	case 476:
     	OpenMonsterModel(155);
 		c = CreateCharacter(Key,MODEL_MONSTER01+155,PositionX,PositionY);
 		c->Object.Scale = 1.7f;
@@ -13434,7 +13384,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 	case 300:
 #endif
 
-	case 62://뮤턴트
+	case 62:
     	OpenMonsterModel(45);
 		c = CreateCharacter(Key,MODEL_MONSTER01+45,PositionX,PositionY);
 		c->Object.Scale = 1.5f;
@@ -13442,8 +13392,8 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,2,o,30.f);
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,3,o,30.f);
 		break;
-	case 63://데쓰빔나이트
-	case 61://빔나이트
+	case 63:
+	case 61:
     	OpenMonsterModel(44);
 		c = CreateCharacter(Key,MODEL_MONSTER01+44,PositionX,PositionY);
 		if(Type == 63)
@@ -13460,7 +13410,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,2,o,30.f);
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,3,o,30.f);
 		break;
-	case 60://블러드울프
+	case 60:
     	OpenMonsterModel(43);
 		c = CreateCharacter(Key,MODEL_MONSTER01+43,PositionX,PositionY);
    		c->Object.Scale = 2.2f;
@@ -13468,8 +13418,8 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,2,o,30.f);
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,3,o,30.f);
 		break;
-	case 58://자이칸
-	case 59://탄탈로스
+	case 58:
+	case 59:
     	OpenMonsterModel(42);
 		c = CreateCharacter(Key,MODEL_MONSTER01+42,PositionX,PositionY);
 		c->Object.BlendMesh = 2;
@@ -13489,7 +13439,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,2,o,30.f);
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,3,o,30.f);
 	break;
-	case 57://아이언휠
+	case 57:
     	OpenMonsterModel(41);
 		c = CreateCharacter(Key,MODEL_MONSTER01+41,PositionX,PositionY);
 		c->Object.Scale = 1.4f;
@@ -13914,9 +13864,9 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 1.6f;
 		break;
 
-	case 14:    //  해골전사.
-	case 55:    //  데쓰킹.
-	case 56:    //  데쓰본.
+	case 14:
+	case 55:
+	case 56:
 		c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
 		strcpy(c->ID,"해골전사");
 		c->Object.SubType = MODEL_SKELETON1;
@@ -13939,7 +13889,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 			c->Weapon[0].Type = MODEL_SPEAR+9;
 		}
 		break;
-	case 15:	// 해골 궁수
+	case 15:
 		c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
 		strcpy(c->ID,"해골궁수");
 		c->Object.Scale = 1.1f;
@@ -13948,7 +13898,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Level = 1;
 		c->Blood = true;
 		break;
-	case 16:	// 해골 전사 대장
+	case 16:
 		c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
 		strcpy(c->ID,"해골전사 대장");
 		c->Object.Scale = 1.2f;
@@ -13958,28 +13908,24 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Level = 1;
 		c->Blood = true;
 		break;
-		// 엘리트 해골전사 모델 데이타 생성
 	case 372:
 		c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
 		::strcpy(c->ID, "엘리트 해골전사");
 		c->Object.Scale = 0.95f;
 		c->Object.SubType = MODEL_SKELETON_PCBANG;
 		break;
-		// 할로윈 이벤트 모델 데이타 생성
-	case 373:	// 373 1 "잭 오랜턴"
+	case 373:
 		c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
 		::strcpy(c->ID, "잭 오랜턴");
 		c->Object.Scale = 0.95f;
 		c->Object.SubType = MODEL_HALLOWEEN;
 		break;
-		// 크리스마스 이벤트 모델 데이타 생성
 	case 374:
 		c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
 		::strcpy(c->ID, "크리스마스 걸");
 		c->Object.Scale = 0.85f;
 		c->Object.SubType = MODEL_XMAS_EVENT_CHANGE_GIRL;
 		break;
-		// GM 모델 데이타 생성
 	case 378:
 		c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
 		::strcpy(c->ID, "GameMaster");
@@ -13997,8 +13943,8 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,2,o,30.f);
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,3,o,30.f);
 		break;
-	case 54:    //  솔져
-	case 151:   //  소환된 솔져.
+	case 54:
+	case 151:
     	OpenMonsterModel(40);
 		c = CreateCharacter(Key,MODEL_MONSTER01+40,PositionX,PositionY);
 		strcpy(c->ID,"솔져");
@@ -14018,13 +13964,13 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 	case 102:
 		c = CreateCharacter(Key,51,PositionX,PositionY);
 		break;
-	case 103://운석
+	case 103:
 		c = CreateCharacter(Key,25,PositionX,PositionY);
 		break;
-	case 106:	// 레이져형 트랩
+	case 106:
 		c = CreateCharacter(Key,51,PositionX,PositionY);
 		break;
-	case 200://공
+	case 200:
 		c = CreateCharacter(Key,MODEL_BALL,PositionX,PositionY);
 		o = &c->Object;
 		o->BlendMesh = 2;
@@ -14049,7 +13995,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
         break;
 
     case 228:
-		OpenNpc(MODEL_HERO_SHOP);//    대천사의 전령
+		OpenNpc(MODEL_HERO_SHOP);
 		c = CreateCharacter(Key,MODEL_HERO_SHOP,PositionX,PositionY);
 		strcpy(c->ID,"영웅상점");
         break;
@@ -14073,9 +14019,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Weapon[1].Type = -1;
 		SetCharacterScale(c);
 		break;
-
-    //  데비아스, 로랜시아 추가 상점 NPC
-	case 230 :	//	로랜시아 추가 상인.
+	case 230:
 		OpenNpc(MODEL_MERCHANT_MAN);
 		c = CreateCharacter(Key,MODEL_MERCHANT_MAN,PositionX,PositionY);
 		strcpy(c->ID,"로랜추가상인");
@@ -14084,21 +14028,21 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->BodyPart[BODYPART_GLOVES].Type = MODEL_MERCHANT_MAN_GLOVES+1;
 		c->BodyPart[BODYPART_BOOTS ].Type = MODEL_MERCHANT_MAN_BOOTS;
 		break;
-	case 231 :	//	데비아스 추가 상인.
+	case 231:
     	OpenNpc(MODEL_DEVIAS_TRADER);
 		c = CreateCharacter(Key,MODEL_DEVIAS_TRADER,PositionX,PositionY);
 		strcpy(c->ID,"데비추가상인");
 		break;
 
 	case 232:
-		OpenNpc(MODEL_NPC_ARCHANGEL);//    대천사
+		OpenNpc(MODEL_NPC_ARCHANGEL);
 		c = CreateCharacter(Key,MODEL_NPC_ARCHANGEL,PositionX,PositionY);
         o = &c->Object;
         o->Scale = 1.f;
         o->Kind  = KIND_NPC;
 		break;
 	case 233:
-		OpenNpc(MODEL_NPC_ARCHANGEL_MESSENGER);//    대천사의 전령
+		OpenNpc(MODEL_NPC_ARCHANGEL_MESSENGER);
 		c = CreateCharacter(Key,MODEL_NPC_ARCHANGEL_MESSENGER,PositionX,PositionY);
         o = &c->Object;
         o->Scale = 1.f;
@@ -14116,15 +14060,15 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
         break;
 
     case 235:
-		OpenNpc(MODEL_NPC_SEVINA);//    여사제 세비나.
+		OpenNpc(MODEL_NPC_SEVINA);
 		c = CreateCharacter(Key,MODEL_NPC_SEVINA,PositionX,PositionY);
         o = &c->Object;
         o->Scale = 1.f;
         o->Kind  = KIND_NPC;
         break;
 
-    case 236:   //  이벤트 NPC.
-		OpenNpc(MODEL_PLAYER);//
+    case 236:
+		OpenNpc(MODEL_PLAYER);
 		c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
         o = &c->Object;
         o->SubType  = MODEL_SKELETON2;
@@ -14133,11 +14077,10 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
         c->Level    = 8;
         break;
 	case 237:
-		OpenNpc(MODEL_NPC_DEVILSQUARE);//악마의 광장-카론
+		OpenNpc(MODEL_NPC_DEVILSQUARE);
 		c = CreateCharacter(Key,MODEL_NPC_DEVILSQUARE,PositionX,PositionY);
 		break;
-	//정제는 따로 한다
-	case 369://제련
+	case 369:
 		OpenNpc(MODEL_REFINERY_NPC);
 		c = CreateCharacter(Key,MODEL_REFINERY_NPC,PositionX,PositionY);
 		o = &c->Object;
@@ -14148,17 +14091,17 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		o = &c->Object;
 		break;
 	case 238:
-    	OpenNpc(MODEL_MIX_NPC);//믹스
+    	OpenNpc(MODEL_MIX_NPC);
 		c = CreateCharacter(Key,MODEL_MIX_NPC,PositionX,PositionY);
 		o = &c->Object;
 		o->BlendMesh = 1;
 		break;
 	case 239:
-    	OpenNpc(MODEL_TOURNAMENT);//경기장지기
+    	OpenNpc(MODEL_TOURNAMENT);
 		c = CreateCharacter(Key,MODEL_TOURNAMENT,PositionX,PositionY);
 		break;
 	case 240:
-		OpenNpc(MODEL_STORAGE);//창고지기
+		OpenNpc(MODEL_STORAGE);
 		c = CreateCharacter(Key,MODEL_STORAGE,PositionX,PositionY);
 		break;
 	case 241:
@@ -14166,12 +14109,12 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c = CreateCharacter(Key,MODEL_MASTER,PositionX,PositionY);
 		strcpy(c->ID,"마스터");
 		break;
-	case 256:  // 축합성 NPC
+	case 256:
 		OpenNpc(MODEL_NPC_SERBIS);
 		c = CreateCharacter(Key, MODEL_NPC_SERBIS, PositionX, PositionY);
 		strcpy(c->ID, "세르비스");
 		break;
-	case 257:  // 요정 도우미
+	case 257:
 		c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
 		MakeElfHelper(c);
 		strcpy(c->ID, "페이아");
@@ -14207,20 +14150,8 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		strcpy(c->ID,"무기상인");
 		break;
 	case 247:
-#ifdef _PVP_ATTACK_GUARD
-    	OpenNpc(MODEL_ANGEL);
 		c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
 		strcpy(c->ID,"경비병");
-		SetCharacterScale(c);
-		c->Weapon[0].Type = MODEL_BOW+9;
-		c->Weapon[1].Type = MODEL_BOW+7;
-		if (World == WD_10HEAVEN)
-			c->Wing.Type = MODEL_WING+1;
-#else	// _PVP_ATTACK_GUARD
-		c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
-		//c->Class = 2;
-		strcpy(c->ID,"경비병");
-
 		c->BodyPart[BODYPART_HELM  ].Type = MODEL_HELM  +9;
 		c->BodyPart[BODYPART_ARMOR ].Type = MODEL_ARMOR +9;
 		c->BodyPart[BODYPART_PANTS ].Type = MODEL_PANTS +9;
@@ -14229,7 +14160,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Weapon[0].Type = MODEL_BOW+11;
 		c->Weapon[1].Type = MODEL_BOW+7;
 		SetCharacterScale(c);
-#endif	// _PVP_ATTACK_GUARD
 		break;
 	case 248:
    		OpenNpc(MODEL_MERCHANT_MAN);
@@ -14241,16 +14171,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->BodyPart[BODYPART_BOOTS ].Type = MODEL_MERCHANT_MAN_BOOTS+1;
 		break;
 	case 249:
-#ifdef _PVP_ATTACK_GUARD
-    	OpenNpc(MODEL_ANGEL);
-		c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
-		strcpy(c->ID,"경비병");
-		SetCharacterScale(c);
-		c->Weapon[0].Type = MODEL_MACE+2;
-		c->Weapon[1].Type = MODEL_SHIELD+7;
-		if (World == WD_10HEAVEN)
-			c->Wing.Type = MODEL_WING+1;
-#else	// _PVP_ATTACK_GUARD
 		c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
 		strcpy(c->ID,"경비병");
 		c->BodyPart[BODYPART_HELM  ].Type = MODEL_HELM  +9;
@@ -14260,7 +14180,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->BodyPart[BODYPART_BOOTS ].Type = MODEL_BOOTS +9;
 		c->Weapon[0].Type = MODEL_SPEAR+7;
 		SetCharacterScale(c);
-#endif	// _PVP_ATTACK_GUARD
 		break;
 	case 250:
     	OpenNpc(MODEL_MERCHANT_MAN);
@@ -14294,19 +14213,19 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
     	OpenNpc(MODEL_MERCHANT_FEMALE);
 		c = CreateCharacter(Key,MODEL_MERCHANT_FEMALE,PositionX,PositionY);
 		strcpy(c->ID,"술집마담 리아먼");
-		c->BodyPart[BODYPART_HELM  ].Type = MODEL_MERCHANT_FEMALE_HEAD+1;
-		c->BodyPart[BODYPART_ARMOR ].Type = MODEL_MERCHANT_FEMALE_UPPER+1;
-		c->BodyPart[BODYPART_PANTS ].Type = MODEL_MERCHANT_FEMALE_LOWER+1;
-		c->BodyPart[BODYPART_BOOTS ].Type = MODEL_MERCHANT_FEMALE_BOOTS+1;
+		c->BodyPart[BODYPART_HELM].Type  = MODEL_MERCHANT_FEMALE_HEAD+1;
+		c->BodyPart[BODYPART_ARMOR].Type = MODEL_MERCHANT_FEMALE_UPPER+1;
+		c->BodyPart[BODYPART_PANTS].Type = MODEL_MERCHANT_FEMALE_LOWER+1;
+		c->BodyPart[BODYPART_BOOTS].Type = MODEL_MERCHANT_FEMALE_BOOTS+1;
 		break;
-	case 204: // 늑대의 신상
-		OpenNpc(MODEL_CRYWOLF_STATUE);	// 늑대의 신상
+	case 204:
+		OpenNpc(MODEL_CRYWOLF_STATUE);
 		c = CreateCharacter(Key,MODEL_CRYWOLF_STATUE,PositionX,PositionY);
 		strcpy(c->ID,"석상");
 		c->Object.Live = false;
 		break;
 	case 205:
-		OpenNpc(MODEL_CRYWOLF_ALTAR1);	// 제단 1
+		OpenNpc(MODEL_CRYWOLF_ALTAR1);
 		c = CreateCharacter(Key,MODEL_CRYWOLF_ALTAR1,PositionX,PositionY);
 		strcpy(c->ID,"제단1");
 		c->Object.Position[2] -= 10.0f;
@@ -14315,7 +14234,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.EnableShadow = false;
 		break;
 	case 206:
-		OpenNpc(MODEL_CRYWOLF_ALTAR2);	// 제단 2
+		OpenNpc(MODEL_CRYWOLF_ALTAR2);
 		c = CreateCharacter(Key,MODEL_CRYWOLF_ALTAR2,PositionX,PositionY);
 		strcpy(c->ID,"제단2");
 		c->Object.HiddenMesh = -2;
@@ -14324,7 +14243,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.EnableShadow = false;
 		break;
 	case 207:
-		OpenNpc(MODEL_CRYWOLF_ALTAR3);	// 제단 3
+		OpenNpc(MODEL_CRYWOLF_ALTAR3);
 		c = CreateCharacter(Key,MODEL_CRYWOLF_ALTAR3,PositionX,PositionY);
 		strcpy(c->ID,"제단3");
 		c->Object.HiddenMesh = -2;
@@ -14333,7 +14252,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.EnableShadow = false;
 		break;
 	case 208:
-		OpenNpc(MODEL_CRYWOLF_ALTAR4);	// 제단 4
+		OpenNpc(MODEL_CRYWOLF_ALTAR4);
 		c = CreateCharacter(Key,MODEL_CRYWOLF_ALTAR4,PositionX,PositionY);
 		strcpy(c->ID,"제단4");
 		c->Object.HiddenMesh = -2;
@@ -14342,7 +14261,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.EnableShadow = false;
 		break;
 	case 209:
-		OpenNpc(MODEL_CRYWOLF_ALTAR5);	// 제단 5
+		OpenNpc(MODEL_CRYWOLF_ALTAR5);
 		c = CreateCharacter(Key,MODEL_CRYWOLF_ALTAR5,PositionX,PositionY);
 		strcpy(c->ID,"제단5");
 		c->Object.HiddenMesh = -2;
@@ -14350,7 +14269,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Visible = false;
 		c->Object.EnableShadow = false;
 		break;
-	case 368:	// 제련의 탑 npc
+	case 368:
 		OpenNpc(MODEL_SMELTING_NPC);
 		c = CreateCharacter(Key,MODEL_SMELTING_NPC,PositionX+1,PositionY-1);
 		strcpy(c->ID,"제련의탑NPC");
@@ -14358,7 +14277,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.EnableShadow = false;
 		c->Object.m_bRenderShadow = false;
 		break;		
-	case 379:	// 폭죽판매 NPC Wedding
+	case 379:
 		OpenNpc(MODEL_WEDDING_NPC);
 		c = CreateCharacter(Key,MODEL_WEDDING_NPC,PositionX,PositionY);
 		strcpy(c->ID,"WeddingNPC");
@@ -14435,31 +14354,31 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		}
 		break;
 #ifdef ADD_NPC_DEVIN 
-	case 406:	// 사제데빈
+	case 406:
 		OpenNpc(MODEL_NPC_DEVIN);
 		c = CreateCharacter(Key,MODEL_NPC_DEVIN,PositionX,PositionY);
 		strcpy(c->ID,"사제데빈");
 		break;
 #endif	// ADD_NPC_DEVIN
-	case 407:	// 웨어울프쿼렐
+	case 407:
 		OpenNpc(MODEL_NPC_QUARREL);
 		c = CreateCharacter(Key,MODEL_NPC_QUARREL,PositionX,PositionY);
 		strcpy(c->ID,"웨어울프쿼렐");
 		c->Object.Scale = 1.9f;
 		break;
-	case 408:	// 성문
+	case 408:
 		OpenNpc(MODEL_NPC_CASTEL_GATE);
 		c = CreateCharacter(Key,MODEL_NPC_CASTEL_GATE,PositionX,PositionY, 90.f);
 		strcpy(c->ID,"성문");
 		o = &c->Object;
 		o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1]) + 240.f;
 		c->Object.Scale = 1.2f;
-		c->Object.m_fEdgeScale = 1.1f;	// 마우스 커서로 선택 시 초록 외곽선.
+		c->Object.m_fEdgeScale = 1.1f;
 		c->Object.EnableShadow = false;
 		c->Object.m_bRenderShadow = false;
 		break;
 #ifdef PRUARIN_EVENT07_3COLORHARVEST
-	case 413:		// 달토끼
+	case 413:
 		{
 			OpenMonsterModel(127);
 			c = CreateCharacter(Key, MODEL_MONSTER01+127, PositionX, PositionY);
@@ -14467,7 +14386,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 			c->Object.Scale = 0.8f;
 			c->Weapon[0].Type = -1;
 			c->Weapon[1].Type = -1;
-			c->Object.SubType = rand()%3;		// 죽을때 떨어지는 이펙트 선택
+			c->Object.SubType = rand()%3;
 			c->Object.m_iAnimation = 0;			
 			
 			BoneManager::RegisterBone(c, "Rabbit_1", 3);		// Bip01 Spine 	
@@ -14805,21 +14724,21 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_CHRISTIN, PositionX, PositionY);
 		strcpy(c->ID, "크리스틴");
 		c->Object.Scale = 1.1f;
-		c->Object.m_fEdgeScale = 1.2f;	// 마우스 커서로 선택 시 초록 외곽선.
+		c->Object.m_fEdgeScale = 1.2f;
 		break;
 	case 546:	// 라울
 		OpenNpc(MODEL_UNITEDMARKETPLACE_RAUL);
 		c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_RAUL, PositionX, PositionY);
 		strcpy(c->ID, "라울");
 		c->Object.Scale = 1.0f;
-		c->Object.m_fEdgeScale = 1.15f;	// 마우스 커서로 선택 시 초록 외곽선.
+		c->Object.m_fEdgeScale = 1.15f;
 		break;
 	case 547:	// 줄리아
 		OpenNpc(MODEL_UNITEDMARKETPLACE_JULIA);
 		c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_JULIA, PositionX, PositionY);
 		strcpy(c->ID, "줄리아");
 		c->Object.Scale = 1.0f;
-		c->Object.m_fEdgeScale = 1.1f;	// 마우스 커서로 선택 시 초록 외곽선.
+		c->Object.m_fEdgeScale = 1.1f;
 		break;
 #endif // LDS_ADD_NPC_UNITEDMARKETPLACE
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC

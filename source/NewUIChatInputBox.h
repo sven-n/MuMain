@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-class CUITextInputBox;	//. 기존 클래스사용
+class CUITextInputBox;
 
 namespace SEASON3B
 {
@@ -48,8 +48,8 @@ namespace SEASON3B
 		};
 
 		enum IMAGE_LIST
-		{	//. max: 12개
-			IMAGE_INPUTBOX_BACK = BITMAP_INTERFACE_NEW_CHATINPUTBOX_BEGIN,	//. newui_chat_back.jpg
+		{
+			IMAGE_INPUTBOX_BACK = BITMAP_INTERFACE_NEW_CHATINPUTBOX_BEGIN,
 			IMAGE_INPUTBOX_NORMAL_ON,
 			IMAGE_INPUTBOX_PARTY_ON,
 			IMAGE_INPUTBOX_GUILD_ON,
@@ -76,8 +76,7 @@ namespace SEASON3B
 			EVENT_CLIENT_WND_HOVER,
 		};
 
-		typedef std::basic_string<unicode::t_char, std::char_traits<unicode::t_char>, 
-			std::allocator<unicode::t_char> > type_string;
+		typedef std::basic_string<unicode::t_char, std::char_traits<unicode::t_char>, std::allocator<unicode::t_char> > type_string;
 		typedef std::vector<type_string>	type_vec_history;
 
 		CNewUIManager*			m_pNewUIMng;
@@ -90,20 +89,18 @@ namespace SEASON3B
 
 		int m_iCurChatHistory, m_iCurWhisperIDHistory;
 
-		int m_iTooltipType;			// 채팅 버튼들 툴팁 타입
-		int m_iInputMsgType;		// 채팅 타입
-		bool m_bBlockWhisper;		// 귓속말 차단 On/Off
-		bool m_bOnlySystemMessage;	// 시스템 메시지만 표시 On/Off
-		bool m_bShowChatLog;		// 채팅로그창 On/Off
-		bool m_bWhisperSend;		// 귓속말 보내기 On/Off
-		bool m_bShowMessageElseNormal;		// 일반 채팅만 빼고 나머지 다 표시
+		int m_iTooltipType;
+		int m_iInputMsgType;
+		bool m_bBlockWhisper;
+		bool m_bOnlySystemMessage;
+		bool m_bShowChatLog;
+		bool m_bWhisperSend;
+		bool m_bShowMessageElseNormal;
 		
-		CNewUIButton m_BtnSize;				// 크기조절 버튼
-		CNewUIButton m_BtnTransparency;		// 투명도조절 버튼
+		CNewUIButton m_BtnSize;
+		CNewUIButton m_BtnTransparency;
 		
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		const int MAX_CHAT_SIZE_UTF16;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 		void Init();
 		
@@ -129,14 +126,14 @@ namespace SEASON3B
 		
 		void SetFont(HFONT hFont);
 
-		bool HaveFocus();	// 커서를 가지고 있는가
+		bool HaveFocus();
 
-		void AddChatHistory(const type_string& strText);	// 히스토리에 추가한다
-		void RemoveChatHistory(int index);	// 히스토리 제거
+		void AddChatHistory(const type_string& strText);
+		void RemoveChatHistory(int index);
 		void RemoveAllChatHIstory();
 
-		void AddWhsprIDHistory(const type_string& strWhsprID);	// 히스토리에 추가한다
-		void RemoveWhsprIDHistory(int index);	// 히스토리 제거
+		void AddWhsprIDHistory(const type_string& strWhsprID);
+		void RemoveWhsprIDHistory(int index);
 		void RemoveAllWhsprIDHIstory();
 
 		bool IsBlockWhisper();
@@ -147,8 +144,8 @@ namespace SEASON3B
 		bool Update();
 		bool Render();
 
-		float GetLayerDepth();	//. 6.2f
-		float GetKeyEventOrder();	//. 9.0f
+		float GetLayerDepth();
+		float GetKeyEventOrder();
 
 		void OpenningProcess();
 		void ClosingProcess();
@@ -156,7 +153,7 @@ namespace SEASON3B
 		void SetWhsprID(const char* strWhsprID);
 
 	protected:
-		void GetChatText(type_string& strText);	// 텍스트 가져오기
+		void GetChatText(type_string& strText);
 		void GetWhsprID(type_string& strWhsprID);
 
 		void SetTextPosition(int x, int y);

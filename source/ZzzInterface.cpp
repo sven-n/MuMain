@@ -1,8 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 인터페이스 관련 함수
-// 케릭터 조작, 텍스트 랜더링, 채팅 랜더링, 화면 하단의 인터페이스 랜더링 등등
-//
-// *** 함수 레벨: 3
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -32,9 +28,7 @@
 #include "CSItemOption.h"
 #include "npcBreeder.h"
 #include "PvPSystem.h"
-#ifdef PET_SYSTEM
 #include "GIPetManager.h"
-#endif// PET_SYSTEM
 #include "CSParts.h"
 #include "GMBattleCastle.h"
 #include "GMCrywolf1st.h"
@@ -44,15 +38,7 @@
 #include "GM_Kanturu_3rd.h"
 #include "GM_Kanturu_2nd.h"
 #include "MapManager.h"
-#ifdef ADD_MU_HOMEPAGE
-#include "iexplorer.h"
-#endif //ADD_MU_HOMEPAGE
 #include "Event.h"
-#ifndef KJH_DEL_PC_ROOM_SYSTEM				// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-#include "PCRoomPoint.h"
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "NewUISystem.h"
 #include "w_CursedTemple.h"
@@ -62,21 +48,10 @@
 #include "NewUICommonMessageBox.h"
 #include "SummonSystem.h"
 #include "GMSwampOfQuiet.h"
-#ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
-#endif // PSW_ADD_MAPSYSTEM
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 #include "DuelMgr.h"
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef PBG_ADD_PKSYSTEM_INGAMESHOP
-#include "PKSystem.h"
-#endif //PBG_ADD_PKSYSTEM_INGAMESHOP
-#ifdef LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG
 #include "ChangeRingManager.h"
-#endif // LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG
-#ifdef PBG_ADD_GENSRANKING
 #include "NewUIGensRanking.h"
-#endif //PBG_ADD_GENSRANKING
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -85,10 +60,6 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////
 extern CUITextInputBox * g_pSingleTextInputBox;
 extern CUITextInputBox * g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
@@ -577,7 +548,6 @@ void ScrollNotice()
 
 void ClearNotice ( void )
 {
-    //  공지.
     memset ( Notice, 0, sizeof( NOTICE )*MAX_NOTICE );
 }
 
@@ -585,11 +555,7 @@ void CreateNotice(char *Text,int Color)
 {
 	SIZE Size;
 	g_pRenderText->SetFont(g_hFontBold);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text,lstrlen(Text),&Size);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), Text,lstrlen(Text),&Size);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	ScrollNotice();
 	Notice[NoticeCount].Color = Color;
@@ -623,13 +589,6 @@ int NoticeInverse = 0;
 
 void RenderNotices()
 {
-// #ifdef LDS_ADD_EMPIRE_GUARDIAN
-// 	// 제국 수호군 진행중에 공지 출력안함
-// 	if(	IsEmpireGuardian1() || IsEmpireGuardian2() || IsEmpireGuardian3() || IsEmpireGuardian4() )
-// 	{
-// 		return;
-// 	}
-// #endif //LDS_ADD_EMPIRE_GUARDIAN
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 	if( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == true)
@@ -637,10 +596,6 @@ void RenderNotices()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 	EnableAlphaTest();
-	
-#ifdef SYSTEM_NOT_RENDER_TEXT
-	return;
-#endif // SYSTEM_NOT_RENDER_TEXT
 	
 	g_pRenderText->SetFont(g_hFontBold);
 	
@@ -678,85 +633,40 @@ void RenderNotices()
 	NoticeInverse++;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 텍스트 출력시 문장이 길 경우 두줄로 자르는 함수
-///////////////////////////////////////////////////////////////////////////////
-
-
 void CutText(const char* Text,char *Text1,char *Text2,int Length)
 {
 
-// Text가 UTF-8 타입이 아닐 경우 기존의 방식대로 CutText
-#ifdef	LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	if (g_pMultiLanguage->IsCharUTF8(Text))
 	{
-		// 원본 Text를 그냥 반으로 나눌 경우 UTF-8 encoding에 벗어나게 자를수 있으므로 
-		// UTF-16으로 변환시킨 후 반으로 나눈다. 
 		std::wstring wstrText = L"";
 		g_pMultiLanguage->ConvertCharToWideStr(wstrText, Text);
 		int iClosestBlankFromCenter = g_pMultiLanguage->GetClosestBlankFromCenter(wstrText);
 
-		// 기준을 가지고 나눈다(기준이 되는 빈칸은 앞줄에 포함시킨다).
 		std::wstring wstrText1, wstrText2;
 		wstrText1 = wstrText.substr(iClosestBlankFromCenter+1, std::string::npos);
 		wstrText2 = wstrText.substr(0, iClosestBlankFromCenter+1);
 
-		// 나누어진 UTF-8 형식의 Text들
 		std::string strText1, strText2;
 		g_pMultiLanguage->ConvertWideCharToStr(strText1, wstrText1.c_str(), CP_UTF8);
 		g_pMultiLanguage->ConvertWideCharToStr(strText2, wstrText2.c_str(), CP_UTF8);
 		
-		// Text1, Text2에 복사
 		strncpy(Text1, strText1.c_str(), strText1.length()+1);
 		strncpy(Text2, strText2.c_str(), strText2.length()+1);
 		
 		return ;
 	}
-#endif	//LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
-	// 자를 길이 결정
-	/*	int Cut = 0;
-	bool Hangul = false;
-	for(int j=0;j<Length;j++)
-	{
-	if((j>=Length/2-2 && Text[j]==' ') || j>=Length/2+2)
-	{
-	Cut = j;
-	break;
-	}
-	if(Hangul)
-	{
-	Hangul = false;
-	}
-	else
-	{
-	if((unsigned char)Text[j] >= 128)
-				Hangul = true;
-				}
-				}
-				if(Hangul && (unsigned char)Text[Cut] >= 128)
-	Cut++;*/
-	
-	// 자를 길이 결정
 	int Cut = 0;
-	//int Space = -10;
+
 	for(int j=0;j<Length;)
 	{
-	/*if ( Text[j]==' ')
-	{
-	Space = j;
-	}*/
 		if((j>=Length/2-2 && Text[j]==' ') || j>=Length/2+2)
 		{
 			Cut = j;
-			/*if ( Cut - Space < 4)
-			{
-			Cut = Space;
-		}*/
 			break;
 		}
 		
-		j += _mbclen( ( unsigned char*)&( Text[j]));	// 한글이면 2, 아니면 1 을 리턴
+		j += _mbclen( ( unsigned char*)&( Text[j]));
 	}
 
 	int iTextSize = 0;
@@ -775,13 +685,9 @@ void CutText(const char* Text,char *Text1,char *Text2,int Length)
 
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 귓속말 처리하는 함수들
-///////////////////////////////////////////////////////////////////////////////
-
 int     WhisperID_Num = 0;
 char    WhisperRegistID[MAX_ID_SIZE+1][10];
-//  귓속말 체크.
+
 bool CheckWhisperLevel ( int lvl, char* text )
 {
 	int level = CharacterAttribute->Level;
@@ -798,13 +704,11 @@ bool CheckWhisperLevel ( int lvl, char* text )
         }
     }
 	
-	//  6레벨 이상 캐릭터부터 귓속말을 먼저 보낼수 있습니다.
 	g_pChatListBox->AddText("", GlobalText[479], SEASON3B::TYPE_SYSTEM_MESSAGE);
 	
     return  false;
 }
 
-//  귓속말 아이디 등록.
 void RegistWhisperID ( int lvl, char* text )
 {
 	int level = CharacterAttribute->Level;
@@ -881,33 +785,18 @@ void SetBooleanPosition(CHAT *c)
 			(c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))	
 		{
 			g_pRenderText->SetFont(g_hFontBold);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			bResult[0] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
-			bResult[0] = unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pRenderText->SetFont(g_hFont);
 		}
 		else
 		{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			bResult[0] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
-			bResult[0] = unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		}
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		bResult[1] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[0],lstrlen(c->Text[0]),&Size[1]);
 		bResult[2] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[1],lstrlen(c->Text[1]),&Size[2]);
 		bResult[3] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Union  ,lstrlen(c->Union  ),&Size[3]);
 		bResult[4] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Guild  ,lstrlen(c->Guild  ),&Size[4]);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
-		bResult[1] = unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[0],lstrlen(c->Text[0]),&Size[1]);
-		bResult[2] = unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[1],lstrlen(c->Text[1]),&Size[2]);
-		bResult[3] = unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Union  ,lstrlen(c->Union  ),&Size[3]);
-		bResult[4] = unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Guild  ,lstrlen(c->Guild  ),&Size[4]);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 		Size[0].cx += 3;
 
@@ -924,13 +813,8 @@ void SetBooleanPosition(CHAT *c)
 		{
 			SIZE sizeT[2];
 			g_pRenderText->SetFont(g_hFontBold);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			if(g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) 
-				&& g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], lstrlen(GlobalText[1104]), &sizeT[1]))
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
-			if(unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) 
-				&& unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], lstrlen(GlobalText[1104]), &sizeT[1]))
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
+			if(g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], lstrlen(GlobalText[1104]), &sizeT[1]))
 			{
 				if(c->Width < sizeT[0].cx+sizeT[1].cx)
 					c->Width = sizeT[0].cx+sizeT[1].cx;
@@ -1005,7 +889,6 @@ void RenderBoolean(int x,int y,CHAT *c)
 	
 	if (FontHeight > 32) FontHeight = 32;	// 에러 예방
 	
-	// 상점을 심플버전 출력 : x, y는 현재 해상도 기준
 	POINT RenderPos = { x, y };	//. 640*480 기준
 	SIZE RenderBoxSize = { c->Width, c->Height }; //. 640*480 기준
 	int iLineHeight = FontHeight/g_fScreenRate_y;
@@ -1031,7 +914,6 @@ void RenderBoolean(int x,int y,CHAT *c)
 	}
 #ifdef PBG_MOD_STRIFE_GENSMARKRENDER
 #ifdef ASG_MOD_GM_VIEW_NAME_IN_GENS_STRIFE_MAP
-	// 분쟁지역에서 타세력이며 자신이 GM캐릭터가 아니면.
 	else if(::IsStrifeMap(gMapManager.WorldActive) && Hero->m_byGensInfluence != c->Owner->m_byGensInfluence
 		&& !::IsGMCharacter())
 #else	// ASG_MOD_GM_VIEW_NAME_IN_GENS_STRIFE_MAP
@@ -1042,7 +924,6 @@ void RenderBoolean(int x,int y,CHAT *c)
 		if(!c->Owner->m_nContributionPoint)
 			return;
 
-		// 분쟁지역에서는 상대방의 겐스 마크만 랜더한다
 		if(KIND_PLAYER == c->Owner->Object.Kind && MODEL_PLAYER == c->Owner->Object.Type)
 		{
 			int _TempX = (int)(c->x + c->Width*0.5f+20.0f);
@@ -1185,51 +1066,31 @@ void RenderBoolean(int x,int y,CHAT *c)
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, c->Text[0], RenderBoxSize.cx, iLineHeight);
 	}
 
-#ifdef ASG_ADD_GENS_MARK
-	// 겐스 마크 표시.
 	if (KIND_PLAYER == c->Owner->Object.Kind && MODEL_PLAYER == c->Owner->Object.Type)
 	{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		const int nGensMarkHeight = 18;
 		int nGensMarkPosY = (RenderPos.y - y - nGensMarkHeight) / 2 + y;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-#ifdef PBG_ADD_GENSRANKING
 		if(c->LifeTime[1] > 0)
 			RenderPos.y -= iLineHeight;
-#endif //PBG_ADD_GENSRANKING
 
-		if (1 == c->Owner->m_byGensInfluence)		// 겐스 듀프리언인가?
-#ifdef PBG_ADD_GENSRANKING
+		if (1 == c->Owner->m_byGensInfluence)
 			g_pNewUIGensRanking->RanderMark(x, y, c->Owner->m_byGensInfluence, c->Owner->m_byRankIndex, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
-#else //PBG_ADD_GENSRANKING
-			SEASON3B::RenderImage(BITMAP_GENS_MARK_DUPRIAN, x - nGensMarkWidth - 2, nGensMarkPosY,
-				nGensMarkWidth, nGensMarkHeight);
-#endif //PBG_ADD_GENSRANKING
-		else if (2 == c->Owner->m_byGensInfluence)	// 겐스 바네르트인가?
-#ifdef PBG_ADD_GENSRANKING
+		else if (2 == c->Owner->m_byGensInfluence)
 			g_pNewUIGensRanking->RanderMark(x, y, c->Owner->m_byGensInfluence, c->Owner->m_byRankIndex, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
-#else //PBG_ADD_GENSRANKING
-			SEASON3B::RenderImage(BITMAP_GENS_MARK_BARNERT, x - nGensMarkWidth - 2, nGensMarkPosY,
-				nGensMarkWidth, nGensMarkHeight);
-#endif //PBG_ADD_GENSRANKING
 	}
-#endif	// ASG_ADD_GENS_MARK
+
 }
 void AddChat(CHAT *c,const char* Text,int Flag)
 {	
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int Time = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int Time;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int Length = (int)strlen(Text);
 	switch(Flag)
 	{
 	case 0:
 		Time = Length*2+160;
 		break;
-	case 1:		// #써서 쓴 글도 리스트에 남게
+	case 1:
 		Time = 1000;
 		g_pChatListBox->AddText(c->ID, Text, SEASON3B::TYPE_CHAT_MESSAGE);
 		break;
@@ -1380,11 +1241,8 @@ int CreateChat(char *ID,const char* Text,OBJECT* Owner,int Flag, int SetColor)
 	OBJECT *o = Owner;
 	if(!o->Live || !o->Visible) return 0;
 	
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int Color = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int Color;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	if ( SetColor != -1)
 	{
 		Color = SetColor;
@@ -1805,12 +1663,10 @@ bool CheckAttack()
 		return false;
 	}
 		
-#ifdef CSK_ADD_GM_ABILITY
 	if(IsGMCharacter() && IsNonAttackGM() == true)
 	{
 		return false;
 	}
-#endif // CSK_ADD_GM_ABILITY
 		
 	CHARACTER *c = &CharactersClient[SelectedCharacter];
 		
@@ -7414,14 +7270,6 @@ void CheckGate()
                         {
 							g_pChatListBox->AddText("", GlobalText[569], SEASON3B::TYPE_ERROR_MESSAGE);
                         }
-						/*
-						#if SELECTED_LANGUAGE == LANGUAGE_JAPANESE
-						else if(i>=45 && i<=49 && PartyNumber==0)
-						{
-						CreateWhisper("",GlobalText[262],2);
-						}
-						#endif
-						*/
 						else if(CharacterAttribute->Level < Level)
 						{
 							LoadingWorld = 50;

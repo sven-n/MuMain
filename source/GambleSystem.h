@@ -1,5 +1,4 @@
 // GambleSystem.h: interface for the GembleSystem class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_GEMBLESYSTEM_H__366551E9_005D_44AC_844B_B78AC928455B__INCLUDED_)
@@ -24,10 +23,10 @@ typedef struct _buyItemInfo
 class GambleSystem
 {
 private:
-	bool m_isGambleShop;	//겜블상점 모드.
-	BYTE m_byBuyItemPos;	//구입할 아이템 위치.
+	bool m_isGambleShop;
+	BYTE m_byBuyItemPos;
 	
-	BUYITEMINFO	m_itemInfo;		// 구입 아이템 정보
+	BUYITEMINFO	m_itemInfo;
 
 public:
 	static GambleSystem& Instance();
@@ -36,10 +35,9 @@ public:
 
 	void Init();
 
-	void SetGambleShop(bool isGambleshop = true)	{ m_isGambleShop = isGambleshop; }	// 겜블 여부 세팅.
-	bool IsGambleShop()								{ return m_isGambleShop; }			// 겜블상점인가?
+	void SetGambleShop(bool isGambleshop = true)	{ m_isGambleShop = isGambleshop; }
+	bool IsGambleShop()								{ return m_isGambleShop; }
 
-	// 구입 아이템 정보
 	void SetBuyItemInfo(int index, DWORD cost)	{ m_itemInfo.ItemIndex = index; m_itemInfo.ItemCost = cost; }
 	LPBUYITEMINFO GetBuyItemInfo()				{ return &m_itemInfo; }
 

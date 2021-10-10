@@ -161,15 +161,15 @@ public:
 	virtual CHARACTER * GetPhotoChar() { return &m_PhotoChar; }
 
 	virtual void Init(int iInitType);
-	virtual void SetClass(BYTE byClass);				// 클래스 설정
-	virtual void SetEquipmentPacket(BYTE * pbyEquip);	// 패킷에서 장비 설정
-	virtual void CopyPlayer();							// 주인공과 같이 설정
-	virtual void SetAngle(float fDegree);				// 회전 각도 설정
-	virtual void SetZoom(float fZoom);					// 확대 정도 설정
+	virtual void SetClass(BYTE byClass);
+	virtual void SetEquipmentPacket(BYTE * pbyEquip);
+	virtual void CopyPlayer();
+	virtual void SetAngle(float fDegree);
+	virtual void SetZoom(float fZoom);
 	virtual void SetAutoupdatePlayer(BOOL bFlag) { m_bUpdatePlayer = bFlag; }
 
-	virtual void SetAnimation(int iAnimationType);		// 동작 설정
-	virtual void ChangeAnimation(int iMoveDir = 0);		// 이전/다음 동작으로
+	virtual void SetAnimation(int iAnimationType);
+	virtual void ChangeAnimation(int iMoveDir = 0);
 
 	void SetID(const char* pszID);
 	const char* GetID() { return m_PhotoChar.ID; }
@@ -186,27 +186,26 @@ protected:
 
 protected:
 	CHARACTER m_PhotoChar;
-	OBJECT m_PhotoHelper;			// 유니리아 같은 것들
-	float m_fPhotoHelperScale;		// " 의 크기
+	OBJECT m_PhotoHelper;
+	float m_fPhotoHelperScale;
 	BOOL m_bIsInitialized;
-	BOOL m_bHelpEnable;	// 도움말 표시?
+	BOOL m_bHelpEnable;
 	BOOL m_bUpdatePlayer;
-	BOOL m_bActionRepeatCheck;	// 중복 동작 체크
+	BOOL m_bActionRepeatCheck;
     int m_iShowType;
-	int m_iCurrentAnimation;	// 현재 행동
-	int m_iSettingAnimation;	// 설정된 행동
-	int m_iCurrentFrame;		// 현재 프레임
+	int m_iCurrentAnimation;
+	int m_iSettingAnimation;
+	int m_iCurrentFrame;
 	float m_fSettingAngle;
 	float m_fCurrentAngle;
 	float m_fRotateClickPos_x;
-	float m_fSettingZoom;	// 확대
+	float m_fSettingZoom;
 	float m_fCurrentZoom;
 	BOOL m_bIsWebzenMail;
 
 public :
     void    SetShowType ( int Stype ) { m_iShowType = Stype; }
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUILetterReadWindow : public CUIBaseWindow
 {
@@ -430,10 +429,9 @@ private:
 	std::deque<LETTERLIST_TEXT> m_LetterList;
 	std::deque<LETTERLIST_TEXT>::iterator m_LetterListIter;
 	
-	std::map<DWORD, FS_LETTER_TEXT, std::less<DWORD> > m_LetterCache;	// 편지 캐시
+	std::map<DWORD, FS_LETTER_TEXT, std::less<DWORD> > m_LetterCache;
 	std::map<DWORD, FS_LETTER_TEXT, std::less<DWORD> >::iterator m_LetterCacheIter;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUILetterBoxTabWindow : public CUITabWindow
 {
@@ -443,17 +441,17 @@ public:
 
 	virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
 	virtual void Refresh();
-	LETTERLIST_TEXT * GetCurrentSelectedLetter();												// 현재 선택된 편지의 번호를 얻는다.
+	LETTERLIST_TEXT * GetCurrentSelectedLetter();
 	DWORD GetKeyMoveListUIID() { return m_LetterListBox.GetUIID(); }
 	void RefreshLetterList();
 	void CheckAll(BOOL bCheck);
 	void PrevNextCursorMove(int iMove);
 
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();
+	virtual BOOL HandleMessage();
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();
 	
 protected:
 	CUILetterListBox m_LetterListBox;
@@ -477,20 +475,20 @@ public:
 	void Reset();
 	void Close();
 	void RefreshPalList() { m_FriendListWnd.RefreshPalList(); }
-//	const char* GetCurrentSelectedFriend()										// 현재 선택된 친구 ID
+//	const char* GetCurrentSelectedFriend()	
 //	{ return m_FriendListWnd.GetCurrentSelectedFriend(); }
 
-	void AddWindow(DWORD dwUIID, const char* pszTitle)								// 윈도우 추가
+	void AddWindow(DWORD dwUIID, const char* pszTitle)
 	{ m_ChatRoomListWnd.AddWindow(dwUIID, pszTitle); }
-	void RemoveWindow(DWORD dwUIID)												// 윈도우 제거
+	void RemoveWindow(DWORD dwUIID)
 	{ m_ChatRoomListWnd.RemoveWindow(dwUIID); }
-	DWORD GetCurrentSelectedWindow()											// 현재 선택된 윈도우 UIID 얻기
+	DWORD GetCurrentSelectedWindow()
 	{ return m_ChatRoomListWnd.GetCurrentSelectedWindow(); }
-	void ResetWindow()															// 윈도우 리스트 초기화
+	void ResetWindow()
 	{ m_ChatRoomListWnd.Reset(); }
 
 	void RefreshLetterList() { m_LetterBoxWnd.RefreshLetterList(); }
-	LETTERLIST_TEXT * GetCurrentSelectedLetter()											// 현재 선택된 편지의 번호를 얻는다.
+	LETTERLIST_TEXT * GetCurrentSelectedLetter()
 	{ return m_LetterBoxWnd.GetCurrentSelectedLetter(); }
 	void PrevNextCursorMove(int iMove)
 	{ m_LetterBoxWnd.PrevNextCursorMove(iMove); }
@@ -499,10 +497,10 @@ public:
 	int GetTabIndex() { return m_iTabIndex; }
 
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();
+	virtual BOOL HandleMessage();
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();
 
 protected:
 	int m_iTabIndex;
@@ -551,10 +549,10 @@ public:
 	void SaveID(const char* pszText);
 
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();
+	virtual BOOL HandleMessage();
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();
 
 protected:
 	DWORD m_dwReturnWindowUIID;

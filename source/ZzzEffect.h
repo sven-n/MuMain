@@ -152,11 +152,6 @@ void MoveJoints();
 void RenderJoints( BYTE bRenderOneMore=0 );
 
 
-//  tamajjang
-void CreateTamaJjang ( void );
-void DeleteTamaJjang ( void );
-void HideTamaJjang ( void );
-
 void GetMagicScrew( int iParam, vec3_t vResult, float fSpeedRate = 1.0f);
 
 // 가까운 랜덤 위치얻기

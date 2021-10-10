@@ -6,10 +6,6 @@
 #include <tlhelp32.h>
 #include <time.h>
 
-#ifdef KJH_LOG_ERROR_DUMP
-	#include "../DebugAngel.h"
-#endif // KJH_LOG_ERROR_DUMP
-
 //. Wrapping to C-style function
 bool leaf::AttachExceptionHandler(const std::string& dmpfile, bool bSecondChance) { 
 	return CExceptionHandler::GetObjPtr()->AttachExceptionHandler(dmpfile, bSecondChance); 
@@ -222,7 +218,8 @@ void CExceptionHandler::SetProcessInfoHeader(DMPPROCESSINFOHEADER* pProcessInfoH
 			CloseHandle(hProcessSnap);
 		}
 		
-		if(!pProcessInfoHeader->ProcessId) {	//. 프로세스를 찾지 못했다면 (고의적으로 프로세스를 숨긴경우)
+		if(!pProcessInfoHeader->ProcessId) 
+		{
 			pProcessInfoHeader->ProcessId = GetCurrentProcessId();
 			
 			char szModuleFileName[256];

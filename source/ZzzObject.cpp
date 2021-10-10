@@ -477,26 +477,26 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
 			return;
 		}
-		if ( gMapManager.WorldActive == WD_10HEAVEN)	// 천공
+		if ( gMapManager.WorldActive == WD_10HEAVEN)
 		{
 			if ( o->Type==MODEL_MONSTER01+31)
-			{	// 드래곤 검게
+			{
 				Vector(0.02f,0.05f,0.15f,b->BodyLight);
 			}
 		}
-		if ( gMapManager.InDevilSquare() )	// 악마의 광장에
+		if ( gMapManager.InDevilSquare() )
 		{
 			if ( o->Type==MODEL_MONSTER01+18)
-			{	// 아이스퀸 붉게
+			{
 				Vector(0.0f,0.3f,1.0f,b->BodyLight);
 			}
 		}
 		if ( ExtraMon && o->Type==MODEL_MONSTER01+27)
-		{	// 발록2
+		{
 			Vector(0.0f,0.0f,1.0f,b->BodyLight);
 		}
 
-        if(o->RenderType==RENDER_DARK)//용머리(악령머리)
+        if(o->RenderType==RENDER_DARK)
 		{
 			b->RenderBody(RENDER_TEXTURE|RENDER_DARK,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		}
@@ -842,10 +842,9 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
 				if(o->CurrentAction == FENRIR_ATTACK_SKILL)
 				{
-					// 턱에서 떨어지는 spark03
 					Vector ( 1.0f, 0.0f, 0.0f, vLight );
 					Vector ( (float)(rand()%10-10)*0.5f, 0.f, (float)(rand()%40-20)*0.5f, vPos );
-					b->TransformPosition ( BoneTransform[14], vPos, vPosition, false );	// 턱
+					b->TransformPosition ( BoneTransform[14], vPos, vPosition, false );
 					CreateParticle(BITMAP_SPARK+1, vPosition, o->Angle, vLight, 15, 0.7f+(fLuminosity*0.05f));
 				}
 
@@ -875,7 +874,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
 			b->EndRender();
 			
-			//^ 펜릴 그림자 렌더링
 			if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE)
 			{
 				if(!g_Direction.m_CKanturu.IsMayaScene())
@@ -897,17 +895,17 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
 			Vector ( 0.9f+fLuminosity, 0.2f+(fLuminosity*0.5f), 0.1f+(fLuminosity*0.5f), vLight );
 			Vector ( 50.f, 2.f, 11.f, vPos );
-			b->TransformPosition ( BoneTransform[11], vPos, vPosition, false );	// 왼쪽눈
+			b->TransformPosition ( BoneTransform[11], vPos, vPosition, false );
 			CreateSprite ( BITMAP_LIGHT, vPosition, 0.5f+(fLuminosity*0.1f), vLight, o);
 			CreateSprite ( BITMAP_LIGHT, vPosition, 0.5f+(fLuminosity*0.1f), vLight, o);
 			Vector ( 50.f, 2.f, -11.f, vPos );
-			b->TransformPosition ( BoneTransform[11], vPos, vPosition, false );	// 오른쪽눈
+			b->TransformPosition ( BoneTransform[11], vPos, vPosition, false );
 			CreateSprite ( BITMAP_LIGHT, vPosition, 0.5f+(fLuminosity*0.1f), vLight, o);
 			CreateSprite ( BITMAP_LIGHT, vPosition, 0.5f+(fLuminosity*0.1f), vLight, o);
 
 			Vector ( 1.0f, 0.3f, 0.2f, vLight );
 			Vector ( 40.f, 15.f, 0.f, vPos );
-			b->TransformPosition ( BoneTransform[13], vPos, vPosition, false );	// 입안
+			b->TransformPosition ( BoneTransform[13], vPos, vPosition, false );
 			CreateSprite ( BITMAP_LIGHT, vPosition, 1.5f, vLight, o);
 			CreateSprite ( BITMAP_LIGHT, vPosition, 1.0f, vLight, o);
 
@@ -915,27 +913,26 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			if(o->Type == MODEL_FENRIR_RED)
 			{
 				Vector ( 0.8f, 0.0f, 0.0f, vLight );
-				iSubType = 1;	// 빨강
+				iSubType = 1;
 			}
 			else if(o->Type == MODEL_FENRIR_BLUE)
 			{
 				Vector ( 0.1f, 0.1f, 0.8f, vLight );
-				iSubType = 2;	// 블루
+				iSubType = 2;
 			}
 			else if(o->Type == MODEL_FENRIR_GOLD)
 			{
 				Vector ( 0.8f, 0.8f, 0.1f, vLight );
-				iSubType = 4;	// 블루
+				iSubType = 4;
 			}
 			else 
 			{
 				Vector ( 1.0f, 1.0f, 0.2f, vLight );
-				iSubType = 3;	// 검정
+				iSubType = 3;
 			}
 			CreateEffect(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
 			CreateEffect(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
 
-			// 4발바닥 번개
 			Vector(1.0f, 1.0f, 1.0f, vLight);
 			if(o->CurrentAction == FENRIR_WALK)
 			{
@@ -943,37 +940,37 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				{
 					Vector(0.0f, 0.0f, 0.0f, vPos);
 					b->TransformPosition ( BoneTransform[22], vPos, vPosition, false );
-					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);	// 앞 왼발
+					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
 					Vector(0.0f, 0.0f, 0.0f, vPos);
 					b->TransformPosition ( BoneTransform[28], vPos, vPosition, false );
-					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);	// 앞 왼발
+					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
 					Vector(0.0f, 0.0f, 0.0f, vPos);
 					b->TransformPosition ( BoneTransform[36], vPos, vPosition, false );
-					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);	// 뒤 왼발
+					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
 					Vector(0.0f, 0.0f, 0.0f, vPos);
 					b->TransformPosition ( BoneTransform[44], vPos, vPosition, false );
-					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);	// 뒤 오른발
+					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
 				}
 			}
 			else if(o->CurrentAction == FENRIR_RUN)
 			{
-				if ( o->AnimationFrame>1.f && o->AnimationFrame<=1.4f )	// 앞발
+				if ( o->AnimationFrame>1.f && o->AnimationFrame<=1.4f )
                 {
 					Vector(0.0f, 0.0f, 0.0f, vPos);
 					b->TransformPosition ( BoneTransform[22], vPos, vPosition, false );
-					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);	// 앞 왼발
+					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
 					Vector(0.0f, 0.0f, 0.0f, vPos);
 					b->TransformPosition ( BoneTransform[28], vPos, vPosition, false );
-					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);	// 앞 왼발
+					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                 }
-                else if ( o->AnimationFrame>4.8f && o->AnimationFrame<=5.2f )	 // 뒷발
+                else if ( o->AnimationFrame>4.8f && o->AnimationFrame<=5.2f )
                 {
                     Vector(0.0f, 0.0f, 0.0f, vPos);
 					b->TransformPosition ( BoneTransform[36], vPos, vPosition, false );
-					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);	// 뒤 왼발
+					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
 					Vector(0.0f, 0.0f, 0.0f, vPos);
 					b->TransformPosition ( BoneTransform[44], vPos, vPosition, false );
-					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);	// 뒤 오른발
+					CreateEffect(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                 }
 			}
 		}
@@ -983,7 +980,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 #else //PBG_ADD_NEWCHAR_MONK
 			o->Type <= MODEL_FACE+5 
 #endif //PBG_ADD_NEWCHAR_MONK
-			)           //  캐릭터 선택창에 나오는 다크로드의 멋진 얼굴.
+			)
         {
 			Vector(4.8f,4.8f,4.8f,b->BodyLight);
       		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -6489,7 +6486,7 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 	int Type = ConvertItemType(Item);
 	ITEM *n = &ip->Item;
 	n->Type = Type;
-	if(Type==ITEM_POTION+15)//돈
+	if(Type==ITEM_POTION+15)
 	{
     	n->Level	  = (Item[1]<<16)+(Item[2]<<8)+(Item[4]);
       	n->Durability = 0;
@@ -6509,7 +6506,6 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 
 		if(CreateFlag)
 		{
-			// 아이템 떨어질때 나오는 소리
 			if(Type==ITEM_POTION+13 || Type==ITEM_POTION+14 ||  Type==ITEM_POTION+16 || Type==ITEM_WING+15 || Type==ITEM_POTION+22 || Type==ITEM_POTION+31)
 				PlayBuffer(SOUND_JEWEL01,&ip->Object);
 			else if(Type == ITEM_POTION+41)
@@ -6698,10 +6694,6 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 
 	ItemAngle(o);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 땅에 놓여 있을때 반짝이는 처리하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void CreateShiny(OBJECT *o)
 {
@@ -10942,7 +10934,6 @@ void BodyLight(OBJECT *o,BMD *b);
 
 void RenderPartObject(OBJECT *o,int Type,void *p2,vec3_t Light,float Alpha,int ItemLevel,int Option1,int ExtOption,bool GlobalTransform,bool HideSkin,bool Translate,int Select,int RenderType)
 {
-	// 알파값이 0.01값 이하이면 안그린다.
 	if(Alpha <= 0.01f) 
 	{
 		return;
@@ -10950,7 +10941,6 @@ void RenderPartObject(OBJECT *o,int Type,void *p2,vec3_t Light,float Alpha,int I
 
 	PART_t *p = ( PART_t*)p2;
 	
-	//이벤트 아이템(하트)
 	if(Type == MODEL_POTION+12)	
 	{
      	int Level = (ItemLevel>>3)&15;
@@ -11096,7 +11086,7 @@ void RenderPartObject(OBJECT *o,int Type,void *p2,vec3_t Light,float Alpha,int I
 				}
 			}
 			else if ( iCloth == 0)
-			{	// 천 없애기
+			{
 				DeleteCloth( NULL, o, p);
 			}
 		}

@@ -83,27 +83,30 @@
 
 extern int CurrentProtocolState;
 
-typedef struct {
+typedef struct 
+{
 	BYTE Code;
 	BYTE Size;
 	BYTE HeadCode;
 } PBMSG_HEADER, * LPPBMSG_HEADER;
 
-typedef struct {
+typedef struct 
+{
 	BYTE Code;
 	BYTE SizeH;
 	BYTE SizeL;
 	BYTE HeadCode;
 } PWMSG_HEADER, * LPPWMSG_HEADER;
 
-// 암호화 패킷
-typedef struct {
+typedef struct 
+{
 	BYTE Code;
 	BYTE Size;
 	BYTE byBuffer[255];
 } PBMSG_ENCRYPTED, * LPPBMSG_ENCRYPTED;
 
-typedef struct {
+typedef struct 
+{
 	BYTE Code;
 	BYTE SizeH;
 	BYTE SizeL;
@@ -111,27 +114,25 @@ typedef struct {
 } PWMSG_ENCRYPTED, * LPWBMSG_ENCRYPTED;
 
 //request default SubCode
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 } PREQUEST_DEFAULT_SUBCODE, * LPPREQUEST_DEFAULT_SUBCODE;
 
 //receive default
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         Value;
 } PHEADER_DEFAULT, * LPPHEADER_DEFAULT;
 
-// 마이너스 열매 관련
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER	Header;
 	BYTE			result;
-#ifdef PSW_FRUIT_ITEM
-	WORD			btStatValue;	// 증 / 감 스탯값
-#else //PSW_FRUIT_ITEM
-	BYTE			btStatValue;	// 증 / 감 스탯값
-#endif //PSW_FRUIT_ITEM	
-	BYTE			btFruitType;	// 열매 종류
+	WORD			btStatValue;
+	BYTE			btFruitType;
 } PMSG_USE_STAT_FRUIT, * LPPMSG_USE_STAT_FRUIT;
 
 //receive default subcode
@@ -150,25 +151,23 @@ typedef struct
 	BYTE         Value;
 } PHEADER_DEFAULT_CHARACTER_LIST, * LPPHEADER_DEFAULT_CHARACTER_LIST;
 
-#ifdef PBG_ADD_CHARACTERCARD
-//////////////////////////////////////////////////////////////////////////
-// 0xDE, 0x00	해외 소환술사 카드와 같은 구조
 #define CLASS_SUMMONER_CARD		0x01
 #define CLASS_DARK_LORD_CARD	0x02
 #define CLASS_DARK_CARD			0x04
 #define CLASS_CHARACTERCARD_TOTALCNT	3
 
-typedef struct {
+typedef struct 
+{
 	PWMSG_HEADER	header;
-	BYTE			CharacterCard;	// 다크로드 마검사 캐릭터 카드
+	BYTE			CharacterCard;
 } PHEADER_CHARACTERCARD, *LPPHEADER_CHARACTERCARD;
 
-typedef struct {
-	bool bCharacterEnable[CLASS_CHARACTERCARD_TOTALCNT];		// 활성화 [0]마검 [1]다크
+typedef struct 
+{
+	bool bCharacterEnable[CLASS_CHARACTERCARD_TOTALCNT];
 }CHARACTER_ENABLE, *LPCHARACTER_ENABLE;
 
 extern CHARACTER_ENABLE g_CharCardEnable;
-#endif //PBG_ADD_CHARACTERCARD
 
 //receive default key
 typedef struct {
@@ -185,7 +184,6 @@ typedef struct {
 	BYTE         KeyL;
 } PHEADER_DEFAULT_VALUE_KEY, * LPPHEADER_DEFAULT_VALUE_KEY;
 
-//(이벤트)오픈시간 요청.
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         Value;
@@ -194,11 +192,10 @@ typedef struct {
     BYTE         KeyL;
 } PHEADER_MATCH_OPEN_VALUE, * LPPHEADER_MATCH_OPEN_VALUE;
 
-// 마법 걸린 상태 바꾸기 패킷
 typedef struct
 {
 	PBMSG_HEADER Header;
-	BYTE		State;				// 0 : 해제, 1 : 상태적용
+	BYTE		State;
 	BYTE		KeyH;
 	BYTE		KeyL;
 	BYTE		BuffIndex;
@@ -269,16 +266,15 @@ typedef struct {
 // log in
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
-	WORD         Index;	// 서버 개수 늘어나면서 바뀜
+typedef struct 
+{
+	WORD         Index;
 	BYTE         Percent;
-#ifdef _PVP_DYNAMIC_SERVER_TYPE
-	BYTE		 IsPvPServer;
-#endif	// _PVP_DYNAMIC_SERVER_TYPE
 } PRECEIVE_SERVER_LIST, * LPPRECEIVE_SERVER_LIST;
 
 //receive join server
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         Result;
@@ -288,17 +284,12 @@ typedef struct {
 } PRECEIVE_JOIN_SERVER, * LPPRECEIVE_JOIN_SERVER;
 
 //request create acoount
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         ID[MAX_ID_SIZE];
-	
-#ifdef LDS_MODIFY_CHAR_LENGTH_USERPASSWORD // 비밀번호 자릿수 10->12로 변경 사항
-	BYTE         Password[MAX_PASSWORD_SIZE];
-#else // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
 	BYTE         Password[MAX_ID_SIZE];
-#endif // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
-
 	BYTE         Name[10];
 	BYTE         ResidentNumber[13];
 	BYTE         Quiz[30];
@@ -308,31 +299,28 @@ typedef struct {
 } PREQUEST_CREATE_ACCOUNT, * LPPREQUEST_CREATE_ACCOUNT;
 
 //request log in
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         ID[MAX_ID_SIZE];
-	
-#ifdef LDS_MODIFY_CHAR_LENGTH_USERPASSWORD  // 비밀번호 자릿수 10->12로 변경 사항
-	BYTE         Password[MAX_PASSWORD_SIZE];
-#else // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
 	BYTE         Password[MAX_ID_SIZE];
-#endif // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
-	
 	DWORD        Time;
 	BYTE         Version[SIZE_PROTOCOLVERSION];
 	BYTE         Serial[SIZE_PROTOCOLSERIAL];
 } PREQUEST_LOG_IN, * LPPREQUEST_LOG_IN;
 
 //request confirm password
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         ID[MAX_ID_SIZE];
 } PREQUEST_CONFIRM_PASSWORD, * LPPREQUEST_CONFIRM_PASSWORD;
 
 //receive confirm password
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         Result;
@@ -340,7 +328,8 @@ typedef struct {
 } PRECEIVE_CONFIRM_PASSWORD, * LPPRECEIVE_CONFIRM_PASSWORD;
 
 //request confirm password
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         ID[MAX_ID_SIZE];
@@ -357,7 +346,8 @@ typedef struct {
 } PRECEIVE_CONFIRM_PASSWORD2, * LPPRECEIVE_CONFIRM_PASSWORD2;
 
 //request change password
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         ID[MAX_ID_SIZE];
@@ -367,7 +357,8 @@ typedef struct {
 } PREQUEST_CHANGE_PASSWORD, * LPPREQUEST_CHANGE_PASSWORD;
 
 //receive characters list
-typedef struct {
+typedef struct 
+{
 	BYTE         Index;
 	BYTE         ID[MAX_ID_SIZE];
 	WORD         Level;
@@ -378,7 +369,8 @@ typedef struct {
 } PRECEIVE_CHARACTER_LIST, * LPPRECEIVE_CHARACTER_LIST;
 
 //request create character
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         ID[MAX_ID_SIZE];
@@ -386,7 +378,8 @@ typedef struct {
 } PREQUEST_CREATE_CHARACTER, * LPREQUEST_CREATE_CHARACTER;
 
 //receive create character
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         Result;
@@ -398,7 +391,8 @@ typedef struct {
 } PRECEIVE_CREATE_CHARACTER, * LPPRECEIVE_CREATE_CHARACTER;
 
 //request delete character
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         ID[MAX_ID_SIZE];
@@ -406,40 +400,38 @@ typedef struct {
 } PREQUEST_DELETE_CHARACTER, * LPREQUEST_DELETE_CHARACTER;
 
 //request join map server
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE		 SubCode;
 	BYTE         ID[MAX_ID_SIZE];
 } PREQUEST_JOIN_MAP_SERVER, * LPPREQUEST_JOIN_MAP_SERVER;
 
 //receive join map server
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         PositionX;
 	BYTE         PositionY;
 	BYTE         Map;
 	BYTE         Angle;
-
-	BYTE		btMExp1;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 1)
-	BYTE		btMExp2;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 2)
-	BYTE		btMExp3;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 3)
-	BYTE		btMExp4;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 4)
-	BYTE		btMExp5;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 5)
-	BYTE		btMExp6;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 6)
-	BYTE		btMExp7;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 7)
-	BYTE		btMExp8;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 8)
-
-
-	BYTE		btMNextExp1;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 1)
-	BYTE		btMNextExp2;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 2)
-	BYTE		btMNextExp3;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 3)
-	BYTE		btMNextExp4;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 4)
-	BYTE		btMNextExp5;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 5)
-	BYTE		btMNextExp6;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 6)
-	BYTE		btMNextExp7;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 7)
-	BYTE		btMNextExp8;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 8)
-
+	BYTE		btMExp1;
+	BYTE		btMExp2;
+	BYTE		btMExp3;
+	BYTE		btMExp4;
+	BYTE		btMExp5;
+	BYTE		btMExp6;
+	BYTE		btMExp7;
+	BYTE		btMExp8;
+	BYTE		btMNextExp1;
+	BYTE		btMNextExp2;
+	BYTE		btMNextExp3;
+	BYTE		btMNextExp4;
+	BYTE		btMNextExp5;
+	BYTE		btMNextExp6;
+	BYTE		btMNextExp7;
+	BYTE		btMNextExp8;
 	WORD         LevelUpPoint;
 	//BYTE         LevelUpPoint;
 	WORD         Strength;
@@ -459,13 +451,14 @@ typedef struct {
 	BYTE		 CtlCode;
     short        AddPoint;
     short        MaxAddPoint;
-    WORD         Charisma;  //  통솔.
-	WORD		 wMinusPoint;		// 현재 감소 포인트
-	WORD		 wMaxMinusPoint;	// 최대 감소 포인트
+    WORD         Charisma;
+	WORD		 wMinusPoint;
+	WORD		 wMaxMinusPoint;
 } PRECEIVE_JOIN_MAP_SERVER, * LPPRECEIVE_JOIN_MAP_SERVER;
 
 //receive revival
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         PositionX;
@@ -476,14 +469,14 @@ typedef struct {
 	WORD         Mana;
 	WORD		 Shield;
 	WORD		 SkillMana;
-	BYTE		btMExp1;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 1)
-	BYTE		btMExp2;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 2)
-	BYTE		btMExp3;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 3)
-	BYTE		btMExp4;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 4)
-	BYTE		btMExp5;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 5)
-	BYTE		btMExp6;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 6)
-	BYTE		btMExp7;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 7)
-	BYTE		btMExp8;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 8)
+	BYTE		btMExp1;
+	BYTE		btMExp2;
+	BYTE		btMExp3;
+	BYTE		btMExp4;
+	BYTE		btMExp5;
+	BYTE		btMExp6;
+	BYTE		btMExp7;
+	BYTE		btMExp8;
 
 	DWORD        Gold;
 } PRECEIVE_REVIVAL, * LPPRECEIVE_REVIVAL;
@@ -666,16 +659,6 @@ typedef struct {
 	BYTE          Item[PACKET_ITEM_LENGTH];
 } PCHANGE_CHARACTER, * LPPCHANGE_CHARACTER;
 
-//request attack
-#ifdef KJH_MOD_ATTACK_PROTOCOL_FOR_PROTECT_HACK
-typedef struct {
-	PBMSG_HEADER  Header;
-	BYTE          Action;
-	BYTE          Dir;
-	BYTE          KeyH;
-	BYTE          KeyL;
-} PREQUEST_ATTACK, * LPPREQUEST_ATTACK;
-#else // KJH_MOD_ATTACK_PROTOCOL_FOR_PROTECT_HACK
 typedef struct {
 	PBMSG_HEADER  Header;
 	BYTE          KeyH;
@@ -683,7 +666,6 @@ typedef struct {
 	BYTE          Action;
 	BYTE          Dir;
 } PREQUEST_ATTACK, * LPPREQUEST_ATTACK;
-#endif // KJH_MOD_ATTACK_PROTOCOL_FOR_PROTECT_HACK
 
 //receive get item
 typedef struct {
@@ -842,7 +824,7 @@ typedef struct {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE         Value;
-    BYTE         ListType;  //  스킬 리스트 종류. ( 0:일반 전체 스킬 리스트, 1:추가적인 스킬 리스트, 2:삭제 스킬 리스트 ).
+    BYTE         ListType;
 } PHEADER_MAGIC_LIST_COUNT, * LPPHEADER_MAGIC_LIST_COUNT;
 
 #pragma pack(push, 1)
@@ -860,8 +842,8 @@ typedef	struct {
 	PBMSG_HEADER  Header;
 	BYTE          KeyH;
 	BYTE          KeyL;
-	BYTE		  m_byType;		//	스킬 번호.
-	BYTE		  m_byCount;	//	단계 카운트.
+	BYTE		  m_byType;
+	BYTE		  m_byCount;
 } PRECEIVE_EX_SKILL_COUNT, * LPPRECEIVE_EX_SKILL_COUNT;
 
 //receive gold
@@ -883,16 +865,14 @@ typedef struct {
 	BYTE         SubCode;
 	WORD         Level;
 	WORD         LevelUpPoint;
-	//BYTE         Level;
-	//BYTE         LevelUpPoint;
 	WORD         MaxLife;
 	WORD         MaxMana;
 	WORD		 MaxShield;
 	WORD		 SkillManaMax;
     short        AddPoint;
     short        MaxAddPoint;
-	WORD		 wMinusPoint;		// 현재 감소 포인트
-	WORD		 wMaxMinusPoint;	// 최대 감소 포인트
+	WORD		 wMinusPoint;
+	WORD		 wMaxMinusPoint;
 } PRECEIVE_LEVEL_UP, * LPPRECEIVE_LEVEL_UP;
 
 typedef struct {
@@ -965,9 +945,6 @@ typedef struct {
 	BYTE         y;
     int          currHP;
     int          maxHP;
-#ifdef LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER	
-	char		 PKPartyLevel;
-#endif //LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER	
 } PRECEIVE_PARTY_LIST, * LPPRECEIVE_PARTY_LIST;
 
 //receive party list
@@ -1040,7 +1017,7 @@ typedef struct {
 	BYTE         ID[MAX_ID_SIZE];
 	BYTE         Number;
 	BYTE		 CurrentServer;
-	BYTE		 GuildStatus;		// 길드직위
+	BYTE		 GuildStatus;
 } PRECEIVE_GUILD_LIST, * LPPRECEIVE_GUILD_LIST;
 
 // 길드원 목록 리스트
@@ -1080,26 +1057,21 @@ typedef struct {
 	BYTE         Type;
 } PRECEIVE_WAR_SCORE, * LPPRECEIVE_WAR_SCORE;
 
-// 뷰포트의 길드 ID 목록
 typedef struct
 {
 	int			 GuildKey;
-	BYTE		 GuildStatus;		// 길드직위 -1 : NONE, 0 : PERSON, 32 : BATTLE_MASTER, 64 : SUB_MASTER, 128 : MASTER
-	BYTE		 GuildType;			// 길드종류 일반(0), 수호길드(1)
-	BYTE		 GuildRelationShip;	// 길드관계 (0x00 : 관계없음, 0x01 : Union, 0x04 Union Master, 0x02 : Rival, 0x08: Rival Union )
+	BYTE		 GuildStatus;
+	BYTE		 GuildType;
+	BYTE		 GuildRelationShip;
 	BYTE		 KeyH;
 	BYTE		 KeyL;
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-	BYTE btCastleOwner;		// 수성측길드나 연합이면 1, 아니면 0
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
 } PRECEIVE_GUILD_ID, *LPPRECEIVE_GUILD_ID;
 
-// 길드 정보 요청 결과
 typedef struct
 {
 	PBMSG_HEADER Header;
 	int			GuildKey;
-	BYTE		GuildType;			// 길드종류 일반(0), 용병(1), 클랜(2)
+	BYTE		GuildType;
 	BYTE		UnionName[MAX_GUILDNAME];
 	BYTE		GuildName[MAX_GUILDNAME];
 	BYTE		Mark[32];
@@ -1107,93 +1079,67 @@ typedef struct
 
 enum GUILD_REQ_COMMON_RESULT
 {
-	// 길드가 없음
 	GUILD_ANS_NOTEXIST_GUILD			= 0x10,
-	// 연합관계 실패 (공성전관계때문에)
 	GUILD_ANS_UNIONFAIL_BY_CASTLE		= 0x10,
-	// 권한 없음
 	GUILD_ANS_NOTEXIST_PERMISSION		= 0x11,
-
-	// 임명 할 수 있는 계급이 없음
 	GUILD_ANS_NOTEXIST_EXTRA_STATUS		= 0x12,
-	// 임명 할 수 있는 타입이 없음
 	GUILD_ANS_NOTEXIST_EXTRA_TYPE		= 0x13,
-
-	// 관계 유 & 무
 	GUILD_ANS_EXIST_RELATIONSHIP_UNION	= 0x15,
 	GUILD_ANS_EXIST_RELATIONSHIP_RIVAL	= 0x16,
-
-	// 연합 유 & 무
 	GUILD_ANS_EXIST_UNION				= 0x17,
 	GUILD_ANS_EXIST_RIVAL				= 0x18,
 	GUILD_ANS_NOTEXIST_UNION			= 0x19,
 	GUILD_ANS_NOTEXIST_RIVAL			= 0x1A,
-
-	// 연합 마스터가 아님
 	GUILD_ANS_NOT_UNION_MASTER			= 0x1B,
-
-	// 적대 길드가 아님
 	GUILD_ANS_NOT_GUILD_RIVAL			= 0x1C,
-
-	// 연합길드생성조건미달 (길드원20이상)
 	GUILD_ANS_CANNOT_BE_UNION_MASTER_GUILD = 0x1D,
-	
-	// 최대 길드 연합 개수 초과함
 	GUILD_ANS_EXCEED_MAX_UNION_MEMBER	= 0x1E,
-
-	// 신청이 취소되었습니다.
 	GUILD_ANS_CANCEL_REQUEST			= 0x20,
-
-#ifdef ASG_ADD_GENS_SYSTEM
-	// 연합 길마가 겐스에 가입이 안되어 있다.
 	GUILD_ANS_UNION_MASTER_NOT_GENS		= 0xA1,
-	// 길마가 겐스에 가입이 안되어 있다.
 	GUILD_ANS_GUILD_MASTER_NOT_GENS		= 0xA2,
-	// 연합 길마와 겐스가 서로 다르다.
 	GUILD_ANS_UNION_MASTER_DISAGREE_GENS = 0xA3,
-#endif	// ASG_ADD_GENS_SYSTEM
 };
 
-// 길드생성 결과
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER	Header;
 	BYTE			Value;
 	BYTE			GuildType;
 } PMSG_GUILD_CREATE_RESULT, *LPPMSG_GUILD_CREATE_RESULT;
 
-// 길드종류를 변경 결과
 typedef struct
 {
 	PBMSG_HEADER	Header;
-	BYTE			byGuildType;				// 일반(0), 용병(1), 클랜(2)
-	BYTE			byResult;					// 실패(0x00), 성공(0x01), 길드없음(0x10), 권한없음(0x11), 길드종류없음(0x13)
+	BYTE			byGuildType;
+	BYTE			byResult;
 } PMSG_GUILD_ASSIGN_TYPE_RESULT, *LPPMSG_GUILD_ASSIGN_TYPE_RESULT;
 
-// 직책을 임명 / 변경 / 해제 결과
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER	Header;
-	BYTE			byType;						// 임명(1), 변경(2), 해제(3)
-	BYTE			byResult;					// 결과
-	char			szTargetName[MAX_ID_SIZE];	// 대상유저이름
+	BYTE			byType;
+	BYTE			byResult;
+	char			szTargetName[MAX_ID_SIZE];
 } PRECEIVE_GUILD_ASSIGN, *LPPRECEIVE_GUILD_ASSIGN;
 
-// 연합길드 리스트 개수
-typedef struct {
+typedef struct 
+{
 	PWMSG_HEADER	Header;
 	BYTE			byCount;
 	BYTE			byResult;
 	BYTE			byRivalCount;
 	BYTE			byUnionCount;
 } PMSG_UNIONLIST_COUNT, *LPPMSG_UNIONLIST_COUNT;
-// 연합길드 정보
-typedef struct {
+
+typedef struct 
+{
 	BYTE			byMemberCount;
 	BYTE			GuildMark[32];
 	char			szGuildName[MAX_GUILDNAME];
 } PMSG_UNIONLIST, *LPPMSG_UNIONLIST;
 
-// 연합이나 적대길드 요청  
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER	Header;
 	BYTE			byRelationShipType;			// 관계종류 ( 0x01 : Union, 0x02 : Rival )
 	BYTE			byRequestType;				// 요청종류 ( 0x01 : Join, 0x02 : BreakOff )
@@ -1201,8 +1147,8 @@ typedef struct {
 	BYTE			byTargetUserIndexL;			// 목표유저인덱스L
 } PMSG_GUILD_RELATIONSHIP, *LPPMSG_GUILD_RELATIONSHIP;
 
-// 연합이나 적대길드 요청결과  
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER	Header;
 	BYTE			byRelationShipType;			// 관계종류 ( 0x01 : Union, 0x02 : Rival )
 	BYTE			byRequestType;				// 요청종류 ( 0x01 : Join, 0x02 : BreakOff )
@@ -1211,15 +1157,16 @@ typedef struct {
 	BYTE			byTargetUserIndexL;			// 목표유저인덱스L
 } PMSG_GUILD_RELATIONSHIP_RESULT, *LPPMSG_GUILD_RELATIONSHIP_RESULT;
 
-typedef struct {
+typedef struct 
+{
 	PREQUEST_DEFAULT_SUBCODE	Header;
 	BYTE			byResult;
 	BYTE			byRequestType;
 	BYTE			byRelationShipType;
 } PMSG_BAN_UNIONGUILD, *LPPMSG_BAN_UNIONGUILD;
 
-// 뷰포트내의 연합정보 변화를  
-typedef struct {
+typedef struct 
+{
 	PWMSG_HEADER	Header;
 	BYTE			byCount;
 } PMSG_UNION_VIEWPORT_NOTIFY_COUNT, *LPPMSG_UNION_VIEWPORT_NOTIFY_COUNT;
@@ -1232,7 +1179,8 @@ typedef struct {
 } PMSG_UNION_VIEWPORT_NOTIFY, *LPPMSG_UNION_VIEWPORT_NOTIFY;
 
 //receive gold
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         Result;
 	DWORD        StorageGold;
@@ -1255,28 +1203,22 @@ typedef struct {
 	BYTE         Score2;
 } PRECEIVE_SOCCER_SCORE, * LPPRECEIVE_SOCCER_SCORE;
 
-#ifdef CSK_FIX_QWER
 #pragma pack(push, 1)
-#endif // CSK_FIX_QWER
-typedef struct {
+typedef struct 
+{
     PBMSG_HEADER Header;
     BYTE         SubCode;
-#ifdef CSK_FIX_SKILLHOTKEY_PACKET
 	BYTE         HotKey[20];
-#else // CSK_FIX_SKILLHOTKEY_PACKET
-	BYTE         HotKey[10];
-#endif // CSK_FIX_SKILLHOTKEY_PACKET
     BYTE         GameOption;
     BYTE         KeyQWE[3];
 	BYTE		 ChatLogBox;
 	BYTE		 KeyR;
-	int			 QWERLevel;		// 4바이트
+	int			 QWERLevel;
 } PRECEIVE_OPTION, * LPPRECEIVE_OPTION;
-#ifdef CSK_FIX_QWER
 #pragma pack(pop)
-#endif // CSK_FIX_QWER
 
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE		 Cmd1;
@@ -1285,41 +1227,38 @@ typedef struct {
 } PRECEIVE_SERVER_COMMAND, * LPPRECEIVE_SERVER_COMMAND;
 
 
-typedef struct {
+typedef struct 
+{
 	PBMSG_HEADER Header;
 	BYTE		 m_MyRank;
 	BYTE         m_Count;
 	BYTE		 m_byRank;
 } PDEVILRANK, * LPPDEVILRANK;
 
-typedef struct {    //  이벤트칩 정보들. .
+typedef struct 
+{
     PBMSG_HEADER Header;
-    BYTE        m_byType;       //  ( 0:레나, 1:스톤, 2:상용화 2주년 복권 ... )
-#ifdef ASG_FIX_LENA_REGISTRATION
-	int			m_nChipCount;  //  이벤트칩 수.
-#else	// ASG_FIX_LENA_REGISTRATION
-	short       m_shChipCount;  //  이벤트칩 수.
-#endif	// ASG_FIX_LENA_REGISTRATION
-    short       m_shMutoNum[3]; //  뮤토 번호.
+    BYTE        m_byType;
+	int			m_nChipCount;
+    short       m_shMutoNum[3];
 } PRECEIVE_EVENT_CHIP_INFO, * LPPRECEIVE_EVENT_CHIP_INFO;
 
-typedef struct {    //  이벤트칩수.
+typedef struct 
+{
     PBMSG_HEADER Header;
-    BYTE        m_byType;       //  ( 0:레나, 1:스톤, 2:상용화 2주년 복권 ... )
-#ifdef ASG_FIX_LENA_REGISTRATION
+    BYTE        m_byType;
 	unsigned int  m_unChipCount;
-#else	// ASG_FIX_LENA_REGISTRATION
-    unsigned short  m_shChipCount;
-#endif	// ASG_FIX_LENA_REGISTRATION
 } PRECEIVE_ENVET_CHIP, * LPPRECEIVE_EVENT_CHIP;
 
-typedef struct {    //  뮤토번호.
+typedef struct 
+{
     PBMSG_HEADER Header;
     short        m_shMutoNum[3];
 } PRECEIVE_MUTONUMBER, * LPPRECEIVE_MUTONUMBER;
 
 #ifdef SCRATCH_TICKET
-typedef struct {	//	복권.
+typedef struct 
+{	//	복권.
 	PBMSG_HEADER Header;
 	BYTE		 m_byIsRegistered;	//	복권이 등록되 있는지 검사. ( 0:미등록, 1:등록, 2:등록횟순 넘김 ).
 	char		 m_strGiftName[64];	//	경품이름.
@@ -1382,52 +1321,38 @@ typedef struct
 	WORD			m_wQuestCount;
 } PMSG_NPCTALK_QUESTLIST, *LPPMSG_NPCTALK_QUESTLIST;
 
-//0xF6, 0x0B 대사 계속 진행
-//0xF6, 0x0C 퀘스트 조건 보상(퀘스트 진행창에서 받을 때)
-//0xF6, 0x1B 퀘스트 조건 보상(진행 중인 퀘스트 리스트에서 받을 때)
 #pragma pack(push, 1)
 typedef struct 
 {	
 	PBMSG_HEADER	Header;
 	BYTE			SubCode;
-
 	DWORD			m_dwQuestIndex;
 	BYTE			m_byRequestCount;
 	BYTE			m_byRewardCount;
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-	BYTE			m_byRandRewardCount;	// 랜덤 보상 실재 개수(A개 중에 B개 의 B를 말함)
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
+	BYTE			m_byRandRewardCount;
 } PMSG_NPC_QUESTEXP_INFO, *LPPMSG_NPC_QUESTEXP_INFO;
 #pragma pack(pop)
 
-// 요구 사항
 enum QUEST_REQUEST_TYPE
 {
 	QUEST_REQUEST_NONE		= 0x0000,
-	QUEST_REQUEST_MONSTER	= 0x0001,	// 몬스터 잡아와라.
-	QUEST_REQUEST_SKILL		= 0x0002,	// 스킬 배워와라
-	QUEST_REQUEST_ITEM		= 0x0004,	// 아이템 구해와라
-	QUEST_REQUEST_LEVEL		= 0x0008,	// 레벨 올려와라
-	QUEST_REQUEST_TUTORIAL	= 0x0010,	// 튜토리얼
-	QUEST_REQUEST_BUFF		= 0x0020,	// 버프를 받아라.
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-	QUEST_REQUEST_EVENT_MAP_USER_KILL		= 0x0040,	// 유저 킬 포인트
-	QUEST_REQUEST_EVENT_MAP_MON_KILL		= 0x0041,	// 몬스터 킬 포인트
-	QUEST_REQUEST_EVENT_MAP_BLOOD_GATE		= 0x0042,	// 블러드 캐슬 성문 파괴
-	QUEST_REQUEST_EVENT_MAP_CLEAR_BLOOD		= 0x0100,	// 블러드 캐슬 클리어
-	QUEST_REQUEST_EVENT_MAP_CLEAR_CHAOS		= 0x0101,	// 카오스 캐슬 클리어
-	QUEST_REQUEST_EVENT_MAP_CLEAR_DEVIL		= 0x0102,	// 악마의 광장 클리어
-	QUEST_REQUEST_EVENT_MAP_CLEAR_ILLUSION	= 0x0103,	// 환영 사원 클리어
-	QUEST_REQUEST_EVENT_MAP_DEVIL_POINT		= 0x0104,	// 악마의 광장 포인트 획득
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-#ifdef ASG_ADD_TIME_LIMIT_QUEST
-	QUEST_REQUEST_ZEN		= 0x0105,	// 젠
-	QUEST_REQUEST_PVP_POINT	= 0x0106,	// PVP 포인트
-#endif	// ASG_ADD_TIME_LIMIT_QUEST
-#ifdef ASG_ADD_QUEST_REQUEST_NPC_SEARCH
-	QUEST_REQUEST_NPC_TALK	= 0x0107,	// NPC를 찾아라.
-#endif	// ASG_ADD_QUEST_REQUEST_NPC_SEARCH
-
+	QUEST_REQUEST_MONSTER	= 0x0001,
+	QUEST_REQUEST_SKILL		= 0x0002,
+	QUEST_REQUEST_ITEM		= 0x0004,
+	QUEST_REQUEST_LEVEL		= 0x0008,
+	QUEST_REQUEST_TUTORIAL	= 0x0010,
+	QUEST_REQUEST_BUFF		= 0x0020,
+	QUEST_REQUEST_EVENT_MAP_USER_KILL		= 0x0040,
+	QUEST_REQUEST_EVENT_MAP_MON_KILL		= 0x0041,
+	QUEST_REQUEST_EVENT_MAP_BLOOD_GATE		= 0x0042,
+	QUEST_REQUEST_EVENT_MAP_CLEAR_BLOOD		= 0x0100,
+	QUEST_REQUEST_EVENT_MAP_CLEAR_CHAOS		= 0x0101,
+	QUEST_REQUEST_EVENT_MAP_CLEAR_DEVIL		= 0x0102,
+	QUEST_REQUEST_EVENT_MAP_CLEAR_ILLUSION	= 0x0103,
+	QUEST_REQUEST_EVENT_MAP_DEVIL_POINT		= 0x0104,
+	QUEST_REQUEST_ZEN		= 0x0105,
+	QUEST_REQUEST_PVP_POINT	= 0x0106,
+	QUEST_REQUEST_NPC_TALK	= 0x0107,
 	QUEST_REQUEST_TYPE_MAX
 };
 
@@ -1437,11 +1362,7 @@ typedef struct
 	DWORD	m_dwType;
 	WORD	m_wIndex;
 	DWORD	m_dwValue;
-#ifdef ASG_ADD_TIME_LIMIT_QUEST
-	DWORD	m_dwCurValue;
-#else	// ASG_ADD_TIME_LIMIT_QUEST
 	WORD	m_wCurValue;
-#endif	// ASG_ADD_TIME_LIMIT_QUEST
 	BYTE	m_byItemInfo[PACKET_ITEM_LENGTH];
 } NPC_QUESTEXP_REQUEST_INFO, *LPNPC_QUESTEXP_REQUEST_INFO;
 #pragma pack(pop)
@@ -1450,17 +1371,12 @@ typedef struct
 enum QUEST_REWARD_TYPE
 {
 	QUEST_REWARD_NONE		= 0x0000,
-	QUEST_REWARD_EXP		= 0x0001,	// 경험치 준다.
-	QUEST_REWARD_ZEN		= 0x0002,	// 젠 준다.
-	QUEST_REWARD_ITEM		= 0x0004,	// 아이템 준다.
-	QUEST_REWARD_BUFF		= 0x0008,	// 버프 준다.
-#ifdef ASG_ADD_GENS_SYSTEM
-	QUEST_REWARD_CONTRIBUTE	= 0x0010,	// 기여도를 준다.
-#endif	// ASG_ADD_GENS_SYSTEM
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-	QUEST_REWARD_RANDOM		= 0x0020,	// 랜덤설정
-#endif //ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-
+	QUEST_REWARD_EXP		= 0x0001,
+	QUEST_REWARD_ZEN		= 0x0002,
+	QUEST_REWARD_ITEM		= 0x0004,
+	QUEST_REWARD_BUFF		= 0x0008,
+	QUEST_REWARD_CONTRIBUTE	= 0x0010,
+	QUEST_REWARD_RANDOM		= 0x0020,
 	QUEST_REWARD_TYPE_MAX
 };
 
@@ -1474,7 +1390,6 @@ typedef struct
 } NPC_QUESTEXP_REWARD_INFO, *LPNPC_QUESTEXP_REWARD_INFO;
 #pragma pack(pop)
 
-// 요구 사항, 보상 정보
 typedef struct 
 {	
 	NPC_QUESTEXP_REQUEST_INFO	NpcQuestRequestInfo[5];
@@ -1482,7 +1397,7 @@ typedef struct
 } NPC_QUESTEXP_INFO, *LPNPC_QUESTEXP_INFO;
 
 //----------------------------------------------------------------------------
-// GC[0xF6][0x0D] 퀘스트 완료 결과
+// GC[0xF6][0x0D]
 //----------------------------------------------------------------------------
 typedef struct 
 {	
@@ -1490,11 +1405,11 @@ typedef struct
 	BYTE			SubCode;
 
 	DWORD			m_dwQuestIndex;
-	BYTE			m_byResult;	// 1 : 보상 정상 지급, 2 : 젠이 최대치가 넘었다. 3 : 인벤에 아이템 들어갈 자리 없다.
+	BYTE			m_byResult;
 } PMSG_ANS_QUESTEXP_COMPLETE, *LPPMSG_ANS_QUESTEXP_COMPLETE;
 
 //----------------------------------------------------------------------------
-// GC[0xF6][0x0F] 퀘스트 포기
+// GC[0xF6][0x0F]
 //----------------------------------------------------------------------------
 typedef struct 
 {	
@@ -1517,72 +1432,47 @@ typedef struct
 
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
-#ifdef ASG_ADD_TIME_LIMIT_QUEST
-
-const enum QUESTEXP_RESULT
-{
-	QUEST_RESULT_TIME_LIMIT	= 0x00,		// 시간 제한
-	QUEST_RESULT_CNT_LIMIT	= 0x01,		// 퀘스트 개수 제한.
-		
-	QUEST_RESULT_MAX
-};
-
 //----------------------------------------------------------------------------
-// CG[0xF6][0x00] 퀘스트 관련 결과
+// GC[0xF8][0x02]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER	Header;
 	BYTE			SubCode;
 
-	BYTE			m_byResult;			// enum QUESTEXP_RESULT 값
-} PMSG_ANS_QUESTEXP_RESULT, *LPPMSG_ANS_QUESTEXP_RESULT;
-#endif	// ASG_ADD_TIME_LIMIT_QUEST
-
-#ifdef ASG_ADD_GENS_SYSTEM
-//----------------------------------------------------------------------------
-// GC[0xF8][0x02] 겐스 가입 응답
-//----------------------------------------------------------------------------
-typedef struct
-{
-	PBMSG_HEADER	Header;
-	BYTE			SubCode;
-
-	BYTE			m_byResult;				// 가입 요청 결과.
-	BYTE			m_byInfluence;			// 겐스 소속.
+	BYTE			m_byResult;
+	BYTE			m_byInfluence;
 } PMSG_ANS_REG_GENS_MEMBER, *LPPMSG_ANS_REG_GENS_MEMBER;
 
 //----------------------------------------------------------------------------
-// GC[0xF8][0x04] 겐스 탈퇴 응답
+// GC[0xF8][0x04]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER	Header;
 	BYTE			SubCode;
 	
-	BYTE			m_byResult;				// 탈퇴 요청 결과.
+	BYTE			m_byResult;
 	
 } PMSG_ANS_SECEDE_GENS_MEMBER, *LPPMSG_ANS_SECEDE_GENS_MEMBER;
 
 //----------------------------------------------------------------------------
-// GC[0xF8][0x07] 겐스 세력 정보  .
+// GC[0xF8][0x07]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER	Header;
 	BYTE			SubCode;
 	
-	BYTE			m_byInfluence;			// 겐스 소속.
-#ifdef PBG_ADD_GENSRANKING
-	int				m_nRanking;				// 개인 랭킹
-	int				m_nGensClass;			// 겐스 계급
-	int				m_nContributionPoint;	// 기여도점수
-	int				m_nNextContributionPoint;	// 다음 계급 기여도점수
-#endif //PBG_ADD_GENSRANKING
+	BYTE			m_byInfluence;
+	int				m_nRanking;
+	int				m_nGensClass;
+	int				m_nContributionPoint;
+	int				m_nNextContributionPoint;
 } PMSG_MSG_SEND_GENS_INFO, *LPPMSG_MSG_SEND_GENS_INFO;
 
 //----------------------------------------------------------------------------
-// GC[0xF8][0x05] 뷰포트 안의 다른 플래이어의 겐스 세력 정보  
+// GC[0xF8][0x05]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -1594,32 +1484,28 @@ typedef struct
 
 typedef struct
 {
-	BYTE			m_byInfluence;			// 겐스 소속.
+	BYTE			m_byInfluence;
 	BYTE			m_byNumberH;
 	BYTE			m_byNumberL;
-#ifdef PBG_ADD_GENSRANKING
-	int				m_nRanking;				// 개인 랭킹	//클라 현재 사용안함
-	int				m_nGensClass;			// 겐스 계급
-	int				m_nContributionPoint;	// 기여도점수	//클라 현재 사용안함
-#endif //PBG_ADD_GENSRANKING
+	int				m_nRanking;
+	int				m_nGensClass;
+	int				m_nContributionPoint;
 } PMSG_GENS_MEMBER_VIEWPORT_INFO, *LPPMSG_GENS_MEMBER_VIEWPORT_INFO;
 #endif	// ASG_ADD_GENS_SYSTEM
 
-#ifdef PBG_ADD_GENSRANKING
 //----------------------------------------------------------------------------
-// GC[0xF8][0x08] 겐스 보상
+// GC[0xF8][0x08]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER	Header;
 	BYTE			SubCode;
-	BYTE			m_byRewardResult;				// 보상요청결과
+	BYTE			m_byRewardResult;
 }PMSG_GENS_REWARD_CODE, *LPPMSG_GENS_REWARD_CODE;
-#endif //PBG_ADD_GENSRANKING
 
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
 //----------------------------------------------------------------------------
-// GC[0xF9][0x01] NPC UI가 대화로 진행되는 NPC 클릭 때 응답
+// GC[0xF9][0x01]
 //----------------------------------------------------------------------------
 typedef struct 
 {	
@@ -1627,17 +1513,15 @@ typedef struct
 	BYTE			SubCode;
 	
 	WORD			m_wNPCIndex;
-	DWORD			m_dwContributePoint;	//기여도 포인트
+	DWORD			m_dwContributePoint;
 } PMSG_ANS_NPC_CLICK, *LPPMSG_ANS_NPC_CLICK;
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 
-//  맵 속성 위치.
 typedef struct {
     BYTE        m_byX;
     BYTE        m_byY;
 }PRECEIVE_MAP_ATTRIBUTE, *LPPRECEIVE_MAP_ATTRIBUTE;
 
-//  맵 속성 변경 정보.
 typedef struct {
     PBMSG_HEADER    Header;
     BYTE            m_byType;
@@ -1648,7 +1532,6 @@ typedef struct {
     PRECEIVE_MAP_ATTRIBUTE  m_vAttribute[128*128];
 }PRECEIVE_SET_MAPATTRIBUTE, *LPPRECEIVE_SET_MAPATTRIBUTE;
 
-//  게임 진행 정보. ( 블러드 캐슬 )
 typedef struct  {
     PBMSG_HEADER    Header;
     BYTE            m_byPlayState;      //  경기 상태 (블러드 캐슬--> 0:경기시작, 1:경기진행, 2:경기종료 )
@@ -1659,10 +1542,7 @@ typedef struct  {
     BYTE            m_byItemType;       //  절대 아이템 타입.
 }PRECEIVE_MATCH_GAME_STATE, *LPPRECEIVE_MATCH_GAME_STATE;
 
-
-#ifdef YDG_ADD_NEW_DUEL_PROTOCOL
-// 결투요청시 상대의 요청 결과 (1)
-typedef struct		// SC4
+typedef struct
 {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
@@ -1672,7 +1552,6 @@ typedef struct		// SC4
 	CHAR		szID[MAX_ID_SIZE];	// 상대방 케릭이름
 } PMSG_ANS_DUEL_INVITE, *LPPMSG_ANS_DUEL_INVITE;
 
-// 결투요청받은 유저에게 응답 요청 (2)
 typedef struct _tagPMSG_REQ_DUEL_ANSWER		// SC2
 {
 	PBMSG_HEADER Header;
@@ -1682,7 +1561,6 @@ typedef struct _tagPMSG_REQ_DUEL_ANSWER		// SC2
 	CHAR		szID[MAX_ID_SIZE];	// 상대방 케릭이름
 } PMSG_REQ_DUEL_ANSWER, *LPPMSG_REQ_DUEL_ANSWER;
 
-// 결투종료 (3)
 typedef struct
 {
 	PBMSG_HEADER Header;
@@ -1693,7 +1571,6 @@ typedef struct
 	CHAR		szID[MAX_ID_SIZE];	// 케릭이름
 } PMSG_ANS_DUEL_EXIT, *LPPMSG_ANS_DUEL_EXIT;
 
-// 결투자 점수 정보 (4)
 typedef struct
 {
 	PBMSG_HEADER Header;
@@ -1706,7 +1583,6 @@ typedef struct
 	BYTE		btDuelScore2;		// 결투점수 - 2번
 } PMSG_DUEL_SCORE_BROADCAST, *LPPMSG_DUEL_SCORE_BROADCAST;
 
-// 결투자 생명 정보 (5)
 typedef struct
 {
 	PBMSG_HEADER Header;
@@ -1718,46 +1594,42 @@ typedef struct
 	BYTE		btHP1;			// 생명 - 1번(%)
 	BYTE		btHP2;			// 생명 - 2번(%)
 	BYTE		btShield1;		// 쉴드 - 1번(%)
-	BYTE		btShield2;		// 쉴드 - 2번(%)
+	BYTE		btShield2;
 } PMSG_DUEL_HP_BROADCAST, *LPPMSG_DUEL_HP_BROADCAST;
 
-// 결투 채널(관전) 리스트 (6)
 typedef struct
 {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	struct {
-		CHAR	szID1[MAX_ID_SIZE];	// 케릭이름
-		CHAR	szID2[MAX_ID_SIZE];	// 케릭이름
-		BYTE	bStart;			// PK 시작 유/무
-		BYTE	bWatch;			// 관전가능 유/무
+		CHAR	szID1[MAX_ID_SIZE];
+		CHAR	szID2[MAX_ID_SIZE];
+		BYTE	bStart;
+		BYTE	bWatch;
 	} channel[4];
 } PMSG_ANS_DUEL_CHANNELLIST, *LPPMSG_ANS_DUEL_CHANNELLIST;
 
-// 채널(관전) 요청 (7)
 typedef struct
 {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE		nResult;
-	BYTE		nChannelId;				// 채널 아이디
-	CHAR		szID1[MAX_ID_SIZE];	// 케릭이름
-	CHAR		szID2[MAX_ID_SIZE];	// 케릭이름
-	BYTE		bIndexH1;		// 사용자의 인덱스 (상위 바이트) - 1번
-	BYTE		bIndexL1;		// 사용자의 인덱스 (하위 바이트) - 1번
-	BYTE		bIndexH2;		// 사용자의 인덱스 (상위 바이트) - 2번
-	BYTE		bIndexL2;		// 사용자의 인덱스 (하위 바이트) - 2번
+	BYTE		nChannelId;
+	CHAR		szID1[MAX_ID_SIZE];
+	CHAR		szID2[MAX_ID_SIZE];
+	BYTE		bIndexH1;
+	BYTE		bIndexL1;
+	BYTE		bIndexH2;
+	BYTE		bIndexL2;
 } PMSG_ANS_DUEL_JOINCNANNEL, *LPPMSG_ANS_DUEL_JOINCNANNEL;
 
-// 채널(관전) 입장한 관전자 (8)
 typedef struct
 {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
-	CHAR		szID[MAX_ID_SIZE];	// 케릭이름
+	CHAR		szID[MAX_ID_SIZE];
 } PMSG_DUEL_JOINCNANNEL_BROADCAST, *LPPMSG_DUEL_JOINCNANNEL_BROADCAST;
 
-// 채널(관전) 종료 (9)
 typedef struct
 {
 	PBMSG_HEADER Header;
@@ -1765,79 +1637,37 @@ typedef struct
 	BYTE		nResult;
 } PMSG_ANS_DUEL_LEAVECNANNEL, *LPPMSG_ANS_DUEL_LEAVECNANNEL;
 
-// 채널(관전) 떠난 관전자 (10)
 typedef struct
 {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
-	CHAR		szID[MAX_ID_SIZE];	// 케릭이름
+	CHAR		szID[MAX_ID_SIZE];
 } PMSG_DUEL_LEAVECNANNEL_BROADCAST, *LPPMSG_DUEL_LEAVECNANNEL_BROADCAST;
 
-// 관전자 리스트(All) (11)
 typedef struct
 {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
 	BYTE		nCount;
 	struct {
-		CHAR	szID[MAX_ID_SIZE];	// 케릭이름
+		CHAR	szID[MAX_ID_SIZE];
 	} user[10];
 } PMSG_DUEL_OBSERVERLIST_BROADCAST, *LPPMSG_DUEL_OBSERVERLIST_BROADCAST;
 
-// 결투결과 정보 (12)
 typedef struct
 {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
-	CHAR		szWinner[MAX_ID_SIZE];	// 승자 케릭이름
-	CHAR		szLoser[MAX_ID_SIZE];	// 패자 케릭이름
+	CHAR		szWinner[MAX_ID_SIZE];
+	CHAR		szLoser[MAX_ID_SIZE];
 } PMSG_DUEL_RESULT_BROADCAST, *LPPMSG_DUEL_RESULT_BROADCAST;
 
 typedef struct
 {
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
-	BYTE		nFlag;					// 0: 라운드 시작, 1: 라운드 종료
+	BYTE		nFlag;
 } PMSG_DUEL_ROUNDSTART_BROADCAST, *LPPMSG_DUEL_ROUNDSTART_BROADCAST;
-
-#else	// YDG_ADD_NEW_DUEL_PROTOCOL
-#ifdef DUEL_SYSTEM
-
-typedef struct {
-	PBMSG_HEADER    Header;
-	BYTE			bStart;
-	BYTE			bIndexH;
-	BYTE			bIndexL;
-	BYTE			ID[MAX_ID_SIZE];
-}PRECEIVE_DUELSTART, *LPPRECEIVE_DUELSTART;
-
-typedef struct {
-	PBMSG_HEADER    Header;
-	BYTE			bIndexH;
-	BYTE			bIndexL;
-	BYTE			ID[MAX_ID_SIZE];
-}PRECEIVE_DUELEND, *LPPRECEIVE_DUELEND;
-
-typedef struct {
-	PBMSG_HEADER    Header;
-	BYTE			bIndexH;
-	BYTE			bIndexL;
-	BYTE			ID[MAX_ID_SIZE];
-}PNOTIFY_DUELSTART, *LPPNOTIFY_DUELSTART;
-
-typedef struct
-{
-	PBMSG_HEADER	h;
-	BYTE			NumberH1;		// 결투 중이었던 상대방 사용자의 인덱스 (상위 바이트) - 1번
-	BYTE			NumberL1;		// 결투 중이었던 상대방 사용자의 인덱스 (하위 바이트) - 1번
-	BYTE			NumberH2;		// 결투 중이었던 상대방 사용자의 인덱스 (상위 바이트) - 2번
-	BYTE			NumberL2;		// 결투 중이었던 상대방 사용자의 인덱스 (하위 바이트) - 2번
-	BYTE			btDuelScore1;	// 결투점수 - 1번
-	BYTE			btDuelScore2;	// 결투점수 - 1번
-}PNOTIFY_DUELSCORE, *LPPNOTIFY_DUELSCORE;
-
-#endif // DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_PROTOCOL
 
 typedef struct tagPSHOPTITLE_HEADER {
 	PWMSG_HEADER    Header;
@@ -1920,7 +1750,7 @@ typedef struct tagDISPLAYEFFECT_NOTIFY {
 	PBMSG_HEADER	Header;
 	BYTE			byIndexH;
 	BYTE			byIndexL;
-	BYTE			byType;			// 포션 정보(효과타입)
+	BYTE			byType;
 } DISPLAYEREFFECT_NOTIFYINFO, *LPDISPLAYEREFFECT_NOTIFYINFO;
 
 typedef struct {
@@ -1964,11 +1794,7 @@ typedef struct {
 	WORD			Index;
 	BYTE			Name[MAX_ID_SIZE];
 	BYTE			Date[30];
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	BYTE			Subject[MAX_LETTER_TITLE_LENGTH];
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	BYTE			Subject[32];
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	BYTE			Read;
 } FS_LETTER_ALERT, * LPFS_LETTER_ALERT;
 
@@ -1980,11 +1806,7 @@ typedef struct {
 	BYTE			Equipment[EQUIPMENT_LENGTH];
 	BYTE			PhotoDir;
 	BYTE			PhotoAction;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	BYTE			Memo[MAX_LETTERTEXT_LENGTH];
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	BYTE			Memo[1000];
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 } FS_LETTER_TEXT, * LPFS_LETTER_TEXT;
 
 typedef struct {
@@ -2040,7 +1862,7 @@ typedef struct {
 } FS_CHAT_TEXT, * LPFS_CHAT_TEXT;
 
 //----------------------------------------------------------------------------
-// GC [0x2D] 아이템 효과 해제
+// GC [0x2D]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2052,11 +1874,6 @@ typedef struct
 	int			wEffectTime;
 	BYTE		byBuffType;
 } PMSG_ITEMEFFECTCANCEL, *LPPMSG_ITEMEFFECTCANCEL;
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
-#ifdef PET_SYSTEM
 
 typedef struct
 {
@@ -2083,18 +1900,13 @@ typedef struct
 typedef struct 
 {
     PBMSG_HEADER    m_Header;
-    BYTE            m_byPetType;    //  팻아이템 타입 ( 0:다크스피릿. etc ).
-    BYTE            m_byInvType;    //  인벤 종류 ( 0:인벤토리, 1:창고, 2:거래창... )
-    BYTE            m_byPos;        //  위치.
-    BYTE            m_byLevel;      //  아이템 레벨.
-    int             m_iExp;         //  경험치.
-#ifdef KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
-	BYTE			m_byLife;		//	생명력
-#endif // KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
+    BYTE            m_byPetType;
+    BYTE            m_byInvType;
+    BYTE            m_byPos;
+    BYTE            m_byLevel;
+    int             m_iExp;
+	BYTE			m_byLife;
 }PRECEIVE_PET_INFO, *LPPRECEIVE_PET_INFO;
-
-#endif// PET_SYSTEM
-
 
 typedef struct
 {
@@ -2137,9 +1949,7 @@ extern PMSG_MATCH_RESULT		g_wtMatchResult;
 extern PMSG_MATCH_TIMEVIEW		g_wtMatchTimeLeft;
 extern int g_iGoalEffect;
 
-//////////////////////////////////////////////////////////////////////////
-
-typedef struct      //  맵서버 이동을 위한 서버 정보.
+typedef struct
 {
     PBMSG_HEADER    m_Header;
     MServerInfo     m_vSvrInfo;
@@ -2162,7 +1972,7 @@ enum CASTLESIEGE_STATE
 };
 
 //----------------------------------------------------------------------------
-// GC [0xB2][0x00] 클라이언트가 공성전 상태정보를 요청 응답
+// GC [0xB2][0x00]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2197,7 +2007,7 @@ typedef struct
 } PMSG_ANS_CASTLESIEGESTATE, *LPPMSG_ANS_CASTLESIEGESTATE;
 
 //----------------------------------------------------------------------------
-// GC [0xB2][0x01] 공성전 등록을 요청 응답
+// GC [0xB2][0x01]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2207,7 +2017,7 @@ typedef struct
 } PMSG_ANS_REGCASTLESIEGE, *LPPMSG_ANS_REGCASTLESIEGE;
 
 //----------------------------------------------------------------------------
-// GC [0xB2][0x02] 공성전 포기를 요청 응답
+// GC [0xB2][0x02]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2218,7 +2028,7 @@ typedef struct
 } PMSG_ANS_GIVEUPCASTLESIEGE, *LPPMSG_ANS_GIVEUPCASTLESIEGE;
 
 //----------------------------------------------------------------------------
-// GC [0xB2][0x03] 자신의 길드의 공성등록에 대한 정보를 요청 응답
+// GC [0xB2][0x03]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2234,7 +2044,7 @@ typedef struct
 } PMSG_ANS_GUILDREGINFO, *LPPMSG_ANS_GUILDREGINFO;
 
 //----------------------------------------------------------------------------
-// GC [0xB2][0x04] 자신의 길드의 성주의 표식 등록 요청 응답
+// GC [0xB2][0x04]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2248,7 +2058,7 @@ typedef struct
 } PMSG_ANS_REGGUILDMARK, *LPPMSG_ANS_REGGUILDMARK;
 
 //----------------------------------------------------------------------------
-// GC [0xB2][0x05] 수성측 NPC 구매 요청 응답 -> 권한체크, 수성측만 가능 (0xC1)
+// GC [0xB2][0x05]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2259,7 +2069,7 @@ typedef struct
 } PMSG_ANS_NPCBUY, *LPPMSG_ANS_NPCBUY;
 
 //----------------------------------------------------------------------------
-// GC [0xB2][0x06] 수성측 NPC 수리 요청 응답 -> 권한체크, 수성측만 가능 (0xC1)
+// GC [0xB2][0x06]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2272,7 +2082,7 @@ typedef struct
 } PMSG_ANS_NPCREPAIR, *LPPMSG_ANS_NPCREPAIR;
 
 //----------------------------------------------------------------------------
-// GC [0xB2][0x07] 수성측 NPC 업그레이드 요청 응답 -> 권한체크, 수성측만 가능 (0xC1)
+// GC [0xB2][0x07]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2285,7 +2095,7 @@ typedef struct
 } PMSG_ANS_NPCUPGRADE, *LPPMSG_ANS_NPCUPGRADE;
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x08] 현재 성의 자금, 세금 정보 요청 응답 (0xC1)
+// CG [0xB2][0x08]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2304,7 +2114,7 @@ typedef struct
 } PMSG_ANS_TAXMONEYINFO, *LPPMSG_ANS_TAXMONEYINFO;
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x09] 현재 성의 세율 변경 요청 응답 (0xC1)
+// CG [0xB2][0x09]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -2318,90 +2128,89 @@ typedef struct
 } PMSG_ANS_TAXRATECHANGE, *LPPMSG_ANS_TAXRATECHANGE;
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x10] 현재 성의 자금 출금 요청 응답 (0xC1)
+// CG [0xB2][0x10]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PREQUEST_DEFAULT_SUBCODE	Header;
-	BYTE		btResult;					// 요청 결과 (0:실패/1:성공/2:권한이없음)
-	BYTE		btMoney1;					// 현재 성의 자금 (INT64의 최상위 바이트 부터 1)
-	BYTE		btMoney2;					// 현재 성의 자금 (INT64의 최상위 바이트 부터 2)
-	BYTE		btMoney3;					// 현재 성의 자금 (INT64의 최상위 바이트 부터 3)
-	BYTE		btMoney4;					// 현재 성의 자금 (INT64의 최상위 바이트 부터 4)
-	BYTE		btMoney5;					// 현재 성의 자금 (INT64의 최상위 바이트 부터 5)
-	BYTE		btMoney6;					// 현재 성의 자금 (INT64의 최상위 바이트 부터 6)
-	BYTE		btMoney7;					// 현재 성의 자금 (INT64의 최상위 바이트 부터 7)
-	BYTE		btMoney8;					// 현재 성의 자금 (INT64의 최상위 바이트 부터 8)
+	BYTE		btResult;
+	BYTE		btMoney1;
+	BYTE		btMoney2;
+	BYTE		btMoney3;
+	BYTE		btMoney4;
+	BYTE		btMoney5;
+	BYTE		btMoney6;
+	BYTE		btMoney7;
+	BYTE		btMoney8;
 } PMSG_ANS_MONEYDRAWOUT, *LPPMSG_ANS_MONEYDRAWOUT;
 
 //----------------------------------------------------------------------------
-// CG [0xB2][0x1A] 세율 변경 (0xC1)
+// CG [0xB2][0x1A]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PREQUEST_DEFAULT_SUBCODE	Header;
-	BYTE		btTaxType;					// 세율 형태 (1:카오스조합/2:상점)
-	BYTE		btTaxRate;					// 세율
+	BYTE		btTaxType;
+	BYTE		btTaxRate;
 } PMSG_ANS_MAPSVRTAXINFO, *LPPMSG_ANS_MAPSVRTAXINFO;
 
 //----------------------------------------------------------------------------
-// GC [0xB3] 공성관련 DB로 관리되는 특정 NPC의 목록을 요청 응답 (0xC2)
+// GC [0xB3]
 //----------------------------------------------------------------------------
 typedef struct
 {
     PREQUEST_DEFAULT_SUBCODE    m_Header;
-	BYTE		btResult;					// 요청 결과 (0:실패/1:성공/2:권한이없음)
+	BYTE		btResult;
 	INT			iCount;
 } PMSG_ANS_NPCDBLIST, *LPPMSG_ANS_NPCDBLIST;
 typedef struct
 {
-	INT			iNpcNumber;					// NPC번호
-	INT			iNpcIndex;					// NPC인덱스
-	INT			iNpcDfLevel;				// 방어력 레벨
-	INT			iNpcRgLevel;				// 회복력 레벨
-	INT			iNpcMaxHp;					// 최대 HP
-	INT			iNpcHp;						// HP
-	BYTE		btNpcX;						// 좌표 - X
-	BYTE		btNpcY;						// 좌표 - Y
-	BYTE		btNpcLive;					// NPC가 현재 존재하는지 여부
+	INT			iNpcNumber;
+	INT			iNpcIndex;
+	INT			iNpcDfLevel;
+	INT			iNpcRgLevel;
+	INT			iNpcMaxHp;
+	INT			iNpcHp;
+	BYTE		btNpcX;
+	BYTE		btNpcY;
+	BYTE		btNpcLive;
 } PMSG_NPCDBLIST, *LPPMSG_NPCDBLIST;
 
-
 //----------------------------------------------------------------------------
-// GC [0xB4] 공성 등록 길드목록 요청 응답 (0xC2)
+// GC [0xB4]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PREQUEST_DEFAULT_SUBCODE	h;
-	BYTE		btResult;					// 요청 결과 (0:실패/1:성공)
+	BYTE		btResult;
 	INT			iCount;
 } PMSG_ANS_CSREGGUILDLIST, *LPPMSG_ANS_CSREGGUILDLIST;
 typedef struct
 {
-	CHAR		szGuildName[8];				// 길드이름
-	BYTE		btRegMarks1;				// 성주의 표식의 개수 (INT의 상위 바이트 부터 1)
-	BYTE		btRegMarks2;				// 성주의 표식의 개수 (INT의 상위 바이트 부터 2)
-	BYTE		btRegMarks3;				// 성주의 표식의 개수 (INT의 상위 바이트 부터 3)
-	BYTE		btRegMarks4;				// 성주의 표식의 개수 (INT의 상위 바이트 부터 4)
-	BYTE		btIsGiveUp;					// 포기여부 (0:포기안함/1:포기함)
-	BYTE		btSeqNum;					// 등록순서
+	CHAR		szGuildName[8];
+	BYTE		btRegMarks1;
+	BYTE		btRegMarks2;
+	BYTE		btRegMarks3;
+	BYTE		btRegMarks4;
+	BYTE		btIsGiveUp;
+	BYTE		btSeqNum;
 } PMSG_CSREGGUILDLIST, *LPPMSG_CSREGGUILDLIST;
 
 //----------------------------------------------------------------------------
-// GC [0xB5] 공성 확정 길드목록 요청 응답 (0xC2)
+// GC [0xB5]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PREQUEST_DEFAULT_SUBCODE	h;
-	BYTE		btResult;					// 요청 결과 (0:실패/1:성공/2:기간아님/3:데이터준비않됨)
+	BYTE		btResult;
 	INT			iCount;
 } PMSG_ANS_CSATTKGUILDLIST, *LPPMSG_ANS_CSATTKGUILDLIST;
 typedef struct
 {
-	BYTE		btCsJoinSide;				// 참여측 정보 (1:수성측/2이상:공성측)
-	BYTE		btGuildInvolved;			// 길드가 연합의 주측 길드인지 여부 (0:아님/1:주축임)
-	CHAR		szGuildName[8];				// 길드이름
-	INT			iGuildScore;				// 길드 선정 당시의 점수 <<--- 추가됨
+	BYTE		btCsJoinSide;
+	BYTE		btGuildInvolved;
+	CHAR		szGuildName[8];
+	INT			iGuildScore;
 } PMSG_CSATTKGUILDLIST, *LPPMSG_CSATTKGUILDLIST;
 
 
@@ -2412,25 +2221,16 @@ typedef struct
 }PBMSG_HEADER2;
 
 //----------------------------------------------------------------------------
-// GC [0xA4][0x00] 유저의 몬스터 킬 카운트 정보를 되돌려준다.
+// GC [0xA4][0x00]
 //----------------------------------------------------------------------------
 typedef struct
 { 
 	PBMSG_HEADER2	h;
-	BYTE	byResult;		// 결과 0x00:실패(에러)
-							//		0x01:성공 
-							//		0x02:이미 완료한 퀘스트
-							//		0x03:진행중인 퀘스트 아님
-							//		0x04:퀘스트가 없음(퀘스트 번호가 잘못왔음)
-							//		0x05:완료조건이 킬카운트가 아님(클라이언트에서 요청하면 안됨)
-		
-	BYTE	byQuestIndex;		// 퀘스트 인덱스
-	int		anKillCountInfo[10];// 몬스터 킬카운트 정보
+	BYTE	byResult;		
+	BYTE	byQuestIndex;
+	int		anKillCountInfo[10];
 } PMSG_ANS_QUEST_MONKILL_INFO, *LPPMSG_ANS_QUEST_MONKILL_INFO;
 
-    //////////////////////////////////////////////////////////////////////////
-    //  GC [0xB2][0x1F] 성 사냥터 입장 가능 여부 지정 요청 응답 ( 0xC1 )
-    //////////////////////////////////////////////////////////////////////////
     typedef struct 
     {
         PBMSG_HEADER2       m_Header;
@@ -2438,83 +2238,71 @@ typedef struct
         BYTE                m_byHuntZoneEnter;
     }PMSG_CSHUNTZONEENTER, *LPPMSG_CSHUNTZONEENTER;
 
-    //////////////////////////////////////////////////////////////////////////
-    //  GC [0xB9][0x03] 성 사냥터 문지기가 그 사냥터의 여러 정보를 알려준다.
-    //////////////////////////////////////////////////////////////////////////
     typedef struct 
     {
         PBMSG_HEADER2       m_Header;
-        BYTE                m_byResult;         //  0:일반인, 1:일반인, 2:연합(길드)원, 3:연합(길드)마스터.
-        BYTE                m_byEnable;         //  0:일반인 입장 불가, 1:일반인 입장 가능.
-        INT                 m_iCurrPrice;       //  현재 설정된 입장료.
-        INT                 m_iMaxPrice;        //  최대 받을수 있는 입장료.
-        INT                 m_iUnitPrice;       //  증가 단위.
+        BYTE                m_byResult;
+        BYTE                m_byEnable;
+        INT                 m_iCurrPrice;
+        INT                 m_iMaxPrice;
+        INT                 m_iUnitPrice;
     }PRECEIVE_CASTLE_HUNTZONE_INFO, *LPPRECEIVE_CASTLE_HUNTZONE_INFO; 
 
-    //////////////////////////////////////////////////////////////////////////
-    //  GC [0xB9][0x05] 성 사냥터 입장 결과.
-    //////////////////////////////////////////////////////////////////////////
     typedef struct 
     {
         PBMSG_HEADER2       m_Header;
-        BYTE                m_byResult;     //  0:입장불가, 1:입장가능
+        BYTE                m_byResult;
     }PRECEVIE_CASTLE_HUNTZONE_RESULT, *LPPRECEVIE_CASTLE_HUNTZONE_RESULT;
 
-    //////////////////////////////////////////////////////////////////////////
-    //  GC [0xB9][0x02] 성을 차지한 길드 마크.
-    //////////////////////////////////////////////////////////////////////////
     typedef struct 
     {
         PBMSG_HEADER2       m_Header;
         BYTE                m_byGuildMark[32];
     }PRECEIVE_CASTLE_FLAG, *LPPRECEIVE_CASTLE_FLAG;
 
-    //////////////////////////////////////////////////////////////////////////
-    //  성문.
-    //////////////////////////////////////////////////////////////////////////
-    typedef struct  //  성문 정보.
+    typedef struct
     {
-        PBMSG_HEADER2        m_Header;           //  헤더.
-        BYTE                m_byResult;         //  성문 정보 요청 결과값. ( 0:실패, 1:성공, 2:성문없음, 3:레버없음, 4:권한없음 )
-        BYTE                m_byKeyH;           //  
+        PBMSG_HEADER2        m_Header;
+        BYTE                m_byResult;
+        BYTE                m_byKeyH; 
         BYTE                m_byKeyL;
     }PRECEIVE_GATE_STATE, *LPPRECEIVE_GATE_STATE;
 
 
-    typedef struct  //  성문에 대한 명령 결과.
+    typedef struct
     {
         PBMSG_HEADER2        m_Header;
-        BYTE                m_byResult;         //  성문 정보 요청 결과값. ( 0:실패, 1:성공, 2:성문없음, 3:레버없음, 4:권한없음 )
-        BYTE                m_byOperator;       //  작동 결과.
+        BYTE                m_byResult;
+        BYTE                m_byOperator;
         BYTE                m_byKeyH;
         BYTE                m_byKeyL;
     }PRECEIVE_GATE_OPERATOR, *LPPRECEIVE_GATE_OPERATOR;
 
 
-    typedef struct  //  성문의 상태.
+    typedef struct
     {
         PBMSG_HEADER2        m_Header;
-        BYTE                m_byOperator;       //  작동 상황 ( 0:닫기, 1:열기 )
+        BYTE                m_byOperator;
         BYTE                m_byKeyH;
         BYTE                m_byKeyL;
     }PRECEIVE_GATE_CURRENT_STATE, *LPPRECEIVE_GATE_CURRENT_STATE;
 
 
-    typedef struct  //  스위치 작동 여부.
+    typedef struct
     {
         PBMSG_HEADER2       m_Header;   
-        BYTE                m_byIndexH;         //  왕관 스위치 인덱스.
-        BYTE                m_byIndexL;         //  
-        BYTE                m_byKeyH;           //  사용자 스위치 인덱스.
-        BYTE                m_byKeyL;           //  
-        BYTE                m_byState;          //  상태. ( 0:스위치땜, 1:스위치 작동, 2:다른이가 사용중 )
+        BYTE                m_byIndexH;
+        BYTE                m_byIndexL;
+        BYTE                m_byKeyH;
+        BYTE                m_byKeyL;
+        BYTE                m_byState;
     }PRECEIVE_SWITCH_PROC, *LPPRECEIVE_SWITCH_PROC;
 
 
-    typedef struct  //  왕관의 상태.
+    typedef struct
     {
         PBMSG_HEADER2       m_Header;
-        BYTE                m_byCrownState;     //  왕관의 상태 ( 0:직인등록, 1:직인등록성공, 2:직인등록실패, 3:다른사람이 사용중 )
+        BYTE                m_byCrownState;
 
 		DWORD				m_dwCrownAccessTime;
 
@@ -2534,18 +2322,14 @@ typedef struct
 	}PRECEIVE_CROWN_SWITCH_INFO, *LPRECEIVE_CROWN_SWITCH_INFO;
 
 
-    typedef struct  //  공성전 진행 상태 알림.
+    typedef struct
     {
         PBMSG_HEADER2       m_Header;
-        BYTE                m_byBasttleCastleState; //  0:왕의 직인 등록, 1:중간 승리.
-        BYTE                m_szGuildName[8];       //  등록, 승리한 길드 이름.
+        BYTE                m_byBasttleCastleState;
+        BYTE                m_szGuildName[8];
     }PRECEIVE_BC_PROCESS, *LPPRECEIVE_BC_PROCESS;
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  
-    //////////////////////////////////////////////////////////////////////////
-    typedef struct //   몬스터 생성 시간.
+    typedef struct
     {
         PBMSG_HEADER2       m_Header;
         BYTE                m_byKeyH;
@@ -2554,59 +2338,51 @@ typedef struct
         BYTE                m_byBuildTime;
     }PRECEIVE_MONSTER_BUILD_TIME, *LPPRECEIVE_MONSTER_BUILD_TIME;
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  공성무기
-    //////////////////////////////////////////////////////////////////////////
-    typedef struct  //  Npc선택시 선택한 Npc의 상태값.
+    typedef struct
     {
         PBMSG_HEADER2       m_Header;
-        BYTE                m_byResult;         //  NPC요청 결과. ( 0:실패, 1:성공, 2... ).
+        BYTE                m_byResult;
 
-        BYTE                m_byWeaponType;     //  무기 종류.
+        BYTE                m_byWeaponType;
 
-        BYTE                m_byKeyH;           //  NPC Key값.
+        BYTE                m_byKeyH;
         BYTE                m_byKeyL;
     }PRECEIVE_CATAPULT_STATE, *LPPRECEIVE_CATAPULT_STATE;
 
-
-    typedef struct  //  공성 무기 발사 요청 결과.
+    typedef struct
     {
         PBMSG_HEADER2        m_Header;
-        BYTE                m_byResult;         //  발사 요청 결과.
-        BYTE                m_byKeyH;           //  발사하는 무기의 키값.
+        BYTE                m_byResult;
+        BYTE                m_byKeyH;
         BYTE                m_byKeyL;           
 
-        BYTE                m_byWeaponType;     //  무기 종류 ( 0: 공성, 1:수성 )
+        BYTE                m_byWeaponType;
 
-        BYTE                m_byTargetX;        //  공격 위치 X.
-        BYTE                m_byTargetY;        //  공격 위치 Y.
+        BYTE                m_byTargetX;
+        BYTE                m_byTargetY;
     }PRECEIVE_WEAPON_FIRE, *LPPRECEIVE_WEAPON_FIRE;
 
-
-    typedef struct  //  투석기 공습 경보.
+    typedef struct
     {
         PBMSG_HEADER2        m_Header;
-        BYTE                m_byWeaponType;     //  무기 종류 ( 0:공성, 1:수성 )
+        BYTE                m_byWeaponType;
 
-        BYTE                m_byTargetX;        //  공격 위치 X.
-        BYTE                m_byTargetY;        //  공격 위치 Y.
+        BYTE                m_byTargetX;
+        BYTE                m_byTargetY;
     }PRECEIVE_BOMBING_ALERT, *LPPRECEIVE_BOMBING_ALERT;
 
-
-    typedef struct //   공격을 받는 대상 정보.
+    typedef struct
     {
         PBMSG_HEADER2        m_Header;
-        BYTE                m_byKeyH;           //  공격 당하는 Key값.
+        BYTE                m_byKeyH;
         BYTE                m_byKeyL;
 
-        BYTE                m_byWeaponType;     //  무기 종류 ( 0:공성, 1:수성 ).
+        BYTE                m_byWeaponType;
     }PRECEIVE_BOMBING_TARGET, *LPPRECEIVE_BOMBING_TARGET;
 
-
-    typedef struct //   미리 임시적인 위치의 뷰포트를 받는다.
+    typedef struct
     {
-        BYTE                m_byObjType;        //  오브젝트 종류. ( 0:캐릭터, 1:몬스터, 2:NPC )
+        BYTE                m_byObjType;
         BYTE                m_byTypeH;
         BYTE                m_byTypeL;
         BYTE                m_byKeyH;
@@ -2618,7 +2394,6 @@ typedef struct
 		BYTE				s_BuffEffectState[MAX_BUFF_SLOT_INDEX];     
     }PRECEIVE_PREVIEW_PORT, *LPPRECEIVE_PREVIEW_PORT;
 
-
     typedef struct 
     {
         PBMSG_HEADER2       m_Header;
@@ -2628,29 +2403,26 @@ typedef struct
         BYTE                m_byCmd;
     }PRECEIVE_GUILD_COMMAND, *LPPRECEIVE_GUILD_COMMAND;
 
-
     typedef struct 
     {
         BYTE                m_byX;
         BYTE                m_byY;
     }PRECEIVE_MEMBER_LOCATION, *LPPRECEIVE_MEMBER_LOCATION;
 
-
     typedef struct 
     {
-        BYTE                m_byType;           //  오브젝트 종류.
+        BYTE                m_byType;
         BYTE                m_byX;
         BYTE                m_byY;
     }PRECEIVE_NPC_LOCATION, *LPPRECEIVE_NPC_LOCATION;
 
-
     typedef struct
     {
         PBMSG_HEADER2       m_Header;
-        BYTE                m_byResult;         //  데이터 요청 결과.
+        BYTE                m_byResult;
     }PRECEIVE_MAP_INFO_RESULT, *LPPRECEIVE_MAP_INFO_RESULT;
 
-    typedef struct  //  공성전 중 남은 시간을 사용자들에게 주기적으로 알림. 
+    typedef struct
     {
         PBMSG_HEADER2       m_Header;
         BYTE                m_byHour;
@@ -2660,53 +2432,46 @@ typedef struct
 	typedef struct  
 	{
 		PBMSG_HEADER2		m_Header;	
-		BYTE				m_iJewelType;		//보석 타입 ( 0: 축석 / 1: 영석)
-		BYTE				m_iJewelMix;		//조합 타입 ( 0, 1, 2순으로 10개, 20개, 30개)
+		BYTE				m_iJewelType;
+		BYTE				m_iJewelMix;
 	}PMSG_REQ_JEWEL_MIX, *LPPMSG_REQ_JEWEL_MIX;
 
 	typedef struct 
 	{
 		PBMSG_HEADER2		m_Header;
-		BYTE				m_iResult;			//0 : 오류, 1: 성공
-												//2 : 보석 타입 오류, 3: 조합타입 오류, 4: 보석 부족, 5: 조합금 부족
+		BYTE				m_iResult;
 	}PMSG_ANS_JEWEL_MIX, *LPPMSG_ANS_JEWEL_MIX;
 
 	typedef struct  
 	{
 		PBMSG_HEADER2		m_Header;			
-		BYTE				m_iJewelType;		//보석 타입
-		BYTE				m_iJewelLevel;		//조합된 레벨
-		BYTE				m_iJewelPos;		//인벤토리 내 인덱스
+		BYTE				m_iJewelType;
+		BYTE				m_iJewelLevel;
+		BYTE				m_iJewelPos;
 	}PMSG_REQ_JEWEL_UNMIX, *LPPMSG_REQ_JEWEL_UNMIX;
 
 	typedef struct  
 	{
 		PBMSG_HEADER2		m_Header;
 		
-		int		iMasterLevelSkill;	// 습득하려는 스킬 번호
+		int		iMasterLevelSkill;
 	}PMSG_REQ_MASTERLEVEL_SKILL, *LPPMSG_REQ_MASTERLEVEL_SKILL;
 
 	typedef struct 
 	{
 		PBMSG_HEADER2		m_Header;
-		BYTE				m_iResult;			//0: 오류, 1: 성공
-												//2: 보석 타입 오류, 3: 보석 레벨 오류 4: 아이템 없음
-												//5: 인벤토리 범위 오류, 6: 해체할 아이템 오류
-												//7: 인벤토리 공간 부족, 8: 조합금이 부족
+		BYTE				m_iResult;
 	}PMSG_ANS_JEWEL_UNMIX, *LPPMSG_ANS_JEWEL_UNMIX;
 
-////////////////////////////////////////////////////////////////////////////
-//  크라이울프 1차 MVP 프로토콜 ( 0xBD 사용 )
-////////////////////////////////////////////////////////////////////////////
 //--------------------------------------------------------------------------
-// GC [0xBD][0x00] 클라이언트가 크라이울프 점령 및 상태정보 요청에 대한 응답
+// GC [0xBD][0x00]
 //--------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
 
-	BYTE			btOccupationState;	// 점령 정보 (0:평화, 1:점령, 2:전쟁)
-	BYTE			btCrywolfState;		// 크라이울프 진행 상태
+	BYTE			btOccupationState;
+	BYTE			btCrywolfState;
 
 } PMSG_ANS_CRYWOLF_INFO, *LPPMSG_ANS_CRYWOLF_INFO;
 
@@ -2716,65 +2481,61 @@ typedef struct
 typedef struct
 {
 	PBMSG_HEADER2	h;
-
-	INT				iCrywolfStatueHP;	// 방어막 HP
-	BYTE			btAltarState1;		// 제단 1 상태
-	BYTE			btAltarState2;		// 제단 2 상태
-	BYTE			btAltarState3;		// 제단 3 상태
-	BYTE			btAltarState4;		// 제단 4 상태
-	BYTE			btAltarState5;		// 제단 5 상태
+	INT				iCrywolfStatueHP;
+	BYTE			btAltarState1;
+	BYTE			btAltarState2;
+	BYTE			btAltarState3;
+	BYTE			btAltarState4;
+	BYTE			btAltarState5;
 
 } PMSG_ANS_CRYWOLF_STATE_ALTAR_INFO, *LPPMSG_ANS_CRYWOLF_STATE_ALTAR_INFO;
 
 //--------------------------------------------------------------------------
-// GC [0xBD][0x03] 클라이언트가 특정 제단과 사제 계약 요청에 대한 응답
+// GC [0xBD][0x03]
 //--------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-
-	BYTE			bResult;			// 계약 결과 (0:실패, 1:성공)
-	BYTE			btAltarState;		// 제단 상태
-	BYTE			btObjIndexH;		// 제단 인덱스
-	BYTE			btObjIndexL;		// 제단 인덱스
+	BYTE			bResult;
+	BYTE			btAltarState;
+	BYTE			btObjIndexH;
+	BYTE			btObjIndexL;
 
 } PMSG_ANS_CRYWOLF_ALTAR_CONTRACT, *LPPPMSG_ANS_CRYWOLF_ALTAR_CONTRACT;
 
 //--------------------------------------------------------------------------
-// GC [0xBD][0x04] 크라이울프 진행 시간
+// GC [0xBD][0x04]
 //--------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-
-	BYTE			btHour;				// 남은 시간
-	BYTE			btMinute;			// 남은 분
+	BYTE			btHour;
+	BYTE			btMinute;
 
 } PMSG_ANS_CRYWOLF_LEFTTIME, *LPPPMSG_ANS_CRYWOLF_LEFTTIME;
 
 //--------------------------------------------------------------------------
-// GC [0xBD][0x0C] 크라이울프 MVP 탱커 공격 영역 알림
+// GC [0xBD][0x0C]
 //--------------------------------------------------------------------------
 typedef struct
 {
     PBMSG_HEADER2       h;
 
-    BYTE                btObjClassH;        //  몬스터 종류
+    BYTE                btObjClassH;
     BYTE                btObjClassL;           
 
-	BYTE                btSourceX;        //  발사 위치 X.
-    BYTE                btSourceY;        //  발사 위치 Y.
+	BYTE                btSourceX;
+    BYTE                btSourceY;
 
-    BYTE                btPointX;        //  폭발 위치 X.
-    BYTE                btPointY;        //  폴발 위치 Y.
+    BYTE                btPointX;
+    BYTE                btPointY;
 } PMSG_NOTIFY_REGION_MONSTER_ATTACK, *LPPMSG_NOTIFY_REGION_MONSTER_ATTACK;
 
 typedef struct
 {
 	PBMSG_HEADER2	h;
-
-	int				btBossHP;			//발가스 HP
-	BYTE			btMonster2;			//다크엘프 마리수
+	int				btBossHP;
+	BYTE			btMonster2;
 	
 } PMSG_ANS_CRYWOLF_BOSSMONSTER_INFO, *LPPMSG_ANS_CRYWOLF_BOSSMONSTER_INFO;
 
@@ -2782,19 +2543,14 @@ typedef struct
 typedef struct 
 {
 	PBMSG_HEADER2	h;
-
-	BYTE			btPlusChaosRate;	// 크라이울프 혜택
+	BYTE			btPlusChaosRate;
 } PMSG_ANS_CRYWOLF_BENEFIT_PLUS_CHAOSRATE, *LPPMSG_ANS_CRYWOLF_BENEFIT_PLUS_CHAOSRATE;
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
 
 typedef struct
 {
 	PBMSG_HEADER2	h;
 	BYTE			btRank;			//0 : D    1 : C   2 : B   3 : A   4 : S
-	int				iGettingExp;	//획득경험치
+	int				iGettingExp;
 } PMSG_ANS_CRYWOLF_PERSONAL_RANK, *LPPMSG_ANS_CRYWOLF_PERSONAL_RANK;
 
 typedef struct
@@ -2810,212 +2566,168 @@ typedef struct
 	int iHeroScore;
 	BYTE btHeroClass;
 } PMSG_ANS_CRYWOLF_HERO_LIST_INFO, *LPPMSG_ANS_CRYWOLF_HERO_LIST_INFO;
-//////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////
-//  칸투르 관련  프로토콜 ( 0xD1 사용 )
-////////////////////////////////////////////////////////////////////////////
 
 //----------------------------------------------------------------------------
-// CG [0xD1][0x00] 클라이언트가 칸투르 보스전의 현재 상태 정보
+// CG [0xD1][0x00]
 //----------------------------------------------------------------------------
 typedef struct 
 {
 	PBMSG_HEADER2	h;
-
-	BYTE	btState;			// 칸투르 보스전 상태
-	BYTE	btDetailState;		// 칸투르 보스전 세부 상태
-
-	BYTE	btEnter;			// 입장 가능 여부 ( 0:불가 1:가능 )
-	BYTE	btUserCount;		// 입장이 가능 한 경우 현재 입장 인원
-	int		iRemainTime;		// 입장이 가능한 경우 입장 종료까지 남은 시간(Sec)
-	
+	BYTE	btState;
+	BYTE	btDetailState;
+	BYTE	btEnter;
+	BYTE	btUserCount;
+	int		iRemainTime;
 } PMSG_ANS_KANTURU_STATE_INFO, *LPPMSG_ANS_KANTURU_STATE_INFO;
 
 //----------------------------------------------------------------------------
-// GC [0xD1][0x01] 클라이언트의 칸투르 보스전 전투맵 입장 요청에 대한 응답
+// GC [0xD1][0x01]
 //----------------------------------------------------------------------------
 typedef struct 
 {
 	PBMSG_HEADER2	h;
-	
-	BYTE		btResult;	// 0:입장가능
-							// 1:입장 가능한 인원 수 초과
-							// 2:입장에 필요한 아이템이 없음
-							// 3:입장가능한 상태가 아님
-
+	BYTE		btResult;
 } PMSG_ANS_ENTER_KANTURU_BOSS_MAP, *LPPMSG_ANS_ENTER_KANTURU_BOSS_MAP;
 
 //----------------------------------------------------------------------------
-// GC [0xD1][0x02] 유저가 칸투르 보스전 전투맵에 입장했을 때 현재 상태를 보낸다
+// GC [0xD1][0x02]
 //----------------------------------------------------------------------------
 typedef struct 
 {
 	PBMSG_HEADER2	h;
-
-	BYTE		btCurrentState;			// 칸투르의 현재 메인 상태
-	BYTE		btCurrentDetailState;	// 그에 대한 세부 상태
-
+	BYTE		btCurrentState;
+	BYTE		btCurrentDetailState;
 } PMSG_ANS_KANTURU_CURRENT_STATE, *LPPMSG_ANS_KANTURU_CURRENT_STATE;
 
 //----------------------------------------------------------------------------
-// GC [0xD1][0x03] 칸투르 보스전 도중 상태가 변했을 때 상태값을 알린다
+// GC [0xD1][0x03]
 //----------------------------------------------------------------------------
 typedef struct 
 {
 	PBMSG_HEADER2	h;
 
-	BYTE		btState;			// 칸투르의 메인 상태
-	BYTE		btDetailState;		// 그에 대한 세부 상태
+	BYTE		btState;
+	BYTE		btDetailState;
 	
 } PMSG_ANS_KANTURU_STATE_CHANGE, *LPPMSG_ANS_KANTURU_STATE_CHANGE;
 
 //----------------------------------------------------------------------------
-// GC [0xD1][0x04] 칸투르 보스전 전투 성공 / 실패
+// GC [0xD1][0x04]
 //----------------------------------------------------------------------------
 typedef struct 
 {
 	PBMSG_HEADER2	h;
 
-	BYTE		btResult;	// 0:실패 1:성공
+	BYTE		btResult;
 	
 } PMSG_ANS_KANTURU_BATTLE_RESULT, *LPPMSG_ANS_KANTURU_BATTLE_RESULT;
 
 //----------------------------------------------------------------------------
-// GC [0xD1][0x05] 칸투르 보스전 전투 연출마다 제한 시간
+// GC [0xD1][0x05]
 //----------------------------------------------------------------------------
 typedef struct 
 {
 	PBMSG_HEADER2	h;
 
-	int			btTimeLimit;	// 제한 시간(Sec)
+	int			btTimeLimit;
 	
 } PMSG_ANS_KANTURU_BATTLE_SCENE_TIMELIMIT, *LPPMSG_ANS_KANTURU_BATTLE_SCENE_TIMELIMIT;
 
 //----------------------------------------------------------------------------
-// GC [0xD1][0x06] 칸투르 보스전 광역 공격( 마야 스킬 사용 )
+// GC [0xD1][0x06]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
 
-	BYTE		btObjClassH;	// 몬스터 종류
+	BYTE		btObjClassH;
 	BYTE		btObjClassL;
 	
-	BYTE		btType;			// 0 : 아이스스톰  1:브로큰샤워
+	BYTE		btType;
 
 } PMSG_NOTIFY_KANTURU_WIDE_AREA_ATTACK, *LPPMSG_NOTIFY_KANTURU_WIDE_AREA_ATTACK;
 
 //----------------------------------------------------------------------------
-// GC [0xD1][0x07] 칸투르 입장 유저&몬스터 수 디스플레이
+// GC [0xD1][0x07]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
 
-	BYTE		bMonsterCount;		// 유저에게 보내 줄 몬스터 수
-	BYTE		btUserCount;		// 유저에게 보내 줄 유저 수
+	BYTE		bMonsterCount;
+	BYTE		btUserCount;
 
 } PMSG_NOTIFY_KANTURU_USER_MONSTER_COUNT, *LPPMSG_NOTIFY_KANTURU_USER_MONSTER_COUNT;
 
 
 #ifdef ADD_PCROOM_POINT_SYSTEM
 //----------------------------------------------------------------------------
-// PC방 포인트 시스템 : 0xD0 사용
-//----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
-// GC [0xD0][0x04] PC방 포인트 정보 요청 응답
+// GC [0xD0][0x04]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;	
-	short		nPoint;			// 현재 포인트
-	short		nMaxPoint;		// 최대 포인트
+	short		nPoint;
+	short		nMaxPoint;
 #ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-	BYTE		bPCBang;		// PC방인가 아닌가?	
+	BYTE		bPCBang
 #endif // CSK_MOD_MOVE_COMMAND_WINDOW	
 } PMSG_ANS_GC_PCROOM_POINT_INFO, *LPPMSG_ANS_GC_PCROOM_POINT_INFO;
 
 //----------------------------------------------------------------------------
-// GC [0xD0][0x05] PC방 포인트 사용 요청 응답
+// GC [0xD0][0x05]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-	BYTE		byResult;	// 사용 결과 0x00:성공 
-							//			0x01:안전지대 아님 
-							//			0x02:해당위치에 아이템이 없음 
-							//			0x03:인벤토리 공간 부족
-							//			0x04:기본 조건 포인트부족
-							//			0x05:PC방 포인트 시스템 대상자가 아님
-							//			0x06:에러
-							//			0x07:상점 사용 가능 시간 초과
-							//			0x08:PC방 포인트 전용 아이템이 아님
-							//			0x09:구입 가능한 포인트 부족
-	BYTE		byInvenPos;		// 인벤토리 위치	0xff일 경우 버프.
-						// *인장은 성공시 바로 적용하고 아이템은 성공시 인벤에 아이템 추가한다.
+	BYTE		byResult;
+	BYTE		byInvenPos;
 	BYTE		ItemInfo[PACKET_ITEM_LENGTH];
 } PMSG_ANS_GC_PCROOM_POINT_USE, *LPPMSG_ANS_GC_PCROOM_POINT_USE;
 
 //----------------------------------------------------------------------------
-// CG GC [0xD0][0x06] PC방 포인트 샾 열림/닫힘
+// CG GC [0xD0][0x06]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-	BYTE		byResult;	// 결과	0x00:오픈 
-							//		0x01:안전지대 아님
-							//		0x02:상점에 아이템 없음 
-							//		0x03:다른 창 사용 중 
-							//		0x04:PC방 포인트 시스템 대상자가 아님							
-							//		0x05:에러
+	BYTE		byResult;
 } PMSG_REQ_PCROOM_POINT_SHOP_OPEN, *LPPMSG_REQ_PCROOM_POINT_SHOP_OPEN;
 
 #endif	// ADD_PCROOM_POINT_SYSTEM
 
 //----------------------------------------------------------------------------
-// CG [0xBF][0x00] 입장 요청
+// CG [0xBF][0x00]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-	BYTE			btCursedTempleIdx;// 저주받은 사원 번호
-	BYTE			iItemPos;// 피의 두루마리 위치
+	BYTE			btCursedTempleIdx;
+	BYTE			iItemPos;
 } PMSG_REQ_ENTER_CURSED_TEMPLE, *LPPMSG_REQ_ENTER_CURSED_TEMPLE;
 
 //----------------------------------------------------------------------------
-// GC [0xBF][0x00] 입장 요청 결과
+// GC [0xBF][0x00]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-	BYTE			Result;		/* 요청결과 (	0 : 성공
-											1 : 알맞은 피의 두루마리 없음
-											2 : 들어갈수 있는 시간이 아님
-											3 : 피의 두루마리는 맞으나 자신의 레벨과 맞지 않음
-											4 : 인원제한이 넘었음
-											5 : 1일 입장제한 횟수를 넘었음
-											6 : 입장료가 모자란다.
-											7 : 카오유저는 입장할 수 없다.
-											8 : 변신반지를 착용하고 입장할 수 없다.
-										)
-							    */
+	BYTE			Result;
 } PMSG_RESULT_ENTER_CURSED_TEMPLE, *LPPMSG_RESULT_ENTER_CURSED_TEMPLE;
 
 //----------------------------------------------------------------------------
-// GC [0xBF][0x01] 진행 상태 / 시간 정보 / 파티 위치정보
+// GC [0xBF][0x01]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-	WORD		wRemainSec;			// 게임시작 후 종료까지 남은 초
-	WORD		btUserIndex;		// 성물을 가지고 있는 사용자 인덱스
-	BYTE		btX;				// 성물 위치 X
-	BYTE		btY;				// 성물 위치 Y
-	BYTE		btAlliedPoint;		// 연합군측 점수
-	BYTE		btIllusionPoint;	// 환영교단측 점수
-	BYTE		btMyTeam;		    // 0:연합군, 1: 환영교단
+	WORD		wRemainSec;
+	WORD		btUserIndex;
+	BYTE		btX;
+	BYTE		btY;
+	BYTE		btAlliedPoint;
+	BYTE		btIllusionPoint;
+	BYTE		btMyTeam;
 
 	BYTE		btPartyCount;
 } PMSG_CURSED_TAMPLE_STATE, *LPPMSG_CURSED_TAMPLE_STATE;
@@ -3029,7 +2741,7 @@ typedef struct
 } PMSG_CURSED_TAMPLE_PARTY_POS, *LPPMSG_CURSED_TAMPLE_PARTY_POS;
 
 //----------------------------------------------------------------------------
-// CG [0xBF][0x02]	저주받은 사원 전용 마법사용
+// CG [0xBF][0x02]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -3037,53 +2749,51 @@ typedef struct
 
 	BYTE          MagicH;
 	BYTE          MagicL;
-	WORD		wTargetObjIndex;	// 타겟 인덱스
-	BYTE		Dis;				// 거리
+	WORD		wTargetObjIndex;
+	BYTE		Dis;
 } PMSG_CURSED_TEMPLE_USE_MAGIC, *LPPMSG_CURSED_TEMPLE_USE_MAGIC;
 
 //----------------------------------------------------------------------------
-// GC [0xBF][0x03]	저주받은 사원에 입장한 인원수를 전송
+// GC [0xBF][0x03]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-	BYTE		btUserCount[6];		// 각 저주받은 사원의 인원수
+	BYTE		btUserCount[6];
 } PMSG_CURSED_TEMPLE_USER_COUNT, *LPPMSG_CURSED_TEMPLE_USER_COUNT;
 
 //----------------------------------------------------------------------------
-// GC [0xBF][0x02]	저주받은 사원 전용 마법사용 결과
+// GC [0xBF][0x02]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-	BYTE        MagicResult;        // 0 실패, 1 성공
-
+	BYTE        MagicResult;
 	BYTE          MagicH;
 	BYTE          MagicL;
-
-	WORD		wSourceObjIndex;	// 소스 인덱스
-	WORD		wTargetObjIndex;	// 타겟 인덱스
+	WORD		wSourceObjIndex;
+	WORD		wTargetObjIndex;
 } PMSG_CURSED_TEMPLE_USE_MAGIC_RESULT, *LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT;
 
 //----------------------------------------------------------------------------
-// GC [0xBF][0x04] 이벤트 경기 결과
+// GC [0xBF][0x04]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2	h;
-	BYTE		btAlliedPoint;		// 연합군측 점수
-	BYTE		btIllusionPoint;	// 환영교단측 점수
+	BYTE		btAlliedPoint;
+	BYTE		btIllusionPoint;
 
-	BYTE		btUserCount;		// 캐릭터 수
+	BYTE		btUserCount;
 } PMSG_CURSED_TEMPLE_RESULT, *LPPMSG_CURSED_TEMPLE_RESULT;
 
 typedef struct 
 {
-	char		GameId[MAX_ID_SIZE];		// 캐릭터이름
-	BYTE		byMapNumber;				// 맵번호
-	BYTE		btTeam;						// 팀
-	BYTE		btClass;					// 클래스
-	int			nAddExp;					// 보상 경험치
+	char		GameId[MAX_ID_SIZE];
+	BYTE		byMapNumber;
+	BYTE		btTeam;
+	BYTE		btClass;
+	int			nAddExp;
 } PMSG_CURSED_TEMPLE_USER_ADD_EXP, *LPPMSG_CURSED_TEMPLE_USER_ADD_EXP;
 
 
@@ -3093,11 +2803,11 @@ typedef struct
 typedef struct
 {
 	PBMSG_HEADER2 h;
-	BYTE		btSkillPoint;		// 현재의 스킬 포인트
+	BYTE		btSkillPoint;
 } PMSG_CURSED_TEMPLE_SKILL_POINT, *LPPMSG_CURSED_TEMPLE_SKILL_POINT;
 
 //----------------------------------------------------------------------------
-// GC [0xBF][0x07] 저주받은 사원에서 전용스킬 종료
+// GC [0xBF][0x07]
 //----------------------------------------------------------------------------
 typedef struct 
 {
@@ -3110,7 +2820,7 @@ typedef struct
 } PMSG_CURSED_TEMPLE_SKILL_END, *LPPMSG_CURSED_TEMPLE_SKILL_END;
 
 //----------------------------------------------------------------------------
-// GC [0xBF][0x08] 환영 사원에서 성물을 획득
+// GC [0xBF][0x08]
 //----------------------------------------------------------------------------
 typedef struct  
 {
@@ -3120,7 +2830,7 @@ typedef struct
 } PMSG_RELICS_GET_USER, *LPPMSG_RELICS_GET_USER;
 
 //----------------------------------------------------------------------------
-// GC [0xBF][0x09] 환영 사원의 상태 전송
+// GC [0xBF][0x09]
 //----------------------------------------------------------------------------
 typedef struct  
 {
@@ -3130,13 +2840,8 @@ typedef struct
 } PMSG_ILLUSION_TEMPLE_STATE, *LPPMSG_ILLUSION_TEMPLE_STATE;
 
 //----------------------------------------------------------------------------
-// GC [0xBF][0x0a] 체인마법 전송
+// GC [0xBF][0x0a]
 //----------------------------------------------------------------------------
-/////////////////////////////////////////////////////////////////////
-// 엘리스 체인라이트닝 시전시 서버로부터 받는 패킷
-// 보낼때는 SendRequestMagicContinue() 로  
-/////////////////////////////////////////////////////////////////////
-// Receive Chain Magic			
 typedef struct {
 	PBMSG_HEADER2	Header;
 
@@ -3147,45 +2852,34 @@ typedef struct {
 	BYTE			byCount;
 } PRECEIVE_CHAIN_MAGIC, *LPPRECEIVE_CHAIN_MAGIC;
 
-	/////////////////////////////////////////////////////////////////////
-	// ReceiveChainMagic()의 wCount 갯수대로 서버로부터 패킷을 받는다.
-	/////////////////////////////////////////////////////////////////////
-	// Receive Chain Magic Object
-	typedef struct {
-		WORD			wTargetIndex;
-	} PRECEIVE_CHAIN_MAGIC_OBJECT, *LPPRECEIVE_CHAIN_MAGIC_OBJECT;
+typedef struct 
+{
+	WORD			wTargetIndex;
+} PRECEIVE_CHAIN_MAGIC_OBJECT, *LPPRECEIVE_CHAIN_MAGIC_OBJECT;
 
 typedef struct 
 {
 	PBMSG_HEADER  h;	
 	BYTE		subcode;	
-	
-	short		nMLevel;		// 마스터레벨
+	short		nMLevel;
+	BYTE		btMExp1;
+	BYTE		btMExp2;
+	BYTE		btMExp3;
+	BYTE		btMExp4;
+	BYTE		btMExp5;
+	BYTE		btMExp6;
+	BYTE		btMExp7;
+	BYTE		btMExp8;
 
-	BYTE		btMExp1;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 1)
-	BYTE		btMExp2;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 2)
-	BYTE		btMExp3;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 3)
-	BYTE		btMExp4;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 4)
-	BYTE		btMExp5;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 5)
-	BYTE		btMExp6;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 6)
-	BYTE		btMExp7;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 7)
-	BYTE		btMExp8;					// 현재 마스터레벨 경험치 (INT64의 최상위 바이트 부터 8)
-
-	BYTE		btMNextExp1;				// 다음 마스터레벨 경험치 (INT64의 최상위 바이트 부터 1)
-	BYTE		btMNextExp2;				// 다음 마스터레벨 경험치 (INT64의 최상위 바이트 부터 2)
-	BYTE		btMNextExp3;				// 다음 마스터레벨 경험치 (INT64의 최상위 바이트 부터 3)
-	BYTE		btMNextExp4;				// 다음 마스터레벨 경험치 (INT64의 최상위 바이트 부터 4)
-	BYTE		btMNextExp5;				// 다음 마스터레벨 경험치 (INT64의 최상위 바이트 부터 5)
-	BYTE		btMNextExp6;				// 다음 마스터레벨 경험치 (INT64의 최상위 바이트 부터 6)
-	BYTE		btMNextExp7;				// 다음 마스터레벨 경험치 (INT64의 최상위 바이트 부터 7)
-	BYTE		btMNextExp8;				// 다음 마스터레벨 경험치 (INT64의 최상위 바이트 부터 8)
-
-	// 마스터레벨 포인트(미정)
-	// 마스터스킬 및 마스터스킬 트리 정보(미정)
-
-	short		nMLPoint;					// 마스터레벨 포인트
-
-	// 마스터레벨에 의해 정보가 재설정된다.
+	BYTE		btMNextExp1;
+	BYTE		btMNextExp2;
+	BYTE		btMNextExp3;
+	BYTE		btMNextExp4;
+	BYTE		btMNextExp5;
+	BYTE		btMNextExp6;
+	BYTE		btMNextExp7;
+	BYTE		btMNextExp8;
+	short		nMLPoint;
 	WORD		wMaxLife;
 	WORD		wMaxMana;
 	WORD		wMaxShield;
@@ -3196,14 +2890,11 @@ typedef struct
 {
 	PBMSG_HEADER	h;
 	BYTE		subcode;
-
-	short		nMLevel;			// 현재 마스터레벨
-
-	short		nAddMPoint;			// 추가된 마스터레벨 포인트
-	short       nMLevelUpMPoint;	// 사용 가능한 마스터레벨 포인트
-//	short		nTotalMPoint;		// 내가 가진 총 마스터레벨 포인트
-	short		nMaxPoint;			// 최대 마스터레벨 포인트
-
+	short		nMLevel;
+	short		nAddMPoint;
+	short       nMLevelUpMPoint;
+//	short		nTotalMPoint;
+	short		nMaxPoint;
 	WORD		wMaxLife;
 	WORD		wMaxMana;
 	WORD		wMaxShield;
@@ -3214,29 +2905,25 @@ typedef struct
 {
 	PBMSG_HEADER	h;
 	BYTE		subcode;
-
-	BYTE		btResult;	// 결과값	0:에러 1:습득했다. 2:습득 가능한 사용자 아님 3:습득 가능한 스킬번호 아님
-							//			4:마스터레벨 포인트 부족 5:그 외
-
-	short       nMLPoint;	// 현재 마스터레벨 포인트
-
+	BYTE		btResult;
+	short       nMLPoint;
 	int			nSkillNum;
 	int			nSkillLevel;
 } PMSG_ANS_MASTERLEVEL_SKILL, *LPPMSG_ANS_MASTERLEVEL_SKILL;
 
 #ifdef PJH_CHARACTER_RENAME
 //----------------------------------------------------------------------------
-// GC [0xF3][0x15] 캐릭터명 변경 확인요청 결과
+// GC [0xF3][0x15]
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2 h;
 	char		Name[MAX_ID_SIZE];
-	BYTE		btResult;		// 0: 불필요, 1: 필요
+	BYTE		btResult;
 } PMSG_ANS_CHECK_CHANGE_NAME, *LPPMSG_ANS_CHECK_CHANGE_NAME;
 
 //----------------------------------------------------------------------------
-// GC [0xF3][0x16] 캐릭터명 변경 요청 결과
+// GC [0xF3][0x16]
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -3842,7 +3529,7 @@ typedef struct
 {
 	PBMSG_HEADER2			h;
 	
-	long				lEventCategorySeq;			// 하위 이벤트 카테고리 Sequence
+	long				lEventCategorySeq;
 }PMSG_CASHSHOP_EVENTITEM_REQ, *LPPMSG_CASHSHOP_EVENTITEM_REQ;
 
 
@@ -3853,23 +3540,17 @@ typedef struct
 {
 	PBMSG_HEADER2			h;
 	
-	WORD				wEventItemListCount;						// 전체 아이템 리스트 카운트
+	WORD				wEventItemListCount;
 }PMSG_CASHSHOP_EVENTITEM_COUNT, *LPPMSG_CASHSHOP_EVENTITEM_COUNT;
 
 
-//----------------------------------------------------------------------------
-// 이벤트 아이템 리스트 (0xD2)(0x14)
-//----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2			h;
 	
-	long				lPackageSeq[INGAMESHOP_DISPLAY_ITEMLIST_SIZE];			// 이벤트 아이템 리스트를 9개 단위로 보낸다.
+	long				lPackageSeq[INGAMESHOP_DISPLAY_ITEMLIST_SIZE];
 }PMSG_CASHSHOP_EVENTITEM_LIST, *LPPMSG_CASHSHOP_EVENTITEM_LIST;
 
-//----------------------------------------------------------------------------
-// 배너 버전 업데이트 (0xD2)(0x15)
-//----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2			h;
@@ -3886,9 +3567,6 @@ typedef struct
 
 #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 
-//----------------------------------------------------------------------------
-// 기간제 아이템 리스트 카운트 (0xD2)(0x11)
-//----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2		h;
@@ -3897,9 +3575,6 @@ typedef struct
 }PMSG_PERIODITEMEX_ITEMCOUNT, *LPPMSG_PERIODITEMEX_ITEMCOUNT;
 
 
-//----------------------------------------------------------------------------
-// 기간제 아이템 리스트 (0xD2)(0x12)
-//----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2		h;
@@ -3911,30 +3586,6 @@ typedef struct
 
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
-#ifdef PBG_MOD_GAMEGUARD_HANDLE
-//----------------------------------------------------------------------------
-// ?????????
-//----------------------------------------------------------------------------
-typedef struct  
-{
-	PBMSG_HEADER2		h;
-	WORD				wCharInfo;
-}PMSG_GAMEGUARD_HADLE, *LPPMSG_GAMEGUARD_HADLE;
-#endif //PBG_MOD_GAMEGUARD_HANDLE
-
-#ifdef KJH_ADD_DUMMY_SKILL_PROTOCOL
-//----------------------------------------------------------------------------
-// 더미 프로토콜 초기화 (0x8D)(0x05)
-//----------------------------------------------------------------------------
-typedef struct
-{
-	PBMSG_HEADER2		h;
-	DWORD				dwDummySeedValue;
-#ifdef KJH_ADD_CREATE_SERIAL_NUM_AT_ATTACK_SKILL
-	DWORD				dwAttackSerialSeedValue;
-#endif // KJH_ADD_CREATE_SERIAL_NUM_AT_ATTACK_SKILL
-}PMSG_SET_ATTACK_PROTOCOL_DUMMY_VALUE, *LPPMSG_SET_ATTACK_PROTOCOL_DUMMY_VALUE;
-#endif // KJH_ADD_DUMMY_SKILL_PROTOCOL
 
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 //----------------------------------------------------------------------------
@@ -4032,4 +3683,4 @@ typedef struct _CROWN_SWITCH_INFO
 extern CROWN_SWITCH_INFO *Switch_Info;
 
 extern MASTER_LEVEL_VALUE	Master_Level_Data;
-#endif
+

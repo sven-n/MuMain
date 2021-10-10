@@ -42,20 +42,16 @@ extern BOOL g_bUseWindowMode;
 #endif
 
 #define ARRAY_SIZE(pArray) (sizeof(pArray)/sizeof(pArray[0]))
-////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef KJH_FIX_BTS158_TEXT_CUT_ROUTINE
+
 int CutStr(const char* pszSrcText, char * pTextOut, const int iTargetPixelWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab /* = 0 */)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(iFirstLineTab < 0)	return 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	if (pszSrcText == NULL)
 	{
 		assert(!"텍스트 자르기 입력값 오류");
 		return 0;
 	}
-
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 	int iConversionType = (g_pMultiLanguage->IsCharUTF8(pszSrcText)) ? CP_UTF8 : g_pMultiLanguage->GetCodePage();
 
@@ -63,7 +59,7 @@ int CutStr(const char* pszSrcText, char * pTextOut, const int iTargetPixelWidth,
 	std::string strText = "";
 	g_pMultiLanguage->ConvertCharToWideStr(wstrUTF16, pszSrcText);
 	int iCharIndex = 0, iLineIndex = 0;
-	int iScreenRatePixelWidth = iTargetPixelWidth*g_fScreenRate_x-5;				// 타겟 픽셀 길이를 스크린에 따라 유동적으로 바꾼다.(-5은 여백을 남기기 위함)
+	int iScreenRatePixelWidth = iTargetPixelWidth*g_fScreenRate_x-5;
 	SIZE iSize;
 
 
@@ -72,30 +68,22 @@ int CutStr(const char* pszSrcText, char * pTextOut, const int iTargetPixelWidth,
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), wstrUTF16.c_str(), iCharIndex, &iSize);
 		g_pMultiLanguage->ConvertWideCharToStr(strText, (wstrUTF16.substr(0, iCharIndex)).c_str(), iConversionType);
 		
-		// 첫번째 줄은 넘어온 값(예: 이름 표시 길이)만큼을 뺀 나머지로 계산한다.
 		if (iLineIndex == 0) 
 			iSize.cx += iFirstLineTab;
 
-		// 1. 현재 글자를 포함했을 때의 문자열의 길이가 제한된 길이보다 크거나 
-		// 2. Array 'pTextOut'의 size 보다 클 경우  
 		if (iSize.cx >= iScreenRatePixelWidth || strText.length() >= iOutStrLength-1)
 		{
-			// 빈칸이 있을 경우 바로 전 빈칸까지 
-			// 빈칸이 없을 경우 바로 전의 글자까지 UTF-8로 변환한 후 저장
 			int iPosLastSpace = wstrUTF16.find_last_of(L" ", iCharIndex);
 			iCharIndex = (iPosLastSpace == std::wstring::npos) ? iCharIndex-1 : iPosLastSpace;
 
 			g_pMultiLanguage->ConvertWideCharToStr(strText, (wstrUTF16.substr(0, iCharIndex+1)).c_str(), iConversionType);
 			strncpy(pTextOut, strText.c_str(), iOutStrLength);
 			
-			// 복사될 array를 가리키고 있는 pTextOut포인터의 위치를 iOutStrLength만큼 뒤로 옮긴다.
-			// (pTextOut[i][] => pTextOut[i+1][] 과 같은 역할)
 			iLineIndex++;
 			pTextOut += iOutStrLength;
 
-			// 나머지 문자열을 가지고 반복
 			wstrUTF16 = wstrUTF16.substr(iCharIndex+1, wstrUTF16.length()-iCharIndex-1);
-			// 초기화 
+
 			iCharIndex = 0;
 		}
 		else 
@@ -112,167 +100,12 @@ int CutStr(const char* pszSrcText, char * pTextOut, const int iTargetPixelWidth,
 	}
 
 	return iLineIndex;
-
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
-	//memset(pTextOut, 0, iMaxOutLine * iOutStrLength);		// 메모리 침범함.
-	
-	const char *pWorkStr = pszSrcText;						// 작업용 Str 포인터
-	int iSrcTotalStrLength = unicode::_strlen(pszSrcText)+1;				// 전체 문자갯수(Null문자 포함)
-	int iDestStrLineIndex = 0;									// 현재 라인
-	int iDestTotalStrLength = 0;								// 현재 문자 갯수
-	bool bEndofSrcStr = false;									// 원본 문자열의 끝인가?
-	int iStrByteSize = 0;					
-
-	int iScreenRatePixelWidth = iTargetPixelWidth*g_fScreenRate_x;				// 타겟 픽셀 길이를 스크린에 따라 유동적으로 바꾼다.
-	
-	for( iDestStrLineIndex = 0 ; iDestStrLineIndex < iMaxOutLine ; iDestStrLineIndex++ )
-	{
-		int iDestStrLength = 0;
-		SIZE iDestStrPixelSize;
-		iDestStrPixelSize.cx = 0;
-
-		for( iDestStrLength = 0 ; iDestStrLength < iOutStrLength ; )
-		{
-			iStrByteSize = _mbclen((unsigned char*)&pWorkStr[iDestStrLength]);		// 한 문자당 바이트
-
-			iDestStrLength += iStrByteSize;
-			iDestTotalStrLength += iStrByteSize;
-			
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), pWorkStr, iDestStrLength, &iDestStrPixelSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), pWorkStr, iDestStrLength, &iDestStrPixelSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
-			if( iDestTotalStrLength >= iSrcTotalStrLength )
-			{
-				bEndofSrcStr = true;
-				break;
-			}
-			
-			if( iDestStrPixelSize.cx >= iScreenRatePixelWidth )
-				break;
-		}
-
-		// 넘어가는(픽셀,문자갯수) 마지막문자 빼기
-		iDestStrLength -= iStrByteSize;
-		iDestTotalStrLength -= iStrByteSize;
-
-		strncpy(pTextOut, pWorkStr, iDestStrLength);
-		pTextOut[iDestStrLength] = '\0';
-
-		if( bEndofSrcStr == true )
-			break;
-
-		pWorkStr += iDestStrLength;
-		pTextOut += iOutStrLength;
-	}
-
-	return iDestStrLineIndex+1;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 }
 
-// Wrapped Function임, 이걸 쓰지말고, CutStr을 사용하삼.
 int CutText3(const char* pszText, char * pTextOut, const int TargetWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab, const BOOL bReverseWrite)
 {
 	return CutStr(pszText, pTextOut, TargetWidth, iMaxOutLine, iOutStrLength, iFirstLineTab );
 }
-
-#else  // KJH_FIX_BTS158_TEXT_CUT_ROUTINE
-
-// 요건 버그 덩어리~
-int CutText3(const char* pszText, char * pTextOut, const int TargetWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab, const BOOL bReverseWrite)
-{
-	if (pszText == NULL)
-	{
-		assert(!"텍스트 자르기 입력값 오류");
-		return 0;
-	}
-	const char * pWorkText = pszText;
-	//memset(pTextOut, 0, iMaxOutLine * iOutStrLength);
-	int iTextIndex = 0;
-	int index = 0;
-	SIZE TextSize;
-	while(1)
-	{
-		if (index + 1 > iMaxOutLine) return index + 1;
-		char * pszTextOut = pTextOut + iOutStrLength * (bReverseWrite == TRUE ? iMaxOutLine - 1 - index : index);	// 결과 저장용
-
-		// 텍스트 길이 체크
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), pWorkText, lstrlen(pWorkText), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), pWorkText, lstrlen(pWorkText), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		int TextWidth = int(TextSize.cx / g_fScreenRate_x);	// 작업 문장 너비
-		if (TextSize.cx == 0) return index;
-
-		if (TextWidth > TargetWidth - (index == 0 ? iFirstLineTab : 0))
-		{
-			// 잘라야 한다
-
-			// 길이 정하기
-			int resultLength = (TargetWidth - (index == 0 ? iFirstLineTab : 0)) / (TextWidth / lstrlen(pWorkText));	// 길이로 맞춰보고 시작
-			int MoveSize = int((float)resultLength / 2.0f + 0.5f);
-			while(TRUE)
-			{
-				if (MoveSize == 0)
-					break;
-
-				MoveSize = int((float)MoveSize / 2.0f + 0.5f);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), pWorkText, resultLength, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), pWorkText, resultLength, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				if (TextSize.cx / g_fScreenRate_x > TargetWidth - (index == 0 ? iFirstLineTab : 0) + 4)
-				{
-					resultLength -= MoveSize;
-					if (MoveSize == 1) break;
-				}
-				else if (TextSize.cx / g_fScreenRate_x < TargetWidth - (index == 0 ? iFirstLineTab : 0) - 4)
-				{
-					resultLength += MoveSize;
-				}
-				else
-				{
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-					// 버퍼를 작게 잡았을경우 버퍼를 우선으로 자른다
-					if(resultLength >= iOutStrLength-2)
-						resultLength = iOutStrLength-2;
-#endif //KJH_ADD_INGAMESHOP_UI_SYSTEM
-					break;
-				}
-			}
-			int iTextSize = 0;
-			for (int i = 0; i < resultLength;)
-			{
-				if (i > resultLength) break;
-				i += _mbclen(( unsigned char*)&pWorkText[i]);	// 한글이면 2, 아니면 1 을 리턴
-				iTextSize = i;
-			}
-
-			strncpy(pszTextOut, pWorkText, iTextSize);
-			pszTextOut[iTextSize] = '\0';
-			pWorkText += iTextSize;
-			++index;
-		}
-		else
-		{
-			// 끝
-			strncpy(pszTextOut, pWorkText, iOutStrLength);
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
- 			pszTextOut[iOutStrLength] = '\0';
-#endif //KJH_ADD_INGAMESHOP_UI_SYSTEM
-			return index + 1;
-		}
-	}
-	return index + 1;
-}
-
-#endif // KJH_FIX_BTS158_TEXT_CUT_ROUTINE
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CutText4(const char* pszSource, char * pszResult1, char * pszResult2, int iCutCount)
 {
@@ -3020,15 +2853,11 @@ void CUIRenderText::RenderText(int iPos_x, int iPos_y, const char* pszText,
 							   int iBoxWidth /* = 0 */, int iBoxHeight /* = 0 */, 
 							   int iSort /* = RT3_SORT_LEFT */, OUT SIZE* lpTextSize /* = NULL */)
 {
-#ifdef SYSTEM_NOT_RENDER_TEXT
-	return;
-#endif // SYSTEM_NOT_RENDER_TEXT
 	if(m_pRenderText)
 	{
 		m_pRenderText->RenderText(iPos_x, iPos_y, pszText, iBoxWidth, iBoxHeight, iSort, lpTextSize);
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 CUIRenderTextOriginal::CUIRenderTextOriginal() 
 {
 	m_hFontDC = NULL;
@@ -3181,16 +3010,10 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const unicode::t_
 	
 	SIZE RealTextSize;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	if (pszText[0] == '\0') 
 		g_pMultiLanguage->_GetTextExtentPoint32(m_hFontDC, "0", 1, &RealTextSize);
 	else 
 		g_pMultiLanguage->_GetTextExtentPoint32(m_hFontDC,pszText,lstrlen(pszText),&RealTextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(m_hFontDC,pszText,unicode::_strlen(pszText),&RealTextSize);
-	if (pszText[0] == '\0') 
-		unicode::_GetTextExtentPoint(m_hFontDC, "0", 1, &RealTextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	MU_POINTF RealBoxPos = { (float)iPos_x*g_fScreenRate_x, (float)iPos_y*g_fScreenRate_y };
 	SIZEF RealBoxSize = { (float)iBoxWidth*g_fScreenRate_x, (float)iBoxHeight*g_fScreenRate_y };
@@ -3256,7 +3079,6 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const unicode::t_
 	}
 	else if (iSort == RT3_WRITE_CENTER)
 	{
-		//. 중앙 정렬
 		if(RealRenderingSize.cx > RealBoxSize.cx)
 		{
 			iClipMove = (RealRenderingSize.cx - RealBoxSize.cx) / 2;
@@ -3271,10 +3093,8 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const unicode::t_
 
 	const int LIMIT_WIDTH = 256;
 
-#ifndef DEBUG_FONT_TEXTURE_TEST
 	if(m_dwBackColor != 0)
-#endif //! DEBUG_FONT_TEXTURE_TEST
-	{	//. 배경 박스 그리기
+	{
 		EnableAlphaTest();
 		glColor4ub(GetRed(m_dwBackColor), GetGreen(m_dwBackColor), 
 			GetBlue(m_dwBackColor), GetAlpha(m_dwBackColor));
@@ -3287,11 +3107,7 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const unicode::t_
 	{
 		::SetBkColor(m_hFontDC, RGB(0, 0, 0));
 		::SetTextColor(m_hFontDC, RGB(255,255,255));
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_TextOut(m_hFontDC, 0, 0, pszText, lstrlen(pszText));
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
-		unicode::_TextOut(m_hFontDC, 0, 0, pszText, unicode::_strlen(pszText));
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	}
 	
 	int iRealRenderWidth = RealRenderingSize.cx;
@@ -3657,7 +3473,6 @@ void CUITextInputBox::GetText(wchar_t * pwszText, int iGetLenght)
 
 void CUITextInputBox::SetText(const char * pszText)
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE 
 	if (pszText == NULL)
 	{
 		SetWindowTextW(m_hEditWnd, L"");
@@ -3669,18 +3484,6 @@ void CUITextInputBox::SetText(const char * pszText)
 	
 	if (wstrText.length() > MAX_TEXT_LENGTH) return;
 	SetWindowTextW(m_hEditWnd, wstrText.c_str());
-
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	if (pszText == NULL)	// 지워라
-	{
-		SetWindowText(m_hEditWnd, "");
-	}
-	else	// 바꿔라
-	{
-		if (strlen(pszText) > MAX_TEXT_LENGTH) return;
-		SetWindowText(m_hEditWnd, pszText);
-	}
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -4630,11 +4433,7 @@ void CUISlideHelp::Init(BOOL bBold, BOOL bBlink)
 	memset(m_szSlideTextA, 0, SLIDE_TEXT_LENGTH);
 	memset(m_szSlideTextB, 0, SLIDE_TEXT_LENGTH);
 
-#ifdef KJW_FIX_SLIDE_MOVE
 	m_fMovePosition = 640.0f;
-#else // KJW_FIX_SLIDE_MOVE
-	m_fMovePosition = 0.0f;
-#endif // KJW_FIX_SLIDE_MOVE
 	m_fMoveAccel = 1.0f;
 	m_fMoveSpeed = 0;
 	m_iCutLength = 0;
@@ -6718,9 +6517,9 @@ void CUIQuestContentsListBox::AddText(HFONT hFont, DWORD dwColor, int nSort, con
 	sQuestContents.m_wIndex = 0;
 	sQuestContents.m_pItem = NULL;
 
-	m_TextList.push_front(sQuestContents);	// 뒤부터 랜더하기 때문에 push_front 사용.
+	m_TextList.push_front(sQuestContents);
 
-	SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);	// 스크롤바 썸 위치를 맨 위로.
+	SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
 }
 
 void CUIQuestContentsListBox::AddText(SRequestRewardText* pRequestRewardText, int nSort)
@@ -6736,9 +6535,9 @@ void CUIQuestContentsListBox::AddText(SRequestRewardText* pRequestRewardText, in
 	sQuestContents.m_wIndex = pRequestRewardText->m_wIndex;
 	sQuestContents.m_pItem = pRequestRewardText->m_pItem;
 	
-	m_TextList.push_front(sQuestContents);	// 뒤부터 랜더하기 때문에 push_front 사용.
+	m_TextList.push_front(sQuestContents);
 	
-	SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);	// 스크롤바 썸 위치를 맨 위로.
+	SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
 }
 
 void CUIQuestContentsListBox::RenderInterface()
@@ -6746,13 +6545,10 @@ void CUIQuestContentsListBox::RenderInterface()
 	if (GetState() != UISTATE_SCROLL)
 		ComputeScrollBar();
 
-	// 렌더되는 줄 수 보다 리스트 줄 수가 크면 스크롤바를 그림.
 	if (GetLineNum() > m_iNumRenderLine)
 	{
-		g_pGuardWindow->RenderScrollBarFrame(m_iPos_x + m_iWidth - 8, m_fScrollBarRange_top,
-			m_fScrollBarRange_bottom - m_fScrollBarRange_top);
-		g_pGuardWindow->RenderScrollBar(m_iPos_x + m_iWidth - 12, m_fScrollBarPos_y,
-			(GetState() == UISTATE_SCROLL && MouseLButtonPush));
+		g_pGuardWindow->RenderScrollBarFrame(m_iPos_x + m_iWidth - 8, m_fScrollBarRange_top,m_fScrollBarRange_bottom - m_fScrollBarRange_top);
+		g_pGuardWindow->RenderScrollBar(m_iPos_x + m_iWidth - 12, m_fScrollBarPos_y,(GetState() == UISTATE_SCROLL && MouseLButtonPush));
 	}
 }
 

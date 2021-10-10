@@ -86,16 +86,14 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 {
 	float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy + SCROLL_TOP_BOTTOM_PART_HEIGHT;
 
-	// 현재 메세지를 가져온다.
 	type_vector_msgs* pvecMsgs = GetMsgs( GetCurrentMsgType() );
 
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
+		assert(!"empty chat!");
 		return false;
 	}
 
-	//. 메세지 그리기
 	int iRenderStartLine = 0;
 	if(GetCurrentRenderEndLine() >= m_nShowingLines)
 	{
@@ -119,47 +117,47 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 
 		CMessageText* pMsgText = (*pvecMsgs)[i];
 
-		if( pMsgText->GetType() == TYPE_WHISPER_MESSAGE )		//귓말
+		if( pMsgText->GetType() == TYPE_WHISPER_MESSAGE )
 		{
 			g_pRenderText->SetBgColor(255, 200, 50, 150);
 			g_pRenderText->SetTextColor(0, 0, 0, 255);
 		}
-		else if( pMsgText->GetType() == TYPE_SYSTEM_MESSAGE )		//메세지
+		else if( pMsgText->GetType() == TYPE_SYSTEM_MESSAGE )
 		{
 			g_pRenderText->SetBgColor(0, 0, 0, 150);
 			g_pRenderText->SetTextColor(100, 150, 255, 255);
 		}
-		else if( pMsgText->GetType() == TYPE_ERROR_MESSAGE )		//에러
+		else if( pMsgText->GetType() == TYPE_ERROR_MESSAGE )
 		{
 			g_pRenderText->SetBgColor(0, 0, 0, 150);
 			g_pRenderText->SetTextColor(255, 30, 0, 255);
 		}
-		else if( pMsgText->GetType() == TYPE_CHAT_MESSAGE )			//채팅
+		else if( pMsgText->GetType() == TYPE_CHAT_MESSAGE )
 		{
 			g_pRenderText->SetBgColor(0, 0, 0, byAlpha);
 			g_pRenderText->SetTextColor(205, 220, 239, 255);
 		}
-		else if( pMsgText->GetType() == TYPE_PARTY_MESSAGE )		//파티 채팅
+		else if( pMsgText->GetType() == TYPE_PARTY_MESSAGE )
 		{
 			g_pRenderText->SetBgColor(0, 200, 255, 150);
 			g_pRenderText->SetTextColor(0, 0, 0, 255);
 		}
-		else if( pMsgText->GetType() == TYPE_GUILD_MESSAGE )		//길드 채팅
+		else if( pMsgText->GetType() == TYPE_GUILD_MESSAGE )
 		{
 			g_pRenderText->SetBgColor(0, 255, 150, 200);
 			g_pRenderText->SetTextColor(0, 0, 0, 255);
 		}
-		else if( pMsgText->GetType() == TYPE_GUILD_MESSAGE )		//길드 채팅
+		else if( pMsgText->GetType() == TYPE_GUILD_MESSAGE )
 		{
 			g_pRenderText->SetBgColor(0, 255, 150, 200);
 			g_pRenderText->SetTextColor(0, 0, 0, 255);
 		}
-		else if( pMsgText->GetType() == TYPE_UNION_MESSAGE  )		//연합 채팅
+		else if( pMsgText->GetType() == TYPE_UNION_MESSAGE  )
 		{
 			g_pRenderText->SetBgColor(200, 200, 0, 200);
 			g_pRenderText->SetTextColor(0, 0, 0, 255);
 		}
-		else if( pMsgText->GetType() == TYPE_GM_MESSAGE )		//+ 알바: GM님의 말씀
+		else if( pMsgText->GetType() == TYPE_GM_MESSAGE )
 		{
 			g_pRenderText->SetBgColor(30, 30, 30, 200);
 			g_pRenderText->SetTextColor(250, 200, 50, 255);
@@ -182,13 +180,9 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 					g_pRenderText->SetBgColor(30, 30, 30, 180);
 					g_pRenderText->SetTextColor(255, 128, 255, 255);
 				}
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				std::string strIDUTF8 = "";
 				g_pMultiLanguage->ConvertANSIToUTF8OrViceVersa(strIDUTF8, (pMsgText->GetID()).c_str());
 				type_string strLine = strIDUTF8 + " : " + pMsgText->GetText();
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				type_string strLine = pMsgText->GetID() + " : " + pMsgText->GetText();
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				g_pRenderText->RenderText(ptRenderPos.x, ptRenderPos.y, strLine.c_str());
 			}
 			else
@@ -379,26 +373,17 @@ bool SEASON3B::CNewUIChatLogWindow::Create(CNewUIManager* pNewUIMng, int x, int 
 
 	m_pNewUIMng = pNewUIMng;
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CHATLOGWINDOW, this);
-
 	m_WndPos.x = x; m_WndPos.y = y;
-	//. 출력 가능 라인수를 지정하고 창 사이즈를 얻어온다.
 	SetNumberOfShowingLines(nShowingLines);
-
 	LoadImages();
-
 	return true;
 }
 
 void SEASON3B::CNewUIChatLogWindow::Release()
 {
 	UnloadImages();
-	
 	ResetFilter();
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 	ClearAll();
-#else // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
-	Clear();
-#endif // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
 
 	if(m_pNewUIMng)
 	{
@@ -414,8 +399,6 @@ void SEASON3B::CNewUIChatLogWindow::SetPosition(int x, int y)
 	m_WndPos.y = y; 
 }
 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-
 void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType , MESSAGE_TYPE ErrMsgType /*= TYPE_ALL_MESSAGE*/)
 {
 	if (strID.empty() && strText.empty()) 
@@ -423,35 +406,33 @@ void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type
 		return;
 	}
 
-	// 해당메세지 컨테이너
 	if (GetNumberOfLines(MsgType) >= MAX_NUMBER_OF_LINES)
 	{
 		RemoveFrontLine(MsgType);
 	}
 
-	// 전체메세지 컨테이너
 	if (GetNumberOfLines(TYPE_ALL_MESSAGE) >= MAX_NUMBER_OF_LINES)
 	{
 		RemoveFrontLine(TYPE_ALL_MESSAGE);
 	}
 	
-	if(m_vecFilters.empty() == true)		// 필터 해제 상태
+	if(m_vecFilters.empty() == true)
 	{
 		ProcessAddText(strID, strText, MsgType, ErrMsgType);	
 	}
-	else	// 필터 설정 상태
+	else
 	{
 		if(MsgType != TYPE_CHAT_MESSAGE)
 		{
 			ProcessAddText(strID, strText, MsgType, ErrMsgType);
 		}
-		else if(CheckFilterText(strID) || CheckFilterText(strText))	// 필터 단어에 걸려 들었다면
+		else if(CheckFilterText(strID) || CheckFilterText(strText))
 		{
 			ProcessAddText(strID, strText, MsgType, ErrMsgType);		
 			
 			if(g_pOption->IsWhisperSound())
 			{
-				PlayBuffer(SOUND_WHISPER);	// 필터 사용시 귓말음 나오게
+				PlayBuffer(SOUND_WHISPER);
 			} 
 		}
 	}
@@ -459,16 +440,15 @@ void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type
 
 void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType)
 {
-	// 해당 메세지 가져오기
 	type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
+		assert(!"Empty Message");
 		return;
 	}
 
 	int nScrollLines = 0;
-	if(strText.size() >= 20)	//. 텍스트 개행처리
+	if(strText.size() >= 20)
 	{
 		type_string	strText1, strText2;
 		SeparateText(strID, strText, strText1, strText2);
@@ -479,7 +459,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 				delete pMsgText;
 			else
 			{
-				pvecMsgs->push_back(pMsgText);			// 해당 메세지 컨테이너
+				pvecMsgs->push_back(pMsgText);
 			}
 
 			CMessageText* pAllMsgText = new CMessageText;
@@ -487,19 +467,15 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 				delete pAllMsgText;
 			else
 			{
-				m_vecAllMsgs.push_back(pAllMsgText);		// 모든 메세지 컨테이너
+				m_vecAllMsgs.push_back(pAllMsgText);
 			}
 
-			// 해당 메세지가 에러 메세지이면,
-			// ErrMsgType를 검사하여 해당 메세지 컨테이너에 추가.
-			// ex : ErrMsgType가 TYPE_WHISPER_ERROR 이면, Whisper컨테이너에 에러메세지를 추가한다.
-			if( (MsgType == TYPE_ERROR_MESSAGE) 
-				&& (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE) )
+			if( (MsgType == TYPE_ERROR_MESSAGE) && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE) )
 			{
 				type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
 				if( pErrvecMsgs == NULL )
 				{
-					assert(!"메세지 타입이 맞지 않습니다.!");
+					assert(!"Error Chat");
 					return;
 				}
 
@@ -508,11 +484,10 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 					delete pErrMsgText;
 				else
 				{
-					pErrvecMsgs->push_back(pErrMsgText);		// 모든 메세지 컨테이너
+					pErrvecMsgs->push_back(pErrMsgText);
 				}
 			}
 			
-			// 현재 렌더되는 메세지가 전체메세지이거나 현재 추가되는 메세지이면, 한칸 올린다.
 			if( GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType)
 			{
 				nScrollLines++;
@@ -525,7 +500,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 				delete pMsgText;
 			else
 			{
-				pvecMsgs->push_back(pMsgText);			// 해당 메세지 컨테이너
+				pvecMsgs->push_back(pMsgText);
 			}
 			
 			CMessageText* pAllMsgText = new CMessageText;
@@ -533,19 +508,15 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 				delete pAllMsgText;
 			else
 			{
-				m_vecAllMsgs.push_back(pAllMsgText);		// 모든 메세지 컨테이너
+				m_vecAllMsgs.push_back(pAllMsgText);
 			}
 
-			// 해당 메세지가 에러 메세지이면,
-			// ErrMsgType를 검사하여 해당 메세지 컨테이너에 추가.
-			// ex : ErrMsgType가 TYPE_WHISPER_ERROR 이면, Whisper컨테이너에 에러메세지를 추가한다.
-			if( (MsgType == TYPE_ERROR_MESSAGE) 
-				&& (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE) )
+			if( (MsgType == TYPE_ERROR_MESSAGE) && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE) )
 			{
 				type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
 				if( pErrvecMsgs == NULL )
 				{
-					assert(!"메세지 타입이 맞지 않습니다.!");
+					assert(!"Error chat 2");
 					return;
 				}
 				
@@ -554,11 +525,10 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 					delete pErrMsgText;
 				else
 				{
-					pErrvecMsgs->push_back(pErrMsgText);		// 모든 메세지 컨테이너
+					pErrvecMsgs->push_back(pErrMsgText);
 				}
 			}
 			
-			// 현재 렌더되는 메세지가 전체메세지이거나 현재 추가되는 메세지이면, 한칸 올린다.
 			if( GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType)
 			{
 				nScrollLines++;
@@ -572,7 +542,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 			delete pMsgText;
 		else
 		{
-			pvecMsgs->push_back(pMsgText);			// 해당 메세지 컨테이너
+			pvecMsgs->push_back(pMsgText);
 		}
 		
 		CMessageText* pAllMsgText = new CMessageText;
@@ -580,19 +550,16 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 			delete pAllMsgText;
 		else
 		{
-			m_vecAllMsgs.push_back(pAllMsgText);		// 모든 메세지 컨테이너
+			m_vecAllMsgs.push_back(pAllMsgText);
 		}
 
-		// 해당 메세지가 에러 메세지이면,
-		// ErrMsgType를 검사하여 해당 메세지 컨테이너에 추가.
-		// ex : ErrMsgType가 TYPE_WHISPER_ERROR 이면, Whisper컨테이너에 에러메세지를 추가한다.
 		if( (MsgType == TYPE_ERROR_MESSAGE) 
 			&& (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE) )
 		{
 			type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
 			if( pErrvecMsgs == NULL )
 			{
-				assert(!"메세지 타입이 맞지 않습니다.!");
+				assert(!"Error chat 3");
 				return;
 			}
 			
@@ -601,25 +568,22 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 				delete pErrMsgText;
 			else
 			{
-				pErrvecMsgs->push_back(pErrMsgText);		// 모든 메세지 컨테이너
+				pErrvecMsgs->push_back(pErrMsgText);
 			}
 		}
 
-		// 현재 렌더되는 메세지가 전체메세지이거나 현재 추가되는 메세지이면, 한칸 올린다.
 		if( GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType)
 		{
 			nScrollLines++;
 		}
 	}
 
-	// 랜더중인 메세지 가져오기
 	pvecMsgs = GetMsgs( GetCurrentMsgType() );
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
+		assert(!"Error chat 4");
 		return;
 	}
-
 
 	//. Auto Scrolling
 	if( nScrollLines > 0 && ((pvecMsgs->size() - (m_iCurrentRenderEndLine+1) - nScrollLines) < 3) )
@@ -628,111 +592,20 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 		m_iCurrentRenderEndLine = pvecMsgs->size()-1;
 }
 
-#else // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
-//-----------------------------------------------------------------------------------------
-void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType)
-{
-	if (strID.empty() && strText.empty()) 
-	{
-		return;
-	}
-
-	if (GetNumberOfLines() > MAX_NUMBER_OF_LINES)
-	{
-		RemoveFrontLine();
-	}
-	
-	if(m_vecFilters.empty() == true)		// 필터 해제 상태
-	{
-		ProcessAddText(strID, strText, MsgType);	
-	}
-	else	// 필터 설정 상태
-	{
-		if(MsgType != TYPE_CHAT_MESSAGE)
-		{
-			ProcessAddText(strID, strText, MsgType);
-		}
-		else if(CheckFilterText(strID) || CheckFilterText(strText))	// 필터 단어에 걸려 들었다면
-		{
-			ProcessAddText(strID, strText, MsgType);		
-			
-			if(g_pOption->IsWhisperSound())
-			{
-				PlayBuffer(SOUND_WHISPER);	// 필터 사용시 귓말음 나오게
-			}
-		}
-	}
-}
-
-void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType)
-{
-	int nScrollLines = 0;
-	if(strText.size() >= 20)	//. 텍스트 개행처리
-	{
-		type_string	strText1, strText2;
-		SeparateText(strID, strText, strText1, strText2);
-		if(!strText1.empty())
-		{
-			CMessageText* pMsgText = new CMessageText;
-			if(!pMsgText->Create(strID, strText1, MsgType))
-				delete pMsgText;
-			else
-			{
-				m_vecMsgs.push_back(pMsgText);
-				nScrollLines++;
-			}
-		}
-		if(!strText2.empty())
-		{
-			CMessageText* pMsgText = new CMessageText;
-			if(!pMsgText->Create("", strText2, MsgType))
-				delete pMsgText;
-			else
-			{
-				m_vecMsgs.push_back(pMsgText);
-				nScrollLines++;
-			}
-		}
-	}
-	else
-	{
-		CMessageText* pMsgText = new CMessageText;
-		if(!pMsgText->Create(strID, strText, MsgType))
-			delete pMsgText;
-		else
-		{
-			m_vecMsgs.push_back(pMsgText);
-			nScrollLines++;
-		}
-	}
-	//. Auto Scrolling
-	if( nScrollLines > 0 && ((m_vecMsgs.size() - (m_iCurrentRenderEndLine+1) - nScrollLines) < 3) )
-		m_iCurrentRenderEndLine = m_vecMsgs.size()-1;
-	else if(!m_bShowFrame)
-		m_iCurrentRenderEndLine = m_vecMsgs.size()-1;
-}
-//-----------------------------------------------------------------------------------------
-#endif // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
-
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-////////////////////////////////////////////////////////////////////////////////////
-// RemoveFrontLine
-// - 해당하는 메세지 컨테이너의 메세지중 맨 처음에 들어간 메세지를 삭제한다.
-////////////////////////////////////////////////////////////////////////////////////
 void SEASON3B::CNewUIChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
 {
 	type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
 
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
+		assert(!"Empty Message RemoveFrontLine");
 		return;
 	}
 
 	type_vector_msgs::iterator vi = pvecMsgs->begin();
 	if(vi != pvecMsgs->end())
 	{
-		delete (*vi);	//. 첫줄 지운다
+		delete (*vi);
 		vi = pvecMsgs->erase(vi);
 	}
 
@@ -742,16 +615,12 @@ void SEASON3B::CNewUIChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// Clear
-// - 해당하는 메세지 컨테이너를 Clear한다.
-////////////////////////////////////////////////////////////////////////////////////
 void SEASON3B::CNewUIChatLogWindow::Clear(MESSAGE_TYPE MsgType)
 {
 	type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
+		assert(!"Empty Message CNewUIChatLogWindow");
 		return;
 	}
 
@@ -766,10 +635,6 @@ void SEASON3B::CNewUIChatLogWindow::Clear(MESSAGE_TYPE MsgType)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// GetNumberOfLines
-// - 해당 메세지 컨테이너에서 메세지 갯수를 구한다.
-////////////////////////////////////////////////////////////////////////////////////
 size_t SEASON3B::CNewUIChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgType)
 { 
 	type_vector_msgs* pvecMsgs = GetMsgs( MsgType );
@@ -782,59 +647,17 @@ size_t SEASON3B::CNewUIChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgType)
 	return pvecMsgs->size(); 
 }
 
-#else // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
-//-----------------------------------------------------------------------------------------
-
-void SEASON3B::CNewUIChatLogWindow::RemoveFrontLine()
-{
-	type_vector_msgs::iterator vi = m_vecMsgs.begin();
-	if(vi != m_vecMsgs.end())
-	{
-		delete (*vi);	//. 첫줄 지운다
-		vi = m_vecMsgs.erase(vi);
-
-		if(vi != m_vecMsgs.end())
-		{
-			if((*vi)->GetType() == TYPE_CHAT_MESSAGE && (*vi)->GetID().empty())	//. 채팅이고 아이디가 없다면
-			{	//. 개행으로 판단하고 깔끔하게 한줄 더 지워준다.
-				delete (*vi);
-				m_vecMsgs.erase(vi);
-			}
-		}
-		Scrolling(GetCurrentRenderEndLine());
-	}
-}
-
-void SEASON3B::CNewUIChatLogWindow::Clear()
-{
-	type_vector_msgs::iterator vi_msg = m_vecMsgs.begin();
-	for(; vi_msg != m_vecMsgs.end(); vi_msg++)
-		delete (*vi_msg);
-	m_vecMsgs.clear();
-
-	m_iCurrentRenderEndLine = -1;
-}
-
-size_t SEASON3B::CNewUIChatLogWindow::GetNumberOfLines() const 
-{ 
-	return m_vecMsgs.size(); 
-}
-
-//-----------------------------------------------------------------------------------------
-#endif // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
-
 int SEASON3B::CNewUIChatLogWindow::GetCurrentRenderEndLine() const 
 { 
 	return m_iCurrentRenderEndLine; 
 }
 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 void SEASON3B::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
 {
 	type_vector_msgs* pvecMsgs = GetMsgs( m_CurrentRenderMsgType );
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
+		assert(!"Empty message Scrolling");
 		return;
 	}
 
@@ -854,33 +677,10 @@ void SEASON3B::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
 	}
 }
 
-#else // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
-//-----------------------------------------------------------------------------------------
-void SEASON3B::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
-{
-	if(m_vecMsgs.size() <= m_nShowingLines)
-	{
-		m_iCurrentRenderEndLine = m_vecMsgs.size() - 1;
-	}
-	else
-	{
-		if(nRenderEndLine < m_nShowingLines)
-			m_iCurrentRenderEndLine = m_nShowingLines - 1;
-		else if(nRenderEndLine >= m_vecMsgs.size())
-			m_iCurrentRenderEndLine = m_vecMsgs.size() - 1;
-		else
-			m_iCurrentRenderEndLine = nRenderEndLine;
-	}
-}
-//-----------------------------------------------------------------------------------------
-#endif // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
-
 void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterText)
 {
 	bool bPrevFilter = false;
 
-	// 본래의도는 5개까지 필터String을 저장 하는 것으로 알고 있지만,
-	// 이유는 모르지만, Reset을 시켜주고 있음... (기획적의도??)
 	if(!m_vecFilters.empty())
 	{
 		bPrevFilter = true;
@@ -896,7 +696,7 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
 	if(token == NULL)
 	{
 		ResetFilter();
-		AddText("", GlobalText[756], TYPE_SYSTEM_MESSAGE);	// 필터가 해제되었습니다.
+		AddText("", GlobalText[756], TYPE_SYSTEM_MESSAGE);
 	}
 	else
 	{
@@ -910,7 +710,7 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
 			token = unicode::_strtok(NULL, " ");
 		}
 		
-		AddText("", GlobalText[755], TYPE_SYSTEM_MESSAGE);	// 필터가 설정되었습니다.
+		AddText("", GlobalText[755], TYPE_SYSTEM_MESSAGE);
 	}
 }
 
@@ -941,8 +741,7 @@ void SEASON3B::CNewUIChatLogWindow::SetNumberOfShowingLines(int nShowingLines, O
 	if(lpBoxSize)
 	{
 		lpBoxSize->cx = WND_WIDTH;
-		lpBoxSize->cy = (SCROLL_MIDDLE_PART_HEIGHT*GetNumberOfShowingLines())
-			+ (SCROLL_TOP_BOTTOM_PART_HEIGHT*2) + (WND_TOP_BOTTOM_EDGE*2);
+		lpBoxSize->cy = (SCROLL_MIDDLE_PART_HEIGHT*GetNumberOfShowingLines()) + (SCROLL_TOP_BOTTOM_PART_HEIGHT*2) + (WND_TOP_BOTTOM_EDGE*2);
 	}
 }
 size_t SEASON3B::CNewUIChatLogWindow::GetNumberOfShowingLines() const 
@@ -1007,7 +806,6 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 		return true;
 	}
 
-	//. 휠처리
 	if(m_EventState == EVENT_CLIENT_WND_HOVER)
 	{
 		if(MouseWheel > 0)
@@ -1021,27 +819,19 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 	m_bPointedMessage = false;
 	if(SEASON3B::CheckMouseIn(m_WndPos.x, m_WndPos.y-m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
 	{
-		//. 메세지 그리기
 		int iRenderStartLine = 0;
 		if(GetCurrentRenderEndLine() >= m_nShowingLines)
 			iRenderStartLine = GetCurrentRenderEndLine() - m_nShowingLines + 1;
 
 		for(int i=iRenderStartLine, s=0; i<=GetCurrentRenderEndLine(); i++, s++)
 		{
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-
 			type_vector_msgs* pvecMsgs = GetMsgs( GetCurrentMsgType() );
 			if( pvecMsgs == NULL )
 			{
-				assert(!"메세지 타입이 맞지 않습니다.!");
 				return false;
 			}
 
 			CMessageText* pMsgText = (*pvecMsgs)[i];
-
-#else // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
-			CMessageText* pMsgText = m_vecMsgs[i];
-#endif // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
 
 			if(pMsgText->GetType() == TYPE_WHISPER_MESSAGE 
 				|| pMsgText->GetType() == TYPE_CHAT_MESSAGE
@@ -1053,12 +843,10 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 			{
 				float fRenderPosX = m_WndPos.x;
 				float fRenderPosY = m_WndPos.y - m_WndSize.cy + SCROLL_TOP_BOTTOM_PART_HEIGHT;
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 				if(GetCurrentRenderEndLine() < m_nShowingLines)
 				{
 					fRenderPosY = fRenderPosY+FONT_LEADING+(SCROLL_MIDDLE_PART_HEIGHT*(m_nShowingLines-GetCurrentRenderEndLine()-1));
 				}
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 
 				POINT ptRenderPos;
 				ptRenderPos.x = fRenderPosX+WND_LEFT_RIGHT_EDGE;
@@ -1079,7 +867,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 		}
 	}
 
-	if(m_bShowFrame)		//// 아래부터는 프레임이 있을경우에만 처리 ////
+	if(m_bShowFrame)
 	{
 		if(m_EventState == EVENT_CLIENT_WND_HOVER && MouseLButtonPush &&
 			SEASON3B::CheckMouseIn(m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH, SCROLL_BTN_HEIGHT))
@@ -1094,11 +882,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 		{
 			if(SEASON3B::IsRepeat(VK_LBUTTON))
 			{
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 				if(GetNumberOfLines(GetCurrentMsgType()) > GetNumberOfShowingLines())
-#else // KJH_FIX_UI_CHAT_MESSAGE
-				if(GetNumberOfLines() > GetNumberOfShowingLines())
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 				{
 					extern int MouseY;
 					if(MouseY-m_iGrapRelativePosY < m_WndPos.y-m_WndSize.cy+WND_TOP_BOTTOM_EDGE)
@@ -1108,22 +892,13 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 					}
 					else if(MouseY-m_iGrapRelativePosY > m_WndPos.y-SCROLL_BTN_HEIGHT-WND_TOP_BOTTOM_EDGE)
 					{
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 						Scrolling(GetNumberOfLines(GetCurrentMsgType())-1);
-#else // KJH_FIX_UI_CHAT_MESSAGE
-						Scrolling(GetNumberOfLines()-1);
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 						m_ScrollBtnPos.y = m_WndPos.y-SCROLL_BTN_HEIGHT-WND_TOP_BOTTOM_EDGE;
 					}
 					else
 					{
-						float fScrollRate = (float)((MouseY-m_iGrapRelativePosY) - (m_WndPos.y-m_WndSize.cy+WND_TOP_BOTTOM_EDGE))
-							/ (float)(m_WndSize.cy-WND_TOP_BOTTOM_EDGE*2-SCROLL_BTN_HEIGHT);
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
+						float fScrollRate = (float)((MouseY-m_iGrapRelativePosY) - (m_WndPos.y-m_WndSize.cy+WND_TOP_BOTTOM_EDGE)) / (float)(m_WndSize.cy-WND_TOP_BOTTOM_EDGE*2-SCROLL_BTN_HEIGHT);
 						Scrolling(GetNumberOfShowingLines() + (float)(GetNumberOfLines(GetCurrentMsgType())-GetNumberOfShowingLines())*fScrollRate);
-#else // KJH_FIX_UI_CHAT_MESSAGE
-						Scrolling(GetNumberOfShowingLines() + (float)(GetNumberOfLines()-GetNumberOfShowingLines())*fScrollRate);
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 						
 						m_ScrollBtnPos.y = MouseY - m_iGrapRelativePosY;
 					}
@@ -1137,7 +912,6 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 			}
 		}
 
-		//. 버튼 처리
 		POINT ptResizingBtn = { m_WndPos.x, m_WndPos.y-m_WndSize.cy-RESIZING_BTN_HEIGHT };
 		if(m_EventState == EVENT_NONE && false == MouseLButtonPush &&
 			SEASON3B::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
@@ -1221,7 +995,6 @@ bool SEASON3B::CNewUIChatLogWindow::Render()
 	}
 
 	
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 	if( m_bShowChatLog == true )
 	{
 		if(RenderMessages() == false)
@@ -1229,12 +1002,6 @@ bool SEASON3B::CNewUIChatLogWindow::Render()
 			return false;
 		}
 	}
-#else // KJH_FIX_UI_CHAT_MESSAGE
-	if(RenderMessages() == false)
-	{
-		return false;
-	}
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 
 	if(RenderFrame() == false) 
 	{
@@ -1254,11 +1021,8 @@ float SEASON3B::CNewUIChatLogWindow::GetKeyEventOrder()
 	return 8.0f; 
 }
 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-
 bool SEASON3B::CNewUIChatLogWindow::CheckChatRedundancy(const type_string& strText, int iSearchLine/* = 1*/)
 {
-	// 전체 메세지만 검사한다.
 	type_vector_msgs* pvecMsgs = GetMsgs( TYPE_ALL_MESSAGE );
 	if( pvecMsgs == NULL )
 	{
@@ -1269,34 +1033,18 @@ bool SEASON3B::CNewUIChatLogWindow::CheckChatRedundancy(const type_string& strTe
 	if( pvecMsgs->empty() ) return false;
 	type_vector_msgs::reverse_iterator vri_msgs = pvecMsgs->rbegin();
 	for(int i = 0; (i < iSearchLine) || (vri_msgs != pvecMsgs->rend()); vri_msgs++, i++)
-		if(0 == (*vri_msgs)->GetText().compare(strText)) return true;		//. 중복 발견
+		if(0 == (*vri_msgs)->GetText().compare(strText)) return true;
 	return false;
 }
-
-#else // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
-//-----------------------------------------------------------------------------------------
-bool SEASON3B::CNewUIChatLogWindow::CheckChatRedundancy(const type_string& strText, int iSearchLine/* = 1*/)
-{
-	if( m_vecMsgs.empty() ) return false;
-	type_vector_msgs::reverse_iterator vri_msgs = m_vecMsgs.rbegin();
-	for(int i = 0; (i < iSearchLine) || (vri_msgs != m_vecMsgs.rend()); vri_msgs++, i++)
-		if(0 == (*vri_msgs)->GetText().compare(strText)) return true;		//. 중복 발견
-	return false;
-}
-//-----------------------------------------------------------------------------------------
-#endif // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
 
 void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2)
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	extern float g_fScreenRate_x;
 	
 	SIZE TextSize;
 	type_string strIDPart = strID + " : ";
 	std::wstring wstrUTF16 = L"";
 	
-	// 화면에 나오는 문자열 한줄의 길이: 아이디 + (:) + 내용
-	// MaxFirstLineWidth: 아이디 + (:) 의 길이를 뺀 나머지
 	g_pMultiLanguage->ConvertCharToWideStr(wstrUTF16, strIDPart.c_str());
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), wstrUTF16.c_str(), wstrUTF16.length(), &TextSize);
 	size_t MaxFirstLineWidth = CLIENT_WIDTH - (size_t)(TextSize.cx / g_fScreenRate_x);
@@ -1307,58 +1055,16 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
 	BOOL bSpaceExist = (wstrUTF16.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
 	int iLocToken = wstrUTF16.length(); 
 	
-	//뒤에서부터 오면서 검색
-	//문자열에 공백이 있으면 ? 공백 단위 : 문자 단위
 	while (((size_t)(TextSize.cx / g_fScreenRate_x) > MaxFirstLineWidth) && (iLocToken > -1))
 	{
 		iLocToken = (bSpaceExist) ? wstrUTF16.find_last_of(L" ", iLocToken-1) : iLocToken-1;
 		
-		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), 
-												(wstrUTF16.substr(0, iLocToken)).c_str(), 
-												iLocToken, 
-												&TextSize);
+		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (wstrUTF16.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
 	}
 
 	g_pMultiLanguage->ConvertWideCharToStr(strText1, (wstrUTF16.substr(0, iLocToken)).c_str(), CP_UTF8);
 	g_pMultiLanguage->ConvertWideCharToStr(strText2, (wstrUTF16.substr(iLocToken, wstrUTF16.length()-iLocToken)).c_str(), CP_UTF8);
 
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	extern float g_fScreenRate_x;
-
-	SIZE TextSize;
-	type_string strIDPart = strID + " : ";
-
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.size(), &TextSize);
-	size_t TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-	size_t MaxFirstLineWidth = CLIENT_WIDTH - TextExtentWidth;
-
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strText.c_str(), strText.size(), &TextSize);
-	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-	if(TextExtentWidth > MaxFirstLineWidth)	//. 잘라야 하는가?
-	{
-		int prev_offset = 0;
-		for(int cur_offset = 0; cur_offset<(int)strText.size(); )	
-		{
-			prev_offset = cur_offset;
-			size_t offset = _mbclen((const unsigned char*)(strText.c_str()+cur_offset));
-			cur_offset += offset;
-
-			type_string strTemp(strText, 0, cur_offset+offset/* size */);
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-			TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-			if(TextExtentWidth > MaxFirstLineWidth && cur_offset != 0)
-			{
-				strText1 = type_string(strText, 0, prev_offset/* size */);
-				strText2 = type_string(strText, prev_offset, strText.size()-prev_offset/* size */);
-				return;
-			}
-		}
-	}
-	else
-	{
-		strText1 = strText;
-	}
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 }
 bool SEASON3B::CNewUIChatLogWindow::CheckFilterText(const type_string& strTestText)
 {
@@ -1374,38 +1080,17 @@ bool SEASON3B::CNewUIChatLogWindow::CheckFilterText(const type_string& strTestTe
 	return false;
 }
 
-#ifndef KJH_FIX_UI_CHAT_MESSAGE					// #ifndef 정리할 때 지워야 하는 소스
-//-----------------------------------------------------------------------------------------
-bool SEASON3B::CNewUIChatLogWindow::CheckMessageShowFlag(SHOW_MESSAGE_FLAG Flag)
-{
-	if((m_ShowMessageFlag & Flag) == Flag)
-		return true;
-	return false;
-}
-
-void SEASON3B::CNewUIChatLogWindow::ShowMessage(SHOW_MESSAGE_FLAG Flag)
-{
-	m_ShowMessageFlag = Flag;
-}
-//-----------------------------------------------------------------------------------------
-#endif // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
-
 void SEASON3B::CNewUIChatLogWindow::UpdateWndSize()
 {
 	m_WndSize.cx = WND_WIDTH;
-	m_WndSize.cy = (SCROLL_MIDDLE_PART_HEIGHT*GetNumberOfShowingLines())
-		+ (SCROLL_TOP_BOTTOM_PART_HEIGHT*2) + (WND_TOP_BOTTOM_EDGE*2);
+	m_WndSize.cy = (SCROLL_MIDDLE_PART_HEIGHT*GetNumberOfShowingLines()) + (SCROLL_TOP_BOTTOM_PART_HEIGHT*2) + (WND_TOP_BOTTOM_EDGE*2);
 }
 
 void SEASON3B::CNewUIChatLogWindow::UpdateScrollPos()
 {
-	//. 스크롤바 위치계산
 	float fPosRate = 1.f;
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
+
 	if(GetNumberOfLines(GetCurrentMsgType()) > GetNumberOfShowingLines())
-#else // KJH_FIX_UI_CHAT_MESSAGE
-	if(GetNumberOfLines() > GetNumberOfShowingLines())
-#endif // KJH_FIX_UI_CHAT_MESSAGE
 	{
 		if((int)GetNumberOfShowingLines() > GetCurrentRenderEndLine())
 		{
@@ -1413,30 +1098,23 @@ void SEASON3B::CNewUIChatLogWindow::UpdateScrollPos()
 		}
 		else
 		{
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-			fPosRate = (float)(GetCurrentRenderEndLine()+1-GetNumberOfShowingLines()) 
-				/ (float)(GetNumberOfLines(GetCurrentMsgType())-GetNumberOfShowingLines());
-#else KJH_FIX_UI_CHAT_MESSAGE
-			fPosRate = (float)(GetCurrentRenderEndLine()+1-GetNumberOfShowingLines()) 
-				/ (float)(GetNumberOfLines()-GetNumberOfShowingLines());
-#endif // KJH_FIX_UI_CHAT_MESSAGE
+			fPosRate = (float)(GetCurrentRenderEndLine()+1-GetNumberOfShowingLines()) / (float)(GetNumberOfLines(GetCurrentMsgType())-GetNumberOfShowingLines());
 		}
 	}
 	if(m_EventState != EVENT_SCROLL_BTN_DOWN)
 	{
 		m_ScrollBtnPos.x = m_WndPos.x+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE-4;
-		m_ScrollBtnPos.y = m_WndPos.y-m_WndSize.cy+WND_TOP_BOTTOM_EDGE 
-			+ ((float)(m_WndSize.cy-SCROLL_BTN_HEIGHT-WND_TOP_BOTTOM_EDGE*2) * fPosRate);
+		m_ScrollBtnPos.y = m_WndPos.y-m_WndSize.cy+WND_TOP_BOTTOM_EDGE + ((float)(m_WndSize.cy-SCROLL_BTN_HEIGHT-WND_TOP_BOTTOM_EDGE*2) * fPosRate);
 	}
 }
 
 void SEASON3B::CNewUIChatLogWindow::AddFilterWord(const type_string& strWord)
 {
-	if(m_vecFilters.size() > 5)	//. 최대 5개 까지
+	if(m_vecFilters.size() > 5)
 		return;
 
 	type_vector_filters::iterator vi_filters = m_vecFilters.begin();
-	for(; vi_filters != m_vecFilters.end(); vi_filters++)	//. 중복검사
+	for(; vi_filters != m_vecFilters.end(); vi_filters++)
 	{
 		if(0 == (*vi_filters).compare(strWord))
 		{
@@ -1447,13 +1125,6 @@ void SEASON3B::CNewUIChatLogWindow::AddFilterWord(const type_string& strWord)
 	m_vecFilters.push_back(strWord);
 }
 
-// 추가
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
-
-////////////////////////////////////////////////////////////////////////////////////
-// ClearAll
-// - 모든 메세지 컨테이너를 Clear한다.
-////////////////////////////////////////////////////////////////////////////////////
 void SEASON3B::CNewUIChatLogWindow::ClearAll()
 {
 	for(int i=TYPE_ALL_MESSAGE ; i<NUMBER_OF_TYPES ; i++)
@@ -1464,10 +1135,6 @@ void SEASON3B::CNewUIChatLogWindow::ClearAll()
 	m_iCurrentRenderEndLine = -1;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// SetCurrentMsgType()
-// - 현재 메세지 타입 Return
-////////////////////////////////////////////////////////////////////////////////////
 SEASON3B::CNewUIChatLogWindow::type_vector_msgs* SEASON3B::CNewUIChatLogWindow::GetMsgs(MESSAGE_TYPE MsgType)
 {
 	switch( MsgType )
@@ -1495,10 +1162,6 @@ SEASON3B::CNewUIChatLogWindow::type_vector_msgs* SEASON3B::CNewUIChatLogWindow::
 	return NULL;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// SetCurrentMsgType()
-// - 현재 메세지 타입을 바꾼다.
-////////////////////////////////////////////////////////////////////////////////////
 void SEASON3B::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
 {
 
@@ -1511,23 +1174,14 @@ void SEASON3B::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
 		return;
 	}
 
-	// 스크롤링 초기화
 	m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// GetCurrentMsgType()
-// - 현재 메세지 타입을 return.
-////////////////////////////////////////////////////////////////////////////////////
 SEASON3B::MESSAGE_TYPE SEASON3B::CNewUIChatLogWindow::GetCurrentMsgType() const
 {
 	return m_CurrentRenderMsgType;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// ShowChatLog()
-// - 채팅메세지 Show
-////////////////////////////////////////////////////////////////////////////////////
 void SEASON3B::CNewUIChatLogWindow::ShowChatLog()
 {
 	m_bShowChatLog = true;
@@ -1539,17 +1193,11 @@ void SEASON3B::CNewUIChatLogWindow::ShowChatLog()
 		return;
 	}
 
-	// 스크롤링 초기화
 	m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// HideChatLog()
-// - 채팅메세지 Hide
-////////////////////////////////////////////////////////////////////////////////////
 void SEASON3B::CNewUIChatLogWindow::HideChatLog()
 {
 	m_bShowChatLog = false;
 }
 
-#endif // KJH_FIX_UI_CHAT_MESSAGE

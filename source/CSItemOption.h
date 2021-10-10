@@ -64,7 +64,6 @@ private:
 			strCur = m_iterESIN->second;
 			int iSizeCurName = strCur.size();
 			
-			// . 굳이 비교자와 피비교자간에 Size로 모두 하는건 기존 코드가 그렇게 되어 있었기 때문 입니다. 
 			if( !strncmp( szSetItemname, strCur.c_str(), iSizeFindName ) 
 				&& !strncmp( szSetItemname, strCur.c_str(), iSizeCurName ) )
 			{
@@ -93,10 +92,7 @@ public:
 
 	BYTE	Search_From_EquippedSetItemNameSequence( char *szSetItemname )
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		BYTE	byCur = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		int		iResult = Search_From_EquippedSetItemNameMapTable( szSetItemname );
 		
 		if( -1 != iResult )
@@ -232,15 +228,7 @@ public :
 		ITEM_SET_TYPE& itemSType = m_ItemSetType[CurItem_.Type];
 
 
-#ifdef YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
 		for (int i = 0; i < 30; i += 3)
-#else	// YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
-#ifdef PBG_FIX_SETITEM_4OVER
-		for( int i = 0; i < 13; i+=3 )
-#else //PBG_FIX_SETITEM_4OVER
-		for( int i = 0; i < 10; i+=3 )
-#endif //PBG_FIX_SETITEM_4OVER
-#endif	// YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
 		{
 			ITEM_SET_OPTION& itemOption = m_ItemSetOption[byOptionList[i]];
 			
@@ -248,7 +236,6 @@ public :
 			{
 				int iEquippedCount = byOptionList[i+1];
 				
-				// 풀세트에 해당
 				if ( iEquippedCount>=itemOption.byOptionCount-1 )
 				{
 					return BYTE_MAX;

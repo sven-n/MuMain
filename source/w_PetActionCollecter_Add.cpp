@@ -288,9 +288,7 @@ void PetActionCollecterAdd::FindZen(OBJECT* obj)
 	if( NULL == obj || true == m_isRooting ) return;
 
 	float dx, dy, dl;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	bool sameItem = false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	for(int i=0;i<MAX_ITEMS;i++)	
 	{
@@ -300,23 +298,20 @@ void PetActionCollecterAdd::FindZen(OBJECT* obj)
 			continue;
 		}
 
-		dx = obj->Owner->Position[0] - _item->Position[0]; // 자기와의 거리를 계산한다.
+		dx = obj->Owner->Position[0] - _item->Position[0];
 		dy = obj->Owner->Position[1] - _item->Position[1];
 
 		dl = sqrtf(dx*dx+dy*dy);
 		
-		//범위 지정
 		if( SEARCH_LENGTH > dl )
 		{
-			//젠만 먹도록 할려면 여기서 걸러버리자...
-			//다른 아이템까지 먹도록할려면 여기서 list에 담아버리자...
 			//if( -1 == g_pMyInventory->FindEmptySlot(&Items[i].Item) && Items[i].Item.Type != ITEM_POTION+15 )
-			if( Items[i].Item.Type != ITEM_POTION+15 ) //젠만 먹자
+			if( Items[i].Item.Type != ITEM_POTION+15 )
 			{
 				continue;
 			}
 
-			if(!m_isRooting) //그냥 한번더 검사....
+			if(!m_isRooting)
 			{
 				m_isRooting = true;
 				m_RootItem.itemIndex = i;
@@ -378,19 +373,15 @@ bool PetActionCollecterSkeleton::Move( OBJECT* obj, CHARACTER *Owner, int target
 		m_state = eAction_Move;
 	}
 
-	//------------------------------------------//
 	float FlyRange = 12.0f;
 	vec3_t targetPos, Range, Direction;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	bool _isMove = false;
 	float fRadHeight = ((2*3.14f)/15000.0f) * (float)(tick%15000);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	m_fRadWidthStand = ((2*3.14f)/4000.0f) * (float)(tick%4000);
 	m_fRadWidthGet = ((2*3.14f)/2000.0f) * (float)(tick%2000);
 	
 	obj->Position[2] = obj->Owner->Position[2] + (50.0f * obj->Owner->Scale);
 
-	//------------------------------------------//
 	VectorSubtract( obj->Position, obj->Owner->Position, Range );
 
 	float Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );

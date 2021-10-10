@@ -86,3 +86,5 @@ const std::list<CMoveCommandData::MOVEINFODATA*>& CMoveCommandData::GetMoveComma
 {
 	return m_listMoveInfoData;
 }
+
+

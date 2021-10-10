@@ -138,25 +138,20 @@ bool SEASON3B::CNewUIMyInventory::EquipItem(int iIndex, BYTE* pbyItemPacket)
 			return false;
 		}
 
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-		// 장착 아이템이 다크호스나 다크스피릿이면, 펫 정보를 서버에 요청
-		// 다크호스
 		if( pTempItem->Type == ITEM_HELPER+4 )
 			SendRequestPetInfo( PET_TYPE_DARK_HORSE, 0, iIndex );
-		// 다크스피릿
+
 		if( pTempItem->Type == ITEM_HELPER+5 )
 		{
 			giPetManager::CreatePetDarkSpirit( Hero );
 			SendRequestPetInfo( PET_TYPE_DARK_SPIRIT, 0, iIndex );
 		}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 		
 		pTempItem->lineal_pos = iIndex;
 		pTempItem->ex_src_type = ITEM_EX_SRC_EQUIPMENT;
-		memcpy(pTargetItemSlot, pTempItem, sizeof(ITEM));		//. 캐릭터 버퍼로 복사
-		g_pNewItemMng->DeleteItem(pTempItem);	//. 임시 아이템 제거 (메니져 관리 밖이므로)
+		memcpy(pTargetItemSlot, pTempItem, sizeof(ITEM));
+		g_pNewItemMng->DeleteItem(pTempItem);
 
-		//. 장착효과 생성
 		CreateEquippingEffect(pTargetItemSlot);
 	}
 	return false;
