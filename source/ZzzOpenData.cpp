@@ -4930,17 +4930,17 @@ void OpenSounds()
 #endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK_SOUND
 
 #ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER_SOUND
-	LoadWaveFile(SOUND_SKILL_SWELL_OF_MAGICPOWER, "Data\\Sound\\SwellofMagicPower.wav");	// 마력증대 (마법사)
+	LoadWaveFile(SOUND_SKILL_SWELL_OF_MAGICPOWER, "Data\\Sound\\SwellofMagicPower.wav");
 #endif	// KJH_ADD_SKILL_SWELL_OF_MAGICPOWER_SOUND
 
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-	LoadWaveFile(SOUND_SKILL_MULTI_SHOT, "Data\\Sound\\multi_shot.wav");	//멀티샷
+	LoadWaveFile(SOUND_SKILL_MULTI_SHOT, "Data\\Sound\\multi_shot.wav");
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-	LoadWaveFile(SOUND_SKILL_RECOVER, "Data\\Sound\\recover.wav");	//획복
+	LoadWaveFile(SOUND_SKILL_RECOVER, "Data\\Sound\\recover.wav");
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 #ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-	LoadWaveFile(SOUND_SKILL_CAOTIC, "Data\\Sound\\caotic.wav");	//다크로드 신규스킬
+	LoadWaveFile(SOUND_SKILL_CAOTIC, "Data\\Sound\\caotic.wav");
 #endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC	
 
 #ifdef YDG_ADD_FIRECRACKER_ITEM

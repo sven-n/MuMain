@@ -4634,13 +4634,8 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 						SetAction(so, PLAYER_SKILL_SLEEP);
 						break;
 					}
-					
-					// 사운드
-					if(MagicNumber == AT_SKILL_ALICE_SLEEP
-#ifdef PJH_ADD_MASTERSKILL
-						|| (AT_SKILL_ALICE_SLEEP_UP <= MagicNumber && MagicNumber <= AT_SKILL_ALICE_SLEEP_UP+4)
-#endif
-						) 
+
+					if(MagicNumber == AT_SKILL_ALICE_SLEEP || (AT_SKILL_ALICE_SLEEP_UP <= MagicNumber && MagicNumber <= AT_SKILL_ALICE_SLEEP_UP+4)) 
 					{
 							PlayBuffer(SOUND_SUMMON_SKILL_SLEEP);
 					}
@@ -6210,23 +6205,18 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 			g_pCursedTempleEnterWindow->SetCursedTempleEnterInfo(cursedtempleenterinfo);
 		}
 		break;
-#ifdef CSK_CHAOS_CARD
 	case 0x15:
 		{
 			g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CHAOS_CARD);
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
 		}
 		break;
-#endif //CSK_CHAOS_CARD
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	case 0x16:
 		{
 			g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CHERRYBLOSSOM);
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
 		}
 		break;
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef ADD_SOCKET_MIX
 	case 0x17:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSeedMasterMenuMsgBoxLayout));
@@ -6237,37 +6227,27 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSeedInvestigatorMenuMsgBoxLayout));
 		}
 		break;
-#endif	// ADD_SOCKET_MIX
-#ifdef PSW_ADD_RESET_CHARACTER_POINT
 	case 0x19:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CResetCharacterPointMsgBoxLayout));
 		}
 		break;
-#endif //PSW_ADD_RESET_CHARACTER_POINT
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 	case 0x20:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDelgardoMainMenuMsgBoxLayout));
 		}
 		break;
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_NEW_DUEL_NPC
 	case 0x21:
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_DUELWATCH);
 		}
 		break;
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef LDK_ADD_GAMBLE_SYSTEM
 	case 0x22:
 		{
 			GambleSystem::Instance().SetGambleShop();
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCSHOP);
 		}
 		break;
-#endif //LDK_ADD_GAMBLE_SYSTEM
-#ifdef YDG_ADD_DOPPELGANGER_PROTOCOLS
 	case 0x23:
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_DOPPELGANGER_NPC);
@@ -6275,21 +6255,16 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 			g_pDoppelGangerWindow->SetRemainTime(*pbtRemainTime);
 		}
 		break;
-#endif	// YDG_ADD_DOPPELGANGER_PROTOCOLS
-#ifdef LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 	case 0x24:
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC);
 		}
 		break;
-#endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
-#ifdef LDS_ADD_SERVERPROCESSING_UNITEDMARKETPLACE
 	case 0x25:
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
 		}
 		break;
-#endif // LDS_ADD_SERVERPROCESSING_UNITEDMARKETPLACE
 #ifdef LEM_ADD_LUCKYITEM
 	case 0x26:	
 		{
@@ -13002,15 +12977,10 @@ bool ReceiveEquippingInventoryItem(BYTE* pReceiveBuffer)
 
 bool ReceivePeriodItemListCount(BYTE* pReceiveBuffer)
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPPMSG_PERIODITEMEX_ITEMCOUNT Data = (LPPMSG_PERIODITEMEX_ITEMCOUNT)pReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-
 	return true;
 }
 
-//----------------------------------------------------------------------------
-// 기간제 아이템 리스트 (0xD2)(0x12)
 bool ReceivePeriodItemList(BYTE* pReceiveBuffer)
 {
 	LPPMSG_PERIODITEMEX_ITEMLIST Data = (LPPMSG_PERIODITEMEX_ITEMLIST)pReceiveBuffer;
@@ -14818,7 +14788,6 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 		case eBuff_Scroll_Strengthen:
 		case eBuff_Scroll_Healing:
 			{
-				// 버프 시간 설정
 				g_RegisterBuffTime(buff, bufftime);
 				
 				if( buff == eBuff_EliteScroll1 ) 

@@ -11,10 +11,8 @@
 #include "MapManager.h"
 using namespace SEASON3B;
 
-SEASON3B::CNewUIChatInputBox::CNewUIChatInputBox() 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	:	MAX_CHAT_SIZE_UTF16((int)(MAX_CHAT_SIZE/(g_pMultiLanguage->GetNumByteForOneCharUTF8())))
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+SEASON3B::CNewUIChatInputBox::CNewUIChatInputBox() : MAX_CHAT_SIZE_UTF16((int)(MAX_CHAT_SIZE/(g_pMultiLanguage->GetNumByteForOneCharUTF8())))
+
 { 
 	Init(); 
 }
@@ -85,11 +83,7 @@ bool SEASON3B::CNewUIChatInputBox::Create(CNewUIManager* pNewUIMng, CNewUIChatLo
 	SetWndPos(x, y);
 
 	m_pChatInputBox = new CUITextInputBox;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_pChatInputBox->Init(g_hWnd, 176, 14, MAX_CHAT_SIZE_UTF16-1);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	m_pChatInputBox->Init(g_hWnd, 176, 14, MAX_CHAT_SIZE-2);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_pChatInputBox->SetPosition(m_WndPos.x+72, m_WndPos.y+32);
 	m_pChatInputBox->SetTextColor(255, 255, 230, 210);
 	m_pChatInputBox->SetBackColor(0, 0, 0, 25);
@@ -311,7 +305,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 		}
 	}
 
-	// 채팅 로그 출력 On/Off 
 	if(CheckMouseIn(m_WndPos.x+141, m_WndPos.y, 27, 26) == true && SEASON3B::IsRelease(VK_LBUTTON))
 	{
 		m_bShowChatLog = !m_bShowChatLog;
@@ -456,7 +449,6 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 	if( false == IsVisible() && SEASON3B::IsPress(VK_RETURN) )
 	{
 		if(gMapManager.InChaosCastle() == true && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME) == false)
-
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_CHATINPUTBOX);
 		}

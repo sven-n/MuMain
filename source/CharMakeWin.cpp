@@ -284,38 +284,26 @@ void CCharMakeWin::Show(bool bShow)
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : CursorInWin()
-// 함수 설명 : 윈도우 영역 안에 마우스 커서가 위치하는가?
-// 매개 변수 : eArea	: 검사할 영역.(win.h의 #define 참조)
-//*****************************************************************************
 bool CCharMakeWin::CursorInWin(int nArea)
 {
-	if (!CWin::m_bShow)		// 보이지 않는다면 처리하지 않음.
+	if (!CWin::m_bShow)
 		return false;
 
 	switch (nArea)
 	{
 	case WA_MOVE:
-		return false;	// 이동 영역은 없음.(이동을 막음)
+		return false;
 	}
 
 	return CWin::CursorInWin(nArea);
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateDisplay()
-// 함수 설명 : 현재의 정보를 창에 반영함.
-//*****************************************************************************
 void CCharMakeWin::UpdateDisplay()
 {
 	int i;
 
-	// 직업 선택 제한.
 	BYTE byMaxClass = ::GetCreateMaxClass();
 #ifdef PBG_ADD_NEWCHAR_MONK
-	// byMaxClass가 3이면 전캐릭터 선택가능/ 2이면 다크로드 선택가능/
-	// 1이면 마검사선택가능/ 0이면 기본 4개 캐릭만 생성가능
 	const int _SecondClassCnt = 3;
 	int _LimitClass[_SecondClassCnt] = {CLASS_DARK_LORD, CLASS_DARK, CLASS_RAGEFIGHTER};
 
@@ -328,8 +316,6 @@ void CCharMakeWin::UpdateDisplay()
 		m_abtnJob[_LimitClass[i]].SetEnable(false);
 	}
 #else //PBG_ADD_NEWCHAR_MONK
-	// byMaxClass가 5면 전캐릭터 선택 가능. 4면 다크로드 선택 불가능,
-	//3이면 마검사, 다크로드 선택 불가능.
 	for (i = 0; i <= byMaxClass - 1; ++i)
 		m_abtnJob[i].SetEnable(true);
 	for (; i < CLASS_SUMMONER; ++i)
@@ -339,7 +325,6 @@ void CCharMakeWin::UpdateDisplay()
 #ifdef PBG_ADD_CHARACTERCARD
 	for(i=0; i<CLASS_CHARACTERCARD_TOTALCNT; ++i)
 	{
-		// 마검,다크,소환술사 돌면서 활성화여부 판단
 		if(!g_CharCardEnable.bCharacterEnable[i])
 			m_abtnJob[i+CLASS_DARK].SetEnable(false);
 	}
@@ -347,13 +332,11 @@ void CCharMakeWin::UpdateDisplay()
 	m_abtnJob[CLASS_SUMMONER].SetEnable(true);
 #endif //PBG_ADD_CHARACTERCARD
 
-	// 다크로드이면 스탯 배경 스프라이트 아래로 크기 늘림.
 	if (m_nSelJob == CLASS_DARK_LORD)
 		m_asprBack[CMW_SPR_STAT].SetSize(0, 96, Y);
 	else
 		m_asprBack[CMW_SPR_STAT].SetSize(0, 80, Y);
 
-	// 직업 설명 줄 나누기.
 	int nText = m_nSelJob == CLASS_SUMMONER ? 1690 : 1705 + m_nSelJob;
 #ifdef PBG_ADD_NEWCHAR_MONK
 	if(m_nSelJob == CLASS_RAGEFIGHTER)
@@ -371,7 +354,6 @@ void CCharMakeWin::UpdateWhileActive()
 void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 {
-	// 서버 그룹 버튼 처리.
 	int i, j;
 #ifdef PJH_CHARACTER_RENAME
 	if(ReName_Inter == false)
@@ -381,7 +363,6 @@ void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
 		{
 			if (m_abtnJob[i].IsClick())
 			{
-				// 라디오 버튼 동작 구현.
 				for (j = 0; j < MAX_CLASS; ++j)
 					m_abtnJob[j].SetCheck(false);
 				m_abtnJob[i].SetCheck(true);
@@ -402,34 +383,37 @@ SendRequestChangeName( POldName, PNewName )
 	if(ReName_Inter == false)
 #endif //PJH_CHARACTER_RENAME
 	{
-	if (m_aBtn[CMW_OK].IsClick())		// 확인 버튼 클릭.
-		RequestCreateCharacter();
-	else if (m_aBtn[CMW_CANCEL].IsClick())
-		CUIMng::Instance().HideWin(this);
-
-	else if (CInput::Instance().IsKeyDown(VK_RETURN))
-	{
-		::PlayBuffer(SOUND_CLICK01);
-		RequestCreateCharacter();
-	}
-	else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-	{
-		::PlayBuffer(SOUND_CLICK01);
-		CUIMng::Instance().HideWin(this);
-		CUIMng::Instance().SetSysMenuWinShow(false);
-	}
+		if(m_aBtn[CMW_OK].IsClick())
+		{
+			RequestCreateCharacter();
+		}
+		else if(m_aBtn[CMW_CANCEL].IsClick())
+		{
+			CUIMng::Instance().HideWin(this);
+		}
+		else if (CInput::Instance().IsKeyDown(VK_RETURN))
+		{
+			::PlayBuffer(SOUND_CLICK01);
+			RequestCreateCharacter();
+		}
+		else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
+		{
+			::PlayBuffer(SOUND_CLICK01);
+			CUIMng::Instance().HideWin(this);
+			CUIMng::Instance().SetSysMenuWinShow(false);
+		}
 	}
 #ifdef PJH_CHARACTER_RENAME
 	else
 	if(ReName_Inter == true)
 	{
-	if (m_aBtn[CMW_OK].IsClick())		// 확인 버튼 클릭.
+	if (m_aBtn[CMW_OK].IsClick())
 	{
 		if (g_iChatInputType == 1)
 			g_pSingleTextInputBox->GetText(InputText[0]);
 
 		CUIMng& rUIMng = CUIMng::Instance();
-		// 입력된 이름을 체크.
+
 		if (::strlen(InputText[0]) < 4)
 			rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
 		else if(::CheckName())
@@ -439,8 +423,10 @@ SendRequestChangeName( POldName, PNewName )
 		else
 			SendRequestChangeName( CharactersClient[SelectedHero].ID, InputText[0] );
 	}
-	else if (m_aBtn[CMW_CANCEL].IsClick())
+	else if(m_aBtn[CMW_CANCEL].IsClick())
+	{
 		CUIMng::Instance().HideWin(this);
+	}
 	else if (CInput::Instance().IsKeyDown(VK_RETURN))
 	{
 		::PlayBuffer(SOUND_CLICK01);
@@ -448,7 +434,6 @@ SendRequestChangeName( POldName, PNewName )
 			g_pSingleTextInputBox->GetText(InputText[0]);
 		
 		CUIMng& rUIMng = CUIMng::Instance();
-		// 입력된 이름을 체크.
 		if (::strlen(InputText[0]) < 4)
 			rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
 		else if(::CheckName())
@@ -467,7 +452,7 @@ SendRequestChangeName( POldName, PNewName )
 	}
 #endif //PJH_CHARACTER_RENAME
 
-	UpdateCreateCharacter();	// 3D 생성 캐릭터 업데이트.
+	UpdateCreateCharacter();
 }
 
 void CCharMakeWin::RequestCreateCharacter()
@@ -619,8 +604,7 @@ void CCharMakeWin::RenderCreateCharacter()
     CameraFOV = 10.f;
 	MoveCharacterCamera(CharacterView.Object.Position,Position,Angle);
 
-	BeginOpengl( m_winBack.GetXPos()/g_fScreenRate_x, m_winBack.GetYPos()/g_fScreenRate_y,
-				410/g_fScreenRate_x, 335/g_fScreenRate_y );
+	BeginOpengl( m_winBack.GetXPos()/g_fScreenRate_x, m_winBack.GetYPos()/g_fScreenRate_y,410/g_fScreenRate_x, 335/g_fScreenRate_y );
 
 	if (CharacterView.Class == CLASS_WIZARD)
 	{

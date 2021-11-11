@@ -996,7 +996,7 @@ bool CNewUIMixInventory::InventoryProcess()
 
 		ITEM* pItemObj = pPickedItem->GetItem();
 		if (GetMixState() == MIX_READY && g_MixRecipeMgr.IsMixSource(pPickedItem->GetItem()) &&
-			pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())	// 인벤토리에서 조합창으로
+			pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
 		{
 			m_pNewInventoryCtrl->SetSquareColorNormal(m_fInventoryColor[0], m_fInventoryColor[1], m_fInventoryColor[2]);
 			if (SEASON3B::IsPress(VK_LBUTTON))
@@ -1013,7 +1013,7 @@ bool CNewUIMixInventory::InventoryProcess()
 				}
 			}
 		}
-		else if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)	// 조합창에서 조합창으로	
+		else if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
 		{
 			m_pNewInventoryCtrl->SetSquareColorNormal(m_fInventoryColor[0], m_fInventoryColor[1], m_fInventoryColor[2]);
 			if (SEASON3B::IsPress(VK_LBUTTON))
@@ -1030,16 +1030,13 @@ bool CNewUIMixInventory::InventoryProcess()
 				}
 			}
 		}
-		/* CNewUIInventoryCtrl를 사용하지 않는 예외 */
-		/* ITEM::ex_src_type 값으로 구분한다. (ITEM구조체 참조) */
-		// ex_src_type검사는 맨 마지막에 해줘야 한다. 장비창이 아니더라도 ex_src_type이 1로 유지된다.
 		else if (GetMixState() == MIX_READY && g_MixRecipeMgr.IsMixSource(pPickedItem->GetItem()) &&
-			pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)		// 장비창에서 조합창으로 (장비창은 CNewUIInventoryCtrl를 사용 하지 않으므로)
+			pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
 		{
 			m_pNewInventoryCtrl->SetSquareColorNormal(m_fInventoryColor[0], m_fInventoryColor[1], m_fInventoryColor[2]);
 			if (SEASON3B::IsPress(VK_LBUTTON))
 			{
-				int iSourceIndex = pPickedItem->GetSourceLinealPos();	// return ITEM::lineal_pos;
+				int iSourceIndex = pPickedItem->GetSourceLinealPos();
 				int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 				if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
 				{

@@ -34,12 +34,9 @@ void SEASON3B::CNewUIChatLogWindow::Init()
 
 	m_bShowFrame = false;
 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 	m_CurrentRenderMsgType = TYPE_ALL_MESSAGE;
 	m_bShowChatLog = true;
-#else // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
-	m_ShowMessageFlag = SHOW_ALL_MESSAGES;
-#endif // KJH_FIX_UI_CHAT_MESSAGE				// 정리할 때 지워야 하는 소스
+
 
 	m_bPointedMessage = false;
 	m_iPointedMessageIndex = 0;
@@ -67,7 +64,6 @@ void SEASON3B::CNewUIChatLogWindow::UnloadImages()
 
 bool SEASON3B::CNewUIChatLogWindow::RenderBackground()
 {
-	//. 배경색 그리기
 	if(m_bShowFrame)
 	{
 		float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy;
@@ -347,7 +343,6 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
 		RenderImage(IMAGE_SCROLL_BOTTOM, fRenderPosX+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE, 
 			m_WndPos.y-WND_TOP_BOTTOM_EDGE-SCROLL_TOP_BOTTOM_PART_HEIGHT, 7, 3);
 		
-		//. 스크롤바 버튼
 		EnableAlphaTest();
 		if(m_EventState == EVENT_SCROLL_BTN_DOWN)
 		{

@@ -497,7 +497,6 @@ VOID StopBuffer(int Buffer, BOOL bResetPosition )
         g_lpDSBuffer[Buffer][0]->SetCurrentPosition( 0L );    
 }
 
-//  지금 플레이되고 있는 효과음을 모두 제거한다.
 void AllStopSound (void)
 {
     if(!g_EnableSound) 

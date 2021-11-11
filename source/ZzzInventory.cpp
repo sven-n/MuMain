@@ -1391,7 +1391,7 @@ void RepairAllGold ( void )
     char    text[100];
 
     AllRepairGold = 0;
-    //  장비창의 아이템을 검사한다.
+
 	for( int i=0; i<MAX_EQUIPMENT; ++i )
 	{
 		if( CharacterMachine->Equipment[i].Type != -1)
@@ -1402,49 +1402,17 @@ void RepairAllGold ( void )
 			int Level = (ip->Level>>3)&15;
             int maxDurability = calcMaxDurability(ip, p, Level);
 
-#ifdef LDK_FIX_USING_ISREPAIRBAN_FUNCTION
-			// 있는 함수를 활용합시다...
 			if(IsRepairBan(ip) == true)
 			{
 				continue;
 			}
-#else //LDK_FIX_USING_ISREPAIRBAN_FUNCTION
-			// CSK수리금지
-#ifdef CSK_PCROOM_ITEM
-			if(ip->Type >= ITEM_POTION+55 && ip->Type <= ITEM_POTION+57)
-			{
-				continue;
-			}
-#endif // CSK_PCROOM_ITEM
-			//. item filtering
-			if( (ip->Type >= ITEM_HELPER && ip->Type <= ITEM_HELPER+5) || ip->Type == ITEM_HELPER+10 || ip->Type == ITEM_HELPER+31 )
-				continue;
-			if( ip->Type == ITEM_BOW+7 || ip->Type == ITEM_BOW+15 || ip->Type >= ITEM_POTION )
-				continue;
-			if( ip->Type >= ITEM_WING+7 && ip->Type <= ITEM_WING+19 )	//. 구슬 필터링
-				continue;
-			if( (ip->Type >= ITEM_HELPER+14 && ip->Type <= ITEM_HELPER+19) || ip->Type==ITEM_POTION+21 )
-				continue;
-			if( ip->Type == ITEM_HELPER+20)
-				continue;
-#ifdef MYSTERY_BEAD
-			if( ip->Type == ITEM_WING+26)
-				continue;
-#endif // MYSTERY_BEAD
-
-			if(ip->Type == ITEM_HELPER+37)
-				continue;
-
-			if( ip->Type == ITEM_HELPER+38 )
-				continue;
-#endif //LDK_FIX_USING_ISREPAIRBAN_FUNCTION
 
 			//. check durability
             if( ip->Durability<maxDurability )
             {
                 int gold = ConvertRepairGold(ItemValue(ip,2),ip->Durability, maxDurability, ip->Type, text);
 
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 장비창의 수리비 검사 제외
+#ifdef LEM_ADD_LUCKYITEM
 				if( Check_LuckyItem( ip->Type ) )	gold = 0;
 #endif // LEM_ADD_LUCKYITEM
                 AllRepairGold += gold;
@@ -1464,7 +1432,6 @@ void RepairAllGold ( void )
 			int Level = (pItem->Level>>3)&15;
 			int maxDurability = calcMaxDurability( pItem, p, Level );
 			
-			// CSK수리금지
 #ifdef CSK_PCROOM_ITEM
 			if(pItem->Type >= ITEM_POTION+55 && pItem->Type <= ITEM_POTION+57)
 			{
@@ -1472,11 +1439,11 @@ void RepairAllGold ( void )
 			}
 #endif // CSK_PCROOM_ITEM
 			//. item filtering
-			if( (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+5) || pItem->Type == ITEM_HELPER+10  || pItem->Type == ITEM_HELPER+31)  // 이혁재 - 수정 수리할때 ITEM_HELPER+5 인 다크 스피릿 누락됨
+			if( (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+5) || pItem->Type == ITEM_HELPER+10  || pItem->Type == ITEM_HELPER+31)
 				continue;
 			if( pItem->Type == ITEM_BOW+7 || pItem->Type == ITEM_BOW+15 || pItem->Type >= ITEM_POTION )
 				continue;
-			if( pItem->Type >= ITEM_WING+7 && pItem->Type <= ITEM_WING+19 )	//. 구슬 필터링
+			if( pItem->Type >= ITEM_WING+7 && pItem->Type <= ITEM_WING+19 )
 				continue;
 			if( (pItem->Type >= ITEM_HELPER+14 && pItem->Type <= ITEM_HELPER+19) || pItem->Type==ITEM_POTION+21 )
 				continue;
@@ -1493,7 +1460,6 @@ void RepairAllGold ( void )
 			{
 				continue;
 			}
-			// 아이템 수리 안되게 예외 처리
 			if(pItem->Type >= ITEM_POTION+145 && pItem->Type <= ITEM_POTION+150)
 			{
 				continue;
@@ -1693,7 +1659,7 @@ void RepairAllGold ( void )
 			if( pItem->Durability<maxDurability )
 			{
 				int gold = ConvertRepairGold(ItemValue(pItem,2),pItem->Durability, maxDurability, pItem->Type, text);
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리의 수리비 검사 제외
+#ifdef LEM_ADD_LUCKYITEM
 				if( Check_LuckyItem( pItem->Type ) )	gold = 0;
 #endif // LEM_ADD_LUCKYITEM
 				AllRepairGold += gold;
@@ -6012,227 +5978,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 
 void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 {
-#ifdef LDK_FIX_USING_ISREPAIRBAN_FUNCTION
 	if(IsRepairBan(ip) == true)
 	{
 		return;
 	}
-#else //LDK_FIX_USING_ISREPAIRBAN_FUNCTION
-	if(g_ChangeRingMgr->CheckRepair(ip->Type) == true)
-	{
-		return;
-	}
-#ifdef CSK_PCROOM_ITEM
-	if(ip->Type >= ITEM_POTION+55 && ip->Type <= ITEM_POTION+57)
-	{
-		return;
-	}
-#endif // CSK_PCROOM_ITEM
-
-	if( ( ip->Type >= ITEM_HELPER && ip->Type <= ITEM_HELPER+4 ) || ip->Type == ITEM_HELPER+10 )    return;
-	if( ip->Type == ITEM_BOW+7 || ip->Type == ITEM_BOW+15 || ip->Type >= ITEM_POTION )              return;
-	if( ip->Type >= ITEM_WING+7 && ip->Type <= ITEM_WING+19 )	return;		//. 구슬 필터링
-	if( (ip->Type >= ITEM_HELPER+14 && ip->Type <= ITEM_HELPER+19) || ip->Type==ITEM_POTION+21 )    return;
-	if( ip->Type == ITEM_HELPER+20)   return;
-	if(ip->Type == ITEM_HELPER+29)   return;
-    if ( ip->Type==ITEM_HELPER+4 || ip->Type==ITEM_HELPER+5 )  return;
-#ifdef DARK_WOLF
-    if ( ip->Type==ITEM_HELPER+6 )    return;
-#endif// DARK_WOLF
-#ifdef MYSTERY_BEAD
-	if ( ip->Type==ITEM_WING+26 )	return;
-#endif // MYSTERY_BEAD
-	if(ip->Type==ITEM_HELPER+7)	return;
-	if(ip->Type==ITEM_HELPER+11) return;
-	if(ip->Type >= ITEM_HELPER+32 && ip->Type <= ITEM_HELPER+37) return;	//^ 펜릴 아이템 수리 불가능
-	if(ip->Type == ITEM_HELPER+38)
-		return;
-#ifdef CSK_LUCKY_SEAL
-	if( ip->Type == ITEM_HELPER+43 || ip->Type == ITEM_HELPER+44 || ip->Type == ITEM_HELPER+45 )
-	{
-		return;
-	}
-#endif //CSK_LUCKY_SEAL	
-#ifdef CSK_FREE_TICKET
-	// 아이템 수리 안되게 예외 처리
-	if(ip->Type >= ITEM_HELPER+46 && ip->Type <= ITEM_HELPER+48)
-	{
-		return;
-	}
-#endif // CSK_FREE_TICKET
-	
-#ifdef CSK_RARE_ITEM
-	// 아이템 수리 안되게 예외 처리
-	if(ip->Type >= ITEM_POTION+58 && ip->Type <= ITEM_POTION+62)
-	{
-		return;
-	}
-#endif // CSK_RARE_ITEM
-
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-	// 희귀아이템티켓 7-12 수리 안되게 예외 처리
-	if(ip->Type >= ITEM_POTION+145 && ip->Type <= ITEM_POTION+150)
-	{
-		return;
-	}
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
-
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-	// 아이템 수리 안되게 예외 처리
-	if(ip->Type >= ITEM_HELPER+125 && ip->Type <= ITEM_HELPER+127)
-	{
-		return;
-	}
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
-	
-#ifdef CSK_LUCKY_CHARM
-	if( ip->Type == ITEM_POTION+53 )// 행운의 부적
-	{
-		return;
-	}
-#endif //CSK_LUCKY_CHARM
-	
-#ifdef CSK_LUCKY_SEAL
-	if( ip->Type == ITEM_HELPER+43 || ip->Type == ITEM_HELPER+44 || ip->Type == ITEM_HELPER+45 )
-	{
-		return;
-	}
-#endif //CSK_LUCKY_SEAL
-	
-#ifdef PSW_ELITE_ITEM              // 엘리트 물약
-	if( ip->Type >= ITEM_POTION+70 && ip->Type <= ITEM_POTION+71 )
-	{
-		return;
-	}
-#endif //PSW_ELITE_ITEM
-	
-#ifdef PSW_SCROLL_ITEM             // 엘리트 스크롤
-	if( ip->Type >= ITEM_POTION+72 && ip->Type <= ITEM_POTION+77 )
-	{
-		return;
-	}
-#endif //PSW_SCROLL_ITEM
-	
-#ifdef PSW_SEAL_ITEM               // 이동 인장
-	if( ip->Type == ITEM_HELPER+59 )
-	{
-		return;
-	}
-#endif //PSW_SEAL_ITEM
-	
-#ifdef PSW_FRUIT_ITEM              // 리셋 열매
-	if( ip->Type >= ITEM_HELPER+54 && ip->Type <= ITEM_HELPER+58 )
-	{
-		return;
-	}
-#endif //PSW_FRUIT_ITEM
-	
-#ifdef PSW_SECRET_ITEM             // 강화의 비약
-	if( ip->Type >= ITEM_POTION+78 && ip->Type <= ITEM_POTION+82 )
-	{
-		return;
-	}
-#endif //PSW_SECRET_ITEM
-	
-#ifdef PSW_INDULGENCE_ITEM         // 면죄부
-	if( ip->Type == ITEM_HELPER+60 )
-	{
-		return;
-	}
-#endif //PSW_INDULGENCE_ITEM
-	
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
-	if( ip->Type == ITEM_HELPER+61 )
-	{
-		return;
-	}
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-
-#ifdef PSW_ADD_PC4_SEALITEM
-	if( ip->Type == ITEM_HELPER+62 ) {
-		return;
-	}
-	if( ip->Type == ITEM_HELPER+63 ) {
-		return;
-	}
-#endif //PSW_ADD_PC4_SEALITEM
-	
-#ifdef PSW_ADD_PC4_SCROLLITEM
-	if( ip->Type == ITEM_POTION+97 ) {
-		return;
-	}
-	if( ip->Type == ITEM_POTION+98 ) {
-		return;
-	}
-#endif //PSW_ADD_PC4_SCROLLITEM
-
-#ifdef YDG_ADD_HEALING_SCROLL
-	if (ip->Type == ITEM_POTION+140)	// 치유의 스크롤
-	{
-		return;
-	}
-#endif	// YDG_ADD_HEALING_SCROLL
-
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
-	if( ip->Type == ITEM_POTION+96 ) {
-		return;
-	}
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-
-#ifdef LDK_ADD_PC4_GUARDIAN
-	if( ip->Type == ITEM_HELPER+64 || ip->Type == ITEM_HELPER+65 ) 
-	{
-		return;
-	}
-#endif //LDK_ADD_PC4_GUARDIAN	
-#ifdef LDK_ADD_RUDOLPH_PET
-	if( ip->Type == ITEM_HELPER+67 )
-	{
-		return;
-	}
-#endif //LDK_ADD_RUDOLPH_PET
-#ifdef PJH_ADD_PANDA_PET
-	if( ip->Type == ITEM_HELPER+80 )
-	{
-		return;
-	}
-#endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET
-	if( ip->Type == ITEM_HELPER+106 )
-	{
-		return;
-	}
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef YDG_ADD_SKELETON_PET
-	if( ip->Type == ITEM_HELPER+123 )	// 스켈레톤 펫
-	{
-		return;
-	}
-#endif	// YDG_ADD_SKELETON_PET
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
-	if( ip->Type == ITEM_HELPER+69 )	// 부활의 부적
-	{
-		return;
-	}
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
-	if( ip->Type == ITEM_HELPER+70 )	// 이동의 부적
-	{
-		return;
-	}
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef PBG_ADD_SANTAINVITATION
-	if( ip->Type == ITEM_HELPER+66 )	return;	//산타마을의 초대장
-#endif //PBG_ADD_SANTAINVITATION
-	if (ip->Type>=ITEM_HELPER+49 || ip->Type>=ITEM_HELPER+50 || ip->Type>=ITEM_HELPER+51)	// 피의 두루마리 등 수리 불가능
-	{
-		return;
-	}
-#endif //LDK_FIX_USING_ISREPAIRBAN_FUNCTION
-
-
-	if( ip->Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN 
-		&& ip->Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END )
+	if( ip->Type >= MODEL_TYPE_CHARM_MIXWING+EWS_BEGIN && ip->Type <= MODEL_TYPE_CHARM_MIXWING+EWS_END )
 	{
 		return;
 	}
@@ -6546,7 +6296,6 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
 	ITEM *l = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
 	if ( PickItem.Number>0 && SrcInventory==Inventory )
 	{	
-		// 아이템을 든 경우
 		switch ( SrcInventoryIndex)
 		{
 		case EQUIPMENT_WEAPON_RIGHT:
@@ -8125,11 +7874,6 @@ void ClearInventory()
 	COMGEM::Init();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 인밴토리에 아이템 추가
-///////////////////////////////////////////////////////////////////////////////
-
-//  아이템의 색을 결정한다.
 void SetItemColor ( int index, ITEM* Inv, int color )
 {
 	int Width  = ItemAttribute[Inv[index].Type].Width;
@@ -8145,7 +7889,6 @@ void SetItemColor ( int index, ITEM* Inv, int color )
 	}
 }
 
-//  두 아이템를 비교한다. ( -1: 더 나쁜 아이템, 0: 같은 아이템, 1: 더 좋은 아이템 ).
 int CompareItem ( ITEM item1, ITEM item2 )
 {
     int equal = 0;
@@ -8173,7 +7916,6 @@ int CompareItem ( ITEM item1, ITEM item2 )
         {
             equal = -1;
         }
-        //  스킬.
         if ( equal==0 )
         {
             if ( skill1<skill2 )
@@ -8185,7 +7927,6 @@ int CompareItem ( ITEM item1, ITEM item2 )
                 equal = 1;
             }
         }
-        //  액설런트.
         if ( equal==0 )
         {
             if ( option1<option2 )
@@ -8197,7 +7938,6 @@ int CompareItem ( ITEM item1, ITEM item2 )
                 equal = 1;
             }
         }
-        //  옵션.
         if ( equal==0 )
         {
             if ( item1.SpecialNum<item2.SpecialNum )
@@ -8251,8 +7991,7 @@ int CompareItem ( ITEM item1, ITEM item2 )
                 }
             }
         }
-        //  내구력.
-        if ( equal==0 )
+         if ( equal==0 )
         {
             if( item1.Durability<item2.Durability  )
                 equal = -1;
@@ -8271,20 +8010,19 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 
 	if(Inv==Inventory)
 	{
-		//내장비
 		if(Index < 12)
 		{
 			ITEM *ip = &CharacterMachine->Equipment[Index];
 			ip->Type       = Type;
 			ip->Durability = Item[2];
 			ip->Option1    = Item[3];
-            ip->ExtOption  = Item[4];   //  세트 타입.
+            ip->ExtOption  = Item[4];
 			ip->Number     = 1;
 			ip->option_380 = false;
 			BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
 			ip->option_380 = b;
-			ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;//옵션 종류
-			ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;//옵션 레벨( 값이 아님 )
+			ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;
+			ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;
 
 			ItemConvert(ip,Item[1],Item[3],Item[4]);			
             SetCharacterClass(Hero);
@@ -8308,7 +8046,7 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
                         if(!Hero->SafeZone)
                             CreateEffect(BITMAP_MAGIC+1,o->Position,o->Angle,o->Light,1,o);
                         break;
-					case ITEM_HELPER+37:	//^ 펜릴 인벤토리에 넣을때 생성및 효과
+					case ITEM_HELPER+37:
 						Hero->Helper.Option1 = ip->Option1;
 						if(ip->Option1 == 0x01)
 						{
@@ -8332,7 +8070,6 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
                     }
                 }
 			}
-#ifdef PET_SYSTEM
             else if ( Index==EQUIPMENT_WEAPON_LEFT )
             {
                 switch ( Type )
@@ -8340,15 +8077,8 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
                 case ITEM_HELPER+5:
                     giPetManager::CreatePetDarkSpirit ( Hero );            
                     break;
-    #ifdef DARK_WOLF
-                    //  임의로 선택.
-                case ITEM_SHIELD :
-                    giPetManager::CreatePetDarkWolf ( Hero );            
-                    break;
-    #endif// DARK_WOLF
                 }
             }
-#endif// PET_SYSTEM
 
             if ( Index==EQUIPMENT_RING_LEFT || Index==EQUIPMENT_RING_RIGHT && ( Hero->EtcPart<=0 || Hero->EtcPart>3 ) )
             {
@@ -8361,18 +8091,18 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 
 			if ( Index==EQUIPMENT_WING)
 			{
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING			// 기간제 날개 작은(군망, 재날, 요날, 천날, 사날)
+#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 				if (Type==ITEM_WING+39 || 
 					Type==ITEM_HELPER+30 || 
-					Type==ITEM_WING+130 ||	// 추가 날개
+					Type==ITEM_WING+130 ||
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 					Type==ITEM_WING+49 ||
 					Type==ITEM_WING+50 ||
 					Type==ITEM_WING+135||
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-					Type==ITEM_WING+40 )	// 날개 장착시 망토 모양 변경
+					Type==ITEM_WING+40 )
 #else //LDK_ADD_INGAMESHOP_SMALL_WING
-				if (Type==ITEM_WING+39 || Type==ITEM_HELPER+30 || Type==ITEM_WING+40)	// 날개 장착시 망토 모양 변경
+				if (Type==ITEM_WING+39 || Type==ITEM_HELPER+30 || Type==ITEM_WING+40)
 #endif //LDK_ADD_INGAMESHOP_SMALL_WING
 				{
 					DeleteCloth(Hero, &Hero->Object);
@@ -8398,8 +8128,8 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 					ip->option_380 = false;
 					BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
 					ip->option_380 = b;
-					ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;//옵션 종류
-					ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;//옵션 레벨( 값이 아님 )
+					ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;
+					ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;
 
 					if(i==0 && j==0)
 						ip->Number = 1;
@@ -8413,12 +8143,10 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 
             if( SrcInventoryIndex < 12 )
             {
-                //  공격속도 계산.
         		if(CharacterAttribute->AbilityTime[0] != 0)
                 {
                     CharacterMachine->CalculateAttackSpeed();
                 }
-                //  공격속도 계산.
         		if(CharacterAttribute->AbilityTime[2] != 0)
                 {
                     CharacterMachine->CalculateAttackSpeed();
@@ -8443,8 +8171,8 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 					ip->option_380 = false;
 					BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
 					ip->option_380 = b;
-					ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;//옵션 종류
-					ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;//옵션 레벨( 값이 아님 )
+					ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;
+					ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;
 					if(i==0 && j==0)
 						ip->Number = 1;
 					else
@@ -8455,7 +8183,6 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 			
             if( SrcInventoryIndex < 12 )
             {
-                //  공격속도 계산.
 				if(CharacterAttribute->AbilityTime[0] != 0)
                 {
                     CharacterMachine->CalculateAttackSpeed();
@@ -8469,7 +8196,6 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 	}
 	else
 	{
-		//트레이드장비
 		int InventoryIndex = Index;
 		ITEM_ATTRIBUTE *ap = &ItemAttribute[Type];
 		for(int i=0;i<ap->Height;i++)

@@ -88,11 +88,7 @@ bool SEASON3B::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int x, in
 
 	m_EditBox = new CUITextInputBox;
 
-#ifdef KJW_FIX_MYSHOP
 	m_EditBox->Init( g_hWnd, 200, 14, iMAX_SHOPTITLE_MULTI - 1 );
-#else // KJW_FIX_MYSHOP
-	m_EditBox->Init( g_hWnd, 200, 14, MAX_SHOPTITLE_UTF16 - 1 );
-#endif // KJW_FIX_MYSHOP
 	m_EditBox->SetPosition(m_Pos.x+50, m_Pos.y+55);
 	m_EditBox->SetTextColor(255, 255, 230, 210);
 	m_EditBox->SetBackColor(0, 0, 0, 25);
@@ -211,9 +207,7 @@ void SEASON3B::CNewUIMyShopInventory::ChangePersonal( bool state )
 		m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 		m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
 		m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-		// 1106 "적용"
 		m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1106], true);
-		
 		m_Button[MYSHOPINVENTORY_CLOSE].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 		m_Button[MYSHOPINVENTORY_CLOSE].ChangeTextColor(RGBA(255, 255, 255, 255));
 		m_Button[MYSHOPINVENTORY_CLOSE].UnLock();
@@ -223,11 +217,9 @@ void SEASON3B::CNewUIMyShopInventory::ChangePersonal( bool state )
 		m_Button[MYSHOPINVENTORY_CLOSE].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
 		m_Button[MYSHOPINVENTORY_CLOSE].ChangeTextColor(RGBA(100, 100, 100, 255));
 		m_Button[MYSHOPINVENTORY_CLOSE].Lock();
-
 		m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 		m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
 		m_Button[MYSHOPINVENTORY_OPEN].UnLock();		
-		// 1107 "개설"
 		m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1107], true);
 	}
 }
@@ -237,7 +229,6 @@ void SEASON3B::CNewUIMyShopInventory::OpenButtonLock()
 	m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
 	m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(100, 100, 100, 255));
 	m_Button[MYSHOPINVENTORY_OPEN].Lock();
-	// 1107 "개설"
 	m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1107], true);
 }
 
@@ -246,7 +237,6 @@ void SEASON3B::CNewUIMyShopInventory::OpenButtonUnLock()
 	m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 	m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
 	m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-	// 1107 "개설"
 	m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1107], true);
 }
 
@@ -298,7 +288,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 		int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 
 #ifndef KJH_FIX_CHANGE_ITEM_PRICE_IN_PERSONAL_SHOP				// #ifndef
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 개인상점에 물품 등록시 인벤 Warning칼라 [lem_2010.9.8]
+#ifdef LEM_ADD_LUCKYITEM
 	if( IsPersonalShopBan( pItemObj ) )	
 		m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f );
 	else	
@@ -311,11 +301,10 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 			return true;
 		}
 
-		if(pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())	// 인벤토리에서 개인상점으로
+		if(pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
 		{
-			if(IsPersonalShopBan(pItemObj) == true)	// 개인상점 불가능이면
+			if(IsPersonalShopBan(pItemObj) == true)
 			{
-				// 2226 "개인상점 이용이 불가능한 아이템입니다."
 				g_pChatListBox->AddText("", GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
 				return true;
 			}
@@ -326,19 +315,16 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 				ChangeTargetIndex(iTargetIndex);
 				
 				CreateMessageBox(MSGBOX_LAYOUT_CLASS(CPersonalShopItemValueMsgBoxLayout));
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 				SetInputValueTextBox(true);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 
 				pPickedItem->HidePickedItem();
 				return true;
 			}
 		}
-		else if(pPickedItem->GetOwnerInventory() == NULL)	// 장비창에서 개인상점으로
+		else if(pPickedItem->GetOwnerInventory() == NULL)
 		{
-			if(IsPersonalShopBan(pItemObj) == true)	// 개인상점 불가능이면
+			if(IsPersonalShopBan(pItemObj) == true)
 			{
-				// 2226 "개인상점 이용이 불가능한 아이템입니다."
 				g_pChatListBox->AddText("", GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
 				return true;
 			}
@@ -349,15 +335,13 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 				ChangeTargetIndex(iTargetIndex);
 				
 				CreateMessageBox(MSGBOX_LAYOUT_CLASS(CPersonalShopItemValueMsgBoxLayout));
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 				SetInputValueTextBox(true);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 				
 				pPickedItem->HidePickedItem();
 				return true;
 			}
 		}
-		else if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)            // 개인 상점에서 개인상점으로
+		else if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
 		{
 			if(m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
 			{
@@ -369,7 +353,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 			}
 		}
 	}
-	else if(m_pNewInventoryCtrl && !pPickedItem && IsPress(VK_RBUTTON))        // 가격 다시 설정
+	else if(m_pNewInventoryCtrl && !pPickedItem && IsPress(VK_RBUTTON))
 	{
 		int iCurSquareIndex = m_pNewInventoryCtrl->FindItemptIndex(MouseX, MouseY);
 
@@ -378,9 +362,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 			ChangeSourceIndex(iCurSquareIndex);
 			ChangeTargetIndex(-1);
 			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CPersonalShopItemValueMsgBoxLayout));
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 			SetInputValueTextBox(true);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 			return true;
 		}
 	}
@@ -403,7 +385,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
 		}
 		
 		POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
-		//. Exit1 버튼 (기본처리)
+
 		if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 		{
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
@@ -431,13 +413,11 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
 		{
 			switch(i)
 			{
-			// 닫기 버튼	
 			case 0:
 				{
 					g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
 				}
 				return false;
-			// 개설, 적용 버튼	
 			case 1:
 				{
 					unicode::t_string strTitle;
@@ -458,7 +438,6 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
 					}
 					else
 					{
-						// 1119 "상점이름이 없거나 아이템가격이 설정되지 않았습니다."
 						g_pChatListBox->AddText("", GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
 					}
 				}
@@ -475,7 +454,6 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
 		}
 	}
 	
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 	{
 		if(SEASON3B::IsPress(VK_RBUTTON))
@@ -516,7 +494,6 @@ void SEASON3B::CNewUIMyShopInventory::RenderFrame()
 
 	unicode::t_char Text[100];
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1102 "개인상점"
 	sprintf( Text, GlobalText[1102]);
 	RenderText( Text, m_Pos.x, m_Pos.y+15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER );
 }
@@ -527,47 +504,38 @@ void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
 
 	if(m_EnablePersonalShop)
 	{
-		// 1103 "개설중"
 		RenderText(GlobalText[1103], m_Pos.x, m_Pos.y+200, 190, 0, RGBA(215, 138, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold );
 	}
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 370 "주의!"
 	sprintf(Text, GlobalText[370]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1109 "상점 등록시 판매 가격을"
 	sprintf(Text, GlobalText[1109]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+250, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1111 "꼭! 확인하시기 바랍니다."
 	sprintf(Text, GlobalText[1111]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+262, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1112 "개인상점에서 이미"
 	sprintf(Text, GlobalText[1112]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+274, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1113 "판매된 아이템은 취소하여"
 	sprintf(Text, GlobalText[1113]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+286, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1115 "돌려 받을 수 없습니다."
 	sprintf(Text, GlobalText[1115]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+298, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1134 "아이템 거래는 모두"
 	sprintf(Text, GlobalText[1134]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+320, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1135 "젠으로만 거래 가능합니다."
 	sprintf(Text, GlobalText[1135]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold );
 }
@@ -603,12 +571,8 @@ bool SEASON3B::CNewUIMyShopInventory::Render()
 
 void SEASON3B::CNewUIMyShopInventory::ClosingProcess()
 {
-#ifdef KJH_FIX_WOPS_K29690_PICKED_ITEM_BACKUP
-	// 창이 닫힐때 아이템이 Picked되어있으면 되돌린다.
 	CNewUIInventoryCtrl::BackupPickedItem();
-#endif // KJH_FIX_WOPS_K29690_PICKED_ITEM_BACKUP
 	g_pMyInventory->ChangeMyShopButtonStateOpen();
-
 	SetFocus(g_hWnd);
 }
 
@@ -632,7 +596,6 @@ void SEASON3B::CNewUIMyShopInventory::ResetSubject()
 	}
 }
 
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 bool SEASON3B::CNewUIMyShopInventory::IsEnableInputValueTextBox()
 {
 	return m_bIsEnableInputValueTextBox;
@@ -642,4 +605,4 @@ void SEASON3B::CNewUIMyShopInventory::SetInputValueTextBox(bool bIsEnable)
 {
 	m_bIsEnableInputValueTextBox = bIsEnable;
 }
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
+

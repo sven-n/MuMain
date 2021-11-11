@@ -789,9 +789,9 @@ int AttackHand = 0;
 void SetAttackSpeed()
 {
 
-	float AttackSpeed1 = CharacterAttribute->AttackSpeed * 0.004f;	// 기사, 일반공격
-	float MagicSpeed1  = CharacterAttribute->MagicSpeed * 0.004f;	// 요정
-	float MagicSpeed2  = CharacterAttribute->MagicSpeed * 0.002f;	// 법사
+	float AttackSpeed1 = CharacterAttribute->AttackSpeed * 0.004f;
+	float MagicSpeed1  = CharacterAttribute->MagicSpeed * 0.004f;
+	float MagicSpeed2  = CharacterAttribute->MagicSpeed * 0.002f;
 
  	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_FIST].PlaySpeed = 0.6f + AttackSpeed1;
 
@@ -14984,7 +14984,6 @@ bool IsBackItem(CHARACTER *c, int iType)
 		return true;
 	}
 
-	// 검류, 도끼류, 창류, 활/석궁류, 지팡이류, 방패류이면 등에 붙는다. 책들은 등에 붙지 않는다.
 	if(iType >= MODEL_SWORD && iType < MODEL_SHIELD+MAX_ITEM_INDEX && !(iType >= MODEL_STAFF+21 && iType <= MODEL_STAFF+29))
 	{
 		return true;

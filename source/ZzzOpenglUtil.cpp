@@ -544,7 +544,7 @@ void EnableAlphaBlend2()
 		glEnable(GL_FOG);
 }
 
-void EnableAlphaBlend3()	// 연기등 블랜딩 잘 되도록 (TGA 출력시 유용)
+void EnableAlphaBlend3()
 {
     if(AlphaBlendType != 6)
 	{
@@ -729,7 +729,6 @@ void EndOpengl()
 	glPopMatrix();
 }
 
-// 현재 카메라의 매트릭스를 가지고 MousePosition 업데이트
 void UpdateMousePositionn()
 {
 	vec3_t vPos;
@@ -1160,8 +1159,7 @@ float RenderNumber2D(float x,float y,int Num,float Width,float Height)
 
 void BeginBitmap()
 {
-	// OpenGL에서 StackUnder Flow 호출되며, 
-	//	Mode를 먼저 설정하고 Push하여야 하는데 반대로 되었습니다.
+
 #ifdef LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();

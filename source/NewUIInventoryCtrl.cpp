@@ -434,12 +434,10 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE* pbyIt
 
 	if(!CanMove(iColumnX, iRowY, pNewItem))
 	{
-		//. 옮길 수 없다면
 		m_pNewItemMng->DeleteItem(pNewItem);
 		return false;
 	}
 	
-	//. 장착 가능
 	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pNewItem->Type];
 	pNewItem->x = iColumnX;
 	pNewItem->y = iRowY;
@@ -449,7 +447,7 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE* pbyIt
 		for(int x=0; x<pItemAttr->Width; x++)
 		{
 			int iCurIndex = (pNewItem->y+y)*m_nColumn+(pNewItem->x+x);
-			m_pdwItemCheckBox[iCurIndex] = pNewItem->Key;	//. 체크박스에 아이템 추가
+			m_pdwItemCheckBox[iCurIndex] = pNewItem->Key;
 		}
 	}
 	m_vecItem.push_back(pNewItem);
@@ -468,12 +466,10 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, ITEM* pItem
 	
 	if(!CanMove(iColumnX, iRowY, pNewItem))
 	{
-		//. 옮길 수 없다면
 		m_pNewItemMng->DeleteItem(pNewItem);
 		return false;
 	}
 	
-	//. 장착 가능
 	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pNewItem->Type];
 	pNewItem->x = iColumnX;
 	pNewItem->y = iRowY;
@@ -483,16 +479,14 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, ITEM* pItem
 		for(int x=0; x<pItemAttr->Width; x++)
 		{
 			int iCurIndex = (pNewItem->y+y)*m_nColumn+(pNewItem->x+x);
-			m_pdwItemCheckBox[iCurIndex] = pNewItem->Key;	//. 체크박스에 아이템 추가
+			m_pdwItemCheckBox[iCurIndex] = pNewItem->Key;
 		}
 	}
 	m_vecItem.push_back(pNewItem);
 	return true;
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE byType, BYTE bySubType, BYTE byLevel /* = 0 */, 
-								  BYTE byDurability /* = 255 */, BYTE byOption1 /* = 0 */, BYTE byOptionEx /* = 0 */, 
-								  BYTE byOption380 /* = 0 */, BYTE byOptionHarmony /* = 0 */)
+bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE byType, BYTE bySubType, BYTE byLevel, BYTE byDurability, BYTE byOption1, BYTE byOptionEx, BYTE byOption380, BYTE byOptionHarmony)
 {
 	if(iColumnX < 0 || iRowY < 0 || 
 		iColumnX >= m_nColumn || iRowY >= m_nRow) return false;
@@ -504,12 +498,10 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE byType
 
 	if(!CanMove(iColumnX, iRowY, pNewItem))
 	{
-		//. 옮길 수 없다면
 		m_pNewItemMng->DeleteItem(pNewItem);
 		return false;
 	}
 	
-	//. 장착 가능
 	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pNewItem->Type];
 	pNewItem->x = iColumnX;
 	pNewItem->y = iRowY;
@@ -519,7 +511,7 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE byType
 		for(int x=0; x<pItemAttr->Width; x++)
 		{
 			int iCurIndex = (pNewItem->y+y)*m_nColumn+(pNewItem->x+x);
-			m_pdwItemCheckBox[iCurIndex] = pNewItem->Key;	//. 체크박스에 아이템 추가
+			m_pdwItemCheckBox[iCurIndex] = pNewItem->Key;
 		}
 	}
 	m_vecItem.push_back(pNewItem);
@@ -541,7 +533,7 @@ void SEASON3B::CNewUIInventoryCtrl::RemoveItem(ITEM* pItem)
 				for(int x=0; x<pItemAttr->Width; x++)
 				{
 					int iCurIndex = (pItem->y+y)*m_nColumn+(pItem->x+x);
-					m_pdwItemCheckBox[iCurIndex] = 0;	//. 체크박스에서 아이템 제거
+					m_pdwItemCheckBox[iCurIndex] = 0;
 				}
 			}
 			m_pNewItemMng->DeleteItem(pItem);
@@ -638,19 +630,13 @@ bool SEASON3B::CNewUIInventoryCtrl::IsItem(short int siType)
 	return false;
 }
 
-#ifdef PSW_EVENT_LENA
 int SEASON3B::CNewUIInventoryCtrl::GetItemCount(short int siType, int iLevel)
-#else //PSW_EVENT_LENA
-int SEASON3B::CNewUIInventoryCtrl::GetItemCount(short int siType)
-#endif //PSW_EVENT_LENA
 {
 	int count = 0;
 	type_vec_item::iterator li = m_vecItem.begin();
 	for(; li != m_vecItem.end(); li++) {
 		if((*li)->Type == siType) {
-#ifdef PSW_EVENT_LENA
 			if( iLevel == -1 || (((*li)->Level>>3)&15) == iLevel )
-#endif //PSW_EVENT_LENA
 			{
 				count += ((*li)->Durability==0) ? 1 : (*li)->Durability;
 			}
@@ -666,7 +652,6 @@ int SEASON3B::CNewUIInventoryCtrl::FindItemIndex( short int siType, int iLevel )
 	{
 		if( (*li)->Type == siType )
 		{
-			// 아이템 타입이 같고 레벨이 상관없거나 해당되는 레벨이면 위치값 리턴
 			if( iLevel == -1 || (((*li)->Level>>3)&15) == iLevel )
 			{
 				return (*li)->y*GetNumberOfColumn()+(*li)->x;
@@ -689,7 +674,6 @@ int SEASON3B::CNewUIInventoryCtrl::FindItemReverseIndex(short sType, int iLevel)
 			{
 				if(pItem->Type == sType)
 				{
-					// 아이템 타입이 같고 레벨이 상관없거나 해당되는 레벨이면 위치값 리턴
 					if( iLevel == -1 || ((pItem->Level>>3)&15) == iLevel )
 					{
 						return (pItem->y * GetNumberOfColumn()) + pItem->x;
@@ -702,7 +686,6 @@ int SEASON3B::CNewUIInventoryCtrl::FindItemReverseIndex(short sType, int iLevel)
 	return -1;
 }	
 
-// 인벤토리안의 아이템의 위치값으로 기본 인덱스를 구한다. (ex.서버에 보낼 위치값을 위해)
 int SEASON3B::CNewUIInventoryCtrl::FindBaseIndexByITEM(ITEM* pItem)
 {
 	return pItem->y*GetNumberOfColumn()+pItem->x;
@@ -750,13 +733,7 @@ int SEASON3B::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy)
 {
 	for(int i=0; i<m_nColumn*m_nRow; i++)
 	{
-#ifdef PBG_WOPS_INVENCHECK
-		//인벤토리체크시에 해당 아이템 크기 x크기의 넓이가 넘어가서 체크시에
-		//다음줄로 넘어가서 체크하는것을 방지하기 위해.
 		if(CheckSlot(i, cx, cy) && (i%m_nColumn < (m_nColumn - (cx-1))))
-#else //PBG_WOPS_INVENCHECK
-		if(CheckSlot(i, cx, cy))
-#endif //PBG_WOPS_INVENCHECK
 		{
 			return i;
 		}
@@ -854,8 +831,8 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
 		&& SEASON3B::IsRelease(VK_LBUTTON) 
 		&& m_iPointedSquareIndex != -1 
 		&& NULL == GetPickedItem() 
-		&& false == IsLocked()	// Lock이 걸렸다면 Picking 금지
-		&& m_bRepairMode == false	// 수리모드가 아니면 
+		&& false == IsLocked()
+		&& m_bRepairMode == false
 		)
 	{
 		m_EventState = EVENT_PICKING;
@@ -878,11 +855,9 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
 		ITEM* pItem = FindItemByKey(m_pdwItemCheckBox[m_iPointedSquareIndex]);
 		if(pItem != m_pToolTipItem)
 		{
-			//. 툴팁 생성
 			CreateItemToolTip(pItem);
 
 #ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-			// 펫정보 요청 (Mouse커서 On)
 			if( (pItem->Type == ITEM_HELPER+4) || (pItem->Type == ITEM_HELPER+5) )
 			{
 				ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
@@ -930,11 +905,8 @@ void SEASON3B::CNewUIInventoryCtrl::UpdateProcess()
 	int iCurSquareIndex = GetSquareIndexAtPt(MouseX, MouseY);
 	if(iCurSquareIndex != m_iPointedSquareIndex)
 	{
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-		// 펫정보 초기화
 		if( (GetPickedItem() == NULL) && (g_pMyShopInventory->IsEnableInputValueTextBox() == false) )
 			giPetManager::InitItemBackup();
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 		m_iPointedSquareIndex = iCurSquareIndex;
 	}
 	
@@ -942,7 +914,6 @@ void SEASON3B::CNewUIInventoryCtrl::UpdateProcess()
 		|| (m_iPointedSquareIndex != -1 && m_pdwItemCheckBox[m_iPointedSquareIndex] == 0))
 	{
 		m_EventState = EVENT_NONE;
-		//. 툴팁이 있다면 제거
 		DeleteItemToolTip();
 	}
 }
@@ -999,8 +970,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 					glColor4f(0.3f, 0.5f, 0.5f, 0.6f);
 				}
 				
-				RenderColor(m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT),
-					INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
+				RenderColor(m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT),INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
 				EndRenderColor();
 			}
 
@@ -1126,8 +1096,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 
 										int	iDurability = pTargetItem->Durability;
 										
-										if((pPickItem->Type==ITEM_POTION+13)    
-											|| (pPickItem->Type==ITEM_POTION+14)) 
+										if((pPickItem->Type==ITEM_POTION+13) || (pPickItem->Type==ITEM_POTION+14)) 
 										{	   
 											bSuccess = CanUpgradeItem(pPickItem, pTargetItem);
 										}
@@ -1163,7 +1132,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 											bSuccess = IsOverlayItem(pPickItem, pTargetItem);
 										}
 
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리 내에 아이템이 서로 겹칠 때의 예외처리 [lem_2010.9.8]
+#ifdef LEM_ADD_LUCKYITEM
 										if( Check_LuckyItem( pTargetItem->Type ) )
 										{
 											bSuccess	= false;
@@ -1227,16 +1196,14 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 	if(m_pNew3DRenderMng)
 	{
 #ifdef NEW_USER_INTERFACE_UISYSTEM
-		// 부분유료화 상점에서는 갯수 렌더링과 툴팁렌더링을 따로 호출하고 있기 때문에 리턴
 		if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP))
 		{
 			return;
 		}
 #endif // NEW_USER_INTERFACE_UISYSTEM
-		//. 아이템 갯수 랜더링
 		m_pNew3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, RENDER_NUMBER_OF_ITEM, 0);
 		if(m_pToolTipItem && GetPickedItem() == NULL)
-		{	//. 툴팁 랜더링
+		{
 			if( tooltipvisible )
 			{
 				m_pNew3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, RENDER_ITEM_TOOLTIP, 0);
@@ -1464,10 +1431,7 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
 		float x = m_Pos.x+(pItem->x*INVENTORY_SQUARE_WIDTH);
 		float y = m_Pos.y+(pItem->y*INVENTORY_SQUARE_HEIGHT);
 		float width = pItemAttr->Width*INVENTORY_SQUARE_WIDTH;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		float height = pItemAttr->Height*INVENTORY_SQUARE_HEIGHT;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 		if(pItem->Type>=ITEM_POTION && pItem->Type<=ITEM_POTION+8 && pItem->Durability > 1)
 		{
@@ -1484,48 +1448,31 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
 			glColor3f(1.f,0.9f,0.7f);
 			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
 		}
-#ifdef PSW_ELITE_ITEM						// 엘리트 물약
 		else if(pItem->Type>=ITEM_POTION+70 && pItem->Type<=ITEM_POTION+71 && pItem->Durability > 1)
 		{
 			glColor3f(1.f,0.9f,0.7f);
 			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
 		}
-#endif //PSW_ELITE_ITEM						// 엘리트 물약
-#ifdef PSW_NEW_ELITE_ITEM                   // 중간 엘리트 물약
 		else if(pItem->Type==ITEM_POTION+94 && pItem->Durability > 1) 
 		{
 			glColor3f(1.f,0.9f,0.7f);
 			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
 		}
-#endif //PSW_NEW_ELITE_ITEM                 // 중간 엘리트 물약
-#ifdef PSW_SECRET_ITEM						// 강화의 비약
 		else if(pItem->Type>=ITEM_POTION+78 && pItem->Type<=ITEM_POTION+82 && pItem->Durability > 1)
 		{
 			glColor3f(1.f,0.9f,0.7f);
 			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
 		}
-#endif //PSW_SECRET_ITEM					// 강화의 비약
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 		else if(pItem->Type>=ITEM_POTION+85 && pItem->Type<=ITEM_POTION+90 && pItem->Durability > 1)
 		{
 			glColor3f(1.f,0.9f,0.7f);
 			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
 		}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
-		else if(pItem->Type==ITEM_POTION+133 && pItem->Durability > 1)	// 엘리트 SD회복물약
+		else if(pItem->Type==ITEM_POTION+133 && pItem->Durability > 1)
 		{
 			glColor3f(1.f,0.9f,0.7f);
 			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
 		}
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_ITEM
-		else if(pItem->Type>=ITEM_POTION+153 && pItem->Type<=ITEM_POTION+156 && pItem->Durability > 1)	// 스타더스트 ~ 잿더미 도살자의 몽둥이
-		{
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
-		}
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_ITEM
 		else if(COMGEM::isCompiledGem(pItem)) 
 		{
 			int Level = (pItem->Level>>3)&15;

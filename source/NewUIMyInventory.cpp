@@ -1529,7 +1529,7 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 			if(IsEquipable(m_iPointedSlot, pItemObj))
 			{
 				if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
-				{	//. 인벤토리에서 장비창
+				{
 					int iSourceIndex = pPickedItem->GetSourceLinealPos();
 					int iTargetIndex = m_iPointedSlot;
 					SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex, 
@@ -1680,10 +1680,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 	}
 
 	CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-	if(m_pNewInventoryCtrl && pPickedItem 
-		&& SEASON3B::IsRelease(VK_LBUTTON)
-		//&& m_pNewInventoryCtrl->CanPushItem() == true
-		)
+	if(m_pNewInventoryCtrl && pPickedItem && SEASON3B::IsRelease(VK_LBUTTON))
 	{
 		ITEM* pPickItem = pPickedItem->GetItem();
 		if(pPickItem == NULL)
@@ -1734,14 +1731,12 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 						bSuccess = false;
 					}
 
-					if((pPickItem->Type==ITEM_POTION+13 && iLevel >= 6)    
-						|| (pPickItem->Type==ITEM_POTION+14 && iLevel >= 9)) 
-					{	    
+					if((pPickItem->Type==ITEM_POTION+13 && iLevel >= 6) || (pPickItem->Type==ITEM_POTION+14 && iLevel >= 9)) 
+					{
 						bSuccess = false;
 					}
 					
-					if(pPickItem->Type == ITEM_POTION+13 
-						&& iType == ITEM_HELPER+37 && iDurability != 255)
+					if(pPickItem->Type == ITEM_POTION+13 && iType == ITEM_HELPER+37 && iDurability != 255)
 					{
 						SEASON3B::CFenrirRepairMsgBox* pMsgBox = NULL;
 						SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CFenrirRepairMsgBoxLayout), &pMsgBox);
@@ -1776,15 +1771,13 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 						}
 					}
 					
-					if(pPickItem->Type == ITEM_POTION+43 
-						|| pPickItem->Type == ITEM_POTION+44 )
+					if(pPickItem->Type == ITEM_POTION+43 || pPickItem->Type == ITEM_POTION+44 )
 					{
 						if (g_SocketItemMgr.IsSocketItem(pItem))
 						{
 							bSuccess = false;
 						}
-						else
-						if( pItem->Jewel_Of_Harmony_Option == 0 )
+						else if( pItem->Jewel_Of_Harmony_Option == 0 )
 						{
 							bSuccess = false;
 						}
@@ -1823,8 +1816,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 
 					if(bOverlay)
 					{
-						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex,
-							pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);
+						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex,	pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);
 					}
 				}
 			}
@@ -1833,8 +1825,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 			{
 				if(pPickedItem->GetSourceLinealPos() != iTargetIndex)
 				{
-					SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex, 
-						pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);
+					SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex, pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);
 				}
 				else
 				{
@@ -1850,9 +1841,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 			if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
-				g_pStorageInventory->SendRequestItemToMyInven(
-					pPickItem, iSourceIndex, MAX_EQUIPMENT_INDEX+iTargetIndex);
-
+				g_pStorageInventory->SendRequestItemToMyInven(pPickItem, iSourceIndex, MAX_EQUIPMENT_INDEX+iTargetIndex);
 				return true;
 			}
 		}
@@ -1862,8 +1851,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 			if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
-				g_pTrade->SendRequestItemToMyInven(
-					pPickItem, iSourceIndex, MAX_EQUIPMENT_INDEX+iTargetIndex);
+				g_pTrade->SendRequestItemToMyInven(pPickItem, iSourceIndex, MAX_EQUIPMENT_INDEX+iTargetIndex);
 
 				return true;
 			}
@@ -1904,11 +1892,9 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				return true;
 			}
 		}
-		/* CNewUIInventoryCtrl를 사용하지 않는 예외 */
-		/* ITEM::ex_src_type 값으로 구분한다. (ITEM구조체 참조) */
 		else if(pPickItem->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
-		{	//. 장비창에서 인벤토리	(장비창은 CNewUIInventoryCtrl를 사용 하지 않으므로)
-			int iSourceIndex = pPickedItem->GetSourceLinealPos();	// return ITEM::lineal_pos;
+		{
+			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 			if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
@@ -1918,12 +1904,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 			}
 		}
 	}
-	else if(m_pNewInventoryCtrl && GetRepairMode() == REPAIR_MODE_OFF && 
-			SEASON3B::IsPress(VK_RBUTTON)
-		#ifdef LEM_FIX_USER_LOGOUT
-			 && g_bExit == false 
-		#endif	// LEM_FIX_USER_LOGOUT [lem_2010.8.18]
-			)
+	else if(m_pNewInventoryCtrl && GetRepairMode() == REPAIR_MODE_OFF && SEASON3B::IsPress(VK_RBUTTON))
 	{
 		ResetMouseRButton();
 
@@ -2460,50 +2441,50 @@ bool SEASON3B::CNewUIMyInventory::CanRegisterItemHotKey(int iType)
 {
 	switch(iType)
 	{
-	case ITEM_POTION+0:		// 사과
-	case ITEM_POTION+1:		// 작은치료물약	
-	case ITEM_POTION+2:		// 중간치료물약	
-	case ITEM_POTION+3:		// 큰치료물약	
-	case ITEM_POTION+4:		// 작은마나물약	
-	case ITEM_POTION+5:		// 중간마나물약	
-	case ITEM_POTION+6:		// 큰마나물약		
-	case ITEM_POTION+7:		// 공성물약(축복의물약, 영혼의물약)
-	case ITEM_POTION+8:		// 해독물약
-	case ITEM_POTION+9:		// 술
-	case ITEM_POTION+10:	// 마을귀환문서
-	case ITEM_POTION+20:	// 사랑의 묘약
-	case ITEM_POTION+35:	// 작은SD회복물약
-	case ITEM_POTION+36:	// 중간SD회복물약
-	case ITEM_POTION+37:	// 큰SD회복물약
-	case ITEM_POTION+38:	// 작은복합물약
-	case ITEM_POTION+39:	// 중간복합물약
-	case ITEM_POTION+40:	// 큰복합물약
-	case ITEM_POTION+46:	// 잭오랜턴의축복
-	case ITEM_POTION+47:	// 잭오랜턴의분노
-	case ITEM_POTION+48:	// 잭오랜턴의외침
-	case ITEM_POTION+49:	// 잭오랜턴의음식
-	case ITEM_POTION+50:	// 잭오랜턴의음료
+	case ITEM_POTION+0:
+	case ITEM_POTION+1:
+	case ITEM_POTION+2:
+	case ITEM_POTION+3:
+	case ITEM_POTION+4:
+	case ITEM_POTION+5:
+	case ITEM_POTION+6:
+	case ITEM_POTION+7:
+	case ITEM_POTION+8:
+	case ITEM_POTION+9:
+	case ITEM_POTION+10:
+	case ITEM_POTION+20:
+	case ITEM_POTION+35:
+	case ITEM_POTION+36:
+	case ITEM_POTION+37:
+	case ITEM_POTION+38:
+	case ITEM_POTION+39:
+	case ITEM_POTION+40:
+	case ITEM_POTION+46:
+	case ITEM_POTION+47:
+	case ITEM_POTION+48:
+	case ITEM_POTION+49:
+	case ITEM_POTION+50:
 #ifdef PSW_ELITE_ITEM
-	case ITEM_POTION+70:    // 부분유료화 엘리트 체력 물약
-	case ITEM_POTION+71:    // 부분유료화 엘리트 마나 물약
+	case ITEM_POTION+70:
+	case ITEM_POTION+71:
 #endif //PSW_ELITE_ITEM
 #ifdef PSW_ELITE_ITEM
-	case ITEM_POTION+78:    // 부분유료화 힘의 비약
-	case ITEM_POTION+79:    // 부분유료화 민첩의 비약
-	case ITEM_POTION+80:    // 부분유료화 체력의 비약
-	case ITEM_POTION+81:    // 부분유료화 에너지의 비약
-	case ITEM_POTION+82:    // 부분유료화 통솔의
+	case ITEM_POTION+78:
+	case ITEM_POTION+79:
+	case ITEM_POTION+80:
+	case ITEM_POTION+81:
+	case ITEM_POTION+82:
 #endif //PSW_ELITE_ITEM
 #ifdef PSW_NEW_ELITE_ITEM
-	case ITEM_POTION+94:    // 부분유료화 엘리트 중간 체력 물약
+	case ITEM_POTION+94:
 #endif //PSW_NEW_ELITE_ITEM
 #ifdef CSK_EVENT_CHERRYBLOSSOM
-	case ITEM_POTION+85:	// 벚꽃술
-	case ITEM_POTION+86:	// 벚꽃경단
-	case ITEM_POTION+87:	// 벚꽃잎
+	case ITEM_POTION+85:
+	case ITEM_POTION+86:
+	case ITEM_POTION+87:
 #endif //CSK_EVENT_CHERRYBLOSSOM
 #ifdef YDG_ADD_CS7_ELITE_SD_POTION
-	case ITEM_POTION+133:	// 엘리트SD회복물약
+	case ITEM_POTION+133:
 #endif	// YDG_ADD_CS7_ELITE_SD_POTION
 		return true;
 	}

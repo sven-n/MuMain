@@ -131,7 +131,7 @@ namespace SEASON3B
 		POINT	m_Pos;
 		SIZE	m_Size;
 		int	m_nColumn, m_nRow;
-		DWORD*	m_pdwItemCheckBox;		//. containing key value
+		DWORD*	m_pdwItemCheckBox;
 		EVENT_STATE	m_EventState;
 		int	m_iPointedSquareIndex;
 		bool m_bShow, m_bLock;
@@ -143,7 +143,7 @@ namespace SEASON3B
 
 		bool m_bRepairMode;
 
-		bool m_bCanPushItem;	// 인벤토리에 아이템 넣을 수 있는가 판별 변수
+		bool m_bCanPushItem;
 		
 		void Init();
 
@@ -205,7 +205,6 @@ namespace SEASON3B
 
 		bool UpdateMouseEvent();
 		bool Update();
-		// 업데이트의 실제 작업 프로세스
 		void UpdateProcess();
 		void Render();
 
@@ -261,19 +260,15 @@ namespace SEASON3B
 		static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
 		//. PickedItem Control Functions
-		static CNewUIPickedItem* GetPickedItem();	//. 없으면 NULL
+		static CNewUIPickedItem* GetPickedItem();
 		static bool CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem);
-		static void DeletePickedItem();		//. 있으면 지운다.
-		static void BackupPickedItem();		//. 있으면 되돌린다.
+		static void DeletePickedItem();
+		static void BackupPickedItem();
 
 	//protected:
-		void Render3D();	//. 외부에서 호출 금지
+		void Render3D();
 		void RenderNumberOfItem();
 		void RenderItemToolTip();
-		
-#ifdef NEW_USER_INTERFACE_UISYSTEM
-		ITEM* GetTooltipItem() { return m_pToolTipItem; }
-#endif //NEW_USER_INTERFACE_UISYSTEM
 	};
 }
 

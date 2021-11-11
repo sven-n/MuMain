@@ -565,8 +565,6 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 		Vector(1.0f,0.0f,0.0f,light);
 		b->RenderMesh(0, RENDER_TEXTURE, o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 		VectorCopy(light, b->BodyLight);
-		//맵툴과 맵소스가 달라서 값이 다르게 표현된다.
-		//b->RenderMesh(0, RENDER_BRIGHT|RENDER_CHROME, 0.5f, 0, 0.5f,o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);	//맵툴내의 값
 		b->RenderMesh(0, RENDER_BRIGHT|RENDER_CHROME, 0.2f,0,0.2f,o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
 		vec3_t vLightFire, Position, vPos;

@@ -597,9 +597,9 @@ bool CGMDoppelGanger4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 	
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+189:	// 도살자
-	case MODEL_MONSTER01+190:	// 도살자
-		if(rand()%4 == 0)	// 숨연기
+	case MODEL_MONSTER01+189:
+	case MODEL_MONSTER01+190:
+		if(rand()%4 == 0)
 		{
 			b->TransformByObjectBone(vPos, o, 6);
 			vPos[1] += 50.0f;
@@ -607,7 +607,7 @@ bool CGMDoppelGanger4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			Vector(1.0f,1.0f,1.0f,vLight);
 			CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 61);
 		}
-		if(c->Dead==0 && rand()%4==0)	// 발연기
+		if(c->Dead==0 && rand()%4==0)
 		{
 			Vector(o->Position[0]+(float)(rand()%64-32),
 				o->Position[1]+(float)(rand()%64-32),
@@ -617,7 +617,6 @@ bool CGMDoppelGanger4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 		if (o->Type == MODEL_MONSTER01+190)
 		{
-			// 본에 불붙이기
 			Vector(1.0f,0.2f,0.1f,vLight);
 			for (int j = 0; j < 50; ++j)
 			{
@@ -638,17 +637,16 @@ bool CGMDoppelGanger4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				vPos[1] += rand()%10-20;
 				vPos[2] += rand()%10-20;
 
-				// 리얼한 불 만들기!!
  				switch(rand()%3)
 				{
 				case 0:
-					CreateParticle(BITMAP_FIRE_HIK1,vPos,o->Angle,vLight,0,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_HIK1,vPos,o->Angle,vLight,0,fScale);
 					break;
 				case 1:
-					CreateParticle(BITMAP_FIRE_CURSEDLICH,vPos,o->Angle,vLight,4,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_CURSEDLICH,vPos,o->Angle,vLight,4,fScale);
 					break;
 				case 2:
-					CreateParticle(BITMAP_FIRE_HIK3,vPos,o->Angle,vLight,0,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_HIK3,vPos,o->Angle,vLight,0,fScale);
 					break;
 				}
 			}

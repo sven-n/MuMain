@@ -469,7 +469,7 @@ CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iK
 		strcpy(pCharacter->ID, "우산");
 		pCharacter->Object.Scale = 0.8f;
 		pCharacter->Object.HiddenMesh = 2;
-		pCharacter->Object.m_iAnimation = 0;			// 걷기 사운드2개를 번갈아 play하기 위해 임시변수 사용. (원래는 팬릴이사용)
+		pCharacter->Object.m_iAnimation = 0;
 
 		OBJECT* pObject = &pCharacter->Object;
 	}
@@ -522,18 +522,14 @@ bool C09SummerEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 		{
 			if( o->AnimationFrame > 0.0f && o->AnimationFrame <= 0.3f )
 			{
- #ifdef CSK_EVENT_CHERRYBLOSSOM
  				CreateEffect( MODEL_EFFECT_SKURA_ITEM, o->Position, o->Angle, o->Light, 1, o );
- #endif // CSK_EVENT_CHERRYBLOSSOM
 				vec3_t Position, Angle, Light;
 				Position[0] = o->Position[0];
 				Position[1] = o->Position[1];
 				Position[2] = RequestTerrainHeight(Position[0],Position[1]);
 				ZeroMemory( Angle, sizeof ( Angle));
-#ifdef YDG_ADD_FIRECRACKER_ITEM
 				Light[0] = Light[1] = Light[2] = 1.0f;
 				CreateEffect(BITMAP_FIRECRACKER0001,Position,Angle,Light,0);
-#endif	// YDG_ADD_FIRECRACKER_ITEM
 				CreateEffect( MODEL_EFFECT_UMBRELLA_DIE, o->Position, o->Angle, o->Light, 0, o);
 				for(int i=0 ; i<40 ; i++)
 				{

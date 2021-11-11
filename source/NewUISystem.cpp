@@ -743,11 +743,6 @@ bool SEASON3B::CNewUISystem::IsPartChargeShop( DWORD dwKey, bool isMessagebox )
 
 void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 {
-#ifdef NEW_USER_INTERFACE_SHELL
-	if( IsPartChargeShop( dwKey ) ) {
-		return;
-	}
-#endif //NEW_USER_INTERFACE_SHELL
 	if(m_pNewUIMng) 
 	{
 		if(dwKey == SEASON3B::INTERFACE_FRIEND)
@@ -758,11 +753,7 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		}
 		else if(dwKey == SEASON3B::INTERFACE_INVENTORY)
 		{
-#ifdef CSK_FIX_UI_FUNCTIONNAME
 			HideGroupBeforeOpenInterface();
-#else // CSK_FIX_UI_FUNCTIONNAME
-			HideAllGroupC();
-#endif // CSK_FIX_UI_FUNCTIONNAME
 			
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
 
@@ -778,11 +769,7 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		}
 		else if(dwKey == SEASON3B::INTERFACE_CHARACTER)
 		{
-#ifdef CSK_FIX_UI_FUNCTIONNAME
 			HideGroupBeforeOpenInterface();
-#else // CSK_FIX_UI_FUNCTIONNAME
-			HideAllGroupC();
-#endif // CSK_FIX_UI_FUNCTIONNAME
 
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, true);
 
@@ -806,22 +793,17 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 			{
 				Hide(SEASON3B::INTERFACE_MYQUEST);
 			}
-#ifdef CSK_FIX_UI_FUNCTIONNAME
+
 			HideGroupBeforeOpenInterface();
-#else // CSK_FIX_UI_FUNCTIONNAME
-			HideAllGroupC();
-#endif // CSK_FIX_UI_FUNCTIONNAME
+
 			m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_CHARACTER);
 			g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, true);
 			m_pNewPetInfoWindow->OpenningProcess();
 		}
 		else if(dwKey == SEASON3B::INTERFACE_MYQUEST)
 		{
-#ifdef CSK_FIX_UI_FUNCTIONNAME
 			HideGroupBeforeOpenInterface();
-#else // CSK_FIX_UI_FUNCTIONNAME
-			HideAllGroupC();
-#endif // CSK_FIX_UI_FUNCTIONNAME
+
 			if(IsVisible(SEASON3B::INTERFACE_CHARACTER))
 			{
 				g_pMyQuestInfoWindow->SetPos(640-190*2, 0);
@@ -1024,27 +1006,14 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		{
 			m_pNewCryWolfInterface->OpenningProcess();
 		}
-#ifdef NEW_USER_INTERFACE_SHELL
-		else if(dwKey == SEASON3B::INTERFACE_PARTCHARGE_SHOP)
-			m_pNewPartChargeShop->OpeningProcess();
-			g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
-		}
-#endif //NEW_USER_INTERFACE_SHELL
-#ifdef PSW_GOLDBOWMAN
 		else if( dwKey == SEASON3B::INTERFACE_GOLD_BOWMAN )
 		{
 			m_pNewGoldBowman->OpeningProcess();
 		}
-#endif //PSW_GOLDBOWMAN
-
-#ifdef PSW_EVENT_LENA
 		else if( dwKey == SEASON3B::INTERFACE_GOLD_BOWMAN_LENA )
 		{
 			m_pNewGoldBowmanLena->OpeningProcess();
 		}
-#endif //PSW_EVENT_LENA	
-
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 		else if(dwKey == SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION)
 		{
 			HideAllGroupA();
@@ -1057,14 +1026,10 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 			HideAllGroupA();
 			g_pExchangeLuckyCoinWindow->OpenningProcess();
 		}
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_NEW_DUEL_UI
 		else if( dwKey == SEASON3B::INTERFACE_DUELWATCH )
 		{
 			m_pNewDuelWatchWindow->OpeningProcess();
 		}
-#endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 		else if( dwKey == SEASON3B::INTERFACE_DUELWATCH_MAINFRAME )
 		{
 			m_pNewDuelWatchMainFrameWindow->OpeningProcess();
@@ -1073,8 +1038,6 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		{
 			m_pNewDuelWatchUserListWindow->OpeningProcess();
 		}
-#endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef YDG_ADD_DOPPELGANGER_UI
 		else if( dwKey == SEASON3B::INTERFACE_DOPPELGANGER_NPC )
 		{
 			m_pNewDoppelGangerWindow->OpeningProcess();
@@ -1083,21 +1046,17 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		{
 			m_pNewDoppelGangerFrame->OpenningProcess();
 		}
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 		else if(dwKey == SEASON3B::INTERFACE_NPC_DIALOGUE)
 		{
 			HideAllGroupA();
 			g_pNPCDialogue->ProcessOpening();
 		}
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 		else if(dwKey == SEASON3B::INTERFACE_QUEST_PROGRESS)
 		{
 			HideAllGroupA();
 			g_pQuestProgress->ProcessOpening();
 		}
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
+
 #ifdef ASG_ADD_UI_NPC_MENU
 		else if(dwKey == SEASON3B::INTERFACE_NPC_MENU)
 		{
@@ -1105,7 +1064,6 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 			g_pNPCMenu->ProcessOpening();
 		}
 #endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		else if(dwKey == SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
 		{
 			if (IsVisible(SEASON3B::INTERFACE_INVENTORY))
@@ -1119,8 +1077,6 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 				g_pQuestProgressByEtc->SetPos(640-190*2, 0);
 			g_pQuestProgressByEtc->ProcessOpening();
 		}
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 		else if( dwKey == SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC )
 		{
 			m_pNewEmpireGuardianNPC->OpenningProcess();
@@ -1129,27 +1085,20 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		{
 			m_pNewEmpireGuardianTimer->OpenningProcess();
 		}
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-#ifdef PJH_ADD_MINIMAP
 		else if( dwKey == SEASON3B::INTERFACE_MINI_MAP)
 		{
 			m_pNewMiniMap->OpenningProcess();
 		}
-#endif //PJH_ADD_MINIMAP
-#ifdef PBG_ADD_GENSRANKING
 		else if(dwKey == SEASON3B::INTERFACE_GENSRANKING)
 		{
 			HideAllGroupA();
 			g_pNewUIGensRanking->OpenningProcess();
 			g_pNewUIGensRanking->SetPos(640-190, 0);
 		}
-#endif //PBG_ADD_GENSRANKING
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 		else if( dwKey == SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA )
 		{
 			m_pNewUnitedMarketPlaceWindow->OpeningProcess();
 		}
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 #ifdef LEM_ADD_LUCKYITEM
 		else if( dwKey == SEASON3B::INTERFACE_LUCKYITEMWND )
 		{
@@ -1162,9 +1111,7 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		m_pNewUIMng->ShowInterface(dwKey);
 		
 		int iScreenWidth = GetScreenWidth();
-		// 아이템 내구도 위치 수정
 		m_pNewItemEnduranceInfo->SetPos( iScreenWidth );
-		// 버프 윈도우 위치 수정
 		m_pNewBuffWindow->SetPos(iScreenWidth);
 		m_pNewPartyListWindow->SetPos( iScreenWidth );
 	}

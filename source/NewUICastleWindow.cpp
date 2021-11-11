@@ -157,14 +157,13 @@ bool CNewUICastleWindow::Update()
 	{
 		int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
 		
-		if( iNumCurOpenTab == RADIOGROUPEVENT_NONE )	// 탭 버튼의 변경이 없을시에는 Update skip
+		if( iNumCurOpenTab == RADIOGROUPEVENT_NONE )
 			return true;
 		
 		m_iNumCurOpenTab = iNumCurOpenTab;
 
 		if (iNumCurOpenTab == TAB_CASTLE_MIX)
 		{
-			// 성주 조합 열기
 			g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CASTLE_SENIOR);
 //	 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_SENATUS);
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);

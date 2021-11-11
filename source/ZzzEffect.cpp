@@ -3297,18 +3297,12 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				o->LifeTime     = 40;
 				o->Scale        = 1.f;
 				break;
-			/*case MODEL_STONE01:
-				o->LifeTime     = 100;
-    			o->Scale        = (float)(rand()%8+8)*0.02f;
-     			o->Position[2]  = RequestTerrainHeight(o->Position[0],o->Position[1]);
-    			o->Direction[2] = 0.f;
-				break;*/
-			case BITMAP_FIRECRACKERRISE:	// 발사대
+			case BITMAP_FIRECRACKERRISE:
 				ZeroMemory( o->Angle, sizeof ( o->Angle));
 				o->Position[2] = 100.0f;
 				o->LifeTime = 15*5;
 				break;
-			case BITMAP_FIRECRACKER:	// 폭죽 발사
+			case BITMAP_FIRECRACKER:
 				Vector( 1.0f, 1.0f, 1.0f, o->Light);
 				Vector(( float)( rand()%9-4),( float)( rand()%9-4),26.f,o->Direction);
 				
@@ -3320,23 +3314,18 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				PlayBuffer(SOUND_FIRECRACKER1,o);
 				break;
 #ifdef YDG_ADD_FIRECRACKER_ITEM
-			case BITMAP_FIRECRACKER0001:	// 새 폭죽 발사대
-				// subtype이 BITMAP_FIRECRACKER0002로 전달되므로 기본폭축 추가 효과 가능
-				// subtype 추가하지 마세요!
+			case BITMAP_FIRECRACKER0001:
 				{
 					o->LifeTime = 31;
 					Vector(0, 0, 0.f, o->Direction);
 				}
 				break;
-			case BITMAP_FIRECRACKER0002:	// 새 폭죽 폭발
-				// subtype 추가하지 마세요!
-				// BITMAP_FIRECRACKER0001에서 전달됨
+			case BITMAP_FIRECRACKER0002:
 				{
 					o->LifeTime = 30;
 
 					CreateParticle(BITMAP_EXPLOTION_MONO,o->Position,o->Angle,o->Light, 0, 0.6f);
 					
-					// 스파크
 					vec3_t vLight;
 					Vector(1.0f, 1.0f, 1.0f, vLight);
 					for( int i=0 ; i<60 ; i++)
@@ -5158,10 +5147,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				break;
 #endif //CSK_EVENT_CHERRYBLOSSOM
 
-//--------------------------------------------------------------------------------------------------------------------------------
-
-#ifdef ADD_SOCKET_ITEM
-			case MODEL_EFFECT_TRACE:			// 무기 잔상이팩트
+			case MODEL_EFFECT_TRACE:
 				{
 					if( o->SubType == 0 )
 					{
@@ -5182,16 +5168,14 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 						}break;
 					}		
 				}break;
-			case MODEL_FEATHER:				// 다크스팅거 보우 깃털 날리기
+			case MODEL_FEATHER:
 				{
 					switch( o->SubType )
 					{
 					case 0:
 					case 1:
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 					case 2:
 					case 3:
-#endif //#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
  						{
 							vec3_t vOriginPos;
 							VectorCopy( o->Position, vOriginPos );
@@ -5207,25 +5191,22 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 							o->Direction[1] += iAddDirection;
 							o->Direction[2] += iAddDirection;
 
- 							o->Scale = o->Scale + ((float)(rand()%20-10)*(o->Scale*0.03f)); // o->Scale의 30% (20단계)
- 							o->LifeTime = 30+(rand()%20-10);						// 20 ~ 40 (20단계)
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
+ 							o->Scale = o->Scale + ((float)(rand()%20-10)*(o->Scale*0.03f));
+ 							o->LifeTime = 30+(rand()%20-10);
 							if(o->SubType == 2 || o->SubType == 3)
-								o->LifeTime = 100;						// 20 ~ 40 (20단계)
-#endif //#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-							o->Alpha = 0.6f + ((float)(rand()%10)*0.02f);				// 0.8 ~ 1.0f (10단계)
+								o->LifeTime = 100;
+							o->Alpha = 0.6f + ((float)(rand()%10)*0.02f);
 
 							o->Gravity = 0.1f;
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
+
 							if(o->SubType == 2 || o->SubType == 3)
 								o->Gravity = 0.f;
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
+
 							o->Angle[0] = (float)(rand()%360);
 							o->Angle[1] = (float)(rand()%360);
 							o->Angle[2] = (float)(rand()%360);
 
-							// 회전 속도 (이 이팩트에서 EyeRight는 사용불가)
-							o->EyeRight[0] = (float)(rand()%10-5);		// -15도 ~ 15도
+							o->EyeRight[0] = (float)(rand()%10-5);
 							o->EyeRight[1] = (float)(rand()%10-5);
 							o->EyeRight[2] = (float)(rand()%10-5);
 
@@ -5233,9 +5214,8 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					}
 
 				}break;
-#endif // ADD_SOCKET_ITEM
 #ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-					case MODEL_FEATHER_FOREIGN:				// 수호정령 타입 추가 하자
+					case MODEL_FEATHER_FOREIGN:
 						{
 							switch( o->SubType )
 							{
@@ -6542,7 +6522,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 				break;
 #endif //PBG_ADD_CHARACTERSLOT
-#ifdef KJH_ADD_09SUMMER_EVENT
 			case BITMAP_RING_OF_GRADATION:
 				{
 					if( o->SubType == 0 )
@@ -6574,35 +6553,26 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 
 					o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1]) + 100.f;
 				}break;
-#endif // KJH_ADD_09SUMMER_EVENT
-#ifdef KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
-			case MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2:		// 제국수호군 방패병 공격2 이팩트
+			case MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2:
 				{
 					o->LifeTime = 20;
 					o->Scale = 0.9f;
 				}break;
-#endif // KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
-#ifdef PBG_ADD_AURA_EFFECT
 			case MODEL_EFFECT_SD_AURA:
 				{
 					o->LifeTime = 1000;
 					o->Scale = 1.0f;
 				}
 				break;
-#endif //PBG_ADD_AURA_EFFECT
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_WAND_EFFECT
 			case BITMAP_WATERFALL_4:
 				{
 					o->LifeTime = 80;
 					o->Scale = (rand()%20*0.01f)+0.1f;
 					o->Angle[0] = (float)(rand()%360);
-
 					o->Distance = rand()%10+5.0f;
-
 					o->Timer = (float)(rand()%360); //degree
 				}
 				break;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_WAND_EFFECT
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case MODEL_WOLF_HEAD_EFFECT:
 				{
@@ -7328,7 +7298,7 @@ void CheckClientArrow(OBJECT *o)
         if
 #endif //#ifdef PJH_FIX_4_BUGFIX_7
 
-			(AttackCharacterRange(Hero->CurrentSkill,o->Position,range,Hero->Object.Weapon,TKey,o->AttackPoint[0]))//클라이언트마법처리
+			(AttackCharacterRange(Hero->CurrentSkill,o->Position,range,Hero->Object.Weapon,TKey,o->AttackPoint[0]))
 #ifdef PJH_FIX_4_BUGFIX_7
 					if(CharacterAttribute->Skill[o->Skill] == AT_SKILL_DARK_SCREAM)
 						{
@@ -7370,12 +7340,12 @@ void CheckClientArrow(OBJECT *o)
 				if(Skill != AT_SKILL_DARK_SCREAM)
 #endif //#ifdef PJH_FIX_4_BUGFIX_7
 					o->Live = false;
-				if ( o->Type==MODEL_ARROW_BOMB || o->Type==MODEL_ARROW_HOLY	)   //  폭탄
+				if ( o->Type==MODEL_ARROW_BOMB || o->Type==MODEL_ARROW_HOLY	)
 				{
 #ifdef CRYINGWOLF_2NDMVP
 					if(o->SubType == 1)
 					{
-						//. 공방해제 효과처리
+
 					}
 					else
 #endif // CRYINGWOLF_2NDMVP
@@ -7435,7 +7405,6 @@ void CheckClientArrow(OBJECT *o)
                         {
                             if ( o->Type==MODEL_ARROW_HOLY && o->LifeTime>14 )
                             {
-                                //  LifeTime 2가 지난후에 또 관통 데미지 검사.
                                 o->AttackPoint[0] = 5;
                             }
                             else if ( o->Type==MODEL_ARROW_BOMB )
@@ -7444,7 +7413,6 @@ void CheckClientArrow(OBJECT *o)
                             }
                             else
                             {
-                                //  LifeTime 2가 지난후에 또 관통 데미지 검사.
                                 o->AttackPoint[0] = 2;
                             }
                             CreateJoint(BITMAP_FLARE,o->Position,o->Position,o->Angle,6,o,30.0f);
@@ -7457,14 +7425,14 @@ void CheckClientArrow(OBJECT *o)
                         break;
                     case AT_SKILL_PARALYZE:
                         o->Live = false;
-        				if(o->Type==MODEL_ARROW_BOMB || o->Type==MODEL_ARROW_HOLY)//폭탄
+        				if(o->Type==MODEL_ARROW_BOMB || o->Type==MODEL_ARROW_HOLY)
 		    				CreateBomb(o->Position,true);
                         break;
 
                     default:
 						o->Live = false;
 						PlayBuffer(SOUND_ATTACK01+5+rand()%4,o);
-						if(o->Type==MODEL_ARROW_BOMB || o->Type==MODEL_ARROW_HOLY)//폭탄
+						if(o->Type==MODEL_ARROW_BOMB || o->Type==MODEL_ARROW_HOLY)
 							CreateBomb(o->Position,true);
                         break;
                     }
@@ -12915,15 +12883,15 @@ void MoveEffect( OBJECT *o, int iIndex)
 			CheckClientArrow(o);
 		}
         break;
-#ifdef ADD_SOCKET_ITEM
+
 	case MODEL_ARROW_DARKSTINGER:
 		{
 			CheckClientArrow(o);
 			
 			BMD *pModel = &Models[o->Type];
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 			int iNumCreateFeather = rand()%2;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 			vec3_t vPos;
 
 			Vector( 0.6f, 0.7f, 0.9f, Light);
@@ -12961,8 +12929,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 				CreateJoint( BITMAP_FLARE+1, vPos, vPos, o->Angle, 18, o, 90.f, 40, 0, 0, -1, Light );
 			}
 
-		}break;
-#endif	// ADD_SOCKET_ITEM
+		}
+		break;
+
 #ifdef LDK_ADD_GAMBLERS_WEAPONS
 	case MODEL_ARROW_GAMBLE:
 		{
@@ -16555,7 +16524,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					
 					if( 15 == o->LifeTime )
 					{
-						// 달 덩이 한개 발사
 						const float fForce = 20.0f;
 						
 						float matRotation[3][4];
@@ -19879,7 +19847,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 							o->Light[1] *= fLight;
 							o->Light[2] *= fLight;
 						}
-						// 플레이어 모델
 						BMD* pModel = &Models[o->Owner->Type];
 						vec3_t vPos;
 						const int nBoneCount = 14;

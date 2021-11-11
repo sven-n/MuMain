@@ -322,7 +322,6 @@ void SetIME_Status (bool halfShape)
     ::ImmReleaseContext( g_hWnd, data );
 }
 
-//  현재 IME 상태를 채크한다.
 bool CheckIME_Status (bool change, int mode)
 {
 	if (g_iChatInputType == 1) return false;
@@ -339,7 +338,6 @@ bool CheckIME_Status (bool change, int mode)
     {
         bIme = true;
 		
-        //  설정값 저장.
         if( (mode&IME_CONVERSIONMODE)==IME_CONVERSIONMODE )
         {
             g_dwOldConv = dwConv;
@@ -469,11 +467,7 @@ void RenderTipText(int sx, int sy, const char* Text)
 {
 	SIZE TextSize = {0, 0};
 	g_pRenderText->SetFont(g_hFont);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	int BackupAlphaBlendType = AlphaBlendType;
 	EnableAlphaTest();
@@ -515,10 +509,6 @@ void RenderTipText(int sx, int sy, const char* Text)
 		break;
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 게임내의 공지 사항 처리하는 함수들
-///////////////////////////////////////////////////////////////////////////////
 
 typedef struct
 {
@@ -3003,13 +2993,9 @@ void ReloadArrow()
 	
 	if ( Index!=-1 )
     {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		ITEM* rp = NULL;
 		ITEM* lp = NULL;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-        ITEM* rp;
-        ITEM* lp;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
         bool Success = false;
 		
 		if (gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_ELF && SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL )
@@ -4027,35 +4013,11 @@ bool CheckCommand(char *Text, bool bMacroText )
 			}
 		}
 
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-		// 260 "/이동"
-		if(strcmp(Name, GlobalText[260]) == 0 || stricmp(Name, "/move") == 0)
-		{
-#ifdef CSK_FIX_GM_MOVE
-			// GM캐릭터는 /이동 명령어 먹어야 한다.
-			if(IsGMCharacter() == true
-#ifdef CSK_FIX_GM_WEBZEN_ID
-				|| FindText2(Hero->ID, "webzen") == true	// 자기 아이디에 webzen이 들어가 있으면
-#endif // CSK_FIX_GM_WEBZEN_ID
-				)
-			{
-				return false;
-			}
-#endif // CSK_FIX_GM_MOVE
-			return true;
-		}
-#else // CSK_MOD_MOVE_COMMAND_WINDOW
-		if(strcmp(Text,GlobalText[260])==0 || stricmp(Text, "/move")==0)
-		{
-		}
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
-#ifdef CSK_ADD_GM_ABILITY
-		// 688 "/폭죽"
 		if(strcmp(Text, GlobalText[688]) == 0)
 		{
 			return false;
 		}
-#endif // CSK_ADD_GM_ABILITY
+
 		if(strcmp(Text,GlobalText[1117])==0 || stricmp(Text, "/personalshop")==0)
 		{
 			if ( gMapManager.InChaosCastle()==true )
@@ -4064,7 +4026,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 				return false;
 			}
 			
-			//. 상점개설 레벨제한
 			int level = CharacterAttribute->Level;
 			if( level >= 6)
 			{
@@ -4073,7 +4034,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 			else
 			{
 				char szError[48] = "";
-				sprintf(szError, GlobalText[1123], 6);	//. 레벨 6이상부터 이용 할 수 있습니다.
+				sprintf(szError, GlobalText[1123], 6);
 				g_pChatListBox->AddText("", szError, SEASON3B::TYPE_SYSTEM_MESSAGE);				
 			}
 			return true;
@@ -4086,7 +4047,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 				return false;
 			}
 #ifdef LJH_FIX_UNABLE_TO_TRADE_OR_PURCHASE_IN_TROUBLED_AREAS
-			if (::IsStrifeMap(gMapManager.WorldActive))	// 분쟁지역?
+			if (::IsStrifeMap(gMapManager.WorldActive))
 			{
 				g_pChatListBox->AddText("", GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
 				return false;
@@ -7912,9 +7873,11 @@ int SelectCharacter(BYTE Kind)
 						}
 					}
 				}
-#ifndef HERO_SELECT
-				if ( Main && c==Hero ) continue;
-#endif// HERO_SELECT
+
+				if(Main && c == Hero)
+				{
+					continue;
+				}
 				
 				if ( c->m_bIsSelected==false ) 
 				{

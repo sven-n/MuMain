@@ -414,7 +414,6 @@ bool CGMDoppelGanger3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 		if (o->Type == MODEL_MONSTER01+190)
 		{
-			// 본에 불붙이기
 			Vector(1.0f,0.2f,0.1f,vLight);
 			for (int j = 0; j < 50; ++j)
 			{
@@ -435,17 +434,16 @@ bool CGMDoppelGanger3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				vPos[1] += rand()%10-20;
 				vPos[2] += rand()%10-20;
 
-				// 리얼한 불 만들기!!
  				switch(rand()%3)
 				{
 				case 0:
-					CreateParticle(BITMAP_FIRE_HIK1,vPos,o->Angle,vLight,0,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_HIK1,vPos,o->Angle,vLight,0,fScale);
 					break;
 				case 1:
-					CreateParticle(BITMAP_FIRE_CURSEDLICH,vPos,o->Angle,vLight,4,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_CURSEDLICH,vPos,o->Angle,vLight,4,fScale);
 					break;
 				case 2:
-					CreateParticle(BITMAP_FIRE_HIK3,vPos,o->Angle,vLight,0,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_HIK3,vPos,o->Angle,vLight,0,fScale);
 					break;
 				}
 			}

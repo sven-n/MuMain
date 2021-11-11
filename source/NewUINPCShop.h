@@ -26,7 +26,6 @@ namespace SEASON3B
 			IMAGE_NPCSHOP_RIGHT= CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
 			IMAGE_NPCSHOP_BOTTOM= CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
 			IMAGE_NPCSHOP_BTN_REPAIR = CNewUIMyInventory::IMAGE_INVENTORY_REPAIR_BTN,
-
 			IMAGE_NPCSHOP_REPAIR_MONEY = BITMAP_INTERFACE_NEW_NPCSHOP_BEGIN,
 		};
 		
@@ -34,10 +33,8 @@ namespace SEASON3B
 		{
 			NPCSHOP_POS_X = 260,
 			NPCSHOP_POS_Y = 0,
-
-			// 상점 상태(토글된다.)
-			SHOP_STATE_BUYNSELL = 1,	// 사고 파는 상태
-			SHOP_STATE_REPAIR = 2,		// 수리 상태
+			SHOP_STATE_BUYNSELL = 1,
+			SHOP_STATE_REPAIR = 2,
 		};
 		
 	private:
@@ -51,32 +48,28 @@ namespace SEASON3B
 		CNewUIInventoryCtrl*	m_pNewInventoryCtrl;
 		POINT m_Pos;
 
-		// 상점 정보
-		DWORD m_dwShopState;	// 상점 현재 상태
+		DWORD m_dwShopState;
 
-		// 상점 세율 정보
 		int m_iTaxRate;
 
-		// 수리 정보
-		bool m_bRepairShop;		// 수리가능한 상점인가
+		bool m_bRepairShop;
 		
 #ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM			
-		bool m_bIsNPCShopOpen;	// 상점이 열리고 난 상태
-#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM			// 디파인 정리할때 지워야 하는 부분
+		bool m_bIsNPCShopOpen;
+#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 #ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-		// 상점 처음열림상태
-		bool m_bFirstOpen;		// 상점이 처음 열렸나?
+		bool m_bFirstOpen;
 #endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM		// 디파인 정리할때 지워야 하는 부분
+#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 
 		// 버튼
-		CNewUIButton m_BtnRepair;		// 수리 버튼
-		CNewUIButton m_BtnRepairAll;	// 전체수리 버튼
+		CNewUIButton m_BtnRepair;
+		CNewUIButton m_BtnRepairAll;
 		
 		DWORD m_dwStandbyItemKey;
 	
 #ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
-		bool m_bSellingItem;	// 고가 아이템 판매중인가(패킷을 날려서 패킷 받기를 기다리고 있는 중인가?)
+		bool m_bSellingItem;
 #endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
 		
 	public:
@@ -95,22 +88,16 @@ namespace SEASON3B
 
 		float GetLayerDepth();	//. 2.5f
 
-		// 세율 관련 함수
 		void SetTaxRate(int iTaxRate);
 		int GetTaxRate();
 
-		// 상점 아이템 등록
 		bool InsertItem(int iIndex, BYTE* pbyItemPacket);
 		
 #ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-		// 상점 열 때 프로세스
 		void OpenningProcess();
 #endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
 
-		// 상점 닫을 때 프로세스
 		void ClosingProcess();
-
-		// 수리 관련 함수
 		void SetRepairShop(bool bRepair);
 		bool IsRepairShop();
 		void ToggleState();

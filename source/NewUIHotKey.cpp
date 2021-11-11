@@ -283,7 +283,6 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-#ifdef PJH_ADD_MINIMAP
 	else if(SEASON3B::IsPress(VK_TAB) == true)
 	{
 		if(g_pNewUIMiniMap->m_bSuccess == false)
@@ -295,12 +294,8 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-#endif //PJH_ADD_MINIMAP
-
-#ifdef PBG_ADD_GENSRANKING
-	else if(SEASON3B::IsPress('B'))				// 겐스랭킹
+	else if(SEASON3B::IsPress('B'))
 	{
-		// 겐스에 가입되어 있지 않다면 창을 열지 않는다
 		if(!g_pNewUIGensRanking->SetGensInfo())
 			return false;
 
@@ -308,9 +303,8 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-#endif //PBG_ADD_GENSRANKING
 #ifdef YDG_ADD_DOPPELGANGER_UI
-// 	else if(SEASON3B::IsPress('Z') == true)		// 도플갱어 테스트
+// 	else if(SEASON3B::IsPress('Z') == true)
 // 	{
 // 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_DOPPELGANGER_FRAME);
 // // 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_DOPPELGANGER_NPC);
@@ -348,13 +342,12 @@ bool SEASON3B::CNewUIHotKey::Render()
 
 bool SEASON3B::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
 {
-	// 인벤토리 핫키만 먹는 경우(I, V)
-	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)	// 조합창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)		// 거래창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)	// 창고창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)	// NPC상점
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY)			// 개인상점
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY)	// 구매상점
+	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY)
 #ifdef LEM_ADD_LUCKYITEM
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
 #endif // LEM_ADD_LUCKYITEM
@@ -369,55 +362,32 @@ bool SEASON3B::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
 
 bool SEASON3B::CNewUIHotKey::CanUpdateKeyEvent()
 {
-	// 아무 핫키도 안먹어야 하는 창은 이곳에 추가해주세요.
-	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)	// 칸투르 입장창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT)			// 공성전 투석기창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST)			// NPC퀘스트창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SENATUS)			// 원로원창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATEKEEPER)		// 시련의 땅 문지기 창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GUARDSMAN)			// 공성 근위병 창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATESWITCH)		// 공성 성문 스위치창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER)	// 길드 생성 창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE)		// 블러드캐슬 입장창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DEVILSQUARE)		// 악마의광장 입장창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC)	// 환영의사원 입장창
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MASTER_LEVEL)		// 마스터 레벨 창
-#ifdef YDG_ADD_NEW_DUEL_UI
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DUELWATCH)			// 결투 문지기 창
-#endif	// YDG_ADD_NEW_DUEL_UI
-#ifdef YDG_ADD_DOPPELGANGER_UI
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DOPPELGANGER_NPC)	// 도플갱어 루가드 창
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE)		// NPC 대화 창.
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS)	// 퀘스트 진행 창(NPC로 인한)
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
+	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SENATUS)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATEKEEPER)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GUARDSMAN)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATESWITCH)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DEVILSQUARE)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MASTER_LEVEL)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DUELWATCH)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DOPPELGANGER_NPC)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS)
 #ifdef ASG_ADD_UI_NPC_MENU
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_MENU)	// NPC 메뉴창.
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_MENU)
 #endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)// 퀘스트 진행 창(기타 등등으로 인한)
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
-#ifdef PSW_GOLDBOWMAN
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN)
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN_LENA)
-#endif //PSW_EVENT_LENA	
-#endif // KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
-#ifdef PBG_MOD_LUCKYCOINEVENT
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION)
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN)
-#endif //PBG_MOD_LUCKYCOINEVENT
-#ifdef LDK_FIX_EMPIREGUARDIAN_UI_HOTKEY
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC)
-#endif	// LDK_FIX_EMPIREGUARDIAN_UI_HOTKEY
-#ifdef LDS_ADD_NPC_UNITEDMARKETPLACE
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
-#endif // LDS_ADD_NPC_UNITEDMARKETPLACE
 		)
 	{
 		return false;
@@ -448,7 +418,6 @@ bool SEASON3B::CNewUIHotKey::IsStateGameOver()
 
 bool SEASON3B::CNewUIHotKey::AutoGetItem()
 {
-	//  아이템 space로 자동 먹기.
 	if (
 		CNewUIInventoryCtrl::GetPickedItem() == NULL 
 		&& SEASON3B::IsPress(VK_SPACE) 

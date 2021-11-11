@@ -49,13 +49,13 @@ namespace SEASON3B
 		
 		CNewUIButton m_BtnMix;
 
-		int m_iMixState;		// 현재 조합창 상태
-		int m_iMixEffectTimer;	// 믹스 이펙트 타이머
-		float m_fInventoryColor[3];	// 픽킹 기본 배경색 백업용
-		float m_fInventoryWarningColor[3];	// 픽킹 기본 배경색 백업용
+		int m_iMixState;
+		int m_iMixEffectTimer;
+		float m_fInventoryColor[3];
+		float m_fInventoryWarningColor[3];
 
 #ifdef ADD_SOCKET_MIX
-		CUISocketListBox m_SocketListBox;	// 소켓 아이템 장착/파괴시 목록 표시용
+		CUISocketListBox m_SocketListBox;
 #endif	// ADD_SOCKET_MIX
 
 	public:
@@ -70,7 +70,7 @@ namespace SEASON3B
 		void DeleteAllItems();
 		
 		void OpeningProcess();
-		bool ClosingProcess();	// 닫을수 있는지 검사하고 hide를 제외한 조합 종료 처리
+		bool ClosingProcess();
 
 		void SetMixState(int iMixState);
 		int GetMixState() { return m_iMixState; }

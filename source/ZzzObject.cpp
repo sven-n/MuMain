@@ -2565,7 +2565,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 #ifdef KJH_ADD_09SUMMER_EVENT
 			else if( o->Type == MODEL_MONSTER01+154 )
 			{
-				if( o->CurrentAction == MONSTER01_DIE )		// 우산 몬스터
+				if( o->CurrentAction == MONSTER01_DIE )
 				{ 
 					Vector(1.0f,0.6f,0.9f,b->BodyLight);
 					o->m_bRenderShadow = false;
@@ -2595,12 +2595,12 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			}
 #endif //PBG_ADD_AURA_EFFECT
 #ifdef LDS_ADD_NPC_UNITEDMARKETPLACE
-			else if(o->Type == MODEL_UNITEDMARKETPLACE_CHRISTIN)	// 통합시장 크리스틴
+			else if(o->Type == MODEL_UNITEDMARKETPLACE_CHRISTIN)
 			{				
 				// 보통 뿌리기
       			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-			else if(o->Type == MODEL_UNITEDMARKETPLACE_RAUL)	// 통합시장 라울
+			else if(o->Type == MODEL_UNITEDMARKETPLACE_RAUL)
 			{
 				b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 				b->RenderMesh(1,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
@@ -2621,7 +2621,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				// 보통 뿌리기
 //				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-			else if(o->Type == MODEL_UNITEDMARKETPLACE_JULIA)	// 통합시장 줄리아
+			else if(o->Type == MODEL_UNITEDMARKETPLACE_JULIA)
 			{	
 				vec3_t vRelativePos, vWorldPos, Light;
 				Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -2658,7 +2658,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			}
 #endif // LDS_ADD_NPC_UNITEDMARKETPLACE
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
-			else if(o->Type == MODEL_TIME_LIMIT_QUEST_NPC_TERSIA)	// 길드관리인 테르시아
+			else if(o->Type == MODEL_TIME_LIMIT_QUEST_NPC_TERSIA)
 			{
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 				b->RenderMesh(0,RENDER_BRIGHT|RENDER_CHROME,o->Alpha*0.4f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
@@ -2673,7 +2673,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			}
 #endif // LEM_ADD_LUCKYITEM
 #ifdef ASG_ADD_KARUTAN_NPC
-			else if(o->Type == MODEL_KARUTAN_NPC_VOLVO)	// 무기상인 볼로
+			else if(o->Type == MODEL_KARUTAN_NPC_VOLVO)
 			{
 				b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 					o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -2809,13 +2809,10 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				}
 			}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-//---------------------------------------------------------------------------------------
-// 기본 Render
 			else
-			{	// 보통 뿌리기
+			{
       			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-//---------------------------------------------------------------------------------------
 			if( g_isCharacterBuff(o, eDeBuff_Freeze) )
 			{
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,-2,1.f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -2831,7 +2828,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 
 
-			if(o->Type==MODEL_MONSTER01+37)//히드라
+			if(o->Type==MODEL_MONSTER01+37)
 			{
 				b->BeginRender(o->Alpha);
            		float Light = sinf(WorldTime*0.002f)*0.3f+0.5f;
@@ -2840,7 +2837,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderMesh(3,RENDER_CHROME|RENDER_BRIGHT,o->Alpha,3,Light,o->BlendMeshTexCoordU,-TexCoord);
 				b->EndRender();
 			}
-			if (o->Type == MODEL_NPC_ARCHANGEL_MESSENGER || o->Type == MODEL_NPC_ARCHANGEL)	// 대천사의 전령
+			if (o->Type == MODEL_NPC_ARCHANGEL_MESSENGER || o->Type == MODEL_NPC_ARCHANGEL)
 			{
 				b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight);
 			}
@@ -5287,11 +5284,7 @@ void DeleteObject(OBJECT *o,OBJECT_BLOCK *ob)
 		SAFE_DELETE( o );
 	}
 }
-///////////////////////////////////////////////////////////////////////////////
-// 모든 배경 오브젝트를 타입별로 정렬하는 함수
-///////////////////////////////////////////////////////////////////////////////
 
-//블럭 안에서 타입별로 오브젝트를 정렬한다.
 typedef std::vector<OBJECT* > ObjectPtrVec_t; 
 typedef std::map<int, ObjectPtrVec_t> SortObj_t;
 void SortInBlockByType()
@@ -5754,11 +5747,6 @@ void ItemObjectAttribute(OBJECT *o)
     case MODEL_POTION+21:
         o->Scale = 0.5f;
         break;
-#ifdef _PVP_MURDERER_HERO_ITEM
-    case MODEL_POTION+30:
-        o->Scale = 0.5f;
-        break;
-#endif	// _PVP_MURDERER_HERO_ITEM
 	case MODEL_SWORD+14:
 		o->BlendMesh = 1;
 		o->BlendMeshTexCoordU = (float)(rand()%10)*0.1f;
@@ -5792,9 +5780,7 @@ void ItemObjectAttribute(OBJECT *o)
 	case MODEL_WING+10:
 	case MODEL_WING+11:
 	case MODEL_WING+20:
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	case MODEL_WING+132:
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 		o->BlendMesh = 0;
 		break;
 	case MODEL_SHIELD+11:

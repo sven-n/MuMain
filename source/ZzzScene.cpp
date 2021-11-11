@@ -197,6 +197,7 @@ char *g_lpszMp3[NUM_MUSIC] =
 	"data\\music\\Karutan_B.mp3",
 #endif	// ASG_ADD_MAP_KARUTAN
 };
+
 extern char Mp3FileName[256];
 
 #define MAX_LENGTH_CMB	( 38)
@@ -1067,43 +1068,37 @@ void NewMoveCharacterScene()
 	CInput& rInput = CInput::Instance();
 	CUIMng& rUIMng = CUIMng::Instance();
 
-	if (rInput.IsKeyDown(VK_RETURN))	// 엔터키를 눌렀는가?
+	if (rInput.IsKeyDown(VK_RETURN))
 	{
-		// 메시지 창, 캐릭터 생성 창 등등 보이지 않으며 캐릭터가 선택되어 있다면.
 		if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_CharMakeWin.IsShow()
 			|| rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow())
 			&& SelectedHero > -1 && SelectedHero < 5)
 		{
-			::PlayBuffer(SOUND_CLICK01);	// 클릭 사운드.
-#ifdef PBG_FIX_CHARACTERSELECTINDEX
-			if(SelectedCharacter >= 0)		// 캐릭터 선택이 아닐경우만
-#endif //PBG_FIX_CHARACTERSELECTINDEX
-#ifdef LJH_FIX_LOADING_INFO_OF_AN_OTHER_CHARACTER_IN_LOGIN
-			SelectedHero = SelectedCharacter;
-#endif //LJH_FIX_LOADING_INFO_OF_AN_OTHER_CHARACTER_IN_LOGIN
+			::PlayBuffer(SOUND_CLICK01);
+
+			if(SelectedCharacter >= 0)
+				SelectedHero = SelectedCharacter;
+
 			::StartGame();
 		}
 	}
-	else if (rInput.IsKeyDown(VK_ESCAPE))	// Esc키를 눌렀는가?
+	else if (rInput.IsKeyDown(VK_ESCAPE))
 	{
-		// 메시지 창, 캐릭터 생성 창 등등 보이지 않으면.
 		if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_CharMakeWin.IsShow()
 			|| rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow()
 			)
 			&& rUIMng.IsSysMenuWinShow() )
 		{
-			::PlayBuffer(SOUND_CLICK01);	// 클릭 사운드.
+			::PlayBuffer(SOUND_CLICK01);
 			rUIMng.ShowWin(&rUIMng.m_SysMenuWin);
 		}
 	}
 
-	if (rUIMng.IsCursorOnUI())	// UI 뒤의 캐릭터가 클릭되면 안되므로.
+	if (rUIMng.IsCursorOnUI())
 	{
 		return;
 	}
 
-	// 마우스 왼쪽 버튼 더블 클릭인가?
-	// 캐릭터 선택 씬 메인 창이 보이지 않는다는 것은 로그인씬으로 변경한다는 뜻.
 	if (rInput.IsLBtnDbl() && rUIMng.m_CharSelMainWin.IsShow())
 	{
 		if (SelectedCharacter < 0 || SelectedCharacter > 4)
@@ -1114,7 +1109,7 @@ void NewMoveCharacterScene()
 		SelectedHero = SelectedCharacter;
 		::StartGame();
 	}
-	else if(rInput.IsLBtnDn())	// 마우스 왼쪽 버튼 클릭인가?
+	else if(rInput.IsLBtnDn())
 	{
 		if (SelectedCharacter < 0 || SelectedCharacter > 4)
 			SelectedHero = -1;
@@ -1373,9 +1368,6 @@ void NewMoveLogInScene()
 		//SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
 		gProtocolSend.SendRequestCharactersListNew();
 
-#ifdef NP_GAME_GUARD
-        npGameGuard::loginID( LogInID );
-#endif
         ReleaseLogoSceneData();
 
 		ClearCharacters();
@@ -2054,7 +2046,7 @@ void MoveMainScene()
 
 	    SendRequestJoinMapServer(CharactersClient[SelectedHero].ID);
 
-		CUIMng::Instance().CreateMainScene();	// 메인 씬 UI 생성.
+		CUIMng::Instance().CreateMainScene();
 
 		CameraAngle[2] = -45.f;
 
@@ -2555,11 +2547,7 @@ void MainScene(HDC hDC)
 	}
 	if(GrabEnable && iCaptureMode == 1)
 	{
-#ifndef CAMERA_TEST
-#ifndef FOR_WORK
 		g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
-#endif // FOR_WORK
-#endif // CAMERA_TEST
 	}
 
 #ifdef CAMERA_TEST_FPS
@@ -2887,7 +2875,6 @@ void MainScene(HDC hDC)
 		{
 			if(Hero->SafeZone)
 			{
-				// 크리스마스 사운드 넣을 곳
 				if(( Hero->PositionX)>=205 && ( Hero->PositionX)<=214 &&
 					( Hero->PositionY)>=13 && ( Hero->PositionY)<=31)
                 {
@@ -3011,10 +2998,6 @@ void MainScene(HDC hDC)
 	}
 	TimeRemain = DifTimer;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 씬 관리 함수 (윈도우 메세지 루프에서 실행함)
-///////////////////////////////////////////////////////////////////////////////
 
 float g_Luminosity;
 

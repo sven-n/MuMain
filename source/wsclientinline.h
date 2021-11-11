@@ -1054,7 +1054,7 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 	BYTE spareBits;
 	if (g_SocketItemMgr.IsSocketItem(pItem))
 	{
-		spareBits = pItem->SocketSeedSetOption;	// 소켓아이템이면 조화보석자리에 소켓 세트옵션을 사용한다.
+		spareBits = pItem->SocketSeedSetOption;
 	}
 	else
 	{
@@ -1196,7 +1196,6 @@ __forceinline void SendRequestUse(int Index,int Target)
 {
 	if( !IsCanUseItem() )
 	{
-		// 474 "창고 사용시나 거래중에는 아이템을 사용하실 수 없습니다."
 		g_pChatListBox->AddText("", GlobalText[474], SEASON3B::TYPE_ERROR_MESSAGE);
 		return;
 	}

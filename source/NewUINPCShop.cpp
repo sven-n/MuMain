@@ -311,13 +311,10 @@ bool SEASON3B::CNewUINPCShop::Render()
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// 프레임 그린다.
 	RenderFrame();
 
-	// 텍스트를 그린다.
 	RenderTexts();
 
-	// 버튼을 그린다.
 	RenderButton();
 
 	RenderRepairMoney();
@@ -343,61 +340,12 @@ void SEASON3B::CNewUINPCShop::RenderFrame()
 
 void SEASON3B::CNewUINPCShop::RenderTexts()
 {
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-	if (CPCRoomPtSys::Instance().IsPCRoomPointShopMode())	// PC포인트 상점인가?
-	{
-		// 주의 사항 텍스트 렌더.
-		g_pRenderText->SetFont(g_hFontBold);
-		g_pRenderText->SetBgColor(0);
-		g_pRenderText->SetTextColor(255, 128, 255, 255);
-
-		// 2325 "PC방 포인트 상점"
-		g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, GlobalText[2325], NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
-
-		const short c_nLineMax = 2;
-		const short c_nLowMax = 36;
-		unicode::t_char aszNotice[c_nLineMax][c_nLowMax];
-
-		const short c_nNoticeMax = 3;	// 문장 개수
-		// 2327 "PC방 포인트 상점에서는 물건의 구입만 가능합니다."
-		// 2328 "인장은 구입 후 바로 효과가 적용됩니다."
-		// 2332 "캐릭터 종료 및 로랜협곡 이동시 효과가 사라집니다."
-		const unicode::t_char* c_apszGlobalText[c_nNoticeMax]
-			= { GlobalText[2327], GlobalText[2328], GlobalText[2332] };
-
-		int i, j;
-		for (i = 0; i < c_nNoticeMax; ++i)
-		{
-			::memset(aszNotice[0], 0, sizeof(unicode::t_char) * c_nLineMax * c_nLowMax);
-			::SeparateTextIntoLines(
-				c_apszGlobalText[i], aszNotice[0], c_nLineMax, c_nLowMax);
-			for (j = 0; j < c_nLineMax; ++j)
-			{
-#ifdef LDK_FIX_PCROOM_INFOMATION
-				if(0 == unicode::_strlen(aszNotice[j]) ) continue;
-#endif //LDK_FIX_PCROOM_INFOMATION
-
-				g_pRenderText->RenderText(m_Pos.x,
-					m_Pos.y+356+(i*22)+(j*11),	// 문장 간격 26, 줄 간격 12.
-					aszNotice[j], 190, 0, RT3_SORT_CENTER);
-			}
-		}
-
-		g_pRenderText->SetFont(g_hFont);
-
-		return;	// 사기, 팔기, 수리 등은 렌더할 필요 없음.
-	}
-#endif //ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->SetTextColor(220, 220, 220, 255);
 
-	// 230 "상  인"	
 	g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, GlobalText[230], NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
 	
-	// 1623 "세율: %d%% (실시간변동)"
 	unicode::t_char strText[256];
 	unicode::_sprintf(strText, GlobalText[1623], m_iTaxRate);
 	g_pRenderText->RenderText(m_Pos.x,m_Pos.y + 27, strText, NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
@@ -425,7 +373,6 @@ void SEASON3B::CNewUINPCShop::RenderRepairMoney()
         ConvertGold(AllRepairGold, strText);
 
 		g_pRenderText->SetFont(g_hFontBold);
-		// 239 "전체수리"
 		g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+362, GlobalText[239]);
         g_pRenderText->SetTextColor(getGoldColor(AllRepairGold));
 		g_pRenderText->RenderText(m_Pos.x+100, m_Pos.y+362, strText);
@@ -434,12 +381,7 @@ void SEASON3B::CNewUINPCShop::RenderRepairMoney()
 
 float SEASON3B::CNewUINPCShop::GetLayerDepth()
 { 
-#ifdef KJH_FIX_WOPS_K27500_POTION_NUM_RENDER
-	// MyInventory보다 나중에 Render되어야 한다.
 	return 4.55;	
-#else // KJH_FIX_WOPS_K27500_POTION_NUM_RENDER
-	return 2.5f; 
-#endif // KJH_FIX_WOPS_K27500_POTION_NUM_RENDER
 }
 
 void SEASON3B::CNewUINPCShop::LoadImages()
@@ -495,7 +437,7 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 	ITEM* pItem = pPickedItem->GetItem();
 
 #ifndef KJH_FIX_SELL_LUCKYITEM				// #ifndef
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 상인 판매할 때에 인벤 Warning칼라 [lem_2010.9.8]
+#ifdef LEM_ADD_LUCKYITEM
 	if( IsSellingBan( pItem ) )	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f );
 	else	m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f );
 #endif // LEM_ADD_LUCKYITEM
@@ -503,7 +445,7 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 	if(	SEASON3B::IsRelease(VK_LBUTTON) == true
 		&& m_pNewInventoryCtrl->CheckPtInRect(MouseX, MouseY) == true
 #ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
-		&& m_bSellingItem == false	// 아이템 팔고 있는 중이 아니면
+		&& m_bSellingItem == false
 #endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
 		)
 	{
@@ -521,7 +463,6 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 #endif // KJH_DEL_PC_ROOM_SYSTEM
 
 #ifdef LJH_FIX_BUG_SELLING_ITEM_CAUSING_OVER_LIMIT_OF_ZEN
-		// 현재 소지하고 있는 금액과 아이템의 판매금액의 합이 20억(제한)을 넘을 경우 판매 금지
 		if (CharacterMachine->Gold + ItemValue(pItem) > 2000000000)
 		{
 			g_pChatListBox->AddText("", GlobalText[3148], SEASON3B::TYPE_SYSTEM_MESSAGE);
@@ -532,16 +473,14 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 
 		if( pItem && pItem->Jewel_Of_Harmony_Option != 0 )
 		{
-			// 2211 "강화된 아이템은 판매할 수 없습니다."
 			g_pChatListBox->AddText("", GlobalText[2211], SEASON3B::TYPE_ERROR_MESSAGE);
 
 			return true;
 		}
 #ifndef KJH_FIX_SELL_LUCKYITEM				// #ifndef
-#ifdef LEM_ADD_LUCKYITEM		// 럭키아이템 판매 금지
+#ifdef LEM_ADD_LUCKYITEM
 		else if( Check_ItemAction(pItem, eITEM_SELL) && pItem->Durability > 0)
 		{
-			// 668 "거래가 불가능한 아이템입니다."
 			g_pChatListBox->AddText("", GlobalText[2329], SEASON3B::TYPE_ERROR_MESSAGE);
 			m_pNewInventoryCtrl->BackupPickedItem();
 
@@ -550,10 +489,8 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 #endif // LEM_ADD_LUCKYITEM
 #endif // KJH_FIX_SELL_LUCKYITEM
 
-#ifdef LJH_FIX_NOT_POP_UP_HIGHVALUE_MSGBOX_FOR_BANNED_TO_TRADE
-		else if(pItem && IsSellingBan(pItem) == true)	// 판매금지 아이템
+		else if(pItem && IsSellingBan(pItem) == true)
 		{
-			// 668 "거래가 불가능한 아이템입니다."
 			g_pChatListBox->AddText("", GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
 			m_pNewInventoryCtrl->BackupPickedItem();
 			
@@ -566,25 +503,7 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 			
 			return true;
 		}
-#else  //LJH_FIX_NOT_POP_UP_HIGHVALUE_MSGBOX_FOR_BANNED_TO_TRADE
-		else if(pItem && IsHighValueItem(pItem) == true)
-		{
-			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHighValueItemCheckMsgBoxLayout));
-			pPickedItem->HidePickedItem();
 
-			return true;
-		}
-		else if(pItem && IsSellingBan(pItem) == true)	// 판매금지 아이템
-		{
-			// 668 "거래가 불가능한 아이템입니다."
-			g_pChatListBox->AddText("", GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
-			m_pNewInventoryCtrl->BackupPickedItem();
-
-			return true;
-		}
-#endif //LJH_FIX_NOT_POP_UP_HIGHVALUE_MSGBOX_FOR_BANNED_TO_TRADE
-
-		// 인벤토리에서 상점으로
 		if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos() + MAX_EQUIPMENT_INDEX;
@@ -592,7 +511,6 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 
 			return true;
 		}
-		// 장비창에서 상점으로
 		else if(pPickedItem->GetOwnerInventory() == NULL)
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
@@ -609,12 +527,7 @@ bool SEASON3B::CNewUINPCShop::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
 
-	//. Exit1 버튼 (기본처리)
-	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12)
-#ifdef YDG_FIX_NPCSHOP_SELLING_LOCK
-		&& m_bSellingItem == false
-#endif	// YDG_FIX_NPCSHOP_SELLING_LOCK
-		)
+	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12) && m_bSellingItem == false	)
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCSHOP);
 		
@@ -641,7 +554,7 @@ bool SEASON3B::CNewUINPCShop::BtnProcess()
 }
 
 #ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM_EX
-// 상점을 열 때 프로세스
+
 void SEASON3B::CNewUINPCShop::OpenningProcess()
 {
 	if( SEASON3B::IsRepeat(VK_LBUTTON))
@@ -650,7 +563,7 @@ void SEASON3B::CNewUINPCShop::OpenningProcess()
 	}
 	else
 	{
-		m_bIsNPCShopOpen = true;		// 초기화(상점이 열리고 나서 true)
+		m_bIsNPCShopOpen = true;
 	}
 }
 #else KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM_EX
@@ -675,7 +588,6 @@ void SEASON3B::CNewUINPCShop::ClosingProcess()
 {
 	SendExitInventory();
 
-	// 각 정보 초기화
 	m_dwShopState = SHOP_STATE_BUYNSELL;
 	m_iTaxRate = 0;
 	m_bRepairShop = false;
@@ -693,15 +605,8 @@ void SEASON3B::CNewUINPCShop::ClosingProcess()
 	{
 		m_pNewInventoryCtrl->RemoveAllItems();
 	}
-#ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-	// PC방 포인트 상점 모드 초기화.
-	CPCRoomPtSys::Instance().SetPCRoomPointShopMode(false);
-#endif //ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 
 #ifdef LDK_ADD_GAMBLE_SYSTEM
-	// 겜블 상점 모드 초기화
 	GambleSystem::Instance().SetGambleShop(false);
 #endif //LDK_ADD_GAMBLE_SYSTEM
 
@@ -714,12 +619,10 @@ void SEASON3B::CNewUINPCShop::SetButtonInfo()
 {
 	m_BtnRepair.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
 	m_BtnRepair.ChangeButtonInfo(m_Pos.x + 54, m_Pos.y + 390, 36, 29);
-	// 233 "수리(R)"
 	m_BtnRepair.ChangeToolTipText(GlobalText[233], true);
 
 	m_BtnRepairAll.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
 	m_BtnRepairAll.ChangeButtonInfo(m_Pos.x + 98, m_Pos.y + 390, 36, 29);
-	// 237 "전체수리(A)"
 	m_BtnRepairAll.ChangeToolTipText(GlobalText[237], true);
 }
 
