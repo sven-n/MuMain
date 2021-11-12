@@ -148,12 +148,4 @@ bool CollisionDetectLineToFace(vec3_t Position, vec3_t Target, int Polygon, floa
 bool CollisionDetectLineToOBB(vec3_t p1, vec3_t p2, OBB_t obb);
 void CalcFPS();
 
-#ifdef NEW_USER_INTERFACE_UISYSTEM
-	void CreateScreenVector2( int sx, int sy, vec3_t Target, bool bFixView=true );
-	void BeginDrawMesh();
-	void EndDrawMesh();
-	void BeginDrawViewPortMesh( const Coord& pos, const Dim& size, const vec3_t& objectpos );
-	void EndDrawViewPortMesh();
-#endif //NEW_USER_INTERFACE_UISYSTEM
-
 #endif// __ZZOPENGLUTIL_H__

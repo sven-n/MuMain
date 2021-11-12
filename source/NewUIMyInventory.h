@@ -121,12 +121,6 @@ namespace SEASON3B
 		REPAIR_MODE GetRepairMode() const;
 		void SetRepairMode(bool bRepair);
 		
-#ifdef NEW_USER_INTERFACE_UISYSTEM
-		void UpdateShop( const Coord& pos );
-		void RenderShop( const Coord& pos );
-		void RenderShop3D( const Coord& pos );
-#endif //NEW_USER_INTERFACE_UISYSTEM
-
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		BOOL IsInvenItem( const short sType );
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY

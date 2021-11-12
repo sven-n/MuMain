@@ -1191,12 +1191,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 
 	if(m_pNew3DRenderMng)
 	{
-#ifdef NEW_USER_INTERFACE_UISYSTEM
-		if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP))
-		{
-			return;
-		}
-#endif // NEW_USER_INTERFACE_UISYSTEM
 		m_pNew3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, RENDER_NUMBER_OF_ITEM, 0);
 		if(m_pToolTipItem && GetPickedItem() == NULL)
 		{

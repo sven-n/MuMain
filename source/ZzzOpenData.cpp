@@ -5204,81 +5204,12 @@ void OpenBasicData(HDC hDC)
 	LoadWaveFile(SOUND_START_DUEL,	"Data\\Sound\\iDuelStart.wav", 1);
 #endif // DUEL_SYSTEM
 	
-
-#ifdef NEW_USER_INTERFACE_RESOURCEFILE
-	int count = 0;
-	//BITMAP_NEWUI_SHOP_LEFTBT = 9
-	LoadBitmap("Interface\\partCharge1\\LeftBt\\Deco0.tga", BITMAP_NEWUI_SHOP_LEFTBT );
-	LoadBitmap("Interface\\partCharge1\\LeftBt\\Deco1.tga", BITMAP_NEWUI_SHOP_LEFTBT+1 );
-	LoadBitmap("Interface\\partCharge1\\LeftBt\\Deco2.tga", BITMAP_NEWUI_SHOP_LEFTBT+2 );
-	LoadBitmap("Interface\\partCharge1\\LeftBt\\Deco3.tga", BITMAP_NEWUI_SHOP_LEFTBT+3 );
-	LoadBitmap("Interface\\partCharge1\\LeftBt\\Deco4.tga", BITMAP_NEWUI_SHOP_LEFTBT+4 );
-	LoadBitmap("Interface\\partCharge1\\LeftBt\\LeftMenuBT0.tga", BITMAP_NEWUI_SHOP_LEFTBT+5 );	
-	LoadBitmap("Interface\\partCharge1\\LeftBt\\LeftMenuBT1.tga", BITMAP_NEWUI_SHOP_LEFTBT+6 );
-	LoadBitmap("Interface\\partCharge1\\LeftBt\\TopMenuTabBT0.tga", BITMAP_NEWUI_SHOP_LEFTBT+7 );	
-	LoadBitmap("Interface\\partCharge1\\LeftBt\\TopMenuTabBT1.tga", BITMAP_NEWUI_SHOP_LEFTBT+8 );
-	
-	//BITMAP_NEWUI_SHOP_LEFTDISPLAYBT = 17
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\Buy0.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT );
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\Buy1.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+1 );
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\Buy2.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+2 );
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\Cash0.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+3 );
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\Cash1.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+4 );
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\Cash2.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+5 );
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\ItemBackPanel.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+6 );
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\MiniInventoryPanel.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+7 );
-	for ( count = 8; count < 14; ++count )
-	{
-		string filename = ( format( "Interface\\partCharge1\\ShopDisplay\\page%1%.tga" ) % (count-8) ).str();
-		LoadBitmap( const_cast<char*>(filename.c_str()), BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+count );
-	}
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\New.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+14 );	
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\Hot.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+15 );
-	LoadBitmap("Interface\\partCharge1\\ShopDisplay\\Sale.tga", BITMAP_NEWUI_SHOP_LEFTDISPLAYBT+16 );
-	
-	//BITMAP_NEWUI_SHOP_RIGHTBT = 5
-	LoadBitmap("Interface\\partCharge1\\RightBt\\InventoryPanel0.tga", BITMAP_NEWUI_SHOP_RIGHTBT );
-	LoadBitmap("Interface\\partCharge1\\RightBt\\InventoryPanel1.tga", BITMAP_NEWUI_SHOP_RIGHTBT+1 );
-	LoadBitmap("Interface\\partCharge1\\RightBt\\Return0.tga", BITMAP_NEWUI_SHOP_RIGHTBT+2 );
-	LoadBitmap("Interface\\partCharge1\\RightBt\\Return1.tga", BITMAP_NEWUI_SHOP_RIGHTBT+3 );
-	LoadBitmap("Interface\\partCharge1\\RightBt\\Return2.tga", BITMAP_NEWUI_SHOP_RIGHTBT+4 );
-	
-	//BITMAP_NEWUI_SHOP_FRAMESHOPBT = 1
-	//LoadBitmap("Interface\\partCharge1\\menu_cashshop.OZJ", BITMAP_NEWUI_SHOP_FRAMESHOPBT );
-	
-	//BITMAP_NEWUI_SHOP_MAINBACKPANEL = 14
-	for( count = 0; count < 14; ++count )
-	{
-		string filename = ( format( "Interface\\partCharge1\\MainBackPanel\\backpanel%1%.tga" ) % count ).str();
-		LoadBitmap( const_cast<char*>(filename.c_str()), 
-			BITMAP_NEWUI_SHOP_MAINBACKPANEL+count 
-			);
-	}
-	
-	//BITMAP_NEWUI_SHOP_SUBBACKPANEL = 8
-	for( count = 0; count < 8; ++count )
-	{
-		string filename = ( format( "Interface\\partCharge1\\SubBackPanel\\shopback%1%.tga" ) % count ).str();
-		LoadBitmap( const_cast<char*>(filename.c_str()), 
-			BITMAP_NEWUI_SHOP_SUBBACKPANEL+count 
-			);
-	}
-#endif //NEW_USER_INTERFACE_RESOURCEFILE
-
 	LoadBitmap("Interface\\CursorID.tga",	BITMAP_INTERFACE_EX+29); 
 	LoadBitmap("Interface\\bar.jpg"			,BITMAP_INTERFACE+23);
 	LoadBitmap("Interface\\back1.jpg"			,BITMAP_INTERFACE+24);
 	LoadBitmap("Interface\\back2.jpg"			,BITMAP_INTERFACE+25);
 	LoadBitmap("Interface\\back3.jpg"			,BITMAP_INTERFACE+26);
 
-	// =======================================================================================
-	// /여기까지 1. 기본 Interface 이미지 및 리소스들
-	// =======================================================================================
-
-	//effect
-	// =======================================================================================
-	// 2. Effect Images들
-	// =======================================================================================
 	LoadBitmap("Effect\\Fire01.jpg"		,BITMAP_FIRE      ,GL_LINEAR,GL_CLAMP_TO_EDGE);			// GM3rdChangeUp, GMCrywolf1st,GMHellas,Kanturu 3rd
 	LoadBitmap("Effect\\Fire02.jpg"		,BITMAP_FIRE+1    ,GL_LINEAR,GL_CLAMP_TO_EDGE);			// GM3rdChangeUp, GMCrywolf1st,GMHellas,Kanturu 3rd
 	LoadBitmap("Effect\\Fire03.jpg"		,BITMAP_FIRE+2    ,GL_LINEAR,GL_CLAMP_TO_EDGE);			// GM3rdChangeUp, GMCrywolf1st,GMHellas,Kanturu 3rd

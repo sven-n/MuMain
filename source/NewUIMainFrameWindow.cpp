@@ -702,15 +702,11 @@ void SEASON3B::CNewUIMainFrameWindow::RenderHotKeyItemCount()
 
 void SEASON3B::CNewUIMainFrameWindow::RenderButtons()
 {
-#if defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	m_BtnCShop.Render();
-#endif //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 	RenderCharInfoButton();
-#else	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-	m_BtnChaInfo.Render();
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 	m_BtnMyInven.Render();
 
 	RenderFriendButton();
@@ -723,25 +719,17 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCharInfoButton()
 {
 	m_BtnChaInfo.Render();
 
-	// 기타 상황에 의한 (NPC 클릭이 아닌)퀘스트가 없다면.
 	if (g_QuestMng.IsQuestIndexByEtcListEmpty())
 		return;
 
-	if (g_Time.GetTimeCheck(5, 500))	// 0.5초 마다 true를 주는 5번 인덱스 타이머에 등록 및 체크.
+	if (g_Time.GetTimeCheck(5, 500))
 		m_bButtonBlink = !m_bButtonBlink;
 
 	if (m_bButtonBlink)
 	{
-		// 캐릭터 정보창과 기타 퀘스트 진행창이 안보일 때 깜박임.
-#if defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		if (!(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)))
 			RenderImage(IMAGE_MENU_BTN_CHAINFO, 489+30, 480-51, 30, 41, 0.0f, 41.f);
-#else //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		if (!(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
-			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)))
-			RenderImage(IMAGE_MENU_BTN_CHAINFO, 488, 480-51, 38, 42, 0.0f, 42.f);
-#endif//defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	}
 }
 #endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
@@ -779,7 +767,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFriendButton()
 
 void SEASON3B::CNewUIMainFrameWindow::RenderFriendButtonState()
 {
-#if defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == true)
 	{
 		RenderImage(IMAGE_MENU_BTN_FRIEND, 489+(30*3), 480-51, 30, 41, 0.0f, 123.f);
@@ -2858,7 +2846,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown)
 {
 	switch(iBtnType)
 	{
-#if defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	case MAINFRAME_BTN_PARTCHARGE:
 		{
 			if(bStateDown) 

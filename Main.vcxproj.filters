@@ -1702,9 +1702,6 @@
     <ClInclude Include="source\NewUIOptionWindow.h">
       <Filter>MU\Interface\NewUI</Filter>
     </ClInclude>
-    <ClInclude Include="source\NewUIPartChargeShop.h">
-      <Filter>MU\Interface\NewUI</Filter>
-    </ClInclude>
     <ClInclude Include="source\NewUIPartyInfoWindow.h">
       <Filter>MU\Interface\NewUI</Filter>
     </ClInclude>

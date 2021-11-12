@@ -2395,7 +2395,6 @@
     <ClInclude Include="source\NewUINPCQuest.h" />
     <ClInclude Include="source\NewUINPCShop.h" />
     <ClInclude Include="source\NewUIOptionWindow.h" />
-    <ClInclude Include="source\NewUIPartChargeShop.h" />
     <ClInclude Include="source\NewUIPartyInfoWindow.h" />
     <ClInclude Include="source\NewUIPartyListWindow.h" />
     <ClInclude Include="source\NewUIPetInfoWindow.h" />

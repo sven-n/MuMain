@@ -44,13 +44,6 @@ protected:
 	bool	m_bFormerBtn1Dn;
 	bool	m_bFormerBtn2Dn;
 	
-#ifdef NEW_USER_INTERFACE_UTIL
-	typedef std::list< BoostWeak_Ptr(InputMessageHandler) >   HandlerList;
-	
-    HandlerList										m_HandlerList;
-	int												m_PosValue;
-#endif
-
 protected:
 	CInput();
 
@@ -98,15 +91,6 @@ public:
 	bool IsLeftHandMode(){ return m_bLeftHand; }
 	void SetTextEditMode(bool bTextEditMode){ m_bTextEditMode = bTextEditMode; }
 	bool IsTextEditMode(){ return m_bTextEditMode; }
-
-#ifdef NEW_USER_INTERFACE_UTIL
-public:
-	void RegisterInputMessageHandler( BoostWeak_Ptr(InputMessageHandler) handler, bool first = false );
-	
-private:
-	//Mouse
-	void HandleMouseMessage( eKeyType key, eKeyStateType type, int value );
-#endif
 };
 
 #endif
