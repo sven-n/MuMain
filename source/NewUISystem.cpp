@@ -69,9 +69,6 @@ SEASON3B::CNewUISystem::CNewUISystem()
 	m_pNewCursedTempleResultWindow = NULL;
 	m_pNewCursedTempleWindow = NULL;
 	m_pNewCursedTempleEnterWindow = NULL;
-#ifdef NEW_USER_INTERFACE_SHELL
-	m_pNewPartChargeShop = NULL;
-#endif //NEW_USER_INTERFACE_SHELL
 #ifdef PSW_GOLDBOWMAN
 	m_pNewGoldBowman = NULL;
 #endif //PSW_GOLDBOWMAN
@@ -166,7 +163,6 @@ void SEASON3B::CNewUISystem::Release()
 {
 	UnloadMainSceneInterface();
 
-#ifdef LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 	SAFE_DELETE(m_pNewSlideWindow);
 	SAFE_DELETE(m_pNewOptionWindow);
 	SAFE_DELETE(m_pNewChatLogWindow);
@@ -175,15 +171,6 @@ void SEASON3B::CNewUISystem::Release()
 	m_pNewUIMng->RemoveAllUIObjs();
 
 	SAFE_DELETE(m_pNewUIMng);
-#else LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
-	m_pNewUIMng->RemoveAllUIObjs();
-
- 	SAFE_DELETE(m_pNewSlideWindow);
- 	SAFE_DELETE(m_pNewOptionWindow);
- 	SAFE_DELETE(m_pNewChatLogWindow);
- 	SAFE_DELETE(m_pNewUI3DRenderMng);
- 	SAFE_DELETE(m_pNewUIMng);
-#endif // LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 }
 
 //---------------------------------------------------------------------------------------------
@@ -282,11 +269,11 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	if(m_pNewMyQuestInfoWindow->Create(m_pNewUIMng, 640-190, 0) == false)
 		return false;
 
-	m_pNewPartyInfoWindow = new CNewUIPartyInfoWindow;		//  파티 정보 창
+	m_pNewPartyInfoWindow = new CNewUIPartyInfoWindow;
 	if( m_pNewPartyInfoWindow->Create( m_pNewUIMng, 640-190, 0 ) == false )
 		return false;
 
-	m_pNewPartyListWindow = new CNewUIPartyListWindow;		//	파티 미니리스트 창
+	m_pNewPartyListWindow = new CNewUIPartyListWindow;
 	if( m_pNewPartyListWindow->Create( m_pNewUIMng, 640-79, 14 ) == false )
 		return false;
 
@@ -341,14 +328,7 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	}
 
 	m_pNewWindowMenu = new CNewUIWindowMenu;
-	if(m_pNewWindowMenu->Create(m_pNewUIMng, 640-112, 480-
-#ifdef PJH_ADD_MINIMAP
-		171
-#else
-		156
-#endif //PJH_ADD_MINIMAP
-
-		) == false)
+	if(m_pNewWindowMenu->Create(m_pNewUIMng, 640-112, 480-171) == false)
 	{
 		return false;
 	}
@@ -440,31 +420,18 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	if(m_pNewMaster_Level_Interface->Create(m_pNewUIMng, 0, 0) == false)
 		return false;
 
-#ifdef PJH_ADD_MINIMAP
 	m_pNewMiniMap = new CNewUIMiniMap;
 	if(m_pNewMiniMap->Create(m_pNewUIMng, 0, 0) == false)
 		return false;
-#endif //PJH_ADD_MINIMAP
 
-#ifdef NEW_USER_INTERFACE_SHELL
-	m_pNewPartChargeShop = new CNewUIPartChargeShop;
-	if(m_pNewPartChargeShop->Create(m_pNewUIMng, 0, 0) == false)
-		return false;
-#endif //NEW_USER_INTERFACE_SHELL
-
-#ifdef PSW_GOLDBOWMAN
 	m_pNewGoldBowman = new CNewUIGoldBowmanWindow;
 	if( m_pNewGoldBowman->Create(m_pNewUIMng, 640-190, 0) == false )
 		return false;
-#endif //PSW_GOLDBOWMAN
 
-#ifdef PSW_EVENT_LENA
 	m_pNewGoldBowmanLena = new CNewUIGoldBowmanLena;
 	if( m_pNewGoldBowmanLena->Create(m_pNewUIMng, 640-190, 0) == false )
 		return false;
-#endif //PSW_EVENT_LENA	
 
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 	m_pNewLuckyCoinRegistration = new CNewUIRegistrationLuckyCoin;
 	if( m_pNewLuckyCoinRegistration->Create(m_pNewUIMng, 640 - (190 * 2), 0) == false )
 		return false;	
@@ -472,15 +439,11 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	m_pNewExchangeLuckyCoinWindow = new CNewUIExchangeLuckyCoin;
 	if( m_pNewExchangeLuckyCoinWindow->Create(m_pNewUIMng, 640-(190*2), 0) == false )
 		return false;
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 
-#ifdef YDG_ADD_NEW_DUEL_UI
 	m_pNewDuelWatchWindow = new CNewUIDuelWatchWindow;
 	if( m_pNewDuelWatchWindow->Create(m_pNewUIMng, 640-190, 0) == false )
 		return false;
-#endif	// YDG_ADD_NEW_DUEL_UI	
 
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 	m_pNewDuelWatchMainFrameWindow = new CNewUIDuelWatchMainFrameWindow;
 	if(m_pNewDuelWatchMainFrameWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
 		return false;
@@ -488,9 +451,7 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	m_pNewDuelWatchUserListWindow = new CNewUIDuelWatchUserListWindow;
 	if(m_pNewDuelWatchUserListWindow->Create(m_pNewUIMng, 640-57, 480-51) == false)
 		return false;
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
 
-#ifdef YDG_ADD_DOPPELGANGER_UI
 	m_pNewDoppelGangerWindow = new CNewUIDoppelGangerWindow;
 	if( m_pNewDoppelGangerWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640-190, 0) == false )
 		return false;
@@ -505,15 +466,11 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	if( m_pNewDoppelGangerFrame->Create(m_pNewUIMng, 640-227, 480-51-87) == false )
 #endif //MOD_DOPPELGANGERFRAME_POSITION
 		return false;
-#endif	// YDG_ADD_DOPPELGANGER_UI
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	m_pNewNPCDialogue = new CNewUINPCDialogue;
 	if (m_pNewNPCDialogue->Create(m_pNewUIMng, 640-190, 0) == false)
 		return false;
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 	m_pNewQuestProgress = new CNewUIQuestProgress;
 #ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
 	if (m_pNewQuestProgress->Create(m_pNewUIMng, 640-190, 0) == false)
@@ -521,7 +478,6 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	if (m_pNewQuestProgress->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640-267, 0) == false)
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 		return false;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 
 #ifdef ASG_ADD_UI_NPC_MENU
 	m_pNewNPCMenu = new CNewUINPCMenu;
@@ -535,7 +491,6 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 		return false;
 #endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 	m_pNewEmpireGuardianNPC = new CNewUIEmpireGuardianNPC;
 	if( m_pNewEmpireGuardianNPC->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 450, 0) == false )
 		return false;
@@ -543,7 +498,6 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	m_pNewEmpireGuardianTimer = new CNewUIEmpireGuardianTimer;
 	if( m_pNewEmpireGuardianTimer->Create(m_pNewUIMng, 507, 342) == false )
 		return false;
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
 	
 #ifdef PBG_MOD_STAMINA_UI
 	m_pNewUIStamina = new CNewUIStamina;
@@ -551,17 +505,13 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 		return false;
 #endif //PBG_MOD_STAMINA_UI
 
-#ifdef PBG_ADD_GENSRANKING
 	m_pNewGensRanking = new CNewUIGensRanking;
 	if(m_pNewGensRanking->Create(m_pNewUIMng, 640, 480) == false)
 		return false;
-#endif //PBG_ADD_GENSRANKING
 
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE	// 통합 시장 맵 UI 클래스 추가.
 	m_pNewUnitedMarketPlaceWindow = new CNewUIUnitedMarketPlaceWindow;
 	if( m_pNewUnitedMarketPlaceWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640-190, 0) == false )
 		return false;
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 
 #ifdef LEM_ADD_LUCKYITEM
 	m_pNewUILuckyItemWnd = new CNewUILuckyItemWnd;
@@ -612,44 +562,30 @@ void SEASON3B::CNewUISystem::UnloadMainSceneInterface()
 	SAFE_DELETE(m_pNewNameWindow);
 	SAFE_DELETE(m_pNewSkillList);
 	SAFE_DELETE(m_pNewMainFrameWindow);
-	SAFE_DELETE( m_pNewPartyInfoWindow );
-	SAFE_DELETE( m_pNewPartyListWindow );
-	SAFE_DELETE( m_pNewEnterBloodCastle );
-	SAFE_DELETE( m_pNewEnterDevilSquare );
-	SAFE_DELETE( m_pNewBloodCastle );
-	SAFE_DELETE( m_pNewChaosCastleTime );
-	SAFE_DELETE( m_pNewCommandWindow );
-	SAFE_DELETE( m_pNewHeroPositionInfo );
-	SAFE_DELETE( m_pNewMoveCommandWindow );
+	SAFE_DELETE(m_pNewPartyInfoWindow );
+	SAFE_DELETE(m_pNewPartyListWindow );
+	SAFE_DELETE(m_pNewEnterBloodCastle );
+	SAFE_DELETE(m_pNewEnterDevilSquare );
+	SAFE_DELETE(m_pNewBloodCastle );
+	SAFE_DELETE(m_pNewChaosCastleTime );
+	SAFE_DELETE(m_pNewCommandWindow );
+	SAFE_DELETE(m_pNewHeroPositionInfo );
+	SAFE_DELETE(m_pNewMoveCommandWindow );
 	SAFE_DELETE(m_pNewUIHotKey);
-	SAFE_DELETE( m_pNewSiegeWarfare);
-	SAFE_DELETE( m_pNewItemEnduranceInfo );
+	SAFE_DELETE(m_pNewSiegeWarfare);
+	SAFE_DELETE(m_pNewItemEnduranceInfo );
 	SAFE_DELETE(m_pNewBuffWindow);
 	SAFE_DELETE(m_pNewCursedTempleResultWindow);
 	SAFE_DELETE(m_pNewCursedTempleWindow);
 	SAFE_DELETE(m_pNewCursedTempleEnterWindow);
 	SAFE_DELETE(m_pNewCryWolfInterface);
 	SAFE_DELETE(m_pNewMaster_Level_Interface);
-#ifdef NEW_USER_INTERFACE_SHELL
-	SAFE_DELETE(m_pNewPartChargeShop);
-#endif //NEW_USER_INTERFACE_SHELL
-
-#ifdef PSW_GOLDBOWMAN
 	SAFE_DELETE(m_pNewGoldBowman);
-#endif //PSW_GOLDBOWMAN
-
-#ifdef PSW_EVENT_LENA
 	SAFE_DELETE(m_pNewGoldBowmanLena);
-#endif //PSW_EVENT_LENA	
-
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 	SAFE_DELETE(m_pNewLuckyCoinRegistration);
 	SAFE_DELETE(m_pNewExchangeLuckyCoinWindow);
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 
-#ifdef YDG_ADD_NEW_DUEL_UI
 	SAFE_DELETE(m_pNewDuelWatchWindow);
-#endif	// YDG_ADD_NEW_DUEL_UI	
 
 #ifdef YDG_FIX_MEMORY_LEAK_0905
 	SAFE_DELETE(m_pNewDuelWindow);
@@ -660,39 +596,25 @@ void SEASON3B::CNewUISystem::UnloadMainSceneInterface()
 #endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
 #endif	// YDG_FIX_MEMORY_LEAK_0905
 
-#ifdef YDG_ADD_DOPPELGANGER_UI
 	SAFE_DELETE(m_pNewDoppelGangerWindow);
 	SAFE_DELETE(m_pNewDoppelGangerFrame);
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	SAFE_DELETE(m_pNewNPCDialogue);
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 	SAFE_DELETE(m_pNewQuestProgress);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 #ifdef ASG_ADD_UI_NPC_MENU
 	SAFE_DELETE(m_pNewNPCMenu);
 #endif	// ASG_ADD_UI_NPC_MENU
 #ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 	SAFE_DELETE(m_pNewQuestProgressByEtc);
 #endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 	SAFE_DELETE(m_pNewEmpireGuardianNPC);
 	SAFE_DELETE(m_pNewEmpireGuardianTimer);
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-#ifdef PJH_ADD_MINIMAP
 	SAFE_DELETE(m_pNewMiniMap);
-#endif //PJH_ADD_MINIMAP
 	SAFE_DELETE(m_pNewItemMng);
 #ifdef PBG_MOD_STAMINA_UI
 	SAFE_DELETE(m_pNewUIStamina);
 #endif //PBG_MOD_STAMINA_UI
-#ifdef PBG_ADD_GENSRANKING
 	SAFE_DELETE(m_pNewGensRanking);
-#endif //PBG_ADD_GENSRANKING
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 	SAFE_DELETE(m_pNewUnitedMarketPlaceWindow);
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 
 #ifdef LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
 	SAFE_DELETE( m_pNewUILuckyItemWnd );
@@ -712,34 +634,6 @@ bool SEASON3B::CNewUISystem::IsVisible(DWORD dwKey)
 
 	return false;
 }
-
-#ifdef NEW_USER_INTERFACE_SHELL
-bool SEASON3B::CNewUISystem::IsPartChargeShop( DWORD dwKey, bool isMessagebox )
-{
-	if( IsVisible( SEASON3B::INTERFACE_PARTCHARGE_SHOP ) ) {
-		if( isMessagebox )
-		{
-			MESSAGEBOXDATA data;
-			data.s_message.push_back( ( format( GlobalText[2561] ) ).str() );
-			data.s_id      = 1;
-			data.s_type    = eMB_OK;
-			MessageBoxMake( data );
-		}
-		return true;
-	}
-	else if( dwKey == SEASON3B::INTERFACE_PARTCHARGE_SHOP ){
-		if( IsVisible( SEASON3B::INTERFACE_MIXINVENTORY )
-#ifdef LEM_ADD_LUCKYITEM
-			IsVisible( SEASON3B::INTERFACE_LUCKYITEMWND )
-#endif // LEM_ADD_LUCKYITEM
-		  ) {
-			SEASON3B::CreateOkMessageBox(GlobalText[2562], RGBA(255, 30, 0, 255) );
-			return true;
-		}
-	}
-	return false;
-}
-#endif //NEW_USER_INTERFACE_SHELL
 
 void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 {
@@ -1382,29 +1276,14 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		{
 			m_pNewCryWolfInterface->ClosingProcess();
 		}
-#ifdef NEW_USER_INTERFACE_SHELL
-		else if(dwKey == SEASON3B::INTERFACE_PARTCHARGE_SHOP)
-		{
-			m_pNewPartChargeShop->ClosingProcess();
-			g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, false);
-			g_pMyInventory->SetPos(640-190, 0);
-		}
-#endif //NEW_USER_INTERFACE_SHELL
-#ifdef PSW_GOLDBOWMAN
 		else if( dwKey == SEASON3B::INTERFACE_GOLD_BOWMAN )
 		{
 			m_pNewGoldBowman->ClosingProcess();
 		}
-#endif //PSW_GOLDBOWMAN
-
-#ifdef PSW_EVENT_LENA
 		else if( dwKey == SEASON3B::INTERFACE_GOLD_BOWMAN_LENA )
 		{
 			m_pNewGoldBowmanLena->ClosingProcess();
 		}
-#endif //PSW_EVENT_LENA	
-
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 		else if(dwKey == SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION)
 		{
 			m_pNewLuckyCoinRegistration->ClosingProcess();
@@ -1425,14 +1304,10 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 				m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
 			}
 		}
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_NEW_DUEL_UI
 		else if( dwKey == SEASON3B::INTERFACE_DUELWATCH )
 		{
 			m_pNewDuelWatchWindow->ClosingProcess();
 		}
-#endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 		else if( dwKey == SEASON3B::INTERFACE_DUELWATCH_MAINFRAME )
 		{
 			m_pNewDuelWatchMainFrameWindow->ClosingProcess();
@@ -1441,8 +1316,6 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		{
 			m_pNewDuelWatchUserListWindow->ClosingProcess();
 		}
-#endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef YDG_ADD_DOPPELGANGER_UI
 		else if( dwKey == SEASON3B::INTERFACE_DOPPELGANGER_NPC )
 		{
 			m_pNewDoppelGangerWindow->ClosingProcess();
@@ -1451,32 +1324,24 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		{
 			m_pNewDoppelGangerFrame->ClosingProcess();
 		}
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 		else if (dwKey == SEASON3B::INTERFACE_NPC_DIALOGUE)
 		{
 			m_pNewNPCDialogue->ProcessClosing();
 		}
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 		else if (dwKey == SEASON3B::INTERFACE_QUEST_PROGRESS)
 		{
 			m_pNewQuestProgress->ProcessClosing();
 		}
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 #ifdef ASG_ADD_UI_NPC_MENU
 		else if (dwKey == SEASON3B::INTERFACE_NPC_MENU)
 		{
 			m_pNewNPCMenu->ProcessClosing();
 		}
 #endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		else if (dwKey == SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
 		{
 			m_pNewQuestProgressByEtc->ProcessClosing();
 		}
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 		else if( dwKey == SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC )
 		{
 			m_pNewEmpireGuardianNPC->ClosingProcess();
@@ -1485,20 +1350,14 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		{
 			m_pNewEmpireGuardianTimer->ClosingProcess();
 		}
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-
-#ifdef PJH_ADD_MINIMAP
 		else if( dwKey == SEASON3B::INTERFACE_MINI_MAP)
 		{
 			m_pNewMiniMap->ClosingProcess();
 		}
-#endif //PJH_ADD_MINIMAP
-#ifdef PBG_ADD_GENSRANKING
 		else if(dwKey == SEASON3B::INTERFACE_GENSRANKING)
 		{
 			g_pNewUIGensRanking->ClosingProcess();
 		}
-#endif //PBG_ADD_GENSRANKING
 #ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 		else if( dwKey == SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA )
 		{
@@ -2298,12 +2157,6 @@ CNewUICursedTempleResult* SEASON3B::CNewUISystem::GetUI_NewCursedTempleResultWin
 	return m_pNewCursedTempleResultWindow;
 }
 
-#ifdef NEW_USER_INTERFACE_SHELL
-CNewUIPartChargeShop* SEASON3B::CNewUISystem::GetUI_pNewPartChargeShopInterface() const
-{
-	return m_pNewPartChargeShop;
-}
-#endif //NEW_USER_INTERFACE_SHEL
 #ifdef PSW_GOLDBOWMAN
 CNewUIGoldBowmanWindow*	SEASON3B::CNewUISystem::GetUI_pNewGoldBowman() const
 {

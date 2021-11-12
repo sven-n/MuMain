@@ -1692,7 +1692,6 @@
     <ClCompile Include="source\NewUINPCQuest.cpp" />
     <ClCompile Include="source\NewUINPCShop.cpp" />
     <ClCompile Include="source\NewUIOptionWindow.cpp" />
-    <ClCompile Include="source\NewUIPartChargeShop.cpp" />
     <ClCompile Include="source\NewUIPartyInfoWindow.cpp" />
     <ClCompile Include="source\NewUIPartyListWindow.cpp" />
     <ClCompile Include="source\NewUIPetInfoWindow.cpp" />

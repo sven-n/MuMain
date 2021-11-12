@@ -1189,10 +1189,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 
 	bool tooltipvisible = true;
 
-#ifdef NEW_USER_INTERFACE_SHELL
-	tooltipvisible = g_pNewUISystem->IsVisible( SEASON3B::INTERFACE_PARTCHARGE_SHOP ) ? false : true;
-#endif //NEW_USER_INTERFACE_SHELL
-
 	if(m_pNew3DRenderMng)
 	{
 #ifdef NEW_USER_INTERFACE_UISYSTEM

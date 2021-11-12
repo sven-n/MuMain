@@ -660,8 +660,8 @@
 	#endif //LDK_ADD_GAMBLE_SYSTEM
 
 	// - ¹ÚÁ¾ÈÆ
-	#define PJH_ADD_PANDA_PET						// Ææ´õ Æê
-	#define PJH_ADD_PANDA_CHANGERING				// Ææ´õ º¯½Å¹ÝÁö
+	#define PJH_ADD_PANDA_PET
+	#define PJH_ADD_PANDA_CHANGERING
 
 	// Season 4.5 ³»ºÎ Å×¼· ¹ö±× ¼öÁ¤
 	#define ADD_FIX_AFTER_SEASON4_5_TEST
@@ -878,7 +878,6 @@
 	#define NEW_USER_INTERFACE_UTIL
 	#define NEW_USER_INTERFACE_UISYSTEM
 	#define NEW_USER_INTERFACE_INPUTSYSTEM
-	#define NEW_USER_INTERFACE_SHELL
 	#define NEW_USER_INTERFACE_FUNCTIONS
 	#define NEW_USER_INTERFACE_PROXY
 	#define NEW_USER_INTERFACE_FONT

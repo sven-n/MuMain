@@ -1213,11 +1213,8 @@ void RenderColor(float x,float y,float Width,float Height
 	Height = ConvertY(Height);
 
 	float p[4][2];
-#ifdef NEW_USER_INTERFACE_SHELL 
-	y = TheShell().GetWindowSize().y - y;
-#else  //NEW_USER_INTERFACE_SHELL 
 	y = WindowHeight - y;
-#endif //NEW_USER_INTERFACE_SHELL 
+
 	p[0][0] = x      ;p[0][1] = y;
 	p[1][0] = x      ;p[1][1] = y-Height;
 	p[2][0] = x+Width;p[2][1] = y-Height;
@@ -1263,11 +1260,9 @@ void RenderColorBitmap(int Texture,float x,float y,float Width,float Height,floa
     BindTexture(Texture);
 
 	float p[4][2];
-#ifdef NEW_USER_INTERFACE_SHELL 
-	y = TheShell().GetWindowSize().y - y;
-#else  //NEW_USER_INTERFACE_SHELL 
+
 	y = WindowHeight - y;
-#endif //NEW_USER_INTERFACE_SHELL 
+
 	p[0][0] = x      ;p[0][1] = y;
 	p[1][0] = x      ;p[1][1] = y-Height;
 	p[2][0] = x+Width;p[2][1] = y-Height;
@@ -1313,11 +1308,7 @@ void RenderBitmap(int Texture,float x,float y,float Width,float Height,float u,f
 
 	float p[4][2];
 
-#ifdef NEW_USER_INTERFACE_SHELL 
-	y = TheShell().GetWindowSize().y - y;
-#else  //NEW_USER_INTERFACE_SHELL 
 	y = WindowHeight - y;
-#endif //NEW_USER_INTERFACE_SHELL 
 	
 	p[0][0] = x      ;p[0][1] = y;
 	p[1][0] = x      ;p[1][1] = y-Height;
@@ -1362,11 +1353,9 @@ void RenderBitmapRotate(int Texture,float x,float y,float Width,float Height,flo
     BindTexture(Texture);
 
 	vec3_t p[4],p2[4];
-#ifdef NEW_USER_INTERFACE_SHELL 
-	y = TheShell().GetWindowSize().y - y;
-#else  //NEW_USER_INTERFACE_SHELL 
+
 	y = WindowHeight - y;
-#endif //NEW_USER_INTERFACE_SHELL 
+
 	Vector(-Width*0.5f, Height*0.5f,0.f,p[0]);
 	Vector(-Width*0.5f,-Height*0.5f,0.f,p[1]);
 	Vector( Width*0.5f,-Height*0.5f,0.f,p[2]);

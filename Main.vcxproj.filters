@@ -737,9 +737,6 @@
     <ClCompile Include="source\NewUIOptionWindow.cpp">
       <Filter>MU\Interface\NewUI</Filter>
     </ClCompile>
-    <ClCompile Include="source\NewUIPartChargeShop.cpp">
-      <Filter>MU\Interface\NewUI</Filter>
-    </ClCompile>
     <ClCompile Include="source\NewUIPartyInfoWindow.cpp">
       <Filter>MU\Interface\NewUI</Filter>
     </ClCompile>

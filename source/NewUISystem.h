@@ -344,58 +344,31 @@ namespace SEASON3B
 #define g_pCursedTempleResultWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewCursedTempleResultWindow()
 #define g_pCryWolfInterface SEASON3B::CNewUISystem::GetInstance()->GetUI_NewCryWolfInterface()
 #define g_pMasterLevelInterface SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface()
-#ifdef NEW_USER_INTERFACE_SHELL
-#define g_pPartChargeShopInterface SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewPartChargeShopInterface()
-#endif //NEW_USER_INTERFACE_SHEL
-#ifdef PSW_GOLDBOWMAN
 #define g_pGoldBowmanInterface SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewGoldBowman()
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA
 #define g_pGoldBowmanLenaInterface SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewGoldBowmanLena()
-#endif //PSW_EVENT_LENA
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 #define g_pLuckyCoinRegistration SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewLuckyCoinRegistration()
 #define g_pExchangeLuckyCoinWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewExchangeLuckyCoin()
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_NEW_DUEL_UI
 #define g_pDuelWatchWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDuelWatch()
-#endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 #define g_pDuelWatchMainFrameWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDuelWatchMainFrame()
 #define g_pDuelWatchUserList SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDuelWatchUserList()
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #define g_pInGameShop SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewInGameShop()
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
-#ifdef YDG_ADD_DOPPELGANGER_UI
 #define g_pDoppelGangerWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDoppelGangerWindow()
 #define g_pDoppelGangerFrame SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDoppelGangerFrame()
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 #define g_pNPCDialogue SEASON3B::CNewUISystem::GetInstance()->GetUI_NewNPCDialogue()
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 #define g_pQuestProgress SEASON3B::CNewUISystem::GetInstance()->GetUI_NewQuestProgress()
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 #ifdef ASG_ADD_UI_NPC_MENU
 #define g_pNPCMenu SEASON3B::CNewUISystem::GetInstance()->GetUI_NewNPCMenu()
 #endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 #define g_pQuestProgressByEtc SEASON3B::CNewUISystem::GetInstance()->GetUI_NewQuestProgressByEtc()
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 #define g_pEmpireGuardianNPC SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewEmpireGuardianNPC()
 #define g_pEmpireGuardianTimer SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewEmpireGuardianTimer()
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
-#ifdef PJH_ADD_MINIMAP
 #define g_pNewUIMiniMap SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewUIMiniMap()
-#endif //PJH_ADD_MINIMAP
 #ifdef PBG_MOD_STAMINA_UI
 #define g_pNewUIStamina SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewUIStamina()
 #endif //PBG_MOD_STAMINA_UI
-#ifdef PBG_ADD_GENSRANKING
 #define g_pNewUIGensRanking SEASON3B::CNewUISystem::GetInstance()->GetUI_NewGensRanking()
-#endif //PBG_ADD_GENSRANKING
 #ifdef LEM_ADD_LUCKYITEM
 #define g_pLuckyItemWnd	SEASON3B::CNewUISystem::GetInstance()->Get_pNewUILuckyItemWnd()
 #endif // LEM_ADD_LUCKYITEM

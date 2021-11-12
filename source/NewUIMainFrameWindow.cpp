@@ -837,22 +837,21 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
 		else if(m_BtnChaInfo.UpdateMouseEvent() == true)
 		{
 			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_CHARACTER);
+
 			PlayBuffer(SOUND_CLICK01);
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
+
 			if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER))
-				g_QuestMng.SendQuestIndexByEtcSelection();	// 기타 상황에 의한 퀘스트 인덱스를 선택해서 서버로 알림.
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
+				g_QuestMng.SendQuestIndexByEtcSelection();
+
 			return true;
 		}
 		else if(m_BtnFriend.UpdateMouseEvent() == true)
 		{
-#ifdef CSK_FIX_CHAOSFRIENDWINDOW
 			if( gMapManager.InChaosCastle() == true )
 			{
 				PlayBuffer(SOUND_CLICK01);
 				return true;
 			}
-#endif //! CSK_FIX_CHAOSFRIENDWINDOW	// 정리할 때 지워야 하는 소스
 
 			int iLevel = CharacterAttribute->Level;
 			
@@ -860,7 +859,7 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
 			{
 				if(g_pChatListBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
 				{
-					g_pChatListBox->AddText("",GlobalText[1067],SEASON3B::TYPE_SYSTEM_MESSAGE);	// "레벨 6부터 내친구 기능 사용이 가능합니다."
+					g_pChatListBox->AddText("",GlobalText[1067],SEASON3B::TYPE_SYSTEM_MESSAGE);
 				}
 			}
 			else
@@ -876,21 +875,6 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
 			PlayBuffer(SOUND_CLICK01);
 			return true;
 		}
-#if defined NEW_USER_INTERFACE_SHELL && !defined LDK_MOD_GLOBAL_PORTAL_CASHSHOP_BUTTON_DENY
-		else if(m_BtnCShop.UpdateMouseEvent() == true)
-		{
-			if( g_pNewUISystem->IsVisible( SEASON3B::INTERFACE_PARTCHARGE_SHOP ) == false ) 
-			{
-				TheShopServerProxy().SetShopIn();
-				return false;
-			}
-			else 
-			{
-				TheShopServerProxy().SetShopOut();
-				return false;
-			}
-		}
-#endif //NEW_USER_INTERFACE_SHELL
 	}
 
 	return false;

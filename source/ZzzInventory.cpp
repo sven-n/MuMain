@@ -5963,10 +5963,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	
 	bool isrendertooltip = true;
 
-#ifdef NEW_USER_INTERFACE_SHELL
-	isrendertooltip = g_pNewUISystem->IsVisible( SEASON3B::INTERFACE_PARTCHARGE_SHOP ) ? false : true;
-#endif //NEW_USER_INTERFACE_SHELL
-
 	if( isrendertooltip )
 	{
 		if (bItemTextListBoxUse)

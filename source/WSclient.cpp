@@ -792,15 +792,9 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		break;
 	}
 	
-#ifdef PSW_BUGFIX_FRIEND_LIST_CLEAR
 	g_pWindowMgr->Reset();
 	g_pFriendList->ClearFriendList();
 	g_pLetterList->ClearLetterList();
-#endif //PSW_BUGFIX_FRIEND_LIST_CLEAR
-	
-#ifdef NEW_USER_INTERFACE_SHELL
-	TheShopServerProxy().ShopReset( true );
-#endif //NEW_USER_INTERFACE_SHELL
 	
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x02 [ReceiveServerList(%d)]", Data->Value);
 

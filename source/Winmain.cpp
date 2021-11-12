@@ -690,13 +690,7 @@ void DestroyWindow()
 #endif // MOVIE_DIRECTSHOW
 
 	SAFE_DELETE(pMultiLanguage);
-
 	BoostRest( g_BuffSystem );
-
-#ifdef NEW_USER_INTERFACE_SHELL
-	BoostRest( g_shell );
-#endif //NEW_USER_INTERFACE_SHELL
-	
 	BoostRest( g_MapProcess );
 	BoostRest( g_petProcess );
 
@@ -1884,11 +1878,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	g_pMovieScene = new CMovieScene;
 #endif // MOVIE_DIRECTSHOW
 	
-#ifdef NEW_USER_INTERFACE_SHELL
-	g_shell = Shell::Make();
-	g_shell->Initialize( g_hWnd, WindowWidth, WindowHeight );
-#endif //NEW_USER_INTERFACE_SHELL
-
 	g_BuffSystem = BuffStateSystem::Make();
 
 	g_MapProcess = MapProcess::Make();

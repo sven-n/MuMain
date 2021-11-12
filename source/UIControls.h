@@ -774,11 +774,11 @@ public:
 	{ return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
 */	
 protected:
-	virtual void RenderInterface();				// 인터페이스 출력
-	virtual BOOL RenderDataLine(int nLine);		// 내부 텍스트 라인 출력
-	virtual void RenderCoveredInterface();		// 최상단 인터페이스 출력
+	virtual void RenderInterface();
+	virtual BOOL RenderDataLine(int nLine);
+	virtual void RenderCoveredInterface();
 	virtual void DoActionSub(BOOL bMessageOnly);
-	virtual BOOL DoLineMouseAction(int nLine);	// 내부 라인 마우스 액션
+	virtual BOOL DoLineMouseAction(int nLine);
 	virtual int GetRenderLinePos_y(int nLine);
 };
 
@@ -786,8 +786,8 @@ protected:
 
 struct TEXTCOLOR_DATA
 {
-	int m_iCharPos;		// 문자상의 위치
-	int m_iStartPos;	// 픽셀 시작 위치
+	int m_iCharPos;
+	int m_iStartPos;
 	DWORD m_dwTextColor;
 	DWORD m_dwBackColor;
 };
@@ -795,7 +795,7 @@ const int MAX_COLOR_PER_LINE = 10;
 
 struct RENDER_TEXT_DATA
 {
-	char m_szText[MAX_TEXT_LENGTH + 1];		// 텍스트 저장
+	char m_szText[MAX_TEXT_LENGTH + 1];
 	int m_iWidth;
 	int m_iHeight;
 	int m_iTab;				// 탭 크기
@@ -826,7 +826,6 @@ public:
 
 	virtual void SetFont(HFONT hFont) = 0;
 
-	//. lpTextSize: 640*480 기준 텍스트 사이즈를 돌려줌 (GetTextExtentPoint랑 틀림)
 	virtual void RenderText(int iPos_x, int iPos_y, const char* pszText, int iBoxWidth = 0, int iBoxHeight = 0, 
 		int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL) = 0;
 };
@@ -838,7 +837,7 @@ class CUIRenderTextOriginal : public IUIRenderText
 {
 	HDC	m_hFontDC;
 	HBITMAP m_hBitmap;
-	BYTE* m_pFontBuffer;			// 텍스트 저장 버퍼
+	BYTE* m_pFontBuffer;
 	DWORD m_dwTextColor, m_dwBackColor;
 public:
 	CUIRenderTextOriginal();
@@ -863,7 +862,6 @@ public:
 
 	void SetFont(HFONT hFont);
 
-	//. lpTextSize: 640*480 기준 텍스트 사이즈를 돌려줌 (GetTextExtentPoint랑 틀림)
 	void RenderText(int iPos_x, int iPos_y, const unicode::t_char* pszText, int iBoxWidth = 0, int iBoxHeight = 0, 
 		int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL);
 
@@ -922,22 +920,20 @@ public:
 
 	virtual void Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength = 50, BOOL bIsPassword = FALSE);
 	virtual void Render();
-	virtual void GiveFocus(BOOL bSel = FALSE);	// 셀을 지정하고 싶으면 bSel을 TRUE로 해주세요.
+	virtual void GiveFocus(BOOL bSel = FALSE);
 
-	virtual void SetState(int iState);	// UISTATE_NORMAL 설정을 해야 화면에 표시됩니다
-	virtual void SetFont(HFONT hFont);	// 폰트 설정
-	virtual void SetMultiline(BOOL bUseFlag) { m_bUseMultiLine = bUseFlag; }	// 멀티라인 텍스트 사용 (Init전에 호출)
+	virtual void SetState(int iState);
+	virtual void SetFont(HFONT hFont);
+	virtual void SetMultiline(BOOL bUseFlag) { m_bUseMultiLine = bUseFlag; }
 
-	virtual void SetTextLimit(int iLimit);	// 최대 입력 문자수 설정
+	virtual void SetTextLimit(int iLimit);
 	virtual void SetTextColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwTextColor = _ARGB(a, r, g, b); }
 	virtual void SetBackColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwBackColor = _ARGB(a, r, g, b); }
 	virtual void SetSelectBackColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwSelectBackColor = _ARGB(a, r, g, b); }
-	virtual void SetText(const char* pszText);	// NULL: 클리어
-	virtual void GetText(char* pszText, int iGetLenght = MAX_TEXT_LENGTH);	// 텍스트 얻기
+	virtual void SetText(const char* pszText);
+	virtual void GetText(char* pszText, int iGetLenght = MAX_TEXT_LENGTH);
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	virtual void GetText(wchar_t* pwszText, int iGetLenght = MAX_TEXT_LENGTH);	// 텍스트 얻기
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+	virtual void GetText(wchar_t* pwszText, int iGetLenght = MAX_TEXT_LENGTH);
 	HWND GetHandle() { return m_hEditWnd; }
 	HWND GetParentHandle() { return m_hParentWnd; }
 	BOOL HaveFocus() { return (GetHandle() == GetFocus()); }
@@ -951,7 +947,7 @@ public:
 
 	virtual void SetIMEPosition();
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
-	bool GetUseScrollbar() { return m_bUseScrollbarRender; }		//스크롤바 사용여부
+	bool GetUseScrollbar() { return m_bUseScrollbarRender; }
 	void SetUseScrollbar(bool _scrollbar = TRUE) { m_bUseScrollbarRender = _scrollbar; }
 #endif //PBG_ADD_INGAMESHOPMSGBOX
 
@@ -1053,14 +1049,10 @@ class CUILoginInputBox : public CUIChatInputBox
 public:
 	CUILoginInputBox() {}
 	virtual ~CUILoginInputBox() {}
-
 	virtual void Init(HWND hWnd);
-	// 히스토리 안씀 -_-
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void AddHistory(const char* pszText) {}
 	virtual void MoveHistory(int iDegree) {}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 };
 
 class CUIMercenaryInputBox : public CUIChatInputBox
@@ -1068,14 +1060,9 @@ class CUIMercenaryInputBox : public CUIChatInputBox
 public:
 	CUIMercenaryInputBox() {}
 	virtual ~CUIMercenaryInputBox() {}
-
 	virtual void Init(HWND hWnd);
-	// 히스토리 안씀 -_-
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void AddHistory(const char* pszText) {}
 	virtual void MoveHistory(int iDegree) {}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 };
 
 #ifdef REVISION_SLIDE_LEVEL_MAX
@@ -1117,19 +1104,17 @@ public:
 	CUISlideHelp();
 	virtual ~CUISlideHelp();
 
-	// 슬라이드 기본
 	void Init(BOOL bBold = FALSE, BOOL bBlink = FALSE);
 	BOOL DoMouseAction();
 	void Render(BOOL bForceFadeOut = FALSE);
-	void SetScrollSpeed(float fSpeed);								// 슬라이드 속도
-	BOOL AddSlideText(const char* pszNewText, DWORD dwTextColor = (255<<24)+(200<<16)+(220<<8)+(230));	// 슬라이드 버퍼에 텍스트 추가
+	void SetScrollSpeed(float fSpeed);
+	BOOL AddSlideText(const char* pszNewText, DWORD dwTextColor = (255<<24)+(200<<16)+(220<<8)+(230));
 
 	int GetAlphaRate() { return m_iAlphaRate; }
 	BOOL HaveText();
 
-	// 시간 관리
 	void AddSlide(int iLoopCount, int iLoopDelay, const char* pszText, int iType, float fSpeed, DWORD dwTextColor);
-	void CheckTime();	// 시간 체크
+	void CheckTime();
 	void ManageSlide();
 	DWORD m_dwTimer;
 	DWORD m_dwCurrentSecond;
@@ -1170,14 +1155,12 @@ public:
 	void Init();
 	void Render();
 
-	// 슬라이드 도움말
-	void CreateSlideText();											// 슬라이드 도움말 추가
-	void OpenSlideTextFile(const char* szFileName);						// slide(?).txt 로딩
-	void ClearSlideText();											// 슬라이드 텍스트 지우기
-	const char* GetSlideText(int iLevel);								// 현재 레벨의 슬라이드 텍스트 얻기
-	void SetCreateDelay(int iDelay) { m_iCreateDelay = iDelay; }	// 슬라이드 도움말 생성 딜레이
+	void CreateSlideText();
+	void OpenSlideTextFile(const char* szFileName);
+	void ClearSlideText();
+	const char* GetSlideText(int iLevel);
+	void SetCreateDelay(int iDelay) { m_iCreateDelay = iDelay; }
 
-	// 슬라이드 관리자
 	void AddSlide(int iLoopCount, int iLoopDelay, const char* pszText,
 		int iType, float fSpeed, DWORD dwTextColor = (255<<24)+(200<<16)+(220<<8)+(230));
 	void ManageSlide();
@@ -1195,7 +1178,7 @@ protected:
 };
 
 
-extern DWORD g_dwActiveUIID;	// 현재 작동중인 UI ID
+extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;	
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
