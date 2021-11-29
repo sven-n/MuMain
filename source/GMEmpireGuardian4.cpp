@@ -1,5 +1,4 @@
 // GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
-//
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
@@ -20,10 +19,6 @@
 #include "LoadData.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 GMEmpireGuardian4Ptr GMEmpireGuardian4::Make()
 {
@@ -56,10 +51,10 @@ bool GMEmpireGuardian4::CreateObject(OBJECT* o)
 {
 	switch(o->Type)
 	{
-	case 129:	// 불기운 박스 청
-	case 130:	// 불기운 박스 녹
-	case 131:	// 연기박스
-	case 132:	// 연기박스
+	case 129:
+	case 130:
+	case 131:
+	case 132:
 		{
 			o->Angle[2] = (float)((int)o->Angle[2]%360);
 			VectorCopy(o->Angle,o->HeadAngle);
@@ -73,7 +68,7 @@ bool GMEmpireGuardian4::CreateObject(OBJECT* o)
 			o->SubType = 100;
 		}
 		return true;
-	case 10:				// 함정 손이펙트들은 랜덤 애니메이션.
+	case 10:
 		{
 			o->SubType = rand() % 50; 
 		}
@@ -94,8 +89,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
 
  	switch (iType)
  	{
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN	// 제국 수호군 맵 4   (일	  )몬스터 월드 보스 가이온 카레인	(504/164)
-	case 504: // 제국 수호군 맵 4   (일	  )몬스터 월드 보스 가이온 카레인	(504/164)
+	case 504:
 		{
 			OpenMonsterModel(164);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+164, PosX, PosY);
@@ -113,16 +107,13 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
 			gLoadData.OpenTexture( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
 			gLoadData.OpenTexture( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\" );
 
-			//pCharacter->Object.Scale = 1.50f;
 			pCharacter->Object.Scale = 1.40f;
 
 			m_bCurrentIsRage_BossGaion = false;
 		}
 		break;
-#endif //LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-#ifdef LDS_ADD_EG_4_MONSTER_JELINT					// 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
-	case 505: // 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
-	case 522: // 제국 수호군 맵 4   (일	  )NPC    가이온 보좌관 제린트		(522/182)
+	case 505:
+	case 522:
 		{
 			OpenMonsterModel(165);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+165, PosX, PosY);
@@ -133,7 +124,6 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
 			m_bCurrentIsRage_Jerint = false;
 		}
 		break;
-#endif //LDS_ADD_EG_4_MONSTER_JELINT
 	case 527:
 		{
 			OpenMonsterModel(186);
@@ -193,7 +183,7 @@ bool GMEmpireGuardian4::MoveObject(OBJECT* o)
 			fSpeed *= 6.0f;
 		}
 		break;
-	case 10:	// 벽함정손 에니메이션 시작 점 조정.
+	case 10:
 		{
 			if( o->SubType > 0 )
 			{
@@ -209,7 +199,7 @@ bool GMEmpireGuardian4::MoveObject(OBJECT* o)
 	
 	switch(o->Type)
 	{
-	case 20:	// 좌우로 자르는 칼은 항상 싱크 맞춰줘야 한다.
+	case 20:
 		{
 			static float fAniFrame = 0;
 			
@@ -219,35 +209,34 @@ bool GMEmpireGuardian4::MoveObject(OBJECT* o)
 				o->AnimationFrame = fAniFrame;
 		}
 		return true;
-	case 64:	// 칼찍는 석상
+	case 64:
 		{
-			o->Velocity = 0.64f;	// 애니메이션 속도 조절
+			o->Velocity = 0.64f;
 		}
 		return true;
-	case 79:	// 리얼빨간불박스
-	case 80:	// 주변광박스
-	case 82:	// 폭포 효과 - 물 쏟아짐
-	case 83:	// 폭포 효과 - 물 튐
-	case 84:	// 폭포 효과 - 물 안개 효과
-	case 85:	// 법사불 기둥 박스
-	case 86:	// 불기운 박스 적
-	case 129:	// 불기운 박스 청
-	case 130:	// 불기운 박스 녹
-	case 131:	// 연기박스
-	case 132:	// 연기박스
-		//case 91:	// 입김 박스
+	case 79:
+	case 80:
+	case 82:
+	case 83:
+	case 84:
+	case 85:
+	case 86:
+	case 129:
+	case 130:
+	case 131:
+	case 132:	
 		{
 			o->HiddenMesh = -2;
 		}
 		return true;
-	case 81:	// 폭포수
+	case 81:
 		{
-			o->BlendMeshTexCoordV += 0.015f;	// 흘리기
+			o->BlendMeshTexCoordV += 0.015f;
 		}
 		return true;
-	case 36:	// 바닥문양
+	case 36:
 		{
-			o->Velocity = 0.02f;		// 애니메이션 속도조절
+			o->Velocity = 0.02f;
 		}
 		return true;
 	}
@@ -260,16 +249,14 @@ bool GMEmpireGuardian4::MoveMonsterVisual(OBJECT* o, BMD* b)
  	if(gMapManager.IsEmpireGuardian4() == false)
  		return false;
 	
-	//g_EmpireGuardian1에 character정보 있음
 	if(true == g_EmpireGuardian1.MoveMonsterVisual(o, b))
 	{
 		return true;
 	}
-	//	int iBreatTest = MODEL_MONSTER01+164;
 	
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+187:	// 주말 성문
+	case MODEL_MONSTER01+187:
 		{
 			if(o->CurrentAction == MONSTER01_DIE)
 			{
@@ -290,27 +277,23 @@ bool GMEmpireGuardian4::MoveMonsterVisual(OBJECT* o, BMD* b)
 	return false;
 }
 
-// 몬스터(NPC) 프로세서 - 제국 수호군 특화 (Boss gaion이 선택한 케릭터 정보필요로 character* c 인자값 추가.)
 bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
 	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 
-	//g_EmpireGuardian1에 character정보 있음
 	if(true == g_EmpireGuardian1.MoveMonsterVisual(c, o, b))
 	{
 		return true;
 	}
-//	int iBreatTest = MODEL_MONSTER01+164;
 
 	switch(o->Type)
 	{
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 	case MODEL_MONSTER01+164:
 		{
 			switch( o->CurrentAction )
 			{
-			case MONSTER01_ATTACK1:	// 공격1:기본 공격
+			case MONSTER01_ATTACK1:
 				{
 					CreateEffect ( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, 
 						o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
@@ -319,8 +302,6 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					CreateEffect ( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, 
  							o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
 
-
-					// 양측 02번검들의 공격 EFFECT.
 					if( o->AnimationFrame >= 0.0f && o->AnimationFrame < 0.5f )
 					{	
 						CHARACTER *tc = &CharactersClient[c->TargetCharacter];
@@ -330,26 +311,19 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 						vec3_t v3PosTo = { to->Position[0], to->Position[1], to->Position[2] };
 						vec3_t v3RelativePos, v3StartPos;
 						
-						Vector ( o->Angle[0] + AngleRelative[0], 
-							o->Angle[1] + AngleRelative[1], 
-							o->Angle[2] + AngleRelative[2], 
-							Angle );
+						Vector ( o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1], o->Angle[2] + AngleRelative[2], Angle );
 						
 						Vector ( 0.f, 0.f, 0.f, v3RelativePos );
 						
-    					// 좌측 2번
     					b->TransformPosition ( o->BoneTransform[2], v3RelativePos, v3StartPos, true );
-    					CreateEffect ( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, 
-    						v3StartPos, Angle, v3PosTo, 1, o,-1,0,0,0,o->Scale );
+    					CreateEffect ( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o,-1,0,0,0,o->Scale );
 						
- 						// 우측 2번
  						b->TransformPosition ( o->BoneTransform[10], v3RelativePos, v3StartPos, true );
- 						CreateEffect ( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, 
- 							v3StartPos, Angle, v3PosTo, 1, o,-1,0,0,0,o->Scale );
+ 						CreateEffect ( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o,-1,0,0,0,o->Scale );
 					}
 				}
 				break;
-			case MONSTER01_ATTACK2:	// 공격2:블러드 어택
+			case MONSTER01_ATTACK2:
 				{
 					CreateEffect ( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, 
 						o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
@@ -358,8 +332,6 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					CreateEffect ( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, 
  							o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
 
-
-					// 양측 02번검들의 공격 EFFECT.
 					if( o->AnimationFrame >= 0.0f && o->AnimationFrame < 0.7f )
 					{
 						CHARACTER *tc = &CharactersClient[c->TargetCharacter];
@@ -369,28 +341,20 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 						vec3_t v3PosTo = { to->Position[0], to->Position[1], to->Position[2] };
 						vec3_t v3RelativePos, v3StartPos;
 						
-						Vector ( o->Angle[0] + AngleRelative[0], 
-							o->Angle[1] + AngleRelative[1], 
-							o->Angle[2] + AngleRelative[2], 
-							Angle );
-						
+						Vector ( o->Angle[0] + AngleRelative[0],o->Angle[1] + AngleRelative[1],o->Angle[2] + AngleRelative[2],Angle );
 						Vector ( 0.f, 0.f, 0.f, v3RelativePos );
 						
-   						// 좌측 1번
-    						b->TransformPosition ( o->BoneTransform[4], v3RelativePos, v3StartPos, true );
-    						CreateEffect ( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, 
-    							v3StartPos, Angle, v3PosTo, 1, o,-1,0,0,0,o->Scale );
+    					b->TransformPosition ( o->BoneTransform[4], v3RelativePos, v3StartPos, true );
+    					CreateEffect ( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_,v3StartPos, Angle, v3PosTo, 1, o,-1,0,0,0,o->Scale );
  					
-  						// 우측 1번
    						b->TransformPosition ( o->BoneTransform[8], v3RelativePos, v3StartPos, true );
    						CreateEffect ( MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, 
    							v3StartPos, Angle, v3PosTo, 1, o,-1,0,0,0,o->Scale );
 					}	
 				}
 				break;
-			case MONSTER01_ATTACK3: // 공격3:기간틱스톰
+			case MONSTER01_ATTACK3:
 				{
-					// Center Main Sword 공격
 					if( o->AnimationFrame >= 0.0f && o->AnimationFrame < 0.5f )
 					{
 						CHARACTER *tc = &CharactersClient[c->TargetCharacter];
@@ -407,34 +371,29 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 						
 						Vector ( 0.f, 0.f, 0.f, v3RelativePos );
 						
-						// 좌측 1번
 						b->TransformPosition ( o->BoneTransform[4], v3RelativePos, v3StartPos, true );
    						CreateEffect ( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, 
    							v3StartPos, Angle, v3PosTo, 3, o,-1,0,0,0,o->Scale );
 
-						// 우측 1번
 						b->TransformPosition ( o->BoneTransform[8], v3RelativePos, v3StartPos, true );
 						CreateEffect ( MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, 
  							v3StartPos, Angle, v3PosTo, 3, o,-1,0,0,0,o->Scale );
 
-						// 좌측 2번
 						b->TransformPosition ( o->BoneTransform[2], v3RelativePos, v3StartPos, true );
 						CreateEffect ( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, 
 							v3StartPos, Angle, v3PosTo, 3, o,-1,0,0,0,o->Scale );
 						
-						// 우측 2번
 						b->TransformPosition ( o->BoneTransform[10], v3RelativePos, v3StartPos, true );
 						CreateEffect ( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, 
 							v3StartPos, Angle, v3PosTo, 3, o,-1,0,0,0,o->Scale );
 
-						// MainSword
 						b->TransformPosition ( o->BoneTransform[6], v3RelativePos, v3StartPos, true );	
 						CreateEffect ( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, 
 							v3StartPos, Angle, v3PosTo, 3, o,-1,0,0,0,o->Scale );
 					}
 				}
 				break;
-			case MONSTER01_ATTACK4: // 공격4:가이온 플레임스트라이크
+			case MONSTER01_ATTACK4:
 				{
 					CreateEffect ( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, 
 						o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
@@ -445,7 +404,6 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					CreateEffect ( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, 
 						o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
 
-					// Center Main Sword 공격
 					if( o->AnimationFrame >= 0.0f && o->AnimationFrame < 0.5f )
 					{
 						CHARACTER *tc = &CharactersClient[c->TargetCharacter];
@@ -455,34 +413,22 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 						vec3_t v3PosTo = { to->Position[0], to->Position[1], to->Position[2] };
 						vec3_t v3RelativePos, v3StartPos;
 						
-						Vector ( o->Angle[0] + AngleRelative[0], 
-							o->Angle[1] + AngleRelative[1], 
-							o->Angle[2] + AngleRelative[2], 
-							Angle );
+						Vector ( o->Angle[0] + AngleRelative[0], o->Angle[1] + AngleRelative[1], o->Angle[2] + AngleRelative[2], Angle );
 						
 						Vector ( 0.f, 0.f, 0.f, v3RelativePos );
 						
-						// MainSword
 						b->TransformPosition ( o->BoneTransform[6], v3RelativePos, v3StartPos, true );
-						CreateEffect ( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, 
-							v3StartPos, Angle, v3PosTo, 1, o,-1,0,0,0,o->Scale );
+						CreateEffect ( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, v3StartPos, Angle, v3PosTo, 1, o,-1,0,0,0,o->Scale );
 					}
 				}
 				break;	
-			case MONSTER01_APEAR:	// 공격5:광폭화
+			case MONSTER01_APEAR:
 				{	
-					CreateEffect ( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, 
-						o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
-					CreateEffect ( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, 
-						o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
-					CreateEffect ( MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, 
-						o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
-					CreateEffect ( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, 
-						o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
-					CreateEffect ( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, 
- 						o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
-
-					// 광폭화 액션 EFFECT 처리
+					CreateEffect ( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
+					CreateEffect ( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
+					CreateEffect ( MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
+					CreateEffect ( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
+					CreateEffect ( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
 					{
 						vec3_t		Light;
 						
@@ -490,7 +436,6 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 						{
 							Vector ( 1.0f, 1.0f, 1.0f, Light );
 							CreateInferno(o->Position);
-
 							CreateEffect(MODEL_CIRCLE,o->Position,o->Angle,Light,4,o);
 							CreateEffect(MODEL_CIRCLE,o->Position,o->Angle,Light,4,o);	
 							m_bCurrentIsRage_BossGaion = false;
@@ -500,25 +445,18 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				break;
 			default:
 				{
-					CreateEffect ( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, 
-							o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
-					CreateEffect ( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, 
-							o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
-					CreateEffect ( MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, 
- 							o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
- 					CreateEffect ( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, 
- 							o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
- 					CreateEffect ( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, 
- 							o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
+					CreateEffect ( MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
+					CreateEffect ( MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
+					CreateEffect ( MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
+ 					CreateEffect ( MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
+ 					CreateEffect ( MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,o->Scale );
 				}
 				break;
 			}
 		}
 		return true;
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-#ifdef LDS_ADD_EG_4_MONSTER_JELINT		// 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
-	case MODEL_MONSTER01+182:		// 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/182)
-	case MODEL_MONSTER01+165:		// 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
+	case MODEL_MONSTER01+182:
+	case MODEL_MONSTER01+165:
 		{
 			switch( o->CurrentAction )
 			{
@@ -533,14 +471,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				break;
 			case MONSTER01_ATTACK1:
 				{
-					// 제린트 검기
-					//if( 4.0f <= o->AnimationFrame && o->AnimationFrame < 14.0f )
-					//if( 6.0f <= o->AnimationFrame && o->AnimationFrame < 10.1f )
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					if( 7.5f <= o->AnimationFrame && o->AnimationFrame < 10.8f )
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-					if( 4.0f <= o->AnimationFrame && o->AnimationFrame < 5.2f )
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					{
 						vec3_t  Light;
 						Vector(1.0f, 0.5f, 0.2f, Light);
@@ -549,22 +480,14 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 						vec3_t vPosBlur02, vPosBlurRelative02;
 						
 						float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
+
 						float fSpeedPerFrame = fActionSpeed/10.f;
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-						float fSpeedPerFrame = fActionSpeed/6.f;
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
+
 						float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 						int iSwordForceType = 0;
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 						
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 						for(int i=0; i<14; i++) 
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-						for(int i=0; i<10; i++) 
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 						{
 							b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
 							
@@ -574,25 +497,14 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 							b->TransformPosition(BoneTransform[61], vPosBlurRelative01, vPosBlur01, false);
 							b->TransformPosition(BoneTransform[51], vPosBlurRelative02, vPosBlur02, false);
 
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 							CreateObjectBlur(o, vPosBlur01, vPosBlur02, Light, iSwordForceType, true, 1, 30);
 							CreateObjectBlur(o, vPosBlur01, vPosBlur02, Light, iSwordForceType, true, 2, 30);
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-							CreateObjectBlur(o, vPosBlur01, vPosBlur02, Light, 7, false, 1);
-							CreateObjectBlur(o, vPosBlur01, vPosBlur02, Light, 7, false, 2);
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 
 							b->TransformPosition(BoneTransform[52], vPosBlurRelative01, vPosBlur01, false);
 							b->TransformPosition(BoneTransform[60], vPosBlurRelative02, vPosBlur02, false);
 
-
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 							CreateObjectBlur(o, vPosBlur01, vPosBlur02, Light, iSwordForceType, true, 11, 30);
 							CreateObjectBlur(o, vPosBlur01, vPosBlur02, Light, iSwordForceType, true, 12, 30);
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-							CreateObjectBlur(o, vPosBlur01, vPosBlur02, Light, 7, false, 11);
-							CreateObjectBlur(o, vPosBlur01, vPosBlur02, Light, 7, false, 12);
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 							
 							fAnimationFrame += fSpeedPerFrame;	
 						}
@@ -601,22 +513,12 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				break;
 			case MONSTER01_ATTACK2:	
 				{
-					// 1. 몸체 중앙의 번개 효과
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					if( o->AnimationFrame >= 3.0f && o->AnimationFrame <= 5.0f )
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-					if( o->AnimationFrame >= 1.5f && o->AnimationFrame <= 3.5f )
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					{
 						CreateEffect(BITMAP_GATHERING,o->Position,o->Angle,o->Light,1,o);
 					}
-					
-					// 2. 검날 이동자리의 번개 효과 + 불 효과
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
+
 					if( 8.0f <= o->AnimationFrame && o->AnimationFrame < 10.1f )
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-					if( 4.2f <= o->AnimationFrame && o->AnimationFrame < 5.1f )
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					{
 						float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
 						float fSpeedPerFrame = fActionSpeed/10.f;
@@ -624,16 +526,12 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 						vec3_t	vRelative, vPosition, vRelative2;
 
-						// 효과 : 난수지역에 번개효과
 						vec3_t	vAngle, vRandomDir, vRandomDirPosition, vResultRandomPosition;
 						vec34_t	matRandomRotation;
 						Vector(0.0f,0.0f, 0.0f,vAngle);
 						
 						Vector(0.0f,0.0f, 0.0f,vRandomDirPosition);
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-						float	fRandomArea = 0.0f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 						Vector(0.0f, 0.0f, 0.0f, vRelative);
 						Vector(0.0f, 0.0f, 0.0f, vRelative2);
 						for( int i = 0; i < 100; i++ )
@@ -646,7 +544,6 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 							b->TransformPosition(BoneTransform[61], vRelative, vPosition, false);
 							CreateParticle(BITMAP_FIRE,vPosition,o->Angle,o->Light,0);
 
-							// 효과 : 난수지역에 번개효과
 							Vector((float)(rand()%360),0.f,(float)(rand()%360),vAngle);
 							AngleMatrix(vAngle,matRandomRotation);
 							VectorRotate(vRandomDir,matRandomRotation,vRandomDirPosition);
@@ -658,12 +555,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 						
  					}
 
-					// 3. 실제 제린트 검기
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					if( 6.0f <= o->AnimationFrame && o->AnimationFrame < 10.1f )
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-					if( 3.0f <= o->AnimationFrame && o->AnimationFrame < 5.1f )
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					{
 						vec3_t  Light;
 						Vector(1.0f, 1.0f, 1.0f, Light);
@@ -695,46 +587,25 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				break;	
 			case MONSTER01_ATTACK3:	
 				{
-					// - 스킬 이펙트 정의 부분 - 파괴의 일격 발동
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					if( o->AnimationFrame >= 0.2f && o->AnimationFrame <= 1.0f )
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-					if( o->AnimationFrame >= 0.2f && o->AnimationFrame <= 1.0f )
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					{
 						CHARACTER	*chT = &CharactersClient[c->TargetCharacter];
 						vec3_t	&v3TargetPos = chT->Object.Position;
 						
-						// 이펙트 발생
-						// o->Light 에다가 타켓 위치 담아서 이펙트 발생한다.
 						Vector(v3TargetPos[0], v3TargetPos[1], v3TargetPos[2], o->Light);						
-						CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, 
-							o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,1.0f); // 단지 스케일을 위한 공인자값들.
+						CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, o->Position, o->Angle, o->Light, 0, o,-1,0,0,0,1.0f);
 					}
 					
-					// 제린트 검기
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					if( 9.8f <= o->AnimationFrame && o->AnimationFrame < 14.0f )
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-					if( 4.9f <= o->AnimationFrame && o->AnimationFrame < 6.6f )
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 					{
 						vec3_t  Light;
-						//Vector(0.8f, 0.4f, 0.1f, Light);
-						//Vector(0.2f, 0.2f, 1.0f, Light);
 						Vector(1.0f, 1.0f, 1.0f, Light);
-						
-						//						vec3_t vPosBlur01, vPosBlurRelative01;
-						//						vec3_t vPosBlur02, vPosBlurRelative02;
+
 						vec3_t vPosBlur03, vPosBlurRelative03;
 						vec3_t vPosBlur04, vPosBlurRelative04;
 						
 						float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 						float fSpeedPerFrame = fActionSpeed/10.f;
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-						float fSpeedPerFrame = fActionSpeed/5.f;
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
 						
 						float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 						for(int i=0; i<10; i++) 
@@ -747,9 +618,6 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 							b->TransformPosition(BoneTransform[52], vPosBlurRelative04, vPosBlur04, false);
 							b->TransformPosition(BoneTransform[58], vPosBlurRelative04, vPosBlur03, false);
 							
-							//CreateBlur(c, vPosBlur03, vPosBlur04, Light, 10, false, 0);
-							//CreateBlur(c, vPosBlur03, vPosBlur04, Light, 10, false, 1);
-							//CreateBlur(c, vPosBlur03, vPosBlur04, Light, 10, false, 2);
 							CreateObjectBlur(o, vPosBlur03, vPosBlur04, Light, 10, false, 0);
 							CreateObjectBlur(o, vPosBlur03, vPosBlur04, Light, 10, false, 1);
 							CreateObjectBlur(o, vPosBlur03, vPosBlur04, Light, 10, false, 2);
@@ -759,9 +627,8 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					}
 				}
 				break;
-			case MONSTER01_APEAR:		// 광폭화동작	
+			case MONSTER01_APEAR:
 				{
-					// 광폭화 액션 EFFECT 처리
 					{
 						vec3_t		Light;
 						
@@ -780,9 +647,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-#endif // LDS_ADD_EG_4_MONSTER_JELINT		// 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
  	}
-	
 	return false;
 }
 
@@ -790,11 +655,11 @@ void GMEmpireGuardian4::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
  	switch(o->Type)
  	{
-	case MODEL_MONSTER01+166:	//레이몬드
-	case MODEL_MONSTER01+178:	// 방패병
-	case MODEL_MONSTER01+179:	// 치유병
-	case MODEL_MONSTER01+180:	// 기사단
-	case MODEL_MONSTER01+181:	// 호위병 (검기 이펙트)
+	case MODEL_MONSTER01+166:
+	case MODEL_MONSTER01+178:
+	case MODEL_MONSTER01+179:
+	case MODEL_MONSTER01+180:
+	case MODEL_MONSTER01+181:
 		{
 			g_EmpireGuardian1.MoveBlurEffect(c, o, b);
 		}
@@ -807,15 +672,14 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 
-	//g_EmpireGuardian1에 character정보 있음
 	if(true == g_EmpireGuardian1.RenderObjectMesh(o, b, ExtraMon))
 	{
 		return true;
 	}
 
-switch(o->Type)
+	switch(o->Type)
 	{
-	case MODEL_MONSTER01+164:	// 제국 수호군 맵 내에 몬스터 렌더처리
+	case MODEL_MONSTER01+164:
 	case MODEL_MONSTER01+165:
 	case MODEL_MONSTER01+167:
 		{
@@ -823,31 +687,30 @@ switch(o->Type)
 			
 			return true;
 		}	
-	case 96:	// 바닥 카페트
-	case 97:	// 바닥 카페트
-	case 100:	// 바닥 카페트	
+	case 96:
+	case 97:
+	case 100:
 		{
-			// 카페트는 빛 영향을 무조건 DEFAULT로 설정 합니다.
 			Vector(0.170382, 0.170382, 0.170382, b->BodyLight);
 			b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 		}
 		return true;
-	case MODEL_MONSTER01+186:	// 주말 창살 성문
+	case MODEL_MONSTER01+186:
 		{
 			int tileX = int(o->Position[0]/100);
 			int tileY = int(o->Position[1]/100);
-			//위치 강제 이동.
-			if( (49<=tileX && tileX <= 51) && (68 <= tileY && tileY <= 70) ) //1존 함정앞
+
+			if( (49<=tileX && tileX <= 51) && (68 <= tileY && tileY <= 70) )
 			{
 				o->Scale = 1.0f;
 				o->Position[0] = 5080;	o->Position[1] = 6920;
 			}
-			else if( (51<=tileX && tileX <= 53) && (190 <= tileY && tileY <= 192) ) //2존 함정앞
+			else if( (51<=tileX && tileX <= 53) && (190 <= tileY && tileY <= 192) )
 			{
 				o->Scale = 1.0f;
 				o->Position[0] = 5270;	o->Position[1] = 19120;
 			}
-			else if( (196<=tileX && tileX <= 198) && (131 <= tileY && tileY <= 133) ) //3존 함정앞
+			else if( (196<=tileX && tileX <= 198) && (131 <= tileY && tileY <= 133) )
 			{
 				o->Scale = 1.0f;
 				o->Position[0] = 19750;	o->Position[1] = 13220;
@@ -857,44 +720,44 @@ switch(o->Type)
 		}
 		return true;
 		
-	case MODEL_MONSTER01+187:	// 주말 성문
+	case MODEL_MONSTER01+187:
 		{
 			if(o->CurrentAction != MONSTER01_DIE)
 			{
 				int tileX = int(o->Position[0]/100);
 				int tileY = int(o->Position[1]/100);
-				//위치 강제 이동.
-				if( (80 <= tileX && tileX <= 82) && (68<= tileY && tileY <= 70 ) ) //1존 시작
+
+				if( (80 <= tileX && tileX <= 82) && (68<= tileY && tileY <= 70 ) )
 				{
 					o->Scale = 0.8f;
 					o->Position[0] = 8115;	o->Position[1] = 6880;
 				}
-				else if( (31 <= tileX && tileX <= 33) && (89<= tileY && tileY <= 91 ) ) //1존 워프존
+				else if( (31 <= tileX && tileX <= 33) && (89<= tileY && tileY <= 91 ) )
 				{
 					o->Scale = 0.9f;
 					o->Position[0] = 3250;	o->Position[1] = 9000;
 				}
-				else if( (33 <= tileX && tileX <= 35) && (175<= tileY && tileY <= 177) ) //2존 시작점
+				else if( (33 <= tileX && tileX <= 35) && (175<= tileY && tileY <= 177) )
 				{
 					o->Scale = 0.8f;
 					o->Position[0] = 3470;	o->Position[1] = 17600;
 				}
-				else if( (68 <= tileX && tileX <= 70) && (165<= tileY && tileY <= 167) ) //2존 워프존
+				else if( (68 <= tileX && tileX <= 70) && (165<= tileY && tileY <= 167) )
 				{
 					o->Scale = 0.9f;
 					o->Position[0] = 6915;	o->Position[1] = 16650;
 				}
-				else if( (155 <= tileX && tileX <= 157) && (131<= tileY && tileY <= 133) ) //3존 시작점
+				else if( (155 <= tileX && tileX <= 157) && (131<= tileY && tileY <= 133) ) 
 				{
 					o->Scale = 0.9f;
 					o->Position[0] = 15710;	o->Position[1] = 13250;
 				}
-				else if( (223 <= tileX && tileX <= 225) && (158<= tileY && tileY <= 160) ) //3존 워프존
+				else if( (223 <= tileX && tileX <= 225) && (158<= tileY && tileY <= 160) )
 				{
 					o->Scale = 0.8f;
 					o->Position[0] = 22500;	o->Position[1] = 16000;
 				}
-				else if( (213 <= tileX && tileX <= 215) && (23<= tileY && tileY <= 25) ) //4존 시작점
+				else if( (213 <= tileX && tileX <= 215) && (23<= tileY && tileY <= 25) )
 				{
 					o->Scale = 0.9f;
 					o->Position[0] = 21480;	o->Position[1] = 2430;
@@ -920,7 +783,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 
 	switch(o->Type)
 	{
-	case 12:		// CobraST (코브라석상 눈 이팩트)
+	case 12:
 		{	
 			vec3_t vPos, vRelativePos, vLight1, vLight2;
 			float flumi = absf(sinf(WorldTime*0.0008))*0.9f+0.1f;
@@ -948,7 +811,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 20:		// 좌우로 자르는 칼
+	case 20:
 		{
 			if (o->AnimationFrame > 5.4f && o->AnimationFrame < 6.5f)
 			{
@@ -973,7 +836,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 37:	// 벽등
+	case 37:
 		{
 			Vector(0.f, 0.f, 0.f, p);
 			b->TransformPosition(BoneTransform[1], p, Position);
@@ -986,7 +849,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 50:	// sobo_med01 (만다라 석상 손위의 불 이팩트)
+	case 50:
 		{	
 			vec3_t vPos, vRelativePos, vLight1, vLight2, vAngle;
 			Vector(0.f, 0.f, 0.f, vPos);
@@ -998,13 +861,13 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 			for( int i=2 ; i<=7 ; i++ )
 			{
 				b->TransformPosition(BoneTransform[i], vRelativePos, vPos);
-				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLight1,4,o->Scale*0.6f);	// 불
-				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLight2,4,o->Scale*0.3f);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLight1,4,o->Scale*0.6f);
+				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLight2,4,o->Scale*0.3f);
 			}
 		}
 		return true;
 
-	case 64:	// 땅찍는 석상
+	case 64:
 		{
 			if ((o->AnimationFrame > 9.5f && o->AnimationFrame < 11.5f) ||
 				(o->AnimationFrame > 23.5f && o->AnimationFrame < 25.5f))
@@ -1026,7 +889,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 		
-	case 79:		// 리얼빨간불박스
+	case 79:
 		{
 			vec3_t vLightFire;
 			Vector(1.0f, 0.2f, 0.0f, vLightFire);
@@ -1034,25 +897,23 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 			
 			vec3_t vLight;
 			Vector(1.0f, 1.0f, 1.0f, vLight);
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fScale = o->Scale * (rand()%5+13)*0.1f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);
 				break;
 			}
 		}
 		return true;
 
-	case 80:	// 주변광박스
+	case 80:
 		{
 			float fLumi;
 			fLumi = (sinf(WorldTime*0.04f) + 1.0f) * 0.3f + 0.4f;
@@ -1062,20 +923,20 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 82:	// 폭포 효과 - 물 쏟아짐
+	case 82:
 		{
 			CreateParticle ( BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 9, o->Scale );
 		}
 		return true;
 
-	case 83:	// 폭포 효과 - 물 튐
+	case 83:
 		{
 			Vector ( 1.f, 1.f, 1.f, Light );
 			CreateParticle ( BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 14, o->Scale );
 		}
 		return true;
 
-	case 84:  //  폭포 효과 - 물 안개 효과
+	case 84:
 		{
 			Vector ( 1.f, 1.f, 1.f, Light );
 			if ( rand()%8==0 )
@@ -1084,7 +945,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-	case 85:	// 법사불기둥박스
+	case 85:
 		{
 			vec3_t vLight;
 			Vector(0.5f, 0.5f, 0.5f, vLight);
@@ -1102,7 +963,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 86:	// 불기운 박스 적
+	case 86:
 		{
 			if ( rand()%6==0) 
 			{
@@ -1112,7 +973,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 129:	// 불기운 박스 청
+	case 129:
 		{
 			if ( rand()%6==0) 
 			{
@@ -1122,7 +983,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 130:	// 불기운 박스 녹
+	case 130:
 		{
 			if ( rand()%6==0) 
 			{
@@ -1132,7 +993,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 131 :   //  연기박스1.
+	case 131:
 		{
 			if ( rand()%3==0 )
 			{
@@ -1145,7 +1006,7 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 132 :   //  연기박스2.
+	case 132:
 		{
 			if ( rand()%3==0) 
 			{
@@ -1163,16 +1024,14 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 
 	case 157:
 		{
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 			if(gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
 				return true;
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
 			vec3_t vPos, vRelativePos, vLightFire01, vLightFire02, vLightFlareFire, vLightSmoke, vAngle;
 			Vector(0.f, 0.f, 0.f, vPos);
 			
 			
-			Vector(4.f, 0.f, 0.0f, vRelativePos);		// 촛불위 불은 높이를 10정도 준다.
+			Vector(4.f, 0.f, 0.0f, vRelativePos);
 			Vector(0.0f, 0.0f, 0.0f, vAngle);
 			Vector(0.9f, 0.5f, 0.0f, vLightFire01);
 			Vector(0.75f, 0.3f, 0.0f, vLightFire02);
@@ -1188,21 +1047,17 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 				{
 					int iCurBoneIdx = arriCandleFire[i];
 					b->TransformPosition(BoneTransform[iCurBoneIdx], vRelativePos, vPos);
-					
-					//CreateSprite ( BITMAP_LIGHT, vPos, Luminosity+0.4f, vLightFlareFire, o );	 // 광원
-					//CreateSprite(BITMAP_FLARE, vPos, 0.2f * o->Scale, vLightFlareFire, o);		// 플레어
-					
+									
 					for( int j = 0; j < 5; ++j )
 					{
-						CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLightFire01,3,o->Scale*0.2f);	// 불
-						CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLightFire02,3,o->Scale*0.1f);	// 불
+						CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLightFire01,3,o->Scale*0.2f);	
+						CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLightFire02,3,o->Scale*0.1f);	
 					}
 					
 				}
 			}
 			
-			
-			Vector(4.f, 0.f, 0.0f, vRelativePos);		// 촛불위 불은 높이를 10정도 준다.
+			Vector(4.f, 0.f, 0.0f, vRelativePos);
 			Vector(1.f, 1.f, 1.f, vLightSmoke);
 			
 			{
@@ -1213,19 +1068,14 @@ bool GMEmpireGuardian4::RenderObjectVisual( OBJECT* o, BMD* b )
 					
 					for( int j = 0; j < 4; ++j )
 					{
-#ifdef LDS_FIX_EG_COLOR_CHANDELIER
 						CreateParticle ( BITMAP_SMOKE, vPos, o->Angle, vLightSmoke, 65, o->Scale * 0.1, o);
-#else // LDS_FIX_EG_COLOR_CHANDELIER
-						CreateParticle ( BITMAP_SMOKE, vPos, o->Angle, Light, 65, o->Scale * 0.1, o);
-#endif // LDS_FIX_EG_COLOR_CHANDELIER
 					}
 				}
 			}
 		}
 		return true;
-	case 158:	// 연기박스_방향성_독가스
+	case 158:
 		{
-			//Vector ( 0.2f, 0.8f, 0.2f, Light );
 			for( int i_ = 0; i_ < 1; ++i_ )
 			{
 				CreateParticle ( BITMAP_SMOKE, o->Position, o->Angle, Light, 64, o->Scale, o);
@@ -1241,16 +1091,13 @@ bool GMEmpireGuardian4::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
 	switch(o->Type)
 	{
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-	case MODEL_MONSTER01+164: // 제국 수호군 맵 4   (일	  )몬스터 월드 보스 가이온 카레인	(504/164)
+	case MODEL_MONSTER01+164:
 		{
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		}
 		break;
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-#ifdef LDS_ADD_EG_4_MONSTER_JELINT
-	case MODEL_MONSTER01+165: // 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
-	case MODEL_MONSTER01+182: // 제국 수호군 맵 4   (일	  )NPC    가이온 보좌관 제린트		(522/182)	
+	case MODEL_MONSTER01+165:
+	case MODEL_MONSTER01+182:	
 		{
 			vec3_t		v3LightBackup;
 
@@ -1270,15 +1117,12 @@ bool GMEmpireGuardian4::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			VectorCopy( v3LightBackup, b->BodyLight );
 		}
 		return true;
-#endif // LDS_ADD_EG_4_MONSTER_JELINT
 	}
-
 	return false;
 }
 
 bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	//g_EmpireGuardian1에 character정보 있음
 	if(g_EmpireGuardian1.RenderMonsterVisual(c, o, b))
 	{
 		return true;
@@ -1288,12 +1132,8 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
  	
  	switch(o->Type)
  	{
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 	case MODEL_MONSTER01+164:
 		{
-			// 1. 가이온 기본 Effect
-
-			// 1-1. 가슴에 RedFlare
 			VectorCopy(o->Position, b->BodyOrigin);
 			Vector(0.0f, 0.0f, 0.0f, vRelative);
 			
@@ -1303,23 +1143,15 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			Vector(0.9f+fLumi1, 0.3f+fLumi1, 0.2f+fLumi1, vLight);
 			Vector(0.0f, 5.0f, 0.0f, vRelative);
 			b->TransformByObjectBone(vPos, o, 57, vRelative);
-			
-			// flare01.jpg - Red 변환
-			//CreateSprite(BITMAP_LIGHT, vPos, 2.2f+fLumi2, vLight, o);
-			//CreateSprite(BITMAP_LIGHT, vPos, 3.5f+fLumi2, vLight, o);
+
 			CreateSprite(BITMAP_LIGHT_RED, vPos, 1.5f+fLumi2, vLight, o);
 			CreateSprite(BITMAP_LIGHT_RED, vPos, 2.0f+fLumi2, vLight, o);
 
-			// 1-2. 가슴에 파티클
 			Vector(0.0f, -10.0f, 0.0f, vRelative);
 			b->TransformByObjectBone(vPos, o, 57, vRelative);
 			Vector(1.0f, 0.0f, 0.0f, vLight);
 			CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 10, 2.0f);
-			//CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 10, 4.0f);
 
-			// 1. 가이온 기본 Effect / 까지
-
-			// 10. 광폭화 - Effect 
 			if( g_isNotCharacterBuff( o ) == true && g_isCharacterBuff( o, eBuff_Berserker ) == true )
 			{
 				vec3_t vLightRage, vPosRage;
@@ -1332,19 +1164,16 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					if ( i % 5 == 0 )
 					{
 						b->TransformByObjectBone(vPosRage, o, i);
-						CreateParticle(BITMAP_SMOKE,vPosRage,o->Angle,vLightRage,50,1.0f);	// 연기
-						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPosRage,o->Angle,vLightRage,0,1.0f);	// 3종 연기
+						CreateParticle(BITMAP_SMOKE,vPosRage,o->Angle,vLightRage,50,1.0f);
+						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPosRage,o->Angle,vLightRage,0,1.0f);
 					}
 				}
-			} // 10. 광폭화 - Effect
+			}
 		}
 		break;
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-#ifdef LDS_ADD_EG_4_MONSTER_JELINT
-	case MODEL_MONSTER01+165: // 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
-	case MODEL_MONSTER01+182: // 제국 수호군 맵 4   (일	  )NPC    가이온 보좌관 제린트		(522/182)	
+	case MODEL_MONSTER01+165: 
+	case MODEL_MONSTER01+182: 
 		{
-			// 1. 제린트 기본 Effect : 검날
 			VectorCopy(o->Position, b->BodyOrigin);
 			Vector(0.0f, 0.0f, 0.0f, vRelative);
 			float fLumi1 = (sinf(WorldTime*0.004f) + 1.f) * 0.05f;
@@ -1377,9 +1206,7 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 			b->TransformByObjectBone(vPos, o, 57, vRelative);
 			CreateSprite(BITMAP_LIGHT, vPos, fSize+fLumi2, vLight, o);
-			// 1. 제린트 기본 Effect : 검날 / 까지
-			
-			// 2. 제린트 기본 Effect : BODY
+
 			float fLumi3 = (cosf(WorldTime*0.004f) + 1.f) * 0.1f;
 			float fLumi4 = (cosf(WorldTime*0.004f) + 1.f) * 0.2f;
 
@@ -1414,9 +1241,7 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 			b->TransformByObjectBone(vPos, o, 64, vRelative);		// node_body09
 			CreateSprite(BITMAP_LIGHT, vPos, fSize+fLumi4, vLight, o);
-			// 2. 제린트 기본 Effect : BODY / 까지
 
-			// 3. 제린트 기본 Effect : BODY2
 			fLumi3 = (cosf(WorldTime*0.004f) + 1.f) * 0.25f;
 			fLumi4 = (cosf(WorldTime*0.004f) + 1.f) * 0.2f;
 			
@@ -1433,9 +1258,7 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 			b->TransformByObjectBone(vPos, o, 33, vRelative);		// Bip01 R UpperArm
 			CreateSprite(BITMAP_LIGHT, vPos, fSize+fLumi4, vLight, o);
-			// 3. 제린트 기본 Effect : BODY2 / 까지
 
-			// 4. 제린트 기본 Effect : BODY2
 			fSize = 1.3f;
 			
 			Vector(0.9f+fLumi3, 0.1f+fLumi3, 0.4f+fLumi3, vLight);
@@ -1449,9 +1272,7 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			
 			b->TransformByObjectBone(vPos, o, 33, vRelative);		// Bip01 R UpperArm
 			CreateSprite(BITMAP_LIGHT, vPos, fSize+fLumi4, vLight, o);
-			// 4. 제린트 기본 Effect : BODY2 / 까지
 
-			// 5. 제린트 기본 Effect : BODY3 : SPLINE
 			fSize = 2.3f;
 			
 			Vector(0.9f+fLumi3, 0.1f+fLumi3, 0.4f+fLumi3, vLight);
@@ -1459,9 +1280,7 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 			b->TransformByObjectBone(vPos, o, 5, vRelative);		// Bip01 Spine2
 			CreateSprite(BITMAP_LIGHT, vPos, fSize+fLumi4, vLight, o);	
-			// 5. 제린트 기본 Effect : BODY3 : SPLINE / 까지
 
-			// 10. 광폭화 - Effect 
 			if( g_isNotCharacterBuff( o ) == true && g_isCharacterBuff( o, eBuff_Berserker ) == true )
 			{
 				vec3_t vLightRage, vPosRage;
@@ -1474,16 +1293,14 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					if ( i % 5 == 0 )
 					{
 						b->TransformByObjectBone(vPosRage, o, i);
-						CreateParticle(BITMAP_SMOKE,vPosRage,o->Angle,vLightRage,50,1.0f);	// 연기
-						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPosRage,o->Angle,vLightRage,0,1.0f);	// 3종 연기
+						CreateParticle(BITMAP_SMOKE,vPosRage,o->Angle,vLightRage,50,1.0f);
+						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPosRage,o->Angle,vLightRage,0,1.0f);
 					}
 				}
-			} // 10. 광폭화 - Effect
+			}
 		}
 		return true;
-#endif // LDS_ADD_EG_4_MONSTER_JELINT
 	}
-	
 	return false;
 }
 
@@ -1497,7 +1314,7 @@ void GMEmpireGuardian4::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 	case 0:
 	case 1:
 	case 3:
-	case 44:	// 돌기둥들
+	case 44:
 		{
 			float fLumi;
 			fLumi = (sinf(WorldTime*0.0015f) + 1.0f) * 0.4f + 0.2f;
@@ -1508,7 +1325,7 @@ void GMEmpireGuardian4::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 		}
 		break;
 		
-	case 81:	// 폭포물
+	case 81:
 		{
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		}
@@ -1531,66 +1348,56 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 
-	//g_EmpireGuardian1에 PlayMonsterSound정보 있음
 	if( true == g_EmpireGuardian1.SetCurrentActionMonster(c, o) )
 	{
 		return true;
 	}
 	
-	switch(c->MonsterIndex)//(기준 인덱스 가이온:504)
+	switch(c->MonsterIndex)
 	{
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-	case 504: // 제국 수호군 맵 4   (일	  )몬스터 월드 보스 가이온 카레인	(504/164)
+	case 504:
 		{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			BMD* b = &Models[o->Type];		// 가이온의 경우 특수하게 본TM이 필요.
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-
-			// 광폭화 서버로부터 신호 이후, 광폭화 비주얼 호출 여부. - 가이온.
 			if( m_bCurrentIsRage_BossGaion == true )
 			{
 				SetAction(o, MONSTER01_APEAR);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 				return true;
 			}
 			
 			switch(c->MonsterSkill)
 			{
-			case ATMON_SKILL_EMPIREGUARDIAN_GAION_01_GENERALATTACK:	// 67 일반공격
+			case ATMON_SKILL_EMPIREGUARDIAN_GAION_01_GENERALATTACK:
 				{
-					// 동작은 2번 공격 동작.
 					SetAction(o, MONSTER01_ATTACK1);
 					c->MonsterSkill = -1;
 				}
 				break;
-			case ATMON_SKILL_EMPIREGUARDIAN_GAION_02_BLOODATTACK:	// 64 블러드어택
+			case ATMON_SKILL_EMPIREGUARDIAN_GAION_02_BLOODATTACK:
 				{
-					// 동작은 2번 공격 동작.
 					SetAction(o, MONSTER01_ATTACK2);
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+					c->MonsterSkill = -1;
 				}
 				break;
-			case ATMON_SKILL_EMPIREGUARDIAN_GAION_03_GIGANTIKSTORM: // 65 기간틱스톰
+			case ATMON_SKILL_EMPIREGUARDIAN_GAION_03_GIGANTIKSTORM:
 				{
 					SetAction(o, MONSTER01_ATTACK3);
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+					c->MonsterSkill = -1;
 				}
 				break;
-			case ATMON_SKILL_EMPIREGUARDIAN_GAION_04_FLAMEATTACK: // 66 프레임 어택
+			case ATMON_SKILL_EMPIREGUARDIAN_GAION_04_FLAMEATTACK:
 				{
 					SetAction(o, MONSTER01_ATTACK4);
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+					c->MonsterSkill = -1;
 				}
 				break;
-			case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:			// 59 광폭화
+			case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:
 				{
 					SetAction(o, MONSTER01_APEAR);
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
-
+					c->MonsterSkill = -1;
 					m_bCurrentIsRage_BossGaion = true;
 				}
 				break;
-			default:	// 기타 모든 일반공격 
+			default:
 				{
 					SetAction(o, MONSTER01_ATTACK1);
 					c->MonsterSkill = -1;	
@@ -1601,55 +1408,39 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		return true;
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-#ifdef LDS_ADD_EG_4_MONSTER_JELINT					// 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
-	case 505: // 제국 수호군 맵 4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
+	case 505:
 		{
-			// 광폭화 서버로부터 신호 이후, 광폭화 비주얼 호출 여부. - 제린트.
 			if( m_bCurrentIsRage_Jerint == true )
 			{
 				SetAction(o, MONSTER01_APEAR);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 				return true;
 			}
 			
 			switch(c->MonsterSkill)
 			{
-			case 55:	// Skill:55	// 공격 2
+			case 55:
 				{
 					SetAction(o, MONSTER01_ATTACK2);
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+					c->MonsterSkill = -1;
 				}
 				break;
-			case 61:	// Skill:61	// 공격 3
+			case 61:
 				{
 					SetAction(o, MONSTER01_ATTACK3);
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+					c->MonsterSkill = -1;
 				}
 				break;
-			case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:	// 59 광폭화
+			case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:
 				{
-					SetAction(o, MONSTER01_APEAR);		// 광폭화 동작
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+					SetAction(o, MONSTER01_APEAR);
+					c->MonsterSkill = -1;
 
 					m_bCurrentIsRage_Jerint = true;
 				}
 				break;
-			default:	// 기타 모든 일반공격 
+			default:
 				{
-// 					// FOR TESTDEBUG
-// 					//int arrSkillAttack[] = { MONSTER01_ATTACK1, MONSTER01_ATTACK2, MONSTER01_ATTACK3 };
-// 					int arrSkillAttack[] = { MONSTER01_ATTACK1 };
-// 					int iRandNumCur = rand() % 1;
-// 					int iCurrentSkillAttack = arrSkillAttack[iRandNumCur];
-// 					
-// 					SetAction(o, iCurrentSkillAttack);
-// 
-// 
-// 					// FOR TESTDEBUG
-// 					
-// //					SetAction(o, MONSTER01_ATTACK3);
-// 
  					SetAction( o, MONSTER01_ATTACK1 );
 					c->MonsterSkill = -1;
 				}
@@ -1657,9 +1448,7 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			}
 		}
 		return true;
-#endif //LDS_ADD_EG_4_MONSTER_JELINT
 	}
-	
 	return false;
 }
 
@@ -1671,13 +1460,11 @@ bool GMEmpireGuardian4::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 	return false;
 }
 
-// 몬스터 사운드
 bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o) 
 {
 	if(gMapManager.IsEmpireGuardian4() == false)
 		return false;
 	
-	//g_EmpireGuardian1에 PlayMonsterSound정보 있음
 	if( true == g_EmpireGuardian1.PlayMonsterSound(o) )
 	{
 		return true;
@@ -1693,8 +1480,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
 
 	switch(o->Type)
 	{
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-	case MODEL_MONSTER01+164:	// 월드 보스 가이온 카레인	(504/164)
+	case MODEL_MONSTER01+164:
 		{
 			switch( o->CurrentAction )
 			{
@@ -1708,7 +1494,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
 					PlayBuffer( SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH );
 				}
 				return true;
-			case MONSTER01_APEAR:	// 광폭화.
+			case MONSTER01_APEAR:
 				{
 					PlayBuffer( SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE );
 				}
@@ -1716,7 +1502,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+165:	// 가이온 보좌관 제린트		(505/165) 
+	case MODEL_MONSTER01+165:
 		{
 			switch( o->CurrentAction )
 			{
@@ -1737,7 +1523,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
 					PlayBuffer( SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01 );
 				}
 				return true;
-			case MONSTER01_ATTACK2:	// 제린트 블러드어택 사운드.
+			case MONSTER01_ATTACK2:
 				{
 					PlayBuffer( SOUND_BLOODATTACK );
 				
@@ -1745,8 +1531,8 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
 				return true;	
 			case MONSTER01_ATTACK3:
 				{
-					PlayBuffer( SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03 );	// 공격3 사운드
-					PlayBuffer( SOUND_SKILL_BLOWOFDESTRUCTION );				// 파괴의 일격 사운드
+					PlayBuffer( SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03 );
+					PlayBuffer( SOUND_SKILL_BLOWOFDESTRUCTION );
 				}
 				return true;
 			case MONSTER01_DIE:
@@ -1754,7 +1540,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
 					PlayBuffer( SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH );
 				}
 				return true;
-			case MONSTER01_APEAR:	// 광폭화.
+			case MONSTER01_APEAR:
 				{
 					PlayBuffer( SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE );
 				}
@@ -1762,13 +1548,11 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
 			}
 		}
 		return true;
-#endif // LDS_ADD_EMPIRE_GUARDIAN
 	}
 
 	return false; 
 }
 
-// 오브젝트 사운드
 void GMEmpireGuardian4::PlayObjectSound(OBJECT* o)
 {
 	g_EmpireGuardian1.PlayObjectSound(o);
@@ -1780,11 +1564,9 @@ void GMEmpireGuardian4::PlayBGM()
 	{
 		PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN4]);
 	}
-#ifdef PBG_FIX_STOPBGMSOUND
 	else
 	{
 		StopMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN4]);
 	}
-#endif //PBG_FIX_STOPBGMSOUND
 }
 #endif	// LDS_ADD_MAP_EMPIREGUARDIAN4

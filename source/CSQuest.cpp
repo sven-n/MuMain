@@ -644,16 +644,15 @@ int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
 {
 	SEASON3B::CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
 
-	int nItemsInInven = pInvenCtrl->GetNumberOfItems();	// 인벤토리 아이템 개수.
+	int nItemsInInven = pInvenCtrl->GetNumberOfItems();
 	ITEM* pItem = NULL;
-	int nFindItemCount = 0;		// 찾은 아이템 개수.
+	int nFindItemCount = 0;
 	
 	for (int i = 0; i < nItemsInInven; ++i)
 	{
 		pItem = pInvenCtrl->GetItem(i);
 		if (nType == pItem->Type)
 		{
-			// 레벨이 상관없거나, 맞는 레벨인 경우
 			if (nLevel == -1 || nLevel == (int)((pItem->Level>>3)&15))
 			{	
                 if (nCount <= ++nFindItemCount)
@@ -684,7 +683,7 @@ bool CSQuest::ProcessNextProgress()
         ShowDialogText(m_shCurrPage);
 		return true;
     }
-    else	// 요구조건에 충족.
+    else
     {
         SendRequestQuestState(m_byCurrQuestIndex, 1);
 		return false;

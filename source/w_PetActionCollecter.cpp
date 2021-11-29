@@ -70,10 +70,6 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 	//------------------------------------------//
 	float FlyRange = 10.0f;
 	vec3_t targetPos, Range, Direction;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	bool _isMove = false;
-	float fRadHeight = ((2*3.14f)/15000.0f) * (float)(tick%15000);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	m_fRadWidthStand = ((2*3.14f)/4000.0f) * (float)(tick%4000);
 	m_fRadWidthGet = ((2*3.14f)/2000.0f) * (float)(tick%2000);
 	
@@ -310,9 +306,6 @@ void PetActionCollecter::FindZen(OBJECT* obj)
 	if( NULL == obj || true == m_isRooting ) return;
 
 	float dx, dy, dl;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	bool sameItem = false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	for(int i=0;i<MAX_ITEMS;i++)	
 	{

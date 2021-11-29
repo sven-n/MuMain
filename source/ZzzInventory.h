@@ -130,7 +130,7 @@ extern char g_strGiftName[64];
 extern bool RepairShop;
 extern int  RepairEnable;
 extern int AskYesOrNo;
-extern BYTE OkYesOrNo;
+extern char OkYesOrNo;
 
 extern int  SommonTable[];
 extern int  StorageGoldFlag;
@@ -146,40 +146,27 @@ extern bool EquipmentItem;
 extern BYTE g_byItemUseType;
 extern char	g_lpszKeyPadInput[2][MAX_KEYPADINPUT + 1];
 
-//////////////////////////////////////////////////////////////////////////
-//  카오스 조합.
-//////////////////////////////////////////////////////////////////////////
-
 #ifdef ASG_ADD_GENS_SYSTEM
 bool IsStrifeMap(int nMapIndex);
 #endif	// ASG_ADD_GENS_SYSTEM
 void CreateShiny(OBJECT *o);
 void ClearInventory();
-void CreateShopInventory();
 bool CheckEmptyInventory(ITEM *Inv,int InvWidth,int InvHeight);
 #ifdef  AUTO_CHANGE_ITEM
 void AutoEquipmentChange( int sx, int sy, ITEM* Inv, int InvWidth, int InvHeight );
 #endif // AUTO_CHANGE_ITEM
 
 int CompareItem(ITEM item1, ITEM item2);
-#ifdef KJH_MOD_BTS191_GOLD_FLOATING_NUMBER
 void ConvertGold(double dGold, unicode::t_char* szText, int iDecimals = 0);
-#else // KJH_MOD_BTS191_GOLD_FLOATING_NUMBER
-void ConvertGold(DWORD Gold,unicode::t_char* Text);
-#endif // KJH_MOD_BTS191_GOLD_FLOATING_NUMBER
-#ifdef YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
 void ConvertGold64(__int64 Gold,unicode::t_char* Text);
-#endif	// YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
 void ConvertTaxGold(DWORD Gold,char *Text);
 void ConvertChaosTaxGold(DWORD Gold,char *Text);
 int  ConvertRepairGold(int Gold,int Durability, int MaxDurability, short Type, char *Text);
 void RepairAllGold ( void );
 WORD calcMaxDurability ( const ITEM* ip, ITEM_ATTRIBUTE *p, int Level );
-void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, 
-						int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
-// 아이템 사용가능여부 판단
+void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab,int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
+
 bool IsCanUseItem();
-// 거래요청 가능상태 판단
 bool IsCanTrade();
 //  Party.
 void InitPartyList ();
@@ -200,10 +187,8 @@ void CreateGuildMark( int nMarkIndex, bool blend=true );
 void RenderGuildColor(float x,float y,int SizeX,int SizeY,int Index);
 void CreateCastleMark ( int Type, BYTE* buffer=NULL, bool blend=true );
 
-// 아이템을 렌더링 하는 함수
 void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,int Option1,int ExtOption,bool PickUp=false);
 void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t Target,int Select,bool PickUp);
-//	캐릭터의 공격력을 계산한다.
 bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage );
 void GetItemName ( int iType, int iLevel, char* Text );
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
@@ -229,9 +214,6 @@ bool IsHighValueItem(ITEM* pItem);
 bool IsPersonalShopBan(ITEM* pItem);
 bool IsTradeBan(ITEM* pItem);
 bool IsDropBan(ITEM* pItem);
-#ifdef LEM_FIX_ITEMSET_FROMJAPAN	// IsItemSet_FromJapan함수 헤더 선언 [lem_2010.8.19]
-int IsItemSet_FromJapan( ITEM* _pItem, int _nType );
-#endif	// LEM_FIX_ITEMSET_FROMJAPAN [lem_2010.8.19]
 bool IsStoreBan(ITEM* pItem);
 bool IsSellingBan(ITEM* pItem);
 bool IsRepairBan(ITEM* pItem);

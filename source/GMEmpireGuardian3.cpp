@@ -1,5 +1,4 @@
 // GMEmpireGuardian3.cpp: implementation of the GMEmpireGuardian3 class.
-//
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
@@ -15,14 +14,9 @@
 #include "DSPlaySound.h"
 #include "ZzzOpenData.h"
 #include "ZzzLodTerrain.h"
-
 #include "GOBoid.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 GMEmpireGuardian3Ptr GMEmpireGuardian3::Make()
 {
@@ -55,10 +49,10 @@ bool GMEmpireGuardian3::CreateObject(OBJECT* o)
 {
 	switch(o->Type)
 	{
-	case 129:	// 불기운 박스 청
-	case 130:	// 불기운 박스 녹
-	case 131:	// 연기박스
-	case 132:	// 연기박스
+	case 129:
+	case 130:
+	case 131:
+	case 132:
 		{
 			o->Angle[2] = (float)((int)o->Angle[2]%360);
 			VectorCopy(o->Angle,o->HeadAngle);
@@ -81,8 +75,6 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
 {
 	CHARACTER* pCharacter = g_EmpireGuardian1.CreateMonster(iType, PosX, PosY, Key);
 
-	// 중복 코딩 방지용
-	//g_EmpireGuardian1에 없으면 로딩
 	if(NULL != pCharacter)
 	{
 		return pCharacter;
@@ -90,7 +82,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
 
  	switch (iType)
  	{
-	case 510: // 카토
+	case 510: 
 		{
 			OpenMonsterModel(170);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+170, PosX, PosY);
@@ -100,8 +92,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
 			m_bCurrentIsRage_Kato = false;
 		}
 		break;
-#ifdef LDK_ADD_EG_MONSTER_ASSASSINMASTER
-	case 516: // 암살단장
+	case 516:
 		{
 			OpenMonsterModel(176);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+176, PosX, PosY);
@@ -109,8 +100,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
 			pCharacter->Object.Scale = 1.55f;
 		}
 		break;
-#endif //LDK_ADD_EG_MONSTER_ASSASSINMASTER
-	case 517: // 기마단장
+	case 517:
 		{
 			OpenMonsterModel(177);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+177, PosX, PosY);
@@ -162,7 +152,7 @@ bool GMEmpireGuardian3::MoveObject(OBJECT* o)
 	
 	switch(o->Type)
 	{
-	case 20:	// 좌우로 자르는 칼은 항상 싱크 맞춰줘야 한다.
+	case 20:
 		{
 			static float fAniFrame = 0;
 			
@@ -172,35 +162,34 @@ bool GMEmpireGuardian3::MoveObject(OBJECT* o)
 				o->AnimationFrame = fAniFrame;
 		}
 		return true;
-	case 64:	// 칼찍는 석상
+	case 64:
 		{
-			o->Velocity = 0.44f;	// 애니메이션 속도 조절
+			o->Velocity = 0.44f;
 		}
 		return true;
-	case 79:	// 리얼빨간불박스
-	case 80:	// 주변광박스
-	case 82:	// 폭포 효과 - 물 쏟아짐
-	case 83:	// 폭포 효과 - 물 튐
-	case 84:	// 폭포 효과 - 물 안개 효과
-	case 85:	// 법사불 기둥 박스
-	case 86:	// 불기운 박스 적
-	case 129:	// 불기운 박스 청
-	case 130:	// 불기운 박스 녹
-	case 131:	// 연기박스
-	case 132:	// 연기박스
-		//case 91:	// 입김 박스
+	case 79:
+	case 80:
+	case 82:
+	case 83:
+	case 84:
+	case 85:
+	case 86:
+	case 129:
+	case 130:
+	case 131:
+	case 132:
 		{
 			o->HiddenMesh = -2;
 		}
-		return true; //?
-	case 81:	// 폭포수
+		return true;
+	case 81:
 		{
-			o->BlendMeshTexCoordV += 0.015f;	// 흘리기
+			o->BlendMeshTexCoordV += 0.015f;
 		}
 		return true;
-	case 36:	// 바닥문양
+	case 36:
 		{
-			o->Velocity = 0.02f;		// 애니메이션 속도조절
+			o->Velocity = 0.02f;
 		}
 		return true;
 	}
@@ -210,7 +199,6 @@ bool GMEmpireGuardian3::MoveObject(OBJECT* o)
 
 bool GMEmpireGuardian3::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
-	//g_EmpireGuardian1에 character정보 있음
 	if(true == g_EmpireGuardian1.MoveMonsterVisual(o, b))
 	{
 		return true;
@@ -219,15 +207,11 @@ bool GMEmpireGuardian3::MoveMonsterVisual(OBJECT* o, BMD* b)
 	return false;
 }
 
-
-
-// 몬스터(NPC) 프로세서 - 제국 수호군 특화 (Boss gaion이 선택한 케릭터 정보필요로 character* c 인자값 추가.)
 bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
 //  	if(IsEmpireGuardian3() == false)
   //		return false;
 
-	//g_EmpireGuardian1에 character정보 있음
 	if(true == g_EmpireGuardian1.MoveMonsterVisual(c, o, b))
 	{
 		return true;
@@ -237,7 +221,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 	
  	switch(o->Type)
  	{
-	case MODEL_MONSTER01+170:// 3군단장 카토
+	case MODEL_MONSTER01+170:
 		{
 			switch(o->CurrentAction)
 			{
@@ -247,8 +231,8 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			case MONSTER01_ATTACK3:
 			case MONSTER01_DIE:	
 				break;
-			case MONSTER01_APEAR:		// 광폭화
-				{// 광폭화 액션 EFFECT 처리
+			case MONSTER01_APEAR:
+				{
 					vec3_t		Light;
 					
 					if( m_bCurrentIsRage_Kato == true )
@@ -265,7 +249,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		return true;	
-	case MODEL_MONSTER01+176:// 암살단장
+	case MODEL_MONSTER01+176:
 		{
 			switch(o->CurrentAction)
 			{
@@ -404,15 +388,15 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				break;
 			case MONSTER01_DIE:	
 				break;
-			case MONSTER01_APEAR:		// 광폭화
-				{// 광폭화 액션 EFFECT 처리
+			case MONSTER01_APEAR:
+				{
 
 				}
 				break;
 			}
 		}
 		return true;	
-	case MODEL_MONSTER01+177:	// 기마단장
+	case MODEL_MONSTER01+177:
 		{
 			switch(o->CurrentAction)
 			{
@@ -424,9 +408,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 						Vector(0.8f, 0.4f, 0.1f, o->Light);
 						
 						b->TransformByObjectBone( vPos, o, 15 );
-						//입 연기
 						CreateParticle(BITMAP_CLUD64, vPos, o->Angle, o->Light, 3, 0.2f);
-						//입 침 튀기기??
 						CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, o->Light, 13, 1.0f);
 					}
 				}
@@ -437,28 +419,25 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					
 					if( 7.0f <= o->AnimationFrame && o->AnimationFrame < 8.0f )
 					{
-						//왼발
 						b->TransformByObjectBone( vPos, o, 32 );
 						vPos[2] += 25.0f;
 						CreateParticle ( BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f );
 					}
 					if( 1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f )
 					{
-						//오른발
 						b->TransformByObjectBone( vPos, o, 19 );
 						vPos[2] += 25.0f;
 						CreateParticle ( BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f );
 					}
 				}
 				break;
-			case MONSTER01_ATTACK1:	// 공격1
+			case MONSTER01_ATTACK1:
 				{
 
 				}	
 				break;
-			case MONSTER01_ATTACK2: // 공격2
+			case MONSTER01_ATTACK2:
 				{
-					// - 스킬 이펙트 정의 부분 - 어스 퀘이크 스킬 발동 : 되도록 범위 변동 없도록 유의
 					if( o->AnimationFrame >= 3.8f && o->AnimationFrame <= 9.4f )
 					{
 						RenderSkillEarthQuake ( c, o, b, 14 );
@@ -469,12 +448,12 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					}
 				}
 				break;
-			case MONSTER01_APEAR:	// 공격3
+			case MONSTER01_APEAR:
 				{
 					
 				}
 				break;
-			case MONSTER01_ATTACK3:	// 공격4
+			case MONSTER01_ATTACK3:
 				{
 					
 				}
@@ -520,18 +499,16 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+166:	// 레이몬드
-	case MODEL_MONSTER01+178:	// 방패병
-	case MODEL_MONSTER01+179:	// 치유병
-	case MODEL_MONSTER01+180:	// 기사단
-	case MODEL_MONSTER01+181:	// 호위병 (검기 이펙트)
+	case MODEL_MONSTER01+166:
+	case MODEL_MONSTER01+178:
+	case MODEL_MONSTER01+179:
+	case MODEL_MONSTER01+180:
+	case MODEL_MONSTER01+181:
 		{
 			g_EmpireGuardian1.MoveBlurEffect(c, o, b);
 		}
 		break;
-
-#ifdef KJH_ADD_EG_MONSTER_KATO_EFFECT
-	case MODEL_MONSTER01+170:	// 3군단장 카토
+	case MODEL_MONSTER01+170:
 		{
 			vec3_t  Light;
 			vec3_t StartPos, StartRelative;
@@ -617,7 +594,6 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 			else if( o->CurrentAction == MONSTER01_ATTACK3 )
 			{
-				// 검기 영역에 불 이펙트 효과.
 				vec3_t	vRelative, vRelative2, vPosition;
 				Vector(0.0f, 0.0f, 0.0f, vRelative);
 				Vector(0.0f, 0.0f, 0.0f, vRelative2);
@@ -645,7 +621,6 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 							
 						fAnimationFrame += fSpeedPerFrame;
 
-						// 검기 영역에 불이펙트 출력.
 						if( 7.4f <= o->AnimationFrame && o->AnimationFrame < 8.0f )
 						{
 							int iOffset = 80;
@@ -679,7 +654,6 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 								vec3_t	vLight__;
 								Vector( 0.9f, 0.9f, 0.9f, vLight__);
 
-
 								vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
 								vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
 								vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
@@ -708,9 +682,9 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 					}
 				}
 			}
-		}break;
-#endif // KJH_ADD_EG_MONSTER_KATO_EFFECT
-	case MODEL_MONSTER01+177:	// 기마단장
+		}
+		break;
+	case MODEL_MONSTER01+177:
 		{
 			switch(o->CurrentAction)
 			{
@@ -755,7 +729,6 @@ bool GMEmpireGuardian3::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
 
-	//g_EmpireGuardian1에 character정보 있음
 	if(true == g_EmpireGuardian1.RenderObjectMesh(o, b, ExtraMon))
 	{
 		return true;
@@ -775,7 +748,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 
 	switch(o->Type)
 	{
-	case 12:		// CobraST (코브라석상 눈 이팩트)
+	case 12:
 		{	
 			vec3_t vPos, vRelativePos, vLight1, vLight2;
 			float flumi = absf(sinf(WorldTime*0.0008))*0.9f+0.1f;
@@ -802,8 +775,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 #endif // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
 		}
 		return true;
-
-	case 20:		// 좌우로 자르는 칼
+	case 20:
 		{
 			if (o->AnimationFrame > 5.4f && o->AnimationFrame < 6.5f)
 			{
@@ -828,7 +800,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 37:	// 벽등
+	case 37:
 		{
 			Vector(0.f, 0.f, 0.f, p);
 			b->TransformPosition(BoneTransform[1], p, Position);
@@ -841,7 +813,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 50:	// sobo_med01 (만다라 석상 손위의 불 이팩트)
+	case 50:
 		{	
 			vec3_t vPos, vRelativePos, vLight1, vLight2, vAngle;
 			Vector(0.f, 0.f, 0.f, vPos);
@@ -853,13 +825,13 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 			for( int i=2 ; i<=7 ; i++ )
 			{
 				b->TransformPosition(BoneTransform[i], vRelativePos, vPos);
-				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLight1,4,o->Scale*0.6f);	// 불
-				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLight2,4,o->Scale*0.3f);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLight1,4,o->Scale*0.6f);
+				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vLight2,4,o->Scale*0.3f);
 			}
 		}
 		return true;
 
-	case 51:		// 좌우로 자르는 칼
+	case 51:
 		{
 			if (o->AnimationFrame > 5.4f && o->AnimationFrame < 6.5f)
 			{
@@ -874,7 +846,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 64:	// 땅찍는 석상
+	case 64:
 		{
 			if ((o->AnimationFrame > 9.5f && o->AnimationFrame < 11.5f) ||
 				(o->AnimationFrame > 23.5f && o->AnimationFrame < 25.5f))
@@ -896,7 +868,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 		
-	case 79:		// 리얼빨간불박스
+	case 79:
 		{
 			vec3_t vLightFire;
 			Vector(1.0f, 0.2f, 0.0f, vLightFire);
@@ -904,25 +876,22 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 			
 			vec3_t vLight;
 			Vector(1.0f, 1.0f, 1.0f, vLight);
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fScale = o->Scale * (rand()%5+13)*0.1f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);
 				break;
 			}
 		}
 		return true;
-
-	case 80:	// 주변광박스
+	case 80:
 		{
 			float fLumi;
 			fLumi = (sinf(WorldTime*0.04f) + 1.0f) * 0.3f + 0.4f;
@@ -931,21 +900,20 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 			CreateSprite(BITMAP_LIGHT, o->Position, 8.0f * o->Scale, vLightFire, o);
 		}
 		return true;
-
-	case 82:	// 폭포 효과 - 물 쏟아짐
+	case 82:
 		{
 			CreateParticle ( BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 9, o->Scale );
 		}
 		return true;
 
-	case 83:	// 폭포 효과 - 물 튐
+	case 83:
 		{
 			Vector ( 1.f, 1.f, 1.f, Light );
 			CreateParticle ( BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 14, o->Scale );
 		}
 		return true;
 
-	case 84:  //  폭포 효과 - 물 안개 효과
+	case 84:
 		{
 			Vector ( 1.f, 1.f, 1.f, Light );
 			if ( rand()%8==0 )
@@ -955,7 +923,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 
-	case 85:	// 법사불기둥박스
+	case 85:
 		{
 			vec3_t vLight;
 			Vector(0.5f, 0.5f, 0.5f, vLight);
@@ -972,8 +940,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-
-	case 86:	// 불기운 박스 적
+	case 86:
 		{
 			if ( rand()%6==0) 
 			{
@@ -982,8 +949,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-
-	case 129:	// 불기운 박스 청
+	case 129:
 		{
 			if ( rand()%6==0) 
 			{
@@ -992,8 +958,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-
-	case 130:	// 불기운 박스 녹
+	case 130:
 		{
 			if ( rand()%6==0) 
 			{
@@ -1002,8 +967,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-
-	case 131 :   //  연기박스1.
+	case 131:
 		{
 			if ( rand()%3==0 )
 			{
@@ -1015,8 +979,7 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-
-	case 132 :   //  연기박스2.
+	case 132:
 		{
 			if ( rand()%3==0) 
 			{
@@ -1032,7 +995,6 @@ bool GMEmpireGuardian3::RenderObjectVisual( OBJECT* o, BMD* b )
 		}
 		return true;
 	}
-		
 	return false;
 }
 
@@ -1043,7 +1005,6 @@ bool GMEmpireGuardian3::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	//g_EmpireGuardian1에 character정보 있음
 	if(g_EmpireGuardian1.RenderMonsterVisual(c, o, b))
 	{
 		return true;
@@ -1051,22 +1012,17 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
  	
  	switch(o->Type)
  	{
-#ifdef KJH_ADD_EG_MONSTER_KATO_EFFECT
-	case MODEL_MONSTER01+170:	// 3군단장 카토
+	case MODEL_MONSTER01+170:
 		{
 			vec3_t Light, Position;
 
-			// 베이스이팩트
-
 			Vector(0.4f, 0.4f, 0.4f, Light);
-			// 얼굴눈
 			b->TransformByObjectBone( Position, o, 9 );
 			CreateSprite(BITMAP_LIGHT_RED, Position, 0.4f, Light, o);
 			CreateSprite(BITMAP_LIGHT_RED, Position, 1.2f, Light, o);
 			b->TransformByObjectBone( Position, o, 10 );
 			CreateSprite(BITMAP_LIGHT_RED, Position, 0.4f, Light, o);
 			CreateSprite(BITMAP_LIGHT_RED, Position, 1.2f, Light, o);
-			// 어깨
 			b->TransformByObjectBone( Position, o, 28 );
 			CreateSprite(BITMAP_LIGHT_RED, Position, 0.4f, Light, o);
 			CreateSprite(BITMAP_LIGHT_RED, Position, 1.2f, Light, o);
@@ -1079,7 +1035,6 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			b->TransformByObjectBone( Position, o, 48 );
 			CreateSprite(BITMAP_LIGHT_RED, Position, 0.4f, Light, o);
 			CreateSprite(BITMAP_LIGHT_RED, Position, 1.2f, Light, o);
-			// 골반
 			b->TransformByObjectBone( Position, o, 123 );
 			CreateSprite(BITMAP_LIGHT_RED, Position, 0.4f, Light, o);
 			CreateSprite(BITMAP_LIGHT_RED, Position, 1.2f, Light, o);
@@ -1092,7 +1047,6 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			b->TransformByObjectBone( Position, o, 120 );
 			CreateSprite(BITMAP_LIGHT_RED, Position, 0.4f, Light, o);
 			CreateSprite(BITMAP_LIGHT_RED, Position, 1.2f, Light, o);
-			// 아랫배
 			b->TransformByObjectBone( Position, o, 125 );
 			CreateSprite(BITMAP_LIGHT_RED, Position, 0.4f, Light, o);
 			CreateSprite(BITMAP_LIGHT_RED, Position, 1.2f, Light, o);
@@ -1100,7 +1054,6 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			CreateSprite(BITMAP_LIGHT_RED, Position, 0.4f, Light, o);
 			CreateSprite(BITMAP_LIGHT_RED, Position, 1.2f, Light, o);	
 
-			// 날개 주위에서 피어 나는 연기 이펙트
 			Vector( 0.9f, 0.9f, 0.9f, Light);
 			if(rand()%3 == 0) 
 			{
@@ -1132,7 +1085,6 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			
 			b->RenderMesh ( 1, RENDER_CHROME|RENDER_BRIGHT, 0.5f, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );		
 
-			// 10. 광폭화 - Effect 
 			if( g_isNotCharacterBuff( o ) == true && g_isCharacterBuff( o, eBuff_Berserker ) == true )
 			{
 				vec3_t vLightRage, vPosRage;
@@ -1145,21 +1097,18 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					if ( i % 5 == 0 )
 					{
 						b->TransformByObjectBone(vPosRage, o, i);
-						CreateParticle(BITMAP_SMOKE,vPosRage,o->Angle,vLightRage,50,1.0f);	// 연기
-						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPosRage,o->Angle,vLightRage,0,1.0f);	// 3종 연기
+						CreateParticle(BITMAP_SMOKE,vPosRage,o->Angle,vLightRage,50,1.0f);
+						CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPosRage,o->Angle,vLightRage,0,1.0f);
 					}
 				}
-			} // 10. 광폭화 - Effect
-		}return true;
-#endif // KJH_ADD_EG_MONSTER_KATO_EFFECT
-#ifdef LDK_ADD_EG_MONSTER_ASSASSINMASTER
+			}
+		}
+		return true;
 	case MODEL_MONSTER01+176:
 		{
 		}
 		return true;
-#endif //LDK_ADD_EG_MONSTER_ASSASSINMASTER
  	}
-
 	return false;
 }
 
@@ -1173,7 +1122,7 @@ void GMEmpireGuardian3::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 	case 0:
 	case 1:
 	case 3:
-	case 44:	// 돌기둥들
+	case 44:
 		{
 			float fLumi;
 			fLumi = (sinf(WorldTime*0.0015f) + 1.0f) * 0.4f + 0.2f;
@@ -1184,7 +1133,7 @@ void GMEmpireGuardian3::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 		}
 		break;
 		
-	case 81:	// 폭포물
+	case 81:
 		{
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		}
@@ -1212,7 +1161,6 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
 
-	//g_EmpireGuardian1에 SetCurrentActionMonster정보 있음
 	if( true == g_EmpireGuardian1.SetCurrentActionMonster(c, o) )
 	{
 		return true;
@@ -1220,40 +1168,38 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 	
  	switch(c->MonsterIndex) 
  	{
-	case 510: // 몬스터 3군단장 카토			(510/170)
+	case 510: 
 		{
-			// 광폭화 서버로부터 신호 이후, 광폭화 비주얼 호출 여부. - 카토.
 			if( m_bCurrentIsRage_Kato == true )
 			{
 				SetAction(o, MONSTER01_APEAR);
-				c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				c->MonsterSkill = -1;
 				return true;
 			}
 			
 			switch(c->MonsterSkill)
 			{
-			case 58:	// Skill:58	// 공격 1
+			case 58:
 				{
-					SetAction(o, MONSTER01_ATTACK2);		// 공격2번 동작.
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+					SetAction(o, MONSTER01_ATTACK2);
+					c->MonsterSkill = -1;
 				}
 				break;
-			case 60:	// Skill:60	// 공격 2
+			case 60:
 				{
-					//SetAction(o, MONSTER01_ATTACK2);		// 공격2번 동작.
-					SetAction(o, MONSTER01_ATTACK3);		// 공격2번 동작.
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+					SetAction(o, MONSTER01_ATTACK3);
+					c->MonsterSkill = -1;
 				}
 				break;	
-			case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:	// 59 광폭화
+			case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:
 				{
 					SetAction(o, MONSTER01_APEAR);
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+					c->MonsterSkill = -1;
 					
 					m_bCurrentIsRage_Kato = true;
 				}
 				break;
-			default:	// 기타 모든 일반공격 
+			default:
 				{
 					SetAction(o, MONSTER01_ATTACK1);
 					c->MonsterSkill = -1;
@@ -1262,86 +1208,29 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			}
 		}
 		return true;		
-#ifdef LDK_ADD_EG_MONSTER_RIDERMASTER	// 제국 수호군 기마단장
-	case 517:	// 제국 수호군 기마단장
+	case 517:
 		{
 			switch(c->MonsterSkill)
 			{
-			case 54:	// Skill:58	// 공격 2
-				{
-					SetAction(o, MONSTER01_ATTACK2);
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
-				}
-				break;
-			case 55:	// Skill:60	// 공격 3 
-				{
-					SetAction(o, MONSTER01_APEAR);	// 공격 3임. 주의.
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
-				}
-				break;
-			case 56:	// Skill:56	// 공격 4
-				{
-					SetAction(o, MONSTER01_ATTACK3);	// 공격 4임. 주의.
-					c->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
-				}
-				break;
-			default:	// 기타 모든 일반공격 
-				{
-// 					// FOR TESTDEBUG
-// 					int arrSkillAttack[] = { MONSTER01_ATTACK1, MONSTER01_ATTACK2, MONSTER01_ATTACK3 };
-// 					int iRandNumCur = rand() % 3;
-// 					int iCurrentSkillAttack = arrSkillAttack[iRandNumCur];
-// 					
-// 					SetAction(o, iCurrentSkillAttack);
-// FOR TESTDEBUG
-					
-					SetAction(o, MONSTER01_ATTACK1);
-					c->MonsterSkill = -1;
-				}
-				break;
-			}
-		}
-		return true;
-#endif // LDK_ADD_EG_MONSTER_RIDERMASTER
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-	case 519:			// 치유병
-		{
-			switch(c->MonsterSkill)
-			{
-			case 46:	// 공격2
+			case 54:
 				{
 					SetAction(o, MONSTER01_ATTACK2);
 					c->MonsterSkill = -1;
 				}
 				break;
-			default:	// 기타 모든 일반공격 
+			case 55:
 				{
-					SetAction(o, MONSTER01_ATTACK1);
+					SetAction(o, MONSTER01_APEAR);
 					c->MonsterSkill = -1;
 				}
 				break;
-			}
-		}
-		return true;
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-#ifdef LDK_ADD_EG_MONSTER_ASSASSINMASTER
-	case 516:			// 암살단장
-		{
-			switch(c->MonsterSkill)
-			{
-			case 47:	// 공격2
-				{
-					SetAction(o, MONSTER01_ATTACK2);
-					c->MonsterSkill = -1;
-				}
-				break;
-			case 53:	// 공격3
+			case 56:
 				{
 					SetAction(o, MONSTER01_ATTACK3);
 					c->MonsterSkill = -1;
 				}
 				break;
-			default:	// 기타 모든 일반공격 
+			default: 
 				{
 					SetAction(o, MONSTER01_ATTACK1);
 					c->MonsterSkill = -1;
@@ -1350,9 +1239,51 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			}
 		}
 		return true;
-#endif //LDK_ADD_EG_MONSTER_ASSASSINMASTER
+	case 519:
+		{
+			switch(c->MonsterSkill)
+			{
+			case 46:
+				{
+					SetAction(o, MONSTER01_ATTACK2);
+					c->MonsterSkill = -1;
+				}
+				break;
+			default:
+				{
+					SetAction(o, MONSTER01_ATTACK1);
+					c->MonsterSkill = -1;
+				}
+				break;
+			}
+		}
+		return true;
+	case 516:
+		{
+			switch(c->MonsterSkill)
+			{
+			case 47:
+				{
+					SetAction(o, MONSTER01_ATTACK2);
+					c->MonsterSkill = -1;
+				}
+				break;
+			case 53:
+				{
+					SetAction(o, MONSTER01_ATTACK3);
+					c->MonsterSkill = -1;
+				}
+				break;
+			default:
+				{
+					SetAction(o, MONSTER01_ATTACK1);
+					c->MonsterSkill = -1;
+				}
+				break;
+			}
+		}
+		return true;
  	}
-	
 	return false;
 }
 
@@ -1360,21 +1291,14 @@ bool GMEmpireGuardian3::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
 	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
-
-// 	switch(c->MonsterIndex) 
-// 	{
-// 	}
-
 	return false;
 }
 
-// 몬스터 사운드
 bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o) 
 {
 	if(gMapManager.IsEmpireGuardian3() == false)
 		return false;
 
-	//g_EmpireGuardian1에 PlayMonsterSound정보 있음
 	if( true == g_EmpireGuardian1.PlayMonsterSound(o) )
 	{
 		return true;
@@ -1390,13 +1314,13 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
 
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+170:// 3군단장 카토
+	case MODEL_MONSTER01+170:
 		{
 			switch(o->CurrentAction)
 			{
 			case MONSTER01_WALK:
 				{
-					PlayBuffer(SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE);// 3Cato_move.wav
+					PlayBuffer(SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE);
 				}
 				break;
 			case MONSTER01_ATTACK1:
@@ -1407,7 +1331,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
 			case MONSTER01_ATTACK2:
 			case MONSTER01_ATTACK3:
 				{
-					PlayBuffer(SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02);// 3Cato_attack2.wav					
+					PlayBuffer(SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02);				
 				}
 				break;
 			case MONSTER01_APEAR:
@@ -1424,7 +1348,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
 		}
 		return true;
 
-	case MODEL_MONSTER01+176:// 암살단장
+	case MODEL_MONSTER01+176:
 		{
 			switch(o->CurrentAction)
 			{
@@ -1453,7 +1377,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
 		}
 		return true;
 
-	case MODEL_MONSTER01+177:// 기마단장
+	case MODEL_MONSTER01+177:
 		{
 			switch(o->CurrentAction)
 			{
@@ -1472,13 +1396,13 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
 			case MONSTER01_ATTACK1:
 			case MONSTER01_ATTACK3:
 				{
-					PlayBuffer(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01);// CavalryLeader_attack1.wav
+					PlayBuffer(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01);
 				}
 				break;
 			case MONSTER01_ATTACK2:
 			case MONSTER01_ATTACK4:
 				{
-					PlayBuffer(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02);// CavalryLeader_attack2.wav
+					PlayBuffer(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02);
 				}
 				break;
 			case MONSTER01_DIE:
@@ -1494,7 +1418,6 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
 	return false; 
 }
 
-// 오브젝트 사운드
 void GMEmpireGuardian3::PlayObjectSound(OBJECT* o)
 {
 	g_EmpireGuardian1.PlayObjectSound(o);
@@ -1506,11 +1429,9 @@ void GMEmpireGuardian3::PlayBGM()
 	{
 		PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN3]);
 	}
-#ifdef PBG_FIX_STOPBGMSOUND
 	else
 	{
 		StopMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN3]);
 	}
-#endif //PBG_FIX_STOPBGMSOUND
 }
 #endif	// LDK_ADD_MAP_EMPIREGUARDIAN3

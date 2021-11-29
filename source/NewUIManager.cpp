@@ -71,9 +71,6 @@ void SEASON3B::CNewUIManager::RemoveAllUIObjs()
 #if defined(_DEBUG) && defined(LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE)
 	
 	{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		unsigned int uiUICNT = m_vecUI.size();
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		unsigned int uiUIManageCNT = m_mapUI.size();
 		
 		type_map_uibase::iterator mi = m_mapUI.begin();

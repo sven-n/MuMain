@@ -1,22 +1,18 @@
 // ItemAddOptioninfo.h: interface for the ItemAddOptioninfo class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_ITEMADDOPTIONINFO_H__F0F0BF49_D23C_465F_BE31_4F4312C7D280__INCLUDED_)
-#define AFX_ITEMADDOPTIONINFO_H__F0F0BF49_D23C_465F_BE31_4F4312C7D280__INCLUDED_
 
 #pragma once
 
 typedef struct _ITEM_ADD_OPTION
 {
-	BYTE	m_byOption1;	// 옵션 첫번째 타입(음수 존재)
-	WORD	m_byValue1;	    // 옵션 첫번째 값
+	BYTE	m_byOption1;
+	WORD	m_byValue1;
 
-	BYTE	m_byOption2;	// 옵션 두번째 타입(음수 존재)
-	WORD	m_byValue2;	    // 옵션 두번째 값
+	BYTE	m_byOption2;
+	WORD	m_byValue2;
 
 	BYTE	m_Type;
-	DWORD	m_Time;         // 버프 아이템만 필요함.
+	DWORD	m_Time;
 
 	_ITEM_ADD_OPTION()
 	{
@@ -84,5 +80,3 @@ const ITEM_ADD_OPTION& ItemAddOptioninfo::GetItemAddOtioninfo( int type )
 {
 	return m_ItemAddOption[type];
 }
-
-#endif // !defined(AFX_ITEMADDOPTIONINFO_H__F0F0BF49_D23C_465F_BE31_4F4312C7D280__INCLUDED_)

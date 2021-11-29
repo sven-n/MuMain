@@ -1,5 +1,4 @@
 // GMSantaTown.cpp: implementation of the CGMSantaTown class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -19,10 +18,6 @@
 #endif //LDK_ADD_SANTA_NPC
 
 extern char* g_lpszMp3[NUM_MUSIC];
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CGMSantaTownPtr CGMSantaTown::Make()
 {
@@ -73,7 +68,6 @@ CHARACTER* CGMSantaTown::CreateMonster(int iType, int PosX, int PosY, int Key)
  	switch (iType)
  	{
 #ifdef LDK_ADD_SANTA_NPC
-		// 산타마을 산타npc 데이타 생성
 	case 465:
 		OpenNpc(MODEL_XMAS2008_SANTA_NPC);
 		pCharacter = CreateCharacter(Key,MODEL_XMAS2008_SANTA_NPC,PosX,PosY);
@@ -82,7 +76,6 @@ CHARACTER* CGMSantaTown::CreateMonster(int iType, int PosX, int PosY, int Key)
 		break;
 #endif //LDK_ADD_SANTA_NPC
 #ifdef LDK_ADD_SNOWMAN_NPC
-		// 눈사람npc 모델 데이타 생성
 	case 467:
 		OpenNpc(MODEL_XMAS2008_SNOWMAN_NPC);
 		pCharacter = CreateCharacter(Key,MODEL_XMAS2008_SNOWMAN_NPC,PosX,PosY);
@@ -102,15 +95,15 @@ bool CGMSantaTown::MoveObject(OBJECT* o)
 
 	switch(o->Type)
 	{
-	case 16:	//  사과 나무
+	case 16:
 		{
-			o->Velocity = 0.06f;	// 애니메이션 속도 조절
+		o->Velocity = 0.06f;
 			return true;
 		}
 		break;
-	case 26:	// 빨간빛박스
-	case 27:	// 파란빛박스
-	case 28:	// 시안빛박스
+	case 26:
+	case 27:
+	case 28:
 		{
 			o->HiddenMesh = -2;
 			return true;
@@ -147,7 +140,7 @@ bool CGMSantaTown::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 	switch(o->Type)
 	{
-	case 16:	// 사과
+	case 16:
 		{
 			b->RenderMesh ( 0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 			b->RenderMesh ( 1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
@@ -166,7 +159,7 @@ bool CGMSantaTown::RenderObjectVisual( OBJECT* o, BMD* b )
 {
 	switch(o->Type)
 	{
-	case 26:	// 빨간빛박스
+	case 26:
 		{
  			float fLumi;
  			fLumi = (sinf(WorldTime*0.005f) + 1.0f) * 0.1f + 0.9f;
@@ -176,7 +169,7 @@ bool CGMSantaTown::RenderObjectVisual( OBJECT* o, BMD* b )
 			return true;
 		}
 		break;
-	case 27:	// 파란빛박스
+	case 27:
 		{
  			float fLumi;
  			fLumi = (sinf(WorldTime*0.005f) + 1.0f) * 0.1f + 0.9f;
@@ -186,7 +179,7 @@ bool CGMSantaTown::RenderObjectVisual( OBJECT* o, BMD* b )
 			return true;
 		}
 		break;
-	case 28:	// 시안빛박스
+	case 28:
 		{
  			float fLumi;
  			fLumi = (sinf(WorldTime*0.005f) + 1.0f) * 0.1f + 0.9f;
@@ -277,7 +270,6 @@ bool CGMSantaTown::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 	return false;
 }
 
-// 몬스터 사운드
 bool CGMSantaTown::PlayMonsterSound(OBJECT* o) 
 {
 	if(IsSantaTown() == false)
@@ -298,7 +290,6 @@ bool CGMSantaTown::PlayMonsterSound(OBJECT* o)
 	return false; 
 }
 
-// 오브젝트 사운드
 void CGMSantaTown::PlayObjectSound(OBJECT* o)
 {
 

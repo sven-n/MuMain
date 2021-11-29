@@ -1603,7 +1603,6 @@
     <ClCompile Include="source\GOBoid.cpp" />
     <ClCompile Include="source\GuildCache.cpp" />
     <ClCompile Include="source\GuildManager.cpp" />
-    <ClCompile Include="source\HackTest.cpp" />
     <ClCompile Include="source\ImportanceData.cpp" />
     <ClCompile Include="source\Input.cpp" />
     <ClCompile Include="source\ItemAddOptioninfo.cpp" />
@@ -2302,7 +2301,6 @@
     <ClInclude Include="source\GOBoid.h" />
     <ClInclude Include="source\GuildCache.h" />
     <ClInclude Include="source\GuildManager.h" />
-    <ClInclude Include="source\HackTest.h" />
     <ClInclude Include="source\iexplorer.h" />
     <ClInclude Include="source\ImportanceData.h" />
     <ClInclude Include="source\InfoHelperFunctions.h" />

@@ -1,5 +1,4 @@
 // ItemAddOptioninfo.cpp: implementation of the ItemAddOptioninfo class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -11,15 +10,7 @@
 #include "ItemAddOptioninfo.h"
 #include "wsclientinline.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
-#ifdef USE_ITEMADDOPTION_BMD
-#define ITEMADDOPTION_DATA_FILE "Data\\Local\\ItemAddOptiontest.bmd"
-#else //USE_ITEMADDOPTION_BMD
 #define ITEMADDOPTION_DATA_FILE "Data\\Local\\ItemAddOption.bmd"
-#endif //USE_ITEMADDOPTION_BMD
 
 ItemAddOptioninfo* ItemAddOptioninfo::MakeInfo()
 {
@@ -29,11 +20,6 @@ ItemAddOptioninfo* ItemAddOptioninfo::MakeInfo()
 
 ItemAddOptioninfo::ItemAddOptioninfo()
 {
-
-#ifdef INFO_BUILDER
-	//string a = TheGolbalText( 1 );
-#endif //INFO_BUILDER
-
 	bool Result = true;
 
 	Result = OpenItemAddOptionInfoFile( ITEMADDOPTION_DATA_FILE );
@@ -68,33 +54,6 @@ const bool ItemAddOptioninfo::OpenItemAddOptionInfoFile( const std::string& file
 	}
 	return false;
 }
-
-/*
-// 380 아이템 옵션 추가 - 이민정 2006.7.11
-2184 "대인공격성공률 상승 +%d"
-2185 "대인공격 추가 데미지 +%d"
-2186 "대인방어성공률상승 +%d"
-2187 "대인방어력 +%d"
-2188 "최대 HP 상승 +%d"
-2189 "최대 SD 상승 +%d"
-2190 "SD 자동회복"
-2191 "SD 회복량 증가 +%d%"
-2192 "옵션 추가"
-2193 "아이템 옵션 추가 조합"
-2194 "380 아이템에 옵션 추가"
-2195 "%s시"
-2196 "반드시 아이템의 레벨이 4이상 및"
-2197 "옵션이 4 이상이어야 조합이 가능합니다."
-*/
-
-//#define 1  대인공격성공률 상승
-//#define 2  대인공격 추가 데미지 +%d
-//#define 3  대인방어성공률상승
-//#define 4  대인방어력 +%d
-//#define 5  최대 HP 상승
-//#define 6  최대 SD 상승
-//#define 7  SD 자동회복
-//#define 8  SD 회복량 증가
 
 void ItemAddOptioninfo::GetItemAddOtioninfoText( std::vector<std::string>& outtextlist, int type )
 {

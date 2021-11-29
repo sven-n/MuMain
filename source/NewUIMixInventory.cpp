@@ -55,9 +55,9 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	LoadImages();
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	POINT ptBtn = { m_Pos.x+INVENTORY_WIDTH*0.5f-22.f, m_Pos.y+380 };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	m_BtnMix.ChangeButtonImgState(true, IMAGE_MIXINVENTORY_MIXBTN, false);
 	m_BtnMix.ChangeButtonInfo(m_Pos.x+INVENTORY_WIDTH*0.5f-22.f, m_Pos.y+380, 44.f, 35.f);
 	m_BtnMix.ChangeToolTipText(GlobalText[591], true); // 조합
@@ -90,22 +90,16 @@ void CNewUIMixInventory::SetMixState(int iMixState)
 
 	if (iMixState == MIX_REQUESTED)
 	{
-		// 이펙트 ON!
 		m_iMixEffectTimer = 50;
-
 		m_pNewInventoryCtrl->LockInventory();
 		g_pMyInventory->GetInventoryCtrl()->LockInventory();
-#ifdef YDG_FIX_LOCK_MIX_BUTTON_WHILE_MIXING
 		m_BtnMix.Lock();
-#endif	// YDG_FIX_LOCK_MIX_BUTTON_WHILE_MIXING
 	}
 	else
 	{
 		m_pNewInventoryCtrl->UnlockInventory();
 		g_pMyInventory->GetInventoryCtrl()->UnlockInventory();
-#ifdef YDG_FIX_LOCK_MIX_BUTTON_WHILE_MIXING
 		m_BtnMix.UnLock();
-#endif	// YDG_FIX_LOCK_MIX_BUTTON_WHILE_MIXING
 	}
 }
 
@@ -149,7 +143,6 @@ bool CNewUIMixInventory::ClosingProcess()
 {
  	if (g_pMixInventory->GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
  	{
-		// 조합창에 아이템이 있으면 창을 닫을 수 없다
 		g_pChatListBox->AddText("", GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
  		return false;
  	}
@@ -183,7 +176,6 @@ bool CNewUIMixInventory::ClosingProcess()
 			SendRequestMixExit();
 			break;
 #endif	// CSK_EVENT_CHERRYBLOSSOM
-#ifdef ADD_SOCKET_MIX
 		case SEASON3A::MIXTYPE_ATTACH_SOCKET:
 		case SEASON3A::MIXTYPE_DETACH_SOCKET:
 			m_SocketListBox.Clear();
@@ -191,12 +183,11 @@ bool CNewUIMixInventory::ClosingProcess()
 		case SEASON3A::MIXTYPE_SEED_SPHERE:
 			SendRequestMixExit();
 			break;
-#endif	// ADD_SOCKET_MIX
 		default:
 			break;
 		}
 		g_pMixInventory->DeleteAllItems();
-		g_MixRecipeMgr.ClearCheckRecipeResult();	// 닫을때 조합 검사 결과를 초기화 해준다.
+		g_MixRecipeMgr.ClearCheckRecipeResult();
 		return true;
 	}
 }
@@ -215,11 +206,9 @@ bool CNewUIMixInventory::UpdateMouseEvent()
 	if(true == InventoryProcess())
 		return false;
 
-	//. 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 	{
 		if(SEASON3B::IsPress(VK_RBUTTON))
@@ -264,7 +253,7 @@ bool CNewUIMixInventory::Update()
 					{
 						if (g_MixRecipeMgr.GetFirstItemSocketSeedID(i) == SOCKET_EMPTY)
 						{
-							sprintf(szSocketText, GlobalText[2652]);	// "장착아이템 없음"
+							sprintf(szSocketText, GlobalText[2652]);
 						}
 						else
 						{
@@ -279,7 +268,6 @@ bool CNewUIMixInventory::Update()
 				{
 					if (g_MixRecipeMgr.GetFirstItemSocketCount() == 0)
 					{
-						// 제거
 						m_SocketListBox.Clear();
 					}
 				}
@@ -302,7 +290,6 @@ bool CNewUIMixInventory::Render()
 	if(m_pNewInventoryCtrl)
 		m_pNewInventoryCtrl->Render();
 
-	// 조합 효과
 	if (GetMixState() >= MIX_REQUESTED && g_pNewUI3DRenderMng)
 		g_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
 
@@ -423,19 +410,19 @@ void CNewUIMixInventory::RenderFrame()
 #ifdef ADD_SOCKET_MIX
 	case SEASON3A::MIXTYPE_EXTRACT_SEED:
 		fLine_y += 5.0f;
-		unicode::_sprintf(szText, "%s", GlobalText[2660]);	// "추 출"
+		unicode::_sprintf(szText, "%s", GlobalText[2660]);
 		break;
 	case SEASON3A::MIXTYPE_SEED_SPHERE:
 		fLine_y += 5.0f;
-		unicode::_sprintf(szText, "%s", GlobalText[2661]);	// "합 성"
+		unicode::_sprintf(szText, "%s", GlobalText[2661]);
 		break;
 	case SEASON3A::MIXTYPE_ATTACH_SOCKET:
 		fLine_y += 5.0f;
-		unicode::_sprintf(szText, "%s", GlobalText[2662]);	// "장 착"
+		unicode::_sprintf(szText, "%s", GlobalText[2662]);
 		break;
 	case SEASON3A::MIXTYPE_DETACH_SOCKET:
 		fLine_y += 5.0f;
-		unicode::_sprintf(szText, "%s", GlobalText[2663]);	// "파 괴"
+		unicode::_sprintf(szText, "%s", GlobalText[2663]);
 		break;
 #endif	// ADD_SOCKET_MIX
 	default:
@@ -461,12 +448,11 @@ void CNewUIMixInventory::RenderFrame()
 		break;
 	}
 
-	if (GetMixState() == MIX_FINISHED)	// 조합창 이름까지만 출력
+	if (GetMixState() == MIX_FINISHED)
 	{
 		return;
 	}
 
-	// 조합 이름 표시 (최대 2줄)
 	fLine_y += 24;
  	if (!g_MixRecipeMgr.IsReadyToMix())
 		g_pRenderText->SetTextColor(255, 48, 48, 255);
@@ -477,11 +463,10 @@ void CNewUIMixInventory::RenderFrame()
 	g_MixRecipeMgr.GetCurRecipeName(szText, 1);
 	g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
 	fLine_y += 10;
-	if (g_MixRecipeMgr.GetCurRecipeName(szText, 2))	// 2번째 줄이 있으면 출력해준다.
+	if (g_MixRecipeMgr.GetCurRecipeName(szText, 2))
 		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
 	fLine_y += 10;
 
-	// 조합 성공 확률 표시
 	switch (g_MixRecipeMgr.GetMixInventoryType())
 	{
 	case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
@@ -580,7 +565,6 @@ void CNewUIMixInventory::RenderFrame()
 		if (!g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetMostSimilarRecipeName(szTempText[0], 1) == TRUE)
 		{
 			unicode::_sprintf(szText, GlobalText[2334], szTempText[0]);
-#ifdef KJH_FIX_BTS158_TEXT_CUT_ROUTINE
 			iTextLines = CutStr(szText, szTempText[0], 150, 2, 100);
 			
 			for(int i=0 ; i<iTextLines ; i++)
@@ -591,15 +575,6 @@ void CNewUIMixInventory::RenderFrame()
 				g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (iTextPos_y*15), szTempText[i]);
 				iTextPos_y++;
 			}
-#else // KJH_FIX_BTS158_TEXT_CUT_ROUTINE
-			iTextLines = CutText3(szText, szTempText[0], 150, 2, 100);
-
-			g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szTempText[0]);
-			if (iTextLines == 2)
-				g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y+(++iTextPos_y)*15, szTempText[1]);
-#endif // KJH_FIX_BTS158_TEXT_CUT_ROUTINE
-
-
 		}
 		int iResult;
 		for (int iLine = 0; iLine < 8; ++iLine)
@@ -610,7 +585,6 @@ void CNewUIMixInventory::RenderFrame()
 			else if (iResult == SEASON3A::MIX_SOURCE_PARTIALLY) g_pRenderText->SetTextColor(210, 230, 255, 255);
 			else if (iResult == SEASON3A::MIX_SOURCE_YES) g_pRenderText->SetTextColor(255, 255, 48, 255);
 			
-#ifdef KJH_FIX_BTS158_TEXT_CUT_ROUTINE
 			iTextLines = CutStr(szText, szTempText[0], 156, 2, 100);
 			
 			for(int i=0 ; i<iTextLines ; i++)
@@ -621,14 +595,6 @@ void CNewUIMixInventory::RenderFrame()
 				g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (iTextPos_y*15), szTempText[i]);
 				iTextPos_y++;
 			}
-#else // KJH_FIX_BTS158_TEXT_CUT_ROUTINE
-			iTextLines = CutText3(szText, szTempText[0], 156, 2, 100);
-
-			g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y+(++iTextPos_y)*15, szTempText[0]);
-			if (iTextLines == 2)
-				g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y+(++iTextPos_y)*15, szTempText[1]);
-#endif // KJH_FIX_BTS158_TEXT_CUT_ROUTINE
-			
 		}
 	}
 	else if (g_MixRecipeMgr.IsMixInit())
@@ -638,9 +604,7 @@ void CNewUIMixInventory::RenderFrame()
 		
 		unicode::_sprintf(szText, GlobalText[2346]);
 		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
-#ifdef KJH_FIX_BTS158_TEXT_CUT_ROUTINE
 		iTextPos_y++;
-#endif // KJH_FIX_BTS158_TEXT_CUT_ROUTINE
 		
 	}
 	else
@@ -649,7 +613,6 @@ void CNewUIMixInventory::RenderFrame()
 		g_pRenderText->SetBgColor(40, 40, 40, 128);
 
 #ifdef LDK_FIX_CHAR_NUMBER_OVER
-		//해외 글자수가 너무 길어서 두줄로 나눔(2008.08.11)
 		unicode::_sprintf(szText, GlobalText[2334]," ");
 		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
 

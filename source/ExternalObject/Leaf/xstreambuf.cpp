@@ -139,12 +139,8 @@ xfstreambuf::~xfstreambuf()
 bool xfstreambuf::load(const std::string& filename) 
 {
 	FILE* fp = NULL;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	fp = fopen(filename.data(), "rb");
 	if(fp) {
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	if(fp = fopen(filename.data(), "rb")) {
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		fseek(fp, 0, SEEK_END);
 		unsigned int size = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
@@ -163,12 +159,8 @@ bool xfstreambuf::load(const std::string& filename)
 bool xfstreambuf::save(const std::string& filename) 
 {
 	FILE* fp = NULL;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	fp = fopen(filename.data(), "wb");
 	if(fp) {
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	if(fp = fopen(filename.data(), "wb")) {
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		fwrite(data(), 1, size(), fp);
 		fclose(fp);
 		

@@ -20,10 +20,6 @@
 
 extern char* g_lpszMp3[NUM_MUSIC];
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CGMDoppelGanger4Ptr CGMDoppelGanger4::Make()
 {
 	CGMDoppelGanger4Ptr doppelganger(new CGMDoppelGanger4);
@@ -81,12 +77,10 @@ bool CGMDoppelGanger4::MoveObject(OBJECT* o)
 
 	switch(o->Type)
 	{
-#ifdef YDG_ADD_DOPPELGANGER_PORTAL
-	case 47:	// 리얼파란불
-	case 48:	// 하늘색빛박스
-#endif	// YDG_ADD_DOPPELGANGER_PORTAL
-	case 59:	// 검은연기 박스.
-	case 62:	// 안개 박스.(흰색)
+	case 47:
+	case 48:
+	case 59:
+	case 62:
 	case 81:
 	case 82:
 	case 83:
@@ -94,43 +88,41 @@ bool CGMDoppelGanger4::MoveObject(OBJECT* o)
 	case 108:
 		o->HiddenMesh = -2;
 		return true;
-	case 44:	// 톱니바퀴.
-		o->Velocity = 0.02f;	// 애니메이션 속도 조절.
+	case 44:
+		o->Velocity = 0.02f;
 		return true;
-	case 46:	// 발광바퀴.
-		o->Velocity = 0.01f;	// 애니메이션 속도 조절.
-		// 발광.
+	case 46:
+		o->Velocity = 0.01f;
 		o->BlendMeshLight = (float)sinf(WorldTime*0.0015f)*0.8f+1.0f;
 		return true;
-	case 60:	// 라이트 박스.
+	case 60:
 		Luminosity = (float)(rand() % 4 + 3) * 0.1f;
 		Vector(Luminosity * 0.9f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
 		AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
 		o->HiddenMesh = -2;
 		return true;
-	case 61:	// 빨간불 박스.
+	case 61:
 		Luminosity = (float)(rand() %4 + 3) * 0.1f;
 		Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
 		AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
 		o->HiddenMesh = -2;
 		return true;
-	case 70:	// 중심 빨간 구 밖에 3개 띠가 공중에 떠서 돌아가는 오브젝트.
-		o->Velocity = 0.04f;	// 애니메이션 속도 조절.
-		// 지형 라이트 색 변화.
+	case 70:
+		o->Velocity = 0.04f;
 		Luminosity = (float)sinf(WorldTime*0.002f)*0.45f+0.55f;
 		Vector ( Luminosity*1.4f, Luminosity*0.7f, Luminosity*0.4f, Light );
 		AddTerrainLight( o->Position[0], o->Position[1], Light, 4, PrimaryTerrainLight );
 		return true;
-	case 76:	// 빛
+	case 76:
 		o->Alpha = 0.5f;
 		return true;
-	case 77:	// 폭포
+	case 77:
 		o->BlendMeshTexCoordV = -(int)WorldTime%10000 * 0.0002f;
 		return true;
-	case 90:	// 도는 바퀴.
-		o->Velocity = 0.04f;	// 애니메이션 속도 조절.
+	case 90:
+		o->Velocity = 0.04f;
 		return true;
-	case 96:	// 입구 계단 모래
+	case 96:
 		o->Alpha = 0.5f;
 		return true;
 	case 97:
@@ -141,7 +133,7 @@ bool CGMDoppelGanger4::MoveObject(OBJECT* o)
 		if(o->Timer > 5.f)
      		CreateParticle(BITMAP_BUBBLE,o->Position,o->Angle,o->Light, 5);
 		return true;
-	case 102:	// 칸투르 2차 번쩍이는 바닥 타일.
+	case 102:
 		o->BlendMeshLight = (float)sinf(WorldTime*0.0010f)+1.0f;
 		return true;
 	}
@@ -156,39 +148,22 @@ bool CGMDoppelGanger4::MoveMonsterVisual(OBJECT* o, BMD* b)
 	
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+145:	// 아이스워커
+	case MODEL_MONSTER01+145:
 		{			
 			switch( o->CurrentAction )
 			{
 			case MONSTER01_ATTACK2:
 				if( o->AnimationFrame > 4.4f && o->AnimationFrame < 4.7f )
 				{
-					//const float OFFSETLEN = 250.0f, POS_HEIGHT = 220.0f;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-					const float OFFSETLEN	= 70.0f;
-					const float POS_HEIGHT	= 240.0f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					const float ANG_REVISION = 20.0f;
-					
-					// 위치 보정이 필요한 경우 
+
 					vec3_t v3Pos, v3Ang_, v3BasisPos;
 					
-					//vec3_t v3Dir_, v3Dir;
-					//float  matRotation[3][4];
-					
-					// a. Bipad Header의 위치 값을 가져온다.
 					b->TransformByObjectBone( v3BasisPos, o, 8 );
-					
-					// b. Position 보정 및 최종 Position 산출 부분..
+
 					VectorCopy( v3BasisPos, v3Pos );
-					// b. Position 보정 부분..
-					
-					// c. 각도 보정 부분.
 					VectorCopy( o->Angle, v3Ang_ );
 					v3Ang_[0] = v3Ang_[0] + ANG_REVISION;
-					// c. 각도 보정 부분.
-					
-					// d. Effect 호출 부분..
 					CreateEffect( MODEL_STREAMOFICEBREATH, v3Pos, o->Angle, o->Light, 0, 0, -1, 0, 0, 0, 0.2f, -1 );	
 				}
 				break;
@@ -208,14 +183,14 @@ bool CGMDoppelGanger4::MoveMonsterVisual(OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+189:	// 도살자
+	case MODEL_MONSTER01+189:
 	case MODEL_MONSTER01+190:
 		{
 			if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
 				o->CurrentAction = MONSTER01_WALK;
 		}
 		return true;
-	case MODEL_MONSTER01+191:	// 도플갱어
+	case MODEL_MONSTER01+191:
 		if (o->CurrentAction == MONSTER01_APEAR)
 		{
 			if (o->AnimationFrame > 18.0f)
@@ -227,7 +202,6 @@ bool CGMDoppelGanger4::MoveMonsterVisual(OBJECT* o, BMD* b)
 					vec3_t vPos, vLight;
 					int i;
 
-					// 바닥효과
 					for (i = 0; i < 6; ++i)
 					{
 						VectorCopy(o->Position, vPos);
@@ -237,7 +211,6 @@ bool CGMDoppelGanger4::MoveMonsterVisual(OBJECT* o, BMD* b)
 						CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
 					}
 
-					// 폭발
 					Vector(0.4f, 1.0f, 0.6f, vLight);
 					for (i = 0; i < 3; ++i)
 					{
@@ -247,7 +220,6 @@ bool CGMDoppelGanger4::MoveMonsterVisual(OBJECT* o, BMD* b)
 						CreateParticle(BITMAP_EXPLOTION_MONO,vPos,o->Angle,vLight, 0, (rand()%8+7)*0.1f);
 					}
 
-					// 젤리 덩어리
 					Vector(0.0f, 0.5f, 0.0f, vLight);
 					for (i = 0; i < 15; ++i)
 					{
@@ -257,7 +229,6 @@ bool CGMDoppelGanger4::MoveMonsterVisual(OBJECT* o, BMD* b)
 						CreateEffect(MODEL_DOPPELGANGER_SLIME_CHIP,vPos,o->Angle,vLight,0,o,0,0);
 					}
 
-					// 입자
 					Vector(0.2f, 0.9f, 0.3f, vLight);
 					for (i = 0; i < 30; ++i)
 					{
@@ -266,8 +237,7 @@ bool CGMDoppelGanger4::MoveMonsterVisual(OBJECT* o, BMD* b)
 						vPos[2] = o->Position[2] + 20.0f + (rand()%10)*10.0f;
 						CreateParticle(BITMAP_SPARK+1,vPos,o->Angle,vLight,31);
 					}
-					
-					// 연기
+
 					Vector(0.8f, 1.0f, 0.8f, vLight);
 					CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,vLight,54,2.8f);
 
@@ -285,7 +255,7 @@ void CGMDoppelGanger4::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
 {
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+189:	// 도살자
+	case MODEL_MONSTER01+189:
 	case MODEL_MONSTER01+190:
 		{
 			if (!(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
@@ -326,15 +296,13 @@ bool CGMDoppelGanger4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 	switch (o->Type)
 	{
-#ifdef YDG_ADD_DOPPELGANGER_PORTAL
 	case 19:
 	case 20:
 	case 31:
 	case 33:
 		o->m_bRenderAfterCharacter = true;
 		return true;
-#endif	// YDG_ADD_DOPPELGANGER_PORTAL
-	case 103:	// 칸투르 2차 1번과 동일.
+	case 103:
 		{
 			float fLumi = (sinf(WorldTime*0.002f) + 1.f) * 0.5f;
 			o->HiddenMesh = 1;
@@ -342,44 +310,41 @@ bool CGMDoppelGanger4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 			b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 		}
 		return true;
-	case 76:	// 빛.
-	case 77:	// 폭포.
-	case 91:	// 세로 유리관.
-	case 92:	// 가로 유리관.
-	case 95:	// 크리스탈.
-	case 105:	// 칸투르 2차 8번과 동일.
+	case 76:
+	case 77:
+	case 91:
+	case 92:
+	case 95:
+	case 105:
 		o->m_bRenderAfterCharacter = true;
 		return true;
-	case 142:	// 뿔기둥 크롬
+	case 142:
 		b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderMesh(0, RENDER_BRIGHT|RENDER_CHROME,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		return true;
 	case MODEL_MONSTER01+145:
-		// 몸통
 		b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER0);
-		// 털
 		b->RenderMesh(1,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER1);
 		return true;
 	case MODEL_MONSTER01+6:
 		b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,BITMAP_DOPPELGANGER_SNAKE01);
 		b->RenderMesh(1,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		return true;
-	case MODEL_MONSTER01+189:	// 도살자
-		b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-		b->RenderMesh(1,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-		b->RenderMesh(2,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-		fBlendMeshLight = (sinf(WorldTime*0.003f)+1.0f)*0.5f*0.8f;
-		b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
-		//b->Actions[MONSTER01_WALK].PlaySpeed =		0.34f;
-		return true;
-	case MODEL_MONSTER01+190:	// 도살자
+	case MODEL_MONSTER01+189:
 		b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(1,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(2,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		fBlendMeshLight = (sinf(WorldTime*0.003f)+1.0f)*0.5f*0.8f;
 		b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
 		return true;
-	case MODEL_MONSTER01+191:	// 도플갱어
+	case MODEL_MONSTER01+190:
+		b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
+		b->RenderMesh(1,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
+		b->RenderMesh(2,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
+		fBlendMeshLight = (sinf(WorldTime*0.003f)+1.0f)*0.5f*0.8f;
+		b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
+		return true;
+	case MODEL_MONSTER01+191:
 		return true;
 	}
 
@@ -396,7 +361,7 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 
 	switch(o->Type)
 	{
-	case 37:  //  반딧불
+	case 37:
 		{
 			int time = timeGetTime()%1024;
 			if(time >= 0 && time < 10) {
@@ -404,32 +369,29 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 				Vector(1.f,1.f,1.f,Light);
 				CreateEffect(MODEL_BUTTERFLY01,o->Position,o->Angle,Light, 3, o);
 			}
-			o->HiddenMesh = -2;	//. Hide Object				
+			o->HiddenMesh = -2;		
 		}
 		return true;
-#ifdef YDG_ADD_DOPPELGANGER_PORTAL
-	case 47:		// 리얼파란불박스
+	case 47:
 		{
 			vec3_t vLight;
 			Vector(0.1f, 0.4f, 1.0f, vLight);
-			// 리얼한 불 만들기!!
 			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_HIK2_MONO,o->Position,o->Angle,vLight,6,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK2_MONO,o->Position,o->Angle,vLight,6,o->Scale);
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3_MONO,o->Position,o->Angle,vLight,2,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 				break;
 			}
-			// 리얼한 불 만들기!!
-			CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);	// 불
+			CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 		}
 		return true;
-	case 48:	// 하늘색빛박스
+	case 48:
 		if (rand()%3 == 0)
 		{
 			vec3_t Light, vPos;
@@ -441,8 +403,7 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 			CreateParticle(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
 		}
 		return true;
-#endif	// YDG_ADD_DOPPELGANGER_PORTAL
-	case 59:	// 검은연기 박스.
+	case 59:
 		if (rand() % 3 == 0)
 		{
 			Vector(1.f, 1.f, 1.f, Light);
@@ -450,7 +411,7 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 				Light, 13, o->Scale);
 		}
 		return true;
-	case 61:	// 빨간불 박스.
+	case 61:
 		if (rand() % 3 == 0)
 		{
 			Vector(1.f, 1.f, 1.f, Light);
@@ -458,7 +419,7 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 				Light, 0, o->Scale);
 		}
 		return true;
-	case 62:	// 안개 박스.(흰색)
+	case 62:
 		if (o->HiddenMesh != -2)
 		{
 			vec3_t Light;
@@ -468,8 +429,7 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 				CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 0, o->Scale, o);
 		}
 		return true;
-	case 70:	// 중심 빨간 구 밖에 3개 띠가 공중에 떠서 돌아가는 오브젝트.
-		// 광원 색 변화.
+	case 70:
 		Vector(0.0f,  0.0f, 0.0f, p);
 		b->TransformPosition(BoneTransform[6],p,Position,false);
 		Luminosity = (float)sinf(WorldTime*0.002f) + 1.8f;
@@ -478,30 +438,27 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 		Vector(0.65f,0.65f,0.65f,Light);
 		CreateSprite(BITMAP_SPARK+1, Position, Luminosity * 4.0f, Light, o);
 		return true;
-	case 81:	// 폭포 효과 - 위에서 떨어지는것
-		// 색상 변경 시 CreateParticle() 안에서 Light 강제 적용 막아야 함.
+	case 81:
 		Vector(1.f, 1.f, 1.f, Light);
 		if (rand() % 2 == 0)
 			CreateParticle(BITMAP_WATERFALL_1, o->Position, o->Angle, Light, 2, o->Scale);
 		return true;
-	case 82:	// 폭포 효과 - 물 뛰는 느낌
+	case 82:
 		Vector(1.f, 1.f, 1.f, Light);
 		CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 3, o->Scale);
 		return true;
-	case 83:	//  폭포 효과 - 물 안개 효과
+	case 83:
 		Vector(1.f, 1.f, 1.f, Light);
 		if (rand() % 3 == 0)
 			CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 1, o->Scale);
 		return true;
-	case 85:	// 입구.
-		// 수정 반짝임.
+	case 85:
 		b->BeginRender(o->Alpha);
 		b->RenderMesh(3,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(3,RENDER_CHROME|RENDER_DARK,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,BITMAP_CHROME);
 		b->EndRender();
 		return true;
-	case 92:	// 가로 유리관.
-		//  번개 효과
+	case 92:
 		{
 			vec3_t EndRelative, StartPos, EndPos;
 			Vector(0.f, 0.f, 0.f, EndRelative);
@@ -511,17 +468,17 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 				CreateJoint ( BITMAP_JOINT_THUNDER, StartPos, EndPos, o->Angle, 8, NULL, 50.f );
 		}
 		return true;
-	case 96:	// 입구 계단 모래
+	case 96:
 		b->StreamMesh = 0;
-		glAlphaFunc(GL_GREATER,0.0f);	// 0.0f 이상의 알파값을 표현해줌.
+		glAlphaFunc(GL_GREATER,0.0f);
 		b->RenderMesh(
 			0, RENDER_TEXTURE, 1.0f, o->BlendMesh,
 			o->BlendMeshLight, o->BlendMeshTexCoordU,
 			-(int)WorldTime%20000 * 0.00005f);
-		glAlphaFunc(GL_GREATER,0.25f);	// 0.25f 이상의 알파값을 표현해줌.(원래값)
+		glAlphaFunc(GL_GREATER,0.25f);
 		b->StreamMesh = -1;
 		return true;
-	case 98:	// 거대 식충 식물 물방울 효과.
+	case 98:
 		{
 			if(rand()%3 == 0)
 			{
@@ -533,7 +490,7 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-	case 105:	// 칸투르 2차 회전하는 수정(?) 오브젝트(8번 오브젝트)와 동일
+	case 105:
 		{
 			float fLumi = (sinf(WorldTime*0.001f) + 1.0f) * 0.5f;
 			vec3_t vPos;
@@ -558,7 +515,7 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-	case 107:	// 흰안개박스2
+	case 107:
 		if(o->HiddenMesh != -2)
 		{
 			vec3_t  Light;
@@ -567,7 +524,7 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 				CreateParticle ( BITMAP_CLOUD, o->Position, o->Angle, Light, 2, o->Scale, o );
 		}
 		return true;
-	case 108:	// 검은안개박스1
+	case 108:
 		if(o->HiddenMesh != -2)
 		{
 			vec3_t  Light;
@@ -576,7 +533,7 @@ bool CGMDoppelGanger4::RenderObjectVisual( OBJECT* o, BMD* b )
 				CreateParticle ( BITMAP_CLOUD, o->Position, o->Angle, Light, 7, o->Scale, o );
 		}
 		return true;
-	case 110:	// 칸투르 2차 4번 오브젝트 동일.
+	case 110:
 		{
 			float fLumi = (sinf(WorldTime*0.002f) + 1.5f) * 0.5f;
 			Vector ( fLumi*0.6f, fLumi*1.0f, fLumi*0.8f, Light );
@@ -789,7 +746,6 @@ bool CGMDoppelGanger4::PlayMonsterSound(OBJECT* o)
 	return false; 
 }
 
-// 오브젝트 사운드
 void CGMDoppelGanger4::PlayObjectSound(OBJECT* o)
 {
 

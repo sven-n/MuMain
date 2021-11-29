@@ -440,9 +440,6 @@
     <ClCompile Include="source\GuildCache.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\HackTest.cpp">
-      <Filter>MU\Client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\Local.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
@@ -1346,9 +1343,6 @@
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\GuildCache.h">
-      <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\HackTest.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\iexplorer.h">

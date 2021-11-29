@@ -1142,9 +1142,6 @@ namespace battleCastle
         if ( gMapManager.InBattleCastle()==false ) return false;
 
         vec3_t Light;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-        float  Luminosity = 0.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
         switch(o->Type)
         {
@@ -1868,9 +1865,6 @@ namespace battleCastle
         if ( gMapManager.InBattleCastle()==false ) return false;
 
         vec3_t Position, Light, p;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-        float  Luminosity = sinf ( WorldTime*0.001 )*0.2f+0.8f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
         switch ( o->Type )
         {

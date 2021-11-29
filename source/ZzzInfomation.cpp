@@ -922,12 +922,8 @@ void PrintItem(char *FileName)
 				ip.Type       = i;
        			ItemConvert(&ip,j<<3,Excellent,0);
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 				ItemValue( &ip, 0);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				int iValue = ItemValue( &ip, 0);
-				int iRate = min( iValue / 20000, 100);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 				if(j==0)
      				fprintf(fp,"%20s %8d %8d %8d %8d %8d %8d %8d %8d %8d\n",p->Name,DamageMin,DamageMax,Defense, SuccessfulBlocking,RequireStrength,RequireDexterity,RequireEnergy,p->WeaponSpeed,ItemValue(&ip));
      				//fprintf(fp,"%20s %4d%%",p->Name, iRate);
@@ -941,10 +937,6 @@ void PrintItem(char *FileName)
 	fclose(fp);
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	법서에 해당되는 스킬 인덱스를 리턴한다.
-//////////////////////////////////////////////////////////////////////////
 BYTE getSkillIndexByBook ( int Type )
 {
 	int SkillIndex = Type-ITEM_ETC+1;
@@ -958,24 +950,14 @@ BYTE getSkillIndexByBook ( int Type )
 	return SkillIndex;
 }
 
-#ifdef CSK_FIX_EPSOLUTESEPTER
-// 셉터 아이템인가?
 bool IsCepterItem(int iType)
 {
-	if( (iType >= ITEM_MACE+8 && iType <= ITEM_MACE+15)
-		|| iType == ITEM_MACE+17
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
-		|| iType == ITEM_MACE+18
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-		)
+	if( (iType >= ITEM_MACE+8 && iType <= ITEM_MACE+15)	|| iType == ITEM_MACE+17 || iType == ITEM_MACE+18)
 	{
 		return true;
 	}
-
 	return false;
 }
-
-#endif // CSK_FIX_EPSOLUTESEPTER
 
 void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 {
@@ -1422,12 +1404,8 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 			)
     {
-#ifndef PBG_MOD_NEWCHAR_MONK_WING_2			//정리할시에 제거할 소스
-		/////////////////////////////////////////////////////////////////////
-		// 망토 관련 군주의망토/무인의 망토를 다른 날개 처럼 옵션을 제거 하고
-		// 아이템의 수치로 적용한다- 기획의도
-		/////////////////////////////////////////////////////////////////////
-        //  방어력 증가.
+#ifndef PBG_MOD_NEWCHAR_MONK_WING_2
+
 		int Cal = 0;
 		if(Level <= 9)
 			Cal = Level;
@@ -1436,14 +1414,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		ip->SpecialValue[ip->SpecialNum] = 15+Cal*2;
 		switch(Level - 9)
 		{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 6: ip->SpecialValue[ip->SpecialNum] += 9;	// +15 아이템
-		case 5: ip->SpecialValue[ip->SpecialNum] += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		case 4: ip->SpecialValue[ip->SpecialNum] += 7;	// +13 아이템
-		case 3: ip->SpecialValue[ip->SpecialNum] += 6;	// +12 아이템
-		case 2: ip->SpecialValue[ip->SpecialNum] += 5;	// +11 아이템
-		case 1: ip->SpecialValue[ip->SpecialNum] += 4;	// +10 아이템
+		case 6: ip->SpecialValue[ip->SpecialNum] += 9; break;	// +15
+		case 5: ip->SpecialValue[ip->SpecialNum] += 8; break;	// +14
+		case 4: ip->SpecialValue[ip->SpecialNum] += 7; break;	// +13
+		case 3: ip->SpecialValue[ip->SpecialNum] += 6; break;	// +12
+		case 2: ip->SpecialValue[ip->SpecialNum] += 5; break;	// +11
+		case 1: ip->SpecialValue[ip->SpecialNum] += 4; break;	// +10
 		default: break;
 		};
 #ifdef PBG_MOD_NEWCHAR_MONK_WING
@@ -1455,23 +1431,22 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		}
 #endif //PBG_MOD_NEWCHAR_MONK_WING
 
-        //  데미지 증가.
 		ip->SpecialValue[ip->SpecialNum] = 20+Level*2;
 		ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_DAMAGE; ip->SpecialNum++;
-#endif //PBG_MOD_NEWCHAR_MONK_WING_2			//정리할시에 제거할 소스
-        if ( excelWing&0x01 )           //  최대 HP+50증가.
+#endif //PBG_MOD_NEWCHAR_MONK_WING_2
+        if ( excelWing&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 50+Level*5;
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_HP_MAX;ip->SpecialNum++;
         }
         
-        if ( (excelWing>>1)&0x01 )      //  최대 MP+50증가.
+        if ( (excelWing>>1)&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 50+Level*5;
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_MP_MAX;ip->SpecialNum++;
         }
         
-        if ( (excelWing>>2)&0x01 )      //  1% 확률로 적에 방어력 무시 공격.     ???  데미지 HP -> MP로 손실.
+        if ( (excelWing>>2)&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 3;
 			ip->Special[ip->SpecialNum] = AT_ONE_PERCENT_DAMAGE;ip->SpecialNum++;
@@ -1481,7 +1456,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			&& (ip->Type != ITEM_WING+49)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)      //  통솔 증가.
+			)
         {
 		    ip->SpecialValue[ip->SpecialNum] = 10+Level*5;
 		    ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_CHARISMA; ip->SpecialNum++;
@@ -1493,28 +1468,27 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		)	// 3차 날개
     {
-        if ( excelWing&0x01 )           //  %5 확률로 적 방어력 무시
+        if ( excelWing&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 5;
 			ip->Special[ip->SpecialNum] = AT_ONE_PERCENT_DAMAGE;ip->SpecialNum++;
         }
-        if ( (excelWing>>1)&0x01 )      //  5% 확률로 적 공격력 50% 돌려줌
+        if ( (excelWing>>1)&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 5;
 			ip->Special[ip->SpecialNum] = AT_DAMAGE_REFLECTION;ip->SpecialNum++;
         }
-        if ( (excelWing>>2)&0x01 )      //  5% 확률로 유저 생명 100% 순간 회복
+        if ( (excelWing>>2)&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 5;
 			ip->Special[ip->SpecialNum] = AT_RECOVER_FULL_LIFE;ip->SpecialNum++;
         }
-        if ( (excelWing>>3)&0x01 )      //  5% 확률로 유저 마력 100% 순간 회복
+        if ( (excelWing>>3)&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 5;
 			ip->Special[ip->SpecialNum] = AT_RECOVER_FULL_MANA;ip->SpecialNum++;
         }
     }
-	//옵션1(스킬) 1/6
 	if((Attribute1>>7)&1)
 	{        
         //  스킬 연결.

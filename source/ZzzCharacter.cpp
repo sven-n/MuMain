@@ -6615,7 +6615,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			Matrix[1][3] = -7.f;
 			Matrix[2][3] = 0.f;
 		}
-		//. ¼®±Ã
+
 		else if((Type>=MODEL_BOW+8 && Type<MODEL_BOW+15) || (Type>=MODEL_BOW+16 && Type<MODEL_BOW+17) || 
 			(Type>=MODEL_BOW+18 && Type<MODEL_BOW+20))
 		{
@@ -6625,7 +6625,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			Matrix[1][3] = 8.f;
 			Matrix[2][3] = 40.f;
 		}
-#ifdef LDK_ADD_14_15_GRADE_ITEM_MODEL
 		else if( Type == MODEL_15GRADE_ARMOR_OBJ_ARMLEFT || Type == MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT || 
 				Type == MODEL_15GRADE_ARMOR_OBJ_BODYLEFT || Type == MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT ||
 				Type == MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT || Type == MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT ||
@@ -6708,7 +6707,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				}break;
 			}
 		}
-#endif //LDK_ADD_14_15_GRADE_ITEM_MODEL
 		else
 		{
 			if ( Type==MODEL_STAFF+9 )
@@ -7696,10 +7694,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 					continue;
 				}
 				Vector( 0.f, 0.f, 0.f, Position );
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				int iNumBone = (rand()%7)+1;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 				b->TransformByObjectBone(Position, Object, i);
 				CreateParticle(BITMAP_WATERFALL_4, Position, Object->Angle, Light, 12, 0.5f, Object);
 			}	
@@ -8153,12 +8147,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 	case MODEL_STAFF+33:
 		{
 			vec3_t vPos, vLight;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			float fSize = 0.0f;	
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
-			//Å« ±¸½½
 			b->TransformByObjectBone(vPos, Object, 8);
 			Vector(0.9f, 0.1f, 0.4f, vLight);
 			CreateSprite(BITMAP_LIGHT, vPos, 3.5f, vLight, Object);
@@ -9236,11 +9225,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 			else
 			{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				CSIPartsMDL* pParts = (CSIPartsMDL*) c->m_pTempParts;
-				OBJECT* pObj = pParts->GetObject();
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 				RenderParts ( c );
 			}
 		}
@@ -10908,7 +10892,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						b->TransformPosition(o->BoneTransform[0],p,Position,true);
 						CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
                     }
-#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
                     else if ( EquipmentLevelSet==14 )
                     {
 						Vector(0.0f, -20.0f, 50.0f, p);
@@ -10933,7 +10916,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						b->TransformPosition(o->BoneTransform[0],p,Position,true);
 						CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
                     }
-#endif //LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
                     VectorCopy ( Light, o->Light );
                 }
 			}
@@ -10986,7 +10968,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                                 CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1 );
                             }
                         }
-#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
                         else if ( EquipmentLevelSet==14 )
                         {
                             if((MoveSceneFrame%6)==0)
@@ -11017,12 +10998,9 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                                 CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1 );
                             }
                         }
-#endif //LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
-
                         VectorCopy ( Light, o->Light );
                     }
 
-	#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
 					if ( EquipmentLevelSet==15 )
 					{
 						//left
@@ -11033,7 +11011,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 						Vector(0.09f, 0.09f, 0.8f, vColor);
 						CreateJoint(BITMAP_JOINT_ENERGY,Position,o->Position,o->Angle,55,o,6.0f,-1,0,0,-1, vColor);
-						//¾È±¤
 						float fRad = (float)sinf((WorldTime)*0.002f);
 						Vector(0.2f, 0.4f, 0.8f, vColor);
 						CreateSprite(BITMAP_SHINY+6, Position, 0.5f*fRad, vColor, o);
@@ -11055,7 +11032,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						Vector(0.1f, 0.15f, 1.0f, vColor);
 						CreateSprite(BITMAP_PIN_LIGHT, Position, 1.3f*fRad+0.5f, vColor, o, 80.0f);
 					}
-	#endif //LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
                 }
     		}
         }
@@ -12214,40 +12190,40 @@ void SetChangeClass(CHARACTER *c)
         SetPlayerStop(c);
 
 	int iSkinModelIndex = gCharacterManager.GetSkinModelIndex(c->Class);
-	if(c->BodyPart[BODYPART_HELM  ].Type >= MODEL_BODY_HELM)
+	if(c->BodyPart[BODYPART_HELM].Type >= MODEL_BODY_HELM)
 	{
-		c->BodyPart[BODYPART_HELM  ].Type = MODEL_BODY_HELM+iSkinModelIndex;
-		c->BodyPart[BODYPART_HELM  ].Level= 0;
-		c->BodyPart[BODYPART_HELM  ].Option1= 0;
-        c->BodyPart[BODYPART_HELM  ].ExtOption = 0;
+		c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM+iSkinModelIndex;
+		c->BodyPart[BODYPART_HELM].Level= 0;
+		c->BodyPart[BODYPART_HELM].Option1= 0;
+        c->BodyPart[BODYPART_HELM].ExtOption = 0;
 	}
-	if(c->BodyPart[EQUIPMENT_ARMOR ].Type >= MODEL_BODY_ARMOR)
+	if(c->BodyPart[BODYPART_ARMOR].Type >= MODEL_BODY_ARMOR)
     {
-		c->BodyPart[BODYPART_ARMOR ].Type = MODEL_BODY_ARMOR+iSkinModelIndex;
-		c->BodyPart[BODYPART_ARMOR ].Level= 0;
-		c->BodyPart[BODYPART_ARMOR ].Option1= 0;
-		c->BodyPart[BODYPART_ARMOR ].ExtOption = 0;
+		c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR+iSkinModelIndex;
+		c->BodyPart[BODYPART_ARMOR].Level= 0;
+		c->BodyPart[BODYPART_ARMOR].Option1= 0;
+		c->BodyPart[BODYPART_ARMOR].ExtOption = 0;
     }
-	if(c->BodyPart[EQUIPMENT_PANTS ].Type >= MODEL_BODY_PANTS)
+	if(c->BodyPart[BODYPART_PANTS].Type >= MODEL_BODY_PANTS)
     {
-		c->BodyPart[BODYPART_PANTS ].Type = MODEL_BODY_PANTS+iSkinModelIndex;
-		c->BodyPart[BODYPART_PANTS ].Level= 0;
-		c->BodyPart[BODYPART_PANTS ].Option1= 0;
-		c->BodyPart[BODYPART_PANTS ].ExtOption = 0;
+		c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS+iSkinModelIndex;
+		c->BodyPart[BODYPART_PANTS].Level= 0;
+		c->BodyPart[BODYPART_PANTS].Option1= 0;
+		c->BodyPart[BODYPART_PANTS].ExtOption = 0;
     }
-	if(c->BodyPart[EQUIPMENT_GLOVES].Type >= MODEL_BODY_GLOVES)
+	if(c->BodyPart[BODYPART_GLOVES].Type >= MODEL_BODY_GLOVES)
     {
 		c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES+iSkinModelIndex;
 		c->BodyPart[BODYPART_GLOVES].Level= 0;
 		c->BodyPart[BODYPART_GLOVES].Option1= 0;
 		c->BodyPart[BODYPART_GLOVES].ExtOption = 0;
     }
-	if(c->BodyPart[EQUIPMENT_BOOTS ].Type >= MODEL_BODY_BOOTS)
+	if(c->BodyPart[BODYPART_BOOTS].Type >= MODEL_BODY_BOOTS)
     {
-		c->BodyPart[BODYPART_BOOTS ].Type = MODEL_BODY_BOOTS+iSkinModelIndex;
-		c->BodyPart[BODYPART_BOOTS ].Level= 0;
-		c->BodyPart[BODYPART_BOOTS ].Option1= 0;
-		c->BodyPart[BODYPART_BOOTS ].ExtOption = 0;
+		c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS+iSkinModelIndex;
+		c->BodyPart[BODYPART_BOOTS].Level= 0;
+		c->BodyPart[BODYPART_BOOTS].Option1= 0;
+		c->BodyPart[BODYPART_BOOTS].ExtOption = 0;
     }
     
 	SetCharacterScale(c);
@@ -14803,11 +14779,6 @@ CHARACTER *CreateHero(int Index,int Class,int Skin,float x,float y,float Rotate)
 	c->Skin = Skin;
 
 	g_CharacterClearBuff(o);
-
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int Level = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	if(SceneFlag == LOG_IN_SCENE)
 	{

@@ -235,7 +235,7 @@ void CUIMng::CreateLoginScene()
 
 	m_LoginMainWin.Create();
 	m_WinList.AddHead(&m_LoginMainWin);
-	// 800*600 모드에서 3D화면 밑바닥 Y위치가 567임.
+
 	int nBaseY = int(567.0f / 600.0f * (float)rInput.GetScreenHeight());
 	m_LoginMainWin.SetPosition(30,  nBaseY - m_LoginMainWin.GetHeight() - 11);
 
@@ -736,8 +736,7 @@ void CUIMng::Render()
 
 void CUIMng::PopUpMsgWin(int nMsgCode, char* pszMsg)
 {
-	if (UIM_SCENE_NONE == m_nScene || UIM_SCENE_TITLE == m_nScene
-		|| UIM_SCENE_LOADING == m_nScene)
+	if (UIM_SCENE_NONE == m_nScene || UIM_SCENE_TITLE == m_nScene || UIM_SCENE_LOADING == m_nScene)
 		return;
 
 	if (UIM_SCENE_MAIN == m_nScene)	return;

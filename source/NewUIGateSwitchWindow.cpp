@@ -1,5 +1,4 @@
 // NewUIGateSwitchWindow.cpp: implementation of the CNewUIGateSwitchWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -16,10 +15,6 @@
 #include "npcGateSwitch.h"
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIGateSwitchWindow::CNewUIGateSwitchWindow()
 {
@@ -46,7 +41,7 @@ bool CNewUIGateSwitchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	m_BtnExit.ChangeButtonImgState(true, IMAGE_GATESWITCHWINDOW_EXIT_BTN, false);
 	m_BtnExit.ChangeButtonInfo(m_Pos.x+13, m_Pos.y+391, 36, 29);
-	m_BtnExit.ChangeToolTipText(GlobalText[1002], true); // 225 "닫기(I,V)"
+	m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
 
 	InitButton(&m_BtnOpen, m_Pos.x + 41, m_Pos.y + 320, GlobalText[1479]);
 	
@@ -90,11 +85,9 @@ bool CNewUIGateSwitchWindow::UpdateMouseEvent()
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATESWITCH);
 	}
 
-	//. 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 		return false;
 
@@ -129,7 +122,6 @@ bool CNewUIGateSwitchWindow::Render()
 	
 	POINT ptOrigin = { m_Pos.x, m_Pos.y+50 };
 
-	//  설명.
     g_pRenderText->RenderText(ptOrigin.x+95, ptOrigin.y, GlobalText[1476], 0, 0, RT3_WRITE_CENTER); ptOrigin.y += 17;
 	g_pRenderText->RenderText(ptOrigin.x+95, ptOrigin.y, GlobalText[1477], 0, 0, RT3_WRITE_CENTER); ptOrigin.y += 17;
 
@@ -150,14 +142,9 @@ bool CNewUIGateSwitchWindow::Render()
 		m_BtnOpen.ChangeText(GlobalText[1479]);
 	}
 
-	// 성문 열기 버튼 표시
 	m_BtnOpen.Render();
-
-	// 닫기 버튼 표시
 	m_BtnExit.Render();
-
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -227,7 +214,6 @@ void CNewUIGateSwitchWindow::RenderFrame()
 	g_pRenderText->SetTextColor(220, 220, 220, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-	// 창 제목 표시
 	unicode::_sprintf(szText, "%s", GlobalText[1475]);
 	g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
@@ -235,17 +221,12 @@ void CNewUIGateSwitchWindow::RenderFrame()
 bool CNewUIGateSwitchWindow::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	POINT ptExitBtn2 = { m_Pos.x+13, m_Pos.y+391 };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATESWITCH);
 	}
 
-	// 닫기 버튼
 	if(m_BtnExit.UpdateMouseEvent() == true)
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATESWITCH);
@@ -259,18 +240,10 @@ void CNewUIGateSwitchWindow::RenderOutlineUpper(float fPos_x, float fPos_y, floa
 {
 	POINT ptOrigin = { fPos_x, fPos_y };
 	float fBoxWidth = fWidth;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fBoxHeight = fHeight;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-	// 위쪽 테두리
 	RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_TOP_LEFT, ptOrigin.x+12, ptOrigin.y-4, 14, 14);
 	RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_TOP_RIGHT, ptOrigin.x+fBoxWidth+4, ptOrigin.y-4, 14, 14);
-	// 위쪽 라인
 	RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_TOP_PIXEL, ptOrigin.x+25, ptOrigin.y-4, fBoxWidth-21, 14);
-	//glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
-	//RenderColor(ptOrigin.x+15, ptOrigin.y-3, fBoxWidth-2, 15);
-	//EndRenderColor();
 }
 
 void CNewUIGateSwitchWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
@@ -279,14 +252,9 @@ void CNewUIGateSwitchWindow::RenderOutlineLower(float fPos_x, float fPos_y, floa
 	float fBoxWidth = fWidth;
 	float fBoxHeight = fHeight;
 
-	// 왼쪽 라인, 오른쪽 라인
 	RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_LEFT_PIXEL, ptOrigin.x+12, ptOrigin.y+9, 14, fBoxHeight);
 	RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_RIGHT_PIXEL, ptOrigin.x+fBoxWidth+4, ptOrigin.y+9, 14, fBoxHeight);
-	// 중간라인
-	//RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x+15, ptOrigin.y+3, fBoxWidth-2, 14);
-	// 아래쪽 테두리
 	RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_LEFT, ptOrigin.x+12, ptOrigin.y+fBoxHeight+3, 14, 14);
 	RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_RIGHT, ptOrigin.x+fBoxWidth+4, ptOrigin.y+fBoxHeight+3, 14, 14);
-	// 아래쪽 라인
 	RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x+25, ptOrigin.y+fBoxHeight+3, fBoxWidth-21, 14);
 }

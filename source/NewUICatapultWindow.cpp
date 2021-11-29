@@ -48,28 +48,24 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Create(int iType, POI
 	{
 		m_iBtnNum = 4;
 		m_pButton = new CNewUIButton[m_iBtnNum];
-		// 1402 "성문1"
 		m_pButton[0].ChangeText(GlobalText[1402]);
 		m_pButton[0].ChangeTextBackColor(RGBA(255,255,255,0));
 		m_pButton[0].ChangeButtonImgState( true, IMAGE_CATAPULT_BTN_SMALL, true );
 		m_pButton[0].ChangeButtonInfo(ptWindow.x+22, ptWindow.y+135, 46, 36);
 		m_pButton[0].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 		m_pButton[0].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-		// 1403 "성문2"
 		m_pButton[1].ChangeText(GlobalText[1403]);
 		m_pButton[1].ChangeTextBackColor(RGBA(255,255,255,0));
 		m_pButton[1].ChangeButtonImgState( true, IMAGE_CATAPULT_BTN_SMALL, true );
 		m_pButton[1].ChangeButtonInfo(ptWindow.x+74, ptWindow.y+135, 46, 36);
 		m_pButton[1].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 		m_pButton[1].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-		// 1404 "성문3"
 		m_pButton[2].ChangeText(GlobalText[1404]);
 		m_pButton[2].ChangeTextBackColor(RGBA(255,255,255,0));
 		m_pButton[2].ChangeButtonImgState( true, IMAGE_CATAPULT_BTN_SMALL, true );
 		m_pButton[2].ChangeButtonInfo(ptWindow.x+126, ptWindow.y+135, 46, 36);
 		m_pButton[2].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 		m_pButton[2].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-		// 1405 "앞마당"
 		m_pButton[3].ChangeText(GlobalText[1405]);
 		m_pButton[3].ChangeTextBackColor(RGBA(255,255,255,0));
 		m_pButton[3].ChangeButtonImgState( true, IMAGE_CATAPULT_BTN_BIG, true );
@@ -81,21 +77,18 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Create(int iType, POI
 	{
 		m_iBtnNum = 3;
 		m_pButton = new CNewUIButton[m_iBtnNum];
-		// 1406 "앞마당1"
 		m_pButton[0].ChangeText(GlobalText[1406]);
 		m_pButton[0].ChangeTextBackColor(RGBA(255,255,255,0));
 		m_pButton[0].ChangeButtonImgState( true, IMAGE_CATAPULT_BTN_BIG, true );
 		m_pButton[0].ChangeButtonInfo(ptWindow.x+18, ptWindow.y+125, 77, 47);
 		m_pButton[0].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 		m_pButton[0].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-		// 1407 "앞마당2"
 		m_pButton[1].ChangeText(GlobalText[1407]);
 		m_pButton[1].ChangeTextBackColor(RGBA(255,255,255,0));
 		m_pButton[1].ChangeButtonImgState( true, IMAGE_CATAPULT_BTN_BIG, true );
 		m_pButton[1].ChangeButtonInfo(ptWindow.x+97, ptWindow.y+125, 77, 47);
 		m_pButton[1].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
 		m_pButton[1].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-		// 1408 "다리"
 		m_pButton[2].ChangeText(GlobalText[1408]);
 		m_pButton[2].ChangeTextBackColor(RGBA(255,255,255,0));
 		m_pButton[2].ChangeButtonImgState( true, IMAGE_CATAPULT_BTN_BIG, true );
@@ -172,9 +165,6 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Render()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
 SEASON3B::CNewUICatapultWindow::CNewUICatapultWindow()
 {
 	m_pNewUIMng = NULL;
@@ -220,12 +210,9 @@ void SEASON3B::CNewUICatapultWindow::Release()
 
 void SEASON3B::CNewUICatapultWindow::SetButtonInfo()
 {
-	// Exit Button
 	m_BtnExit.ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_EXIT, false);
 	m_BtnExit.ChangeButtonInfo( m_Pos.x+13, m_Pos.y+392, 36, 29 );		
-	m_BtnExit.ChangeToolTipText(GlobalText[1002], true);	// 1002 "닫기"
-
-	// 1499 "발 사"
+	m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
 	m_BtnFire.ChangeText(GlobalText[1499]);
 	m_BtnFire.ChangeTextBackColor(RGBA(255,255,255,0));
 	m_BtnFire.ChangeButtonImgState( true, IMAGE_CATAPULT_BTN_FIRE, true );
@@ -245,8 +232,7 @@ void SEASON3B::CNewUICatapultWindow::SetPos(int x, int y)
 
 bool SEASON3B::CNewUICatapultWindow::UpdateMouseEvent()
 {
-	// 버튼 마우스이벤트 처리
-	if(BtnProcess() == true)	// 처리가 완료 되었다면
+	if(BtnProcess() == true)
 	{
 		return false;
 	}
@@ -277,29 +263,18 @@ bool SEASON3B::CNewUICatapultWindow::Update()
 bool SEASON3B::CNewUICatapultWindow::Render()
 {
 	EnableAlphaTest();
-
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// 프레임을 그린다.
 	RenderFrame();
-
-	// 테이블
 	RenderOutlineUpper( m_Pos.x+0, m_Pos.y+120, 162, 100 );
 	RenderOutlineLower( m_Pos.x+0, m_Pos.y+120, 162, 100 );
-
 	RenderTexts();
-
-	// 버튼을 그린다.
 	RenderButtons();
-	
 	DisableAlphaBlend();
-
 	return true;
 }
 
 void SEASON3B::CNewUICatapultWindow::RenderFrame()
 {
-	// 프레임
 	RenderImage(IMAGE_CATAPULT_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
 	RenderImage(IMAGE_CATAPULT_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
 	RenderImage(IMAGE_CATAPULT_LEFT, m_Pos.x, m_Pos.y+64, 21.f, 320.f);
@@ -309,25 +284,18 @@ void SEASON3B::CNewUICatapultWindow::RenderFrame()
 
 void SEASON3B::CNewUICatapultWindow::RenderTexts()
 {
-	// 제목
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetTextColor(220, 220, 220, 255);
 	g_pRenderText->SetBgColor(0);
 	if(m_iType == CATAPULT_ATTACK)
 	{
-		// 1400 "공성용 투석기"
 		g_pRenderText->RenderText(m_Pos.x, m_Pos.y+13.f, GlobalText[1400], 190, 0, RT3_SORT_CENTER);
 	}
 	else if(m_iType == CATAPULT_DEFENSE)
 	{
-		// 1401 "수성용 투석기"
 		g_pRenderText->RenderText(m_Pos.x, m_Pos.y+13.f, GlobalText[1401], 190, 0, RT3_SORT_CENTER);
 	}
 
-	// 설명
-	// 1409 "공격을 하기 위한 위치의"
-	// 1410 "버튼을 선택하고 발사버튼을"
-	// 1411 "누르면 투석기가 발사합니다."
 	float fLine = 50.f;
 	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+fLine, GlobalText[1409], 190, 0, RT3_SORT_CENTER);
 	fLine += 15.f;
@@ -348,14 +316,9 @@ void SEASON3B::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, float fPos
 {
 	POINT ptOrigin = { fPos_x, fPos_y };
 	float fBoxWidth = fWidth;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fBoxHeight = fHeight;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-	// 위쪽 테두리
 	RenderImage(IMAGE_CATAPULT_TABLE_TOP_LEFT, ptOrigin.x+12, ptOrigin.y-4, 14, 14);
 	RenderImage(IMAGE_CATAPULT_TABLE_TOP_RIGHT, ptOrigin.x+fBoxWidth+4, ptOrigin.y-4, 14, 14);
-	// 위쪽 라인
 	RenderImage(IMAGE_CATAPULT_TABLE_TOP_PIXEL, ptOrigin.x+25, ptOrigin.y-4, fBoxWidth-21, 14);
 }
 
@@ -365,13 +328,10 @@ void SEASON3B::CNewUICatapultWindow::RenderOutlineLower(float fPos_x, float fPos
 	float fBoxWidth = fWidth;
 	float fBoxHeight = fHeight;
 
-	// 왼쪽 라인, 오른쪽 라인
 	RenderImage(IMAGE_CATAPULT_TABLE_LEFT_PIXEL, ptOrigin.x+12, ptOrigin.y+9, 14, fBoxHeight);
 	RenderImage(IMAGE_CATAPULT_TABLE_RIGHT_PIXEL, ptOrigin.x+fBoxWidth+4, ptOrigin.y+9, 14, fBoxHeight);
-	// 아래쪽 테두리
 	RenderImage(IMAGE_CATAPULT_TABLE_BOTTOM_LEFT, ptOrigin.x+12, ptOrigin.y+fBoxHeight+3, 14, 14);
 	RenderImage(IMAGE_CATAPULT_TABLE_BOTTOM_RIGHT, ptOrigin.x+fBoxWidth+4, ptOrigin.y+fBoxHeight+3, 14, 14);
-	// 아래쪽 라인
 	RenderImage(IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL, ptOrigin.x+25, ptOrigin.y+fBoxHeight+3, fBoxWidth-21, 14);
 }
 
@@ -417,7 +377,6 @@ void SEASON3B::CNewUICatapultWindow::DoFire(int iKey, int iResult, int iType, in
     CHARACTER* c = &CharactersClient[iIndex];
     OBJECT* o = &c->Object;
 
-    //  투석기 공격 애니메이션.
     SetAction ( o, 1 );
 
     BYTE bySubType = 0;
@@ -439,11 +398,11 @@ void SEASON3B::CNewUICatapultWindow::DoFire(int iKey, int iResult, int iType, in
     Vector(iPositionX*TERRAIN_SCALE, iPositionY*TERRAIN_SCALE, 100.f, vTargetPos );
     switch(iType)
     {
-    case 1: //  공성 무기.
+    case 1:
         CreateEffect(MODEL_FLY_BIG_STONE1, vPos, vTargetPos, o->Light, bySubType, &Hero->Object, 1, byKeyH, byKeyL);
         break;
 
-    case 2: //  수성 무기.
+    case 2:
         CreateEffect(MODEL_FLY_BIG_STONE2, vPos, vTargetPos, o->Light, bySubType, &Hero->Object, 1, byKeyH, byKeyL);
         break;
     }
@@ -459,18 +418,17 @@ void SEASON3B::CNewUICatapultWindow::DoFireFixStartPosition(int iType, int iPosi
 
     switch ( iType )
     {
-    case 1: //  공성 무기.
+    case 1:
         Vector(9200, 3000, 500.f, vPos);
         CreateEffect(MODEL_FLY_BIG_STONE1, vPos, vTargetPos, Hero->Object.Light, 0, &Hero->Object, 1);
         break;
 
-    case 2: //  수성 무기.
+    case 2:
         Vector(9400, 19000, 500.f, vPos);
         CreateEffect( MODEL_FLY_BIG_STONE2, vPos, vTargetPos, Hero->Object.Light, 0, &Hero->Object, 1);
         break;
     }
 
-    //  떨어질 위치를 알려준다.
     vec3_t vLight = { 1.f, 0.3f, 0.1f };
     CreateEffect(BITMAP_SHOCK_WAVE, vTargetPos, Hero->Object.Angle, vLight, 6);
 
@@ -545,8 +503,6 @@ bool SEASON3B::CNewUICatapultWindow::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
 
-	//. Exit1 버튼 (기본처리)
-
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_CATAPULT);
@@ -559,7 +515,6 @@ bool SEASON3B::CNewUICatapultWindow::BtnProcess()
 		return true;
 	}
 
-	// 지역 선택 버튼 처리
 	int iIndex = 0;
 	iIndex = m_BtnChoiceArea.UpdateMouseEvent();
 
@@ -571,7 +526,6 @@ bool SEASON3B::CNewUICatapultWindow::BtnProcess()
 		return true;
 	}
 
-	// 발사버튼 처리
 	iIndex = m_BtnChoiceArea.GetIndex();
 	if(iIndex > -1 && m_BtnFire.UpdateMouseEvent() == true)
 	{

@@ -65,11 +65,7 @@ void RenderSprite(OBJECT *o,OBJECT *Owner)
 
     if ( o->Type==BITMAP_FORMATION_MARK )
     {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		float u = 0.0f, v = 0.0f, uw, vw;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-        float u, v, uw, vw;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		uw=0.33f; vw=0.33f;
         switch ( o->SubType )
         {

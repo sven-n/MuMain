@@ -1,5 +1,4 @@
 // NewUIGuardWindow.cpp: implementation of the CNewUIGuardWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -21,10 +20,6 @@
 using namespace SEASON3B;
 
 extern DWORD g_dwActiveUIID;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIGuardWindow::CNewUIGuardWindow()
 {
@@ -62,7 +57,7 @@ bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	m_BtnExit.ChangeButtonImgState(true, IMAGE_GUARDWINDOW_EXIT_BTN, false);
 	m_BtnExit.ChangeButtonInfo(m_Pos.x+13, m_Pos.y+391, 36, 29);
-	m_BtnExit.ChangeToolTipText(GlobalText[1002], true); // 225 "닫기(I,V)"
+	m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
 
 	InitButton(&m_BtnProclaim, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 120, GlobalText[1435]);
 	InitButton(&m_BtnRegister, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 200, GlobalText[1439]);
@@ -115,11 +110,9 @@ bool CNewUIGuardWindow::UpdateMouseEvent()
 		break;
 	}
 
-	//. 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 		return false;
 
@@ -147,7 +140,7 @@ bool CNewUIGuardWindow::Update()
 	{
 		int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
 		
-		if( iNumCurOpenTab == RADIOGROUPEVENT_NONE )	// 탭 버튼의 변경이 없을시에는 Update skip
+		if( iNumCurOpenTab == RADIOGROUPEVENT_NONE )
 			return true;
 		
 		m_iNumCurOpenTab = iNumCurOpenTab;
@@ -177,13 +170,13 @@ bool CNewUIGuardWindow::Render()
 	if( m_eTimeType == CASTLESIEGE_STATE_REGSIEGE )
 	{
 		ltext.push_back(GlobalText[1448]);
-		ltext.push_back(GlobalText[1435]);	// 1435 "선포하기"
+		ltext.push_back(GlobalText[1435]);
 		ltext.push_back(GlobalText[1449]);
 	}
 	else
 	{
 		ltext.push_back(GlobalText[1448]);
-		ltext.push_back(GlobalText[1439]);	// 1439 "표식등록하기"
+		ltext.push_back(GlobalText[1439]);
 		ltext.push_back(GlobalText[1449]);
 	}
 	m_TabBtn.ChangeRadioText(ltext);
@@ -203,9 +196,7 @@ bool CNewUIGuardWindow::Render()
 		break;
 	}
 	
-	// 닫기 버튼 표시
 	m_BtnExit.Render();
-
 	DisableAlphaBlend();
 
 	return true;
@@ -291,7 +282,6 @@ void CNewUIGuardWindow::RenderFrame()
 	g_pRenderText->SetTextColor(220, 220, 220, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-	// 창 제목 표시
 	unicode::_sprintf(szText, "%s", GlobalText[1445]);
 	g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 
@@ -300,22 +290,22 @@ void CNewUIGuardWindow::RenderFrame()
 	
 	if( m_szOwnerGuildMaster[0] )
 	{
-		unicode::_sprintf( szText, GlobalText[1446], m_szOwnerGuildMaster );	// 1446 "왕의 직인 : %s"
+		unicode::_sprintf( szText, GlobalText[1446], m_szOwnerGuildMaster );
 	}
 	else
 	{
-		unicode::_sprintf( szText, GlobalText[1446], GlobalText[1361] );		// 1446 "왕의 직인 : %s"
+		unicode::_sprintf( szText, GlobalText[1446], GlobalText[1361] );
 	}
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 	
 	ptOrigin.y += 15;
 	if( m_szOwnerGuild[0] )
 	{
-		unicode::_sprintf( szText, GlobalText[1447], m_szOwnerGuild );			// 1447 "소속길드 : %s"
+		unicode::_sprintf( szText, GlobalText[1447], m_szOwnerGuild );
 	}
 	else
 	{
-		unicode::_sprintf( szText, GlobalText[1447], GlobalText[1361] );		// 1447 "소속길드 : %s"
+		unicode::_sprintf( szText, GlobalText[1447], GlobalText[1361] );
 	}
 
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
@@ -324,17 +314,12 @@ void CNewUIGuardWindow::RenderFrame()
 bool CNewUIGuardWindow::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	POINT ptExitBtn2 = { m_Pos.x+13, m_Pos.y+391 };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_GUARDSMAN);
 	}
 
-	// 닫기 버튼
 	if(m_BtnExit.UpdateMouseEvent() == true)
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_GUARDSMAN);
@@ -352,22 +337,20 @@ void CNewUIGuardWindow::UpdateRegisterTab()
 {
 	switch( m_eTimeType )
 	{
-	case CASTLESIEGE_STATE_REGSIEGE:	// 신청기간
+	case CASTLESIEGE_STATE_REGSIEGE:
 		if (m_BtnProclaim.UpdateMouseEvent() == true)
 		{
 			if( g_GuardsMan.IsSufficentDeclareLevel() )
 			{
-				// 공성전 등록 요청
 				SendRequestBCReg();
 			}
 			else
 			{
-				// 레벨 제한 200 표시
 				SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSiegeLevelMsgBoxLayout));
 			}
 		}
 		break;
-	case CASTLESIEGE_STATE_REGMARK:		// 표식등록 기간
+	case CASTLESIEGE_STATE_REGMARK:
 		if (m_BtnRegister.UpdateMouseEvent() == true)
 		{
 			int nMarkSlot = g_GuardsMan.GetMyMarkSlotIndex();
@@ -401,14 +384,12 @@ void CNewUIGuardWindow::UpdateRegisterInfoTab()
 			m_GuildListBox.Scrolling(m_GuildListBox.GetBoxSize());
 	}
 	
-	// 공성 등록상태일때 포기가능 기간에만 포기버튼 표시
 	if( g_GuardsMan.HasRegistered() &&
 		CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType && m_eTimeType <= CASTLESIEGE_STATE_REGMARK 
 		&& Hero->GuildStatus == G_MASTER)
 	{
 		if (m_BtnGiveUp.UpdateMouseEvent() == true)
 		{
-			// 공성전 포기
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSiegeGiveUpMsgBoxLayout));
 		}
 	}
@@ -420,48 +401,45 @@ void CNewUIGuardWindow::RenderSeigeInfoTab()
 	unicode::t_char szTemp[256];
 
 	g_pRenderText->SetFont(g_hFont);
-	// 1533 "%u-%u-%u %u : %u 부터"
 	sprintf( szTemp, GlobalText[1533], m_wStartYear, m_byStartMonth, m_byStartDay, m_byStartHour, m_byStartMinute );
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
 	
 	ptOrigin.y += 14;
-	// 1534 "%u-%u-%u %u : %u 까지는"
 	sprintf( szTemp, GlobalText[1534], m_wEndYear, m_byEndMonth, m_byEndDay, m_byEndHour, m_byEndMinute );
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
 	
 	ptOrigin.y += 14;
-	// 현재 공성상태 표시
 	switch( m_eTimeType )
 	{
-	case CASTLESIEGE_STATE_NONE:		// 상태없음
-	case CASTLESIEGE_STATE_IDLE_1:		// 신청대기 기간		// 1535 "공성기간이 아닙니다."
+	case CASTLESIEGE_STATE_NONE:
+	case CASTLESIEGE_STATE_IDLE_1:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1535], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_REGSIEGE:	// 신청기간				// 1536 "공성신청 기간입니다."
+	case CASTLESIEGE_STATE_REGSIEGE:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1536], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_IDLE_2:		// 표식등록 대기기간	// 1537 "표식등록 대기기간입니다."
+	case CASTLESIEGE_STATE_IDLE_2:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1537], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_REGMARK:		// 표식등록 기간		// 1538 "표식등록 기간입니다."
+	case CASTLESIEGE_STATE_REGMARK:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1538], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_IDLE_3:		// 발표 대기기간		// 1539 "발표 대기기간입니다."
+	case CASTLESIEGE_STATE_IDLE_3:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1539], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_NOTIFY:		// 발표 기간			// 1540 "발표 기간입니다."
+	case CASTLESIEGE_STATE_NOTIFY:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1540], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_READYSIEGE:	// 공성준비 기간		// 1541 "공성준비 기간입니다."
+	case CASTLESIEGE_STATE_READYSIEGE:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1541], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_STARTSIEGE:	// 공성 기간			// 1542 "공성 기간입니다."
+	case CASTLESIEGE_STATE_STARTSIEGE:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1542], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_ENDSIEGE:	// 휴전 기간			// 1543 "휴전 기간입니다."
+	case CASTLESIEGE_STATE_ENDSIEGE:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1543], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_ENDCYCLE:	// 공성주기 종료		// 1544 "공성이 끝났습니다."
+	case CASTLESIEGE_STATE_ENDCYCLE:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1544], 190, 0, RT3_SORT_CENTER);
 		break;
 	}
@@ -469,16 +447,13 @@ void CNewUIGuardWindow::RenderSeigeInfoTab()
 	if( m_eTimeType < CASTLESIEGE_STATE_STARTSIEGE )
 	{
 		ptOrigin.y += 35;
-		// 1545 "공성 예상 시기는"
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  GlobalText[1545], 190, 0, RT3_SORT_CENTER);
 
 		ptOrigin.y += 14;
-		// 1546 "%u-%u-%u %u : %u 입니다."
 		sprintf( szTemp, GlobalText[1546], m_wSiegeStartYear, m_bySiegeStartMonth, m_bySiegeStartDay, m_bySiegeStartHour, m_bySiegeStartMinute );
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
 
 		ptOrigin.y += 35;
-		// 1421 "다음 상태까지는 %u : %u : %u 남았습니다."
 		sprintf( szTemp, GlobalText[1421], m_dwStateLeftSec/3600, (m_dwStateLeftSec%3600)/60, (m_dwStateLeftSec%3600)%60 );
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y,  szTemp, 190, 0, RT3_SORT_CENTER);
 	}
@@ -491,16 +466,15 @@ void CNewUIGuardWindow::RenderRegisterTab()
 
 	switch( m_eTimeType )
 	{
-	case CASTLESIEGE_STATE_NONE:		// 상태없음
-	case CASTLESIEGE_STATE_IDLE_1:		// 신청대기 기간
-		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1535], 190, 0, RT3_SORT_CENTER);	// 1535 "공성기간이 아닙니다."
+	case CASTLESIEGE_STATE_NONE:
+	case CASTLESIEGE_STATE_IDLE_1:
+		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1535], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_REGSIEGE:	// 신청기간
+	case CASTLESIEGE_STATE_REGSIEGE:
  		if( Hero->GuildStatus == G_MASTER )
  		{
 			if(!g_GuardsMan.HasRegistered())
 			{
-				// 수성측 연합에 속해있다면 선포불가
 				if( !strcmp( GuildMark[Hero->GuildMarkIndex].UnionName, m_szOwnerGuild )
 					|| !strcmp( GuildMark[Hero->GuildMarkIndex].GuildName, m_szOwnerGuild ) )
 				{
@@ -518,32 +492,31 @@ void CNewUIGuardWindow::RenderRegisterTab()
 			}
 			else
 			{
-				g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1547], 190, 0, RT3_SORT_CENTER);	// 1547 "선포되었습니다"
+				g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1547], 190, 0, RT3_SORT_CENTER);
 			}
 		}
 		else
 		{
-			g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1320], 190, 0, RT3_SORT_CENTER);	// 1320 "길드마스터가 아닙니다."
+			g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1320], 190, 0, RT3_SORT_CENTER);
 		}
 		break;
-	case CASTLESIEGE_STATE_IDLE_2:		// 표식등록 대기기간
-		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1548], 190, 0, RT3_SORT_CENTER);	// 1548 "표식등록 대기기간입니다."
+	case CASTLESIEGE_STATE_IDLE_2:
+		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1548], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_REGMARK:		// 표식등록 기간
+	case CASTLESIEGE_STATE_REGMARK:
 		{
 			if(g_GuardsMan.HasRegistered())
 			{
-				// 1436 "획득한 표식을 등록하세요."
 				g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1436], 190, 0, RT3_SORT_CENTER);
 				ptOrigin.y += 30;
 
 				int nMarkCount = g_GuardsMan.GetMyMarkCount();
 				unicode::t_char szBuffer[256];
-				unicode::_sprintf( szBuffer, GlobalText[1437], nMarkCount );	// 1437 "습득한 표식수 : %u"
+				unicode::_sprintf( szBuffer, GlobalText[1437], nMarkCount );
 				g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
 				
 				ptOrigin.y += 14;
-				unicode::_sprintf( szBuffer, GlobalText[1438], g_GuardsMan.GetRegMarkCount() );	// 1438 "등록한 표식수 : %u"
+				unicode::_sprintf( szBuffer, GlobalText[1438], g_GuardsMan.GetRegMarkCount() );
 				g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
 
 				if( nMarkCount > 0 )
@@ -562,31 +535,30 @@ void CNewUIGuardWindow::RenderRegisterTab()
 			}
 			else
 			{
-				// 1514 "공성전에 등록된 길드가 아닙니다."
-				g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1514], 190, 0, RT3_SORT_CENTER);	// 1514 "공성전에 등록된 길드가 아닙니다."
+				g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1514], 190, 0, RT3_SORT_CENTER);
 			}
 		}
 		break;
-	case CASTLESIEGE_STATE_IDLE_3:		// 발표 대기기간
+	case CASTLESIEGE_STATE_IDLE_3:
 		g_pRenderText->SetFont(g_hFontBold);
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1440], 190, 0, RT3_SORT_CENTER);
 		ptOrigin.y += 14;
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1441], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_NOTIFY:		// 발표 기간
+	case CASTLESIEGE_STATE_NOTIFY:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1540], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_READYSIEGE:	// 공성준비 기간
+	case CASTLESIEGE_STATE_READYSIEGE:	
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1541], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_STARTSIEGE:	// 공성 기간
+	case CASTLESIEGE_STATE_STARTSIEGE:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1542], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_ENDSIEGE:	// 휴전 기간
+	case CASTLESIEGE_STATE_ENDSIEGE:
 		g_pRenderText->SetFont(g_hFontBold);
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1442], 190, 0, RT3_SORT_CENTER);
 		break;
-	case CASTLESIEGE_STATE_ENDCYCLE:	// 공성주기 종료
+	case CASTLESIEGE_STATE_ENDCYCLE:
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1544], 190, 0, RT3_SORT_CENTER);
 		break;
 	}
@@ -597,11 +569,9 @@ void CNewUIGuardWindow::RenderRegisterInfoTab()
 	POINT ptOrigin = { m_Pos.x, m_Pos.y+125 };
 	g_pRenderText->SetFont(g_hFontBold);
 	
-	// 신청기간, 문장 등록기간
 	if( m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK )
 	{
 		EnableAlphaTest();
-		// 테두리
 		RenderImage(IMAGE_GUARDWINDOW_LEFT_PIXEL, ptOrigin.x+11, ptOrigin.y-14, 14, 255);
 		RenderImage(IMAGE_GUARDWINDOW_RIGHT_PIXEL, ptOrigin.x+166, ptOrigin.y-14, 14, 255);
 		RenderImage(IMAGE_GUARDWINDOW_TOP_PIXEL, ptOrigin.x+14, ptOrigin.y-14, 161, 14);
@@ -610,11 +580,9 @@ void CNewUIGuardWindow::RenderRegisterInfoTab()
 
 		m_DeclareGuildListBox.Render();
 	}
-	// 발표기간, 준비기간
 	else if( m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE )
 	{
 		EnableAlphaTest();
-		// 테두리
 		RenderImage(IMAGE_GUARDWINDOW_LEFT_PIXEL, ptOrigin.x+11, ptOrigin.y-14, 14, 215);
 		RenderImage(IMAGE_GUARDWINDOW_RIGHT_PIXEL, ptOrigin.x+166, ptOrigin.y-14, 14, 215);
 		RenderImage(IMAGE_GUARDWINDOW_TOP_PIXEL, ptOrigin.x+14, ptOrigin.y-14, 161, 14);
@@ -628,22 +596,19 @@ void CNewUIGuardWindow::RenderRegisterInfoTab()
 
 		m_GuildListBox.Render();
 	}
-	// 공성기간
 	else if( m_eTimeType == CASTLESIEGE_STATE_NOTIFY )
 	{
 		unicode::t_char szBuffer[256];
-		unicode::_sprintf( szBuffer, GlobalText[1443], 1, 1 );	// 1443 "공성전이 %d월 %d일"
+		unicode::_sprintf( szBuffer, GlobalText[1443], 1, 1 );
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
 		ptOrigin.y += 14;
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1444], 190, 0, RT3_SORT_CENTER);
 	}
-	// 휴전기간
 	else if( m_eTimeType == CASTLESIEGE_STATE_ENDSIEGE )
 	{
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1442], 190, 0, RT3_SORT_CENTER);
 	}
 
-	// 공성 등록상태일때 포기가능 기간에만 포기버튼 표시
 	if( g_GuardsMan.HasRegistered() &&
 		CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType && m_eTimeType <= CASTLESIEGE_STATE_REGMARK 
 		&& Hero->GuildStatus == G_MASTER)
@@ -711,18 +676,16 @@ void CNewUIGuardWindow::RenderScrollBarFrame(int iPos_x, int iPos_y, int iHeight
 {
 	RenderImage(IMAGE_GUARDWINDOW_SCROLL_TOP, iPos_x, iPos_y, 7, 3);
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-	// 스크롤 프레임중 중간 부분 시작과 끝의 픽셀의 흐려짐의 변화로
-	// 이미지를 늘리지 않고 랜더한다
+
 	BITMAP_t *pImage = &Bitmaps[IMAGE_GUARDWINDOW_SCROLL_MIDDLE];
 	float _Temp = pImage->Height-1;
 	float _fMiddle_Cnt = (iHeight-6)/_Temp;
 	int _iMiddle_Cnt = (int)_fMiddle_Cnt;
 	float _Middle_rest = _fMiddle_Cnt - _iMiddle_Cnt;
 
-	// 중간부분 반복해서 그린다
 	for(int i=0; i<_iMiddle_Cnt; i++)
 		RenderImage(IMAGE_GUARDWINDOW_SCROLL_MIDDLE, iPos_x, iPos_y+(float)(i*_Temp+3), 7, _Temp);
-	// 한개가 안되는 마지막 부분 그린다
+
 	RenderImage(IMAGE_GUARDWINDOW_SCROLL_MIDDLE, iPos_x, iPos_y+(float)(_iMiddle_Cnt*_Temp+3), 7, _Temp*_Middle_rest);
 #else //PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 	RenderBitmap(IMAGE_GUARDWINDOW_SCROLL_MIDDLE, iPos_x, iPos_y+3, 7.f, iHeight - 6, 0, 0, 7.f/8.f, 15.f/16.f);

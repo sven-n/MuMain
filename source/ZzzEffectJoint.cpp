@@ -1,7 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 3D 특수효과 관련 함수
-//
-// *** 함수 레벨: 3
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -23,13 +20,8 @@
 
 #include "GMBattleCastle.h"
 
+extern float g_fBoneSave[10][3][4];
 
-
-extern float g_fBoneSave[10][3][4];	// 임시 저장을 위한 공간
-
-///////////////////////////////////////////////////////////////////////////////
-// 기다란 연결된 효과 처리(게임상의 번개 마법 등등)
-///////////////////////////////////////////////////////////////////////////////
 void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int SubType,OBJECT *Target,float Scale,short PKKey,
 				 WORD SkillIndex,WORD SkillSerialNum,int iChaIndex, const float* vPriorColor, short int sTargetindex)
 {
@@ -121,13 +113,11 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                 bCreateStartTail = false;
                 o->NumTails = -1;
             }
-#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
             else if ( Type==BITMAP_JOINT_ENERGY && ( o->SubType==55 || o->SubType==56 ) )
             {
                 bCreateStartTail = false;
                 o->NumTails = -1;
             }
-#endif //LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
 #ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
             else if ( Type==BITMAP_JOINT_ENERGY && o->SubType==57 )
             {
@@ -175,8 +165,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 				o->MaxTails = 28;
 				o->Velocity = 3.f;
 				break;
-			// subType : 0 ~ 47 (08.05.14)
-			// subtype 47 은 데들리스태프 잔상 전용(사용하지 말것)
 			case BITMAP_JOINT_ENERGY:				
 				o->Scale = Scale;
 				switch(o->SubType)
@@ -224,7 +212,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					VectorCopy(o->Target->EyeLeft,o->Position);
 					break;
 #ifdef ADD_SOCKET_ITEM
-				case 47:		// 데들리스태프 잔상
+				case 47:
 					{
 						o->Velocity = 0.f;
 						o->LifeTime = 12;
@@ -240,13 +228,13 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                 case 11:
 				case 14:
 				case 15:
-				case 18:	// 파란 선
+				case 18:
 				case 19:
 				case 20:
 				case 21:
 				case 26:
 				case 27:
-				case 28:	// 빨간 선
+				case 28:
 				case 29:
 				case 30:
 				case 31:
@@ -351,13 +339,12 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					}			
 					break;
 #ifdef ASG_ADD_SUMMON_RARGLE
-				// 소환수 라글의 손톱 이펙트.
-				case 48:	// 왼손1.
-				case 49:	// 왼손2.
-				case 50:	// 왼손3.
-				case 51:	// 오른손1.
-				case 52:	// 오른손2.
-				case 53:	// 오른손3.
+				case 48:
+				case 49:
+				case 50:
+				case 51:
+				case 52:
+				case 53:
 					o->LifeTime = 999999999;
 					o->MaxTails = 3;
 					Vector(0.5f, 0.5f, 0.9f, o->Light);
@@ -384,9 +371,8 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						break;
 					}
 					break;
-#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
-				case 55:	//아이템 업그레이드 14 15용 셋트이펙트1
-				case 56:	//아이템 업그레이드 14 15용 셋트이펙트2
+				case 55:
+				case 56:
 					{
 						o->Velocity = 0.f;
 						o->MaxTails = 8;
@@ -400,9 +386,8 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						}
 					}
 					break;
-#endif //LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
 #ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
-				case 57:	//아이템 업그레이드 14 15용 셋트이펙트2
+				case 57:
 					{
 						o->Velocity = 0.f;
 						o->MaxTails = iChaIndex;
@@ -440,10 +425,10 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					case 26:
 					case 27: Vector(0.8f, 0.5f, 1.0f, o->Light);break;
 					case 42: Vector(0.0f, 0.0f, 0.0f, o->Light); break;
-					case 43: Vector(2.5f, 0.0f, 0.0f, o->Light); break;	// 빨강
-					case 46: Vector(0.1f, 0.25f, 0.1f, o->Light); break;	// 초록 
+					case 43: Vector(2.5f, 0.0f, 0.0f, o->Light); break;
+					case 46: Vector(0.1f, 0.25f, 0.1f, o->Light); break;
 #ifdef ADD_SOCKET_ITEM
-					case 47: Vector(0.9f, 0.f, 0.f, o->Light); break;	// 데들이스테프 잔상(빨강)
+					case 47: Vector(0.9f, 0.f, 0.f, o->Light); break;
 #endif // ADD_SOCKET_ITEM
 					}					
 				}
@@ -463,7 +448,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->LifeTime = 30;
                     Vector((float)(rand()%64-32),-10.f,0.f,o->TargetPosition);
                 }
-                else if(o->SubType == 5) //  단순히 위로 올라간다.
+                else if(o->SubType == 5)
                 {
                     o->Scale += rand()%10-5;
 					o->Velocity = (float)(rand()%20+6);
@@ -901,9 +886,8 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						o->Position[0] += (float)(rand()%300-150);
 						o->Position[1] += (float)(rand()%300-150);
 
-						// 라글 모델 생성.
-						float fRargleScale = o->Scale / 70.f;	// 모델 크기는 꼬리 크기에 비례.
-						if (0.9f <= fRargleScale)	// 0.9f 이상만 라글 모델 생성.
+						float fRargleScale = o->Scale / 70.f;
+						if (0.9f <= fRargleScale)
 						{
 							vec3_t vLight;
 							Vector(0.0f, 0.0f, 0.1f, vLight);
@@ -1015,10 +999,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						Vector( 0.1f, 0.3f, 1.0f, o->Light);
 					}
 					break;
-					
-					/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					
-					//^ 펜릴 이펙트 관련
 				case MODEL_FENRIR_SKILL_THUNDER:
 					o->Scale    = Scale;
 					o->MaxTails = MAX_TAILS;
@@ -1026,52 +1006,50 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->LifeTime = 20;
 					o->bTileMapping = true;
 					
-					if(o->SubType == 0)	// 검정
+					if(o->SubType == 0)
 					{
 						o->TexType = BITMAP_JOINT_THUNDER;
 						Vector ( 0.7f, 1.0f, 0.7f, o->Light );
 					}
-					else if(o->SubType == 1)	// 빨강
+					else if(o->SubType == 1)
 					{
 						o->TexType = BITMAP_JOINT_THUNDER;
 						Vector ( 1.0f, 0.6f, 0.6f, o->Light );
 					}
-					else if(o->SubType == 2)	// 파랑
+					else if(o->SubType == 2)
 					{
 						o->TexType = BITMAP_JOINT_THUNDER;
 						Vector ( 0.7f, 0.7f, 1.0f, o->Light );
 					}
-					else if(o->SubType == 3)	// 노랑
+					else if(o->SubType == 3)
 					{
 						o->TexType = BITMAP_JOINT_THUNDER;
 						Vector ( 0.9f, 0.9f, 0.3f, o->Light );
 					}
-					else if(o->SubType == 4)	// 검정
+					else if(o->SubType == 4)
 					{
 						o->TexType = BITMAP_FLASH;
 						Vector ( 0.1f, 0.8f, 0.1f, o->Light );
 					}
-					else if(o->SubType == 5)	// 빨강
+					else if(o->SubType == 5)
 					{
 						o->TexType = BITMAP_FLASH;
 						Vector ( 1.0f, 0.3f, 0.2f, o->Light );
 					}
-					else if(o->SubType == 6)	// 블루
+					else if(o->SubType == 6)
 					{
 						o->TexType = BITMAP_FLASH;
 						Vector ( 0.2f, 0.3f, 1.0f, o->Light );
 					}
-					else if(o->SubType == 7)	// 골드
+					else if(o->SubType == 7)
 					{
 						o->TexType = BITMAP_FLASH;
 						Vector ( 0.8f, 0.8f, 0.1f, o->Light );
 					}
 					break;
-					
-					////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					
 				case BITMAP_JOINT_LASER+1:
 					o->bTileMapping = true;
+					break;
 				case BITMAP_BLUR+1:
 					o->Scale    = 60.f;
 					o->Velocity = 40.f;
@@ -1125,7 +1103,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						Models[MODEL_PLAYER].TransformPosition(o->Target->BoneTransform[33],BitePosition,o->TargetPosition,true);
 						break;
 						
-					case 3 :    //  제자리에 원형으로 전기효과로 사용.
+					case 3:
 						o->Velocity = SkillIndex;
 						o->PKKey    = -1;
 						o->LifeTime = PKKey;
@@ -1134,7 +1112,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						VectorCopy(o->Position,o->StartPosition);
 						break;
 						
-					case 4 :    //  전격 마법.
+					case 4:
 						o->Velocity = 60.f;
 						o->LifeTime = 20;
 						o->MaxTails = 10;
@@ -1144,7 +1122,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						VectorCopy(o->Position,o->StartPosition);
 						break;
 						
-					case 5 :    //  
+					case 5:
 						o->Velocity = -60.f;
 						o->LifeTime = 20;
 						o->MaxTails = 10;
@@ -1155,7 +1133,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						o->TargetPosition[2] += 600.f;
 						break;
 						
-					case 6 :    //  벼락.
+					case 6:
 						o->LifeTime = rand()%20+6;
 						o->m_bCreateTails = false;
 						o->Velocity = 15.f+(float)(rand()%10);
@@ -1166,7 +1144,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						VectorCopy(o->Position,o->StartPosition);
 						break;
 						
-					case 7 :    //  짧은 두 위치 연결 번개.
+					case 7:
 						o->bTileMapping = TRUE;
 						o->Velocity = 5.f;
 						o->MaxTails = 3;
@@ -1177,7 +1155,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						MoveHumming(o->Position,o->Angle,o->TargetPosition,360.f);
 						break;
 						
-					case 8 :    //  전기 스파크.
+					case 8:
 						o->Scale    = 5.f;
 						o->Velocity = (float)(rand()%10+6);
 						o->LifeTime = rand()%8+8;
@@ -1185,7 +1163,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						Vector(1.f,1.f,1.f,o->Light);
 						break;
 						
-					case 9 :    //  넓은 두 위치 연결 번개.
+					case 9:
 						{
 							o->Velocity = 80.f+(float)(rand()%20);
 							o->LifeTime = 30;
@@ -1197,7 +1175,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						}
 						break;
 						
-					case 10 :   // 
+					case 10:
 						{
 							o->bTileMapping = TRUE;
 							o->LifeTime = 0;
@@ -1397,7 +1375,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->Light[2] = ( float)o->MaxTails;
                     VectorCopy ( o->Position, o->StartPosition );
                 }
-                else if ( o->SubType==1 || o->SubType==2 || o->SubType==3 || o->SubType==5 || o->SubType==6 || o->SubType == 7 ) //  위에서 아래로 번개가 내려친다.
+                else if ( o->SubType==1 || o->SubType==2 || o->SubType==3 || o->SubType==5 || o->SubType==6 || o->SubType == 7 )
 				{
                     o->MaxTails = MAX_TAILS;
                     o->LifeTime = 20;
@@ -1433,15 +1411,15 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						o->Position[2] += 700.f;
                     }
                 }
-                else if ( o->SubType==4 )   //  시작위치에서 목표위치로 번개가 연결된다.
+                else if ( o->SubType==4 )
                 {
                     o->MaxTails = MAX_TAILS;
                     o->LifeTime = 20;
                     o->m_bCreateTails = false;
                     o->byOnlyOneRender= 2;
-                    o->TargetIndex[0] = (int)(o->MaxTails/1.5f);        //  처음 생성한 고리 갯수. 나머지는 다음에 생성.
+                    o->TargetIndex[0] = (int)(o->MaxTails/1.5f);
                     o->TargetIndex[1] = o->MaxTails-1;
-                    o->StartPosition[0] = (float)( 1.f/o->MaxTails );   //  처음 위치 간격을 위한 단계값.
+                    o->StartPosition[0] = (float)( 1.f/o->MaxTails );
                     o->StartPosition[1] = (float)( 1.f/(o->MaxTails-o->TargetIndex[0]-1) );
                     Vector ( 0.f, 0.f, 0.f, o->Angle );
                     Vector ( 1.f, 0.8f, 1.f, o->Light );
@@ -1540,7 +1518,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->Scale    = rand()%20+20.f;
                     o->LifeTime = 25;
                 }
-#ifdef PJH_SEASON4_FIX_MULTI_SHOT
 				else
 				if( o->SubType == 1)
 				{
@@ -1549,11 +1526,10 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->LifeTime = rand()%10+8;
 					o->MaxTails = 4;
 				}
-#endif //PJH_SEASON4_FIX_MULTI_SHOT
 				Vector(1.f,1.f,1.f,o->Light);
 				VectorCopy(o->Position,o->TargetPosition);
                 break;
-			case MODEL_SPEARSKILL:	// 방어막
+			case MODEL_SPEARSKILL:
 				VectorCopy( o->Target->Position, o->TargetPosition);
 				switch ( o->SubType)
 				{
@@ -1564,7 +1540,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->TexType  = BITMAP_FLARE_BLUE;
 					break;
                 case 4:
-				case 9:	//^ 펜릴 이펙트 관련(방어력향상)
+				case 9:
 					Vector(.4f,.8f,.2f,o->Light);
 					o->LifeTime = 10000;//30 * 24;
 					o->MaxTails = 30;
@@ -1608,26 +1584,26 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->MaxTails = 30;
                     o->TexType  = BITMAP_JOINT_SPIRIT;
                     break;
-                case 5:     //  배틀마스터의 마법 해제용 효과.
-                case 6:     //  배틀마스터의 마법 해제용 효과.
-                case 7:     //  배틀마스터의 마법 해제용 효과.
+                case 5:
+                case 6:
+                case 7:
                     o->RenderFace = RENDER_FACE_ONE;
 					o->LifeTime = 60;
 					o->MaxTails = 30;
                     o->Weapon   = 0;
                     o->m_bCreateTails = false;
 					
-                    if ( o->SubType==5 )        //  물리 방어력 향상.
+                    if ( o->SubType==5 )
                     {
 						Vector ( 1.f, 1.f, 0.8f, o->Light );
 						o->TexType  = BITMAP_FLARE+1;
                     }
-                    else if ( o->SubType==6 )   //  공격력 향상.
+                    else if ( o->SubType==6 )
                     {
 						Vector ( 1.f, 0.8f, 1.f, o->Light );
 						o->TexType  = BITMAP_FLARE+1;
                     }
-                    else if ( o->SubType==7 )   //  방어력 향상.
+                    else if ( o->SubType==7 )
                     {
 						Vector ( 0.8f, 1.0f, 1.0f, o->Light );
 						o->TexType  = BITMAP_FLARE+1;
@@ -1635,7 +1611,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     Vector ( 0.f, 800.f, 0.f, o->Direction );
                     VectorCopy ( TargetPosition, o->StartPosition );
 					
-                    //  최소 위치 설정.
                     AngleMatrix ( o->Angle, Matrix );
                     VectorRotate ( o->Direction, Matrix, Position );
                     VectorAdd ( o->StartPosition, Position, o->Position );
@@ -1643,7 +1618,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->NumTails = -1;
                     CreateTail ( o, Matrix );
                     break;
-					//회색의 연기가 꼬여 올라간다.
 				case 8:
                     o->RenderFace = RENDER_FACE_ONE;
 					o->LifeTime = 40;
@@ -1659,13 +1633,13 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					VectorRotate( o->Direction, Matrix, Position);
 					VectorAdd( o->StartPosition, Position, o->Position );
 					break;
-				case 14:	// 소환 손목링
+				case 14:
 					VectorCopy(vPriorColor, o->Light);
 					o->LifeTime = 100;
 					o->MaxTails = 30;
                     o->TexType  = BITMAP_LIGHT;
 					break;
-				case 15:	// 소환수 꼬리
+				case 15:
 					Vector (1.0f, 1.0f, 1.0f, o->Light);
 					o->LifeTime = 100;
 					o->MaxTails = 20;
@@ -1679,7 +1653,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->TexType  = BITMAP_LIGHT;
                     break;
 #ifdef ASG_ADD_SUMMON_RARGLE
-				case 17:	// 소환수 라글 머리 꼬리
+				case 17:
 					Vector(0.7f, 0.2f, 1.f, o->Light);
 					o->LifeTime = 100;
 					o->MaxTails = 20;
@@ -1695,7 +1669,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                 o->LifeTime     = 100;
                 o->MaxTails     = 20;
                 o->Scale        = 10.f;
-                if( o->SubType==0 || o->SubType==18 )     //  자신의 주위를 돌면서 올라가는 빛줄기. ( 18: 다른 텍스쳐 ).
+                if( o->SubType==0 || o->SubType==18 )
                 {
                     if ( o->Type==BITMAP_FLARE && o->SubType==18 )
                     {
@@ -1715,7 +1689,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					
                     VectorCopy(o->Target->Light,o->Light);
                 }
-                else if ( o->SubType==20 )      //  부모의 위치로 따라간다.
+                else if ( o->SubType==20 )
                 {
                     if ( o->Target==NULL )
                     {
@@ -1734,7 +1708,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					Vector( 0.0f, 0.0f, 0.0f, p );
 					b->TransformPosition ( o->Target->BoneTransform[33], p, o->Position, true );
                 }
-                else if( o->SubType==10 )     //  자신의 주위를 돌면서 올라가는 빛줄기. 위에서 아래로.
+                else if( o->SubType==10 )
                 {
                     o->Scale = Scale;
                     o->Direction[2] = (rand()%150)/100.f;
@@ -1752,7 +1726,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					
                     VectorCopy(o->Target->Light,o->Light);
                 }
-				else if ( o->SubType==14 || o->SubType==15 )	//	돌다가 사라짐. 임팩트 있게.
+				else if ( o->SubType==14 || o->SubType==15 )
 				{
                     o->RenderType = RENDER_TYPE_ALPHA_BLEND_OTHER;
                     o->Scale   = Scale;
@@ -1772,7 +1746,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					
                     o->Position[2] += rand()%25;
 				}
-                else if ( o->SubType==16 )      //  빛에 생겼다가 사라진다.
+                else if ( o->SubType==16 )
                 {
                     o->LifeTime = 60;
                     o->m_bCreateTails = false;
@@ -1786,7 +1760,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                         CreateTail ( o, Matrix );
                     }
                 }
-                else if ( o->SubType==17 )      //  다크홀스의 발에 붙이다. 기의 흐름.
+                else if ( o->SubType==17 )
                 {
                     o->Position[0] += rand()%500-500;
                     o->Position[1] += rand()%500-500;
@@ -1800,9 +1774,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					
 					Vector(0.f,0.f,1.f,o->Light);
                 }
-                else if(o->SubType==2 || o->SubType==24 
-					|| o->SubType == 50 || o->SubType == 51
-					)  //  위로 올라가는 빛줄기.
+                else if(o->SubType==2 || o->SubType==24 || o->SubType == 50 || o->SubType == 51	)
                 {
 					if(o->SubType == 24)
 						o->TexType = BITMAP_FLARE_RED;
@@ -1816,7 +1788,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						Vector(1.f,1.f,1.f,o->Light);
                 }
 #ifdef GUILD_WAR_EVENT
-                else if(o->SubType==21)  //  캐릭터 주변에서 여러 가지 빛깔로 올라간다. 전체 효과
+                else if(o->SubType==21)
                 {
                     o->Direction[2] = (float)(rand()%20+35);
                     o->Scale    = Scale;
@@ -1825,7 +1797,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Light[1] = 0.5f + (float)(rand() % 127) / 255.f;
 					o->Light[2] = 0.5f + (float)(rand() % 127) / 255.f;
 				}
-				else if(o->SubType==22) //   캐릭터 주변에서 따라다니며 돈다.
+				else if(o->SubType==22)
 				{
 					VectorCopy(o->Target->Position, o->StartPosition);
                     o->Direction[2] = (float)(rand()%20+35);
@@ -1847,7 +1819,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Direction[2] = 0.f;					
 				}
 #endif //GUILD_WAR_EVENT
-				//자신 주위에서 조용히 계속해서 올라오는 빛
+
 				else if(o->SubType==41)
 				{
 					o->Scale = Scale;
@@ -1858,7 +1830,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					Vector(1.f - rbias, 1.f - gbias, 1.f, o->Light);
 					o->Direction[2] = (float)(rand()%5+5);
 				}
-				//캐릭터 주변을 돌면서 랜덤으로 41번 이펙트를 계속 발생시킨다.
 				else if(o->SubType==42)
 				{
 					o->Direction[1] = -15.f;
@@ -1871,7 +1842,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Scale = Scale;
 					Vector(1.f,1.f,1.f, o->Light);
 				}
-                else if ( o->SubType==19 )  //  위에서 아래로 내려오는 빛.
+                else if ( o->SubType==19 )
                 {
                     o->Direction[2] = -(float)(rand()%20+35);
                     o->Scale    = Scale;
@@ -1879,7 +1850,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					
 					Vector ( 1.f, 1.f, 1.f, o->Light );
                 }
-                else if(o->SubType==3)  //  자신의 각도에 직선 이동하는 빛줄기.
+                else if(o->SubType==3)
                 {
                     o->Velocity = 50.f;
                     o->Scale    = Scale;
@@ -1900,7 +1871,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->Angle[1] *= -1.f;
                     o->Angle[2] *= -1.f;
                 }
-				else if ( o->SubType == 4 || o->SubType==6 || o->SubType == 12)	// 꼬깔모양
+				else if ( o->SubType == 4 || o->SubType==6 || o->SubType == 12)
 				{
 					o->Scale = Scale;
 					if ( o->SubType == 12)
@@ -1940,7 +1911,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						o->Direction[2] = -2.0f * ( float)cosf( -o->Angle[2]*Q_PI/180.0f);
                     }
 				}
-				else if ( o->SubType == 5)	// 내려가는 모양
+				else if ( o->SubType == 5)
 				{
 					o->LifeTime = 2;
 					o->MaxTails = 3;
@@ -1948,11 +1919,11 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					
 					Vector(1.f,1.f,1.f,o->Light);
 				}
-				else if ( o->SubType == 7)	// 수정
+				else if ( o->SubType == 7)
 				{
 					Vector(0.2f,0.2f,1.0f,o->Light);
-					o->MultiUse = rand()%10;	// 어떤 것은 더 빨리 터지게 하기
-					o->LifeTime = 30 + o->MultiUse;	// 어떤 것은 더 빨리 터지게 하기
+					o->MultiUse = rand()%10;
+					o->LifeTime = 30 + o->MultiUse;
 					o->MaxTails = 15;
 					o->Direction[0] = ( float)( rand() % 3000);
 					o->Scale        = 30.f;
@@ -2075,8 +2046,8 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 				if(o->SubType == 47)
 				{
 					Vector(0.7f,0.7f,1.0f,o->Light);
-					o->MultiUse = rand()%10;	// 어떤 것은 더 빨리 터지게 하기
-					o->LifeTime = 30 + o->MultiUse;	// 어떤 것은 더 빨리 터지게 하기
+					o->MultiUse = rand()%10;
+					o->LifeTime = 30 + o->MultiUse;
 					o->MaxTails = 15;
 					o->Direction[0] = ( float)( rand() % 3000);
 					o->Scale        = 30.f;
@@ -2088,10 +2059,8 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                 }
 				VectorCopy(TargetPosition,o->TargetPosition);
                 break;
-				
-				//////////////////////////////////////////////////////////////////////////
-				
-					case BITMAP_FLARE+1:    //  꼬여 나가는 광선.
+						
+					case BITMAP_FLARE+1:
 						o->LifeTime     = PKKey;
 						o->PKKey        = 0;
 						o->MaxTails     = MAX_TAILS;
@@ -2107,7 +2076,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							Vector(1.f,0.5f,0.f,o->Light);
 							break;
 #ifdef CRYINGWOLF_2NDMVP
-						case 3:		// Target의 라이트값을 따른다.
+						case 3:
 							o->Scale = 20.f;
 							VectorCopy(Target->Light, o->Light);
 							break;
@@ -3176,7 +3145,7 @@ void MoveJoint( JOINT *o, int iIndex)
 		case 24:
 		case 25:
 #ifdef ADD_SOCKET_ITEM
-		case 47:			// 데들리스태프 잔상
+		case 47:
 #endif // ADD_SOCKET_ITEM
 #ifdef ASG_ADD_SUMMON_RARGLE
 		case 48:
@@ -3187,12 +3156,10 @@ void MoveJoint( JOINT *o, int iIndex)
 		case 53:
 		case 54:
 #endif	// ASG_ADD_SUMMON_RARGLE
-#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
 		case 55:
 		case 56:
-#endif //LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
 #ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
-		case 57:	//아이템 업그레이드 14 15용 셋트이펙트2
+		case 57:
 #endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
 
 			if(!o->Target->Live)
@@ -3266,14 +3233,12 @@ void MoveJoint( JOINT *o, int iIndex)
 			case 33:
 				VectorCopy(o->Target->EyeRight3,o->Position);
 				break;
-#ifdef LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
 			case 55:
 				VectorCopy(o->Target->EyeLeft,o->Position);
 				break;
 			case 56:
  				VectorCopy(o->Target->EyeRight,o->Position);
 				break;
-#endif //LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT
 #ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
 			case 57:
 				Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,
@@ -3284,48 +3249,36 @@ void MoveJoint( JOINT *o, int iIndex)
 #endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
 #ifdef ASG_ADD_SUMMON_RARGLE
 			case 48:
-				// 애니메이션이 있는 모델에서 본위치를 구하기 위해서는 아래와 같이
-				//강제적으로 애니메이션 함수를 호출.
 				Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,
 					o->Target->PriorAnimationFrame, o->Target->PriorAction, o->Target->Angle,
 					o->Target->HeadAngle, false, false);
 				Models[o->Target->Type].TransformByObjectBone(o->Position, o->Target, 24);
 				break;
 			case 49:
-				// 애니메이션이 있는 모델에서 본위치를 구하기 위해서는 아래와 같이
-				//강제적으로 애니메이션 함수를 호출.
 				Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,
 					o->Target->PriorAnimationFrame, o->Target->PriorAction, o->Target->Angle,
 					o->Target->HeadAngle, false, false);
 				Models[o->Target->Type].TransformByObjectBone(o->Position, o->Target, 28);
 				break;
 			case 50:
-				// 애니메이션이 있는 모델에서 본위치를 구하기 위해서는 아래와 같이
-				//강제적으로 애니메이션 함수를 호출.
 				Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,
 					o->Target->PriorAnimationFrame, o->Target->PriorAction, o->Target->Angle,
 					o->Target->HeadAngle, false, false);
 				Models[o->Target->Type].TransformByObjectBone(o->Position, o->Target, 32);
 				break;
 			case 51:
-				// 애니메이션이 있는 모델에서 본위치를 구하기 위해서는 아래와 같이
-				//강제적으로 애니메이션 함수를 호출.
 				Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,
 					o->Target->PriorAnimationFrame, o->Target->PriorAction, o->Target->Angle,
 					o->Target->HeadAngle, false, false);
 				Models[o->Target->Type].TransformByObjectBone(o->Position, o->Target, 44);
 				break;
 			case 52:
-				// 애니메이션이 있는 모델에서 본위치를 구하기 위해서는 아래와 같이
-				//강제적으로 애니메이션 함수를 호출.
 				Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,
 					o->Target->PriorAnimationFrame, o->Target->PriorAction, o->Target->Angle,
 					o->Target->HeadAngle, false, false);
 				Models[o->Target->Type].TransformByObjectBone(o->Position, o->Target, 48);
 				break;
 			case 53:
-				// 애니메이션이 있는 모델에서 본위치를 구하기 위해서는 아래와 같이
-				//강제적으로 애니메이션 함수를 호출.
 				Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,
 					o->Target->PriorAnimationFrame, o->Target->PriorAction, o->Target->Angle,
 					o->Target->HeadAngle, false, false);
@@ -3518,7 +3471,7 @@ void MoveJoint( JOINT *o, int iIndex)
 							PlayBuffer(SOUND_GET_ENERGY);
 						}
 						else if ( Distance <= 70.0f && fabs( fOldAngle - o->Angle[2]) > 20.0f)
-						{	// 거리가 가깝고 회전 각이 크면 속도를 줄인다.
+						{
 							if(o->Velocity >= 20.f)
 								o->Velocity -= 10.f;
 						}
@@ -3633,14 +3586,10 @@ void MoveJoint( JOINT *o, int iIndex)
 				}
 				
 				Luminosity = (float)(rand()%4+8)*0.03f;
-				// 빨강
 				Vector(Luminosity*1.0f,Luminosity*0.4,Luminosity*0.3f,Light);
-				// 파랑
 				//Vector(Luminosity*0.3f,Luminosity*0.4,Luminosity*1.0f,Light);
 				AddTerrainLight(o->Position[0],o->Position[1],Light,1,PrimaryTerrainLight);
 				
-				// 빨강
-				// 캐넌 몸통
 				float fLumi;
 				vec3_t vPos, vLight;
 				VectorCopy(o->Position, vPos);
@@ -3651,15 +3600,12 @@ void MoveJoint( JOINT *o, int iIndex)
 				Vector(2.0f+(rand()%10)*0.03f, 0.4f+(rand()%10)*0.03f, 0.4f+(rand()%10)*0.03f, vLight);
 				CreateSprite(BITMAP_LIGHT,vPos,2.0f,vLight,NULL,-(WorldTime*0.1f));
 				CreateSprite(BITMAP_LIGHT,vPos,2.0f,vLight,NULL,(WorldTime*0.12f));
-				// 꼬리 연기
 				Vector(1.0f, 0.6f ,0.4f, vLight);
 				CreateParticle(BITMAP_SMOKE,vPos,o->Angle,vLight, 31, 1.0f);
 			}
 			break;
 		}
 		break;
-		
-		//////////////////////////////////////////////////////////////////////////
 		
 	case BITMAP_JOINT_HEALING:
         if(o->SubType == 4)
@@ -3672,7 +3618,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			Luminosity = (12-o->LifeTime)*0.1f;
             Vector(Luminosity*0.4f,Luminosity*0.6f,Luminosity*1.f,o->Light);
         }
-        else if(o->SubType == 5)  //  단순히 위로 올라간다.
+        else if(o->SubType == 5)
         {
 			Luminosity = (12-o->LifeTime)*0.1f;
 			Vector(Luminosity*0.4f,Luminosity*0.6f,Luminosity*1.f,o->Light);
@@ -4353,7 +4299,6 @@ void MoveJoint( JOINT *o, int iIndex)
 				Luminosity = 1.0f;
 			Vector(0.7f*Luminosity, 0.7f*Luminosity, 0.9f*Luminosity, o->Light);
 
-		// 라글 모델의 위치와 각도 변경.
 			if (o->Target != NULL)
 			{
 				VectorCopy(o->Position, o->Target->Position);
@@ -4622,11 +4567,8 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
 #endif // CSK_LUCKY_SEAL
 			
-            if ( o->SubType==4 
-				|| o->SubType == 9	//^ 펜릴 이펙트 관련(방어력향상)
-				)
+            if ( o->SubType==4 || o->SubType == 9)
             {
-                //  방향중.
 				if( g_isCharacterBuff(o->Target, eBuff_Defense ) || g_isCharacterBuff(o->Target, eBuff_HelpNpc ) )
 				{
 					o->LifeTime = 100;
@@ -4639,12 +4581,12 @@ void MoveJoint( JOINT *o, int iIndex)
 				}
             }
 			
-			if ( 0 == o->SubType || o->SubType==4 || o->SubType == 9	//^ 펜릴 이펙트 관련(방어력향상)
+			if ( 0 == o->SubType || o->SubType==4 || o->SubType == 9
 #ifdef CSK_LUCKY_SEAL
 				|| o->SubType == 10 || o->SubType == 11
 #endif // CSK_LUCKY_SEAL
-				|| o->SubType == 14	// 소환 손목링
-				|| o->SubType == 16 // 마우스 클릭 이동 할 위치 이팩트
+				|| o->SubType == 14
+				|| o->SubType == 16
 				)
 			{
 				for(int j=o->NumTails-1;j>=0;j--)
@@ -4654,7 +4596,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				}
 			}
 			
-			if (o->SubType == 14)	// 소환 손목링
+			if (o->SubType == 14)
 			{
 				vec3_t vRelative;
 				Vector(0, 0, 0, vRelative);
@@ -4695,11 +4637,11 @@ void MoveJoint( JOINT *o, int iIndex)
 				o->TargetPosition[2] += 10.f;
 			}
 			
-			if ( 0 == o->SubType || o->SubType==4 || o->SubType == 9	//^ 펜릴 이펙트 관련(방어력향상)
+			if ( 0 == o->SubType || o->SubType==4 || o->SubType == 9
 #ifdef CSK_LUCKY_SEAL
 				|| o->SubType == 10 || o->SubType == 11
 #endif // CSK_LUCKY_SEAL
-				|| o->SubType == 14	// 소환 손목링
+				|| o->SubType == 14
 				|| o->SubType == 16 
 				)
 			{
@@ -4714,8 +4656,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			iFrame = ( ( iIndex % 2) ? iFrame : -iFrame) + iIndex * 53731;
 			
 			vec3_t vDir, vDirTemp;
-			// 굴리기
-			//float fSpeed[3] = { 0.097f, 0.1213f, 0.2313f};
 			float fSpeed[3] = { 0.048f, 0.0613f, 0.1113f};
 			if ( o->SubType == 1)
 			{
@@ -4726,7 +4666,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			vDirTemp[0] = sinf( ( float)( iFrame+55555)*fSpeed[0]) * cosf( ( float)iFrame*fSpeed[1]);
 			vDirTemp[1] = sinf( ( float)( iFrame+55555)*fSpeed[0]) * sinf( ( float)iFrame*fSpeed[1]);
 			vDirTemp[2] = cosf( ( float)( iFrame+55555)*fSpeed[0]);
-			// 한번 더 굴리기
+
 			float fSinAdd = sinf( ( float)( iFrame+11111)*fSpeed[2]);
 			float fCosAdd = cosf( ( float)( iFrame+11111)*fSpeed[2]);
 			vDir[2] = vDirTemp[0];
@@ -4741,7 +4681,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				o->Position[1] = o->TargetPosition[1] + vDir[1] * 80.0f;// + ( float)( rand() % 11 - 5);
 				o->Position[2] = 110.0f + o->TargetPosition[2] + vDir[2] * 120.0f;
 				break;
-			case 9:	//^ 펜릴 이펙트 관련(방어력향상)
+			case 9:
 				o->Position[0] = o->TargetPosition[0] + vDir[0] * 80.0f;// + ( float)( rand() % 11 - 5);
 				o->Position[1] = o->TargetPosition[1] + vDir[1] * 80.0f;// + ( float)( rand() % 11 - 5);
 				o->Position[2] = 140.0f + o->TargetPosition[2] + vDir[2] * 120.0f;
@@ -4788,12 +4728,12 @@ void MoveJoint( JOINT *o, int iIndex)
 					o->Position[2] = o->TargetPosition[2] + vDir[2] * 15.0f;
 				}
 				break;
-			case 15:	// 소환수 꼬리
+			case 15:
 				if(o->Target != NULL)
 				{
 					if(o->Target->Live)
 					{
-						o->LifeTime = 100.f; //무한
+						o->LifeTime = 100.f;
 						Vector(o->Target->Alpha, o->Target->Alpha, o->Target->Alpha, o->Light);
 					}
 					else
@@ -4820,7 +4760,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				{
 					if(o->Target->Live)
 					{
-						o->LifeTime = 100.f; //무한
+						o->LifeTime = 100.f;
 					}
 					else
 					{
@@ -4834,22 +4774,12 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
 		}
 		break;
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	case BITMAP_SMOKE:
-		if ( o->Target!=NULL && o->Target->Live &&
-			( o->Target->Type== MODEL_MAYASTONE1
-			|| o->Target->Type== MODEL_MAYASTONE2
-			|| o->Target->Type== MODEL_MAYASTONE3
-			|| o->Target->Type==MODEL_FIRE)
-			)
+		if ( o->Target!=NULL && o->Target->Live && ( o->Target->Type== MODEL_MAYASTONE1	|| o->Target->Type== MODEL_MAYASTONE2 || o->Target->Type== MODEL_MAYASTONE3	|| o->Target->Type==MODEL_FIRE))
 		{
 			VectorCopy ( o->Target->Position, o->Position );
 		}
 		break;
-		
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		//^ 펜릴 이펙트 관련
 	case MODEL_FENRIR_SKILL_THUNDER:
 		for(int j=0; j<o->MaxTails; j++)
 		{
@@ -4898,9 +4828,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			VectorAdd(o->Position,p,o->Position);
 		}
 		break;
-		
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		
     case BITMAP_BLUR+1:
 	case BITMAP_JOINT_LASER+1:
 
@@ -4966,9 +4893,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			VectorAdd(o->Position,p,o->Position);
 		}
 		break;
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		
 	case BITMAP_JOINT_THUNDER:
         if( ( o->SubType == 6 && o->LifeTime > 4 ) || o->SubType == 8 ) 
 			break;
@@ -4976,7 +4900,7 @@ void MoveJoint( JOINT *o, int iIndex)
         switch( o->SubType )
         {
         case 4:
-        case 5://  전격 마법.
+        case 5:
             VectorCopy(o->TargetPosition,o->Position);
 			if ( o->SubType==4 )
             {
@@ -5082,35 +5006,30 @@ void MoveJoint( JOINT *o, int iIndex)
 				Distance = MoveHumming(o->Position,o->Angle,o->TargetPosition, 100.f);
                 break;
 				// ChainLighting
-			case 22:		// 왼손
-			case 23:		// 오른손
-			case 24:		// 몬스터
+			case 22:
+			case 23:
+			case 24:
 				{
-					// o : 라이트닝 오브젝트
-					// o->Target : 주인공 오브젝트
 					if( o->Target )
 					{
 						if(j == 0)			// ????
 						{	
-							OBJECT* pSourceObj = o->Target;			// 주인공 오브젝트
+							OBJECT* pSourceObj = o->Target;
 							CHARACTER* pTargetChar = &CharactersClient[FindCharacterIndex(o->m_sTargetIndex)];
-							OBJECT* pTargetObj = &pTargetChar->Object;	// 타겟 오브젝트
+							OBJECT* pTargetObj = &pTargetChar->Object;
 							vec3_t vRelativePos, vPos, vAngle;
 							BMD *pModel = &Models[pSourceObj->Type];
 							Vector(0.f, 0.f, 0.f, vRelativePos );
 							if(o->SubType == 22)
 							{
-								// 왼손
 								pModel->TransformPosition( pSourceObj->BoneTransform[37], vRelativePos, vPos, true);
 							}
 							else if(o->SubType == 23)
 							{
-								// 오른손
 								pModel->TransformPosition( pSourceObj->BoneTransform[28], vRelativePos, vPos, true);
 							}
 							else if( o->SubType == 24)
 							{
-								// 몬스터
 								VectorCopy( pSourceObj->Position, vPos );
 								vPos[2] += 80.0f;
 							}
@@ -5123,10 +5042,9 @@ void MoveJoint( JOINT *o, int iIndex)
 							CreateTail(o, fMatrix);
 							
 							
-							VectorCopy( vPos, o->Position );						// 주인공 포지션
-							VectorCopy( pTargetObj->Position, o->TargetPosition);	// 몬스터 포지션
+							VectorCopy( vPos, o->Position );
+							VectorCopy( pTargetObj->Position, o->TargetPosition);
 							
-							// 몬스터의 좌표에서 위로 조금 올려준다.
 							o->TargetPosition[2] += 80.f;
 						}
 						
@@ -5138,7 +5056,7 @@ void MoveJoint( JOINT *o, int iIndex)
 					}
 				}
 				break;
-			case 25:			// 라이트닝스킬에 맞은 캐릭터의 이팩트 지글지글
+			case 25:
 				{
 					if ( o->Target )
 					{
@@ -5164,20 +5082,20 @@ void MoveJoint( JOINT *o, int iIndex)
 				o->Direction[0] = (float)(rand()%256-128);
 				o->Direction[2] = (float)(rand()%256-128);
 			}
-            else if ( o->SubType==4 )   //  전격 마법 아래에서 위로.
+            else if ( o->SubType==4 )
             {
                 o->Direction[0] = (float)(rand()%64-32);
             }
-            else if ( o->SubType==5 )   //  전격 마법 위에서 아래로.
+            else if ( o->SubType==5 )
             {
                 o->Direction[0] = (float)(rand()%32-16);
             }
-			else if ( o->SubType==6 )   //  벼락.
+			else if ( o->SubType==6 )
             {
 				o->Direction[0] = (float)(rand()%100+20);
 				o->Direction[2] = (float)(rand()%100+20);
             }
-            else if ( o->SubType==7 )   //  .
+            else if ( o->SubType==7 )
             {
 				o->Direction[0] = (float)(rand()%100+20);
 				o->Direction[2] = (float)(rand()%100+20);
@@ -5230,42 +5148,26 @@ void MoveJoint( JOINT *o, int iIndex)
 						VectorAdd(Position,o->TargetPosition,Position);
 						CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,o->Light);
 					}
-					if(o->SubType==0
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-						|| o->SubType==27
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-						)
+					if(o->SubType==0 || o->SubType==27)
 					{
 						if((int)WorldTime%1000<500 && rand()%16==0) 
 						{
 							Vector((float)(rand()%100-50),(float)(rand()%100-50),(float)(rand()%120-60),Position);
 							VectorAdd(Position,o->TargetPosition,Position);
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 							CreateJoint(BITMAP_JOINT_THUNDER,Position,o->TargetPosition, o->Angle,28,o->Target, 6.0f+(float)(rand()%8),-1,0,0,0,o->Light);
-#else //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-							CreateJoint(BITMAP_JOINT_THUNDER,Position,o->TargetPosition,o->Angle,1,o->Target,6.f+(float)(rand()%8));
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 						}
 					}
 				}
 				break;
 			}
 			
-			// 바닥 번쩍이는 효과.
             if(o->Scale >= 50.f && o->SubType!=4 && o->SubType!=7 )
 			{
-				if(o->SubType==0 || o->SubType==11 || o->SubType==2	|| o->SubType==18
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-					|| o->SubType==27
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-					)
+				if(o->SubType==0 || o->SubType==11 || o->SubType==2	|| o->SubType==18 || o->SubType==27	)
 				{
 					Luminosity = (float)(rand()%4+4)*0.04f;
-					if(o->SubType==0 || o->SubType==11 || o->SubType==18
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-					|| o->SubType==27
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-						)
+
+					if(o->SubType==0 || o->SubType==11 || o->SubType==18 || o->SubType==27)
 					{
 						Vector(Luminosity*0.1f,Luminosity*0.1f,Luminosity*0.5f,Light);
 					}
@@ -5273,10 +5175,10 @@ void MoveJoint( JOINT *o, int iIndex)
 					{
 						Vector(Luminosity*0.4f,Luminosity*0.1f,Luminosity*0.1f,Light);
 					}
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
+
 					if(o->SubType==27)
 						VectorCopy(o->Light, Light);
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
+
 					AddTerrainLight(o->Position[0],o->Position[1],Light,2,PrimaryTerrainLight);
 				}
 			}
@@ -5285,7 +5187,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			VectorRotate(Position,Matrix,p);
 			VectorAdd(o->Position,p,o->Position);
 		}
-		if( o->SubType==7 && o->SubType == 18)
+		if( o->SubType==7 || o->SubType == 18)
         {
             VectorCopy( o->TargetPosition, o->Position );
         }
@@ -5329,9 +5231,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
 		}
 		break;
-		
-		//////////////////////////////////////////////////////////////////////////
-		
 	case BITMAP_JOINT_THUNDER+1:
         if ( o->SubType==0 )
         {
@@ -5357,13 +5256,9 @@ void MoveJoint( JOINT *o, int iIndex)
 					CreateTail(o,Matrix);
 					
 					Vector(0.f,-o->Velocity,0.f,p);
-#ifdef KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 					vec3_t vTempPos;
 					VectorCopy(p, vTempPos);
 					VectorRotate(vTempPos,Matrix,p);
-#else // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
-					VectorRotate(p,Matrix,p);
-#endif // KJH_FIX_THUNDER_EFFECT_IN_IKARUS
 					VectorAdd(o->Position,p,o->Position);
 				}
             }
@@ -5441,7 +5336,7 @@ void MoveJoint( JOINT *o, int iIndex)
                 CreateParticle ( BITMAP_TRUE_BLUE, o->TargetPosition, o->Angle, Light, 0, 2.0f );
             }
         }
-        else if ( o->SubType==4 )   //  시작위치에서 목표위치로 연결되는 번개.
+        else if ( o->SubType==4 )
         {
             if ( o->Target!=NULL )
             {
@@ -5449,7 +5344,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				AngleMatrix ( o->Angle, Matrix );
 				
                 VectorSubtract ( o->TargetPosition, o->Position, Position );
-                VectorScale ( Position, o->StartPosition[0], Position );        //  반복된 이동 간격 Vector.
+                VectorScale ( Position, o->StartPosition[0], Position );
 
                 for ( int i=0; i<o->TargetIndex[0]; ++i )
                 {
@@ -5459,11 +5354,11 @@ void MoveJoint( JOINT *o, int iIndex)
                     o->Position[1] += rand()%20-10;
                     o->Position[2] += rand()%20-10;
                 }
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
                 float width = o->TargetIndex[1]/2.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
                 VectorSubtract ( o->TargetPosition, o->Position, Position );
-                VectorScale ( Position, o->StartPosition[1], Position );        //  2번째 반복되는 이동 간격 Vector.
+                VectorScale ( Position, o->StartPosition[1], Position );
 
                 for ( int i=o->TargetIndex[0]; i<o->TargetIndex[1]; ++i )
                 {
@@ -5734,9 +5629,7 @@ void MoveJoint( JOINT *o, int iIndex)
                 o->Direction[2] += (rand()%200+200)/100.f;
             }
         }
-        else if( o->SubType==2 || o->SubType==24 
-			|| o->SubType == 50  || o->SubType == 51
-			)    //  아래에서 위로 올라가는 빛.
+        else if( o->SubType==2 || o->SubType==24 || o->SubType == 50  || o->SubType == 51)
         {
 			if( o->SubType == 51)
 			{
@@ -5745,9 +5638,7 @@ void MoveJoint( JOINT *o, int iIndex)
                 o->Position[1] = o->TargetPosition[1];
                 o->Position[2]+= o->Direction[2];
             }
-            if ( o->LifeTime<=25 
-				|| o->SubType == 50 
-				)
+            if ( o->LifeTime<=25 || o->SubType == 50 )
             {
 				o->Direction[2] += 5.f;
                 o->Position[0] = o->TargetPosition[0];
@@ -5756,7 +5647,7 @@ void MoveJoint( JOINT *o, int iIndex)
             }
         }
 #ifdef GUILD_WAR_EVENT
-        else if(o->SubType == 21)    //  아래에서 위로 올라가는 빛. 전체 범위
+        else if(o->SubType == 21)
         {
             if ( o->LifeTime<=25 )
             {
@@ -5766,7 +5657,7 @@ void MoveJoint( JOINT *o, int iIndex)
                 o->Position[2]+= o->Direction[2];
             }
         }
-		else if(o->SubType == 22)	//	캐릭터 주위
+		else if(o->SubType == 22)
 		{
             if ( o->LifeTime<=25 )
             {
@@ -5794,15 +5685,15 @@ void MoveJoint( JOINT *o, int iIndex)
 		else if(o->SubType == 42)
 		{
 			o->Angle[2] += 15.f;
+
 			if(o->Target->Live)
-				o->LifeTime = 100.f; //무한
+				o->LifeTime = 100.f;
 			else
 			{
 				DeleteJoint(BITMAP_FLARE, o->Target, 42);
 				break;
 			}
 			
-			//캐릭터 주변으로 빙글빙글
 			AngleMatrix(o->Angle, Matrix);
 			VectorRotate(o->Direction, Matrix, Position);
 			VectorAdd(o->StartPosition, Position, o->Position);
@@ -5816,7 +5707,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
 			AddTerrainLight(o->TargetPosition[0],o->TargetPosition[1],o->Light,2,PrimaryTerrainLight);
 		}
-        else if( o->SubType==19 )   //  위에서 아래로 내려오는 빛.
+        else if( o->SubType==19 )
         {
             if ( o->LifeTime<=25 )
             {
@@ -5826,13 +5717,8 @@ void MoveJoint( JOINT *o, int iIndex)
                 o->Position[2]+= o->Direction[2];
             }
         }
-        else if( o->SubType==3 )
-        {
-			//          o->Velocity += 20.f;
-        }
 		else if ( o->SubType==40)
 		{
-			//XY평면상의 방향을 따라 스프링처럼 움직인다.
 			static int lMax = o->LifeTime;
 			int radious = 50.f;
 			vec3_t vPos;
@@ -5859,14 +5745,12 @@ void MoveJoint( JOINT *o, int iIndex)
 			o->Position[1] += o->Direction[1] * 12;
 			VectorCopy(o->Position, o->TargetPosition);
 			
-			//스케일이 변한다.
 			o->Scale *= 1.1f;
-			//색깔이 변한다.
 			o->Light[0] = 0.5f + (float) (rand() % 64) / 255;
 			o->Light[1] = 0.5f + (float) (rand() % 64) / 255;
 			o->Light[2] = 0.5f + (float) (rand() % 128) / 255;		
 		}
-		else if ( o->SubType==4 || o->SubType==6 || o->SubType==12)	// 꼬깔모양
+		else if ( o->SubType==4 || o->SubType==6 || o->SubType==12)
 		{
             float count;
 			vec3_t vPos;
@@ -5910,18 +5794,9 @@ void MoveJoint( JOINT *o, int iIndex)
             o->Position[2]+= o->Direction[2];
 			o->Scale    = rand()%4+6.f;
         }
-		else if ( o->SubType == 7 || o->SubType==11 || o->SubType==25
-			|| o->SubType == 45 || o->SubType == 46
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-			|| o->SubType == 47
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-			)	// 수정
+		else if ( o->SubType == 7 || o->SubType==11 || o->SubType==25 || o->SubType == 45 || o->SubType == 46 || o->SubType == 47)
 		{
-            if ( o->SubType==11 
-#ifdef CRYINGWOLF_2NDMVP
-				|| o->SubType==25
-#endif // CRYINGWOLF_2NDMVP
-				)   //  홀리 사이트 보우 화살.
+            if ( o->SubType==11 || o->SubType==25)
             {
                 if ( o->Target->Live==false )
                 {
@@ -5936,7 +5811,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			iFrame = ( ( iIndex % 2) ? iFrame : -iFrame) + iIndex * 53731;
 			
 			vec3_t vDir, vDirTemp;
-			// 굴리기
 			//float fSpeed[3] = { 0.097f, 0.1213f, 0.2313f};
 			float fSpeed[3] = { 0.048f, 0.0613f, 0.1113f};
 			if ( o->SubType == 11 )
@@ -5948,7 +5822,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			vDirTemp[0] = sinf( ( float)( iFrame+55555)*fSpeed[0]) * cosf( ( float)iFrame*fSpeed[1]);
 			vDirTemp[1] = sinf( ( float)( iFrame+55555)*fSpeed[0]) * sinf( ( float)iFrame*fSpeed[1]);
 			vDirTemp[2] = cosf( ( float)( iFrame+55555)*fSpeed[0]);
-			// 한번 더 굴리기
+
 			float fSinAdd = sinf( ( float)( iFrame+11111)*fSpeed[2]);
 			float fCosAdd = cosf( ( float)( iFrame+11111)*fSpeed[2]);
 			vDir[2] = vDirTemp[0];
@@ -6002,11 +5876,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
 			
 			float fCircle;
-            if ( o->SubType==11 
-#ifdef CRYINGWOLF_2NDMVP
-				|| o->SubType==25
-#endif // CRYINGWOLF_2NDMVP
-				)   //  홀리 사이트 보우 화살.
+            if ( o->SubType==11 || o->SubType==25)
             {
                 fCircle = min( max( 0.f, fLife-10) * 5.f, 150.f);
             }
@@ -6023,19 +5893,13 @@ void MoveJoint( JOINT *o, int iIndex)
 			{
 				if ( o->SubType==11 )
 					fLastTarget = ( 100.f - fPos) * ( o->Target->StartPosition[k] + 25.f * cosf( ( float)( iIndex * 51231 + k * 3711 + iFrame/10) * 0.01f));
-#ifdef CRYINGWOLF_2NDMVP
 				else if (o->SubType==25)
 					fLastTarget = ( 100.f - fPos) * ( o->Target->StartPosition[k] + 25.f * cosf( ( float)( iIndex * 51231 + k * 3711 + iFrame/10) * 0.01f));
-#endif // CRYINGWOLF_2NDMVP
 				else
 					fLastTarget = ( 100.f - fPos) * ( o->Target->Position[k] + 25.f * cosf( ( float)( iIndex * 51231 + k * 3711 + iFrame/10) * 0.01f));
 				o->Position[k] = ( fPos * o->Position[k] + fLastTarget) * 0.01f;
 			}
-            if ( o->SubType!=11 
-#ifdef CRYINGWOLF_2NDMVP
-				&& o->SubType!=25
-#endif // CRYINGWOLF_2NDMVP
-				)
+            if ( o->SubType!=11	&& o->SubType!=25)
             {
 				o->Position[2] += 100.0f;
             }
@@ -6043,7 +5907,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			
 			vec3_t Light = { .5f, .5f, 1.0f};
 			
-            if ( o->SubType==11 )   //  홀리 사이트 보우 화살.
+            if ( o->SubType==11 )
             {
                 Vector ( 0.3f, 0.3f, 0.5f, Light );
                 if ( o->Skill==1 )
@@ -6052,26 +5916,22 @@ void MoveJoint( JOINT *o, int iIndex)
                     CheckClientArrow ( o->Target );
                 }
             }
-#ifdef CRYINGWOLF_2NDMVP
-			if ( o->SubType==25 )  // 발람용 관통 효과
+			if ( o->SubType==25 )
 			{
 				Vector ( 0.9f, 0.4f, 0.6f, Light );
 				if ( o->Skill==1 )
 				{
-					VectorCopy ( o->Position, o->Target->Position );		//. 관통을 위해
+					VectorCopy ( o->Position, o->Target->Position );
 					CheckClientArrow ( o->Target );
 				}
 			}
-#endif // CRYINGWOLF_2NDMVP
 			if(o->SubType == 45 && o->LifeTime <= 1)
 			{
 				CreateEffect(MODEL_CHANGE_UP_EFF,o->Target->Position,o->Target->Angle,o->Target->Light,1,o->Target);
 				CreateEffect(MODEL_CHANGE_UP_CYLINDER,o->Target->Position,o->Target->Angle,o->Target->Light,1,o->Target);
 			}
 			{
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 				if(o->SubType != 47)
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 				{
 					CreateSprite(BITMAP_SHINY+1,o->Position,(float)(rand()%2+8)*0.10f,Light,o->Target,(float)(rand()%360));
 					CreateSprite(BITMAP_LIGHT,o->Position,(float)(rand()%2+8)*0.18f,Light,o->Target,(float)(rand()%360));
@@ -6079,11 +5939,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				}
 			}
 			
-			if ( o->SubType!=11 && 1 == o->LifeTime && o->SubType != 45 && o->SubType != 46
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-				&& o->SubType != 47
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-				)
+			if ( o->SubType!=11 && 1 == o->LifeTime && o->SubType != 45 && o->SubType != 46	&& o->SubType != 47)
 			{
 				vec3_t Angle = { 0.0f, 0.0f, 0.0f};
 				vec3_t Light = { 1.f, 1.f, 1.f};
@@ -6276,7 +6132,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
 		}
 		
-		// 흐려지게 하기
 		if( o->SubType!=5 && o->SubType!=7 && o->SubType!=11 || ( o->SubType==14 || o->SubType==15 || o->SubType==16 ) )
 		{
 			if(o->LifeTime<10)
@@ -6287,7 +6142,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
 		}
 		
-        //  정지시.
         if( ( o->SubType==0 || o->SubType==10 || o->SubType==18 ) && o->Scale<40.f )
         {
             if(((o->Target->CurrentAction>=PLAYER_WALK_MALE && o->Target->CurrentAction<=PLAYER_RUN_RIDE_WEAPON) || 
@@ -6303,11 +6157,8 @@ void MoveJoint( JOINT *o, int iIndex)
             }
         }
         break;
-		
-		//////////////////////////////////////////////////////////////////////////
-		
-    case BITMAP_FLARE+1:    //  꼬여 나가는 광선.
-        if ( o->SubType==5 )    //  움직여서 타켓위치로 찾아 이동한다.  .  ( 속이빈 띠 )
+    case BITMAP_FLARE+1:
+        if ( o->SubType==5 )
         {
 			if(o->LifeTime>=25)
 			{
@@ -6325,7 +6176,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				Distance = MoveHumming(o->Position,o->Angle,Position,o->Velocity);
 				
 				if ( Distance <= 70.0f && fabs( fOldAngle - o->Angle[2]) > 20.0f)
-				{	// 거리가 가깝고 회전 각이 크면 속도를 줄인다.
+				{
 					if(o->Velocity >= 20.f)
 						o->Velocity -= 5.f;
 				}
@@ -6360,7 +6211,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				Distance = MoveHumming(o->Position,o->Angle,Position,o->Velocity);
 				
 				if ( Distance <= 70.0f && fabs( fOldAngle - o->Angle[2]) > 20.0f)
-				{	// 거리가 가깝고 회전 각이 크면 속도를 줄인다.
+				{
 					if(o->Velocity >= 20.f)
 						o->Velocity -= 10.f;
 				}
@@ -6376,7 +6227,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			Vector(Luminosity*1.0f,Luminosity*1.0f,Luminosity*1.0f,Light);
 			AddTerrainLight(o->Position[0],o->Position[1],Light,1,PrimaryTerrainLight);			
 		}
-        else if ( o->SubType==6 )   //  움직여서 타켓을 찾아 움직인다. 타켓은 Object.  ( 속이빈 띠 )
+        else if ( o->SubType==6 )
         {
             if ( o->Target!=NULL )
             {
@@ -6400,7 +6251,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				//					CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 35, 1.0f);
 				//박종훈테스트
 				if ( Distance <= 70.0f && fabs( fOldAngle - o->Angle[2]) > 20.0f)
-				{	// 거리가 가깝고 회전 각이 크면 속도를 줄인다.
+				{
 					if(o->Velocity >= 20.f)
 						o->Velocity -= 10.f;
 				}
@@ -6455,17 +6306,7 @@ void MoveJoint( JOINT *o, int iIndex)
                 o->Position[2] += o->MultiUse;
             }
         }
-        else if ( o->SubType==12 
-#ifdef CRYINGWOLF_2NDMVP
-			|| o->SubType==13
-#endif // CRYINGWOLF_2NDMVP
-			|| o->SubType==14
-			|| o->SubType==17
-			|| o->SubType==15	//$
-#ifdef ADD_SOCKET_ITEM
-			|| o->SubType == 18
-#endif // ADD_SOCKET_ITEM
-			)   //  움직여서 타켓을 찾아 움직인다. 타켓은 Object.  ( 속이빈 띠 )
+        else if ( o->SubType==12 || o->SubType==13 || o->SubType==14 || o->SubType==17 || o->SubType==15 || o->SubType == 18)
         {
             if ( o->Target!=NULL )
             {
@@ -6500,9 +6341,8 @@ void MoveJoint( JOINT *o, int iIndex)
                     o->Light[1] /= 1.2f;
                     o->Light[2] /= 1.2f;
                 }
-#ifdef ADD_SOCKET_ITEM
+
 				if( o->SubType != 18 )
-#endif //ADD_SOCKET_ITEM
 				{
 					Luminosity = (float)(rand()%4+8)*0.03f;
 					Vector(Luminosity*0.4f,Luminosity,Luminosity*0.8f,Light);
@@ -6531,9 +6371,8 @@ void MoveJoint( JOINT *o, int iIndex)
 			
             for( int j=0; j<3; j++ )
 			{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				Angle[1] += 30.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 				VectorAdd( o->TargetPosition, pos, o->TargetPosition );
 				
 				vec3_t  position;
@@ -6561,9 +6400,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			
             for( int j=0; j<3; j++ )
 				{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-					Angle[1] += 30.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					VectorAdd( o->TargetPosition, pos, o->TargetPosition );
 					
 					vec3_t  position;
@@ -6815,11 +6651,7 @@ void MoveJoint( JOINT *o, int iIndex)
                 CreateSprite ( BITMAP_SHINY+1, o->Position, 1.5f, Light, NULL, WorldTime*0.1f );
             }
         }
-#ifdef LDS_ADD_EFFECT_FIRESCREAM_FOR_MONSTER
 		else if ( o->SubType==7 || o->SubType==20 )
-#else // LDS_ADD_EFFECT_FIRESCREAM_FOR_MONSTER
-		else if ( o->SubType==7 )
-#endif // LDS_ADD_EFFECT_FIRESCREAM_FOR_MONSTER
 		{
             o->Velocity += o->Direction[2];
             if ( o->LifeTime<20 )
@@ -6886,7 +6718,7 @@ void MoveJoint( JOINT *o, int iIndex)
 		o->Light[2] /= 1.2f;
 		break;
 	case BITMAP_PIERCING:
-        if ( o->SubType==0 )            //  스트롱 피어.
+        if ( o->SubType==0 )
         {
 			if ( o->LifeTime>9 )
 			{
@@ -7081,7 +6913,6 @@ void MoveJoint( JOINT *o, int iIndex)
     case BITMAP_FLASH:
         if ( o->SubType<=3 || o->SubType==5 )
         {
-            //  회전하는 것들.
             if ( o->SubType==2 )
             {
                 o->Angle[2] += rand()%10+10.f;
@@ -7252,9 +7083,7 @@ void MoveJoint( JOINT *o, int iIndex)
 					}
 					
 					VectorCopy ( o->Light, Light );
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					float Scale = 2.f*(o->LifeTime/10)+2.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					
 					//CreateSprite(BITMAP_LIGHT,o->Position,Scale,Light,o->Target,(float)(rand()%360),0);
 					//CreateSprite(BITMAP_SHINY+1,o->Position,Scale/2.f,Light,o->Target,(float)(rand()%360),0);
@@ -7418,7 +7247,7 @@ void RenderJoints( BYTE bRenderOneMore )
 				DisableDepthTest ();				
 			}
 			
-            if ( o->Type == MODEL_SPEARSKILL)	// 방어막
+            if ( o->Type == MODEL_SPEARSKILL)
 			{
                 float fAlpha;
 				switch ( o->SubType)
@@ -7427,7 +7256,7 @@ void RenderJoints( BYTE bRenderOneMore )
 				case 1:
 				case 2:
                 case 4:
-				case 9:		// 펜릴 이펙트
+				case 9:
 #ifdef CSK_LUCKY_SEAL
 				case 10:
 #endif // CSK_LUCKY_SEAL
@@ -7435,18 +7264,18 @@ void RenderJoints( BYTE bRenderOneMore )
 					glColor3f( fAlpha*o->Light[0], fAlpha*o->Light[1], fAlpha*o->Light[2]);
 					break;
                 case 3:
-				case 5:     //  배틀 마스터 마법 해제 스킬.
+				case 5:
 				case 6:
 				case 7:
 				case 8:
 				case 16:
-				case 14:	// 소환 손목링
+				case 14:
 #ifdef ASG_ADD_SUMMON_RARGLE
 				case 17:
 #endif	// ASG_ADD_SUMMON_RARGLE
 					glColor3f( o->Light[0], o->Light[1], o->Light[2]);
 					break;
-				case 15:	// 소환수 꼬리
+				case 15:
 					glColor3f( o->Light[0], o->Light[1], o->Light[2]);
 					EnableAlphaBlendMinus();
 					break;
@@ -7544,9 +7373,8 @@ void RenderJoints( BYTE bRenderOneMore )
                 }
                 else
                 {
-                    //  방어막 ( 솔바리어 )
                     if ( o->Type == MODEL_SPEARSKILL && ( o->SubType==0 || o->SubType==4 
-						|| o->SubType == 9	//^ 펜릴 이펙트 관련(방어력향상)
+						|| o->SubType == 9
 						) )
                     {
                         float scale = 0.7f;
@@ -7576,7 +7404,6 @@ void RenderJoints( BYTE bRenderOneMore )
                             glColor3f(1.f,1.f,1.f);
                         }
 						
-                        //  중앙.
                         if ( j==(o->NumTails/2) )
                         {
                             vec3_t  Position;
@@ -7665,7 +7492,7 @@ void RenderJoints( BYTE bRenderOneMore )
                         }
                     }
                     else if ( o->Type==BITMAP_FLARE_FORCE && ( o->SubType>=0 && o->SubType<=4 ) 
-						|| (o->SubType >= 11 && o->SubType <= 13)	//^ 펜릴 스킬 관련
+						|| (o->SubType >= 11 && o->SubType <= 13)
 						)
                     {
                         float Luminosity = ((float)((o->NumTails-1-j)/(float)(o->MaxTails))*2);
@@ -7702,8 +7529,7 @@ void RenderJoints( BYTE bRenderOneMore )
 						continue;
 					}
 #endif //GUILD_WAR_EVENT
-					
-                    //  ! UV텍스쳐 좌표를 변경한다.
+
                     float V1 = 0.f;
                     float V2 = 1.f;
                     float L1 = Light1;
@@ -7769,7 +7595,6 @@ void GetMagicScrew( int iParam, vec3_t vResult, float fSpeedRate)
 	iParam += MoveSceneFrame;
 	
 	vec3_t vDirTemp;
-	// 굴리기
 	float fSpeed[3] = { 0.048f, 0.0613f, 0.1113f};
 	fSpeed[0] *= fSpeedRate;
 	fSpeed[1] *= fSpeedRate;
@@ -7777,7 +7602,6 @@ void GetMagicScrew( int iParam, vec3_t vResult, float fSpeedRate)
 	vDirTemp[0] = sinf( ( float)( iParam+55555)*fSpeed[0]) * cosf( ( float)iParam*fSpeed[1]);
 	vDirTemp[1] = sinf( ( float)( iParam+55555)*fSpeed[0]) * sinf( ( float)iParam*fSpeed[1]);
 	vDirTemp[2] = cosf( ( float)( iParam+55555)*fSpeed[0]);
-	// 한번 더 굴리기
 	float fSinAdd = sinf( ( float)( iParam+11111)*fSpeed[2]);
 	float fCosAdd = cosf( ( float)( iParam+11111)*fSpeed[2]);
 	vResult[2] = vDirTemp[0];

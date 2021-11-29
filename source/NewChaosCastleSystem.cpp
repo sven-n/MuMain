@@ -86,8 +86,6 @@ void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
             PlayBuffer ( SOUND_CHAOS_END );
         }
         break;
-		
-        //  처음 제한 레벨 돌파.
     case 8:
         if ( m_byCurrCastleLevel==0 )
         {
@@ -101,8 +99,6 @@ void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
             PlayBuffer ( SOUND_CHAOS_FALLING_STONE );
         }
         break;
-		
-        //  둘째 제한 레벨 돌파.
     case 9:
         if ( m_byCurrCastleLevel==3 )
         {
@@ -116,8 +112,6 @@ void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
             PlayBuffer ( SOUND_CHAOS_FALLING_STONE );
         }
         break;
-		
-        //  셋째 제한 레벨 돌파.
     case 10:
         if ( m_byCurrCastleLevel==6 )
         {
@@ -134,25 +128,19 @@ void CNewChaosCastleSystem::SetMatchGameCommand ( const LPPRECEIVE_MATCH_GAME_ST
     }
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  경기에 필요한 정보를 표시한다.
-//////////////////////////////////////////////////////////////////////////
 void CNewChaosCastleSystem::RenderMatchTimes ( void )
 {
-	//  카운트 다운
 	if ( m_byMatchType > 0 && gMapManager.InChaosCastle() )
 	{
         switch ( m_byMatchType )
         {
-            //  카오스캐슬.
         case 6:
         case 7:
-        case 8: //  몬스터수.
+        case 8:
             if ( m_iMatchTime>0 )
             {
 				if( !g_pNewUISystem->IsVisible( SEASON3B::INTERFACE_CHAOSCASTLE_TIME ) )
 				{
-					// 카오스캐슬 이벤트가 시작하면 모든 창이 닫히고 이벤트정보창만 보인다.
 					g_pNewUISystem->HideAll();
 					g_pNewUISystem->Show( SEASON3B::INTERFACE_CHAOSCASTLE_TIME );
 				}
@@ -161,16 +149,15 @@ void CNewChaosCastleSystem::RenderMatchTimes ( void )
 				g_pChaosCastleTime->SetKillMonsterStatue( m_iKillMonster, m_iMaxKillMonster );	
 				
 				
-                //  금지 구역 설정값.
-                if ( m_iKillMonster<=46 && m_iKillMonster>40 )  //  1단계 경고.
+                if ( m_iKillMonster<=46 && m_iKillMonster>40 )
                 {
                     m_byCurrCastleLevel = 0;
                 }
-                else if ( m_iKillMonster<=36 && m_iKillMonster>30 )  //  2단계 경고.
+                else if ( m_iKillMonster<=36 && m_iKillMonster>30 )
                 {
                     m_byCurrCastleLevel = 3;
                 }
-                else if ( m_iKillMonster<=26 && m_iKillMonster>20 )  //  3단계 경고.
+                else if ( m_iKillMonster<=26 && m_iKillMonster>20 )
                 {
                     m_byCurrCastleLevel = 6;
                 }
@@ -190,11 +177,7 @@ void CNewChaosCastleSystem::RenderMatchTimes ( void )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  경기 결과를 화면에 출력한다.
-//////////////////////////////////////////////////////////////////////////
-void    CNewChaosCastleSystem::RenderMatchResult ( void )
+void CNewChaosCastleSystem::RenderMatchResult ( void )
 {
 	int x = 640/2;
 	int yPos = m_PosResult.y + 40;	
@@ -206,20 +189,19 @@ void    CNewChaosCastleSystem::RenderMatchResult ( void )
 	g_pRenderText->SetTextColor( 128, 255, 128, 255 );
 	g_pRenderText->SetBgColor( 0, 0, 0, 0 );
 
-	// 축하 메시지
     if ( m_iNumResult )
     {
-		g_pRenderText->RenderText(x, yPos, GlobalText[1151], 0, 0, RT3_WRITE_CENTER);   //  근위병들의 영혼이 정화 되었습니다.
+		g_pRenderText->RenderText(x, yPos, GlobalText[1151], 0, 0, RT3_WRITE_CENTER);
 		yPos += 16;
         unicode::_sprintf(lpszStr, "%s %s", GlobalText[1152], GlobalText[858]);
-		g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);            //  퀘스트를 성공하였습니다.
+		g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
     }
     else
     {
 		unicode::_sprintf(lpszStr, "%s %s", GlobalText[1152], GlobalText[860]);
-		g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);            //  퀘스트를 실패하였습니다.
+		g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
 		yPos += 16;
-		g_pRenderText->RenderText(x, yPos, GlobalText[1153], 0, 0, RT3_WRITE_CENTER);   //  다음 기회를 이용해 주십시요.
+		g_pRenderText->RenderText(x, yPos, GlobalText[1153], 0, 0, RT3_WRITE_CENTER);
     }
 	yPos += 30;
 	
@@ -228,15 +210,12 @@ void    CNewChaosCastleSystem::RenderMatchResult ( void )
 	g_pRenderText->SetFont(g_hFontBold);	
 	g_pRenderText->SetTextColor(210, 255, 210, 255);
 
-	//  보상 경험치
 	unicode::_sprintf( lpszStr, GlobalText[861], pResult->m_dwExp);
 	g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
 	
-	// 점수
     unicode::_sprintf( lpszStr, GlobalText[1162], pResult->m_iScore );
 	g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
 	
-	// 젠
     unicode::_sprintf( lpszStr, GlobalText[1163], pResult->m_iZen );
 	g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 24;
 

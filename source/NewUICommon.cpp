@@ -51,7 +51,6 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
 {
 	BITMAP_t *pImage = &Bitmaps[uiImageType];
 
-	// 텍스쳐 로딩할때 TextureMagFilter에서 GL_LINEAR 옵션주면 끝에 흰선이 생기는 현상을 없애기 위한 처리
 	float u, v, uw, vh;
 
 	u = 0.5f / (float)pImage->Width;
@@ -64,10 +63,6 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
 
 void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv,float uw, float vh, DWORD color)
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	BITMAP_t *pImage = &Bitmaps[uiImageType];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-
 	RenderColorBitmap(uiImageType, x, y, width, height, su, sv, uw, vh, color);
 }
 
@@ -75,7 +70,6 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
 {
 	BITMAP_t *pImage = &Bitmaps[uiImageType];
 
-	// 텍스쳐 로딩할때 TextureMagFilter에서 GL_LINEAR 옵션주면 끝에 흰선이 생기는 현상을 없애기 위한 처리
 	float u, v, uw, vh;
 	u = ((su + 0.5f) / (float)pImage->Width);
 	v = ((sv + 0.5f) / (float)pImage->Height);
@@ -89,7 +83,6 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
 {
 	BITMAP_t *pImage = &Bitmaps[uiImageType];
 
-	// 텍스쳐 로딩할때 TextureMagFilter에서 GL_LINEAR 옵션주면 끝에 흰선이 생기는 현상을 없애기 위한 처리
 	float u, v, uw, vh;
 	u = ((su + 0.5f) / (float)pImage->Width);
 	v = ((sv + 0.5f) / (float)pImage->Height);
@@ -104,8 +97,6 @@ float SEASON3B::RenderNumber(float x, float y, int iNum, float fScale)
 	return g_RenderNumber->RenderNumber(x, y, iNum, fScale);
 }
 
-
-// 키보드 키 검사 관련 함수들
 bool SEASON3B::IsNone(int iVirtKey)
 { 
 	return g_pNewKeyInput->IsNone(iVirtKey); 

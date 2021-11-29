@@ -250,42 +250,40 @@ typedef struct tagITEM
 	union 
 	{
 		BYTE  x;    //client olny
-		BYTE  lineal_pos;	// 선형 위치(==y*column+x)
+		BYTE  lineal_pos;
 	};
 	union
 	{
 		BYTE  y;    //client olny
-		BYTE  ex_src_type;	// 아이템 메니져를 통하지 않는 static한 아이템의 경우 이 변수로 구분한다.
-		// 0: 없음, 1: 인벤토리 장비창
+		BYTE  ex_src_type;
 	};
-	WORD  Jewel_Of_Harmony_Option;//옵션 종류
-	WORD  Jewel_Of_Harmony_OptionLevel;//옵션 레벨( 값이 아님 )
+	WORD  Jewel_Of_Harmony_Option;
+	WORD  Jewel_Of_Harmony_OptionLevel;
 	bool option_380;
 #ifdef SOCKET_SYSTEM
-	BYTE bySocketOption[MAX_SOCKETS];	// 소켓 정보 (서버에서 받은것 그대로 저장-서버에 재전송용)
-	BYTE SocketCount;					// 소켓 개수 (0~MAX_SOCKETS), 0: 소켓 아이템 아님
-	BYTE SocketSeedID[MAX_SOCKETS];		// 시드 고유번호 (0~49), SOCKET_EMPTY: 빈 소켓
-	BYTE SocketSphereLv[MAX_SOCKETS];	// 스피어 레벨 (1~5)
-	BYTE SocketSeedSetOption;			// 시드 세트 옵션 (소켓 장착시 결정되는)
+	BYTE bySocketOption[MAX_SOCKETS];
+	BYTE SocketCount;
+	BYTE SocketSeedID[MAX_SOCKETS];
+	BYTE SocketSphereLv[MAX_SOCKETS];
+	BYTE SocketSeedSetOption;
 #endif	// SOCKET_SYSTEM
+
+	int   Number;
+	BYTE  Color;
 	
-	// 정리할 때 지워야 하는 소스
-	int   Number;	//. UI_RENEW_INVENTORY_BASE: 사용하지 않을 예정
-	BYTE  Color;	//. UI_RENEW_INVENTORY_BASE: 사용하지 않을 예정
-	
-	BYTE byColorState;		// 아이템 밑에 깔리는 칼라 세팅
+	BYTE byColorState;
 	
 #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-	bool	bPeriodItem;	// 기간제 아이템인가?
-	bool	bExpiredPeriod;	// 기간이 만료되었나?
-	//DWORD	dwLeftTime;		// 기간제 아이템일때 남은시간 (단위 : 초)	- Render용
-	long	lExpireTime;	// 기간 만료 시간.
-	//DWORD	dwPastSystemTime;	// 지난System시간		- 계산용
+	bool	bPeriodItem;
+	bool	bExpiredPeriod;
+	//DWORD	dwLeftTime;
+	long	lExpireTime;
+	//DWORD	dwPastSystemTime;
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
 private:
 	friend class SEASON3B::CNewUIItemMng;
-	int   RefCount;		//. 오로지 CNewUIItemMng 에서만 접근 가능
+	int   RefCount;
 } ITEM;
 #pragma pack(pop)
 
@@ -328,29 +326,22 @@ typedef struct
 	BYTE Distance;
 	int  Delay;
 
-#ifdef PBG_FIX_SKILL_DEMENDCONDITION
-	int Energy;				// 필요 에너지 ( 계산식이 필요함 = 20+(ReqEng*Level)*0.04 )
-#else //PBG_FIX_SKILL_DEMENDCONDITION
-	BYTE Energy;            // 필요 에너지 ( 계산식이 필요함 = 20+(ReqEng*Level)*0.04 )
-#endif //PBG_FIX_SKILL_DEMENDCONDITION
+	int Energy;
 	
 	WORD Charisma;
 	BYTE MasteryType;
-	BYTE SkillUseType;      //  스킬 유저 종류.
-	BYTE SkillBrand;        //  스킬을 사용하기 위해 시전되야 하는 스킬 번호.
+	BYTE SkillUseType;
+	BYTE SkillBrand;
 	BYTE KillCount;
 	BYTE RequireDutyClass[MAX_DUTY_CLASS];
 	BYTE RequireClass[MAX_CLASS];
-	WORD Magic_Icon;		//마스터 스킬에서 사용
+	WORD Magic_Icon;
 	
-#ifdef LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 	BYTE TypeSkill;
-#endif // LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 
-#ifdef PBG_FIX_SKILL_DEMENDCONDITION
-	int Strength;		// 필요 힘
-	int Dexterity;	    // 필요 민첩
-#endif //PBG_FIX_SKILL_DEMENDCONDITION
+	int Strength;
+	int Dexterity;
+
 } SKILL_ATTRIBUTE;
 
 
@@ -379,11 +370,11 @@ typedef struct
 	DWORD Experience;
 	DWORD NextExperince;
 
-	WORD Strength;		//힘
-	WORD Dexterity;		//민첩
-	WORD Vitality;		//체력
-	WORD Energy;		//에너지
-	WORD Charisma;		//통솔
+	WORD Strength;
+	WORD Dexterity;
+	WORD Vitality;
+	WORD Energy;
+	WORD Charisma;
 	WORD Life;
 	WORD Mana;
 	WORD LifeMax;
@@ -404,10 +395,10 @@ typedef struct
 	BYTE Ability;
 	WORD AbilityTime[3];
 
-	short AddPoint;			// 현재 생성 포인트
-	short MaxAddPoint;		// 최대 생성 포인트
-	WORD wMinusPoint;		// 현재 감소 포인트
-	WORD wMaxMinusPoint;	// 최대 감소 포인트
+	short AddPoint;
+	short MaxAddPoint;
+	WORD wMinusPoint;
+	WORD wMaxMinusPoint;
 	WORD AttackSpeed;
 	WORD AttackRating;
 	WORD AttackDamageMinRight;
@@ -417,8 +408,8 @@ typedef struct
 	WORD MagicSpeed;
 	WORD MagicDamageMin;
 	WORD MagicDamageMax;
-	WORD CurseDamageMin;	// 저주력 데미지 최소값
-	WORD CurseDamageMax;	// 저주력 데미지 최대값
+	WORD CurseDamageMin;
+	WORD CurseDamageMax;
 	WORD CriticalDamage;
 	WORD SuccessfulBlocking;
 	WORD Defense;
@@ -429,19 +420,19 @@ typedef struct
 	BYTE SkillMasterNumber;
 	WORD Skill[MAX_SKILLS];
 	BYTE SkillLevel[MAX_SKILLS];
-	int  SkillDelay[MAX_SKILLS];        //  스킬 딜레이.
+	int  SkillDelay[MAX_SKILLS];
 } CHARACTER_ATTRIBUTE;
 
 typedef struct _MASTER_LEVEL_VALUE
 {
-	short		 nMLevel;			// 현재 마스터레벨
+	short		 nMLevel;
 	__int64		 lMasterLevel_Experince;
 	__int64		 lNext_MasterLevel_Experince;
 
-	short		nAddMPoint;			// 추가된 마스터레벨 포인트
-	short      	nMLevelUpMPoint;	// 사용 가능한 마스터레벨 포인트
-	short		nTotalMPoint;		// 내가 가진 총 마스터레벨 포인트
-	short		nMaxPoint;			// 최대 마스터레벨 포인트
+	short		nAddMPoint;
+	short      	nMLevelUpMPoint;
+	short		nTotalMPoint;
+	short		nMaxPoint;
 
 	WORD		wMaxLife;
 	WORD		wMaxMana;
@@ -491,7 +482,7 @@ typedef struct
 	vec3_t TurningForce;
 	vec3_t StartPosition; 
 #ifdef ADD_SOCKET_ITEM
-	int iNumBone;				// 오브젝트의 해당하는 본번호의 위치를 보정
+	int iNumBone;
 #endif // ADD_SOCKET_ITEM
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	bool bRepeatedly;

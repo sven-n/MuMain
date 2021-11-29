@@ -370,7 +370,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 {
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+81:	//. ¿ïÇÁ
+	case MODEL_MONSTER01+81:
 		{
 			vec3_t Position, Light;
 			Vector ( 0.9f, 0.2f, 0.1f, Light );
@@ -401,7 +401,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 				pObject->SubType = FALSE;
 		}
 		break;
-	case MODEL_MONSTER01+82:	//. ºÒ°ñ·½
+	case MODEL_MONSTER01+82:
 		{
 			vec3_t Light;
 			Vector ( 1.f, 1.f, 1.f, Light );
@@ -491,7 +491,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 				pObject->SubType = FALSE;
 		}
 		break;
-	case MODEL_MONSTER01+83:	//. ¿©¿Õ¹ú
+	case MODEL_MONSTER01+83:
 		{
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
@@ -530,11 +530,8 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 		}
 		break;
 
-	case MODEL_MONSTER01+84:	//. µ¶°ñ·½
+	case MODEL_MONSTER01+84:
 		{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			int angle = timeGetTime()%360;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			vec3_t Light, Position;
 			
 			Vector(0.4f,1.0f,0.7f,Light);

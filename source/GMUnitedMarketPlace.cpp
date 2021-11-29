@@ -140,11 +140,11 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
 			AddTerrainLight(vLightPosition[0],vLightPosition[1],vLightFire,1,PrimaryTerrainLight);
 		}
 		return true;
-	case 54:	// 폭포 효과 - 물 쏟아짐
-	case 55:	// 폭포 효과 - 물 튐
-	case 56:	// 폭포 효과 - 물 안개 효과
-	case 57:	// 불박스
-	case 58:	// 주변광박스
+	case 54:
+	case 55:
+	case 56:
+	case 57:
+	case 58:
 		{
 			o->HiddenMesh = -2;
 		}
@@ -156,10 +156,9 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
 
 bool GMUnitedMarketPlace::MoveMonsterVisual(OBJECT* o, BMD* b)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(o == NULL)	return false;
 	if(b == NULL)	return false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	if(	IsUnitedMarketPlace() == false )
 	{
 		return false;
@@ -167,7 +166,7 @@ bool GMUnitedMarketPlace::MoveMonsterVisual(OBJECT* o, BMD* b)
 	
 	switch(o->Type)
 	{
-		case MODEL_UNITEDMARKETPLACE_JULIA:	// 통합시장 줄리아
+		case MODEL_UNITEDMARKETPLACE_JULIA:
 		{	
 		}
 		return true;
@@ -225,12 +224,6 @@ void GMUnitedMarketPlace::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 	Vector(0.0f, 0.0f, 0.0f, EndPos);
 	Vector(0.0f, 0.0f, 0.0f, EndRelative);
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-	float fSpeedPerFrame = fActionSpeed/10.f;
-	float fAnimationFrame = o->AnimationFrame - fActionSpeed;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	
 // 	switch(o->Type)
 // 	{
 // 		default : return;
@@ -246,8 +239,8 @@ bool GMUnitedMarketPlace::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 	switch(o->Type)
 	{
-	case 8:		// 분수
-	case 30:	// 가로등
+	case 8:
+	case 30:
 		o->m_bRenderAfterCharacter = true;
 		return true;
 	}
@@ -267,7 +260,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual( OBJECT* o, BMD* b )
 
 	switch(o->Type)
 	{
-	case 30:	// 가로등
+	case 30:
 		{
 			for (int i = 1; i <= 3; ++i)
 			{
@@ -283,7 +276,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-	case 35:	// 벽가로등
+	case 35:
 		{	
 			vec3_t	vLightPosition, vRelativePos;
 			Vector(0.0f, 0.0f, 0.0f, vRelativePos);
@@ -295,18 +288,18 @@ bool GMUnitedMarketPlace::RenderObjectVisual( OBJECT* o, BMD* b )
 			CreateSprite(BITMAP_FLARE, vLightPosition, 1.5f * o->Scale, vLightFire, o);
 		}
 		return true;
-	case 54:	// 폭포 효과 - 물 쏟아짐
+	case 54:
 		{
 			CreateParticle ( BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 0 );
 		}
 		return true;
-	case 55:	// 폭포 효과 - 물 튐
+	case 55:
 		{
 			Vector ( 1.f, 1.f, 1.f, Light );
 		    CreateParticle ( BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 8, o->Scale );
 		}
 		return true;
-	case 56:  //  폭포 효과 - 물 안개 효과
+	case 56:
 		{
 			Vector ( 1.f, 1.f, 1.f, Light );
 			if ( rand()%8==0 )
@@ -315,7 +308,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-	case 57:	// 리얼빨간불박스
+	case 57:
 		{
 			vec3_t vLightFire;
 			Vector(1.0f, 0.2f, 0.0f, vLightFire);
@@ -323,24 +316,22 @@ bool GMUnitedMarketPlace::RenderObjectVisual( OBJECT* o, BMD* b )
 
 			vec3_t vLight;
 			Vector(1.0f, 1.0f, 1.0f, vLight);
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fScale = o->Scale * (rand()%5+13)*0.1f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);	
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);	
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);	
 				break;
 			}
 		}
 		return true;
-	case 58:	// 주변광박스
+	case 58:
 		{
 			float fLumi;
 			fLumi = (sinf(WorldTime*0.005f) + 1.0f) * 0.3f + 0.5f;
@@ -354,12 +345,11 @@ bool GMUnitedMarketPlace::RenderObjectVisual( OBJECT* o, BMD* b )
 	return false;
 }
 
-// 몬스터 렌더링
 bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+185:	//석상
+	case MODEL_MONSTER01+185:
 		{
 			if(o->CurrentAction != MONSTER01_DIE)
 			{
@@ -376,17 +366,16 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 { 	
  	switch(o->Type)
  	{
-	case MODEL_UNITEDMARKETPLACE_CHRISTIN:	// 크리스틴
+	case MODEL_UNITEDMARKETPLACE_CHRISTIN:
 		{
 			
 		}
 		return true;
-	case MODEL_UNITEDMARKETPLACE_RAUL:		// 라울
+	case MODEL_UNITEDMARKETPLACE_RAUL:
 		{
 			vec3_t vRelativePos, vWorldPos, Light, vLightPosition;
 			Vector(0.f, 0.f, 0.f, vRelativePos);
 			
-			//파이프 연기
 			Vector(0.8f, 0.8f, 0.8f, Light);
 			vec3_t vAngle; 
 			Vector(10.0f, 0.0f, 0.0f, vAngle);
@@ -394,13 +383,11 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			CreateParticle(BITMAP_SMOKELINE1+rand()%3,vWorldPos,o->Angle,Light,1,0.6f,o);
 			CreateParticle(BITMAP_CLUD64,vWorldPos,o->Angle,Light,6,0.6f,o);
 			
-			//파이프 Flare Red 효과
 			Vector(1.0f, 1.0f, 1.0f, Light);
 			Vector(0.0f, 0.0f, 0.0f, vRelativePos);
 			b->TransformPosition(o->BoneTransform[43], vRelativePos, vLightPosition, true);
 			CreateSprite(BITMAP_FLARE_RED,vLightPosition,0.24f,Light,o);
 			
-			// 조명
 			vec3_t	v3Angle;
 			Vector(0.0f, 0.0f, 0.0f, v3Angle);
 			Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -409,7 +396,6 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			CreateSprite(BITMAP_LIGHT, vWorldPos, 0.6f, Light, o);
 			CreateSprite(BITMAP_LIGHT, vWorldPos, 0.6f, Light, o);
 			
-			// Light 2 깜빡이는 효과
 			Vector(0.0f, 0.0f, 0.0f, vRelativePos);
 			b->TransformPosition(o->BoneTransform[78], vRelativePos, vLightPosition, true);
 			
@@ -418,13 +404,11 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			Vector(fLumi*1.0f, fLumi*0.7f, fLumi*0.3f, vLightFire);
 			CreateSprite(BITMAP_FLARE, vLightPosition, 0.5f * o->Scale, vLightFire, o);
 
-			// Pig 통 Flare Red 효과
 			Vector(1.0f, 1.0f, 1.0f, Light);
 			Vector(0.0f, 0.0f, 0.0f, vRelativePos);
 			b->TransformPosition(o->BoneTransform[77], vRelativePos, vLightPosition, true);
 			CreateSprite(BITMAP_FLARE_RED,vLightPosition,0.5f,Light,o);
 
-			// 골드 FLARE 효과
 			Vector(1.0f, 0.7f, 0.3f, Light);
 			Vector(0.0f, 0.0f, 0.0f, vRelativePos);
 			b->TransformPosition(o->BoneTransform[76], vRelativePos, vLightPosition, true);
@@ -442,7 +426,7 @@ void GMUnitedMarketPlace::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon
 	
 	switch(o->Type)
 	{
-	case 8:		// 폭포에서 떨어져 고인물의 TextureAnimation 흐르는 물 효과
+	case 8:
 		{
 			b->RenderMesh(2,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight);
 			b->RenderMesh(3,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight);
@@ -453,7 +437,7 @@ void GMUnitedMarketPlace::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon
 			b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,0,0.3f, fFlow_u, fFlow_v);
 		}
 		break;
-	case 30:	// 가로등
+	case 30:
 		{
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		}
@@ -478,7 +462,7 @@ bool GMUnitedMarketPlace::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 		{
 // 			switch(c->MonsterSkill)
 // 			{
-// 			default:	// 기타 모든 일반공격 
+// 			default:
 // 				{	
 // 					SetAction(o, MONSTER01_ATTACK1);
 // 					c->MonsterSkill = -1;
@@ -504,7 +488,6 @@ bool GMUnitedMarketPlace::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 	return false;
 }
 
-// 몬스터 사운드
 bool GMUnitedMarketPlace::PlayMonsterSound(OBJECT* o) 
 {
 	if(	IsUnitedMarketPlace() == false )
@@ -522,7 +505,7 @@ bool GMUnitedMarketPlace::PlayMonsterSound(OBJECT* o)
 
 // 	switch(o->Type)
 // 	{	
-// 	case MODEL_MONSTER01+179:	// 수호군 치유병 
+// 	case MODEL_MONSTER01+179:
 // 		{
 // 			switch(o->CurrentAction)
 // 			{
@@ -536,14 +519,13 @@ bool GMUnitedMarketPlace::PlayMonsterSound(OBJECT* o)
 // 					PlayBuffer(SOUND_THUNDERS01);
 // 				}break;
 // 			}
-// 		} // MODEL_MONSTER01+179:	// 수호군 치유병 
+// 		} // MODEL_MONSTER01+179:
 // 		return true;
 // 	}
 
 	return false; 
 }
 
-// 오브젝트 사운드
 void GMUnitedMarketPlace::PlayObjectSound(OBJECT* o)
 {
 	if(	IsUnitedMarketPlace() == false )
@@ -567,11 +549,8 @@ bool GMUnitedMarketPlace::CreateRain( PARTICLE* o )
 		return false;
 	}
 
-	// 비효과
 	o->Type = BITMAP_RAIN;
-	Vector(Hero->Object.Position[0]+(float)(rand()%1600-800),Hero->Object.Position[1]+(float)(rand()%1400-500),
-		Hero->Object.Position[2]+(float)(rand()%200+200),
-		o->Position);
+	Vector(Hero->Object.Position[0]+(float)(rand()%1600-800),Hero->Object.Position[1]+(float)(rand()%1400-500),Hero->Object.Position[2]+(float)(rand()%200+200),o->Position);
 	Vector(-30.f,0.f,0.f,o->Angle);
 	vec3_t Velocity;
 	Vector(0.f,0.f,-(float)(rand()%24+20),Velocity);

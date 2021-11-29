@@ -22,14 +22,14 @@
 extern void MonsterMoveSandSmoke(OBJECT *o);
 extern void MonsterDieSandSmoke(OBJECT *o);
 
-BYTE m_AltarState[5] = {2,2,2,2,2};			// 제단 상태 
+BYTE m_AltarState[5] = {2,2,2,2,2};
 
 #include "UIControls.h"
 #include "wsclientinline.h"
 
 bool	View_Bal = false;
-char	Suc_Or_Fail = -1;						//-1 : 평소상태, 0 : 실패상태, 1 : 성공상태
-char	View_Suc_Or_Fail = -1;					//-1 : 평소상태, 0 : 실패상태, 1 : 성공상태
+char	Suc_Or_Fail = -1;
+char	View_Suc_Or_Fail = -1;
 float Deco_Insert  = 0.f;
 char Message_Box = 0;
 char   Box_String[2][200]={NULL,NULL};
@@ -41,8 +41,8 @@ int m_iHour = 0,m_iMinute = 0;
 DWORD m_dwSyncTime;
 int Delay = 1;
 int Add_Num = 10;
-bool Dark_Elf_Check = false;	// MVP 시작될때 한번 다크엘프 주위 밀어내기 효과 뿌려줌 체크
-int iNextNotice = -1;		// 크라이울프 준비때 공지 뿌려주는 것을 두번에 나누어 뿌려주줌 체크
+bool Dark_Elf_Check = false;
+int iNextNotice = -1;
 
 BYTE Rank = 0;
 int Exp = 0;
@@ -58,9 +58,9 @@ bool View_End_Result = false;
 int nPastTick = 0;
 int BackUpTick = 0;
 
-BYTE m_OccupationState = 0;		// 크라이울프 레이드 MVP 상태 (0: 평화, 1: 점령, 2: 전쟁)
+BYTE m_OccupationState = 0;
 BYTE m_CrywolfState = 0;
-int m_StatueHP = 0;				// 석상 HP
+int m_StatueHP = 0;
 
 extern char* g_lpszMp3[NUM_MUSIC];
 
@@ -68,7 +68,6 @@ void M34CryWolf1st::CryWolfMVPInit()
 {
 	Deco_Insert  = 0.f;
 	memset(Box_String, 0, sizeof(Box_String));
-	//Box_String[2][200]=NULL;	// 보스급 버그;;
 	Button_Down = 0;
 	BackUp_Key = 0;
 	m_iHour = 0,m_iMinute = 0;
@@ -80,14 +79,13 @@ void M34CryWolf1st::CryWolfMVPInit()
 
 	iNextNotice = -1;
 	View_Bal = false;
-//	Suc_Or_Fail = -1;					//-1 : 평소상태, 0 : 실패상태, 1 : 성공상태
 	Message_Box = 0;
 	Dark_elf_Num	= 0;
 	Val_Hp = 100;
 
-	m_OccupationState = 0;		// 크라이울프 레이드 MVP 상태 (0: 평화, 1: 점령, 2: 전쟁)
+	m_OccupationState = 0;
 	m_CrywolfState = 0;
-	m_StatueHP = 0;				// 석상 HP
+	m_StatueHP = 0;
 	SelectedNpc = -1;
 }
 
@@ -118,7 +116,7 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
 
 	if(m_CrywolfState == CRYWOLF_STATE_START)
 	{
-		Dark_Elf_Check = true;	// MVP 시작될때 한번 만 다크엘프 주위 밀어내기 효과 뿌려줌
+		Dark_Elf_Check = true;
 
 		g_pCryWolfInterface->InitTime();
 	}
@@ -144,10 +142,8 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
 				View_Suc_Or_Fail = -1;
 		}
 	}
-//	if(m_CrywolfState == CRYWOLF_STATE_ENDCYCLE)	// 크라이울프 상태 값 모두 초기화
-//		CryWolfMVPInit();
 	
-	if(m_OccupationState == btOccupationState)	// 석상 상태만 바뀐다면 리턴시킨다
+	if(m_OccupationState == btOccupationState)
 		return;
 
 	m_OccupationState = btOccupationState;
@@ -159,13 +155,13 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
 	
 	switch(m_OccupationState)
 	{
-	case CRYWOLF_OCCUPATION_STATE_PEACE:    // 평화상태
+	case CRYWOLF_OCCUPATION_STATE_PEACE:
 		sprintf ( FileName, "%s\\TerrainLight.jpg", WorldName);
 		break;
-	case CRYWOLF_OCCUPATION_STATE_OCCUPIED: // 점령상태
+	case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
 		sprintf ( FileName, "%s\\TerrainLight1.jpg", WorldName);
 		break;
-	case CRYWOLF_OCCUPATION_STATE_WAR:		// 전쟁상태
+	case CRYWOLF_OCCUPATION_STATE_WAR:
 		sprintf ( FileName, "%s\\TerrainLight2.jpg", WorldName);
 		break;
 	}
@@ -173,13 +169,13 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
 
 	switch(m_OccupationState)
 	{
-	case CRYWOLF_OCCUPATION_STATE_PEACE:    // 평화상태
+	case CRYWOLF_OCCUPATION_STATE_PEACE:
 		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive+1);
 		break;
-	case CRYWOLF_OCCUPATION_STATE_OCCUPIED: // 점령상태
+	case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
 		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive+1)*10+1);
 		break;
-	case CRYWOLF_OCCUPATION_STATE_WAR:		// 전쟁상태
+	case CRYWOLF_OCCUPATION_STATE_WAR:
 		sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive+1)*10+2);
 		break;
 	}
@@ -209,15 +205,15 @@ void M34CryWolf1st::DoTankerFireFixStartPosition(int SourceX, int SourceY, int P
 
     switch ( Type )
     {
-    case 0: // 왼쪽에서 날라오는 화살
+    case 0:
         Vector(TargetPosition[0]-800.0f, TargetPosition[1], 800.0f, Position);
         CreateEffect(MODEL_ARROW_TANKER_HIT, Position, TargetPosition, Hero->Object.Light, 0, &Hero->Object);
         break;
-    case 1: // 오른쪽에서 날라오는 화살
+    case 1:
 		Vector(TargetPosition[0]+800.0f, TargetPosition[1], 800.0f, Position);
         CreateEffect(MODEL_ARROW_TANKER_HIT, Position, TargetPosition, Hero->Object.Light, 1, &Hero->Object);
         break;
-    case 2: // 앞쪽에서 날라오는 화살
+    case 2:
 		Vector(TargetPosition[0], TargetPosition[1]+800.0f, 800.0f, Position);
         CreateEffect(MODEL_ARROW_TANKER_HIT, Position, TargetPosition, Hero->Object.Light, 2, &Hero->Object);
         break;
@@ -263,7 +259,7 @@ void M34CryWolf1st::RenderNoticesCryWolf()
 		nText = 1957+i+iTemp;
 		if (1966 == nText || 1967 == nText)
 		{
-			wsprintf(szText, GlobalText[nText]);	// Text.txt에서는 무조건 %를 %%로 쓰기로 약속되어 있음.
+			wsprintf(szText, GlobalText[nText]);
 			g_pRenderText->RenderText(190, 63+i*13, szText);
 		}
 		else
@@ -346,7 +342,7 @@ bool M34CryWolf1st::MoveCryWolf1stObject(OBJECT* o)
 
 	switch(o->Type)
 	{
-	case 36:	//늑대의 신상
+	case 36:
 		{
 		}
 		break;
@@ -361,7 +357,7 @@ bool M34CryWolf1st::MoveCryWolf1stObject(OBJECT* o)
 		}
 		break;
 	case 71:
-	case 57:	//빨간불박스
+	case 57:
 		{
 			    Luminosity = (float)(rand()%4+3)*0.1f;
 			    Vector(Luminosity,Luminosity*0.6f,Luminosity*0.2f,Light);
@@ -380,7 +376,6 @@ bool M34CryWolf1st::MoveCryWolf1stObject(OBJECT* o)
 	return true;
 }
 
-//. 오브젝트 효과를 추가한다.
 bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
 {
 	if(!IsCyrWolf1st())
@@ -450,7 +445,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b,int ExtraMon)
 
 	switch(o->Type)
 	{
-	case 36:	//늑대의 신상
+	case 36:
 		{
 			if(m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE)
 			{
@@ -482,7 +477,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b,int ExtraMon)
 		Vector(0.2f,0.7f,0.f,Light);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		return true;
-	case 57:	//불+연기 박스
+	case 57:
 		{
 			if ( rand()%3==0) 
             {
@@ -492,7 +487,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b,int ExtraMon)
 			}
 		}
 		return true;
-	case 71:	//불 박스
+	case 71:
 		{
 			if ( rand()%3==0) 
             {
@@ -501,7 +496,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b,int ExtraMon)
 			}
 		}
 		return true;
-	case 72:	//맵상의 수증기같은연기.
+	case 72:
 		{
 			if ( rand()%10==0) 
 			{
@@ -514,13 +509,13 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b,int ExtraMon)
 			}
 		}
 		return true;
-	case 73:	//모래바람(재...)
+	case 73:
 		{
 			if(weather == 0)
 				ashies = true;
 		}
 		return true;
-	case 74:    //연기만 나는박스.(검은연기)
+	case 74:
 		{
 			if(rand()%3 == 0 && m_OccupationState == CRYWOLF_OCCUPATION_STATE_OCCUPIED)
             {
@@ -529,7 +524,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b,int ExtraMon)
 			}
 		}
 		return true;
-	case 77:    //안개(엷은녹색박스.
+	case 77: 
 		{
 			if ( rand()%6==0) 
 			{
@@ -539,7 +534,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b,int ExtraMon)
 			}
 		}
 		return true;
-	case 78:    //파랑안개박스.
+	case 78:
 		{
 			if ( rand()%6==0) 
 			{
@@ -582,20 +577,16 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b,int ExtraMon)
 	return RenderCryWolf1stMonsterObjectMesh(o, b,ExtraMon);
 }
 
-//. 몬스터
 CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY, int Key)
 {
 	if(!IsCyrWolf1st() && !(gMapManager.InDevilSquare())) 
 		return NULL;
 
 	CHARACTER* c = NULL;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	OBJECT* o = NULL;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	
 	switch(iType)
 	{
-	case 310:	//스카우트 근거리
+	case 310:
 		{
 			OpenMonsterModel(98);
 			c = CreateCharacter(Key,MODEL_MONSTER01+98,PosX,PosY);
@@ -604,7 +595,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 			c->Weapon[1].Type = -1;
 		}
 		break;
-	case 311:	//스카우트 중거리
+	case 311:
 		{
 			OpenMonsterModel(97);
 			c = CreateCharacter(Key,MODEL_MONSTER01+97,PosX,PosY);
@@ -613,7 +604,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 			c->Weapon[1].Type = -1;
 		}
 		break;
-	case 312:	//스카우트 원거리
+	case 312:
 		{
 			OpenMonsterModel(96);
 			c = CreateCharacter(Key,MODEL_MONSTER01+96,PosX,PosY);
@@ -626,7 +617,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 			BoneManager::RegisterBone(c, "Monster96_Bottom", 29);
 		}
 		break;
-	case 313:	//웨어울프
+	case 313:
 		{
 			OpenMonsterModel(95);
 			c = CreateCharacter(Key,MODEL_MONSTER01+95,PosX,PosY);
@@ -638,7 +629,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 			BoneManager::RegisterBone(c, "Monster95_Head", 6);
 		}
 		break;
-	case 314:	//스카우트 (영웅)
+	case 314:
 		{
 			OpenMonsterModel(98);
 			c = CreateCharacter(Key,MODEL_MONSTER01+98,PosX,PosY);
@@ -647,7 +638,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 			c->Weapon[1].Type = -1;
 		}
 		break;
-	case 315:   //웨어울프(영웅)
+	case 315:
 		{
 			OpenMonsterModel(95);
 			c = CreateCharacter(Key,MODEL_MONSTER01+95,PosX,PosY);
@@ -660,7 +651,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 		}
 		break;
 	case 316:
-	case 344:	//발람
+	case 344:
 		{
 			OpenMonsterModel(91);
 			c = CreateCharacter(Key,MODEL_MONSTER01+91,PosX,PosY);
@@ -670,7 +661,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 		}
 		break;
 	case 317:
-	case 341:	//소람
+	case 341:
 		{
     		OpenMonsterModel(94);
 			c = CreateCharacter(Key,MODEL_MONSTER01+94,PosX,PosY);
@@ -679,7 +670,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 			c->Weapon[1].Type = -1;
 		}
 		break;
-    case 349:	//발가스	
+    case 349:
 		{
     		OpenMonsterModel(89);
 			c = CreateCharacter(Key,MODEL_MONSTER01+89,PosX,PosY);
@@ -690,7 +681,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
    			CreateJoint(BITMAP_JOINT_ENERGY,c->Object.Position,c->Object.Position,c->Object.Angle,3,&c->Object,30.f);
 		}
         break;
-	case 345:	//데스스피릿
+	case 345:
 		{
 			OpenMonsterModel(93);
 			c = CreateCharacter(Key,MODEL_MONSTER01+93,PosX,PosY);
@@ -703,7 +694,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 		}
 		break;
 	case 440:
-	case 340:	//다크엘프
+	case 340:
 		{
 			OpenMonsterModel(92);
 			c = CreateCharacter(Key,MODEL_MONSTER01+92,PosX,PosY);
@@ -713,7 +704,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
 			BoneManager::RegisterBone(c, "Left_Hand", 17);
 		}
 		break;
-	case 348:	//탱커
+	case 348:
 		{
 			OpenMonsterModel(99);
 			c = CreateCharacter(Key,MODEL_MONSTER01+99,PosX,PosY, 180);
@@ -743,9 +734,6 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 	case MODEL_MONSTER01+98:
 		{
 			float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fSpeedPerFrame = fActionSpeed/10.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 			b->Animation(BoneTransform,fAnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);
 			vec3_t Light;
@@ -775,13 +763,9 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+94:	//소람
+	case MODEL_MONSTER01+94:
 		{
 			float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fSpeedPerFrame = fActionSpeed/10.f;
-			float fAnimationFrame = o->AnimationFrame - fActionSpeed;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			vec3_t Light;
 			vec3_t EndPos, EndRelative;
 			Vector ( 1.f, 1.f, 1.f, Light );
@@ -819,13 +803,10 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+89:	//발가스
+	case MODEL_MONSTER01+89:
 		{
 			MoveEye(o,b,9,10);
 			float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fSpeedPerFrame = fActionSpeed/10.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 			b->Animation(BoneTransform,fAnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);
 			vec3_t Light;
@@ -833,9 +814,6 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			if(o->CurrentAction == MONSTER01_ATTACK2)
 			{
 				vec3_t EndPos, EndRelative;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				float Ani = o->AnimationFrame/fActionSpeed;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				if(o->AnimationFrame >= 7.5f && o->AnimationFrame < (7.5f + fActionSpeed))
 				{
 					Vector(0.f, 0.f, 0.f, EndRelative);
@@ -857,7 +835,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+91:	//발람
+	case MODEL_MONSTER01+91:
 		{
 			vec3_t Light;
 			Vector ( 0.9f, 0.2f, 0.1f, Light );
@@ -869,11 +847,9 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+92:	//다크엘프
+	case MODEL_MONSTER01+92:
 		{
-			if(m_CrywolfState == CRYWOLF_STATE_START
-				&& Dark_Elf_Check
-				)	// MVP 시작될때 한번 다크엘프 주위 밀어내기 효과 뿌려줌
+			if(m_CrywolfState == CRYWOLF_STATE_START && Dark_Elf_Check)
 			{
 				Dark_Elf_Check = false;
 
@@ -895,7 +871,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+93:	//가면의 사신
+	case MODEL_MONSTER01+93:
 		{
 			vec3_t Light;
 			Vector ( 0.9f, 0.2f, 0.1f, Light );
@@ -907,7 +883,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+95:	//. 웨어울프
+	case MODEL_MONSTER01+95:
 		{
 			//CreateEffect ( MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 1, o, -1, 0, 1 );
 			vec3_t Position, Light;
@@ -919,10 +895,6 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			}
 
 			float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fSpeedPerFrame = fActionSpeed/10.f;
-			float fAnimationFrame = o->AnimationFrame - fActionSpeed;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			vec3_t EndPos, EndRelative;
 			Vector ( 1.f, 1.f, 1.f, Light );
 
@@ -952,7 +924,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+97:	//. 스카우트 중거리
+	case MODEL_MONSTER01+97:
 		{
 			vec3_t Position, Light;
 			
@@ -967,7 +939,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+96:	//. 스카우트 장거리
+	case MODEL_MONSTER01+96:
 		{
 			vec3_t Position, Light;
 
@@ -993,7 +965,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
             CreateSprite(BITMAP_SHINY+1,Position,0.5f*fScalePercent,Light,o, 360.f-Rotation );
 		}
 		break;
-	case MODEL_MONSTER01+99:	// 탱커
+	case MODEL_MONSTER01+99:
 		{
 			if(m_CrywolfState == CRYWOLF_STATE_START)
 			{
@@ -1019,9 +991,6 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
 	//CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 6, o, 20.f, 40 );
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	CHARACTER *tc = NULL;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	OBJECT *to = NULL;
 /*
     if ( c->TargetCharacter >= 0 && c->TargetCharacter<MAX_CHARACTERS_CLIENT )
@@ -1031,13 +1000,12 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 		 o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],to->Position[0],to->Position[1]);
     }
 */	
-//임시로 뺀것 나중에 판단.
 	if(!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
 		return false;
 	
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+96:	//. 스타우트 원거리
+	case MODEL_MONSTER01+96:
 		{
 			if( c->AttackTime==14 )
 			{
@@ -1046,7 +1014,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 			}
 		}
 		break;
-	case MODEL_MONSTER01+91:	//. 발람
+	case MODEL_MONSTER01+91:
 		{
 			if( c->AttackTime==14 )
 			{
@@ -1086,7 +1054,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 				{
 					int Hand = 0;
 					if(i>=3) Hand = 1;
-					b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone],p,Position,true);//에러
+					b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone],p,Position,true);
 					Vector(0.f,0.f,(float)(rand()%360),Angle);
 					
 					if(to != NULL)
@@ -1128,9 +1096,6 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 	//CreateEffect ( MODEL_STONE2,o->Position,o->Angle,o->Light);
 	vec3_t Angle,Position;
 	float Matrix[3][4];
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float Luminosity = (float)(rand()%4+7)*0.1f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
     vec3_t  p, p2,EndPos;
 	vec3_t  TempAngle;
 	switch(o->Type)
@@ -1235,7 +1200,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+89:	//발가스 
+	case MODEL_MONSTER01+89:
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK1)
 			{
@@ -1286,7 +1251,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 		}
 		break;
 		
-	case MODEL_MONSTER01+92:	// 다크엘프
+	case MODEL_MONSTER01+92:
 		{
 			if((o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2))
 			{
@@ -1332,7 +1297,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+93:	// 데스스피릿
+	case MODEL_MONSTER01+93:
 		{
 			if((o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2))
 			{
@@ -1381,7 +1346,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+95:	//. 웨어울프
+	case MODEL_MONSTER01+95:
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK2)
 			{
@@ -1402,21 +1367,21 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 					b->TransformPosition(BoneTransform[80],StartRelative,StartPos,false);
 					b->TransformPosition(BoneTransform[80],EndRelative,EndPos,false);
 
-					CreateBlur(c,StartPos,EndPos,Light,3,true,80);	// 왼쪽 끝
+					CreateBlur(c,StartPos,EndPos,Light,3,true,80);
 
 					Vector(0.f, 0.f, 90.f, StartRelative);
 					Vector(0.f, 0.f, 0.f, EndRelative);
 					b->TransformPosition(BoneTransform[82],StartRelative,StartPos,false);
 					b->TransformPosition(BoneTransform[82],EndRelative,EndPos,false);
 					
-					CreateBlur(c,StartPos,EndPos,Light,3,true,84);	// 오른쪽 끝
+					CreateBlur(c,StartPos,EndPos,Light,3,true,84);
 					
 					fAnimationFrame += fSpeedPerFrame;
 				}
 			}
 		}
 		break;
-	case MODEL_MONSTER01+97:	//. 스카우트 중거리
+	case MODEL_MONSTER01+97:
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK1)
 			{
@@ -1437,7 +1402,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 					b->TransformPosition(BoneTransform[25],StartRelative,StartPos,false);
 					b->TransformPosition(BoneTransform[25],EndRelative,EndPos,false);
 
-					CreateBlur(c,StartPos,EndPos,Light,3,true,25);	// 칼날
+					CreateBlur(c,StartPos,EndPos,Light,3,true,25);
 					
 					fAnimationFrame += fSpeedPerFrame;
 				}
@@ -1460,7 +1425,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+89:	//. 발가스
+	case MODEL_MONSTER01+89:
 		{
 			Vector(1.f,1.f,1.f,b->BodyLight);
 			b->BeginRender(o->Alpha);
@@ -1479,7 +1444,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+93:	// 데스스피릿
+	case MODEL_MONSTER01+93:
 		{
 			b->BeginRender(o->Alpha);
 				static float aaa = 0.f;
@@ -1621,7 +1586,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
 			EnableAlphaBlend();
 
-			if( g_isCharacterBuff(o, eBuff_CrywolfAltarContracted ) )	// 계약된 상태		
+			if( g_isCharacterBuff(o, eBuff_CrywolfAltarContracted ) )	
 			{
 				Vector(Luminosity2, Luminosity2, 0.05f, Light);
 				fRotation1 = WorldTime*0.01f;
@@ -1631,15 +1596,15 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 				CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light);
 				CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 1);
 			}
-			if( g_isCharacterBuff(o, eBuff_CrywolfAltarOccufied ) )	// 정령 당한 상태
+			if( g_isCharacterBuff(o, eBuff_CrywolfAltarOccufied ) )
 			{
 				Vector(Luminosity, 0.1f, 0.1f, Light);
 			}
-			if( g_isCharacterBuff(o, eBuff_CrywolfAltarDisable ) )    // 계약 불능 상태
+			if( g_isCharacterBuff(o, eBuff_CrywolfAltarDisable ) )
 			{
 				Vector(Luminosity, 0.1f, 0.1f, Light);
 			}
-			if(g_isCharacterBuff(o, eBuff_CrywolfAltarEnable ) || g_isCharacterBuff(o, eBuff_CrywolfAltarAttempt ) ) // 계약 가능 상태, 계약 중인 상태
+			if(g_isCharacterBuff(o, eBuff_CrywolfAltarEnable ) || g_isCharacterBuff(o, eBuff_CrywolfAltarAttempt ) )
 			{
 				fRotation1 = WorldTime*0.01f;
 				Vector(0.15f, 0.15f, Luminosity, Light);
@@ -1655,9 +1620,8 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			if(fRotation2 >= 360.0f) fRotation2 = 0.0f;
 		}
 		break;
-	case MODEL_MONSTER01+89:	// 발가스
+	case MODEL_MONSTER01+89:
 		{
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1701,12 +1665,10 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////
 		}
 		break;
-	case MODEL_MONSTER01+92:	// 다크엘프
+	case MODEL_MONSTER01+92:
 		{
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1750,12 +1712,11 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////
+
 		}
 		break;
-	case MODEL_MONSTER01+99:	// 탱커
+	case MODEL_MONSTER01+99:
 		{
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2) 
 			{
 				if(o->SubType == FALSE) {
@@ -1773,12 +1734,10 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
 			if(!(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_DIE))
 				o->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////			
 		}
 		break;
-	case MODEL_MONSTER01+93:	// 데스스피릿
+	case MODEL_MONSTER01+93:
 		{
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1808,7 +1767,6 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////			
 
 			vec3_t Position, Light;
 			int dummy = rand()%14;
@@ -1835,9 +1793,8 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			CreateSprite(BITMAP_LIGHT,Position,1.5f,Light,o);
 		}
 		return true;
-	case MODEL_MONSTER01+91:	//발람
+	case MODEL_MONSTER01+91:
 		{
-				//사운드//////////////////////////////////////////////////////////////////////////////////
 				if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 				{
 					if(rand()%15==0)
@@ -1866,12 +1823,10 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 				}
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-				//////////////////////////////////////////////////////////////////////////////////////////
 		}
 		return true;
-	case MODEL_MONSTER01+94:	//소람
+	case MODEL_MONSTER01+94:
 		{
-				//사운드//////////////////////////////////////////////////////////////////////////////////
 				if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 				{
 					if(rand()%15==0)
@@ -1900,10 +1855,9 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 				}
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-				//////////////////////////////////////////////////////////////////////////////////////////
 		}
 		return true;
-	case MODEL_MONSTER01+95:	//. 웨어울프
+	case MODEL_MONSTER01+95:
 		{
 			vec3_t Position, Light;
 			
@@ -1922,7 +1876,6 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 				}
 			}
 
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1951,10 +1904,9 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			}
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////
 		}
 		return true;
-	case MODEL_MONSTER01+97:	//. 스카우트 중거리
+	case MODEL_MONSTER01+97:
 		{
 			vec3_t Position, Light;
 			
@@ -1968,7 +1920,6 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
                 CreateEffect ( MODEL_PIERCING2, o->Position, o->Angle, Light, 1);
 
 			}
-				//사운드//////////////////////////////////////////////////////////////////////////////////
 				if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 				{
 					if(rand()%15==0)
@@ -1997,11 +1948,9 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 				}
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-				//////////////////////////////////////////////////////////////////////////////////////////
-
 		}
 		return true;
-	case MODEL_MONSTER01+96:	//. 스카우트 장거리
+	case MODEL_MONSTER01+96:
 		{
 			vec3_t Position, Light;
 
@@ -2026,7 +1975,6 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			CreateSprite(BITMAP_SHINY+1,Position,0.5f*fScalePercent,Light,o, Rotation );
             CreateSprite(BITMAP_SHINY+1,Position,0.5f*fScalePercent,Light,o, 360.f-Rotation );
 
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -2056,10 +2004,9 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-				//////////////////////////////////////////////////////////////////////////////////////////
 		}
 		return true;
-		case MODEL_MONSTER01+98:	//. 스카우트 근거리
+		case MODEL_MONSTER01+98:
 			{
 				if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 				{
@@ -2109,19 +2056,19 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
 		vec3_t TargetPosition = {0.f, 0.f, 400.f}, TargetAngle = {0.f, 0.f, 0.f};
 		switch(rand()%8)
 		{
-		case 0:	//. 우
+		case 0:
 			TargetPosition[0] = Hero->Object.Position[0] + (300-ff+rand()%250);
 			TargetPosition[1] = Hero->Object.Position[1] + (300-ff+rand()%250);
 			break;
-		case 1:	//. 하
+		case 1:
 			TargetPosition[0] = Hero->Object.Position[0] + (250-ff+rand()%250);
 			TargetPosition[1] = Hero->Object.Position[1] - (250-ff+rand()%250);
 			break;
-		case 2:	//. 상
+		case 2:
 			TargetPosition[0] = Hero->Object.Position[0] - (200-ff+rand()%250);
 			TargetPosition[1] = Hero->Object.Position[1] + (200-ff+rand()%250);
 			break;
-		case 3:	//. 좌
+		case 3:
 			TargetPosition[0] = Hero->Object.Position[0] - (300-ff+rand()%250);
 			TargetPosition[1] = Hero->Object.Position[1] - (300-ff+rand()%250);
 			break;
@@ -2143,7 +2090,6 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
 			break;
 		}
 
-		//. 이동방향으로 범위 평행이동
 		if(Hero->Movement)
 		{
 			float Matrix[3][4];
@@ -2179,7 +2125,6 @@ void M34CryWolf1st::RenderBaseSmoke ( void )
 
 
 bool M34CryWolf1st::Get_State()
-//현재 크라이울프가 시작됐나?
 {
 	if(m_CrywolfState == CRYWOLF_STATE_START)
 		return true;
@@ -2187,7 +2132,6 @@ bool M34CryWolf1st::Get_State()
 }
 
 bool M34CryWolf1st::Get_State_Only_Elf()
-//현재 크라이울프가 준비상태 또는 시작 상태인가?
 {
 	if(m_CrywolfState == CRYWOLF_STATE_START || m_CrywolfState == CRYWOLF_STATE_READY)
 		return true;
@@ -2195,7 +2139,6 @@ bool M34CryWolf1st::Get_State_Only_Elf()
 }
 
 void M34CryWolf1st::SetTime ( BYTE byHour, BYTE byMinute )
-//크라이울프 타이머에 쓸 타이머를 세팅한다.
 {
 	if(M34CryWolf1st::Get_State() == false || M34CryWolf1st::IsCyrWolf1st() == false)
 		return;
@@ -2209,7 +2152,6 @@ void M34CryWolf1st::SetTime ( BYTE byHour, BYTE byMinute )
 }
 
 void M34CryWolf1st::Set_BossMonster(int Val_Hp,int Dl_Num)
-//크라이울프 보스(발가스,다크엘프)가 나타났을때 인터페이스를 세팅해준다.(보스몹 체력(발가스),다크엘프 마리수)
 {
 	if(M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false)
 		return;
@@ -2225,7 +2167,6 @@ void M34CryWolf1st::Set_BossMonster(int Val_Hp,int Dl_Num)
 }
 
 void M34CryWolf1st::Check_AltarState(int Num,int State)
-//크라이울프 제단의 상태를 세팅해준다.(제단넘버,세팅할 상태)
 {
 	if(M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false)
 		return;
@@ -2233,7 +2174,6 @@ void M34CryWolf1st::Check_AltarState(int Num,int State)
 }
 
 void M34CryWolf1st::Set_Message_Box(int Str,int Num,int Key,int ObjNum)
-//크라이울프에서 쓰이는 메세지 박스(출력해야할 메세지번호 + 1950을 해줘야 한다,행수,제단고유번호,제단번호)
 {
 	if(M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false || LogOut)
 		return;
@@ -2256,7 +2196,6 @@ void M34CryWolf1st::Set_Message_Box(int Str,int Num,int Key,int ObjNum)
 }
 
 void M34CryWolf1st::MoveMvp_Interface()
-//크라이울프에서 사용된 메세지 박스의 버튼들처리.
 {
 	int Yes = 250;
 	int No = 330;
@@ -2279,7 +2218,6 @@ void M34CryWolf1st::MoveMvp_Interface()
 	if(View_End_Result == true)
 	{
 		if(MouseX > 300 && MouseX < 300 + 54 && MouseY > 300 && MouseY < 300+30)
-		//Yes 버튼
 		{
 			if(MouseLButton == true)
 			{
@@ -2295,10 +2233,8 @@ void M34CryWolf1st::MoveMvp_Interface()
 	}
 
 	if(Message_Box == 1)
-	//mvp 제단에 계약을 제시하는 창.
 	{
 		if(MouseX > No && MouseX < No + 54 && MouseY > 250 && MouseY < 250+30)
-		//No 버튼
 		{
 			if(MouseLButton == true)
 			{
@@ -2307,11 +2243,9 @@ void M34CryWolf1st::MoveMvp_Interface()
 			}
 		}
 		if(MouseX > Yes && MouseX < Yes + 54 && MouseY > 250 && MouseY < 250+30)
-		//Yes 버튼
 		{
 			if(MouseLButton == true)
 			{
-				//유니리아,펜릴,등등의 요정이 탈수있는걸 타고 계약을 시도했다.
 				if( Hero->Helper.Type==MODEL_HELPER+2 
 					|| Hero->Helper.Type==MODEL_HELPER+3 
 					|| Hero->Helper.Type == MODEL_HELPER+37
@@ -2348,7 +2282,6 @@ void M34CryWolf1st::MoveMvp_Interface()
 }
 
 void M34CryWolf1st::Sub_Interface()
-//메세지 박스의 버튼체크
 {
 	
 	if(M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false)
@@ -2445,20 +2378,16 @@ void M34CryWolf1st::Sub_Interface()
 }
 
 void M34CryWolf1st::Set_Hp(int State)
-//늑대신상의 체력을 세팅
 {
 	m_StatueHP = State;
 }
 
 void M34CryWolf1st::Set_Val_Hp(int State)
-//발가스 체력세팅
 {
 	Val_Hp = State;
 }
 
 bool M34CryWolf1st::Get_AltarState_State(int Num)
-//현재 제단의 상태를 받아온다.(제단번호)
-//true = 계약중.
 {
 	BYTE Use = (m_AltarState[Num] & 0xf0)>>4;
 //	BYTE State = (m_AltarState[Num] & 0x0f);
@@ -2469,9 +2398,7 @@ bool M34CryWolf1st::Get_AltarState_State(int Num)
 }
 
 bool M34CryWolf1st::Render_Mvp_Interface()
-//크라이울프 인터페이스를 찍어주는 부분.
 {
-	//박종훈
 	if(M34CryWolf1st::IsCyrWolf1st() == false)
 		return false;
 
@@ -2480,9 +2407,6 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 	char Text[300];
 
 	float Main[] = {518.f,278.f,122.f,119.f,120.f/128.f,118.f/128.f};
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float Deco[] = {4.f,98.f,20.f,9.f,20.f/32.f,8.5f/16.f};
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	float Number[5][6] =   {{565.f,280.f,13.f,13.f,12.f/16.f,12.f/16.f},
 							{582.f,282.f,13.f,13.f,12.f/16.f,12.f/16.f},
 							{598.f,286.f,13.f,13.f,12.f/16.f,12.f/16.f},
@@ -2737,7 +2661,6 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 
 	if(TimeStart = true)
 	{
-	//크라이울프 시간을 찍는다.
 		int nPastHour = m_iHour;
 		int nPastMinute;
 
@@ -2781,9 +2704,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 		else
 			RenderNumber2D ( 520+87, 384+18, 60 - nPastTick, 14, 14 );
 	}
-//크라이울프 시간을 찍는다.
 
-//늑대의 석상 hp를 찍어준다.
 	float Hp = ((88.f / 100.f) * (float)m_StatueHP);
 	float nx = ((89.f / 100.f) * (float)m_StatueHP);
 
@@ -2803,11 +2724,11 @@ bool M34CryWolf1st::SetCurrentActionCrywolfMonster(CHARACTER* c, OBJECT* o)
 	switch(c->MonsterIndex)
 	{
 	case 440:
-	case 340:		//  다크엘프
-	case 344:		//  발람
-	case 345:		//  데쓰스피릿
-	case 341:		//  소람
-	case 349:		//  발가스
+	case 340:
+	case 344:
+	case 345:
+	case 341:
+	case 349:
 		return CheckMonsterSkill(c, o);
 	}
 	return false;

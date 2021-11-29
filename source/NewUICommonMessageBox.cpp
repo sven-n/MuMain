@@ -535,11 +535,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 #ifdef PBG_ADD_NAMETOPMSGBOX
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	if(TextExtentWidth <= (DWORD)_TextSize)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	if(TextExtentWidth <= _TextSize)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 #else //PBG_ADD_NAMETOPMSGBOX
 	if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
 #endif //PBG_ADD_NAMETOPMSGBOX
@@ -575,11 +571,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 #endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 #ifdef PBG_ADD_NAMETOPMSGBOX
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			if(TextExtentWidth > (DWORD)_TextSize && cur_offset != 0)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			if(TextExtentWidth > _TextSize && cur_offset != 0)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 #else //PBG_ADD_NAMETOPMSGBOX
 			if(TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
 #endif //PBG_ADD_NAMETOPMSGBOX
@@ -602,11 +594,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 				TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 #ifdef PBG_ADD_NAMETOPMSGBOX
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				if(TextExtentWidth <= (DWORD)_TextSize)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				if(TextExtentWidth <= _TextSize)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 #else //PBG_ADD_NAMETOPMSGBOX
 				if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
 #endif //PBG_ADD_NAMETOPMSGBOX
@@ -994,11 +982,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
 	size_t TextExtentWidth;
 	int iLine = 0;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 	if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
@@ -1028,11 +1012,8 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
 			cur_offset += offset;
 
 			type_string strTemp(strRemainText, 0, cur_offset/* size */);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 			if(TextExtentWidth > MSGBOX_TEXT_MAXWIDTH_3DITEM && cur_offset != 0)
@@ -1047,11 +1028,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
 				m_MsgDataList.push_back(pMsg);
 				iLine++;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 				if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
@@ -1134,16 +1111,9 @@ bool SEASON3B::CNewUI3DItemCommonMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// 메세지박스 프레임
 	RenderFrame();
-
-	// 텍스트
 	RenderTexts();
-
-	// 버튼 부분
 	RenderButtons();
-	
 	DisableAlphaBlend();
 	return true;
 }
@@ -1174,15 +1144,12 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 	
-	// 메세지박스 중간부분(3줄이상)
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
 	y += height;
@@ -1196,7 +1163,6 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderFrame()
 		}
 	}
 
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -1205,7 +1171,6 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderTexts()
 {
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x + MSGBOX_TEXT_LEFT_BLANK_3DITEM; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
 	for(; vi != m_MsgDataList.end(); vi++)
@@ -1225,11 +1190,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -1253,8 +1214,6 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderButtons()
 	}
 }
 
-////////////////////////////////// Common Message Box Layout //////////////////////////////////
-
 bool SEASON3B::CServerLostMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -1263,9 +1222,7 @@ bool SEASON3B::CServerLostMsgBoxLayout::SetLayout()
 	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK, 10.f))
 		return false;
 
-	// 402 "서버와의 접속이 끊어졌습니다."
 	pMsgBox->AddMsg(GlobalText[402]);
-
 	pMsgBox->AddCallbackFunc(CServerLostMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->RemoveCallbackFunc(MSGBOX_EVENT_PRESSKEY_ESC);
 	

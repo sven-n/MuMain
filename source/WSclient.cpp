@@ -6841,16 +6841,8 @@ void ReceivePartyInfo( BYTE *ReceiveBuffer )
     {
         LPPRECEIVE_PARTY_INFO Data2 = (LPPRECEIVE_PARTY_INFO)(ReceiveBuffer+Offset);
         char stepHP= Data2->value&0xf;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		char number= (Data2->value>>4)&0xf;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		
-#ifdef KJH_FIX_WOPS_K27187_STEPHP_INFO_IN_PARTY
+
 		PARTY_t* p = &Party[i];
-#else // KJH_FIX_WOPS_K27187_STEPHP_INFO_IN_PARTY
-		PARTY_t* p = &Party[number];
-#endif // KJH_FIX_WOPS_K27187_STEPHP_INFO_IN_PARTY
 		
         p->stepHP = min ( 10, max ( 0, stepHP ) );
 		
@@ -9214,10 +9206,6 @@ void NotifySoldItem(BYTE* ReceiveBuffer)
 
 void NotifyClosePersonalShop(BYTE* ReceiveBuffer)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	LPCLOSEPSHOP_RESULTINFO Header = (LPCLOSEPSHOP_RESULTINFO)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	if( g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE )
 	{
 		g_pNewUISystem->Hide( SEASON3B::INTERFACE_MYSHOP_INVENTORY );		
@@ -10239,11 +10227,6 @@ void ReceiveQuestLimitResult(BYTE* ReceiveBuffer)
 
 void ReceiveQuestByItemUseEP(BYTE* ReceiveBuffer)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	LPPMSG_NPCTALK_QUESTLIST pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-
 	DWORD* pdwQuestIndex = (DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST));
 	SendQuestSelection(*pdwQuestIndex, 0);
 }
@@ -10745,11 +10728,8 @@ void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
 
 void ReceiveChangeMapServerResult ( BYTE* ReceiveBuffer )
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
     LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	
+
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0xB1 [ReceiveChangeMapServerResult]");
 }
 
@@ -11702,7 +11682,7 @@ OBJECT* to = &tc->Object;
   }
 */
 
-void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
+void ReceivePreviewPort ( BYTE* ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD pData = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	int Offset = sizeof(PWHEADER_DEFAULT_WORD);
@@ -11710,9 +11690,6 @@ void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
 	{
 		LPPRECEIVE_PREVIEW_PORT pData2 = (LPPRECEIVE_PREVIEW_PORT)(ReceiveBuffer+Offset);
 		WORD Key       = ((WORD)(pData2->m_byKeyH)<<8) + pData2->m_byKeyL;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		int CreateFlag = (Key>>15);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		Key &= 0x7FFF;
 		
         switch ( pData2->m_byObjType )
@@ -11792,9 +11769,7 @@ void    ReceivePreviewPort ( BYTE* ReceiveBuffer )
 
 void ReceiveMapInfoResult ( BYTE* ReceiveBuffer )
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
     LPPRECEIVE_MAP_INFO_RESULT pData = (LPPRECEIVE_MAP_INFO_RESULT)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 }
 
 void ReceiveGuildCommand ( BYTE* ReceiveBuffer )
@@ -12114,9 +12089,7 @@ void ReceivePCRoomPointShopOpen(BYTE* ReceiveBuffer)
 
 void ReceiveCursedTempleEnterInfo( BYTE* ReceiveBuffer )
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPPMSG_CURSED_TEMPLE_USER_COUNT data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	
 	g_pCursedTempleEnterWindow->ReceiveCursedTempleEnterInfo( ReceiveBuffer );
 }
@@ -12222,23 +12195,17 @@ void RecevieRaklionStateChange(BYTE* ReceiveBuffer)
 
 void RecevieRaklionBattleResult(BYTE* ReceiveBuffer)
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPPMSG_ANS_RAKLION_BATTLE_RESULT pData = (LPPMSG_ANS_RAKLION_BATTLE_RESULT)ReceiveBuffer;	
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 }
 
 void RecevieRaklionWideAreaAttack(BYTE* ReceiveBuffer)
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPPMSG_NOTIFY_RAKLION_WIDE_AREA_ATTACK pData = (LPPMSG_NOTIFY_RAKLION_WIDE_AREA_ATTACK)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 }
 
 void RecevieRaklionUserMonsterCount(BYTE* ReceiveBuffer)
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPPMSG_NOTIFY_RAKLION_USER_MONSTER_COUNT pData = (LPPMSG_NOTIFY_RAKLION_USER_MONSTER_COUNT)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 }
 #endif // CSK_RAKLION_BOSS
 
@@ -12307,11 +12274,7 @@ void ProtocolCompiler( CWsctlc *pSocketClient, int iTranslation, int iParam)
 	//if(CurrentProtocolState >= RECEIVE_JOIN_MAP_SERVER)
 	//	return;
 	int HeadCode;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int Size = 0;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int Size;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	
 	while(1)
 	{
@@ -13583,10 +13546,10 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x53:
         ReceiveGuildLeave(ReceiveBuffer);
 		break;
-	case 0x54:	// 길드마스터 NPC 클릭시
+	case 0x54:
         ReceiveCreateGuildInterface(ReceiveBuffer);
 		break;
-	case 0x55:	// 길드마스터 NPC 클릭후 길드 생성 클릭시
+	case 0x55:
         ReceiveCreateGuildMasterInterface(ReceiveBuffer);
 		break;
 	case 0x56:

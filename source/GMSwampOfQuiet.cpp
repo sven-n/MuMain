@@ -78,28 +78,28 @@ bool GMSwampOfQuiet::MoveObject(OBJECT* pObject)
 
 	switch(pObject->Type)
 	{
-	case 57:	// 불+연기 박스
+	case 57:
 		pObject->HiddenMesh = -2;
 		Luminosity = (float)(rand()%4+3)*0.1f;
 		Vector(Luminosity,Luminosity*0.6f,Luminosity*0.2f,Light);
 		AddTerrainLight(pObject->Position[0], pObject->Position[1],Light,3,PrimaryTerrainLight);
 		break;
-	case 71:	// 불박스
+	case 71:
 		pObject->HiddenMesh = -2;
 		break;
-	case 72:	// 흰연기
+	case 72:
 		pObject->HiddenMesh = -2;
 		break;
-	case 73:	// 재박스
+	case 73:
 		pObject->HiddenMesh = -2;
 		break;
-	case 74:	// 검은연기
+	case 74:
 		pObject->HiddenMesh = -2;
 		break;
-	case 77:	// 노란안개
+	case 77:
 		pObject->HiddenMesh = -2;
 		break;
-	case 78:	// 파란안개
+	case 78:
 		pObject->HiddenMesh = -2;
 		break;
 	}
@@ -136,7 +136,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 
 	switch(pObject->Type)
 	{
-	case 57:	//불+연기 박스
+	case 57:
 		{
 			if ( rand()%3==0) 
 			{
@@ -146,7 +146,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			}
 		}
 		break;
-	case 71:	//불 박스
+	case 71:
 		{
 			if ( rand()%3==0) 
 			{
@@ -155,7 +155,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			}
 		}
 		break;
-	case 72:	//맵상의 수증기같은연기.
+	case 72:
 		{
 			if ( rand()%6==0) 
 			{
@@ -168,9 +168,9 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			}
 		}
 		break;
-	case 73:	//모래바람(재...)
+	case 73:
 		break;
-	case 74:    //연기만 나는박스.(검은연기)
+	case 74:
 		{
 			if(rand()%3 == 0)
 			{
@@ -179,7 +179,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			}
 		}
 		break;
-	case 77:    //안개(엷은녹색박스.
+	case 77:
 		{
 			if ( rand()%6==0) 
 			{
@@ -188,7 +188,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			}
 		}
 		break;
-	case 78:    //파랑안개박스.
+	case 78:
 		{
 			if ( rand()%6==0) 
 			{
@@ -203,12 +203,9 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 
 bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel,bool ExtraMon)
 {
-// 	if(!IsCurrentMap())	// ◎ 임시로 주석처리
-// 		return false;
-
 	if (pObject->Type >= MODEL_MONSTER01+139 && pObject->Type <= MODEL_MONSTER01+141)
 	{
-		if (pObject->CurrentAction == MONSTER01_DIE)	// 쉐도우 계열 사망동작 안그림
+		if (pObject->CurrentAction == MONSTER01_DIE)
 		{
 			float fLumi = 1.0f;
 			if (pObject->AnimationFrame > 9.0f)
@@ -218,18 +215,15 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel,bool ExtraMon)
 
 			switch(pObject->Type)
 			{
-			case MODEL_MONSTER01+139:	// 쉐도우 폰
-				// 피부는 반투명
+			case MODEL_MONSTER01+139:
 				Vector(1.0f,0.2f,0.2f,pModel->BodyLight);
  				pModel->RenderMesh(3,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,3,fLumi);
 				break;
-			case MODEL_MONSTER01+140:	// 쉐도우 나이트
-				// 피부는 반투명
+			case MODEL_MONSTER01+140:
 				Vector(0.5f,0.8f,1.0f,pModel->BodyLight);
  				pModel->RenderMesh(3,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,3,fLumi);
 				break;
-			case MODEL_MONSTER01+141:	// 쉐도우 룩
-				// 피부는 반투명
+			case MODEL_MONSTER01+141:
 				Vector(0.5f,1.0f,0.5f,pModel->BodyLight);
  				pModel->RenderMesh(4,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,4,fLumi);
 				break;
@@ -240,36 +234,30 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel,bool ExtraMon)
 			float fLumi = (sinf(WorldTime*0.002f) + 1.2f) * 0.5f * 1.0f;
 			switch(pObject->Type)
 			{
-			case MODEL_MONSTER01+139:	// 쉐도우 폰
+			case MODEL_MONSTER01+139:
  				pModel->RenderMesh(0,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  				pModel->RenderMesh(1,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  				pModel->RenderMesh(2,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  				pModel->RenderMesh(4,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
-				// 피부는 반투명
  				pModel->RenderMesh(3,RENDER_TEXTURE,0.7f,pObject->BlendMesh,pObject->BlendMeshLight);
-				// 어깨 색깔
 				pModel->RenderMesh(4,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,4,fLumi,0,0,BITMAP_SHADOW_PAWN_RED);
 				pModel->RenderMesh(4,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,4,fLumi,0,0,BITMAP_SHADOW_PAWN_RED);
 				break;
-			case MODEL_MONSTER01+140:	// 쉐도우 나이트
+			case MODEL_MONSTER01+140:
  				pModel->RenderMesh(0,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  				pModel->RenderMesh(1,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  				pModel->RenderMesh(2,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  				pModel->RenderMesh(4,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
-				// 피부는 반투명
  				pModel->RenderMesh(3,RENDER_TEXTURE,0.7f,pObject->BlendMesh,pObject->BlendMeshLight);
-				// 어깨 색깔
 				pModel->RenderMesh(4,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,4,fLumi,0,0,BITMAP_SHADOW_KINGHT_BLUE);
 				pModel->RenderMesh(4,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,4,fLumi,0,0,BITMAP_SHADOW_KINGHT_BLUE);
 				break;
-			case MODEL_MONSTER01+141:	// 쉐도우 룩
+			case MODEL_MONSTER01+141:
  				pModel->RenderMesh(0,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  				pModel->RenderMesh(1,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  				pModel->RenderMesh(2,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  				pModel->RenderMesh(3,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
-				// 피부는 반투명
  				pModel->RenderMesh(4,RENDER_TEXTURE,0.7f,pObject->BlendMesh,pObject->BlendMeshLight);
-				// 어깨 색깔
 				pModel->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,0,fLumi,0,0,BITMAP_SHADOW_ROOK_GREEN);
 				pModel->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,0,fLumi,0,0,BITMAP_SHADOW_ROOK_GREEN);
 				break;
@@ -299,7 +287,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 
 	switch (iType)
 	{
-	case 441:	// 사피-우누스
+	case 441:
 		OpenMonsterModel(136);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+136,PosX,PosY);
 		strcpy(pCharacter->ID,"사피-우누스");
@@ -317,7 +305,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 // 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 // 		}
 		break;
-	case 442:	// 사피-두오
+	case 442:
 		OpenMonsterModel(137);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+137,PosX,PosY);
 		strcpy(pCharacter->ID,"사피-두오");
@@ -335,7 +323,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 // 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 // 		}
 		break;
-	case 443:	// 사피-트레스
+	case 443:
 		OpenMonsterModel(138);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+138,PosX,PosY);
 		strcpy(pCharacter->ID,"사피-트레스");
@@ -353,7 +341,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 // 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 // 		}
 		break;
-	case 444:	// 쉐도우 폰
+	case 444:
 		OpenMonsterModel(139);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+139,PosX,PosY);
 		strcpy(pCharacter->ID,"쉐도우 폰");
@@ -361,18 +349,8 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		pCharacter->Object.LifeTime = 100;
-// 		{
-// 	  		BMD *b = &Models[MODEL_MONSTER01+139];
-// // 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.4f;
-// 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.4f;
-// // 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
-// 		}
 		break;
-	case 445:	// 쉐도우 나이트
+	case 445:
 		OpenMonsterModel(140);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+140,PosX,PosY);
 		strcpy(pCharacter->ID,"쉐도우 나이트");
@@ -380,18 +358,8 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		pCharacter->Object.LifeTime = 100;
-// 		{
-// 	  		BMD *b = &Models[MODEL_MONSTER01+140];
-// // 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.45f;
-// 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.45f;
-// // 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
-// 		}
 		break;
-	case 446:	// 쉐도우 룩
+	case 446:
 		OpenMonsterModel(141);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+141,PosX,PosY);
 		strcpy(pCharacter->ID,"쉐도우 룩");
@@ -399,70 +367,30 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		pCharacter->Object.LifeTime = 100;
-// 		{
-// 	  		BMD *b = &Models[MODEL_MONSTER01+141];
-// // 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
-// 		}
 		break;
-	case 447:	// 썬더 네이핀
+	case 447:
 		OpenMonsterModel(142);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+142,PosX,PosY);
 		strcpy(pCharacter->ID,"썬더 네이핀");
 		pCharacter->Object.Scale = 0.95f;
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
-// 		{
-// 	  		BMD *b = &Models[MODEL_MONSTER01+142];
-// // 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.20f;
-// 		}
 		break;
-	case 448:	// 고스트 네이핀
+	case 448:
 		OpenMonsterModel(143);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+143,PosX,PosY);
 		strcpy(pCharacter->ID,"고스트 네이핀");
 		pCharacter->Object.Scale = 0.95f;
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
-// 		{
-// 	  		BMD *b = &Models[MODEL_MONSTER01+143];
-// // 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.20f;
-// 		}
 		break;
-	case 449:	// 블레이즈 네이핀
+	case 449:
 		OpenMonsterModel(144);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+144,PosX,PosY);
 		strcpy(pCharacter->ID,"블레이즈 네이핀");
 		pCharacter->Object.Scale = 0.95f;
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
-// 		{
-// 	  		BMD *b = &Models[MODEL_MONSTER01+144];
-// // 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
-// // 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
-// 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.20f;
-// 		}
 		break;
 #ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 	case 561:
@@ -471,13 +399,11 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 		strcpy(pCharacter->ID,"메듀사");
 		pCharacter->Object.Scale = 1.5f;
 		pCharacter->Object.LifeTime = 100;
-// 		pCharacter->Weapon[0].Type = -1;
-// 		pCharacter->Weapon[1].Type = -1;
 		break;
 #endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 #ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
-	case 557:	// 사피퀸	// 사피 우누스 441/136
-	case 560:	// 사피퀸 - 메두사 부하	// 사피우누스  441/136
+	case 557:
+	case 560:
 		OpenMonsterModel(201);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+201,PosX,PosY);
 		strcpy(pCharacter->ID,"사피퀸");
@@ -485,7 +411,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-	case 558:	// 아이스 네이핀	// 블레이즈 네이핀 449/144
+	case 558:
 		OpenMonsterModel(202);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+202,PosX,PosY);
 		strcpy(pCharacter->ID,"아이스 네이핀");
@@ -493,7 +419,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-	case 559:	// 쉐도우 마스터	// 쉐도우 룩 446/141
+	case 559:
 		OpenMonsterModel(203);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+203,PosX,PosY);
 		strcpy(pCharacter->ID,"쉐도우 마스터");
@@ -515,7 +441,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+142:	// 썬더 네이핀
+	case MODEL_MONSTER01+142:
 		if (pObject->CurrentAction == MONSTER01_ATTACK2)
 		{	
 			BMD* pModel = &Models[pObject->Type];
@@ -532,35 +458,27 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 				VectorRotate( vPosition, matRotate, vLook );
 				VectorAdd( pObject->Position, vLook, vPosition );
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				float a = pObject->Direction[0];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				// 땅파이는 이펙트
 				CreateEffect( BITMAP_CRATER, vPosition,   pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f );
 				for(int iu = 0; iu < 20; iu++)
 				{
 					//CreateEffect ( MODEL_BIG_STONE1, vPosition,pObject->Angle,pObject->Light,10);
 					CreateEffect ( MODEL_STONE2, vPosition,pObject->Angle,pObject->Light );
 				}
-				// 연기 이펙트
 				Vector( 0.7f, 0.7f, 1.f, vLight );
 				CreateParticle(BITMAP_CLUD64, vPosition, pObject->Angle, vLight, 7, 2.0f);
 				CreateParticle(BITMAP_CLUD64, vPosition, pObject->Angle, vLight, 7, 2.0f);
-				//CreateParticle(BITMAP_CLUD64, vPosition, pObject->Angle, vLight, 7, 2.0f);
 				
-				// 충격파
 				Vector( 0.3f, 0.2f, 1.f, vLight );
  				CreateEffect( BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 11 );
  				CreateEffect( BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 11 );
 				
-				// 에너지볼(전기)
 				vPosition[2] += 100.0f;
 				Vector ( 0.0f, 0.2f, 1.0f, vLight );
 				CreateEffect(MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1, vPosition, pObject->Angle, vLight, 0 );
 			}
 		}
 		break;
-	case MODEL_MONSTER01+143:	// 고스트 네이핀
+	case MODEL_MONSTER01+143:
 		if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{	
 			float Start_Frame = 7.0f;
@@ -593,11 +511,11 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 				AngleMatrix ( pObject->Angle, matRotate );
 				VectorRotate( vPosition, matRotate, vLook );
 				VectorAdd( pObject->Position, vLook, vPosition );
-				CreateJoint(BITMAP_JOINT_ENERGY,vPosition, pObject->Position, pObject->Angle,46,pObject,20.0f);  // 마나 스틸 맞는 효과
+				CreateJoint(BITMAP_JOINT_ENERGY,vPosition, pObject->Position, pObject->Angle,46,pObject,20.0f);
 			}
 		}
 		break;
-	case MODEL_MONSTER01+144:	// 블레이즈 네이핀
+	case MODEL_MONSTER01+144:
 		if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{	
 			BMD* pModel = &Models[pObject->Type];
@@ -615,17 +533,14 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 				VectorRotate( vPosition, matRotate, vLook );
 				VectorAdd( pObject->Position, vLook, vPosition );
 
-				// 불
 				CreateEffect(BITMAP_FIRE_CURSEDLICH, vPosition, pObject->Angle, vLight, 1, pObject);
 
-				// 땅파이는 이펙트
 				CreateEffect( BITMAP_CRATER, vPosition,   pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f );
 				for(int iu = 0; iu < 20; iu++)
 				{
 					CreateEffect ( MODEL_STONE2, vPosition,pObject->Angle,pObject->Light );
 				}
 
-				// 충격파
 				Vector( 0.5f, 0.1f, 0.0f, vLight );
   				CreateEffect( BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 12, NULL, -1, 0, 0, 0, 0.1f );
 			}
@@ -664,13 +579,13 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 							switch(rand()%3)
 							{
 							case 0:
-								CreateParticle(BITMAP_FIRE_HIK1_MONO,vPos,vAngle,vColor,4,pObject->Scale,pObject);	// 불
+								CreateParticle(BITMAP_FIRE_HIK1_MONO,vPos,vAngle,vColor,4,pObject->Scale,pObject);	
 								break;
 							case 1:
-								CreateParticle(BITMAP_FIRE_HIK2_MONO,vPos,vAngle,vColor,8,pObject->Scale,pObject);	// 불
+								CreateParticle(BITMAP_FIRE_HIK2_MONO,vPos,vAngle,vColor,8,pObject->Scale,pObject);	
 								break;
 							case 2:
-								CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vColor,5,pObject->Scale,pObject);	// 불
+								CreateParticle(BITMAP_FIRE_HIK3_MONO,vPos,vAngle,vColor,5,pObject->Scale,pObject);	
 								break;
 							}
 						}
@@ -685,7 +600,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 		break;
 #endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 #ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
-	case MODEL_MONSTER01+202:	// 아이스 네이핀 // 공격 이후 이펙트
+	case MODEL_MONSTER01+202:
 		if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{	
 			BMD* pModel = &Models[pObject->Type];
@@ -703,17 +618,14 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 				VectorRotate( vPosition, matRotate, vLook );
 				VectorAdd( pObject->Position, vLook, vPosition );
 				
-				// 불
 				CreateEffect(BITMAP_FIRE_CURSEDLICH, vPosition, pObject->Angle, vLight, 1, pObject);
 				
-				// 땅파이는 이펙트
 				CreateEffect( BITMAP_CRATER, vPosition,   pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f );
 				for(int iu = 0; iu < 20; iu++)
 				{
 					CreateEffect ( MODEL_STONE2, vPosition,pObject->Angle,pObject->Light );
 				}
 				
-				// 충격파
 				Vector( 0.5f, 0.1f, 0.0f, vLight );
 				CreateEffect( BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 12, NULL, -1, 0, 0, 0, 0.1f );
 			}
@@ -831,7 +743,7 @@ void GMSwampOfQuiet::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 					Vector(0.f, 0.f, 0.f, EndRelative);
 
 					// 왼손
-					pModel->TransformPosition(BoneTransform[42], StartRelative, StartPos, false);	// 기준
+					pModel->TransformPosition(BoneTransform[42], StartRelative, StartPos, false);
 
 					pModel->TransformByBoneMatrix( EndPos, BoneTransform[34] );
 //					pModel->TransformPosition(BoneTransform[34], EndRelative, EndPos, false);
@@ -845,8 +757,7 @@ void GMSwampOfQuiet::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD*
  					pModel->TransformPosition(BoneTransform[43], EndRelative, EndPos, false);
  					CreateBlur(pCharacter, StartPos, EndPos, vLight, 0, false, 4);
 
-					// 오른손
-					pModel->TransformPosition(BoneTransform[75], StartRelative, StartPos, false);	// 기준
+					pModel->TransformPosition(BoneTransform[75], StartRelative, StartPos, false);
 
 					pModel->TransformPosition(BoneTransform[76], EndRelative, EndPos, false);
 					CreateBlur(pCharacter, StartPos, EndPos, vLight, 0, false, 5);
@@ -864,11 +775,11 @@ void GMSwampOfQuiet::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 			}
 		}
 		break;
-	case MODEL_MONSTER01+142:	// 썬더 네이핀
+	case MODEL_MONSTER01+142:
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
-	case MODEL_MONSTER01+201:	// 사피 퀸
-	case MODEL_MONSTER01+204:	// 사피 퀸 : 메두사 부하
+	case MODEL_MONSTER01+201:
+	case MODEL_MONSTER01+204:
 		{
 			float Start_Frame = 6.f;
 			float End_Frame = 7.6f;
@@ -922,7 +833,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 
 	switch(pObject->Type)		
 	{
-	case MODEL_MONSTER01+136:	// 사피-우노스
+	case MODEL_MONSTER01+136:
 		{
 			Vector(1.0f, 0.6f, 0.1f, vLight);
 			Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -932,7 +843,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, pObject);
 		}
 		break;
-	case MODEL_MONSTER01+137:	// 사피-두오
+	case MODEL_MONSTER01+137:
 		{
 			Vector(1.0f, 0.0f, 0.0f, vLight);
 			Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -942,7 +853,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, pObject);
 		}
 		break;
-	case MODEL_MONSTER01+138:	// 사피-트레스
+	case MODEL_MONSTER01+138:
 		{
 			Vector(0.2f, 0.7f, 1.0f, vLight);
 			Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -952,7 +863,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, pObject);
 		}
 		break;
-	case MODEL_MONSTER01+139:	// 쉐도우 폰
+	case MODEL_MONSTER01+139:
 		{
 			int iBones[] = { 11, 15, 34, 21, 25, 39 };
 			Vector(1.0f, 0.1f, 0.1f, vLight);
@@ -960,15 +871,15 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			{
 				if (rand()%6 > 0) continue;
 				pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-				CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vLight,50,1.0f);	// 연기
-				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,0,1.0f);	// 3종 연기
+				CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vLight,50,1.0f);
+				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,0,1.0f);
 			}
 		}
  		if (pObject->CurrentAction == MONSTER01_DIE)
 		{
 			if (pObject->LifeTime == 100)
 			{
-				pObject->LifeTime = 90;	// 한번만 실행
+				pObject->LifeTime = 90;
 				pObject->m_bRenderShadow = false;
 
 				vec3_t vWorldPos, Light;
@@ -995,7 +906,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			}
 		}
 		break;
-	case MODEL_MONSTER01+140:	// 쉐도우 나이트
+	case MODEL_MONSTER01+140:
 		{
 			int iBones[] = { 11, 15, 34, 21, 25, 39 };
 			Vector(0.3f, 0.6f, 1.0f, vLight);
@@ -1003,15 +914,15 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			{
 				if (rand()%6 > 0) continue;
 				pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-				CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vLight,50,1.0f);	// 연기
-				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,0,1.0f);	// 3종 연기
+				CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vLight,50,1.0f);
+				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,0,1.0f);
 			}
 		}
  		if (pObject->CurrentAction == MONSTER01_DIE)
 		{
 			if (pObject->LifeTime == 100)
 			{
-				pObject->LifeTime = 90;	// 한번만 실행
+				pObject->LifeTime = 90;
 				pObject->m_bRenderShadow = false;
 
 				vec3_t vWorldPos, Light;
@@ -1038,7 +949,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			}
 		}
 		break;
-	case MODEL_MONSTER01+141:	// 쉐도우 룩
+	case MODEL_MONSTER01+141:
 		{
 			int iBones[] = { 11, 15, 34, 21, 25, 39 };
 			Vector(0.5f, 1.0f, 0.5f, vLight);
@@ -1046,15 +957,15 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			{
 				if (rand()%6 > 0) continue;
 				pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-				CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vLight,50,1.5f);	// 연기
-				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,0,1.1f);	// 3종 연기
+				CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vLight,50,1.5f);
+				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,0,1.1f);
 			}
 		}
  		if (pObject->CurrentAction == MONSTER01_DIE)
 		{
 			if (pObject->LifeTime == 100)
 			{
-				pObject->LifeTime = 90;	// 한번만 실행
+				pObject->LifeTime = 90;
 				pObject->m_bRenderShadow = false;
 
 				vec3_t vWorldPos, Light;
@@ -1081,7 +992,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			}
 		}
 		break;
-	case MODEL_MONSTER01+142:	// 썬더 네이핀
+	case MODEL_MONSTER01+142:
 		{
 			int iBones[] = { 7, 4, 5, 10, 22, 11, 23, 12, 24, 34, 39 };
 			vec3_t vLightFlare;
@@ -1096,23 +1007,23 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 				Vector((rand()%30-15)*1.0f, (rand()%30-15)*1.0f, (rand()%30-15)*1.0f, vRelative);
 				pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
 				fScale = (float)(rand()%80+32)*0.01f*1.0f;
-				CreateParticle(BITMAP_LIGHTNING_MEGA1+rand()%3,vPos,pObject->Angle,vLight,0, fScale);	// 전기
+				CreateParticle(BITMAP_LIGHTNING_MEGA1+rand()%3,vPos,pObject->Angle,vLight,0, fScale);
 			}
 		}
 		break;
-	case MODEL_MONSTER01+143:	// 고스트 네이핀
+	case MODEL_MONSTER01+143:
 		{
 			int iBones[] = { 21, 37, 65, 66, 77, 78, 79 };
 			Vector(0.4f, 1.0f, 0.4f, vLight);
 			for (int i = 0; i < 7; ++i)
 			{
 				pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,1,1.0f,pObject);	// 연기
-				CreateParticle(BITMAP_CLUD64,vPos,pObject->Angle,vLight,6,1.0f,pObject);	// 연기
+				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,1,1.0f,pObject);
+				CreateParticle(BITMAP_CLUD64,vPos,pObject->Angle,vLight,6,1.0f,pObject);
 			}
 		}
 		break;
-	case MODEL_MONSTER01+144:	// 블레이즈 네이핀
+	case MODEL_MONSTER01+144:
 		{
 			int iBones[] = { 10, 61, 72, 21, 122, 116 };
 			Vector(1.0f, 1.0f, 1.0f, vLight);
@@ -1139,17 +1050,17 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 					Vector((rand()%20-10)*1.0f, (rand()%20-10)*1.0f, (rand()%20-10)*1.0f, vRelative);
 					pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
 				}
-				// 리얼한 불 만들기!!
+
  				switch(rand()%3)
 				{
 				case 0:
-					CreateParticle(BITMAP_FIRE_HIK1,vPos,pObject->Angle,vLight,0,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_HIK1,vPos,pObject->Angle,vLight,0,fScale);
 					break;
 				case 1:
-					CreateParticle(BITMAP_FIRE_CURSEDLICH,vPos,pObject->Angle,vLight,4,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_CURSEDLICH,vPos,pObject->Angle,vLight,4,fScale);
 					break;
 				case 2:
-					CreateParticle(BITMAP_FIRE_HIK3,vPos,pObject->Angle,vLight,0,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_HIK3,vPos,pObject->Angle,vLight,0,fScale);
 					break;
 				}
 			}
@@ -1161,30 +1072,22 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			vec3_t vColor;
 			Vector(1.0f, 1.0f, 1.0f, vColor);
 			
-			//node5 상체
-			//lightmarks 작게
 			pModel->TransformByObjectBone(vPos, pObject, 5);
 			Vector(0.9f, 0.8f, 0.3f, vColor);
 			CreateSprite(BITMAP_LIGHTMARKS, vPos, 2.0f, vColor, pObject);
-			//flare01 크게
 			Vector(0.1f, 1.0f, 0.0f, vColor);
 			CreateSprite(BITMAP_LIGHT, vPos, 2.4f, vColor, pObject);
 			
-			//node33 머리
-			//lightmarks 작게
 			pModel->TransformByObjectBone(vPos, pObject, 33);
 			Vector(0.9f, 0.8f, 0.3f, vColor);
 			CreateSprite(BITMAP_LIGHTMARKS, vPos, 1.2f, vColor, pObject);
-			//flare01 크게
 			Vector(0.1f, 1.0f, 0.0f, vColor);
 			CreateSprite(BITMAP_LIGHT, vPos, 1.4f, vColor, pObject);
 			
-			//눈 광원
 			MoveEye(pObject,pModel,34,35);
 			Vector(1.0f, 0.0f, 0.0f, vColor);
 			CreateJoint(BITMAP_JOINT_ENERGY,vPos,pObject->Position,pObject->Angle,55,pObject,6.0f,-1,0,0,-1, vColor);
 			CreateJoint(BITMAP_JOINT_ENERGY,vPos,pObject->Position,pObject->Angle,56,pObject,6.0f,-1,0,0,-1, vColor);
-			// 따로 만들지 않음
 			Vector(1.0f, 1.0f, 1.0f, vColor);
 			pModel->TransformByObjectBone(vPos, pObject, 34);
 			vPos[1] -= 0.8f;
@@ -1193,8 +1096,6 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			vPos[1] -= 0.8f;
 			CreateSprite(BITMAP_LIGHT_RED, vPos, 0.4f, vColor, pObject);
 			
-			//node68 지팡이
-			//flare01 크게
 			pModel->TransformByObjectBone(vPos, pObject, 68);
 			Vector(0.1f, 1.0f, 0.0f, vColor);
 			CreateSprite(BITMAP_LIGHT, vPos, 4.0f, vColor, pObject);
@@ -1204,17 +1105,15 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			CreateSprite(BITMAP_SHOCK_WAVE, vPos, 0.22f, vColor, pObject);
 			Vector(0.9f, 1.0f, 0.9f, vColor);
 			CreateSprite(BITMAP_SHINY+1, vPos, 1.2f, vColor, pObject);
-			//이펙트
 			if (rand()%2 == 0)
 			{
 				CreateEffect(BITMAP_WATERFALL_4, vPos, pObject->Angle, vColor, 0, pObject, 68);
 			}
 			
-			//지팡이 눈 광원
 			Vector(0.1f, 0.6f, 0.3f, vColor);
 			CreateJoint(BITMAP_JOINT_ENERGY,vPos,pObject->Position,pObject->Angle,57,pObject,10.0f,67,0,0,15, vColor); //57 - pk:node , ichaindex:maxtail
 			CreateJoint(BITMAP_JOINT_ENERGY,vPos,pObject->Position,pObject->Angle,57,pObject,10.0f,70,0,0,15, vColor); //57 - pk:node , ichaindex:maxtail
-			// 따로 만들지 않음
+
 			Vector(1.0f, 1.0f, 1.0f, vColor);
 			pModel->TransformByObjectBone(vPos, pObject, 66);
 			CreateSprite(BITMAP_LIGHT_RED, vPos, 0.4f, vColor, pObject);
@@ -1234,8 +1133,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 				if ( i % 5 == 0 )
 				{
 					pModel->TransformByObjectBone(vPos, pObject, temp[i]);
-					CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vColor,50,1.0f);	// 연기
-					CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vColor,0,1.0f);	// 3종 연기
+					CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vColor,50,1.0f);
+					CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vColor,0,1.0f);
 				}
 			}
 
@@ -1245,7 +1144,6 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 
 				if(rand()%3 == 0)
 				{
-					// 독 연기 이펙트
 					Vector(0.4f,0.9f,0.6f,vColor);
 					pModel->TransformByObjectBone(vPos, pObject, 0);
 					CreateParticle(BITMAP_SMOKE, vPos, pObject->Angle, vColor, 1);
@@ -1264,8 +1162,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 		break;
 #endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 #ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
-	case MODEL_MONSTER01+201:	// 사피퀸
-	case MODEL_MONSTER01+204:	// 사피퀸 : 메두사 부하
+	case MODEL_MONSTER01+201:
+	case MODEL_MONSTER01+204:
 		{
 			Vector(1.0f, 0.6f, 0.1f, vLight);
 			Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -1275,7 +1173,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, pObject);
 		}
 		break;
-	case MODEL_MONSTER01+202:	// 아이스 네이핀
+	case MODEL_MONSTER01+202:
 		{
 			int iBones[] = { 10, 61, 72, 21, 122, 116 };
 			Vector(1.0f, 1.0f, 1.0f, vLight);
@@ -1302,25 +1200,24 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 					Vector((rand()%20-10)*1.0f, (rand()%20-10)*1.0f, (rand()%20-10)*1.0f, vRelative);
 					pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
 				}
-				// 리얼한 불 만들기!!
 				Vector( 0.25f, 0.6f, 0.7f, vLight );
 
 				switch(rand()%3)
 				{
 				case 0:
-					CreateParticle(BITMAP_FIRE_HIK1,vPos,pObject->Angle,vLight,0,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_HIK1,vPos,pObject->Angle,vLight,0,fScale);
 					break;
 				case 1:
-					CreateParticle(BITMAP_FIRE_CURSEDLICH,vPos,pObject->Angle,vLight,4,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_CURSEDLICH,vPos,pObject->Angle,vLight,4,fScale);
 					break;
 				case 2:
-					CreateParticle(BITMAP_FIRE_HIK3,vPos,pObject->Angle,vLight,0,fScale);	// 불
+					CreateParticle(BITMAP_FIRE_HIK3,vPos,pObject->Angle,vLight,0,fScale);
 					break;
 				}
 			}
 		}
 		break;
-	case MODEL_MONSTER01+203:	// 쉐도우 마스터
+	case MODEL_MONSTER01+203:
 		{
 			int iBones[] = { 11, 15, 34, 21, 25, 39 };
 			Vector(1.0f, 1.0f, 1.f, vLight);
@@ -1328,15 +1225,15 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			{
 				if (rand()%6 > 0) continue;
 				pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-				CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vLight,50,1.5f);	// 연기
-				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,0,1.1f);	// 3종 연기
+				CreateParticle(BITMAP_SMOKE,vPos,pObject->Angle,vLight,50,1.5f);
+				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vPos,pObject->Angle,vLight,0,1.1f);
 			}
 		}
 		if (pObject->CurrentAction == MONSTER01_DIE)
 		{
 			if (pObject->LifeTime == 100)
 			{
-				pObject->LifeTime = 90;	// 한번만 실행
+				pObject->LifeTime = 90;
 				pObject->m_bRenderShadow = false;
 				
 				vec3_t vWorldPos, Light;
@@ -1381,11 +1278,10 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 
 	if (fDistance > 500.0f) return true;
 
-	// 사운드 처리
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+136:	// 사피-우누스
-	case MODEL_MONSTER01+137:	// 사피-두오
+	case MODEL_MONSTER01+136:
+	case MODEL_MONSTER01+137:
 		if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{
 			if (rand()%3 == 0)
@@ -1401,7 +1297,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+138:	// 사피-트레스
+	case MODEL_MONSTER01+138:
 		if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{
 			if (rand()%3 == 0)
@@ -1417,7 +1313,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+139:	// 쉐도우 폰
+	case MODEL_MONSTER01+139:
 		if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{
 			PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_PAWN_ATTACK01);
@@ -1427,7 +1323,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+140:	// 쉐도우 나이트
+	case MODEL_MONSTER01+140:
 		if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{
 			PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_KNIGHT_ATTACK01);
@@ -1437,7 +1333,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+141:	// 쉐도우 룩
+	case MODEL_MONSTER01+141:
 		if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{
 			PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01);
@@ -1447,7 +1343,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+142:	// 썬더 네이핀
+	case MODEL_MONSTER01+142:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)
@@ -1464,7 +1360,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+143:	// 고스트 네이핀
+	case MODEL_MONSTER01+143:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)
@@ -1481,7 +1377,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+144:	// 블레이즈 네이핀
+	case MODEL_MONSTER01+144:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)
@@ -1506,8 +1402,8 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 		return true;
 #endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 #ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
-	case MODEL_MONSTER01+201:	// 사피퀸
-	case MODEL_MONSTER01+204:	// 사피퀸 : 메두사 부하
+	case MODEL_MONSTER01+201:
+	case MODEL_MONSTER01+204:
 		if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{
 			if (rand()%3 == 0)
@@ -1523,7 +1419,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+202:	// 아이스 네이핀
+	case MODEL_MONSTER01+202:
 		if (pObject->CurrentAction == MONSTER01_WALK)
 		{
 			if (rand() % 100 == 0)
@@ -1540,7 +1436,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
 		}
 		return true;
-	case MODEL_MONSTER01+203:	// 쉐도우 마스터
+	case MODEL_MONSTER01+203:
 		if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{
 			PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01);
@@ -1577,29 +1473,27 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
 		{
 			switch(pCharacter->Skill)
 			{
-			case AT_SKILL_BLAST_POISON:	// 커즈 포이즌				
+			case AT_SKILL_BLAST_POISON:			
 				{
-					// 동작은 2번 공격 동작.
 					SetAction(pObject, MONSTER01_ATTACK2);
 					pCharacter->MonsterSkill = -1;
 				} break;
-			case AT_SKILL_GAOTIC:	// 카오틱디세이어
+			case AT_SKILL_GAOTIC:
 				{
-					// 동작은 2번 공격 동작.
 					SetAction(pObject, MONSTER01_ATTACK2);
 					pCharacter->MonsterSkill = -1;
 				} break;
-			case AT_SKILL_GIGANTIC_STORM: // 기간틱스톰
+			case AT_SKILL_GIGANTIC_STORM:
 				{
 					SetAction(pObject, MONSTER01_ATTACK3);
 					pCharacter->MonsterSkill = -1;
 				} break;
-			case AT_SKILL_EVIL: // 악령
+			case AT_SKILL_EVIL:
 				{
 					SetAction(pObject, MONSTER01_ATTACK1);
 					pCharacter->MonsterSkill = -1;
 				} break;
-			default:	// 기타 모든 일반공격 
+			default:
 				{
 					SetAction(pObject, MONSTER01_ATTACK1);
 					pCharacter->MonsterSkill = -1;	
@@ -1609,8 +1503,8 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
 		return true;
 #endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 #ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
-	case MODEL_MONSTER01+201:	// 사피퀸
-	case MODEL_MONSTER01+204:	// 사피퀸 , 메두사 부하
+	case MODEL_MONSTER01+201:
+	case MODEL_MONSTER01+204:
 		{
 			if (pCharacter->MonsterSkill == ATMON_SKILL_EX_SAPIQUEEN_ATTACKSKILL)
 			{
@@ -1625,7 +1519,7 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
 			return true;
 		}
 		return true;
-	case MODEL_MONSTER01+202:	// 아이스 네이핀
+	case MODEL_MONSTER01+202:
 		{
 			if (pCharacter->MonsterSkill == ATMON_SKILL_EX_ICENAPIN_ATTACKSKILL)
 			{
@@ -1640,7 +1534,7 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
 			return true;
 		}
 		return true;
-	case MODEL_MONSTER01+203:	// 쉐도우 마스터
+	case MODEL_MONSTER01+203:
 		{
 			if (pCharacter->MonsterSkill == ATMON_SKILL_EX_SHADOWMASTER_ATTACKSKILL)
 			{

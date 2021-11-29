@@ -125,78 +125,72 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 	
 	int iType = 0;
 	int TabSpace = 0;
-	// 항목파악
+
 	if (ItemHelp==ITEM_BOW+7 || ItemHelp==ITEM_BOW+15)
 	{
-		// 화살과 석궁용화살
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
 		return true;
 	}
 	else if(ItemHelp>=ITEM_SWORD && ItemHelp<ITEM_BOW+MAX_ITEM_INDEX)
 	{
-		iType = 1;	// 칼
-		TabSpace += int(2160 / iInfoWidth);//24
+		iType = 1;
+		TabSpace += int(2160 / iInfoWidth);
 	}
 	else if(ItemHelp>=ITEM_STAFF && ItemHelp<ITEM_STAFF+MAX_ITEM_INDEX)
 	{
-		iType = 2;	// 지팡이
-		TabSpace += int(1800 / iInfoWidth);//10
+		iType = 2;
+		TabSpace += int(1800 / iInfoWidth);
 	}
 	else if(ItemHelp>=ITEM_SHIELD && ItemHelp<ITEM_SHIELD+MAX_ITEM_INDEX)
 	{
-		iType = 3;	// 방패
-		TabSpace += int(1800 / iInfoWidth);//20
+		iType = 3;
+		TabSpace += int(1800 / iInfoWidth);
 	}
 	else if(ItemHelp>=ITEM_HELM && ItemHelp<ITEM_BOOTS+MAX_ITEM_INDEX)
 	{
-		iType = 4;	// 투구,신발
-		TabSpace += int(1800 / iInfoWidth);//36
+		iType = 4;
+		TabSpace += int(1800 / iInfoWidth);
 	}
 	else if(ItemHelp>=ITEM_ETC && ItemHelp<ITEM_ETC+MAX_ITEM_INDEX)
 	{
-		iType = 5;	// 법서
+		iType = 5;
 
 		if (WindowWidth == 640 || WindowWidth == 1280) 
 			TabSpace += int(5940 / iInfoWidth);
 		else if (WindowWidth == 800 || WindowWidth == 1024) 
 			TabSpace += int(5200 / iInfoWidth);
 	}
-	else // 아이템 설명이 없는 아이템.
+	else
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
 		return true;
 	}
 
-#ifdef CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
 	if(ItemHelp >= ITEM_STAFF+21 && ItemHelp <= ITEM_STAFF+29)
 	{
-		iType = 6; // 소환술사 서
+		iType = 6;
 		TabSpace += int(800 / iInfoWidth);//20
 	}
-#endif // CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
 	
 	int iCurrMaxLevel = iMaxLevel;
 	
-	if( iType == 5 )	// 법서이면
+	if( iType == 5 )
 	{
 		iCurrMaxLevel = 0;
 	}
 	
 	ITEM_ATTRIBUTE *p = &ItemAttribute[ItemHelp];
-	ComputeItemInfo(ItemHelp);	// 아이템 설명 계산
+	ComputeItemInfo(ItemHelp);
 	
-	// 출력 상태 초기화
 	TextNum = 0;
 	sprintf(TextList[TextNum], "\n");
 	TextNum++;
 
-	// 160 "아이템 정보"
 	strcpy(TextList[TextNum], GlobalText[160]);
 	TextListColor[TextNum] = TEXT_COLOR_BLUE; 
 	TextBold[TextNum] = true; 
 	TextNum++;
 
-	// 아이템 이름
 	sprintf(TextList[TextNum], "%s", p->Name);
 	TextListColor[TextNum] = TEXT_COLOR_WHITE; 
 	TextBold[TextNum] = true; 
@@ -209,8 +203,6 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 	sprintf(TextList[TextNum],"\n");
 	TextNum++;
 	
-	// 배경칠 -_-
-	// 정보창 너비 계산
 	float fNumAdd = 1.0f;
 	if (!(g_iItemInfo[0][_COLUMN_TYPE_ATTMIN] <= 0 || (ItemHelp>=ITEM_ETC && ItemHelp<ITEM_ETC+MAX_ITEM_INDEX)))
 		++fNumAdd;
@@ -218,10 +210,8 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 		++fNumAdd;
 	if (g_iItemInfo[0][_COLUMN_TYPE_MAGIC] > 0)
 		++fNumAdd;
-#ifdef CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
 	if (g_iItemInfo[0][_COLUMN_TYPE_CURSE] > 0)
 		++fNumAdd;
-#endif // CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
 	if (g_iItemInfo[0][_COLUMN_TYPE_PET_ATTACK] > 0)
 		++fNumAdd;
 	if (g_iItemInfo[0][_COLUMN_TYPE_DEFENCE] > 0)
@@ -246,13 +236,12 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 		iInfoWidth = iAddWidth;
 
 #ifdef CSK_FIX_MAGICALPOWER_INCREASE
-	if(iType == 5 && fNumAdd < 3.f)	// 법서이고 카테고리가 하나인 경우 가운데쯤에 표시되기 위해 수정	
+	if(iType == 5 && fNumAdd < 3.f)
 	{
 		TabSpace += 20;
 	}
 #endif // CSK_FIX_MAGICALPOWER_INCREASE
 
-	//8 * iFontWidth;	// 화면 해상도에따라 정보창 사이즈 다르다 -_-
 	int iInfoNum = (WindowWidth <= 800 ? 46 : 51);
 	memset(TextList[TextNum], ' ', iInfoNum); 
 	TextList[TextNum][iInfoNum] = '\0';
@@ -293,37 +282,26 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 	RequireClass(p);
 	sprintf(TextList[TextNum],"\n");
 	TextNum++;
-	RenderTipTextList(1, 1, TextNum, iInfoWidth, RT3_SORT_CENTER);	// 화면 해상도에따라 정보창 사이드 다르다 -_-
+	RenderTipTextList(1, 1, TextNum, iInfoWidth, RT3_SORT_CENTER);
 	EnableAlphaTest();
 	
 	TextNum = 0;
-	// 레벨
-#ifdef CSK_FIX_MAGICALPOWER_INCREASE
-	if(iType != 5)	// 법서는 레벨 카테코리가 필요없다.
+
+	if(iType != 5)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_LEVEL, TabSpace, iLabelHeight);
 		RenderHelpLine(_COLUMN_TYPE_LEVEL, "+%d", TabSpace, "000000", iDataHeight, iType);
 	}
-#else // CSK_FIX_MAGICALPOWER_INCREASE
-	RenderHelpCategory(_COLUMN_TYPE_LEVEL, TabSpace, iLabelHeight);
-	RenderHelpLine(_COLUMN_TYPE_LEVEL, "+%d", TabSpace, "000000", iDataHeight, iType);
-#endif // CSK_FIX_MAGICALPOWER_INCREASE
 	
 	
 	if (g_iItemInfo[0][_COLUMN_TYPE_REQNLV] > 0)
 	{
 		TabSpace += 2;
 		RenderHelpCategory(_COLUMN_TYPE_REQNLV, TabSpace, iLabelHeight);
-#ifdef CSK_FIX_MAGICALPOWER_INCREASE
 		RenderHelpLine(_COLUMN_TYPE_REQNLV, "%3d", TabSpace, "00000", iDataHeight, iType);
 		TabSpace += 14;
-#else // CSK_FIX_MAGICALPOWER_INCREASE
-		RenderHelpLine(_COLUMN_TYPE_REQNLV, "%3d", TabSpace, "00000", iDataHeight);
-		TabSpace += 10;
-#endif // CSK_FIX_MAGICALPOWER_INCREASE
 	}
 	
-	// 최소공
 	if (g_iItemInfo[0][_COLUMN_TYPE_ATTMIN] <= 0 || (ItemHelp>=ITEM_ETC && ItemHelp<ITEM_ETC+MAX_ITEM_INDEX))
 	{
 
@@ -336,7 +314,6 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 		RenderHelpLine(_COLUMN_TYPE_LEVEL, "~", TabSpace, " 00", iDataHeight);
 	}
 	
-	// 최대공
 	if (g_iItemInfo[0][_COLUMN_TYPE_ATTMAX] <= 0 || (ItemHelp>=ITEM_ETC && ItemHelp<ITEM_ETC+MAX_ITEM_INDEX))
 	{
 
@@ -346,80 +323,60 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 		RenderHelpLine(_COLUMN_TYPE_ATTMAX, "%3d", TabSpace, "00000", iDataHeight);
 	}
 	
-	// 마력
 	if (g_iItemInfo[0][_COLUMN_TYPE_MAGIC] > 0)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_MAGIC, TabSpace, iLabelHeight);
 		RenderHelpLine( _COLUMN_TYPE_MAGIC, "%2d%%", TabSpace, "00000", iDataHeight);
 	}
 
-#ifdef CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
-	// 저주력
 	if (g_iItemInfo[0][_COLUMN_TYPE_CURSE] > 0)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_CURSE, TabSpace, iLabelHeight);
 		RenderHelpLine(_COLUMN_TYPE_CURSE, "%2d", TabSpace, "00000", iDataHeight, iType);
 	}	
-#endif // CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
 	
-	//  팻 공격력.
 	if (g_iItemInfo[0][_COLUMN_TYPE_PET_ATTACK] > 0)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_PET_ATTACK, TabSpace, iLabelHeight);
 		RenderHelpLine( _COLUMN_TYPE_PET_ATTACK, "%2d%%", TabSpace, "00000", iDataHeight);
 	}
 	
-	// 방어력
 	if (g_iItemInfo[0][_COLUMN_TYPE_DEFENCE] > 0)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_DEFENCE, TabSpace, iLabelHeight);
 		RenderHelpLine(_COLUMN_TYPE_DEFENCE, "%3d", TabSpace, "000000", iDataHeight);
 	}
 	
-	// 방어율
 	if (g_iItemInfo[0][_COLUMN_TYPE_DEFRATE] > 0)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_DEFRATE, TabSpace, iLabelHeight);
-#ifdef CSK_FIX_WOPS_K28204_ITEM_EXPLANATION
 		RenderHelpLine(_COLUMN_TYPE_DEFRATE, "%3d", TabSpace, "000000", iDataHeight);
-#else // CSK_FIX_WOPS_K28204_ITEM_EXPLANATION
-		RenderHelpLine(_COLUMN_TYPE_DEFRATE, "%3d%%", TabSpace, "000000", iDataHeight);
-#endif // CSK_FIX_WOPS_K28204_ITEM_EXPLANATION
 	}
 	
-	// 요구힘
 	if (g_iItemInfo[0][_COLUMN_TYPE_REQSTR] > 0)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_REQSTR, TabSpace, iLabelHeight);
 		RenderHelpLine(_COLUMN_TYPE_REQSTR, "%3d", TabSpace, "00000", iDataHeight);
 	}
 	
-	// 요구민
 	if (g_iItemInfo[0][_COLUMN_TYPE_REQDEX] > 0 || ItemHelp < ITEM_ETC)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_REQDEX, TabSpace, iLabelHeight);
-#ifdef JAPANESE_ITEM_HELP_FIX
-		RenderHelpLine(_COLUMN_TYPE_REQDEX, "%3d", TabSpace, "000000", iDataHeight);
-#else	// JAPANESE_ITEM_HELP_FIX
 		RenderHelpLine(_COLUMN_TYPE_REQDEX, "%3d", TabSpace, "00000", iDataHeight);
-#endif	// JAPANESE_ITEM_HELP_FIX
 	}
 	
-	// 요구 체력
 	if (g_iItemInfo[0][_COLUMN_TYPE_REQVIT] > 0)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_REQVIT, TabSpace, iLabelHeight);
 		RenderHelpLine(_COLUMN_TYPE_REQVIT, "%3d", TabSpace, "00000", iDataHeight);
 	}
 	
-	// 요구에너지
 	if (g_iItemInfo[0][_COLUMN_TYPE_REQENG] > 0)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_REQENG, TabSpace, iLabelHeight);
 		RenderHelpLine(_COLUMN_TYPE_REQENG, "%3d", TabSpace, "00000", iDataHeight, iType);
 	}
 	
-	// 요구 통솔
 	if (g_iItemInfo[0][_COLUMN_TYPE_REQCHA] > 0)
 	{
 		RenderHelpCategory(_COLUMN_TYPE_REQCHA, TabSpace, iLabelHeight);

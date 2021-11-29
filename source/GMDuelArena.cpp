@@ -1,5 +1,4 @@
 // GMDuelArena.cpp: implementation of the CGMDuelArena class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -18,10 +17,6 @@
 #include "ZzzLodTerrain.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CGMDuelArenaPtr CGMDuelArena::Make()
 {
@@ -81,13 +76,13 @@ bool CGMDuelArena::MoveObject(OBJECT* o)
 
 	switch(o->Type)
 	{
-	case 35:	// 연기박스
-	case 36:	// 불박스
+	case 35:
+	case 36:
 		{
 			o->HiddenMesh = -2;
 		}
 		break;
-	case 34:	// 주변광박스
+	case 34:
 		{
 			float Luminosity = (float)(rand()%3+5)*0.1f;
 			vec3_t Light;
@@ -136,9 +131,9 @@ bool CGMDuelArena::RenderObjectVisual( OBJECT* o, BMD* b )
 {
 	switch(o->Type)
 	{
-	case 34:	// 주변광박스
+	case 34:
 		break;
-	case 35:	// 연기박스
+	case 35:
 		{
 			vec3_t vLight;
 			if ( rand()%3==0) 
@@ -148,7 +143,7 @@ bool CGMDuelArena::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		break;
-	case 36:	// 불박스
+	case 36:
 		{
 			vec3_t vLightFire;
 			Vector(1.0f, 0.2f, 0.0f, vLightFire);
@@ -156,19 +151,17 @@ bool CGMDuelArena::RenderObjectVisual( OBJECT* o, BMD* b )
 
 			vec3_t vLight;
 			Vector(1.0f, 1.0f, 1.0f, vLight);
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fScale = o->Scale * (rand()%5+13)*0.1f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
- 			switch(rand()%3)
+
+			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);
 				break;
 			}
 		}

@@ -317,10 +317,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 					if( o->AnimationFrame > 4.4f && o->AnimationFrame < 4.7f )
 					{
 						//const float OFFSETLEN = 250.0f, POS_HEIGHT = 220.0f;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-						const float OFFSETLEN	= 70.0f;
-						const float POS_HEIGHT	= 240.0f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 						const float ANG_REVISION = 20.0f;
 						
 						vec3_t v3Pos, v3Ang_, v3BasisPos;
@@ -379,10 +375,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 	case MODEL_MONSTER01+146:
 		{
 			float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fSpeedPerFrame = fActionSpeed/10.f;
-			float fAnimationFrame = o->AnimationFrame - fActionSpeed;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			vec3_t Light;
 			vec3_t EndPos, EndRelative;
 			Vector ( 1.f, 1.f, 1.f, Light );
@@ -845,10 +837,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 		case MODEL_MONSTER01+205:
 			{
 				float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				float fSpeedPerFrame = fActionSpeed/10.f;
-				float fAnimationFrame = o->AnimationFrame - fActionSpeed;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				vec3_t Light;
 				vec3_t EndPos, EndRelative;
 				Vector ( 1.f, 1.f, 1.f, Light );

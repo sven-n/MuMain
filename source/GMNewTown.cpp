@@ -82,7 +82,7 @@ void GMNewTown::CreateObject(OBJECT* pObject)
 
 	switch(pObject->Type)
 	{
-	case 103:	// 의자 설정
+	case 103:
 		{
 			CreateOperate(pObject);
 		}
@@ -92,14 +92,14 @@ void GMNewTown::CreateObject(OBJECT* pObject)
 	if (pObject->Type==15 || pObject->Type==25 || pObject->Type==27 || pObject->Type==45 || pObject->Type==46 || pObject->Type==47 || pObject->Type==48
 		|| pObject->Type==53 || pObject->Type==98 || pObject->Type==107 || pObject->Type==115 || pObject->Type==122 || pObject->Type==130)
 	{
-		pObject->CollisionRange = -300;	// 컬링 최적화 가능한 부분☆
+		pObject->CollisionRange = -300;
 	}
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 	if (World == WD_77NEW_LOGIN_SCENE || World == WD_78NEW_CHARACTER_SCENE)
 	{
-		if (pObject->Type == 62)	// 독수리 박스
+		if (pObject->Type == 62)
 		{
-			pObject->SubType = 0;	// 독수리 일련번호 저장용
+			pObject->SubType = 0;
 		}
 	}
 #endif //PJH_NEW_SERVER_SELECT_MAP
@@ -217,12 +217,12 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
 					|| World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
 					)
-					pBoid->ShadowScale = 0.f;	// 그림자 생략
+					pBoid->ShadowScale = 0.f;
 				else
 				if (pObject->Position[2] > 100)
 					pBoid->ShadowScale = 15.f;
 				else
-					pBoid->ShadowScale = 0.f;	// 그림자 생략
+					pBoid->ShadowScale = 0.f;
 				pBoid->HiddenMesh  = -1;
 				pBoid->BlendMesh   = -1;
 				pBoid->Timer       = (float)(rand()%314)*0.01f;
@@ -241,9 +241,6 @@ void GMNewTown::PlayObjectSound(OBJECT* pObject)
 	float fDis_x, fDis_y;
 	fDis_x = pObject->Position[0] - Hero->Object.Position[0];
 	fDis_y = pObject->Position[1] - Hero->Object.Position[1];
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fDistance = sqrtf(fDis_x*fDis_x+fDis_y*fDis_y);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	int Index = TERRAIN_INDEX_REPEAT(( Hero->PositionX),( Hero->PositionY));
 	BOOL bSafeZone = FALSE;
@@ -252,29 +249,29 @@ void GMNewTown::PlayObjectSound(OBJECT* pObject)
 
 	switch(pObject->Type)
 	{
-	case 2:		// 마을안 수로
+	case 2:
 		if (!bSafeZone)
 			PlayBuffer(SOUND_ELBELAND_WATERSMALL01, pObject, false);
 		break;
-	case 53:	// 폭포물
+	case 53:
 		if (!bSafeZone)
 			PlayBuffer(SOUND_ELBELAND_RAVINE01, pObject, false);
 		break;
-	case 56:	// 아틀란스 입구 포탈
+	case 56:
 		PlayBuffer(SOUND_ELBELAND_ENTERATLANCE01, pObject, false);
 		break;
-	case 59:	// 폭포 물흐르는 파티클
+	case 59:
 		if (!bSafeZone)
 			PlayBuffer(SOUND_ELBELAND_WATERFALLSMALL01, pObject, false);
 		break;
-	case 85:	// 데비아스 입구 포탈
+	case 85:
 		PlayBuffer(SOUND_ELBELAND_ENTERDEVIAS01, pObject, false);
 		break;
-	case 89:	// 수로
+	case 89:
 		if (!bSafeZone)
 			PlayBuffer(SOUND_ELBELAND_WATERWAY01, pObject, false);
 		break;
-	case 110:	// 보호결계
+	case 110:
 		PlayBuffer(SOUND_ELBELAND_VILLAGEPROTECTION01, pObject, false);
 		break;
 	}
@@ -297,32 +294,32 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 
 	switch(pObject->Type)
 	{
-	case 0:	// 빨간불 박스.
+	case 0:
 		if (rand() % 3 == 0)
 		{
 			Vector(1.f, 1.f, 1.f, Light);
 			CreateParticle(BITMAP_TRUE_FIRE, pObject->Position, pObject->Angle, Light, 0, pObject->Scale);
 		}
 		break;
-    case 54:  //  폭포 효과 - 물 안개 효과
+    case 54:
         Vector ( 1.f, 1.f, 1.f, Light );
         if ( rand()%4==0 )
         {
             CreateParticle ( BITMAP_WATERFALL_2, pObject->Position, pObject->Angle, Light, 4, pObject->Scale );
         }
         break;
-	case 58:	// 폭포 효과 - 물 쏟아짐
+	case 58:
 		CreateParticle ( BITMAP_WATERFALL_5, pObject->Position, pObject->Angle, Light, 0 );
 		break;
-	case 59:	// 폭포 효과 - 물 튐
+	case 59:
         Vector ( 1.f, 1.f, 1.f, Light );
         CreateParticle ( BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 8, pObject->Scale );
 		break;
-	case 60:  //  안개 효과 - 흰색
+	case 60:
 		if ( pObject->HiddenMesh!=-2 )
 		{
             vec3_t  Light;
-            Vector(0.06f,0.07f,0.08f,Light);	// 푸른빛
+            Vector(0.06f,0.07f,0.08f,Light);
 			for ( int i=0; i<10; ++i )
 			{
 #ifndef PJH_NEW_SERVER_SELECT_MAP
@@ -335,14 +332,14 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			pObject->HiddenMesh = -2;
 		}
 		break;
-	case 61:	// 푸른불 박스.
+	case 61:
 		if (rand() % 3 == 0)
 		{
 			Vector(1.f, 1.f, 1.f, Light);
 			CreateParticle(BITMAP_TRUE_BLUE, pObject->Position, pObject->Angle, Light, 0, pObject->Scale);
 		}
 		break;
-	case 63:	// 앉은 독수리
+	case 63:
 		{
 			vec3_t vPos, vRelative;
  			float fLumi;
@@ -354,7 +351,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			CreateSprite(BITMAP_LIGHT, vPos, pObject->Scale*6.f, Light, pObject);
 		}
 		break;
-	case 110:	// 분수 코어
+	case 110:
 			Vector(1.0f, 1.0f, 1.0f, Light);
 			Vector(0.f, 0.f, 70.f, p);
 			if (rand()%2 == 0)
@@ -365,7 +362,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 				CreateParticle(BITMAP_LIGHT, Position, pObject->Angle, Light, 11, 0.6f, pObject);
 			}
 		break;
-	case 121:	// 토템 눈에서 빛
+	case 121:
 		{
 			vec3_t vPos, vRelative;
 			float fLumi, fScale;
@@ -753,7 +750,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 		{
 			if (pObject->Owner->CurrentAction < MONSTER01_WALK)
 			{
-				if (pObject->Type == 153)	// 돌골렘
+				if (pObject->Type == 153)
 				{
 					int iRand = rand()%3;
 					if (iRand == 0) SetAction(pObject->Owner,MONSTER01_ATTACK1);
@@ -789,7 +786,7 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel,bool ExtraMon)
 #endif //PJH_NEW_SERVER_SELECT_MAP
 
 	// 배경
-	if ((pObject->Type>=5 && pObject->Type<=14) || pObject->Type == 4 || pObject->Type == 129)	// 절벽 오브젝트는 음영제거를 위해 강제로 빛을 설정해준다.
+	if ((pObject->Type>=5 && pObject->Type<=14) || pObject->Type == 4 || pObject->Type == 129)
 	{
 		Mesh_t *m = NULL;
 		for(int i = 0; i < pModel->NumMeshs; i++)
@@ -818,10 +815,10 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel,bool ExtraMon)
 		Vector(1.0f, 1.0f, 1.0f, pObject->Light);
 	}
 #endif //PJH_NEW_SERVER_SELECT_MAP
-	if(pObject->Type == 53 || pObject->Type == 55	// 폭포1,2
-		|| pObject->Type == 110 || pObject->Type == 89	// 분수 코어, 수로 물
-		|| pObject->Type == 78 || pObject->Type == 79	// 크리스탈
-		|| pObject->Type == 125 || pObject->Type == 128	// 회오리, 빛
+	if(pObject->Type == 53 || pObject->Type == 55
+		|| pObject->Type == 110 || pObject->Type == 89
+		|| pObject->Type == 78 || pObject->Type == 79
+		|| pObject->Type == 125 || pObject->Type == 128
 		|| pObject->Type == 2
 		)
 	{
@@ -848,15 +845,15 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel,bool ExtraMon)
 		pModel->RenderBody(RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,pObject->HiddenMesh);
 		pModel->RenderMesh(9,RENDER_BRIGHT|RENDER_CHROME,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
 	}
-	else if (pObject->Type == 121)	// 토템
+	else if (pObject->Type == 121)
 	{
 		pModel->RenderMesh(2,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
 		pModel->RenderMesh(3,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  		pModel->RenderMesh(1,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
 		float fLumi = (sinf(WorldTime*0.002f) + 1.f) * 0.5f;
- 		pModel->RenderMesh(1,RENDER_BRIGHT,pObject->Alpha,1,fLumi);	// 눈
+ 		pModel->RenderMesh(1,RENDER_BRIGHT,pObject->Alpha,1,fLumi);
  		fLumi = (sinf(WorldTime*0.0015f) + 1.0f) * 0.1f + 0.1f;
-   		pModel->RenderMesh(0,RENDER_BRIGHT|RENDER_CHROME,fLumi,0,fLumi);	// 모델 주위 껍데기
+   		pModel->RenderMesh(0,RENDER_BRIGHT|RENDER_CHROME,fLumi,0,fLumi);
 	}
 	// NPC
 	else if(pObject->Type == MODEL_ELBELAND_MARCE)
@@ -865,14 +862,14 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel,bool ExtraMon)
  		pModel->RenderMesh(1,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  		pModel->RenderMesh(2,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
 	}
-	else if (pObject->Type == MODEL_MONSTER01+130)	// 늑대인간
+	else if (pObject->Type == MODEL_MONSTER01+130)
 	{
  		pModel->RenderMesh(1,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
  		pModel->RenderMesh(0,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
 	}
 	else if (pObject->Type == MODEL_MONSTER01+133 && pObject->CurrentAction == MONSTER01_DIE)
 	{
-		// 사망동작 안그림
+
 	}
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 	else if (World == WD_77NEW_LOGIN_SCENE &&
@@ -880,18 +877,18 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel,bool ExtraMon)
 		|| pObject->Type == 58 || pObject->Type == 59 || pObject->Type == 60 || pObject->Type == 61
 		|| pObject->Type == 62))
 	{
-		// 박스 안그림
+
 	}
 	else if (World == WD_78NEW_CHARACTER_SCENE && pObject->Type == 4)
 	{
-		if(pObject->CurrentAction == 0 && pObject->AnimationFrame >= 15.5)	// 날개짓
+		if(pObject->CurrentAction == 0 && pObject->AnimationFrame >= 15.5)
 		{
 			if(CharacterSceneCheckMouse(pObject) == false)
 			{
 				SetAction(pObject, rand()%2+1);
 			}
 		}
-		else if(pObject->CurrentAction == 1 && pObject->AnimationFrame >= 15.5) // 숨쉬는 동작
+		else if(pObject->CurrentAction == 1 && pObject->AnimationFrame >= 15.5)
 		{
 			if(CharacterSceneCheckMouse(pObject) == false)
 			{
@@ -911,7 +908,7 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel,bool ExtraMon)
 				SetAction(pObject, iRand);
 			}
 		}
-		else if(pObject->CurrentAction == 2 && pObject->AnimationFrame >= 14.2) // 고개 흔드는 동작
+		else if(pObject->CurrentAction == 2 && pObject->AnimationFrame >= 14.2)
 		{
 			if(CharacterSceneCheckMouse(pObject) == false)
 			{
@@ -958,18 +955,16 @@ void GMNewTown::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel,bool Ext
 	{
 		pModel->RenderBody(RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,pObject->HiddenMesh);
 	}
-	else if(pObject->Type == 110)	// 분수 코어
+	else if(pObject->Type == 110)
 	{
 		pModel->RenderMesh(2,RENDER_TEXTURE|RENDER_BRIGHT|RENDER_CHROME2,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
 		pModel->RenderMesh(1,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
 		pModel->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight);
 	}
-	else if (pObject->Type == 78)	// 크리스탈.
+	else if (pObject->Type == 78)
 	{
-		// 크롬 효과.
 		pModel->RenderMesh(0,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV);
 		pModel->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV);
-		// 발광체
 		vec3_t p, Position, Light;
 		for (int i = 1; i <= 4; ++i)
 		{
@@ -979,12 +974,11 @@ void GMNewTown::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel,bool Ext
 			CreateSprite(BITMAP_SPARK+1, Position, 5.5f, Light, pObject);
 		}
 	}
-	else if (pObject->Type == 79)	// 크리스탈.
+	else if (pObject->Type == 79)
 	{
-		// 크롬 효과.
 		pModel->RenderMesh(0,RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV);
 		pModel->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV);
-		// 발광체
+
 		vec3_t p, Position, Light;
 		for (int i = 1; i <= 6; ++i)
 		{
@@ -1002,30 +996,30 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
 
 	switch (iType)
 	{
-	case 415:	// 물약 파는 NPC 실비아
+	case 415:
    		OpenNpc(MODEL_ELBELAND_SILVIA);
 		pCharacter = CreateCharacter(Key,MODEL_ELBELAND_SILVIA,PosX,PosY);
 		strcpy(pCharacter->ID,"실비아");
 		pCharacter->Object.Scale = 1.0f;
-		pCharacter->Object.m_fEdgeScale = 1.2f;	// 마우스 커서로 선택 시 초록 외곽선.
+		pCharacter->Object.m_fEdgeScale = 1.2f;
 		break;
-	case 416:	// 무기 파는 NPC 레아
+	case 416:
    		OpenNpc(MODEL_ELBELAND_RHEA);
 		pCharacter = CreateCharacter(Key,MODEL_ELBELAND_RHEA,PosX,PosY);
 		strcpy(pCharacter->ID,"레아");
 		pCharacter->Object.Scale = 1.0f;
-		pCharacter->Object.m_fEdgeScale = 1.1f;	// 마우스 커서로 선택 시 초록 외곽선.
+		pCharacter->Object.m_fEdgeScale = 1.1f;
 		Models[MODEL_ELBELAND_RHEA].Actions[0].PlaySpeed = 0.2f;
 		Models[MODEL_ELBELAND_RHEA].Actions[1].PlaySpeed = 0.4f;
 		break;
-	case 417:	// 마법 파는 NPC 마르세
+	case 417:
    		OpenNpc(MODEL_ELBELAND_MARCE);
 		pCharacter = CreateCharacter(Key,MODEL_ELBELAND_MARCE,PosX,PosY);
 		strcpy(pCharacter->ID,"마르세");
 		pCharacter->Object.Scale = 1.05f;
-		pCharacter->Object.m_fEdgeScale = 1.2f;	// 마우스 커서로 선택 시 초록 외곽선.
+		pCharacter->Object.m_fEdgeScale = 1.2f;
 		break;
-	case 418:	// 기괴한 토끼
+	case 418:
 		OpenMonsterModel(128);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+128,PosX,PosY);
 		strcpy(pCharacter->ID,"기괴한 토끼");
@@ -1033,7 +1027,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-	case 419:	// 흉측한 토끼
+	case 419:
 		OpenMonsterModel(129);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+129,PosX,PosY);
 		strcpy(pCharacter->ID,"흉측한 토끼");
@@ -1041,7 +1035,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-	case 420:	// 늑대인간
+	case 420:
 		OpenMonsterModel(130);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+130,PosX,PosY);
 		strcpy(pCharacter->ID,"늑대인간");
@@ -1049,7 +1043,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-	case 421:	// 오염된 나비
+	case 421:
 		OpenMonsterModel(131);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+131,PosX,PosY);
 		strcpy(pCharacter->ID,"오염된 나비");
@@ -1057,7 +1051,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-	case 422:	// 저주받은리치
+	case 422:
 		OpenMonsterModel(132);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+132,PosX,PosY);
 		strcpy(pCharacter->ID,"저주받은리치");
@@ -1065,7 +1059,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-	case 423:	// 토템골렘
+	case 423:
 		OpenMonsterModel(133);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+133,PosX,PosY);
 		strcpy(pCharacter->ID,"토템골렘");
@@ -1076,7 +1070,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-	case 424:	// 괴수 우씨
+	case 424:
 		OpenMonsterModel(134);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+134,PosX,PosY);
 		strcpy(pCharacter->ID,"괴수 우씨");
@@ -1084,7 +1078,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-	case 425:	// 괴수 우씨 대장
+	case 425:
 		OpenMonsterModel(135);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+135,PosX,PosY);
 		strcpy(pCharacter->ID,"괴수 우씨 대장");
@@ -1154,7 +1148,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 
 	switch(pObject->Type)
 	{
-	case MODEL_ELBELAND_RHEA:	// 무기 파는 NPC 레아
+	case MODEL_ELBELAND_RHEA:
 		if (pObject->CurrentAction == 0 && rand()%5==0)
 		{
 			Vector((rand()%90+10)*0.01f, (rand()%90+10)*0.01f, (rand()%90+10)*0.01f, Light);
@@ -1209,22 +1203,22 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 				Vector(0.f, 0.f, 0.f, vRelativePos);
 				
 				pModel->TransformPosition(pObject->BoneTransform[7], vRelativePos, vWorldPos, true);
-				CreateEffect(MODEL_TOTEMGOLEM_PART1,vWorldPos,pObject->Angle,Light,0,pObject,0,0);	// 머리
+				CreateEffect(MODEL_TOTEMGOLEM_PART1,vWorldPos,pObject->Angle,Light,0,pObject,0,0);
 				
 				pModel->TransformPosition(pObject->BoneTransform[5], vRelativePos, vWorldPos, true);
-				CreateEffect(MODEL_TOTEMGOLEM_PART2,vWorldPos,pObject->Angle,Light,0,pObject,0,0);	// 몸통
+				CreateEffect(MODEL_TOTEMGOLEM_PART2,vWorldPos,pObject->Angle,Light,0,pObject,0,0);
 				
 				pModel->TransformPosition(pObject->BoneTransform[29], vRelativePos, vWorldPos, true);
-				CreateEffect(MODEL_TOTEMGOLEM_PART3,vWorldPos,pObject->Angle,Light,0,pObject,0,0);	// 왼팔
+				CreateEffect(MODEL_TOTEMGOLEM_PART3,vWorldPos,pObject->Angle,Light,0,pObject,0,0);
 				
 				pModel->TransformPosition(pObject->BoneTransform[64], vRelativePos, vWorldPos, true);
-				CreateEffect(MODEL_TOTEMGOLEM_PART4,vWorldPos,pObject->Angle,Light,0,pObject,0,0);	// 오른팔
+				CreateEffect(MODEL_TOTEMGOLEM_PART4,vWorldPos,pObject->Angle,Light,0,pObject,0,0);
 
 				pModel->TransformPosition(pObject->BoneTransform[93], vRelativePos, vWorldPos, true);
-				CreateEffect(MODEL_TOTEMGOLEM_PART5,vWorldPos,pObject->Angle,Light,0,pObject,0,0);	// 왼다리
+				CreateEffect(MODEL_TOTEMGOLEM_PART5,vWorldPos,pObject->Angle,Light,0,pObject,0,0);
 
 				pModel->TransformPosition(pObject->BoneTransform[98], vRelativePos, vWorldPos, true);
-				CreateEffect(MODEL_TOTEMGOLEM_PART6,vWorldPos,pObject->Angle,Light,0,pObject,0,0);	// 오른다리
+				CreateEffect(MODEL_TOTEMGOLEM_PART6,vWorldPos,pObject->Angle,Light,0,pObject,0,0);
 
 				pModel->TransformPosition(pObject->BoneTransform[5], vRelativePos, vWorldPos, true);
 				VectorCopy(vWorldPos, vRelativePos);
@@ -1234,17 +1228,17 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 					vWorldPos[0] = vRelativePos[0] + rand()%160-80;
 					vWorldPos[1] = vRelativePos[1] + rand()%160-80;
 					vWorldPos[2] = vRelativePos[2];
-					CreateParticle(BITMAP_LEAF_TOTEMGOLEM,vWorldPos,pObject->Angle,Light,0,1.0f);	// 연기
+					CreateParticle(BITMAP_LEAF_TOTEMGOLEM,vWorldPos,pObject->Angle,Light,0,1.0f);
 				}
 
-				Vector(0.5f,0.5f,0.5f,Light);	// 연기 펑
+				Vector(0.5f,0.5f,0.5f,Light);
 
 				for ( int i = 0; i < 20; ++i)
 				{
 					vWorldPos[0] = vRelativePos[0] + rand()%160-80;
 					vWorldPos[1] = vRelativePos[1] + rand()%160-80;
 					vWorldPos[2] = vRelativePos[2] + (rand()%150)-50;
-					CreateParticle(BITMAP_SMOKE,vWorldPos,pObject->Angle,Light,48,1.0f);	// 연기
+					CreateParticle(BITMAP_SMOKE,vWorldPos,pObject->Angle,Light,48,1.0f);
 				}
 			}
 		}

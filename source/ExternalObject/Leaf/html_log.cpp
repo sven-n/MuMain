@@ -35,10 +35,6 @@ bool CHtmlLog::LoadHtmlLog(const std::string& filename)
 
 	for(int offset=0; offset<(int)size; offset++) 
 	{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		bool bBeginSyntax = false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-
 		if(pbyLog[offset] == '<') {
 			iBeginSyntax = offset;
 			iEndSyntax = -1;

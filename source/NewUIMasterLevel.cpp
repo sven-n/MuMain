@@ -72,20 +72,6 @@ bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng, int x, int y)
 			panelspaceY = -120;
 			panelspace = 219+panelspaceY;
 		}
-
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		int mainbackpanel[14][2] =
-		{
-			{panelspaceX, panelspaceY}, {panelspaceX+256, panelspaceY}, {panelspaceX+(256*2), panelspaceY }, 
-			{panelspaceX+(256*3), panelspaceY }, {panelspaceX+(256*4)-2, panelspaceY }, 
-
-			{panelspaceX, panelspace }, {panelspaceX+(256*4)-2, panelspace },
-			{panelspaceX, panelspace+256 }, {panelspaceX+(256*4)-2, panelspace+256 },
-			
-			{panelspaceX, panelspace+(256*2)-2 }, {panelspaceX+256, panelspace+(256*2)-2 }, {panelspaceX+(256*2), panelspace+(256*2)-2 }, 
-			{panelspaceX+(256*3), panelspace+(256*2)-2 }, {panelspaceX+(256*4)-2, panelspace+(256*2)-2 },
-		};
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	}
 	return true;
 }
@@ -174,9 +160,6 @@ bool SEASON3B::CNewUIMasterLevel::Render()
 void SEASON3B::CNewUIMasterLevel::Render_Scroll()
 {
 	int Scroll_Loc[4][2] = {{185,65},{308,65},{432,65},{590,65}};
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int Scroll_Lenth = 285 - 65;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	for(int i = 0; i < 4; i++)
 	{
@@ -1122,10 +1105,7 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 	}
 
 	int Skill_Num = -1;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float nx = 43.f;
-	float ny = 42.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	BYTE Job = (Hero->Class >> 4) & 0x01;
 	int GetJob = -1;
 

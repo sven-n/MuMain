@@ -1031,7 +1031,6 @@ void CPhysicsCloth::ProcessCollision( void)
 			}
 		}
 
-		// 최종 처리
 		for ( int i = 0; i < m_iNumVertices; ++i)
 		{
 			m_pVertices[i].DoOneTimeMove();
@@ -1047,18 +1046,12 @@ CPhysicsClothMesh::CPhysicsClothMesh()
 
 CPhysicsClothMesh::~CPhysicsClothMesh()
 {
-#ifdef YDG_FIX_MEMORY_LEAK_0905
 	Clear();
-#endif	// YDG_FIX_MEMORY_LEAK_0905
 }
 
 void CPhysicsClothMesh::Clear( void)
 {
-#ifdef YDG_FIX_MEMORY_LEAK_0905
 	CPhysicsCloth::Destroy();
-#else	// YDG_FIX_MEMORY_LEAK_0905
-	CPhysicsCloth::Clear();
-#endif	// YDG_FIX_MEMORY_LEAK_0905
 }
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
@@ -1066,7 +1059,6 @@ extern float BoneScale;
 
 BOOL CPhysicsClothMesh::Create( OBJECT *o, int iMesh, int iBone, DWORD dwType, int iBMDType)
 {
-	// 기본 초기화
 	m_oOwner = o;
 	m_iMesh = iMesh;
 	m_iBone = iBone;
@@ -1077,8 +1069,6 @@ BOOL CPhysicsClothMesh::Create( OBJECT *o, int iMesh, int iBone, DWORD dwType, i
 	assert( iMesh < b->NumMeshs);
 	Mesh_t *pMesh = &b->Meshs[m_iMesh];
 
-
-	// 간혹 중첩된 피직 개체 접근으로 인해 메모리 릭 발생으로 중첩되더라도 안전장치로써 heap 영역의 메모리를 반환합니다.
 #ifdef LDS_FIX_MEMORYLEAK_PHYSICSMANAGER_RELEASE
 	if( m_pVertices )
 	{
@@ -1093,18 +1083,15 @@ BOOL CPhysicsClothMesh::Create( OBJECT *o, int iMesh, int iBone, DWORD dwType, i
 	}
 #endif // LDS_FIX_MEMORYLEAK_PHYSICSMANAGER_RELEASE
 
-	// 실제 그릴 물리메쉬 생성
 	m_iNumVertices = pMesh->NumVertices;
 	m_pVertices = new CPhysicsVertex [m_iNumVertices];
 
-	// 각 버텍스별로 움직임을 정의할 링크 생성
+
 	m_iNumLink = pMesh->NumTriangles * 3 * 2;
 	m_pLink = new St_PhysicsLink [m_iNumLink];
 
-	// 정점 초기화 = 모델의 위치점만을 본트렌스폼에서 가져와 m_pVertices[] 로 갱신
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	float (*BoneMatrix)[3][4] = m_oOwner->BoneTransform;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	for ( int iVertex = 0; iVertex < m_iNumVertices; ++iVertex)
 	{
 		Vertex_t *v = &pMesh->Vertices[iVertex];
@@ -1112,7 +1099,6 @@ BOOL CPhysicsClothMesh::Create( OBJECT *o, int iMesh, int iBone, DWORD dwType, i
 		m_pVertices[iVertex].Init( vPos[0], vPos[1], vPos[2], ( v->Node == m_iBone));
 	}
 
-	// 연결점들 구성 = 모든 TRI에 접근하여 보유한 각 버텍스별로 위치점을 기준으로 링크를 생성하는 부분.
 	int iLink = 0;
 	vec3_t vTemp;
 	for ( int iTri = 0; iTri < pMesh->NumTriangles; iTri++)

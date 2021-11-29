@@ -13,12 +13,8 @@
 #include "npcBreeder.h"
 #include "GMCrywolf1st.h"
 #include "ZzzOpenData.h"
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 #include "DuelMgr.h"
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 #include "w_CursedTemple.h"
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 
 extern int DeleteIndex;
 extern int AppointStatus;
@@ -49,7 +45,6 @@ bool SEASON3B::CNewUITextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwInputTy
 
 	int x, y, width, height;
 
-	// 메세지창 정보
 	x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
 	y = 100;
 	width = MSGBOX_WIDTH;
@@ -59,7 +54,6 @@ bool SEASON3B::CNewUITextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwInputTy
 		return false;
 	}
 
-	// 입력박스 정보
 	m_pInputBox = new CUITextInputBox;
 
 	if(m_pInputBox)
@@ -75,7 +69,6 @@ bool SEASON3B::CNewUITextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwInputTy
 		m_pInputBox->GiveFocus();
 	}	
 
-	// 버튼 정보 입력
 	SetButtonInfo();
 
 	return true;
@@ -191,7 +184,6 @@ void SEASON3B::CNewUITextInputMsgBox::AddMsg(const type_string& strMsg, DWORD dw
 		SetSize(GetSize().cx, height);
 		AddButtonBlank(iLine);
 
-		// 입력박스 위치 조절
 		if(m_pInputBox)
 		{
 			m_pInputBox->SetPosition(m_pInputBox->GetPosition_x(), m_pInputBox->GetPosition_y() + (iLine * MSGBOX_MIDDLE_HEIGHT));
@@ -221,11 +213,7 @@ int SEASON3B::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWO
 	size_t TextExtentWidth;
 	int iLine = 0;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 	if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
@@ -254,11 +242,7 @@ int SEASON3B::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWO
 			cur_offset += offset;
 
 			type_string strTemp(strRemainText, 0, cur_offset/* size */);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 			if(TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
@@ -273,11 +257,7 @@ int SEASON3B::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWO
 				m_MsgTextList.push_back(pMsg);
 				iLine++;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 				if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
@@ -323,7 +303,6 @@ bool SEASON3B::CNewUITextInputMsgBox::Update()
 	{
 		m_pInputBox->DoAction();
 
-		// related윈도우가 설정이 안되어 있으면 키이벤트가 발생하지 않음으로 related윈도우 설정해준다.
 		if(m_pInputBox->HaveFocus() && g_MessageBox->GetRelatedWnd() != m_pInputBox->GetHandle())
 		{
 			g_MessageBox->SetRelatedWnd(m_pInputBox->GetHandle());
@@ -344,15 +323,12 @@ bool SEASON3B::CNewUITextInputMsgBox::Render()
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	int iCount = m_MsgTextList.size();
 	for(int i=0; i<iCount; ++i)
@@ -361,20 +337,16 @@ bool SEASON3B::CNewUITextInputMsgBox::Render()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 
-	// 텍스트 부분
 	RenderTexts();
 	
-	// 입력부분 렌더링
 	if(m_pInputBox)
 	{
 		m_pInputBox->Render();
 	}
 
-	// 버튼 렌더링
 	RenderButtons();
 
 	DisableAlphaBlend();
@@ -406,11 +378,7 @@ void SEASON3B::CNewUITextInputMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -466,19 +434,17 @@ void SEASON3B::CNewUITextInputMsgBox::SetInputBoxSize(int width, int height)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 void SEASON3B::CNewUIKeyPadButton::Render()
 {
-	if(GetEventState() == EVENT_BTN_HOVER)	// 마우스가 올라간 상태
+	if(GetEventState() == EVENT_BTN_HOVER)
 	{
 		RenderImage(BITMAP_INVENTORY+17, GetPosX(), GetPosY(), GetWidth(), GetHeight());
 	}
-	else if(GetEventState() == EVENT_BTN_DOWN)	// 마우스가 눌러진 상태
+	else if(GetEventState() == EVENT_BTN_DOWN)
 	{
 		RenderImage(BITMAP_INVENTORY+18, GetPosX(), GetPosY(), GetWidth(), GetHeight());
 	}
-	else	// 일반 상태
+	else
 	{
 		glColor3f(0.80f, 0.80f, 0.80f);
 		RenderImage(BITMAP_INVENTORY+17, GetPosX(), GetPosY(), GetWidth(), GetHeight());
@@ -488,15 +454,15 @@ void SEASON3B::CNewUIKeyPadButton::Render()
 
 void SEASON3B::CNewUIDeleteKeyPadButton::Render()
 {
-	if(GetEventState() == EVENT_BTN_HOVER)	// 마우스가 올라간 상태
+	if(GetEventState() == EVENT_BTN_HOVER)
 	{
 		RenderImage(BITMAP_INTERFACE+25, GetPosX(), GetPosY(), GetWidth(), GetHeight());
 	}
-	else if(GetEventState() == EVENT_BTN_DOWN)	// 마우스가 눌러진 상태
+	else if(GetEventState() == EVENT_BTN_DOWN)
 	{
 		RenderImage(BITMAP_INTERFACE+26, GetPosX(), GetPosY(), GetWidth(), GetHeight());
 	}
-	else	// 일반 상태
+	else
 	{
 		RenderImage(BITMAP_INTERFACE+24, GetPosX(), GetPosY(), GetWidth(), GetHeight());
 	}
@@ -578,7 +544,6 @@ CALLBACK_RESULT SEASON3B::CNewUIKeyPadMsgBox::LButtonUp(class CNewUIMessageBoxBa
 	CNewUIKeyPadMsgBox* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 	if(pMsgBox)
 	{
-		// 키패드 버튼 이벤트 처리
 		for(int i=0; i<MAX_KEYPADINPUT; ++i)
 		{
 			if(pMsgBox->m_BtnKeyPad[i].IsMouseIn() == true)
@@ -592,14 +557,12 @@ CALLBACK_RESULT SEASON3B::CNewUIKeyPadMsgBox::LButtonUp(class CNewUIMessageBoxBa
 			}
 		}
 
-		// Delete 버튼 이벤트 처리
 		if(pMsgBox->m_BtnDeleteKeyPad.IsMouseIn() == true)
 		{
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_KEYPAD_DELETE);
 			return CALLBACK_BREAK;
 		}
 
-		// Ok, Cancel 버튼 이벤트 처리
 		if(pMsgBox->m_BtnOk.IsMouseIn() == true)
 		{
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_OK);
@@ -712,7 +675,6 @@ bool SEASON3B::CNewUIKeyPadMsgBox::IsAllSameNumber()
 
 void SEASON3B::CNewUIKeyPadMsgBox::KeyPadInput(int iInput)
 {
-	// 유니코드 지원 안해야 함!
 	char strInput[4] = { 0, };
 	sprintf(strInput, "%d", iInput);
 	strcat(m_strKeyPadInput, strInput);
@@ -720,7 +682,6 @@ void SEASON3B::CNewUIKeyPadMsgBox::KeyPadInput(int iInput)
 
 void SEASON3B::CNewUIKeyPadMsgBox::DeleteKeyPadInput()
 {
-	// 유니코드 지원 안해야 함!
 	int iSize = strlen(m_strKeyPadInput);
 	if(iSize > 0)
 	{
@@ -732,7 +693,6 @@ void SEASON3B::CNewUIKeyPadMsgBox::SetButtonInfo()
 {
 	int x, y, width, height;
 
-	// 숫자 키패드 정보
 	width = KEYPAD_WIDTH; height = KEYPAD_HEIGHT;
 	x = GetPos().x + (GetSize().cx / 2) - ((width + 5) * 5) / 2; 
 	y = GetPos().y + 80; 
@@ -741,7 +701,6 @@ void SEASON3B::CNewUIKeyPadMsgBox::SetButtonInfo()
 		int xPos = i % 5;
 		int yPos = i / 5;
 
-		// 텍스쳐 타입은 상관없음.
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 		m_BtnKeyPad[i].SetInfo(0, x + ((width + 5) * xPos), y + ((height + 5) * yPos), width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -749,16 +708,14 @@ void SEASON3B::CNewUIKeyPadMsgBox::SetButtonInfo()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 	}
 
-	// 키패드 지우는 버튼 정보
 	y += (height + 5) * 2;
-	// 텍스쳐 타입은 상관없음.
+
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 	m_BtnDeleteKeyPad.SetInfo(0, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
 	m_BtnDeleteKeyPad.SetInfo(0, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-	// Ok, Cancel 버튼 정보
 	width = MSGBOX_BTN_WIDTH;
 	height = MSGBOX_BTN_HEIGHT;
 	x = GetPos().x + (((GetSize().cx / 2) - width) / 2);
@@ -802,16 +759,9 @@ bool SEASON3B::CNewUIKeyPadMsgBox::Render()
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// 메세지박스 틀
 	RenderFrame();
-
-	// 텍스트들
 	RenderTexts();
-
-	// 키패드 입력값들
 	RenderKeyPadInput();
-
-	// 버튼들 렌더링
 	RenderButtons();
 
 	DisableAlphaBlend();
@@ -822,15 +772,12 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<MSGBOX_MIDDLE_FRAME_NUM; ++i)
 	{
@@ -838,14 +785,12 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void SEASON3B::CNewUIKeyPadMsgBox::RenderKeyPadInput()
 {
-	// 입력 틀
 	float x, y, width, height;
 	glColor3f(0.3f, 0.3f, 0.3f);
 	width = 10.f * m_iInputLimit + 12.f; 
@@ -856,7 +801,6 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderKeyPadInput()
 	RenderBitmap(BITMAP_INTERFACE+23, x, y, width, height, 0.f, 0.f, 40/64.f, 18/32.f);
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	// 입력 값들 (**** 별표로 표시)
 	unicode::t_string strInput = "";
 	for(int i=0; i<GetInputSize(); ++i)
 	{
@@ -895,11 +839,7 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -911,20 +851,13 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderTexts()
 
 void SEASON3B::CNewUIKeyPadMsgBox::RenderButtons()
 {
-	// 0 ~ 9 까지 숫자 키패드 렌더링
 	for(int i=0; i<MAX_KEYPADINPUT; ++i)
 	{
-		// 키패드 모양
 		m_BtnKeyPad[i].Render();
-
-		// 키패드 숫자
 		SEASON3B::RenderNumber(m_BtnKeyPad[i].GetPosX() + 15, m_BtnKeyPad[i].GetPosY() + 5, m_iKeyPadMapping[i], 1.5f);
 	}
 
-	// 입력 지우는 버튼
 	m_BtnDeleteKeyPad.Render();
-
-	// Ok, Cancel 버튼
 	m_BtnOk.Render();
 	m_BtnCancel.Render();
 }
@@ -970,37 +903,31 @@ bool SEASON3B::CUseFruitCheckMsgBox::Create(float fPriority)
 	Set3DItem(pItem);
 
 	unicode::t_char strName[50] = { 0, };
-    if(pItem->Type == ITEM_HELPER+15) // 열매 ( 에너지/체력/민첩/힘/통솔 )
+    if(pItem->Type == ITEM_HELPER+15)
     {
         switch((pItem->Level>>3)&15)
         {
         case 0:
-			// 168 "에너지"
 			unicode::_sprintf(strName, "%s", GlobalText[168] );
 			break;	
         case 1:
-			// 169 "체력"
 			unicode::_sprintf(strName, "%s", GlobalText[169] );
 			break;
         case 2:
-			// 167 "민첩"
 			unicode::_sprintf(strName, "%s", GlobalText[167] );
 			break;
         case 3:
-			// 166 " 힘 "
 			unicode::_sprintf(strName, "%s", GlobalText[166] );
 			break;
 		case 4:
-			// 1900 "통솔"
 			unicode::_sprintf(strName, "%s", GlobalText[1900] );
 			break;
         }
     }
-	// 1901 "열매"
+
 	unicode::t_char strText[128] = { 0, };
 	unicode::_sprintf(strText, "( %s%s )", strName, GlobalText[1901] );
 	AddMsg(strText, RGBA(255,255, 0, 255), MSGBOX_FONT_BOLD);
-	// 1902 "선택해 주시기 바랍니다."
 	AddMsg(GlobalText[1902], RGBA(255,255, 0, 255), MSGBOX_FONT_BOLD);
 
 	return true;
@@ -1052,13 +979,8 @@ bool SEASON3B::CUseFruitCheckMsgBox::Render()
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// 메세지박스 프레임
 	RenderFrame();
-
-	// 텍스트
 	RenderTexts();
-
-	// 버튼 부분
 	RenderButtons();
 	
 	DisableAlphaBlend();
@@ -1084,7 +1006,7 @@ void SEASON3B::CUseFruitCheckMsgBox::Render3D()
 
 bool SEASON3B::CUseFruitCheckMsgBox::IsVisible() const
 {
-	return true;	//. 지금은 Render3D()에만 영향 줌
+	return true;
 }
 
 CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -1115,7 +1037,6 @@ CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::LButtonUp(class CNewUIMessageBox
 CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::AddBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
 	g_byItemUseType = 0x00;
-	// 아이템의 인덱스를 넘겨준다.
 	BYTE byIndex = g_pMyInventory->GetStandbyItemIndex();
 	SendRequestUse ( byIndex, 0 );
 
@@ -1128,7 +1049,6 @@ CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::AddBtnDown(class CNewUIMessageBo
 CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::MinusBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
 	g_byItemUseType = 0x01;
-	// 아이템의 인덱스를 넘겨준다.
 	BYTE byIndex = g_pMyInventory->GetStandbyItemIndex();
 	SendRequestUse ( byIndex, 0 );
 
@@ -1166,17 +1086,14 @@ void SEASON3B::CUseFruitCheckMsgBox::SetButtonInfo()
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
 	height = MSGBOX_BTN_EMPTY_HEIGHT;
 	m_BtnAdd.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1412 "생성"
 	m_BtnAdd.SetText(GlobalText[1412]);
 
 	x = GetPos().x + triwidth + (triwidth / 2) - btnhalf;
 	m_BtnMinus.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1903 "감소"
 	m_BtnMinus.SetText(GlobalText[1903]);
 
 	x = GetPos().x + (triwidth * 2) + (triwidth / 2) - btnhalf;
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 229 "취소"
 	m_BtnCancel.SetText(GlobalText[229]);
 }
 
@@ -1184,15 +1101,12 @@ void SEASON3B::CUseFruitCheckMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 	
-	// 메세지박스 중간부분(3줄이상)
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<1; ++i)
 	{
@@ -1200,7 +1114,6 @@ void SEASON3B::CUseFruitCheckMsgBox::RenderFrame()
 		y += height;
 	}
 
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -1212,7 +1125,6 @@ void SEASON3B::CUseFruitCheckMsgBox::RenderTexts()
 
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x + MSGBOX_TEXT_LEFT_BLANK_3DITEM; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
 	for(; vi != m_MsgDataList.end(); vi++)
@@ -1232,11 +1144,7 @@ void SEASON3B::CUseFruitCheckMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -1278,18 +1186,10 @@ bool SEASON3B::CGemIntegrationMsgBox::Create(float fPriority)
 
 	CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
 
-	// 1801 "보석 조합"
 	AddMsg(GlobalText[1801], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 해체 선택 창 (2010.10.27)
 	AddMsg(GlobalText[3307]);
 	AddMsg(GlobalText[3308]);
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	// 1802 "축복의 보석 및 영혼의 보석을"
-	// 1803 "조합 또는 해체 할 수 있습니다."
-	AddMsg(GlobalText[1802]);
-	AddMsg(GlobalText[1803]);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 	SetButtonInfo();
 
@@ -1321,13 +1221,9 @@ bool SEASON3B::CGemIntegrationMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-
 	RenderTexts();
-
 	RenderButtons();
-
 	DisableAlphaBlend();
 	return true;
 }
@@ -1390,7 +1286,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::DisjointBtnDown(class CNewUIMes
 {
 	COMGEM::SetMode(COMGEM::DETACH);
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 해체가 불가능 하다면 메세지 출력
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	if( !COMGEM::FindWantedList() )	
 	{
 		g_pChatListBox->AddText("", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
@@ -1428,13 +1324,13 @@ void SEASON3B::CGemIntegrationMsgBox::SetButtonInfo()
 	width = MSGBOX_BTN_EMPTY_WIDTH;
 	height = MSGBOX_BTN_EMPTY_HEIGHT;
 	m_BtnUnity.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 1801 "보석 조합"
+
 	m_BtnUnity.SetText(GlobalText[1801]);
 
 	x = GetPos().x + msgboxhalfwidth - btnhalf;
 	y += BTN_GAP;
 	m_BtnDisjoint.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 1800 "보석 해체"
+
 	m_BtnDisjoint.SetText(GlobalText[1800]);
 
 	btnhalf = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
@@ -1442,7 +1338,7 @@ void SEASON3B::CGemIntegrationMsgBox::SetButtonInfo()
 	y += BTN_GAP;
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
+
 	m_BtnCancel.SetText(GlobalText[1002]);
 }
 
@@ -1450,15 +1346,12 @@ void SEASON3B::CGemIntegrationMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<MIDDLE_COUNT; ++i)
 	{
@@ -1466,7 +1359,6 @@ void SEASON3B::CGemIntegrationMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -1478,7 +1370,6 @@ void SEASON3B::CGemIntegrationMsgBox::RenderTexts()
 
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x; y = GetPos().y + (MSGBOX_TEXT_TOP_BLANK / 2);
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
 	for(; vi != m_MsgDataList.end(); vi++)
@@ -1498,11 +1389,7 @@ void SEASON3B::CGemIntegrationMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -1541,14 +1428,11 @@ bool SEASON3B::CGemIntegrationUnityMsgBox::Create(float fPriority)
 
 	CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
 
-	// 1801 "보석 조합"
 	AddMsg(GlobalText[1801], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 보석 종류 선택 창 (2010.10.27)
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	SetText();
 #else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	// 1804 "조합하실 보석을 먼저 선택하고"
-	// 1805 "개수버튼을 누르셔야 합니다."
 	AddMsg(GlobalText[1804]);
 	AddMsg(GlobalText[1805]);
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
@@ -1588,7 +1472,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::Release()
 
 bool SEASON3B::CGemIntegrationUnityMsgBox::Update()
 {
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 창 Update (2010.10.27)
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int i;
 	switch( COMGEM::m_cGemType )
 	{
@@ -1668,7 +1552,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetAddCallbackFunc()
 	
 }
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 해체창 사이즈 변동 (2010.10.27)
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 void SEASON3B::CGemIntegrationUnityMsgBox::ResetWndSize( int _nType )
 {
 	int	height;
@@ -1699,7 +1583,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 	height = MSGBOX_BTN_EMPTY_HEIGHT;
 	btnhalfwidth = width / 2.f;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 조합, 묶음 버튼 셋팅
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int	  nNum = 0;
 	int	  nBtnIndex[COMGEM::eGEMTYPE_END]	= { 1806, 1807, 3312, 3313, 3314, 2081, 3315, 3316, 3317, 3318 };
 	unicode::t_char szTemp[256] = {0, };
@@ -1735,12 +1619,10 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 	x = GetPos().x + (msgboxhalfwidth / 2) - btnhalfwidth;
 	y = GetPos().y + 60;
 	m_BtnBlessing.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1806 "축복의 보석"
 	m_BtnBlessing.SetText(GlobalText[1806]);
 
 	x = GetPos().x + msgboxhalfwidth + (msgboxhalfwidth / 2) - btnhalfwidth;
 	m_BtnSoul.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1807 "영혼의 보석"
 	m_BtnSoul.SetText(GlobalText[1807]);
 
 	width = MSGBOX_BTN_EMPTY_WIDTH + 20;
@@ -1748,7 +1630,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y += 40.f;
 	m_BtnTen.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 1808 "%d개 조합(%d젠 소요)"
 	unicode::t_char strText[256] = {0, };
 	unicode::_sprintf(strText, GlobalText[1808], 10, 500000);
 	m_BtnTen.SetText(strText);
@@ -1756,14 +1637,12 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 
 	y += 40.f;
 	m_BtnTwenty.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 1808 "%d개 조합(%d젠 소요)"
 	unicode::_sprintf(strText, GlobalText[1808], 10*2, 500000*2);
 	m_BtnTwenty.SetText(strText);
 	m_BtnTwenty.SetEnable(false);
 
 	y += 40.f;
 	m_BtnThirty.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 1808 "%d개 조합(%d젠 소요)"
 	unicode::_sprintf(strText, GlobalText[1808], 10*3, 500000*3);
 	m_BtnThirty.SetText(strText);
 	m_BtnThirty.SetEnable(false);
@@ -1774,7 +1653,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y += 40;
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnCancel.SetText(GlobalText[1002]);	
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 }
@@ -1783,15 +1661,12 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 
 #ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
@@ -1804,7 +1679,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -1816,7 +1690,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderTexts()
 
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x; y = GetPos().y + (MSGBOX_TEXT_TOP_BLANK / 2);
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
 	for(; vi != m_MsgDataList.end(); vi++)
@@ -1836,11 +1709,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -1852,7 +1721,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderTexts()
 
 void SEASON3B::CGemIntegrationUnityMsgBox::RenderButtons()
 {
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 선택 창 버튼 Render (2010.10.27)
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int i;
 	switch( COMGEM::m_cGemType )
 	{
@@ -1902,7 +1771,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::LButtonUp(class CNewUIMess
 	CGemIntegrationUnityMsgBox* pMsgBox = dynamic_cast<CGemIntegrationUnityMsgBox*>(pOwner);
 	if(pMsgBox)
 	{
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 선택 창 버튼 메세지 처리 (2010.10.27)
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		int i;
 		switch( COMGEM::m_cGemType )
 		{
@@ -1980,7 +1849,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SoulBtnDown(class CNewUIMe
 	return CALLBACK_CONTINUE;
 }
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 조합버튼 (2010.10.27)
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
 	if( !COMGEM::CheckInv() )	
@@ -2020,18 +1889,13 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TenBtnDown(class CNewUIMes
 			unicode::t_char strText[256] = {0, };
 			if(COMGEM::m_cGemType == COMGEM::CELE)
 			{
-				// 1809 "%s을 %d개 조합하시겠습니까?"
-				// 1806 "축복의 보석"
 				unicode::_sprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
 			}
 			else if(COMGEM::m_cGemType == COMGEM::SOUL)
 			{
-				// 1809 "%s을 %d개 조합하시겠습니까?"
-				// 1807 "영혼의 보석"
 				unicode::_sprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
 			}
 			pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-			// 1810 "조합비용: %d젠"
 			unicode::_sprintf(strText, GlobalText[1810], COMGEM::m_iValue);
 			pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
 		}
@@ -2065,18 +1929,13 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TwentyBtnDown(class CNewUI
 			unicode::t_char strText[256] = {0, };
 			if(COMGEM::m_cGemType == COMGEM::CELE)
 			{
-				// 1809 "%s을 %d개 조합하시겠습니까?"
-				// 1806 "축복의 보석"
 				unicode::_sprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
 			}
 			else if(COMGEM::m_cGemType == COMGEM::SOUL)
 			{
-				// 1809 "%s을 %d개 조합하시겠습니까?"
-				// 1807 "영혼의 보석"
 				unicode::_sprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
 			}
 			pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-			// 1810 "조합비용: %d젠"
 			unicode::_sprintf(strText, GlobalText[1810], COMGEM::m_iValue);
 			pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
 		}
@@ -2110,18 +1969,13 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class CNewUI
 			unicode::t_char strText[256] = {0, };
 			if(COMGEM::m_cGemType == COMGEM::CELE)
 			{
-				// 1809 "%s을 %d개 조합하시겠습니까?"
-				// 1806 "축복의 보석"
 				unicode::_sprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
 			}
 			else if(COMGEM::m_cGemType == COMGEM::SOUL)
 			{
-				// 1809 "%s을 %d개 조합하시겠습니까?"
-				// 1807 "영혼의 보석"
 				unicode::_sprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
 			}
 			pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-			// 1810 "조합비용: %d젠"
 			unicode::_sprintf(strText, GlobalText[1810], COMGEM::m_iValue);
 			pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
 		}
@@ -2176,11 +2030,10 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Create(float fPriority)
 
 	CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
 
-	// 1800 "보석 해체"
 	AddMsg(GlobalText[1800], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 	SetButtonInfo();
 	
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 해체 창 (2010.10.27)
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	ChangeMiddleFrameBig();	
 
 	AddMsg(" ", RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
@@ -2212,7 +2065,7 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Update()
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 해체 창 업데이트
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	if( true )
 #else
 	if(COMGEM::m_cGemType != COMGEM::NOGEM)
@@ -2235,17 +2088,11 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-
 	RenderTexts();
-
 	RenderButtons();
-
 	RenderGemList();
-
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -2344,11 +2191,8 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class C
 
 	if(COMGEM::m_UnmixTarList.IsEmpty() == true)
 	{
-		// 1818 "해체할 수 없습니다."
 		g_pChatListBox->AddText("", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
-
 		COMGEM::GetBack();
-
 		pMsgBox->ChangeMiddleFrameSmall();
 	}
 	else
@@ -2374,11 +2218,8 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CNewU
 
 	if(COMGEM::m_UnmixTarList.IsEmpty() == true)
 	{
-		// 1818 "해체할 수 없습니다."
 		g_pChatListBox->AddText("", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
-
 		COMGEM::GetBack();
-
 		pMsgBox->ChangeMiddleFrameSmall();
 	}
 	else
@@ -2415,19 +2256,13 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
 #else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 			if(COMGEM::m_cGemType == 0)
 			{
-				// 1813 "정말로 %s +%d를 해체하시겠습니까?"
-				// 1806 "축복의 보석"
 				sprintf(strText, GlobalText[1813], GlobalText[1806], iGemLevel);
 			}
 			else
 			{
-				// 1813 "정말로 %s +%d를 해체하시겠습니까?"
-				// 1807 "영혼의 보석"
 				sprintf(strText, GlobalText[1813], GlobalText[1807], iGemLevel);
 			}
 			pMsgBox->AddMsg(strText);
-
-			// 1814 "해체비용: %d젠"
 			sprintf(strText, GlobalText[1814], COMGEM::m_iValue);
 			pMsgBox->AddMsg(strText);
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
@@ -2472,12 +2307,10 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::SetButtonInfo()
 	x = GetPos().x + (msgboxhalfwidth / 2) - btnhalfwidth;
 	y = GetPos().y + 40;
 	m_BtnBlessing.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1806 "축복의 보석"
 	m_BtnBlessing.SetText(GlobalText[1806]);
 
 	x = GetPos().x + msgboxhalfwidth + (msgboxhalfwidth / 2) - btnhalfwidth;
 	m_BtnSoul.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1807 "영혼의 보석"
 	m_BtnSoul.SetText(GlobalText[1807]);
 
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
@@ -2485,13 +2318,11 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y += 40;
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnCancel.SetText(GlobalText[1002]);
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-	// 188 "해체"
 	m_BtnDisjoint.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
 	m_BtnDisjoint.SetText(GlobalText[188]);
 	m_BtnDisjoint.SetEnable(false);
@@ -2501,23 +2332,19 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleFrameCount; ++i)
 	{
 		RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
 		y += height;
 	}
-	
-	// 메세지박스 아랫부분
+
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -2529,7 +2356,6 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderTexts()
 
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x; y = GetPos().y + (MSGBOX_TEXT_TOP_BLANK / 2);
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
 	for(; vi != m_MsgDataList.end(); vi++)
@@ -2549,11 +2375,7 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -2584,11 +2406,8 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderGemList()
 	y = GetPos().y + 80;
 	SIZE TextSize;
 	size_t TextExtentWidth, TextExtentHeight;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strText, unicode::_strlen(strText), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strText, unicode::_strlen(strText), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 	TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 	
@@ -2600,7 +2419,6 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderGemList()
 
 	m_BtnDisjoint.Render();
 
-	//이 창은 시작좌표가 좌측 아래다.
 	x = GetPos().x + (GetSize().cx / 2) - (COMGEM::m_UnmixTarList.GetWidth() / 2);
 
 #ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
@@ -2677,11 +2495,11 @@ void SEASON3B::CSystemMenuMsgBox::Release()
 
 bool SEASON3B::CSystemMenuMsgBox::Update()
 {
-	m_BtnGameOver.Update();			// 게임종료
-	m_BtnChooseServer.Update();		// 서버선택
-	m_BtnChooseCharacter.Update();	// 캐릭터선택
-	m_BtnOption.Update();				// 옵션
-	m_BtnCancel.Update();				// 취소
+	m_BtnGameOver.Update();
+	m_BtnChooseServer.Update();
+	m_BtnChooseCharacter.Update();
+	m_BtnOption.Update();
+	m_BtnCancel.Update();
 	return true;
 }
 
@@ -2689,13 +2507,9 @@ bool SEASON3B::CSystemMenuMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-
 	RenderButtons();
-
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -2703,15 +2517,12 @@ void SEASON3B::CSystemMenuMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<5; ++i)
 	{
@@ -2719,21 +2530,17 @@ void SEASON3B::CSystemMenuMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void SEASON3B::CSystemMenuMsgBox::RenderButtons()
 {
-	m_BtnGameOver.Render();			// 게임종료
-#ifdef LEM_ADD_GAMECHU
-	// LEM_TEST - 다른 아이디로 접속 서버선택 (2010.10.28)
-#endif // LEM_ADD_GAMECHU
-	m_BtnChooseServer.Render();		// 서버선택
-	m_BtnChooseCharacter.Render();	// 캐릭터선택
-	m_BtnOption.Render();				// 옵션
-	m_BtnCancel.Render();				// 취소
+	m_BtnGameOver.Render();
+	m_BtnChooseServer.Render();
+	m_BtnChooseCharacter.Render();
+	m_BtnOption.Render();
+	m_BtnCancel.Render();
 }
 
 void SEASON3B::CSystemMenuMsgBox::SetAddCallbackFunc()
@@ -2760,27 +2567,22 @@ void SEASON3B::CSystemMenuMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + 23;
 	m_BtnGameOver.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 381 "게임 종료"
 	m_BtnGameOver.SetText(GlobalText[381]);
 
 	y += 30.f;	
 	m_BtnChooseServer.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 382 "서버 선택"
 	m_BtnChooseServer.SetText(GlobalText[382]);
 
 	y += 30.f;	
 	m_BtnChooseCharacter.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 383 "다른 캐릭터로 접속"
 	m_BtnChooseCharacter.SetText(GlobalText[383]);
 
 	y += 30.f;
 	m_BtnOption.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 385 "옵     션"
 	m_BtnOption.SetText(GlobalText[385]);
 
 	y += 30.f;
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 384 "취     소"
 	m_BtnCancel.SetText(GlobalText[384]);
 }
 
@@ -2794,7 +2596,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBas
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_GAMEOVER);
 
 #ifdef LDK_FIX_EXCEPTION_SETSTATEGAMEOVER			
-			//정방 걸린상태에서 재접,캐릭선택,서버선택시도시 인벤토이 안열림 수정(2008.5.29)
 			if(Hero->PK) return CALLBACK_BREAK;
 #endif //LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
 			g_pNewUIHotKey->SetStateGameOver(true);	
@@ -2806,7 +2607,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBas
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSESERVER);
 
 #ifdef LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
-			//정방 걸린상태에서 재접,캐릭선택,서버선택시도시 인벤토이 안열림 수정(2008.5.29)
 			if(Hero->PK) return CALLBACK_BREAK;
 #endif //LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
 			g_pNewUIHotKey->SetStateGameOver(true);	
@@ -2818,7 +2618,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBas
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSECHARACTER);
 
 #ifdef LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
-			//정방 걸린상태에서 재접,캐릭선택,서버선택시도시 인벤토이 안열림 수정(2008.5.29)
 			if(Hero->PK) return CALLBACK_BREAK;
 #endif //LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
 			g_pNewUIHotKey->SetStateGameOver(true);	
@@ -2845,13 +2644,11 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessage
 	g_ErrorReport.Write( "> Menu - Exit game. ");
 	g_ErrorReport.WriteCurrentTime();
 
-	//  게임내에서 설정한 데이터 저장.
 	SaveOptions();
 	SaveMacro("Data\\Macro.txt");
 
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
 	{
-		// 592 "카오스창을 닫으신 후 종료하시기 바랍니다."
 		g_pChatListBox->AddText("", GlobalText[592], SEASON3B::TYPE_ERROR_MESSAGE);
 	}
 	else
@@ -2882,7 +2679,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
 
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
 	{
-		// 592 "카오스창을 닫으신 후 종료하시기 바랍니다."
 		g_pChatListBox->AddText("", GlobalText[592], SEASON3B::TYPE_ERROR_MESSAGE);
 	}
 	else
@@ -2918,7 +2714,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
 
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
 	{
-		// 592 "카오스창을 닫으신 후 종료하시기 바랍니다.
 		g_pChatListBox->AddText("", GlobalText[592], SEASON3B::TYPE_SYSTEM_MESSAGE);
 	}
 	else
@@ -2953,10 +2748,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::CancelBtnDown(class CNewUIMessageBo
 
 	return CALLBACK_BREAK;
 }
-
-
-
-//////////////////////////////////////////////////////////////////////////
 
 SEASON3B::CBloodCastleResultMsgBox::CBloodCastleResultMsgBox()
 {
@@ -3006,14 +2797,10 @@ bool SEASON3B::CBloodCastleResultMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-	
 	m_BtnOk.Render();
-
 	EnableAlphaBlend();
 	matchEvent::RenderResult();
-	
 	DisableAlphaBlend();
 	return true;
 }
@@ -3022,15 +2809,12 @@ void SEASON3B::CBloodCastleResultMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<MIDDLE_COUNT; ++i)
 	{
@@ -3038,7 +2822,6 @@ void SEASON3B::CBloodCastleResultMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -3065,8 +2848,6 @@ CALLBACK_RESULT SEASON3B::CBloodCastleResultMsgBox::OkBtnDown(class CNewUIMessag
 
 	return CALLBACK_BREAK;	
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 SEASON3B::CDevilSquareRankMsgBox::CDevilSquareRankMsgBox()
 {
@@ -3114,14 +2895,10 @@ bool SEASON3B::CDevilSquareRankMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-	
 	m_BtnOk.Render();
-
 	EnableAlphaBlend();
 	matchEvent::RenderResult();
-	
 	DisableAlphaBlend();
 
 	return true;
@@ -3244,16 +3021,11 @@ bool SEASON3B::CChaosCastleResultMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-	
 	m_BtnOk.Render();
-
 	EnableAlphaBlend();
 	matchEvent::RenderResult();
-	
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -3276,7 +3048,6 @@ CALLBACK_RESULT SEASON3B::CChaosCastleResultMsgBox::OkBtnDown(class CNewUIMessag
 {
 	PlayBuffer(SOUND_CLICK01);
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
 	return CALLBACK_BREAK;
 }
 
@@ -3284,15 +3055,12 @@ void SEASON3B::CChaosCastleResultMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<MIDDLE_COUNT; ++i)
 	{
@@ -3300,7 +3068,6 @@ void SEASON3B::CChaosCastleResultMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -3355,15 +3122,10 @@ bool SEASON3B::CChaosMixMenuMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-
 	RenderTexts();
-
 	RenderButtons();
-
 	DisableAlphaBlend();
-	
 	return true;
 }
 
@@ -3429,7 +3191,7 @@ CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::Mix380BtnDown(class CNewUIMessage
 
 CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-	g_MixRecipeMgr.ClearCheckRecipeResult();	// 닫을때 조합 검사 결과를 초기화 해준다.
+	g_MixRecipeMgr.ClearCheckRecipeResult();
 	g_pNewUISystem->Hide( SEASON3B::INTERFACE_MIXINVENTORY );
 
 	PlayBuffer(SOUND_CLICK01);
@@ -3460,17 +3222,14 @@ void SEASON3B::CChaosMixMenuMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + 85;
 	m_BtnGeneralMix.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 735 "일반 조합"
 	m_BtnGeneralMix.SetText(GlobalText[735]);
 
 	y = GetPos().y + 155;
 	m_BtnChaosMix.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 736 "카오스 무기 아이템 조합"
 	m_BtnChaosMix.SetText(GlobalText[736]);
 
 	y = GetPos().y + 225;
 	m_BtnMix380.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	// 2193 "아이템 옵션 추가 조합"
 	m_BtnMix380.SetText(GlobalText[2193]);
 	
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
@@ -3478,7 +3237,6 @@ void SEASON3B::CChaosMixMenuMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnCancel.SetText(GlobalText[1002]);
 }
 
@@ -3486,15 +3244,12 @@ void SEASON3B::CChaosMixMenuMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<MIDDLE_COUNT; ++i)
 	{
@@ -3502,7 +3257,6 @@ void SEASON3B::CChaosMixMenuMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -3548,10 +3302,6 @@ void SEASON3B::CChaosMixMenuMsgBox::RenderButtons()
 	m_BtnMix380.Render();
 	m_BtnCancel.Render();
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-
 
 SEASON3B::CDialogMsgBox::CDialogMsgBox()
 {
@@ -3646,15 +3396,10 @@ bool SEASON3B::CDialogMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-
 	RenderTexts();
-
 	RenderButtons();
-
 	DisableAlphaBlend();
-	
 	return true;
 }
 
@@ -3672,11 +3417,7 @@ int SEASON3B::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwCol
 	size_t TextExtentWidth;
 	int iLine = 0;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 	if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
@@ -3705,11 +3446,7 @@ int SEASON3B::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwCol
 			cur_offset += offset;
 
 			type_string strTemp(strRemainText, 0, cur_offset/* size */);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 			if(TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
@@ -3724,11 +3461,7 @@ int SEASON3B::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwCol
 				m_MsgDataList.push_back(pMsg);
 				iLine++;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 				if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
@@ -3765,7 +3498,6 @@ void SEASON3B::CDialogMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 	m_BtnEnd.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 609 "대화종료"
 	m_BtnEnd.SetText(GlobalText[609]);
 }
 
@@ -3824,11 +3556,7 @@ void SEASON3B::CDialogMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -3879,8 +3607,6 @@ bool SEASON3B::CProgressMsgBox::Create(DWORD dwElapseTime, float fPriority)
 	return true;
 }
 
-
-
 void SEASON3B::CProgressMsgBox::Release()
 {
 
@@ -3926,11 +3652,7 @@ int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwC
 	size_t TextExtentWidth;
 	int iLine = 0;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 	if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
@@ -3960,11 +3682,7 @@ int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwC
 			cur_offset += offset;
 
 			type_string strTemp(strRemainText, 0, cur_offset/* size */);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 			if(TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
@@ -3979,11 +3697,7 @@ int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwC
 				m_MsgDataList.push_back(pMsg);
 				iLine++;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 				if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
@@ -4003,9 +3717,7 @@ int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwC
 			}
 		}
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int i = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	}
 
 	return iLine;
@@ -4042,15 +3754,12 @@ void SEASON3B::CProgressMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y ,width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y ,width, height);
 
-	// 메세지박스 중간부분(3줄이상)
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	if(m_MsgDataList.size() > 2)
 	{
@@ -4062,7 +3771,6 @@ void SEASON3B::CProgressMsgBox::RenderFrame()
 		}
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y ,width, height);
 }
@@ -4073,7 +3781,6 @@ void SEASON3B::CProgressMsgBox::RenderTexts()
 
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
 	for(; vi != m_MsgDataList.end(); vi++)
@@ -4093,11 +3800,7 @@ void SEASON3B::CProgressMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -4128,9 +3831,6 @@ CALLBACK_RESULT SEASON3B::CProgressMsgBox::ClosingProcess(class CNewUIMessageBox
 	
 	return CALLBACK_CONTINUE;
 }
-
-//////////////////////////////////////////////////////////////////////////
-
 
 SEASON3B::CCursedTempleProgressMsgBox::CCursedTempleProgressMsgBox()
 {
@@ -4165,8 +3865,6 @@ bool SEASON3B::CCursedTempleProgressMsgBox::Create(DWORD dwElapseTime, float fPr
 
 	return true;
 }
-
-
 
 void SEASON3B::CCursedTempleProgressMsgBox::Release()
 {
@@ -4207,11 +3905,7 @@ int SEASON3B::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMs
 	size_t TextExtentWidth;
 	int iLine = 0;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 	if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
@@ -4240,11 +3934,8 @@ int SEASON3B::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMs
 			cur_offset += offset;
 
 			type_string strTemp(strRemainText, 0, cur_offset/* size */);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 			if(TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
@@ -4259,11 +3950,7 @@ int SEASON3B::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMs
 				m_MsgDataList.push_back(pMsg);
 				iLine++;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
 				if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
@@ -4319,10 +4006,7 @@ CALLBACK_RESULT SEASON3B::CCursedTempleProgressMsgBox::ClosingProcess(class CNew
 {
 	PlayBuffer(SOUND_CLICK01);
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 	g_CursedTemple->SetGaugebarEnabled(false);
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
-	
 	return CALLBACK_CONTINUE;
 }
 
@@ -4338,10 +4022,7 @@ CALLBACK_RESULT SEASON3B::CCursedTempleProgressMsgBox::CompleteProcess(class CNe
 
 	PlayBuffer(SOUND_CLICK01);
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
-	g_CursedTemple->SetGaugebarCloseTimer();	// 재클릭 방지 타이머 작동
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
-	
+	g_CursedTemple->SetGaugebarCloseTimer();
 	return CALLBACK_CONTINUE;
 }
 
@@ -4349,13 +4030,10 @@ bool SEASON3B::CCursedTempleProgressMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
 	RenderTexts();
 	RenderProgress();
-
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -4363,15 +4041,12 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y ,width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y ,width, height);
 
-	// 메세지박스 중간부분(3줄이상)
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	if(m_MsgDataList.size() > 2)
 	{
@@ -4383,7 +4058,6 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderFrame()
 		}
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y ,width, height);
 }
@@ -4394,7 +4068,6 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderTexts()
 
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
 	for(; vi != m_MsgDataList.end(); vi++)
@@ -4414,11 +4087,7 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -4444,7 +4113,6 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderProgress()
 
 bool SEASON3B::CCursedTempleProgressMsgBox::CheckHeroAction()
 {
-	// 버프 체크
 	if( g_isCharacterBuff((&Hero->Object), eDeBuff_Harden)
 		|| g_isCharacterBuff((&Hero->Object), eDeBuff_Stun)
 		|| g_isCharacterBuff((&Hero->Object), eDeBuff_CursedTempleRestraint) 
@@ -4454,7 +4122,6 @@ bool SEASON3B::CCursedTempleProgressMsgBox::CheckHeroAction()
 		return false;
 	}
 
-	// 액션 체크
 	int action = Hero->Object.CurrentAction;
 
 	if( !(action >= PLAYER_SET && action <= PLAYER_STOP_RIDE_WEAPON) 
@@ -4478,10 +4145,6 @@ bool SEASON3B::CCursedTempleProgressMsgBox::CheckHeroAction()
 
 	return true;
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-
 
 SEASON3B::CDuelMsgBox::CDuelMsgBox()
 {
@@ -4559,11 +4222,9 @@ bool SEASON3B::CDuelMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
 	RenderTexts();
 	RenderButton();
-
 	DisableAlphaBlend();
 	return true;
 }
@@ -4572,22 +4233,18 @@ void SEASON3B::CDuelMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 결투신청 배경 이미지
 	x = GetPos().x + (GetSize().cx / 2) - 74;
 	y = GetPos().y + 15;
 	width = 148;
 	height = 138;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_DUEL_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 	
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<7; ++i)
 	{
@@ -4595,14 +4252,12 @@ void SEASON3B::CDuelMsgBox::RenderFrame()
 		y += height;
 	}
 
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void SEASON3B::CDuelMsgBox::RenderTexts()
 {
-	// 결투신청 ID : 유니코드 아님!!
 	char strDuelID[256];
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 0, 255);
@@ -4617,9 +4272,7 @@ void SEASON3B::CDuelMsgBox::RenderTexts()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetFont(g_hFont);
-	// 910 "당신에게 결투를 신청합니다."
 	g_pRenderText->RenderText(GetPos().x, GetPos().y + 135, GlobalText[910], MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
-	// 911 "결투에 응하시겠습니까?"
 	g_pRenderText->RenderText(GetPos().x, GetPos().y + 151, GlobalText[911], MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 }
 
@@ -4747,11 +4400,9 @@ bool SEASON3B::CDuelResultMsgBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
 	RenderTexts();
 	RenderButton();
-
 	DisableAlphaBlend();
 	return true;
 }
@@ -4760,22 +4411,18 @@ void SEASON3B::CDuelResultMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 결투신청 배경 이미지
 	x = GetPos().x + (GetSize().cx / 2) - 74;
 	y = GetPos().y + 15;
 	width = 148;
 	height = 138;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_DUEL_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 	
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<7; ++i)
 	{
@@ -4783,19 +4430,12 @@ void SEASON3B::CDuelResultMsgBox::RenderFrame()
 		y += height;
 	}
 
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void SEASON3B::CDuelResultMsgBox::RenderTexts()
 {
-	//결투 종료(id=2694)
-	//%s님께서(id=2695)
-	//%s님과의 결투에서(id=2696)
-	//승리하였습니다. (id=2697)
-	
-	// 결투신청 ID : 유니코드 아님!!
 	char strDuelID[256];
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 0, 255);
@@ -4904,7 +4544,6 @@ bool CCherryBlossomMsgBox::Render()
 	RenderTexts();
 	RenderButtons();
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -5024,15 +4663,12 @@ void CCherryBlossomMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 	
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 	
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 	
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleCount; ++i)
 	{
@@ -5040,7 +4676,6 @@ void CCherryBlossomMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -5087,10 +4722,7 @@ bool SEASON3B::CTradeZenMsgBoxLayout::SetLayout()
 		return false;
 
 	pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY|UIOPTION_PAINTBACK);
-
-	// 422 "거래할 금액을 입력해주세요."
 	pMsgBox->AddMsg(GlobalText[422]);
-
 	pMsgBox->AddCallbackFunc(CTradeZenMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
 	pMsgBox->AddCallbackFunc(CTradeZenMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CTradeZenMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -5146,10 +4778,7 @@ bool SEASON3B::CZenReceiptMsgBoxLayout::SetLayout()
 		return false;
 
 	pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY|UIOPTION_PAINTBACK);
-
-	// 420 "입금할 금액을 입력해주세요."
 	pMsgBox->AddMsg(GlobalText[420]);
-
 	pMsgBox->AddCallbackFunc(CZenReceiptMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
 	pMsgBox->AddCallbackFunc(CZenReceiptMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CZenReceiptMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -5169,7 +4798,6 @@ CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::OkBtnDown(class CNewUIMessage
 
 CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-	//창고에 입금
 	CNewUITextInputMsgBox* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
 	unicode::t_char strText[MAX_TEXT_LENGTH] = { 0, };
 	pMsgBox->GetInputBoxText(strText);
@@ -5207,8 +4835,6 @@ CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::CancelBtnDown(class CNewUIMes
 	return CALLBACK_BREAK;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CZenPaymentMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
@@ -5219,10 +4845,7 @@ bool SEASON3B::CZenPaymentMsgBoxLayout::SetLayout()
 		return false;
 
 	pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY|UIOPTION_PAINTBACK);
-
-	// 421 "출금할 금액을 입력해주세요."
 	pMsgBox->AddMsg(GlobalText[421]);
-
 	pMsgBox->AddCallbackFunc(CZenPaymentMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
 	pMsgBox->AddCallbackFunc(CZenPaymentMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CZenPaymentMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -5242,7 +4865,6 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::OkBtnDown(class CNewUIMessage
 
 CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-	//창고에서 출금
 	CNewUITextInputMsgBox* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
 	unicode::t_char strText[MAX_TEXT_LENGTH] = { 0, };
 	pMsgBox->GetInputBoxText(strText);
@@ -5267,19 +4889,16 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessage
 			}
 			else
 			{
-				// 비밀번호 입력하게 키패드 메세지박스 생성
 				g_pStorageInventory->SetBackupTakeZen(iInputZen);
 				SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPasswordKeyPadMsgBoxLayout));
 			}
 	}
 	else if(CharacterMachine->Gold + iInputZen > 2000000000) 
 	{
-		// 메세지박스 뛰워야 함
-		// 20억젠 이상 출금 불가
+
 	}
 	else
 	{
-		// 423 "젠이 부족합니다."
 		SEASON3B::CreateOkMessageBox(GlobalText[423]);
 	}
 	
@@ -5297,8 +4916,6 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::CancelBtnDown(class CNewUIMes
 	return CALLBACK_BREAK;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
@@ -5309,10 +4926,7 @@ bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
 		return false;
 
 	pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY|UIOPTION_PAINTBACK);
-
-	// 1129 "판매가격을 입력하세요."
 	pMsgBox->AddMsg(GlobalText[1129]);
-
 	pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
 	pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -5354,7 +4968,6 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 	bool bResult = false;
 	if(pItem)
 	{
-		//	선택된 아이템의 판매가격.
 		DWORD dwItemValue = ItemValue(pItem, 2);
 
 		if(iInputZen < (int)dwItemValue) 
@@ -5371,10 +4984,8 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 		if(lpMsgBox)
 		{
 			unicode::t_char strText2[MAX_TEXT_LENGTH] = { 0, };
-			// 1132
 			unicode::_sprintf(strText2, GlobalText[1132], strText);
 			lpMsgBox->AddMsg(strText2, RGBA(255, 0, 0, 255), MSGBOX_FONT_BOLD);
-			// 1133
 			lpMsgBox->AddMsg(GlobalText[1133]);
 			lpMsgBox->SetItemValue(iInputZen);
 		}
@@ -5389,9 +5000,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 		CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 
 		int iSourceIndex = -1, iTargetIndex = -1;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		int shopWndType = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 		if(pPickedItem)
 		{
@@ -5399,29 +5008,26 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 			iSourceIndex = pPickedItem->GetSourceLinealPos();
 			iTargetIndex = g_pMyShopInventory->GetTargetIndex();
 
-			if(pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())	// 인벤토리에서 개인상점에서
+			if(pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
 			{
 				BYTE byIndex = MAX_EQUIPMENT_INDEX+iSourceIndex;
 				SendRequestSetSalePrice(byIndex, iInputZen);
 
-				SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT+iSourceIndex, pItemObj,
-										REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);	//. 옮긴다
+				SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT+iSourceIndex, pItemObj,REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);
 			}
-			else if(pPickedItem->GetOwnerInventory() == NULL)	// 장비창에서 개인상점으로
+			else if(pPickedItem->GetOwnerInventory() == NULL)
 			{
 				BYTE byIndex = iSourceIndex;
 				SendRequestSetSalePrice(byIndex, iInputZen);	
 
-				SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex, pItemObj,
-					REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);	//. 옮긴다
+				SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex, pItemObj,REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);
 			}
-			else if(pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())		// 개인상점에서 개인상점으로
+			else if(pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
 			{
 				BYTE byIndex = MAX_MY_INVENTORY_INDEX+iSourceIndex;
 				SendRequestSetSalePrice(byIndex, iInputZen);
 
-				SendRequestEquipmentItem(REQUEST_EQUIPMENT_MYSHOP, MAX_EQUIPMENT_INDEX+iSourceIndex, pItemObj,
-										REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);	//. 옮긴다
+				SendRequestEquipmentItem(REQUEST_EQUIPMENT_MYSHOP, MAX_EQUIPMENT_INDEX+iSourceIndex, pItemObj,REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);
 			}
 			
 			AddPersonalItemPrice(MAX_MY_INVENTORY_INDEX+iTargetIndex, iInputZen, g_IsPurchaseShop);
@@ -5481,10 +5087,7 @@ bool SEASON3B::CPersonalShopNameMsgBoxLayout::SetLayout()
 		return false;
 
 	pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
-
-	// 1128 "상점이름을 입력하세요."
 	pMsgBox->AddMsg(GlobalText[1128]);
-
 	pMsgBox->AddCallbackFunc(CPersonalShopNameMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
 	pMsgBox->AddCallbackFunc(CPersonalShopNameMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CPersonalShopNameMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);	
@@ -5508,7 +5111,6 @@ CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::ProcessOk(class CNewUIM
 	}
 	else
 	{
-		// 1130 "잘못된 상점이름 입니다."
 		g_pChatListBox->AddText("", GlobalText[1130], SEASON3B::TYPE_SYSTEM_MESSAGE);
 	}
 	
@@ -5536,8 +5138,6 @@ CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::CancelBtnDown(class CNe
 	return CALLBACK_BREAK;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CCastleWithdrawMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
@@ -5549,8 +5149,8 @@ bool SEASON3B::CCastleWithdrawMsgBoxLayout::SetLayout()
 
 	pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY|UIOPTION_PAINTBACK);
 
-	pMsgBox->AddMsg(GlobalText[1571]);	// 1571 "출금할 금액을 입력하세요."
-	pMsgBox->AddMsg(GlobalText[1570]);	// 1570 "(최대 15,000,000 Zen)"
+	pMsgBox->AddMsg(GlobalText[1571]);
+	pMsgBox->AddMsg(GlobalText[1570]);
 
 	pMsgBox->AddCallbackFunc(CCastleWithdrawMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
 	pMsgBox->AddCallbackFunc(CCastleWithdrawMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -5615,8 +5215,6 @@ CALLBACK_RESULT SEASON3B::CCastleWithdrawMsgBoxLayout::CancelBtnDown(class CNewU
 	return CALLBACK_BREAK;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CPasswordKeyPadMsgBoxLayout::SetLayout()
 {
 	CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
@@ -5626,11 +5224,8 @@ bool SEASON3B::CPasswordKeyPadMsgBoxLayout::SetLayout()
 	if(false == pMsgBox->Create(KEYPAD_TYPE_MOVE, 4))
 		return false;
 
-	// 690 "비밀번호 확인"
 	pMsgBox->AddMsg(GlobalText[690]);
-	// 695 "창고 비밀번호 4자리를 입력하세요."
 	pMsgBox->AddMsg(GlobalText[695]);
-
 	pMsgBox->AddCallbackFunc(CPasswordKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CPasswordKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
@@ -5658,11 +5253,6 @@ CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMes
 		}
 		*/
 
-		// 출금할때 비밀번호 Type은 0 
-		// 2번째 인자는 숫자로 서버에 날려야 함
-		// 3번째 인자는 아무의미 없는 데이타임 
-		// NULL로 주면 뻑남! 임시로 byTemp 10바이트 넘겨줌 AddData를 10바이트만큼 하기 때문
-		// 유니코드 아니여야 함!
 #ifdef LDK_MOD_PASSWORD_LENGTH_20
 		BYTE byTemp[20] = {0, };
 #else //LDK_MOD_PASSWORD_LENGTH_20
@@ -5696,8 +5286,6 @@ CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::CancelBtnDown(class CNewU
 	return CALLBACK_BREAK;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CStorageLockKeyPadMsgBoxLayout::SetLayout()
 {
 	CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
@@ -5707,14 +5295,10 @@ bool SEASON3B::CStorageLockKeyPadMsgBoxLayout::SetLayout()
 	if(false == pMsgBox->Create(KEYPAD_TYPE_LOCK_FIRST, 4))
 		return false;
 
-	// 693 "새 비밀번호 지정"
 	pMsgBox->AddMsg(GlobalText[693]);
-	// 695 "창고 비밀번호 4자리를 입력하세요."
 	pMsgBox->AddMsg(GlobalText[695]);
-
 	pMsgBox->AddCallbackFunc(CStorageLockKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CStorageLockKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-
 	return true;
 }
 
@@ -5760,8 +5344,6 @@ CALLBACK_RESULT SEASON3B::CStorageLockKeyPadMsgBoxLayout::CancelBtnDown(class CN
 	return CALLBACK_BREAK;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::SetLayout()
 {
 	CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
@@ -5771,14 +5353,10 @@ bool SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::SetLayout()
 	if(false == pMsgBox->Create(KEYPAD_TYPE_LOCK_SECOND, 4))
 		return false;
 
-	// 694 "새 비밀번호 확인"
 	pMsgBox->AddMsg(GlobalText[694]);
-	// 696 "한번만 더 입력하세요."
 	pMsgBox->AddMsg(GlobalText[696]);
-
 	pMsgBox->AddCallbackFunc(CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-
 	return true;
 }
 
@@ -5845,9 +5423,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown(cla
 	return CALLBACK_BREAK;
 }
 
-//////////////////////////////////////////////////////////////////////////
 #ifdef LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
-// 글로벌 포털용 창고 비번 설정
 bool SEASON3B::CStorageLockMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
@@ -5860,17 +5436,12 @@ bool SEASON3B::CStorageLockMsgBoxLayout::SetLayout()
 		return false;
 	}
 
-	pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);	// 글로벌은 영문자도 입력 가능해야함.
-
-	// 691 "주민등록번호 확인"
+	pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
 	pMsgBox->AddMsg(GlobalText[691]);
-	// 697 "주민번호 뒷자리를 입력하세요."
 	pMsgBox->AddMsg(GlobalText[697]);
-
 	pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
 	pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 	pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-
 	return true;
 }
 
@@ -6084,8 +5655,6 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::CancelBtnDown(class 
 	return CALLBACK_BREAK;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CUseFruitCheckMsgBoxLayout::SetLayout()
 {
 	CUseFruitCheckMsgBox* pMsgBox = GetMsgBox();
@@ -6097,8 +5666,6 @@ bool SEASON3B::CUseFruitCheckMsgBoxLayout::SetLayout()
 
 	return true;
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 bool SEASON3B::CGemIntegrationMsgBoxLayout::SetLayout()
 {
@@ -6172,8 +5739,6 @@ bool SEASON3B::CChaosCastleResultMsgBoxLayout::SetLayout()
 	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CChaosMixMenuMsgBoxLayout::SetLayout()
 {
 	CChaosMixMenuMsgBox* pMsgBox = GetMsgBox();
@@ -6207,7 +5772,6 @@ bool SEASON3B::CCrownSwitchPopLayout::SetLayout()
 	if(false == pMsgBox->Create(3000))
 		return false;
 
-	// 1484 "왕관스위치 에서 떨어졌습니다"
 	pMsgBox->AddMsg(GlobalText[1484]);
 
 	return true;
@@ -6222,7 +5786,6 @@ bool SEASON3B::CCrownSwitchPushLayout::SetLayout()
 	if(false == pMsgBox->Create(3000))
 		return false;
 
-	// 1485 "왕관스위치 를 누르고 있습니다"
 	pMsgBox->AddMsg(GlobalText[1485]);
 
 	return true;
@@ -6246,7 +5809,7 @@ bool SEASON3B::CSealRegisterStartLayout::SetLayout()
 	if(0 == pMsgBox)
 		return false;
 
-	if(false == pMsgBox->Create())	// 시간은 이후에 세팅함!
+	if(false == pMsgBox->Create())
 		return false;
 
 	return true;
@@ -6261,7 +5824,6 @@ bool SEASON3B::CSealRegisterSuccessLayout::SetLayout()
 	if(false == pMsgBox->Create(3000))
 		return false;
 
-	// 1490 "직인 등록에 성공했습니다"
 	pMsgBox->AddMsg(GlobalText[1490]);
 
 	return true;
@@ -6288,7 +5850,6 @@ bool SEASON3B::CSealRegisterOtherLayout::SetLayout()
 	if(false == pMsgBox->Create(3000))
 		return false;
 
-	// 1492 "다른 사람이 직인등록 중입니다"
 	pMsgBox->AddMsg(GlobalText[1492]);
 
 	return true;
@@ -6303,7 +5864,6 @@ bool SEASON3B::CSealRegisterOtherCampLayout::SetLayout()
 	if(false == pMsgBox->Create(3000))
 		return false;
 
-	// 1982 "다른 공성진영이 왕관스위치를 작동중입니다."
 	pMsgBox->AddMsg(GlobalText[1982]);
 
 	return true;
@@ -6318,7 +5878,6 @@ bool SEASON3B::CCrownDefenseRemoveLayout::SetLayout()
 	if(false == pMsgBox->Create(3000))
 		return false;
 
-	// 1493 "왕관의 방어막이 해제되었습니다"
 	pMsgBox->AddMsg(GlobalText[1493]);
 
 	return true;
@@ -6333,7 +5892,6 @@ bool SEASON3B::CCrownDefenseCreateLayout::SetLayout()
 	if(false == pMsgBox->Create(3000))
 		return false;
 
-	// 1494 "왕관의 방어막이 생성되었습니다"
 	pMsgBox->AddMsg(GlobalText[1494]);
 
 	return true;
@@ -6348,7 +5906,6 @@ bool SEASON3B::CCursedTempleHolicItemGetLayout::SetLayout()
 	if(false == pMsgBox->Create(10000))
 		return false;
 
-	// 2417 "성물 획득 중입니다."
 	pMsgBox->AddMsg(GlobalText[2417]);
 
 	return true;
@@ -6363,13 +5920,10 @@ bool SEASON3B::CCursedTempleHolicItemSaveLayout::SetLayout()
 	if(false == pMsgBox->Create(10000))
 		return false;
 
-	// 2418 "성물 보관 중입니다."
 	pMsgBox->AddMsg(GlobalText[2418]);
 
 	return true;
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 bool SEASON3B::CTrainerMenuMsgBoxLayout::SetLayout()
 {
@@ -6395,8 +5949,6 @@ bool SEASON3B::CTrainerRecoverMsgBoxLayout::SetLayout()
 	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CElpisMsgBoxLayout::SetLayout()
 {
 	CElpisMsgBox* pMsgBox = GetMsgBox();
@@ -6408,8 +5960,6 @@ bool SEASON3B::CElpisMsgBoxLayout::SetLayout()
 
 	return true;
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 bool SEASON3B::CSystemMenuMsgBoxLayout::SetLayout()
 {
@@ -6423,8 +5973,6 @@ bool SEASON3B::CSystemMenuMsgBoxLayout::SetLayout()
 	return true;	
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 bool SEASON3B::CDuelMsgBoxLayout::SetLayout()
 {
 	CDuelMsgBox* pMsgBox = GetMsgBox();
@@ -6436,8 +5984,6 @@ bool SEASON3B::CDuelMsgBoxLayout::SetLayout()
 
 	return true;	
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 #ifdef YDG_ADD_NEW_DUEL_UI
 bool SEASON3B::CDuelResultMsgBoxLayout::SetLayout()
@@ -6452,8 +5998,6 @@ bool SEASON3B::CDuelResultMsgBoxLayout::SetLayout()
 	return true;	
 }
 #endif	// YDG_ADD_NEW_DUEL_UI
-
-//////////////////////////////////////////////////////////////////////////
 
 #ifdef CSK_EVENT_CHERRYBLOSSOM
 bool CCherryBlossomMsgBoxLayout::SetLayout()
@@ -6496,8 +6040,6 @@ bool SEASON3B::CSeedInvestigatorMenuMsgBoxLayout::SetLayout()
 	return true;
 }
 #endif	// ADD_SOCKET_MIX
-
-
 
 #ifdef PSW_ADD_RESET_CHARACTER_POINT
 bool SEASON3B::CResetCharacterPointMsgBoxLayout::SetLayout()
@@ -6689,15 +6231,12 @@ void SEASON3B::CLuckyTradeMenuMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleCount; ++i)
 	{
@@ -6705,15 +6244,10 @@ void SEASON3B::CLuckyTradeMenuMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
-//----------------------------------------------------------------------------------------
-// Function: NPC 대화창에 텍스트를 찍음 x.y ( 0/0 ) 부터
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
+
 void SEASON3B::CLuckyTradeMenuMsgBox::RenderTexts()
 {
 	unicode::t_char szText[256] = { 0, };
@@ -6883,7 +6417,6 @@ void SEASON3B::CTrainerMenuMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 	m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnExit.SetText(GlobalText[1002]);
 }
 
@@ -6891,15 +6424,12 @@ void SEASON3B::CTrainerMenuMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleCount; ++i)
 	{
@@ -6907,7 +6437,6 @@ void SEASON3B::CTrainerMenuMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -6938,8 +6467,6 @@ void SEASON3B::CTrainerMenuMsgBox::RenderButtons()
 	m_BtnRevive.Render();
 	m_BtnExit.Render();
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 SEASON3B::CTrainerRecoverMsgBox::CTrainerRecoverMsgBox()
 {
@@ -7083,7 +6610,6 @@ void SEASON3B::CTrainerRecoverMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 	m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnExit.SetText(GlobalText[1002]);
 }
 
@@ -7091,15 +6617,12 @@ void SEASON3B::CTrainerRecoverMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleCount; ++i)
 	{
@@ -7107,7 +6630,6 @@ void SEASON3B::CTrainerRecoverMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -7121,17 +6643,15 @@ void SEASON3B::CTrainerRecoverMsgBox::RenderTexts()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetFont(g_hFontBold);
-	// 1227 "조련사"
 	sprintf( szText, GlobalText[1227] );
 	g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
 	fPos_y += 15;
 	g_pRenderText->SetFont(g_hFont);
-	// 1228 "생명을 회복시키고 싶은 팻을 선택하세요"
 	sprintf( szText, GlobalText[1228] );
 	g_pRenderText->RenderText(fPos_x, fPos_y+1*18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 	
-	g_pRenderText->SetTextColor(206, 192, 146, 255);	// 황금색
+	g_pRenderText->SetTextColor(206, 192, 146, 255);
 	npcBreeder::CalcRecoveryZen(REVIVAL_DARKHORSE, szText);
 	g_pRenderText->RenderText(fPos_x, fPos_y+75, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 	npcBreeder::CalcRecoveryZen(REVIVAL_DARKSPIRIT, szText);
@@ -7144,8 +6664,6 @@ void SEASON3B::CTrainerRecoverMsgBox::RenderButtons()
 	m_BtnRecoverDarkHorse.Render();
 	m_BtnExit.Render();
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 SEASON3B::CElpisMsgBox::CElpisMsgBox()
 {
@@ -7314,7 +6832,6 @@ void SEASON3B::CElpisMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 	m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnExit.SetText(GlobalText[1002]);
 }
 
@@ -7322,23 +6839,19 @@ void SEASON3B::CElpisMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleCount; ++i)
 	{
 		RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
 		y += height;
 	}
-	
-	// 메세지박스 아랫부분
+
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 
@@ -7399,8 +6912,6 @@ void SEASON3B::CElpisMsgBox::RenderButtons()
 	m_BtnRefine.Render();
 	m_BtnExit.Render();
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 #ifdef ADD_SOCKET_MIX
 SEASON3B::CSeedMasterMenuMsgBox::CSeedMasterMenuMsgBox()
@@ -7532,18 +7043,17 @@ void SEASON3B::CSeedMasterMenuMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + 85;
 	m_BtnExtractSeed.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	m_BtnExtractSeed.SetText(GlobalText[2664]);	// "시드 추출"
+	m_BtnExtractSeed.SetText(GlobalText[2664]);
 
 	y = GetPos().y + 120;
 	m_BtnSeedSphere.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	m_BtnSeedSphere.SetText(GlobalText[2665]);	// "시드 스피어 합성"
+	m_BtnSeedSphere.SetText(GlobalText[2665]);
 
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
 	btnhalfwidth = width / 2.f;
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 	m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnExit.SetText(GlobalText[1002]);
 }
 
@@ -7551,15 +7061,12 @@ void SEASON3B::CSeedMasterMenuMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleCount; ++i)
 	{
@@ -7567,7 +7074,6 @@ void SEASON3B::CSeedMasterMenuMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -7581,14 +7087,14 @@ void SEASON3B::CSeedMasterMenuMsgBox::RenderTexts()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetFont(g_hFontBold);
-	sprintf( szText, GlobalText[2666] );	// "시드 마스터"
+	sprintf( szText, GlobalText[2666] );
 	g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
 	fPos_y += 15;
 	g_pRenderText->SetFont(g_hFont);
-	sprintf( szText, GlobalText[2667] );	// "시드를 추출하거나 시드 스피어를"
+	sprintf( szText, GlobalText[2667] );
 	g_pRenderText->RenderText(fPos_x, fPos_y+1*18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-	sprintf( szText, GlobalText[2668] );	// "합성할 수 있습니다."
+	sprintf( szText, GlobalText[2668] );
 	g_pRenderText->RenderText(fPos_x, fPos_y+2*18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -7730,18 +7236,17 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + 85;
 	m_BtnAttachSocket.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	m_BtnAttachSocket.SetText(GlobalText[2669]);	// "시드 스피어 장착"
+	m_BtnAttachSocket.SetText(GlobalText[2669]);
 
 	y = GetPos().y + 120;
 	m_BtnDetachSocket.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	m_BtnDetachSocket.SetText(GlobalText[2670]);	// "시드 스피어 파괴"
+	m_BtnDetachSocket.SetText(GlobalText[2670]);
 
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
 	btnhalfwidth = width / 2.f;
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 	m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnExit.SetText(GlobalText[1002]);
 }
 
@@ -7749,15 +7254,12 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleCount; ++i)
 	{
@@ -7765,7 +7267,6 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -7779,14 +7280,14 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderTexts()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetFont(g_hFontBold);
-	sprintf( szText, GlobalText[2671] );	// "시드 연구가"
+	sprintf( szText, GlobalText[2671] );
 	g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
 	fPos_y += 15;
 	g_pRenderText->SetFont(g_hFont);
-	sprintf( szText, GlobalText[2672] );	// "시드 스피어를 장착하거나"
+	sprintf( szText, GlobalText[2672] );
 	g_pRenderText->RenderText(fPos_x, fPos_y+1*18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-	sprintf( szText, GlobalText[2673] );	// "시드 스피어를 파괴할 수 있습니다."
+	sprintf( szText, GlobalText[2673] );
 	g_pRenderText->RenderText(fPos_x, fPos_y+2*18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -7846,7 +7347,6 @@ void SEASON3B::CResetCharacterPointMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 	m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnExit.SetText(GlobalText[1002]);
 }
 
@@ -7905,23 +7405,19 @@ void SEASON3B::CResetCharacterPointMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 	
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 	
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 	
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleCount; ++i)
 	{
 		RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
 		y += height;
 	}
-	
-	// 메세지박스 아랫부분
+
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -7935,12 +7431,12 @@ void SEASON3B::CResetCharacterPointMsgBox::RenderTexts()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetFont(g_hFontBold);
-	sprintf( szText, GlobalText[1885] );	// "초기화 도우미"
+	sprintf( szText, GlobalText[1885] );
 	g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 	
 	fPos_y += 25;
 	g_pRenderText->SetFont(g_hFont);
-	sprintf( szText, GlobalText[1886] );	// 버튼을 클릭하면 모든 스탯포인트가 초기화됩니다."
+	sprintf( szText, GlobalText[1886] );
 	g_pRenderText->RenderText(fPos_x, fPos_y+1*18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
 }
@@ -7968,7 +7464,6 @@ CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown
 	for(int i=0; i<MAX_EQUIPMENT; i++) {
 		if(CharacterMachine->Equipment[i].Type != -1) 
 		{
-			// 장비 착용 하므로 스텟 리셋 할 수 없다. 채팅 메세지로 뿌릴것 !! 
 			g_pChatListBox->AddText(Hero->ID, GlobalText[1883], SEASON3B::TYPE_ERROR_MESSAGE);
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 			return CALLBACK_BREAK;
@@ -8115,13 +7610,9 @@ bool SEASON3B::CGuild_ToPerson_Position::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-
 	RenderTexts();
-
 	RenderButtons();
-
 	DisableAlphaBlend();
 	return true;
 }
@@ -8148,9 +7639,7 @@ void SEASON3B::CGuild_ToPerson_Position::SetButtonInfo()
 {
 	float x, y, width, height;
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	float msgboxhalfwidth = (GetSize().cx / 2.f);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	float btnhalfwidth = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
 	
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH + 50;
@@ -8159,12 +7648,10 @@ void SEASON3B::CGuild_ToPerson_Position::SetButtonInfo()
 	x = GetPos().x + 57;//(GetPos().x + (msgboxhalfwidth / 2) - btnhalfwidth) + 60;
 	y = GetPos().y + 30;
 	m_BtnBlessing.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1806 "축복의 보석"
 	m_BtnBlessing.SetText(GlobalText[1311]);
 
 	y += 27;
 	m_BtnSoul.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1807 "영혼의 보석"
 	m_BtnSoul.SetText(GlobalText[1312]);
 
 
@@ -8173,7 +7660,6 @@ void SEASON3B::CGuild_ToPerson_Position::SetButtonInfo()
 	x -= 9;
 	y += 70;
 	m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnOk.SetText(GlobalText[228]);	
 
 
@@ -8181,7 +7667,6 @@ void SEASON3B::CGuild_ToPerson_Position::SetButtonInfo()
 	btnhalfwidth = width / 2.f;
 	x += 64;
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnCancel.SetText(GlobalText[1002]);	
 
 
@@ -8191,18 +7676,15 @@ void SEASON3B::CGuild_ToPerson_Position::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; 
 	y = GetPos().y + 2.f;
 	width = (GetSize().cx - MSGBOX_BACK_BLANK_WIDTH); 
 	height = (GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT) - 75;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 	
-	// 메세지박스 중간부분(3줄이상)
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	int iCount = 5;
 	for(int i=0; i<iCount; ++i)
@@ -8211,7 +7693,6 @@ void SEASON3B::CGuild_ToPerson_Position::RenderFrame()
 		y += height;
 	}
 
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -8223,7 +7704,6 @@ void SEASON3B::CGuild_ToPerson_Position::RenderTexts()
 
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x; y = (GetPos().y + (MSGBOX_TEXT_TOP_BLANK / 2)) + 80;
 	
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
@@ -8244,11 +7724,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -8270,8 +7746,6 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
 	unicode::t_char strText[256];
 	if(COMGEM::m_cGemType == COMGEM::CELE)
 	{
-		// 1314 "'%s'님을 %s로"
-		// 1301 "부길드마스터"
 		unicode::_sprintf(strText, GlobalText[1314], GuildList[DeleteIndex].Name, GlobalText[1301]);
 		AppointType = SUBGUILDMASTER;
 		AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
@@ -8286,8 +7760,6 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
 	
 	if(COMGEM::m_cGemType == COMGEM::SOUL)
 	{
-		// 1314 "'%s'님을 %s로"
-		// 1302 "배틀마스터"
 		unicode::_sprintf(strText, GlobalText[1314], GuildList[DeleteIndex].Name, GlobalText[1302]);
 		AppointType = BATTLEMASTER;
 		AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
@@ -8302,8 +7774,6 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
 
 	m_BtnOk.Render();
 	m_BtnCancel.Render();
-
-	// 1315 "임명 하시겠습니까?"
 	AddMsg(GlobalText[1315], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 }
 
@@ -8355,16 +7825,15 @@ CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::OkBtnDown(class CNewUIMessag
 {
 	COMGEM::Exit();
 	
-	// 직책임명요청
-	if( AppointStatus == G_PERSON )	// 직위 임명
+	if( AppointStatus == G_PERSON )
 	{
 		SendRequestGuildAssign( 0x01, AppointType, GuildList[DeleteIndex].Name );
 	}
-	else									// 직위 변경
+	else
 	{
 		SendRequestGuildAssign( 0x02, AppointType, GuildList[DeleteIndex].Name );
 	}
-	// 바뀐 길드리스트 요청
+
 	SendRequestGuildList();
 
 	PlayBuffer(SOUND_CLICK01);
@@ -8395,10 +7864,6 @@ bool SEASON3B::CGuild_ToPerson_PositionLayout::SetLayout()
 	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-// 델가도(7주년기념이벤트) 메인메뉴
 SEASON3B::CDelgardoMainMenuMsgBox::CDelgardoMainMenuMsgBox()
 {
 	m_iMiddleCount = 7;
@@ -8525,18 +7990,17 @@ void SEASON3B::CDelgardoMainMenuMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + 85;
 	m_BtnReg.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	m_BtnReg.SetText(GlobalText[1891]);	// "행운의 동전 등록"
+	m_BtnReg.SetText(GlobalText[1891]);
 
 	y = GetPos().y + 120;
 	m_BtnExchange.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	m_BtnExchange.SetText(GlobalText[1892]);	// "행운의 동전 교환"
+	m_BtnExchange.SetText(GlobalText[1892]);
 
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
 	btnhalfwidth = width / 2.f;
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 	m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "닫기"
 	m_BtnExit.SetText(GlobalText[1002]);
 }
 
@@ -8544,15 +8008,12 @@ void SEASON3B::CDelgardoMainMenuMsgBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<m_iMiddleCount; ++i)
 	{
@@ -8560,7 +8021,6 @@ void SEASON3B::CDelgardoMainMenuMsgBox::RenderFrame()
 		y += height;
 	}
 	
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
@@ -8574,16 +8034,16 @@ void SEASON3B::CDelgardoMainMenuMsgBox::RenderTexts()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetFont(g_hFontBold);
-	sprintf( szText, GlobalText[1890] );	// "델가도"
+	sprintf( szText, GlobalText[1890] );
 	g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
 	fPos_y += 26;
 	g_pRenderText->SetFont(g_hFont);
-	sprintf( szText, GlobalText[1932] );	// "행운의 동전을 누적 또는 등록 하거나"
+	sprintf( szText, GlobalText[1932] );
 	g_pRenderText->RenderText(fPos_x, fPos_y+1*12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-	sprintf( szText, GlobalText[1933] );	// "소지한 행운의 동전을 소비하여"
+	sprintf( szText, GlobalText[1933] );
 	g_pRenderText->RenderText(fPos_x, fPos_y+2*12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-	sprintf( szText, GlobalText[1934] );	// "아이템을 지급 받을 수 있습니다."
+	sprintf( szText, GlobalText[1934] );
 	g_pRenderText->RenderText(fPos_x, fPos_y+3*12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -8593,4 +8053,4 @@ void SEASON3B::CDelgardoMainMenuMsgBox::RenderButtons()
 	m_BtnExchange.Render();
 	m_BtnExit.Render();
 }
-#endif KJH_PBG_ADD_SEVEN_EVENT_2008
+

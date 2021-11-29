@@ -62,15 +62,10 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 
 	float FlyRange = 10.0f;
 	vec3_t targetPos, Range, Direction;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	bool _isMove = false;
-	float fRadHeight = ((2*3.14f)/15000.0f) * (float)(tick%15000);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	m_fRadWidthStand = ((2*3.14f)/4000.0f) * (float)(tick%4000);
 	m_fRadWidthGet = ((2*3.14f)/2000.0f) * (float)(tick%2000);
 	
 	obj->Position[2] = obj->Owner->Position[2] + 20.0f;	
-	//------------------------------------------//
 	VectorSubtract( obj->Position, obj->Owner->Position, Range );
 
 	float Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
@@ -94,12 +89,11 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 			targetPos[2] = obj->Owner->Position[2];
 			
 			VectorSubtract( targetPos, obj->Position, Range );
-			//------------------------------//
 			Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 			
 			if(80.0f >= FlyRange)
 			{
-				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] ); //test
+				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] );
 				obj->Angle[2] = TurnAngle2( obj->Angle[2],Angle, 8.0f );
 			}
 			
@@ -240,9 +234,6 @@ bool PetActionCollecterAdd::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey
 
 	float fRad1 = ((3.14f/3000.0f) * (float)(tick%3000));
 	float fSize = sinf(fRad1) * 0.2f;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fSize2 = 1.0f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	Vector( 1.f, 1.f, 1.f, Light);
 	VectorCopy(obj->Position, Position);
@@ -258,7 +249,6 @@ bool PetActionCollecterAdd::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey
 		CreateParticle(BITMAP_LIGHT+3, Position, obj->Angle, Light, 1, 1.f);
 	}
 
-	//코
 	Vector(0.f, 0.f, 0.f, vRelativePos);
 	b->TransformPosition(BoneTransform[4], vRelativePos, Position, false);
 	Vector( 0.9f, 0.9f, 0.0f, Light);
@@ -387,7 +377,6 @@ bool PetActionCollecterSkeleton::Move( OBJECT* obj, CHARACTER *Owner, int target
 	float Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 	if( Distance > SEARCH_LENGTH*3)
 	{
-		//맵 이동시 ...
 		obj->Position[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 		obj->Position[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 		
@@ -439,15 +428,14 @@ bool PetActionCollecterSkeleton::Move( OBJECT* obj, CHARACTER *Owner, int target
 
 			targetPos[0] = m_RootItem.position[0] + (sinf(m_fRadWidthGet) * CIRCLE_STAND_RADIAN);
 			targetPos[1] = m_RootItem.position[1] + (cosf(m_fRadWidthGet) * CIRCLE_STAND_RADIAN);
-			targetPos[2] = m_RootItem.position[2];// + 70 + (sinf(fRadHeight) * 70.0f);
+			targetPos[2] = m_RootItem.position[2];
 			
 			VectorSubtract( targetPos, obj->Position, Range );
-			//------------------------------//
 
 			Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 			if(Distance >= FlyRange)
 			{
-				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] ); //test
+				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] );
 				obj->Angle[2] = TurnAngle2( obj->Angle[2],Angle, 20.0f );
 			}
 			
@@ -470,7 +458,7 @@ bool PetActionCollecterSkeleton::Move( OBJECT* obj, CHARACTER *Owner, int target
 		}
 		break;
 
-	case eAction_Get: //줍는 행동
+	case eAction_Get:
 		{
 			if(	!m_isRooting || SEARCH_LENGTH < Distance || CompTimeControl(3000, m_dwRootingTime))
 			{
@@ -489,10 +477,7 @@ bool PetActionCollecterSkeleton::Move( OBJECT* obj, CHARACTER *Owner, int target
 
 			if(CompTimeControl(1000, m_dwSendDelayTime))
 			{
-#ifdef LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
 				if(&Hero->Object == obj->Owner)
-#endif //LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
-					//1000ms
 					SendRequestGetItem(m_RootItem.itemIndex);
 			}
 		}
@@ -510,7 +495,7 @@ bool PetActionCollecterSkeleton::Move( OBJECT* obj, CHARACTER *Owner, int target
 			Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 			if(Distance >= FlyRange)
 			{
-				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] ); //test
+				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] );
 				obj->Angle[2] = TurnAngle2( obj->Angle[2], Angle, 20.0f );
 			}
 			
@@ -562,7 +547,6 @@ bool PetActionCollecterSkeleton::Effect( OBJECT* obj, CHARACTER *Owner, int targ
 	b->TransformByBoneMatrix(vPosition, BoneTransform[62], obj->Position);
 	CreateSprite(BITMAP_LIGHT, vPosition, 0.3f, vLight, obj);
 
-	// 불뿜기
 	m_bIsMoving = !(
 		(Owner->Object.CurrentAction >= PLAYER_STOP_MALE && Owner->Object.CurrentAction <= PLAYER_STOP_RIDE_WEAPON)
 		|| Owner->Object.CurrentAction == PLAYER_STOP_RIDE_HORSE
@@ -586,7 +570,7 @@ bool PetActionCollecterSkeleton::Effect( OBJECT* obj, CHARACTER *Owner, int targ
 
 		vec3_t vAngle;
 		VectorCopy(obj->Angle, vAngle);
-		vAngle[0] += 35.0f;		// 바닥을 향해 발사
+		vAngle[0] += 35.0f;
 
 		for (int i = 0; i < 2; ++i)
 		{
@@ -595,13 +579,13 @@ bool PetActionCollecterSkeleton::Effect( OBJECT* obj, CHARACTER *Owner, int targ
 			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1_MONO,vPosition,vAngle,vLight,4,obj->Scale,obj);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1_MONO,vPosition,vAngle,vLight,4,obj->Scale,obj);	
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_HIK2_MONO,vPosition,vAngle,vLight,8,obj->Scale,obj);	// 불
+				CreateParticle(BITMAP_FIRE_HIK2_MONO,vPosition,vAngle,vLight,8,obj->Scale,obj);	
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPosition,vAngle,vLight,5,obj->Scale,obj);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3_MONO,vPosition,vAngle,vLight,5,obj->Scale,obj);	
 				break;
 			}
 		}

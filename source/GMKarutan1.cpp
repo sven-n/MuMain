@@ -1,9 +1,5 @@
 //*****************************************************************************
 // File: GMKarutan1.cpp
-//
-// Desc: 킬루탄1 맵, 몬스터.
-//
-// producer: Ahn Sang-Kyu (10.08.03)
 //*****************************************************************************
 
 #include "stdafx.h"
@@ -25,10 +21,6 @@
 #include "NewUISystem.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CGMKarutan1::CGMKarutan1()
 {
@@ -115,7 +107,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
 			CreateSprite(BITMAP_SPARK+1, vPos, 1.5f, vLight1, o);
 		}
 		return true;
-	case 113:	// 불박스
+	case 113:
 		{
 			vec3_t vLightFire;
 			Vector(1.0f, 0.2f, 0.0f, vLightFire);
@@ -123,24 +115,22 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
 			
 			vec3_t vLight;
 			Vector(1.0f, 1.0f, 1.0f, vLight);
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fScale = o->Scale * (rand()%5+13)*0.1f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 			switch(rand()%3)
 			{
 			case 0:
-				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK1,o->Position,o->Angle,vLight,0,o->Scale);	
 				break;
 			case 1:
-				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_CURSEDLICH,o->Position,o->Angle,vLight,4,o->Scale);	
 				break;
 			case 2:
-				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);	// 불
+				CreateParticle(BITMAP_FIRE_HIK3,o->Position,o->Angle,vLight,0,o->Scale);	
 				break;
 			}
 		}
 		return true;
-	case 114:	// 반짝이 상승 박스
+	case 114:
 		if (rand()%3==0)
 		{
 			vec3_t vLight;
@@ -148,7 +138,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
 			CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, vLight, 16, o->Scale);
 		}
 		return true;
-	case 115:	// 안개 박스.(흰색)
+	case 115:
 		if (o->HiddenMesh != -2)
 		{
 			vec3_t vLight;
@@ -157,16 +147,16 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
 				CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, vLight, 0, o->Scale, o);
 		}
 		return true;
-	case 116:   // 유독가스.
+	case 116:
 		if (rand()%8==0)
 		{
 			vec3_t vLight;
 			Vector(0.5f, 0.9f, 0.5f, vLight);
 			CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 69, o->Scale);
-			CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 13, o->Scale*2.0f, o);	// 검은연기
+			CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 13, o->Scale*2.0f, o);
 		}
 		return true;
-	case 118:	// 모래먼지
+	case 118:
 		if (o->HiddenMesh != -2)
 		{
 			vec3_t vLight;
@@ -208,10 +198,10 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 		return true;
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
-	case MODEL_MONSTER01+210:	// 본스콜피온
+	case MODEL_MONSTER01+210:
 		b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 			o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-		// 점멸 효과
+
 		if (o->CurrentAction != MONSTER01_DIE)
 		{
 			float fLumi = sinf(WorldTime * 0.002f) + 0.5f;
@@ -219,10 +209,10 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BONE_SCORPION_SKIN_EFFECT);
 		}
 		return true;
-	case MODEL_MONSTER01+213:	// 크립타
+	case MODEL_MONSTER01+213:
 		b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 			o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-		// 점멸 효과
+
 		if (o->CurrentAction != MONSTER01_DIE)
 		{
 			float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
@@ -230,34 +220,31 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_KRYPTA_BALL_EFFECT);
 		}
 		return true;
-	case MODEL_MONSTER01+214:	// 크립포스
+	case MODEL_MONSTER01+214:
 		b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 			o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 		b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 			o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 		b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-		// 날개 RENDER_BRIGHT 효과.
 		Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
 		b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 		return true;
-	case MODEL_MONSTER01+215:	// 콘드라
-		if (o->CurrentAction != MONSTER01_DIE)	// 사망동작은 안그림
+	case MODEL_MONSTER01+215:
+		if (o->CurrentAction != MONSTER01_DIE)
 		{
 			b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 			b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 			
-			// 점멸 효과
 			float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
 			b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CONDRA_SKIN_EFFECT);
 			b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CONDRA_SKIN_EFFECT2);
 			
-			// 팔 부위 오브젝트 회전
 			b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, o->BlendMeshLight*0.9f,
 				WorldTime*0.0010f, o->BlendMeshTexCoordV);
 			Vector(0.4f, 0.95f, 1.0f, b->BodyLight);
@@ -265,8 +252,8 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 				WorldTime*0.0015f, o->BlendMeshTexCoordV);
 		}
 		return true;
-	case MODEL_MONSTER01+216:	// 나르콘드라
-		if (o->CurrentAction != MONSTER01_DIE)	// 사망동작은 안그림
+	case MODEL_MONSTER01+216:
+		if (o->CurrentAction != MONSTER01_DIE)
 		{
 			b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -275,7 +262,6 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 			b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 			
-			// 점멸 효과
 			float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
 			b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, fLumi,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_NARCONDRA_SKIN_EFFECT);
@@ -284,12 +270,10 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 			b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_NARCONDRA_SKIN_EFFECT3);
 			
-			// 보라색 구슬 RENDER_BRIGHT 효과.
 			Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
 			b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight,
 				o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 			
-			// 팔 부위 오브젝트 회전
 			Vector(1.0f, 0.1f, 1.0f, b->BodyLight);
 			b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 4, o->BlendMeshLight*0.9f,
 				WorldTime*0.0010f, o->BlendMeshTexCoordV);
@@ -384,61 +368,58 @@ CHARACTER* CGMKarutan1::CreateMonster(int iType, int PosX, int PosY, int Key)
 
 	switch (iType)
 	{
-	case 569:	// 맹독고리전갈
+	case 569:
 		OpenMonsterModel(209);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+209, PosX, PosY);
 		strcpy(pCharacter->ID, "맹독고리전갈");
 		pCharacter->Object.Scale = 1.0f;
 		break;
-	case 570:	// 본스콜피온
+	case 570:
 		OpenMonsterModel(210);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+210, PosX, PosY);
 		strcpy(pCharacter->ID, "본스콜피온");
 		pCharacter->Object.Scale = 0.58f;
 		break;
-	case 571:	// 오르커스
+	case 571:
 		OpenMonsterModel(211);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+211, PosX, PosY);
 		strcpy(pCharacter->ID, "오르커스");
 		pCharacter->Object.Scale = 0.64f;
 		break;
-	case 572:	// 골록
+	case 572:
 		OpenMonsterModel(212);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+212, PosX, PosY);
 		strcpy(pCharacter->ID, "골록");
 		pCharacter->Object.Scale = 1.5f;
 		break;
-	case 573:	// 크립타
+	case 573:
 		OpenMonsterModel(213);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+213, PosX, PosY);
 		strcpy(pCharacter->ID, "크립타");
 		pCharacter->Object.Scale = 1.5f;
 		break;
-	case 574:	// 크립포스
+	case 574:
 		OpenMonsterModel(214);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+214, PosX, PosY);
 		strcpy(pCharacter->ID, "크립포스");
 		pCharacter->Object.Scale = 1.25f;
 		break;
-	case 575:	// 콘드라
+	case 575:
 		OpenMonsterModel(215);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+215, PosX, PosY);
 		strcpy(pCharacter->ID, "콘드라");
 		pCharacter->Object.Scale = 1.45f;
 		pCharacter->Object.LifeTime = 100;
 		break;
-	case 576:	// 나르콘드라
+	case 576:
 		OpenMonsterModel(216);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+216, PosX, PosY);
 		strcpy(pCharacter->ID, "나르콘드라");
 		pCharacter->Object.Scale = 1.55f;
 		pCharacter->Object.LifeTime = 100;
 
-		// 안광 이펙트
 		OBJECT* o = &pCharacter->Object;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		BMD* b = &Models[o->Type];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 		vec3_t vColor = { 1.5f, 0.1f, 0.5f };
 		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,24,o,10.f,-1, 0, 0, -1, vColor);
 		break;
@@ -458,20 +439,19 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+209:	// 맹독고리전갈
+	case MODEL_MONSTER01+209:
 		Vector(0.f,0.f,0.f,p);
 		b->TransformPosition(o->BoneTransform[15],p,Position,true);
 		Vector(Luminosity*1.f,Luminosity*0.4f,Luminosity*0.2f,Light);
 		CreateSprite(BITMAP_LIGHT,Position,1.5f,Light,o);
 		return true;
-	case MODEL_MONSTER01+210:	// 본스콜피온
+	case MODEL_MONSTER01+210:
 		Vector(0.f,0.f,0.f,p);
 		b->TransformPosition(o->BoneTransform[8],p,Position,true);
 		Vector(Luminosity*1.f,Luminosity*0.4f,Luminosity*0.2f,Light);
 		CreateSprite(BITMAP_LIGHT,Position,2.0f,Light,o);
 		return true;
-	case MODEL_MONSTER01+212:	// 골록
-		// 이동시 먼지
+	case MODEL_MONSTER01+212:
 		if (o->CurrentAction == MONSTER01_WALK)
 		{
 			vec3_t Position;
@@ -479,11 +459,9 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 			CreateParticle(BITMAP_SMOKE+1, Position, o->Angle, o->Light);
 		}
 		return true;
-	case MODEL_MONSTER01+215:	// 콘드라
-		// 죽을 때 오브젝트 떨어지는 이펙트
+	case MODEL_MONSTER01+215:
 		if (o->CurrentAction == MONSTER01_DIE)
 		{
-			// 돌조각
 			if (o->AnimationFrame < 1.0f)
 			{
 				vec3_t vPos, vLight;
@@ -492,10 +470,9 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 				for (int j = 0; j < 6; ++j)
 					CreateEffect(MODEL_CONDRA_STONE+rand()%6, vPos, o->Angle, vLight, 0);
 			}
-			// 몸통 조각
 			if (o->LifeTime == 100)
 			{
-				o->LifeTime = 90;	// 한번만 실행
+				o->LifeTime = 90;
 				o->m_bRenderShadow = false;
 				
 				vec3_t vRelativePos, vWorldPos, Light;
@@ -526,13 +503,13 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 				VectorCopy(vWorldPos, vRelativePos);
 
 				int i;	
-				Vector(0.5f, 0.5f, 0.5f, Light);	// 연기 펑
+				Vector(0.5f, 0.5f, 0.5f, Light);
 				for (i = 0; i < 20; ++i)
 				{
 					vWorldPos[0] = vRelativePos[0] + rand()%160-80;
 					vWorldPos[1] = vRelativePos[1] + rand()%160-80;
 					vWorldPos[2] = vRelativePos[2] + (rand()%150)-50;
-					CreateParticle(BITMAP_SMOKE, vWorldPos, o->Angle, Light, 48, 1.0f);	// 연기
+					CreateParticle(BITMAP_SMOKE, vWorldPos, o->Angle, Light, 48, 1.0f);
 				}
 			}
 		}
@@ -555,11 +532,9 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+216:	// 나르콘드라
-		// 죽을 때 오브젝트 떨어지는 이펙트
+	case MODEL_MONSTER01+216:
 		if (o->CurrentAction == MONSTER01_DIE)
 		{
-			// 돌조각
 			if (o->AnimationFrame < 1.0f)
 			{
 				vec3_t vPos, vLight;
@@ -568,10 +543,9 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 				for (int j = 0; j < 4; ++j)
 					CreateEffect(MODEL_NARCONDRA_STONE+rand()%4, vPos, o->Angle, vLight, 0);
 			}
-			// 몸통 조각
 			if (o->LifeTime == 100)
 			{
-				o->LifeTime = 90;	// 한번만 실행
+				o->LifeTime = 90;
 				o->m_bRenderShadow = false;
 				
 				vec3_t vRelativePos, vWorldPos, Light;
@@ -614,21 +588,19 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 				VectorCopy(vWorldPos, vRelativePos);
 
 				int i;	
-				Vector(0.5f, 0.5f, 0.5f, Light);	// 연기 펑
+				Vector(0.5f, 0.5f, 0.5f, Light);
 				for (i = 0; i < 20; ++i)
 				{
 					vWorldPos[0] = vRelativePos[0] + rand()%160-80;
 					vWorldPos[1] = vRelativePos[1] + rand()%160-80;
 					vWorldPos[2] = vRelativePos[2] + (rand()%150)-50;
-					CreateParticle(BITMAP_SMOKE, vWorldPos, o->Angle, Light, 48, 1.0f);	// 연기
+					CreateParticle(BITMAP_SMOKE, vWorldPos, o->Angle, Light, 48, 1.0f);
 				}
 			}
 		}
 		else
 		{
-			MoveEye(o, b, 9, 9);	// 안광 이펙트
-
-			// 반짝이 이펙트
+			MoveEye(o, b, 9, 9);
 			Vector(0.f, 0.f, 0.f, p);
 			Vector(Luminosity*1.0f, Luminosity*0.4f, Luminosity*1.0f, Light);
 			b->TransformPosition(o->BoneTransform[9], p, Position, true);
@@ -656,7 +628,7 @@ void CGMKarutan1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 {
 	switch (pObject->Type)
 	{
-	case MODEL_MONSTER01+211:	// 오르커스 (검기 이펙트)
+	case MODEL_MONSTER01+211:
 		{
 			float Start_Frame = 0.f;
 			float End_Frame = 9.0f;
@@ -690,7 +662,7 @@ void CGMKarutan1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 			}
 		}
 		break;
-	case MODEL_MONSTER01+214:	// 크립포스
+	case MODEL_MONSTER01+214:
 		{
 			float Start_Frame = 0.f;//3.5f;
 			float End_Frame = 6.0f;//6.7f;
@@ -757,7 +729,7 @@ bool CGMKarutan1::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+214:	// 크립포스
+	case MODEL_MONSTER01+214:
 		if (o->CurrentAction == MONSTER01_ATTACK2 &&
 			(o->AnimationFrame >= 3.5f && o->AnimationFrame <= 4.5f))
 		{
@@ -766,12 +738,10 @@ bool CGMKarutan1::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 			vec3_t vLight;
 			int i;
 			
-			// 독 연기 이펙트
 			Vector(0.4f, 0.9f, 0.6f, vLight);
 			for(i = 0; i < 5; ++i)
 				CreateParticle(BITMAP_SMOKE, to->Position, to->Angle, vLight, 1);
 			
-			// 물방울 올라오는 이펙트
 			Vector(0.4f, 1.0f, 0.6f, vLight);
 			for (i = 0; i < 2; ++i)
 				CreateParticle(BITMAP_TWINTAIL_WATER, to->Position, to->Angle, vLight, 0);
@@ -796,7 +766,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 	
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+209:	// 맹독고리전갈
+	case MODEL_MONSTER01+209:
 		if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			PlayBuffer(SOUND_KARUTAN_TCSCORPION_ATTACK);
 		else if (MONSTER01_DIE == o->CurrentAction)
@@ -805,7 +775,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_KARUTAN_TCSCORPION_HIT);
 		return true;
 
-	case MODEL_MONSTER01+210:	// 본스콜피온
+	case MODEL_MONSTER01+210:
 		if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			PlayBuffer(SOUND_KARUTAN_BONESCORPION_ATTACK);
 		else if (MONSTER01_DIE == o->CurrentAction)
@@ -814,7 +784,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_KARUTAN_BONESCORPION_HIT);
 		return true;
 
-	case MODEL_MONSTER01+211:	// 오르커스
+	case MODEL_MONSTER01+211:
 		if (MONSTER01_WALK == o->CurrentAction)
 		{
 			if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)
@@ -830,7 +800,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_KARUTAN_ORCUS_DEATH);
 		return true;
 
-	case MODEL_MONSTER01+212:	// 골록
+	case MODEL_MONSTER01+212:
 		if (MONSTER01_WALK == o->CurrentAction)
 		{
 			if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)
@@ -844,7 +814,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_KARUTAN_GOLOCH_DEATH);
 		return true;
 
-	case MODEL_MONSTER01+213:	// 크립타
+	case MODEL_MONSTER01+213:
 		if (MONSTER01_WALK == o->CurrentAction)
 		{
 			if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)
@@ -858,7 +828,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_KARUTAN_CRYPTA_DEATH);
 		return true;
 
-	case MODEL_MONSTER01+214:	// 크립포스
+	case MODEL_MONSTER01+214:
 		if (MONSTER01_WALK == o->CurrentAction)
 		{
 			if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)
@@ -874,7 +844,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_KARUTAN_CRYPTA_DEATH);
 		return true;
 
-	case MODEL_MONSTER01+215:	// 콘드라
+	case MODEL_MONSTER01+215:
 		if (MONSTER01_WALK == o->CurrentAction)
 		{
 			if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)
@@ -888,7 +858,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_KARUTAN_CONDRA_DEATH);
 		return true;
 		
-	case MODEL_MONSTER01+216:	// 나르콘드라
+	case MODEL_MONSTER01+216:
 		if (MONSTER01_WALK == o->CurrentAction)
 		{
 			if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)

@@ -69,8 +69,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 			float Matrix[3][4];
 			switch(o->Type)
 			{
-//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_EFFECT:
 				if(o->SubType == 1)
 				{
@@ -94,14 +92,11 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Gravity = 0.0f;
 					o->Scale = (float)(rand()%5+20)*0.1f;
 				}
-
-				// 라이프타임
 				o->LifeTime = 20 + rand()%3;
 				if(o->SubType == 2) 
 				{
 					o->LifeTime = 40 + rand()%3;
 				}
-				// 위치
 				o->Position[0] += (float)(rand()%50 - 25);
 				o->Position[1] += (float)(rand()%50 - 25);
 				o->Position[2] += (float)(rand()%200 - 100) + 250.0f;
@@ -150,8 +145,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				}
 #endif	// YDG_ADD_DOPPELGANGER_PORTAL
 				break;
-
-//////////////////////////////////////////////////////////////////////////
 
 			case BITMAP_FLOWER01:
 			case BITMAP_FLOWER01+1:
@@ -232,7 +225,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				case 0:
     				o->Scale = 0.15f;
 					break;
-				case 4:		//. Monster81(울프) 눈깔 라이트
+				case 4:
 					o->Scale = 0.25f;
 					break;
 				case 1:
@@ -283,9 +276,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				o->Rotation = (float)(rand()%360);
 				break;
 			case BITMAP_FIRE_CURSEDLICH:
-#ifdef CSK_ADD_MAP_ICECITY
 			case BITMAP_FIRE_HIK2_MONO:
-#endif // CSK_ADD_MAP_ICECITY
 				if (o->SubType == 0)
 				{
 					o->LifeTime = (rand()%12+8);
@@ -347,7 +338,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#ifdef CSK_ADD_MAP_ICECITY
 				else if (o->SubType == 6)
 				{
 					o->LifeTime = rand()%5+24;
@@ -361,8 +351,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#endif // CSK_ADD_MAP_ICECITY	
-#ifdef YDG_ADD_NEW_DUEL_NPC
 				else if (o->SubType == 7)
 				{
       				o->LifeTime = rand()%5+12;
@@ -373,8 +361,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef YDG_ADD_SKELETON_PET
 				else if (o->SubType == 8)
 				{
 					o->LifeTime = 8;//rand()%5+5;
@@ -386,7 +372,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0, 0, 0, o->Light);
 					VectorCopy(o->Target->Position, o->StartPosition);
 				}
-#endif	// YDG_ADD_SKELETON_PET
 				break;
 			case BITMAP_LEAF_TOTEMGOLEM:
 				o->LifeTime = rand()%10+40;
@@ -660,18 +645,15 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				}
     			o->Rotation = (float)(rand()%360);
 				break;
-
-//--------------------------------------------------------------------------------------------------------------
-
 			case BITMAP_FLAME:
                 switch (o->SubType)
                 {
-                case 0: //  불기둥에 사용된는 불.
+                case 0:
 				    o->LifeTime = 20;
 				    Vector(0.f,0.f,(float)(rand()%128+128)*0.15f,o->Velocity);
         		    o->Scale = Scale*(float)(rand()%64+64)*0.01f;
                     break;
-				case 6:	// 짧은 불기둥
+				case 6:
 					o->LifeTime = 10;
 				    Vector(0.f,0.f,(float)(rand()%128+256)*0.12f,o->Velocity);
         		    o->Scale = Scale*(float)(rand()%64+64)*0.01f;
@@ -692,7 +674,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Position[1] += o->Position[0] - o->StartPosition[0];
 					}
 					break;
-                case 1: //  작은 불기둥.
+                case 1:
 				    o->LifeTime = 15;
         		    o->Scale += (float)(rand()%32+32)*0.01f;
 				    Vector(0.f,(float)(rand()%4+4)*0.15f,0.f,o->Velocity);
@@ -701,7 +683,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				    o->LifeTime = 4;
 				    Vector(0.f,(float)(rand()%4+4)*0.15f,0.f,o->Velocity);
 					break;
-                case 2: //  불. 같은 속도로 이동.
+                case 2:
                     {
                         float Luminosity;
 
@@ -721,7 +703,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                     }
                     break;
 
-                case 3: //  제자리에서 회전만 한다.
+                case 3:
                     {
                         float Luminosity;
 
@@ -729,7 +711,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
         		        o->Scale += (float)(rand()%32+32)*0.01f;
 				        Vector(0.f,0.f,0.f,o->Velocity);
 
-                        //  색.
                         Luminosity = (float)sinf(WorldTime*0.002f)*0.3f+0.7f;
 			            Vector(Luminosity,Luminosity*0.5f,Luminosity*0.5f,o->Light);
                     }
@@ -743,7 +724,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                         o->Gravity = 10.f;
                         VectorCopy(o->Target->Position,o->StartPosition);
 
-                        //  색.
                         Luminosity = (float)sinf(WorldTime*0.002f)*0.3f+0.7f;
 			            Vector(Luminosity,Luminosity*0.5f,Luminosity*0.5f,o->Light);
                     }
@@ -765,7 +745,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Position[1] += o->Position[0] - o->StartPosition[0];
 					}
 					break;
-				case 10:	// 불 뿜어져 나오는 효과.(BITMAP_ADV_SMOKE 2번과 동일)
+				case 10:
 					o->LifeTime = 20+rand()%5;
 					o->Rotation = 0.f;
 					o->Scale = Scale*0.5f + (float)(rand()%10)*0.02f;
@@ -783,7 +763,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					break;
 #endif // CSK_RAKLION_BOSS
 #ifdef LDS_ADD_EMPIRE_GUARDIAN
-                case 12: //  짧은 불기둥
+                case 12:
 					o->LifeTime = 10;
 					Vector(0.f,0.f,(float)(rand()%128+128)*0.15f,o->Velocity);
 					o->Scale = Scale*(float)(rand()%64+64)*0.01f;
@@ -791,17 +771,11 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 #endif //LDS_ADD_EMPIRE_GUARDIAN
 				}
 				break;
-
-//--------------------------------------------------------------------------------------------------------------
-
 			case BITMAP_FIRE_RED:
 				o->LifeTime = 20;
 				Vector(0.f,0.f,(float)(rand()%100+100)*0.15f,o->Velocity);
         		o->Scale = Scale*(float)(rand()%64+64)*0.01f;
 				break;
-
-//--------------------------------------------------------------------------------------------------------------
-
 			case BITMAP_RAIN_CIRCLE:
 			case BITMAP_RAIN_CIRCLE+1:
    				o->LifeTime = 20;
@@ -819,20 +793,17 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                     o->Velocity[1] = 1.f;
                 }
 				break;
-
-//--------------------------------------------------------------------------------------------------------------
-
 			case BITMAP_ENERGY://thunder energy
         		o->Scale = Scale*(float)(rand()%8+6)*0.1f;
 				o->Rotation = (float)(rand()%360);
-				o->Gravity = 20.f;	//. 회전속도
+				o->Gravity = 20.f;
 
 				if ( o->SubType==1 )
 				{
 					o->LifeTime = 10;
 					Vector ( 0.5f, 0.5f, 0.5f, o->Light );
 				}
-				else if(o->SubType == 2)	// 빨강	//^ 펜릴 이펙트 관련
+				else if(o->SubType == 2)
 				{
 					o->TexType = BITMAP_MAGIC+1;
 					o->LifeTime = 10;
@@ -857,9 +828,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				break;
-
-//--------------------------------------------------------------------------------------------------------------
-				
 			case BITMAP_MAGIC:
 				{
 					if(o->SubType == 0)
@@ -869,10 +837,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					}
 				}
 				break;
-
-//--------------------------------------------------------------------------------------------------------------
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
             case BITMAP_FLARE:  //
                 o->LifeTime = 60;
                 if ( o->SubType==0 || o->SubType==3 || o->SubType==6 
@@ -924,9 +888,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0.2f,0.6f,1.f,o->Light);
 				}
                 break;
-
-//--------------------------------------------------------------------------------------------------------------
-
 			case BITMAP_LIGHT+2:
 				if(o->SubType == 0)
 				{
@@ -1018,7 +979,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Velocity[1] = 0;
 					o->Velocity[2] = 0;
 				}
-				// Drain Life (드레인 라이프)
 				else if( o->SubType == 7 )
 				{
 					o->LifeTime = 18;
@@ -1040,9 +1000,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Velocity[2] = 0;
 				}
 				break;
-
-//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_MAGIC+1:
 				o->LifeTime = 10;
      			o->Scale += (float)(rand()%32+48)*0.001f;
@@ -1068,9 +1025,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					break;
 				}
 				break;
-				
-//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_CLUD64:
 				{
 					if(o->SubType == 0 || o->SubType == 2)
@@ -1140,7 +1094,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						Vector(0, 0, 0, o->Light);
 						VectorCopy(o->Target->Position, o->StartPosition);
 					}
-					else if( o->SubType == 7 )		// 썬더네이핀 공격 이팩트 (연기)
+					else if( o->SubType == 7 )
 					{
 						o->LifeTime = 40;
 						o->Velocity[0] = (float)(rand()%20-10)*0.1f;
@@ -1150,7 +1104,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Gravity = 0;
 						o->Alpha = 0.5f;
 					}
-					else if( o->SubType == 8 )		// 고스트 네이핀 공격 이팩트 (연기)
+					else if( o->SubType == 8 )
 					{
 						o->LifeTime = 20;
 						o->Velocity[0] = (float)(rand()%20-10)*0.1f;
@@ -1160,14 +1114,12 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Gravity = 0;
 						o->Alpha = 0.5f;
 					}
-#ifdef ADD_SOCKET_ITEM
-					else if( o->SubType == 9 )		// 프로스트메이스 (아이스연기 내려오는 효과)
+					else if( o->SubType == 9 )
 					{ 
 						if(rand()%2 != 0)
 							o->TexType = BITMAP_SMOKE;
 						o->LifeTime = 40;
 						o->Alpha = 0.5f;
-						// 10단계 +-10% 크기변환
 						float fIntervalScale = Scale*0.1f;
 						o->Scale += ((float((rand()%20)-10)/2.0f)*((fIntervalScale/2.f)));
       					o->Rotation = (float)(rand()%360);
@@ -1176,8 +1128,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Velocity[2] = -((1.2f)+((float)(rand()%20-10)*0.025f));
 						o->Gravity = 2.f+((float)(rand()%20-10)*0.05f);
 					}
-#endif // ADD_SOCKET_ITEM
-#ifdef ASG_ADD_SUMMON_RARGLE
 					else if(o->SubType == 10)	// BITMAP_FIRE_CURSEDLICH o->SubType == 1과 비슷.
 					{
 						o->Position[0] += (rand()%10-5)*0.2f;
@@ -1190,8 +1140,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Gravity = (rand()%5+10)*0.01f;
 						VectorCopy(o->Target->Position, o->StartPosition);
 					}
-#endif	// ASG_ADD_SUMMON_RARGLE
-#ifdef LDK_ADD_PC4_GUARDIAN
 					else if(o->SubType == 11)
 					{
 						if(rand()%4 != 0)
@@ -1205,12 +1153,8 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
     					o->Position[2] += (float)(rand()%20-10);
 						o->Gravity = -1.5f;
 					}
-#endif //LDK_ADD_PC4_GUARDIAN
-
 				}
 				break;
-
-#ifdef PBG_ADD_LITTLESANTA_NPC
 			case BITMAP_LIGHT+3:
 				{
 					if(o->SubType == 0)
@@ -1221,7 +1165,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Position[0] += (float)(rand()%100-50);
 						o->Position[1] += (float)(rand()%100-50);
 					}
-#ifdef PJH_ADD_PANDA_PET
 					else if(o->SubType == 1)
 					{
 						o->Scale = 0.1f;
@@ -1243,11 +1186,8 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 
 						o->Rotation = rand()%20-10;
 					}
-#endif //PJH_ADD_PANDA_PET
 				}
 				break;
-#endif // PBG_ADD_LITTLESANTA_NPC
-
 			case BITMAP_TWINTAIL_WATER:
 				{
 					if(o->SubType == 0)
@@ -1282,13 +1222,13 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 			case BITMAP_SMOKE:
 				switch(SubType)
 				{
-				case 0://일반
+				case 0:
 #ifdef PBG_ADD_PKFIELD
 				case 61:
 #endif //PBG_ADD_PKFIELD
-				case 4://일반
+				case 4:
                 case 9://
-				case 23:	// 일반 (녹색)
+				case 23:
       				o->LifeTime = 16;
 #ifdef PBG_ADD_PKFIELD
 					if(o->Type == MODEL_MONSTER01+159)
@@ -1305,7 +1245,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
       				o->Angle[0] = (float)(rand()%360);
                     o->Rotation = (float)((int)WorldTime%360);
 					break;
-				case 17://색 바꾸기 가능 일반
+				case 17:
 					VectorCopy ( o->Light, o->TurningForce );
       				o->LifeTime = 12;
      				o->Scale = Scale*(float)(rand()%32+8)*0.01f;
@@ -1365,22 +1305,22 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
      					Vector(0.f,-(float)(rand()%8+40),0.f,o->Velocity);
 					}
 					break;
-				case 10:	//. Fire
+				case 10:
       				o->LifeTime = 16;
 					break;
-				case 12:	//. Fire ( Black ).
+				case 12:
       				o->LifeTime = 20;
      				o->Scale = (float)(rand()%64+64)*0.01f;
       				o->Rotation = (float)(rand()%360);
 					o->Gravity = (float)(rand()%32+60)*0.1f;
 					break;
-				case 13:	//. Fire.
+				case 13:
       				o->LifeTime = 20;
      				o->Scale = (float)(rand()%64+64)*0.01f;
       				o->Rotation = (float)(rand()%360);
 					o->Gravity = (float)(rand()%32+60)*0.1f;
 					break;
-				case 18:	//. Fire.   천천히 커진다.
+				case 18:
       				o->LifeTime = 20;
      				o->Scale = (float)(rand()%64+64)*0.01f;
       				o->Rotation = (float)(rand()%360);
@@ -1393,7 +1333,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
     				o->Angle[2] = (float)(rand()%360);
      				Vector(0.f,-(float)(rand()%8+40),0.f,o->Velocity);
 					break;
-				case 11://초록
+				case 11:
 				case 14:
      				o->LifeTime = 50;
     				o->Position[0] += (float)(rand()%64-32);
@@ -1405,7 +1345,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy ( o->Light, o->TurningForce );
      				Vector(0.f,-(float)(rand()%8+40),0.f,o->Velocity);
 					break;
-                case 15:    //  스케일을 갖는 일반 연기.
+                case 15:
       				o->LifeTime = 80;
       				o->Angle[0] = (float)(rand()%360);
                     o->Rotation = (float)((int)WorldTime%360);
@@ -1414,9 +1354,9 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				case 53:
 #endif //#ifdef PJH_GIANT_MAMUD
 #ifdef ASG_ADD_SUMMON_RARGLE
-				case 56:	// 보라색.
+				case 56:
 #endif	// ASG_ADD_SUMMON_RARGLE
-				case 1:		//초록
+				case 1:
      				o->LifeTime = 50;
      				o->Scale = (float)(rand()%32+80)*0.01f;
     				o->Position[0] += (float)(rand()%64-32);
@@ -1426,19 +1366,19 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
     				o->Angle[2] = (float)(rand()%360);
      				Vector(0.f,-(float)(rand()%8+40),0.f,o->Velocity);
 					break;
-				case 2://검정
+				case 2:
       				o->LifeTime = 50;
      				o->Scale = (float)(rand()%64+64)*0.01f;
       				o->Rotation = (float)(rand()%360);
 					o->Gravity = (float)(rand()%32+60)*0.1f;
 					break;
-                case 16://검정.
+                case 16:
       				o->LifeTime = 50;
      				o->Scale = (float)(rand()%64+64)*0.01f;
       				o->Rotation = (float)(rand()%360);
 					o->Gravity = (float)(rand()%32+60)*0.1f;
                     break;
-                case 5://회색.
+                case 5:
       				o->LifeTime = 20;
      				o->Scale = (float)(rand()%64+98)*0.01f;
       				o->Rotation = (float)(rand()%360);
@@ -1455,7 +1395,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
          			Vector(0.f,0.f,0.f,o->Velocity);
                     break;
 
-                case    7 :
+                case 7 :
      			    o->LifeTime = 30;
 				    Vector(0.f,(float)(rand()%4+6)*o->Scale,0.f,o->Velocity);
 
@@ -1463,42 +1403,40 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                     o->Scale *= (float)(rand()%20+120)*0.01f;
                     o->Rotation = (float)(rand()%360);
                     break;
-
-                    //  나태.
                 case 8:
 				    o->LifeTime = 24;
                     Vector(0.f,-(float)(rand()%8+32)*0.3f,0.f,o->Velocity);
         		    o->Scale *= 0.8f;
 				    o->Rotation = (float)(rand()%360);
                     break;
-				case 19://색 바꾸기,스케일 가능 일반
+				case 19:
 					VectorCopy ( o->Light, o->TurningForce );
       				o->LifeTime = 40;
      				o->Scale = Scale*(float)(rand()%32+8)*0.01f;
       				o->Angle[0] = (float)(rand()%360);
                     o->Rotation = (float)((int)WorldTime%360);
 					break;
-				case 20://색 바꾸기,스케일 가능 일반
+				case 20:
       				o->LifeTime = 40;
      				o->Scale = Scale*(float)(rand()%32+8)*0.01f;
       				o->Angle[0] = (float)(rand()%360);
                     o->Rotation = (float)((int)WorldTime%360);
 					break;
-				case 21:	//. 검은연기 박스 Fixed : 2004/11/05
+				case 21:
 					o->LifeTime = 80;
 					o->Scale = o->Scale * (float)(rand()%64+64)*0.005f;
       				o->Rotation = (float)(rand()%360);
 					o->Gravity = (float)(rand()%32+60)*0.1f;
 					break;
-				case 22:	//. 붉은연기 박스 : 2004/11/26
+				case 22:
 					o->LifeTime = 60;
 					o->Scale = o->Scale * (float)(rand()%64+64)*0.005f;
       				o->Rotation = (float)(rand()%360);
 					o->Gravity = (float)(rand()%32+60)*0.1f;
 					break;
-				case 24:	// 일반 (녹색, 스케일 조정가능)
+				case 24:
 #ifdef ASG_ADD_SUMMON_RARGLE
-				case 57:	// 보라색.
+				case 57:
 #endif	// ASG_ADD_SUMMON_RARGLE
       				o->LifeTime = 32;
      				o->Scale = Scale+(float)(rand()%32+48)*0.01f*Scale;
@@ -1577,7 +1515,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Gravity = (float)(rand()%100-50)*0.1f;
 					}
 					break;
-				case 43: // 몬스터(마야) 입김 효과- (색 ,스케일 조정 가능)
+				case 43:
 					{
 						o->TexType = BITMAP_CLUD64;
       					o->LifeTime = 40;
@@ -1586,7 +1524,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						Vector(rand()%20/10.0f-1.0f, 2.0f, 15.0f, o->Velocity);
 					}
 					break;
-				case 44: // 몬스터(마야) 몸체 효과- (색 ,스케일 조정 가능)
+				case 44:
 					{
       					o->LifeTime = 60;
 						o->Scale += (float)(rand()%10)/2.0f;
@@ -1598,7 +1536,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						Vector(0.1f, 0.2f, 0.3f, o->Light);
 					}
 					break;
-				case 45: // 몬스터(마야) 석상 효과 - (색, 스케일 조정 가능)
+				case 45:
 					{
 						o->TexType = BITMAP_LIGHT+2;
       					o->LifeTime = 15;
@@ -1608,7 +1546,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Position[2] += (float)(rand()%40)-20.0f;
 					}
 					break;
-				case 46: // 연기 - 위로 올라가는것 (색, 스케일 조정 가능)
+				case 46:
 					{
 						//o->TexType = BITMAP_CLOUD;
       					o->LifeTime = 60 + (int)(o->Scale*10.0f);
@@ -1680,7 +1618,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					break;
 #endif // CSK_RAKLION_BOSS
 #ifdef YDG_ADD_SKILL_GIGANTIC_STORM
-				case 54: // 연기 - 위로 올라가는것 (색, 스케일 조정 가능)
+				case 54:
 					{
 						//o->TexType = BITMAP_CLOUD;
       					o->LifeTime = (int)(o->Scale*8.0f);
@@ -1701,7 +1639,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					break;
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 #ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
-				case 58:		// 임의색 퍼지는 연기
+				case 58:
      				o->LifeTime = 50;
      				o->Scale = (float)(rand()%32+80)*0.01f;
     				o->Position[0] += (float)(rand()%64-32);
@@ -1751,7 +1689,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					break;
 #endif //PBG_ADD_PKFIELD
 #ifdef LDS_ADD_MAP_EMPIREGUARDIAN4_MAPEFFECT
-				case 64:	// 방향성 연기(독가스효과)
+				case 64:
 					{
 						o->LifeTime = 30;
 						o->Scale = o->Scale * 0.3f;
@@ -1759,8 +1697,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Velocity[0] = 0.0f;
 						o->Velocity[1] = 10.0f;
 						o->Velocity[2] = 0.0f;
-						
-						// 위치점 정의
+
 						const float ANG_REVISION = 20.0f;
 						float fAng;
 						fAng = (float)((rand() % (int)ANG_REVISION) + 10);
@@ -1768,9 +1705,8 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Angle[0] = o->Angle[0] + fAng;
 					}
 					break;
-				case 65:	// 아지랭이 같은 연기
+				case 65:
 					{
-						//Vector(0.4f, 0.4f, 0.4f, o->Light);
 						o->LifeTime = 45;
 						o->Scale = o->Scale * (float)(rand()%64+64)*0.005f;
 						o->Rotation = (float)(rand()%360);
@@ -1825,12 +1761,12 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					break;
 #endif // LDS_ADD_EFFECT_UNITEDMARKETPLACE
 #ifdef ASG_ADD_MAP_KARUTAN
-				case 69:	// 색상지정가능 연기박스.
+				case 69:
 					o->LifeTime = 60;
 					o->Scale = o->Scale * (float)(rand()%64+64)*0.005f;
 					o->Rotation = (float)(rand()%360);
 					o->Gravity = (float)(rand()%16+30)*0.1f;
-					VectorCopy(Light, o->Angle);	// o->Angle을 연기 원래 색상 저장 공간으로 이용.
+					VectorCopy(Light, o->Angle);
 					break;
 #endif	// ASG_ADD_MAP_KARUTAN
 				}
@@ -1916,7 +1852,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
       				o->Angle[0] = -2 + (float)(rand()%4);
                     o->Rotation = (float)((int)WorldTime%360);
 					break;
-				case 3:	// 검은 연기 박스 - 칸투르 몹 사라질때 검은 연기
+				case 3:
 					o->TexType = BITMAP_CLUD64;
 					o->LifeTime = 60;
 					o->Scale = o->Scale * (float)(rand()%64+64)*0.02f;
@@ -1927,7 +1863,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Gravity = (float)(rand()%100-50)*0.1f;
 					Vector(1.0f, 1.0f, 1.0f, o->Light);
 					break;
-				case 4:	// 검은 연기 박스 - 칸투르 몹 사라질때 검은 연기
+				case 4:
 					o->TexType = BITMAP_WATERFALL_3;
 					o->LifeTime = 30;
 					o->Scale = o->Scale * (float)(rand()%64+64)*0.02f;
@@ -1972,7 +1908,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
-				else if (o->SubType == 1)	// ◎
+				else if (o->SubType == 1)
 				{
       				o->LifeTime = 25;
      				o->Scale = (float)(rand()%50+55)*0.01f*Scale;
@@ -1984,11 +1920,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(o->Target->Position, o->StartPosition);
 				}
 #ifdef ADD_RAKLION_IRON_KNIGHT
-#ifdef KJH_ADD_EG_MONSTER_KATO_EFFECT
 				else if ( (o->SubType == 2) || (o->SubType == 3) )
-#else // KJH_ADD_EG_MONSTER_KATO_EFFECT
-				else if (o->SubType == 2)
-#endif // KJH_ADD_EG_MONSTER_KATO_EFFECT
 				{
       				o->LifeTime = 45;
      				o->Scale = (float)(rand()%96+96)*0.01f*Scale;
@@ -2006,7 +1938,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Position[1] += (float)(rand()%20-10)*2.f;
 					o->Position[2] += (float)(rand()%20-10)*2.f;
 
-					o->Scale = o->Scale + ((float)(rand()%20-10)*(o->Scale*0.03f)); // o->Scale의 30% (20단계)
+					o->Scale = o->Scale + ((float)(rand()%20-10)*(o->Scale*0.03f));
 					o->LifeTime = 45;
 					o->Alpha = 1.0f;
 
@@ -2024,8 +1956,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					case 0:
 						{
 							o->LifeTime = 5;
-							// 스케일은 인자값으로 받는다.
-							//o->Scale = (float)(rand()%80+32)*0.01f*Scale;
 							o->Rotation = (float)(rand()%360);
 							o->Gravity = 0;
 							o->Alpha = 1.0f;
@@ -2037,9 +1967,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				}
 				break;
 			case BITMAP_FIRE_HIK1:
-#ifdef CSK_ADD_MAP_ICECITY
 			case BITMAP_FIRE_HIK1_MONO:	
-#endif // CSK_ADD_MAP_ICECITY
 				if (o->SubType == 0
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					|| o->SubType == 6
@@ -2129,8 +2057,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 #endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				break;
 
-			//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_FIRE_HIK3:
 #ifdef CSK_ADD_MAP_ICECITY
 			case BITMAP_FIRE_HIK3_MONO:	
@@ -2212,9 +2138,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 #endif	// YDG_ADD_SKELETON_PET
 
 				break;
-
-			//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_LIGHT+1:
 				o->LifeTime = 20+rand()%8;
 				if(o->SubType == 1)
@@ -2250,9 +2173,9 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					|| o->SubType==13
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)//터지는거
+					)
 #else
-      			if(o->SubType==0 || o->SubType==2 || o->SubType==3 || o->SubType==4 || o->SubType==6)//터지는거
+      			if(o->SubType==0 || o->SubType==2 || o->SubType==3 || o->SubType==4 || o->SubType==6)
 #endif //LDS_ADD_EMPIRE_GUARDIAN
 				{
 					o->LifeTime = rand()%16+24;
@@ -2300,20 +2223,15 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				{
 					o->LifeTime = rand()%12+12;
 				}
-				else if(o->SubType == 8 
-#ifdef PJH_FIX_CAOTIC
-					|| o->SubType == 10
-#endif //PJH_FIX_CAOTIC
-					)
+				else if(o->SubType == 8 || o->SubType == 10	)
 				{
-#ifdef PJH_FIX_CAOTIC
 					if(o->SubType == 10)
 					{
 						o->TexType = BITMAP_CLUD64;
 					}
 					else
-#endif //PJH_FIX_CAOTIC
-					o->TexType = BITMAP_SPARK+1;
+						o->TexType = BITMAP_SPARK+1;
+
 					o->LifeTime = rand()%16+24;
 					o->Angle[2] = (float)(rand()%360);
 					AngleMatrix(o->Angle,Matrix);
@@ -2345,7 +2263,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorRotate(p,Matrix,o->Velocity);
 				}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-      			else//그냥 떨어지는거
+      			else
 				{
 					if (o->SubType==5)
 					{
@@ -2366,7 +2284,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                     }
 				}
 				break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			case BITMAP_SPARK+1:
 				switch(o->SubType)
 				{
@@ -2484,7 +2401,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Scale = (float)(rand()%5)/10.0f + 0.4f;
 					}
 					break;
-				case 15:	//^ 펜릴 이펙트 관련
+				case 15:
 					if(rand()%3 == 0)
 					{
 						o->Alpha = 1.0f;
@@ -2556,7 +2473,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					break;
 
 #ifdef PRUARIN_EVENT07_3COLORHARVEST
-				case 21:					// 흩어지는 파티클(13번 참고)
+				case 21:
 					{	
 						vec3_t vSpeed;
 						vSpeed[0] = -8.0f + (float)(rand()%16);
@@ -2567,11 +2484,11 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						VectorScale( vSpeed, 12.0f, vSpeed );			
 						VectorCopy( vSpeed, o->Velocity );
 						
-						o->LifeTime = rand()%10+20;			// (20~30)
-						o->Scale = (float)(rand()%20)/20.0f+1.0f;	//(1~2 20단계)
+						o->LifeTime = rand()%10+20;
+						o->Scale = (float)(rand()%20)/20.0f+1.0f;
 					}	
 					break;
-				case 22:					// 떨어지는 파티클(20번 참고)
+				case 22:
 					{	
 						vec3_t vSpeed;
 						vSpeed[0] = -8.0f + (float)(rand()%16);
@@ -2582,7 +2499,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						VectorScale( vSpeed, 14.0f, vSpeed );				
 						VectorCopy( vSpeed, o->Velocity );
 
-						o->Scale = (float)(rand()%20)/20.0f+1.0f;	//(1~2 20단계)
+						o->Scale = (float)(rand()%20)/20.0f+1.0f;
 						o->LifeTime = rand()%10+20;
 						o->Angle[2] = (float)(rand()%360);
 						AngleMatrix(o->Angle, Matrix);
@@ -2632,7 +2549,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					break;
 #endif // CSK_ADD_MAP_ICECITY
 #ifdef YDG_ADD_FIRECRACKER_ITEM
-				case 27:					// 흩어지는 파티클(13번 참고)
+				case 27:
 					{	
 						vec3_t vSpeed;
 						vSpeed[0] = -8.0f + (float)(rand()%16);
@@ -2647,7 +2564,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Scale = (float)(rand()%20)/20.0f+1.0f;
 					}	
 					break;
-				case 28:					// 떨어지는 파티클(20번 참고)
+				case 28:
 					{	
 // 						vec3_t vSpeed;
 // 						vSpeed[0] = -8.0f + (float)(rand()%16);
@@ -2716,9 +2633,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 #endif	// YDG_ADD_DOPPELGANGER_MONSTER
                 }
 				break;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_SPARK+2:
 				if(o->SubType == 0)
 				{
@@ -2831,7 +2745,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Gravity = -(float)(rand()%10)*0.3f;
 				}
 #ifdef YDG_ADD_FIRECRACKER_ITEM
-				else if(o->SubType == 6)	// 오색별가루
+				else if(o->SubType == 6)
 				{
 					o->Scale = (float)(rand()%5)/10.0f+0.5f;
 					o->StartPosition[0] = o->Scale;
@@ -2885,7 +2799,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				}
 #endif	// YDG_ADD_SANTA_MONSTER
 #ifdef YDG_ADD_FIRECRACKER_ITEM
-				else if(o->SubType == 9)	// 오색 별가루 + 노란 별가루 왕창
+				else if(o->SubType == 9)
 				{
 					o->Scale = (float)(rand()%5)/10.0f+0.5f;
 					o->StartPosition[0] = o->Scale;
@@ -3060,7 +2974,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 #endif	// YDG_ADD_DOPPELGANGER_NPC
 				break;
 #ifdef ASG_ADD_SKILL_BERSERKER
-			case BITMAP_ORORA:	// 플레이어 손목 주변을 돌며 커지면서 사라지는 이펙트. 색상만 변경하여 생성 가능.
+			case BITMAP_ORORA:
 				o->Scale = 0.2f;
 				switch (o->SubType)
 				{
@@ -3587,7 +3501,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				}
 #endif	// YDG_ADD_MAP_DOPPELGANGER1
                 break;
-            case BITMAP_POUNDING_BALL:  //  자이언트 오거의 통통볼 공격.
+            case BITMAP_POUNDING_BALL:
                 if ( o->SubType==0 )
                 {
 				    o->LifeTime = 24;
@@ -3629,7 +3543,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				}
                 break;
 #endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-            case BITMAP_ADV_SMOKE:      //  블러드캐슬의 불연기.
+            case BITMAP_ADV_SMOKE:
                 o->LifeTime = 20+rand()%5;
                 o->Rotation = 0.f;
                 if(o->SubType == 0)
@@ -3664,7 +3578,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                     o->Velocity[2] = (float)(rand()%10+5)*0.1f;
                 }
                 break;
-            case BITMAP_ADV_SMOKE+1:    //  블러드캐슬의 불연기.
+			case BITMAP_ADV_SMOKE+1:
                 o->LifeTime = 25+rand()%5;
                 o->Rotation = (float)(rand()%360);
                 o->Scale = 0.5f;
@@ -3676,8 +3590,8 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                 o->Velocity[1] = 0.f;
                 o->Velocity[2] = (float)(rand()%10+5)*0.2f;
 
-            case BITMAP_TRUE_FIRE : //  진짜불 효과.
-            case BITMAP_TRUE_BLUE : //  진짜불 효과.
+            case BITMAP_TRUE_FIRE :
+            case BITMAP_TRUE_BLUE :
 				if(o->SubType == 7)
 				{
 					o->Scale = Scale + (float)(rand()%30)/100.f;
@@ -3725,7 +3639,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                 Vector ( 0.1f, 0.1f, 0.1f, o->Light );
                 break;
             case BITMAP_WATERFALL_1:
-                //  SubType: 0 (기본텍스쳐), 1(BITMAP_CLOUD+2)
                 o->LifeTime = 30;
                 o->Rotation = (float)(rand()%360);
                 o->Velocity[2] = (float)(-(rand()%5+7));
@@ -3782,7 +3695,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				else if ( o->SubType==4 )
                 {
 	                o->LifeTime = 6;
-                    o->Gravity  = ((rand()%100)/100.f)*4.f+o->Angle[0]*1.2f;//45.f;
+                    o->Gravity  = ((rand()%100)/100.f)*4.f+o->Angle[0]*1.2f;
 					o->Scale    = Scale+(float)(rand()%6)*0.20f;
 					o->Rotation = (float)(rand()%360);
 
@@ -3801,7 +3714,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				{
 					o->LifeTime = 30;
 					o->Rotation = (float)(rand()%360);
-					o->Scale    = Scale+0.6f;		// 물파티클 박스 Fixed : 2004/11/05
+					o->Scale    = Scale+0.6f;
 					o->Velocity[2] = -(rand()%5+12);
 					
 					Vector ( 0.2f, 0.2f, 0.2f, o->Light );
@@ -3932,9 +3845,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				}
 #endif //LDS_ADD_EMPIRE_GUARDIAN
                 break;
-
-			//////////////////////////////////////////////////////////////////////////
-
             case BITMAP_WATERFALL_3:
             case BITMAP_WATERFALL_4:
                 if ( o->SubType==0 )
@@ -3950,14 +3860,14 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				else if ( o->SubType==2 )
                 {
 	                o->LifeTime = 6;
-                    o->Gravity  = ((rand()%100)/100.f)*4.f+o->Angle[0]*1.2f;//45.f;
+                    o->Gravity  = ((rand()%100)/100.f)*4.f+o->Angle[0]*1.2f;
 					o->Scale    = Scale+(float)(rand()%6)*0.10f;
 					o->Rotation = (float)(rand()%360);
 
 					VectorCopy(o->Position,o->StartPosition);
 					break;
                 }
-				else if ( o->SubType==3 )		// 먼지불빛 박스 Added : 2004/11/09
+				else if ( o->SubType==3 )
 				{
 					o->LifeTime = 60;
 					o->Velocity[2] = -1.0f;
@@ -3968,14 +3878,10 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					break;
 				}
 #ifdef ADD_SOCKET_ITEM
-				// 소드브레이커 이팩트
-				// * 정해진 위치에 waterfall을 생성하여 돌아가면서 작아짐, 페이드 아웃
-				// * 주의 : 다른곳에서 사용하지 말것
 				else if( o->SubType == 12 )
 				{
 					o->Rotation = (float)(rand()%360);
 					o->LifeTime = (rand()%2-1)+5;
-					// 10단계 +-30% 크기변환
 					float fIntervalScale = Scale*0.3f;
 					o->Scale += ((float((rand()%20)-10)/2.0f)*((fIntervalScale/2.f)));
 					o->Position[0] += (float)(rand()%20)-10.f;
@@ -4016,7 +3922,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Position[2] -= 50.f;
 					break;
 				}
-				else if(o->SubType == 7)	//@@ CreateParticle
+				else if(o->SubType == 7)
 				{
 					o->LifeTime = 60;
 					o->Velocity[2] = (rand()%4)*0.1f + 0.8f;
@@ -4030,7 +3936,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				{
                     o->LifeTime = 30;
                     o->Velocity[2] = rand()%5+5;
-					o->Scale    = (rand()%10+10)*0.05f;// + Scale;
+					o->Scale    = (rand()%10+10)*0.05f;
 				}
 #ifdef CSK_ADD_MAP_ICECITY
 				else if(o->SubType == 9)
@@ -4447,7 +4353,7 @@ void MoveParticles()
 					
 					o->Rotation += 2.0f;	
 				}			
-				else if(o->SubType == 7)		// Drain Life (드레인 라이프)
+				else if(o->SubType == 7)
 				{
 					o->TurningForce[2] -= o->Gravity;
 					
@@ -4559,7 +4465,7 @@ void MoveParticles()
 			        o->Position[0] += (float)(rand()%20-10)*2.5f*o->Scale;
 			        o->Position[1] += (float)(rand()%20-10)*2.5f*o->Scale;
 			        o->Position[2] += (float)(rand()%20+10)*2.5f*o->Scale;
-					if (o->Position[2] > 550)	// 기포 올라오는 높이 제한.
+					if (o->Position[2] > 550)
 						o->Live = false;
 					break;
                 }
@@ -4677,9 +4583,7 @@ void MoveParticles()
 				o->Frame = (23-o->LifeTime)/6;
 				break;
 			case BITMAP_FIRE_CURSEDLICH:
-#ifdef CSK_ADD_MAP_ICECITY
 			case BITMAP_FIRE_HIK2_MONO:
-#endif // CSK_ADD_MAP_ICECITY
 				if (o->SubType == 0)
 				{
 					o->Scale -= (rand()%20+10)*0.001f;
@@ -4932,8 +4836,8 @@ void MoveParticles()
 					}
                     break;
 				case	17:
-                case    5 : //  운석 마법.
-                case    6 : //  색반전.
+                case    5 :
+                case    6 :
 					{
 						o->Gravity += 0.004f;
 						Luminosity = (float)(o->LifeTime)/24.f;
@@ -4963,7 +4867,7 @@ void MoveParticles()
 						o->Position[2] += o->Gravity*10.f;
 					}
 					break;     
-				case    9 : //  위치 고정.
+				case    9 :
 					{
 						o->Gravity += 0.004f;
 						Luminosity = (float)(o->LifeTime)/24.f;
@@ -5049,7 +4953,7 @@ void MoveParticles()
 						o->Position[2] += o->Gravity*10.f;
 					}
 					break;
-				case 16:			// 제국수호군 방패병 공격 이팩트
+				case 16:
 					{
 						o->Frame = (3-o->LifeTime);
 						o->Light[0] /= 1.7f;
@@ -5090,8 +4994,8 @@ void MoveParticles()
                 case    0 :
 					o->Scale -= 0.04f;
                     break;
-                case    5 : //  운석 마법.
-                case    6 : //  색반전.
+                case    5 :
+                case    6 :
 					o->Scale -= 0.04f;
                     o->Rotation+=5;
                     break;
@@ -5103,7 +5007,7 @@ void MoveParticles()
 					o->Scale *= 0.95f;
 					o->Rotation+=5;
 					break;     
-				case    9 : //  위치 고정.
+				case    9 :
                     o->Position[0] = o->Target->Position[0] + o->StartPosition[0];
                     o->Position[1] = o->Target->Position[1] + o->StartPosition[1];
                     o->Position[2] = o->Target->Position[2] + o->StartPosition[2];
@@ -5240,9 +5144,6 @@ void MoveParticles()
 					Vector(Luminosity,Luminosity,Luminosity,o->Light);
 				}
 				break;
-
-//----------------------------------------------------------------------------------------------------
-
             case BITMAP_FLAME:
 				if(o->LifeTime <= 0) o->Live = false;
                 
@@ -5349,7 +5250,7 @@ void MoveParticles()
 						o->Light[2] /= 1.008f;
 					}
 					break;
-				case 10:	// 불 뿜어져 나오는 효과.(BITMAP_ADV_SMOKE 2번과 동일)
+				case 10:
 					VectorAdd(o->Position,o->Velocity,o->Position);
 					o->Velocity[0] *= 0.95f;
 					o->Velocity[1] *= 0.95f;
@@ -5368,9 +5269,6 @@ void MoveParticles()
 #endif // CSK_RAKLION_BOSS
 				}
                 break;
-
-//----------------------------------------------------------------------------------------------------
-
 			case BITMAP_FIRE_RED:
 				if(o->LifeTime <= 0) 
 					o->Live = false;
@@ -5393,7 +5291,7 @@ void MoveParticles()
 				else
 				{
 #ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
-					if( o->SubType == 2 )		// 통합 로렌 시장 인 경우
+					if( o->SubType == 2 )
 					{
 						Vector(0.03f,0.03f,0.03f,Light);
 						VectorSubtract(o->Light,Light,o->Light);
@@ -5409,7 +5307,6 @@ void MoveParticles()
 #endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 				}
 				break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			case BITMAP_ENERGY:
 				{
 					o->Rotation += o->Gravity;
@@ -5419,7 +5316,7 @@ void MoveParticles()
 						o->Light[1] = o->Light[2] = o->Light[0] = o->LifeTime/15.f;
 						o->Scale += 0.1f;
 					}
-					else if(o->SubType == 2)	//^ 펜릴 이펙트 관련
+					else if(o->SubType == 2)
 					{
 						o->Light[0] -= 0.01f;
 						o->Light[1] -= 0.01f;
@@ -5428,26 +5325,22 @@ void MoveParticles()
 					// ChainLighting
 					else if(o->SubType == 3 || o->SubType == 4 || o->SubType == 5)
 					{
-						// 플레이어 모델
 						BMD* pModel = &Models[o->Target->Type];
 						vec3_t vRelativePos, vPos;
 						Vector(0.f, 0.f, 0.f, vRelativePos );
 						
 						if(o->SubType == 3)
 						{
-							// 플레이어 왼손
 							pModel->TransformPosition( o->Target->BoneTransform[37], vRelativePos, vPos, true);
 							VectorCopy(vPos, o->Position);
 						}
 						else if(o->SubType == 4)
 						{
-							// 플레이어 오른손
 							pModel->TransformPosition( o->Target->BoneTransform[28], vRelativePos, vPos, true);
 							VectorCopy(vPos, o->Position);
 						}
 						else if(o->SubType == 5)
 						{
-							// 몬스터 
 							VectorCopy(o->Target->Position, o->Position);
 							o->Position[2] += 80.f;
 						}
@@ -5464,8 +5357,6 @@ void MoveParticles()
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
 				break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_MAGIC:
 				if(o->SubType == 0)
 				{
@@ -5476,9 +5367,6 @@ void MoveParticles()
 					o->Light[2] -= 0.01f;
 				}
 				break;
-
-//////////////////////////////////////////////////////////////////////////
-
             case BITMAP_FLARE:  //
                 if ( o->SubType==0 || o->SubType==3 || o->SubType==6 
 					|| o->SubType == 10
@@ -5564,7 +5452,6 @@ void MoveParticles()
                         o->Light[2] /= 1.1f;
                     }
 				}
-                //  정지시.
                 if( o->SubType==0 )
                 {
                     if((o->Target->CurrentAction>=PLAYER_WALK_MALE && o->Target->CurrentAction<=PLAYER_RUN_RIDE_WEAPON) || 
@@ -5629,7 +5516,7 @@ void MoveParticles()
 						if(o->Light[0] <= 0.05f)
 							o->Live = false;
 					}
-					else if(o->SubType == 6)	// ◎
+					else if(o->SubType == 6)
 					{
 						if (o->LifeTime < 10)
 						{
@@ -5661,7 +5548,7 @@ void MoveParticles()
 						VectorCopy(o->Target->Position, o->StartPosition);
 						VectorAdd(o->Position, o->StartPosition, o->Position);
 					}
-					else if( o->SubType == 7 )		// 썬더네이핀 공격 이팩트 (연기)
+					else if( o->SubType == 7 )
 					{
 						if (o->LifeTime < 10)
 						{
@@ -5676,7 +5563,7 @@ void MoveParticles()
 						VectorAdd( o->Position, o->Velocity, o->Position );
 						o->Scale += ((float)(rand()%10)*0.01f);
 					}
-					else if( o->SubType == 8 )		// 썬더네이핀 공격 이팩트 (연기)
+					else if( o->SubType == 8 )
 					{
 						if (o->LifeTime < 10)
 						{
@@ -5728,8 +5615,6 @@ void MoveParticles()
 #endif //LDK_ADD_PC4_GUARDIAN
 				}
 				break;
-
-//////////////////////////////////////////////////////////////////////////
 
 #ifdef PBG_ADD_LITTLESANTA_NPC
 			case BITMAP_LIGHT+3:
@@ -5820,7 +5705,7 @@ void MoveParticles()
      				VectorScale(o->Velocity,0.4f,o->Velocity);
      				o->Scale += 0.1f;
 					break;
-				case 23:	//. 일반(녹색)
+				case 23:
 					Luminosity = (float)(o->LifeTime)/8.f;
 					Vector(Luminosity*0.1f,Luminosity,Luminosity*0.6f,o->Light);
 					o->Gravity += 0.2f;
@@ -5933,7 +5818,7 @@ void MoveParticles()
                     }
 					Vector(Luminosity*0.725f,Luminosity*0.572f,Luminosity*0.333f,o->Light);
 					break;
-                case 8: //  나태.
+                case 8:
 				    o->Gravity += 0.02f;
                     if ( o->LifeTime>5 )
                     {
@@ -5958,7 +5843,7 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
      				o->Scale += 0.1f;
 					break;
-				case 10:    //  블러드캐슬의 연기
+				case 10:
 					Luminosity = (float)(o->LifeTime)/16.f;
     				Vector(Luminosity*1.f,Luminosity*0.1f,Luminosity*0.1f,o->Light);
      				o->Scale += 0.05f;
@@ -5983,7 +5868,7 @@ void MoveParticles()
      				o->Scale += (rand()%10)/1000.f;
                     o->Rotation = o->Scale;
 					break;
-				case 21:	//. 검은연기 박스 Fixed : 2004/11/05
+				case 21:
      				Luminosity = (float)(o->LifeTime)/50.f;
 					Vector(Luminosity,Luminosity,Luminosity,o->Light);
 					o->Gravity -= 0.1f;
@@ -5991,7 +5876,7 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Scale -= 0.01f;
 					break;
-				case 22:	//. 붉은연기 박스 : 2004/11/26
+				case 22:
 					Luminosity = (float)(o->LifeTime)/50.f;
 					Vector(Luminosity*0.9f,Luminosity*0.5f,Luminosity*0.5f,o->Light);
 					o->Gravity -= 0.1f;
@@ -5999,7 +5884,7 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Scale += 0.04f;
 					break;
-				case 24:	//. 일반(녹색, 스케일조정가능)
+				case 24:
 					Luminosity = (float)(o->LifeTime)/32.f;
 					Vector(Luminosity*0.2f,Luminosity*0.5f,Luminosity*0.35f,o->Light);
 					o->Gravity += 0.1f;
@@ -6075,7 +5960,7 @@ void MoveParticles()
 						o->Position[2] += o->Gravity;
 					}
 					break;
-				case 42:	// case 4:와 동일하지만 o->Light 세팅 부분만 틀림(버서커 형광색).
+				case 42:
 					Luminosity = (float)(o->LifeTime) / 8.f;
 					Vector(Luminosity*127.f/255.f, Luminosity*255.f/255.f,
 						Luminosity*200.f/255.f, o->Light);
@@ -6255,13 +6140,13 @@ void MoveParticles()
 					break;
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 #ifdef ASG_ADD_SUMMON_RARGLE
-				case 56:	// case 1:과 동일하나 색상만 다름.
+				case 56:
 					Luminosity = (float)(o->LifeTime)/50.f;
 					Vector(Luminosity*0.5f,Luminosity*0.1f,Luminosity*0.8f,o->Light);
 					VectorScale(o->Velocity,0.4f,o->Velocity);
 					o->Scale += 0.05f;
 					break;
-				case 57:	//case 24:와 동일하나 색상만 다름.
+				case 57:
 					Luminosity = (float)(o->LifeTime)/32.f;
 					Vector(Luminosity*0.5f,Luminosity*0.1f,Luminosity*0.8f,o->Light);
 					o->Gravity += 0.1f;
@@ -6323,7 +6208,7 @@ void MoveParticles()
 					break;
 #endif //PBG_ADD_PKFIELD
 #ifdef LDS_ADD_MAP_EMPIREGUARDIAN4_MAPEFFECT	
-				case 64: // 방향성 연기 (독가스 효과)
+				case 64:
 					{
 						Luminosity = (float)(o->LifeTime)/24.f;
 						Vector(Luminosity*0.1f,Luminosity*0.7f,Luminosity*0.4f,o->Light);
@@ -6390,7 +6275,7 @@ void MoveParticles()
 					break;
 #endif //LDK_ADD_CS7_UNICORN_PET
 #ifdef LDS_ADD_EFFECT_UNITEDMARKETPLACE
-				case 68:		// 방향성 연기 Angle 값 넣으면 조정.
+				case 68:
 					{
 						Luminosity = (float)(o->LifeTime)/40.f;
 						Vector(Luminosity*0.4f,Luminosity*0.4f,Luminosity*0.4f,o->Light);
@@ -6410,10 +6295,10 @@ void MoveParticles()
 #ifdef ASG_ADD_MAP_KARUTAN
 				case 69:
 					Luminosity = (float)(o->LifeTime)/50.f;
-					Vector(Luminosity*o->Angle[0],Luminosity*o->Angle[1],Luminosity*o->Angle[2],o->Light);	// o->Angle을 연기 원래 색상 저장 공간으로 이용.
+					Vector(Luminosity*o->Angle[0],Luminosity*o->Angle[1],Luminosity*o->Angle[2],o->Light);
 					o->Gravity -= 0.04f;
 					o->Position[0] += o->Gravity*sinf(WorldTime)*0.05f;
-					o->Position[2] += o->Gravity; // 상하방향
+					o->Position[2] += o->Gravity;
 					o->Scale += 0.04f;
 					break;
 #endif	// ASG_ADD_MAP_KARUTAN
@@ -6529,7 +6414,7 @@ void MoveParticles()
 					}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
-				else if (o->SubType == 1)	// ◎
+				else if (o->SubType == 1)
 				{
 					if (o->LifeTime < 10)
 					{
@@ -6564,11 +6449,7 @@ void MoveParticles()
 					VectorAdd(o->Position, o->StartPosition, o->Position);
 				}
 #ifdef ADD_RAKLION_IRON_KNIGHT
-#ifdef KJH_ADD_EG_MONSTER_KATO_EFFECT
 				else if ( (o->SubType == 2) || (o->SubType == 3) )
-#else // KJH_ADD_EG_MONSTER_KATO_EFFECT
-				else if (o->SubType == 2)
-#endif // KJH_ADD_EG_MONSTER_KATO_EFFECT
 				{
 					if (o->LifeTime < 10)
 					{
@@ -6634,9 +6515,7 @@ void MoveParticles()
 				}
 				break;
 			case BITMAP_FIRE_HIK1:
-#ifdef CSK_ADD_MAP_ICECITY
 			case BITMAP_FIRE_HIK1_MONO:
-#endif // CSK_ADD_MAP_ICECITY
 				if (o->SubType == 0
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					|| o->SubType == 6
@@ -7134,9 +7013,6 @@ void MoveParticles()
 				VectorScale(o->Velocity,0.95f,o->Velocity);
 				VectorAdd(o->Position,o->Velocity,o->Position);
 				break;
-
-//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_SPARK:
 				Luminosity = (float)(o->LifeTime)/16.f;
 #ifdef LDS_ADD_EMPIRE_GUARDIAN
@@ -7195,9 +7071,6 @@ void MoveParticles()
 					VectorSubtract(o->Position, p, o->Position);
 				}
 				break;
-
-//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_SPARK+1:
 				switch(o->SubType)
 				{
@@ -7325,7 +7198,7 @@ void MoveParticles()
 						if(o->Alpha <= 0.0f) o->Live = false;
 					}
 					break;
-				case 15:	//^ 펜릴 이펙트 관련
+				case 15:
 					{
 						o->Light[0] /= 1.05f;
 						o->Light[1] /= 1.05f;
@@ -7621,9 +7494,6 @@ void MoveParticles()
 #endif	// YDG_ADD_DOPPELGANGER_MONSTER
                 }
 				break;
-
-//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_SPARK+2:
 				{
 					if(o->SubType == 0)
@@ -7643,11 +7513,7 @@ void MoveParticles()
 						}
 					}
 #ifdef ASG_ADD_SKILL_BERSERKER
-#ifdef CSK_FIX_JACK_PARTICLE
 					else if((o->SubType == 2 || o->SubType == 3) && o->Target != NULL)
-#else // CSK_FIX_JACK_PARTICLE
-					if (o->SubType == 2 || o->SubType == 3)
-#endif // CSK_FIX_JACK_PARTICLE	
 					{
 						o->Frame = (16 - o->LifeTime) / 4;
 						
@@ -7853,7 +7719,6 @@ void MoveParticles()
 							Position[1] = o->Position[1] + rand()%40-20;
 							Position[2] = o->Position[2];
 							Vector(0.8f+(rand()%200)*0.001f, 0.5f+(rand()%200)*0.001f, 0.1f+(rand()%100)*0.001f, Light);
-// 							Vector(1.0f,0.7f,0.2f, Light);
 							CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 8 );
 						}
 					}
@@ -7906,11 +7771,7 @@ void MoveParticles()
 						o->Scale = sinf(o->LifeTime*(Q_PI/180.f));
 						o->Alpha -= 0.002f;
 						if(o->Alpha <= 0.0f) o->Live = false;
-
-						//o->Light[0] /= 1.045f;
-						//o->Light[1] /= 1.045f;
-						//o->Light[2] /= 1.045f;
-						
+			
 						o->Position[2] += (o->Gravity * 0.5f);
 						o->Gravity -= 1.5f;
 
@@ -7943,9 +7804,6 @@ void MoveParticles()
 						VectorCopy( o->Target->Angle, o->Angle );
 						o->Scale -= 0.06f;
 						o->Position[2] += o->Gravity*10.f;
-						//o->Light[0] = o->LifeTime/10.f;
-						//o->Light[1] = o->Light[0];
-						//o->Light[2] = o->Light[0];
 					}
 					else
 #endif //CSK_EVENT_CHERRYBLOSSOM
@@ -8048,10 +7906,9 @@ void MoveParticles()
 				}
 				break;
 #ifdef ASG_ADD_SKILL_BERSERKER
-			case BITMAP_ORORA:	// 플레이어 손목 주변을 돌며 커지면서 사라지는 이펙트.
+			case BITMAP_ORORA:
 				{
-					float fScale, fLight;	// 각 증감값.
-					// 플레이어 모델
+					float fScale, fLight;
 					BMD* pModel = &Models[o->Target->Type];
 					vec3_t vRelativePos, vPos;
 					Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -8062,14 +7919,12 @@ void MoveParticles()
 						fScale = 0.01f;
 						fLight = 1.05f;
 						o->Rotation += 5.f;
-						// 플레이어 왼손
 						pModel->TransformByObjectBone(vPos, o->Target, 37);
 						break;
 					case 1:
 						fScale = 0.01f;
 						fLight = 1.05f;
 						o->Rotation -= 5.f;
-						// 플레이어 오른손
 						pModel->TransformByObjectBone(vPos, o->Target, 28);
 						break;
 					case 2:
@@ -8077,7 +7932,6 @@ void MoveParticles()
 //						fLight = 1.12f;
 						fLight = 1.33f;
 						o->Rotation += 20.f;
-						// 플레이어 왼손
 						pModel->TransformByObjectBone(vPos, o->Target, 37);
 						break;
 					case 3:
@@ -8085,14 +7939,13 @@ void MoveParticles()
 //						fLight = 1.12f;
 						fLight = 1.33f;
 						o->Rotation -= 20.f;
-						// 플레이어 오른손
 						pModel->TransformByObjectBone(vPos, o->Target, 28);
 						break;
 					}
 
 					VectorCopy(vPos, o->Position);
 					o->Scale += fScale;
-					if (o->Scale >= 0.8f)	// 투명해지는 시점.
+					if (o->Scale >= 0.8f)
 					{
 						o->Light[0] /= fLight;
 						o->Light[1] /= fLight;
@@ -8281,7 +8134,7 @@ void MoveParticles()
                         o->Live = false;
                     }
 				}
-				else if(o->SubType == 11)	//@@ MovePaticle
+				else if(o->SubType == 11)
 				{
 					VectorAdd(o->Position,o->Velocity,o->Position);
 					o->TurningForce[0] = 1.5f;
@@ -8717,7 +8570,7 @@ void MoveParticles()
                     o->Position[1] -= 2.f;
                     o->Position[2] += o->Gravity;
                 }
-                else if ( o->SubType==4 )   //  최대 생명력 증가 상태.
+                else if ( o->SubType==4 )
                 {
                     if ( o->Target!=NULL && o->Target->Type==MODEL_PLAYER && o->Target->Kind==KIND_PLAYER )
                     {
@@ -8788,7 +8641,7 @@ void MoveParticles()
 				}
 				else if ( o->SubType == 13 )
 				{
-					o->Position[1] -= o->Gravity;// + (rand()%10)*0.1f;
+					o->Position[1] -= o->Gravity;
                     o->Position[2] += o->Gravity;
 					o->Scale -= 0.001f;
 				}
@@ -8822,7 +8675,7 @@ void MoveParticles()
 				}
 #endif	// YDG_ADD_MAP_DOPPELGANGER1
                 break;
-			case BITMAP_POUNDING_BALL:  //  블러드 캐슬 자이언트 오거의 통통볼
+			case BITMAP_POUNDING_BALL:
 				if ( o->SubType==0 && o->SubType==1 )
 				{
 					o->Gravity += 0.004f;
@@ -8881,7 +8734,7 @@ void MoveParticles()
 				}
 #endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				break;
-            case BITMAP_ADV_SMOKE:      //  블러드 캐슬의 불 연기.
+            case BITMAP_ADV_SMOKE:
                 VectorAdd(o->Position,o->Velocity,o->Position);
                 o->Velocity[0] *= 0.95f;
                 o->Velocity[1] *= 0.95f;
@@ -8913,7 +8766,7 @@ void MoveParticles()
                     o->Scale += 0.09f;
                 }
                 break;
-            case BITMAP_ADV_SMOKE+1:    //  블러드 캐슬의 불 연기.
+            case BITMAP_ADV_SMOKE+1:
                 VectorAdd(o->Position,o->Velocity,o->Position);
                 o->Velocity[0] *= 0.95f;
                 o->Velocity[1] *= 0.95f;
@@ -8924,7 +8777,6 @@ void MoveParticles()
                 o->Scale += 0.05f;
 				if(o->SubType == 2)
 				{
-					//~-1.f, ~1.f사이 
 					o->Light[0] = (float)(o->LifeTime)/25.f*2 - 1.f;
 					o->Light[1] = o->Light[0];
 					o->Light[2] = o->Light[0];					
@@ -8946,7 +8798,7 @@ void MoveParticles()
                         o->LifeTime-=2;
                 }
 
-				if(o->SubType>=3 && o->SubType<5 && o->Target!=NULL)	//. 불골렘에 붙는 불..
+				if(o->SubType>=3 && o->SubType<5 && o->Target!=NULL)
 				{
 					std::string name;
 					switch(o->SubType)
@@ -8959,9 +8811,7 @@ void MoveParticles()
 						VectorSubtract(o->Position, TargetPosition, Direction);
 						
 						float length = VectorLength(Direction);
-						//. 스케일 보정
 						o->Scale -= (length * 0.003f);
-						//. 라이트 보정
 						o->Light[0] -= (length * 0.08f);
 						o->Light[1] -= (length * 0.08f);
 						o->Light[2] -= (length * 0.08f);
@@ -9065,7 +8915,6 @@ void MoveParticles()
                     o->Scale += 0.1f;
                     o->Position[0] += rand()%10-5.f;
                     o->Position[1] += rand()%10-5.f;
-                    //                    o->Position[2] += rand()%20-10.f
                 }
                 else if ( o->SubType==2 )
                 {
@@ -9217,7 +9066,6 @@ void MoveParticles()
 					o->Light[1]  *= 0.77f;
 					o->Light[2]  *= 0.77f;
 
-				//	o->Gravity += 1.f;
 					VectorCopy(o->StartPosition,o->Position);
 					o->StartPosition[2] = o->StartPosition[2]+rand()%5+10.0f;
  					o->Position[2] = o->StartPosition[2] + o->Gravity;
@@ -9238,7 +9086,7 @@ void MoveParticles()
 					o->Light[2] /= 1.1f;
 					break;
                 }
-				else if( o->SubType == 3)		//. 먼지불빛 박스 : 2004/11/09
+				else if( o->SubType == 3)
 				{
 					o->Scale    += 0.005f;
 					o->Velocity[2] -= 0.05f;
@@ -9271,7 +9119,7 @@ void MoveParticles()
 					o->Light[2] /= 1.1f;
 					break;
 				}
-				else if(o->SubType == 7)	//@@ MoveParticle
+				else if(o->SubType == 7)
 				{
 					o->Velocity[2] += 0.01f;
 					o->Light[0] *= 0.97f;
@@ -9437,16 +9285,6 @@ void MoveParticles()
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 			case BITMAP_RAKLION_CLOUDS:
 				{
-					// A. 다음 위치 지정
-					// 1. 방향 벡터를 y = 1인 단위 벡터 로 설정한뒤
-					// 2. 오브텍트가 바라보는 방향으로 
-					// 3. Velocity 값을 지정한뒤
-					// 4. 2,3 요소를 곱해서 방향_크기벡터를 만들고,
-					// 5. 기존 위치 에서 변위위치를 더해준다.
-					// B. 다음 알파 값 지정 
-					// C. 다음 크기 지정
-					
-					// A. 다음 위치 지정
 					const	float FORCESCALAR	= 13.0f;
 					const	float SCALEFACTOR	= 0.065f;
 					const	float LIGHTDIVIDEDFACTOR = 1.6f;
@@ -9465,11 +9303,8 @@ void MoveParticles()
 					vForceVec[2] = vForceVec[2] * fForceScalar;
 					
 					VectorAdd( o->Position, vForceVec, o->Position );				
-					// B. 다음 크기 지정
 					o->Scale = o->Scale + SCALEFACTOR; 
-					
-					// C. ALPHA 감산 효과
-					o->Light[0] = o->Light[0] / LIGHTDIVIDEDFACTOR;
+										o->Light[0] = o->Light[0] / LIGHTDIVIDEDFACTOR;
 					o->Light[1] = o->Light[1] / LIGHTDIVIDEDFACTOR;
 					o->Light[2] = o->Light[2] / LIGHTDIVIDEDFACTOR;
 					//o->Alpha	= o->Alpha / LIGHTDIVIDEDFACTOR;
@@ -9478,15 +9313,10 @@ void MoveParticles()
 					{
 						o->Live = false;
 					}
-					
-					// ShinyStar 드문드문 하게 하나씩 반짝.
+
 					if ( rand() % 10 == 0 )
 					{
-						// ShinyStar 효과 부분 
 						const	float BASERANGE_SHINYSTAR	= 70.0f * o->Scale;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-						const	float RESIZINGVALUE			= 0.8f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 						float	fRand1,fRand2,fRand3;
 						vec3_t	v3Pos_ShinyStar, v3OffsetPos_ShinyStar;
 						
@@ -9646,11 +9476,11 @@ void RenderParticles ( BYTE byRenderOneMore )
 		PARTICLE *o = &Particles[i];
 		if(o->Live)
 		{
-            if ( byRenderOneMore==1 )            //  수면 아래의 것들만 찍는다.
+            if ( byRenderOneMore==1 )
             {
                 if ( o->Position[2]>350.f ) continue;
             }
-            else if ( byRenderOneMore==2 )       //  수면위의 것들만 찍는다.
+            else if ( byRenderOneMore==2 )
             {
                 if ( o->Position[2]<=300.f ) continue;
             }
@@ -9691,11 +9521,7 @@ void RenderParticles ( BYTE byRenderOneMore )
 				break;
 
 			case BITMAP_SPARK+2:
-				if (o->SubType == 0
-#ifdef ASG_ADD_SKILL_BERSERKER
-					|| o->SubType == 2 || o->SubType == 3
-#endif	// ASG_ADD_SKILL_BERSERKER
-					)
+				if (o->SubType == 0	|| o->SubType == 2 || o->SubType == 3)
 				{
 					RenderSprite(o->TexType,o->Position,Width,Height,o->Light,0.f, o->Frame%2*0.5f, o->Frame/2*0.5f, 0.5f, 0.5f);
 				}
@@ -9711,17 +9537,9 @@ void RenderParticles ( BYTE byRenderOneMore )
 			case BITMAP_SUMMON_SAHAMUTT_EXPLOSION:
 				RenderSprite(o->TexType,o->Position,Width,Height,o->Light,0.f,o->Frame%4*0.25f+0.005f,o->Frame/4*0.25f+0.005f,0.25f-0.01f,0.25f-0.01f);
 				break;
-
-//////////////////////////////////////////////////////////////////////////
-	
 			case BITMAP_CLUD64:
 				{
-					if(o->SubType == 0
-						|| o->SubType == 5
-#ifdef LDK_ADD_PC4_GUARDIAN
-						|| o->SubType == 11
-#endif //LDK_ADD_PC4_GUARDIAN
-						)
+					if(o->SubType == 0 || o->SubType == 5 || o->SubType == 11)
 					{
 						EnableAlphaBlendMinus();
 					}
@@ -9787,7 +9605,6 @@ void RenderParticles ( BYTE byRenderOneMore )
             case BITMAP_ADV_SMOKE+1:
 				if(o->SubType == 2)
 				{
-					//라이트값에 따라 더 밝게 만든다.
 					glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
 					EnableAlphaBlend3();
 					RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);	
@@ -9911,9 +9728,6 @@ void RenderParticles ( BYTE byRenderOneMore )
     				RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);
 				}
 				break;
-
-//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_LIGHT+2:
 				if (o->SubType == 3 || o->SubType == 4 || o->SubType == 6 )// || o->SubType == 7)
 				{
@@ -9921,25 +9735,21 @@ void RenderParticles ( BYTE byRenderOneMore )
 				}
 				RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);
 				break;
-
-//////////////////////////////////////////////////////////////////////////
-
 			case BITMAP_MAGIC+1:
 				RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);
 				break;
-
-//////////////////////////////////////////////////////////////////////////
             case BITMAP_CLOUD :
                 switch ( o->SubType )
                 {
 				case 10:
 				case 12:
-                case 7: //  흑색.
+                case 7:
 				case 14:	
 				case 16:
          			EnableAlphaBlendMinus();
-                case 0: //  좌/우로 회전.
-				case 8:	// 사냥터 옅은안개
+					break;
+                case 0:
+				case 8:
                 case 3:
 				case 18:
                     if( (i%2)==0 )
@@ -9952,12 +9762,7 @@ void RenderParticles ( BYTE byRenderOneMore )
                     }
                     break;
                 }
-				if(o->SubType==8 || o->SubType == 9
-					|| o->SubType==20
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
-					|| o->SubType==21
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-					)	// 사냥터 옅은안개
+				if(o->SubType==8 || o->SubType == 9	|| o->SubType==20 || o->SubType==21)
 				{
 					vec3_t Light;
 					Light[0] = o->Light[0] * o->Alpha;
@@ -9980,9 +9785,6 @@ void RenderParticles ( BYTE byRenderOneMore )
 				else
 					RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);
                 break;
-
-//---------------------------------------------------------------------------------------------------------
-
 			case BITMAP_SPARK:
 #ifdef PJH_FIX_CAOTIC
 				if(o->SubType == 10)
@@ -9991,8 +9793,6 @@ void RenderParticles ( BYTE byRenderOneMore )
 #endif //PJH_FIX_CAOTIC
 				RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);
 				break;
-
-//---------------------------------------------------------------------------------------------------------
 
 #ifdef CSK_RAKLION_BOSS
 			case BITMAP_FLAME:

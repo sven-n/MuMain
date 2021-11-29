@@ -1,7 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include "stdafx.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
@@ -58,15 +57,11 @@
 #include "SkillManager.h"
 
 
-///////////////////////////////////////////
 extern CUITextInputBox * g_pSingleTextInputBox;
 extern int g_iChatInputType;
 extern CUIGuildListBox * g_pGuildListBox;
-////////////////////////////////////////////
-
 
 int			g_nTaxRate			= 0;
-
 int			g_nChaosTaxRate		= 0;
 
 char         g_GuildNotice[3][128];
@@ -109,76 +104,60 @@ ITEM  *SrcInventory;
 int   SrcInventoryIndex;
 int   DstInventoryIndex;
 
-int  AllRepairGold              = 0;     //  전체 수리 비용.
+int  AllRepairGold              = 0;
 int  StorageGoldFlag            = 0;
 
 int ListCount                = 0;
 int GuildListPage            = 0;
 
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM		// 정리할때 삭제해야 함
+#ifndef YDG_ADD_NEW_DUEL_SYSTEM
 #ifdef DUEL_SYSTEM
 bool g_bEnableDuel = false;
-bool g_PetEnableDuel = true;	// LHJ - 결투중에 다크로드의 다크스피릿이 공격중 인지 판단하는 변수
+bool g_PetEnableDuel = true;
 
 int g_iDuelPlayerIndex = 0;
 char g_szDuelPlayerID[24] = { 0, };
 extern int g_iMyPlayerScore = 0;
 extern int g_iDuelPlayerScore = 0;
 #endif // DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM	// 정리할때 삭제해야 함
+#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
-int  g_bEventChipDialogEnable  = EVENT_NONE;       //  레나.     ( 1:레나, 2:스톤, 3:상용화 2주년 복권 이벤트. ).
-int  g_shEventChipCount        = 0;       //  레나개수.
-short g_shMutoNumber[3]        = { -1, -1, -1 };//  뮤토 번호.
+int  g_bEventChipDialogEnable  = EVENT_NONE;
+int  g_shEventChipCount        = 0;
+short g_shMutoNumber[3]        = { -1, -1, -1 };
 
-bool g_bServerDivisionAccept   = false; //  서버분할 동의?
+bool g_bServerDivisionAccept   = false;
 #ifdef SCRATCH_TICKET
-char g_strGiftName[64];					//	상용화 2주년 경품 이름.
+char g_strGiftName[64];
 #endif
 
-//  내구력 관련.
-bool RepairShop                = false; //  수리를 해주는 상점.
-int  RepairEnable              = 0;     //  수리.
-int AskYesOrNo                  = 0;    //  확인창(1-팔기, 2-카오스 조합, 3-거래확인, 4-서버분할, 5-구매확인, 6-가격확인)
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-char OkYesOrNo                  = -1;   //  확인창용 확인
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-BYTE OkYesOrNo                  = -1;   //  확인창용 확인
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+bool RepairShop                = false;
+int  RepairEnable              = 0;
+int AskYesOrNo                  = 0; 
 
-// 창고 잠금 관련
+char OkYesOrNo                  = -1;
+
 int g_iKeyPadEnable = 0;
 WORD g_wStoragePassword = 0;
 short	g_nKeyPadMapping[10];
 char	g_lpszKeyPadInput[2][MAX_KEYPADINPUT + 1];
 
-// 열매사용 관련 변수
-BYTE g_byItemUseType = 0;	//: 열매 사용 용도 0x00 스탯생성 0x01 스탯감소
+BYTE g_byItemUseType = 0;
 
 static  const int DEFAULT_DEVILSQUARELEVEL[6][2] = { {15, 130}, { 131, 180}, { 181, 230}, {231, 280}, { 281, 330}, { 331, 99999} };
 static  const int DARKCLASS_DEVILSQUARELEVEL[6][2] = { {15, 110}, { 111, 160}, { 161, 210}, {211, 260}, { 261, 310}, { 311, 99999} };
 int g_iDevilSquareLevel[6][2];
 
-// (0~5)일반 레벨제한, (6~9)(마검사|다크로드) 레벨제한
 static  const int g_iChaosCastleLevel[12][2] = {  
 						{ 15, 49 }, { 50, 119 }, { 120, 179 }, { 180, 239 }, { 240, 299 }, { 300, 999 }, 
                         { 15, 29 }, { 30,  99 }, { 100, 159 }, { 160, 219 }, { 220, 279 }, { 280, 999 }  
 												};
-//  기본 천젠(1000젠)이다.
-#ifdef CHINESE_PRICERISE
-static  const int g_iChaosCastleZen[6] = {  25, 80, 200, 350, 600, 900 };
-#else
 static  const int g_iChaosCastleZen[6] = {  25, 80, 150, 250, 400, 650 };
-#endif // CHINESE_PRICERISE
 
 BYTE BuyItem[4];
 
-//  스탯 갯수.
 static  int iStateNum = 4;
 
-//////////////////////////////////////////////////////////////////////////
-//  Extern.
-//////////////////////////////////////////////////////////////////////////
 extern bool Teleport;
 
 extern float g_fScreenRate_x;	// ※
@@ -927,14 +906,12 @@ void ComputeItemInfo(int iHelpItem)	// ★
             DamageMin += (min(9,Level)*3);	// ~ +9아이템
 			switch(Level - 9)
 			{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-			case 6: DamageMin += 9;	// +15 아이템
-			case 5: DamageMin += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-			case 4: DamageMin += 7;	// +13 아이템
-			case 3: DamageMin += 6;	// +12 아이템
-			case 2: DamageMin += 5;	// +11 아이템
-			case 1: DamageMin += 4;	// +10 아이템
+			case 6: DamageMin += 9; break;	// +15
+			case 5: DamageMin += 8; break;	// +14
+			case 4: DamageMin += 7; break;	// +13
+			case 3: DamageMin += 6; break;	// +12
+			case 2: DamageMin += 5; break;	// +11
+			case 1: DamageMin += 4; break;	// +10
 			default: break;
 			};
         }
@@ -943,40 +920,32 @@ void ComputeItemInfo(int iHelpItem)	// ★
             DamageMax += (min(9,Level)*3);	// ~ +9아이템
 			switch(Level - 9)
 			{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-			case 6: DamageMax += 9;	// +15 아이템
-			case 5: DamageMax += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-			case 4: DamageMax += 7;	// +13 아이템
-			case 3: DamageMax += 6;	// +12 아이템
-			case 2: DamageMax += 5;	// +11 아이템
-			case 1: DamageMax += 4;	// +10 아이템
+			case 6: DamageMax += 9; break;	// +15
+			case 5: DamageMax += 8; break;	// +14
+			case 4: DamageMax += 7; break;	// +13
+			case 3: DamageMax += 6; break;	// +12
+			case 2: DamageMax += 5; break;	// +11
+			case 1: DamageMax += 4; break;	// +10
 			default: break;
 			};
         }
 
 		if(Magic > 0)
 		{
-			Magic += (min(9,Level)*3);	// ~ +9아이템
+			Magic += (min(9,Level)*3);	// ~ +9
 			switch(Level - 9)
 			{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-			case 6: Magic += 9;		// +15 아이템
-			case 5: Magic += 8;		// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-			case 4: Magic += 7;	    // +13 아이템
-			case 3: Magic += 6;		// +12 아이템
-			case 2: Magic += 5;		// +11 아이템
-			case 1: Magic += 4;		// +10 아이템
+			case 6: Magic += 9; break;		// +15
+			case 5: Magic += 8; break;		// +14
+			case 4: Magic += 7; break;	    // +13
+			case 3: Magic += 6; break;		// +12
+			case 2: Magic += 5; break;		// +11
+			case 1: Magic += 4; break;		// +10
 			default: break;
 			};
 			Magic /= 2;
-            //  셉터가 아닐 경우에만.
-#ifdef CSK_FIX_EPSOLUTESEPTER
+
 			if(IsCepterItem(ItemHelp) == false)
-#else // CSK_FIX_EPSOLUTESEPTER
-			if ( ItemHelp < ITEM_MACE+8 || ItemHelp > ITEM_MACE+15 )
-#endif // CSK_FIX_EPSOLUTESEPTER
             {
     			Magic += Level*2;
 			}
@@ -990,34 +959,30 @@ void ComputeItemInfo(int iHelpItem)	// ★
 			}
 			else
             {
-                Defense     += (min(9,Level)*3);	// ~ +9아이템
+                Defense     += (min(9,Level)*3);	// ~ +9
 				switch(Level - 9)
 				{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-				case 6: Defense += 9;	// +15 아이템
-				case 5: Defense += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-				case 4: Defense += 7;	// +13 아이템
-				case 3: Defense += 6;	// +12 아이템
-				case 2: Defense += 5;	// +11 아이템
-				case 1: Defense += 4;	// +10 아이템
+				case 6: Defense += 9; break;	// +15
+				case 5: Defense += 8; break;	// +14
+				case 4: Defense += 7; break;	// +13
+				case 3: Defense += 6; break;	// +12
+				case 2: Defense += 5; break;	// +11
+				case 1: Defense += 4; break;	// +10
 				default: break;
 				};
             }
 		}
 		if(Blocking  > 0)
 		{
-            Blocking     += (min(9,Level)*3);	// ~ +9아이템
+            Blocking     += (min(9,Level)*3);	// ~ +9
 			switch(Level - 9)
 			{
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-			case 6: Blocking += 9;	// +15 아이템
-			case 5: Blocking += 8;	// +14 아이템
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-			case 4: Blocking += 7;	// +13 아이템
-			case 3: Blocking += 6;	// +12 아이템
-			case 2: Blocking += 5;	// +11 아이템
-			case 1: Blocking += 4;	// +10 아이템
+			case 6: Blocking += 9; break;	// +15
+			case 5: Blocking += 8; break;	// +14
+			case 4: Blocking += 7; break;	// +13
+			case 3: Blocking += 6; break;	// +12
+			case 2: Blocking += 5; break;	// +11
+			case 1: Blocking += 4; break;	// +10
 			default: break;
 			};
 		}
@@ -1048,26 +1013,20 @@ void ComputeItemInfo(int iHelpItem)	// ★
 
 		if(p->RequireEnergy)
 		{
-			if (ItemHelp >= ITEM_STAFF+21 && ItemHelp <= ITEM_STAFF+29)	// 소환술사 서는 요구에너지가 낮다
+			if (ItemHelp >= ITEM_STAFF+21 && ItemHelp <= ITEM_STAFF+29)
 			{
 				RequireEnergy    = 20+p->RequireEnergy   *(p->Level+Level*1)*3/100;
 			}
 			else
-// p->RequireLevel : 아이템 레벨 요구치
-// p->RequireEnergy : 아이템 에너지 요구치
-// ip->RequireEnergy : 실제 에너지 요구치 (꼐산된값)
-#ifdef KJH_FIX_LEARN_SKILL_ITEM_REQUIRE_STAT_CALC
-		// 레벨 요구치가 0이면 원래 계산대로 간다.
-		// skill.txt 에서 기존 아이템 레벨요구치를 변경할 수가 없어서, 예외처리 함.
-		// 요구치 계산이 코드에 왜 있어야 하는지 의문.. 고치자!!!!
-		if((p->RequireLevel > 0) && (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC+MAX_ITEM_INDEX) )	// 법서
-		{
-			RequireEnergy = 20+(p->RequireEnergy)*(p->RequireLevel)*4/100;
-		}
-		else
-#endif // KJH_FIX_LEARN_SKILL_ITEM_REQUIRE_STAT_CALC
 			{
-				RequireEnergy    = 20+p->RequireEnergy   *(p->Level+Level*3)*4/100;
+				if((p->RequireLevel > 0) && (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX))
+				{
+					RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
+				}
+				else
+				{
+					RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 3) * 4 / 100;
+				}
 			}
 		}
 		else
@@ -1082,8 +1041,6 @@ void ComputeItemInfo(int iHelpItem)	// ★
 		g_iItemInfo[Level][_COLUMN_TYPE_ATTMIN] = DamageMin;
 		g_iItemInfo[Level][_COLUMN_TYPE_ATTMAX] = DamageMax;
 		
-#ifdef CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
-		// 소환술사 서는 저주력 칼럼에 값을 입력하여야 한다.
 		if (ItemHelp >= ITEM_STAFF+21 && ItemHelp <= ITEM_STAFF+29)
 		{
 			g_iItemInfo[Level][_COLUMN_TYPE_CURSE] = Magic;
@@ -1092,9 +1049,6 @@ void ComputeItemInfo(int iHelpItem)	// ★
 		{
 			g_iItemInfo[Level][_COLUMN_TYPE_MAGIC] = Magic;
 		}
-#else // CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
-		g_iItemInfo[Level][_COLUMN_TYPE_MAGIC] = Magic;
-#endif // CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
 		
 		g_iItemInfo[Level][_COLUMN_TYPE_PET_ATTACK] = Magic;
 		g_iItemInfo[Level][_COLUMN_TYPE_DEFENCE] = Defense;
@@ -1106,12 +1060,8 @@ void ComputeItemInfo(int iHelpItem)	// ★
 		g_iItemInfo[Level][_COLUMN_TYPE_REQVIT] = RequireVitality;
 		g_iItemInfo[Level][_COLUMN_TYPE_REQNLV] = RequireLevel;
 
-        //  아이템이 셉터일경우.
-#ifdef CSK_FIX_EPSOLUTESEPTER
 		if ( IsCepterItem(ItemHelp) == true )
-#else // CSK_FIX_EPSOLUTESEPTER
-		if ( ItemHelp>=ITEM_MACE+8 && ItemHelp<=ITEM_MACE+15 )
-#endif // CSK_FIX_EPSOLUTESEPTER	
+
         {
     		g_iItemInfo[Level][_COLUMN_TYPE_MAGIC] = 0;
         }
@@ -1140,20 +1090,17 @@ void ComputeItemInfo(int iHelpItem)	// ★
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 아이템 정보창 랜더링하는 함수
-///////////////////////////////////////////////////////////////////////////////
 unsigned int getGoldColor ( DWORD Gold )
 {
-    if ( Gold>=10000000 )        //  빨강.
+    if ( Gold>=10000000 )
     {
         return  (255<<24)+(0<<16)+(0<<8)+(255);
     }
-    else if ( Gold>=1000000 )    //  주황.
+    else if ( Gold>=1000000 )
     {
         return  (255<<24)+(0<<16)+(150<<8)+(255);
     }
-    else if( Gold>=100000 )      //  녹색.
+    else if( Gold>=100000 )
     {
         return  (255<<24)+(24<<16)+(201<<8)+(0);
     }
@@ -1161,14 +1108,12 @@ unsigned int getGoldColor ( DWORD Gold )
     return  (255<<24)+(150<<16)+(220<<8)+(255);
 }
 
-#ifdef KJH_MOD_BTS191_GOLD_FLOATING_NUMBER
 void ConvertGold(double dGold, unicode::t_char* szText, int iDecimals /*= 0*/)
 {
 	unicode::t_char szTemp[256];
 	int iCipherCnt=0;
 	DWORD dwValueTemp = (DWORD)dGold;
 	
-	// 정수자리
 	while( dwValueTemp/1000 > 0 )
 	{
 		iCipherCnt = iCipherCnt + 3;
@@ -1186,7 +1131,6 @@ void ConvertGold(double dGold, unicode::t_char* szText, int iDecimals /*= 0*/)
 		iCipherCnt = iCipherCnt - 3;
 	}
 
-	// 소수점 아랫 자리 
 	if( iDecimals > 0 )
 	{
 		dwValueTemp = (int)(dGold*pow(10.f,(float)iDecimals))%(int)pow(10.f, (float)iDecimals);
@@ -1194,25 +1138,7 @@ void ConvertGold(double dGold, unicode::t_char* szText, int iDecimals /*= 0*/)
 		strcat(szText, szTemp);
 	}
 }
-#else // KJH_MOD_BTS191_GOLD_FLOATING_NUMBER
-void ConvertGold(DWORD Gold,unicode::t_char* Text)
-{
-	int Gold1 = Gold%1000;
-	int Gold2 = Gold%1000000/1000;
-	int Gold3 = Gold%1000000000/1000000;
-	int Gold4 = Gold/1000000000;
-	if(Gold >= 1000000000)
-		unicode::_sprintf(Text,"%d,%03d,%03d,%03d",Gold4,Gold3,Gold2,Gold1);
-	else if(Gold >= 1000000)
-		unicode::_sprintf(Text,"%d,%03d,%03d",Gold3,Gold2,Gold1);
-	else if(Gold >= 1000)
-		unicode::_sprintf(Text,"%d,%03d",Gold2,Gold1);
-	else 
-		unicode::_sprintf(Text,"%d",Gold1);
-}
-#endif // KJH_MOD_BTS191_GOLD_FLOATING_NUMBER
 
-#ifdef YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
 void ConvertGold64(__int64 Gold,unicode::t_char* Text)
 {
 	int Gold1 = Gold%1000;
@@ -1234,7 +1160,6 @@ void ConvertGold64(__int64 Gold,unicode::t_char* Text)
 	else 
 		unicode::_sprintf(Text,"%d",Gold1);
 }
-#endif	// YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
 
 void ConvertTaxGold(DWORD Gold,char *Text)
 {
@@ -1278,10 +1203,6 @@ int ConvertRepairGold(int Gold,int Durability, int MaxDurability, short Type, ch
 
 	float   repairGold = (float)Gold;
 	float   persent = 1.f - (float)( Durability / (float)MaxDurability );
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float   baseP = 1.f;
-	float   addP  = 1.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	bool    doubleP = false;
 	
 	if ( persent > 0 )
@@ -1724,68 +1645,66 @@ WORD calcMaxDurability ( const ITEM* ip, ITEM_ATTRIBUTE *p, int Level )
 			break;
 		}
 		else
-#ifdef LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		if(i>=14)	// 15레벨
+		if(i>=14)
 		{
 			maxDurability = (maxDurability+8 >= 255 ? 255 : maxDurability+8);
 		}
-		else if(i>=13)	// 14레벨
+		else if(i>=13)	// 14
 		{
 			maxDurability = (maxDurability+7 >= 255 ? 255 : maxDurability+7);
 		}
 		else
-#endif //LDK_ADD_14_15_GRADE_ITEM_HELP_INFO
-		if(i>=12)	// 13레벨
+		if(i>=12)	// 13
 		{
 			maxDurability+=6;
 		}
-		else if(i>=11)	// 12레벨
+		else if(i>=11)	// 12
 		{
 			maxDurability+=5;
 		}
 		else 
-		if(i>=10)	// 11레벨
+		if(i>=10)	// 11
 		{
 			maxDurability+=4;
 		}
-        else if(i>=9)	// 10레벨
+        else if(i>=9)	// 10
 		{
 			maxDurability+=3;
 		}
-        else if(i>=4)	// 5~9레벨
+        else if(i>=4)	// 5~9
         {
             maxDurability+=2;
         }
-        else	// 1~4레벨
+        else	// 1~4
         {
             maxDurability++;
         }
     }
-#ifdef PBG_FIX_DARKPET_DURABILITY
+
 	if( ip->Type==ITEM_HELPER+4 || ip->Type== ITEM_HELPER+5)
 	{
-		maxDurability = 255;		// 예외처리
+		maxDurability = 255;
 	}
-#endif //PBG_FIX_DARKPET_DURABILITY
-    if ( (ip->ExtOption%0x04)==EXT_A_SET_OPTION || (ip->ExtOption%0x04)==EXT_B_SET_OPTION )    //  세트 아이템.
+
+    if ( (ip->ExtOption%0x04)==EXT_A_SET_OPTION || (ip->ExtOption%0x04)==EXT_B_SET_OPTION )
     {
         maxDurability+=20;
     }
     else if( ( ip->Option1&63)>0 && 
-		( ip->Type<ITEM_WING+3 || ip->Type>ITEM_WING+6 ) &&		// 1차 날개 포함, 2차 날개 제외.
+		( ip->Type<ITEM_WING+3 || ip->Type>ITEM_WING+6 ) &&
 		( ip->Type!=ITEM_SWORD+19 && ip->Type!=ITEM_BOW+18 && ip->Type!=ITEM_STAFF+10 )
-        && ip->Type!=ITEM_HELPER+30   //  군주의 망토.
-		&& ( ip->Type<ITEM_WING+36 || ip->Type>ITEM_WING+40 )	// 3차날개 제외.
-		&& (ip->Type<ITEM_WING+42 || ip->Type>ITEM_WING+43)	// 소환술사 2,3차날개 제외.
-		&& ip->Type!=ITEM_MACE+13	// 절대 셉터 
+        && ip->Type!=ITEM_HELPER+30
+		&& ( ip->Type<ITEM_WING+36 || ip->Type>ITEM_WING+40 )
+		&& (ip->Type<ITEM_WING+42 || ip->Type>ITEM_WING+43)
+		&& ip->Type!=ITEM_MACE+13
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		&& !(ip->Type >= ITEM_WING+49 && ip->Type <= ITEM_WING+50)	//레이지파이터날개
+		&& !(ip->Type >= ITEM_WING+49 && ip->Type <= ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 	  )
     {
-        maxDurability+=15;	// 엑템
+        maxDurability += 15;
     }
-#ifdef LEM_ADD_LUCKYITEM		// 럭키아이템 내구도 레벨 Max설정 예외처리
+#ifdef LEM_ADD_LUCKYITEM
 	if( Check_LuckyItem(ip->Type) )
 	{
 		maxDurability	= 255;
@@ -2332,7 +2251,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	int Level = (ip->Level>>3)&15;
 	int Color;
 
-    //  아이템 색.
 	if(ip->Type==ITEM_POTION+13 || ip->Type==ITEM_POTION+14 || ip->Type==ITEM_WING+15 || ip->Type==ITEM_POTION+31 ||
 		(COMGEM::isCompiledGem(ip)) ||
 		ip->Type == ITEM_POTION+65 || ip->Type == ITEM_POTION+66 || ip->Type == ITEM_POTION+67 ||
@@ -2451,17 +2369,16 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 #endif	// ADD_PCROOM_POINT_SYSTEM
 #endif // KJH_DEL_PC_ROOM_SYSTEM
 		{
-			if(Sell)    //  구매 가격.
+			if(Sell)
 			{
 				DWORD dwValue = ItemValue(ip, 0);
 				ConvertGold(dwValue, Text);
 				char Text2[100];
 
-				// 세율가격 표시
 				ConvertTaxGold(ItemValue(ip,0),Text2);
-				sprintf(TextList[TextNum],GlobalText[1620],Text2,Text);	// 1620 "구입 가격: %s(%s)"
+				sprintf(TextList[TextNum],GlobalText[1620],Text2,Text);
 			}
-			else        //  판매 가격.
+			else
 			{
 				ConvertGold(ItemValue(ip,1),Text);
 				sprintf(TextList[TextNum],GlobalText[63],Text);
@@ -2476,7 +2393,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		if(	(Inventype == SEASON3B::TOOLTIP_TYPE_MY_SHOP || Inventype == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP)
 			&& !IsPersonalShopBan(ip) )
 	{
-		//. 등록된 물품에 한에서만 출력한다
 		{
 			int price = 0;
 			int indexInv = (MAX_EQUIPMENT + MAX_INVENTORY)+(ip->y*COL_PERSONALSHOP_INVEN)+ip->x;
@@ -3289,9 +3205,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	}
 	else if( ip->Type == ITEM_POTION+97 )
 	{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		
 		sprintf(TextList[TextNum], GlobalText[2580]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3305,9 +3219,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	}
 	else if( ip->Type == ITEM_POTION+98 )
 	{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		
 		sprintf(TextList[TextNum], GlobalText[2581]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -8642,22 +8554,15 @@ sItemAct Set_ItemActOption( int _nIndex, int _nOption )
 	return sItem;
 }
 
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.10]-
+
 bool Check_ItemAction( ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType )
 {
 	std::vector<sItemAct>			sItem;
 	std::vector<sItemAct>::iterator li;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int		nMaxClass	= 11;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int		i			= 0;
 	
-	for( i=0; i<12; i++ )	sItem.push_back( Set_ItemActOption( ITEM_HELPER+135 +i, 0 ) );		// 럭키아이템 교환 티켓 [lem_2010.9.8]
-	for( i=0; i< 2; i++ )	sItem.push_back( Set_ItemActOption( ITEM_POTION+160 +i, 0 ) );		// 상승의 보석, 연장의 보석 [lem_2010.9.8]
+	for( i=0; i<12; i++ )	sItem.push_back( Set_ItemActOption( ITEM_HELPER+135 +i, 0 ) );
+	for( i=0; i< 2; i++ )	sItem.push_back( Set_ItemActOption( ITEM_POTION+160 +i, 0 ) );
 	for( i=0; i<12; i++ )
 	{
 		sItem.push_back( Set_ItemActOption( ITEM_ARMOR+62 +i, 1 ) );
@@ -8680,16 +8585,8 @@ bool Check_ItemAction( ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType )
 	return false;
 }
 
-//----------------------------------------------------------------------------------------
-// Function: 럭키아이템 체크를 한다.
-// Input   : 아이템 포인터
-// Output  : 럭키아이템 TRUE, 일반템 FALSE
-//------------------------------------------------------------------------[lem_2010.9.7]-
 bool Check_LuckyItem( int _nIndex, int _nType )
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int		nItemTab		= int( (_nIndex+_nType)/ 512.0f);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int		nItemTabIndex	= (_nIndex + _nType)% 512;
 
 	if( _nIndex < ITEM_HELM || _nIndex > ITEM_WING )	return false;
@@ -8717,58 +8614,6 @@ bool IsLuckySetItem( int iType )
 	return false;
 }
 #endif // KJH_FIX_SELL_LUCKYITEM
-
-#ifdef	LEM_FIX_ITEMSET_FROMJAPAN
-int IsItemSet_FromJapan( ITEM* _pItem, int _nType )
-{
-	int	bEnAble		= 1;
-	int	nItem		= -1;
-	int nList[9]	= { ITEM_POTION+ 96,	// 0: 카오스 조합부적
-						ITEM_HELPER+ 64,	// 1: 데몬 펫
-						ITEM_HELPER+ 65,	// 2: 수호정령 펫
-						ITEM_HELPER+ 80,	// 3: 팬더 펫
-						ITEM_HELPER+ 76,	// 4: 팬더 변신반지
-						ITEM_HELPER+122,	// 5: 스켈레톤 변신반지
-						ITEM_HELPER+123,	// 6: 스켈레톤 펫
-						ITEM_HELPER+106,	// 7: 유니콘 펫
-						ITEM_HELPER+107 };	// 8: 치명적인 마법사의 반지
-
-
-	for( int i=0; i<10; i++ )
-	{
-		if( nList[i] != _pItem->Type )	continue;
-		nItem = i;
-		break;
-	}
-	if( nItem < 0 )		return -1;
-
-	switch( _nType )
-	{
-		// 개인상점
-		case eITEM_PERSONALSHOP:
-			if( nItem == 3 || nItem == 4 )	bEnAble	= 0;
-		break;
-		// 창고이용
-		case eITEM_STORE:
-			bEnAble	= 0;
-		break;
-		// 거래
-		case eITEM_TRADE:
-			if( nItem == 3 || nItem == 4 )	bEnAble	= 0;
-		break;
-		// 버리기
-		case eITEM_DROP:
-			if( nItem == 3 || nItem == 4 )	bEnAble	= 0;
-		break;
-		// NPC판매
-		case eITEM_SELL:
-			if( nItem == 3 || nItem == 4 )	bEnAble	= 0;
-		break;
-	}
-
-	return bEnAble;
-}
-#endif
 
 bool IsDropBan(ITEM* pItem)
 {
@@ -11938,9 +11783,6 @@ int CheckMouseOnKeyPad( void)
 {
 	int Width, Height, WindowX, WindowY;
     Width = 213;Height = 2*5+6*40;WindowX = (640-Width)/2;WindowY = 60+40;//60 220
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int yPos = WindowY;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	int iButtonTop = 50;
 
@@ -12108,11 +11950,6 @@ bool IsExistUndecidedPrice()
 
 void OpenPersonalShopMsgWnd(int iMsgType)
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int Width = 213; int Height = 2*5+6*40;
-	int WindowX = (640-Width)/2; int WindowY = 60+40;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	
 	if(iMsgType == 1) 
 	{
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopNameMsgBoxLayout));

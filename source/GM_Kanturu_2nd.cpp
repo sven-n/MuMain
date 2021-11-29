@@ -57,7 +57,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
 	switch(iType)
 	{
 	case 438:
-	case 358:	// 페르소나(임시로 번호 지정)
+	case 358:
 		{
 			OpenMonsterModel(114);
 		    pCharacter = CreateCharacter(Key,MODEL_MONSTER01+114,PosX,PosY);
@@ -65,14 +65,12 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
 		    pCharacter->Weapon[0].Type = -1;
 		    pCharacter->Weapon[1].Type = -1;
 
-			// 무기 본
 			BoneManager::RegisterBone(pCharacter, "PRSona_A1", 73);
-			// 꼬리 본
 			BoneManager::RegisterBone(pCharacter, "PRSona_Tail", 76);
 			BoneManager::RegisterBone(pCharacter, "PRSona_Tail1", 77);
 		}
 		break;
-	case 359:	// 트윈테일(임시로 번호 지정)
+	case 359:
 		{
 			OpenMonsterModel(115);
 		    pCharacter = CreateCharacter(Key,MODEL_MONSTER01+115,PosX,PosY);
@@ -83,13 +81,12 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
 		    pCharacter->Weapon[0].Type = -1;
 		    pCharacter->Weapon[1].Type = -1;
 
-			// 머리 끝 본
 			BoneManager::RegisterBone(pCharacter, "Twintail_Hair24", 16);
 			BoneManager::RegisterBone(pCharacter, "Twintail_Hair32", 24);
 		}
 		break;
 	case 439:
-	case 360:	// 드레드피어(임시로 번호 지정)
+	case 360:
 		{
 			OpenMonsterModel(116);
 		    pCharacter = CreateCharacter(Key,MODEL_MONSTER01+116,PosX,PosY);
@@ -100,19 +97,16 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
 		    pCharacter->Weapon[0].Type = -1;
 		    pCharacter->Weapon[1].Type = -1;
 
-			// 날개 본
 			BoneManager::RegisterBone(pCharacter, "Dreadfear_Wing32", 71);
 			BoneManager::RegisterBone(pCharacter, "Dreadfear_Wing34", 68);
 			BoneManager::RegisterBone(pCharacter, "Dreadfear_Wing51", 50);
 			BoneManager::RegisterBone(pCharacter, "Dreadfear_Wing53", 47);
-
-			// 눈 본
 			BoneManager::RegisterBone(pCharacter, "Dreadfear_Eye52", 9);
 			BoneManager::RegisterBone(pCharacter, "Dreadfear_Eye54", 10);
 
 		}
 		break;
-	case 367:	// 2차에서 3차로 가는 입구NPC
+	case 367:
 		{
 			OpenNpc(MODEL_KANTURU2ND_ENTER_NPC);
 			pCharacter = CreateCharacter(Key, MODEL_KANTURU2ND_ENTER_NPC, PosX, PosY);
@@ -126,8 +120,6 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
 			g_pKanturu2ndEnterNpc->SetNpcObject(&pCharacter->Object);
 			g_pKanturu2ndEnterNpc->SetNpcAnimation(false);
 
-			// 본 등록
-			// 방울
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_1", 37);
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_2", 38);
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_3", 39);
@@ -135,18 +127,16 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_5", 41);
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_6", 42);
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_7", 43);
-			// 구름
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_8", 6);
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_9", 7);
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_10", 8);
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_11", 15);
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_12", 16);
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_13", 17);
-			// 불꽃
 			BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_14", 10);
 		}
 		break;
-	case 105:	// 캐논형 트랩(105)
+	case 105:
 		{
 			pCharacter = g_TrapCanon.Create_TrapCanon(PosX, PosY, Key);
 		}
@@ -163,9 +153,9 @@ bool M38Kanturu2nd::Set_CurrentAction_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o
 
 	switch(c->MonsterIndex) 
 	{
-	case 358:	// 페르소나(임시로 번호 지정)
-	case 359:	// 트윈테일(임시로 번호 지정)
-	case 360:	// 드레드피어(임시로 번호 지정)
+	case 358:
+	case 359:
+	case 360:
 		{
 			return CheckMonsterSkill(c, o);
 		}
@@ -177,22 +167,19 @@ bool M38Kanturu2nd::Set_CurrentAction_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o
 
 bool M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	//if(Is_Kanturu2nd() == false)
-	//	return false;
-	
 	switch(o->Type) 
 	{
-	case MODEL_MONSTER01+114:	// 페르소나(임시로 번호 지정)
+	case MODEL_MONSTER01+114:
 		{
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+115:	// 트윈테일(임시로 번호 지정)
+	case MODEL_MONSTER01+115:
 		{
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+116:	// 드레드피어(임시로 번호 지정)
+	case MODEL_MONSTER01+116:
 		{
 			return true;
 		}
@@ -210,15 +197,14 @@ bool M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o, BMD
 
 void M38Kanturu2nd::Sound_Kanturu2nd_Object(OBJECT* o)
 {
-	// 맵 전체 앰비언스
 	PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_GLOBAL);
 	
 	switch(o->Type)
 	{
-	case 9:	// 톱니바퀴
+	case 9:
 		PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_GEAR);
 		break;
-	case 31:	// 기포소리
+	case 31:
 	case 35:	
 	case 36:
 	case 37:
@@ -389,7 +375,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 10:	// 빨간 회전 크리스탈
+	case 10:
 		{
 			if(rand()%6 == 0) 
 			{
@@ -401,7 +387,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 45:	// 흰안개박스1
+	case 45:
 		{
 			if(o->HiddenMesh != -2)
 			{
@@ -414,7 +400,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 46:	// 흰안개박스2
+	case 46:
 		{
 			if(o->HiddenMesh != -2)
 			{
@@ -427,7 +413,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 47:	// 검은안개박스1
+	case 47:
 		{
 			if(o->HiddenMesh != -2)
 			{
@@ -440,7 +426,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 48:	// 검은안개박스2
+	case 48:
 		{
 			if(rand()%3 == 0)
 			{
@@ -450,7 +436,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 49:	// 푸른안개박스
+	case 49:
 		{
 			if ( o->HiddenMesh!=-2 )
 			{
@@ -463,7 +449,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 50:	// 푸른연기박스
+	case 50:
 		{
 			if(rand()%3 == 0)
 			{
@@ -474,7 +460,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 51:	// 빨간연기박스
+	case 51:
 		{
 			if(rand()%3 == 0)
 			{
@@ -494,7 +480,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 53:	// 물방울박스
+	case 53:
 		{
 			if(rand()%3 == 0)
 			{
@@ -503,7 +489,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 54:	// 번개박스1
+	case 54:
 		{
 			if(rand()%20 == 0)
 			{
@@ -511,7 +497,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 55:	// 번개박스2
+	case 55:
 		{
 			if(rand()%5 == 0)
 			{
@@ -521,7 +507,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			
 		}
 		break;
-	case 56:	// 번개박스3
+	case 56:
 		{
 			if(rand()%10 == 0)
 			{
@@ -529,7 +515,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 65:	// 번개박스4
+	case 65:
 		{
 			if(rand()%10 == 0)
 			{
@@ -670,7 +656,6 @@ void M38Kanturu2nd::Render_Kanturu2nd_AfterObjectMesh(OBJECT* o, BMD* b)
 	}
 	else if(o->Type == 76)
 	{
-		// 크롬 효과.
 		b->BeginRender(o->Alpha);
 
 		b->BodyLight[0] = 0.4f;
@@ -681,7 +666,6 @@ void M38Kanturu2nd::Render_Kanturu2nd_AfterObjectMesh(OBJECT* o, BMD* b)
 		b->RenderMesh(0,RENDER_CHROME7|RENDER_DARK,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,BITMAP_CHROME);
 		b->EndRender();
 		
-		// 발광체
 		vec3_t Light, p, Position;
 		for (int i = 0; i < 10; ++i)
 		{
@@ -701,7 +685,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b,int Ex
 {
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+114:	// 페르소나(임시로 번호 지정)
+	case MODEL_MONSTER01+114:
 		{
 			float fLumi2 = (sinf(WorldTime*0.002f) + 1.f) * 0.5f;
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -710,12 +694,11 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b,int Ex
 			return true;	
 		}
 		break;
-	case MODEL_MONSTER01+115:	// 트윈테일(임시로 번호 지정)
+	case MODEL_MONSTER01+115:
 		{
 			float fLumi = (sinf(WorldTime*0.002f) + 1.f) * 0.5f;
 			float fLumi2 = (sinf(WorldTime*0.002f) + 1.f);
 
-			// 몸통 색깔
 			if(o->CurrentAction != MONSTER01_DIE)
 			{
 				Vector(0.9f,0.9f,1.0f,b->BodyLight);
@@ -726,14 +709,14 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b,int Ex
 			}
 
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-			// 살 부위 밝아졌다 어두워지는 효과
+
 			b->RenderMesh(2, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 2, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_TWINTAIL_EFFECT);
-			// 칼 부위 밝아졌다 어두워지는 효과
+
 			b->RenderMesh(3, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 3, fLumi);
 			return true;	
 		}
 		break;
-	case MODEL_MONSTER01+116:	// 드레드피어(임시로 번호 지정)
+	case MODEL_MONSTER01+116:	
 		{
 			if(o->CurrentAction == MONSTER01_DIE)
 			{
@@ -747,7 +730,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b,int Ex
 			return true;
 		}
 		break;
-	case MODEL_KANTURU2ND_ENTER_NPC:	// 3차로 가는 입장 NPC
+	case MODEL_KANTURU2ND_ENTER_NPC:
 		{
 			b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 			
@@ -781,9 +764,8 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 {
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+114:	// 페르소나(임시로 번호 지정)
+	case MODEL_MONSTER01+114:
 		{
-			// 사운드 처리
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
 				if (rand() % 15 == 0)
@@ -825,17 +807,14 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 			float Luminosity = (float)(rand()%30 + 70)*0.01f;
 			Vector(Luminosity*0.5f,Luminosity*0.6f,Luminosity*1.0f,vLight);
 
-			// 무기에 불빛효과
 			BoneManager::GetBonePosition(o, "PRSona_A1", vPos);
 			CreateSprite ( BITMAP_LIGHT, vPos, 2.0f, vLight, o );
 
-			// 바닥면에 흙먼지효과
 			if(rand()%5 == 0)
 			{
 				CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 40);
 			}
 
-			// 꼬리에서 나방 가루 효과
 			if(rand()%3 == 0)
 			{
 				Vector(0.5f, 0.5f, 0.5f, vLight);
@@ -868,7 +847,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 				}
 			}
 
-			// 죽었을때 이펙트
 			else if(o->CurrentAction == MONSTER01_DIE)
 			{
 				o->BlendMesh = -2;
@@ -892,7 +870,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 			return true;	
 		}
 		break;
-	case MODEL_MONSTER01+115:	// 트윈테일(임시로 번호 지정)
+	case MODEL_MONSTER01+115:
 		{
 			if(gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
 			{
@@ -918,7 +896,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 				RenderTerrainAlphaBitmap ( BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle );
 			}
 
-			// 사운드 처리
 			if(o->CurrentAction == MONSTER01_ATTACK1)
 			{
 				if (o->SubType == FALSE)
@@ -979,7 +956,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 					}
 					o->m_dwTime = timeGetTime();
 					
-					// 트윈테일 걷는 사운드는 이곳에서!!
 					PlayBuffer(SOUND_KANTURU_2ND_TWIN_MOVE1 + rand() % 2);
 				}
 			}
@@ -989,20 +965,16 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 				o->m_bRenderShadow = false;
 				if(o->AnimationFrame <= 3.0f)
 				{
-					// 연기 올라오는 이펙트
 					Vector(0.1f, 1.0f, 0.2f, vLight);
 					for(int i=0; i<5; i++)
 					{
 						CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 39);
 					}
-					// 물방울 올라오는 이펙트
 					Vector(0.4f, 1.0f, 0.6f, vLight);
 					CreateParticle(BITMAP_TWINTAIL_WATER, o->Position, o->Angle, vLight, 0);
 
-					// 인페르노 효과 이펙트
 					CreateEffect ( MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 9, o );
 
-					// 구름 회전 시키는 이펙트
 					if(o->AnimationFrame <= 0.2f)
 					{
 						Vector(0.4f, 1.0f, 0.6f, vLight);
@@ -1014,7 +986,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 			return true;	
 		}
 		break;
-	case MODEL_MONSTER01+116:	// 드레드피어(임시로 번호 지정)
+	case MODEL_MONSTER01+116:
 		{
 			if(gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
 			{
@@ -1079,7 +1051,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 
 			if(o->CurrentAction != MONSTER01_STOP1 && o->CurrentAction != MONSTER01_DIE && gMapManager.WorldActive != WD_39KANTURU_3RD)
 			{
-				// 날개 주위에서 연기 피어 나는 이펙트
 				if(rand()%3 == 0) 
 				{
 					BoneManager::GetBonePosition(o, "Dreadfear_Wing32", vPos);
@@ -1109,7 +1080,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 				CreateParticle(BITMAP_SMOKE+3, vPos, o->Angle, vLight, 3, 1.0f);
 			}
 						
-			// 눈에서 불빛
 			Vector(0.25f, 0.7f, 0.6f, vLight);
 			fScale = (rand()%10-5)*0.01f;
 			BoneManager::GetBonePosition(o, "Dreadfear_Eye52", vPos);
@@ -1128,7 +1098,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 
 				int iAnimationFrame = (int)o->AnimationFrame;
 
-				// 방울
 				vec3_t vPos, vLight;
 				Vector(0.f, 0.f, 0.f, vPos);
 				Vector(1.0f,1.0f,2.0f,vLight);
@@ -1153,7 +1122,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 					}
 				}
 
-				// 연기
 				Vector(1.0f, 1.0f, 2.f, vLight);
 				if(rand()%4 == 0)
 				{
@@ -1171,7 +1139,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 					CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 2, 2.f);
 				}
 
-				// 가운데 불빛
 				if(iAnimationFrame <= 10)
 				{
 					Vector(0.0f,0.0f,0.0f,vLight);
@@ -1196,7 +1163,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 				vPos[0] += 40;	// Z
 				CreateSprite(BITMAP_LIGHTNING+1,vPos,1.0,vLight,o,(WorldTime/10.0f));
 				
-				// 영혼 따라 오는거
 				if(iAnimationFrame >= 12 && iAnimationFrame <= 25)
 				{
 					vec3_t vPos, vPos2;
@@ -1210,7 +1176,6 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 					CreateJoint(BITMAP_JOINT_ENERGY, vPos, vPos2, o->Angle, 42, o, 10.f);
 				}
 
-				// 불꽃
 				VectorCopy(o->Position, vPos);
 				vPos[0] += 260.0f;
 				vPos[1] -= 115.0f;
@@ -1232,11 +1197,11 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 					CreateJoint(BITMAP_JOINT_SPARK, vPos, vPos, vAngle, 0);
 				}
 				
-				if(iAnimationFrame >= 42)	// 에니메이션 40프레임에 오면 입장요청
+				if(iAnimationFrame >= 42)
 				{
 					if(g_pKanturu2ndEnterNpc->IsEnterRequest() == false)
 					{
-						if(Hero->Dead == 0)	// 캐릭터가 안죽었다.
+						if(Hero->Dead == 0)
 						{
 							g_pKanturu2ndEnterNpc->SendRequestKanturu3rdEnter();
 						}
@@ -1282,11 +1247,11 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+114:	// 페르소나(임시로 번호 지정)
+	case MODEL_MONSTER01+114:
 		{
 		}
 		break;
-	case MODEL_MONSTER01+115:	// 트윈테일(임시로 번호 지정)
+	case MODEL_MONSTER01+115:
 		{
 			if((o->AnimationFrame <= 4.12f && o->CurrentAction == MONSTER01_ATTACK1))
 			{
@@ -1315,7 +1280,6 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 			else if(o->CurrentAction == MONSTER01_ATTACK2)
 			{
-				// 영혼들 올라와서 캐릭터한테 공격가는거
 				CHARACTER *tc = &CharactersClient[c->TargetCharacter];
 				OBJECT *to = &tc->Object;
 				
@@ -1352,7 +1316,7 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+116:	// 드레드피어(임시로 번호 지정)
+	case MODEL_MONSTER01+116:
 		{
 			if((o->AnimationFrame <= 5.0f && o->CurrentAction == MONSTER01_ATTACK1) 
 				|| (o->AnimationFrame <= 9.0f && o->CurrentAction == MONSTER01_ATTACK2))
@@ -1444,10 +1408,8 @@ void CTrapCanon::Render_Object(OBJECT* o, BMD* b)
 
 void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-	// 빨강
 	if(c->AttackTime == 0)
 	{
-		// 캐넌 몸통
 		float fLumi;
 		vec3_t vPos, vLight;
 		VectorCopy(o->Position, vPos);
@@ -1462,26 +1424,6 @@ void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 		CreateSprite(BITMAP_LIGHT,vPos,2.0f,vLight,o,-(WorldTime*0.1f));
 		CreateSprite(BITMAP_LIGHT,vPos,2.0f,vLight,o,(WorldTime*0.12f));
 	}
-
-	// 파랑
-//	if(c->AttackTime == 0)
-//	{
-//		float fLumi;
-//		vec3_t vPos, vLight;
-//		VectorCopy(o->Position, vPos);
-//
-//		fLumi = (sinf(WorldTime*0.003f) + 1.f);
-//		vPos[1] -= 5.0f;
-//		vPos[2] += 80.f + fLumi*5.f;
-//		fLumi = (sinf(WorldTime*0.002f) + 1.f) * 0.1f;
-//		Vector(1.0f+fLumi, 1.0f+fLumi, 2.0f+fLumi, vLight);
-//		CreateSprite(BITMAP_ENERGY,vPos,0.6f+fLumi,vLight,o,(WorldTime/10.0f));
-//		
-//		fLumi = (sinf(WorldTime*0.002f) + 1.f) * 1.0f;
-//		Vector(0.4f+(rand()%10)*0.03f, 0.6f+(rand()%10)*0.03f, 1.0f+(rand()%10)*0.03f, vLight);
-//		CreateSprite(BITMAP_LIGHT,vPos,1.5f,vLight,o,-(WorldTime*0.1f));
-//		CreateSprite(BITMAP_LIGHT,vPos,1.5f,vLight,o,(WorldTime*0.12f));
-//	}
 }
 
 void CTrapCanon::Render_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)

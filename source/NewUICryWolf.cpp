@@ -147,17 +147,11 @@ bool SEASON3B::CNewUICryWolf::Render()
 	char Text[300];
 
 	float Main[] = {518.f,278.f,122.f,119.f,120.f/128.f,118.f/128.f};
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float Deco[] = {4.f,98.f,20.f,9.f,20.f/32.f,8.5f/16.f};
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	float Number[5][6] =   {{565.f,280.f,13.f,13.f,12.f/16.f,12.f/16.f},
 							{582.f,282.f,13.f,13.f,12.f/16.f,12.f/16.f},
 							{598.f,286.f,13.f,13.f,12.f/16.f,12.f/16.f},
 							{613.f,294.f,13.f,13.f,12.f/16.f,12.f/16.f},
 							{625.f,306.f,13.f,13.f,12.f/16.f,12.f/16.f}};
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float bar[] = {530.f,380.f,97.f,21.f,97.f/128.f,21.f/32.f};
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	float Dark_Elf_Icon[] = {623.f,358.f,15.f,15.f,14.f/16.f,14.f/16.f};
 	float Val_Icon[] = {623.f,379.f,15.f,15.f,14.f/16.f,14.f/16.f};
 	int TotDelay = 400;
@@ -468,14 +462,11 @@ bool SEASON3B::CNewUICryWolf::Render()
 		RenderNumber2D ( 520+87, 384+18, 0, 14, 14 );
 	}
 
-	//늑대의 석상 hp를 찍어준다.
 	int HpS = 100 - m_StatueHP;
 	float Hp = ((88.f / 100.f) * (float)HpS);
 	float nx = ((89.f / 100.f) * (float)HpS);
 	RenderImage(IMAGE_MVP_INTERFACE + 9, 548 + nx, 323, 89.f - nx, 30 ,Hp/128.f,0.f,((((88.f / 100.f) * (float)(100.f - HpS)))/128.f),29.f/32.f);
 	
-	//늑대의 석상 hp를 찍어준다.
-
 	M34CryWolf1st::RenderNoticesCryWolf();
 
 	if(M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false)

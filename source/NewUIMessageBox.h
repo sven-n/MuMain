@@ -38,21 +38,16 @@ namespace SEASON3B
 		MSGBOX_EVENT_MOUSE_RBUTTON_UP,
 		MSGBOX_EVENT_PRESSKEY_ESC,
 		MSGBOX_EVENT_PRESSKEY_RETURN,
-
 		MSGBOX_EVENT_USER_DEFINE = 0x0F00,
-
 		// common msgbox
 		MSGBOX_EVENT_USER_COMMON_OK,
 		MSGBOX_EVENT_USER_COMMON_CANCEL,
-
 		// keypad
 		MSGBOX_EVENT_USER_CUSTOM_KEYPAD_INPUT,
 		MSGBOX_EVENT_USER_CUSTOM_KEYPAD_DELETE,
-
 		// use fruit
 		MSGBOX_EVENT_USER_CUSTOM_USE_FRUIT_ADD,
 		MSGBOX_EVENT_USER_CUSTOM_USE_FRUIT_MINUS,
-
 		// gem interation
 		MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY,
 		MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT,
@@ -64,54 +59,42 @@ namespace SEASON3B
 		MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_BLESSING,
 		MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_SOUL,
 		MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_DISJOINT,
-
 		// system menu
 		MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_GAMEOVER,
 		MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSESERVER,
 		MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSECHARACTER,
 		MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_OPTION,
-
 		// mix menu
 		MSGBOX_EVENT_USER_CUSTOM_MIXMENU_GENERALMIX,
 		MSGBOX_EVENT_USER_CUSTOM_MIXMENU_CHAOSMIX,		
 		MSGBOX_EVENT_USER_CUSTOM_MIXMENU_MIX380,
-
 		// trainer menu
 		MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER,
 		MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_REVIVE,
 		MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKSPRIT,
 		MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKHORSE,
-		
 		// elpis menu
 		MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY,
 		MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY,
 		MSGBOX_EVENT_USER_CUSTOM_ELPIS_REFINE,
-
 		// dialog
 		MSGBOX_EVENT_USER_CUSTOM_DIALOG_END,
-
 		// progress
 		MSGBOX_EVENT_USER_CUSTOM_PROGRESS_CLOSINGPROCESS,
 		MSGBOX_EVENT_USER_CUSTOM_PROGRESS_COMPLETEPROCESS,
-
 		// duel
 		MSGBOX_EVENT_USER_CUSTOM_DUEL_OK,
 		MSGBOX_EVENT_USER_CUSTOM_DUEL_CANCEL,
-
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 		MSGBOX_EVENT_USER_CUSTOM_CB_WHITE,
 		MSGBOX_EVENT_USER_CUSTOM_CB_RED,
 		MSGBOX_EVENT_USER_CUSTOM_CB_GOLD,
-#endif // CSK_EVENT_CHERRYBLOSSOM
-		
-#ifdef ADD_SOCKET_MIX
 		// seed master menu
 		MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_EXTRACT_SEED,
 		MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_SEED_SPHERE,
 		// seed investigator menu
 		MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_ATTACH_SOCKET,
 		MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_DETACH_SOCKET,
-#endif	// ADD_SOCKET_MIX		
+	
 #ifdef PSW_ADD_RESET_CHARACTER_POINT
 		MSGBOX_EVENT_USER_CUSTOM_RESET_CHARACTER_POINT,
 #endif //PSW_ADD_RESET_CHARACTER_POINT
@@ -181,12 +164,9 @@ namespace SEASON3B
 		void SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent);
 		void SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam);
 #ifdef PBG_ADD_MSGBACKOPACITY
-		// 메시지박스 외 배경 어둡게 처리 시에 true설정
 		void RenderMsgBackColor(bool _bRender = false);
-		// 어둡기 설정
 		void SetMsgBackOpacity(float _fAlpha = 0.5f);
 		const float& GetMsgBackOpacity() const { return m_fOpacityAlpha; }
-		// 밑바탕 색설정,기본 검정색
 		void SetMsgBackColor(vec3_t _vColor = NULL);
 		const vec3_t& GetMsgBackColor() const { return m_vColor; }
 #endif //PBG_ADD_MSGBACKOPACITY
@@ -249,8 +229,8 @@ namespace SEASON3B
 			T* NewMessageBox(TContainer<T>& _container)
 		{
 			T* pObj = _container.GetInstance();
-			m_listMsgBoxes.push_back(pObj);					//. 인스턴스 관리권한을 넘긴다.
-			_container.SetInstState(INSTANCE_REFERENCE);	//. 넘겼으니 참조
+			m_listMsgBoxes.push_back(pObj);
+			_container.SetInstState(INSTANCE_REFERENCE);
 			return pObj;
 		}
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
@@ -462,7 +442,7 @@ namespace SEASON3B
 	template <class _L>
 		bool CreateMessageBox(TMsgBoxLayoutContainer<_L>& container)
 	{
-		if(false == container.Create()) //. MessageBox Layout 생성
+		if(false == container.Create()) //. MessageBox Layout
 			return false;
 		
 		return container.SetLayout();
@@ -470,7 +450,7 @@ namespace SEASON3B
 	template <class _L, class _M>
 		bool CreateMessageBox(TMsgBoxLayoutContainer<_L>& container, _M** ppMsgBox)
 	{
-		if(false == container.Create()) //. MessageBox Layout 생성
+		if(false == container.Create()) //. MessageBox Layout
 			return false;
 		if(ppMsgBox)
 			*ppMsgBox = TMsgBoxLayout<_M>::GetMsgBox();

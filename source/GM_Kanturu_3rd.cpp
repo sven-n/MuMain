@@ -17,20 +17,19 @@
 #include "DSPlaySound.h"
 #include "MapManager.h"
 
-extern unsigned int WindowWidth;		// LHJ - 윈도우 창 넓이
+extern unsigned int WindowWidth;
 extern char* g_lpszMp3[NUM_MUSIC];
 
-// 칸투르 관련 변수
-bool KanturuSuccessMap		 = false;	// LHJ - 칸투르 맵 변경 상태
-bool KanturuSuccessMapBackup = false;	// LHJ - 칸투르 맵 변경 상태 백업
-int iMayaAction				 = -1;		// LHJ - 마야 스킬값
-bool bMayaSkill2			 = false;	// LHJ - 크리스탈 메테오 스킬 체크
-int iMayaSkill2_Counter		 = 0;		// LHJ - 크리스탈 메테오 스킬 관련
-int iMayaDie_Counter		 = 0;		// LHJ - 마야 죽는 효과 관련
-int	iKanturuResult			 = -1;		// LHJ - 마야 0: 실패 1 : 성공
-float fAlpha				 = 0.1f;	// LHJ - 성공 실패 그림 나올때 투명도
-int	UserCount				 = 0;		// LHJ - 현재 남은 유저 수
-int	MonsterCount			 = 0;		// LHJ - 현재 남은 몬스터 수
+bool KanturuSuccessMap		 = false;
+bool KanturuSuccessMapBackup = false;
+int iMayaAction				 = -1;
+bool bMayaSkill2			 = false;
+int iMayaSkill2_Counter		 = 0;
+int iMayaDie_Counter		 = 0;
+int	iKanturuResult			 = -1;
+float fAlpha				 = 0.1f;
+int	UserCount				 = 0;
+int	MonsterCount			 = 0;
 
 
 bool M39Kanturu3rd::IsInKanturu3rd()
@@ -155,7 +154,7 @@ bool M39Kanturu3rd::MoveKanturu3rdObject(OBJECT* o)
 			}
 		}
 		break;
-	case 48:	// 검은 안개 박스2
+	case 48:
 		{
 			o->HiddenMesh = -2;
 		}
@@ -207,7 +206,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 
 	switch(o->Type)
 	{
-	case 0:	// 마야
+	case 0:
 		{
 			vec3_t p, Pos, Light;
 
@@ -232,18 +231,12 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			}
 			else
 			{
-				// 입에서 입김 나오는 효과
 				Vector(0.08f, 0.08f, 0.08f, Light);
 				Vector(rand()%20-30.0f, rand()%20-30.0f, 0.0f, p);
 				b->TransformPosition(BoneTransform[34],p,Pos,false);
 				if(o->AnimationFrame >= 5.0f && o->AnimationFrame < 12.5f)
 					CreateParticle(BITMAP_SMOKE,Pos,o->Angle,Light, 43, 1.5f);
 			}
-
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			int a = g_Direction.m_CKanturu.m_iMayaState;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 			if(g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_ENDCYCLE || g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_STANDBY)
 			{
@@ -254,7 +247,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			MayaAction(o, b);
 		}
 		break;
-	case 1:		// 흰색 안개1
+	case 1:
 		{
 			if (o->HiddenMesh != -2 )
 			{
@@ -268,7 +261,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			o->HiddenMesh = -2;	
 		}
 		break;
-	case 5:		// 빛 반짝이는 효과
+	case 5:
 		{
 			float fLumi = (sinf(WorldTime*0.002f) + 2.0f) * 0.5f;
 			Vector ( fLumi*0.3f, fLumi*0.5f, fLumi*1.0f, Light );
@@ -280,7 +273,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			CreateSprite(BITMAP_SHINY+1, Position, fLumi/2.4, Light, o, (float)((int)(WorldTime/4)%360));
 		}
 		break;
-	case 11:	// 흰색 안개2
+	case 11:
 		{
 			if ( o->HiddenMesh!=-2 )
 			{
@@ -294,7 +287,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			o->HiddenMesh = -2;
 		}
 		break;
-	case 32:	// 기포 올리가는 효과
+	case 32:
 		{
 			if(rand()%3 == 0)
 			{
@@ -303,7 +296,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 46:	// 검은 안개 박스
+	case 46:
 		{
 			if(o->HiddenMesh != -2)
 			{
@@ -328,13 +321,13 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 47:	// 번개 박스
+	case 47:
 		{
 			if(rand()%5 == 0)
 				CreateJoint( BITMAP_JOINT_THUNDER+1, o->Position, o->Position, o->Angle, 11, NULL, o->Scale*15.0f );
 		}
 		break;
-	case 48:	// 검은 안개 박스2
+	case 48:
 		{
 			if(rand()%3 == 0)
 			{
@@ -342,7 +335,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 49:	// 푸른 안개 박스
+	case 49:
 		{
 			if (o->HiddenMesh != -2 )
 			{
@@ -356,7 +349,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			o->HiddenMesh = -2;
 		}
 		break;
-	case 50:	// 라이트 박스
+	case 50:
 		{
 			if ( o->HiddenMesh!=-2 )
 			{
@@ -370,7 +363,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			o->HiddenMesh = -2;
 		}
 		break;
-	case 52:	// 불 박스
+	case 52:
 		{
 			if(rand()%3==0)
 			{
@@ -379,7 +372,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 53:	// 검은 연기 박스
+	case 53:
 		{
 			if(rand()%3 == 0)
 			{
@@ -388,7 +381,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 54:	// 전기 박스
+	case 54:
 		{
 			if(rand()%3 == 0)
 			{
@@ -397,17 +390,6 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-//	case	// 불 박스 - 미정
-//		{
-//			Vector ( 1.0f, 1.0f, 1.0f, o->Light );
-//			CreateParticle ( BITMAP_FLAME, o->Position, o->Angle, o->Light, 7, o->Scale);
-//		}
-//		break;
-//	case	// 번개 박스 - 미정
-//		{
-//			CreateJoint( BITMAP_JOINT_THUNDER+1, o->Position, o->Position, o->Angle, 12, NULL, o->Scale*30.0f );
-//		}
-//		break;
 	}
 	return true;
 }
@@ -685,7 +667,7 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
 
 	switch(iType)
 	{
-	case 361: // 나이트메어
+	case 361:
 		{
 			OpenMonsterModel(121);
 		    c = CreateCharacter(Key,MODEL_MONSTER01+121,PosX,PosY);
@@ -693,7 +675,6 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
 		    c->Weapon[0].Type = -1;
 		    c->Weapon[1].Type = -1;
 
-			//몸통
 			BoneManager::RegisterBone(c, "Body_Bone1",		61);
 			BoneManager::RegisterBone(c, "Body_Bone2",		62);
 			BoneManager::RegisterBone(c, "Body_Bone3",		54);
@@ -707,32 +688,27 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
 			BoneManager::RegisterBone(c, "Body_Bone11",		43);
 			BoneManager::RegisterBone(c, "Body_Bone12",		44);
 
-			//왼손
 			BoneManager::RegisterBone(c, "LHand_Bone",		14);
 
-			//배
 			BoneManager::RegisterBone(c, "Body_Bone13",		63);
 
-			//칼
 			BoneManager::RegisterBone(c, "Sword_Bone1",		39);
 			BoneManager::RegisterBone(c, "Sword_Bone2",		40);
 
 	   		CreateJoint(BITMAP_JOINT_ENERGY,c->Object.Position,c->Object.Position,c->Object.Angle,20,&c->Object,10.f);
  			CreateJoint(BITMAP_JOINT_ENERGY,c->Object.Position,c->Object.Position,c->Object.Angle,21,&c->Object,10.f);
 
-			//눈
 			BoneManager::RegisterBone(c, "Eye_Bone1",		9);
 			BoneManager::RegisterBone(c, "Eye_Bone2",		10);
 
    			CreateJoint(BITMAP_JOINT_ENERGY,c->Object.Position,c->Object.Position,c->Object.Angle,18,&c->Object,10.f);
  			CreateJoint(BITMAP_JOINT_ENERGY,c->Object.Position,c->Object.Position,c->Object.Angle,19,&c->Object,10.f);
 
-			//풍차
 			BoneManager::RegisterBone(c, "Windmill_Bone1",	47);
 
 		}
 		break;
-	case 362: // 마야의 왼손
+	case 362:
 		{
 			OpenMonsterModel(118);
 			c = CreateCharacter(Key,MODEL_MONSTER01+118,PosX,PosY);
@@ -765,7 +741,7 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
  			CreateJoint(BITMAP_JOINT_ENERGY,c->Object.Position,c->Object.Position,c->Object.Angle,27,&c->Object,15.f);
 		}
 		break;
-	case 363: // 마야의 오른손
+	case 363:
 		{
 			OpenMonsterModel(119);
 			c = CreateCharacter(Key,MODEL_MONSTER01+119,PosX,PosY);
@@ -798,7 +774,7 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
  			CreateJoint(BITMAP_JOINT_ENERGY,c->Object.Position,c->Object.Position,c->Object.Angle,33,&c->Object,15.f);
 		}
 		break;
-	case 364: // 마야
+	case 364:
 		{
 			OpenMonsterModel(0);
 			c = CreateCharacter(Key,MODEL_MONSTER01+120,PosX,PosY);
@@ -822,9 +798,8 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+121: // 나이트메어
+	case MODEL_MONSTER01+121:
 		{
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -865,9 +840,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 					PlayBuffer ( SOUND_KANTURU_3RD_NIGHTMARE_DIE );
 				}
 			}
-			//////////////////////////////////////////////////////////////////////////////////////////
 
-			// 소환스킬
 			if(o->CurrentAction == MONSTER01_ATTACK3)
 			{
 				Vector(0.f,0.f,(float)(rand()%360),Angle);
@@ -880,7 +853,6 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 					CreateJoint(BITMAP_FLARE,Position,Position,Angle,2,NULL,40);
 				}
 			}
-			// 회오리스킬
 			else if(o->CurrentAction == MONSTER01_ATTACK2 && (o->AnimationFrame >= 5.2f && o->AnimationFrame <= 5.8f))
 			{
 				float Matrix[3][4];
@@ -894,7 +866,6 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 				CreateEffect(MODEL_STORM2,Position,o->Angle,Light, 0);
 				CreateEffect(BITMAP_BOSS_LASER,Position,o->Angle,Light,2);
 			}
-			// 죽을때 효과
 			else if(o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 3.0f)
 			{
 				vec3_t Position; 
@@ -912,11 +883,10 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 
 		}
 		break;
-	case MODEL_MONSTER01+118: // 마야의 왼손
+	case MODEL_MONSTER01+118: 
 		{
 			vec3_t Pos;
 
-			// 죽을때 효과
 			if(o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3)
 			{
 				o->BlendMesh = -2;
@@ -932,7 +902,6 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 			else
 				o->BlendMesh = -1;
 
-			// 죽을때 효과
 			if(o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3)
 			{
 				Vector(1.0f, 1.0f, 1.0f, Light);
@@ -944,11 +913,10 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 
 		}
 		break;
-	case MODEL_MONSTER01+119: // 마야의 오른손
+	case MODEL_MONSTER01+119:
 		{
 			vec3_t Pos;
 
-			// 죽을때 효과
 			if(o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3)
 			{
 				o->BlendMesh = -2;
@@ -964,7 +932,6 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 			else
 				o->BlendMesh = -1;
 
-			// 죽을때 효과
 			if(o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3)
 			{
 				Vector(1.0f, 1.0f, 1.0f, Light);
@@ -975,7 +942,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+120: // 마야
+	case MODEL_MONSTER01+120:
 		{
 
 		}
@@ -998,7 +965,7 @@ void M39Kanturu3rd::MoveKanturu3rdBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+121: // 나이트메어
+	case MODEL_MONSTER01+121:
 		{
 
 			if((o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK4) && o->AnimationFrame <= 5.9f)
@@ -1029,15 +996,15 @@ void M39Kanturu3rd::MoveKanturu3rdBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
 		}
 		break;
-	case MODEL_MONSTER01+118: // 마야의 왼손
+	case MODEL_MONSTER01+118:
 		{
 		}
 		break;
-	case MODEL_MONSTER01+119: // 마야의 오른손
+	case MODEL_MONSTER01+119:
 		{
 		}
 		break;
-	case MODEL_MONSTER01+120: // 마야
+	case MODEL_MONSTER01+120:
 		{
 		}
 		break;
@@ -1053,7 +1020,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+121: // 나이트메어
+	case MODEL_MONSTER01+121: 
 		{
 
 			if(o->CurrentAction == MONSTER01_DIE)
@@ -1061,14 +1028,9 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
 			MoveEye(o, b,  9, 10, 39, 40);
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			float Random_Light = (float)(rand()%30)/100.0f + 0.6f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			Vector ( 1.0f, 1.0f, 1.0f, Light );
 			Vector ( 0.0f, 0.0f, 0.0f, Position );
 			
-			//몸통
 			BoneManager::GetBonePosition(o, "Body_Bone1", Position);
 			CreateSprite(BITMAP_LIGHT,Position,0.3f,Light,o);
 			CreateSprite(BITMAP_FLARE_BLUE,Position,0.5f,Light,o);
@@ -1110,11 +1072,9 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			CreateSprite(BITMAP_LIGHT,Position,0.4f,Light,o);
 			CreateSprite(BITMAP_FLARE_BLUE,Position,0.7f,Light,o);
 
-			//배
 			BoneManager::GetBonePosition(o, "Body_Bone13", Position);
 			CreateParticle(BITMAP_FIRE+1,Position,o->Angle,Light,3,1.7f);
 
-			//칼
 			Vector ( 3.0f, 0.0f, 0.0f, Position );
 			BoneManager::GetBonePosition(o, "Sword_Bone1", Position, Position);
 			CreateSprite(BITMAP_LIGHT,Position,0.3f,Light,o);
@@ -1124,7 +1084,6 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			CreateSprite(BITMAP_LIGHT,Position,0.3f,Light,o);
 			CreateSprite(BITMAP_FLARE_BLUE,Position,0.6f,Light,o);
 
-			//눈
 			Vector ( 0.0f, -2.0f, 0.0f, Position );
 			BoneManager::GetBonePosition(o, "Eye_Bone1", Position, Position);
 			CreateSprite(BITMAP_FLARE_BLUE,Position,0.3f,Light,o);
@@ -1132,14 +1091,13 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			BoneManager::GetBonePosition(o, "Eye_Bone2", Position, Position);
 			CreateSprite(BITMAP_FLARE_BLUE,Position,0.3f,Light,o);
 
-			//풍차
 			BoneManager::GetBonePosition(o, "Windmill_Bone1", Position);
 			if(rand()%2 == 0)
 				CreateParticle(BITMAP_SPARK+1, Position, o->Angle, Light, 16, 1.0f);
 
 		}
 		return true;
-	case MODEL_MONSTER01+118: // 마야의 왼손
+	case MODEL_MONSTER01+118:
 		{
 			o->m_bRenderShadow = false;
 
@@ -1204,7 +1162,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			CreateSprite(BITMAP_FLARE_BLUE,Position,1.0f,Light,o);
 		}
 		return true;
-	case MODEL_MONSTER01+119: // 마야의 오른손
+	case MODEL_MONSTER01+119:
 		{
 			o->m_bRenderShadow = false;
 
@@ -1268,7 +1226,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			
 		}
 		return true;
-	case MODEL_MONSTER01+120: // 마야
+	case MODEL_MONSTER01+120:
 		{
 		}
 		return true;
@@ -1295,7 +1253,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b,bool Ext
 {
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+114:	// 페르소나(임시로 번호 지정)
+	case MODEL_MONSTER01+114:
 		{
 			float fLumi2 = (sinf(WorldTime*0.002f) + 1.f) * 0.5f;
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1304,12 +1262,11 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b,bool Ext
 			return true;	
 		}
 		break;
-	case MODEL_MONSTER01+115:	// 트윈테일(임시로 번호 지정)
+	case MODEL_MONSTER01+115:
 		{
 			float fLumi = (sinf(WorldTime*0.002f) + 1.f) * 0.5f;
 			float fLumi2 = (sinf(WorldTime*0.002f) + 1.f);
 
-			// 몸통 색깔
 			if(o->CurrentAction != MONSTER01_DIE)
 			{
 				Vector(0.9f,0.9f,1.0f,b->BodyLight);
@@ -1320,14 +1277,12 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b,bool Ext
 			}
 
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-			// 살 부위 밝아졌다 어두워지는 효과
 			b->RenderMesh(2, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 2, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_TWINTAIL_EFFECT);
-			// 칼 부위 밝아졌다 어두워지는 효과
 			b->RenderMesh(3, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 3, fLumi);
 			return true;	
 		}
 		break;
-	case MODEL_MONSTER01+116:	// 드레드피어(임시로 번호 지정)
+	case MODEL_MONSTER01+116:
 		{
 			if(o->CurrentAction == MONSTER01_DIE)
 			{
@@ -1341,7 +1296,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b,bool Ext
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+121: // 나이트메어
+	case MODEL_MONSTER01+121:
 		{
 
 			b->BeginRender(1.f);
@@ -1378,7 +1333,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b,bool Ext
 
 		}
 		return true;
-	case MODEL_MONSTER01+118: // 마야 왼손
+	case MODEL_MONSTER01+118:
 		{
 			b->BeginRender(1.f);
 
@@ -1390,7 +1345,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b,bool Ext
 			b->EndRender();			
 		}
 		return true;
-	case MODEL_MONSTER01+119: // 마야 오른손
+	case MODEL_MONSTER01+119:
 		{
 			b->BeginRender(1.f);
 
@@ -1425,17 +1380,11 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 
 	switch(c->MonsterIndex)
 	{
-		case 354:	// 블레이드 헌터
+		case 354:
 			{
 				if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
 				{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-					float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-					float StartAction = 3.23f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 					if(c->AttackTime == 14)
-	//				if(o->AnimationFrame >= StartAction && o->AnimationFrame < (StartAction + fActionSpeed))
 					{
 						vec3_t vPos, vRelative,Light;
 						Vector(140.f, 0.f, -30.f, vRelative);
@@ -1455,15 +1404,13 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 				}
 			}
 			return true;
-		case 361:  //  나이트메어
+		case 361:
 			{
-				// 소환스킬
 				if(o->CurrentAction == MONSTER01_ATTACK3 && c->AttackTime >= 14)
 				{
 					Vector ( 0.3f, 0.2f, 0.1f, Light );
 					CreateEffect(MODEL_SUMMON,o->Position,o->Angle,Light, 3);
 				}
-				// 헬버스터 스킬
 				else if(o->CurrentAction == MONSTER01_ATTACK4 && c->AttackTime >= 10)
 				{
 					Vector ( 1.0f, 1.0f, 1.0f, Light );
@@ -1475,9 +1422,8 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 				}
 			}
 			return true;
-		case 362: // 마야의 왼손
+		case 362:
 			{
-				// 충격파 스킬
 				if(o->CurrentAction == MONSTER01_ATTACK1 && c->AttackTime == 14)
 				{
 					CreateInferno(o->Position, 2);
@@ -1486,7 +1432,6 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 
 					PlayBuffer( SOUND_KANTURU_3RD_MAYAHAND_ATTACK1 );
 				}
-				// 크리스탈 스킬
 				else if(o->CurrentAction == MONSTER01_ATTACK2 && c->AttackTime == 14)
 				{
 					float Matrix[3][4];
@@ -1503,9 +1448,8 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 				}
 			}
 			return true;
-		case 363: // 마야의 오른손
+		case 363:
 			{
-				// 충격파 스킬
 				if(o->CurrentAction == MONSTER01_ATTACK1 && c->AttackTime == 14)
 				{
 					CreateInferno(o->Position, 3);
@@ -1514,7 +1458,6 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 					
 					PlayBuffer( SOUND_KANTURU_3RD_MAYAHAND_ATTACK1 );
 				}
-				// 크리스탈 스킬
 				else if(o->CurrentAction == MONSTER01_ATTACK2 && c->AttackTime == 14)
 				{
 					float Matrix[3][4];
@@ -1531,7 +1474,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 				}
 			}
 			return true;
-		case 364: // 마야
+		case 364:
 			return true;
 	}
 
@@ -1545,10 +1488,10 @@ bool M39Kanturu3rd::SetCurrentActionKanturu3rdMonster(CHARACTER* c, OBJECT* o)
 
 	switch(c->MonsterIndex)
 	{
-	case 361: // 나이트메어
-	case 362: // 마야의 왼손
-	case 363: // 마야의 오른손
-	case 364: // 마야
+	case 361:
+	case 362:
+	case 363:
+	case 364:
 		return CheckMonsterSkill(c, o);
 	}
 
@@ -1573,12 +1516,12 @@ void M39Kanturu3rd::MayaAction(OBJECT* o, BMD* b)
 {
 	vec3_t Angle, Direction, Position, Pos, Light;
 
-	if(g_Direction.m_CKanturu.GetMayaExplotion())			// 마야가 죽는 동작일때
+	if(g_Direction.m_CKanturu.GetMayaExplotion())
 		iMayaAction = 2;
 
 	switch(iMayaAction)
 	{
-	case 0:		// 회오리 스킬
+	case 0:
 		{
 			float Matrix[3][4];
 
@@ -1604,7 +1547,7 @@ void M39Kanturu3rd::MayaAction(OBJECT* o, BMD* b)
 			PlayBuffer ( SOUND_KANTURU_3RD_MAYA_STORM );
 		}
 		break;
-	case 1:		// 크리스탈 떨어지는 스킬
+	case 1:
 		{
 			if(bMayaSkill2)
 			{
@@ -1634,7 +1577,7 @@ void M39Kanturu3rd::MayaAction(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case 2:		// 마야 죽는 효과
+	case 2:
 		{
 			if(g_Direction.m_CKanturu.GetMayaExplotion())
 			{
@@ -1715,10 +1658,10 @@ void M39Kanturu3rd::Kanturu3rdResult(BYTE Result)
 {
 	switch(Result)
 	{
-	case 0:		// 칸투르 보스전 실패 일때
+	case 0:
 		iKanturuResult = 0;
 		break;
-	case 1:		// 칸투르 보스전 성공 일때
+	case 1:
 		{
 			if(g_Direction.m_CKanturu.m_iKanturuState != KANTURU_STATE_NIGHTMARE_BATTLE)
 				break;
@@ -1762,12 +1705,12 @@ void M39Kanturu3rd::Kanturu3rdSuccess()
 {
 	float fPosX, fPosY, fWidth, fHeight, tu, tv;
 
-	fWidth	= 372.0f;				// 텍스쳐 넓이
-	fHeight	= 99.0f;				// 텍스쳐 높이
-	fPosX	= (640.0f-fWidth)/2.0f;	// 텍스쳐 위치 X
-	fPosY	= (480.0f-fWidth)/2.0f;	// 텍스쳐 위치 Y
-	tu		= fWidth/512.f;			// 텍스쳐 좌표값
-	tv		= fHeight/128.f;		// 텍스쳐 좌표값
+	fWidth	= 372.0f;
+	fHeight	= 99.0f;
+	fPosX	= (640.0f-fWidth)/2.0f;
+	fPosY	= (480.0f-fWidth)/2.0f;
+	tu		= fWidth/512.f;	
+	tv		= fHeight/128.f;
 
 	if(fAlpha <= 1.0f)
 		fAlpha += 0.01f;
@@ -1785,12 +1728,12 @@ void M39Kanturu3rd::Kanturu3rdFailed()
 {
 	float fPosX, fPosY, fWidth, fHeight, tu, tv;
 
-	fWidth	= 372.0f;				// 텍스쳐 넓이
-	fHeight	= 99.0f;				// 텍스쳐 높이
-	fPosX	= (640.0f-fWidth)/2.0f;	// 텍스쳐 위치 X
-	fPosY	= (480.0f-fWidth)/2.0f;	// 텍스쳐 위치 Y
-	tu		= fWidth/512.f;			// 텍스쳐 좌표값
-	tv		= fHeight/128.f;		// 텍스쳐 좌표값
+	fWidth	= 372.0f;
+	fHeight	= 99.0f;
+	fPosX	= (640.0f-fWidth)/2.0f;
+	fPosY	= (480.0f-fWidth)/2.0f;
+	tu		= fWidth/512.f;
+	tv		= fHeight/128.f;
 
 	if(fAlpha <= 1.0f)
 		fAlpha += 0.01f;

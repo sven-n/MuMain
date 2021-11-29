@@ -70,9 +70,7 @@ extern bool bCheckNPC;
 #ifdef WINDOWMODE
 extern BOOL g_bUseWindowMode;
 #endif //WINDOWMODE
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 extern void SetPlayerBow(CHARACTER *c);
-#endif //#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 
 bool m_pc_wanted = false;
 
@@ -80,7 +78,7 @@ bool m_pc_wanted = false;
 extern CMurdererMove g_MurdererMove;
 #endif	// _PVP_ADD_MOVE_SCROLL
 
-extern float g_fScreenRate_x;	// ※
+extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 
 extern char *g_lpszMp3[NUM_MUSIC];
@@ -92,12 +90,9 @@ extern void UnRegisterBuff( eBuffState buff, OBJECT* o );
 
 extern BYTE m_CrywolfState;
 
-//////////////////////////////////////////////////////////////////////////
-//  Global Variable
-//////////////////////////////////////////////////////////////////////////
 MovementSkill g_MovementSkill;
-//                                   시간   분   초
-const   float   AutoMouseLimitTime = (1.f * 60.f*60.f); //  AutoMouse 제한 시간 ( 2시간 )
+
+const   float   AutoMouseLimitTime = (1.f * 60.f*60.f);
 int   LoadingWorld       = 0;
 #ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 BOOL g_bReponsedMoveMapFromServer	= TRUE;
@@ -111,7 +106,6 @@ int   InputFrame         = 0;
 int   EditFlag           = EDIT_NONE;
 char  ColorTable[][10]   = {"White","Black","Red","Yellow","Green","Cyan","Blue","Magenta"};
 
-//  선택.
 int   SelectMonster      = 0;
 int   SelectModel        = 0;
 int   SelectMapping		 = 0;
@@ -119,22 +113,20 @@ int   SelectColor		 = 0;
 int   SelectWall         = 0;
 float SelectMappingAngle = 0.f;
 bool  DebugEnable        = true;
-int   SelectedItem       = -1;      //  아이템 선택.
-int   SelectedNpc        = -1;      //  Npc 선택.
-int   SelectedCharacter  = -1;      //  캐릭터 선택.
-int   SelectedOperate    = -1;      //  
-int   Attacking          = -1;      //  자동 공격.
+int   SelectedItem       = -1;
+int   SelectedNpc        = -1;
+int   SelectedCharacter  = -1;
+int   SelectedOperate    = -1;
+int   Attacking          = -1;
 
-//  자동 따라가기.
-int   g_iFollowCharacter = -1;      //  따라갈 대상 캐릭터 인덱스.
+int   g_iFollowCharacter = -1;
 
-bool g_bAutoGetItem = false;        //  아이템 space로 자동 먹기.
+bool g_bAutoGetItem = false;
 
-//  AutoMouse 방지.
-float LButtonPopTime     = 0.f;     //  왼쪽 버튼이 눌리기 전 시간.
-float LButtonPressTime   = 0.f;     //  왼쪽 버튼이 눌리고 있는 시간.
-float RButtonPopTime     = 0.f;     //  오른쪽 버튼이 눌리기 전 시간.
-float RButtonPressTime   = 0.f;     //  오른쪽 버튼이 눌리고 있는 시간.
+float LButtonPopTime     = 0.f;
+float LButtonPressTime   = 0.f;
+float RButtonPopTime     = 0.f;
+float RButtonPressTime   = 0.f;
 
 //  
 int   BrushSize          = 0;
@@ -259,15 +251,12 @@ void ClearInput(BOOL bClearWhisperTarget)
 		g_pSinglePasswdInputBox->SetText(NULL);
 	}
 }
-///////////////////////////////////////////////////////////////////////////////
-// IME Input 창 위치 변경 함수.	// IME 수정                                                                                                        
-///////////////////////////////////////////////////////////////////////////////
+
 void SetPositionIME_Wnd( float x, float y )
 {
     float xRatio_Input = x/640.f;
     float yRatio_Input = y/480.f;
 	
-    //  IME 조합창의 위치 변경.
 	COMPOSITIONFORM comForm;
     comForm.dwStyle = CFS_POINT;
     comForm.ptCurrentPos.x = (long)(WindowWidth*xRatio_Input);
@@ -275,21 +264,13 @@ void SetPositionIME_Wnd( float x, float y )
     SetRect ( &comForm.rcArea, 0, 0, WindowWidth, WindowHeight );
 	
     HWND hWnd = ImmGetDefaultIMEWnd(g_hWnd);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	::SendMessage(hWnd, WM_IME_CONTROL, IMC_SETCOMPOSITIONWINDOW, (LPARAM)&comForm);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-    int ret = ::SendMessage(hWnd, WM_IME_CONTROL, IMC_SETCOMPOSITIONWINDOW, (LPARAM)&comForm);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// IME Input 상태 변경.
-///////////////////////////////////////////////////////////////////////////////
 DWORD   g_dwOldConv = IME_CMODE_ALPHANUMERIC;
 DWORD   g_dwOldSent = IME_SMODE_AUTOMATIC;
 DWORD   g_dwCurrConv= 0;
 
-// 현재 IME 입력 상태를 저장한다.
 void SaveIME_Status ()
 {
     HIMC  data;
@@ -877,30 +858,28 @@ void RenderBoolean(int x,int y,CHAT *c)
 	EnableAlphaTest();
 	glColor3f(1.f,1.f,1.f);
 	
-	if (FontHeight > 32) FontHeight = 32;	// 에러 예방
+	if (FontHeight > 32) FontHeight = 32;
 	
-	POINT RenderPos = { x, y };	//. 640*480 기준
-	SIZE RenderBoxSize = { c->Width, c->Height }; //. 640*480 기준
+	POINT RenderPos = { x, y };
+	SIZE RenderBoxSize = { c->Width, c->Height };
 	int iLineHeight = FontHeight/g_fScreenRate_y;
 
 	if(IsShopInViewport(c->Owner))
 	{
-		SIZE TextSize;	//. 640*480 기준 텍스트 사이즈(GetTextExtentPoint랑 틀림)
+		SIZE TextSize;
 		g_pRenderText->SetFont(g_hFontBold);
 		g_pRenderText->SetBgColor(GetShopBGColor(c->Owner));
 		
-		// [상점] 부분 먼저 출력하고
 		g_pRenderText->SetTextColor(GetShopTextColor(c->Owner));
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, GlobalText[1104], 0, iLineHeight, RT3_SORT_LEFT, &TextSize);
-		RenderPos.x += TextSize.cx;	//. 상점명으로 이동
+		RenderPos.x += TextSize.cx;
 		
-		// [상점] 뒷부분에 상점명을 출력한다.
 		g_pRenderText->SetTextColor(GetShopText2Color(c->Owner));
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, c->szShopTitle, RenderBoxSize.cx-TextSize.cx, iLineHeight, RT3_SORT_LEFT, &TextSize);
 		g_pRenderText->SetFont(g_hFont);
 		
 		RenderPos.x = x;
-		RenderPos.y += iLineHeight;	//. 다음 라인
+		RenderPos.y += iLineHeight;
 	}
 #ifdef PBG_MOD_STRIFE_GENSMARKRENDER
 #ifdef ASG_MOD_GM_VIEW_NAME_IN_GENS_STRIFE_MAP
@@ -910,7 +889,6 @@ void RenderBoolean(int x,int y,CHAT *c)
 	else if(::IsStrifeMap(World) && Hero->m_byGensInfluence != c->Owner->m_byGensInfluence)
 #endif	// ASG_MOD_GM_VIEW_NAME_IN_GENS_STRIFE_MAP
 	{
-		// 기여도 포인트 0 이면 랜더 하지 않는다
 		if(!c->Owner->m_nContributionPoint)
 			return;
 
@@ -937,43 +915,37 @@ void RenderBoolean(int x,int y,CHAT *c)
 	if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))	
 	{
 		bGmMode = true;
-		//. 연합 길드색 설정
 		g_pRenderText->SetBgColor(30, 30, 30, 200);
 		g_pRenderText->SetTextColor(200, 255, 255, 255);
 	}
-			
-	// 나 자신: 연합 길드색 설정
+
 	if( c->Owner == Hero )
 	{
 		g_pRenderText->SetBgColor(60, 100, 0, 150);
 		g_pRenderText->SetTextColor(200, 255, 0, 255);
 	}
-	// 같은 길드 (연합과 같은 색): 연합 길드색 설정
 	else if( c->Owner->GuildMarkIndex == Hero->GuildMarkIndex )
 	{
 		g_pRenderText->SetBgColor(GetGuildRelationShipBGColor(GR_UNION));
 		g_pRenderText->SetTextColor(GetGuildRelationShipTextColor(GR_UNION));
 	}
-	else	// 연합 길드색 설정
+	else
 	{
 		g_pRenderText->SetBgColor(GetGuildRelationShipBGColor(c->Owner->GuildRelationShip));
 		g_pRenderText->SetTextColor(GetGuildRelationShipTextColor(c->Owner->GuildRelationShip));
 	}
 	
-	// 연합명 표시
 	if( c->Union && c->Union[0] )
 	{
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, c->Union, RenderBoxSize.cx, iLineHeight, RT3_SORT_LEFT);
 		RenderPos.y += iLineHeight;
 	}
-	// 길드명 표시
 	if( c->Guild && c->Guild[0] )
 	{
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, c->Guild, RenderBoxSize.cx, iLineHeight, RT3_SORT_LEFT);
 		RenderPos.y += iLineHeight;
 	}
 	
-	// 플레이어 이름 색 설정
 	if (bGmMode)	
 	{
 		g_pRenderText->SetTextColor(100, 250, 250, 255);
@@ -983,7 +955,6 @@ void RenderBoolean(int x,int y,CHAT *c)
 		SetPlayerColor(c->Color);
 	}
 	
-	// 마우스를 캐릭터나 말풍선에 올렸을때 깜박이게 하기(반전)
 	if ( c->x <= MouseX && MouseX < (int)(c->x+c->Width*640/WindowWidth) &&
 		c->y <= MouseY && MouseY < (int)(c->y+c->Height*480/WindowHeight) &&
 		InputEnable && Hero->SafeZone && strcmp(c->ID,Hero->ID)!=NULL &&
@@ -994,7 +965,6 @@ void RenderBoolean(int x,int y,CHAT *c)
 		g_pRenderText->SetTextColor(Temp);
 	}
 	
-	// 아이디 표시
 	if (bGmMode)	
 	{
 		g_pRenderText->SetFont(g_hFontBold);
@@ -1008,7 +978,6 @@ void RenderBoolean(int x,int y,CHAT *c)
 		RenderPos.y += iLineHeight;
 	}
 	
-	// 내용출력
 	if(c->GuildColor==0)
 		g_pRenderText->SetBgColor(10, 30, 50, 150);
 	else if(c->GuildColor==1)
@@ -1036,22 +1005,17 @@ void RenderBoolean(int x,int y,CHAT *c)
 		dwTextColor[1] = RGBA(230, 220, 200, byAlpha[1]);
 	}
 	
-	// 텍스트가 두줄이면
 	if(c->LifeTime[1] > 0)
 	{
-		// 텍스트 라인 1을 출력
 		g_pRenderText->SetTextColor(dwTextColor[1]);
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, c->Text[1], RenderBoxSize.cx, iLineHeight, RT3_SORT_LEFT);
 		RenderPos.y += iLineHeight;
 		
-		// 텍스트 라인 0을 출력
 		g_pRenderText->SetTextColor(dwTextColor[0]);
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, c->Text[0], RenderBoxSize.cx, iLineHeight);
 	}
-	// 텍스트가 한줄이면
 	else if(c->LifeTime[0] > 0)
 	{
-		// 텍스트 라인 0을 출력
 		g_pRenderText->SetTextColor(dwTextColor[0]);
 		g_pRenderText->RenderText(RenderPos.x, RenderPos.y, c->Text[0], RenderBoxSize.cx, iLineHeight);
 	}
@@ -1113,7 +1077,6 @@ void AddGuildName(CHAT *c,CHARACTER *Owner)
 	
 	if( Owner->GuildMarkIndex >= 0 && GuildMark[Owner->GuildMarkIndex].UnionName[0] )
 	{
-		// 길드연합과 연합관계 표시
 		if( Owner->GuildRelationShip == GR_UNION )
 			wsprintf( c->Union, "<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295] );
 		if( Owner->GuildRelationShip == GR_UNIONMASTER )
@@ -1138,7 +1101,6 @@ void AddGuildName(CHAT *c,CHARACTER *Owner)
 	else
 		c->Union[0] = NULL;
 	
-	// 길드명과 길드직책보여주기
 	if( Owner->GuildMarkIndex >= 0 )
 	{
 		c->GuildColor = Owner->GuildTeam;
@@ -3445,7 +3407,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 		}
 		if (Items[ItemKey].Item.Type == ITEM_POTION+15)
 		{
-			SendRequestGetItem(ItemKey);	// 젠
+			SendRequestGetItem(ItemKey);
 		}
 		else if(g_pMyInventory->FindEmptySlot(&Items[ItemKey].Item) == -1)
 		{
@@ -3527,20 +3489,15 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 							BYTE State = (m_AltarState[Num] & 0x0f);
 							if(State > 0)
 							{
-								//								g_pCryWolfInterface->
 								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Get_Temple));
-								//								M34CryWolf1st::Set_Message_Box(56,0,CharactersClient[TargetNpc].Key,Num);
-								//								M34CryWolf1st::Set_Message_Box(57,1,CharactersClient[TargetNpc].Key);
 							}
 							else
 								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Destroy_Set_Temple));
-							//								M34CryWolf1st::Set_Message_Box(53,0,0);	//"제단이 파괴되어 더이상 계약이 불가능합니다."
 						}
 						else
 							if ((gCharacterManager.GetBaseClass(Hero->Class)==CLASS_ELF) && M34CryWolf1st::Get_AltarState_State(Num) == true )
 							{
 								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Ing_Set_Temple));
-								//							M34CryWolf1st::Set_Message_Box(52,0,0);	//"계약이 진행 중이므로 중복 계약을 할수 없습니다."
 							}
 							else
 								SendRequestTalk(CharactersClient[TargetNpc].Key);
@@ -3608,13 +3565,10 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					}
 					else if( gMapManager.IsCursedTemple())
 					{
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 						if (!g_CursedTemple->IsGaugebarEnabled())
 						{
 #ifdef LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE 
-							// 석상을 클릭 했을 때나 
 							if (CharactersClient[TargetNpc].MonsterIndex == 380 
-								// 유저가 성물을 들고 있고 자기 팀측의 보관함을 클릭했을  
 								|| (g_pCursedTempleWindow->CheckInventoryHolyItem( Hero )
 									&&   ((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied	&& CharactersClient[TargetNpc].MonsterIndex == 383) 
 									   || (g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && CharactersClient[TargetNpc].MonsterIndex == 384))
@@ -3627,13 +3581,8 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 							{
 								g_CursedTemple->SetGaugebarEnabled(true);
 							}
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
-							g_pCursedTempleWindow->CheckTalkProgressNpc(CharactersClient[TargetNpc].MonsterIndex, 
-								CharactersClient[TargetNpc].Key);
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
+							g_pCursedTempleWindow->CheckTalkProgressNpc(CharactersClient[TargetNpc].MonsterIndex, CharactersClient[TargetNpc].Key);
 						}
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
-
 					}
 					else
 					{	
@@ -3801,9 +3750,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 				}
 				if(Sit)
 				{
-					//마을을 제외하면 이하 탈것들을 탔을 때 앉지 못하게 한다. 
-					if((!c->SafeZone) && (c->Helper.Type == MODEL_HELPER+37 || c->Helper.Type == MODEL_HELPER+2 
-						|| c->Helper.Type == MODEL_HELPER+3 || c->Helper.Type == MODEL_HELPER+4))
+					if((!c->SafeZone) && (c->Helper.Type == MODEL_HELPER+37 || c->Helper.Type == MODEL_HELPER+2 || c->Helper.Type == MODEL_HELPER+3 || c->Helper.Type == MODEL_HELPER+4))
 						return;
 					
 					if(!gCharacterManager.IsFemale(c->Class))
@@ -4111,19 +4058,15 @@ bool CheckCommand(char *Text, bool bMacroText )
 			return true;
 		}
 		
-		// 1136 "/상점보기 on"
 		if(strcmp(Text,GlobalText[1136]) == 0)
 		{
 			ShowShopTitles();
-			// 1138 "개인상점 창들을 볼 수 있습니다."
 			g_pChatListBox->AddText("", GlobalText[1138], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		}
 		
-		// 1137 "/상점보기 off"
 		if(strcmp(Text,GlobalText[1137]) == 0)
 		{
 			HideShopTitles();
-			// 1139 "개인상점 창들을 볼 수 없습니다."
 			g_pChatListBox->AddText("", GlobalText[1139], SEASON3B::TYPE_ERROR_MESSAGE);
 		}
 #ifdef DUEL_SYSTEM
@@ -4137,17 +4080,17 @@ bool CheckCommand(char *Text, bool bMacroText )
 			}
 #endif// UILD_WAR_EVENT
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
-			if(!g_DuelMgr.IsDuelEnabled())	//. 자신이 결투중이 아닐경우 결투가능
+			if(!g_DuelMgr.IsDuelEnabled())
 #else	// YDG_ADD_NEW_DUEL_SYSTEM
-			if(!g_bEnableDuel)	//. 자신이 결투중이 아닐경우 결투가능
+			if(!g_bEnableDuel)
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 			{
 #ifdef YDG_ADD_NEW_DUEL_UI
 				int iLevel = CharacterAttribute->Level;
-				if(iLevel < 30)	// 레벨제한
+				if(iLevel < 30)
 				{
 					char szError[48] = "";
-					sprintf(szError, GlobalText[2704], 30);	// "%d레벨 이상의 캐릭터만 결투가 가능합니다."
+					sprintf(szError, GlobalText[2704], 30);
 					g_pChatListBox->AddText("", szError, SEASON3B::TYPE_ERROR_MESSAGE);				
 					return 3;
 				}
@@ -4185,7 +4128,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 			}
 			else
 			{
-				//. 본인이 지금 결투중일때
 				g_pChatListBox->AddText("", GlobalText[915], SEASON3B::TYPE_SYSTEM_MESSAGE);				
 			}
 		}
@@ -4199,9 +4141,9 @@ bool CheckCommand(char *Text, bool bMacroText )
 			}
 #endif// GUILD_WAR_EVENT
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
-			if(g_DuelMgr.IsDuelEnabled())	//. 자신이 결투중일때만 해지가능
+			if(g_DuelMgr.IsDuelEnabled())
 #else	// YDG_ADD_NEW_DUEL_SYSTEM
-			if(g_bEnableDuel)	//. 자신이 결투중일때만 해지가능
+			if(g_bEnableDuel)
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 			{
 				SendRequestDuelEnd();
@@ -4275,20 +4217,16 @@ bool CheckCommand(char *Text, bool bMacroText )
 				{
 					if( !strcmp(Text,GlobalText[1354]) || !stricmp(Text,"/union") )
 					{
-						// 길드연합 요청하기
 						SendRequestGuildRelationShip( 0x01, 0x01, HIBYTE(CharactersClient[SelectedCharacter].Key), LOBYTE(CharactersClient[SelectedCharacter].Key));
 					}
 					else if( !strcmp(Text,GlobalText[1356]) || !stricmp(Text,"/rival") )
 					{
-						// 적대길드 요청하기
 						SendRequestGuildRelationShip( 0x02, 0x01, HIBYTE(CharactersClient[SelectedCharacter].Key), LOBYTE(CharactersClient[SelectedCharacter].Key));
 					}
 					else
 					{
-						// 무릎꿇기
 						SetAction( &Hero->Object, PLAYER_RESPECT1 );
 						SendRequestAction( AT_RESPECT1, ((BYTE)((Hero->Object.Angle[2]+22.5f)/360.f*8.f+1.f)%8) );
-						// 적대길드 끊기
 						SendRequestGuildRelationShip( 0x02, 0x02, HIBYTE(CharactersClient[SelectedCharacter].Key), LOBYTE(CharactersClient[SelectedCharacter].Key));
 					}
 				}
@@ -4307,20 +4245,16 @@ bool CheckCommand(char *Text, bool bMacroText )
 					if(abs(Dir1-Dir2)==4) {
 						if( !strcmp(Text,GlobalText[1354]) || !stricmp(Text,"/union") )
 						{
-							// 길드연합 요청하기
 							SendRequestGuildRelationShip( 0x01, 0x01, HIBYTE(c->Key), LOBYTE(c->Key));
 						}
 						else if( !strcmp(Text,GlobalText[1356]) || !stricmp(Text,"/rival") )
 						{
-							// 적대길드 요청하기
 							SendRequestGuildRelationShip( 0x02, 0x01, HIBYTE(c->Key), LOBYTE(c->Key));
 						}
 						else
 						{
-							// 무릎꿇기
 							SetAction( &Hero->Object, PLAYER_RESPECT1 );
 							SendRequestAction( AT_RESPECT1, ((BYTE)((Hero->Object.Angle[2]+22.5f)/360.f*8.f+1.f)%8) );
-							// 적대길드 끊기
 							SendRequestGuildRelationShip( 0x02, 0x02, HIBYTE(c->Key), LOBYTE(c->Key));
 						}
 						break;
@@ -4346,22 +4280,19 @@ bool CheckCommand(char *Text, bool bMacroText )
 			{
 				CHARACTER *c = &CharactersClient[SelectedCharacter];
 				OBJECT *o = &c->Object;
-				if(o->Kind==KIND_PLAYER && c!=Hero && (o->Type==MODEL_PLAYER||c->Change) &&
-					abs(( c->PositionX)-( Hero->PositionX))<=1 &&
-					abs(( c->PositionY)-( Hero->PositionY))<=1)
+				if(o->Kind==KIND_PLAYER && c!=Hero && (o->Type==MODEL_PLAYER||c->Change) &&	abs(( c->PositionX)-( Hero->PositionX))<=1 && abs(( c->PositionY)-( Hero->PositionY))<=1)
 					SendRequestParty(CharactersClient[SelectedCharacter].Key);
 			}
 			else for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
 			{
 				CHARACTER *c = &CharactersClient[i];
 				OBJECT *o = &c->Object;	
-				if(o->Live && o->Kind==KIND_PLAYER && c!=Hero && (o->Type==MODEL_PLAYER||c->Change) &&
-					abs(( c->PositionX)-( Hero->PositionX))<=1 &&
-					abs(( c->PositionY)-( Hero->PositionY))<=1)
+				if(o->Live && o->Kind==KIND_PLAYER && c!=Hero && (o->Type==MODEL_PLAYER||c->Change) && abs(( c->PositionX)-( Hero->PositionX))<=1 && abs(( c->PositionY)-( Hero->PositionY))<=1)
 				{
 					BYTE Dir1 = (BYTE)((o->Angle[2]+22.5f)/360.f*8.f+1.f)%8;
 					BYTE Dir2 = (BYTE)((Hero->Object.Angle[2]+22.5f)/360.f*8.f+1.f)%8;
-					if(abs(Dir1-Dir2)==4) {
+					if(abs(Dir1-Dir2)==4) 
+					{
 						SendRequestParty(c->Key);
 						break;
 					}
@@ -4370,12 +4301,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 			return true;
 		}
 #ifdef CSK_ADD_GM_ABILITY
-		// GM캐릭터만 명령어가 작동하게 함.
-#ifdef PBG_MOD_GM_ABILITY
-		if((stricmp(Text, "/캐릭터명") == NULL) || (stricmp(Text, "/charactername") == NULL))
-#else //PBG_MOD_GM_ABILITY
-		if(stricmp(Text, "/캐릭터명") == NULL)
-#endif //PBG_MOD_GM_ABILITY
+		if(stricmp(Text, "/charactername") == NULL)
 		{
 			if(IsGMCharacter() == true)
 			{
@@ -4394,7 +4320,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 				sprintf(Name,"/%d",0);
 			if(Text[0]==Name[0] && Text[1]==Name[1])
 			{
-				//  "/파티, /거래"는 매크로가 되지 않는다.
 				if( CheckMacroLimit( Text )==true )
 				{
 					return  false;
@@ -4412,7 +4337,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 			}
 		}
 
-		// 필터 기능
 		char lpszFilter[] = "/filter";
 		if((strlen(GlobalText[753]) > 0 && strncmp(Text,GlobalText[753], strlen(GlobalText[753]))==NULL)
 			|| (strncmp(Text,lpszFilter, strlen(lpszFilter))==NULL))
@@ -4421,10 +4345,8 @@ bool CheckCommand(char *Text, bool bMacroText )
 		}
     }
 #ifdef CSK_FIX_MACRO_MOVEMAP
-	// 매크로에서 /이동 명령어 막는작업
 	else if(bMacroText == true)
 	{
-		// 이름 파악
 		char Name[256];
 
 		int iTextSize=0;
@@ -4435,10 +4357,8 @@ bool CheckCommand(char *Text, bool bMacroText )
 		}
 		Name[iTextSize] = NULL;
 
-		// 260 "/이동"
 		if(strcmp(Name, GlobalText[260]) == 0 || stricmp(Name, "/move") == 0)
 		{
-			// GM캐릭터는 /이동 명령어 먹어야 한다. // 자기 아이디에 webzen이 들어가 있으면
 			if(IsGMCharacter() == true || FindText2(Hero->ID, "webzen") == true)
 			{
 				return false;
@@ -4448,10 +4368,8 @@ bool CheckCommand(char *Text, bool bMacroText )
 	}
 #endif // CSK_FIX_MACRO_MOVEMAP
 	
-#ifdef LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG					
 	if(IsIllegalMovementByUsingMsg(Text))
 		return TRUE;
-#endif //LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG
 
 	for(int i=0; i<16*MAX_ITEM_INDEX; ++i)	
 	{
@@ -4461,11 +4379,8 @@ bool CheckCommand(char *Text, bool bMacroText )
 		{
 			char Name[256];
 			sprintf(Name,"/%s",p->Name);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 			if(stricmp(Text,Name) == NULL)
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			if(strcmp(Text,Name) == NULL)
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			{
 				g_csItemOption.ClearOptionHelper ();
 				
@@ -5007,7 +4922,7 @@ void AttackElf(CHARACTER *c, int Skill, float Distance)
 			if(!CheckArrow()) 
 				break;
 
-			if (gCharacterManager.GetEquipedBowType_Skill() == BOWTYPE_NONE)	// 활을 들어야 활성화
+			if (gCharacterManager.GetEquipedBowType_Skill() == BOWTYPE_NONE)
 				return;
 			o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
 
@@ -5178,7 +5093,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 		|| Skill == AT_SKILL_WHEEL
 		|| (AT_SKILL_TORNADO_SWORDA_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDA_UP+4)
 		|| (AT_SKILL_TORNADO_SWORDB_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDB_UP+4)
-#endif	// YDG_FIX_BLOCK_STAFF_WHEEL	// 정리할때 삭제할 부분
+#endif	// YDG_FIX_BLOCK_STAFF_WHEEL
 		|| Skill == AT_SKILL_GIGANTIC_STORM
 		|| Skill == AT_SKILL_GAOTIC
 		) )
@@ -5189,10 +5104,8 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
         {
             Success = false;
         }
-#ifdef PJH_FIX_4_BUGFIX_33
 		if(g_csItemOption.Special_Option_Check() == false && (Skill == AT_SKILL_ICE_BLADE || (AT_SKILL_POWER_SLASH_UP<= Skill && AT_SKILL_POWER_SLASH_UP + 5 > Skill)))
 			Success = false;
-#endif //PJH_FIX_4_BUGFIX_33
 
 #ifdef YDG_ADD_NEW_DUEL_UI
 		if (Skill==AT_SKILL_PARTY_TELEPORT && g_DuelMgr.IsDuelEnabled())
@@ -5201,12 +5114,10 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 		}
 #endif	// YDG_ADD_NEW_DUEL_UI
 		
-#ifdef YDG_ADD_DOPPELGANGER_UI
 		if (Skill==AT_SKILL_PARTY_TELEPORT && (IsDoppelGanger1() || IsDoppelGanger2() || IsDoppelGanger3() || IsDoppelGanger4()))
 		{
 			Success = false;
 		}
-#endif	// YDG_ADD_DOPPELGANGER_UI
 		
 		if( Skill == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP+4))
 		{
@@ -5436,15 +5347,15 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 
 						if( c->Helper.Type == MODEL_HELPER+37 )				
 						{
-							SetAction( o, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );		// 팬릴착용
+							SetAction( o, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );
 						}
 						else if((c->Helper.Type>=MODEL_HELPER+2) && (c->Helper.Type<=MODEL_HELPER+4))
 						{
-							SetAction( o, PLAYER_ATTACK_RIDE_STRIKE );		// 탈것착용 (다크호스포함)
+							SetAction( o, PLAYER_ATTACK_RIDE_STRIKE );
 						}
 						else
 						{
-							SetAction( o, PLAYER_ATTACK_STRIKE );				// 일반공격
+							SetAction( o, PLAYER_ATTACK_STRIKE );
 						}
 
 						vec3_t Light,Position,P,dp;
@@ -5468,7 +5379,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 						{
 							Position[0] = (o->Position[0] - 119.f) + (float)(rand()%240); 
 							Position[2] = (o->Position[2] + 49.f) + (float)(rand()%60); 
-							CreateJoint(BITMAP_2LINE_GHOST,Position,o->Position,o->Angle,0,o,20.f,o->PKKey,0,o->m_bySkillSerialNum);//클라이언트마법처리
+							CreateJoint(BITMAP_2LINE_GHOST,Position,o->Position,o->Angle,0,o,20.f,o->PKKey,0,o->m_bySkillSerialNum);
 						}
 						if(c==Hero && SelectedCharacter!=-1)
 						{
@@ -5706,7 +5617,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 				{
 					o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
 					
-                    // 대상 지점 상대 좌표 계산
                     int TargetX = (int)(c->TargetPosition[0]/TERRAIN_SCALE);
                     int TargetY = (int)(c->TargetPosition[1]/TERRAIN_SCALE);
                     if( CheckTile( c, o, Distance ) )

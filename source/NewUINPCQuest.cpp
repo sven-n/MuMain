@@ -404,10 +404,8 @@ void CNewUINPCQuest::RenderItem3D()
         {
 			int nItemType = (pQuest->QuestAct[i].wItemType*MAX_ITEM_INDEX)
 					+ pQuest->QuestAct[i].byItemSubType;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-            int nItemNum = pQuest->QuestAct[i].byItemNum;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-            int nItemLevel = pQuest->QuestAct[i].byItemLevel;
+
+			int nItemLevel = pQuest->QuestAct[i].byItemLevel;
 
             ::RenderItem3D(x, y, 20.f, Height, nItemType, nItemLevel<<3, 0, 0, false);
 

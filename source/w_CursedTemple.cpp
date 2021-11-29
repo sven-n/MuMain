@@ -35,10 +35,6 @@ extern char* g_lpszMp3[NUM_MUSIC];
 
 using namespace SEASON3A;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CursedTemple* CursedTemple::GetInstance()
 {
 	static CursedTemple s_Instance;
@@ -73,16 +69,12 @@ void CursedTemple::ResetCursedTemple()
 	m_IllusionPoint = 0;
 	m_ShowAlliedPointEffect = false;
 	m_ShowIllusionPointEffect = false;
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 	m_bGaugebarEnabled = false;
 	m_fGaugebarCloseTimer = 0;
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 }
 
 void CursedTemple::SetInterfaceState( bool state, int subtype )
 {
-	// 거래, 파티, 개인 상점을 막기 위해서..
-	// -1 일반적인 상황..0 대기실에서 30초, 래뒤 30초 전 경고 메세지에서 창 열기 못 함
 	if( subtype == -1 )
 	{
 		m_InterfaceState = state;
@@ -120,8 +112,7 @@ bool CursedTemple::GetInterfaceState( int type, int subtype )
 		{
 			return false;
 		}
-		else if( tempSubtype == COMMAND_TRADE || tempSubtype == COMMAND_PURCHASE 
-			  || tempSubtype == COMMAND_BATTLE || tempSubtype == COMMAND_END ) // COMMAND_END Pc방 포인트
+		else if( tempSubtype == COMMAND_TRADE || tempSubtype == COMMAND_PURCHASE || tempSubtype == COMMAND_BATTLE || tempSubtype == COMMAND_END )
 		{
 			return result;
 		}
@@ -166,8 +157,6 @@ bool CursedTemple::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 	if(!gMapManager.IsCursedTemple())
 		return false;
 
-	//몬스터가 스킬이 두개 이상일 경우 몬스터스킬 파일을 이용해서 스킬을 적용한다.
-	//스턴, 독
 	switch(c->MonsterIndex)
 	{
 	case 388:
@@ -188,7 +177,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
 
 	switch(iType)
 	{
-	case 380:	// 석상
+	case 380:
 		{
     		OpenNpc(MODEL_CURSEDTEMPLE_STATUE);
 			pCharacter = CreateCharacter(iKey,MODEL_CURSEDTEMPLE_STATUE,iPosX,iPosY);
@@ -199,7 +188,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
 			pCharacter->Object.PKKey = 0;
 		}
 		break;
-	case 381://Npc 연합군 장로
+	case 381:
 		{
 			OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_NPC);
 			pCharacter = CreateCharacter(iKey,MODEL_CURSEDTEMPLE_ALLIED_NPC,iPosX,iPosY);
@@ -207,7 +196,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
 			pCharacter->Object.Scale = 1.2f;
 		}
 		break;
-	case 382://Npc 환영교 장로
+	case 382:
 		{
 			OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION_NPC);
 			pCharacter = CreateCharacter(iKey,MODEL_CURSEDTEMPLE_ILLUSION_NPC,iPosX,iPosY);
@@ -215,7 +204,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
 			pCharacter->Object.Scale = 1.2f;
 		}
 		break;
-	case 383:	// 연합군 성물보관함
+	case 383:
 		{
     		OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_BASKET);
 			pCharacter = CreateCharacter(iKey,MODEL_CURSEDTEMPLE_ALLIED_BASKET,iPosX,iPosY);
@@ -225,7 +214,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
 			m_ShowAlliedPointEffect = false;
 		}
 		break;
-	case 384:	// 환영교단 성물보관함
+	case 384:
 		{
     		OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION__BASKET);
 			pCharacter = CreateCharacter(iKey,MODEL_CURSEDTEMPLE_ILLUSION__BASKET,iPosX,iPosY);
@@ -235,7 +224,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
 			m_ShowIllusionPointEffect = false;
 		}
 		break;
-	case 385: // Npc 미라주
+	case 385:
 		{
 			OpenNpc(MODEL_CURSEDTEMPLE_ENTER_NPC);
 			pCharacter = CreateCharacter(iKey,MODEL_CURSEDTEMPLE_ENTER_NPC,iPosX,iPosY);
@@ -288,7 +277,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
 		    pCharacter->Weapon[1].Type = -1;
 		}
 		break;
-	case 404: //"뮤연합군"
+	case 404:
 		{
 			pCharacter = CreateCharacter(iKey,MODEL_PLAYER,iPosX,iPosY);
 			strcpy(pCharacter->ID,"뮤연합");
@@ -296,7 +285,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
 			pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ALLIED_PLAYER;
 		}
 		break;
-	case 405: //"환영교단"
+	case 405:
 		{
 			pCharacter = CreateCharacter(iKey,MODEL_PLAYER,iPosX,iPosY);
 			strcpy(pCharacter->ID,"환영교단");
@@ -359,12 +348,10 @@ bool CursedTemple::MoveObject( OBJECT* o )
 {
 	if(!gMapManager.IsCursedTemple()) return false;
 
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
-	if (m_bGaugebarEnabled == true && WorldTime - m_fGaugebarCloseTimer > 3000.0f)	// 3초간 게이지 등록 금지
+	if (m_bGaugebarEnabled == true && WorldTime - m_fGaugebarCloseTimer > 3000.0f)
 	{
 		SetGaugebarEnabled(false);
 	}
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 
 	switch(gMapManager.WorldActive)
 	{
@@ -382,16 +369,16 @@ bool CursedTemple::MoveObject( OBJECT* o )
 			case 80:
 				o->BlendMeshLight = (float)sinf(WorldTime*0.0010f)*0.5f+0.5f;
 				break;
-			case 70:	// 안개박스시안
-			case 71:	// 안개박스연분홍
-			case 72:	// 안개박스통합
-			case 73:	// 흰안개박스
-			case 74:	// 검은안개박스
-			case 75:	// 유령안개박스
-			case 76:	// 토치불박스
-			case 77:	// 토치불박스
-			case 78:	// 돌떨어지는박스
-			case 79:	// 안개자욱박스	
+			case 70:
+			case 71:
+			case 72:
+			case 73:
+			case 74:
+			case 75:
+			case 76:
+			case 77:
+			case 78:
+			case 79:
 				o->HiddenMesh = -2;
 				break;
 			}
@@ -583,15 +570,15 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					vec3_t position;
 					VectorCopy( o->Position, position );
 					position[2] -= 100.f;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 					float Rotation = (int)WorldTime%3600/(float)10.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 					Vector ( 0.15f, 0.15f, 0.15f, o->Light );
 					CreateParticle(BITMAP_EFFECT, position, o->Angle, o->Light);
 					CreateParticle(BITMAP_EFFECT, position, o->Angle, o->Light, 3);
 				}
 				break;
-			case 70:	// 안개박스시안
+			case 70:
 				{
 					if(rand()%3 == 0)
 					{
@@ -601,7 +588,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					}
 				}
 				return true;
-			case 71:	// 안개박스연분홍
+			case 71:
 				{
 					if(rand()%3 == 0)
 					{
@@ -611,7 +598,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					}
 				}
 				return true;
-			case 72:	// 안개박스통합
+			case 72:
 				{
 					if(rand()%3 == 0)
 					{
@@ -623,7 +610,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					}
 				}
 				return true;	
-			case 73:	// 흰안개박스
+			case 73:
 				{
 					if(rand()%3 == 0)
 					{
@@ -633,7 +620,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					}
 				}
 				return true;
-			case 74:	// 검은안개박스
+			case 74:
 				{
 					if(rand()%2 == 0)
 					{
@@ -642,7 +629,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					}
 				}
 				return true;
-			case 75:	// 유령안개박스
+			case 75:
 				{
 					if(rand()%35 == 5)
 					{
@@ -652,7 +639,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					}
 				}
 				return true;
-			case 76:	// 붉은토치불박스
+			case 76:
 				{
 					float fLumi = (rand()%100)*0.01;
 					//Vector(180.f/255.f+fLumi, 71.f/255.f, 55.f/255.f, Light);
@@ -668,7 +655,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					CreateSprite(BITMAP_LIGHT, vPos, o->Scale*6.f, Light, o);
 				}
 				return true;
-			case 77:	// 시안토치불박스
+			case 77:
 				{
 					float fLumi = (rand()%100)*0.005;
 					Vector(55.f/256.f, 71.f/256.f, 180.f/256.f+fLumi, Light);
@@ -684,7 +671,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					CreateSprite(BITMAP_LIGHT, vPos, o->Scale*6.f, Light, o);
 				}
 				return true;	
-			case 78:	// 돌떨어지는박스
+			case 78:
 				{
 					int iTime = timeGetTime()%500;
 					int iRand = rand()%485;
@@ -707,7 +694,7 @@ bool CursedTemple::RenderObjectVisual( OBJECT* o, BMD* b )
 					}
 				}
 				return true;
-			case 79:	// 안개자욱박스
+			case 79:
 				{
 					if(rand()%1 == 0)
 					{
@@ -926,28 +913,28 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case MODEL_CURSEDTEMPLE_STATUE:	// 석상
+	case MODEL_CURSEDTEMPLE_STATUE:
  		if (o->CurrentAction == MONSTER01_DIE)
 		{
 			vec3_t vRelativePos, vWorldPos, Light;
 			Vector(1.0f,1.0f,1.0f,Light);
 			Vector(0.f, 0.f, 0.f, vRelativePos);
 			b->TransformPosition(o->BoneTransform[13], vRelativePos, vWorldPos, true);
-			vRelativePos[0] = vWorldPos[0];	// 보관
-			vRelativePos[1] = vWorldPos[1];	// 보관
-			vRelativePos[2] = vWorldPos[2];	// 보관
+			vRelativePos[0] = vWorldPos[0];
+			vRelativePos[1] = vWorldPos[1];
+			vRelativePos[2] = vWorldPos[2];
 			if (o->PKKey == 0)
 			{
-				o->PKKey = 1;	// 한번만 실행
+				o->PKKey = 1;
                 EarthQuake = (float)(rand()%16-8)*0.1f;
 				vWorldPos[2] = vRelativePos[2] + 250;
-				CreateEffect(MODEL_CURSEDTEMPLE_STATUE_PART2,vWorldPos,o->Angle,Light,0,o,0,0);	// 머리
+				CreateEffect(MODEL_CURSEDTEMPLE_STATUE_PART2,vWorldPos,o->Angle,Light,0,o,0,0);
 				for (int i = 0; i < 60; ++i)
 				{
 					vWorldPos[0] = vRelativePos[0] + rand()%80-40;
 					vWorldPos[1] = vRelativePos[1] + rand()%80-40;
 					vWorldPos[2] = vRelativePos[2] + (rand()%250);
-					CreateEffect(MODEL_CURSEDTEMPLE_STATUE_PART1,vWorldPos,o->Angle,Light,0,o,0,0);	// 돌들
+					CreateEffect(MODEL_CURSEDTEMPLE_STATUE_PART1,vWorldPos,o->Angle,Light,0,o,0,0);
 				}
 				Vector(0.5f,0.5f,0.5f,Light);
 
@@ -956,7 +943,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					vWorldPos[0] = vRelativePos[0] + rand()%140-70;
 					vWorldPos[1] = vRelativePos[1] + rand()%140-70;
 					vWorldPos[2] = vRelativePos[2] + (rand()%400)-100;
-					CreateParticle(BITMAP_SMOKE,vWorldPos,o->Angle,Light,48,1.0f);	// 연기
+					CreateParticle(BITMAP_SMOKE,vWorldPos,o->Angle,Light,48,1.0f);
 				}
 			}
 
@@ -967,20 +954,20 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			Vector(0.2f,0.3f,0.4f+(rand()%3)*0.1f,Light);
 			Vector(0.f, 0.f, 0.f, vRelativePos);
 			b->TransformPosition(o->BoneTransform[13], vRelativePos, vWorldPos, true);
-			CreateParticle(BITMAP_FLARE+1,vWorldPos,o->Angle,Light,0,0.15f);	// 말려올라감
+			CreateParticle(BITMAP_FLARE+1,vWorldPos,o->Angle,Light,0,0.15f);
 			vWorldPos[2] += 30;
- 			CreateParticle(BITMAP_LIGHT,vWorldPos,o->Angle,Light,1,8.0f);	// 몸통 빛
+ 			CreateParticle(BITMAP_LIGHT,vWorldPos,o->Angle,Light,1,8.0f);
 
 			vWorldPos[2] += 160;
 			Vector(0.2f,0.1f,0.0f,Light);
 			b->TransformPosition(o->BoneTransform[14], vRelativePos, vWorldPos, true);
- 			CreateParticle(BITMAP_LIGHT,vWorldPos,o->Angle,Light,1,4.0f);	// 돌맹이 빛
+ 			CreateParticle(BITMAP_LIGHT,vWorldPos,o->Angle,Light,1,4.0f);
 		}
 		return true;
-	case MODEL_CURSEDTEMPLE_ALLIED_BASKET:	// 연합군 보관함
+	case MODEL_CURSEDTEMPLE_ALLIED_BASKET:
 		{
 			vec3_t vRelativePos, vWorldPos, Light;
-			if (m_ShowAlliedPointEffect)	// 빛 번쩍
+			if (m_ShowAlliedPointEffect)
 			{
 				Vector(1.0f,1.0f,0.5f,Light);
 				Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -994,10 +981,10 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case MODEL_CURSEDTEMPLE_ILLUSION__BASKET:	// 환영교단 보관함
+	case MODEL_CURSEDTEMPLE_ILLUSION__BASKET:
 		{
 			vec3_t vRelativePos, vWorldPos, Light;
-			if (m_ShowIllusionPointEffect)	// 빛 번쩍
+			if (m_ShowIllusionPointEffect)
 			{
 				Vector(0.5f,1.0f,1.0f,Light);
 				Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -1022,47 +1009,37 @@ void CursedTemple::UpdateTempleSystemMsg(int _Value)
 	switch(_Value)
 	{
 	case 0:
-		//0 : 성공
 		break;
 	case 1:
-		//1 : 알맞은 피의 두루마리 없음
 		break;
 	case 2:
-		//2 : 들어갈수 있는 시간이 아님
 		break;
 	case 3:	
-		//3 : 피의 두루마리는 맞으나 자신의 레벨과 맞지 않음
 		g_pChatListBox->AddText("", GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 	case 4:
-		//4 : 인원제한이 넘었음
 		g_pChatListBox->AddText("", GlobalText[2368], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 	case 5:
-		//5 : 1일 입장제한 횟수를 넘었음 (입장제한 횟수가 있는국가만 들어옴)
 		unicode::_sprintf(szText, GlobalText[829], 6);
 		g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 	case 6:
-		//6 : 입장료가 모자란다
 		break;
 	case 7:
-		//7 : 카오유저는 입장할 수 없다
 		g_pChatListBox->AddText("", GlobalText[2865], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 	case 8:
-		//8 : 변신반지를 착용하고 입장할 수 없다
 		g_pChatListBox->AddText("", GlobalText[2175], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 	}
 }
 #endif //PBG_FIX_CURSEDTEMPLE_SYSTEMMSG
 
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 void CursedTemple::SetGaugebarEnabled(bool bFlag)
 {
 	m_bGaugebarEnabled = bFlag;
-	m_fGaugebarCloseTimer = WorldTime + 10000000.0f;	// 의미없는 큰 시간
+	m_fGaugebarCloseTimer = WorldTime + 10000000.0f;
 }
 
 void CursedTemple::SetGaugebarCloseTimer()
@@ -1074,7 +1051,6 @@ bool CursedTemple::IsGaugebarEnabled()
 {
 	return m_bGaugebarEnabled; 
 }
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 
 bool CursedTemple::RenderObjectMesh( OBJECT* o, BMD* b, bool ExtraMon )
 {
@@ -1082,40 +1058,30 @@ bool CursedTemple::RenderObjectMesh( OBJECT* o, BMD* b, bool ExtraMon )
 	
 	switch(o->Type) 
 	{
-	case MODEL_CURSEDTEMPLE_STATUE:	// 석상
+	case MODEL_CURSEDTEMPLE_STATUE:
  		if (o->CurrentAction != MONSTER01_DIE)
 		{
-			// 석상
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-			// 받침대
  			b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(1, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
- 			// 구슬
 			b->RenderMesh(3, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(3, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(2, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
- 			// 소용돌이
 			b->RenderMesh(4, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-			// 바닥 이펙트?
  			b->RenderMesh(5, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		}
 		return true;
-	case MODEL_CURSEDTEMPLE_ALLIED_BASKET:	// 연합군 보관함
-		// 밑둥 그릇
+	case MODEL_CURSEDTEMPLE_ALLIED_BASKET:
 		b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		// 보관함 속 이펙트
 		b->RenderMesh(1, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		// 보관함 위 이펙트
 		b->RenderMesh(2, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderMesh(2, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		return true;
-	case MODEL_CURSEDTEMPLE_ILLUSION__BASKET:	// 환영교단 보관함
-		// 밑둥 그릇
+	case MODEL_CURSEDTEMPLE_ILLUSION__BASKET:
 		b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderMesh(1, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		// 보관함 속 이펙트
 		b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		return true;
@@ -1241,12 +1207,10 @@ void CursedTemple::ReceiveCursedTempleInfo( BYTE* ReceiveBuffer )
 	
 	if( m_AlliedPoint != data->btAlliedPoint )
 	{
-		// 연합군 성물 보관함 이펙트
 		m_ShowAlliedPointEffect = true;
 	}
 	else if( m_IllusionPoint != data->btIllusionPoint )
 	{
-		// 환영교단 성물 보관함 이펙트
 		m_ShowIllusionPointEffect = true;
 	}
 	m_AlliedPoint   = data->btAlliedPoint;
@@ -1254,7 +1218,6 @@ void CursedTemple::ReceiveCursedTempleInfo( BYTE* ReceiveBuffer )
 
 	if( m_HolyItemPlayerIndex != 0xffff && data->btUserIndex == 0xffff )
 	{
-		//무조건 지우기
 		DeleteEffect( MODEL_CURSEDTEMPLE_HOLYITEM );
 	}
 	
@@ -1265,12 +1228,10 @@ void CursedTemple::ReceiveCursedTempleInfo( BYTE* ReceiveBuffer )
 
 		if( holyitemcharacterindex != MAX_CHARACTERS_CLIENT )
 		{
-			//뷰포터에 있는 사람만..
 			CHARACTER* c = &CharactersClient[holyitemcharacterindex];
 			OBJECT* o    = &c->Object;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			OBJECT* ho    = &Hero->Object;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 		
 			if( o->Live && !SearchEffect( MODEL_CURSEDTEMPLE_HOLYITEM, o ) )
 			{
@@ -1282,9 +1243,9 @@ void CursedTemple::ReceiveCursedTempleInfo( BYTE* ReceiveBuffer )
 				VectorCopy(o->Position,b->BodyOrigin);
 
 				float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 				float fSpeedPerFrame = fActionSpeed/10.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 				float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 				
 				b->Animation(BoneTransform,fAnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);

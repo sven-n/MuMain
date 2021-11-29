@@ -23,7 +23,6 @@
 #include "GMCrywolf1st.h"
 #include "GM3rdChangeUp.h"
 #include "MapManager.h"
-// 맵 관련 include
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM
@@ -34,15 +33,9 @@
 int RainTarget = 0;
 int RainCurrent = 0;
 
-// 악마의 광장 비
 static  int RainSpeed = 30;
 static  int RainAngle = 0;
 static  int RainPosition = 0;
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 불 효과 생성(배경의 횟불 같은데 쓰임)
-///////////////////////////////////////////////////////////////////////////////
 
 void CreateBonfire(vec3_t Position,vec3_t Angle)
 {
@@ -532,14 +525,7 @@ void RenderLeaves()
 			)
 		{
             BindTexture(o->Type);
-			if(gMapManager.WorldActive == WD_2DEVIAS 
-#ifdef CSK_ADD_MAP_ICECITY	
-				|| IsIceCity()
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_MAP_SANTA_TOWN
-				|| IsSantaTown()
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-				)
+			if(gMapManager.WorldActive == WD_2DEVIAS || IsIceCity()	|| IsSantaTown())
 			{
 				RenderSprite(o->Type,o->Position,o->Scale,o->Scale,o->Light);
 			}

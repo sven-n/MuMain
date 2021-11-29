@@ -112,13 +112,13 @@ void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT *pObj, int iType)
 	switch(c->Object.SubType)
 	{
 	case MODEL_XMAS_EVENT_CHA_SSANTA:
-		::strcpy(c->ID, GlobalText[2245]);	// 2245 "산타할아버지"
+		::strcpy(c->ID, GlobalText[2245]);	// 2245
 		break;
 	case MODEL_XMAS_EVENT_CHA_DEER:
-		::strcpy(c->ID, GlobalText[2246]);	// 2246 "루돌프"
+		::strcpy(c->ID, GlobalText[2246]);	// 2246
 		break;
 	case MODEL_XMAS_EVENT_CHA_SNOWMAN:
-		::strcpy(c->ID, GlobalText[2247]);	// 2247 "눈사람"
+		::strcpy(c->ID, GlobalText[2247]);	// 2247
 		break;
 	}
 
@@ -136,7 +136,6 @@ void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT *pObj, int iType)
 	o->CurrentAction = pObj->CurrentAction;
 	o->AnimationFrame = pObj->AnimationFrame;
 
-	// 나타날 때 폭발씬 이펙트
 	vec3_t vPos, vLight;
 	Vector(0.6f, 0.6f, 0.6f, vLight);
 
@@ -210,10 +209,6 @@ void CXmasEvent::GenID()
 	m_iEffectID++;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-// 새해 이벤트
-///////////////////////////////////////////////////////////////////////////////////////////////////////
 CNewYearsDayEvent::CNewYearsDayEvent()
 {
 
@@ -274,14 +269,12 @@ CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int
 
 bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(c == NULL)	return false;
 	if(o == NULL)	return false;
 	if(b == NULL)	return false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+122:	// 복주머니
+	case MODEL_MONSTER01+122:
 		{
 			vec3_t vRelativePos, vWorldPos;
 			Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -294,11 +287,9 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			{
 				if(rand()%3 == 0)
 				{
-					// 밥통 노란색 연기
 					Vector(1.0f, 0.4f, 0.0f, vLight);
 					CreateParticle(BITMAP_LIGHT+2, vWorldPos, o->Angle, vLight, 0, 0.28f);
 
-					// 빤짝이는거 튀는거
 					if(rand()%2 == 0)
 					{
 						Vector(0.8f, 0.6f, 0.1f, vLight);
@@ -321,7 +312,6 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			{
 				if(rand()%3 == 0)
 				{
-					// 밥통 노란색 연기
 					Vector(1.0f, 0.4f, 0.0f, vLight);
 					float fScale;
 					if(o->CurrentAction == MONSTER01_SHOCK)	fScale = 0.4f;
@@ -329,7 +319,6 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 						
 					CreateParticle(BITMAP_LIGHT+2, vWorldPos, o->Angle, vLight, 0, fScale);
 
-					// 빤짝이는거 튀는거
 					for(int i=0; i<5; ++i)
 					{
 						if(rand()%2 == 0)
@@ -351,7 +340,6 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 				}
 				if(rand()%2 == 0)
 				{
-					// 흰 연기
 					Vector(0.3f, 0.3f, 0.8f, vLight);
 					CreateParticle(BITMAP_LIGHT+2, vWorldPos, o->Angle, vLight, 1, 1.f);
 				}
@@ -359,14 +347,12 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 
 			if(o->CurrentAction == MONSTER01_DIE)
 			{
-				// 폭발
 				if(o->AnimationFrame <= 0.3f)
 				{
 					o->m_iAnimation = rand()%6 + MODEL_NEWYEARSDAY_EVENT_BEKSULKI;
 					CreateParticle(BITMAP_EXPLOTION, vWorldPos, o->Angle, vLight, 0, 0.5f);
 					if(rand()%4 == 0) o->m_iAnimation = MODEL_NEWYEARSDAY_EVENT_PIG;
 
-					// 죽을때 사운드
 					PlayBuffer(SOUND_NEWYEARSDAY_DIE);
 				}
 				

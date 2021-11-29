@@ -43,10 +43,6 @@
 #include "NewUINPCShop.h"
 #include "MixMgr.h"
 
-//////////////////////////////////////////////////////////////////////////
-//						 												//
-//////////////////////////////////////////////////////////////////////////
-
 extern int g_iKeyPadEnable;
 extern int g_iChatInputType;
 extern DWORD g_dwMouseUseUIID;
@@ -64,17 +60,13 @@ extern int   ShopInventoryStartY;
 
 extern bool g_bTradeEndByOppenent;
 
-bool HeroInventoryEnable       = false; //  캐릭터 장비창.
-bool GuildListEnable           = false; //  길드 리스트.
-bool EnableGuildInterface      = false; //  
-bool StorageInventoryEnable    = false; //  창고.
-bool MixInventoryEnable        = false; //  조합기.
+bool HeroInventoryEnable       = false;
+bool GuildListEnable           = false;
+bool EnableGuildInterface      = false;  
+bool StorageInventoryEnable    = false;
+bool MixInventoryEnable        = false;
 bool g_bPersonalShopWnd		   = false;
-bool g_bServerDivisionEnable   = false; //  서버분할창.
-
-//////////////////////////////////////////////////////////////////////////
-//						 												//
-//////////////////////////////////////////////////////////////////////////
+bool g_bServerDivisionEnable   = false;
 
 CUIManager::CUIManager()
 {
@@ -121,19 +113,17 @@ POINT CUIManager::RenderWindowBase( int nHeight, int nOriginY )
 		fPosY = nOriginY;
 	POINT ptPos = { fPosX, fPosY };
 
-	// 위쪽외곽 그리기
 	RenderBitmap( BITMAP_INTERFACE+22, fPosX, fPosY, nWidth, 5, 0.f, 0.f, nWidth/256.f, 5.f/8.f );
 	fPosY += 5;
 
-	// 가운데부분 40 단위로 그리고 (비트맵크기때문)
-	int nBodyHeight = nHeight - 10;		// 가로높이에서 위아래 외곽을 뺀 크기
+	int nBodyHeight = nHeight - 10;
 	int nPatternCount = nBodyHeight / 40;
 	for( int i=0; i<nPatternCount; ++i )
 	{
 		RenderBitmap( BITMAP_INTERFACE+21, fPosX, fPosY, nWidth, 40, 0.f, 0.f, nWidth/256.f, 40.f/64.f );
 		fPosY += 40;
 	}
-	// 남은 부분 그리기 (나머지는 비트맵을 잘라서 그린다)
+
 	if( nBodyHeight > nPatternCount*40 )
 	{
 		float fRate = (float)( nBodyHeight-nPatternCount*40 ) / 40.0f;
@@ -141,7 +131,6 @@ POINT CUIManager::RenderWindowBase( int nHeight, int nOriginY )
 		fPosY += 40*fRate;
 	}
 
-	// 아래쪽외곽 그리기
 	RenderBitmap( BITMAP_INTERFACE+22, fPosX, fPosY, nWidth, 5, 0.f, 0.f, nWidth/256.f, 5.f/8.f );
 
 	glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -150,17 +139,13 @@ POINT CUIManager::RenderWindowBase( int nHeight, int nOriginY )
 	return ptPos;
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 bool CUIManager::PressKey( int nKey )
 {
 	return false;
 }
-#endif // #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 bool CUIManager::IsInputEnable()
 {
-	// 개선된 입력창 미사용시 이것먼저 체크해서 결과 반환
 	if( InputEnable || GuildInputEnable || (g_pUIPopup->GetPopupID() != 0 && g_pUIPopup->IsInputEnable()) )
 		return true;
 	if( GetFocus() == g_hWnd )
@@ -179,7 +164,6 @@ void CUIManager::Render()
 
 void CUIManager::CloseAll()
 {
-	// 모든 창 닫기
 	for( DWORD dwInterface=INTERFACE_FRIEND ; dwInterface<INTERFACE_MAX_COUNT ; ++dwInterface )
 	{
 		if( g_pUIManager->IsOpen( dwInterface ) )

@@ -76,22 +76,22 @@ namespace SEASON3B
 		POINT m_Pos;
 
 		CNewUIRadioGroupButton	m_TabBtn;
-		int						m_iNumCurOpenTab;		// 현재 열려있는 탭버튼번호
-		int						m_iCurrMsgBoxRequest;	// 메시지 박스 요청 내용
+		int						m_iNumCurOpenTab;
+		int						m_iCurrMsgBoxRequest;
 
 		CNewUIButton m_BtnExit;
 		
-		CNewUIButton m_BtnBuy;				// 구입 버튼
-		CNewUIButton m_BtnRepair;			// 수리 버튼
-		CNewUIButton m_BtnUpgradeHP;		// HP 업그레이트 버튼
-		CNewUIButton m_BtnUpgradeDefense;	// 방어력 업그레이드 버튼
-		CNewUIButton m_BtnUpgradeRecover;	// 회복기능 업그레이드 버튼
-		CNewUIButton m_BtnApplyTax;			// 세금조절 - 적용버튼
-		CNewUIButton m_BtnWithdraw;			// 세금조절 - 출금버튼
-		CNewUIButton m_BtnChaosTaxUp;		// 세금조절 - 카오스 up
-		CNewUIButton m_BtnChaosTaxDn;		// 세금조절 - 카오스 down
-		CNewUIButton m_BtnNPCTaxUp;			// 세금조절 - NPC up
-		CNewUIButton m_BtnNPCTaxDn;			// 세금조절 - NPC down
+		CNewUIButton m_BtnBuy;
+		CNewUIButton m_BtnRepair;
+		CNewUIButton m_BtnUpgradeHP;
+		CNewUIButton m_BtnUpgradeDefense;
+		CNewUIButton m_BtnUpgradeRecover;
+		CNewUIButton m_BtnApplyTax;
+		CNewUIButton m_BtnWithdraw;
+		CNewUIButton m_BtnChaosTaxUp;
+		CNewUIButton m_BtnChaosTaxDn;
+		CNewUIButton m_BtnNPCTaxUp;
+		CNewUIButton m_BtnNPCTaxDn;
 	public:
 		CNewUICastleWindow();
 		virtual ~CNewUICastleWindow();
@@ -121,9 +121,7 @@ namespace SEASON3B
 
 		void SetCurrMsgBoxRequest(int iMsgBoxRequest) { m_iCurrMsgBoxRequest = iMsgBoxRequest; }
 		void InsertComma(unicode::t_char * pszText, DWORD dwNumber);
-#ifdef YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
 		void InsertComma64(unicode::t_char * pszText, __int64 iNumber);
-#endif	// YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
 
 		void UpdateGateManagingTab();
 		void UpdateStatueManagingTab();

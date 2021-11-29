@@ -1,8 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 
-// 
-//
-// 
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -92,13 +88,12 @@ void CUIWindowMgr::Reset()
 	{
 		GetFriendMainWindow()->Reset();
 	}
-	if (g_iChatInputType == 0) SendRequestChangeState(2);	// 구버전 채팅 사용 알림
+	if (g_iChatInputType == 0) SendRequestChangeState(2);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const char* pszTitle, DWORD dwParentID, int iOption)
 {
-	if (g_iChatInputType == 0/* || g_dwTopWindow != 0*/) return 0;	// 윈도우 생성 금지
+	if (g_iChatInputType == 0/* || g_dwTopWindow != 0*/) return 0;
 	CUIBaseWindow * pbw = NULL;
 
 	switch(iWindowType)
@@ -132,45 +127,46 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const cha
 			g_pFriendMenu->SetNewMailAlert(FALSE);
 			if (IsServerEnable() == FALSE)
 			{
-				// 서버 죽었을때 친구창 열면 서버에 0xC0 보내서 서버 재접속 알림
 				SendRequestFriendList();
 			}
 		}
 		else return 0;
 		break;
 	case UIWNDTYPE_TEXTINPUT:
-		if (g_dwTopWindow != 0) return 0;	// 윈도우 생성 금지
+		if (g_dwTopWindow != 0) return 0;
 		pbw = new CUITextInputWindow;
 		{
 			CUIFriendWindow * pMainWnd = (CUIFriendWindow *)GetWindow(m_dwMainWindowUIID);
 			if (pMainWnd != NULL)
 				pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
 		}
-		g_dwTopWindow = pbw->GetUIID();	// 다른 윈도우 정지
+		g_dwTopWindow = pbw->GetUIID();
 		break;
 	case UIWNDTYPE_QUESTION:
-		if (g_dwTopWindow != 0) return 0;	// 윈도우 생성 금지
+		if (g_dwTopWindow != 0) 
+			return 0;
+		break;
 	case UIWNDTYPE_QUESTION_FORCE:
 		pbw = new CUIQuestionWindow(0);
 		{
 			CUIFriendWindow * pMainWnd = (CUIFriendWindow *)GetWindow(m_dwMainWindowUIID);
 
 			if (pMainWnd != NULL)
-				pMainWnd->AddWindow(pbw->GetUIID(), GlobalText[991]);	// "질문"
+				pMainWnd->AddWindow(pbw->GetUIID(), GlobalText[991]);
 		}
-		if (iWindowType == UIWNDTYPE_QUESTION) g_dwTopWindow = pbw->GetUIID();	// 다른 윈도우 정지
+		if (iWindowType == UIWNDTYPE_QUESTION) g_dwTopWindow = pbw->GetUIID();
 		else AddForceTopWindowList(pbw->GetUIID());
 		break;
 	case UIWNDTYPE_OK:
-		if (g_dwTopWindow != 0) return 0;	// 윈도우 생성 금지
+		if (g_dwTopWindow != 0) return 0;
 	case UIWNDTYPE_OK_FORCE:
 		pbw = new CUIQuestionWindow(1);
 		{
 			CUIFriendWindow * pMainWnd = (CUIFriendWindow *)GetWindow(m_dwMainWindowUIID);
 			if (pMainWnd != NULL)
-				pMainWnd->AddWindow(pbw->GetUIID(), GlobalText[228]);	// "확인"
+				pMainWnd->AddWindow(pbw->GetUIID(), GlobalText[228]);
 		}
-		if (iWindowType == UIWNDTYPE_OK) g_dwTopWindow = pbw->GetUIID();	// 다른 윈도우 정지
+		if (iWindowType == UIWNDTYPE_OK) g_dwTopWindow = pbw->GetUIID();
 		else AddForceTopWindowList(pbw->GetUIID());
 		break;
 	case UIWNDTYPE_READLETTER:
@@ -183,7 +179,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const cha
 		}
 		break;
 	case UIWNDTYPE_WRITELETTER:
-		if (g_dwTopWindow != 0) return 0;	// 윈도우 생성 금지
+		if (g_dwTopWindow != 0) return 0;
 		pbw = new CUILetterWriteWindow;
 		if (m_dwMainWindowUIID != 0)
 		{
@@ -215,7 +211,6 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const cha
 					if (iPos_y % 10 == 9)
 					{
 						delete pbw;
-						assert(!"너무 많은 윈도우");
 						return 0;
 					}
 					iPos_x = iPos_y = iPos_y % 10 + 1;
@@ -324,7 +319,6 @@ void CUIWindowMgr::Render()
 	}
 	m_bRenderFrame = TRUE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIWindowMgr::DoAction()
 {
@@ -353,7 +347,7 @@ void CUIWindowMgr::DoAction()
 
 	if (m_dwMainWindowUIID > 0 && GetFriendMainWindow()->GetState() == UISTATE_HIDE)
 	{
-		CloseMainWnd();	// 메인창 숨김 = 닫음
+		CloseMainWnd();
 	}
 
 	for (m_WindowReverseArrangeListIter = m_WindowArrangeList.rbegin(); m_WindowReverseArrangeListIter != m_WindowArrangeList.rend(); ++m_WindowReverseArrangeListIter)
@@ -369,8 +363,8 @@ void CUIWindowMgr::DoAction()
 
 	while (m_MessageList.empty() == FALSE)
 	{
-		GetUIMessage();		// 메시지 가져오기
-		HandleMessage();	// 메시지 처리
+		GetUIMessage();
+		HandleMessage();
 	}
 
 	m_bRenderFrame = FALSE;
@@ -398,7 +392,7 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
 	{
 		if ((bMainClose == TRUE || m_WindowMapIter->first != m_dwMainWindowUIID) && m_WindowMapIter->first != g_dwTopWindow)
 		{
-			if (bHide == TRUE)	// 숨기기
+			if (bHide == TRUE)
 			{
 				if (m_WindowMapIter->second->GetState() == UISTATE_NORMAL)
 				{
@@ -406,7 +400,7 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
 					m_WindowMapIter->second->SetState(UISTATE_HIDE);
 				}
 			}
-			else	// 보이기
+			else
 			{
 				for (std::list<DWORD>::iterator iter = m_HideWindowList.begin(); iter != m_HideWindowList.end(); ++iter)
 				{
@@ -484,7 +478,6 @@ CUIBaseWindow * CUIWindowMgr::GetWindow(DWORD dwUIID)
 		m_WindowMapIter = m_WindowFindMap.find(dwUIID);
 		if (m_WindowMapIter == m_WindowFindMap.end())
 		{
-			//assert(!"윈도우찾기실패");
 			return NULL;
 		}
 		else
@@ -529,10 +522,11 @@ void CUIWindowMgr::SendUIMessageToWindow(DWORD dwUIID, int iMessage, int iParam1
 
 void CUIWindowMgr::HandleMessage()
 {
-	assert(m_WorkMessage.m_iParam1 != 0 && "Param1이 0");
+	assert(m_WorkMessage.m_iParam1 != 0 && "Error Handle message");
+
 	switch(m_WorkMessage.m_iMessage)
 	{
-	case UI_MESSAGE_SELECT:	// 윈도우 선택
+	case UI_MESSAGE_SELECT:	
 		if (m_WorkMessage.m_iParam1 != 0 && GetWindow(m_WorkMessage.m_iParam1) != NULL)
 		{
 			if (GetWindow(m_WorkMessage.m_iParam1)->HaveTextBox() == FALSE)
@@ -548,11 +542,8 @@ void CUIWindowMgr::HandleMessage()
 
 			m_WindowArrangeListIter = m_WindowArrangeList.end();
 			--m_WindowArrangeListIter;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 			if ((int)(*m_WindowArrangeListIter) != m_WorkMessage.m_iParam1 || GetFocus() == g_hWnd)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			if (*m_WindowArrangeListIter != m_WorkMessage.m_iParam1 || GetFocus() == g_hWnd)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			{
 				m_WindowArrangeList.remove(m_WorkMessage.m_iParam1);
 				m_WindowArrangeList.push_back(m_WorkMessage.m_iParam1);
@@ -567,11 +558,8 @@ void CUIWindowMgr::HandleMessage()
 	case UI_MESSAGE_HIDE:
 		if (m_WorkMessage.m_iParam1 != 0)
 		{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 			if (g_dwTopWindow != 0 && m_dwMainWindowUIID != 0 && m_WorkMessage.m_iParam1 == (int)m_dwMainWindowUIID) break;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			if (g_dwTopWindow != 0 && m_dwMainWindowUIID != 0 && m_WorkMessage.m_iParam1 == m_dwMainWindowUIID) break;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 			PlayBuffer(SOUND_CLICK01);
 			ShowHideWindow(m_WorkMessage.m_iParam1, FALSE);
 			m_WindowArrangeList.remove(m_WorkMessage.m_iParam1);
@@ -610,7 +598,7 @@ void CUIWindowMgr::HandleMessage()
 			}
 		}
 		break;
-	case UI_MESSAGE_CLOSE:	// 윈도우 삭제
+	case UI_MESSAGE_CLOSE:
 		if (m_WorkMessage.m_iParam1 != 0)
 		{
 			PlayBuffer(SOUND_CLICK01);
@@ -644,14 +632,10 @@ void CUIWindowMgr::HandleMessage()
 			}
 		}
 		break;
-	case UI_MESSAGE_BOTTOM:	// 윈도우 순서 맨 밑으로
+	case UI_MESSAGE_BOTTOM:
 		if (m_WorkMessage.m_iParam1 != 0 && GetWindow(m_WorkMessage.m_iParam1) != NULL)
 		{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 			if ((int)(*m_WindowArrangeList.begin()) != m_WorkMessage.m_iParam1)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			if (*m_WindowArrangeList.begin() != m_WorkMessage.m_iParam1)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			{
 				m_WindowArrangeList.remove(m_WorkMessage.m_iParam1);
 				m_WindowArrangeList.push_front(m_WorkMessage.m_iParam1);
@@ -665,12 +649,11 @@ void CUIWindowMgr::HandleMessage()
 
 void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
 {
-	g_pWindowMgr->HideAllWindowClear();	// 숨김 윈도우 저장 취소
+	g_pWindowMgr->HideAllWindowClear();
 	if (g_iChatInputType == 0)
 	{
 		if (g_pChatListBox->CheckChatRedundancy(GlobalText[992], 2) == FALSE)
 			g_pChatListBox->AddText("",GlobalText[992],SEASON3B::TYPE_SYSTEM_MESSAGE);
-		// "친구기능을 사용할 수 없습니다. 옵션에서 개선된 입력창 사용을 체크해주세요."
 		return;
 	}
 	int iLevel = CharacterAttribute->Level;
@@ -678,7 +661,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
 	if (iLevel < 6)
 	{
 		if (g_pChatListBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
-			g_pChatListBox->AddText("",GlobalText[1067],SEASON3B::TYPE_SYSTEM_MESSAGE);	// "레벨 6부터 내친구 기능 사용이 가능합니다."
+			g_pChatListBox->AddText("",GlobalText[1067],SEASON3B::TYPE_SYSTEM_MESSAGE);
 		return;
 	}
 
@@ -698,7 +681,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
 	}
 	if (m_iMainWindowWidth == 0)
 	{
-		AddWindow(UIWNDTYPE_FRIENDMAIN, iPos_x, iPos_y,  GlobalText[m_iFriendMainWindowTitleNumber]);	// "친구"
+		AddWindow(UIWNDTYPE_FRIENDMAIN, iPos_x, iPos_y,  GlobalText[m_iFriendMainWindowTitleNumber]);
 		g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, m_dwMainWindowUIID, 0);
 		//SendRequestDeliverLetter();
 		// 윈도우 목록 복구
@@ -708,7 +691,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
 	}
 	else
 	{
-		AddWindow(UIWNDTYPE_FRIENDMAIN, m_iMainWindowPos_x, m_iMainWindowPos_y, GlobalText[m_iFriendMainWindowTitleNumber]);	// "친구"
+		AddWindow(UIWNDTYPE_FRIENDMAIN, m_iMainWindowPos_x, m_iMainWindowPos_y, GlobalText[m_iFriendMainWindowTitleNumber]);
 		g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, m_dwMainWindowUIID, 0);
 		CUIBaseWindow * pWindow = GetWindow(m_dwMainWindowUIID);
 		if (pWindow != NULL)
@@ -1085,15 +1068,12 @@ void CUIBaseWindow::Render()
 		{
 			SetControlButtonColor(2);
 			if (m_bIsMaximize == FALSE)
-				RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - 27,(float)m_iPos_y + 8,(float)9,(float)9,
-					9.f/32.f,0.f,9.f/32.f,9.f/32.f);
+				RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - 27,(float)m_iPos_y + 8,(float)9,(float)9,9.f/32.f,0.f,9.f/32.f,9.f/32.f);
 			else
-				RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - 27,(float)m_iPos_y + 8,(float)9,(float)9,
-					9.f/32.f,9.f/32.f,9.f/32.f,9.f/32.f);
+				RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - 27,(float)m_iPos_y + 8,(float)9,(float)9,9.f/32.f,9.f/32.f,9.f/32.f,9.f/32.f);
 		}
 		SetControlButtonColor(3);
-		RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - 16,(float)m_iPos_y + 8,(float)9,(float)9,
-			0.f,9.f/32.f,9.f/32.f,9.f/32.f);
+		RenderBitmap(BITMAP_INTERFACE_EX+10,(float)m_iPos_x + m_iWidth - 16,(float)m_iPos_y + 8,(float)9,(float)9,0.f,9.f/32.f,9.f/32.f,9.f/32.f);
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		g_pRenderText->SetFont(g_hFont);
 	}
@@ -1599,11 +1579,7 @@ BOOL CUIChatWindow::HandleMessage()
 {
 	if (m_WorkMessage.m_iMessage == UI_MESSAGE_LISTDBLCLICK)
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		if( m_WorkMessage.m_iParam1 == (int)(m_InvitePalListBox.GetUIID()) )
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		if (m_WorkMessage.m_iParam1 == m_InvitePalListBox.GetUIID())
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		{
 			PlayBuffer(SOUND_CLICK01);
 			m_WorkMessage.m_iMessage = UI_MESSAGE_BTNLCLICK;
@@ -1673,14 +1649,14 @@ BOOL CUIChatWindow::HandleMessage()
 					m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 					m_CloseInviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
 					m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-					m_InviteButton.SetCaption(GlobalText[996]);	// "초대닫기"
+					m_InviteButton.SetCaption(GlobalText[996]);
 
 					UpdateInvitePalList();
 
 					if (m_iPos_x + m_iWidth > 640) m_iPos_x = 640 - m_iWidth;
 					Refresh();
 				}
-				else if (m_iShowType >= 2)	// 초대닫기
+				else if (m_iShowType >= 2)
 				{
 					m_iShowType = 1;
 					SetSize(GetWidth() - 80, GetHeight());
@@ -1692,16 +1668,16 @@ BOOL CUIChatWindow::HandleMessage()
 					m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
 					m_CloseInviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
 					m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-					m_InviteButton.SetCaption(GlobalText[993]);	// "초대하기"
+					m_InviteButton.SetCaption(GlobalText[993]);
 				}
 				break;
-			case 2:			// 친구 초대 추가
+			case 2:
 				if (m_TextInputBox.IsLocked() == FALSE && m_InvitePalListBox.GetSelectedText() != NULL)
 				{
 					if (m_PalListBox.GetLineNum() <= 1);
 					else if (m_PalListBox.GetLineNum() >= 30)
 					{
-						AddChatText(255, GlobalText[1074], 1, 0);	// "초대 가능 인원을 초과하였습니다."
+						AddChatText(255, GlobalText[1074], 1, 0);
 					}
 					else
 					{
@@ -1747,13 +1723,12 @@ void CUIChatWindow::DoMouseActionSub()
 //		m_TextInputBox.GiveFocus();
 //	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const char * CUIChatWindow::GetChatFriend(int * piResult)
 {
 	if (m_PalListBox.GetFriendList().size() > 2)
 	{
-		if (piResult != NULL) *piResult = 2;	// 2명이상이라 패스
+		if (piResult != NULL) *piResult = 2;
 		return NULL;
 	}
 	else
@@ -1763,11 +1738,11 @@ const char * CUIChatWindow::GetChatFriend(int * piResult)
 		{
 			if (strncmp(PalListIter->m_szID, Hero->ID, MAX_ID_SIZE) != 0)
 			{
-				if (piResult != NULL) *piResult = 1;	// 찾았다
+				if (piResult != NULL) *piResult = 1;
 				return PalListIter->m_szID;
 			}
 		}
-		if (piResult != NULL) *piResult = 0;	// 못찾았다
+		if (piResult != NULL) *piResult = 0;
 		return NULL;
 	}
 }
@@ -1780,8 +1755,7 @@ void CUIChatWindow::Lock(BOOL bFlag)
 		char szTitle[128] = {0};
 		if (strncmp(GetTitle(), GlobalText[995], strlen(GlobalText[995])) != 0)
 		{
-			// 이미 오프라인 중이아니면
-			strncpy(szTitle, GlobalText[995], strlen(GlobalText[995]));	// "*대기중* "
+			strncpy(szTitle, GlobalText[995], strlen(GlobalText[995]));
 		}
 		strncat(szTitle, GetTitle(), 128);
 		SetTitle(szTitle);
@@ -1797,19 +1771,15 @@ void CUIChatWindow::Lock(BOOL bFlag)
 		}
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
 extern int gix, giy;
 extern void MoveCharacter(CHARACTER *c,OBJECT *o);
 extern void MoveCharacterVisual(CHARACTER *c,OBJECT *o);
 
 void CUIPhotoViewer::RenderPhotoCharacter()
 {
-	// 출력 좌표 만들기
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	float fPos_x = m_iPos_x * 1.2f + m_iWidth / 2 - 50;
 	float fPos_y = m_iPos_y * 1.2f + m_iHeight * 1.2f - 62;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	CHARACTER * c = &m_PhotoChar;
 	OBJECT * o = &c->Object;
@@ -1888,14 +1858,10 @@ void CUIPhotoViewer::RenderPhotoCharacter()
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
 {
 	if (m_PhotoHelper.Live == true && 
-	(m_PhotoHelper.Type == MODEL_UNICON || m_PhotoHelper.Type == MODEL_PEGASUS || m_PhotoHelper.Type == MODEL_DARK_HORSE //이혁재 - 다크호스 추가
-	|| (m_PhotoHelper.Type >= MODEL_FENRIR_BLACK && m_PhotoHelper.Type <= MODEL_FENRIR_GOLD)	//^ 펜릴 포토 관련
-	)) 
+	(m_PhotoHelper.Type == MODEL_UNICON || m_PhotoHelper.Type == MODEL_PEGASUS || m_PhotoHelper.Type == MODEL_DARK_HORSE || (m_PhotoHelper.Type >= MODEL_FENRIR_BLACK && m_PhotoHelper.Type <= MODEL_FENRIR_GOLD))) 
 	{
 		static const int MAX_POSE_NUM = 3;
-		static int siPose[MAX_POSE_NUM] = {
-			AT_STAND1, AT_MOVE1, AT_ATTACK1
-		};
+		static int siPose[MAX_POSE_NUM] = {AT_STAND1, AT_MOVE1, AT_ATTACK1};
 
 		int iCurrentAniArray = 0;
 
@@ -3814,12 +3780,7 @@ DWORD CChatRoomSocketList::CreateChatRoomSocketID(DWORD dwRoomID)
 
 		if (iWhileCount > 256)
 		{
-			assert(!"방 256개 초과!!!");
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 			return MCI_SEQ_MAPPER;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			return -1;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		}
 	};
 	m_bChatRoomSocketStatus[m_bCurrectCreateID] = TRUE;
@@ -3832,12 +3793,7 @@ DWORD CChatRoomSocketList::GetChatRoomSocketID(DWORD dwSocketID)
 	m_ChatRoomSocketStatusMapIter = m_ChatRoomSocketStatusMap.find(dwSocketID);
 	if (m_ChatRoomSocketStatusMapIter == m_ChatRoomSocketStatusMap.end())
 	{
-		assert(!"번호 맵 찾기 실패");
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		return MCI_SEQ_MAPPER;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		return -1;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	}
 	else return m_ChatRoomSocketStatusMapIter->second;
 }
@@ -3847,7 +3803,6 @@ CHATROOM_SOCKET * CChatRoomSocketList::GetChatRoomSocketData(DWORD dwRoomID)
 	m_ChatRoomSocketMapIter = m_ChatRoomSocketMap.find(dwRoomID);
 	if (m_ChatRoomSocketMapIter == m_ChatRoomSocketMap.end())
 	{
-		assert(!"소켓데이터 없음!!!");
 		return NULL;
 	}
 	return m_ChatRoomSocketMapIter->second;
@@ -4175,10 +4130,6 @@ BOOL CLetterList::CheckNoReadLetter()
 {
 	for (m_LetterListIter = m_LetterList.begin(); m_LetterListIter != m_LetterList.end(); ++m_LetterListIter)
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		LETTERLIST_TEXT * l = &(*m_LetterListIter);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		if (m_LetterListIter->m_bIsRead == FALSE) return TRUE;
 	}
 	return FALSE;
@@ -5268,9 +5219,8 @@ void CUIFriendMenu::Init()
 
 void CUIFriendMenu::AddWindow(DWORD dwUIID, CUIBaseWindow * pWindow)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(pWindow == NULL)		return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	m_WindowList.push_back(dwUIID);
 }
 
@@ -5677,8 +5627,10 @@ void CUIFriendMenu::SetNewChatAlertOff(DWORD dwAlertWindowID)
 
 BOOL CUIFriendMenu::IsNewChatAlert()
 {
-	if (m_NewChatWindowList.empty() == FALSE) return TRUE;
-	else return FALSE;
+	if (m_NewChatWindowList.empty() == FALSE) 
+		return TRUE;
+	else 
+		return FALSE;
 }
 
 void CUIFriendMenu::SetNewMailAlert(BOOL bAlert)
@@ -5694,20 +5646,15 @@ DWORD CUIFriendMenu::CheckChatRoomDuplication(const char * pszTargetName)
 		const char * pName = ((CUIChatWindow *)g_pWindowMgr->GetWindow(*m_WindowListIter))->GetChatFriend(&iResult);
 		if (iResult == 2 || iResult == 0)
 		{
-			continue;	// 2명 이상방이라 패스, 찾기 실패라 패스
+			continue;
 		}
 		else if (pName == NULL || pName[0] == '\0')
 		{
-			assert(!"잘못된 이름");
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 			return MCI_SEQ_MAPPER;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			return -1;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		}
 		else if (strncmp(pName, pszTargetName, MAX_ID_SIZE) == 0)
 		{
-			return *m_WindowListIter;	// 찾았다
+			return *m_WindowListIter;
 		}
 	}
 	return 0;

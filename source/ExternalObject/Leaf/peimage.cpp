@@ -197,11 +197,8 @@ PPE_INJECTION_DATA_HEADER leaf::GetPtrOfInjectionDataHeader(void* pImage, int in
 	BYTE* pbyIPD = (BYTE*)pImage + _pIPH->dwBaseOfIPD;
 	
 	PPE_INJECTION_DATA_HEADER _pNextIDH = (PPE_INJECTION_DATA_HEADER)pbyIPD;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	for(int i = 0; i < (int)_pIPH->dwNumberOfIPD; i++)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	for(int i=0; i<_pIPH->dwNumberOfIPD; i++)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	{
 		PPE_INJECTION_DATA_HEADER _pCurIDH = _pNextIDH;
 		if(IsBadReadPtr(_pCurIDH, sizeof(PE_INJECTION_DATA_HEADER)))
@@ -209,15 +206,13 @@ PPE_INJECTION_DATA_HEADER leaf::GetPtrOfInjectionDataHeader(void* pImage, int in
 
 		if(i==index)
 		{
-			if(_pCurIDH->dwSignature == PE_INJECTION_DATA_SIGNATURE)	//. PIDH
+			if(_pCurIDH->dwSignature == PE_INJECTION_DATA_SIGNATURE)
 			{
 				return _pCurIDH;
 			}
 			break;
 		}
-		//. move to next header
-		_pNextIDH = (PPE_INJECTION_DATA_HEADER)((BYTE*)_pCurIDH + sizeof(PE_INJECTION_DATA_HEADER) + 
-			(_pCurIDH->wSizeOfDataName + _pCurIDH->dwSizeOfData));
+		_pNextIDH = (PPE_INJECTION_DATA_HEADER)((BYTE*)_pCurIDH + sizeof(PE_INJECTION_DATA_HEADER) + (_pCurIDH->wSizeOfDataName + _pCurIDH->dwSizeOfData));
 	}
 	return NULL;
 }
@@ -240,11 +235,7 @@ PPE_INJECTION_DATA_HEADER leaf::GetPtrOfInjectionDataHeader(void* pImage, const 
 
 	BYTE* pbyIPD = (BYTE*)pImage+_pIPH->dwBaseOfIPD;
 	PPE_INJECTION_DATA_HEADER _pNextIDH = (PPE_INJECTION_DATA_HEADER)pbyIPD;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	for(int i = 0; i < (int)_pIPH->dwNumberOfIPD; i++)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	for(int i=0; i<_pIPH->dwNumberOfIPD; i++)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	{
 		PPE_INJECTION_DATA_HEADER _pCurIDH = _pNextIDH;
 		if(IsBadReadPtr(_pCurIDH, sizeof(PE_INJECTION_DATA_HEADER)))
@@ -496,11 +487,7 @@ bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN 
 	if( ReadFile(hFile, pInjectionData->pvBuffer, dwSizeOfFile, &dwNumberOfBytesRead, NULL) 
 		&& (dwNumberOfBytesRead == dwSizeOfFile) )
 	{	
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		if(Index >= 0 && Index < (int)m_listInjectionData.size())
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		if(Index >= 0 && Index < m_listInjectionData.size())
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		{
 			std::vector<INJECTION_DATA*>::iterator where = m_listInjectionData.begin() + Index;
 			m_listInjectionData.insert(where, pInjectionData);
@@ -530,11 +517,7 @@ bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN 
 
 	memcpy(pInjectionData->pvBuffer, pcvBuffer, SizeOfBuffer);
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	if(Index >= 0 && Index < (int)m_listInjectionData.size())
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	if(Index >= 0 && Index < m_listInjectionData.size())
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	{
 		std::vector<INJECTION_DATA*>::iterator where = m_listInjectionData.begin() + Index;
 		m_listInjectionData.insert(where, pInjectionData);
@@ -549,11 +532,7 @@ bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN 
 }
 void CPeImageDataInjector::Remove(int Index)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	if(Index >= 0 && Index < (int)m_listInjectionData.size())
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	if(Index >= 0 && Index < m_listInjectionData.size())
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	{
 		std::vector<INJECTION_DATA*>::iterator where = m_listInjectionData.begin() + Index;
 		
@@ -617,11 +596,9 @@ bool CPeImageDataInjector::Inject(const std::string& strInPeImagePath, const std
 	return xfNewImage.save(strOutPeImagePath);
 }
 
-
-/* protected */
 bool CPeImageDataInjector::BuildInjectionPack(const void* pOrigImage, bool bInjectNew, OUT PPE_INJECTION_PACK_HEADER pIPH, OUT xstreambuf& xIPD)
 {
-	PCIMAGE_DOS_HEADER pOrigDosHeader = GetPtrOfImageDosHeader(pOrigImage);	//. acquire original dos header
+	PCIMAGE_DOS_HEADER pOrigDosHeader = GetPtrOfImageDosHeader(pOrigImage);
 	if(NULL == pOrigDosHeader)	
 		return false;
 	
@@ -660,11 +637,7 @@ bool CPeImageDataInjector::BuildInjectionPack(const void* pOrigImage, bool bInje
 	DWORD dwPointerToWrite = TempIPH.dwBaseOfIPD;
 	if(NULL != pOrigIPH && false == bInjectNew) /* Build original data if the IPH exists */
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		for(int i = 0; i < (int)pOrigIPH->dwNumberOfIPD; i++)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		for(int i=0; i<pOrigIPH->dwNumberOfIPD; i++)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		{
 			PCPE_INJECTION_DATA_HEADER pOrigIDH = GetPtrOfInjectionDataHeader(pOrigImage, i);
 			if(NULL == pOrigIDH)

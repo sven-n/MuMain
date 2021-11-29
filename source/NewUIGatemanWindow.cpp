@@ -221,9 +221,6 @@ void CNewUIGatemanWindow::RenderFrame()
 bool CNewUIGatemanWindow::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	POINT ptExitBtn2 = { m_Pos.x+13, m_Pos.y+391 };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{

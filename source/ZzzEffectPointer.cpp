@@ -26,11 +26,7 @@ PARTICLE  Pointers	[MAX_POINTERS];
 
 void CreatePointer(int Type,vec3_t Position,float Angle,vec3_t Light,float Scale)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	PARTICLE* Select = NULL;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	PARTICLE *Select;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int MinLifeTime = 9999;
 	for(int i=0;i<MAX_POINTERS;i++)
 	{

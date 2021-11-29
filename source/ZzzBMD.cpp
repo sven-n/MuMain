@@ -2534,17 +2534,6 @@ void BMD::RenderMeshTranslate(int i,int RenderFlag,float Alpha,int BlendMesh,flo
     	Render = RENDER_TEXTURE;
 	}
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int iFrame = MoveSceneFrame;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	
-	// ver 1.0 (triangle)
-#ifdef _DEBUG	// юс╫ц
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int iSelectPoly = iFrame%11;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-#endif
 	glBegin(GL_TRIANGLES);
 	for(int j=0;j<m->NumTriangles;j++)
 	{

@@ -2142,10 +2142,6 @@ bool SEASON3B::CNewUISkillList::Render()
             int iSkillType  = 0;
 			int iSkillCount = 0;
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-            int iSkillNumber = min(CharacterAttribute->SkillNumber - CharacterAttribute->SkillMasterNumber, 36);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-
 			for(i=0; i<MAX_MAGIC; ++i)
 			{
                 iSkillType = CharacterAttribute->Skill[i];

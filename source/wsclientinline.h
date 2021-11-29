@@ -1406,7 +1406,7 @@ __forceinline bool SendRequestStorageExit()
 	spe << ( BYTE)( p_Result) << ( BYTE)( PartyKey>>8) << ( BYTE)( PartyKey&0xff);\
 	spe.Send( TRUE);\
 }
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 #define SendRequestPartyList()\
 {\
 	CStreamPacketEngine spe;\
@@ -1421,25 +1421,6 @@ __forceinline bool SendRequestStorageExit()
 	spe << ( BYTE)( p_Index);\
 	spe.Send();\
 }
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-#define SendRequestPartyList()\
-{\
-	unsigned char Size = sizeof(PBMSG_HEADER);\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x42);\
-	spe.Send();\
-}
-
-#define SendRequestPartyLeave( p_Index)\
-{\
-	unsigned char Size = sizeof(PHEADER_DEFAULT);\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x43);\
-	spe << ( BYTE)( p_Index);\
-	spe.Send();\
-}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-
 
 #define SendRequestGuildMaster( p_Value)\
 {\

@@ -460,9 +460,6 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 			
 			vec3_t vLight;
 			Vector(1.0f, 1.0f, 1.0f, vLight);
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			float fScale = o->Scale * (rand()%5+13)*0.1f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			switch(rand()%3)
 			{
 			case 0:
@@ -494,7 +491,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 		
 		return true;
 	}
- 	else if(o->Type == 15)	//용암 흐르는거
+ 	else if(o->Type == 15)
  	{
  		b->StreamMesh = 0;
  		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,-(int)WorldTime%10000*0.0001f);

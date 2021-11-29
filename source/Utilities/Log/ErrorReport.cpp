@@ -176,9 +176,7 @@ char* CErrorReport::CheckHeadToCut( char *lpszBuffer, DWORD dwNumber)
 
 	char *lpFoundList[128];
 	int iFoundCount = 0;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	char *lpFirstFound = NULL;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	for ( char *lpFind = lpszBuffer; lpFind && *lpFind; )
 	{
 		lpFind = strchr( lpFind, ( int)'#');
@@ -1059,9 +1057,6 @@ DWORD GetDXVersion()
 
 void GetSystemInfo( ER_SystemInfo *si)
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	char *lpszUnknown = "Unknown";
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	ZeroMemory( si, sizeof ( ER_SystemInfo));
 
 	// CPU

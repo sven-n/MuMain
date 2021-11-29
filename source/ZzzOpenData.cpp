@@ -623,7 +623,7 @@ void OpenPlayerTextures()
 	for(int i=45 ; i<=53 ; i++)
 	{
 		if( i==47 || i== 48)
-			continue;		// 마검사투구제외
+			continue;
 
 		gLoadData.OpenTexture( MODEL_HELM+i, "Player\\" );
 	} // for()
@@ -1591,7 +1591,6 @@ void OpenItemTextures()
 	
 	gLoadData.OpenTexture(MODEL_HELPER+61, "Item\\partCharge2\\");
 
-
 #ifdef PSW_CHARACTER_CARD 
 	gLoadData.OpenTexture(MODEL_POTION+91, "Item\\partCharge3\\");
 #endif // PSW_CHARACTER_CARD
@@ -1757,44 +1756,43 @@ void OpenItemTextures()
 
 
 #ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
-	gLoadData.OpenTexture(MODEL_HELPER+109,"Item\\InGameShop\\");  // InGameShop Item : 반지(사파이어/BLUE)
+	gLoadData.OpenTexture(MODEL_HELPER+109,"Item\\InGameShop\\");
 #endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
 #ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
-	gLoadData.OpenTexture(MODEL_HELPER+110,"Item\\InGameShop\\");  // InGameShop Item : 반지(루비/RED)
+	gLoadData.OpenTexture(MODEL_HELPER+110,"Item\\InGameShop\\");
 #endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
 #ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
-	gLoadData.OpenTexture(MODEL_HELPER+111,"Item\\InGameShop\\");  // InGameShop Item : 반지(토파즈/yellow)
+	gLoadData.OpenTexture(MODEL_HELPER+111,"Item\\InGameShop\\");
 #endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
 #ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
-	gLoadData.OpenTexture(MODEL_HELPER+112,"Item\\InGameShop\\");  // InGameShop Item : 반지(자수정/violet)
+	gLoadData.OpenTexture(MODEL_HELPER+112,"Item\\InGameShop\\");
 #endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY			// 인게임샾 아이템 // 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
-	gLoadData.OpenTexture(MODEL_HELPER+113,"Item\\InGameShop\\");  // InGameShop Item : 목걸이(루비/red)
+#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY
+	gLoadData.OpenTexture(MODEL_HELPER+113,"Item\\InGameShop\\");
 #endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// 인게임샾 아이템 // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
-	gLoadData.OpenTexture(MODEL_HELPER+114,"Item\\InGameShop\\");  // InGameShop Item : 목걸이(에메랄드/Blue)
+#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD
+	gLoadData.OpenTexture(MODEL_HELPER+114,"Item\\InGameShop\\");
 #endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115
-	gLoadData.OpenTexture(MODEL_HELPER+115,"Item\\InGameShop\\");  // InGameShop Item : 목걸이(사파이어/Green)
+#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE
+	gLoadData.OpenTexture(MODEL_HELPER+115,"Item\\InGameShop\\");
 #endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE
 
 #ifdef LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-	// 고블린금화
 	gLoadData.OpenTexture(MODEL_POTION+120,"Item\\InGameShop\\");
 #endif //LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// 봉인된 금색상자
+#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
 	gLoadData.OpenTexture(MODEL_POTION+121,"Item\\InGameShop\\");
 #endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST		// 봉인된 은색상자
+#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
 	gLoadData.OpenTexture(MODEL_POTION+122,"Item\\InGameShop\\");
 #endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST				// 금색상자
+#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST
 	gLoadData.OpenTexture(MODEL_POTION+123,"Item\\InGameShop\\");
 #endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST				// 은색상자
+#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST
 	gLoadData.OpenTexture(MODEL_POTION+124,"Item\\InGameShop\\");
 #endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX				// 패키지 상자A-F
+#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX
 	for(int k=0; k<6; k++)
 	{
 		gLoadData.OpenTexture(MODEL_POTION+134+k,"Item\\InGameShop\\");
@@ -1810,26 +1808,17 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_HELPER+116, "Item\\");
 #endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 	
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	gLoadData.OpenTexture(MODEL_WING+130, "Item\\");
 	for(int j=0; j<4; j++)
 	{
 		gLoadData.OpenTexture(MODEL_WING+131+j, "Item\\Ingameshop\\");
 	}
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 
-#ifdef ASG_ADD_CHARGED_CHANNEL_TICKET
 	gLoadData.OpenTexture(MODEL_HELPER+124, "Item\\partCharge6\\");
-#endif	// ASG_ADD_CHARGED_CHANNEL_TICKET
-
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYSILVER			// 인게임샾 아이템 // 신규 키(실버)				// MODEL_POTION+112
 	gLoadData.OpenTexture(MODEL_POTION+112, "Item\\Ingameshop\\");
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYSILVER			// 인게임샾 아이템 // 신규 키(실버)				// MODEL_POTION+112
-#ifdef LDS_ADD_INGAMESHOP_ITEM_KEYGOLD				// 인게임샾 아이템 // 신규 키(골드)				// MODEL_POTION+113
 	gLoadData.OpenTexture(MODEL_POTION+113, "Item\\Ingameshop\\");
-#endif // LDS_ADD_INGAMESHOP_ITEM_KEYGOLD				// 인게임샾 아이템 // 신규 키(골드)				// MODEL_POTION+113
 
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
+#ifdef LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6
 	{
 		for(int k=0; k<6; k++)
 		{
@@ -1838,8 +1827,8 @@ void OpenItemTextures()
 
 		LoadBitmap("Item\\InGameShop\\mebership_3items_green.jpg"	,BITMAP_INGAMESHOP_PRIMIUM6	,GL_LINEAR, GL_REPEAT);
 	}
-#endif //LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// 인게임샾 아이템 // 프리미엄서비스6종			// MODEL_POTION+114~119
-#ifdef LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
+#endif //LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6
+#ifdef LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4
 	{
 		for(int k=0; k<4; k++)
 		{
@@ -1848,8 +1837,8 @@ void OpenItemTextures()
 
 		LoadBitmap("Item\\InGameShop\\mebership_3items_red.jpg"	,BITMAP_INGAMESHOP_COMMUTERTICKET4	,GL_LINEAR, GL_REPEAT);
 	}
-#endif //LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// 인게임샾 아이템 // 정액권4종					// MODEL_POTION+126~129
-#ifdef LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
+#endif //LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4
+#ifdef LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3
 	{
 		for(int k=0; k<3; k++)
 		{
@@ -1858,35 +1847,37 @@ void OpenItemTextures()
 
 		LoadBitmap("Item\\InGameShop\\mebership_3items_yellow.jpg"	,BITMAP_INGAMESHOP_SIZECOMMUTERTICKET3	,GL_LINEAR, GL_REPEAT);
 	}
-#endif //LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// 인게임샾 아이템 // 정량권3종					// MODEL_POTION+130~132
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
+#endif //LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3
+
+#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE
 	{
 		gLoadData.OpenTexture(MODEL_HELPER+121,"Item\\InGameShop\\");
 	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// 인게임샾 아이템 // 카오스케슬 자유입장권		// MODEL_HELPER+121
+#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE
+
 #ifdef PBG_ADD_GENSRANKING
 	for(int _index=0; _index<4; ++_index)
-		gLoadData.OpenTexture(MODEL_POTION+141+_index, "Item\\");	// 보석함
+		gLoadData.OpenTexture(MODEL_POTION+141+_index, "Item\\");
 #endif //PBG_ADD_GENSRANKING
-#ifdef LDK_ADD_14_15_GRADE_ITEM_MODEL
-	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT,	"Item\\");	// 14, 15등급 방어구용 모델 왼팔
-	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT,	"Item\\");	// 14, 15등급 방어구용 모델 오른팔
-	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT,	"Item\\");	// 14, 15등급 방어구용 모델 갑옷왼쪽
-	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT,	"Item\\");	// 14, 15등급 방어구용 모델 갑옷오른쪽
-	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT,	"Item\\");	// 14, 15등급 방어구용 모델 왼발
-	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT,	"Item\\");	// 14, 15등급 방어구용 모델 오른발
-	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_HEAD,		"Item\\");	// 14, 15등급 방어구용 모델 머리
-	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT,	"Item\\");	// 14, 15등급 방어구용 모델 바지왼쪽
-	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT,	"Item\\");	// 14, 15등급 방어구용 모델 바지오른쪽
+
+	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMLEFT,	"Item\\");		// 14, 15 efeito chifres brancos
+	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT,	"Item\\");		// 14, 15
+	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYLEFT,	"Item\\");		// 14, 15
+	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT,	"Item\\");	// 14, 15
+	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT,	"Item\\");		// 14, 15
+	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT,	"Item\\");	// 14, 15
+	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_HEAD,		"Item\\");		// 14, 15
+	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT,	"Item\\");		// 14, 15
+	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT,	"Item\\");	// 14, 15
 	LoadBitmap("Item\\rgb_mix.jpg"	,BITMAP_RGB_MIX	,GL_LINEAR, GL_REPEAT);
-#endif //LDK_ADD_14_15_GRADE_ITEM_MODEL
+
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-	gLoadData.OpenTexture(MODEL_WING+49, "Item\\");		// 무인의망토
-	gLoadData.OpenTexture(MODEL_WING+50, "Item\\");		// 군림의망토
-	gLoadData.OpenTexture(MODEL_WING+135, "Item\\");		// 작은무인의망토
+	gLoadData.OpenTexture(MODEL_WING+49, "Item\\");
+	gLoadData.OpenTexture(MODEL_WING+50, "Item\\");
+	gLoadData.OpenTexture(MODEL_WING+135, "Item\\");
 	g_CMonkSystem.LoadModelItemTexture();
 	for(int _nRollIndex=0; _nRollIndex<7; ++_nRollIndex)
-		gLoadData.OpenTexture(MODEL_ETC+30+_nRollIndex, "Item\\");	// 스킬관련양피지
+		gLoadData.OpenTexture(MODEL_ETC+30+_nRollIndex, "Item\\");
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
 #ifdef LEM_ADD_LUCKYITEM

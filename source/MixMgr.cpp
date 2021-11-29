@@ -566,16 +566,16 @@ BOOL CMixRecipes::GetCurRecipeName(unicode::t_char * pszNameOut, int iNameLine)
 			switch(g_MixRecipeMgr.GetMixInventoryType())
 			{
 			case MIXTYPE_TRAINER:
-				unicode::_sprintf (pszNameOut, GlobalText[1213], GlobalText[1212]);	// 부활용 아이템 부적합
+				unicode::_sprintf (pszNameOut, GlobalText[1213], GlobalText[1212]);
 				break;
 			case MIXTYPE_OSBOURNE:
-				unicode::_sprintf (pszNameOut, GlobalText[1213], GlobalText[2061]);	// 제련용 아이템 부적합
+				unicode::_sprintf (pszNameOut, GlobalText[1213], GlobalText[2061]);
 				break;
 			case MIXTYPE_JERRIDON:
-				unicode::_sprintf (pszNameOut, GlobalText[1213], GlobalText[2062]);	// 제련용 아이템 부적합
+				unicode::_sprintf (pszNameOut, GlobalText[1213], GlobalText[2062]);
 				break;
 			case MIXTYPE_ELPIS:
-				unicode::_sprintf (pszNameOut, GlobalText[1213], GlobalText[2063]);	// 정제용 아이템 부적합
+				unicode::_sprintf (pszNameOut, GlobalText[1213], GlobalText[2063]);
 				break;
 			default:
 				unicode::_sprintf (pszNameOut, "%s", GlobalText[601]);
@@ -592,10 +592,10 @@ BOOL CMixRecipes::GetRecipeName(MIX_RECIPE * pRecipe, unicode::t_char * pszNameO
 {
 	if (pRecipe == NULL) return FALSE;
 	if (iNameLine > 2 || iNameLine < 1) return FALSE;
-	if (pRecipe->m_bMixOption == 'C')	// 380 옵션
+	if (pRecipe->m_bMixOption == 'C')
 	{
 		std::vector<std::string> optionTextlist;
-		// 380아이템의 타입에 따라 다른 옵션이 붙는다.
+
 		g_pItemAddOptioninfo->GetItemAddOtioninfoText(optionTextlist, m_iFirstItemType);
 		if (optionTextlist.empty() || bSimilarRecipe)
 		{
@@ -859,9 +859,9 @@ void CMixRecipes::CalcMixRate(int iNumMixItems, CMixItem * pMixItems)
 
 	if (m_iSuccessRate > GetCurRecipe()->m_iSuccessRate)
 	{
-		m_iSuccessRate = GetCurRecipe()->m_iSuccessRate;	// 최대확률
+		m_iSuccessRate = GetCurRecipe()->m_iSuccessRate;
 	}
-	if (GetCurRecipe()->m_bCharmOption == 'A')	// 행운의 부적
+	if (GetCurRecipe()->m_bCharmOption == 'A')
 	{
 		m_iSuccessRate += m_wTotalCharmBonus;
 	}
@@ -876,7 +876,7 @@ float CMixRecipes::MixrateAddSub()
 	float fLvalue = 0;
 	while(1)
 	{
-		if (m_iMixRateIter >= GetCurRecipe()->m_iNumRateData || m_pMixRates[m_iMixRateIter].op == MRCP_RP)	// 수식의 끝, 닫는 괄호
+		if (m_iMixRateIter >= GetCurRecipe()->m_iNumRateData || m_pMixRates[m_iMixRateIter].op == MRCP_RP)
 		{
 			return fLvalue;
 		}
@@ -891,7 +891,7 @@ float CMixRecipes::MixrateAddSub()
 			fLvalue -= MixrateMulDiv();
 			break;
 		default:
-			fLvalue = MixrateMulDiv();	// 수식의 첫항
+			fLvalue = MixrateMulDiv();
 			break;
 		};
 	}
@@ -902,7 +902,7 @@ float CMixRecipes::MixrateMulDiv()
 	float fLvalue = 0;
 	while(1)
 	{
-		if (m_iMixRateIter >= GetCurRecipe()->m_iNumRateData || m_pMixRates[m_iMixRateIter].op == MRCP_RP)	// 수식의 끝, 닫는 괄호
+		if (m_iMixRateIter >= GetCurRecipe()->m_iNumRateData || m_pMixRates[m_iMixRateIter].op == MRCP_RP)
 		{
 			return fLvalue;
 		}
@@ -920,7 +920,7 @@ float CMixRecipes::MixrateMulDiv()
 			fLvalue /= MixrateFactor();
  			break;
 		default:
-			fLvalue = MixrateFactor();	// 수식의 첫항
+			fLvalue = MixrateFactor();
  			break;
 		};
 	}
@@ -937,40 +937,40 @@ float CMixRecipes::MixrateFactor()
 		break;
 	case MRCP_INT:
 		++m_iMixRateIter;
-		if (m_pMixRates[m_iMixRateIter].op != MRCP_LP) assert(!"문법에러");
-		++m_iMixRateIter;	// ( 스킵
+		if (m_pMixRates[m_iMixRateIter].op != MRCP_LP) assert(!"m_pMixRates error");
+		++m_iMixRateIter;
 		fValue = int(MixrateAddSub());
 		break;
 	case MRCP_NUMBER:
-		fValue = (float)m_pMixRates[m_iMixRateIter].value;	// 상수 값
+		fValue = (float)m_pMixRates[m_iMixRateIter].value;
 		break;
-	case MRCP_MAXRATE:	// 스크립트의 최대 확률
+	case MRCP_MAXRATE:
 		fValue = GetCurRecipe()->m_iSuccessRate;
 		break;
-	case MRCP_ITEM:			// 조합창 아이템 가격 총합
+	case MRCP_ITEM:
 		fValue = m_dwTotalItemValue;
 		break;
-	case MRCP_WING:			// 조합창 날개 가격 총합
+	case MRCP_WING:
 		fValue = m_dwWingItemValue;
 		break;
-	case MRCP_EXCELLENT:		// 조합창 엑템 가격 총합
+	case MRCP_EXCELLENT:
 		fValue = m_dwExcellentItemValue;
 		break;
-	case MRCP_EQUIP:			// 조합창 무기+방어구 가격 총합
+	case MRCP_EQUIP:
 		fValue = m_dwEquipmentItemValue;
 		break;
-	case MRCP_SET:			// 조합창 세트아이템 가격 총합
+	case MRCP_SET:
 		fValue = m_dwSetItemValue;
 		break;
-	case MRCP_LUCKOPT:		// 아이템의 행운 옵션 보너스 값
+	case MRCP_LUCKOPT:
 		if (m_bFindMixLuckItem) fValue = 25;
 		else fValue = 0;
 		break;
-	case MRCP_LEVEL1:		// 조합 조건 첫번째 아이템의 레벨 (1~13)
+	case MRCP_LEVEL1:
 		fValue = m_iFirstItemLevel;
 		break;
 #ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
-	case MRCP_NONJEWELITEM:	// 보석가격을 제외한 조합창 아이템 가격 총합 (축,영,혼,창,생,조,수,석묶음)
+	case MRCP_NONJEWELITEM:
 		fValue = m_dwTotalNonJewelItemValue;
 		break;
 #endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
@@ -981,21 +981,15 @@ float CMixRecipes::MixrateFactor()
 
 void CMixRecipes::CalcMixReqZen(int iNumMixItems, CMixItem * pMixItems)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(iNumMixItems < 0)	return;
 	if(pMixItems == NULL)	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	// 조합시 필요 젠
-	//	필요 젠 타입 A: [고정 금액]
-	//	필요 젠 타입 B: [확률] * 10,000젠
-	//	필요 젠 타입 C: [고정 금액] (물약당 금액)
-	//	필요 젠 타입 D: [제련레벨에 따라 제련아이템 환원 테이블 이용]
+
 	m_dwRequiredZen = 0;
 	if (GetCurRecipe() == NULL) return;
 	switch(GetCurRecipe()->m_bRequiredZenType)
 	{
 	case 'A':
-	case 'C':	// 출력시에 물약당 가격으로 표시
+	case 'C':
 		m_dwRequiredZen = GetCurRecipe()->m_dwRequiredZen;
 		break;
 	case 'B':
@@ -1003,7 +997,6 @@ void CMixRecipes::CalcMixReqZen(int iNumMixItems, CMixItem * pMixItems)
 		break;
 	case 'D':
 		{
-			// 조화의 보석 제련 아이템 환원 가격 얻어내기
 			int iItemType = 0;
 			if( ITEM_SWORD <= pMixItems[0].m_sType && ITEM_STAFF > pMixItems[0].m_sType )
 			{
@@ -1026,7 +1019,6 @@ void CMixRecipes::CalcMixReqZen(int iNumMixItems, CMixItem * pMixItems)
 	}
 }
 
-// 조합옵션 조건 검사용
 BOOL CMixRecipes::IsChaosItem(CMixItem & rSource)
 {
 	if (rSource.m_sType == ITEM_MACE+6 || rSource.m_sType == ITEM_BOW+6 || rSource.m_sType == ITEM_STAFF+7) return TRUE;
@@ -1091,8 +1083,6 @@ BOOL CMixRecipes::IsSourceOfAttachSeedSphereToWeapon(CMixItem & rSource)
 	if (rSource.m_sType >= ITEM_WING+100 && rSource.m_sType <= ITEM_WING+129)
 	{
 		int iSeedSphereType = rSource.m_sType - ITEM_WING;
-
-		// 불 얼음 번개 속성은 ITEM_WING+100, 102 등 짝수인덱스이다
 		if (iSeedSphereType % 2 == 0) return TRUE;
 	}
 	return FALSE;
@@ -1104,7 +1094,6 @@ BOOL CMixRecipes::IsSourceOfAttachSeedSphereToArmor(CMixItem & rSource)
 	{
 		int iSeedSphereType = rSource.m_sType - ITEM_WING;
 
-		// 물 바람 땅 속성은 ITEM_WING+101, 103 등 홀수인덱스이다
 		if (iSeedSphereType % 2 == 1) return TRUE;
 	}
 	return FALSE;
@@ -1130,7 +1119,7 @@ BOOL CMixRecipes::IsJewelItem(CMixItem & rSource)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char * szFileName)	// mix.bmd를 읽어들인다.
+void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char * szFileName)
 {
 	int i, j;
 	for (j = 0; j < MAX_MIX_TYPES; ++j)
@@ -1151,20 +1140,16 @@ void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char * szFileName)	// mix.bm
 
 	int iNumMixRecipes[MAX_MIX_TYPES];
 	int iSize = sizeof(int) * MAX_MIX_TYPES;
-	fread(iNumMixRecipes, iSize, 1, fp);	// 총 조합 방법 수
+	fread(iNumMixRecipes, iSize, 1, fp);
 	BuxConvert((BYTE*)iNumMixRecipes, iSize);
 
 	iSize = sizeof(MIX_RECIPE);
 	for (j = 0; j < MAX_MIX_TYPES; ++j)
 	{
 #ifdef SOCKET_SYSTEM
-#ifdef LJH_MOD_EXTENDING_NUM_OF_MIX_RECIPES_FROM_100_TO_1000 
+
 		if (feof(fp) || iNumMixRecipes[j] > 1000)
-#else  //LJH_MOD_EXTENDING_NUM_OF_MIX_RECIPES_FROM_100_TO_1000
-		if (feof(fp) || iNumMixRecipes[j] > 100)
-#endif //LJH_MOD_EXTENDING_NUM_OF_MIX_RECIPES_FROM_100_TO_1000
 		{
-			//assert(!"이전버전의 mix.bmd입니다. 최신 mix.bmd가 맞는지 확인하세요!");
 			unicode::t_char Text[256];
     		unicode::_sprintf(Text,"%s - Version not matched.",szFileName);
 			g_ErrorReport.Write( Text);

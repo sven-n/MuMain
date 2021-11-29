@@ -42,7 +42,7 @@ void CCreditWin::Create()
 	CInput rInput = CInput::Instance();
 
 	CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
-	CWin::SetBgAlpha(255);	// 불투명임.
+	CWin::SetBgAlpha(255);
 
 	float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
 	float fScaleY = (float)rInput.GetScreenHeight() / 600.0f;
@@ -228,11 +228,7 @@ void CCreditWin::CloseWin()
 {
 	CUIMng::Instance().HideWin(this);
 
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-	SendRequestServerList2();
-#else // PKD_ADD_ENHANCED_ENCRYPTION
 	SendRequestServerList();
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
 
 	::StopMp3(g_lpszMp3[MUSIC_MUTHEME]);
 	::PlayMp3(g_lpszMp3[MUSIC_MAIN_THEME]);
@@ -256,7 +252,6 @@ void CCreditWin::Init()
 void CCreditWin::LoadIllust()
 {
 	CInput rInput = CInput::Instance();
-	// 800 * 600 가상 스크린 모드를 사용 함.
 	float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
 	float fScaleY = (float)rInput.GetScreenHeight() / 600.0f;
 	

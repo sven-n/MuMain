@@ -100,23 +100,19 @@ void CCharMakeWin::Set_State(bool Set)
 }
 #endif //#ifdef PJH_CHARACTER_RENAME
 
-//*****************************************************************************
-// 함수 이름 : Create()
-// 함수 설명 : 캐릭터 생성창 생성.
-//*****************************************************************************
 void CCharMakeWin::Create()
 {
 	CInput rInput = CInput::Instance();
 	CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
 
-// 아무것도 안보이는 배경 윈도우.
+
 	m_winBack.Create(454, 406, -2);
 
-// 이름 입력 배경 스프라이트.
+
 	m_asprBack[CMW_SPR_INPUT].Create(346, 38, BITMAP_LOG_IN);
-// 능력치 배경 스프라이트.
+
 	m_asprBack[CMW_SPR_STAT].Create(108, 80);
-// 직업 설명 배경 스프라이트.
+
 	m_asprBack[CMW_SPR_DESC].Create(454, 51);
 
 	int i;
@@ -126,7 +122,6 @@ void CCharMakeWin::Create()
 		m_asprBack[i].SetColor(0, 0, 0);
 	}
 
-// 직업 버튼 생성.
 	DWORD adwJobBtnClr[8] =
 	{
 		CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, CLRDW_GRAY,
@@ -156,7 +151,6 @@ void CCharMakeWin::Create()
 		}
 	}
 
-// OK, CANCEL 버튼 생성.
 	for (i = 0; i < 2; ++i)
 	{
 		m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
@@ -173,10 +167,6 @@ void CCharMakeWin::Create()
 	UpdateDisplay();
 }
 
-//*****************************************************************************
-// 함수 이름 : PreRelease()
-// 함수 설명 : 모든 컨트롤 릴리즈.(버튼은 자동 삭제)
-//*****************************************************************************
 void CCharMakeWin::PreRelease()
 {
 	for (int i = 0; i < CMW_SPR_MAX; ++i)
@@ -184,22 +174,13 @@ void CCharMakeWin::PreRelease()
 	m_winBack.Release();
 }
 
-//*****************************************************************************
-// 함수 이름 : SetPosition()
-// 함수 설명 : 창 위치 지정.
-// 매개 변수 : nXCoord	: 스크린 X좌표.
-//			   nYCoord	: 스크린 Y좌표.
-//*****************************************************************************
 void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 {
-	// 배경 창.
 	m_winBack.SetPosition(nXCoord, nYCoord);
 
-	// 스탯 배경.
 	int nBaseX = nXCoord + 346;
 	m_asprBack[CMW_SPR_STAT].SetPosition(nBaseX, nYCoord + 24);
 
-	// 직업 버튼.
 	int i;
 	int nBaseY = nYCoord + 131;
 	int nBtnHeight = m_abtnJob[0].GetHeight();
@@ -217,12 +198,11 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 	for (; i <= CLASS_DARK_LORD; ++i)
 		m_abtnJob[i].SetPosition(nBaseX, nBaseY + (i - 3) * nBtnHeight);
 #endif //PBG_ADD_NEWCHAR_MONK
-	// 확인, 취소 버튼.
+
 	nBaseY = nYCoord + 325;
 	m_aBtn[CMW_OK].SetPosition(nBaseX, nBaseY);
 	m_aBtn[CMW_CANCEL].SetPosition(nXCoord + 400, nBaseY);
 
-	// 택스트 입력 배경.
 	m_asprBack[CMW_SPR_INPUT].SetPosition(nXCoord, nYCoord + 317);
 
 	if (g_iChatInputType == 1)
@@ -232,15 +212,9 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 			int((m_asprBack[CMW_SPR_INPUT].GetYPos() + 21) / g_fScreenRate_y));
 	}
 
-	// 직업 설명 배경.
 	m_asprBack[CMW_SPR_DESC].SetPosition(nXCoord, nYCoord + 355);
 }
 
-//*****************************************************************************
-// 함수 이름 : Show()
-// 함수 설명 : 창을 보여 주거나 안보이게함.
-// 매개 변수 : bShow	: true이면 보여줌.
-//*****************************************************************************
 void CCharMakeWin::Show(bool bShow)
 {
 	CWin::Show(bShow);
@@ -461,7 +435,7 @@ void CCharMakeWin::RequestCreateCharacter()
 		g_pSingleTextInputBox->GetText(InputText[0]);
 
 	CUIMng& rUIMng = CUIMng::Instance();
-	// 입력된 이름을 체크.
+
 	if (::strlen(InputText[0]) < 4)
 		rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
     else if(::CheckName())
@@ -470,8 +444,7 @@ void CCharMakeWin::RequestCreateCharacter()
 		rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
 	else
 	{
-		SendRequestCreateCharacter(
-			InputText[0], CharacterView.Class, CharacterView.Skin);
+		SendRequestCreateCharacter(InputText[0], CharacterView.Class, CharacterView.Skin);
 		rUIMng.HideWin(this);
 		rUIMng.PopUpMsgWin(MESSAGE_WAIT);
 	}
@@ -479,7 +452,7 @@ void CCharMakeWin::RequestCreateCharacter()
 
 void CCharMakeWin::RenderControls()
 {
-	RenderCreateCharacter();	// 3D 생성 캐릭터 렌더.
+	RenderCreateCharacter();
 	::EnableAlphaTest();
 
 	int i;
@@ -496,17 +469,16 @@ void CCharMakeWin::RenderControls()
 	g_pRenderText->SetTextColor(CLRDW_WHITE);
 	g_pRenderText->SetBgColor(0);
 
-// 능력치.
 	char* apszStat[MAX_CLASS][4] =
 	{
-		"18", "18", "15", "30",		// 흑마법사.
-		"28", "20", "25", "10",		// 흑기사.
-		"22", "25", "20", "15",		// 요정.
-		"26", "26", "26", "26",		// 마검사.
-		"26", "20", "20", "15",		// 다크로드.
-		"21", "21", "18", "23",		// 소환술사.
+		"18", "18", "15", "30",
+		"28", "20", "25", "10",
+		"22", "25", "20", "15",
+		"26", "26", "26", "26",
+		"26", "20", "20", "15",
+		"21", "21", "18", "23",
 #ifdef PBG_ADD_NEWCHAR_MONK
-		"32", "27", "25", "20",		// 레이지파이터
+		"32", "27", "25", "20",
 #endif //PBG_ADD_NEWCHAR_MONK
 	};
 	int nStatBaseX = m_asprBack[CMW_SPR_STAT].GetXPos() + 22;
@@ -530,26 +502,20 @@ void CCharMakeWin::RenderControls()
 			GlobalText[1701 + i]);
 	}
 
-	// 다크로드일경우만 통솔 능력치 표시.
 	if (m_nSelJob == CLASS_DARK_LORD
 #ifdef PJH_CHARACTER_RENAME
 		&& ReName_Inter == false
 #endif //PJH_CHARACTER_RENAME
 		)
 	{
-		nStatY = int((m_asprBack[CMW_SPR_STAT].GetYPos() + 10 + 4 * 17)
-			/ g_fScreenRate_y);
+		nStatY = int((m_asprBack[CMW_SPR_STAT].GetYPos() + 10 + 4 * 17)	/ g_fScreenRate_y);
 
-		// 능력치 값.
 		g_pRenderText->SetTextColor(CLRDW_ORANGE);
 		g_pRenderText->RenderText(int((nStatBaseX + 54) / g_fScreenRate_x), nStatY, "25");
-
-		// 능력치 이름.
 		g_pRenderText->SetTextColor(CLRDW_WHITE);
 		g_pRenderText->RenderText(int(nStatBaseX / g_fScreenRate_x), nStatY, GlobalText[1738]);
 	}
 
-// 직업 설명.
 #ifdef PJH_CHARACTER_RENAME
 	if(ReName_Inter == true)
 	{

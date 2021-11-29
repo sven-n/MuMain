@@ -1,5 +1,4 @@
 // GM3rdChangeUp.cpp: implementation of the CGM3rdChangeUp class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -17,9 +16,7 @@
 #include "MapManager.h"
 #include "BoneManager.h"
 #include "dsplaysound.h"
-
 #include "GM3rdChangeUp.h"
-
 #include "CSChaosCastle.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
@@ -79,41 +76,42 @@ bool SEASON3A::CGM3rdChangeUp::MoveObject(OBJECT* pObject)
 
 	switch (pObject->Type)
 	{
-	case 2:	//. 검은연기 박스 : 2005/05/24
-	case 5:	//. 연기 박스 : 2005/05/25
+	case 2:
+	case 5:
 	case 58:
 	case 59:
 	case 60:
 		pObject->HiddenMesh = -2;
 		break;
-	case 3:	//. 빨간불 박스 : 2005/05/24
+	case 3:
 		Luminosity = (float)(rand() % 4 + 3) * 0.1f;
 		Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
 		AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3,
 			PrimaryTerrainLight);
 		pObject->HiddenMesh = -2;
 		break;
-	case 57:	// 폭포
+	case 57:
 		pObject->BlendMeshTexCoordV = -(int)WorldTime % 10000 * 0.0002f;
 		break;
-	case 84:	// 바닥별의 빛
+	case 84:
 		{
 			pObject->Position[2]
 				= RequestTerrainHeight(pObject->Position[0], pObject->Position[1])
 					+ sinf(WorldTime*0.0005f)*150.f - 100.f;
 		}
 		break;
-	case 78:	// 햇살
+	case 78:
 		pObject->Alpha = 0.5f;
-	case 85:	// 법사불기둥박스
-	case 86:	// 불리얼박스
-	case 87:	// 불원형박스
-	case 88:	// 검은안개박스	
-	case 89:	// 붉은안개박스
-	case 90:	// 파티클박스
-	case 91:	// 가끔불기둥박스
-	case 92:	// 붉은불기둥박스
-	case 93:	// 파티클2박스	
+		break;
+	case 85:
+	case 86:
+	case 87:
+	case 88:
+	case 89:
+	case 90:
+	case 91:
+	case 92:
+	case 93:
 		pObject->HiddenMesh = -2;
 		break;
 	}
@@ -121,7 +119,6 @@ bool SEASON3A::CGM3rdChangeUp::MoveObject(OBJECT* pObject)
 	return true;
 }
 
-// 오브젝트 효과 랜더.
 bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 {
 	if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap()))
@@ -131,39 +128,39 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 
 	switch (pObject->Type)
 	{
-	case 2:	//. 검은연기 박스 : 2005/05/24
+	case 2:
 		if ( rand()%3==0 )
 		{
 			Vector ( 1.f, 1.f, 1.f, Light );
 			CreateParticle ( BITMAP_SMOKE, pObject->Position, pObject->Angle, Light, 13 , pObject->Scale);
 		}
 		break;
-	case 3:	//. 빨간불 박스 : 2005/05/24
+	case 3:
 		if(rand()%3==0) {
 			Vector ( 1.f, 1.f, 1.f, Light );
 			CreateParticle ( BITMAP_TRUE_FIRE, pObject->Position, pObject->Angle, Light, 0, pObject->Scale );
 		}
 		break;
-	case 5:    //. 연기 박스 : 2005/05/25
+	case 5:
 		{
 			Vector ( 1.f, 1.f, 1.f, Light );
 			if(rand()%2==0) {
 				if((int)((pObject->Timer++)+2)%4==0)
 				{
 					CreateParticle ( BITMAP_ADV_SMOKE+1, pObject->Position, pObject->Angle, Light );
-					CreateParticle ( BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 0 ); //작은놈
+					CreateParticle ( BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 0 );
 				}
 			}
 			if(rand()%2==0) {
 				if((int)(pObject->Timer++)%4==0)
 				{
 					CreateParticle ( BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 6 );
-					CreateParticle ( BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 1 ); //큰놈
+					CreateParticle ( BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 1 );
 				}
 			}
 		}
 		break;
-	case 6:    //. 연기 박스2
+	case 6:
 		{
 			Vector ( 1.f, 1.f, 1.f, Light );
 			Vector ( 0.2f, 0.2f, 0.2f, Light );
@@ -177,22 +174,21 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			pObject->HiddenMesh = -2;
 		}
 		break;
-	case 58:	// 폭포 효과 - 위에서 떨어지는것
-		// 색상 변경 시 CreateParticle() 안에서 Light 강제 적용 막아야 함.
+	case 58:
 		Vector(1.f, 1.f, 1.f, Light);
 		if (rand() % 2 == 0)
 			CreateParticle(BITMAP_WATERFALL_1, pObject->Position, pObject->Angle, Light, 2, pObject->Scale);
 		break;
-	case 59:	//  폭포 효과 - 물 안개 효과
+	case 59:
 		Vector(1.f, 1.f, 1.f, Light);
 		if (rand() % 3 == 0)
 			CreateParticle(BITMAP_WATERFALL_2, pObject->Position, pObject->Angle, Light, 1, pObject->Scale);
 		break;
-	case 60:	// 폭포 효과 - 물 뛰는 느낌
+	case 60:
 		Vector(1.f, 1.f, 1.f, Light);
 		CreateParticle(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 3, pObject->Scale);
 		break;
-	case 85:	// 법사불기둥박스
+	case 85:
 		if(rand()%2==0)
 		{
 			if((int)((pObject->Timer++)+2)%4==0)
@@ -203,7 +199,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 					CreateParticle ( BITMAP_ADV_SMOKE+1, pObject->Position, pObject->Angle, Light, 1, pObject->Scale );
 				}
 				Vector( 1.f, 0.4f, 0.4f, Light );
-				CreateParticle ( BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 2, pObject->Scale ); //작은놈
+				CreateParticle ( BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 2, pObject->Scale );
 			}
 		}
 		Vector( 1.f, 0.4f, 0.4f, Light );
@@ -212,18 +208,18 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			if((int)(pObject->Timer++)%4==0)
 			{
 				CreateParticle ( BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 14, pObject->Scale, 0 );
-				CreateParticle ( BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 2, pObject->Scale*2 ); //큰놈
+				CreateParticle ( BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 2, pObject->Scale*2 );
 			}
 		}
 		break;
-	case 88:	// 검은안개박스
+	case 88:
 		Vector(1.f, 1.f, 1.f, Light);
 		if(rand()%4 == 0)
 		{
 			CreateParticle ( BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 10, pObject->Scale, pObject );
 		}
 		break;
-	case 89:	// 붉은안개박스
+	case 89:
 		if(rand()%4 == 0)
 		{
 			float fRed = (rand()%3)*0.01f + 0.015f;
@@ -231,7 +227,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			CreateParticle ( BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 11, pObject->Scale, pObject );
 		}
 		break;
-	case 90:	// 파티클박스
+	case 90:
 		{
 			Vector ( 1.0f, 0.4f, 0.4f, Light );
 			vec3_t vAngle;
@@ -244,7 +240,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			}
 		}
 		break;
-	case 92:	// 붉은불기둥박스
+	case 92:
 		{
 			Vector ( 1.0f, 0.4f, 0.4f, Light );
 			float fSin = (sinf(WorldTime*0.0005f) + 1.f) * 0.5f;
@@ -262,37 +258,34 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 	return true;
 }
 
-// 오브젝트 렌더.
 bool SEASON3A::CGM3rdChangeUp::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
 	if (IsBalgasBarrackMap() || IsBalgasRefugeMap())
 	{
 		switch(o->Type)
 		{
-		case 79:	// 용암 흐르는 거
+		case 79:
 			b->StreamMesh = 0;
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,-(int)WorldTime%10000*0.0001f);
 			b->StreamMesh = -1;
 			return true;
-		case 81:	// 바닥 용암 페이드인 페이드아웃
+		case 81:
 			{
 				float fLumi = (sinf(WorldTime*0.002f) + 1.f) * 0.5f + 0.3f;
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,0,fLumi,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
 			return true;
-		case 82:	// 바닥별
-		case 83:	// 바닥별
+		case 82:
+		case 83:
 			{
 				float fLumi = (sinf(WorldTime*0.0005f)) * 10.f;
 				b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 				b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,1,fLumi,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
 			return true;
-		// 랜더 순서에 의해 반투명 오류가 나서 맨 나중에 그림.
-		// ZzzObject.cpp의 Draw_RenderObject_AfterCharacter()에서 처리.
-		case 57:	// 폭포
-		case 78:	// 햇살
-		case 84:	// 바닥별의 빛
+		case 57:
+		case 78:
+		case 84:
 			o->m_bRenderAfterCharacter = true;
 			return true;
 		}
@@ -307,12 +300,12 @@ void SEASON3A::CGM3rdChangeUp::RenderAfterObjectMesh(OBJECT* o, BMD* b)
 
 	switch(o->Type) 
 	{
-	case 57:			// 폭포.
+	case 57:
 		b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
 			o->BlendMeshLight, o->BlendMeshTexCoordU,
 			o->BlendMeshTexCoordV, o->HiddenMesh);
 		break;
-	case 78:	// 햇살.
+	case 78:
 		b->BodyLight[0] = 0.52f;
 		b->BodyLight[1] = 0.52f;
 		b->BodyLight[2] = 0.52f;
@@ -324,7 +317,7 @@ void SEASON3A::CGM3rdChangeUp::RenderAfterObjectMesh(OBJECT* o, BMD* b)
 			o->BlendMeshTexCoordV);
 		b->StreamMesh = -1;
 		break;
-	case 84:	// 바닥별의 빛
+	case 84:
 		b->StreamMesh = 0;
 		float fLumi = (sinf(WorldTime*0.001f) + 1.f) * 0.5f;
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,0,fLumi,(int)WorldTime%10000*0.0001f,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -362,19 +355,16 @@ bool SEASON3A::CGM3rdChangeUp::CreateFireSnuff( PARTICLE* o )
 
 void SEASON3A::CGM3rdChangeUp::PlayEffectSound(OBJECT* o)
 {
-	// 맵 전체 앰비언스
-//	PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_GLOBAL);
-	
 	switch(o->Type)
 	{
-	case 74:	// 새장1
-	case 75:	// 새장2
+	case 74:
+	case 75:
 		::PlayBuffer(SOUND_3RD_CHANGE_UP_BG_CAGE1+rand()%2);
 		break;
-	case 79:	// 용암 흐르는 거
+	case 79:
 		::PlayBuffer(SOUND_3RD_CHANGE_UP_BG_VOLCANO);
 		break;
-	case 92:	// 붉은불기둥박스
+	case 92:
 		{
 			float fSin = (sinf(WorldTime*0.0005f) + 1.f) * 0.5f;
 			if (fSin > 0.9f)
@@ -415,7 +405,7 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
 	switch(iType)
 	{
 	case 436:
-	case 409:	// 발람(훈련병)
+	case 409:
 		{
 			OpenMonsterModel(91);
 			c = CreateCharacter(Key,MODEL_MONSTER01+91,PosX,PosY);
@@ -424,7 +414,7 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
 			c->Weapon[1].Type = -1;
 		}
 		break;
-	case 410:	// 데스스피릿(훈련병)
+	case 410:
 		{
 			OpenMonsterModel(93);
 			c = CreateCharacter(Key,MODEL_MONSTER01+93,PosX,PosY);
@@ -437,7 +427,7 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
 		}
 		break;
 	case 437:
-	case 411:	// 소람(훈련병)
+	case 411:
 		{
     		OpenMonsterModel(94);
 			c = CreateCharacter(Key,MODEL_MONSTER01+94,PosX,PosY);
@@ -446,7 +436,7 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
 			c->Weapon[1].Type = -1;
 		}
 		break;
-	case 412:	// 다크엘프(훈련병)
+	case 412:
 		{
 			m_nDarkElfAppearance = true;
 
@@ -470,10 +460,10 @@ bool SEASON3A::CGM3rdChangeUp::SetCurrentActionBalgasBarrackMonster(CHARACTER* c
 
 	switch (c->MonsterIndex)
 	{
-	case 409:		// 발람(훈련병)
-	case 410:		// 데스스피릿(훈련병)
-	case 411:		// 소람(훈련병)
-	case 412:		// 다크엘프(훈련병)
+	case 409:
+	case 410:
+	case 411:
+	case 412:
 		return CheckMonsterSkill(c, o);
 	}
 	return false;
@@ -484,15 +474,9 @@ bool SEASON3A::CGM3rdChangeUp::AttackEffectBalgasBarrackMonster(CHARACTER* c, OB
 	if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap()))
 		return false;
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	CHARACTER *tc = NULL;
-	OBJECT *to = NULL;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+91:	// 발람(훈련병)
+	case MODEL_MONSTER01+91:
 		if (c->AttackTime==14 )
 		{
 			CreateEffect(MODEL_ARROW_HOLY,o->Position,o->Angle,o->Light,1,o,o->PKKey);
@@ -508,7 +492,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c,OBJEC
 {
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+91:	// 발람(훈련병)
+	case MODEL_MONSTER01+91:
 		{
 			vec3_t Light;
 			Vector ( 0.9f, 0.2f, 0.1f, Light );
@@ -520,7 +504,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c,OBJEC
 			}
 		}
 		break;
-	case MODEL_MONSTER01+93:	// 데스스피릿(훈련병)
+	case MODEL_MONSTER01+93:
 		{
 			vec3_t Light;
 			Vector ( 0.9f, 0.2f, 0.1f, Light );
@@ -533,14 +517,9 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c,OBJEC
 			}
 		}
 		break;
-	case MODEL_MONSTER01+94:	// 소람(훈련병)
+	case MODEL_MONSTER01+94:
 		{
 			float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			float fSpeedPerFrame = fActionSpeed/10.f;
-			float fAnimationFrame = o->AnimationFrame - fActionSpeed;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			vec3_t Light;
 			vec3_t EndPos, EndRelative;
 			Vector ( 1.f, 1.f, 1.f, Light );
@@ -578,8 +557,8 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c,OBJEC
 			}
 		}
 		break;
-	case MODEL_MONSTER01+126:	//다크엘프(훈련병)
-		if (m_nDarkElfAppearance)	// 시작될때 한번 다크엘프 주위 밀어내기 효과 뿌려줌
+	case MODEL_MONSTER01+126:
+		if (m_nDarkElfAppearance)
 		{
 			m_nDarkElfAppearance = false;
 
@@ -608,16 +587,12 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
 {
 	vec3_t Angle,Position;
 	float Matrix[3][4];
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	float Luminosity = (float)(rand()%4+7)*0.1f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
     vec3_t  p, p2,EndPos;
 	vec3_t  TempAngle;
 
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+93:	// 데스스피릿(훈련병)
+	case MODEL_MONSTER01+93:
 		{
 			if((o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2))
 			{
@@ -633,12 +608,12 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
 
 				VectorCopy(o->Angle,TempAngle);
 				for(int i=0; i<10; i++) {
-					b->Animation(BoneTransform,fAnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);//o->
+					b->Animation(BoneTransform,fAnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);
 
 					Vector(0.f, 250.f, 0.f, StartRelative);
 					Vector(0.f, 0.f, 0.f, EndRelative);
-					b->TransformPosition(BoneTransform[27],StartRelative,StartPos,false);//o->
-					b->TransformPosition(BoneTransform[27],EndRelative,EndPos,false);//o->
+					b->TransformPosition(BoneTransform[27],StartRelative,StartPos,false);
+					b->TransformPosition(BoneTransform[27],EndRelative,EndPos,false);
 					CreateBlur(c,StartPos,EndPos,Light,3,true,80);	
 
 
@@ -666,7 +641,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
 			}
 		}
 		break;
-	case MODEL_MONSTER01+94:	// 소람(훈련병)
+	case MODEL_MONSTER01+94:
 		{
 			vec3_t  Light;
 			Vector(1.0f,1.0f,1.0f,Light);
@@ -681,10 +656,10 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
 				VectorCopy(o->Angle,TempAngle);
 				for(int i=0; i<10; ++i)
 				{
-					b->Animation(BoneTransform,fAnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);//o->
+					b->Animation(BoneTransform,fAnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);
 
 					Vector(0.f, 100.f, -150.f, EndRelative);
-					b->TransformPosition(BoneTransform[16],EndRelative,EndPos,false);	//o->
+					b->TransformPosition(BoneTransform[16],EndRelative,EndPos,false);
 
 					if(o->AnimationFrame > 5.0f && o->AnimationFrame < 7.0f)
 					{
@@ -706,7 +681,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
 			}
 		}
 		break;
-	case MODEL_MONSTER01+126:	// 다크엘프
+	case MODEL_MONSTER01+126:
 		{
 			if((o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2))
 			{
@@ -725,12 +700,12 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
 
 				VectorCopy(o->Angle,TempAngle);
 				for(int i=0; i<10; i++) {
-					b->Animation(BoneTransform,fAnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);//o->
+					b->Animation(BoneTransform,fAnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);
 
 					Vector(0.f, 0.f, -60.f, StartRelative);
 					Vector(0.f, 0.f, -150.f, EndRelative);
-					b->TransformPosition(BoneTransform[c->Weapon[0].LinkBone],StartRelative,StartPos,false);//o->
-					b->TransformPosition(BoneTransform[c->Weapon[0].LinkBone],EndRelative,EndPos,false);//o->
+					b->TransformPosition(BoneTransform[c->Weapon[0].LinkBone],StartRelative,StartPos,false);
+					b->TransformPosition(BoneTransform[c->Weapon[0].LinkBone],EndRelative,EndPos,false);
 					CreateBlur(c,StartPos,EndPos,Light,3,true,80);	
 
 
@@ -759,13 +734,13 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b,int Ext
 {
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+91:	// 발람(훈련병)
+	case MODEL_MONSTER01+91:
 		{
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, 5);
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+93:	// 데스스피릿(훈련병)
+	case MODEL_MONSTER01+93:
 		{
 			b->BeginRender(o->Alpha);
 				static float aaa = 0.f;
@@ -795,7 +770,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b,int Ext
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+94:	// 소람(훈련병)
+	case MODEL_MONSTER01+94:
 		{
 			Vector(1.f,1.f,1.f,b->BodyLight);
 			b->BeginRender(o->Alpha);
@@ -804,7 +779,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b,int Ext
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+126:	// 다크엘프
+	case MODEL_MONSTER01+126:
 		b->RenderMesh ( 0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 		b->RenderMesh ( 0, RENDER_BRIGHT|RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 		b->RenderMesh ( 0, RENDER_BRIGHT|RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
@@ -823,8 +798,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
 
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+91:	// 발람(훈련병)
-		//사운드//////////////////////////////////////////////////////////////////////////////////
+	case MODEL_MONSTER01+91:
 		if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 		{
 			if(rand()%15==0)
@@ -853,11 +827,10 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
 		}
 		if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 			o->SubType = FALSE;
-		//////////////////////////////////////////////////////////////////////////////////////////
+
 		return true;
-	case MODEL_MONSTER01+93:	// 데스스피릿(훈련병)
+	case MODEL_MONSTER01+93:
 		{
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -887,7 +860,6 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
 
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////			
 
 			vec3_t Position, Light;
 			int dummy = rand()%14;
@@ -914,8 +886,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
 			CreateSprite(BITMAP_LIGHT,Position,1.5f,Light,o);
 		}
 		return true;
-	case MODEL_MONSTER01+94:	// 소람(훈련병)
-		//사운드//////////////////////////////////////////////////////////////////////////////////
+	case MODEL_MONSTER01+94:
 		if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 		{
 			if(rand()%15==0)
@@ -944,11 +915,9 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
 		}
 		if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 			o->SubType = FALSE;
-		//////////////////////////////////////////////////////////////////////////////////////////
 		return true;
-	case MODEL_MONSTER01+126:	// 다크엘프
+	case MODEL_MONSTER01+126:
 		{
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -992,8 +961,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
 
 			if(o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////
-			// 번개 이펙트
+
 			vec3_t vRelativePos, vPos, vLight;
 			Vector(0.f, 0.f, 0.f, vRelativePos);
 			Vector(0.f, 0.f, 0.f, vPos);

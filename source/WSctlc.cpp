@@ -148,10 +148,6 @@ void CWsctlc::Cleanup()
 extern BOOL g_bGameServerConnected;
 extern BYTE g_byNextFuncCrcCheck;
 
-
-//////////////////////////////////////////////////////////////////////
-// 소켓을 생성한다.
-//////////////////////////////////////////////////////////////////////
 int CWsctlc::Create(HWND hWnd, BOOL bGame)
 {	
 	m_socket = socket( PF_INET, SOCK_STREAM, 0);
@@ -177,18 +173,12 @@ int CWsctlc::Create(HWND hWnd, BOOL bGame)
 	return TRUE;
 }
 
-//////////////////////////////////////////////////////////////////////
-// 소켓을 닫는다.
-//////////////////////////////////////////////////////////////////////
 BOOL CWsctlc::Close()
 {
 	if ( m_bGame)
 	{
 		g_bGameServerConnected = FALSE;
 	}
-#ifdef USE_SELFCHECKCODE
-	g_byNextFuncCrcCheck = 1;
-#endif
 	
 	LINGER linger;
 	linger.l_onoff	= 1;
@@ -229,9 +219,6 @@ BOOL CWsctlc::Close(SOCKET & socket)
 	{
 		g_bGameServerConnected = FALSE;
 	}
-#ifdef USE_SELFCHECKCODE
-	g_byNextFuncCrcCheck = 1;
-#endif
 
 #ifdef PKD_ADD_ENHANCED_ENCRYPTION
 	g_SessionCryptorCS.Close( (int)socket );
@@ -248,9 +235,6 @@ SOCKET CWsctlc::GetSocket()
 	return m_socket;
 }
 
-//////////////////////////////////////////////////////////////////////
-// 접속을 한다.
-//////////////////////////////////////////////////////////////////////
 int CWsctlc::Connect(char *ip_addr, unsigned short port, DWORD WinMsgNum)
 {
 	sockaddr_in		addr;

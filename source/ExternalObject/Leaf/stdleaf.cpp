@@ -20,11 +20,7 @@ bool leaf::CreateDirectoryIncSub(const std::string& path) {
 					return false;
 			}
 		}
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 		else if(i == (int)(path.size())-1) {
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		else if(i == path.size()-1) {
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			if(GetFileAttributes(path.c_str()) == 0xFFFFFFFF) {
 				if(!CreateDirectory(path.c_str(), NULL))
 					return false;

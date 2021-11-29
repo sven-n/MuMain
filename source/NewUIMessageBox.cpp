@@ -206,7 +206,6 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateMouseEvent()
 	if(vi == m_vecMsgBoxes.end())
 		return true;
 	
-	//. 기본 마우스 이벤트 등록
 	CNewUIMessageBoxBase* pCurMsgBox = (*vi);
 
 	if(m_EventState == EVENT_NONE && false == MouseLButtonPush && 
@@ -286,7 +285,6 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateKeyEvent()
 	if(vi == m_vecMsgBoxes.end())
 		return true;
 
-	//. 기본 키 이벤트 등록
 	CNewUIMessageBoxBase* pCurMsgBox = (*vi);
 	if(SEASON3B::IsPress(VK_ESCAPE))
 	{
@@ -299,7 +297,7 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateKeyEvent()
 	
 	if(!IsEmpty())
 	{
-		return false;	//. 창이 열려있다면 다른 UI들은 키처리를 하지 않는다.
+		return false;
 	}
 	
 	return true;

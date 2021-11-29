@@ -408,11 +408,6 @@ bool CDmpFileLoader::Create(const std::string& dmpfile)
 		m_listModule.push_back(pModuleInfo);
 	}
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	DMPEXCEPTIONINFOHEADER* pExceptionInfoHeader = &m_DmpFileHeader.ExceptionInfo;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	//. Read callstack infomation
-
 	for(int j=0; j<(int)m_DmpFileHeader.CallStackDepth; j++) 
 	{
 		DMPCALLSTACKFRAME* pCallstackFrame = new DMPCALLSTACKFRAME;

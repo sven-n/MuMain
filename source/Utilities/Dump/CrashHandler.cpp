@@ -636,9 +636,7 @@ LONG CCrashHandler::GenerateErrorReport(PEXCEPTION_POINTERS pExInfo, PVOID pExce
 	// Upload additional files
 	LPCTSTR szFilename;
 	std::list<LPCTSTR>::iterator itor;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	int i = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
 	for (itor = m_lstFile.begin(); itor != m_lstFile.end(); itor++)
 	{
 		// Get filename from filepath

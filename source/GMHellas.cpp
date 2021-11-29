@@ -1077,31 +1077,27 @@ CHARACTER* CreateHellasMonster ( int Type, int PositionX, int PositionY, int Key
     return c;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스 몬스터의 링크본 설정.
-//////////////////////////////////////////////////////////////////////////
 bool    SettingHellasMonsterLinkBone ( CHARACTER* c, int Type )
 {
     switch ( Type )
     {
-    case MODEL_MONSTER01+64:    //  진짜쿤둔
+    case MODEL_MONSTER01+64:
 		c->Weapon[0].LinkBone = 29;
 		c->Weapon[1].LinkBone = 49;
         return true;
-    case MODEL_MONSTER01+66:    //  어퍼컷.
+    case MODEL_MONSTER01+66:
 		c->Weapon[0].LinkBone = 13;
 		c->Weapon[1].LinkBone = 14;
         return true;
-    case MODEL_MONSTER01+67:    //  블루나이트.
+    case MODEL_MONSTER01+67:
 		c->Weapon[0].LinkBone = 56;
 		c->Weapon[1].LinkBone = 42;
         return true;
-    case MODEL_MONSTER01+68:    //  네크론.
+    case MODEL_MONSTER01+68:
 		c->Weapon[0].LinkBone = 60;
 		c->Weapon[1].LinkBone = 60;
         return true;
-    case MODEL_MONSTER01+69:    //  쿤둔후보
+    case MODEL_MONSTER01+69:
 		c->Weapon[0].LinkBone = 41;
 		c->Weapon[1].LinkBone = 51;
         return true;
@@ -1118,7 +1114,7 @@ bool    SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
 {
     switch ( c->MonsterIndex )
     {
-    case 145:   //  로드 센튜리온.
+    case 145:
     case 175:
     case 183:
     case 191:
@@ -1134,11 +1130,11 @@ bool    SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
 		case AT_SKILL_BLOOD_ATT_UP+3:
 		case AT_SKILL_BLOOD_ATT_UP+4:
 #endif //PJH_SEASON4_MASTER_RANK4
-        case AT_SKILL_REDUCEDEFENSE:        //  방어력 감소 스킬.
-        case AT_SKILL_POISON:               //  독스킬.
-        case AT_SKILL_MONSTER_SUMMON :      //  몬스터 소환.
-        case AT_SKILL_MONSTER_MAGIC_DEF :   //  마법 방어력 최고.
-        case AT_SKILL_MONSTER_PHY_DEF :     //  물리 방어력 최고.
+        case AT_SKILL_REDUCEDEFENSE:
+        case AT_SKILL_POISON:
+        case AT_SKILL_MONSTER_SUMMON :
+        case AT_SKILL_MONSTER_MAGIC_DEF :
+        case AT_SKILL_MONSTER_PHY_DEF :
             SetAction ( o, MONSTER01_ATTACK2 );
             break;
 

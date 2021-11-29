@@ -338,11 +338,7 @@ int OpenTerrainMapping(char *FileName)	//
 	delete [] EncData;		//
 
 	int DataPtr = 0;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	DataPtr+=1;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	BYTE Version = *((BYTE *)(Data+DataPtr));DataPtr+=1;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	int iMapNumber = ( int)*((BYTE *)(Data+DataPtr));DataPtr+=1;		//
 	memcpy(TerrainMappingLayer1,Data+DataPtr,256*256);DataPtr+=256*256;
 	memcpy(TerrainMappingLayer2,Data+DataPtr,256*256);DataPtr+=256*256;
@@ -2021,9 +2017,6 @@ void RenderTerrainAlphaBitmap(int Texture,float xf,float yf,float SizeX,float Si
 			Vector((TexU+x+1.f)*TexScaleU,(TexV+y    )*TexScaleV,0.f,p1[1]);
 			Vector((TexU+x+1.f)*TexScaleU,(TexV+y+1.f)*TexScaleV,0.f,p1[2]);
 			Vector((TexU+x    )*TexScaleU,(TexV+y+1.f)*TexScaleV,0.f,p1[3]);
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			bool Clip = false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			for(int i=0;i<4;i++) 
 			{
 				p1[i][0] -= 0.5f;
@@ -2804,9 +2797,6 @@ void RenderSky()
 	AngleIMatrix(Angle,Matrix);
 	float Aspect = (float)(WindowWidth)/(float)(WindowWidth);
 	float Width  = 1780.f * Aspect;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float Height = 700.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 	BeginSprite();
 	vec3_t p,Position;

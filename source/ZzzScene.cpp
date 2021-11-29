@@ -2794,22 +2794,11 @@ void MainScene(HDC hDC)
 			break;
 #endif	// ASG_ADD_MAP_KARUTAN
 		}
-		if(gMapManager.WorldActive != WD_0LORENCIA && gMapManager.WorldActive != WD_2DEVIAS && gMapManager.WorldActive != WD_3NORIA
-#ifdef CSK_ADD_MAP_ICECITY	
-			&& gMapManager.WorldActive != WD_58ICECITY_BOSS
-#endif // CSK_ADD_MAP_ICECITY	
-#ifdef LDS_ADD_SOUND_UNITEDMARKETPLACE
-			&& gMapManager.WorldActive != WD_79UNITEDMARKETPLACE
-#endif // LDS_ADD_SOUND_UNITEDMARKETPLACE
-			)
+		if(gMapManager.WorldActive != WD_0LORENCIA && gMapManager.WorldActive != WD_2DEVIAS && gMapManager.WorldActive != WD_3NORIA && gMapManager.WorldActive != WD_58ICECITY_BOSS	&& gMapManager.WorldActive != WD_79UNITEDMARKETPLACE)
 		{
 			StopBuffer(SOUND_WIND01,true);
 		}
-		if ( gMapManager.WorldActive != WD_0LORENCIA && gMapManager.InDevilSquare() == false
-#ifdef LDS_ADD_SOUND_UNITEDMARKETPLACE
-			 && gMapManager.WorldActive != WD_79UNITEDMARKETPLACE
-#endif // LDS_ADD_SOUND_UNITEDMARKETPLACE
-			)
+		if ( gMapManager.WorldActive != WD_0LORENCIA && gMapManager.InDevilSquare() == false && gMapManager.WorldActive != WD_79UNITEDMARKETPLACE)
 		{
 			StopBuffer(SOUND_RAIN01,true);
 		}
@@ -3005,8 +2994,6 @@ extern int g_iNoMouseTime;
 extern GLvoid KillGLWindow(GLvoid);
 
 
-//void StartDevilSquareCountDown( int iType);	// 임시
-
 void Scene(HDC hDC)
 {
 	g_Luminosity = sinf(WorldTime*0.004f)*0.15f+0.6f;
@@ -3017,15 +3004,15 @@ void Scene(HDC hDC)
 		MovieScene(hDC);
 		break;
 #endif // MOVIE_DIRECTSHOW
-	case WEBZEN_SCENE://웹젠 로고 나오는 씬
+	case WEBZEN_SCENE:
         WebzenScene(hDC);
 		break;
-	case LOADING_SCENE://로딩 씬
+	case LOADING_SCENE:
       	LoadingScene(hDC);
 		break;
-	case LOG_IN_SCENE://계정 입력받는 씬
-	case CHARACTER_SCENE://케릭터 선택하는 씬
-	case MAIN_SCENE://메인 씬
+	case LOG_IN_SCENE:
+	case CHARACTER_SCENE:
+	case MAIN_SCENE:
 		MainScene(hDC);
 		break;
 	}
@@ -3035,7 +3022,7 @@ void Scene(HDC hDC)
 	_asm { __emit 0x15 }
 Pos_NoMouseTimeCheck2:
 	if ( g_iNoMouseTime > 31)
-	{	// g_iNoMouseTime 체크를 건너뛰게 조작한 경우
+	{
 		SendHackingChecked( 0x02, 0);
 		FAKE_CODE( Pos_NoMouse_KillWindow);
 Pos_NoMouse_KillWindow:

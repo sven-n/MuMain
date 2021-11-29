@@ -1,5 +1,4 @@
 // NewUICursedTempleSystem.cpp: implementation of the CNewUICursedTempleSystem class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -28,19 +27,15 @@ extern int TextNum;
 extern char TextList[30][100];
 extern int  TextListColor[30];
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 using namespace SEASON3B;
 
 namespace
 {
-	const int HolyItemNpc				= 380;         // 성물Npcindex
-	const int AlliedNpc					= 381;		   // 연합군측Npcindex
-	const int IllusionNpc				= 382;		   // 환영교단측Npcindex
-	const int AlliedHolyItemBoxNpc		= 383;         // 성물보관함(연합군)Npcindex
-	const int IllusionHolyItemBoxNpc	= 384;         // 성물보관함(환영교)Npcindex
+	const int HolyItemNpc				= 380;
+	const int AlliedNpc					= 381;
+	const int IllusionNpc				= 382;
+	const int AlliedHolyItemBoxNpc		= 383;
+	const int IllusionHolyItemBoxNpc	= 384;
 
 	const int	AXIS_X			= 0;
 	const int	AXIS_Y			= 1;
@@ -64,13 +59,11 @@ namespace
 		
 		if( aXis == AXIS_X )
 		{
-			// 45도로 돌리기
 			float ridY = posY[6]-pointY;
 			return ((pointX-ridY)/scale)+minmapframeposX;
 		}
 		else
 		{
-			// 45도로 돌리기
 			float ridX = posX[6]-pointX;
 			return (((125-(pointY+ridX)))/scale)+minmapframeposY;
 		}
@@ -542,7 +535,6 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc( DWORD npcindex, D
 					return false;
 				}
 
-				//성물이 있는지 검사
 				if( CheckInventoryHolyItem( Hero ) )
 				{
 					SEASON3B::CCursedTempleProgressMsgBox* pMsgBox = NULL;
@@ -554,8 +546,6 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc( DWORD npcindex, D
 				}
 				else
 				{
-					// 아이템이 없기 때문에 에러 메세지 출력
-					// "아이템이 없습니다."
 					g_pChatListBox->AddText("", GlobalText[2092], SEASON3B::TYPE_ERROR_MESSAGE);					
 				}
 			}
@@ -577,11 +567,9 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc( DWORD npcindex, D
 	{
 		if( g_MessageBox->IsEmpty() )
 		{
-			// 2359 "우리는 현재 환영교단의 심장부에 입성했다. 사원 내부의 성물이 우리의 목표다. 많은 수의 성물을 우리측 성물보관함으로 이동시켜라. 용감한자에게는 그만한 포상이 기다리고 있을 것이다."
 			if( npcindex == AlliedNpc )
 				SEASON3B::CreateOkMessageBox(GlobalText[2359]);
 
-			// 2362 "주목해주십시오. 연합군이 사원 입구까지 진격해왔습니다. 우리는 그들과의 전투에 혼신의 힘을 기울여야 합니다. 또한 성물을 그들에게 뺏기지 않도록 보호하여 사원을 지켜냅시다."
 			if( npcindex == IllusionNpc )
 				SEASON3B::CreateOkMessageBox(GlobalText[2362]);
 		}
@@ -595,12 +583,12 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc( DWORD npcindex, D
 
 bool SEASON3B::CNewUICursedTempleSystem::CheckHeroSkillType( int operatortype )
 {
-	if( operatortype == 0 ) //상승
+	if( operatortype == 0 )
 	{
 		if( Hero->m_CursedTempleCurSkill >= AT_SKILL_CURSED_TEMPLE_SUBLIMATION ) return false;
 		else return true;
 	}
-	else//하강
+	else
 	{
 		if( Hero->m_CursedTempleCurSkill <= AT_SKILL_CURSED_TEMPLE_PRODECTION ) return false;
 		else return true;
@@ -683,7 +671,6 @@ void SEASON3B::CNewUICursedTempleSystem::UpdateScore()
 {
 	if( !m_IsScoreEffect ) return;
 
-	// -=-;;; 할말이 없다....
 	switch( m_ScoreEffectState )
 	{
 	case 0:
@@ -747,7 +734,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 {
 #ifdef KJH_ADD_SKILLICON_RENEWAL
 	EnableAlphaTest();
-	glColor4f( 1.f, 1.f, 1.f, m_Alph );		// 알파값변경
+	glColor4f( 1.f, 1.f, 1.f, m_Alph );
 
 	float Width, Height, fU, fV, x, y;
 	int iSkillIndex;
@@ -765,7 +752,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 		iSkillIndex = IMAGE_NON_SKILL2;
 	}
 	
-    //  스킬 아이콘.
 	x = 512.f+27.f; 
 	y = 258.f-58.f;
 	Width = 20.f;
@@ -951,8 +937,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderMiniMap()
 	x = 512.f; y = 232.f; Width = 128.f; Height = 165.f;
 	RenderBitmap ( IMAGE_CURSEDTEMPLESYSTEM_MINIMAPFRAME, x, y, Width, Height, 0.f, 0.f, Width/128.f, Height/256.f );
 
-	// MINI Map이 38 만큼 Y값이 올라갔음
-	/////////////////////////////////////////////////////////////////////////////////////////////////
 	float npc_x = MiniMapPos( 138, 44, m_Scale, AXIS_X );
 	float npc_y = MiniMapPos( 138, 44, m_Scale, AXIS_Y );
 	RenderBitmap( IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_NPC, 
@@ -973,7 +957,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderMiniMap()
 	RenderBitmap( IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_NPC, 
 		          npc_x, npc_y, 9.0f, 9.0f ,0.f,0.f, 9.f/16.f, 9.f/16.f );
 
-	// 아군 위치
 	for ( int k=0; k<m_CursedTempleMyTeamCount; ++k )
 	{
 		PMSG_CURSED_TAMPLE_PARTY_POS* p = &m_CursedTempleMyTeam[k];
@@ -1263,10 +1246,6 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill( CHARACTER* c, OBJ
 			return;
 		}
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		OBJECT* to = &tc->Object;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-
 		SendRequestCursedTempleMagic( CursedTempleCurSkillType, static_cast<WORD>(tc->Key), Distance );
 		Hero->m_CursedTempleCurSkillPacket = true;
 		MouseRButtonPush = false;
@@ -1296,11 +1275,11 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill( BYTE* R
 
 	WORD magNumber     = ((WORD)(data->MagicH)<<8) + data->MagicL;
 
-	WORD sourceobjkey  = data->wSourceObjIndex;	// 소스 인덱스
-	WORD targetobjkey  = data->wTargetObjIndex;	// 타겟 인덱스
+	WORD sourceobjkey  = data->wSourceObjIndex;
+	WORD targetobjkey  = data->wTargetObjIndex;
 
-	WORD sourceobjindex  = FindCharacterIndex(sourceobjkey);	// 소스 인덱스
-	WORD targetobjindex  = FindCharacterIndex(targetobjkey);	// 타겟 인덱스
+	WORD sourceobjindex  = FindCharacterIndex(sourceobjkey);
+	WORD targetobjindex  = FindCharacterIndex(targetobjkey);
 
 	if(sourceobjindex == MAX_CHARACTERS_CLIENT || targetobjindex == MAX_CHARACTERS_CLIENT)
 		return;
@@ -1343,7 +1322,6 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill( BYTE* R
 		break;
 	case AT_SKILL_CURSED_TEMPLE_RESTRAINT:
 		{
-			//  얼려진 캐릭터는 무조건 정지.
             tc->Movement = false;
 
 	        SetPlayerStop(tc);
@@ -1425,7 +1403,6 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo( BYTE* ReceiveB
 
 	if( data->btUserIndex == 0xffff )
 	{
-		//무조건 지우기
 		memset(&m_HolyItemPlayerName, 0, sizeof(char));
 	}
 
@@ -1510,7 +1487,5 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint( BYTE* Rece
 
 void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleHolyItemRelics( BYTE* ReceiveBuffer )
 {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPPMSG_RELICS_GET_USER data = (LPPMSG_RELICS_GET_USER)ReceiveBuffer;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 }

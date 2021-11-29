@@ -5606,11 +5606,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					// ¤¤. À§Ä¡°ª ÁöÁ¤ -----------------------------------------------------
 					vec3_t		v3DirDistAD;
 					vec3_t		v3PosStartModify, v3PosTargetModify;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					const int	iLimitArea1 = 200;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-					const int	iLimitArea1 = 200, iLimitArea2 = 200;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					float		fDistAD, fDistAB, fDistCD;	
 					float		fHeightTerrainTarget = RequestTerrainHeight(v3PosTarget[0],v3PosTarget[1]);
 					int			iOffsetDist = 100;
@@ -6346,46 +6342,30 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 									v3PosModify,
 									v3PosTargetModify;
 								
-								o->ExtState		= TOTAL_LIFETIME;			// TotalLife ¹Ì»ç¿ëÁßÀÎ ÀÓÀÇÀÇ º¯¼ö »ç¿ë.
+								o->ExtState		= TOTAL_LIFETIME;
 								o->LifeTime     = TOTAL_LIFETIME;
 								o->Gravity      = 0.0f;
 								o->HiddenMesh   = 1;
 								o->Distance		= 0.0f;
 								o->Alpha		= 1.0f;
-								o->ChromeEnable	= false;					// Hierarchical ÇÏÁö ¾Ê°Ô Ã³¸® ÇÑ´Ù.
+								o->ChromeEnable	= false;
 								o->Scale		= 1.0f;
 								o->Visible		= false;
 								o->Velocity		= 0.4f;
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 								BMD*	b = &Models[o->Type];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 								//b->Velocity = 10.f;
-								
-								// ¤¡. ¿òÁ÷ÀÓ °¢µµ ¹é¾÷. ¸ðµ¨ÀÇ °¢µµ + ÀÚ½ÅÀÇ »ó´ë °¢µµ
+
 								Vector ( o->Angle[0], o->Angle[1], o->Angle[2], o->HeadAngle );	
-								
-								// 1. ¹æÇâ
 								VectorSubtract( o->Light, o->Position, o->Direction );
 								
-								// 2. ±âº» °Å¸® °ª ÁöÁ¤
 								o->Distance = sqrt(o->Direction[0] * o->Direction[0] +
 									o->Direction[1] * o->Direction[1] + 
 									o->Direction[2] * o->Direction[2]);
 								
 								VectorDivFSelf( o->Direction, o->Distance );
 								
-								// 3. ¸ñÇ¥ À§Ä¡°ªÀ» Å¸°ÙÄÉ¸¯ÅÍÀ§Ä¡°ª ¹æÇâº¤ÅÍ ¹æÇâÀ¸·Î ÃÊ°úÇÑ À§Ä¡·Î ¼³Á¤.
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-								float	fDistanceResult = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-								
-								// 3-0. DirÀ» µÚ·Î ´Ã·Á¾ßÇÏ´Âµ¥ ¸ñÇ¥Á¡ÀÌ ½ÃÀÛÁ¡º¸´Ù ¾Æ·¡¿¡ ÀÖÀ¸¹Ç·Î ¶¥¹ØÀ¸·Î ²¨Áö´Â ¹®Á¦¸¦
-								//      ÇØ°áÇÏ±â À§ÇØ ½ÃÀÛÁ¡ÀÇ ³ôÀÌ°ªÀ» ¸ñÇ¥Á¡ÀÌ¶û µ¿ÀÏÇÏ°Ô ÇØÁØ´Ù.
-								
-								// 3-0- ¹æ½Ä 1.
-								VectorCopy( o->Owner->Position, v3PosModify );
-								
+								VectorCopy( o->Owner->Position, v3PosModify );					
 								v3PosModify[2] = o->Light[2];
 								VectorCopy( o->Light, v3PosTargetModify );
 								
@@ -6396,11 +6376,10 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								//vc = va + scale*vb
 								VectorMA( v3PosTargetModify,200.0f,v3DirModify,v3PosProcess01 );
 
-								VectorCopy ( v3PosProcess01, o->StartPosition );	// ¤¤. ½ÃÀÛ À§Ä¡Á¡ ¹é¾÷.
+								VectorCopy ( v3PosProcess01, o->StartPosition );
 								
 								o->m_Interpolates.ClearContainer();
 								
-								// º¸°£ÄÁÅ×ÀÌ³Ê¿¡ °¢µµ ÀûÀç ----------------------------------------------- 
 								CInterpolateContainer::INTERPOLATE_FACTOR	InsertFactor;
 								InsertFactor.fRateStart	= 0.0f;			
 								InsertFactor.fRateEnd	= 0.28f;		
@@ -6427,18 +6406,14 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								VectorCopy(v3PosProcess01, InsertFactor.v3Start);
 								VectorCopy(v3PosProcess01, InsertFactor.v3End);
 								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
-								// º¸°£ÄÁÅ×ÀÌ³Ê¿¡ À§Ä¡ ÀûÀç ----------------------------------------------- 
 
-								// º¸°£ÄÁÅ×ÀÌ³Ê¿¡ SCALE ÀûÀç ----------------------------------------------- 
 								CInterpolateContainer::INTERPOLATE_FACTOR_F	InsertFactorF;
 								InsertFactorF.fRateStart	= 0.0f;
 								InsertFactorF.fRateEnd	= 1.01f;
 								InsertFactorF.fStart = o->Scale * 1.0f;
 								InsertFactorF.fEnd = o->Scale * 1.0f;
 								o->m_Interpolates.m_vecInterpolatesScale.push_back( InsertFactorF );		// 2#
-								// º¸°£ÄÁÅ×ÀÌ³Ê¿¡ SCALE ÀûÀç ----------------------------------------------- 
 
-								// º¸°£ÄÁÅ×ÀÌ³Ê¿¡ ALPHA ÀûÀç ----------------------------------------------- 
 								InsertFactorF.fRateStart	= 0.0f;
 								InsertFactorF.fRateEnd	= 0.15f;
 								InsertFactorF.fStart = 0.0f;
@@ -6456,50 +6431,35 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								InsertFactorF.fStart = 1.0f;
 								InsertFactorF.fEnd = 0.0f;
 								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 2#
-								// º¸°£ÄÁÅ×ÀÌ³Ê¿¡ ALPHA ÀûÀç ----------------------------------------------- 
 
-								
-								// ÃÊ±â°ª ¼³Á¤
-								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);		// °¢µµ
-								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);		// À§Ä¡
-								o->m_Interpolates.GetAlphaCurrent(o->Alpha, 0.0f);		// ¾ËÆÄ
-								o->m_Interpolates.GetScaleCurrent(o->Scale, 0.0f);		// ½ºÄÉÀÏ
+								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);
+								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);
+								o->m_Interpolates.GetAlphaCurrent(o->Alpha, 0.0f);
+								o->m_Interpolates.GetScaleCurrent(o->Scale, 0.0f);
 							}
 						}		
 					}
 				}
-				// °¡ÀÌ¿Â ¸ðµç ÀÌÆåÆ® »ý¼º ³¡ºÎºÐ
-				// ==========================================================================================<
 			}
 			break;
 #endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 #ifdef LDS_ADD_EG_4_MONSTER_JELINT
-			case MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION:	// MODEL_BLOW_OF_DESTRUCTION±×´ë·Î ÂüÁ¶ : Scale º¯°æ °¡´É
+			case MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION:
 				{
 					if(o->SubType == 0)
 					{
 						o->LifeTime = 40;
 						
-						// ºÎ¸ð¿ÀÇÁÁ§Æ®°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î Á¶±Ý ÀÌµ¿
-						assert(o->Owner && "ºÎ¸ð Æ÷ÀÎÆ®¸¦ ³Ö¾îÁà¾ß ÇÕ´Ï´Ù.!");
 						vec3_t vPos, vPos2;
 						float Matrix[3][4];
 						Vector(-20.f, -100.f, 0.f, vPos);
 						AngleMatrix(o->Owner->Angle, Matrix);
 						VectorRotate(vPos, Matrix, vPos2);	
-						VectorAdd(vPos2, o->Position, o->Position);
-						
-						// Å¸ÄÏ À§Ä¡ º¹»ç
+						VectorAdd(vPos2, o->Position, o->Position);			
 						VectorCopy(o->Light, o->StartPosition);
-						
-						// ¶óÀÌÆ®°ª ÀÔ·Â
 						Vector(1.2f, 1.2f, 1.2f, o->Light);
 						
-						// Å¸ÄÏ¿¡ ÀÌÆåÆ® ¹ß»ý
-						CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, 
-							o->StartPosition, o->Angle, 
-							o->Light, 1, o->Owner, -1, 0, 
-							0, 0, o->Scale );
+						CreateEffect(MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION,o->StartPosition,o->Angle,o->Light,1,o->Owner,-1,0,0,0,o->Scale);
 					}
 					else if(o->SubType == 1)
 					{
@@ -7894,18 +7854,12 @@ void MoveEffect( OBJECT *o, int iIndex)
 				Vector(fTemp1+0.01f, fTemp2+0.01f, fTemp3+0.01f, o->Light);
 				o->Angle[1] += 4.0f + o->Gravity;
 			}
-#ifdef CSK_ADD_MAP_ICECITY	
 			else if(o->SubType == 1)
 			{
 				float fTemp1 = sinf(WorldTime*0.0011f)*0.05f;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				float fTemp2 = sinf(WorldTime*0.0017f)*0.05f;
-				float fTemp3 = sinf(WorldTime*0.0013f)*0.05f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				Vector(0.0f+fTemp1, 0.2f+fTemp1, 0.1f+fTemp1, o->Light);
 				o->Angle[1] += 2.0f + o->Gravity;
 			}
-#endif // CSK_ADD_MAP_ICECITY
 		}
 		break;	
 	case MODEL_GHOST:
@@ -8061,9 +8015,6 @@ void MoveEffect( OBJECT *o, int iIndex)
                             Position[0] = o->Owner->Position[0] + fDist * ( float)sinf( fParam);
                             Position[1] = o->Owner->Position[1] + fDist * ( float)cosf( fParam);
                             Position[2] = o->Owner->Position[2] + ( ( o->SubType == 3) ? 250.0f : 200.0f) * o->Owner->Scale;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-                            vec3_t LightFlame[2] = { { 0.65f, 0.65f, 0.65f}, { 0.1f, 1.0f, 1.0f}};
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
                             CreateSprite(BITMAP_SKULL,Position,1.0f,Light,o->Owner,0.0f);
                         }
                     }
@@ -8315,13 +8266,13 @@ void MoveEffect( OBJECT *o, int iIndex)
  				switch(rand()%3)
 				{
 				case 0:
-					CreateParticle(BITMAP_FIRE_HIK1,vFirePosition,o->Angle,o->Light,1,fScale);	// ºÒ
+					CreateParticle(BITMAP_FIRE_HIK1,vFirePosition,o->Angle,o->Light,1,fScale);	
 					break;
 				case 1:
-					CreateParticle(BITMAP_FIRE_CURSEDLICH,vFirePosition,o->Angle,o->Light,5,fScale);	// ºÒ
+					CreateParticle(BITMAP_FIRE_CURSEDLICH,vFirePosition,o->Angle,o->Light,5,fScale);	
 					break;
 				case 2:
-					CreateParticle(BITMAP_FIRE_HIK3,vFirePosition,o->Angle,o->Light,1,fScale);	// ºÒ
+					CreateParticle(BITMAP_FIRE_HIK3,vFirePosition,o->Angle,o->Light,1,fScale);	
 					break;
 				}
 			}			
@@ -8339,13 +8290,13 @@ void MoveEffect( OBJECT *o, int iIndex)
 				switch(rand()%3)
 				{
 				case 0:
-					CreateParticle(BITMAP_FIRE_HIK1,vFirePosition,o->Angle,o->Light,1,fScale);	// ºÒ
+					CreateParticle(BITMAP_FIRE_HIK1,vFirePosition,o->Angle,o->Light,1,fScale);	
 					break;
 				case 1:
-					CreateParticle(BITMAP_FIRE_CURSEDLICH,vFirePosition,o->Angle,o->Light,5,fScale);	// ºÒ
+					CreateParticle(BITMAP_FIRE_CURSEDLICH,vFirePosition,o->Angle,o->Light,5,fScale);	
 					break;
 				case 2:
-					CreateParticle(BITMAP_FIRE_HIK3,vFirePosition,o->Angle,o->Light,1,fScale);	// ºÒ
+					CreateParticle(BITMAP_FIRE_HIK3,vFirePosition,o->Angle,o->Light,1,fScale);	
 					break;
 				}
 			}			
@@ -8376,13 +8327,13 @@ void MoveEffect( OBJECT *o, int iIndex)
  				switch(rand()%3)
 				{
 				case 0:
-					CreateParticle(BITMAP_FIRE_HIK1,vFirePosition,o->Angle,vLight,0,fScale);	// ºÒ
+					CreateParticle(BITMAP_FIRE_HIK1,vFirePosition,o->Angle,vLight,0,fScale);	
 					break;
 				case 1:
-					CreateParticle(BITMAP_FIRE_CURSEDLICH,vFirePosition,o->Angle,vLight,4,fScale);	// ºÒ
+					CreateParticle(BITMAP_FIRE_CURSEDLICH,vFirePosition,o->Angle,vLight,4,fScale);	
 					break;
 				case 2:
-					CreateParticle(BITMAP_FIRE_HIK3,vFirePosition,o->Angle,vLight,0,fScale);	// ºÒ
+					CreateParticle(BITMAP_FIRE_HIK3,vFirePosition,o->Angle,vLight,0,fScale);	
 					break;
 				}
 			}				
@@ -10115,9 +10066,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 
 				OBJECT * pObject = o;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				BMD * pModel = &Models[pObject->Type];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				OBJECT * pOwner = pObject->Owner;
 				BMD * pOwnerModel = &Models[pOwner->Type];
 
@@ -10174,11 +10122,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			else if(o->SubType == 1)
 			{
 				OBJECT * pObject = o;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				BMD * pModel = &Models[pObject->Type];
-				OBJECT * pOwner = pObject->Owner;
-				BMD * pOwnerModel = &Models[pOwner->Type];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 				float fScale = 0.8f;
 				vec3_t vPos, vLightFlare;
@@ -12011,10 +11954,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 	case MODEL_SKULL:
         if ( o->SubType==1 && o->Owner!=NULL )
         {
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-            float dx = o->Position[0]-o->StartPosition[0];
-            float dy = o->Position[1]-o->StartPosition[1];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
             if ( (o->LifeTime%10)==0 )
             {
@@ -12024,9 +11963,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 		    VectorCopy ( o->Owner->Position, o->StartPosition );
 		    o->StartPosition[2] += 200.f;
 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-		    float Distance = sqrtf(dx*dx+dy*dy);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			MoveHumming(o->Position,o->Angle,o->StartPosition,10.f);
 
 		    o->HeadAngle[0] += (float)(rand()%32-16)*0.2f;
@@ -12827,9 +12763,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			b->PlayAnimation( &o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity/3.f, o->Position, o->Angle );
 
 			vec3_t vRelativePos, Light;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-			BMD *ob = &Models[o->Owner->Type];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 			Vector(0.4f, 0.4f, 0.8f, Light);
 			Vector(0.f, 0.f, 0.f, vRelativePos);
 		}
@@ -13824,11 +13757,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 #ifdef LDK_ADD_EG_MONSTER_DEASULER
 	case MODEL_DEASULER:
 		{
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				float	fEPSILON = 0.000001f;	
-				float	fRateAlpha_EraseOver = 0.7f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				vec3_t	v3RotateAngleRelative;
+				vec3_t	v3RotateAngleRelative; 
 				o->Visible = true;
 
 				float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
@@ -13865,9 +13794,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 				int		iTYPESWORDFORCE = 0;		// 1: FORCE OF SWORD 
 				int		iTYPESWORDSHADOW = 0;		// 1: SHADOW SWORD 
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				int		iTYPESWORDJOINT = 0;		// 1: JOINT OF SWORD
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 				iTYPESWORDFORCE = 1;
 				iTYPESWORDSHADOW = 0;
@@ -14071,11 +13997,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             {
                 VectorCopy ( o->Owner->Position, p );
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				MoveHumming ( o->Position, o->Angle, p, o->Velocity );
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-                float Distance = MoveHumming ( o->Position, o->Angle, p, o->Velocity );
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
                 o->Velocity += 2.4f;
                 
 		        AngleMatrix(o->Angle,Matrix);
@@ -15849,11 +15771,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 						Vector(0.3f, 0.3f, 0.3f,vLight1);
 						Vector(1.f, 0.6f, 0.8f, vLight2);
 						
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-						float fRot = (WorldTime*0.0006f) * 360.0f;
-						float Scale = (rand()%30+50) / 60.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-						
 						b->Animation(BoneTransform,o->AnimationFrame,o->PriorAnimationFrame,o->PriorAction, o->Angle, o->HeadAngle);
 						
 						b->TransformPosition(BoneTransform[1], vRelativePos, vtaWorldPos, false);
@@ -16055,11 +15972,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 						Vector(1.0f, 1.0f, 1.0f, vLight);
 						vec3_t vDir, vPos, vAngle;
 						VectorSubtract(o->StartPosition, o->Position, vDir);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 						VectorLength(vDir);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-						float fLength = VectorLength(vDir);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 						VectorNormalize(vDir);
 						VectorScale(vDir, 55.f, vPos);
 						VectorAdd(o->Position, vPos, vPos);
@@ -17015,14 +16928,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 									for(int i=0;i<iAccess;i++) 
 									{
 										fCurrentRateUnit += fUnit;	
-										
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-										if( fCurrentRateUnit > fEndRate )
-										{
-											int iBreakPoint = 0;
-										}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-										
+											
 										o->m_Interpolates.GetAngleCurrent(v3CurBlurAngle, fCurrentRateUnit);
 										o->m_Interpolates.GetPosCurrent(v3CurBlurPos, fCurrentRateUnit);
 										
@@ -17156,20 +17062,12 @@ void MoveEffect( OBJECT *o, int iIndex)
 						if( fCurrentRate >= 0.0f && fCurrentRate <= 0.6f )
 						{
 							o->Visible = true;		// MoveEffect CreateEffect
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-							const int iNumUnitBone = 11;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 							BMD*	b = &Models[o->Type];
 							vec3_t	*arrEachBonePos;
 							vec3_t	v3LightModify;
-
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-							int		arriBoneIdxCur [] = {10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-							
+			
 							// 1. BonePosition Particle
 							arrEachBonePos = new vec3_t[b->NumBones];
-
 
 							// - APPEAR WITH FIRE EFFECT
 							vec3_t	vRelativePos, vAngle;
@@ -17216,9 +17114,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 							// - APPEAR WITH FIRE EFFECT
 							vec3_t	vAngle;
 							vec3_t	v3LightModify, v3PosModify;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-							float	fParamBasis = 100.0f, fParamUnit = 50.0f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
 							// 1. BonePosition Particle
 							BMD	*b = &Models[o->Type];
@@ -17326,10 +17221,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			else if( o->SubType==3 )
 			{
 				o->Visible = true;		// MoveEffect
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-				float	fEPSILON = 0.000001f;
-				float	fRateAlpha_EraseOver = 0.7f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 				vec3_t	v3RotateAngleRelative;
 
 				// 2. RATE %
@@ -17374,9 +17265,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 						if(o->LifeTime==0)
 						{
 							OBJECT	*oHighHier = o->Owner;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-							BMD		*bHighHier = &Models[oHighHier->Type];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 							
 							vec3_t	v3RelativePos, v3OwnerBonePos;
 							Vector(0.0f, 0.0f, 0.0f ,v3RelativePos);
@@ -17525,21 +17413,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 				if( fCurrentRate >= 0.0f && fCurrentRate <= 0.5f )
 				{
 					o->Visible = true;		// MoveEffect­ CreateEffect
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-					const int iNumUnitBone = 11;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					BMD*	b = &Models[o->Type];
 					vec3_t	*arrEachBonePos;
 					vec3_t	v3LightModify;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-					int		arriBoneIdx[5][11] = {	{ 2, 3, 13, 12, 5, 6, 1, 8, 9, 10, 4 }, 
-													{ 9, 10, 13, 6, 1, 7, 2, 4, 3, 11, 8 }, 
-													{ 1, 2, 3, 4, 5, 6, 12, 8, 9, 10, 7 },
-													{3, 10, 4, 12, 2, 9, 5, 7, 6, 8, 1 },
-													{10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9 } };
-					int		iOffset = o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_;
-					int		*arriBoneIdxCur = arriBoneIdx[iOffset];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					
 					// 1. BonePosition Particle
 					arrEachBonePos = new vec3_t[b->NumBones];
@@ -17652,25 +17528,12 @@ void MoveEffect( OBJECT *o, int iIndex)
 				if( fCurrentRate >= 0.0f && fCurrentRate <= 0.6f )
 				{
 					o->Visible = true;		// MoveEffect CreateEffect
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-					const int iNumUnitBone = 11;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					BMD*	b = &Models[o->Type];
 					vec3_t	*arrEachBonePos;			// Bone
 					vec3_t	v3LightModify;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-					int		arriBoneIdx[5][11] = {	{ 2, 3, 13, 12, 5, 6, 1, 8, 9, 10, 4 }, 
-													{ 9, 10, 13, 6, 1, 7, 2, 4, 3, 11, 8 }, 
-													{ 1, 2, 3, 4, 5, 6, 12, 8, 9, 10, 7 },
-													{3, 10, 4, 12, 2, 9, 5, 7, 6, 8, 1 },
-													{10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9 } };
-					int		iOffset = o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_;
-					int		*arriBoneIdxCur = arriBoneIdx[iOffset];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 					
 					// 1. BonePosition Particle
 					arrEachBonePos = new vec3_t[b->NumBones];
-
 
 					// - APPEAR WITH FIRE EFFECT
 					vec3_t	vRelativePos, vAngle;

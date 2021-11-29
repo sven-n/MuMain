@@ -56,14 +56,10 @@ namespace SEASON3A
 		bool RenderObjectVisual( OBJECT* o, BMD* b );
 		bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
 		bool RenderObjectMesh( OBJECT* o, BMD* b, bool ExtraMon = 0 );
-#ifdef PBG_FIX_CURSEDTEMPLE_SYSTEMMSG
 		void UpdateTempleSystemMsg(int _Value);
-#endif //PBG_FIX_CURSEDTEMPLE_SYSTEMMSG
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 		void SetGaugebarEnabled(bool bFlag);
 		void SetGaugebarCloseTimer();
 		bool IsGaugebarEnabled();
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 		
 	private:
 		bool			m_IsTalkEnterNpc;
@@ -75,10 +71,8 @@ namespace SEASON3A
 		WORD				m_IllusionPoint;
 		bool				m_ShowAlliedPointEffect;
 		bool				m_ShowIllusionPointEffect;
-#ifdef YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 		bool				m_bGaugebarEnabled;
 		float				m_fGaugebarCloseTimer;
-#endif	// YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR
 	};
 };
 

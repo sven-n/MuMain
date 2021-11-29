@@ -1,8 +1,4 @@
 
-//-------------------------------------------------------------------------------------------------------------------------------
-// _LANGUGE_ENG
-//-------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef _LANGUAGE_ENG
 
 // [2010.10.28 1.03H+]
@@ -26,9 +22,9 @@
 #endif // _DEBUG
 
 
-#define KJW_FIX_SLEEPUP_SKILL_INFO						// 소환술사 마스터레벨 슬립 강화 정보 출력 수정(10.10.01)
-#define KJW_FIX_LOGIN_ID_BLACK_SPACE					// 아이디 입력 부분에 검은색 배경이 연장되는 문제 수정(10.10.01)
-#define KJW_FIX_SLIDE_MOVE								// 슬라이드 움직이는 방식 변경 ( 기존의 방식은 앞에 공백을 집어넣는 형태로 입력 글자수에도 제한을 줌 )(10.10.12)
+#define KJW_FIX_SLEEPUP_SKILL_INFO
+#define KJW_FIX_LOGIN_ID_BLACK_SPACE
+#define KJW_FIX_SLIDE_MOVE
 
 //----------------------------------------------------------------------------------------------
 // << Season 5-4 >>
@@ -38,7 +34,7 @@
 
 	//-----------------------------------------------------------------------------
 	// [ Season 5 - Part 4 ]
-	#define PJH_ADD_MASTERSKILL								//소환술사 마스터레벨 추가(2010.03.09)
+	#define PJH_ADD_MASTERSKILL
 		#ifdef PJH_ADD_MASTERSKILL								
 		#undef KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT	//해외에 소환술사 마스터스킬 추가(10.05.28)
 	#endif //PJH_ADD_MASTERSKILL								
@@ -82,19 +78,8 @@
 	#define PBG_FIX_CHARACTERSELECTINDEX					// 캐릭터 인덱스 버그수정(10.07.05)
 #endif //SEASON5_4
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << 버그수정 >>
-//----------------------------------------------------------------------------------------------
-// [2010.06.24 글로벌 1.03A+] - 이주흥
 
 #define KJH_FIX_INGAMESHOP_SENDGIFT_ELIXIROFCONTROL		// 인게임샵 선물하기에서 다크로드가 아닌 클래스도 선물하기 받을수 있는문제 수정 (10.06.23)
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << 버그수정 >>
-//----------------------------------------------------------------------------------------------
-// [2010.06.10 글로벌 1.03z] - 이주흥
-
 #define KJH_FIX_SELL_EXPIRED_UNICON_PET					// 기간지난 유니콘펫 상점판매 가능하게 수정 (10.06.08)
 #define KJH_FIX_SELL_EXPIRED_CRITICAL_WIZARD_RING		// 기간지난 치명적인 마법사의 반지 상점판매 가능하게 수정 (10.06.08)
 
@@ -115,7 +100,6 @@
 	#define KJH_FIX_EMPIREGUARDIAN_ENTER_UI_RENDER_TEXT_ONLY_GLOBAL	// 제국수호군 입장 UI(제린트NPC) Text 수정 (10.05.17) - 글로벌 전용
 	#define KJH_FIX_DOPPELGANGER_ENTER_UI_RENDER_TEXT_ONLY_GLOBAL	// 도펠갱어 입장 UI(루가드NPC) Text 수정 (10.05.19) - 글로벌 전용
 	#define KJH_FIX_BTS167_MOVE_NPC_IN_VIEWPORT						// 뷰포트안에 NPC가 들어오면 NPC가 갑자기 이동하는 버그수정 (10.05.17)
-	#define KJH_MOD_BTS191_GOLD_FLOATING_NUMBER						// 아이템이나 캐시 금액을, 소숫점자리까지 계산 (10.05.18)
 	#define KJH_FIX_BTS204_INGAMESHOP_ITEM_STORAGE_SELECT_LINE		// 인게임샵 보관함에서 1번째 아이템 사용시, 포커싱이 3번째 아이템으로 선택되는 버그수정 (10.05.18)
 	#define	KJH_FIX_BTS206_INGAMESHOP_SEND_GIFT_MSGBOX_BLANK_ID		// 인게임샵 선물하기 메세지창에서 ID입력하지 않고 확인 버튼 클릭시, 선물확인 메세지창이 뜨는 버그 (10.05.18)
 	#define KJH_MOD_COMMON_MSG_BOX_BTN_DISABLE_TEXT_COLOR			// 공통 메세지박스 버튼 Disable시 글자색 수정 (10.05.18)
@@ -177,34 +161,12 @@
 			#define LDS_ADD_EFFECT_UNITEDMARKETPLACE				// 통합시장 NPC 등에 추가 EFFECT. (10.01.14)
 		#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 
-		//------------------------------------------------
-		// 2. 겐스랭킹 시스템
-		// - 박보근
-		#define PBG_ADD_GENSRANKING							// 겐스 랭킹(09.12.01)
+		#define PBG_ADD_GENSRANKING
 
-		//------------------------------------------------
-		// 3. 스킬 아이콘 리뉴얼
-		#define KJH_ADD_SKILLICON_RENEWAL					// 스킬아이콘 리뉴얼(10.01.20)
+		#define KJH_ADD_SKILLICON_RENEWAL
 
-		//------------------------------------------------
-		// 4. 아이템 인챈트 UP
-		#define LDK_ADD_ITEM_UPGRADE_14_15					// 아이템 14 15
-		#ifdef LDK_ADD_ITEM_UPGRADE_14_15
-			#define LDK_ADD_14_15_GRADE_ITEM_HELP_INFO			// 아이템 14 15 도움말 추가(09.12.2)
-			#define LDK_ADD_14_15_GRADE_ITEM_VALUE				// 아이템 14 15 판매금액 추가(09.12.2)
-			#define LDK_ADD_14_15_GRADE_ITEM_RENDERING			// 아이템 14 15 랜더효과 추가(10.01.04) 기존의 13처럼 크롬,블렌드 처리
-			#define LDK_ADD_14_15_GRADE_ITEM_SET_EFFECT			// 아이템 14 15 세트이펙트효과 추가(10.01.22)
-			#define LDK_ADD_14_15_GRADE_ITEM_TYPE_CHANGE		// 아이템 14 15 래벨 타입 변경(10.01.27)
-			#define LDK_ADD_14_15_GRADE_ITEM_MODEL				// 아이템 14 15 모델링 추가(10.01.18)
-			#define YDG_FIX_ITEM_EFFECT_POSITION_ERROR			// 아이템 이펙트 위치가 이상하게 나오는 문제 (2010.01.27)
-		#endif //LDK_ADD_ITEM_UPGRADE_14_15
- 
-		//------------------------------------------------
-		// 4. 미니맵
-		#define PJH_ADD_MINIMAP								// 미니맵 
+		#define PJH_ADD_MINIMAP
 
-		//------------------------------------------------
-		// 5. 버그수정
 		#define PBG_MOD_PREMIUMITEM_TRADE_0118						// 카오스 카드,부적,행운의부적 레드블루 거래가능으로 기획변경(10.01.18)
 		#define KJH_FIX_INGAMESHOP_SCRIPTDOWN_BUG2				// 인게임샵 스크립트 다운로드 버그수정 2 (10.01.14)
 		#define ASG_ADD_QUEST_REQUEST_REWARD_TYPE				// 퀘스트 요구사항, 보상 추가(2009.12.15)
@@ -450,9 +412,6 @@
 			#define KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT		// 수호군 방패병 이팩트 (09.07.31)
 		#endif //LDS_ADD_EMPIRE_GUARDIAN
 
-		//------------------------------------------------
-		// 3. 신 퀘스트 시스템
-		// - 안상규
 		#define ASG_ADD_NEW_QUEST_SYSTEM						// 뉴 퀘스트 시스템(2009.05.20)
 		#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 			#define ASG_ADD_UI_QUEST_PROGRESS					// 퀘스트 진행 창(NPC용)(2009.05.27)
@@ -481,12 +440,11 @@
 		#define LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG			// 유저가 채팅메세지를 이용 이동할수 없는 맵에 이동하려 하는지 판정(2009.10.29)
 		#define PBG_FIX_SETOPTION_CALCULATE_SECRET_POTION		// 비약관련 세트 옵션 적용버그(09.11.04)
 				
-		// Season 5 3차 본섭버젼 버그 수정
+		// Season 5
 		#define LJH_FIX_BUG_BUYING_AG_AURA_WHEN_USING_SD_AURA	// SD증가 오라를 하용하는 중 AG오라를 구입할 수 있는 버그 수정(09.11.16)
 		#define PBG_FIX_JELINTNPC_TEXTWIDTH						// 제린트npc ui설정 버그 수정(09.11.10)
 		#define PBG_FIX_STOPBGMSOUND							// 로딩이후 bgm사운드 종료되지 않는 버그 수정(09.11.10)
 		#define PBG_FIX_SDELITE_OVERLAY							// sd엘리트 물약 겹쳐지지 않는 버그 수정(09.11.17)
-		#define YDG_FIX_CURSEDTEMPLE_GAUGEBAR_ERROR				// 환영사원 성물 획득/등록 게이지 오류 수정 (2009.12.03)
 		#define LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT	// (JP_575)재 로그인 시 착용하고 있던 세트 아이템의 옵션 미적용으로 그 아이템을 더이상 착용할수 없는 버그 수정(09.12.10)-> 한국과 동일하게
 		#define LJH_FIX_HERO_MOVES_EVEN_NOT_PRESENT				// (국내버그)(JP_524)유저의 캐릭터가 화면에 없을때도 이동할 수 있었던 버그 수정 (예:공성서버으로/에서 이동)(09.12.11)
 		#define LJH_FIX_NOT_CALCULATED_BUFF						// 세트계산과 관련되어 버프가 적용되지 않았던 버그 수정(2010.01.15)
@@ -631,13 +589,8 @@
 #define SEASON4_5										
 #ifdef SEASON4_5
 
-	//------------------------------------------------
-	// 컨텐츠 추가
-	//------------------------------------------------
-	// - 김재희
 	#define KJH_ADD_09SUMMER_EVENT					// 09년 여름이벤트		(09.06.23)
 
-	// - 양대근
 	#define YDG_ADD_NEW_DUEL_SYSTEM					// 새로운 결투 시스템 (2009.01.05) [09.03.19 테섭]
 	#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 		#define YDG_ADD_NEW_DUEL_UI					// 새로운 결투 관련 UI 추가 (2009.01.05) [09.03.19 테섭]
@@ -647,11 +600,9 @@
 		#define YDG_ADD_MAP_DUEL_ARENA				// 새로운 결투장 맵 추가 (2009.02.04) [09.03.19 테섭]
 	#endif	// YDG_ADD_PVP_SYSTEM
 
-	// - 박보근
 	#define PBG_ADD_PKFIELD							// PK필드 추가(2008.12.29) [09.03.19 테섭]
 	#define PBG_ADD_HONOROFGLADIATORBUFFTIME		// 검투사의 명예 버프 시간 툴팁 추가(2009.03.19) [09.03.19 테섭]
 
-	// - 이동근
 	#define LDK_ADD_GAMBLE_SYSTEM					// 젠소모 무기 뽑기 상점 (09.01.05) [09.03.19 테섭]
 	#ifdef LDK_ADD_GAMBLE_SYSTEM
 		#define LDK_ADD_GAMBLE_NPC_MOSS				// 겜블 상인 모스 [09.03.19 테섭]
@@ -659,11 +610,9 @@
 		#define LDK_ADD_GAMBLERS_WEAPONS			// 겜블전용 레어 무기들 [09.03.19 테섭]
 	#endif //LDK_ADD_GAMBLE_SYSTEM
 
-	// - 박종훈
 	#define PJH_ADD_PANDA_PET
 	#define PJH_ADD_PANDA_CHANGERING
 
-	// Season 4.5 내부 테섭 버그 수정
 	#define ADD_FIX_AFTER_SEASON4_5_TEST
 	#ifdef ADD_FIX_AFTER_SEASON4_5_TEST
 		#define YDG_FIX_PANDA_CHANGERING_PANTS_BUG				// 다크로드 맨몸으로 팬더 변신반지 착용시 바지 보이는 버그 (09.07.21)
@@ -703,8 +652,6 @@
 #define ADD_TOTAL_CHARGE_6TH
 #ifdef ADD_TOTAL_CHARGE_6TH
 
-	// 1. 케쉬 샾 아이템
-	// ---------------------------------------------------------------------------
 	#define ADD_CASH_SHOP_6TH
 		#ifdef ADD_CASH_SHOP_6TH
 		// - 안상규

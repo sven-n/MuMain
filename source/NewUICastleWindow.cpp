@@ -59,7 +59,7 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	m_BtnExit.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_EXIT_BTN, false);
 	m_BtnExit.ChangeButtonInfo(m_Pos.x+13, m_Pos.y+391, 36, 29);
-	m_BtnExit.ChangeToolTipText(GlobalText[1002], true); // 225 "닫기(I,V)"
+	m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
 
 	InitButton(&m_BtnBuy, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 250, GlobalText[1558]);
 	InitButton(&m_BtnRepair, m_Pos.x + 110, m_Pos.y + 260, GlobalText[1559]);
@@ -125,11 +125,9 @@ bool CNewUICastleWindow::UpdateMouseEvent()
 		break;
 	}
 
-	//. 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 		return false;
 
@@ -193,7 +191,6 @@ bool CNewUICastleWindow::Render()
 		break;
 	}
 	
-	// 닫기 버튼 표시
 	m_BtnExit.Render();
 
 	DisableAlphaBlend();
@@ -209,8 +206,8 @@ void CNewUICastleWindow::OpeningProcess()
 	g_SenatusInfo.SetCurrGate(0);
 	g_SenatusInfo.SetCurrStatue(0);
 
-	SendRequestBCNPCList(1);	// 성문 NPC 리스트 요청
-	SendRequestBCNPCList(2);	// 석상 NPC 리스트 요청
+	SendRequestBCNPCList(1);
+	SendRequestBCNPCList(2);
 	SendRequestBCGetTaxInfo();
 }
 
@@ -287,7 +284,6 @@ void CNewUICastleWindow::RenderFrame()
 	g_pRenderText->SetTextColor(220, 220, 220, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-	// 조합창 제목 표시
 	unicode::_sprintf(szText, "%s", GlobalText[1588]);
 	g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
@@ -295,17 +291,13 @@ void CNewUICastleWindow::RenderFrame()
 bool CNewUICastleWindow::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	POINT ptExitBtn2 = { m_Pos.x+13, m_Pos.y+391 };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_SENATUS);
 	}
 
-	// 닫기 버튼
 	if(m_BtnExit.UpdateMouseEvent() == true)
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_SENATUS);
@@ -318,10 +310,9 @@ bool CNewUICastleWindow::BtnProcess()
 void CNewUICastleWindow::UpdateGateManagingTab()
 {
 	POINT ptOrigin = { m_Pos.x, m_Pos.y+55+6+12 };
-	// 성문버튼
+
 	if( MouseLButtonPush )
 	{
-		// 공성맵 위인지 체크
 		if( CheckMouseIn( ptOrigin.x+15, ptOrigin.y, 160.f, 165.f ) )
 		{
 			if( CheckMouseIn( ptOrigin.x+82, ptOrigin.y+35, 24, 24 ) )
@@ -345,28 +336,28 @@ void CNewUICastleWindow::UpdateGateManagingTab()
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_GATE);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		pMsgBox->AddMsg(GlobalText[1551]);	// 1551 "선택하신 성문의 구입에는"
-		unicode::_sprintf( szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()) );	// 1617 "%d 젠이 소모됩니다."
+		pMsgBox->AddMsg(GlobalText[1551]);
+		unicode::_sprintf( szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()) );
 		InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1612]);	// 1612 "구입하시겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1612]);
 	}
 	else if(m_BtnRepair.UpdateMouseEvent() == true)
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_GATE);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		pMsgBox->AddMsg(GlobalText[1552]);	// 1551 "선택하신 성문의 구입에는"
-		unicode::_sprintf( szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()) );	// 1617 "%d 젠이 소모됩니다."
+		pMsgBox->AddMsg(GlobalText[1552]);
+		unicode::_sprintf( szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()) );
 		InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1612]);	// 1612 "구입하시겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1612]);
 	}
 	else if(m_BtnUpgradeHP.UpdateMouseEvent() == true)
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_HP);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		pMsgBox->AddMsg(GlobalText[1555]);	// 1555 "선택하신 성문의 내구도 업그레이드에는"
-		// 1553 "수호의보석 %d 개와 %d 젠이 소모됩니다."
+		pMsgBox->AddMsg(GlobalText[1555]);
+
 		if( g_SenatusInfo.GetHPLevel( &g_SenatusInfo.GetCurrGateInfo() ) == 0 )
 			unicode::_sprintf( szText, GlobalText[1553], 2, 1000000 );
 		else if( g_SenatusInfo.GetHPLevel( &g_SenatusInfo.GetCurrGateInfo() ) == 1 )
@@ -375,13 +366,13 @@ void CNewUICastleWindow::UpdateGateManagingTab()
 			unicode::_sprintf( szText, GlobalText[1553], 4, 1000000 );
 		InsertComma(szText, 1000000);
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1554]);	// 1554 "수리하겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1554]);
 	}
 	else if(m_BtnUpgradeDefense.UpdateMouseEvent() == true)
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_DEFENSE);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		pMsgBox->AddMsg(GlobalText[1556]);	// 1556 "선택하신 성문의 방어력 업그레이드에는"
+		pMsgBox->AddMsg(GlobalText[1556]);
 		if( g_SenatusInfo.GetDefenseLevel( &g_SenatusInfo.GetCurrGateInfo() ) == 0 )
 			unicode::_sprintf( szText, GlobalText[1553], 2, 3000000 );
 		else if( g_SenatusInfo.GetDefenseLevel( &g_SenatusInfo.GetCurrGateInfo() ) == 1 )
@@ -390,17 +381,16 @@ void CNewUICastleWindow::UpdateGateManagingTab()
 			unicode::_sprintf( szText, GlobalText[1553], 4, 3000000 );
 		InsertComma(szText, 3000000);
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1554]);	// 1554 "수리하겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1554]);
 	}
 }
 
 void CNewUICastleWindow::UpdateStatueManagingTab()
 {
 	POINT ptOrigin = { m_Pos.x, m_Pos.y+55+6+12 };
-	// 성문버튼
+
 	if( MouseLButtonPush )
 	{
-		// 공성맵 위인지 체크
 		if( CheckMouseIn( ptOrigin.x+15, ptOrigin.y, 160.f, 165.f ) )
 		{
 			if( CheckMouseIn( ptOrigin.x+82, ptOrigin.y+20, 24, 24 ) )
@@ -420,28 +410,28 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_STATUE);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		pMsgBox->AddMsg(GlobalText[1610]);	// 1610 "선택하신 석상의 구입에는"
-		unicode::_sprintf( szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()) );	// 1617 "%d 젠이 소모됩니다."
+		pMsgBox->AddMsg(GlobalText[1610]);
+		unicode::_sprintf( szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()) );
 		InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1612]);	// 1612 "구입하시겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1612]);
 	}
 	else if(m_BtnRepair.UpdateMouseEvent() == true)
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_STATUE);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		pMsgBox->AddMsg(GlobalText[1611]);	// 1611 "선택하신 석상의 수리에는"
-		unicode::_sprintf( szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()) );	// 1617 "%d 젠이 소모됩니다."
+		pMsgBox->AddMsg(GlobalText[1611]);
+		unicode::_sprintf( szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()) );
 		InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1554]);	// 1554 "수리하겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1554]);
 	}
 	else if(m_BtnUpgradeHP.UpdateMouseEvent() == true)
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_HP);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		pMsgBox->AddMsg(GlobalText[1613]);		// 1613 "선택하신 성문의 내구도 업그레이드에는"
-		// 1553 "수호의보석 %d 개와 %d 젠이 소모됩니다."
+		pMsgBox->AddMsg(GlobalText[1613]);
+
 		if( g_SenatusInfo.GetHPLevel( &g_SenatusInfo.GetCurrStatueInfo() ) == 0 )
 			unicode::_sprintf( szText, GlobalText[1553], 3, 1000000 );
 		else if( g_SenatusInfo.GetHPLevel( &g_SenatusInfo.GetCurrStatueInfo() ) == 1 )
@@ -450,14 +440,14 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
 			unicode::_sprintf( szText, GlobalText[1553], 7, 1000000 );
 		InsertComma(szText, 1000000);
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1554]);	// 1554 "수리하겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1554]);
 	}
 	else if(m_BtnUpgradeDefense.UpdateMouseEvent() == true)
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_DEFENSE);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		pMsgBox->AddMsg(GlobalText[1614]);		// 1614 "선택하신 성문의 방어력 업그레이드에는"
-		// 1553 "수호의보석 %d 개와 %d 젠이 소모됩니다."
+		pMsgBox->AddMsg(GlobalText[1614]);
+
 		if( g_SenatusInfo.GetDefenseLevel( &g_SenatusInfo.GetCurrStatueInfo() ) == 0 )
 			unicode::_sprintf( szText, GlobalText[1553], 3, 3000000 );
 		else if( g_SenatusInfo.GetDefenseLevel( &g_SenatusInfo.GetCurrStatueInfo() ) == 1 )
@@ -466,14 +456,14 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
 			unicode::_sprintf( szText, GlobalText[1553], 7, 3000000 );
 		InsertComma(szText, 3000000);
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1554]);	// 1554 "수리하겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1554]);
 	}
 	else if(m_BtnUpgradeRecover.UpdateMouseEvent() == true)
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_RECOVER);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		pMsgBox->AddMsg(GlobalText[1615]);		// 1615 "선택하신 석상의 회복력 업그레이드에는"
-		// 1553 "수호의보석 %d 개와 %d 젠이 소모됩니다."
+		pMsgBox->AddMsg(GlobalText[1615]);
+
 		if( g_SenatusInfo.GetRecoverLevel( &g_SenatusInfo.GetCurrStatueInfo() ) == 0 )
 			unicode::_sprintf( szText, GlobalText[1553], 3, 5000000 );
 		else if( g_SenatusInfo.GetRecoverLevel( &g_SenatusInfo.GetCurrStatueInfo() ) == 1 )
@@ -482,7 +472,7 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
 			unicode::_sprintf( szText, GlobalText[1553], 7, 5000000 );
 		InsertComma(szText, 5000000);
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1554]);	// 1554 "수리하겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1554]);
 	}
 }
 
@@ -494,11 +484,11 @@ void CNewUICastleWindow::UpdateTaxManagingTab()
 	{
 		SetCurrMsgBoxRequest(CASTLE_MSGREQ_APPLY_TAX);
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-		unicode::_sprintf( szText, GlobalText[1566], g_SenatusInfo.GetChaosTaxRate() );	// 1566 "카오스 조합 고블린 세율 %d%%"
+		unicode::_sprintf( szText, GlobalText[1566], g_SenatusInfo.GetChaosTaxRate() );
 		pMsgBox->AddMsg(szText);
-		unicode::_sprintf( szText, GlobalText[1567], g_SenatusInfo.GetNormalTaxRate() );	// 1567 "각종 NPC 세율 %d%%"
+		unicode::_sprintf( szText, GlobalText[1567], g_SenatusInfo.GetNormalTaxRate() );
 		pMsgBox->AddMsg(szText);
-		pMsgBox->AddMsg(GlobalText[1568]);	// 1568 "적용하시겠습니까?"
+		pMsgBox->AddMsg(GlobalText[1568]);
 	}
 	else if(m_BtnWithdraw.UpdateMouseEvent() == true)
 	{
@@ -527,14 +517,9 @@ void CNewUICastleWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fW
 {
 	POINT ptOrigin = { fPos_x, fPos_y };
 	float fBoxWidth = fWidth;
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
-	float fBoxHeight = fHeight;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 
-	// 위쪽 테두리
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT, ptOrigin.x+12, ptOrigin.y-4, 14, 14);
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_RIGHT, ptOrigin.x+fBoxWidth+4, ptOrigin.y-4, 14, 14);
-	// 위쪽 라인
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_PIXEL, ptOrigin.x+25, ptOrigin.y-4, fBoxWidth-21, 14);
 	glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
 	RenderColor(ptOrigin.x+15, ptOrigin.y-3, fBoxWidth-2, 15);
@@ -547,15 +532,11 @@ void CNewUICastleWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fW
 	float fBoxWidth = fWidth;
 	float fBoxHeight = fHeight;
 
-	// 왼쪽 라인, 오른쪽 라인
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_LEFT_PIXEL, ptOrigin.x+12, ptOrigin.y+9, 14, fBoxHeight);
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_RIGHT_PIXEL, ptOrigin.x+fBoxWidth+4, ptOrigin.y+9, 14, fBoxHeight);
-	// 중간라인
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x+15, ptOrigin.y+3, fBoxWidth-2, 14);
-	// 아래쪽 테두리
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_LEFT, ptOrigin.x+12, ptOrigin.y+fBoxHeight+3, 14, 14);
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_RIGHT, ptOrigin.x+fBoxWidth+4, ptOrigin.y+fBoxHeight+3, 14, 14);
-	// 아래쪽 라인
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x+25, ptOrigin.y+fBoxHeight+3, fBoxWidth-21, 14);
 }
 
@@ -568,14 +549,11 @@ void CNewUICastleWindow::RenderGateManagingTab()
 
 	ptOrigin.y += 6;
 	RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 165);
-	// 제목 텍스트
 	g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, GlobalText[1557], 190, 0, RT3_SORT_CENTER);
-	// 공성맵 전체이미지
 	RenderBitmap( BITMAP_INTERFACE_EX+35, ptOrigin.x+15, ptOrigin.y+12, 160.f, 165.f, 0.f, 0.f, 160.f/256.f, 165.f/256.f );
 	RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 165);
 
 	ptOrigin.y += 12;
-	// 성문버튼 이미지
 	RenderCastleItem( ptOrigin.x+82, ptOrigin.y+35, &g_SenatusInfo.GetGateInfo(0) );
 	RenderCastleItem( ptOrigin.x+64, ptOrigin.y+83, &g_SenatusInfo.GetGateInfo(1) );
 	RenderCastleItem( ptOrigin.x+100, ptOrigin.y+83, &g_SenatusInfo.GetGateInfo(2) );
@@ -637,12 +615,12 @@ void CNewUICastleWindow::RenderGateManagingTab()
 		g_pRenderText->SetTextColor(0xFFFFFFFF);
 		
 		unicode::t_char szTemp[256];
-		unicode::_sprintf( szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp );		// 1560 "내구도 : %d/%d"
+		unicode::_sprintf( szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp );
 		InsertComma(szTemp, pNPCInfo->iNpcHp);
 		InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
 		g_pRenderText->RenderText( ptOrigin.x+20, ptOrigin.y, szTemp );
 		ptOrigin.y += 13;
-		unicode::_sprintf( szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber,pNPCInfo->iNpcDfLevel) );	// 1561 "방어력 : %d"
+		unicode::_sprintf( szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber,pNPCInfo->iNpcDfLevel) );
 		g_pRenderText->RenderText( ptOrigin.x+20, ptOrigin.y, szTemp );
 
 		
@@ -651,15 +629,15 @@ void CNewUICastleWindow::RenderGateManagingTab()
 		RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 78);
 
 		g_pRenderText->SetFont(g_hFontBold);
-		g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, GlobalText[1550], 190, 0, RT3_SORT_CENTER );	// 1550 "강화"
+		g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, GlobalText[1550], 190, 0, RT3_SORT_CENTER );
 		g_pRenderText->SetFont(g_hFont);
 		
 		ptOrigin.y += 24;
-		unicode::_sprintf( szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP( pNPCInfo ) );		// 1563 "내구도 +%d"
+		unicode::_sprintf( szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP( pNPCInfo ) );
 		InsertComma(szTemp, g_SenatusInfo.GetNextAddHP( pNPCInfo ));
 		g_pRenderText->RenderText( ptOrigin.x+30, ptOrigin.y, szTemp );
 		ptOrigin.y += 23;
-		unicode::_sprintf( szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense( pNPCInfo ) );	// 1564 "방어력 +%d"
+		unicode::_sprintf( szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense( pNPCInfo ) );
 		InsertComma(szTemp, g_SenatusInfo.GetNextAddDefense( pNPCInfo ));
 		g_pRenderText->RenderText( ptOrigin.x+30, ptOrigin.y, szTemp );
 	}
@@ -674,14 +652,11 @@ void CNewUICastleWindow::RenderStatueManagingTab()
 	
 	ptOrigin.y += 6;
 	RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 165);
-	// 제목 텍스트
 	g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, GlobalText[1557], 190, 0, RT3_SORT_CENTER);
-	// 공성맵 전체이미지
 	RenderBitmap( BITMAP_INTERFACE_EX+35, ptOrigin.x+15, ptOrigin.y+12, 160.f, 165.f, 0.f, 0.f, 160.f/256.f, 165.f/256.f );
 	RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 165);
 
 	ptOrigin.y += 12;
-	// 성문버튼 이미지
 	RenderCastleItem( ptOrigin.x+82, ptOrigin.y+20, &g_SenatusInfo.GetStatueInfo(0) );
 	RenderCastleItem( ptOrigin.x+82, ptOrigin.y+65, &g_SenatusInfo.GetStatueInfo(1) );
 	RenderCastleItem( ptOrigin.x+64, ptOrigin.y+110, &g_SenatusInfo.GetStatueInfo(2) );
@@ -754,34 +729,34 @@ void CNewUICastleWindow::RenderStatueManagingTab()
 		g_pRenderText->SetBgColor(0);
 		
 		unicode::t_char szTemp[256];
-		unicode::_sprintf( szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp );						// 1560 "내구도 : %d/%d"
+		unicode::_sprintf( szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp );
 		InsertComma(szTemp, pNPCInfo->iNpcHp);
 		InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
 		g_pRenderText->RenderText( ptOrigin.x+20, ptOrigin.y, szTemp);
 		ptOrigin.y += 13;
-		unicode::_sprintf( szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber,pNPCInfo->iNpcDfLevel) );	// 1561 "방어력 : %d"
+		unicode::_sprintf( szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber,pNPCInfo->iNpcDfLevel) );
 		g_pRenderText->RenderText( ptOrigin.x+20, ptOrigin.y, szTemp);
 		ptOrigin.y += 13;
-		unicode::_sprintf( szTemp, GlobalText[1562], g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber,pNPCInfo->iNpcRgLevel) );	// 1562 "회복력 : %d%%"
+		unicode::_sprintf( szTemp, GlobalText[1562], g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber,pNPCInfo->iNpcRgLevel) );
 		g_pRenderText->RenderText( ptOrigin.x+20, ptOrigin.y, szTemp);
 
 		ptOrigin.y += 22;
 		RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 78);
 		RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 78);
 		g_pRenderText->SetFont(g_hFontBold);
-		g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, GlobalText[1550], 190, 0, RT3_SORT_CENTER);	// 1550 "강화"
+		g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, GlobalText[1550], 190, 0, RT3_SORT_CENTER);
 		g_pRenderText->SetFont(g_hFont);
 
 		ptOrigin.y += 24;
-		unicode::_sprintf( szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP( pNPCInfo ) );		// 1563 "내구도 +%d"
+		unicode::_sprintf( szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP( pNPCInfo ) );
 		InsertComma(szTemp, g_SenatusInfo.GetNextAddHP( pNPCInfo ));
 		g_pRenderText->RenderText( ptOrigin.x+30, ptOrigin.y, szTemp );
 		ptOrigin.y += 23;
-		unicode::_sprintf( szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense( pNPCInfo ) );	// 1564 "방어력 +%d"
+		unicode::_sprintf( szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense( pNPCInfo ) );
 		InsertComma(szTemp, g_SenatusInfo.GetNextAddDefense( pNPCInfo ));
 		g_pRenderText->RenderText( ptOrigin.x+30, ptOrigin.y, szTemp );
 		ptOrigin.y += 23;
-		unicode::_sprintf( szTemp, GlobalText[1565], g_SenatusInfo.GetNextAddRecover( pNPCInfo ) );	// 1565 "회복력 +%d%%"
+		unicode::_sprintf( szTemp, GlobalText[1565], g_SenatusInfo.GetNextAddRecover( pNPCInfo ) );
 		InsertComma(szTemp, g_SenatusInfo.GetNextAddRecover( pNPCInfo ));
 		g_pRenderText->RenderText( ptOrigin.x+30, ptOrigin.y, szTemp );
 	}
@@ -804,11 +779,9 @@ void CNewUICastleWindow::RenderTaxManagingTab()
 	RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 55);
 
 	g_pRenderText->SetFont(g_hFontBold);
-	g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, GlobalText[1572], 190, 0, RT3_SORT_CENTER );	// 1572 "세 율 조 절"
+	g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, GlobalText[1572], 190, 0, RT3_SORT_CENTER );
 	
 	RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 55);
-
-	// 중간라인
 	RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x+15, ptOrigin.y+30, 160-2, 14);
 
 	m_BtnChaosTaxUp.Render();
@@ -820,48 +793,41 @@ void CNewUICastleWindow::RenderTaxManagingTab()
 	ptOrigin.y += 23;
 	g_pRenderText->SetFont(g_hFont);
 	
-	// 1573 "카오스 조합 고블린 : %d(%d)%%"
 	unicode::_sprintf( szTemp, GlobalText[1573], g_SenatusInfo.GetRealTaxRateChaos(), g_SenatusInfo.GetChaosTaxRate() );
 	g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, szTemp, 175, 0, RT3_SORT_CENTER );
 	ptOrigin.y += 25;
-	// 1574 "각종 NPC : %d(%d)%%"
+
 	unicode::_sprintf( szTemp, GlobalText[1574], g_SenatusInfo.GetRealTaxRateStore(), g_SenatusInfo.GetNormalTaxRate() );
 	g_pRenderText->RenderText( ptOrigin.x, ptOrigin.y, szTemp, 175, 0, RT3_SORT_CENTER );
 
 	m_BtnApplyTax.Render();
 
 	ptOrigin.y += 53;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1575], 160, 0, RT3_SORT_CENTER );	// 1575 "해당 NPC : 떠돌이 상인, 물약소녀,"
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1575], 160, 0, RT3_SORT_CENTER );
 	ptOrigin.y += 13;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1576], 160, 0, RT3_SORT_CENTER );	// 1576 "마담 ,마법사, 대장장이, 알렉스,"
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1576], 160, 0, RT3_SORT_CENTER );
 	ptOrigin.y += 13;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1577], 160, 0, RT3_SORT_CENTER );	// 1577 "라라요정, 장인, 톰슨켄넬, 무기상"
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1577], 160, 0, RT3_SORT_CENTER );
 
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetTextColor(0xFF947BBB);
 	
 	ptOrigin.y += 20;
-#ifdef ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
-	unicode::_sprintf(szTemp, GlobalText[1578]);	// 1578 "조합고블린 최대 3%%, NPC 최대 3%%"
+	unicode::_sprintf(szTemp, GlobalText[1578]);
 	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, szTemp, 160, 0, RT3_SORT_CENTER );
-#else	// ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1578], 160, 0, RT3_SORT_CENTER );	// 1578 "조절 범위는 0%~200% 입니다."
-#endif	// ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
+
 	ptOrigin.y += 12;
-#ifdef ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
-	unicode::_sprintf(szTemp, GlobalText[1579]);	// 1579 "공성 직후부터 다음 공성 전까지" , 글로벌:"Maximum Tax rates: 3%%"
+	unicode::_sprintf(szTemp, GlobalText[1579]);
 	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, szTemp, 160, 0, RT3_SORT_CENTER );
-#else	// ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1579], 160, 0, RT3_SORT_CENTER );	// 1579 "공성 직후부터 다음 공성 전까지"
-#endif	// ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
+
 	ptOrigin.y += 12;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1580], 160, 0, RT3_SORT_CENTER );	// 1580 "조절가능합니다."
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1580], 160, 0, RT3_SORT_CENTER );
 	ptOrigin.y += 12;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1581], 160, 0, RT3_SORT_CENTER );	// 1581 "조절 제한 횟수는 없으며,"
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1581], 160, 0, RT3_SORT_CENTER );
 	ptOrigin.y += 12;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1582], 160, 0, RT3_SORT_CENTER );	// 1582 "성을 차지한 길드마스터만이"
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1582], 160, 0, RT3_SORT_CENTER );
 	ptOrigin.y += 12;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1583], 160, 0, RT3_SORT_CENTER );	// 1583 "조절가능합니다."
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1583], 160, 0, RT3_SORT_CENTER );
 
 	ptOrigin.y += 10;
 	RenderBitmap(IMAGE_CASTLEWINDOW_LINE, ptOrigin.x+1, ptOrigin.y,
@@ -872,18 +838,14 @@ void CNewUICastleWindow::RenderTaxManagingTab()
 	ptOrigin.y += 18;
 	RenderImage(IMAGE_CASTLEWINDOW_MONEY, ptOrigin.x+10, ptOrigin.y, 170.f, 24.f);
 
-	unicode::_sprintf( szTemp, GlobalText[1246] );	// 1584 "성의 보유 Zen : %I64d"
+	unicode::_sprintf( szTemp, GlobalText[1246] );
 	g_pRenderText->RenderText( ptOrigin.x+14, ptOrigin.y+7, szTemp );
 
 	//unicode::t_char szGoldText[32];
 	//ConvertGold(g_SenatusInfo.GetCastleMoney(),szGoldText);
 
-	unicode::_sprintf( szTemp, "%I64d", g_SenatusInfo.GetCastleMoney() );	// 1584 "성의 보유 Zen : %I64d"
-#ifdef YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
+	unicode::_sprintf( szTemp, "%I64d", g_SenatusInfo.GetCastleMoney() );
 	InsertComma64(szTemp, g_SenatusInfo.GetCastleMoney());
-#else	// YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
-	InsertComma(szTemp, g_SenatusInfo.GetCastleMoney());
-#endif	// YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
 	g_pRenderText->RenderText( ptOrigin.x+90, ptOrigin.y+7, szTemp, 80, 0, RT3_SORT_RIGHT );
 	
 	m_BtnWithdraw.Render();
@@ -892,11 +854,11 @@ void CNewUICastleWindow::RenderTaxManagingTab()
 	g_pRenderText->SetTextColor(0xFF947BBB);
 	
 	ptOrigin.y += 54;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1585], 160, 0, RT3_SORT_CENTER );	// 1585 "세금은 성의 보유 Zen으로 되며"
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1585], 160, 0, RT3_SORT_CENTER );
 	ptOrigin.y += 12;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1586], 160, 0, RT3_SORT_CENTER );	// 1586 "성의 운영에 관련되는 젠 소모는"
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1586], 160, 0, RT3_SORT_CENTER );
 	ptOrigin.y += 12;
-	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1587], 160, 0, RT3_SORT_CENTER );	// 1587 "이곳에서 빠져 나가게 됩니다."
+	g_pRenderText->RenderText( ptOrigin.x+15, ptOrigin.y, GlobalText[1587], 160, 0, RT3_SORT_CENTER );
 }
 
 void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST pInfo)
@@ -909,7 +871,6 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
 	{
 		glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
-		// 구입한 성문의 업그레이드 정도를 보여준다
 		if( pInfo->btNpcLive )
 		{
 			int nHP = g_SenatusInfo.GetHPLevel( pInfo );
@@ -918,31 +879,29 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
 
             DisableAlphaBlend();
 
-			RenderColor( nPosX, nPosY-10, nHPBlockSize*(nHP+1), 3 );			// 내구도 최대량표시 (업그레이드된만큼)
-			RenderColor( nPosX, nPosY-5, 24, 3 );								// 방어력 최대레벨표시
+			RenderColor( nPosX, nPosY-10, nHPBlockSize*(nHP+1), 3 );
+			RenderColor( nPosX, nPosY-5, 24, 3 );
 			glColor4f( 1.0f, 0.0f, 0.0f, 1.0f );
-			RenderColor( nPosX, nPosY-10, (nHPBlockSize*(nHP+1))*fHPRate, 3 );	// 내구도 표시
+			RenderColor( nPosX, nPosY-10, (nHPBlockSize*(nHP+1))*fHPRate, 3 );
 			glColor4f( 0.0f, 0.0f, 0.0f, 1.0f );
-			RenderColor( nPosX, nPosY-10, 24, 1 );								// 내구도 레벨 바탕 표시
-			RenderColor( nPosX, nPosY-7, 24, 1 );								// 내구도 레벨 바탕 표시
-			RenderColor( nPosX, nPosY-10, 1, 3 );								// 내구도 레벨 바탕 표시
-			RenderColor( nPosX+24, nPosY-10, 1, 3 );							// 내구도 레벨 바탕 표시
+			RenderColor( nPosX, nPosY-10, 24, 1 );
+			RenderColor( nPosX, nPosY-7, 24, 1 );
+			RenderColor( nPosX, nPosY-10, 1, 3 );
+			RenderColor( nPosX+24, nPosY-10, 1, 3 );
 			glColor4f( 0.0f, 1.0f, 0.0f, 1.0f );
-			RenderColor( nPosX, nPosY-5, nDefenseBlockSize*(nDefense+1), 3 );	// 방어력레벨 표시
+			RenderColor( nPosX, nPosY-5, nDefenseBlockSize*(nDefense+1), 3 );
 			EndRenderColor();
 		}
 
-		// 현재선택된건지 표시
 		if( pInfo->iNpcIndex == g_SenatusInfo.GetCurrGate()+1 )
 			RenderBitmap( BITMAP_INTERFACE_EX+37, nPosX, nPosY, 24.f, 24.f, 0.f, 0.f, 24.f/32.f, 24.f/32.f );
 		else
 			RenderBitmap( BITMAP_INTERFACE_EX+36, nPosX, nPosY, 24.f, 24.f, 0.f, 0.f, 24.f/32.f, 24.f/32.f );
 	}
-	if( g_SenatusInfo.IsStatue(pInfo) )	// 석상
+	if( g_SenatusInfo.IsStatue(pInfo) )
 	{
 		glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
-		// 구입한 석상의 업그레이드 정도를 보여준다
 		if( pInfo->btNpcLive )
 		{
 			int nHP = g_SenatusInfo.GetHPLevel( pInfo );
@@ -952,19 +911,18 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
 
             DisableAlphaBlend();
 
-			RenderColor( nPosX, nPosY-15, nHPBlockSize*(nHP+1), 3 );			// 내구도 최대량표시 (업그레이드된만큼)
-			RenderColor( nPosX, nPosY-10, 24, 3 );								// 방어력 최대레벨표시
-			RenderColor( nPosX, nPosY-5, 24, 3 );								// 회복력 최대레벨표시
+			RenderColor( nPosX, nPosY-15, nHPBlockSize*(nHP+1), 3 );
+			RenderColor( nPosX, nPosY-10, 24, 3 );
+			RenderColor( nPosX, nPosY-5, 24, 3 );
 			glColor4f( 1.0f, 0.0f, 0.0f, 1.0f );
-			RenderColor( nPosX, nPosY-15, (nHPBlockSize*(nHP+1))*fHPRate, 3 );	// 내구도 표시
+			RenderColor( nPosX, nPosY-15, (nHPBlockSize*(nHP+1))*fHPRate, 3 );
 			glColor4f( 0.0f, 1.0f, 0.0f, 1.0f );
-			RenderColor( nPosX, nPosY-10, nDefenseBlockSize*(nDefense+1), 3 );	// 방어력레벨 표시
+			RenderColor( nPosX, nPosY-10, nDefenseBlockSize*(nDefense+1), 3 );
 			glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
-			RenderColor( nPosX, nPosY-5, nRecoverBlockSize*(nRecover+1), 3 );	// 회복력레벨 표시
+			RenderColor( nPosX, nPosY-5, nRecoverBlockSize*(nRecover+1), 3 );
 			EndRenderColor();
 		}
 
-		// 현재선택된건지 표시
 		if( pInfo->iNpcIndex == g_SenatusInfo.GetCurrStatue()+1 )
 			RenderBitmap( BITMAP_INTERFACE_EX+39, nPosX, nPosY, 24.f, 24.f, 0.f, 0.f, 24.f/32.f, 24.f/32.f );
 		else
@@ -989,7 +947,6 @@ void CNewUICastleWindow::InsertComma(unicode::t_char * pszText, DWORD dwNumber)
 	unicode::_sprintf(pszText, "%s%s%s", pszTextBegin, szNumber, pszTextNext);
 }
 
-#ifdef YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
 void CNewUICastleWindow::InsertComma64(unicode::t_char * pszText, __int64 iNumber)
 {
 	unicode::t_char szNumber[32];
@@ -1005,4 +962,3 @@ void CNewUICastleWindow::InsertComma64(unicode::t_char * pszText, __int64 iNumbe
 
 	unicode::_sprintf(pszText, "%s%s%s", pszTextBegin, szNumber, pszTextNext);
 }
-#endif	// YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH
