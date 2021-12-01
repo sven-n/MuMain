@@ -153,7 +153,7 @@ void CSlider::Update(double dDeltaTick)
 	if (!m_btnThumb.IsShow())
 		return;
 
-	m_btnThumb.Update(dDeltaTick);
+	m_btnThumb.Update();
 
 	if (!m_btnThumb.IsEnable())
 		return;

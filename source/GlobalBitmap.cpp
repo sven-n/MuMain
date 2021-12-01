@@ -18,11 +18,8 @@ bool CBitmapCache::Create()
 {
 	Release();
 
-	//////////////////////////////////////////////////////////////////////////
-	//. QuickCache 생성
 	DWORD dwRange = 0;
 
-	//. 맵타일
 	dwRange =  BITMAP_MAPTILE_END - BITMAP_MAPTILE_BEGIN;
 	m_QuickCache[QUICK_CACHE_MAPTILE].dwBitmapIndexMin = BITMAP_MAPTILE_BEGIN;
 	m_QuickCache[QUICK_CACHE_MAPTILE].dwBitmapIndexMax = BITMAP_MAPTILE_END;
@@ -30,7 +27,6 @@ bool CBitmapCache::Create()
 	m_QuickCache[QUICK_CACHE_MAPTILE].ppBitmap = new BITMAP_t* [dwRange];
 	memset(m_QuickCache[QUICK_CACHE_MAPTILE].ppBitmap, 0, dwRange*sizeof(BITMAP_t*));
 
-	//. 맵글래스
 	dwRange =  BITMAP_MAPGRASS_END - BITMAP_MAPGRASS_BEGIN;
 	m_QuickCache[QUICK_CACHE_MAPGRASS].dwBitmapIndexMin = BITMAP_MAPGRASS_BEGIN;
 	m_QuickCache[QUICK_CACHE_MAPGRASS].dwBitmapIndexMax = BITMAP_MAPGRASS_END;
@@ -38,7 +34,6 @@ bool CBitmapCache::Create()
 	m_QuickCache[QUICK_CACHE_MAPGRASS].ppBitmap = new BITMAP_t* [dwRange];
 	memset(m_QuickCache[QUICK_CACHE_MAPGRASS].ppBitmap, 0, dwRange*sizeof(BITMAP_t*));
 
-	//. 맵워터
 	dwRange =  BITMAP_WATER_END - BITMAP_WATER_BEGIN;
 	m_QuickCache[QUICK_CACHE_WATER].dwBitmapIndexMin = BITMAP_WATER_BEGIN;
 	m_QuickCache[QUICK_CACHE_WATER].dwBitmapIndexMax = BITMAP_WATER_END;
@@ -46,7 +41,6 @@ bool CBitmapCache::Create()
 	m_QuickCache[QUICK_CACHE_WATER].ppBitmap = new BITMAP_t* [dwRange];
 	memset(m_QuickCache[QUICK_CACHE_WATER].ppBitmap, 0, dwRange*sizeof(BITMAP_t*));
 
-	//. 마우스 커서
 	dwRange = BITMAP_CURSOR_END - BITMAP_CURSOR_BEGIN;
 	m_QuickCache[QUICK_CACHE_CURSOR].dwBitmapIndexMin = BITMAP_CURSOR_BEGIN;
 	m_QuickCache[QUICK_CACHE_CURSOR].dwBitmapIndexMax = BITMAP_CURSOR_END;
@@ -54,7 +48,6 @@ bool CBitmapCache::Create()
 	m_QuickCache[QUICK_CACHE_CURSOR].ppBitmap = new BITMAP_t* [dwRange];
 	memset(m_QuickCache[QUICK_CACHE_CURSOR].ppBitmap, 0, dwRange*sizeof(BITMAP_t*));
 
-	//. 폰트
 	dwRange = BITMAP_FONT_END - BITMAP_FONT_BEGIN;
 	m_QuickCache[QUICK_CACHE_FONT].dwBitmapIndexMin = BITMAP_FONT_BEGIN;
 	m_QuickCache[QUICK_CACHE_FONT].dwBitmapIndexMax = BITMAP_FONT_END;
@@ -62,7 +55,6 @@ bool CBitmapCache::Create()
 	m_QuickCache[QUICK_CACHE_FONT].ppBitmap = new BITMAP_t* [dwRange];
 	memset(m_QuickCache[QUICK_CACHE_FONT].ppBitmap, 0, dwRange*sizeof(BITMAP_t*));
 
-	//. 메인프레임
 	dwRange = BITMAP_INTERFACE_NEW_MAINFRAME_END - BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN;
 	m_QuickCache[QUICK_CACHE_MAINFRAME].dwBitmapIndexMin = BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN;
 	m_QuickCache[QUICK_CACHE_MAINFRAME].dwBitmapIndexMax = BITMAP_INTERFACE_NEW_MAINFRAME_END;
@@ -70,7 +62,6 @@ bool CBitmapCache::Create()
 	m_QuickCache[QUICK_CACHE_MAINFRAME].ppBitmap = new BITMAP_t* [dwRange];
 	memset(m_QuickCache[QUICK_CACHE_MAINFRAME].ppBitmap, 0, dwRange*sizeof(BITMAP_t*));
 
-	//. 스킬아이콘
 	dwRange = BITMAP_INTERFACE_NEW_SKILLICON_END - BITMAP_INTERFACE_NEW_SKILLICON_BEGIN;
 	m_QuickCache[QUICK_CACHE_SKILLICON].dwBitmapIndexMin = BITMAP_INTERFACE_NEW_SKILLICON_BEGIN;
 	m_QuickCache[QUICK_CACHE_SKILLICON].dwBitmapIndexMax = BITMAP_INTERFACE_NEW_SKILLICON_END;
@@ -78,15 +69,12 @@ bool CBitmapCache::Create()
 	m_QuickCache[QUICK_CACHE_SKILLICON].ppBitmap = new BITMAP_t* [dwRange];
 	memset(m_QuickCache[QUICK_CACHE_SKILLICON].ppBitmap, 0, dwRange*sizeof(BITMAP_t*));
 	
-	//. 플레이어 텍스트
 	dwRange = BITMAP_PLAYER_TEXTURE_END - BITMAP_PLAYER_TEXTURE_BEGIN;
 	m_QuickCache[QUICK_CACHE_PLAYER].dwBitmapIndexMin = BITMAP_PLAYER_TEXTURE_BEGIN;
 	m_QuickCache[QUICK_CACHE_PLAYER].dwBitmapIndexMax = BITMAP_PLAYER_TEXTURE_END;
 	m_QuickCache[QUICK_CACHE_PLAYER].dwRange = dwRange;
 	m_QuickCache[QUICK_CACHE_PLAYER].ppBitmap = new BITMAP_t* [dwRange];
 	memset(m_QuickCache[QUICK_CACHE_PLAYER].ppBitmap, 0, dwRange*sizeof(BITMAP_t*));
-
-	//////////////////////////////////////////////////////////////////////////
 
 	m_pNullBitmap = new BITMAP_t;
 	memset(m_pNullBitmap, 0, sizeof(BITMAP_t));
@@ -111,7 +99,6 @@ void CBitmapCache::Release()
 
 void CBitmapCache::Add(GLuint uiBitmapIndex, BITMAP_t* pBitmap)
 {
-	//. 가능하다면, 퀵캐쉬에 등록한다.
 	for(int i=0; i<NUMBER_OF_QUICK_CACHE; i++)
 	{
 		if(uiBitmapIndex > m_QuickCache[i].dwBitmapIndexMin && uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
@@ -121,7 +108,7 @@ void CBitmapCache::Add(GLuint uiBitmapIndex, BITMAP_t* pBitmap)
 				m_QuickCache[i].ppBitmap[dwVI] = pBitmap;
 			else
 				m_QuickCache[i].ppBitmap[dwVI] = m_pNullBitmap;
-			return;		//. 등록 완료
+			return;
 		}
 	}
 	if(pBitmap)
@@ -138,18 +125,16 @@ void CBitmapCache::Add(GLuint uiBitmapIndex, BITMAP_t* pBitmap)
 }
 void CBitmapCache::Remove(GLuint uiBitmapIndex)
 {
-	//. 퀵캐쉬에 있다면 제거한다.
 	for(int i=0; i<NUMBER_OF_QUICK_CACHE; i++)
 	{
 		if(uiBitmapIndex > m_QuickCache[i].dwBitmapIndexMin && uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
 		{
 			DWORD dwVI = uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin;
 			m_QuickCache[i].ppBitmap[dwVI] = NULL;
-			return;		//. 제거 완료
+			return;
 		}
 	}
 
-	//. 없다면 맵캐쉬들을 검색
 	if(BITMAP_PLAYER_TEXTURE_BEGIN <= uiBitmapIndex && BITMAP_PLAYER_TEXTURE_END >= uiBitmapIndex)
 	{
 		type_cache_map::iterator mi = m_mapCachePlayer.find(uiBitmapIndex);
@@ -197,9 +182,8 @@ void CBitmapCache::Update()
 {
 	m_ManageTimer.UpdateTime();
 
-	if(m_ManageTimer.IsTime())	//. 1.5초에 한번
+	if(m_ManageTimer.IsTime())
 	{
-		//. Main Map Cache
 		type_cache_map::iterator mi = m_mapCacheMain.begin();
 		for(; mi != m_mapCacheMain.end(); )
 		{
@@ -211,12 +195,10 @@ void CBitmapCache::Update()
 			}
 			else
 			{
-				//. 사용하지 않는것들은 캐쉬에서 제거한다.
 				mi = m_mapCacheMain.erase(mi);
 			}
 		}
 
-		//. Player Map Cache
 		mi = m_mapCachePlayer.begin();
 		for(; mi != m_mapCachePlayer.end(); )
 		{
@@ -229,12 +211,10 @@ void CBitmapCache::Update()
 			}
 			else
 			{
-				//. 사용하지 않는것들은 캐쉬에서 제거한다.
 				mi = m_mapCachePlayer.erase(mi);
 			}
 		}
 
-		//. Interface Map Cache
 		mi = m_mapCacheInterface.begin();
 		for(; mi != m_mapCacheInterface.end(); )
 		{
@@ -246,12 +226,10 @@ void CBitmapCache::Update()
 			}
 			else
 			{
-				//. 사용하지 않는것들은 캐쉬에서 제거한다.
 				mi = m_mapCacheInterface.erase(mi);
 			}
 		}
 
-		//. Effect Map Cache
 		mi = m_mapCacheEffect.begin();
 		for(; mi != m_mapCacheEffect.end(); )
 		{
@@ -263,7 +241,6 @@ void CBitmapCache::Update()
 			}
 			else
 			{
-				//. 사용하지 않는것들은 캐쉬에서 제거한다.
 				mi = m_mapCacheEffect.erase(mi);
 			}
 		}
@@ -277,7 +254,6 @@ void CBitmapCache::Update()
 
 bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
 {
-	//. 퀵캐쉬에 있다면 찾는다.
 	for(int i=0; i<NUMBER_OF_QUICK_CACHE; i++)
 	{
 		if(uiBitmapIndex > m_QuickCache[i].dwBitmapIndexMin && 
@@ -286,7 +262,7 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
 			DWORD dwVI = uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin;
 			if(m_QuickCache[i].ppBitmap[dwVI])
 			{
-				if(m_QuickCache[i].ppBitmap[dwVI] == m_pNullBitmap)	//. 찾았으나 Null 비트맵이라면
+				if(m_QuickCache[i].ppBitmap[dwVI] == m_pNullBitmap)
 					*ppBitmap = NULL;
 				else
 				{
@@ -298,7 +274,6 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
 		}
 	}
 
-	//. 없다면 맵캐쉬들을 검색
 	if(BITMAP_PLAYER_TEXTURE_BEGIN <= uiBitmapIndex && BITMAP_PLAYER_TEXTURE_END >= uiBitmapIndex)
 	{
 		type_cache_map::iterator mi = m_mapCachePlayer.find(uiBitmapIndex);
@@ -342,8 +317,6 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
 	return false;
 }
 
-
-////////////////////////////////////////////////////////////////////////// CGlobalBitmap
 CGlobalBitmap::CGlobalBitmap() 
 { 
 	Init();
@@ -425,7 +398,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename,
 			{
 				g_ErrorReport.Write("인덱스를 공유하거나 Delete없이 사용하였음%s(0x%00000008X)->%s\r\n", 
 					pBitmap->FileName, uiBitmapIndex, filename.c_str());
-				UnloadImage(uiBitmapIndex, true);	//. 강제로 지운다.
+				UnloadImage(uiBitmapIndex, true);
 			}
 		}
 	}
@@ -447,54 +420,21 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 	{
 		BITMAP_t* pBitmap = (*mi).second;
 
-#ifdef LDS_OPTIMIZE_FORLOADING
-		string strKey(pBitmap->FileName), strKey_Identity;
-		// Full FileName에서 파일명만 따로 strKey_Identity로 가져온다.
-		SplitFileName(strKey, strKey_Identity, true);		
-		
-		// string들을 비교 시 map::find는 대소문자에 대한 구분을 하기 때문에 전부 소문자로 변환 하여 준다.
-		StringToLower( strKey );
-		StringToLower( strKey_Identity );
-
-		type_bitmap_namemap::iterator iter_ = m_mapBitmap_Namemap.end();
-		
-		// FullNameMap에 존재여부 검사 후 존재시 erase 하여준다.
-		// erase 인자값으로 map::iterator를 넣어도 되고, firstKey를 인자로 해도 무방하다.
-		// namemap 상의 FileName String 삭제
-		iter_	= m_mapBitmap_Namemap.find( strKey );
-		if( iter_ != m_mapBitmap_Namemap.end() )
-		{
-			m_mapBitmap_Namemap.erase( strKey );
-		}
-
-		//  namemap_identity 상의 FileName String 삭제
-		iter_	= m_mapBitmap_Namemap_identity.find( strKey_Identity );
-		if( iter_ != m_mapBitmap_Namemap_identity.end() )
-		{
-			m_mapBitmap_Namemap_identity.erase( strKey_Identity );
-		}
-		
-#endif // LDS_OPTIMIZE_FORLOADING
-
 		if(--pBitmap->Ref == 0 || bForce)
 		{
-			// OpenGL 텍스쳐 삭제
 			glDeleteTextures( 1, &(pBitmap->TextureNumber));
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 			m_dwUsedTextureMemory -= (DWORD)(pBitmap->Width * pBitmap->Height * pBitmap->Components);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			m_dwUsedTextureMemory -= (pBitmap->Width*pBitmap->Height*pBitmap->Components);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 			delete [] pBitmap->Buffer;
 			delete pBitmap;
 			m_mapBitmap.erase(mi);
 			
 			if(uiBitmapIndex >= BITMAP_NONAMED_TEXTURES_BEGIN && uiBitmapIndex <= BITMAP_NONAMED_TEXTURES_END)
 			{
-				m_listNonamedIndex.remove(uiBitmapIndex);	//. 인덱스 캐쉬에서 제거
+				m_listNonamedIndex.remove(uiBitmapIndex);
 			}
-			m_BitmapCache.Remove(uiBitmapIndex);	//. 비트맵 캐쉬에서 제거
+			m_BitmapCache.Remove(uiBitmapIndex);
 		}
 	}
 }
@@ -502,7 +442,7 @@ void CGlobalBitmap::UnloadAllImages()
 {
 #ifdef _DEBUG
 	if(!m_mapBitmap.empty())
-		g_ErrorReport.Write("해제되지 않은 비트맵 메모리:\r\n");
+		g_ErrorReport.Write("Unload Images\r\n");
 #endif // _DEBUG
 	
 	type_bitmap_map::iterator mi = m_mapBitmap.begin();
@@ -521,13 +461,8 @@ void CGlobalBitmap::UnloadAllImages()
 	}
 
 	m_mapBitmap.clear();
-	m_listNonamedIndex.clear();		//. 인덱스 캐쉬 클리어
-	m_BitmapCache.RemoveAll();		//. 비트맵 캐쉬 클리어
-
-#ifdef LDS_OPTIMIZE_FORLOADING
-	m_mapBitmap_Namemap.clear();	//. bitmap texturefullfile명 namemap 클리어
-	m_mapBitmap_Namemap_identity.clear();  //. bitmap texturefile명 namemap 클리어
-#endif // LDS_OPTIMIZE_FORLOADING
+	m_listNonamedIndex.clear();
+	m_BitmapCache.RemoveAll();
 
 	Init();
 }
@@ -535,14 +470,14 @@ void CGlobalBitmap::UnloadAllImages()
 BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
 {
 	BITMAP_t* pBitmap = NULL;
-	if(false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))	//. 캐쉬에 없다면
+	if(false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))
 	{
-		type_bitmap_map::iterator mi = m_mapBitmap.find(uiBitmapIndex);	//. 맵에서 찾는다.
+		type_bitmap_map::iterator mi = m_mapBitmap.find(uiBitmapIndex);
 		if(mi != m_mapBitmap.end())
 			pBitmap = (*mi).second;
-		m_BitmapCache.Add(uiBitmapIndex, pBitmap);	//. 캐쉬에 추가
+		m_BitmapCache.Add(uiBitmapIndex, pBitmap);
 	}
-	if(NULL == pBitmap)	//. 없는 인덱스라면
+	if(NULL == pBitmap)
 	{
 		static BITMAP_t s_Error;
 		memset(&s_Error, 0, sizeof(BITMAP_t));
@@ -554,34 +489,17 @@ BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
 BITMAP_t* CGlobalBitmap::FindTexture(GLuint uiBitmapIndex)
 {
 	BITMAP_t* pBitmap = NULL;
-	if(false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))	//. 캐쉬에 없다면
+	if(false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))
 	{
-		type_bitmap_map::iterator mi = m_mapBitmap.find(uiBitmapIndex);	//. 맵에서 찾는다.
+		type_bitmap_map::iterator mi = m_mapBitmap.find(uiBitmapIndex);
 		if(mi != m_mapBitmap.end())
 			pBitmap = (*mi).second;
 		if(pBitmap != NULL)
-			m_BitmapCache.Add(uiBitmapIndex, pBitmap);	//. 캐쉬에 추가
+			m_BitmapCache.Add(uiBitmapIndex, pBitmap);
 	}
 	return pBitmap;
 }
 
-#ifdef LDS_OPTIMIZE_FORLOADING
-// firstkey(string(filename))를 기준으로 std::map::find로 binary search 하여 secondkey값인 BITMAP_t* 를 반환 하여준다.
-BITMAP_t* CGlobalBitmap::FindTexture(const std::string& filename)
-{
-	// 정확한 검색을 위해 find의 firstkey 값 string을 모두 소문자로 변환 한다. insert시에 모두 소문자로 변환이 된다.
-	string strFileName( filename );
-	StringToLower( strFileName );
-	
-	type_bitmap_namemap::iterator iter_bitmapnamemap = m_mapBitmap_Namemap.find( strFileName );
-	if( iter_bitmapnamemap != m_mapBitmap_Namemap.end() )
-	{			
-		return (*iter_bitmapnamemap).second;
-	}
-				
-	return NULL;
-}
-#else // LDS_OPTIMIZE_FORLOADING
 BITMAP_t* CGlobalBitmap::FindTexture(const std::string& filename)
 {
 	type_bitmap_map::iterator mi = m_mapBitmap.begin();
@@ -593,26 +511,7 @@ BITMAP_t* CGlobalBitmap::FindTexture(const std::string& filename)
 	}
 	return NULL;
 }
-#endif // LDS_OPTIMIZE_FORLOADING
 
-
-#ifdef LDS_OPTIMIZE_FORLOADING
-// firstkey(string(filename))를 기준으로 std::map::find로 binary search 하여 secondkey값인 BITMAP_t* 를 반환 하여준다.
-// FullFile명 중 FileName만을 Split 하여 firstkey로 잡은 std::map(Namemap_identity)의 find로 BinarySearch 한다.
-BITMAP_t* CGlobalBitmap::FindTextureByName(const std::string& name)
-{
-	string strFileName( name );
-	StringToLower( strFileName );
-
-	type_bitmap_namemap::iterator iter_bitmapnamemap = m_mapBitmap_Namemap_identity.find( strFileName );
-	if( iter_bitmapnamemap != m_mapBitmap_Namemap_identity.end() )
-	{						
-		return (*iter_bitmapnamemap).second;
-	}
-
-	return NULL;
-}
-#else // LDS_OPTIMIZE_FORLOADING
 BITMAP_t* CGlobalBitmap::FindTextureByName(const std::string& name)
 {
 	type_bitmap_map::iterator mi = m_mapBitmap.begin();
@@ -626,50 +525,6 @@ BITMAP_t* CGlobalBitmap::FindTextureByName(const std::string& name)
 	}
 	return NULL;
 }
-#endif // LDS_OPTIMIZE_FORLOADING
-
-
-
-
-#ifdef LDS_OPTIMIZE_FORLOADING
-// std::map::find로 String을 firstkey로 두어 find 할 경우 기존의 
-// LinearSearch로 각 String을 모두 stricmp 하여 각 character를 명확히 대조하는
-// 방식이 아닌 단순 대소 비교 이기에 만에 하나 있을 수 있는 비교 fail 이 
-// 생기지 않도록 기존의 비교 방식을 따로 함수로 구성한다. 
-BITMAP_t* CGlobalBitmap::FindTexture_Linear(const std::string& filename)
-{
-	type_bitmap_map::iterator mi = m_mapBitmap.begin();
-	for(; mi != m_mapBitmap.end(); mi++)
-	{
-		BITMAP_t* pBitmap = (*mi).second;
-
-		if(0 == _stricmp(filename.c_str(), pBitmap->FileName)) 
-		{
-			return pBitmap;
-		}
-	}
-	
-	return NULL;
-}
-
-BITMAP_t* CGlobalBitmap::FindTextureByName_Linear(const std::string& name)
-{
-	type_bitmap_map::iterator mi = m_mapBitmap.begin();
-	for(; mi != m_mapBitmap.end(); mi++)
-	{
-		BITMAP_t* pBitmap = (*mi).second;
-		std::string texname;
-		SplitFileName(pBitmap->FileName, texname, true);
-		if(0 == stricmp(texname.c_str(), name.c_str())) 
-		{
-			return pBitmap;
-		}
-	}
-	
-	return NULL;
-}
-#endif // LDS_OPTIMIZE_FORLOADING
-
 
 DWORD CGlobalBitmap::GetUsedTextureMemory() const
 {
@@ -695,11 +550,11 @@ void CGlobalBitmap::Manage()
 GLuint CGlobalBitmap::GenerateTextureIndex()
 {
 	GLuint uiAvailableTextureIndex = FindAvailableTextureIndex(m_uiTextureIndexStream);
-	if(uiAvailableTextureIndex >= BITMAP_NONAMED_TEXTURES_END)	//. 범위 초과시
+	if(uiAvailableTextureIndex >= BITMAP_NONAMED_TEXTURES_END)
 	{
 		m_uiAlternate++;
 		m_uiTextureIndexStream = BITMAP_NONAMED_TEXTURES_BEGIN;
-		uiAvailableTextureIndex = FindAvailableTextureIndex(m_uiTextureIndexStream);	//. 재검색
+		uiAvailableTextureIndex = FindAvailableTextureIndex(m_uiTextureIndexStream);
 	}
 	return m_uiTextureIndexStream = uiAvailableTextureIndex;
 }
@@ -708,8 +563,8 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
 	if(m_uiAlternate > 0)
 	{
 		type_index_list::iterator li = std::find(m_listNonamedIndex.begin(), m_listNonamedIndex.end(), uiSeed+1);
-		if(li != m_listNonamedIndex.end())	//. 있다면
-			return FindAvailableTextureIndex(uiSeed+1);	//. 재검색
+		if(li != m_listNonamedIndex.end())
+			return FindAvailableTextureIndex(uiSeed+1);
 	}
 	return uiSeed+1;
 }
@@ -786,22 +641,6 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
 			offset += row_stride;
 		}
 
-#ifdef LDS_OPTIMIZE_FORLOADING
-		// Texture Image Open의 Bitmap_map이 구성될 시점에 Bitmap_namemap에 또한 검색 키 값이 되는 
-		// filename을 기준으로 Firstkey(FileName), Secondkey(BITMAP_t*) 키로 삽입 한다.
-		// 삽입시 각 FileName은 필수로 소문자화 시킨다.
-		std::string strFileName, strFullFileName( pNewBitmap->FileName );
-
-		StringToLower(strFullFileName);
-		SplitFileName(strFullFileName, strFileName, true);
-
-		// 1. Namemap 에 추가. FindTexture(string) 함수의 검색시 활용 된다.
-		m_mapBitmap_Namemap.insert( type_bitmap_namemap::value_type(strFullFileName, pNewBitmap) );
-
-		// 2. NameMap Identity 추가  한다. FindTextureByName(string) 함수의 검색시 활용 된다.
-		m_mapBitmap_Namemap_identity.insert( type_bitmap_namemap::value_type(strFileName, pNewBitmap) );
-#endif // LDS_OPTIMIZE_FORLOADING
-
 		m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, pNewBitmap));
 		
 		glGenTextures( 1, &(pNewBitmap->TextureNumber));
@@ -828,7 +667,6 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
 	std::string filename_ozt;
 	ExchangeExt(filename, "OZT", filename_ozt);
 
-	// 파일 오픈과 실패시 처리.
     FILE *fp = fopen(filename_ozt.c_str(), "rb");
     if(fp == NULL)
 	{
@@ -988,7 +826,6 @@ bool CGlobalBitmap::Convert_Format(const unicode::t_string& filename)
 	}
 	else
 	{
-		// 이미지 포멧이 다릅니다.
 	}
 
 	return false;
@@ -1029,6 +866,3 @@ void CGlobalBitmap::my_error_exit(j_common_ptr cinfo)
 	(*cinfo->err->output_message) (cinfo);
 	longjmp(myerr->setjmp_buffer, 1);
 }
-
-
-////////////////////////////////////////////////////////////////////////// CGlobalBitmap

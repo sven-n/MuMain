@@ -20,6 +20,7 @@
 #ifdef _DEBUG
 	#define ENABLE_EDIT
 	#define ENABLE_EDIT2
+	//#define DEBUG_BITMAP_CACHE
 #endif // _DEBUG
 
 #ifdef FOR_WORK

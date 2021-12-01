@@ -1,17 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  GMHellas.cpp
-//  
-//  내  용 : 24번째 맵 ( 마도시 헬라스--가칭 )
-//
-//  날  짜 : 2004/05/20
-//
-//  작성자 : 조 규 하
-//
-//////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UIWindows.h"
@@ -33,18 +21,11 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 
-
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
 extern  int  WaterTextureNumber;
 extern	char TextList[30][100];
 extern  int  TextListColor[30];
 extern	int  TextBold[30];
 
-//////////////////////////////////////////////////////////////////////////
-//  Global Variable
-//////////////////////////////////////////////////////////////////////////
 static  CSWaterTerrain* g_pCSWaterTerrain = NULL;
 static  std::queue<ObjectDescript> g_qObjDes;
 
@@ -58,12 +39,6 @@ static  const int g_iKalimaLevel[14][2] = { { 40, 999 }, { 131, 999 }, { 181, 99
 
 #define KUNDUN_ZONE NUM_HELLAS
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  물 지형 처리.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  물 지형을 생성한다.
-//////////////////////////////////////////////////////////////////////////
 bool CreateWaterTerrain ( int mapIndex )
 {
     if ( gMapManager.InHellas( mapIndex ) )
@@ -82,10 +57,6 @@ bool CreateWaterTerrain ( int mapIndex )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  물지형을 처리하고 있나?
-//////////////////////////////////////////////////////////////////////////
 bool IsWaterTerrain ( void )
 {
     if ( g_pCSWaterTerrain!=NULL )
@@ -95,10 +66,6 @@ bool IsWaterTerrain ( void )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 void AddWaterWave ( int x, int y, int range, int height )
 {
     if ( g_pCSWaterTerrain!=NULL )
@@ -109,10 +76,6 @@ void AddWaterWave ( int x, int y, int range, int height )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  물 지형 처리.
-//////////////////////////////////////////////////////////////////////////
 void MoveWaterTerrain ( void )
 {
     if ( g_pCSWaterTerrain!=NULL )
@@ -121,10 +84,6 @@ void MoveWaterTerrain ( void )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  물 지형을 화면에 나타낸다.
-//////////////////////////////////////////////////////////////////////////
 bool RenderWaterTerrain ( void )
 {
     if ( g_pCSWaterTerrain!=NULL )
@@ -136,10 +95,6 @@ bool RenderWaterTerrain ( void )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  물 지형 제거.
-//////////////////////////////////////////////////////////////////////////
 void DeleteWaterTerrain ( void )
 {
     if ( g_pCSWaterTerrain!=NULL )
@@ -149,11 +104,7 @@ void DeleteWaterTerrain ( void )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  수면 위치.
-//////////////////////////////////////////////////////////////////////////
-float GetWaterTerrain ( float x, float y )
+float GetWaterTerrain(float x, float y )
 {
     if ( x<0 ) x = 0;
     if ( y<0 ) y = 0;
@@ -164,11 +115,7 @@ float GetWaterTerrain ( float x, float y )
     return 0.f;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
-void  RenderWaterTerrain ( int Texture, float xf, float yf, float SizeX, float SizeY, vec3_t Light, float Rotation, float Alpha, float Height )
+void RenderWaterTerrain(int Texture, float xf, float yf, float SizeX, float SizeY, vec3_t Light, float Rotation, float Alpha, float Height )
 {
     if ( g_pCSWaterTerrain!=NULL )
     {
@@ -176,25 +123,12 @@ void  RenderWaterTerrain ( int Texture, float xf, float yf, float SizeX, float S
     }
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  
-void    SettingHellasColor ( void )
+void SettingHellasColor()
 {
     glClearColor ( 0.f, 0.f, 0.f, 1.f );
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  아이템 관련.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  레벨에 따른 등급을 계산한다.
-//////////////////////////////////////////////////////////////////////////
-BYTE    GetHellasLevel ( int Class, int Level )
+BYTE GetHellasLevel(int Class, int Level)
 {
     int startIndex = 0;
     if (gCharacterManager.GetBaseClass( Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Class )==CLASS_DARK_LORD   
@@ -205,7 +139,6 @@ BYTE    GetHellasLevel ( int Class, int Level )
     {
         startIndex = NUM_HELLAS;
     }
-
 
     int byLevel = 0;
     for ( int i=0; i<NUM_HELLAS; i++ )
@@ -219,12 +152,10 @@ BYTE    GetHellasLevel ( int Class, int Level )
     return byLevel;
 }
 
-// 칼리마 이동 가능한 레벨인가?
 bool EnableKalima(int Class, int Level, int ItemLevel)
 {
     int startIndex = 0;
 
-	// 마검사나 다크로드
     if(gCharacterManager.GetBaseClass( Class ) == CLASS_DARK || gCharacterManager.GetBaseClass( Class ) == CLASS_DARK_LORD
 #ifdef PBG_ADD_NEWCHAR_MONK
 		|| GetBaseClass( Class ) == CLASS_RAGEFIGHTER
@@ -278,7 +209,7 @@ bool GetUseLostMap ( bool bDrawAlert )
     return false;
 }
 
-int RenderHellasItemInfo ( ITEM* ip, int textNum )
+int RenderHellasItemInfo(ITEM* ip, int textNum )
 {
     int TextNum = textNum;
     switch ( ip->Type )
@@ -344,7 +275,7 @@ int RenderHellasItemInfo ( ITEM* ip, int textNum )
     return TextNum;
 }
 
-void AddObjectDescription ( char* Text, vec3_t position )
+void AddObjectDescription(char* Text, vec3_t position )
 {
     ObjectDescript QD;
     
@@ -354,7 +285,7 @@ void AddObjectDescription ( char* Text, vec3_t position )
     g_qObjDes.push ( QD );
 }
 
-void RenderObjectDescription ( void )
+void RenderObjectDescription()
 {
     glColor3f ( 1.f, 1.f, 1.f );
     while ( !g_qObjDes.empty() )
@@ -378,28 +309,21 @@ void RenderObjectDescription ( void )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스의 오브젝트 효과.
-//////////////////////////////////////////////////////////////////////////
-bool    MoveHellasObjectSetting ( int& objCount, int object )
+bool MoveHellasObjectSetting(int& objCount, int object)
 {
     if ( gMapManager.InHellas()==false ) return false;
 
-    //  배경 효과음을 나타낸다.
     PlayBuffer ( SOUND_KALIMA_AMBIENT );
     if ( (MoveSceneFrame%100)==0 )
     {
         PlayBuffer ( SOUND_KALIMA_AMBIENT2+rand()%2 );
     }
 
-    //  쿤둔존에 들어가면은 소리를 나게 한다.
     if ( GetHellasLevel( Hero->Class, CharacterAttribute->Level )==KUNDUN_ZONE)
     {
         int CurrX =  ( Hero->PositionX );
         int CurrY =  ( Hero->PositionY );
 
-        //  쿤둔존에 존재한다.
         if ( ( CurrX>=25 && CurrY>=44 ) && ( CurrX<=51 && CurrY<=119 ) && (MoveSceneFrame%50)==0 )
         {
             PlayBuffer ( SOUND_KUNDUN_AMBIENT1+rand()%2 );
@@ -422,7 +346,7 @@ bool    MoveHellasObjectSetting ( int& objCount, int object )
         Position[1] = Hero->Object.Position[1]+rand()%800-400.f;
         Position[2] = Hero->Object.Position[2]+50.f;
 
-        CreateParticle ( BITMAP_LIGHT, Position, Hero->Object.Angle, Light, 7, 1.f, &Hero->Object );//, rand()%10+50.f );
+        CreateParticle ( BITMAP_LIGHT, Position, Hero->Object.Angle, Light, 7, 1.f, &Hero->Object );
 
         if ( (rand()%15)==0 )
         {
@@ -437,11 +361,7 @@ bool    MoveHellasObjectSetting ( int& objCount, int object )
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  각각 오브젝트들을 검사후 해당 오브젝트를 찾는다.
-//////////////////////////////////////////////////////////////////////////
-bool    MoveHellasObject ( OBJECT* o, int& object, int& visibleObject )
+bool MoveHellasObject(OBJECT* o, int& object, int& visibleObject)
 {
     if ( gMapManager.InHellas()==true )
     {
@@ -451,31 +371,19 @@ bool    MoveHellasObject ( OBJECT* o, int& object, int& visibleObject )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스월드의 오브젝트 처리.
-//////////////////////////////////////////////////////////////////////////
-bool    MoveHellasAllObject ( OBJECT* o )
+bool MoveHellasAllObject(OBJECT* o)
 {
     if ( gMapManager.InHellas()==false ) return false;
 
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스 월드 오브젝트 생성.
-//////////////////////////////////////////////////////////////////////////
-bool    CreateHellasObject ( OBJECT* o )
+bool CreateHellasObject(OBJECT* o)
 {
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
-bool    MoveHellasVisual ( OBJECT* o )
+bool MoveHellasVisual(OBJECT* o)
 {
     if ( gMapManager.InHellas()==false ) return false;
 
@@ -488,16 +396,10 @@ bool    MoveHellasVisual ( OBJECT* o )
         o->HiddenMesh = -2;
         break;
     }
-
     return true;
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////
-//  주인공이 물풀을 지나갈 때 물풀이 수면을 따라 밀리며 움직임.
-///////////////////////////////////////////////////////////////////////////////
-void    CheckGrass ( OBJECT* o )
+void CheckGrass(OBJECT* o)
 {
 	vec3_t Position;
 	VectorCopy ( Hero->Object.Position, Position );
@@ -529,11 +431,7 @@ void    CheckGrass ( OBJECT* o )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//   헬라스 월드의 오브젝트들에 효과를 추가한다.
-//////////////////////////////////////////////////////////////////////////
-bool    RenderHellasVisual ( OBJECT* o, BMD* b )
+bool RenderHellasVisual(OBJECT* o,BMD* b)
 {
     if ( gMapManager.InHellas()==false ) return false;
 
@@ -566,12 +464,12 @@ bool    RenderHellasVisual ( OBJECT* o, BMD* b )
         CreateSprite ( BITMAP_LIGHT, Position, Luminosity+0.2f, Light, o );
         o->Position[2] = GetWaterTerrain ( o->Position[0], o->Position[1] )+180;
         break;
-    case 35:    //  작은 푸른불.
+    case 35:
         Vector ( 0.3f, 0.6f, 1.f, Light );
         CreateParticle( BITMAP_LIGHT, o->Position, o->Angle, Light, 6, 1.f, o );
         o->HiddenMesh = -2;
         break;
-    case 36:    //  진짜 푸른 불.
+    case 36:
         Vector ( 1.f, 1.f, 1.f, Light );
         CreateParticle ( BITMAP_TRUE_BLUE, o->Position, o->Angle, Light, 0 );
 
@@ -612,13 +510,9 @@ bool    RenderHellasVisual ( OBJECT* o, BMD* b )
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스 맵에 속하는 오브젝트들의 효과. ( 메쉬 효과 ).
-//////////////////////////////////////////////////////////////////////////
-bool    RenderHellasObjectMesh ( OBJECT* o, BMD* b )
+bool RenderHellasObjectMesh ( OBJECT* o, BMD* b )
 {
-    if ( o->Type==MODEL_MONSTER01+33 && gMapManager.InHellas() )     //  밑바닥을 다니는 대형바하무트.
+    if ( o->Type==MODEL_MONSTER01+33 && gMapManager.InHellas() )
     {
 		Vector ( 0.0f, 0.0f, 0.0f, b->BodyLight );
         b->RenderBody( RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
@@ -645,7 +539,6 @@ bool    RenderHellasObjectMesh ( OBJECT* o, BMD* b )
 
 		float Luminosity = (float)sin ( WorldTime*0.003f )*0.2f+0.8f;
 		vec3_t p, Light, Position;
-		// 눈
 		Vector(0,0,0,p);
 		Vector ( Luminosity*1.0f, Luminosity*0.2f, Luminosity*0.1f, Light );
 		b->TransformPosition ( BoneTransform[3], p, Position, false );
@@ -673,7 +566,7 @@ bool    RenderHellasObjectMesh ( OBJECT* o, BMD* b )
 
 		float Luminosity = (float)sin ( WorldTime*0.003f )*0.2f+0.8f;
 		vec3_t p, Light, Position;
-		// 눈
+
 		Vector(0,0,0,p);
 		Vector ( Luminosity*1.0f, Luminosity*0.2f, Luminosity*0.1f, Light );
 		b->TransformPosition ( BoneTransform[8], p, Position, false );
@@ -719,10 +612,8 @@ bool    RenderHellasObjectMesh ( OBJECT* o, BMD* b )
                 }
             }
             
-            //  물에 뜨는 오브젝트.
             if ( o->Type==15 || o->Type==29 || o->Type==32 )
             {
-                //  그림자 찍는다.
                 DisableAlphaBlend();
                 Vector ( 0.1f, 0.1f, 0.1f, b->BodyLight );
                 b->RenderBody( RENDER_TEXTURE|RENDER_SHADOWMAP,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh );
@@ -739,13 +630,7 @@ bool    RenderHellasObjectMesh ( OBJECT* o, BMD* b )
     return false;
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  활동하는 맵 오브젝트.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  
-int     CreateBigMon ( OBJECT* o )
+int CreateBigMon( OBJECT* o )
 {
 	if ( gMapManager.InHellas()==false ) return 0;
 
@@ -780,10 +665,7 @@ int     CreateBigMon ( OBJECT* o )
     return 1;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-void    MoveBigMon ( OBJECT* o )
+void MoveBigMon(OBJECT* o)
 {
 	o->Angle[2] += o->Gravity;
 
@@ -802,14 +684,7 @@ void    MoveBigMon ( OBJECT* o )
     if ( o->LifeTime<0 ) o->Live = false;
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  몬스터.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  몬스터 스킬 : 방어력 감소.
-//////////////////////////////////////////////////////////////////////////
-void    CreateMonsterSkill_ReduceDef ( OBJECT* o, int AttackTime, BYTE time, float Height )
+void CreateMonsterSkill_ReduceDef(OBJECT* o, int AttackTime, BYTE time, float Height)
 {
     if ( AttackTime>=time )
     {
@@ -830,11 +705,7 @@ void    CreateMonsterSkill_ReduceDef ( OBJECT* o, int AttackTime, BYTE time, flo
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  몬스터 스킬 : 독 발사.
-//////////////////////////////////////////////////////////////////////////
-void    CreateMonsterSkill_Poison ( OBJECT* o, int AttackTime, BYTE time )
+void CreateMonsterSkill_Poison ( OBJECT* o, int AttackTime, BYTE time )
 {
     if ( AttackTime>=time )
     {
@@ -858,30 +729,19 @@ void    CreateMonsterSkill_Poison ( OBJECT* o, int AttackTime, BYTE time )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  몬스터 스킬 : 몬스터 소환.
-//////////////////////////////////////////////////////////////////////////
-void    CreateMonsterSkill_Summon ( OBJECT* o, int AttackTime, BYTE time )
+void CreateMonsterSkill_Summon ( OBJECT* o, int AttackTime, BYTE time )
 {
     if ( AttackTime>=time )
     {
         CreateEffect ( MODEL_CIRCLE, o->Position, o->Angle, o->Light, 3, o );
-        //  소환되는 몬스터에게 나타내준다.
         CreateEffect ( MODEL_CIRCLE_LIGHT, o->Position, o->Angle, o->Light, 4 );
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  마법, 물리 방어력 보호막 제거.
-//  wsclient.cpp 에서만 쓴다.
-//////////////////////////////////////////////////////////////////////////
-void    SetActionDestroy_Def ( OBJECT* o )
+void SetActionDestroy_Def ( OBJECT* o )
 {
     if ( o->Type!=MODEL_PLAYER )
     {
-		// _buffwani_
 		if( g_isCharacterBuff(o, eBuff_PhysDefense ) )
 		{
             o->AI = ACTION_DESTROY_PHY_DEF;
@@ -895,11 +755,7 @@ void    SetActionDestroy_Def ( OBJECT* o )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  방어력 파괴 효과.
-//////////////////////////////////////////////////////////////////////////
-void    RenderDestroy_Def ( OBJECT* o, BMD* b )
+void RenderDestroy_Def ( OBJECT* o, BMD* b )
 {
     if ( o->Type!=MODEL_PLAYER )
     {
@@ -920,10 +776,6 @@ void    RenderDestroy_Def ( OBJECT* o, BMD* b )
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스 몬스터를 생성한다.
-//////////////////////////////////////////////////////////////////////////
 CHARACTER* CreateHellasMonster ( int Type, int PositionX, int PositionY, int Key )
 {
     CHARACTER*  c = NULL;
@@ -1106,11 +958,7 @@ bool    SettingHellasMonsterLinkBone ( CHARACTER* c, int Type )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
-bool    SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
+bool SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
 {
     switch ( c->MonsterIndex )
     {
@@ -1123,13 +971,11 @@ bool    SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
         switch ( ( c->Skill ) )
         {
         case AT_SKILL_ENERGYBALL:
-#ifdef PJH_SEASON4_MASTER_RANK4
 		case AT_SKILL_BLOOD_ATT_UP:
 		case AT_SKILL_BLOOD_ATT_UP+1:
 		case AT_SKILL_BLOOD_ATT_UP+2:
 		case AT_SKILL_BLOOD_ATT_UP+3:
 		case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
         case AT_SKILL_REDUCEDEFENSE:
         case AT_SKILL_POISON:
         case AT_SKILL_MONSTER_SUMMON :
@@ -1144,7 +990,7 @@ bool    SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
         }
         return true;
 
-    case 147:   //  데빌 윙.
+    case 147:
     case 177:
     case 185:
     case 193:
@@ -1162,7 +1008,7 @@ bool    SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
         }
         return true;
 
-    case 148:   //  데스 센튜리온.
+    case 148:
     case 178:
     case 186:
     case 194:
@@ -1180,7 +1026,7 @@ bool    SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
         }
         return true;
 
-    case 149:   //  네크론.
+    case 149:
     case 179:
     case 187:
     case 195:
@@ -1198,13 +1044,13 @@ bool    SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
         }
         return true;
 
-    case 160:   //  쿤둔의 잔영.
+    case 160:
     case 180:
     case 188:
     case 196:
     case 266:
     case 274:
-    case 161:   //  쿤둔의 잔영2.
+    case 161:
     case 181:
     case 189:
     case 197:
@@ -1212,18 +1058,14 @@ bool    SetCurrentAction_HellasMonster ( CHARACTER* c, OBJECT* o )
         SetAction ( o, MONSTER01_ATTACK1+rand()%2 );
         return true;
 
-    case 275:   //  쿤둔의 환영.
+    case 275:
         SetAction ( o, MONSTER01_ATTACK1+rand()%2 );
         return true;
     }
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스 몬스터의 공격 효과.
-//////////////////////////////////////////////////////////////////////////
-bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* to, BMD* b )
+bool AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* to, BMD* b )
 {
 	vec3_t Light;
 	vec3_t p, Position;
@@ -1231,7 +1073,7 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
 	Vector ( 1.f, 1.f, 1.f, Light );
     switch ( c->MonsterIndex )
     {
-    case 144:   //  장수 거북.
+    case 144:
     case 174:
     case 182:
     case 190:
@@ -1255,7 +1097,7 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
         }
         return true;
 
-    case 145:   //  로드 센튜리온.
+    case 145:
     case 175:
     case 183:
     case 191:
@@ -1271,32 +1113,30 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
 		case AT_SKILL_BLOOD_ATT_UP+3:
 		case AT_SKILL_BLOOD_ATT_UP+4:
 #endif //PJH_SEASON4_MASTER_RANK4
-        case AT_SKILL_REDUCEDEFENSE:        //  방어력 감소 스킬.
+        case AT_SKILL_REDUCEDEFENSE:
             CreateMonsterSkill_ReduceDef ( o, c->AttackTime, 13, 200.f );
             break;
 
-        case AT_SKILL_POISON:               //  독스킬.
+        case AT_SKILL_POISON:
             CreateMonsterSkill_Poison ( o, c->AttackTime, 13 );
             break;
 
-        case AT_SKILL_MONSTER_SUMMON :      //  몬스터 소환.
+        case AT_SKILL_MONSTER_SUMMON:
             CreateMonsterSkill_Summon ( o, c->AttackTime, 13 );
             break;
 
-        case AT_SKILL_MONSTER_MAGIC_DEF :   //  마법 방어력 최고.
+        case AT_SKILL_MONSTER_MAGIC_DEF:
             if ( c->AttackTime>=13 )
             {
-				// _buffwani_
 				g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 c->AttackTime = 15;
                 PlayBuffer ( SOUND_GREAT_SHIELD );
             }
             break;
 
-        case AT_SKILL_MONSTER_PHY_DEF :     //  물리 방어력 최고.
+        case AT_SKILL_MONSTER_PHY_DEF:
             if ( c->AttackTime>=13 )
             {
-				// _buffwani_
 				g_CharacterRegisterBuff(o, eBuff_Defense);
                 c->AttackTime = 15;
                 PlayBuffer ( SOUND_GREAT_SHIELD );
@@ -1314,7 +1154,7 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
         }
         return true;
 
-    case 146:   //  블러디 솔져.
+    case 146:
     case 176:
     case 184:
     case 192:
@@ -1338,7 +1178,7 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
         }
         return true;
 
-    case 147:   //  데빌 윙.
+    case 147:
     case 177:
     case 185:
     case 193:
@@ -1351,7 +1191,7 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
         }
         return true;
 
-    case 148:   //  데스 센튜리온.
+    case 148:
     case 178:
     case 186:
     case 194:
@@ -1372,7 +1212,7 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
         }
         return true;
 
-    case 149:   //  네크론.
+    case 149:
     case 179:
     case 187:
     case 195:
@@ -1423,7 +1263,7 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
         }
         return true;
 
-    case 160:   //  쿤둔의 잔영.
+    case 160:
     case 180:
     case 188:
     case 196:
@@ -1437,7 +1277,7 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
         }
         return true;
 
-    case 161:   //  쿤둔의 잔영2.
+    case 161:
     case 181:
     case 189:
     case 197:
@@ -1451,32 +1291,30 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
 		case AT_SKILL_BLOOD_ATT_UP+3:
 		case AT_SKILL_BLOOD_ATT_UP+4:
 #endif //PJH_SEASON4_MASTER_RANK4
-        case AT_SKILL_REDUCEDEFENSE:        //  방어력 감소 스킬.
+        case AT_SKILL_REDUCEDEFENSE:
             CreateMonsterSkill_ReduceDef ( o, c->AttackTime, 13, 200.f );
             break;
 
-        case AT_SKILL_POISON:               //  독스킬.
+        case AT_SKILL_POISON:
             CreateMonsterSkill_Poison ( o, c->AttackTime, 13 );
             break;
 
-        case AT_SKILL_MONSTER_SUMMON :      //  몬스터 소환.
+        case AT_SKILL_MONSTER_SUMMON:
             CreateMonsterSkill_Summon ( o, c->AttackTime, 13 );
             break;
 
-        case AT_SKILL_MONSTER_MAGIC_DEF :   //  마법 방어력 최고.
+        case AT_SKILL_MONSTER_MAGIC_DEF:
             if ( c->AttackTime>=13 )
             {
-				// _buffwani_
 				g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 c->AttackTime = 15;
                 PlayBuffer ( SOUND_GREAT_SHIELD );
             }
             break;
 
-        case AT_SKILL_MONSTER_PHY_DEF :     //  물리 방어력 최고.
+        case AT_SKILL_MONSTER_PHY_DEF:
             if ( c->AttackTime>=13 )
             {
-				// _buffwani_
 				g_CharacterRegisterBuff(o, eBuff_Defense);
                 c->AttackTime = 15;
                 PlayBuffer ( SOUND_GREAT_SHIELD );
@@ -1487,7 +1325,6 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
             break;
         }
 
-        //  몬스터 공격.
         if ( o->CurrentAction==MONSTER01_ATTACK1 )
         {
             if ( c->AttackTime==7 )
@@ -1502,32 +1339,29 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
             }
         }
         return true;
-    case 275:   //  진짜 쿤둔의 환영.
+    case 275:
         switch ( ( c->Skill ) )
         {
-#ifdef PJH_SEASON4_MASTER_RANK4
 		case AT_SKILL_BLOOD_ATT_UP:
 		case AT_SKILL_BLOOD_ATT_UP+1:
 		case AT_SKILL_BLOOD_ATT_UP+2:
 		case AT_SKILL_BLOOD_ATT_UP+3:
 		case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
-        case AT_SKILL_REDUCEDEFENSE:        //  방어력 감소 스킬.
+        case AT_SKILL_REDUCEDEFENSE:
             CreateMonsterSkill_ReduceDef ( o, c->AttackTime, 13, 200.f );
             break;
 
-        case AT_SKILL_POISON:               //  독스킬.
+        case AT_SKILL_POISON:
             CreateMonsterSkill_Poison ( o, c->AttackTime, 13 );
             break;
 
-        case AT_SKILL_MONSTER_SUMMON :      //  몬스터 소환.
+        case AT_SKILL_MONSTER_SUMMON:
             CreateMonsterSkill_Summon ( o, c->AttackTime, 13 );
             break;
 
-        case AT_SKILL_MONSTER_MAGIC_DEF :   //  마법 방어력 최고.
+        case AT_SKILL_MONSTER_MAGIC_DEF:
             if ( c->AttackTime>=13 )
             {
-				// _buffwani_
 				g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 c->AttackTime = 15;
 
@@ -1535,10 +1369,9 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
             }
             break;
 
-        case AT_SKILL_MONSTER_PHY_DEF :     //  물리 방어력 최고.
+        case AT_SKILL_MONSTER_PHY_DEF:
             if ( c->AttackTime>=13 )
             {
-				// _buffwani_
 				g_CharacterRegisterBuff(o, eBuff_Defense);
                 c->AttackTime = 15;
 
@@ -1549,16 +1382,11 @@ bool    AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJ
         default :
             break;
         }
-        //  몬스터 공격.
         return true;
     }
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 void MonsterMoveWaterSmoke ( OBJECT* o )
 {
 	if(o->CurrentAction == MONSTER01_WALK)
@@ -1584,12 +1412,7 @@ void MonsterDieWaterSmoke(OBJECT *o)
 	}
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스 몬스터 비주얼 처리.
-//////////////////////////////////////////////////////////////////////////
-bool    MoveHellasMonsterVisual ( OBJECT* o, BMD* b )
+bool MoveHellasMonsterVisual( OBJECT* o, BMD* b )
 {
     vec3_t Position, p;
     vec3_t Light;
@@ -1612,12 +1435,11 @@ bool    MoveHellasMonsterVisual ( OBJECT* o, BMD* b )
         o->BlendMeshLight = sinf ( WorldTime*0.001f )*0.5f+0.5f;
 		return true;
         
-    case MODEL_MONSTER01+63://  장수 거북.
+    case MODEL_MONSTER01+63:
         o->BlendMeshLight = sinf ( WorldTime*0.001f )*0.7f+0.3f;
         return true;
 
-    case MODEL_MONSTER01+64:	// 진짜쿤둔
-        //			MoveEye ( o, b, 9, 8 );
+    case MODEL_MONSTER01+64:
         if(rand()%2==0)
         {
             Vector(2.f,30.f,0.f,p);
@@ -1627,27 +1449,27 @@ bool    MoveHellasMonsterVisual ( OBJECT* o, BMD* b )
         }
         return true;
 
-    case MODEL_MONSTER01+65://  랍스터
+    case MODEL_MONSTER01+65:
         return true;
 
-    case MODEL_MONSTER01+66://  가오리
+    case MODEL_MONSTER01+66:
         return true;
 
     case MODEL_MONSTER01+67:
         return true;
 
-    case MODEL_MONSTER01+68:    //  네크론.
+    case MODEL_MONSTER01+68:
         o->BlendMeshLight = sinf ( WorldTime*0.001f )*0.7f+0.3f;
         return true;
 
-    case MODEL_MONSTER01+69:	// 쿤둔후보
+    case MODEL_MONSTER01+69:
         if ( o->CurrentAction!=MONSTER01_DIE )
         {
             if(rand()%2==0)
             {
                 Vector ( 2.f, 30.f, 0.f, p );
                 b->TransformPosition ( o->BoneTransform[31], p, Position, true );
-                if ( o->SubType==9 )    //  보스급 쿤둔의 잔영.
+                if ( o->SubType==9 )
                 {
                     Vector ( 1.0f, 0.0f, 0.0f, Light );
                 }
@@ -1664,11 +1486,7 @@ bool    MoveHellasMonsterVisual ( OBJECT* o, BMD* b )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스 몬스터 효과를 나타낸다.
-//////////////////////////////////////////////////////////////////////////
-bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
+bool RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 {
     vec3_t Position, Light, p;
     float  Luminosity;
@@ -1676,7 +1494,7 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 
     switch ( o->Type )
     {
-    case MODEL_WARCRAFT:    //  헬게이트.
+    case MODEL_WARCRAFT:
         if ( o->CurrentAction==1 )
         {
             VectorCopy ( o->Position, Position );
@@ -1697,13 +1515,12 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
         }
         return true;
 
-    case MODEL_MONSTER01+63://  장수 거북.
+    case MODEL_MONSTER01+63:
 		Vector ( 0.f, 0.f, 0.f, p );
 
         if ( o->CurrentAction!=MONSTER01_DIE )
         {
             Luminosity = 0.f;
-            //  발부분 보글보글.
             for ( i=0; i<5; ++i )
             {
                 Luminosity += 1/4.f;
@@ -1726,7 +1543,6 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
                 }
             }
 
-            //  이마.
 		    Vector ( 2.f, 2.f, 0.f, p );
             Vector ( o->BlendMeshLight, o->BlendMeshLight, o->BlendMeshLight, Light );
 		    b->TransformPosition ( o->BoneTransform[8], p, Position, true );
@@ -1734,7 +1550,6 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
             Vector ( o->BlendMeshLight*0.1f, o->BlendMeshLight*0.1f, o->BlendMeshLight, Light );
 		    CreateSprite(BITMAP_SHINY+1,Position,1.f,Light,o,0.f);
 
-            //  손바닥.
 		    Vector ( 0.f, 0.f, 0.f, p );
 		    b->TransformPosition ( o->BoneTransform[22], p, Position, true );
 		    CreateSprite(BITMAP_ENERGY,Position,0.2f,Light,o,0.f);
@@ -1761,7 +1576,7 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
         }
         return true;
 
-	case MODEL_MONSTER01+64://  쿤둔의 환영
+	case MODEL_MONSTER01+64:
 
         if ( o->CurrentAction==MONSTER01_DIE )
         {
@@ -1781,15 +1596,14 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 			Vector ( Luminosity*1.0f, Luminosity*0.0f, Luminosity*0.0f, Light );
 			b->TransformPosition ( o->BoneTransform[9], p, Position, true );
 			CreateSprite(BITMAP_ENERGY,Position,0.4f,Light,o,0.f);
-			// 배
-			Vector(0,0,0,p);
+
+            Vector(0,0,0,p);
 			{
 				Vector ( 1.f, 1.f, 1.f, Light );
 				b->TransformPosition ( o->BoneTransform[100], p, Position, true );
 				float fRoar = 1.0f;
 				if ( o->CurrentAction==MONSTER01_SHOCK )
 				{
-					// 쿤둔 포효
 					if (o->AnimationFrame > 10.0f && o->PKKey > 10)
 						o->PKKey -= 1;
 					else if (o->AnimationFrame > 4.0f)
@@ -1830,7 +1644,6 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 			
 			if ( o->CurrentAction==MONSTER01_SHOCK )
 			{
-				// 쿤둔 포효
 				if (o->AnimationFrame < 2.0f)
 				{
 					if ( o->LifeTime!=100 )
@@ -1870,7 +1683,6 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 			}
 			if ( o->CurrentAction==MONSTER01_ATTACK1 )
 			{
-				// 쿤둔 공격1 (9frame)
 				if (o->AnimationFrame < 2.0f)
 				{
 					o->LifeTime = 100;
@@ -1887,7 +1699,6 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 			}
 			if ( o->CurrentAction==MONSTER01_ATTACK2 )
 			{
-				// 쿤둔 공격2 (11frame)
 				if (o->AnimationFrame < 2.0f)
 				{
 					o->LifeTime = 100;
@@ -1939,10 +1750,9 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 		}
 		return true;
 
-    case MODEL_MONSTER01+65://  랍스터
+    case MODEL_MONSTER01+65:
         if ( o->CurrentAction!=MONSTER01_DIE )
         {
-		    // 눈
             Luminosity = (float)sin ( WorldTime*0.003f )*0.2f+0.8f;
 		    Vector(20.f,30.f,-7.f,p);
 		    Vector ( Luminosity*1.0f, Luminosity*0.9f, Luminosity*0.9f, Light );
@@ -1958,7 +1768,6 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 		    Vector ( Luminosity*1.0f, Luminosity*0.3f, Luminosity*0.1f, Light );
 		    CreateSprite(BITMAP_SHINY+1,Position,1.f,Light,o,0.f);
 
-		    // 수염
 		    Vector(0.f,0.f,7.f,p);
 		    Vector ( Luminosity*1.0f, Luminosity*0.9f, Luminosity*0.9f, Light );
 		    b->TransformPosition ( o->BoneTransform[13], p, Position, true );
@@ -1973,7 +1782,6 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 		    Vector ( Luminosity*1.0f, Luminosity*0.5f, Luminosity*0.1f, Light );
 		    CreateSprite(BITMAP_SHINY+1,Position,0.7f,Light,o,0.f);
 
-		    // 팔
 		    Vector ( Luminosity*1.0f,Luminosity*0.8f,Luminosity*0.8f, Light );
 		    Vector ( 0,0,0, p );
 		    b->TransformPosition ( o->BoneTransform[23], p, Position, true );
@@ -1990,10 +1798,9 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
         }
 		return true;
 
-    case MODEL_MONSTER01+66://  가오리
+    case MODEL_MONSTER01+66:
         if ( o->CurrentAction!=MONSTER01_DIE )
         {
-            //  눈의 효과.
             Luminosity = (float)sin ( WorldTime*0.005f )*0.15f+0.85f;
 		    Vector ( 4.f, 0.f, 5.f, p );
 		    Vector ( Luminosity*1.0f, Luminosity*1.0f, Luminosity*1.0f, Light );
@@ -2009,7 +1816,6 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 		    Vector ( Luminosity*0.3f, Luminosity*0.6f, Luminosity*1.f, Light );
 		    CreateSprite(BITMAP_SHINY+1,Position,1.f,Light,o,0.f);
 
-            //  가운데 배.
 		    Vector ( 0, 0, 0,  p );
 		    Vector ( 0.7f, 0.6f, 1, Light );
 		    b->TransformPosition ( o->BoneTransform[3], p, Position, true );
@@ -2040,15 +1846,14 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
         }
 		return true;
 
-    case MODEL_MONSTER01+67://  블루나이트.
+    case MODEL_MONSTER01+67:
         if ( o->CurrentAction!=MONSTER01_DIE )
         {
             Vector ( 0.f, 0.f, 30.f, p );
             
-            if ( c->MonsterIndex==145 ) //  대형.
+            if ( c->MonsterIndex==145 )
             {
                 Vector ( 1.f, 0.f, 0.f, Light );
-                //  배.
                 b->TransformPosition ( o->BoneTransform[0], p, Position, true );
                 CreateSprite ( BITMAP_FLARE_BLUE, Position, 2.f+(sinf(WorldTime*0.001f)*0.3f), Light, o, 0.f );
                 
@@ -2060,7 +1865,6 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
             else
             {
                 Vector ( 1.f, 1.f, 1.f, Light );
-                //  배.
                 b->TransformPosition ( o->BoneTransform[0], p, Position, true );
                 CreateSprite ( BITMAP_FLARE_BLUE, Position, 1.2f+(sinf(WorldTime*0.001f)*0.3f), Light, o, 0.f );
             }
@@ -2079,7 +1883,7 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
         }
         return true;
 
-    case MODEL_MONSTER01+68:    //  네크론.
+    case MODEL_MONSTER01+68:
         if ( o->CurrentAction!=MONSTER01_DIE )
         {
             vec3_t pos;
@@ -2093,11 +1897,9 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 			b->TransformPosition ( o->BoneTransform[10], p, Position, true );
 			CreateSprite ( BITMAP_LIGHT, Position, 0.3f+(sinf(WorldTime*0.001f)*0.2f), Light, o, 0.f );
 
-            //  손.
 			Vector ( 0.f, 0.f, 0.f, p );
             Luminosity = (float)sin ( WorldTime*0.002f )*0.3f+0.6f;
 
-            //  독공격시.
             if ( o->CurrentAction==MONSTER01_ATTACK2 )
             {
                 Vector ( Luminosity*0.1f, Luminosity, Luminosity*0.1f, Light );
@@ -2130,16 +1932,15 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
         }
         return true;
 
-    case MODEL_MONSTER01+69://  쿤둔의 잔영.
+    case MODEL_MONSTER01+69:
         if ( o->CurrentAction!=MONSTER01_DIE )
         {
             vec3_t Pos1, Pos2;
-		    // 눈
             Luminosity = (float)sin ( WorldTime*0.003f )*0.2f+0.8f;
 		    Vector ( 0, 0, 0, p );
 		    b->TransformPosition ( o->BoneTransform[33], p, Pos1, true );
 		    b->TransformPosition ( o->BoneTransform[34], p, Pos2, true );
-            if ( o->SubType==9 )    //  보스급 쿤둔의 잔영.
+            if ( o->SubType==9 )
             {
                 Vector ( Luminosity*1.0f, Luminosity*0.9f, Luminosity*0.9f, Light );
             }
@@ -2149,7 +1950,7 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
             }
 		    CreateSprite(BITMAP_ENERGY,Pos1,0.1f,Light,o,0.f);
 		    CreateSprite(BITMAP_ENERGY,Pos2,0.1f,Light,o,0.f);
-            if ( o->SubType==9 )    //  보스급 쿤둔의 잔영.
+            if ( o->SubType==9 )
             {
     		    Vector ( Luminosity*1.0f, Luminosity*0.3f, Luminosity*0.1f, Light );
             }
@@ -2160,8 +1961,7 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 		    CreateSprite(BITMAP_SHINY+1,Pos1,0.7f,Light,o,0.f);
 		    CreateSprite(BITMAP_SHINY+1,Pos2,0.7f,Light,o,0.f);
 
-		    // 칼
-            if ( o->SubType==9 )    //  보스급 쿤둔의 잔영.
+            if ( o->SubType==9 )
             {
     		    Vector ( Luminosity*1.0f, Luminosity*0.9f, Luminosity*0.9f, Light );
             }
@@ -2174,7 +1974,7 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
 			    Vector(0.f,-40.f - i * 24.f,0.f,p);
 			    b->TransformPosition ( o->BoneTransform[41], p, Pos1, true );
 			    b->TransformPosition ( o->BoneTransform[51], p, Pos2, true );
-                if ( o->SubType==9 )    //  보스급 쿤둔의 잔영.
+                if ( o->SubType==9 )
                 {
 			        CreateParticle(BITMAP_FIRE+1,Pos1,o->Angle,Light,1,7.2f/(i/2+6));
 			        CreateParticle(BITMAP_FIRE+1,Pos2,o->Angle,Light,1,7.2f/(i/2+6));
@@ -2196,20 +1996,12 @@ bool    RenderHellasMonsterVisual ( CHARACTER* c, OBJECT* o, BMD* b )
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  헬라스 몬스터의 천 추가.
-//////////////////////////////////////////////////////////////////////////
-bool    RenderHellasMonsterCloth ( CHARACTER* c, OBJECT* o, bool Translate, int Select )
+bool RenderHellasMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select )
 {
     return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  해당 맵에 속하는 몬스터들의 (메쉬) 효과 처리.
-//////////////////////////////////////////////////////////////////////////
-bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
+bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b )
 {
     bool    success = false;
     if ( o->Type==MODEL_MONSTER01+63 )
@@ -2225,7 +2017,7 @@ bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
         b->RenderMesh( 0, RENDER_METAL|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME );
         success = true;
     }
-    else if ( o->Type==MODEL_MONSTER01+64 )	// 진짜쿤둔
+    else if ( o->Type==MODEL_MONSTER01+64 )
     {
         if ( o->CurrentAction==MONSTER01_DIE && o->AnimationFrame > 14.8f && o->LifeTime == 90)
         {
@@ -2239,28 +2031,28 @@ bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
             
             vec3_t p, Position;
 			Vector(39.0f,-7.5f,-0.5,p);
-			b->TransformPosition(o->BoneTransform[4], p, Position, true);	// 투구
+			b->TransformPosition(o->BoneTransform[4], p, Position, true);
 			CreateEffect(MODEL_CUNDUN_PART8,Position,o->Angle,o->Light,3,o,-130,3);
 			Vector(24.0f,-7.5f,32.5f,p);
-			b->TransformPosition(o->BoneTransform[4], p, Position, true);	// 우 어깨
+			b->TransformPosition(o->BoneTransform[4], p, Position, true);
 			CreateEffect(MODEL_CUNDUN_PART1,Position,o->Angle,o->Light,3,o,-130,4);
 			Vector(24.0f,-8.5f,-32.5f,p);
-			b->TransformPosition(o->BoneTransform[4], p, Position, true);	// 좌 어깨
+			b->TransformPosition(o->BoneTransform[4], p, Position, true);
 			CreateEffect(MODEL_CUNDUN_PART2,Position,o->Angle,o->Light,3,o,-130,5);
 			Vector(-0.5f,4.0f,0.5f,p);
-			b->TransformPosition(o->BoneTransform[4], p, Position, true);	// 가슴
+			b->TransformPosition(o->BoneTransform[4], p, Position, true);
 			CreateEffect(MODEL_CUNDUN_PART3,Position,o->Angle,o->Light,2,o,-130,6);
 			Vector(-2.5f,-22.0f,54.0f,p);
-			b->TransformPosition(o->BoneTransform[4], p, Position, true);	// 왼팔
+			b->TransformPosition(o->BoneTransform[4], p, Position, true);
 			CreateEffect(MODEL_CUNDUN_PART4,Position,o->Angle,o->Light,3,o,-130,1);
 			Vector(-4.5f,-24.5f,-53,p);
-			b->TransformPosition(o->BoneTransform[4], p, Position, true);	// 오른팔
+			b->TransformPosition(o->BoneTransform[4], p, Position, true);
 			CreateEffect(MODEL_CUNDUN_PART5,Position,o->Angle,o->Light,3,o,-130,2);
 			Vector(-136.0f,-153.5f,0,p);
-			b->TransformPosition(o->BoneTransform[4], p, Position, true);	// 망또
+			b->TransformPosition(o->BoneTransform[4], p, Position, true);
 			CreateEffect(MODEL_CUNDUN_PART6,Position,o->Angle,o->Light,4,o,-10,2);
 			Vector(-135.0f,-153.0f,0.0f,p);
-			b->TransformPosition(o->BoneTransform[4], p, Position, true);	// 치마
+			b->TransformPosition(o->BoneTransform[4], p, Position, true);
 			CreateEffect(MODEL_CUNDUN_PART7,Position,o->Angle,o->Light,5,o,-130,2);
  
 			CreateEffect ( MODEL_CUNDUN_SKILL, o->Position, o->Angle, o->Light, 2 );
@@ -2327,7 +2119,7 @@ bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
         b->RenderBody(RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
         success = true;
     }
-    else if ( o->Type==MODEL_MONSTER01+65 )	// 랍스터
+    else if ( o->Type==MODEL_MONSTER01+65 )
     {
         if ( o->CurrentAction==MONSTER01_DIE )
         {
@@ -2341,7 +2133,7 @@ bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
         b->RenderMesh(0, RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
         success = true;
     }
-    else if ( o->Type==MODEL_MONSTER01+66 )	// 가오리
+    else if ( o->Type==MODEL_MONSTER01+66 )
     {
         if ( o->CurrentAction==MONSTER01_DIE )
         {
@@ -2391,15 +2183,13 @@ bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
         b->RenderMesh(0, RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
         b->RenderMesh(2, RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
-
-        //  마법, 물리 방어력 제거.
         if ( o->SubType==9 )
         {
             RenderDestroy_Def ( o, b );
         }
         success = true;
     }
-    else if ( o->Type==MODEL_MONSTER01+68 ) //  네크론.
+    else if ( o->Type==MODEL_MONSTER01+68 )
     {
         if ( o->CurrentAction==MONSTER01_DIE )
         {
@@ -2415,7 +2205,7 @@ bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
         b->RenderMesh(0, RENDER_CHROME|RENDER_BRIGHT, 0.8f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
         success = true;
     }
-    else if ( o->Type==MODEL_MONSTER01+69 )	// 쿤둔후보
+    else if ( o->Type==MODEL_MONSTER01+69 )
     {
         if ( o->CurrentAction==MONSTER01_DIE )
         {
@@ -2431,7 +2221,7 @@ bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
         b->RenderMesh(5, RENDER_TEXTURE,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
         float Luminosity = sinf(WorldTime*0.002f)*0.3f+0.7f;
-        if ( o->SubType==9 )    //  확장된 쿤둔의 잔영.
+        if ( o->SubType==9 )
         {
             o->BlendMeshLight = 0.5f;
 
@@ -2445,7 +2235,7 @@ bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
         b->RenderMesh(2, RENDER_WAVE|RENDER_BRIGHT,o->Alpha,2,o->BlendMeshLight ,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
         b->RenderMesh(4, RENDER_WAVE|RENDER_BRIGHT,o->Alpha,4,o->BlendMeshLight ,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
         
-        if ( o->SubType==9 )    //  확장된 쿤둔의 잔영.
+        if ( o->SubType==9 )
         {
             Vector ( 1.f, 1.f, 1.f, b->BodyLight);
             b->RenderMesh(0, RENDER_METAL|RENDER_BRIGHT,o->Alpha,-1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -2463,13 +2253,11 @@ bool    RenderHellasMonsterObjectMesh ( OBJECT* o, BMD* b )
         b->RenderMesh(6, RENDER_TEXTURE,o->Alpha,6,o->BlendMeshLight ,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
     	b->EndRender();
 
-        //  마법, 물리 방어력 제거.
         RenderDestroy_Def ( o, b );
         success = true;
     }
     if ( success )
     {
-        //  마법, 물리 방어력 최고.
 		if( g_isCharacterBuff(o, eBuff_PhysDefense) || g_isCharacterBuff(o, eBuff_Defense) )
         {
             float Luminosity = sinf( WorldTime*0.001f )*0.2f+0.5f;

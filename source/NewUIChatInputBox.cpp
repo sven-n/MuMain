@@ -733,11 +733,7 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
 
 	SIZE Fontsize;
 	g_pRenderText->SetFont(g_hFont);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, unicode::_strlen(strTooltip), &Fontsize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strTooltip, unicode::_strlen(strTooltip), &Fontsize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 	Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
 	Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);

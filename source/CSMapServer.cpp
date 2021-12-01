@@ -64,7 +64,7 @@ void CSMServer::GetServerAddress ( char* szAddress )
     }
 }
 
-void CSMServer::ConnectChangeMapServer ( MServerInfo sInfo )
+void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
 {
     SetServerInfo ( sInfo );
 
@@ -79,9 +79,6 @@ void CSMServer::ConnectChangeMapServer ( MServerInfo sInfo )
         if ( CreateSocket( m_vServerInfo.m_szMapSvrIpAddress, m_vServerInfo.m_wMapSvrPort ) )
         {
             g_bGameServerConnected = TRUE;
-#ifdef USE_SELFCHECKCODE
-            g_byNextFuncCrcCheck = 1;
-#endif
         }
     }
 }

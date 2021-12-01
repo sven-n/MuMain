@@ -1,5 +1,4 @@
 // NewUIButton.h: interface for the CNewUIButton class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIBUTTON_H__7DC4490D_D859_4159_9EE5_FBC4ECDE209A__INCLUDED_)
@@ -9,14 +8,11 @@
 
 namespace SEASON3B
 {
-	enum BUTTON_STATE	//. 다른거랑 이름 똑같아서 조낸 곂침: 이름 바꾸거나 맴버로 넣으셈
+	enum BUTTON_STATE
 	{
 		BUTTON_STATE_UP = 0,
 		BUTTON_STATE_DOWN,
 		BUTTON_STATE_OVER,
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		BUTTON_STATE_LOCK,
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 	};
 
 	enum RADIOGROUPEVENT
@@ -29,11 +25,6 @@ namespace SEASON3B
 		int s_ImgIndex;
 		int s_BTstate;
 		unsigned int s_imgColor;
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		unsigned int s_FontColor;
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-
-		
 		ButtonInfo() : s_ImgIndex(0), s_BTstate(0), s_imgColor(0xffffffff) { }
 	};
 	
@@ -57,13 +48,8 @@ namespace SEASON3B
 		const BUTTON_STATE GetBTState();
 
 	public:
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		virtual void Lock();
-		virtual void UnLock();
-#else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 		void Lock();
 		void UnLock();
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 		bool IsLock();
 
 	public:
@@ -133,13 +119,8 @@ namespace SEASON3B
 		CNewUIButton();
 		virtual ~CNewUIButton();
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		void ChangeButtonImgState( bool imgregister, int imgindex, 
-								   bool overflg = false, bool bLockImage = false, bool bClickEffect = false );
-#else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		void ChangeButtonImgState( bool imgregister, int imgindex, 
-								   bool overflg = false, bool isimgwidth = false, bool bClickEffect = false );
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
+		void ChangeButtonImgState( bool imgregister, int imgindex,bool overflg = false, bool isimgwidth = false, bool bClickEffect = false );
+
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
 		void ChangeButtonImgState( bool imgregister, int imgindex, 
 								   bool overflg = false, bool isimgwidth = false );
@@ -157,11 +138,11 @@ namespace SEASON3B
 	public:
 		void ChangeImgColor( BUTTON_STATE eventstate, unsigned int color );
 		void ChangeText( unicode::t_string btname );
-		void SetFont( HFONT hFont );					// 추가 : Pruarin(07.09.03)
+		void SetFont( HFONT hFont );
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 		void ChangeButtonState( BUTTON_STATE eventstate, int iButtonState );
-		void MoveTextPos(int iX, int iY);		// 중앙기준으로 X,Y로 얼마나 옮길지를 계산
+		void MoveTextPos(int iX, int iY);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 		void ChangeTextBackColor( const DWORD bcolor );
@@ -171,18 +152,10 @@ namespace SEASON3B
 		void ChangeToolTipTextColor( const DWORD color );
 		void SetToolTipFont( HFONT hFont );
 
-#ifndef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE			// #ifndef
 		void ChangeImgWidth( bool isimgwidth );
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 		void ChangeImgIndex( int imgindex, int curimgstate = 0 );
-		void ChangeAlpha( unsigned char fAlpha, bool isfontalph = true ); // 0 ~ 255
-		void ChangeAlpha( float fAlpha, bool isfontalph = true ); // 0.0f ~ 1.0f
-
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		void Lock();
-		void UnLock();
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		
+		void ChangeAlpha( unsigned char fAlpha, bool isfontalph = true );
+		void ChangeAlpha( float fAlpha, bool isfontalph = true );
 	public:
 		bool UpdateMouseEvent();
 
@@ -204,8 +177,8 @@ namespace SEASON3B
 		unicode::t_string		m_Name;
 		unicode::t_string		m_TooltipText;
 
-		HFONT					m_hTextFont;			// 추가 : Pruarin(07.08.03)
-		HFONT					m_hToolTipFont;			// 추가 : Pruarin(07.08.03)
+		HFONT					m_hTextFont;
+		HFONT					m_hToolTipFont;
 		DWORD					m_NameColor;
 		DWORD					m_NameBackColor;
 		DWORD					m_TooltipTextColor;
@@ -218,26 +191,22 @@ namespace SEASON3B
 
 		unsigned int			m_CurImgColor;
 		bool					m_IsTopPos;
-#ifndef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE				// #ifndef
 		bool                    m_IsImgWidth;
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 		
 		unsigned char			m_fAlpha;
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-		bool					m_bClickEffect;				// 버튼 눌렸을때 버튼 이미지에따라 글자도 움직이는 효과
+		bool					m_bClickEffect;
 		int						m_iMoveTextPosX;
 		int						m_iMoveTextPosY;
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 	};
 
-#ifndef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE				// #ifndef
 	inline
 	void CNewUIButton::ChangeImgWidth( bool isimgwidth )
 	{
 		m_IsImgWidth = isimgwidth;
 	}
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 
 	inline
 	void CNewUIButton::ChangeText( unicode::t_string btname )
@@ -245,7 +214,6 @@ namespace SEASON3B
 		m_Name = btname;
 	}
 
-	// 추가 : Pruarin(07.09.03)
 	inline
 	void CNewUIButton::SetFont( HFONT hFont )
 	{
@@ -292,11 +260,7 @@ namespace SEASON3B
 
 	public:
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		void ChangeRadioButtonImgState(int imgindex, bool bMouseOnImage, bool bLockImage, bool bClickEffect);
-#else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 		void ChangeRadioButtonImgState(int imgindex, bool isDown = false, bool bClickEffect = false);
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
 		void ChangeRadioButtonImgState(int imgindex, bool isDown = false);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -313,10 +277,6 @@ namespace SEASON3B
 		void ChangeButtonState( int iImgIndex, BUTTON_STATE eventstate, int iButtonState );
 		void SetFont(HFONT hFont);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		void Lock();
-		void UnLock();
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 
 	public:
 		void RegisterButtonState(BUTTON_STATE eventstate, int imgindex, int btstate);
@@ -388,12 +348,7 @@ namespace SEASON3B
 
 	public:
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		void CreateRadioGroup( int radiocount, int imgindex, bool bFirstIndexBtnDown = true, 
-								bool bMouseOnImage = false, bool bLockImage = false, bool bClickEffect = false );
-#else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 		void CreateRadioGroup( int radiocount, int imgindex, bool bClickEffect = false );
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 		void ChangeRadioButtonInfo( bool iswidth, int x, int y, int sx, int sy, int iDistance = 1);
 		void MoveTextPos(int iX, int iY);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -402,19 +357,16 @@ namespace SEASON3B
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 		void ChangeRadioText(std::list<unicode::t_string>& textlist );
 		void ChangeFrame( int buttonIndex );
-		void LockButtonindex( int buttonIndex );					// 추가 : Pruarin(07.09.03)
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		void UnLockButtonIndex( int iButtonIndex );
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
+		void LockButtonindex( int buttonIndex );
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 		void SetFont( HFONT hFont, int iButtonIndex );
 		void SetFont( HFONT hFont );
-		void ChangeButtonState( BUTTON_STATE eventstate, int iButtonState );			// EventState에 따른 Radio버튼의 State를 모두 변경한다.
+		void ChangeButtonState( BUTTON_STATE eventstate, int iButtonState );
 		void ChangeButtonState( int iBtnIndex, int iImgIndex, 
-								BUTTON_STATE eventstate, int iButtonState);				// EventState에 따른 해당Index인 Radio버튼의 State를 변경한다. (이미지도 변경가능)
+								BUTTON_STATE eventstate, int iButtonState);
 		POINT GetPos(int iButtonIndex);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-		void SetFontIndex( int buttonIndex, HFONT hFont );			// 추가 : Pruarin(07.09.03)
+		void SetFontIndex( int buttonIndex, HFONT hFont );
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 	public:

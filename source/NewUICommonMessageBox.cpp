@@ -264,7 +264,6 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 	}
 #endif // KJH_MOD_COMMON_MSG_BOX_BTN_DISABLE_TEXT_COLOR
 
-	// 텍스트가 들어가 있는 경우
 	if(m_strText.size() > 0)
 	{
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -285,11 +284,7 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 #endif // KJH_MOD_COMMON_MSG_BOX_BTN_DISABLE_TEXT_COLOR
 		g_pRenderText->SetBgColor(0);
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &Fontsize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &Fontsize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		
 		Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
 		Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
@@ -310,11 +305,7 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 		SIZE TextSize;
 		size_t TextExtentWidth;
 		
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		
 		g_pRenderText->SetFont(g_hFont);
@@ -528,11 +519,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 	size_t TextExtentWidth;
 	int iLine = 0;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 #ifdef PBG_ADD_NAMETOPMSGBOX
 	if(TextExtentWidth <= (DWORD)_TextSize)
@@ -564,17 +551,10 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 			cur_offset += offset;
 
 			type_string strTemp(strRemainText, 0, cur_offset/* size */);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-#ifdef PBG_ADD_NAMETOPMSGBOX
+
 			if(TextExtentWidth > (DWORD)_TextSize && cur_offset != 0)
-#else //PBG_ADD_NAMETOPMSGBOX
-			if(TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
-#endif //PBG_ADD_NAMETOPMSGBOX
 			{
 				strCutText = type_string(strRemainText, 0, prev_offset/* size */);
 				strRemainText = type_string(strRemainText, prev_offset, strRemainText.size()-prev_offset/* size */);
@@ -586,18 +566,10 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 				m_MsgDataList.push_back(pMsg);
 				iLine++;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
-#ifdef PBG_ADD_NAMETOPMSGBOX
 				if(TextExtentWidth <= (DWORD)_TextSize)
-#else //PBG_ADD_NAMETOPMSGBOX
-				if(TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
-#endif //PBG_ADD_NAMETOPMSGBOX
 				{
 					MSGBOX_TEXTDATA* pMsg = new MSGBOX_TEXTDATA;
 					pMsg->strMsg = strRemainText;
@@ -638,16 +610,9 @@ bool SEASON3B::CNewUICommonMessageBox::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// 프레임 렌더링
 	RenderFrame();
-
-	// 텍스트 렌더링
 	RenderTexts();
-
-	// 버튼 렌더링
 	RenderButtons();
-	
 	DisableAlphaBlend();
 	return true;
 }
@@ -656,15 +621,12 @@ void SEASON3B::CNewUICommonMessageBox::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 	
-	// 메세지박스 중간부분(3줄이상)
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	if(m_MsgDataList.size() > 2)
 	{
@@ -676,7 +638,6 @@ void SEASON3B::CNewUICommonMessageBox::RenderFrame()
 		}
 	}
 
-	// 메세지박스 아랫부분
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }	
@@ -685,7 +646,6 @@ void SEASON3B::CNewUICommonMessageBox::RenderTexts()
 {
 	float x, y;
 
-	// 텍스트 부분
 	x = GetPos().x; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
 	type_vector_msgdata::iterator vi = m_MsgDataList.begin();
 	for(; vi != m_MsgDataList.end(); vi++)
@@ -705,11 +665,7 @@ void SEASON3B::CNewUICommonMessageBox::RenderTexts()
 		SIZE TextSize;
 		size_t TextExtentWidth, TextExtentHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 		TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -1137,7 +1093,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::Render3D()
 
 bool SEASON3B::CNewUI3DItemCommonMsgBox::IsVisible() const
 {
-	return true;	//. 지금은 Render3D()에만 영향줌
+	return true;
 }
 
 void SEASON3B::CNewUI3DItemCommonMsgBox::RenderFrame()

@@ -90,25 +90,14 @@ void CLoadData::OpenTexture(int Model,char *SubFolder, int Wrap, int Type,bool C
 			}
 			else
 			{
-#ifdef LDS_OPTIMIZE_FORLOADING
-				pBitmap = Bitmaps.FindTextureByName_Linear(pTexture->FileName);
-				if( pBitmap )
-				{
-					Bitmaps.LoadImage(pBitmap->BitmapIndex, pBitmap->FileName);
-					pModel->IndexTexture[i] = pBitmap->BitmapIndex;	
-				}
-				else
-#endif // LDS_OPTIMIZE_FORLOADING
-				{
-					char szErrorMsg[256] = {0, };
-					sprintf(szErrorMsg, "OpenTexture Failed: %s of %s", szFullPath, pModel->Name);
+				char szErrorMsg[256] = {0, };
+				sprintf(szErrorMsg, "OpenTexture Failed: %s of %s", szFullPath, pModel->Name);
 #ifdef FOR_WORK
-					PopUpErrorCheckMsgBox(szErrorMsg);
+				PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK
-					PopUpErrorCheckMsgBox(szErrorMsg, true);
+				PopUpErrorCheckMsgBox(szErrorMsg, true);
 #endif // FOR_WORK
-					break;
-				}
+				break;
 				
 			}
 		}

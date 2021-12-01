@@ -1,8 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Scene들을 처리하는 함수
-// 로딩화면, 접속화면, 케릭터 선택 화면, 게임 화면 등등
-//
-// *** 함수 레벨: 4
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -33,9 +29,6 @@
 #include "uicontrols.h"
 #include "GOBoid.h"
 #include "GMHellas.h"
-#ifdef NP_GAME_GUARD
-	#include "ExternalObject/Nprotect/npGameGuard.h"
-#endif // NP_GAME_GUARD
 #include "CSItemOption.h"
 #include "PvPSystem.h"
 #include "GMBattleCastle.h"
@@ -59,9 +52,6 @@
 	#include <dshow.h>
 	#include "MovieScene.h"
 #endif // MOVIE_DIRECTSHOW
-#ifdef ADD_MU_HOMEPAGE
-	#include "iexplorer.h"
-#endif //ADD_MU_HOMEPAGE
 #include "Event.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "MixMgr.h"
@@ -135,10 +125,6 @@ int  SceneFlag = WEBZEN_SCENE;
 
 int  MoveSceneFrame = 0;
 
-#ifdef _PVP_DYNAMIC_SERVER_TYPE
-BOOL g_bIsCurrentServerPvP = FALSE;
-#endif	// _PVP_DYNAMIC_SERVER_TYPE
-
 extern int g_iKeyPadEnable;
 
 
@@ -210,9 +196,9 @@ char    g_cMessageTextCurrNum   = 0;
 char    g_cMessageTextNum       = 0;
 int     g_iNumLineMessageBoxCustom;
 char    g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
-int     g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];// ok, cancel // 사용여부, x, y, width, height
+int     g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
 
-int     g_iCustomMessageBoxButton_Cancel[NUM_PAR_BUTTON_CMB];	// 마이너스 스탯 생성, 감소, 취소버튼에서 취소버튼으로 사용
+int     g_iCustomMessageBoxButton_Cancel[NUM_PAR_BUTTON_CMB];
 
 int		g_iCancelSkillTarget	= 0;
 
@@ -506,8 +492,7 @@ int SeparateTextIntoLines( const char *lpszText, char *lpszSeparated, int iMaxLi
 	{
 		iMbclen = _mbclen( ( unsigned char*)lpSeek);
 		if ( iMbclen + ( int)( lpSeek - lpLineStart) >= iLineSize)
-		{	// 꽉 찼다. 다음 줄로
-			// 최근 공백이 가까우면 공백까지
+		{
 			if ( lpSpace && ( int)( lpSeek - lpSpace) < min( 10, iLineSize / 2))
 			{
 				lpDst -= ( lpSeek - lpSpace - 1);
@@ -517,7 +502,7 @@ int SeparateTextIntoLines( const char *lpszText, char *lpszSeparated, int iMaxLi
 			lpLineStart = lpSeek;
 			*lpDst = '\0';
 			if ( iLine >= iMaxLine - 1)
-			{	// 모든 줄을 다 썼다.
+			{
 				break;
 			}
 			++iLine;
@@ -525,14 +510,12 @@ int SeparateTextIntoLines( const char *lpszText, char *lpszSeparated, int iMaxLi
 			lpSpace = NULL;
 		}
 
-		// 한 글자 복사
 		memcpy( lpDst, lpSeek, iMbclen);
 		if ( *lpSeek == ' ')
 		{
 			lpSpace = lpSeek;
 		}
 	}
-	// 끝
 	*lpDst = '\0';
 
 	return ( iLine + 1);
@@ -573,9 +556,6 @@ void SetViewPortLevel ( int Wheel )
 		    g_shCameraLevel = 0;
     }
 }
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
 void RenderInfomation3D()
 {
@@ -644,8 +624,6 @@ void RenderInfomation3D()
 		glPopMatrix();
 		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
-		
-		// 현재 카메라의 매트릭스를 가지고 MousePosition 업데이트
 		UpdateMousePositionn();
     }
 }
@@ -664,15 +642,12 @@ void RenderInfomation()
     RenderInfomation3D();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 거래 확인창.
-///////////////////////////////////////////////////////////////////////////////
 BOOL ShowCheckBox( int num, int index, int message )
 {
 	if ( message==MESSAGE_USE_STATE || message==MESSAGE_USE_STATE2)
     {
         char Name[50] = { 0, };
-        if ( TargetItem.Type==ITEM_HELPER+15 )//  서클. ( 에너지/체력/민첩/힘/통솔 )
+        if ( TargetItem.Type==ITEM_HELPER+15 )
         {
             switch ( (TargetItem.Level>>3)&15 )
             {
@@ -680,7 +655,7 @@ BOOL ShowCheckBox( int num, int index, int message )
             case 1:sprintf(Name,"%s", GlobalText[169] );break;
             case 2:sprintf(Name,"%s", GlobalText[167] );break;
             case 3:sprintf(Name,"%s", GlobalText[166] );break;
-			case 4:sprintf(Name,"%s", GlobalText[1900] );break;	// 통솔
+			case 4:sprintf(Name,"%s", GlobalText[1900] );break;
             }
         }
 
@@ -713,7 +688,6 @@ BOOL ShowCheckBox( int num, int index, int message )
 	    g_iNumLineMessageBoxCustom = 0;
         for ( int i=0; i<num; ++i )
         {
-	        // 1. 텍스트 초기화
 	        g_iNumLineMessageBoxCustom += SeparateTextIntoLines( GlobalText[index+i], g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], NUM_LINE_CMB, MAX_LENGTH_CMB);
         }
     }
@@ -803,10 +777,6 @@ BOOL ShowCheckBox( int num, int index, int message )
 
 	return true;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 계정 입력과 케릭터 선택 화면에서의 자동으로 카메라 움직여주는 함수
-///////////////////////////////////////////////////////////////////////////////
 
 int    CameraWalkCut;
 int    CurrentCameraCount    = -1;
@@ -944,7 +914,6 @@ void StartGame(
 	else
 #endif //PJH_CHARACTER_RENAME
 	{
-		// 캐릭터 블럭이 아닐때만 접속 가능
 		if (CTLCODE_01BLOCKCHAR & CharactersClient[SelectedHero].CtlCode)
 			CUIMng::Instance().PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);
 		else
@@ -966,8 +935,8 @@ void CreateCharacterScene()
 	g_pNewUIMng->ResetActiveUIObj();
 
 	EnableMainRender = true;
-	MouseOnWindow = false;	// ESC 키 눌렀을때 종료 옵션 메뉴 초기화 
-	ErrorMessage = NULL;	// ESC 키 눌렀을때 종료 옵션 메뉴 초기화 
+	MouseOnWindow = false;
+	ErrorMessage = NULL;
 
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 	gMapManager.WorldActive = WD_74NEW_CHARACTER_SCENE;
@@ -982,9 +951,8 @@ void CreateCharacterScene()
 	CharacterView.Class = 1;
 	CharacterView.Object.Kind = 0;
 
-	//초기화
 	SelectedHero = -1;
-	CUIMng::Instance().CreateCharacterScene();	// 캐릭터 선택 씬 UI 생성.
+	CUIMng::Instance().CreateCharacterScene();
 
     ClearInventory();
     CharacterAttribute->SkillNumber = 0;
@@ -1524,33 +1492,17 @@ bool NewRenderLogInScene(HDC hDC)
 	g_pRenderText->SetBgColor(0, 0, 0, 128);
 	
 	strcpy(Text,GlobalText[454]);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text,lstrlen(Text),&Size);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), Text,lstrlen(Text),&Size);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pRenderText->RenderText(335-Size.cx*640/WindowWidth,480-Size.cy*640/WindowWidth-1,Text);
 
 	strcpy(Text,GlobalText[455]);
 	
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text,lstrlen(Text),&Size);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), Text,lstrlen(Text),&Size);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pRenderText->RenderText(335,480-Size.cy*640/WindowWidth-1,Text);
 
-#ifdef PBG_MOD_BLUEVERLOGO
-	sprintf(Text,"Blue Ver %s",m_ExeVersion);
-#else //PBG_MOD_BLUEVERLOGO
 	sprintf(Text,GlobalText[456],m_ExeVersion);
-#endif //PBG_MOD_BLUEVERLOGO
 	
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text,lstrlen(Text),&Size);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), Text,lstrlen(Text),&Size);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pRenderText->RenderText(0, 480-Size.cy*640/WindowWidth-1,Text);
 
     RenderInfomation();
@@ -1589,11 +1541,6 @@ void RenderInterfaceEdge()
 	RenderBitmap(BITMAP_LOG_IN+3,(float)WindowX,(float)WindowY,(float)Width,(float)Height,0.f,0.f,Width/256.f,Height/128.f);
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 로딩 화면
-///////////////////////////////////////////////////////////////////////////////
-
 void LoadingScene(HDC hDC)
 {
 	g_ConsoleDebug->Write(MCD_NORMAL, "LoadingScene_Start");
@@ -1610,7 +1557,6 @@ void LoadingScene(HDC hDC)
 
 		InitLoading = true;
 		
-		// 텍스처 로드.
 		LoadBitmap("Interface\\LSBg01.JPG", BITMAP_TITLE, GL_LINEAR);
 		LoadBitmap("Interface\\LSBg02.JPG", BITMAP_TITLE+1, GL_LINEAR);
 		LoadBitmap("Interface\\LSBg03.JPG", BITMAP_TITLE+2, GL_LINEAR);
@@ -1624,11 +1570,7 @@ void LoadingScene(HDC hDC)
 
     FogEnable = false;
 	::BeginOpengl();
-#ifdef USE_SHADOWVOLUME
-	::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-#else
 	::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#endif
 	::BeginBitmap();
 
 	rUIMng.m_pLoadingScene->Render();
@@ -1646,10 +1588,6 @@ void LoadingScene(HDC hDC)
 
 	::ClearInput();
 
-#ifdef ACC_PACKETSIZE
-	g_dwPacketInitialTick = ::GetTickCount();
-#endif
-
 	g_ConsoleDebug->Write(MCD_NORMAL, "LoadingScene_End");
 }
 
@@ -1659,12 +1597,6 @@ float CameraDistance = CameraDistanceTarget;
 bool MoveMainCamera()
 {
     bool bLockCamera = false;
-
-#ifdef DO_PROCESS_DEBUGCAMERA
-	CameraAngle[0] = fmod( CameraAngle[0], 360.0f );
-	CameraAngle[1] = fmod( CameraAngle[1], 360.0f );
-	CameraAngle[2] = fmod( CameraAngle[2], 360.0f );
-#endif // DO_PROCESS_DEBUGCAMERA
 
 	if (
 #ifdef PJH_NEW_SERVER_SELECT_MAP
@@ -1767,36 +1699,6 @@ bool MoveMainCamera()
 		CameraPosition[1] = Hero->Object.Position[1];
 		CameraPosition[2] = CameraViewFar;
 	}
-    else if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
-    {
-        vec3_t Position,TransformPosition, Pos;
-		float Matrix[3][4];
-
-        if ( FindText( Hero->ID, "webzen" ) )
-        {
-    		Pos[0] = 54*TERRAIN_SCALE;
-    		Pos[1] = 160*TERRAIN_SCALE;
-            CameraAngle[2] = -40.f;
-        }
-        else
-        {
-		    Pos[0] = 57*TERRAIN_SCALE;
-		    Pos[1] = 163*TERRAIN_SCALE;
-            CameraAngle[2] = -140.f;
-        }
-		Pos[2] = 200.f;
-        CameraViewFar = 5000.f;
-
-		Vector(0.f,-CameraDistance,0.f,Position);//-750
-		AngleMatrix(CameraAngle,Matrix);
-		VectorIRotate(Position,Matrix,TransformPosition);
-
-        VectorAdd(Pos,TransformPosition,CameraPosition);
-
-        CameraPosition[2] = Pos[2];
-		CameraPosition[2] += 800.f;
-		CameraAngle[0] = -70.f;
-    }
 	else
 	{
 		int iIndex = TERRAIN_INDEX((Hero->PositionX),(Hero->PositionY));
@@ -1827,10 +1729,6 @@ bool MoveMainCamera()
 #endif //PBG_ADD_PKFIELD
         else
         {
-        #ifdef CAMERA_TEST_FPS
-            CameraViewFar = 2000.f;
-            CameraDistance = 500.f;
-        #else
             switch ( g_shCameraLevel )
             {
             case 0:
@@ -1860,7 +1758,6 @@ bool MoveMainCamera()
 			case 5:
             case 4: CameraViewFar = 3200.f; break;
             }
-        #endif
         }
 
 		Vector(0.f,-CameraDistance,0.f,Position);//-750
@@ -1903,11 +1800,6 @@ bool MoveMainCamera()
 
 		VectorAdd ( Position,TransformPosition,CameraPosition);
 
-#ifdef CAMERA_TEST_FPS
-        CameraPosition[2] = Hero->Object.Position[2];//700
-		CameraPosition[2] += 200;//700
-		CameraAngle[0] = -80.f;
-#else
         if ( gMapManager.InBattleCastle()==true )
         {
             CameraPosition[2] = 255.f;//700
@@ -1935,7 +1827,7 @@ bool MoveMainCamera()
 			CameraAngle[1] = 0.0f;
 			CameraAngle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
 		}
-		else if(SceneFlag == CHARACTER_SCENE) // 이혁재 - 케릭터 씬 일때 카메라 위치 세팅
+		else if(SceneFlag == CHARACTER_SCENE)
 		{
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 			CameraAngle[0] = -84.5f;
@@ -1954,11 +1846,12 @@ bool MoveMainCamera()
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		}
 		else
+		{
 			CameraAngle[0] = -48.5f;
-#endif
+		}
+
 		CameraAngle[0] += EarthQuake;
 
-        //  카메라 속성.
         if ( ( TerrainWall[iIndex]&TW_CAMERA_UP )==TW_CAMERA_UP )
         {
             if ( g_fCameraCustomDistance<=CUSTOM_CAMERA_DISTANCE1 )
@@ -1996,13 +1889,7 @@ bool MoveMainCamera()
 		CameraAngle[0] += sinf(WorldTime*0.0005f)*2.f;
 		CameraAngle[1] += sinf(WorldTime*0.0008f)*2.5f;
 	}
-    else if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
-    {
-        CameraDistanceTarget = 3200.f;
-        CameraDistance = CameraDistanceTarget;
-    }
-    else
-	if (CCameraMove::GetInstancePtr()->IsTourMode())
+    else if (CCameraMove::GetInstancePtr()->IsTourMode())
 	{
 		CameraDistanceTarget = 1100.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel() * 0.1f;
 		CameraDistance = CameraDistanceTarget;
@@ -2206,23 +2093,10 @@ bool RenderMainScene()
     FogEnable = false;
 
     vec3_t pos;
+
     if(MoveMainCamera() == true)
     {
         VectorCopy ( Hero->Object.StartPosition, pos );
-    }
-    else if(gMapManager.WorldActive==WD_6STADIUM && (FindText(Hero->ID, "webzen") || FindText(Hero->ID, "webzen2")))
-    {
-        if(FindText(Hero->ID, "webzen"))
-        {
-            pos[0] = 64*TERRAIN_SCALE;
-            pos[1] = 154*TERRAIN_SCALE;
-        }
-        else
-        {
-            pos[0] = 63*TERRAIN_SCALE;
-            pos[1] = 168*TERRAIN_SCALE;
-        }
-        pos[2] = Hero->Object.Position[2];
     }
     else
     {
@@ -2281,14 +2155,6 @@ bool RenderMainScene()
 	BeginOpengl(0,0,Width,Height);
 
 	CreateFrustrum((float)Width/(float)640, pos);
-#ifdef DYNAMIC_FRUSTRUM
-	ResetAllFrustrum();
-#endif //DYNAMIC_FRUSTRUM
-
-#ifdef DO_PROCESS_DEBUGCAMERA
-	// 게임 카메라 Frustum 구성된 이후에 디버깅용 카메라로 Camera View Transform 구성하도록 한다.
-	ProcessDebugCamera();	
-#endif // DO_PROCESS_DEBUGCAMERA
 
     if ( gMapManager.InBattleCastle() )
     {
@@ -2322,8 +2188,9 @@ bool RenderMainScene()
             RenderTerrain(false);
         }
     }
-		if(!gMapManager.IsPKField()	&& !IsDoppelGanger2())
-			RenderObjects();
+
+	if(!gMapManager.IsPKField()	&& !IsDoppelGanger2())
+		RenderObjects();
 
 	RenderEffectShadows();
    	RenderBoids(); 
@@ -2550,17 +2417,12 @@ void MainScene(HDC hDC)
 		g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 	}
 
-#ifdef CAMERA_TEST_FPS
-    glClearColor(0.5f,0.5f,0.5f,1.f);
-#else
-
     if( gMapManager.WorldActive==WD_10HEAVEN )
     {
         glClearColor(3.f/256.f,25.f/256.f,44.f/256.f,1.f);
     }
 #ifdef PJH_NEW_SERVER_SELECT_MAP
-	else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
-		|| gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
+	else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE|| gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
     {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
     }
@@ -2587,7 +2449,7 @@ void MainScene(HDC hDC)
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		)
 	{
-		glClearColor(178.f/256.f,178.f/256.f,178.f/256.f,1.f);	// 배경색 회색으로
+		glClearColor(178.f/256.f,178.f/256.f,178.f/256.f,1.f);
 	}
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 	else if(World == WD_78NEW_CHARACTER_SCENE)
@@ -2598,14 +2460,13 @@ void MainScene(HDC hDC)
 #ifdef YDG_ADD_MAP_DOPPELGANGER1
 	else if(gMapManager.WorldActive == WD_65DOPPLEGANGER1)
 	{
-		glClearColor(148.f/256.f,179.f/256.f,223.f/256.f,1.f);	// 배경색 하늘색으로
+		glClearColor(148.f/256.f,179.f/256.f,223.f/256.f,1.f);
 	}
 #endif	// YDG_ADD_MAP_DOPPELGANGER1
     else
     {
         glClearColor(0/256.f,0/256.f,0/256.f,1.f);
     }
-#endif
 		
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -2658,13 +2519,9 @@ void MainScene(HDC hDC)
 #if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 	BeginBitmap();
 	unicode::t_char szDebugText[128];
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-	unicode::_sprintf(szDebugText, "FPS : %.1f/%.1f", FPS, g_fFrameEstimate);
-#else // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-	unicode::_sprintf(szDebugText, "FPS : %.1f", FPS);
+	unicode::_sprintf(szDebugText, "FPS : %.1f Connected: %d", FPS,g_bGameServerConnected);
 	unicode::t_char szMousePos[128];
 	unicode::_sprintf(szMousePos, "MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0, 0, 0, 100);
 	g_pRenderText->SetTextColor(255, 255, 255, 200);
@@ -2781,7 +2638,7 @@ void MainScene(HDC hDC)
 			PlayBuffer(SOUND_KARUTAN_DESERT_ENV, NULL, true);
 			break;
 		case WD_81KARUTAN2:
-			if (HeroTile == 12)	// 투명타일 위에서
+			if (HeroTile == 12)
 			{
 				StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
 				PlayBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, NULL, true);

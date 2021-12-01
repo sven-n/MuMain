@@ -736,7 +736,7 @@ namespace olc
 			// ...but needs a thread of its own to execute its work commands
 			std::thread thrContext;
 			// The client has a single instance of a "connection" object, which handles data transfer
-			std::unique_ptr<connection<T>> m_connection;
+			std::unique_ptr<connection<T>> m_connection = NULL;
 
 		private:
 			// This is the thread safe queue of incoming messages from server

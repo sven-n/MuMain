@@ -4154,7 +4154,7 @@ void MoveParticles()
 			vec3_t Position;
 			vec3_t TargetPosition;
 			vec3_t Light;
-			float Luminosity;
+			float Luminosity = 0.0f;
 			float Height;
 			float Matrix[3][4];
 
@@ -9304,7 +9304,7 @@ void MoveParticles()
 					
 					VectorAdd( o->Position, vForceVec, o->Position );				
 					o->Scale = o->Scale + SCALEFACTOR; 
-										o->Light[0] = o->Light[0] / LIGHTDIVIDEDFACTOR;
+					o->Light[0] = o->Light[0] / LIGHTDIVIDEDFACTOR;
 					o->Light[1] = o->Light[1] / LIGHTDIVIDEDFACTOR;
 					o->Light[2] = o->Light[2] / LIGHTDIVIDEDFACTOR;
 					//o->Alpha	= o->Alpha / LIGHTDIVIDEDFACTOR;

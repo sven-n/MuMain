@@ -179,58 +179,6 @@ bool CmuConsoleDebug::CheckCommand(const std::string& strCommand)
 		std::cout << "color test: white" << std::endl;
 		return true;
 	}
-#ifdef CSK_HACK_TEST
-	else
-	{
-		char* pToken = NULL;
-		char seps[] = " ";
-		char str[256];
-		strcpy(str, strCommand.c_str());
-		pToken = strtok(str, seps);
-
-		if(strcmp(pToken, "pos") == 0)
-		{
-			pToken = strtok(NULL, seps);
-			int x = atoi(pToken);
-			pToken = strtok(NULL, seps);
-			int y = atoi(pToken);
-			
-			g_pHackTest->MovePos(x, y);
-		}
-		else if(strcmp(pToken, "movemon") == 0)
-		{
-			g_pHackTest->MoveMonster();
-		}
-		else if(strcmp(pToken, "start1") == 0)
-		{
-			g_pHackTest->StartAuto(CHackTest::HACK_AUTOATTACK);
-		}
-		else if(strcmp(pToken, "start2") == 0)
-		{
-			g_pHackTest->StartAuto(CHackTest::HACK_PILLAR_OF_FIRE);
-		}
-		else if(strcmp(pToken, "start3") == 0)
-		{
-			g_pHackTest->StartAuto(CHackTest::HACK_EVILSPIRIT);
-		}
-		else if(strcmp(pToken, "start4") == 0)
-		{
-			g_pHackTest->StartAuto(CHackTest::HACK_DABAL);
-		}
-		else if(strcmp(pToken, "end") == 0)
-		{	
-			g_pHackTest->EndAuto();
-		}
-		else if(strcmp(pToken, "startskill") == 0)
-		{
-			g_pHackTest->StartSkill();
-		}
-		else if(strcmp(pToken, "endskill") == 0)
-		{
-			g_pHackTest->EndSkill();
-		}
-	}
-#endif // CSK_HACK_TEST
 #endif
 	return false;
 }

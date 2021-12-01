@@ -884,7 +884,6 @@ void CalcFPS()
 	FPS = (float)rv;
 	last = current;
 
-    //  매 프레임마다 스킬 딜레이를 계산한다.
     if ( SceneFlag==MAIN_SCENE )
     {
         gSkillManager.CalcSkillDelay ( difTime );

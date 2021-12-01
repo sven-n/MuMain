@@ -277,8 +277,7 @@ bool Calc_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
 	if(o->Owner != NULL)
 	{
-		if(g_isCharacterBuff(o->Owner, eDeBuff_Stun)
-			|| g_isCharacterBuff(o->Owner, eDeBuff_Sleep) )	
+		if(g_isCharacterBuff(o->Owner, eDeBuff_Stun) || g_isCharacterBuff(o->Owner, eDeBuff_Sleep) )	
 		{
 			o->AnimationFrame = 0.f;
 		}
@@ -1023,44 +1022,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				}
             }
         }
-#ifdef DARK_WOLF
-        else if ( o->Type==MODEL_DARK_WOLF )
-        {
-            glColor3f ( 1.f, 1.f, 1.f );
-            b->BeginRender(o->Alpha);
-            b->RenderMesh ( 0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
-            if ( o->WeaponLevel>=40 )
-            {
-            }
-            else if ( o->WeaponLevel>=20 )
-            {
-            }
-            else
-            {
-            }
-            b->EndRender();
-
-            if ( World!=WD_10HEAVEN && gMapManager.InHellas()==false )
-            {
-                vec3_t Position;
-			    EnableAlphaTest();
-
-                if ( World==WD_7ATLANSE )
-                {
-			        glColor4f(0.f,0.f,0.f,0.2f);
-                }
-                else
-                {
-			        glColor4f(0.f,0.f,0.f,1.f);
-                }
-			    VectorCopy(o->Position,Position);
-			    Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1]);
-			    VectorCopy(Position,b->BodyOrigin);
-			    b->RenderBodyShadow();
-            }
-        }
-#endif// DARK_WOLF	
-		else if(gMapManager.WorldActive==WD_0LORENCIA && o->Type==MODEL_WATERSPOUT)//분수대
+		else if(gMapManager.WorldActive==WD_0LORENCIA && o->Type==MODEL_WATERSPOUT)
 		{
 			b->BeginRender(o->Alpha);
 			b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight);
@@ -1590,14 +1552,11 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
       			b->RenderBody ( RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh, BITMAP_MAGIC_EMBLEM );
 		        Vector ( 1.f, 1.f, 1.f, b->BodyLight );
             }
-
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			else if(o->Type == MODEL_MULTI_SHOT1||o->Type == MODEL_MULTI_SHOT2||o->Type == MODEL_MULTI_SHOT3)
 			{
 				VectorCopy(o->Light, b->BodyLight);
 				b->RenderBody ( RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 			}
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 #ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 			else if(o->Type == MODEL_DESAIR)
 			{
@@ -2153,27 +2112,21 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 							vec3_t vPos, Position;
 							Vector(o->Position[0], o->Position[1], o->Position[2] + 250, vPos);
 							
-							// 스파크
 							vec3_t vLight;
 							Vector(0.7f, 0.3f, 0.0f, vLight);
 							for( int i=0 ; i<30 ; i++)
 							{
-								// 퍼지는거
 								CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 27 );
 							}				
 
 							for( int i=0 ; i<20 ; i++ )
 							{
-								// 퍼져서 떨어지는거
 								CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 28 );
 							}
 							
-							// 번쩍
 							Vector(vPos[0]+(rand()%100-50), vPos[1]+(rand()%100-50),
 								vPos[2], Position);
 							CreateSprite(BITMAP_DS_SHOCK, Position, rand()%10*0.1f+1.5f, o->Light, o);
-
-							// 별
 
 							for(int i=0 ; i<60 ; i++ )
 							{
@@ -2214,7 +2167,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
 						CreateSprite(BITMAP_LIGHT,vPosition,5.5f,vLight,o);
 
-						// 진동
 						if (o->WeaponLevel == 0)
 						{
 							o->WeaponLevel = 1;
@@ -2367,12 +2319,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 						Vector((rand()%10-5)*1.0f, (rand()%10-5)*1.0f, (rand()%10-5)*1.0f, vRelative);
 						b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
 					}
-// 					if (rand()%10==0)	// 연기
-// 					{
-// 						Vector(1.0f, 1.0f, 1.0f, vLight);
-// 						CreateParticle(BITMAP_SMOKE,vPos,o->Angle,vLight,5,fScale*0.5f, o );
-// 					}
-					// 리얼한 불 만들기!!
  					switch(rand()%3)
 					{
 					case 0:
@@ -2397,14 +2343,11 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			{
 				vec3_t vRelativePos, vWorldPos, Light;
 				Vector(0.f, 0.f, 0.f, vRelativePos);
-
-				//파이프 연기
 				Vector(0.8f, 0.8f, 0.8f, Light);
 				b->TransformPosition(o->BoneTransform[41], vRelativePos, vWorldPos, true);
 				CreateParticle(BITMAP_SMOKELINE1+rand()%3,vWorldPos,o->Angle,Light,1,0.6f,o);
 				CreateParticle(BITMAP_CLUD64,vWorldPos,o->Angle,Light,6,0.6f,o);
  
-				//머리 조명
 				Vector(0.5f, 0.5f, 0.5f, Light);
 				b->TransformPosition(o->BoneTransform[55], vRelativePos, vWorldPos, true);
 				CreateSprite(BITMAP_LIGHT, vWorldPos, 2.0f, Light, o);
@@ -2826,17 +2769,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			}
 		}
 	}
-
-#ifdef USE_SHADOWVOLUME
-	if ( World != WD_10HEAVEN)
-	{
-		//케릭터
-		CShadowVolume *pShadowVolume = new CShadowVolume;
-		pShadowVolume->Create( VertexTransform, b, o);
-		InsertShadowVolume( pShadowVolume);
-	}
-#endif
-
 }
 
 void RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
@@ -2935,6 +2867,7 @@ void RenderObjectVisual(OBJECT *o)
 	float Scale;
 	float Rotation;
 	Vector ( 0.f, 0.f, 0.f, p );
+
 	switch ( gMapManager.WorldActive )
 	{
 	case WD_0LORENCIA:

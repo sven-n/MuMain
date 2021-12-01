@@ -124,16 +124,11 @@ namespace SEASON3B
 		int					m_TargetIndex;
 		int					m_SourceIndex;
 		bool				m_EnablePersonalShop;
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 		bool				m_bIsEnableInputValueTextBox;
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 
 		CNewUIButton*			m_Button;
 		CUITextInputBox*        m_EditBox;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		const int MAX_SHOPTITLE_UTF16;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
 	};
 
 	inline

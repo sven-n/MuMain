@@ -63,14 +63,12 @@ void CNewUIDuelWatchUserListWindow::SetPos(int x, int y)
 
 bool CNewUIDuelWatchUserListWindow::UpdateMouseEvent()
 {
-	// 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
 
 	POINT ptSize = { 57, 17 };
 	POINT ptOrigin = { m_Pos.x, m_Pos.y - (ptSize.y + 1) * g_DuelMgr.GetDuelWatchUserCount() };
 
-	// 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(ptOrigin.x, ptOrigin.y, ptSize.x, (ptSize.y + 1) * g_DuelMgr.GetDuelWatchUserCount() + 10))
 		return false;
 
@@ -104,12 +102,9 @@ bool CNewUIDuelWatchUserListWindow::Render()
 #ifdef LJH_FIX_CHANING_FONT_FOR_DUAL_WATCHUSER_NAME
 	g_pRenderText->SetFont(g_hFontBold);
 #endif //LJH_FIX_CHANING_FONT_FOR_DUAL_WATCHUSER_NAME
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), "Q", 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), "Q", 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	float fFontHeight = TextSize.cy / g_fScreenRate_y;;		// 현재 해상도 기준으로 사용
+	float fFontHeight = TextSize.cy / g_fScreenRate_y;
 
 	POINT ptSize = { 57, 17 };
 	POINT ptOrigin = { m_Pos.x, m_Pos.y - (ptSize.y + 1) * g_DuelMgr.GetDuelWatchUserCount() + (ptSize.y - fFontHeight) / 2 + 1 };

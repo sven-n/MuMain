@@ -157,20 +157,19 @@ void CMapManager::Load() // OK
         break;
     case WD_10HEAVEN:
 		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP_TO_EDGE);
-        //  구름.
 		gLoadData.AccessModel(MODEL_CLOUD,"Data\\Object11\\","cloud");
 		gLoadData.OpenTexture(MODEL_CLOUD,"Object11\\");
-        //  번쩍이는 광원.
+
 		LoadBitmap("Effect\\cloudLight.jpg" ,BITMAP_CLOUD+1, GL_LINEAR, GL_CLAMP_TO_EDGE);
         break;
 
-    case WD_11BLOODCASTLE1:     //  블러드 1캐슬.
-    case WD_11BLOODCASTLE1+1:   //  블러드 2캐슬.
-    case WD_11BLOODCASTLE1+2:   //  블러드 3캐슬.
-    case WD_11BLOODCASTLE1+3:   //  블러드 4캐슬.
-    case WD_11BLOODCASTLE1+4:   //  블러드 5캐슬.
-    case WD_11BLOODCASTLE1+5:   //  블러드 6캐슬.
-    case WD_11BLOODCASTLE1+6:   //  블러드 7캐슬.
+    case WD_11BLOODCASTLE1:
+    case WD_11BLOODCASTLE1+1:
+    case WD_11BLOODCASTLE1+2:
+    case WD_11BLOODCASTLE1+3:
+    case WD_11BLOODCASTLE1+4:
+    case WD_11BLOODCASTLE1+5:
+    case WD_11BLOODCASTLE1+6:
 	case WD_52BLOODCASTLE_MASTER_LEVEL:
         {
 		    gLoadData.AccessModel ( MODEL_CROW, "Data\\Object12\\", "Crow", 1 );
@@ -180,8 +179,6 @@ void CMapManager::Load() // OK
                 gLoadData.OpenTexture ( MODEL_GATE+i, "Monster\\" );
 			
 			LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP_TO_EDGE);
-
-            //  효과음.
 		    LoadWaveFile ( SOUND_BLOODCASTLE, "Data\\Sound\\iBloodCastle.wav" , 1 );
         }
         break;
@@ -202,7 +199,7 @@ void CMapManager::Load() // OK
 			LoadBitmap("Effect\\Impack03.jpg"			, BITMAP_EXT_LOG_IN+2);
 			LoadBitmap("Logo\\chasellight.jpg"		, BITMAP_EFFECT);
 
-			LoadWaveFile ( SOUND_CRY1ST_AMBIENT,    "Data\\Sound\\w35\\crywolf_ambi.wav", 1, true );      //  배경 효과음
+			LoadWaveFile ( SOUND_CRY1ST_AMBIENT,    "Data\\Sound\\w35\\crywolf_ambi.wav", 1, true );
 			LoadWaveFile ( SOUND_CRY1ST_WWOLF_MOVE1,             "Data\\Sound\\w35\\ww_idle1.wav", 1 );
 			LoadWaveFile ( SOUND_CRY1ST_WWOLF_MOVE2,             "Data\\Sound\\w35\\ww_idle2.wav", 1 );
 			LoadWaveFile ( SOUND_CRY1ST_WWOLF_ATTACK1,           "Data\\Sound\\w35\\ww_attack1.wav", 1 );
@@ -262,36 +259,36 @@ void CMapManager::Load() // OK
     case WD_30BATTLECASTLE :
 		LoadBitmap( "Effect\\Map_Smoke1.jpg" ,BITMAP_CHROME+2, GL_LINEAR, GL_REPEAT );
 		LoadBitmap( "Effect\\Map_Smoke2.tga" ,BITMAP_CHROME+3, GL_LINEAR, GL_REPEAT );
-		LoadBitmap( "World31\\Map1.jpg" ,BITMAP_INTERFACE_MAP+1, GL_LINEAR, GL_CLAMP_TO_EDGE );    //  공성전 지도.
-		LoadBitmap( "World31\\Map2.jpg" ,BITMAP_INTERFACE_MAP+2, GL_LINEAR, GL_CLAMP_TO_EDGE );    //  공성전 지도.
+		LoadBitmap( "World31\\Map1.jpg" ,BITMAP_INTERFACE_MAP+1, GL_LINEAR, GL_CLAMP_TO_EDGE );
+		LoadBitmap( "World31\\Map2.jpg" ,BITMAP_INTERFACE_MAP+2, GL_LINEAR, GL_CLAMP_TO_EDGE );
 
-        LoadWaveFile ( SOUND_BC_AMBIENT        ,   "Data\\Sound\\BattleCastle\\aSiegeAmbi.wav", 1, true );      //  배경 효과음 ( 비공성 ).
-        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE1,   "Data\\Sound\\BattleCastle\\RanAmbi1.wav", 1, true );        //  배경 효과음 ( 공성 ).  
-        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE2,   "Data\\Sound\\BattleCastle\\RanAmbi2.wav", 1, true );        //  배경 효과음 ( 공성 ).  
-        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE3,   "Data\\Sound\\BattleCastle\\RanAmbi3.wav", 1, true );        //  배경 효과음 ( 공성 ).  
-        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE4,   "Data\\Sound\\BattleCastle\\RanAmbi4.wav", 1, true );        //  배경 효과음 ( 공성 ).  
-        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE5,   "Data\\Sound\\BattleCastle\\RanAmbi5.wav", 1, true );        //  배경 효과음 ( 공성 ).  
-        LoadWaveFile ( SOUND_BC_GUARD_STONE_DIS,   "Data\\Sound\\BattleCastle\\oGuardStoneDis.wav", 1, true );  //  수호석상 파괴.         
-        LoadWaveFile ( SOUND_BC_SHIELD_SPACE_DIS,  "Data\\Sound\\BattleCastle\\oProtectionDis.wav", 1, true );  //  방어막 파괴.           
-        LoadWaveFile ( SOUND_BC_CATAPULT_ATTACK,   "Data\\Sound\\BattleCastle\\oSWFire.wav", 1, true  );         //  공성무기 발사.         
-        LoadWaveFile ( SOUND_BC_CATAPULT_HIT   ,   "Data\\Sound\\BattleCastle\\oSWHitG.wav", MAX_CHANNEL, true );//  공성무기 폭발.
-        LoadWaveFile ( SOUND_BC_WALL_HIT       ,   "Data\\Sound\\BattleCastle\\oSWHit.wav", MAX_CHANNEL, true );//  성벽 폭발.
+        LoadWaveFile ( SOUND_BC_AMBIENT        ,   "Data\\Sound\\BattleCastle\\aSiegeAmbi.wav", 1, true );
+        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE1,   "Data\\Sound\\BattleCastle\\RanAmbi1.wav", 1, true );
+        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE2,   "Data\\Sound\\BattleCastle\\RanAmbi2.wav", 1, true ); 
+        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE3,   "Data\\Sound\\BattleCastle\\RanAmbi3.wav", 1, true );
+        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE4,   "Data\\Sound\\BattleCastle\\RanAmbi4.wav", 1, true );
+        LoadWaveFile ( SOUND_BC_AMBIENT_BATTLE5,   "Data\\Sound\\BattleCastle\\RanAmbi5.wav", 1, true );
+        LoadWaveFile ( SOUND_BC_GUARD_STONE_DIS,   "Data\\Sound\\BattleCastle\\oGuardStoneDis.wav", 1, true );      
+        LoadWaveFile ( SOUND_BC_SHIELD_SPACE_DIS,  "Data\\Sound\\BattleCastle\\oProtectionDis.wav", 1, true );       
+        LoadWaveFile ( SOUND_BC_CATAPULT_ATTACK,   "Data\\Sound\\BattleCastle\\oSWFire.wav", 1, true  );   
+        LoadWaveFile ( SOUND_BC_CATAPULT_HIT   ,   "Data\\Sound\\BattleCastle\\oSWHitG.wav", MAX_CHANNEL, true );
+        LoadWaveFile ( SOUND_BC_WALL_HIT       ,   "Data\\Sound\\BattleCastle\\oSWHit.wav", MAX_CHANNEL, true );
 
-        LoadWaveFile ( SOUND_BC_GATE_OPEN      ,   "Data\\Sound\\BattleCastle\\oCDoorMove.wav", 1, true  );      //  성문 닫기/열기
-        LoadWaveFile ( SOUND_BC_GUARDIAN_ATTACK,   "Data\\Sound\\BattleCastle\\mGMercAttack.wav", 1, true  );    //  가디언 공격.
-        LoadWaveFile ( SOUND_BMS_STUN          ,   "Data\\Sound\\BattleCastle\\sDStun.wav", MAX_CHANNEL, true  );          //  스턴 발동.             
-        LoadWaveFile ( SOUND_BMS_STUN_REMOVAL  ,   "Data\\Sound\\BattleCastle\\sDStunCancel.wav", MAX_CHANNEL, true   );    //  스턴 해제 발동.        
-        LoadWaveFile ( SOUND_BMS_MANA          ,   "Data\\Sound\\BattleCastle\\sDSwllMana.wav", MAX_CHANNEL, true   );      //  마나 증가 발동.        
-        LoadWaveFile ( SOUND_BMS_INVISIBLE     ,   "Data\\Sound\\BattleCastle\\sDTrans.wav", MAX_CHANNEL , true  );         //  투명 발동.             
-        LoadWaveFile ( SOUND_BMS_VISIBLE       ,   "Data\\Sound\\BattleCastle\\sDStunCancel.wav", MAX_CHANNEL, true   );    //  투명 해제.             
-        LoadWaveFile ( SOUND_BMS_MAGIC_REMOVAL ,   "Data\\Sound\\BattleCastle\\sDMagicCancel.wav", MAX_CHANNEL, true   );   //  마법 해제.             
-        LoadWaveFile ( SOUND_BCS_RUSH          ,   "Data\\Sound\\BattleCastle\\sCHaveyBlow.wav", MAX_CHANNEL, true   );     //  기사 돌격 스킬.        
-        LoadWaveFile ( SOUND_BCS_JAVELIN       ,   "Data\\Sound\\BattleCastle\\sCShockWave.wav", MAX_CHANNEL, true   );     //  법사 표창 스킬.        
-        LoadWaveFile ( SOUND_BCS_DEEP_IMPACT   ,   "Data\\Sound\\BattleCastle\\sCFireArrow.wav", MAX_CHANNEL, true  );     //  요정 입펙트 샷.        
-        LoadWaveFile ( SOUND_BCS_DEATH_CANON   ,   "Data\\Sound\\BattleCastle\\sCMW.wav", MAX_CHANNEL, true  );            //  마검사 마살포.         
-        LoadWaveFile ( SOUND_BCS_ONE_FLASH     ,   "Data\\Sound\\BattleCastle\\sCColdAttack.wav", MAX_CHANNEL, true  );    //  마검사 일섬.           
-        LoadWaveFile ( SOUND_BCS_SPACE_SPLIT   ,   "Data\\Sound\\BattleCastle\\sCDarkAttack.wav", MAX_CHANNEL, true  );    //  다크로드 공간 가르기.  
-        LoadWaveFile ( SOUND_BCS_BRAND_OF_SKILL,   "Data\\Sound\\BattleCastle\\sCDarkAssist.wav", 1, true  );    //  다크로드 보조 스킬.    
+        LoadWaveFile ( SOUND_BC_GATE_OPEN      ,   "Data\\Sound\\BattleCastle\\oCDoorMove.wav", 1, true  );
+        LoadWaveFile ( SOUND_BC_GUARDIAN_ATTACK,   "Data\\Sound\\BattleCastle\\mGMercAttack.wav", 1, true  );
+        LoadWaveFile ( SOUND_BMS_STUN          ,   "Data\\Sound\\BattleCastle\\sDStun.wav", MAX_CHANNEL, true  );        
+        LoadWaveFile ( SOUND_BMS_STUN_REMOVAL  ,   "Data\\Sound\\BattleCastle\\sDStunCancel.wav", MAX_CHANNEL, true   );    
+        LoadWaveFile ( SOUND_BMS_MANA          ,   "Data\\Sound\\BattleCastle\\sDSwllMana.wav", MAX_CHANNEL, true   );      
+        LoadWaveFile ( SOUND_BMS_INVISIBLE     ,   "Data\\Sound\\BattleCastle\\sDTrans.wav", MAX_CHANNEL , true  );      
+        LoadWaveFile ( SOUND_BMS_VISIBLE       ,   "Data\\Sound\\BattleCastle\\sDStunCancel.wav", MAX_CHANNEL, true   );         
+        LoadWaveFile ( SOUND_BMS_MAGIC_REMOVAL ,   "Data\\Sound\\BattleCastle\\sDMagicCancel.wav", MAX_CHANNEL, true   );        
+        LoadWaveFile ( SOUND_BCS_RUSH          ,   "Data\\Sound\\BattleCastle\\sCHaveyBlow.wav", MAX_CHANNEL, true   );    
+        LoadWaveFile ( SOUND_BCS_JAVELIN       ,   "Data\\Sound\\BattleCastle\\sCShockWave.wav", MAX_CHANNEL, true   );  
+        LoadWaveFile ( SOUND_BCS_DEEP_IMPACT   ,   "Data\\Sound\\BattleCastle\\sCFireArrow.wav", MAX_CHANNEL, true  );  
+        LoadWaveFile ( SOUND_BCS_DEATH_CANON   ,   "Data\\Sound\\BattleCastle\\sCMW.wav", MAX_CHANNEL, true  );       
+        LoadWaveFile ( SOUND_BCS_ONE_FLASH     ,   "Data\\Sound\\BattleCastle\\sCColdAttack.wav", MAX_CHANNEL, true  );     
+        LoadWaveFile ( SOUND_BCS_SPACE_SPLIT   ,   "Data\\Sound\\BattleCastle\\sCDarkAttack.wav", MAX_CHANNEL, true  );
+        LoadWaveFile ( SOUND_BCS_BRAND_OF_SKILL,   "Data\\Sound\\BattleCastle\\sCDarkAssist.wav", 1, true  );  
         break;
 
 	case WD_31HUNTING_GROUND:
@@ -346,7 +343,7 @@ void CMapManager::Load() // OK
 
 		LoadBitmap("Effect\\clouds.jpg"	  ,BITMAP_CLOUD ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 
-		LoadWaveFile ( SOUND_AIDA_AMBIENT,    "Data\\Sound\\w34\\aida_ambi.wav", 1, true );      //  배경 효과음
+		LoadWaveFile ( SOUND_AIDA_AMBIENT,    "Data\\Sound\\w34\\aida_ambi.wav", 1, true );
 		LoadWaveFile ( SOUND_AIDA_BLUEGOLEM_MOVE1,             "Data\\Sound\\w34\\bg_idle1.wav", 1 );
 		LoadWaveFile ( SOUND_AIDA_BLUEGOLEM_MOVE2,             "Data\\Sound\\w34\\bg_idle2.wav", 1 );
 		LoadWaveFile ( SOUND_AIDA_BLUEGOLEM_ATTACK1,           "Data\\Sound\\w34\\bg_attack1.wav", 1 );
@@ -588,7 +585,7 @@ void CMapManager::Load() // OK
 	case WD_42CHANGEUP3RD_2ND:
 		LoadBitmap("Effect\\clouds.jpg" , BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 		LoadBitmap("Effect\\firered.jpg" , BITMAP_FIRE_RED, GL_LINEAR, GL_CLAMP_TO_EDGE);
-		LoadBitmap("Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);      //  불씨.
+		LoadBitmap("Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
 		LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE1,			"Data\\Sound\\w42\\cage01.wav", 1);
 		LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE2,			"Data\\Sound\\w42\\cage02.wav", 1);
@@ -602,8 +599,8 @@ void CMapManager::Load() // OK
 		{
 			LoadBitmap("Logo\\New_Login_Back01.jpg"         ,BITMAP_LOG_IN+9);
 			LoadBitmap("Logo\\New_Login_Back02.jpg"         ,BITMAP_LOG_IN+10);
-			LoadBitmap("World78\\bg_b_05.jpg" ,BITMAP_CHROME+3, GL_LINEAR, GL_REPEAT );	// 화면 흐리기
-			LoadBitmap("World78\\bg_b_08.jpg" ,BITMAP_CHROME+4, GL_LINEAR, GL_REPEAT );	// 화면 흐리기
+			LoadBitmap("World78\\bg_b_05.jpg" ,BITMAP_CHROME+3, GL_LINEAR, GL_REPEAT );
+			LoadBitmap("World78\\bg_b_08.jpg" ,BITMAP_CHROME+4, GL_LINEAR, GL_REPEAT );
 			LoadBitmap("Logo\\MU-logo.tga"         ,BITMAP_LOG_IN+16, GL_LINEAR);
 			LoadBitmap("Logo\\MU-logo_g.jpg", BITMAP_LOG_IN+17, GL_LINEAR);
 
@@ -665,16 +662,16 @@ void CMapManager::Load() // OK
 #ifdef PBG_ADD_PKFIELD
 	case WD_63PK_FIELD:
 		{
-			gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD,"Data\\Monster\\","pk_manhead_green");		//암살자 그린 머리
+			gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD,"Data\\Monster\\","pk_manhead_green");
 			gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD,"Monster\\");
 
-			gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD,"Data\\Monster\\","pk_manhead_red");			//암살자 레드 머리
+			gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD,"Data\\Monster\\","pk_manhead_red");
 			gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD,"Monster\\");
 
-			gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY,"Data\\Monster\\","assassin_dieg");		//암살자 그린 몸
+			gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY,"Data\\Monster\\","assassin_dieg");
 			gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY,"Monster\\");
 			
-			gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY,"Data\\Monster\\","assassin_dier");			//암살자 레드 몸
+			gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY,"Data\\Monster\\","assassin_dier");
 			gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY,"Monster\\");
 		}
 		break;
@@ -1172,18 +1169,18 @@ void CMapManager::Load() // OK
 			gLoadData.OpenTexture( i, DirName );
 		}
 		
-		if(this->WorldActive == WD_1DUNGEON)	// 던전
+		if(this->WorldActive == WD_1DUNGEON)
 		{
 			Models[40].Actions[1].PlaySpeed = 0.4f;
 		}
-        else if(this->WorldActive == WD_8TARKAN)	// 타르칸
+        else if(this->WorldActive == WD_8TARKAN)
         {
-            Models[11].StreamMesh = 0;  //  얇은 모래 폭포.
-            Models[12].StreamMesh = 0;  //  모래늪.
-            Models[13].StreamMesh = 0;  //  모래폭포.
-            Models[73].StreamMesh = 0;  //  용암 흐르기2.
-            Models[75].StreamMesh = 0;  //  용암 흐르기3.
-            Models[79].StreamMesh = 0;  //  용암 흐르기4.
+            Models[11].StreamMesh = 0;
+            Models[12].StreamMesh = 0;
+            Models[13].StreamMesh = 0;
+            Models[73].StreamMesh = 0;
+            Models[75].StreamMesh = 0;
+            Models[79].StreamMesh = 0;
         }
 		if (this->WorldActive == WD_51HOME_6TH_CHAR 
 #ifndef PJH_NEW_SERVER_SELECT_MAP
@@ -1238,11 +1235,11 @@ void CMapManager::LoadWorld(int Map)
 	}
 	RemoveAllShopTitleExceptHero();
 
-	g_Direction.Init();					// 맵 이동시 연출관련 초기화 
-	g_Direction.HeroFallingDownInit();	// 맵 이동시 연출관련 초기화
+	g_Direction.Init();
+	g_Direction.HeroFallingDownInit();
 	g_Direction.DeleteMonster();
 	M39Kanturu3rd::Kanturu3rdInit();
-	g_Direction.m_CKanturu.m_iKanturuState = 0; // --;
+	g_Direction.m_CKanturu.m_iKanturuState = 0;
 	g_Direction.m_CKanturu.m_iMayaState = 0;
 	g_Direction.m_CKanturu.m_iNightmareState = 0;
 
@@ -1353,13 +1350,13 @@ void CMapManager::LoadWorld(int Map)
 	{
 		switch( CryWolfState )
 		{
-		case CRYWOLF_OCCUPATION_STATE_PEACE:    // 평화상태
+		case CRYWOLF_OCCUPATION_STATE_PEACE:
 			sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld);
 			break;
-		case CRYWOLF_OCCUPATION_STATE_OCCUPIED: // 점령상태
+		case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
 			sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld*10+1);
 			break;
-		case CRYWOLF_OCCUPATION_STATE_WAR:		// 전쟁상태
+		case CRYWOLF_OCCUPATION_STATE_WAR:
 			sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld*10+2);
 			break;
 		}

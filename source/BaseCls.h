@@ -30,15 +30,13 @@ template <class T>
 class CNode
 {
 	protected:
-		T m_Data;	// 기본 데이터
-		CNode<T>* m_pPrev;	// 앞에 링크된 노드
-		CNode<T>* m_pNext;	// 뒤에 링크된 노드
+		T m_Data;
+		CNode<T>* m_pPrev;
+		CNode<T>* m_pNext;
 
-		// 앞쪽 노드 처리
 		void SetPrev( CNode<T>* pPrev)	{ m_pPrev = pPrev; }
 		CNode<T>* GetPrev( void)		{ return ( m_pPrev); }
 
-		// 뒤쪽 노드 처리
 		void SetNext( CNode<T>* pNext)	{ m_pNext = pNext; }
 		CNode<T>* GetNext( void)		{ return ( m_pNext); }
 
@@ -55,11 +53,6 @@ class CNode
 		T& GetData( void)		{ return ( m_Data);	}
 };
 
-
-//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
-//	Constructor
-//
-//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
 template <class T>
 CNode<T>::CNode()
 {

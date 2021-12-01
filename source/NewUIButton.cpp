@@ -426,12 +426,8 @@ bool SEASON3B::CNewUIButton::Render( )
 	if( m_Name.size() != 0 )
 	{
 		SIZE Fontsize;
-		g_pRenderText->SetFont( m_hTextFont );				// 수정 : Pruarin(07.08.03)
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+		g_pRenderText->SetFont( m_hTextFont );
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 		Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
 		Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
@@ -458,12 +454,8 @@ bool SEASON3B::CNewUIButton::Render( )
 		if( CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y) )
 		{
 			SIZE Fontsize;
-			g_pRenderText->SetFont( m_hToolTipFont );			// 수정 : Pruarin(07.08.03)
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+			g_pRenderText->SetFont( m_hToolTipFont );
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 			Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
 			Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
@@ -471,10 +463,8 @@ bool SEASON3B::CNewUIButton::Render( )
 			int x = m_Pos.x+((m_Size.x/2)-(Fontsize.cx/2));
 			int y = m_Pos.y+m_Size.y+2;
 			
-#ifdef LDK_FIX_MENUPOPUP_POSITION_BUG	// 수정 : LDK (2008.4.29)
 			int _iTempWidth =  x + Fontsize.cx + 6;
 			x = ( _iTempWidth > 640 ) ? (x - ( _iTempWidth - 640 )) : x;
-#endif //LDK_FIX_MENUPOPUP_POSITION_BUG
 
 			if( m_IsTopPos ) y = m_Pos.y-(Fontsize.cy+2);
 
@@ -484,24 +474,6 @@ bool SEASON3B::CNewUIButton::Render( )
 	
 	return true;
 }
-
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void CNewUIBaseButton::Lock()
-{
-	m_EventState = BUTTON_STATE_LOCK;
-	m_Lock = true;
-}
-
-void CNewUIBaseButton::UnLock()
-{
-	m_EventState = BUTTON_STATE_UP;
-	m_Lock = false;
-}
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-
-//////////////////////////////////////////////////////////////////////
-// CNewUIRadioButton
-//////////////////////////////////////////////////////////////////////
 
 CNewUIRadioButton::CNewUIRadioButton() : m_NameColor(0xffB5B5B5), m_NameBackColor(0x00000000), 
 m_CurImgIndex(0), m_CurImgState(0), m_ImgWidth(0), m_ImgHeight(0), m_CurImgColor(0xffffffff)
@@ -520,9 +492,6 @@ void CNewUIRadioButton::Initialize()
 	m_hTextFont		= g_hFont;
 	m_bClickEffect	= false;
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-	m_bLockImage	= false;
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 }
 
 void CNewUIRadioButton::Destroy()
@@ -720,20 +689,6 @@ void CNewUIRadioButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonSt
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void SEASON3B::CNewUIRadioButton::Lock()
-{
-	CNewUIBaseButton::Lock();
-	ChangeFrame();
-}
-
-void SEASON3B::CNewUIRadioButton::UnLock()
-{
-	CNewUIBaseButton::UnLock();
-	ChangeFrame();
-}
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-
 bool CNewUIRadioButton::UpdateMouseEvent( bool isGroupevent )
 {
 	if( IsLock() )
@@ -741,7 +696,6 @@ bool CNewUIRadioButton::UpdateMouseEvent( bool isGroupevent )
 		return false;
 	}
 
-	// 마우스 이벤트 검사
 	BUTTON_STATE backevent = GetBTState();
 
 	bool result = false;
@@ -774,14 +728,11 @@ bool CNewUIRadioButton::Render()
 	if( m_RadioButtonInfo.size() != 0 )
 	{
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-		// 버튼이미지 리소스는 무조건 세로로 작업!
-		// State에 따라 Image를 Render 안할때 BITMAP Index를 BITMAP_UNKNOWN으로 설정한다.
-		if( m_CurImgIndex != BITMAP_UNKNOWN )	 // BITMAP Index가 있을때만 Render
+		if( m_CurImgIndex != BITMAP_UNKNOWN )
 		{
 			RenderImage(m_CurImgIndex, m_Pos.x, m_Pos.y, m_Size.x, m_Size.y, 0.0f, m_CurImgState*m_Size.y, m_CurImgColor);
 		}
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-		// 이미지 가로, 세로 크기 비교로 UV값을 바꾸는방법은 옳지 않아!! (버그발생함)
 		if( m_ImgWidth < m_ImgHeight )
 		{
 			RenderImage(m_CurImgIndex, m_Pos.x, m_Pos.y, m_Size.x, m_Size.y, m_CurImgState*m_Size.x, 0.0f, m_CurImgColor);
@@ -802,11 +753,8 @@ bool CNewUIRadioButton::Render()
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
 		g_pRenderText->SetFont(g_hFont);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 		Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
 		Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
@@ -814,8 +762,6 @@ bool CNewUIRadioButton::Render()
 		int x = m_Pos.x+((m_Size.x/2)-(Fontsize.cx/2));
 		int y = m_Pos.y+((m_Size.y/2)-(Fontsize.cy/2));
 
-		// 수정 : Pruarin(07.08.03)
-		//RenderText( m_Name.c_str(), x, y, m_Size.x, 0, m_NameColor, m_NameBackColor, RT3_SORT_LEFT );
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 		if( (m_bClickEffect==true) && GetBTState()==BUTTON_STATE_DOWN)
 		{

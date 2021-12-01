@@ -9,7 +9,7 @@
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "WSclient.h"
-// WM_USER+0x100 부터 0x100개를 채팅 윈도우 소켓용으로 사용합니다.
+
 #define WM_CHATROOMMSG_BEGIN (WM_USER+0x100)
 #define WM_CHATROOMMSG_END (WM_USER+0x200)
 
@@ -18,13 +18,13 @@
 #define WARNING_TIMER	1004
 #endif
 
-const int g_ciWindowFrameThickness = 5;			// 윈도우 프레임 두께
-const int g_ciWindowTitleHeight = 21;			// 윈도우 타이틀 높이
-const int UIWND_DEFAULT = -1;					// 윈도우 기본 위치로 생성
+const int g_ciWindowFrameThickness = 5;
+const int g_ciWindowTitleHeight = 21;
+const int UIWND_DEFAULT = -1;
 
-const DWORD g_cdwLetterCost = 1000;				// 편지 발송 비용
+const DWORD g_cdwLetterCost = 1000;
 
-enum UIWINDOWSTYLE	// 윈도우 스타일
+enum UIWINDOWSTYLE
 {
 	UIWINDOWSTYLE_NULL = 0, UIWINDOWSTYLE_TITLEBAR = 1, UIWINDOWSTYLE_FRAME = 2,
 	UIWINDOWSTYLE_RESIZEABLE = 4, UIWINDOWSTYLE_MOVEABLE = 8, UIWINDOWSTYLE_MINBUTTON = 16, UIWINDOWSTYLE_MAXBUTTON = 32,
@@ -59,7 +59,7 @@ public:
 	const char* GetTitle() { return m_pszTitle; }
 	virtual void Maximize();
 
-	void Render();						// 기본 틀을 그린다
+	void Render();
 	virtual int RPos_x(int iPos_x) { return iPos_x + (m_iPos_x + g_ciWindowFrameThickness); }
 	virtual int RPos_y(int iPos_y) { return iPos_y + (m_iPos_y + g_ciWindowTitleHeight); }
 	virtual int RWidth() { return m_iWidth - g_ciWindowFrameThickness * 2; }
@@ -70,39 +70,35 @@ public:
 	void SetBackPosition(BOOL bIsMaximize, int iBackPos_y, int iBackHeight)
 	{ m_bIsMaximize = bIsMaximize; m_iBackPos_y = iBackPos_y; m_iBackHeight = iBackHeight; }
 
-	virtual BOOL CloseCheck() { return TRUE; }			// 닫아도 되는가 체크 (TRUE는 닫아도 된다)
+	virtual BOOL CloseCheck() { return TRUE; }
 	
 protected:
-	BOOL DoMouseAction();				// 기본 틀의 마우스의 액션을 처리한다.
-	// 윈도우 내부의 범위를 보내준다
+	BOOL DoMouseAction();
 
-	virtual void RenderSub() {}			// 하위 요소들을 그린다
-	virtual void RenderOver() {}		// 윈도우 위에 그릴 것들
+	virtual void RenderSub() {}
+	virtual void RenderOver() {}
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	virtual void DoActionSub()					{ return;	}	// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
+	virtual void DoActionSub()					{ return;	}
 #else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	virtual void DoActionSub(BOOL bMessageOnly)	{			}	// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
+	virtual void DoActionSub(BOOL bMessageOnly)	{			}	
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	virtual void DoMouseActionSub() {}	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void DoMouseActionSub() {}
 	void DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight);
 	void SetControlButtonColor(int iSelect);
 
 protected:
 	int m_iMouseClickPos_x, m_iMouseClickPos_y;
-	int m_iResizeDir;	// 크기조절 방향
-	int m_iMinWidth, m_iMinHeight;		// 크기 제한
+	int m_iResizeDir;
+	int m_iMinWidth, m_iMinHeight;
 	int m_iMaxWidth, m_iMaxHeight;
-	char* m_pszTitle;				// 윈도우 이름
-	BOOL m_bHaveTextBox;			// 한개 이상의 텍스트 박스가 있나
-	int m_iControlButtonClick;		// 최소(1) 최대(2) 닫기(3) 버튼 선택
-	BOOL m_bIsMaximize;				// 최대화 상태인가
+	char* m_pszTitle;
+	BOOL m_bHaveTextBox;
+	int m_iControlButtonClick;
+	BOOL m_bIsMaximize;
 	int m_iBackPos_y, m_iBackHeight;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	const int MAX_LETTER_TITLE_LENGTH_UTF16, MAX_LETTER_TEXT_LENGTH_UTF16;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUIChatWindow : public CUIBaseWindow
 {
@@ -128,29 +124,24 @@ public:
 	void Lock(BOOL bFlag);
 
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();
+	virtual BOOL HandleMessage();
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();
 
 protected:
-	int m_iShowType;	// 창 표시 타입 (0: 보통, 1: 대화상대 표시, 2: 친구초대 표시)
+	int m_iShowType;
 	CUITextInputBox m_TextInputBox;
 	CUISimpleChatListBox m_ChatListBox;
 	CUIChatPalListBox m_PalListBox;
 	CUIButton m_InviteButton;
 	CUIChatPalListBox m_InvitePalListBox;
 	CUIButton m_CloseInviteButton;
-	DWORD m_dwRoomNumber;	// 방 번호
+	DWORD m_dwRoomNumber;
 	int m_iPrevWidth;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	const int MAX_CHATROOM_TEXT_LENGTH_UTF16;
 	char m_szLastText[MAX_CHATROOM_TEXT_LENGTH];
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	char m_szLastText[MAX_TEXT_LENGTH + 1];
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUIPhotoViewer : public CUIControl
 {
@@ -218,17 +209,17 @@ public:
 	void SetLetter(LETTERLIST_TEXT * pLetterHead, const char* pLetterText);
 
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual void RenderOver();			// 윈도우 위에 그릴 것들
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();
+	virtual void RenderOver();
+	virtual BOOL HandleMessage();	
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();
 	
 public:
 	CUIPhotoViewer m_Photo;
 
 protected:
-	int m_iShowType;	// 창 표시 타입 (0: 보통, 1: 대화상대 표시, 2: 친구초대 표시)
+	int m_iShowType;
 	LETTERLIST_TEXT m_LetterHead;
 
 	CUILetterTextListBox m_LetterTextBox;
@@ -238,7 +229,6 @@ protected:
 	CUIButton m_PrevButton;
 	CUIButton m_NextButton;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUILetterWriteWindow : public CUIBaseWindow
 {
@@ -254,19 +244,19 @@ public:
 
 	void SetSendState(BOOL bFlag) { m_bIsSend = bFlag; }
 
-	virtual BOOL CloseCheck();			// 닫아도 되는가 체크 (TRUE는 닫아도 된다)
+	virtual BOOL CloseCheck();	
 
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual void RenderOver();			// 윈도우 위에 그릴 것들
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();
+	virtual void RenderOver();
+	virtual BOOL HandleMessage();
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();	
 
 protected:
-	int m_iShowType;	// 창 표시 타입 (0: 보통, 1: 대화상대 표시, 2: 친구초대 표시)
+	int m_iShowType;
 	CUIPhotoViewer m_Photo;
-	BOOL m_bIsSend;	// 보내는 중인가
+	BOOL m_bIsSend;	
 	int m_iLastTabIndex;
 
 	CUITextInputBox m_MailtoInputBox;
@@ -278,7 +268,6 @@ protected:
 	CUIButton m_PrevPoseButton;
 	CUIButton m_NextPoseButton;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUITabWindow : public CUIBaseWindow
 {
@@ -291,15 +280,14 @@ public:
 	virtual int RWidth() { return m_iWidth; }
 	virtual int RHeight() { return m_iHeight; }
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CFriendList
 {
 public:
 	CFriendList():m_iCurrentSortType(0) {}
 	~CFriendList() { ClearFriendList(); }
-	void AddFriend(const char* pszID, BYTE Number, BYTE Server);	// 친구 추가
-	void RemoveFriend(const char* pszID);						// 친구 삭제
+	void AddFriend(const char* pszID, BYTE Number, BYTE Server);
+	void RemoveFriend(const char* pszID);
 	void ClearFriendList();
 	int UpdateFriendList(std::deque<GUILDLIST_TEXT> & pDestData, const char* pszID);
 	void UpdateFriendState(const char* pszID, BYTE Number, BYTE Server);
@@ -311,7 +299,6 @@ private:
 	std::deque<GUILDLIST_TEXT> m_FriendList;
 	std::deque<GUILDLIST_TEXT>::iterator m_FriendListIter;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUIFriendListTabWindow : public CUITabWindow
 {
@@ -321,15 +308,15 @@ public:
 
 	virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
 	virtual void Refresh();
-	const char* GetCurrentSelectedFriend(BYTE * pNumber = NULL, BYTE * pServer = NULL);		// 현재 선택된 친구 ID
+	const char* GetCurrentSelectedFriend(BYTE * pNumber = NULL, BYTE * pServer = NULL);	
 	DWORD GetKeyMoveListUIID() { return m_PalListBox.GetUIID(); }
 	void RefreshPalList();
 
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();
+	virtual BOOL HandleMessage();
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();
 
 protected:
 	CUIChatPalListBox m_PalListBox;
@@ -338,13 +325,12 @@ protected:
 	CUIButton m_TalkButton;
 	CUIButton m_LetterButton;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct CHATROOM_SOCKET
 {
-	DWORD m_dwRoomID;		// 방 번호
+	DWORD m_dwRoomID;
 	CWsctlc m_WSClient;
-	DWORD m_dwWindowUIID;	// 윈도우 번호
+	DWORD m_dwWindowUIID;
 };
 
 class CChatRoomSocketList
@@ -352,8 +338,8 @@ class CChatRoomSocketList
 public:
 	CChatRoomSocketList() { ClearChatRoomSocketList(); }
 	~CChatRoomSocketList() { ClearChatRoomSocketList(); }
-	BOOL AddChatRoomSocket(DWORD dwRoomID, DWORD dwWindowUIID, const char* pszIP);	// 채팅 소켓 추가
-	void RemoveChatRoomSocket(DWORD dwRoomID);					// 친구 삭제
+	BOOL AddChatRoomSocket(DWORD dwRoomID, DWORD dwWindowUIID, const char* pszIP);
+	void RemoveChatRoomSocket(DWORD dwRoomID);
 	void ClearChatRoomSocketList();
 	CHATROOM_SOCKET * GetChatRoomSocketData(DWORD dwRoomID);
 	void ProcessSocketMessage(DWORD dwSocketID, WORD wMessage);
@@ -381,31 +367,30 @@ public:
 
 	virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
 	virtual void Refresh();
-	void AddWindow(DWORD dwUIID, const char* pszTitle);	// 윈도우 추가
-	void RemoveWindow(DWORD dwUIID);				// 윈도우 제거
-	DWORD GetCurrentSelectedWindow();				// 현재 선택된 윈도우 UIID 얻기
+	void AddWindow(DWORD dwUIID, const char* pszTitle);
+	void RemoveWindow(DWORD dwUIID);
+	DWORD GetCurrentSelectedWindow();
 	DWORD GetKeyMoveListUIID() { return m_WindowListBox.GetUIID(); }
 	void Reset() { m_WindowListBox.Clear(); }
 
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();	
+	virtual BOOL HandleMessage();
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();
 
 public:
 	CUIWindowListBox m_WindowListBox;
 	CUIButton m_HideAllButton;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CLetterList
 {
 public:
 	CLetterList():m_iCurrentSortType(0) {}
 	~CLetterList() { ClearLetterList(); }
-	void AddLetter(DWORD dwLetterID, const char* pszID, const char* pszText, const char* pszDate, const char* pszTime, BOOL bIsRead);	// 편지 추가
-	void RemoveLetter(DWORD dwLetterID);														// 편지 제거
+	void AddLetter(DWORD dwLetterID, const char* pszID, const char* pszText, const char* pszDate, const char* pszTime, BOOL bIsRead);
+	void RemoveLetter(DWORD dwLetterID);
 	void ClearLetterList();
 	int UpdateLetterList(std::deque<LETTERLIST_TEXT> & pDestData, DWORD dwSelectLineNum);
 	void Sort(int iType = -1);
@@ -462,7 +447,6 @@ protected:
 	//CUIButton m_DeliveryButton;
 	BOOL m_bCheckAllState;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUIFriendWindow : public CUIBaseWindow
 {
@@ -509,7 +493,6 @@ protected:
 	CUIChatRoomListTabWindow m_ChatRoomListWnd;
 	CUILetterBoxTabWindow m_LetterBoxWnd;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUITextInputWindow : public CUIBaseWindow
 {
@@ -522,12 +505,12 @@ public:
 	void SetText(const char* pszText) { m_TextInputBox.SetText(pszText); m_TextInputBox.GiveFocus(TRUE); }
 
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();
+	virtual BOOL HandleMessage();
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();
 
-	void ReturnText();	// 입력창의 값을 부모창에 전달하고 종료
+	void ReturnText();
 
 protected:
 	DWORD m_dwReturnWindowUIID;
@@ -535,7 +518,6 @@ protected:
 	CUIButton m_AddButton;
 	CUIButton m_CancelButton;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUIQuestionWindow : public CUIBaseWindow
 {
@@ -552,7 +534,6 @@ protected:
 	virtual void RenderSub();
 	virtual BOOL HandleMessage();
 	virtual void DoActionSub(BOOL bMessageOnly);
-	virtual void DoMouseActionSub();
 
 protected:
 	DWORD m_dwReturnWindowUIID;
@@ -562,7 +543,6 @@ protected:
 	CUIButton m_AddButton;
 	CUIButton m_CancelButton;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef std::map<DWORD, CUIBaseWindow *, std::less<DWORD> > WndMap;
 
@@ -601,8 +581,8 @@ public:
 	void SetChatReject(BOOL bChatReject) { m_bChatReject = bChatReject; }
 	BOOL GetChatReject() { return m_bChatReject; }
 
-	BOOL LetterReadCheck(DWORD dwLetterID);	// 편지 중복 읽기 방지
-	void CloseLetterRead(DWORD dwLetterID);	// 편지 중복 읽기 방지
+	BOOL LetterReadCheck(DWORD dwLetterID);
+	void CloseLetterRead(DWORD dwLetterID);
 	void SetLetterReadWindow(DWORD dwLetterID, DWORD dwWindowUIID);
 	DWORD GetLetterReadWindow(DWORD dwLetterID);
 
@@ -620,26 +600,26 @@ public:
 	BOOL IsRenderFrame() { return m_bRenderFrame; }
 
 protected:
-	void HandleMessage();			// 메시지 처리 함수
+	void HandleMessage();
 
 public:
-	BOOL m_bRenderFrame;			// 프레임당 1회 액션을 위한 변수
+	BOOL m_bRenderFrame;
 
 protected:
 	BOOL m_bWindowsEnable;
-	DWORD m_dwMainWindowUIID;		// 창관리 윈도우의 UIID
-	WndMap m_WindowMap;						// 번호순 윈도우 (메모리 생성/삭제 관리)
-	WndMap m_WindowFindMap;					// 번호순 윈도우 (순수 검색용)
-	WndMap m_WindowReadyMap;				// 대기중 윈도우 (대기했다가 m_WindowMap로 이동)
+	DWORD m_dwMainWindowUIID;
+	WndMap m_WindowMap;
+	WndMap m_WindowFindMap;
+	WndMap m_WindowReadyMap;
 	WndMap::iterator m_WindowMapIter;
-	std::list<DWORD> m_WindowArrangeList;		// 윈도우 정렬 순서 리스트 (front->back순서로 앞에 출력된다)
+	std::list<DWORD> m_WindowArrangeList;
 	std::list<DWORD>::iterator m_WindowArrangeListIter;
 	std::list<DWORD>::reverse_iterator m_WindowReverseArrangeListIter;
-	std::map<DWORD, DWORD, std::less<DWORD> > m_LetterReadMap;	// 편지 읽기 목록
+	std::map<DWORD, DWORD, std::less<DWORD> > m_LetterReadMap;
 	std::map<DWORD, DWORD, std::less<DWORD> >::iterator m_LetterReadMapIter;
 	BOOL m_bCurrentHideWindowState;
-	std::list<DWORD> m_HideWindowList;		// 숨겨진 윈도우 (복원용)
-	std::list<DWORD> m_ForceTopWindowList;	// 최상위 윈도우 (서버에서)
+	std::list<DWORD> m_HideWindowList;
+	std::list<DWORD> m_ForceTopWindowList;
 
 	int m_iMainWindowPos_x, m_iMainWindowPos_y;
 	int m_iMainWindowWidth, m_iMainWindowHeight;
@@ -648,11 +628,10 @@ protected:
 	BOOL m_bChatReject;
 	int m_iLastFriendWindowTabIndex;
 
-	BOOL m_bServerEnable;	// 채팅 서버 잘 되는가
-	int m_iFriendMainWindowTitleNumber;	// 친구 메인창 이름 번호 (text.txt)
-	DWORD m_dwAddWindowUIID;	// 친구 추가 윈도우 id
+	BOOL m_bServerEnable;
+	int m_iFriendMainWindowTitleNumber;
+	DWORD m_dwAddWindowUIID;
 };
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUIFriendMenu : public CUIBaseWindow
 {
@@ -694,13 +673,13 @@ public:
 	void RemoveRequestWindow(const char* szTargetName);
 	void RemoveAllRequestWindow();
 
-	void CloseAllChatWindow();	// 대화 거부시 모든 채팅창 닫기
-	void LockAllChatWindow();	// 모든 채팅창 잠그기
+	void CloseAllChatWindow();
+	void LockAllChatWindow();
 protected:
-	virtual void RenderSub();			// 하위 요소들을 그린다
-	virtual BOOL HandleMessage();		// 메시지 처리 함수
-	virtual void DoActionSub(BOOL bMessageOnly);			// 하위 요소들의 메시지, 마우스 액션 등을 처리한다.
-	virtual void DoMouseActionSub();	// 하위 요소들의 마우스 액션을 처리한다.
+	virtual void RenderSub();
+	virtual BOOL HandleMessage();
+	virtual void DoActionSub(BOOL bMessageOnly);
+	virtual void DoMouseActionSub();
 
 	void RenderWindowList();
 protected:

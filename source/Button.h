@@ -50,11 +50,7 @@ public:
 		int nDownFrame = -1, int nActiveFrame = -1, int nDisableFrame = -1,
 		int nCheckUpFrame = -1, int nCheckDownFrame = -1,
 		int nCheckActiveFrame = -1, int nCheckDisableFrame = -1);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	void Update();
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	void Update(double dDeltaTick = 0.0);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	void Render();
 	void Show(bool bShow = true);
 	BOOL CursorInObject();

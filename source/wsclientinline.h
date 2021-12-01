@@ -19,6 +19,7 @@ extern ItemAddOptioninfo*			g_pItemAddOptioninfo;
 #endif
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "NewUISystem.h" 
+#include "ProtocolSend.h" 
 
 #define PACKET_MOVE         0xD4
 #define PACKET_POSITION     0x15
@@ -72,6 +73,11 @@ __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bF
 	leaf::GetTimeString(timeString);
 	DebugAngel_Write((char*)PACKET_SAVE_FILE, "%s Send \t0x%02X 0x%02X (size = %d)\r\n", timeString.c_str(), pData->Header.HeadCode, pData->SubCode, len);
 #endif
+
+	gProtocolSend.SendPacketClassic((uint8_t*)buf,len);
+
+	if(SceneFlag >= CHARACTER_SCENE)
+		return 1;
 
 	if ( !bEncrypt)
 	{
@@ -254,12 +260,7 @@ __forceinline void SendRequestLogOut(int Flag)
 	g_ConsoleDebug->Write(MCD_SEND, "0xF1 [SendRequestLogOut]");
 }
 
-#ifdef LDS_MODIFY_CHAR_LENGTH_USERPASSWORD 
-extern char Password[MAX_PASSWORD_SIZE+1];
-#else // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD
 extern char Password[MAX_ID_SIZE+1];
-#endif // LDS_MODIFY_CHAR_LENGTH_USERPASSWORD
-
 extern char QuestionID[MAX_ID_SIZE+1];
 extern char Question[31];
 
@@ -658,7 +659,6 @@ BYTE MakeSkillSerialNumber(BYTE * pSerialNumber);
 		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << ( BYTE)( p_x) << ( BYTE)( p_y) << ( BYTE)( p_Angle) << ( BYTE)( p_Dest) << ( BYTE)( p_Tpos) << ( BYTE)( ( p_TKey)>>8) << ( BYTE)( ( p_TKey)&0xff);\
 		spe << MakeSkillSerialNumber(p_SkillSerial);\
 		spe.Send( TRUE);\
-		hanguo_check6();\
 	}\
 }
 #else // ENABLE_EDIT

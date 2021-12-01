@@ -270,7 +270,7 @@ public :
 
 #define g_csItemOption CSItemOption::GetSingleton ()
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 extern std::string g_strSelectedML;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 #endif

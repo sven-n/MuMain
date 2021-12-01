@@ -1,12 +1,4 @@
-//  
 //  UIPopup.cpp
-//  
-//  내  용 : 팝업창 띄우기
-//  
-//  날  짜 : 2004년 11월 12일
-//  
-//  작성자 : 강 병 국
-//  
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -21,11 +13,6 @@ extern CUITextInputBox*	g_pSingleTextInputBox;
 extern int				g_iChatInputType;
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
-
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CUIPopup::CUIPopup()
 {
@@ -62,14 +49,13 @@ void CUIPopup::Init()
 
 	m_dwPopupID			= 0;
 	m_nPopupTextCount	= 0;
-	m_PopupType			= 0;	//. bug fix by soyaviper : 2005/03/09
+	m_PopupType			= 0;
 	ZeroMemory( m_szPopupText, sizeof(char)*MAX_POPUP_TEXTLINE*MAX_POPUP_TEXTLENGTH );
 	ZeroMemory( m_szInputText, sizeof(char)*1024 );
 }
 
 DWORD CUIPopup::SetPopup( const char* pszText, int nLineCount, int nBufferSize, int Type, int (*ResultFunc)( POPUP_RESULT Result ), POPUP_ALIGN Align )
 {
-	// 예외처리
 	if( nLineCount > MAX_POPUP_TEXTLINE )
 	{
 #ifdef KWAK_ADD_TRACE_FUNC
@@ -88,10 +74,6 @@ DWORD CUIPopup::SetPopup( const char* pszText, int nLineCount, int nBufferSize, 
 
 	Init();
 	m_Align = Align;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	SIZE sizeTotal = { 0, 0 };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	m_sizePopup.cy = 0;
 	SIZE sizeText;
 	for( int i=0 ; i<nLineCount ; ++i )
@@ -99,11 +81,7 @@ DWORD CUIPopup::SetPopup( const char* pszText, int nLineCount, int nBufferSize, 
 		if( pszText[i*nBufferSize] )
 		{
 			strcpy( m_szPopupText[i], &pszText[i*nBufferSize] );
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], strlen(m_szPopupText[i]), &sizeText);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], strlen(m_szPopupText[i]), &sizeText);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			m_sizePopup.cy += sizeText.cy + 2;
 		}
 	}
@@ -111,21 +89,17 @@ DWORD CUIPopup::SetPopup( const char* pszText, int nLineCount, int nBufferSize, 
 	m_PopupType = Type;
 	PopupResultFuncPointer = ResultFunc;
 
-	// 팝업관련 계산
-	m_sizePopup.cx = 213;		// 비트맵 가로 사이즈
-	m_sizePopup.cy += 43;		// 아래쪽외곽
+	m_sizePopup.cx = 213;
+	m_sizePopup.cy += 43;
 	if( m_PopupType & POPUP_OK || m_PopupType & POPUP_OKCANCEL || m_PopupType & POPUP_YESNO )
-		m_sizePopup.cy += 20;		// 버튼 사이즈
+		m_sizePopup.cy += 20;
 	if( m_PopupType & POPUP_INPUT )
-		m_sizePopup.cy += 17;		// 입력창 사이즈 추가
+		m_sizePopup.cy += 17;
 	if( m_PopupType & POPUP_TIMEOUT )
-		m_sizePopup.cy += 17;		// 시간진행상황표시 사이즈 추가
+		m_sizePopup.cy += 17;
 
-	// 팝업창 시간 기억
 	m_dwPopupStartTime = GetTickCount();
 	m_dwPopupEndTime = m_dwPopupStartTime + m_dwPopupElapseTime;
-
-	// 시간을 고유 인덱스로 사용
 	m_dwPopupID = m_dwPopupStartTime;
 
 	return m_dwPopupID;
@@ -239,7 +213,6 @@ bool CUIPopup::PressKey( int nKey )
 {
 	if( m_dwPopupID == 0 )	return false;
 
-	// 엔터키는 긍정적 응답, ESC키는 부정적 응답
 	if( m_PopupType & POPUP_CUSTOM )
 	{
 		if( nKey == VK_ESCAPE )
@@ -290,7 +263,6 @@ bool CUIPopup::PressKey( int nKey )
 			return true;
 		}
 	}
-	// 버튼이 없을때
 	else
 	{
 		if( nKey == VK_ESCAPE )
@@ -378,7 +350,6 @@ void CUIPopup::UpdateInput()
 	if( CheckMouseIn( fSubWinPos_x, fSubWinPos_y, m_sizePopup.cx, m_sizePopup.cy ) )
 		MouseOnWindow = TRUE;
 
-	// Custom 입력처리
 	if( PopupUpdateInputFuncPointer )
 	{
 		PopupUpdateInputFuncPointer();
@@ -499,14 +470,12 @@ void CUIPopup::Render()
 		return;
 	}
 
-	// Custom 부분 그리기
 	if( PopupRenderFuncPointer )
 	{
 		PopupRenderFuncPointer();
 	}
 	else
 	{
-		// 팝업 바깥상자 그리기
 		POINT pt;
 		if( m_Align == PA_CENTER )
 			pt = g_pUIManager->RenderWindowBase( m_sizePopup.cy );
@@ -516,7 +485,6 @@ void CUIPopup::Render()
 		g_pRenderText->SetFont(g_hFont);		
 		EnableAlphaTest();
 
-		// 팝업텍스트 그리기
 		g_pRenderText->SetBgColor(0x00000000);
 		g_pRenderText->SetTextColor(0xFFFFFFFF);
 		
@@ -524,11 +492,7 @@ void CUIPopup::Render()
 		for( int i=0 ; i<m_nPopupTextCount ; ++i )
 		{
 			SIZE size;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], strlen(m_szPopupText[i]), &size);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], strlen(m_szPopupText[i]), &size);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			
 			size.cx /= g_fScreenRate_x;
 			g_pRenderText->RenderText(320-(size.cx/2), fPosY, m_szPopupText[i], 0, 0, RT3_SORT_LEFT);			
@@ -540,7 +504,6 @@ void CUIPopup::Render()
 			RenderBitmap( BITMAP_INVENTORY+11, 320-m_nInputSize/2, fPosY, m_nInputSize, 18, 0.f, 0.f, 113.f/128.f, 18.f/32.f );
 
 			fPosY += 7;
-			// 입력창 출력
 			if( g_iChatInputType == 1 )
 			{
 				g_pSingleTextInputBox->SetState( UISTATE_NORMAL );
@@ -566,15 +529,12 @@ void CUIPopup::Render()
 			DWORD dwCurrTime = GetTickCount();
 			float fProgress = (float)(dwCurrTime-m_dwPopupStartTime)/m_dwPopupElapseTime;
 
-			// 프로그레스
 			RenderBitmap( BITMAP_INTERFACE_EX+42, 320-75, fPosY, 150.0f, 12.0f ,0.f,0.f, 200.0f/256.0f, 16.0f/16.0f );
 			EnableAlphaBlend();
 			RenderBitmap( BITMAP_INTERFACE_EX+43, 320-75-4, fPosY, 150.0f*fProgress, 12.0f ,0.f,0.f, (150.0f*fProgress)/256.0f, 16.0f/16.0f );
 			DisableAlphaBlend();
 			fPosY += 10;
 		}
-
-		// 팝업버튼 그리기
 		fPosY += 9;
 		if( m_PopupType & POPUP_OK )
 		{

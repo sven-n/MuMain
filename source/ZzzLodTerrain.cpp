@@ -1821,7 +1821,6 @@ bool RenderTerrainTile(float xf,float yf,int xi,int yi,float lodf,int lodi,bool 
 #endif// _DEBUG
 		
 		vec3_t Normal;
-        //  현재 타일의 노멜벡터값을 구한다.
 		FaceNormalize ( TerrainVertex[0], TerrainVertex[1], TerrainVertex[2], Normal );
 		bool Success = CollisionDetectLineToFace ( MousePosition, MouseTarget, 3, TerrainVertex[0], TerrainVertex[1], TerrainVertex[2], TerrainVertex[3], Normal );
 		if ( Success==false )

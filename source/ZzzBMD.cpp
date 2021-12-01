@@ -1,9 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// BMD관련 함수
-// Open, Save, Animation, Rendering 등등
-// 뮤의 케릭터, 배경 오브젝트는 모두 BMD포맷으로 구성되어 있음
-//
-// *** 함수 레벨: 2
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -39,11 +34,6 @@ vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 vec3_t NormalTransform[MAX_MESH][MAX_VERTICES];
 float  IntensityTransform[MAX_MESH][MAX_VERTICES];
 vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
-//float  ShadowCoordU[MAX_MESH][MAX_VERTICES];
-//float  ShadowCoordV[MAX_MESH][MAX_VERTICES];
-
-
-///////////////////////////////////////////////////////////////////////////////6244-6555
 
 unsigned char ShadowBuffer[256*256];
 int           ShadowBufferWidth  = 256;
@@ -53,16 +43,9 @@ extern int  MouseX;
 extern int  MouseY;
 extern bool MouseLButton;
 
-///////////////////////////////////////////////////////////////////////////////
-// animation
-///////////////////////////////////////////////////////////////////////////////
-
 bool  StopMotion = false;
 float ParentMatrix[3][4];
 
-//////////////////////////////////////////////////////////////////////////
-//  Light Vector
-//////////////////////////////////////////////////////////////////////////
 static vec3_t LightVector = { 0.f, -0.1f, -0.8f };
 static vec3_t LightVector2 = { 0.f, -0.5f, -0.8f };
 
@@ -516,7 +499,7 @@ bool BMD::PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigne
 
 		if(SceneFlag == 4)
 		{
-			fTemp = *AnimationFrame+2; // 케릭터 씬일때
+			fTemp = *AnimationFrame+2;
 		}
 		else if(gMapManager.WorldActive == WD_39KANTURU_3RD && CurrentAction == MONSTER01_APEAR)
 		{
@@ -527,7 +510,7 @@ bool BMD::PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigne
 			fTemp = *AnimationFrame;
 		}
 
-		if(fTemp >= (int)Key)  // 케릭터 씬 생성창에 나오는 케릭 에니메니션 조절을 위해(같은 동작이 여러번 반복되는 경우 발생)
+		if(fTemp >= (int)Key)
 		{
      		int Frame = (int)*AnimationFrame;
      		*AnimationFrame = (float)(Frame%(Key))+(*AnimationFrame-(float)Frame);
@@ -543,15 +526,8 @@ bool BMD::PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigne
 
 #ifdef LDS_ADD_MODEL_ATTACH_SPECIFIC_NODE_
 
-	// 자신을 object의 n번째 노드위치에 애니 하여 bmd의 모든 Vertex들에 반영.
 #ifdef LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
-void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM( 
-												OBJECT* oHighHierarchyModel, 
-												BMD* bmdHighHierarchyModel, 
-												int iBoneNumberHighHierarchyModel,
-												vec3_t &vOutPosHighHiearachyModelBone,
-												vec3_t *arrOutSetfAllBonePositions,
-												bool bApplyTMtoVertices)
+void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(OBJECT* oHighHierarchyModel,BMD* bmdHighHierarchyModel,int iBoneNumberHighHierarchyModel,vec3_t &vOutPosHighHiearachyModelBone,vec3_t *arrOutSetfAllBonePositions,bool bApplyTMtoVertices)
 {
 	if( NumBones < 1) return;
 	if( NumBones > MAX_BONES ) return;
@@ -562,10 +538,6 @@ void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(
 	
 	vec3_t		Temp, v3Position;
 	OBB_t		OBB;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int			iBoneCount = NumBones;	
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	
 	arrBonesTMLocal = new vec34_t[NumBones];
 	Vector( 0.0f, 0.0f, 0.0f, Temp );
@@ -573,34 +545,26 @@ void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(
 	memset( arrBonesTMLocal, 0, sizeof(vec34_t) * NumBones );
 	memset( tmBoneHierarchicalObject, 0, sizeof(vec34_t) );
 	
-	// 1. 상위모델의본TM 을 HierarachicalObj로 복사.
 	memcpy( tmBoneHierarchicalObject, oHighHierarchyModel->BoneTransform[iBoneNumberHighHierarchyModel], sizeof(vec34_t) );
 	BodyScale = oHighHierarchyModel->Scale;		
 	
-	// 2. 상위모델의본Translation에 상위모델의Scale 반영. 
 	tmBoneHierarchicalObject[0][3] = tmBoneHierarchicalObject[0][3] * BodyScale;
 	tmBoneHierarchicalObject[1][3] = tmBoneHierarchicalObject[1][3] * BodyScale;
 	tmBoneHierarchicalObject[2][3] = tmBoneHierarchicalObject[2][3] * BodyScale;
 	
-	// 3. OutParam : 상위 계층 모델의 해당 Bone 위치값
 	if( NULL != vOutPosHighHiearachyModelBone )
 	{
 		Vector( tmBoneHierarchicalObject[0][3], tmBoneHierarchicalObject[1][3], tmBoneHierarchicalObject[2][3],
 			vOutPosHighHiearachyModelBone );
 	}
 	
-	// ㄴ. 상위 모델의 위치
 	VectorCopy( oHighHierarchyModel->Position, v3Position );
 	
-	// ㄷ. Sword 자체 에니메이션 산출
 	Animation( arrBonesTMLocal, 0, 0, 0, Temp, Temp, false, false );
 	
-	// ㄹ. (부모tm(scale적용) X 자체tm) + 부모위치
 	for( int i_ = 0; i_ < NumBones; ++i_ )
 	{
 		R_ConcatTransforms( tmBoneHierarchicalObject, arrBonesTMLocal[i_], BoneTransform[i_] );
-		
-		// LocalTM+World(상위위치) => WorldTM
 		BoneTransform[i_][0][3] = BoneTransform[i_][0][3] + v3Position[0];
 		BoneTransform[i_][1][3] = BoneTransform[i_][1][3] + v3Position[1];
 		BoneTransform[i_][2][3] = BoneTransform[i_][2][3] + v3Position[2];
@@ -611,7 +575,6 @@ void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(
 			arrOutSetfAllBonePositions[i_] );
 	}
 	
-	// ㅁ. Vertex 결과 TM 적용.
 	if(true == bApplyTMtoVertices)
 	{
 		Transform(BoneTransform, Temp, Temp, &OBB, false);
@@ -621,29 +584,15 @@ void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(
 }
 #endif // LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
 						
-void BMD::AnimationTransformWithAttachHighModel( 
-						OBJECT* oHighHierarchyModel, 
-						BMD* bmdHighHierarchyModel, 
-						int iBoneNumberHighHierarchyModel,
-						vec3_t &vOutPosHighHiearachyModelBone,
-						vec3_t *arrOutSetfAllBonePositions )
+void BMD::AnimationTransformWithAttachHighModel(OBJECT* oHighHierarchyModel,BMD* bmdHighHierarchyModel,int iBoneNumberHighHierarchyModel,vec3_t &vOutPosHighHiearachyModelBone,vec3_t *arrOutSetfAllBonePositions )
 {
 	if( NumBones < 1) return;
 	if( NumBones > MAX_BONES ) return;
 	
 	vec34_t*	arrBonesTMLocal;
-	vec34_t*	arrBonesTMLocalResult;		// BoneTransform
-
+	vec34_t*	arrBonesTMLocalResult;
 	vec34_t		tmBoneHierarchicalObject;
-
 	vec3_t		Temp, v3Position;
-#ifndef LDS_MOD_ANIMATIONTRANSFORM_WITHHIGHMODEL		// #ifndef // 추후삭제
-	OBB_t		OBB;
-#endif // LDS_MOD_ANIMATIONTRANSFORM_WITHHIGHMODEL
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int			iBoneCount = NumBones;	
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	
 	arrBonesTMLocal = new vec34_t[NumBones];
 	Vector( 0.0f, 0.0f, 0.0f, Temp );
@@ -655,57 +604,37 @@ void BMD::AnimationTransformWithAttachHighModel(
 
 	memset( tmBoneHierarchicalObject, 0, sizeof(vec34_t) );
 	
-	// 1. 상위모델의본TM 을 HierarachicalObj로 복사.
 	memcpy( tmBoneHierarchicalObject, oHighHierarchyModel->BoneTransform[iBoneNumberHighHierarchyModel], sizeof(vec34_t) );
 
 	BodyScale = oHighHierarchyModel->Scale;		
 
-	// 2. 상위모델의본Translation에 상위모델의Scale 반영. 
 	tmBoneHierarchicalObject[0][3] = tmBoneHierarchicalObject[0][3] * BodyScale;
 	tmBoneHierarchicalObject[1][3] = tmBoneHierarchicalObject[1][3] * BodyScale;
 	tmBoneHierarchicalObject[2][3] = tmBoneHierarchicalObject[2][3] * BodyScale;
 
-	// 3. OutParam : 상위 계층 모델의 해당 Bone 위치값
 	if( NULL != vOutPosHighHiearachyModelBone )
 	{
 		Vector( tmBoneHierarchicalObject[0][3], tmBoneHierarchicalObject[1][3], tmBoneHierarchicalObject[2][3],
 					vOutPosHighHiearachyModelBone );
 	}
-	
-	// ㄴ. 상위 모델의 위치
+
 	VectorCopy( oHighHierarchyModel->Position, v3Position );
-	
-	// ㄷ. Sword 자체 에니메이션 산출
+
 	Animation( arrBonesTMLocal, 0, 0, 0, Temp, Temp, false, false );
-	
-	// ㄹ. (부모tm(scale적용) X 자체tm) + 부모위치
 	for( int i_ = 0; i_ < NumBones; ++i_ )
 	{
-		// 상위_본의위치*자신_애니위치 => LocalTM
 		R_ConcatTransforms( tmBoneHierarchicalObject, arrBonesTMLocal[i_], arrBonesTMLocalResult[i_] );
-
-		// LocalTM+World(상위위치) => WorldTM
  		arrBonesTMLocalResult[i_][0][3] = arrBonesTMLocalResult[i_][0][3] + v3Position[0];
  		arrBonesTMLocalResult[i_][1][3] = arrBonesTMLocalResult[i_][1][3] + v3Position[1];
   		arrBonesTMLocalResult[i_][2][3] = arrBonesTMLocalResult[i_][2][3] + v3Position[2];
 
-		// ㄹ_. Out Attach 하려는 상위 계층 모델의 해당 Bone 위치값
-		Vector( arrBonesTMLocalResult[i_][0][3], 
-			    arrBonesTMLocalResult[i_][1][3],
-				arrBonesTMLocalResult[i_][2][3],
-				arrOutSetfAllBonePositions[i_] );
+		Vector( arrBonesTMLocalResult[i_][0][3], arrBonesTMLocalResult[i_][1][3], arrBonesTMLocalResult[i_][2][3], arrOutSetfAllBonePositions[i_] );
 	}
 	
-	// ㅁ. Vertex 결과 TM 적용.	
-#ifndef LDS_MOD_ANIMATIONTRANSFORM_WITHHIGHMODEL		// #ifndef // 추후삭제
-	Transform(arrBonesTMLocalResult, Temp, Temp, &OBB, false);
-#endif // LDS_MOD_ANIMATIONTRANSFORM_WITHHIGHMODEL
-
 	delete [] arrBonesTMLocalResult;
 	delete [] arrBonesTMLocal;
 }
 
-// 외부object의 rts => RootRTS로 animate되어 각 Bone별 Position 값 array 반환
 void BMD::AnimationTransformOnlySelf( vec3_t *arrOutSetfAllBonePositions, const OBJECT* oSelf )
 {
 	if( NumBones < 1) return;
@@ -714,36 +643,21 @@ void BMD::AnimationTransformOnlySelf( vec3_t *arrOutSetfAllBonePositions, const 
 	vec34_t*	arrBonesTMLocal;
 	
 	vec3_t		Temp;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int			iBoneCount = NumBones;	
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	
 	arrBonesTMLocal = new vec34_t[NumBones];
 	Vector( 0.0f, 0.0f, 0.0f, Temp );
 	
 	memset( arrBonesTMLocal, 0, sizeof(vec34_t) * NumBones );
 
-	// ㄷ. 자체 에니메이션 산출 : (외부 인자값=rotation), (내부인자값=BodyScale,Position)
 	Animation( arrBonesTMLocal, oSelf->AnimationFrame,oSelf->PriorAnimationFrame,oSelf->PriorAction, (const_cast<OBJECT*>(oSelf))->Angle, Temp, false, true );
 	
-	// ㄹ. 자체 에니메이션 * SCALE * n번 본의 에니메이션 + n번 본의 위치
 	for( int i_ = 0; i_ < NumBones; ++i_ )
 	{				
-		// ㄹ_. Out에 위치값 갱신.
-		Vector( arrBonesTMLocal[i_][0][3], 
-			arrBonesTMLocal[i_][1][3],
-			arrBonesTMLocal[i_][2][3],
-			arrOutSetfAllBonePositions[i_] );
+		Vector( arrBonesTMLocal[i_][0][3], arrBonesTMLocal[i_][1][3], arrBonesTMLocal[i_][2][3], arrOutSetfAllBonePositions[i_] );
 	}
-	
-	// ㅁ. Vertex로 결과 갱신.
-	//Transform(arrBonesTMLocal, Temp, Temp, &OBB, false);
 	delete [] arrBonesTMLocal;
 }
 
-
-// 인자값 rts로 animate되어 각 Bone별 Position 값 array 반환
 void BMD::AnimationTransformOnlySelf( vec3_t *arrOutSetfAllBonePositions, 
 									  const vec3_t &v3Angle, 
 									  const vec3_t &v3Position,
@@ -759,10 +673,6 @@ void BMD::AnimationTransformOnlySelf( vec3_t *arrOutSetfAllBonePositions,
 	vec3_t		v3RootAngle, v3RootPosition;
 	float		fRootScale;
 	vec3_t		Temp;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int			iBoneCount = NumBones;	
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	fRootScale = const_cast<float&>(fScale);
 
@@ -779,7 +689,6 @@ void BMD::AnimationTransformOnlySelf( vec3_t *arrOutSetfAllBonePositions,
 	
 	memset( arrBonesTMLocal, 0, sizeof(vec34_t) * NumBones );
 	
-	// ㄷ. Sword 자체 에니메이션 산출 : (외부 인자값=rotation), (내부인자값=BodyScale,Position)
 	if( NULL == oRefAnimation )
 	{
 		Animation( arrBonesTMLocal, 0, 0, 0, v3RootAngle, Temp, false, true );
@@ -1209,10 +1118,6 @@ void BMD::ReleaseLightMaps()
 	}
     LightMapEnable = false;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// render body
-///////////////////////////////////////////////////////////////////////////////
 
 void BMD::BeginRender(float Alpha)
 {
@@ -3366,8 +3271,7 @@ bool BMD::Open2(char *DirName,char *ModelFileName, bool bReAlloc)
 	int DataPtr = 3;
 	Version          = *((char *)(Data+DataPtr));DataPtr+=1;
 	if ( Version == 12)
-	{	// 암호화 된거면
-		// 암호화 풀기
+	{
 		long lSize          = *((long *)(Data+DataPtr));DataPtr+=sizeof ( long);
 		long lDecSize = MapFileDecrypt( NULL, Data+DataPtr, lSize);
 		BYTE *pbyDec = new BYTE [lDecSize];

@@ -36,9 +36,6 @@ public:
 	int	 GetClosestBlankFromCenter(const std::wstring wstrTarget);
 	
 	WPARAM ConvertFulltoHalfWidthChar(DWORD wParam);
-	// wrapper functions 
-	// WIN32 APIs
-	// MSDN에서는 GetTextExtentPoint보다 더 정확한 결과를 제공하는 GetTextExtentPoint32 사용을 강력히 권장한다.
 	BOOL _GetTextExtentPoint32(HDC hdc, LPCWSTR lpString, int cbString, LPSIZE lpSize);
 	BOOL _GetTextExtentPoint32(HDC hdc, LPCSTR lpString, int cbString, LPSIZE lpSize);
 

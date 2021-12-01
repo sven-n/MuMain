@@ -65,10 +65,8 @@
 
 #include <ThemidaInclude.h>
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 #include "MultiLanguage.h"
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-///////////////////////////////////////////
+
 CUIMercenaryInputBox * g_pMercenaryInputBox = NULL;
 CUITextInputBox * g_pSingleTextInputBox = NULL;
 CUITextInputBox * g_pSinglePasswdInputBox = NULL;
@@ -77,9 +75,7 @@ extern BOOL g_bIMEBlock;
 
 CChatRoomSocketList * g_pChatRoomSocketList = NULL;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 CMultiLanguage *pMultiLanguage = NULL;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 extern DWORD g_dwTopWindow;
 
@@ -186,234 +182,37 @@ void CheckHack( void)
 	gProtocolSend.SendCheckOnline();
 }
 
-#ifdef ATTACH_HACKSHIELD
-int __stdcall HackShieldCallback(long lCode, long lParamSize, void* pParam)
-{
-	const char* szErrorBoxTitle = "HackShield Error";
-	switch(lCode)
-	{
-		//Engine Callback
-		case AHNHS_ENGINE_DETECT_GAME_HACK:
-		case AHNHS_ENGINE_DETECT_GENERAL_HACK:
-		{
-			leaf::CBTMessageBox(g_hWnd, GlobalText[1450], szErrorBoxTitle, MB_ICONERROR, true);
-			g_ErrorReport.Write("[HACKSHIELD] 다음 위치에서 해킹툴이 발견되어 프로그램을 종료시켰습니다.(%s)\r\n", (char*)pParam);
-
-			if(g_hWnd) {
-				SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-			}
-			break;
-		}
-
-		//이미 후킹이 이루어진 상태 
-		//일부 API가 이미 후킹되어 있는 상태
-		//그러나 실제로는 이를 차단하고 있기 때문에 다른 후킹시도 프로그램으 동작하지 않습니다.
-		//이 Callback은 단지 경보내지는 정보제공 차원에서 사용할 수 있습니다.
-		case AHNHS_ACTAPC_DETECT_ALREADYHOOKED:
-		{
-			PACTAPCPARAM_DETECT_HOOKFUNCTION pHookFunction = (PACTAPCPARAM_DETECT_HOOKFUNCTION)pParam;
-			
-			g_ErrorReport.Write("[HACKSHIELD] Already Hooked(-szFunctionName : %s -szModuleName : %s)\r\n", 
-				pHookFunction->szFunctionName, pHookFunction->szModuleName);
-
-			break;
-		}
-
-		//Speed 관련
-		case AHNHS_ACTAPC_DETECT_SPEEDHACK:
-		case AHNHS_ACTAPC_DETECT_SPEEDHACK_APP:
-		{
-			leaf::CBTMessageBox(g_hWnd, GlobalText[1451], szErrorBoxTitle, MB_ICONERROR, true);
-			g_ErrorReport.Write("[HACKSHIELD] PC에서 스피드핵으로 의심되는 증상이 발견되었습니다.(Code : %d)\r\n", lCode);
-			if(g_hWnd) {
-				SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-			}
-			break;
-		}
-
-		//디버깅 방지 
-		case AHNHS_ACTAPC_DETECT_KDTRACE:	
-		case AHNHS_ACTAPC_DETECT_KDTRACE_CHANGED:
-		{
-			leaf::CBTMessageBox(g_hWnd, GlobalText[1452], szErrorBoxTitle, MB_ICONERROR, true);
-			g_ErrorReport.Write("[HACKSHIELD] 디버깅시도가 있었습니다.(Code : %d)\r\n", lCode);
-			if(g_hWnd) {
-				SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-			}
-			break;
-		}
-
-		//해킹 방지 기능 이상 
-		case AHNHS_ACTAPC_DETECT_AUTOMOUSE:
-		{
-			leaf::CBTMessageBox(g_hWnd, GlobalText[1453], szErrorBoxTitle, MB_ICONERROR, true);
-			g_ErrorReport.Write("[HACKSHIELD] 해킹방지 기능이상.(Code : %d)\r\n", lCode);
-			if(g_hWnd) {
-				SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-			}
-			break;
-		}
-		case AHNHS_ACTAPC_DETECT_DRIVERFAILED:
-		{
-			leaf::CBTMessageBox(g_hWnd, GlobalText[1454], szErrorBoxTitle, MB_ICONERROR, true);
-			g_ErrorReport.Write("[HACKSHIELD] 해킹방지 기능이상.(Code : %d)\r\n", lCode);
-			if(g_hWnd) {
-				SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-			}
-			break;
-		}
-		case AHNHS_ACTAPC_DETECT_HOOKFUNCTION:
-		{
-			leaf::CBTMessageBox(g_hWnd, GlobalText[1455], szErrorBoxTitle, MB_ICONERROR, true);
-			g_ErrorReport.Write("[HACKSHIELD] 해킹방지 기능이상.(Code : %d)\r\n", lCode);
-			if(g_hWnd) {
-				SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-			}
-			break;
-		}
-		case AHNHS_ACTAPC_DETECT_MESSAGEHOOK:
-		{
-			leaf::CBTMessageBox(NULL, GlobalText[1456], szErrorBoxTitle, MB_ICONERROR, true);
-			g_ErrorReport.Write("[HACKSHIELD] 해킹방지 기능이상.(Code : 0x%d)\r\n", lCode);
-			if(g_hWnd) {
-				SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-			}
-			break;
-		}
-	}
-	return 1;
-}
-bool AttachHackShield(int nGameCode, const char* szLicenseKey) 
-{
-	char* szFileName;
-	char szEhSvcFileFullPath[256] = {0,};
-	GetFullPathName("HackShield/EhSvc.dll", 256, szEhSvcFileFullPath, &szFileName);
-
-	int nRet;
-	nRet = _AhnHS_Initialize(szEhSvcFileFullPath, HackShieldCallback, 
-		nGameCode, szLicenseKey, 
-		AHNHS_CHKOPT_SPEEDHACK | AHNHS_CHKOPT_AUTOMOUSE |
-#ifndef _DEBUG
-		AHNHS_CHKOPT_READWRITEPROCESSMEMORY | AHNHS_CHKOPT_KDTARCER | AHNHS_CHKOPT_OPENPROCESS |
-#endif // _DEBUG
-		AHNHS_CHKOPT_MESSAGEHOOK | AHNHS_CHKOPT_PROCESSSCAN | AHNHS_DONOT_TERMINATE_PROCESS |
-		AHNHS_ALLOW_SVCHOST_OPENPROCESS | AHNHS_USE_LOG_FILE/* | AHNHS_CHECK_UPDATE_STATE*/);
-
-	assert(nRet != HS_ERR_INVALID_PARAM);
-	assert(nRet != HS_ERR_INVALID_LICENSE);
-	assert(nRet != HS_ERR_ALREADY_INITIALIZED);
-
-	const char* szErrorBoxTitle = "HackShield Initailize Error";
-	if(nRet != HS_ERR_OK) 
-	{
-		switch(nRet)
-		{
-			case HS_ERR_ANOTHER_SERVICE_RUNNING:
-			{
-				leaf::CBTMessageBox(g_hWnd, "[HACKSHIELD] HS_ERR_ANOTHER_SERVICE_RUNNING", szErrorBoxTitle, MB_ICONERROR, true);
-				g_ErrorReport.Write("[HACKSHIELD] 다른 게임이 실행중입니다.\n프로그램을 종료합니다.", szErrorBoxTitle, MB_ICONERROR);
-				break;
-			}
-			case HS_ERR_INVALID_FILES:
-			{
-				leaf::CBTMessageBox(g_hWnd, "[HACKSHIELD] HS_ERR_INVALID_FILES", szErrorBoxTitle, MB_ICONERROR, true);
-				g_ErrorReport.Write("[HACKSHIELD] 잘못된 파일 설치되었습니다.\n프로그램을 재설치하시기 바랍니다.", szErrorBoxTitle, MB_ICONERROR);
-				break;
-			}
-			case HS_ERR_SOFTICE_DETECT:
-			{
-				leaf::CBTMessageBox(g_hWnd, "[HACKSHIELD] HS_ERR_SOFTICE_DETECT", szErrorBoxTitle, MB_ICONERROR, true);
-				g_ErrorReport.Write("[HACKSHIELD] 컴퓨터에서 SoftICE 실행이 감지되었습니다.\nSoftICE 실행을 중지시킨 뒤에 다시 실행시켜주시기바랍니다.", szErrorBoxTitle, MB_ICONERROR);
-				break;
-			}
-			case HS_ERR_INIT_DRV_FAILED:
-			{
-				leaf::CBTMessageBox(g_hWnd, "[HACKSHIELD] HS_ERR_INIT_DRV_FAILED", szErrorBoxTitle, MB_ICONERROR, true);
-				g_ErrorReport.Write("[HACKSHIELD] 해킹방지 기능에 문제가 발생하였습니다.(Error Code = %x)\n프로그램을 종료합니다.", nRet);
-				break;
-			}
-			case HS_ERR_NEED_UPDATE:
-			{
-				leaf::CBTMessageBox(g_hWnd, "[HACKSHIELD] HS_ERR_NEED_UPDATE", szErrorBoxTitle, MB_ICONERROR, true);
-				g_ErrorReport.Write("[HACKSHIELD] 업데이트파일이 정상적이지 않습니다.(Error Code = %x)\n프로그램을 종료합니다.", nRet);
-				break;
-			}
-		}
-		return false;
-	}
-
-	//시작 함수 호출 
-	nRet = _AhnHS_StartService();
-	assert(nRet != HS_ERR_NOT_INITIALIZED);
-	assert(nRet != HS_ERR_ALREADY_SERVICE_RUNNING);
-
-	if(nRet != HS_ERR_OK)
-	{
-		// nRet ==  HS_ERR_START_ENGINE_FAILED || nRet == HS_ERR_DRV_FILE_CREATE_FAILED
-		// || nRet == HS_ERR_REG_DRV_FILE_FAILED || nRet == HS_ERR_START_DRV_FAILED
-		g_ErrorReport.Write("해킹방지 기능에 문제가 발생하였습니다.(Error Code = 0x%x)\n프로그램을 종료합니다.", nRet);
-		leaf::CBTMessageBox(g_hWnd, "[HACKSHIELD] Start Error", szErrorBoxTitle, MB_ICONERROR, true);
-		return false;
-	}
-
-	return true;
-}
-void DetachHackShield()
-{
-	//서비스 종료 함수 호출 
-	_AhnHS_StopService();
-	//완료 함수 호출 
-	_AhnHS_Uninitialize();
-}
-#endif // ATTACH_HACKSHIELD
-
-///////////////////////////////////////////////////////////////////////////////
-// Window 관련함수
-///////////////////////////////////////////////////////////////////////////////
-
-//윈도우 죽이는 함수
 GLvoid KillGLWindow(GLvoid)								
 {
-	if (g_hRC)											// 랜더링 컨텍스트가 있다면...
+	if (g_hRC)
 	{
-		if (!wglMakeCurrent(NULL,NULL))					// DC와 RC 컨텍스트를 제거할 수 있는가?
+		if (!wglMakeCurrent(NULL,NULL))
 		{
 			g_ErrorReport.Write( "GL - Release Of DC And RC Failed\r\n");
 			MessageBox(NULL,"Release Of DC And RC Failed.","Error",MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (!wglDeleteContext(g_hRC))						// 랜더링 컨텍스트 제거
+		if (!wglDeleteContext(g_hRC))
 		{
 			g_ErrorReport.Write( "GL - Release Rendering Context Failed\r\n");
 			MessageBox(NULL,"Release Rendering Context Failed.","Error",MB_OK | MB_ICONINFORMATION);
 		}
 
-		g_hRC=NULL;										// RC <- NULL 대입
+		g_hRC=NULL;
 	}
 
-	if (g_hDC && !ReleaseDC(g_hWnd,g_hDC))					// DC 제거
+	if (g_hDC && !ReleaseDC(g_hWnd,g_hDC))
 	{
 		g_ErrorReport.Write( "GL - OpenGL Release Error\r\n");
 		MessageBox(NULL,"OpenGL Release Error.","Error",MB_OK | MB_ICONINFORMATION);
-		g_hDC=NULL;										// DC <- NULL 대입
+		g_hDC=NULL;
 	}
 
-	/*if (g_hWnd && !DestroyWindow(g_hWnd))					// 윈도우즈를 파괴한다.
-	{
-		MessageBox(NULL,"OpenGL Destroy Error. 그래픽카드 최신 드라이버를 설치하십시요.","ERROR",MB_OK | MB_ICONINFORMATION);
-		g_hWnd=NULL;										// hWnd <- NULL 대입
-	}*/
-
-	/*if (!UnregisterClass("OpenGL",g_hInst))			// 윈도우 클래스 제거
-	{
-		MessageBox(NULL,"Could Not Unregister Class.","ERROR",MB_OK | MB_ICONINFORMATION);
-		g_hInst=NULL;									// hInstance <- NULL 대입
-	}*/
 #if (defined WINDOWMODE)
 	if (g_bUseWindowMode == FALSE)
 	{
-		ChangeDisplaySettings(NULL,0);					// 데스크탑 설정으로 복귀
-		ShowCursor(TRUE);								// 마우스 포인트를 보이도록
+		ChangeDisplaySettings(NULL,0);
+		ShowCursor(TRUE);
 	}
 #else
 #ifdef ENABLE_FULLSCREEN
@@ -421,8 +220,8 @@ GLvoid KillGLWindow(GLvoid)
 	if (g_bUseWindowMode == FALSE)
 #endif	// USER_WINDOW_MODE
 	{
-		ChangeDisplaySettings(NULL,0);					// 데스크탑 설정으로 복귀
-		ShowCursor(TRUE);								// 마우스 포인트를 보이도록
+		ChangeDisplaySettings(NULL,0);
+		ShowCursor(TRUE);
 	}
 #endif //ENABLE_FULLSCREEN
 #endif	//WINDOWMODE(#else)
@@ -440,7 +239,6 @@ BOOL GetFileNameOfFilePath( char *lpszFile, char *lpszPath)
 		lpFound = strchr( lpFound + 1, iFind);
 	}
 
-	// 이름 복사
 	if ( strchr( lpszPath, iFind))
 	{
 		strcpy( lpszFile, lpOld + 1);
@@ -449,7 +247,7 @@ BOOL GetFileNameOfFilePath( char *lpszFile, char *lpszPath)
 	{
 		strcpy( lpszFile, lpOld);
 	}
-	// 뒤에 옵션 붙은 것 없애기
+
 	BOOL bCheck = TRUE;
 	for ( char *lpTemp = lpszFile; bCheck; ++lpTemp)
 	{
@@ -478,16 +276,9 @@ BOOL OpenMainExe( void)
 #endif
 	char lpszFile[MAX_PATH];
 	char *lpszCommandLine = GetCommandLine();
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	GetFileNameOfFilePath( lpszFile, lpszCommandLine);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	BOOL bResult = GetFileNameOfFilePath( lpszFile, lpszCommandLine);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
-
-	// 열어놔서 고치지 못하게 한다.
-	g_hMainExe = CreateFile( ( char*)lpszFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
-								FILE_ATTRIBUTE_NORMAL, 0);
+	g_hMainExe = CreateFile( ( char*)lpszFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL, 0);
 	
 	return ( INVALID_HANDLE_VALUE != g_hMainExe);
 }
@@ -541,11 +332,7 @@ DWORD GetCheckSum( WORD wKey)
 
 	char lpszFile[MAX_PATH];
 
-#ifdef _TEST_SERVER
-	strcpy( lpszFile, "data\\local\\Gameguardtest.csr");
-#else  // _TEST_SERVER
 	strcpy( lpszFile, "data\\local\\Gameguard.csr");
-#endif // _TEST_SERVER
 
 	HANDLE hFile = CreateFile( ( char*)lpszFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if ( INVALID_HANDLE_VALUE == hFile)
@@ -829,7 +616,7 @@ Pos_UserMemoryHack:
 			}
 #endif // CONSOLE_DEBUG
 			SocketClient.Close();
-			gProtocolSend.DisconnectServer();
+			gProtocolSend.DisconnectServer(); 
 			CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
 			break;
 		}
@@ -1295,10 +1082,8 @@ int  m_Resolution;
 int	m_nColorDepth;
 int	g_iRenderTextType = 0;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 char g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = {'\0'};
 std::string g_strSelectedML = "";
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 BOOL OpenInitFile()
 {
@@ -1403,14 +1188,12 @@ BOOL OpenInitFile()
 		}
 #endif // USER_WINDOW_MODE
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		dwSize = MAX_LANGUAGE_NAME_LENGTH;
 		if ( RegQueryValueEx (hKey, "LangSelection", 0, NULL, (LPBYTE)g_aszMLSelection, &dwSize) != ERROR_SUCCESS)
 		{
 			strcpy(g_aszMLSelection, "Eng");
 		}
 		g_strSelectedML = g_aszMLSelection;
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 #ifdef ADD_GFX_REG_OPTION
 		//레지스트레에서 ui설정값 확인
@@ -1619,44 +1402,39 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
 	leaf::AttachExceptionHandler(ExceptionCallback);
 
-#ifndef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	OpenTextData();		//. Text.bmd, Testtest.bmd를 읽는다.
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	{
-		char lpszExeVersion[256] = "unknown";
+	char lpszExeVersion[256] = "unknown";
 
-		char *lpszCommandLine = GetCommandLine();
-		char lpszFile[MAX_PATH];
-		WORD wVersion[4] = { 0,};
-		if ( GetFileNameOfFilePath( lpszFile, lpszCommandLine))
+	char *lpszCommandLine = GetCommandLine();
+	char lpszFile[MAX_PATH];
+	WORD wVersion[4] = { 0,};
+	if ( GetFileNameOfFilePath( lpszFile, lpszCommandLine))
+	{
+		if ( GetFileVersion( lpszFile, wVersion))
 		{
-			if ( GetFileVersion( lpszFile, wVersion))
+			sprintf( lpszExeVersion, "%d.%02d", wVersion[0], wVersion[1]);
+			if ( wVersion[2] > 0)
 			{
-				sprintf( lpszExeVersion, "%d.%02d", wVersion[0], wVersion[1]);
-				if ( wVersion[2] > 0)
-				{
-					char lpszMinorVersion[2] = "a";
-					lpszMinorVersion[0] += ( wVersion[2] - 1);
-					strcat( lpszExeVersion, lpszMinorVersion);
-				}
+				char lpszMinorVersion[2] = "a";
+				lpszMinorVersion[0] += ( wVersion[2] - 1);
+				strcat( lpszExeVersion, lpszMinorVersion);
 			}
 		}
-
-		g_ErrorReport.Write( "\r\n");
-		g_ErrorReport.WriteLogBegin();
-		g_ErrorReport.AddSeparator();
-		g_ErrorReport.Write( "Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, "Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
-
-		g_ConsoleDebug->Write(MCD_NORMAL, "Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
-
-		g_ErrorReport.WriteCurrentTime();
-		ER_SystemInfo si;
-		ZeroMemory( &si, sizeof ( ER_SystemInfo));
-		GetSystemInfo( &si);
-		g_ErrorReport.AddSeparator();
-		g_ErrorReport.WriteSystemInfo( &si);
-		g_ErrorReport.AddSeparator();
 	}
+
+	g_ErrorReport.Write( "\r\n");
+	g_ErrorReport.WriteLogBegin();
+	g_ErrorReport.AddSeparator();
+	g_ErrorReport.Write( "Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, "Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+
+	g_ConsoleDebug->Write(MCD_NORMAL, "Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+
+	g_ErrorReport.WriteCurrentTime();
+	ER_SystemInfo si;
+	ZeroMemory( &si, sizeof ( ER_SystemInfo));
+	GetSystemInfo( &si);
+	g_ErrorReport.AddSeparator();
+	g_ErrorReport.WriteSystemInfo( &si);
+	g_ErrorReport.AddSeparator();
 
 	// PKD_ADD_BINARY_PROTECTION
 	VM_START
@@ -1965,12 +1743,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     while( 1 )
     {
-#ifdef USE_SELFCHECKCODE
-		if ( TimeRemain >= 40)
-		{
-			SendCrcOfFunction( 8, 20, MoveHero, 0x93B7);
-		}
-#endif
         if( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
         {
             if( !GetMessage( &msg, NULL, 0, 0 ) )
@@ -2033,6 +1805,7 @@ Pos_ActiveCheck:
 		}
         ProtocolCompiler();
 		g_pChatRoomSocketList->ProtocolCompile();
+		gProtocolSend.RecvMessage();
     } // while( 1 )
 
 #ifdef DO_PROCESS_DEBUGCAMERA	

@@ -461,11 +461,7 @@ void CUIButton::Render()
 		{
 			SIZE TextSize;
 			const int TextLen = lstrlen(m_pszCaption);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pRenderText->SetTextColor(230, 220, 200, 255);
 			g_pRenderText->SetBgColor(0);
 			g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
@@ -499,11 +495,7 @@ void CUIButton::Render()
 		SIZE TextSize;
 		const int TextLen = lstrlen(m_pszCaption);
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pRenderText->SetTextColor(230, 220, 200, 255);
 		g_pRenderText->SetBgColor(0, 0, 0, 0);
 		
@@ -1541,11 +1533,7 @@ void CUISimpleChatListBox::AddTextToRenderList(const char * pszID, const char * 
 	if (strlen(pszID) + strlen(pszText) >= 20)
 	{
 		SIZE nameSize;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszID, lstrlen(pszID), &nameSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), pszID, lstrlen(pszID), &nameSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 		char Text1[10][MAX_TEXT_LENGTH + 1] = {{0},{0},{0},{0},{0}};
 		int iLine = CutText3(pszText, Text1[0], m_iWidth - 30, 10, MAX_TEXT_LENGTH + 1, (nameSize.cx + 5) / g_fScreenRate_x);
@@ -1709,17 +1697,9 @@ CUIChatPalListBox::CUIChatPalListBox()
 
 	m_iColumnWidth[0] = m_iColumnWidth[1] = m_iColumnWidth[2] = m_iColumnWidth[3] = 0;
 	SIZE TextSize;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), "ZZZZZZZZZZ", lstrlen("ZZZZZZZZZZ"), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), "ZZZZZZZZZZ", lstrlen("ZZZZZZZZZZ"), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SetColumnWidth(0, TextSize.cx / g_fScreenRate_x + 8);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1022], lstrlen(GlobalText[1022]), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), GlobalText[1022], lstrlen(GlobalText[1022]), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
 
 	m_bForceEditList = FALSE;
@@ -2172,23 +2152,11 @@ CUILetterListBox::CUILetterListBox()
 	SIZE TextSize;
 
 	SetColumnWidth(0, 15 + 10);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1028], lstrlen(GlobalText[1028]), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), GlobalText[1028], lstrlen(GlobalText[1028]), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1029], lstrlen(GlobalText[1029]), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), GlobalText[1029], lstrlen(GlobalText[1029]), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SetColumnWidth(2, TextSize.cx / g_fScreenRate_x + 8);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1030], lstrlen(GlobalText[1030]), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), GlobalText[1030], lstrlen(GlobalText[1030]), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SetColumnWidth(3, TextSize.cx / g_fScreenRate_x + 8);
 
 	m_bForceEditList = FALSE;
@@ -3240,11 +3208,7 @@ CUITextInputBox::CUITextInputBox()
 
 CUITextInputBox::~CUITextInputBox()
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SetWindowLongW(m_hEditWnd, GWL_WNDPROC, (LONG)m_hOldProc);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	SetWindowLong(m_hEditWnd, GWL_WNDPROC, (LONG)m_hOldProc);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_hOldProc = NULL;
 
 	if(m_hEditWnd != NULL)
@@ -3350,17 +3314,10 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		default:
 			{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				wchar_t Char = (wchar_t)(wParam);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				char Char = (TCHAR)(wParam);           
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				if (Char>=25 && Char<=28) return 0;
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				// 전각으로 된 기본 글자들을 반각으로 변환
 				wParam = g_pMultiLanguage->ConvertFulltoHalfWidthChar(wParam);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 				if (pTextInputBox->CheckOption(UIOPTION_NUMBERONLY))
 				{
@@ -3414,11 +3371,7 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			g_pFriendMenu->ShowMenu(TRUE);
 		break;
 	}
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	return CallWindowProcW(pTextInputBox->m_hOldProc, hWnd, msg, wParam, lParam );
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	return CallWindowProc(pTextInputBox->m_hOldProc, hWnd, msg, wParam, lParam );
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -3463,13 +3416,11 @@ void CUITextInputBox::GetText(char * pszText, int iGetLenght)
 	GetWindowText(m_hEditWnd, pszText, iGetLenght);
 }
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 void CUITextInputBox::GetText(wchar_t * pwszText, int iGetLenght)
 {
 	if (pwszText == NULL) return;
 	GetWindowTextW(m_hEditWnd, pwszText, iGetLenght);
 }
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 void CUITextInputBox::SetText(const char * pszText)
 {
@@ -3485,17 +3436,11 @@ void CUITextInputBox::SetText(const char * pszText)
 	if (wstrText.length() > MAX_TEXT_LENGTH) return;
 	SetWindowTextW(m_hEditWnd, wstrText.c_str());
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputBox::SetTextLimit(int iLimit)
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SendMessageW(m_hEditWnd, EM_SETLIMITTEXT, iLimit, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	SendMessage(m_hEditWnd, EM_SETLIMITTEXT, iLimit, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputBox::SetSize(int iWidth, int iHeight)
 {
@@ -3505,7 +3450,6 @@ void CUITextInputBox::SetSize(int iWidth, int iHeight)
 	m_iWidth = iWidth;
 	m_iHeight = iHeight;
 	
-	//. DC를 사이즈에 맞게 지우고 새로 생성
 	if (m_hMemDC != NULL)
 	{
 		DeleteDC(m_hMemDC);
@@ -3560,11 +3504,7 @@ void CUITextInputBox::SetSize(int iWidth, int iHeight)
 	if (m_hEditWnd != NULL)
 	{
 		SetWindowPos(m_hEditWnd, 0, 0, 0, iWidth*g_fScreenRate_x, iHeight*g_fScreenRate_y, SWP_NOMOVE | SWP_NOZORDER);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		SendMessageW(m_hEditWnd, EM_SETSEL, (WPARAM)0, (LPARAM)0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		SendMessage(m_hEditWnd, EM_SETSEL, (WPARAM)0, (LPARAM)0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	}
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3598,7 +3538,6 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
 	m_iRealWindowPos_y = iMove;
 #endif // #ifdef DEBUG_FONT_TEXTURE_TEST
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_hEditWnd = CreateWindowW(L"edit", NULL,WS_CHILD | WS_VISIBLE | dwOptionFlag,
 		m_iRealWindowPos_x, m_iRealWindowPos_y, iWidth*g_fScreenRate_x, iHeight*g_fScreenRate_y,
 		m_hParentWnd, (HMENU)ID_UICEDIT,g_hInst, NULL);
@@ -3611,20 +3550,6 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
 		SetWindowLongW(m_hEditWnd, GWL_USERDATA, (LONG)this);
 		ShowWindow(m_hEditWnd, SW_HIDE);
 	}
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	m_hEditWnd = CreateWindow("edit", NULL,WS_CHILD | WS_VISIBLE | dwOptionFlag,
-		m_iRealWindowPos_x, m_iRealWindowPos_y, iWidth*g_fScreenRate_x, iHeight*g_fScreenRate_y,
-		m_hParentWnd, (HMENU)ID_UICEDIT,g_hInst, NULL);
-	
-	SetSize(iWidth, iHeight);
-	if(m_hEditWnd)
-	{
-		SetTextLimit(iMaxLength);
-		m_hOldProc = (WNDPROC)SetWindowLong(m_hEditWnd, GWL_WNDPROC, (LONG)EditWndProc);
-		SetWindowLong(m_hEditWnd, GWL_USERDATA, (LONG)this);
-		ShowWindow(m_hEditWnd, SW_HIDE);
-	}
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
 	m_bUseScrollbarRender = true;
@@ -3705,7 +3630,7 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 	GetCaretPos(&pt);
 
 	SIZE RealBoxSize = { m_iWidth*g_fScreenRate_x, m_iHeight*g_fScreenRate_y };
-	const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;		// 폰트 텍스쳐의 가로, 세로 사이즈
+	const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
 	int iPitch = ((RealBoxSize.cx*24+31)&~31)>>3;
 
 	int iSectionX = (iOffset % iPitch) / (LIMIT_WIDTH*3);
@@ -3725,30 +3650,27 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 			if((SrcIndex > iPitch*RealBoxSize.cy) || (DstIndex > LIMIT_WIDTH*4*LIMIT_HEIGHT))
 			{
 #ifdef _DEBUG
-				__asm { int 3 };			//. 절대로 들어오면 안됨: 꼭 디버깅 하세요.
+				__asm { int 3 };
 #endif // _DEBUG
 				return;
 			}
 
-			if(*(m_pFontBuffer+SrcIndex) == 255)	// 글자
+			if(*(m_pFontBuffer+SrcIndex) == 255)
 			{
-				//. 현재 픽셀이 캐럿 영역안에 있는가?
 				if(bIsCaretTime && PtInRect(&rcCaret, ptProcessing))
 					*((unsigned int *)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
 				else
 					*((unsigned int *)(pBitmapFont->Buffer + DstIndex)) = m_dwTextColor;
 			}
-			else if(*(m_pFontBuffer+SrcIndex) == 0)	// 배경
+			else if(*(m_pFontBuffer+SrcIndex) == 0)
 			{
-				//. 현재 픽셀이 캐럿 영역안에 있는가?
 				if(bIsCaretTime && PtInRect(&rcCaret, ptProcessing))
 					*((unsigned int *)(pBitmapFont->Buffer + DstIndex)) = _ARGB(255, 200, 200, 200);
 				else
 					*((unsigned int *)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
 			}
-			else			// 선택영역 배경
+			else
 			{
-				//. 현재 픽셀이 캐럿 영역안에 있는가?
 				if(bIsCaretTime && PtInRect(&rcCaret, ptProcessing))
 					*((unsigned int *)(pBitmapFont->Buffer + DstIndex)) = _ARGB(255, 200, 200, 200);
 				else
@@ -3772,11 +3694,7 @@ void CUITextInputBox::Render()
 	if (m_fCaretHeight == 0)
 	{
 		SIZE TextSize;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(m_hMemDC, "Q", 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(m_hMemDC, "Q", 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		m_fCaretHeight = TextSize.cy;
 	}
 	
@@ -3788,13 +3706,8 @@ void CUITextInputBox::Render()
 		EndRenderColor();
 	}
 	
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	CallWindowProcW(m_hOldProc, m_hEditWnd, WM_ERASEBKGND, (WPARAM)m_hMemDC, 0);
 	CallWindowProcW(m_hOldProc, m_hEditWnd, WM_PAINT, (WPARAM)m_hMemDC, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	CallWindowProc(m_hOldProc, m_hEditWnd, WM_ERASEBKGND, (WPARAM)m_hMemDC, 0);
-	CallWindowProc(m_hOldProc, m_hEditWnd, WM_PAINT, (WPARAM)m_hMemDC, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 	const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
 	SIZE RealTextLine = { 0, 0 };
@@ -3803,19 +3716,13 @@ void CUITextInputBox::Render()
 	{
 		char TextCheck[MAX_TEXT_LENGTH + 1] = {0, };
 		GetText(TextCheck);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		wchar_t TextCheckUTF16[MAX_TEXT_LENGTH+1] = {'\0'};
 		GetText(TextCheckUTF16);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		SIZE TextSize;
 
 		if (IsPassword() == FALSE)
 		{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(m_hMemDC, TextCheckUTF16, wcslen(TextCheckUTF16), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(m_hMemDC, TextCheck, strlen(TextCheck), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		}
 		else
 		{
@@ -3824,22 +3731,16 @@ void CUITextInputBox::Render()
 			szPasswd[MAX_TEXT_LENGTH] = '\0';
 			g_pRenderText->SetFont(g_hFontBold);
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(m_hMemDC, szPasswd, strlen(TextCheck), &TextSize);	
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(m_hMemDC, szPasswd, strlen(TextCheck), &TextSize);	
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pRenderText->SetFont(g_hFont);
 		}
 		RealTextLine.cx = TextSize.cx + m_fCaretWidth;
 		RealTextLine.cy = (TextSize.cy > m_fCaretHeight) ? TextSize.cy : m_fCaretHeight;
-		if(RealTextLine.cx > RealWndSize.cx)		//. 렌더영역 너비보다 문자열 너비가 크다면
+		if(RealTextLine.cx > RealWndSize.cx)
 			RealTextLine.cx = RealWndSize.cx;
-		if(RealTextLine.cy > RealWndSize.cy)		//. 렌더영역 너비보다 문자열 높이가 크다면
+		if(RealTextLine.cy > RealWndSize.cy)
 			RealTextLine.cy = RealWndSize.cy;
 		
-		//. 256(텍스쳐 사이즈)을 넘어가는 텍스트는 x개의 구간으로 쪼깬다.
-		//. 256을 넘지 않으면 iNumberOfSections == 1이 된다
 		int iNumberOfSections = (RealTextLine.cx / LIMIT_WIDTH) + ((RealTextLine.cx % LIMIT_WIDTH >= 0) ? 1 : 0);
 		for(int i=0; i<iNumberOfSections; i++)
 		{
@@ -3849,19 +3750,9 @@ void CUITextInputBox::Render()
 			
 			WriteText(LIMIT_WIDTH*i*3, RealSectionLine.cx, RealSectionLine.cy);
 			UploadText(RealWndPos.x+LIMIT_WIDTH*i, RealWndPos.y, RealSectionLine.cx, RealSectionLine.cy);	
-
-#ifdef DEBUG_FONT_TEXTURE_TEST
-			EnableAlphaTest();
-			glColor4f(0.0f, 0.7f, 0.0f, 0.3f);
-			RenderColor((RealWndPos.x+LIMIT_WIDTH*i)/g_fScreenRate_x, RealWndPos.y/g_fScreenRate_y, 
-				RealSectionLine.cx/g_fScreenRate_x, RealSectionLine.cy/g_fScreenRate_y);
-			//DisableAlphaBlend();
-			EndRenderColor();
-			//SEASON3B::RenderImage(BITMAP_FONT, 0, 250, 256, 32);	//! test
-#endif	// DEBUG_FONT_TEXTURE_TEST
 		}
 	}
-	else							//. 멀티 라인
+	else
 	{
 		m_iNumLines = RealWndSize.cy / m_fCaretHeight;
 		RealTextLine.cx = RealWndSize.cx; 
@@ -3884,15 +3775,6 @@ void CUITextInputBox::Render()
 
 				WriteText(iPitch*LIMIT_HEIGHT*y + LIMIT_WIDTH*x*3, RealSectionLine.cx, RealSectionLine.cy);
 				UploadText(RealWndPos.x+LIMIT_WIDTH*x, RealWndPos.y+LIMIT_HEIGHT*y, RealSectionLine.cx, RealSectionLine.cy);
-#ifdef DEBUG_FONT_TEXTURE_TEST
-				EnableAlphaTest();
-				glColor4f(0.0f, 0.7f, 0.0f, 0.3f);
-				RenderColor((RealWndPos.x+LIMIT_WIDTH*x)/g_fScreenRate_x, (RealWndPos.y+LIMIT_HEIGHT*y)/g_fScreenRate_y, 
-					RealSectionLine.cx/g_fScreenRate_x, RealSectionLine.cy/g_fScreenRate_y);
-				//DisableAlphaBlend();
-				EndRenderColor();
-				//SEASON3B::RenderImage(BITMAP_FONT, 0, 100, 256, 32);	//! test
-#endif // DEBUG_FONT_TEXTURE_TEST
 			}
 		}
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
@@ -3956,11 +3838,8 @@ void CUITextInputBox::SetFont(HFONT hFont)
 {
 	if (m_hEditWnd == NULL || hFont == NULL)
 		return;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 	SendMessageW(m_hEditWnd, WM_SETFONT, (UINT)hFont, FALSE);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	SendMessage(m_hEditWnd, WM_SETFONT, (UINT)hFont, FALSE);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	SelectObject(m_hMemDC, hFont);
 }
 
@@ -3971,28 +3850,17 @@ BOOL CUITextInputBox::DoMouseAction()
 	{
 		if (MouseLButtonPush && GetState() == UISTATE_NORMAL)
 		{
-			// 위로 버튼
 			if(::CheckMouseIn(m_iPos_x + m_iWidth - 15, m_iPos_y - 4, 13, 13))
 			{
 				if (m_bScrollBtnClick == FALSE)
 				{
-					//Scrolling(-1);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					SendMessageW(m_hEditWnd, EM_SCROLL, SB_LINEUP, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					SendMessage(m_hEditWnd, EM_SCROLL, SB_LINEUP, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					PlayBuffer(SOUND_CLICK01);
 					m_bScrollBtnClick = TRUE;
 				}
 				else if (m_bScrollBtnClick > 15)
 				{
-					//Scrolling(-1);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					SendMessageW(m_hEditWnd, EM_SCROLL, SB_LINEUP, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					SendMessage(m_hEditWnd, EM_SCROLL, SB_LINEUP, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				}
 				else
 				{
@@ -4004,23 +3872,13 @@ BOOL CUITextInputBox::DoMouseAction()
 			{
 				if (m_bScrollBtnClick == FALSE)
 				{
-					//Scrolling(1);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					SendMessageW(m_hEditWnd, EM_SCROLL, SB_LINEDOWN, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					SendMessage(m_hEditWnd, EM_SCROLL, SB_LINEDOWN, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					PlayBuffer(SOUND_CLICK01);
 					m_bScrollBtnClick = TRUE;
 				}
 				else if (m_bScrollBtnClick > 15)
 				{
-					//Scrolling(1);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					SendMessageW(m_hEditWnd, EM_SCROLL, SB_LINEDOWN, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					SendMessage(m_hEditWnd, EM_SCROLL, SB_LINEDOWN, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				}
 				else
 				{
@@ -4028,13 +3886,7 @@ BOOL CUITextInputBox::DoMouseAction()
 						m_bScrollBtnClick++;
 				}
 			}
-//			if (GetLineNum() < m_iNumRenderLine);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			if (SendMessageW(m_hEditWnd, EM_GETLINECOUNT, 0, 0) < m_iNumLines);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			if (SendMessage(m_hEditWnd, EM_GETLINECOUNT, 0, 0) < m_iNumLines);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			// 스크롤바 끌기
 			else if(::CheckMouseIn(m_iPos_x + m_iWidth - 14, m_fScrollBarPos_y,
 				m_fScrollBarWidth, m_fScrollBarHeight))
 			{
@@ -4045,29 +3897,18 @@ BOOL CUITextInputBox::DoMouseAction()
 					m_fScrollBarClickPos_y = MouseY - m_fScrollBarPos_y;
 				}
 			}
-			// 스크롤바 클릭
 			else if(::CheckMouseIn(m_iPos_x + m_iWidth - 14, m_fScrollBarRange_top,
 				m_fScrollBarWidth, m_fScrollBarPos_y - m_fScrollBarRange_top))
 			{
 				if (GetParentUIID() > 0 && g_pWindowMgr->IsRenderFrame() == FALSE);
 				else if (m_bScrollBarClick == FALSE)
 				{
-					//Scrolling(-1 * m_iNumRenderLine);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					SendMessageW(m_hEditWnd, EM_SCROLL, SB_PAGEUP, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					SendMessage(m_hEditWnd, EM_SCROLL, SB_PAGEUP, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					m_bScrollBarClick = TRUE;
 				}
 				else if (m_bScrollBarClick > 15)
 				{
-					//Scrolling(-1 * m_iNumRenderLine);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					SendMessageW(m_hEditWnd, EM_SCROLL, SB_PAGEUP, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					SendMessage(m_hEditWnd, EM_SCROLL, SB_PAGEUP, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				}
 				else
 				{
@@ -4081,22 +3922,12 @@ BOOL CUITextInputBox::DoMouseAction()
 				if (GetParentUIID() > 0 && g_pWindowMgr->IsRenderFrame() == FALSE);
 				else if (m_bScrollBarClick == FALSE)
 				{
-					//Scrolling(m_iNumRenderLine);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					SendMessageW(m_hEditWnd, EM_SCROLL, SB_PAGEDOWN, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					SendMessage(m_hEditWnd, EM_SCROLL, SB_PAGEDOWN, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					m_bScrollBarClick = TRUE;
 				}
 				else if (m_bScrollBarClick > 15)
 				{
-					//Scrolling(m_iNumRenderLine);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 					SendMessageW(m_hEditWnd, EM_SCROLL, SB_PAGEDOWN, 0);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-					SendMessage(m_hEditWnd, EM_SCROLL, SB_PAGEDOWN, 0);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 				}
 				else
 				{
@@ -4130,19 +3961,13 @@ BOOL CUITextInputBox::DoMouseAction()
 		if (MouseLButtonPush)
 		{
 			MouseOnWindow = true;
-			// 역계산
 			m_fScrollBarPos_y = (float)MouseY - m_fScrollBarClickPos_y;
 			int iCurrentRenderEndLine = (m_fScrollBarPos_y - m_fScrollBarRange_top + 0.5f)
 				/ (m_fScrollBarRange_bottom - m_fScrollBarRange_top)
 				* (float)SendMessage(m_hEditWnd, EM_GETLINECOUNT, 0, 0);
 			SetScrollPos(m_hEditWnd, SB_VERT, iCurrentRenderEndLine, TRUE);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			SendMessageW(m_hEditWnd, EM_LINESCROLL, 0, -10000);
 			SendMessageW(m_hEditWnd, EM_LINESCROLL, 0, iCurrentRenderEndLine);
-#else //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			SendMessage(m_hEditWnd, EM_LINESCROLL, 0, -10000);
-			SendMessage(m_hEditWnd, EM_LINESCROLL, 0, iCurrentRenderEndLine);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		}
 		else
 		{
@@ -4153,7 +3978,6 @@ BOOL CUITextInputBox::DoMouseAction()
 	
 	return bResult;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::Init(HWND hWnd)
 {
@@ -4176,7 +4000,6 @@ void CUIChatInputBox::Init(HWND hWnd)
 	ImmGetConversionStatus(hIMC, &g_dwBKConv, &g_dwBKSent);
 	ImmReleaseContext(g_hWnd, hIMC);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::Reset()
 {
@@ -4185,44 +4008,39 @@ void CUIChatInputBox::Reset()
 	ClearTexts();
 	RemoveHistory(TRUE);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::Render()
 {
 	m_TextInputBox.Render();
 	m_BuddyInputBox.Render();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::TabMove(int iBoxNumber)
 {
 	if (GetState() == UISTATE_HIDE) return;
-	if (iBoxNumber == 1)// && GetFocus() == m_TextInputBox.GetHandle())	// 귓속말
+	if (iBoxNumber == 1)
 	{
 		m_BuddyInputBox.GiveFocus();
 		PostMessage(m_BuddyInputBox.GetHandle(), EM_SETSEL, ( WPARAM)0, ( LPARAM)-1);
 	}
-	else// if (GetFocus() == m_BuddyInputBox.GetHandle())	// 기본
+	else
 	{
 		m_TextInputBox.GiveFocus();
 		PostMessage(m_TextInputBox.GetHandle(), EM_SETSEL, ( WPARAM)0, ( LPARAM)-1);
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::GetTexts(char * pText, char * pBuddyText)
 {
 	m_TextInputBox.GetText(pText);
 	m_BuddyInputBox.GetText(pBuddyText);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::ClearTexts()
 {
 	m_TextInputBox.SetText(NULL);
 	m_BuddyInputBox.SetText(NULL);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::SetState(int iState)
 {
@@ -4233,21 +4051,18 @@ void CUIChatInputBox::SetState(int iState)
 		m_TextInputBox.GiveFocus();
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::SetFont(HFONT hFont)
 {
 	m_TextInputBox.SetFont(hFont);
 	m_BuddyInputBox.SetFont(hFont);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatInputBox::SetText(BOOL bSetText, const char * pText, BOOL bSetBuddyText, const char * pBuddyText)
 {
 	if (bSetText == TRUE) m_TextInputBox.SetText(pText);
 	if (bSetBuddyText == TRUE) m_BuddyInputBox.SetText(pBuddyText);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUIChatInputBox::DoMouseAction()
 {
@@ -4255,7 +4070,6 @@ BOOL CUIChatInputBox::DoMouseAction()
 	if (m_BuddyInputBox.DoAction() == TRUE) InputIndex = 1;
 	return TRUE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const int MAX_HISTORY_LINES = 10;
 
@@ -4511,11 +4325,7 @@ void CUISlideHelp::Render(BOOL bForceFadeOut)
 	if (m_iFontHeight == 0)
 	{
 		SIZE TextSize = {0, 0};
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), "Z", 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), "Z", 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		m_iFontHeight = TextSize.cy /= g_fScreenRate_y;
 
 		if(GetPosition_y() >= m_iFontHeight)	
@@ -4550,21 +4360,10 @@ void CUISlideHelp::SlideMove()
 
 	if (m_fMovePosition < m_iCutSize * -1)
 	{
-#ifdef KJW_FIX_SLIDE_MOVE
 		memset(m_pszSlideText, 0, SLIDE_TEXT_LENGTH);
 		m_fMovePosition = 640.0f;
 		m_iCutSize = CheckCutSize(m_pszSlideText, 4);
 		m_iCutSize /= g_fScreenRate_x;
-#else // KJW_FIX_SLIDE_MOVE
-		char * pCopyText = (m_pszSlideText == m_szSlideTextA ? m_szSlideTextB : m_szSlideTextA);
-		memset(pCopyText, 0, SLIDE_TEXT_LENGTH);
-		strncpy(pCopyText, m_pszSlideText + m_iCutLength, strlen(m_pszSlideText) - m_iCutLength);
-		m_pszSlideText = pCopyText;
-		m_fMovePosition += m_iCutSize;
-		
-		m_iCutSize = CheckCutSize(m_pszSlideText, 4);
-		m_iCutSize /= g_fScreenRate_x;
-#endif // KJW_FIX_SLIDE_MOVE
 	}
 }
 
@@ -4597,32 +4396,6 @@ BOOL CUISlideHelp::AddSlideText(const char * pszNewText, DWORD dwTextColor)
 
 	m_dwSlideTextColor = dwTextColor;
 	g_pRenderText->SetFont(m_hFont);
-
-#ifndef KJW_FIX_SLIDE_MOVE
-	char szSpace[SLIDE_TEXT_LENGTH];
-	memset(szSpace, 0, SLIDE_TEXT_LENGTH);
-	
-	SIZE TextSize = {0, 0};
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"ZZ", 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), " ", 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	
-	float fNumSpace = 640.0f / (float)TextSize.cx * g_fScreenRate_x;
-	
-	if (fNumSpace > SLIDE_TEXT_LENGTH)
-	{
-		fNumSpace = SLIDE_TEXT_LENGTH;
-	}
-	if (strlen(m_pszSlideText) + fNumSpace + strlen(pszNewText) > SLIDE_TEXT_LENGTH)
-	{
-		return FALSE;
-	}
-
-	memset(szSpace, ' ', int(fNumSpace));
-	strcat(m_pszSlideText, szSpace);
-#endif // KJW_FIX_SLIDE_MOVE
 	strcat(m_pszSlideText, pszNewText);
 	return TRUE;
 }
@@ -4657,11 +4430,7 @@ int CUISlideHelp::CheckCutSize(const char * pszSource, int iNeedValue)
 	m_iCutLength = iTextSize;
 
 	SIZE TextSize = {0, 0};
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszSource, m_iCutLength, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), pszSource, m_iCutLength, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	return TextSize.cx;
 }
 
@@ -4682,10 +4451,6 @@ void CUISlideHelp::AddSlide(int iLoopCount, int iLoopDelay, const char * pszText
 	if (iLoopCount > 30) return;
 	int iLength = strlen(pszText);
 
-	// 공지 Type
-	//	1	- 긴급 메시지 (중요도 상) : 다른 공지 무시하고 바로 다음번에 등장
-	//	0	- 필독 메시지 (중요도 중) : 공지 시간에 맞게 등장
-	//	-1	- 일반 메시지 (중요도 하) : 공지 시간에 맞게 등장하나 등장 시간이 지체될 경우 삭제됨
 	SLIDE_QUEUE_DATA slidedata;
 	slidedata.m_iType = iType;
 	slidedata.m_pszText = new char[iLength + 1];
@@ -4702,7 +4467,7 @@ void CUISlideHelp::AddSlide(int iLoopCount, int iLoopDelay, const char * pszText
 			slidedata.m_bLastData = TRUE;
 		}
 
-		if (iType == 1)	// 긴급 메시지
+		if (iType == 1)
 		{
 			m_SlideQueue.insert(std::pair<DWORD, SLIDE_QUEUE_DATA>(0, slidedata));
 		}
@@ -4742,10 +4507,6 @@ void CUISlideHelp::ManageSlide()
 		if (m_SlideQueueIter->first > m_dwCurrentSecond) break;
 		else
 		{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			BOOL bResult = FALSE;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			if ( m_SlideQueueIter->second.m_iType == -1 && m_SlideQueueIter->first + 60 < m_dwCurrentSecond );	// 시간 지나면 삭제
 			else if ( AddSlideText( m_SlideQueueIter->second.m_pszText, m_SlideQueueIter->second.m_dwTextColor ) == FALSE ) break;
 			
@@ -4760,7 +4521,6 @@ void CUISlideHelp::ManageSlide()
 		}
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////
 
 CSlideHelpMgr::CSlideHelpMgr()
 {
@@ -4815,16 +4575,14 @@ void CSlideHelpMgr::CreateSlideText()
 	if (m_HelpSlide.GetAlphaRate() > 0) 
 		return;
 
-	//////////////////////////////////////////////////////////////////////////
 	int iLevel = CharacterMachine->Character.Level;
-	//////////////////////////////////////////////////////////////////////////
 
 	const char * pszNewText = GetSlideText(iLevel);
 	
 	AddSlide(1, 0, pszNewText, 1, m_fHelpSlideSpeed);
 }
 
-void CSlideHelpMgr::OpenSlideTextFile(const char * szFileName)	// slide.bmd 로딩
+void CSlideHelpMgr::OpenSlideTextFile(const char * szFileName)
 {
 	for (int i = 0; i < SLIDE_LEVEL_MAX; ++i)
 	{
@@ -4845,10 +4603,7 @@ void CSlideHelpMgr::OpenSlideTextFile(const char * szFileName)	// slide.bmd 로딩
 		SendMessage(g_hWnd,WM_DESTROY,0,0);
 		return;
 	}
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int Size = sizeof(SLIDEHELP);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	SLIDEHELP SlideHelp;
 	fread(&SlideHelp, sizeof(SLIDEHELP), 1, fp);
 	BuxConvert((BYTE*)&SlideHelp, sizeof(SLIDEHELP));
@@ -4863,7 +4618,6 @@ void CSlideHelpMgr::OpenSlideTextFile(const char * szFileName)	// slide.bmd 로딩
 		m_iTextNumber[i] = SlideHelp.SlideHelp[i].iNumber;
 		for (int j = 0; j < m_iTextNumber[i]; ++j)
 		{
-			//if (m_SlideTextList[i].size() >= m_iTextNumber[i]) break;	// 더이상 못넣게
 			int iLength = strlen(SlideHelp.SlideHelp[i].szSlideHelpText[j]);
 			char * pszText = new char[iLength + 1];
 			memset(pszText, 0, iLength + 1);
@@ -4873,7 +4627,7 @@ void CSlideHelpMgr::OpenSlideTextFile(const char * szFileName)	// slide.bmd 로딩
 	}
 }
 
-void CSlideHelpMgr::ClearSlideText()						// 슬라이드 텍스트 지우기
+void CSlideHelpMgr::ClearSlideText()
 {
 	for (int i = 0; i < SLIDE_LEVEL_MAX; ++i)
 	{
@@ -4891,7 +4645,7 @@ void CSlideHelpMgr::ClearSlideText()						// 슬라이드 텍스트 지우기
 	}
 }
 
-const char * CSlideHelpMgr::GetSlideText(int iLevel)			// 현재 레벨의 슬라이드 텍스트 얻기
+const char * CSlideHelpMgr::GetSlideText(int iLevel)
 {
 	int iHelpType = -1;
 	for (int i = 0; i < SLIDE_LEVEL_MAX; ++i)
@@ -4902,14 +4656,10 @@ const char * CSlideHelpMgr::GetSlideText(int iLevel)			// 현재 레벨의 슬라이드 �
 			break;
 		}
 	}
-	if (iHelpType == -1) return NULL;	// 슬라이드 표시 레벨 초과
+	if (iHelpType == -1) return NULL;
 	if (m_iTextNumber[iHelpType] == 0) return NULL;
 
 	int iRandom = rand() % m_iTextNumber[iHelpType];
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int ii = m_SlideTextList[iHelpType].size();
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	if ((unsigned int)iRandom >= m_SlideTextList[iHelpType].size()) return NULL;
 
@@ -4925,18 +4675,7 @@ void CSlideHelpMgr::AddSlide(int iLoopCount, int iLoopDelay, const char * pszTex
 	if (SceneFlag != MAIN_SCENE) return;
 	if (pszText == NULL || pszText[0] == '\0') return;
 	if (iLoopCount > 30) return;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int iLength = strlen(pszText);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
-	// 공지 Type
-	//	5	- 긴급 공지 (중요도 최상)	: 다른 공지 무시하고 바로 다음번에 등장
-	//	4	- 필독 공지 (중요도 상)		: 공지 시간에 맞게 등장
-	//	3	- 일반 공지 (중요도 중상)	: 공지 시간에 맞게 등장하나 등장 시간이 지체될 경우 삭제됨
-	//	2	- 긴급 메시지 (중요도 중)	: 다른 공지 무시하고 바로 다음번에 등장
-	//	1	- 필독 메시지 (중요도 하)	: 공지 시간에 맞게 등장
-	//	0	- 일반 메시지 (중요도 최하)	: 공지 시간에 맞게 등장하나 등장 시간이 지체될 경우 삭제됨
 	switch(iType)
 	{
 	case 2:	case 1:	case 0:
@@ -5019,24 +4758,16 @@ void CUIGuildNoticeListBox::SetNumRenderLine(int iLine)
 
 void CUIGuildNoticeListBox::RenderInterface()
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
-	// 배경칠
 	EnableAlphaTest();
 	SetLineColor(7, 0.4f);
 	RenderColor(m_iPos_x - 1, m_iPos_y - m_iHeight - 1, m_iWidth + 1, m_iHeight + 2);
 
 	EndRenderColor();
-
-	// 스크롤 바
 	ComputeScrollBar();
 
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
-		//-_- 버튼
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
 			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
 				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
@@ -5107,7 +4838,6 @@ BOOL CUIGuildNoticeListBox::RenderDataLine(int iLineNumber)
 	int iPos_x = m_iPos_x + 4;
 	int iPos_y = GetRenderLinePos_y(iLineNumber);
 
-	// 로그내용	
 	g_pRenderText->RenderText(iPos_x, iPos_y, m_TextListIter->m_szContent, 0, 0, RT3_SORT_LEFT );
 
 	DisableAlphaBlend();
@@ -5140,7 +4870,7 @@ CUINewGuildMemberListBox::CUINewGuildMemberListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
 	m_iCurrentRenderEndLine = 0;
-	m_iNumRenderLine = 18;	// 3의 배수로 -_-
+	m_iNumRenderLine = 18;
 
 	m_fScrollBarRange_top = 0;
 	m_fScrollBarRange_bottom = 0;
@@ -5166,7 +4896,7 @@ void CUINewGuildMemberListBox::AddText(const char * pszID, BYTE Number, BYTE Ser
 {
 	if (pszID == NULL || pszID[0] == '\0') return;
 
-	if (GetLineNum() == 0)	// 길드마스터인가
+	if (GetLineNum() == 0)
 	{
 		if (strcmp(pszID, Hero->ID) == NULL) m_bIsGuildMaster = TRUE;
 		else m_bIsGuildMaster = FALSE;
@@ -5211,25 +4941,14 @@ void CUINewGuildMemberListBox::SetNumRenderLine(int iLine)
 
 void CUINewGuildMemberListBox::RenderInterface()
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
-	// 배경칠
 	EnableAlphaTest();
 	SetLineColor(7, 0.4f);
 	RenderColor(m_iPos_x - 1, m_iPos_y - m_iHeight - 1, m_iWidth + 1, m_iHeight + 2);
-
-
 	EndRenderColor();
-
-	// 스크롤 바
 	ComputeScrollBar();
 
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
-		//-_- 버튼
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
 			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
 				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
@@ -5270,7 +4989,6 @@ void CUINewGuildMemberListBox::RenderInterface()
 		}
 	}
 
-	// 목록
 	g_pRenderText->RenderText(m_iPos_x + 14, m_iPos_y - m_iHeight - 12, GlobalText[1389]);
 	g_pRenderText->RenderText(m_iPos_x + 65, m_iPos_y - m_iHeight - 12, GlobalText[1307]);
 	g_pRenderText->RenderText(m_iPos_x + 106, m_iPos_y - m_iHeight - 12, GlobalText[1022]);
@@ -5289,28 +5007,28 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
 	EnableAlphaTest();
 
 	int iCharacterLevel;
-	if (m_TextListIter->m_GuildStatus == 128)	// 길드마스터
+	if (m_TextListIter->m_GuildStatus == 128)
 		iCharacterLevel = 0;
-	else if (m_TextListIter->m_GuildStatus == 64)	// 부길드마스터
+	else if (m_TextListIter->m_GuildStatus == 64)
 		iCharacterLevel = 1;
-	else if (m_TextListIter->m_GuildStatus == 32)	// 배틀마스터
+	else if (m_TextListIter->m_GuildStatus == 32)
 		iCharacterLevel = 2;
-	else	// 일반 길드원
+	else
 		iCharacterLevel = 3;
 
-	if (iCharacterLevel == 0)	// 길드마스터
+	if (iCharacterLevel == 0)
 	{
 		glColor4ub(255, 100, 50, 127);
 		RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
 		glColor4f(255, 255, 255, 255);
 	}
-	else if (iCharacterLevel == 1)	// 부길드마스터
+	else if (iCharacterLevel == 1)
 	{
 		glColor4ub(255, 150, 80, 127);
 		RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
 		glColor4f(255, 255, 255, 255);
 	}
-	else if (iCharacterLevel == 2)	// 배틀마스터
+	else if (iCharacterLevel == 2)
 	{
 		glColor4ub(255, 200, 100, 127);
 		RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
@@ -5345,7 +5063,6 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
 
 	if (m_TextListIter->m_Server != 255/* && m_TextListIter->m_Number != 0*/)
 	{	
-		// 접속중일때는 서버 이름 표시
 		g_pRenderText->SetBgColor(0);
 		g_pRenderText->SetTextColor(255, 196, 0, 255);
 
@@ -5477,12 +5194,10 @@ void CUIUnionGuildListBox::RenderInterface()
 
 	EndRenderColor();
 
-	// 스크롤 바
 	ComputeScrollBar();
 
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
-		//-_- 버튼
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
 			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
 				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
@@ -5523,11 +5238,8 @@ void CUIUnionGuildListBox::RenderInterface()
 		}
 	}
 
-	// 길드명
 	g_pRenderText->RenderText(m_iPos_x+15, m_iPos_y - m_iHeight - 12, GlobalText[182] );
-	// 길드원수
 	g_pRenderText->RenderText(m_iPos_x+113, m_iPos_y - m_iHeight - 12, GlobalText[1330] );
-
 }
 
 int CUIUnionGuildListBox::GetRenderLinePos_y(int iLineNumber)
@@ -5537,7 +5249,6 @@ int CUIUnionGuildListBox::GetRenderLinePos_y(int iLineNumber)
 	else
 		return (m_iPos_y - m_iHeight + (GetLineNum() - 1) * 13 - iLineNumber * 13 + 3);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUIUnionGuildListBox::RenderDataLine(int iLineNumber)
 {
@@ -5560,7 +5271,6 @@ BOOL CUIUnionGuildListBox::RenderDataLine(int iLineNumber)
 	int iPos_x = m_iPos_x + 4;
 	int iPos_y = GetRenderLinePos_y(iLineNumber);
 
-	// 길드마크
 	memcpy( GuildMark[MARK_EDIT].Mark, m_TextListIter->GuildMark, sizeof(BYTE)*64 );
 	CreateGuildMark(MARK_EDIT);
 	RenderBitmap(BITMAP_GUILD,(float)iPos_x,(float)iPos_y,8,8);
@@ -5570,11 +5280,9 @@ BOOL CUIUnionGuildListBox::RenderDataLine(int iLineNumber)
 		memset( GuildMark[MARK_EDIT].Mark, 0, 64 );
 
 	char Text[MAX_TEXT_LENGTH + 1] = {0};
-	// 길드명
 	sprintf(Text,"%s", m_TextListIter->szName);
 	g_pRenderText->RenderText(iPos_x + 12, iPos_y, Text);
 
-	// 길드원수
 	sprintf(Text,"%d", m_TextListIter->nMemberCount);
 	g_pRenderText->RenderText(iPos_x + 138, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
@@ -5582,7 +5290,6 @@ BOOL CUIUnionGuildListBox::RenderDataLine(int iLineNumber)
 
 	return TRUE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUIUnionGuildListBox::DoLineMouseAction(int iLineNumber)
 {
@@ -5597,7 +5304,6 @@ BOOL CUIUnionGuildListBox::DoLineMouseAction(int iLineNumber)
 	}
 	return TRUE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 #else // KWAK_FIX_COMPILE_LEVEL4_WARNING
@@ -5695,12 +5401,10 @@ void CUIUnmixgemList::RenderInterface()
 
 	EndRenderColor();
 
-	// 스크롤 바
 	ComputeScrollBar();
 
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
-		//-_- 버튼
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
 			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
 				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
@@ -5762,10 +5466,9 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
 	int iPos_x = m_iPos_x + 4;
 	int iPos_y = GetRenderLinePos_y(iLineNumber);
 	
-	//텍스트 출력
 	char oText[MAX_GLOBAL_TEXT_STRING] = {0,};
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX // 보석조합 해체 리스트 출력
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX 
 	ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(m_TextListIter->m_iInvenIdx);
 	int	  nIdx	= COMGEM::Check_Jewel( pItem->Type );
 	sprintf(oText, "%s,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
@@ -5792,7 +5495,6 @@ BOOL CUIUnmixgemList::DoLineMouseAction(int iLineNumber)
 			MouseLButtonPush = false;
 		}
 
-		//더블클릭했을 경우 
 		if (MouseLButtonDBClick)
 		{
 			SLSetSelectLine(m_iCurrentRenderEndLine + iLineNumber + 1);
@@ -5815,13 +5517,11 @@ int CUIUnmixgemList::GetRenderLinePos_y(int iLineNumber)
 		return (m_iPos_y - m_iHeight + (GetLineNum() - 1) * 13 - iLineNumber * 13 + 3);
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 CUIBCDeclareGuildListBox::CUIBCDeclareGuildListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
 	m_iCurrentRenderEndLine = 0;
-	m_iNumRenderLine = 18;	// 3의 배수로 -_-
+	m_iNumRenderLine = 18;
 
 	m_fScrollBarRange_top = 0;
 	m_fScrollBarRange_bottom = 0;
@@ -5990,7 +5690,7 @@ CUIBCGuildListBox::CUIBCGuildListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
 	m_iCurrentRenderEndLine = 0;
-	m_iNumRenderLine = 15;	// 3의 배수로 -_-
+	m_iNumRenderLine = 15;
 
 	m_fScrollBarRange_top = 0;
 	m_fScrollBarRange_bottom = 0;
@@ -6057,12 +5757,9 @@ void CUIBCGuildListBox::SetNumRenderLine(int iLine)
 
 void CUIBCGuildListBox::RenderInterface()
 {
-	// 배경칠
 	EnableAlphaTest();
 	SetLineColor(7, 0.4f);
 	RenderColor(m_iPos_x - 1, m_iPos_y - m_iHeight - 1, m_iWidth + 1, m_iHeight + 2);
-
-	//남겨놔...
 	SetLineColor(0, 0.4f);
 	RenderColor(m_iPos_x - 1, m_iPos_y + 25 - 1, m_iWidth  - 100 + 1, 20);
 
@@ -6070,21 +5767,16 @@ void CUIBCGuildListBox::RenderInterface()
 	RenderColor(m_iPos_x - 1 + m_iWidth - 100 + 1, m_iPos_y + 25 - 1, m_iWidth - 60, 20);
 	EndRenderColor();
 
-	// 스크롤 바
+
 	if (GetState() != UISTATE_SCROLL)
 		ComputeScrollBar();
 
 	g_pGuardWindow->RenderScrollBarFrame(m_iPos_x + m_iWidth - 8, m_fScrollBarRange_top, m_fScrollBarRange_bottom - m_fScrollBarRange_top);
 	g_pGuardWindow->RenderScrollBar(m_iPos_x + m_iWidth - 12, m_fScrollBarPos_y, (GetState() == UISTATE_SCROLL && MouseLButtonPush));
-
-	// 길드명
 	g_pRenderText->RenderText(m_iPos_x+5, m_iPos_y - m_iHeight - 12, GlobalText[182] );
-	// 진영
-	g_pRenderText->RenderText(m_iPos_x+80, m_iPos_y - m_iHeight - 12, GlobalText[1603] );	// 1603 "진영"
-	// 주체
-	g_pRenderText->RenderText(m_iPos_x+120, m_iPos_y - m_iHeight - 12, GlobalText[1604] );	// 1604 "주체"
-
-	g_pRenderText->RenderText(m_iPos_x + 18, m_iPos_y + 31 - 1, GlobalText[1977] );	// 1977 "점수"
+	g_pRenderText->RenderText(m_iPos_x+80, m_iPos_y - m_iHeight - 12, GlobalText[1603] );
+	g_pRenderText->RenderText(m_iPos_x+120, m_iPos_y - m_iHeight - 12, GlobalText[1604] );
+	g_pRenderText->RenderText(m_iPos_x + 18, m_iPos_y + 31 - 1, GlobalText[1977] );
 }
 
 int CUIBCGuildListBox::GetRenderLinePos_y(int iLineNumber)
@@ -6125,22 +5817,19 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
 	int iPos_y = GetRenderLinePos_y(iLineNumber);
 
 	char Text[MAX_TEXT_LENGTH + 1] = {0};
-	// 길드명
 	sprintf(Text,"%s", m_TextListIter->szName);
 	g_pRenderText->RenderText(iPos_x + 2, iPos_y, Text);
 
-	// 진영
 	if( m_TextListIter->byJoinSide == 1 )
-		sprintf(Text,"%s", GlobalText[1606] );	// 1606 "수성측"
+		sprintf(Text,"%s", GlobalText[1606] );
 	else
-		sprintf(Text,"%s", GlobalText[1605] );	// 1605 "공성측"
+		sprintf(Text,"%s", GlobalText[1605] );
 	g_pRenderText->RenderText(iPos_x + 100, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
-	// 주체
 	if( m_TextListIter->byGuildInvolved == 1 )
-		sprintf(Text,"%s", GlobalText[1607] );	// 1607 "주체"
+		sprintf(Text,"%s", GlobalText[1607] );
 	else
-		sprintf(Text,"%s", GlobalText[1608] );	// 1608 "보조"
+		sprintf(Text,"%s", GlobalText[1608] );
 
 	g_pRenderText->RenderText(iPos_x + 137, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
@@ -6151,7 +5840,7 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
 			wsprintf(Dummy,"--");
 		else
 			wsprintf(Dummy,"%s :     %d",m_TextListIter->szName,m_TextListIter->iGuildScore);
-		g_pRenderText->RenderText(m_iPos_x + 60, m_iPos_y + 31 - 1, Dummy );	// 1977 "점수"
+		g_pRenderText->RenderText(m_iPos_x + 60, m_iPos_y + 31 - 1, Dummy );
 	}
 
 	DisableAlphaBlend();
@@ -6214,7 +5903,7 @@ CUIMoveCommandListBox::CUIMoveCommandListBox()
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
 	m_iCurrentRenderEndLine = 0;
 
-	m_iNumRenderLine = 21;	// 3의 배수로 -_-
+	m_iNumRenderLine = 21;
 
 	m_fScrollBarRange_top = 0;
 	m_fScrollBarRange_bottom = 0;
@@ -6312,8 +6001,6 @@ BOOL CUIMoveCommandListBox::DoLineMouseAction(int iLineNumber)
 }
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 #ifdef ASG_MOD_UI_QUEST_INFO
 
 CUICurQuestListBox::CUICurQuestListBox()
@@ -6347,10 +6034,10 @@ void CUICurQuestListBox::AddText(DWORD dwQuestIndex, const char* pszText)
 	sCurQuestItem.m_dwIndex = dwQuestIndex;
 	strncpy(sCurQuestItem.m_szText, pszText, 64);
 
-	m_TextList.push_front(sCurQuestItem);	// 뒤부터 랜더하기 때문에 push_front 사용.
+	m_TextList.push_front(sCurQuestItem);
 
-	SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);	// 스크롤바 썸 위치를 맨 위로.
-	SLSetSelectLine(0);									// 선택 없음.
+	SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
+	SLSetSelectLine(0);
 }
 
 void CUICurQuestListBox::SetNumRenderLine(int iLine)
@@ -6368,7 +6055,6 @@ void CUICurQuestListBox::RenderInterface()
 	if (GetState() != UISTATE_SCROLL)
 		ComputeScrollBar();
 
-	// 렌더되는 줄 수 보다 리스트 줄 수가 작거나 같으면 스크롤바를 안그림.
 	if (GetLineNum() <= m_iNumRenderLine)
 		return;
 
@@ -6421,7 +6107,6 @@ BOOL CUICurQuestListBox::DoLineMouseAction(int iLineNumber)
 
 			int nSelLine = m_iCurrentRenderEndLine + iLineNumber + 1;
 
-			// 선택한 줄이 이전에 선택한 줄이라면 리턴.
 			if (SLGetSelectLineNum() == nSelLine)
 				return TRUE;
 
@@ -6430,20 +6115,14 @@ BOOL CUICurQuestListBox::DoLineMouseAction(int iLineNumber)
 			SLSetSelectLine(nSelLine);
 			m_TextListIter->m_bIsSelected = (m_TextListIter->m_bIsSelected + 1) % 2;	// T/F Reverse
 
-			// 기타상황에 의한 퀘스트라면 퀘스트 열기 버튼 활성화, 아니라면 비활성화.
 			m_TextListIter = SLGetSelectLine();
 			if (g_QuestMng.IsQuestByEtc(m_TextListIter->m_dwIndex))
 				g_pMyQuestInfoWindow->QuestOpenBtnEnable(true);
 			else
 				g_pMyQuestInfoWindow->QuestOpenBtnEnable(false);
 
-			// 퀘스트 포기 버튼 활성화.
 			g_pMyQuestInfoWindow->QuestGiveUpBtnEnable(true);
-
-			// 퀘스트 요약를 세팅.
 			g_pMyQuestInfoWindow->SetSelQuestSummary();
-
-			// 서버에 퀘스트 요구사항, 보상 정보를 요구.
 			SendRequestProgressQuestRequestReward(m_TextListIter->m_dwIndex);
 		}
 	}
@@ -6597,20 +6276,18 @@ void CUIQuestContentsListBox::RenderCoveredInterface()
 	}
 }
 
-// DoLineMouseAction() 함수 호출전에 호출 됨.
 void CUIQuestContentsListBox::DoActionSub(BOOL bMessageOnly)
 {
 #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	bMessageOnly = FALSE;
-	SLSetSelectLine(bMessageOnly);	// 마우스 커서가 아이템, 스킬 텍스트 항목 위에 없을 때 툴팁을 안그리기 위함.
+	SLSetSelectLine(bMessageOnly);
 #else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	SLSetSelectLine(0);	// 마우스 커서가 아이템, 스킬 텍스트 항목 위에 없을 때 툴팁을 안그리기 위함.
+	SLSetSelectLine(0);
 #endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 }
 
 BOOL CUIQuestContentsListBox::DoLineMouseAction(int iLineNumber)
 {
-	// 각 항목에 마우스 커서가 있으면 항목 선택.
 	if (::CheckMouseIn(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13))
 	{		
 		int nSelLine = m_iCurrentRenderEndLine + iLineNumber + 1;
@@ -6746,7 +6423,6 @@ void CUIInGameShopListBox::RenderInterface()
 		ComputeScrollBar();
 
 #ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// #ifndef
-	// 렌더되는 줄 수 보다 리스트 줄 수가 작거나 같으면 스크롤바를 안그림.
 	if (GetLineNum() <= m_iNumRenderLine)
 		return;
 
@@ -6829,7 +6505,6 @@ BOOL CUIInGameShopListBox::DoLineMouseAction(int iLineNumber)
 
 			int nSelLine = m_iCurrentRenderEndLine + iLineNumber + 1;
 
-			// 선택한 줄이 이전에 선택한 줄이라면 리턴.
 			if (SLGetSelectLineNum() == nSelLine)
 				return TRUE;
 
@@ -6841,8 +6516,7 @@ BOOL CUIInGameShopListBox::DoLineMouseAction(int iLineNumber)
 	}
 	return TRUE;
 }
-///////////////////////////////////////////////////////////////////////////////////
-// 단일 구매창 리스트 박스
+
 CUIBuyingListBox::CUIBuyingListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
@@ -6973,7 +6647,6 @@ BOOL CUIBuyingListBox::DoLineMouseAction(int iLineNumber)
 
 			int nSelLine = m_iCurrentRenderEndLine + iLineNumber + 1;
 
-			// 선택한 줄이 이전에 선택한 줄이라면 리턴.
 			if (SLGetSelectLineNum() == nSelLine)
 				return TRUE;
 
@@ -6985,8 +6658,7 @@ BOOL CUIBuyingListBox::DoLineMouseAction(int iLineNumber)
 	}
 	return TRUE;
 }
-///////////////////////////////////////////////////////////////////////////////////
-// 패키지 구매창 리스트 박스
+
 CUIPackCheckBuyingListBox::CUIPackCheckBuyingListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
@@ -7038,8 +6710,6 @@ void CUIPackCheckBuyingListBox::AddText(IGS_SelectBuyItem& _Item)
 	strncpy(sItem.m_szItemPeriod, _Item.m_szItemPeriod, MAX_TEXT_LENGTH);
 	strncpy(sItem.m_szAttribute, _Item.m_szAttribute, MAX_TEXT_LENGTH);
 
-	// 클래스 생성시에 static변수로 갯수를 인덱스로 사용한다
-	// 리스트 박스의 선택을 따라 이동하기 때문에 사용할 필요 없음
 	CRadioButton::m_nIterIndex++;
 	sItem.m_RadioBtn.SetRadioBtnIsEnable(CRadioButton::m_nIterIndex);
 
@@ -7110,16 +6780,12 @@ BOOL CUIPackCheckBuyingListBox::RenderDataLine(int nLine)
 
 	if(m_TextListIter->m_szItemName != NULL)
 	{
- 		// 클래스의 인덱스와 체크된 인덱스를 비교 아니라면 false
-// 		if(m_TextListIter->m_RadioBtn.GetRadioBtnIsEnable() != CRadioButton::m_nIterIndex)
-// 			m_TextListIter->m_RadioBtn.SetCheckState(false);
 
-		if(SLGetSelectLineNum() == m_iCurrentRenderEndLine + nLine + 1)		//선택된 리스트는 무조건 체크상태로 만든다
+		if(SLGetSelectLineNum() == m_iCurrentRenderEndLine + nLine + 1)
 			m_TextListIter->m_RadioBtn.UpdateActionCheck(true);
 		else
 			m_TextListIter->m_RadioBtn.UpdateActionCheck(false);
 
-		// 라디오 버튼 박스의 렌더
  		m_TextListIter->m_RadioBtn.SetRadioBtnRect(iPos_x+1, iPos_y+TEXT_HEIGHTSIZE*0.2f);
 		m_TextListIter->m_RadioBtn.RadiobuttonBoxRender();
 
@@ -7137,9 +6803,6 @@ BOOL CUIPackCheckBuyingListBox::RenderDataLine(int nLine)
 }
 BOOL CUIPackCheckBuyingListBox::DoLineMouseAction(int nLine)
 {
-	// 라디오버튼박스의 마우스 액션
-//	m_TextListIter->m_RadioBtn.UpdateMouseAction();
-
 	if(::CheckMouseIn(m_iPos_x, GetRenderLinePos_y(nLine) - 3, m_iWidth - m_fScrollBarWidth + 1, TEXT_HEIGHTSIZE))
 	{
 		if (MouseLButtonPush)
@@ -7148,7 +6811,6 @@ BOOL CUIPackCheckBuyingListBox::DoLineMouseAction(int nLine)
 
 			int nSelLine = m_iCurrentRenderEndLine + nLine + 1;
 
-			// 선택한 줄이 이전에 선택한 줄이라면 리턴.
 			if (SLGetSelectLineNum() == nSelLine)
 				return TRUE;
 
@@ -7162,7 +6824,6 @@ BOOL CUIPackCheckBuyingListBox::DoLineMouseAction(int nLine)
 }
 int CUIPackCheckBuyingListBox::GetRenderLinePos_y(int nLine)
 {
-	// 두줄씩받는다
 	if (GetLineNum() > m_iNumRenderLine)
 		return (m_iPos_y - m_iHeight + (m_iNumRenderLine - 1) * TEXT_HEIGHTSIZE - nLine * TEXT_HEIGHTSIZE + TEXT_HEIGHTSIZE*0.1f);
 	else
@@ -7179,8 +6840,7 @@ BOOL CUIPackCheckBuyingListBox::IsChangeLine()
 
 	return FALSE;
 }
-///////////////////////////////////////////////////////////////////////////////////
-// 라디오버튼 3가지 액션
+
 CRadioButton::CRadioButton()
 {
 	m_byMouseState = LBTN_DEFAULT;
@@ -7197,12 +6857,10 @@ CRadioButton::~CRadioButton()
 }
 void CRadioButton::SetCheckState(bool _Value)
 {
-	//체크된 상태
 	m_bCheckState =_Value;
 }
 void CRadioButton::SetRadioBtnIsEnable(int _Value)
 {
-	// 클래스의 인덱스 차후 활성화된 클래스 인덱스랑 비교
 	m_nRadioBtnEnable = _Value;
 }
 bool CRadioButton::UpdateMouseAction()
@@ -7211,29 +6869,24 @@ bool CRadioButton::UpdateMouseAction()
 
 	if(SEASON3B::IsPress(VK_LBUTTON) && _Temp)
 	{
-		// 누르는 순간
 		m_byMouseState = LBTN_DOWN;
 		return true;
 	}
 	else if(SEASON3B::IsRelease(VK_LBUTTON) && _Temp)
 	{
-		// 뗀 순간
 		m_bCheckState ^= 1;
 		m_byMouseState = LBTN_UP;
-		// 클래스의 인덱스 번호를 static변수에 기억시킨다
 		m_nIterIndex = m_nRadioBtnEnable;
 		return true;
 	}
 	else if(SEASON3B::IsRepeat(VK_LBUTTON) && _Temp)
 	{
-		// 누르고 있는 동안
 		m_byMouseState = LBTN_DOWN;
 		return true;
 	}
 
 	if(m_byMouseState == LBTN_DOWN && !_Temp)
 	{
-		// 누른 상태에서 외부로 포커스를 갖고 갔을때 과거 상태값으로 돌린다
 		m_byMouseState = LBTN_UP;
 		return false;
 	}
@@ -7242,13 +6895,12 @@ bool CRadioButton::UpdateMouseAction()
 
 bool CRadioButton::UpdateActionCheck(int _nState)
 {
-	//체크 박스의 선택에 따라 라디오 버튼도 선택을 따라가게 한다
 	m_bCheckState = _nState;
 
 	if(m_bCheckState)
-		m_byMouseState = LBTN_UP;		//리스트 박스의 선택에 따라가기 위해 무조건 체크
+		m_byMouseState = LBTN_UP;
 	else
-		m_byMouseState = LBTN_DEFAULT;	//선택되지 않은 것은 선택되지 않은 이미지 출력토록
+		m_byMouseState = LBTN_DEFAULT;
 
 	return true;
 }
@@ -7287,15 +6939,12 @@ void CRadioButton::RadiobuttonBoxRender()
 	switch(m_byMouseState)
 	{
 	case LBTN_DEFAULT:
-		// 체크 없는 이미지
 		RenderImage(IMAGE_CHECKBTN, m_rtCheckBtn.left, m_rtCheckBtn.top, BTN_WIDTH, BTN_HEIGHT, 0, 0);
 		break;
 	case LBTN_UP:
-		// 체크 상태유무
 		m_bCheckState ? RenderImage(IMAGE_CHECKBTN, m_rtCheckBtn.left, m_rtCheckBtn.top, BTN_WIDTH, BTN_HEIGHT, 0, BTN_HEIGHT+BTN_SPACE) : RenderImage(IMAGE_CHECKBTN, m_rtCheckBtn.left, m_rtCheckBtn.top, BTN_WIDTH, BTN_HEIGHT, 0, 0);
 		break;
 	case LBTN_DOWN:
-		// 눌리고 있는 상태를 그린다
 		RenderImage(IMAGE_CHECKBTN, m_rtCheckBtn.left, m_rtCheckBtn.top, BTN_WIDTH, BTN_HEIGHT, 0, (BTN_HEIGHT+BTN_SPACE)*2.0f);
 		break;
 	}

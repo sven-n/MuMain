@@ -19,8 +19,8 @@ bool CProtocolSend::ConnectServer()
 
 	if (this->SocketConnect->Connect("127.0.0.1", 55905))
 	{
-		if(this->m_ClientAcceptThread == 0)
-			this->m_ClientAcceptThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)this->RecvMessage, this, 0, 0);
+		//if(this->m_ClientAcceptThread == 0)
+			//this->m_ClientAcceptThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)this->RecvMessage, this, 0, 0);
 
 		return true;
 	}
@@ -46,51 +46,104 @@ void CProtocolSend::SendPingTest()
 
 void CProtocolSend::RecvMessage()
 {
-	while (true)
-	{
-		if (gProtocolSend.SocketConnect->IsConnected())
+	//while (true)
+	//{
+		if (gProtocolSend.SocketConnect && gProtocolSend.SocketConnect->IsConnected())
 		{
-			if (!gProtocolSend.SocketConnect->Incoming().empty())
+			while(true)
 			{
-				auto msg = gProtocolSend.SocketConnect->Incoming().pop_front().msg;
-
-				switch (msg.header.id)
+				if (!gProtocolSend.SocketConnect->Incoming().empty())
 				{
-					case ProtocolHead::SERVER_CONNECT:
+					auto msg = gProtocolSend.SocketConnect->Incoming().pop_front().msg;
+
+					switch(msg.header.id)
 					{
-						PMSG_CONNECT_CLIENT_RECV pMsg;
-						msg >> pMsg;
-						gProtocolSend.RecvJoinServerNew(&pMsg);
-						break;
+						case ProtocolHead::SERVER_CONNECT:
+						{
+							PMSG_CONNECT_CLIENT_RECV pMsg;
+							msg >> pMsg;
+							gProtocolSend.RecvJoinServerNew(&pMsg);
+							break;
+						}
+						case ProtocolHead::SERVER_DISCONNECT:
+						{
+							// Server has responded to a ping request	
+							DWORD clientID;
+							msg >> clientID;
+							std::cout << "Hello from [" << clientID << "]\n";
+							break;
+						}
+						case ProtocolHead::BOTH_CONNECT_LOGIN:
+						{
+							//PMSG_SIMPLE_RESULT_RECV pMsg; //exemplo
+							//msg >> pMsg;
+							gProtocolSend.RecvLoginNew((PMSG_SIMPLE_RESULT_RECV*)msg.body.data());
+							break;
+						}
+						case ProtocolHead::BOTH_CONNECT_CHARACTER:
+							ReceiveCharacterList((BYTE*)msg.body.data());
+							break;
+						case ProtocolHead::BOTH_POSITION:
+							ReceiveMovePosition((BYTE*)msg.body.data());
+							break;
+						case ProtocolHead::BOTH_MOVE:
+							ReceiveMoveCharacter((BYTE*)msg.body.data());
+							break;
+
+						case(ProtocolHead::BOTH_MESSAGE):
+						{
+							uint8_t recv[8024];
+
+							std::memcpy(recv,&msg.body[0],msg.header.size);
+
+							BYTE header,head;
+							int size = 0;
+
+							if(recv[0] == 0xC1 || recv[0] == 0xC3)
+							{
+								header = recv[0];
+								size = recv[1];
+								head = recv[2];
+							}
+							else if(recv[0] == 0xC2 || recv[0] == 0xC4)
+							{
+								header = recv[0];
+								size = MAKEWORD(recv[2],recv[1]);
+								head = recv[3];
+							}
+
+							//BYTE subhead = ((recv[0] == 0xC1 || recv[0] == 0xC3) ? recv[3] : recv[4]);
+
+							//if((head != 0xF3 || subhead != 0xF1) && head != 0x0E && head != 0x18 && head != 0xD4 && subhead != 0xE1)
+							//{
+							//	if(size < 129)
+							//	{
+							//		char String[200];
+							//		char hex_chars[16] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
+
+							//		for(int i = 0; i < size; ++i)
+							//		{
+							//			sprintf(&String[2 * i],"%02X",recv[i]);
+							//		}
+
+							//		g_ConsoleDebug->Write(MCD_NORMAL,"PACKET: %s",String);
+							//	}
+							//}
+
+							//g_ConsoleDebug->Write(MCD_NORMAL, "[BOTH MESSAGE] %02x %02x %02x %02x %02x %02x",head,recv[0],recv[1],recv[2],recv[3],recv[4]);
+
+							TranslateProtocol(head,recv,size,0);
+							break;
+						}
 					}
-					case ProtocolHead::SERVER_DISCONNECT:
-					{
-						// Server has responded to a ping request	
-						DWORD clientID;
-						msg >> clientID;
-						std::cout << "Hello from [" << clientID << "]\n";
-						break;
-					}
-					case ProtocolHead::BOTH_CONNECT_LOGIN:
-					{
-						//PMSG_SIMPLE_RESULT_RECV pMsg; //exemplo
-						//msg >> pMsg;
-						gProtocolSend.RecvLoginNew((PMSG_SIMPLE_RESULT_RECV*)msg.body.data());
-						break;
-					}
-					case ProtocolHead::BOTH_CONNECT_CHARACTER:
-						ReceiveCharacterList((BYTE*)msg.body.data());
-						break;
-					case ProtocolHead::BOTH_POSITION:
-						ReceiveMovePosition((BYTE*)msg.body.data());
-						break;
-					case ProtocolHead::BOTH_MOVE:
-						ReceiveMoveCharacter((BYTE*)msg.body.data());
-						break;
+				}
+				else
+				{
+					break;
 				}
 			}
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		//}
+		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 }
 
@@ -293,7 +346,6 @@ void CProtocolSend::RecvLoginNew(PMSG_SIMPLE_RESULT_RECV* pMsg)
 		case 0x20:
 			CurrentProtocolState = RECEIVE_LOG_IN_SUCCESS;
 			LogIn = 2;
-			m_pc_wanted = true;
 			CheckHack();
 			break;
 		case 0x00:

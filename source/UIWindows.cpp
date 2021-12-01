@@ -3819,7 +3819,7 @@ void CChatRoomSocketList::ProcessSocketMessage(DWORD dwSocketID, WORD wMessage)
 	}
 	switch(wMessage)
 	{
-	case FD_CONNECT : // 서버에 접속 되었다.
+	case FD_CONNECT:
 		break;
 	case FD_READ :
 		pSocketClient->nRecv();
@@ -3827,7 +3827,7 @@ void CChatRoomSocketList::ProcessSocketMessage(DWORD dwSocketID, WORD wMessage)
 	case FD_WRITE :
 		pSocketClient->FDWriteSend();
 		break;
-	case FD_CLOSE : // 서버와의 접속이 종료되었다.
+	case FD_CLOSE :
 		CUIChatWindow * pWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(pChatroomSocket->m_dwWindowUIID);
 		if (pWindow != NULL)
 			pWindow->AddChatText(255, GlobalText[402], 1, 0);
@@ -4879,11 +4879,8 @@ void CUIFriendWindow::DoMouseActionSub()
 	{
 		m_iTabMouseOverIndex = m_iTabIndex;
 		SIZE TextSize;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1035], strlen(GlobalText[1035]), &TextSize);	// "대화 거부"
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), GlobalText[1035], strlen(GlobalText[1035]), &TextSize);	// "대화 거부"
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
+		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1035], strlen(GlobalText[1035]), &TextSize);
 
 		if (CheckMouseIn(RPos_x(0) + RWidth() - TextSize.cx - 2 - 14,
 			RPos_y(4), TextSize.cx + 2 + 14, 20) == TRUE)
@@ -4898,7 +4895,7 @@ void CUIFriendWindow::DoMouseActionSub()
 				}
 				else
 				{
-					g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1036], GetUIID());	// "대화 거부를 하면 메시지를 받을수 없습니다!"
+					g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1036], GetUIID());
 				}
 				MouseLButtonPop = FALSE;
 			}
@@ -4912,13 +4909,12 @@ void CUIFriendWindow::DoMouseActionSub()
 		m_LetterBoxWnd.Refresh();
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputWindow::Init(const char * pszTitle, DWORD dwParentID)
 {
 	SetTitle(pszTitle);
 	SetParentUIID(0);
-	m_dwReturnWindowUIID = dwParentID;	// 예외적으로 값을 반환할 용도로 사용
+	m_dwReturnWindowUIID = dwParentID;
 
 	SetPosition(50,50);
 	//SetSize(213, 170);
@@ -4935,17 +4931,16 @@ void CUITextInputWindow::Init(const char * pszTitle, DWORD dwParentID)
 	m_TextInputBox.SetArrangeType(0, 30, 14);
 	m_TextInputBox.SetState(UISTATE_NORMAL);
 
-	m_AddButton.Init(1, GlobalText[228]);	// "확인"
+	m_AddButton.Init(1, GlobalText[228]);
 	m_AddButton.SetParentUIID(GetUIID());
 	m_AddButton.SetArrangeType(0, 18, 40);
 	m_AddButton.SetSize(50, 20);
 
-	m_CancelButton.Init(2, GlobalText[229]);	// "취소"
+	m_CancelButton.Init(2, GlobalText[229]);
 	m_CancelButton.SetParentUIID(GetUIID());
 	m_CancelButton.SetArrangeType(0, 73, 40);
 	m_CancelButton.SetSize(50, 20);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputWindow::Refresh()
 {
@@ -5000,10 +4995,10 @@ BOOL CUITextInputWindow::HandleMessage()
 		{
 			switch(m_WorkMessage.m_iParam1)
 			{
-			case 1:		// 확인버튼
+			case 1:
 				ReturnText();
 				break;
-			case 2:		// 취소버튼
+			case 2:
 				g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
 				break;
 			default:
@@ -5016,7 +5011,6 @@ BOOL CUITextInputWindow::HandleMessage()
 	}
 	return FALSE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputWindow::DoActionSub(BOOL bMessageOnly)
 {
@@ -5024,7 +5018,6 @@ void CUITextInputWindow::DoActionSub(BOOL bMessageOnly)
 	m_CancelButton.DoAction(bMessageOnly);
 	m_TextInputBox.DoAction(bMessageOnly);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputWindow::DoMouseActionSub()
 {
@@ -5033,17 +5026,16 @@ void CUITextInputWindow::DoMouseActionSub()
 //		m_TextInputBox.GiveFocus();
 //	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIQuestionWindow::Init(const char * pszTitle, DWORD dwParentID)
 {
-	if (m_iDialogType == 0) SetTitle(GlobalText[991]);	// "질문"
-	else if (m_iDialogType == 1) SetTitle(GlobalText[228]);	// "확인"
+	if (m_iDialogType == 0) SetTitle(GlobalText[991]);
+	else if (m_iDialogType == 1) SetTitle(GlobalText[228]);
 	SetParentUIID(0);
-	m_dwReturnWindowUIID = dwParentID;	// 예외적으로 값을 반환할 용도로 사용
+	m_dwReturnWindowUIID = dwParentID;
 	m_szCaption[0][0] = m_szCaption[1][0] = '\0';
 	m_szSaveID[0] = '\0';
-	CutText3(pszTitle, m_szCaption[0], 125, 2, 256);	// 예외적으로 사용
+	CutText3(pszTitle, m_szCaption[0], 125, 2, 256);
 
 	SetPosition(50,50);
 	//SetSize(213, 170);
@@ -5053,25 +5045,24 @@ void CUIQuestionWindow::Init(const char * pszTitle, DWORD dwParentID)
 
 	if (m_iDialogType == 0)
 	{
-		m_AddButton.Init(1, GlobalText[1037]);	// "예"
+		m_AddButton.Init(1, GlobalText[1037]);	
 		m_AddButton.SetParentUIID(GetUIID());
 		m_AddButton.SetArrangeType(0, 18, 40);
 		m_AddButton.SetSize(50, 20);
 
-		m_CancelButton.Init(2, GlobalText[1038]);	// "아니오"
+		m_CancelButton.Init(2, GlobalText[1038]);
 		m_CancelButton.SetParentUIID(GetUIID());
 		m_CancelButton.SetArrangeType(0, 73, 40);
 		m_CancelButton.SetSize(50, 20);
 	}
 	else if (m_iDialogType == 1)
 	{
-		m_AddButton.Init(1, GlobalText[228]);	// "확인"
+		m_AddButton.Init(1, GlobalText[228]);
 		m_AddButton.SetParentUIID(GetUIID());
 		m_AddButton.SetArrangeType(0, 45, 40);
 		m_AddButton.SetSize(50, 20);
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 extern int KeyState[256];
 
 void CUIQuestionWindow::Refresh()
@@ -5090,7 +5081,6 @@ void CUIQuestionWindow::RenderSub()
 		m_CancelButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
 	}
 
-	// 윈도우를 그린다
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0);
 	
@@ -5102,7 +5092,6 @@ void CUIQuestionWindow::RenderSub()
 	m_AddButton.Render();
 	if (m_iDialogType == 0) m_CancelButton.Render();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUIQuestionWindow::HandleMessage()
 {
@@ -5114,8 +5103,8 @@ BOOL CUIQuestionWindow::HandleMessage()
 		{
 			switch(m_WorkMessage.m_iParam1)
 			{
-			case 1:		// 예버튼
-				if (m_dwReturnWindowUIID == -1)	// 친구 요청 수락 확인
+			case 1:
+				if (m_dwReturnWindowUIID == -1)
 				{
 					SendAcceptAddFriend(0x01, m_szSaveID);
 				}
@@ -5125,9 +5114,9 @@ BOOL CUIQuestionWindow::HandleMessage()
 				}
 				g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
 				break;
-			case 2:		// 아니오버튼
-				if (m_iDialogType != 0) break;	// OK만 있는 윈도우 타입
-				if (m_dwReturnWindowUIID == -1)	// 친구 요청 수락 확인
+			case 2:
+				if (m_iDialogType != 0) break;
+				if (m_dwReturnWindowUIID == -1)
 				{
 					SendAcceptAddFriend(0x00, m_szSaveID);
 				}
@@ -5147,7 +5136,6 @@ BOOL CUIQuestionWindow::HandleMessage()
 	}
 	return FALSE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIQuestionWindow::DoActionSub(BOOL bMessageOnly)
 {
@@ -5159,12 +5147,6 @@ void CUIQuestionWindow::DoActionSub(BOOL bMessageOnly)
 	m_AddButton.DoAction(bMessageOnly);
 	m_CancelButton.DoAction(bMessageOnly);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CUIQuestionWindow::DoMouseActionSub()
-{
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIQuestionWindow::SaveID(const char * pszText)
 {
@@ -5176,7 +5158,6 @@ void CUIQuestionWindow::SaveID(const char * pszText)
 	else
 		m_szSaveID[0] = '\0';
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIFriendMenu::Reset()
 {
@@ -5345,7 +5326,7 @@ void CUIFriendMenu::RenderFriendButton()
 		if (g_pFriendMenu->IsNewChatAlert() && bIsAlertTime)
 		{
 			RenderBitmap(BITMAP_INTERFACE_EX+17,m_iPos_x + 7,m_iFriendMenuPos_y + 3,25.f,14.f,
-				0.f,14.f/32.f,25.f/32.f,14.f/32.f);	// 새 메시지
+				0.f,14.f/32.f,25.f/32.f,14.f/32.f);
 		}
 		if (g_pFriendMenu->IsNewMailAlert())
 		{
@@ -5355,7 +5336,7 @@ void CUIFriendMenu::RenderFriendButton()
 			if (bIsAlertTime)
 			{
 				RenderBitmap(BITMAP_INTERFACE_EX+16,m_iPos_x + 36,m_iFriendMenuPos_y + 7,15.f,9.f,
-					0.f,0.f,15.f/16.f,9.f/16.f);	// 새 편지
+					0.f,0.f,15.f/16.f,9.f/16.f);
 				if (m_iBlinkTemp % 24 == 11) ++m_iLetterBlink;
 				if (m_iLetterBlink > 5)
 				{
@@ -5367,7 +5348,7 @@ void CUIFriendMenu::RenderFriendButton()
 		else if (g_pLetterList->CheckNoReadLetter())
 		{
 			RenderBitmap(BITMAP_INTERFACE_EX+16,m_iPos_x + 36,m_iFriendMenuPos_y + 7,15.f,9.f,
-				0.f,0.f,15.f/16.f,9.f/16.f);	// 새 편지
+				0.f,0.f,15.f/16.f,9.f/16.f);
 		}
 	}
 	else
@@ -5375,14 +5356,14 @@ void CUIFriendMenu::RenderFriendButton()
 		if (g_pFriendMenu->IsNewChatAlert() && bIsAlertTime)
 		{
 			RenderBitmap(BITMAP_INTERFACE_EX+17,m_iPos_x + 4,m_iFriendMenuPos_y + 2,25.f,14.f,
-				0.f,0.f/32.f,25.f/32.f,14.f/32.f);	// 새 메시지
+				0.f,0.f/32.f,25.f/32.f,14.f/32.f);
 		}
 		if (g_pFriendMenu->IsNewMailAlert())
 		{
 			if (bIsAlertTime)
 			{
 				RenderBitmap(BITMAP_INTERFACE_EX+16,m_iPos_x + 33,m_iFriendMenuPos_y + 5,15.f,9.f,
-					0.f,0.f,15.f/16.f,9.f/16.f);	// 새 편지
+					0.f,0.f,15.f/16.f,9.f/16.f);
 				if (m_iBlinkTemp % 24 == 11) ++m_iLetterBlink;
 				if (m_iLetterBlink > 5)
 				{
@@ -5394,7 +5375,7 @@ void CUIFriendMenu::RenderFriendButton()
 		else if (g_pLetterList->CheckNoReadLetter())
 		{
 			RenderBitmap(BITMAP_INTERFACE_EX+16,m_iPos_x + 33,m_iFriendMenuPos_y + 5,15.f,9.f,
-				0.f,0.f,15.f/16.f,9.f/16.f);	// 새 편지
+				0.f,0.f,15.f/16.f,9.f/16.f);
 		}
 	}
 	++m_iBlinkTemp;
@@ -5405,11 +5386,7 @@ void CUIFriendMenu::RenderSub()
 	if (m_fLineHeight == 0)
 	{
 		SIZE TextSize;
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), "0", 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), "0", 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		
 		m_fLineHeight = TextSize.cy / g_fScreenRate_y;
 	}
@@ -5425,11 +5402,9 @@ void CUIFriendMenu::RenderSub()
 		m_fMenuAlpha = 1.0f;
 	}
 
-	//RenderFriendButton();
-	
 	EnableAlphaTest();
 
-	if (m_WindowList.empty() == false && GetState() == UISTATE_NORMAL)	// && m_fMenuAlpha > 0.0f)
+	if (m_WindowList.empty() == false && GetState() == UISTATE_NORMAL)
 	{
 		int iSize = 0;
 		for (m_WindowListIter = m_WindowList.begin(); m_WindowListIter != m_WindowList.end(); ++m_WindowListIter, ++iSize)
@@ -5477,11 +5452,7 @@ void CUIFriendMenu::RenderWindowList()
 		{
 			if (*iter == *m_WindowListIter)
 			{
-//				BOOL bIsAlertTime = (m_iBlinkTemp % 24 < 12);
-//				if (bIsAlertTime == TRUE)
-//				{
-					bAlert = TRUE;
-//				}
+				bAlert = TRUE;
 			}
 		}
 
@@ -5507,22 +5478,19 @@ void CUIFriendMenu::RenderWindowList()
 		g_pRenderText->SetBgColor(0);	
 		const char * pszChatTitleOriginal = g_pWindowMgr->GetWindow(*m_WindowListIter)->GetTitle();
 
-		// ,앞에만 얻기
 		char temp[MAX_TEXT_LENGTH + 1] = {0};
 		strncpy(temp, pszChatTitleOriginal, MAX_TEXT_LENGTH + 1);
 		char * pszChatTitle = strtok(temp, ",");
 
-		// 빈방 체크
 		if (strlen(pszChatTitle) > strlen(GlobalText[994]))
 		{
 			if (strncmp(pszChatTitle, GlobalText[995], strlen(GlobalText[995])) == 0)
 			{
-				// 오프라인
-				CutText3(pszChatTitle + strlen(GlobalText[995]) + strlen(GlobalText[994]), szText, m_iWidth - 8, 1, 64);	// "대화중: "
+				CutText3(pszChatTitle + strlen(GlobalText[995]) + strlen(GlobalText[994]), szText, m_iWidth - 8, 1, 64);
 			}
 			else
 			{
-				CutText3(pszChatTitle + strlen(GlobalText[994]), szText, m_iWidth - 8, 1, 64);	// "대화중: "
+				CutText3(pszChatTitle + strlen(GlobalText[994]), szText, m_iWidth - 8, 1, 64);
 			}
 		}
 		else
@@ -5534,10 +5502,8 @@ void CUIFriendMenu::RenderWindowList()
 		CUIChatWindow * pWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(*m_WindowListIter);
 		if (pWindow != NULL && pWindow->GetUserCount() > 2)
 		{
-			// 여러명방 표시
 			glColor3f(255, 0, 0);
-			RenderBitmap(BITMAP_INTERFACE_EX+15,(float)m_iPos_x + m_iWidth - 7,(float)m_iFriendMenuPos_y - (m_fLineHeight + 4) * i + 5,
-				(float)4,(float)6,0.f,0.f,4.f/8.f,6.f/8.f);
+			RenderBitmap(BITMAP_INTERFACE_EX+15,(float)m_iPos_x + m_iWidth - 7,(float)m_iFriendMenuPos_y - (m_fLineHeight + 4) * i + 5,	(float)4,(float)6,0.f,0.f,4.f/8.f,6.f/8.f);
 			glColor3f(255, 255, 255);
 		}
 	}
@@ -5584,7 +5550,7 @@ void CUIFriendMenu::HideMenu()
 	if (GetState() == UISTATE_NORMAL)
 	{
 		SetState(UISTATE_HIDE);
-		m_iHeight = 0;	//m_iFriendMenuHeight;
+		m_iHeight = 0;
 		m_iPos_y = m_iFriendMenuPos_y;
 		m_fMenuAlphaAdd = -0.25f;
 		m_bHotKey = FALSE;

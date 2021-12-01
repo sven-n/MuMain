@@ -1,5 +1,4 @@
 // NewUIGuildInfoWindow.cpp: implementation of the CNewUIGuildInfoWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -16,11 +15,7 @@
 #include "CSitemOption.h"
 #include "MapManager.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
-extern BYTE m_OccupationState;		// 크라이울프 레이드 MVP 상태 (0: 평화, 1: 점령, 2: 전쟁)
+extern BYTE m_OccupationState;
 #ifdef PJH_ADD_MINIMAP
 
 using namespace SEASON3B;
@@ -44,12 +39,12 @@ bool SEASON3B::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_pNewUIMng = pNewUIMng;
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MINI_MAP, this);
 
-	LoadBitmap("Interface\\mini_map_ui_corner.tga", IMAGE_MINIMAP_INTERFACE + 1, GL_LINEAR);	//코너....
-	LoadBitmap("Interface\\mini_map_ui_line.jpg", IMAGE_MINIMAP_INTERFACE + 2, GL_LINEAR);		//라인....
-	LoadBitmap("Interface\\mini_map_ui_cha.tga", IMAGE_MINIMAP_INTERFACE + 3, GL_LINEAR);		//라인....
-	LoadBitmap("Interface\\mini_map_ui_portal.tga", IMAGE_MINIMAP_INTERFACE + 4, GL_LINEAR);	//포털....
-	LoadBitmap("Interface\\mini_map_ui_npc.tga", IMAGE_MINIMAP_INTERFACE + 5, GL_LINEAR);		//npc....
-	LoadBitmap("Interface\\mini_map_ui_cancel.tga", IMAGE_MINIMAP_INTERFACE + 6, GL_LINEAR);		//캔슬버튼
+	LoadBitmap("Interface\\mini_map_ui_corner.tga", IMAGE_MINIMAP_INTERFACE + 1, GL_LINEAR);
+	LoadBitmap("Interface\\mini_map_ui_line.jpg", IMAGE_MINIMAP_INTERFACE + 2, GL_LINEAR);
+	LoadBitmap("Interface\\mini_map_ui_cha.tga", IMAGE_MINIMAP_INTERFACE + 3, GL_LINEAR);
+	LoadBitmap("Interface\\mini_map_ui_portal.tga", IMAGE_MINIMAP_INTERFACE + 4, GL_LINEAR);
+	LoadBitmap("Interface\\mini_map_ui_npc.tga", IMAGE_MINIMAP_INTERFACE + 5, GL_LINEAR);
+	LoadBitmap("Interface\\mini_map_ui_cancel.tga", IMAGE_MINIMAP_INTERFACE + 6, GL_LINEAR);
 
 	m_BtnExit.ChangeButtonImgState( true, IMAGE_MINIMAP_INTERFACE + 6, false );
 	m_BtnExit.ChangeButtonInfo( m_Pos.x+610, 3, 85, 85 );		
@@ -217,14 +212,7 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const char* Filename)
 {
 	char Fname[300]; 
 	int i = 0;
-#ifdef ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
-	if (World == WD_33AIDA)
-		sprintf(Fname, "Data\\%s\\mini_maptest.ozt", Filename);
-	else
-		sprintf(Fname, "Data\\%s\\mini_map.ozt", Filename);
-#else	// ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
 	sprintf(Fname,"Data\\%s\\mini_map.ozt",Filename);
-#endif	// ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
 	FILE *pFile = fopen(Fname,"rb");
 	
 	if(pFile == NULL)
@@ -236,30 +224,11 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const char* Filename)
 	{
 		m_bSuccess = true;
 		fclose(pFile);
-#ifdef ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
-		if (World == WD_33AIDA)
-			sprintf(Fname, "%s\\mini_maptest.tga", Filename);
-		else
-			sprintf(Fname, "%s\\mini_map.tga", Filename);
-#else	// ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
 		sprintf(Fname,"%s\\mini_map.tga",Filename);
-#endif	// ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
 		LoadBitmap(Fname, IMAGE_MINIMAP_INTERFACE, GL_LINEAR);
 	}
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef USE_MINIMAPTEST_BMD
-	sprintf(Fname,"Data\\Local\\%s\\Minimap\\Minimap_%stest_%s.bmd", g_strSelectedML.c_str(), Filename, g_strSelectedML.c_str());
-#else
 	sprintf(Fname,"Data\\Local\\%s\\Minimap\\Minimap_%s_%s.bmd", g_strSelectedML.c_str(), Filename, g_strSelectedML.c_str());
-#endif  //USE_MASTERTREE_BMD
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef USE_MINIMAPTEST_BMD
-	sprintf(Fname,"Data\\%s\\minimaptest.bmd",Filename);
-#else
-	sprintf(Fname,"Data\\%s\\minimap.bmd",Filename);
-#endif  //USE_MASTERTREE_BMD
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	for(i = 0; i < MAX_MINI_MAP_DATA; i++)
 	{
@@ -352,12 +321,8 @@ bool SEASON3B::CNewUIMiniMap::Check_Btn(int mx,int my)
 			{
 				SIZE Fontsize;
 				m_TooltipText = (unicode::t_string)m_Mini_Map_Data[i].Name;
-				g_pRenderText->SetFont( g_hFont );			// 수정 : Pruarin(07.08.03)
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+				g_pRenderText->SetFont( g_hFont );
 				g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 				Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
 				Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);

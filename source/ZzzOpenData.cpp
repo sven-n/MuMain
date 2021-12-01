@@ -5550,12 +5550,10 @@ void OpenBasicData(HDC hDC)
 	::LoadBitmap("Interface\\menu01_new2_SD.jpg" ,BITMAP_INTERFACE_EX+46);
 
 #ifdef ASG_ADD_GENS_SYSTEM
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 	std::string strFileName = "Local\\" + g_strSelectedML + "\\ImgsMapName\\MapNameAddStrife.tga";
 	::LoadBitmap(strFileName.c_str(), BITMAP_INTERFACE_EX+47);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	::LoadBitmap("Interface\\MapNameAddStrife.tga", BITMAP_INTERFACE_EX+47);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
+
 #endif	// ASG_ADD_GENS_SYSTEM
 
 #ifdef ASG_ADD_GENS_MARK
@@ -5762,13 +5760,7 @@ void OpenTextData()
 {
 	char Text[100];
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	sprintf(Text,"Data\\Local\\%s\\Text_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	sprintf(Text,"Data\\Local\\Text.bmd");
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
 	GlobalText.Load(Text, CGlobalText::LD_USA_CANADA_TEXTS|CGlobalText::LD_FOREIGN_TEXTS);
 	OpenMacro("Data\\Macro.txt");
 }

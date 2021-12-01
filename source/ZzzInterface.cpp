@@ -72,8 +72,6 @@ extern BOOL g_bUseWindowMode;
 #endif //WINDOWMODE
 extern void SetPlayerBow(CHARACTER *c);
 
-bool m_pc_wanted = false;
-
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;
 #endif	// _PVP_ADD_MOVE_SCROLL
@@ -2477,10 +2475,7 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 			
 			WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;			
 			
-			SendRequestMagicContinue( iSkill, (int)(pCha->TargetPosition[0]/100.f),
-				(int)(pCha->TargetPosition[1]/100.f),
-				(BYTE)(pObj->Angle[2]/360.f*256.f), 
-				0, 0, wTargetKey,0);
+			SendRequestMagicContinue( iSkill, (int)(pCha->TargetPosition[0]/100.f),(int)(pCha->TargetPosition[1]/100.f),(BYTE)(pObj->Angle[2]/360.f*256.f),0, 0, wTargetKey,0);
 		}
 		break;
 	case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
@@ -6444,8 +6439,7 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
                     {
                         TKey = getTargetCharacterKey ( c, g_MovementSkill.m_iTarget );
                     }
-                    SendRequestMagicContinue ( Skill, ( c->PositionX),
-                        ( c->PositionY), (BYTE)(o->Angle[2]/360.f*256.f), byValue, pos, TKey, 0);
+                    SendRequestMagicContinue ( Skill, ( c->PositionX),( c->PositionY), (BYTE)(o->Angle[2]/360.f*256.f), byValue, pos, TKey, 0);
 					SetAttackSpeed();
 					
 					if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )

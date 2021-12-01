@@ -18,6 +18,8 @@ enum class ProtocolHead : uint16_t
 	BOTH_ATTACK1,
 	BOTH_ATTACK2,
 	BOTH_ATTACK3,
+
+	BOTH_MESSAGE,
 };
 
 struct PMSG_CONNECT_ACCOUNT_SEND
@@ -109,6 +111,28 @@ public:
 		Send(lpMsg);
 	}
 
+	void DataSend(uint8_t* lpMsg, uint16_t size) 
+	{
+		std::cout << " Send data NEW1" << size << "\n";
+
+		if (IsConnected())
+		{
+			olc::net::message<ProtocolHead> msg;
+
+			msg.header.id = ProtocolHead::BOTH_MESSAGE;
+
+			msg.body.resize(msg.body.size() + size);
+
+			std::memcpy(msg.body.data(), lpMsg, size);
+
+			msg.header.size = msg.size();
+
+			Send(msg);
+
+			std::cout << " Send data NEW2.\n";
+		}
+	}
+
 };
 
 class CProtocolSend
@@ -118,8 +142,9 @@ public:
 	bool ConnectServer();
 	void DisconnectServer();
 	void SendPingTest();
-	static void RecvMessage();
-	void SendPacket(ProtocolHead head,uint8_t* message, uint16_t size) { SocketConnect->DataSend(head,message,size); }
+	void RecvMessage();
+	void SendPacket(ProtocolHead head,uint8_t* message, uint16_t size) { if(SocketConnect) SocketConnect->DataSend(head,message,size); }
+	void SendPacketClassic(uint8_t* message,uint16_t size) { if(SocketConnect) SocketConnect->DataSend(message,size);}
 	void SendCheckOnline();
 	void SendRequestLogInNew(char* account, char* password);
 	void SendRequestCharactersListNew();

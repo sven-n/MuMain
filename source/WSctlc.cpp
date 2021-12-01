@@ -135,11 +135,6 @@ BOOL CWsctlc::ShutdownConnection(SOCKET sd)
     return true;
 }
 
-
-
-//////////////////////////////////////////////////////////////////////
-// Winsock dll을 해제한다.
-//////////////////////////////////////////////////////////////////////
 void CWsctlc::Cleanup()
 {
 	WSACleanup();
@@ -202,12 +197,6 @@ BOOL CWsctlc::Close()
 	}
 	g_ErrorReport.Write("[Socket Closed][Clear PacketQueue]\r\n");
 
-	//ShutdownConnection(m_socket);
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-	g_SessionCryptorCS.Close( (int)m_socket );
-	g_SessionCryptorSC.Close( (int)m_socket );
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
-
 	closesocket(m_socket);
 	m_socket = INVALID_SOCKET;
 	return TRUE;
@@ -219,11 +208,6 @@ BOOL CWsctlc::Close(SOCKET & socket)
 	{
 		g_bGameServerConnected = FALSE;
 	}
-
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-	g_SessionCryptorCS.Close( (int)socket );
-	g_SessionCryptorSC.Close( (int)socket );
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
 
 	closesocket(socket);
 	socket = INVALID_SOCKET;
@@ -242,7 +226,7 @@ int CWsctlc::Connect(char *ip_addr, unsigned short port, DWORD WinMsgNum)
 	struct hostent    *host = NULL;
 
 	if( m_hWnd == NULL ) {
-		MessageBox(NULL, "윈도우 핸들 에러", "Error", MB_OK);
+		MessageBox(NULL, "Connect Error", "Error", MB_OK);
 		return FALSE;
 	}
     addr.sin_family			= PF_INET;
@@ -291,7 +275,6 @@ int CWsctlc::Connect(char *ip_addr, unsigned short port, DWORD WinMsgNum)
 	g_SessionCryptorSC.Open( (int)m_socket );
 #endif // PKD_ADD_ENHANCED_ENCRYPTION
 
-	//cLogProc.Add("서버에 접속했습니다. %s/%d", ip_addr, port);
 	return 1;
 }
 
@@ -349,147 +332,33 @@ int CWsctlc::sSend(SOCKET socket, char *buf, int len)
 	}
 	return TRUE;
 }
-/*
-int CWsctlc::sSend(SOCKET socket, char *buf, int len)
-{	
-	int nResult;
-	
-	int nLeft = len;
-	int nDx=0;
-	if( socket == INVALID_SOCKET ) return FALSE;
 
-	while( 1 ) 
-	{
-		nResult = send(socket, (char*)buf+nDx, len-nDx, 0);
-		if( nResult == SOCKET_ERROR )
-		{
-			if( WSAGetLastError() != WSAEWOULDBLOCK )
-			{
-				LogPrint("send() 에러 %d로 종료시킴 len(%d)", WSAGetLastError(), len);
-				Close();
-				return FALSE;
-			}
-			else 
-			{
-				if( (m_nSendBufLen+len) > MAX_SENDBUF )
-				{
-					Close();
-					return FALSE;
-				}
-				memcpy( m_SendBuf+m_nSendBufLen, buf, nLeft);
-				m_nSendBufLen += nLeft;
-				//LogPrint("send() WSAEWOULDBLOCK : %d", WSAGetLastError());
-				return FALSE;
-			}
-		}
-		else {
-			if( nResult == 0 ) {
-				//LogPrint("send()  result is zero", WSAGetLastError());
-				break;
-			}
-		}
-		nDx += nResult;
-		nLeft -= nResult;
-		if( nLeft <= 0 ) break;
-	}	
-	return TRUE;
-}
-
-  */
-//////////////////////////////////////////////////////////////////////
-// 내부 소켓 번호로 데이터를 전송한다.
-//////////////////////////////////////////////////////////////////////
-/*int CWsctlc::sSend(char *buf, int len)
-{*/	
-	/*WSABUF		wsabuf;
-	DWORD		SendByte;
-
-	
-	wsabuf.buf = buf;
-	wsabuf.len = len;
-
-	WSASend(m_socket, &wsabuf, 1, &SendByte, 0, NULL, NULL);
-	return TRUE;
-*/
-
-/*	int nResult;
-	
-	int nLeft = len;
-	int nDx=0;
-	if( m_socket == INVALID_SOCKET ) return FALSE;
-
-	while( 1 ) 
-	{
-		nResult = send(m_socket, (char*)buf+nDx, len-nDx, 0);
-		if( nResult == SOCKET_ERROR )
-		{
-			if( WSAGetLastError() != WSAEWOULDBLOCK )
-			{
-				LogPrint("send() 에러 %d로 종료시킴 len(%d)", WSAGetLastError(), len);
-				Close();
-				return FALSE;
-			}
-			else 
-			{
-				if( (m_nSendBufLen+len) > MAX_SENDBUF )
-				{
-					Close();
-					return FALSE;
-				}
-				memcpy( m_SendBuf+m_nSendBufLen, buf, nLeft);
-				m_nSendBufLen += nLeft;
-				//LogPrint("send() WSAEWOULDBLOCK : %d", WSAGetLastError());
-				return FALSE;
-			}
-		}
-		else {
-			if( nResult == 0 ) {
-				//LogPrint("send()  result is zero", WSAGetLastError());
-				break;
-			}
-			if( m_LogPrint )
-			{
-				LogHexPrintS((BYTE*)buf, nResult);
-			}
-		}
-		nDx += nResult;
-		nLeft -= nResult;
-		if( nLeft <= 0 ) break;
-	}	
-	return TRUE;
-}*/
-
-
-//////////////////////////////////////////////////////////////////////
-// FD_WRITE메시지 발생시 내부버퍼에 쌓은 데이터를 전송한다.
-//////////////////////////////////////////////////////////////////////
 int CWsctlc::FDWriteSend()
 {
 	int nResult;
 	int nDx	  = 0;
 	
-	//cLogProc.Add("fd_write 메시지 접수 socket(%d)", m_socket);
 	while( m_nSendBufLen > 0 ) 
 	{
 		nResult = send(m_socket, (char*)m_SendBuf+nDx, m_nSendBufLen-nDx, 0);
-		//cLogProc.Add("fd_write %d byte 메시지   ", nResult);
+
 		if( nResult == SOCKET_ERROR )
 		{
 			if( WSAGetLastError() != WSAEWOULDBLOCK )
 			{
-				g_ErrorReport.Write("FD_WRITE Send Error = %d\r\n", WSAGetLastError());
+				g_ErrorReport.Write("FDWriteSend Error 1.\r\n");
 				Close();
 				return FALSE;
 			}
 			else 
 			{
-				//cLogProc.Add("FD_WRITE send() WSAEWOULDBLOCK : %d", WSAGetLastError());
 				break;
 			}
 		}
 		else {
-			if( nResult <= 0 ) {
-				//cLogProc.Add("send() result is zero %d", WSAGetLastError());			
+			if( nResult <= 0 ) 
+			{
+				g_ErrorReport.Write("FDWriteSend Error 2.\r\n");
 				Close();
 				return FALSE;
 			}
@@ -592,34 +461,16 @@ int CWsctlc::nRecv()
 {	
 	int nResult;
 
-	if(m_nRecvBufLen >= MAX_RECVBUF) {
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-		DebugAngel_Write(PACKET_LOG_FILE, "m_nRecvBufLen[%d] \r\n", m_nRecvBufLen);
-#endif //PBG_LOG_PACKET_WINSOCKERROR
-		g_ErrorReport.Write("Receive Packet Buffer Overflow - 접속을 끊습니다.\r\n");
-		return 1;	//. 접속 끊기
+	if(m_nRecvBufLen >= MAX_RECVBUF) 
+	{
+		g_ErrorReport.Write("Receive Packet Buffer Overflow.\r\n");
+		return 1;
 	}
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-	DebugAngel_Write(PACKET_LOG_FILE, "m_nRecvBufLen[%d]\r\n", m_nRecvBufLen);
-#endif //PBG_LOG_PACKET_WINSOCKERROR
 
 	nResult = recv( m_socket, (char*)m_RecvBuf+m_nRecvBufLen, MAX_RECVBUF-m_nRecvBufLen, 0);
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-	if(nResult == SOCKET_ERROR || nResult == 0)
+
+	if( nResult == 0 )
 	{
-		DebugAngel_Write(PACKET_LOG_FILE, "WSAGetLastError[%d] nResult[%d] m_nRecvBufLen[%d]\r\n", WSAGetLastError(), nResult, m_nRecvBufLen);
-		
-		for(int test=0; test<MAX_RECVBUF; test++)
-		{
-			if(test%32 == 0)
-				DebugAngel_Write(PACKET_LOG_FILE, "\r\n");
-			DebugAngel_Write(PACKET_LOG_FILE, "%02x ", m_RecvBuf[test]);
-		}
-	}
-#endif //PBG_LOG_PACKET_WINSOCKERROR
-	if( nResult == 0 ) //접속이 끊겼씀.
-	{
-		//cLogProc.Add("접속 종료됨 %d", WSAGetLastError());
 		return 1;
 	}
 	if( nResult == SOCKET_ERROR )
@@ -630,16 +481,14 @@ int CWsctlc::nRecv()
 		}
 		else {
 #ifdef _DEBUG
-			LogPrint("recv() 받기 에러 %d", WSAGetLastError());
+			LogPrint("recv() %d", WSAGetLastError());
 #endif
 		}
 		return 1;
 	}
 	m_nRecvBufLen += nResult;
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-	DebugAngel_Write(PACKET_LOG_FILE, "m_nRecvBufLen[%d] nResult[%d]\r\n", m_nRecvBufLen, nResult);
-#endif //PBG_LOG_PACKET_WINSOCKERROR
-	if( m_nRecvBufLen < 3 ) return 3;		//. 해더가 다 안받아졌으면 리턴해서 계속함
+
+	if( m_nRecvBufLen < 3 ) return 3;
 
 	int lOfs=0;
 	int size=0;
@@ -658,7 +507,7 @@ int CWsctlc::nRecv()
 		}
 		else {
 #ifdef _DEBUG
-			LogPrint("헤더가 올바르지 않다.(%s %d)", __FILE__, __LINE__);
+			LogPrint("Packet Error.(%s %d)", __FILE__, __LINE__);
 #endif
 			m_nRecvBufLen = 0;
 			return FALSE;
@@ -668,27 +517,12 @@ int CWsctlc::nRecv()
 		if( size <= 0 ) 
 		{
 #ifdef _DEBUG
-			LogPrint("size 가 %d이다.", size);
+			LogPrint("size %d", size);
 #endif
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-			DebugAngel_Write(PACKET_LOG_FILE, "size < 0 \r\n");
-#endif //PBG_LOG_PACKET_WINSOCKERROR
 			return FALSE;
 		}
-		else if( size <= m_nRecvBufLen )	// 데이터가 크기만큼 존재하면..
+		else if( size <= m_nRecvBufLen )
 		{
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-			DebugAngel_Write(PACKET_LOG_FILE, "[socket recv push] PushPacket lOfs[%d] size[%d]\r\n", lOfs, size);
-
-			for(int i=lOfs; i<lOfs+size; i++)
-				DebugAngel_Write(PACKET_LOG_FILE, "%02x ", m_RecvBuf[i]);
-
-			DebugAngel_Write(PACKET_LOG_FILE, "\r\n");
-
-			DebugAngel_Write(PACKET_LOG_FILE, "%02x ", m_RecvBuf[i]);
-			DebugAngel_Write(PACKET_LOG_FILE, "\r\n");
-#endif //PBG_LOG_PACKET_WINSOCKERROR
-
 			m_pPacketQueue->PushPacket(m_RecvBuf+lOfs, size);
 			if( m_LogPrint )
 			{
@@ -698,31 +532,23 @@ int CWsctlc::nRecv()
 			m_nRecvBufLen -= size;
 			if( m_nRecvBufLen <= 0 )
 			{
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-			DebugAngel_Write(PACKET_LOG_FILE, "\r\n m_nRecvBufLen <= 0 \r\n");
-#endif //PBG_LOG_PACKET_WINSOCKERROR
 				break;
 			}
 		}			
-		else {	// recv 데이터가 아직 완성되지 않았다면..
+		else 
+		{
 			if( lOfs > 0 ) 
 			{
 				if( m_nRecvBufLen < 1 ) 
 				{
 #ifdef _DEBUG
-					LogPrint("m_nRecvBufLen 이 1보다 작다..");
+					LogPrint("m_nRecvBufLen..");
 #endif
 					break;
 				}
 				else
 				{
-					memcpy(m_RecvBuf, m_RecvBuf+lOfs, m_nRecvBufLen); // 남은만큼 복사한다.
-#ifdef PBG_LOG_PACKET_WINSOCKERROR
-					DebugAngel_Write(PACKET_LOG_FILE, "\r\n");
-
-					for(int i=0; i<m_nRecvBufLen; i++)
-						DebugAngel_Write(PACKET_LOG_FILE, "[socket recv memcpy] m_RecvBuf [%02x] \r\n", m_RecvBuf[i]);
-#endif //PBG_LOG_PACKET_WINSOCKERROR
+					memcpy(m_RecvBuf, m_RecvBuf+lOfs, m_nRecvBufLen);
 				}
 			}
 			break;
@@ -736,7 +562,8 @@ int CWsctlc::nRecv()
 
 BYTE * CWsctlc::GetReadMsg()
 {
-	if(!m_pPacketQueue->IsEmpty()){
+	if(!m_pPacketQueue->IsEmpty())
+	{
 		CPacket* pPacket = m_pPacketQueue->FrontPacket();
 		m_pPacketQueue->PopPacket();
 		return pPacket->GetBuffer();

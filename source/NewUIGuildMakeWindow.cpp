@@ -182,9 +182,7 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_EditBox->SetBackColor(0, 0, 0, 25);
 	m_EditBox->SetFont(g_hFont);
 	m_EditBox->SetState(UISTATE_NORMAL);
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_EditBox->SetOption(UIOPTION_NOLOCALIZEDCHARACTERS);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	m_Button = new CNewUIButton[GUILDMAKEBUTTON_COUNT];
 
 	for( int i = 0; i < GUILDMAKEBUTTON_COUNT; ++i )
@@ -204,7 +202,7 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 	// Exit Button
 	m_BtnExit.ChangeButtonImgState( true, IMAGE_GUILDMAKE_BTN_EXIT, false );
 	m_BtnExit.ChangeButtonInfo( m_Pos.x+13, m_Pos.y+392, 36, 29 );		
-	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );	// 1002 "´Ý±â"
+	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );
 	
 	Show(false);
 

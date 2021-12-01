@@ -51,9 +51,7 @@ extern int  SelectedCharacter;
 extern int  SelectedOperate;
 extern int  SelectedHero;
 extern int  Attacking;
-extern bool	m_pc_wanted;
 
-//  자동 따라가기.
 extern int   g_iFollowCharacter;
 extern int  HeroTile;
 extern int  LoadingWorld;

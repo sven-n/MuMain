@@ -77,7 +77,6 @@ bool SEASON3B::CNewUIChatLogWindow::RenderBackground()
 	return true;
 }
 
-#ifdef KJH_FIX_UI_CHAT_MESSAGE
 bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 {
 	float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy + SCROLL_TOP_BOTTOM_PART_HEIGHT;
@@ -192,131 +191,12 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 	return true;
 }
 
-#else // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
-//-----------------------------------------------------------------------------------------
-bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
-{
-	float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy + SCROLL_TOP_BOTTOM_PART_HEIGHT;
-
-	//. 메세지 그리기
-	int iRenderStartLine = 0;
-	if(GetCurrentRenderEndLine() >= m_nShowingLines)
-		iRenderStartLine = GetCurrentRenderEndLine() - m_nShowingLines + 1;
-	
-	BYTE byAlpha = 150;
-	if(m_bShowFrame) byAlpha = 100;
-
-	EnableAlphaTest();
-	for(int i=iRenderStartLine, s=0; i<=GetCurrentRenderEndLine(); i++, s++)
-	{					
-		if(i < 0 && i >= m_vecMsgs.size()) break;
-		
-		bool bRenderMessage = true;	
-		g_pRenderText->SetFont(g_hFont);
-
-		CMessageText* pMsgText = m_vecMsgs[i];
-
-		if( pMsgText->GetType() == TYPE_WHISPER_MESSAGE 
-			&& (bRenderMessage = CheckMessageShowFlag(SHOW_WHISPER_MESSAGE)) )		//귓말
-		{
-			g_pRenderText->SetBgColor(255, 200, 50, 150);
-			g_pRenderText->SetTextColor(0, 0, 0, 255);
-		}
-		else if( pMsgText->GetType() == TYPE_SYSTEM_MESSAGE 
-			&& (bRenderMessage = CheckMessageShowFlag(SHOW_SYSTEM_MESSAGE)) )		//메세지
-		{
-			g_pRenderText->SetBgColor(0, 0, 0, 150);
-			g_pRenderText->SetTextColor(100, 150, 255, 255);
-		}
-		else if( pMsgText->GetType() == TYPE_ERROR_MESSAGE 
-			&& (bRenderMessage = CheckMessageShowFlag(SHOW_ERROR_MESSAGE)) )		//에러
-		{
-			g_pRenderText->SetBgColor(0, 0, 0, 150);
-			g_pRenderText->SetTextColor(255, 30, 0, 255);
-		}
-		else if( pMsgText->GetType() == TYPE_CHAT_MESSAGE 
-			&& (bRenderMessage = CheckMessageShowFlag(SHOW_CHAT_MESSAGE)) )			//채팅
-		{
-			g_pRenderText->SetBgColor(0, 0, 0, byAlpha);
-			g_pRenderText->SetTextColor(205, 220, 239, 255);
-		}
-		else if( pMsgText->GetType() == TYPE_PARTY_MESSAGE 
-			&& (bRenderMessage = CheckMessageShowFlag(SHOW_PARTY_MESSAGE)) )		//파티 채팅
-		{
-			g_pRenderText->SetBgColor(0, 200, 255, 150);
-			g_pRenderText->SetTextColor(0, 0, 0, 255);
-		}
-		else if( pMsgText->GetType() == TYPE_GUILD_MESSAGE 
-			&& (bRenderMessage = CheckMessageShowFlag(SHOW_GUILD_MESSAGE)) )		//길드 채팅
-		{
-			g_pRenderText->SetBgColor(0, 255, 150, 200);
-			g_pRenderText->SetTextColor(0, 0, 0, 255);
-		}
-		else if( pMsgText->GetType() == TYPE_GUILD_MESSAGE 
-			&& (bRenderMessage = CheckMessageShowFlag(SHOW_GUILD_MESSAGE)) )		//길드 채팅
-		{
-			g_pRenderText->SetBgColor(0, 255, 150, 200);
-			g_pRenderText->SetTextColor(0, 0, 0, 255);
-		}
-		else if( pMsgText->GetType() == TYPE_UNION_MESSAGE 
-			&& (bRenderMessage = CheckMessageShowFlag(SHOW_UNION_MESSAGE)) )		//연합 채팅
-		{
-			g_pRenderText->SetBgColor(200, 200, 0, 200);
-			g_pRenderText->SetTextColor(0, 0, 0, 255);
-		}
-		else if( pMsgText->GetType() == TYPE_GM_MESSAGE 
-			&& (bRenderMessage = CheckMessageShowFlag(SHOW_GM_MESSAGE)) )		//+ 알바: GM님의 말씀
-		{
-			g_pRenderText->SetBgColor(30, 30, 30, 200);
-			g_pRenderText->SetTextColor(250, 200, 50, 255);
-			g_pRenderText->SetFont(g_hFontBold);
-		}
-		else
-		{
-			bRenderMessage = false;
-		}
-		if(bRenderMessage && !pMsgText->GetText().empty())
-		{
-			POINT ptRenderPos = { fRenderPosX+WND_LEFT_RIGHT_EDGE, 
-				fRenderPosY+FONT_LEADING+(SCROLL_MIDDLE_PART_HEIGHT*s) };
-			if(!pMsgText->GetID().empty())
-			{
-				if(m_bPointedMessage == true && m_iPointedMessageIndex == i)
-				{
-					g_pRenderText->SetBgColor(30, 30, 30, 180);
-					g_pRenderText->SetTextColor(255, 128, 255, 255);
-				}
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				string strIDUTF8 = "";
-				g_pMultiLanguage->ConvertANSIToUTF8OrViceVersa(strIDUTF8, (pMsgText->GetID()).c_str());
-				type_string strLine = strIDUTF8 + " : " + pMsgText->GetText();
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				type_string strLine = pMsgText->GetID() + " : " + pMsgText->GetText();
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-				g_pRenderText->RenderText(ptRenderPos.x, ptRenderPos.y, strLine.c_str());
-			}
-			else
-			{
-				g_pRenderText->RenderText(ptRenderPos.x, ptRenderPos.y, pMsgText->GetText().c_str());
-			}
-		}
-	}
-	DisableAlphaBlend();
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------------------
-#endif // KJH_FIX_UI_CHAT_MESSAGE					// 정리할 때 지워야 하는 소스
-
 bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
 {
-	//. 프레임 그리기
 	if(m_bShowFrame)
 	{
 		float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy;
 
-		//. 사이즈 조절 버튼
 		EnableAlphaTest();
 		if(m_EventState == EVENT_RESIZING_BTN_DOWN)
 		{
@@ -326,13 +206,12 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
 		{
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		}
-		RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY-(float)RESIZING_BTN_HEIGHT, 254.0f, 10.0f);	// 사이즈조절
+		RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY-(float)RESIZING_BTN_HEIGHT, 254.0f, 10.0f);
 		DisableAlphaBlend();
 		
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		//. 스크롤바 틀
-		RenderImage(IMAGE_SCROLL_TOP, fRenderPosX+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE, 
-			fRenderPosY+WND_TOP_BOTTOM_EDGE, 7, 3);
+
+		RenderImage(IMAGE_SCROLL_TOP, fRenderPosX+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE, fRenderPosY+WND_TOP_BOTTOM_EDGE, 7, 3);
 		
 		for(int i=0; i<(int)GetNumberOfShowingLines(); i++)
 		{
@@ -1021,7 +900,6 @@ bool SEASON3B::CNewUIChatLogWindow::CheckChatRedundancy(const type_string& strTe
 	type_vector_msgs* pvecMsgs = GetMsgs( TYPE_ALL_MESSAGE );
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
 		return 0;
 	}
 
@@ -1165,7 +1043,6 @@ void SEASON3B::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
 	type_vector_msgs* pvecMsgs = GetMsgs( GetCurrentMsgType() );
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
 		return;
 	}
 
@@ -1184,7 +1061,6 @@ void SEASON3B::CNewUIChatLogWindow::ShowChatLog()
 	type_vector_msgs* pvecMsgs = GetMsgs( GetCurrentMsgType() );
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
 		return;
 	}
 

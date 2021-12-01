@@ -36,7 +36,6 @@ static void BuxConvert(BYTE *Buffer,int Size)
 
 bool CSItemOption::OpenItemSetScript ( bool bTestServer )
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	std::string strFileName = "";
 	std::string strTest = (bTestServer) ? "Test" : "";
 
@@ -45,20 +44,6 @@ bool CSItemOption::OpenItemSetScript ( bool bTestServer )
 
 	strFileName = "Data\\Local\\" + g_strSelectedML + "\\ItemSetOption" + strTest + "_" + g_strSelectedML + ".bmd";
 	if ( !OpenItemSetOption(strFileName.c_str()) )	 	return false;
-
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	if ( bTestServer )
-	{
-		if ( !OpenItemSetType( "Data\\Local\\ItemSetTypeTest.bmd" ) )		return false;
-		if ( !OpenItemSetOption( "Data\\Local\\ItemSetOptionTest.bmd" ) ) 	return false;
-	}
-	else
-	{
-		if ( !OpenItemSetType( "Data\\Local\\ItemSetType.bmd" ) )		return false;
-		if ( !OpenItemSetOption( "Data\\Local\\ItemSetOption.bmd" ) ) 	return false;
-	}
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-
 	return true;
 }
 
@@ -1475,16 +1460,7 @@ void CSItemOption::RenderOptionHelper ( void )
 	sprintf(TextList[TextNum],"\n");TextNum++;
 
 	SIZE TextSize = {0, 0};	
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int Height = (int)( ((TextNum ) * TextSize.cy + TextSize.cy / 2) / g_fScreenRate_y );
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
 	RenderTipTextList(sx,sy,TextNum,0);
 }
 

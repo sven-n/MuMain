@@ -158,7 +158,7 @@ typedef struct
 
 typedef struct 
 {
-	PWMSG_HEADER	header;
+	PBMSG_HEADER	header;
 	BYTE			CharacterCard;
 } PHEADER_CHARACTERCARD, *LPPHEADER_CHARACTERCARD;
 
@@ -3651,6 +3651,7 @@ void ProtocolCompiler( CWsctlc *pSocketClient = &SocketClient, int iTranslation 
 void ReceiveCharacterList(BYTE* ReceiveBuffer);
 void ReceiveMovePosition(BYTE* ReceiveBuffer);
 void ReceiveMoveCharacter(BYTE* ReceiveBuffer);
+BOOL TranslateProtocol(int HeadCode,BYTE* ReceiveBuffer,int Size,BOOL bEncrypted);
 
 
 void InitGame ();

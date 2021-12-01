@@ -69,19 +69,7 @@ BuffScriptLoaderPtr BuffScriptLoader::Make()
 
 BuffScriptLoader::BuffScriptLoader()
 {
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef _TEST_SERVER
-	string filename = "data/local/"+g_strSelectedML+"/BuffEffecttest_"+g_strSelectedML+".bmd";
-#else //_TEST_SERVER
 	std::string filename = "data/local/"+g_strSelectedML+"/BuffEffect_"+g_strSelectedML+".bmd";
-#endif //_TEST_SERVER
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#ifdef _TEST_SERVER
-	string filename = "data/local/BuffEffecttest.bmd";
-#else //_TEST_SERVER
-	string filename = "data/local/BuffEffect.bmd";
-#endif //_TEST_SERVER
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 	if( !Load( filename ) )
 	{

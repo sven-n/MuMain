@@ -334,11 +334,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 			g_pRenderText->SetFont(g_hFont);
 		}
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		
 		if (fWidth < TextSize.cx) 
 			fWidth = TextSize.cx;
@@ -409,11 +405,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 		float fHeight = 0;
 		if(TextList[i][0] == 0x0a || (TextList[i][0] == ' ' && TextList[i][1] == 0x00))
 		{
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-			unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 			fHeight = (float)TextSize.cy / g_fScreenRate_y / (TextList[i][0] == 0x0a ? 2.0f : 1.0f);
 		}
 		else
@@ -5839,11 +5831,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		fRateY	= fRateY / 1.1f;
 		g_pRenderText->SetFont(g_hFont);
 
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 		Height = (TextLine * TextSize.cy + EmptyLine * TextSize.cy / 2.0f) / fRateY;
 		
@@ -6396,22 +6384,12 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		    sprintf(TextList[TextNum],GlobalText[881],iLimitTime);
 		    TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
         }
-		else if( SkillType != AT_SKILL_SWELL_OF_MAGICPOWER 
-			&& SkillType != AT_SKILL_ALICE_SLEEP
-			&& !(AT_SKILL_ALICE_SLEEP_UP <= SkillType && SkillType <= AT_SKILL_ALICE_SLEEP_UP + 4 )
-			)
+		else if( SkillType != AT_SKILL_SWELL_OF_MAGICPOWER && SkillType != AT_SKILL_ALICE_SLEEP	&& !(AT_SKILL_ALICE_SLEEP_UP <= SkillType && SkillType <= AT_SKILL_ALICE_SLEEP_UP + 4 ))
         {
-			BYTE bySkill = CharacterAttribute->Skill[Type];
-			if (!(AT_SKILL_STUN <= bySkill && bySkill <= AT_SKILL_MANA)
-				&& !(AT_SKILL_ALICE_THORNS <= bySkill && bySkill <= AT_SKILL_ALICE_ENERVATION)
-				&& bySkill != AT_SKILL_TELEPORT
-				&& bySkill != AT_SKILL_TELEPORT_B)
+			WORD bySkill = CharacterAttribute->Skill[Type];
+			if (!(AT_SKILL_STUN <= bySkill && bySkill <= AT_SKILL_MANA)	&& !(AT_SKILL_ALICE_THORNS <= bySkill && bySkill <= AT_SKILL_ALICE_ENERVATION) && bySkill != AT_SKILL_TELEPORT && bySkill != AT_SKILL_TELEPORT_B)
 			{
-#ifdef ASG_ADD_SUMMON_RARGLE
 				if (AT_SKILL_SUMMON_EXPLOSION <= bySkill && bySkill <= AT_SKILL_SUMMON_POLLUTION)
-#else	// ASG_ADD_SUMMON_RARGLE
-				if (AT_SKILL_SUMMON_EXPLOSION <= bySkill && bySkill <= AT_SKILL_SUMMON_REQUIEM)
-#endif	// ASG_ADD_SUMMON_RARGLE
 				{
 					gCharacterManager.GetCurseSkillDamage(bySkill, &iMinDamage, &iMaxDamage);
 					sprintf(TextList[TextNum], GlobalText[1692], iMinDamage, iMaxDamage);
@@ -6742,11 +6720,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	}
 
 	SIZE TextSize = {0, 0};	
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-#else  //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-	unicode::_GetTextExtentPoint(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	
 	if( iRenderPoint == STRP_NONE )
 	{

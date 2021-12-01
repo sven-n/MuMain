@@ -76,21 +76,15 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
 	CWin::SetPosition(nXCoord, nYCoord);
 
 	int nBtnWidth = m_aBtn[0].GetWidth();
-#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int nBtnHeight = m_aBtn[0].GetHeight();
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	m_aBtn[CSMW_BTN_CREATE].SetPosition(nXCoord, nYCoord);
 	m_aBtn[CSMW_BTN_MENU].SetPosition(nXCoord + nBtnWidth + 1, nYCoord);
-	m_asprBack[CSMW_SPR_INFO].SetPosition(
-		m_aBtn[CSMW_BTN_MENU].GetXPos() + nBtnWidth + 2, nYCoord + 5);
+	m_asprBack[CSMW_SPR_INFO].SetPosition(m_aBtn[CSMW_BTN_MENU].GetXPos() + nBtnWidth + 2, nYCoord + 5);
 
 	int nWinRPosX = nXCoord + CWin::GetWidth();
-	m_asprBack[CSMW_SPR_DECO].SetPosition(
-		nWinRPosX - (m_asprBack[CSMW_SPR_DECO].GetWidth() - 22), nYCoord - 59);
+	m_asprBack[CSMW_SPR_DECO].SetPosition(nWinRPosX - (m_asprBack[CSMW_SPR_DECO].GetWidth() - 22), nYCoord - 59);
 	m_aBtn[CSMW_BTN_DELETE].SetPosition(nWinRPosX - nBtnWidth, nYCoord);
-	m_aBtn[CSMW_BTN_CONNECT].SetPosition(
-		nWinRPosX - (nBtnWidth * 2 + 1), nYCoord);
+	m_aBtn[CSMW_BTN_CONNECT].SetPosition(nWinRPosX - (nBtnWidth * 2 + 1), nYCoord);
 }
 
 void CCharSelMainWin::Show(bool bShow)
