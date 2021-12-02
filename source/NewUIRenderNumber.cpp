@@ -1,15 +1,9 @@
 // NewUIRenderNumber.cpp: implementation of the CNewUIRenderNumber class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 
 #include "NewUIRenderNumber.h"	// self
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 
 SEASON3B::CNewUIRenderNumber* SEASON3B::CNewUIRenderNumber::GetInstance()
 {
@@ -48,7 +42,6 @@ float SEASON3B::CNewUIRenderNumber::RenderNumber(float x, float y, int iNum, flo
 		return x;
 	}
 
-	// 기본크기가 원본크기보다 작게 표현하기 위해
 	width = 12.f * (fScale - 0.3f);
 	height = 16.f * (fScale - 0.3f);
 

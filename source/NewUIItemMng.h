@@ -36,9 +36,7 @@ namespace SEASON3B
 		ITEM* CreateItem(ITEM* pItem);		//. refer to the instance already existed
 		ITEM* DuplicateItem(ITEM* pItem);	//. create instance
 		void DeleteItem(ITEM* pItem);
-#ifdef YDG_FIX_MEMORY_LEAK_0905_2ND
-		void DeleteDuplicatedItem(ITEM* pItem);		// DuplicateItem 함수로 생성된 ITEM을 삭제한다
-#endif	// YDG_FIX_MEMORY_LEAK_0905_2ND
+		void DeleteDuplicatedItem(ITEM* pItem);
 		void DeleteAllItems();
 
 		bool IsEmpty();

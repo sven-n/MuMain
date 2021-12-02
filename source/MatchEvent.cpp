@@ -1,11 +1,4 @@
 //////////////////////////////////////////////////////////////////////////
-//
-//////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
-//////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
@@ -13,15 +6,10 @@
 #include "zzzlodterrain.h"
 #include "ZzzScene.h"
 #include "MatchEvent.h"
-//#include "CSEventMatch.h"
-//#include "CSChaosCastle.h"
 #include "MapManager.h"
 #include "w_CursedTemple.h"
 
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
-extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];// ok, cancel // 사용여부, x, y, width, height
+extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
 
 namespace   matchEvent
 {
@@ -31,15 +19,15 @@ namespace   matchEvent
     {		
 		DeleteEventMatch ();
 
-        if ( gMapManager.InBloodCastle() == true )   //  블러드캐슬.
+        if ( gMapManager.InBloodCastle() == true )
         {
 			g_csMatchInfo = new SEASON3B::CNewBloodCastleSystem;
         }
-        else if ( gMapManager.InChaosCastle()==true )  //  카오스캐슬.
+        else if ( gMapManager.InChaosCastle()==true )
         {
 			g_csMatchInfo = new SEASON3B::CNewChaosCastleSystem;
         }
-        else if ( gMapManager.InDevilSquare() )//  광장.
+        else if ( gMapManager.InDevilSquare() )
         {
             g_csMatchInfo = new CSDevilSquareMatch;
         }
@@ -53,10 +41,6 @@ namespace   matchEvent
 		}
     }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  EventMatch를 제거한다.
-//////////////////////////////////////////////////////////////////////////
     void    DeleteEventMatch ( void )
     {
         if ( g_csMatchInfo!=NULL )

@@ -128,8 +128,6 @@ void initBackLight(void);
 void AnimationBackLight( void );
 void RenderBackLight( OBJECT* o, vec3_t Position, vec3_t Light1, vec3_t Light2 );
 
-//  Joint.
-// 조인트 이펙트 생성 함수
 //void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int SubType,OBJECT *Target,float Scale,short PKKey,BYTE SkillIndex,BYTE SkillSerialNum, int iChaIndex, const float* vColor, short int sTargetIndex);
 //void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int SubType=0,OBJECT *Target=NULL,float Scale=10.f,short PK=-1,BYTE SkillIndex=0,BYTE SkillSerialNum=0, int iChaIndex=-1, const float* vColor = NULL, short int sTargetIndex = -1);
 void DeleteJoint( int Type, OBJECT *Target, int SubType=-1 );
@@ -141,9 +139,6 @@ void CreateTail(JOINT *o,float Matrix[3][4]
 				);
 void CreateTail(JOINT *o,float Matrix[3][4], float ScaleX, float ScaleY );
 
-//axis 
-//0이면 통상
-//1이면 xz평면상에서 테일 생성
 void CreateTailAxis(JOINT *o, float Matrix[3][4], BYTE axis = 0);
 void CreateTailAxis(JOINT *o, float Matrix[3][4], float ScaleX, float ScaleY, BYTE axis = 0);
 
@@ -154,7 +149,6 @@ void RenderJoints( BYTE bRenderOneMore=0 );
 
 void GetMagicScrew( int iParam, vec3_t vResult, float fSpeedRate = 1.0f);
 
-// 가까운 랜덤 위치얻기
 inline void GetNearRandomPos( vec3_t Pos, int iRange, vec3_t NewPos)
 {
 	VectorCopy( Pos, NewPos);
@@ -170,7 +164,7 @@ void MoveParticle(OBJECT *o,int Turn);
 void MoveParticle(OBJECT *o,vec3_t angle );
 
 #ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
-void CreateMyGensInfluenceGroundEffect();	// 자신 겐스 세력 바닥 이펙트 생성.(항상 파란색임)
+void CreateMyGensInfluenceGroundEffect();
 #endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
 
 #endif// __ZZZ_EFFECT_H__

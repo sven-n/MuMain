@@ -27,7 +27,6 @@
 #include "zzzopenglUtil.h"
 #include "CSItemOption.h"
 #include "npcBreeder.h"
-#include "PvPSystem.h"
 #include "GIPetManager.h"
 #include "CSParts.h"
 #include "GMBattleCastle.h"
@@ -2678,7 +2677,6 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 			{
 				wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
 			}
-			// 캐릭터의 스킬 사용여부의 알림을 위함
 			SendRequestRageAtt(iSkill, wTargetKey);
 
 			g_CMonkSystem.InitConsecutiveState(3.0f, 12.0f);
@@ -2689,7 +2687,6 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 		break;
 	case AT_SKILL_DRAGON_KICK:
 		{
-			// 캐릭터의 스킬 사용여부의 알림을 위함
 			WORD wTargetKey = 0;
 			if(g_MovementSkill.m_iTarget!=-1)
 			{
@@ -2711,7 +2708,6 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 				wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
 			}
 			
-			// 캐릭터 pk시 target 필요
 			SendRequestDarkside((WORD)iSkill, wTargetKey);
 
 			SendRequestRageAtt(iSkill, wTargetKey);
@@ -2841,7 +2837,7 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 								UseSkillRagefighter(pCha, pObj);
 						}
 						else
-						{	// 멀어졌으면 또 걷기
+						{
 							if(PathFinding2(pCha->PositionX, pCha->PositionY, TargetX, TargetY, &pCha->Path, fDistance))
 							{
 								pCha->Movement = true;
@@ -2884,7 +2880,7 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 					if(g_MovementSkill.m_iTarget != -1)
 					{
 						if(PathFinding2(pCha->PositionX, pCha->PositionY, nTargetX, nTargetY, &pCha->Path, fDistance*1.2f))
-						{	// 멀면 걸어가서 사용
+						{
 							pCha->Movement = true;
 						}
 					}
@@ -3178,7 +3174,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 			{
 				if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
 				{	
-					// 요정 활쏘기의 경우 사정거리 밖이면 걸어가게 한다.
 					if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Range))
 					{
 						c->Movement = true;
@@ -3897,13 +3892,12 @@ bool CheckCommand(char *Text, bool bMacroText )
 					
 					return false;
 				}
-#ifdef LJH_FIX_UNABLE_TO_TRADE_OR_PURCHASE_IN_TROUBLED_AREAS
+
 				if (::IsStrifeMap(gMapManager.WorldActive))
 				{
 					g_pChatListBox->AddText("", GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
 					return false;
 				}
-#endif //LJH_FIX_UNABLE_TO_TRADE_OR_PURCHASE_IN_TROUBLED_AREAS
 
 				int level = CharacterAttribute->Level;
 
@@ -3988,15 +3982,13 @@ bool CheckCommand(char *Text, bool bMacroText )
 				g_pChatListBox->AddText("", GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
 				return false;
 			}
-#ifdef LJH_FIX_UNABLE_TO_TRADE_OR_PURCHASE_IN_TROUBLED_AREAS
+
 			if (::IsStrifeMap(gMapManager.WorldActive))
 			{
 				g_pChatListBox->AddText("", GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
 				return false;
 			}
-#endif //LJH_FIX_UNABLE_TO_TRADE_OR_PURCHASE_IN_TROUBLED_AREAS
-			
-			//. bugfix by soyaviper 2005/03/16
+
 			if (
 				g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
 				|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
@@ -4046,9 +4038,9 @@ bool CheckCommand(char *Text, bool bMacroText )
 								break;
 							}
 						}		
-					}	// end of ; strlen(szId) <= 0
-				}	// end of ; for
-			}	// end of ; SelectedCharcter == -1
+					}
+				}
+			}
 
 			return true;
 		}
@@ -5254,26 +5246,8 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 			case AT_SKILL_POWER_SLASH_UP+3:
 			case AT_SKILL_POWER_SLASH_UP+4:
             case AT_SKILL_ICE_BLADE:
-                if ( c->Helper.Type<MODEL_HELPER+2 || c->Helper.Type>MODEL_HELPER+4
-					&& c->Helper.Type != MODEL_HELPER+37
-					)
+                if ( c->Helper.Type<MODEL_HELPER+2 || c->Helper.Type>MODEL_HELPER+4	&& c->Helper.Type != MODEL_HELPER+37)
                 {
-					/*
-#ifdef PJH_SEASON4_MASTER_RANK4
-								bool jd = true;
-								for(int j=0;j<2;j++)
-								{
-									if(Hero->Weapon[j].Type==MODEL_SWORD+21||Hero->Weapon[j].Type==MODEL_SWORD+23||Hero->Weapon[j].Type==MODEL_SWORD+28||
-										Hero->Weapon[j].Type==MODEL_SWORD+25||Hero->Weapon[j].Type==MODEL_SWORD+31
-										)	//21 = 데스블레이드,23 = 익스플로전블레이드,25 = 소드댄서,28 = 룬바스타드,31 = 데쓰브로드
-									{
-										jd = false;
-									}
-								}
-								if(jd == true)
-									return;
-#endif //PJH_SEASON4_MASTER_RANK4                        
-									*/
                     o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
                     
                     if( CheckTile( c, o, Distance ) )

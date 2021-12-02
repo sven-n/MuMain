@@ -666,10 +666,10 @@ BOOL CMixRecipes::GetRecipeAdvice(unicode::t_char * pszAdviceOut, int iAdivceLin
 
 int CMixRecipes::GetSourceName(int iItemNum, unicode::t_char * pszNameOut, int iNumMixItems, CMixItem * pMixItems)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	if(iNumMixItems < 0)	return MIX_SOURCE_ERROR;
 	if(pMixItems == NULL)	return MIX_SOURCE_ERROR;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	if (GetMostSimilarRecipe() == NULL) return MIX_SOURCE_ERROR;
 	if (iItemNum >= GetMostSimilarRecipe()->m_iNumMixSoruces) return MIX_SOURCE_ERROR;
 
@@ -1117,8 +1117,6 @@ BOOL CMixRecipes::IsJewelItem(CMixItem & rSource)
 }
 #endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char * szFileName)
 {
 	int i, j;
@@ -1231,7 +1229,6 @@ void CMixRecipeMgr::CheckMixInventory()
 	if (m_MixItemInventory.GetNumMixItems() == 0) m_bIsMixInit = TRUE;
 	else m_bIsMixInit = FALSE;
 
-	// 조합 조건과 비교한다.
 	CheckRecipe(m_MixItemInventory.GetNumMixItems(), m_MixItemInventory.GetMixItems());
 	CheckRecipeSimilarity(m_MixItemInventory.GetNumMixItems(), m_MixItemInventory.GetMixItems());
 }
@@ -1243,7 +1240,7 @@ int CMixRecipeMgr::GetSeedSphereID(int iOrder)
 	CMixItem * pItems = m_MixItemInventory.GetMixItems();
 	for (int i = 0; i < m_MixItemInventory.GetNumMixItems(); ++i)
 	{
-		if (pItems[i].m_bySeedSphereID != SOCKET_EMPTY)	// 시드스피어다
+		if (pItems[i].m_bySeedSphereID != SOCKET_EMPTY)
 		{
 			if (iCurrOrder == iOrder)
 			{

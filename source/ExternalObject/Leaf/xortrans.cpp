@@ -24,7 +24,7 @@ bool CCyclicXorTrans::LoadKeyTable(const void* pKey, size_t size)
 }
 void CCyclicXorTrans::UnloadKeyTable() 
 {
-	m_xfKeyTable.resize(0);	//. 메모리를 해제하지는 않는다. new/delete 호출을 아끼자
+	m_xfKeyTable.resize(0);
 }
 
 bool CCyclicXorTrans::AppendKeyTable(const std::string& filename) 

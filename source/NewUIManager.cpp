@@ -81,7 +81,7 @@ void SEASON3B::CNewUIManager::RemoveAllUIObjs()
 			if( pUIObj != NULL )
 			{
 			#ifdef KWAK_ADD_TRACE_FUNC
-				__TraceF(TEXT("UIÅ¬·¡½º ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(°¹¼ö:%d)ÀÌ ÀÖ½À´Ï´Ù. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´Ù. UIKEY(%d) : mapUI \n"), uiUIManageCNT, dwKey);
+				__TraceF(TEXT("UIÅ¬·¡½º ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(°¹¼ö:%d)ÀÌ ÀÖ½À´Ï´. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´. UIKEY(%d) : mapUI \n"), uiUIManageCNT, dwKey);
 			#endif // KWAK_ADD_TRACE_FUNC
 			}
 		}
@@ -93,7 +93,7 @@ void SEASON3B::CNewUIManager::RemoveAllUIObjs()
 			if( pUIObj != NULL )
 			{
 			#ifdef KWAK_ADD_TRACE_FUNC
-				__TraceF(TEXT("UIÅ¬·¡½º ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(°¹¼ö:%d)ÀÌ ÀÖ½À´Ï´Ù. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´Ù. vecUI \n"), uiUIManageCNT);
+				__TraceF(TEXT("UIÅ¬·¡½º ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(°¹¼ö:%d)ÀÌ ÀÖ½À´Ï´. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´. vecUI \n"), uiUIManageCNT);
 			#endif // KWAK_ADD_TRACE_FUNC
 			}
 		}
@@ -228,12 +228,6 @@ bool SEASON3B::CNewUIManager::Render()
 		if((*vi)->IsVisible()) 
 		{
 			(*vi)->Render();
-
-			// Render() ÇÔ¼ö¿¡¼­ false¸¦ ¸®ÅÏÇÏ¸é ´ÙÀ½ °´Ã¼ºÎÅÍ Render() ÇÔ¼ö È£Ãâ ¾ÈÇÏ´Â ·çÆ¾ Á¦°Å (¾ÆÁ÷±îÁö »ç¿ë¿¹¸¦ ¸øº½)
-// 			if(false == (*vi)->Render())
-// 			{
-// 				return false;		//. stop rendering
-// 			}
 		}
 	}
 

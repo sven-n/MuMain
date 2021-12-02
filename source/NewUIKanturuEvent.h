@@ -1,5 +1,4 @@
 // NewUIKanturu2ndEnterNpc.h: interface for the CNewUIKanturu2ndEnterNpc class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIKANTURU2NDENTERNPC_H__4CDE30B6_3570_47BA_9401_0EA282BA1949__INCLUDED_)
@@ -20,7 +19,6 @@ namespace SEASON3B
 	public:
 		enum IMAGE_LIST
 		{
-			// 기본창
 			IMAGE_KANTURU2ND_TOP = CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP,	
 			IMAGE_KANTURU2ND_MIDDLE = CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE,
 			IMAGE_KANTURU2ND_BOTTOM = CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM,
@@ -36,13 +34,13 @@ namespace SEASON3B
 		enum MSGBOX_TYPE
 		{
 			POPUP_NONE = 0,
-			POPUP_USER_OVER,	// 입장 가능한 인원 수 초과
-			POPUP_NOT_MUNSTONE,	// 문스톤 펜던트 착용하고 있는 않다.
-			POPUP_FAILED,		// 입장 가능한 상태가 아님
-			POPUP_FAILED2,		// 이상한 오류로 실패
-			POPUP_UNIRIA = 5,	// 유니리아를 탑승하고 이동 불과
-			POPUP_CHANGERING,	// 변신반지 착용하면 이동 불과
-			POPUP_NOT_HELPER,	// 날개, 망토, 디노란트, 펜릴, 다크호스를 가지고 있지 않을 경우
+			POPUP_USER_OVER,
+			POPUP_NOT_MUNSTONE,
+			POPUP_FAILED,
+			POPUP_FAILED2,
+			POPUP_UNIRIA = 5,
+			POPUP_CHANGERING,
+			POPUP_NOT_HELPER,
 		};
 
 	public:
@@ -68,7 +66,6 @@ namespace SEASON3B
 		void SetEnterRequest(bool bValue);
 		void CreateMessageBox(BYTE btResult);
 
-		// 패킷 관련 함수
 		void ReceiveKanturu3rdInfo(BYTE btState, BYTE btDetailState, BYTE btEnter, BYTE btUserCount, int iRemainTime);
 		void ReceiveKanturu3rdEnter(BYTE btResult);
 		void SendRequestKanturu3rdInfo();
@@ -92,23 +89,20 @@ namespace SEASON3B
 		CNewUIManager* m_pNewUIMng;
 		POINT m_Pos;
 
-		BYTE m_byState;	//	칸투르 3차 상태 
+		BYTE m_byState;
 
-		bool m_bNpcAnimation;	//	NPC 에니메이션 
-		OBJECT*	m_pNpcObject;		//	NPC 오브젝트
+		bool m_bNpcAnimation;
+		OBJECT*	m_pNpcObject;
 		
-		bool m_bEnterRequest;	// 입장요청
+		bool m_bEnterRequest;
 
-		// 시간 관련 변수
-		DWORD m_dwRefreshTime;	// 정보갱신 시간 재는 변수(4초마다 갱신)
-		DWORD m_dwRefreshButtonGapTime;	// 정보갱신 버튼 1초 
+		DWORD m_dwRefreshTime;
+		DWORD m_dwRefreshButtonGapTime;
 
-		// 텍스트 관련 변수
-		unicode::t_char m_strSubject[MAX_GLOBAL_TEXT_STRING];		// 제목
-		unicode::t_char m_strStateText[KANTURU2ND_STATETEXT_MAX][MAX_GLOBAL_TEXT_STRING];	// 상태별 텍스트
-		int	m_iStateTextNum;							// 상태별 텍스트 갯수
+		unicode::t_char m_strSubject[MAX_GLOBAL_TEXT_STRING];
+		unicode::t_char m_strStateText[KANTURU2ND_STATETEXT_MAX][MAX_GLOBAL_TEXT_STRING];
+		int	m_iStateTextNum;
 
-		// 버튼들
 		CNewUIButton m_BtnEnter;
 		CNewUIButton m_BtnRefresh;
 		CNewUIButton m_BtnClose;
@@ -120,7 +114,6 @@ namespace SEASON3B
 	public:
 		enum IMAGE_LIST
 		{
-			// 기본창
 			IMAGE_KANTURUINFO_WINDOW = BITMAP_KANTURU_INFO_BEGIN,	
 		};
 		enum

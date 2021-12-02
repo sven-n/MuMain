@@ -161,7 +161,7 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
 		pCharacter = CreateCharacter(Key,MODEL_PLAYER,PosX,PosY);
 		pCharacter->Object.Scale = 1.0f;
 		pCharacter->Class = CLASS_DARK_LORD;
-		strcpy(pCharacter->ID,"µµÇÃ°»¾î´ÙÅ©·Îµå");
+		strcpy(pCharacter->ID,"µµÇÃ°»¾î´Å©·Îµå");
 		pCharacter->BodyPart[BODYPART_HELM  ].Type = MODEL_HELM  +27;
 		pCharacter->BodyPart[BODYPART_ARMOR ].Type = MODEL_ARMOR +27;
 		pCharacter->BodyPart[BODYPART_PANTS ].Type = MODEL_PANTS +27;

@@ -32,7 +32,6 @@
 #include "npcGateSwitch.h"
 #include "GMBattleCastle.h"
 #include "CComGem.h"
-#include "PvPSystem.h"
 #include "GMCrywolf1st.h"
 #include "CDirection.h"
 #include "ChangeRingManager.h"
@@ -167,52 +166,43 @@ extern float g_fScreenRate_y;
 extern CMurdererMove g_MurdererMove;
 #endif	// _PVP_ADD_MOVE_SCROLL
 
-///////////////////////////////////////////////////////////////////////////////
-// 유틸리티.
-///////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  캐릭터 레벨에 따른 색을 결정한다.
-//////////////////////////////////////////////////////////////////////////
 int getLevelGeneration ( int level, unsigned int* color )
 {
     int lvl;
-    if(level>=300) //
+    if(level>=300)
     {
         lvl = 300;
 	    *color = (255<<24)+(255<<16)+(153<<8)+(255);
     }
-    else if(level>=200) //  흰색.
+    else if(level>=200)
     {
         lvl = 200;
 	    *color = (255<<24)+(255<<16)+(230<<8)+(210);
     }
-    else if(level>=100) //  녹색.
+    else if(level>=100)
     {
         lvl = 100;
         *color = (255<<24)+(24<<16)+(201<<8)+(0);
     }
-    else if(level>=50)  //  주황색.
+    else if(level>=50)
     {
         lvl = 50;
         *color = (255<<24)+(0<<16)+(150<<8)+(255);
     }
-    else                //  빨간색.
+    else
     {
         lvl = 10;
         *color = (255<<24)+(0<<16)+(0<<8)+(255);
     }
     return lvl;
 }
-///////////////////////////////////////////////////////////////////////////////
-// 정보창 랜더링(도움말, 아이템, 스킬 정보창에 사용)
-///////////////////////////////////////////////////////////////////////////////
 
 char TextList[30][100];
 int  TextListColor[30];
 int  TextBold[30];
 SIZE Size[30];
 
-int RenderTextList(int sx,int sy,int TextNum,int Tab, int iSort = RT3_SORT_CENTER)	// ★
+int RenderTextList(int sx,int sy,int TextNum,int Tab, int iSort = RT3_SORT_CENTER)
 {
 	int TextWidth = 0;
 	float fsy = sy;
@@ -313,7 +303,6 @@ int RenderTextList(int sx,int sy,int TextNum,int Tab, int iSort = RT3_SORT_CENTE
 
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort, int iRenderPoint, BOOL bUseBG)
 {
-	// 창너비와 높이
 	SIZE TextSize = {0, 0};
 	int TextLine = 0; int EmptyLine = 0;
 	float fWidth = 0; float fHeight = 0;
@@ -358,7 +347,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 	fWidth += 4;
 	int iPos_x = sx - fWidth / 2;
 	if(iPos_x < 0) iPos_x = 0;
-	if(iPos_x + fWidth > (int)WindowWidth / g_fScreenRate_x)	// 화면 밖으로 나간 것 처리
+	if(iPos_x + fWidth > (int)WindowWidth / g_fScreenRate_x)
 	{
 		iPos_x = ((int)WindowWidth) / g_fScreenRate_x - fWidth - 1;
 	}
@@ -381,8 +370,8 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 	if (bUseBG == TRUE && TextNum > 0)
 	{
 		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-		RenderColor ((float)iPos_x-1, fsy - 1, (float)fWidth + 1, (float)1);	// 위
-		RenderColor ((float)iPos_x-1, fsy - 1, (float)1, (float)fHeight + 1);	// 좌
+		RenderColor ((float)iPos_x-1, fsy - 1, (float)fWidth + 1, (float)1);
+		RenderColor ((float)iPos_x-1, fsy - 1, (float)1, (float)fHeight + 1);
 		RenderColor ((float)iPos_x-1 + fWidth + 1, (float)fsy - 1, (float)1, (float)fHeight + 1);	
 		RenderColor ((float)iPos_x-1, fsy - 1 + fHeight + 1, (float)fWidth + 2, (float)1);
 
@@ -549,9 +538,7 @@ bool IsRequireClassRenderItem(const short sType)
 		||(sType >= ITEM_POTION+78 && sType <= ITEM_POTION+82)
 		|| (sType == ITEM_HELPER+60)
 		|| (sType == ITEM_HELPER+61)
-#ifdef PSW_CHARACTER_CARD
 		|| (sType == ITEM_POTION+91)
-#endif // PSW_CHARACTER_CARD
 		|| (sType == ITEM_POTION+94)
 		|| (sType >= ITEM_POTION+92 && sType <= ITEM_POTION+93)
 		|| (sType == ITEM_POTION+95)
@@ -749,13 +736,11 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 			{
 				if(byRequireClass==1)
 				{
-					// 61 "%s 사용 가능"	3150 "레이지파이터"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[3150]);
 					TextListColor[TextNum] = iTextColor;
 				}
 				else if(byRequireClass==3)
 				{
-					// 61 "%s 사용 가능"	3151 "템플나이트"
 					sprintf(TextList[TextNum], GlobalText[61], GlobalText[3151]);
 					TextListColor[TextNum] = iTextColor;	
 				}
@@ -820,45 +805,43 @@ void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y)
 	switch(iColumnType)
 	{
 	case _COLUMN_TYPE_LEVEL:
-		pText = GlobalText[161];//" 레벨";
+		pText = GlobalText[161];
 		break;
 	case _COLUMN_TYPE_ATTMIN: case _COLUMN_TYPE_ATTMAX:
-		pText = GlobalText[162];//" 공격력";
+		pText = GlobalText[162];
 		break;
 	case _COLUMN_TYPE_MAGIC:
-		pText = GlobalText[163];//"마력 ";
+		pText = GlobalText[163];
 		break;
-#ifdef CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
 	case _COLUMN_TYPE_CURSE:
-		pText = GlobalText[1144];	// 1144 "저주력"
+		pText = GlobalText[1144];
 		break;
-#endif // CSK_FIX_WOPS_K28219_ITEM_EXPLANATION
     case _COLUMN_TYPE_PET_ATTACK:
-		pText = GlobalText[1239];//"팻공격력 ";
+		pText = GlobalText[1239];
         break;
 	case _COLUMN_TYPE_DEFENCE:
-		pText = GlobalText[164];//"방어력 ";
+		pText = GlobalText[164];
 		break;
 	case _COLUMN_TYPE_DEFRATE:
-		pText = GlobalText[165];//"방어율";
+		pText = GlobalText[165];
 		break;
 	case _COLUMN_TYPE_REQSTR:
-		pText = GlobalText[166];//"힘 ";
+		pText = GlobalText[166];
 		break;
 	case _COLUMN_TYPE_REQDEX:
-		pText = GlobalText[167];//"민첩";
+		pText = GlobalText[167];
 		break;
 	case _COLUMN_TYPE_REQENG:
-		pText = GlobalText[168];//"에너지";
+		pText = GlobalText[168];
 		break;
 	case _COLUMN_TYPE_REQCHA:
-		pText = GlobalText[1900];//"통솔";
+		pText = GlobalText[1900];
 		break;
 	case _COLUMN_TYPE_REQVIT:
-		pText = GlobalText[169];//"체력";
+		pText = GlobalText[169];
 		break;
 	case _COLUMN_TYPE_REQNLV:
-		pText = GlobalText[1931];//"필요레벨";
+		pText = GlobalText[1931];
 		break;
 	default:
 		break;
@@ -870,7 +853,7 @@ void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y)
 	TextNum = 0;
 }
 
-void ComputeItemInfo(int iHelpItem)	// ★
+void ComputeItemInfo(int iHelpItem)
 {
 	if (g_iCurrentItem == iHelpItem) 
 		return;
@@ -887,15 +870,15 @@ void ComputeItemInfo(int iHelpItem)	// ★
 		int RequireCharisma = 0;
 		int RequireVitality = 0;
 		int RequireLevel = 0;
-		int DamageMin = p->DamageMin;	// 최소공격력
-		int DamageMax = p->DamageMax;	// 최대공격력
-		int Defense   = p->Defense;		// 방어력
-		int Magic	  = p->MagicPower;	// 마력
-		int Blocking  = p->SuccessfulBlocking;	// 방어율
+		int DamageMin = p->DamageMin;
+		int DamageMax = p->DamageMax;
+		int Defense   = p->Defense;
+		int Magic	  = p->MagicPower;
+		int Blocking  = p->SuccessfulBlocking;
 
 		if(DamageMin > 0)
         {
-            DamageMin += (min(9,Level)*3);	// ~ +9아이템
+            DamageMin += (min(9,Level)*3);
 			switch(Level - 9)
 			{
 			case 6: DamageMin += 9; break;	// +15
@@ -909,7 +892,7 @@ void ComputeItemInfo(int iHelpItem)	// ★
         }
 		if(DamageMax > 0)
         {
-            DamageMax += (min(9,Level)*3);	// ~ +9아이템
+            DamageMax += (min(9,Level)*3);
 			switch(Level - 9)
 			{
 			case 6: DamageMax += 9; break;	// +15
@@ -1203,7 +1186,6 @@ int ConvertRepairGold(int Gold,int Durability, int MaxDurability, short Type, ch
 		float fRootRoot = ( float)sqrt( sqrt( ( double)repairGold));
 		repairGold = 3.f * fRoot * fRootRoot;
 
-		// 두배
 		if(doubleP)
 		{
 			repairGold *= 2;
@@ -1212,29 +1194,16 @@ int ConvertRepairGold(int Gold,int Durability, int MaxDurability, short Type, ch
 		repairGold *= persent;
 		repairGold++;
 
-		// 내구도가 0일때
 		if ( Durability <= 0 )
 		{
-#ifdef KJH_FIX_REPAIR_DARKLOAD_PET_DURABILITY_ZERO
-			if(Type == ITEM_HELPER+4 ||  Type == ITEM_HELPER+5)	// 다크호스, 다크스피릿 예외처리
+			if(Type == ITEM_HELPER+4 ||  Type == ITEM_HELPER+5)
 			{
 				repairGold *= 2;
 			}
 			else
 			{
-#ifdef PBG_FIX_REPAIRGOLD_DURABILITY0
-				repairGold = repairGold*0.4f;
-#else //PBG_FIX_REPAIRGOLD_DURABILITY0
 				repairGold += repairGold*0.4f;
-#endif //PBG_FIX_REPAIRGOLD_DURABILITY0
 			}
-#else // KJH_FIX_REPAIR_DARKLOAD_PET_DURABILITY_ZERO
-#ifdef PBG_FIX_REPAIRGOLD_DURABILITY0
-				repairGold = repairGold*0.4f;
-#else //PBG_FIX_REPAIRGOLD_DURABILITY0
-				repairGold += repairGold*0.4f;
-#endif //PBG_FIX_REPAIRGOLD_DURABILITY0
-#endif // KJH_FIX_REPAIR_DARKLOAD_PET_DURABILITY_ZERO
 		}
 	}
 	else
@@ -1242,53 +1211,24 @@ int ConvertRepairGold(int Gold,int Durability, int MaxDurability, short Type, ch
 		repairGold = 0;
 	}
 	
-#ifdef KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == true && g_pNPCShop->IsRepairShop())
 	{
-		Gold = (int)(repairGold);		// npc상점 수리 금액 (일반공식)
+		Gold = (int)(repairGold);
 	}
 	else if((g_pMyInventory->IsVisible()) && (!g_pNPCShop->IsVisible()))
 	{
-#ifdef PBG_MOD_INVENTORY_REPAIR_COST
-		Gold = (int)(repairGold + (repairGold * 1.5f));		// 자동수리 금액 하향 조정
-#else //PBG_MOD_INVENTORY_REPAIR_COST
-		Gold = (int)(repairGold + (repairGold * 2.0f));		// 인벤토리 자동수리 금액 공식(3배공식)
-#endif //PBG_MOD_INVENTORY_REPAIR_COST
+		Gold = (int)(repairGold + (repairGold * 1.5f));
 	}	
 	else
 	{
-		// 조련사npc 대화창이 떠있는지 검사를 할수 없기 때문에,
-		// 위쪽에서 예외처리 하고 나머지를 조련사npc라고 가정하였다.
-		Gold = (int)(repairGold);		// npc상점(조련사) 수리 금액 (일반공식)
+		Gold = (int)(repairGold);
 	}
-#else // KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
-	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == true && g_pNPCShop->IsRepairShop())
-	{
-		Gold = (int)(repairGold);		// npc상점 전체수리 금액
-	}
-	else if(Type == ITEM_HELPER+4 ||  Type == ITEM_HELPER+5)	// 다크호스, 다크스피릿은 가격 동일
-	{
-		Gold = (int)(repairGold);		
-	}
-	else
-	{
-#ifdef KJH_FIX_INVENTORY_REPAIR_COST
-		Gold = (int)(repairGold + (repairGold * 2.0f));		// 인벤토리 자동수리 금액 공식
-#else // KJH_FIX_INVENTORY_REPAIR_COST
-		Gold = (int)(repairGold + (repairGold * 0.05f));
-#endif // KJH_FIX_INVENTORY_REPAIR_COST
-	}
-#endif // KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
 	
 	if(Gold >= 1000)
 	{
 		Gold = (Gold / 100) * 100;
 	}
-#ifdef PBG_FIX_REPAIRGOLD_DURABILITY0
-	else if(Gold > 10)
-#else //PBG_FIX_REPAIRGOLD_DURABILITY0
 	else if(Gold >= 100)
-#endif //PBG_FIX_REPAIRGOLD_DURABILITY0
 	{
 		Gold = (Gold / 10) * 10;
 	}
@@ -1297,7 +1237,6 @@ int ConvertRepairGold(int Gold,int Durability, int MaxDurability, short Type, ch
 	
 	return  Gold;
 }
-
 
 void RepairAllGold ( void )
 {
@@ -1345,12 +1284,10 @@ void RepairAllGold ( void )
 			int Level = (pItem->Level>>3)&15;
 			int maxDurability = calcMaxDurability( pItem, p, Level );
 			
-#ifdef CSK_PCROOM_ITEM
 			if(pItem->Type >= ITEM_POTION+55 && pItem->Type <= ITEM_POTION+57)
 			{
 				continue;
 			}
-#endif // CSK_PCROOM_ITEM
 			//. item filtering
 			if( (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+5) || pItem->Type == ITEM_HELPER+10  || pItem->Type == ITEM_HELPER+31)
 				continue;
@@ -1444,7 +1381,7 @@ void RepairAllGold ( void )
 			{
 				continue;
 			}
-			if (pItem->Type == ITEM_POTION+140)	// 치유의 스크롤
+			if (pItem->Type == ITEM_POTION+140)
 			{
 				continue;
 			}
@@ -1526,8 +1463,8 @@ void RepairAllGold ( void )
 				continue;
 
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-#ifdef LEM_FIX_SHOPITEM_DURABILITY_REPAIRGOLD	// 인게임샵 5-4에 추가된 일부 누락된 아이템 수리비 제외 [lem.2010.7.28]
-		#ifdef LDK_ADD_INGAMESHOP_SMALL_WING	// 기간제 날개 작은(군주/재앙/요정/천공/사탄)의 날개 제외
+#ifdef LEM_FIX_SHOPITEM_DURABILITY_REPAIRGOLD
+		#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 			if( pItem->Type >= ITEM_WING+130 && pItem->Type <= ITEM_WING+134 )
 				continue;
 		#endif
@@ -1597,12 +1534,12 @@ int GuildListStartY;
 int SommonTable[]={2,7,14,8,9,41};
 
 char ChaosEventName[][100] = {
-	"히딩크 고향 여행권",
+	"히돼� 고향 여행권",
 	"펜티엄4 컴퓨터",
 	"디지탈카메라",
 	"로지텍 무선 마우스+키보드 세트",
 	"256M 램",
-    "6개월 잡지 구독권",
+    "6개� 잡지 구독권",
 	"문화상품권(만원)",
 	"뮤 머그컵",
 	"뮤 T셔츠",
@@ -1613,19 +1550,6 @@ WORD calcMaxDurability ( const ITEM* ip, ITEM_ATTRIBUTE *p, int Level )
 {
     WORD maxDurability = p->Durability;
 	
-#ifdef KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
-	// 다크로드 펫
-#ifndef PBG_FIX_DARKPET_DURABILITY
-	if( ip->Type==ITEM_HELPER+4 || ip->Type== ITEM_HELPER+5)
-	{
-#ifdef PBG_FIX_REPAIRGOLD_DARKPAT
-		maxDurability = 255 -1;
-#else //PBG_FIX_REPAIRGOLD_DARKPAT
-		maxDurability = 255;		// 예외처리
-#endif //PBG_FIX_REPAIRGOLD_DARKPAT
-	}
-#endif //PBG_FIX_DARKPET_DURABILITY
-#endif // KJH_ADD_INVENTORY_REPAIR_DARKLOAD_PET
     if( ip->Type>=ITEM_STAFF && ip->Type<ITEM_STAFF+MAX_ITEM_INDEX )
     {
         maxDurability = p->MagicDur;
@@ -2116,7 +2040,7 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
         gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf ( Text, GlobalText[1189], iMana );
         break;
-	case AT_SKILL_PLASMA_STORM_FENRIR:	// 플라즈마 스톰
+	case AT_SKILL_PLASMA_STORM_FENRIR:
 		gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf ( Text, GlobalText[1928], iMana );
 		break;
@@ -2334,32 +2258,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	if ( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && !IsSellingBan(ip) )
 	{
 		char Text[100];
-#ifndef KJH_DEL_PC_ROOM_SYSTEM				// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-		CPCRoomPtSys& rPCRoomPtSys = CPCRoomPtSys::Instance();
-		if (rPCRoomPtSys.IsPCRoomPointShopMode())
-		{
-			if (Sell)    //  구매 가격.
-			{
-#ifdef ASG_PCROOM_POINT_SYSTEM_MODIFY
-				// 2331 "구입 가격 : %d 포인트"
-				::sprintf(TextList[TextNum], GlobalText[2331], ItemValue(ip, 0));
-#else	// ASG_PCROOM_POINT_SYSTEM_MODIFY
-				// 2331 "구입 가격 : %d 포인트 (구입 조건 : %d 이상)"
-				::sprintf(TextList[TextNum], GlobalText[2331],
-					ItemValue(ip, 0), GetItemBuyingTermsPoint(ip));
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY
-				TextListColor[TextNum] = Color;
-				++TextNum;
-
-				::sprintf(TextList[TextNum],"\n");
-				++TextNum;
-				++SkipNum;
-			}
-		}
-		else
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 		{
 			if(Sell)
 			{
@@ -2395,11 +2293,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 				ConvertGold(price, Text);
 				sprintf(TextList[TextNum], GlobalText[63],Text);
 				
-				if ( price>=10000000 )        //  빨강.
+				if ( price>=10000000 )
 					TextListColor[TextNum] = TEXT_COLOR_RED;
-				else if ( price>=1000000 )    //  주황.
+				else if ( price>=1000000 )
 					TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-				else if( price>=100000 )      //  녹색.
+				else if( price>=100000 )
 					TextListColor[TextNum] = TEXT_COLOR_GREEN;
 				else
 					TextListColor[TextNum] = TEXT_COLOR_WHITE;
@@ -5641,8 +5539,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	else if(g_pMyInventory->IsInvenItem(ip->Type))
 	{
 		TextNum--; SkipNum--;
-		
-		// 사용중인 경우 "(사용중)" 문구 출력
+
 		if (ip->Durability == 254)
 		{
 			sprintf(TextList[TextNum], GlobalText[3143]);
@@ -5652,27 +5549,22 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 			sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
 		}
 
-		// 아이템 종류 출력
 		switch (ip->Type)
 		{
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-			// 우상 아이템
-			case ITEM_HELPER+128:	// 매조각상
-			case ITEM_HELPER+129:	// 양조각상
+			case ITEM_HELPER+128:
+			case ITEM_HELPER+129:
 				sprintf(TextList[TextNum], GlobalText[3121]);
 				break;
-
-			// 유물 아이템
-			case ITEM_HELPER+134:	// 편자
+			case ITEM_HELPER+134:
 				sprintf(TextList[TextNum], GlobalText[3123]);
 				break;
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-			// 참 아이템
-			case ITEM_HELPER+130:	// 오크참
-			case ITEM_HELPER+131:	// 메이플참
-			case ITEM_HELPER+132:	// 골든오크참
-			case ITEM_HELPER+133:	// 골든메이플참
+			case ITEM_HELPER+130:
+			case ITEM_HELPER+131:
+			case ITEM_HELPER+132:
+			case ITEM_HELPER+133:
 				sprintf(TextList[TextNum], GlobalText[3122]);
 				break;
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
@@ -5688,24 +5580,22 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
 
-
-		// 각각의 아이템 효과 출력
 		switch (ip->Type)
 		{
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-			case ITEM_HELPER+128:	// 매조각상
+			case ITEM_HELPER+128:
 				sprintf(TextList[TextNum], GlobalText[965], 10);
 				TextListColor[TextNum] = TEXT_COLOR_BLUE;
 				TextBold[TextNum] = false;
 				TextNum++;
 				break;
-			case ITEM_HELPER+129:	// 양조각상
+			case ITEM_HELPER+129:
 				sprintf(TextList[TextNum], GlobalText[967], 10);
 				TextListColor[TextNum] = TEXT_COLOR_BLUE;
 				TextBold[TextNum] = false;
 				TextNum++;
 				break;
-			case ITEM_HELPER+134:	// 편자
+			case ITEM_HELPER+134:
 				sprintf(TextList[TextNum], GlobalText[3126], 20);
 				TextListColor[TextNum] = TEXT_COLOR_BLUE;
 				TextBold[TextNum] = false;
@@ -5713,19 +5603,19 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 				break;
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-			case ITEM_HELPER+130:	// 오크참
+			case ITEM_HELPER+130:
 				sprintf(TextList[TextNum], GlobalText[3132], 50);
 				TextListColor[TextNum] = TEXT_COLOR_BLUE;
 				TextBold[TextNum] = false;
 				TextNum++;
 				break;
-			case ITEM_HELPER+131:	// 메이플참
+			case ITEM_HELPER+131:
 				sprintf(TextList[TextNum], GlobalText[3134], 50);
 				TextListColor[TextNum] = TEXT_COLOR_BLUE;
 				TextBold[TextNum] = false;
 				TextNum++;
 				break;
-			case ITEM_HELPER+132:	// 골든오크참
+			case ITEM_HELPER+132:
 #ifdef LJH_MOD_CHANGED_GOLDEN_OAK_CHARM_STAT
 				sprintf(TextList[TextNum], GlobalText[3132], 100);
 #else //LJH_MOD_CHANGED_GOLDEN_OAK_CHARM_STAT
@@ -5761,7 +5651,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
 		sprintf(TextList[TextNum],"\n"); TextNum++; SkipNum++;
 
-		// 인벤장착 아이템용 "인벤에서 오른쪽 마우스로 사용할수 있습니다" 문구 출력
 		sprintf(TextList[TextNum], GlobalText[3124]);
 		TextListColor[TextNum] = TEXT_COLOR_BLUE;
 		TextBold[TextNum] = false;
@@ -5807,9 +5696,8 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 
 		bool bThisisEquippedItem = false;
 
-		//ITEM *pFindItem = SEASON3B::CNewUIInventoryCtrl::FindItemByKey( ip->Key );	// 인벤토리 검색으로 착용 아이템인지 여부 결정.
 		SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-		ITEM *pFindItem = pNewInventoryCtrl->FindItemByKey( ip->Key );	// 인벤토리 검색으로 착용 아이템인지 여부 결정.
+		ITEM *pFindItem = pNewInventoryCtrl->FindItemByKey( ip->Key );
 		(pFindItem==NULL)?bThisisEquippedItem=true:bThisisEquippedItem=false;
 
 		TextNum = g_csItemOption.RenderSetOptionListInItem ( ip, TextNum, bThisisEquippedItem );
@@ -6360,7 +6248,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 
 	if (HeroClass==CLASS_WIZARD || HeroClass==CLASS_SUMMONER)
 	{
-        if ( CharacterAttribute->Skill[Type]==AT_SKILL_WIZARDDEFENSE || (AT_SKILL_SOUL_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_SOUL_UP+4))	// 소울바리어
+        if ( CharacterAttribute->Skill[Type]==AT_SKILL_WIZARDDEFENSE || (AT_SKILL_SOUL_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_SOUL_UP+4))
         {
 			int iDamageShield;
 			if( CharacterAttribute->Skill[Type]==AT_SKILL_WIZARDDEFENSE )
@@ -6451,9 +6339,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
         case AT_SKILL_SUMMON+4 :
         case AT_SKILL_SUMMON+5 :
         case AT_SKILL_SUMMON+6 :
-#ifdef ADD_ELF_SUMMON
 		case AT_SKILL_SUMMON+7:
-#endif // ADD_ELF_SUMMON
         case AT_SKILL_IMPROVE_AG:
         case AT_SKILL_STUN:
         case AT_SKILL_REMOVAL_STUN:
@@ -8307,15 +8193,15 @@ bool IsHighValueItem(ITEM* pItem)
 		|| pItem->Type == ITEM_POTION+113
 		|| ( pItem->Type==ITEM_HELPER+20 && iLevel==0)
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 255)	// 장착해제중인 인벤아이템만 고가아이템 설정 및 판매가능
+		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 255)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (pItem->Type >= ITEM_WING+49 && pItem->Type <= ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 #ifdef KJH_FIX_SELL_LUCKYITEM
-		|| ( Check_ItemAction(pItem, eITEM_SELL) && pItem->Durability > 0 )		// 럭키 아이템의 내구도가 있을때는 팔수 없다.
+		|| ( Check_ItemAction(pItem, eITEM_SELL) && pItem->Durability > 0 )
 #endif // KJH_FIX_SELL_LUCKYITEM
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 고가아이템 설정
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		|| ( COMGEM::isCompiledGem( pItem ) )
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		)

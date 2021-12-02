@@ -1,7 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 3D 특수효과 관련 함수
-//
-// *** 함수 레벨: 3
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -18,11 +15,6 @@
 #include "WSClient.h"
 
 PARTICLE  Pointers	[MAX_POINTERS];
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 바닥에 찍히는 효과 처리(피 표현할때 쓰임)
-///////////////////////////////////////////////////////////////////////////////
 
 void CreatePointer(int Type,vec3_t Position,float Angle,vec3_t Light,float Scale)
 {
@@ -83,11 +75,7 @@ void MovePointers()
 				{
 					o->Scale += 0.004f;
 				}
-#ifndef FOR_ADULT
       			Vector(0.1f,0.f,0.f,o->Light);
-#else
-      			RequestTerrainLight(o->Position[0],o->Position[1],o->Light);
-#endif
 				if(o->LifeTime <= 0) o->Live = false;
 				if(o->LifeTime < 50) o->Alpha = o->LifeTime*0.02f;
 				break;

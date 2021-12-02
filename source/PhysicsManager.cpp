@@ -1,5 +1,4 @@
 // PhysicsManager.cpp: implementation of the CPhysicsManager class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -16,7 +15,7 @@
 #define RATE_SHORT_SHOULDER		( 0.6f)
 
 float CPhysicsVertex::s_Gravity = 9.8f;
-float CPhysicsVertex::s_fMass = 0.0025f;			// 조절값 - 입자 질량 ( 탄성력을 받을때 상관)
+float CPhysicsVertex::s_fMass = 0.0025f;
 float CPhysicsVertex::s_fInvOfMass = 400.0f;
 
 
@@ -65,7 +64,7 @@ void CPhysicsVertex::UpdateForce( unsigned int iKey, DWORD dwType, float fWind)
 #ifndef DISABLE_WIND
 	for ( int i = 0; i < 3; ++i)
 	{
-		m_vForce[i] = fRand * CPhysicsManager::s_vWind[i] - m_vVel[i] * 0.01f;	// 바람 + 공기 저항력, 조절값 - 저향력
+		m_vForce[i] = fRand * CPhysicsManager::s_vWind[i] - m_vVel[i] * 0.01f;
 	}
 #else
 	for ( int i = 0; i < 3; ++i)
@@ -76,10 +75,10 @@ void CPhysicsVertex::UpdateForce( unsigned int iKey, DWORD dwType, float fWind)
 	
 	switch ( PCT_MASK_ELASTIC & dwType)	// m_dwType
 	{
-	case PCT_RUBBER:	// 위로 바람이 추가로 불게
+	case PCT_RUBBER:
 		m_vForce[2] += fRand * ( fWind + 0.1f) * 1.f;
 		break;
-	case PCT_RUBBER2:	// 위로 바람이 추가로 불게
+	case PCT_RUBBER2:
 		m_vForce[2] += fRand * ( fWind );
 		break;
 	}
@@ -89,7 +88,7 @@ void CPhysicsVertex::UpdateForce( unsigned int iKey, DWORD dwType, float fWind)
 	case PCT_ELASTIC_HALLOWEEN:
 		m_vForce[0] += -(fRand * fWind * 0.5f);
 		m_vForce[2] += fRand * (fWind + 0.1f) * 0.5f * (float)sinf(WorldTime*0.003f) * 5.0f;
-		m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 50.0f;	// 조절값 - 중력
+		m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 50.0f;
 		break;
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case PCT_ELASTIC_RAGE_L:
@@ -104,10 +103,10 @@ void CPhysicsVertex::UpdateForce( unsigned int iKey, DWORD dwType, float fWind)
 	switch ( PCT_MASK_WEIGHT & dwType)	// m_dwType
 	{
 	case PCT_HEAVY:
-		m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 180.0f;	// 조절값 - 중력
+		m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 180.0f;
 		break;
 	default:
-		m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 100.0f;	// 조절값 - 중력
+		m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 100.0f;	
 		break;
 	}
 }
@@ -161,10 +160,8 @@ BOOL CPhysicsVertex::KeepLength( CPhysicsVertex *pVertex2, float *pfLength)
 	vec3_t vDistance;
 	float fDistance = max( 0.001f, GetDistance( pVertex2, &vDistance));
 
-	// 이상하게 늘어난 경우
 	if ( fDistance > pfLength[1] * 20.0f)
 	{
-		//assert( !"망토 늘어남");
 		return ( FALSE);
 	}
 
@@ -219,13 +216,6 @@ void CPhysicsVertex::AddOneTimeMove( vec3_t vMove)
 	m_iCountOneTimeMove++;
 }
 
-
-//--------------------------------------------------------------------
-//
-//                          Physics Collision
-//
-//--------------------------------------------------------------------
-
 CPhysicsCollision::CPhysicsCollision()
 {
 	Clear();
@@ -262,13 +252,6 @@ void CPhysicsCollision::GetCenterBeforeTransform( vec3_t vCenter)
 void CPhysicsCollision::ProcessCollision( CPhysicsVertex *pVertex)
 {
 }
-
-
-//--------------------------------------------------------------------
-//
-//                          Physics Collision Sphere
-//
-//--------------------------------------------------------------------
 
 CPhysicsColSphere::CPhysicsColSphere()
 {
@@ -313,14 +296,6 @@ void CPhysicsColSphere::ProcessCollision( CPhysicsVertex *pVertex)
 	}
 }
 
-
-//--------------------------------------------------------------------
-//
-//                          Physics Cloth
-//
-//--------------------------------------------------------------------
-
-
 CPhysicsCloth::CPhysicsCloth()
 {
 	Clear();
@@ -356,7 +331,6 @@ BOOL CPhysicsCloth::Create( OBJECT *o, int iBone, float fxPos, float fyPos, floa
 {
 	assert( iNumHor > 1 && iNumVer > 1);
 
-	// 기본 초기화
 	m_oOwner = o;
 	m_iBone = iBone;
 	m_iTexFront = iTexFront;
@@ -366,8 +340,6 @@ BOOL CPhysicsCloth::Create( OBJECT *o, int iBone, float fxPos, float fyPos, floa
 	m_fyPos = fyPos;
 	m_fzPos = fzPos;
 
-	// 간혹 중첩된 피직 개체 접근으로 인해 메모리 릭 발생으로 중첩되더라도 안전장치로써 heap 영역의 메모리를 반환합니다.
-#ifdef LDS_FIX_MEMORYLEAK_PHYSICSMANAGER_RELEASE
 	if( m_pVertices )
 	{
 		delete [] m_pVertices;
@@ -379,7 +351,6 @@ BOOL CPhysicsCloth::Create( OBJECT *o, int iBone, float fxPos, float fyPos, floa
 		delete [] m_pLink;
 		m_pLink = NULL;
 	}
-#endif // LDS_FIX_MEMORYLEAK_PHYSICSMANAGER_RELEASE
 
 	m_fWidth = fWidth;
 	m_fHeight = fHeight;
@@ -405,7 +376,7 @@ BOOL CPhysicsCloth::Create( OBJECT *o, int iBone, float fxPos, float fyPos, floa
 	}
 
 	bool bCylinder = false;
-	// 위치 세팅
+
 	for ( int j = 0; j < m_iNumVer; ++j)
 	{
 		float fWidth = m_fWidth;
@@ -468,7 +439,6 @@ BOOL CPhysicsCloth::Create( OBJECT *o, int iBone, float fxPos, float fyPos, floa
 			m_pVertices[iVertex].Init( vPos2[0], vPos2[1], vPos2[2]);
 		}
 	}
-	// 연결
 	BYTE byVerLinkStyle = 0;
 	BYTE byCrossLinkStyle = 0;
 	switch ( PCT_MASK_ELASTIC & m_dwType)
@@ -855,54 +825,6 @@ void CPhysicsCloth::Render( vec3_t *pvColor, int iLevel)
  	        RenderFace( FALSE, m_iTexBack, pvRenderPos);
          }
      }
-	//*/
-	/*/
-	if ( iLevel < 3)
-	{
-		// 앞면, 뒷면
-		RenderFace( TRUE, m_iTexFront, pvRenderPos);
-		RenderFace(	FALSE, m_iTexBack, pvRenderPos);
-	}
-	else if ( iLevel < 5)
-	{
-		glColor3f( 1.f, .6f, .6f);
-		RenderFace( TRUE, m_iTexFront, pvRenderPos);
-		RenderFace( FALSE, m_iTexBack, pvRenderPos);
-	}
-	else if ( iLevel < 7)
-	{
-		glColor3f( .5f, .7f, 1.0f);
-		RenderFace( TRUE, m_iTexFront, pvRenderPos);
-		RenderFace( FALSE, m_iTexBack, pvRenderPos);
-	}
-	else if ( iLevel < 9)
-	{
-		glColor3f( .8f, .8f, .8f);
-		RenderFace( TRUE, m_iTexFront, pvRenderPos);
-		RenderFace( FALSE, m_iTexBack, pvRenderPos);
-		//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT,1.f);
-		EnableAlphaBlend();
-		RenderFace( TRUE, BITMAP_CHROME, pvRenderPos);
-		RenderFace( FALSE, BITMAP_CHROME, pvRenderPos);
-	}
-	else if ( iLevel < 11)
-	{
-		glColor3f( .9f, .9f, .9f);
-		RenderFace( TRUE, m_iTexFront, pvRenderPos);
-		RenderFace( FALSE, m_iTexBack, pvRenderPos);
-	    //RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-		//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-	}
-	else if ( iLevel < 12)
-	{
-		glColor3f( 1.f, .6f, .6f);
-		RenderFace( TRUE, m_iTexFront, pvRenderPos);
-		RenderFace( FALSE, m_iTexBack, pvRenderPos);
-	    //RenderPartObjectBodyColor2(b,o,Type,1.f,RENDER_CHROME2|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-		//RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_METAL|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-	    //RenderPartObjectBodyColor(b,o,Type,Alpha,RENDER_CHROME|RENDER_BRIGHT|(RenderType&RENDER_EXTRA),1.f);
-	}
-	//*/
 #endif
 
 	delete [] pvRenderPos;
@@ -948,34 +870,8 @@ void CPhysicsCloth::RenderVertex( vec3_t *pvRenderPos, int xVertex, int yVertex)
 {
 	int iVertex = m_iNumHor * yVertex + xVertex;
 	vec3_t *pvPos = &pvRenderPos[iVertex];
-/*/
-	switch ( m_dwType & PCT_MASK_SHAPE_EXT)
-	{
-	case PCT_SHORT_SHOULDER:
-		{
-			float fxCoord = ( float)xVertex / ( float)( m_iNumHor - 1);
-			float fRate = ( RATE_SHORT_SHOULDER + ( 1.0f - RATE_SHORT_SHOULDER) * ( float)yVertex / ( float)( m_iNumVer - 1));
-			fxCoord = 0.5f + ( fxCoord - 0.5f) / fRate;
-			glTexCoord2f( fxCoord, min( 0.99f, ( float)yVertex / ( float)( m_iNumVer - 1)));
-			if ( fxCoord < 0.0f || fxCoord > 1.0f)
-			{	// 투명
-				glVertex4f( ( *pvPos)[0], ( *pvPos)[1], ( *pvPos)[2], 0.0f);
-			}
-			else
-			{
-				glVertex3f( ( *pvPos)[0], ( *pvPos)[1], ( *pvPos)[2]);
-			}
-		}
-		break;
-	default:
-		glTexCoord2f( ( float)xVertex / ( float)( m_iNumHor - 1), min( 0.99f, ( float)yVertex / ( float)( m_iNumVer - 1)));
-		glVertex3f( ( *pvPos)[0], ( *pvPos)[1], ( *pvPos)[2]);
-		break;
-	}
-/*/
 	glTexCoord2f( ( float)xVertex / ( float)( m_iNumHor - 1), min( 0.99f, ( float)yVertex / ( float)( m_iNumVer - 1)));
 	glVertex3f( ( *pvPos)[0], ( *pvPos)[1], ( *pvPos)[2]);
-//*/
 }
 
 void CPhysicsCloth::RenderCollisions( void)
@@ -1069,7 +965,6 @@ BOOL CPhysicsClothMesh::Create( OBJECT *o, int iMesh, int iBone, DWORD dwType, i
 	assert( iMesh < b->NumMeshs);
 	Mesh_t *pMesh = &b->Meshs[m_iMesh];
 
-#ifdef LDS_FIX_MEMORYLEAK_PHYSICSMANAGER_RELEASE
 	if( m_pVertices )
 	{
 		delete [] m_pVertices;
@@ -1081,7 +976,6 @@ BOOL CPhysicsClothMesh::Create( OBJECT *o, int iMesh, int iBone, DWORD dwType, i
 		delete [] m_pLink;
 		m_pLink = NULL;
 	}
-#endif // LDS_FIX_MEMORYLEAK_PHYSICSMANAGER_RELEASE
 
 	m_iNumVertices = pMesh->NumVertices;
 	m_pVertices = new CPhysicsVertex [m_iNumVertices];
@@ -1128,7 +1022,7 @@ BOOL CPhysicsClothMesh::Create( OBJECT *o, int iMesh, int iBone, DWORD dwType, i
 			{
 				float fDist2 = m_pVertices[iV3].GetDistance( &m_pVertices[iMatch], &vTemp);
 				if ( fDist2 < fDist * 1.2f && !FindInLink( iLink, iV3, iMatch))
-				{	// 대간선일때만
+				{
 					SetLink( iLink++, iV3, iMatch, fDist2 * 0.5f, fDist2, PLS_SPRING | byLinkType);
 				}
 			}
@@ -1145,24 +1039,16 @@ BOOL CPhysicsClothMesh::Create( OBJECT *o, int iMesh, int iBone, float fxPos, fl
 
 	m_iMesh = iMesh;
 
-	// 혼합형태
 	m_dwType |= PCT_OPT_MESHPROG;
 	if ( !CPhysicsCloth::Create( o, iBone, fxPos, fyPos, fzPos, iNumHor, iNumVer, fWidth, fHeight, iTexFront, TexBack, dwType))
 	{
 		return ( FALSE);
 	}
 
-	// 매핑 좌표 수정
 	BMD *b = &Models[m_iBMDType];
 	assert( iMesh < b->NumMeshs);
 	Mesh_t *pMesh = &b->Meshs[m_iMesh];
 
-//	if ( pMesh->NumNormals != pMesh->NumTriangles)
-//	{
-//		delete [] pMesh->Normals;
-//		pMesh->NumNormals = pMesh->NumTriangles;
-//		pMesh->Normals = new Normal_t      [pMesh->NumNormals];
-//	}
 	for( int j=0; j < pMesh->NumTriangles; j++)
 	{
 		int iRight = j % 2;
@@ -1195,15 +1081,6 @@ BOOL CPhysicsClothMesh::Create( OBJECT *o, int iMesh, int iBone, float fxPos, fl
 			texp->TexCoordU = ( float)x / ( float)( m_iNumHor - 1);
 			texp->TexCoordV = ( float)y / ( float)( m_iNumVer - 1);
 		}
-		// normal
-//		vec3_t vFirst, vSecond;
-//		VectorSubtract( pMesh->Vertices[tp->VertexIndex[0]].Position, pMesh->Vertices[tp->VertexIndex[1]].Position, vFirst);
-//		VectorSubtract( pMesh->Vertices[tp->VertexIndex[1]].Position, pMesh->Vertices[tp->VertexIndex[2]].Position, vSecond);
-//		CrossProduct( vFirst, vSecond, pMesh->Normals[j].Normal);
-//		VectorNormalize( pMesh->Normals[j].Normal);
-//		pMesh->Normals[j].Normal[0] += 1.5f * ( ( float)xQuad / ( float)m_iNumHor - 0.5f);
-//		pMesh->Normals[j].Normal[1] += 1.5f * ( ( float)yQuad / ( float)m_iNumVer - 0.5f);
-//		VectorNormalize( pMesh->Normals[j].Normal);
 	}
 
 	return ( TRUE);
@@ -1269,13 +1146,11 @@ void CPhysicsClothMesh::NotifyVertexPos( int iVertex, vec3_t vPos)
 	{
 		BMD *b = &Models[m_iBMDType];
 		Mesh_t *pMesh = &b->Meshs[m_iMesh];
-		// 위치
+
 		Vertex_t *v = &pMesh->Vertices[iVertex];
 		v->Position[0] = vPos[2];
 		v->Position[1] = -vPos[1];
 		v->Position[2] = vPos[0];
-
-		// 노말
 
 		if ( v->Node != m_iBone)
 		{

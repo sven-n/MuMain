@@ -652,7 +652,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 			}
 			else
 			{
-				assert(!"공격동작이 없다?");
+				assert(!"공격동작이 없�?");
 			}
 			pObject->Owner = pNewObject;
 		}

@@ -1,11 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-//  - 퀘스트 관련 -
-//  
-//  
-//////////////////////////////////////////////////////////////////////////
-/*+++++++++++++++++++++++++++++++++++++
-    INCLUDE.
-+++++++++++++++++++++++++++++++++++++*/
+
 #include "stdafx.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
@@ -24,10 +18,7 @@
 #include "NewUIInventoryCtrl.h"
 #include "CharacterManager.h"
 
-/*+++++++++++++++++++++++++++++++++++++
-    Extern.
-+++++++++++++++++++++++++++++++++++++*/
-bool bCheckNPC;		// 말론인지 아닌지 채크
+bool bCheckNPC;
 extern  int  g_iMessageTextStart;
 extern  char g_cMessageTextCurrNum;
 extern  char g_cMessageTextNum;
@@ -37,15 +28,8 @@ extern  int g_iCurrentDialogScript;
 extern  int g_iNumAnswer;
 extern  char g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 
-
-/*+++++++++++++++++++++++++++++++++++++
-    Global.
-+++++++++++++++++++++++++++++++++++++*/
 static  CSQuest csQuest;
 
-/*+++++++++++++++++++++++++++++++++++++
-    FUNCTIONS.
-+++++++++++++++++++++++++++++++++++++*/
 static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
 
 static void BuxConvert(BYTE *Buffer,int Size)
@@ -92,7 +76,7 @@ void CSQuest::clearQuest(void)
 	}
 }
 
-BYTE CSQuest::getCurrQuestState(void)			//	현재 퀘스트의 상태.
+BYTE CSQuest::getCurrQuestState(void)
 {
 	return CheckQuestState ();
 }
@@ -102,12 +86,12 @@ unicode::t_char* CSQuest::GetNPCName(BYTE byQuestIndex)
 	return ::getMonsterName(int(m_Quest[byQuestIndex].wNpcType));
 }
 
-unicode::t_char* CSQuest::getQuestTitle()	//	현재 퀘스트 타이틀.
+unicode::t_char* CSQuest::getQuestTitle()
 {
 	return m_Quest[m_byCurrQuestIndex].strQuestName;
 }
 
-unicode::t_char* CSQuest::getQuestTitle( BYTE byQuestIndex )	//	현재 퀘스트 타이틀.
+unicode::t_char* CSQuest::getQuestTitle( BYTE byQuestIndex )
 {
 	return m_Quest[byQuestIndex].strQuestName;
 }
@@ -137,10 +121,7 @@ int CSQuest::GetEventCount(BYTE byType)
 	return m_byEventCount[byType];
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 정보를 읽는다.
-//////////////////////////////////////////////////////////////////////////
-bool    CSQuest::OpenQuestScript ( char* filename )
+bool CSQuest::OpenQuestScript ( char* filename )
 {
 	FILE* fp = fopen ( filename, "rb" );
 	if ( fp==NULL )                
@@ -160,11 +141,7 @@ bool    CSQuest::OpenQuestScript ( char* filename )
 		BuxConvert ( Buffer, Size );
 		memcpy ( &m_Quest[i], Buffer, Size );
 	}
-#ifdef KJH_FIX_ARRAY_DELETE
 	SAFE_DELETE_ARRAY(Buffer);
-#else // KJH_FIX_ARRAY_DELETE
-	delete Buffer;
-#endif // KJH_FIX_ARRAY_DELETE
 	fclose ( fp );
 
 	return  TRUE;
@@ -181,14 +158,10 @@ void CSQuest::setQuestLists ( BYTE* byList, int num, int Class )
     }
 
     memset ( m_byQuestList, 0, sizeof( BYTE )*(MAX_QUESTS/4) );
-	// 퀘스트 하나당 2bit를 쓰므로 BYTE 당 4개의 퀘스트 정보를 담을 수 있다.
-	// num은 퀘스트 MaxIndex이다.
-	// 따라서 원하는 퀘스트 개수을 카피하기 위해서는 MaxIndex / 4 + 1 이 된다.
 	::memcpy(m_byQuestList, byList, sizeof (BYTE) * (num / 4 + 1));
 
-	// 현재 진행 중인 퀘스트 인덱스 얻기. <- 차후 신규 UI에서 수정 필요.
 	int i;
-	if (CLASS_KNIGHT == m_byClass)	// 흑기사 계열이면.
+	if (CLASS_KNIGHT == m_byClass)
 	{
 		for (i = 0; i < num; ++i)
 		{
@@ -200,20 +173,19 @@ void CSQuest::setQuestLists ( BYTE* byList, int num, int Class )
 #ifdef PBG_ADD_NEWCHAR_MONK
 			|| CLASS_RAGEFIGHTER == m_byClass
 #endif //PBG_ADD_NEWCHAR_MONK
-		) // 마검사, 다크로드 계열 이면.
+		)
 	{
-		// 0 ~ 3 퀘스트는 검사할 필요 없음.
 		for (i = 4; i < num; ++i)
 		{
 			if (getQuestState(i) != QUEST_END)
 				break;
 		}
 	}
-	else							// 그 외 계열 이면.
+	else
 	{
 		for (i = 0; i < num; ++i)
 		{
-			if (QUEST_COMBO == i)	// 콤보 퀘스트는 검사 안함.
+			if (QUEST_COMBO == i)
 				continue;
 			if (getQuestState(i) != QUEST_END)
 				break;
@@ -223,19 +195,14 @@ void CSQuest::setQuestLists ( BYTE* byList, int num, int Class )
 	m_byCurrQuestIndex = i;
     m_byCurrQuestIndexWnd = i;
 
-	//	원하는 퀘스트의 상태를 검사한다.
-	Hero->byExtensionSkill = 0;	//	콤보 스킬을 습득함.
+	Hero->byExtensionSkill = 0;
 	if ( getQuestState( QUEST_COMBO )==QUEST_END )
 	{
-		Hero->byExtensionSkill = 1;	//	콤보 스킬을 습득함.
+		Hero->byExtensionSkill = 1;
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 수행정보를 설정한다. ( 해당 퀘스트의 수행 결과를 서버에서 받는다. )
-//////////////////////////////////////////////////////////////////////////
-void    CSQuest::setQuestList ( int index, int result )  //  퀘스트 수행정보 설정 ( 해당 퀘스트 정보를 갱신한다. )
+void CSQuest::setQuestList ( int index, int result )
 {
     m_byCurrQuestIndex = index;
 
@@ -244,57 +211,41 @@ void    CSQuest::setQuestList ( int index, int result )  //  퀘스트 수행정보 설�
     int questIndex = (int)(m_byCurrQuestIndex/4);
     m_byQuestList[questIndex] = result;
 
-	//	원하는 퀘스트의 상태를 검사한다.
-	Hero->byExtensionSkill = 0;	//	콤보 스킬을 습득함.
+	Hero->byExtensionSkill = 0;
 	if ( getQuestState( QUEST_COMBO )==QUEST_END )
 	{
-		Hero->byExtensionSkill = 1;	//	콤보 스킬을 습득함.
+		Hero->byExtensionSkill = 1;
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  해당 퀘스트대화를 찾는다.
-//////////////////////////////////////////////////////////////////////////
 short   CSQuest::FindQuestContext ( QUEST_ATTRIBUTE* pQuest, int index )
 {
-    //  해당 퀘스트 대화를 찾는다.
     for ( int i=0; i<pQuest->shQuestConditionNum; ++i )
     {
-        //  해당 클래스를 찾는다.
         if ( pQuest->QuestAct[i].byRequestClass[m_byClass]>=1  )
         {
             return pQuest->QuestAct[i].shQuestStartText[index];
         }
     }
 
-    //  모든 퀘스트를 수행을 했다.
-    //  이전 퀘스트의 수행 완료를 보여준다.
-    m_byCurrQuestIndex--;
+	m_byCurrQuestIndex--;
     CheckQuestState ();
 
     return m_shCurrPage;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트의 요구 조건을 검사한다.
-//////////////////////////////////////////////////////////////////////////
 bool    CSQuest::CheckRequestCondition ( QUEST_ATTRIBUTE* pQuest, bool bLastCheck )
 {
     int iRequestType;
     for ( int i=0; i<pQuest->shQuestConditionNum; ++i )
     {
-        //  해당 클래스를 찾는다.
         if ( pQuest->QuestAct[i].byRequestClass[m_byClass]!=0 )
         {
             iRequestType = pQuest->QuestAct[i].byRequestType;
             for ( int j=0; j<pQuest->shQuestRequestNum; ++j )
             {
-                //  해당 요구 조건 검사.
                 if ( pQuest->QuestRequest[j].byType==iRequestType || pQuest->QuestRequest[j].byType==255 )
                 {
-					//	필수 퀘스트 인덱스. ( 이전에 클리어한 퀘스트 인덱스 ).
 					if ( pQuest->QuestRequest[j].wCompleteQuestIndex!=65535 )
 					{
 						if ( getQuestState2( pQuest->QuestRequest[j].wCompleteQuestIndex )!=QUEST_END )
@@ -304,7 +255,6 @@ bool    CSQuest::CheckRequestCondition ( QUEST_ATTRIBUTE* pQuest, bool bLastChec
 							return false;
 						}
 					}
-                    //  최소 레벨.
                     if ( pQuest->QuestRequest[j].wLevelMin>0 )
                     {
                         WORD level = CharacterAttribute->Level;
@@ -316,7 +266,6 @@ bool    CSQuest::CheckRequestCondition ( QUEST_ATTRIBUTE* pQuest, bool bLastChec
                             return false;
                         }
                     }
-                    //  최대 레벨.
                     if ( pQuest->QuestRequest[j].wLevelMax>0 )
                     {
                         WORD level = CharacterAttribute->Level;
@@ -328,12 +277,10 @@ bool    CSQuest::CheckRequestCondition ( QUEST_ATTRIBUTE* pQuest, bool bLastChec
                             return false;
                         }
                     }
-					//	필요젠.
                     if ( pQuest->QuestRequest[j].dwZen>0 )
                     {
                         if ( bLastCheck )
                         {
-                            //  젠.
 							DWORD gold = CharacterMachine->Gold;
 
                             m_dwNeedZen = pQuest->QuestRequest[j].dwZen;
@@ -356,15 +303,10 @@ bool    CSQuest::CheckRequestCondition ( QUEST_ATTRIBUTE* pQuest, bool bLastChec
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트의 수행 조건을 검사한다.
-//////////////////////////////////////////////////////////////////////////
-bool    CSQuest::CheckActCondition ( QUEST_ATTRIBUTE* pQuest )
+bool CSQuest::CheckActCondition ( QUEST_ATTRIBUTE* pQuest )
 {
     for ( int i=0; i<pQuest->shQuestConditionNum; ++i )
     {
-        //  해당 클래스를 찾는다.
         if ( pQuest->QuestAct[i].byRequestClass[m_byClass]>=1 )
         {
             switch ( pQuest->QuestAct[i].byQuestType )
@@ -379,7 +321,6 @@ bool    CSQuest::CheckActCondition ( QUEST_ATTRIBUTE* pQuest )
 
 					itemLevel	= pQuest->QuestAct[i].byItemLevel;
                     
-                    //  수행조건의 ??가가 있는가? 없다면 등록후의 퀘스트 대화를 보여준다.
 					if (FindQuestItemsInInven(itemType, itemNum, itemLevel))
                     {
                         m_shCurrPage = FindQuestContext ( pQuest, 1 );
@@ -402,7 +343,6 @@ bool    CSQuest::CheckActCondition ( QUEST_ATTRIBUTE* pQuest )
 						}
 					}
 
-					// 찾지 못했다면 등록후의 퀘스트 대화를 보여준다.
 					if (!bFind)
 					{
 						m_shCurrPage = FindQuestContext(pQuest, 1);
@@ -416,11 +356,7 @@ bool    CSQuest::CheckActCondition ( QUEST_ATTRIBUTE* pQuest )
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  현재 퀘스트의 상태.
-//////////////////////////////////////////////////////////////////////////
-BYTE    CSQuest::getQuestState ( int questIndex )
+BYTE CSQuest::getQuestState ( int questIndex )
 {
     int  Index;
 	BYTE byCurrState;
@@ -488,27 +424,23 @@ BYTE CSQuest::CheckQuestState ( BYTE state )
         {
             if ( CheckRequestCondition( lpQuest ) )
             {
-                //  해당 퀘스트 대화를 찾는다.
                 m_shCurrPage = FindQuestContext ( lpQuest, 0 );
             }
         }
         break;
 
-    case QUEST_ING :    //  등록후.
+    case QUEST_ING : 
         {
-            //  수행 조건을 검사한다.
             if ( CheckActCondition( lpQuest ) )
             {
-                //  해당 퀘스트 대화를 찾는다.
                 m_shCurrPage = FindQuestContext ( lpQuest, 2 );
                 m_byCurrState = QUEST_ITEM;
             }
         }
         break;
 
-    case QUEST_END :    //  완료.
+    case QUEST_END :
         {
-            //  해당 퀘스트 대화를 찾는다.
             m_shCurrPage = FindQuestContext ( lpQuest, 3 );
         }
         break;
@@ -567,31 +499,26 @@ void CSQuest::ShowQuestPreviewWindow ( int index )
     m_byCurrQuestIndex = tmp;
 }
 
-void    CSQuest::ShowQuestNpcWindow ( int index )
+void CSQuest::ShowQuestNpcWindow ( int index )
 {
     if ( index!=-1 ) m_byCurrQuestIndex = index;
 
     g_bEventChipDialogEnable = EVENT_NONE;
 
-    //  퀘스트 검색.
     CheckQuestState ();
-
     ShowDialogText ( m_shCurrPage );
 }
 
-bool    CSQuest::BeQuestItem ( void )
+bool CSQuest::BeQuestItem ( void )
 {
     bool bCompleteItem = false;
 
-    //  아이템 등록 버튼.
     if ( m_byCurrState==QUEST_ING )
     {
-        //  아이템 정보.
         QUEST_ATTRIBUTE* pQuest = &m_Quest[m_byCurrQuestIndex];
 
         for ( int i=0; i<pQuest->shQuestConditionNum; ++i )
         {
-            //  해당 클래스를 찾는다.
             if ( pQuest->QuestAct[i].byRequestClass[m_byClass]>0 )
             {
                 switch ( pQuest->QuestAct[i].byQuestType )
@@ -628,7 +555,7 @@ bool    CSQuest::BeQuestItem ( void )
 							}
 						}
 
-						if (!bFind)	// 찾지 못했다면.
+						if (!bFind)
 							return false;
 					}
 					break;

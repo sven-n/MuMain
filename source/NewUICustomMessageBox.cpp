@@ -6262,10 +6262,8 @@ void SEASON3B::CLuckyTradeMenuMsgBox::RenderTexts()
 	
 	fPos_y += 15;
 	g_pRenderText->SetFont(g_hFont);
-	sprintf( szText, "럭키아이템으로 교환하거나 제련할 수 있습니다." );	// "시드를 추출하거나 시드 스피어를"
+	sprintf( szText, "럭키아이템으로 교환하거나 제련할 수 있습니�." );
 	g_pRenderText->RenderText(fPos_x, fPos_y+1*18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-	// 	sprintf( szText, GlobalText[2668] );	// "합성할 수 있습니다."
-	// 	g_pRenderText->RenderText(fPos_x, fPos_y+2*18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CLuckyTradeMenuMsgBox::RenderButtons()

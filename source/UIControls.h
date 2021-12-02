@@ -10,7 +10,7 @@
 
 inline DWORD _ARGB(BYTE a, BYTE r, BYTE g, BYTE b) { return (a << 24) + (b << 16) + (g << 8) + (r); }
 
-#ifndef ASG_ADD_NEW_QUEST_SYSTEM		// 정리시 삭제.
+#ifndef ASG_ADD_NEW_QUEST_SYSTEM
 void CutText2(const char* Text,char* Text1,char* Text2,int Length);
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
 #ifdef KJH_FIX_BTS158_TEXT_CUT_ROUTINE
@@ -41,13 +41,8 @@ enum UIOPTIONS
 	UIOPTION_NUMBERONLY = 1,
 	UIOPTION_SERIALNUMBER = 2,
 	UIOPTION_ENTERIMECHKOFF = 4,
-#ifdef LJH_ADD_RESTRICTION_ON_ID
 	UIOPTION_PAINTBACK = 8,
 	UIOPTION_NOLOCALIZEDCHARACTERS = 16
-#else  //LJH_ADD_RESTRICTION_ON_ID
-	UIOPTION_PAINTBACK = 8	
-#endif //LJH_ADD_RESTRICTION_ON_ID
-
 };
 
 typedef struct
@@ -146,14 +141,12 @@ typedef struct _UNMIX_TEXT
 
 }UNMIX_TEXT;
 
-#ifdef ADD_SOCKET_MIX
 typedef struct _SOCKETLIST_TEXT
 {
 	BOOL	m_bIsSelected;
 	int		m_iSocketIndex;	
 	char	m_szText[64 + 1];
 } SOCKETLIST_TEXT;
-#endif	// ADD_SOCKET_MIX
 
 enum UI_MESSAGE_ENUM
 {
@@ -224,11 +217,7 @@ public:
 	virtual BOOL DoAction(BOOL bMessageOnly = FALSE);
 
 protected:
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	virtual void DoActionSub()					{ return;	}
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void DoActionSub(BOOL bMessageOnly) {			}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual BOOL DoMouseAction() { return TRUE; }
 	virtual void DefaultHandleMessage();
 	virtual BOOL HandleMessage() { return FALSE; }
@@ -355,12 +344,7 @@ public:
 protected:
 	virtual void RenderInterface();
 	virtual BOOL RenderDataLine(int iLineNumber);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	virtual BOOL DoLineMouseAction(int iLineNumber);
-	virtual int GetRenderLinePos_y(int iLineNumber);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual BOOL DoLineMouseAction(int iLineNumber) { return TRUE; }
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual BOOL DoSubMouseAction();
 protected:
 	BOOL m_bIsGuildMaster;
@@ -378,12 +362,7 @@ protected:
 	virtual void AddTextToRenderList(const char* pszID, const char* pszText, int iType, int iColor);
 	virtual void RenderInterface();	
 	virtual BOOL RenderDataLine(int iLineNumber);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	virtual BOOL DoLineMouseAction(int iLineNumber);
-	virtual int GetRenderLinePos_y(int iLineNumber);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual BOOL DoLineMouseAction(int iLineNumber)		{ return TRUE; }
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			void CalcLineNum();
 };
 
@@ -399,12 +378,8 @@ protected:
 	virtual void AddTextToRenderList(const char* pszText);
 	virtual void RenderInterface();
 	virtual BOOL RenderDataLine(int iLineNumber);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	virtual BOOL DoLineMouseAction(int iLineNumber);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual BOOL DoLineMouseAction(int iLineNumber) { return TRUE;	}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			void CalcLineNum();
+	void CalcLineNum();
 	virtual int	GetRenderLinePos_y(int iLineNumber);
 };
 
@@ -522,10 +497,7 @@ public:
 	virtual ~CUIGuildNoticeListBox() {}
 
 	virtual void AddText( const char* szContent );
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void DeleteText( DWORD dwIndex );
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void SetNumRenderLine( int nLine );
 	GUILDLOG_TEXT * GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
 protected:
@@ -542,10 +514,7 @@ public:
 	virtual ~CUINewGuildMemberListBox() {}
 
 	virtual void AddText(const char* pszID, BYTE Number, BYTE Server, BYTE GuildStatus);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void DeleteText(DWORD dwUIID);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void SetNumRenderLine(int iLine);
 	GUILDLIST_TEXT * GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
 protected:
@@ -565,10 +534,7 @@ public:
 	virtual ~CUIUnionGuildListBox() {}
 
 	virtual void AddText(BYTE* pGuildMark, const char* szGuildName, int nMemberCount);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void DeleteText(DWORD dwGuildIndex);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual int GetTextCount();
 	virtual void SetNumRenderLine(int iLine);
 	UNIONGUILD_TEXT * GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
@@ -609,10 +575,7 @@ public:
 	virtual ~CUIBCDeclareGuildListBox() {}
 
 	virtual void AddText( const char* szGuildName, int nMarkCount, BYTE byIsGiveUp, BYTE bySeqNum );
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void DeleteText(DWORD dwGuildIndex);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void SetNumRenderLine(int iLine);
 	BCDECLAREGUILD_TEXT * GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
 	void Sort();
@@ -632,13 +595,8 @@ public:
 	CUIBCGuildListBox();
 	virtual ~CUIBCGuildListBox() {}
 
-	virtual void AddText( const char* szGuildName, BYTE byJoinSide, BYTE byGuildInvolved 	
-		,int iGuildScore
-		);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
+	virtual void AddText( const char* szGuildName, BYTE byJoinSide, BYTE byGuildInvolved ,int iGuildScore);
 	virtual void DeleteText(DWORD dwGuildIndex);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void SetNumRenderLine(int iLine);
 	BCGUILD_TEXT * GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
 protected:
@@ -662,11 +620,8 @@ public:
 
 protected:
 	virtual void RenderInterface();
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual BOOL RenderDataLine(int iLineNumber);
 	virtual BOOL DoLineMouseAction(int iLineNumber);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual int GetRenderLinePos_y(int iLineNumber);
 };
 
@@ -1015,12 +970,7 @@ public:
 	virtual void MoveHistory(int iDegree) {}
 };
 
-#ifdef REVISION_SLIDE_LEVEL_MAX
-#define SLIDE_LEVEL_MAX 10 
-#else //REVISION_SLIDE_LEVEL_MAX
 #define SLIDE_LEVEL_MAX 5
-#endif //REVISION_SLIDE_LEVEL_MAX
-
 #define SLIDE_TEXT_LENGTH 1024
 
 struct SLIDEHELPTEXT
@@ -1255,7 +1205,6 @@ public:
 	void SetCheckState(bool _Value);
 	void SetRadioBtnIsEnable(int _Value);
 	int GetRadioBtnIsEnable(){ return m_nRadioBtnEnable; }
-	///////////////////////////////////////////////////////////
 private:
 	RECT m_rtCheckBtn;
 	bool m_bCheckState;

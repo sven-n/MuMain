@@ -1,10 +1,5 @@
 //*****************************************************************************
 // File: NewUINPCQuest.h
-//
-// Desc: interface for the CNewUINPCQuest class.
-//		 NPC 퀘스트창 클래스.
-//
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
 
 #if !defined(AFX_NEWUINPCQUEST_H__7767F9B8_2F3F_4A7F_8C07_CD747D76A6D3__INCLUDED_)
@@ -46,11 +41,11 @@ namespace SEASON3B
 			NPCQUEST_HEIGHT = 429,
 		};
 
-		CNewUIManager*			m_pNewUIMng;			// UI 매니저.
+		CNewUIManager*			m_pNewUIMng;
 		CNewUI3DRenderMng*		m_pNewUI3DRenderMng;
-		POINT					m_Pos;					// 창의 위치.
+		POINT					m_Pos;
 
-		CNewUIButton			m_btnComplete;			// 퀘스트 완료 버튼.
+		CNewUIButton			m_btnComplete;
 		CNewUIButton			m_btnClose;
 
 	public:

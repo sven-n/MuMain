@@ -115,14 +115,14 @@ void RenderSprites ( BYTE byRenderOneMore )
 	for(int i=0;i<MAX_SPRITES;i++)
 	{
 		OBJECT *o = &Sprites[i];
-        if( byRenderOneMore == 1 )            //  수면 아래의 것들만 찍는다.
+        if( byRenderOneMore == 1 )
         {
             if ( o->Position[2] > 350.f ) 
 			{
 				continue;
 			}
         }
-        else if( byRenderOneMore == 2 )       //  수면위의 것들만 찍는다.
+        else if( byRenderOneMore == 2 )
         {
             if( o->Position[2] <= 300.f )
             {

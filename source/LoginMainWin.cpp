@@ -96,11 +96,7 @@ bool CLoginMainWin::CursorInWin(int nArea)
 	return CWin::CursorInWin(nArea);
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-void CLoginMainWin::UpdateWhileActive()
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CLoginMainWin::UpdateWhileActive(double dDeltaTick)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 {
 	if (m_aBtn[LMW_BTN_MENU].IsClick())
 	{
@@ -110,11 +106,7 @@ void CLoginMainWin::UpdateWhileActive(double dDeltaTick)
 	}
 	else if (m_aBtn[LMW_BTN_CREDIT].IsClick())
 	{
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-		SendRequestServerList2();
-#else
 		SendRequestServerList();
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
 
 		CUIMng& rUIMng = CUIMng::Instance();
 		rUIMng.ShowWin(&rUIMng.m_CreditWin);

@@ -1,5 +1,4 @@
 // PCRoomPoint.cpp: implementation of the CPCRoomPtSys class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -14,10 +13,6 @@
 
 extern int GetScreenWidth();
 extern int PartyNumber;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CPCRoomPtSys::CPCRoomPtSys()
 	: m_bPCRoom(false)
@@ -34,11 +29,6 @@ CPCRoomPtSys::~CPCRoomPtSys()
 
 }
 
-//*****************************************************************************
-// 함수 이름 : Instance()
-// 함수 설명 : 객체를 단 하나만 생성.
-//			  이 클래스에 접근하기 위한 인터페이스임
-//*****************************************************************************
 CPCRoomPtSys& CPCRoomPtSys::Instance()
 {
 	static CPCRoomPtSys s_PCRoomPtSys;                  

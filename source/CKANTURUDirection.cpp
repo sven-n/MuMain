@@ -344,7 +344,7 @@ void CKanturuDirection::Direction3rd1()
 	{
 		if(g_Direction.m_iCheckTime == 0) g_Direction.GetTimeCheck(1000);
 		else if(g_Direction.m_iCheckTime == 1)
-			g_Direction.SummonCreateMonster(361, 79, 142, 0, true, true, 0.25f);	// LHJ - 나이트 메어 소환
+			g_Direction.SummonCreateMonster(361, 79, 142, 0, true, true, 0.25f);
 		else if(g_Direction.m_iCheckTime == 2) g_Direction.GetTimeCheck(5000);
 		else if(g_Direction.m_iCheckTime == 3)
 		{

@@ -186,7 +186,7 @@ namespace SEASON3B
 			class TContainer
 		{
 			T*	m_pObj;
-			INSTANCE_STATE	m_InstState;	//. 안전 장치
+			INSTANCE_STATE	m_InstState;
 		public:
 
 			TContainer() : m_pObj(NULL), m_InstState(INSTANCE_NEW) { m_pObj = new T; }		//. create instance
@@ -216,24 +216,15 @@ namespace SEASON3B
 			}
 		};
 		template <class T>
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-		T* NewMessageBox(const TContainer<T>& _container)
-		{
-			TContainer<T>& _tcontainer = (TContainer<T>&)_container;
-			T* pObj = _tcontainer.GetInstance();
-			m_listMsgBoxes.push_back(pObj);					//. 인스턴스 관리권한을 넘긴다.
-			_tcontainer.SetInstState(INSTANCE_REFERENCE);	//. 넘겼으니 참조
-			return pObj;
-		}
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			T* NewMessageBox(TContainer<T>& _container)
+
+		T* NewMessageBox(TContainer<T>& _container)
 		{
 			T* pObj = _container.GetInstance();
 			m_listMsgBoxes.push_back(pObj);
 			_container.SetInstState(INSTANCE_REFERENCE);
 			return pObj;
 		}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 		void DeleteMessageBox(const CNewUIMessageBoxBase* pObj)
 		{
 			type_list_msgbox::iterator li = 
@@ -331,11 +322,8 @@ namespace SEASON3B
 		static bool ComparePriority(CNewUIMessageBoxBase* pObj1, CNewUIMessageBoxBase* pObj2);
 
 		template <class T>
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-		T* NewMessageBox(const CNewUIMessageBoxFactory::TContainer<T>& container)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			T* NewMessageBox(CNewUIMessageBoxFactory::TContainer<T>& container)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
+		T* NewMessageBox(CNewUIMessageBoxFactory::TContainer<T>& container)
 		{
 			T* pMsgBox = NULL;
 			if(m_pMsgBoxFactory)
@@ -417,28 +405,6 @@ namespace SEASON3B
 		}
 	};
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	template <class _L>
-		bool CreateMessageBox(const TMsgBoxLayoutContainer<_L>& container)
-		{
-			TMsgBoxLayoutContainer<_L> tcontainer = container;
-			if(false == tcontainer.Create()) //. MessageBox Layout 생성
-				return false;
-
-			return tcontainer.SetLayout();
-		}
-		template <class _L, class _M>
-		bool CreateMessageBox(const TMsgBoxLayoutContainer<_L>& container, _M** ppMsgBox)
-		{
-			TMsgBoxLayoutContainer<_L> tcontainer = container;
-			if(false == tcontainer.Create()) //. MessageBox Layout 생성
-				return false;
-			if(ppMsgBox)
-				*ppMsgBox = TMsgBoxLayout<_M>::GetMsgBox();
-
-			return tcontainer.SetLayout();
-		}
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	template <class _L>
 		bool CreateMessageBox(TMsgBoxLayoutContainer<_L>& container)
 	{
@@ -457,29 +423,6 @@ namespace SEASON3B
 
 		return container.SetLayout();
 	}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
-	/*
-		Usage:
-
-		CNewUICommonMessageBox* pMsgBox = g_pMsgBoxMng->NewMessageBox(MSGBOX_CLASS(CNewUICommonMessageBox));
-		pMsgBox->Create(Type, Msg, Color);
-		pMsgBox->AddCallbackFunc(PressEscKey, MSGBOX_EVENT_PRESSKEY_ESC);	//. 이미 존재하면 지우고 등록한다.
-
-		static DWORD PressEscKey(CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-		{
-			return CALLBACK_BREAK;	//. 현재 프레임에서 더이상 이벤트를 처리하지 않는다.
-			return CALLBACK_CONTINUE;	//. 현재 프레임에서 계속 다음 이벤트를 처리한다.
-			return CALLBACK_POP_ALL_EVENTS;	//. 남은 이벤트를 처리하지 않고 모두 클리어 한다.
-			return CALLBACK_EXCEPTION;	//. 예외를 발생시킨다.
-		}
-
-		pMsgBox->AddCallbackFunc(Destroy, MSGBOX_EVENT_DESTROY);
-		//. 이런식으로 Destroy함수도 재정의가 가능하다, 하지만 DeleteMessageBox처리에 대한 부분을 명확히 해야한다.
-		//. CALLBACK_CONTINUE를 리턴하면 자동으로 메세지 박스를 제거하겠지만
-		//. CALLBACK_BREAK, CALLBACK_POP_ALL_EVENTS등을 리턴하면 자동으로 제거되지 않으므로 꼭 DeleteMessageBox를 호출해 주어야 한다.
-	*/
-	
 }
 
 #define MSGBOX_LAYOUT_CLASS(x) SEASON3B::TMsgBoxLayoutContainer<x>()

@@ -225,7 +225,7 @@ bool CConsoleWindow::SaveScreenBuffer(const std::string& filename)
 	SMALL_RECT RectToRead = { 0, 0, BufferSize.X, BufferSize.Y };
 	if(ReadConsoleOutput(GetStdHandle(STD_OUTPUT_HANDLE), pbyCharBuffer, BufferSize, StartPointToWrite, &RectToRead)) 
 	{
-		//. 멀로 저장할까나~
+
 	}
 
 	delete [] pbyCharBuffer;

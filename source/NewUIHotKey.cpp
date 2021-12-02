@@ -41,9 +41,7 @@ bool SEASON3B::CNewUIHotKey::Create(CNewUIManager* pNewUIMng)
 	
 	m_pNewUIMng = pNewUIMng;
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_HOTKEY, this);
-
-	Show(true);		//. 그릴필요 없다
-	
+	Show(true);
 	return true;
 }
 
@@ -235,7 +233,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 	{
 		if(gCharacterManager.IsMasterLevel( Hero->Class ) == true 
 #ifdef PBG_ADD_NEWCHAR_MONK
-			&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT				// 현재 마스터 스킬트리 없음
+			&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT
 #endif //PBG_ADD_NEWCHAR_MONK
 			)
 			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
@@ -312,14 +310,14 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 // 	}
 #endif	// YDG_ADD_DOPPELGANGER_UI
 #if defined LDK_TEST_MAP_EMPIREGUARDIAN
-// 	else if(SEASON3B::IsPress('Z') == true)		// ui
+// 	else if(SEASON3B::IsPress('Z') == true)
 // 	{
 // 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC);
 // 		return false;
 // 	}
 #endif //LDK_TEST_MAP_EMPIREGUARDIAN
 #ifdef LDS_ADD_TEST_UNITEDMARKETPLACE
-	else if(SEASON3B::IsPress('Z') == true)		// 통합시장 테스트.
+	else if(SEASON3B::IsPress('Z') == true)
 	{
 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
 // 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);

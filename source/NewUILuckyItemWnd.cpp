@@ -1,5 +1,4 @@
 // NewUILuckyItemWnd.cpp: implementation of the CNewUILuckyItemWnd class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -19,10 +18,6 @@
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
 
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 using namespace SEASON3B;
 CNewUILuckyItemWnd::CNewUILuckyItemWnd()
 {
@@ -75,10 +70,6 @@ int CNewUILuckyItemWnd::GetLuckyItemRate( int _nType )
 void CNewUILuckyItemWnd::Render_Frame( void )
 {
 	int	i=0;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	unicode::t_char szText[256] = { 0, };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	for( i=0; i< eFrame_END; i++ )
 	{
@@ -131,11 +122,6 @@ int CNewUILuckyItemWnd::SetWndAction( eLUCKYITEM _eType )
 	return -1;
 }
 
-//----------------------------------------------------------------------------------------
-// Function: 인벤 반짝이 효과
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.10.6]-
 void CNewUILuckyItemWnd::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
 	if(pClass)
@@ -185,11 +171,6 @@ void CNewUILuckyItemWnd::RenderMixEffect()
 		DisableAlphaBlend();
 }
 
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.7]-
 void CNewUILuckyItemWnd::GetResult( BYTE _byResult, int _nIndex, BYTE* _pbyItemPacket )
 {
 	int		nDefault	= -1;
@@ -198,7 +179,6 @@ void CNewUILuckyItemWnd::GetResult( BYTE _byResult, int _nIndex, BYTE* _pbyItemP
 	int		nAddInven	= -1;
 	bool	bInitInven	= false;
 
-	// 인벤 컨트롤 초기화
 	SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 
 	switch( m_eWndAction )
@@ -227,7 +207,6 @@ void CNewUILuckyItemWnd::GetResult( BYTE _byResult, int _nIndex, BYTE* _pbyItemP
 				}
 			}
 
-			// 럭키아이템 대화창 종료!
 			m_eEnd = eLuckyItem_End;
 			SetFrame_Text( m_eEnd );
 		break;
@@ -241,19 +220,15 @@ void CNewUILuckyItemWnd::GetResult( BYTE _byResult, int _nIndex, BYTE* _pbyItemP
 
 	m_eWndAction	= eLuckyItem_None;
 }
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
+
 void CNewUILuckyItemWnd::LoadImg( void )
 {
-	float	fSizeX	= m_fSizeX;					// 프레임 넓이
-	float	fSizeY	= m_fSizeY;					// 프레임 높이
-	float	fTop	= 64.0f;					// 프레임 제목 텝 *
-	float	fBottom	= 45.0f;					// 프레임 하단 텝 *
-	float	fLineX	= 21.0f;					// 프레임 라인 넓이 *
-	float	fLineY	= fSizeY - fTop - fBottom;	// 프레임 라인 높이
+	float	fSizeX	= m_fSizeX;
+	float	fSizeY	= m_fSizeY;
+	float	fTop	= 64.0f;
+	float	fBottom	= 45.0f;
+	float	fLineX	= 21.0f;
+	float	fLineY	= fSizeY - fTop - fBottom;
 
 	char*	szFileName[] = { "Interface\\newui_msgbox_back.jpg", 
 							 "Interface\\newui_item_back04.tga", 
@@ -275,11 +250,7 @@ void CNewUILuckyItemWnd::LoadImg( void )
 		LoadBitmap( szFileName[i], m_sImgList[i].s_nImgIndex, GL_LINEAR);	
  	}
 }
-//----------------------------------------------------------------------------------------
-// Function: [Virtual]
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
+
 bool CNewUILuckyItemWnd::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
 	if(NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
@@ -323,11 +294,6 @@ bool CNewUILuckyItemWnd::Create(CNewUIManager* pNewUIMng, int x, int y)
 	return true;
 }
 
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
 void CNewUILuckyItemWnd::Release()
 {
 #ifdef LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
@@ -340,15 +306,8 @@ void CNewUILuckyItemWnd::Release()
 	}
 }
 
-
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
 void CNewUILuckyItemWnd::OpeningProcess( void )
 {
-	// 텍스트 인덱스 초기화 [lem_2010.9.2]
 	for( int i=0; i< LUCKYITEMMAXLINE; i++ )	
 	{
 		m_sText[i].s_nTextIndex	= -1;
@@ -384,7 +343,6 @@ void CNewUILuckyItemWnd::SetFrame_Text( eLUCKYITEM _eType )
 	switch( _eType )
 	{
 		case eLuckyItem_End:
-			// 텍스트 인덱스 초기화 [lem_2010.9.2]
 			for( int i=0; i< LUCKYITEMMAXLINE; i++ )	
 			{
 				m_sText[i].s_nTextIndex	= -1;
@@ -412,7 +370,6 @@ bool CNewUILuckyItemWnd::ClosingProcess( void )
 {
 	if ( GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
 	{
-		// 조합창에 아이템이 있으면 창을 닫을 수 없다
 		g_pChatListBox->AddText("", GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
 		return false;
  	}
@@ -443,21 +400,13 @@ void CNewUILuckyItemWnd::Process_InventoryCtrl_DeleteItem(int iIndex)
 			m_pNewInventoryCtrl->RemoveItem(pItem);
 	}
 }
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.7]-
+
 bool CNewUILuckyItemWnd::Check_LuckyItem_InWnd( void )
 {
 	if( GetInventoryCtrl()->GetNumberOfItems() > 0 )	return true;
 	return false;
 }
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.7]-
+
 bool CNewUILuckyItemWnd::Check_LuckyItem( ITEM* _pItem )
 {
 	switch( m_eType )
@@ -490,11 +439,7 @@ bool CNewUILuckyItemWnd::Check_LuckyItem_Refinery( ITEM* _pItem )
 	
 	return false;
 }
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.6]-
+
 bool CNewUILuckyItemWnd::Process_InventoryCtrl( void )
 {
 	CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
@@ -503,19 +448,14 @@ bool CNewUILuckyItemWnd::Process_InventoryCtrl( void )
 
 	ITEM*	pItemObj	= pPickedItem->GetItem();
 	bool	bAct		= Check_LuckyItem( pItemObj );
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	float	fInvenClr[3]= { 0, };
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	if( !bAct || Check_LuckyItem_InWnd() )
 	{
-		// 럭키아이템과 상관없은 템이 올라오면 인벤 비활성 처리 후 리턴.
 		m_pNewInventoryCtrl->SetSquareColorNormal(m_fInvenClrWarning[0], m_fInvenClrWarning[1], m_fInvenClrWarning[2] );
 		return false;
 	}
 
-	if ( pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())	// 인벤토리에서 조합창으로
+	if ( pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
 	{
 		if (SEASON3B::IsPress(VK_LBUTTON))
 		{
@@ -529,7 +469,7 @@ bool CNewUILuckyItemWnd::Process_InventoryCtrl( void )
 			}
 		}
 	}
-	else if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)	// 조합창에서 조합창으로	
+	else if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
 	{
 		if (SEASON3B::IsPress(VK_LBUTTON))
 		{
@@ -554,11 +494,6 @@ bool CNewUILuckyItemWnd::Process_InventoryCtrl( void )
 CNewUIInventoryCtrl* CNewUILuckyItemWnd::GetInventoryCtrl() const
 { return m_pNewInventoryCtrl; }
 
-//----------------------------------------------------------------------------------------
-// Function: 
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.6]-
 bool CNewUILuckyItemWnd::Process_BTN_Action( void )
 {
 	if( !m_BtnMix.UpdateMouseEvent() )							
@@ -570,7 +505,6 @@ bool CNewUILuckyItemWnd::Process_BTN_Action( void )
 	if( CNewUIInventoryCtrl::GetPickedItem() )					
 		return false;
 
-	// 조합/제련 창에 아이템이 아무것도 없을 때
 	if( !Check_LuckyItem_InWnd() )
 	{
 		g_pChatListBox->AddText("", GlobalText[1817], SEASON3B::TYPE_ERROR_MESSAGE);
@@ -595,11 +529,6 @@ bool CNewUILuckyItemWnd::Process_BTN_Action( void )
 	return true;
 }
 
-//----------------------------------------------------------------------------------------
-// Function: [Virtual]
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
 bool CNewUILuckyItemWnd::UpdateMouseEvent( void )
 {
 	if(m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->UpdateMouseEvent())
@@ -608,16 +537,13 @@ bool CNewUILuckyItemWnd::UpdateMouseEvent( void )
 	
 	POINT ptExitBtn1 = { m_ptPos.x+169, m_ptPos.y+7 };
 	
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_LUCKYITEMWND);
 	}
-	
-	// 조합 버튼
+
 	Process_BTN_Action();
-	
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
+
 	if(CheckMouseIn(m_ptPos.x, m_ptPos.y, m_fSizeX, m_fSizeY))
 	{
 		if(SEASON3B::IsPress(VK_RBUTTON))
@@ -636,20 +562,12 @@ bool CNewUILuckyItemWnd::UpdateMouseEvent( void )
 	
 	return true;
 }
-//----------------------------------------------------------------------------------------
-// Function: [Virtual]
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
+
 bool CNewUILuckyItemWnd::UpdateKeyEvent( void )
 {
 	return true;
 }
-//----------------------------------------------------------------------------------------
-// Function: [Virtual]
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
+
 bool CNewUILuckyItemWnd::Update( void )
 {
 	if(m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())	
@@ -657,11 +575,7 @@ bool CNewUILuckyItemWnd::Update( void )
 	
 	return true;
 }
-//----------------------------------------------------------------------------------------
-// Function: [Virtual]
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
+
 bool CNewUILuckyItemWnd::Render( void )
 {
 	EnableAlphaTest();
@@ -676,11 +590,7 @@ bool CNewUILuckyItemWnd::Render( void )
 	
 	return true;
 }
-//----------------------------------------------------------------------------------------
-// Function: [Virtual]
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.9.1]-
+
 float CNewUILuckyItemWnd::GetLayerDepth( void )
 {	
 	return 3.4f;

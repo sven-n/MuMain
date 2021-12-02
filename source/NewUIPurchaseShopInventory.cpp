@@ -1,13 +1,7 @@
 // NewUIPurchaseShopInventory.cpp: implementation of the CNewUIPurchaseShopInventory class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 #include "NewUIPurchaseShopInventory.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
@@ -151,7 +145,6 @@ void SEASON3B::CNewUIPurchaseShopInventory::UnloadImages()
 bool SEASON3B::CNewUIPurchaseShopInventory::UpdateMouseEvent()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsRelease(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12)) 
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY);
@@ -176,7 +169,6 @@ bool SEASON3B::CNewUIPurchaseShopInventory::UpdateMouseEvent()
 		}
 	}
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 	{
 		if(SEASON3B::IsPress(VK_RBUTTON))
@@ -239,50 +231,39 @@ void SEASON3B::CNewUIPurchaseShopInventory::RenderFrame()
 
 void SEASON3B::CNewUIPurchaseShopInventory::RenderTextInfo()
 {
-	// 1102 "개인상점"
 	RenderText(GlobalText[1102], m_Pos.x, m_Pos.y+15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER );
-	// 상점이름
 	RenderText( m_TitleText.c_str(), m_Pos.x, m_Pos.y+58, 190, 0, RGBA(0, 255, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold );
-
 	unicode::t_char Text[100];
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 370 "주의!"
 	sprintf(Text, GlobalText[370]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1109 "상점 등록시 판매 가격을"
 	sprintf(Text, GlobalText[1109]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+250, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1111 "꼭! 확인하시기 바랍니다."
 	sprintf(Text, GlobalText[1111]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+262, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1112 "개인상점에서 이미"
 	sprintf(Text, GlobalText[1112]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+274, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1114 "구매한 아이템은 취소하여"
 	sprintf(Text, GlobalText[1114]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+286, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1115 "돌려 받을 수 없습니다."
 	sprintf(Text, GlobalText[1115]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+298, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1134 "아이템 거래는 모두"
 	sprintf(Text, GlobalText[1134]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+320, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold );
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
-	// 1135 "젠으로만 거래 가능합니다."
 	sprintf(Text, GlobalText[1135]); 
 	RenderText( Text, m_Pos.x+30, m_Pos.y+332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold );
 }
@@ -310,15 +291,11 @@ bool SEASON3B::CNewUIPurchaseShopInventory::Render()
 
 void SEASON3B::CNewUIPurchaseShopInventory::ClosingProcess()
 {
-#ifdef LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
  	if( m_pNewInventoryCtrl )
  	{
  		m_pNewInventoryCtrl->RemoveAllItems();
-#ifdef LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM
 		g_ErrorReport.Write("@ [Notice] CNewUIPurchaseShopInventory::ClosingProcess():m_pNewInventoryCtrl->RemoveAllItems(); )\n" );
-#endif // LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM
  	}
-#endif // LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 
 	m_ShopCharacterIndex = -1;
 
@@ -327,7 +304,6 @@ void SEASON3B::CNewUIPurchaseShopInventory::ClosingProcess()
 
 int SEASON3B::CNewUIPurchaseShopInventory::GetPointedItemIndex()
 {
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 	int iPointedItemIndex = m_pNewInventoryCtrl->GetPointedSquareIndex();
 	
 	if(iPointedItemIndex != -1)
@@ -336,8 +312,5 @@ int SEASON3B::CNewUIPurchaseShopInventory::GetPointedItemIndex()
 	}
 	
 	return iPointedItemIndex;
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM
-	return m_pNewInventoryCtrl->GetPointedSquareIndex();
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 

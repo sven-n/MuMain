@@ -1,16 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  npcGateSwitch.cpp
-//  
-//  공성 성문 스위치 처리
-//
-//  날  짜 : 2004/12/09
-//
-//  작성자 : 조규하.
-//  
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UIManager.h"
@@ -26,33 +15,19 @@
 #include "ZzzTexture.h"
 #include "zzzAi.h"
 #include "wsclientinline.h"
-
 #include "zzzlodterrain.h"
 #include "zzzeffect.h"
-
 #include "GMBattleCastle.h"
 #include "npcGateSwitch.h"
 
-
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
-
-
-namespace   npcGateSwitch
+namespace npcGateSwitch
 {
-    //////////////////////////////////////////////////////////////////////////
-    //  GLOBAL Variable.
-    //////////////////////////////////////////////////////////////////////////
 	static  const   DWORD   GATE_OPEN  = static_cast<DWORD>(eBuff_CastleGateIsOpen);
     static  const   DWORD   GATE_CLOSE = 0;
 	static          bool   g_isCurrentGateopen = false;
     static          int     g_iNpcCharacterKey = 0;
     
-    //////////////////////////////////////////////////////////////////////////
-    //  성문 오픈.
-    //////////////////////////////////////////////////////////////////////////
-    void    GateOpen ( CHARACTER* c, OBJECT* o )
+    void GateOpen ( CHARACTER* c, OBJECT* o )
     {
         SetAction ( o, 1 );
 
@@ -62,12 +37,8 @@ namespace   npcGateSwitch
 
         PlayBuffer ( SOUND_BC_GATE_OPEN );
     }
-    
 
-    //////////////////////////////////////////////////////////////////////////
-    //  성문 클로즈.
-    //////////////////////////////////////////////////////////////////////////
-    void    GateClose ( CHARACTER* c, OBJECT* o )
+    void GateClose ( CHARACTER* c, OBJECT* o )
     {
         SetAction ( o, 0 );
 
@@ -78,11 +49,7 @@ namespace   npcGateSwitch
         PlayBuffer ( SOUND_BC_GATE_OPEN );
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  성문의 정보를 설정한다.
-    //////////////////////////////////////////////////////////////////////////
-    void    DoInterfaceOpen ( int Key )
+    void DoInterfaceOpen ( int Key )
     {
         g_iNpcCharacterKey = Key;
 
@@ -93,18 +60,14 @@ namespace   npcGateSwitch
 		g_isCurrentGateopen = g_isCharacterBuff(o, eBuff_CastleGateIsOpen);
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    //  성문의 상태를 변경시킨다.
-    //////////////////////////////////////////////////////////////////////////
-    void    ProcessState ( int Key, BYTE GateOnOff, BYTE State )
+    void ProcessState ( int Key, BYTE GateOnOff, BYTE State )
     {
         switch ( State )
         {
-        case 0: //  실패.
+        case 0:
             break;
 
-        case 1: //  성공.
+        case 1:
             {
         	    int        Index = FindCharacterIndex ( Key );
                 CHARACTER* c     = &CharactersClient[Index];
@@ -113,7 +76,7 @@ namespace   npcGateSwitch
                 if ( c->MonsterIndex!=277 ) return;
 
                 OBJECT* o = &c->Object;
-                //  성문 개/폐
+
                 if ( GateOnOff )
                 {
                     GateOpen ( c, o );
@@ -125,13 +88,13 @@ namespace   npcGateSwitch
             }
             break;
 
-        case 2: //  성문이 없음.
+        case 2:
             break;
 
-        case 3: //  레버 없음.
+        case 3:
             break;
 
-        case 4: //  권한 없음.
+        case 4:
             break;
         }
     }

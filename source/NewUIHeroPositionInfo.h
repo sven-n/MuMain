@@ -1,5 +1,4 @@
 // NewUIHeroPositionInfo.h: interface for the CNewUIHeroPositionInfo class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIHEROPOSITIONINFO_H__5D452B62_B315_41EE_A862_5929286925F7__INCLUDED_)
@@ -17,7 +16,6 @@ namespace SEASON3B
 	public:
 		enum IMAGE_LIST
 		{	
-			// 기타 이미지
 			IMAGE_HERO_POSITION_INFO_BASE_WINDOW = BITMAP_HERO_POSITION_INFO_BEGIN,		// newui_position02.tga			(70, 25)	
 		};
 	private:
@@ -26,7 +24,7 @@ namespace SEASON3B
 #ifdef PJH_ADD_MINIMAP
 			HERO_POSITION_INFO_BASEA_WINDOW_WIDTH = 22,
 			HERO_POSITION_INFO_BASE_WINDOW_HEIGHT = 25,
-			HERO_POSITION_INFO_BASEB_WINDOW_WIDTH = 80,		//이수치만 조정하면 인터페이스의 전체 길이가 달라진다.
+			HERO_POSITION_INFO_BASEB_WINDOW_WIDTH = 80,
 			HERO_POSITION_INFO_BASEC_WINDOW_WIDTH = 22,
 #else
 			HERO_POSITION_INFO_BASE_WINDOW_WIDTH = 70,
@@ -43,7 +41,7 @@ namespace SEASON3B
 		CNewUIManager*				m_pNewUIMng;
 		POINT						m_Pos;
 
-		POINT						m_CurHeroPosition;			// 지도상 주인공의 현재 위치
+		POINT						m_CurHeroPosition;
 		
 	public:
 		CNewUIHeroPositionInfo();

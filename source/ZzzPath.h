@@ -14,11 +14,9 @@ public:
 	PATH();
 	~PATH();
 
-	// 초기화
 public:
     void SetMapDimensions( int iWidth, int iHeight, WORD *pbyMap);
 
-	// 맵 정보
 private:
 	int	m_iWidth, m_iHeight;
 	int m_iSize;
@@ -33,27 +31,24 @@ public:
 	BYTE* GetPathX( void)	{ return ( m_xPath + MAX_COUNT_PATH - m_iNumPath); }
 	BYTE* GetPathY( void)	{ return ( m_yPath + MAX_COUNT_PATH - m_iNumPath); }
 
-	// 데이터 접근
 	int GetIndex( int xPos, int yPos)	{ return ( xPos + yPos * m_iWidth); }
 	void GetXYPos( int iIndex, int *pxPos, int *pyPos)	{ *pxPos = iIndex % m_iWidth; *pyPos = iIndex / m_iWidth; }
 	BOOL CheckXYPos( int xPos, int yPos)	{ return ( xPos >= 0 && yPos >= 0 && xPos < m_iWidth && yPos < m_iHeight);}
 	static int s_iDir[8][2];
 
-	// 길찾기 내부 정보
 private:
-	BYTE *m_pbyClosed;	                // 열렸는가? 닫혔는가? ( 0 : 열린 곳, 1 : 닫힌 곳)
-	int m_iMinClosed, m_iMaxClosed;	    // m_pbyClosed 를 초기화할 영역
-	int *m_piCostToStart;		        // 도착점까지의 비용
-	int *m_pxPrev;		                // 바로 직전 노드
+	BYTE *m_pbyClosed;
+	int m_iMinClosed, m_iMaxClosed;
+	int *m_piCostToStart;
+	int *m_pxPrev;
 	int *m_pyPrev;
-	CBTree<int, int> m_btOpenNodes;	    // 검사해볼 것들의 리스트 ( 인덱스, 예상 총비용)
+	CBTree<int, int> m_btOpenNodes;
 
 	void Clear( void);
 	bool AddClearPos( int iIndex);
 	void Init( void);
 	int GetNewNodeToTest( void);
 
-	// 길 찾기
 public:
 	bool FindPath(int xStart, int yStart, int xEnd, int yEnd, bool bErrorCheck, int iWall, bool Value, float fDistance = 0.0f);
 
@@ -63,7 +58,6 @@ private:
 	int EstimateCostToGoal( int xStart, int yStart, int xNew, int yNew);
 	bool GeneratePath( int xStart, int yStart, int xEnd, int yEnd);
 
-	// 디버그용 함수
 #ifdef SHOW_PATH_INFO
 public:
 	BYTE GetClosedStatus( int iIndex)	{ return ( m_pbyClosed[iIndex]); }
@@ -154,7 +148,6 @@ inline void PATH::Init( void)
 
 inline int PATH::GetNewNodeToTest( void)
 {	
-	// 새로 검사할 노드를 얻어온다.
 	CBNode<int, int> *pResult = NULL;
 	CBNode<int, int> *pNode = m_btOpenNodes.FindHead();
 	while ( pNode)
@@ -166,22 +159,19 @@ inline int PATH::GetNewNodeToTest( void)
 	return ( m_btOpenNodes.RemoveNode( pResult));
 }
 
-// bErrorCheck 가 false 이면 가까운데 까지라도 간다.
 inline bool PATH::FindPath( int xStart, int yStart, int xEnd, int yEnd, bool bErrorCheck, int iWall, bool Value, float fDistance)
 {	
 	Init();
 
-	// 1. 잘못된 호출 체크
 	if(xStart == 0 || yStart == 0)
 	{
 		return false;
 	}
 
-	// 2. 끝점이 갈 수 있는 곳인지 체크
 	if(0.0f == fDistance)
 	{
 		int iEndIndex = GetIndex(xEnd, yEnd);
-		if(iEndIndex < 0 || iEndIndex >= m_iSize)	//. 인덱스가 범위 밖이라면 실패!
+		if(iEndIndex < 0 || iEndIndex >= m_iSize)
 		{
 			return false;
 		}
@@ -207,14 +197,12 @@ inline bool PATH::FindPath( int xStart, int yStart, int xEnd, int yEnd, bool bEr
 		SetEndNodes( bErrorCheck, iWall, xEnd, yEnd, fDistance);
 	}
 
-	// 갈 수 없을 경우 가장 가까운 곳까지라도 가게 하기 위한 변수
 	int iCostToGoalOfNearest = MAX_INT_FORPATH;
 	int xNearest = xStart;
 	int yNearest = yStart;
 
-	// 3. 시작점은 비용이 0 인 것으로 추가한다.
 	int iStartIndex = GetIndex( xStart, yStart);
-	if (iStartIndex < 0 || iStartIndex >= m_iSize)		//. 인덱스가 범위 밖이라면 실패!
+	if (iStartIndex < 0 || iStartIndex >= m_iSize)
 	{
 		return false;
 	}
@@ -390,11 +378,10 @@ inline int PATH::CalculateCostToStartAddition( int xDir, int yDir)
 
 inline int PATH::EstimateCostToGoal( int xStart, int yStart, int xNew, int yNew)
 {
-	//사각+대각선거리
 	int xDist = abs( xNew - xStart);
 	int yDist = abs( yNew - yStart);
 	if ( xDist == 1 && yDist == 1)
-	{	// 기사가 대각선에서 때리지 않는 버그 수정 위함
+	{
 		yDist = 0;
 	}
 
@@ -407,7 +394,6 @@ inline bool PATH::GeneratePath( int xStart, int yStart, int xEnd, int yEnd)
 	int yCurrent = yEnd;
 	for ( m_iNumPath = 0; m_iNumPath < MAX_COUNT_PATH; m_iNumPath++)
 	{
-		// 찾은 길을 뒤집어 넣는다.
 		m_xPath[( MAX_COUNT_PATH - 1) - m_iNumPath] = xCurrent;
 		m_yPath[( MAX_COUNT_PATH - 1) - m_iNumPath] = yCurrent;
 

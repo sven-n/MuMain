@@ -1,5 +1,4 @@
 // CNewUISiegeWarfare.cpp: implementation of the CNewUISiegeWarfare class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -15,10 +14,6 @@
 
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUISiegeWarfare::CNewUISiegeWarfare()
 {
@@ -43,15 +38,13 @@ SEASON3B::CNewUISiegeWarfare::~CNewUISiegeWarfare()
 	Release();
 }
 
-//---------------------------------------------------------------------------------------------
-// Create
 bool SEASON3B::CNewUISiegeWarfare::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
 	if( NULL == pNewUIMng )
 		return false;
 	
 	m_pNewUIMng = pNewUIMng;
-	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_SIEGEWARFARE, this );		// 인터페이스 오브젝트 등록
+	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_SIEGEWARFARE, this );
 	
 	Show( true );
 	
@@ -60,8 +53,6 @@ bool SEASON3B::CNewUISiegeWarfare::Create(CNewUIManager* pNewUIMng, int x, int y
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Release
 void SEASON3B::CNewUISiegeWarfare::Release()
 {
 	if( m_pSiegeWarUI )
@@ -78,16 +69,12 @@ void SEASON3B::CNewUISiegeWarfare::Release()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// SetPos
 void SEASON3B::CNewUISiegeWarfare::SetPos(int x, int y)
 {
 	m_Pos.x = x;
 	m_Pos.y = y;	
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateMouseEvent
 bool SEASON3B::CNewUISiegeWarfare::UpdateMouseEvent()
 {
 	if( m_pSiegeWarUI )
@@ -99,8 +86,6 @@ bool SEASON3B::CNewUISiegeWarfare::UpdateMouseEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateKeyEvent
 bool SEASON3B::CNewUISiegeWarfare::UpdateKeyEvent()
 {
 	if( m_pSiegeWarUI )
@@ -112,8 +97,6 @@ bool SEASON3B::CNewUISiegeWarfare::UpdateKeyEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Update
 bool SEASON3B::CNewUISiegeWarfare::Update()
 {		
 	if( IsVisible() == false )
@@ -158,8 +141,6 @@ bool SEASON3B::CNewUISiegeWarfare::Update()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Render
 bool SEASON3B::CNewUISiegeWarfare::Render()
 {
 	if( m_pSiegeWarUI == NULL || gMapManager.InBattleCastle() == false )
@@ -172,37 +153,27 @@ bool SEASON3B::CNewUISiegeWarfare::Render()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// GetLayerDepth
 float SEASON3B::CNewUISiegeWarfare::GetLayerDepth()
 {
 	return 1.6f;
 }
 
-//---------------------------------------------------------------------------------------------
-// OpenningProcess
 void SEASON3B::CNewUISiegeWarfare::OpenningProcess()
 {
 	
 }
 
-//---------------------------------------------------------------------------------------------
-// ClosingProcess
 void SEASON3B::CNewUISiegeWarfare::ClosingProcess()
 {
 	
 }
 
-//---------------------------------------------------------------------------------------------
-// Init
 void SEASON3B::CNewUISiegeWarfare::SetGuildData( const CHARACTER* pCharacter )
 {
 	m_sGuildMarkIndex = pCharacter->GuildMarkIndex;
 	m_byGuildStatus = pCharacter->GuildStatus;
 }
 
-//---------------------------------------------------------------------------------------------
-// CreateMiniMapUI
 bool SEASON3B::CNewUISiegeWarfare::CreateMiniMapUI()
 {
 	if( m_pSiegeWarUI != NULL )
@@ -210,7 +181,6 @@ bool SEASON3B::CNewUISiegeWarfare::CreateMiniMapUI()
 		InitMiniMapUI();
 	}
 	
-	// 길드장이거나 배틀마스터가 아닐때 
 	if ( !(Hero->EtcPart == PARTS_ATTACK_TEAM_MARK 
 		|| Hero->EtcPart == PARTS_ATTACK_TEAM_MARK2
 		|| Hero->EtcPart == PARTS_ATTACK_TEAM_MARK3
@@ -253,7 +223,6 @@ bool SEASON3B::CNewUISiegeWarfare::CreateMiniMapUI()
 		}break;
 	}
 
-	// UI생성
 	m_pSiegeWarUI->LoadImages();
 	m_pSiegeWarUI->Create( m_Pos.x, m_Pos.y );
 	Show( true );
@@ -277,8 +246,6 @@ void SEASON3B::CNewUISiegeWarfare::SetGuildMemberLocation ( BYTE type, int x, in
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// ResetType
 void SEASON3B::CNewUISiegeWarfare::InitMiniMapUI( ) 
 {
 	if( m_pSiegeWarUI == NULL )
@@ -296,9 +263,6 @@ void SEASON3B::CNewUISiegeWarfare::InitMiniMapUI( )
 	m_sGuildMarkIndex = -1;
 }
 
-//---------------------------------------------------------------------------------------------
-// SetTime
-// 서버에서 시간을 받는다.
 void  SEASON3B::CNewUISiegeWarfare::SetTime( BYTE byHour, BYTE byMinute )
 {
     m_iHour = (int)byHour;
@@ -307,8 +271,6 @@ void  SEASON3B::CNewUISiegeWarfare::SetTime( BYTE byHour, BYTE byMinute )
 	m_dwSyncTime = GetTickCount();
 }
 
-//---------------------------------------------------------------------------------------------
-// SetMapInfo
 void SEASON3B::CNewUISiegeWarfare::SetMapInfo( GuildCommander& data )
 {
 	if( m_pSiegeWarUI == NULL ) 

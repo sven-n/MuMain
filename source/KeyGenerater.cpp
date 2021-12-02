@@ -1,13 +1,8 @@
 // KeyGenerater.cpp: implementation of the CKeyGenerater class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "KeyGenerater.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 #ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
 
@@ -42,23 +37,17 @@ CKeyGenerater::~CKeyGenerater()
 }
 
 #ifdef USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
-// 1. 키 값 생성 관련
-// 1-1. 초기의 시드값을 생성한다.
 DWORD CKeyGenerater::GenerateSeedValue()
 {
 	return GetLargeRand();
 }
 #endif // USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
 
-// 1-2. 키값으로 다음 키 값을 생성한다.
 DWORD CKeyGenerater::GenerateKeyValue(DWORD dwKeyValue)
 {
 	DWORD dwRegenerateKeyValue = 0;
 	BYTE btNumericValue = 0;
 
-	// 고정 연산 과정을 통해 다음 키 값을 생성해낸다.
-	// *, /, +, -아 %연산 모두를 사용한다.
-	// 복잡도를 증가시키기 위해 키값의 mod 연산을 통해 10개의 필터로 값을 분배한다.
 	btNumericValue = dwKeyValue % MAX_KEY_GENERATER_FILTER;
 
 #ifdef KJH_FIX_MOVE_MAP_GENERATE_KEY
@@ -70,10 +59,8 @@ DWORD CKeyGenerater::GenerateKeyValue(DWORD dwKeyValue)
 	return dwRegenerateKeyValue;
 }
 
-// 1-3. 입력된 키 값다 다음 키 값을 비교한다.
 bool CKeyGenerater::CheckKeyValue(DWORD* dwOldKeyValue, DWORD dwReceiveKeyValue)
 {
-	// 클라이언트로부터 받은 키 값과 기존에 저장하고 있던 키 값을 비교한다.
 	DWORD dwGeneratedKeyValue = 0;
 
 	dwGeneratedKeyValue = GenerateKeyValue( *dwOldKeyValue );

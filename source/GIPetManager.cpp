@@ -88,7 +88,7 @@ namespace giPetManager
 
 			if (g_isCharacterBuff(o, eBuff_Cloaking))
 			{
-				pPet->RenderPet(10); //투명마법이다...
+				pPet->RenderPet(10);
 			}
 			else
 			{
@@ -386,7 +386,7 @@ namespace giPetManager
 
 		switch (pPetInfo->m_dwPetType)
 		{
-		case PET_TYPE_DARK_SPIRIT: //  다크스피릿.
+		case PET_TYPE_DARK_SPIRIT:
 			pPetInfo->m_dwExp2 = ((10 + Level) * Level * Level * Level * 100);
 			pPetInfo->m_wDamageMin = (180 + (pPetInfo->m_wLevel * 15) + (Charisma / 8));
 			pPetInfo->m_wDamageMax = (200 + (pPetInfo->m_wLevel * 15) + (Charisma / 4));
@@ -394,7 +394,7 @@ namespace giPetManager
 			pPetInfo->m_wAttackSuccess = (1000 + pPetInfo->m_wLevel) + (pPetInfo->m_wLevel * 15);
 			break;
 
-		case PET_TYPE_DARK_HORSE: //  다크호스.
+		case PET_TYPE_DARK_HORSE:
 			pPetInfo->m_dwExp2 = ((10 + Level) * Level * Level * Level * 100);
 			pPetInfo->m_wDamageMin = (Strength / 10) + (Charisma / 10) + (pPetInfo->m_wLevel * 5);
 			pPetInfo->m_wDamageMax = pPetInfo->m_wDamageMin + (pPetInfo->m_wDamageMin / 2);

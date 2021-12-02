@@ -1518,7 +1518,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
                     Vector ( 1.f, 1.f, 1.f, b->BodyLight );
                 }
 				else if ( o->SubType==2 || o->SubType==3)
-				{	//. »öÀ» ¹Ù²Û´Ù.
+				{
 					Vector(0.5f,1.0f,0.3f,b->BodyLight);
 					b->RenderBody ( RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 					Vector(1.f,1.f,1.f,b->BodyLight);

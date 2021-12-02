@@ -34,7 +34,7 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
 		return false;
 	
 	m_pNewUIMng = pNewUIMng;
-	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_HERO_POSITION_INFO, this );		// 인터페이스 오브젝트 등록
+	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_HERO_POSITION_INFO, this );
 
 #ifdef PJH_ADD_MINIMAP
 	WidenX = HERO_POSITION_INFO_BASEB_WINDOW_WIDTH;
@@ -50,16 +50,11 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
 #endif //PJH_ADD_MINIMAP
 
 	SetPos(x, y);
-	
 	LoadImages();
-	
 	Show( true );
-	
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Release
 void CNewUIHeroPositionInfo::Release()
 {
 	UnloadImages();
@@ -71,37 +66,28 @@ void CNewUIHeroPositionInfo::Release()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// SetPos
 void CNewUIHeroPositionInfo::SetPos(int x, int y)
 {
 	m_Pos.x = x;
 	m_Pos.y = y;
 }
 
-//---------------------------------------------------------------------------------------------
-// BtnProcess
 bool CNewUIHeroPositionInfo::BtnProcess()
 {
 	
 	return false;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateMouseEvent
 bool CNewUIHeroPositionInfo::UpdateMouseEvent()
 {
-	// 버튼 처리
-	if( true == BtnProcess() )	// 처리가 완료 되었다면
+	if( true == BtnProcess() )
 		return false;
 
 #ifdef PJH_ADD_MINIMAP
-	// 파티 창 내 영역 클릭시 하위 UI처리 및 이동 불가
 	int Width = HERO_POSITION_INFO_BASEA_WINDOW_WIDTH + WidenX + HERO_POSITION_INFO_BASEC_WINDOW_WIDTH;
 	if( CheckMouseIn(m_Pos.x, m_Pos.y, Width, HERO_POSITION_INFO_BASE_WINDOW_HEIGHT) )
 		return false;
 #else
-	// 파티 창 내 영역 클릭시 하위 UI처리 및 이동 불가
 	if( CheckMouseIn(m_Pos.x, m_Pos.y, HERO_POSITION_INFO_BASE_WINDOW_WIDTH, HERO_POSITION_INFO_BASE_WINDOW_HEIGHT) )
 		return false;
 #endif //PJH_ADD_MINIMAP	
@@ -109,15 +95,11 @@ bool CNewUIHeroPositionInfo::UpdateMouseEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateKeyEvent
 bool CNewUIHeroPositionInfo::UpdateKeyEvent()
 {
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Update
 bool CNewUIHeroPositionInfo::Update()
 {
 	if( (IsVisible() == true) && (Hero != NULL) )
@@ -129,8 +111,6 @@ bool CNewUIHeroPositionInfo::Update()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Render
 bool CNewUIHeroPositionInfo::Render()
 {
 	unicode::t_char szText[256] = {NULL, };
@@ -146,13 +126,10 @@ bool CNewUIHeroPositionInfo::Render()
 	RenderImage(IMAGE_HERO_POSITION_INFO_BASE_WINDOW, m_Pos.x, m_Pos.y, 
 						float(HERO_POSITION_INFO_BASEA_WINDOW_WIDTH), float(HERO_POSITION_INFO_BASE_WINDOW_HEIGHT));
 
-	RenderImage(IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 1, m_Pos.x+HERO_POSITION_INFO_BASEA_WINDOW_WIDTH, m_Pos.y, 
-			float(WidenX), float(HERO_POSITION_INFO_BASE_WINDOW_HEIGHT),
-			0.1f,0.f,22.4f/32.f,25.f/32.f);
+	RenderImage(IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 1, m_Pos.x+HERO_POSITION_INFO_BASEA_WINDOW_WIDTH, m_Pos.y, float(WidenX), float(HERO_POSITION_INFO_BASE_WINDOW_HEIGHT),0.1f,0.f,22.4f/32.f,25.f/32.f);
 
 
-	RenderImage(IMAGE_HERO_POSITION_INFO_BASE_WINDOW+2, m_Pos.x+HERO_POSITION_INFO_BASEA_WINDOW_WIDTH+WidenX, m_Pos.y, 
-						float(HERO_POSITION_INFO_BASEC_WINDOW_WIDTH), float(HERO_POSITION_INFO_BASE_WINDOW_HEIGHT));
+	RenderImage(IMAGE_HERO_POSITION_INFO_BASE_WINDOW+2, m_Pos.x+HERO_POSITION_INFO_BASEA_WINDOW_WIDTH+WidenX, m_Pos.y, float(HERO_POSITION_INFO_BASEC_WINDOW_WIDTH), float(HERO_POSITION_INFO_BASE_WINDOW_HEIGHT));
 #else
 	RenderImage(IMAGE_HERO_POSITION_INFO_BASE_WINDOW, m_Pos.x, m_Pos.y, 
 						float(HERO_POSITION_INFO_BASE_WINDOW_WIDTH), float(HERO_POSITION_INFO_BASE_WINDOW_HEIGHT));
@@ -178,8 +155,6 @@ bool CNewUIHeroPositionInfo::Render()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// GetLayerDepth
 float CNewUIHeroPositionInfo::GetLayerDepth()
 {
 #ifdef PJH_ADD_MINIMAP
@@ -192,15 +167,11 @@ float CNewUIHeroPositionInfo::GetLayerDepth()
 	return 4.3f;
 }
 
-//---------------------------------------------------------------------------------------------
-// OpenningProcess
 void CNewUIHeroPositionInfo::OpenningProcess()
 {
 	
 }
 
-//---------------------------------------------------------------------------------------------
-// ClosingProcess
 void CNewUIHeroPositionInfo::ClosingProcess()
 {
 	
@@ -212,8 +183,6 @@ void CNewUIHeroPositionInfo::SetCurHeroPosition( int x, int y )
 	m_CurHeroPosition.y = y;
 }
 
-//---------------------------------------------------------------------------------------------
-// LoadImages
 void CNewUIHeroPositionInfo::LoadImages()
 {
 #ifdef PJH_ADD_MINIMAP
@@ -226,8 +195,6 @@ void CNewUIHeroPositionInfo::LoadImages()
 
 }
 
-//---------------------------------------------------------------------------------------------
-// UnloadImages
 void CNewUIHeroPositionInfo::UnloadImages()
 {
 	DeleteBitmap(IMAGE_HERO_POSITION_INFO_BASE_WINDOW);

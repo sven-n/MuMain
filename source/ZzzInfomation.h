@@ -67,11 +67,11 @@ extern float CalcDurabilityPercent ( BYTE dur, BYTE maxDur, int Level, int optio
 extern int ItemValue(ITEM *ip,int goldType=1);
 extern int ItemValueOld(ITEM *ip,int goldType=1);
 #ifndef KJH_DEL_PC_ROOM_SYSTEM				// #ifndef
-#ifndef ASG_PCROOM_POINT_SYSTEM_MODIFY		// 정리시 삭제.
+#ifndef ASG_PCROOM_POINT_SYSTEM_MODIFY
 #ifdef ADD_PCROOM_POINT_SYSTEM
 int GetItemBuyingTermsPoint(ITEM* pItem);
 #endif	// ADD_PCROOM_POINT_SYSTEM
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY	// 정리시 삭제.
+#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY
 #endif // KJH_DEL_PC_ROOM_SYSTEM
 extern void PrintItem(char *FileName);
 
@@ -110,15 +110,7 @@ BOOL IsCorrectSkillType_CommonAttack( INT iSkillSeq );
 
 #endif // LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 
-///////////////////////////////////////////////////////////////////////////////
-// class
-///////////////////////////////////////////////////////////////////////////////
-
 extern CLASS_ATTRIBUTE ClassAttribute[MAX_CLASS];
-
-///////////////////////////////////////////////////////////////////////////////
-// character machine
-///////////////////////////////////////////////////////////////////////////////
 
 #ifdef PSW_BUGFIX_REQUIREEQUIPITEM
 bool IsRequireEquipItem(ITEM* pItem);
@@ -170,14 +162,7 @@ public:
 	void CalulateMasterLevelNextExperience();
     void CalculateAll();
 	void CalculateBasicState();
-
-#ifdef LDS_FIX_APPLY_BUFF_STATEVALUES_WHEN_CALCULATE_CHARACTERSTATE_WITH_SETITEM
-	void getAllAddStateOnlyExValues( int &iAddStrengthExValues, 
-									int &iAddDexterityExValues, 
-									int &iAddVitalityExValues,
-									int &iAddEnergyExValues, 
-									int &iAddCharismaExValues );
-#endif // LDS_FIX_APPLY_BUFF_STATEVALUES_WHEN_CALCULATE_CHARACTERSTATE_WITH_SETITEM
+	void getAllAddStateOnlyExValues( int &iAddStrengthExValues, int &iAddDexterityExValues, int &iAddVitalityExValues,	int &iAddEnergyExValues, int &iAddCharismaExValues );
 };
 
 

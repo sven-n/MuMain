@@ -1,9 +1,7 @@
 // NewUIGuildMakeWindow.cpp: implementation of the CNewUIGuildMakeWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
 #include "NewUIGuildMakeWindow.h"
 #include "NewUIManager.h"
 #include "NewUICommonMessageBox.h"
@@ -122,14 +120,10 @@ namespace
 			break;
 		};
 
-		RenderBitmap(BITMAP_INVENTORY+19, x, y, sx, 2,
-			10/256.f, 5/16.f, 170.f/256.f, 2.f/16.f);
-		RenderBitmap(BITMAP_INVENTORY+19, x, y + sy, sx + 1, 2,
-			10/256.f, 5/16.f, 170.f/256.f, 2.f/16.f);
-		RenderBitmap(BITMAP_INVENTORY, x, y, 2, sy,
-			1.f/256.f, 5/16.f, 2.f/256.f, 125.f/256.f);
-		RenderBitmap(BITMAP_INVENTORY, x + sx, y, 2, sy,
-			1.f/256.f, 5/16.f, 2.f/256.f, 125.f/256.f);
+		RenderBitmap(BITMAP_INVENTORY+19, x, y, sx, 2,10/256.f, 5/16.f, 170.f/256.f, 2.f/16.f);
+		RenderBitmap(BITMAP_INVENTORY+19, x, y + sy, sx + 1, 2,	10/256.f, 5/16.f, 170.f/256.f, 2.f/16.f);
+		RenderBitmap(BITMAP_INVENTORY, x, y, 2, sy,	1.f/256.f, 5/16.f, 2.f/256.f, 125.f/256.f);
+		RenderBitmap(BITMAP_INVENTORY, x + sx, y, 2, sy, 1.f/256.f, 5/16.f, 2.f/256.f, 125.f/256.f);
 	}
 
 	void RenderText( char* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort )
@@ -149,10 +143,6 @@ namespace
 };
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIGuildMakeWindow::CNewUIGuildMakeWindow() : m_pNewUIMng(NULL), m_EditBox(NULL), m_Button(NULL),
  m_GuildMakeState( GUILDMAKE_INFO )
@@ -370,7 +360,6 @@ bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
 
 	if( m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].UpdateMouseEvent() )
 	{
-		// 길드마크 얻기
 		BYTE Mark[32];
 		for( int i=0 ; i<64; i++ )
 		{
@@ -380,7 +369,6 @@ bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
      			Mark[i / 2] += GuildMark[MARK_EDIT].Mark[i];
 		}
 
-		// 길드 생성시
 		SendRequestCreateGuild( 0, (BYTE*)GuildMark[MARK_EDIT].GuildName, Mark );
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
 		return true;
@@ -394,7 +382,7 @@ void CNewUIGuildMakeWindow::RenderGMInfo()
 	char Text[100];
 
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[181]); //"길드 마스터가 되시겠습니까?"
+	sprintf( Text, GlobalText[181]);
 	RenderText( Text, m_Pos.x, m_Pos.y+50, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 
 	m_Button[GUILDMAKEBUTTON_INFO_MAKE].Render();
@@ -405,16 +393,14 @@ void CNewUIGuildMakeWindow::RenderGMInfo()
 void CNewUIGuildMakeWindow::RenderGMMark()
 {
 	//edit box
-
 	char Text[100];
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[182]); //"길  드"
+	sprintf( Text, GlobalText[182]);
 	RenderText( Text, m_Pos.x+10, m_Pos.y+66, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_LEFT );
 
 	RenderImage(IMAGE_GUILDMAKE_EDITBOX, m_Pos.x+45, m_Pos.y+60, 108.f, 23.f);
 	m_EditBox->Render();
 
-	//명칭이 이상하다..그리는 부위 인데...수정을 해보자..
 	RenderGoldRect( m_Pos.x+45, m_Pos.y+95, 130.f, 130.f );
 	CreateGuildMark( MARK_EDIT );
 	RenderEditGuildMark( m_Pos.x, m_Pos.y );
@@ -425,7 +411,6 @@ void CNewUIGuildMakeWindow::RenderGMMark()
 
 void CNewUIGuildMakeWindow::RenderGMResultInfo()
 {
-	// 길드마크
 	RenderGoldRect( m_Pos.x+72, m_Pos.y+70, 53.f, 53.f );
 	CreateGuildMark( MARK_EDIT );
 	RenderBitmap( BITMAP_GUILD, m_Pos.x+72, m_Pos.y+74, 48, 48 );
@@ -449,7 +434,7 @@ void CNewUIGuildMakeWindow::RenderFrame()
 
 	char Text[100];
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[180]); //"길  드"
+	sprintf( Text, GlobalText[180]);
 	RenderText( Text, m_Pos.x, m_Pos.y+15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER );
 }
 
@@ -481,7 +466,7 @@ bool CNewUIGuildMakeWindow::UpdateMouseEvent()
 	}
 
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
-	//. Exit1 버튼 (기본처리)
+
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
@@ -505,7 +490,6 @@ bool CNewUIGuildMakeWindow::UpdateMouseEvent()
 		return false;
 	}
 	
-	// 인터페이스 내에 클릭하면 아무 동작 안되게 처리
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, GUILDMAKE_WIDTH, GUILDMAKE_HEIGHT))
 	{
 		if(SEASON3B::IsPress(VK_RBUTTON))
@@ -526,7 +510,6 @@ bool CNewUIGuildMakeWindow::Render()
 	EnableAlphaTest();
 	glColor4f(1.f, 1.f, 1.f, 1.f);
 
-	//윈도우 기본 프레임
 	RenderFrame();
 
 	switch( m_GuildMakeState )

@@ -1,11 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-//
 // Simple Modulus ( Cryptography library ) ver 1.1
-//
-// by Robbie Hong ( 2003/01/09)
-//
-// SimpleModulus.h: interface for the CSimpleModulus class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_SIMPLEMODULUS_H__5EC20CDC_CA87_4F9D_927B_24C8DD11ECB7__INCLUDED_)
@@ -18,11 +12,11 @@
 # define SIZE_ENCRYPTED_BLOCK	( 38)*/
 
 /*# define SIZE_ENCRYPTION_BLOCK	( 16)
-# define SIZE_ENCRYPTION_KEY	( 8)	// SIZE_ENCRYPTION_BLOCK 의 절반
+# define SIZE_ENCRYPTION_KEY	( 8)	// SIZE_ENCRYPTION_BLOCK
 # define SIZE_ENCRYPTED_BLOCK	( 20)*/
 
 # define SIZE_ENCRYPTION_BLOCK	( 8)
-# define SIZE_ENCRYPTION_KEY	( 4)	// SIZE_ENCRYPTION_BLOCK 의 절반
+# define SIZE_ENCRYPTION_KEY	( 4)	// SIZE_ENCRYPTION_BLOCK
 # define SIZE_ENCRYPTED_BLOCK	( 11)
 
 
@@ -42,26 +36,16 @@ protected:
 
 	static DWORD s_dwSaveLoadXOR[SIZE_ENCRYPTION_KEY];
 
-
-	//////////////////////////////////////////////////////////////////////////
-	// 암호화/복호화 ->
-
-	// 암호화
 public:
-	int Encrypt( void *lpTarget, void *lpSource, int iSize);	// 큰 사이즈 모두, lpTarget 이 NULL이면 필요량 리턴
-	int Decrypt( void *lpTarget, void *lpSource, int iSize);	// 큰 사이즈 모두, lpTarget 이 NULL이면 필요량 리턴
+	int Encrypt( void *lpTarget, void *lpSource, int iSize);
+	int Decrypt( void *lpTarget, void *lpSource, int iSize);
 
 protected:
-	void EncryptBlock( void *lpTarget, void *lpSource, int nSize);	// 32 byte 를 38 byte 로
-	int DecryptBlock( void *lpTarget, void *lpSource);	// 38 byte 를 32 byte 로, Size를 리턴함
+	void EncryptBlock( void *lpTarget, void *lpSource, int nSize);
+	int DecryptBlock( void *lpTarget, void *lpSource);
 	int AddBits( void *lpBuffer, int nNumBufferBits, void *lpBits, int nInitialBit, int nNumBits);
 	void Shift( void *lpBuffer, int nByte, int nShift);
 	int GetByteOfBit( int nBit);
-
-	// <- 암호화/복호화
-	//////////////////////////////////////////////////////////////////////////
-
-	// 저장/읽기
 public:
 	BOOL SaveAllKey( char *lpszFileName);
 	BOOL LoadAllKey( char *lpszFileName);
@@ -73,7 +57,7 @@ protected:
 	BOOL SaveKey( char *lpszFileName, unsigned short sID, BOOL bMod, BOOL bEnc, BOOL bDec, BOOL bXOR);
 	BOOL LoadKey( char *lpszFileName, unsigned short sID, BOOL bMod, BOOL bEnc, BOOL bDec, BOOL bXOR);
 public:
-	BOOL LoadKeyFromBuffer( BYTE *pbyBuffer, BOOL bMod, BOOL bEnc, BOOL bDec, BOOL bXOR);	// 청크 없이 읽는다.
+	BOOL LoadKeyFromBuffer( BYTE *pbyBuffer, BOOL bMod, BOOL bEnc, BOOL bDec, BOOL bXOR);
 };
 
 

@@ -497,7 +497,7 @@ void CUIMng::CheckDockWin()
 					continue;
 			}
 		}
-	}	// while (position)문 끝.
+	}
 
 DOCKING:
 	if (bEdgeDocking)
@@ -576,7 +576,7 @@ DOCKING:
 			} 
 		}
 		SetDockWinPosition(pMovWin, nXCoord, nYCoord);
-	}	// if (bEdgeDocking)문 끝.
+	}
 }
 
 bool CUIMng::SetDockWinPosition(CWin* pMoveWin, int nDockX, int nDockY)

@@ -101,10 +101,8 @@ int CMultiLanguage::ConvertCharToWideStr(std::wstring& wstrDest, LPCSTR lpString
 
     int nLenOfWideCharStr;
 	int iConversionType;
-	if (strcmp(lpString, "멀티 로긴 버젼") == 0)
-		iConversionType = (IsCharUTF8(lpString)) ? CP_UTF8 : 949;
-	else 
-		iConversionType = (IsCharUTF8(lpString)) ? CP_UTF8 : iCodePage;
+
+	iConversionType = (IsCharUTF8(lpString)) ? CP_UTF8 : iCodePage;
 
     // calculate the number of characters needed to hold the wide-character version of the string.
     nLenOfWideCharStr = MultiByteToWideChar(iConversionType, 0, lpString, -1, NULL, 0);

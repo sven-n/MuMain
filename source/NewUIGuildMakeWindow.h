@@ -21,7 +21,6 @@ namespace SEASON3B
 	public:
 		enum IMAGE_LIST
 		{
-			// 같은 이미지 파일은 로딩을 하지 않고 참조 해서 쓰자.
 			IMAGE_GUILDMAKE_BACK       = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	
 			IMAGE_GUILDMAKE_MAKEBUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
 			IMAGE_GUILDMAKE_NEXTBUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,

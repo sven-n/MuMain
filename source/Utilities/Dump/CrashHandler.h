@@ -9,7 +9,6 @@
 #include <list>
 
 #include "Uploader.h"
-#include "UploaderSftp.h"
 #include "Logger.h"
 
 #pragma comment(lib, "DbgHelp")
@@ -92,7 +91,6 @@ private:
 	_CRT_REPORT_HOOK				m_oldReportFunction;	// previous reporting function
 
 	CLogger*						m_pLogger;	// logger pointer
-	CUploader*						m_pUploader;	// uploader pointer
 	std::list< LPCTSTR >			m_lstFile;	// added file list
 
 	bool							m_bCatchException; // catch exception or not

@@ -30,7 +30,6 @@
 #include "GOBoid.h"
 #include "GMHellas.h"
 #include "CSItemOption.h"
-#include "PvPSystem.h"
 #include "GMBattleCastle.h"
 #include "GMHuntingGround.h"
 #include "GMAida.h"

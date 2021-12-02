@@ -1,10 +1,6 @@
 //*****************************************************************************
 // File: NewUINPCMenu.h
-//
-// Desc: interface for the CNewUINPCMenu class.
-//		 NPC 메뉴 창 클래스.(2009.06.17)
-//
-// producer: Ahn Sang-Gyu
+
 //*****************************************************************************
 
 #if !defined(AFX_NEWUINPCMENU_H__FA3E0F1C_3C30_4BFD_AC94_843421A3F04A__INCLUDED_)
@@ -21,10 +17,10 @@
 #include "NewUIQuestProgress.h"
 #include "QuestMng.h"
 
-#define NM_NPC_LINE_MAX				4	// NPC 대사 최대 줄 수.
-#define NM_SEL_TEXT_LINE_MAX		11	// 선택문 최대 줄 수.
-#define NM_TEXT_ROW_MAX				64	// 한 줄 당 최대 글자 수 + 종료 문자.
-#define NM_QUEST_INDEX_MAX_COUNT	20	// 퀘스트 인덱스 최대 개수.
+#define NM_NPC_LINE_MAX				4
+#define NM_SEL_TEXT_LINE_MAX		11
+#define NM_TEXT_ROW_MAX				64
+#define NM_QUEST_INDEX_MAX_COUNT	20
 
 namespace SEASON3B
 {
@@ -33,7 +29,6 @@ namespace SEASON3B
 	public:
 		enum IMAGE_LIST
 		{
-			// 기본창
 			IMAGE_NM_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,				//. newui_msgbox_back.jpg
 			IMAGE_NM_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,			//. newui_item_back01.tga	(190,64)
 			IMAGE_NM_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,	// newui_item_back02-l.tga	(21,320)
@@ -42,8 +37,8 @@ namespace SEASON3B
 
 			IMAGE_NM_LINE = CNewUIMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
 #ifdef ASG_ADD_UI_QUEST_PROGRESS
-#ifndef ASG_MOD_3D_CHAR_EXCLUSION_UI	// 3D 캐릭터 표현 추가시 다시 사용해야하므로 삭제 하지 말 것.
-			IMAGE_NM_BOX_NPC = CNewUIQuestProgress::IMAGE_QP_BOX_PLAYER,	// Quest_box_user.tga	(86,96)
+#ifndef ASG_MOD_3D_CHAR_EXCLUSION_UI
+			IMAGE_NM_BOX_NPC = CNewUIQuestProgress::IMAGE_QP_BOX_PLAYER,
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 #endif	// ASG_ADD_UI_QUEST_PROGRESS
 			IMAGE_NM_BTN_CLOSE = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
@@ -56,20 +51,20 @@ namespace SEASON3B
 			NM_HEIGHT = 429,
 		};
 
-		CNewUIManager*		m_pNewUIMng;			// UI 매니저.
+		CNewUIManager*		m_pNewUIMng;
 		CNewUI3DRenderMng*	m_pNewUI3DRenderMng;
-		POINT				m_Pos;					// 창의 위치.
+		POINT				m_Pos;
 
 		CNewUIButton		m_btnClose;
 
-		char	m_aszNPCWords[NM_NPC_LINE_MAX][NM_TEXT_ROW_MAX];		// NPC 대사.
+		char	m_aszNPCWords[NM_NPC_LINE_MAX][NM_TEXT_ROW_MAX];
 		DWORD	m_adwQuestIndex[NM_QUEST_INDEX_MAX_COUNT];
-		char	m_aszSelText[NM_SEL_TEXT_LINE_MAX][NM_TEXT_ROW_MAX];	// 선택문.
-		int		m_anSelTextLine[NM_SEL_TEXT_LINE_MAX];	// 각 선택문 줄 수.
-		int		m_nSelTextCount;						// 선택문 개수.
+		char	m_aszSelText[NM_SEL_TEXT_LINE_MAX][NM_TEXT_ROW_MAX];
+		int		m_anSelTextLine[NM_SEL_TEXT_LINE_MAX];
+		int		m_nSelTextCount;
 
-		int		m_nSelText;				// 선택한 텍스트 번호.
-		bool	m_bCanClick;			// 선택문 클릭 가능 여부.(여러번 클릭 방지)
+		int		m_nSelText;
+		bool	m_bCanClick;
 
 	public:
 		CNewUINPCMenu();

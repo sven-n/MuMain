@@ -51,26 +51,26 @@
 	#define GRAMMAR_OF
 
 
-//#define CSK_EVENT_HALLOWEEN_MAP	//	할로윈 이벤트 맵 처리(2006.10.09)
-//#define DEVIAS_XMAS_EVENT			//  크리스마스 이벤트 관련 데비아스 맵 및 리소스 수정(2005.12)
-//#define LENA_EXCHANGE_ZEN			// 레나 환전 시스템, 주위 : 스톤에서는 켜서는 안된다.
-#define BLOODCASTLE_2ND_PATCH		// 스톤 환전 시스템, 조합관련
-#define USE_EVENT_ELDORADO			// 엘도라도의 상자 이벤트
-#define SCRATCH_TICKET				// 상용화 2주년 이벤트.
-#define FRIEND_EVENT				// 친구 이벤트.
-#define FRIENDLYSTONE_EXCHANGE_ZEN	// 우정의돌 환전 시스템
+//#define CSK_EVENT_HALLOWEEN_MAP
+//#define DEVIAS_XMAS_EVENT
+//#define LENA_EXCHANGE_ZEN
+#define BLOODCASTLE_2ND_PATCH
+#define USE_EVENT_ELDORADO
+#define SCRATCH_TICKET
+#define FRIEND_EVENT
+#define FRIENDLYSTONE_EXCHANGE_ZEN
 
-#define CASTLE_EVENT				// 군주의 문장 등록
+#define CASTLE_EVENT
 #ifdef CASTLE_EVENT
 	#undef FRIEND_EVENT
 	#undef FRIENDLYSTONE_EXCHANGE_ZEN
 	#undef LENA_EXCHANGE_ZEN
-	#define DISABLE_MUTO			// CASTLE_EVENT 시 필요
+	#define DISABLE_MUTO
 #endif
 
-#define LOREN_RAVINE_EVENT			// 로랜협곡 이벤트에서 쓰임.
-//#define GUILD_WAR_EVENT           // 길전 이벤트.
-//#define MYSTERY_BEAD				// 신비의 구슬 이벤트
+#define LOREN_RAVINE_EVENT
+//#define GUILD_WAR_EVENT
+//#define MYSTERY_BEAD
 
 #define	PCROOM_EVENT
 #define DUEL_SYSTEM

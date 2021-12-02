@@ -35,8 +35,8 @@ namespace SEASON3B
 		
 		enum SHOPTYEP
 		{
-			PERSONALSHOPSALE = 0, // 내자신이 개인 상점을 열때
-			PERSONALSHOPPURCHASE, // 구매 하기 위해 다른 개인 플래이어의 상점을 열었을때
+			PERSONALSHOPSALE = 0,
+			PERSONALSHOPPURCHASE,
 		};
 		
 	private:

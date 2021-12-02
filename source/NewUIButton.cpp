@@ -362,14 +362,12 @@ bool SEASON3B::CNewUIButton::UpdateMouseEvent()
 		return false;
 	}
 
-	// 마우스 이벤트 검사
 	BUTTON_STATE backevent = GetBTState();
 
 	bool result = Process();
 
 	if( backevent != GetBTState() )
 	{
-		//이미지를 바꿔준다.
 		ChangeFrame();
 	}
 

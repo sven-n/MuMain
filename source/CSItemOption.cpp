@@ -139,20 +139,19 @@ bool	CSItemOption::OpenItemSetOption ( const char* filename )
 	return true;
 }
 
-bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
+bool CSItemOption::IsDisableSkill(int Type, int Energy, int Charisma )
 {
-
 	int SkillEnergy = 20+SkillAttribute[Type].Energy*(SkillAttribute[Type].Level)*4/100;
 
-	if( Type == AT_SKILL_SUMMON_EXPLOSION || Type == AT_SKILL_SUMMON_REQUIEM ) {
+	if( Type == AT_SKILL_SUMMON_EXPLOSION || Type == AT_SKILL_SUMMON_REQUIEM ) 
+	{
 		SkillEnergy = 20+SkillAttribute[Type].Energy*(SkillAttribute[Type].Level)*3/100;
 	}
 
-#ifdef PSW_BUGFIX_CLASS_KNIGHT_REQUIRESKILL
-	if( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT ) {
+	if( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT ) 
+	{
 		SkillEnergy = 10+SkillAttribute[Type].Energy*(SkillAttribute[Type].Level)*4/100;
 	}
-#endif //PSW_BUGFIX_CLASS_KNIGHT_REQUIRESKILL
     
     switch ( Type )
     {
@@ -164,9 +163,7 @@ bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
 	case 34:SkillEnergy = 170;break;
 	case 35:SkillEnergy = 210;break;
 	case 36:SkillEnergy = 300;break;
-#ifdef ADD_ELF_SUMMON
 	case 37:SkillEnergy = 500;break;
-#endif // ADD_ELF_SUMMON
     case 60:SkillEnergy = 15; break;
 	case AT_SKILL_ASHAKE_UP:
 	case AT_SKILL_ASHAKE_UP+1:
@@ -179,29 +176,16 @@ bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
     case AT_PET_COMMAND_OWNER:   SkillEnergy = 0; break; 
     case AT_PET_COMMAND_TARGET:  SkillEnergy = 0; break; 
 	case AT_SKILL_PLASMA_STORM_FENRIR: SkillEnergy = 0; break;
-	case AT_SKILL_INFINITY_ARROW: SkillEnergy = 0; 
-		break;	// 인피니티 애로우
-		
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
-	case AT_SKILL_BLOW_OF_DESTRUCTION: SkillEnergy = 0;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
+	case AT_SKILL_INFINITY_ARROW: SkillEnergy = 0; break;
+	case AT_SKILL_BLOW_OF_DESTRUCTION: SkillEnergy = 0; break;
 	case AT_SKILL_RECOVER:
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 	case AT_SKILL_GAOTIC:
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 	case AT_SKILL_MULTI_SHOT:
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_FIRE_SCREAM_UP:
 	case AT_SKILL_FIRE_SCREAM_UP+1:
 	case AT_SKILL_FIRE_SCREAM_UP+2:
 	case AT_SKILL_FIRE_SCREAM_UP+3:
 	case AT_SKILL_FIRE_SCREAM_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_DARK_SCREAM: 
 		SkillEnergy = 0; 
 		break;
@@ -211,26 +195,12 @@ bool CSItemOption::IsDisableSkill ( int Type, int Energy, int Charisma )
 		break;
     }
 
-	/*
-    AT_SKILL_STUN               , 
-    AT_SKILL_REMOVAL_STUN       , 
-    AT_SKILL_MANA               ,  
-    AT_SKILL_INVISIBLE          ,   
-    AT_SKILL_REMOVAL_INVISIBLE  ,     
-    AT_SKILL_REMOVAL_BUFF       ,   
-	*/
-
 	if(Type >= AT_SKILL_STUN && Type <= AT_SKILL_REMOVAL_BUFF)
 	{
 		SkillEnergy = 0;
 	}
 	else
-    //  17, 18, 19, 20, 21, 22, 23, 41, 47, 49, 48, 43, 42, 24, 52, 51, 30, 31, 32, 33, 34, 35, 36, 55, 56
-#ifdef KJH_FIX_SKILL_REQUIRE_ENERGY
 	if ( ( Type>=18 && Type<=23 ) || ( Type>=41 && Type<=43 ) || ( Type>=47 && Type<=49 ) || Type==24 || Type==51 || Type==52 || Type==55 || Type==56 )
-#else // KJH_FIX_SKILL_REQUIRE_ENERGY
-	if ( ( Type>=18 && Type<23 ) || ( Type>=41 && Type<=43 ) || ( Type>=47 && Type<=49 ) || Type==24 || Type==51 || Type==52 || Type==55 || Type==56 )
-#endif // KJH_FIX_SKILL_REQUIRE_ENERGY
     {
         SkillEnergy = 0;
     }
@@ -318,15 +288,7 @@ void CSItemOption::checkItemType ( BYTE* optionList, const int iType, const int 
 
 		if ( itemSType.byOption[setItemType-1]!=255 && itemSType.byOption[setItemType-1]!=0 )
 		{
-#ifdef YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
 			for (int i = 0; i < 30; i += 3)
-#else	// YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
-#ifdef PBG_FIX_SETITEM_4OVER
-			for ( int i=0; i<13; i+=3 )
-#else //PBG_FIX_SETITEM_4OVER
-			for ( int i=0; i<10; i+=3 )
-#endif //PBG_FIX_SETITEM_4OVER
-#endif	// YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
 			{
 				if ( optionList[i]==0 )
 				{
@@ -355,11 +317,8 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
     BYTE    bySetOptionListTmp2[2][16];
     int     iSetOptionListValue[2][16];
 
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-	unsigned int    
-			arruiSetItemTypeSequence[2][16];
+	unsigned int arruiSetItemTypeSequence[2][16];
 	memset( arruiSetItemTypeSequence, 0, sizeof( unsigned int ) * 32 );
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 
     BYTE    optionCount[2] = { 0, 0 };  //  
     BYTE    setType = 0;
@@ -374,22 +333,12 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 	m_bySetOptionBNum = 0;
     Hero->ExtendState = 0;
 
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 	unsigned int iSetItemTypeSequence = 0, iCurrentSetItemTypeSequence = 0;
 
 	m_mapEquippedSetItemName.clear();
 	m_mapEquippedSetItemSequence.clear();
-#endif //LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 
-#ifdef YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
 	for (int i = 0; i < 30; i += 3)
-#else	// YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
-#ifdef PBG_FIX_SETITEM_4OVER
-	for ( int i=0; i<13; i+=3 )
-#else //PBG_FIX_SETITEM_4OVER
-	for ( int i=0; i<10; i+=3 )
-#endif //PBG_FIX_SETITEM_4OVER
-#endif	// YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG
 	{
 		if ( optionList[i+1]>=2 )
 		{
@@ -428,10 +377,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
             {
                 strcpy ( m_strSetName[setType], itemOption.strSetName );
             }
-
-
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-			
+		
 			bool	bFind	=	false;
 			for( m_iterESIN = m_mapEquippedSetItemName.begin(); m_iterESIN != m_mapEquippedSetItemName.end(); ++m_iterESIN )
 			{
@@ -449,9 +395,6 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 				iCurrentSetItemTypeSequence = iSetItemTypeSequence++;
 				m_mapEquippedSetItemName.insert(std::pair<int, std::string>(iCurrentSetItemTypeSequence, itemOption.strSetName) );
 			}
-			
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-
 
 			BYTE option[2];
             int  value[2];
@@ -475,12 +418,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 				{
                     if ( option[0]<MASTERY_OPTION )
                     {
-						
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-						arruiSetItemTypeSequence[setType][optionCount[setType]] = 
-																			iCurrentSetItemTypeSequence;
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-
+						arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
                         bySetOptionListTmp[setType][optionCount[setType]] = option[0];
                         bySetOptionListTmp2[setType][optionCount[setType]]= RequireClass;
                         iSetOptionListValue[setType][optionCount[setType]]= value[0];
@@ -491,12 +429,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
                     {
 			            if ( itemOption.byRequireClass[Class] && ExClass>=itemOption.byRequireClass[Class]-1 )
                         {
-							
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-							arruiSetItemTypeSequence[setType][optionCount[setType]] = 
-																			iCurrentSetItemTypeSequence;
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-							
+							arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
                             bySetOptionListTmp[setType][optionCount[setType]] = option[0];
                             bySetOptionListTmp2[setType][optionCount[setType]]= RequireClass;
                             iSetOptionListValue[setType][optionCount[setType]]= value[0];
@@ -508,11 +441,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 				{
                     if ( option[1]<MASTERY_OPTION )
                     {
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-						arruiSetItemTypeSequence[setType][optionCount[setType]] = 
-																	iCurrentSetItemTypeSequence;
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-
+						arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
                         bySetOptionListTmp[setType][optionCount[setType]] = option[1];
                         bySetOptionListTmp2[setType][optionCount[setType]]= RequireClass;
                         iSetOptionListValue[setType][optionCount[setType]]= value[1];
@@ -522,11 +451,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
                     {
 			            if ( itemOption.byRequireClass[Class] && ExClass>=itemOption.byRequireClass[Class]-1 )
                         {
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-							arruiSetItemTypeSequence[setType][optionCount[setType]] = 
-																	iCurrentSetItemTypeSequence;
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-
+							arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
                             bySetOptionListTmp[setType][optionCount[setType]] = option[1];
                             bySetOptionListTmp2[setType][optionCount[setType]]= RequireClass;
                             iSetOptionListValue[setType][optionCount[setType]]= value[1];
@@ -546,10 +471,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
                     {
                         if ( option[0]<MASTERY_OPTION )
                         {
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-							arruiSetItemTypeSequence[setType][optionCount[setType]] = 
-															iCurrentSetItemTypeSequence;
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
+							arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
                             bySetOptionListTmp[setType][optionCount[setType]] = option[0];
                             bySetOptionListTmp2[setType][optionCount[setType]]= RequireClass;
                             iSetOptionListValue[setType][optionCount[setType]]= value[0];
@@ -561,11 +483,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
                         {
                             if ( itemOption.byRequireClass[Class] && ExClass>=itemOption.byRequireClass[Class]-1 )
                             {
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-								arruiSetItemTypeSequence[setType][optionCount[setType]] = 
-															iCurrentSetItemTypeSequence;
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-								
+								arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
                                 bySetOptionListTmp[setType][optionCount[setType]] = option[0];
                                 bySetOptionListTmp2[setType][optionCount[setType]]= RequireClass;
                                 iSetOptionListValue[setType][optionCount[setType]]= value[0];
@@ -586,9 +504,7 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
     {
         for ( int j=0; j<optionCount[i]; ++j )
         {
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 			m_mapEquippedSetItemSequence.insert(std::pair<BYTE, int>((i*optionCount[0])+j, arruiSetItemTypeSequence[i][j]) );
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
             m_bySetOptionList[(i*optionCount[0])+j][0] = bySetOptionListTmp[i][j];
             m_bySetOptionList[(i*optionCount[0])+j][1] = bySetOptionListTmp2[i][j];	
             m_iSetOptionListValue[(i*optionCount[0])+j][0] = iSetOptionListValue[i][j];
@@ -861,8 +777,6 @@ bool CSItemOption::GetDefaultOptionText ( const ITEM* ip, char* Text )
     return true;
 }
 
-
-#ifdef PJH_FIX_4_BUGFIX_33
 bool CSItemOption::Special_Option_Check(int Kind)
 {
 	int i,j;
@@ -893,7 +807,6 @@ bool CSItemOption::Special_Option_Check(int Kind)
 	}
 	return false;
 }
-#endif //PJH_FIX_4_BUGFIX_33
 
 int CSItemOption::RenderDefaultOptionText ( const ITEM* ip, int TextNum )
 {
@@ -914,11 +827,7 @@ int CSItemOption::RenderDefaultOptionText ( const ITEM* ip, int TextNum )
     return TNum;
 }
 
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION 
 void CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma )
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-void CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality )
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 {
     for ( int i=EQUIPMENT_WEAPON_RIGHT; i<MAX_EQUIPMENT; ++i )
     {
@@ -958,38 +867,20 @@ void CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energ
 	GetSpecial ( Dexterity, AT_SET_OPTION_IMPROVE_DEXTERITY );
 	GetSpecial ( Energy,    AT_SET_OPTION_IMPROVE_ENERGY );
 	GetSpecial ( Vitality,  AT_SET_OPTION_IMPROVE_VITALITY );
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION 
 	GetSpecial ( Charisma,  AT_SET_OPTION_IMPROVE_CHARISMA );
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 }
 
 #ifdef LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
 
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	void CSItemOption::getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma )
-	{
-		*AddStrength = *AddDexterity = *AddEnergy = *AddVitality = *AddCharisma = 0;
-		memset ( m_bySetOptionListOnOff, 0, sizeof( BYTE )* 16 );
+void CSItemOption::getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma )
+{
+	*AddStrength = *AddDexterity = *AddEnergy = *AddVitality = *AddCharisma = 0;
+	memset ( m_bySetOptionListOnOff, 0, sizeof( BYTE )* 16 );
 		
-		getAllAddState( AddStrength, AddDexterity, AddEnergy, AddVitality, AddCharisma );
-	}	
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	void CSItemOption::getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality )
-	{
-		*AddStrength = *AddDexterity = *AddEnergy = *AddVitality = 0;
-		memset ( m_bySetOptionListOnOff, 0, sizeof( BYTE )* 16 );
-		
-		getAllAddState( AddStrength, AddDexterity, AddEnergy, AddVitality );
-	}
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
+	getAllAddState( AddStrength, AddDexterity, AddEnergy, AddVitality, AddCharisma );
+}	
 
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-void CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma,
-													  WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality, WORD iCompareCharisma )
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-void CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality,
-													  WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality )
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
+void CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma,WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality, WORD iCompareCharisma )
 {	
     for ( int i=EQUIPMENT_WEAPON_RIGHT; i<MAX_EQUIPMENT; ++i )
     {
@@ -1038,10 +929,8 @@ void CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexter
 	GetSpecial ( Dexterity, AT_SET_OPTION_IMPROVE_DEXTERITY );
 	GetSpecial ( Energy,    AT_SET_OPTION_IMPROVE_ENERGY );
 	GetSpecial ( Vitality,  AT_SET_OPTION_IMPROVE_VITALITY );
-	
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 	GetSpecial ( Charisma,  AT_SET_OPTION_IMPROVE_CHARISMA );
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
+
 }
 #endif // LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
 
@@ -1053,27 +942,15 @@ void CSItemOption::CheckItemSetOptions ( void )
 
     memset ( m_bySetOptionList, 0, sizeof( BYTE ) * 16 );
 
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 	for ( int i=0; i<MAX_EQUIPMENT_INDEX; ++i )
-#else // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-	for ( int i=0; i<12; ++i )
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 	{	
 		if ( i==EQUIPMENT_WING || i==EQUIPMENT_HELPER ) continue;
 
 		ITEM *ip = &CharacterMachine->Equipment[i];
 
-#ifdef LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
 		if( ip->Durability <= 0 ) {
 			continue;
 		}
-#else	//LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
-#if defined PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM || defined YDG_FIX_SETITEM_REQUIRED_STATUS_BUG
-		if( ip->Durability <= 0 || IsRequireEquipItem( ip ) == false ) {
-			continue;
-		}
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-#endif	//LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
 
         if (itemTmp ==nullptr || ((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT) && itemTmp->Type == ip->Type && itemTmp->ExtOption == (ip->ExtOption % 0x04)))
         {
@@ -1094,20 +971,10 @@ void CSItemOption::CheckItemSetOptions ( void )
 
 	calcSetOptionList( byOptionList );
 
-#ifdef LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
-
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
 	getAllAddStateOnlyAddValue ( &CharacterAttribute->AddStrength,	&CharacterAttribute->AddDexterity, 
 								 &CharacterAttribute->AddEnergy,	&CharacterAttribute->AddVitality, 
 								 &CharacterAttribute->AddCharisma 
 							   );
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-    getAllAddStateOnlyAddValue ( &CharacterAttribute->AddStrength,	&CharacterAttribute->AddDexterity, 
-								 &CharacterAttribute->AddEnergy,	&CharacterAttribute->AddVitality 
-							   );
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-
-#if defined PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM || defined LDK_FIX_USE_SECRET_ITEM_TO_SETITEM_OPTION_BUG
 
     WORD AllStrength  = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
     WORD AllDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
@@ -1115,58 +982,11 @@ void CSItemOption::CheckItemSetOptions ( void )
     WORD AllVitality  = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
 	WORD AllCharisma  = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 	WORD AllLevel     = CharacterAttribute->Level;
-#else //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-
-    WORD AllStrength = CharacterAttribute->Strength;
-    WORD AllDexterity = CharacterAttribute->Dexterity;
-    WORD AllEnergy = CharacterAttribute->Energy;
-    WORD AllVitality = CharacterAttribute->Vitality;
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	WORD AllCharisma  =CharacterAttribute->Charisma;
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-
-#else //LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
-#if defined PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM || defined LDK_FIX_USE_SECRET_ITEM_TO_SETITEM_OPTION_BUG
-
-    WORD AllStrength  = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-    WORD AllDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-    WORD AllEnergy    = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-    WORD AllVitality  = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
-	WORD AllCharisma  = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-	WORD AllLevel     = CharacterAttribute->Level;
-#else //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-
-    WORD AllStrength = CharacterAttribute->Strength;
-    WORD AllDexterity = CharacterAttribute->Dexterity;
-    WORD AllEnergy = CharacterAttribute->Energy;
-    WORD AllVitality = CharacterAttribute->Vitality;
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	WORD AllCharisma  =CharacterAttribute->Charisma;
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-
-
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	getAllAddState ( &AllStrength, &AllDexterity, &AllEnergy, &AllVitality, &AllCharisma );
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-    getAllAddState ( &AllStrength, &AllDexterity, &AllEnergy, &AllVitality );
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-
-#endif	//LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT
-
 
     memset ( byOptionList, 0, sizeof( BYTE ) * 30 );
     memset ( m_bySetOptionList, 255, sizeof( BYTE ) * 16 );
 
-
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 	for (int i=0; i<MAX_EQUIPMENT_INDEX; ++i )
-#else // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-	for ( i=0; i<12; ++i )
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 	{
 		if ( i==EQUIPMENT_WING || i==EQUIPMENT_HELPER ) continue;
 
@@ -1198,10 +1018,7 @@ void CSItemOption::CheckItemSetOptions ( void )
         }
 	}
 
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 	UpdateCount_SetOptionPerEquippedSetItem( byOptionList, m_arLimitSetItemOptionCount, CharacterMachine->Equipment );
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-
 	calcSetOptionList( byOptionList );
 }
 
@@ -1263,13 +1080,10 @@ void CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
         sprintf ( TextList[TextNum], "\n" ); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
         sprintf ( TextList[TextNum], "\n" ); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
 
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 		int		iCurSetItemTypeSequence = 0, iCurSetItemType = -1;
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 
 		for ( int i=0; i<m_bySetOptionANum+m_bySetOptionBNum; ++i )
 		{
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 			std::string	strCurrent;
 
 			m_iterESIS = m_mapEquippedSetItemSequence.find( i );
@@ -1299,54 +1113,6 @@ void CSItemOption::RenderSetOptionList ( const int StartX, const int StartY )
 					TextNum++;
 				}
 			}
-			
-#else // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-            if ( i==0 && m_bySetOptionANum>0 )
-            {
-                sprintf ( TextList[TextNum], "%s %s", m_strSetName[0], GlobalText[1089] );
-       		    TextListColor[TextNum] = 3;
-			    TextBold[TextNum] = true;
-                TextNum++;
-            }
-            else if ( i==m_bySetOptionANum && m_bySetOptionBNum>0 )
-            {
-                setIndex = 1;
-
-                sprintf ( TextList[TextNum], "\n" );
-       		    TextListColor[TextNum] = 0;
-			    TextBold[TextNum] = false;
-                TextNum++; SkipNum++;
-
-                sprintf ( TextList[TextNum], "%s %s", m_strSetName[1], GlobalText[1089] );
-       		    TextListColor[TextNum] = 3;
-			    TextBold[TextNum] = true;
-                TextNum++;
-            }
-            else if ( m_bySameSetItem!=0 && m_bySetOptionANum>0 && (m_bySetOptionANum-m_bySameSetItem)==i )
-            {
-                sprintf ( TextList[TextNum], "\n" );
-       		    TextListColor[TextNum] = 0;
-			    TextBold[TextNum] = false;
-                TextNum++; SkipNum++;
-
-                sprintf ( TextList[TextNum], "%s %s", m_strSetName[1], GlobalText[1089] );
-       		    TextListColor[TextNum] = 3;
-			    TextBold[TextNum] = true;
-                TextNum++;
-            }
-            else if ( m_bySameSetItem!=0 && m_bySetOptionBNum>0 && (m_bySetOptionBNum-m_bySameSetItem)==i )
-            {
-                sprintf ( TextList[TextNum], "\n" );
-       		    TextListColor[TextNum] = 0;
-			    TextBold[TextNum] = false;
-                TextNum++; SkipNum++;
-
-                sprintf ( TextList[TextNum], "%s %s", m_strSetName[0], GlobalText[1089] );
-       		    TextListColor[TextNum] = 3;
-			    TextBold[TextNum] = true;
-                TextNum++;
-            }
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 			getExplainText ( TextList[TextNum], m_bySetOptionList[i][0], m_iSetOptionListValue[i][0], setIndex );
             if ( m_bySetOptionList[i][0]>=AT_SET_OPTION_IMPROVE_ATTACK_1 && m_bySetOptionList[i][1]==0 )
                 TextListColor[TextNum] = 2;
@@ -1378,7 +1144,6 @@ void CSItemOption::CheckRenderOptionHelper ( const char* FilterName )
 
             int Length2 = strlen ( Name );
 
-            //  검색한다.
             m_byRenderOptionList = 0;
             if ( strncmp( FilterName, Name, Length1 )==NULL && strncmp( FilterName, Name, Length2 )==NULL )
             {
@@ -1533,11 +1298,7 @@ bool CSItemOption::isFullseteffect( const ITEM* pselecteditem )
 		return false;
 }
 
-#ifdef LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum, bool bIsEquippedItem )
-#else // LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
-int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
-#endif // LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 {
     ITEM_SET_TYPE& itemSType= m_ItemSetType[ip->Type];
 
@@ -1570,8 +1331,6 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 	if(m_bySetOptionBNum > 0)
 		byLimitOptionNum += m_bySetOptionBNum-m_bySameSetItem;//m_bySetOptionANum-1;
 
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-
 	count1 = Search_From_EquippedSetItemNameSequence( setOption.strSetName );
 
 	if( BYTE_MAX == count1 )
@@ -1583,45 +1342,6 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 		byLimitOptionNum = abs( (m_bySetOptionANum + m_bySetOptionBNum) - m_bySameSetItem);
 	}
 
-#else  // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE	
-    int     length1 = strlen ( setOption.strSetName );
-    int     length2 = strlen ( m_strSetName[1] );
-    int     length3 = strlen ( m_strSetName[0] );
-    if ( !strncmp( setOption.strSetName, m_strSetName[1], length1 ) &&  !strncmp( m_strSetName[1], setOption.strSetName, length2 ) )
-    {
-        count1 = m_bySetOptionANum-m_bySameSetItem;
-#ifdef PJH_ADD_SET_NEWJOB
-		if(m_bySetOptionANum-m_bySameSetItem < 0)
-			count1 = 0;
-#else
-        byLimitOptionNum = count1+m_bySameSetItem;
-#endif //PJH_ADD_SET_NEWJOB
-    }
-    else
-#ifdef PJH_ADD_SET_NEWJOB		
-		if ( !strncmp( setOption.strSetName, m_strSetName[0], length1 ) && !strncmp( m_strSetName[0], setOption.strSetName, length3 ) )
-#else
-		if ( strncmp( setOption.strSetName, m_strSetName[0], length1 ) && strncmp( m_strSetName[0], setOption.strSetName, length3 ) )
-#endif //#ifdef PJH_ADD_SET_NEWJOB
-    {
-#ifdef PJH_ADD_SET_NEWJOB
-			if(m_bySetOptionANum > 0)
-				count1 = 0;
-			else
-				count1 = (m_bySetOptionANum + m_bySetOptionBNum) -m_bySameSetItem;
-
-			byLimitOptionNum = abs(m_bySetOptionANum - m_bySameSetItem);
-#else
-		byLimitOptionNum = 0;
-#endif //PJH_ADD_SET_NEWJOB
-    }
-#ifdef PJH_ADD_SET_NEWJOB
-	else
-		byLimitOptionNum = 0;
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
-
-	
-#endif //PJH_ADD_SET_NEWJOB 
 	sprintf ( TextList[TNum], "\n" ); TNum += 1;
     sprintf ( TextList[TNum], "%s %s", GlobalText[1089], GlobalText[159] );
     TextListColor[TNum] = TEXT_COLOR_YELLOW; 
@@ -1637,29 +1357,11 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
 		byLimitOptionNum = 13;
 	}
 
-
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-
-#ifdef LDS_FIX_OUTPUT_WRONG_EQUIPPEDSETITEMOPTION_BY_WRONG_SLOTINDEX
-
 	BYTE byCurrentSelectedSlotIndex = ip->bySelectedSlotIndex;
 
 	int iLimitOptionCount = m_arLimitSetItemOptionCount[byCurrentSelectedSlotIndex]-1;
-#else // LDS_FIX_OUTPUT_WRONG_EQUIPPEDSETITEMOPTION_BY_WRONG_SLOTINDEX
-	int iLimitOptionCount = m_arLimitSetItemOptionCount[ip->bySelectedSlotIndex]-1;
-#endif // LDS_FIX_OUTPUT_WRONG_EQUIPPEDSETITEMOPTION_BY_WRONG_SLOTINDEX
 
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-	
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
-	for ( int i=0; i<=MAX_SETITEM_OPTIONS; ++i )	// 아이템 추가옵션 갯수 제한 수치 반영
-#else // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
-	for ( int i=0; i<=MAX_EQUIPMENT_INDEX; ++i )
-#endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
-#else // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-    for ( int i=0; i<13; ++i )
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE	
+	for ( int i=0; i<=MAX_SETITEM_OPTIONS; ++i )
     {
         if ( i<6 )
         {
@@ -1708,37 +1410,16 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
         {
             getExplainText ( TextList[TNum], option1, value1, 0 );
 
-
-#ifdef LDS_FIX_OUTPUT_WRONG_EQUIPPEDSETITEMOPTION_BY_WRONG_SLOTINDEX
             if ( m_bySetOptionList[count1][0]==option1 
 				&& byLimitOptionNum!=255
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 				&& iLimitOptionCount > i
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 				&& byLimitOptionNum!=0			
-#endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
-#ifdef LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 #ifdef PBG_FIX_SETITEMTOOLTIP
 				&& bIsEquippedItem == false
 #else //PBG_FIX_SETITEMTOOLTIP
 				&& bIsEquippedItem == true
 #endif //PBG_FIX_SETITEMTOOLTIP
-#endif // LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 				)
-#else // LDS_FIX_OUTPUT_WRONG_EQUIPPEDSETITEMOPTION_BY_WRONG_SLOTINDEX
-				
-			if ( m_bySetOptionList[count1][0]==option1 
-					&& i<byLimitOptionNum 
-					&& byLimitOptionNum!=255
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-					&& iLimitOptionCount > i
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
-					&& byLimitOptionNum!=0
-#endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
-				)
-#endif // LDS_FIX_OUTPUT_WRONG_EQUIPPEDSETITEMOPTION_BY_WRONG_SLOTINDEX
             {
                 TextListColor[TNum] = TEXT_COLOR_BLUE; 
                 count1++;
@@ -1752,23 +1433,11 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum )
         if ( option2!=255 )
         {
             getExplainText ( TextList[TNum], option2, value2, 0 );
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
             if ( m_bySetOptionList[count1][0]==option2 
 				&& byLimitOptionNum!=255
 				&& iLimitOptionCount > i
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 				&& byLimitOptionNum!=0
-#endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
 				)
-#else // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-			if ( m_bySetOptionList[count1][0]==option2 
-				&& i<byLimitOptionNum 
-				&& byLimitOptionNum!=255
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
-				&& byLimitOptionNum!=0
-#endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
-				)
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
             {
                 TextListColor[TNum] = TEXT_COLOR_BLUE; 
                 count1++;

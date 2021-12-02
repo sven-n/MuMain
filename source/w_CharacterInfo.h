@@ -1,5 +1,4 @@
 // w_CharacterInfo.h: interface for the CHARACTER class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_W_CHARACTER_H__95647591_5047_48A4_81AE_E88B5F17EE94__INCLUDED_)
@@ -61,7 +60,7 @@ typedef struct _PART_t
 	float PriorAnimationFrame;
 	float PlaySpeed;
 	BYTE m_byNumCloth;
-	void *m_pCloth[2];	// 아이템에 천붙이기
+	void *m_pCloth[2];
 
 	_PART_t()
 	{
@@ -86,15 +85,15 @@ typedef struct _PART_t
 //cspetsystem start
 typedef struct 
 {
-	DWORD		m_dwPetType;	//	펫타입
-	DWORD       m_dwExp1;       //  경험치1.
-	DWORD       m_dwExp2;       //  경험치2.
-	WORD        m_wLevel;       //  레벨.
-	WORD        m_wLife;        //  생명력.
-	WORD        m_wDamageMin;   //  최소 데미지.
-	WORD        m_wDamageMax;   //  최대 데미지.
-	WORD        m_wAttackSpeed; //  공격 속도.
-	WORD        m_wAttackSuccess;// 공격 성공율.
+	DWORD		m_dwPetType;
+	DWORD       m_dwExp1;
+	DWORD       m_dwExp2;
+	WORD        m_wLevel;
+	WORD        m_wLife;
+	WORD        m_wDamageMin;
+	WORD        m_wDamageMax;
+	WORD        m_wAttackSpeed;
+	WORD        m_wAttackSuccess;
 }PET_INFO;
 //cspetsystem end
 #endif // KJH_FIX_DARKLOAD_PET_SYSTEM
@@ -260,9 +259,9 @@ public:
 #endif //PBG_ADD_GENSRANKING
 #ifdef PBG_MOD_STRIFE_GENSMARKRENDER
 #ifdef KJH_FIX_CONTRIBUTIONPOINT_CASTING
-	int			m_nContributionPoint;	// 기여도 포인트
+	int			m_nContributionPoint;
 #else // KJH_FIX_CONTRIBUTIONPOINT_CASTING
-	BYTE		m_nContributionPoint;	// 기여도 포인트
+	BYTE		m_nContributionPoint;
 #endif // KJH_FIX_CONTRIBUTIONPOINT_CASTING
 #endif //PBG_MOD_STRIFE_GENSMARKRENDER
 };

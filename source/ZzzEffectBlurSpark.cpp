@@ -1,7 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 3D 특수효과 관련 함수
-//
-// *** 함수 레벨: 3
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -17,14 +14,7 @@
 #include "DSPlaySound.h"
 #include "WSClient.h"
 
-
-///////////////////////////////////////////////////////////////////////////////
-// 잔상 효과(게임상의 칼 휘두를때 나는 잔상)
-///////////////////////////////////////////////////////////////////////////////
-
-// CreateBlur
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-#define MAX_BLURS      100		// 
+#define MAX_BLURS      100
 #define MAX_BLUR_TAILS 30
 #define MAX_BLUR_LIFETIME 30
 
@@ -32,10 +22,6 @@
 #define MAX_OBJECTBLUR_TAILS 600
 #define MAX_OBJECTBLUR_LIFETIME 30
 //#define MAX_OBJECTBLUR_LIFETIME 11		// FIX
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-#define MAX_BLURS      100
-#define MAX_BLUR_TAILS 30
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 
 typedef struct
 {
@@ -70,8 +56,6 @@ void AddBlur(BLUR *b,vec3_t p1,vec3_t p2,vec3_t Light,int Type)
     }
 }
 
-
-// SubType
 void CreateBlur(CHARACTER *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bool Short,int SubType)
 {
 	for(int i=0;i<MAX_BLURS;i++)
@@ -94,11 +78,7 @@ void CreateBlur(CHARACTER *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bool 
 			b->Live = true;
 			b->Owner = Owner;
             b->Number= 0;
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 			b->LifeTime = Short? 15 : MAX_BLUR_LIFETIME;
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-            b->LifeTime = Short? 15 : MAX_BLUR_TAILS;
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 			b->SubType = SubType;
 			AddBlur(b,p1,p2,Light,Type);
             return;
@@ -215,36 +195,20 @@ typedef struct
 	OBJECT *  Owner;
 	int       Number;
 	vec3_t    Light;
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	int		  _iLimitLifeTime;
 	vec3_t    p1[MAX_OBJECTBLUR_TAILS];
 	vec3_t    p2[MAX_OBJECTBLUR_TAILS];
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-	vec3_t    p1[MAX_BLUR_TAILS];
-	vec3_t    p2[MAX_BLUR_TAILS];
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	int       SubType;
 } OBJECT_BLUR;
 
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 OBJECT_BLUR ObjectBlur[MAX_OBJECTBLURS];
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-OBJECT_BLUR ObjectBlur[MAX_BLURS];
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 
 void ClearAllObjectBlurs()
 {
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	for(int i = 0; i < MAX_OBJECTBLURS; ++i)
 	{
 		ObjectBlur[i].Live = false;
 	}
-#else //LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-	for(int i = 0; i < MAX_BLURS; ++i)
-	{
-		ObjectBlur[i].Live = false;
-	}
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 }
 
 void AddObjectBlur(OBJECT_BLUR *b,vec3_t p1,vec3_t p2,vec3_t Light,int Type)
@@ -252,7 +216,6 @@ void AddObjectBlur(OBJECT_BLUR *b,vec3_t p1,vec3_t p2,vec3_t Light,int Type)
 	b->Type = Type;
 	VectorCopy(Light,b->Light);
 
-	// 이미 블루어데이터가 있으면, 그 뒤로 하나씩 밀어준다.
 	for(int i=b->Number-1;i>=0;i--)
 	{
 		VectorCopy(b->p1[i],b->p1[i+1]);
@@ -261,63 +224,35 @@ void AddObjectBlur(OBJECT_BLUR *b,vec3_t p1,vec3_t p2,vec3_t Light,int Type)
 	VectorCopy(p1,b->p1[0]);
 	VectorCopy(p2,b->p2[0]);
 	b->Number++;
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
+
 	if(b->Number >= MAX_OBJECTBLUR_TAILS-1)
     {
 		b->Number = MAX_OBJECTBLUR_TAILS-1;
     }
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-	if(b->Number >= MAX_BLUR_TAILS-1)
-    {
-		b->Number = MAX_BLUR_TAILS-1;
-    }
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 }
 
-
-// CreateObjectBlur : 검기 효과 함수, 식별자로 기존 CreateBlur는 Character를 넘겼으나, Object를 넘김.
-// - SubType : 한캐릭터 안에서의 식별자로 사용
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 void CreateObjectBlur(OBJECT *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bool Short,int SubType, int iLimitLifeTime)
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-void CreateObjectBlur(OBJECT *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bool Short,int SubType)
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 {
-	// 1. 전체 오브젝트 블루어 접근으로 같은계열 블루어가 있으면 AddObjectBlur 해준다. 즉 꼬리 붙이고 나면 바로 리턴.
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	for(int i=0;i<MAX_OBJECTBLURS;i++)
-#else //LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-	for(int i=0;i<MAX_BLURS;i++)
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	{
 		OBJECT_BLUR *b = &ObjectBlur[i];
 		if(b->Live && b->Owner==Owner)
 		{
 			if(SubType > 0 && b->SubType != SubType)
 				continue;
-
-
-            // 1-1. 블루어테이블에 리스트형식으로 Tail 하나 붙여준다.
 			AddObjectBlur(b,p1,p2,Light,Type);
             return;
 		}
 	}
 
-	// 2. 같은 계열이 없으면 신규 블루어 추가.
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	for(int i=0;i<MAX_OBJECTBLURS;i++)
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-	for(int i=0;i<MAX_BLURS;i++)
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	{
-		// 2-1. 빈자리 하나 찾아서 신규 생성.
 		OBJECT_BLUR *b = &ObjectBlur[i];
 		if(!b->Live)
 		{
 			b->Live = true;
 			b->Owner = Owner;
             b->Number= 0;
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 			if( iLimitLifeTime > -1 )
 			{
 				b->LifeTime = iLimitLifeTime;
@@ -328,9 +263,6 @@ void CreateObjectBlur(OBJECT *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bo
 				b->_iLimitLifeTime = Short? 15 : MAX_OBJECTBLUR_LIFETIME ;
 				b->LifeTime = b->_iLimitLifeTime;				
 			}
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-			b->LifeTime = Short? 15 : MAX_BLUR_TAILS;
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 			b->SubType = SubType;
 
 			AddObjectBlur(b,p1,p2,Light,Type);
@@ -341,47 +273,26 @@ void CreateObjectBlur(OBJECT *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bo
 
 void MoveObjectBlurs()
 {
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	for(int i=0;i<MAX_OBJECTBLURS;i++)
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-	for(int i=0;i<MAX_BLURS;i++)
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	{
 		OBJECT_BLUR *b = &ObjectBlur[i];
-
-		// 1. 각 블루어의 하나씩 감산
 		if(b->Live)
 		{
 			b->LifeTime--;
 			b->Number--;
 
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 			if(b->LifeTime <= 0)
 			{
 				b->Number = 0;
 				b->Live = false;
 				continue;
 			}
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 
-			// 1-1. 블루어 내 각 블루어 위치값을 한칸씩 뒤로 이동.
 	        for(int i=b->Number-1;i>=0;i--)
 	        {
 		        VectorCopy(b->p1[i],b->p1[i+1]);
 		        VectorCopy(b->p2[i],b->p2[i+1]);
 	        }
-
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-			if(b->LifeTime <= 0)
-			{
-				b->Number--;
-				if(b->Number <= 0)
-				{
-        			b->Live = false;
-				}
-			}
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 		}
 	}
 }
@@ -389,12 +300,7 @@ void MoveObjectBlurs()
 void RenderObjectBlurs()
 {
     int Type;
-    //DisableCullFace();
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	for(int i=0;i<MAX_OBJECTBLURS;i++)
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-	for(int i=0;i<MAX_BLURS;i++)
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	{
 		OBJECT_BLUR *b = &ObjectBlur[i];
 		if(b->Live)
@@ -409,12 +315,10 @@ void RenderObjectBlurs()
 			{
 				nTexture = BITMAP_BLUR;
 			}
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 			else if (Type == 5)
 			{
 				nTexture = BITMAP_LAVA;
 			}
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
 
             EnableAlphaBlend();
 
@@ -453,14 +357,9 @@ void RenderObjectBlurs()
 	}
 }
 
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 void RemoveObjectBlurs(OBJECT *Owner,int SubType)
 {
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	for(int i=0;i<MAX_OBJECTBLURS;i++)
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-	for(int i=0;i<MAX_BLURS;i++)
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 	{
 		OBJECT_BLUR *b = &ObjectBlur[i];
 		if(b->Live && b->Owner==Owner)
@@ -469,11 +368,6 @@ void RemoveObjectBlurs(OBJECT *Owner,int SubType)
 		}
 	}
 }
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-
-///////////////////////////////////////////////////////////////////////////////
-// 스파크 효과(기사 스킬 사용시)
-///////////////////////////////////////////////////////////////////////////////
 
 void CreateSpark(int Type,CHARACTER *tc,vec3_t Position,vec3_t Angle)
 {
@@ -496,10 +390,6 @@ void CreateSpark(int Type,CHARACTER *tc,vec3_t Position,vec3_t Angle)
 	    CreateParticle(BITMAP_SPARK,Position,to->Angle,Light);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 피 효과(케릭터나 몬스터 죽을때 나는 효과)
-///////////////////////////////////////////////////////////////////////////////
 
 void CreateBlood(OBJECT *o)
 {
@@ -524,52 +414,6 @@ void CreateBlood(OBJECT *o)
 		}
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 충격 효과(캐릭터나 몬스터가 충격을 받을때 나는 효과)
-///////////////////////////////////////////////////////////////////////////////
-
-/*void AttackRange(vec3_t Position,float Range,int Damage)
-{
-	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-	{
-		CHARACTER *c = &CharactersClient[i];
-		OBJECT *o = &c->Object;
-		if(o->Live)
-		{
-			vec3_t p;
-			VectorSubtract(o->Position,Position,p);
-			float Distance = p[0]*p[0]+p[1]*p[1];
-			if(Distance <= Range*Range)
-			{
-				SetPlayerShock(c);
-			}
-		}
-	}
-}*/
-
-/*int SearchTargetCharacter(CHARACTER *c)
-{
-	int Dir[] = {-1,-1, 0,-1,  1,-1,  1,0,  1,1,  0,1,  -1,1,  -1,0};
-	int Angle = ((BYTE)((c->Object.Angle[2]+22.5f)/360.f*8.f+1.f)%8);
-	int x = c->PositionX+Dir[Angle*2  ];
-	int y = c->PositionY+Dir[Angle*2+1];
-	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-	{
-		CHARACTER *tc = &CharactersClient[i];
-		OBJECT *to = &tc->Object;
-		if(to->Live && to->Visible)
-		{
-			if(x==tc->PositionX && y==tc->PositionY)
-				return i;
-		}
-	}
-	return -1;
-}*/
-
-///////////////////////////////////////////////////////////////////////////////
-// 마검사 등에 달린 망토 효과
-///////////////////////////////////////////////////////////////////////////////
 
 #define FLAG_WIDTH  7
 #define FLAG_HEIGHT 10
@@ -606,84 +450,6 @@ float Ks = 5.f; //hook's spring
 float Kd = 0.1f; //spring dumping
 float Kr = 0.8f;
 float DeltaTime = 0.1f;
-
-/*void integrate_physics(int num)
-{
-    physics_boundbox *b = &object_boundbox[num];
-	
-	Gravity[0] = 0.f;
-	Gravity[1] = 0.5f;
-	Gravity[2] = 0.f;
-	
-	int i,j;
-	for(i=0;i<8;i++)
-	{
-		physics_vertex *v = &b->vtx[i];
-
-		v->f[0]=0.f;
-		v->f[1]=0.f;
-		v->f[2]=0.f;
-
-		VectorAdd(v->f,Gravity,v->f);
-		VectorMA(v->f,-Damping,v->v,v->f);
-		VectorAdd(v->f,v->uf,v->f);//user force
-
-		for(j=0;j<v->link_num;j++)
-		{
-        	physics_vertex *v1 = &b->vtx[i];
-			physics_vertex *v2 = &b->vtx[v->link[j]];
-
-			vec3_t DeltaP;
-			VectorSubtract(v1->p,v2->p,DeltaP);
-			float dist = VectorLength(DeltaP);
-			float Hterm = (dist - v->link_length[j]) * Ks;	
-
-			vec3_t DeltaV;
-			VectorSubtract(v1->v,v2->v,DeltaV);
-			float Dterm = (DotProduct(DeltaV,DeltaP) * Kd) / dist;
-
-			vec3_t SpringForce;
-			VectorScale(DeltaP,1.f/dist,SpringForce);	
-			VectorScale(SpringForce,-(Hterm+Dterm),SpringForce);
-			VectorAdd(v1->f,SpringForce,v1->f);	
-			VectorSubtract(v2->f,SpringForce,v2->f);	
-		}
-	}
-	for(i=0;i<8;i++)
-	{
-    	physics_vertex *v = &b->vtx[i];
-		VectorMA(v->v,DeltaTime,v->f,v->v);
-		VectorMA(v->p,DeltaTime,v->v,v->p);
-	}
-	//for(j=0;j<100;j++)
-	for(i=0;i<8;i++)
-	{
-    	physics_vertex *v = &b->vtx[i];
-
-		float height = terrain_height(v->p[0],v->p[2]);
-		if(v->p[1] >= height)
-		{
-			vec3_t normal;
-            terrain_normal(v->p[0],v->p[1],normal);
-			normal[0]=0.f;
-			normal[1]=1.f;
-			normal[2]=0.f;
-			if(v->collision==0)
-			{
-				v->collision=1;
-				float VdotN = -DotProduct(normal,v->v)*2.f;
-				vec3_t Vn;
-				VectorScale(normal,VdotN,Vn);
-				ddd2=v->v[1];
-				ddd3=Vn[1];
-				VectorAdd(v->v,Vn,v->v);
-				VectorScale(v->v,1.5f,v->v);
-				//v->p[1]=height;
-			}
-		}
-		else v->collision=0;
-	}
-}*/
 
 void CreateFlag()
 {
@@ -800,7 +566,7 @@ void AnimationFlag()
 				VectorScale(SpringForce,-(Hterm+Dterm),SpringForce);
 				VectorAdd(v1->f,SpringForce,v1->f);	
 				if ( (index+1)/FLAG_WIDTH > (v->link[k]+1)/FLAG_WIDTH)
-				{	// 이중 계산은 밑의 줄것만
+				{
 					VectorSubtract(v2->f,SpringForce,v2->f);
 				}
 			}

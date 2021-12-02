@@ -1,5 +1,4 @@
 // NewUIGuildInfoWindow.cpp: implementation of the CNewUIGuildInfoWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -16,12 +15,9 @@
 #include "wsclientinline.h"
 #include "GMCrywolf1st.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 extern bool	View_Bal;
-extern char	Suc_Or_Fail;						//-1 : 평소상태, 0 : 실패상태, 1 : 성공상태
-extern char	View_Suc_Or_Fail;					//-1 : 평소상태, 0 : 실패상태, 1 : 성공상태
+extern char	Suc_Or_Fail;
+extern char	View_Suc_Or_Fail;
 extern float Deco_Insert;
 extern char Message_Box;
 extern char   Box_String[2][200];
@@ -33,8 +29,8 @@ extern int m_iHour,m_iMinute;
 extern DWORD m_dwSyncTime;
 extern int Delay;
 extern int Add_Num;
-extern bool Dark_Elf_Check;	// MVP 시작될때 한번 다크엘프 주위 밀어내기 효과 뿌려줌 체크
-extern int iNextNotice;		// 크라이울프 준비때 공지 뿌려주는 것을 두번에 나누어 뿌려주줌 체크
+extern bool Dark_Elf_Check;
+extern int iNextNotice;
 
 extern BYTE Rank;
 extern int Exp;
@@ -50,9 +46,9 @@ extern bool View_End_Result;
 extern int nPastTick;
 extern int BackUpTick;
 
-extern BYTE m_OccupationState;		// 크라이울프 레이드 MVP 상태 (0: 평화, 1: 점령, 2: 전쟁)
+extern BYTE m_OccupationState;
 extern BYTE m_CrywolfState;
-extern int m_StatueHP;				// 석상 HP
+extern int m_StatueHP;
 
 using namespace SEASON3B;
 
@@ -156,90 +152,6 @@ bool SEASON3B::CNewUICryWolf::Render()
 	float Val_Icon[] = {623.f,379.f,15.f,15.f,14.f/16.f,14.f/16.f};
 	int TotDelay = 400;
 
-			
-
-	if(View_End_Result == true)
-	{
-//		g_pCryWolfInterface->Render(200, 110, 252, 240,0.f,0.f,252.f/256.f, 323.f/512.f,44);
-//		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Result_Set_Temple));
-		/*
-		g_pCryWolfInterface->Render(200, 110, 252, 240,0.f,0.f,252.f/256.f, 323.f/512.f,44);
-		
-		g_pRenderText->SetFont(g_hFont);
-		g_pRenderText->SetTextColor(255, 148, 21, 255);
-		g_pRenderText->SetBgColor(0x00000000);
-
-		wsprintf ( Text, "%s", GlobalText[680]);
-		g_pRenderText->RenderText(240, 160, Text, 0 ,0, RT3_WRITE_CENTER);
-		wsprintf ( Text, "%s", GlobalText[681]);
-		g_pRenderText->RenderText(285, 160, Text, 0 ,0, RT3_WRITE_CENTER);
-		wsprintf ( Text, "%s", GlobalText[1973]);
-		g_pRenderText->RenderText(333, 160, Text, 0 ,0, RT3_WRITE_CENTER);
-		wsprintf ( Text, "%s", GlobalText[1977]);
-		g_pRenderText->RenderText(387, 160, Text, 0 ,0, RT3_WRITE_CENTER);
-
-		g_pRenderText->SetTextColor(255, 255, 255, 255);
-		g_pRenderText->SetBgColor(0x00000000);
-		
-		for(int i = 0; i < 5; i++)
-		{
-			if(HeroScore[i] == -1)
-				continue;
-
-			wsprintf ( Text, "%d", i+1);
-			g_pRenderText->RenderText(240, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
-			wsprintf ( Text, "%s", HeroName[i]);
-			g_pRenderText->RenderText(285, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
-
-			wsprintf(Text, "%s", GetCharacterClassText(HeroClass[i]));
-			
-			g_pRenderText->RenderText(335, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
-			wsprintf ( Text, "%d", HeroScore[i]);
-			g_pRenderText->RenderText(385, 175 + i*15, Text, 0 ,0, RT3_WRITE_CENTER);
-		}
-
-		g_pRenderText->SetTextColor(255, 0, 255, 255);
-		g_pRenderText->SetBgColor(0);
-
-		if(View_Suc_Or_Fail == 1)
-		{
-			//"몬스터의 체력이 10% 하락되었습니다."
-			g_pRenderText->RenderText(330, 175 + i*17, GlobalText[2000], 0 ,0, RT3_WRITE_CENTER); i++;
-			//"모든 캐슬 및 광장의 입장권 조합확률이 5%상향 조정되었습니다."
-			g_pRenderText->RenderText(328, 175 + i*17, GlobalText[2001], 0 ,0, RT3_WRITE_CENTER );
-		}
-		else
-		{
-			//"크라이울프 내 모든 NPC가 삭제되었습니다."
-			g_pRenderText->RenderText(330, 175 + i*17, GlobalText[2009], 0 ,0, RT3_WRITE_CENTER);
-		}
-		
-		
-		if(MouseX > 300 && MouseX < 300 + 54 && MouseY > 300 && MouseY < 300+30)
-		{
-			if(Button_Down == 5)
-			{
-				g_pCryWolfInterface->Render(300, 300, 54, 30,0.f,0.f,54.f/64.f, 30.f/32.f,21);
-				Message_Box = 0;
-				Button_Down = 0;
-				View_End_Result = false;
-				g_pNewUISystem->Hide(SEASON3B::INTERFACE_CRYWOLF);
-			}
-			else
-			{
-				g_pCryWolfInterface->Render(300, 300, 54, 30,0.f,0.f, 54.f/64.f, 30.f/32.f,20);
-			}
-			
-		}
-		else
-		{
-			g_pCryWolfInterface->Render(300, 300, 54, 30, 0.f,0.f,54.f/64.f, 30.f/32.f,19);
-		}
-		*/
-//		g_pCryWolfInterface->Render(300, 300, 54, 30, 0.f,0.f,54.f/64.f, 30.f/32.f,19);
-//		g_pCryWolfInterface->Render(300, 300, 54, 30,0.f,0.f,54.f/64.f, 30.f/32.f,21);
-	}
-	
 	if(Suc_Or_Fail == 1)
 	{
 		Delay++;
@@ -250,7 +162,6 @@ bool SEASON3B::CNewUICryWolf::Render()
 		}
 	}
 	
-	//-1 : 안찍는다., 0 : 찍는다.
 	if(Suc_Or_Fail >= 0)
 	{
 		float A_Value = 0.f;
@@ -422,7 +333,6 @@ bool SEASON3B::CNewUICryWolf::Render()
 
 	if(m_bTimeStart == true && m_CrywolfState == CRYWOLF_STATE_START)
 	{
-		//크라이울프 시간을 찍는다.
 		m_iSecond = m_iSecond - (GetTickCount()-m_dwSyncTime);
 		
 		if(View_Bal == false)

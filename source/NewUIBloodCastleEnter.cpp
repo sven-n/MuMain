@@ -126,12 +126,9 @@ void CNewUIEnterBloodCastle::SetBtnPos(int x, int y)
 // UpdateMouseEvent
 bool CNewUIEnterBloodCastle::UpdateMouseEvent()
 {
-	// 버튼 처리
-	if( true == BtnProcess() )	// 처리가 완료 되었다면
+	if( true == BtnProcess() )
 		return false;
 	
-	// 파티 창 내 영역 클릭시 하위 UI처리 및 이동 불
-	// ( #include "NewUICommon" )
 	if( CheckMouseIn(m_Pos.x, m_Pos.y, ENTERBC_BASE_WINDOW_WIDTH, ENTERBC_BASE_WINDOW_HEIGHT) )
 		return false;
 
@@ -200,16 +197,11 @@ bool CNewUIEnterBloodCastle::Render()
 	glColor4f(1.f, 1.f, 1.f, 1.f);
 	
 	// Base Window
-	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, 
-						float(ENTERBC_BASE_WINDOW_WIDTH), float(ENTERBC_BASE_WINDOW_HEIGHT));
-	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, 
-						float(ENTERBC_BASE_WINDOW_WIDTH), 64.f);
-	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y+64.f, 
-						21.f, float(ENTERBC_BASE_WINDOW_HEIGHT)-64.f-45.f);
-	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_RIGHT, m_Pos.x+float(ENTERBC_BASE_WINDOW_WIDTH)-21.f, 
-						m_Pos.y+64.f, 21.f, float(ENTERBC_BASE_WINDOW_HEIGHT)-64.f-45.f);
-	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y+float(ENTERBC_BASE_WINDOW_HEIGHT)-45.f, 
-						float(ENTERBC_BASE_WINDOW_WIDTH), 45.f);		
+	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(ENTERBC_BASE_WINDOW_WIDTH), float(ENTERBC_BASE_WINDOW_HEIGHT));
+	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(ENTERBC_BASE_WINDOW_WIDTH), 64.f);
+	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y+64.f, 21.f, float(ENTERBC_BASE_WINDOW_HEIGHT)-64.f-45.f);
+	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_RIGHT, m_Pos.x+float(ENTERBC_BASE_WINDOW_WIDTH)-21.f, m_Pos.y+64.f, 21.f, float(ENTERBC_BASE_WINDOW_HEIGHT)-64.f-45.f);
+	RenderImage(IMAGE_ENTERBC_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y+float(ENTERBC_BASE_WINDOW_HEIGHT)-45.f, float(ENTERBC_BASE_WINDOW_WIDTH), 45.f);		
 	
 	g_pRenderText->SetFont( g_hFontBold );
 	g_pRenderText->SetTextColor( 0xFFFFFFFF );

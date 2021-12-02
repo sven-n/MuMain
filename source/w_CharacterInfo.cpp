@@ -1,14 +1,9 @@
 // w_CharacterInfo.cpp: implementation of the CHARACTER class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "w_CharacterInfo.h"
 #include "SkillManager.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CHARACTER::CHARACTER()
 {
@@ -153,12 +148,8 @@ PET_INFO* CHARACTER::GetEquipedPetInfo(int iPetType)
 }
 #endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 
-
-
-// MoveCharacter함수상에 사용자 지정 내용을 RenderCharacter 함수상에서 사용하고자 함입니다.
 #ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 
-// 제한 Counting을 두어 PostMoveProcess를 활성화 합니다.
 void CHARACTER::PostMoveProcess_Active( unsigned int uiLimitCount )
 {
 	if( m_pPostMoveProcess != NULL )
@@ -171,13 +162,11 @@ void CHARACTER::PostMoveProcess_Active( unsigned int uiLimitCount )
 	m_pPostMoveProcess->uiProcessingCount_PostMoveEvent = uiLimitCount;
 }
 
-// 현재 Counting을 반환 합니다.
 unsigned int CHARACTER::PostMoveProcess_GetCurProcessCount()
 {
 	return m_pPostMoveProcess->uiProcessingCount_PostMoveEvent;
 }
 
-// 현재 PostMoveProcess가 Processing중인지 반환 합니다.
 bool CHARACTER::PostMoveProcess_IsProcessing()
 {
 	if( m_pPostMoveProcess == NULL)
@@ -188,7 +177,6 @@ bool CHARACTER::PostMoveProcess_IsProcessing()
 	return (0 <= m_pPostMoveProcess->uiProcessingCount_PostMoveEvent);
 }
 
-// Tick Process 합니다.
 bool CHARACTER::PostMoveProcess_Process()
 {
 	if( m_pPostMoveProcess == NULL )
@@ -196,7 +184,6 @@ bool CHARACTER::PostMoveProcess_Process()
 		return false;
 	}
 	
-	// 한Tick당 한번씩 감산 시킵니다.
 	unsigned int uiCurretProcessingCount_ = m_pPostMoveProcess->uiProcessingCount_PostMoveEvent--;
 
 	if( 0 >= uiCurretProcessingCount_)

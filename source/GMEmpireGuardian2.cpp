@@ -262,13 +262,7 @@ bool GMEmpireGuardian2::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 				break;
 			case MONSTER01_DIE:
 				{
-// 					// »ùÇÃ ÀÌÆåÆ®
-//  					float Scale = 0.2f;
-//  					b->TransformByObjectBone( vPos, o, 30 );
-//  					CreateParticle(BITMAP_SMOKE+1, vPos, o->Angle, o->Light, 1, Scale);
-//  					
-//  					b->TransformByObjectBone( vPos, o, 17 );
-//  					CreateParticle(BITMAP_SMOKE+1, vPos, o->Angle, o->Light, 1, Scale);
+
 				}
 				break;
 			case MONSTER01_ATTACK1:

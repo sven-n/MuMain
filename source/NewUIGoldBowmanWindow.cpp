@@ -73,7 +73,7 @@ bool CNewUIGoldBowmanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 	// Exit Button
 	m_BtnExit.ChangeButtonImgState( true, IMAGE_GB_BTN_EXIT, false );
 	m_BtnExit.ChangeButtonInfo( m_Pos.x+13, m_Pos.y+392, 36, 29 );		
-	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );	// 1002 "닫기"
+	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );
 	
 	Show(false);
 
@@ -131,7 +131,7 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
 	}
 
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
-	//. Exit1 버튼 (기본처리)
+
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_GOLD_BOWMAN);
@@ -144,7 +144,6 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
 		return false;
 	}
 
-	// 서버에 시리얼 보내는 버튼
 	if( m_EditBox && m_BtnSerial.UpdateMouseEvent() )
 	{
 		SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
@@ -178,7 +177,6 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
 		}
 	}
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 	{
 		if(SEASON3B::IsPress(VK_RBUTTON))
@@ -228,7 +226,6 @@ bool CNewUIGoldBowmanWindow::Update()
 
 	if(m_EditBox)
 	{
-		// related윈도우가 설정이 안되어 있으면 키이벤트가 발생하지 않음으로 related윈도우 설정해준다.
 		if(m_EditBox->HaveFocus() && GetRelatedWnd() != m_EditBox->GetHandle())
 		{
 			SetRelatedWnd(m_EditBox->GetHandle());
@@ -261,53 +258,50 @@ void CNewUIGoldBowmanWindow::RenderTexts()
 	char Text[100];
 
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, getMonsterName(236) ); // npc Name file "황금의 궁수"
+	sprintf( Text, getMonsterName(236) ); // npc Name file
 	RenderText( Text, m_Pos.x, m_Pos.y+15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 
 	/////////////////////////////// top text /////////////////////////////////////////////////////
 	
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[891]); //"100%% 당첨 감사카드에 있는"
+	sprintf( Text, GlobalText[891]); //"100%%
 	RenderText( Text, m_Pos.x, m_Pos.y+80, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[892]); // "행운의 번호 12자리를 입력하세요!"
+	sprintf( Text, GlobalText[892]);
 	RenderText( Text, m_Pos.x, m_Pos.y+95, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[897]); // "행운의 번호를 등록하실 수 있는 기간"
+	sprintf( Text, GlobalText[897]);
 	RenderText( Text, m_Pos.x, m_Pos.y+110, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[898]); //"2003년 10월 28일 ~ 11월 30일"
+	sprintf( Text, GlobalText[898]);
 	RenderText( Text, m_Pos.x, m_Pos.y+125, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 
 
 	/////////////////////////////// bottom text /////////////////////////////////////////////////////
 
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[893]); //"행운 번호을 넣어주세요"
+	sprintf( Text, GlobalText[893]);
 	RenderText( Text, m_Pos.x, m_Pos.y+180, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 	
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[894]); // "예) AUS919DKL2J9"
+	sprintf( Text, GlobalText[894]);
 	RenderText( Text, m_Pos.x, m_Pos.y+195, 190, 0, 0xFF18FF00, 0x00000000, RT3_SORT_CENTER );
 	
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[916]); // "영문 O와 숫자 0, 영문 I와 숫자1을"
+	sprintf( Text, GlobalText[916]);
 	RenderText( Text, m_Pos.x, m_Pos.y+210, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 	
 	memset(&Text, 0, sizeof(char)*100);
-	sprintf( Text, GlobalText[917]); // "잘 구분해 주세요"
+	sprintf( Text, GlobalText[917]);
 	RenderText( Text, m_Pos.x, m_Pos.y+225, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 
 	if ( strcmp(g_strGiftName,"") )
 	{
-		// 획득한 아이템 이름
 		RenderText( g_strGiftName, m_Pos.x, m_Pos.y+330, 190, 0, 0xFFFFD200, 0x00000000, RT3_SORT_CENTER );
 	}
-
-////////////////////////////// edit box text /////////////////////////////////////////////////////////////
 
 	if( m_EditBox ) { 
 		m_EditBox->Render();
@@ -325,18 +319,10 @@ bool CNewUIGoldBowmanWindow::Render()
 {
 	EnableAlphaTest();
 	glColor4f(1.f, 1.f, 1.f, 1.f);
-	
-	// 프레임 렌더링
 	RenderFrame();
-
-	// 텍스트
 	RenderTexts();
-	
-	// 버튼 렌더링
 	RendeerButton();
-	
 	DisableAlphaBlend();
-
 	return true;
 }
 

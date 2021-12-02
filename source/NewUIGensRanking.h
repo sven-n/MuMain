@@ -75,9 +75,6 @@ namespace SEASON3B
 
 		enum IMAGE_INDEX
 		{
-			// 계급이 늘어날 경우 순서의 의해 추가 할것
-			// 1.대공 2.공작 3.후작 4.백작 5.자작 6.남작 7.기사단장 
-			// 8.상급기사 9.기사 10.근위대장 11.사관 12.백인장 13.십인장 14 사병
 			TITLENAME_NONE =	0,
 			TITLENAME_START =	1,
 			TITLENAME_END =		14,
@@ -99,11 +96,8 @@ namespace SEASON3B
 
 		POINT m_Pos;
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		FLOAT m_fBooleanSize;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		const float m_fBooleanSize;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 		int m_nContribution;
 		unicode::t_char m_szRanking[TEAMNAME_LENTH];
 		unicode::t_char m_szGensTeam[TEAMNAME_LENTH];
@@ -149,28 +143,22 @@ namespace SEASON3B
 	
 		float GetLayerDepth() { return 4.2f; }
 
-		// 기여도 관련
 		void SetContribution(int _Contribution);
 		int GetContribution();
 
-		// 다음 기여도까지 포인트
 		void SetNextContribution(int _NextContribution);
 		int GetNextContribution();
 
-		// 랭킹
 		bool SetRanking(int _Ranking);
 		unicode::t_char* GetRanking();
 
-		// 가입겐스
 		bool SetGensInfo();
 		bool SetGensTeamName(const char* _pTeamName);
 		unicode::t_char* GetGensTeamName();
 
-		// 계급관련
 		void SetTitleName();
 		const unicode::t_char* GetTitleName(BYTE _index);
 
-		// 계급장 랜더
 		void RanderMark(float _x, float _y, BYTE _GensInfluence, BYTE _GensRankInfo, int _ImageArea = MARK_RANKINFOWIN, float _RenderY = 0);
 		int GetImageIndex(BYTE _index);
 	};

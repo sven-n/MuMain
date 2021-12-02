@@ -126,10 +126,10 @@ void CNewUIGroup::Release()
 		if( pUIObj != NULL )
 		{
 #ifdef KWAK_ADD_TRACE_FUNC
-			__TraceF( TEXT( "UIÅ¬·¡½º ±×·ì ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(ÀÎµ¦½º:%d)ÀÌ ÀÖ½À´Ï´Ù. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´Ù. vecUI \n" ), iCount );
+			__TraceF( TEXT( "UIÅ¬·¡½º ±×·ì ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(ÀÎµ¦½º:%d)ÀÌ ÀÖ½À´Ï´. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´. vecUI \n" ), iCount );
 #else // KWAK_ADD_TRACE_FUNC
 			char	szOutput[128];
-			sprintf( szOutput, "UIÅ¬·¡½º ±×·ì ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(ÀÎµ¦½º:%d)ÀÌ ÀÖ½À´Ï´Ù. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´Ù. vecUI \n", iCount );
+			sprintf( szOutput, "UIÅ¬·¡½º ±×·ì ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(ÀÎµ¦½º:%d)ÀÌ ÀÖ½À´Ï´. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´. vecUI \n", iCount );
 			OutputDebugString( szOutput );
 #endif // KWAK_ADD_TRACE_FUNC
 		}

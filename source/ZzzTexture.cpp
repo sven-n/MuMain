@@ -1,8 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Jpeg, Tga 이미지 파일을 읽어들이는 함수
-// 수정할 일이 거의 없을것 같음
-//
-// *** 함수 레벨: 1
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -15,7 +11,8 @@
 
 CGlobalBitmap Bitmaps;
 
-struct my_error_mgr {
+struct my_error_mgr 
+{
 	struct jpeg_error_mgr pub;	
 	jmp_buf setjmp_buffer;	
 };
@@ -113,11 +110,7 @@ void SaveImage(int HeaderSize,char *Ext,char *filename,BYTE *PakBuffer,int Size)
 
 	if(PakBuffer==NULL || Size==0)
 	{
-#ifdef KJH_FIX_ARRAY_DELETE
 		SAFE_DELETE_ARRAY(PakBuffer);
-#else // KJH_FIX_ARRAY_DELETE
-		delete PakBuffer;
-#endif // KJH_FIX_ARRAY_DELETE
 	}
 }
 
@@ -192,11 +185,7 @@ bool OpenJpegBuffer(char *filename,float *BufferFloat)
 			Index += 3;
 		}
 	}
-#ifdef KJH_FIX_ARRAY_DELETE
 	SAFE_DELETE_ARRAY(Buffer);
-#else // KJH_FIX_ARRAY_DELETE
-	delete Buffer;
-#endif // KJH_FIX_ARRAY_DELETE
 	
 	(void) jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
@@ -253,17 +242,12 @@ void PopUpErrorCheckMsgBox(const char* szErrorMsg, bool bForceDestroy)
 
 	if(bForceDestroy)
 	{
-#ifdef FOR_WORK
 		MessageBox(g_hWnd, szErrorMsg, "ErrorCheckBox", MB_OK|MB_ICONERROR);
-#endif // FOR_WORK
 	}
 	else
 	{
-#ifdef FOR_WORK
-		strcat(szMsg, "\r\n\r\n 프로그램을 계속 실행하시겠습니까?\r\n");
 		int iResult = MessageBox(g_hWnd, szMsg, "ErrorCheckBox", MB_YESNO|MB_ICONERROR);
 		if(IDYES == iResult)
-#endif // FOR_WORK
 		{
 			return;
 		}

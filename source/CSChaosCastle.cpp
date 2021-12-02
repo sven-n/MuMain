@@ -94,7 +94,7 @@ void    ChangeChaosCastleUnit ( CHARACTER* c )
     }
 }
 
-bool    MoveChaosCastleObjectSetting ( int& objCount, int object )
+bool MoveChaosCastleObjectSetting ( int& objCount, int object )
 {
     if ( gMapManager.InChaosCastle()==false ) return false;
 
@@ -118,7 +118,7 @@ bool    MoveChaosCastleObjectSetting ( int& objCount, int object )
     return true;
 }
 
-bool    MoveChaosCastleObject ( OBJECT* o, int& object, int& visibleObject )
+bool MoveChaosCastleObject ( OBJECT* o, int& object, int& visibleObject )
 {
     if ( gMapManager.InChaosCastle()==true )
     {
@@ -151,7 +151,7 @@ bool    MoveChaosCastleObject ( OBJECT* o, int& object, int& visibleObject )
     return false;
 }
 
-bool    MoveChaosCastleAllObject ( OBJECT* o )
+bool MoveChaosCastleAllObject ( OBJECT* o )
 {
     if ( gMapManager.InChaosCastle()==false ) return false;
 
@@ -270,11 +270,7 @@ bool    MoveChaosCastleAllObject ( OBJECT* o )
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
-bool    CreateChaosCastleObject ( OBJECT* o )
+bool CreateChaosCastleObject ( OBJECT* o )
 {
     if ( gMapManager.InChaosCastle()==false ) return false;
 
@@ -304,11 +300,7 @@ bool    CreateChaosCastleObject ( OBJECT* o )
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  카오스 캐슬 월드의 오브젝트들에 효과를 추가한다.
-//////////////////////////////////////////////////////////////////////////
-bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
+bool RenderChaosCastleVisual ( OBJECT* o, BMD* b )
 {
     if ( gMapManager.InChaosCastle()==false ) return false;
 
@@ -316,7 +308,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
 
     switch ( o->Type )
     {
-    case    6 : //  구름 1.
+    case    6 :
 		if ( o->HiddenMesh!=-2 )
 		{
             vec3_t  Light;
@@ -329,7 +321,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
         o->HiddenMesh = -2;
         break;
 
-    case    7 : //  구름 2.
+    case    7 : 
 		if ( o->HiddenMesh!=-2 )
 		{
             vec3_t  Light;
@@ -342,7 +334,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
         o->HiddenMesh = -2;
         break;
 
-    case    8 : //  구름 3.
+    case    8 :
 		if ( o->HiddenMesh!=-2 )
 		{
             vec3_t  Light;
@@ -355,7 +347,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
         o->HiddenMesh = -2;
         break;
 
-    case    9 : //  구름 4.
+    case    9 :
 		if ( o->HiddenMesh!=-2 )
 		{
             vec3_t  Light;
@@ -368,7 +360,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
         o->HiddenMesh = -2;
         break;
 
-    case    10 : //  구름 5.
+    case    10 :
 		if ( o->HiddenMesh!=-2 )
 		{
             vec3_t  Light;
@@ -381,7 +373,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
         o->HiddenMesh = -2;
         break;
 
-    case    11 : //  구름 6.
+    case    11 :
 		if ( o->HiddenMesh!=-2 )
 		{
             vec3_t  Light;
@@ -394,7 +386,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
         o->HiddenMesh = -2;
         break;
 
-    case    12 : //  구름 7.
+    case    12 :
 		if ( o->HiddenMesh!=-2 )
 		{
             vec3_t  Light;
@@ -456,7 +448,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
     case    0 :
     case    1 :
     case    2 :
-    case    3 : //  전기 발생한다.
+    case    3 :
         if ( o->PKKey && o->HiddenMesh!=-2 )
         {
             Vector ( 0.f, 0.f, 0.f, p );
@@ -495,11 +487,7 @@ bool    RenderChaosCastleVisual ( OBJECT* o, BMD* b )
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  카오스캐슬의 바닥 효과.
-//////////////////////////////////////////////////////////////////////////
-void    RenderTerrainVisual ( int xi, int yi )
+void RenderTerrainVisual ( int xi, int yi )
 {
     if ( gMapManager.InChaosCastle()==false || rand()%8 ) return;
 

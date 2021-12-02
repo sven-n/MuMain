@@ -25,10 +25,10 @@ private:
 	void InitBuilder();
 	void Clear();
 
-public://Query로 접근 가능 하게 하자.
+public:
 	InfoFile* QueryInfo( InfoTextType type );
 
-private://make는 접근 하지 못 하도록 한다.
+private:
 	BoostSmart_Ptr(InfoFile) MakeInfo( InfoTextType type );
 
 private:

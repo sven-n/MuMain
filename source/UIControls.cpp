@@ -1,12 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 
-// 
-//
-// 
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
+#include "CComGem.h"
 #include "UIControls.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
@@ -32,10 +28,7 @@ float g_fScreenRate_x = 0;
 float g_fScreenRate_y = 0;
 int g_iWidthEx = 5;
 
-///////////////////////////////////////////
 extern int g_iChatInputType;
-
-/////////////////////////////////////////////
 
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 extern BOOL g_bUseWindowMode;
@@ -49,7 +42,7 @@ int CutStr(const char* pszSrcText, char * pTextOut, const int iTargetPixelWidth,
 
 	if (pszSrcText == NULL)
 	{
-		assert(!"텍스트 자르기 입력값 오류");
+		assert(!"CutStr Error");
 		return 0;
 	}
 
@@ -455,8 +448,8 @@ void CUIButton::Render()
 	if (GetState() == UISTATE_DISABLE)
 	{
 		glColor4f(1.0f, 0.4f, 0.4f, 1.0f);
-		RenderBitmap(BITMAP_INTERFACE_EX+9, m_iPos_x, m_iPos_y,
-			(float)m_iWidth, (float)m_iHeight, 0.f,0.f,49.f/64.f,16.f/16.f);
+		RenderBitmap(BITMAP_INTERFACE_EX+9, m_iPos_x, m_iPos_y,(float)m_iWidth, (float)m_iHeight, 0.f,0.f,49.f/64.f,16.f/16.f);
+
 		if (m_pszCaption != NULL)
 		{
 			SIZE TextSize;
@@ -464,8 +457,7 @@ void CUIButton::Render()
 			g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
 			g_pRenderText->SetTextColor(230, 220, 200, 255);
 			g_pRenderText->SetBgColor(0);
-			g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
-				m_iPos_y + 1 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
+			g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, m_iPos_y + 1 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
 		}
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		return;
@@ -484,11 +476,9 @@ void CUIButton::Render()
 	}
 
 	if (m_bMouseState == TRUE)
-		RenderBitmap(BITMAP_INTERFACE_EX+9, m_iPos_x + 1, m_iPos_y + 1,
-			(float)m_iWidth - 1, (float)m_iHeight - 1, 0.f,0.f,48.f/64.f,15.f/16.f);
+		RenderBitmap(BITMAP_INTERFACE_EX+9, m_iPos_x + 1, m_iPos_y + 1,	(float)m_iWidth - 1, (float)m_iHeight - 1, 0.f,0.f,48.f/64.f,15.f/16.f);
 	else
-		RenderBitmap(BITMAP_INTERFACE_EX+9, m_iPos_x, m_iPos_y,
-			(float)m_iWidth, (float)m_iHeight, 0.f,0.f,49.f/64.f,16.f/16.f);
+		RenderBitmap(BITMAP_INTERFACE_EX+9, m_iPos_x, m_iPos_y, (float)m_iWidth, (float)m_iHeight, 0.f,0.f,49.f/64.f,16.f/16.f);
 
 	if (m_pszCaption != NULL)
 	{
@@ -501,13 +491,11 @@ void CUIButton::Render()
 		
 		if (m_bMouseState == TRUE)
 		{
-			g_pRenderText->RenderText(m_iPos_x + 1 + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
-				m_iPos_y + 2 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
+			g_pRenderText->RenderText(m_iPos_x + 1 + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, m_iPos_y + 2 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
 		}
 		else
 		{
-			g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
-				m_iPos_y + 1 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
+			g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, m_iPos_y + 1 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
 		}
 	}
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -634,7 +622,7 @@ typename std::deque<T>::iterator CUITextListBox<T>::SLGetSelectLine()
 	{
 		if (iLineCount == m_iSelectLineNum) return resultIter;
 	}
-	assert(!"라인 계산 오류");
+	assert(!"SLGetSelectLine");
 	return m_TextList.end();
 }
 
@@ -702,7 +690,7 @@ void CUITextListBox<T>::ComputeScrollBar()
 	{
 		m_fScrollBarRange_top = m_iPos_y - m_iHeight;
 		m_fScrollBarRange_bottom = m_iPos_y;
-		m_fScrollBarHeight = 20;	// 크기 제한
+		m_fScrollBarHeight = 20;
 
 		float fPosRate = 0;
 		if (GetLineNum() - GetBoxSize() <= 0) fPosRate = 1;
@@ -725,7 +713,7 @@ void CUITextListBox<T>::ComputeScrollBar()
 
 		float fLineRate = (GetLineNum() > 0 ? (float)m_iNumRenderLine / (float)GetLineNum() : 1);
 		m_fScrollBarHeight = (m_fScrollBarRange_bottom - m_fScrollBarRange_top) * (fLineRate < 1 ? fLineRate : 1);
-		if (m_fScrollBarHeight < 2) m_fScrollBarHeight = 2;	// 크기 제한
+		if (m_fScrollBarHeight < 2) m_fScrollBarHeight = 2;
 		float fPosRate = (GetLineNum() > 0 ? (float)m_iCurrentRenderEndLine / (float)GetLineNum() : 0);
 		m_fScrollBarPos_y = m_fScrollBarRange_bottom 
 			- ((m_fScrollBarRange_bottom - m_fScrollBarRange_top - (m_fScrollBarHeight > 2 ? 0 : m_fScrollBarHeight)) * fPosRate)
@@ -775,7 +763,7 @@ BOOL CUITextListBox<T>::HandleMessage()
 			}
 		}
 		break;
-	case UI_MESSAGE_LISTSCRLTOP:	// 스크롤 맨 위로
+	case UI_MESSAGE_LISTSCRLTOP:
 		Scrolling(-1000);
 		if (m_bUseSelectLine == TRUE && m_TextList.empty() == FALSE)
 		{
@@ -1079,8 +1067,7 @@ BOOL CUITextListBox<T>::DoMouseAction()
 				}
  				else
 				{
-					float fRate = (m_fScrollBarRange_bottom - m_fScrollBarPos_y - m_fScrollBarHeight * 1.5f)
-						/ (m_fScrollBarRange_bottom - m_fScrollBarRange_top - m_fScrollBarHeight * 1.5f);
+					float fRate = (m_fScrollBarRange_bottom - m_fScrollBarPos_y - m_fScrollBarHeight * 1.5f) / (m_fScrollBarRange_bottom - m_fScrollBarRange_top - m_fScrollBarHeight * 1.5f);
 					m_iCurrentRenderEndLine = fRate * (float)(GetLineNum() - GetBoxSize()) + 0.5f;
 				}
 			}
@@ -1092,9 +1079,7 @@ BOOL CUITextListBox<T>::DoMouseAction()
 				else if (m_fScrollBarPos_y > m_fScrollBarRange_bottom - m_fScrollBarHeight)
 					m_iCurrentRenderEndLine = 0;
 				else
-					m_iCurrentRenderEndLine = (m_fScrollBarRange_bottom - m_fScrollBarPos_y - m_fScrollBarHeight + 0.5f)
-						/ (m_fScrollBarRange_bottom - m_fScrollBarRange_top - (m_fScrollBarHeight > 2 ? 0 : 1.0f))
-						* (float)GetLineNum();
+					m_iCurrentRenderEndLine = (m_fScrollBarRange_bottom - m_fScrollBarPos_y - m_fScrollBarHeight + 0.5f) / (m_fScrollBarRange_bottom - m_fScrollBarRange_top - (m_fScrollBarHeight > 2 ? 0 : 1.0f))	* (float)GetLineNum();
 			}
 		}
 		else
@@ -1147,8 +1132,6 @@ CUIGuildListBox::CUIGuildListBox()
 	m_bIsGuildMaster = FALSE;
 	m_bNewTypeScrollBar = FALSE;
 
-//	SetPosiion(213, 415);
-//	SetSize(213, 250);
 	m_iNumRenderLine = 18;
 	SetPosition(460, 340);
 	SetSize(170, 250);
@@ -1183,36 +1166,26 @@ void CUIGuildListBox::AddText(const char * pszID, BYTE Number, BYTE Server)
 
 void CUIGuildListBox::RenderInterface()
 {
-	// 틀 출력
 	const int iFillImageHeight = 40;
 	const int iFrameImageHeight = 5;
 
 	int iBlockHeight = m_iNumRenderLine / 3;
 	m_iHeight = iFillImageHeight * iBlockHeight + iFrameImageHeight * 2;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int yPos = m_iPos_y - m_iHeight;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	ComputeScrollBar();
 
 	if (GetLineNum() >= m_iNumRenderLine)
 	{
-		RenderBitmap(BITMAP_INTERFACE_EX+4, (float)m_iPos_x + m_iWidth - 19, (float)m_iPos_y - m_iHeight + 8,
-			13.0f, 13.0f, 0.0f, 0.0f, 13.0f/16.0f, 13.0f/16.0f);	// ▲
+		RenderBitmap(BITMAP_INTERFACE_EX+4, (float)m_iPos_x + m_iWidth - 19, (float)m_iPos_y - m_iHeight + 8,13.0f, 13.0f, 0.0f, 0.0f, 13.0f/16.0f, 13.0f/16.0f);
 		EnableAlphaTest();
-		RenderBitmap(BITMAP_INTERFACE_EX+4, (float)m_iPos_x + m_iWidth - 19, (float)m_iPos_y - 4,
-			13.0f, -13.0f, 0.0f, 0.0f, 13.0f/16.0f, 13.0f/16.0f);	// ▼
+		RenderBitmap(BITMAP_INTERFACE_EX+4, (float)m_iPos_x + m_iWidth - 19, (float)m_iPos_y - 4,13.0f, -13.0f, 0.0f, 0.0f, 13.0f/16.0f, 13.0f/16.0f);
 		DisableAlphaBlend();
 
-		RenderBitmap(BITMAP_INTERFACE_EX+3, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth - 6, m_fScrollBarRange_top,
-			m_fScrollBarWidth, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 0.0f, 13.0f/16.0f, 13.0f/16.0f);
+		RenderBitmap(BITMAP_INTERFACE_EX+3, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth - 6, m_fScrollBarRange_top,m_fScrollBarWidth, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 0.0f, 13.0f/16.0f, 13.0f/16.0f);
 
-		RenderBitmap(BITMAP_INTERFACE_EX+2, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth - 5, m_fScrollBarPos_y,
-			m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 0.0f, 11.0f/16.0f, 11.0f/16.0f);
+		RenderBitmap(BITMAP_INTERFACE_EX+2, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth - 5, m_fScrollBarPos_y,m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 0.0f, 11.0f/16.0f, 11.0f/16.0f);
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUIGuildListBox::RenderDataLine(int iLineNumber)
 {
@@ -1287,30 +1260,6 @@ BOOL CUIGuildListBox::RenderDataLine(int iLineNumber)
 	DisableAlphaBlend();
 	return TRUE;
 }
-
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-BOOL CUIGuildListBox::DoLineMouseAction(int iLineNumber)
-{
-	if (::CheckMouseIn(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13))
-	{
-		if (MouseLButtonPush)
-		{
-			SLSetSelectLine(m_iCurrentRenderEndLine + iLineNumber + 1);
-			m_TextListIter->m_bIsSelected = (m_TextListIter->m_bIsSelected + 1) % 2;	// T/F Reverse
-			MouseLButtonPush = false;
-		}
-	}
-	return TRUE;
-}
-
-int CUIGuildListBox::GetRenderLinePos_y(int iLineNumber)
-{
-	if (GetLineNum() > m_iNumRenderLine)
-		return (m_iPos_y - m_iHeight + (m_iNumRenderLine - 1)* 13 - iLineNumber * 13 + 3);
-	else
-		return (m_iPos_y - m_iHeight + (GetLineNum() - 1) * 13 - iLineNumber * 13 + 3);
-}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 BOOL CUIGuildListBox::DoSubMouseAction()
 {
@@ -1392,25 +1341,12 @@ void CUISimpleChatListBox::AddText(const char * pszID, const char * pszText, int
 	strncpy(text.m_szText, pszText, MAX_TEXT_LENGTH + 1);
 	//memcpy(text.m_szText, pszText, strlen(pszText) + 1);
 	m_TextList.push_front(text);
-
-	//RemoveText();
-	//if (m_iCurrentRenderEndLine != 0) ++m_iCurrentRenderEndLine;
-
-//	if (GetLineNum() < m_iNumRenderLine);
-//	else if (GetLineNum() - m_iCurrentRenderEndLine < m_iNumRenderLine) 
-//		m_iCurrentRenderEndLine = GetLineNum() - m_iNumRenderLine;
-
-	// 줄 개수 재 계산
 	CalcLineNum();
 }
 
 void CUISimpleChatListBox::Render()
 {
-	
-	// 틀 출력
 	RenderInterface();
-
-	// 내용
 	MoveRenderLine();
 	
 	glColor3f(1.f,1.f,1.f);
@@ -1444,18 +1380,14 @@ void CUISimpleChatListBox::RenderInterface()
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 		
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 
 		SetLineColor(2);
 		RenderColor((float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarRange_top,(float)1,(float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
@@ -1464,28 +1396,22 @@ void CUISimpleChatListBox::RenderInterface()
 
 		if (GetLineNum() >= m_iNumRenderLine)
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 		else
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 	}
 }
 
 void CUISimpleChatListBox::CalcLineNum()
 {
-	if (m_dwParentUIID != 0)	// 사이즈 바꾸고 시작하자
+	if (m_dwParentUIID != 0)
 	{
 		CUIBaseWindow * pWindow = g_pWindowMgr->GetWindow(m_dwParentUIID);
 		if (pWindow != NULL)
@@ -1563,13 +1489,6 @@ void CUISimpleChatListBox::AddTextToRenderList(const char * pszID, const char * 
 		//memcpy(text.m_szText, pszText, strlen(pszText) + 1);
 		m_RenderTextList.push_front(text);
 	}
-
-// 	RemoveText();
-//	if (m_iCurrentRenderEndLine != 0) ++m_iCurrentRenderEndLine;
-
-//	if (GetLineNum() < m_iNumRenderLine);
-//	else if (GetLineNum() - m_iCurrentRenderEndLine < m_iNumRenderLine) 
-//		m_iCurrentRenderEndLine = GetLineNum() - m_iNumRenderLine;
 }
 
 BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
@@ -1650,30 +1569,6 @@ BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
 	return TRUE;
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-BOOL CUISimpleChatListBox::DoLineMouseAction(int iLineNumber)
-{
-	if (::CheckMouseIn(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13))
-	{
-		if (MouseLButtonPush)
-		{
-			SLSetSelectLine(m_iCurrentRenderEndLine + iLineNumber + 1);
-			m_TextListIter->m_bIsSelected = (m_TextListIter->m_bIsSelected + 1) % 2;	// T/F Reverse
-			MouseLButtonPush = false;
-		}
-	}
-	return TRUE;
-}
-
-int CUISimpleChatListBox::GetRenderLinePos_y(int iLineNumber)
-{
-	if (GetLineNum() > m_iNumRenderLine)
-		return (m_iPos_y - m_iHeight + (m_iNumRenderLine - 1)* 13 - iLineNumber * 13 + 3);
-	else
-		return (m_iPos_y - m_iHeight + (GetLineNum() - 1) * 13 - iLineNumber * 13 + 3);
-}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
 CUIChatPalListBox::CUIChatPalListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
@@ -1707,11 +1602,7 @@ CUIChatPalListBox::CUIChatPalListBox()
 
 void CUIChatPalListBox::AddText(const char * pszID, BYTE Number, BYTE Server)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	if(pszID == NULL)	return;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if (pszID == "")	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	static GUILDLIST_TEXT text;
 	text.m_bIsSelected = FALSE;
@@ -1807,20 +1698,15 @@ void CUIChatPalListBox::RenderInterface()
 
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
-		//-_- 버튼
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
 		
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
 
 		SetLineColor(2);
 		RenderColor((float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarRange_top,(float)1,(float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
@@ -1829,21 +1715,15 @@ void CUIChatPalListBox::RenderInterface()
 
 		if (GetLineNum() >= m_iNumRenderLine)
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 		else
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 	}
 }
@@ -1998,18 +1878,14 @@ void CUIWindowListBox::RenderInterface()
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 		
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 
 		SetLineColor(2);
 		RenderColor((float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarRange_top,(float)1,(float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
@@ -2018,21 +1894,15 @@ void CUIWindowListBox::RenderInterface()
 
 		if (GetLineNum() >= m_iNumRenderLine)
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 		else
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 	}
 }
@@ -2224,18 +2094,14 @@ void CUILetterListBox::RenderInterface()
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 		
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 
 		SetLineColor(2);
 		RenderColor((float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarRange_top,(float)1,(float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
@@ -2244,21 +2110,15 @@ void CUILetterListBox::RenderInterface()
 
 		if (GetLineNum() >= m_iNumRenderLine)
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1, m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 		else
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top, m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top, m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1, m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 	}
 }
@@ -2335,13 +2195,12 @@ BOOL CUILetterListBox::DoLineMouseAction(int iLineNumber)
 	}
 	return TRUE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CUILetterTextListBox::CUILetterTextListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
 	m_iCurrentRenderEndLine = 0;
-	m_iNumRenderLine = 6;	// 3의 배수로 -_-
+	m_iNumRenderLine = 6;
 
 	m_fScrollBarRange_top = 0;
 	m_fScrollBarRange_bottom = 0;
@@ -2357,7 +2216,6 @@ CUILetterTextListBox::CUILetterTextListBox()
 	m_bUseMultiline = TRUE;
 	m_iScrollType = UILISTBOX_SCROLL_UPDOWN;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUILetterTextListBox::AddText(const char * pszText)
 {
@@ -2371,18 +2229,12 @@ void CUILetterTextListBox::AddText(const char * pszText)
 	strncpy(text.m_szText, pszText, MAX_LETTERTEXT_LENGTH + 1);
 	m_TextList.push_front(text);
 	SLSetSelectLine(0);
-
-	// 줄 개수 재 계산
 	CalcLineNum();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUILetterTextListBox::Render()
 {
-	// 틀 출력
 	RenderInterface();
-
-	// 내용
 	MoveRenderLine();
 	
 	glColor3f(1.f,1.f,1.f);
@@ -2392,11 +2244,11 @@ void CUILetterTextListBox::Render()
 	{
 		if (m_TextListIter == m_RenderTextList.end()) break;
 		BOOL bResult = RenderDataLine(i);
-		if (bResult < 0)	// 공란 삽입 (-1 * 공란 개수)
+		if (bResult < 0)
 		{
 			i -= bResult;
 		}
-		else if (bResult == FALSE)	// 라인 스킵
+		else if (bResult == FALSE)
 		{
 			--i;
 		}
@@ -2408,25 +2260,19 @@ void CUILetterTextListBox::Render()
 
 void CUILetterTextListBox::RenderInterface()
 {
-	// 스크롤 바
 	ComputeScrollBar();
 
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
-		//-_- 버튼
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 		
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 
 		SetLineColor(2);
 		RenderColor((float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarRange_top,(float)1,(float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
@@ -2435,46 +2281,39 @@ void CUILetterTextListBox::RenderInterface()
 
 		if (GetLineNum() >= m_iNumRenderLine)
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 		else
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUILetterTextListBox::CalcLineNum()
 {
-	if (m_dwParentUIID != 0)	// 사이즈 바꾸고 시작하자
+	if (m_dwParentUIID != 0)
 	{
 		CUIBaseWindow * pWindow = g_pWindowMgr->GetWindow(m_dwParentUIID);
 		if (pWindow != NULL)
 		{
 			switch(m_iResizeType)
 			{
-			case 0:	// 절대;절대
-				if (m_iRelativeWidth == 0 && m_iRelativeHeight == 0) break;	// 사이즈 변하지 않는것
+			case 0:
+				if (m_iRelativeWidth == 0 && m_iRelativeHeight == 0) break;
 				else SetSize(m_iRelativeWidth, m_iRelativeHeight);
 				break;
-			case 1:	// 상대;절대
+			case 1:
 				SetSize(pWindow->RWidth() + m_iRelativeWidth, m_iRelativeHeight);
 				break;
-			case 2:	// 절대;상대
+			case 2:
 				SetSize(m_iRelativeWidth, pWindow->RHeight() + m_iRelativeHeight);
 				break;
-			case 3:	// 상대;상대
+			case 3:
 				SetSize(pWindow->RWidth() + m_iRelativeWidth, pWindow->RHeight() + m_iRelativeHeight);
 				break;
 			default:
@@ -2487,7 +2326,6 @@ void CUILetterTextListBox::CalcLineNum()
 	std::deque<LETTER_TEXT>::reverse_iterator iter;
 	for (iter = m_TextList.rbegin(); iter != m_TextList.rend(); ++iter)
 	{
-		// 텍스트 만들기
 		AddTextToRenderList(iter->m_szText);
 	}
 }
@@ -2497,7 +2335,7 @@ void CUILetterTextListBox::AddTextToRenderList(const char * pszText)
 	if (pszText == NULL) return;
 
 	static LETTER_TEXT text;
-	if (strlen(pszText) >= 20)	// 사이즈 오버
+	if (strlen(pszText) >= 20)
 	{
 		static char Text1[80][MAX_TEXT_LENGTH + 1];
 		int iLine = CutText3(pszText, Text1[0], m_iWidth - 30, 80, MAX_TEXT_LENGTH + 1);
@@ -2518,15 +2356,7 @@ void CUILetterTextListBox::AddTextToRenderList(const char * pszText)
 		//memcpy(text.m_szText, pszText, strlen(pszText) + 1);
 		m_RenderTextList.push_front(text);
 	}
-
-// 	RemoveText();
-//	if (m_iCurrentRenderEndLine != 0) ++m_iCurrentRenderEndLine;
-
-//	if (GetLineNum() < m_iNumRenderLine);
-//	else if (GetLineNum() - m_iCurrentRenderEndLine < m_iNumRenderLine) 
-//		m_iCurrentRenderEndLine = GetLineNum() - m_iNumRenderLine;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int CUILetterTextListBox::GetRenderLinePos_y(int iLineNumber)
 {
@@ -2535,7 +2365,6 @@ int CUILetterTextListBox::GetRenderLinePos_y(int iLineNumber)
 	else
 		return (m_iPos_y - m_iHeight + (GetLineNum() - 1) * 13 - iLineNumber * 13 + 3);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUILetterTextListBox::RenderDataLine(int iLineNumber)
 {
@@ -2555,25 +2384,6 @@ BOOL CUILetterTextListBox::RenderDataLine(int iLineNumber)
 	return TRUE;
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-BOOL CUILetterTextListBox::DoLineMouseAction(int iLineNumber)
-{
-	if (::CheckMouseIn(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13))
-	{
-		if (MouseLButtonPush)
-		{
-			SLSetSelectLine(m_iCurrentRenderEndLine + iLineNumber + 1);
-			m_TextListIter->m_bIsSelected = (m_TextListIter->m_bIsSelected + 1) % 2;	// T/F Reverse
-			MouseLButtonPush = false;
-		}
-	}
-	return TRUE;
-}
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifdef ADD_SOCKET_MIX
 CUISocketListBox::CUISocketListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
@@ -2634,13 +2444,11 @@ void CUISocketListBox::SetNumRenderLine(int iLine)
 
 void CUISocketListBox::RenderInterface()
 {
-	// 배경칠
 	EnableAlphaTest();
 	SetLineColor(7, 0.4f);
 	RenderColor(m_iPos_x - 1, m_iPos_y - m_iHeight - 1, m_iWidth + 1, m_iHeight + 2);
 	EndRenderColor();
 
-	// 스크롤 바
 	if (GetState() != UISTATE_SCROLL)
 		ComputeScrollBar();
 
@@ -2655,7 +2463,6 @@ int CUISocketListBox::GetRenderLinePos_y(int iLineNumber)
 	else
 		return (m_iPos_y - m_iHeight + (GetLineNum() - 1) * 13 - iLineNumber * 13 + 3);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUISocketListBox::RenderDataLine(int iLineNumber)
 {
@@ -2688,7 +2495,6 @@ BOOL CUISocketListBox::RenderDataLine(int iLineNumber)
 
 	return TRUE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CUISocketListBox::DoLineMouseAction(int iLineNumber)
 {
@@ -2704,7 +2510,6 @@ BOOL CUISocketListBox::DoLineMouseAction(int iLineNumber)
 	}
 	return TRUE;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUISocketListBox::DeleteText(int iSocketIndex)
 {
@@ -2728,8 +2533,6 @@ void CUISocketListBox::DeleteText(int iSocketIndex)
 	if (SLGetSelectLineNum() != 1) SLSelectNextLine();
 	m_TextList.erase(m_TextListIter);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
-#endif	// ADD_SOCKET_MIX
 
 CUIRenderText::CUIRenderText() : m_pRenderText(NULL), m_iRenderTextType(-1) {}
 CUIRenderText::~CUIRenderText() { Release(); }
@@ -2742,15 +2545,15 @@ CUIRenderText* CUIRenderText::GetInstance()
 
 bool CUIRenderText::Create(int iRenderTextType, HDC hDC)
 {
-	if(iRenderTextType == 0)	// 구버전
+	if(iRenderTextType == 0)
 	{
 		m_pRenderText = new CUIRenderTextOriginal;
 		if(false == m_pRenderText->Create(hDC))
 			return false;
 	}
-	else if(iRenderTextType == 1)	// 새버전
+	else if(iRenderTextType == 1)
 	{
-		//m_pRenderText = new CUIRenderTextAdvance;		/* 사용하지 않으므로 */
+		//m_pRenderText = new CUIRenderTextAdvance;
 	}
 	return true;
 }
@@ -2817,9 +2620,7 @@ void CUIRenderText::SetFont(HFONT hFont)
 		m_pRenderText->SetFont(hFont);
 }
 
-void CUIRenderText::RenderText(int iPos_x, int iPos_y, const char* pszText, 
-							   int iBoxWidth /* = 0 */, int iBoxHeight /* = 0 */, 
-							   int iSort /* = RT3_SORT_LEFT */, OUT SIZE* lpTextSize /* = NULL */)
+void CUIRenderText::RenderText(int iPos_x, int iPos_y, const char* pszText, int iBoxWidth /* = 0 */, int iBoxHeight /* = 0 */, int iSort /* = RT3_SORT_LEFT */, OUT SIZE* lpTextSize /* = NULL */)
 {
 	if(m_pRenderText)
 	{
@@ -2841,8 +2642,8 @@ bool CUIRenderTextOriginal::Create(HDC hDC)
     DIB_INFO = (BITMAPINFO*)new BYTE[ sizeof(BITMAPINFOHEADER) + sizeof(PALETTEENTRY) * 256 ];
     memset( DIB_INFO, 0x00, sizeof(BITMAPINFOHEADER) );
     DIB_INFO->bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
-    DIB_INFO->bmiHeader.biWidth       = 640*g_fScreenRate_x;		//. 640 기준
-	DIB_INFO->bmiHeader.biHeight      = -(480*g_fScreenRate_y);		//. 480 기준
+    DIB_INFO->bmiHeader.biWidth       = 640*g_fScreenRate_x;		//. 640
+	DIB_INFO->bmiHeader.biHeight      = -(480*g_fScreenRate_y);		//. 480
     DIB_INFO->bmiHeader.biPlanes      = 1;
     DIB_INFO->bmiHeader.biBitCount    = 24;
     DIB_INFO->bmiHeader.biCompression = BI_RGB;
@@ -2899,7 +2700,7 @@ void CUIRenderTextOriginal::SetFont(HFONT hFont) { SelectObject(m_hFontDC, hFont
 
 void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
 {
-	const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;		// 폰트 텍스쳐의 가로, 세로 사이즈
+	const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
 	
 	SIZE FontDCSize = { 640*g_fScreenRate_x, 480*g_fScreenRate_y };
 	int iPitch = ((FontDCSize.cx*24+31)&~31)>>3;
@@ -2914,7 +2715,7 @@ void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
 			if((SrcIndex > iPitch*FontDCSize.cy) || (DstIndex > LIMIT_WIDTH*4*LIMIT_HEIGHT))
 			{
 #ifdef _DEBUG
-				__asm { int 3 };			//. 절대로 들어오면 안됨: 꼭 디버깅 하세요.
+				__asm { int 3 };
 #endif // _DEBUG
 				return;
 			}
@@ -2926,7 +2727,7 @@ void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
 			else									// 배경
 			{
 				//*((unsigned int *)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
-				*((unsigned int *)(pBitmapFont->Buffer + DstIndex)) = 0;	//. 투과
+				*((unsigned int *)(pBitmapFont->Buffer + DstIndex)) = 0;
 			}
 			SrcIndex += 3;
 			DstIndex += 4;
@@ -2985,7 +2786,7 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const unicode::t_
 	
 	MU_POINTF RealBoxPos = { (float)iPos_x*g_fScreenRate_x, (float)iPos_y*g_fScreenRate_y };
 	SIZEF RealBoxSize = { (float)iBoxWidth*g_fScreenRate_x, (float)iBoxHeight*g_fScreenRate_y };
-	SIZEF RealRenderingSize = { RealTextSize.cx, RealTextSize.cy };		// 현재 해상도 기준
+	SIZEF RealRenderingSize = { RealTextSize.cx, RealTextSize.cy };	
 	
 	if(RealBoxSize.cx == 0)
 		RealBoxSize.cx = RealTextSize.cx;
@@ -3137,9 +2938,6 @@ void CheckTextInputBoxIME(int iMode)
 		if (dwConv != IME_CMODE_ALPHANUMERIC)
 		{
 			g_dwBKConv = dwConv;
-
-			// IME 상태를 영문으로
-			//CreateWhisper("","IMEConv 상태를 영문으로",3);
 			g_bForceIMEConv = TRUE;
 			ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
 		}
@@ -3373,7 +3171,6 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	return CallWindowProcW(pTextInputBox->m_hOldProc, hWnd, msg, wParam, lParam );
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputBox::SetIMEPosition()
 {
@@ -3507,7 +3304,6 @@ void CUITextInputBox::SetSize(int iWidth, int iHeight)
 		SendMessageW(m_hEditWnd, EM_SETSEL, (WPARAM)0, (LPARAM)0);
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, BOOL bIsPassword)
 {
@@ -3531,16 +3327,7 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
 	m_iRealWindowPos_x = m_iPos_x * g_fScreenRate_x + WindowWidth;
 	m_iRealWindowPos_y = m_iPos_y * g_fScreenRate_y + WindowHeight;
 
-#ifdef DEBUG_FONT_TEXTURE_TEST
-	static int iMove = 0;		//! test
-	iMove += 30;
-	m_iRealWindowPos_x = 0;
-	m_iRealWindowPos_y = iMove;
-#endif // #ifdef DEBUG_FONT_TEXTURE_TEST
-
-	m_hEditWnd = CreateWindowW(L"edit", NULL,WS_CHILD | WS_VISIBLE | dwOptionFlag,
-		m_iRealWindowPos_x, m_iRealWindowPos_y, iWidth*g_fScreenRate_x, iHeight*g_fScreenRate_y,
-		m_hParentWnd, (HMENU)ID_UICEDIT,g_hInst, NULL);
+	m_hEditWnd = CreateWindowW(L"edit", NULL,WS_CHILD | WS_VISIBLE | dwOptionFlag,m_iRealWindowPos_x, m_iRealWindowPos_y, iWidth*g_fScreenRate_x, iHeight*g_fScreenRate_y,m_hParentWnd, (HMENU)ID_UICEDIT,g_hInst, NULL);
 	
 	SetSize(iWidth, iHeight);
 	if(m_hEditWnd)
@@ -3804,18 +3591,14 @@ void CUITextInputBox::RenderScrollbar()
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x+m_iWidth-m_fScrollBarWidth, m_iPos_y - 4, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth, (float)m_iPos_y - 4,
-				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth, (float)m_iPos_y - 4,13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth, (float)m_iPos_y - 4,
-				13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth, (float)m_iPos_y - 4,13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
 		
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x+m_iWidth-m_fScrollBarWidth, m_iPos_y + m_iHeight - 9, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9,
-				13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9,13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9,
-				13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9,13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
 
 		EnableAlphaTest();
 		SetLineColor(2);
@@ -3824,12 +3607,9 @@ void CUITextInputBox::RenderScrollbar()
 		EndRenderColor();
 		DisableAlphaBlend();
 
-		RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth+1, m_fScrollBarPos_y,
-			m_fScrollBarWidth-1, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-		RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth+1, m_fScrollBarPos_y,
-			m_fScrollBarWidth-2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-		RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth+1, m_fScrollBarPos_y + m_fScrollBarHeight,
-			m_fScrollBarWidth-2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+		RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth+1, m_fScrollBarPos_y,m_fScrollBarWidth-1, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+		RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth+1, m_fScrollBarPos_y,m_fScrollBarWidth-2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+		RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x+m_iWidth-m_fScrollBarWidth+1, m_fScrollBarPos_y + m_fScrollBarHeight,m_fScrollBarWidth-2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 	}
 
 }
@@ -3947,7 +3727,6 @@ BOOL CUITextInputBox::DoMouseAction()
 		if (MouseLButtonPush)
 		{
 			GiveFocus(TRUE);
-//			MouseLButtonPush = false;
 			MouseUpdateTime = 0;
 			MouseUpdateTimeMax = 6;
 			//PlayBuffer(SOUND_CLICK01);
@@ -3962,9 +3741,7 @@ BOOL CUITextInputBox::DoMouseAction()
 		{
 			MouseOnWindow = true;
 			m_fScrollBarPos_y = (float)MouseY - m_fScrollBarClickPos_y;
-			int iCurrentRenderEndLine = (m_fScrollBarPos_y - m_fScrollBarRange_top + 0.5f)
-				/ (m_fScrollBarRange_bottom - m_fScrollBarRange_top)
-				* (float)SendMessage(m_hEditWnd, EM_GETLINECOUNT, 0, 0);
+			int iCurrentRenderEndLine = (m_fScrollBarPos_y - m_fScrollBarRange_top + 0.5f) / (m_fScrollBarRange_bottom - m_fScrollBarRange_top)	* (float)SendMessage(m_hEditWnd, EM_GETLINECOUNT, 0, 0);
 			SetScrollPos(m_hEditWnd, SB_VERT, iCurrentRenderEndLine, TRUE);
 			SendMessageW(m_hEditWnd, EM_LINESCROLL, 0, -10000);
 			SendMessageW(m_hEditWnd, EM_LINESCROLL, 0, iCurrentRenderEndLine);
@@ -4507,7 +4284,7 @@ void CUISlideHelp::ManageSlide()
 		if (m_SlideQueueIter->first > m_dwCurrentSecond) break;
 		else
 		{
-			if ( m_SlideQueueIter->second.m_iType == -1 && m_SlideQueueIter->first + 60 < m_dwCurrentSecond );	// 시간 지나면 삭제
+			if ( m_SlideQueueIter->second.m_iType == -1 && m_SlideQueueIter->first + 60 < m_dwCurrentSecond );
 			else if ( AddSlideText( m_SlideQueueIter->second.m_pszText, m_SlideQueueIter->second.m_dwTextColor ) == FALSE ) break;
 			
 			SetScrollSpeed(m_SlideQueueIter->second.m_fSpeed);
@@ -4732,8 +4509,6 @@ void CUIGuildNoticeListBox::AddText( const char* szContent )
 	SLSetSelectLine(0);
 	if (GetLineNum() > m_iNumRenderLine) ++m_iCurrentRenderEndLine;
 
-//	if (m_iCurrentRenderEndLine != 0) ++m_iCurrentRenderEndLine;
-
 	if (GetLineNum() < m_iNumRenderLine);
 	else if (GetLineNum() - m_iCurrentRenderEndLine < m_iNumRenderLine) 
 		m_iCurrentRenderEndLine = GetLineNum() - m_iNumRenderLine;
@@ -4744,7 +4519,6 @@ void CUIGuildNoticeListBox::AddText( const char* szContent )
 	if (m_TextList.empty() == FALSE)
 	{
 		SLSetSelectLine(GetLineNum());
-//		m_iCurrentRenderEndLine = 0;
 		Scrolling(-10000);
 	}
 }
@@ -4758,29 +4532,24 @@ void CUIGuildNoticeListBox::SetNumRenderLine(int iLine)
 
 void CUIGuildNoticeListBox::RenderInterface()
 {
-
+	return;
 	EnableAlphaTest();
 	SetLineColor(7, 0.4f);
 	RenderColor(m_iPos_x - 1, m_iPos_y - m_iHeight - 1, m_iWidth + 1, m_iHeight + 2);
-
 	EndRenderColor();
 	ComputeScrollBar();
 
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
 		
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
 
 		EnableAlphaTest();
 		SetLineColor(2);
@@ -4790,21 +4559,15 @@ void CUIGuildNoticeListBox::RenderInterface()
 
 		if (GetLineNum() >= m_iNumRenderLine)
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 		else
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1, m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 	}
 }
@@ -4859,12 +4622,10 @@ BOOL CUIGuildNoticeListBox::DoLineMouseAction(int iLineNumber)
 	return TRUE;
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CUIGuildNoticeListBox::DeleteText(DWORD dwGuildIndex)
 {
 }
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 
 CUINewGuildMemberListBox::CUINewGuildMemberListBox()
 {
@@ -4887,9 +4648,6 @@ CUINewGuildMemberListBox::CUINewGuildMemberListBox()
 
 	SetPosition(466, 360);
 	SetSize(157, 235);
-
-//	SetPosition(466, 345);
-//	SetSize(157, 235);
 }
 
 void CUINewGuildMemberListBox::AddText(const char * pszID, BYTE Number, BYTE Server, BYTE GuildStatus)
@@ -4941,6 +4699,7 @@ void CUINewGuildMemberListBox::SetNumRenderLine(int iLine)
 
 void CUINewGuildMemberListBox::RenderInterface()
 {
+	return; 
 	EnableAlphaTest();
 	SetLineColor(7, 0.4f);
 	RenderColor(m_iPos_x - 1, m_iPos_y - m_iHeight - 1, m_iWidth + 1, m_iHeight + 2);
@@ -4950,18 +4709,14 @@ void CUINewGuildMemberListBox::RenderInterface()
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▲
 		
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ▼
 
 		EnableAlphaTest();
 		SetLineColor(2);
@@ -4971,21 +4726,15 @@ void CUINewGuildMemberListBox::RenderInterface()
 
 		if (GetLineNum() >= m_iNumRenderLine)
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 		else
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 	}
 
@@ -5059,7 +4808,6 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
 	if (iCharacterLevel == 0) g_pRenderText->RenderText(iPos_x + 45, iPos_y, GlobalText[1300], 70, 0, RT3_SORT_CENTER);
 	else if (iCharacterLevel == 1) g_pRenderText->RenderText(iPos_x + 45, iPos_y, GlobalText[1301], 70, 0, RT3_SORT_CENTER);
 	else if (iCharacterLevel == 2) g_pRenderText->RenderText(iPos_x + 45, iPos_y, GlobalText[1302], 70, 0, RT3_SORT_CENTER);
-//	else g_pRenderText->RenderText(iPos_x + 45, iPos_y, "일반 길드원", 60, 0, RT3_SORT_CENTER);
 
 	if (m_TextListIter->m_Server != 255/* && m_TextListIter->m_Number != 0*/)
 	{	
@@ -5089,37 +4837,16 @@ BOOL CUINewGuildMemberListBox::DoLineMouseAction(int iLineNumber)
 	return TRUE;
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else //KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CUINewGuildMemberListBox::DeleteText(DWORD dwUIID)
 {
-//	BOOL bFind = FALSE;
-//	for (m_TextListIter = m_TextList.begin(); m_TextListIter != m_TextList.end(); ++m_TextListIter)
-//	{
-//		if (m_TextListIter->m_dwUIID == dwUIID)
-//		{
-//			bFind = TRUE;
-//			break;
-//		}
-//	}
-//	if (bFind == FALSE) return;
-//	
-//	if (m_TextList.size() == 1)
-//	{
-//		m_TextList.erase(m_TextListIter);
-//		SLSetSelectLine(0);
-//		return;
-//	}
-//	if (SLGetSelectLineNum() != 1) SLSelectNextLine();
-//	m_TextList.erase(m_TextListIter);
+
 }
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 CUIUnionGuildListBox::CUIUnionGuildListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
 	m_iCurrentRenderEndLine = 0;
-	m_iNumRenderLine = 6;	// 3의 배수로 -_-
+	m_iNumRenderLine = 6;
 
 	m_fScrollBarRange_top = 0;
 	m_fScrollBarRange_bottom = 0;
@@ -5182,12 +4909,8 @@ void CUIUnionGuildListBox::SetNumRenderLine(int iLine)
 
 void CUIUnionGuildListBox::RenderInterface()
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
-	// 배경칠
 	EnableAlphaTest();
 	SetLineColor(7, 0.4f);
 	RenderColor(m_iPos_x - 1, m_iPos_y - m_iHeight - 1, m_iWidth + 1, m_iHeight + 2);
@@ -5305,21 +5028,14 @@ BOOL CUIUnionGuildListBox::DoLineMouseAction(int iLineNumber)
 	return TRUE;
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CUIUnionGuildListBox::DeleteText(DWORD dwGuildIndex)
 {
 }
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 int CUIUnionGuildListBox::GetTextCount()
 {
 	return m_TextList.size();
 }
-
-//////////////////////////////////////////////////////////////////////////
-
-#include "CComGem.h"
 
 CUIUnmixgemList::CUIUnmixgemList()
 {
@@ -5866,13 +5582,10 @@ BOOL CUIBCGuildListBox::DoLineMouseAction(int iLineNumber)
 	return TRUE;
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CUIBCGuildListBox::DeleteText(DWORD dwGuildIndex)
 {
 
 }
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 void RenderGoldRect(float fPos_x, float fPos_y, float fWidth, float fHeight, int iFillType = 0)
 {
@@ -5887,16 +5600,11 @@ void RenderGoldRect(float fPos_x, float fPos_y, float fWidth, float fHeight, int
 		break;
 	};
 
-	RenderBitmap(BITMAP_INVENTORY+19, fPos_x, fPos_y, fWidth, 2,
-		10/256.f, 5/16.f, 170.f/256.f, 2.f/16.f);
-	RenderBitmap(BITMAP_INVENTORY+19, fPos_x, fPos_y + fHeight, fWidth + 1, 2,
-		10/256.f, 5/16.f, 170.f/256.f, 2.f/16.f);
-    RenderBitmap(BITMAP_INVENTORY, fPos_x, fPos_y, 2, fHeight,
-		1.f/256.f, 5/16.f, 2.f/256.f, 125.f/256.f);
-    RenderBitmap(BITMAP_INVENTORY, fPos_x + fWidth, fPos_y, 2, fHeight,
-		1.f/256.f, 5/16.f, 2.f/256.f, 125.f/256.f);
+	RenderBitmap(BITMAP_INVENTORY+19, fPos_x, fPos_y, fWidth, 2,10/256.f, 5/16.f, 170.f/256.f, 2.f/16.f);
+	RenderBitmap(BITMAP_INVENTORY+19, fPos_x, fPos_y + fHeight, fWidth + 1, 2, 10/256.f, 5/16.f, 170.f/256.f, 2.f/16.f);
+    RenderBitmap(BITMAP_INVENTORY, fPos_x, fPos_y, 2, fHeight,1.f/256.f, 5/16.f, 2.f/256.f, 125.f/256.f);
+    RenderBitmap(BITMAP_INVENTORY, fPos_x + fWidth, fPos_y, 2, fHeight,	1.f/256.f, 5/16.f, 2.f/256.f, 125.f/256.f);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CUIMoveCommandListBox::CUIMoveCommandListBox()
 {
@@ -5926,11 +5634,7 @@ CUIMoveCommandListBox::CUIMoveCommandListBox()
 
 void CUIMoveCommandListBox::AddText( int iIndex, const char* szMapName, const char* szSubMapName, int iReqLevel, int iReqZen, int iGateNum )
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if (szMapName == NULL || szMapName[0] == '\0' || iIndex < 0)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	if (szMapName == NULL || szMapName[0] == '\0') 
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		return;
 
 	static MOVECOMMAND_TEXT text;
@@ -5948,21 +5652,9 @@ void CUIMoveCommandListBox::AddText( int iIndex, const char* szMapName, const ch
 	SLSetSelectLine(0);
 	if (GetLineNum() > m_iNumRenderLine) ++m_iCurrentRenderEndLine;
 
-//	if (m_iCurrentRenderEndLine != 0) ++m_iCurrentRenderEndLine;
-
 	if (GetLineNum() < m_iNumRenderLine);
 	else if (GetLineNum() - m_iCurrentRenderEndLine < m_iNumRenderLine) 
 		m_iCurrentRenderEndLine = GetLineNum() - m_iNumRenderLine;
-
-// 	if (m_TextList.size() == 1)
-// 		SLSetSelectLine(1);
-// 
-// 	if (m_TextList.empty() == FALSE)
-// 	{
-// 		SLSetSelectLine(GetLineNum());
-// //		m_iCurrentRenderEndLine = 0;
-// 		Scrolling(-10000);
-// 	}
 }
 
 void CUIMoveCommandListBox::SetNumRenderLine(int iLine)
@@ -5988,8 +5680,6 @@ int CUIMoveCommandListBox::GetRenderLinePos_y(int iLineNumber)
 		return (m_iPos_y - m_iHeight + (GetLineNum() - 1) * 13 - iLineNumber * 13 + 3);
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 BOOL CUIMoveCommandListBox::RenderDataLine(int iLineNumber)
 {
 	return TRUE;
@@ -5999,7 +5689,6 @@ BOOL CUIMoveCommandListBox::DoLineMouseAction(int iLineNumber)
 {
 	return TRUE;
 }
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 #ifdef ASG_MOD_UI_QUEST_INFO
 
@@ -6257,10 +5946,8 @@ BOOL CUIQuestContentsListBox::RenderDataLine(int iLineNumber)
 	return TRUE;
 }
 
-// 리스트 박스 랜더 중 가장 나중에 호출.
 void CUIQuestContentsListBox::RenderCoveredInterface()
 {
-// 선택한 항목이 있으면 아이템 또는 스킬 툴팁 랜더.
 	m_TextListIter = SLGetSelectLine();
 	
 	if (SLGetSelectLine() == m_TextList.end())
@@ -6278,12 +5965,7 @@ void CUIQuestContentsListBox::RenderCoveredInterface()
 
 void CUIQuestContentsListBox::DoActionSub(BOOL bMessageOnly)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	bMessageOnly = FALSE;
-	SLSetSelectLine(bMessageOnly);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	SLSetSelectLine(0);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 }
 
 BOOL CUIQuestContentsListBox::DoLineMouseAction(int iLineNumber)
@@ -6464,7 +6146,6 @@ BOOL CUIInGameShopListBox::RenderDataLine(int iLineNumber)
 	int iPos_y = GetRenderLinePos_y(iLineNumber);
 
 	unicode::t_char szItemName[MAX_TEXT_LENGTH];
-#ifdef KJH_MOD_RENDER_INGAMESHOP_KEEPBOX_ITEM
 	if( m_TextListIter->m_iNum > 1 )
 	{
 		sprintf(szItemName, "%s(%d)", m_TextListIter->m_szName, m_TextListIter->m_iNum);
@@ -6476,19 +6157,6 @@ BOOL CUIInGameShopListBox::RenderDataLine(int iLineNumber)
 	}
 
 	g_pRenderText->RenderText(iPos_x + 102, iPos_y, m_TextListIter->m_szPeriod, 33, 0, RT3_SORT_RIGHT);
-#else // KJH_MOD_RENDER_INGAMESHOP_KEEPBOX_ITEM
-	if( m_TextListIter->m_iNum <= 0 )
-	{
-		g_pRenderText->RenderText(iPos_x, iPos_y, m_TextListIter->m_szName, 93, 0, RT3_SORT_LEFT);
-	}
-	else
-	{
-		sprintf(szItemName, "%s(%d)", m_TextListIter->m_szName, m_TextListIter->m_iNum);
-		g_pRenderText->RenderText(iPos_x, iPos_y, szItemName, 93, 0, RT3_SORT_LEFT);
-	}
-
-	g_pRenderText->RenderText(iPos_x + m_iWidth*0.72f, iPos_y, m_TextListIter->m_szPeriod, 28, 0, RT3_SORT_LEFT);
-#endif // KJH_MOD_RENDER_INGAMESHOP_KEEPBOX_ITEM
 
 	DisableAlphaBlend(); 
 
@@ -6780,7 +6448,6 @@ BOOL CUIPackCheckBuyingListBox::RenderDataLine(int nLine)
 
 	if(m_TextListIter->m_szItemName != NULL)
 	{
-
 		if(SLGetSelectLineNum() == m_iCurrentRenderEndLine + nLine + 1)
 			m_TextListIter->m_RadioBtn.UpdateActionCheck(true);
 		else
@@ -6914,25 +6581,11 @@ void CRadioButton::SetRadioBtnRect(float _x, float _y, float _width, float _heig
 }
 bool CRadioButton::IsRadioBtn(RECT _rt)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	bool bSuccess = false;
-	if(MouseX >= _rt.left && MouseX < _rt.right && MouseY < _rt.bottom && MouseY >= _rt.top)
-	{
-		bSuccess = true;
-	}
-	else
-	{
-		bSuccess = false;
-	}
-
-	return bSuccess;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(MouseX >= _rt.left && MouseX < _rt.right && MouseY < _rt.bottom && MouseY >= _rt.top)
 		return true;
 	else
 		return false;
 	return false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 }
 void CRadioButton::RadiobuttonBoxRender()
 {

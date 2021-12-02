@@ -1,5 +1,4 @@
 // w_PetActionUnicorn.cpp: implementation of the w_PetActionUnicorn class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -13,10 +12,6 @@
 #include "ZzzObject.h"
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 PetActionUnicornPtr PetActionUnicorn::Make()
 {
@@ -193,7 +188,7 @@ bool PetActionUnicorn::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 		}
 		break;
 
-	case eAction_Get: //줍는 행동
+	case eAction_Get:
 		{
 			if(	!m_isRooting || SEARCH_LENGTH < Distance || CompTimeControl(3000, m_dwRootingTime))
 			{
@@ -215,7 +210,7 @@ bool PetActionUnicorn::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 #ifdef LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
 				if(&Hero->Object == obj->Owner)
 #endif //LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
-					//1000ms 마다 패킷  
+					//1000ms
 					SendRequestGetItem(m_RootItem.itemIndex);
 			}	
 			obj->Velocity = m_speed;
@@ -274,18 +269,15 @@ bool PetActionUnicorn::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
  	
  	b->Animation(BoneTransform,obj->AnimationFrame,obj->PriorAnimationFrame,obj->PriorAction, obj->Angle, obj->HeadAngle);
  
- 	//뿔
  	Vector(0.f, 0.f, 0.f, vRelativePos);
   	b->TransformPosition(BoneTransform[11], vRelativePos, Position, false);
  	Vector( 1.0f, 0.7f, 0.0f, Light);
- 	CreateSprite(BITMAP_MAGIC, Position, 0.15f, Light, obj); //원 테두리
+ 	CreateSprite(BITMAP_MAGIC, Position, 0.15f, Light, obj);
 
-	//빛
 	Vector( 1.0f, 0.7f, 0.3f, Light);
 	if(rand()%3 == 0)
 		CreateEffect(BITMAP_PIN_LIGHT, Position, obj->Angle, Light, 4, obj, -1, 0, 0, 0, 0.45f);
 
-	//몸
   	b->TransformPosition(BoneTransform[4], vRelativePos, Position, false);
 	Vector( 0.5f, 0.5f, 1.0f, Light);
 
@@ -295,7 +287,6 @@ bool PetActionUnicorn::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 	if(rand()%2 == 0)
 		CreateParticle(BITMAP_SMOKE, Position, obj->Angle, Light, 67, 1.0f);
 
-	//연기
 	Vector( 0.7f, 0.7f, 1.0f, Light);
 	b->TransformPosition(BoneTransform[4], vRelativePos, Position, false);
 	CreateParticle(BITMAP_SMOKELINE1,Position,obj->Angle,Light,4,0.6f,obj);
@@ -335,23 +326,19 @@ void PetActionUnicorn::FindZen(OBJECT* obj)
 			continue;
 		}
 
-		dx = obj->Owner->Position[0] - _item->Position[0]; // 자기와의 거리를 계산한다.
+		dx = obj->Owner->Position[0] - _item->Position[0];
 		dy = obj->Owner->Position[1] - _item->Position[1];
 
 		dl = sqrtf(dx*dx+dy*dy);
 		
-		//범위 지정
 		if( SEARCH_LENGTH > dl )
 		{
-			//젠만 먹도록 할려면 여기서 걸러버리자...
-			//다른 아이템까지 먹도록할려면 여기서 list에 담아버리자...
-			//if( -1 == g_pMyInventory->FindEmptySlot(&Items[i].Item) && Items[i].Item.Type != ITEM_POTION+15 )
-			if( Items[i].Item.Type != ITEM_POTION+15 ) //젠만 먹자
+			if( Items[i].Item.Type != ITEM_POTION+15 )
 			{
 				continue;
 			}
 
-			if(!m_isRooting) //그냥 한번더 검사....
+			if(!m_isRooting)
 			{
 				m_isRooting = true;
 				m_RootItem.itemIndex = i;

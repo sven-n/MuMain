@@ -142,7 +142,6 @@ namespace SEASON4A
 		int CalcSocketBonusItemValue(const ITEM * pItem, int iOrgGold);
 #endif // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
 
-		// 소켓아이템 옵션값을 구한다
 		int GetSocketOptionValue(const ITEM * pItem, int iSocketIndex);
 
 		void CalcSocketStatusBonus();

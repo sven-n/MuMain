@@ -1,5 +1,4 @@
 // DuelMgr.h: interface for the CDuelMgr class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_DUELMGR_H__9B443DA1_CBFB_49E7_9BE9_2BB718489DE3__INCLUDED_)
@@ -11,11 +10,11 @@
 
 typedef struct _DUEL_PLAYER_INFO
 {
-	int m_iIndex;		// 인덱스
-	char m_szID[24];	// ID
-	int m_iScore;		// 점수
-	float m_fHPRate;	// HP 비율 (0~1)
-	float m_fSDRate;	// SD 비율 (0~1)
+	int m_iIndex;
+	char m_szID[24];
+	int m_iScore;
+	float m_fHPRate;
+	float m_fSDRate;
 } DUEL_PLAYER_INFO;
 
 enum _DUEL_PLAYER_TYPE
@@ -27,10 +26,10 @@ enum _DUEL_PLAYER_TYPE
 
 typedef struct _DUEL_CHANNEL_INFO
 {
-	BOOL m_bEnable;		// 방 개설 여부
-	BOOL m_bJoinable;	// 관전 가능 여부
-	char m_szID1[24];	// 유저1 ID
-	char m_szID2[24];	// 유저2 ID
+	BOOL m_bEnable;
+	BOOL m_bJoinable;
+	char m_szID1[24];
+	char m_szID2[24];
 } DUEL_CHANNEL_INFO;
 
 #define MAX_DUEL_CHANNELS 4
@@ -40,11 +39,7 @@ class CDuelMgr
 public:
 	CDuelMgr();
 	virtual ~CDuelMgr();
-
 	void Reset();
-
-//////////////////////////////////////////////////////////////////////////
-// 결투 직접 할때 관련
 public:
 	void EnableDuel(BOOL bEnable);
 	BOOL IsDuelEnabled();
@@ -73,12 +68,10 @@ public:
 	void SendDuelRequestAnswer(int iPlayerNum, BOOL bOK);
 
 protected:
-	BOOL m_bIsDuelEnabled;		// 결투 상태 여부
-	BOOL m_bIsPetDuelEnabled;	// LHJ - 결투중에 다크로드의 다크스피릿이 공격중 인지 판단하는 변수
-	DUEL_PLAYER_INFO m_DuelPlayer[MAX_DUEL_PLAYERS];	// 결투자 상태
+	BOOL m_bIsDuelEnabled;
+	BOOL m_bIsPetDuelEnabled;
+	DUEL_PLAYER_INFO m_DuelPlayer[MAX_DUEL_PLAYERS];
 
-//////////////////////////////////////////////////////////////////////////
-// 결투 관전 관련
 public:
 	void SetDuelChannel(int iChannelIndex, BOOL bEnable, BOOL bJoinable, char * pszID1, char * pszID2);
 	BOOL IsDuelChannelEnabled(int iChannelIndex) { return m_DuelChannels[iChannelIndex].m_bEnable; }
@@ -102,7 +95,7 @@ protected:
 	DUEL_CHANNEL_INFO m_DuelChannels[MAX_DUEL_CHANNELS];
 	int m_iCurrentChannel;
 
-	BOOL m_bRegenerated;	// 막 부활했나
+	BOOL m_bRegenerated;
 
 	std::list<std::string> m_DuelWatchUserList;
 };

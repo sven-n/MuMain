@@ -1,13 +1,9 @@
 //*****************************************************************************
 // File: NewUINPCMenu.cpp
-//
-// Desc: implementation of the CNewUINPCMenu class.
-//
-// producer: Ahn Sang-Gyu
 //*****************************************************************************
 
 #include "stdafx.h"
-#include <crtdbg.h>  // _ASSERT() 사용.
+#include <crtdbg.h>
 #include "NewUINPCMenu.h"
 #include "NewUISystem.h"
 #include "wsclientinline.h"
@@ -16,11 +12,7 @@
 
 using namespace SEASON3B;
 
-#define NM_TEXT_GAP					16	// 텍스트 간격.
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#define NM_TEXT_GAP					16
 
 CNewUINPCMenu::CNewUINPCMenu()
 {
@@ -34,14 +26,6 @@ CNewUINPCMenu::~CNewUINPCMenu()
 	Release();
 }
 
-//*****************************************************************************
-// 함수 이름 : Create()
-// 함수 설명 : 창 생성.
-// 매개 변수 : pNewUIMng	: CNewUIManager 오브젝트 주소.
-//			   pNewUI3DRenderMng: CNewUI3DRenderMng 오브젝트 주소.
-//			   x			: x 좌표.
-//			   y			: y 좌표.
-//*****************************************************************************
 bool CNewUINPCMenu::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng,
 						   int x, int y)
 {
@@ -58,7 +42,6 @@ bool CNewUINPCMenu::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3D
 
 	LoadImages();
 
-	// 닫기 버튼.
 	m_btnClose.ChangeButtonImgState(true, IMAGE_NM_BTN_CLOSE);
 	m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
 	m_btnClose.ChangeToolTipText(GlobalText[1002], true);
@@ -70,10 +53,6 @@ bool CNewUINPCMenu::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3D
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Release()
-// 함수 설명 : 창 Release.
-//*****************************************************************************
 void CNewUINPCMenu::Release()
 {
 	UnloadImages();
@@ -91,21 +70,12 @@ void CNewUINPCMenu::Release()
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : SetPos()
-// 함수 설명 : 창 위치 지정.
-//*****************************************************************************
 void CNewUINPCMenu::SetPos(int x, int y)
 {
 	m_Pos.x = x;
 	m_Pos.y = y;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateMouseEvent()
-// 함수 설명 : 마우스 이벤트 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool CNewUINPCMenu::UpdateMouseEvent()
 {
 	if (ProcessBtns())
@@ -114,18 +84,12 @@ bool CNewUINPCMenu::UpdateMouseEvent()
 	if (UpdateSelTextMouseEvent())
 		return false;
 
-	// 창 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, NM_WIDTH, NM_HEIGHT))
 		return false;
 
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : ProcessBtns()
-// 함수 설명 : 버튼 아이템 이벤트 처리.
-// 반환 값	 : 처리 했으면 true.
-//*****************************************************************************
 bool CNewUINPCMenu::ProcessBtns()
 {
 	if (m_btnClose.UpdateMouseEvent())
@@ -142,11 +106,6 @@ bool CNewUINPCMenu::ProcessBtns()
 	return false;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateSelTextMouseEvent()
-// 함수 설명 : 선택문 마우스 이벤트 처리.
-// 반환 값	 : 처리 했으면 true.
-//*****************************************************************************
 bool CNewUINPCMenu::UpdateSelTextMouseEvent()
 {
 	if (!m_bCanClick)
@@ -172,7 +131,7 @@ bool CNewUINPCMenu::UpdateSelTextMouseEvent()
 				SendQuestSelection(m_adwQuestIndex[i], (BYTE)m_nSelText);
 				::PlayBuffer(SOUND_CLICK01);
 				m_bCanClick = false;
-				if (0 == HIWORD(m_adwQuestIndex[i]))	// EP(상위 2바이트)가 0이면.
+				if (0 == HIWORD(m_adwQuestIndex[i]))
 				{
 					if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_MENU))
 						g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPC_MENU);
@@ -186,11 +145,6 @@ bool CNewUINPCMenu::UpdateSelTextMouseEvent()
 	return false;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateKeyEvent()
-// 함수 설명 : 키보드 입력 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool CNewUINPCMenu::UpdateKeyEvent()
 {
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_MENU))
@@ -205,21 +159,11 @@ bool CNewUINPCMenu::UpdateKeyEvent()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Update()
-// 함수 설명 : 기타 매 프레임 일어나는 이벤트 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool CNewUINPCMenu::Update()
 {
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Render()
-// 함수 설명 : 창 렌더.
-// 반환 값	 : true면 성공.
-//*****************************************************************************
 bool CNewUINPCMenu::Render()
 {
 	::EnableAlphaTest();
@@ -238,10 +182,6 @@ bool CNewUINPCMenu::Render()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderBackImage()
-// 함수 설명 : 창 바탕 이미지 렌더.
-//*****************************************************************************
 void CNewUINPCMenu::RenderBackImage()
 {
 	RenderImage(IMAGE_NM_BACK, m_Pos.x, m_Pos.y, float(NM_WIDTH), float(NM_HEIGHT));
@@ -258,10 +198,6 @@ void CNewUINPCMenu::RenderBackImage()
 #endif	// ASG_ADD_UI_QUEST_PROGRESS
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderSelTextBlock()
-// 함수 설명 : 선택문 블럭 렌더.
-//*****************************************************************************
 void CNewUINPCMenu::RenderSelTextBlock()
 {
 	if (0 == m_nSelText)
@@ -277,22 +213,16 @@ void CNewUINPCMenu::RenderSelTextBlock()
 	::EndRenderColor();
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderText()
-// 함수 설명 : 텍스트 렌더.
-//*****************************************************************************
 void CNewUINPCMenu::RenderText()
 {
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0);
 
-// NPC 이름.
 	g_pRenderText->SetTextColor(150, 255, 240, 255);
 	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+12, g_QuestMng.GetNPCName(),
 		NM_WIDTH, 0, RT3_SORT_CENTER);
 
 	g_pRenderText->SetFont(g_hFont);
-// NPC 대사.
 	g_pRenderText->SetTextColor(255, 230, 210, 255);
 
 	int i;
@@ -304,7 +234,6 @@ void CNewUINPCMenu::RenderText()
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 			RT3_SORT_LEFT);
 
-// 선택문.
 	g_pRenderText->SetTextColor(255, 230, 210, 255);
 	for (i = 0; i < NM_SEL_TEXT_LINE_MAX; ++i)
 		g_pRenderText->RenderText(m_Pos.x+13, m_Pos.y+220+(NM_TEXT_GAP*i), m_aszSelText[i], 0, 0,
@@ -319,19 +248,11 @@ void CNewUINPCMenu::Render3D()
 bool CNewUINPCMenu::IsVisible() const
 { return CNewUIObj::IsVisible(); }
 
-//*****************************************************************************
-// 함수 이름 : GetLayerDepth()
-// 함수 설명 : 창의 레이어값을 얻음.
-//*****************************************************************************
 float CNewUINPCMenu::GetLayerDepth()
 {
 	return 3.1f;
 }
 
-//*****************************************************************************
-// 함수 이름 : LoadImages()
-// 함수 설명 : 이미지 리소스 로드.
-//*****************************************************************************
 void CNewUINPCMenu::LoadImages()
 {
 	LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_NM_BACK, GL_LINEAR);
@@ -349,10 +270,6 @@ void CNewUINPCMenu::LoadImages()
 	LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_NM_BTN_CLOSE, GL_LINEAR);
 }
 
-//*****************************************************************************
-// 함수 이름 : LoadImages()
-// 함수 설명 : 이미지 리소스 삭제.
-//*****************************************************************************
 void CNewUINPCMenu::UnloadImages()
 {
 	DeleteBitmap(IMAGE_NM_BTN_CLOSE);
@@ -370,20 +287,11 @@ void CNewUINPCMenu::UnloadImages()
 	DeleteBitmap(IMAGE_NM_BACK);
 }
 
-//*****************************************************************************
-// 함수 이름 : ProcessOpening()
-// 함수 설명 : 창을 열 때 처리.
-//*****************************************************************************
 void CNewUINPCMenu::ProcessOpening()
 {
 	::PlayBuffer(SOUND_INTERFACE01);
 }
 
-//*****************************************************************************
-// 함수 이름 : ProcessClosing()
-// 함수 설명 : 창을 닫을 때 처리.
-// 반환 값	 : true 면 닫기 성공.
-//*****************************************************************************
 bool CNewUINPCMenu::ProcessClosing()
 {
 	SendExitInventory();
@@ -391,12 +299,6 @@ bool CNewUINPCMenu::ProcessClosing()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : SetContents()
-// 함수 설명 : 창의 내용 세팅.
-// 매개 변수 : adwSrcQuestIndex	: 원본 퀘스트 인덱스 배열 주소.
-//			   nIndexCount		: 원본 퀘스트 인덱스 개수.
-//*****************************************************************************
 void CNewUINPCMenu::SetContents(DWORD* adwSrcQuestIndex, int nIndexCount)
 {
 	SetNPCWords();
@@ -411,17 +313,13 @@ void CNewUINPCMenu::SetContents(DWORD* adwSrcQuestIndex, int nIndexCount)
 
 extern float g_fScreenRate_x;
 
-//*****************************************************************************
-// 함수 이름 : SetNPCWords()
-// 함수 설명 : NPC 대사 세팅.
-//*****************************************************************************
 void CNewUINPCMenu::SetNPCWords()
 {
 	int nNPCWordsIndex = 0;
 
 	switch (g_QuestMng.GetNPCIndex())
 	{
-	case 257:	// 쉐도우 펜텀 부대원.
+	case 257:
 		nNPCWordsIndex = 296;
 		break;
 	default:
@@ -430,17 +328,11 @@ void CNewUINPCMenu::SetNPCWords()
 
 	::memset(m_aszNPCWords[0], 0, sizeof(char) * NM_NPC_LINE_MAX * NM_TEXT_ROW_MAX);
 
-	g_pRenderText->SetFont(g_hFont);	// DivideStringByPixel()함수 전에 폰트를 설정해주어야 함.
+	g_pRenderText->SetFont(g_hFont);
 	::DivideStringByPixel(&m_aszNPCWords[0][0], NM_NPC_LINE_MAX, NM_TEXT_ROW_MAX,
 		g_QuestMng.GetWords(nNPCWordsIndex), 160);
 }
 
-//*****************************************************************************
-// 함수 이름 : SetSelText()
-// 함수 설명 : 선택문 세팅.
-// 매개 변수 : adwSrcQuestIndex	: 원본 퀘스트 인덱스 배열 주소.
-//			   nIndexCount		: 원본 퀘스트 인덱스 개수.
-//*****************************************************************************
 void CNewUINPCMenu::SetSelText(DWORD* adwSrcQuestIndex, int nIndexCount)
 {
 	_ASSERT(0 < nIndexCount && nIndexCount <= NM_QUEST_INDEX_MAX_COUNT);
@@ -456,22 +348,20 @@ void CNewUINPCMenu::SetSelText(DWORD* adwSrcQuestIndex, int nIndexCount)
 	char szSelText[2 * NM_TEXT_ROW_MAX];
 	const char* pszSelText;
 	int nSelTextRow = 0;
-	g_pRenderText->SetFont(g_hFont);	// DivideStringByPixel()함수 전에 폰트를 설정해주어야 함.
+	g_pRenderText->SetFont(g_hFont);
 	int i;
 	for (i = 0; i < nIndexCount; ++i)
 	{
-	// 선택문 앞에 번호 붙이기(퀘스트라면 '[Q]'도 붙임).
-		if (0 == HIWORD(m_adwQuestIndex[i]))		// EP(상위 2바이트)가 0이면.
-			::sprintf(szSelText, "%d.", i + 1);		// NPC 기능 항목.(버프 받기, 상점 이용 등)
+		if (0 == HIWORD(m_adwQuestIndex[i]))
+			::sprintf(szSelText, "%d.", i + 1);
 		else
-			::sprintf(szSelText, "%d. [Q]", i + 1);	// 퀘스트 진행 항목.
+			::sprintf(szSelText, "%d. [Q]", i + 1);
 
 		pszSelText = g_QuestMng.GetSubject(m_adwQuestIndex[i]);
 		if (NULL == pszSelText)
 			break;
 		::strcat(szSelText, pszSelText);
 
-	// 행 나누기. 선택문 1개는 최대 2행임.
 		m_anSelTextLine[i] = ::DivideStringByPixel(&m_aszSelText[nSelTextRow][0],
 			2, NM_TEXT_ROW_MAX, szSelText, 160, false);
 		

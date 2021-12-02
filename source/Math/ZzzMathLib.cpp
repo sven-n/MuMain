@@ -291,7 +291,7 @@ void R_ConcatTransforms (const float in1[3][4], const float in2[3][4], float out
 
 void VectorRotate (const vec3_t in1, const float in2[3][4], vec3_t out)
 {
-	assert(in1 != out && "in1과 out은 다른 값이여야 합니다.!");
+	assert(in1 != out && "VectorRotate!");
 	out[0] = DotProduct(in1, in2[0]);
 	out[1] = DotProduct(in1, in2[1]);
 	out[2] = DotProduct(in1, in2[2]);

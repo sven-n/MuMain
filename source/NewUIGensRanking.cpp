@@ -1,5 +1,4 @@
 // NewUIGensRanking.cpp: implementation of the CNewUIGensRanking class.
-//
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
@@ -8,9 +7,6 @@
 #include "NewUISystem.h"
 #include "wsclientinline.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 using namespace SEASON3B;
 
 #define TEMP_MAX_TEXT_LENGTH 1024
@@ -175,22 +171,22 @@ void CNewUIGensRanking::RenderTexts()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetFont(g_hFontBold);
-	sprintf(szText, GlobalText[3090]);			// 겐스 정보창
+	sprintf(szText, GlobalText[3090]);
 	g_pRenderText->RenderText(_x, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_CENTER);
 
 	_y += 75;
-	sprintf(szText, GlobalText[3091]);			// 겐스
+	sprintf(szText, GlobalText[3091]);
 	g_pRenderText->SetTextColor(246, 209, 73, 255);
 	g_pRenderText->RenderText(_x+102, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetFont(g_hFont);
 
-	sprintf(szText, "%s", GetGensTeamName());	// 소속겐스명(듀프리언,바네르트)
+	sprintf(szText, "%s", GetGensTeamName());
 	_y += 20;
 	g_pRenderText->RenderText(_x+102, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
-	sprintf(szText, GlobalText[3095]);			// 등급 :
+	sprintf(szText, GlobalText[3095]);
 	_y += 24;
 	g_pRenderText->RenderText(_x+100, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
@@ -199,18 +195,18 @@ void CNewUIGensRanking::RenderTexts()
 
 	g_pRenderText->SetTextColor(230, 230, 0, 255);
 	g_pRenderText->SetFont(g_hFontBold);
-	sprintf(szText, GlobalText[3098]);			// 겐 스 랭 킹
+	sprintf(szText, GlobalText[3098]);
 	_y += 23;
 	g_pRenderText->RenderText(_x+13, _y, szText, 74, 0, RT3_SORT_CENTER);
 
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
-	sprintf(szText, GlobalText[3099], GetRanking());	// %s 등
+	sprintf(szText, GlobalText[3099], GetRanking());
 	g_pRenderText->RenderText(_x, _y, szText, GENSRANKING_WIDTH-20, 0, RT3_SORT_RIGHT);
 
 	g_pRenderText->SetTextColor(230, 230, 0, 255);
 	g_pRenderText->SetFont(g_hFontBold);
-	sprintf(szText, GlobalText[3096]);			// 획득기여도
+	sprintf(szText, GlobalText[3096]);
 	_y += 23;
 	g_pRenderText->RenderText(_x+13, _y, szText, 74, 0, RT3_SORT_CENTER);
 	g_pRenderText->SetFont(g_hFont);
@@ -220,7 +216,7 @@ void CNewUIGensRanking::RenderTexts()
 	g_pRenderText->RenderText(_x, _y, szText, GENSRANKING_WIDTH-20, 0, RT3_SORT_RIGHT);
 
 	
-	unicode::t_char _szTempText[TEMP_MAX_TEXT_LENGTH];	// 다음계급으로 진급하기 위해
+	unicode::t_char _szTempText[TEMP_MAX_TEXT_LENGTH];
 	unicode::t_char _szText[NUM_LINE_CMB][MAX_TEXT_LENGTH];
 	int _TextLineCnt = 0;
 	float _fWidth=180, _fHeight=15;
@@ -235,7 +231,7 @@ void CNewUIGensRanking::RenderTexts()
 
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetTextColor(230, 230, 0, 255);
-	sprintf(szText, GlobalText[3100]);			// 겐스 설명
+	sprintf(szText, GlobalText[3100]);
 	
 	_y += 78;
 	g_pRenderText->RenderText(_x+13, _y, szText, 58, 0, RT3_SORT_CENTER);
@@ -425,7 +421,6 @@ int CNewUIGensRanking::GetContribution()
 
 bool CNewUIGensRanking::SetRanking(int _Ranking)
 {
-	// 0 내지 음수값이면 예외처리
 	if(_Ranking <= 0)
 	{
 		sprintf(m_szRanking, "-");
@@ -443,13 +438,11 @@ unicode::t_char* CNewUIGensRanking::GetRanking()
 
 void CNewUIGensRanking::SetNextContribution(int _NextContribution)
 {
-	// 음수값이 들어온다면 상대랭킹 이란 뜻
 	if(_NextContribution < 0)
 	{
 		m_nNextContribution = -1;
 		return;
 	}
-	// 0값이 들어오면 달성하고 다음 값이 없을경우
 	m_nNextContribution = _NextContribution;
 }
 
@@ -464,17 +457,16 @@ bool CNewUIGensRanking::SetGensInfo()
 
 	if((m_byGensInfluence & GENSTYPE_DUPRIAN)==GENSTYPE_DUPRIAN)
 	{
-		SetGensTeamName(GlobalText[3092]);	//"듀프리언"
+		SetGensTeamName(GlobalText[3092]);
 		return true;
 	}
 	else if((m_byGensInfluence & GENSTYPE_BARNERT)==GENSTYPE_BARNERT)
 	{
-		SetGensTeamName(GlobalText[3093]);	//"바네르트"
+		SetGensTeamName(GlobalText[3093]);
 		return true;
 	}
 	else
 	{
-		// 겐스에 가입되어 있지 않습니다
 		g_pChatListBox->AddText("", GlobalText[3094], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		return false;
 	}
@@ -510,20 +502,17 @@ void CNewUIGensRanking::SetTitleName()
 
 const char* CNewUIGensRanking::GetTitleName(BYTE _index)
 {
-	//m_nGensClass 1~14까지 해당 이외의 값은 잘못된값이다
 	if(TITLENAME_START <= _index && TITLENAME_END >= _index)
 		return m_szTitleName[_index-1];
 	else
-		return m_szTitleName[TITLENAME_END-1];	// _index에러
+		return m_szTitleName[TITLENAME_END-1];
 }
 
 void CNewUIGensRanking::RanderMark(float _x, float _y, BYTE _GensInfluence, BYTE _GensRankInfo, int _ImageArea, float _RenderY)
 {
-	// 겐스에 가입되어 있지 않으면 안그린다
 	if(!_GensInfluence)
 		return;
 
-	// 겐스에 가입되어 있으나 잘못된 값이 들어왔을경우(일단 최 하위값)
 	if(_GensRankInfo < TITLENAME_START || _GensRankInfo > TITLENAME_END)
 		_GensRankInfo = TITLENAME_END;
 

@@ -1,5 +1,4 @@
 // NewUIDoppelGangerFrame.cpp: implementation of the CNewUIDoppelGangerFrame class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -9,10 +8,6 @@
 #ifdef YDG_ADD_DOPPELGANGER_UI
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIDoppelGangerFrame::CNewUIDoppelGangerFrame()
 {
@@ -40,7 +35,7 @@ bool CNewUIDoppelGangerFrame::Create( CNewUIManager* pNewUIMng, int x, int y )
 		return false;
 	
 	m_pNewUIMng = pNewUIMng;
- 	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_DOPPELGANGER_FRAME, this );		// 인터페이스 오브젝트 등록
+ 	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_DOPPELGANGER_FRAME, this );
 	
 	SetPos(x, y);
 	
@@ -71,15 +66,8 @@ void CNewUIDoppelGangerFrame::SetPos(int x, int y)
 
 bool CNewUIDoppelGangerFrame::UpdateMouseEvent()
 {
-	// 버튼 처리
-	if( true == BtnProcess() )	// 처리가 완료 되었다면
+	if( true == BtnProcess() )
 		return false;
-	
-	// 파티 창 내 영역 클릭시 하위 UI처리 및 이동 불
-	// ( #include "NewUICommon" )
-// 	if( CheckMouseIn( m_Pos.x, m_Pos.y, BLOODCASTLE_TIME_WINDOW_WIDTH, BLOODCASTLE_TIME_WINDOW_HEIGHT) )
-// 		return false;
-
 	return true;
 }
 
@@ -101,9 +89,7 @@ bool CNewUIDoppelGangerFrame::Render()
 	EnableAlphaTest();
 	glColor4f(1.f, 1.f, 1.f, 1.f);
 
-	// 프레임
-	RenderImage(IMAGE_DOPPELGANGER_FRAME_WINDOW, m_Pos.x, m_Pos.y, 
-					float(DOPPELGANGER_FRAME_WINDOW_WIDTH), float(DOPPELGANGER_FRAME_WINDOW_HEIGHT));
+	RenderImage(IMAGE_DOPPELGANGER_FRAME_WINDOW, m_Pos.x, m_Pos.y, float(DOPPELGANGER_FRAME_WINDOW_WIDTH), float(DOPPELGANGER_FRAME_WINDOW_HEIGHT));
 
 	char szText[256] = {NULL, };
 	g_pRenderText->SetFont( g_hFont );
@@ -122,13 +108,11 @@ bool CNewUIDoppelGangerFrame::Render()
 		g_pRenderText->SetTextColor( 255, 0, 0, 255 );
 	}
 
-	// 몬스터 진입수
 	sprintf(szText, GlobalText[2772], m_iEnteredMonsters, m_iMaxMonsters);
 	g_pRenderText->RenderText(m_Pos.x+117, m_Pos.y+13, szText, 110, 0, RT3_SORT_CENTER);
 
-	// 남은시간
 	g_pRenderText->SetTextColor( 255, 150, 0, 255 );
-	g_pRenderText->RenderText(m_Pos.x+117, m_Pos.y+38, GlobalText[865], 110, 0, RT3_SORT_CENTER);		// "남은 시간"
+	g_pRenderText->RenderText(m_Pos.x+117, m_Pos.y+38, GlobalText[865], 110, 0, RT3_SORT_CENTER);
 				
 	int iMinute = m_iTime/60;
 	int iSecond = 99-(int)WorldTime%100;
@@ -154,7 +138,6 @@ bool CNewUIDoppelGangerFrame::Render()
 		m_fMonsterGauge = m_fMonsterGaugeRcvd;
 	}
 
-	// 게이지바
 	if (m_iEnteredMonsters == 0)
 	{
 		RenderImage(IMAGE_DOPPELGANGER_GUAGE_YELLOW, m_Pos.x+59+167.f*(1.0f-m_fMonsterGauge), m_Pos.y+78,
@@ -175,7 +158,6 @@ bool CNewUIDoppelGangerFrame::Render()
 			167.f * m_fMonsterGauge, 8.f-1, 165.f/256.f * (1.0f-m_fMonsterGauge), 0, 165.f/256.f*m_fMonsterGauge, 6.f/8.f);
 	}
 
-	// 아이스워커 위치정보
 	if (m_bIceWalkerEnabled == TRUE)
 	{
 		if (m_fIceWalkerPosition + fMonsterGaugeSpeed <= m_fIceWalkerPositionRcvd)
@@ -194,7 +176,6 @@ bool CNewUIDoppelGangerFrame::Render()
 		RenderImage(IMAGE_DOPPELGANGER_GUAGE_ICEWALKER, m_Pos.x+59-6.5f+167*m_fIceWalkerPosition, m_Pos.y+78-1, 13.0f, 7.0f);
 	}
 
-	// 유저 위치정보
 	for(std::map<WORD, PARTY_POSITION>::iterator iter = m_PartyPositionMap.begin(); iter != m_PartyPositionMap.end(); ++iter)
 	{
 		if (iter->second.m_fPositionRcvd == -1) continue;
@@ -215,12 +196,10 @@ bool CNewUIDoppelGangerFrame::Render()
 
 		if (iter->first == Hero->Key)
 		{
-			// 플레이어 위치
 			RenderImage(IMAGE_DOPPELGANGER_GUAGE_PLAYER, m_Pos.x+59-4.5f+167*iter->second.m_fPosition, m_Pos.y+78+1, 9.0f, 8.0f);
 		}
 		else
 		{
-			// 파티 위치
 			RenderImage(IMAGE_DOPPELGANGER_GUAGE_PARTY_MEMBER, m_Pos.x+59-4.5f+167*iter->second.m_fPosition, m_Pos.y+78+1, 9.0f, 8.0f);
 		}
 	}
@@ -310,7 +289,6 @@ void CNewUIDoppelGangerFrame::SetPartyMemberInfo(WORD wIndex, float fPosition)
 	std::map<WORD, PARTY_POSITION>::iterator iter = m_PartyPositionMap.find(wIndex);
 	if (iter == m_PartyPositionMap.end())
 	{
-		// 못찾으면 추가
 		PARTY_POSITION party_pos;
 		party_pos.m_fPosition = 0;
 		party_pos.m_fPositionRcvd = fPosition;
@@ -318,7 +296,6 @@ void CNewUIDoppelGangerFrame::SetPartyMemberInfo(WORD wIndex, float fPosition)
 	}
 	else
 	{
-		// 찾았으면 갱신
 		iter->second.m_fPositionRcvd = fPosition;
 	}
 }
@@ -327,7 +304,7 @@ void CNewUIDoppelGangerFrame::SetIceWalkerMap(BOOL bEnable, float fPosition)
 {
 	if (bEnable == TRUE)
 	{
-		if (m_bIceWalkerEnabled == TRUE)	// 업데이트
+		if (m_bIceWalkerEnabled == TRUE)
 		{
 			m_fIceWalkerPositionRcvd = fPosition;
 		}

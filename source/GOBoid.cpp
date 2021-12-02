@@ -2,16 +2,6 @@
 //  
 //  GOBoid.cpp
 //  
-//  내  용 : 게임 오브젝트 개별 처리 ( 무리 지어 다니는 오브젝트들 ).
-//
-//  날  짜 : 2004/05/24
-//
-//  작성자 : 조 규 하
-//
-//////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "zzzInfomation.h"
@@ -61,13 +51,13 @@ bool IsBug(ITEM* pItem)
 		return false;
 	}
 
-	if(pItem->Type == ITEM_HELPER+0			// 수호천사
-		|| pItem->Type == ITEM_HELPER+1		// 사탄
-		|| pItem->Type == ITEM_HELPER+2		// 유니리아
-		|| pItem->Type == ITEM_HELPER+3		// 디노란트
-		|| pItem->Type == ITEM_HELPER+4		// 다크호스
-		|| pItem->Type == ITEM_HELPER+5		// 다크스피릿
-		|| pItem->Type == ITEM_HELPER+37	// 펜릴의 뿔피리
+	if(pItem->Type == ITEM_HELPER+0
+		|| pItem->Type == ITEM_HELPER+1
+		|| pItem->Type == ITEM_HELPER+2
+		|| pItem->Type == ITEM_HELPER+3
+		|| pItem->Type == ITEM_HELPER+4
+		|| pItem->Type == ITEM_HELPER+5
+		|| pItem->Type == ITEM_HELPER+37
 		)
 	{
 		return true;
@@ -76,10 +66,6 @@ bool IsBug(ITEM* pItem)
 	return false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  수호천사, 사탄, 유니 등등의 보조 유닛 생성.
-//////////////////////////////////////////////////////////////////////////
 bool CreateBugSub ( int Type, vec3_t Position, OBJECT *Owner, OBJECT * o, int SubType, int LinkBone )
 {
     if ( gMapManager.InChaosCastle()==true ) return false;
@@ -112,7 +98,6 @@ bool CreateBugSub ( int Type, vec3_t Position, OBJECT *Owner, OBJECT * o, int Su
 		o->Velocity            = 0.5f;
 		switch ( o->Type )
 		{
-		//^ 펜릴 모델 스케일 조정
 		case MODEL_FENRIR_BLACK:
 		case MODEL_FENRIR_BLUE:
 		case MODEL_FENRIR_RED:
@@ -144,9 +129,6 @@ bool CreateBugSub ( int Type, vec3_t Position, OBJECT *Owner, OBJECT * o, int Su
 	return TRUE;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  보조 유닛을 생성한다.
-//////////////////////////////////////////////////////////////////////////
 void CreateBug(int Type,vec3_t Position,OBJECT *Owner,int SubType,int LinkBone)
 {
     if ( gMapManager.InChaosCastle()==true ) return;
@@ -209,7 +191,6 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
                 o->Alpha = 1.f;
             }
 
-			//b->BoneHead = 11; // 목 돌아가는 기능 일단 제거
             VectorCopy ( o->Owner->HeadAngle, o->HeadAngle );
             VectorCopy ( o->Owner->Position, o->Position );
             VectorCopy ( o->Owner->Angle, o->Angle );
@@ -221,48 +202,48 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 				)
             {
-                SetAction(o, FENRIR_ATTACK);	// 펜릴 일반 공격
+                SetAction(o, FENRIR_ATTACK);
         		o->Velocity = 0.4f;
             }
 			else if(o->Owner->CurrentAction >= PLAYER_FENRIR_SKILL && o->Owner->CurrentAction <= PLAYER_FENRIR_SKILL_ONE_LEFT)
 			{
-				SetAction(o, FENRIR_ATTACK_SKILL);	// 펜릴 스킬 공격
+				SetAction(o, FENRIR_ATTACK_SKILL);
         		o->Velocity = 0.4f;
 			}
 			else if(o->Owner->CurrentAction >= PLAYER_FENRIR_DAMAGE && o->Owner->CurrentAction <= PLAYER_FENRIR_DAMAGE_ONE_LEFT)
 			{
-				SetAction(o, FENRIR_DAMAGE);	// 펜릴 데미지
+				SetAction(o, FENRIR_DAMAGE);
         		o->Velocity = 0.4f;
 			}
 			else if(o->Owner->CurrentAction >= PLAYER_FENRIR_STAND && o->Owner->CurrentAction <= PLAYER_FENRIR_STAND_ONE_LEFT)
 			{
-				SetAction(o, FENRIR_STAND);	// 펜릴 정지
+				SetAction(o, FENRIR_STAND);
 				o->Velocity = 0.4f;
 			}
 			else if(o->Owner->CurrentAction == PLAYER_DIE1)
 			{
-				SetAction(o, FENRIR_STAND);	// 펜릴 정지
+				SetAction(o, FENRIR_STAND);
 				o->Velocity = 0.4f;
 			}
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 			else if(o->Owner->CurrentAction >= PLAYER_RAGE_FENRIR_DAMAGE && o->Owner->CurrentAction <= PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT)
 			{
-				SetAction(o, FENRIR_DAMAGE);	// 펜릴 데미지
+				SetAction(o, FENRIR_DAMAGE);
         		o->Velocity = 0.4f;
 			}
 			else if(o->Owner->CurrentAction >= PLAYER_RAGE_FENRIR && o->Owner->CurrentAction <= PLAYER_RAGE_FENRIR_ONE_LEFT)
 			{
-				SetAction(o, FENRIR_ATTACK_SKILL);	// 펜릴 스킬 공격
+				SetAction(o, FENRIR_ATTACK_SKILL);
         		o->Velocity = 0.4f;
 			}
 			else if(o->Owner->CurrentAction >= PLAYER_RAGE_FENRIR_STAND && o->Owner->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
 			{
-				SetAction(o, FENRIR_STAND);	// 펜릴 정지
+				SetAction(o, FENRIR_STAND);
 				o->Velocity = 0.4f;
 			}
 			else if(o->Owner->CurrentAction >= PLAYER_SKILL_THRUST && o->Owner->CurrentAction <= PLAYER_SKILL_HP_UP_OURFORCES)
 			{
-				SetAction(o, FENRIR_STAND);	// 펜릴 정지
+				SetAction(o, FENRIR_STAND);
 				o->Velocity = 0.4f;
 			}
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
@@ -270,12 +251,12 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 			{
 				if(o->Owner->CurrentAction >= PLAYER_FENRIR_WALK && o->Owner->CurrentAction <= PLAYER_FENRIR_WALK_ONE_LEFT)
 				{
-					SetAction(o, FENRIR_WALK);	// 펜릴 걷기
+					SetAction(o, FENRIR_WALK);
 					o->Velocity = 1.0f;				
 				}
 				else if(o->Owner->CurrentAction >= PLAYER_FENRIR_RUN && o->Owner->CurrentAction <= PLAYER_FENRIR_RUN_ONE_LEFT_ELF)
 				{
-					SetAction(o, FENRIR_RUN);	// 펜릴 달리기
+					SetAction(o, FENRIR_RUN);
 					o->Velocity = 0.6f;	
 				}
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
@@ -290,10 +271,9 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 					o->Velocity = 1.0f;				
 				}
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
-				
-				//^ 펜릴 이펙트 관련 (걷기나 달리기시 이펙트)
+
 				Vector ( 1.f, 1.f, 1.f, Light );
-                if ( gMapManager.WorldActive==WD_10HEAVEN )	// 천공에서 파동 효과
+                if ( gMapManager.WorldActive==WD_10HEAVEN )
                 {
                     bool   bWave = false;
                     vec3_t p = { 120.f, 0.f, 32.f };
@@ -326,14 +306,14 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
                         }
                     }
                 }
-                else if ( rand()%3==0 && !gMapManager.InHellas() )	// 바닥에 연기 효과
+                else if ( rand()%3==0 && !gMapManager.InHellas() )
 				{
 					if( o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking) )			
 					{
 						Vector ( o->Position[0]+(float)(rand()%64-32),
 								 o->Position[1]+(float)(rand()%64-32),
 								 o->Position[2]+(float)(rand()%32-16), Position );
-						if ( gMapManager.WorldActive==WD_2DEVIAS ) //  데비아스에서는 눈연기.
+						if ( gMapManager.WorldActive==WD_2DEVIAS )
 							CreateParticle ( BITMAP_SMOKE, Position, o->Angle, Light );
 						else if ( gMapManager.WorldActive!=WD_10HEAVEN )
 							if(!g_Direction.m_CKanturu.IsMayaScene())
@@ -342,7 +322,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 				}
 			}
 			break;
-        case MODEL_DARK_HORSE: //  다크호스.
+        case MODEL_DARK_HORSE:
 			if ( ( TerrainWall[TERRAIN_INDEX_REPEAT( (int)(o->Owner->Position[0]/TERRAIN_SCALE), (int)(o->Owner->Position[1]/TERRAIN_SCALE) )]&TW_SAFEZONE )==TW_SAFEZONE
 				&& bForceRender == FALSE)
 			{
@@ -361,12 +341,10 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
                 SetAction ( o, 3 );
         		o->Velocity = 0.34f;
             }
-            //  이동시.
 			else if ( o->Owner->CurrentAction==PLAYER_RUN_RIDE_HORSE )
 			{
 				Vector ( 1.f, 1.f, 1.f, Light );
 
-                //  이동 행동으로 변경.
 				SetAction ( o, 1 );
                 if ( gMapManager.WorldActive==WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene() )
                 {
@@ -417,7 +395,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 						Vector ( o->Position[0]+(float)(rand()%64-32),
 								 o->Position[1]+(float)(rand()%64-32),
 								 o->Position[2]+(float)(rand()%32-16), Position );
-						//  데비아스에서는 눈연기.
+
 						if ( gMapManager.WorldActive==WD_2DEVIAS )
 							CreateParticle ( BITMAP_SMOKE, Position, o->Angle, Light );
 						else if ( gMapManager.WorldActive!=WD_10HEAVEN )
@@ -443,7 +421,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 				SetAction(o, 6);
 				o->Velocity = 1.0f;
 			}
-            else    //  기본 행동.
+            else
             {
                 SetAction ( o, 0 );
                 o->WeaponLevel = 0;
@@ -471,8 +449,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 				}
             }
 
-            //  잔상.
-            if ( o->CurrentAction==3 )
+			if ( o->CurrentAction==3 )
             {
                 vec3_t Pos1, Pos2, p, p2;
 
@@ -484,14 +461,12 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
                 CreateBlur ( Hero, p, p2, Light, 0 );
             }
 
-            //  다크홀스 스킬.
             if ( o->CurrentAction==3 )
             {
                 RenderDarkHorseSkill ( o, b );
             }
 
-            //////////////////////////////////////////////////////////////////////////
-            if ( o->Owner->ExtState==1 )        //  레벨업.
+            if ( o->Owner->ExtState==1 ) 
             {
                 vec3_t p;
                 vec3_t Angle    = { 0.f, 0.f, 0.f };
@@ -511,15 +486,15 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
                     }
                 }
             }
-            else if ( o->Owner->ExtState==2 )   //  레벨다운.
+            else if ( o->Owner->ExtState==2 )
             {
             }
             o->Owner->ExtState = 0;
 
 			o->Live = o->Owner->Live;
             break;
-        case MODEL_PEGASUS:	// 디노란트
-		case MODEL_UNICON:	// 유니리아
+        case MODEL_PEGASUS:
+		case MODEL_UNICON:
 			if ( ( TerrainWall[TERRAIN_INDEX_REPEAT( (int)(o->Owner->Position[0]/TERRAIN_SCALE), (int)(o->Owner->Position[1]/TERRAIN_SCALE) )]&TW_SAFEZONE )==TW_SAFEZONE
 				&& bForceRender == FALSE)
 			{
@@ -527,7 +502,6 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 				break;
 			}
 
-            //  순간이동을 할때. 유니리아도 같이 순간이동을 한다.
             if ( o->Owner->Teleport==TELEPORT_BEGIN || o->Owner->Teleport==TELEPORT )
             {
                 o->Alpha -= 0.1f;
@@ -652,7 +626,6 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
         b->CurrentAction = o->CurrentAction;
    		b->PlayAnimation(&o->AnimationFrame,&o->PriorAnimationFrame,&o->PriorAction,o->Velocity,o->Position,o->Angle);
         
-		//  수호, 사탄 움직임 표현
 		if(o->Type == MODEL_HELPER || o->Type == MODEL_HELPER+1)
 		{
 			vec3_t Range;
@@ -846,14 +819,10 @@ void DeleteBoids ()
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  환수 드래곤을 생성한다.
 int CreateDragon ( OBJECT* o, int index )
 {
     if ( gMapManager.WorldActive!=WD_10HEAVEN ) return 0;
 
-    //  새끼 환수드래곤 날기...ㅋㅋㅋㅋ
 	if ( index<3 )
 	{
 		o->Live  = true;
@@ -880,7 +849,6 @@ int CreateDragon ( OBJECT* o, int index )
 	}
 	else
 	{
-		// 천공유충
 		o->Type = MODEL_SPEARSKILL;
 		o->Velocity    = 2.2f;
 		o->LightEnable = false;
@@ -913,9 +881,6 @@ int CreateDragon ( OBJECT* o, int index )
 	return 1;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  아틀란스 물고기 생성. 
 int CreateAtlanseFish ( OBJECT* o )
 {
 	if ( gMapManager.WorldActive!=WD_7ATLANSE && gMapManager.WorldActive!=WD_67DOPPLEGANGER3) 
@@ -954,10 +919,7 @@ int CreateAtlanseFish ( OBJECT* o )
 	}
     return 1;
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-//  
+ 
 void MoveBat ( OBJECT* o )
 {
 	o->Position[2] = RequestTerrainHeight(o->Position[0],o->Position[1]);
@@ -965,9 +927,6 @@ void MoveBat ( OBJECT* o )
 	o->Timer += 0.2f;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
 void MoveButterFly ( OBJECT* o )
 {
 	if(rand()%32 == 0)
@@ -990,9 +949,6 @@ void MoveButterFly ( OBJECT* o )
 	o->Position[2] += (float)(rand()%15-7)*0.3f;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
 void MoveBird ( OBJECT* o )
 {
 	if(o->AI == BOID_FLY)
@@ -1048,19 +1004,14 @@ void MoveBird ( OBJECT* o )
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  
 void MoveHeavenBug ( OBJECT* o, int index )
 {
 	int iFrame = MoveSceneFrame;
 	
-	// 천공유충
 	o->Position[0] += o->Velocity * ( float)sinf( o->Angle[2]);
 	o->Position[1] -= o->Velocity * ( float)cosf( o->Angle[2]);
 	o->Angle[2] += 0.01f * cosf( ( float)( 34571+iFrame+index*41273)*0.0003f) * sinf( ( float)( 17732+iFrame+index*5161)*0.0003f);
 
-    //사라짐
 	float dx = o->Position[0]-Hero->Object.Position[0];
 	float dy = o->Position[1]-Hero->Object.Position[1];
 	float Range = sqrtf(dx*dx + dy*dy);
@@ -1078,22 +1029,20 @@ void MoveHeavenBug ( OBJECT* o, int index )
     }
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  
 void MoveEagle ( OBJECT* o )
 {
 	if (o->SubType == 0 && rand()%120 == 0)
 	{
-		o->SubType = 1;	// 펄럭 시작
+		o->SubType = 1;
 		o->AnimationFrame = 0;
 	}
 	else if (o->SubType == 1 && o->AnimationFrame == 24)
 	{
-		o->SubType = 2;	// 펄럭 끝
+		o->SubType = 2;
 	}
 	else if (o->SubType == 2 && o->AnimationFrame == 0)
 	{
-		o->SubType = 0;	// 비행
+		o->SubType = 0;
 	}
 	else if (o->SubType == 0)
 	{
@@ -1109,15 +1058,15 @@ void MoveEagle ( OBJECT* o )
 		o->HeadAngle[1] = sinf( fSeedAngle ) * fFlyRange;
 		fAngle = CreateAngle(o->Position[0],o->Position[1], o->Position[0] + o->HeadAngle[0], o->Position[1] + o->HeadAngle[1]);
 
-		if (o->HeadAngle[2] == 0 && o->HeadAngle[0] > o->HeadAngle[1])	// cos이 sin보다 큰 구간
+		if (o->HeadAngle[2] == 0 && o->HeadAngle[0] > o->HeadAngle[1])
 		{
-			o->HeadAngle[2] = 1;	// check point로 사용
+			o->HeadAngle[2] = 1;
 		}
-		else if (o->HeadAngle[2] == 1 && o->HeadAngle[0] < o->HeadAngle[1])	// cos이 sin보다 작은 구간
+		else if (o->HeadAngle[2] == 1 && o->HeadAngle[0] < o->HeadAngle[1])
 		{
-			o->HeadAngle[2] = 2;	// check point로 사용
+			o->HeadAngle[2] = 2;
 		}
-		else if (o->HeadAngle[2] == 2 && o->HeadAngle[0] > o->HeadAngle[1])	// cos이 sin보다 큰 구간이 다시 오면 한바퀴 끝
+		else if (o->HeadAngle[2] == 2 && o->HeadAngle[0] > o->HeadAngle[1])
 		{
 			o->AI = BOID_GROUND;
 			o->HeadAngle[2] = 0;
@@ -1133,15 +1082,15 @@ void MoveEagle ( OBJECT* o )
 		o->HeadAngle[1] = cosf( fSeedAngle ) * fFlyRange;
 		fAngle = CreateAngle(o->Position[0],o->Position[1], o->Position[0] + o->HeadAngle[0], o->Position[1] + o->HeadAngle[1]);
 
-		if (o->HeadAngle[2] == 0 && o->HeadAngle[0] < o->HeadAngle[1])	// cos이 sin보다 작은 구간
+		if (o->HeadAngle[2] == 0 && o->HeadAngle[0] < o->HeadAngle[1])
 		{
-			o->HeadAngle[2] = 1;	// check point로 사용
+			o->HeadAngle[2] = 1;
 		}
-		else if (o->HeadAngle[2] == 1 && o->HeadAngle[0] > o->HeadAngle[1])	// cos이 sin보다 작은 구간
+		else if (o->HeadAngle[2] == 1 && o->HeadAngle[0] > o->HeadAngle[1])
 		{
-			o->HeadAngle[2] = 2;	// check point로 사용
+			o->HeadAngle[2] = 2;
 		}
-		else if (o->HeadAngle[2] == 2 && o->HeadAngle[0] < o->HeadAngle[1])	// cos이 sin보다 작은 구간이 다시 오면 한바뀌 끝
+		else if (o->HeadAngle[2] == 2 && o->HeadAngle[0] < o->HeadAngle[1])
 		{
 			o->AI = BOID_FLY;
 			o->HeadAngle[2] = 0;
@@ -1161,7 +1110,6 @@ void MoveEagle ( OBJECT* o )
 
 void MoveTornado ( OBJECT* o )
 {
-	// 맵 효과 회오리
 	o->Scale = 1.0f;
 	if (rand()%500 == 0)
 	{
@@ -1175,7 +1123,6 @@ void MoveTornado ( OBJECT* o )
 
 void MoveBoidGroup ( OBJECT* o, int index )
 {
-    //  무리지어 가는 루틴
     if ( o->AI!=BOID_GROUND )
     {
         if ( o->Type!=MODEL_BUTTERFLY01 || rand()%4==0 )
@@ -1216,7 +1163,6 @@ void MoveBoidGroup ( OBJECT* o, int index )
         o->Direction[0] = o->Position[0] + 3.f*p[0];
         o->Direction[1] = o->Position[1] + 3.f*p[1];
     
-        //사라짐
         float dx = o->Position[0]-Hero->Object.Position[0];
         float dy = o->Position[1]-Hero->Object.Position[1];
         float Range = sqrtf(dx*dx + dy*dy);
@@ -1276,7 +1222,6 @@ void MoveBoids ()
 		AddTerrainLight ( o->Position[0], o->Position[1], Light, 16, PrimaryTerrainLight );
 	}
 
-	// boid 처리
     int Index = TERRAIN_INDEX_REPEAT ( (int)(Hero->Object.Position[0]/TERRAIN_SCALE), (int)(Hero->Object.Position[1]/TERRAIN_SCALE) );
 	for ( int i=0; i<MAX_BOIDS; i++ )
 	{
@@ -1381,7 +1326,7 @@ void MoveBoids ()
 						)  && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) )
                     || gMapManager.InBloodCastle()
                     || gMapManager.InHellas()
-					|| (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && i < 1 && rand()%500==0 && Hero->SafeZone!=true)	// 0번은 회오리, 1번은 독수리
+					|| (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && i < 1 && rand()%500==0 && Hero->SafeZone!=true)
                 )
 			{
                 int iCreateBoid = 0;
@@ -1413,7 +1358,6 @@ void MoveBoids ()
 				}
                 else if ( gMapManager.InBloodCastle() == true )
                 {
-                    //  까마귀.
                     o->Type = MODEL_CROW;
                 }
 				else if(gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
@@ -1456,7 +1400,7 @@ void MoveBoids ()
                 }
 			}
 		}
-        //  처리.
+
 		if ( o->Live )
 		{
 			BMD* b = &Models[o->Type];
@@ -1465,7 +1409,7 @@ void MoveBoids ()
 			{
 				PlaySpeed = 0.5f;
 			}
-            //드래곤이밴트	////USE_EVENT_ELDORADO
+
 			if ( EnableEvent!=0 && o->Type == MODEL_MONSTER01+31 )
 			{
 				SetAction ( o, MONSTER01_DIE+1 );
@@ -1531,14 +1475,9 @@ void MoveBoids ()
 					break;
                 }
 				
-                //  무리지는 것들.
                 MoveBoidGroup ( o, i );
 
-                if ( o->LifeTime<=0 && (gMapManager.WorldActive==WD_7ATLANSE
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-					|| gMapManager.WorldActive==WD_67DOPPLEGANGER3
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-					) && TerrainWall[Index]==TW_SAFEZONE )
+                if ( o->LifeTime<=0 && (gMapManager.WorldActive==WD_7ATLANSE || gMapManager.WorldActive==WD_67DOPPLEGANGER3) && TerrainWall[Index]==TW_SAFEZONE )
 				{
 					o->Angle[2] += 180.f;
 					if(o->Angle[2] >= 360.f) o->Angle[2] -= 360.f;
@@ -1550,7 +1489,6 @@ void MoveBoids ()
 				else if ( o->SubType>=2 ) o->Live = false;
 				o->LifeTime--;
 
-				//효과음
 				float dx = o->Position[0]-Hero->Object.Position[0];
 				float dy = o->Position[1]-Hero->Object.Position[1];
 				float Range = sqrtf(dx*dx + dy*dy);
@@ -1573,7 +1511,7 @@ void MoveBoids ()
                         if ( TerrainWall[Index]==TW_SAFEZONE )
                         {
                             if(rand()%128==0)
-							    PlayBuffer(SOUND_CROW,o);     //  카악.
+							    PlayBuffer(SOUND_CROW,o);
                         }
 					}
 				}
@@ -1589,7 +1527,7 @@ void RenderBoids ( bool bAfterCharacter )
 	{
 		OBJECT* o = &Boids[i];
 		if (o->m_bRenderAfterCharacter != bAfterCharacter) continue;
-		if ( MODEL_SPEARSKILL != o->Type)	// 천공유충
+		if ( MODEL_SPEARSKILL != o->Type)
 		{
 			o->Angle[2] += 90.f;
 		}
@@ -1598,7 +1536,7 @@ void RenderBoids ( bool bAfterCharacter )
 			o->Visible = TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-20.f);
 			if ( o->Visible )
 			{
-				if ( MODEL_SPEARSKILL == o->Type)	// 천공유충
+				if ( MODEL_SPEARSKILL == o->Type)
 				{
 					continue;
 				}
@@ -1624,7 +1562,7 @@ void RenderBoids ( bool bAfterCharacter )
 				    }
 #endif
 #ifdef USE_EVENT_ELDORADO
-                    if ( EnableEvent!=0 )//드래곤
+                    if ( EnableEvent!=0 )
 #endif
                     {
                         Vector(0.f,-50.f,0.f,p);
@@ -1713,7 +1651,7 @@ void RenderFishs()
 			{
 				RenderObject(o);
 
-				if(o->Type==MODEL_FISH01+7 || o->Type==MODEL_FISH01+8)//해파리
+				if(o->Type==MODEL_FISH01+7 || o->Type==MODEL_FISH01+8)
 				{
 				}
 				else
@@ -1752,7 +1690,6 @@ void MoveFishs()
         OBJECT *o = &Fishs[i];
 		if ( !o->Live )
 		{	
-            // 생성
 			Vector( Hero->Object.Position[0]+(float)(rand()%1024-512),
 				    Hero->Object.Position[1]+(float)(rand()%1024-512),
 				    Hero->Object.Position[2],o->Position );
@@ -1761,9 +1698,7 @@ void MoveFishs()
 				 ( gMapManager.WorldActive==WD_1DUNGEON && TerrainWall[Index]<TW_NOGROUND )  ||
 				 ( gMapManager.WorldActive==WD_6STADIUM && TerrainWall[Index]<TW_NOGROUND )  ||
 				 ( (gMapManager.WorldActive==WD_7ATLANSE
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
 					|| gMapManager.WorldActive==WD_67DOPPLEGANGER3
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
 					 ) && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) ) ||
                  ( gMapManager.InHellas() && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) ) || 
                  ( M33Aida::IsInAida() && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) ) || 
@@ -1826,11 +1761,9 @@ void MoveFishs()
 						o->Live = false;
 					break;
 				case WD_7ATLANSE:
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
 				case WD_67DOPPLEGANGER3:
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
         			o->Scale       = (float)(rand()%2+8)*0.1f;
-					if(Hero->Object.Position[1]*0.01f < 128)//큰물고기
+					if(Hero->Object.Position[1]*0.01f < 128)
 					{
          				o->Type = MODEL_FISH01+1+2+rand()%4;
           				o->Velocity = 1.f/o->Scale;
@@ -1839,7 +1772,7 @@ void MoveFishs()
 						else
      						o->Gravity = 3;
 					}
-					else//해파리
+					else
 					{
 						o->Type = MODEL_FISH01+1+6+rand()%2;
 						if(o->Type==MODEL_FISH01+7 || o->Type==MODEL_FISH01+8)
@@ -1870,7 +1803,7 @@ void MoveFishs()
 			}
 		}
 		if(o->Live)
-		{	// 움직임
+		{
 			if ( o->Type!=-1 )
             {
                 BMD *b = &Models[o->Type];
@@ -1878,7 +1811,7 @@ void MoveFishs()
 
 			    b->PlayAnimation(&o->AnimationFrame,&o->PriorAnimationFrame,&o->PriorAction,o->Velocity*0.5f,o->Position,o->Angle);
             }
-			if(o->Type==MODEL_FISH01+7 || o->Type==MODEL_FISH01+8)//해파리
+			if(o->Type==MODEL_FISH01+7 || o->Type==MODEL_FISH01+8)
 			{
 				o->BlendMeshLight = sinf(o->Timer)*0.4f+0.5f;
 				o->Timer += 0.1f;
@@ -1940,7 +1873,6 @@ void MoveFishs()
 				}
 				if(o->SubType >= 2) o->Live = false;
 
-				//잔상
 				if(o->Type == MODEL_BUG01+1
 				|| o->Type == MODEL_SCOLPION 
 					)
@@ -1948,14 +1880,12 @@ void MoveFishs()
 					VectorCopy(o->Position,o->EyeLeft);
 				}
 
-				//사라짐
 				float dx = o->Position[0]-Hero->Object.Position[0];
 				float dy = o->Position[1]-Hero->Object.Position[1];
 				float Range = sqrtf(dx*dx + dy*dy);
 				if(Range >= 1500.f)
 					o->Live = false;
 
-				//사운드
 				if(Range < 600.f)
       				if(o->Type==MODEL_RAT01 && rand()%256==0)
 	     				PlayBuffer(SOUND_RAT01,o);

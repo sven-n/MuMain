@@ -60,16 +60,16 @@ namespace SEASON3B
 		enum TAB_BUTTON_INDEX
 		{
 			TAB_NON	= -1,
-			TAB_QUEST = 0,		// 퀘스트
-			TAB_JOB_CHANGE,		// 전직 퀘스트
-			TAB_CASTLE_TEMPLE,	// 캐슬, 환영사원
+			TAB_QUEST = 0,
+			TAB_JOB_CHANGE,
+			TAB_CASTLE_TEMPLE,
 		};
 #else	// ASG_MOD_UI_QUEST_INFO
 		enum TAB_BUTTON_INDEX
 		{
-			TAB_QUEST = 0,		// 퀘스트
-			TAB_CASTLE,		// 캐슬
-			TAB_TEMPLE,		// 환영사원
+			TAB_QUEST = 0,
+			TAB_CASTLE,
+			TAB_TEMPLE,
 		};
 #endif	// ASG_MOD_UI_QUEST_INFO
 		
@@ -139,20 +139,20 @@ namespace SEASON3B
 		CNewUIManager* m_pNewUIMng;
 		POINT m_Pos;
 
-#ifndef ASG_MOD_UI_QUEST_INFO		// 정리시 삭제.
+#ifndef ASG_MOD_UI_QUEST_INFO
 		CNewUIRadioGroupButton m_BtnTab;
 #endif	// ASG_MOD_UI_QUEST_INFO
 		CNewUIButton m_BtnExit;
 #ifdef ASG_MOD_UI_QUEST_INFO
-		CNewUIButton	m_btnQuestOpen;		// 퀘스트 열기 버튼.
-		CNewUIButton	m_btnQuestGiveUp;	// 퀘스트 포기 버튼.
+		CNewUIButton	m_btnQuestOpen;
+		CNewUIButton	m_btnQuestGiveUp;
 
-		TAB_BUTTON_INDEX m_eTabBtnIndex;	// 탭버튼 인덱스.
+		TAB_BUTTON_INDEX m_eTabBtnIndex;
 
-		CUICurQuestListBox		m_CurQuestListBox;		// 진행중인 퀘스트 리스트 박스.
-		CUIQuestContentsListBox	m_QuestContentsListBox;	// 퀘스트 내용 리스트 박스.
-		char			m_aszMsg[2][64];	// 2줄 메시지 용.
-		int				m_nMsgLine;			// 메시지 줄 수.
+		CUICurQuestListBox		m_CurQuestListBox;
+		CUIQuestContentsListBox	m_QuestContentsListBox;
+		char			m_aszMsg[2][64];
+		int				m_nMsgLine;
 #endif	// ASG_MOD_UI_QUEST_INFO
 	};
 }

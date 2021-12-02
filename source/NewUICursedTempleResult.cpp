@@ -107,7 +107,6 @@ void SEASON3B::CNewUICursedTempleResult::SetButtonInfo()
 
 	m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeButtonImgState( true, CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true );
 	m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeButtonInfo( x, m_Pos.y+CURSEDTEMPLE_RESULT_WINDOW_HEIGHT-37, 54, 23 );
-	// 1002 "닫기"
 	m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeText(GlobalText[1002]);
 }
 
@@ -153,7 +152,6 @@ bool SEASON3B::CNewUICursedTempleResult::UpdateMouseEvent()
 {
 	if(m_Button[CURSEDTEMPLERESULT_CLOSE].UpdateMouseEvent())
 	{
-		//이겼는지 졌는지 판단해서 보낼것...
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_CURSEDTEMPLE_RESULT);
 		return false;
 	}
@@ -210,27 +208,22 @@ void SEASON3B::CNewUICursedTempleResult::RenderFrame()
 {
 	float x, y, width, height;
 
-	// 메세지박스 바탕
 	x = GetPos().x; y = GetPos().y + 2.f, width = CURSEDTEMPLE_RESULT_WINDOW_WIDTH - MSGBOX_BACK_BLANK_WIDTH; height = CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - MSGBOX_BACK_BLANK_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
-	// 메세지박스 윗부분
 	x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
-	// 메세지박스 중간부분
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 	for(int i=0; i<11; ++i)
 	{
 		RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
 		y += height;
 	}
-	
-	// 메세지박스 아랫부분
+
 	x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 
-	// 라인
 	x = GetPos().x; y = GetPos().y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 77; width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
 	RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
 	y = GetPos().y + 45;
@@ -247,16 +240,13 @@ void SEASON3B::CNewUICursedTempleResult::RenderTextLine( const CursedTempleGameR
 {
 	unicode::t_char Text[200];
 
-	//진영
 	memset(&Text, 0, sizeof(unicode::t_char)*200);
 	if( SEASON3A::eTeam_Allied == resultinfo.s_team )
 	{
-		// 2387 "뮤 연합군 측"
 		unicode::_sprintf( Text, GlobalText[2387] );
 	}
 	else
 	{
-		// 2388 "환영교단 측"
 		unicode::_sprintf( Text, GlobalText[2388] );
 	}
 	DrawText( Text, x+5, y, color, backcolor, RT3_SORT_LEFT, 0, false );
@@ -283,18 +273,11 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
 	unicode::t_char Text[200];
 
 	memset(&Text, 0, sizeof(unicode::t_char)*200);
-	// 2414 "Hero List"
 	unicode::_sprintf( Text, GlobalText[2414]);
 	DrawText( Text, m_Pos.x, m_Pos.y+13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false );
 
-	// 2415 "진영"
-	// 681 "캐릭터"
-	// 1973 "클래스"
-	// 683 "경험치"
-	// 682 "누적점수"
 	memset(&Text, 0, sizeof(unicode::t_char)*200);
-	unicode::_sprintf( Text, "  %s           %s        %s     %s    %s", 
-		     GlobalText[2415], GlobalText[681], GlobalText[1973], GlobalText[683], GlobalText[682]);
+	unicode::_sprintf( Text, "  %s           %s        %s     %s    %s", GlobalText[2415], GlobalText[681], GlobalText[1973], GlobalText[683], GlobalText[682]);
 	DrawText( Text, m_Pos.x, m_Pos.y+38, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false );
 
 	int i = 0;
@@ -330,7 +313,6 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
 	}
 
 	memset(&Text, 0, sizeof(unicode::t_char)*200);
-	// 2416 "닫기 버튼을 누르면 보상을 받을 수 있습니다."
 	sprintf( Text, GlobalText[2416]);
 	DrawText( Text, m_Pos.x, m_Pos.y+CURSEDTEMPLE_RESULT_WINDOW_HEIGHT-55, 0xFF0000FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false );
 }
@@ -387,11 +369,8 @@ void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult( BYTE* Re
 		memset(&TempData.s_characterId, 0, sizeof(char)*(MAX_ID_SIZE+1));
 		memcpy(&TempData.s_characterId, data2->GameId, MAX_ID_SIZE);
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		TempData.s_mapnumber = (short)data2->byMapNumber;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		TempData.s_mapnumber = data2->byMapNumber;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 		TempData.s_team = static_cast<SEASON3A::eCursedTempleTeam>(data2->btTeam);
 		TempData.s_class = data2->btClass;
 		TempData.s_addexp = data2->nAddExp;

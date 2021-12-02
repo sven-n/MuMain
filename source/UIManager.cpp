@@ -4,14 +4,6 @@
 //  
 //  내  용 : UI 들을 관리 해주는 클래스
 //  
-//  날  짜 : 2004년 11월 09일
-//  
-//  작성자 : 강 병 국
-//  
-//////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
-//						 												//
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -265,11 +257,7 @@ void CUIManager::GetDeleteInterface(std::list<DWORD>& outflag, DWORD deleteflag 
 	}
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-bool CUIManager::Open( DWORD dwInterface )
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 bool CUIManager::Open( DWORD dwInterface, DWORD dwExtraData )
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 {
 	if( IsOpen(INTERFACE_REFINERYINFO) )
 		return false;
@@ -281,34 +269,23 @@ bool CUIManager::Open( DWORD dwInterface, DWORD dwExtraData )
 		return false;
 	
 	std::list<DWORD> closeinterfaceflag;
-	// 자기자신은 제외한 모든 인터페이스
 	GetInterfaceAll( closeinterfaceflag );
 	GetDeleteInterface( closeinterfaceflag, dwInterface );
-	// 같이 열려도 상관없는걸 뺀다.
 	GetDeleteInterface( closeinterfaceflag, INTERFACE_FRIEND );
 
 	switch( dwInterface )
 	{
-	case INTERFACE_INVENTORY:							//## 사용하지않는 UI
+	case INTERFACE_INVENTORY:
 		{
 			bool bResult = CloseInterface( closeinterfaceflag );
 			if( bResult )
 			{
 				HeroInventoryEnable = true;
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM												//## 소스정리 대상임.
-				//인벤토리를 열 때마다 펫 정보 리셋을 요구한다.
-				if(GetBaseClass(Hero->Class)==CLASS_DARK_LORD)
-				{
-					SendRequestPetInfo ( 0, 0, EQUIPMENT_WEAPON_LEFT );
-					SendRequestPetInfo ( 1, 0, EQUIPMENT_HELPER );
-				}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM											//## 소스정리 대상임.
 			}
 		}
 		break;
 	case INTERFACE_PERSONALSHOPSALE:
 		{
-			// 같이 열려도 상관없는걸 뺀다.
 			GetDeleteInterface( closeinterfaceflag, INTERFACE_INVENTORY );
 
 			bool bResult = CloseInterface( closeinterfaceflag );
@@ -318,11 +295,9 @@ bool CUIManager::Open( DWORD dwInterface, DWORD dwExtraData )
 
 				if(g_iPShopWndType != PSHOPWNDTYPE_NONE) {
 					g_ErrorReport.Write("@ OpenPersonalShop : SendRequestInventory\n");
-					SendRequestInventory();		//. 혹시 꼬였을지도 모르니 인벤을 새로 받아온다
+					SendRequestInventory();
 				}
 
-				//. 인스턴스가 없을때만 새로 생성한다
-				//. 인스턴스가 이미 있다면 return false;
 				CreatePersonalItemTable();
 
 				g_bPersonalShopWnd = true;
@@ -339,11 +314,8 @@ bool CUIManager::Open( DWORD dwInterface, DWORD dwExtraData )
 
 				if(g_iPShopWndType != PSHOPWNDTYPE_NONE) {
 					g_ErrorReport.Write("@ OpenPersonalShop : SendRequestInventory\n");
-					SendRequestInventory();		//. 혹시 꼬였을지도 모르니 인벤을 새로 받아온다
+					SendRequestInventory();
 				}
-
-				//. 인스턴스가 없을때만 새로 생성한다
-				//. 인스턴스가 이미 있다면 return false;
 				CreatePersonalItemTable();
 
 				g_bPersonalShopWnd = true;
@@ -375,7 +347,6 @@ bool CUIManager::Close( DWORD dwInterface, DWORD dwExtraData )
 {
 	if( !IsOpen( dwInterface ) )		return false;
 
-	// 같이 닫혀야 할것들을 설정한다.
 	switch( dwInterface )
 	{
 	case INTERFACE_INVENTORY:

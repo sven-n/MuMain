@@ -18,10 +18,6 @@
 
 CDuelMgr g_DuelMgr;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CDuelMgr::CDuelMgr()
 {
 	Reset();
@@ -130,7 +126,7 @@ BOOL CDuelMgr::IsDuelPlayer(CHARACTER * pCharacter, int iPlayerNum)
 	}
 	else if (
 #ifdef YDG_FIX_DUEL_SUMMON_CLOAK
-		bIncludeSummon == TRUE &&		// 소환 몬스터도 검사
+		bIncludeSummon == TRUE &&
 #endif	// YDG_FIX_DUEL_SUMMON_CLOAK
 		gCharacterManager.GetBaseClass(pCharacter->Class) == 0 && strncmp(pCharacter->OwnerID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
 	{
@@ -184,16 +180,12 @@ void CDuelMgr::RemoveDuelWatchUser(char * pszUserID)
 			return;
 		}
 	}
-	assert(!"없는 유저를 지우려고 함!");
+	assert(!"RemoveDuelWatchUser!");
 }
 
 char * CDuelMgr::GetDuelWatchUser(int iIndex)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if(m_DuelWatchUserList.size() <= (DWORD)iIndex)
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	if (m_DuelWatchUserList.size() <= iIndex)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		return NULL;
 
 	int i = 0;

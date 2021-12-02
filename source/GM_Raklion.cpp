@@ -219,7 +219,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		{
 			OpenMonsterModel(205);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+205, PosX, PosY);
-			strcpy(pCharacter->ID, "´ÙÅ© ÀÚÀÌ¾ðÆ® ¸Å¸Óµå");
+			strcpy(pCharacter->ID, "´Å© ÀÚÀÌ¾ðÆ® ¸Å¸Óµå");
 			//pCharacter->Object.Scale = 1.7f;
 			pCharacter->Object.Scale = 1.9f;
 			pCharacter->Weapon[0].Type = -1;
@@ -236,7 +236,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		{
 			OpenMonsterModel(206);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+206, PosX, PosY);
-			strcpy(pCharacter->ID, "´ÙÅ© ÀÚÀÌ¾ðÆ®");
+			strcpy(pCharacter->ID, "´Å© ÀÚÀÌ¾ðÆ®");
 			//pCharacter->Object.Scale = 1.0f;
 			pCharacter->Object.Scale = 1.1f;
 			pCharacter->Weapon[0].Type = -1;
@@ -249,7 +249,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		{
 			OpenMonsterModel(207);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+207, PosX, PosY);
-			strcpy(pCharacter->ID, "´ÙÅ© Äð·¯Æ¾");
+			strcpy(pCharacter->ID, "´Å© Äð·¯Æ¾");
 			//pCharacter->Object.Scale = 1.0f;
 			pCharacter->Object.Scale = 1.3f;
 			pCharacter->Weapon[0].Type = -1;
@@ -260,7 +260,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		{
 			OpenMonsterModel(208);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+208, PosX, PosY);
-			strcpy(pCharacter->ID, "´ÙÅ© ¾ÆÀÌ¾ð ³ªÀÌÆ®");
+			strcpy(pCharacter->ID, "´Å© ¾ÆÀÌ¾ð ³ªÀÌÆ®");
 			//pCharacter->Object.Scale = 1.5f;
 			pCharacter->Object.Scale = 1.8f;
 			pCharacter->Weapon[0].Type = -1;
@@ -820,7 +820,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 					Vector(0.2f, 0.4f, 1.0f, vLight);
 					CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 11, 1.2f);
 
-					// ¹Ù´ÚÈ¿°ú
 					if(rand()%2 == 0)
 					{
 						VectorCopy(o->Position, vPos);
@@ -975,14 +974,12 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 								CreateParticle ( BITMAP_SMOKE,  vPos, o->Angle, vLight, 1, 0.5f );
 								CreateParticle ( BITMAP_SMOKE,  vPos, o->Angle, vLight, 24, 1.25f );
 								
-								// ¹Ù´ÚÈ¿°ú
 								VectorCopy(o->Position, vPos);
 								vPos[0] += (float)(rand()%250-125);
 								vPos[1] += (float)(rand()%250-125);
 								Vector(0.1f, 1.0f, 0.1f, vLight);
 								CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 1.0f);
 								
-								// ½ºÆÄÅ©
 								Vector(1.0f, 1.0f, 1.0f, vLight);
 								vPos[2] += 50.f;
 								CreateParticle ( BITMAP_SPARK+1,  vPos, o->Angle, vLight, 5, 0.75f );
@@ -1429,8 +1426,6 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 	}
 	else if(o->Type == MODEL_WARP4 || o->Type == MODEL_WARP5 || o->Type == MODEL_WARP6)
 	{
-		// ¸¸¾à ¶óÅ¬¸®¿Â º¸½º¸Ê¿¡ µé¾î°¥ ¼ö ÀÖ´Â »óÅÂ¶ó¸é ·»´õ¸µ ÇÏ°í
-		// ¶óÅ¬¸®¿Â º¸½º¸Ê¿¡ µé¾î°¥ ¼ö ¾ø´Â »óÅÂ¶ó¸é ·»´õ¸µ ¾ÈÇÑ´Ù.
 		if(m_bCanGoBossMap == false)
 		{
 			return true;
@@ -1456,7 +1451,7 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 		return true;
 	}
-	else if(o->Type == 82)	// º¸½º °ÔÀÌÆ® ¿ÀºêÁ§Æ®
+	else if(o->Type == 82)
 	{
 		if(m_bCanGoBossMap == false)
 		{
@@ -1469,12 +1464,10 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 		return true;
 	}
 	else if( (o->Type >= MODEL_MONSTER01+145 && o->Type <= MODEL_MONSTER01+153)
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION	// È®Àå¸Ê Ãß°¡ ¸ó½ºÅÍµé
 		|| o->Type == MODEL_MONSTER01+205
 		|| o->Type == MODEL_MONSTER01+206 
 		|| o->Type == MODEL_MONSTER01+208 
 		|| o->Type == MODEL_MONSTER01+207
-#endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
 		)
 	{
 		RenderMonster(o, b, ExtraMon);
@@ -1490,7 +1483,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 	switch(o->Type)
 	{
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case MODEL_MONSTER01+145:	// ¾ÆÀÌ½º¿öÄ¿
+	case MODEL_MONSTER01+145:
 		{
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(1, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1500,7 +1493,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 #ifdef PJH_GIANT_MAMUD
-	case MODEL_MONSTER01+146:	// ÀÚÀÌ¾ðÆ®¸Å¸Óµå
+	case MODEL_MONSTER01+146:
 		{
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
@@ -1536,7 +1529,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 #endif	// ADD_RAKLION_MOB_ICEGIANT
 
 #ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
-	case MODEL_MONSTER01+148:	// Äð·¯Æ¾
+	case MODEL_MONSTER01+148:
 		{
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(1, RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1547,7 +1540,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 #endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
 
 #ifdef ADD_RAKLION_IRON_KNIGHT
-	case MODEL_MONSTER01+149:	// ¾ÆÀÌ¾ð ³ªÀÌÆ®
+	case MODEL_MONSTER01+149:
 		if (o->CurrentAction == MONSTER01_DIE)
 		{
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1565,11 +1558,8 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 		return true;
 
 #endif	// ADD_RAKLION_IRON_KNIGHT
-	case MODEL_MONSTER01+150:	// ¼¼·çÆÇ (º¸½º¸ó½ºÅÍ)
+	case MODEL_MONSTER01+150:
 		{
-
-			//b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
 			b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1818,7 +1808,6 @@ bool CGM_Raklion::RenderObjectVisual( OBJECT* o, BMD* b )
 				CreateParticle(BITMAP_FIRE_HIK3_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 				break;
 			}
-			// ¸®¾óÇÑ ºÒ ¸¸µé±â!!
 			CreateParticle(BITMAP_FIRE_HIK1_MONO,o->Position,o->Angle,vLight,2,o->Scale);
 
 			return true;

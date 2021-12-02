@@ -1,5 +1,4 @@
 // NewUIMyInventory.cpp: implementation of the CNewUIMyInventory class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -83,15 +82,10 @@ bool SEASON3B::CNewUIMyInventory::Create(CNewUIManager* pNewUIMng, CNewUI3DRende
 	}
 
 	SetPos(x, y);
-
 	LoadImages();
-
-	//. 장비창 슬롯들 영역 셋팅
 	SetEquipmentSlotInfo();
 	SetButtonInfo();
-
 	Show(false);
-
 	return true;
 }
 
@@ -124,14 +118,13 @@ bool SEASON3B::CNewUIMyInventory::EquipItem(int iIndex, BYTE* pbyItemPacket)
 	if(iIndex >= 0 && iIndex < MAX_EQUIPMENT_INDEX && g_pNewItemMng && CharacterMachine)
 	{
 		ITEM* pTargetItemSlot = &CharacterMachine->Equipment[iIndex];
-		if(pTargetItemSlot->Type > 0)	//. 이미 차고있다면
+		if(pTargetItemSlot->Type > 0)
 		{
-			UnequipItem(iIndex);	//. 장비 해제
+			UnequipItem(iIndex);
 		}
 
-		//. 임시 아이템 생성
 		ITEM* pTempItem = g_pNewItemMng->CreateItem(pbyItemPacket);		
-		//. 장착 할 수 있는가??
+
 		if(NULL == pTempItem)	
 		//if(NULL == pTempItem || false == IsEquipable(iIndex, pTempItem))	
 		{
@@ -162,7 +155,6 @@ void SEASON3B::CNewUIMyInventory::UnequipItem(int iIndex)
 	{
 		ITEM* pEquippedItem = &CharacterMachine->Equipment[iIndex];
 
-		//. 장착 효과 제거
 		if(pEquippedItem && pEquippedItem->Type != -1)
 		{
 #ifdef PBG_FIX_SKILLHOTKEY
@@ -170,12 +162,11 @@ void SEASON3B::CNewUIMyInventory::UnequipItem(int iIndex)
 #endif //PBG_FIX_SKILLHOTKEY
 
 #ifdef PBG_FIX_DARKPET_RENDER
-			// 다크호스
+
 			if( pEquippedItem->Type == ITEM_HELPER+4 )
 			{
 				Hero->InitPetInfo(PET_TYPE_DARK_HORSE);
 			}
-			// 다크스피릿
 			else if( pEquippedItem->Type == ITEM_HELPER+5 )
 			{
 				giPetManager::DeletePet(Hero);
@@ -210,12 +201,10 @@ void SEASON3B::CNewUIMyInventory::UnequipItem(int iIndex)
 
 #ifndef PBG_FIX_DARKPET_RENDER
 #ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-			// 다크호스
 			if( pEquippedItem->Type == ITEM_HELPER+4 )
 			{
 				Hero->InitPetInfo(PET_TYPE_DARK_HORSE);
 			}
-			// 다크스피릿
 			else if( pEquippedItem->Type == ITEM_HELPER+5 )
 			{
 				giPetManager::DeletePet(Hero);
@@ -235,9 +224,9 @@ void SEASON3B::CNewUIMyInventory::UnequipAllItems()
 		{
 #ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 			UnequipItem( i );
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM											//## 소스정리 대상임.
+#else // KJH_FIX_DARKLOAD_PET_SYSTEM
 			ITEM* pEquippedItem = &CharacterMachine->Equipment[i];
-			//. 장착 효과 제거		
+	
 			if(pEquippedItem && pEquippedItem->Type != -1)
 			{
 				DeleteEquippingEffectBug(pEquippedItem);
@@ -249,7 +238,7 @@ void SEASON3B::CNewUIMyInventory::UnequipAllItems()
 
 				DeleteEquippingEffect();
 			}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM											//## 소스정리 대상임.
+#endif // KJH_FIX_DARKLOAD_PET_SYSTEM		
 		}
 	}
 }
@@ -322,7 +311,7 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 	if(GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(iIndex == EQUIPMENT_GLOVES)
-			bEquipable = false;	//레이지 파이터는 장갑을 착용할수 없다
+			bEquipable = false;
 		else if(pItemAttr->m_byItemSlot == EQUIPMENT_WEAPON_RIGHT)
 			bEquipable = g_CMonkSystem.RageEquipmentWeapon(iIndex, pItem->Type);
 	}
@@ -468,7 +457,6 @@ void SEASON3B::CNewUIMyInventory::SetPos(int x, int y)
 	m_Pos.x = x;
 	m_Pos.y = y;
 	
-	//. 다시 셋팅
 	SetEquipmentSlotInfo();
 	
 	m_pNewInventoryCtrl->SetPos(x+15, y+200);
@@ -512,17 +500,14 @@ bool SEASON3B::CNewUIMyInventory::UpdateMouseEvent()
 	if(m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->UpdateMouseEvent())
 		return false;
 
-	//. PickedItem 처리
-	if(true == EquipmentWindowProcess())		//. 처리가 완료 되었다면
+	if(true == EquipmentWindowProcess())
 		return false;
 	if(true == InventoryProcess())
 		return false;
 
-	//. 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
 	
-	//. 버리기
 	CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 	if(pPickedItem && SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(0, 0, GetScreenWidth(), 429))
 	{
@@ -545,7 +530,6 @@ bool SEASON3B::CNewUIMyInventory::UpdateMouseEvent()
 		ITEM* pItemObj = pPickedItem->GetItem();
 		if( pItemObj && pItemObj->Jewel_Of_Harmony_Option != 0 )
 		{
-			// 2217 "강화된 아이템은 버릴 수 없습니다."			
 			g_pChatListBox->AddText("", GlobalText[2217], SEASON3B::TYPE_ERROR_MESSAGE);
 			
 			ResetMouseLButton();
@@ -553,7 +537,6 @@ bool SEASON3B::CNewUIMyInventory::UpdateMouseEvent()
 		}
 		else if(pItemObj && IsHighValueItem(pItemObj) == true)
 		{
-			// 269 "고가의 아이템은 버릴 수 없습니다."
 			g_pChatListBox->AddText("", GlobalText[269], SEASON3B::TYPE_ERROR_MESSAGE);
 			CNewUIInventoryCtrl::BackupPickedItem();
 			
@@ -562,34 +545,19 @@ bool SEASON3B::CNewUIMyInventory::UpdateMouseEvent()
 		}
 		else if(pItemObj && IsDropBan(pItemObj))
 		{
-			// "버릴 수 없는 아이템입니다."
 			g_pChatListBox->AddText("", GlobalText[1915], SEASON3B::TYPE_ERROR_MESSAGE);
 			CNewUIInventoryCtrl::BackupPickedItem();
 			
 			ResetMouseLButton();
 			return false;
 		}
-#ifdef CSK_FIX_WOPS_K27964_LOSTMAP_POP
-		// 잃어버린지도 환영의사원에서는 못버리게 수정
 		else if(pItemObj && pItemObj->Type == ITEM_POTION+28 && gMapManager.IsCursedTemple() == true)
 		{
 			ResetMouseLButton();
 			return false;
 		}
-#endif // CSK_FIX_WOPS_K27964_LOSTMAP_POP
-		
-		// 칼리마맵에서는 잃어버린 지도를 못버립니다.
-		// 던져도 상관없다고 해서 일단 주석으로 처리
-// 		else if(pItemObj && pItemObj->Type == ITEM_POTION+28 && gMapManager.InHellas() == true)
-// 		{
-// 			// 메세지 추가해줘야 한다.
-// 
-// 			ResetMouseLButton();
-// 			return false;
-// 		}
 		else
 		{
-			//떨어트리다
 			RenderTerrain(true);
 			if(RenderTerrainTile(SelectXF,SelectYF,(int)SelectXF,(int)SelectYF,1.f,1,true))
 			{
@@ -598,7 +566,6 @@ bool SEASON3B::CNewUIMyInventory::UpdateMouseEvent()
 				int ty = (int)(CollisionPosition[1]/TERRAIN_SCALE);
 				if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
 				{
-					// 사망중에는 던질 수 없다
 					if( Hero->Dead == false )
 					{
 						SendRequestDropItem(MAX_EQUIPMENT_INDEX+iSourceIndex,tx,ty);
@@ -617,18 +584,13 @@ bool SEASON3B::CNewUIMyInventory::UpdateMouseEvent()
 		}
 	}
 
-	// 세트 옵션 설명 리스트
 	g_csItemOption.SetViewOptionList(false);
-#ifdef SOCKET_SYSTEM
+
 	if(CheckMouseIn(m_Pos.x, m_Pos.y+20, INVENTORY_WIDTH * 0.5f, 15) == true)
-#else	// SOCKET_SYSTEM
-	if(CheckMouseIn(m_Pos.x, m_Pos.y+20, INVENTORY_WIDTH, 15) == true)
-#endif	// SOCKET_SYSTEM
 	{
 		g_csItemOption.SetViewOptionList(true);	
 	}
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 	{
 		if(SEASON3B::IsPress(VK_RBUTTON))
@@ -652,9 +614,7 @@ bool SEASON3B::CNewUIMyInventory::UpdateKeyEvent()
 	{
 		if(SEASON3B::IsPress(VK_ESCAPE) == true)
 		{
-#ifdef YDG_FIX_NPCSHOP_SELLING_LOCK
 			if (g_pNPCShop->IsSellingItem() == false)
-#endif	// YDG_FIX_NPCSHOP_SELLING_LOCK
 			{
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
 				PlayBuffer(SOUND_CLICK01);
@@ -664,10 +624,7 @@ bool SEASON3B::CNewUIMyInventory::UpdateKeyEvent()
 		else if(SEASON3B::IsPress('L') == true)
 		{
 			if(m_bRepairEnableLevel == true && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == false
-#ifdef PBG_WOPS_REPAIRKEY
-				//조합창사용시 수리는 안되게 된다
 				&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY) == false
-#endif //PBG_WOPS_REPAIRKEY
 #ifdef LEM_ADD_LUCKYITEM
 				&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false
 #endif // LEM_ADD_LUCKYITEM
@@ -679,7 +636,6 @@ bool SEASON3B::CNewUIMyInventory::UpdateKeyEvent()
 			}
 		}
 
-		// 개인상점 인벤토리 단축키 
 		if(CanOpenMyShopInterface() == true && SEASON3B::IsPress('S') )	
 		{
 #ifdef DO_PROCESS_DEBUGCAMERA
@@ -687,7 +643,6 @@ bool SEASON3B::CNewUIMyInventory::UpdateKeyEvent()
 			{
 				if( m_bMyShopOpen )
 				{
-					// 개인상점 토글 모드
 					if(m_MyShopMode == MYSHOP_MODE_OPEN)
 					{	
 						ChangeMyShopButtonStateClose();
@@ -703,7 +658,6 @@ bool SEASON3B::CNewUIMyInventory::UpdateKeyEvent()
 #else // DO_PROCESS_DEBUGCAMERA
 			if( m_bMyShopOpen )
 			{
-				// 개인상점 토글 모드
 				if(m_MyShopMode == MYSHOP_MODE_OPEN)
 				{	
 					ChangeMyShopButtonStateClose();
@@ -846,9 +800,8 @@ void SEASON3B::CNewUIMyInventory::RenderSocketOption()
 		g_pRenderText->SetTextColor(100, 100, 100, 255);
 	}
 
-	// "소켓 옵션"
 	unicode::t_char strText[128];
-	unicode::_sprintf(strText, "[%s]", GlobalText[2651]);	// "소켓 옵션"
+	unicode::_sprintf(strText, "[%s]", GlobalText[2651]);
 	g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y+25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
 
 	if(CheckMouseIn(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y+20, INVENTORY_WIDTH * 0.5f, 15) == true)
@@ -1460,7 +1413,6 @@ void SEASON3B::CNewUIMyInventory::RenderInventoryDetails()
 	CPCRoomPtSys& rPCRoomPtSys = CPCRoomPtSys::Instance();
 	if(rPCRoomPtSys.IsPCRoomPointShopMode())
 	{
-		// PC방 포인트 상점일 경우 젠이 아니라 포인트로 표시 됨.
 		g_pRenderText->SetBgColor(40, 40, 40, 255);
 		g_pRenderText->SetTextColor(255, 220, 250, 255);
 		g_pRenderText->RenderText((int)m_Pos.x+50, (int)m_Pos.y+371, GlobalText[2326]);
@@ -1478,7 +1430,6 @@ void SEASON3B::CNewUIMyInventory::RenderInventoryDetails()
 		unicode::t_char Text[256] = { 0, };
 		ConvertGold(dwZen, Text);
 
-		//  젠의 색 단위별 변화. ( 녹색 -> 주황색 -> 빨간색 ).
 		g_pRenderText->SetTextColor(getGoldColor(dwZen));
 		g_pRenderText->RenderText((int)m_Pos.x+50,(int)m_Pos.y+371, Text);
 	}
@@ -2298,13 +2249,10 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				if (MouseLButton || MouseLButtonPop || MouseLButtonPush)
 					return false;
 #endif //LJH_FIX_APP_SHUTDOWN_WEQUIPPING_INVENITEM_WITH_CLICKING_MOUSELBTN
-				// 내구도가 0인 경우 아이템을 장착할 수 없음.
-				// 이미 장착되어 있는 종류의 아이템을 장착하려고 할 때에 대한 처리는 서버.
 				if (pItem->Durability == 0) 
 					return false; 
 
 				int iChangeInvenItemStatus = 0;
-				// 장착되어 있으면 장착해제 요청, 장착되어 있지 않으면 장착 요청
 				(pItem->Durability == 255) ? iChangeInvenItemStatus = 254 : iChangeInvenItemStatus = 255;
 
 				SendRequestEquippingInventoryItem(MAX_EQUIPMENT_INDEX+iIndex, iChangeInvenItemStatus);
@@ -2373,15 +2321,12 @@ bool SEASON3B::CNewUIMyInventory::BtnProcess()
 	{
 		if(m_bRepairEnableLevel == true && m_BtnRepair.UpdateMouseEvent() == true)
 		{
-			//. 토글 수리모드
 			ToggleRepairMode();
-			
 			return true;
 		}
 
 		if( m_bMyShopOpen == true && m_BtnMyShop.UpdateMouseEvent() == true )
 		{
-			// 개인상점 토글 모드
 			if(m_MyShopMode == MYSHOP_MODE_OPEN)
 			{	
 				ChangeMyShopButtonStateClose();
@@ -2417,12 +2362,12 @@ void SEASON3B::CNewUIMyInventory::RenderItemToolTip(int iSlotIndex)
 
 			if(m_RepairMode == REPAIR_MODE_OFF)
 			{
-#ifndef CSK_FIX_ITEMTOOLTIP_POS			// 정리할 때 지워야 하는 소스	
+#ifndef CSK_FIX_ITEMTOOLTIP_POS
 				if(iSlotIndex == EQUIPMENT_WEAPON_LEFT)
 				{
 					iTargetY += 100.f;
 				}
-#endif //! CSK_FIX_ITEMTOOLTIP_POS		// 정리할 때 지워야 하는 소스
+#endif //! CSK_FIX_ITEMTOOLTIP_POS
 				RenderItemInfo(iTargetX, iTargetY, pEquipmentItemSlot, false);
 			}
 			else
@@ -2524,7 +2469,6 @@ void SEASON3B::CNewUIMyInventory::ChangeMyShopButtonStateOpen()
 	m_BtnMyShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 0);
 	m_BtnMyShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 1);
 	m_BtnMyShop.ChangeImgIndex(IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 0);
-	// 1125 "개인상점열기(S)"
 	m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
@@ -2535,7 +2479,6 @@ void SEASON3B::CNewUIMyInventory::ChangeMyShopButtonStateClose()
 	m_BtnMyShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 0);
 	m_BtnMyShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 1);
 	m_BtnMyShop.ChangeImgIndex(IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 0);
-	// 1127 "개인상점닫기(S)"
 	m_BtnMyShop.ChangeToolTipText(GlobalText[1127], true);
 }
 
@@ -2605,7 +2548,6 @@ BYTE SEASON3B::CNewUIMyInventory::GetDurabilityPointedItem()
 {
 	ITEM* pItem = NULL;	
 	
-	// 먼저 장비창쪽 검사
 	if(m_iPointedSlot != -1)
 	{
 		pItem = &CharacterMachine->Equipment[m_iPointedSlot];
@@ -2614,7 +2556,6 @@ BYTE SEASON3B::CNewUIMyInventory::GetDurabilityPointedItem()
 		return byDurability;
 	}
 
-	// 다음으로 인벤토리 검사
 	pItem = m_pNewInventoryCtrl->FindItemPointedSquareIndex();
 	if(pItem != NULL)
 	{
@@ -2627,13 +2568,11 @@ BYTE SEASON3B::CNewUIMyInventory::GetDurabilityPointedItem()
 
 int SEASON3B::CNewUIMyInventory::GetPointedItemIndex()
 {
-	// 먼저 장비창쪽 검사
 	if(m_iPointedSlot != -1)
 	{
 		return m_iPointedSlot;
 	}
 
-	// 다음으로 인벤토리 검사
 	int iPointedItemIndex = m_pNewInventoryCtrl->GetPointedSquareIndex();
 	if(iPointedItemIndex != -1)
 	{
@@ -2679,10 +2618,10 @@ BOOL SEASON3B::CNewUIMyInventory::IsInvenItem( const short sType )
 	BOOL bInvenItem = FALSE;
 
 	if (FALSE 
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM			// 매조각상, 양조각상, 편자
+#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM	
 		|| (sType == ITEM_HELPER+128 || sType == ITEM_HELPER+129 || sType == ITEM_HELPER+134)
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2	// 오크참, 메이플참, 골든오크참, 골든메이플참
+#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 		|| (sType >= ITEM_HELPER+130 && sType <= ITEM_HELPER+133 )
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 	)

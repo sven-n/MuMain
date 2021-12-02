@@ -514,7 +514,6 @@ size_t SEASON3B::CNewUIChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgType)
 	type_vector_msgs* pvecMsgs = GetMsgs( MsgType );
 	if( pvecMsgs == NULL )
 	{
-		assert(!"메세지 타입이 맞지 않습니다.!");
 		return 0;
 	}
 	

@@ -680,7 +680,7 @@ Pos_Wm_Move_MinimizedNotEnabled:
 			&& g_bUseWindowMode == FALSE
 #endif
 			)
-		{	// 외부에서 윈도우를 최소화 시켰다.
+		{
 			if ( !( g_bMinimizedEnabled))
 			{
 				SendHackingChecked( 0x05, 0);
@@ -864,14 +864,7 @@ BOOL IsUsingSavage( HINSTANCE hCurrentInst)
     wndClass.lpszClassName = windowName;
     RegisterClass(&wndClass);
 
-	g_hWnd = CreateWindow(
-		windowName, windowName,
-		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-		0,
-		0,
-		100,
-		40,
-		NULL, NULL, hCurrentInst, NULL);
+	g_hWnd = CreateWindow(windowName, windowName,WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,0,0,100,40,NULL, NULL, hCurrentInst, NULL);
 
 	g_ErrorReport.Write("Create OpenGL Window For Savage Test.\n\r");
 	if ( !CreateOpenglWindow())
@@ -1369,20 +1362,12 @@ void MoveObject(OBJECT *o);
 
 bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo )
 {
-#ifdef KJH_LOG_ERROR_DUMP
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " ## Start Log\r\n");
-#endif // KJH_LOG_ERROR_DUMP
-
-#ifndef MSZ_ADD_CRASH_DUMP_UPLOAD	// 덤프를 두번 생성할 필요는 없으므로..
+#ifndef MSZ_ADD_CRASH_DUMP_UPLOAD
 	if(leaf::SaveExceptionDumpFile("MuError.dmp", pExceptionInfo->ContextRecord, pExceptionInfo))
 	{
 		g_ErrorReport.Write("Save DumpFile complete - MuError.dmp\r\n");
 	}
 #endif
-
-#ifdef KJH_LOG_ERROR_DUMP
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " ## End Log\r\n");
-#endif // KJH_LOG_ERROR_DUMP
 
 #ifdef ENABLE_FULLSCREEN
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)

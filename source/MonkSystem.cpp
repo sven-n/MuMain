@@ -68,38 +68,33 @@ void CMonkSystem::Destroy()
 	m_DarksideIndex.clear();
 	m_DarkTargetIndex.clear();
 }
-// 글러브형 아이템 등록
+
 void CMonkSystem::RegistItem()
 {
-	// 세크리드글러브
 	m_cItemEqualType.SetModelType(MODEL_SWORD+32, MODEL_SWORD_32_LEFT, MODEL_SWORD_32_RIGHT);
 	m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
 
-	// 홀리스톰클로
 	m_cItemEqualType.SetModelType(MODEL_SWORD+33, MODEL_SWORD_33_LEFT, MODEL_SWORD_33_RIGHT);
 	m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
 
-	// 피어싱블레이드
 	m_cItemEqualType.SetModelType(MODEL_SWORD+34, MODEL_SWORD_34_LEFT, MODEL_SWORD_34_RIGHT);
 	m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
 }
-// 글러브형 아이템 load
+
 void CMonkSystem::LoadModelItem()
 {
-	AccessModel(MODEL_SWORD+32, "Data\\Item\\", "Sword33");				// 세크리드글러브
+	AccessModel(MODEL_SWORD+32, "Data\\Item\\", "Sword33");	
 	AccessModel(MODEL_SWORD_32_LEFT, "Data\\Item\\", "SwordL33");
 	AccessModel(MODEL_SWORD_32_RIGHT, "Data\\Item\\", "SwordR33");
 
-	AccessModel(MODEL_SWORD+33, "Data\\Item\\", "Sword34");				// 홀리스톰클로
+	AccessModel(MODEL_SWORD+33, "Data\\Item\\", "Sword34");	
 	AccessModel(MODEL_SWORD_33_LEFT, "Data\\Item\\", "SwordL34");
 	AccessModel(MODEL_SWORD_33_RIGHT, "Data\\Item\\", "SwordR34");
 
-	AccessModel(MODEL_SWORD+34, "Data\\Item\\", "Sword35");				// 피어싱블레이드
+	AccessModel(MODEL_SWORD+34, "Data\\Item\\", "Sword35");	
 	AccessModel(MODEL_SWORD_34_LEFT, "Data\\Item\\", "SwordL35");
 	AccessModel(MODEL_SWORD_34_RIGHT, "Data\\Item\\", "SwordR35");
 
-	// 세크리트파이어 인벤용(예외처리용)
-	// 양 어깨의 갑옷의 피직이 인벤에서의 위치점변경으로 인한 피직안잡힌 모델링으로 변경
 	AccessModel(MODEL_ARMORINVEN_60, "Data\\player\\", "Armor_inventory60");
 	AccessModel(MODEL_ARMORINVEN_61, "Data\\player\\", "ArmorMale61_inventory");
 	AccessModel(MODEL_ARMORINVEN_62, "Data\\player\\", "ArmorMale62_inventory");
@@ -107,26 +102,25 @@ void CMonkSystem::LoadModelItem()
 
 void CMonkSystem::LoadModelItemTexture()
 {
-	OpenTexture(MODEL_SWORD+32, "player\\");	// 세크리드글러브		
+	OpenTexture(MODEL_SWORD+32, "player\\");	
 	OpenTexture(MODEL_SWORD_32_LEFT, "player\\");
 	OpenTexture(MODEL_SWORD_32_RIGHT, "player\\");
 
-	OpenTexture(MODEL_SWORD+33, "Item\\");		// 홀리스톰클로
+	OpenTexture(MODEL_SWORD+33, "Item\\");
 	OpenTexture(MODEL_SWORD_33_LEFT, "Item\\");
 	OpenTexture(MODEL_SWORD_33_RIGHT, "Item\\");
 
-	OpenTexture(MODEL_SWORD+34, "player\\");	// 피어싱블레이드
+	OpenTexture(MODEL_SWORD+34, "player\\");
 	OpenTexture(MODEL_SWORD_34_LEFT, "player\\");
 	OpenTexture(MODEL_SWORD_34_RIGHT, "player\\");
 	
-	OpenTexture(MODEL_ARMORINVEN_60, "player\\");// 세크리트파이러 갑옷 인벤용
+	OpenTexture(MODEL_ARMORINVEN_60, "player\\");
 	OpenTexture(MODEL_ARMORINVEN_61, "player\\");
 	OpenTexture(MODEL_ARMORINVEN_62, "player\\");
 }
 
 int CMonkSystem::GetSubItemType(int _Type, int _Left)
 {	
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	int iType = _Type;
 	tm_ItemEqualType::iterator iter = m_mapItemEqualType.find(iType);
 
@@ -142,22 +136,6 @@ int CMonkSystem::GetSubItemType(int _Type, int _Left)
 		return _SubType.GetSubRightType();
 
 	return iType;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	tm_ItemEqualType::iterator iter = m_mapItemEqualType.find(_Type);
-	
-	CItemEqualType _SubType;
-	if(iter == m_mapItemEqualType.end())
-		return _Type;
-
-	_SubType = (CItemEqualType)iter->second;
-
-	if(_Left)
-		return _SubType.GetSubLeftType();
-	else
-		return _SubType.GetSubRightType();
-
-	return _Type;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 }
 
 int CMonkSystem::GetModelItemType(int _Type)
@@ -201,7 +179,7 @@ int CMonkSystem::ModifyTypeCommonItemMonk(int _OrginalType)
 		{
 			if(nItemSubType == nCommonItem[i])
 			{
-				int _TempItemType = (nItemType == 11) ? nItemType-1 : nItemType;	// 장갑류가 없어 인덱스조정
+				int _TempItemType = (nItemType == 11) ? nItemType-1 : nItemType;
 				_OrginalType = MODEL_HELM_MONK + (_TempItemType - 7) * MODEL_ITEM_COMMONCNT_RAGEFIGHTER + i;
 				break;
 			}
@@ -261,11 +239,11 @@ int CMonkSystem::EqualItemModelType(int _Type)
 
 void CMonkSystem::MoveBlurEffect(CHARACTER* _pCha, OBJECT* _pObj, BMD* pModel)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	if(_pCha == NULL)	return;
 	if(_pObj == NULL)	return;
 	if(pModel == NULL)	return;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	BMD *b = &Models[_pObj->Type];
 	vec3_t  Light;
 	vec3_t StartPos, StartLocal, EndPos, EndLocal;
@@ -416,37 +394,16 @@ bool CMonkSystem::SetRageSkillAni(int _nSkill, OBJECT* _pObj)
 
 bool CMonkSystem::IsRageHalfwaySkillAni(int _nSkill)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	bool bSkillAni = false;
 	switch(_nSkill)
 	{
-	case AT_SKILL_STAMP:
-	case AT_SKILL_GIANTSWING:
-	case AT_SKILL_DRAGON_KICK:
-		{
-			bSkillAni = true;
-		}
-		break;
-	default:
-		{
-			bSkillAni = false;
-		}
-		break;
-	}
-
-	return bSkillAni;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	switch(_nSkill)
-	{
-	case AT_SKILL_STAMP:
-	case AT_SKILL_GIANTSWING:
-	case AT_SKILL_DRAGON_KICK:
-		return true;
-	default:
-		return false;
+		case AT_SKILL_STAMP:
+		case AT_SKILL_GIANTSWING:
+		case AT_SKILL_DRAGON_KICK:
+			return true;
+		default:
+			return false;
 	}
 	return false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 }
 
 bool CMonkSystem::SendAttackPacket(CHARACTER* _pCha, int _nMoveTarget, int _nSkill)
@@ -538,7 +495,7 @@ bool CMonkSystem::RageFighterEffect(OBJECT* _pObj, int _Type)
 
 void CMonkSystem::SetDarksideTargetIndex(WORD* _pTargetIndex)
 {
-	for(int i=0; i<DARKSIDE_TARGET_MAX; ++i)	//최대 5개의 타겟이 들어온다, DS_TARGET_NONE은 타겟이 없음
+	for(int i=0; i<DARKSIDE_TARGET_MAX; ++i)
 	{
 		m_DarksideIndex.push_back(_pTargetIndex[i]);
 		if(_pTargetIndex[i] != DS_TARGET_NONE)
@@ -551,7 +508,7 @@ void CMonkSystem::SetDarksideTargetIndex(WORD* _pTargetIndex)
 			m_bDarkSideEffOnce2 =false;
 		}
 	}
-	// 서버 요청으로 타겟 없을시에 임의로 send
+
 	if(!m_nDarksideEffectTotal)
 	{
 		SendRequestMagic(AT_SKILL_DARKSIDE, HeroKey);
@@ -564,13 +521,8 @@ void CMonkSystem::SetDarksideTargetIndex(WORD* _pTargetIndex)
 
 WORD CMonkSystem::GetDarksideTargetIndex(int _nIndex)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	if((DWORD)_nIndex >= m_DarkTargetIndex.size())
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	if(_nIndex >= m_DarkTargetIndex.size())
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+	if(_nIndex >= (int)m_DarkTargetIndex.size())
 	{
-	//	assert(0);
 		return 0;
 	}
 
@@ -595,12 +547,12 @@ void CMonkSystem::SetDarksideCnt()
 
 bool CMonkSystem::SendDarksideAtt(OBJECT* _pObj)
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	if(_pObj == NULL)	return false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	if(m_nDarksideCnt >= DARKSIDE_TARGET_MAX)
 	{
-		InitDarksideTarget();		//5개이상의 타겟이 잡힐경우 초기화
+		InitDarksideTarget();
 		return false;
 	}
 	
@@ -614,11 +566,11 @@ bool CMonkSystem::SendDarksideAtt(OBJECT* _pObj)
 	
 	if(_DarksideTargetIndex == DS_TARGET_NONE)
 	{
-		return false;				//타겟이 없다
+		return false;
 	}
 
 	SendRequestMagic(AT_SKILL_DARKSIDE, _DarksideTargetIndex);
-	m_nDarksideCnt++;				//다음타겟으로 넘긴다
+	m_nDarksideCnt++;
 	return true;
 }
 
@@ -720,10 +672,6 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t *pPart, bool Transla
 	
 	if(GetDarksideEffectTotal() > m_nDarksideEffectAttCnt)
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		float fTime = (float)((((int)(fAnimationFrame*10.0f))%20)*0.1f);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		int _TargetIndex = GetDarksideTargetIndex(m_nDarksideEffectAttCnt);
 
 		m_fOtherAniFrame = (float)(pCha->AttackTime+1)*0.1f*2.0f;
@@ -739,11 +687,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t *pPart, bool Transla
 			VectorCopy(CharactersClient[_TargetIndex].Object.Position, vPos);
 		}
 		VectorCopy(vOrgPos, pObj->StartPosition);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		CalculateDarksideTrans(pObj, vPos, m_fDistanceFrame, m_fDistanceNextFrame);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		bool _bIsEff = CalculateDarksideTrans(pObj, vPos, m_fDistanceFrame, m_fDistanceNextFrame);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 		vec3_t vDisLen;
 		VectorSubtract(pObj->Position, pObj->StartPosition, vDisLen);
@@ -788,11 +732,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t *pPart, bool Transla
 			{
 				VectorCopy(CharactersClient[pObj->m_sTargetIndex].Object.Position, vPos);
 			}
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-			if((DWORD)m_nDarksideEffectAttCnt < m_DarkTargetIndex.size())
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			if(m_nDarksideEffectAttCnt < m_DarkTargetIndex.size())
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+			if(m_nDarksideEffectAttCnt < (int)m_DarkTargetIndex.size())
 			{
 				VectorCopy(CharactersClient[m_DarkTargetIndex[m_nDarksideEffectAttCnt]].Object.Position, vPos);
 			}
@@ -1208,19 +1148,15 @@ bool CMonkSystem::RageCreateEffect(OBJECT *_pObj, int _nSkill)
 
 			for(int i=0; i<3; ++i)
 			{
-				// 물결 나는것
 				Vector(1.0f, 0.1f, 0.0f,vLight);
 				CreateEffect(MODEL_SHOCKWAVE_GROUND01, _pObj->Position, _pObj->Angle, vLight, 0, _pObj, -1, 0, 0, 0, 1.0f - (i*0.15f));
 				
-				//바닥 clouds2.jpg 회전하면서 천천히 점점 커지며 사라짐
 				Vector(1.0f, 0.3f,0.2f,vLight);
 				CreateEffect(BITMAP_EVENT_CLOUD, _pObj->Position, _pObj->Angle, vLight, 0, _pObj, -1, 0, 0, 0, 1.0f);
 			}
-			//Wind_foce.smd 시계 방향으로 회전하며 점점 커지면서 사라짐
 			Vector(1.0f, 0.2f,0.0f,vLight);
 			CreateEffect(MODEL_WINDFOCE, _pObj->Position, _pObj->Angle, vLight, 5, _pObj, -1, 0, 0, 0, 1.0f);
 
-			//magic_ground1 땅바닥 가격순간 커지며 점점 투명해지며 사라짐
 			Vector(1.0f, 0.15f,0.0f,vLight);
 			CreateEffect(BITMAP_MAGIC, _pObj->Position, _pObj->Angle, vLight, 13);
 		}

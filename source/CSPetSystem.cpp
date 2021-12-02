@@ -729,7 +729,7 @@ void    CSPetDarkSpirit::RenderCmdType ( void )
     RenderBitmap ( BITMAP_SKILL_INTERFACE+2, (float)x, (float)y, (float)Width-4, (float)Height-8, (((m_byCommand)%8)*32+6.f)/256.f, (((m_byCommand)/8)*Height+3.f)/256.f,Width/256.f,(Height-1.f)/256.f);
 
     Width -= 8.f; Height -= 8.f;
-    //  명령 설명을 표시한다.
+
     if ( MouseX>=x && MouseX<=x+Width && MouseY>=y && MouseY<=y+Height )
     {
         RenderTipText ( (int)x, (int)(y+Height), GlobalText[1219+m_byCommand] );

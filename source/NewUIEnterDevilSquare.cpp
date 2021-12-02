@@ -1,5 +1,4 @@
 // NewUIEnterBloodCastle.cpp: implementation of the CNewUIPartyInfo class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -77,8 +76,6 @@ bool CNewUIEnterDevilSquare::Create(CNewUIManager* pNewUIMng, int x, int y)
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Release
 void CNewUIEnterDevilSquare::Release()
 {
 	UnloadImages();
@@ -90,8 +87,6 @@ void CNewUIEnterDevilSquare::Release()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// SetPos
 void CNewUIEnterDevilSquare::SetPos(int x, int y)
 {
 	m_Pos.x = x;
@@ -110,32 +105,23 @@ void CNewUIEnterDevilSquare::SetPos(int x, int y)
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// SetBtnPos
 void CNewUIEnterDevilSquare::SetBtnPos(int x, int y)
 {
 	m_BtnEnterStartPos.x = x;
 	m_BtnEnterStartPos.y = y;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateMouseEvent
 bool CNewUIEnterDevilSquare::UpdateMouseEvent()
 {
-	// 버튼 처리
-	if( true == BtnProcess() )	// 처리가 완료 되었다면
+	if( true == BtnProcess() )
 		return false;
 	
-	// 파티 창 내 영역 클릭시 하위 UI처리 및 이동 불
-	// ( #include "NewUICommon" )
 	if( CheckMouseIn(m_Pos.x, m_Pos.y, ENTERDS_BASE_WINDOW_WIDTH, ENTERDS_BASE_WINDOW_HEIGHT) )
 		return false;
 
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// UpdateKeyEvent
 bool CNewUIEnterDevilSquare::UpdateKeyEvent()
 {
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DEVILSQUARE) == true)
@@ -151,8 +137,6 @@ bool CNewUIEnterDevilSquare::UpdateKeyEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Update
 bool CNewUIEnterDevilSquare::Update()
 {
 	if( !IsVisible() )
@@ -161,43 +145,29 @@ bool CNewUIEnterDevilSquare::Update()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Render
 bool CNewUIEnterDevilSquare::Render()
 {
 	EnableAlphaTest();
 	
-	// Base Window
-	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, 
-						float(ENTERDS_BASE_WINDOW_WIDTH), float(ENTERDS_BASE_WINDOW_HEIGHT));
-	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, 
-						float(ENTERDS_BASE_WINDOW_WIDTH), 64.f);
-	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y+64.f, 
-						21.f, float(ENTERDS_BASE_WINDOW_HEIGHT)-64.f-45.f);
-	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_RIGHT, m_Pos.x+float(ENTERDS_BASE_WINDOW_WIDTH)-21.f, 
-						m_Pos.y+64.f, 21.f, float(ENTERDS_BASE_WINDOW_HEIGHT)-64.f-45.f);
-	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y+float(ENTERDS_BASE_WINDOW_HEIGHT)-45.f, 
-						float(ENTERDS_BASE_WINDOW_WIDTH), 45.f);
+	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y,float(ENTERDS_BASE_WINDOW_WIDTH), float(ENTERDS_BASE_WINDOW_HEIGHT));
+	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(ENTERDS_BASE_WINDOW_WIDTH), 64.f);
+	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y+64.f,21.f, float(ENTERDS_BASE_WINDOW_HEIGHT)-64.f-45.f);
+	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_RIGHT, m_Pos.x+float(ENTERDS_BASE_WINDOW_WIDTH)-21.f, m_Pos.y+64.f, 21.f, float(ENTERDS_BASE_WINDOW_HEIGHT)-64.f-45.f);
+	RenderImage(IMAGE_ENTERDS_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y+float(ENTERDS_BASE_WINDOW_HEIGHT)-45.f,float(ENTERDS_BASE_WINDOW_WIDTH), 45.f);
 
 	
 	g_pRenderText->SetFont( g_hFontBold );
 	g_pRenderText->SetTextColor( 0xFFFFFFFF );
 	g_pRenderText->SetBgColor( 0x00000000 );
-	
-	// UI제목
-	g_pRenderText->RenderText(m_Pos.x+60, m_Pos.y+12, GlobalText[39], 72, 0, RT3_SORT_CENTER);		// "악마의 광장"
-
+	g_pRenderText->RenderText(m_Pos.x+60, m_Pos.y+12, GlobalText[39], 72, 0, RT3_SORT_CENTER);
 	g_pRenderText->SetFont( g_hFont );
+	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y, GlobalText[670], 190, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+15, GlobalText[671], 190, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+30, GlobalText[672], 190, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+45, GlobalText[673], 190, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+60, GlobalText[674], 190, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+75, GlobalText[675], 190, 0, RT3_SORT_CENTER);
 
-	// 대사
-	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y, GlobalText[670], 190, 0, RT3_SORT_CENTER);		//  "그대는 자신의 힘을 시험해 볼"
-	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+15, GlobalText[671], 190, 0, RT3_SORT_CENTER);	// "기회를 얻었다. 지금까지"
-	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+30, GlobalText[672], 190, 0, RT3_SORT_CENTER);	// "그곳에 들어간 인간은 없었지."
-	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+45, GlobalText[673], 190, 0, RT3_SORT_CENTER);	// "눈에 보이는 것을 믿지 않는게"
-	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+60, GlobalText[674], 190, 0, RT3_SORT_CENTER);	// "좋을 것이다. 그대의 힘만이"
-	g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y+75, GlobalText[675], 190, 0, RT3_SORT_CENTER);	// "스스로를 구할 수 있을테니..."
-
-	// 입장 버튼
 	for( int i=0 ; i<MAX_ENTER_GRADE ; i++ )
 	{
 		m_BtnEnter[i].Render();
@@ -217,38 +187,30 @@ bool CNewUIEnterDevilSquare::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
 	
-	// Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide( SEASON3B::INTERFACE_DEVILSQUARE );
 		return true;
 	}
 	
-	// Exit2 버튼 
 	if(m_BtnExit.UpdateMouseEvent() == true)
 	{
 		g_pNewUISystem->Hide( SEASON3B::INTERFACE_DEVILSQUARE );
 		return true;
 	}
 
-	// 데빌스퀘어 입장 버튼
 	if( (m_iNumActiveBtn !=- 1) && (m_BtnEnter[m_iNumActiveBtn].UpdateMouseEvent() == true) )
 	{	
-		// 레벨에 맞는 데빌스퀘어로 입장!!
 		int iItemIndex = -1;
 
-		// 악마의광장 초대권 레벨 0은 무조건 입장 가능 (이벤트 아이템)
 		iItemIndex = g_pMyInventory->FindItemIndex( ITEM_POTION+19, 0 );
-		
-		// 악마의광장 초대권을 검사
+
 		if( iItemIndex == -1 )
 		{
 			iItemIndex = g_pMyInventory->FindItemIndex( ITEM_POTION+19, m_iNumActiveBtn+1 );
 		}
 
 #ifdef CSK_FREE_TICKET
-		// 우선순위는 기존 입장권이 높다. 그래서 기존 입장권 검사후에 검사한다.
-		// 악마의광장 자유입장권이 있는가 검사한다.
 		if(iItemIndex == -1)
 		{
 			iItemIndex = g_pMyInventory->FindItemIndex( ITEM_HELPER+46, -1 );
@@ -257,13 +219,11 @@ bool CNewUIEnterDevilSquare::BtnProcess()
 		
 		if( iItemIndex > -1)	
 		{
-			// 1번째인자는 입장할 square-1을 하여야 함
 			SendRequestMoveToDevilSquare( m_iNumActiveBtn, MAX_EQUIPMENT+iItemIndex );	
 		}
 		else
 		{
-			// 데빌스퀘어 초대권이 없을때
-			SEASON3B::CreateOkMessageBox( GlobalText[677] );		// "데빌스퀘어 초대권이 있어야 갈 수 있습니다."
+			SEASON3B::CreateOkMessageBox( GlobalText[677] );
 		}
 		g_pNewUISystem->Hide( SEASON3B::INTERFACE_DEVILSQUARE );
 		
@@ -313,11 +273,9 @@ int CNewUIEnterDevilSquare::CheckLimitLV( int iIndex )
 	return iRet;
 }
 
-//---------------------------------------------------------------------------------------------
-// OpenningProcess
 void CNewUIEnterDevilSquare::OpenningProcess()
 {
-	SendExitInventory();		// 왜 호출하는지 알아보자!!
+	SendExitInventory();
 
 	for( int i=0 ; i<MAX_ENTER_GRADE ; i++ )
 	{
@@ -325,7 +283,6 @@ void CNewUIEnterDevilSquare::OpenningProcess()
 		m_BtnEnter[i].Lock( );
 	}
 
-	// 레벨 제한 체크
 	int iLimitLVIndex = 0;
 	if( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
@@ -341,7 +298,6 @@ void CNewUIEnterDevilSquare::OpenningProcess()
 	m_BtnEnter[ m_iNumActiveBtn ].UnLock();
 	m_BtnEnter[ m_iNumActiveBtn ].ChangeTextColor( m_dwBtnTextColor[ ENTERBTN_ENABLE ] );
 
-	// 캐슬 입장 버튼 텍스트
 	unicode::t_char sztext[255] = {0, };
 
 	for( int i=0 ; i<MAX_ENTER_GRADE-1 ; i++)
@@ -353,24 +309,18 @@ void CNewUIEnterDevilSquare::OpenningProcess()
 		m_BtnEnter[ i ].ChangeText( sztext );
 	}
 
-	// 1778	"제 %d광장(마스터레벨)"
 	unicode::_sprintf( sztext, GlobalText[ 1778 ], 7 );
 	m_BtnEnter[ MAX_ENTER_GRADE-1 ].SetFont( g_hFontBold );
 	m_BtnEnter[ MAX_ENTER_GRADE-1 ].ChangeText( sztext );
 }
 
-//---------------------------------------------------------------------------------------------
-// ClosingProcess
 void CNewUIEnterDevilSquare::ClosingProcess()
 {
 	SendExitInventory();
 }
 
-//---------------------------------------------------------------------------------------------
-// LoadImages
 void CNewUIEnterDevilSquare::LoadImages()
 {
-	// 기본창
 	LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_ENTERDS_BASE_WINDOW_BACK, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_ENTERDS_BASE_WINDOW_TOP, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_ENTERDS_BASE_WINDOW_LEFT, GL_LINEAR);
@@ -384,7 +334,6 @@ void CNewUIEnterDevilSquare::LoadImages()
 // UnloadImages
 void CNewUIEnterDevilSquare::UnloadImages()
 {
-	// 기본창
 	DeleteBitmap( IMAGE_ENTERDS_BASE_WINDOW_BACK );
 	DeleteBitmap( IMAGE_ENTERDS_BASE_WINDOW_TOP );
 	DeleteBitmap( IMAGE_ENTERDS_BASE_WINDOW_LEFT );

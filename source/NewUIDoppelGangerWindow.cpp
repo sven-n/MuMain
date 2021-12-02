@@ -1,5 +1,4 @@
 // NewUIDoppelGangerWindow.cpp: implementation of the CNewUIDoppelGangerWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -19,10 +18,6 @@
 #ifdef YDG_ADD_DOPPELGANGER_UI
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIDoppelGangerWindow::CNewUIDoppelGangerWindow()
 {
@@ -96,11 +91,9 @@ void CNewUIDoppelGangerWindow::SetPos(int x, int y)
 
 bool CNewUIDoppelGangerWindow::UpdateMouseEvent()
 {
-	//. 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 		return false;
 
@@ -207,18 +200,17 @@ bool CNewUIDoppelGangerWindow::Render()
 	}
 	m_BtnEnter.Render();
 
-	// 라인
 	RenderImage(IMAGE_DOPPELGANGERWINDOW_LINE, m_Pos.x+1, m_Pos.y+130+90, 188.f, 21.f);
 
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+210, GlobalText[2761], 190, 0, RT3_SORT_CENTER);
 	if (m_iRemainTime == 0)
 	{
-		sprintf(szText, GlobalText[2164]);	// "지금 입장하실 수 있습니다."
+		sprintf(szText, GlobalText[2164]);
 	}
 	else
 	{
-		sprintf(szText, GlobalText[2762], m_iRemainTime);	// "%d분 후 입장가능"
+		sprintf(szText, GlobalText[2762], m_iRemainTime);
 	}
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+230, szText, 190, 0, RT3_SORT_CENTER);
 
@@ -295,8 +287,7 @@ void CNewUIDoppelGangerWindow::RenderFrame()
 	g_pRenderText->SetTextColor(220, 220, 220, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-	// 창 제목 표시
-	unicode::_sprintf(szText, "%s", GlobalText[2756]);	// 임시
+	unicode::_sprintf(szText, "%s", GlobalText[2756]);
 	g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -304,7 +295,6 @@ bool CNewUIDoppelGangerWindow::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
 
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_DOPPELGANGER_NPC);
@@ -325,23 +315,10 @@ bool CNewUIDoppelGangerWindow::BtnProcess()
 		}
 		else
 		{
-			// 마경 없음 - 에러메시지 필요
 			SEASON3B::CNewUICommonMessageBox* pMsgBox;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2779], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
 		}
-		// 시작 메시지
-// 		SEASON3B::CNewUICommonMessageBox* pMsgBox;
-// 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
-// 		pMsgBox->AddMsg(GlobalText[2763], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
-// 		pMsgBox->AddMsg(" ");
-// 		pMsgBox->AddMsg(GlobalText[2764], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
-// 		pMsgBox->AddMsg(" ");
-// 		pMsgBox->AddMsg(GlobalText[2765], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
-// 
-
-//		pMsgBox->AddMsg(GlobalText[2693], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
-//		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerBeginMsgBoxLayout));
 		return true;
 	}
 

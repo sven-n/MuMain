@@ -1,43 +1,25 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 윈속2 관련 함수
-// 수정할 일이 거의 없을것 같음
-//
-// *** 함수 레벨: 1
-///////////////////////////////////////////////////////////////////////////////
-// wsctlc.cpp : Defines the entry point for the DLL application.
-//
 
 #include "stdafx.h"
 #include "wsctlc.h"
 #include "wsctlc_addon.h"
 
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-#include "SessionCryptor.h"
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
-
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-extern CSessionCryptor g_SessionCryptorCS;
-extern CSessionCryptor g_SessionCryptorSC;
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
-
 typedef struct
 {
-	BYTE c;			// 프로토콜 코드
-	BYTE size;		// 프로토콜 크기( 헤더 크기 포함 )
-	BYTE headcode1;	// 프로토콜 종류
+	BYTE c;
+	BYTE size;
+	BYTE headcode1;
 } WSCTLC_PBMSG_HEAD, *WSCTLC_LPPBMSG_HEAD;
 
 typedef struct
 {
-	BYTE c;			// 프로토콜 코드
-	BYTE sizeH;		// 프로토콜 크기( 헤더 크기 포함 )
-	BYTE sizeL;		// 프로토콜 크기( 헤더 크기 포함 )
-	BYTE headcode1;	// 프로토콜 종류
+	BYTE c;
+	BYTE sizeH;
+	BYTE sizeL;
+	BYTE headcode1;
 } WSCTLC_PWMSG_HEAD, *WSCTLC_LPPWMSG_HEAD;
 
 
-// This is the constructor of a class that has been exported.
-// see wsctlc.h for the class definition
 CWsctlc::CWsctlc()
 { 
 	m_hWnd = NULL;
@@ -74,9 +56,8 @@ BOOL CWsctlc::Startup()
 	err = WSAStartup( wVersionRequested, &wsaData);
 	if( err != 0)
 	{
-		// winsock.dll을 찾을수 없다.
 		g_ErrorReport.Write( "Winsock DLL Initialize error.\r\n");
-		MessageBox(NULL,"WINSOCK DLL 초기화 에러","Error",MB_OK);
+		MessageBox(NULL,"WINSOCK DLL","Error",MB_OK);
 		return FALSE;
 	}
 
@@ -86,12 +67,11 @@ BOOL CWsctlc::Startup()
 			/* WinSock DLL.                                  */
 		WSACleanup( );
 		g_ErrorReport.Write( "Winsock version low.\r\n");
-		MessageBox(NULL,"WINSOCK 버전이 낮습니다.","Error",MB_OK);
+		MessageBox(NULL,"WINSOCK","Error",MB_OK);
 		return FALSE;
 	}
 	m_socket = NULL;
 	m_iMaxSockets = wsaData.iMaxSockets;	
-	//cLogProc.Add("소켓 초기화 완료 (%d.%d)", LOBYTE(wsaData.wVersion), HIBYTE(wsaData.wVersion));
 	LogPrintOn();
 	return TRUE;
 }

@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "Win.h"
-
 #include "Input.h"
 #include "Button.h"
 
@@ -135,11 +134,7 @@ void CWin::Show(bool bShow)
 		m_bActive = false;
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-void CWin::Update()
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CWin::Update(double dDeltaTick)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 {
 	if (!m_bShow)
 		return;
@@ -160,11 +155,7 @@ void CWin::Update(double dDeltaTick)
 		}
 	}
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	UpdateWhileShow();
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	UpdateWhileShow(dDeltaTick);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	if (!m_bActive)
 		return;
@@ -187,14 +178,8 @@ void CWin::Update(double dDeltaTick)
 			SetPosition(m_ptTemp.x, m_ptTemp.y);
 		m_ptHeld = rInput.GetCursorPos();
 	}
-
 	CheckAdditionalState();
-
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	UpdateWhileActive();
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	UpdateWhileActive(dDeltaTick);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 }
 
 void CWin::Render()

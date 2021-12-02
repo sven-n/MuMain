@@ -1,5 +1,4 @@
 // NewUIQuickCommandWindow.h: interface for the CNewUIQuickCommandWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIQUICKCOMMANDWINDOW_H__3A1D6614_8C41_4066_A831_2954B3C461D5__INCLUDED_)
@@ -47,9 +46,6 @@ namespace SEASON3B
 		
 		void OpenningProcess();
 		void ClosingProcess();
-
-		// 캐릭터명은 유니코드가 아니다.
-		// 아이디와 위치값을 넣어준다.
 		void OpenQuickCommand(const char* strID, int iIndex, int x, int y);
 		void CloseQuickCommand();
 		void SetID(const char* strID);
@@ -68,8 +64,6 @@ namespace SEASON3B
 		POINT			m_Pos;
 
 		int m_iSelectedIndex;
-
-		// 캐릭터명은 유니코드가 아니다.
 		char m_strID[32];
 		int m_iSelectedCharacterIndex;
 	};

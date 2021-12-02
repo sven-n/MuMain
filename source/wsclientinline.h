@@ -782,10 +782,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 	spe.Send( TRUE);\
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 이벤트 칩.
-///////////////////////////////////////////////////////////////////////////////
-//  레나를 등록을 요청한다.
 #define SendRequestEventChip( p_Type, p_Index )\
 {\
     CStreamPacketEngine spe;\
@@ -794,7 +790,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send( FALSE);\
 }
 
-//  행운의 숫자를 요청한다.
 #define SendRequestMutoNumber()\
 {\
     CStreamPacketEngine spe;\
@@ -820,7 +815,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 
 
 #ifdef SCRATCH_TICKET
-//	복권 등록.
 #define SendRequestScratchSerial( p_strSerial1, p_strSerial2, p_strSerial3 )\
 {\
 	CStreamPacketEngine spe;\
@@ -840,11 +834,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 	spe.Send( TRUE);\
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 시스템.
-//////////////////////////////////////////////////////////////////////////
-//  퀘스트 정보 전송을 요구.
 #define SendRequestQuestHistory()\
 {\
     CStreamPacketEngine spe;\
@@ -852,7 +841,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send ( TRUE );\
 }
 
-//  특정 퀘스트 상태정보 설정 요구.
 #define SendRequestQuestState( p_Index, p_State )\
 {\
     CStreamPacketEngine spe;\
@@ -861,7 +849,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send ( TRUE );\
 }
 
-//  속성.
 #define SendRequestAttribute( p_Att )\
 {\
     CStreamPacketEngine spe;\
@@ -871,7 +858,7 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 }
 
 //----------------------------------------------------------------------------
-// CG [0xA4][0x00] 몬스터 킬 카운트가 퀘스트 완료조건인 경우 정보 요청
+// CG [0xA4][0x00]
 //----------------------------------------------------------------------------
 #define SendRequestQuestMonKillInfo(byQuestIndex)\
 {\
@@ -883,7 +870,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 }
 
 #ifdef ASG_ADD_NEW_QUEST_SYSTEM
-// 서버에 dwQuestIndex 퀘스트를 선택했음을 알림.
 #define SendQuestSelection(dwQuestIndex, byResult)\
 {\
     CStreamPacketEngine spe;\
@@ -894,7 +880,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 
-// 서버에 퀘스트 선택문을 선택했음을 알림.
 #define SendQuestSelAnswer(dwQuestIndex, bySelAnswer)\
 {\
     CStreamPacketEngine spe;\
@@ -905,7 +890,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 
-// 퀘스트 완료 했음을 요구.
 #define SendRequestQuestComplete(dwQuestIndex)\
 {\
     CStreamPacketEngine spe;\
@@ -972,7 +956,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 
-// 겐스 탈퇴 요청.
 #define SendRequestGensSecession()\
 {\
     CStreamPacketEngine spe;\
@@ -983,7 +966,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 
 #endif	// ASG_ADD_GENS_SYSTEM
 #ifdef PBG_ADD_GENSRANKING
-// 겐스 보상 받기
 #define SendRequestGensReward(byInfluence)\
 {\
     CStreamPacketEngine spe;\
@@ -992,7 +974,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 	spe << (BYTE)(byInfluence);\
     spe.Send();\
 }
-// 겐스 정보창 열기
 #define SendRequestGensInfo_Open()\
 {\
     CStreamPacketEngine spe;\
@@ -1002,7 +983,7 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 }
 #endif //PBG_ADD_GENSRANKING
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
-// NPC에 의한 퀘스트 EP(에피소드)리스트 요청.(서버에서 (0xF6 0x0A)로 응답)
+// (0xF6 0x0A)
 #define SendRequestQuestByNPCEPList()\
 {\
     CStreamPacketEngine spe;\
@@ -1011,7 +992,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 
-// 공격력, 방어력 상승 버프 요청.
 #define SendRequestAPDPUp()\
 {\
     CStreamPacketEngine spe;\
@@ -1050,7 +1030,6 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 	}
 #endif // #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 
-#ifdef MODIFY_SOCKET_PROTOCOL
 	BYTE spareBits;
 	if (g_SocketItemMgr.IsSocketItem(pItem))
 	{
@@ -1060,13 +1039,8 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 	{
 		spareBits = (((BYTE)pItem->Jewel_Of_Harmony_Option)<<4)+((BYTE)pItem->Jewel_Of_Harmony_OptionLevel);
 	}
-#else	// MODIFY_SOCKET_PROTOCOL
-	BYTE spareBits = (((BYTE)pItem->Jewel_Of_Harmony_Option)<<4)+((BYTE)pItem->Jewel_Of_Harmony_OptionLevel);
-#endif	// MODIFY_SOCKET_PROTOCOL
 
-#ifdef MODIFY_SOCKET_PROTOCOL
 	BYTE socketBits[5] = { pItem->bySocketOption[0], pItem->bySocketOption[1], pItem->bySocketOption[2], pItem->bySocketOption[3], pItem->bySocketOption[4] };
-#endif	// MODIFY_SOCKET_PROTOCOL
 	
 #ifdef KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
 	spe << (BYTE)(iSrcType&0xff) << (BYTE)(iSrcIndex&0xff) << (BYTE)(pItem->Type&0xff) << (BYTE)(pItem->Level&0xff)
@@ -1080,16 +1054,12 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 	spe << BYTECAST(char, iSrcType) << BYTECAST(char, iSrcIndex) << BYTECAST(char, pItem->Type) << BYTECAST(char, pItem->Level)
 		<< BYTECAST(char,pItem->Durability) << BYTECAST(char,pItem->Option1) << BYTECAST(char,pItem->ExtOption)
 		<< splitType << spareBits
-#ifdef MODIFY_SOCKET_PROTOCOL
 		<< socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
-#endif	// MODIFY_SOCKET_PROTOCOL
 		<< ( BYTE)iDstType << ( BYTE)iDstIndex;
 #endif // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
 	spe.Send( TRUE);
 
-	g_ConsoleDebug->Write(MCD_SEND, "0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", 
-		iSrcIndex, iDstIndex, iSrcType, iDstType, (pItem->Type&0x1FFF), 
-		( BYTE)( pItem->Level), ( BYTE)( pItem->Durability));
+	g_ConsoleDebug->Write(MCD_SEND, "0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", iSrcIndex, iDstIndex, iSrcType, iDstType, (pItem->Type&0x1FFF), ( BYTE)( pItem->Level), ( BYTE)( pItem->Durability));
 
 	return true;
 }
@@ -1123,35 +1093,21 @@ __forceinline void SendRequestEquipmentItem(int SrcFlag,int SrcIndex,int DstFlag
 	}
 #endif // #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 
-
-#ifdef MODIFY_SOCKET_PROTOCOL
 	BYTE spareBits;
 	if (g_SocketItemMgr.IsSocketItem(&PickItem))
 	{
-		spareBits = PickItem.SocketSeedSetOption;	// 소켓아이템이면 조화보석자리에 소켓 세트옵션을 사용한다.
+		spareBits = PickItem.SocketSeedSetOption;
 	}
 	else
 	{
 		spareBits = (((BYTE)PickItem.Jewel_Of_Harmony_Option)<<4)+((BYTE)PickItem.Jewel_Of_Harmony_OptionLevel);
 	}
-#else	// MODIFY_SOCKET_PROTOCOL
 
-	BYTE Jewel = (((BYTE)PickItem.Jewel_Of_Harmony_Option)<<4)+((BYTE)PickItem.Jewel_Of_Harmony_OptionLevel);
-	BYTE spareBits = Jewel;
-
-#endif	// MODIFY_SOCKET_PROTOCOL
-
-#ifdef MODIFY_SOCKET_PROTOCOL
 	BYTE socketBits[5] = { PickItem.bySocketOption[0], PickItem.bySocketOption[1], PickItem.bySocketOption[2], PickItem.bySocketOption[3], PickItem.bySocketOption[4] };
-#endif	// MODIFY_SOCKET_PROTOCOL
-	
-
 	
 	spe << ( BYTE)SrcFlag << ( BYTE)SrcIndex << ( BYTE)PickItem.Type << ( BYTE)( PickItem.Level)
 		<< ( BYTE)( PickItem.Durability) << ( BYTE)( PickItem.Option1) << ( BYTE)( PickItem.ExtOption) << splitType << spareBits
-#ifdef MODIFY_SOCKET_PROTOCOL
 		<< socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
-#endif	// MODIFY_SOCKET_PROTOCOL
 		<< ( BYTE)DstFlag << ( BYTE)DstIndex;
 	spe.Send( TRUE);
 
@@ -1261,11 +1217,6 @@ extern int SendDropItem;
 	spe.Send();\
     PlayBuffer(SOUND_CLICK01);\
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// 교환
-///////////////////////////////////////////////////////////////////////////////
 
 #define SendRequestTrade( p_Key)\
 {\
@@ -1598,7 +1549,6 @@ void InitGuildWar();
 	spe.Send();\
 }
 
-// 직책을 임명 / 변경 / 해제 요청
 #define SendRequestGuildAssign( Type, GuildStatus, Name )\
 {\
 	CStreamPacketEngine spe;\
@@ -1608,10 +1558,6 @@ void InitGuildWar();
 	spe.AddData( (Name), MAX_ID_SIZE );\
 	spe.Send();\
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 믹스관련 함수
-///////////////////////////////////////////////////////////////////////////////
 
 #ifdef ADD_SOCKET_MIX
 #define SendRequestMix( p_Type, p_SubType)\
@@ -1682,10 +1628,6 @@ __forceinline bool SendRequestMixExit()
     spe.Send();\
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 블러드 캐슬 관련 함수
-///////////////////////////////////////////////////////////////////////////////
-
 #define SendRequestMoveToEventMatch(byCastleNumber, iItemIndex)\
 {	\
 	CStreamPacketEngine spe;\
@@ -1702,9 +1644,6 @@ __forceinline bool SendRequestMixExit()
 	spe.Send();\
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  카오스 캐슬 관련 함스.
-//////////////////////////////////////////////////////////////////////////
 #define SendRequestMoveToEventMatch2(byCastleNumber, iItemIndex)\
 {	\
 	CStreamPacketEngine spe;\

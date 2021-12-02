@@ -59,16 +59,16 @@ DWORD CUIPopup::SetPopup( const char* pszText, int nLineCount, int nBufferSize, 
 	if( nLineCount > MAX_POPUP_TEXTLINE )
 	{
 #ifdef KWAK_ADD_TRACE_FUNC
-		__TraceF(TEXT("CUIPopup::SetPopup : 텍스트 라인수 초과!\n"));
+		__TraceF(TEXT("CUIPopup::SetPopup\n"));
 #endif // KWAK_ADD_TRACE_FUNC
 		return 0;
 	}
 	if( m_dwPopupID != 0 )
 	{
 #ifdef KWAK_ADD_TRACE_FUNC
-		__TraceF(TEXT("CUIPopup::SetPopup : 이미 팝업창이 떠 있습니다\n"));
+		__TraceF(TEXT("CUIPopup::SetPopup\n"));
 #endif // KWAK_ADD_TRACE_FUNC
-		g_pChatListBox->AddText("", "이미 팝업창이 떠 있습니다.", SEASON3B::TYPE_SYSTEM_MESSAGE);
+		g_pChatListBox->AddText("", "SetPopup", SEASON3B::TYPE_SYSTEM_MESSAGE);
 		return 0;
 	}
 

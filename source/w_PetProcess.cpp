@@ -1,33 +1,26 @@
 // w_PetProcess.cpp: implementation of the PetProcess class.
-// LDK_2008/07/08
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
 #ifdef LDK_ADD_NEW_PETPROCESS
-
 #include "w_PetActionStand.h"
 #include "w_PetActionRound.h"
 #include "w_PetActionDemon.h"
-
 #include "w_PetActionCollecter.h"
 #include "w_PetActionCollecter_Add.h"
 #include "w_PetActionUnicorn.h"
-
 #include "w_PetProcess.h"
 #include "ReadScript.h"
 #include "./Utilities/Log/ErrorReport.h"
 
-/////////////////////////////////////////////////////////////////////
+
 static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
 static void BuxConvert(BYTE *Buffer,int Size)
 {
 	for(int i=0;i<Size;i++)
 		Buffer[i] ^= bBuxCode[i%3];
 }
-//////////////////////////////////////////////////////////////////////
-// Infomation class
-//////////////////////////////////////////////////////////////////////
+
 PetInfoPtr PetInfo::Make()
 {
 	PetInfoPtr petInfo( new PetInfo );
@@ -74,9 +67,6 @@ void PetInfo::SetActions(int count, int *actions, float *speeds)
 	memcpy(m_speeds, speeds, sizeof(int)*m_count);
 }
 
-//////////////////////////////////////////////////////////////////////
-// extern
-//////////////////////////////////////////////////////////////////////
 PetProcessPtr g_petProcess;
 
 PetProcess& ThePetProcess()
@@ -84,9 +74,7 @@ PetProcess& ThePetProcess()
 	assert( g_petProcess );
 	return *g_petProcess;
 }
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+
 PetProcessPtr PetProcess::Make()
 {
 	PetProcessPtr petprocess( new PetProcess );
@@ -103,40 +91,34 @@ PetProcess::~PetProcess()
 	Destroy();
 }
 
-//////////////////////////////////////////////////////////////////////
-// 사용할 ActionExpress를 ActionMap에 등록
-//  - ActionExpress class를 생성시에만 등록하자
-//	- 기존 ActionExpress를 사용시에는 등록 안함
-//	- 등록시 인자는 스크립트의actNum값, 클래스포인터 입니다.
-//////////////////////////////////////////////////////////////////////
 void PetProcess::Init()
 {
 	PetActionStandPtr actionStand = PetActionStand::Make();
-	m_petsAction.insert( make_pair( PC4_ELF, actionStand ) ); //정령
-	//m_petsAction.insert( make_pair( 4, actionStand ) ); //정령
+	m_petsAction.insert( make_pair( PC4_ELF, actionStand ) );
+	//m_petsAction.insert( make_pair( 4, actionStand ) );
 
 	PetActionRoundPtr actionRound = PetActionRound::Make();
 	m_petsAction.insert( make_pair( PC4_TEST, actionRound ) );
 
 	PetActionDemonPtr actionTest = PetActionDemon::Make();
-	m_petsAction.insert( make_pair( PC4_SATAN, actionTest ) ); //사탄
+	m_petsAction.insert( make_pair( PC4_SATAN, actionTest ) );
 
 	PetActionCollecterPtr actionCollecter = PetActionCollecter::Make();
-	m_petsAction.insert( make_pair( XMAS_RUDOLPH, actionCollecter ) ); //아이템 수집자?????(가칭 : 루돌프 펫 ㅋㅋ)
+	m_petsAction.insert( make_pair( XMAS_RUDOLPH, actionCollecter ) );
 
 #ifdef PJH_ADD_PANDA_PET
 	PetActionCollecterAddPtr actionCollecter_Add = PetActionCollecterAdd::Make();
-	m_petsAction.insert( make_pair( PANDA, actionCollecter_Add ) ); //아이템 수집자?????(가칭 : 루돌프 펫 ㅋㅋ)
+	m_petsAction.insert( make_pair( PANDA, actionCollecter_Add ) );
 #endif //#ifdef PJH_ADD_PANDA_PET
 
 #ifdef LDK_ADD_CS7_UNICORN_PET
  	PetActionUnicornPtr actionUnicorn = PetActionUnicorn::Make();
- 	m_petsAction.insert( make_pair( UNICORN, actionUnicorn ) ); //유니콘 펫
+ 	m_petsAction.insert( make_pair( UNICORN, actionUnicorn ) );
 #endif //LDK_ADD_CS7_UNICORN_PET
 	
 #ifdef YDG_ADD_SKELETON_PET
 	PetActionCollecterSkeletonPtr actionCollecter_Skeleton = PetActionCollecterSkeleton::Make();
-	m_petsAction.insert( make_pair( SKELETON, actionCollecter_Skeleton ) ); // 스켈레톤 펫
+	m_petsAction.insert( make_pair( SKELETON, actionCollecter_Skeleton ) );
 #endif	// YDG_ADD_SKELETON_PET
 
 	LoadData();
@@ -161,9 +143,6 @@ void PetProcess::Destroy()
  	m_petsAction.clear();
 }
 
-//////////////////////////////////////////////////////////////////////
-// ActionMap에서 key값으로 검색 weakPoint로 넘겨줌
-//////////////////////////////////////////////////////////////////////
 BoostWeak_Ptr(PetAction) PetProcess::Find( int key )
 {
 	ActionMap::iterator iter = m_petsAction.find( key );
@@ -289,21 +268,10 @@ void PetProcess::UnRegister(CHARACTER *Owner, int itemType, bool isUnregistAll)
 }
 #endif //LDK_MOD_NUMBERING_PETCREATE
 
-//--------------------------------------------//
-// 외부 지원함수들
-//--------------------------------------------//
-
-//////////////////////////////////////////////////////////////////////
-// 스크립트 load 함수 : load후 map에 등록
-//////////////////////////////////////////////////////////////////////
 bool PetProcess::LoadData()
 {
 	char FileName[100];
-#ifdef USE_PET_TEST_BMD
-	sprintf(FileName, "Data\\Local\\pettest.bmd");
-#else	// USE_PET_TEST_BMD
 	sprintf(FileName, "Data\\Local\\pet.bmd");
-#endif	// USE_PET_TEST_BMD
 
 	int _ver;
 	int _array;
@@ -383,7 +351,6 @@ bool PetProcess::LoadData()
 			memcpy(_speed, pSeek, sizeof(_speed)*_array);
 			pSeek += sizeof(_speed)*_array;
 
-			//입력
 			PetInfoPtr petInfo = PetInfo::Make();
 			petInfo->SetBlendMesh( _blendMesh );
 			petInfo->SetScale( _scale );
@@ -399,12 +366,8 @@ bool PetProcess::LoadData()
 	return TRUE;
 }
 
-//////////////////////////////////////////////////////////////////////
-// map에 등록 된것 인지 확인한다.
-//////////////////////////////////////////////////////////////////////
 bool PetProcess::IsPet(int itemType)
 {
-	//등록되어있는  item_number면 true
 	InfoMap::iterator iter = m_petsInfo.find(itemType);
 	if( iter == m_petsInfo.end() ) return FALSE;
   	
@@ -415,9 +378,6 @@ bool PetProcess::IsPet(int itemType)
 }
 
 #ifdef LDK_MOD_NUMBERING_PETCREATE
-//////////////////////////////////////////////////////////////////////
-// 펫 생성후 등록
-//////////////////////////////////////////////////////////////////////
 int PetProcess::CreatePet( int itemType, int modelType, vec3_t Position, CHARACTER *Owner, int SubType, int LinkBone )
 {
 	if ( NULL == Owner ) return 0;
@@ -454,9 +414,8 @@ int PetProcess::CreatePet( int itemType, int modelType, vec3_t Position, CHARACT
 	}
 	
 	return 0;
-}//////////////////////////////////////////////////////////////////////
-// 등록되어 있는 펫 삭제 : 외부 지원 함수
-//////////////////////////////////////////////////////////////////////
+}
+
 bool PetProcess::DeletePet( CHARACTER *Owner, int petRegNum, bool ex )
 {
 	if( NULL == Owner ) return FALSE;
@@ -469,9 +428,7 @@ bool PetProcess::DeletePet( CHARACTER *Owner, int petRegNum, bool ex )
 	return UnRegister( Owner, petRegNum );
 }
 #else //LDK_MOD_NUMBERING_PETCREATE
-//////////////////////////////////////////////////////////////////////
-// 펫 생성후 등록
-//////////////////////////////////////////////////////////////////////
+
 bool PetProcess::CreatePet( int itemType, int modelType, vec3_t Position, CHARACTER *Owner, int SubType, int LinkBone )
 {
 	if ( NULL == Owner ) return FALSE;
@@ -482,7 +439,6 @@ bool PetProcess::CreatePet( int itemType, int modelType, vec3_t Position, CHARAC
 	PetObjectPtr _tempPet = PetObject::Make();
 	if( _tempPet->Create( itemType, modelType, Position, Owner, SubType, LinkBone ) )
 	{
-		//actions및 초기값 설정.-----------------------------//
 		InfoMap::iterator iter = m_petsInfo.find(itemType);
 		if( iter == m_petsInfo.end() ) return FALSE;
 
@@ -505,18 +461,13 @@ bool PetProcess::CreatePet( int itemType, int modelType, vec3_t Position, CHARAC
 		{
 			_tempPet->SetActions( (PetObject::ActionType)i, Find(action[i]), speed[i] );
 		}
-		//---------------------------------------------------//
-
-		//list에 등록
 		Register( _tempPet );
      	return TRUE;
 	}
 
 	return FALSE;
 }
-//////////////////////////////////////////////////////////////////////
-// 등록되어 있는 펫 삭제 : 외부 지원 함수
-//////////////////////////////////////////////////////////////////////
+
 void PetProcess::DeletePet(CHARACTER *Owner, int itemType, bool allDelete)
 {
 	if( NULL == Owner ) return;
@@ -565,9 +516,6 @@ bool PetProcess::SetCommandPet( CHARACTER *Owner, int petRegNum, int targetKey, 
 	return FALSE;
 }
 #else //LDK_MOD_NUMBERING_PETCREATE
-//////////////////////////////////////////////////////////////////////
-// 펫 행동 변경 함수 : 같은 주인의 모든 펫
-//////////////////////////////////////////////////////////////////////
 void PetProcess::SetCommandPet(CHARACTER *Owner, int targetKey, PetObject::ActionType cmdType )
 {
 	if( NULL == Owner ) return;
@@ -589,9 +537,6 @@ void PetProcess::SetCommandPet(CHARACTER *Owner, int targetKey, PetObject::Actio
 }
 #endif //LDK_MOD_NUMBERING_PETCREATE
 
-//////////////////////////////////////////////////////////////////////
-// MoveUpdate 함수
-//////////////////////////////////////////////////////////////////////
 void PetProcess::UpdatePets()
 {
  	for( PetList::iterator iter = m_petsList.begin(); iter != m_petsList.end(); )
@@ -607,9 +552,6 @@ void PetProcess::UpdatePets()
  	}
 }
 
-//////////////////////////////////////////////////////////////////////
-// RenderUpdate 함수
-//////////////////////////////////////////////////////////////////////
 void PetProcess::RenderPets()
 {
 	for( PetList::iterator iter = m_petsList.begin(); iter != m_petsList.end(); )

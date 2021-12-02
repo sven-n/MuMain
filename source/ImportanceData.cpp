@@ -38,8 +38,6 @@ void ImportanceData::InitData()
 	m_SkillAttribute =  shared_array<SKILL_ATTRIBUTE>( new SKILL_ATTRIBUTE[MAX_SKILLS] );
 	m_ClientCharacter =  shared_array<CHARACTER>( new CHARACTER[MAX_CHARACTERS_CLIENT] );
 	m_MachineCharacter = shared_ptr<CHARACTER_MACHINE>( new CHARACTER_MACHINE );
-
-	//weak point 소유권이 없다.
 	m_CharacterAttribute = m_MachineCharacter->Character;
 }
 

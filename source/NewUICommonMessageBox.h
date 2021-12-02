@@ -547,7 +547,6 @@ namespace SEASON3B
 	};
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
-	// 시간제 퀘스트 수행 개수 제한 메시지 박스.
 	class CQuestCountLimitMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
 	{
 	public:

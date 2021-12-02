@@ -63,12 +63,12 @@ namespace SEASON3B
 
 	private:
 		CNewUIManager*				m_pNewUIMng;
-		POINT						m_UIStartPos;				// UI 시작위치
-		int							m_iTextEndPosX;				// Text끝 X의 위치
-		POINT						m_ItemDurUIStartPos;		// 아이템 내구도UI 시작위치
+		POINT						m_UIStartPos;
+		int							m_iTextEndPosX;
+		POINT						m_ItemDurUIStartPos;
 
-		int							m_iCurArrowType;			// 현재 화살타입
-		int							m_iItemDurImageIndex[MAX_EQUIPMENT];	// 아이템 내구도 이미지 인덱스
+		int							m_iCurArrowType;
+		int							m_iItemDurImageIndex[MAX_EQUIPMENT];
 		int							m_iTooltipIndex;
 
 	public:
@@ -105,19 +105,18 @@ namespace SEASON3B
 		void RenderHPUI( int iX, int iY, unicode::t_char* pszName, int iLife, int iMaxLife = 255, bool bWarning = false );
 		void RenderTooltip( int iX, int iY, const ITEM* pItem, const DWORD& dwTextColor);
 		//void RenderItemDurIcon( int iImageIndex, int iX, int iY, int iWidth, int iHeight, DWORD dwColor, unicode::t_char* pszName );
-															// 순위
-		bool RenderEquipedHelperLife( int iX, int iY );		// 1. 수호천사, 사탄, 다크호스, 디노란트, 펜릴
-		bool RenderEquipedPetLife( int iX, int iY );		// 2. 다크스피릿
-		bool RenderSummonMonsterLife( int iX, int iY );		// 3. 소환몬스터
-		bool RenderNumArrow( int iX, int iY );				// 4. 남은화살
+		bool RenderEquipedHelperLife( int iX, int iY );
+		bool RenderEquipedPetLife( int iX, int iY );
+		bool RenderSummonMonsterLife( int iX, int iY );
+		bool RenderNumArrow( int iX, int iY );
 #ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
- 		bool RenderPCRoomPoint( int iX, int iY );			// 5. PC방포인트표시
+ 		bool RenderPCRoomPoint( int iX, int iY );
 #endif // KJH_DEL_PC_ROOM_SYSTEM
 #ifdef PBG_ADD_PCROOM_NEWUI
-		bool RenderPCRoomUI(int _PosX, int _PosY);			// pc방 UI
+		bool RenderPCRoomUI(int _PosX, int _PosY);
 		bool RenderPCRoomToolTip(int _PosX, int _PosY);
 #endif //PBG_ADD_PCROOM_NEWUI
- 		bool RenderItemEndurance( int ix, int iY );			// 6. 아이템 내구도
+ 		bool RenderItemEndurance( int ix, int iY );
 	};
 }
 

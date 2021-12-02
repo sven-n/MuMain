@@ -26,7 +26,6 @@
 #endif // SAVE_PACKET
 #include "CSQuest.h"
 #include "PersonalShopTitleImp.h"
-#include "PvPSystem.h"
 #include "GMHellas.h"
 #include "npcBreeder.h"
 #include "GIPetManager.h"
@@ -661,8 +660,6 @@ void InitGame()
 	
 	CheckInventory = NULL;
 	
-	//World = -1;
-	
 	SendExitInventory ();
 	
 	g_iFollowCharacter = -1;
@@ -679,12 +676,9 @@ void InitGame()
 	CharacterAttribute->AbilityTime[1] = 0;
 	CharacterAttribute->AbilityTime[2] = 0;
 	
-#ifdef KJH_FIX_WOPS_K27340_INIT_STORAGE_GOLD
 	CharacterMachine->StorageGold	= 0;
 	CharacterMachine->Gold			= 0;
-#endif // KJH_FIX_WOPS_K27340_INIT_STORAGE_GOLD
 
-	
 	g_shEventChipCount = 0;
 	g_shMutoNumber[0]  = -1;
 	g_shMutoNumber[1]  = -1;
@@ -879,10 +873,6 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		CharacterAttribute->NextExperince = (int)Data_Exp;
 	}
 	
-	//	Master_Level_Data.wMaxLife			= Data->LifeMax;
-	//	Master_Level_Data.wMaxMana			= Data->ManaMax;
-	//	Master_Level_Data.wMaxShield		= Data->ShieldMax;
-
 	CharacterAttribute->LevelUpPoint  = Data->LevelUpPoint;
 	CharacterAttribute->Strength      = Data->Strength;
 	CharacterAttribute->Dexterity     = Data->Dexterity;
@@ -3625,7 +3615,6 @@ void SetPlayerBow(CHARACTER *c)
 
 void SetPlayerHighBow ( CHARACTER* c )
 {
-#ifdef ADD_SOCKET_ITEM
 #ifdef KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
 		switch( gCharacterManager.GetEquipedBowType( c ))
 	{
@@ -3697,27 +3686,6 @@ void SetPlayerHighBow ( CHARACTER* c )
 		break;
 	}
 #endif // KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
-#else // ADD_SOCKET_ITEM
-    if((c->Weapon[1].Type>=MODEL_BOW && c->Weapon[1].Type<MODEL_BOW+7) || c->Weapon[1].Type==MODEL_BOW+17 
-        || c->Weapon[1].Type==MODEL_BOW+20 
-		|| c->Weapon[1].Type==MODEL_BOW+21
-		|| c->Weapon[1].Type==MODEL_BOW+22
-        )
-    {
-        if(gCharacterManager.GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
-            SetAction(&c->Object,PLAYER_ATTACK_FLY_BOW_UP);
-        else
-            SetAction(&c->Object,PLAYER_ATTACK_BOW_UP);
-    }
-    else if((c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) || c->Weapon[0].Type==MODEL_BOW+16 || 
-        (c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
-    {
-        if(gCharacterManager.GetBaseClass(c->Class)==CLASS_ELF && c->Wing.Type!=-1)
-            SetAction(&c->Object,PLAYER_ATTACK_FLY_CROSSBOW_UP);
-        else
-            SetAction(&c->Object,PLAYER_ATTACK_CROSSBOW_UP);
-    }
-#endif // ADD_SOCKET_ITEM
 }
 
 BOOL ReceiveMonsterSkill(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
@@ -3776,12 +3744,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 	
 	WORD MagicNumber = ((WORD)(Data->MagicH )<<8) + Data->MagicL;
 	
-	if(MagicNumber == AT_SKILL_ATTACK || MagicNumber == AT_SKILL_DEFENSE
-#ifdef PJH_SEASON4_MASTER_RANK4
-		|| (AT_SKILL_DEF_POWER_UP <= MagicNumber && MagicNumber <= AT_SKILL_DEF_POWER_UP+4)
-		|| (AT_SKILL_ATT_POWER_UP <= MagicNumber && MagicNumber <= AT_SKILL_ATT_POWER_UP+4)
-#endif //PJH_SEASON4_MASTER_RANK4
-		)
+	if(MagicNumber == AT_SKILL_ATTACK || MagicNumber == AT_SKILL_DEFENSE || (AT_SKILL_DEF_POWER_UP <= MagicNumber && MagicNumber <= AT_SKILL_DEF_POWER_UP+4) || (AT_SKILL_ATT_POWER_UP <= MagicNumber && MagicNumber <= AT_SKILL_ATT_POWER_UP+4))
 		{
 			if(Success == false)
 			{
@@ -3809,7 +3772,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					so->Angle[2] = CreateAngle(so->Position[0],so->Position[1],to->Position[0],to->Position[1]);
 				sc->TargetCharacter = TargetIndex;
 				
-				// 펜릴 스킬 플라즈마 사용하면 타켓인덱스를 따로 저장한다.
 			if(MagicNumber == AT_SKILL_PLASMA_STORM_FENRIR)
 				sc->m_iFenrirSkillTarget = TargetIndex;
 					
@@ -4952,26 +4914,18 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 #endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
                 break;
 				
-				// 다크로드 스킬 파이어 스크림
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_FIRE_SCREAM_UP:
 			case AT_SKILL_FIRE_SCREAM_UP+1:
 			case AT_SKILL_FIRE_SCREAM_UP+2:
 			case AT_SKILL_FIRE_SCREAM_UP+3:
 			case AT_SKILL_FIRE_SCREAM_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_DARK_SCREAM:
 				{
-#ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					if( sc->Helper.Type == MODEL_HELPER+37 )				
 					{
 						SetAction( so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );
 					}
-#ifdef PBG_FIX_CHAOTIC_ANIMATION
 					else if((sc->Helper.Type>=MODEL_HELPER+2) && (sc->Helper.Type<=MODEL_HELPER+4))
-#else //PBG_FIX_CHAOTIC_ANIMATION
-					else if((sc->Helper.Type>=MODEL_HELPER+2) || (sc->Helper.Type<=MODEL_HELPER+4))
-#endif //PBG_FIX_CHAOTIC_ANIMATION
 					{
 						SetAction( so, PLAYER_ATTACK_RIDE_STRIKE );
 					}
@@ -4979,13 +4933,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					{
 						SetAction( so, PLAYER_ATTACK_STRIKE );
 					}
-#else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-					if(sc->Helper.Type == MODEL_HELPER+37)
-						SetAction(so,PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);	
-					else
-						SetAction ( so, PLAYER_ATTACK_STRIKE );
-#endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-					// 사운드
 					PlayBuffer(SOUND_FIRE_SCREAM);
 				}
 				break;
@@ -5005,49 +4952,28 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
                 SetAction ( so, PLAYER_ATTACK_DARKHORSE );
                 PlayBuffer ( SOUND_EARTH_QUAKE );
                 break;
-				
-				//----------------------------------------------------------------------------------------------------
-				
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ANGER_SWORD_UP:
 			case AT_SKILL_ANGER_SWORD_UP+1:
 			case AT_SKILL_ANGER_SWORD_UP+2:
 			case AT_SKILL_ANGER_SWORD_UP+3:
 			case AT_SKILL_ANGER_SWORD_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
             case AT_SKILL_FURY_STRIKE:
 				SetAction(so,PLAYER_ATTACK_SKILL_FURY_STRIKE);
                 break;
-				
-				//----------------------------------------------------------------------------------------------------
-				
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 			case AT_SKILL_BLOW_OF_DESTRUCTION:
 				SetAction(so,PLAYER_SKILL_BLOW_OF_DESTRUCTION);
 				break;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-				
-				//----------------------------------------------------------------------------------------------------
-				
-				
-				//----------------------------------------------------------------------------------------------------
-				
 			case AT_SKILL_SPEAR:
 				if(sc->Helper.Type == MODEL_HELPER+37)
 					SetAction(so, PLAYER_FENRIR_ATTACK_SPEAR);
 				else
 					SetAction(so,PLAYER_ATTACK_SKILL_SPEAR);
 				break;
-				
-				//----------------------------------------------------------------------------------------------------
-				
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_BLOOD_ATT_UP:
 			case AT_SKILL_BLOOD_ATT_UP+1:
 			case AT_SKILL_BLOOD_ATT_UP+2:
 			case AT_SKILL_BLOOD_ATT_UP+3:
 			case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_REDUCEDEFENSE:
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
 				switch(sc->Helper.Type)
@@ -5069,23 +4995,19 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				SetAction(so,PLAYER_ATTACK_SKILL_WHEEL);
 #endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
 				break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_POWER_SLASH_UP:
 			case AT_SKILL_POWER_SLASH_UP+1:
 			case AT_SKILL_POWER_SLASH_UP+2:
 			case AT_SKILL_POWER_SLASH_UP+3:
 			case AT_SKILL_POWER_SLASH_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
             case AT_SKILL_ICE_BLADE:
 				SetAction(so,PLAYER_ATTACK_TWO_HAND_SWORD_TWO);
 				break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_BLOW_UP:
 			case AT_SKILL_BLOW_UP+1:
 			case AT_SKILL_BLOW_UP+2:
 			case AT_SKILL_BLOW_UP+3:
 			case AT_SKILL_BLOW_UP+4:
-#endif	//PJH_SEASON4_MASTER_RANK4
             case AT_SKILL_ONETOONE:
 				SetAction(so,PLAYER_ATTACK_ONETOONE);
                 break;
@@ -5105,16 +5027,11 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 #ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 			case AT_SKILL_GAOTIC:
 				{
-#ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					if( sc->Helper.Type == MODEL_HELPER+37 )				
 					{
 						SetAction( &sc->Object, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );
 					}
-#ifdef PBG_FIX_CHAOTIC_ANIMATION
 					else if((sc->Helper.Type>=MODEL_HELPER+2) && (sc->Helper.Type<=MODEL_HELPER+4))
-#else //PBG_FIX_CHAOTIC_ANIMATION
-					else if((sc->Helper.Type>=MODEL_HELPER+2) || (sc->Helper.Type<=MODEL_HELPER+4))
-#endif //PBG_FIX_CHAOTIC_ANIMATION
 					{
 						SetAction( &sc->Object, PLAYER_ATTACK_RIDE_STRIKE );
 					}
@@ -5122,12 +5039,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					{
 						SetAction( &sc->Object, PLAYER_ATTACK_STRIKE );
 					}
-#else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-					if(sc->Helper.Type == MODEL_HELPER+37)
-						SetAction(so,PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
-					else
-						SetAction ( so, PLAYER_ATTACK_STRIKE );
-#endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 
 					OBJECT* o = so;
 					vec3_t Light,Position,P,dp;
@@ -5153,7 +5064,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 						Position[2] = (o->Position[2] + 49.f) + (float)(rand()%60); 
 						CreateJoint(BITMAP_2LINE_GHOST,Position,o->Position,o->Angle,0,o,20.f,o->PKKey,0,o->m_bySkillSerialNum);
 					}
-#ifdef PJH_FIX_CAOTIC
 					if(sc==Hero && SelectedCharacter!=-1)
 					{
 						vec3_t Pos;
@@ -5161,7 +5071,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 						VectorCopy(st->Object.Position,Pos);
 						CreateBomb(Pos,true);
 					}
-#endif //PJH_FIX_CAOTIC
 					PlayBuffer(SOUND_SKILL_CAOTIC);
 				}
 				break;
@@ -5173,8 +5082,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					OBJECT* o = so;
 					vec3_t Light,Position,P,dp;
 
-					
-#ifdef PJH_SEASON4_FIX_MULTI_SHOT
 					float Matrix[3][4];
 					Vector(0.f,20.f,0.f,P);
 					AngleMatrix(o->Angle,Matrix);
@@ -5218,58 +5125,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					}
 
 					CreateEffect(MODEL_BLADE_SKILL, Position, o->Angle, Light, 1, o, Key);
-#else	//PJH_SEASON4_FIX_MULTI_SHOT
-
-					float Matrix[3][4];
-					Vector(0.f,20.f,0.f,P);
-					AngleMatrix(o->Angle,Matrix);
-					VectorRotate(P,Matrix,dp);
-					VectorAdd(dp,o->Position,Position);
-					Vector(0.4f, 0.6f, 1.f, Light);
-					CreateEffect ( MODEL_MULTI_SHOT3, Position, o->Angle, Light, 0);
-					CreateEffect ( MODEL_MULTI_SHOT3, Position, o->Angle, Light, 0);
-					
-					Vector(0.f,-20.f,0.f,P);
-					Vector(0.f,0.f,0.f,P);
-					AngleMatrix(o->Angle,Matrix);
-					VectorRotate(P,Matrix,dp);
-					VectorAdd(dp,o->Position,Position);
-					
-					CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-					CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-					CreateEffect ( MODEL_MULTI_SHOT1, Position, o->Angle, Light, 0);
-					
-					Vector(0.f,20.f,0.f,P);
-					AngleMatrix(o->Angle,Matrix);
-					VectorRotate(P,Matrix,dp);
-					VectorAdd(dp,o->Position,Position);
-					CreateEffect ( MODEL_MULTI_SHOT2, Position, o->Angle, Light, 0);
-					CreateEffect ( MODEL_MULTI_SHOT2, Position, o->Angle, Light, 0);
-					
-					Vector(0.f,-120.f,130.f,P);
-					AngleMatrix(o->Angle,Matrix);
-					VectorRotate(P,Matrix,dp);
-					VectorAdd(dp,o->Position,Position);
-					CreateEffect(MODEL_BLADE_SKILL, Position, o->Angle, Light, 1);
-					
-					BYTE Skill = 0;
-					//			CHARACTER *tc;
-					OBJECT *to = NULL;
-					vec3_t Angle;
-
-					VectorCopy(o->Angle,Angle);
-					CreateArrow(sc,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2] + 8.f;
-					CreateArrow(sc,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2] + 16.f;
-					CreateArrow(sc,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2] - 8.f;
-					CreateArrow(sc,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2] - 16.f;
-					CreateArrow(sc,o,to,FindHotKey(( o->Skill)),1,0);
-					o->Angle[2] = Angle[2];
-					PlayBuffer(SOUND_SKILL_MULTI_SHOT);
-#endif //PJH_SEASON4_FIX_MULTI_SHOT
 				}
 				break;
 #endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
@@ -5281,17 +5136,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					vec3_t vFirePosition;
 					
 					float Matrix[3][4];
-					/*
-					Vector(0.f,-220.f,130.f,P);
-					AngleMatrix(o->Angle,Matrix);
-					VectorRotate(P,Matrix,dp);
-					VectorAdd(dp,o->Position,Position);
-					Vector(0.7f, 0.6f, 0.f, Light);
-					CreateEffect(BITMAP_IMPACT, Position, o->Angle, Light, 0,o);
-					SetAction(o,PLAYER_RECOVER_SKILL);
-					
-					  
-					*/
+
 					OBJECT* o = so;
 					
 					Vector(0.4f, 0.6f, 1.f, Light);
@@ -5349,7 +5194,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 		case AT_SKILL_ALICE_DRAINLIFE_UP+3:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+4:
 #endif				
-			case AT_SKILL_ALICE_DRAINLIFE:		// Drain Life (드레인 라이프)
+			case AT_SKILL_ALICE_DRAINLIFE:
 				{
 					switch(sc->Helper.Type)
 					{
@@ -5368,12 +5213,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					}
 				}
 				break;
-				
-				// ReceiveChainMagic() 에서 SetAction해주었으므로 안해주어도 됨.
-				// 			case AT_SKILL_ALICE_CHAINLIGHTNING:
-				// 				SetAction(so, PLAYER_SKILL_CHAIN_LIGHTNING);
-				// 				break;
-				
 			case AT_SKILL_ALICE_WEAKNESS:
 			case AT_SKILL_ALICE_ENERVATION:
 				switch(sc->Helper.Type)
@@ -5430,18 +5269,15 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 #endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
 					break;
 #endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef PJH_ADD_MASTERSKILL
+
 		case AT_SKILL_LIGHTNING_SHOCK_UP:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+1:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+2:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+3:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+4:
-#endif
 				case AT_SKILL_LIGHTNING_SHOCK:
 					SetAction(so, PLAYER_SKILL_LIGHTNING_SHOCK);
 					break;
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				case AT_SKILL_DRAGON_LOWER:
 				{
@@ -8627,7 +8463,6 @@ void ReceiveMatchGameCommand ( BYTE* ReceiveBuffer )
     matchEvent::SetMatchGameCommand ( Data );
 }
 
-#ifdef YDG_ADD_NEW_DUEL_PROTOCOL
 void ReceiveDuelRequest(BYTE* ReceiveBuffer)
 {
 	if(g_MessageBox->IsEmpty() == false)
@@ -8846,103 +8681,6 @@ void ReceiveDuelRound(BYTE* ReceiveBuffer)
 	{
 	}
 }
-
-#else	// YDG_ADD_NEW_DUEL_PROTOCOL
-#ifdef DUEL_SYSTEM
-
-void ReplyDuelStart(BYTE* ReceiveBuffer)
-{
-	LPPRECEIVE_DUELSTART Data = (LPPRECEIVE_DUELSTART)ReceiveBuffer;
-	
-	if(Data->bStart)
-	{
-		g_bEnableDuel = true;
-		g_iDuelPlayerIndex = MAKEWORD(Data->bIndexL,Data->bIndexH);
-		strncpy(g_szDuelPlayerID, (const char*)Data->ID, MAX_ID_SIZE);
-		g_szDuelPlayerID[10] = NULL;
-		
-		char szMessage[256];
-		// 912 "%s 님이 결투에 응했습니다."
-		sprintf(szMessage, GlobalText[912], g_szDuelPlayerID);
-		g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
-		
-		g_pNewUISystem->Show(SEASON3B::INTERFACE_DUEL_WINDOW);
-		PlayBuffer(SOUND_START_DUEL);
-	}
-	else
-	{
-		char szMessage[256];
-		strncpy(g_szDuelPlayerID, (const char*)Data->ID, MAX_ID_SIZE);
-		g_szDuelPlayerID[10] = NULL;
-		// 913 "%s 님이 결투신청을 거부했습니다."
-		sprintf(szMessage, GlobalText[913], g_szDuelPlayerID);
-		g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
-	}
-}
-
-void NotifyDuelStart(BYTE* ReceiveBuffer)
-{
-	if(g_MessageBox->IsEmpty() == false)
-	{
-		return;
-	}
-	
-	LPPNOTIFY_DUELSTART Data = (LPPNOTIFY_DUELSTART)ReceiveBuffer;
-	
-	g_iDuelPlayerIndex = MAKEWORD(Data->bIndexL,Data->bIndexH);
-	strncpy(g_szDuelPlayerID, (const char*)Data->ID, MAX_ID_SIZE);
-	g_szDuelPlayerID[10] = NULL;
-	
-	if(g_pNewUISystem->IsImpossibleDuelInterface() == true)
-	{
-		SendRequestDuelOk(0, g_iDuelPlayerIndex, g_szDuelPlayerID);
-		return;
-	}
-	
-	SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDuelMsgBoxLayout));
-	PlayBuffer(SOUND_OPEN_DUELWINDOW);
-}
-
-void ReplyDuelEnd(BYTE* ReceiveBuffer)
-{
-	LPPRECEIVE_DUELEND Data = (LPPRECEIVE_DUELEND)ReceiveBuffer;
-	
-	g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUEL_WINDOW);
-	g_bEnableDuel = false;
-	
-	g_iDuelPlayerIndex = MAKEWORD(Data->bIndexL,Data->bIndexH);
-	strncpy(g_szDuelPlayerID, (const char*)Data->ID, MAX_ID_SIZE);
-	g_szDuelPlayerID[10] = NULL;
-	
-	g_pChatListBox->AddText("", GlobalText[914], SEASON3B::TYPE_ERROR_MESSAGE);
-	
-	if(g_wtMatchTimeLeft.m_Type == 2)
-		g_wtMatchTimeLeft.m_Time = 0;
-	g_PetEnableDuel = false;	// LHJ - 결투 끝날때 다크 스피릿도 공격 못하게 하는 변수
-}
-
-void NotifyDuelScore(BYTE* ReceiveBuffer)
-{
-	LPPNOTIFY_DUELSCORE Data = (LPPNOTIFY_DUELSCORE)ReceiveBuffer;
-	
-	if(g_iDuelPlayerIndex == MAKEWORD(Data->NumberL1, Data->NumberH1))
-	{
-		g_iDuelPlayerScore = Data->btDuelScore1;
-		g_iMyPlayerScore = Data->btDuelScore2;
-	}
-	else if(g_iDuelPlayerIndex == MAKEWORD(Data->NumberL2, Data->NumberH2))
-	{
-		g_iDuelPlayerScore = Data->btDuelScore2;
-		g_iMyPlayerScore = Data->btDuelScore1;
-	}
-	else
-	{
-		//. 먼가 데이타가 잘못온경우
-	}
-}
-
-#endif // DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_PROTOCOL
 
 void ReceiveCreateShopTitleViewport(BYTE* ReceiveBuffer)
 {
@@ -9693,7 +9431,7 @@ void ReceiveChatRoomInviteResult(BYTE* ReceiveBuffer)
 		}
 		else
 		{
-			assert(!"초대 ID가 없다");
+			assert(!"ReceiveChatRoomInviteResult");
 		}
 		break;
 	case 0x03:
@@ -9974,7 +9712,7 @@ void ReceiveServerImmigration( BYTE *ReceiveBuffer)
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CServerImmigrationErrorMsgBoxLayout));
 		break;
 	case 1:
-		SEASON3B::CreateOkMessageBox("서버 이전시 오류 발생 : 문의 바람");
+		SEASON3B::CreateOkMessageBox("ReceiveServerImmigration");
 		break;
 	}
 }
@@ -10307,7 +10045,6 @@ void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
 
 	case 3:
 #ifdef ASG_MOD_QUEST_OK_BTN_DISABLE
-		// 퀘스트 진행창의 확인 버튼을 비활성화.
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
 			g_pQuestProgress->EnableCompleteBtn(false);
 		else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
@@ -10628,7 +10365,6 @@ void ReceivePetAttack ( BYTE* ReceiveBuffer )
 	
     Key = ((WORD)(Data->m_byTKeyH)<<8) + Data->m_byTKeyL;
 	
-    //  공격.
     giPetManager::SetAttack ( sc, Key, Data->m_bySkillType );
 }
 
@@ -10636,7 +10372,6 @@ void ReceivePetInfo ( BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_PET_INFO Data = ( LPPRECEIVE_PET_INFO )ReceiveBuffer;
 	
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 	PET_INFO Petinfo;
 	ZeroMemory( &Petinfo, sizeof(PET_INFO) );
 
@@ -10646,27 +10381,6 @@ void ReceivePetInfo ( BYTE* ReceiveBuffer )
 	Petinfo.m_dwExp1	= Data->m_iExp;
 
 	giPetManager::SetPetInfo( Data->m_byInvType, Data->m_byPos, &Petinfo );
-
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM
-#ifdef KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
-
-	PET_INFO Petinfo;
-	ZeroMemory( &Petinfo, sizeof(PET_INFO) );
-
-	Petinfo.m_dwPetType = Data->m_byPetType;
-	Petinfo.m_wLevel	= Data->m_byLevel;
-	Petinfo.m_wLife		= Data->m_byLife;
-	Petinfo.m_dwExp1	= Data->m_iExp;
-	
-	giPetManager::SetPetInfo ( Data->m_byInvType, Data->m_byPos, Petinfo );
-
-#else // KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
-    giPetManager::SetPetInfo ( Data->m_byPetType, Data->m_byInvType, Data->m_byPos, Data->m_byLevel, Data->m_iExp );
-#endif // KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
-
-    CharacterMachine->CalculateAll();
-
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 
 void ReceiveWTTimeLeft(BYTE* ReceiveBuffer)
@@ -10695,7 +10409,6 @@ void ReceiveWTBattleSoccerGoalIn(BYTE* ReceiveBuffer)
 {
 /*	LPPMSG_SOCCER_GOALIN Data = (LPPMSG_SOCCER_GOALIN)ReceiveBuffer;
 
-  //정해진 위치에 이펙트 발생
   vec3_t Position, Angle, Light;
   Position[0]  = (float)(Data->m_x+0.5f)*TERRAIN_SCALE;
   Position[1]  = (float)(Data->m_y+0.5f)*TERRAIN_SCALE;
@@ -10703,7 +10416,7 @@ void ReceiveWTBattleSoccerGoalIn(BYTE* ReceiveBuffer)
   ZeroMemory( Angle, sizeof ( Angle));
   Light[0] = Light[1] = Light[2] = 1.0f;
 	CreateEffect(BITMAP_FIRECRACKERRISE,Position,Angle,Light);*/
-} //월드 토너먼트용 결과 디스플레이
+}
 
 void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
 {
@@ -11627,7 +11340,7 @@ void ReceiveCastleHuntZoneResult ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveCatapultState ( BYTE* ReceiveBuffer )
+void ReceiveCatapultState(BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_CATAPULT_STATE pData = (LPPRECEIVE_CATAPULT_STATE)ReceiveBuffer;
 	
@@ -11640,11 +11353,11 @@ void ReceiveCatapultState ( BYTE* ReceiveBuffer )
     }
     else if ( pData->m_byResult==0 )
     {
-		g_pChatListBox->AddText( "", "공성 무기 선택 실패", SEASON3B::TYPE_SYSTEM_MESSAGE);
+		g_pChatListBox->AddText( "", "ReceiveCatapultState", SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
-void ReceiveCatapultFire ( BYTE* ReceiveBuffer )
+void ReceiveCatapultFire(BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_WEAPON_FIRE pData = (LPPRECEIVE_WEAPON_FIRE)ReceiveBuffer;
     
@@ -11656,7 +11369,7 @@ void ReceiveCatapultFire ( BYTE* ReceiveBuffer )
     }
     else if ( pData->m_byResult==0 )
     {
-		g_pChatListBox->AddText( "", "공성무기 발사 실패했습니다.", SEASON3B::TYPE_SYSTEM_MESSAGE);
+		g_pChatListBox->AddText( "", "ReceiveCatapultFire", SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -11666,24 +11379,6 @@ void    ReceiveCatapultFireToMe ( BYTE* ReceiveBuffer )
 	
 	g_pCatapultWindow->DoFireFixStartPosition(pData->m_byWeaponType, pData->m_byTargetX, pData->m_byTargetY);
 }
-
-/*
-void    ReceiveDamageFrmeCatapult ( BYTE* ReceiveBuffer )
-{
-LPPRECEIVE_BOMBING_TARGET pData = (LPPRECEIVE_BOMBING_TARGET)ReceiveBuffer;
-int Key = (((int)pData->m_byKeyH)<<8) + pData->m_byKeyL;
-int Index = FindCharacterIndex ( Key );
-CHARACTER* tc = &CharactersClient[Index];
-OBJECT* to = &tc->Object;
-
-  switch ( pData->m_byWeaponType )
-  {
-  case 1:
-  SetAction ( to, PLAYER_SKILL_VITALITY );// PLAYER_HIGH_SHOCK );
-  break;
-  }
-  }
-*/
 
 void ReceivePreviewPort ( BYTE* ReceiveBuffer )
 {
@@ -12706,19 +12401,18 @@ bool ReceiveRequestMoveMap(BYTE* ReceiveBuffer)
 		
 	}
 
-//	에러번호
-// 	MAPMOVE_SUCCESS				= 0,			// 이동 성공
-// 	MAPMOVE_FAILED,								// 이동 실패 (이동 불가능한 다른 경우)
-// 	MAPMOVE_FAILED_TELEPORT,					// 이동 실패 (텔레포트 중)
-// 	MAPMOVE_FAILED_PSHOP_OPEN,					// 이동 실패 (개인상점이 열려있는 경우)
-// 	MAPMOVE_FAILED_RECALLED,					// 이동 실패 (소환되는 도중)
-// 	MAPMOVE_FAILED_NOT_ENOUGH_EQUIP,			// 이동 실패 (해당 맵으로 이동하기 위한 장비 부족)
-// 	MAPMOVE_FAILED_WEARING_EQUIP,				// 이동 실패 (해당 맵에 입장시 장비하지 못하는 장비 착용)
-// 	MAPMOVE_FAILED_MURDERER,					// 이동 실패 (살인마 일 경우 맵 이동 불가)
-// 	MAPMOVE_FAILED_NOT_ENOUGH_LEVEL,			// 이동 실패 (레벨 부족)
-// 	MAPMOVE_FAILED_NOT_ENOUGH_ZEN,				// 이동 실패 (소유 젠 부족)
-// 	MAPMOVE_FORCED_EVENT_END		= 20,		// 강제 이동 (이벤트 종료에 의한 강제 이동)
-// 	MAPMOVE_FORCED_GM							// 강제 이동 (GM에 의한 강제 이동)
+// 	MAPMOVE_SUCCESS	
+// 	MAPMOVE_FAILED,	
+// 	MAPMOVE_FAILED_TELEPORT,
+// 	MAPMOVE_FAILED_PSHOP_OPEN,
+// 	MAPMOVE_FAILED_RECALLED,
+// 	MAPMOVE_FAILED_NOT_ENOUGH_EQUIP,
+// 	MAPMOVE_FAILED_WEARING_EQUIP,
+// 	MAPMOVE_FAILED_MURDERER,	
+// 	MAPMOVE_FAILED_NOT_ENOUGH_LEVEL,
+// 	MAPMOVE_FAILED_NOT_ENOUGH_ZEN,	
+// 	MAPMOVE_FORCED_EVENT_END		= 20,
+// 	MAPMOVE_FORCED_GM			
 
 	return true;
 }
@@ -14639,7 +14333,7 @@ bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )
 	}
 }
 
-void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
+void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime )
 {
 	if(o && o == &Hero->Object)
 	{
@@ -14764,7 +14458,7 @@ void InsertBuffLogicalEffect( eBuffState buff, OBJECT* o, const int bufftime )
 			{
 				g_RegisterBuffTime(buff, bufftime);
 
-				char _Temp[32] = {0,};
+				char _Temp[64] = {0,};
 
 				if(buff == eBuff_BlessingOfXmax)
 				{
@@ -15411,6 +15105,11 @@ void RegisterBuff( eBuffState buff, OBJECT* o, const int bufftime )
 	eBuffClass buffclasstype = g_IsBuffClass( buff );
 	
 	if( buffclasstype == eBuffClass_Count ) return;
+
+	if(!o)
+	{
+		return;
+	}
 	
 	if(gMapManager.InChaosCastle() && (o && o != &Hero->Object)) 
 	{

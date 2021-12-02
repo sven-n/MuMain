@@ -732,7 +732,6 @@ bool SEASON3B::CNewUICursedTempleSystem::Update()
 
 void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 {
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	EnableAlphaTest();
 	glColor4f( 1.f, 1.f, 1.f, m_Alph );
 
@@ -765,48 +764,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 	
 	glColor4f ( 1.f, 1.f, 1.f, m_Alph);
     RenderNumber( x+77.f, y+8.f, m_SkillPoint, 1.f );
-#else // KJH_ADD_SKILLICON_RENEWAL
-	// 기본색깔 설정
-	float a = 1.f,r = 1.f,g = 0.f,b = 0.f;
-	float x,y,Width,Height;
 
-	int CursedTempleCurSkillType = Hero->m_CursedTempleCurSkill;
-
-    int MaxKillCount = SkillAttribute[CursedTempleCurSkillType].KillCount;
-    
-    if( m_SkillPoint >= MaxKillCount )
-	{
-		g = b = 1.f;	// 흰색
-	}
-	else
-	{
-		g = b = 0.f;	// 빨간색
-	}
-
-	// 블렌딩효과 적용
-
-	EnableAlphaTest();
-	glColor4f ( 1.f, 1.f, 1.f, m_Alph );
-
-	x = 512.f; y = 232.f-53.f; Width=128.f; Height=53.f; 
-	RenderBitmap ( IMAGE_CURSEDTEMPLESYSTEM_SKILLFRAME, x, y, Width, Height, 0.f, 0.f, Width/128.f, Height/64.f );
-
-    //  스킬 아이콘.
-	x = 512.f+28; y = 258.f-55.f; Width = 18; Height = 24;
-    glColor4f( r, g, b, m_Alph );
-	float u = ((6+(CursedTempleCurSkillType-210)*32))/256.f;
-	float v = 111/256.f;
-	RenderBitmap ( BITMAP_SKILL_INTERFACE+1, x, y, Width, Height, u, v, Width/256.f, (Height-1.f)/256.f );
-
-	glColor4f ( 0.9f, 0.4f, 0.1f, m_Alph );
-    RenderNumber( x+55.f, y+8.f, MaxKillCount, 1.f );
-
-	glColor4f ( 1.f, 1.f, 1.f, m_Alph );
-    RenderNumber( x+77.f, y+8.f, m_SkillPoint, 1.f );
-
-	glColor4f ( 1.f, 1.f, 1.f, 1.f );
-	DisableAlphaBlend();
-#endif // KJH_ADD_SKILLICON_RENEWAL
 
 	x = 512.f+50; y = 201.f;
 	m_Button[CURSEDTEMPLERESULT_SKILLUP].SetPos( x, y );

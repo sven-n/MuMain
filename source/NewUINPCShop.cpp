@@ -1,5 +1,4 @@
 // NewUINPCShop.cpp: implementation of the CNewUINPCShop class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -14,10 +13,6 @@
 #endif //LDK_ADD_GAMBLE_SYSTEM
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUINPCShop::CNewUINPCShop() 
 { 
@@ -41,11 +36,11 @@ void SEASON3B::CNewUINPCShop::Init()
 
 #ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 	m_bIsNPCShopOpen = false;
-#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM			// 디파인 정리할때 지워야 하는 부분
+#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 #ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
 	m_bFirstOpen = false;
 #endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM		// 디파인 정리할때 지워야 하는 부분
+#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 
 	m_dwStandbyItemKey = 0;
 
@@ -71,9 +66,7 @@ bool SEASON3B::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	if(m_pNewInventoryCtrl)
 	{
-		// 상점은 Lock 걸어놓고 사용해야 한다.
 		m_pNewInventoryCtrl->LockInventory();
-		// 툴팁 타입은 상점으로 해야한다.
 		m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_NPC_SHOP);
 	}
 
@@ -116,8 +109,7 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 			return false;
 		}
 		
-		// 상점 인벤토리 마우스이벤트 처리
-		if(InventoryProcess() == true)	// 처리가 완료 되었다면
+		if(InventoryProcess() == true)
 		{
 			return false;
 		}
@@ -126,12 +118,7 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 		{
 			ITEM* pItem = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
 
-			// 아이템이 선택되어있고, 마우스 왼쪽버튼 Release
-#ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 			if((m_bIsNPCShopOpen == true) && (pItem) && (SEASON3B::IsRelease(VK_LBUTTON)))
-#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
-			if(pItem && SEASON3B::IsRelease(VK_LBUTTON))
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 			{
 				int iIndex = (pItem->y * m_pNewInventoryCtrl->GetNumberOfColumn()) + pItem->x;
 #ifdef LDK_ADD_GAMBLE_SYSTEM
@@ -140,11 +127,9 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 
 #ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
 #ifdef ADD_PCROOM_POINT_SYSTEM				
-				// PC방 포인트 상점에서 구입시는 확인창을 뛰움.
 				CPCRoomPtSys& rPCRoomPtSys = CPCRoomPtSys::Instance();
 				if(rPCRoomPtSys.IsPCRoomPointShopMode())
 				{
-					// 아이템 위치 저장.
 					rPCRoomPtSys.SetBuyItemPos(iIndex);
 					g_pNPCShop->SetStandbyItemKey(pItem->Key);
 					
@@ -156,7 +141,6 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 #endif //ADD_PCROOM_POINT_SYSTEM
 #endif // KJH_DEL_PC_ROOM_SYSTEM
 #ifdef LDK_ADD_GAMBLE_SYSTEM
-				// 겜블 상점 구입 확인창.	
 				if( _gambleSys.IsGambleShop() )
 				{
 					_gambleSys.SetBuyItemInfo(iIndex, ItemValue(pItem, 0));
@@ -169,54 +153,19 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 				else
 #endif //LDK_ADD_GAMBLE_SYSTEM
 				{
-					// 상점 물품 사기 	
-					if(BuyCost == 0)	// BuyCost 전역변수
+					if(BuyCost == 0)
 					{
-#ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 						SendRequestBuy(iIndex, ItemValue(pItem, 0));
-#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM					// 디파인 정리할때 지워야 하는 부분
-#ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-						// 상점이 처음 열리고 마우스 왼쪽버튼을 Release 하고 나서야 NPC상점을 이용할 수 있다. 
-#ifdef KJH_FIX_DOUBLECLICK_BUY_ITEM
-						if( m_bFirstOpen == false )
-						{
-							SendRequestBuy(iIndex, ItemValue(pItem, 0));
-						}
-
-						if( SEASON3B::IsRelease(VK_LBUTTON) )
-						{
-							m_bFirstOpen = false;
-						}
-#else // KJH_FIX_DOUBLECLICK_BUY_ITEM
-						if( m_bFirstOpen == false )
-						{
-							SendRequestBuy(iIndex, ItemValue(pItem, 0));
-						}
-						else
-						{
-							if( SEASON3B::IsRelease(VK_LBUTTON) )
-							{
-								m_bFirstOpen = false;
-								return false;
-							}
-						}
-#endif // KJH_FIX_DOUBLECLICK_BUY_ITEM
-#else // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-						SendRequestBuy(iIndex, ItemValue(pItem, 0));
-#endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM				// 디파인 정리할때 지워야 하는 부분
 					}	
 
 					return false;
 				}
 			}
-#ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 			else if(SEASON3B::IsRelease(VK_LBUTTON))
 			{
 				m_bIsNPCShopOpen = true;
 				return false;
 			}
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 			else if(SEASON3B::IsPress(VK_LBUTTON))
 			{
 				return false;
@@ -224,8 +173,7 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 		}
 	}
 
-	// 버튼 마우스이벤트 처리
-	if(BtnProcess() == true)	// 처리가 완료 되었다면
+	if(BtnProcess() == true)
 	{
 		return false;
 	}
@@ -262,10 +210,8 @@ bool SEASON3B::CNewUINPCShop::UpdateKeyEvent()
 		return false;
 	}
 
-	else if(SEASON3B::IsPress('L'))	// 수리 단축키.
+	else if(SEASON3B::IsPress('L'))
     {
-        //  상점에서 수리 단축키.
-		// 수리가능한 상점이면서 픽크된 아이템이 없을 시
 		if(m_bRepairShop && CNewUIInventoryCtrl::GetPickedItem() == NULL )	
         {
 			ToggleState();
@@ -308,15 +254,10 @@ bool SEASON3B::CNewUINPCShop::Update()
 bool SEASON3B::CNewUINPCShop::Render()
 {
 	EnableAlphaTest();
-
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	RenderFrame();
-
 	RenderTexts();
-
 	RenderButton();
-
 	RenderRepairMoney();
 
 	if(m_pNewInventoryCtrl)
@@ -325,7 +266,6 @@ bool SEASON3B::CNewUINPCShop::Render()
 	}
 
 	DisableAlphaBlend();
-	
 	return true;
 }
 
@@ -365,13 +305,10 @@ void SEASON3B::CNewUINPCShop::RenderRepairMoney()
 	if(m_bRepairShop)
 	{
 		RenderImage(IMAGE_NPCSHOP_REPAIR_MONEY, m_Pos.x+10, m_Pos.y+355, 170.f, 24.f);
-
 		g_pRenderText->SetBgColor(255, 255, 255, 0);
 		g_pRenderText->SetTextColor(255, 220, 150, 255);
-		
 		unicode::t_char strText[256];
         ConvertGold(AllRepairGold, strText);
-
 		g_pRenderText->SetFont(g_hFontBold);
 		g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+362, GlobalText[239]);
         g_pRenderText->SetTextColor(getGoldColor(AllRepairGold));
@@ -392,7 +329,6 @@ void SEASON3B::CNewUINPCShop::LoadImages()
 	LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_NPCSHOP_RIGHT, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_NPCSHOP_BOTTOM, GL_LINEAR);
 	LoadBitmap("Interface\\newui_repair_00.tga", IMAGE_NPCSHOP_BTN_REPAIR, GL_LINEAR);
-
 	LoadBitmap("Interface\\newui_item_money2.tga", IMAGE_NPCSHOP_REPAIR_MONEY, GL_LINEAR);
 }
 
@@ -404,7 +340,6 @@ void SEASON3B::CNewUINPCShop::UnloadImages()
 	DeleteBitmap(IMAGE_NPCSHOP_LEFT);
 	DeleteBitmap(IMAGE_NPCSHOP_BOTTOM);
 	DeleteBitmap(IMAGE_NPCSHOP_BTN_REPAIR);
-
 	DeleteBitmap(IMAGE_NPCSHOP_REPAIR_MONEY);
 }
 
@@ -451,10 +386,8 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 	{
 #ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
 #ifdef ADD_PCROOM_POINT_SYSTEM
-		// PC방 포인트 상점에 팔 수 없다. 
 		if (CPCRoomPtSys::Instance().IsPCRoomPointShopMode())
 		{
-			// 2329 "아이템을 판매 할 수 없습니다."
 			g_pChatListBox->AddText("", GlobalText[2329], SEASON3B::TYPE_ERROR_MESSAGE);
 			
 			return true;
@@ -553,8 +486,6 @@ bool SEASON3B::CNewUINPCShop::BtnProcess()
 	return false;
 }
 
-#ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM_EX
-
 void SEASON3B::CNewUINPCShop::OpenningProcess()
 {
 	if( SEASON3B::IsRepeat(VK_LBUTTON))
@@ -566,23 +497,6 @@ void SEASON3B::CNewUINPCShop::OpenningProcess()
 		m_bIsNPCShopOpen = true;
 	}
 }
-#else KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM_EX
-#ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
-// 상점을 열 때 프로세스
-void SEASON3B::CNewUINPCShop::OpenningProcess()
-{
-	m_bIsNPCShopOpen = false;		// 초기화(상점이 열리고 나서 true)
-}
-#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM			// 디파인 정리할때 지워야 하는 부분
-#ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-// 상점을 열 때 프로세스
-void SEASON3B::CNewUINPCShop::OpenningProcess()
-{
-	m_bFirstOpen = true;
-}
-#endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM		// 디파인 정리할때 지워야 하는 부분
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM_EX
 
 void SEASON3B::CNewUINPCShop::ClosingProcess()
 {
@@ -593,13 +507,7 @@ void SEASON3B::CNewUINPCShop::ClosingProcess()
 	m_bRepairShop = false;
 	m_dwStandbyItemKey = 0;
 
-#ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 	m_bIsNPCShopOpen = false;
-#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM		// 디파인 정리할때 지워야 하는 부분
-#ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-	m_bFirstOpen = false;
-#endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM		// 디파인 정리할때 지워야 하는 부분
 
 	if(m_pNewInventoryCtrl)
 	{

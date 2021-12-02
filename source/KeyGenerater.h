@@ -17,14 +17,10 @@ public:
 	CKeyGenerater();
 	virtual ~CKeyGenerater();
 
-	// 1. 키 값 생성 관련
 #ifdef USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
-	// 1-1. 초기의 시드값을 생성한다.
 	DWORD		GenerateSeedValue();
 #endif // USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
-	// 1-2. 키값으로 다음 키 값을 생성한다.
 	DWORD		GenerateKeyValue(DWORD dwKeyValue);
-	// 1-3. 입력된 키 값다 다음 키 값을 비교한다. (서버 전용)
 	bool		CheckKeyValue(DWORD* dwOldKeyValue, DWORD dwReceiveKeyValue);
 
 #ifdef USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE

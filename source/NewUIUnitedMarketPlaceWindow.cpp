@@ -1,5 +1,4 @@
 // NewUIUnitedMarketPlaceWindow.cpp: implementation of the CNewUIUnitedMarketPlaceWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "NewUIUnitedMarketPlaceWindow.h"
@@ -19,10 +18,6 @@
 #ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIUnitedMarketPlaceWindow::CNewUIUnitedMarketPlaceWindow()
 {
@@ -55,11 +50,9 @@ bool CNewUIUnitedMarketPlaceWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRen
 
 	InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 230, GlobalText[3016]);
 
-	// 닫기 버튼.
 	m_BtnClose.ChangeButtonImgState(true, IMAGE_UNITEDMARKETPLACEWINDOW_BTN_CLOSE);
 	m_BtnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
 	m_BtnClose.ChangeToolTipText(GlobalText[1002], true);
-		
 
 	Show(false);
 
@@ -101,11 +94,9 @@ void CNewUIUnitedMarketPlaceWindow::SetPos(int x, int y)
 
 bool CNewUIUnitedMarketPlaceWindow::UpdateMouseEvent()
 {
-	//. 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 		return false;
 
@@ -196,27 +187,22 @@ bool CNewUIUnitedMarketPlaceWindow::Render()
 	{
 		m_BtnEnter.Lock();
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-#ifdef YDG_FIX_DOPPELGANGER_BUTTON_COLOR
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(100, 100, 100, 255));
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_OVER, RGBA(100, 100, 100, 255));
-#endif	// YDG_FIX_DOPPELGANGER_BUTTON_COLOR
 		m_BtnEnter.ChangeTextColor(RGBA(100, 100, 100, 255));
 	}
 	else
 	{
 		m_BtnEnter.UnLock();
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-#ifdef YDG_FIX_DOPPELGANGER_BUTTON_COLOR
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_OVER, RGBA(255, 255, 255, 255));
-#endif	// YDG_FIX_DOPPELGANGER_BUTTON_COLOR
 		m_BtnEnter.ChangeTextColor(RGBA(255, 255, 255, 255));
 	}
 	m_BtnEnter.Render();
 	m_BtnClose.Render();
 
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -287,8 +273,7 @@ void CNewUIUnitedMarketPlaceWindow::RenderFrame()
 	g_pRenderText->SetTextColor(220, 220, 220, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-	// 창 제목 표시
-	unicode::_sprintf(szText, "%s", GlobalText[3000]);	// 줄리아
+	unicode::_sprintf(szText, "%s", GlobalText[3000]);
 	g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -296,18 +281,16 @@ bool CNewUIUnitedMarketPlaceWindow::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
 
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
 	}
 
-	//. 입장 버튼 이벤트
 	if (m_BtnEnter.UpdateMouseEvent() == true)
 	{
 #ifdef LDS_FIX_DISABLEALLKEYEVENT_WHENMAPLOADING
 #ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		LoadingWorld = 200;				// 로딩 최대 시간을 약 8초정도로 설정
+		LoadingWorld = 200;
 		g_bReponsedMoveMapFromServer = FALSE;
 #else // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 		LoadingWorld = 9999999;

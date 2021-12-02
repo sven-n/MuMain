@@ -33,9 +33,6 @@ namespace SEASON3B
 		INPUTBOX_TEXTLIMIT = 8,
 	};
 
-	//////////////////////////////////////////////////////////////////////////
-
-	// 숫자나 문자 입력처리 되는 메세지박스
 	class CNewUITextInputMsgBox : public CNewUIMessageBoxBase
 	{
 		enum
@@ -76,7 +73,6 @@ namespace SEASON3B
 
 		DWORD GetMsgBoxType();
 
-		// InputBox 랩핑 함수
 		void GetInputBoxText(unicode::t_char* strText);
 		void SetInputBoxOption(int iOption);
 		void SetInputBoxPosition(int x, int y);
@@ -108,8 +104,6 @@ namespace SEASON3B
 #endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 	};
 
-	//////////////////////////////////////////////////////////////////////////
-	
 	class CNewUIKeyPadButton : public CNewUIMessageBoxButton
 	{
 	public:
@@ -122,8 +116,6 @@ namespace SEASON3B
 		void Render();
 	};
 
-	//////////////////////////////////////////////////////////////////////////
-	// 비밀번호나 주민등록번호 입력받는 키패드 메세지박스
 	class CNewUIKeyPadMsgBox : public CNewUIMessageBoxBase
 	{	
 		enum
@@ -166,11 +158,9 @@ namespace SEASON3B
 		int GetInputLimit();
 		int GetInputSize();
 		void ClearInput();
-		// 유니코드 아니여야 함!
 		const char* GetInputText();
 		void SetCheckInputText(const char* strInput);
 		bool IsCheckInput();
-		// 입력된 번호들이 모두 같은 번호인가?
 		bool IsAllSameNumber();
 
 		void SetStoragePassword(WORD wPassword);
@@ -194,36 +184,19 @@ namespace SEASON3B
 
 		DWORD m_dwType;
 
-		// 키패드 정보들
 		int m_iInputLimit;
 		int m_iKeyPadMapping[MAX_KEYPADINPUT];
-
-		// 키패드 입력정보들(유니코드 아니여야 함!)
-		// 서버와 주고 받는 데이타 타입이 문자 타입임 ㅡㅡ;
-#ifdef LDK_MOD_PASSWORD_LENGTH_20
-		//글로벌 포털 
 		char m_strKeyPadInput[MAX_PASSWORD_SIZE+ 1];
-#else //LDK_MOD_PASSWORD_LENGTH_20
-		char m_strKeyPadInput[MAX_KEYPADINPUT + 1];
-#endif //LDK_MOD_PASSWORD_LENGTH_20
 		char m_strCheckKeyPadInput[MAX_KEYPADINPUT + 1];
 
-		// 비밀번호 임시로 저장해 놓는 변수
 		WORD m_wStoragePassword;
-
-		// 텍스트들
 		type_vector_msgdata m_MsgTextList;
-
-		// 버튼들
 		CNewUIKeyPadButton m_BtnKeyPad[MAX_KEYPADINPUT];
 		CNewUIDeleteKeyPadButton m_BtnDeleteKeyPad;
 		CNewUIMessageBoxButton m_BtnOk;
 		CNewUIMessageBoxButton m_BtnCancel;
 	};
 
-	//////////////////////////////////////////////////////////////////////////
-
-	// 열매 사용에서 생성, 감소, 취소 버튼있는 메세지 박스
 	class CUseFruitCheckMsgBox : public CNewUIMessageBoxBase, public INewUI3DRenderObj
 	{
 		enum
@@ -272,9 +245,6 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnCancel;
 	};
 
-	//////////////////////////////////////////////////////////////////////////
-
-	// 보석 통합 해체 메세지박스
 	class CGemIntegrationMsgBox : public CNewUIMessageBoxBase
 	{
 		enum
@@ -315,7 +285,6 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnCancel;
 	};
 	
-	// 보석 통합 메세지박스
 	class CGemIntegrationUnityMsgBox : public CNewUIMessageBoxBase
 	{
 		enum
@@ -377,7 +346,6 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnCancel;
 	};
 
-	// 보석 해체 메세지박스
 	class CGemIntegrationDisjointMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -419,7 +387,6 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnCancel;
 	};
 
-	// 시스템 메뉴 메세지박스
 	class CSystemMenuMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -445,14 +412,13 @@ namespace SEASON3B
 		void RenderButtons();
 
 		// button
-		CNewUIMessageBoxButton m_BtnGameOver;			// 게임종료
-		CNewUIMessageBoxButton m_BtnChooseServer;		// 서버선택
-		CNewUIMessageBoxButton m_BtnChooseCharacter;	// 캐릭터선택
-		CNewUIMessageBoxButton m_BtnOption;				// 옵션
-		CNewUIMessageBoxButton m_BtnCancel;				// 취소
+		CNewUIMessageBoxButton m_BtnGameOver;
+		CNewUIMessageBoxButton m_BtnChooseServer;
+		CNewUIMessageBoxButton m_BtnChooseCharacter;
+		CNewUIMessageBoxButton m_BtnOption;
+		CNewUIMessageBoxButton m_BtnCancel;	
 	};
 
-	// 블러드캐슬 결과 메세지박스
 	class CBloodCastleResultMsgBox : public CNewUIMessageBoxBase
 	{
 		enum
@@ -477,7 +443,6 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnOk;
 	};
 
-	// 악마의광장 랭킹 메세지박스
 	class CDevilSquareRankMsgBox : public CNewUIMessageBoxBase
 	{
 		enum
@@ -566,7 +531,6 @@ namespace SEASON3B
 	};
 
 
-	// 조련사 메인 메뉴
 	class CTrainerMenuMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -600,7 +564,6 @@ namespace SEASON3B
 		int m_iMiddleCount;
 	};
 
-	// 조련사 회복 메뉴
 	class CTrainerRecoverMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -635,7 +598,6 @@ namespace SEASON3B
 	};
 
 
-	// 엘피스 메뉴 (제련석)
 	class CElpisMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -708,7 +670,6 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnEnd;
 	};
 	
-	// Progress바가 있는 메세지박스
 	class CProgressMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -737,12 +698,11 @@ namespace SEASON3B
 	private:
 		type_vector_msgdata m_MsgDataList;
 		
-		DWORD m_dwStartTime;		// 시작된 시간
-		DWORD m_dwEndTime;			// 종료될 시간
-		DWORD m_dwElapseTime;		// 경과 시간
+		DWORD m_dwStartTime;
+		DWORD m_dwEndTime;
+		DWORD m_dwElapseTime;
 	};
 
-	// 환영사원 전용 Progress바 메세지박스
 	class CCursedTempleProgressMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -776,14 +736,13 @@ namespace SEASON3B
 	private:
 		type_vector_msgdata m_MsgDataList;
 		
-		DWORD m_dwStartTime;		// 시작된 시간
-		DWORD m_dwEndTime;			// 종료될 시간
-		DWORD m_dwElapseTime;		// 경과 시간
+		DWORD m_dwStartTime;
+		DWORD m_dwEndTime;
+		DWORD m_dwElapseTime;
 
 		DWORD m_dwNpcIndex;
 	};
 
-	// 결투신청 메세지박스
 	class CDuelMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -813,7 +772,6 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnCancel;
 	};
 #ifdef YDG_ADD_NEW_DUEL_UI
-	// 결투결과 메세지박스
 	class CDuelResultMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -973,7 +931,6 @@ namespace SEASON3B
 	};
 #endif // LEM_ADD_LUCKYITEM
 #ifdef ADD_SOCKET_MIX
-	// 시드마스터 메인 메뉴
 	class CSeedMasterMenuMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -1007,7 +964,6 @@ namespace SEASON3B
 		int m_iMiddleCount;
 	};
 
-	// 시드연구가 메인 메뉴
 	class CSeedInvestigatorMenuMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -1077,7 +1033,6 @@ namespace SEASON3B
 #endif	// PSW_ADD_RESET_CHARACTER_POINT
 	
 #ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-	// 델가도(7주년기념이벤트) 메인메뉴
 	class CDelgardoMainMenuMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -1113,10 +1068,6 @@ namespace SEASON3B
 #endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 
 	
-	//////////////////////////////////////////////////////////////////////////
-	///////////////////////// Custom MsgBox Layout ///////////////////////////
-	//////////////////////////////////////////////////////////////////////////
-	// 거래 젠 입력 처리 메세지박스
 	class CTradeZenMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
 	public:
@@ -1128,7 +1079,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner);
 	};
 
-	// 젠 입금 처리 메세지박스
 	class CZenReceiptMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
 	public:
@@ -1140,9 +1090,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 	};
 
-	//////////////////////////////////////////////////////////////////////////
-
-	// 젠 출금 처리 메세지박스
 	class CZenPaymentMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
 	public:
@@ -1154,7 +1101,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 	};
 
-	// 개인상점 아이템 판매가격 입력 메세지박스
 	class CPersonalShopItemValueMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
 	public:
@@ -1166,7 +1112,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 	};
 
-	// 개인 상점명 입력 메세지박스
 	class CPersonalShopNameMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
 		enum
@@ -1196,7 +1141,6 @@ namespace SEASON3B
 
 	//////////////////////////////////////////////////////////////////////////
 #ifdef LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
-	// 글로벌 포털용 창고 비번 확인용 패스워드창
 	class CStorageLockMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
 	public:
@@ -1209,7 +1153,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 	};
 
-	// 창고 잠금해제
 	class CStorageUnlockMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
 	public:
@@ -1220,8 +1163,6 @@ namespace SEASON3B
 
 #endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 
-	// 출금할 때 비밀번호 키패드 메세지박스
-	// 창고에서 인벤토리로 아이템 옮길때 비밀번호 물어보는 키패드 메세지 박스
 	class CPasswordKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
 	{
 	public:	
@@ -1230,7 +1171,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);		
 	};
 
-	// 창고 잠금 상태 키패드 메세지박스
 	class CStorageLockKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
 	{
 	public:
@@ -1239,7 +1179,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);		
 	};
 
-	// 창고 잠금 확인 키패드 메세지박스
 	class CStorageLockCheckKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
 	{
 	public:
@@ -1248,7 +1187,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 	};
 
-	// 창고 잠금 최종 주민번호 키패드 메세지박스
 	class CStorageLockFinalKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
 	{
 	public:
@@ -1257,7 +1195,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 	};
 
-	// 창고 잠금해제 상태 키패드 메세지박스
 	class CStorageUnlockKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
 	{
 	public:
@@ -1266,161 +1203,138 @@ namespace SEASON3B
 		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);		
 	};
 
-	// 열매 사용에서 생성, 감소, 취소 버튼있는 메세지 박스
 	class CUseFruitCheckMsgBoxLayout : public TMsgBoxLayout<CUseFruitCheckMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 보석 통합 해체 메세지박스
 	class CGemIntegrationMsgBoxLayout : public TMsgBoxLayout<CGemIntegrationMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 보석 통합 메세지박스
 	class CGemIntegrationUnityMsgBoxLayout : public TMsgBoxLayout<CGemIntegrationUnityMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 보석 해체 메세지박스
 	class CGemIntegrationDisjointMsgBoxLayout : public TMsgBoxLayout<CGemIntegrationDisjointMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 블러드캐슬 결과 메세지박스
 	class CBloodCastleResultMsgBoxLayout : public TMsgBoxLayout<CBloodCastleResultMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 악마의 광장 랭킹 메세지박스
 	class CDevilSquareRankMsgBoxLayout : public TMsgBoxLayout<CDevilSquareRankMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 카오스 캐슬 결과 메세지박스
 	class CChaosCastleResultMsgBoxLayout : public TMsgBoxLayout<CChaosCastleResultMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 노리아에 있는 카오스 조합 메뉴 메세지박스
 	class CChaosMixMenuMsgBoxLayout : public TMsgBoxLayout<CChaosMixMenuMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 조련사 메뉴
 	class CTrainerMenuMsgBoxLayout : public TMsgBoxLayout<CTrainerMenuMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 조련사 회복 메뉴
 	class CTrainerRecoverMsgBoxLayout : public TMsgBoxLayout<CTrainerRecoverMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 엘피스 제련 메뉴
 	class CElpisMsgBoxLayout : public TMsgBoxLayout<CElpisMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 대화 메세지박스
 	class CDialogMsgBoxLayout : public TMsgBoxLayout<CDialogMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 왕관 스위치 땜
 	class CCrownSwitchPopLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 왕관 스위치 누름
 	class CCrownSwitchPushLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 왕관 스위치 다른사람이 누르고 있음
 	class CCrownSwitchOtherPushLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 직인 등록 시작
 	class CSealRegisterStartLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 직인 등록 성공
 	class CSealRegisterSuccessLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 직인 등록 실패
 	class CSealRegisterFailLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 다른 사람이 직인 등록 중
 	class CSealRegisterOtherLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 다른 진영이 직인 등록 중
 	class CSealRegisterOtherCampLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 왕관 방어막 해제
 	class CCrownDefenseRemoveLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 왕관 방어막 생성
 	class CCrownDefenseCreateLayout : public TMsgBoxLayout<CProgressMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	// 환영사원 성물 획득 프로그레스바
 	class CCursedTempleHolicItemGetLayout : public TMsgBoxLayout<CCursedTempleProgressMsgBox>
 	{
 	public:
@@ -1432,15 +1346,13 @@ namespace SEASON3B
 	public:
 		bool SetLayout();
 	};
-	
-	// 시스템 메뉴 메세지박스
+
 	class CSystemMenuMsgBoxLayout : public TMsgBoxLayout<CSystemMenuMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 
-	//길드해체시 주민등록 입력
 	class CGuildBreakPasswordMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
 	public:
@@ -1459,14 +1371,12 @@ namespace SEASON3B
 		bool SetLayout();
 	};
 
-	// 결투신청 메세지박스
 	class CDuelMsgBoxLayout : public TMsgBoxLayout<CDuelMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
 #ifdef YDG_ADD_NEW_DUEL_UI
-	// 결투결과 메세지박스
 	class CDuelResultMsgBoxLayout : public TMsgBoxLayout<CDuelResultMsgBox>
 	{
 	public:
@@ -1483,13 +1393,11 @@ namespace SEASON3B
 #endif // CSK_EVENT_CHERRYBLOSSOM
 
 #ifdef ADD_SOCKET_MIX
-	// 시드마스터 메뉴
 	class CSeedMasterMenuMsgBoxLayout : public TMsgBoxLayout<CSeedMasterMenuMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
-	// 시드연구가 메뉴
 	class CSeedInvestigatorMenuMsgBoxLayout : public TMsgBoxLayout<CSeedInvestigatorMenuMsgBox>
 	{
 	public:
@@ -1507,7 +1415,6 @@ namespace SEASON3B
 #endif //PSW_ADD_RESET_CHARACTER_POINT
 
 #ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-	// 델가도(7주년기념이벤트) 메인메뉴
 	class CDelgardoMainMenuMsgBoxLayout : public TMsgBoxLayout<CDelgardoMainMenuMsgBox>
 	{
 	public:

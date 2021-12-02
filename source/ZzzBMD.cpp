@@ -710,7 +710,6 @@ void BMD::AnimationTransformOnlySelf( vec3_t *arrOutSetfAllBonePositions,
 			LInterpolationF( fAnimationFrame, fAnimationFrameStart, fAnimationFrameEnd, fWeight );
 		}
 
-		// 현재 설정된 AnimationFrame을 가져온다.
 		Animation( arrBonesTMLocal, 
 					fAnimationFrame,
 					fPiriorAnimationFrame,
@@ -718,21 +717,16 @@ void BMD::AnimationTransformOnlySelf( vec3_t *arrOutSetfAllBonePositions,
 					v3RootAngle, Temp, false, true );
 	}
 	
-	// ㄹ. 자체 에니메이션 * SCALE * n번 본의 에니메이션 + n번 본의 위치
 	vec3_t	v3RelatePos;
 	Vector(1.0f, 1.0f, 1.0f, v3RelatePos);
 	for( int i_ = 0; i_ < NumBones; ++i_ )
 	{				
-		// ㄹ_. Out에 위치값 갱신.
  		Vector( arrBonesTMLocal[i_][0][3], 
  			arrBonesTMLocal[i_][1][3],
  			arrBonesTMLocal[i_][2][3],
  			arrOutSetfAllBonePositions[i_] );
 	}
 	
-	// ㅁ. Vertex로 결과 갱신.  
-// 	OBB_t		OBB;
-// 	Transform(arrBonesTMLocal, Temp, Temp, &OBB, false);
 	delete [] arrBonesTMLocal;
 }
 
@@ -1620,7 +1614,6 @@ void BMD::RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFl
 	if(m->NumTriangles == 0) return;
 	float Wave = (int)WorldTime%10000 * 0.0001f;
 
-	//텍스쳐
 	int Texture = IndexTexture[m->Texture];
 	if(Texture == BITMAP_HIDE)
 		return;
@@ -1690,9 +1683,6 @@ void BMD::RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFl
               (RenderFlag&RENDER_CHROME4)==RENDER_CHROME4   ||
               (RenderFlag&RENDER_CHROME5)==RENDER_CHROME5   ||
 				(RenderFlag&RENDER_CHROME7)==RENDER_CHROME7   ||
-#ifdef PJH_NEW_CHROME
-				(RenderFlag&RENDER_CHROME8)==RENDER_CHROME8   ||
-#endif // PJH_NEW_CHROME
               (RenderFlag&RENDER_METAL)==RENDER_METAL       ||
               (RenderFlag&RENDER_OIL)==RENDER_OIL
             )
@@ -1708,12 +1698,6 @@ void BMD::RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFl
         {
             Render = RENDER_CHROME4;
         }
-#ifdef PJH_NEW_CHROME
-        if ( (RenderFlag&RENDER_CHROME8)==RENDER_CHROME8 )
-        {
-            Render = RENDER_CHROME8;
-        }
-#endif //PJH_NEW_CHROME
         float Wave2 = (int)WorldTime%5000 * 0.00024f - 0.4f;
 
         vec3_t L = { (float)(cos(WorldTime*0.001f)), (float)(sin(WorldTime*0.002f)), 1.f };
@@ -1739,15 +1723,6 @@ void BMD::RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFl
 				g_chrome[j][1] -= Normal[2]*0.5f + Wave*3.f;
 				g_chrome[j][0] += Normal[1]*0.5f + L[1]*3.f;
             }
-#ifdef PJH_NEW_CHROME
-            else if((RenderFlag&RENDER_CHROME8)==RENDER_CHROME8)
-            {
-                g_chrome[j][0] = DotProduct ( Normal, L );
-                g_chrome[j][1] = 1.f-DotProduct ( Normal, L );
-				g_chrome[j][1] += Normal[2]*0.5f + Wave*3.f;
-				g_chrome[j][0] += Normal[1]*0.5f + L[1]*3.f;
-            }
-#endif //#ifdef PJH_NEW_CHROME
             else if((RenderFlag&RENDER_CHROME5)==RENDER_CHROME5)
             {
                 Vector ( 0.1f, -0.23f, 0.22f, LightVector2 );
@@ -1783,9 +1758,6 @@ void BMD::RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFl
 			|| (RenderFlag&RENDER_CHROME4)==RENDER_CHROME4
 			|| (RenderFlag&RENDER_CHROME5)==RENDER_CHROME5
 			|| (RenderFlag&RENDER_CHROME7)==RENDER_CHROME7 
-#ifdef PJH_NEW_CHROME
-			|| (RenderFlag&RENDER_CHROME8)==RENDER_CHROME8 
-#endif //PJH_NEW_CHROME
 		   )
         {
 			if ( Alpha < 0.99f)
@@ -1832,12 +1804,6 @@ void BMD::RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFl
         {
 			BindTexture(BITMAP_CHROME2);
         }
-#ifdef PJH_NEW_CHROME
-        else if((RenderFlag&RENDER_CHROME8)==RENDER_CHROME8 && MeshTexture==-1)
-        {
-			BindTexture(BITMAP_CHROME9);
-        }
-#endif //PJH_NEW_CHROME
         else if((RenderFlag&RENDER_CHROME)==RENDER_CHROME && MeshTexture==-1)
 			BindTexture(BITMAP_CHROME);
 		else if((RenderFlag&RENDER_METAL)==RENDER_METAL && MeshTexture==-1)
@@ -1910,11 +1876,6 @@ void BMD::RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFl
     	Render = RENDER_TEXTURE;
 	}
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int iFrame = MoveSceneFrame;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	
 	// ver 1.0 (triangle)
 	glBegin(GL_TRIANGLES);
 	for(int j=0;j<m->NumTriangles;j++)
@@ -1963,16 +1924,7 @@ void BMD::RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFl
 				float vPos[3];
 				float fParam = ( float)( ( int)WorldTime + vi * 931)*0.007f;
 				float fSin = sinf( fParam);
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				float fCos = cosf( fParam);
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
 				int ni = tp->NormalIndex[k];
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				Normal_t *np = &m->Normals[ni];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 				float *Normal = NormalTransform[i][ni];
 				for ( int iCoord = 0; iCoord < 3; ++iCoord)
 				{
@@ -2059,11 +2011,11 @@ void BMD::RenderMeshEffect ( int i, int iType, int iSubType, vec3_t Angle, VOID*
                     Vector ( 0.2f, 0.2f, 0.2f, Light );
                     if ( (rand()%5)==0 )
                     {
-                        CreateEffect ( MODEL_GATE+1, VertexTransform[i][vi], angle, Light, 2 );//작은거.
+                        CreateEffect ( MODEL_GATE+1, VertexTransform[i][vi], angle, Light, 2 );
                     }
                     if ( (rand()%10)==0 )
                     {
-                        CreateEffect ( MODEL_GATE, VertexTransform[i][vi], angle, Light, 2 );//큰거.
+                        CreateEffect ( MODEL_GATE, VertexTransform[i][vi], angle, Light, 2 );
                     }
                 }
                 else if ( iSubType==0 )
@@ -2071,11 +2023,11 @@ void BMD::RenderMeshEffect ( int i, int iType, int iSubType, vec3_t Angle, VOID*
                     Vector ( 0.2f, 0.2f, 0.2f, Light );
                     if ( (rand()%12)==0 )
                     {
-                        CreateEffect ( MODEL_GATE+1,VertexTransform[i][vi],angle,Light);//작은거.
+                        CreateEffect ( MODEL_GATE+1,VertexTransform[i][vi],angle,Light);
                     }
                     if ( (rand()%50)==0 )
                     {
-                        CreateEffect ( MODEL_GATE,VertexTransform[i][vi],angle,Light);//큰거.
+                        CreateEffect ( MODEL_GATE,VertexTransform[i][vi],angle,Light);
                     }
                 }
                 break;
@@ -2104,15 +2056,15 @@ void BMD::RenderMeshEffect ( int i, int iType, int iSubType, vec3_t Angle, VOID*
                 Vector ( 0.2f, 0.2f, 0.2f, Light );
                 if ( (rand()%12)==0 )
                 {
-                    CreateEffect ( MODEL_GATE_PART1+1,VertexTransform[i][vi],angle,Light);//작은거.
+                    CreateEffect ( MODEL_GATE_PART1+1,VertexTransform[i][vi],angle,Light);
                 }
                 if ( (rand()%40)==0 )
                 {
-                    CreateEffect ( MODEL_GATE_PART1,VertexTransform[i][vi],angle,Light);//큰거.
+                    CreateEffect ( MODEL_GATE_PART1,VertexTransform[i][vi],angle,Light);
                 }
                 if ( (rand()%40)==0 )
                 {
-                    CreateEffect ( MODEL_GATE_PART1+2,VertexTransform[i][vi],angle,Light);//큰거.
+                    CreateEffect ( MODEL_GATE_PART1+2,VertexTransform[i][vi],angle,Light);
                 }
                 break;
 			case MODEL_GOLEM_STONE:
@@ -2194,11 +2146,9 @@ void BMD::RenderBody(int Flag,float Alpha,int BlendMesh,float BlendMeshLight,flo
                 }
     		    RenderMesh(i,Flag,Alpha,iBlendMesh,BlendMeshLight,BlendMeshTexCoordU,BlendMeshTexCoordV,Texture);
 
-                //  그림자도 표시할 메쉬는 그림자를 표시한다.
                 BYTE shadowType = m->m_csTScript->getShadowMesh ();
                 if ( shadowType==SHADOW_RENDER_COLOR )
                 {
-                    //  그림자 찍는다.
 			        DisableAlphaBlend();
 		            if ( Alpha >= 0.99f )
 			            glColor3f( 0.f, 0.f, 0.f );
@@ -2210,8 +2160,7 @@ void BMD::RenderBody(int Flag,float Alpha,int BlendMesh,float BlendMeshLight,flo
                 }
                 else if ( shadowType==SHADOW_RENDER_TEXTURE )
                 {
-                    //  그림자 찍는다.
-			        DisableAlphaBlend();
+  			        DisableAlphaBlend();
 		            if ( Alpha >= 0.99f )
 			            glColor3f( 0.f, 0.f, 0.f );
 		            else
@@ -2249,10 +2198,6 @@ void BMD::RenderBodyAlternative( int iRndExtFlag, int iParam, int Flag,float Alp
 	{
 		if(i != HiddenMesh)
 		{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-         	Mesh_t *m = &Meshs[i];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			RenderMeshAlternative(iRndExtFlag, iParam, i,Flag,Alpha,BlendMesh,BlendMeshLight,BlendMeshTexCoordU,BlendMeshTexCoordV,Texture);
 		}
 	}
@@ -2267,7 +2212,6 @@ void BMD::RenderMeshTranslate(int i,int RenderFlag,float Alpha,int BlendMesh,flo
 	if(m->NumTriangles == 0) return;
 	float Wave = (int)WorldTime%10000 * 0.0001f;
 
-	//텍스쳐
 	int Texture = IndexTexture[m->Texture];
 	if(Texture == BITMAP_HIDE)
 		return;
@@ -2482,55 +2426,6 @@ void BMD::RenderMeshTranslate(int i,int RenderFlag,float Alpha,int BlendMesh,flo
 					break;
 				}
 			}
-// 테스트 코드 --->
-#if defined TEST_TYPE1 || defined TEST_TYPE2 || defined TEST_TYPE3 || defined TEST_TYPE4
-			if ( Render == RENDER_CHROME)
-			{
-				float vPos[3];
-#ifdef TEST_TYPE1
-				float fParam = ( float)( ( int)WorldTime + vi * 931)*0.007f;
-#endif
-#ifdef TEST_TYPE3
-				float fParam = ( float)( ( int)WorldTime + vi * 931)*0.007f;
-#endif
-#ifdef TEST_TYPE4
-				float fParam = ( float)( ( int)WorldTime + vi * 931)*0.007f;
-#endif
-#ifdef TEST_TYPE2
-				float fParam = ( float)( ( int)WorldTime + vi * 931)*0.001f;
-#endif
-				float fSin = sinf( fParam);
-				float fCos = cosf( fParam);
-
-#ifdef TEST_TYPE1
-				for ( int iCoord = 0; iCoord < 3; ++iCoord)
-				{
-					vPos[iCoord] = VertexTransform[i][vi][iCoord] + fSin*fTransformedSize*0.04f;
-				}
-#endif
-#ifdef TEST_TYPE3
-				int ni = tp->NormalIndex[k];
-				Normal_t *np = &m->Normals[ni];
-				float *Normal = NormalTransform[i][ni];
-				for ( int iCoord = 0; iCoord < 3; ++iCoord)
-				{
-					vPos[iCoord] = VertexTransform[i][vi][iCoord] + Normal[iCoord]*fSin*fTransformedSize*0.04f;
-					//vPos[iCoord] = VertexTransform[i][vi][iCoord] + Normal[iCoord]*(fSin+1.f)*fTransformedSize*0.02f;
-				}
-#endif
-#ifdef TEST_TYPE2
-				for ( int iCoord = 0; iCoord < 2; ++iCoord)
-				{
-					vPos[iCoord] = VertexTransform[i][vi][iCoord];
-				}
-				vPos[2] = VertexTransform[i][vi][2] + (fCos-.99f)*fTransformedSize*0.1f;
-#endif
-
-				glVertex3fv(vPos);
-			}
-			else
-#endif //defined TEST_TYPE1 || defined TEST_TYPE2 || defined TEST_TYPE3 || defined TEST_TYPE4
-// 테스트 코드 <---
 			{
 				VectorAdd(VertexTransform[i][vi],BodyOrigin,pos);
 				glVertex3fv(pos);
@@ -2556,10 +2451,6 @@ void BMD::RenderBodyTranslate(int Flag,float Alpha,int BlendMesh,float BlendMesh
 	{
 		if(i != HiddenMesh)
 		{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-         	Mesh_t *m = &Meshs[i];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			RenderMeshTranslate(i,Flag,Alpha,BlendMesh,BlendMeshLight,BlendMeshTexCoordU,BlendMeshTexCoordV,Texture);
 		}
 	}
@@ -2695,10 +2586,6 @@ void BMD::RenderBone(float (*BoneMatrix)[3][4])
 			if(Parent > 0)
 			{
 				float Scale = 1.f;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNINGggj
-         		Bone_t *p = &Bones[i];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 				float dx = bm->Position[CurrentAnimationFrame][0];
 				float dy = bm->Position[CurrentAnimationFrame][1];
 				float dz = bm->Position[CurrentAnimationFrame][2];
@@ -2733,10 +2620,6 @@ void BMD::RenderBone(float (*BoneMatrix)[3][4])
 	glDepthFunc(GL_LEQUAL);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// projection shadow
-///////////////////////////////////////////////////////////////////////////////
-
 void BlurShadow()
 {
 	for(int i=1;i<ShadowBufferHeight-1;i++)
@@ -2750,16 +2633,8 @@ void BlurShadow()
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// util
-///////////////////////////////////////////////////////////////////////////////
-
 void BMD::Release()
 {
-#ifndef LDS_FIX_MEMORYLEAK_BMDWHICHBONECOUNTZERO	// #ifndef 정리시 삭제.
-	if(NumBones == 0) return;
-#endif // LDS_FIX_MEMORYLEAK_BMDWHICHBONECOUNTZERO
-
 	for(int i=0;i<NumBones;i++)
 	{
        	Bone_t *b = &Bones[i];
@@ -2829,60 +2704,6 @@ void BMD::Release()
 
 }
 
-/*
-void EdgeTriangleIndex(int i,int Edge,int Index1,int Index2,Triangle_t *Tri,int Number)
-{
-		Triangle_t *Tri1 = &Tri[i];
-		if ( Tri1->EdgeTriangleIndex[Edge] != -1)
-		{
-			return;
-		}
-		int v1 = Tri1->VertexIndex[Index1];
-		int v2 = Tri1->VertexIndex[Index2];
-		for(int j=0;j<Number;j++)
-		{
-			if(i!=j)
-			{
-				Triangle_t *Tri2 = &Tri[j];
-				for(int k1=0;k1<3;k1++)
-				{
-					int k2 = (k1+1)%3;
-					if( ( v1 == Tri2->VertexIndex[k2]) && 
-						( v2 == Tri2->VertexIndex[k1]))
-					{
-						if ( Tri2->EdgeTriangleIndex[k1] == -1)
-						{
-							Tri1->EdgeTriangleIndex[Edge] = j;
-							Tri2->EdgeTriangleIndex[k1] = i;
-							return;
-						}
-					}
-				}
-			}
-		}
-}
-
-void EdgeTriangleIndex(Triangle_t *Tri,int Number)
-{
-	int i,j;
-	for(i=0;i<Number;i++)
-	{
-		for(j=0;j<3;j++)
-		{
-			Tri[i].EdgeTriangleIndex[j] = -1;
-		}
-	}
-	for(i=0;i<Number;i++)
-	{
-        EdgeTriangleIndex(i,0,0,1,Tri,Number);
-        EdgeTriangleIndex(i,1,1,2,Tri,Number);
-        EdgeTriangleIndex(i,2,2,0,Tri,Number);
-	}
-}
-//*/
-
-//#ifdef USE_SHADOWVOLUME
-
 void BMD::FindNearTriangle( void)
 {
 	for( int iMesh=0; iMesh<NumMeshs; iMesh++)
@@ -2900,95 +2721,13 @@ void BMD::FindNearTriangle( void)
 		}
 		for (int iTri = 0; iTri < iNumTriangles; ++iTri)
 		{
-#ifdef LDS_OPTIMIZE_FORLOADING
-			// 각 Triangle 별로 Triangle이 보유한 각 3변에 인접한 Triangle들의 
-			// Tri Index 값을 검색하여 설정 한다.
-			FindTriangleForEdge( m, iTri);
-#else // LDS_OPTIMIZE_FORLOADING
 			FindTriangleForEdge( iMesh, iTri, 0);
 			FindTriangleForEdge( iMesh, iTri, 1);
 			FindTriangleForEdge( iMesh, iTri, 2);
-#endif // LDS_OPTIMIZE_FORLOADING
 		}
 	}
 }
 
-
-#ifdef LDS_OPTIMIZE_FORLOADING
-// 해당 arg1.Mesh의 arg2.IndexTriangle 로 해당 Triangle의 
-// 각 3변이 맞닿는 Triangle들의 Tri Index들을 EdgeTriangleIndex[0-2] 로 구성한다.
-void BMD::FindTriangleForEdge( Mesh_t* m, int iTriBasis )
-{
-	Triangle_t* pTriangle = m->Triangles;
-	Triangle_t* pTriBasis = &pTriangle[iTriBasis];
-	
-	// 1. 이미 EdgeTriIndex 지정되어있으면 Return
-	//if ( pTriBasis->EdgeTriangleIndex[0] != -1 && 
-	//	pTriBasis->EdgeTriangleIndex[1] != -1 && 
-	//	pTriBasis->EdgeTriangleIndex[2] != -1 )
-	//{	// 이미 지정됨
-	//	return;
-	//}
-	
-	
-	int iNumTriangles = m->NumTriangles;
-	unsigned int uiFindCount = 0, uiMaxCount = 0;
-	
-	// 1. 현재 Triangle에서 이미 인접 Tri를 찾은 갯수를 센다.
-	//	  이미 찾은 나머지 갯수만큼만 접근하여 인접 Triangle을 구성
-	for( int iIdx = 0; iIdx < 3; ++iIdx )
-	{
-		(pTriBasis->EdgeTriangleIndex[iIdx] != -1)? ++uiMaxCount:0;
-	}
-	
-	if( uiMaxCount < 1 ) return;
-	
-	// 2. 모든 각 Tri 별 접근을 하여 인접 TriIndex를 설정 한다.
-	for ( int iTri = 0; iTri < iNumTriangles; ++iTri)
-	{
-		// 2-1. 현재 Tri와 같으면 안된다.
-		if ( iTriBasis == iTri)
-		{
-			continue;
-		}
-		
-		// 2-2. 비교할 현재 Triangle
-		Triangle_t *pTri = &pTriangle[iTri];
-		
-		// 2-3. 현재 Triangle의 각 Index 에 접근 
-		for( int iIndex11 = 0; iIndex11 < 3; ++iIndex11 )
-		{
-			// 2-3-1. 현재 Index의 다음 Index를 가져와 Edge 를 구성
-			int iIndex12 = ( iIndex11 + 1) % 3;
-			
-			// 2-3-2. 비교할 Triangle의 각 Index에 접근
-			for ( int iIndex21 = 0; iIndex21 < 3; ++iIndex21)
-			{
-				// 2-3-2-1. 비교할 Triangle의 현재 Vertex의 다음 순번 Vertex를 가져와 Edge 구성
-				int iIndex22 = ( iIndex21 + 1) % 3;
-				
-				// 2-3-2-2. (1) 현재 Edge에 인접 Tri 설정이 안되어 있고,
-				//			(2) 현재 Triangle Edge의 IndexVertex가 비교대상 Triangle의 Edge와 같다면 
-				//			인접 Triangle로 설정
-				if ( pTri->EdgeTriangleIndex[iIndex21] == -1 &&
-					pTriBasis->VertexIndex[iIndex11] == pTri->VertexIndex[iIndex22] &&
-					pTriBasis->VertexIndex[iIndex12] == pTri->VertexIndex[iIndex21])
-				{
-					
-					pTriBasis->EdgeTriangleIndex[iIndex11] = iTri;
-					pTri->EdgeTriangleIndex[iIndex21] = iTriBasis;
-					
-					// 2-3-2-2-1. 
-					++uiFindCount;
-				}
-			}	
-		}
-		
-		if( uiMaxCount <= uiFindCount ) return;
-	}
-}
-
-#else // LDS_OPTIMIZE_FORLOADING
 void BMD::FindTriangleForEdge( int iMesh, int iTri1, int iIndex11)
 {
     if ( iMesh>=NumMeshs || iMesh<0 ) return;
@@ -2998,7 +2737,7 @@ void BMD::FindTriangleForEdge( int iMesh, int iTri1, int iIndex11)
 
 	Triangle_t *pTri1 = &pTriangle[iTri1];
 	if ( pTri1->EdgeTriangleIndex[iIndex11] != -1)
-	{	// 이미 지정됨
+	{
 		return;
 	}
 
@@ -3026,9 +2765,6 @@ void BMD::FindTriangleForEdge( int iMesh, int iTri1, int iIndex11)
 		}
 	}
 }
-#endif // LDS_OPTIMIZE_FORLOADING
-
-
 //#endif //USE_SHADOWVOLUME
 
 bool BMD::Open(char *DirName,char *ModelFileName)
@@ -3039,16 +2775,6 @@ bool BMD::Open(char *DirName,char *ModelFileName)
     FILE *fp = fopen(ModelName,"rb");
 	if(fp == NULL)
 	{
-		/*char Text[256];
-    	sprintf(Text,"%s file does not exist.",ModelFileName);
-		MessageBox(g_hWnd,Text,NULL,MB_OK);
-		SendMessage(g_hWnd,WM_DESTROY,0,0);*/
-#ifdef _DEBUG
-		/*char Text[256];
-    	sprintf(Text,"%s 파일이 존재하지 않습니다.",ModelFileName);
-		MessageBox(g_hWnd,Text,NULL,MB_OK);*/
-		//SendMessage(g_hWnd,WM_DESTROY,0,0);
-#endif
 		return false;
 	}
 	fseek(fp,0,SEEK_END);
@@ -3285,7 +3011,7 @@ bool BMD::Open2(char *DirName,char *ModelFileName, bool bReAlloc)
 
 	NumMeshs         = *((short *)(Data+DataPtr));DataPtr+=2;
 	NumBones         = *((short *)(Data+DataPtr));DataPtr+=2;
-	assert(NumBones <= MAX_BONES && "본 갯수가 200 넘었습니다.! 본 최대갯수가 200개입니다.");
+	assert(NumBones <= MAX_BONES && "Bones 200");
 	NumActions       = *((short *)(Data+DataPtr));DataPtr+=2;
 
 	Meshs            = new Mesh_t    [max( 1, NumMeshs)  ];

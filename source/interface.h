@@ -18,8 +18,6 @@ struct Interface
 
 namespace info
 {
-//들어 가는 인자 값이 비슷 하므로 통일화 시키자.
-//템플릿으로 묶는게 편하다.
 class InfoFile : public concept::Interface
 {
 public:

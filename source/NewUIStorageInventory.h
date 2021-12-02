@@ -1,10 +1,5 @@
 //*****************************************************************************
 // File: NewUIStorageInventory.h
-//
-// Desc: interface for the CNewUIStorageInventory class.
-//		 창고창 클래스.
-//
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
 
 #if !defined(AFX_NEWUISTORAGEINVENTORY_H__BD790479_EDDE_4981_9B03_A12163A58D5D__INCLUDED_)
@@ -48,29 +43,27 @@ namespace SEASON3B
 
 		enum STORAGE_BUTTON
 		{
-			BTN_INSERT_ZEN = 0,		// 입금.
-			BTN_TAKE_ZEN,			// 출금.
-			BTN_LOCK,				// 잠금.
+			BTN_INSERT_ZEN = 0,
+			BTN_TAKE_ZEN,
+			BTN_LOCK,
 			MAX_BTN
 		};
 		
-		CNewUIManager*			m_pNewUIMng;			// UI 매니저.
-		POINT					m_Pos;					// 창의 위치.
-		CNewUIButton			m_abtn[MAX_BTN];		// 버튼.
-		CNewUIInventoryCtrl*	m_pNewInventoryCtrl;	// 인벤토리 컨트롤.
+		CNewUIManager*			m_pNewUIMng;
+		POINT					m_Pos;
+		CNewUIButton			m_abtn[MAX_BTN];
+		CNewUIInventoryCtrl*	m_pNewInventoryCtrl;
 
-		bool					m_bLock;				// true면 창고가 잠겨있는 상태.
-		bool					m_bCorrectPassword;		// true면 패스워드가 맞는 상태.
+		bool					m_bLock;
+		bool					m_bCorrectPassword;
 
-		bool					m_bItemAutoMove;		// 마우스 우버튼으로 아이템을 창고나 인벤토리로 이동시 true.
-		int						m_nBackupMouseX;		// 아이템 자동 이동 시 마우스 X 좌표 백업.
-		int						m_nBackupMouseY;		// 아이템 자동 이동 시 마우스 Y 좌표 백업.
+		bool					m_bItemAutoMove;
+		int						m_nBackupMouseX;
+		int						m_nBackupMouseY;
 
-	// 잠겨있을 때 서버로 비밀번호를 먼저 전송해야 되므로 상황에 따라
-	//m_bTakeZen에 그 상황을 저장 후 출금액 또는 아이템의 옮길 인벤토리 위치 백업.
-		bool					m_bTakeZen;				// true면 출금, false면 아이템.
-		int						m_nBackupTakeZen;		// 출금될 젠.
-		int						m_nBackupInvenIndex;	// 옮길 인벤토리 위치 백업.
+		bool					m_bTakeZen;
+		int						m_nBackupTakeZen;
+		int						m_nBackupInvenIndex;
 		
 	public:
 		CNewUIStorageInventory();
@@ -94,9 +87,9 @@ namespace SEASON3B
 		bool InsertItem(int iIndex, BYTE* pbyItemPacket);
 		int FindEmptySlot(ITEM* pItemObj);
 
-		bool IsStorageLocked(){ return m_bLock; }				// 창고가 잠겨 있는가?
-		bool IsCorrectPassword(){ return m_bCorrectPassword; }	// 패스워드가 통과된 상태인가?
-		bool IsItemAutoMove(){ return m_bItemAutoMove; }		// 아이템 자동 이동인가?
+		bool IsStorageLocked(){ return m_bLock; }
+		bool IsCorrectPassword(){ return m_bCorrectPassword; }
+		bool IsItemAutoMove(){ return m_bItemAutoMove; }
 
 		void SetBackupTakeZen(int nZen);
 
@@ -124,14 +117,13 @@ namespace SEASON3B
 		void DeleteAllItems();
 
 		void LockStorage(bool bLock);
-		// 올바른 패스워드이면 bCorrectPassword에 true.
 		void SetCorrectPassword(bool bCorrectPassword)
 		{ m_bCorrectPassword = bCorrectPassword; }
 
 		void InitBackupItemInfo();
-		int GetBackupTakeZen(){ return m_nBackupTakeZen; }			// 출금할 돈을 얻음.
+		int GetBackupTakeZen(){ return m_nBackupTakeZen; }
 		void SetBackupInvenIndex(int nInvenIndex);
-		int GetBackupInvenIndex(){ return m_nBackupInvenIndex; }	// 백업된 인벤토리 인덱스를 얻음.
+		int GetBackupInvenIndex(){ return m_nBackupInvenIndex; }
 
 		void ProcessInventoryCtrl();
 		bool ProcessBtns();

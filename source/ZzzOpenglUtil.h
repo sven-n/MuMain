@@ -2,9 +2,6 @@
 #define __ZZOPENGLUTIL_H__
 
 #pragma once
-//////////////////////////////////////////////////////////////////////////
-//  DEFINE.
-//////////////////////////////////////////////////////////////////////////
 
 extern float PerspectiveX;
 extern float PerspectiveY;
@@ -56,16 +53,6 @@ extern bool         GrabEnable;
 extern bool			MouseRButtonClicking;
 #endif // DO_PROCESS_DEBUGCAMERA
 
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-#define DEFAULT_MSAAVALUE 2
-#define DEFAULT_USINGMSAA TRUE
-
-extern BOOL			g_bActivityProcessMSAA;					// MSAA 활성화 비활성화 여부
-extern BOOL			g_bSupportedMSAA;				// Anti Aliasing을 위한 Multisample 기능 제공 여부
-extern BOOL			g_bIsNowRecreationingForMSAA;	// MSAA생성을 위한 WindowsRecreate시에 WM_DESTROY 메세지 처리를 막고 WindowsDestroy 처리를 위한 FLAG 변수
-extern int			g_iMSAALevel;			// MSAA x4, x2 선택사항
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
-
 //  etc
 //void OpenExploper(char *Name,char *para=NULL);
 bool CheckID_HistoryDay ( char* Name, WORD day );
@@ -92,7 +79,7 @@ void EnableAlphaTest(bool DepthMake=true);
 void EnableAlphaBlend();
 void EnableAlphaBlendMinus();
 void EnableAlphaBlend2();
-void EnableAlphaBlend3();	// 연기등 블랜딩 잘 되도록 (TGA 출력시 유용)
+void EnableAlphaBlend3();
 void EnableAlphaBlend4();
 
 

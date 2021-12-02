@@ -1,20 +1,13 @@
 // PartyManager.cpp: implementation of the CPartyManager class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
 #include "PartyManager.h"
-
 #include "ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "ZzzInventory.h"
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CPartyManager::CPartyManager()
 {
@@ -53,9 +46,6 @@ CPartyManager* CPartyManager::GetInstance( )
 	return &sPartyManager;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 파티원찾기.
-///////////////////////////////////////////////////////////////////////////////
 void CPartyManager::SearchPartyMember()
 {
 	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
@@ -64,7 +54,6 @@ void CPartyManager::SearchPartyMember()
 		OBJECT *o = &c->Object;
 		if( o->Type==MODEL_PLAYER && o->Kind==KIND_PLAYER && o->Live && o->Visible && o->Alpha>0.f && c->Dead==0 )
         {
-            //  파티 정보도 같이 갱신한다.
             for ( int j=0; j<PartyNumber; ++j )
             {
 		        PARTY_t *p = &Party[j];
@@ -102,7 +91,6 @@ void CPartyManager::SearchPartyMember()
     }
 }
 
-//  파티원 인가?
 bool CPartyManager::IsPartyMember ( int index )
 {
     CHARACTER* c = &CharactersClient[index];

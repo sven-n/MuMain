@@ -19,7 +19,6 @@
 #define ITEMHOTKEYNUMBER_CAMERA_Z_ORDER 11.f
 
 #ifdef KJH_FIX_WOPS_K27500_POTION_NUM_RENDER
-	// 일단 사용하지 않음.
 	#define TOOLTIP_CAMERA_Z_ORDER		5.6f
 #endif // KJH_FIX_WOPS_K27500_POTION_NUM_RENDER
 
@@ -71,7 +70,7 @@ namespace SEASON3B
 		void RemoveAll3DRenderObjs();
 
 		void RenderUI2DEffect(UI_2DEFFECT_CALLBACK pCallbackFunc, LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
-		void DeleteUI2DEffectObject(UI_2DEFFECT_CALLBACK pCallbackFunc);	// 랜더링 중인 Effect Object를 지운다.
+		void DeleteUI2DEffectObject(UI_2DEFFECT_CALLBACK pCallbackFunc);
 
 		float GetLayerDepth();			//. fZOrder == fLayerDepth
 		int GetCameraIndex() const;

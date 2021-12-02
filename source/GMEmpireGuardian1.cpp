@@ -960,7 +960,6 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			{
 				if( 4.0f <= o->AnimationFrame && o->AnimationFrame < 5.0f )
 				{
-					// 캐릭터가 바라보는 방향의 위치값 계산하기
 					vec3_t vLook, vPosition, vLight;
 					float matRotate[3][4];
 					Vector(0.0f, -100.0f, 100.0f, vPosition );

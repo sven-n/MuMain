@@ -479,9 +479,6 @@
     <ClCompile Include="source\ProtectSysKey.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\PvPSystem.cpp">
-      <Filter>MU\Client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\QuestMng.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
@@ -995,15 +992,6 @@
     <ClCompile Include="source\Time\Timer.cpp">
       <Filter>External Object\time</Filter>
     </ClCompile>
-    <ClCompile Include="source\Utilities\DebugProfiling\Profiler.cpp">
-      <Filter>Utilities\debugprofiling</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Utilities\DebugProfiling\Profiler_Clock.cpp">
-      <Filter>Utilities\debugprofiling</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Utilities\DebugProfiling\Profiler_Unit.cpp">
-      <Filter>Utilities\debugprofiling</Filter>
-    </ClCompile>
     <ClCompile Include="source\Utilities\DebugCamera\DebugCameraDefault.cpp">
       <Filter>Utilities\debugcamera</Filter>
     </ClCompile>
@@ -1044,9 +1032,6 @@
       <Filter>Utilities\dump</Filter>
     </ClCompile>
     <ClCompile Include="source\Utilities\Dump\Uploader.cpp">
-      <Filter>Utilities\dump</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Utilities\Dump\UploaderSftp.cpp">
       <Filter>Utilities\dump</Filter>
     </ClCompile>
     <ClCompile Include="source\ExternalObject\Leaf\callstackdmp.cpp">
@@ -1385,9 +1370,6 @@
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\ProtectSysKey.h">
-      <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PvPSystem.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\QuestMng.h">
@@ -1969,24 +1951,6 @@
     <ClInclude Include="source\Time\Timer.h">
       <Filter>External Object\time</Filter>
     </ClInclude>
-    <ClInclude Include="source\Utilities\DebugProfiling\Profiler.h">
-      <Filter>Utilities\debugprofiling</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Utilities\DebugProfiling\Profiler_Clock.h">
-      <Filter>Utilities\debugprofiling</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Utilities\DebugProfiling\Profiler_Define.h">
-      <Filter>Utilities\debugprofiling</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Utilities\DebugProfiling\Profiler_FileIO_.h">
-      <Filter>Utilities\debugprofiling</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Utilities\DebugProfiling\Profiler_Unit.h">
-      <Filter>Utilities\debugprofiling</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Utilities\DebugProfiling\Profiler_util_.h">
-      <Filter>Utilities\debugprofiling</Filter>
-    </ClInclude>
     <ClInclude Include="source\Utilities\DebugCamera\DebugCameraDefault.h">
       <Filter>Utilities\debugcamera</Filter>
     </ClInclude>
@@ -2023,9 +1987,6 @@
     <ClInclude Include="source\Utilities\Memory\MemoryLock.h">
       <Filter>Utilities\memory</Filter>
     </ClInclude>
-    <ClInclude Include="source\Utilities\Debug\DebugArray_.h">
-      <Filter>Utilities\debug</Filter>
-    </ClInclude>
     <ClInclude Include="source\Utilities\Debug\debugSingleton_.h">
       <Filter>Utilities\debug</Filter>
     </ClInclude>
@@ -2039,9 +2000,6 @@
       <Filter>Utilities\dump</Filter>
     </ClInclude>
     <ClInclude Include="source\Utilities\Dump\Uploader.h">
-      <Filter>Utilities\dump</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Utilities\Dump\UploaderSftp.h">
       <Filter>Utilities\dump</Filter>
     </ClInclude>
     <ClInclude Include="source\ExternalObject\Leaf\callstackdmp.h">

@@ -29,7 +29,6 @@ bool M33Aida::IsInAidaSection2(const vec3_t Position)
 	return false;
 }
 
-//. 오브젝트
 bool M33Aida::CreateAidaObject(OBJECT* pObject)
 {
 	if(!IsInAida())
@@ -48,31 +47,31 @@ bool M33Aida::MoveAidaObject(OBJECT* pObject)
 	
 	switch(pObject->Type)
 	{
-		case 25:  // 폭포 1
+		case 25:
 			{
 				pObject->BlendMeshTexCoordV -= 0.015f;
 			}
 			break;	
-		case 28:  // 폭포 2
+		case 28:
 			{
 				pObject->BlendMeshTexCoordV -= 0.015f;
 			}
 			break;	
-		case 30:  //  풀 - 주위 빛
+		case 30:
 			{
 				Luminosity = (float)(rand()%5)*0.01f;
 				Vector(Luminosity+0.4f,Luminosity+0.6f,Luminosity+0.4f,Light);
 				AddTerrainLight(pObject->Position[0],pObject->Position[1],Light,2,PrimaryTerrainLight);
 			}
 			break;
-		case 71:  //  풀(붉은) - 주위 빛
+		case 71:
 			{
 				Luminosity = (float)(rand()%5)*0.01f;
 				Vector(Luminosity+0.9f,Luminosity+0.2f,Luminosity+0.2f,Light);
 				AddTerrainLight(pObject->Position[0],pObject->Position[1],Light,2,PrimaryTerrainLight);
 			}
 			break;
-		case 41:  // 빛
+		case 41:
 			{
 				pObject->Alpha = 0.5f;
 			}
@@ -92,16 +91,11 @@ bool M33Aida::MoveAidaObject(OBJECT* pObject)
 			break;
 	}
 
-	//. 배경음악 컨트롤
-//	if(::timeGetTime() - g_MusicStartStamp2 > 100000) {
-//		g_MusicStartStamp2 = ::timeGetTime();
-		PlayBuffer ( SOUND_AIDA_AMBIENT );
-//	}
-	
+	PlayBuffer ( SOUND_AIDA_AMBIENT );
+
 	return true;
 }
 
-//. 오브젝트 효과를 추가한다.
 bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 {
 	if(!IsInAida())
@@ -157,7 +151,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				
 			}
 			break;
-		case 41:  // 빛
+		case 41:
 			{
 				pModel->BeginRender(1.0f);
 
@@ -166,35 +160,31 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				pModel->BodyLight[2] = 0.52f;
 
 				pModel->StreamMesh = 0;
-#ifdef LDK_FIX_AIDA_OBJ41_UV_FIX
 				pModel->RenderMesh ( 0, RENDER_TEXTURE| RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV );
-#else //LDK_FIX_AIDA_OBJ41_UV_FIX
-				pModel->RenderMesh ( 0, RENDER_TEXTURE| RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, -(int)WorldTime%100000*0.00001f, pObject->BlendMeshTexCoordV );
-#endif //LDK_FIX_AIDA_OBJ41_UV_FIX
 				pModel->StreamMesh = -1;
 				
 				pModel->EndRender();
 			}
 			break;	
-        case 56 :  //  폭포 효과 - 위에서 떨어지는것
+        case 56 :
             Vector ( 1.f, 1.f, 1.f, Light );
             if ( rand()%2==0 )
             {
                 CreateParticle ( BITMAP_WATERFALL_1, pObject->Position, pObject->Angle, Light, 2, pObject->Scale );
             }
             break;
-        case 57 :  //  폭포 효과 - 물 튀는 느낌
+        case 57 :
             Vector ( 1.f, 1.f, 1.f, Light );
             CreateParticle ( BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 4, pObject->Scale );
             break;
-        case 58 :  //  폭포 효과 - 물 안개 효과
+        case 58 :
             Vector ( 1.f, 1.f, 1.f, Light );
             if ( rand()%3==0 )
             {
 				CreateParticle ( BITMAP_WATERFALL_2, pObject->Position, pObject->Angle, Light, 2, pObject->Scale );
             }
             break;
-		case 59:  //  안개 효과 - 푸르슴한 빛
+		case 59:
 			if ( pObject->HiddenMesh!=-2 )
 			{
                 vec3_t  Light;
@@ -205,7 +195,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				}
 			}
 			break;
-		case 60:  //  반딧불
+		case 60:
 			{
 				int time = timeGetTime()%1024;
 				if(time >= 0 && time < 10) {
@@ -216,7 +206,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				pObject->HiddenMesh = -2;	//. Hide Object				
 			}
 			break;
-		case 62:  //  안개 효과 - 흰색
+		case 62:
 			if ( pObject->HiddenMesh!=-2 )
 			{
                 vec3_t  Light;
@@ -227,7 +217,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				}
 			}
 			break;
-		case 63:  //  안개 효과 - 붉으스레한 빛
+		case 63:
 			if ( pObject->HiddenMesh!=-2 )
 			{
                 vec3_t  Light;
@@ -238,8 +228,8 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				}
 			}
 			break;
-		case 65:  //  뱀 1
-		case 66:  //  뱀 2 
+		case 65:
+		case 66:
 			{
 				pModel->BeginRender(1.0f);
 
@@ -250,11 +240,11 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				pModel->EndRender();
 			}
 			break;
-		case	67 :  //  불박스
+		case	67 :
 			Vector(0.3f, 0.3f, 0.3f, pObject->Light);
 			CreateParticle(BITMAP_FLAME, pObject->Position, pObject->Angle, pObject->Light, 7, pObject->Scale);
 			break;
-		case	70 :  //  유령박스2
+		case	70 :
 			{
 				int time = timeGetTime()%1024;
 				if(rand()%5 == 1 && (time >= 0 && time < 30))
@@ -264,7 +254,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				}
 			}
 			break;
-		case	71 :  //  풀 (붉은색)
+		case	71 :
 			{
 				Vector(0.0f,  -3.0f, 1.0f, p);
 				pModel->TransformPosition(BoneTransform[6],p,Position,false);
@@ -321,8 +311,8 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 			}
 			break;
 #ifdef LDK_ADD_AIDA_OBJ77_OBJ78
-		case 77:  //  뱀 3
-		case 78:  //  뱀 3
+		case 77:
+		case 78:
 			{
 				pModel->BeginRender(1.0f);
 				pModel->StreamMesh = 0;
@@ -345,13 +335,12 @@ bool M33Aida::RenderAidaObjectMesh(OBJECT* pObject, BMD* pModel,bool ExtraMon)
 	return RenderAidaMonsterObjectMesh(pObject, pModel,ExtraMon);
 }
 
-//. 몬스터
 CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 {
 	CHARACTER* pCharacter = NULL;
 	switch(iType)
 	{
-	case 304:	//  위치 퀸
+	case 304:
 		{
 			OpenMonsterModel(100);
 		    pCharacter = CreateCharacter(Key,MODEL_MONSTER01+100,PosX,PosY);
@@ -370,7 +359,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 			BoneManager::RegisterBone(pCharacter, "Monster100_z05",	     110);
 		}
 		break;
-	case 305:	//  블루 골렘
+	case 305:
 		{
 			OpenMonsterModel(101);
 		    pCharacter = CreateCharacter(Key,MODEL_MONSTER01+101,PosX,PosY);
@@ -383,7 +372,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 			BoneManager::RegisterBone(pCharacter, "Monster101_Head", 6);
 		}
 		break;
-	case 306:	//  데스 라이더
+	case 306:
 		{
 			OpenMonsterModel(102);
 		    pCharacter = CreateCharacter(Key,MODEL_MONSTER01+102,PosX,PosY);
@@ -395,7 +384,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 			BoneManager::RegisterBone(pCharacter, "Monster102_Head",       6);
 		}
 		break;
-	case 307:	//  포트레스 오크
+	case 307:
 		{
 			OpenMonsterModel(103);
 		    pCharacter = CreateCharacter(Key,MODEL_MONSTER01+103,PosX,PosY);
@@ -404,7 +393,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 		    pCharacter->Weapon[1].Type = -1;
 		}
 		break;
-	case 308:	//  데스 트리
+	case 308:
 		{
 			OpenMonsterModel(104);
 		    pCharacter = CreateCharacter(Key,MODEL_MONSTER01+104,PosX,PosY);
@@ -422,7 +411,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 
 		}
 		break;
-	case 309:	//  헬 마이너
+	case 309:
 		{
 			OpenMonsterModel(105);
 		    pCharacter = CreateCharacter(Key,MODEL_MONSTER01+105,PosX,PosY);
@@ -441,7 +430,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
-	case 549:	//  블러디 포트레스 오크
+	case 549:
 		{
 			OpenMonsterModel(193);
 			pCharacter = CreateCharacter(Key,MODEL_MONSTER01+193,PosX,PosY);
@@ -451,7 +440,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 			pCharacter->Weapon[1].Type = -1;
 		}
 		break;
-	case 550:	//  블러디 데스 라이더
+	case 550:
 		{
 			OpenMonsterModel(194);
 			pCharacter = CreateCharacter(Key,MODEL_MONSTER01+194,PosX,PosY);
@@ -464,7 +453,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 			BoneManager::RegisterBone(pCharacter, "Monster102_Head",       6);
 		}
 		break;
-	case 551:	//  블러디 골렘
+	case 551:
 		{
 			OpenMonsterModel(195);
 			pCharacter = CreateCharacter(Key,MODEL_MONSTER01+195,PosX,PosY);
@@ -478,7 +467,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 			BoneManager::RegisterBone(pCharacter, "Monster101_Head", 6);
 		}
 		break;
-	case 552:	//  블러디 위치 퀸
+	case 552:
 		{
 			OpenMonsterModel(196);
 			pCharacter = CreateCharacter(Key,MODEL_MONSTER01+196,PosX,PosY);
@@ -507,21 +496,21 @@ bool M33Aida::MoveAidaMonsterVisual(OBJECT* pObject, BMD* pModel)
 {
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+100: //  위치 퀸
+	case MODEL_MONSTER01+100:
 		{
 			vec3_t Light;
 			Vector ( 0.7f, 0.1f, 0.1f, Light );
 			AddTerrainLight(pObject->Position[0], pObject->Position[1],Light,3,PrimaryTerrainLight);
 		}
 		break;
-	case MODEL_MONSTER01+101: //  블루 골렘
+	case MODEL_MONSTER01+101:
 		{
 			vec3_t Light;
 			Vector ( 0.f, 0.0f, 0.7f, Light );
 			AddTerrainLight(pObject->Position[0], pObject->Position[1],Light,3,PrimaryTerrainLight);
 		}
 		break;
-	case MODEL_MONSTER01+105: // 헬 마이네
+	case MODEL_MONSTER01+105:
 		{
 			vec3_t Light;
 			Vector ( 1.f, 0.0f, 0.0f, Light );
@@ -529,14 +518,14 @@ bool M33Aida::MoveAidaMonsterVisual(OBJECT* pObject, BMD* pModel)
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
-	case MODEL_MONSTER01+195: //  블러디 골렘
+	case MODEL_MONSTER01+195:
 		{
 			vec3_t Light;
 			Vector ( 0.f, 0.0f, 0.7f, Light );
 			AddTerrainLight(pObject->Position[0], pObject->Position[1],Light,3,PrimaryTerrainLight);
 		}
 		break;
-	case MODEL_MONSTER01+196: //  블러디 위치 퀸
+	case MODEL_MONSTER01+196:
 		{
 			vec3_t Light;
 			Vector ( 0.7f, 0.1f, 0.1f, Light );
@@ -552,7 +541,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 {
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+102: //  데스 라이더
+	case MODEL_MONSTER01+102:
 		{
 			if(pObject->AnimationFrame <= 5.06f && (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
 			{
@@ -584,7 +573,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 			}
 		}
 		break;	
-	case MODEL_MONSTER01+103: //  포트레스 오크
+	case MODEL_MONSTER01+103:
 		{
 			if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 			{
@@ -620,7 +609,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 			}
 		}
 		break;
-	case MODEL_MONSTER01+104: //  데스 트리
+	case MODEL_MONSTER01+104:
 		{
 			if(pObject->CurrentAction == MONSTER01_ATTACK1 )
 			{
@@ -649,7 +638,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
-	case MODEL_MONSTER01+193: //  포트레스 오크
+	case MODEL_MONSTER01+193:
 		{
 			if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 			{
@@ -685,7 +674,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 			}
 		}
 		break;
-	case MODEL_MONSTER01+194: //  데스 라이더
+	case MODEL_MONSTER01+194:
 		{
 			if(pObject->AnimationFrame <= 5.06f && (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
 			{
@@ -725,7 +714,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 {
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+100: // 위치 퀸
+	case MODEL_MONSTER01+100:
 		{
 			vec3_t Position, Light, Angle;
 			float Random_Light = (float)(rand()%30)/100.0f + 0.6f;
@@ -747,7 +736,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 			BoneManager::GetBonePosition(pObject, "Monster100_Footstepst", Relative, Position);
 			CreateParticle(BITMAP_LIGHT+1,Position, Angle, Light, 4, 4.0f);
 
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -775,7 +763,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					PlayBuffer ( SOUND_AIDA_WITCHQUEEN_DIE );
 				}
 			}
-			//////////////////////////////////////////////////////////////////////////////////////////
 
 			if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 			{
@@ -809,11 +796,11 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
 					if(pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK1)
 					{
-						CreateParticle(BITMAP_LIGHT+1,vTemp, Angle, Light, 3, 1.3f);  // 위치 퀸 챰 맞은 효과
+						CreateParticle(BITMAP_LIGHT+1,vTemp, Angle, Light, 3, 1.3f);
 					}
 					if(pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK2)
 					{
-						CreateJoint(BITMAP_JOINT_THUNDER, to->Position, vTemp, pObject->Angle, 16);// 위치 퀸 썬더 맞은 효과
+						CreateJoint(BITMAP_JOINT_THUNDER, to->Position, vTemp, pObject->Angle, 16);
 					}
 				}
 			}
@@ -822,7 +809,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 				pObject->SubType = FALSE;			
 		}
 		break;
-	case MODEL_MONSTER01+101: //  블루 골렘
+	case MODEL_MONSTER01+101:
 		{
 			vec3_t Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 			Vector ( 1.0f, 1.0f, 1.0f, Light );		
@@ -834,7 +821,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 			BoneManager::GetBonePosition(pObject, "Monster101_Head", Position);
 			CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
 
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -861,7 +847,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					PlayBuffer ( SOUND_AIDA_BLUEGOLEM_DIE );
 				}
 			}
-			//////////////////////////////////////////////////////////////////////////////////////////
 
 			if(pObject->CurrentAction == MONSTER01_ATTACK1)
 			{
@@ -891,7 +876,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					VectorCopy(to->Position, vTemp );
 					vTemp[2] += 100.0f;
 
-					CreateJoint(BITMAP_JOINT_ENERGY,vTemp, pObject->Position, to->Angle,16,pObject,20.0f);  // 블루 골렘 : 마나 스틸 맞는 효과
+					CreateJoint(BITMAP_JOINT_ENERGY,vTemp, pObject->Position, to->Angle,16,pObject,20.0f);
 				}
 			}
 			
@@ -899,7 +884,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 				pObject->SubType = FALSE;
 		}
 		break;
-	case MODEL_MONSTER01+102: //  데스 라이더
+	case MODEL_MONSTER01+102:
 		{
 			vec3_t Relative, Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 			
@@ -911,7 +896,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 			CreateSprite(BITMAP_LIGHT+1,Position,3.0f,Light,pObject);
 			CreateParticle(BITMAP_SPARK+1, Position, Angle, Light, 7);
 
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -941,13 +925,11 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
 			if(pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
 				pObject->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////
 		}
 		break;
 
-	case MODEL_MONSTER01+103: //  포트레스 오크
+	case MODEL_MONSTER01+103:
 		{
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -977,13 +959,10 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
 			if(pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
 				pObject->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////
 		}
 		break;
-	case MODEL_MONSTER01+104: //  데스 트리
+	case MODEL_MONSTER01+104:
 		{
-
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1010,7 +989,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					PlayBuffer ( SOUND_AIDA_DEATHTREE_DIE );
 				}
 			}
-			//////////////////////////////////////////////////////////////////////////////////////////
 
 			vec3_t Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 			float Random_Light;
@@ -1036,7 +1014,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 				pObject->SubType = FALSE;
 		}
 		break;
-	case MODEL_MONSTER01+105: // 헬 마이네
+	case MODEL_MONSTER01+105:
 		{
 			vec3_t Relative, Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 			float Random_Light;
@@ -1059,8 +1037,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 			BoneManager::GetBonePosition(pObject, "Monster105_L_Arm02", Position);
 			CreateSprite(BITMAP_LIGHT+1,Position,1.0f,Light,pObject);
 
-
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1094,7 +1070,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					PlayBuffer ( SOUND_AIDA_HELL_DIE );
 				}
 			}
-			//////////////////////////////////////////////////////////////////////////////////////////
 
 			if(pObject->CurrentAction == MONSTER01_ATTACK2)
 			{
@@ -1118,51 +1093,13 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 				CreateEffect(BITMAP_BOSS_LASER,Position,pObject->Angle,Light,1);
 			}
 
-//#ifdef AIDA_DAMAGE
-            if ( (pCharacter->TargetCharacter>=0 && pCharacter->TargetCharacter<MAX_CHARACTERS_CLIENT))
-            {
-/*                CHARACTER *tc = &CharactersClient[pCharacter->TargetCharacter];
-                OBJECT *to = &tc->Object;
-			
-				vec3_t p;
-				Vector(1.0f, 1.0f, 1.0f, Light);
-				BMD* pTModel = &Models[to->Type];
-				
-				Vector(0.0f, 20.0f, 50.0f, p);
-				pTModel->TransformPosition(to->BoneTransform[0],p,p,false);
-				VectorAdd(p, to->Position, p)
-				CreateParticle(BITMAP_TRUE_FIRE ,p, Angle, Light, 7, 1.0f);  // 헬 마이네 불 장풍 맞은 효과
-
-				Vector(0.0f, -5.0f, 20.0f, p);
-				pTModel->TransformPosition(to->BoneTransform[0],p,p,false);
-				VectorAdd(p, to->Position, p)
-				CreateParticle(BITMAP_TRUE_FIRE ,p, Angle, Light, 7, 1.0f);  // 헬 마이네 불 장풍 맞은 효과
-
-				Vector(0.0f, 15.0f, -20.0f, p);
-				pTModel->TransformPosition(to->BoneTransform[0],p,p,false);
-				VectorAdd(p, to->Position, p)
-				CreateParticle(BITMAP_TRUE_FIRE ,p, Angle, Light, 7, 1.0f);  // 헬 마이네 불 장풍 맞은 효과
-*/
-/*				vTemp[1] -= 20.0f;
-				vTemp[2] += 80.0f;
-				CreateParticle(BITMAP_TRUE_FIRE ,vTemp, Angle, Light, 7, 0.6f);  // 헬 마이네 불 장풍 맞은 효과
-				vTemp[1] += 40.0f;
-				vTemp[2] += 20.0f;
-				CreateParticle(BITMAP_TRUE_FIRE ,vTemp, Angle, Light, 7, 0.6f);  // 헬 마이네 불 장풍 맞은 효과
-				vTemp[1] -= 40.0f;
-				vTemp[2] += 50.0f;
-				CreateParticle(BITMAP_TRUE_FIRE ,vTemp, Angle, Light, 7, 0.6f);  // 헬 마이네 불 장풍 맞은 효과
-*/			}
-//#endif //AIDA_DAMAGE
-
 			if(pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
 				pObject->SubType = FALSE;
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
-	case MODEL_MONSTER01+193: //  블러디 포트레스 오크
+	case MODEL_MONSTER01+193:
 		{
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1192,10 +1129,9 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 			
 			if(pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
 				pObject->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////
 		}
 		break;
-	case MODEL_MONSTER01+194: //  블러디 데스 라이더
+	case MODEL_MONSTER01+194:
 		{
 			vec3_t Relative, Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 			
@@ -1207,7 +1143,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 			CreateSprite(BITMAP_LIGHT+1,Position,3.0f,Light,pObject);
 			CreateParticle(BITMAP_SPARK+1, Position, Angle, Light, 7);
 			
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1237,11 +1172,10 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 			
 			if(pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
 				pObject->SubType = FALSE;
-			//////////////////////////////////////////////////////////////////////////////////////////
 		}
 		break;
 
-	case MODEL_MONSTER01+195: //  블러디 골렘
+	case MODEL_MONSTER01+195:
 		{
 			vec3_t Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 			Vector ( 1.0f, 1.0f, 1.0f, Light );		
@@ -1253,7 +1187,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 			BoneManager::GetBonePosition(pObject, "Monster101_Head", Position);
 			CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
 
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1280,7 +1213,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					PlayBuffer ( SOUND_AIDA_BLUEGOLEM_DIE );
 				}
 			}
-			//////////////////////////////////////////////////////////////////////////////////////////
 
 			if(pObject->CurrentAction == MONSTER01_ATTACK1)
 			{
@@ -1310,7 +1242,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					VectorCopy(to->Position, vTemp );
 					vTemp[2] += 100.0f;
 
-					CreateJoint(BITMAP_JOINT_ENERGY,vTemp, pObject->Position, to->Angle,16,pObject,20.0f);  // 블루 골렘 : 마나 스틸 맞는 효과
+					CreateJoint(BITMAP_JOINT_ENERGY,vTemp, pObject->Position, to->Angle,16,pObject,20.0f);
 				}
 			}
 			
@@ -1318,7 +1250,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 				pObject->SubType = FALSE;
 		}
 		break;
-	case MODEL_MONSTER01+196: // 위치 퀸
+	case MODEL_MONSTER01+196:
 		{
 			vec3_t Position, Light, Angle;
 			float Random_Light = (float)(rand()%30)/100.0f + 0.6f;
@@ -1340,7 +1272,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 			BoneManager::GetBonePosition(pObject, "Monster100_Footstepst", Relative, Position);
 			CreateParticle(BITMAP_LIGHT+1,Position, Angle, Light, 4, 4.0f);
 			
-			//사운드//////////////////////////////////////////////////////////////////////////////////
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
 			{
 				if(rand()%15==0)
@@ -1368,7 +1299,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					PlayBuffer ( SOUND_AIDA_WITCHQUEEN_DIE );
 				}
 			}
-			//////////////////////////////////////////////////////////////////////////////////////////
 			
 			if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 			{
@@ -1401,7 +1331,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					
 					if(pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK1)
 					{
-						CreateParticle(BITMAP_LIGHT+1,vTemp, Angle, Light, 3, 1.3f);  // 위치 퀸 챰 맞은 효과
+						CreateParticle(BITMAP_LIGHT+1,vTemp, Angle, Light, 3, 1.3f);
 					}
 					if(pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK2)
 					{
@@ -1409,9 +1339,9 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 						vec3_t		v3Light;
 						float		fScale = 1.8f;
 						Vector(1.0f, 0.0f, 0.4f, v3Light);
-						CreateParticle(BITMAP_LIGHT+1,vTemp, Angle, v3Light, 3, fScale);  // 위치 퀸 챰 맞은 효과
+						CreateParticle(BITMAP_LIGHT+1,vTemp, Angle, v3Light, 3, fScale);
 #else // LDS_MOD_BLOODWITCHQUEEN_EFFECT_ATTACK2
-						CreateJoint(BITMAP_JOINT_THUNDER, to->Position, vTemp, pObject->Angle, 16);// 위치 퀸 썬더 맞은 효과
+						CreateJoint(BITMAP_JOINT_THUNDER, to->Position, vTemp, pObject->Angle, 16);
 #endif // LDS_MOD_BLOODWITCHQUEEN_EFFECT_ATTACK2
 					}
 				}
@@ -1430,7 +1360,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel,bool Extr
 {
 	switch(pObject->Type)
 	{
-	case MODEL_MONSTER01+101: //  블루 골렘
+	case MODEL_MONSTER01+101:
 		{
 			pModel->BeginRender(1.f);
 
@@ -1449,7 +1379,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel,bool Extr
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+102: //  데쓰 라이더
+	case MODEL_MONSTER01+102:
 		{
 			pModel->BeginRender(1.f);
 
@@ -1470,7 +1400,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel,bool Extr
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+105: //  헬 마이네
+	case MODEL_MONSTER01+105:
 		{
 			pModel->BeginRender(1.f);
 
@@ -1505,7 +1435,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel,bool Extr
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
-	case MODEL_MONSTER01+194: //  블러디 데쓰 라이더
+	case MODEL_MONSTER01+194:
 		{
 			pModel->BeginRender(1.f);
 			
@@ -1526,7 +1456,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel,bool Extr
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+195: //  블러디 골렘
+	case MODEL_MONSTER01+195:
 		{
 			pModel->BeginRender(1.f);
 			
@@ -1548,17 +1478,16 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel,bool Extr
 #endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
 	}
 	return false;
-}
+} 
 
 bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
 {
 	if(!IsInAida())
 		return false;
 
-	//. 디폴트 처리로 넘기고 싶지않거든 true를 리턴하라.
 	switch(pCharacter->MonsterIndex)
 	{
-		case 304:  //  위치 퀸
+		case 304:
 			{
 				if(pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2 )
 				{
@@ -1568,20 +1497,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
 				}
 			}
 			return true;
-/*		case 305:  //  블루 골렘
-			{
-				if(pCharacter->AttackTime == 0 && pObject->CurrentAction == MONSTER01_ATTACK1 )
-				{
-					vec3_t Position, Light, Angle = {0.0f, 0.0f, 0.0f};
-					Vector ( 5.0f, 5.0f, 5.0f, Light );		
-					Vector ( 0.0f, 45.0f, 45.0f, Angle );
-					vec3_t Relative = { 0.0f, 0.0f, 0.0f };
-					BoneManager::GetBonePosition(pObject, "Monster101_L_Arm", Relative, Position);
-					CreateParticle(BITMAP_SHOCK_WAVE, Position, Angle, Light, 3, 0.5f);
-				}
-			}
-			return true;	
-*/		case 308:  //  데스 트리
+		case 308:
 			{
 				if(pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2 )
 				{
@@ -1591,7 +1507,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
 				}
 			}
 			return true;
-		case 309:  //  헬 마이네
+		case 309:
 			{
 				for(int i = 0; i < 5; i++)
 				{
@@ -1605,7 +1521,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
 			}
 			return true;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
-		case 552:  //  블러디 위치 퀸
+		case 552:
 			{
 #ifndef LDS_MOD_BLOODWITCHQUEEN_EFFECT_ATTACK2		// #ifndef
 				if(pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2 )
@@ -1630,20 +1546,20 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
 
 	switch(pCharacter->MonsterIndex)
 	{
-	case 304:		//  위치 퀸
-	case 305:		//  블루 골렘
-	case 309:		//  헬 마이네
+	case 304:
+	case 305:
+	case 309:
 		return CheckMonsterSkill(pCharacter, pObject);
 #ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
-	case 549:	//  포트레스 오크
-	case 550:	//  블러디 데스 라이더
+	case 549:
+	case 550:
 		return CheckMonsterSkill(pCharacter, pObject);
-	case 551:	//  블러디 골렘
+	case 551:
 		{
 			if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYGOLUEM_ATTACKSKILL)
 			{
 				SetAction(pObject, MONSTER01_ATTACK2);
-				pCharacter->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				pCharacter->MonsterSkill = -1;
 			}
 			else
 			{
@@ -1653,12 +1569,12 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
 			return true;
 		}
 		return true;
-	case 552:	//  블러디 위치 퀸
+	case 552:
 		{
 			if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYWITCHQUEEN_ATTACKSKILL)
 			{
 				SetAction(pObject, MONSTER01_ATTACK2);
-				pCharacter->MonsterSkill = -1;	// 스킬 공격과 일반 공격이 있는 경우 스킬 공격 후 초기화 해야됨.
+				pCharacter->MonsterSkill = -1;
 			}
 			else
 			{
@@ -1673,7 +1589,6 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
 	return false;
 }
 
-//. 화면처리
 bool M33Aida::CreateMist(PARTICLE* pParticleObj)
 {
 	if(!IsInAida())

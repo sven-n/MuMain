@@ -1,9 +1,5 @@
 //*****************************************************************************
 // File: NewUIQuestProgress.cpp
-//
-// Desc: implementation of the CNewUIQuestProgress class.
-//
-// producer: Ahn Sang-Gyu
 //*****************************************************************************
 
 #include "stdafx.h"
@@ -16,13 +12,9 @@
 
 using namespace SEASON3B;
 
-#define QP_NPC_MAX_LINE_PER_PAGE	7	// 페이지당 NPC 대사 최대 줄 수.
-#define QP_TEXT_GAP					15	// 텍스트 간격.
-#define QP_LIST_BOX_LINE_NUM		12	// 요구 사항, 보상 리스트 박스 줄 수.
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#define QP_NPC_MAX_LINE_PER_PAGE	7
+#define QP_TEXT_GAP					15
+#define QP_LIST_BOX_LINE_NUM		12
 
 CNewUIQuestProgress::CNewUIQuestProgress()
 {
@@ -38,14 +30,6 @@ CNewUIQuestProgress::~CNewUIQuestProgress()
 	Release();
 }
 
-//*****************************************************************************
-// 함수 이름 : Create()
-// 함수 설명 : 퀘스트 진행 창 생성.
-// 매개 변수 : pNewUIMng	: CNewUIManager 오브젝트 주소.
-//			   pNewUI3DRenderMng: CNewUI3DRenderMng 오브젝트 주소.
-//			   x			: x 좌표.
-//			   y			: y 좌표.
-//*****************************************************************************
 bool CNewUIQuestProgress::Create(CNewUIManager* pNewUIMng,
 #ifndef ASG_MOD_3D_CHAR_EXCLUSION_UI
 								 CNewUI3DRenderMng* pNewUI3DRenderMng,
@@ -85,8 +69,7 @@ bool CNewUIQuestProgress::Create(CNewUIManager* pNewUIMng,
 	m_btnProgressR.ChangeButtonInfo(x + 232, y + 189, 17, 18);
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 
-	// 퀘스트 처리 버튼.
-	m_btnComplete.ChangeText(GlobalText[2811]);	// "확     인"
+	m_btnComplete.ChangeText(GlobalText[2811]);
 	m_btnComplete.ChangeButtonImgState(true, IMAGE_QP_BTN_COMPLETE, true);
 #ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
 	m_btnComplete.ChangeButtonInfo(x + (QP_WIDTH - 108) / 2, y + 362, 108, 29);
@@ -94,12 +77,10 @@ bool CNewUIQuestProgress::Create(CNewUIManager* pNewUIMng,
 	m_btnComplete.ChangeButtonInfo(x + (QP_WIDTH - 108) / 2, y + 392, 108, 29);
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 
-	// 닫기 버튼.
 	m_btnClose.ChangeButtonImgState(true, IMAGE_QP_BTN_CLOSE);
 	m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
 	m_btnClose.ChangeToolTipText(GlobalText[1002], true);
 
-	// 요구사항, 보상 리스트 박스.
 	m_RequestRewardListBox.SetNumRenderLine(QP_LIST_BOX_LINE_NUM);
 #ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
 	m_RequestRewardListBox.SetSize(174, 158);
@@ -112,10 +93,6 @@ bool CNewUIQuestProgress::Create(CNewUIManager* pNewUIMng,
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Release()
-// 함수 설명 : 창 Release.
-//*****************************************************************************
 void CNewUIQuestProgress::Release()
 {
 	UnloadImages();
@@ -134,10 +111,6 @@ void CNewUIQuestProgress::Release()
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : SetPos()
-// 함수 설명 : 창 위치 지정.
-//*****************************************************************************
 void CNewUIQuestProgress::SetPos(int x, int y)
 {
 	m_Pos.x = x;
@@ -150,11 +123,6 @@ void CNewUIQuestProgress::SetPos(int x, int y)
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateMouseEvent()
-// 함수 설명 : 마우스 이벤트 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool CNewUIQuestProgress::UpdateMouseEvent()
 {
 	if (REQUEST_REWARD_MODE == m_eLowerView)
@@ -173,11 +141,6 @@ bool CNewUIQuestProgress::UpdateMouseEvent()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : ProcessBtns()
-// 함수 설명 : 버튼 아이템 이벤트 처리.
-// 반환 값	 : 처리 했으면 true.
-//*****************************************************************************
 bool CNewUIQuestProgress::ProcessBtns()
 {
 	if (m_btnClose.UpdateMouseEvent())
@@ -223,7 +186,7 @@ bool CNewUIQuestProgress::ProcessBtns()
 
 		return true;
 	}
-	else if (m_bRequestComplete && m_bCanClick)	// 요구 사항을 만족하는가?
+	else if (m_bRequestComplete && m_bCanClick)
 	{
 		if (m_btnComplete.UpdateMouseEvent())
 		{
@@ -237,11 +200,6 @@ bool CNewUIQuestProgress::ProcessBtns()
 	return false;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateSelTextMouseEvent()
-// 함수 설명 : 선택문 마우스 이벤트 처리.
-// 반환 값	 : 처리 했으면 true.
-//*****************************************************************************
 bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
 {
 	if (PLAYER_WORDS_MODE != m_eLowerView || !m_bCanClick)
@@ -284,11 +242,6 @@ bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
 	return false;
 }
 
-//*****************************************************************************
-// 함수 이름 : UpdateKeyEvent()
-// 함수 설명 : 키보드 입력 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool CNewUIQuestProgress::UpdateKeyEvent()
 {
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
@@ -303,21 +256,11 @@ bool CNewUIQuestProgress::UpdateKeyEvent()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Update()
-// 함수 설명 : 기타 매 프레임 일어나는 이벤트 처리.
-// 반환 값	 : true면 창 뒤로도 이벤트를 처리.
-//*****************************************************************************
 bool CNewUIQuestProgress::Update()
 {
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : Render()
-// 함수 설명 : 창 렌더.
-// 반환 값	 : true면 성공.
-//*****************************************************************************
 bool CNewUIQuestProgress::Render()
 {
 	::EnableAlphaTest();
@@ -338,7 +281,7 @@ bool CNewUIQuestProgress::Render()
 	{
 		m_btnComplete.Render();
 		m_RequestRewardListBox.Render();
-		::EnableAlphaTest();	// 위 리스트 박스로 인해 아래의 닫기 버튼의 알파값이 안먹음.
+		::EnableAlphaTest();
 	}
 
 	m_btnClose.Render();
@@ -348,10 +291,6 @@ bool CNewUIQuestProgress::Render()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderBackImage()
-// 함수 설명 : 창 바탕 이미지 렌더.
-//*****************************************************************************
 void CNewUIQuestProgress::RenderBackImage()
 {
 	RenderImage(IMAGE_QP_BACK, m_Pos.x, m_Pos.y, float(QP_WIDTH), float(QP_HEIGHT));
@@ -371,10 +310,6 @@ void CNewUIQuestProgress::RenderBackImage()
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderSelTextBlock()
-// 함수 설명 : 선택문 블럭 렌더.
-//*****************************************************************************
 void CNewUIQuestProgress::RenderSelTextBlock()
 {
 	if (PLAYER_WORDS_MODE != m_eLowerView)
@@ -401,25 +336,15 @@ void CNewUIQuestProgress::RenderSelTextBlock()
 	::EndRenderColor();
 }
 
-//*****************************************************************************
-// 함수 이름 : RenderText()
-// 함수 설명 : 텍스트 렌더.
-//*****************************************************************************
 void CNewUIQuestProgress::RenderText()
 {
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0);
-
-// 제목
 	g_pRenderText->SetTextColor(230, 230, 230, 255);
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+12, "Quest",
-		QP_WIDTH, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+12, "Quest",	QP_WIDTH, 0, RT3_SORT_CENTER);
 	g_pRenderText->SetTextColor(36, 242, 252, 255);
-	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+27,
-		g_QuestMng.GetSubject(m_dwCurQuestIndex), QP_WIDTH, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(m_Pos.x, m_Pos.y+27,		g_QuestMng.GetSubject(m_dwCurQuestIndex), QP_WIDTH, 0, RT3_SORT_CENTER);
 
-
-// NPC 이름.
 	g_pRenderText->SetTextColor(255, 255, 10, 255);
 #ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
 	g_pRenderText->RenderText(m_Pos.x+13, m_Pos.y+51, g_QuestMng.GetNPCName(),
@@ -428,7 +353,6 @@ void CNewUIQuestProgress::RenderText()
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 		0, 0, RT3_SORT_LEFT);
 
-// 플래이어 캐릭터 이름.
 	if (REQUEST_REWARD_MODE != m_eLowerView)
 	{
 		g_pRenderText->SetTextColor(255, 185, 10, 255);
@@ -457,7 +381,6 @@ void CNewUIQuestProgress::RenderText()
 			m_aszNPCWords[i + QP_NPC_MAX_LINE_PER_PAGE * m_nSelNPCPage],
 			0, 0, RT3_SORT_LEFT);
 
-// 플래이어 대사.
 	if (PLAYER_WORDS_MODE == m_eLowerView)
 	{
 		g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -486,21 +409,16 @@ void CNewUIQuestProgress::Render3D()
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 
 bool CNewUIQuestProgress::IsVisible() const
-{ return CNewUIObj::IsVisible(); }
+{ 
+	return CNewUIObj::IsVisible(); 
+}
 
-//*****************************************************************************
-// 함수 이름 : GetLayerDepth()
-// 함수 설명 : 창의 레이어값을 얻음.
-//*****************************************************************************
+
 float CNewUIQuestProgress::GetLayerDepth()
 {
 	return 3.1f;
 }
 
-//*****************************************************************************
-// 함수 이름 : LoadImages()
-// 함수 설명 : 이미지 리소스 로드.
-//*****************************************************************************
 void CNewUIQuestProgress::LoadImages()
 {
 #ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
@@ -529,10 +447,6 @@ void CNewUIQuestProgress::LoadImages()
 	LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_QP_BTN_CLOSE, GL_LINEAR);
 }
 
-//*****************************************************************************
-// 함수 이름 : UnloadImages()
-// 함수 설명 : 이미지 리소스 삭제.
-//*****************************************************************************
 void CNewUIQuestProgress::UnloadImages()
 {
 	DeleteBitmap(IMAGE_QP_BTN_CLOSE);
@@ -553,20 +467,11 @@ void CNewUIQuestProgress::UnloadImages()
 	DeleteBitmap(IMAGE_QP_BACK);
 }
 
-//*****************************************************************************
-// 함수 이름 : ProcessOpening()
-// 함수 설명 : 창을 열 때 처리.
-//*****************************************************************************
 void CNewUIQuestProgress::ProcessOpening()
 {
 	::PlayBuffer(SOUND_INTERFACE01);
 }
 
-//*****************************************************************************
-// 함수 이름 : ProcessClosing()
-// 함수 설명 : 창을 닫을 때 처리.
-// 반환 값	 : true 면 닫기 성공.
-//*****************************************************************************
 bool CNewUIQuestProgress::ProcessClosing()
 {
 	m_dwCurQuestIndex = 0;
@@ -575,11 +480,6 @@ bool CNewUIQuestProgress::ProcessClosing()
 	return true;
 }
 
-//*****************************************************************************
-// 함수 이름 : SetContents()
-// 함수 설명 : 창의 내용 세팅.
-// 매개 변수 : dwQuestIndex	: 퀘스트 인덱스
-//*****************************************************************************
 void CNewUIQuestProgress::SetContents(DWORD dwQuestIndex)
 {
 	if (0 == dwQuestIndex)
@@ -592,7 +492,7 @@ void CNewUIQuestProgress::SetContents(DWORD dwQuestIndex)
 
 	m_btnProgressL.Lock();
 
-	if (NULL != g_QuestMng.GetAnswer(m_dwCurQuestIndex, 0))		// 선택문이 있다면.
+	if (NULL != g_QuestMng.GetAnswer(m_dwCurQuestIndex, 0))
 	{
 		SetCurPlayerWords();
 		m_eLowerView = NON_PLAYER_WORDS_MODE;
@@ -605,17 +505,13 @@ void CNewUIQuestProgress::SetContents(DWORD dwQuestIndex)
 		SetCurRequestReward();
 		m_eLowerView = REQUEST_REWARD_MODE;
 
-		if (0 == m_nMaxNPCPage)					// 최대 페이지 수가 1페이지라면.
+		if (0 == m_nMaxNPCPage)
 			m_btnProgressR.Lock();
 		else
 			m_btnProgressR.UnLock();
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : SetCurNPCWords()
-// 함수 설명 : 현재 퀘스트 인덱스의 NPC 대사 세팅.
-//*****************************************************************************
 void CNewUIQuestProgress::SetCurNPCWords()
 {
 	if (0 == m_dwCurQuestIndex)
@@ -623,7 +519,7 @@ void CNewUIQuestProgress::SetCurNPCWords()
 
 	::memset(m_aszNPCWords[0], 0, sizeof(char) * QP_NPC_LINE_MAX * QP_WORDS_ROW_MAX);
 
-	g_pRenderText->SetFont(g_hFont);	// DivideStringByPixel()함수 전에 폰트를 설정해주어야 함.
+	g_pRenderText->SetFont(g_hFont);
 	int nLine = ::DivideStringByPixel(&m_aszNPCWords[0][0],
 #ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
 		QP_NPC_LINE_MAX, QP_WORDS_ROW_MAX, g_QuestMng.GetNPCWords(m_dwCurQuestIndex), 160);
@@ -662,7 +558,6 @@ void CNewUIQuestProgress::SetCurPlayerWords()
 			break;
 		::strcat(szAnswer, pszAnswer);
 
-	// 행 나누기. 선택문 1개는 최대 2행임.
 		m_anAnswerLine[i] = ::DivideStringByPixel(&m_aszPlayerWords[nPlayerWordsRow][0],2, QP_WORDS_ROW_MAX, szAnswer, 160, false);
 
 		nPlayerWordsRow += m_anAnswerLine[i];
@@ -672,16 +567,11 @@ void CNewUIQuestProgress::SetCurPlayerWords()
 	}
 }
 
-//*****************************************************************************
-// 함수 이름 : SetCurRequestReward()
-// 함수 설명 : 현재 퀘스트 인덱스의 요구사항, 보상 세팅.
-//*****************************************************************************
 void CNewUIQuestProgress::SetCurRequestReward()
 {
 	if (0 == m_dwCurQuestIndex)
 		return;
 
-	// 요구사항, 보상 정보가 없다면 리턴.
 	const SQuestRequestReward* pQuestRequestReward
 		= g_QuestMng.GetRequestReward(m_dwCurQuestIndex);
 	if (NULL == pQuestRequestReward)
@@ -689,9 +579,8 @@ void CNewUIQuestProgress::SetCurRequestReward()
 	
 	m_RequestRewardListBox.Clear();
 	
-	// 요구사항, 보상 텍스트를 얻어온다.
 #ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-	SRequestRewardText aRequestRewardText[13];	// 요구사항 제목(1)+요구사항(5)+보상 제목(1)+보상(5)+랜덤보상 제목(1)
+	SRequestRewardText aRequestRewardText[13];
 	m_bRequestComplete
 		= g_QuestMng.GetRequestRewardText(aRequestRewardText, 13, m_dwCurQuestIndex);
 #else	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
@@ -705,18 +594,18 @@ void CNewUIQuestProgress::SetCurRequestReward()
 #ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 	for (j = 0; j < 3; ++j)
 	{
-		if (0 == j)			// 요구사항
+		if (0 == j)
 		{
 			nLoop = 1 + pQuestRequestReward->m_byRequestCount;
 		}
-		else if (1 == j && pQuestRequestReward->m_byGeneralRewardCount)	// 일반보상
+		else if (1 == j && pQuestRequestReward->m_byGeneralRewardCount)
 		{
-			m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");	// 공백 1줄.
+			m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");
 			nLoop = 1 + pQuestRequestReward->m_byGeneralRewardCount + i;
 		}
-		else if (2 == j && pQuestRequestReward->m_byRandRewardCount)	// 랜덤보상
+		else if (2 == j && pQuestRequestReward->m_byRandRewardCount)
 		{
-			m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");	// 공백 1줄.
+			m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");
 			nLoop = 1 + pQuestRequestReward->m_byRandRewardCount + i;
 		}
 		else
@@ -730,7 +619,7 @@ void CNewUIQuestProgress::SetCurRequestReward()
 		}
 		else		// 보상
 		{
-			m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");	// 공백 1줄.
+			m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");
 			nLoop = 1 + pQuestRequestReward->m_byRewardCount + i;
 		}
 #endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
@@ -742,7 +631,7 @@ void CNewUIQuestProgress::SetCurRequestReward()
 #ifdef ASG_MOD_QUEST_OK_BTN_DISABLE
 	EnableCompleteBtn(m_bRequestComplete);
 #else	// ASG_MOD_QUEST_OK_BTN_DISABLE
-	if (m_bRequestComplete)	// 요구사항을 만족하는가?
+	if (m_bRequestComplete)
 	{
 		m_btnComplete.UnLock();
 		m_btnComplete.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
@@ -758,11 +647,6 @@ void CNewUIQuestProgress::SetCurRequestReward()
 }
 
 #ifdef ASG_MOD_QUEST_OK_BTN_DISABLE
-//*****************************************************************************
-// 함수 이름 : EnableCompleteBtn()
-// 함수 설명 : 확인 버튼 활성화 또는 비활성화.
-// 매개 변수 : bEnable	: 활성화이면 ture.
-//*****************************************************************************
 void CNewUIQuestProgress::EnableCompleteBtn(bool bEnable)
 {
 	if (bEnable)

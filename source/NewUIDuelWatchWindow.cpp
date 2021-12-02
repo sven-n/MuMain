@@ -1,5 +1,4 @@
 // NewUIDuelWatchWindow.cpp: implementation of the CNewUIDuelWatchWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -22,10 +21,6 @@
 #ifdef YDG_ADD_NEW_DUEL_UI
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIDuelWatchWindow::CNewUIDuelWatchWindow()
 {
@@ -90,11 +85,9 @@ void CNewUIDuelWatchWindow::SetPos(int x, int y)
 
 bool CNewUIDuelWatchWindow::UpdateMouseEvent()
 {
-	//. 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
 
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
 		return false;
 
@@ -127,7 +120,6 @@ bool CNewUIDuelWatchWindow::Update()
 			else
 				m_bChannelEnable[i] = FALSE;
 
-			// 버튼 잠금
 			if (m_bChannelEnable[i] == TRUE && g_DuelMgr.IsDuelChannelJoinable(i))
 			{
 				m_BtnChannel[i].UnLock();
@@ -155,11 +147,9 @@ bool CNewUIDuelWatchWindow::Render()
 	POINT ptOrigin = { m_Pos.x, m_Pos.y+50 };
 	unicode::t_char szText[256];
 
-	// 고르시오
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[2699], 190, 0, RT3_SORT_CENTER);
 
-	// 라인
 	RenderImage(IMAGE_DUELWATCHWINDOW_LINE, m_Pos.x+1, m_Pos.y+130, 188.f, 21.f);
 	RenderImage(IMAGE_DUELWATCHWINDOW_LINE, m_Pos.x+1, m_Pos.y+130+90, 188.f, 21.f);
 	RenderImage(IMAGE_DUELWATCHWINDOW_LINE, m_Pos.x+1, m_Pos.y+130+90+90, 188.f, 21.f);
@@ -168,8 +158,6 @@ bool CNewUIDuelWatchWindow::Render()
 	g_pRenderText->SetFont(g_hFontBold);
 	for (i = 0; i < 4; ++i)
 	{
-		// 제1결투장
-		//g_pRenderText->SetTextColor(200, 210, 100, 255);
 		g_pRenderText->SetTextColor(255, 255, 128, 255);
 		unicode::_sprintf(szText, GlobalText[2700], i + 1);
 		g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 20, szText, 190, 0, RT3_SORT_CENTER);
@@ -183,27 +171,14 @@ bool CNewUIDuelWatchWindow::Render()
 	{
 		if (m_bChannelEnable[i] == TRUE)
 		{
-// 			if (g_DuelMgr.IsDuelChannelJoinable(i))
-// 			{
-				// VS
 				g_pRenderText->SetTextColor(255, 50, 50, 255);
 				g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 35, "VS", 190, 0, RT3_SORT_CENTER);
-
-				// 이름
 				g_pRenderText->SetTextColor(255, 255, 255, 255);
 				g_pRenderText->RenderText(ptOrigin.x+20, ptOrigin.y + 35, g_DuelMgr.GetDuelChannelUserID1(i), 70, 0, RT3_SORT_CENTER);
 				g_pRenderText->RenderText(ptOrigin.x+100, ptOrigin.y + 35, g_DuelMgr.GetDuelChannelUserID2(i), 70, 0, RT3_SORT_CENTER);
-// 			}
-// 			else
-// 			{
-// 				// 관전 가능한 최대 인원을 넘었습니다.
-// 				g_pRenderText->SetTextColor(255, 255, 255, 255);
-// 				g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 35, GlobalText[2707], 190, 0, RT3_SORT_CENTER);
-// 			}
 		}
 		else
 		{
-			// 결투 중이지 않습니다
 			g_pRenderText->SetTextColor(255, 255, 255, 255);
 			g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 35, GlobalText[2705], 190, 0, RT3_SORT_CENTER);
 		}
@@ -211,7 +186,6 @@ bool CNewUIDuelWatchWindow::Render()
 		ptOrigin.y += 90;
 	}
 
-	// 버튼
 	for (i = 0; i < 4; ++i)
 	{
 		m_BtnChannel[i].Render();
@@ -272,7 +246,7 @@ void CNewUIDuelWatchWindow::RenderFrame()
 	g_pRenderText->SetTextColor(220, 220, 220, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-	// 창 제목 표시
+
 	unicode::_sprintf(szText, "%s", GlobalText[2698]);
 	g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
@@ -281,7 +255,6 @@ bool CNewUIDuelWatchWindow::BtnProcess()
 {
 	POINT ptExitBtn1 = { m_Pos.x+169, m_Pos.y+7 };
 
-	//. Exit1 버튼 (기본처리)
 	if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
 	{
 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUELWATCH);

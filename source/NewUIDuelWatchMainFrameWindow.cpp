@@ -1,5 +1,4 @@
 // NewUIDuelWatchMainFrameWindow.cpp: implementation of the CNewUIDuelWatchMainFrameWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -11,10 +10,6 @@
 #ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIDuelWatchMainFrameWindow::CNewUIDuelWatchMainFrameWindow()
 {
@@ -54,10 +49,9 @@ bool CNewUIDuelWatchMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRe
 	LoadImages();
 
 	m_BtnExit.SetPos(640-36, 480-29);
-	//. 닫기 버튼
 	m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
 	m_BtnExit.ChangeButtonInfo(640-36, 480-29, 36, 29);
-	m_BtnExit.ChangeToolTipText(GlobalText[2702], true); // 2702 "관전종료"
+	m_BtnExit.ChangeToolTipText(GlobalText[2702], true);
 
 	Show(false);
 
@@ -83,14 +77,8 @@ void CNewUIDuelWatchMainFrameWindow::Release()
 
 bool CNewUIDuelWatchMainFrameWindow::UpdateMouseEvent()
 {
-	//. 버튼 처리
-	if(true == BtnProcess())	//. 처리가 완료 되었다면
+	if(true == BtnProcess())
 		return false;
-
-	//. 인벤토리 내의 영역 클릭시 하위 UI처리 및 이동 불가
-// 	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
-// 		return false;
-
 	return true;
 }
 
@@ -119,12 +107,10 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
 
 	POINT ptOrigin = { 0, 480.f - 51.f };
 
-	// 이름 출력
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->RenderText(ptOrigin.x + 320 - 80, ptOrigin.y + 36, g_DuelMgr.GetDuelPlayerID(DUEL_HERO), 55, 0, RT3_SORT_CENTER);
 	g_pRenderText->RenderText(ptOrigin.x + 320 + 25, ptOrigin.y + 36, g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY), 55, 0, RT3_SORT_CENTER);
 
-	// 승수 출력
 	int i;
 	for (i = 0; i < g_DuelMgr.GetScore(DUEL_HERO); ++i)
 	{
@@ -139,18 +125,14 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
 	{
 		m_bHasHPReceived = TRUE;
 		g_DuelMgr.SetFighterRegenerated(FALSE);
-
-		// 초기화
 		m_fPrevHPRate1 = m_fLastHPRate1 = m_fReceivedHPRate1 = g_DuelMgr.GetHP(DUEL_HERO);
 		m_fPrevHPRate2 = m_fLastHPRate2 = m_fReceivedHPRate2 = g_DuelMgr.GetHP(DUEL_ENEMY);
 		m_fPrevSDRate1 = m_fLastSDRate1 = m_fReceivedSDRate1 = g_DuelMgr.GetSD(DUEL_HERO);
 		m_fPrevSDRate2 = m_fLastSDRate2 = m_fReceivedSDRate2 = g_DuelMgr.GetSD(DUEL_ENEMY);
 	}
 
-	if (m_fLastHPRate1 != g_DuelMgr.GetHP(DUEL_HERO) || m_fLastHPRate2 != g_DuelMgr.GetHP(DUEL_ENEMY)
-		|| m_fLastSDRate1 != g_DuelMgr.GetSD(DUEL_HERO) || m_fLastSDRate2 != g_DuelMgr.GetSD(DUEL_ENEMY))
+	if (m_fLastHPRate1 != g_DuelMgr.GetHP(DUEL_HERO) || m_fLastHPRate2 != g_DuelMgr.GetHP(DUEL_ENEMY)|| m_fLastSDRate1 != g_DuelMgr.GetSD(DUEL_HERO) || m_fLastSDRate2 != g_DuelMgr.GetSD(DUEL_ENEMY))
 	{
-		// 새로운 정보가 왔다
 		m_fLastHPRate1 = g_DuelMgr.GetHP(DUEL_HERO);
 		m_fLastHPRate2 = g_DuelMgr.GetHP(DUEL_ENEMY);
 		m_fLastSDRate1 = g_DuelMgr.GetSD(DUEL_HERO);
@@ -161,34 +143,26 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
 		m_fReceivedSDRate2 = m_fPrevSDRate2;
 	}
 
-	// HP 출력
 	int iDamageGap = int(absf(m_fReceivedHPRate1 - g_DuelMgr.GetHP(DUEL_HERO)) * 5.0f) + 2;
 	float fHPRatePerPixel = 1.0f / 236.f * iDamageGap;
 
 	float fHPRate = g_DuelMgr.GetHP(DUEL_HERO);
 	if (m_fPrevHPRate1 > fHPRate + fHPRatePerPixel)
 	{
-		// HP 감소
 		m_fPrevHPRate1 -= fHPRatePerPixel;
-		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE_FX, 60 + 236.f * (1.f - m_fPrevHPRate1), 440,
-			236.f * m_fPrevHPRate1, 7.f, 235.f/256.f * m_fPrevHPRate1, 0, -235.f/256.f * m_fPrevHPRate1, 6.f/8.f);
-		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, 60 + 236.f * (1.f - fHPRate), 440,
-			236.f * fHPRate, 7.f, 235.f/256.f * fHPRate, 0, -235.f/256.f * fHPRate, 6.f/8.f);
+		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE_FX, 60 + 236.f * (1.f - m_fPrevHPRate1), 440,236.f * m_fPrevHPRate1, 7.f, 235.f/256.f * m_fPrevHPRate1, 0, -235.f/256.f * m_fPrevHPRate1, 6.f/8.f);
+		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, 60 + 236.f * (1.f - fHPRate), 440,236.f * fHPRate, 7.f, 235.f/256.f * fHPRate, 0, -235.f/256.f * fHPRate, 6.f/8.f);
 	}
 	else if (m_fPrevHPRate1 < fHPRate - fHPRatePerPixel)
 	{
-		// HP 증가
 		m_fPrevHPRate1 += fHPRatePerPixel;
-		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE_FX, 60 + 236.f * (1.f - fHPRate), 440,
-			236.f * fHPRate, 7.f, 235.f/256.f * fHPRate, 0, -235.f/256.f * fHPRate, 6.f/8.f);
-		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, 60 + 236.f * (1.f - m_fPrevHPRate1), 440,
-			236.f * m_fPrevHPRate1, 7.f, 235.f/256.f * m_fPrevHPRate1, 0, -235.f/256.f * m_fPrevHPRate1, 6.f/8.f);
+		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE_FX, 60 + 236.f * (1.f - fHPRate), 440,236.f * fHPRate, 7.f, 235.f/256.f * fHPRate, 0, -235.f/256.f * fHPRate, 6.f/8.f);
+		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, 60 + 236.f * (1.f - m_fPrevHPRate1), 440,236.f * m_fPrevHPRate1, 7.f, 235.f/256.f * m_fPrevHPRate1, 0, -235.f/256.f * m_fPrevHPRate1, 6.f/8.f);
 	}
 	else
 	{
 		m_fPrevHPRate1 = fHPRate;
-		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, 60 + 236.f * (1.f - fHPRate), 440,
-			236.f * fHPRate, 7.f, 235.f/256.f * fHPRate, 0, -235.f/256.f * fHPRate, 6.f/8.f);
+		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, 60 + 236.f * (1.f - fHPRate), 440,236.f * fHPRate, 7.f, 235.f/256.f * fHPRate, 0, -235.f/256.f * fHPRate, 6.f/8.f);
 	}
 
 	iDamageGap = int(absf(m_fReceivedHPRate2 - g_DuelMgr.GetHP(DUEL_ENEMY)) * 5.0f) + 2;
@@ -197,14 +171,12 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
 	fHPRate = g_DuelMgr.GetHP(DUEL_ENEMY);
 	if (m_fPrevHPRate2 > fHPRate + fHPRatePerPixel)
 	{
-		// HP 감소
 		m_fPrevHPRate2 -= fHPRatePerPixel;
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE_FX, 580-236, 440, 236.f * m_fPrevHPRate2, 7.f);
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, 580-236, 440, 236.f * fHPRate, 7.f);
 	}
 	else if (m_fPrevHPRate2 < fHPRate - fHPRatePerPixel)
 	{
-		// HP 증가
 		m_fPrevHPRate2 += fHPRatePerPixel;
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE_FX, 580-236, 440, 236.f * fHPRate, 7.f);
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, 580-236, 440, 236.f * m_fPrevHPRate2, 7.f);
@@ -215,21 +187,18 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, 580-236, 440, 236.f * fHPRate, 7.f);
 	}
 
-	// SD 출력
 	iDamageGap = int(absf(m_fReceivedSDRate1 - g_DuelMgr.GetSD(DUEL_HERO)) * 5.0f) + 2;
 	float fSDRatePerPixel = 1.0f / 154.f * iDamageGap;
 
 	float fSDRate = g_DuelMgr.GetSD(DUEL_HERO);
 	if (m_fPrevSDRate1 > fSDRate + fSDRatePerPixel)
 	{
-		// SD 감소
 		m_fPrevSDRate1 -= fSDRatePerPixel;
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE_FX, 142 + 154.f * (1.f - m_fPrevSDRate1), 450, 154.f * m_fPrevSDRate1, 4.f);
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE, 142 + 154.f * (1.f - fSDRate), 450, 154.f * fSDRate, 4.f);
 	}
 	else if (m_fPrevSDRate1 < fSDRate - fSDRatePerPixel)
 	{
-		// SD 증가
 		m_fPrevSDRate1 += fSDRatePerPixel;
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE_FX, 142 + 154.f * (1.f - fSDRate), 450, 154.f * fSDRate, 4.f);
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE, 142 + 154.f * (1.f - m_fPrevSDRate1), 450, 154.f * m_fPrevSDRate1, 4.f);
@@ -246,14 +215,12 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
 	fSDRate = g_DuelMgr.GetSD(DUEL_ENEMY);
 	if (m_fPrevSDRate2 > fSDRate + fSDRatePerPixel)
 	{
-		// SD 감소
 		m_fPrevSDRate2 -= fSDRatePerPixel;
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE_FX, 344, 450, 154.f * m_fPrevSDRate2, 4.f);
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE, 344, 450, 154.f * fSDRate, 4.f);
 	}
 	else if (m_fPrevSDRate2 < fSDRate - fSDRatePerPixel)
 	{
-		// SD 증가
 		m_fPrevSDRate2 += fSDRatePerPixel;
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE_FX, 344, 450, 154.f * fSDRate, 4.f);
 		RenderImage(IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE, 344, 450, 154.f * m_fPrevSDRate2, 4.f);
@@ -319,10 +286,9 @@ void CNewUIDuelWatchMainFrameWindow::UnloadImages()
 
 void CNewUIDuelWatchMainFrameWindow::RenderFrame()
 {
-	float width, height;	// 이미지 실제 넓이, 높이 값
-	float x, y;				// 이미지 위치 x, y 값
+	float width, height;
+	float x, y;
 	
-	// MainFrame 틀 먼저 렌더링
 	width = 256.f; height = 51.f;
 	x = 0.f; y = 480.f - height;
 	SEASON3B::RenderImage(IMAGE_DUELWATCH_MAINFRAME_BACK1, x, y, width, height);
@@ -338,7 +304,6 @@ bool CNewUIDuelWatchMainFrameWindow::BtnProcess()
 {
 	if(m_BtnExit.UpdateMouseEvent() == true)
 	{
-		// 관전 종료
 		if (g_DuelMgr.GetCurrentChannel() >= 0)
 		{
 			SendRequestQuitChannel(g_DuelMgr.GetCurrentChannel());

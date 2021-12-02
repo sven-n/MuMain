@@ -28,18 +28,12 @@ bool CPersonalShopTitleImp::AddShopTitle(int key, CHARACTER* pPlayer, const std:
 
 	type_drawobj_map::iterator mi = m_listShopTitleDrawObj.find(pPlayer);
 	if(mi != m_listShopTitleDrawObj.end())
-	{	//. 이미 존재 한다면 수정
+	{
 		CShopTitleDrawObj* pDrawObj = (*mi).second;
 		if(pDrawObj->GetKey() == key) 
 		{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-			POINT ptPos = MakePos(-1, -1);
 			pDrawObj->SetBoxContent(full_name, title);
-			pDrawObj->SetBoxPos(ptPos);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			pDrawObj->SetBoxContent(full_name, title);
-			pDrawObj->SetBoxPos(MakePos(-1,-1));	//. 어짜피 그리기 전에 포지션 업데이트 하므로..
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+			pDrawObj->SetBoxPos(MakePos(-1,-1));
 		}
 		else 
 		{
@@ -47,16 +41,9 @@ bool CPersonalShopTitleImp::AddShopTitle(int key, CHARACTER* pPlayer, const std:
 		}
 	}
 	else 
-	{	//. 없다면 새로 추가
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-		CShopTitleDrawObj* pDrawObj = new CShopTitleDrawObj;
-		POINT ptPos = MakePos(-1, -1);
-		pDrawObj->Create(key, full_name, title, ptPos);
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
+	{
 		CShopTitleDrawObj* pDrawObj = new CShopTitleDrawObj;
 		pDrawObj->Create(key, full_name, title, MakePos(-1,-1));
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
 		m_listShopTitleDrawObj.insert(type_drawobj_map::value_type(pPlayer, pDrawObj));
 	}
 
@@ -211,7 +198,6 @@ DWORD CPersonalShopTitleImp::GetShopTextColor(CHARACTER* pPlayer)
 		case PVP_MURDERER1:
 			return RGBA(230,110,0,255);
 		default:
-			// 흰색 : 옅은 노랑
 			return IsShopTitleHighlight(pPlayer) ? (255<<24)+(255<<16)+(230<<8)+(230) : (255<<24)+(0<<16)+(230<<8)+(230);
 		}
 	}
@@ -233,7 +219,6 @@ DWORD CPersonalShopTitleImp::GetShopText2Color(CHARACTER* pPlayer)
 		case PVP_MURDERER1:
 			return RGBA(230,110,0,255);
 		default:
-			// 옅은붉은 : 주황색
 			return IsShopTitleHighlight(pPlayer) ? (255<<24)+(41<<16)+(57<<8)+(108) : (255<<24)+(0<<16)+(150<<8)+(250);
 		}
 	}
@@ -255,7 +240,6 @@ DWORD CPersonalShopTitleImp::GetShopBGColor(CHARACTER* pPlayer)
 		case PVP_MURDERER1:
 			return IsShopTitleHighlight(pPlayer) ? RGBA(182,122,82,128) : RGBA(108,57,41,128);
 		default:
-			// 주황색 : 옅은붉은
 			return IsShopTitleHighlight(pPlayer) ? (128<<24)+(0<<16)+(150<<8)+(250) : (128<<24)+(41<<16)+(57<<8)+(108);
 		}
 	}
@@ -264,16 +248,15 @@ DWORD CPersonalShopTitleImp::GetShopBGColor(CHARACTER* pPlayer)
 void CPersonalShopTitleImp::Update()
 {
 	if(!m_listShopTitleDrawObj.empty()){
-		CheckKeyIntegrity();		//. Key 무결성 검사 (오류발생시 자동수정)
+		CheckKeyIntegrity();
 	}
 }
 void CPersonalShopTitleImp::Draw()
 {
 	if(!m_listShopTitleDrawObj.empty())
 	{
-		//. moved from Update() : 구조때문에 어쩔수없이 이리로 옮김.
-		UpdatePosition();		//. 현재 포지션 업데이트
-		RevisionPosition();		//. 위치 보정
+		UpdatePosition();
+		RevisionPosition();
 
 		if(m_iHighlightFrame > 6) 
 		{
@@ -372,8 +355,8 @@ void CPersonalShopTitleImp::RevisionPosition()
 					(*mi_x).second->SetBoxPos(pos);
 				}
 			}
-		}	// for ; mi_y
-	}	// for ; mi_x
+		}
+	}
 
 	for(mi_x = m_listShopTitleDrawObj.begin(); mi_x != m_listShopTitleDrawObj.end(); ++mi_x) {
 		POINT pos; SIZE size;

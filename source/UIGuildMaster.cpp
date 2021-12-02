@@ -463,7 +463,6 @@ void CUIGuildMaster::DoGuildMasterMainAction()
 	}
 	if( m_EditGuildMarkButton.DoMouseAction() )
 	{
-		// 1269 "아직 지원하지 않는 기능입니다."
 		char szText[50];
 		strcpy( szText, GlobalText[1269] );
 		m_dwEditGuildMarkConfirmPopup = g_pUIPopup->SetPopup( szText, 1, 50, POPUP_OK, NULL );

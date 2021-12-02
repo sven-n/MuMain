@@ -83,16 +83,16 @@ namespace SEASON3B
 			BUTTON_GUILD_OUT = 0,
 			BUTTON_GET_POSITION,
 			BUTTON_FREE_POSITION,
-			BUTTON_GET_OUT,			// 방출
-			BUTTON_UNION_CREATE,	//연합길드생성
-			BUTTON_UNION_OUT,		//연합길드해체
+			BUTTON_GET_OUT,
+			BUTTON_UNION_CREATE,
+			BUTTON_UNION_OUT,
 			BUTTON_END,
 		};
 		EVENT_STATE				m_EventState;
 		
 		CNewUIManager*			m_pNewUIMng;
 		POINT					m_Pos;
-		int						m_nCurrentTab;		// 정보 탭 ( 0: 길드, 1:길드원, 2:길드연합 )
+		int						m_nCurrentTab;
 		int						m_Loc;
 		int						m_Loc_Bk;
 		int						m_BackUp;

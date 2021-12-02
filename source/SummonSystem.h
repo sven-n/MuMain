@@ -1,5 +1,4 @@
 // SummonSystem.h: interface for the CSummonSystem class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_SUMMONSYSTEM_H__B6F7054C_8D6B_4E3C_94E1_C9A5B1207076__INCLUDED_)
@@ -19,25 +18,25 @@ public:
 	CSummonSystem();
 	virtual ~CSummonSystem();
 
-	void MoveEquipEffect(CHARACTER * pCharacter, int iItemType, int iItemLevel,int iItemOption1);		// 소환수 아이템 장비 이펙트 처리
-	void RemoveEquipEffects(CHARACTER * pCharacter);	// 해당 캐릭터의 소환수 아이템 장비 이펙트를 모두 제거한다
-	void RemoveEquipEffect_Summon(CHARACTER * pCharacter);	// 소환수 아이템 장비시 소환 유령 회전 이펙트 제거
+	void MoveEquipEffect(CHARACTER * pCharacter, int iItemType, int iItemLevel,int iItemOption1);
+	void RemoveEquipEffects(CHARACTER * pCharacter);
+	void RemoveEquipEffect_Summon(CHARACTER * pCharacter);
 	
-	BOOL SendRequestSummonSkill(int iSkill, CHARACTER * pCharacter, OBJECT * pObject);	// 소환수 스킬 사용 서버 전송
-	void CastSummonSkill(int iSkill, CHARACTER * pCharacter, OBJECT * pObject, int iTargetPos_X, int iTargetPos_Y);	// 소환수 스킬 이펙트 생성
+	BOOL SendRequestSummonSkill(int iSkill, CHARACTER * pCharacter, OBJECT * pObject);
+	void CastSummonSkill(int iSkill, CHARACTER * pCharacter, OBJECT * pObject, int iTargetPos_X, int iTargetPos_Y);
 
-	void CreateDamageOfTimeEffect(int iSkill, OBJECT * pObject);	// DOT 이펙트 생성
-	void RemoveDamageOfTimeEffect(int iSkill, OBJECT * pObject);	// DOT 이펙트 제거
-	void RemoveAllDamageOfTimeEffect(OBJECT * pObject);	// DOT 이펙트 모두 제거
+	void CreateDamageOfTimeEffect(int iSkill, OBJECT * pObject);
+	void RemoveDamageOfTimeEffect(int iSkill, OBJECT * pObject);
+	void RemoveAllDamageOfTimeEffect(OBJECT * pObject);
 	
 protected:
-	void CreateEquipEffect_WristRing(CHARACTER * pCharacter, int iItemType, int iItemLevel,int iItemOption1);	// 소환수 아이템 장비시 팔목 이펙트 생성
-	void RemoveEquipEffect_WristRing(CHARACTER * pCharacter);	// 소환수 아이템 해제시 팔목 이펙트 제거
-	void CreateEquipEffect_Summon(CHARACTER * pCharacter, int iItemType, int iItemLevel,int iItemOption1);	// 소환수 아이템 장비시 소환 유령 회전 이펙트 생성
+	void CreateEquipEffect_WristRing(CHARACTER * pCharacter, int iItemType, int iItemLevel,int iItemOption1);
+	void RemoveEquipEffect_WristRing(CHARACTER * pCharacter);
+	void CreateEquipEffect_Summon(CHARACTER * pCharacter, int iItemType, int iItemLevel,int iItemOption1);
 
-	void CreateCastingEffect(vec3_t vPosition, vec3_t vAngle, int iSubType);	// 소환수 스킬 시전시 공통 이펙트 생성
+	void CreateCastingEffect(vec3_t vPosition, vec3_t vAngle, int iSubType);
 
-	void CreateSummonObject(int iSkill, CHARACTER * pCharacter, OBJECT * pObject, float fTargetPos_X, float fTargetPos_Y);	// 소환수 생성
+	void CreateSummonObject(int iSkill, CHARACTER * pCharacter, OBJECT * pObject, float fTargetPos_X, float fTargetPos_Y);
 	void SetPlayerSummon(CHARACTER * pCharacter, OBJECT * pObject);
 	
 protected:

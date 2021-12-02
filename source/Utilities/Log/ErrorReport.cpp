@@ -68,11 +68,6 @@ int Xor_ConvertBuffer( void *lpBuffer, int iSize, int iKey = 0)
 	return ( iConvertSize);
 }
 
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CErrorReport::CErrorReport()
 {
 	Clear();
@@ -99,9 +94,6 @@ void CErrorReport::Create(char* lpszFileName)
 {
 	char szTempFileName[128] = "";
 	::strcpy(szTempFileName, lpszFileName);
-
-	// 로그 파일 생성 시 사용중이라면 파일 이름을 바꿔서 다시 생성.
-	// 2번째 로그 파일은 "MuError2.log"
 	while (1)
 	{
 		m_hFile = ::CreateFile(szTempFileName, GENERIC_READ | GENERIC_WRITE,
@@ -183,7 +175,7 @@ char* CErrorReport::CheckHeadToCut( char *lpszBuffer, DWORD dwNumber)
 		if ( lpFind)
 		{
 			if ( 0 == strncmp( lpFind, lpszBegin, iLengthOfBegin))
-			{	//찾음
+			{
 				lpFoundList[iFoundCount++] = lpFind;
 				lpFind += iLengthOfBegin;
 			}
@@ -384,11 +376,6 @@ void CErrorReport::WriteSoundCardInfo( void)
 
 	AddSeparator();
 }
-
-//////////////////////////////////////////////////////////////////////
-// System Setting check
-//////////////////////////////////////////////////////////////////////
-
 
 void GetOSVersion( ER_SystemInfo *si)
 {
@@ -593,7 +580,6 @@ void GetCPUInfo( ER_SystemInfo *si)
 	char *lpszUnknown = "Unknown";
 	char lpszTemp[256];
 
-	// 종류
 	DWORD eaxreg, ebxreg, ecxreg, edxreg;
  
 	// We read the standard CPUID level 0x00000000 which should
@@ -634,7 +620,6 @@ void GetCPUInfo( ER_SystemInfo *si)
 	unsigned int uiFamily   = (eaxreg >> 8) & 0xF;
 	unsigned int uiModel    = (eaxreg >> 4) & 0xF;
 
-	// 종류 찾기
 	switch ( iBrand)
 	{
 		case 0x756E6547:	// GenuineIntel
@@ -753,7 +738,6 @@ void GetCPUInfo( ER_SystemInfo *si)
 			break;
 	}
 
-	// 속도
 	__int64 llFreq = GetCPUFrequency( 50) / 1000000;
 	wsprintf( lpszTemp, " %dMhz", ( int)llFreq);
 	strcat( si->m_lpszCPU, lpszTemp);

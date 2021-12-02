@@ -198,7 +198,7 @@ void CExceptionHandler::SetProcessInfoHeader(DMPPROCESSINFOHEADER* pProcessInfoH
 			ProcessEntry.dwSize = sizeof(PROCESSENTRY32);
 			if(Process32First(hProcessSnap, &ProcessEntry)) {
 				do {
-					if(ProcessEntry.th32ProcessID == GetCurrentProcessId()) {	//. 해당 프로세스를 찾는다.
+					if(ProcessEntry.th32ProcessID == GetCurrentProcessId()) {
 						pProcessInfoHeader->ProcessId = ProcessEntry.th32ProcessID;
 						
 						char szModuleFileName[256];
@@ -238,7 +238,7 @@ void CExceptionHandler::SetProcessInfoHeader(DMPPROCESSINFOHEADER* pProcessInfoH
 			
 			VS_FIXEDFILEINFO* pFileInfoPointer = NULL;
 			pProcessInfoHeader->IsExistFixedFileInfo = (BYTE)VerQueryValue(pbyData, "\\", 
-				(LPVOID*)&pFileInfoPointer, (UINT*)&dwVersionInfoSize);	//. 파일정보가 존재하는가?
+				(LPVOID*)&pFileInfoPointer, (UINT*)&dwVersionInfoSize);
 			if(pProcessInfoHeader->IsExistFixedFileInfo)
 				ImageFileInfo = *pFileInfoPointer;
 			
@@ -395,7 +395,7 @@ bool CDmpFileLoader::Create(const std::string& dmpfile)
 	
 	DMPPROCESSINFOHEADER* pProcessInfoHeader = &m_DmpFileHeader.ProcessInfo;
 	//. Read image file infomation
-	if(pProcessInfoHeader->IsExistFixedFileInfo == TRUE) {		//. 파일 정보가 존재한다면 읽는다.
+	if(pProcessInfoHeader->IsExistFixedFileInfo == TRUE) {
 		fread(&m_FixedImageFileInfo, sizeof(VS_FIXEDFILEINFO), 1, fd);
 	}
 

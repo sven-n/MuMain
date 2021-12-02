@@ -344,7 +344,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 	case 444:
 		OpenMonsterModel(139);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+139,PosX,PosY);
-		strcpy(pCharacter->ID,"½¦µµ¿ì Æù");
+		strcpy(pCharacter->ID,"½¦µµ¿ì Æ");
 		pCharacter->Object.Scale = 1.1f;
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;

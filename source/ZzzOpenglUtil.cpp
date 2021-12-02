@@ -1176,8 +1176,6 @@ void BeginBitmap()
 	glLoadIdentity();
     gluOrtho2D(0,WindowWidth,0,WindowHeight);
 
-	// OpenGL에서 StackUnder Flow 호출되며, 
-	//	Mode를 먼저 설정하고 Push하여야 하는데 반대로 되었습니다.
 #ifdef LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();

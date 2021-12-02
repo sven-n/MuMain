@@ -1,5 +1,4 @@
 // NewUIItemEnduranceInfo.cpp: implementation of the CNewUIItemEnduranceInfo class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -16,10 +15,6 @@ extern float g_fScreenRate_x;
 
 using namespace SEASON3B;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CNewUIItemEnduranceInfo::CNewUIItemEnduranceInfo()
 {
 	memset( &m_UIStartPos, 0, sizeof(POINT) );
@@ -34,30 +29,21 @@ CNewUIItemEnduranceInfo::~CNewUIItemEnduranceInfo()
 	Release();
 }
 
-//---------------------------------------------------------------------------------------------
-// Create
 bool SEASON3B::CNewUIItemEnduranceInfo::Create( CNewUIManager* pNewUIMng, int x, int y )
 {
 	if( NULL == pNewUIMng )
 		return false;
 	
 	m_pNewUIMng = pNewUIMng;
-	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO, this );		// 인터페이스 오브젝트 등록
+	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO, this );
 	
 	SetPos( x, y );
-	
 	LoadImages();
-
-	// 내구도 이미지 인덱스 초기화
 	InitImageIndex();
-	
 	Show( true );
-	
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Release
 void SEASON3B::CNewUIItemEnduranceInfo::Release()
 {
 	UnloadImages();
@@ -69,8 +55,6 @@ void SEASON3B::CNewUIItemEnduranceInfo::Release()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// SetPos
 void SEASON3B::CNewUIItemEnduranceInfo::SetPos( int x, int y )
 {
 	m_UIStartPos.x = x;
@@ -263,24 +247,16 @@ bool SEASON3B::CNewUIItemEnduranceInfo::Update()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// Render
 bool SEASON3B::CNewUIItemEnduranceInfo::Render()
 {
 	EnableAlphaTest();
-
 	glColor3f( 1.f, 1.f, 1.f );
 	g_pRenderText->SetFont( g_hFont );
 	g_pRenderText->SetBgColor( 0, 0, 0, 0 );
 	g_pRenderText->SetTextColor( 255, 255, 255, 255 );
-	
-	// 왼쪽에 위치하는 UI정보
 	RenderLeft();
-	// 오른쪽에 위치하는 UI정보 - 아이템 내구도
 	RenderRight();
-	
 	DisableAlphaBlend();
-
 	return true;
 }
 
@@ -292,7 +268,6 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 	int iNextPosY = m_UIStartPos.y;
 	
 #ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-	// 1. PC방 포인트
 	if( RenderPCRoomPoint( m_UIStartPos.x, iNextPosY ) )
 	{
 		iNextPosY += (UI_INTERVAL_HEIGHT+10);
@@ -300,7 +275,6 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 #endif // KJH_DEL_PC_ROOM_SYSTEM
 	if( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF )
 	{
-		// 2. 엘프 화살갯수
 		if( RenderNumArrow( m_UIStartPos.x, iNextPosY ) )
 		{
 			iNextPosY += (UI_INTERVAL_HEIGHT+10);
@@ -308,20 +282,17 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 	}
 
 #ifdef PBG_ADD_PCROOM_NEWUI
-	// PC방 UI
 	if(RenderPCRoomUI(m_UIStartPos.x, iNextPosY))
 	{
 		iNextPosY += (UI_INTERVAL_HEIGHT+PCROOM_HEIGHT);
 	}
 #endif //PBG_ADD_PCROOM_NEWUI
 	
-	// 3.사탄, 수호천사, 유니리아, 다크호스, 펜릴
 	if( RenderEquipedHelperLife( m_UIStartPos.x, iNextPosY ) )
 	{
 		iNextPosY += (UI_INTERVAL_HEIGHT+PETHP_FRAME_HEIGHT);
 	}
 	
-	// 4. 다크로드 펫 (다크스피릿)
 	if ( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD )
     {
 		if( RenderEquipedPetLife( m_UIStartPos.x, iNextPosY ) )
@@ -331,7 +302,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 	}
 	
 	if( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF )
-	{	// 5. 엘프 소환 몬스터
+	{
 		if( RenderSummonMonsterLife( m_UIStartPos.x, iNextPosY ) )
 		{
 			iNextPosY += (UI_INTERVAL_HEIGHT+PETHP_FRAME_HEIGHT);
@@ -339,16 +310,11 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-
 void SEASON3B::CNewUIItemEnduranceInfo::RenderRight()
 {
-	// 1. 아이템 내구도 표시
 	RenderItemEndurance( m_ItemDurUIStartPos.x, m_ItemDurUIStartPos.y );
 }
 
-//---------------------------------------------------------------------------------------------
-// BtnProcess
 bool SEASON3B::CNewUIItemEnduranceInfo::BtnProcess()
 {
 	
@@ -360,15 +326,11 @@ float SEASON3B::CNewUIItemEnduranceInfo::GetLayerDepth()
 	return 3.5f;
 }
 
-//---------------------------------------------------------------------------------------------
-// OpenningProcess
 void SEASON3B::CNewUIItemEnduranceInfo::OpenningProcess()
 {
 
 }
 
-//---------------------------------------------------------------------------------------------
-// ClosingProcess
 void SEASON3B::CNewUIItemEnduranceInfo::ClosingProcess()
 {
 
@@ -563,18 +525,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedPetLife( int iX, int iY )
 	int iLife = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability;
 	
 	RenderHPUI( iX, iY, szText, iLife );
-	// 
-	//     Width=20.f; Height=28.f; x=GetScreenWidth()-Width-PartyWidth-65.f; y=5.f; 
-	//     RenderBitmap ( BITMAP_SKILL_INTERFACE+2, (float)x, (float)y, (float)Width-4, (float)Height-8, (((m_byCommand)%8)*32+6.f)/256.f, (((m_byCommand)/8)*Height+3.f)/256.f,Width/256.f,(Height-1.f)/256.f);
-	// 
-	//     Width -= 8.f; Height -= 8.f;
-	//     //  명령 설명을 표시한다.
-	//     if ( MouseX>=x && MouseX<=x+Width && MouseY>=y && MouseY<=y+Height )
-	//     {
-	//         RenderTipText ( (int)x, (int)(y+Height), GlobalText[1219+m_byCommand] );
-	//     }
-	
-	
 	return true;
 }
 

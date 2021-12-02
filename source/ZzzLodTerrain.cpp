@@ -1,9 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Terrain 관련 함수
-// 뮤의 배경중에 Terrain 바닥을 처리하는 함수
-// 배경 바닥 빛처리, 랜더링 등등
-//
-// *** 함수 레벨: 2
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -55,7 +51,7 @@ float           TerrainMappingAlpha[TERRAIN_SIZE*TERRAIN_SIZE];
 float           TerrainGrassTexture[TERRAIN_SIZE*TERRAIN_SIZE];
 float           TerrainGrassWind[TERRAIN_SIZE*TERRAIN_SIZE];
 #ifdef ASG_ADD_MAP_KARUTAN
-float			g_fTerrainGrassWind1[TERRAIN_SIZE*TERRAIN_SIZE];	// 특정맵에서 물 흐름 속도와 풀 흔들리는 속도를 다르게 쓰고 싶을 때 사용.
+float			g_fTerrainGrassWind1[TERRAIN_SIZE*TERRAIN_SIZE];
 #endif	// ASG_ADD_MAP_KARUTAN
 
 WORD            TerrainWall[TERRAIN_SIZE*TERRAIN_SIZE];
@@ -74,22 +70,12 @@ FrustrumMap_t	g_FrustrumMap;
 const float g_fMinHeight = -500.f;
 const float g_fMaxHeight = 1000.f;
 
-//////////////////////////////////////////////////////////////////////////
-//  Extern.
-//////////////////////////////////////////////////////////////////////////
 extern  short   g_shCameraLevel;
 extern  float CameraDistanceTarget;
 extern  float CameraDistance;
 
-//////////////////////////////////////////////////////////////////////////
-//  Static Global Variable.
-//////////////////////////////////////////////////////////////////////////
 static  float   g_fFrustumRange = -40.f;
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Util
-///////////////////////////////////////////////////////////////////////////////
 
 inline int TERRAIN_INDEX(int x,int y)
 {
@@ -136,8 +122,6 @@ static void BuxConvert(BYTE *Buffer,int Size)
 
 int OpenTerrainAttribute(char *FileName)
 {
-	// 암호화 이후
-
 	FILE *fp = fopen(FileName,"rb");
 	if(fp == NULL)
 	{
@@ -154,14 +138,12 @@ int OpenTerrainAttribute(char *FileName)
 	BYTE Width;
 	BYTE Height;
 
-	// 읽고
 	fseek(fp,0,SEEK_END);
 	int EncBytes = ftell(fp);	//
 	fseek(fp,0,SEEK_SET);
 	unsigned char *EncData = new unsigned char [EncBytes];
 	fread( EncData, EncBytes, 1, fp);
 
-	// 암호화 풀기
 	int iSize = MapFileDecrypt( NULL, EncData, EncBytes);	//
 	unsigned char *byBuffer = new unsigned char[iSize];		//
 	MapFileDecrypt( byBuffer, EncData, EncBytes);	//
@@ -256,7 +238,6 @@ bool SaveTerrainAttribute(char *FileName, int iMap)
     return true;
 }
 
-//  속성 변경.
 void AddTerrainAttribute ( int x, int y, BYTE att )
 {
     int     iIndex = (x+(y*TERRAIN_SIZE));
@@ -278,11 +259,11 @@ void AddTerrainAttributeRange ( int x, int y, int dx, int dy, BYTE att, BYTE Add
     {
         for ( int i=0; i<dx; ++i )
         {
-            if ( Add )             //  추가.
-            {
+            if ( Add )
+			{
                 AddTerrainAttribute ( x+i, y+j, att );
             }
-            else                    //  제거.
+            else
             {
                 SubTerrainAttribute ( x+i, y+j, att );
             }
@@ -331,7 +312,6 @@ int OpenTerrainMapping(char *FileName)	//
 	fread(EncData,1,EncBytes,fp);	//
 	fclose(fp);
 
-	// 암호화 된 것 풀기
 	int DataBytes = MapFileDecrypt( NULL, EncData, EncBytes);	//
 	unsigned char *Data = new unsigned char[DataBytes];		//
 	MapFileDecrypt( Data, EncData, EncBytes);	//
@@ -397,7 +377,6 @@ bool SaveTerrainMapping(char *FileName, int iMapNumber)	//
 */
 	fclose(fp);
 
-	// 암호화
 	{
 		fp = fopen(FileName,"rb");
 		if(fp == NULL)
@@ -411,13 +390,11 @@ bool SaveTerrainMapping(char *FileName, int iMapNumber)	//
 		fread(EncData,1,EncBytes,fp);	//
 		fclose(fp);
 
-		// 암호화 시키기
 		int DataBytes = MapFileEncrypt( NULL, EncData, EncBytes);	//
 		unsigned char *Data = new unsigned char[DataBytes];		//
 		MapFileEncrypt( Data, EncData, EncBytes);	//
 		delete [] EncData;		//
 
-		// 암호화 저장
 		fp = fopen(FileName,"wb");
 		fwrite( Data, DataBytes, 1, fp);
 		fclose( fp);
@@ -614,11 +591,7 @@ void SaveTerrainLight(char *FileName)
 		}
 	}
 	WriteJpeg(FileName,TERRAIN_SIZE,TERRAIN_SIZE,Buffer,100);
-#ifdef KJH_FIX_ARRAY_DELETE
 	SAFE_DELETE_ARRAY(Buffer);
-#else // KJH_FIX_ARRAY_DELETE
-	delete Buffer;
-#endif // KJH_FIX_ARRAY_DELETE
 }
 
 void CreateTerrain(char *FileName, bool bNew)
@@ -636,11 +609,6 @@ void CreateTerrain(char *FileName, bool bNew)
 
 	CreateSun();
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Height 관련 함수
-///////////////////////////////////////////////////////////////////////////////
 
 unsigned char BMPHeader[1080];
 
@@ -662,7 +630,6 @@ bool IsTerrainHeightExtMap(int iWorld)
 	return false;
 }
 
-// 바닥 높이 데이타 로딩
 bool OpenTerrainHeight(char *filename)
 {
 	char FileName[256];
@@ -716,7 +683,6 @@ bool OpenTerrainHeight(char *filename)
 	return true;
 }
 
-// 바닥 높이 데이타 저장
 void SaveTerrainHeight(char *name)
 {
 	unsigned char *Buffer = new unsigned char [256*256];
@@ -812,7 +778,6 @@ float RequestTerrainHeight(float xf,float yf)
 
 	unsigned int Index = TERRAIN_INDEX(xf,yf);
 
-	//. 예외처리
 	if(Index >= TERRAIN_SIZE*TERRAIN_SIZE)
 		return g_fSpecialHeight;
 
@@ -830,7 +795,6 @@ float RequestTerrainHeight(float xf,float yf)
     unsigned int Index3 = TERRAIN_INDEX_REPEAT(xi+1,yi  );
     unsigned int Index4 = TERRAIN_INDEX_REPEAT(xi+1,yi+1);
 	
-	//. 예외처리
 	if(Index1 >= TERRAIN_SIZE*TERRAIN_SIZE || Index2 >= TERRAIN_SIZE*TERRAIN_SIZE || 
 		Index3 >= TERRAIN_SIZE*TERRAIN_SIZE || Index4 >= TERRAIN_SIZE*TERRAIN_SIZE)
 		return g_fSpecialHeight;
@@ -878,10 +842,6 @@ void AddTerrainHeight(float xf,float yf,float Height,int Range,float *Buffer)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Light 관련 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void SetTerrainLight(float xf,float yf,vec3_t Light,int Range,vec3_t *Buffer)
 {
 	float rf = (float)Range;
@@ -923,13 +883,13 @@ void AddTerrainLight(float xf,float yf,vec3_t Light,int Range,vec3_t *Buffer)
     yf = (yf/TERRAIN_SCALE);
     int   xi = (int)xf;
     int   yi = (int)yf;
-	int   syi = yi-Range;   //  y축 시작 좌표.
-	int   eyi = yi+Range;   //  y축 끝 좌표.
+	int   syi = yi-Range;
+	int   eyi = yi+Range;
 	float syf = (float)(syi);
     for(;syi<=eyi;syi++,syf+=1.f)
 	{
-		int   sxi = xi-Range;   //  x축 시작 좌표.
-		int   exi = xi+Range;   //  x축 끝 좌표.
+		int   sxi = xi-Range;
+		int   exi = xi+Range;
 		float sxf = (float)(sxi);
         for(;sxi<=exi;sxi++,sxf+=1.f)
         {
@@ -1020,10 +980,6 @@ void RequestTerrainLight(float xf,float yf,vec3_t Light)
 		Light[i] = (left+(right-left)*xd);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// Lod 관련 함수
-///////////////////////////////////////////////////////////////////////////////
 
 void CreateLodBuffer()
 {
@@ -1161,10 +1117,6 @@ void PrefixTerrainHeight()
 		}
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// Rendering 관련 함수
-///////////////////////////////////////////////////////////////////////////////
 
 bool  SelectFlag;
 
@@ -1398,7 +1350,7 @@ void RenderFace(int Texture,int mx,int my)
 	{
 		if(Texture == 3)
 			EnableAlphaTest();
-		else if(Texture == 100)	// 나중에 그리고 싶은 텍스쳐 번호를 지정해 준다
+		else if(Texture == 100)
 			return;
 		else
 		  	DisableAlphaBlend();
@@ -1436,7 +1388,7 @@ void RenderFace(int Texture,int mx,int my)
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		)
 	{
-		if(Texture == 10)	// 에디트일때는 투명타일 표시
+		if(Texture == 10)
 		{
 			EnableAlphaTest();
 		}
@@ -1468,9 +1420,9 @@ void RenderFace(int Texture,int mx,int my)
 
 void RenderFace_After(int Texture, int mx, int my)
 {
-	if(Texture == 100)			// Tga 파일 투명 일 때
+	if(Texture == 100)
 		EnableAlphaTest();
-	else if( Texture == 101)	// Jpg 파일 투명 일 때
+	else if( Texture == 101)
 		EnableAlphaBlend();
 	else
 		return;
@@ -1594,7 +1546,6 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 		{
       		Texture = TerrainMappingLayer1[TerrainIndex1];
 			Alpha = true;
-			// BITMAP_MAPTILE+5 면 물지면 텍스쳐이다.
 			if ( Texture == 5)
 			{
 				Water = true;
@@ -1679,7 +1630,6 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 				TerrainVertex[0][0] += -50.f;
 				TerrainVertex[1][0] += -50.f;
 #ifdef ASG_ADD_MAP_KARUTAN
-				// 칼루탄맵에서는 풀이 흔들리는 정도가 다름. g_fTerrainGrassWind1 값을 따로 사용.
 				if (IsKarutanMap())
 				{
 					TerrainVertex[0][1] += g_fTerrainGrassWind1[TerrainIndex1];
@@ -1735,7 +1685,7 @@ void RenderTerrainFace_After(float xf,float yf,int xi,int yi,float lodf)
 		{
       		Texture = TerrainMappingLayer1[TerrainIndex1];
 			if(TerrainMappingLayer1[TerrainIndex1]==5)
-				Water = 1;   //  물 흐르기.  왼쪽으로.
+				Water = 1;
 		}
 		
 		FaceTexture(Texture,xf,yf,Water,false);
@@ -1743,9 +1693,7 @@ void RenderTerrainFace_After(float xf,float yf,int xi,int yi,float lodf)
 	}
 }
 
-#ifdef SHOW_PATH_INFO
 extern PATH* path;
-#endif // SHOW_PATH_INFO
 
 extern int SelectWall;
 
@@ -1774,7 +1722,6 @@ bool RenderTerrainTile(float xf,float yf,int xi,int yi,float lodf,int lodi,bool 
 	if(!Flag)
 	{
 		RenderTerrainFace(xf,yf,xi,yi,lodf);
-		// 길찾기 정보 표시
 #ifdef SHOW_PATH_INFO
 #ifdef CSK_DEBUG_MAP_PATHFINDING
 		if(g_bShowPath == true)
@@ -1974,10 +1921,6 @@ void RenderTerrainBitmap(int Texture,int mxi,int myi,float Rotation)
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//  지형에 맞춰서 이미지를 표시한다.
-//////////////////////////////////////////////////////////////////////////
 void RenderTerrainAlphaBitmap(int Texture,float xf,float yf,float SizeX,float SizeY,vec3_t Light,float Rotation,float Alpha,float Height)
 {
 	if(Alpha==1.f)
@@ -2030,11 +1973,6 @@ void RenderTerrainAlphaBitmap(int Texture,float xf,float yf,float SizeX,float Si
 		}
 	}
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Frustrum 관련 함수
-///////////////////////////////////////////////////////////////////////////////
 
 vec3_t  FrustrumVertex[5];
 vec3_t  FrustrumFaceNormal[5];
@@ -2468,7 +2406,7 @@ void InitTerrainLight()
 #ifdef ASG_ADD_MAP_KARUTAN
 	float WindScale1 = 0.f;
 	float WindSpeed1 = 0.f;
-	if (IsKarutanMap())	// 칼루탄에서만 풀 흔들리는 정도가 다름. 물 흐르는 속도는 다른 맵이랑 동일하므로 어쩔 수 없음.
+	if (IsKarutanMap())
 	{
 		WindScale1 = 15.f;
 		WindSpeed1 = (int)WorldTime%36000*(0.008f);
@@ -2643,7 +2581,7 @@ void RenderTerrainFrustrum(bool EditFlag)
 					float fDistance_y = CameraPosition[1] - yf / 0.01f;
 					float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
 
-					if (fDistance > 5200.f) // 컬링 최적화 가능한 부분☆
+					if (fDistance > 5200.f)
 						continue;
 				}
     			RenderTerrainBlock(xf,yf,xi,yi,EditFlag);

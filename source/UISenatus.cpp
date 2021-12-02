@@ -1,13 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  UIGuardsMan.cpp
-//  
-//  내  용 : 원로원 인터페이스
-//  
-//  날  짜 : 2004년 11월 25일
-//  
-//  작성자 : 강 병 국
-//  
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -28,10 +20,6 @@ extern int   ShopInventoryStartY;
 
 CSenatusInfo g_SenatusInfo;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 CSenatusInfo::CSenatusInfo()
 {
 	m_iCurrGate = 0;
@@ -50,7 +38,6 @@ CSenatusInfo::~CSenatusInfo()
 {
 }
 
-// 수리비를 얻는다.
 int CSenatusInfo::GetRepairCost( LPPMSG_NPCDBLIST pInfo )
 {
 	if( pInfo->iNpcNumber == GATENPC_NUMBER )
@@ -61,7 +48,6 @@ int CSenatusInfo::GetRepairCost( LPPMSG_NPCDBLIST pInfo )
 		return -1;
 }
 
-// NPC 의 내구도 를 얻는다.
 int CSenatusInfo::GetHP( int nType, int nLevel )
 {
 	if( nType == GATENPC_NUMBER )
@@ -82,7 +68,6 @@ int CSenatusInfo::GetHP( int nType, int nLevel )
 		return -1;
 }
 
-// NPC 의 내구도 레벨을 얻는다.
 int CSenatusInfo::GetHPLevel( LPPMSG_NPCDBLIST pInfo )
 {
 	if( pInfo->iNpcNumber == GATENPC_NUMBER )
@@ -91,11 +76,7 @@ int CSenatusInfo::GetHPLevel( LPPMSG_NPCDBLIST pInfo )
 			return 0;
 		else if( GATELEVEL_HP_0 < pInfo->iNpcMaxHp && pInfo->iNpcMaxHp <= GATELEVEL_HP_1 )
 			return 1;
-#ifdef KJH_FIX_WOPS_K25856_UPGRADE_WARFARE_DEFENCE_GATE_AND_STONESTATUE
 		else if( GATELEVEL_HP_1 < pInfo->iNpcMaxHp && pInfo->iNpcMaxHp <= GATELEVEL_HP_2 )
-#else // KJH_FIX_WOPS_K25856_UPGRADE_WARFARE_DEFENCE_GATE_AND_STONESTATUE
-		else if( GATELEVEL_HP_1 < pInfo->iNpcMaxHp && pInfo->iNpcMaxHp == GATELEVEL_HP_2 )
-#endif // KJH_FIX_WOPS_K25856_UPGRADE_WARFARE_DEFENCE_GATE_AND_STONESTATUE
 			return 2;
 		else
 			return 3;
@@ -115,7 +96,6 @@ int CSenatusInfo::GetHPLevel( LPPMSG_NPCDBLIST pInfo )
 		return -1;
 }
 
-// NPC 가 업그레이드될시 증가되는 내구도 를 얻는다.
 int CSenatusInfo::GetNextAddHP( LPPMSG_NPCDBLIST pInfo )
 {
 	if( pInfo->iNpcNumber == GATENPC_NUMBER )
@@ -144,7 +124,6 @@ int CSenatusInfo::GetNextAddHP( LPPMSG_NPCDBLIST pInfo )
 		return -1;
 }
 
-// NPC 의 방어력을 얻는다.
 int CSenatusInfo::GetDefense( int nType, int nLevel )
 {
 	if( nType == GATENPC_NUMBER )
@@ -165,7 +144,6 @@ int CSenatusInfo::GetDefense( int nType, int nLevel )
 		return -1;
 }
 
-// NPC 의 방어력 레벨을 얻는다.
 int CSenatusInfo::GetDefenseLevel( LPPMSG_NPCDBLIST pInfo )
 {
 	if( pInfo->iNpcNumber == GATENPC_NUMBER )
@@ -176,7 +154,6 @@ int CSenatusInfo::GetDefenseLevel( LPPMSG_NPCDBLIST pInfo )
 		return -1;
 }
 
-// NPC 가 업그레이드될시 증가되는 방어력 를 얻는다.
 int CSenatusInfo::GetNextAddDefense( LPPMSG_NPCDBLIST pInfo )
 {
 	if( pInfo->iNpcNumber == GATENPC_NUMBER )
@@ -205,7 +182,6 @@ int CSenatusInfo::GetNextAddDefense( LPPMSG_NPCDBLIST pInfo )
 		return -1;
 }
 
-// NPC 의 회복력을 얻는다.
 int CSenatusInfo::GetRecover( int nType, int nLevel )
 {
 	if( nType == GATENPC_NUMBER )
@@ -223,7 +199,6 @@ int CSenatusInfo::GetRecover( int nType, int nLevel )
 		return -1;
 }
 
-// NPC 의 회복력 레벨을 얻는다.
 int CSenatusInfo::GetRecoverLevel( LPPMSG_NPCDBLIST pInfo )
 {
 	if( pInfo->iNpcNumber == GATENPC_NUMBER )
@@ -234,7 +209,6 @@ int CSenatusInfo::GetRecoverLevel( LPPMSG_NPCDBLIST pInfo )
 		return -1;
 }
 
-// NPC 가 업그레이드될시 증가되는 회복력 를 얻는다.
 int CSenatusInfo::GetNextAddRecover( LPPMSG_NPCDBLIST pInfo )
 {
 	if( pInfo->iNpcNumber == GATENPC_NUMBER )
@@ -258,12 +232,10 @@ int CSenatusInfo::GetNextAddRecover( LPPMSG_NPCDBLIST pInfo )
 
 void CSenatusInfo::DoGateRepairAction()
 {
-	// 없는 성문이라면 구입요청
 	if( GetCurrGateInfo().btNpcLive == 0 )
 	{
 		SendRequestBCNPCBuy( GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex );
 	}
-	// 있다면 수리요청
 	else
 	{
 		SendRequestBCNPCRepair( GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex );
@@ -381,12 +353,12 @@ void CSenatusInfo::SetTaxInfo( LPPMSG_ANS_TAXMONEYINFO pInfo )
 
 void CSenatusInfo::ChangeTaxInfo( LPPMSG_ANS_TAXRATECHANGE pInfo )
 {
-	if( pInfo->btTaxType == 1 )	// 카오스조합
+	if( pInfo->btTaxType == 1 )
     {
         m_iRealTaxRateChaos = (pInfo->btTaxRate1<<24) | (pInfo->btTaxRate2<<16) | (pInfo->btTaxRate3<<8) | (pInfo->btTaxRate4);
 		m_iChaosTaxRate = m_iRealTaxRateChaos;
     }
-	else if( pInfo->btTaxType == 2 )	// 일반
+	else if( pInfo->btTaxType == 2 )
     {
         m_iRealTaxRateStore = (pInfo->btTaxRate1<<24) | (pInfo->btTaxRate2<<16) | (pInfo->btTaxRate3<<8) | (pInfo->btTaxRate4);
 		m_iNormalTaxRate = m_iRealTaxRateStore;

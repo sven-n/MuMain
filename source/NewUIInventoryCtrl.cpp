@@ -104,8 +104,6 @@ int SEASON3B::CNewUIPickedItem::GetSourceLinealPos()
 	{
 		return m_pPickedItem->y*m_pSrcInventory->GetNumberOfColumn()+m_pPickedItem->x;
 	}
-	/* CNewUIInventoryCtrl를 사용하지 않는 예외 */
-	/* ITEM::ex_src_type 값으로 구분한다. (ITEM구조체 참조) */
 	else if(m_pPickedItem && m_pPickedItem->ex_src_type > 0)	// m_pPickedItem->ex_src_type==ITEM::y
 	{
 		return m_pPickedItem->lineal_pos; // m_pPickedItem->lineal_pos==ITEM::x
@@ -287,8 +285,6 @@ void SEASON3B::CNewUIInventoryCtrl::SetItemColorState(ITEM* pItem)
 	}
 }
 
-
-//인벤토리 안에서 내구력에 따라서 바탕색깔 바뀌는함수.
 bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 {
 	if(pItem == NULL)
@@ -301,19 +297,16 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 		return true;
 	}
 
-	// 화살/석궁화살
 	if( pItem->Type == ITEM_BOW+7 || pItem->Type == ITEM_BOW+15 )
 	{
 		return false;
 	}
 
-	// 용사/전사의 반지 제외
 	if( pItem->Type == ITEM_HELPER+20 && ((pItem->Level>>3)&15) == 1 || ((pItem->Level>>3)&15) == 2 )
 	{
 		return false;
 	}
 	
-	// 반지/목걸이
 	if( pItem->Type >= ITEM_HELPER+8 && pItem->Type <= ITEM_HELPER+9 
 		|| pItem->Type == ITEM_HELPER+10 
 		|| pItem->Type >= ITEM_HELPER+12 && pItem->Type <= ITEM_HELPER+13
@@ -324,27 +317,27 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 		|| pItem->Type == ITEM_HELPER+76
 #endif //PJH_ADD_PANDA_CHANGERING
 #ifdef YDG_ADD_SKELETON_CHANGE_RING
-		|| pItem->Type == ITEM_HELPER+122	// 스켈레톤 변신반지
+		|| pItem->Type == ITEM_HELPER+122
 #endif	// YDG_ADD_SKELETON_CHANGE_RING
 #ifdef PBG_FIX_CHANGEITEMCOLORSTATE
-		|| pItem->Type == ITEM_HELPER+80	// 팬더펫
-		|| pItem->Type == ITEM_HELPER+64	// 데몬
-		|| pItem->Type == ITEM_HELPER+65	// 수호정령
+		|| pItem->Type == ITEM_HELPER+80
+		|| pItem->Type == ITEM_HELPER+64
+		|| pItem->Type == ITEM_HELPER+65
 #endif //PBG_FIX_CHANGEITEMCOLORSTATE
 #ifdef YDG_ADD_SKELETON_PET
-		|| pItem->Type == ITEM_HELPER+123	// 스켈레톤 펫
+		|| pItem->Type == ITEM_HELPER+123
 #endif	// YDG_ADD_SKELETON_PET
 #ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING 
-		|| pItem->Type == ITEM_HELPER+107	// 치명적인 마법사의반지
+		|| pItem->Type == ITEM_HELPER+107
 #endif //YDG_ADD_CS7_CRITICAL_MAGIC_RING
 #ifdef LDS_FIX_VISUALRENDER_PERIODITEM_EXPIRED_RE
-		|| pItem->Type == ITEM_HELPER+109	// 인게임샾 아이템 // 신규 사파이어(푸른색)링	// MODEL_HELPER+109
-		|| pItem->Type == ITEM_HELPER+110	// 인게임샾 아이템 // 신규 루비(붉은색)링		// MODEL_HELPER+110
-		|| pItem->Type == ITEM_HELPER+111	// 인게임샾 아이템 // 신규 토파즈(주황)링		// MODEL_HELPER+111
-		|| pItem->Type == ITEM_HELPER+112	// 인게임샾 아이템 // 신규 자수정(보라색)링	// MODEL_HELPER+112
-		|| pItem->Type == ITEM_HELPER+113	// 인게임샾 아이템 // 신규 루비(붉은색) 목걸이	// MODEL_HELPER+113
-		|| pItem->Type == ITEM_HELPER+114	// 인게임샾 아이템 // 신규 에메랄드(푸른) 목걸이// MODEL_HELPER+114
-		|| pItem->Type == ITEM_HELPER+115 	// 인게임샾 아이템 // 신규 사파이어(녹색) 목걸이// MODEL_HELPER+115
+		|| pItem->Type == ITEM_HELPER+109
+		|| pItem->Type == ITEM_HELPER+110
+		|| pItem->Type == ITEM_HELPER+111
+		|| pItem->Type == ITEM_HELPER+112
+		|| pItem->Type == ITEM_HELPER+113
+		|| pItem->Type == ITEM_HELPER+114
+		|| pItem->Type == ITEM_HELPER+115
 #endif // LDS_FIX_VISUALRENDER_PERIODITEM_EXPIRED_RE
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| g_pMyInventory->IsInvenItem(pItem->Type)

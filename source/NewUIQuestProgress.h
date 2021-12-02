@@ -1,11 +1,5 @@
 //*****************************************************************************
 // File: NewUIQuestProgress.h
-//
-// Desc: interface for the CNewUIQuestProgress class.
-//		 신규 (NPC에 의한)퀘스트 진행 창 클래스.(2009.05.27)
-//		 NPC를 클릭하여 진행되는 퀘스트는 이 UI로 진행.
-//
-// producer: Ahn Sang-Gyu
 //*****************************************************************************
 
 #if !defined(AFX_NEWUIQUESTPROGRESS_H__218DE487_9F61_448C_AC69_2AFF5949C15F__INCLUDED_)
@@ -24,9 +18,9 @@
 #include "QuestMng.h"
 #include "UIControls.h"
 
-#define QP_NPC_LINE_MAX		35	// NPC 대사 최대 줄 수.
-#define QP_PLAYER_LINE_MAX	9	// 플래이어 대사 최대 줄 수.
-#define QP_WORDS_ROW_MAX	64	// 대사 한 줄 당 최대 글자 수 + 종료 문자.
+#define QP_NPC_LINE_MAX		35
+#define QP_PLAYER_LINE_MAX	9
+#define QP_WORDS_ROW_MAX	64
 
 namespace SEASON3B
 {
@@ -77,39 +71,39 @@ namespace SEASON3B
 			QP_HEIGHT = 429,
 		};
 
-		CNewUIManager*		m_pNewUIMng;			// UI 매니저.
+		CNewUIManager*		m_pNewUIMng;
 #ifndef ASG_MOD_3D_CHAR_EXCLUSION_UI
 		CNewUI3DRenderMng*	m_pNewUI3DRenderMng;
 #endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
-		POINT				m_Pos;					// 창의 위치.
+		POINT				m_Pos;
 
-		CNewUIButton		m_btnProgressL;			// 대화 진행 L 버튼.
-		CNewUIButton		m_btnProgressR;			// 대화 진행 R 버튼.
-		CNewUIButton		m_btnComplete;			// 퀘스트 완료 버튼.
+		CNewUIButton		m_btnProgressL;
+		CNewUIButton		m_btnProgressR;
+		CNewUIButton		m_btnComplete;
 		CNewUIButton		m_btnClose;
 
-		DWORD	m_dwCurQuestIndex;		// 현재 진행 중인 퀘스트 인덱스.
+		DWORD	m_dwCurQuestIndex;
 
-		char	m_aszNPCWords[QP_NPC_LINE_MAX][QP_WORDS_ROW_MAX];	// NPC 대사.
-		int		m_nSelNPCPage;			// 선택된 NPC 대사 페이지(0 ~ 4).
-		int		m_nMaxNPCPage;			// 최대 NPC 대사 페이지수(0 ~ 4).
+		char	m_aszNPCWords[QP_NPC_LINE_MAX][QP_WORDS_ROW_MAX];
+		int		m_nSelNPCPage;
+		int		m_nMaxNPCPage;
 
 		enum LOWER_VIEW_MODE
 		{
-			NON_PLAYER_WORDS_MODE,		// 플래이어 대사 안보여줌.
-			PLAYER_WORDS_MODE,			// 플래이어 대사 보여줌.
-			REQUEST_REWARD_MODE			// 요구 사항, 보상 보여줌.
+			NON_PLAYER_WORDS_MODE,
+			PLAYER_WORDS_MODE,
+			REQUEST_REWARD_MODE
 		};
-		LOWER_VIEW_MODE	m_eLowerView;	// 창의 하단 부분 정보.
+		LOWER_VIEW_MODE	m_eLowerView;
 
-		char	m_aszPlayerWords[QP_PLAYER_LINE_MAX][QP_WORDS_ROW_MAX];	// 플래이어 대사.
-		int		m_anAnswerLine[QM_MAX_ANSWER];	// 각 선택문 줄 수.
-		int		m_nSelAnswer;			// 선택한 선택문 번호.
+		char	m_aszPlayerWords[QP_PLAYER_LINE_MAX][QP_WORDS_ROW_MAX];
+		int		m_anAnswerLine[QM_MAX_ANSWER];
+		int		m_nSelAnswer;
 
-		CUIQuestContentsListBox	m_RequestRewardListBox;	// 요구 사항, 보상 리스트 박스.
-		bool	m_bRequestComplete;		// 요구 사항 만족 여부.
+		CUIQuestContentsListBox	m_RequestRewardListBox;
+		bool	m_bRequestComplete;
 
-		bool	m_bCanClick;			// 선택문 및 퀘스트 처리 버튼 클릭 가능 여부.(여러번 클릭 방지)
+		bool	m_bCanClick;
 
 	public:
 		CNewUIQuestProgress();

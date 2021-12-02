@@ -145,7 +145,6 @@ bool leaf::GetOSInfoString(OUT std::string& osinfo)
 }
 void leaf::GetCPUInfoString(OUT std::string& cpuinfo)
 {
-	// 종류
 	DWORD eaxreg, ebxreg, ecxreg, edxreg;
 	
 	// We read the standard CPUID level 0x00000000 which should
@@ -191,7 +190,6 @@ void leaf::GetCPUInfoString(OUT std::string& cpuinfo)
 	unsigned int uiFamily   = (eaxreg >> 8) & 0xF;
 	unsigned int uiModel    = (eaxreg >> 4) & 0xF;
 	
-	// 종류 찾기
 	switch(iBrand)
 	{
 	case 0x756E6547:	// GenuineIntel

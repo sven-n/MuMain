@@ -35,24 +35,6 @@ LONG WINAPI CustomUnhandledExceptionHandler(PEXCEPTION_POINTERS pExInfo)
 // Invalid parameter handler set with _set_invalid_parameter_handler()
 void CustomInvalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, unsigned int line, uintptr_t pReserved)
 {
-	// release 모드에서 사용되나 정확한 메시지가 출력이 되지 않아 사용하지 않음
-	/*
-	// Write errMsg.txt
-	FILE *pFile;
-	fopen_s(&pFile, "errMsg.txt", "w");
-
-	if (pFile != NULL)
-	{
-		wprintf(L"Invalid parameter detected in function %s. File: %s Line: %d\n", function, file, line);
-		wprintf(L"Expression: %s\n", expression);
-
-		fwprintf(pFile, L"Invalid parameter detected in function %s. File: %s Line: %d\n", function, file, line);
-		fwprintf(pFile, L"Expression: %s\n", expression);
-		fclose(pFile);
-	}
-
-	g_hCrash->AddFile(_T("errMsg.txt"));
-	*/
 }
 
 // Unexpected error handler set with set_unexpected(), set_terminate()
@@ -129,8 +111,6 @@ CCrashHandler::CCrashHandler(
 	else
 		m_pLogger = NULL;
 
-	// NOTE: 여기서 SFTP로 변경한다. FTP를 쓰려면 그냥 CUploader를 사용하면 된다.
-	m_pUploader = new CUploaderSftp(szFtpUrl, nPort, szId, szPassword, nUploadCount);
 	_stprintf_s(m_szClientVersion, BUFFER_SIZE, _T("%s"), szClientVersion);
 	_stprintf_s(m_szHttpUrl, BUFFER_SIZE, _T("%s"), szHttpUrl);
 	STACKTRACE_FILENAME = _T("Stacktrace.txt");
@@ -163,8 +143,6 @@ CCrashHandler::CCrashHandler(
 		m_oldUnexpectedHandler = set_unexpected(CustomUnexpectedErrorHandler);
 		m_oldTerminateHandler = set_terminate(CustomUnexpectedErrorHandler);
 	
-		// NOTE: 주석 코드 제거 
-
 		WriteCrashLog(_T("Install"));
 	}
 	else
@@ -193,7 +171,6 @@ CCrashHandler::~CCrashHandler()
 	WriteCrashLog(_T("Uninstall"));
 
 	delete m_pLogger;
-	delete m_pUploader;
 }
 
 void CCrashHandler::Destroyer()
@@ -201,8 +178,6 @@ void CCrashHandler::Destroyer()
 	WriteCrashLog(_T("Terminate"));
 
 	delete m_pLogger;
-	delete m_pUploader;
-
 	::DeleteFile(_T("errMsg.txt"));
 }
 
@@ -552,62 +527,6 @@ LONG CCrashHandler::GenerateErrorReport(PEXCEPTION_POINTERS pExInfo, PVOID pExce
 	bool bUploadSuccess = true;
 	if (bCreateDumpSuccess || !m_bCatchException)
 	{
-		// Upload minidump file & stacktrace file
-		if (m_bUpload)
-		{
-			// Upload minidump file
-			if (IsFile(m_szDumpfile) && GetFullPathName(m_szDumpfile, BUFFER_SIZE, szClientFilename, NULL))
-			{
-				_stprintf_s(szServerFilename, BUFFER_SIZE, _T("%s.dmp"), szServerFilePrefix);
-
-				if (!m_pUploader->UploadFTP(szClientFilename, szServerFilename))
-				{
-					WriteCrashLog(_T("Upload %s : %s"), szClientFilename, _T("Succeeded"));
-				}
-				else
-				{
-					WriteCrashLog(_T("Upload %s : %s"), szClientFilename, _T("Failed"));
-					bUploadSuccess = false;
-				}
-			}
-			// Minidump file not exist
-			else
-			{
-				WriteCrashLog(_T("Upload %s:\t%s"), szClientFilename, _T("Failed(file not exist)"));
-			}
-
-			// Upload stacktrace file
-			if (m_bStackTrace)
-			{
-				// Callstack trace
-				if (pExInfo != NULL)
-				{
-					WriteCrashLog(_T("Do stack trace"));
-					StackTrace(pExInfo);
-				}
-
-				if (IsFile(STACKTRACE_FILENAME))
-				{
-					_stprintf_s(szServerFilename, BUFFER_SIZE, _T("%s_%s"), szServerFilePrefix, STACKTRACE_FILENAME);
-
-					if (!m_pUploader->UploadFTP(STACKTRACE_FILENAME, szServerFilename))
-					{
-						WriteCrashLog(_T("Upload %s:\t%s"), STACKTRACE_FILENAME, _T("Succeeded"));
-					}
-					else
-					{
-						WriteCrashLog(_T("Upload %s:\t%s"), STACKTRACE_FILENAME, _T("Failed"));
-						bUploadSuccess = false;
-					}
-				}
-				// stacktrace file not exist
-				else
-				{
-					WriteCrashLog(_T("Upload %s:\tFailed(file not exist)"), STACKTRACE_FILENAME);
-				}
-			}
-		}
-
 		// Delete minidump file
 		if (m_bDeleteDumpfile && m_bCatchException)
 		{
@@ -651,18 +570,6 @@ LONG CCrashHandler::GenerateErrorReport(PEXCEPTION_POINTERS pExInfo, PVOID pExce
 		{
 			WriteCrashLog(_T("Upload %s:\t%s"), szFilename, _T("Failed(file not exist)"));
 			continue;
-		}
-
-		// Upload
-		_stprintf_s(szServerFilename, BUFFER_SIZE, _T("%s_%s"), szServerFilePrefix, szFilename);
-		if (!m_pUploader->UploadFTP(*itor, szServerFilename))
-		{
-			WriteCrashLog(_T("Upload %s:\t%s"), szFilename, _T("Succeeded"));
-		}
-		else
-		{
-			WriteCrashLog(_T("Upload %s:\t%s"), szFilename, _T("Failed"));
-			bUploadSuccess = false;
 		}
 	}
 
@@ -749,11 +656,7 @@ bool CCrashHandler::StackTrace(PEXCEPTION_POINTERS pExInfo)
 	if (pFile == NULL)
 		return false;
 
-#ifdef _TEST_SERVER
-	fprintf(pFile, "Client Version %s(Test)\r\n\r\n", m_Version );
-#else
 	fprintf(pFile, "Client Version %s\r\n\r\n", m_Version );
-#endif //_TEST_SERVER
 
 	HANDLE hProcess = GetCurrentProcess();
 	HANDLE hThread = GetCurrentThread();

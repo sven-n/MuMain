@@ -127,10 +127,6 @@ void RenderCircle2D(int Type,vec3_t ScreenPosition,float ScaleBottom,float Scale
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 스킬 사용시 손에 빛나는 이팩트 효과
-///////////////////////////////////////////////////////////////////////////////
-
 void CreateMagicShiny(CHARACTER *c,int Hand)
 {
 	OBJECT *o = &c->Object;
@@ -149,10 +145,6 @@ void CreateMagicShiny(CHARACTER *c,int Hand)
 		CreateParticle(BITMAP_SHINY+1,Position,o->Angle,Light,Hand+2,0.f,o);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 순간이동 마법 효과
-///////////////////////////////////////////////////////////////////////////////
 
 void CreateTeleportBegin(OBJECT *o)
 {
@@ -174,10 +166,6 @@ void CreateTeleportEnd(OBJECT *o)
 	CreateEffect(BITMAP_SPARK+1,o->Position,o->Angle,o->Light);
     PlayBuffer(SOUND_MAGIC);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// 화살 이팩트 효과
-///////////////////////////////////////////////////////////////////////////////
 
 extern int CurrentSkill;
 
@@ -213,7 +201,6 @@ void CreateArrow(CHARACTER *c,OBJECT *o,OBJECT *to,
 		SubType = 99;
 	}
 
-    //  강력한 한방 스킬.
     if ( SKKey==AT_SKILL_DEEPIMPACT )
     {
         CreateEffect ( MODEL_ARROW_IMPACT, o->Position, o->Angle, o->Light, 0, to, o->PKKey, SkillIndex, Skill );
@@ -244,7 +231,7 @@ void CreateArrow(CHARACTER *c,OBJECT *o,OBJECT *to,
         case MODEL_BOW+4:CreateEffect(MODEL_ARROW        ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
         case MODEL_BOW+5:CreateEffect(MODEL_ARROW        ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
         case MODEL_BOW+6:CreateEffect(MODEL_ARROW_NATURE ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
-        case MODEL_BOW+17:CreateEffect(MODEL_ARROW_HOLY  ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;    //  홀리 사이트 보우.
+        case MODEL_BOW+17:CreateEffect(MODEL_ARROW_HOLY  ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
         case MODEL_BOW+20:CreateEffect(MODEL_LACEARROW   ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
         case MODEL_BOW+21:CreateEffect(MODEL_ARROW_SPARK ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
 		case MODEL_BOW+22:CreateEffect(MODEL_ARROW_RING   ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
@@ -274,13 +261,9 @@ void CreateArrows(CHARACTER *c,OBJECT *o,OBJECT *to,WORD SkillIndex,WORD Skill,W
 			if ( c->Weapon[0].Type==MODEL_BOW+18 
 				|| c->Weapon[0].Type==MODEL_BOW+19 
 				|| c->Weapon[1].Type == MODEL_BOW+22
-#ifdef KJH_FIX_DARKSTINGER_MULTISHOT_SKILL
 				|| c->Weapon[1].Type == MODEL_BOW+23
-#endif // KJH_FIX_DARKSTINGER_MULTISHOT_SKILL
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 				|| c->Weapon[1].Type == MODEL_BOW+24
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-				)	//	절대 석궁 ( 4다발 ).
+				)
 			{	
 				o->Angle[2] += 5.f;//15.f;//7.5f;
 				CreateArrow(c,o,to,SkillIndex,Skill,SKKey);
@@ -293,22 +276,6 @@ void CreateArrows(CHARACTER *c,OBJECT *o,OBJECT *to,WORD SkillIndex,WORD Skill,W
 				o->Angle[2] += 30.f;//30.f;//15.f;
 				CharacterMachine->PacketSerial++;
 			}
-/*
-			else if ( c->Weapon[1].Type==MODEL_BOW+17 || c->Weapon[0].Type==MODEL_BOW+18 )	//	홀리 보우, 
-			{
-				CreateArrow(c,o,to,SkillIndex,Skill,SKKey);
-				o->Angle[2] += 10.f;//7.5f;//15.f;//7.5f;
-				CreateArrow(c,o,to,SkillIndex,Skill,SKKey);
-				o->Angle[2] += 10.f;//7.5f;//15.f;//7.5f;
-				CreateArrow(c,o,to,SkillIndex,Skill,SKKey);
-				o->Angle[2] -= 30.f;//22.5f;//45.f;//22.5f;
-				CreateArrow(c,o,to,SkillIndex,Skill,SKKey);
-				o->Angle[2] -= 10.f;//7.5f;//15.f;//7.5f;
-				CreateArrow(c,o,to,SkillIndex,Skill,SKKey);
-				o->Angle[2] += 20.f;//15.f;//30.f;//15.f;
-				CharacterMachine->PacketSerial++;
-			}
-*/
 			else
 			{
 				CreateArrow(c,o,to,SkillIndex,Skill,SKKey);
@@ -325,23 +292,12 @@ void CreateArrows(CHARACTER *c,OBJECT *o,OBJECT *to,WORD SkillIndex,WORD Skill,W
 			CreateArrow(c,o,to,SkillIndex,Skill,SKKey);
 		}
 
-		if ( c->Weapon[0].Type==MODEL_BOW+19 )	//	초절대 석궁이 발사될때.
+		if ( c->Weapon[0].Type==MODEL_BOW+19 )
 		{
 			vec3_t p, Position, Light;
 			BMD *b = &Models[o->Type];
 
 			Vector ( 1.f, 1.f, 1.f, Light );
-
-/*
-			Vector ( 50.f, -10.f, -150.f, p );
-			b->TransformPosition ( o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true );
-            CreateParticle ( BITMAP_EXPLOTION, Position, o->Angle, Light, 0, 0.5f );
-
-			Vector ( 0.f, -10.f, -150.f, p );
-			b->TransformPosition ( o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true );
-            CreateParticle ( BITMAP_EXPLOTION, Position, o->Angle, Light, 0, 0.5f );
-
-*/
 			Vector ( 0.f, 10.f, -130.f, p );
 			b->TransformPosition ( o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true );
 

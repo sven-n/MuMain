@@ -40,34 +40,18 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE* pbyItemPacket)
 	byOption380 = pbyItemPacket[5];
 	byOptionHarmony = pbyItemPacket[6];
 
-#ifdef MODIFY_SOCKET_PROTOCOL
-	// 소켓 아이템 옵션 (0x00~0xF9: 옵션고유번호, 0xFE: 빈 소켓, 0xFF: 막힌 소켓)
 	BYTE bySocketOption[5] = { pbyItemPacket[7], pbyItemPacket[8], pbyItemPacket[9], pbyItemPacket[10], pbyItemPacket[11] };
-#else	// MODIFY_SOCKET_PROTOCOL
-	BYTE bySocketOption[5] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-#endif	// MODIFY_SOCKET_PROTOCOL
 	
-	return CNewUIItemMng::CreateItem(wType/MAX_ITEM_INDEX, wType%MAX_ITEM_INDEX, pbyItemPacket[1], pbyItemPacket[2], pbyItemPacket[3], 
-		pbyItemPacket[4], byOption380, byOptionHarmony
-#ifdef SOCKET_SYSTEM
-		, bySocketOption
-#endif	// SOCKET_SYSTEM
-		);
+	return CNewUIItemMng::CreateItem(wType/MAX_ITEM_INDEX, wType%MAX_ITEM_INDEX, pbyItemPacket[1], pbyItemPacket[2], pbyItemPacket[3], pbyItemPacket[4], byOption380, byOptionHarmony, bySocketOption);
 }
 
-ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel /* = 0 */, BYTE byDurability /* = 255 */, 
-								BYTE byOption1 /* = 0 */, BYTE byOptionEx /* = 0 */, BYTE byOption380 /* = 0 */, 
-								BYTE byOptionHarmony /* = 0 */
-#ifdef SOCKET_SYSTEM
-								, BYTE * pbySocketOptions /*= NULL*/
-#endif	// SOCKET_SYSTEM
-								)
+ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel /* = 0 */, BYTE byDurability /* = 255 */,BYTE byOption1 /* = 0 */, BYTE byOptionEx /* = 0 */, BYTE byOption380 /* = 0 */,BYTE byOptionHarmony /* = 0 */	, BYTE * pbySocketOptions /*= NULL*/)
 {
 	ITEM* pNewItem = new ITEM;
 	memset(pNewItem, 0, sizeof(ITEM));
 
 	WORD wType = byType * MAX_ITEM_INDEX + bySubType;
-	pNewItem->Key = GenerateItemKey();	//. 키를 생성한다.
+	pNewItem->Key = GenerateItemKey();
 	pNewItem->Type = wType;
 	pNewItem->Durability = byDurability;
 	pNewItem->Option1 = byOption1;
@@ -76,8 +60,8 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLe
 		pNewItem->option_380 = true;
 	else
 		pNewItem->option_380 = false;
-	pNewItem->Jewel_Of_Harmony_Option = (byOptionHarmony & 0xf0) >> 4;	//옵션 종류
-	pNewItem->Jewel_Of_Harmony_OptionLevel = byOptionHarmony & 0x0f;	//옵션 레벨( 값이 아님 )
+	pNewItem->Jewel_Of_Harmony_Option = (byOptionHarmony & 0xf0) >> 4;
+	pNewItem->Jewel_Of_Harmony_OptionLevel = byOptionHarmony & 0x0f;
 
 #ifdef SOCKET_SYSTEM
 	if (pbySocketOptions == NULL)
@@ -129,7 +113,6 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLe
 
 	pNewItem->RefCount = 1;
 	
-// 기간제 아이템
 #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 	if( ((byOption380&0x02) >> 1) > 0 )
 	{
@@ -168,11 +151,7 @@ ITEM* SEASON3B::CNewUIItemMng::DuplicateItem(ITEM* pItem)
 	memcpy(pNewItem, pItem, sizeof(ITEM));
 	pNewItem->Key = GenerateItemKey();
 	pNewItem->RefCount = 1;
-
-#ifdef LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
 	m_listItem.push_back(pNewItem);
-#endif // LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
-	
 	return pNewItem;
 }
 
@@ -181,11 +160,7 @@ void SEASON3B::CNewUIItemMng::DeleteItem(ITEM* pItem)
 	if(pItem == NULL)
 		return;
 	
-#ifdef LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
 	if(--pItem->RefCount <= 0)
-#else // LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
-	if(--pItem->RefCount == 0)
-#endif // LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
 	{
 		type_list_item::iterator li = m_listItem.begin();
 		for(; li != m_listItem.end(); li++)
@@ -200,26 +175,16 @@ void SEASON3B::CNewUIItemMng::DeleteItem(ITEM* pItem)
 	}
 }
 
-#ifdef YDG_FIX_MEMORY_LEAK_0905_2ND
 void SEASON3B::CNewUIItemMng::DeleteDuplicatedItem(ITEM* pItem)
 {
 	if(pItem == NULL)
 		return;
 
-#ifdef LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
 	if(--pItem->RefCount <= 0)
-#else // LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
-	if(--pItem->RefCount == 0)
-#endif // LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
 	{
 		DeleteItem( pItem );
-		
-#ifndef LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
-		SAFE_DELETE(pItem);
-#endif // LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS
 	}
 }
-#endif	// YDG_FIX_MEMORY_LEAK_0905_2ND
 
 void SEASON3B::CNewUIItemMng::DeleteAllItems()
 {

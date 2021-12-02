@@ -24,14 +24,13 @@ char	s_szTargetID[MAX_ID_SIZE+1];
 extern int s_nTargetFireMemberIndex = 0;
 
 
-char Guild_Skill_Button = 0; //0 = 버튼이 아무것도 안눌렸다, 1 = up버튼이 눌렸다, 2 = down버튼이 눌렸다.
+char Guild_Skill_Button = 0;
 
 
 void RenderGoldRect( float fPos_x, float fPos_y, float fWidth, float fHeight, int iFillType = 0 );
 
 int DoBreakUpGuildAction( POPUP_RESULT Result )
 {
-	// 길드 해체 OK
 	if( Result == POPUP_RESULT_YES )
 	{
 		DeleteGuildIndex = 0;
@@ -50,10 +49,7 @@ int DoDisbandAction( POPUP_RESULT Result )
 {
 	if( Result == POPUP_RESULT_YES )
 	{
-		// 직책해제요청
 		SendRequestGuildAssign( 0x03, G_PERSON, s_szTargetID );
-
-		// 바뀐 길드리스트 요청
 		SendRequestGuildList();
 	}
 	return 1;
@@ -84,26 +80,22 @@ void DoAppointAction()
 
 	if( MouseLButtonPush )
 	{
-		// 부길드마스터
 		if( CheckMouseIn( s_ptAppointWindow.x+20, s_ptAppointWindow.y+19, 170, 20.f ) )
 			s_eAppointType = APPOINT_SUBGUILDMASTER;
-		// 배틀마스터
 		if( CheckMouseIn( s_ptAppointWindow.x+20, s_ptAppointWindow.y+19+25-3, 170, 20.f ) )
 			s_eAppointType = APPOINT_BATTLEMASTSER;
 	}
 
 	if( s_PopupAppointOkButton.DoMouseAction() )
 	{
-		// 직책임명요청
-		if( s_eAppointStatus == G_PERSON )	// 직위 임명
+		if( s_eAppointStatus == G_PERSON )
 		{
 			SendRequestGuildAssign( 0x01, s_eAppointType, s_szTargetID );
 		}
-		else									// 직위 변경
+		else
 		{
 			SendRequestGuildAssign( 0x02, s_eAppointType, s_szTargetID );
 		}
-		// 바뀐 길드리스트 요청
 		SendRequestGuildList();
 
 		g_pUIPopup->CancelPopup();
@@ -118,16 +110,13 @@ void RenderAppoint()
 
 	EnableAlphaTest();
 
-	// 부길마로임명
 	RenderGoldRect( s_ptAppointWindow.x+20, s_ptAppointWindow.y+19, 170, 20.f, ( s_eAppointType == APPOINT_SUBGUILDMASTER ? 1 : 0 ) );
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->RenderText(s_ptAppointWindow.x+20, s_ptAppointWindow.y+24, GlobalText[1311], 170, 0, RT3_SORT_CENTER);
-	
-	// 배마로임병
+
 	RenderGoldRect( s_ptAppointWindow.x+20, s_ptAppointWindow.y+19+25-5, 170, 20.f, ( s_eAppointType == APPOINT_BATTLEMASTSER ? 1 : 0 ) );
 	g_pRenderText->RenderText(s_ptAppointWindow.x+20, s_ptAppointWindow.y+24+25-3, GlobalText[1312], 170, 0, RT3_SORT_CENTER);
 
-	// 임명하시겠습니까?
 	char Text[64];
 	sprintf( Text, GlobalText[1314], s_szTargetID, ( s_eAppointType == APPOINT_SUBGUILDMASTER ? GlobalText[1301] : GlobalText[1302] ) );
 
@@ -188,14 +177,12 @@ CUIGuildInfo::CUIGuildInfo()
 	s_PopupAppointCancelButton.SetParentUIID( GetUIID() );
 	s_PopupAppointCancelButton.SetSize( 50, 18 );
 
-	// 길드연합 해체/탈퇴
 	m_BreakUnionButton.Init( nButtonID++, "" );
 	m_BreakUnionButton.SetParentUIID( GetUIID() );
 	m_BreakUnionButton.SetSize( 50, 18 );
 	m_BreakUnionButton.SetPosition( GetPosition_x()+15+55, GetPosition_y()+350 );
 
-	// 길드연합 방출
-	m_BanUnionButton.Init( nButtonID++, GlobalText[1422] );	// 1422 "연합방출"
+	m_BanUnionButton.Init( nButtonID++, GlobalText[1422] );
 	m_BanUnionButton.SetParentUIID( GetUIID() );
 	m_BanUnionButton.SetSize( 50, 18 );
 	m_BanUnionButton.SetPosition( GetPosition_x()+15+55, GetPosition_y()+220 );
@@ -207,7 +194,6 @@ CUIGuildInfo::~CUIGuildInfo()
 
 int CUIGuildInfo::GetGuildMemberIndex( char* szName )
 {
-	// 캐릭터명으로 길드에서의 인덱스를 구한다.
 	for( int i=0 ; i<g_nGuildMemberCount ; ++i )
 	{
 		if( GuildList[i].Name && !strcmp( GuildList[i].Name, szName ) )

@@ -2941,7 +2941,6 @@ void PlusSpecial(WORD *Value,int Special,ITEM *Item)
 	{
 		for(int i=0;i<Item->SpecialNum;i++)
 		{
-			//  내구력이 0이면은 아이템의 능력을 받지 못한다.
 			if(Item->Special[i] == Special && Item->Durability!=0)
 				*Value += Item->SpecialValue[i];
 		}
@@ -4466,13 +4465,7 @@ void CHARACTER_MACHINE::CalculateBasicState()
 
 #endif //PSW_SECRET_ITEM
 
-
-#ifdef LDS_FIX_APPLY_BUFF_STATEVALUES_WHEN_CALCULATE_CHARACTERSTATE_WITH_SETITEM
-void CHARACTER_MACHINE::getAllAddStateOnlyExValues( int &iAddStrengthExValues, 
-												int &iAddDexterityExValues, 
-												int &iAddVitalityExValues,
-												int &iAddEnergyExValues, 
-												int &iAddCharismaExValues )
+void CHARACTER_MACHINE::getAllAddStateOnlyExValues( int &iAddStrengthExValues, int &iAddDexterityExValues, int &iAddVitalityExValues, int &iAddEnergyExValues, int &iAddCharismaExValues )
 {
 	if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
 	{
@@ -4505,12 +4498,9 @@ void CHARACTER_MACHINE::getAllAddStateOnlyExValues( int &iAddStrengthExValues,
 	iAddVitalityExValues  += g_SocketItemMgr.m_StatusBonus.m_iVitalityBonus;
 	iAddEnergyExValues    += g_SocketItemMgr.m_StatusBonus.m_iEnergyBonus;
 }
-#endif // LDS_FIX_APPLY_BUFF_STATEVALUES_WHEN_CALCULATE_CHARACTERSTATE_WITH_SETITEM
 
 void CHARACTER_MACHINE::CalculateAll()
 {
-
-
 	CalculateBasicState();
 	g_csItemOption.CheckItemSetOptions ();
 	g_csItemOption.ClearListOnOff();

@@ -52,7 +52,7 @@ namespace
 		"jewelofharmonyoption", 
 		"jewelofharmonysmelt", 
 		"itemaddoption"
-	}; //client text file //순서를 틀리면 안 된다.
+	};
 }
 
 Builder::Builder() : m_isTestServer( false )

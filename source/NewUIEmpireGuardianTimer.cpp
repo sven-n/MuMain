@@ -1,5 +1,4 @@
 // NewUIEmpireGuardianTimer.cpp: implementation of the CNewUIEmpireGuardianTimer class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -9,9 +8,6 @@
 #ifdef LDK_ADD_EMPIREGUARDIAN_UI
 
 using namespace SEASON3B;
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIEmpireGuardianTimer::CNewUIEmpireGuardianTimer()
 {
@@ -35,7 +31,7 @@ bool CNewUIEmpireGuardianTimer::Create( CNewUIManager* pNewUIMng, int x, int y )
 		return false;
 	
 	m_pNewUIMng = pNewUIMng;
- 	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_EMPIREGUARDIAN_TIMER, this );		// 인터페이스 오브젝트 등록
+ 	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_EMPIREGUARDIAN_TIMER, this );
 	
 	SetPos(x, y);
 	
@@ -66,15 +62,8 @@ void CNewUIEmpireGuardianTimer::SetPos(int x, int y)
 
 bool CNewUIEmpireGuardianTimer::UpdateMouseEvent()
 {
-	// 버튼 처리
-	if( true == BtnProcess() )	// 처리가 완료 되었다면
+	if( true == BtnProcess() )
 		return false;
-	
-	// 파티 창 내 영역 클릭시 하위 UI처리 및 이동 불
-	// ( #include "NewUICommon" )
-// 	if( CheckMouseIn( m_Pos.x, m_Pos.y, BLOODCASTLE_TIME_WINDOW_WIDTH, BLOODCASTLE_TIME_WINDOW_HEIGHT) )
-// 		return false;
-
 	return true;
 }
 
@@ -96,30 +85,26 @@ bool CNewUIEmpireGuardianTimer::Render()
 	EnableAlphaTest();
 	glColor4f(1.f, 1.f, 1.f, 1.f);
 
- 	// 프레임
- 	RenderImage(IMAGE_EMPIREGUARDIAN_TIMER_WINDOW, m_Pos.x, m_Pos.y, 
-				float(TIMER_WINDOW_WIDTH), float(TIMER_WINDOW_HEIGHT));
+ 	RenderImage(IMAGE_EMPIREGUARDIAN_TIMER_WINDOW, m_Pos.x, m_Pos.y, float(TIMER_WINDOW_WIDTH), float(TIMER_WINDOW_HEIGHT));
 
 	char szText[256] = {NULL, };
 	g_pRenderText->SetFont( g_hFont );
 	g_pRenderText->SetBgColor( 0 );
 
-	// 진행 맵, 존	"%s맵 %d존"
  	sprintf(szText, GlobalText[2805], m_iDay, m_iZone);
  	g_pRenderText->RenderText(m_Pos.x+(TIMER_WINDOW_WIDTH/2)-55, m_Pos.y+13, szText, 110, 0, RT3_SORT_CENTER);
 
-	// 남은시간
 	switch(m_iType)
 	{
-	case 0: //대기
-	case 1: //루팅
+	case 0:
+	case 1:
 		g_pRenderText->SetTextColor( 10, 200, 10, 255 );
-		g_pRenderText->RenderText(m_Pos.x+(TIMER_WINDOW_WIDTH/2)-55, m_Pos.y+38, GlobalText[2844], 110, 0, RT3_SORT_CENTER);		// "남은 시간"
+		g_pRenderText->RenderText(m_Pos.x+(TIMER_WINDOW_WIDTH/2)-55, m_Pos.y+38, GlobalText[2844], 110, 0, RT3_SORT_CENTER);
 		break;
-	case 2: //타임어택
+	case 2:
 		g_pRenderText->SetTextColor( 255, 150, 0, 255 );
 		sprintf(szText,"%s (%s)", GlobalText[865], GlobalText[2845]);
-		g_pRenderText->RenderText(m_Pos.x+(TIMER_WINDOW_WIDTH/2)-55, m_Pos.y+38, szText, 110, 0, RT3_SORT_CENTER);		// "남은 시간"
+		g_pRenderText->RenderText(m_Pos.x+(TIMER_WINDOW_WIDTH/2)-55, m_Pos.y+38, szText, 110, 0, RT3_SORT_CENTER);
 		break;
 	}
 				

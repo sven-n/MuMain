@@ -169,32 +169,16 @@ bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,shor
 		}
 	}
 
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 7, 17, Action, 0x823F);
-#endif
 	if(Count > 0)
 	{
-		if(Skill == AT_SKILL_DARK_SCREAM
-#ifdef PJH_SEASON4_MASTER_RANK4
-	|| (AT_SKILL_FIRE_SCREAM_UP <= Skill && AT_SKILL_FIRE_SCREAM_UP+4 >= Skill)
-#endif //PJH_SEASON4_MASTER_RANK4
-			)
+		if(Skill == AT_SKILL_DARK_SCREAM || (AT_SKILL_FIRE_SCREAM_UP <= Skill && AT_SKILL_FIRE_SCREAM_UP+4 >= Skill))
 		{
-#ifdef CSK_HACK_TEST
-			g_pHackTest->AddAttackCount(Skill);
-#endif // CSK_HACK_TEST
-#ifdef PBG_FIX_DARK_FIRESCREAM_HACKCHECK
 			BYTE _SerialTemp = (BYTE)SkillSerialNum;
 			SendRequestMagicAttack(Skill,(int)(Position[0]/TERRAIN_SCALE),(int)(Position[1]/TERRAIN_SCALE),_SerialTemp,Count,DamageKey,SkillSerialNum);
-#else //PBG_FIX_DARK_FIRESCREAM_HACKCHECK
-			SendRequestMagicAttack(Skill,(int)(Position[0]/TERRAIN_SCALE),(int)(Position[1]/TERRAIN_SCALE),SkillSerialNum,Count,DamageKey,SkillSerialNum);
-#endif //PBG_FIX_DARK_FIRESCREAM_HACKCHECK
 		}
 		else
 		{
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			if(Skill != AT_SKILL_MULTI_SHOT)
-#endif //#define PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			{
 				SendRequestMagicAttack(Skill,(int)(Position[0]/TERRAIN_SCALE),(int)(Position[1]/TERRAIN_SCALE),Serial,Count,DamageKey,SkillSerialNum);
 			}
@@ -202,11 +186,6 @@ bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,shor
 		return true;
 	}
 	return false;
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 }
 
 void CreateHealing(OBJECT *o)
@@ -274,7 +253,7 @@ void EffectDestructor(OBJECT *o)
 
 
 #ifdef LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
-// DanglingPointer(SourcePointer가 NULL이 된상황에 ReferencePointer가 NULL아닌 NULL이 된 경우)
+
 void TerminateOwnerEffectObject( int iOwnerObjectType )	
 {
 	if( iOwnerObjectType < 0 )
@@ -312,14 +291,8 @@ bool DeleteEffect(int Type,OBJECT *Owner, int iSubType)
 			{
 				if(o->Owner==Owner)
                 {
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 					EffectDestructor(o);
                     bDelete = true;
-#else	// YDG_ADD_SKILL_FLAME_STRIKE
-					o->Live = false;
-                    bDelete = true;
-					o->Owner = NULL;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
                 }
 			}
 		}
@@ -342,12 +315,7 @@ void DeleteEffect( int efftype )
 		OBJECT *o = &Effects[i];
 		if(o->Live && o->Type==efftype)
 		{
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 			EffectDestructor(o);
-#else	// YDG_ADD_SKILL_FLAME_STRIKE
-			o->Live = false;
-			o->Owner = NULL;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
 		}
 	}
 
@@ -487,12 +455,7 @@ void CheckTargetRange(OBJECT *o)
                     for(int j=0;j<20;j++)
 				    {
 					    CreateEffect(MODEL_WOOSISTONE,o->Position,o->Angle,o->Light,1);
-						//Vector(1.0f, 0.5f, 0.5f, Light);
 					    CreateParticle(BITMAP_FIRE,o->Position,o->Angle,o->Light,0,1,o);
-						//Vector(0.5f,0.2f,0.2f,Light);	// 연기 펑
-					    //CreateParticle(BITMAP_FIRE,o->Position,o->Angle,o->Light,6,1,o);
-						//CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,Light,2);	// 연기
-						//CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,Light,48);	// 연기
 				    }
                	    PlayBuffer(SOUND_BREAK01);
                 }
@@ -517,7 +480,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 		OBJECT *o = &Effects[icntEffect];
 
 #ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
-		// 스킬 이펙트면 스킬이펙트 구조의 메모리를 사용한다
 		if (g_SkillEffects.IsSkillEffect(Type, Position, Angle, Light, SubType, Owner, PKKey, SkillIndex, Skill, SkillSerialNum, Scale, sTargetIndex))
 		{
 			o = g_SkillEffects.CreateEffect();
@@ -809,7 +771,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->LifeTime -= 60;
 				}
 				else if ( 2 == o->SubType)
-				{	// 임시
+				{
 					o->LifeTime = 8;
 					o->Position[2] += 150.f;
 				}
@@ -825,10 +787,10 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				o->BlendMesh = 0;
 				o->BlendMeshLight = 1.0f;
 				break;
-			case MODEL_SPEAR:	// 꼬깔모양
+			case MODEL_SPEAR:
 				o->LifeTime = 10;
 				break;
-			case MODEL_SPEAR+1:	// 창술 준비동작
+			case MODEL_SPEAR+1:
 				o->Angle[0] = o->Angle[1] = o->Angle[2] = 0.0f;
 				o->LifeTime = 5;
 				break;
@@ -838,15 +800,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				o->Scale = 1.5f;
 				o->Direction[0] = 5.0f * sinf( o->Angle[2]*Q_PI/180.0f);
 				o->Direction[1] = -5.0f * cosf( o->Angle[2]*Q_PI/180.0f);
-				//o->Direction[1] = 50.f;
-				/*/
-				memcpy( o->Matrix, g_pvEffectTemp, 3 * 4 * sizeof ( float));
-				o->Matrix[0][3] = 0.0f;
-				o->Matrix[1][3] = 0.0f;
-				o->Matrix[2][3] = 0.0f;
-				o->Angle[2] = 0.0f;
-				/*/
-				//*/
 				break;
 			case BITMAP_FIRE_CURSEDLICH:
 				if (o->SubType == 0)
@@ -1179,7 +1132,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 							CreateEffect ( BITMAP_MAGIC, vPosition, o->Angle, vLight, 12 );
 						}
 
-						// 바닥 쪼개짐
 						Vector(1.0f, 0.4f, 0.2f, vLight);
 						VectorCopy(o->Position, vPosition);
 						vPosition[2] = RequestTerrainHeight ( vPosition[0], vPosition[1] ) + 10;
@@ -1190,7 +1142,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					else if(o->SubType == 2)
 					{
 						o->LifeTime = 15;
-						// 바닥 쪼개짐
 						vec3_t vLight;
 						vec3_t vPosition;
 						Vector(1.0f, 0.4f, 0.2f, vLight);
@@ -1303,15 +1254,9 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
                     o->Velocity = 0.f;
                 }
 				break;
-
-//------------------------------------------------------------------------------------------------------------
-
             case BITMAP_FIRE:
                 o->LifeTime = 1000;
                 break;
-
-//------------------------------------------------------------------------------------------------------------
-
 			case BITMAP_FIRE+1:
 				o->LifeTime = 10;
 				AngleMatrix(o->Angle,Matrix);
@@ -1320,9 +1265,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				VectorAdd(o->Position,p2,o->Position)
 				o->Position[2] += 130.f;
 				break;
-
-//------------------------------------------------------------------------------------------------------------
-
 			case BITMAP_FLAME:
                 if ( o->SubType==0 )
                 {
@@ -1355,11 +1297,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 #endif // LDS_ADD_EMPIRE_GUARDIAN
 				break;
-
-//------------------------------------------------------------------------------------------------------------
-
 #ifdef CSK_RAKLION_BOSS
-
 			case MODEL_RAKLION_BOSS_CRACKEFFECT:
 				if(o->SubType == 0)
 				{
@@ -1369,9 +1307,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Angle[2] = rand()%360;
 				}
 				break;
-
-//------------------------------------------------------------------------------------------------------------	
-
 			case MODEL_RAKLION_BOSS_MAGIC:
 				if(o->SubType == 0)
 				{
@@ -1379,9 +1314,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Scale = Scale;
 				}
 				break;
-
-//------------------------------------------------------------------------------------------------------------	
-
 			case BITMAP_FIRE_HIK2_MONO:
 				if(o->SubType == 0)
 				{
@@ -1393,9 +1325,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					Vector ( 0.f, 0.f, 0.f, o->Angle );
 				}
 				break;
-
-//------------------------------------------------------------------------------------------------------------		
-
 			case BITMAP_CLOUD:
 				if(o->SubType == 0)
 				{
@@ -1404,16 +1333,10 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Angle[2] = (float)(rand()%360);
 				}
 				break;
-				
 #endif // CSK_RAKLION_BOSS
-
-//------------------------------------------------------------------------------------------------------------
-
 			case BITMAP_FIRE_RED:
 				o->LifeTime = 40;
 				break;
-
-//------------------------------------------------------------------------------------------------------------
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 			case BITMAP_IMPACT:
 				{
@@ -2080,7 +2003,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 #endif // CRYINGWOLF_2NDMVP
 
-                //  땅으로 떨어지는 화살.
                 if ( Type==MODEL_ARROW && ( o->SubType==3 || o->SubType==4 ) )
                 {
                     o->LifeTime = 40;
@@ -2571,7 +2493,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
                     o->Gravity  = 5.f;
                     Vector ( 0.f, 0.f, (float)(rand()%360), o->HeadAngle );
 
-                    //  연기를 내준다.
                     for ( int i=0; i<3; ++i )
 			        {
 				        vec3_t Position;
@@ -2598,7 +2519,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
     			o->Scale        = 1.2f;
 				break;
 			case MODEL_WOOSISTONE:
-				if(o->SubType==1)	// 돌 파편
+				if(o->SubType==1)
 				{
 					o->Direction[0] = 0;
 					o->Direction[1] = 0;
@@ -2615,7 +2536,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->HeadAngle[2] += 15.0f;
 					break;
 				}
-				else	// 돌 덩이
+				else
 				{
 					AngleMatrix(o->Angle,Matrix);
 					Vector(0.f,-60.f,150.f,p1);
@@ -2660,15 +2581,15 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 			case MODEL_CUNDUN_PART6:
 			case MODEL_CUNDUN_PART7:
 			case MODEL_CUNDUN_PART8:
-			case MODEL_MONSTER01+64:	// 진짜쿤둔
+			case MODEL_MONSTER01+64:
 				switch(o->SubType)
 				{
-				case 1:	// 몸
+				case 1:
 					o->LifeTime     = 100;
     				o->Scale        = 2.0f;
 					break;
-				case 2:	// 투구
-				case 3:	// 갑옷
+				case 2:
+				case 3:
 					Vector(o->Position[0], o->Position[1],
 						RequestTerrainHeight(o->Position[0],o->Position[1]) - (float)o->PKKey - 80,
 						o->StartPosition);
@@ -2678,20 +2599,17 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->HeadAngle[0]	= (float)(rand()%2);
 					if (o->SubType == 2) o->HeadAngle[0] = 0;
 					break;
-				case 4:	// 망또
+				case 4:
 					Vector(o->Position[0], o->Position[1],
 						RequestTerrainHeight(o->Position[0],o->Position[1]) - (float)o->PKKey,
 						o->StartPosition);
 					Vector(0,0,0,o->Direction);
-				case 5:	// 치마
+				case 5:
 					o->CurrentAction = 0;
 					o->LifeTime     = 170;
     				o->Scale        = 2.0f;
 					break;
 				}
-				// 쿤둔 조각 좌표맞추는 코드 -_-
-//				o->LifeTime = 1000000;
-				// 여기까지 쿤둔 조각 좌표맞추는 코드
 				o->PKKey = -1;
 				o->Owner = Owner;
 				break;
@@ -2769,7 +2687,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				o->Direction[2] = 0;
 				break;
 #ifdef ASG_ADD_KARUTAN_MONSTERS
-			// 토템 골렘과 스케일만 빼고 동일.
 			case MODEL_CONDRA_ARM_L:
 			case MODEL_CONDRA_ARM_L2:
 			case MODEL_CONDRA_SHOULDER:
@@ -2931,21 +2848,21 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					Vector(0.f,0.f,-50.f,o->Direction);
          			Vector(0.f,20.f,0.f,o->Angle);
 				}
-				else if(o->SubType==2)//드래곤
+				else if(o->SubType==2)
 				{
      				o->LifeTime = 40;
        				o->Scale = (float)(rand()%8+10)*0.1f;
 					Vector(0.f,0.f,-50.f,o->Direction);
          			//o->Angle[0] = -20.f;
 				}
-				else if(o->SubType==3)//불사조
+				else if(o->SubType==3)
 				{
      				o->LifeTime = 80;
        				o->Scale = 0.3f;
 					Vector(0.f,-12.f,0.f,o->Direction);
 //					PlayBuffer( SOUND_PHOENIXFIRE);
 				}
-                else if ( o->SubType==4 )   //  블러드캐슬.
+                else if ( o->SubType==4 )
                 {
      				o->LifeTime = 40;
        				o->Scale = (float)(rand()%10+15)*0.1f;
@@ -2954,13 +2871,13 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					Vector(0.f,-(rand()%20+10.f),-(rand()%10+20.f),o->Direction);
          			Vector(0.f,20.f,0.f,o->Angle);
                 }
-                else if ( o->SubType==5 )   //  오거.
+                else if ( o->SubType==5 )
                 {
      				o->LifeTime = 40;
                     o->Gravity  = 5.f;
 					Vector(0.f,-30.f,0.f,o->Direction);
                 }
-				else if ( o->SubType==6 )	//	왕 독.
+				else if ( o->SubType==6 )
 				{
      				o->LifeTime = 40;
 					o->HiddenMesh = -2;
@@ -2975,7 +2892,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 
 					CreateJoint(BITMAP_SMOKE,o->Position,o->Position,o->HeadAngle,0,o,100.f);
 				}
-				else if ( o->SubType==7 )	//	왕 독2 ( 
+				else if ( o->SubType==7 )
 				{
      				o->LifeTime = 40;
 					o->HiddenMesh = -2;
@@ -2988,7 +2905,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					Vector(0.f,0.f,-50.f-rand()%50,o->Direction);
          			Vector(0.f,20.f,0.f,o->HeadAngle);
 				}
-				else if ( o->SubType==8 )	//	왕 독3 ( 
+				else if ( o->SubType==8 )
 				{
      				o->LifeTime = 40;
 					o->HiddenMesh = -2;
@@ -3052,7 +2969,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
                     o->Angle[2] = (float)(rand()%360);
                     break;
                 }
-				else if(o->SubType==10)	//. 파편스케일이 좀 큰경우.
+				else if(o->SubType==10)
 				{
 					Vector(0.f,(float)(rand()%256+64)*0.2,0.f,p1);
 					o->LifeTime = rand()%16+32;
@@ -3063,7 +2980,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Gravity = (float)(rand()%16+28);
 					break;
 				}
-				else if(o->SubType==12)	//. 파편스케일이 좀 큰경우.
+				else if(o->SubType==12)
 				{
 					Vector(0.f,(float)(rand()%256+64)*0.1f,0.f,p1);
 					o->LifeTime = rand()%16+32;
@@ -3102,17 +3019,14 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 			case MODEL_ICE_SMALL:
 			case MODEL_METEO1:
 			case MODEL_METEO2:
-			case MODEL_EFFECT_SAPITRES_ATTACK_2:		// 사피트레스 가시떨어지기
+			case MODEL_EFFECT_SAPITRES_ATTACK_2:
 				if(o->Type==MODEL_BIG_STONE1 || o->Type==MODEL_BIG_STONE2)
 				{
 					Vector((float)(rand()%128-64),(float)(rand()%128-64),(float)(rand()%180),p1);
 					VectorAdd(o->Position,p1,o->Position);
 				}
-#ifdef YDG_FIX_STONE_FLY
+
 				if(Type==MODEL_ICE_SMALL)
-#else	/// YDG_FIX_STONE_FLY
-				else if(Type==MODEL_ICE_SMALL )
-#endif	// YDG_FIX_STONE_FLY
 				{
 					o->BlendMesh = 0;
 					o->BlendMeshLight = 0.3f;
@@ -3181,8 +3095,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 				break;
 
-//------------------------------------------------------------------------------------------
-
 #ifdef ADD_RAKLION_IRON_KNIGHT
 			case MODEL_EFFECT_BROKEN_ICE0:
 			case MODEL_EFFECT_BROKEN_ICE1:
@@ -3200,7 +3112,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 			case MODEL_NARCONDRA_STONE2:
 			case MODEL_NARCONDRA_STONE3:
 #endif	// ASG_ADD_KARUTAN_MONSTERS
-				if(o->SubType == 0)	// 얼음 파편
+				if(o->SubType == 0)
 				{
 					o->Direction[0] = 0;
 					o->Direction[1] = 0;
@@ -3217,7 +3129,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->HeadAngle[2] += 25.0f;
 					break;
 				}
-				else if(o->SubType == 1)	// 얼음 하늘에서 떨어지는 효과
+				else if(o->SubType == 1)
 				{
 					o->LifeTime = 40;
 					o->Scale = Scale + (float)(rand()%8+15) * 0.1f;
@@ -3266,7 +3178,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 				break;
 #endif //PBG_ADD_PKFIELD
-//------------------------------------------------------------------------------------------
 
 			case MODEL_DUNGEON_STONE01:
 				o->LifeTime     = rand()%16+24;
@@ -3277,9 +3188,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				VectorRotate(p1,Matrix,p2);
 				VectorAdd(o->Position,p2,o->Position);
 				break;
-
-//------------------------------------------------------------------------------------------
-
 			case MODEL_WARCRAFT:
 				o->LifeTime     = 50;
 				o->Scale        = 0.7f;
@@ -3289,9 +3197,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
     				o->BlendMesh    = -4;
 				Vector(0.f,0.f,45.f,o->Angle);
 				break;
-
-//------------------------------------------------------------------------------------------
-
 			case MODEL_POISON:
 				o->BlendMesh    = 1;
 				o->LifeTime     = 40;
@@ -3714,13 +3619,11 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								v3PosTargetModify[2] = v3PosTargetModify[2] + 100.0f;
 								VectorDistNormalize( v3PosModify02,v3PosTargetModify,v3DirModify);
 								
-								// 3-1. 첫번째 위치값
 								fDistanceResult = o->Distance * 0.3f;
 								fFirstDist = fDistanceResult;
 								VectorMulF( v3DirModify, fDistanceResult, v3DirResult );
 								VectorAdd( v3PosModify, v3DirResult, v3PosProcess01 );
 								
-								// 3-2. 두번째 위치값
 								fDistanceResult = fTotalDist;
 								VectorMulF( v3DirModify, fDistanceResult, v3DirResult );
 								VectorAdd( v3PosModify, v3DirResult, v3PosProcessFinal );
@@ -3757,17 +3660,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
  								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);
 								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);
-					/*
-                    o->LifeTime     = 60;
-					o->Alpha = o->Scale;
-                    o->Scale        = 1.4f;
-					o->BlendMesh = -1;
-                    Vector ( 1.f, 1.f, 1.f, o->Light );
-                    Vector ( 0.f, -40.f, 0.f, o->Direction );
-				    VectorCopy ( o->Position, o->StartPosition );
-                    Vector ( 0.f, 90.f, Angle[2], o->Angle );
-                    VectorCopy ( o->Angle, o->HeadAngle );
-					*/
 				}
 				break;
 			case MODEL_DEATH_SPI_SKILL:
@@ -4148,7 +4040,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				};
 				break;
 
-            case BATTLE_CASTLE_WALL1:   //  성벽. ( 부서지는 효과를 위함.
+            case BATTLE_CASTLE_WALL1:
             case BATTLE_CASTLE_WALL2:
             case BATTLE_CASTLE_WALL3:
             case BATTLE_CASTLE_WALL4:
@@ -4430,7 +4322,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
                     VectorScale ( o->Direction, 0.001f, o->Direction );
                     o->Direction[2] = 5.f;
                 }
-                else if ( o->SubType==2 )   //  떨어지는 돌.
+                else if ( o->SubType==2 )
                 {
                     o->LifeTime = 50;
                     o->Scale    = rand()%8/20.f+0.7f;
@@ -4487,20 +4379,20 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
     				o->Scale    = (float)(rand()%2+7)*0.1f;
         			o->Gravity  = (float)(rand()%5+6);
                 }
-				else if (o->Type == MODEL_GOLEM_STONE )	//. 골렘 파편
+				else if (o->Type == MODEL_GOLEM_STONE )
 				{
 					Vector ( 0.f, (float)(rand()%128+32)*0.1f, 0.f, p1 );
 					o->Scale    = (float)(rand()%2+10)*0.25f;
         			o->Gravity  = (float)(rand()%5+2);
 				}
 				else if ( (o->Type == MODEL_BIG_STONE_PART1 || o->Type == MODEL_BIG_STONE_PART2) && o->SubType == 2)
-				{	//. 독골렘 파편
+				{
 					Vector ( 0.f, (float)(rand()%128+32)*0.1f, 0.f, p1 );
 					o->Scale    = 0.6F+(float)(rand()%2+4)*0.12f;
         			o->Gravity  = (float)(rand()%5+2);
 				}
 				else if ( o->Type == MODEL_BIG_STONE_PART2 && o->SubType == 3)
-				{	//. 독골렘 공격용 파편
+				{
 					o->LifeTime = rand()%16+32;
 					o->Scale    = 1.2f+(float)(rand()%3+2)*0.12f;
 					o->Direction[2] = -(rand()%5+20);
@@ -4627,7 +4519,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
                 }
 				break;
 
-            case MODEL_SKIN_SHELL:      //  스킨 파편.
+            case MODEL_SKIN_SHELL:
     			Vector(0.f,(float)(rand()%128+32)*0.1f,0.f,p1);
 				o->Position[2] += 50.f;
 				o->LifeTime = rand()%16+32;
@@ -4676,7 +4568,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
                     o->BlendMeshLight = 0.4f;
                 }
                 break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
             case MODEL_SKILL_JAVELIN:
                 {
                     o->LifeTime     = 35;
@@ -4694,15 +4585,13 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
                     o->HeadAngle[2] += o->SubType*Ang-Ang;
                 }
                 break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//^ 펜릴 이펙트 관련
 			case MODEL_FENRIR_THUNDER:
 			{
 				if(o->SubType == 0)
 				{
 					o->LifeTime = 100;
 					o->Scale	= 0.3f + (float)(rand()%100)*0.002f;
-					o->m_iAnimation	= 0;	// 페이드인 페이드아웃 상태로 사용
+					o->m_iAnimation	= 0;
 					o->Alpha	= 0.7f;
 
 					o->Angle[0] = rand()%360;
@@ -4716,20 +4605,20 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					BMD* p_b = &Models[o->Owner->Type];
 					int irandom = rand()%30;
 
-					if(irandom >= 1 && irandom <= 2)	// 목 쪽 
+					if(irandom >= 1 && irandom <= 2)
 					{
 						p_b->TransformPosition(BoneTransform[10], vPos, o->Position, false);
 					}
-					else if(irandom == 3)	// 턱 바깥
+					else if(irandom == 3)
 					{
 						o->Scale -= 0.2f;
 						p_b->TransformPosition(BoneTransform[14], vPos, o->Position, false);
 					}
-					else if(irandom >= 4 && irandom <= 5)	// 엉덩이 쪽
+					else if(irandom >= 4 && irandom <= 5)
 					{
 						p_b->TransformPosition(BoneTransform[2], vPos, o->Position, false);
 					}
-					else if(irandom >= 6 && irandom <= 7)	// 꼬리쪽
+					else if(irandom >= 6 && irandom <= 7)
 					{
 						o->Scale -= 0.2f;
 						if(rand()%2 == 0)
@@ -4737,7 +4626,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 						else
 							p_b->TransformPosition(BoneTransform[51], vPos, o->Position, false);
 					}
-					else if(irandom == 8)	// 꼬리 끝
+					else if(irandom == 8)
 					{	
 						o->Scale -= 0.2f;
 						p_b->TransformPosition(BoneTransform[53], vPos, o->Position, false);
@@ -4747,7 +4636,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 						o->Live = false;
 						o->Alpha = 0.0f;
 					}
-					else	// 몸 전체
+					else
 					{
 						o->Scale += 0.1f;
 						o->Position[0] += rand()%240 - 120;
@@ -4881,18 +4770,15 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 #endif // CSK_RAKLION_BOSS	
 				}
 				break;	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			case MODEL_FENRIR_FOOT_THUNDER:
 				o->LifeTime = 200;
-				//o->SubType = SubType;	// 에니메이션 키값으로 사용
 				o->m_iAnimation = 0;
 				VectorCopy(Position, o->Position);
 				VectorCopy(Light, o->Light);
 				o->Alpha = 1.0f;
-				o->m_dwTime = timeGetTime();	// 프레임간 시간계산으로 사용
+				o->m_dwTime = timeGetTime();
 				o->Position[2] = 0.0f;
 				break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				case MODEL_TWINTAIL_EFFECT:
 				{
 					if(o->SubType == 0)
@@ -4917,23 +4803,20 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					}
 				}
 				break;
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			case MODEL_FENRIR_SKILL_DAMAGE:
 			{
 				switch(o->SubType) 
 				{
-				case 1:	// 빨강
+				case 1:
 					Vector(0.6f, 0.2f, 0.2f, o->Light);
 					break;
-				case 2:	// 파랑
+				case 2:
 					Vector(0.2f, 0.2f, 0.4f, o->Light);
 					break;
-				case 3:	// 검정
+				case 3:
 					Vector(0.6f, 0.8f, 0.6f, o->Light);
 					break;
 				}
-
-//				Vector(1.0f, 0.7f, 0.7f, o->Light);//석근궁금해???
 				
 				vec3_t vPos;
 				int irandom;
@@ -4948,7 +4831,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 			}
 			break;
-			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
             case MODEL_ARROW_IMPACT:
 				o->Velocity = 1.f;
 				o->LifeTime = 20;
@@ -5052,13 +4934,11 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 						VectorCopy( o->Position, vPos );
 						vPos[2] += 85.f;
 						
-						// 기존 이팩트가 있으면 삭제
 						DeleteEffect( BITMAP_MAGIC, NULL, 11 );
 						DeleteEffect( BITMAP_TARGET_POSITION_EFFECT2, NULL, 0 );
 						DeleteEffect( BITMAP_TARGET_POSITION_EFFECT1, NULL, 0 );
 						DeleteJoint( MODEL_SPEARSKILL, NULL, 16 );
-						
-						// 추가 이팩트 생성
+
 						CreateEffect( BITMAP_MAGIC, o->Position, o->Angle, vLight, 11 );
 						CreateEffect( BITMAP_TARGET_POSITION_EFFECT2, o->Position, o->Angle, vLight, 0);
 						CreateJoint( MODEL_SPEARSKILL, vPos, vPos, Angle, 16, o, 5.0f );
@@ -5087,13 +4967,12 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					}
 				}
 				break;
-			case MODEL_EFFECT_SAPITRES_ATTACK:		// 사피트레스 공격 이팩트
+			case MODEL_EFFECT_SAPITRES_ATTACK:
 				{
 					if( o->SubType == 0)
 					{
 						o->LifeTime = 20;
 
-						// 사방으로 가시 날라가기
 					    for( int i=0 ; i<10 ; i++ )
 						{
 							CreateEffect( MODEL_EFFECT_SAPITRES_ATTACK_2, o->Position, o->Angle, o->Light, 14 );
@@ -5101,7 +4980,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					}
 				}
 				break;
-			case MODEL_EFFECT_SAPITRES_ATTACK_1:	// 사피트레스 가시 날리기
+			case MODEL_EFFECT_SAPITRES_ATTACK_1:
 				{
 					if( o->SubType == 0 )
 					{
@@ -5112,12 +4991,11 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 						o->Scale = 1.1f;
 						VectorSubtract( o->Owner->Position, o->Position, o->Direction );
 						VectorNormalize( o->Direction );
-						// 앵글값 구하기
 						o->Angle[2] = CreateAngle( o->Position[0], o->Position[1], o->Owner->Position[0], o->Owner->Position[1] );
 					}
 				}
 				break;
-			case MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1:	// 썬더네이핀 썬더 에너지볼
+			case MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1:
 				{
 					if( o->SubType == 0 )
 					{
@@ -5130,16 +5008,10 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 				break;
 
-//--------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef CSK_EVENT_CHERRYBLOSSOM
 			case MODEL_EFFECT_SKURA_ITEM:
 				{
-#ifdef KJH_ADD_09SUMMER_EVENT
 					if( (o->SubType == 0) || (o->SubType == 1))
-#else // KJH_ADD_09SUMMER_EVENT
-					if( o->SubType == 0 )
-#endif // KJH_ADD_09SUMMER_EVENT
 					{	
 						o->LifeTime = 52;	
 					}
@@ -5235,17 +5107,16 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 									o->Direction[1] += iAddDirection;
 									o->Direction[2] += iAddDirection;
 									
-									o->Scale = o->Scale + ((float)(rand()%20-10)*(o->Scale*0.03f)); // o->Scale의 30% (20단계)
-									o->LifeTime = 25;//<<-------수치가 틀리게 되어있음 할칠때 조심할것
-									o->Alpha = 0.3f; //<<-------수치가 틀리게 되어있음 할칠때 조심할것
+									o->Scale = o->Scale + ((float)(rand()%20-10)*(o->Scale*0.03f));
+									o->LifeTime = 25;
+									o->Alpha = 0.3f;
 									
 									o->Gravity = 0.1f;
 									o->Angle[0] = (float)(rand()%360);
 									o->Angle[1] = (float)(rand()%360);
 									o->Angle[2] = (float)(rand()%360);
-									
-									// 회전 속도 (이 이팩트에서 EyeRight는 사용불가)
-									o->EyeRight[0] = (float)(rand()%10-5);		// -15도 ~ 15도
+
+									o->EyeRight[0] = (float)(rand()%10-5);
 									o->EyeRight[1] = (float)(rand()%10-5);
 									o->EyeRight[2] = (float)(rand()%10-5);
 									
@@ -5254,32 +5125,20 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 							
 						}break;
 #endif //LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 			case MODEL_BLOW_OF_DESTRUCTION:
 				{
 					if(o->SubType == 0)
 					{
 						o->LifeTime = 40;
-						
-						// 부모오프젝트가 바라보는 방향으로 조금 이동
-						assert(o->Owner && "부모 포인트를 넣어줘야 합니다.!");
 						vec3_t vPos, vPos2;
 						float Matrix[3][4];
 						Vector(-20.f, -100.f, 0.f, vPos);
 						AngleMatrix(o->Owner->Angle, Matrix);
 						VectorRotate(vPos, Matrix, vPos2);	
 						VectorAdd(vPos2, o->Position, o->Position);
-
-						// 타켓 위치 복사
 						VectorCopy(o->Light, o->StartPosition);
-						
-						// 라이트값 입력
 						Vector(1.2f, 1.2f, 1.2f, o->Light);
-
-						// 타켓에 이펙트 발생
 						CreateEffect(MODEL_BLOW_OF_DESTRUCTION, o->StartPosition, o->Angle, o->Light, 1, o->Owner);
 					}
 					else if(o->SubType == 1)
@@ -5307,9 +5166,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
 				break;
-
-//--------------------------------------------------------------------------------------------------------------------------------	
-
 			case MODEL_NIGHTWATER_01:
 				{
 					o->LifeTime = 25;
@@ -5317,9 +5173,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Angle[2] = rand()%360;
 				}
 				break;
-
-//--------------------------------------------------------------------------------------------------------------------------------		
-				
 			case MODEL_KNIGHT_PLANCRACK_A:
 				if (o->SubType == 0)
 				{
@@ -5340,9 +5193,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 #endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
 				break;
-
-//--------------------------------------------------------------------------------------------------------------------------------			
-
 			case MODEL_KNIGHT_PLANCRACK_B:
 				{
 					o->LifeTime = 25;
@@ -5352,9 +5202,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 				break;
 #endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef YDG_ADD_SKILL_FLAME_STRIKE
 			case MODEL_EFFECT_FLAME_STRIKE:
 				if(o->SubType == 0)
@@ -5367,8 +5214,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 				break;
 #endif	// YDG_ADD_SKILL_FLAME_STRIKE
-
-//--------------------------------------------------------------------------------------------------------------------------------
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 			case MODEL_STREAMOFICEBREATH:
 				{
@@ -5406,18 +5251,15 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 						fCurrentOffsetScale	= RANDOMOFFSET_SCALE * RANDNUM;
 						fCurrentOffsetPos	= RANDOMOFFSET_POSITION * RANDNUM;
 						fCurrentOffsetAngle	= RANDOMOFFSET_ANGLE * RANDNUM;
-						
-						// 1. 위치값 
+
 						v3ResultPos[0] = v3PosBasis_[0] + fCurrentOffsetPos;
 						v3ResultPos[1] = v3PosBasis_[1] + fCurrentOffsetPos;
 						v3ResultPos[2] = v3PosBasis_[2] + fCurrentOffsetPos;
 						
-						// 2. 각도 값
 						v3ResultAngle[0] = o->Angle[0] + fCurrentOffsetAngle;
 						v3ResultAngle[1] = o->Angle[1] + fCurrentOffsetAngle;
 						v3ResultAngle[2] = o->Angle[2] + fCurrentOffsetAngle;
 						
-						// 3. 크기값
 						fResultScale = o->Scale + fCurrentOffsetScale;
 						
 						CreateParticle( BITMAP_RAKLION_CLOUDS, v3ResultPos, v3ResultAngle, o->Light, 0, fResultScale );
@@ -5425,9 +5267,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					
 				}break;
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER	
-//--------------------------------------------------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------------------------------------------------
 #ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
 			case MODEL_1_STREAMBREATHFIRE:
 				{
@@ -5435,7 +5274,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				}
 				break;
 #endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
-//--------------------------------------------------------------------------------------------------------------------------------
 #ifdef PBG_ADD_PKFIELD
 			case MODEL_LAVAGIANT_FOOTPRINT_R:
 			case MODEL_LAVAGIANT_FOOTPRINT_V:	
@@ -5451,7 +5289,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				break;
 #endif //PBG_ADD_PKFIELD
 #ifdef LDS_ADD_GOLDCORPS_EVENT_MOD_GREATDRAGON
-			case MODEL_EFFECT_FIRE_HIK3_MONO:		// 황금 군단의 황금 그레이트 드래곤 비주얼 이펙트. 
+			case MODEL_EFFECT_FIRE_HIK3_MONO:
 				{
 					int iRandNum = (rand() % 100);
 
@@ -5465,29 +5303,27 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 #ifdef LDS_ADD_EMPIRE_GUARDIAN
 			case MODEL_PROJECTILE:
 				{
-					//o->m_iAnimation을 switch 로 사용하자
 					o->LifeTime = 50;
 					o->Gravity = 0.0f;
 					o->Velocity = 70.0f;
-					VectorCopy(Position,o->StartPosition); //시작위치
-					//o->Angle //방향
+					VectorCopy(Position,o->StartPosition);
 				}
 				break;
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE01:	//성문 파괴 이펙트 조각 1
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE02:	//성문 파괴 이펙트 조각 2
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE03:	//성문 파괴 이펙트 조각 3
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE04:	//성문 파괴 이펙트 조각 4
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE05:	//성문 파괴 이펙트 조각 5
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE06:	//성문 파괴 이펙트 조각 6
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE07:	//성문 파괴 이펙트 조각 7
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE08:	//성문 파괴 이펙트 조각 8
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE09:	//성문 파괴 이펙트 조각 9
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE11:	//성문 파괴 이펙트 조각 7
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE12:	//성문 파괴 이펙트 조각 8
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE13:	//성문 파괴 이펙트 조각 9
-			case MODEL_STATUE_CRUSH_EFFECT_PIECE01:	//석상 파괴 이펙트 조각 1
-			case MODEL_STATUE_CRUSH_EFFECT_PIECE02:	//석상 파괴 이펙트 조각 2
-			case MODEL_STATUE_CRUSH_EFFECT_PIECE03:	//석상 파괴 이펙트 조각 3
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE01:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE02:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE03:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE04:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE05:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE06:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE07:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE08:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE09:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE11:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE12:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE13:
+			case MODEL_STATUE_CRUSH_EFFECT_PIECE01:
+			case MODEL_STATUE_CRUSH_EFFECT_PIECE02:
+			case MODEL_STATUE_CRUSH_EFFECT_PIECE03:
 				{
 					o->LifeTime     = 30+(rand()%30);
 					o->Velocity     = 0.f;
@@ -5509,8 +5345,8 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Direction[2] = 0;
 				}
 				break;
-			case MODEL_STATUE_CRUSH_EFFECT_PIECE04:	//석상 파괴 이펙트 조각 4 잔해
-			case MODEL_DOOR_CRUSH_EFFECT_PIECE10:	// 주말 성문 파괴 이펙트 조각1 잔해
+			case MODEL_STATUE_CRUSH_EFFECT_PIECE04:
+			case MODEL_DOOR_CRUSH_EFFECT_PIECE10:
 				{
 					o->LifeTime     = 100;
  					o->Scale		= Scale;
@@ -5519,7 +5355,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Owner = Owner;
 				}
 				break;
-			case MODEL_DOOR_CRUSH_EFFECT:	//성문 파괴 이펙트
+			case MODEL_DOOR_CRUSH_EFFECT:
 				{
 					switch(o->SubType)
 						
@@ -5536,7 +5372,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								CreateEffect(MODEL_DOOR_CRUSH_EFFECT_PIECE01+i, vPos, o->Angle, o->Light,0,o->Owner,0,0);
 							}
 						}break;
-					case 1:	//주말용
+					case 1:
 						{
 							vec3_t vPos;
 							for(int i=0; i<9; i++)
@@ -5551,7 +5387,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					}
 				}
 				break;
-			case MODEL_STATUE_CRUSH_EFFECT:			//석상 파괴 이펙트
+			case MODEL_STATUE_CRUSH_EFFECT:
 				{
 					for(int i=0; i<6; i++)
 					{
@@ -5568,119 +5404,90 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 			case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
 			case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
 			{
-				// . 생성되었던 모든 검기를 삭제. 사용되는 검기Index는 113-155에 산발적 분포.
 				OBJECT	*O = &(Hero->Object);
 				for( int i = 113; i<=155; ++i )
 				{
 					RemoveObjectBlurs(O, i);
 				}
 			
-				// 가이온 모든 이펙트 생성 시작부분
-				// ==========================================================================================>
-				if ( o->SubType==0 )		// 가이온기본 본 위치.
+				if ( o->SubType==0 )
 				{
 					o->LifeTime = 2;
-					o->ChromeEnable = true;	// Owner Bone에 Attach하여 렌더링 할것인지?
+					o->ChromeEnable = true;
 				}
-				else if(o->SubType==3)		// 기간틱 스톰.	(모든 보델을 렌덤하게 일괄 처리 합니다.)
+				else if(o->SubType==3)
 				{
-					const int	TOTAL_LIFETIME = 60;		// 3초정도
+					const int	TOTAL_LIFETIME = 60;
 					vec3_t		v3PosStart, v3PosTarget;
-					vec3_t		arv3PosProcess[3];//, arv3AngProcess[3];
+					vec3_t		arv3PosProcess[3];
 					
-					o->ExtState		= TOTAL_LIFETIME;			// TotalLife 미사용중인 임의의 변수 사용.
+					o->ExtState		= TOTAL_LIFETIME;
 					o->LifeTime     = TOTAL_LIFETIME;
 					o->Gravity      = 0.0f;
 					o->HiddenMesh   = 1;
 					o->Distance		= 0.0f;
 					o->Alpha		= 1.0f;
-					o->ChromeEnable = false;	// Owner Bone에 Attach하여 렌더링 할것인지?
+					o->ChromeEnable = false;
 					
-					// ㄱ. 움직임 각도 백업. 모델의 각도 + 자신의 상대 각도
 					Vector ( o->Angle[0], o->Angle[1], o->Angle[2], o->HeadAngle );	
 					
-					VectorCopy ( o->Position, o->StartPosition );	// ㄴ. 시작 위치점 백업.
-					VectorCopy ( o->Position, v3PosStart );			// ㄷ. 최초 시작 지점.
-					VectorCopy ( o->Light, v3PosTarget );			// ㄹ. 최종 타겟 지점.
+					VectorCopy ( o->Position, o->StartPosition );
+					VectorCopy ( o->Position, v3PosStart );
+					VectorCopy ( o->Light, v3PosTarget );
 					
-					// ㄴ. 위치값 지정 -----------------------------------------------------
 					vec3_t		v3DirDistAD;
 					vec3_t		v3PosStartModify, v3PosTargetModify;
 					const int	iLimitArea1 = 200;
 					float		fDistAD, fDistAB, fDistCD;	
 					float		fHeightTerrainTarget = RequestTerrainHeight(v3PosTarget[0],v3PosTarget[1]);
 					int			iOffsetDist = 100;
-					// 1. 위치 선계산
 					VectorCopy( v3PosStart, v3PosStartModify );
 					VectorCopy( v3PosTarget, v3PosTargetModify );
 					v3PosTargetModify[2] = v3PosStartModify[2];
 					fDistAD =  VectorDistance3D_DirDist( v3PosStartModify, v3PosTargetModify, v3DirDistAD );
 					
 					fDistAB = 900.0f + (rand() % iOffsetDist - (iOffsetDist / 2)) ;
-					fDistCD;		// 후계산.
-					VectorCopy(v3PosStart, arv3PosProcess[0]);		//			A 위치 : 시전자의 위치
-					// ------------------------------------------------			B 위치 : 시전자의 머리위 위치
+					fDistCD;
+					VectorCopy(v3PosStart, arv3PosProcess[0]);
 					arv3PosProcess[1][0] = arv3PosProcess[0][0] + (float)(rand()%iLimitArea1 - (iLimitArea1/2));
 					arv3PosProcess[1][1] = arv3PosProcess[0][1] + (float)(rand()%iLimitArea1 - (iLimitArea1/2));
 					arv3PosProcess[1][2] = v3PosStart[2] + fDistAB;				 
-					VectorAdd(arv3PosProcess[1],v3DirDistAD,arv3PosProcess[2]);	//C 위치: 대상의 머리위 위치
+					VectorAdd(arv3PosProcess[1],v3DirDistAD,arv3PosProcess[2]);
 
-					// ------------------------------------------------			D 위치 : 대상의 FLour 위치
 					VectorCopy(v3PosTargetModify, arv3PosProcess[3]);
 					arv3PosProcess[3][0] = arv3PosProcess[2][0];// + (float)(rand()%iLimitArea2 - (iLimitArea2/2));
 					arv3PosProcess[3][1] = arv3PosProcess[2][1];// + (float)(rand()%iLimitArea2 - (iLimitArea2/2));
 					arv3PosProcess[3][2] = fHeightTerrainTarget + (float)iOffsetDist*1.2f + ((rand()%iOffsetDist)-(iOffsetDist/2));
-
-// 					// 2. 각도값 선계산
-// 					int	iOffsetAng = 100;
-// 					VectorCopy(o->Angle, arv3AngProcess[0]);
-// 					for(int i = 0; i < 3; ++i)
-// 					{
-// 						arv3AngProcess[i][0] = (rand()%iOffsetAng * 0.1f );
-// 						arv3AngProcess[i][1] = (rand()%iOffsetAng * 0.1f );
-// 						arv3AngProcess[i][2] = (rand()%iOffsetAng * 0.1f );
-// 					}
-// 					
+	
  					float	arfRates[] = { 0.0f, 0.22f, 0.35f, 0.50f, 1.01f };
  					float	fOffsetRate = (0.03f * (o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_));
 					
 					o->m_Interpolates.ClearContainer();
-//  					// 보간컨테이너에 각도 적재 ----------------------------------------------- 
   					CInterpolateContainer::INTERPOLATE_FACTOR	InsertFactor;
-// 					InsertFactor.fRateStart	= arfRates[0];
-// 					InsertFactor.fRateEnd	= arfRates[1];
-// 					VectorCopy(arv3AngProcess[0], InsertFactor.v3Start);
-// 					VectorCopy(arv3AngProcess[1], InsertFactor.v3End);
-// 					o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 1#
-// 					// 보간컨테이너에 각도 적재 ----------------------------------------------- 
-					
-					// 보간컨테이너에 위치 적재 ----------------------------------------------- 
 					InsertFactor.fRateStart	= arfRates[0] + fOffsetRate;
 					InsertFactor.fRateEnd	= arfRates[1] + fOffsetRate;
 					VectorCopy(v3PosStart, InsertFactor.v3Start);
 					VectorCopy(arv3PosProcess[1], InsertFactor.v3End);
-					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
+					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 					
 					InsertFactor.fRateStart	= arfRates[1] + fOffsetRate;
 					InsertFactor.fRateEnd	= arfRates[2] + fOffsetRate;
 					VectorCopy(arv3PosProcess[1], InsertFactor.v3Start);
 					VectorCopy(arv3PosProcess[2], InsertFactor.v3End);
-					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
+					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 
 					InsertFactor.fRateStart	= arfRates[2] + fOffsetRate;
 					InsertFactor.fRateEnd	= arfRates[3] + fOffsetRate;
 					VectorCopy(arv3PosProcess[2], InsertFactor.v3Start);
 					VectorCopy(arv3PosProcess[3], InsertFactor.v3End);
-					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
+					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 
 					InsertFactor.fRateStart	= arfRates[3] + fOffsetRate;
 					InsertFactor.fRateEnd	= arfRates[4];
 					VectorCopy(arv3PosProcess[3], InsertFactor.v3Start);
 					VectorCopy(arv3PosProcess[3], InsertFactor.v3End);
-					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
-					// 보간컨테이너에 위치 적재 ----------------------------------------------- 
-
-					// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
+					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
+ 
 					CInterpolateContainer::INTERPOLATE_FACTOR_F	InsertFactorF;						
 					InsertFactorF.fRateStart	= arfRates[0];
 					InsertFactorF.fRateEnd	= arfRates[3];
@@ -5691,18 +5498,14 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					InsertFactorF.fRateEnd	= arfRates[4];
 					InsertFactorF.fStart = 1.0f;
 					InsertFactorF.fEnd = 0.0f;
-					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 2#
-					// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
+					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );
+					o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);
+					o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);
+					o->m_Interpolates.GetAlphaCurrent(o->Alpha, 0.0f);
 
-					// 초기값 설정
-					o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);		// 각도
-					o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);		// 위치
-					o->m_Interpolates.GetAlphaCurrent(o->Alpha, 0.0f);		// 알파
-
-					// 각 검별로 JOINT 생성
 					CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 20, o, 160.f, 40 );
 				}
-				else if( o->SubType == 11 )	// END EFFECT의 APPEAR.
+				else if( o->SubType == 11 )
 				{
 					const int	TOTALLIFETIME = 24;
 					o->LifeTime = TOTALLIFETIME;
@@ -5712,41 +5515,37 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					
 					o->m_Interpolates.ClearContainer();
 					
-					// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
 					CInterpolateContainer::INTERPOLATE_FACTOR_F InsertFactorF;
 					InsertFactorF.fRateStart	= 0.0f;
 					InsertFactorF.fRateEnd	= 0.61f;
 					InsertFactorF.fStart = 0.0f;
 					InsertFactorF.fEnd = 1.0f;
-					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 1#
+					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );
 
 					InsertFactorF.fRateStart	= 0.61f;
 					InsertFactorF.fRateEnd	= 1.01f;
 					InsertFactorF.fStart = 1.0f;
 					InsertFactorF.fEnd = 1.0f;
-					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 1#
-					// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
+					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );
 				}
-				else if( o->SubType == 12 )	// END EFFECT의 APPEAR.
+				else if( o->SubType == 12 )
 				{
 					const int	TOTALLIFETIME = 14;
 					o->LifeTime = TOTALLIFETIME;
 					o->ExtState = TOTALLIFETIME;
 					o->ChromeEnable = true;
-					o->Scale = Scale;
-					
+					o->Scale = Scale;	
 					o->m_Interpolates.ClearContainer();
 					
-					// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
+
 					CInterpolateContainer::INTERPOLATE_FACTOR_F InsertFactorF;
 					InsertFactorF.fRateStart	= 0.0f;
 					InsertFactorF.fRateEnd	= 1.01f;
 					InsertFactorF.fStart = 0.0f;
 					InsertFactorF.fEnd = 1.0f;
-					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 2#
-					// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
+					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );
 				}
-				else if( o->SubType==20 )	// 블러드 어택의 잔상 검기.
+				else if( o->SubType==20 )
 				{
 					const int	TOTALLIFETIME = 10;
 					o->LifeTime = TOTALLIFETIME;
@@ -5772,97 +5571,65 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 							o->LifeTime = 5;
 						}
 					}
-					// PASS METHOD
-// 					o->Alpha = 0.6f;
-// 					o->Distance = o->Alpha;
-// 					o->Scale = Scale;
-// 					o->AlphaTarget = Scale;								// 스케일   BACKUP
-// 					VectorCopy( o->Position, o->StartPosition );		// 시작지점 BACKUP
-// 					VectorCopy( o->Angle, o->m_v3PrePos1 );				// 시작각도 BACKUP
-// 					VectorCopy( Light, o->Light );
-// 					VectorCopy( Position, o->Position );
-// 					VectorCopy( Angle, o->Angle );
-
-					// NEW METHOD
 					o->m_Interpolates.ClearContainer();
-  					// 보간컨테이너에 각도 적재 ----------------------------------------------- 
 					CInterpolateContainer::INTERPOLATE_FACTOR	InsertFactor;
 					InsertFactor.fRateStart	= 0.0f;
 					InsertFactor.fRateEnd	= 1.0f;
 					VectorCopy(o->Angle, InsertFactor.v3Start);
 					VectorCopy(o->Angle, InsertFactor.v3End);
-					o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 1#
-					// 보간컨테이너에 각도 적재 ----------------------------------------------- 
-					
-					// 보간컨테이너에 위치 적재 ----------------------------------------------- 
+				
+					o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );
 					InsertFactor.fRateStart	= 0.0f;
 					InsertFactor.fRateEnd	= 1.0f;
 					VectorCopy(o->Position, InsertFactor.v3Start);
 					VectorCopy(o->Position, InsertFactor.v3End);
-					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
-					// 보간컨테이너에 위치 적재 ----------------------------------------------- 
-					
-					// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
+					o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
+
 					CInterpolateContainer::INTERPOLATE_FACTOR_F	InsertFactorF;						
 					InsertFactorF.fRateStart = 0.0f;
 					InsertFactorF.fRateEnd	 = 1.0f;
 					InsertFactorF.fStart = 0.7f;
 					InsertFactorF.fEnd = 0.0f;
-					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 2#
-					// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
+					o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );
 
-					// 보간컨테이너에 SCALE 적재 ----------------------------------------------- 					
 					InsertFactorF.fRateStart = 0.0f;
 					InsertFactorF.fRateEnd	 = 1.0f;
 					InsertFactorF.fStart = o->Scale;
 					InsertFactorF.fEnd = o->Scale;
-					o->m_Interpolates.m_vecInterpolatesScale.push_back( InsertFactorF );		// 2#
-					// 보간컨테이너에 SCALE 적재 ----------------------------------------------- 
+					o->m_Interpolates.m_vecInterpolatesScale.push_back( InsertFactorF );
 				}
 				else	// SubType == 1
 				{
 					switch(o->Type)
 					{
-						case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:		// 블러드어택
+						case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
 						{
-							if ( o->SubType==1 )	// 블러드어택 Animation
+							if ( o->SubType==1 )
 							{
 								const int	TOTAL_LIFETIME = 35;
 								vec3_t		v3PosProcess01, v3PosProcessFinal, 
 											v3DirModify, v3PosModify,
 											v3PosTargetModify;
 								
-								o->ExtState		= TOTAL_LIFETIME;			// TotalLife 미사용중인 임의의 변수 사용.
+								o->ExtState		= TOTAL_LIFETIME;
 								o->LifeTime     = TOTAL_LIFETIME;
 								o->Gravity      = 0.0f;
 								o->HiddenMesh   = 1;
 								o->Distance		= 0.0f;
 								o->Alpha		= 1.0f;
-								o->ChromeEnable = false;	// Owner Bone에 Attach하여 렌더링 할것인지?
+								o->ChromeEnable = false;
 								
-								// ㄱ. 움직임 각도 백업. 모델의 각도 + 자신의 상대 각도
 								Vector ( o->Angle[0], o->Angle[1], o->Angle[2], o->HeadAngle );	
-								
-								VectorCopy ( o->Position, o->StartPosition );	// ㄴ. 시작 위치점 백업.
-								
-								// 1. 방향
+								VectorCopy ( o->Position, o->StartPosition );
 								VectorSubtract( o->Light, o->Position, o->Direction );
-								
-								// 2. 기본 거리 값 지정
 								o->Distance = sqrt(o->Direction[0] * o->Direction[0] +
 									o->Direction[1] * o->Direction[1] + 
 									o->Direction[2] * o->Direction[2]);
 
 								VectorDivFSelf( o->Direction, o->Distance );
 
-								// 2.5. 두케릭간 실거리 검사 : 두 케릭 높이를 동일하게 맞추고 실거리 검사.
 								float	fDistanceResult = 0;
 								vec3_t	v3DirResult;
-								
-								// 3-0. Dir을 뒤로 늘려야하는데 목표점이 시작점보다 아래에 있으므로 땅밑으로 꺼지는 문제를
-								//      해결하기 위해 시작점의 높이값을 목표점이랑 동일하게 해준다.
-								
-								// 3-0- 방식 1.
 								vec3_t v3PosModify02;
 								float	fTotalDist = 1700.0f, fFirstDist = 0.0f, fRateFirstDist = 0.0f;
 								VectorCopy(o->Owner->Position, v3PosModify02);
@@ -5876,13 +5643,11 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								v3PosTargetModify[2] = v3PosTargetModify[2] + 100.0f;
 								VectorDistNormalize( v3PosModify02,v3PosTargetModify,v3DirModify);
 								
-								// 3-1. 첫번째 위치값
 								fDistanceResult = o->Distance * 0.3f;
 								fFirstDist = fDistanceResult;
 								VectorMulF( v3DirModify, fDistanceResult, v3DirResult );
 								VectorAdd( v3PosModify, v3DirResult, v3PosProcess01 );
 								
-								// 3-2. 두번째 위치값
 								fDistanceResult = fTotalDist;
 								VectorMulF( v3DirModify, fDistanceResult, v3DirResult );
 								VectorAdd( v3PosModify, v3DirResult, v3PosProcessFinal );
@@ -5893,83 +5658,64 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 									
 								fRateFirstDist = fFirstDist / fTotalDist;
 								
-								// 보간컨테이너에 각도 적재 ----------------------------------------------- 
 								CInterpolateContainer::INTERPOLATE_FACTOR	InsertFactor;
-								InsertFactor.fRateStart	= 0.0f;			// Start
-								InsertFactor.fRateEnd	= fRateFirstDist;			// 01 Ready
+								InsertFactor.fRateStart	= 0.0f;	
+								InsertFactor.fRateEnd	= fRateFirstDist;
 								Vector(0.0f, 0.0f, 0.0f, InsertFactor.v3Start);
 								Vector(90.0f, 0.0f, 0.0f, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 1#
+								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );
 
-								InsertFactor.fRateStart	= fRateFirstDist;			// 02 First Final
+								InsertFactor.fRateStart	= fRateFirstDist;
 								InsertFactor.fRateEnd	= 1.01f;			
 								Vector(90.0f, 0.0f, 0.0f, InsertFactor.v3Start);
 								Vector(90.0f, 0.0f, 1560.0f, InsertFactor.v3End);
-								//Vector(90.0f, 0.0f, 1000.0f, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 각도 적재 ----------------------------------------------- 
-								
-								
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 
+
+								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );
 								InsertFactor.fRateStart	= 0.0f;
 								InsertFactor.fRateEnd	= fRateFirstDist;
 								VectorCopy(o->Position, InsertFactor.v3Start);
 								VectorCopy(v3PosProcess01, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
+								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 
  								InsertFactor.fRateStart	= fRateFirstDist;
  								InsertFactor.fRateEnd	= 1.01f;
  								VectorCopy(v3PosProcess01, InsertFactor.v3Start);
  								VectorCopy(v3PosProcessFinal, InsertFactor.v3End);
- 								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 
+ 								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 
-								// 초기값 설정
-								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);		// 각도
-								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);		// 위치
+								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);
+								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);
 							}
 						}	// MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_
 						break;
-					case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:		// 블러드어택
+					case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
 						{
-							if ( o->SubType==1 )	// 블러드어택 Animation
+							if ( o->SubType==1 )
 							{
 								const int	TOTAL_LIFETIME = 35;
 								vec3_t		v3PosProcess01, v3PosProcessFinal, 
 									v3DirModify, v3PosModify,
 									v3PosTargetModify;
 								
-								o->ExtState		= TOTAL_LIFETIME;			// TotalLife 미사용중인 임의의 변수 사용.
+								o->ExtState		= TOTAL_LIFETIME;
 								o->LifeTime     = TOTAL_LIFETIME;
 								o->Gravity      = 0.0f;
 								o->HiddenMesh   = 1;
 								o->Distance		= 0.0f;
 								o->Alpha		= 1.0f;
-								o->ChromeEnable = false;	// Owner Bone에 Attach하여 렌더링 할것인지?
+								o->ChromeEnable = false;
 								
-								// ㄱ. 움직임 각도 백업. 모델의 각도 + 자신의 상대 각도
 								Vector ( o->Angle[0], o->Angle[1], o->Angle[2], o->HeadAngle );	
-								
-								VectorCopy ( o->Position, o->StartPosition );	// ㄴ. 시작 위치점 백업.
-								
-								// 1. 방향
+								VectorCopy ( o->Position, o->StartPosition );
 								VectorSubtract( o->Light, o->Position, o->Direction );
 								
-								// 2. 기본 거리 값 지정
-								o->Distance = sqrt(o->Direction[0] * o->Direction[0] +
-									o->Direction[1] * o->Direction[1] + 
-									o->Direction[2] * o->Direction[2]);
+								o->Distance = sqrt(o->Direction[0] * o->Direction[0] + o->Direction[1] * o->Direction[1] + o->Direction[2] * o->Direction[2]);
 								
 								VectorDivFSelf( o->Direction, o->Distance );
 								
-								// 3. 목표 위치값을 타겟케릭터위치값 방향벡터 방향으로 초과한 위치로 설정.
 								float	fDistanceResult = 0;
 								vec3_t	v3DirResult;
 								
-								// 3-0. Dir을 뒤로 늘려야하는데 목표점이 시작점보다 아래에 있으므로 땅밑으로 꺼지는 문제를
-								//      해결하기 위해 시작점의 높이값을 목표점이랑 동일하게 해준다.
-								
-								// 3-0- 방식 1.
 								vec3_t v3PosModify02;
 								float	fTotalDist = 1700.0f, fFirstDist = 0.0f, fRateFirstDist = 0.0f;
 								VectorCopy(o->Owner->Position, v3PosModify02);
@@ -5983,13 +5729,11 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								v3PosTargetModify[2] = v3PosTargetModify[2] + 100.0f;
 								VectorDistNormalize( v3PosModify02,v3PosTargetModify,v3DirModify);
 								
-								// 3-1. 첫번째 위치값
 								fDistanceResult = o->Distance * 0.3f;
 								fFirstDist = fDistanceResult;
 								VectorMulF( v3DirModify, fDistanceResult, v3DirResult );
 								VectorAdd( v3PosModify, v3DirResult, v3PosProcess01 );
 								
-								// 3-2. 두번째 위치값
 								fDistanceResult = fTotalDist;
 								VectorMulF( v3DirModify, fDistanceResult, v3DirResult );
 								VectorAdd( v3PosModify, v3DirResult, v3PosProcessFinal );
@@ -5997,57 +5741,38 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								fRateFirstDist = fFirstDist / fTotalDist;
 								
 								o->m_Interpolates.ClearContainer();
-								
-								// 보간컨테이너에 각도 적재 ----------------------------------------------- 
+
 								CInterpolateContainer::INTERPOLATE_FACTOR	InsertFactor;
-								InsertFactor.fRateStart	= 0.0f;			// Start
-								InsertFactor.fRateEnd	= fRateFirstDist;			// 01 Ready
+								InsertFactor.fRateStart	= 0.0f;
+								InsertFactor.fRateEnd	= fRateFirstDist;
 								Vector(0.0f, 0.0f, 0.0f, InsertFactor.v3Start);
 								Vector(90.0f, 0.0f, 0.0f, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 1#
+								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );
 								
-								InsertFactor.fRateStart	= fRateFirstDist;			// 02 First Final
+								InsertFactor.fRateStart	= fRateFirstDist;
 								InsertFactor.fRateEnd	= 1.01f;			
 								Vector(90.0f, 0.0f, 0.0f, InsertFactor.v3Start);
 								Vector(90.0f, 0.0f, -1560.0f, InsertFactor.v3End);
-								//Vector(90.0f, 0.0f, -1000.0f, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 각도 적재 ----------------------------------------------- 
-								
-								
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 
+								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );
+
 								InsertFactor.fRateStart	= 0.0f;
 								InsertFactor.fRateEnd	= fRateFirstDist;
 								VectorCopy(o->Position, InsertFactor.v3Start);
 								VectorCopy(v3PosProcess01, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
+								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 
 								InsertFactor.fRateStart	= fRateFirstDist;
 								InsertFactor.fRateEnd	= 1.01f;
 								VectorCopy(v3PosProcess01, InsertFactor.v3Start);
 								VectorCopy(v3PosProcessFinal, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 
+								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 
-								// 보간컨테이너에 SCALE 적재 ----------------------------------------------- 
-
-								// 보간컨테이너에 SCALE 적재 ----------------------------------------------- 
-								
-								
-								// 						InsertFactor.fRateStart	= 0.4f;
-								// 						InsertFactor.fRateEnd	= 1.01f;
-								// 						VectorCopy(v3PosProcess01, InsertFactor.v3Start);
-								// 						VectorCopy(v3PosProcessFinal, InsertFactor.v3End);
-								// 						o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 
-
-								// 초기값 설정
-								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);		// 각도
-								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);		// 위치
+								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);
+								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);
 							}
 						}	// MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_
 						break;
-					case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:		// 일반공격
+					case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
 						{
 							if ( o->SubType==1 )	// 일반공격 Animation
 							{
@@ -6060,20 +5785,16 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 											v3DirModify,
 											v3DirModifyR;
 								
-								o->ExtState		= TOTAL_LIFETIME;			// TotalLife 미사용중인 임의의 변수 사용.
+								o->ExtState		= TOTAL_LIFETIME;
 								o->LifeTime     = TOTAL_LIFETIME;
 								o->Gravity      = 0.2f;
 								o->HiddenMesh   = 1;
 								o->Distance		= 0.0f;
 								o->Alpha		= 1.0f;
-								o->ChromeEnable = false;	// Owner Bone에 Attach하여 렌더링 할것인지?
+								o->ChromeEnable = false;
 
-								// ㄱ. 움직임 각도 백업. 모델의 각도 + 자신의 상대 각도
-								Vector ( o->Angle[0], o->Angle[1], o->Angle[2], o->HeadAngle );	
-								
-								VectorCopy ( o->Position, o->StartPosition );	// ㄴ. 시작 위치점 백업.
-								
-								// 1. 방향	// 수평적 방향만을 연산한다.
+								Vector ( o->Angle[0], o->Angle[1], o->Angle[2], o->HeadAngle );			
+								VectorCopy ( o->Position, o->StartPosition );
 								vec3_t	v3PosStartModify, v3PosEndModify;
 								VectorCopy(o->Light, v3PosEndModify);
 								VectorCopy(o->StartPosition, v3PosStartModify);
@@ -6082,7 +5803,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								VectorSubtract( v3PosEndModify, v3PosStartModify,v3DirModify );
 								VectorSubtract( o->Light, o->StartPosition, v3Dir );
 								
-								// 2. 기본 거리 값 지정
 								o->Distance = sqrt(v3Dir[0] * v3Dir[0] +
 									v3Dir[1] * v3Dir[1] + 
 									v3Dir[2] * v3Dir[2]);
@@ -6094,7 +5814,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								VectorNormalize(v3DirModify);
 								VectorCopy(v3Dir,o->Direction);
 
-								// 위치점을 계산한다.	- 01
 								Vector( 0.0f, 0.0f, -40.0f, v3AngleOffset );
 								AngleMatrix(v3AngleOffset,Matrix);
 								VectorRotate(v3DirModify,Matrix,v3DirModifyR);
@@ -6102,87 +5821,67 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								VectorAdd( o->StartPosition, v3DirPower, v3PosProcess01 );
 								v3PosProcess01[2] -= 100.0f;
 								
-								// 최종 위치점을 약간 보정하여 계산. offset Angle	- Final
-								//Vector( 0.0f, 0.0f, 19.0f, v3AngleOffset );
 								Vector( 0.0f, 0.0f, 24.0f, v3AngleOffset );
 								AngleMatrix(v3AngleOffset,Matrix);
 								VectorRotate(v3DirModify,Matrix,v3DirModifyR);
-								//VectorMulF( v3DirModifyR, o->Distance * 1.4f, v3DirPower );
-								//VectorMulF( v3DirModifyR, o->Distance + 200.0f, v3DirPower );
 								VectorMulF( v3DirModifyR, o->Distance + 700.0f, v3DirPower );
 								VectorAdd( o->StartPosition, v3DirPower, v3PosProcessFinal );
-								//v3PosProcessFinal[2] -= 230.0f;
 								v3PosProcessFinal[2] -= 290.0f;
 								
 								o->m_Interpolates.ClearContainer();
 								
-								// 보간컨테이너에 각도 적재 ----------------------------------------------- 
 								CInterpolateContainer::INTERPOLATE_FACTOR	InsertFactor;
-								InsertFactor.fRateStart	= 0.0f;			// Start
-								InsertFactor.fRateEnd	= 0.32f;			// 01 Ready
+								InsertFactor.fRateStart	= 0.0f;
+								InsertFactor.fRateEnd	= 0.32f;
 								Vector(0.0f, 0.0f, 0.0f, InsertFactor.v3Start);
-								//Vector(110.0f, 0.0f, 0.0f, InsertFactor.v3End);
 								Vector(90.0f, 0.0f, 0.0f, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 1#
+								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );
 								
-								InsertFactor.fRateStart	= 0.32f;			// 01 Ready
-								InsertFactor.fRateEnd	= 1.01f;			// 02 First Final
-								//Vector(110.0f, 0.0f, 0.0f, InsertFactor.v3Start);
+								InsertFactor.fRateStart	= 0.32f;
+								InsertFactor.fRateEnd	= 1.01f;
 								Vector(90.0f, 0.0f, 0.0f, InsertFactor.v3Start);
 								Vector(90.0f, 0.0f, 340.0f, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 각도 적재 ----------------------------------------------- 
-								
-								
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 
+								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );
 								InsertFactor.fRateStart	= 0.0f;			
 								InsertFactor.fRateEnd	= 0.32f;
 								VectorCopy(o->Position, InsertFactor.v3Start);
 								VectorCopy(v3PosProcess01, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
+								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 								
 								InsertFactor.fRateStart	= 0.32f;			
 								InsertFactor.fRateEnd	= 1.01f;		
 								VectorCopy(v3PosProcess01, InsertFactor.v3Start);
 								VectorCopy(v3PosProcessFinal, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 
+								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 
-								// 보간컨테이너에 SCALE 적재 ----------------------------------------------- 
-
-								// 보간컨테이너에 SCALE 적재 ----------------------------------------------- 
-
-								// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
 								CInterpolateContainer::INTERPOLATE_FACTOR_F InsertFactorF;
 								InsertFactorF.fRateStart	= 0.0f;
 								InsertFactorF.fRateEnd	= 0.15f;
 								InsertFactorF.fStart = 1.0f;
 								InsertFactorF.fEnd = 1.0f;
-								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 2#
+								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );
 								
 								InsertFactorF.fRateStart	= 0.15f;
 								InsertFactorF.fRateEnd	= 0.75f;
 								InsertFactorF.fStart = 1.0f;
 								InsertFactorF.fEnd = 1.0f;
-								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 2#
+								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );
 								
 								InsertFactorF.fRateStart	= 0.75f;
 								InsertFactorF.fRateEnd	= 1.01f;
 								InsertFactorF.fStart = 1.0f;
 								InsertFactorF.fEnd = 0.0f;
-								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 2#
-								// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
+								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );
 
-								// 초기값 설정
-								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);		// 각도
-								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);		// 위치
-								o->m_Interpolates.GetAlphaCurrent(o->Alpha, 0.0f);		// 알파
+								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);
+								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);
+								o->m_Interpolates.GetAlphaCurrent(o->Alpha, 0.0f);
 							}
 						}	// MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_
 						break;
-					case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:		// 일반공격
+					case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
 						{
-							if ( o->SubType==1 )	// 일반공격 Animation
+							if ( o->SubType==1 )
 							{
 								//const int	TOTAL_LIFETIME = 22;
 								const int	TOTAL_LIFETIME = 30;
@@ -6193,20 +5892,16 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 											v3DirModify,
 											v3DirModifyR;
 								
-								o->ExtState		= TOTAL_LIFETIME;			// TotalLife 미사용중인 임의의 변수 사용.
+								o->ExtState		= TOTAL_LIFETIME;
 								o->LifeTime     = TOTAL_LIFETIME;
 								o->Gravity      = 0.2f;
 								o->HiddenMesh   = 1;
 								o->Distance		= 0.0f;
 								o->Alpha		= 1.0f;
-								o->ChromeEnable = false;	// Owner Bone에 Attach하여 렌더링 할것인지?
+								o->ChromeEnable = false;
 
-								// ㄱ. 움직임 각도 백업. 모델의 각도 + 자신의 상대 각도
-								Vector ( o->Angle[0], o->Angle[1], o->Angle[2], o->HeadAngle );	
-								
-								VectorCopy ( o->Position, o->StartPosition );	// ㄴ. 시작 위치점 백업.
-								
-								// 1. 방향	// 수평적 방향만을 연산한다.
+								Vector ( o->Angle[0], o->Angle[1], o->Angle[2], o->HeadAngle );				
+								VectorCopy ( o->Position, o->StartPosition );
 								vec3_t	v3PosStartModify, v3PosEndModify;
 								VectorCopy(o->Light, v3PosEndModify);
 								VectorCopy(o->StartPosition, v3PosStartModify);
@@ -6215,10 +5910,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								VectorSubtract( v3PosEndModify, v3PosStartModify,v3DirModify );
 								VectorSubtract( o->Light, o->StartPosition, v3Dir );
 								
-								// 2. 기본 거리 값 지정
-								o->Distance = sqrt(v3Dir[0] * v3Dir[0] +
-									v3Dir[1] * v3Dir[1] + 
-									v3Dir[2] * v3Dir[2]);
+								o->Distance = sqrt(v3Dir[0] * v3Dir[0] +v3Dir[1] * v3Dir[1] + v3Dir[2] * v3Dir[2]);
 								
 								v3Dir[0] /= o->Distance;
 								v3Dir[1] /= o->Distance;
@@ -6227,7 +5919,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								VectorNormalize(v3DirModify);
 								VectorCopy(v3Dir,o->Direction);
 
-								// 위치점을 계산한다.	- 01
 								Vector( 0.0f, 0.0f, 50.0f, v3AngleOffset );
 								AngleMatrix(v3AngleOffset,Matrix);
 								VectorRotate(v3DirModify,Matrix,v3DirModifyR);
@@ -6235,21 +5926,15 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								VectorAdd( o->StartPosition, v3DirPower, v3PosProcess01 );
 								v3PosProcess01[2] -= 100.0f;
 								
-								// 최종 위치점을 약간 보정하여 계산. offset Angle	- Final
-								//Vector( 0.0f, 0.0f, -19.0f, v3AngleOffset );
 								Vector( 0.0f, 0.0f, -26.0f, v3AngleOffset );
 								AngleMatrix(v3AngleOffset,Matrix);
 								VectorRotate(v3DirModify,Matrix,v3DirModifyR);
-								//VectorMulF( v3DirModifyR, o->Distance * 1.4f, v3DirPower );
-								//VectorMulF( v3DirModifyR, o->Distance + 200.0f, v3DirPower );
 								VectorMulF( v3DirModifyR, o->Distance + 700.0f, v3DirPower );
 								VectorAdd( o->StartPosition, v3DirPower, v3PosProcessFinal );
-								//v3PosProcessFinal[2] -= 230.0f;
 								v3PosProcessFinal[2] -= 280.0f;
 								
 								o->m_Interpolates.ClearContainer();
 								
-								// 보간컨테이너에 각도 적재 ----------------------------------------------- 
 								CInterpolateContainer::INTERPOLATE_FACTOR	InsertFactor;
 								InsertFactor.fRateStart	= 0.0f;			// Start
 								InsertFactor.fRateEnd	= 0.4f;			// 01 Ready
@@ -6261,11 +5946,8 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								InsertFactor.fRateEnd	= 1.01f;			// 02 First Final
 								Vector(110.0f, 0.0f, 0.0f, InsertFactor.v3Start);
 								Vector(60.0f, 0.0f, -300.0f, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 각도 적재 ----------------------------------------------- 
-								
-								
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 
+								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );
+
 								InsertFactor.fRateStart	= 0.0f;			
 								InsertFactor.fRateEnd	= 0.33f;
 								VectorCopy(o->Position, InsertFactor.v3Start);
@@ -6276,10 +5958,8 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								InsertFactor.fRateEnd	= 1.01f;		
 								VectorCopy(v3PosProcess01, InsertFactor.v3Start);
 								VectorCopy(v3PosProcessFinal, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 
+								o->m_Interpolates.m_vecInterpolatesPos.push_back( InsertFactor );
 
-								// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
 								CInterpolateContainer::INTERPOLATE_FACTOR_F InsertFactorF;
 								InsertFactorF.fRateStart	= 0.0f;
 								InsertFactorF.fRateEnd	= 0.15f;
@@ -6297,13 +5977,11 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								InsertFactorF.fRateEnd	= 1.01f;
 								InsertFactorF.fStart = 1.0f;
 								InsertFactorF.fEnd = 0.0f;
-								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		// 2#
-								// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
+								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );
 
-								// 초기값 설정
-								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);		// 각도
-								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);		// 위치
-								o->m_Interpolates.GetAlphaCurrent(o->Alpha, 0.0f);		// 알파
+								o->m_Interpolates.GetAngleCurrent(o->Angle, 0.0f);
+								o->m_Interpolates.GetPosCurrent(o->Position, 0.0f);
+								o->m_Interpolates.GetAlphaCurrent(o->Alpha, 0.0f);
 							}
 						}	// MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_
 						break;		
@@ -6311,24 +5989,21 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 						{
 							if ( o->SubType==1 )
 							{
-								// 기존 방식 BACKUP
 								const int	TOTAL_LIFETIME = 10;
 								
-								o->ExtState		= TOTAL_LIFETIME;			// TotalLife 미사용중인 임의의 변수 사용.
+								o->ExtState		= TOTAL_LIFETIME;
 								o->LifeTime     = TOTAL_LIFETIME;
-								o->ChromeEnable = true;	// Owner Bone에 Attach하여 렌더링 할것인지?
+								o->ChromeEnable = true;
 								//o->Scale		= 0.8f;
 
 								o->m_Interpolates.ClearContainer();
 
-								// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
 								CInterpolateContainer::INTERPOLATE_FACTOR_F InsertFactorF;
 								InsertFactorF.fRateStart	= 0.0f;
 								InsertFactorF.fRateEnd	= 1.01f;
 								InsertFactorF.fStart = 1.0f;
 								InsertFactorF.fEnd = 0.0f;
 								o->m_Interpolates.m_vecInterpolatesAlpha.push_back( InsertFactorF );		
-								// 보간컨테이너에 ALPHA 적재 ----------------------------------------------- 
 							}
 						}	// MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_
 						break;
@@ -6397,10 +6072,8 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 								InsertFactor.fRateEnd	= 1.01f;			
 								Vector(-90.0f, 0.0f, 0.0f, InsertFactor.v3Start);
 								Vector(-90.0f, 0.0f, 880.0f, InsertFactor.v3End);
-								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );		// 2#
-								// 보간컨테이너에 각도 적재 ----------------------------------------------- 
+								o->m_Interpolates.m_vecInterpolatesAngle.push_back( InsertFactor );
 
-								// 보간컨테이너에 위치 적재 ----------------------------------------------- 						
 								InsertFactor.fRateStart	= 0.0f;
 								InsertFactor.fRateEnd	= 1.01f;		
 								VectorCopy(v3PosProcess01, InsertFactor.v3Start);
@@ -6530,7 +6203,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Scale = (rand()%20*0.01f)+0.1f;
 					o->Angle[0] = (float)(rand()%360);
 					o->Distance = rand()%10+5.0f;
-					o->Timer = (float)(rand()%360); //degree
+					o->Timer = (float)(rand()%360);
 				}
 				break;
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
@@ -7010,8 +6683,8 @@ void CreateBomb(vec3_t p,bool Exp, int SubType)
 		else if(SubType == 4)
 		{
 			if(j == 5) break;
-			Vector(1.0f,0.5f,0.3f,Light);	// 빨강
-			//Vector(0.3f,0.5f,1.0f,Light);	// 파랑
+			Vector(1.0f,0.5f,0.3f,Light);
+			//Vector(0.3f,0.5f,1.0f,Light);
 			CreateParticle(BITMAP_SPARK,Position,Angle,Light,8);
 		}
 #ifdef PJH_FIX_CAOTIC
@@ -7062,11 +6735,11 @@ void CreateBomb(vec3_t p,bool Exp, int SubType)
 		}
 		else if(SubType == 4)
 		{
-			Vector(1.0f,0.4,0.2f,Light);	// 빨강
-			//Vector(0.2f,0.4,1.0f,Light);	// 파랑
+			Vector(1.0f,0.4,0.2f,Light);
+			//Vector(0.2f,0.4,1.0f,Light);
 			CreateParticle(BITMAP_EXPLOTION_MONO,Position,Angle,Light, 0, 0.5f);
-			Vector(1.0f,0.6,0.2f,Light);	// 빨강
-			//Vector(0.2f,0.6,1.0f,Light);	// 파랑
+			Vector(1.0f,0.6,0.2f,Light);
+			//Vector(0.2f,0.6,1.0f,Light);
 			CreateParticle(BITMAP_EXPLOTION_MONO,Position,Angle,Light, 0, 0.3f);
 		}
 		else
@@ -7233,8 +6906,6 @@ void CreateInferno(vec3_t Position, int SubType)
 	}
 }
 
-
-//  화살이 맞는지 검사를 한다.
 void CheckClientArrow(OBJECT *o)
 {
 
@@ -7291,7 +6962,7 @@ void CheckClientArrow(OBJECT *o)
                 break;
             case AT_SKILL_PARALYZE:
                 o->Live = false;
-				if ( o->Type==MODEL_ARROW_BOMB || o->Type==MODEL_ARROW_HOLY )   //  폭탄
+				if ( o->Type==MODEL_ARROW_BOMB || o->Type==MODEL_ARROW_HOLY )
     				CreateBomb(o->Position,true);
                 break;
 
@@ -7349,7 +7020,7 @@ void CheckClientArrow(OBJECT *o)
 #endif //#ifdef PJH_FIX_4_BUGFIX_7
                     o->AttackPoint[0]--;
                 }
-                else if(AttackCharacterRange(o->Skill,o->Position,range,o->Weapon,o->PKKey))//클라이언트마법처리
+                else if(AttackCharacterRange(o->Skill,o->Position,range,o->Weapon,o->PKKey))
 				{
                     switch(Skill)
                     {
@@ -7509,14 +7180,12 @@ void MoveEffect( OBJECT *o, int iIndex)
 			{
 				vec3_t tmp = { -10.f, 5.f, 10.f };
 
-				//점점 사라져간다.
 				if(o->LifeTime < 20)
 				{
 					float flumi = (float)(o->LifeTime-20) / 20.f;
 					VectorScale(o->Direction, flumi, o->Light);
 				}
 
-				//위치와 각도를 캐릭터 이동에 따라 보정한다.
 				OBJECT* pOwner = o->Owner;
 				VectorTransform(tmp, pOwner->BoneTransform[47], o->Position);
 				VectorScale(o->Position, pOwner->Scale, o->Position);
@@ -7904,9 +7573,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 		}
 		break;
-	case MODEL_BUTTERFLY01:		//. 반디불 박스 : 2004/11/05
+	case MODEL_BUTTERFLY01:
 		{
-			//. 이동
 			if(o->Kind > 0)
 				o->Angle[2] += rand()%10;
 			else
@@ -7930,15 +7598,14 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 			o->Position[2] += (float)(rand()%15-7)*0.3f;
 			
-			//. 스프라이트 생성
 			float  Luminosity = (float)(rand()%32+64)*0.01f;
-			if(o->SubType == 0) {	//. 약간 초록
+			if(o->SubType == 0) {
 				Vector ( Luminosity*0.4f, Luminosity*0.8f, Luminosity*0.6f, Light );
 			}
-			else if(o->SubType == 1) {	//. 약간 파랑
+			else if(o->SubType == 1) {
 				Vector ( Luminosity*0.4f, Luminosity*0.6f, Luminosity*0.8f, Light );
 			}
-			else if(o->SubType == 2) {	//. 약간 노랑
+			else if(o->SubType == 2) {
 				Vector ( Luminosity*0.6f, Luminosity*0.8f, Luminosity*0.4f, Light );
 			}
 			else if(o->SubType == 3)
@@ -7955,7 +7622,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			CreateSprite(BITMAP_LIGHT,o->Position,1.f,Light,o);
 		}
 		break;
-    case 9 :                         //  칼리마 맵에만 존재하는 돌덩이.
+    case 9 :
         VectorScale ( o->Direction, o->Velocity, Position );
         VectorAdd ( Position, o->Position, o->Position );
 //        o->Position[2] -= o->Velocity;
@@ -7971,7 +7638,7 @@ void MoveEffect( OBJECT *o, int iIndex)
         }
         break;
 
-	case BITMAP_SKULL:	// 마검 - 방어 감소
+	case BITMAP_SKULL:
         if ( o->SubType==4 )
         {
             o->Direction[1] -= o->Velocity;
@@ -7993,7 +7660,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					if( g_isCharacterBuff(o->Owner, eDeBuff_Defense) )				
                     {
                         o->LifeTime = 10;
-                        //  투명일때 보조계열 효과는 보이지 않는다.
 						if( g_isCharacterBuff(o->Owner, eBuff_Cloaking) )
                         {
                             o->Visible = false;
@@ -8052,7 +7718,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
         }
 		break;
-	case MODEL_MAGIC_CAPSULE2:	// 법사 - 방어막
+	case MODEL_MAGIC_CAPSULE2:
 		VectorCopy( o->Owner->Position, o->Position);
 		if ( o->LifeTime < 10)
 		{
@@ -8429,7 +8095,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 
 			if(pObject->Live)
-				o->LifeTime = 100.f; //무한
+				o->LifeTime = 100.f;
 
 			vec3_t vLight;
 			Vector(o->Alpha * 0.3f, o->Alpha * 0.3f, o->Alpha * 0.3f, vLight);
@@ -8480,7 +8146,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 
 			if(pObject->Live)
-				o->LifeTime = 100.f; //무한
+				o->LifeTime = 100.f;
 
 			vec3_t vLight;
 			Vector(o->Alpha, o->Alpha, o->Alpha, vLight);
@@ -8532,7 +8198,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 			
 			if(pObject->Live)
-				o->LifeTime = 100.f; //무한
+				o->LifeTime = 100.f;
 			
 			vec3_t vLight;
 			Vector(o->Alpha * 0.7f, o->Alpha * 0.3f, o->Alpha * 1.f, vLight);
@@ -8553,22 +8219,22 @@ void MoveEffect( OBJECT *o, int iIndex)
 			switch(o->Type)
 			{
 			case MODEL_SUMMONER_CASTING_EFFECT1:
-				o->Angle[2] -= 3.0f;	// 시계방향 회전
+				o->Angle[2] -= 3.0f;
 				break;
 			case MODEL_SUMMONER_CASTING_EFFECT11:
-				o->Angle[2] += 3.0f;	// 반시계방향 회전
+				o->Angle[2] += 3.0f;
 				break;
 			case MODEL_SUMMONER_CASTING_EFFECT111:
-				o->Angle[2] -= 3.0f;	// 시계방향 회전
+				o->Angle[2] -= 3.0f;
 				break;
 			case MODEL_SUMMONER_CASTING_EFFECT2:
-				o->Angle[2] += 3.0f;	// 반시계방향 회전
+				o->Angle[2] += 3.0f;
 				break;
 			case MODEL_SUMMONER_CASTING_EFFECT22:
-				o->Angle[2] -= 3.0f;	// 시계방향 회전
+				o->Angle[2] -= 3.0f;
 				break;
 			case MODEL_SUMMONER_CASTING_EFFECT222:
-				o->Angle[2] += 3.0f;	// 반시계방향 회전
+				o->Angle[2] += 3.0f;
 				break;
 			case MODEL_SUMMONER_CASTING_EFFECT4:
 				o->Scale += 0.6f;
@@ -8650,15 +8316,13 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 			VectorSubtract(vTempPosition, o->Position, vTempPosition);
 
-			// 폭발
 			if (o->AnimationFrame >= 11.0f)
 			{
 				CreateBomb3(o->Position, o->SubType);
 				if (rand()%2==0)
-					PlayBuffer(SOUND_SUMMON_EXPLOSION);	// 폭발 사운드 ☆
+					PlayBuffer(SOUND_SUMMON_EXPLOSION);
 			}
 
-			// 화염 파티클
 			BMD * pModel = &Models[o->Type];
 			pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
 			vec3_t vPos, vRelative, vLight;
@@ -8706,7 +8370,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				if (o->SubType >= 2)
 					CreateEffect(MODEL_SUMMONER_SUMMON_NEIL_GROUND3, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
 
-				PlayBuffer(SOUND_SUMMON_REQUIEM);	// 가시 사운드 ☆
+				PlayBuffer(SOUND_SUMMON_REQUIEM);
 			}
 // 			if (o->AnimationFrame > 11 && o->AnimationFrame < 12)
 // 				EarthQuake = (float)(-rand()%2-5)*0.1f;
@@ -8734,25 +8398,22 @@ void MoveEffect( OBJECT *o, int iIndex)
 			if (o->SubType == 0)
 			{
 				int anEffectVolume[3] = { 5, 4, 3 };
-				if (rand()%anEffectVolume[o->PKKey] == 0)	// 여기서 o->PKKey는 소환수 레벨.
+				if (rand()%anEffectVolume[o->PKKey] == 0)
 				{
 					vec3_t vPos, vLight;
 
-					// 연기효과
 					VectorCopy(o->HeadTargetAngle, vPos);
 					vPos[0] += (float)(rand()%500-250);
 					vPos[1] += (float)(rand()%500-250);
 					Vector(1.0f, 1.0f, 1.0f, vLight);
 					CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 57, 3.5f);
 					
-					// 바닥효과
 					VectorCopy(o->HeadTargetAngle, vPos);
 					vPos[0] += (float)(rand()%400-200);
 					vPos[1] += (float)(rand()%400-200);
 					Vector(0.6f, 0.1f, 1.f, vLight);
 					CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
 
-					// 물방울 올라오는 이펙트
 					Vector(0.6f, 0.1f, 1.f, vLight);
 					CreateParticle(BITMAP_TWINTAIL_WATER, vPos, o->Angle, vLight, 1);
 				}
@@ -8810,27 +8471,21 @@ void MoveEffect( OBJECT *o, int iIndex)
 		{
 			if (o->LifeTime < 20) o->Alpha -= 0.05f;
 			else if (o->Alpha < 1.0f) o->Alpha += 0.05f;
-            //o->Scale += 1.8f;
 
-			o->HeadAngle[0] += 4.0f;	// 반시계방향 회전
-			o->HeadAngle[1] -= 8.0f;	// 시계방향 회전
-			o->HeadAngle[2] += 4.0f;	// 반시계방향 회전
+			o->HeadAngle[0] += 4.0f;
+			o->HeadAngle[1] -= 8.0f;
+			o->HeadAngle[2] += 4.0f;
 		}
 		else if ( o->SubType == 10 )
 		{
 			if (o->LifeTime < 20) o->Alpha -= 0.03f;
 			else if (o->Alpha < 1.0f) o->Alpha += 0.05f;
-            //o->Scale += 0.1f;
 		}
 		else if( o->SubType == 11 )
 		{
-			//if (o->LifeTime < 10) o->Alpha -= 0.1f;
-			//else if (o->Alpha < 1.0f) o->Alpha += 0.1f;
-            //o->Scale += 1.8f;
-
-			o->HeadAngle[0] += 2.0f;	// 반시계방향 회전
-			o->HeadAngle[1] -= 2.0f;	// 시계방향 회전
-			o->HeadAngle[2] += 2.0f;	// 반시계방향 회전
+			o->HeadAngle[0] += 2.0f;
+			o->HeadAngle[1] -= 2.0f;
+			o->HeadAngle[2] += 2.0f;
 
 			if( o->LifeTime <= 10 )
 			{
@@ -8948,18 +8603,17 @@ void MoveEffect( OBJECT *o, int iIndex)
 			if (o->Owner == NULL || o->Owner->Live == false)
 				o->Live = false;
 
-			VectorCopy(o->Owner->Position, o->Position);	// 이펙트 위치를 캐릭터 위치로 이동.
+			VectorCopy(o->Owner->Position, o->Position);
 
-			// 점점 커지는 문양 이펙트 알파값.
 			o->Alpha -= 0.02f;
 			o->Scale += 0.01f;
+
 			if (o->Alpha < 0.f)
 			{
 				o->Alpha = 1.0f;
 				o->Scale = 0.6f;
 			}
 
-			// 내부 알파값.
 			if (o->LifeTime < 25)
 				o->AlphaTarget -= 0.02f;
 			else if (o->AlphaTarget < 1.0f)
@@ -9148,7 +8802,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			o->Live = false;
 		else
 		{
-			// 사라지는 시점에서 이펙트 죽이고 다시 생성.
 			if (o->LifeTime <= 5)
 			{
 				o->Live = false;
@@ -9162,7 +8815,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			o->Live = false;
 		else
 		{
-			o->LifeTime = 100;	// 이펙트 계속 유지.
+			o->LifeTime = 100;
 
 			if (rand()%60 == 0)
 				CreateParticle(o->Type, o->Position, o->Angle, o->Light, o->SubType, 0.5f, o->Owner);
@@ -9175,13 +8828,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 		else
 		{
 			if (o->LifeTime <= 5)
-				o->LifeTime = 65;	// 이펙트 계속 유지.
+				o->LifeTime = 65;
 		}
 		break;
 #endif	// ASG_ADD_SKILL_BERSERKER
-
-//////////////////////////////////////////////////////////////////////////
-
     case BITMAP_GATHERING:
         if( o->SubType == 1 || o->SubType == 2 )
         {
@@ -9239,9 +8889,6 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
         }
         break;
-
-//------------------------------------------------------------------------------------------------------------
-
 #ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 	case BITMAP_JOINT_THUNDER:
 		{
@@ -9264,65 +8911,44 @@ void MoveEffect( OBJECT *o, int iIndex)
 #ifdef YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 			if (rand()%10 > 4)
 			{
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN	// 번개 색 변화.
+#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				
 				if( o->SubType==1 )
 				{
-					CreateJoint(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 33, NULL, fScale);// 위치 퀸 썬더 맞은 효과
+					CreateJoint(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 33, NULL, fScale);
 				}
 				else
 #endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				{
-					CreateJoint(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 16, NULL, fScale);// 위치 퀸 썬더 맞은 효과
+					CreateJoint(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 16, NULL, fScale);
 				}
 			}
 #endif	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 
-			// 바닥
-#ifdef YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 			vec3_t vLight = { 0.45f, 0.45f, 0.7f };
-#else	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
-			vec3_t vLight = { 0.15f, 0.15f, 0.2f };
-#endif	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
+
 			if (o->LifeTime > 10)
 			{
-#ifdef YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 				if (rand()%2 == 0)
-#else	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
-				//if (rand()%2 == 0)
-#endif	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 					CreateEffect(BITMAP_MAGIC+1, vPosition, o->Angle, vLight, 11, o);
 			}
 
-			// 연기
-#ifdef YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 			if (rand()%4 == 0)
-#endif	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 				CreateParticle(BITMAP_SMOKE,vPosition,o->Angle,vLight,54,2.8f);
 
-			// 돌
 			if (rand()%4 == 0)
 			{
 				CreateEffect(MODEL_STONE1+rand()%2,o->Position,o->Angle,vLight,13);
 			}
 
-			// 바닥 번개
 			if (o->LifeTime > 5)
 			{
 				Vector(0.15f, 0.15f, 0.4f, vLight);
-#ifdef YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 				if (rand()%5 == 0)
-#else	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
-				if (rand()%2 == 0)
-#endif	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 					CreateEffect(BITMAP_CHROME_ENERGY2, vPosition, o->Angle, vLight, 0);
 			}
 
-			if (o->Owner != NULL && rand()%5 == 0
-#ifdef YDG_FIX_GIGANTIC_STORM_CRASH
-				&& o->Owner->BoneTransform != NULL
-#endif	// YDG_FIX_GIGANTIC_STORM_CRASH
-				)
+			if (o->Owner != NULL && rand()%5 == 0 && o->Owner->BoneTransform != NULL)
 			{
 				BMD *pTargetModel = &Models[o->Owner->Type];
 				int iNumBones = pTargetModel->NumBones;
@@ -9331,12 +8957,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 				Vector(0.0f, 0.0f, 0.0f, vRelativePos);
 				for(int i = 0; i < iNumBones; ++i)
 				{
-#ifdef YDG_FIX_GIGANTIC_STORM_OPTIMIZE
 					if (iNumBones > 100 && rand()%iNumBones > iNumBones/10) continue;
 					else if (iNumBones > 50 && rand()%iNumBones > iNumBones/5) continue;
 					else if (iNumBones > 20 && rand()%iNumBones > iNumBones/2) continue;
-#endif	// YDG_FIX_GIGANTIC_STORM_OPTIMIZE
-					VectorCopy ( o->Owner->Position, pTargetModel->BodyOrigin );		// 갱신해주어야 한다.
+					VectorCopy ( o->Owner->Position, pTargetModel->BodyOrigin );
 					pTargetModel->TransformPosition( o->Owner->BoneTransform[i], vRelativePos, vPos, true );
 		
 					Vector( 0.2f, 0.2f, 0.8f, vLight );
@@ -9407,7 +9031,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             AddTerrainLight(o->Position[0],o->Position[1],Light,3,PrimaryTerrainLight);
             if(o->Owner == &Hero->Object)
                 if(o->LifeTime%20 == 0)
-                    AttackCharacterRange(o->Skill,o->Position,150.f,o->Weapon,o->PKKey);//클라이언트마법처리
+                    AttackCharacterRange(o->Skill,o->Position,150.f,o->Weapon,o->PKKey);
         }
         else if ( o->SubType==1 || o->SubType==2 )
         {
@@ -9521,9 +9145,6 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
 		}
 		break;
-
-//------------------------------------------------------------------------------------------------------------
-
 	case BITMAP_CLOUD:
 		if(o->SubType == 0)
 		{
@@ -10135,7 +9756,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					CreateParticle(BITMAP_LIGHTNING_MEGA1+rand()%3,vPos,pObject->Angle,vLight,0, fScale);	// 전기
 				}
 
-				// 바닥 전기
 				vec34_t Matrix;
 				vec3_t vAngle, vDirection, vPosition;
 				float fAngle;
@@ -10252,7 +9872,6 @@ void MoveEffect( OBJECT *o, int iIndex)
             else 
                 o->LifeTime = 0;
 
-            //  투명일때 보조계열 효과는 보이지 않는다.
 			if( g_isCharacterBuff(o->Owner, eBuff_Cloaking) ) break;
 
             Vector ( 1.f, 0.5f, 0.1f, Light );
@@ -11222,7 +10841,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
     	    if(o->LifeTime%15 == 0)
 			    if(o->Owner == &Hero->Object)
-	     		    AttackCharacterRange(o->Skill,o->Position,150.f,o->Weapon,o->PKKey);//클라이언트마법처리
+	     		    AttackCharacterRange(o->Skill,o->Position,150.f,o->Weapon,o->PKKey);
             break;
 
         case 1:
@@ -12847,7 +12466,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			{
 				int iNumCreateFeather = rand()%3;
 				Vector( 0.6f, 0.7f, 0.9f, Light);	
-				pModel->TransformByObjectBone( vPos, o, 1 );		// Zx01
+				pModel->TransformByObjectBone( vPos, o, 1 );
 				for( int i=0 ; i<iNumCreateFeather ; i++ )
 				{
 					CreateEffect( MODEL_FEATHER, vPos, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 0.6f );
@@ -12857,8 +12476,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 			if( o->LifeTime == 30 )
 			{
-				pModel->TransformByObjectBone( vPos, o, 1 );		// Zx01
-				Vector(0.4f, 0.4f, 0.9f, Light);	//보라색
+				pModel->TransformByObjectBone( vPos, o, 1 );
+				Vector(0.4f, 0.4f, 0.9f, Light);
 				CreateJoint( BITMAP_FLARE+1, vPos, vPos, o->Angle, 18, o, 90.f, 40, 0, 0, -1, Light );
 			}
 
@@ -13039,7 +12658,6 @@ void MoveEffect( OBJECT *o, int iIndex)
                         success = true;
                         EarthQuake = (float)(rand()%4-4)*0.1f;
 
-                        //  캐릭터를 찾는다.
 	                    for( int i=0;i<MAX_CHARACTERS_CLIENT;i++ )
 	                    {
 		                    CHARACTER *tc = &CharactersClient[i];
@@ -13267,12 +12885,6 @@ void MoveEffect( OBJECT *o, int iIndex)
             if(o->SubType==1)
 		    {
 			    CheckTargetRange(o);
-			    /*if(CheckCharacterRange(o,100.f,o->PKKey))
-			    {
-				    o->Live = false;
-				    for(int j=0;j<2;j++)
-					    CreateEffect(MODEL_STONE1+rand()%2,o->Position,o->Angle,o->Light);
-			    }*/
 		    }
         }
 		break;
@@ -14075,8 +13687,6 @@ void MoveEffect( OBJECT *o, int iIndex)
         Vector ( 0.79f, 0.72f, 0.49f, Light );
         AddTerrainLight ( o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight );
         break;
-
-//------------------------------------------------------------------------------------------------------------------------
 #ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	case BITMAP_TWLIGHT:
 		{
@@ -14360,10 +13970,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 			else if (o->AnimationFrame > 6.0f)
 			{
 				o->PKKey += 1;
-				o->Position[2] += (o->PKKey * 0.8f);//5.0f;
-//				o->Position[0] += sinf(o->Angle[2]*Q_PI/180.0f) * (o->PKKey * 0.4f);//10.0f;
-//				o->Position[1] -= cosf(o->Angle[2]*Q_PI/180.0f) * (o->PKKey * 0.4f);//10.0f;
-
+				o->Position[2] += (o->PKKey * 0.8f);
 
 				VectorCopy(o->Position, Position);
 				Position[0] += rand()%120 - 60;
@@ -15843,9 +15450,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 			break;
 #endif //CSK_EVENT_CHERRYBLOSSOM
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
 #ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 		case MODEL_BLOW_OF_DESTRUCTION:
 			{
@@ -16132,7 +15736,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					Vector( fDynamicLightVal*vLight[0], fDynamicLightVal*vLight[1], fDynamicLightVal*vLight[2], vDLight );
 					for( int i=0 ; i<pModel->NumBones ; i++ )
 					{
-						pModel->TransformByObjectBone( vPos, o->Owner, i );	
+						pModel->TransformByObjectBone( vPos, o->Owner, i );
 						
 						CreateSprite( BITMAP_LIGHT, vPos, 1.5f, vDLight, o );
 					}
@@ -16142,9 +15746,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 				if( o->LifeTime == 45 )
 				{
 					pModel->TransformByObjectBone( vPos, o->Owner, 28 );
-					CreateEffect( MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 28/*본넘버*/);
+					CreateEffect( MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 28); 
 					pModel->TransformByObjectBone( vPos, o->Owner, 37 );
-					CreateEffect( MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 37/*본넘버*/);
+					CreateEffect( MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 37);
 				}
 
 				if (o->LifeTime >= 30)
@@ -16269,28 +15873,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 					o->Timer = WorldTime;
 
 				}
-
-				
-// MoveEffect() 에서 CreateSprite()가 깜빡거리는 문제로 RenderEffects() 에서 호출해 주었음.
-//------------------------------------------------------------------------------------------
-// 				BMD* pModel = &Models[o->Owner->Type];
-// 				if ( o->Owner->Type == MODEL_PLAYER)
-// 				{
-// 					vec3_t vPos, vLight;
-// 					Vector(0.7f, 0.2f, 0.9f, vLight);
-// 					pModel->TransformByObjectBone( vPos, o->Owner, 27 );			// Bip01 R Forearm
-// 					CreateSprite( BITMAP_LIGHT, vPos, 1.0f, vLight, o->Owner );
-// 					CreateSprite( BITMAP_LIGHT, vPos, 1.5f, vLight, o->Owner );
-// 					pModel->TransformByObjectBone( vPos, o->Owner, 36 );			// Bip01 L Forearm
-// 					CreateSprite( BITMAP_LIGHT, vPos, 1.0f, vLight, o->Owner );
-// 					CreateSprite( BITMAP_LIGHT, vPos, 1.5f, vLight, o->Owner );
-// 				}
-
 				o->LifeTime = 999;
 			}
 		}break;
 #endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-
 #ifdef ADD_SOCKET_ITEM
 	case MODEL_STAR_SHINE:
 		{
@@ -16401,20 +15987,16 @@ void MoveEffect( OBJECT *o, int iIndex)
 								fCurrentOffsetPos	= RANDOMOFFSET_POSITION * RANDNUM ;
 								fCurrentOffsetAngle	= RANDOMOFFSET_ANGLE * RANDNUM ;
 								
-								// 1. 위치값 
 								v3ResultPos[0] = o->StartPosition[0] + fCurrentOffsetPos;
 								v3ResultPos[1] = o->StartPosition[1] + fCurrentOffsetPos;
 								v3ResultPos[2] = o->StartPosition[2] + fCurrentOffsetPos;
 								
-								// 2. 각도 값
 								v3ResultAngle[0] = o->Angle[0] + fCurrentOffsetAngle;
 								v3ResultAngle[1] = o->Angle[1] + fCurrentOffsetAngle;
 								v3ResultAngle[2] = o->Angle[2] + fCurrentOffsetAngle;
 								
-								// 3. 크기값
 								fResultScale = o->Scale + fCurrentOffsetScale;
 								
-								// 4. Color 값
 								v3Light_[0] = 0.5f; v3Light_[1] = 0.6f; v3Light_[2] = 0.94f; 
 								
 								CreateParticle( BITMAP_RAKLION_CLOUDS, v3ResultPos, v3ResultAngle, v3Light_, 1, fResultScale );
@@ -16779,8 +16361,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					}
 					break;	
 				}
-
-				// 실 검기 EFFECT 정의.
 				
 				if( iTYPESWORDFORCE==1 )
 				{
@@ -17303,13 +16883,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 							Vector ( 1.f, 1.f, 1.f, vLight );
 							VectorCopy(o->Light, vPosition);
-							//Vector(0.0f, -250.0f, 0.0f, vPosition );
-							//AngleMatrix ( pObject->Angle, matRotate );
-							//VectorRotate( vPosition, matRotate, vLook );
-							//VectorAdd( pObject->Position, vLook, vPosition );
-							
-						
-							// 땅파이는 이펙트
+
 							CreateEffect( BITMAP_CRATER, vPosition,   o->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f );
 							for(int iu = 0; iu < 20; iu++)
 							{
@@ -17351,24 +16925,18 @@ void MoveEffect( OBJECT *o, int iIndex)
 							v3Pos[2] = vPosition[2] + ((rand()%iLimitPos)-(iLimitPos*0.5f));
 							CreateParticle(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
-							
-							// 충격파
 							Vector( 0.3f, 0.2f, 1.f, vLight );
 							CreateEffect( BITMAP_SHOCK_WAVE, vPosition, o->Angle, vLight, 11 );
 							CreateEffect( BITMAP_SHOCK_WAVE, vPosition, o->Angle, vLight, 11 );
 							
-							// 에너지볼(전기)
 							vPosition[2] += 100.0f;
 							Vector ( 0.0f, 0.2f, 1.0f, vLight );
 							CreateEffect(MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1, vPosition, o->Angle, vLight, 1, NULL, -1, 0, 0, 0, 1.0f );
-							// --------------------------------------------------- 기간틱 이펙트 /까지
 						}
 					}
 					break;
 				}
-				
-				// - 24. END EFFECT
-				// ========================================================================================>		
+	
 				if( o->LifeTime == 15 )
 				{
 					CreateEffect ( o->Type, o->Position, o->Angle, o->Light, 12, o->Owner,-1,0,0,0,o->Scale );
@@ -17379,10 +16947,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				{
 					EarthQuake = (float)(rand()%2-2)*0.5f;
 				}
-				// - 24. END EFFECT
-				// ========================================================================================<
 
-				// - 28. SOUND
 				if( o->LifeTime == o->ExtState )
 				{
 					PlayBuffer( SOUND_ASSASSIN );
@@ -17398,12 +16963,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 					PlayBuffer( SOUND_FURY_STRIKE2 );
 				}
 			}
-			else if( o->SubType==11 )		// END EFFECT
+			else if( o->SubType==11 )
 			{
-				// 2. RATE %
 				float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
 
-				// 9. Alpha
 				if( o->m_Interpolates.m_vecInterpolatesScale.size() > 0 )
 				{
 					o->m_Interpolates.GetAlphaCurrent(o->Alpha,fCurrentRate);
@@ -17447,16 +17010,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
 					case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
 						{
-// 							Vector( 1.0f, 0.4f, 0.3f, v3LightModify );
-// 							
-// 							for( int j = 0; j < 11; ++j )
-// 							{
-// 								if( rand()%2 == 0 )
-// 								{
-// 									CreateParticle(BITMAP_FIRE_HIK1_MONO,arrEachBonePos[j],o->Angle,v3LightModify,10,o->Scale);
-// 								}								
-// 							}
-
 							for( int j = 0; j < 11; ++j )
 							{
 								Vector(1.0f, 1.0f, 1.0f, v3LightModify);
@@ -17557,19 +17110,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					
 					AddTerrainLight(o->Position[0],o->Position[1],v3LightTerrain,2,PrimaryTerrainLight);
 
-// 					// CASE 1		: Yellow
-// 					{
-// 						Vector(1.0f, 1.0f, 1.0f, v3LightModify);
-// 						for( int j = 0; j < 11; ++j )
-// 						{
-// 							if( rand()%3 == 0 )
-// 							{
-// 								CreateParticle(BITMAP_POUNDING_BALL,arrEachBonePos[j],o->Angle,v3LightModify, 3 );
-// 							}
-// 						}
-// 					}
-			
-					// CASE 2		: Blue
 					{
 						Vector( 0.3f, 0.4f, 1.0f, v3LightModify );
 						for( int j = 0; j < 11; ++j )
@@ -17580,23 +17120,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 							}								
 						}
 					}
-			
-// 					// CASE 3		: Red-Yellow
-// 					{
-// 						Vector( 1.0f, 1.0f, 1.0f, v3LightModify );
-// 						for( int j = 0; j < 11; ++j )
-// 						{
-// 							if( rand()%20 == 0 )
-// 							{
-// 								CreateEffect(BITMAP_FIRE_CURSEDLICH,arrEachBonePos[j],vAngle,v3LightModify,12,o,-1,0,0,0,o->Scale);
-// 							}
-// 						}
-// 					}
-					// 3. APPEAR EFFECT
-					
 					delete [] arrEachBonePos;
-				}	// if( fCurrentRate >= 0.0f && fCurrentRate <= 0.01f )
-				// 
+				}
 
 
 				// 2. ALpha
@@ -17611,16 +17136,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				//float	fRateStatic = 0.6f;
 				float	fCurrentRate = (float)(o->LifeTime) / (float)(o->ExtState);
 				vec3_t	v3RotateAngleRelative;
-				// PASSED METHOD
-// 				VectorInterpolation_F( o->Position, o->Owner->Position, o->StartPosition, 1.0f, fRateStatic );
-// 				VectorInterpolation_F( o->Angle, o->Owner->Angle, o->m_v3PrePos1, 1.0f, fRateStatic );
-// 				LInterpolationF( o->Scale, o->Owner->Scale, o->AlphaTarget, fRateStatic );
-// 				LInterpolationF( o->Alpha, 0.0f, o->Distance, fRateCurrent );
 
-				// NEW METHOD
-				// 3. 
-				// ========================================================================================>
-				// 4. (1) Angle
 				if( o->m_Interpolates.m_vecInterpolatesAngle.size() > 0 )
 				{
 					o->m_Interpolates.GetAngleCurrent(v3RotateAngleRelative ,fCurrentRate);		
@@ -18250,7 +17766,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 				{
 					o->Angle[2] = -(int)WorldTime*0.3f;
 
-					if(o->SubType == 0 || o->SubType == 4 || o->SubType == 5)				// 시작때 한번 커지는거
+					if(o->SubType == 0 || o->SubType == 4 || o->SubType == 5)
 					{
 						o->Scale += 0.1f;
 						if(o->Scale > 3)
@@ -19674,14 +19190,14 @@ void RenderEffects ( bool bRenderBlendMesh )
 							
 							vec3_t vPos, p;
 							Vector(0.0f, 0.0f, 0.0f, p);
-							pOwnerModel->RotationPosition(pOwner->BoneTransform[33], p, vPos);	// ParentMatrix 전역변수 생성용
+							pOwnerModel->RotationPosition(pOwner->BoneTransform[33], p, vPos);
 							VectorAdd(pOwner->Position, vPos, pModel->BodyOrigin);
 							Vector(0.0f, 0.0f, 0.0f, pObject->Angle);
 							
 							OBB_t OBB;
 							vec3_t Temp;
-							pModel->Animation(BoneTransform,pObject->AnimationFrame,pObject->PriorAnimationFrame,pObject->PriorAction,pObject->Angle,pObject->Angle,true);	// BoneTransform 전역변수 생성
-							pModel->Transform(BoneTransform,Temp,Temp,&OBB,true);	// BoneTransform으로 실제 모델 transform
+							pModel->Animation(BoneTransform,pObject->AnimationFrame,pObject->PriorAnimationFrame,pObject->PriorAction,pObject->Angle,pObject->Angle,true);
+							pModel->Transform(BoneTransform,Temp,Temp,&OBB,true);
 							
 							BodyLight(pObject, pModel);
 							pModel->BodyScale = pObject->Scale;
@@ -19933,10 +19449,8 @@ void RenderEffects ( bool bRenderBlendMesh )
 							CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge06, 1.5f, vLight, o);
 							CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge07, 1.5f, vLight, o);
 							
-							//Vector( fLumi1 * 0.3f, fLumi1 * 0.5f, fLumi1 * 0.1f, vLight );
 							CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge08, 1.0f, vLight, o);
 							CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge09, 1.0f, vLight, o);
-							// 2-3. 기본 Edge Effect // 
 
 						}
 
@@ -20357,9 +19871,6 @@ void RenderEffectShadows()
 						RenderTerrainAlphaBitmap(BITMAP_CLOUD,o->Position[0],o->Position[1],o->Scale,o->Scale,Light,-o->Angle[2]);
 					}
 					break;
-
-//-----------------------------------------------------------------------------------------------------			
-
 				case MODEL_RAKLION_BOSS_MAGIC:
 					{
 						if(o->SubType == 0)
@@ -20371,9 +19882,6 @@ void RenderEffectShadows()
 						}
 					}
 					break;
-
-//-----------------------------------------------------------------------------------------------------			
-
 				case MODEL_EFFECT_BROKEN_ICE0:
 				case MODEL_EFFECT_BROKEN_ICE1:
 				case MODEL_EFFECT_BROKEN_ICE2:
@@ -20387,9 +19895,6 @@ void RenderEffectShadows()
 					}		
 					break;
 #endif // CSK_RAKLION_BOSS
-
-//-----------------------------------------------------------------------------------------------------	
-
 				case BITMAP_MAGIC+2:
                     EnableAlphaBlend();
 					Rotation = (int)WorldTime%3600/(float)10.f;
@@ -20473,9 +19978,6 @@ void RenderEffectShadows()
 					}
 					break;
 #endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
-
-//-------------------------------------------------------------------------------------------------------------------------------------------
-
 				case BITMAP_FLAME:
 #ifdef LDS_ADD_EMPIRE_GUARDIAN
 					if(o->SubType!=3 && o->SubType!=6 )

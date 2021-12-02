@@ -1,49 +1,28 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  CSEventMatch.h
-//
-//  내  용 : 이벤트 경기에 관련된 처리.
-//
-//  날  짜 : 2004/04/12
-//
-//  작성자 : 조 규 하.
-//
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CSEVENT_MATCH_H__
 #define __CSEVENT_MATCH_H__
 
-
-//////////////////////////////////////////////////////////////////////////
-//  INCLUDE.
-//////////////////////////////////////////////////////////////////////////
 #include "wsclient.h"
 
-//////////////////////////////////////////////////////////////////////////
-//  CLASS.
-//////////////////////////////////////////////////////////////////////////
-
-//  경기 정보 처리.
-//////////////////////////////////////////////////////////////////////////
 class CSBaseMatch
 {
 protected:
     BYTE        m_byMatchEventType;
-    // 카운트 다운
-    MATCH_TYPE  m_iMatchCountDownType;  //  악마의광장(1,2,3), 블러드캐슬(4,5,6,7), 카오스캐슬(8,9,10,11)
+    MATCH_TYPE  m_iMatchCountDownType;
     DWORD       m_dwMatchCountDownStart;
-    BYTE        m_byMatchType;          //  경기 종류.
-    int         m_iMatchTimeMax;        //  경기 총 시간.
-    int         m_iMatchTime;           //  경기 시간.
+    BYTE        m_byMatchType; 
+    int         m_iMatchTimeMax;
+    int         m_iMatchTime;
 
-    int         m_iMaxKillMonster;      //  목표 몬스터 사냥량.
-    int         m_iKillMonster;         //  사냥한 몬스터수.
+    int         m_iMaxKillMonster;
+    int         m_iKillMonster;
 
-    // 경기 결과.
     int         m_iNumResult;
     int         m_iMyResult;
     MatchResult m_MatchResult[11];
 
-	// 결과창 포지션
 	POINT		m_PosResult;
 
     bool    getEqualMonster ( int addV );
@@ -78,10 +57,6 @@ public:
     virtual void    RenderMatchResult ( void ) = 0;
 };
 
-
-//////////////////////////////////////////////////////////////////////////
-//  악마의 광장 경기 정보 처리.
-//////////////////////////////////////////////////////////////////////////
 class CSDevilSquareMatch : public CSBaseMatch
 {
 private:

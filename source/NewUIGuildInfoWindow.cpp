@@ -268,10 +268,6 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
 				{
 					if( pText->m_GuildStatus != G_MASTER )
 					{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-						GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText();
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 						if( GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText() )
 						{
 							DeleteIndex = GetGuildMemberIndex( pText->m_szID );
@@ -521,7 +517,6 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderTabButton()
 
 void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 {
-//////////////////////////////////////////////폰트부분
 	char Text[300];
 	POINT ptOrigin;
 	sprintf( Text, GlobalText[180]);
@@ -749,18 +744,12 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
 
 void SEASON3B::CNewUIGuildInfoWindow::RenderScrollBar()
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	float fRenderPosX = 0, fRenderPosY = 0- 200;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	RenderImage(IMAGE_GUILDINFO_SCROLL_TOP, m_Pos.x+170, 
-		125, 7, 3);
+	RenderImage(IMAGE_GUILDINFO_SCROLL_TOP, m_Pos.x+170, 125, 7, 3);
 	
 	for(int i=0; i<22; i++)
-		RenderImage(IMAGE_GUILDINFO_SCROLL_MIDDLE, m_Pos.x+170, 
-			124+(float)(i*10+4), 7, 15);
+		RenderImage(IMAGE_GUILDINFO_SCROLL_MIDDLE, m_Pos.x+170, 124+(float)(i*10+4), 7, 15);
 	
 	RenderImage(IMAGE_GUILDINFO_SCROLL_BOTTOM, m_Pos.x+170, 352, 7, 3);
 		

@@ -1,9 +1,7 @@
 // NewUIGuildInfoWindow.cpp: implementation of the CNewUIGuildInfoWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
 #include "NewUIMasterLevel.h"
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"
@@ -53,7 +51,7 @@ bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	m_BtnExit.ChangeButtonImgState( true, IMAGE_MASTER_EXIT, false );
 	m_BtnExit.ChangeButtonInfo( m_Pos.x+591, m_Pos.y+390, 36, 29 );		
-	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );	// 1002 "닫기"
+	m_BtnExit.ChangeToolTipText( GlobalText[1002], true );
 
 	for(int i = 0; i < 4; i++)
 	{
@@ -228,8 +226,7 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
 		else
 			TextListColor[i] = TEXT_COLOR_WHITE;
 	}
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
+
 int Skill_Icon;
 int Point_R = 0,Point_Tot = 0;
 
@@ -276,10 +273,8 @@ int Point_R = 0,Point_Tot = 0;
 
 				DWORD Color;
 				if(View_Kind == true || Skill_Num == 0
-#ifdef PJH_FIX_4_BUGFIX_33
 					|| (g_csItemOption.Special_Option_Check() == false && (AT_SKILL_POWER_SLASH_UP<= Skill_Num && AT_SKILL_POWER_SLASH_UP + 5 > Skill_Num))
 					|| (g_csItemOption.Special_Option_Check(1) == false && (AT_SKILL_MANY_ARROW_UP<= Skill_Num && AT_SKILL_MANY_ARROW_UP + 5 > Skill_Num))
-#endif //PJH_FIX_4_BUGFIX_33
 					)
 					Color = RGBA(120,120,120,255);
 				else
@@ -301,10 +296,12 @@ int Point_R = 0,Point_Tot = 0;
 						}
 					}
 					unicode::t_char lpszStr[256] = {NULL, };
+
 					if(View_Kind == true)
 						g_pRenderText->SetTextColor(120, 120, 0, 255);
 					else
 						g_pRenderText->SetTextColor(255, 255, 0, 255);
+
 					unicode::_sprintf( lpszStr, "%d", Get_Magic);
 					g_pRenderText->RenderText(Loc[Skill] + 31 + ((SKILL_ICON_WIDTH + 19) * sx), 95 + ((SKILL_ICON_HEIGHT + 14) * nsy), lpszStr, 0, 0, RT3_WRITE_CENTER);
 
@@ -316,10 +313,6 @@ int Point_R = 0,Point_Tot = 0;
 					}
 				}
 
-
-
-
-				//////////////////////화살표 찍기
 				if(Dir == 1)
 					RenderImage(IMAGE_MASTER_INTERFACE + 2, Loc[Skill] + ((SKILL_ICON_WIDTH + 19) * sx)+9, 70 + ((SKILL_ICON_HEIGHT + 14) * nsy) - 12, 8,12 ,0.f,18.f/32.f,14.8f/16.f,-(18.f/32.f));
 				if(Dir == 2)
@@ -378,13 +371,8 @@ int Point_R = 0,Point_Tot = 0;
 //				if(Point <= 0)
 //					Point = Master_Skill_Data[sy][sx];
 
-
-
-
-
 				if(!(SEASON3B::IsPress(VK_LBUTTON)))
 				{
-					//여기에 추가돼면 %d%% 로 표시
 					int Data_Buff[] = { 
 						AT_SKILL_DURABLE_MINUS1
 						,AT_SKILL_DURABLE_MINUS2
@@ -394,30 +382,21 @@ int Point_R = 0,Point_Tot = 0;
 						,AT_SKILL_AUTO_RECOVER_LIFE
 						,AT_SKILL_GET_MONEY_UP
 						,AT_SKILL_EXP_UP
-#ifdef PJH_SEASON4_MASTER_RANK4
 						,AT_SKILL_SD_RECOVER_SPD_UP
-#endif //PJH_SEASON4_MASTER_RANK4
 					};
-#ifdef PJH_SEASON4_MASTER_RANK4
 					int Tot_Buff = 9;
-#else //PJH_SEASON4_MASTER_RANK4
-					int Tot_Buff = 4;
-#endif //PJH_SEASON4_MASTER_RANK4
 
-					// 마스터스킬창에 TOOLTIP RENDER 
 					if(CheckMouseIn(Loc[Skill] + 5 + ((SKILL_ICON_WIDTH + 19) * sx), 75 + ((SKILL_ICON_HEIGHT + 14) * nsy), 15, 21))
 					{
-#ifdef PJH_SEASON4_MASTER_RANK4
-								bool Check_View = false;
-								for(int CV = 0; CV < Tot_Buff; CV++)
-								{
-									if(Data_Buff[CV] == Skill_Num)
-									{
-										Check_View = true;
-										break;
-									}
-								}
-#endif //PJH_SEASON4_MASTER_RANK4
+						bool Check_View = false;
+						for(int CV = 0; CV < Tot_Buff; CV++)
+						{
+							if(Data_Buff[CV] == Skill_Num)
+							{
+								Check_View = true;
+								break;
+							}
+						}
 
 #ifdef LDS_FIX_NONINIT_TEXTBOLDTABLE
 						// extern int TextBold[30];
@@ -497,11 +476,9 @@ int Point_R = 0,Point_Tot = 0;
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
 									{
 										sprintf(TextList[StartText+Add_Tex+3],GlobalText[174],SkillAttribute[Skill_Num + Num_Master].Distance);
-										//사용 가능 거리
 										Add_Tex++;
 									}
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
-									//마나
 								}
 #ifdef PJH_SEASON4_MASTER_RANK4
 								else
@@ -534,11 +511,9 @@ int Point_R = 0,Point_Tot = 0;
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
 									{
 										sprintf(TextList[StartText+Add_Tex+3],GlobalText[174],SkillAttribute[Skill_Num + Num_Master].Distance);
-										//사용 가능 거리
 										Add_Tex++;
 									}
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[360],SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
-									//AG소모
 								}
 								else
 								if(AT_SKILL_SOUL_UP == Skill_Num
@@ -556,36 +531,25 @@ int Point_R = 0,Point_Tot = 0;
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
 									{
 										sprintf(TextList[StartText+Add_Tex+3],GlobalText[174],SkillAttribute[Skill_Num + Num_Master].Distance);
-										//사용 가능 거리
 										Add_Tex++;
 									}
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
-									//마나
 									Add_Tex++;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[360],SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
-									//AG소모
 								}
 								else
-								if(AT_SKILL_LIFE_UP == Skill_Num 
-#ifdef PJH_ADD_MASTERSKILL
-									|| AT_SKILL_ALICE_SLEEP_UP == Skill_Num ||	AT_SKILL_LIGHTNING_SHOCK_UP == Skill_Num
-#endif //PJH_ADD_MASTERSKILL
-									)
+								if(AT_SKILL_LIFE_UP == Skill_Num || AT_SKILL_ALICE_SLEEP_UP == Skill_Num ||	AT_SKILL_LIGHTNING_SHOCK_UP == Skill_Num)
 								{
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
-									//마나
 									Add_Tex++;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[360],SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
-									//AG소모
 								}
 								else
 								if(AT_SKILL_HEAL_UP == Skill_Num)
 								{
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1785],SkillAttribute[Skill_Num + Num_Master].Damage);
-									//효  과 : %d%% 회복량 증가
 									Add_Tex++;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
-									//마나
 								}
 								else
 #ifdef PJH_SEASON4_MASTER_RANK4
@@ -661,11 +625,9 @@ int Point_R = 0,Point_Tot = 0;
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
 									{
 										sprintf(TextList[StartText+Add_Tex+3],GlobalText[174],SkillAttribute[Skill_Num + Num_Master].Distance);
-										//사용 가능 거리
 										Add_Tex++;
 									}
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
-									//마나
 								}
 #ifdef PJH_SEASON4_MASTER_RANK4
 								else
@@ -690,15 +652,12 @@ int Point_R = 0,Point_Tot = 0;
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
 									{
 										sprintf(TextList[StartText+Add_Tex+3],GlobalText[174],SkillAttribute[Skill_Num + Num_Master].Distance);
-										//사용 가능 거리
 										Add_Tex++;
 									}
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[360],SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
-									//AG소모
 								}
 								else
 								if(AT_SKILL_SOUL_UP == Skill_Num
-#ifdef PJH_SEASON4_MASTER_RANK4
 									|| AT_SKILL_BLOW_UP == Skill_Num
 									|| AT_SKILL_ANGER_SWORD_UP == Skill_Num
 									|| AT_SKILL_DEF_POWER_UP == Skill_Num
@@ -706,7 +665,6 @@ int Point_R = 0,Point_Tot = 0;
 									|| AT_SKILL_BLOOD_ATT_UP == Skill_Num
 									|| AT_SKILL_POWER_SLASH_UP == Skill_Num
 									|| AT_SKILL_FIRE_SCREAM_UP == Skill_Num
-#endif //PJH_SEASON4_MASTER_RANK4
 									)
 								{
 //									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1783],SkillAttribute[Skill_Num + Num_Master].Damage);
@@ -714,27 +672,18 @@ int Point_R = 0,Point_Tot = 0;
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
 									{
 										sprintf(TextList[StartText+Add_Tex+3],GlobalText[174],SkillAttribute[Skill_Num + Num_Master].Distance);
-										//사용 가능 거리
 										Add_Tex++;
 									}
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
-									//마나
 									Add_Tex++;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[360],SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
-									//AG소모
 								}
 								else
-								if(AT_SKILL_LIFE_UP == Skill_Num 
-#ifdef PJH_ADD_MASTERSKILL
-									|| AT_SKILL_ALICE_SLEEP_UP == Skill_Num ||	AT_SKILL_LIGHTNING_SHOCK_UP == Skill_Num
-#endif //PJH_ADD_MASTERSKILL
-									)
+								if(AT_SKILL_LIFE_UP == Skill_Num || AT_SKILL_ALICE_SLEEP_UP == Skill_Num ||	AT_SKILL_LIGHTNING_SHOCK_UP == Skill_Num)
 								{
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
-									//마나
 									Add_Tex++;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[360],SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
-									//AG소모
 								}
 								else
 								if(AT_SKILL_HEAL_UP == Skill_Num)
@@ -742,7 +691,6 @@ int Point_R = 0,Point_Tot = 0;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1785],SkillAttribute[Skill_Num + Num_Master].Damage);
 									Add_Tex++;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
-									//마나
 								}
 								else
 #ifdef PJH_ADD_MASTERSKILL
@@ -825,15 +773,15 @@ int Point_R = 0,Point_Tot = 0;
 							case AT_SKILL_FIRE_SCREAM_UP:
 #endif //#ifdef PJH_SEASON4_MASTER_RANK4
 #ifdef PJH_ADD_MASTERSKILL
-							case AT_SKILL_ALICE_CHAINLIGHTNING_UP:	//체인라이트닝 강화
-							case AT_SKILL_LIGHTNING_SHOCK_UP:				//라이트닝쇼크 강화
-							case AT_SKILL_ALICE_DRAINLIFE_UP:					//드레인라이프 강화
+							case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
+							case AT_SKILL_LIGHTNING_SHOCK_UP:
+							case AT_SKILL_ALICE_DRAINLIFE_UP:
 #endif
 								sprintf(TextList[ib],GlobalText[1784]);
 								break;
 #ifdef PJH_SEASON4_MASTER_RANK4
 #ifdef PJH_ADD_MASTERSKILL
-							case AT_SKILL_ALICE_SLEEP_UP:		//데미지 반사 강화
+							case AT_SKILL_ALICE_SLEEP_UP:
 #endif //PJH_ADD_MASTERSKILL
 							case AT_SKILL_PET_DURABLE_SPD_DN:
 							case AT_SKILL_DEF_POWER_UP:
@@ -851,8 +799,6 @@ int Point_R = 0,Point_Tot = 0;
 		}
 	}
 //////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
 }
 
 bool SEASON3B::CNewUIMasterLevel::Update()
@@ -863,9 +809,6 @@ bool SEASON3B::CNewUIMasterLevel::Update()
 
 void SEASON3B::CNewUIMasterLevel::Render_Text()
 {
-//////////////////////////////////////////////폰트부분
-//	char Text[300];
-//	POINT ptOrigin;
 	g_pRenderText->SetFont(g_hFont);
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -1247,9 +1190,6 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 							}
 						}
 
-
-
-
 						if(Get_Skill == false)
 						{
 							Get_Skill = true;
@@ -1354,14 +1294,11 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 									Pot = 4;
 								Need_Point = Master_Skill_Data[sy][Pot];
 
-#ifdef PJH_FIX_4_BUGFIX_33
-	if(g_csItemOption.Special_Option_Check() == false && (Cur_Skill == AT_SKILL_ICE_BLADE||(AT_SKILL_POWER_SLASH_UP <= Cur_Skill && AT_SKILL_POWER_SLASH_UP+4 >= Cur_Skill)))
-		return true;
+								if(g_csItemOption.Special_Option_Check() == false && (Cur_Skill == AT_SKILL_ICE_BLADE||(AT_SKILL_POWER_SLASH_UP <= Cur_Skill && AT_SKILL_POWER_SLASH_UP+4 >= Cur_Skill)))
+									return true;
 
-	if(g_csItemOption.Special_Option_Check(1) == false && (Cur_Skill == AT_SKILL_CROSSBOW||(AT_SKILL_MANY_ARROW_UP <= Cur_Skill && AT_SKILL_MANY_ARROW_UP+4 >= Cur_Skill)))
-		return true;
-#endif //PJH_FIX_4_BUGFIX_33
-
+								if(g_csItemOption.Special_Option_Check(1) == false && (Cur_Skill == AT_SKILL_CROSSBOW||(AT_SKILL_MANY_ARROW_UP <= Cur_Skill && AT_SKILL_MANY_ARROW_UP+4 >= Cur_Skill)))
+									return true;
 
 								In_Skill = Cur_Skill;
 								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMaster_Level_Interface));

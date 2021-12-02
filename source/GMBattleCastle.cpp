@@ -82,18 +82,16 @@ namespace battleCastle
 	        char WorldName[32];
 
 	        sprintf ( WorldName, "World%d", gMapManager.WorldActive+1 );
-            if ( g_bBattleCastleStart ) //  공성시.
+            if ( g_bBattleCastleStart )
             {
-                //  속성.
 				sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive+1)*10+2 );
 	            OpenTerrainAttribute ( FileName );
 
                 sprintf ( FileName, "%s\\TerrainLight2.jpg", WorldName );
                 OpenTerrainLight ( FileName );
             }
-            else                        //  수성시.
+            else
             {
-                //  속성.
 				sprintf ( FileName, "Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive+1 );
 	            OpenTerrainAttribute ( FileName);
 
@@ -221,13 +219,13 @@ namespace battleCastle
             OBJECT*    to = &tc->Object;
             if ( to->Kind==KIND_PLAYER && to->Type==MODEL_PLAYER && to->Visible==true )
             {
-                if ( Type==0 )      //  x축.
+                if ( Type==0 )
                 {
                     float dx = o->Position[0]-to->Position[0];
                     float dy = o->Position[1]-to->Position[1];
                     if ( dx<fRange && dy<100 ) return true;
                 }
-                else if ( Type==1 ) //  y축.
+                else if ( Type==1 )
                 {
                     float dx = fabs( o->Position[0]-to->Position[0] );
                     float dy = o->Position[1]-to->Position[1];
@@ -236,7 +234,7 @@ namespace battleCastle
                         return true;
                     }
                 }
-                else if ( Type==2 ) //  x,y축.
+                else if ( Type==2 )
                 {
                     float dx = o->Position[0]-to->Position[0];
                     float dy = o->Position[1]-to->Position[1];
@@ -252,7 +250,7 @@ namespace battleCastle
     {
       for ( int i=0; i<6; ++i )
         {
-            if ( bAllClear==true )  //  열려있지 않은 모든 성문의 속성을 연다.
+            if ( bAllClear==true )
             {
                 DWORD wall = TerrainWall[(g_byGateLocation[i][1]+1)*TERRAIN_SIZE+(g_byGateLocation[i][0])];
                 if ( (wall&TW_NOMOVE)==TW_NOMOVE )
@@ -902,35 +900,6 @@ namespace battleCastle
                 }
             }
         }
-    /*
-        if ( (rand()%10)==0 && object )
-        {
-            objCount = rand()%object;
-            return true;
-        }
-
-        if ( (rand()%5)==0 )
-        {
-            vec3_t Position, Light;
-
-            Vector ( 0.3f, 0.8f, 1.f, Light );
-
-            Position[0] = Hero->Object.Position[0]+rand()%800-400.f;
-            Position[1] = Hero->Object.Position[1]+rand()%800-400.f;
-            Position[2] = Hero->Object.Position[2]+50.f;
-
-            CreateParticle ( BITMAP_LIGHT, Position, Hero->Object.Angle, Light, 7, 1.f, &Hero->Object );//, rand()%10+50.f );
-
-            if ( (rand()%15)==0 )
-            {
-                vec3_t Angle = { 0.f, 0.f, 0.f };
-                Position[2] = Hero->Object.Position[2]+800.f;
-                CreateEffect ( 9, Position, Angle, Light );
-
-                PlayBuffer ( SOUND_KALIMA_FALLING_STONE );
-            }
-        }
-    */
         return true;
     }
 
@@ -1116,7 +1085,7 @@ namespace battleCastle
             }
             break;
 
-        case    BATTLE_CASTLE_WALL1:     //  부서지는 성벽.
+        case    BATTLE_CASTLE_WALL1:
         case    BATTLE_CASTLE_WALL2:
         case    BATTLE_CASTLE_WALL3:
         case    BATTLE_CASTLE_WALL4:
@@ -1282,23 +1251,7 @@ namespace battleCastle
 
     void    MoveFlyBigStone ( OBJECT* o )
     {
-    /*
-	    o->Angle[2] += o->Gravity;
 
-        if ( rand()%5==0 )
-        {
-            o->Gravity *= -1;
-        }
-
-        if ( o->LifeTime<20 )
-        {
-            o->Alpha /= 1.2f;
-            o->Velocity += 0.5f;
-            o->Angle[0] += 2.f;
-        }
-
-        if ( o->LifeTime<0 ) o->Live = false;
-    */
     }
 
     CHARACTER* CreateBattleCastleMonster ( int Type, int PositionX, int PositionY, int Key )
@@ -1382,7 +1335,7 @@ namespace battleCastle
             break;
 
         case 221:
-    	    OpenNpc ( MODEL_NPC_CAPATULT_ATT );     //  0:제자리, 1:공격애니.
+    	    OpenNpc ( MODEL_NPC_CAPATULT_ATT );
 		    c = CreateCharacter(Key,MODEL_NPC_CAPATULT_ATT,PositionX,PositionY);
             c->m_bFixForm = true;
             c->Object.m_bRenderShadow = false;
@@ -1421,7 +1374,7 @@ namespace battleCastle
             c->Object.SubType = rand()%2+10;
 		    c->Weapon[0].Type = -1;
 		    c->Weapon[1].Type = -1;
-			strcpy( c->ID, "근위병" );
+			strcpy( c->ID, "굼㎈�" );
             break;
     
         case 277:
@@ -1531,7 +1484,7 @@ namespace battleCastle
       	    Vector(  200.f,  50.f,  100.f  ,c->Object.BoundingBoxMax);
             break;
 
-        case MODEL_MONSTER01+73:    //  성문.
+        case MODEL_MONSTER01+73:
             Vector(-140.f,-140.f,0.f  ,c->Object.BoundingBoxMin);
             Vector( 140.f, 140.f,300.f,c->Object.BoundingBoxMax);
             c->SwordCount = 0;
@@ -1639,7 +1592,7 @@ namespace battleCastle
             c->m_bIsSelected = (g_isCrownState ? true : false);
             break;
 
-        case 277:   //  성문.
+        case 277:
             g_bBeGate = true;
             break;
 
@@ -1653,8 +1606,8 @@ namespace battleCastle
             }
             break;
 
-        case 286 :  //  궁수병.
-        case 287 :  //  창기병.
+        case 286 :
+        case 287 :
             {
                 switch ( o->AI )
                 {
@@ -1664,7 +1617,6 @@ namespace battleCastle
 
                         o->AttackPoint[0] = 0;
 
-                        //  공격 범위에 들어와 있는가?
                         if ( CalcDistanceChrToChr( o, 1, fRange ) || g_byGuardAI==GUARD_ATTACK_READY )
                         {
                             SetAction ( o, 4 );
@@ -1720,7 +1672,7 @@ namespace battleCastle
     {
         switch ( o->Type )
         {
-        case 11 :                   //  트랩.
+        case 11 :
             break;
 
         case MODEL_MONSTER01+76:
@@ -1901,7 +1853,7 @@ namespace battleCastle
             }
             return true;
 
-        case MODEL_MONSTER01+79:    //  캐논 타워.
+        case MODEL_MONSTER01+79:
             if ( IsBattleCastleStart() )
             {
                 c->m_bIsSelected = true;

@@ -590,7 +590,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							CreateEffect(MODEL_DESAIR,o->Position,o->Angle,o->Light,0, NULL, -1, 0, 0, 0,1.f,i);
 						}
 					}
-					else if( o->SubType == 1 )		// 마력증대(흑마법사) 고스트 효과
+					else if( o->SubType == 1 )
 					{
 						o->RenderType = RENDER_TYPE_ALPHA_BLEND;
 						o->Scale = Scale;
@@ -612,7 +612,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 
 						VectorSubtract( o->TargetPosition, o->Position, o->Direction );
 
-						// 시작되는 이팩트의 방향을 구한다.
 						o->Angle[2] = CreateAngle( o->Position[0], o->Position[1], o->TargetPosition[0], o->TargetPosition[1] );
 					}
 				}
@@ -3413,17 +3412,6 @@ void MoveJoint( JOINT *o, int iIndex)
 							
 							Distance = MoveHumming(o->Position,o->Angle,o->TargetPosition,o->Velocity);
 						}
-						
-						
-						//o->Position[0] += o->MultiUse * rand()%5 + cosf(Q_PI / (float)(rand()%180) * 20.0f);
-						//o->Position[1] += o->MultiUse * rand()%5 + sinf(Q_PI / (float)(rand()%180) * 20.0f);
-						/*
-						else if ( Distance <= 70.0f && fabs( fOldAngle - o->Angle[2]) > 20.0f)
-						{	// 거리가 가깝고 회전 각이 크면 속도를 줄인다.
-						if(o->Velocity >= 20.f)
-						o->Velocity -= 10.f;
-						}
-						*/
 					}
 					else
 					{
@@ -3700,7 +3688,6 @@ void MoveJoint( JOINT *o, int iIndex)
         }
 		else if(o->SubType == 14)
 		{
-			//타겟을 따라간다.
 			if(o->LifeTime < 5)
 			{
 				float fLumi = o->LifeTime/5.f;
@@ -3816,14 +3803,11 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
         }
 		break;
-		
-		//////////////////////////////////////////////////////////////////////////
 #ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 		case BITMAP_2LINE_GHOST:
 			{
 				if( o->SubType == 0 )
 				{
-#ifdef PJH_FIX_CAOTIC
 					if(o->LifeTime%16 <= 7)
 					{
 						o->m_sTargetIndex = 10;
@@ -3834,22 +3818,7 @@ void MoveJoint( JOINT *o, int iIndex)
 						o->m_sTargetIndex = -10;
 						o->Angle[2] += o->m_sTargetIndex;
 					}
-//					if(o->LifeTime%2 == 0)
-						CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,o->Light,59,1.0f);	// 연기
-#else
-					if(o->LifeTime%20 <= 9)
-					{
-						o->m_sTargetIndex = -10;
-						o->Angle[2] += o->m_sTargetIndex;
-					}
-					else
-					{
-						o->m_sTargetIndex = 10;
-						o->Angle[2] += o->m_sTargetIndex;
-					}
-					if(o->LifeTime%2 == 0)
-						CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,o->Light,59,1.0f);	// 연기
-#endif //PJH_FIX_CAOTIC
+					CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,o->Light,59,1.0f);
 				}
 				else if( o->SubType == 1 )
 				{
@@ -3896,14 +3865,13 @@ void MoveJoint( JOINT *o, int iIndex)
                     }
                 }
 				
-#ifndef CSK_EVIL_SKILL			// 정리할 때 지워야 하는 소스
-				// 악령의 모든 판별을 서버에서 처리하게끔 하기위해 밑에 코드를 제거
+#ifndef CSK_EVIL_SKILL
 				if(o->LifeTime%15 == 0)
 				{
 					if(o->Target == &Hero->Object)
-						AttackCharacterRange(o->Skill,o->Position,150.f,o->Weapon,o->PKKey,o->m_bySkillSerialNum);//클라이언트마법처리
+						AttackCharacterRange(o->Skill,o->Position,150.f,o->Weapon,o->PKKey,o->m_bySkillSerialNum);
 				}
-#endif // CSK_EVIL_SKILL		// 정리할 때 지워야 하는 소스
+#endif // CSK_EVIL_SKILL
 			}
             else if ( o->SubType==19 )
             {

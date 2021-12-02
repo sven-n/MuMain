@@ -23,19 +23,13 @@ namespace COMGEM
 	char	m_cState = STATE_READY;
 	char	m_cErr = NOERR;
 	char	m_cGemType = -1;
-	char	m_cComType = -1;	//조합타입, 10개, 20개, 30개
+	char	m_cComType = -1;
 	BYTE	m_cCount = 0;
 	int		m_iValue = 0;
 	BYTE	m_cPercent = 0;
 	
 	CUIUnmixgemList	m_UnmixTarList;
 }
-
-//////////////////////////////////////////////////////////////////////////
-
-
-
-//////////////////////////////////////////////////////////////////////////
 
 void COMGEM::SendReqUnMix()
 {
@@ -67,18 +61,12 @@ void COMGEM::ProcessCSAction()
 	else
 		SendReqUnMix();
 }
-//////////////////////////////////////////////////////////////////////////
 
 void COMGEM::ResetWantedList()
 {
 	m_UnmixTarList.Clear();
 }
 
-//----------------------------------------------------------------------------------------
-// Function: 해체 가능한 보석이 있는지 찾는다.
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.10.18]-
 bool COMGEM::FindWantedList()
 {
 	SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
@@ -98,7 +86,7 @@ bool COMGEM::FindWantedList()
 	{
 		pItem = pNewInventoryCtrl->GetItem(i);
 		if( !pItem ) continue;
-	#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 해체 가능한 리스트 생성 (2010.10.27)
+	#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		if( isCompiledGem( pItem ) )
 	#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		if((pItem->Type == INDEX_COMPILED_CELE && m_cGemType == CELE) 
@@ -125,11 +113,9 @@ bool COMGEM::FindWantedList()
 
 void COMGEM::SelectFromList(int iIndex, int iLevel)
 {
-	//선택하고
 	iUnMixIndex = iIndex;
 	iUnMixLevel = iLevel;
 
-	//선택창을 띄운다. 
 	if(CheckInv())
 	{
 
@@ -153,8 +139,6 @@ void COMGEM::RenderUnMixList()
 	m_UnmixTarList.Render();
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 char COMGEM::CheckOneItem(const ITEM* p)
 {
 
@@ -177,17 +161,13 @@ bool COMGEM::CheckInv()
 		switch(GetError())
 		{
 		case COMERROR_NOTALLOWED:
-		// 1817 "조합에 필요한 아이템이 부족합니다."
 		g_pChatListBox->AddText("", GlobalText[1817], SEASON3B::TYPE_ERROR_MESSAGE);
 			break;
 		case DEERROR_NOTALLOWED:
-		// 1818 "해체할 수 없습니다."
 		g_pChatListBox->AddText("", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
 			break;
 		}
-
 		GetBack();
-
 		return false;
 	}
 
@@ -196,11 +176,6 @@ bool COMGEM::CheckInv()
 
 bool COMGEM::CheckMyInvValid()
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int tCount = 0;
-	bool bRes = false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	m_cPercent = 0;
 	m_cCount = 0;
 
@@ -213,7 +188,7 @@ bool COMGEM::CheckMyInvValid()
 		SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
 		ITEM * pItem = NULL;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 또는 해체 가능한 보석의 수를 체크 (2010.10.27)
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		for (int i = 0; i < nInvenMaxIndex; ++i)
 #else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		for (int i = 0; i < (int)pNewInventoryCtrl->GetNumberOfItems(); ++i)
@@ -281,16 +256,13 @@ bool COMGEM::CheckMyInvValid()
 
 void COMGEM::CalcGen()
 {
-	//고정 계산
 	m_iValue = 0;
 	if(m_bType)
 	{
-		//갯수에 상관없이 1000000만 젠
 		m_iValue = 1000000;
 	}
 	else
 	{
-		//m_cComType은 10의 배수이므로 500000, 1000000, 1500000의 계산이 된다.
 		m_iValue = m_cComType * 50000;
 	}
 }
@@ -321,7 +293,7 @@ int	COMGEM::CalcItemValue(const ITEM* p)
 	{
 	case NOGEM:
 		return 0;
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX	// 보석조합 판매금액 설정 (2010.10.27)
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case eBLESS_C:
 		return 9000000 * (Level+1) * FIRST;
 	break;
@@ -414,64 +386,50 @@ int	COMGEM::GetJewelRequireCount( int i )
 	return -1;
 }
 
-//----------------------------------------------------------------------------------------
-// Function: 보석 조합/해제가 가능한 아이템인지 검사한다.
-// Input   : 인덱스, 모델인덱스라면 true ( 인덱스 변환 연산을 위함 )
-// Output  : 불가능하다면 0, 가능하다면 해당 보석 타입을 리턴.
-//------------------------------------------------------------------------[lem_2010.9.30]-
 int COMGEM::Check_Jewel( int _nJewel, int _nType, bool _bModel )
 {
 	bool	bCom = true;
 	bool	bNon = true;
-	// 모델타입이면 인덱스 변환
-	if( _bModel  )		_nJewel -= MODEL_ITEM;
 
-	// _nType 홀수면 단품 보석만 검사
-	// _nType 짝수면 묶음 보석만 검사
+	if( _bModel  )		_nJewel -= MODEL_ITEM;
 	if( _nType & 1 )	bCom = false;
 	if( _nType & 2 )	bNon = false;
 
 	if( bNon )
 	{
-		if( _nJewel == ITEM_POTION+13 )		return eBLESS;			// 축복의 보석										
-		if( _nJewel == ITEM_POTION+14 )		return eSOUL;			// 영혼의 보석
-		if( _nJewel == ITEM_POTION+16 )		return eLIFE;			// 생명의 보석
-		if( _nJewel == ITEM_POTION+22 )		return eCREATE;			// 창조의 보석
-		if( _nJewel == ITEM_POTION+31 )		return ePROTECT;		// 수호 보석
-		if( _nJewel == ITEM_POTION+41 )		return eGEMSTONE;		// 보석 원석
-		if( _nJewel == ITEM_POTION+42 )		return eHARMONY;		// 조화의 보석
-		if( _nJewel == ITEM_WING+15 )		return eCHAOS;			// 혼돈의 보석
-		if( _nJewel == ITEM_POTION+43 )		return eLOW;			// 하급 제련석
-		if( _nJewel == ITEM_POTION+44 )		return eUPPER;			// 상급 제련석
+		if( _nJewel == ITEM_POTION+13 )		return eBLESS;								
+		if( _nJewel == ITEM_POTION+14 )		return eSOUL;
+		if( _nJewel == ITEM_POTION+16 )		return eLIFE;
+		if( _nJewel == ITEM_POTION+22 )		return eCREATE;
+		if( _nJewel == ITEM_POTION+31 )		return ePROTECT;
+		if( _nJewel == ITEM_POTION+41 )		return eGEMSTONE;
+		if( _nJewel == ITEM_POTION+42 )		return eHARMONY;
+		if( _nJewel == ITEM_WING+15 )		return eCHAOS;
+		if( _nJewel == ITEM_POTION+43 )		return eLOW;
+		if( _nJewel == ITEM_POTION+44 )		return eUPPER;
 	}
 
 	if( bCom )
 	{
-		if( _nJewel == ITEM_WING+30 )	return eBLESS_C;		// 축복의 보석 묶음
-		if( _nJewel == ITEM_WING+31 )	return eSOUL_C;			// 영혼의 보석 묶음
-		if( _nJewel == ITEM_WING+136 )	return eLIFE_C;			// 생명의 보석 묶음
-		if( _nJewel == ITEM_WING+137 )	return eCREATE_C;		// 창조의 보석 묶음
-		if( _nJewel == ITEM_WING+138 )	return ePROTECT_C;		// 수호 보석 묶음
-		if( _nJewel == ITEM_WING+139 )	return eGEMSTONE_C;		// 보석 원석 묶음
-		if( _nJewel == ITEM_WING+140 )	return eHARMONY_C;		// 조화의 보석 묶음
-		if( _nJewel == ITEM_WING+141 )	return eCHAOS_C;		// 혼돈의 보석 묶음
-		if( _nJewel == ITEM_WING+142 )	return eLOW_C;			// 하급 제련석 묶음
-		if( _nJewel == ITEM_WING+143 )	return eUPPER_C;		// 상급 제련석 묶음
+		if( _nJewel == ITEM_WING+30 )	return eBLESS_C;
+		if( _nJewel == ITEM_WING+31 )	return eSOUL_C;
+		if( _nJewel == ITEM_WING+136 )	return eLIFE_C;
+		if( _nJewel == ITEM_WING+137 )	return eCREATE_C;
+		if( _nJewel == ITEM_WING+138 )	return ePROTECT_C;
+		if( _nJewel == ITEM_WING+139 )	return eGEMSTONE_C;
+		if( _nJewel == ITEM_WING+140 )	return eHARMONY_C;
+		if( _nJewel == ITEM_WING+141 )	return eCHAOS_C;
+		if( _nJewel == ITEM_WING+142 )	return eLOW_C;
+		if( _nJewel == ITEM_WING+143 )	return eUPPER_C;
 	}
 	
 	return NOGEM;
 }
 
-//----------------------------------------------------------------------------------------
-// Function: 보석의 종류를 받아 해당 타입에 맞는 인덱스 리턴
-// Input   :  
-// Output  : 
-//------------------------------------------------------------------------[lem_2010.10.4]-
 int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 {
 	switch( _nJewel )
 	{
-		// 축복의 보석
 		case eBLESS:
 			if( _nType == eGEM_NAME )		return 1806;
 			if( _nType == eGEM_INDEX )		return ITEM_POTION+13;
@@ -480,7 +438,6 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 			if( _nType == eGEM_NAME )		return 1806;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+14;
 		break;
-		// 영혼의 보석
 		case eSOUL:
 			if( _nType == eGEM_NAME )		return 1807;
 			if( _nType == eGEM_INDEX )		return ITEM_POTION+14;
@@ -489,7 +446,6 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 			if( _nType == eGEM_NAME )		return 1807;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+13;
 		break;
-		// 생명의 보석
 		case eLIFE:
 			if( _nType == eGEM_NAME )		return 3312;
 			if( _nType == eGEM_INDEX )		return ITEM_POTION+16;
@@ -498,7 +454,6 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 			if( _nType == eGEM_NAME )		return 3312;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+13;
 		break;
-		// 창조의 보석
 		case eCREATE:
 			if( _nType == eGEM_NAME )		return 3313;
 			if( _nType == eGEM_INDEX )		return ITEM_POTION+22;
@@ -507,7 +462,6 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 			if( _nType == eGEM_NAME )		return 3313;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+13;
 		break;
-		// 수호 보석
 		case ePROTECT:
 			if( _nType == eGEM_NAME )		return 3314;
 			if( _nType == eGEM_INDEX )		return ITEM_POTION+31;
@@ -516,7 +470,6 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 			if( _nType == eGEM_NAME )		return 3314;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+13;
 		break;
-		// 보석 원석
 		case eGEMSTONE:
 			if( _nType == eGEM_NAME )		return 2081;
 			if( _nType == eGEM_INDEX )		return ITEM_POTION+41;
@@ -525,7 +478,6 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 			if( _nType == eGEM_NAME )		return 2081;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+13;
 		break;
-		// 조화의 보석
 		case eHARMONY:
 			if( _nType == eGEM_NAME )		return 3315;
 			if( _nType == eGEM_INDEX )		return ITEM_POTION+42;
@@ -534,7 +486,6 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 			if( _nType == eGEM_NAME )		return 3315;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+13;
 		break;
-		// 혼돈의 보석
 		case eCHAOS:
 			if( _nType == eGEM_NAME )		return 3316;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+15;
@@ -543,7 +494,6 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 			if( _nType == eGEM_NAME )		return 3316;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+13;
 		break;
-		// 하급 제련석
 		case eLOW:
 			if( _nType == eGEM_NAME )		return 3317;
 			if( _nType == eGEM_INDEX )		return ITEM_POTION+43;
@@ -552,7 +502,6 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 			if( _nType == eGEM_NAME )		return 3317;
 			if( _nType == eGEM_INDEX )		return ITEM_WING+13;
 		break;
-		// 상급 제련석
 		case eUPPER:
 			if( _nType == eGEM_NAME )		return 3318;
 			if( _nType == eGEM_INDEX )		return ITEM_POTION+44;

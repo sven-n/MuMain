@@ -12,7 +12,6 @@
 #define BoostRest(p) { if(p) { p.reset(); } }
 
 ///////////////////////////////////////////////_Scene start_//////////////////////////////////////////////
-//#define MAX_SERVER_HI   25
 #define MAX_SERVER_HI   30
 #define MAX_SERVER_LOW  20
 
@@ -48,9 +47,7 @@
 #define CHARACTER_SCENE		4
 #define MAIN_SCENE			5
 
-#ifdef MOVIE_DIRECTSHOW
-	#define MOVIE_SCENE			6
-#endif // MOVIE_DIRECTSHOW
+#define MOVIE_SCENE			6
 
 #define MAX_FENRIR_SKILL_MONSTER_NUM	10
 #define FENRIR_TYPE_BLACK	0
@@ -63,7 +60,7 @@
 #define NUM_BUTTON_CMB		( 2)
 #define NUM_PAR_BUTTON_CMB	( 5)
 
-#define INGAMESHOP_DISPLAY_ITEMLIST_SIZE (9)		// 인게임샵 한페이지에 Display되는 아이템갯수
+#define INGAMESHOP_DISPLAY_ITEMLIST_SIZE (9)
 
 ///////////////////////////////////////////////_Scene end_//////////////////////////////////////////////////////////
 //////////////////////////////////////////////_Path start_//////////////////////////////////////////////////////////
@@ -71,15 +68,15 @@
 #define MAX_PATH_FIND  15
 #define NEW_PATH_ALGORITHM
 
-#define TW_SAFEZONE		( 0x0001)	//  안전지대
-#define TW_CHARACTER	( 0x0002)	//  캐릭터가 차지하고 있음
-#define TW_NOMOVE		( 0x0004)	//  일반속성 ( 이동 불가)
-#define TW_NOGROUND		( 0x0008)	//  땅뚫기 속성
-#define TW_WATER		( 0x0010)	//  물 속성
-#define TW_ACTION       ( 0x0020)   //  특정 행동을 취하는 속성.
-#define TW_HEIGHT       ( 0x0040)   //  일정한 높이로 올라감.
-#define TW_CAMERA_UP    ( 0x0080)   //  카메라 위로 이동.
-#define TW_NOATTACKZONE ( 0x0100)   //  공격 불가능 지역 ( 클라이언트 처리 마법 ).
+#define TW_SAFEZONE		( 0x0001)
+#define TW_CHARACTER	( 0x0002)
+#define TW_NOMOVE		( 0x0004)
+#define TW_NOGROUND		( 0x0008)
+#define TW_WATER		( 0x0010)
+#define TW_ACTION       ( 0x0020)
+#define TW_HEIGHT       ( 0x0040)
+#define TW_CAMERA_UP    ( 0x0080)
+#define TW_NOATTACKZONE ( 0x0100)
 #define TW_ATT1         ( 0x0200)
 #define TW_ATT2         ( 0x0400)
 #define TW_ATT3         ( 0x0800)
@@ -98,69 +95,25 @@
 #define PATH_TESTED			( 0x02)
 #define PATH_END			( 0x04)
 
-///////////////////////////////////////////////_Path end_///////////////////////////////////////////////////////////
-///////////////////////////////////////////_Openglutil start_///////////////////////////////////////////////////////
-
 #define CUSTOM_CAMERA_DISTANCE1  200
 #define CUSTOM_CAMERA_DISTANCE2  -150
 #define RENDER_ITEMVIEW_FAR   2000.f
 #define RENDER_ITEMVIEW_NEAR  20.f
 
-///////////////////////////////////////////_Openglutil end_///////////////////////////////////////////////////////
-////////////////////////////////////////////_Object start_////////////////////////////////////////////////////////
-
-// -----------------------------------------------------------------------------------------------------
-// 몬스터 타입 설정, 타입 추가하시면 꼭 주석 달아주기를 바랍니다.
-// -----------------------------------------------------------------------------------------------------
-
-// 몬스터 타입의 최대 갯수
-#ifdef LDS_MOD_EXTEND_MAXMODELLIMITS_200TO400
-	// 2010/03-2010/04작업 확장맵 몬스터 추가로 200개 초과
-	#define MAX_MODEL_MONSTER	400		
-#else // LDS_MOD_EXTEND_MAXMODELLIMITS_200TO400
-	// 라클리온 맵 들어가면서 최대 갯수 200개로 확장
-	#ifdef CSK_RAKLION_BOSS
-	#define MAX_MODEL_MONSTER	200
-	#else // CSK_RAKLION_BOSS
-	#define MAX_MODEL_MONSTER   150
-	#endif // CSK_RAKLION_BOSS
-#endif // LDS_MOD_EXTEND_MAXMODELLIMITS_200TO400
+#define MAX_MODEL_MONSTER	400		
 
 #define MODEL_MONSTER01		MODEL_SKILL_END+1
-//  MODEL_MONSTER01+63 ~ MODEL_MONSTER01+69     마도시 헬라스의 몬스터들.
-//  MODEL_MONSTER01+70 ~ MODEL_MONSTER01+73     카오스캐슬 근위병
-//  MODEL_MONSTER01+74 ~ MODEL_MONSTER01+80     공성전 몬스터. ( 성문, 수호석상, ... )
-//	MODEL_MONSTER01+91 ~ MODEL_MONSTER01+99		크라이울프 몬스터
-//	MODEL_MONSTER01+100 ~ MODEL_MONSTER01+105	아이다 몬스터
-//	MODEL_MONSTER01+106 ~ MODEL_MONSTER01+121	칸투르 몬스터
-//	MODEL_MONSTER01+122							설날 이벤트복주머니 몬스터
-//  MODEL_MONSTER01+123 ~ MODEL_MONSTER01+125   이벤트맵 몬스터
-//  MODEL_MONSTER01+126							3차 체인지업 보스 몬스터
-//  MODEL_MONSTER01+127							추석 이벤트 달토끼 몬스터
-//  MODEL_MONSTER01+128 ~ MODEL_MONSTER01+135	엘베란드 몬스터
-//  MODEL_MONSTER01+136 ~ MODEL_MONSTER01+144	평온의늪 몬스터
-//	MODEL_MONSTER01+145 ~ MODEL_MONSTER01+149	라클리온 몬스터 5종
-//	MODEL_MONSTER01+150							라클리온 보스 몬스터
-//  MODEL_MONSTER01+151 ~ MODEL_MONSTER01+153	라클리온 알 3종류
-//  MODEL_MONSTER01+154                         일본 여름 이벤트 몬스터 1종
-//  MODEL_MONSTER01+155 ~ MODEL_MONSTER01+156   일본 크리스마스 이벤트 몬스터 2종
-//  MODEL_MONSTER01+157 ~ MODEL_MONSTER01+163	PK 필드 몬스터 7종
 #define MODEL_MONSTER_END	MODEL_MONSTER01+MAX_MODEL_MONSTER
 
 #ifdef PBG_ADD_NEWCHAR_MONK
-// 모델 기본 스킨 데이타 갯수 확장 20 넘진 않으나 소스간결화를 위함
 #define MODEL_BODY_NUM               24
 #else //PBG_ADD_NEWCHAR_MONK
 #define MODEL_BODY_NUM               20
 #endif //PBG_ADD_NEWCHAR_MONK
 
-#define MODEL_ITEM_COMMON_NUM		2	// 같은 아이템이지만 모델이 다른 아이템 세트 개수. 현재 소환술사와 요정이 같이 쓰는 넝쿨, 실크 시리즈 아이템.
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-	#define MODEL_ITEM_COMMONCNT_RAGEFIGHTER	4	//같은 아이템 모델 교환위함
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
+#define MODEL_ITEM_COMMON_NUM		2
+#define MODEL_ITEM_COMMONCNT_RAGEFIGHTER	4
 #define DARKSIDE_TARGET_MAX		5
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
 //struct
 #define MAX_BOIDS         40
@@ -175,8 +128,6 @@
 #define BODYPART_BOOTS  5
 #define MAX_BODYPART    6
 
-/////////////////////////////State_Buff에 추가/////////////////////////////////////////// 
-
 #define TELEPORT_NONE   0
 #define TELEPORT_BEGIN  1
 #define TELEPORT        2
@@ -185,15 +136,12 @@
 #define KIND_MONSTER 2
 #define KIND_NPC     4
 #define KIND_TRAP    8
-#define KIND_OPERATE 16     //  
+#define KIND_OPERATE 16
 #define KIND_EDIT    32
 #define KIND_PET     64
 #define KIND_TMP     128
 #define MAX_OPERATES 200
 #define MAX_ITEMS 1000
-
-////////////////////////////////////////////_Object end_//////////////////////////////////////////////////////////
-////////////////////////////////////////_inventory start_/////////////////////////////////////////////////////
 
 #define MAX_GUILD_LINE   14
 #define MAX_GUILDS       80
@@ -222,25 +170,22 @@
 #define MAX_MIX_INVENTORY      COLUMN_MIX_INVENTORY*ROW_MIX_INVENTORY
 
 //equipment index
-#define REQUEST_EQUIPMENT_INVENTORY 0		// 인벤토리
-#define REQUEST_EQUIPMENT_TRADE 1			// 거래
-#define REQUEST_EQUIPMENT_STORAGE 2			// 창고
-#define REQUEST_EQUIPMENT_CHAOS_MIX 3		// 카오스 조합
-#define REQUEST_EQUIPMENT_MYSHOP 4			// 개인상점
-#define REQUEST_EQUIPMENT_TRAINER_MIX 5		// 조련사 조합
-#define REQUEST_EQUIPMENT_ELPIS_MIX 6		// 엘피스 조합
-#define REQUEST_EQUIPMENT_OSBOURNE_MIX 7	// 오스본 조합
-#define REQUEST_EQUIPMENT_JERRIDON_MIX 8	// 제리든 조합
-#ifdef ADD_GLOBAL_MIX_MAR08
-#define REQUEST_EQUIPMENT_CHAOS_CARD_MIX 9			// 카오스 카드 조합
-#define REQUEST_EQUIPMENT_CHERRYBLOSSOM_MIX 10		// 벚꽃 조합
-#endif //ADD_GLOBAL_MIX_MAR08
-#ifdef ADD_SOCKET_MIX
-#define REQUEST_EQUIPMENT_EXTRACT_SEED_MIX 11	// 시드 추출 조합
-#define REQUEST_EQUIPMENT_SEED_SPHERE_MIX 12	// 시드 스피어 합성 조합
-#define REQUEST_EQUIPMENT_ATTACH_SOCKET_MIX 13	// 소켓아이템 장착 조합
-#define REQUEST_EQUIPMENT_DETACH_SOCKET_MIX 14	// 소켓아이템 해제 조합
-#endif	// ADD_SOCKET_MIX
+#define REQUEST_EQUIPMENT_INVENTORY 0
+#define REQUEST_EQUIPMENT_TRADE 1
+#define REQUEST_EQUIPMENT_STORAGE 2
+#define REQUEST_EQUIPMENT_CHAOS_MIX 3
+#define REQUEST_EQUIPMENT_MYSHOP 4
+#define REQUEST_EQUIPMENT_TRAINER_MIX 5
+#define REQUEST_EQUIPMENT_ELPIS_MIX 6
+#define REQUEST_EQUIPMENT_OSBOURNE_MIX 7
+#define REQUEST_EQUIPMENT_JERRIDON_MIX 8
+#define REQUEST_EQUIPMENT_CHAOS_CARD_MIX 9
+#define REQUEST_EQUIPMENT_CHERRYBLOSSOM_MIX 10
+
+#define REQUEST_EQUIPMENT_EXTRACT_SEED_MIX 11
+#define REQUEST_EQUIPMENT_SEED_SPHERE_MIX 12
+#define REQUEST_EQUIPMENT_ATTACH_SOCKET_MIX 13
+#define REQUEST_EQUIPMENT_DETACH_SOCKET_MIX 14
 
 #define EQUIPMENT_WEAPON_RIGHT 0
 #define EQUIPMENT_WEAPON_LEFT  1
@@ -259,9 +204,8 @@
 #define MAX_EQUIPMENT_INDEX			MAX_EQUIPMENT
 #define MAX_MY_INVENTORY_INDEX		MAX_EQUIPMENT_INDEX + MAX_INVENTORY
 
-#ifdef LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
-	#define MAX_SETITEM_OPTIONS		12		// 아이템 추가옵션 갯수 제한 수치
-#endif // LDS_FIX_WRONG_QUANTITY_SETITEMOPTION_WHEN_RENDER_SETITEMTOOTIP_IN_INVENTORY
+#define MAX_SETITEM_OPTIONS		12
+
 
 #define MAX_MY_SHOP_INVENTORY_INDEX MAX_MY_INVENTORY_INDEX + MAX_SHOP_INVENTORY
 
@@ -284,15 +228,11 @@
 #define TEXT_COLOR_GREEN_BLUE 9
 #define TEXT_COLOR_GRAY       10
 #define TEXT_COLOR_REDPURPLE  11
-#ifdef SOCKET_SYSTEM
-	#define TEXT_COLOR_VIOLET	12
-#endif	// SOCKET_SYSTEM
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-	#define TEXT_COLOR_ORANGE	13
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
+#define TEXT_COLOR_VIOLET	12
+#define TEXT_COLOR_ORANGE	13
+
 
 ////////////////////////////////////////_inventory end_///////////////////////////////////////////////////////
-
 ////////////////////////////////////////_LodTerrain start_//////////////////////////////////////////////////////
 
 #define TERRAIN_SCALE     100.f
@@ -326,20 +266,20 @@
 #define IME_CONVERSIONMODE  1
 #define IME_SENTENCEMODE    2
 
-#define AUTOATTACK_ON   0x01    //  자동공격 설정.
-#define AUTOATTACK_OFF  0x02    //  자동공격 취소.
+#define AUTOATTACK_ON   0x01
+#define AUTOATTACK_OFF  0x02
 
-#define WHISPER_SOUND_ON    0x04//  귓속말 알림음 On.
-#define WHISPER_SOUND_OFF   0x08//  귓속말 알림음 Off.
+#define WHISPER_SOUND_ON    0x04
+#define WHISPER_SOUND_OFF   0x08
 #define SLIDE_HELP_OFF     0x10
 
-#define RT3_SORT_LEFT 1				// 왼쪽 정렬
-#define RT3_SORT_LEFT_CLIP 2		// 왼쪽 정렬 & 스크롤(왼쪽 클리핑)
-#define RT3_SORT_CENTER 3			// 가운데 정렬
-#define RT3_SORT_RIGHT 4			// 오른쪽 정렬
+#define RT3_SORT_LEFT 1
+#define RT3_SORT_LEFT_CLIP 2
+#define RT3_SORT_CENTER 3
+#define RT3_SORT_RIGHT 4
 
-#define RT3_WRITE_RIGHT_TO_LEFT 7	// 좌표 기준으로 왼쪽으로 쓰기
-#define RT3_WRITE_CENTER 8			// 좌표 기준으로 중앙에 쓰기 (RenderErrorMessage)
+#define RT3_WRITE_RIGHT_TO_LEFT 7
+#define RT3_WRITE_CENTER 8
 
 #define CHAOS_MIX_LEVEL 10
 
@@ -434,11 +374,7 @@
 #define MAX_CLASS			6
 #endif //PBG_ADD_NEWCHAR_MONK
 
-#ifdef ASG_FIX_MONSTER_MAX_COUNT_1024
 #define MAX_MONSTER			1024
-#else	// ASG_FIX_MONSTER_MAX_COUNT_1024
-#define MAX_MONSTER			512
-#endif	// ASG_FIX_MONSTER_MAX_COUNT_1024
 
 #define MAX_SKILLS			600
 
@@ -479,23 +415,14 @@
 ///////////////////////////////////////////_Infomation end_//////////////////////////////////////////////////////
 ////////////////////////////////////////////_effect start_//////////////////////////////////////////////////////
 
-#ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
 #define MAX_EFFECTS       200
 #define MAX_SKILL_EFFECTS 100
-#else	// YDG_MOD_SEPARATE_EFFECT_SKILLS
-#ifdef YDG_FIX_CLIENT_SKILL_EFFECT_SIZE
-#define MAX_EFFECTS       1000
-#else	// YDG_FIX_CLIENT_SKILL_EFFECT_SIZE
-#define MAX_EFFECTS       200
-#endif	// YDG_FIX_CLIENT_SKILL_EFFECT_SIZE
-#endif	// YDG_MOD_SEPARATE_EFFECT_SKILLS
+
 #define MAX_SPRITES       1000
 #define MAX_PARTICLES     3000
 #define MAX_LEAVES        200
 
-#ifdef DEVIAS_XMAS_EVENT
-	#define MAX_LEAVES_DOUBLE 400
-#endif // DEVIAS_XMAS_EVENT 
+#define MAX_LEAVES_DOUBLE 400
 
 #define MAX_POINTS        100
 #define MAX_POINTERS      100
@@ -525,7 +452,6 @@
 #define CTLCODE_20OPERATOR			( 0x20)
 #define CTLCODE_80MANAGER_MOVE_CHAR	( 0x80)
 
-// PvP레벨
 #define PVP_HERO2		1
 #define PVP_HERO1		2
 #define PVP_NEUTRAL		3
@@ -545,7 +471,6 @@
 
 
 //////////////////////////////////////////_character end_/////////////////////////////////////////////////
-
 /////////////////////////////////////////////_ai start_/////////////////////////////////////////////////
 
 #define MONSTER01_STOP1    0
@@ -561,18 +486,18 @@
 #define MONSTER01_RUN      10
 #define MONSTER01_ATTACK5  11
 
-#define FENRIR_STAND		0	// 정지
-#define FENRIR_WALK			1	// 걷기
-#define FENRIR_RUN			2	// 달리기
-#define FENRIR_ATTACK		3	// 일반공격
-#define FENRIR_ATTACK_SKILL	4	// 스킬공격
-#define FENRIR_DAMAGE		5	// 데미지
-#define FENRIR_RUN_DELAY	20	// 펜릴 걷는 딜레이 값
+#define FENRIR_STAND		0
+#define FENRIR_WALK			1
+#define FENRIR_RUN			2
+#define FENRIR_ATTACK		3
+#define FENRIR_ATTACK_SKILL	4
+#define FENRIR_DAMAGE		5
+#define FENRIR_RUN_DELAY	20
 
 /////////////////////////////////////////////_ai end_///////////////////////////////////////////////////
 ////////////////////////////////////////_publicfile start_//////////////////////////////////////////////
 
-#define MAX_MAGIC					64	// 사용자당 최대 마법 개수
+#define MAX_MAGIC					64
 
 //----------------------------------------------------------------------------
 // 저항력 번호

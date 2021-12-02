@@ -1,5 +1,4 @@
 // MovieScene.h: interface for the CMovieScene class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MOVIESCENE_H__89628B4A_20FB_4DA3_9B34_D25B1026CFAC__INCLUDED_)
@@ -25,10 +24,10 @@ private:
 	BOOL			m_bOneTimeInit;
 	BOOL			m_bOneTimePlay;
 	BOOL			m_bEndMovie;
-	BOOL			m_bIsFile;			// 파일이 존재하는가 판별하는 변수
-	BOOL			m_bFailDirectShow;	// 다이렉트쇼 초기화및 동영상 잘 로드 했는가 판별
+	BOOL			m_bIsFile;
+	BOOL			m_bFailDirectShow;
 
-	int				m_iPlayNum;			// 플레이를 한번 했는가 판별하는 변수
+	int				m_iPlayNum;
 
 private:
 	void	Init();

@@ -89,7 +89,7 @@ void CCreditWin::Create()
 	m_hFont = CreateFont(nFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0,DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
 
 	LoadText();
-	SetPosition(0, 0);
+	SetPosition();
 }
 
 void CCreditWin::PreRelease()
@@ -104,7 +104,7 @@ void CCreditWin::PreRelease()
 	}
 }
 
-void CCreditWin::SetPosition(int nXCoord, int nYCoord)
+void CCreditWin::SetPosition()
 {
 	m_aSpr[CRW_SPR_PIC_L].SetPosition(0, 126);
 	m_aSpr[CRW_SPR_PIC_R].SetPosition(400, 126);

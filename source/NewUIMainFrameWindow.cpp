@@ -415,7 +415,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
 	{	
 		char strTipText[256];
 
-		// 2037 " S D : %d / %d"
         sprintf(strTipText, GlobalText[2037], wShield, wMaxShield);
 		RenderTipText((int)x-20, (int)418, strTipText);
     }
@@ -447,9 +446,9 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 	{
 		x = 0; y = 470; width = 6; height = 4;
 
-		__int64 iTotalLevel = wLevel + 400;				// 종합레벨 - 400렙이 만렙이기 때문에 더해준다.
-		__int64 iTOverLevel = iTotalLevel - 255;		// 255레벨 이상 기준 레벨
-		__int64 iBaseExperience = 0;					// 레벨 초기 경험치
+		__int64 iTotalLevel = wLevel + 400;
+		__int64 iTOverLevel = iTotalLevel - 255;
+		__int64 iBaseExperience = 0;
 
 		__int64 iData_Master =	// A
 			(
@@ -471,47 +470,43 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 			);
 		iBaseExperience = (iData_Master - (__int64)3892250000) / (__int64)2;	// B
 
-		// 레벨업 경험치
 		double fNeedExp = (double)dwNexExperience - (double)iBaseExperience;
-
-		// 현재 획득한 경험치
 		double fExp = (double)dwExperience - (double)iBaseExperience;
 
-		if(dwExperience < iBaseExperience)	// 에러
+		if(dwExperience < iBaseExperience)
 		{
 			fExp = 0.f;
 		}
 
-		double fExpBarNum = 0.f;	// 경험치바 단계(0 ~ 9) -> 오른쪽 숫자
+		double fExpBarNum = 0.f;
 		if(fExp > 0.f && fNeedExp > 0)
 		{
 			fExpBarNum = ((double)fExp / (double)fNeedExp) * (double)10.f;
 		}
 
-		double fProgress = fExpBarNum - __int64(fExpBarNum);	// 0.0 ~ 1.0까지 게이지바 한줄에서의 길이
+		double fProgress = fExpBarNum - __int64(fExpBarNum);
 
 		if(m_bExpEffect == true)
 		{
-			double fPreProgress = 0.f;	// 원래 있어서 이펙트 안칠해도 되는 부분
-			double fPreExp = (double)m_loPreExp - (double)iBaseExperience;	// 이전 경험치
-			if(m_loPreExp < iBaseExperience)	// 경험치바 한줄 넘어감
+			double fPreProgress = 0.f;
+			double fPreExp = (double)m_loPreExp - (double)iBaseExperience;
+			if(m_loPreExp < iBaseExperience)
 			{
 				x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
 				RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f/8.f, 4.f/4.f);
-				//만렙해제
 				glColor4f(1.f, 1.f, 1.f, 0.6f);
 				RenderColor(x, y, width, height);
 				EndRenderColor();
 			}
-			else	// 경험치바 넘어가지 않음
+			else
 			{
-				int iPreExpBarNum = 0;	// 이전 경험치바 길이 (0.0 ~ 1.0)
-				int iExpBarNum = 0;		// 새 경험치바 길이 (0.0 ~ 1.0)
+				int iPreExpBarNum = 0;
+				int iExpBarNum = 0;
 				if(fPreExp > 0.f && fNeedExp > 0.f)
 				{
 					fPreProgress = ((double)fPreExp / (double)fNeedExp) * (double)10.f;
 					iPreExpBarNum = (int)fPreProgress;
-					fPreProgress = (double)fPreProgress - __int64(fPreProgress);	// 0.0 ~ 1.0까지 게이지바 한줄에서의 길이
+					fPreProgress = (double)fPreProgress - __int64(fPreProgress);
 				}
 				iExpBarNum = (int)fExpBarNum;
 
@@ -544,7 +539,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 			RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f/8.f, 4.f/4.f);
 		}
 
-		// 경험치 바 숫자
 		int iExp = (int)fExpBarNum;
 		x = 635.f; y = 469.f;
 		SEASON3B::RenderNumber(x, y, iExp);
@@ -554,22 +548,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 		{	
 			char strTipText[256];
 	
-			// 1748 "경험치 :%I64d / %I64d"
 			sprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
-#ifndef PBG_MOD_STAMINA_UI
-#ifdef PBG_ADD_SECRETBUFF
-			// 피로도 시스템을 사용하는가
-			if(g_FatigueTimeSystem->IsFatigueSystem())
-			{
-				char strfatigue[128]={0,};
-				// 임시사용 차후 수정 "피로도 : %d"
-				sprintf(strfatigue, GlobalText[2867], g_FatigueTimeSystem->GetFatiguePercentage());
-
-				strcat(strTipText, "    ");
-				strcat(strTipText, strfatigue);
-			}
-#endif //PBG_ADD_SECRETBUFF
-#endif //PBG_MOD_STAMINA_UI
 			RenderTipText(280, 418, strTipText);
 		}
 	}
@@ -591,10 +570,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 			}
 		}
 
-		// 레벨업 경험치
 		float fNeedExp = dwNexExperience - dwPriorExperience;
-
-		// 현재 획득한 경험치
 		float fExp = dwExperience - dwPriorExperience;
 
 		if(dwExperience < dwPriorExperience)
@@ -602,7 +578,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 			fExp = 0.f;
 		}
 
-		// 경험치바 단계(0 ~ 9)
 		float fExpBarNum = 0.f;
 		if(fExp > 0.f && fNeedExp > 0)
 		{
@@ -620,7 +595,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 			{
 				x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
 				RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f/8.f, 4.f/4.f);
-				//만렙해제
 				glColor4f(1.f, 1.f, 1.f, 0.4f);
 				RenderColor(x, y, width, height);
 				EndRenderColor();
@@ -666,7 +640,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 			RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f/8.f, 4.f/4.f);
 		}
 
-		// 경험치 바 숫자
 		int iExp = (int)fExpBarNum;
 		x = 635.f; y = 469.f;
 		SEASON3B::RenderNumber(x, y, iExp);
@@ -676,20 +649,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 		{	
 			char strTipText[256];
 	
-			// 1748 "경험치 :%I64d / %I64d"
 			sprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
-#ifndef PBG_MOD_STAMINA_UI
-#ifdef PBG_ADD_SECRETBUFF
-			if(g_FatigueTimeSystem->IsFatigueSystem())
-			{
-				char strfatigue[128]={0,};
-				// 임시사용 차후 수정 "피로도 : %d"
-				sprintf(strfatigue, GlobalText[2867], g_FatigueTimeSystem->GetFatiguePercentage());
-				strcat(strTipText, "    ");
-				strcat(strTipText, strfatigue);
-			}
-#endif //PBG_ADD_SECRETBUFF
-#endif //PBG_MOD_STAMINA_UI
 			RenderTipText(280, 418, strTipText);
 		}
 	}
@@ -741,11 +701,11 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFriendButton()
 	int iBlinkTemp = g_pFriendMenu->GetBlinkTemp();
 	BOOL bIsAlertTime = (iBlinkTemp % 24 < 12);
 
-	if (g_pFriendMenu->IsNewChatAlert() && bIsAlertTime)		// 채팅말 경고 이미지
+	if (g_pFriendMenu->IsNewChatAlert() && bIsAlertTime)
 	{
 		RenderFriendButtonState();	
 	}
-	if (g_pFriendMenu->IsNewMailAlert())			// 편지 경고이미지
+	if (g_pFriendMenu->IsNewMailAlert())
 	{
 		if (bIsAlertTime)
 		{
@@ -757,7 +717,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFriendButton()
 			}
 		}
 	}
-	else if (g_pLetterList->CheckNoReadLetter())	// 편지 미확인 이미지
+	else if (g_pLetterList->CheckNoReadLetter())
 	{
 		RenderFriendButtonState();
 	}
@@ -954,8 +914,6 @@ int SEASON3B::CNewUIMainFrameWindow::GetSkillHotKeyIndex(int iSkillType)
 	return g_pSkillList->GetSkillIndex(iSkillType);
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 SEASON3B::CNewUIItemHotKey::CNewUIItemHotKey()
 {
 	for(int i=0; i<HOTKEY_COUNT; ++i)
@@ -1033,7 +991,6 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 	case HOTKEY_Q:
 		if(GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
 		{
-			// 마나물약(W키)
 			if(m_iHotKeyItemType[iType] >= ITEM_POTION+4 && m_iHotKeyItemType[iType] <= ITEM_POTION+6)
             {
                 iStartItemType = ITEM_POTION+6; iEndItemType = ITEM_POTION+4;
@@ -1047,7 +1004,6 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 	case HOTKEY_W:
 		if(GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
 		{
-			// 치료물약(Q키)
 			if(m_iHotKeyItemType[iType] >= ITEM_POTION+0 && m_iHotKeyItemType[iType] <= ITEM_POTION+3)
             {
                 iStartItemType = ITEM_POTION+3; iEndItemType = ITEM_POTION+0;
@@ -1061,12 +1017,10 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 	case HOTKEY_E:
 		if(GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
 		{
-			// 치료물약(Q키)
 			if(m_iHotKeyItemType[iType] >= ITEM_POTION+0 && m_iHotKeyItemType[iType] <= ITEM_POTION+3)
             {
                 iStartItemType = ITEM_POTION+3; iEndItemType = ITEM_POTION+0;
             }
-			// 마나물약(W키)
 			else if(m_iHotKeyItemType[iType] >= ITEM_POTION+4 && m_iHotKeyItemType[iType] <= ITEM_POTION+6)
             {
                 iStartItemType = ITEM_POTION+6; iEndItemType = ITEM_POTION+4;
@@ -1080,12 +1034,10 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 	case HOTKEY_R:
 		if(GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
 		{
-			// 치료물약(Q키)
 			if(m_iHotKeyItemType[iType] >= ITEM_POTION+0 && m_iHotKeyItemType[iType] <= ITEM_POTION+3)
             {
                 iStartItemType = ITEM_POTION+3; iEndItemType = ITEM_POTION+0;
             }
-			// 마나물약(W키)
 			else if(m_iHotKeyItemType[iType] >= ITEM_POTION+4 && m_iHotKeyItemType[iType] <= ITEM_POTION+6)
             {
                 iStartItemType = ITEM_POTION+6; iEndItemType = ITEM_POTION+4;
@@ -1114,15 +1066,14 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 					continue;
 				}
 
-				// Type과 Level이 맞거나 물약종류이면
 				if( 
 					(pItem->Type == i && ((pItem->Level>>3)&15) == m_iHotKeyItemLevel[iType])
 				|| (pItem->Type == i && (pItem->Type >= ITEM_POTION+0 && pItem->Type <= ITEM_POTION+3)) 
 				)
 				{
-					if(pItem->Type == ITEM_POTION+9			// 술
-						|| pItem->Type == ITEM_POTION+10	// 마을귀환문서
-						|| pItem->Type == ITEM_POTION+20	// 사랑의묘약
+					if(pItem->Type == ITEM_POTION+9
+						|| pItem->Type == ITEM_POTION+10
+						|| pItem->Type == ITEM_POTION+20
 						)
 					{
 						iItemCount++;
@@ -1137,7 +1088,6 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 		else
 		{
 			int iIndex = -1;
-			// 물약종류이면 레벨 관계없이 검색한다.
 			if(i >= ITEM_POTION+0 && i <= ITEM_POTION+3)	
 			{
 				iIndex = g_pMyInventory->FindItemReverseIndex(i);
@@ -1150,10 +1100,10 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 			if (-1 != iIndex)
 			{
 				pItem = g_pMyInventory->FindItem(iIndex);
-				if((pItem->Type != ITEM_POTION+7		// 공성물약이 아니고
-					&& pItem->Type != ITEM_POTION+10	// 마을귀환문서가 아니고
-					&& pItem->Type != ITEM_POTION+20)	// 사랑의묘약이 아니거나
-					|| ((pItem->Level>>3)&15) == m_iHotKeyItemLevel[iType] // 아이템 레벨이 같으면
+				if((pItem->Type != ITEM_POTION+7
+					&& pItem->Type != ITEM_POTION+10
+					&& pItem->Type != ITEM_POTION+20)
+					|| ((pItem->Level>>3)&15) == m_iHotKeyItemLevel[iType]
 					)
 				{
 					return iIndex;
@@ -1162,48 +1112,6 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 		}
 	}
 
-/* 물약 단축키 인벤토리 순서 버그 수정 전 소스
-	for(i=iStartItemType; i>=iEndItemType; --i)
-	{
-		int iNumberofItems = g_pMyInventory->GetInventoryCtrl()->GetNumberOfItems();
-		for(j=0; j<iNumberofItems; ++j)
-		{
-			pItem = g_pMyInventory->GetInventoryCtrl()->GetItem(j);
-			if(pItem == NULL)
-			{
-				continue;
-			}
-
-			if(pItem->Type == i
-				&& ((pItem->Type != ITEM_POTION+7	// 공성물약이 아니고
-					&& pItem->Type != ITEM_POTION+10 // 마을귀환문서가 아니고
-					&& pItem->Type != ITEM_POTION+20) // 사랑의묘약이 아니거나
-					|| (((pItem->Level>>3)&15) == m_iHotKeyItemLevel[iType])) // 아이템 레벨이 같으면
-				)
-			{
-				// 아이템의 갯수를 얻는 경우
-				if(bItemCount == true)
-				{
-					if(pItem->Type == ITEM_POTION+9			// 술
-						|| pItem->Type == ITEM_POTION+10	// 마을귀환문서
-						|| pItem->Type == ITEM_POTION+20)	// 사랑의묘약
-					{
-          				iItemCount++;
-					}
-					else
-					{
-           				iItemCount += pItem->Durability;
-					}
-				}
-				else
-				{
-					int iIndex = pItem->x + (pItem->y * g_pMyInventory->GetInventoryCtrl()->GetNumberOfColumn());
-					return iIndex;
-				}
-			}
-		}
-	}
-*/
 	if(bItemCount == true)
 	{
 		return iItemCount;
@@ -1216,39 +1124,28 @@ bool SEASON3B::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iS
 {
 	switch(m_iHotKeyItemType[iHotKey])
 	{
-	case ITEM_POTION+7:		// 공성물약
-	case ITEM_POTION+8:		// 해독물약
-	case ITEM_POTION+9:		// 술
-	case ITEM_POTION+10:	// 마을귀환문서
-	case ITEM_POTION+20:	// 사랑의 묘약
-	case ITEM_POTION+46:	// 잭오랜턴의축복
-	case ITEM_POTION+47:	// 잭오랜턴의분노
-	case ITEM_POTION+48:	// 잭오랜턴의외침
-	case ITEM_POTION+49:	// 잭오랜턴의음식
-	case ITEM_POTION+50:	// 잭오랜턴의음료
-#ifdef PSW_ELITE_ITEM
-	case ITEM_POTION+70:    // 부분유료화 엘리트 체력 물약
-	case ITEM_POTION+71:    // 부분유료화 엘리트 마나 물약
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_ELITE_ITEM
-	case ITEM_POTION+78:    // 부분유료화 힘의 비약
-	case ITEM_POTION+79:    // 부분유료화 민첩의 비약
-	case ITEM_POTION+80:    // 부분유료화 체력의 비약
-	case ITEM_POTION+81:    // 부분유료화 에너지의 비약
-	case ITEM_POTION+82:    // 부분유료화 통솔의
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_NEW_ELITE_ITEM
-	case ITEM_POTION+94:    // 부분유료화 엘리트 중간 체력 물약
-#endif //PSW_NEW_ELITE_ITEM	
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-	case ITEM_POTION+85:	// 벚꽃술
-	case ITEM_POTION+86:	// 벚꽃경단
-	case ITEM_POTION+87:	// 벚꽃잎
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
-	case ITEM_POTION+133:	// 엘리트SD회복물약
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
-		// 사랑의 묘약이 아니거나 레벨이 0이면
+	case ITEM_POTION+7:
+	case ITEM_POTION+8:
+	case ITEM_POTION+9:
+	case ITEM_POTION+10:
+	case ITEM_POTION+20:
+	case ITEM_POTION+46:
+	case ITEM_POTION+47:
+	case ITEM_POTION+48:
+	case ITEM_POTION+49:
+	case ITEM_POTION+50:
+	case ITEM_POTION+70:
+	case ITEM_POTION+71:
+	case ITEM_POTION+78:
+	case ITEM_POTION+79:
+	case ITEM_POTION+80:
+	case ITEM_POTION+81:
+	case ITEM_POTION+82:
+	case ITEM_POTION+94:
+	case ITEM_POTION+85:
+	case ITEM_POTION+86:
+	case ITEM_POTION+87:
+	case ITEM_POTION+133:
 		if(m_iHotKeyItemType[iHotKey] != ITEM_POTION+20 || m_iHotKeyItemLevel[iHotKey] == 0)
 		{
 			iStart = iEnd = m_iHotKeyItemType[iHotKey];
@@ -1256,13 +1153,11 @@ bool SEASON3B::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iS
 		}
 		break;
 	default:
-		// SD 회복물약
 		if(m_iHotKeyItemType[iHotKey] >= ITEM_POTION+35 && m_iHotKeyItemType[iHotKey] <= ITEM_POTION+37)
 		{
 			iStart = ITEM_POTION+37; iEnd = ITEM_POTION+35;
 			return true;
 		}
-		// 복합물약
 		else if(m_iHotKeyItemType[iHotKey] >= ITEM_POTION+38 && m_iHotKeyItemType[iHotKey] <= ITEM_POTION+40)
 		{
 			iStart = ITEM_POTION+40; iEnd = ITEM_POTION+38;
@@ -1270,7 +1165,6 @@ bool SEASON3B::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iS
 		}
 		break;
 	}
-
 	return false;
 }
 
@@ -1372,8 +1266,6 @@ void SEASON3B::CNewUIItemHotKey::UseItemRButton()
 		}
 	}	
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUISkillList::CNewUISkillList()
 {
@@ -2073,56 +1965,15 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
 				}
 			}
 			
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 			if(Hero->CurrentSkill == m_iHotKeySkillType[iIndex])
 			{
 				SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
 			}
-			
 			RenderSkillIcon(m_iHotKeySkillType[iIndex], x+6, y+6, 20, 28);
-#else // KJH_ADD_SKILLICON_RENEWAL
-			if(Hero->CurrentSkill == m_iHotKeySkillType[iIndex])
-			{
-				glColor3f(1.f, 0.9f, 0.8f);
-				SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
-			}
-			else
-			{
-				glColor3f(0.6f,0.7f,0.8f);
-			}
-			
-			RenderSkillIcon(m_iHotKeySkillType[iIndex], x+6, y+6, 20, 28);
-			if(m_EventState == EVENT_BTN_DOWN_SKILLHOTKEY
-				&& m_iRenderSkillInfoType == m_iHotKeySkillType[iIndex])
-			{
-				EnableAlphaBlend();
-				glColor4f(0.15f, 0.15f, 0.15f, 0.5f);
-				RenderColor(x+6, y+6, 20, 28);
-				DisableAlphaBlend();
-				EnableAlphaTest();
-				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			}
-#endif // KJH_ADD_SKILLICON_RENEWAL
 		}
 		
 		x = 392; y = 437; width = 20; height = 28;
-		
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		RenderSkillIcon(Hero->CurrentSkill, x, y, width, height);
-#else // KJH_ADD_SKILLICON_RENEWAL
-		glColor3f(1.f, 0.9f, 0.8f);
-		RenderSkillIcon(Hero->CurrentSkill, x, y, width, height);
-		
-		if(m_EventState == EVENT_BTN_DOWN_CURRENTSKILL)
-		{
-			EnableAlphaBlend();
-			glColor4f(0.15f, 0.15f, 0.15f, 0.5f);
-			RenderColor(x, y, width, height);
-			DisableAlphaBlend();
-			EnableAlphaTest();
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		}
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
 }
 
@@ -2185,7 +2036,6 @@ bool SEASON3B::CNewUISkillList::Render()
 
 					iSkillCount++;
 
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 					if(i == Hero->CurrentSkill)
 					{
 						SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
@@ -2196,31 +2046,6 @@ bool SEASON3B::CNewUISkillList::Render()
 					}
 					
 					RenderSkillIcon(i, x+6, y+6, 20, 28);
-#else // KJH_ADD_SKILLICON_RENEWAL
-					if(i == Hero->CurrentSkill)
-					{
-						glColor3f(1.f, 0.9f, 0.8f);
-						SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
-					}
-					else
-					{
-						glColor3f(1.f, 0.9f, 0.8f);
-						SEASON3B::RenderImage(IMAGE_SKILLBOX, x, y, width, height);	
-						glColor3f(0.6f,0.7f,0.8f);
-					}
-
-					RenderSkillIcon(i, x+6, y+6, 20, 28);
-					if(m_EventState == EVENT_BTN_DOWN_SKILLLIST
-						&& m_iRenderSkillInfoType == i)
-					{
-						EnableAlphaBlend();
-						glColor4f(0.15f, 0.15f, 0.15f, 0.5f);
-						RenderColor(x+6, y+6, 20, 28);
-						DisableAlphaBlend();
-						EnableAlphaTest();
-						glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-					}
-#endif // KJH_ADD_SKILLICON_RENEWAL
 				}
 			}
 			RenderPetSkill();
@@ -2284,7 +2109,6 @@ void SEASON3B::CNewUISkillList::RenderPetSkill()
 	x = 353.f; y = 352; width = 32; height = 38;
 	for(int i=AT_PET_COMMAND_DEFAULT; i<AT_PET_COMMAND_END; ++i)
 	{
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		if(i == Hero->CurrentSkill)
 		{
 			SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
@@ -2295,32 +2119,6 @@ void SEASON3B::CNewUISkillList::RenderPetSkill()
 		}
 		
         RenderSkillIcon(i, x+6, y+6, 20, 28);
-#else // KJH_ADD_SKILLICON_RENEWAL
-		if(i == Hero->CurrentSkill)
-		{
-			glColor3f(1.f, 0.9f, 0.8f);
-			SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
-		}
-		else
-		{
-			glColor3f(1.f, 0.9f, 0.8f);
-			SEASON3B::RenderImage(IMAGE_SKILLBOX, x, y, width, height);	
-			glColor3f(0.6f,0.7f,0.8f);
-		}
-
-        RenderSkillIcon(i, x+6, y+6, 20, 28);
-		if(m_EventState == EVENT_BTN_DOWN_SKILLLIST
-			&& m_iRenderSkillInfoType == i)
-		{
-			EnableAlphaBlend();
-			glColor4f(0.15f, 0.15f, 0.15f, 0.5f);
-			RenderColor(x+6, y+6, 20, 28);
-			DisableAlphaBlend();
-			EnableAlphaTest();
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		}
-#endif // KJH_ADD_SKILLICON_RENEWAL
-
 		x += width;
 	}
 }

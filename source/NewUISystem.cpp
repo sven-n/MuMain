@@ -117,15 +117,11 @@ SEASON3B::CNewUISystem::CNewUISystem()
 #endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 }
 
-//---------------------------------------------------------------------------------------------
-// Destructor
 SEASON3B::CNewUISystem::~CNewUISystem() 
 { 
 	Release(); 
 }
 
-//---------------------------------------------------------------------------------------------
-// Create()
 bool SEASON3B::CNewUISystem::Create()
 {
 	m_pNewUIMng = new CNewUIManager;
@@ -156,9 +152,6 @@ bool SEASON3B::CNewUISystem::Create()
 	return true;
 }
 
-
-//---------------------------------------------------------------------------------------------
-// Release()
 void SEASON3B::CNewUISystem::Release()
 {
 	UnloadMainSceneInterface();
@@ -173,8 +166,6 @@ void SEASON3B::CNewUISystem::Release()
 	SAFE_DELETE(m_pNewUIMng);
 }
 
-//---------------------------------------------------------------------------------------------
-// LoadMainSceneInterface()
 bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 {
 	g_MessageBox->Show(true);
@@ -522,8 +513,6 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// UnloadMainSceneInterface()
 void SEASON3B::CNewUISystem::UnloadMainSceneInterface()
 {
 	if(g_pNewUIMng)
@@ -623,8 +612,6 @@ void SEASON3B::CNewUISystem::UnloadMainSceneInterface()
 	ReleasePersonalItemTable();
 }
 
-//---------------------------------------------------------------------------------------------
-// IsVisible()
 bool SEASON3B::CNewUISystem::IsVisible(DWORD dwKey)
 {
 	if(m_pNewUIMng)
@@ -1386,15 +1373,11 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// Toggle()
 void SEASON3B::CNewUISystem::Toggle(DWORD dwKey) 
 { 
 	IsVisible(dwKey) ? Hide(dwKey) : Show(dwKey); 
 }
 
-//---------------------------------------------------------------------------------------------
-// HideAll()
 void SEASON3B::CNewUISystem::HideAll()
 {
 	if(m_pNewUIMng)
@@ -1412,15 +1395,11 @@ void SEASON3B::CNewUISystem::HideAll()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// HideAllGroupA()
 void SEASON3B::CNewUISystem::HideAllGroupA()
 {
-	// 이 함수는 친구창을 제외한 화면을 줄이면서 열리는 모든 창들을 닫을 때 사용하는 함수입니다.
 	Hide(SEASON3B::INTERFACE_INVENTORY);
 	Hide(SEASON3B::INTERFACE_CHARACTER);
 
-	//. 등록후 사용하세요
 	DWORD dwGroupA[] = 
 	{ 
 		//SEASON3B::INTERFACE_INVENTORY,
@@ -1499,16 +1478,12 @@ void SEASON3B::CNewUISystem::HideAllGroupA()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// HideAllGroupB()
 void SEASON3B::CNewUISystem::HideAllGroupB()
 {
-	// 이 함수는 친구창을 포함한 화면을 줄이면서 열리는 모든 창들을 닫을 때 사용하는 함수입니다.
 	Hide(SEASON3B::INTERFACE_FRIEND);
 	Hide(SEASON3B::INTERFACE_INVENTORY);
 	Hide(SEASON3B::INTERFACE_CHARACTER);
 
-	//. 등록후 사용하세요
 	DWORD dwGroupB[] = 
 	{ 
 		//SEASON3B::INTERFACE_FRIEND,
@@ -1690,8 +1665,6 @@ CNewUIHotKey* SEASON3B::CNewUISystem::GetNewUIHotKey() const
 	return m_pNewUIHotKey;
 }
 
-//---------------------------------------------------------------------------------------------
-
 bool SEASON3B::CNewUISystem::IsImpossibleSendMoveInterface()
 {
 	if(IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
@@ -1706,8 +1679,6 @@ bool SEASON3B::CNewUISystem::IsImpossibleSendMoveInterface()
 
 	return false;
 }
-
-//---------------------------------------------------------------------------------------------
 
 bool SEASON3B::CNewUISystem::IsImpossibleTradeInterface()
 {

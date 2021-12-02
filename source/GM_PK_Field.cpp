@@ -1,6 +1,5 @@
 //*****************************************************************************
 // file    : GM_PK_Field.cpp
-// producer: BGPARK
 //*****************************************************************************
 #include "stdafx.h"
 
@@ -198,10 +197,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
 	if(!gMapManager.IsPKField())
 		return;
-/////////////////////////////////////////////////////////////////
-//검기 관련 이펙트
 
-	//되살아난 검투사/되살아난 검투사_1/잿더미 도살자/잿더미 도살자/암살자
 	if(o->Type >= MODEL_MONSTER01+158 && o->Type <= MODEL_MONSTER01+161)
 	{
 		float Start_Frame = 0.0f;
@@ -209,21 +205,18 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 		
 		switch(o->Type)
 		{
-			//잿더미 도살자
 		case MODEL_MONSTER01+159:
 			{
 				Start_Frame = 4.0f;
 				End_Frame = 10.0f;
 			}
 			break;
-			//되살아난 검투사
 		case MODEL_MONSTER01+158:
 			{
 				Start_Frame = 3.0f;
 				End_Frame = 7.0f;
 			}
 			break;
-			//암살자
 		case MODEL_MONSTER01+160:
 		case MODEL_MONSTER01+161:
 			{
@@ -232,7 +225,6 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 			break;
 		default:
-			//기타 검기 없는 몬스터는 리턴.
 			return;
 		}
 		
@@ -259,7 +251,6 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			
 				switch(o->Type)
 				{
-					//잿더미 도살자
 				case MODEL_MONSTER01+159:
 					{
 						Vector(0.3f, 0.3f, 0.3f, Light);
@@ -268,7 +259,6 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 						CreateBlur(c, StartPos, EndPos, Light, 0);
 					}
 					break;
-					//되살아난 검투사
 				case MODEL_MONSTER01+158:
 					{
 						Vector(0.0f,0.3f,0.2f, Light);
@@ -277,7 +267,6 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 						CreateBlur(c, StartPos, EndPos, Light, 0);
 					}
 					break;
-					//암살자
 				case MODEL_MONSTER01+160:
 				case MODEL_MONSTER01+161:
 					{
@@ -289,7 +278,6 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 						{
 							Vector(0.2f, 0.9f, 0.1f, Light);
 						}
-						//왼손의 기준점을 잡는다
 						b->TransformPosition(BoneTransform[40], StartRelative, StartPos, false);
 						
 						b->TransformByBoneMatrix( EndPos, BoneTransform[40] );
@@ -299,9 +287,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 						CreateBlur(c, StartPos, EndPos, Light, 5, false, 1);
 						b->TransformPosition(BoneTransform[53], EndRelative, EndPos, false);
 						CreateBlur(c, StartPos, EndPos, Light, 5, false, 2);
-						//오른손의 기준점을 잡는다.
 						b->TransformPosition(BoneTransform[14], StartRelative, StartPos, false);
-						
 						b->TransformPosition(BoneTransform[14], EndRelative, EndPos, false);
 						CreateBlur(c, StartPos, EndPos, Light, 5, false, 3);
 						b->TransformPosition(BoneTransform[27], EndRelative, EndPos, false);
@@ -369,7 +355,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 
 	switch(o->Type)
 	{
-	case 0:			//연기솟음박스
+	case 0:
 		{
 			o->HiddenMesh = -2;
 			float fLumi = ((sinf(WorldTime*0.001f) + 1.f) * 0.5f) * 100.0f;
@@ -394,7 +380,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case 1:			//불연기 박스
+	case 1:
 		{
 			o->HiddenMesh = -2;
 			if ( rand()%3==0)
@@ -404,7 +390,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case 2:			//검은 안개 박스
+	case 2:
 		{
 			o->HiddenMesh = -2;
 			vec3_t  Light;
@@ -415,7 +401,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case 3:			//붉은 안개 박스
+	case 3:
 		{
 			o->HiddenMesh = -2;
 			if(rand()%4 == 0)
@@ -426,7 +412,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case 4:			//파티클박스
+	case 4:
 		{
 			o->HiddenMesh = -2;
 			Vector (1.0f, 0.4f, 0.4f, Light);
@@ -440,7 +426,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case 5:			//검은 연기 박스
+	case 5:
 		{
 			o->HiddenMesh = -2;
 			if(rand()%3 == 0)
@@ -450,7 +436,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-	case 6:			//빨간불 박스
+	case 6:	
 		{
 			o->HiddenMesh = -2;
 			
@@ -508,15 +494,13 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
  		Vector(1.0f,0.0f,0.0f,light);
  		b->RenderMesh(0, RENDER_TEXTURE, o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
  		VectorCopy(light, b->BodyLight);
- 		//맵툴과 맵소스가 달라서 값이 다르게 표현된다.
-		//b->RenderMesh(0, RENDER_BRIGHT|RENDER_CHROME, 0.5f,0,0.5f,o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);	//맵툴내의 값
 		b->RenderMesh(0, RENDER_BRIGHT|RENDER_CHROME, 0.2f,0,0.2f,o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
 		vec3_t vLightFire, Position, vPos;
 		Vector(1.0f, 0.0f, 0.0f, vLightFire);
 		Vector(0.0f, 0.0f, 0.0f, vPos);
 
-		b->TransformPosition(BoneTransform[6],vPos,Position,false);			//눈
+		b->TransformPosition(BoneTransform[6],vPos,Position,false);
 		CreateSprite(BITMAP_LIGHT, Position, o->Scale*5.0f, vLightFire, o);
 
 		Vector(0.0f, 0.0f, -350.0f, vPos);
@@ -568,7 +552,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 		Vector(1.0f, 0.0f, 0.0f, vLightFire);
 		Vector(0.0f, 0.0f, 0.0f, vPos);
 
-		b->TransformPosition(BoneTransform[6],vPos,Position,false);			//눈
+		b->TransformPosition(BoneTransform[6],vPos,Position,false);
 		CreateSprite(BITMAP_LIGHT, Position, o->Scale*5.0f, vLightFire, o);
 
 		Vector(0.0f, 0.0f, -350.0f, vPos);
@@ -584,43 +568,6 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 			CreateParticle(BITMAP_SMOKE,Pos,o->Angle,Light, 18, o->Scale*1.5f);
 
 		return true;
-/*
-		vec3_t vLight;
-		float test = o->AnimationFrame;
-		if(o->AnimationFrame >= 0 && o->AnimationFrame <= 20)
-		{
-			int TimeTotal = ((sinf(WorldTime*0.005f)+1.0f)*0.5f)*100.0f;
-			int TimeRange = 80 - rand()%10;
-			if(TimeTotal  >= TimeRange+6)
-			{
-				o->PKKey = 0;
-			}
-
-			if(TimeTotal >= TimeRange && TimeTotal <= TimeRange+5 && o->PKKey == 0)
-			{
-				o->PKKey = -1;
-				vec3_t Position;
-				Vector(0.8f,0.5f,0.5f,vLight);	test
-				//Vector(1.0f,1.0f,1.0f,vLight);
-				float PositionRange = (rand()%100 * o->Scale)-(500.0f * o->Scale);
-
-				vec3_t Position_Face, vPos;
-				Vector(0.0f, 0.0f, 0.0f, vPos);
-				b->TransformPosition(BoneTransform[4], vPos, Position_Face, false);
-
-				Position[0] = Position_Face[0] - PositionRange;	
-				Position[1] = Position_Face[1] + PositionRange;
-				Position[2] = RequestTerrainHeight(Position[0], Position[1])+(60.0f*o->Scale);
-				
-				float Scale = (rand()%5+5.0f) * 0.1f * o->Scale;
-				if(rand()%2 == 1)
-					Scale = o->Scale + Scale;
-				else
-					Scale = o->Scale - Scale;
-
-				CreateEffect(BITMAP_MAGMA_TEST01, Position, o->Angle, vLight, 0, NULL, -1, 0, Scale);
-			}
-		}*/
 	}
 	return false;
 }
@@ -670,7 +617,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
 				for (int i = 0; i<3; ++i)
 				{
 					float fScale = 1.2f;
-					if(i >= 1)		//목주변에 원형의 불빛정도
+					if(i >= 1)
 					{
 						b->TransformByObjectBone(vPos, o, iBones[i]);
 						CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLightFire, o);
@@ -690,7 +637,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
 					}
 					if(o->Type == MODEL_MONSTER01+160)
 					{
-						for (int i = 0; i < 2; ++i)		//불효과를 낸다.
+						for (int i = 0; i < 2; ++i)
 						{
 							float fScale = (rand()%5+18)*0.03f;
 							switch(rand()%3)
@@ -790,8 +737,8 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					if (rand()%4 > 0) continue;
 					
 					b->TransformByObjectBone(vPos, o, iBones[i]);
-					CreateParticle(BITMAP_SMOKE,				vPos,o->Angle,vLight,50,1.0f);	//연기
-					CreateParticle(BITMAP_SMOKELINE1+rand()%3,	vPos,o->Angle,vLight,0, 0.01f);	//흐물
+					CreateParticle(BITMAP_SMOKE,				vPos,o->Angle,vLight,50,1.0f);
+					CreateParticle(BITMAP_SMOKELINE1+rand()%3,	vPos,o->Angle,vLight,0, 0.01f);
 				}
 				
 				if(o->CurrentAction == MONSTER01_ATTACK1)
@@ -820,7 +767,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					case MODEL_MONSTER01+161:
 						Vector(0.6f, 0.9f, 0.2f, vLight);	//green
 						break;
-					}									//파티클 떨어뜨리기
+					}
 					CreateParticle(BITMAP_SPARK+1, vPos, o->Angle, vLight, 29, 1.0f);
 				}
 			}
@@ -837,7 +784,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					Vector(0.f, 0.f, 0.f, vRelativePos);
 					
 					b->TransformPosition(o->BoneTransform[5], vRelativePos, vWorldPos, true);
-					switch(o->Type)		//죽을때 머리 이펙트 굴리는것
+					switch(o->Type)
 					{
 					case MODEL_MONSTER01+160:
 						CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD,vWorldPos,o->Angle,Light,0,o,0,0);
@@ -854,8 +801,6 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 	case MODEL_MONSTER01+162:
 	case MODEL_MONSTER01+163:
 		{
-/////////////////////////////////////////////////////////////////////////////////////////////////
-////////		용암거인 몸주변의 라이팅
 			float fRotation = (float)((int)(WorldTime*0.1f)%360);
 			float fAngle = (sinf(WorldTime*0.003f) + 1.0f)*0.4f+1.5f;
 			vec3_t vWorldPos, vLight;
@@ -880,8 +825,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
 			b->TransformByObjectBone(vWorldPos, o, 43);
 			CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
-/////////////////////////////////////////////////////////////////////////////////////////////////
-////////		용암거인 발자국
+
 			vec3_t vRelative, vPos;
 			Vector(1.0f,1.0f,1.0f,vLight);
 			int iModel = (o->Type == MODEL_MONSTER01+163) ? MODEL_LAVAGIANT_FOOTPRINT_R : MODEL_LAVAGIANT_FOOTPRINT_V;
@@ -913,8 +857,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 					CreateParticle(BITMAP_SMOKE, vRelative, o->Angle, vLight, 62, 4.0f);
 				}
 			}
-/////////////////////////////////////////////////////////////////////////////////////////////////
-////////		용암거인 입김	
+	
 			vec3_t p,Position;
 			if(rand()%4==0)
 			{
@@ -945,27 +888,13 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 	}
 
 	float fRotation = (float)((int)(WorldTime*0.1f)%360);
-	float fAngle = (sinf(WorldTime*0.004f) + 1.0f)*0.4f + 0.2f;	//머리위의 opacity 조절용및 이펙트.(0.2f~1.0f)
+	float fAngle = (sinf(WorldTime*0.004f) + 1.0f)*0.4f + 0.2f;
 	vec3_t vWorldPos, vLight;
 	Vector(0.1f,0.4f,0.5f,vLight);
 
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+157:	//좀비 투사
-		{	
-			//머리 위에 본을 잡고 이펙트
-			b->TransformByObjectBone(vWorldPos, o, 9);
-			CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
-			
-			b->RenderMesh(1,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-			b->RenderMesh(2,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-			DisableDepthTest();
-			//머리 위에 opacity를 줄이고 늘이기 위함 깜빡거림.
-			b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,0,o->BlendMeshLight*fAngle,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-			EnableDepthTest();
-		}
-		return true;
-	case MODEL_MONSTER01+158:	//되살아난 검투사
+	case MODEL_MONSTER01+157:
 		{	
 			b->TransformByObjectBone(vWorldPos, o, 9);
 			CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
@@ -977,7 +906,19 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			EnableDepthTest();
 		}
 		return true;
-	case MODEL_MONSTER01+159:	//잿더미 도살자
+	case MODEL_MONSTER01+158:
+		{	
+			b->TransformByObjectBone(vWorldPos, o, 9);
+			CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
+			
+			b->RenderMesh(1,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
+			b->RenderMesh(2,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
+			DisableDepthTest();
+			b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,0,o->BlendMeshLight*fAngle,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
+			EnableDepthTest();
+		}
+		return true;
+	case MODEL_MONSTER01+159:
 		{
 			float fBlendMeshLight =0.0f;
 			fBlendMeshLight = (sinf(WorldTime*0.003f)+1.0f)*0.5f;
@@ -986,19 +927,17 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			b->RenderMesh(2,RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 
 			b->RenderMesh(0,RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-		//	Vector(b->BodyLight[0]*2.0f, b->BodyLight[0]*2.0f, b->BodyLight[0]*2.0f, b->BodyLight);
 			b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
 		}
 		return true;
-	case MODEL_MONSTER01+160:	//피의 암살자
-	case MODEL_MONSTER01+161:	//잔혹한 피의 암살자
+	case MODEL_MONSTER01+160:
+	case MODEL_MONSTER01+161:
 		{
 			if(o->CurrentAction == MONSTER01_DIE)
 			{
-				// 사망동작 다른 모델링
 				if (o->LifeTime == 100)
 				{
-					switch(o->Type)			//몸이펙트
+					switch(o->Type)
 					{
 					case MODEL_MONSTER01+160:
 						{
@@ -1041,7 +980,6 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 					}
 					break;
 				}
-				//피부 반투명효과 + 크롬
 				Vector(b->BodyLight[0]*0.65f, b->BodyLight[0]*0.65f, b->BodyLight[0]*0.65f, b->BodyLight);
 				b->RenderMesh(2,RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 
@@ -1050,8 +988,8 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+162:	//불타는 용암거인
-	case MODEL_MONSTER01+163:	//포악한 용암거인
+	case MODEL_MONSTER01+162:
+	case MODEL_MONSTER01+163:
 		{
 			b->RenderMesh(1,RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 			b->RenderMesh(2,RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
@@ -1061,7 +999,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
 			switch(o->Type)
 			{
-			case MODEL_MONSTER01+162:		//용암 거인
+			case MODEL_MONSTER01+162:
 			case MODEL_MONSTER01+163:
 				{
 					float fAlpha = 1.0f;
@@ -1086,13 +1024,13 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			}
 		}
 		return true;
-	case MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD:		//암살자의 머리
+	case MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD:
 	case MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD:
 		{
 			b->RenderBody(RENDER_TEXTURE, o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		}
 		return true;
-	case MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY:		//암살자의 몸
+	case MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY:
 	case MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY:
 		{
 			b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1108,7 +1046,7 @@ bool CGM_PK_Field::CreateFireSpark(PARTICLE* o)
 	{
 		return false;
 	}
-	//불씨날리기
+
 	o->Type = BITMAP_FIRE_SNUFF;
 	o->Scale = rand()%50/100.f+0.4f;
 	vec3_t Position;
@@ -1147,7 +1085,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
 
 	switch(o->Type)
 	{
-	case MODEL_MONSTER01+157:		//좀비투사
+	case MODEL_MONSTER01+157:
 		{
 			if(MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			{
@@ -1173,7 +1111,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
 //	SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE02,
 		}
 		return true;
-	case MODEL_MONSTER01+158:		//되살아난 검투사
+	case MODEL_MONSTER01+158:
 		{
 			if(MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			{
@@ -1199,7 +1137,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
 		//	SOUND_PKFIELD_RAISEDGLADIATOR_MOVE02,		
 		}
 		return true;
-	case MODEL_MONSTER01+159:		//잿더미 도살자
+	case MODEL_MONSTER01+159:
 		{
 			if(MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			{
@@ -1225,7 +1163,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
 	//SOUND_PKFIELD_ASHESBUTCHER_MOVE02,
 		}
 		return true;
-	case MODEL_MONSTER01+160:		//피의 암살자
+	case MODEL_MONSTER01+160:
 	case MODEL_MONSTER01+161:
 		{
 			if(MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
@@ -1252,7 +1190,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
 		//	SOUND_PKFIELD_BLOODASSASSIN_MOVE01,
 		}
 		return true;
-	case MODEL_MONSTER01+162:		//용암 거인
+	case MODEL_MONSTER01+162:
 	case MODEL_MONSTER01+163:
 		{		
 			if(MONSTER01_ATTACK1 == o->CurrentAction)

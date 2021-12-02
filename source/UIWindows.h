@@ -77,11 +77,7 @@ protected:
 
 	virtual void RenderSub() {}
 	virtual void RenderOver() {}
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	virtual void DoActionSub()					{ return;	}
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void DoActionSub(BOOL bMessageOnly)	{			}	
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	virtual void DoMouseActionSub() {}
 	void DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight);
 	void SetControlButtonColor(int iSelect);

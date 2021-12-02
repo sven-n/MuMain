@@ -2442,7 +2442,6 @@ void OpenMonsterModel(int Type)
   	BMD *b = &Models[Index];
 	if(b->NumActions > 0 || b->NumMeshs > 0) return;
 
-	// 몬스터 모델 로딩
 	gLoadData.AccessModel(Index,"Data\\Monster\\","Monster",Type+1);
 
 	if(b->NumMeshs == 0) return;
@@ -2451,7 +2450,7 @@ void OpenMonsterModel(int Type)
     {
     	gLoadData.OpenTexture(Index,"Npc\\");
     }
-    else if ( gMapManager.InBattleCastle()==true && Type==74 )   //  수호석상.
+    else if ( gMapManager.InBattleCastle()==true && Type==74 )
     {
         gLoadData.OpenTexture ( Index, "Object31\\" );
     }
@@ -2503,20 +2502,20 @@ void OpenMonsterModel(int Type)
 
 	switch(Type)
 	{
-	case 2 :b->Actions[MONSTER01_WALK].PlaySpeed = 0.7f;break;//버지
-	case 6 :b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f;break;//유충
-	case 8 :b->Actions[MONSTER01_WALK].PlaySpeed = 0.7f;break;//거미전사
-	case 9 :b->Actions[MONSTER01_WALK].PlaySpeed = 1.2f;break;//거미
-	case 10:b->Actions[MONSTER01_WALK].PlaySpeed = 0.28f;break;//싸이크롭스
-	case 12:b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;break;//설인
-	case 13:b->Actions[MONSTER01_WALK].PlaySpeed = 0.28f;break;//설인
-	case 17:b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f;break;//눈괴물
-	case 19:b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f;break;//고블린
-	case 20:b->Actions[MONSTER01_WALK].PlaySpeed = 0.4f;break;//전갈
-	case 21:b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f;break;//풍뎅이
-	case 28:b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;break;//쉐도우
-	case 39:b->Actions[MONSTER01_WALK].PlaySpeed = 0.22f;break;//
-	case 41:b->Actions[MONSTER01_WALK].PlaySpeed = 0.18f;break;//아이언휠
+	case 2 :b->Actions[MONSTER01_WALK].PlaySpeed = 0.7f;break;
+	case 6 :b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f;break;
+	case 8 :b->Actions[MONSTER01_WALK].PlaySpeed = 0.7f;break;
+	case 9 :b->Actions[MONSTER01_WALK].PlaySpeed = 1.2f;break;
+	case 10:b->Actions[MONSTER01_WALK].PlaySpeed = 0.28f;break;
+	case 12:b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;break;
+	case 13:b->Actions[MONSTER01_WALK].PlaySpeed = 0.28f;break;
+	case 17:b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f;break;
+	case 19:b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f;break;
+	case 20:b->Actions[MONSTER01_WALK].PlaySpeed = 0.4f;break;
+	case 21:b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f;break;
+	case 28:b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;break;
+	case 39:b->Actions[MONSTER01_WALK].PlaySpeed = 0.22f;break;
+	case 41:b->Actions[MONSTER01_WALK].PlaySpeed = 0.18f;break;
 	case 42:
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.35f;
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.35f;
@@ -2615,7 +2614,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
 		break;
-	case 109:	// 사티로스.
+	case 109:
 		b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.27f;
@@ -2623,24 +2622,25 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.3f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
 		break;
-	case 110:	// 블레이드 헌터.
+	case 110:
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.23f;
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.23f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
 		break;
-	case 111:	// 켄타우로스.
+	case 111:
 		b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.27f;
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.27f;
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.27f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
-	case 112:	// 기간티스.
+		break;
+	case 112:
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.26f;
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.26f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.21f;
 		break;
-	case 113:	// 제노사이더.
+	case 113:
 		b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.25f;
@@ -2649,7 +2649,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK  ].PlaySpeed = 0.5f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
 		break;
-	case 114:	// 페르소나 에니메이션 속도
+	case 114:
 		b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.34f;
@@ -2657,7 +2657,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.33f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.23f;
 		break;
-	case 115:	// 트윈테일 에니메이션 속도
+	case 115:
 		b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.34f;
@@ -2665,7 +2665,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.23f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.23f;
 		break;
-	case 116:	// 드래드피어 에니메이션 속도
+	case 116:
 		b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.34f;
@@ -2673,7 +2673,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
 		break;
-	case 121: // 나이트메어
+	case 121:
 		b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.22f;
 		b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.22f;
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.25f;
@@ -2684,20 +2684,20 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_ATTACK4].PlaySpeed = 0.25f;
 		break;
-	case 118: // 마야 왼손
+	case 118:
 		b->Actions[MONSTER01_APEAR  ].PlaySpeed = 0.12f;
 		b->Actions[MONSTER01_DIE    ].PlaySpeed = 0.12f;
-	case 119: // 마야 오른손
+	case 119:
 		b->Actions[MONSTER01_APEAR  ].PlaySpeed = 0.12f;
 		b->Actions[MONSTER01_DIE    ].PlaySpeed = 0.12f;
-	case 120: // 마야
+	case 120:
 		break;
 	case 122:
 		b->Actions[MONSTER01_SHOCK  ].PlaySpeed = 0.3f;
 		b->Actions[MONSTER01_DIE	].PlaySpeed = 0.22f;
 		break;
 #ifdef PRUARIN_EVENT07_3COLORHARVEST
-	case 127:	// 달토끼
+	case 127:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.40f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.40f;		
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.40f;
@@ -2706,7 +2706,7 @@ void OpenMonsterModel(int Type)
 		break;
 #endif // PRUARIN_EVENT07_3COLORHARVEST
 #ifdef KJH_ADD_09SUMMER_EVENT
-	case 154:	// '09일본 여름이벤트 우산 캐릭터
+	case 154:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;		
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.60f;
@@ -2715,7 +2715,7 @@ void OpenMonsterModel(int Type)
 		break;
 #endif // KJH_ADD_09SUMMER_EVENT
 #ifdef PBG_ADD_PKFIELD
-	case 157:	//좀비 투사
+	case 157:
 		{
 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
 			b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
@@ -2724,7 +2724,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
 		}
 		break;
-	case 158:	//되살아난 검투사
+	case 158:
 		{
 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
@@ -2733,7 +2733,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.18f;
 		}
 		break;
-	case 159:	//잿더미 도살자
+	case 159:
 		{
 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.2f;
 			b->Actions[MONSTER01_WALK].PlaySpeed = 0.4f;
@@ -2742,7 +2742,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
 		}
 		break;
-	case 160:	//피의 암살자
+	case 160:
 		{
 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
 			b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f;
@@ -2751,7 +2751,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.4f;
 		}
 		break;
-	case 161:	//잔혹한 피의 암살자
+	case 161:
 		{
 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
 			b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f;
@@ -2760,7 +2760,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.4f;
 		}
 		break;
-	case 162:	//불타는 용암거인
+	case 162:
 		{
 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
 			b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
@@ -2770,7 +2770,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
 		}
 		break;
-	case 163:	//포악한 용암거인
+	case 163:
 		{
 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
 			b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
@@ -2781,7 +2781,7 @@ void OpenMonsterModel(int Type)
 		}
 		break;
 #endif //PBG_ADD_PKFIELD
-	case 128:	// 기괴한 토끼
+	case 128:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.28f;
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
@@ -2790,7 +2790,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 		break;
-	case 129:	// 흉측한 토끼
+	case 129:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.20f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.20f;
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
@@ -2799,7 +2799,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.23f;
 		break;
-	case 130:	// 늑대인간
+	case 130:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
@@ -2808,7 +2808,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.30f;
 		break;
-	case 131:	// 오염된 나비
+	case 131:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.45f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.45f;
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.45f;
@@ -2817,7 +2817,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.45f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.45f;
 		break;
-	case 132:	// 저주받은리치
+	case 132:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.20f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.20f;
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
@@ -2826,7 +2826,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.30f;
 		break;
-	case 133:	// 토템골렘
+	case 133:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.20f;
@@ -2835,7 +2835,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.20f;
 		break;
-	case 134:	// 괴수 우씨
+	case 134:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
@@ -2844,7 +2844,7 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.22f;
 		break;
-	case 135:	// 괴수 우씨 대장
+	case 135:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
@@ -2853,68 +2853,68 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.28f;
 		break;
-	case 136:	// 사피-우누스
+	case 136:
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 		break;
-	case 137:	// 사피-두오
+	case 137:
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 		break;
-	case 138:	// 사피-트레스
+	case 138:
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 		break;
-	case 139:	// 쉐도우 폰
+	case 139:
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.4f;
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.4f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 		break;
-	case 140:	// 쉐도우 나이트
+	case 140:
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.45f;
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.45f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 		break;
-	case 141:	// 쉐도우 룩
+	case 141:
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 		break;
-	case 142:	// 썬더 네이핀
+	case 142:
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.20f;
 		break;
-	case 143:	// 고스트 네이핀
+	case 143:
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.20f;
 		break;
-	case 144:	// 블레이즈 네이핀
+	case 144:
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.20f;
 		break;
 #ifdef CSK_ADD_MAP_ICECITY
 #ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case 145:	// 아이스 워커
+	case 145:
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.6f;
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.4f;
 		b->Actions[MONSTER01_DIE    ].PlaySpeed = 0.35f;
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-	case 146:	// 자이언트 매머드
+	case 146:
 		break;
-	case 147:	// 아이스 자이언트
+	case 147:
 #ifdef ADD_RAKLION_MOB_ICEGIANT
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.13f;
 #endif	// ADD_RAKLION_MOB_ICEGIANT
 		break;
 #ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
-	case 148:	// 쿨러틴
+	case 148:
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.46f;
 		break;
 #endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
 #ifdef ADD_RAKLION_IRON_KNIGHT
-	case 149:	// 아이언 나이트
+	case 149:
 		b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.21f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.23f;
 		break;
 #endif	// ADD_RAKLION_IRON_KNIGHT
-	case 150:	// 세루판 (보스몬스터)	
+	case 150:
 		b->Actions[MONSTER01_WALK].PlaySpeed = 0.20f;
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
@@ -2924,21 +2924,17 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_ATTACK4].PlaySpeed = 0.25f;
 		break;
-	case 151:	// 거대 거미알
-	case 152:	// 거대 거미알
-	case 153:	// 거대 거미알
+	case 151:
+	case 152:
+	case 153:
 		break;
 #endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_SANTA_MONSTER
-	case 155:	// 저주받은 산타
+	case 155:
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.3f;
 		b->Actions[MONSTER01_WALK].PlaySpeed = 0.29f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.4f;
 		break;
-#endif	// YDG_ADD_SANTA_MONSTER
-#ifdef LDS_ADD_EMPIRE_GUARDIAN	//제국 수호군
-	#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN	// 제국 수호군 맵4   (일	  )몬스터 월드 보스 가이온 카레인	(504/164)
-		case 164:	// 제국 수호군 맵4   (일	  )몬스터 월드 보스 가이온 카레인	(504/164)
+		case 164:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_WALK].PlaySpeed =		0.40f;
@@ -2946,34 +2942,21 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.40f;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.20f;
-			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.40f;	// 광폭화 동작
+			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.40f;
 			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.38f;
 			b->Actions[MONSTER01_ATTACK4].PlaySpeed =	0.38f;
 			break;
-	#endif //LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN			// 제국 수호군 맵4   (일	  )몬스터 월드 보스 가이온 카레인	(504/164)
-	#ifdef LDS_ADD_EG_4_MONSTER_JELINT					// 제국 수호군 맵4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
-		case 165:	// 제국 수호군 맵4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
+		case 165:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_WALK].PlaySpeed =		0.50f;
-#ifdef LDS_FIX_EG_JERINT_ATTK1_ATTK2_SPEED
-			b->Actions[MONSTER01_ATTACK1].PlaySpeed =	0.86f;	//	0.43f
-			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.86f;	//	0.43f
-#else // LDS_FIX_EG_JERINT_ATTK1_ATTK2_SPEED
-			b->Actions[MONSTER01_ATTACK1].PlaySpeed =	0.43f;	//0.86f;	//	0.43f
-			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.43f;	//0.86f;	//	0.43f
-#endif // LDS_FIX_EG_JERINT_ATTK1_ATTK2_SPEED
+			b->Actions[MONSTER01_ATTACK1].PlaySpeed =	0.86f;
+			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.86f;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.40f;
-			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.40f;	// 광폭화 동작
-#ifdef LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.76f;	// 공격3
-#else // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
-			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.43f;	// 공격3
-#endif // LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED
+			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.40f;
+			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.76f;
 			break;
-	#endif //LDS_ADD_EG_4_MONSTER_JELINT					// 제국 수호군 맵4   (일	  )몬스터 가이온 보좌관 제린트		(505/165)
-	#ifdef LDK_ADD_EG_MONSTER_RAYMOND			// 제국 수호군 부사령관 레이몬드 (수, 일)
 		case 166:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.60f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.60f;
@@ -2985,9 +2968,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.50f;
 			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.80f;
 			break;
-	#endif //LDK_ADD_EG_MONSTER_RAYMOND			// 제국 수호군 부사령관 레이몬드 (수, 일)
-	#ifdef LDS_ADD_EG_2_4_MONSTER_ERCANNE				// 제국 수호군 맵2,4 (화금,일)몬스터 지휘관 에르칸느			(507/167)
-		case 167:	// 제국 수호군 맵2,4 (화금,일)몬스터 지휘관 에르칸느			(507/167)
+		case 167:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.60f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.60f;
 			b->Actions[MONSTER01_WALK].PlaySpeed =		0.50f;
@@ -2995,11 +2976,9 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.40f;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.30f;
-			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.80f;	// 광폭화 동작
-			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.40f;	// 공격3
+			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.80f;
+			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.40f;
 			break;
-	#endif //LDS_ADD_EG_2_4_MONSTER_ERCANNE				// 제국 수호군 맵2,4 (화금,일)몬스터 지휘관 에르칸느			(507/167)
-	#ifdef LDK_ADD_EG_MONSTER_DEASULER			// 제국 수호군 1군단장 데슬러
 		case 168:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
@@ -3011,9 +2990,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.40f;
 			b->Actions[MONSTER01_ATTACK4].PlaySpeed =	0.45f;
 			break;
-	#endif	// LDK_ADD_EG_MONSTER_DEASULER			// 제국 수호군 1군단장 데슬러
-	#ifdef LDS_ADD_EG_2_MONSTER_2NDCORP_VERMONT		// 제국 수호군 맵2   (화,  금)몬스터 2군단장 버몬트			(509/169)
-		case 169:	// 제국 수호군 맵2   (화,  금)몬스터 2군단장 버몬트			(509/169)
+		case 169:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_WALK].PlaySpeed =		0.35f;
@@ -3021,12 +2998,9 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.45f;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.40f;
-			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.45f;	// 광폭화 동작
-			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.45f;	// 공격3
-			
+			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.45f;
+			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.45f;
 			break;
-	#endif //LDS_ADD_EG_2_MONSTER_2NDCORP_VERMONT		// 제국 수호군 맵2   (화,  금)몬스터 2군단장 버몬트			(509/169)
-	#ifdef LDK_ADD_EG_MONSTER_CATO				// 제국 수호군 3군단장 카토
 		case 170:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
@@ -3037,8 +3011,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.35f;
 			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.40f;
 			break;
-	#endif	// LDK_ADD_EG_MONSTER_CATO				// 제국 수호군 3군단장 카토
-	#ifdef LDK_ADD_EG_MONSTER_GALLIA			// 제국 수호군 4군단장 갈리아
 		case 171:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
@@ -3049,8 +3021,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.45f;
 			break;
-	#endif //LDK_ADD_EG_MONSTER_GALLIA			// 제국 수호군 4군단장 갈리아
-	#ifdef LDK_ADD_EG_MONSTER_QUARTERMASTER		// 제국 수호군 병참장교
 		case 172:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.25f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.20f;
@@ -3059,10 +3029,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.33f;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.55f;
-// 			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.33f;
 			break;
-	#endif	// LDK_ADD_EG_MONSTER_QUARTERMASTER		// 제국 수호군 병참장교
-	#ifdef LDK_ADD_EG_MONSTER_DRILLMASTER		// 제국 수호군 전투교관
 		case 173:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.25f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.20f;
@@ -3071,11 +3038,9 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.36f;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.30f;
-			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.40f;		// Attack3
+			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.40f;
 			break;
-	#endif	// LDK_ADD_EG_MONSTER_DRILLMASTER		// 제국 수호군 전투교관
-	#ifdef LDS_ADD_EG_2_MONSTER_ARTICLECAPTAIN		// 제국 수호군 맵2   (화,  금)몬스터 기사단장					(514/174)
-		case 174:	// 제국 수호군 맵2   (화,  금)몬스터 기사단장					(514/174)
+		case 174:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_WALK].PlaySpeed =		0.65f;
@@ -3083,11 +3048,9 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.86f;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.30f;
-			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.86f;	// 공격3
+			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.86f;
 			break;
-	#endif // 제국 수호군 맵2   (화,  금)몬스터 기사단장					(514/174)
-	#ifdef LDS_ADD_EG_2_MONSTER_GRANDWIZARD			// 제국 수호군 맵2   (화,  금)몬스터 대마법사					(515/175)
-		case 175:	// 제국 수호군 맵2   (화,  금)몬스터 대마법사					(515/175)
+		case 175:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.60f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.60f;
 			b->Actions[MONSTER01_WALK].PlaySpeed =		0.80f;
@@ -3095,10 +3058,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.96f;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		1.00f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.30f;
-// 			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.96f;	// 공격3
 			break;
-	#endif // 제국 수호군 맵2   (화,  금)몬스터 대마법사					(515/175)
-	#ifdef LDK_ADD_EG_MONSTER_ASSASSINMASTER	// 제국 수호군 암살장교
 		case 176:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.25f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.20f;
@@ -3109,8 +3069,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.40f;
 			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.38f;
 			break;
-	#endif	// LDK_ADD_EG_MONSTER_ASSASSINMASTER	// 제국 수호군 암살장교
-	#ifdef LDK_ADD_EG_MONSTER_RIDERMASTER		// 제국 수호군 기마단장
 		case 177:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
@@ -3120,9 +3078,7 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.30f;
 			break;
-	#endif	// LDK_ADD_EG_MONSTER_RIDERMASTER		// 제국 수호군 기마단장
-	#ifdef LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER_EX	// 제국 수호군 맵 1234(모든요일)몬스터 수호군 방패병			(518/178)
-		case 178:	// 제국 수호군 맵 1234(모든요일)몬스터 수호군 방패병			(518/178)
+		case 178:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.40f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.40f;
 			b->Actions[MONSTER01_WALK].PlaySpeed =		0.40f;
@@ -3132,9 +3088,8 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.45f;
 			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.40f;
 			break;
-	#endif // LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER_EX 제국 수호군 맵 1234(모든요일)몬스터 수호군 방패병			(518/178)
-	#ifdef LDS_ADD_EG_2_MONSTER_GUARDIANPRIEST		// 제국 수호군 맵 1234(모든요일)몬스터 수호군 치유병			(519/179)
-		case 179:	// 제국 수호군 맵 1234(모든요일)몬스터 수호군 치유병			(519/179)
+	#ifdef LDS_ADD_EG_2_MONSTER_GUARDIANPRIEST
+		case 179:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.80f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.80f;
 			b->Actions[MONSTER01_WALK].PlaySpeed =		0.80f;
@@ -3143,8 +3098,8 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.40f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.40f;
 			break;
-	#endif // LDS_ADD_EG_2_MONSTER_GUARDIANPRIEST 제국 수호군 맵 1234(모든요일)몬스터 수호군 치유병			(519/179)
-	#ifdef LDK_ADD_EG_MONSTER_KNIGHTS			//제국 수호군 기사단
+	#endif // LDS_ADD_EG_2_MONSTER_GUARDIANPRIEST
+	#ifdef LDK_ADD_EG_MONSTER_KNIGHTS
 		case 180:
 	 		b->Actions[MONSTER01_STOP1].PlaySpeed =		0.25f;
 	 		b->Actions[MONSTER01_STOP2].PlaySpeed =		0.20f;
@@ -3155,7 +3110,7 @@ void OpenMonsterModel(int Type)
 	 		b->Actions[MONSTER01_DIE].PlaySpeed =		0.55f;
 			break;
 	#endif //LDK_ADD_EG_MONSTER_KNIGHTS
-	#ifdef LDK_ADD_EG_MONSTER_GUARD			//제국 수호군 호위병
+	#ifdef LDK_ADD_EG_MONSTER_GUARD
 		case 181:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
@@ -3166,15 +3121,13 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.30f;
 			break;
 	#endif //LDK_ADD_EG_MONSTER_GUARD
-
-#endif //LDS_ADD_EMPIRE_GUARDIAN
 #ifdef YDG_ADD_DOPPELGANGER_MONSTER
-		case 189:	// 도살자
-		case 190:	// 분노한도살자
+		case 189:
+		case 190:
 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
 			break;
-		case 191:	// 도플갱어 슬라임
+		case 191:
 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f * 2.0f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed = 0.2f * 2.0f;
 			b->Actions[MONSTER01_WALK].PlaySpeed = 0.34f * 2.0f;
@@ -3182,11 +3135,11 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f * 2.0f;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.5f * 2.0f;
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.55f * 2.0f;
-			b->Actions[MONSTER01_APEAR].PlaySpeed = 0.33f * 3.0f;		// 자폭
+			b->Actions[MONSTER01_APEAR].PlaySpeed = 0.33f * 3.0f;
 			break;
 #endif	// YDG_ADD_DOPPELGANGER_MONSTER
 #ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
-		case 192:	// 평온의늪 메듀사 임시번호
+		case 192:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30;
 			b->Actions[MONSTER01_WALK].PlaySpeed =		0.30;
@@ -3194,29 +3147,29 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed =	0.30;
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.30;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.30;
-			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.30;	// 광폭화 동작
+			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.30;
 			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.30;
 			break;
 #endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 #ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
-		case 205:	// 다크 자이언트 매머드
+		case 205:
 			break;	
-		case 206:	// 다크 아이스 자이언트
+		case 206:
 			b->Actions[MONSTER01_DIE].PlaySpeed			= 0.13f;
 			break;
-		case 207:	// 다크 쿨러틴
+		case 207:
 			b->Actions[MONSTER01_WALK   ].PlaySpeed		= 0.46f;
 			break;
-		case 208:	// 다크 아이언 나이트
+		case 208:
 			b->Actions[MONSTER01_WALK].PlaySpeed		= 0.25f;
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed		= 0.21f;
 			b->Actions[MONSTER01_DIE].PlaySpeed			= 0.23f;
 			break;
 #endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
 #ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
-		case 193:	// 블러디 포레스트 오크
+		case 193:
 			break;
-		case 194:	// 블러디 데스라이더
+		case 194:
 			b->Actions[MONSTER01_STOP1  ].PlaySpeed		= 0.15f;
 			b->Actions[MONSTER01_STOP2  ].PlaySpeed		= 0.15f;
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed		= 0.23f;
@@ -3224,27 +3177,27 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_WALK].PlaySpeed		= 0.3f;
 			b->Actions[MONSTER01_DIE].PlaySpeed			= 0.15f;
 			break;
-		case 195:	// 블러디 블루골렘
+		case 195:
 			b->Actions[MONSTER01_DIE].PlaySpeed			= 0.2f;
 			break;
-		case 196:	// 블러디 위치퀸
+		case 196:
 			b->Actions[MONSTER01_DIE].PlaySpeed			= 0.2f;
 			break;
 #endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
 #ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
-		case 201:	// 사피-퀸
+		case 201:
 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 			break;
-		case 202:	// 아이스 네이핀
+		case 202:
 			b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.20f;
 			break;
-		case 203:	// 쉐도우 마스터
+		case 203:
 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 			break;
 #endif // LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 #ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
-		case 197:	// 버서커 워리어
+		case 197:
 			b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.23f;
@@ -3252,19 +3205,20 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.28f;
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.19f;
 			break;
-		case 198:	// 켄타우로스 워리어
+		case 198:
 			b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.27f;
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.27f;
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.27f;
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
-		case 199:	// 기간티스 워리어
+			break;
+		case 199:
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.26f;
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.26f;
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.21f;
 			break;
-		case 200:	// 제노사이더 워리어
+		case 200:
 			b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.25f;
@@ -3275,16 +3229,16 @@ void OpenMonsterModel(int Type)
 			break;
 #endif // LDS_EXTENSIONMAP_MONSTERS_KANTUR
 #ifdef ASG_ADD_KARUTAN_MONSTERS
-		case 209:	// 맹독고리전갈
+		case 209:
 			b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.95f;
 			break;
-		case 210:	// 본스콜피온
+		case 210:
 			b->Actions[MONSTER01_WALK   ].PlaySpeed = 1.00f;
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.40f;
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.40f;
 			b->Actions[MONSTER01_DIE    ].PlaySpeed = 0.20f;
 			break;
-		case 211:	// 오르커스
+		case 211:
 			b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.7f;
 			b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.7f;
 			b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.6f;
@@ -3293,22 +3247,22 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_SHOCK  ].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_DIE    ].PlaySpeed = 0.3f;
 			break;
-		case 212:	// 골록
+		case 212:
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.4f;
 			b->Actions[MONSTER01_DIE    ].PlaySpeed = 0.3f;
 			break;
-		case 213:	// 크립타
-		case 214:	// 크립포스
+		case 213:
+		case 214:
 			b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.9f;
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.37f;
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.37f;
 			b->Actions[MONSTER01_DIE    ].PlaySpeed = 0.25f;
 			break;
-		case 215:	// 콘드라
+		case 215:
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.80f;
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.80f;
 			break;
-		case 216:	// 나르콘드라
+		case 216:
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.75f;
 			b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.75f;
 			break;
@@ -3348,7 +3302,7 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+3,"Data\\Sound\\mBullAttack2.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+4,"Data\\Sound\\mBullDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,0 ,1 ,2 ,3 ,4 );
-		Models[MODEL_MONSTER01+Type].BoneHead = 20;//소뿔
+		Models[MODEL_MONSTER01+Type].BoneHead = 20;
 		break;
 	case 1:
 		LoadWaveFile(SOUND_MONSTER+5,"Data\\Sound\\mHound1.wav"    ,Channel,Enable);
@@ -3357,18 +3311,18 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+8,"Data\\Sound\\mHoundAttack2.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+9,"Data\\Sound\\mHoundDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,5 ,6 ,7 ,8 ,9 );
-		Models[MODEL_MONSTER01+Type].BoneHead = 5;//하운드
+		Models[MODEL_MONSTER01+Type].BoneHead = 5;
 		break;
 	case 2:
 		LoadWaveFile(SOUND_MONSTER+10,"Data\\Sound\\mBudge1.wav"    ,Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+11,"Data\\Sound\\mBudgeAttack1.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+12,"Data\\Sound\\mBudgeDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,10,11,11,11,12);
-		Models[MODEL_MONSTER01+Type].BoneHead = 7;//버지
+		Models[MODEL_MONSTER01+Type].BoneHead = 7;
 		break;
 	case 9:
 		LoadWaveFile(SOUND_MONSTER+13,"Data\\Sound\\mSpider1.wav"    ,Channel,Enable);
-		SetMonsterSound(MODEL_MONSTER01+Type,13,13,13,13,13);//거미
+		SetMonsterSound(MODEL_MONSTER01+Type,13,13,13,13,13);
 		break;
 	case 3:
 	case 29:
@@ -3488,8 +3442,8 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+71,"Data\\Sound\\mYetiDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+12,68,68,70,70,71);
 		SetMonsterSound(MODEL_MONSTER01+13,68,69,70,70,71);
-		Models[MODEL_MONSTER01+12].BoneHead = 20;//설인
-		Models[MODEL_MONSTER01+13].BoneHead = 20;//설인
+		Models[MODEL_MONSTER01+12].BoneHead = 20;
+		Models[MODEL_MONSTER01+13].BoneHead = 20;
 		break;
 	case 19:
 		LoadWaveFile(SOUND_MONSTER+72,"Data\\Sound\\mGoblin1.wav"    ,Channel,Enable);
@@ -3498,7 +3452,7 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+75,"Data\\Sound\\mGoblinAttack2.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+76,"Data\\Sound\\mGoblinDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,72,73,74,75,76);
-		Models[MODEL_MONSTER01+Type].BoneHead = 6;//고블린
+		Models[MODEL_MONSTER01+Type].BoneHead = 6;
 		break;
 	case 20:
 		LoadWaveFile(SOUND_MONSTER+77,"Data\\Sound\\mScorpion1.wav"    ,Channel,Enable);
@@ -3513,7 +3467,7 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+83,"Data\\Sound\\mBeetleAttack1.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+84,"Data\\Sound\\mBeetleDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,82,82,83,83,84);
-		Models[MODEL_MONSTER01+Type].BoneHead = 5;//풍뎅이
+		Models[MODEL_MONSTER01+Type].BoneHead = 5;
 		break;
 	case 22:
 		LoadWaveFile(SOUND_MONSTER+85,"Data\\Sound\\mHunter1.wav"    ,Channel,Enable);
@@ -3522,7 +3476,7 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+88,"Data\\Sound\\mHunterAttack2.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+89,"Data\\Sound\\mHunterDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,85,86,87,88,89);
-		Models[MODEL_MONSTER01+Type].BoneHead = 6;//헌터
+		Models[MODEL_MONSTER01+Type].BoneHead = 6;
 		break;
 	case 23:
 		LoadWaveFile(SOUND_MONSTER+90,"Data\\Sound\\mWoodMon1.wav"    ,Channel,Enable);
@@ -3531,7 +3485,7 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+93,"Data\\Sound\\mWoodMonAttack2.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+94,"Data\\Sound\\mWoodMonDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,90,91,92,93,94);
-		Models[MODEL_MONSTER01+Type].BoneHead = 6;//괴물
+		Models[MODEL_MONSTER01+Type].BoneHead = 6;
 		break;
 	case 24:
 		LoadWaveFile(SOUND_MONSTER+95,"Data\\Sound\\mArgon1.wav"    ,Channel,Enable);
@@ -3540,7 +3494,7 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+98,"Data\\Sound\\mArgonAttack2.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+99,"Data\\Sound\\mArgonDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,95,96,97,98,99);
-		Models[MODEL_MONSTER01+Type].BoneHead = 16;//철퇴
+		Models[MODEL_MONSTER01+Type].BoneHead = 16;
 		break;
 	case 25:
 		LoadWaveFile(SOUND_MONSTER+100,"Data\\Sound\\mGolem1.wav"    ,Channel,Enable);
@@ -3549,14 +3503,14 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+103,"Data\\Sound\\mGolemAttack2.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+104,"Data\\Sound\\mGolemDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,100,101,102,103,104);
-		Models[MODEL_MONSTER01+Type].BoneHead = 5;//돌
+		Models[MODEL_MONSTER01+Type].BoneHead = 5;
 		break;
 	case 26:
 		LoadWaveFile(SOUND_MONSTER+105,"Data\\Sound\\mYeti1.wav"    ,Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+106,"Data\\Sound\\mSatanAttack1.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+107,"Data\\Sound\\mYetiDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,105,105,106,106,107);
-		Models[MODEL_MONSTER01+Type].BoneHead = 6;//데빌
+		Models[MODEL_MONSTER01+Type].BoneHead = 6;
 		break;
 	case 27:
 		LoadWaveFile(SOUND_MONSTER+108,"Data\\Sound\\mBalrog1.wav"      ,Channel,Enable);
@@ -3565,7 +3519,7 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+111,"Data\\Sound\\mGorgonAttack2.wav"  ,Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+112,"Data\\Sound\\mBalrogDie.wav"   ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,108,109,110,111,112);
-		Models[MODEL_MONSTER01+Type].BoneHead = 6;//발록
+		Models[MODEL_MONSTER01+Type].BoneHead = 6;
 		Models[MODEL_MONSTER01+Type].StreamMesh = 1;
 		break;
 	case 28:
@@ -3575,13 +3529,13 @@ void OpenMonsterModel(int Type)
 		LoadWaveFile(SOUND_MONSTER+116,"Data\\Sound\\mShadowAttack2.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+117,"Data\\Sound\\mShadowDie.wav" ,Channel,Enable);
 		SetMonsterSound(MODEL_MONSTER01+Type,113,114,115,116,117);
-		Models[MODEL_MONSTER01+Type].BoneHead = 5;//쉐도우
+		Models[MODEL_MONSTER01+Type].BoneHead = 5;
 		break;
 	case 31:
 		LoadWaveFile(SOUND_MONSTER+123,"Data\\Sound\\mYeti1.wav"      ,Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+124,"Data\\Sound\\mBullAttack1.wav"  ,Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+125,"Data\\Sound\\mYetiDie.wav"   ,Channel,Enable);
-		SetMonsterSound(MODEL_MONSTER01+Type,123,123,124,124,125);//드래곤
+		SetMonsterSound(MODEL_MONSTER01+Type,123,123,124,124,125);
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.5f;
 		b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.7f;
 		b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.8f;
@@ -3597,13 +3551,13 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_ATTACK4].PlaySpeed = 0.4f;
 		b->Actions[MONSTER01_APEAR  ].PlaySpeed = 0.4f;
 		b->Actions[MONSTER01_RUN    ].PlaySpeed = 0.4f;
-		b->BoneHead = 6;//발리
+		b->BoneHead = 6;
 		break;
 
 	case 33:
 		LoadWaveFile(SOUND_MONSTER+130,"Data\\Sound\\mBahamut1.wav",Channel,Enable);
 		LoadWaveFile(SOUND_MONSTER+131,"Data\\Sound\\mYeti1.wav"    ,Channel,Enable);
-		SetMonsterSound(MODEL_MONSTER01+Type,130,130,131,131,130);//물고기
+		SetMonsterSound(MODEL_MONSTER01+Type,130,130,131,131,130);
 		break;
 	case 34:
 		LoadWaveFile(SOUND_MONSTER+132,"Data\\Sound\\mBepar1.wav"  ,Channel,Enable);
@@ -4172,7 +4126,6 @@ void OpenSkills()
     gLoadData.AccessModel ( MODEL_PEGASUS, "Data\\Skill\\", "Rider", 2 );
     gLoadData.AccessModel ( MODEL_DARK_HORSE , "Data\\Skill\\", "DarkHorse" );
 	
-	//^ 펜릴 모델 데이타 로드(모델 데이타, 텍스쳐)
 	gLoadData.AccessModel(MODEL_FENRIR_BLACK, "Data\\Skill\\", "fenril_black");
 	gLoadData.OpenTexture(MODEL_FENRIR_BLACK, "Skill\\");
 
@@ -4334,10 +4287,6 @@ void OpenSkills()
     gLoadData.OpenTexture ( MODEL_DARK_HORSE, "Skill\\" );
     gLoadData.OpenTexture ( MODEL_DARK_SPIRIT, "Skill\\" );
 
-#ifdef DARK_WOLF
-    gLoadData.OpenTexture ( MODEL_DARK_WOLF, "Skill\\" );
-#endif// DARK_WOLF
-
     gLoadData.OpenTexture ( MODEL_WARCRAFT, "Skill\\" );
     gLoadData.OpenTexture ( MODEL_PEGASUS, "Skill\\" );
 	gLoadData.OpenTexture (MODEL_SKILL_FURY_STRIKE+1,"Skill\\");
@@ -4488,15 +4437,14 @@ void OpenSkills()
 
 	gLoadData.AccessModel(MODEL_SUMMONER_WRISTRING_EFFECT, "Data\\Effect\\", "ringtyperout" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_WRISTRING_EFFECT, "Effect\\");
-	// 소환수 머리
+
 	gLoadData.AccessModel(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, "Data\\Skill\\", "sahatail" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, "Skill\\");
 	gLoadData.AccessModel(MODEL_SUMMONER_EQUIP_HEAD_NEIL, "Data\\Skill\\", "nillsohwanz" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_EQUIP_HEAD_NEIL, "Skill\\");
-#ifdef ASG_ADD_SUMMON_RARGLE
+
 	gLoadData.AccessModel(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, "Data\\Skill\\", "lagul_head" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, "Skill\\");
-#endif	// ASG_ADD_SUMMON_RARGLE
 
 	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT1, "Data\\Effect\\", "Suhwanzin1" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT1, "Effect\\");
@@ -4512,16 +4460,13 @@ void OpenSkills()
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT222, "Effect\\");
 	gLoadData.AccessModel(MODEL_SUMMONER_CASTING_EFFECT4, "Data\\Effect\\", "Suhwanzin4" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_CASTING_EFFECT4, "Effect\\");
-	// 소환수
 	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_SAHAMUTT, "Data\\Skill\\", "summon_sahamutt" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_SAHAMUTT, "Skill\\");
 	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL, "Data\\Skill\\", "summon_neil" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL, "Skill\\");
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL, "Effect\\");
-#ifdef ASG_ADD_SUMMON_RARGLE
 	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_LAGUL, "Data\\Skill\\", "summon_lagul");
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_LAGUL, "Skill\\");
-#endif	// ASG_ADD_SUMMON_RARGLE
 
 	gLoadData.AccessModel(MODEL_SUMMONER_SUMMON_NEIL_NIFE1, "Data\\Skill\\", "nelleff_nife01" );
 	gLoadData.OpenTexture(MODEL_SUMMONER_SUMMON_NEIL_NIFE1, "Skill\\");
@@ -4587,7 +4532,7 @@ void OpenSkills()
 	gLoadData.AccessModel(MODEL_WOLF_HEAD_EFFECT, "Data\\Effect\\", "wolf_head_effect" );
 	gLoadData.OpenTexture(MODEL_WOLF_HEAD_EFFECT, "Effect\\");
 	LoadBitmap("Effect\\sbumb.jpg", BITMAP_SBUMB, GL_LINEAR, GL_REPEAT);
-	gLoadData.AccessModel(MODEL_DOWN_ATTACK_DUMMY_L, "Data\\Effect\\", "down_right_punch");	//데이터가 바뀌었담ㅎ
+	gLoadData.AccessModel(MODEL_DOWN_ATTACK_DUMMY_L, "Data\\Effect\\", "down_right_punch");
 	gLoadData.OpenTexture(MODEL_DOWN_ATTACK_DUMMY_L, "Effect\\");
 	gLoadData.AccessModel(MODEL_DOWN_ATTACK_DUMMY_R, "Data\\Effect\\", "down_left_punch");
 	gLoadData.OpenTexture(MODEL_DOWN_ATTACK_DUMMY_R, "Effect\\");
@@ -4852,18 +4797,18 @@ void OpenSounds()
     LoadWaveFile ( SOUND_DSPIRIT_SHOUT,         "Data\\Sound\\DSpirit_Shout.wav", 1 );
     LoadWaveFile ( SOUND_DSPIRIT_RUSH,          "Data\\Sound\\DSpirit_Rush.wav", 3 );
 	
-	LoadWaveFile ( SOUND_FENRIR_RUN_1,		"Data\\Sound\\pW_run-01.wav",	1 );	// 펜릴 달리기 사운드 1
-	LoadWaveFile ( SOUND_FENRIR_RUN_2,      "Data\\Sound\\pW_run-02.wav",	1 );	// 펜릴 달리기 사운드 2
-	LoadWaveFile ( SOUND_FENRIR_RUN_3,      "Data\\Sound\\pW_run-03.wav",	1 );	// 펜릴 달리기 사운드 3
-	LoadWaveFile ( SOUND_FENRIR_WALK_1,     "Data\\Sound\\pW_step-01.wav",	1 );	// 펜릴 걷기 사운드 1
-	LoadWaveFile ( SOUND_FENRIR_WALK_2,     "Data\\Sound\\pW_step-02.wav",	1 );	// 펜릴 걷기 사운드 2
-	LoadWaveFile ( SOUND_FENRIR_DEATH,		"Data\\Sound\\pWdeath.wav",		1 );	// 펜릴 죽기 사운드
-	LoadWaveFile ( SOUND_FENRIR_IDLE_1,     "Data\\Sound\\pWidle1.wav",		1 );	// 펜릴 정지 사운드 1
-	LoadWaveFile ( SOUND_FENRIR_IDLE_2,     "Data\\Sound\\pWidle2.wav",		1 );	// 펜릴 정지 사운드 2
-	LoadWaveFile ( SOUND_FENRIR_DAMAGE_1,   "Data\\Sound\\pWpain1.wav",		1 );	// 펜릴 데미지 사운드 1
-	LoadWaveFile ( SOUND_FENRIR_DAMAGE_1,   "Data\\Sound\\pWpain2.wav",		1 );	// 펜릴 데미지 사운드 2
-	LoadWaveFile ( SOUND_FENRIR_SKILL,		"Data\\Sound\\pWskill.wav",		1 );	// 펜릴 스킬 사운드
-	LoadWaveFile(SOUND_JEWEL02,				"Data\\Sound\\Jewel_Sound.wav",1);	// 원석 떨어지는 소리
+	LoadWaveFile ( SOUND_FENRIR_RUN_1,		"Data\\Sound\\pW_run-01.wav",	1 );
+	LoadWaveFile ( SOUND_FENRIR_RUN_2,      "Data\\Sound\\pW_run-02.wav",	1 );
+	LoadWaveFile ( SOUND_FENRIR_RUN_3,      "Data\\Sound\\pW_run-03.wav",	1 );
+	LoadWaveFile ( SOUND_FENRIR_WALK_1,     "Data\\Sound\\pW_step-01.wav",	1 );
+	LoadWaveFile ( SOUND_FENRIR_WALK_2,     "Data\\Sound\\pW_step-02.wav",	1 );
+	LoadWaveFile ( SOUND_FENRIR_DEATH,		"Data\\Sound\\pWdeath.wav",		1 );
+	LoadWaveFile ( SOUND_FENRIR_IDLE_1,     "Data\\Sound\\pWidle1.wav",		1 );
+	LoadWaveFile ( SOUND_FENRIR_IDLE_2,     "Data\\Sound\\pWidle2.wav",		1 );
+	LoadWaveFile ( SOUND_FENRIR_DAMAGE_1,   "Data\\Sound\\pWpain1.wav",		1 );
+	LoadWaveFile ( SOUND_FENRIR_DAMAGE_1,   "Data\\Sound\\pWpain2.wav",		1 );
+	LoadWaveFile ( SOUND_FENRIR_SKILL,		"Data\\Sound\\pWskill.wav",		1 );
+	LoadWaveFile(SOUND_JEWEL02,				"Data\\Sound\\Jewel_Sound.wav",1);
 
 	LoadWaveFile ( SOUND_KUNDUN_ITEM_SOUND,	"Data\\Sound\\kundunitem.wav",	1 );
 
@@ -4882,13 +4827,13 @@ void OpenSounds()
 	LoadWaveFile ( SOUND_MOONRABBIT_EXPLOSION,	"Data\\Sound\\SE_Ev_rabbit_Explosion.wav", 1 );
 #endif // PRUARIN_EVENT07_3COLORHARVEST
 
-//	LoadWaveFile(SOUND_SUMMON_CASTING,		"Data\\Sound\\eSummon.wav"	,1);	// 소환 소리
+//	LoadWaveFile(SOUND_SUMMON_CASTING,		"Data\\Sound\\eSummon.wav"	,1);
 	LoadWaveFile(SOUND_SUMMON_SAHAMUTT,		"Data\\Sound\\SE_Ch_summoner_skill05_explosion01.wav"	,1);
 	LoadWaveFile(SOUND_SUMMON_EXPLOSION,	"Data\\Sound\\SE_Ch_summoner_skill05_explosion03.wav"	,1);
 	LoadWaveFile(SOUND_SUMMON_NEIL,			"Data\\Sound\\SE_Ch_summoner_skill06_requiem01.wav"		,1);
 	LoadWaveFile(SOUND_SUMMON_REQUIEM,		"Data\\Sound\\SE_Ch_summoner_skill06_requiem02.wav"		,1);
 #ifdef ASG_ADD_SUMMON_RARGLE_SOUND
-	LoadWaveFile(SOUND_SUMMOM_RARGLE, "Data\\Sound\\Rargle.wav", 1);	// 소환수 라글.
+	LoadWaveFile(SOUND_SUMMOM_RARGLE, "Data\\Sound\\Rargle.wav", 1);
 #endif	// ASG_ADD_SUMMON_RARGLE_SOUND
 	LoadWaveFile(SOUND_SUMMON_SKILL_LIGHTORB,	"Data\\Sound\\SE_Ch_summoner_skill01_lightningof.wav"	,1);
 	LoadWaveFile(SOUND_SUMMON_SKILL_SLEEP,		"Data\\Sound\\SE_Ch_summoner_skill03_sleep.wav"			,1);
@@ -4899,7 +4844,7 @@ void OpenSounds()
 	LoadWaveFile(SOUND_SKILL_WEAKNESS, "Data\\Sound\\SE_Ch_summoner_weakness.wav", 1);
 	LoadWaveFile(SOUND_SKILL_ENERVATION, "Data\\Sound\\SE_Ch_summoner_innovation.wav", 1);
 #ifdef ASG_ADD_SKILL_BERSERKER_SOUND
-	LoadWaveFile(SOUND_SKILL_BERSERKER, "Data\\Sound\\Berserker.wav", 1);	// 버서커 스킬.
+	LoadWaveFile(SOUND_SKILL_BERSERKER, "Data\\Sound\\Berserker.wav", 1);
 #endif	// ASG_ADD_SKILL_BERSERKER_SOUND
 #ifdef CSK_EVENT_CHERRYBLOSSOM
 	LoadWaveFile(SOUND_CHERRYBLOSSOM_EFFECT0, "Data\\Sound\\cherryblossom\\Eve_CherryBlossoms01.wav");
@@ -5098,23 +5043,19 @@ void ReleaseLogoSceneData()
 	ClearCharacters();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// 캐릭터 선택하는 씬에 필요한 데이타 읽어들이는 함수
-///////////////////////////////////////////////////////////////////////////////
-
 void OpenCharacterSceneData()
 {
-	LoadBitmap("Interface\\cha_id.tga", BITMAP_LOG_IN);			// 캐릭터 이름 입력부분.
-	LoadBitmap("Interface\\cha_bt.tga", BITMAP_LOG_IN+1);		// 캐릭터 직업 버튼.
-	LoadBitmap("Interface\\deco.tga", BITMAP_LOG_IN+2);			// 주 메뉴 오른쪽 장식.
-	LoadBitmap("Interface\\b_create.tga", BITMAP_LOG_IN+3);		// 캐릭터 생성 버튼.
-	LoadBitmap("Interface\\server_menu_b_all.tga", BITMAP_LOG_IN+4);// 메뉴 버튼.
-	LoadBitmap("Interface\\b_connect.tga", BITMAP_LOG_IN+5);		// 게임시작 버튼.
-	LoadBitmap("Interface\\b_delete.tga", BITMAP_LOG_IN+6);		// 캐릭터 삭제 버튼.
-	LoadBitmap("Interface\\character_ex.tga", BITMAP_LOG_IN+7);	// 캐릭터 정보 풍선.
-	::LoadBitmap("Interface\\server_ex03.tga", BITMAP_LOG_IN+11, GL_NEAREST, GL_REPEAT);		// 서버 메시지 창 배경 중앙.
-	::LoadBitmap("Interface\\server_ex01.tga", BITMAP_LOG_IN+12);		// 서버 메시지 창 배경 상하.
-	::LoadBitmap("Interface\\server_ex02.jpg", BITMAP_LOG_IN+13, GL_NEAREST, GL_REPEAT);		// 서버 메시지 창 배경 좌우.
+	LoadBitmap("Interface\\cha_id.tga", BITMAP_LOG_IN);
+	LoadBitmap("Interface\\cha_bt.tga", BITMAP_LOG_IN+1);
+	LoadBitmap("Interface\\deco.tga", BITMAP_LOG_IN+2);
+	LoadBitmap("Interface\\b_create.tga", BITMAP_LOG_IN+3);
+	LoadBitmap("Interface\\server_menu_b_all.tga", BITMAP_LOG_IN+4);
+	LoadBitmap("Interface\\b_connect.tga", BITMAP_LOG_IN+5);
+	LoadBitmap("Interface\\b_delete.tga", BITMAP_LOG_IN+6);
+	LoadBitmap("Interface\\character_ex.tga", BITMAP_LOG_IN+7);	
+	::LoadBitmap("Interface\\server_ex03.tga", BITMAP_LOG_IN+11, GL_NEAREST, GL_REPEAT);
+	::LoadBitmap("Interface\\server_ex01.tga", BITMAP_LOG_IN+12);
+	::LoadBitmap("Interface\\server_ex02.jpg", BITMAP_LOG_IN+13, GL_NEAREST, GL_REPEAT);
 	LoadBitmap("Effect\\Impack03.jpg"			, BITMAP_EXT_LOG_IN+2);
 	LoadBitmap("Logo\\chasellight.jpg"		, BITMAP_EFFECT);
     

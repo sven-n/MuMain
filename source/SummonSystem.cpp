@@ -1,5 +1,4 @@
 // SummonSystem.cpp: implementation of the CSummonSystem class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -66,7 +65,7 @@ void CSummonSystem::CastSummonSkill(int iSkill, CHARACTER * pCharacter, OBJECT *
  	pObject->Angle[2] = CreateAngle(pObject->Position[0], pObject->Position[1], (float)iTargetPos_X*TERRAIN_SCALE, (float)iTargetPos_Y*TERRAIN_SCALE);
 	SetPlayerSummon(pCharacter, pObject);
 	CreateCastingEffect(pObject->Position, pObject->Angle, iSkill);
-	RemoveEquipEffect_Summon(pCharacter);	// 회전 소환수 머리 제거
+	RemoveEquipEffect_Summon(pCharacter);
 	CreateSummonObject(iSkill, pCharacter, pObject, (float)iTargetPos_X*TERRAIN_SCALE, (float)iTargetPos_Y*TERRAIN_SCALE);
 }
 
@@ -75,11 +74,7 @@ float RequestTerrainHeight(float xf,float yf);
 
 BOOL CSummonSystem::SendRequestSummonSkill(int iSkill, CHARACTER * pCharacter, OBJECT * pObject)
 {
-#ifdef ASG_ADD_SUMMON_RARGLE
 	if (iSkill < AT_SKILL_SUMMON_EXPLOSION || iSkill > AT_SKILL_SUMMON_POLLUTION)
-#else	// ASG_ADD_SUMMON_RARGLE
-	if (iSkill < AT_SKILL_SUMMON_EXPLOSION || iSkill > AT_SKILL_SUMMON_REQUIEM)
-#endif	// ASG_ADD_SUMMON_RARGLE
 		return FALSE;
 
 	extern int TargetX, TargetY;
@@ -142,12 +137,12 @@ void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER * pCharacter, OBJEC
 			if (rand()%2 == 0) vPos[1] += rand()%300+150;
 			else vPos[1] -= rand()%250+150;
 			
-			vec3_t vTargetPos;	// 공격 목표 위치
+			vec3_t vTargetPos;
 			Vector(fTargetPos_X, fTargetPos_Y, RequestTerrainHeight(fTargetPos_X, fTargetPos_Y), vTargetPos);
 
 			CreateEffect(MODEL_SUMMONER_SUMMON_SAHAMUTT, vPos, pObject->Angle, vTargetPos, iSummonLevel);
 
-			PlayBuffer(SOUND_SUMMON_SAHAMUTT);	// 강아지 사운드 ☆
+			PlayBuffer(SOUND_SUMMON_SAHAMUTT);
 		}
 		break;
 	case AT_SKILL_SUMMON_REQUIEM:
@@ -159,27 +154,24 @@ void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER * pCharacter, OBJEC
 			VectorRotate(vMoveDir,Matrix,vPosition);
 			VectorAdd(pObject->Position,vPosition,vPosition);
 
-			vec3_t vTargetPos;	// 공격 목표 위치
+			vec3_t vTargetPos;	
 			Vector(fTargetPos_X, fTargetPos_Y, RequestTerrainHeight(fTargetPos_X, fTargetPos_Y), vTargetPos);
 
 			CreateEffect(MODEL_SUMMONER_SUMMON_NEIL, vPosition, pObject->Angle, vTargetPos, iSummonLevel);
 
-			PlayBuffer(SOUND_SUMMON_NEIL);	// 닐 사운드 ☆
+			PlayBuffer(SOUND_SUMMON_NEIL);
 		}
 		break;
-#ifdef ASG_ADD_SUMMON_RARGLE
 	case AT_SKILL_SUMMON_POLLUTION:
 		{
-			vec3_t vTargetPos;	// 공격 목표 위치
+			vec3_t vTargetPos;	
 			Vector(fTargetPos_X, fTargetPos_Y, RequestTerrainHeight(fTargetPos_X, fTargetPos_Y), vTargetPos);
 			vec3_t vLight, vAngle;
 
-		// 목표 위치에서 바닥 이펙트.
 			Vector(1.0f, 1.0f, 1.0f, vLight);
 			Vector(1.0f, 1.0f, 1.0f, vAngle);
 			CreateEffect(MODEL_SUMMONER_SUMMON_LAGUL, vTargetPos, vAngle, vLight, 0, NULL, iSummonLevel);
 
-		// 라글 꼬리 이펙트.(라글 모델은 CreateJoint() 안에서 만들어짐.)
 			int anRargle[3] = { 1, 2, 4 };
 			for (int i = 0; i < anRargle[iSummonLevel]; ++i)
 			{
@@ -187,65 +179,51 @@ void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER * pCharacter, OBJEC
 				CreateJoint(BITMAP_JOINT_SPIRIT, vTargetPos, vTargetPos, vAngle, 24, NULL, 100.f);
 				CreateJoint(BITMAP_JOINT_SPIRIT, vTargetPos, vTargetPos, vAngle, 24, NULL, 20.f);
 			}
-#ifdef ASG_ADD_SUMMON_RARGLE_SOUND
 			PlayBuffer(SOUND_SUMMOM_RARGLE);
-#endif	// ASG_ADD_SUMMON_RARGLE_SOUND
 		}
 		break;
-#endif	// ASG_ADD_SUMMON_RARGLE
 	}
 }
 	
 void CSummonSystem::CreateCastingEffect(vec3_t vPosition, vec3_t vAngle, int iSubType)
 {
 	vec3_t vLight;
-	// 바닥에 검은색 칠
 	Vector(1.0f, 1.0f, 1.0f, vLight);
 	CreateEffect ( BITMAP_MAGIC, vPosition, vAngle, vLight, 10 );
-	// 바닥에 무늬 3개
 	switch (iSubType)
 	{
-	case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f, 0.6f, 0.4f, vLight); break;
-	case AT_SKILL_SUMMON_REQUIEM:	Vector(0.7f, 0.7f, 1.0f, vLight); break;
-#ifdef ASG_ADD_SUMMON_RARGLE
-	case AT_SKILL_SUMMON_POLLUTION:	Vector(0.6f, 0.6f, 0.9f, vLight); break;
-#endif	// ASG_ADD_SUMMON_RARGLE
-	default: Vector(0.7f, 0.7f, 1.0f, vLight); break;
+		case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f, 0.6f, 0.4f, vLight); break;
+		case AT_SKILL_SUMMON_REQUIEM:	Vector(0.7f, 0.7f, 1.0f, vLight); break;
+		case AT_SKILL_SUMMON_POLLUTION:	Vector(0.6f, 0.6f, 0.9f, vLight); break;
+		default: Vector(0.7f, 0.7f, 1.0f, vLight); break;
 	}
 	CreateEffect ( BITMAP_MAGIC, vPosition, vAngle, vLight, 9 );
-	// 시전 이펙트
 	switch (iSubType)
 	{
-	case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f,0.5f,0.0f,vLight); break;
-	case AT_SKILL_SUMMON_REQUIEM:	Vector(0.0f,0.7f,1.0f,vLight); break;
-#ifdef ASG_ADD_SUMMON_RARGLE
-	case AT_SKILL_SUMMON_POLLUTION:	Vector(0.6f, 0.3f, 0.9f, vLight); break;
-#endif	// ASG_ADD_SUMMON_RARGLE
-	default: Vector(0.0f,0.7f,1.0f,vLight); break;
+		case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f,0.5f,0.0f,vLight); break;
+		case AT_SKILL_SUMMON_REQUIEM:	Vector(0.0f,0.7f,1.0f,vLight); break;
+		case AT_SKILL_SUMMON_POLLUTION:	Vector(0.6f, 0.3f, 0.9f, vLight); break;
+		default: Vector(0.0f,0.7f,1.0f,vLight); break;
 	}
 	CreateEffect(MODEL_SUMMONER_CASTING_EFFECT1, vPosition, vAngle, vLight);
 	CreateEffect(MODEL_SUMMONER_CASTING_EFFECT11, vPosition, vAngle, vLight);
 	CreateEffect(MODEL_SUMMONER_CASTING_EFFECT111, vPosition, vAngle, vLight);
 	switch (iSubType)
 	{
-	case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f,0.5f,0.0f,vLight); break;
-	case AT_SKILL_SUMMON_REQUIEM:	Vector(0.0f,0.0f,1.0f,vLight); break;
-#ifdef ASG_ADD_SUMMON_RARGLE
-	case AT_SKILL_SUMMON_POLLUTION:	Vector(0.8f, 0.1f, 0.6f, vLight); break;
-#endif	// ASG_ADD_SUMMON_RARGLE
-	default: Vector(0.0f,0.0f,1.0f,vLight); break;
+		case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f,0.5f,0.0f,vLight); break;
+		case AT_SKILL_SUMMON_REQUIEM:	Vector(0.0f,0.0f,1.0f,vLight); break;
+		case AT_SKILL_SUMMON_POLLUTION:	Vector(0.8f, 0.1f, 0.6f, vLight); break;
+		default: Vector(0.0f,0.0f,1.0f,vLight); break;
 	}
 	CreateEffect(MODEL_SUMMONER_CASTING_EFFECT2, vPosition, vAngle, vLight);
 	CreateEffect(MODEL_SUMMONER_CASTING_EFFECT22, vPosition, vAngle, vLight);
 	CreateEffect(MODEL_SUMMONER_CASTING_EFFECT222, vPosition, vAngle, vLight);
 	switch (iSubType)
 	{
-	case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f,0.5f,0.8f,vLight); break;
-	case AT_SKILL_SUMMON_REQUIEM:	Vector(0.8f,0.5f,1.0f,vLight); break;
-#ifdef ASG_ADD_SUMMON_RARGLE
-	case AT_SKILL_SUMMON_POLLUTION:	Vector(0.9f, 0.1f, 1.0f, vLight); break;
-#endif	// ASG_ADD_SUMMON_RARGLE
-	default: Vector(0.8f,0.5f,1.0f,vLight); break;
+		case AT_SKILL_SUMMON_EXPLOSION:	Vector(1.0f,0.5f,0.8f,vLight); break;
+		case AT_SKILL_SUMMON_REQUIEM:	Vector(0.8f,0.5f,1.0f,vLight); break;
+		case AT_SKILL_SUMMON_POLLUTION:	Vector(0.9f, 0.1f, 1.0f, vLight); break;
+		default: Vector(0.8f,0.5f,1.0f,vLight); break;
 	}
 	CreateEffect(MODEL_SUMMONER_CASTING_EFFECT4, vPosition, vAngle, vLight);
 }
@@ -261,15 +239,14 @@ void CSummonSystem::CreateEquipEffect_WristRing(CHARACTER * pCharacter, int iIte
 
 	switch(iItemLevel)
 	{
-	case 0: case 1: case 2:		Vector(1.0f, 1.0f, 0.0f, vLight);	break;	// 노랑
-	case 3: case 4:				Vector(0.5f, 1.0f, 0.5f, vLight);	break;	// 초록
-	case 5: case 6:				Vector(0.5f, 0.1f, 1.0f, vLight);	break;	// 보라
-	case 7: case 8:				Vector(1.0f, 0.5f, 0.0f, vLight);	break;	// 주황
-	case 9: case 10:			Vector(1.0f, 0.2f, 0.2f, vLight);	break;	// 빨강
-	case 11: case 12: case 13:	Vector(0.3f, 0.5f, 1.0f, vLight);	break;	// 하늘
+	case 0: case 1: case 2:		Vector(1.0f, 1.0f, 0.0f, vLight);	break;
+	case 3: case 4:				Vector(0.5f, 1.0f, 0.5f, vLight);	break;
+	case 5: case 6:				Vector(0.5f, 0.1f, 1.0f, vLight);	break;
+	case 7: case 8:				Vector(1.0f, 0.5f, 0.0f, vLight);	break;
+	case 9: case 10:			Vector(1.0f, 0.2f, 0.2f, vLight);	break;
+	case 11: case 12: case 13:	Vector(0.3f, 0.5f, 1.0f, vLight);	break;	
 	}
 
-	// 손목에 라인 감기
 	if (!SearchJoint(MODEL_SPEARSKILL, pObject, 14))
 	{
 		for (int i = 0; i < 4; ++i)
@@ -308,11 +285,6 @@ void CSummonSystem::CreateEquipEffect_WristRing(CHARACTER * pCharacter, int iIte
 void CSummonSystem::RemoveEquipEffect_WristRing(CHARACTER * pCharacter)
 {
 	OBJECT * pObject = &pCharacter->Object;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	BMD * pModel = &Models[pObject->Type];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-
 	DeleteJoint(MODEL_SPEARSKILL, pObject, 14);
 	DeleteEffect(MODEL_SUMMONER_WRISTRING_EFFECT, pObject);
 }

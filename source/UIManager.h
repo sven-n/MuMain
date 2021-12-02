@@ -1,7 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-//  
 //  UIManager.h
-//  
 //////////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_UIMANAGER_H__2A2AD8F0_E731_4B40_AA6E_E86226026AF9__INCLUDED_)
@@ -18,9 +16,6 @@
 #include "ItemAddOptioninfo.h"
 #include "GM_Kanturu_2nd.h"
 
-//////////////////////////////////////////////////////////////////////////
-//  EXTERN.
-//////////////////////////////////////////////////////////////////////////
 extern CUIGateKeeper*		g_pUIGateKeeper;
 extern CUIPopup*			g_pUIPopup;
 extern JewelHarmonyInfo*    g_pUIJewelHarmonyinfo;
@@ -55,10 +50,10 @@ enum
 	INTERFACE_GATEKEEPER,			
 	INTERFACE_CATAPULTATTACK,		
 	INTERFACE_CATAPULTDEFENSE,		
-	INTERFACE_GATESWITCH,					// 성문 개폐 스위치
-	INTERFACE_CHARACTER,					// 연관된것 -> INTERFACE_QUEST, INTERFACE_PET
-	INTERFACE_INVENTORY,					// 연관된것 -> INTERFACE_CHARACTER, INTERFACE_TRADE, INTERFACE_STORAGE, INTERFACE_GUILDSTORAGE, INTERFACE_MIXINVENTORY, INTERFACE_GEMINVENTORY ,INTERFACE_PERSONALSHOPSALE, INTERFACE_NPCBREEDER
-	INTERFACE_REFINERY,						// 연관된것 -> INTERFACE_CHARACTER, INTERFACE_TRADE, INTERFACE_STORAGE, INTERFACE_GUILDSTORAGE, INTERFACE_MIXINVENTORY, INTERFACE_GEMINVENTORY ,INTERFACE_PERSONALSHOPSALE, INTERFACE_NPCBREEDER
+	INTERFACE_GATESWITCH,
+	INTERFACE_CHARACTER,
+	INTERFACE_INVENTORY,
+	INTERFACE_REFINERY,
 	INTERFACE_REFINERYINFO,	
 	INTERFACE_KANTURU2ND_ENTERNPC,
 	INTERFACE_MAP_ENTRANCE,
@@ -72,36 +67,19 @@ public:
 	virtual ~CUIManager();
 
 protected:
-	bool IsCanOpen( DWORD dwInterfaceFlag );		// 열 수 있는 상태인지 판단
-	// 설정된 플래그 의 창 모두 닫기
-	// 리턴값 : true  : 플래그에 해당되는 모든 창이 닫혔다 (닫혀있던 창은 무시)
-	//			false : 어떤 창이 닫히지 못하는 상황일때..
+	bool IsCanOpen( DWORD dwInterfaceFlag );
 	bool CloseInterface(std::list<DWORD>& dwInterfaceFlag, DWORD dwExtraData=0 );
 public:
-	// 초기화
 	void Init();
-	// 윈도우배경을 그린다 (리턴값은 640x480 기준의 윈도우기준점)
 	POINT RenderWindowBase( int nHeight, int nOriginY=-1 );
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	// 내부에서 처리하면 TRUE 리턴
 	bool PressKey( int nKey );
-#endif // #ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	// 키보드 입력중이면 TRUE 리턴 (채팅등)
 	bool IsInputEnable();
-	// 입력처리
 	void UpdateInput();
-	// 렌더링
 	void Render();
-	// 모든 유아이창 닫기
 	void CloseAll();
-	bool IsOpen( DWORD dwInterface );						// 열려 있는지 판단 (0이면 아무거나 열려있는지 판단)
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	bool Open( DWORD dwInterface);							// 조건을 체크하여 연다.
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	bool Open( DWORD dwInterface, DWORD dwExtraData=0 );	// 조건을 체크하여 연다.
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	bool Close( DWORD dwInterface, DWORD dwExtraData=0 );	// 조건을 체크하여 닫는다.
+	bool IsOpen( DWORD dwInterface );
+	bool Open( DWORD dwInterface, DWORD dwExtraData=0 );
+	bool Close( DWORD dwInterface, DWORD dwExtraData=0 );
 	void GetInterfaceAll(std::list<DWORD>& outflag );
 	void GetInsertInterface(std::list<DWORD>& outflag, DWORD insertflag );
 	void GetDeleteInterface(std::list<DWORD>& outflag, DWORD deleteflag );

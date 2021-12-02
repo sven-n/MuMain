@@ -11,8 +11,8 @@
 
 namespace BoneManager {
 	void RegisterBone(CHARACTER* pCharacter, const std::string& name, int nBone);
-	void UnregisterBone(CHARACTER* pCharacter, const std::string& name);	//. 특정 캐릭터의 특정본에 대한 정보를 제거한다.
-	void UnregisterBone(CHARACTER* pCharacter);	//. 특정 캐릭터가 달고있는 본에 대한 정보를 모두 제거한다.
+	void UnregisterBone(CHARACTER* pCharacter, const std::string& name);
+	void UnregisterBone(CHARACTER* pCharacter);
 	void UnregisterAll();
 
 	CHARACTER* GetOwnCharacter(OBJECT* pObject, const std::string& name);
@@ -28,7 +28,7 @@ class CBoneManager {
 
 		CHARACTER*	pCharacter;
 		BMD*		pModel;
-		int			nBone;			//. 본번호
+		int			nBone;
 	} BONEINFO, * LPBONEINFO;
 
 	typedef std::list<LPBONEINFO> t_bone_list;
@@ -38,8 +38,8 @@ public:
 	~CBoneManager();
 
 	void RegisterBone(CHARACTER* pCharacter, const std::string& name, int nBone);
-	void UnregisterBone(CHARACTER* pCharacter, const std::string& name);	//. 특정 캐릭터의 특정본에 대한 정보를 제거한다.
-	void UnregisterBone(CHARACTER* pCharacter);	//. 특정 캐릭터가 달고있는 본에 대한 정보를 모두 제거한다.
+	void UnregisterBone(CHARACTER* pCharacter, const std::string& name);
+	void UnregisterBone(CHARACTER* pCharacter);
 	void UnregisterAll();
 
 	CHARACTER* GetOwnCharacter(OBJECT* pObject, const std::string& name);

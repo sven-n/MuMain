@@ -1,5 +1,4 @@
 // NewUISiegeWarCommander.cpp: implementation of the CNewUISiegeWarCommander class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -9,10 +8,6 @@
 #include "wsclientinline.h"
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUISiegeWarCommander::CNewUISiegeWarCommander()
 {
@@ -31,35 +26,23 @@ SEASON3B::CNewUISiegeWarCommander::~CNewUISiegeWarCommander()
 	
 }
 
-//---------------------------------------------------------------------------------------------
-// OnCreate
 bool SEASON3B::CNewUISiegeWarCommander::OnCreate( int x, int y )
 {
-	// 명령그룹버튼 초기화
 	InitCmdGroupBtn();
-
-	// 명령버튼 초기화
 	InitCmdBtn();
-	
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// OnRelease
 void SEASON3B::CNewUISiegeWarCommander::OnRelease()
 {
 	ClearGuildMemberLocation();
 }
 
-//---------------------------------------------------------------------------------------------
-// OnUpdate
 bool SEASON3B::CNewUISiegeWarCommander::OnUpdate()
 {
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// OnRender
 bool SEASON3B::CNewUISiegeWarCommander::OnRender()
 {
 	EnableAlphaTest();
@@ -67,31 +50,20 @@ bool SEASON3B::CNewUISiegeWarCommander::OnRender()
 	g_pRenderText->SetFont( g_hFontBold );
 	g_pRenderText->SetTextColor( 255, 255, 255, 255 );
 	g_pRenderText->SetBgColor( 0, 0, 0, 0 );
-	
-	// 모든 캐릭터의 위치
 	RenderCharPosInMiniMap();
-
-	// 길드원들의 위치
 	RenderGuildMemberPosInMiniMap();
-
 	DisableAlphaBlend();
-
 	EnableAlphaTest ();
 	glColor4f( 1.f, 1.f, 1.f, m_fMiniMapAlpha );
 
-	// 마우스커서에 따라다니는 명령Icon
 	if( m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand != -1 && m_bMouseInMiniMap == true )
 	{	
 		RenderCmdIconAtMouse();
 	}
 
-	// 미니맵상의 명령Icon
 	RenderCmdIconInMiniMap();
-
-	// 명령 그룹버튼
 	RenderCmdGroupBtn();
 
-	// 명령버튼
 	if( m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand == -1 )
 	{
 		RenderCmdBtn();
@@ -102,8 +74,6 @@ bool SEASON3B::CNewUISiegeWarCommander::OnRender()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// OnUpdateMouseEvent
 bool SEASON3B::CNewUISiegeWarCommander::OnUpdateMouseEvent()
 {
 	if( OnBtnProcess() )
@@ -113,7 +83,6 @@ bool SEASON3B::CNewUISiegeWarCommander::OnUpdateMouseEvent()
 	{
 		if( SEASON3B::IsPress(VK_LBUTTON) && m_iCurSelectBtnCommand != -1 )
 		{	
-			// 처리	
 			GuildCommander SelectCmd;
 			memset(&SelectCmd, 0 ,sizeof(GuildCommander));
 			
@@ -123,7 +92,6 @@ bool SEASON3B::CNewUISiegeWarCommander::OnUpdateMouseEvent()
 			SelectCmd.byY    = 256 - (MouseY+m_MiniMapScaleOffset.y-m_MiniMapPos.y)*m_iMiniMapScale;
 			SelectCmd.byLifeTime = 100;                    
 			
-			//  서버에 명령을 보낸다.
 			SendGuildCommand( SelectCmd.byTeam, SelectCmd.byX, SelectCmd.byY, SelectCmd.byCmd );
 
 			m_iCurSelectBtnCommand = -1;
@@ -140,15 +108,11 @@ bool SEASON3B::CNewUISiegeWarCommander::OnUpdateMouseEvent()
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// OnUpdateKeyEvent
 bool SEASON3B::CNewUISiegeWarCommander::OnUpdateKeyEvent()
 {
 	return true;
 }
 
-//---------------------------------------------------------------------------------------------
-// OnBtnProcess
 bool SEASON3B::CNewUISiegeWarCommander::OnBtnProcess()
 {
 	for(int i=0 ; i<MAX_COMMANDGROUP ; i++)
@@ -157,7 +121,6 @@ bool SEASON3B::CNewUISiegeWarCommander::OnBtnProcess()
 		{
 			if( m_iCurSelectBtnGroup != -1 )
 			{
-				// 상태 되돌림
 				SetBtnState( m_iCurSelectBtnGroup, false );
 			}
 			
@@ -178,7 +141,6 @@ bool SEASON3B::CNewUISiegeWarCommander::OnBtnProcess()
 		}		
 	}
 
-	// 명령을 선택하고 미니맵에 마우스 클릭
 	if( m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand == -1 )
 	{
 		for( int j=0 ; j<MINIMAP_CMD_MAX ; j++ )
@@ -195,17 +157,12 @@ bool SEASON3B::CNewUISiegeWarCommander::OnBtnProcess()
 	return false;
 }
 
-//---------------------------------------------------------------------------------------------
-// OnSetPos
 void SEASON3B::CNewUISiegeWarCommander::OnSetPos( int x, int y )
 {
 	m_BtnCommandGroupPos.x = x;
 	m_BtnCommandGroupPos.y = y+5;
 }
 
-//---------------------------------------------------------------------------------------------
-// InitCmdGroupBtn
-// 명령그룹버튼 Init
 void SEASON3B::CNewUISiegeWarCommander::InitCmdGroupBtn()
 {
 	int iVal = 0;
@@ -221,9 +178,6 @@ void SEASON3B::CNewUISiegeWarCommander::InitCmdGroupBtn()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// InitCmdBtn
-// 명령 버튼 Init
 void SEASON3B::CNewUISiegeWarCommander::InitCmdBtn()
 {
 	for(int i=0 ; i<MINIMAP_CMD_MAX ; i++)
@@ -232,10 +186,6 @@ void SEASON3B::CNewUISiegeWarCommander::InitCmdBtn()
 	}
 }
 
-
-//---------------------------------------------------------------------------------------------
-// RenderCharPosInMiniMap
-// 미니맵에 캐릭터위치 랜더
 void SEASON3B::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
 {
 	float fPosX, fPosY;
@@ -270,9 +220,6 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// RenderGuildMemberPosInMiniMap
-// 길드원들의 위치 랜더
 void SEASON3B::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
 {
 	std::vector<VisibleUnitLocation>::iterator   UnitIterator;
@@ -283,22 +230,21 @@ void SEASON3B::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
 	{
 		switch ( UnitIterator->bIndex )
 		{
-		case 0: //  동료 길드원.
+		case 0:
 			glColor4f( 0.f, 1.f, 0.f, m_fMiniMapAlpha );
 			break;
 			
-		case 1: //  성문.
+		case 1:
 			glColor4f( 0.f, 1.f, 1.f, m_fMiniMapAlpha );
 			break;
 			
-		case 2: //  석상.
+		case 2:
 			glColor4f( 1.f, 1.f, 0.f, m_fMiniMapAlpha );
 			break;
 		}
 		Pos.x = ( UnitIterator->x )/m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x;
 		Pos.y = ( 256 - UnitIterator->y )/m_iMiniMapScale - m_MiniMapScaleOffset.y + m_MiniMapPos.y;
 		
-		// 길드원이 미니맵 밖에 있으면 렌더 안함
 		if( Pos.x<m_MiniMapPos.x || Pos.x>m_MiniMapPos.x+128 || Pos.y<m_MiniMapPos.y || Pos.y>m_MiniMapPos.y+128 )
 		{
 			continue;
@@ -308,9 +254,6 @@ void SEASON3B::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// RenderCmdIconAtMouse
-// 마우스커서에 따라다니는 명령Icon 랜더
 void SEASON3B::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
 {
 	int iWidth, iHeight;
@@ -328,9 +271,6 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
 	RenderImage( IMAGE_COMMAND_ATTACK+m_iCurSelectBtnCommand, MouseX-8, MouseY-8, iWidth, iHeight );
 }
 
-//---------------------------------------------------------------------------------------------
-// RenderCmdGroupBtn
-// 커맨드그룹 버튼 렌더
 void SEASON3B::CNewUISiegeWarCommander::RenderCmdGroupBtn()
 {
 	for ( int i=0 ; i<MAX_COMMANDGROUP ; i++ )
@@ -341,55 +281,34 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCmdGroupBtn()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
-// RenderCmdBtn
-// 명령 버튼 렌더
 void SEASON3B::CNewUISiegeWarCommander::RenderCmdBtn()
 {
 	if( m_iCurSelectBtnGroup < 5)
 	{
 		for(int i=0 ; i<MINIMAP_CMD_MAX ; i++)
 		{
-			m_BtnCommand[i].ChangeButtonInfo( m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH, 
-				m_BtnCommandGroupPos.y+(m_iCurSelectBtnGroup*MINIMAP_BTN_GROUP_HEIGHT)+(i*MINIMAP_BTN_GROUP_HEIGHT), 
-				MINIMAP_BTN_COMMAND_WIDTH, MINIMAP_BTN_COMMAND_HEIGHT );
+			m_BtnCommand[i].ChangeButtonInfo( m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH,m_BtnCommandGroupPos.y+(m_iCurSelectBtnGroup*MINIMAP_BTN_GROUP_HEIGHT)+(i*MINIMAP_BTN_GROUP_HEIGHT),MINIMAP_BTN_COMMAND_WIDTH, MINIMAP_BTN_COMMAND_HEIGHT );
 			m_BtnCommand[i].ChangeAlpha( m_fMiniMapAlpha );
 			m_BtnCommand[i].Render();
 		}
-		RenderImage( IMAGE_COMMAND_ATTACK, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+8, 
-			m_BtnCommandGroupPos.y+(m_iCurSelectBtnGroup*MINIMAP_BTN_GROUP_HEIGHT)+5, 
-			COMMAND_ATTACK_WIDTH, COMMAND_ATTACK_HEIGHT );
-		RenderImage( IMAGE_COMMAND_DEFENCE, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+8, 
-			m_BtnCommandGroupPos.y+(m_iCurSelectBtnGroup*MINIMAP_BTN_GROUP_HEIGHT)+MINIMAP_BTN_GROUP_HEIGHT+3, 
-			COMMAND_DEFENCE_WIDTH, COMMAND_DEFENCE_HEIGHT );
-		RenderImage( IMAGE_COMMAND_WAIT, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+10, 
-			m_BtnCommandGroupPos.y+(m_iCurSelectBtnGroup*MINIMAP_BTN_GROUP_HEIGHT)+(2*MINIMAP_BTN_GROUP_HEIGHT)+5, 
-			COMMAND_WAIT_WIDTH, COMMAND_WAIT_HEIGHT );
+		RenderImage( IMAGE_COMMAND_ATTACK, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+8, m_BtnCommandGroupPos.y+(m_iCurSelectBtnGroup*MINIMAP_BTN_GROUP_HEIGHT)+5, COMMAND_ATTACK_WIDTH, COMMAND_ATTACK_HEIGHT );
+		RenderImage( IMAGE_COMMAND_DEFENCE, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+8, m_BtnCommandGroupPos.y+(m_iCurSelectBtnGroup*MINIMAP_BTN_GROUP_HEIGHT)+MINIMAP_BTN_GROUP_HEIGHT+3, COMMAND_DEFENCE_WIDTH, COMMAND_DEFENCE_HEIGHT );
+		RenderImage( IMAGE_COMMAND_WAIT, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+10, m_BtnCommandGroupPos.y+(m_iCurSelectBtnGroup*MINIMAP_BTN_GROUP_HEIGHT)+(2*MINIMAP_BTN_GROUP_HEIGHT)+5,COMMAND_WAIT_WIDTH, COMMAND_WAIT_HEIGHT );
 	}
 	else
 	{
 		for(int i=0 ; i<MINIMAP_CMD_MAX ; i++)
 		{
-			m_BtnCommand[i].ChangeButtonInfo( m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH, 
-				m_BtnCommandGroupPos.y+(4*MINIMAP_BTN_GROUP_HEIGHT)+(i*MINIMAP_BTN_GROUP_HEIGHT), 
-				MINIMAP_BTN_COMMAND_WIDTH, MINIMAP_BTN_COMMAND_HEIGHT );
+			m_BtnCommand[i].ChangeButtonInfo( m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH, m_BtnCommandGroupPos.y+(4*MINIMAP_BTN_GROUP_HEIGHT)+(i*MINIMAP_BTN_GROUP_HEIGHT), MINIMAP_BTN_COMMAND_WIDTH, MINIMAP_BTN_COMMAND_HEIGHT );
 			m_BtnCommand[i].ChangeAlpha( m_fMiniMapAlpha );
 			m_BtnCommand[i].Render();
 		}
-		RenderImage( IMAGE_COMMAND_ATTACK, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+8, 
-			m_BtnCommandGroupPos.y+(4*MINIMAP_BTN_GROUP_HEIGHT)+5, 
-			COMMAND_ATTACK_WIDTH, COMMAND_ATTACK_HEIGHT );
-		RenderImage( IMAGE_COMMAND_DEFENCE, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+8, 
-			m_BtnCommandGroupPos.y+(4*MINIMAP_BTN_GROUP_HEIGHT)+MINIMAP_BTN_GROUP_HEIGHT+3, 
-			COMMAND_DEFENCE_WIDTH, COMMAND_DEFENCE_HEIGHT );
-		RenderImage( IMAGE_COMMAND_WAIT, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+10, 
-			m_BtnCommandGroupPos.y+(4*MINIMAP_BTN_GROUP_HEIGHT)+(2*MINIMAP_BTN_GROUP_HEIGHT)+5, 
-			COMMAND_WAIT_WIDTH, COMMAND_WAIT_HEIGHT );
+		RenderImage( IMAGE_COMMAND_ATTACK, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+8, m_BtnCommandGroupPos.y+(4*MINIMAP_BTN_GROUP_HEIGHT)+5, COMMAND_ATTACK_WIDTH, COMMAND_ATTACK_HEIGHT );
+		RenderImage( IMAGE_COMMAND_DEFENCE, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+8, m_BtnCommandGroupPos.y+(4*MINIMAP_BTN_GROUP_HEIGHT)+MINIMAP_BTN_GROUP_HEIGHT+3, COMMAND_DEFENCE_WIDTH, COMMAND_DEFENCE_HEIGHT );
+		RenderImage( IMAGE_COMMAND_WAIT, m_BtnCommandGroupPos.x+MINIMAP_BTN_GROUP_WIDTH+10, m_BtnCommandGroupPos.y+(4*MINIMAP_BTN_GROUP_HEIGHT)+(2*MINIMAP_BTN_GROUP_HEIGHT)+5, COMMAND_WAIT_WIDTH, COMMAND_WAIT_HEIGHT );
 	}	
 }
 
-//---------------------------------------------------------------------------------------------
-// SetBtnState
 void SEASON3B::CNewUISiegeWarCommander::SetBtnState(int iBtnType, bool bStateDown)
 {
 	if(bStateDown)
@@ -410,18 +329,11 @@ void SEASON3B::CNewUISiegeWarCommander::SetBtnState(int iBtnType, bool bStateDow
 	}	
 }
 
-//---------------------------------------------------------------------------------------------
-// ClearGuildMemberLocation
-// 길드원들의 위치 정보 초기화.
 void SEASON3B::CNewUISiegeWarCommander::ClearGuildMemberLocation( void )
 {
     m_vGuildMemberLocationBuffer.clear ();
 }
 
-
-//---------------------------------------------------------------------------------------------
-// SetGuildMemberLocation
-// 연합길드원과 자신 길드에 해당되는 캐릭터들을 저장
 void SEASON3B::CNewUISiegeWarCommander::SetGuildMemberLocation( BYTE type, int x, int y )
 {
     VisibleUnitLocation vLocation = { type, x, y };
@@ -429,16 +341,12 @@ void SEASON3B::CNewUISiegeWarCommander::SetGuildMemberLocation( BYTE type, int x
     m_vGuildMemberLocationBuffer.push_back ( vLocation );
 }
 
-//---------------------------------------------------------------------------------------------
-// OnLoadImages
 void SEASON3B::CNewUISiegeWarCommander::OnLoadImages()
 {
 	LoadBitmap( "Interface\\newui_SW_Minimap_Bt_group.tga", IMAGE_MINIMAP_BTN_GROUP, GL_LINEAR );
 	LoadBitmap( "Interface\\newui_SW_Minimap_Bt_Command.tga", IMAGE_MINIMAP_BTN_COMMAND, GL_LINEAR );
 }
 
-//---------------------------------------------------------------------------------------------
-// OnUnloadImages
 void SEASON3B::CNewUISiegeWarCommander::OnUnloadImages()
 {
 	DeleteBitmap( IMAGE_MINIMAP_BTN_GROUP );

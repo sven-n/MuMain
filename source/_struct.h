@@ -546,12 +546,12 @@ typedef struct
 	BYTE		Weapon;
 	int			MultiUse;
 	bool        bTileMapping;
-	BYTE        m_byReverseUV;          //  UV좌표 반전 ( 0: 정상, 1:V 좌표 반전, 2:U 좌표 반전. )
-	bool        m_bCreateTails;         //  기본적으로 꼬리를 생성할지 결정. ( true:생성한다. false:사용자가 직접 생성한다. )
+	BYTE        m_byReverseUV;
+	bool        m_bCreateTails;
 	int			TargetIndex[5];
 	BYTE		m_bySkillSerialNum;
 	int			m_iChaIndex;
-	short int	m_sTargetIndex;			// 체인라이트닝스킬 다음 타겟을 위한 변수
+	short int	m_sTargetIndex;
 } JOINT;
 //character end
 
@@ -561,7 +561,7 @@ typedef struct
 	char Name[MAX_ID_SIZE+1];
 	BYTE Number;
 	BYTE Server;
-	BYTE GuildStatus;	// 길드직위
+	BYTE GuildStatus;
 } GUILD_LIST_t;
 
 typedef struct

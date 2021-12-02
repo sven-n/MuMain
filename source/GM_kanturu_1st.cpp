@@ -1,9 +1,5 @@
 //*****************************************************************************
 // File: GM_kanturu_1st.cpp
-//
-// Desc: 칸투르 1차(외부) 맵, 몬스터.
-//
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
 #include "stdafx.h"
 #include "ZzzInfomation.h"
@@ -54,61 +50,59 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
 
 	switch (pObject->Type)
 	{
-	case 59:	// 검은연기 박스.
-	case 62:	// 안개 박스.(흰색)
+	case 59:
+	case 62:
 	case 81:
 	case 82:
 	case 83:
 	case 107:
 	case 108:
-		pObject->HiddenMesh = -2;	// 메시 자체가 안보임.
+		pObject->HiddenMesh = -2;
 		break;
-	case 44:	// 톱니바퀴.
-		pObject->Velocity = 0.02f;	// 애니메이션 속도 조절.
+	case 44:
+		pObject->Velocity = 0.02f;
 		break;
-	case 46:	// 발광바퀴.
-		pObject->Velocity = 0.01f;	// 애니메이션 속도 조절.
-		// 발광.
+	case 46:
+		pObject->Velocity = 0.01f;
 		pObject->BlendMeshLight
 			= (float)sinf(WorldTime * 0.0015f) * 0.8f + 1.0f;
 		::PlayBuffer(SOUND_KANTURU_1ST_BG_WHEEL);
 		break;
-	case 60:	// 라이트 박스.
+	case 60:
 		Luminosity = (float)(rand() % 4 + 3) * 0.1f;
 		Vector(Luminosity * 0.9f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
 		AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3,
 			PrimaryTerrainLight);
 		pObject->HiddenMesh = -2;
 		break;
-	case 61:	// 빨간불 박스.
+	case 61:
 		Luminosity = (float)(rand() %4 + 3) * 0.1f;
 		Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
 		AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3,
 			PrimaryTerrainLight);
 		pObject->HiddenMesh = -2;
 		break;
-	case 70:	// 중심 빨간 구 밖에 3개 띠가 공중에 떠서 돌아가는 오브젝트.
-		pObject->Velocity = 0.04f;	// 애니메이션 속도 조절.
-		// 지형 라이트 색 변화.
+	case 70:
+		pObject->Velocity = 0.04f;
 		Luminosity = (float)sinf(WorldTime * 0.002f) * 0.45f + 0.55f;
 		Vector(Luminosity * 1.4f, Luminosity * 0.7f, Luminosity * 0.4f, Light);
 		AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 4,
 			PrimaryTerrainLight);
 		break;
-	case 76:	// 빛
+	case 76:
 		pObject->Alpha = 0.5f;
 		break;
-	case 77:	// 폭포
+	case 77:
 		pObject->BlendMeshTexCoordV = -(int)WorldTime % 10000 * 0.0002f;
 		::PlayBuffer(SOUND_KANTURU_1ST_BG_WATERFALL);
 		break;
-	case 90:	// 도는 바퀴.
-		pObject->Velocity = 0.04f;	// 애니메이션 속도 조절.
+	case 90:
+		pObject->Velocity = 0.04f;
 		break;
-	case 92:	// 가로 유리관.
+	case 92:
 		::PlayBuffer(SOUND_KANTURU_1ST_BG_ELEC);
 		break;
-	case 96:	// 입구 계단 모래
+	case 96:
 		pObject->Alpha = 0.5f;
 		break;
 	case 97:
@@ -120,10 +114,10 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
      		CreateParticle(BITMAP_BUBBLE, pObject->Position, pObject->Angle,
 				pObject->Light, 5);
 		break;
-	case 98:	// 식충 식물.
+	case 98:
 		::PlayBuffer(SOUND_KANTURU_1ST_BG_PLANT);
 		break;
-	case 102:	// 칸투르 2차 번쩍이는 바닥 타일.
+	case 102:
 		pObject->BlendMeshLight = (float)sinf(WorldTime * 0.0010f) + 1.0f;
 		break;
 	}
@@ -133,7 +127,6 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
 	return true;
 }
 
-// 오브젝트 효과 랜더.
 bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 {
 	if (!(IsKanturu1st() || M40GMArea::IsGmArea()))
@@ -143,7 +136,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 
 	switch (pObject->Type)
 	{
-	case 37:  //  반딧불
+	case 37:
 		{
 			int time = timeGetTime() % 1024;
 			if (time >= 0 && time < 10)
@@ -155,7 +148,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 			pObject->HiddenMesh = -2;	// Hide Object				
 		}
 		break;
-	case 59:	// 검은연기 박스.
+	case 59:
 		if (rand() % 3 == 0)
 		{
 			Vector(1.f, 1.f, 1.f, Light);
@@ -163,7 +156,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 				Light, 21, pObject->Scale);
 		}
 		break;
-	case 61:	// 빨간불 박스.
+	case 61:
 		if (rand() % 3 == 0)
 		{
 			Vector(1.f, 1.f, 1.f, Light);
@@ -171,7 +164,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 				Light, 0, pObject->Scale);
 		}
 		break;
-	case 62:	// 안개 박스.(흰색)
+	case 62:
 		if (pObject->HiddenMesh != -2)
 		{
 			Vector(0.04f, 0.04f, 0.04f, Light);
@@ -180,8 +173,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 					Light, 20, pObject->Scale, pObject);
 		}
 		break;
-	case 70:	// 중심 빨간 구 밖에 3개 띠가 공중에 떠서 돌아가는 오브젝트.
-		// 광원 색 변화.
+	case 70:
 		float Luminosity;
 		Vector(0.0f, 0.0f, 0.0f, p);
 		pModel->TransformPosition(BoneTransform[6], p, Position, false);
@@ -193,26 +185,24 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 		CreateSprite(
 			BITMAP_SPARK+1, Position, Luminosity * 4.0f, Light, pObject);
 		break;
-	case 81:	// 폭포 효과 - 위에서 떨어지는것
-		// 색상 변경 시 CreateParticle() 안에서 Light 강제 적용 막아야 함.
+	case 81:
 		Vector(1.f, 1.f, 1.f, Light);
 		if (rand() % 2 == 0)
 			CreateParticle(BITMAP_WATERFALL_1, pObject->Position,
 				pObject->Angle, Light, 2, pObject->Scale);
 		break;
-	case 82:	// 폭포 효과 - 물 뛰는 느낌
+	case 82:
 		Vector(1.f, 1.f, 1.f, Light);
 		CreateParticle(BITMAP_WATERFALL_3, pObject->Position,
 			pObject->Angle, Light, 4, pObject->Scale);
 		break;
-	case 83:	//  폭포 효과 - 물 안개 효과
+	case 83:
 		Vector(1.f, 1.f, 1.f, Light);
 		if (rand() % 3 == 0)
 			CreateParticle(BITMAP_WATERFALL_2, pObject->Position,
 				pObject->Angle, Light, 2, pObject->Scale);
 		break;
-	case 85:	// 입구.
-		// 수정 반짝임.
+	case 85:
 		pModel->BeginRender(pObject->Alpha);
 		pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha,
 			pObject->BlendMesh, pObject->BlendMeshLight,
@@ -223,22 +213,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 			BITMAP_CHROME);
 		pModel->EndRender();
 		break;
-	case 91:	// 세로 유리관.
-		/*
-		// 크롬 효과.
-		pModel->BeginRender(pObject->Alpha);
-		pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha,
-			pObject->BlendMesh, pObject->BlendMeshLight,
-			pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-		pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT,
-			pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-			pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV,
-			BITMAP_CHROME);
-		pModel->EndRender();
-		*/
-		break;
-	case 92:	// 가로 유리관.
-		//  번개 효과
+	case 92:
 		{
 			vec3_t EndRelative, StartPos, EndPos;
 			Vector(0.f, 0.f, 0.f, EndRelative);
@@ -249,30 +224,19 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 			if (rand() % 30 == 1)
 				CreateJoint(BITMAP_JOINT_THUNDER, StartPos, EndPos,
 					pObject->Angle, 18, NULL, 50.f);
-			// 크롬 효과.
-		/*	pModel->BeginRender(pObject->Alpha);
-			pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_DARK, pObject->Alpha,
-				pObject->BlendMesh, pObject->BlendMeshLight,
-				pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-			pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha,
-				pObject->BlendMesh, pObject->BlendMeshLight,
-				pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV,
-				BITMAP_CHROME);
-			pModel->EndRender();
-			*/
 		}
 		break;
-	case 96:	// 입구 계단 모래
+	case 96:
 		pModel->StreamMesh = 0;
-		glAlphaFunc(GL_GREATER,0.0f);	// 0.0f 이상의 알파값을 표현해줌.
+		glAlphaFunc(GL_GREATER,0.0f);
 		pModel->RenderMesh(
 			0, RENDER_TEXTURE, 1.0f, pObject->BlendMesh,
 			pObject->BlendMeshLight, pObject->BlendMeshTexCoordU,
 			-(int)WorldTime % 20000 * 0.00005f);
-		glAlphaFunc(GL_GREATER, 0.25f);	// 0.25f 이상의 알파값을 표현해줌.(원래값)
+		glAlphaFunc(GL_GREATER, 0.25f);
 		pModel->StreamMesh = -1;
 		break;
-	case 98:	// 거대 식충 식물 물방울 효과.
+	case 98:
 		if (rand() % 3 == 0)
 		{
 			vec3_t vPos;
@@ -283,7 +247,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 				BITMAP_TWINTAIL_WATER, Position, pObject->Angle, Light, 2);
 		}
 		break;
-	case 105:	// 칸투르 2차 회전하는 수정(?) 오브젝트(8번 오브젝트)와 동일
+	case 105:
 		{
 			float fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.5f;
 			vec3_t vPos;
@@ -308,7 +272,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 					pObject->Angle, 8, NULL, 40.f);
 		}
 		break;
-	case 107:	// 흰안개박스2
+	case 107:
 		if (pObject->HiddenMesh != -2)
 		{
 			vec3_t Light;
@@ -318,7 +282,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 					Light, 2, pObject->Scale, pObject);
 		}
 		break;
-	case 108:	// 검은안개박스1
+	case 108:
 		if (pObject->HiddenMesh != -2)
 		{
 			vec3_t Light;
@@ -328,7 +292,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 					Light, 7, pObject->Scale, pObject);
 		}
 		break;
-	case 110:	// 칸투르 2차 4번 오브젝트 동일.
+	case 110:
 		{
 			float fLumi = (sinf(WorldTime * 0.002f) + 1.5f) * 0.5f;
 			Vector(fLumi * 0.6f, fLumi * 1.0f, fLumi * 0.8f, Light);
@@ -343,14 +307,13 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
 	return true;
 }
 
-// 오브젝트 렌더.
 bool M37Kanturu1st::RenderKanturu1stObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
 	if (IsKanturu1st() || M40GMArea::IsGmArea())
 	{
 		switch(o->Type) 
 		{
-		case 103:	// 칸투르 2차 1번과 동일.
+		case 103:
 			{
 				float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
 				o->HiddenMesh = 1;
@@ -363,14 +326,12 @@ bool M37Kanturu1st::RenderKanturu1stObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 				return true;
 			}
 
-		// 랜더 순서에 의해 반투명 오류가 나서 맨 나중에 그림.
-		//	ZzzObject.cpp의 Draw_RenderObject_AfterCharacter()에서 처리.
-		case 76:	// 빛.
-		case 77:	// 폭포.
-		case 91:	// 세로 유리관.
-		case 92:	// 가로 유리관.
-		case 95:	// 크리스탈.
-		case 105:	// 칸투르 2차 회전하는 수정(?) 오브젝트(8번 오브젝트)와 동일
+		case 76:
+		case 77:
+		case 91:
+		case 92:
+		case 95:
+		case 105:
 			o->m_bRenderAfterCharacter = true;
 			return true;
 		}
@@ -386,7 +347,7 @@ void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b)
 
 	switch(o->Type) 
 	{
-	case 76:	// 빛.
+	case 76:
 		b->BodyLight[0] = 0.52f;
 		b->BodyLight[1] = 0.52f;
 		b->BodyLight[2] = 0.52f;
@@ -399,14 +360,9 @@ void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b)
 		b->StreamMesh = -1;
 		break;
 
-	case 95:	// 크리스탈.
+	case 95:
 		{
-			// 크롬 효과.
 			b->BeginRender(o->Alpha);
-
-//			b->BodyLight[0] = 0.4f;
-//			b->BodyLight[1] = 0.4f;
-//			b->BodyLight[2] = 0.4f;
 
 			b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha,
 				o->BlendMesh, o->BlendMeshLight,
@@ -415,7 +371,6 @@ void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b)
 				o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
 				o->BlendMeshTexCoordV, BITMAP_CHROME);
 			b->EndRender();
-			// 발광체
 			vec3_t Light, p, Position;
 			for (int i = 0; i < 10; ++i)
 			{
@@ -427,7 +382,7 @@ void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b)
 		}
 		break;
 
-	case 105:	// 칸투르 2차 회전하는 수정(?) 오브젝트(8번 오브젝트)와 동일
+	case 105:
 			b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
 				o->BlendMeshLight, o->BlendMeshTexCoordU,
 				o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -436,10 +391,9 @@ void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b)
 				o->BlendMeshTexCoordV, BITMAP_CHROME);
 		break;
 
-	// 기본 오브젝트만 랜더하는것은 이곳에.
-	case 77:	// 폭포.
-	case 91:	// 세로 유리관.
-	case 92:	// 가로 유리관.
+	case 77:
+	case 91:
+	case 92:
 			b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
 				o->BlendMeshLight, o->BlendMeshTexCoordU,
 				o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -451,11 +405,10 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 {
 	CHARACTER* pCharacter = NULL;
 
-//	iType = 353;
 	switch(iType)
 	{
 	case 435:
-	case 350:	// 버서커
+	case 350:
 		{
 			OpenMonsterModel(106);
 		    pCharacter = CreateCharacter(Key, MODEL_MONSTER01+106, PosX, PosY);
@@ -463,12 +416,11 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 		    pCharacter->Weapon[0].Type = -1;
 		    pCharacter->Weapon[1].Type = -1;
 
-			// 본
 			BoneManager::RegisterBone(pCharacter, "BERSERK_MOUTH", 9);
 		}
 		break;
 	case 434:
-	case 356:	// 기간티스
+	case 356:
 		{
 			OpenMonsterModel(112);
 		    pCharacter = CreateCharacter(Key, MODEL_MONSTER01+112, PosX, PosY);
@@ -477,7 +429,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 		    pCharacter->Weapon[1].Type = -1;
 		}
 		break;
-	case 357:	// 제노사이더
+	case 357:
 		{
 			OpenMonsterModel(113);
 		    pCharacter = CreateCharacter(Key, MODEL_MONSTER01+113, PosX, PosY);
@@ -488,8 +440,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 			BoneManager::RegisterBone(pCharacter, "GENO_WP", 47);
 		}
 		break;
-
-	//칸투르 1차 스플린터 울프 & 아이언 라이더
 	case 351:
 		{
 			OpenMonsterModel(107);
@@ -497,7 +447,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 			pCharacter->Object.Scale = 0.8f;
 			pCharacter->Weapon[0].Type = -1;
 			pCharacter->Weapon[1].Type = -1;
-			//인광 위치
 			BoneManager::RegisterBone(pCharacter, "SPL_WOLF_EYE_26", 16);
 			BoneManager::RegisterBone(pCharacter, "SPL_WOLF_EYE_25", 17);
 			strcpy( pCharacter->ID, "스플린터 울프" );
@@ -577,7 +526,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
-	case 553:	// 버서커 워리어
+	case 553:
 		{
 			OpenMonsterModel(197);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+197, PosX, PosY);
@@ -585,12 +534,10 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 			pCharacter->Object.Scale = 1.15f;
 			pCharacter->Weapon[0].Type = -1;
 			pCharacter->Weapon[1].Type = -1;
-			
-			// 본
 			BoneManager::RegisterBone(pCharacter, "BERSERK_MOUTH", 9);
 		}
 		break;
-	case 554:	// 켄타우로스 워리어
+	case 554:
 		{
 			OpenMonsterModel(198);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+198, PosX, PosY);
@@ -615,7 +562,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 			strcpy( pCharacter->ID, "켄타우로스워리어" );	
 		}
 		break;
-	case 555:	// 기간티스 워리어
+	case 555:
 		{
 			OpenMonsterModel(199);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+199, PosX, PosY);
@@ -625,7 +572,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 			pCharacter->Weapon[1].Type = -1;
 		}
 		break;
-	case 556:	// 제노사이더 워리어
+	case 556:
 		{
 			OpenMonsterModel(200);
 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+200, PosX, PosY);
@@ -650,11 +597,11 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
 
 	switch (c->MonsterIndex) 
 	{
-	case 350:	// 버서커
-	case 356:	// 기간티스
-	case 357:	// 제노사이더
-	case 351:	// 스플린터 울프
-	case 352:	// 아이언 라이더
+	case 350:
+	case 356:
+	case 357:
+	case 351:
+	case 352:
 		{
 			if (rand() % 2 == 0)
 				SetAction(o, MONSTER01_ATTACK1);
@@ -664,7 +611,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-	case 355:	//켄타우로스
+	case 355:
 		{
 			
 			if(c->MonsterSkill == ATMON_SKILL_NUM9)
@@ -678,7 +625,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
-	case 553:	// 버서커 워리어
+	case 553:
 		{
 			if(c->MonsterSkill == ATMON_SKILL_EX_BERSERKERWARRIOR_ATTACKSKILL)
 			{
@@ -690,7 +637,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
 			
 		}
 		break;
-	case 554:	//켄타우로스 워리어
+	case 554:
 		{
 			if(c->MonsterSkill == ATMON_SKILL_EX_KENTAURUSWARRIOR_ATTACKSKILL)
 			{
@@ -702,7 +649,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
 			
 		}
 		break;
-	case 555:	// 기간티스 워리어
+	case 555:
 		{
 			if (rand() % 2 == 0)
 				SetAction(o, MONSTER01_ATTACK1);
@@ -712,7 +659,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-	case 556:	// 제노사이더 워리어
+	case 556:
 		{
 			if(c->MonsterSkill == ATMON_SKILL_EX_GENOSIDEWARRIOR_ATTACKSKILL)
 			{
@@ -737,30 +684,26 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 	
 	switch(o->Type) 
 	{
-	case MODEL_MONSTER01+106:	// 버서커
+	case MODEL_MONSTER01+106:
 		{
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+112:	// 기간티스
+	case MODEL_MONSTER01+112:
 		{
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+113:	// 제노사이더
+	case MODEL_MONSTER01+113:
 		{
 			return true;
 		}
 		break;
-	
-	//스플린터 울프, 아이언 라이더
 	case MODEL_MONSTER01+107:
 		{
 			return true;
 		}
 		break;
-	
-	//화살 발사
 	case MODEL_MONSTER01+108:
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -790,11 +733,6 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
 			{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-				float StartAction = 3.23f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 				if(c->AttackTime == 14)
 //				if(o->AnimationFrame >= StartAction && o->AnimationFrame < (StartAction + fActionSpeed))
 				{
@@ -818,7 +756,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+111://켄타우로스
+	case MODEL_MONSTER01+111:
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
 			{
@@ -846,14 +784,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 			}
 			if(c->AttackTime == 14)
 			{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 				vec3_t vPos, vRelative;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				vec3_t vLight = { 0.3f, 0.5f, 0.7f };
-				vec3_t vPos, vRelative;
-				int index = 31;
-				float Width = 2.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 				
 				if(o->CurrentAction == MONSTER01_ATTACK1)
 				{
@@ -878,13 +809,13 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
-	case MODEL_MONSTER01+197:	// 버서커 워리어
+	case MODEL_MONSTER01+197:
 		{
 			
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+198:	// 켄타우루스 워리어
+	case MODEL_MONSTER01+198:
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
 			{
@@ -912,14 +843,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 			}
 			if(c->AttackTime == 14)
 			{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 				vec3_t vPos, vRelative;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				vec3_t vLight = { 0.3f, 0.5f, 0.7f };
-				vec3_t vPos, vRelative;
-				int index = 31;
-				float Width = 2.f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 				
 				if(o->CurrentAction == MONSTER01_ATTACK1)
 				{
@@ -943,12 +867,12 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+199:	// 기간티스 워리어
+	case MODEL_MONSTER01+199:
 		{
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+200:	// 제노사이더 워리어
+	case MODEL_MONSTER01+200:
 		{
 			return true;
 		}
@@ -963,31 +887,31 @@ bool M37Kanturu1st::MoveKanturu1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 {
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+106:	// 버서커
+	case MODEL_MONSTER01+106:
 		break;
-	case MODEL_MONSTER01+112:	// 기간티스
+	case MODEL_MONSTER01+112:
 		break;
-	case MODEL_MONSTER01+113:	// 제노사이더
+	case MODEL_MONSTER01+113:
 		break;
 	case MODEL_MONSTER01+111:
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
-	case MODEL_MONSTER01+197:	// 버서커 워리어
+	case MODEL_MONSTER01+197:
 		{
 			
 		}
 		break;
-	case MODEL_MONSTER01+198:	// 켄타우로스 워리어
+	case MODEL_MONSTER01+198:
 		{
 			
 		}
 		break;
-	case MODEL_MONSTER01+199:	// 기간티스 워리어
+	case MODEL_MONSTER01+199:
 		{	
 			
 		}
 		break;
-	case MODEL_MONSTER01+200:	// 제노사이더 워리어
+	case MODEL_MONSTER01+200:
 		{
 			
 		}
@@ -1002,7 +926,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 {
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+106:	// 버서커
+	case MODEL_MONSTER01+106:
 		{
 			b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
 				o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -1011,24 +935,19 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			if (o->CurrentAction == MONSTER01_DIE)
 				return true;
 
-			// 점멸 효과
 			float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
 			b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0,
 				fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-				BITMAP_BERSERK_EFFECT);	// 몸
+				BITMAP_BERSERK_EFFECT);
 			b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1,
 				fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-				BITMAP_BERSERK_WP_EFFECT);	// 무기
+				BITMAP_BERSERK_WP_EFFECT);
 
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+112:	// 기간티스
+	case MODEL_MONSTER01+112:
 		{
-			// 죽었을 때 뿔만 안그림.
-			//b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-			//	o->BlendMeshLight, o->BlendMeshTexCoordU,
-			//	o->BlendMeshTexCoordV,o->HiddenMesh);
 			b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
 				o->BlendMeshLight, o->BlendMeshTexCoordU,
 				o->BlendMeshTexCoordV);
@@ -1043,17 +962,9 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 				o->BlendMeshTexCoordV);
 
 			return true;
-
-			// 뿔 부위 점멸 효과
-/*			float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-			b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0,
-				fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-				BITMAP_GIGANTIS_EFFECT);
-			return true;	
-			*/
 		}
 		break;
-	case MODEL_MONSTER01+113:	// 제노사이더
+	case MODEL_MONSTER01+113:
 		{
 			b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
 				o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -1061,8 +972,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			return true;	
 		}
 		break;
-
-			//스플린터 울프와 아이언 라이더
 	case MODEL_MONSTER01+107:
 		{
 			float fLumi = (sinf(WorldTime*0.002f) + 1.f) * 0.5f;
@@ -1088,26 +997,21 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			{
 				float fLumi = sinf(WorldTime*0.002f) + 1.0f;
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-				b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLADEHUNTER_EFFECT);	// 몸
+				b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLADEHUNTER_EFFECT);
 			}
 			else
 			{
-//				o->Alpha-=0.1f;
 				if(o->Alpha < 0.f)
 					o->Alpha = 0.f;
 				o->m_bRenderShadow = false;
-//				float fLumi = o->Alpha;//sinf(WorldTime*0.002f);// + 1.0f;
+
 				if(o->Alpha > 0.8f)
 				{
 					b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-//				b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLADEHUNTER_EFFECT);	// 몸
-//				b->RenderMesh(0,RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,BITMAP_CHROME);
 				}
 				else
 				b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,BITMAP_CHROME);
 				b->RenderMesh(0,RENDER_CHROME|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,BITMAP_CHROME);
-//				b->RenderMesh ( 0, RENDER_CHROME2, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV ,RENDER_CHROME3);//파란투명
-//				b->RenderMesh ( 0, RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );//하얀투명
 			}
 			return true;
 		}
@@ -1140,7 +1044,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
-	case MODEL_MONSTER01+197:	// 버서커 워리어
+	case MODEL_MONSTER01+197:
 		{
 			b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
 				o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -1149,19 +1053,18 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			if (o->CurrentAction == MONSTER01_DIE)
 				return true;
 			
-			// 점멸 효과
 			float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
 			b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0,
 				fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-				BITMAP_BERSERK_EFFECT);	// 몸
+				BITMAP_BERSERK_EFFECT);
 			b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1,
 				fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-				BITMAP_BERSERK_WP_EFFECT);	// 무기
+				BITMAP_BERSERK_WP_EFFECT);
 			
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+198:	// 켄타우루스 워리어
+	case MODEL_MONSTER01+198:
 		{
 			float fLumi = (sinf(WorldTime*0.002f) + 1.f) * 0.5f;
 			Vector(1.f,1.f,1.f,b->BodyLight);
@@ -1171,7 +1074,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+199:	// 기간티스 워리어
+	case MODEL_MONSTER01+199:
 		{
 			b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
 				o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -1189,7 +1092,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			return true;
 		}
 		break;
-	case MODEL_MONSTER01+200:	// 제노사이더 워리어
+	case MODEL_MONSTER01+200:
 		{
 			b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
 				o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -1207,9 +1110,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 {
 	switch (o->Type)
 	{
-	case MODEL_MONSTER01+106:	// 버서커
+	case MODEL_MONSTER01+106:
 		{
-		// 사운드
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
 				if (rand() % 15 == 0)
@@ -1235,13 +1137,11 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
 
-			// 죽었거나 공격시 파티클 생성 안함.
 			if (o->CurrentAction == MONSTER01_DIE
 				|| o->CurrentAction == MONSTER01_ATTACK1
 				|| o->CurrentAction == MONSTER01_ATTACK2)
 				return true;
 
-			// 입에서 나오는 입김.
 			vec3_t vPos, vRelative;
 			Vector(0.f, 0.f, 0.f, vRelative);
 			BoneManager::GetBonePosition(o, "BERSERK_MOUTH", vRelative, vPos);
@@ -1252,9 +1152,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 		}
 		break;
 
-	case MODEL_MONSTER01+112:	// 기간티스
+	case MODEL_MONSTER01+112:
 		{
-		// 사운드
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
 				if (rand() % 15 == 0)
@@ -1280,7 +1179,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
 
-		// 뿔 발광 효과.
 			if (o->CurrentAction == MONSTER01_DIE)
 				return true;
 
@@ -1303,9 +1201,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 		}
 		break;
 
-	case MODEL_MONSTER01+113:	// 제노사이더
+	case MODEL_MONSTER01+113:
 		{
-		// 사운드
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
 				if (rand() % 15 == 0)
@@ -1331,10 +1228,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
 
-			// 죽었거나 공격시 파티클 생성 안함.
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
-				// 철퇴 끝에서 연기.
 				vec3_t vPos, vRelative;
 				Vector(0.f, 0.f, 0.f, vRelative);
 				BoneManager::GetBonePosition(o, "GENO_WP", vRelative, vPos);
@@ -1346,8 +1241,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			return true;	
 		}
 		break;
-
-	//스플린트 울프 & 아이언 라이더
 	case MODEL_MONSTER01+107:
 		{
 			MoveEye(o, b, 16, 17);
@@ -1380,7 +1273,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 		{
 			if(o->CurrentAction != MONSTER01_DIE)
 			{
-				//활에서 반짝반짝
 				vec3_t vPos, vRelative;
 				vec3_t vLight = { 0.8f, 1.0f, 0.8f };
 				Vector(0.f, 0.f, 0.f, vRelative);
@@ -1408,7 +1300,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			}
 			else
 			{
-				//죽었을 때 검은 연기 연출
 				vec3_t vLight = { 1.0f, 1.0f, 1.0f };
 				vec3_t vPos, vRelative;
 				Vector(0.f, 0.f, 0.f, vRelative);
@@ -1553,9 +1444,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
-	case MODEL_MONSTER01+197:   // 버서커 워리어
+	case MODEL_MONSTER01+197:
 		{
-			// 사운드
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
 				if (rand() % 15 == 0)
@@ -1581,13 +1471,11 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
 			
-			// 죽었거나 공격시 파티클 생성 안함.
 			if (o->CurrentAction == MONSTER01_DIE
 				|| o->CurrentAction == MONSTER01_ATTACK1
 				|| o->CurrentAction == MONSTER01_ATTACK2)
 				return true;
 			
-			// 입에서 나오는 입김.
 			vec3_t vPos, vRelative;
 			Vector(0.f, 0.f, 0.f, vRelative);
 			BoneManager::GetBonePosition(o, "BERSERK_MOUTH", vRelative, vPos);
@@ -1595,7 +1483,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 				BITMAP_SMOKE, vPos, o->Angle, o->Light, 42, o->Scale);
 		}
 		return true;
-	case MODEL_MONSTER01+198:   // 켄타우로스 워리어
+	case MODEL_MONSTER01+198:
 		{
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
@@ -1647,9 +1535,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			}
 		}
 		return true;
-	case MODEL_MONSTER01+199:   // 기간티스 워리어
+	case MODEL_MONSTER01+199:
 		{
-			// 사운드
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
 				if (rand() % 15 == 0)
@@ -1675,7 +1562,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
 			
-			// 뿔 발광 효과.
 			if (o->CurrentAction == MONSTER01_DIE)
 				return true;
 			
@@ -1695,9 +1581,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 				CreateSprite(BITMAP_LIGHT, EndPos, 1.0f, o->Light, o);
 		}
 		return true;
-	case MODEL_MONSTER01+200:   // 제노사이더 워리어
+	case MODEL_MONSTER01+200:
 		{
-			// 사운드
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
 				if (rand() % 15 == 0)
@@ -1723,10 +1608,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
 				o->SubType = FALSE;
 			
-			// 죽었거나 공격시 파티클 생성 안함.
 			if (o->CurrentAction == MONSTER01_WALK)
 			{
-				// 철퇴 끝에서 연기.
 				vec3_t vPos, vRelative;
 				Vector(0.f, 0.f, 0.f, vRelative);
 				BoneManager::GetBonePosition(o, "GENO_WP", vRelative, vPos);
@@ -1782,7 +1665,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+106:	// 버서커
+	case MODEL_MONSTER01+106:
 		{
 			if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 6.7f
 				&& o->CurrentAction == MONSTER01_ATTACK1) 
@@ -1850,7 +1733,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+112:	// 기간티스
+	case MODEL_MONSTER01+112:
 		{
 			if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 5.9f
 				&& o->CurrentAction == MONSTER01_ATTACK1) 
@@ -1886,7 +1769,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+113:	// 제노사이더
+	case MODEL_MONSTER01+113:
 		{
 			if ((o->AnimationFrame >= 5.5f && o->AnimationFrame <= 6.9f
 				&& o->CurrentAction == MONSTER01_ATTACK1) 
@@ -1942,7 +1825,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 		}
 		break;
 #ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
-	case MODEL_MONSTER01+197:	// 버서커 워리어
+	case MODEL_MONSTER01+197:
 		{
 			if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 6.7f
 				&& o->CurrentAction == MONSTER01_ATTACK1) 
@@ -1978,7 +1861,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+198:	// 기간티스 워리어
+	case MODEL_MONSTER01+198:
 		{
 			if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 5.9f
 				&& o->CurrentAction == MONSTER01_ATTACK1) 
@@ -2014,7 +1897,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-	case MODEL_MONSTER01+199:	// 제노사이더 워리어
+	case MODEL_MONSTER01+199:
 		{
 			if ((o->AnimationFrame >= 5.5f && o->AnimationFrame <= 6.9f
 				&& o->CurrentAction == MONSTER01_ATTACK1) 
@@ -2023,8 +1906,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			{
 				vec3_t  Light;
 				Vector(1.0f, 0.2f, 0.0f, Light);
-				
-				//				vec3_t vPos, vRelative;
+			
 				vec3_t StartPos, StartRelative;
 				vec3_t EndPos, EndRelative;
 				

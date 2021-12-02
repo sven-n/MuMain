@@ -38,21 +38,13 @@ namespace SEASON3B
 		struct CursedTempleGameResult 
 		{
 			char		s_characterId[MAX_ID_SIZE+1];
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 			short		s_mapnumber;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			BYTE		s_mapnumber;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			SEASON3A::eCursedTempleTeam		s_team;
 			BYTE		s_point;
 			BYTE        s_class;
 			DWORD       s_addexp;
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 			CursedTempleGameResult() : s_mapnumber( -1 ), s_team( SEASON3A::eTeam_Count ), s_point( 0xff ), s_class( 0xff ), s_addexp( 0xff )
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			CursedTempleGameResult() : s_mapnumber( -1 ), s_team( SEASON3A::eTeam_Count ), s_point( 0xff ), s_class( 0xff ), s_addexp( 0xff )
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			{
 				memset(&s_characterId, 0, sizeof(char)*(MAX_ID_SIZE+1));
 			}

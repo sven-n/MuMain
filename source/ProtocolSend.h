@@ -113,8 +113,6 @@ public:
 
 	void DataSend(uint8_t* lpMsg, uint16_t size) 
 	{
-		std::cout << " Send data NEW1" << size << "\n";
-
 		if (IsConnected())
 		{
 			olc::net::message<ProtocolHead> msg;
@@ -128,8 +126,6 @@ public:
 			msg.header.size = msg.size();
 
 			Send(msg);
-
-			std::cout << " Send data NEW2.\n";
 		}
 	}
 

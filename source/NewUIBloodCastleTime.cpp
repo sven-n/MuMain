@@ -1,5 +1,4 @@
 // NewUIBloodCastleTime.cpp: implementation of the CNewUIPartyInfo class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -10,10 +9,6 @@
 
 using namespace SEASON3B;
 using namespace matchEvent;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIBloodCastle::CNewUIBloodCastle()
 {
@@ -36,7 +31,7 @@ bool CNewUIBloodCastle::Create( CNewUIManager* pNewUIMng, int x, int y )
 		return false;
 	
 	m_pNewUIMng = pNewUIMng;
- 	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_BLOODCASTLE_TIME, this );		// 인터페이스 오브젝트 등록
+ 	m_pNewUIMng->AddUIObj( SEASON3B::INTERFACE_BLOODCASTLE_TIME, this );
 	
 	SetPos(x, y);
 	
@@ -67,12 +62,9 @@ void CNewUIBloodCastle::SetPos(int x, int y)
 
 bool CNewUIBloodCastle::UpdateMouseEvent()
 {
-	// 버튼 처리
-	if( true == BtnProcess() )	// 처리가 완료 되었다면
+	if( true == BtnProcess() )
 		return false;
 	
-	// 파티 창 내 영역 클릭시 하위 UI처리 및 이동 불
-	// ( #include "NewUICommon" )
 	if( CheckMouseIn( m_Pos.x, m_Pos.y, BLOODCASTLE_TIME_WINDOW_WIDTH, BLOODCASTLE_TIME_WINDOW_HEIGHT) )
 		return false;
 
@@ -89,26 +81,21 @@ bool CNewUIBloodCastle::Update()
 	if ( !IsVisible() )
 		return true;
 	
-#ifdef KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT
-	// 블러드 캐슬에서 벗어났을때 초기화
 	if( (g_csMatchInfo == NULL) || (gMapManager.InBloodCastle() == false) )
 	{
 		Show(false);
 	}
-#endif // KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT
 
 	return true;
 }
 
 bool CNewUIBloodCastle::Render()
 {
-#ifdef KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT
 	if( g_csMatchInfo == NULL )
 	{
 		Show(false);
 		return true;
 	}
-#endif // KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT
 
 	EnableAlphaTest();
 	glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -125,20 +112,18 @@ bool CNewUIBloodCastle::Render()
 
 	if( m_iMaxKillMonster != MAX_KILL_MONSTER )
 	{
-		if ( g_csMatchInfo->GetMatchType()==5 ) //  마법 해골.
+		if ( g_csMatchInfo->GetMatchType()==5 )
 		{
-			// "마법해골 : ( %d/%d )"
 			unicode::_sprintf( szText, GlobalText[866], m_iKilledMonster, m_iMaxKillMonster );
 		}
 		else
 		{
-			// "몬스터 : ( %d/%d )"
 			unicode::_sprintf( szText, GlobalText[864], m_iKilledMonster, m_iMaxKillMonster );
 		}
 		g_pRenderText->RenderText( m_Pos.x ,m_Pos.y+13, szText, BLOODCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
 	}
 	
-	g_pRenderText->RenderText( m_Pos.x ,m_Pos.y+38, GlobalText[865], BLOODCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);		// "남은 시간"
+	g_pRenderText->RenderText( m_Pos.x ,m_Pos.y+38, GlobalText[865], BLOODCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
 				
 	if( m_iTimeState == BC_TIME_STATE_IMMINENCE )
 		g_pRenderText->SetTextColor(255, 32, 32, 255);

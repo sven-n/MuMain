@@ -101,7 +101,7 @@ namespace SEASON3B
 			IMAGE_SKILL2,
 			IMAGE_COMMAND,
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-			IMAGE_SKILL3,			// 이미지 인덱스로 non설정을 위함
+			IMAGE_SKILL3,
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 			IMAGE_SKILLBOX,
 			IMAGE_SKILLBOX_USE,
@@ -139,14 +139,13 @@ namespace SEASON3B
 
 		void Reset();
 
-		// 핫키 등록
 		void SetHotKey(int iHotKey, int iSkillType);
 		int GetHotKey(int iHotKey);
 		int GetSkillIndex(int iSkillType);
 #ifdef PBG_FIX_SKILLHOTKEY
 		void SetHotKeyClear(int iHotKey);
 #endif //PBG_FIX_SKILLHOTKEY
-		void RenderCurrentSkillAndHotSkillList();	// 현재 사용하고 있는 스킬과 핫스킬 
+		void RenderCurrentSkillAndHotSkillList();
 
 		bool IsSkillListUp();
 
@@ -155,13 +154,8 @@ namespace SEASON3B
 	private:
 		void LoadImages();
 		void UnloadImages();
-
-		// 현재 사용중인 스킬이 윗칸인가 아랫칸인가
 		bool IsArrayUp(BYTE bySkill);
-		// 현재 사용중인 스킬이 스킬핫킷 배열 안에 있는가?
 		bool IsArrayIn(BYTE bySkill);
-
-		// 핫키 사용
 		void UseHotKey(int iHotKey);
 		
 		void RenderSkillIcon(int iIndex, float x, float y, float width, float height);
@@ -174,25 +168,20 @@ namespace SEASON3B
 		CNewUIManager*		m_pNewUIMng;
 		CNewUI3DRenderMng*	m_pNewUI3DRenderMng;
 
-		// 스킬 핫키 관련
-		bool m_bHotKeySkillListUp;	// 6 ~ 0인가
+		bool m_bHotKeySkillListUp;
 		int m_iHotKeySkillType[SKILLHOTKEY_COUNT];
 
-		// 스킬 리스트
 		bool m_bSkillList;
 
-		// 스킬 정보 관련
 		bool m_bRenderSkillInfo;
 		int m_iRenderSkillInfoType;
 		int m_iRenderSkillInfoPosX;
 		int m_iRenderSkillInfoPosY;
 
-		// 마우스 상태
 		EVENT_STATE m_EventState;
 		
 #ifdef CSK_FIX_WOPS_K29010_HELLBUST
 #ifdef PBG_ADD_NEWCHAR_MONK
-		// 헬버스트에서만 사용으로 문제는 없으나 하위캐스팅문제
 		WORD m_wHeroPriorSkill;
 #else //PBG_ADD_NEWCHAR_MONK
 		BYTE m_byHeroPriorSkill;
@@ -242,7 +231,6 @@ namespace SEASON3B
 		float GetLayerDepth();		// 10.2f
 		float GetKeyEventOrder();	// 7.f
 
-		// ItemHotKey 관련 외부공개 함수들
 		void SetItemHotKey(int iHotKey, int iItemType, int iItemLevel);
 		int GetItemHotKey(int iHotKey);
 		int GetItemHotKeyLevel(int iHotKey);
@@ -250,7 +238,6 @@ namespace SEASON3B
 		//void RenderHotKeyItems();
 		void UpdateItemHotKey();
 
-		// SkillHotKey 관련 외부공개 함수들
 		void ResetSkillHotKey();
 		void SetSkillHotKey(int iHotKey, int iSkillType);
 		int GetSkillHotKey(int iHotKey);
@@ -274,17 +261,17 @@ namespace SEASON3B
 	private:
 		void SetButtonInfo();
 
-		void LoadImages();	// 이미지 로더 하는 함수
+		void LoadImages();
 		void UnloadImages();
 
 		bool BtnProcess();
 
-		void RenderFrame();	// 메인프레임 틀 렌더링 함수
-		void RenderLifeMana();	// HP, MP 렌더링
-		void RenderGuageAG();	// AG 게이지 렌더링
-		void RenderGuageSD();	// SD 게이지 렌더링
-		void RenderExperience();	// 경험치 렌더링
-		void RenderHotKeyItemCount();	// QWER 키에 등록된 아이템 갯수 렌더링
+		void RenderFrame();
+		void RenderLifeMana();
+		void RenderGuageAG();
+		void RenderGuageSD();
+		void RenderExperience();
+		void RenderHotKeyItemCount();
 		void RenderButtons();
 #ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		void RenderCharInfoButton();
@@ -302,23 +289,22 @@ namespace SEASON3B
 
 		CNewUIItemHotKey m_ItemHotKey;
 		
-		// 경험치바 관련 변수들
-		bool m_bExpEffect;			// 경험치바 효과
-		DWORD m_dwExpEffectTime;	// 경험치바 효과 시간
+		bool m_bExpEffect;
+		DWORD m_dwExpEffectTime;
 
-		DWORD m_dwPreExp;			// 경험치 이전 값
-		DWORD m_dwGetExp;			// 경험치 획득 값
+		DWORD m_dwPreExp;
+		DWORD m_dwGetExp;
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		CNewUIButton m_BtnCShop;	// 부분 유료화 상점
+		CNewUIButton m_BtnCShop;
 #endif //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
-		CNewUIButton m_BtnChaInfo;	// 캐릭터 정보창
-		CNewUIButton m_BtnMyInven;	// 인벤토리창
-		CNewUIButton m_BtnFriend;	// 친구창
-		CNewUIButton m_BtnWindow;	// 윈도우메뉴창
+		CNewUIButton m_BtnChaInfo;
+		CNewUIButton m_BtnMyInven;
+		CNewUIButton m_BtnFriend;
+		CNewUIButton m_BtnWindow;
 
 #ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
-		bool m_bButtonBlink;		// true이면 버튼이 밝아지고(마우스 오버 이미지) false이면 버튼이 원래 상태로 되는 용도로 사용.
+		bool m_bButtonBlink;
 #endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 
 	};

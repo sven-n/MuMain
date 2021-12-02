@@ -322,11 +322,7 @@ void CCharMakeWin::UpdateDisplay()
 	SelectCreateCharacter();
 }
 
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-void CCharMakeWin::UpdateWhileActive()
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 {
 	int i, j;
 #ifdef PJH_CHARACTER_RENAME
@@ -492,11 +488,9 @@ void CCharMakeWin::RenderControls()
 		nStatY = int((m_asprBack[CMW_SPR_STAT].GetYPos() + 10 + i * 17)
 			/ g_fScreenRate_y);
 
-		// 능력치 값.
 		g_pRenderText->SetTextColor(CLRDW_ORANGE);
 		g_pRenderText->RenderText(int((nStatBaseX + 54) / g_fScreenRate_x), nStatY,
 			apszStat[m_nSelJob][i]);
-		// 능력치 이름.
 		g_pRenderText->SetTextColor(CLRDW_WHITE);
 		g_pRenderText->RenderText(int(nStatBaseX / g_fScreenRate_x), nStatY,
 			GlobalText[1701 + i]);

@@ -1,11 +1,5 @@
 //*****************************************************************************
 // File: NewUINPCDialogue.h
-//
-// Desc: interface for the CNewUINPCDialogue class.
-//		 NPC와 대화 형식으로 진행되는 창 클래스.(2009.09.14)
-//		 NPC를 클릭하면 나타나는 UI로 퀘스트 NPC, 겐스 NPC 등이 사용. 
-//
-// producer: Ahn Sang-Gyu
 //*****************************************************************************
 
 #if !defined(AFX_NEWUINPCDIALOGUE_H__5E3DE00E_7D68_42C8_A796_AA368AD96ECC__INCLUDED_)
@@ -18,11 +12,11 @@
 #include "NewUIBase.h"
 #include "NewUIQuestProgress.h"
 
-#define ND_NPC_LINE_MAX				35	// NPC 대사 최대 줄 수.
-#define ND_WORDS_ROW_MAX			64	// 대사 한 줄 당 최대 글자 수 + 종료 문자.
-#define ND_QUEST_INDEX_MAX_COUNT	20	// 퀘스트 인덱스 최대 개수.
-#define ND_SEL_TEXT_LINE_MAX		((ND_QUEST_INDEX_MAX_COUNT+1)*2)	// 선택문 최대 줄 수.(+1은 "돌아가기" 선택문)
-#define ND_SEL_TEXT_PAGE_LIMIT		4	// 선택문 최대 제한 페이지.
+#define ND_NPC_LINE_MAX				35
+#define ND_WORDS_ROW_MAX			64
+#define ND_QUEST_INDEX_MAX_COUNT	20
+#define ND_SEL_TEXT_LINE_MAX		((ND_QUEST_INDEX_MAX_COUNT+1)*2)
+#define ND_SEL_TEXT_PAGE_LIMIT		4
 
 namespace SEASON3B
 {
@@ -54,41 +48,41 @@ namespace SEASON3B
 			ND_HEIGHT = 429,
 		};
 		
-		CNewUIManager*		m_pNewUIMng;			// UI 매니저.
-		POINT				m_Pos;					// 창의 위치.
+		CNewUIManager*		m_pNewUIMng;
+		POINT				m_Pos;
 		
-		CNewUIButton		m_btnProgressL;			// 대화 진행 L 버튼.
-		CNewUIButton		m_btnProgressR;			// 대화 진행 R 버튼.
-		CNewUIButton		m_btnSelTextL;			// 선택문 페이지 넘기기 L 버튼.
-		CNewUIButton		m_btnSelTextR;			// 선택문 페이지 넘기기 R 버튼.
+		CNewUIButton		m_btnProgressL;
+		CNewUIButton		m_btnProgressR;
+		CNewUIButton		m_btnSelTextL;
+		CNewUIButton		m_btnSelTextR;
 		CNewUIButton		m_btnClose;
 		
-		char	m_aszNPCWords[ND_NPC_LINE_MAX][ND_WORDS_ROW_MAX];	// NPC 대사 문자열 배열.
-		int		m_nSelNPCPage;			// 선택된 NPC 대사 페이지(0 ~ 4).
-		int		m_nMaxNPCPage;			// 최대 NPC 대사 페이지수(0 ~ 4).
+		char	m_aszNPCWords[ND_NPC_LINE_MAX][ND_WORDS_ROW_MAX];
+		int		m_nSelNPCPage;
+		int		m_nMaxNPCPage;
 		
-		char	m_aszSelTexts[ND_SEL_TEXT_LINE_MAX][ND_WORDS_ROW_MAX];	// 선택문 문자열 배열.
-		int		m_nSelTextCount;		// 선택문 개수.
-		int		m_anSelTextLine[ND_QUEST_INDEX_MAX_COUNT+1];	// 각 선택문 줄 수.
-		int		m_nSelSelText;			// 선택한 선택문 번호.
-		int		m_nSelSelTextPage;		// 선택된 선택문 페이지(0 ~ 3).
-		int		m_nMaxSelTextPage;		// 최대 선택문 페이지수(0 ~ 3).
-		int		m_anSelTextLinePerPage[ND_SEL_TEXT_PAGE_LIMIT];		// 선택문 각 페이지 당 줄 수.
-		int		m_anSelTextCountPerPage[ND_SEL_TEXT_PAGE_LIMIT];	// 선택문 각 페이지 당 개수.
+		char	m_aszSelTexts[ND_SEL_TEXT_LINE_MAX][ND_WORDS_ROW_MAX];
+		int		m_nSelTextCount;
+		int		m_anSelTextLine[ND_QUEST_INDEX_MAX_COUNT+1];
+		int		m_nSelSelText;
+		int		m_nSelSelTextPage;
+		int		m_nMaxSelTextPage;
+		int		m_anSelTextLinePerPage[ND_SEL_TEXT_PAGE_LIMIT];
+		int		m_anSelTextCountPerPage[ND_SEL_TEXT_PAGE_LIMIT];
 
 		enum LOWER_VIEW_MODE
 		{
-			NON_SEL_TEXTS_MODE,			// 선택문 안보여줌.
-			SEL_TEXTS_MODE,				// 선택문 보여줌.
+			NON_SEL_TEXTS_MODE,
+			SEL_TEXTS_MODE,
 		};
-		LOWER_VIEW_MODE	m_eLowerView;	// 창의 하단 부분 정보.
+		LOWER_VIEW_MODE	m_eLowerView;
 
-		bool	m_bQuestListMode;		// 퀘스트 리스트 모드이면 true.
-		DWORD	m_dwCurDlgIndex;		// 현재 진행 중인 대화 인덱스.(m_bQuestListMode가 false일 경우만 사용)
-		DWORD	m_adwQuestIndex[ND_QUEST_INDEX_MAX_COUNT];	// 퀘스트 인덱스 배열.(m_bQuestListMode가 true일 경우만 사용)
+		bool	m_bQuestListMode;
+		DWORD	m_dwCurDlgIndex;
+		DWORD	m_adwQuestIndex[ND_QUEST_INDEX_MAX_COUNT];
 
-		bool	m_bCanClick;			// 선택문 및 퀘스트 처리 버튼 클릭 가능 여부.(여러번 클릭 방지)
-		DWORD	m_dwContributePoint;	// 기여도.
+		bool	m_bCanClick;
+		DWORD	m_dwContributePoint;
 
 	public:
 		CNewUINPCDialogue();

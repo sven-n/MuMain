@@ -1,5 +1,4 @@
 // NewUIRegistrationLuckyCoin.cpp: implementation of the CNewUIRegistrationLuckyCoin class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -7,10 +6,6 @@
 #include "NewUIRegistrationLuckyCoin.h"
 #include "NewUISystem.h"
 #include "wsclientinline.h"
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 
 namespace SEASON3B
 {
@@ -39,12 +34,8 @@ namespace SEASON3B
 		
 		SetPos(x, y);
 		LoadImages();
-		//버튼이미지
 		SetBtnInfo();
-		
-		//visible()을 flase로
 		Show(false);
-		
 		return true;
 	}
 	
@@ -58,17 +49,11 @@ namespace SEASON3B
 	{
 		EnableAlphaTest();
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		//프레임
 		RenderFrame();
-		//텍스트
 		RenderTexts();
-		//버튼
 		RenderButtons();
-		//행운의동전
 		RenderLuckyCoin();
-		
 		DisableAlphaBlend();
-		
 		return true;
 	}
 	
@@ -90,33 +75,33 @@ namespace SEASON3B
 		g_pRenderText->SetBgColor(0, 0, 0, 0);
 		g_pRenderText->SetTextColor(255, 255, 255, 255);
 		g_pRenderText->SetFont(g_hFontBold);
-		sprintf( szText, GlobalText[1891] );	// "행운의 동전 등록"
+		sprintf( szText, GlobalText[1891] );
 		g_pRenderText->RenderText(_x, _y, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 		
 		g_pRenderText->SetFont(g_hFont);
 #ifdef PBG_MOD_LUCKYCOINEVENT
-		sprintf( szText, GlobalText[2855] );	// "이벤트 기간 중 행운의동전 255개를"
+		sprintf( szText, GlobalText[2855] );
 		g_pRenderText->RenderText(_x, _y+40, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-		sprintf( szText, GlobalText[2856] );	// "등록하시면 추첨을 통하여"
+		sprintf( szText, GlobalText[2856] );
 		g_pRenderText->RenderText(_x, _y+60, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-		sprintf( szText, GlobalText[2857] );	// "절대무기를 드립니다."
+		sprintf( szText, GlobalText[2857] );
 		g_pRenderText->RenderText(_x, _y+80, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-		sprintf( szText, GlobalText[2858] );	// "자세한 사항은 홈페이지를 참고해 주세요."
+		sprintf( szText, GlobalText[2858] );
 		g_pRenderText->RenderText(_x, _y+100, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 #else //PBG_MOD_LUCKYCOINEVENT
-		sprintf( szText, GlobalText[1935] );	// "이벤트 기간 중 가장 많은 행운의 동전을"
+		sprintf( szText, GlobalText[1935] );
 		g_pRenderText->RenderText(_x, _y+40, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-		sprintf( szText, GlobalText[1936] );	// "등록하신 분들께 다양한 선물을 드립니다."
+		sprintf( szText, GlobalText[1936] );
 		g_pRenderText->RenderText(_x, _y+60, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-		sprintf( szText, GlobalText[1937] );	// "자세한 사항은 홈페이지를 참고해 주세요."
+		sprintf( szText, GlobalText[1937] );
 		g_pRenderText->RenderText(_x, _y+80, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 #endif //PBG_MOD_LUCKYCOINEVENT
 		g_pRenderText->SetFont(g_hFontBold);
 		
-		sprintf(szText, GlobalText[1889]);		// 1889 "현재 등록"
+		sprintf(szText, GlobalText[1889]);
 		g_pRenderText->RenderText(_x, _y+120, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);	
 		
-		sprintf(szText, GlobalText[1893], GetRegistCount());	// 1893 " X %d 개"
+		sprintf(szText, GlobalText[1893], GetRegistCount());
 #ifdef LJH_MOD_POSITION_OF_REGISTERED_LUCKY_COIN
 		g_pRenderText->RenderText( _x+24, _y+150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 #else  //LJH_MOD_POSITION_OF_REGISTERED_LUCKY_COIN
@@ -126,7 +111,6 @@ namespace SEASON3B
 	
 	void CNewUIRegistrationLuckyCoin::RenderLuckyCoin()
 	{
-		//인터페이스에 행운의 동전을 그린다.
 		float x, y, width, height;
 		
 		x = GetPos().x -20;
@@ -175,7 +159,6 @@ namespace SEASON3B
 	{
 		POINT pClose = {GetPos().x+169, GetPos().y+7};
 		
-		//close 버튼 좌상단의 x표시
 		if(SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(pClose.x, pClose.y, 13, 12))
 		{
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION);
@@ -184,27 +167,19 @@ namespace SEASON3B
 		
 		if(m_CloseButton.UpdateMouseEvent() == true)
 		{
-			//닫기 버튼이 눌렸다면.종료시스템과 같음
 			if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION) == true)
 			{	
-				//등록창을 닫을때 인벤도 닫는다.
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION);
 				return true;
 			}
 			return false;
 		}
 		
-		//등록버튼이 눌렸다면
 		if(m_RegistButton.UpdateMouseEvent() == true)
 		{	
 			SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
-			
-			//send 등록갯수요청
 			SendRequestRegistLuckyCoin();
-			
-			// 서버로 부터 리시브를 할때까지 Lock
 			LockLuckyCoinRegBtn();
-			
 			return true;
 		}
 		return false;
@@ -218,19 +193,15 @@ namespace SEASON3B
 		m_RegistButton.ChangeButtonImgState(true, IMAGE_CLOSE_REGIST, true);
 		m_RegistButton.ChangeButtonInfo(_x, _y, m_width, m_height);
 		m_RegistButton.SetFont(g_hFontBold);
-		// 1894 "등록"
 		m_RegistButton.ChangeText(GlobalText[1894]);
-		
 		m_CloseButton.ChangeButtonImgState(true, IMAGE_CLOSE_REGIST, true);
 		m_CloseButton.ChangeButtonInfo(_x, 360, m_width, m_height);
 		m_CloseButton.SetFont(g_hFontBold);
-		// 1002 "닫기"
 		m_CloseButton.ChangeText(GlobalText[1002]);
 	}
 	
 	bool CNewUIRegistrationLuckyCoin::Update()
 	{
-		//N/A
 		return true;
 	}
 	
@@ -241,13 +212,11 @@ namespace SEASON3B
 			return true;
 		}
 		
-		// 버튼 마우스이벤트 처리
-		if(BtnProcess() == true)	// 처리가 완료 되었다면
+		if(BtnProcess() == true)
 		{
 			return false;
 		}
 		
-		// 인터페이스 내에 클릭하면 아무 동작 안되게 처리
 		if(CheckMouseIn(m_Pos.x, m_Pos.y, LUCKYCOIN_REG_WIDTH, LUCKYCOIN_REG_HEIGHT))
 		{
 			if(SEASON3B::IsPress(VK_RBUTTON))
@@ -270,10 +239,8 @@ namespace SEASON3B
 	{
 		if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION) == true)
 		{
-			//esc키를 사용하여 취소하는 경우
 			if(SEASON3B::IsPress(VK_ESCAPE) == true)
 			{
-				//등록창을 닫을때 인벤도 닫는다.
 				g_pNewUISystem->Hide(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION);
 				return false;
 			}
@@ -289,10 +256,8 @@ namespace SEASON3B
 
 		UnLockLuckyCoinRegBtn();
 
-		//행운의 동전 등록갯수 요청
 		SendRequestRegistedLuckyCoin();
 		
-		//창을 열었을때
 		m_CoinItem = new ITEM;
 		if(m_CoinItem == NULL)	return;
 		memset(m_CoinItem, 0, sizeof(ITEM));
@@ -305,11 +270,8 @@ namespace SEASON3B
 	
 	void CNewUIRegistrationLuckyCoin::ClosingProcess()
 	{
-		//창을 닫을때
 		SAFE_DELETE(m_CoinItem);
-		
 		g_pMyInventory->GetInventoryCtrl()->UnlockInventory();
-		
 		SendRequestMixExit();
 	}
 	
@@ -346,16 +308,14 @@ namespace SEASON3B
 	
 	void CNewUIRegistrationLuckyCoin::LockLuckyCoinRegBtn()
 	{			
-		// 서버로 부터 리시브를 할때까지 등록버튼 비활성화
 		m_RegistButton.Lock();
-		m_RegistButton.ChangeTextColor(0xff808080);		// 회색
+		m_RegistButton.ChangeTextColor(0xff808080);
 	}
 	
 	void CNewUIRegistrationLuckyCoin::UnLockLuckyCoinRegBtn()
 	{
-		// 등록버튼을 활성화 시킨다.
 		m_RegistButton.UnLock();
-		m_RegistButton.ChangeTextColor(0xffffffff);		// 흰색
+		m_RegistButton.ChangeTextColor(0xffffffff);
 	}
 	
 }

@@ -127,9 +127,9 @@ void CMovieScene::Initialize_DirectShow(HWND hWnd, char* strFileName)
 		return;
 	}
 
-	m_pMediaEventEx->SetNotifyWindow((OAHWND)m_hWnd, WM_GRAPHNOTIFY, 0);	// 이벤트 통지를 처리하는 윈도우를 등록한다.
+	m_pMediaEventEx->SetNotifyWindow((OAHWND)m_hWnd, WM_GRAPHNOTIFY, 0);
 
-	if(IsWindowsMediaFile(strFileName))	// 윈도우 미디어 형식의 파일이냐?
+	if(IsWindowsMediaFile(strFileName))
 	{
 		// Load the improved ASF reader filter by CLSID
 		if(FAILED(CreateFilter(CLSID_WMAsfReader, &m_pReader)))

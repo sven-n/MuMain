@@ -1,5 +1,4 @@
 // HashTable.h: interface for the CHashTable class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_HASHTABLE_H__BDC457BB_BA46_47A2_83DC_0617C57FF876__INCLUDED_)
@@ -13,7 +12,7 @@
 #define HASH_ERROR		( ( DWORD)-1)
 
 
-template <class T, class S>	// T 는 저장할 데이터의 형태, S 는 Hash 함수에 집어넣을 키(0은 없어야 한다.)
+template <class T, class S>
 class CHashTable  
 {
 public:
@@ -24,7 +23,7 @@ public:
 protected:
 	T *m_pDataTable;
 	S *m_pKeyTable;
-	DWORD m_dwTableSize;	// 테이블의 최대값
+	DWORD m_dwTableSize;
 
 public:
 	virtual void Create( DWORD dwTableSize);
@@ -98,19 +97,16 @@ BOOL CHashTable<T,S>::Insert( T Data, S Key)
 	{
 		if ( 0 == memcmp( &Key, &m_pKeyTable[dwIndex], sizeof ( S))
 			|| 0 == memcmp( &NullKey, &m_pKeyTable[dwIndex], sizeof ( S)))
-		{	// 같은 것을 넣는 경우거나 빈곳인 경우
+		{
 			m_pDataTable[dwIndex] = Data;
 			m_pKeyTable[dwIndex] = Key;
 			return ( TRUE);
 		}
 
-		// 이미 차지한 경우 다음 것으로 이동
 		dwIndex = ( dwIndex + 1) % m_dwTableSize;
 	}
 
-	// 꽉찼다.
 	g_ErrorReport.Write( "Hash table full!!! - Insert\r\n");
-	assert( !"해쉬 테이블이 꽉 찼습니다.");
 	return ( FALSE);
 }
 
@@ -123,21 +119,18 @@ DWORD CHashTable<T,S>::GetIndex( S Key)
 	for ( DWORD i = 0; i < m_dwTableSize; ++i)
 	{
 		if ( 0 == memcmp( &NullKey, &m_pKeyTable[dwIndex], sizeof ( S)))
-		{	// 빈곳인 경우
+		{
 			return ( HASH_ERROR);
 		}
 		if ( 0 == memcmp( &Key, &m_pKeyTable[dwIndex], sizeof ( S)))
-		{	// 찾은 경우
+		{
 			return ( dwIndex);
 		}
 
-		// 다른 것이 차지한 경우 다음 것으로 이동
 		dwIndex = ( dwIndex + 1) % m_dwTableSize;
 	}
 
-	// 찾을 수 없다.
 	g_ErrorReport.Write( "Hash table full!!! - GetIndex\r\n");
-	assert( !"해쉬 테이블이 꽉 차서 찾을 수 없는 상태입니다..");
 	return ( HASH_ERROR);
 }
 
