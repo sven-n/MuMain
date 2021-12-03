@@ -57,6 +57,11 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM	
+#include "GameShop\InGameShopSystem.h"
+#include "GameShop\MsgBoxIGSCommon.h"
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM
@@ -12549,6 +12554,687 @@ bool ReceiveResultEmpireGuardian(BYTE* ReceiveBuffer)
 }
 #endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+
+//----------------------------------------------------------------------------
+// 사용자의 캐쉬 포인트 정보 전달 (0xD2)(0x01)
+bool ReceiveIGS_CashPoint(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_CASHPOINT_ANS Data =  (LPPMSG_CASHSHOP_CASHPOINT_ANS)pReceiveBuffer;
+
+	g_InGameShopSystem->SetTotalCash((double)Data->dTotalCash);
+	g_InGameShopSystem->SetTotalPoint((double)Data->dTotalPoint);
+#ifdef KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
+	g_InGameShopSystem->SetCashCreditCard((double)Data->dCashCredit);
+	g_InGameShopSystem->SetCashPrepaid((double)Data->dCashPrepaid);	
+#endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
+	g_InGameShopSystem->SetTotalMileage((double)Data->dTotalMileage);
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 캐쉬샵 Open 결과 (0xD2)(0x02)
+bool ReceiveIGS_ShopOpenResult(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_SHOPOPEN_ANS Data = (LPPMSG_CASHSHOP_SHOPOPEN_ANS)pReceiveBuffer;
+
+	g_InGameShopSystem->SetIsRequestShopOpenning(false);	
+
+	if( (BYTE)Data->byShopOpenResult == 0 )
+	{
+		// 실패 했을때 메세지창
+		return false;
+	}
+
+	SendRequestIGS_CashPointInfo();			// 사용자의 캐시 포인트 정보 요청
+#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	char szCode = g_pInGameShop->GetCurrentStorageCode();
+	SendRequestIGS_ItemStorageList(1, &szCode);		// 보관함 리스트 요청
+#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	SendRequestIGS_ItemStorageList();		// 보관함 리스트 요청
+#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+
+	// 인게임샵 Open
+	g_pNewUISystem->Show(SEASON3B::INTERFACE_INGAMESHOP);			
+	
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 아이템 구매 결과 (0xD2)(0x03)
+bool ReceiveIGS_BuyItem(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_BUYITEM_ANS Data = (LPPMSG_CASHSHOP_BUYITEM_ANS)pReceiveBuffer;
+
+	switch( (BYTE)Data->byResultCode)
+	{
+	case -2: // DB접근실패
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[2953]);
+		}
+		break;
+	case -1: // DB오류
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[2954]);
+		}
+		break;
+	case 0: // 성공
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2900], GlobalText[2901]);
+
+			SendRequestIGS_CashPointInfo();		// 사용자의 캐시 포인트 정보 요청
+
+#ifdef KJH_FIX_BTS179_INGAMESHOP_STORAGE_UPDATE_WHEN_ITEM_BUY
+			char szCode = g_pInGameShop->GetCurrentStorageCode();
+			SendRequestIGS_ItemStorageList(1, &szCode);		// 보관함 리스트 요청
+#endif // KJH_FIX_BTS179_INGAMESHOP_STORAGE_UPDATE_WHEN_ITEM_BUY
+		}
+		break;
+	case 1: // 보유 캐시 부족
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[2903]);
+		}
+		break;
+	case 2:	// 사용자의 상품 구매 불가능
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[2904]);
+		}
+		break;
+#ifdef KJH_MOD_INGAMESHOP_PATCH_091028
+	case 3: // 잔여 수량 부족
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[2956]);
+		}
+		break;
+	case 4: // 판매기간 종료
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[2957]);
+		}
+		break;
+	case 5: // 판매 종료
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[2958]);
+		}
+		break; 
+	case 6:	// 구매 불가
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			// "구매하기 실패" "구매 불가능한 상품입니다."
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[3052]);
+		}break;
+	case 7:	// 이벤트 상품 구매 불가
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			// "구매하기 실패" "이벤트상품은 구매 불가능 합니다."
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[3053]);
+		}break;
+	case 8:	// 이벤트 상품 구매 횟수 초과
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			// "구매하기 실패" "이벤트상품 구매 횟수를 초과 하였습니다."
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[3054]);
+		}break;
+#else // KJH_MOD_INGAMESHOP_PATCH_091028
+	case 4: // 잔여 수량 부족
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[2956]);
+		}
+		break;
+	case 5: // 판매 종료
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[2958]);
+		}
+		break; 
+	case 6:	// 상품정보가 없다.
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2945], GlobalText[2958]);
+		}break;
+#endif // KJH_MOD_INGAMESHOP_PATCH_091028
+#ifdef KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
+	case 9: // 잘못된 캐시타입
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2902], GlobalText[3264]);
+		}
+		break;
+#endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
+	default:	// 알 수 없는 에러
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);		
+		}
+		break;
+	}
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 아이템 선물 결과 (0xD2)(0x04)
+bool ReceiveIGS_SendItemGift(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_GIFTSEND_ANS Data = (LPPMSG_CASHSHOP_GIFTSEND_ANS)pReceiveBuffer;
+
+	switch( (BYTE)Data->byResultCode)
+	{
+	case -2: // DB접근실패
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2953]);
+		}
+		break;
+	case -1: // DB오류
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2954]);
+		}
+		break;
+	case 0: // 성공
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2910], GlobalText[2911]);
+
+			SendRequestIGS_CashPointInfo();		// 사용자의 캐시 포인트 정보 요청
+		}
+		break;
+	case 1: // 보유 캐시 부족
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2913]);
+		}
+		break;
+	case 2:	// 사용자의 상품 구매 불가능
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2914]);
+		}
+		break;
+	case 3: // 사용자의 선물하기 한도 초과
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2915]);
+		}
+		break;
+	case 4: // 잔여 수량 부족
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2956]);
+		}
+		break;
+	case 5: // 판매 기간 종료
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2958]);
+		}
+		break; 
+	case 6:	// 상품정보가 없다.
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2945], GlobalText[2958]);
+		}break;
+	case 7: // 상품 선물 불가능
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+#ifdef PBG_FIX_MSGTITLENUM
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2959]);
+#else //PBG_FIX_MSGTITLENUM
+			pMsgBox->Initialize(GlobalText[1912], GlobalText[2959]);
+#endif //PBG_FIX_MSGTITLENUM
+		}
+		break;
+	case 8: // 이벤트상품 선물불가
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+#ifdef PBG_FIX_MSGTITLENUM
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2960]);
+#else //PBG_FIX_MSGTITLENUM
+			pMsgBox->Initialize(GlobalText[1912], GlobalText[2960]);
+#endif //PBG_FIX_MSGTITLENUM
+		}
+		break;
+	case 9: // 이벤트상품 선물가능 횟수 초과
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+#ifdef PBG_FIX_MSGTITLENUM
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[2961]);
+#else //PBG_FIX_MSGTITLENUM
+			pMsgBox->Initialize(GlobalText[1912], GlobalText[2961]);
+#endif //PBG_FIX_MSGTITLENUM
+		}
+		break;
+#ifdef KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
+	case 10: // 잘못된 캐시타입
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[3264]);
+		}
+		break;
+#endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
+#ifdef KJH_FIX_BTS207_INGAMESHOP_SEND_GIFT_ERRORMSG_INCORRECT_ID
+	case 20: // 상대방의 아이디가 없을때
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2912], GlobalText[3263]);
+		}
+		break;
+#endif // KJH_FIX_BTS207_INGAMESHOP_SEND_GIFT_ERRORMSG_INCORRECT_ID
+	default:	// 알 수 없는 에러
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);
+		}
+		break;
+	}
+	
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 보관함 리스트 카운트 전달 (0xD2)(0x06)
+bool ReceiveIGS_StorageItemListCount(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_STORAGECOUNT Data = (LPPMSG_CASHSHOP_STORAGECOUNT)pReceiveBuffer;
+
+#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	g_pInGameShop->InitStorage((int)Data->wTotalItemCount, (int)Data->wCurrentItemCount, (int)Data->wTotalPage, (int)Data->wPageIndex);
+#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	g_InGameShopSystem->SetStorageItemCnt((WORD)Data->wItemCount);
+	g_pInGameShop->ClearAllStorageItem();
+#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 보관함 리스트 전달 (0xD2)(0x0D)
+bool ReceiveIGS_StorageItemList(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_STORAGELIST Data = (LPPMSG_CASHSHOP_STORAGELIST)pReceiveBuffer;
+
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+	if( g_InGameShopSystem->IsShopOpen() == false )
+		return false;
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+	
+#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	g_pInGameShop->AddStorageItem((int)Data->lStorageIndex, (int)Data->lItemSeq, (int)Data->lStorageGroupCode,
+									(int)Data->lProductSeq, (int)Data->lPriceSeq, (int)Data->dCashPoint, (char)Data->chItemType);
+#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	g_pInGameShop->AddStorageItem(CInGameShopSystem::IGS_SAFEKEEPING_LISTBOX, (int)Data->lStorageIndex, 
+									(int)Data->lItemSeq, (int)Data->lStorageGroupCode, (int)Data->lProductSeq, 
+									(int)Data->lPriceSeq, (int)Data->dCashPoint, (char)Data->chItemType);
+#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 선물함 리스트 전달 (0xD2)(0x0E)
+bool ReceiveIGS_StorageGiftItemList(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_GIFTSTORAGELIST Data = (LPPMSG_CASHSHOP_GIFTSTORAGELIST)pReceiveBuffer;
+
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+	if( g_InGameShopSystem->IsShopOpen() == false )
+		return false;
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+
+	unicode::t_char szID[MAX_ID_SIZE+1];
+	unicode::t_char szMessage[MAX_GIFT_MESSAGE_SIZE];
+
+	strncpy(szID, (unicode::t_char*)Data->chSendUserName, MAX_ID_SIZE+1);
+	strncpy(szMessage, (unicode::t_char*)Data->chMessage, MAX_GIFT_MESSAGE_SIZE);
+	szID[MAX_ID_SIZE] = '\0';
+	szMessage[MAX_GIFT_MESSAGE_SIZE-1] = '\0';
+#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	g_pInGameShop->AddStorageItem( (int)Data->lStorageIndex, (int)Data->lItemSeq, (int)Data->lStorageGroupCode, (int)Data->lProductSeq, 
+									(int)Data->lPriceSeq, (int)Data->dCashPoint, (char)Data->chItemType, szID, szMessage);
+#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	g_pInGameShop->AddStorageItem(CInGameShopSystem::IGS_PRESENTBOX_LISTBOX, (int)Data->lStorageIndex, 
+									(int)Data->lItemSeq, (int)Data->lStorageGroupCode, (int)Data->lProductSeq, 
+									(int)Data->lPriceSeq, (int)Data->dCashPoint, (char)Data->chItemType, szID, szMessage);
+#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 캐쉬선물 결과 (0xD2)(0x07)
+bool ReceiveIGS_SendCashGift(BYTE* pReceiveBuffer)
+{
+#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+	LPPMSG_CASHSHOP_CASHSEND_ANS Data = (LPPMSG_CASHSHOP_CASHSEND_ANS)pReceiveBuffer;
+#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+	
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 해당 사용자가 상품의 구매/선물이 가능한지 확인 결과 (0xD2)(0x08)
+bool ReceiveIGS_PossibleBuy(BYTE* pReceiveBuffer)
+{
+#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+	LPPMSG_CASHSHOP_ITEMBUY_CONFIRM_ANS Data = (LPPMSG_CASHSHOP_ITEMBUY_CONFIRM_ANS)pReceiveBuffer;
+#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+	
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 상품 잔여 개수 조회 결과 (0xD2)(0x09)
+bool ReceiveIGS_LeftCountItem(BYTE* pReceiveBuffer)
+{
+#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+	LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS Data = (LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS)pReceiveBuffer;
+#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+	
+	return true;
+}
+
+#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// #ifndef
+//----------------------------------------------------------------------------
+// 보관함 아이템 버리기 결과 (0xD2)(0x0A)
+bool ReceiveIGS_DeleteStorageItem(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_STORAGE_ITEM_THROW_ANS Data = (LPPMSG_CASHSHOP_STORAGE_ITEM_THROW_ANS)pReceiveBuffer;
+
+	switch( (BYTE)Data->byResult)
+	{
+	case -2: // DB오류
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2935], GlobalText[2967]);
+		}
+		break;
+	case -1: // 오류
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2935], GlobalText[2966]);
+		}
+		break;
+	case 0: // 성공
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2933], GlobalText[2934]);
+
+			g_pInGameShop->DelStorageSelectedItem();		// 현재 선택된 보관함의 Item을 지운다.
+		}
+		break;
+	case 1: // 보관함 버리기 항목이 없음
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2935], GlobalText[2936]);
+		}
+		break;
+	default:	// 알 수 없는 에러
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);		
+		}
+		break;
+	}
+	
+	return true;
+}
+#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+
+//----------------------------------------------------------------------------
+// 보관함 아이템 사용 결과 (0xD2)(0x0B)
+bool ReceiveIGS_UseStorageItem(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_STORAGE_ITEM_USE_ANS Data = (LPPMSG_CASHSHOP_STORAGE_ITEM_USE_ANS)pReceiveBuffer;
+	
+	switch( (BYTE)Data->byResult )
+	{
+	case -2: // DB오류
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2928], GlobalText[2967]);
+		}
+		break;
+	case -1: // 오류
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2928], GlobalText[2966]);
+		}
+		break;	
+	case 0: // 성공
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2924], GlobalText[2925]);
+
+#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+			g_pInGameShop->UpdateStorageItemList();			// 보관함 아이템 리스트 갱신
+#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+			g_pInGameShop->DelStorageSelectedItem();		// 현재 선택된 보관함의 Item을 지운다.
+#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+		}
+		break;
+	case 1: // 보관함 사용하기 항목이 없음
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2928], GlobalText[2962]);
+		}
+		break;
+	case 2:	// PC방에서만 받기 가능한 아이템
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2928], GlobalText[2963]);
+		}
+		break;
+	case 3: // 기간 내 사용중인 컬러 요금이 있는경우
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2928], GlobalText[2964]);
+		}
+		break;
+	case 4: // 기간내 사용중인 개인 정액 요금이 있는경우
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2928], GlobalText[2965]);
+		}break;
+	case 21:	// 인벤토리 공간이 부족합니다.
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2928], GlobalText[2284]);
+		}
+		break;
+	case 22:	// 해당아이템을 사용할 수 없습니다. (캐릭터카드/캐릭터슬롯아이템 사용 완료)
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			// "에러", "해당아이템을 사용할 수 없습니다"
+			pMsgBox->Initialize(GlobalText[2928], GlobalText[3036]);
+		}
+		break;
+#ifdef LEM_FIX_SERVERMSG_SEALITEM	// 같은 타입의 인장을 사용중입니다. [lem.2010.7.28]
+	case 24:
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			// "에러", "해당아이템을 사용할 수 없습니다"
+			pMsgBox->Initialize(GlobalText[2928], GlobalText[2610]);
+		}
+		break;
+#endif	// LEM_FIX_SERVERMSG_SEALITEM
+	default:	// 알 수 없는 에러
+		{
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+			pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);		
+		}
+		break;
+	}
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 스크립트 업데이트 (0xD2)(0x0C)
+bool ReceiveIGS_UpdateScript(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_VERSION_UPDATE Data = (LPPMSG_CASHSHOP_VERSION_UPDATE)pReceiveBuffer;
+
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+//#ifdef _DEBUG
+	//g_InGameShopSystem->SetScriptVersion(512, 0, 0);
+//#else // _DEBUG
+	g_InGameShopSystem->SetScriptVersion(Data->wSaleZone, Data->wYear, Data->wYearIdentify);
+//#endif // _DEBUG
+
+	g_InGameShopSystem->ShopOpenUnLock();
+#else // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+	// 상점을 닫고, Release()
+	if( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == true )
+	{
+		SendRequestIGS_CashShopOpen(1);
+		g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
+	}
+
+	g_InGameShopSystem->Release();
+	
+#ifdef _DEBUG
+	g_InGameShopSystem->SetScriptVersion(512, 0, 0);
+#else // _DEBUG
+ 	g_InGameShopSystem->SetScriptVersion(Data->wSaleZone, Data->wYear, Data->wYearIdentify);
+#endif // _DEBUG
+
+	if( g_InGameShopSystem->ScriptDownload() == false )
+	{
+		return false;
+	}
+
+	g_InGameShopSystem->Initalize();
+	
+	g_pInGameShop->InitZoneBtn();
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 이벤트 아이템 리스트 카운트 (0xD2)(0x13)
+bool ReceiveIGS_EventItemlistCnt(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_EVENTITEM_COUNT Data = (LPPMSG_CASHSHOP_EVENTITEM_COUNT)pReceiveBuffer;
+
+	g_InGameShopSystem->InitEventPackage((int)Data->wEventItemListCount);
+	
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 이벤트 아이템 리스트 (0xD2)(0x14)
+bool ReceiveIGS_EventItemlist(BYTE* pReceiveBuffer)
+{
+	LPPMSG_CASHSHOP_EVENTITEM_LIST Data = (LPPMSG_CASHSHOP_EVENTITEM_LIST)pReceiveBuffer;
+	
+#ifdef KJH_FIX_SHOP_EVENT_CATEGORY_PAGE
+		g_InGameShopSystem->InsertEventPackage((int*)Data->lPackageSeq);
+#else // KJH_FIX_SHOP_EVENT_CATEGORY_PAGE
+	for( int i=0 ; i<INGAMESHOP_DISPLAY_ITEMLIST_SIZE ; i++ )
+	{
+		g_InGameShopSystem->InsertEventPackage((int)Data->lPackageSeq[i]);
+	}
+#endif // KJH_FIX_SHOP_EVENT_CATEGORY_PAGE
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// 배너 버젼 업데이트 (0xD2)(0x15)
+bool ReceiveIGS_UpdateBanner(BYTE* pReceiveBuffer)
+{
+#ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+	LPPMSG_CASHSHOP_BANNER_UPDATE Data = (LPPMSG_CASHSHOP_BANNER_UPDATE)pReceiveBuffer;
+#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
+
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+//#ifdef _DEBUG
+//	g_InGameShopSystem->SetBannerVersion(583, 0, 0);
+//#else // _DEBUG
+	g_InGameShopSystem->SetBannerVersion(Data->wBannerZone, Data->wYear, Data->wYearIdentify);
+//#endif // _DEBUG
+#else // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+	if( g_InGameShopSystem->IsShopOpen() == false )
+		return false;
+	
+#ifdef _DEBUG
+	// 사내 테스트용은 스크립트를 다운로드 받을수 없으므로 지정 스크립트 처리
+	g_InGameShopSystem->SetBannerVersion(583, 0, 0);
+#else // _DEBUG
+	g_InGameShopSystem->SetBannerVersion(Data->wBannerZone, Data->wYear, Data->wYearIdentify);
+#endif // _DEBUG
+
+	if( g_InGameShopSystem->BannerDownload() == false )
+	{
+		return false;
+	}
+
+	// 배너 
+	g_pInGameShop->InitBanner(g_InGameShopSystem->GetBannerFileName(), g_InGameShopSystem->GetBannerURL());
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+
+	return true;
+}
+
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
 
 #ifdef PBG_ADD_SECRETBUFF
 bool ReceiveFatigueTime(BYTE* pReceiveBuffer)
@@ -14162,7 +14848,74 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				}
 				break;
 #endif //defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
-				
+#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
+		case 0xD2:		// 인게임샵
+			{
+				PBMSG_HEADER2* Data = (PBMSG_HEADER2*)ReceiveBuffer;
+				switch(Data->m_bySubCode)
+				{
+				case 0x01:
+					ReceiveIGS_CashPoint(ReceiveBuffer);			// 캐시 포인트 결과
+					break;
+				case 0x02:
+					ReceiveIGS_ShopOpenResult(ReceiveBuffer);		// 샵 Open/Close 결과
+					break;
+				case 0x03:
+					ReceiveIGS_BuyItem(ReceiveBuffer);				// 아이템 구매결과	
+					break;
+				case 0x04:
+					ReceiveIGS_SendItemGift(ReceiveBuffer);			// 아이템 선물결과
+					break;
+				case 0x06:
+					ReceiveIGS_StorageItemListCount(ReceiveBuffer);		// 보관함 리스트 카운트 전달
+					break;
+				case 0x07:
+					ReceiveIGS_SendCashGift(ReceiveBuffer);			// 캐시선물 결과
+					break;
+				case 0x08:
+					ReceiveIGS_PossibleBuy(ReceiveBuffer);			// 아이템이 구매/가능한지 결과
+					break;
+				case 0x09:
+					ReceiveIGS_LeftCountItem(ReceiveBuffer);		// 상품잔여 조회갯수 결과
+					break;
+#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT					// #ifndef
+				case 0x0A:
+					ReceiveIGS_DeleteStorageItem(ReceiveBuffer);	// 아이템 버리기 결과
+					break;
+#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+				case 0x0B:
+					ReceiveIGS_UseStorageItem(ReceiveBuffer);		// 보관함 아이템 사용결과
+					break;
+				case 0x0C:
+					ReceiveIGS_UpdateScript(ReceiveBuffer);			// 스크립트 업데이트
+					break;
+				case 0x0D:
+					ReceiveIGS_StorageItemList(ReceiveBuffer);		// 보관함 리스트 전달
+					break;
+				case 0x0E:
+					ReceiveIGS_StorageGiftItemList(ReceiveBuffer);	// 선물함 리스트 전달
+					break;
+				case 0x13:
+					ReceiveIGS_EventItemlistCnt(ReceiveBuffer);		// 이벤트 아이템 리스트 카운트
+					break;
+				case 0x14:
+					ReceiveIGS_EventItemlist(ReceiveBuffer);		// 이벤트 아이템 리스트
+					break;
+				case 0x15:
+					ReceiveIGS_UpdateBanner(ReceiveBuffer);			// 배너 버젼 업데이트
+					break;
+#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
+				case 0x11:
+					ReceivePeriodItemListCount(ReceiveBuffer);		// 기간제 아이템 리스트 카운트
+					break;	
+				case 0x12:
+					ReceivePeriodItemList(ReceiveBuffer);			// 기간제 아이템 리스트
+					break;
+#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
+				}
+			}break;
+
+#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM	
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		case 0x4A:
 			ReceiveStraightAttack(ReceiveBuffer, Size, bEncrypted);

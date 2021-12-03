@@ -47,11 +47,7 @@ static SMDToken GetToken()
 	case '.':	case '-':
 		ungetc(ch,SMDFile);
 		p = TempString;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		while ( (  (ch = (char)getc(SMDFile) ) !=EOF) && (ch=='.' || isdigit(ch) || ch=='-') )
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		while ( (  (ch = getc(SMDFile) ) !=EOF) && (ch=='.' || isdigit(ch) || ch=='-') )
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			*p++ = ch;
 		*p = 0;
 		TokenNumber = (float)atof(TempString);
@@ -59,11 +55,7 @@ static SMDToken GetToken()
 		return CurrentToken = NUMBER;
 	case '"':
 		p = TokenString;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 		while ( (  (ch = (char)getc(SMDFile) ) !=EOF) && (ch!='"'))// || isalnum(ch)) )
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-		while ( (  (ch = getc(SMDFile) ) !=EOF) && (ch!='"'))// || isalnum(ch)) )
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			*p++ = ch;
 		if (ch!='"')
 			ungetc(ch,SMDFile);
@@ -74,11 +66,7 @@ static SMDToken GetToken()
 		{
 			p = TokenString;
 			*p++ = ch;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 			while ( (  (ch = (char)getc(SMDFile) ) !=EOF) && (ch=='.' || ch=='_' || isalnum(ch)) )
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			while ( (  (ch = getc(SMDFile) ) !=EOF) && (ch=='.' || ch=='_' || isalnum(ch)) )
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 				*p++ = ch;
 			ungetc(ch,SMDFile);
 			*p = 0;

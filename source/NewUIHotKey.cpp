@@ -17,6 +17,9 @@
 #include "UIMng.h"
 #include "MapManager.h"
 #include "CharacterManager.h"
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+#include "GameShop/InGameShopSystem.h"
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #ifdef FOR_WORK
 	#include "./Utilities/Log/DebugAngel.h"
@@ -292,6 +295,50 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+	else if(SEASON3B::IsPress('X') == true)
+	{
+#ifdef FOR_WORK
+		DebugAngel_Write("InGameShopStatue.Txt", "CallStack - CNewUIHotKey.UpdateKeyEvent()\r\n");
+#endif // FOR_WORK
+		if(g_pInGameShop->IsInGameShopOpen() == false)
+			return false;
+
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+		if( g_InGameShopSystem->IsScriptDownload() == true )
+		{
+			if( g_InGameShopSystem->ScriptDownload() == false )
+				return false;
+		}
+		if( g_InGameShopSystem->IsBannerDownload() == true ) 
+		{
+			if( g_InGameShopSystem->BannerDownload() == true )
+			{
+				g_pInGameShop->InitBanner(g_InGameShopSystem->GetBannerFileName(), g_InGameShopSystem->GetBannerURL());
+			}
+		}
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+
+		if( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == false)
+		{
+			if( g_InGameShopSystem->GetIsRequestShopOpenning() == false )		
+			{
+				SendRequestIGS_CashShopOpen(0);
+				g_InGameShopSystem->SetIsRequestShopOpenning(true);
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+				g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+			}
+		}
+		else
+		{
+			SendRequestIGS_CashShopOpen(1);
+			g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
+		}		
+
+		return false;
+	}
+#endif // PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	else if(SEASON3B::IsPress('B'))
 	{
 		if(!g_pNewUIGensRanking->SetGensInfo())

@@ -13,14 +13,10 @@ void CInterpolateContainer::GetCurrentValue(vec3_t& v3Out, float fCurrentRate, V
 	VEC_INTERPOLATES::iterator	iterEnd = vecInterpolates.end();
 	VEC_INTERPOLATES::iterator	iter_;
 	
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	INTERPOLATE_FACTOR*	pCurFactor = NULL;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	INTERPOLATE_FACTOR*	pCurFactor;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	bool	bFindInterpolateFactor = false;
 	
-	// 각도변화량 시간별 리스트 적용.
 	for( iter_ = iterBegin; iter_ < iterEnd; ++iter_ )
 	{
 		INTERPOLATE_FACTOR&	interpolateFactor = (*iter_);
@@ -50,14 +46,10 @@ void CInterpolateContainer::GetCurrentValueF(float& fOut, float fCurrentRate, VE
 	VEC_INTERPOLATES_F::iterator	iterEnd = vecInterpolates.end();
 	VEC_INTERPOLATES_F::iterator	iter_;
 	
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
 	INTERPOLATE_FACTOR_F*	pCurFactor = NULL;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	INTERPOLATE_FACTOR_F*	pCurFactor;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
+
 	bool	bFindInterpolateFactor = false;
 	
-	// 각도변화량 시간별 리스트 적용.
 	for( iter_ = iterBegin; iter_ < iterEnd; ++iter_ )
 	{
 		INTERPOLATE_FACTOR_F&	interpolateFactor = (*iter_);
@@ -88,11 +80,6 @@ void CInterpolateContainer::ClearContainer()
 	m_vecInterpolatesAlpha.clear();
 }
 #endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 OBJECT::OBJECT()
 {

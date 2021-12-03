@@ -127,9 +127,6 @@ void IdentityVector3D( T* vect ) {
 	InitVector( vect, 3 ); }
 
 #ifdef KWAK_ADD_TYPE_TEMPLATE_INBOUNDS
-//===================================================================
-// X가 범위 안에 있는지 판별해준다.
-//===================================================================
 template< class T > inline BOOL InBounds	( const T X, const T Min, const T Max )	{	return X<Min ? FALSE : X>Max ? FALSE : TRUE;		}
 #endif // KWAK_ADD_TYPE_TEMPLATE_INBOUNDS
 

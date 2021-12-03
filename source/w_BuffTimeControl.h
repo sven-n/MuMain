@@ -16,11 +16,7 @@ public:
 	virtual ~BuffTimeControl();
 
 public:
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	void RegisterBuffTime( eBuffState bufftype, int curbufftime );
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	void RegisterBuffTime( eBuffState bufftype, DWORD curbufftime );
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	bool UnRegisterBuffTime( eBuffState bufftype );
 	bool IsBuffTime( eBuffTimeType bufftype );
 
@@ -36,11 +32,7 @@ public:
 private:
 	eBuffTimeType CheckBuffTimeType( eBuffState bufftype );
 	DWORD GetBuffEventTime( eBuffTimeType bufftimetype );
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	int GetBuffMaxTime( eBuffState bufftype, int curbufftime = 0 );
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	DWORD GetBuffMaxTime( eBuffState bufftype, DWORD curbufftime = 0 );
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	bool CheckBuffTime( DWORD type );
 	BuffTimeControl();
 

@@ -133,14 +133,8 @@ typedef struct
 	BYTE y2;
 	WORD Target;
 	BYTE Angle;
-#ifdef CSK_ADD_MAP_ICECITY	
 	WORD Level;
-#else // CSK_ADD_MAP_ICECITY	
-	BYTE Level;
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef ASG_ADD_GATE_TEXT_MAX_LEVEL
-	WORD m_wMaxLevel;	// 최대 제한 레벨.
-#endif	// ASG_ADD_GATE_TEXT_MAX_LEVEL
+	WORD m_wMaxLevel;
 } GATE_ATTRIBUTE;
 
 typedef struct
@@ -260,13 +254,11 @@ typedef struct tagITEM
 	WORD  Jewel_Of_Harmony_Option;
 	WORD  Jewel_Of_Harmony_OptionLevel;
 	bool option_380;
-#ifdef SOCKET_SYSTEM
 	BYTE bySocketOption[MAX_SOCKETS];
 	BYTE SocketCount;
 	BYTE SocketSeedID[MAX_SOCKETS];
 	BYTE SocketSphereLv[MAX_SOCKETS];
 	BYTE SocketSeedSetOption;
-#endif	// SOCKET_SYSTEM
 
 	int   Number;
 	BYTE  Color;
@@ -481,9 +473,7 @@ typedef struct
 	vec3_t Velocity;
 	vec3_t TurningForce;
 	vec3_t StartPosition; 
-#ifdef ADD_SOCKET_ITEM
 	int iNumBone;
-#endif // ADD_SOCKET_ITEM
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	bool bRepeatedly;
 	float fRepeatedlyHeight;
@@ -508,13 +498,9 @@ typedef struct
 
 typedef struct Script_Skill
 {
-#ifdef CSK_FIX_MONSTERSKILL
 	int Skill_Num[MAX_MONSTERSKILL_NUM];
-#else // CSK_FIX_MONSTERSKILL
-	int Skill_Num[5];
-#endif // CSK_FIX_MONSTERSKILL
 	int Slot;
-}Script_Skill;
+} Script_Skill;
 
 
 typedef struct
@@ -605,17 +591,16 @@ typedef struct
 //interface end
 
 //matchevent start
-typedef struct  // 악마의 광장 순위
+typedef struct
 {
-	char	m_lpID[MAX_ID_SIZE];	// ID
-	int		m_iScore;				// 누적점수
-	DWORD	m_dwExp;				// 보상 경험치
-	int		m_iZen;					// 포상금
+	char	m_lpID[MAX_ID_SIZE];
+	int		m_iScore;
+	DWORD	m_dwExp;
+	int		m_iZen;
 } DevilSquareRank;
 //matchevent end
 
 //gmhellas start
-//  선택된 오브젝트의 설명.
 typedef struct 
 {
 	char    m_strName[64];
@@ -626,78 +611,56 @@ typedef struct
 //csquest start
 typedef struct 
 {
-	BYTE    chLive;                 //  해당클래스. 0:해당사항 없음. 1:해당됨.
-	BYTE    byQuestType;            //  퀘스트 종류.
-	WORD    wItemType;				//  아이템 타입 번호 또는 몹 인덱스.
-	BYTE    byItemSubType;          //  아이템.
-	BYTE	byItemLevel;			//	아이템 레벨.
-	BYTE    byItemNum;              //  아이템 수.
-	BYTE    byRequestType;          //  요구 조건 인덱스.
-	BYTE    byRequestClass[MAX_CLASS];//  해당 클래스.
-	short   shQuestStartText[4];    //  퀘스트 내용 시작. ( 등록전, 등록후, 조건완비, 수행완료 ) 
+	BYTE    chLive;
+	BYTE    byQuestType;
+	WORD    wItemType;
+	BYTE    byItemSubType;
+	BYTE	byItemLevel;
+	BYTE    byItemNum;
+	BYTE    byRequestType;
+	BYTE    byRequestClass[MAX_CLASS];
+	short   shQuestStartText[4];
 } QUEST_CLASS_ACT;
 
 typedef struct 
 {
-	BYTE    byLive;                 //  
-	BYTE    byType;                 //  255는 공통 요구 조건임.
-	WORD    wCompleteQuestIndex;    //  수행 왼료된 퀘스트 인덱스.
-	WORD    wLevelMin;              //  최소 레벨.
-	WORD    wLevelMax;              //  최대 레벨.
-	WORD	wRequestStrength;		//	요구 힘.
-	DWORD   dwZen;                  //  요구 젠.
-	short   shErrorText;            //  
+	BYTE    byLive;
+	BYTE    byType;
+	WORD    wCompleteQuestIndex;
+	WORD    wLevelMin;
+	WORD    wLevelMax;
+	WORD	wRequestStrength;
+	DWORD   dwZen;
+	short   shErrorText;
 } QUEST_CLASS_REQUEST;
 
 typedef struct 
 {
-	short   shQuestConditionNum;    //  퀘스트 수행 조건 수.
-	short   shQuestRequestNum;      //  퀘스트 요구 조건 수.
-	WORD	wNpcType;				//  NPC타입.
+	short   shQuestConditionNum;
+	short   shQuestRequestNum;
+	WORD	wNpcType;
 
-	unicode::t_char strQuestName[32];       //  퀘스트 이름.
+	unicode::t_char strQuestName[32];
 
-	QUEST_CLASS_ACT     QuestAct[MAX_QUEST_CONDITION];      //  수행 조건.
-	QUEST_CLASS_REQUEST QuestRequest[MAX_QUEST_REQUEST];    //  요구 조건.
+	QUEST_CLASS_ACT     QuestAct[MAX_QUEST_CONDITION];
+	QUEST_CLASS_REQUEST QuestRequest[MAX_QUEST_REQUEST];
 } QUEST_ATTRIBUTE;
 
-
-//  퀘스트 플래그 버퍼.
 typedef struct 
 {
-	BYTE    byFlag;                 //  0: 미사용. 1~128:퀘스트 아이템, 129~255:몬스터 아이템.
-	BYTE    byCount;                //  갯수.
+	BYTE    byFlag;
+	BYTE    byCount;
 } QUEST_FLAG_BUFFER;
 
-
-//  크래스트.
 typedef struct 
 {
-	int iCrastGold;                 //  금.
-	int iCrastSilver;               //  은.
-	int iCrastBronze;               //  동.
+	int iCrastGold;
+	int iCrastSilver;
+	int iCrastBronze;
 } QUEST_CRAST;
 //csquest end
 
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM							//## 소스정리 대상임.
-//cspetsystem start
-typedef struct 
-{
-	DWORD		m_dwPetType;	//	펫타입
-	DWORD       m_dwExp1;       //  경험치1.
-	DWORD       m_dwExp2;       //  경험치2.
-	WORD        m_wLevel;       //  레벨.
-	WORD        m_wLife;        //  생명력.
-	WORD        m_wDamageMin;   //  최소 데미지.
-	WORD        m_wDamageMax;   //  최대 데미지.
-	WORD        m_wAttackSpeed; //  공격 속도.
-	WORD        m_wAttackSuccess;// 공격 성공율.
-}PET_INFO;
-//cspetsystem end
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM						//## 소스정리 대상임.
-
 //csmapinterface start 
-//  위치 정보.
 typedef struct
 {
 	BYTE    bIndex;
@@ -705,57 +668,54 @@ typedef struct
 	BYTE    y;
 }VisibleUnitLocation;
 
-//  길드 명령.
 typedef struct 
 {
-	BYTE    byTeam;     //  팀 번호.
-	BYTE    byX;        //  위치.
-	BYTE    byY;        //  위치.
-	BYTE    byCmd;      //  명령. ( 0:공격(A), 1:방어(D), 2:대기(H), 3:자유(F) ).
-	BYTE    byLifeTime; //  특정 상태를 보여주는 시간.
+	BYTE    byTeam;
+	BYTE    byX;
+	BYTE    byY;
+	BYTE    byCmd;
+	BYTE    byLifeTime;
 }GuildCommander;
 //csmapinterface end
 
 //csitemsetoption start
 typedef	struct 
 {
-	//	값이 255는 존재하지 않는 아이템임.
-	//	[0]: A세트, [1]:B세트.
-	BYTE	byOption[2];		//	옵션 인덱스.
-	BYTE	byMixItemLevel[2];	//	조합할 아아템의 레벨.
+	BYTE	byOption[2];
+	BYTE	byMixItemLevel[2];
 }ITEM_SET_TYPE;
 
 
 typedef struct 
 {
-	char	strSetName[64];			    //	세트 추가 이름.
-	BYTE	byStandardOption[6][2];	    //	기본 옵션 ( 옵션 1 ~ 6 ).
-	BYTE	byStandardOptionValue[6][2];//	기본 옵션 수치 ( 옵션 1 ~ 6 ).
-	BYTE	byExtOption[2];			    //	추가 옵션 ( 옵션 7 ~ 8 ).
-	BYTE	byExtOptionValue[2];        //	추가 옵션 수치 ( 옵션 7 ~ 8 ).
+	char	strSetName[64];
+	BYTE	byStandardOption[6][2];
+	BYTE	byStandardOptionValue[6][2];
+	BYTE	byExtOption[2];
+	BYTE	byExtOptionValue[2];
 	BYTE	byOptionCount;
-	BYTE	byFullOption[5];		    //	풀   옵션 ( 풀옵 1 ~ 5 ).
-	BYTE	byFullOptionValue[5];		//	풀   옵션 수치 ( 풀옵 1 ~ 5 ).
-	BYTE	byRequireClass[MAX_CLASS];	//	해당 클래스.
+	BYTE	byFullOption[5];
+	BYTE	byFullOptionValue[5];
+	BYTE	byRequireClass[MAX_CLASS];
 }ITEM_SET_OPTION;
 //csitemsetoption end
 
 //cseventmatch start
-typedef struct      //  이벤트 경기 결과 정보.
+typedef struct
 {
-	char	m_lpID[MAX_ID_SIZE];	// ID
-	int		m_iScore;				// 누적점수         ( 카오스 캐슬:몬스터수 ).
-	DWORD	m_dwExp;				// 보상 경험치
-	int		m_iZen;					// 포상금           ( 카오스 캐슬:사람수 ).
+	char	m_lpID[MAX_ID_SIZE];
+	int		m_iScore;
+	DWORD	m_dwExp;
+	int		m_iZen;
 }MatchResult;
 //cseventmatch end
 
 //cdirection start
 struct DirectionMonster
 {
-	int		m_Index;			// 생성될 몬스터의 번호
-	int		m_iActionCheck;		// 크라이울프 연출중 동작 체크
-	bool	m_bAngleCheck;		// 생성될 몬스터 방향 트는것 체크
+	int		m_Index;
+	int		m_iActionCheck;
+	bool	m_bAngleCheck;
 };
 //cdirection end
 

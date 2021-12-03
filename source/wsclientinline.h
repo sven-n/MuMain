@@ -625,8 +625,6 @@ __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int C
 }
 #endif //ENABLE_EDIT
 
-
-
 extern int CurrentSkill;
 
 inline BYTE GetDestValue( int xPos, int yPos, int xDst, int yDst)
@@ -731,7 +729,6 @@ extern bool Teleport;
 	spe.Send( TRUE);\
 }
 
-
 #define SendExitInventory()\
 {\
 	CStreamPacketEngine spe;\
@@ -757,8 +754,6 @@ extern bool Teleport;
 	spe.Send( TRUE);\
 }
 #endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
-
-
 
 extern int BuyCost;
 
@@ -1283,13 +1278,6 @@ __forceinline void SendRequestMoveMap(DWORD dwBlockKey,WORD wMapIndex)
 	spe.Send();
 
 	g_ConsoleDebug->Write(MCD_SEND, "0x8E [SendRequestMoveMap(%d %d)]", dwBlockKey, wMapIndex);
-
-#ifdef PJH_DEBUG
-	//g_ConsoleDebug->Write(MCD_SEND, "맵이동  [time : %d]", GetTickCount());
-	char Text[300];
-	wsprintf(Text,"맵이동 [time : %d]", GetTickCount());
-	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);
-#endif
 }
 #endif	// YDG_ADD_MOVE_COMMAND_PROTOCOL
 
@@ -1487,7 +1475,6 @@ __forceinline bool SendRequestStorageExit()
 	spe.Send();\
 }
 
-//길드 리스트 요청
 #define SendRequestGuildList()\
 {\
 	CStreamPacketEngine spe;\
@@ -1496,8 +1483,6 @@ __forceinline bool SendRequestStorageExit()
 }
 
 #ifdef LDK_MOD_PASSWORD_LENGTH_20
-//글로벌 포털용
-//길드에서 길원한명 방출또는 지발로 나가기
 #define SendRequestGuildLeave( p_ID, p_ResidentNumber)\
 {\
 	CStreamPacketEngine spe;\

@@ -188,6 +188,24 @@
       <UniqueIdentifier>{c456f4dd-ca3d-4a2f-abcb-daaeb49a08eb}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
+    <Filter Include="MU\GameShop">
+      <UniqueIdentifier>{4f577537-fa2d-4509-9033-9007d088af78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\GameShop\ShopListManager">
+      <UniqueIdentifier>{b8b8eebf-befa-4656-bdf6-6f5d448fb133}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\GameShop\ShopListManager\interface">
+      <UniqueIdentifier>{2fe902d0-1183-470f-b9d5-e1e9bea71655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\GameShop\ShopListManager\interface\PathMethod">
+      <UniqueIdentifier>{93f8336f-74b0-49c2-838e-81428cd29438}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\GameShop\ShopListManager\interface\WZResult">
+      <UniqueIdentifier>{c7b6bebf-af2a-4105-88d2-64ee49dd3b60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MU\GameShop\FileDownloader">
+      <UniqueIdentifier>{f4ec21ed-5f9f-4112-9199-660f21fcdea5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="source\icon1.ico">
@@ -1108,6 +1126,108 @@
     </ClCompile>
     <ClCompile Include="source\MoveCommandData.cpp">
       <Filter>MU\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\InGameShopSystem.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSBuyConfirm.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSBuyPackageItem.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSBuySelectItem.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSCommon.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSDeleteItemConfirm.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSGiftStorageItemInfo.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSSendGift.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSSendGiftConfirm.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSStorageItemInfo.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSUseBuffConfirm.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\MsgBoxIGSUseItemConfirm.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\NewUIInGameShop.cpp">
+      <Filter>MU\GameShop</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\BannerInfo.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\BannerInfoList.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\BannerListManager.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\FTPFileDownLoader.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\ListManager.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\ShopCategory.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\ShopCategoryList.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\ShopList.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\ShopListManager.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\ShopPackage.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\ShopPackageList.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\ShopProduct.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\ShopProductList.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\StringMethod.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\StringToken.cpp">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\FileDownloader\DownloadInfo.cpp">
+      <Filter>MU\GameShop\FileDownloader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\FileDownloader\FileDownloader.cpp">
+      <Filter>MU\GameShop\FileDownloader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\FileDownloader\FTPConnecter.cpp">
+      <Filter>MU\GameShop\FileDownloader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\FileDownloader\HTTPConnecter.cpp">
+      <Filter>MU\GameShop\FileDownloader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\interface\WZResult\WZResult.cpp">
+      <Filter>MU\GameShop\ShopListManager\interface\WZResult</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameShop\ShopListManager\interface\PathMethod\Path.cpp">
+      <Filter>MU\GameShop\ShopListManager\interface\PathMethod</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2748,6 +2868,132 @@
     </ClInclude>
     <ClInclude Include="source\MoveCommandData.h">
       <Filter>MU\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\InGameShopSystem.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSBuyConfirm.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSBuyPackageItem.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSBuySelectItem.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSCommon.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSDeleteItemConfirm.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSGiftStorageItemInfo.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSSendGift.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSSendGiftConfirm.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSStorageItemInfo.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSUseBuffConfirm.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\MsgBoxIGSUseItemConfirm.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\NewUIInGameShop.h">
+      <Filter>MU\GameShop</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\BannerInfo.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\BannerInfoList.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\BannerListManager.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\FTPFileDownLoader.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\Include.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\ListManager.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\ShopCategory.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\ShopCategoryList.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\ShopList.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\ShopListManager.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\ShopPackage.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\ShopPackageList.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\ShopProduct.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\ShopProductList.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\StringMethod.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\StringToken.h">
+      <Filter>MU\GameShop\ShopListManager</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\DownloadInfo.h">
+      <Filter>MU\GameShop\ShopListManager\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\FileDownloader.h">
+      <Filter>MU\GameShop\ShopListManager\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\FTPConnecter.h">
+      <Filter>MU\GameShop\ShopListManager\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\HTTPConnecter.h">
+      <Filter>MU\GameShop\ShopListManager\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\IConnecter.h">
+      <Filter>MU\GameShop\ShopListManager\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\IDownloaderStateEvent.h">
+      <Filter>MU\GameShop\ShopListManager\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\Include.h">
+      <Filter>MU\GameShop\ShopListManager\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\WZResult\ErrorCodeDefine.h">
+      <Filter>MU\GameShop\ShopListManager\interface\WZResult</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\WZResult\WZResult.h">
+      <Filter>MU\GameShop\ShopListManager\interface\WZResult</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\ShopListManager\interface\PathMethod\Path.h">
+      <Filter>MU\GameShop\ShopListManager\interface\PathMethod</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\FileDownloader\FTPConnecter.h">
+      <Filter>MU\GameShop\FileDownloader</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\FileDownloader\HTTPConnecter.h">
+      <Filter>MU\GameShop\FileDownloader</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GameShop\FileDownloader\Include.h">
+      <Filter>MU\GameShop\FileDownloader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -83,6 +83,9 @@ SEASON3B::CNewUISystem::CNewUISystem()
 #ifdef YDG_ADD_NEW_DUEL_UI
 	m_pNewDuelWatchWindow = NULL;
 #endif	// YDG_ADD_NEW_DUEL_UI	
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+	m_pNewInGameShop = NULL;
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef YDG_ADD_DOPPELGANGER_UI
 	m_pNewDoppelGangerWindow = NULL;
 	m_pNewDoppelGangerFrame = NULL;
@@ -443,6 +446,12 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 	if(m_pNewDuelWatchUserListWindow->Create(m_pNewUIMng, 640-57, 480-51) == false)
 		return false;
 
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+	m_pNewInGameShop = new CNewUIInGameShop;
+	if(m_pNewInGameShop->Create(m_pNewUIMng, 0, 0) == false)
+		return false;
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
+
 	m_pNewDoppelGangerWindow = new CNewUIDoppelGangerWindow;
 	if( m_pNewDoppelGangerWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640-190, 0) == false )
 		return false;
@@ -575,15 +584,16 @@ void SEASON3B::CNewUISystem::UnloadMainSceneInterface()
 	SAFE_DELETE(m_pNewExchangeLuckyCoinWindow);
 
 	SAFE_DELETE(m_pNewDuelWatchWindow);
-
-#ifdef YDG_FIX_MEMORY_LEAK_0905
 	SAFE_DELETE(m_pNewDuelWindow);
 
 #ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 	SAFE_DELETE(m_pNewDuelWatchMainFrameWindow);
 	SAFE_DELETE(m_pNewDuelWatchUserListWindow);
 #endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-#endif	// YDG_FIX_MEMORY_LEAK_0905
+
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+	SAFE_DELETE(m_pNewInGameShop);
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
 	SAFE_DELETE(m_pNewDoppelGangerWindow);
 	SAFE_DELETE(m_pNewDoppelGangerFrame);
@@ -624,6 +634,10 @@ bool SEASON3B::CNewUISystem::IsVisible(DWORD dwKey)
 
 void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 {
+#ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
+	if(g_pInGameShop->IsInGameShop())
+		return;
+#endif //PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 	if(m_pNewUIMng) 
 	{
 		if(dwKey == SEASON3B::INTERFACE_FRIEND)
@@ -919,6 +933,19 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 		{
 			m_pNewDuelWatchUserListWindow->OpeningProcess();
 		}
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+		else if(dwKey == SEASON3B::INTERFACE_INGAMESHOP)
+		{
+#ifdef FOR_WORK
+			DebugAngel_Write("InGameShopStatue.Txt", "CallStack - CNewUISystem.Show()\r\n");
+#endif // FOR_WORK
+			HideAll();
+			g_pInGameShop->OpeningProcess();
+#ifndef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+			g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+		}
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		else if( dwKey == SEASON3B::INTERFACE_DOPPELGANGER_NPC )
 		{
 			m_pNewDoppelGangerWindow->OpeningProcess();
@@ -1303,6 +1330,13 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		{
 			m_pNewDuelWatchUserListWindow->ClosingProcess();
 		}
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+		else if(dwKey == SEASON3B::INTERFACE_INGAMESHOP)
+		{
+			g_pInGameShop->ClosingProcess();
+			g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, false);
+		}
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		else if( dwKey == SEASON3B::INTERFACE_DOPPELGANGER_NPC )
 		{
 			m_pNewDoppelGangerWindow->ClosingProcess();
@@ -1686,6 +1720,9 @@ bool SEASON3B::CNewUISystem::IsImpossibleTradeInterface()
 		|| IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)
 		|| IsVisible(SEASON3B::INTERFACE_STORAGE)
 		|| IsVisible(SEASON3B::INTERFACE_INGAMESHOP)
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+		|| IsVisible(SEASON3B::INTERFACE_INGAMESHOP)
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef LEM_ADD_LUCKYITEM
 		|| IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
 #endif // LEM_ADD_LUCKYITEM
@@ -1703,6 +1740,9 @@ bool SEASON3B::CNewUISystem::IsImpossibleDuelInterface()
 		|| IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)
 		|| IsVisible(SEASON3B::INTERFACE_STORAGE)
 		|| IsVisible(SEASON3B::INTERFACE_INGAMESHOP)
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+		|| IsVisible(SEASON3B::INTERFACE_INGAMESHOP)
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #ifdef LEM_ADD_LUCKYITEM
 		|| IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)				
 #endif // LEM_ADD_LUCKYITEM
@@ -2168,6 +2208,13 @@ CNewUIDuelWatchUserListWindow* SEASON3B::CNewUISystem::GetUI_pNewDuelWatchUserLi
 	return m_pNewDuelWatchUserListWindow;
 }
 #endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
+
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+CNewUIInGameShop* SEASON3B::CNewUISystem::GetUI_pNewInGameShop() const
+{
+	return m_pNewInGameShop;
+}
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
 #ifdef YDG_ADD_DOPPELGANGER_UI
 CNewUIDoppelGangerWindow* SEASON3B::CNewUISystem::GetUI_pNewDoppelGangerWindow() const

@@ -328,7 +328,6 @@ void RenderObjectBlurs()
 				BindTexture(nTexture);
 				for(int j=0;j<b->Number-1;j++)
 				{
-					//pjh
 					float Data = 300.f;
 					if(b->SubType == 113 || b->SubType == 114)
 					{

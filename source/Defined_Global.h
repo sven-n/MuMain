@@ -228,11 +228,11 @@
 			#define PBG_ADD_ITEMRESIZE
 			#define PBG_FIX_ITEMANGLE
 			#define PBG_ADD_MU_LOGO
-			//^#define PBG_ADD_CHARACTERSLOT					//Add Rf i think
-			#define KJH_DEL_PC_ROOM_SYSTEM						// ÇÇ¾¾¹æ ½Ã½ºÅÛ »èÁ¦ (09.10.22) - ÇÇ¾¾¹æ Á¢¼Ó¿©ºÎ´Â ³²°ÜµÒ(class CPCRoomPtSys)
+			//^#define PBG_ADD_CHARACTERSLOT
+			#define KJH_DEL_PC_ROOM_SYSTEM
 
-			#define PBG_ADD_CHARACTERCARD								// Ä³¸¯ÅÍ Ä«µå (´Å©·Îµå,¸¶°Ë»ç »ý¼º Ä«µå) (09.05.04) - ¼ÒÈ¯¼ú»çÄ«µå Ãß°¡(09.06.04)
-			//^#define LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW		// ±¹³» Àü¿ë ÀÌµ¿Ã¢ ÀÌµ¿Á¦ÇÑ ¼³Á¤, ÀÌµ¿ÀÇ ÀÎÀåÀ¸·Î ÇØÁ¦ (PSW_SEAL_ITEM°ü·Ã) - ±Û·Î¹ú Á¦¿Ü
+			#define PBG_ADD_CHARACTERCARD
+			//^#define LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
 		#endif //KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
 		//------------------------------------------------
@@ -806,6 +806,8 @@
 #ifndef KJH_PBG_ADD_INGAMESHOP_SYSTEM					// #ifndef
 	#define NEW_USER_INTERFACE	
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
+
+
 
 #ifdef NEW_USER_INTERFACE
 	#define NEW_COMMANDS

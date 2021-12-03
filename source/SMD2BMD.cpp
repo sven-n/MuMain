@@ -382,14 +382,7 @@ void SMD2BMDAnimation(int ID,bool LockPosition)
 
 	for(i=0;i<bmd->NumBones;i++)
 	{
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-       	Node_t *n = &NodeGroup.Node[i];
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 		Bone_t *b = &bmd->Bones[i];
-
-		//strcpy(b->Name, n->Name);
-		//b->Parent   = n->Parent;
 
 		//if(!b->Dummy)
 		{

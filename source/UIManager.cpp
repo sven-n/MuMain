@@ -174,29 +174,6 @@ bool CUIManager::CloseInterface(std::list<DWORD>& dwInterfaceFlag, DWORD dwExtra
 
 bool CUIManager::IsOpen( DWORD dwInterface )
 {
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-	bool bOpen = false;
-
-	if( dwInterface == 0 )
-	{
-		for( DWORD dwInterface=INTERFACE_FRIEND ; dwInterface<INTERFACE_MAX_COUNT ; ++dwInterface )
-		{
-			if( IsOpen( dwInterface ) )
-				bOpen = true;
-		}
-	}
-
-	switch( dwInterface )
-	{
-	case INTERFACE_INVENTORY:				bOpen = HeroInventoryEnable;		break;
-	case INTERFACE_STORAGE:					bOpen = StorageInventoryEnable;		break;
-	case INTERFACE_PERSONALSHOPSALE:	
-	case INTERFACE_PERSONALSHOPPURCHASE:	bOpen = g_bPersonalShopWnd;			break;
-	case INTERFACE_SERVERDIVISION:			bOpen = g_bServerDivisionEnable;	break;
-	default:								bOpen = false;						break;
-	}
-	return bOpen;
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
 	if( dwInterface == 0 )
 	{
 		for( DWORD dwInterface=INTERFACE_FRIEND ; dwInterface<INTERFACE_MAX_COUNT ; ++dwInterface )
@@ -221,7 +198,6 @@ bool CUIManager::IsOpen( DWORD dwInterface )
 		return false;
 	}
 	return false;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 }
 
 bool CUIManager::IsCanOpen( DWORD dwInterfaceFlag )

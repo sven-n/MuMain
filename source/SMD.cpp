@@ -61,10 +61,6 @@ void ParseNodes()
 			if(strcmp("time",TokenString)==NULL)
 			{
            		Token = (*GetToken)();
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-				int TimeNum = (int)TokenNumber;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
             	Skeleton_t *s = &ng->Skeleton;
 				for(int i=0;i<ng->NodeNum;i++)
 				{

@@ -29,24 +29,12 @@ void SEASON3B::CNewUINPCShop::Init()
 	m_pNewUIMng = NULL;
 	m_pNewInventoryCtrl = NULL;
 	m_Pos.x = m_Pos.y = 0;
-
 	m_dwShopState = SHOP_STATE_BUYNSELL;
 	m_iTaxRate = 0;
 	m_bRepairShop = false;
-
-#ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 	m_bIsNPCShopOpen = false;
-#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
-#ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-	m_bFirstOpen = false;
-#endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
-
 	m_dwStandbyItemKey = 0;
-
-#ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
 	m_bSellingItem = false;
-#endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
 }
 
 bool SEASON3B::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int y)

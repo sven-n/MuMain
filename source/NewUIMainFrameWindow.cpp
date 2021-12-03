@@ -33,6 +33,10 @@
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#include "GameShop/InGameShopSystem.h"
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
+
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 extern int  MouseUpdateTime;

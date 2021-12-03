@@ -66,6 +66,9 @@
 #include "NewUIDuelWatchWindow.h"
 #include "NewUIDuelWatchMainFrameWindow.h"
 #include "NewUIDuelWatchUserListWindow.h"
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#include "GameShop\NewUIInGameShop.h"
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #include "NewUIDoppelGangerWindow.h"
 #include "NewUIDoppelGangerFrame.h"
 #include "NewUIQuestProgress.h"
@@ -198,6 +201,9 @@ namespace SEASON3B
 		CNewUIDuelWatchWindow*			m_pNewDuelWatchWindow;
 		CNewUIDuelWatchMainFrameWindow*	m_pNewDuelWatchMainFrameWindow;
 		CNewUIDuelWatchUserListWindow* m_pNewDuelWatchUserListWindow;
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+		CNewUIInGameShop* m_pNewInGameShop;
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		CNewUIDoppelGangerWindow*		m_pNewDoppelGangerWindow;
 		CNewUIDoppelGangerFrame*		m_pNewDoppelGangerFrame;
 		CNewUINPCDialogue*				m_pNewNPCDialogue;
@@ -271,6 +277,9 @@ namespace SEASON3B
 		CNewUIDuelWatchWindow*	GetUI_pNewDuelWatch() const;
 		CNewUIDuelWatchMainFrameWindow*	GetUI_pNewDuelWatchMainFrame() const;
 		CNewUIDuelWatchUserListWindow* GetUI_pNewDuelWatchUserList() const;
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+		CNewUIInGameShop* GetUI_pNewInGameShop() const;
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		CNewUIDoppelGangerWindow*	GetUI_pNewDoppelGangerWindow() const;
 		CNewUIDoppelGangerFrame*	GetUI_pNewDoppelGangerFrame() const;
 		CNewUINPCDialogue* GetUI_NewNPCDialogue() const;
@@ -352,7 +361,7 @@ namespace SEASON3B
 #define g_pDuelWatchMainFrameWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDuelWatchMainFrame()
 #define g_pDuelWatchUserList SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDuelWatchUserList()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-#define g_pInGameShop SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewInGameShop()
+#define g_pInGameShop SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewInGameShop() 
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #define g_pDoppelGangerWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDoppelGangerWindow()
 #define g_pDoppelGangerFrame SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDoppelGangerFrame()

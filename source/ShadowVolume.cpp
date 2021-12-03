@@ -79,10 +79,6 @@ void RenderShadowToScreen( void)
 	EnableAlphaBlendMinus();
 	DisableTexture();
 	vec3_t vLight = { .7f,0.7f,0.5f};
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-	float fAlpha = 1.0f;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 
 	//RenderTerrainAlphaBitmap(BITMAP_HIDE, Hero->Object.Position[0],Hero->Object.Position[1],20.f,20.f,vLight,0.f,fAlpha);
 	float p[4][2];
@@ -100,9 +96,6 @@ void RenderShadowToScreen( void)
 		glVertex2f(p[i][0],p[i][1]);
 	}
 	glEnd();
-	//EndBitmap();
-
-	//EnableTexture();
 	glDepthFunc( GL_LESS);
 	glDisable( GL_STENCIL_TEST);
 	EnableDepthMask();

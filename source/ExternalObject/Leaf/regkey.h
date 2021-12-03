@@ -28,10 +28,6 @@ namespace leaf{
 			HKEY	hKey = NULL;
 			DWORD	dwDisp;
 			DWORD	dwType = REG_DWORD;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			DWORD	dwValue = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			DWORD	dwSize = sizeof(DWORD);
 			
 			if (ERROR_SUCCESS != RegCreateKeyEx(m_hKey, m_subkey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
@@ -50,10 +46,6 @@ namespace leaf{
 			HKEY	hKey = NULL;
 			DWORD	dwDisp;
 			DWORD	dwType = REG_EXPAND_SZ;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			DWORD	dwValue = 0;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			DWORD	dwSize = 256;
 			
 			if (ERROR_SUCCESS != RegCreateKeyEx(m_hKey, m_subkey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
@@ -70,10 +62,6 @@ namespace leaf{
 		bool WriteDword(const std::string& name, DWORD value) {
 			HKEY	hKey = NULL;
 			DWORD	dwDisp;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			DWORD	dwType = REG_DWORD;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			DWORD	dwSize = sizeof(DWORD);
 			
 			if (ERROR_SUCCESS != RegCreateKeyEx(m_hKey, m_subkey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
@@ -86,10 +74,6 @@ namespace leaf{
 		bool WriteString(const std::string& name, const std::string& value) {
 			HKEY	hKey = NULL;
 			DWORD	dwDisp;
-#ifdef KWAK_FIX_COMPILE_LEVEL4_WARNING
-#else // KWAK_FIX_COMPILE_LEVEL4_WARNING
-			DWORD	dwType = REG_DWORD;
-#endif // KWAK_FIX_COMPILE_LEVEL4_WARNING
 			DWORD	dwSize = value.size();
 			
 			if (ERROR_SUCCESS != RegCreateKeyEx(m_hKey, m_subkey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
@@ -118,16 +102,6 @@ namespace leaf{
 		HKEY	m_hKey;
 		std::string	m_subkey;
 	};
-
-	// example
-/*
-	leaf::CRegKey reg;
-	reg.SetKey(HKEY_CURRENT_USER, "Control Panel\\Desktop");
-	reg.WriteString("Wallpaper", strFileName);
-	
-	reg.SetKey(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders");
-	reg.ReadString("Favorites", strFavorites);
-*/
 }
 
 #endif /* _REGKEY_H_ */
