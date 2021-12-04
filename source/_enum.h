@@ -1974,7 +1974,8 @@ namespace COMGEM
 		NOCOM = -1,
 		FIRST	= 10,
 		SECOND	= 20,
-		THIRD	= 30
+		THIRD	= 30,
+		eCOMTYPE_END = 3
 	};
 
 	enum	_STATE
@@ -2267,10 +2268,6 @@ enum eBuffValueLoadType
 
 	eBuffValueLoad_Count,
 };
-
-#define BUFFINDEX( buff )				static_cast<eBuffState>(buff)
-#define BUFFTIMEINDEX( timetype )		static_cast<eBuffTimeType>(timetype)
-#define ITEMINDEX( type, index )        static_cast<DWORD>((type*MAX_ITEM_INDEX)+index)
 
 enum
 {

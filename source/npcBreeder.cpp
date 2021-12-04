@@ -23,7 +23,7 @@ extern  int SrcInventoryIndex;
 
 namespace npcBreeder
 {
-    int     CalcRecoveryZen ( BYTE type, char* Text )
+    int CalcRecoveryZen ( BYTE type, char* Text )
     {
         ITEM* ip;
 
@@ -48,17 +48,6 @@ namespace npcBreeder
                 return -1;
             }
             break;
-
-#ifdef DARK_WOLF
-        case REVIVAL_DARKWOLF:
-            ip = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-            if ( ip->Type!=ITEM_HELPER+6 )
-            {
-                sprintf ( Text, GlobalText[1229] );
-                return -1;
-            }
-            break;
-#endif// DARK_WOLF
         }
 	    ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
 
@@ -69,27 +58,10 @@ namespace npcBreeder
         if ( ip->Durability < maxDurability )
         {
 			DWORD dwValue = 0;
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-			dwValue = giPetManager::GetPetItemValue( giPetManager::GetPetInfo(ip) );	// 250¸¸Á¨
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM
-			if(type == REVIVAL_DARKSPIRIT)
-			{
-				dwValue = giPetManager::ItemValue( PET_TYPE_DARK_SPIRIT );	// 250¸¸Á¨
-			}
-			else if(type == REVIVAL_DARKHORSE)
-			{
-				dwValue = giPetManager::ItemValue( PET_TYPE_DARK_HORSE );	// 250¸¸Á¨
-			}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
+			dwValue = giPetManager::GetPetItemValue( giPetManager::GetPetInfo(ip) );
 			
             Gold = ConvertRepairGold( dwValue, ip->Durability, maxDurability, ip->Type, Text );
         }
-#ifndef KJH_FIX_REPAIR_DARKLOAD_PET_DURABILITY_ZERO
-        if ( ip->Durability==0 )
-        {
-            Gold *= 2;
-        }
-#endif // KJH_FIX_REPAIR_DARKLOAD_PET_DURABILITY_ZERO
 
         switch ( Gold )
         {
@@ -104,16 +76,16 @@ namespace npcBreeder
 
 				if ( (int)CharacterMachine->Gold<Gold )
                 {
-	                ConvertGold ( Gold-CharacterMachine->Gold, Text);
-                    sprintf ( Text2, GlobalText[1231], Text );
+	                ConvertGold((double)Gold-CharacterMachine->Gold, Text);
+                    sprintf(Text2, GlobalText[1231], Text);
                 }
                 else
                 {
-                    sprintf ( Text2, GlobalText[1232], Text );
+                    sprintf(Text2, GlobalText[1232], Text);
                 }
 
-                int   Length = strlen ( Text2 );
-                memcpy ( Text, Text2, sizeof( char )*Length );
+                int Length = strlen(Text2);
+                memcpy(Text, Text2, sizeof(char)*Length);
                 Text[Length] = 0;
 
             }
@@ -123,21 +95,21 @@ namespace npcBreeder
         return Gold;
     }
 
-	void RecoverPet( BYTE type )
+	void RecoverPet(BYTE type)
 	{
         char Text[100];
-        int Gold = CalcRecoveryZen ( type, Text );
+        int Gold = CalcRecoveryZen(type, Text );
 
 		if ( (int)CharacterMachine->Gold>=Gold && Gold!=-1 )
         {
-            switch ( type )
+            switch (type)
             {
             case REVIVAL_DARKHORSE:
-				SendRequestRepair ( EQUIPMENT_HELPER, Gold );
+				SendRequestRepair (EQUIPMENT_HELPER, Gold );
                 break;
 
             case REVIVAL_DARKSPIRIT:
-				SendRequestRepair ( EQUIPMENT_WEAPON_LEFT, Gold );
+				SendRequestRepair (EQUIPMENT_WEAPON_LEFT, Gold );
                 break;
             }
             giPetManager::InitItemBackup ();

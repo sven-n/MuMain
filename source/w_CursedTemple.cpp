@@ -1001,7 +1001,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 	}
 	return false;
 }
-#ifdef PBG_FIX_CURSEDTEMPLE_SYSTEMMSG
+
 void CursedTemple::UpdateTempleSystemMsg(int _Value)
 {
 	unicode::t_char szText[256]={0,};
@@ -1034,7 +1034,6 @@ void CursedTemple::UpdateTempleSystemMsg(int _Value)
 		break;
 	}
 }
-#endif //PBG_FIX_CURSEDTEMPLE_SYSTEMMSG
 
 void CursedTemple::SetGaugebarEnabled(bool bFlag)
 {

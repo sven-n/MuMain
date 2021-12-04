@@ -188,10 +188,6 @@ void CSPetSystem::CreatePetPointer ( int Type, unsigned char PositionX, unsigned
 		break;
 	}
     m_byCommand = PET_CMD_DEFAULT;
-
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM
-    SendRequestPetInfo ( 0, 0, EQUIPMENT_WEAPON_LEFT );
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 
 bool CSPetSystem::PlayAnimation ( OBJECT* o )
@@ -599,33 +595,7 @@ void    CSPetDarkSpirit::MovePet ( void )
 
 void CSPetDarkSpirit::CalcPetInformation ( const PET_INFO& Petinfo )
 {
-#ifndef KJH_FIX_DARKLOAD_PET_SYSTEM
-    int Charisma = CharacterAttribute->Charisma+CharacterAttribute->AddCharisma;
-    int CharLevel= CharacterAttribute->Level;
 
-#ifdef KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
-	int Level2              = Petinfo.m_wLevel+1;
-    m_PetCharacter.Level    = Petinfo.m_wLevel;
-    m_PetInfo.m_wLevel      = Petinfo.m_wLevel;
-    m_PetInfo.m_wLife       = Petinfo.m_wLife;
-    m_PetInfo.m_dwExp1      = Petinfo.m_dwExp1;
-#else // KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
-    int Level2              = Level+1;
-    m_PetCharacter.Level    = Level;
-    m_PetInfo.m_wLevel      = Level;
-
-    m_PetInfo.m_wLife       = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability;
-
-
-    m_PetInfo.m_dwExp1      = exp;
-#endif // KJH_FIX_WOPS_K19787_PET_LIFE_ABNORMAL_RENDER
-
-    m_PetInfo.m_dwExp2      = ((10+Level2)*Level2*Level2*Level2*100);
-    m_PetInfo.m_wDamageMax  = (200+(m_PetInfo.m_wLevel*15)+(Charisma/4));
-    m_PetInfo.m_wDamageMin  = (180+(m_PetInfo.m_wLevel*15)+(Charisma/8));
-    m_PetInfo.m_wAttackSpeed= (20+(m_PetInfo.m_wLevel*4/5)+(Charisma/50));
-    m_PetInfo.m_wAttackSuccess = (1000+m_PetInfo.m_wLevel)+(m_PetInfo.m_wLevel*15);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 }
 
 void    CSPetDarkSpirit::RenderPetInventory ( void )
@@ -643,10 +613,9 @@ void    CSPetDarkSpirit::RenderPet ( int PetState )
         return;
     }
 
-#ifdef PBG_FIX_DARKPET_RENDER
 	if(m_pPetInfo)
 		o->WeaponLevel = static_cast<BYTE>(m_pPetInfo->m_wLevel & 0xFF);
-#endif //PBG_FIX_DARKPET_RENDER
+
 	if ( o->Live )
 	{
 		o->Visible = TestFrustrum2D ( o->Position[0]*0.01f, o->Position[1]*0.01f, -20.f );

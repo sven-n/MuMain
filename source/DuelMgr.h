@@ -58,11 +58,7 @@ public:
 	float GetHP(int iPlayerNum);
 	float GetSD(int iPlayerNum);
 
-#ifdef YDG_FIX_DUEL_SUMMON_CLOAK
 	BOOL IsDuelPlayer(CHARACTER * pCharacter, int iPlayerNum, BOOL bIncludeSummon = TRUE);
-#else	// YDG_FIX_DUEL_SUMMON_CLOAK
-	BOOL IsDuelPlayer(CHARACTER * pCharacter, int iPlayerNum);
-#endif	// YDG_FIX_DUEL_SUMMON_CLOAK
 	BOOL IsDuelPlayer(WORD wIndex, int iPlayerNum);
 
 	void SendDuelRequestAnswer(int iPlayerNum, BOOL bOK);

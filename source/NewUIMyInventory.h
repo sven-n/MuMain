@@ -1,5 +1,4 @@
 // NewUIPersonalInventory.h: interface for the CNewUIMyInventory class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIMYINVENTORY_H__74DA6D7A_CF5A_46E9_8C72_9D38F0DC95EC__INCLUDED_)
@@ -61,9 +60,7 @@ namespace SEASON3B
 		enum ITEM_OPTION
 		{
 			ITEM_SET_OPTION = 1,
-#ifdef SOCKET_SYSTEM
 			ITEM_SOCKET_SET_OPTION = 2,
-#endif	// SOCKET_SYSTEM
 		};
 
 		enum
@@ -86,17 +83,16 @@ namespace SEASON3B
 		EQUIPMENT_ITEM m_EquipmentSlots[MAX_EQUIPMENT_INDEX];
 		int	m_iPointedSlot;
 		
-		//. 버튼
-		CNewUIButton m_BtnRepair;		// 수리 버튼
-		CNewUIButton m_BtnExit;			// 닫기 버튼
-		CNewUIButton m_BtnMyShop;		// 개인 상점 버튼
+		CNewUIButton m_BtnRepair;
+		CNewUIButton m_BtnExit;
+		CNewUIButton m_BtnMyShop;
 
 		MYSHOP_MODE m_MyShopMode;
 		REPAIR_MODE m_RepairMode;
 		DWORD m_dwStandbyItemKey;
 		
-		bool m_bRepairEnableLevel;		// 수리 가능 레벨이 넘었는가? 레벨50부터
-		bool m_bMyShopOpen;				// 개인상점 열 수 있는가? 레벨6부터
+		bool m_bRepairEnableLevel;
+		bool m_bMyShopOpen;
 
 	public:
 		CNewUIMyInventory();
@@ -144,20 +140,13 @@ namespace SEASON3B
 		ITEM* FindItemByKey(DWORD dwKey);
 		int FindItemIndex( short int siType, int iLevel = -1 );
 		int FindItemReverseIndex(short sType, int iLevel = -1);
-		int FindEmptySlot(int cx, int cy);
+		int FindEmptySlot(IN int cx,IN int cy);
 		int FindEmptySlot(ITEM* pItem);
 		bool IsItem( short int siType, bool bcheckPick = false );
-		// 아이템 키값으로 인벤토리내에 있는 아이템 갯수 리턴
 		int	GetNumItemByKey( DWORD dwItemKey );
-		// 아이템 타입으로 인벤토리내에 있는 아이템 갯수 리턴
 		int GetNumItemByType(short sItemType);
-		
-		// 마우스가 가르키고 있는 아이템의 내구도를 얻는 함수
 		BYTE GetDurabilityPointedItem(); 
-		// 마우스가 가르키고 있는 아이템의 인텍스를 얻는 함수
 		int GetPointedItemIndex();
-		
-		// 마나아이템 찾아서 인덱스 리턴해주는 함수
 		int FindManaItemIndex();
 
 		static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
@@ -176,30 +165,24 @@ namespace SEASON3B
 		void LockMyShopButtonOpen();
 		void UnlockMyShopButtonOpen();
 
-		void CreateEquippingEffect(ITEM* pItem);	//. 장착효과 생성: 유니리아, 펜릴, 사탄, 요정, 디노란트, 펫
+		void CreateEquippingEffect(ITEM* pItem);
 
-		// QWER 아이템 핫키에 등록 가능한 아이템인가?
 		static bool CanRegisterItemHotKey(int iType);
 
 	protected:
-		void DeleteEquippingEffect();				// 아이템 장착효과 제거
-		void DeleteEquippingEffectBug(ITEM* pItem);	// 펫이나 탈 것 장착효과 제거
+		void DeleteEquippingEffect();
+		void DeleteEquippingEffectBug(ITEM* pItem);
 
 		void SetEquipmentSlotInfo();
 		void SetButtonInfo();
 
-#ifdef PBG_FIX_SKILLHOTKEY
-		void ResetSkillofItem(ITEM* pItem);			//아이템의 스킬 핫키 기억 제거
-#endif //PBG_FIX_SKILLHOTKEY
 	private:
 		void LoadImages();
 		void UnloadImages();
 
 		void RenderFrame();
 		void RenderSetOption();
-#ifdef SOCKET_SYSTEM
 		void RenderSocketOption();
-#endif	// SOCKET_SYSTEM
 		void RenderEquippedItem();
 		void RenderButtons();
 		void RenderInventoryDetails();

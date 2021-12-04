@@ -81,8 +81,6 @@ typedef struct _PART_t
 
 } PART_t;
 
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-//cspetsystem start
 typedef struct 
 {
 	DWORD		m_dwPetType;
@@ -94,10 +92,7 @@ typedef struct
 	WORD        m_wDamageMax;
 	WORD        m_wAttackSpeed;
 	WORD        m_wAttackSuccess;
-}PET_INFO;
-//cspetsystem end
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
-
+} PET_INFO;
 
 #ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 

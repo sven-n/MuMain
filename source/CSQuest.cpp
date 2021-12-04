@@ -449,7 +449,7 @@ BYTE CSQuest::CheckQuestState ( BYTE state )
 	return m_byCurrState;
 }
 
-void    CSQuest::ShowDialogText ( int iDialogIndex )
+void CSQuest::ShowDialogText ( int iDialogIndex )
 {
 	g_iCurrentDialogScript = iDialogIndex;
 

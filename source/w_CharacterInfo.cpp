@@ -106,10 +106,8 @@ void CHARACTER::Initialize()
 	m_pParts = NULL;
 
 	m_pPet = NULL;
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 	InitPetInfo(PET_TYPE_DARK_HORSE);
 	InitPetInfo(PET_TYPE_DARK_SPIRIT);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 
 #ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	for( int i = 0; i < 32; ++i ) OwnerID[i] = 0;
@@ -136,7 +134,6 @@ void CHARACTER::Destroy()
 
 }
 
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 void CHARACTER::InitPetInfo(int iPetType)
 {
 	m_PetInfo[iPetType].m_dwPetType = PET_TYPE_NONE;
@@ -146,7 +143,6 @@ PET_INFO* CHARACTER::GetEquipedPetInfo(int iPetType)
 {
 	return &(m_PetInfo[iPetType]);
 }
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 
 #ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 

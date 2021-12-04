@@ -131,24 +131,15 @@ void CCharMakeWin::Create()
 	int nText;
 	for (i = 0; i < MAX_CLASS; ++i)
 	{
-		bool isMake = true;
-#ifdef PSW_CHARACTER_CARD
-		if( i == CLASS_SUMMONER ) {
-			isMake = TheGameServerProxy().IsCharacterCard();
-		}
-#endif //PSW_CHARACTER_CARD
-		if( isMake == true )
-		{
-			m_abtnJob[i].Create(108, 26, BITMAP_LOG_IN+1, 4, 2, 1, 0, 3, 3, 3, 0);
+		m_abtnJob[i].Create(108, 26, BITMAP_LOG_IN+1, 4, 2, 1, 0, 3, 3, 3, 0);
 #ifdef PBG_ADD_NEWCHAR_MONK
-			int _btn_classname[MAX_CLASS] = {20, 21, 22, 23, 24, 1687, 3150};
-			nText = _btn_classname[i];
+		int _btn_classname[MAX_CLASS] = {20, 21, 22, 23, 24, 1687, 3150};
 #else //PBG_ADD_NEWCHAR_MONK
-			nText = CLASS_SUMMONER == i ? 1687 : 20 + i;
+		int _btn_classname[MAX_CLASS] = {20, 21, 22, 23, 24, 1687};
 #endif //PBG_ADD_NEWCHAR_MONK
-			m_abtnJob[i].SetText(GlobalText[nText], adwJobBtnClr);
-			CWin::RegisterButton(&m_abtnJob[i]);
-		}
+		nText = _btn_classname[i];
+		m_abtnJob[i].SetText(GlobalText[nText], adwJobBtnClr);
+		CWin::RegisterButton(&m_abtnJob[i]);
 	}
 
 	for (i = 0; i < 2; ++i)

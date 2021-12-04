@@ -870,8 +870,6 @@ void CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energ
 	GetSpecial ( Charisma,  AT_SET_OPTION_IMPROVE_CHARISMA );
 }
 
-#ifdef LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
-
 void CSItemOption::getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma )
 {
 	*AddStrength = *AddDexterity = *AddEnergy = *AddVitality = *AddCharisma = 0;
@@ -932,7 +930,6 @@ void CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexter
 	GetSpecial ( Charisma,  AT_SET_OPTION_IMPROVE_CHARISMA );
 
 }
-#endif // LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
 
 
 void CSItemOption::CheckItemSetOptions ( void )
@@ -971,10 +968,7 @@ void CSItemOption::CheckItemSetOptions ( void )
 
 	calcSetOptionList( byOptionList );
 
-	getAllAddStateOnlyAddValue ( &CharacterAttribute->AddStrength,	&CharacterAttribute->AddDexterity, 
-								 &CharacterAttribute->AddEnergy,	&CharacterAttribute->AddVitality, 
-								 &CharacterAttribute->AddCharisma 
-							   );
+	getAllAddStateOnlyAddValue ( &CharacterAttribute->AddStrength,	&CharacterAttribute->AddDexterity, &CharacterAttribute->AddEnergy, &CharacterAttribute->AddVitality, &CharacterAttribute->AddCharisma);
 
     WORD AllStrength  = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
     WORD AllDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
@@ -992,11 +986,7 @@ void CSItemOption::CheckItemSetOptions ( void )
 
 		ITEM *ip = &CharacterMachine->Equipment[i];
 
-        if ( ip->RequireDexterity>AllDexterity || ip->RequireEnergy>AllEnergy || ip->RequireStrength>AllStrength 
-#if defined PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM || defined YDG_FIX_SETITEM_REQUIRED_STATUS_BUG
-			|| ip->RequireLevel > AllLevel || ip->RequireCharisma > AllCharisma || ip->Durability <= 0 || ( IsRequireEquipItem( ip ) == false )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-			)
+        if ( ip->RequireDexterity>AllDexterity || ip->RequireEnergy>AllEnergy || ip->RequireStrength>AllStrength || ip->RequireLevel > AllLevel || ip->RequireCharisma > AllCharisma || ip->Durability <= 0 || ( IsRequireEquipItem( ip ) == false ))
         {
             continue;
         }

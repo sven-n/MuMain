@@ -5122,18 +5122,14 @@ void CUIUnmixgemList::RenderInterface()
 	//if (GetLineNum() >= m_iNumRenderLine)
 	{
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 13.0f/16.0f, 29.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-				13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ¡ã
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 0.0f, 3.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 		
 		if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,	13.0f, 13.0f, 13.0f/16.0f, 16.0f/32.0f, -13.0f/16.0f, -13.0f/32.0f);
 		else
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-				13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);	// ¡å
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,13.0f, 13.0f, 0.0f, 16.0f/32.0f, 13.0f/16.0f, 13.0f/32.0f);
 
 		EnableAlphaTest();
 		SetLineColor(2);
@@ -5143,21 +5139,15 @@ void CUIUnmixgemList::RenderInterface()
 
 		if (GetLineNum() >= m_iNumRenderLine)
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, m_fScrollBarHeight, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarPos_y + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 		else
 		{
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,
-				m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
-			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,
-				m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, m_fScrollBarRange_bottom - m_fScrollBarRange_top, 0.0f, 1.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top,	m_fScrollBarWidth - 2, 1, 0.0f, 0.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
+			RenderBitmap(BITMAP_INTERFACE_EX+12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 2, m_fScrollBarRange_top + m_fScrollBarHeight - 1,m_fScrollBarWidth - 2, 1, 0.0f, 2.0f/32.0f, 11.0f/16.0f, 1.0f/32.0f);
 		}
 	}
 }
@@ -5184,10 +5174,13 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
 	
 	char oText[MAX_GLOBAL_TEXT_STRING] = {0,};
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX 
+#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(m_TextListIter->m_iInvenIdx);
-	int	  nIdx	= COMGEM::Check_Jewel( pItem->Type );
-	sprintf(oText, "%s,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
+	if(pItem)
+	{
+		int	  nIdx	= COMGEM::Check_Jewel( pItem->Type );
+		sprintf(oText, "%s,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
+	}
 #else
 	if(COMGEM::m_cGemType == COMGEM::CELE) sprintf(oText, "%s,  %d", GlobalText[1806], (m_TextListIter->m_cLevel + 1) * 10);
 	else sprintf(oText, "%s,  %d", GlobalText[1807], (m_TextListIter->m_cLevel + 1) * 10);

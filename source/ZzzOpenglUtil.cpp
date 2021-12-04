@@ -1159,15 +1159,8 @@ float RenderNumber2D(float x,float y,int Num,float Width,float Height)
 
 void BeginBitmap()
 {
-
-#ifdef LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
-#else // LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION);
-#endif // LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
-	
     glLoadIdentity();
 
     glViewport(0,0,WindowWidth,WindowHeight);
@@ -1176,16 +1169,10 @@ void BeginBitmap()
 	glLoadIdentity();
     gluOrtho2D(0,WindowWidth,0,WindowHeight);
 
-#ifdef LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-#else // LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
-	glPushMatrix();
-    glMatrixMode(GL_MODELVIEW);
-#endif // LDS_FIX_OPENGL_STACKOVERFLOW_STACKUNDERFLOW
 
     glLoadIdentity();
-	
 	DisableDepthTest();
 }
 
@@ -1197,11 +1184,7 @@ void EndBitmap()
 	glPopMatrix();
 }
 
-void RenderColor(float x,float y,float Width,float Height
-#ifdef PJH_ADD_MINIMAP
-				 ,float Alpha,int Flag
-#endif //PJH_ADD_MINIMAP
-				 )
+void RenderColor(float x,float y,float Width,float Height,float Alpha,int Flag)
 {
     DisableTexture();
 
@@ -1221,7 +1204,6 @@ void RenderColor(float x,float y,float Width,float Height
 	glBegin(GL_TRIANGLE_FAN);
 	for(int i=0;i<4;i++)
 	{
-#ifdef PJH_ADD_MINIMAP
 		if(Alpha > 0.f)
 		{
 			if(Flag == 0)
@@ -1235,9 +1217,6 @@ void RenderColor(float x,float y,float Width,float Height
 		{
 			glColor4f(1.f,1.f,1.f,1.f);
 		}
-#else //PJH_ADD_MINIMAP
-		glVertex2f(p[i][0],p[i][1]);
-#endif //PJH_ADD_MINIMAP
 	}
 	glEnd();
 }
@@ -1336,11 +1315,7 @@ void RenderBitmap(int Texture,float x,float y,float Width,float Height,float u,f
 	glEnd();
 }
 
-void RenderBitmapRotate(int Texture,float x,float y,float Width,float Height,float Rotate
-#ifdef PJH_ADD_MINIMAP
-,float u,float v,float uWidth,float vHeight
-#endif //PJH_ADD_MINIMAP
-						)
+void RenderBitmapRotate(int Texture,float x,float y,float Width,float Height,float Rotate,float u,float v,float uWidth,float vHeight)
 {
 	x = ConvertX(x);
 	y = ConvertY(y);
@@ -1365,17 +1340,10 @@ void RenderBitmapRotate(int Texture,float x,float y,float Width,float Height,flo
 	AngleMatrix(Angle,Matrix);
 
 	float c[4][2];
-#ifdef PJH_ADD_MINIMAP
 	TEXCOORD(c[0],u       ,v        );
 	TEXCOORD(c[3],u+uWidth,v        );
 	TEXCOORD(c[2],u+uWidth,v+vHeight);
 	TEXCOORD(c[1],u       ,v+vHeight);
-#else //#PJH_ADD_MINIMAP
-	TEXCOORD(c[0],0.f,0.f);
-	TEXCOORD(c[3],1.f,0.f);
-	TEXCOORD(c[2],1.f,1.f);
-	TEXCOORD(c[1],0.f,1.f);
-#endif //#PJH_ADD_MINIMAP
 
 	glBegin(GL_TRIANGLE_FAN);
 	for(int i=0;i<4;i++)
@@ -1387,7 +1355,6 @@ void RenderBitmapRotate(int Texture,float x,float y,float Width,float Height,flo
 	glEnd();
 }
 
-#ifdef PJH_ADD_MINIMAP
 void RenderBitRotate(int Texture,float x,float y,float Width,float Height,float Rotate)
 {
 	x = ConvertX(x);
@@ -1503,7 +1470,6 @@ void RenderPointRotate(int Texture,float ix,float iy,float iWidth,float iHeight,
 		}
 	}
 }
-#endif //PJH_ADD_MINIMAP
 
 void RenderBitmapLocalRotate(int Texture,float x,float y,float Width,float Height,float Rotate,float u,float v,float uWidth,float vHeight)
 {

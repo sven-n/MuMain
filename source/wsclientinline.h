@@ -2249,19 +2249,6 @@ __forceinline bool SendRequestMixExit()
 }
 
 //----------------------------------------------------------------------------
-// CG [0xD0][0x00]
-//----------------------------------------------------------------------------
-#ifdef PCROOM_EVENT
-#define SendRequestPCRoomCouponItem( )\
-{	\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xD0);\
-	spe << (BYTE)0x00;\
-	spe.Send();\
-}
-#endif // PCROOM_EVENT
-
-//----------------------------------------------------------------------------
 // CG [0xD0][0x03]
 //----------------------------------------------------------------------------
 #define SendRequestWhiteAngelItem( )\
@@ -2271,34 +2258,6 @@ __forceinline bool SendRequestMixExit()
 	spe << (BYTE)0x03;\
 	spe.Send();\
 }
-
-#ifndef KJH_DEL_PC_ROOM_SYSTEM				// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-//----------------------------------------------------------------------------
-// CG [0xD0][0x05]
-//----------------------------------------------------------------------------
-#define SendRequestPCRoomPointItemBuy(byInvenPos)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xD0);\
-	spe << (BYTE)0x05;\
-    spe << (BYTE)byInvenPos;\
-    spe.Send();\
-}
-
-//----------------------------------------------------------------------------
-// CG GC [0xD0][0x06]
-//----------------------------------------------------------------------------
-#define SendRequestPCRoomPointShopOpen()\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init(0xC1, 0xD0);\
-	spe << (BYTE)0x06;\
-	spe.Send();\
-}
-
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 
 //----------------------------------------------------------------------------
 // CG [0xD0][0x07]

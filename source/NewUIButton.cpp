@@ -389,26 +389,15 @@ void SEASON3B::CNewUIButton::UnLock()
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 
 
-#ifdef PJH_ADD_MINIMAP
 bool SEASON3B::CNewUIButton::Render( bool RendOption )
-#else // PJH_ADD_MINIMAP
-bool SEASON3B::CNewUIButton::Render( )
-#endif // PJH_ADD_MINIMAP
 {
 	if( m_ButtonInfo.size() != 0 )
 	{
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-		// 버튼이미지 리소스는 무조건 세로로 작업!
-#ifdef PJH_ADD_MINIMAP
 		if(RendOption == true)
 		RenderImage(m_CurImgIndex, m_Pos.x, m_Pos.y, m_Size.x, m_Size.y,0.f,m_CurImgState*m_Size.y,36.f/64.f,(29.f/32.f)/2.f);
 		else
-#endif //#ifdef PJH_ADD_MINIMAP
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 		RenderImage(m_CurImgIndex, m_Pos.x, m_Pos.y, m_Size.x, m_Size.y, 0.0f, m_CurImgState*m_Size.y, m_CurImgColor);
-#else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-		RenderImage(m_CurImgIndex, m_Pos.x, m_Pos.y, m_Size.x, m_Size.y, 0.0f, m_CurImgState*m_Size.y, m_CurImgColor);
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
 		if( m_IsImgWidth )
 		{

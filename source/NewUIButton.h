@@ -160,12 +160,7 @@ namespace SEASON3B
 		bool UpdateMouseEvent();
 
 	public:
-		
-#ifdef PJH_ADD_MINIMAP
 		bool Render( bool RendOption = false );
-#else // PJH_ADD_MINIMAP
-		bool Render( );
-#endif // PJH_ADD_MINIMAP
 
 	private:
 		void ChangeFrame();

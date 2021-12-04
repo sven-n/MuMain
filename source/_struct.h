@@ -150,13 +150,13 @@ typedef struct
 typedef struct
 {
 	char Name[30];
-	bool TwoHand;
+	WORD TwoHand;
 	WORD Level;
-	BYTE m_byItemSlot;
+	WORD m_byItemSlot;
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	WORD m_wSkillIndex;
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
-	BYTE m_bySkillIndex;
+	WORD m_bySkillIndex;
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	BYTE Width;
 	BYTE Height;
@@ -176,11 +176,11 @@ typedef struct
 	WORD  RequireVitality;
 	WORD RequireCharisma;
 	WORD RequireLevel;
-	BYTE Value;
+	WORD Value;
 	int  iZen;
 	BYTE  AttType;
-	BYTE RequireClass[MAX_CLASS];
-	BYTE Resistance[MAX_RESISTANCE];
+	BYTE RequireClass[MAX_CLASS+1];
+	BYTE Resistance[MAX_RESISTANCE+1];
 } ITEM_ATTRIBUTE;
 
 typedef struct _MASTER_LEVEL_DATA
@@ -189,19 +189,13 @@ typedef struct _MASTER_LEVEL_DATA
 	int Ability[8][4];
 }MASTER_LEVEL_DATA;
 
-#ifdef PJH_ADD_MINIMAP
 typedef struct _MINI_MAP
 {
 	BYTE Kind;
 	int	 Location[2];
 	int  Rotation;
-#ifdef KJH_FIX_MINIMAP_NAME
 	char Name[100];
-#else KJH_FIX_MINIMAP_NAME
-	char Name[30];
-#endif // KJH_FIX_MINIMAP_NAME
 }MINI_MAP;
-#endif //PJH_ADD_MINIMAP
 
 #pragma pack(push, 1)
 typedef struct tagITEM

@@ -57,14 +57,8 @@ bool SEASON3B::CNewUIPickedItem::Create(CNewUIItemMng* pNewItemMng, CNewUIInvent
 void SEASON3B::CNewUIPickedItem::Release()
 {
 	g_pNewUI3DRenderMng->Remove3DRenderObj(this);
-
-#ifdef YDG_FIX_MEMORY_LEAK_0905_2ND
 	m_pNewItemMng->DeleteDuplicatedItem(m_pPickedItem);
-#else	// YDG_FIX_MEMORY_LEAK_0905_2ND
-	m_pNewItemMng->DeleteItem(m_pPickedItem);
-#endif	// YDG_FIX_MEMORY_LEAK_0905_2ND
 	m_pPickedItem = NULL;
-	
 	m_pNewItemMng = NULL;
 	m_pSrcInventory = NULL;
 	m_bShow = true;
@@ -104,9 +98,9 @@ int SEASON3B::CNewUIPickedItem::GetSourceLinealPos()
 	{
 		return m_pPickedItem->y*m_pSrcInventory->GetNumberOfColumn()+m_pPickedItem->x;
 	}
-	else if(m_pPickedItem && m_pPickedItem->ex_src_type > 0)	// m_pPickedItem->ex_src_type==ITEM::y
+	else if(m_pPickedItem && m_pPickedItem->ex_src_type > 0)
 	{
-		return m_pPickedItem->lineal_pos; // m_pPickedItem->lineal_pos==ITEM::x
+		return m_pPickedItem->lineal_pos;
 	}
 	return -1;
 }
@@ -154,23 +148,14 @@ void SEASON3B::CNewUIPickedItem::HidePickedItem()
 
 void SEASON3B::CNewUIPickedItem::Render3D() 
 {	
-#ifdef NEW_USER_INTERFACE
-	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP) == true)
-	{
-		return;
-	}
-#endif // NEW_USER_INTERFACE
-
 	if(m_pPickedItem && m_pPickedItem->Type >= 0)
 	{
 		m_Pos.x = MouseX - m_Size.cx/2;
 		m_Pos.y = MouseY - m_Size.cy/2;
-		RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level, 
-			m_pPickedItem->Option1, m_pPickedItem->ExtOption, true);	
+		RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level,m_pPickedItem->Option1, m_pPickedItem->ExtOption, true);	
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
 CNewUIPickedItem* SEASON3B::CNewUIInventoryCtrl::ms_pPickedItem = NULL;
 
 SEASON3B::CNewUIInventoryCtrl::CNewUIInventoryCtrl() 
@@ -188,7 +173,6 @@ void SEASON3B::CNewUIInventoryCtrl::Init()
 	m_pNew3DRenderMng = NULL;
 	m_pNewItemMng = NULL;
 	m_pOwner = NULL;
-	
 	m_Pos.x = m_Pos.y = 0;
 	m_Size.cx = m_Size.cy = 0;
 	m_nColumn = m_nRow = 0;
@@ -197,13 +181,10 @@ void SEASON3B::CNewUIInventoryCtrl::Init()
 	m_iPointedSquareIndex = -1;
 	m_bShow = true;
 	m_bLock = false;
-
-	m_ToolTipType = TOOLTIP_TYPE_INVENTORY; //. Default
+	m_ToolTipType = TOOLTIP_TYPE_INVENTORY;
 	m_pToolTipItem = NULL;
-
 	m_bRepairMode = false;
 	m_bCanPushItem = true;
-
 	Vector(0.1f, 0.4f, 0.8f, m_afColorStateNormal);
 	Vector(1.f, 0.2f, 0.2f, m_afColorStateWarning);
 }
@@ -211,7 +192,6 @@ void SEASON3B::CNewUIInventoryCtrl::Init()
 void SEASON3B::CNewUIInventoryCtrl::LoadImages()
 {
 	LoadBitmap("Interface\\newui_item_box.tga", IMAGE_ITEM_SQUARE);
-	
 	LoadBitmap("Interface\\newui_item_table01(L).tga", IMAGE_ITEM_TABLE_TOP_LEFT);
 	LoadBitmap("Interface\\newui_item_table01(R).tga", IMAGE_ITEM_TABLE_TOP_RIGHT);
 	LoadBitmap("Interface\\newui_item_table02(L).tga", IMAGE_ITEM_TABLE_BOTTOM_LEFT);
@@ -316,21 +296,12 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 #ifdef PJH_ADD_PANDA_CHANGERING
 		|| pItem->Type == ITEM_HELPER+76
 #endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
 		|| pItem->Type == ITEM_HELPER+122
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
-#ifdef PBG_FIX_CHANGEITEMCOLORSTATE
 		|| pItem->Type == ITEM_HELPER+80
 		|| pItem->Type == ITEM_HELPER+64
 		|| pItem->Type == ITEM_HELPER+65
-#endif //PBG_FIX_CHANGEITEMCOLORSTATE
-#ifdef YDG_ADD_SKELETON_PET
 		|| pItem->Type == ITEM_HELPER+123
-#endif	// YDG_ADD_SKELETON_PET
-#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING 
 		|| pItem->Type == ITEM_HELPER+107
-#endif //YDG_ADD_CS7_CRITICAL_MAGIC_RING
-#ifdef LDS_FIX_VISUALRENDER_PERIODITEM_EXPIRED_RE
 		|| pItem->Type == ITEM_HELPER+109
 		|| pItem->Type == ITEM_HELPER+110
 		|| pItem->Type == ITEM_HELPER+111
@@ -338,7 +309,6 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 		|| pItem->Type == ITEM_HELPER+113
 		|| pItem->Type == ITEM_HELPER+114
 		|| pItem->Type == ITEM_HELPER+115
-#endif // LDS_FIX_VISUALRENDER_PERIODITEM_EXPIRED_RE
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| g_pMyInventory->IsInvenItem(pItem->Type)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
@@ -850,7 +820,6 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
 		{
 			CreateItemToolTip(pItem);
 
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 			if( (pItem->Type == ITEM_HELPER+4) || (pItem->Type == ITEM_HELPER+5) )
 			{
 				ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
@@ -858,29 +827,8 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
 				int iTargetY = m_Pos.y + m_pToolTipItem->y*INVENTORY_SQUARE_HEIGHT;
 				giPetManager::RequestPetInfo(iTargetX, iTargetY, pItem);
 			}	
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 		}
 	}
-	/*
-	else if(m_EventState == EVENT_PICKING
-		&& SEASON3B::IsRelease(VK_LBUTTON)
-		&& m_iPointedSquareIndex != -1 
-		&& ms_pPickedItem )
-	{
-		//. 제자리에 놓기
-		int iTargetColumnX, iTargetRowY;
-		if(ms_pPickedItem->GetTargetPos(this, iTargetColumnX, iTargetRowY))
-		{
-			ITEM* pItemObj = ms_pPickedItem->GetItem();
-			if(iTargetColumnX == pItemObj->x && iTargetRowY == pItemObj->y)
-			{
-				m_EventState = EVENT_NONE;
-				BackupPickedItem();
-				return false;
-			}
-		}
-	}
-	*/
 	return true;
 }
 
@@ -1010,7 +958,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 				int nItemColumn = pItemAttr->Width, nItemRow = pItemAttr->Height;
 				if(false == GetSquarePosAtPt(iPickedItemX, iPickedItemY, iColumnX, iRowY))
 				{
-					//. iColumnX, iRowY 보정 (negative value)
 					iColumnX = ((iPickedItemX - rcInventory.left) / INVENTORY_SQUARE_WIDTH);
 					
 					if(iPickedItemX - rcInventory.left < 0)
@@ -1166,19 +1113,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 			}
 		}
 	}
-
-#if defined (DEBUG_INVENTORY_BASE_TEST) || defined (_DEBUG)
-
-	if(m_iPointedSquareIndex != -1 && m_pdwItemCheckBox[m_iPointedSquareIndex] != 0)
-	{
-		g_pRenderText->SetBgColor(0, 0, 0, 255);
-		g_pRenderText->SetTextColor(200, 200, 200, 255);
-		
-		char szText[64] = {0, };
-		sprintf(szText, "Item Key: 0x%00000008X", m_pdwItemCheckBox[m_iPointedSquareIndex]);
-		g_pRenderText->RenderText(MouseX+20, MouseY+5, szText);
-	}
-#endif // defined (DEBUG_INVENTORY_BASE_TEST) || defined (_DEBUG)
 
 	bool tooltipvisible = true;
 
@@ -1371,7 +1305,7 @@ void SEASON3B::CNewUIInventoryCtrl::CreateItemToolTip(ITEM* pItem)
 		DeleteItemToolTip();
 
 	if(g_pNewItemMng)
-		m_pToolTipItem = g_pNewItemMng->CreateItem(pItem);		//. Reference Count 증가
+		m_pToolTipItem = g_pNewItemMng->CreateItem(pItem);
 }
 
 void SEASON3B::CNewUIInventoryCtrl::DeleteItemToolTip()
@@ -1474,12 +1408,11 @@ void SEASON3B::CNewUIInventoryCtrl::RenderItemToolTip()
 		ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
 		int iTargetX = m_Pos.x + m_pToolTipItem->x*INVENTORY_SQUARE_WIDTH + pItemAttr->Width*INVENTORY_SQUARE_WIDTH/2;
 		int iTargetY = m_Pos.y + m_pToolTipItem->y*INVENTORY_SQUARE_HEIGHT;
-#ifdef YDG_FIX_SMALL_ITEM_TOOLTIP_POSITION
+
 		if (pItemAttr->Height == 1)
 		{
 			iTargetY += INVENTORY_SQUARE_HEIGHT/2;
 		}
-#endif	// YDG_FIX_SMALL_ITEM_TOOLTIP_POSITION
 		
 		if(m_ToolTipType == TOOLTIP_TYPE_INVENTORY)
 		{
@@ -1560,23 +1493,16 @@ void SEASON3B::CNewUIInventoryCtrl::BackupPickedItem()
 		else if(pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
 		{
 			ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[pItemObj->lineal_pos];
-			memcpy(pEquipmentItemSlot, pItemObj, sizeof(ITEM));		//. 캐릭터 버퍼로 복사
+			memcpy(pEquipmentItemSlot, pItemObj, sizeof(ITEM));
 
-// #if !defined(LDK_FIX_RECALL_CREATEEQUIPPINGEFFECT) && !defined(LDS_FIX_RECALL_CREATEEQUIPPINGEFFECT) 
 			g_pMyInventory->CreateEquippingEffect(pEquipmentItemSlot);
-// #endif //LDK_FIX_RECALL_CREATEEQUIPPINGEFFECT
-#ifdef PBG_FIX_DARKPET_RENDER
-			if (pEquipmentItemSlot->Type == ITEM_HELPER+5
-#ifdef YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH
-				&& !gMapManager.InChaosCastle()
-#endif	// YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH
-				)
+
+			if (pEquipmentItemSlot->Type == ITEM_HELPER+5 && !gMapManager.InChaosCastle())
 			{
 				PET_INFO* pPetInfo = giPetManager::GetPetInfo(pEquipmentItemSlot);
 				giPetManager::CreatePetDarkSpirit_Now(Hero);
 				((CSPetSystem*)Hero->m_pPet)->SetPetInfo(pPetInfo);
 			}
-#endif //PBG_FIX_DARKPET_RENDER
 			DeletePickedItem();
 		}
 	}
@@ -1735,7 +1661,6 @@ bool SEASON3B::CNewUIInventoryCtrl::CanPushItem()
 	return m_bCanPushItem;
 }
 
-#ifdef KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
 bool SEASON3B::CNewUIInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem)
 {
 	int	iTargetLevel = (pTargetItem->Level >> 3) & 15;
@@ -1747,18 +1672,16 @@ bool SEASON3B::CNewUIInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTar
 		||(pTargetItem->Type >= ITEM_WING+36 && pTargetItem->Type <= ITEM_WING+43)
 		)
 	{
-		if( (pSourceItem->Type == ITEM_POTION+13) 				// 축석 (Lv0~5)
+		if( (pSourceItem->Type == ITEM_POTION+13)
 			&& (iTargetLevel >= 0 && iTargetLevel <= 5) )		
 		{
 			return true;
 		}
-		else if( (pSourceItem->Type == ITEM_POTION+14)			// 영석 (Lv0~8)
+		else if( (pSourceItem->Type == ITEM_POTION+14)
 			&& (iTargetLevel >= 0 && iTargetLevel <= 8) )	
 		{
 			return true;
 		}
 	}
-
 	return false;
 }
-#endif // KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY

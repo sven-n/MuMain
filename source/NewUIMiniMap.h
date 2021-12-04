@@ -10,7 +10,6 @@
 #include "NewUIChatLogWindow.h"
 #include "NewUIMyInventory.h"
 
-#ifdef PJH_ADD_MINIMAP
 namespace SEASON3B
 {
 	class CNewUIMiniMap : public CNewUIObj
@@ -18,7 +17,6 @@ namespace SEASON3B
 	public:
 		enum IMAGE_LIST
 		{
-//			IMAGE_MINI_EXIT			= CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,		//. newui_exit_00.tga
 			IMAGE_MINIMAP_INTERFACE		= BITMAP_MINI_MAP_BEGIN,
 		};
 
@@ -69,14 +67,13 @@ namespace SEASON3B
 		bool UpdateKeyEvent();
 		bool Update();
 		bool Render();
-//		bool Render(int Posx,int Posy,int nPosx,int nPosy,float su, float sv,int Index);
-		
+
 		float GetLayerDepth();	//. 8.1f
 		
 		void OpenningProcess();
 		void ClosingProcess();
 		void OpenMasterLevel( const char* filename );
-		CNewUIButton m_BtnToolTip;	// ≈¯∆¡¡§∫∏....
+		CNewUIButton m_BtnToolTip;
 		void LoadImages(const char* Filename );
 		void UnloadImages();
 
@@ -86,10 +83,8 @@ namespace SEASON3B
 		void Render_Scroll();
 		bool Check_Mouse(int mx,int my);
 		bool Check_Btn(int mx,int my);
-//		bool CNewUIMasterLevel::UpdateMouseEvent();
 	};
 }
 
-#endif //PJH_ADD_MINIMAP
 
 

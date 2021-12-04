@@ -1590,14 +1590,14 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 	CNewUIMessageBoxButton	cButton;
 	x		= GetPos().x;
 	y		= GetPos().y + 50;	
-	for( int i=0; i< COMGEM::eGEMTYPE_END; i++ )
+	for( int i=0; i< (int)COMGEM::eGEMTYPE_END; i++ )
 	{
 		cButton.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x +20.0f+ (i%2)*(20+width), y +(height+5.0f)*int(i/2), width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
 		cButton.SetText(GlobalText[nBtnIndex[i]]);
 		m_cJewelButton.push_back(cButton);
 	}
 	
-	for( int k=0; k< COMGEM::eCOMTYPE_END; k++ )
+	for( int k=0; k< (int)COMGEM::eCOMTYPE_END; k++ )
 	{
 		cButton.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x+50.0f, y+ (height+10.0f)*k, MSGBOX_BTN_EMPTY_WIDTH + 20, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
 		// 1808 "%d°³ Á¶ÇÕ(%dÁ¨ ¼Ò¿ä)"
@@ -1609,9 +1609,8 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
 	btnhalfwidth = width / 2.f;
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-	y += 15.0f + (height+10.0f)*(k+1);
+	y += 15.0f + (height+10.0f)*(int)COMGEM::eCOMTYPE_END;
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "´Ý±â"
 	m_BtnCancel.SetText(GlobalText[1002]);	
 
 	ResetWndSize(0);
@@ -2035,7 +2034,6 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Create(float fPriority)
 	
 #ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	ChangeMiddleFrameBig();	
-
 	AddMsg(" ", RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 	AddMsg(GlobalText[3311], CLRDW_YELLOW, MSGBOX_FONT_BOLD);
 #endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
@@ -2301,7 +2299,6 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::SetButtonInfo()
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + 40;
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	// 1002 "´Ý±â"
 	m_BtnCancel.SetText(GlobalText[1002]);
 #else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	x = GetPos().x + (msgboxhalfwidth / 2) - btnhalfwidth;
@@ -5043,12 +5040,9 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 		}	
 	}
 
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 	g_pMyShopInventory->SetInputValueTextBox(false);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 	PlayBuffer(SOUND_CLICK01);
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
 	return CALLBACK_BREAK;	
 }
 
@@ -5065,17 +5059,11 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::OkBtnDown(class CN
 CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
 	SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
-
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 	g_pMyShopInventory->SetInputValueTextBox(false);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 	PlayBuffer(SOUND_CLICK01);
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-	
 	return CALLBACK_BREAK;
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 bool SEASON3B::CPersonalShopNameMsgBoxLayout::SetLayout()
 {

@@ -117,10 +117,6 @@ void CQuestMng::LoadQuestWordsScript()
 	struct SQuestWordsHeader
 	{
 		int		m_nIndex;
-#ifndef ASG_MOD_QUEST_WORDS_SCRIPTS
-		short	m_nAction;
-		BYTE	m_byActCount;
-#endif	// ASG_MOD_QUEST_WORDS_SCRIPTS
 		short	m_nWordsLen;
 	};
 #pragma pack(pop)
@@ -128,11 +124,7 @@ void CQuestMng::LoadQuestWordsScript()
 	int nSize = sizeof(SQuestWordsHeader);
 	SQuestWordsHeader sQuestWordsHeader;
 	char szWords[1024];
-#ifdef ASG_MOD_QUEST_WORDS_SCRIPTS
 	std::string	strWords;
-#else	// ASG_MOD_QUEST_WORDS_SCRIPTS
-	SQuestWords sQuestWords;
-#endif	// ASG_MOD_QUEST_WORDS_SCRIPTS
 	
 	while (0 != ::fread(&sQuestWordsHeader, nSize, 1, fp))
 	{
@@ -140,17 +132,8 @@ void CQuestMng::LoadQuestWordsScript()
 
 		::fread(szWords, sQuestWordsHeader.m_nWordsLen, 1, fp);
 		::BuxConvert((BYTE*)szWords, sQuestWordsHeader.m_nWordsLen);
-#ifdef ASG_MOD_QUEST_WORDS_SCRIPTS
 		strWords = szWords;
-
 		m_mapQuestWords.insert(std::make_pair(sQuestWordsHeader.m_nIndex, strWords));
-#else	// ASG_MOD_QUEST_WORDS_SCRIPTS
-		sQuestWords.m_nAction = sQuestWordsHeader.m_nAction;
-		sQuestWords.m_byActCount = sQuestWordsHeader.m_byActCount;
-		sQuestWords.m_strWords = szWords;
-
-		m_mapQuestWords.insert(make_pair(sQuestWordsHeader.m_nIndex, sQuestWords));
-#endif	// ASG_MOD_QUEST_WORDS_SCRIPTS
 	}
 	
 	::fclose(fp);

@@ -7315,16 +7315,11 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 		b->RenderMesh( 1, RENDER_TEXTURE|RENDER_BRIGHT|RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime%2000*0.0005f );
 		b->RenderMesh( 2, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 	}
-
-#ifdef CSK_PCROOM_ITEM
 	else if(Type >= MODEL_POTION+55 && Type <= MODEL_POTION+57)
 	{
-		//Vector(0.1f, 0.1f, 0.1f, b->BodyLight);
 		b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight, o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		b->RenderBody(RENDER_BRIGHT|RENDER_CHROME2,o->Alpha,o->BlendMesh,o->BlendMeshLight, o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-		//b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 	}
-#endif // CSK_PCROOM_ITEM
 	else if(o->Type == MODEL_HELPER+49)
 	{
 		float sine = float(sinf(WorldTime*0.002f)*0.3f)+0.7f;
@@ -8196,11 +8191,7 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 			b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV );
 		}
 	}
-#if defined PCROOM_EVENT
-	else if (o->m_bpcroom == TRUE 
-		&& (Type == MODEL_HELM+9 || Type == MODEL_ARMOR+9 || Type == MODEL_PANTS+9
-		|| Type == MODEL_GLOVES+9 || Type == MODEL_BOOTS+9)
-		)
+	else if (o->m_bpcroom == TRUE && (Type == MODEL_HELM+9 || Type == MODEL_ARMOR+9 || Type == MODEL_PANTS+9 || Type == MODEL_GLOVES+9 || Type == MODEL_BOOTS+9))
 	{
 			if(Type == MODEL_ARMOR+9)
 			{
@@ -8228,7 +8219,6 @@ void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType)
 			b->RenderMesh(0,RENDER_BRIGHT|RENDER_METAL,o->Alpha,1,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
 			VectorCopy(Light, b->BodyLight);
 	}
-#endif	// PCROOM_EVENT
 	else if( Type == MODEL_POTION+42 || Type == MODEL_POTION+43 || Type == MODEL_POTION+44 )
 	{
 		b->RenderBody(RenderType,Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
@@ -9054,11 +9044,7 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 		}
     }
 #ifdef CSK_ADD_GOLDCORPS_EVENT
-#ifdef KJH_FIX_GOLD_RABBIT_INDEX
 	else if(iMonsterIndex >= 493 && iMonsterIndex <= 502)
-#else // KJH_FIX_GOLD_RABBIT_INDEX
-	else if(iMonsterIndex >= 492 && iMonsterIndex <= 501)
-#endif // KJH_FIX_GOLD_RABBIT_INDEX
 	{
 		if(iMonsterIndex == 495)
 		{

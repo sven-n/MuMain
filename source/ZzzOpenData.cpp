@@ -860,9 +860,7 @@ void OpenItems()
 //	gLoadData.AccessModel(MODEL_HELPER+132, "Data\\Item\\", "goldenmaple_cham");
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2	
 
-#ifdef PSW_CHARACTER_CARD
 	gLoadData.AccessModel(MODEL_POTION+91, "Data\\Item\\partCharge3\\", "alicecard");	
-#endif // PSW_CHARACTER_CARD
 
 	gLoadData.AccessModel(MODEL_POTION+92, "Data\\Item\\partCharge3\\", "juju");	
 	gLoadData.AccessModel(MODEL_POTION+93, "Data\\Item\\partCharge3\\", "juju");
@@ -1591,9 +1589,7 @@ void OpenItemTextures()
 	
 	gLoadData.OpenTexture(MODEL_HELPER+61, "Item\\partCharge2\\");
 
-#ifdef PSW_CHARACTER_CARD 
 	gLoadData.OpenTexture(MODEL_POTION+91, "Item\\partCharge3\\");
-#endif // PSW_CHARACTER_CARD
 	
 	gLoadData.OpenTexture(MODEL_POTION+92, "Item\\partCharge3\\");
 	gLoadData.OpenTexture(MODEL_POTION+93, "Item\\partCharge3\\");
@@ -1642,11 +1638,9 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_HELPER+52, "Item\\");
 	gLoadData.OpenTexture(MODEL_HELPER+53, "Item\\");
 
-#ifdef CSK_PCROOM_ITEM
 	gLoadData.OpenTexture(MODEL_POTION+55, "Item\\");
 	gLoadData.OpenTexture(MODEL_POTION+56, "Item\\");
 	gLoadData.OpenTexture(MODEL_POTION+57, "Item\\");
-#endif // CSK_PCROOM_ITEM
 	
 	gLoadData.OpenTexture(MODEL_POTION+64, "Item\\");
 	gLoadData.OpenTexture(MODEL_POTION+65, "Item\\");
@@ -5459,9 +5453,7 @@ void OpenBasicData(HDC hDC)
 	::LoadBitmap("Item\\partCharge1\\expensiveitem03a_R.jpg", BITMAP_RAREITEM4_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge1\\expensiveitem03b_R.jpg", BITMAP_RAREITEM5_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_RARE_ITEM
-#if defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
 	::LoadBitmap("Item\\partCharge3\\alicecard_R.tga", BITMAP_CHARACTERCARD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
 #ifdef PBG_ADD_CHARACTERCARD
 	::LoadBitmap("Item\\Ingameshop\\kacama_R.jpg", BITMAP_CHARACTERCARD_R_MA, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\Ingameshop\\kacada_R.jpg", BITMAP_CHARACTERCARD_R_DA, GL_LINEAR, GL_CLAMP_TO_EDGE);

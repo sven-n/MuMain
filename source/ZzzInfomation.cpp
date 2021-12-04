@@ -17,11 +17,6 @@
 #include "GIPetManager.h"
 #include "GMHellas.h"
 #include "CComGem.h"
-#ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-#include "PCRoomPoint.h" 
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 #include "NewUIInventoryCtrl.h"
 #include "SocketSystem.h"
 #include "NewUISystem.h"
@@ -49,8 +44,6 @@ static void BuxConvert(BYTE *Buffer,int Size)
 	for(int i=0;i<Size;i++)
 		Buffer[i] ^= bBuxCode[i%3];
 }
-
-extern int GetMoveReqZenFromMCB(const char * pszTargetName);
 
 CGlobalText GlobalText;
 
@@ -660,9 +653,9 @@ void OpenItemScriptText(char *FileName)	// 0.1 ( 2003.01.08)
 
 				Token = (*GetToken)();p->Width  = (int)TokenNumber;
 				Token = (*GetToken)();p->Height = (int)TokenNumber;
-				Token = (*GetToken)();//시리얼
-				Token = (*GetToken)();//옵션
-				Token = (*GetToken)();//몬스터
+				Token = (*GetToken)();
+				Token = (*GetToken)();
+				Token = (*GetToken)();
 				Token = (*GetToken)();strcpy(p->Name,TokenString);
 				if(Type>=0 && Type<=5)
 				{
@@ -737,7 +730,6 @@ void OpenItemScriptText(char *FileName)	// 0.1 ( 2003.01.08)
                     p->DamageMin = p->Level;
                     p->DamageMax = p->Level+p->Level/2;
 				}
-				//사용 클래스
 				if(Type<=13 || Type==15)
 				{
 					Token = (*GetToken)();p->RequireClass[0]  = (int)TokenNumber;
@@ -784,10 +776,9 @@ void OpenItemScript(char *FileName)
 	if(fp != NULL)
 	{
 		int Size = sizeof(ITEM_ATTRIBUTE);
-		// 읽기
 		BYTE *Buffer = new BYTE [Size*MAX_ITEM];
 		fread(Buffer,Size*MAX_ITEM,1,fp);
-		// crc 체크
+		// crc
 		DWORD dwCheckSum;
 		fread(&dwCheckSum,sizeof ( DWORD),1,fp);
 		fclose(fp);
@@ -976,9 +967,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		|| ip->Type==ITEM_STAFF+10
 		|| ip->Type==ITEM_MACE+13
 		|| ip->Type == ITEM_HELPER+30
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 		|| ( ITEM_WING+130 <= ip->Type && ip->Type <= ITEM_WING+134 )
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (ip->Type >= ITEM_WING+49 && ip->Type <= ITEM_WING+50)
 		|| (ip->Type == ITEM_WING+135)
@@ -1039,12 +1028,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         ip->DamageMin     += (min(9,Level)*3);
 		switch(Level - 9)
 		{
-		case 6: ip->DamageMin += 9;
-		case 5: ip->DamageMin += 8;
-		case 4: ip->DamageMin += 7;
-		case 3: ip->DamageMin += 6;
-		case 2: ip->DamageMin += 5;
-		case 1: ip->DamageMin += 4;
+		case 6: ip->DamageMin += 9;break;
+		case 5: ip->DamageMin += 8;break;
+		case 4: ip->DamageMin += 7;break;
+		case 3: ip->DamageMin += 6;break;
+		case 2: ip->DamageMin += 5;break;
+		case 1: ip->DamageMin += 4;break; 
 		default: break;
 		};
 	}
@@ -1067,12 +1056,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         ip->DamageMax     += (min(9,Level)*3);
 		switch ( Level-9 )
 		{
-		case 6: ip->DamageMax += 9;	// +15
-		case 5: ip->DamageMax += 8;	// +14
-		case 4: ip->DamageMax += 7;	// +13
-		case 3: ip->DamageMax += 6;	// +12
-		case 2: ip->DamageMax += 5;	// +11
-		case 1: ip->DamageMax += 4;	// +10
+		case 6: ip->DamageMax += 9;break;	// +15
+		case 5: ip->DamageMax += 8;break;	// +14
+		case 4: ip->DamageMax += 7;break;	// +13
+		case 3: ip->DamageMax += 6;break;	// +12
+		case 2: ip->DamageMax += 5;break;	// +11
+		case 1: ip->DamageMax += 4;break;	// +10
 		default: break;
 		};
 	}
@@ -1095,12 +1084,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         ip->MagicPower += (min(9,Level)*3);	// ~ +9
 		switch ( Level-9 )
 		{
-		case 6: ip->MagicPower += 9;	// +15
-		case 5: ip->MagicPower += 8;	// +14
-		case 4: ip->MagicPower += 7;	// +13
-		case 3: ip->MagicPower += 6;	// +12
-		case 2: ip->MagicPower += 5;	// +11
-		case 1: ip->MagicPower += 4;	// +10
+		case 6: ip->MagicPower += 9;break;	// +15
+		case 5: ip->MagicPower += 8;break;	// +14
+		case 4: ip->MagicPower += 7;break;	// +13
+		case 3: ip->MagicPower += 6;break;	// +12
+		case 2: ip->MagicPower += 5;break;	// +11
+		case 1: ip->MagicPower += 4;break;	// +10
 		default: break;
 		};
 		
@@ -1122,12 +1111,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         ip->SuccessfulBlocking += (min(9,Level)*3);	// ~ +9
 		switch(Level - 9)
 		{
-		case 6: ip->SuccessfulBlocking += 9;	// +15
-		case 5: ip->SuccessfulBlocking += 8;	// +14
-		case 4: ip->SuccessfulBlocking += 7;	// +13
-		case 3: ip->SuccessfulBlocking += 6;	// +12
-		case 2: ip->SuccessfulBlocking += 5;	// +11
-		case 1: ip->SuccessfulBlocking += 4;	// +10
+		case 6: ip->SuccessfulBlocking += 9;break;	// +15
+		case 5: ip->SuccessfulBlocking += 8;break;	// +14
+		case 4: ip->SuccessfulBlocking += 7;break;	// +13
+		case 3: ip->SuccessfulBlocking += 6;break;	// +12
+		case 2: ip->SuccessfulBlocking += 5;break;	// +11
+		case 1: ip->SuccessfulBlocking += 4;break;	// +10
 		default: break;
 		};
 	}
@@ -1176,7 +1165,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				|| (ip->Type == ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				)	// 3차 날개들
+				)
 			{
                 ip->Defense     += (min(9,Level)*4);	// ~ +9
 			}
@@ -1192,12 +1181,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			{
 				switch(Level - 9)
 				{
-				case 6: ip->Defense += 10;	// +15
-				case 5: ip->Defense += 9;	// +14
-				case 4: ip->Defense += 8;	// +13
-				case 3: ip->Defense += 7;	// +12
-				case 2: ip->Defense += 6;	// +11
-				case 1: ip->Defense += 5;	// +10
+				case 6: ip->Defense += 10;break;	// +15
+				case 5: ip->Defense += 9;break;	// +14
+				case 4: ip->Defense += 8;break;	// +13
+				case 3: ip->Defense += 7;break;	// +12
+				case 2: ip->Defense += 6;break;	// +11
+				case 1: ip->Defense += 5;break;	// +10
 				default: break;
 				};
 			}
@@ -1205,12 +1194,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			{
 				switch(Level - 9)
 				{
-				case 6: ip->Defense += 9;	// +15
-				case 5: ip->Defense += 8;	// +14
-				case 4: ip->Defense += 7;	// +13
-				case 3: ip->Defense += 6;	// +12
-				case 2: ip->Defense += 5;	// +11
-				case 1: ip->Defense += 4;	// +10
+				case 6: ip->Defense += 9;break;	// +15
+				case 5: ip->Defense += 8;break;	// +14
+				case 4: ip->Defense += 7;break;	// +13
+				case 3: ip->Defense += 6;break;	// +12
+				case 2: ip->Defense += 5;break;	// +11
+				case 1: ip->Defense += 4;break;	// +10
 				default: break;
 				};
 			}
@@ -2164,7 +2153,7 @@ int ItemValue(ITEM *ip,int goldType)
 	}
     else if ( ip->Type==ITEM_HELPER+18 )
     {
-		Gold = 200000 + 20000 * ( Level - 1);
+		Gold = (long long)(200000 + 20000 * ( Level - 1));
 		if ( Level == 1)
 		{
 			Gold = 50000;
@@ -2177,7 +2166,7 @@ int ItemValue(ITEM *ip,int goldType)
 	}
     else if ( ip->Type==ITEM_POTION+29 )
     {
-        Gold = ( ip->Durability*10000 )*3;
+        Gold = (long long)( ip->Durability*10000 )*3;
     }
 	else if ( ip->Type==ITEM_POTION+111 )
 	{
@@ -2185,7 +2174,7 @@ int ItemValue(ITEM *ip,int goldType)
 	}
     else if ( ip->Type==ITEM_POTION+110 )
     {
-        Gold = ( ip->Durability*10000 )*3;
+        Gold = (long long)( ip->Durability*10000 )*3;
     }
 	else if( ITEM_POTION+102 == ip->Type )
 	{
@@ -2197,7 +2186,7 @@ int ItemValue(ITEM *ip,int goldType)
 	}
 	else if( ITEM_POTION+101 == ip->Type || ITEM_POTION+103 <= ip->Type && ip->Type <= ITEM_POTION+108 )
 	{
-        Gold = ( ip->Durability*10000 )*3;
+        Gold = (long long)((long long)ip->Durability*10000)*3;
 	}
     else if ( ip->Type==ITEM_HELPER+29 )
     {
@@ -2213,7 +2202,7 @@ int ItemValue(ITEM *ip,int goldType)
 			Gold = 3000*3;
 		else if(Level == 3)
 		{
-			Gold = ip->Durability * 3900;
+			Gold = (long long)ip->Durability * 3900;
 		}
 	}
 	else if(ip->Type==ITEM_POTION+17)
@@ -2283,8 +2272,8 @@ int ItemValue(ITEM *ip,int goldType)
     {
         switch ( Level )
         {
-        case 0: Gold = 900000*ip->Durability; break;
-        case 1: Gold = 450000*ip->Durability; break;
+        case 0: Gold = (long long)900000*ip->Durability; break;
+        case 1: Gold = (long long)450000*ip->Durability; break;
         }
     }
     else if ( ip->Type==ITEM_HELPER+7 )
@@ -2395,9 +2384,9 @@ int ItemValue(ITEM *ip,int goldType)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		&& (ip->Type!=ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		) ) || Type==13 || Type==15 ) )//12(날개,구슬) 13(사탄,반지) 15(법서), 디노란트 제외.
+		) ) || Type==13 || Type==15 ) )
 	{
-		Gold = 100+Level2*Level2*Level2;
+		Gold = (long long)100+Level2*Level2*Level2;
 
 		for(int i=0;i<ip->SpecialNum;i++)
 		{
@@ -2431,15 +2420,15 @@ int ItemValue(ITEM *ip,int goldType)
         }
 	    if( ( Type==12 && ip->Type<=ITEM_WING+6) || ip->Type==ITEM_HELPER+30 || (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			|| (ip->Type==ITEM_WING+50)	// 레이지 파이터 날개
+			|| (ip->Type==ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 			)
         {
-            Gold = 40000000+((40+Level2)*Level2*Level2*11);
+            Gold = (long long)(40000000+((40+Level2)*Level2*Level2*11)); 
         }
         else
         {
-		    Gold = 100+(40+Level2)*Level2*Level2/8;
+		    Gold = (long long)100+(40+Level2)*Level2*Level2/8;
         }
 		if(Type>=0 && Type<=6)
 		{
@@ -2475,7 +2464,7 @@ int ItemValue(ITEM *ip,int goldType)
 			case AT_SKILL_THRUST:
 			case AT_SKILL_STAMP:
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-				Gold += ( DWORD)( ( float)Gold*1.5f);
+				Gold += (long long)((double)Gold*1.5f);
 				break;
 			case AT_IMPROVE_DAMAGE:
 			case AT_IMPROVE_MAGIC:
@@ -2579,127 +2568,24 @@ int ItemValue(ITEM *ip,int goldType)
 	}
 
 	if(ip->Type == ITEM_HELPER+32)
-		Gold = ip->Durability*50;
+		Gold = (long long)ip->Durability*50;
 	else if(ip->Type == ITEM_HELPER+33)
-		Gold = ip->Durability*100;
+		Gold = (long long)ip->Durability*100;
 	else if(ip->Type == ITEM_HELPER+34)
-		Gold = ip->Durability*1000;
+		Gold = (long long)ip->Durability*1000;
 	else if(ip->Type == ITEM_HELPER+35)
-		Gold = ip->Durability*10000;
+		Gold = (long long)ip->Durability*10000;
 	else if(ip->Type == ITEM_HELPER+36)
 		Gold = 30000;
 	else if(ip->Type == ITEM_HELPER+37)
 		Gold = 50000;
 
-#ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-	// PC방 포인트 상점인가?
-	if (CPCRoomPtSys::Instance().IsPCRoomPointShopMode())
-	{
-		switch(ip->Type)
-		{
-#ifdef ADD_EVENT_PCROOM_POINT_HALF
-			
-	#ifdef CSK_LUCKY_SEAL	// 해외와 틀림.
-		case ITEM_HELPER+43:
-			Gold = 12;
-			break;
-		case ITEM_HELPER+44:
-			Gold = 18;
-			break;
-		case ITEM_HELPER+45:
-			Gold = 12;
-			break;
-	#endif	//  CSK_LUCKY_SEAL
-	#ifdef CSK_PCROOM_ITEM
-		case ITEM_POTION+55:
-			Gold = 12;
-			break;
-		case ITEM_POTION+56:
-			Gold = 18;
-			break;
-		case ITEM_POTION+57:
-			Gold = 24;
-			break;
-	#endif // CSK_PCROOM_ITEM
-			
-#else	// ADD_EVENT_PCROOM_POINT_HALF
-			
-	#ifdef ASG_PCROOM_POINT_SYSTEM_MODIFY
-			
-	  #ifdef CSK_LUCKY_SEAL	// 해외와 틀림.
-		case ITEM_HELPER+43:
-			Gold = 6;
-			break;
-		case ITEM_HELPER+44:
-			Gold = 9;
-			break;
-		case ITEM_HELPER+45:
-			Gold = 15;
-			break;
-	  #endif	//  CSK_LUCKY_SEAL
-	  #ifdef CSK_PCROOM_ITEM
-		case ITEM_POTION+55:
-			Gold = 9;
-			break;
-		case ITEM_POTION+56:
-			Gold = 15;
-			break;
-		case ITEM_POTION+57:
-			Gold = 30;
-			break;
-	  #endif // CSK_PCROOM_ITEM
-	
-	#else	// ASG_PCROOM_POINT_SYSTEM_MODIFY	
-	  #ifdef CSK_LUCKY_SEAL	// 해외와 틀림.
-		case ITEM_HELPER+43:
-			Gold = 24;
-			break;
-		case ITEM_HELPER+44:
-			Gold = 36;
-			break;
-		case ITEM_HELPER+45:
-			Gold = 24;
-			break;
-	  #endif	//  CSK_LUCKY_SEAL
-	  #ifdef CSK_PCROOM_ITEM
-		case ITEM_POTION+55:
-			Gold = 24;
-			break;
-		case ITEM_POTION+56:
-			Gold = 36;
-			break;
-		case ITEM_POTION+57:
-			Gold = 48;
-			break;
-	  #endif // CSK_PCROOM_ITEM
-	
-	#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY
-#endif	// ADD_EVENT_PCROOM_POINT_HALF
-		}
-	}
-	else	// PC방 포인트 상점이 아님.
-	{
-		switch(ip->Type)
-		{
-#ifdef CSK_PCROOM_ITEM
-		case ITEM_POTION+55:
-		case ITEM_POTION+56:
-		case ITEM_POTION+57:
-			Gold = 3000;	// 일반 상점에서 팔 때의 가격.
-			break;
-#endif // CSK_PCROOM_ITEM
-		}
-	}
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-
 	if(ip->Type >= ITEM_POTION+45 && ip->Type <= ITEM_POTION+50)
 	{
-		Gold = ip->Durability*50;
+		Gold = (long long)ip->Durability*50;
 	}
 	
-	if( ip->Type == ITEM_HELPER+71 || ip->Type == ITEM_HELPER+72 || ip->Type == ITEM_HELPER+73 || ip->Type == ITEM_HELPER+74 ||ip->Type == ITEM_HELPER+75 )	// 겜블러 아이콘
+	if( ip->Type == ITEM_HELPER+71 || ip->Type == ITEM_HELPER+72 || ip->Type == ITEM_HELPER+73 || ip->Type == ITEM_HELPER+74 ||ip->Type == ITEM_HELPER+75 )
 	{
 		Gold = 2000000;
 	}
@@ -4379,7 +4265,7 @@ void CHARACTER_MACHINE::CalulateMasterLevelNextExperience()
 {
 	Master_Level_Data.lMasterLevel_Experince = Master_Level_Data.lNext_MasterLevel_Experince;
 
-	__int64 iTotalLevel = CharacterAttribute->Level + Master_Level_Data.nMLevel + 1;
+	__int64 iTotalLevel = (__int64)CharacterAttribute->Level + (__int64)Master_Level_Data.nMLevel + 1;
 	__int64 iTOverLevel = iTotalLevel - 255;
 	__int64 iBaseExperience = 0;
 	

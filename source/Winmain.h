@@ -72,7 +72,6 @@
 //#define GUILD_WAR_EVENT
 //#define MYSTERY_BEAD
 
-#define	PCROOM_EVENT
 #define DUEL_SYSTEM
 #define PET_SYSTEM
 #define PROTECT_SYSTEMKEY

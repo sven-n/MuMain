@@ -1,5 +1,4 @@
 // NewUIInventoryCtrl.h: interface for the CNewUIInventoryCtrl class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIINVENTORYCTRL_H__3A635AF1_3FFA_44B5_9BF6_3DFE0F061927__INCLUDED_)
@@ -15,11 +14,9 @@
 
 namespace SEASON3B
 {
-	/////////////////////// Predeclaration ///////////////////////////////////
 	class CNewUIItemMng;
 	class CNewUIInventoryCtrl;
 
-	/////////////////////// Constants ////////////////////////////////////////
 	enum
 	{
 		INVENTORY_SQUARE_WIDTH = 20,
@@ -41,7 +38,6 @@ namespace SEASON3B
 		COLOR_STATE_WARNING,
 	};
 	
-	/////////////////////// Classes //////////////////////////////////////////
 	class CNewUIPickedItem : public INewUI3DRenderObj
 	{
 		CNewUIItemMng*	m_pNewItemMng;
@@ -171,12 +167,7 @@ namespace SEASON3B
 		size_t GetNumberOfItems();
 
 		bool IsItem(short int siType);
-
-#ifdef PSW_EVENT_LENA
 		int GetItemCount( short int siType, int iLevel = -1 );
-#else //PSW_EVENT_LENA
-		int GetItemCount(short int siType);
-#endif //PSW_EVENT_LENA
 
 		ITEM* GetItem(int iIndex/* 0 <= iIndex < GetNumberOfItems() */);
 		
@@ -253,9 +244,7 @@ namespace SEASON3B
 
 		bool IsOverlayItem(ITEM* pSourceItem, ITEM* pTargetItem);
 		bool CanPushItem();
-#ifdef KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
 		bool CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem);
-#endif // KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY
 		
 		static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 

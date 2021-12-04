@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #if(DECOMPILE_INGAMESHOP==1)
 #include "ListManager.h"
-
 #include <process.h>
 
 CListManager::CListManager() // OK

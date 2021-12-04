@@ -28,6 +28,7 @@
 //#pragma warning( disable : 4748 )
 //#pragma warning( disable : 4786 )
 #pragma warning( disable : 28159 )
+#pragma warning( disable : 26812 )
 
 #pragma once
 
@@ -120,34 +121,7 @@
 #include "_define.h"
 #include "_enum.h"
 #include "_types.h"
-#include "_struct.h"
-
-#ifdef NEW_USER_INTERFACE
-
-	#include "w_structs.h"
-	//util
-	#include "w_Coord.h"
-	#include "w_Rect.h"
-	#include "w_Color.h"
-	#include "w_ObjectPool.h"
-	#include "w_EventPublisher.h"
-	#include "w_build.h"
-	#include "stlutl.h"  //ÀÌÇö..
-	//input
-	#include "w_InputTypes.h"
-	#include "w_InputMessageHandler.h"
-	//namespace
-	using namespace util;
-	using namespace input;
-	//ui
-	#include "w_UIType.h"
-	#include "w_UIdefines.h"
-	//client
-	#include "w_Task.h"
-	#include "w_Module.h"
-
-#endif //NEW_USER_INTERFACE
-	
+#include "_struct.h"	
 #include "w_WindowMessageHandler.h"
 #include "_GlobalFunctions.h"
 #include "_TextureIndex.h"	
@@ -158,8 +132,4 @@
 #include "ZzzOpenglUtil.h"
 
 #endif // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE		// #ifndef
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
 #endif // !defined(AFX_STDAFX_H__B9DB83DB_A9ZD_12D0_BFJ1_447553540000__INCLUDED_)

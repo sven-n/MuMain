@@ -27,7 +27,7 @@ namespace SEASON3B
 	{
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		MAINFRAME_BTN_PARTCHARGE = 0,
-#endif //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		MAINFRAME_BTN_CHAINFO,
 		MAINFRAME_BTN_MYINVEN,
 		MAINFRAME_BTN_FRIEND,
@@ -128,23 +128,18 @@ namespace SEASON3B
 		void RenderSkillInfo();
 		float GetLayerDepth();		// 10.6f
 		
-#ifdef CSK_FIX_WOPS_K29010_HELLBUST
 #ifdef PBG_ADD_NEWCHAR_MONK
 		WORD GetHeroPriorSkill();
 #else //PBG_ADD_NEWCHAR_MONK
 		BYTE GetHeroPriorSkill();
 #endif //PBG_ADD_NEWCHAR_MONK
 		void SetHeroPriorSkill(BYTE bySkill);
-#endif // CSK_FIX_WOPS_K29010_HELLBUST
 
 		void Reset();
 
 		void SetHotKey(int iHotKey, int iSkillType);
 		int GetHotKey(int iHotKey);
 		int GetSkillIndex(int iSkillType);
-#ifdef PBG_FIX_SKILLHOTKEY
-		void SetHotKeyClear(int iHotKey);
-#endif //PBG_FIX_SKILLHOTKEY
 		void RenderCurrentSkillAndHotSkillList();
 
 		bool IsSkillListUp();
@@ -180,20 +175,18 @@ namespace SEASON3B
 
 		EVENT_STATE m_EventState;
 		
-#ifdef CSK_FIX_WOPS_K29010_HELLBUST
 #ifdef PBG_ADD_NEWCHAR_MONK
 		WORD m_wHeroPriorSkill;
 #else //PBG_ADD_NEWCHAR_MONK
 		BYTE m_byHeroPriorSkill;
 #endif //PBG_ADD_NEWCHAR_MONK
-#endif // CSK_FIX_WOPS_K29010_HELLBUST
 	};
 
 	class CNewUIMainFrameWindow	: public CNewUIObj, public INewUI3DRenderObj
 	{
 	public:
 		enum IMAGE_LIST
-		{	//. max: 10°³
+		{
 			IMAGE_MENU_1 = BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN,	// newui_menu01.jpg
 			IMAGE_MENU_2,		// newui_menu02.jpg
 			IMAGE_MENU_3,		// newui_menu03.jpg
@@ -207,7 +200,7 @@ namespace SEASON3B
 			IMAGE_MASTER_GAUGE_BAR,	// Exbar_Master.jpg
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 			IMAGE_MENU_BTN_CSHOP,
-#endif //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 			IMAGE_MENU_BTN_CHAINFO,
 			IMAGE_MENU_BTN_MYINVEN,
 			IMAGE_MENU_BTN_FRIEND,
@@ -242,10 +235,6 @@ namespace SEASON3B
 		void SetSkillHotKey(int iHotKey, int iSkillType);
 		int GetSkillHotKey(int iHotKey);
 		int GetSkillHotKeyIndex(int iSkillType);
-
-#ifdef PBG_FIX_SKILLHOTKEY
-		void SetSkillHotKeyClear(int iHotKey);
-#endif //PBG_FIX_SKILLHOTKEY
 
 		void SetPreExp_Wide(__int64 dwPreExp);
 		void SetGetExp_Wide(__int64 dwGetExp);
@@ -297,7 +286,7 @@ namespace SEASON3B
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		CNewUIButton m_BtnCShop;
-#endif //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		CNewUIButton m_BtnChaInfo;
 		CNewUIButton m_BtnMyInven;
 		CNewUIButton m_BtnFriend;

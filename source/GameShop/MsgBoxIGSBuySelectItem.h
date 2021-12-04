@@ -7,25 +7,9 @@
 #pragma once
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-
 #include "UIControls.h"
 #include "NewUICommonMessageBox.h"
-
-#ifdef KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL
-#include "NewUIButton.h"
-#endif // KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL
-
-#ifdef KJH_MOD_LIBRARY_LINK_EACH_NATION
-#include <ShopPackage.h>
-#else // KJH_MOD_LIBRARY_LINK_EACH_NATION
 #include "./GameShop/ShopListManager/ShopPackage.h"
-#endif // KJH_MOD_LIBRARY_LINK_EACH_NATION
-
-
-////////////////////////////////////////////////////////////////////
-// 선택 상품 구매창
-////////////////////////////////////////////////////////////////////
-
 
 using namespace SEASON3B;
 

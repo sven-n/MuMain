@@ -4,10 +4,6 @@
 
 #include "callstackdmp.h"
 
-#ifdef KJH_LOG_ERROR_DUMP
-	#include "../DebugAngel.h"
-#endif // KJH_LOG_ERROR_DUMP
-
 using namespace leaf;
 
 
@@ -24,10 +20,7 @@ bool CCallStackDump::CCallStackFrame::Create(DWORD* pEbp) {
 	
 	m_pFrameAddr = (void*) pEbp;
 	m_pReturnAddr = (void*) *(pEbp+1);
-#ifdef KJH_LOG_ERROR_DUMP
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t- CallStack Frame Address : 0x%00000008X\r\n", m_pFrameAddr);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t- CallStack Return Address : 0x%00000008X\r\n", m_pReturnAddr);
-#endif // KJH_LOG_ERROR_DUMP
+
 	for(int i=0; i<MAX_PARAMETER_BUFSIZE; i++) {
 		if(IsBadReadPtr(pEbp+2+i, sizeof(DWORD)))
 			break;
@@ -48,31 +41,11 @@ void CCallStackDump::CCallStackFrame::GetParameter(DWORD* pBuf, size_t size) {
 	memcpy(pBuf, m_pParameter, size*sizeof(DWORD));
 }
 
-
 CCallStackDump::CCallStackDump() {}
 CCallStackDump::~CCallStackDump() { Clear(); }
 
 void CCallStackDump::Dump(const CONTEXT* pContext) {
 	Clear();
-#ifdef KJH_LOG_ERROR_DUMP
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t* Context Pointer\r\n");
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->SegCs : 0x%00000008X\r\n", pContext->SegCs);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->SegDs : 0x%00000008X\r\n", pContext->SegDs);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->SegEs : 0x%00000008X\r\n", pContext->SegEs);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->SegSs : 0x%00000008X\r\n", pContext->SegSs);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->SegFs : 0x%00000008X\r\n", pContext->SegFs);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->SegGs : 0x%00000008X\r\n", pContext->SegGs);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->Eax : 0x%00000008X\r\n", pContext->Eax);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->Ebx : 0x%00000008X\r\n", pContext->Ebx);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->Ecx : 0x%00000008X\r\n", pContext->Ecx);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->Edx : 0x%00000008X\r\n", pContext->Edx);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->Esi : 0x%00000008X\r\n", pContext->Esi);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->Edi : 0x%00000008X\r\n", pContext->Edi);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->Esp : 0x%00000008X\r\n", pContext->Esp);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->Ebp : 0x%00000008X\r\n", pContext->Ebp);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->Eip : 0x%00000008X\r\n", pContext->Eip);        // 명령 포인터
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t\t- pContext->EFlags : 0x%00000008X\r\n", pContext->EFlags);	// 플레그 레지스터
-#endif // KJH_LOG_ERROR_DUMP
 	
 	DWORD* pEbp = (DWORD*)pContext->Ebp;
 	for(int i=0; i<64; i++) 
@@ -84,10 +57,6 @@ void CCallStackDump::Dump(const CONTEXT* pContext) {
 		}
 		m_listFrame.push_back(pCallStackFrame);
 
-#ifdef KJH_LOG_ERROR_DUMP
-		DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " \t* CallStack Frame Pointer : 0x%00000008X, Number : %d\r\n", pCallStackFrame, i);
-#endif // KJH_LOG_ERROR_DUMP
-		
 		if(IsBadReadPtr((DWORD*)*pEbp, sizeof(DWORD)))
 			break;
 

@@ -5,17 +5,7 @@
 
 #include "GlobalText.h"
 
-///////////////////////////////////////////////////////////////////////////////
-// filter
-///////////////////////////////////////////////////////////////////////////////
-
-void OpenTextScriptFile(char *FileName);
-void OpenTextFile(char *FileName);
 void SaveTextFile(char *FileName);
-
-///////////////////////////////////////////////////////////////////////////////
-// filter
-///////////////////////////////////////////////////////////////////////////////
 
 extern char AbuseFilter[MAX_FILTERS][20];
 extern char AbuseNameFilter[MAX_NAMEFILTERS][20];
@@ -29,10 +19,6 @@ void OpenNameFilterFileText(char *FileName);
 void SaveNameFilterFile(char *FileName);
 void OpenNameFilterFile(char *FileName);
 
-///////////////////////////////////////////////////////////////////////////////
-// gate
-///////////////////////////////////////////////////////////////////////////////
-
 extern GATE_ATTRIBUTE *GateAttribute;
 
 void OpenGateScriptText(char *FileName);
@@ -40,20 +26,11 @@ void SaveGateScript(char *FileName);
 void OpenGateScript(char *FileName);
 void OpenMonsterSkillScript(char *FileName);
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Dialog
-///////////////////////////////////////////////////////////////////////////////
-
 extern DIALOG_SCRIPT g_DialogScript[MAX_DIALOG];
 
 void OpenDialogFileText(char *FileName);
 void SaveDialogFile(char *FileName);
 void OpenDialogFile(char *FileName);
-
-///////////////////////////////////////////////////////////////////////////////
-// item
-///////////////////////////////////////////////////////////////////////////////
 
 extern ITEM_ATTRIBUTE *ItemAttribute;
 
@@ -65,29 +42,13 @@ extern BYTE getSkillIndexByBook ( int Type );
 extern void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 );
 extern float CalcDurabilityPercent ( BYTE dur, BYTE maxDur, int Level, int option, int ExtOption=0 );
 extern int ItemValue(ITEM *ip,int goldType=1);
-extern int ItemValueOld(ITEM *ip,int goldType=1);
-#ifndef KJH_DEL_PC_ROOM_SYSTEM				// #ifndef
-#ifndef ASG_PCROOM_POINT_SYSTEM_MODIFY
-#ifdef ADD_PCROOM_POINT_SYSTEM
-int GetItemBuyingTermsPoint(ITEM* pItem);
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 extern void PrintItem(char *FileName);
-
-///////////////////////////////////////////////////////////////////////////////
-// monster
-///////////////////////////////////////////////////////////////////////////////
 
 extern MONSTER_SCRIPT MonsterScript[MAX_MONSTER];
 
 extern void  OpenMonsterScript(char *FileName);
 extern void  MonsterConvert(MONSTER *m,int Level);
 extern char* getMonsterName ( int type );
-
-///////////////////////////////////////////////////////////////////////////////
-// skill
-///////////////////////////////////////////////////////////////////////////////
 
 extern SKILL_ATTRIBUTE *SkillAttribute;
 

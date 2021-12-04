@@ -29,9 +29,6 @@ namespace SEASON3B
 			IMAGE_ITEM_DUR_UPPER,
 			IMAGE_ITEM_DUR_WEAPON,
 			IMAGE_ITEM_DUR_WING,
-#ifdef PBG_ADD_PCROOM_NEWUI
-			IMAGE_PCROOM_UI = BITMAP_PCROOM_NEWUI,
-#endif //PBG_ADD_PCROOM_NEWUI
 		};
 		
 		enum IMAGE_SIZE
@@ -42,10 +39,6 @@ namespace SEASON3B
 			PETHP_BAR_HEIGHT = 3,
 			ITEM_DUR_WIDTH = 23,
 			ITEM_DUR_HEIGHT = 23,
-#ifdef PBG_ADD_PCROOM_NEWUI
-			PCROOM_WIDTH = 57,
-			PCROOM_HEIGHT = 23,
-#endif //PBG_ADD_PCROOM_NEWUI
 		};
 
 		enum ITEM_DUR_ARROW_TYPE
@@ -109,13 +102,6 @@ namespace SEASON3B
 		bool RenderEquipedPetLife( int iX, int iY );
 		bool RenderSummonMonsterLife( int iX, int iY );
 		bool RenderNumArrow( int iX, int iY );
-#ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
- 		bool RenderPCRoomPoint( int iX, int iY );
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-#ifdef PBG_ADD_PCROOM_NEWUI
-		bool RenderPCRoomUI(int _PosX, int _PosY);
-		bool RenderPCRoomToolTip(int _PosX, int _PosY);
-#endif //PBG_ADD_PCROOM_NEWUI
  		bool RenderItemEndurance( int ix, int iY );
 	};
 }

@@ -5,7 +5,6 @@
 #include "NewUINPCShop.h"
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"
-#include "PCRoomPoint.h"
 #include "ZzzInventory.h"
 #include "wsclientinline.h"
 #ifdef LDK_ADD_GAMBLE_SYSTEM
@@ -113,21 +112,6 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 				GambleSystem& _gambleSys = GambleSystem::Instance();
 #endif //LDK_ADD_GAMBLE_SYSTEM
 
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM				
-				CPCRoomPtSys& rPCRoomPtSys = CPCRoomPtSys::Instance();
-				if(rPCRoomPtSys.IsPCRoomPointShopMode())
-				{
-					rPCRoomPtSys.SetBuyItemPos(iIndex);
-					g_pNPCShop->SetStandbyItemKey(pItem->Key);
-					
-					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPCRoomPointItemBuyMsgBoxLayout));
-
-					return false;
-				}
-				else
-#endif //ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 #ifdef LDK_ADD_GAMBLE_SYSTEM
 				if( _gambleSys.IsGambleShop() )
 				{
@@ -210,19 +194,13 @@ bool SEASON3B::CNewUINPCShop::UpdateKeyEvent()
 	
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == true)
 	{
-		if(SEASON3B::IsPress(VK_ESCAPE) == true
-#ifdef YDG_FIX_NPCSHOP_SELLING_LOCK
-			&& m_bSellingItem == false
-#endif	// YDG_FIX_NPCSHOP_SELLING_LOCK
-			)
+		if(SEASON3B::IsPress(VK_ESCAPE) == true	&& m_bSellingItem == false)
 		{
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCSHOP);
 			PlayBuffer(SOUND_CLICK01);
 			return false;
 		}
 	}
-	
-
 	return true;
 }
 
@@ -359,38 +337,19 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 	if( !pPickedItem )			return false;
 	ITEM* pItem = pPickedItem->GetItem();
 
-#ifndef KJH_FIX_SELL_LUCKYITEM				// #ifndef
 #ifdef LEM_ADD_LUCKYITEM
 	if( IsSellingBan( pItem ) )	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f );
 	else	m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f );
 #endif // LEM_ADD_LUCKYITEM
-#endif // KJH_FIX_SELL_LUCKYITEM
-	if(	SEASON3B::IsRelease(VK_LBUTTON) == true
-		&& m_pNewInventoryCtrl->CheckPtInRect(MouseX, MouseY) == true
-#ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
-		&& m_bSellingItem == false
-#endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
-		)
-	{
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-		if (CPCRoomPtSys::Instance().IsPCRoomPointShopMode())
-		{
-			g_pChatListBox->AddText("", GlobalText[2329], SEASON3B::TYPE_ERROR_MESSAGE);
-			
-			return true;
-		}
-#endif //ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 
-#ifdef LJH_FIX_BUG_SELLING_ITEM_CAUSING_OVER_LIMIT_OF_ZEN
+	if(	SEASON3B::IsRelease(VK_LBUTTON) == true	&& m_pNewInventoryCtrl->CheckPtInRect(MouseX, MouseY) == true && m_bSellingItem == false)
+	{
 		if (CharacterMachine->Gold + ItemValue(pItem) > 2000000000)
 		{
 			g_pChatListBox->AddText("", GlobalText[3148], SEASON3B::TYPE_SYSTEM_MESSAGE);
 			
 			return true;
 		}
-#endif //LJH_FIX_BUG_SELLING_ITEM_CAUSING_OVER_LIMIT_OF_ZEN
 
 		if( pItem && pItem->Jewel_Of_Harmony_Option != 0 )
 		{
@@ -398,18 +357,6 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 
 			return true;
 		}
-#ifndef KJH_FIX_SELL_LUCKYITEM				// #ifndef
-#ifdef LEM_ADD_LUCKYITEM
-		else if( Check_ItemAction(pItem, eITEM_SELL) && pItem->Durability > 0)
-		{
-			g_pChatListBox->AddText("", GlobalText[2329], SEASON3B::TYPE_ERROR_MESSAGE);
-			m_pNewInventoryCtrl->BackupPickedItem();
-
-			return true;
-		}
-#endif // LEM_ADD_LUCKYITEM
-#endif // KJH_FIX_SELL_LUCKYITEM
-
 		else if(pItem && IsSellingBan(pItem) == true)
 		{
 			g_pChatListBox->AddText("", GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);

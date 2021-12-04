@@ -15,7 +15,6 @@
 #include "UIManager.h"
 #include "PersonalShopTitleImp.h"
 #include "CComGem.h"
-#include "PCRoomPoint.h"
 #include "MixMgr.h"
 #include "CSQuest.h"
 #include "NewUICryWolf.h"
@@ -1854,40 +1853,6 @@ CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::OkBtnDown(class CNe
 }
 
 CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-	PlayBuffer(SOUND_CLICK01);
-	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-	return CALLBACK_BREAK;
-}
-
-bool SEASON3B::CPCRoomItemGiveLayout::SetLayout()
-{
-	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-	if(0 == pMsgBox)
-		return false;
-	if(false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
-		return false;
-
-	pMsgBox->AddMsg(GlobalText[2020], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
-
-	pMsgBox->AddCallbackFunc(CPCRoomItemGiveLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
-	pMsgBox->AddCallbackFunc(CPCRoomItemGiveLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-
-	return true;
-}
-
-CALLBACK_RESULT SEASON3B::CPCRoomItemGiveLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-	SendRequestPCRoomCouponItem();
-
-	PlayBuffer(SOUND_CLICK01);
-	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-	return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT SEASON3B::CPCRoomItemGiveLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
 	PlayBuffer(SOUND_CLICK01);
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

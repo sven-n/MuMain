@@ -6710,10 +6710,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Matrix[1][3] = 20.f;
      			Matrix[2][3] = 0.f;
 			}
-#ifdef ADD_SOCKET_ITEM
-#ifdef ASG_FIX_ARROW_VIPER_BOW_EQUIP_DIRECTION
 			else
-#endif	// ASG_FIX_ARROW_VIPER_BOW_EQUIP_DIRECTION
 			if(Type == MODEL_BOW+23)
 			{
 				Vector(-60.f,0.f,-80.f,Angle);
@@ -6722,8 +6719,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Matrix[1][3] = 20.f;
      			Matrix[2][3] = -5.f;
 			}
-#endif // ADD_SOCKET_ITEM
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 			else if(Type == MODEL_BOW+24)
 			{
 				Vector(90.f,0.f,-80.f,Angle);
@@ -6732,7 +6727,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Matrix[1][3] = 20.f;
      			Matrix[2][3] = -5.f;
 			}
-#endif //LDK_ADD_GAMBLERS_WEAPONS
 			else if(Type>=MODEL_BOW && Type<MODEL_BOW+MAX_ITEM_INDEX)
 			{
 				Matrix[0][3] = -10.f;
@@ -6751,7 +6745,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Matrix[1][3] = 5.f;
 				Matrix[2][3] = 10.f;
 			}
-#ifdef CSK_EVENT_HALLOWEEN_MAP
 			else if(Type == MODEL_POTION+45)
 			{
 				Vector(0.f,0.f,0.f,Angle);
@@ -6760,7 +6753,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Matrix[1][3] = 0.f;
 				Matrix[2][3] = 0.f;
 			}
-#endif // CSK_EVENT_HALLOWEEN_MAP
 #ifdef CSK_REF_BACK_RENDERITEM
 			else if(Type >= MODEL_SHIELD && Type < MODEL_SHIELD+MAX_ITEM_INDEX)
 			{
@@ -6814,12 +6806,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
 #ifdef CSK_REF_BACK_RENDERITEM
-		if (bRightHandItem == false
-			&& !(Type >= MODEL_SHIELD && Type < MODEL_SHIELD+MAX_ITEM_INDEX)
-#ifdef ASG_FIX_ARROW_VIPER_BOW_EQUIP_DIRECTION
-			&& Type != MODEL_BOW+20
-#endif	// ASG_FIX_ARROW_VIPER_BOW_EQUIP_DIRECTION
-			)
+		if (bRightHandItem == false	&& !(Type >= MODEL_SHIELD && Type < MODEL_SHIELD+MAX_ITEM_INDEX) && Type != MODEL_BOW+20)
 		{
 			vec3_t vNewAngle;
 			float mNewRot[3][4];
@@ -6846,15 +6833,12 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		R_ConcatTransforms(o->BoneTransform[f->LinkBone],Matrix,ParentMatrix);
 		VectorCopy(c->Object.Position, b->BodyOrigin);
 
-#ifdef CSK_EVENT_HALLOWEEN_MAP
 		if(Type == MODEL_POTION+45)
 		{
 			b->BodyOrigin[0] -= 10.f;
 			b->BodyOrigin[1] += 0.f;
 			b->BodyOrigin[2] -= 145.f;
 		}
-#endif // CSK_EVENT_HALLOWEEN_MAP
-
     	Vector(0.f,0.f,0.f,Object->Angle);
 	}
 	else
@@ -6885,15 +6869,9 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
     {
 	    b->CurrentAction  = 1;
     }
-#ifdef ADD_SOCKET_ITEM
     if ( !Link || (Type<MODEL_BOW || Type>=MODEL_BOW+MAX_ITEM_INDEX) || Type==MODEL_BOW+23)
-#else ADD_SOCKET_ITEM
-    if ( !Link || (Type<MODEL_BOW || Type>=MODEL_BOW+MAX_ITEM_INDEX))
-#endif // ADD_SOCKET_ITEM
     {
-		if( !g_isCharacterBuff(o, eDeBuff_Stun) 
-			&& !g_isCharacterBuff(o, eDeBuff_Sleep) 
-			)
+		if( !g_isCharacterBuff(o, eDeBuff_Stun) && !g_isCharacterBuff(o, eDeBuff_Sleep) )
         {
             b->PlayAnimation(&f->AnimationFrame,&f->PriorAnimationFrame,&f->PriorAction,f->PlaySpeed,Position,Object->Angle);
         }
@@ -14209,12 +14187,11 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.EnableShadow = false;
 		c->Object.m_bRenderShadow = false;
 		break;
-#ifdef PCROOM_EVENT
 	case 258:
 	case 371:
 	case 414:
 		c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
-		strcpy(c->ID,"경비병");
+		strcpy(c->ID,"HelperName");
 		c->BodyPart[BODYPART_HELM  ].Type = MODEL_HELM  +9;
 		c->BodyPart[BODYPART_ARMOR ].Type = MODEL_ARMOR +9;
 		c->BodyPart[BODYPART_PANTS ].Type = MODEL_PANTS +9;
@@ -14224,18 +14201,17 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		SetCharacterScale(c);
 		c->Object.m_bpcroom = true;
 		break;
-#endif	// PCROOM_EVENT
 	case 259:
     	OpenNpc(MODEL_KALIMA_SHOP);
 		c = CreateCharacter(Key,MODEL_KALIMA_SHOP,PositionX,PositionY);
 		c->Object.Position[2] += 140.0f;
-		strcpy(c->ID,"신관 레이라");
+		strcpy(c->ID,"KalimaShop");
 		break;
 #ifdef CSK_CHAOS_CARD
 	case 375:
 		{
 			c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
-			strcpy(c->ID,"카오스카드마스터");
+			strcpy(c->ID,"ChaosCard");
 			c->BodyPart[BODYPART_HELM  ].Type = MODEL_HELM  +30;
 			c->BodyPart[BODYPART_ARMOR ].Type = MODEL_ARMOR +30;
 			c->BodyPart[BODYPART_PANTS ].Type = MODEL_PANTS +30;
@@ -14502,11 +14478,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		break;
 #endif //LDK_ADD_GAMBLE_NPC_MOSS
 #ifdef CSK_ADD_GOLDCORPS_EVENT
-#ifdef KJH_FIX_GOLD_RABBIT_INDEX
 	case 502:
-#else // KJH_FIX_GOLD_RABBIT_INDEX
-	case 492:	// 황금토끼
-#endif // KJH_FIX_GOLD_RABBIT_INDEX
 		OpenMonsterModel(128);
 		c = CreateCharacter(Key, MODEL_MONSTER01+128, PositionX, PositionY);
 		strcpy(c->ID,"Unknown");

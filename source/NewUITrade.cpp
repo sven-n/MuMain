@@ -359,17 +359,17 @@ void CNewUITrade::ConvertYourLevel(int& rnLevel, DWORD& rdwColor)
         rnLevel = 300;
 	    rdwColor = (255<<24)+(255<<16)+(153<<8)+(255);
     }
-    else if (m_nYourLevel >= 200)	//  Èò»ö.
+    else if (m_nYourLevel >= 200)
     {
         rnLevel = 200;
 	    rdwColor = (255<<24)+(255<<16)+(230<<8)+(210);
     }
-    else if (m_nYourLevel >= 100)	//  ³ì»ö.
+    else if (m_nYourLevel >= 100)
     {
         rnLevel = 100;
         rdwColor = (255<<24)+(24<<16)+(201<<8)+(0);
     }
-    else if (m_nYourLevel >= 50)	//  ÁÖÈ²»ö.
+    else if (m_nYourLevel >= 50)
     {
         rnLevel = 50;
         rdwColor = (255<<24)+(0<<16)+(150<<8)+(255);
@@ -393,13 +393,11 @@ void CNewUITrade::LoadImages()
 	LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_TRADE_LEFT, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_TRADE_RIGHT, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_TRADE_BOTTOM, GL_LINEAR);
-
 	LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_TRADE_LINE, GL_LINEAR);
 	LoadBitmap("Interface\\newui_Account_title.tga", IMAGE_TRADE_NICK_BACK, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_money.tga", IMAGE_TRADE_MONEY, GL_LINEAR);
 	LoadBitmap("Interface\\newui_Bt_accept.tga", IMAGE_TRADE_CONFIRM, GL_LINEAR);
 	LoadBitmap("Interface\\CursorSitDown.tga", IMAGE_TRADE_WARNING_ARROW, GL_LINEAR, GL_CLAMP);
-	
 	LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_TRADE_BTN_CLOSE, GL_LINEAR);
 	LoadBitmap("Interface\\newui_Bt_money01.tga", IMAGE_TRADE_BTN_ZEN_INPUT, GL_LINEAR);
 }
@@ -408,13 +406,11 @@ void CNewUITrade::UnloadImages()
 {
 	DeleteBitmap(IMAGE_TRADE_BTN_ZEN_INPUT);
 	DeleteBitmap(IMAGE_TRADE_BTN_CLOSE);
-
 	DeleteBitmap(IMAGE_TRADE_WARNING_ARROW);
 	DeleteBitmap(IMAGE_TRADE_CONFIRM);
 	DeleteBitmap(IMAGE_TRADE_MONEY);
 	DeleteBitmap(IMAGE_TRADE_NICK_BACK);
 	DeleteBitmap(IMAGE_TRADE_LINE);
-
 	DeleteBitmap(IMAGE_TRADE_BOTTOM);
 	DeleteBitmap(IMAGE_TRADE_RIGHT);
 	DeleteBitmap(IMAGE_TRADE_LEFT);
@@ -456,8 +452,7 @@ void CNewUITrade::ProcessMyInvenCtrl()
 			int nDstIndex = pPickedItem->GetTargetLinealPos(m_pMyInvenCtrl);
 			if (nDstIndex != -1 && m_pMyInvenCtrl->CanMove(nDstIndex, pItemObj))
 			{
-				SendRequestEquipmentItem(REQUEST_EQUIPMENT_TRADE, nSrcIndex,
-					pItemObj, REQUEST_EQUIPMENT_TRADE, nDstIndex);
+				SendRequestEquipmentItem(REQUEST_EQUIPMENT_TRADE, nSrcIndex, pItemObj, REQUEST_EQUIPMENT_TRADE, nDstIndex);
 			}
 		}
 		else if (pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
@@ -488,22 +483,15 @@ void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
 	}
 }
 
-void CNewUITrade::SendRequestItemToMyInven(ITEM* pItemObj, int nTradeIndex,
-										   int nInvenIndex)
+void CNewUITrade::SendRequestItemToMyInven(ITEM* pItemObj, int nTradeIndex, int nInvenIndex)
 {
-	SendRequestEquipmentItem(REQUEST_EQUIPMENT_TRADE, nTradeIndex,
-		pItemObj, REQUEST_EQUIPMENT_INVENTORY, nInvenIndex);
+	SendRequestEquipmentItem(REQUEST_EQUIPMENT_TRADE, nTradeIndex, pItemObj, REQUEST_EQUIPMENT_INVENTORY, nInvenIndex);
 
-#ifdef YDG_FIX_TRADE_BUTTON_LOCK_WHNE_ITEM_MOVED
 	if (m_bMyConfirm)
 	{
 		AlertTrade();
 	}
 	m_nMyTradeWait = 150;
-#else	// YDG_FIX_TRADE_BUTTON_LOCK_WHNE_ITEM_MOVED
-	if (!m_bMyConfirm)
-        m_nMyTradeWait = 150;
-#endif	// YDG_FIX_TRADE_BUTTON_LOCK_WHNE_ITEM_MOVED
 }
 
 void CNewUITrade::SendRequestMyGoldInput(int nInputGold)

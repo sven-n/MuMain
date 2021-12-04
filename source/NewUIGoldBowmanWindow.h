@@ -1,5 +1,4 @@
 // NewUIGoldBowmanWindow.h: interface for the CNewUIGoldBowmanWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIGOLDBOWMANWINDOW_H__B1287970_FF70_4AE6_B38E_31AA3EC0341F__INCLUDED_)
@@ -41,11 +40,11 @@ namespace SEASON3B
 		};
 		
 	public:
-		CNewUIManager*			m_pNewUIMng;			// UI 매니저.
+		CNewUIManager*			m_pNewUIMng;
 		CUITextInputBox*        m_EditBox;
 		CNewUIButton			m_BtnSerial;
 		CNewUIButton			m_BtnExit;
-		POINT					m_Pos;					// 창의 위치.
+		POINT					m_Pos;
 		
 	public:
 		CNewUIGoldBowmanWindow();

@@ -1,7 +1,4 @@
 
-#ifdef _LANGUAGE_ENG
-
-// [2010.10.28 1.03H+]
 #define PBG_FIX_DROPBAN_GENS
 
 #define KJW_FIX_ITEMNAME_ORB_OF_SUMMONING
@@ -66,7 +63,7 @@
 	#define YDG_ADD_MOVE_COMMAND_PROTOCOL						// ÀÌµ¿¸í·É ÇÁ·ÎÅäÄÝ Ãß°¡(/ÀÌµ¿ Á¦°Å) (2009.04.01) [2009.04.22 Å×¼·]
 
 	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 4 ¹ö±×¼öÁ¤]
+	// [ Season 5 - Part 4]
 	#define LDK_MOD_GUARDIAN_DROP_RESIZE					// µ¥¸ó ¼öÈ£Á¤·É ¹´Ú¿¡ ³õ¿´À»¶§ »çÀÌÁî Á¶Á¤(10.03.04)
 	#define PBG_FIX_SATAN_VALUEINCREASE						// »çÅº Âø¿ë½Ã ¼öÄ¡ Áõ°¡ ¹ö±× ¼öÁ¤(10.04.07)
 	#define PBG_MOD_GUARDCHARMTEXT							// ¼öÈ£ÀÇºÎÀû¾ÆÅÛ ¹®±¸¼öÁ¤(10.04.14)
@@ -91,9 +88,8 @@
 #ifdef UPDATE_100527
 
 	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 3 Ãß°¡ ¹ö±×¼öÁ¤]
+	// [ Season 5 - Part 3]
 	#define KJH_FIX_BTS158_TEXT_CUT_ROUTINE							// UI¿¡ ¸Â°Ô Text¸¦ ÀÚ¸¦½Ã ÀÌ»óÇö»ó ¼öÁ¤ (10.05.07)
-	#define KJH_MOD_BTS173_INGAMESHOP_ITEM_STORAGE_PAGE_ZERO_PAGE	// ÀÎ°ÔÀÓ¼¥ º¸°üÇÔ ¾ÆÀÌÅÛÀÌ ¾øÀ»½Ã 0ÆäÀÌÁö Ãâ·Â (10.05.13)
 	#define KJH_FIX_BTS179_INGAMESHOP_STORAGE_UPDATE_WHEN_ITEM_BUY	// ÀÎ°ÔÀÓ¼¥ ¾ÆÀÌÅÛ ±¸ÀÔ½Ã ¼±¹°ÇÔ ÅÇ¿¡¼­ º¸°üÇÔ ¾ÆÀÌÅÛÀÌ °»½ÅµÇ´Â ¹ö±×¼öÁ¤ (10.05.13)
 	#define KJH_FIX_MINIMAP_NAME									// ¹Ì´Ï¸Ê¿¡¼­ NPC/Portal Name ÀÌ Â©¸®´Â ¹ö±× ¼öÁ¤ (10.05.14) - minimap ½ºÅ©¸³Æ® ¸ðµÎ ÀçÄÁ¹öÆÃ
 	#define KJH_MOD_BTS184_REQUIRE_STAT_WHEN_SPELL_SKILL			// ½ºÅ³ ½ÃÀü½Ã ½ºÅÝ ¿ä±¸Ä¡¿¡ µû¶ó ½ºÅ³ »ç¿ë º¯°æ (10.05.17)
@@ -112,14 +108,14 @@
 	#define ASG_FIX_QUEST_GIVE_UP									// Ä½ºÆ® Æ÷±â ¹ö±× ¼öÁ¤. Ä½ºÆ® »óÅÂ(QS) 0xfe»èÁ¦µÊ.(10.05.26)
 
 	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 3 Ãß°¡ÀÛ¾÷]
+	// [ Season 5 - Part 3]
 	#define KJH_MOD_INGAMESHOP_UNITTTYPE_FILED_OF_PRODUCT_SCRIPT	// Product °ÔÀÓ¼¥ ½ºÅ©¸³Æ®ÀÇ UnitTypeÇÊµå·Î ´ÜÀ§¸í º¯°æ (10.04.22) - 10.03.29ÀÏÀÚ ÀÎ°ÔÀÓ¼¥ ¶óÀÌºê·¯¸® Àû¿ë
 	#define KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// ÀÎ°ÔÀÓ¼¥ º¸°üÇÔ ÆäÀÌÁö ´ÜÀ§ ¹æ½ÄÀ¸·Î º¯°æ (10.04.27)
 	#define KJH_MOD_INGAMESHOP_DOMAIN_EACH_NATION					// ±¹°¡º° °ÔÀÓ¼¥ µµ¸ÞÀÎ ¼³Á¤ (10.05.04)
 	#define KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL			// Global Ä³½Ã Æ÷ÀÎÆ® ½Ã½ºÅÛ. (10.04.19) - ±Û·Î¹ú Àü¿ë
 
 	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 3 ÀÌÈÄ ¹ö±×¼öÁ¤]
+	// [ Season 5 - Part 3]
 	#define KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT			// ºñÁ¤»óÀûÀûÀÎ Á¾·á½Ã ÀÌº¥Æ®¸Ê ÃÊ±âÈ­ (10.04.20)
 
 	#define LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM	// ·Î·» ½ÃÀå ¼­¹ö·ÎºÎÅÍ °³ÀÎ»óÁ¡ ±¸¸ÅÀÌÈÄ ReceiveRefreshPersonalShopItem ¹ÞÀ» ¶§ Error Log Á¤º¸¸¦ ´õ ÀÚ¼¼È÷ Ãâ·Â (10.03.30)
@@ -145,7 +141,7 @@
 
 
 	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 3] - ½ºÅ³¾ÆÀÌÄÜ ¸®´º¾ó, ¹Ì´Ï¸Ê, ¾ÆÀÌÅÛ ¾÷±×·¹ÀÌµå(14, 15lv), °Õ½º ½Ã½ºÅÛ, ·Î·»½ÃÀå (10.04.27)
+	// [ Season 5 - Part 3]
 	#define SEASON5_PART3
 	#ifdef SEASON5_PART3
 		//------------------------------------------------
@@ -162,11 +158,7 @@
 		#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 
 		#define PBG_ADD_GENSRANKING
-
 		#define KJH_ADD_SKILLICON_RENEWAL
-
-		#define PJH_ADD_MINIMAP
-
 		#define PBG_MOD_PREMIUMITEM_TRADE_0118						// Ä«¿À½º Ä«µå,ºÎÀû,Çà¿îÀÇºÎÀû ·¹µåºí·ç °Å·¡°¡´ÉÀ¸·Î ±âÈ¹º¯°æ(10.01.18)
 		#define KJH_FIX_INGAMESHOP_SCRIPTDOWN_BUG2				// ÀÎ°ÔÀÓ¼¥ ½ºÅ©¸³Æ® ´¿î·Îµå ¹ö±×¼öÁ¤ 2 (10.01.14)
 		#define ASG_ADD_QUEST_REQUEST_REWARD_TYPE				// Ä½ºÆ® ¿ä±¸»çÇ×, º¸»ó Ãß°¡(2009.12.15)
@@ -176,7 +168,7 @@
 	#endif // SEASON5_PART3
 
 	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 2 ÀÌÈÄ ¹ö±×¼öÁ¤]
+	// [ Season 5 - Part 2]
 
 	#define PBG_MOD_PANDAPETRING_NOTSELLING						// Ææ´õ Æê ¹ÝÁö ¾ÈÆÈ¸®°Ô ¼³Á¤(10.01.11)
 	#define LJH_FIX_EXTENDING_OVER_MAX_TIME_4S_To_10S			// ÇØ¿Ü»ç¿ëÀÚµé ÀÏºÎ »ç¿ëÀÚ¿¡°Ô Ä³½Ã¼¥ÀÌ ¿­¸®Áö ¾Ê¾Æ Max TimeÀ» ±âÁ¸ 4ÃÊ¿¡¼­ 10ÃÊ·Î º¯°æ(09.12.17)
@@ -229,8 +221,6 @@
 			#define PBG_FIX_ITEMANGLE
 			#define PBG_ADD_MU_LOGO
 			//^#define PBG_ADD_CHARACTERSLOT
-			#define KJH_DEL_PC_ROOM_SYSTEM
-
 			#define PBG_ADD_CHARACTERCARD
 			//^#define LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
 		#endif //KJH_PBG_ADD_INGAMESHOP_SYSTEM
@@ -280,11 +270,6 @@
 			#define LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // Á¤·®±Ç3Á¾					// MODEL_POTION+130~132
 		#endif	//INGAMESHOP_ITEM01
 
-		//------------------------------------------------
-		// 4. ¹ö±×¼öÁ¤
-		#define PBG_FIX_RESETFRUIT_CAL							// ¸®¼Â¿­¸Å °æ°íÃ¢ ±âº» ½ºÅÈÃß°¡ °è»ê ¹ö±×¼öÁ¤(09.10.25)
-		#define ASG_MOD_QUEST_WORDS_SCRIPTS						// QuestWords.txt ¾Ö´Ï ¹øÈ£¿Í È¸¼ö Á¦°Å (2009.10.22) (QuestWords.txt ÀÏº» Àû¿ë½Ã µðÆÄÀÎ Á¤¸®ÇÒ °Í)
-		#define LDK_FIX_GM_WEBZEN_NAME							// GMÆÇº°½Ã id¿¡ webzenÀÌ¶õ ´Ü¾î°¡ µé¾î°¡µµ gmÀÎÁ¤(09.10.13)
 	#endif // SEASON5_PART2
 
 	#define ADD_TOTAL_CHARGE_8TH
@@ -515,18 +500,6 @@
 #define LDS_FIX_MEMORYLEAK_0910_LOGINWIN						// ¸Þ¸ð¸®¸¯ FIXED. Logwin.cppÀÇ ¾ÆÀÌµð, ÆÐ½º¿öµå context°¡ Àç·Î±×ÀÎ ÀÌ³ª ¼­¹ö¼±ÅÃµîÀ¸·Î ÀçÈ£Ãâ½Ã¿¡ ¸Þ¸ð¸® ¹Ì¹ÝÈ¯À¸·Î ¸¯¹ß»ý. (09.11.30)
 #define LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS	// ¸Þ¸ð¸®¸¯ FIXED. ÀÎº¥Åä¸®»ó¿¡ ¾ÆÀÌÅÛÀ» ÁýÀºÈÄ °°Àº À§Ä¡¿¡ ³õÀ»¶§¸¸ È½¼ö ¸¸Å­ ¸Þ¸ð¸® ¸¯ ¹ß»ý. (09.11.09)
 #define LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE			// ¸ÅÄ¡ÀÌº¥Æ®(µµÇÃ°»¾î,ºí·¯µåÄ³½½,Ä«¿À½ºÄ³½½,È¯¿µÀÇ»ç¿ø) Á¾·á½Ã¸¶´ ¸Þ¸ð¸®¸¯ ¹ß»ý FIX. (10.01.29)
-#define LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY	// Âø¿ëµÈ ¼¼Æ®¾ÆÀÌÅÛ°ú µ¿Á¾ÀÇ ¹ÌÀåÂøµÈ ¼¼Æ®¾ÆÀÌÅÛÀÌ ÀÎº¥Åä¸®¿¡ ÀÖ´Â°æ¿ì, ¿É¼Ç È°¼ºÈ­°¡ µÇ´Â ¹®Á¦. (10.02.17)
-#define PBG_FIX_RENDEROBJ_MAXINDEX								// ¿µå ·Îµ½Ã ÃÖ´ë ¿ÀºêÁ§¿ÜÀÇ °ª È£Ãâ¹ö±× ¼öÁ¤(10.02.10)		
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << ¹ö±×¼öÁ¤ ÆÐÄ¡ >>
-//----------------------------------------------------------------------------------------------
-// [2010.04.08 ±Û·Î¹ú 1.03u] - ÀÌµ¿¼®
-
-#define LJH_FIX_LOADING_INFO_OF_AN_OTHER_CHARACTER_IN_LOGIN	// (JP_607)(±¹³»¹ö±×)Ä³¸¯ÅÍ ¼±ÅÃÈ­¸é¿¡¼­ Ä³¸¯ÅÍ B¸¦ ¼±ÅÃÇÏ°í Ä³¸¯ÅÍ A¸¦ Å¬¸¯ÇÏ¸é¼­ ¿£ÅÍÅ°¸¦ µ¿½Ã¿¡ ´©¸£¸é Ä³¸¯ÅÍ BÀÇ ÀÏºÎÁ¤º¸·Î ·Î±×ÀÎ(10.04.01)
-
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -562,30 +535,10 @@
 															//Season5 ÀÌÈÄ »èÁ¦ÇØµµ µÊ.(BuxConvert() ÇÔ¼ö À§Ä¡ ¹®Á¦) // Season5 ¾÷µ¥ÀÌÆ®½Ã¿¡ »èÁ¦ÇØµµ µÇ´Â°ÍÀÎÁö È®ÀÎ ´½Ã ÇÒ°Í.
 	#define ASG_MOD_SERVER_LIST_ADD_CHARGED_CHANNEL		// ¼­¹ö¸®½ºÆ®¿¡ À¯·á Ã¤³Î Ãß°¡.(10.02.26) - ÇöÀç ±Û·Î¹ú¸¸ Àû¿ë.
 #endif	//ASG_ADD_SERVER_LIST_SCRIPTS
-#define ASG_FIX_NOT_EXECUTION_WEBSTARTER_MSG			// À¥½ºÅ¸ÅÍ ¹Ì½ÇÇà ¸Þ½ÃÁö Text.txt ¹øÈ£ ¼öÁ¤(10.03.03)
 
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << ¹ö±×¼öÁ¤ ÆÐÄ¡ >>
-//----------------------------------------------------------------------------------------------
-// [2010.02.24 ±Û·Î¹ú 1.03p] - ¾È»ó±Ô
-
-#define ASG_MOD_CHARGED_CHANNEL_TICKET_ADD_DESCRIPTION			// À¯·á Ã¤³Î ÀÔÀå±Ç ¼³¸í Ãß°¡.(2010.02.24)
-#define ASG_ADD_CASH_SHOP_ALREADY_HAVE_ITEM_MSG					// Ä³½¬¼¥ Áßº¹ ¾ÆÀÌÅÛ ¸Þ½ÃÁö Ãß°¡.(2010.02.24)	
-#define LJH_MOD_EXTENDING_NUM_OF_MIX_RECIPES_FROM_100_TO_1000	//ÇÑ Á¶ÇÕ Ã¢¿¡¼­ Á¶ÇÕÇÒ¼ö ÀÖ´Â Á¾·ÀÇ °³¼ö Á¦ÇÑÀ» 100°³¿¡¼­ 1000°³·Î Áõ°¡(10.02.23)
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << ºÎºÐÀ¯·áÈ­ 6Â÷ + Season 4.5 >> 
-//----------------------------------------------------------------------------------------------
-// [2010.02.22 ±Û·Î¹ú 1.03o] - ¾È»ó±Ô
 
 //-----------------------------------------------------------------------------
 // [ Season 4.5 ] 
-//		- PKÇÊµå/ºÒÄ«´©½º/°×ºí/ÆÒ´õÆÖ
 #define SEASON4_5										
 #ifdef SEASON4_5
 
@@ -613,35 +566,6 @@
 	#define PJH_ADD_PANDA_PET
 	#define PJH_ADD_PANDA_CHANGERING
 
-	#define ADD_FIX_AFTER_SEASON4_5_TEST
-	#ifdef ADD_FIX_AFTER_SEASON4_5_TEST
-		#define YDG_FIX_PANDA_CHANGERING_PANTS_BUG				// ´Å©·Îµå ¸Ç¸öÀ¸·Î ÆÒ´õ º¯½Å¹ÝÁö Âø¿ë½Ã ¹Áö º¸ÀÌ´Â ¹ö±× (09.07.21)
-		#define YDG_FIX_DUEL_SUMMON_CLOAK						// °áÅõ½Ã ¿äÁ¤ ¼ÒÈ¯¼ö ¸ÁÅä ³ª¿À´Â ¹ö±× (09.07.29)
-
-		#define	YDG_FIX_SMALL_ITEM_TOOLTIP_POSITION				// ÀÏº» ¿äÃ»À¸·Î 1Ä­Â¥¸® ¾ÆÀÌÅÛ ÅøÆÁÀ§Ä¡ ³»¸² (09.08.24)
-		#define KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM_EX	// NPC»óÁ¡¿¡¼­ ¾ÆÀÌÅÛÀ» ±¸¸ÅÇÒ¶§, Ã³À½¿¡ µÎ¹øÅ¬¸¯ÇØ¾ß ¾ÆÀÌÅÛÀÌ ±¸ÀÔµÇ´Â Ãß°¡ ¹ö±×¼öÁ¤ (09.08.24)
-
-		#define YDG_FIX_TRADE_BUTTON_LOCK_WHNE_ITEM_MOVED		// °Å·¡Ã¢ »ç±â°ü·Ã Æ®·¹ÀÌµå Àåºñ ¿Å±â¸é °Å·¡¹öÆ° Àá±×±â(º£Æ®³²Á¦º¸) (09.08.25)
-		#define YDG_FIX_NPCSHOP_SELLING_LOCK					// NPC»óÁ¡ ÆÇ¸Å½Ã Ã¢ ¸ø´Ý°Ô Àá±Ý(º£Æ®³²Á¦º¸) (09.08.25)
-
-		#define YDG_FIX_CATLE_MONEY_INT64_TYPE_CRASH			// °ø¼º ¼ºÁÖÃ¢ ¼ºÀÇ µ·ÀÌ ¸¹À»¶§ Æ¨±â´Â ¹ö±× (09.09.01)
-		#define YDG_FIX_USED_PORTAL_CHARM_STORE_BAN				// ÀÌµ¿ÀÇ ºÎÀû »ç¿ëÇÏ¸é Ã¢°í ÀúÀå ¸øÇÏ°Ô ¼öÁ¤ (09.09.02)
-
-		#define PBG_FIX_CHANGEITEMCOLORSTATE							// ÀÎº¥Åä¸® ¾È¿¡¼­ ³»±¸·Â¿¡ µû¸¥ »ö±ò º¯È­ÇÏµµ·Ï ¼öÁ¤(µ¥¸ó/¼öÈ£Á¤·É/ÆÒ´õÆê)(09.06.16)
-		#define PBG_FIX_PETTIP									// ÀÎº¥³»ºÎÀÇ ´Å©·Îµå °ü·Ã ÆêÀÇ Á¤º¸°¡ Âø¿ëÇÑ ÆêÀÇ Á¤º¸·Î Ãâ·ÂµÇ´Â ¹ö±× ¼öÁ¤(09.09.10)
-
-		#define LJH_FIX_CHANGE_RING_DAMAGE_BUG					// º¯½Å¹ÝÁö º¹¼ö Âø¿ë½Ã ³ôÀº °ªÀ¸·Î µ¥¹ÌÁö,¸¶·Â,ÀúÁÖ·Â Áõ°¡°¡ µÇµµ·Ï ¼öÁ¤ (09.09.11)
-		#define YDG_FIX_OVER_5_SETITEM_TOOLTIP_BUG				// ¼¼Æ®¾ÆÀÌÅÛ 5Á¾· ÀÌ»ó Â÷¸é °è»ê¾ÈµÇ´Â ¹ö±× ¼öÁ¤(09.09.11)
-		#define YDG_FIX_MAGIC_DAMAGE_CALC_ORDER					// ¼¼Æ®¾ÆÀÌÅÛ °ü·Ã ¸¶·Â °è»ê ¼ø¼­ ¼öÁ¤ (09.09.11)
-		#define YDG_FIX_SETITEM_REQUIRED_STATUS_BUG				// ¼¼Æ®¾ÆÀÌÅÛ ¿ä±¸´É·ÂÄ¡ ºÎÁ·½Ã ¼¼Æ®°è»ê¿¡¼­ ºüÁö°Ô ¼öÁ¤ (09.09.14)
-
-		#define YDG_FIX_380ITEM_OPTION_TEXT_SD_PERCENT_MISSING	// 380¾ÆÀÌÅÛ ¿É¼Ç¿¡ SDÁõ°¡¿¡ % ºüÁø ¹ö±× ¼öÁ¤ (09.09.23)
-		#define YDG_FIX_LUCKY_CHARM_VALUE_TO_0					// Çà¿îÀÇ ºÎÀû °¡°Ý 0À¸·Î ¼³Á¤ (09.09.23)
-
-		#define YDG_FIX_BUFFTIME_OVERFLOW						// ¹öÇÁ½Ã°£ÀÌ 0º¸´ ÀÛ¾ÆÁö¸é ³ÑÄ¡´Â ¹ö±× (09.09.28)
-		#define LJH_FIX_PET_SHOWN_IN_CHAOS_CASTLE_BUG			// ÆêÀÌ Ä«¿À½ºÄ³½½¿¡¼­ º¸ÀÌ´Â ¹ö±× ¼öÁ¤ (09.09.29)
-		#define YDG_FIX_REPAIR_COST_ADJUST_TO_SERVER_SETTING	// ¼ö¸® °¡°Ý °è»ê ¼­¹ö¿¡ ¸ÂÃã (09.10.12)
-	#endif //ADD_FIX_AFTER_SEASON4_5_TEST
 #endif // SEASON4_5
 
 
@@ -654,74 +578,19 @@
 
 	#define ADD_CASH_SHOP_6TH
 		#ifdef ADD_CASH_SHOP_6TH
-		// - ¾È»ó±Ô
 		#define ASG_ADD_CS6_GUARD_CHARM				// ¼öÈ£ÀÇºÎÀû(2009.02.09)
 		#define ASG_ADD_CS6_ITEM_GUARD_CHARM		// ¾ÆÀÌÅÛº¸È£ºÎÀû(2009.02.09)
 		#define ASG_ADD_CS6_ASCENSION_SEAL_MASTER 	// »ó½ÂÀÇÀÎÀå¸¶½ºÅÍ(2009.02.24)
 		#define ASG_ADD_CS6_WEALTH_SEAL_MASTER 		// Ç³¿äÀÇÀÎÀå¸¶½ºÅÍ(2009.02.24)
-
-		// - ÀÌµ¿¼®		// ÂüÁ¶ Define : CSK_PCROOM_ITEM
-		#define LDS_ADD_CS6_CHARM_MIX_ITEM_WING		// ³¯°³ Á¶ÇÕ 100% ¼º°ø ºÎÀû
+		#define LDS_ADD_CS6_CHARM_MIX_ITEM_WING
 	#endif	// ADD_CASH_SHOP_6TH
 
-	// 2. È²±Ý ±º´Ü 
-	// ---------------------------------------------------------------------------
-	// - ÃÖ¼®±
 	#define CSK_ADD_GOLDCORPS_EVENT					// È²±Ý±º´ÜÀÌº¥Æ®(2009.03.13)
-	// - ÀÌµ¿¼®
 	#define LDS_ADD_GOLDCORPS_EVENT_MOD_GREATDRAGON // È²±Ý ±×·¹ÀÌÆ® µå·¹°ï ºñÁÖ¾ó ÀçÀÛ¾÷. ºñÁÖ¾ó ÀÌÆåÆ® Ãß°¡. ±âÁ¸ µ¿ÀÏÇÑ ¸÷ Á¸Àç. (2009.04.06) (BITMAP_FIRE_HIK3_MONO È¿°ú ÂüÁ¶.)
-
-	// 3. PC ¹æ ½Ã½ºÅÛ ¹× ¾ÆÀÌÅÛ
-	// ---------------------------------------------------------------------------
-	#define	ADD_PCROOM_POINT_SYSTEM
-
-	#define ADD_FIX_AFTER_6TH_TEST
-	#ifdef ADD_FIX_AFTER_6TH_TEST
-		#define PBG_FIX_SHIELD_MAGICDAMAGE								// ¹æÆÐÂø¿ë½Ã Á¤º¸Ã¢¿¡ ¸¶·ÂÀÌ »ó½ÂÇÏ´Â ¹ö±× ¼öÁ¤(09.04.15)
-		#define PBG_FIX_FENRIR_GELENALATTACK							// Ææ¸±À» Å¸°í ÀÏ¹Ý°ø°ÝÀÌ ¾ÈµÇ´Â Çö»ó (09.04.17)
-		#define PBG_FIX_SKILL_RECOVER_TOOLTIP							// È¸º¹½ºÅ³ÀÇ ÅøÆÁ»óÀÇ ½ºÅ³ °ø°Ý·ÂÀÌ Ãâ·ÂµÇ°í ÀÖ´Â ¹ö±×(09.04.20)
-		#define PBG_FIX_SETITEM_4OVER									// ¼¼Æ® ¾ÆÀÌÅÛÀÇ 4Á¾ ÃÊ°úÇÏ¿© ÀåÂøÇßÀ» °æ¿ì ¹ö±×(09.04.24)
-		#define PBG_MOD_MASTERLEVEL_MESSAGEBOX							// »ó½ÂÀÇ ÀÎÀå ¸¶½ºÅÍÄÉ¸¯ÅÍ ±¸ÀÔ¿©ºÎ Ãß°¡(09.04.24)
-		#define PBG_FIX_REPAIRGOLD_DARKPAT								// ´Å©È£½º,½ºÇÇ¸´ ¼ö¸®ºñ ¹ö±× ¼öÁ¤(09.04.14)
-		#define KJH_FIX_DARKLOAD_PET_SYSTEM								// °³ÀÎ»óÁ¡±¸ÀÔÃ¢¿¡¼­ ´Å©·ÎµåÆêÀÇ ÅøÆÁÀÌ Á¤È®ÇÏ°Ô Ãâ·ÂµÇÁö ¾Ê´Â ¹ö±×¼öÁ¤ (09.04.16)	[JP_0226]
-		#define KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM			// NPC»óÁ¡¿¡¼­ ¾ÆÀÌÅÛÀ» ±¸¸ÅÇÒ¶§, Ã³À½¿¡ µÎ¹øÅ¬¸¯ÇØ¾ß ¾ÆÀÌÅÛÀÌ ±¸ÀÔµÇ´Â ¹ö±×¼öÁ¤ (09.04.16)	[JP_0348]
-		#define ASG_FIX_ARROW_VIPER_BOW_EQUIP_DIRECTION					// ¸¶À»¿¡¼­ ¿¡·Î¿ì¹ÀÌÆÛº¸¿ì Âø¿ë ¹æÇâ ¹ö±× ¼öÁ¤.(2009.04.17)
-
-		#define KJH_FIX_MOVECOMMAND_WINDOW_SIZE							// ÀÌµ¿¸í·ÉÃ¢ Å©±âº¯°æ½Ã ºó°ø°£ÀÌ »ý±â´Â ¹®Á¦ ¼öÁ¤ (09.03.02)		[JP_0420]
-		#define PBG_FIX_CHARM_MIX_ITEM_WING								// ³¯°³ÀÇ ºÎÀû »óÁ¡¿¡ ÆÇ¸ÅÈÄ ´À½ ¹°Ç° ÆÇ¸Å ¾ÈµÇ´Â ¹ö±× ¼öÁ¤(09.05.06)
-		#define KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI					// È²±Ý±Ã¼ö NPCÃ¢À» ¿¬»óÅÂ·Î ¾ÆÀÌÅÛ¸ô Ã¢À» ¿­¾úÀ»¶§, ÀÌ»óÇö»óÀÌ ¹ß»ýÇÏ´Â ¹ö±×¼öÁ¤ (09.05.06)
-		#define PBG_FIX_DARKPET_RENDER									// ´Å©·Îµå ÆêÀÇ ½ºÇÇ¸´°ú È£½ºÀÇ °ªÀÌ º¯°æµÇ´Â Çö»ó(09.05.08)
-		#define KJH_FIX_JP0459_CAN_MIX_JEWEL_OF_HARMONY					// Á¶È­ÀÇº¸¼®À¸·Î ¾÷±×·¹ÀÌµå ÇÒ¼ö ÀÖ´Â ¾ÆÀÌÅÛÀÎµ¥µµ »¡°²°Ô ³ª¿À´Â ¹ö±×¼öÁ¤ (09.05.08)
-		#define LDS_FIX_NONINITPROGLEM_SKILLHOTKEY						// °£È¤ ½Å±ÔÄÉ¸¯ÅÍ ÀÌÈÄ ¹·ÎÀÌÀü ·Î±×ÀÎÇß´ø ÄÉ¸¯½ºÅ³´ÜÃàÅ°°¡ ¿µÇâÁÖ´Â ¿À·. MainSceneÈ£Ãâ¸¶´ SkillKey Å×ÀÌºí ÃÊ±âÈ­. (2009.01.20)
-		#define KJH_FIX_JP0450_EQUIPITEM_ENABLE_MOVECOMMAND				// ÀÌµ¿¸í·ÉÃ¢À» ´©¸¥ÈÄ ÀÌµ¿ÇÒ¼ö ¾ø´Â Á¶°ÇÀÇ ¾ÆÀÌÅÛÀ» ¸¶¿ì½ºÇÈ¾÷ÈÄ °­Á¦ ÀÌµ¿ÇÏ´Â ¹ö±× ¼öÁ¤ (09.05.08)
-		//#define PBG_FIX_SKILLHOTKEY										// ¹«±â ½ºÅ³ÀÇ ÇÖÅ° ¹øÈ£ ±â¾ïÇÏ´Â°Í ¹«±â Á¦°Å½Ã¿¡ ¸®¼Â(09.05.11)
-		#define PBG_FIX_CHARM_MIX_ITEM_WING_TOOLTIP						// ³¯°³ÀÇ ºÎÀû ÅøÆÁ Àß¸ø Ãâ·ÂµÇ´Â ¹ö±×(09.05.11)
-		#define LDS_FIX_SYNCRO_HEROATTACK_ACTION_WITH_SERVER			// wops 33863 - Èæ±â»ç ½ºÅ³ ½ÃÀü½Ã ¼­¹ö¿¡¼­ ½ºÅ³ ¹Þ±âÀü¿¡ ¹Ì¸® ½ºÅ³¹ßµ¿ÀÌ °É·Á ÀÌÀü ½ºÅ³ ¿¡´Ï¸ÞÀÌ¼ÇÀÌ Àß¸ø Ãâ·Â. (09.04.22)
-		#define LDK_FIX_MOTION_INTI_AT_THE_LOADINGWORLD					// wops 34113 - ¿µå·Îµ½Ã ¸ð¼Ç ÃÊ±âÈ­(09.04.14)
-
-		#define PBG_FIX_DARKPET_TIPUPDATE								// ´Å©ÆêÀÇ °æÇèÄ¡ÀÇ Ç¥½Ã°¡ °»½ÅµÇÁö ¾Ê´Â´.Àç ÀåÂø½Ã¿¡¸¸ °»½ÅµÇ´Â ¹ö±×¼öÁ¤(09.05.29)
-		#define PBG_FIX_MOVECOMMAND_WINDOW_SCROLL						// ½ºÅ©·Ñ ¸¶¿ì½º ¿ÞÂÊ Å¬¸¯À¸·Î ¿òÁ÷ÀÏ ¼ö ¾ø´Â ¹ö±× ¼öÁ¤(09.05.29)
-		#define PBG_FIX_DARKPET_DURABILITY								// ´Å©·Îµå Æê ³»±¸·Â °ü·Ã ¹ö±× ¼öÁ¤(09.05.29)
-		#define PBG_FIX_DARKSPIRIT_ACTION								// ´Å©·Îµå ½ºÇÇ¸´ÀÇ ¸Ê·Îµ½Ã ¼ÕÀÌ ³»·Á°£ ¸ð¼ÇÀÌ ÃëÇØÁ® ÀÖ´Â ¹ö±× ¼öÁ¤(09.05.29)
-		#define PBG_FIX_LODING_ACTION									// ·Îµ½Ã¿¡ ¹ßÀÌ ¿òÁ÷ÀÌÁö ¾Ê´Â(¸ð¼Ç) ¹ö±×(09.05.25)
-		#define KJH_FIX_JP0467_RENDER_DARKLOAD_PET_OTHER_CHARATER		// ´¸¥ÄÉ¸¯ÅÍÀÇ ´Å©·ÎµåÆêÀÌ ÀåÂøµÇ°Å³ª ÇØÁ¦ÇÒ¶§, È­¸é»ó º¯È­µÇÁö ¾Ê´Â ¹ö±× ¼öÁ¤ (09.06.03)
-		#define KJH_FIX_GOLD_RABBIT_INDEX								// È²±ÝÅä³¢ ÀÎµ¦½º ¼öÁ¤ (09.06.08)
-
-		#define LDK_FIX_PCROOM_INFOMATION								// ÇÇ½Ã¹æ Æ÷ÀÎÆ® »óÁ¡ Á¤º¸Ãâ·Â ¹®±¸ ¿¹¿ÜÃ³¸®(09.07.14)
-		#define LDK_FIX_CHARM_MIX_ITEM_WING_TOOLTIP						// ³¯°³ÀÇ ºÎÀû ÅøÆÁ Àß¸ø Ãâ·Â ¹× ³»¿ë ´©¶ôµÇ´Â ¹ö±×(09.07.20)
-
-		#define YDG_FIX_DARKSPIRIT_CHAOSCASTLE_CRASH					// ´Å©½ºÇÇ¸´ Ä«¿À½ºÄ³½½¿¡¼­ ÀåºñÇØÁ¦ÇØ¼­ ¼Õ¿¡µé°í ÀåºñÃ¢ ´ÝÀ¸¸é Æ¨±â´Â ¹ö±× (09.07.17)
-		#define YDG_FIX_SOCKETITEM_SELLPRICE_BUG						// ¼ÒÄÏ¾ÆÀÌÅÛ ÆÇ¸Å°¡°Ý ¹ö±× (09.09.03)
-	#endif //ADD_FIX_AFTER_6TH_TEST
 #endif // ADD_TOTAL_CHARGE_6TH
 
 
-#define LJH_FIX_BUG_CASTING_SKILLS_W_CURSOR_OUT_OF_VIEWPORT
-#define PBG_MOD_VIEMAPMOVE
-#define LJH_FIX_NO_MSG_FOR_FORCED_MOVEOUT_FROM_BATTLESOCCER
-#define PBG_FIX_CURSEDTEMPLE_SYSTEMMSG
 #define PBG_MOD_NONPVPSERVER
-#define YDG_DARK_SPIRIT_CRASH_BECAUSEOF_FIX_MEMORY_LEAK
 #define LDS_FIX_PETDESTRUCTOR_TERMINATE_EFFECTOWNER_ADD_TYPE
 #define LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
 
@@ -761,78 +630,35 @@
 #define PSW_PARTCHARGE_ITEM3
 
 #ifdef PSW_PARTCHARGE_ITEM3
-#ifndef KJH_ADD_INGAMESHOP_UI_SYSTEM		// #ifndef
-	#define PSW_CHARACTER_CARD						// ¼ÒÈ¯¼ú»ç Ä³¸¯ÅÍ Ä«µå
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-	#define PSW_NEW_CHAOS_CARD						// ½Å±Ô Ä«¿À½º Ä«µå
-	#define PSW_NEW_ELITE_ITEM						// Áß°£ ¿¤¸®Æ® ¹°¾à
+	#define PSW_NEW_CHAOS_CARD
+	#define PSW_NEW_ELITE_ITEM
 #endif //PSW_PARTCHARGE_ITEM3
 
-
-//-----------------------------------------------------------------------------
-// [ ºÎºÐ À¯·áÈ­ 2Â÷ ]
 
 #define PSW_PARTCHARGE_ITEM2
 
 #ifdef PSW_PARTCHARGE_ITEM2
-	#define PSW_ELITE_ITEM						// ¿¤¸®Æ® ¹°¾à
-	#define PSW_SCROLL_ITEM						// ¿¤¸®Æ® ½ºÅ©·Ñ
-	#define PSW_SEAL_ITEM						// ÀÌµ¿ ÀÎÀå
-	#define PSW_FRUIT_ITEM						// ¸®¼Â ¿­¸Å
-	#define PSW_SECRET_ITEM						// °­È­ÀÇ ºñ¾à
-	#define PSW_INDULGENCE_ITEM					// ¸éÁËºÎ
-	#define PSW_RARE_ITEM						// Èñ±Í ¾ÆÀÌÅÛ Æ¼ÄÏ
-	#define PSW_CURSEDTEMPLE_FREE_TICKET		// È¯¿µÀÇ »ç¿ø ÀÚÀ¯ ÀÔÀå±Ç
+	#define PSW_ELITE_ITEM
+	#define PSW_SCROLL_ITEM
+	#define PSW_SEAL_ITEM
+	#define PSW_FRUIT_ITEM
+	#define PSW_SECRET_ITEM
+	#define PSW_INDULGENCE_ITEM
+	#define PSW_RARE_ITEM
+	#define PSW_CURSEDTEMPLE_FREE_TICKET
 #endif //PSW_PARTCHARGE_ITEM2
 
-
-//-----------------------------------------------------------------------------
-// [ ºÎºÐ À¯·áÈ­ 1Â÷ ]
 
 #define PSW_PARTCHARGE_ITEM1
 				
 #ifdef PSW_PARTCHARGE_ITEM1
-	#define CSK_FREE_TICKET						// ÀÚÀ¯ÀÔÀå±Ç - µ¥ºô½ºÄ¾î, ºí·¯µåÄ³½½, Ä®¸®¸¶ (2007.02.06)
-	#define CSK_CHAOS_CARD						// Ä«¿À½ºÄ«µå - º¹±Ç (2007.02.07)
-	#define CSK_RARE_ITEM						// Èñ±Í¾ÆÀÌÅÛ(2006.02.15)
-	#define CSK_LUCKY_CHARM						// Çà¿îÀÇ ºÎÀû( 2007.02.22 )
-	#define CSK_LUCKY_SEAL						// Çà¿îÀÇ ÀÎÀå( 2007.02.22 )	
+	#define CSK_FREE_TICKET						// (2007.02.06)
+	#define CSK_CHAOS_CARD						// (2007.02.07)
+	#define CSK_RARE_ITEM						// (2006.02.15)
+	#define CSK_LUCKY_CHARM						// ( 2007.02.22 )
+	#define CSK_LUCKY_SEAL						// ( 2007.02.22 )	
 #endif //PSW_PARTCHARGE_ITEM1
 
-
-//-----------------------------------------------------------------------------
-// [ UI or Font ]
-
-#ifndef KJH_PBG_ADD_INGAMESHOP_SYSTEM					// #ifndef
-	#define NEW_USER_INTERFACE	
-#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
+#define LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 
-
-#ifdef NEW_USER_INTERFACE
-	#define NEW_COMMANDS
-	#define NEW_STRUCTS
-	#define NEW_USER_INTERFACE_UTIL
-	#define NEW_USER_INTERFACE_UISYSTEM
-	#define NEW_USER_INTERFACE_INPUTSYSTEM
-	#define NEW_USER_INTERFACE_FUNCTIONS
-	#define NEW_USER_INTERFACE_PROXY
-	#define NEW_USER_INTERFACE_FONT
-	#define NEW_USER_INTERFACE_IMAGE
-	#define NEW_USER_INTERFACE_CLIENTSYSTEM
-	#define NEW_USER_INTERFACE_BUILDER
-	#define NEW_USER_INTERFACE_RESOURCEFILE
-	#define NEW_USER_INTERFACE_SERVERMESSAGE
-	#define NEW_USER_INTERFACE_MAINFRAME_BUTTON	
-
-	#define FONTSIZE_ENGLISH		12
-	#define FONTSIZE_LANGUAGE	( FONTSIZE_ENGLISH )
-
-	#ifdef _DEBUG
-		#define _SHOPDEBUGMODE
-	#endif //_DEBUG
-
-#endif //NEW_USER_INTERFACE
-
-
-#endif // _LANGUAGE_ENG

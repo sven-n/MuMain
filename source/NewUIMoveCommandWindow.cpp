@@ -8,7 +8,6 @@
 #include "ZzzInterface.h"
 #include "wsclientinline.h"
 #include "ChangeRingManager.h"
-#include "PCRoomPoint.h"
 #include "KeyGenerater.h"
 #include "Local.h"
 #include "ServerListManager.h"

@@ -2660,42 +2660,6 @@ typedef struct
 } PMSG_NOTIFY_KANTURU_USER_MONSTER_COUNT, *LPPMSG_NOTIFY_KANTURU_USER_MONSTER_COUNT;
 
 
-#ifdef ADD_PCROOM_POINT_SYSTEM
-//----------------------------------------------------------------------------
-// GC [0xD0][0x04]
-//----------------------------------------------------------------------------
-typedef struct
-{
-	PBMSG_HEADER2	h;	
-	short		nPoint;
-	short		nMaxPoint;
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-	BYTE		bPCBang
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW	
-} PMSG_ANS_GC_PCROOM_POINT_INFO, *LPPMSG_ANS_GC_PCROOM_POINT_INFO;
-
-//----------------------------------------------------------------------------
-// GC [0xD0][0x05]
-//----------------------------------------------------------------------------
-typedef struct
-{
-	PBMSG_HEADER2	h;
-	BYTE		byResult;
-	BYTE		byInvenPos;
-	BYTE		ItemInfo[PACKET_ITEM_LENGTH];
-} PMSG_ANS_GC_PCROOM_POINT_USE, *LPPMSG_ANS_GC_PCROOM_POINT_USE;
-
-//----------------------------------------------------------------------------
-// CG GC [0xD0][0x06]
-//----------------------------------------------------------------------------
-typedef struct
-{
-	PBMSG_HEADER2	h;
-	BYTE		byResult;
-} PMSG_REQ_PCROOM_POINT_SHOP_OPEN, *LPPMSG_REQ_PCROOM_POINT_SHOP_OPEN;
-
-#endif	// ADD_PCROOM_POINT_SYSTEM
-
 //----------------------------------------------------------------------------
 // CG [0xBF][0x00]
 //----------------------------------------------------------------------------

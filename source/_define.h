@@ -609,3 +609,7 @@
 
 #define MAX_TEXT_LENGTH		255
 
+#define BUFFINDEX( buff )				static_cast<eBuffState>(buff)
+#define BUFFTIMEINDEX( timetype )		static_cast<eBuffTimeType>(timetype)
+#define ITEMINDEX( type, index )        static_cast<DWORD>((type*MAX_ITEM_INDEX)+index)
+

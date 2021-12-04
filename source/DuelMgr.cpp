@@ -113,22 +113,13 @@ float CDuelMgr::GetSD(int iPlayerNum)
 	return m_DuelPlayer[iPlayerNum].m_fSDRate;
 }
 
-#ifdef YDG_FIX_DUEL_SUMMON_CLOAK
 BOOL CDuelMgr::IsDuelPlayer(CHARACTER * pCharacter, int iPlayerNum, BOOL bIncludeSummon)
-#else	// YDG_FIX_DUEL_SUMMON_CLOAK
-BOOL CDuelMgr::IsDuelPlayer(CHARACTER * pCharacter, int iPlayerNum)
-#endif	// YDG_FIX_DUEL_SUMMON_CLOAK
 {
-	if (pCharacter->Key == m_DuelPlayer[iPlayerNum].m_iIndex
-		&& strncmp(pCharacter->ID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
+	if (pCharacter->Key == m_DuelPlayer[iPlayerNum].m_iIndex && strncmp(pCharacter->ID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
 	{
 		return TRUE;
 	}
-	else if (
-#ifdef YDG_FIX_DUEL_SUMMON_CLOAK
-		bIncludeSummon == TRUE &&
-#endif	// YDG_FIX_DUEL_SUMMON_CLOAK
-		gCharacterManager.GetBaseClass(pCharacter->Class) == 0 && strncmp(pCharacter->OwnerID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
+	else if (bIncludeSummon == TRUE && gCharacterManager.GetBaseClass(pCharacter->Class) == 0 && strncmp(pCharacter->OwnerID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
 	{
 		return TRUE;
 	}

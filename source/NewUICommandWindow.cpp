@@ -76,8 +76,7 @@ void SEASON3B::CNewUICommandWindow::InitButtons( )
 	for(int i=COMMAND_TRADE ; i<COMMAND_END ; i++)
 	{
 		m_BtnCommand[i].ChangeButtonImgState( true, IMAGE_COMMAND_BTN, true );
-		m_BtnCommand[i].ChangeButtonInfo( m_Pos.x+(COMMAND_WINDOW_WIDTH/2-108/2), 
-			(m_Pos.y+33)+(i*(29+COMMAND_BTN_INTERVAL_SIZE)), 108, 29 );
+		m_BtnCommand[i].ChangeButtonInfo( m_Pos.x+(COMMAND_WINDOW_WIDTH/2-108/2), (m_Pos.y+33)+(i*(29+COMMAND_BTN_INTERVAL_SIZE)), 108, 29 );
 	}
 
 	m_BtnCommand[COMMAND_TRADE].ChangeText( GlobalText[943] );
@@ -91,15 +90,7 @@ void SEASON3B::CNewUICommandWindow::InitButtons( )
 	m_BtnCommand[COMMAND_ADD_FRIEND].ChangeText( GlobalText[947] );
 	m_BtnCommand[COMMAND_FOLLOW].ChangeText( GlobalText[948] );
 	m_BtnCommand[COMMAND_BATTLE].ChangeText( GlobalText[949] );
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-	m_BtnCommand[COMMAND_PCBANG].ChangeText( GlobalText[2325] );
-#ifdef ASG_PCROOM_POINT_SYSTEM_MODIFY
-	m_BtnCommand[COMMAND_PCBANG].ChangeTextColor(RGBA(255, 128, 255, 255));
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY
-#endif // ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-	
+
 }
 
 void SEASON3B::CNewUICommandWindow::OpenningProcess()
@@ -142,24 +133,6 @@ bool SEASON3B::CNewUICommandWindow::BtnProcess()
 	{
 		if( m_BtnCommand[i].UpdateMouseEvent() == true )
 		{
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-			if( i == COMMAND_PCBANG )
-			{
-#ifdef ASG_PCROOM_POINT_SYSTEM_MODIFY
-				return CommandPCBangPoint();
-#else	// ASG_PCROOM_POINT_SYSTEM_MODIFY
-				if( CommandPCBangPoint() )
-				{
-					return true;
-				}
-
-				return false;
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY
-			}
-#endif //ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-
 			if( m_iCurSelectCommand != COMMAND_NONE )
 				SetBtnState( m_iCurSelectCommand, false );
 
@@ -168,13 +141,6 @@ bool SEASON3B::CNewUICommandWindow::BtnProcess()
 				m_iCurSelectCommand = i;
 				SetBtnState( m_iCurSelectCommand, true );
 			}
-
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-			//if( m_iCurSelectCommand != COMMAND_PCBANG )
-#endif // ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-				
 		}
 	}
 	
@@ -236,25 +202,6 @@ bool SEASON3B::CNewUICommandWindow::Render()
 	
 	// Base Window
 	RenderBaseWindow( );
-	
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-#ifndef ASG_PCROOM_POINT_SYSTEM_MODIFY		// 정리시 삭제.
-	// PC방 전용 상점 버튼.
-	// PC방이 아니거나, 안전지대가 아니면 Button Lock
-	if ( !CPCRoomPtSys::Instance().IsPCRoom() || !Hero->SafeZone )
-	{
-		m_BtnCommand[COMMAND_PCBANG].Lock();
-		m_BtnCommand[COMMAND_PCBANG].ChangeTextColor( RGBA(128, 64, 128, 255) );
-	}
-	else
-	{
-		m_BtnCommand[COMMAND_PCBANG].UnLock();
-		m_BtnCommand[COMMAND_PCBANG].ChangeTextColor( RGBA(255, 128, 255, 255) );
-	}
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY	// 정리시 삭제.
-#endif // ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 	
 	for(int i=COMMAND_TRADE ; i<COMMAND_END ; i++)
 	{	
@@ -423,17 +370,7 @@ void SEASON3B::CNewUICommandWindow::RunCommand()
 			case COMMAND_BATTLE:
 				{	
 					CommandDual( pSelectedCha );
-				}break;
-				
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-			case COMMAND_PCBANG:
-				{	
-					CommandPCBangPoint();
-				}break;
-#endif // ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-				
+				}break;			
 			}
 		}
 		if( m_iCurSelectCommand != COMMAND_NONE )
@@ -732,29 +669,3 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
 	
 	return 0;
 }
-
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-//---------------------------------------------------------------------------------------------
-// CommandPCBangPoint (PC방 포인트 상점 명령)
-bool SEASON3B::CNewUICommandWindow::CommandPCBangPoint()
-{
-#ifndef ASG_PCROOM_POINT_SYSTEM_MODIFY		// 정리시 삭제.
-	if (Hero->SafeZone)	// 안전지대인가?
-	{
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY	// 정리시 삭제.
-		PlayBuffer(SOUND_CLICK01);
-		PlayBuffer(SOUND_INTERFACE01);
-		MouseUpdateTime = 0;
-		MouseUpdateTimeMax = 6;
-		
-		SendRequestPCRoomPointShopOpen();	// 서버에 상점 열기 요청.
-		return true;
-#ifndef ASG_PCROOM_POINT_SYSTEM_MODIFY		// 정리시 삭제.
-	}
-
-	return false;
-#endif	// ASG_PCROOM_POINT_SYSTEM_MODIFY	// 정리시 삭제.
-}
-#endif // ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM

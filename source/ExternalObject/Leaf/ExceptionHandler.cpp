@@ -71,10 +71,6 @@ const std::string& CExceptionHandler::GetDmpFileName() const
 { return m_filename; }
 bool CExceptionHandler::SaveDmpFile(const std::string& filename, CONTEXT* pContext, _EXCEPTION_POINTERS* pExceptionInfo)
 {
-#ifdef KJH_LOG_ERROR_DUMP
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " - Context Pointer : 0x%00000008X\r\n", pContext);
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " - Exception Pointer : 0x%00000008X\r\n", pExceptionInfo);
-#endif // KJH_LOG_ERROR_DUMP
 	if(pContext == NULL)
 		return false;
 	
@@ -127,9 +123,6 @@ bool CExceptionHandler::SaveDmpFile(const std::string& filename, CONTEXT* pConte
 	leaf::CCallStackDump CallStackDmp;
 	CallStackDmp.Dump(pContext);
 	DmpHeader.CallStackDepth = CallStackDmp.GetStackDepth();
-#ifdef KJH_LOG_ERROR_DUMP
-	DebugAngel_Write(LOG_ERROR_DUMP_FILENAME, " - CallStack Depth : %d\r\n", CallStackDmp.GetStackDepth());
-#endif // KJH_LOG_ERROR_DUMP
 	
 	//. Write header
 	fwrite(&DmpHeader, sizeof(DMPFILEHEADER), 1, fd);

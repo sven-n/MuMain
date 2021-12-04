@@ -21,10 +21,6 @@
 #include "GameShop/InGameShopSystem.h"
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-#ifdef FOR_WORK
-	#include "./Utilities/Log/DebugAngel.h"
-#endif // FOR_WORK
-
 using namespace SEASON3B;
 
 SEASON3B::CNewUIHotKey::CNewUIHotKey() : m_pNewUIMng(NULL) , m_bStateGameOver(false)
@@ -298,9 +294,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	else if(SEASON3B::IsPress('X') == true)
 	{
-#ifdef FOR_WORK
-		DebugAngel_Write("InGameShopStatue.Txt", "CallStack - CNewUIHotKey.UpdateKeyEvent()\r\n");
-#endif // FOR_WORK
+		g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", "CallStack - CNewUIHotKey.UpdateKeyEvent()\r\n");
 		if(g_pInGameShop->IsInGameShopOpen() == false)
 			return false;
 
@@ -348,30 +342,6 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
-#ifdef YDG_ADD_DOPPELGANGER_UI
-// 	else if(SEASON3B::IsPress('Z') == true)
-// 	{
-// 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_DOPPELGANGER_FRAME);
-// // 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_DOPPELGANGER_NPC);
-// 		return false;
-// 	}
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#if defined LDK_TEST_MAP_EMPIREGUARDIAN
-// 	else if(SEASON3B::IsPress('Z') == true)
-// 	{
-// 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC);
-// 		return false;
-// 	}
-#endif //LDK_TEST_MAP_EMPIREGUARDIAN
-#ifdef LDS_ADD_TEST_UNITEDMARKETPLACE
-	else if(SEASON3B::IsPress('Z') == true)
-	{
-		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
-// 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
-		return false;
-	}
-#endif // LDS_ADD_TEST_UNITEDMARKETPLACE
-
 	return true;
 }
 
@@ -401,7 +371,6 @@ bool SEASON3B::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
 	{
 		return true;	
 	}
-	
 	return false;
 }
 

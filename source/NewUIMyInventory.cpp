@@ -16,7 +16,6 @@
 #include "GMCryingWolf2nd.h"
 #include "ZzzInventory.h"
 #include "wsclientinline.h"
-#include "PCRoomPoint.h"
 #include "MixMgr.h"
 #include "ZzzLodTerrain.h"
 #include "CSQuest.h"
@@ -157,12 +156,6 @@ void SEASON3B::CNewUIMyInventory::UnequipItem(int iIndex)
 
 		if(pEquippedItem && pEquippedItem->Type != -1)
 		{
-#ifdef PBG_FIX_SKILLHOTKEY
-			ResetSkillofItem(pEquippedItem);
-#endif //PBG_FIX_SKILLHOTKEY
-
-#ifdef PBG_FIX_DARKPET_RENDER
-
 			if( pEquippedItem->Type == ITEM_HELPER+4 )
 			{
 				Hero->InitPetInfo(PET_TYPE_DARK_HORSE);
@@ -172,24 +165,15 @@ void SEASON3B::CNewUIMyInventory::UnequipItem(int iIndex)
 				giPetManager::DeletePet(Hero);
 				Hero->InitPetInfo(PET_TYPE_DARK_SPIRIT);
 			}
-#endif //PBG_FIX_DARKPET_RENDER
 
-#ifdef PBG_FIX_DARKPET_RENDER
 			if(pEquippedItem->Type != ITEM_HELPER+5)
-#endif //PBG_FIX_DARKPET_RENDER
 			DeleteEquippingEffectBug(pEquippedItem);
-
-#ifdef LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
-			if( pEquippedItem->Type == ITEM_HELPER+20 && pEquippedItem->Level>>3 == 3)
-				Hero->EtcPart = PARTS_NONE;
-#endif //LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
 
 			pEquippedItem->Type = -1;
 			pEquippedItem->Level = 0;
 			pEquippedItem->Number = -1;
 			pEquippedItem->Option1 = 0;
 			pEquippedItem->ExtOption = 0;
-#ifdef SOCKET_SYSTEM
 			pEquippedItem->SocketCount = 0;
 			for(int i = 0; i < MAX_SOCKETS; ++i)
 			{
@@ -197,21 +181,6 @@ void SEASON3B::CNewUIMyInventory::UnequipItem(int iIndex)
 				pEquippedItem->SocketSphereLv[i] = 0;
 			}
 			pEquippedItem->SocketSeedSetOption = 0;
-#endif	// SOCKET_SYSTEM
-
-#ifndef PBG_FIX_DARKPET_RENDER
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
-			if( pEquippedItem->Type == ITEM_HELPER+4 )
-			{
-				Hero->InitPetInfo(PET_TYPE_DARK_HORSE);
-			}
-			else if( pEquippedItem->Type == ITEM_HELPER+5 )
-			{
-				giPetManager::DeletePet(Hero);
-				Hero->InitPetInfo(PET_TYPE_DARK_SPIRIT);
-			}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
-#endif //PBG_FIX_DARKPET_RENDER
 			DeleteEquippingEffect();
 		}
 	}
@@ -222,23 +191,7 @@ void SEASON3B::CNewUIMyInventory::UnequipAllItems()
 	{
 		for(int i=0; i<MAX_EQUIPMENT_INDEX; i++)
 		{
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 			UnequipItem( i );
-#else // KJH_FIX_DARKLOAD_PET_SYSTEM
-			ITEM* pEquippedItem = &CharacterMachine->Equipment[i];
-	
-			if(pEquippedItem && pEquippedItem->Type != -1)
-			{
-				DeleteEquippingEffectBug(pEquippedItem);
-
-				pEquippedItem->Type = -1;
-				pEquippedItem->Number = -1;
-				pEquippedItem->Option1 = 0;
-				pEquippedItem->ExtOption = 0;
-
-				DeleteEquippingEffect();
-			}
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM		
 		}
 	}
 }
@@ -1408,31 +1361,15 @@ void SEASON3B::CNewUIMyInventory::RenderInventoryDetails()
 	g_pRenderText->RenderText(m_Pos.x,m_Pos.y+12,GlobalText[223], INVENTORY_WIDTH, 0, RT3_SORT_CENTER);
 
 	RenderImage(IMAGE_INVENTORY_MONEY, m_Pos.x+11, m_Pos.y+364, 170.f, 26.f);
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-	CPCRoomPtSys& rPCRoomPtSys = CPCRoomPtSys::Instance();
-	if(rPCRoomPtSys.IsPCRoomPointShopMode())
-	{
-		g_pRenderText->SetBgColor(40, 40, 40, 255);
-		g_pRenderText->SetTextColor(255, 220, 250, 255);
-		g_pRenderText->RenderText((int)m_Pos.x+50, (int)m_Pos.y+371, GlobalText[2326]);
-		
-		unicode::t_char Text[256] = { 0, };
-		unicode::_sprintf(Text, "%d", rPCRoomPtSys.GetNowPoint());
-		g_pRenderText->RenderText((int)m_Pos.x+82, (int)m_Pos.y+371, Text);
-	}
-	else
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-	{
-		DWORD dwZen = CharacterMachine->Gold;
 
-		unicode::t_char Text[256] = { 0, };
-		ConvertGold(dwZen, Text);
+	DWORD dwZen = CharacterMachine->Gold;
 
-		g_pRenderText->SetTextColor(getGoldColor(dwZen));
-		g_pRenderText->RenderText((int)m_Pos.x+50,(int)m_Pos.y+371, Text);
-	}
+	unicode::t_char Text[256] = { 0, };
+	ConvertGold(dwZen, Text);
+
+	g_pRenderText->SetTextColor(getGoldColor(dwZen));
+	g_pRenderText->RenderText((int)m_Pos.x+50,(int)m_Pos.y+371, Text);
+
 	g_pRenderText->SetFont(g_hFont);
 	
 	DisableAlphaBlend();
@@ -1589,10 +1526,7 @@ bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 							{
 								bPicked = false;
 							}
-							else if( ((m_iPointedSlot == EQUIPMENT_WING) &&  
-								!((pEquippedPetItem->Type == ITEM_HELPER+3)
-								|| (pEquippedPetItem->Type == ITEM_HELPER+4)
-								|| (pEquippedPetItem->Type == ITEM_HELPER+37)))
+							else if( ((m_iPointedSlot == EQUIPMENT_WING) && !((pEquippedPetItem->Type == ITEM_HELPER+3)	|| (pEquippedPetItem->Type == ITEM_HELPER+4) || (pEquippedPetItem->Type == ITEM_HELPER+37)))
 								)
 							{
 								bPicked = false;
@@ -1945,7 +1879,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				point[2] = CharacterAttribute->Vitality   + CharacterAttribute->AddVitality;
 				point[3] = CharacterAttribute->Energy   + CharacterAttribute->AddEnergy;
 				point[4] = CharacterAttribute->Charisma   + CharacterAttribute->AddCharisma;
-#ifdef PBG_FIX_RESETFRUIT_CAL
+
 #ifdef PBG_ADD_NEWCHAR_MONK
 				char nStat[MAX_CLASS][5] =
 #else //PBG_ADD_NEWCHAR_MONK
@@ -1963,7 +1897,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 #endif //PBG_ADD_NEWCHAR_MONK
 				};
 				point[pItem->Type-(ITEM_HELPER+54)] -= nStat[gCharacterManager.GetBaseClass(Hero->Class)][pItem->Type-(ITEM_HELPER+54)];
-#endif //PBG_FIX_RESETFRUIT_CAL
 
 				if(point[pItem->Type-(ITEM_HELPER+54)] < (pItem->Durability*10) ) 
 				{

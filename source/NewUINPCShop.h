@@ -49,20 +49,10 @@ namespace SEASON3B
 		POINT m_Pos;
 
 		DWORD m_dwShopState;
-
 		int m_iTaxRate;
-
 		bool m_bRepairShop;
-		
-#ifdef KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM			
 		bool m_bIsNPCShopOpen;
-#else // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
-#ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-		bool m_bFirstOpen;
-#endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
-#endif // KJH_FIX_WOPS_K32595_DOUBLE_CLICK_PURCHASE_ITEM
 
-		// ¹öÆ°
 		CNewUIButton m_BtnRepair;
 		CNewUIButton m_BtnRepairAll;
 		
@@ -93,9 +83,7 @@ namespace SEASON3B
 
 		bool InsertItem(int iIndex, BYTE* pbyItemPacket);
 		
-#ifdef KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
 		void OpenningProcess();
-#endif // KJH_FIX_WOPS_K22181_ITEM_PURCHASED_OPENNING_SHOP
 
 		void ClosingProcess();
 		void SetRepairShop(bool bRepair);
@@ -111,10 +99,8 @@ namespace SEASON3B
 		int GetStandbyItemIndex();
 		ITEM* GetStandbyItem();
 
-#ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
 		void SetSellingItem(bool bFlag);
 		bool IsSellingItem();
-#endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
 
 	private:
 		void Init();

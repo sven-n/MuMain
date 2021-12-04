@@ -250,12 +250,7 @@ public :
 
 #endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 
-#ifdef LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
 	int     RenderSetOptionListInItem ( const ITEM* ip, int TextNum, bool bIsEquippedItem = false );
-#else // LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
-	int     RenderSetOptionListInItem ( const ITEM* ip, int TextNum );
-#endif // LDS_FIX_SETITEM_OUTPUTOPTION_WHICH_LOCATED_INVENTORY
-
 
     void    ClearOptionHelper ( void ) { m_byRenderOptionList = 0; }
     void    CheckRenderOptionHelper ( const char* FilterName );

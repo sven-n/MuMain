@@ -84,14 +84,11 @@ void CNewUIGoldBowmanWindow::Release()
 {
 	UnloadImages();
 
-#ifdef LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 	if (m_pNewUIMng)
 	{
 		m_pNewUIMng->RemoveUIObj(this);
 		m_pNewUIMng = NULL;
 	}
-#endif // LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
-
 	SAFE_DELETE(m_EditBox);
 }
 
@@ -147,17 +144,10 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
 	if( m_EditBox && m_BtnSerial.UpdateMouseEvent() )
 	{
 		SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-#ifdef YDG_ADD_GOLDBOWMAN_INVENTORY_SPACE_CHECK
 		if ( pNewInventoryCtrl->FindEmptySlot(2, 4) == -1 )
 		{
 			SEASON3B::CreateOkMessageBox(GlobalText[896]);
 		}
-#else	// YDG_ADD_GOLDBOWMAN_INVENTORY_SPACE_CHECK
-		if ( pNewInventoryCtrl->GetEmptySlotCount()==0 )
-		{
-			SEASON3B::CreateOkMessageBox(GlobalText[896]);
-		}
-#endif	// YDG_ADD_GOLDBOWMAN_INVENTORY_SPACE_CHECK
 		else
 		{
 			char strSerial[12];
@@ -220,7 +210,6 @@ bool CNewUIGoldBowmanWindow::UpdateKeyEvent()
 
 bool CNewUIGoldBowmanWindow::Update()
 {
-#ifdef KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
 	if( !IsVisible() )
 		return true;
 
@@ -235,8 +224,6 @@ bool CNewUIGoldBowmanWindow::Update()
 			SetRelatedWnd(g_hWnd);
 		}
 	}
-#endif // KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
-
 	return true;	
 }
 
@@ -261,8 +248,6 @@ void CNewUIGoldBowmanWindow::RenderTexts()
 	sprintf( Text, getMonsterName(236) ); // npc Name file
 	RenderText( Text, m_Pos.x, m_Pos.y+15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );
 
-	/////////////////////////////// top text /////////////////////////////////////////////////////
-	
 	memset(&Text, 0, sizeof(char)*100);
 	sprintf( Text, GlobalText[891]); //"100%%
 	RenderText( Text, m_Pos.x, m_Pos.y+80, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER );

@@ -414,14 +414,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 	};
 
-	class CPCRoomItemGiveLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
-	{
-	public:	
-		bool SetLayout();
-		static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-	};
-	
 	class CHarvestEventLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
 	{
 	public:	

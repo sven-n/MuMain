@@ -1,6 +1,5 @@
 
 #include "stdafx.h"
-
 #include "NewUISystem.h"
 #include "NewUIMessageBox.h"
 #include "wsclientinline.h"
@@ -9,14 +8,8 @@
 #include "MapManager.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 
-#ifdef FOR_WORK
-	#include "./Utilities/Log/DebugAngel.h"
-#endif // FOR_WORK
-
 using namespace SEASON3B;
 
-//---------------------------------------------------------------------------------------------
-// Constructor
 SEASON3B::CNewUISystem::CNewUISystem()
 {
 	m_pNewUIMng = NULL;
@@ -69,17 +62,10 @@ SEASON3B::CNewUISystem::CNewUISystem()
 	m_pNewCursedTempleResultWindow = NULL;
 	m_pNewCursedTempleWindow = NULL;
 	m_pNewCursedTempleEnterWindow = NULL;
-#ifdef PSW_GOLDBOWMAN
 	m_pNewGoldBowman = NULL;
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA
 	m_pNewGoldBowmanLena = NULL;
-#endif //PSW_EVENT_LENA	
-	
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 	m_pNewLuckyCoinRegistration = NULL;
 	m_pNewExchangeLuckyCoinWindow = NULL;
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 #ifdef YDG_ADD_NEW_DUEL_UI
 	m_pNewDuelWatchWindow = NULL;
 #endif	// YDG_ADD_NEW_DUEL_UI	
@@ -106,9 +92,7 @@ SEASON3B::CNewUISystem::CNewUISystem()
 	m_pNewEmpireGuardianNPC = NULL;
 	m_pNewEmpireGuardianTimer = NULL;
 #endif //LDK_ADD_EMPIREGUARDIAN_UI
-#ifdef PJH_ADD_MINIMAP
 	m_pNewMiniMap = NULL;
-#endif //PJH_ADD_MINIMAP
 #ifdef PBG_MOD_STAMINA_UI
 	m_pNewUIStamina = NULL;
 #endif //PBG_MOD_STAMINA_UI
@@ -936,9 +920,7 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		else if(dwKey == SEASON3B::INTERFACE_INGAMESHOP)
 		{
-#ifdef FOR_WORK
-			DebugAngel_Write("InGameShopStatue.Txt", "CallStack - CNewUISystem.Show()\r\n");
-#endif // FOR_WORK
+			g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", "CallStack - CNewUISystem.Show()\r\n");
 			HideAll();
 			g_pInGameShop->OpeningProcess();
 #ifndef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
@@ -1463,14 +1445,12 @@ void SEASON3B::CNewUISystem::HideAllGroupA()
 		//SEASON3B::INTERFACE_HELP,
 		//SEASON3B::INTERFACE_ITEM_EXPLANATION,
 		//SEASON3B::INTERFACE_SETITEM_EXPLANATION,
-#ifdef KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
 #ifdef PSW_GOLDBOWMAN
 		SEASON3B::INTERFACE_GOLD_BOWMAN,
 #endif //PSW_GOLDBOWMAN
 #ifdef PSW_EVENT_LENA
 		SEASON3B::INTERFACE_GOLD_BOWMAN_LENA,
 #endif //PSW_EVENT_LENA	
-#endif // KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
 		SEASON3B::INTERFACE_NPC_DIALOGUE,
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
@@ -1549,14 +1529,8 @@ void SEASON3B::CNewUISystem::HideAllGroupB()
 		//SEASON3B::INTERFACE_HELP,
 		//SEASON3B::INTERFACE_ITEM_EXPLANATION,
 		//SEASON3B::INTERFACE_SETITEM_EXPLANATION,	
-#ifdef KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
-#ifdef PSW_GOLDBOWMAN
 		SEASON3B::INTERFACE_GOLD_BOWMAN,
-#endif //PSW_GOLDBOWMAN
-#ifdef PSW_EVENT_LENA
 		SEASON3B::INTERFACE_GOLD_BOWMAN_LENA,
-#endif //PSW_EVENT_LENA	
-#endif // KJH_FIX_JP0457_OPENNING_PARTCHARGE_UI
 #ifdef ASG_ADD_UI_NPC_DIALOGUE
 		SEASON3B::INTERFACE_NPC_DIALOGUE,
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
@@ -2184,12 +2158,10 @@ CNewUIExchangeLuckyCoin* SEASON3B::CNewUISystem::GetUI_pNewExchangeLuckyCoin() c
 }
 #endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 
-#ifdef PJH_ADD_MINIMAP
 CNewUIMiniMap* SEASON3B::CNewUISystem::GetUI_pNewUIMiniMap() const
 {
 	return m_pNewMiniMap;
 }
-#endif //PJH_ADD_MINIMAP
 
 #ifdef YDG_ADD_NEW_DUEL_UI
 CNewUIDuelWatchWindow* SEASON3B::CNewUISystem::GetUI_pNewDuelWatch() const

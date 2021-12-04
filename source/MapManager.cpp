@@ -1609,14 +1609,11 @@ void CMapManager::LoadWorld(int Map)
 
     }
 
-#ifdef PJH_ADD_MINIMAP
 	if(iMapWorld != 74 && iMapWorld != 75)
 	{
 		g_pNewUIMiniMap->UnloadImages();
 		g_pNewUIMiniMap->LoadImages(WorldName);
 	}
-#endif //PJH_ADD_MINIMAP
-
 }
 
 void CMapManager::DeleteObjects()

@@ -1,5 +1,4 @@
 // DebugAngel.cpp: implementation of the DebugAngel class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -55,20 +54,3 @@ void DebugAngel_HexWrite( char *lpszFileName, void *pBuffer, int iSize)
 
 	CloseHandle( hFile);
 }
-
-
-/*void DebugAngel_MessageBoxStr( HRESULT hResult, char *lpszToShow)
-{
-	DXTRACE_ERR( lpszToShow, hResult);
-}
-
-void DebugAngel_MessageBox( HRESULT hResult, ...)
-{
-	char lpszBuffer[1024];
-	va_list va;
-	va_start( va, hResult);
-	char *lpszFormat = va_arg( va, char*);
-	wvsprintf( lpszBuffer, lpszFormat, va);
-	DebugAngel_MessageBoxStr( hResult, lpszBuffer);
-	va_end( va);
-}*/

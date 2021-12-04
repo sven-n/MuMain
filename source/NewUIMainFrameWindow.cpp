@@ -740,7 +740,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFriendButtonState()
 	{
 		RenderImage(IMAGE_MENU_BTN_FRIEND, 489+(30*3), 480-51, 30, 41, 0.0f, 41.f);
 	}
-#else //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#else //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == true)
 	{
 		RenderImage(IMAGE_MENU_BTN_FRIEND, 488+76, 480-51, 38, 42, 0.0f, 126.f);
@@ -749,7 +749,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFriendButtonState()
 	{
 		RenderImage(IMAGE_MENU_BTN_FRIEND, 488+76, 480-51, 38, 42, 0.0f, 42.f);
 	}
-#endif//defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#endif//defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 }
 
 bool SEASON3B::CNewUIMainFrameWindow::UpdateMouseEvent()
@@ -905,13 +905,6 @@ int SEASON3B::CNewUIMainFrameWindow::GetSkillHotKey(int iHotKey)
 {
 	return g_pSkillList->GetHotKey(iHotKey);
 }
-
-#ifdef PBG_FIX_SKILLHOTKEY
-void SEASON3B::CNewUIMainFrameWindow::SetSkillHotKeyClear(int iHotKey)
-{
-	g_pSkillList->SetHotKeyClear(iHotKey);
-}
-#endif //PBG_FIX_SKILLHOTKEY
 
 int SEASON3B::CNewUIMainFrameWindow::GetSkillHotKeyIndex(int iSkillType)
 {
@@ -1829,19 +1822,7 @@ void SEASON3B::CNewUISkillList::SetHotKey(int iHotKey, int iSkillType)
 
 	m_iHotKeySkillType[iHotKey] = iSkillType;
 }
-#ifdef PBG_FIX_SKILLHOTKEY
-void SEASON3B::CNewUISkillList::SetHotKeyClear(int iHotKey)
-{
-	for(int i=0; i<SKILLHOTKEY_COUNT; ++i)
-	{
-		if(m_iHotKeySkillType[i] == iHotKey)
-		{
-			m_iHotKeySkillType[i] = -1;
-			break;
-		}
-	}	
-}
-#endif //PBG_FIX_SKILLHOTKEY
+
 int SEASON3B::CNewUISkillList::GetHotKey(int iHotKey)
 {
 	return m_iHotKeySkillType[iHotKey];
@@ -2665,7 +2646,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown)
 			}
 		}
 		break;
-#endif //defined NEW_USER_INTERFACE_MAINFRAME_BUTTON || defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+#endif //defined defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	case MAINFRAME_BTN_CHAINFO:
 		{
 			if(bStateDown)

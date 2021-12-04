@@ -267,12 +267,6 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 	// Todo
 	int iNextPosY = m_UIStartPos.y;
 	
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-	if( RenderPCRoomPoint( m_UIStartPos.x, iNextPosY ) )
-	{
-		iNextPosY += (UI_INTERVAL_HEIGHT+10);
-	}
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 	if( gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF )
 	{
 		if( RenderNumArrow( m_UIStartPos.x, iNextPosY ) )
@@ -281,13 +275,6 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 		}
 	}
 
-#ifdef PBG_ADD_PCROOM_NEWUI
-	if(RenderPCRoomUI(m_UIStartPos.x, iNextPosY))
-	{
-		iNextPosY += (UI_INTERVAL_HEIGHT+PCROOM_HEIGHT);
-	}
-#endif //PBG_ADD_PCROOM_NEWUI
-	
 	if( RenderEquipedHelperLife( m_UIStartPos.x, iNextPosY ) )
 	{
 		iNextPosY += (UI_INTERVAL_HEIGHT+PETHP_FRAME_HEIGHT);
@@ -352,8 +339,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::InitImageIndex()
 	m_iItemDurImageIndex[EQUIPMENT_RING_LEFT] = IMAGE_ITEM_DUR_RING;
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI( int iX, int iY, unicode::t_char* pszName, 
-														int iLife, int iMaxLife/*=255*/, bool bWarning/*=false*/ )
+void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI( int iX, int iY, unicode::t_char* pszName, int iLife, int iMaxLife/*=255*/, bool bWarning/*=false*/ )
 {
 	EnableAlphaTest();
 	
@@ -387,6 +373,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI( int iX, int iY, unicode::t_c
 	}
 	else
 #endif //#ifdef PJH_FIX_SPRIT
+
 		glColor4f ( 1.f, 1.f, 1.f, 1.f );
 	RenderImage( IMAGE_PETHP_FRAME, iX, iY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT );					
 

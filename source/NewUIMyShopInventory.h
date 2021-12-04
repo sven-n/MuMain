@@ -1,5 +1,4 @@
 // NewUIMyShopInventory.h: interface for the CNewUIMyShopInventory class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIMYSHOPINVENTORY_H__A0C3DD4A_C4D5_4CF2_9702_DF54540DB6FD__INCLUDED_)
@@ -61,8 +60,6 @@ namespace SEASON3B
 	public:
 		CNewUIMyShopInventory();
 		virtual ~CNewUIMyShopInventory();
-
-
 		bool Create(CNewUIManager* pNewUIMng, int x, int y);
 		void Release();
 		void SetPos(int x, int y);
@@ -70,9 +67,7 @@ namespace SEASON3B
 		bool UpdateKeyEvent();
 		bool Update();
 		bool Render();
-		
 		void ClosingProcess();
-		
 		float GetLayerDepth();	//. 3.2f
 		
 		CNewUIInventoryCtrl* GetInventoryCtrl() const;
@@ -80,29 +75,20 @@ namespace SEASON3B
 	public:
 		void ChangeSourceIndex( int sindex );
 		const int GetSourceIndex();
-
 		void ChangeTargetIndex( int tindex );
 		const int GetTargetIndex();
-
 		ITEM* FindItem(int iLinealPos);
-
 		void ChangeEditBox(const UISTATES type);
-
 		void ChangeTitle( unicode::t_string& titletext );
 		void GetTitle( unicode::t_string& titletext );
-
 		void ChangePersonal( bool state );
 		const bool IsEnablePersonalShop() const;
 		void OpenButtonLock();
 		void OpenButtonUnLock();
-		
 		int GetPointedItemIndex();
 		void ResetSubject();
-		
-#ifdef KJH_FIX_DARKLOAD_PET_SYSTEM
 		bool IsEnableInputValueTextBox();
 		void SetInputValueTextBox(bool bIsEnable);
-#endif // KJH_FIX_DARKLOAD_PET_SYSTEM
 
 	public:
 		bool InsertItem(int iIndex, BYTE* pbyItemPacket);

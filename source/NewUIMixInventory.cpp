@@ -876,8 +876,7 @@ bool CNewUIMixInventory::Mix()
 	}
 
 	if (g_MixRecipeMgr.GetCurRecipe()->m_iWidth != -1 &&
-		g_pMyInventory->FindEmptySlot(g_MixRecipeMgr.GetCurRecipe()->m_iWidth,
-		g_MixRecipeMgr.GetCurRecipe()->m_iHeight) == -1)
+		g_pMyInventory->FindEmptySlot(g_MixRecipeMgr.GetCurRecipe()->m_iWidth,g_MixRecipeMgr.GetCurRecipe()->m_iHeight) == -1)
 	{
 		g_pChatListBox->AddText("", GlobalText[581], SEASON3B::TYPE_ERROR_MESSAGE);
 		return false;

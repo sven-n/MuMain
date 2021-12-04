@@ -41,9 +41,6 @@
 #include "CSParts.h"
 #include "PhysicsManager.h"
 #include "Event.h"
-#ifdef ADD_PCROOM_POINT_SYSTEM
-#include "PCRoomPoint.h"
-#endif	// ADD_PCROOM_POINT_SYSTEM
 #include "MixMgr.h"
 #include "MapManager.h"
 #include "UIGuardsMan.h"
@@ -7015,9 +7012,7 @@ void ReceiveGuildEndWar( BYTE *ReceiveBuffer )
 	case 4:sprintf(Text,GlobalText[531]);Win = 2;break;
 	case 5:sprintf(Text,GlobalText[532]);break;
 	case 6:sprintf(Text,GlobalText[480]);Win = 1;break;
-#ifdef LJH_FIX_NO_MSG_FOR_FORCED_MOVEOUT_FROM_BATTLESOCCER
 	default:sprintf(Text,"");break;	
-#endif	//LJH_FIX_NO_MSG_FOR_FORCED_MOVEOUT_FROM_BATTLESOCCER
 	}
 	
 	g_wtMatchTimeLeft.m_Time = 0;
@@ -7626,11 +7621,7 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 			Position[2] = RequestTerrainHeight(Position[0],Position[1]);
 			ZeroMemory( Angle, sizeof ( Angle));
 			Light[0] = Light[1] = Light[2] = 1.0f;
-#ifdef YDG_ADD_FIRECRACKER_ITEM
 			CreateEffect(BITMAP_FIRECRACKER0001,Position,Angle,Light,0);
-#else	// YDG_ADD_FIRECRACKER_ITEM
-			CreateEffect(BITMAP_FIRECRACKERRISE,Position,Angle,Light);
-#endif	// YDG_ADD_FIRECRACKER_ITEM
 		}
 		break;
 	case 1:
@@ -7671,45 +7662,9 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
     case 6:
 		SEASON3B::CreateOkMessageBox(GlobalText[449]);
         break;
-		
-#ifdef PCROOM_EVENT
-	case 7:
-#ifdef KJH_ADD_NPC_ROURKE_PCROOM_EVENT_MESSAGEBOX
-		switch(Data->Cmd2) 
-		{
-		case 0:
-			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPCRoomItemGiveLayout));
-			break;
-		case 1:
-			SEASON3B::CreateOkMessageBox(GlobalText[2021]);
-			break;
-		case 2:
-			SEASON3B::CreateOkMessageBox(GlobalText[2022]);
-			break;
-		case 3:
-			SEASON3B::CreateOkMessageBox(GlobalText[2023]);
-			break;
-		case 4:
-			SEASON3B::CreateOkMessageBox(GlobalText[2024]);
-			break;
-		}
-#else // KJH_ADD_NPC_ROURKE_PCROOM_EVENT_MESSAGEBOX
-		if (0 == Data->Cmd2)
-		{
-			ShowCheckBox(1, 2020, MESSAGE_PCROOM_EVENT);
-		}
-		else					
-		{
-			SEASON3B::CreateOkMessageBox(GlobalText[2020 + Data->Cmd2]);
-		}
-#endif // KJH_ADD_NPC_ROURKE_PCROOM_EVENT_MESSAGEBOX
-		break;
-		
-#endif	// PCROOM_EVENT
 	case 13:
 		SEASON3B::CreateOkMessageBox(GlobalText[1826]);
 		break;
-		
 	case 14:
 		{
 			switch(Data->Cmd2) 
@@ -7740,8 +7695,6 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 			}
 		}
 		break;
-		
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
 	case 15:
 		{
 			switch(Data->Cmd2) 
@@ -7758,9 +7711,6 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 			}
 		}
 		break;
-#endif // PRUARIN_EVENT07_3COLORHARVEST
-		
-#ifdef LDK_ADD_SANTA_NPC
 	case 16:
 		{
 			SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
@@ -7784,20 +7734,14 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 			}
 		}
 		break;
-#endif //LDK_ADD_SANTA_NPC
-		
-#ifdef LDK_ADD_SNOWMAN_NPC
 	case 17:
 		SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSantaTownLeaveMsgBoxLayout));
 		break;
-#endif //LDK_ADD_SNOWMAN_NPC
-		
 	case 47:
 	case 48:
 	case 49:
 		SEASON3B::CreateOkMessageBox(GlobalText[1823+Data->Cmd1-47]);
 		break;
-		
 	case 55:
 		{
 			unicode::t_char strText[128];
@@ -7819,7 +7763,6 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 			SEASON3B::CreateOkMessageBox(strText);
 		}
 		break;
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	case 58: 
 		{
 			WORD Key = ((WORD)(Data->Cmd2)<<8)+Data->Cmd3;
@@ -7834,8 +7777,6 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 			}
 		}
 		break;
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef YDG_ADD_FIRECRACKER_ITEM
 	case 59:
 		{
 			vec3_t Position, Angle, Light;
@@ -7846,7 +7787,6 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 			Light[0] = Light[1] = Light[2] = 1.0f;
 			CreateEffect(BITMAP_FIRECRACKER0001,Position,Angle,Light,1);
 		}
-#endif	// YDG_ADD_FIRECRACKER_ITEM
 #ifdef YDG_ADD_CS5_REVIVAL_CHARM
 	case 60:
 		g_PortalMgr.ResetRevivePosition();
@@ -7882,10 +7822,8 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 			case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
 			case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
 			case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-#ifdef ADD_SOCKET_MIX
 			case SEASON3A::MIXTYPE_EXTRACT_SEED:
 			case SEASON3A::MIXTYPE_SEED_SPHERE:
-#endif	// ADD_SOCKET_MIX
 				unicode::_sprintf(szText, GlobalText[594]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
@@ -10540,7 +10478,7 @@ void ReceiveBCGiveUp( BYTE* ReceiveBuffer )
 		g_pChatListBox->AddText("", GlobalText[1515], SEASON3B::TYPE_SYSTEM_MESSAGE);
 		break;
 	default:
-		assert( !"잘못된 ReceiveBCGiveUp(0xB2,0x02)" );
+		assert( !"ReceiveBCGiveUp(0xB2,0x02)" );
 		break;
 	}
 }
@@ -11718,78 +11656,6 @@ void RecevieKanturu3rdLeftUserandMonsterCount( BYTE* ReceiveBuffer)
 	M39Kanturu3rd::Kanturu3rdUserandMonsterCount(pData->bMonsterCount, pData->btUserCount);
 }
 
-#ifdef ADD_PCROOM_POINT_SYSTEM
-
-void ReceivePCRoomPointInfo(BYTE* ReceiveBuffer)
-{
-	LPPMSG_ANS_GC_PCROOM_POINT_INFO pData = (LPPMSG_ANS_GC_PCROOM_POINT_INFO)ReceiveBuffer;
-	
-	CPCRoomPtSys& rPCRoomPtSys = CPCRoomPtSys::Instance();
-
-#ifndef KJH_DEL_PC_ROOM_SYSTEM				// #ifndef
-#ifndef CSK_MOD_MOVE_COMMAND_WINDOW
-	rPCRoomPtSys.SetPCRoom();
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
-
-	rPCRoomPtSys.SetPoint(pData->nPoint, pData->nMaxPoint);
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-	rPCRoomPtSys.SetPCRoom(pData->bPCBang);
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
-
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0xD0 0x04 [ReceivePCRoomPointInfo(%d | %d)]", pData->nPoint, pData->nMaxPoint);
-}
-
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-
-void ReceivePCRoomPointUse(BYTE* ReceiveBuffer)
-{
-	LPPMSG_ANS_GC_PCROOM_POINT_USE pData = (LPPMSG_ANS_GC_PCROOM_POINT_USE)ReceiveBuffer;
-	
-	switch (pData->byResult)
-	{
-	case 0x00:
-		if (pData->byInvenPos != 0xff)
-		{
-			g_pMyInventory->InsertItem(pData->byInvenPos-MAX_EQUIPMENT_INDEX, pData->ItemInfo);
-			
-			PlayBuffer(SOUND_GET_ITEM01);
-		}
-		break;
-		
-	case 0x03:
-		g_pChatListBox->AddText("", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
-		break;
-					
-	case 0x04:
-		g_pChatListBox->AddText("", GlobalText[2333], SEASON3B::TYPE_ERROR_MESSAGE);
-		break;
-					
-	case 0x09:
-		g_pChatListBox->AddText("", GlobalText[2322], SEASON3B::TYPE_ERROR_MESSAGE);
-		break;
-	}
-	
-#ifdef CONSOLE_DEBUG
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0xD0 0x05 [ReceivePCRoomPointUse(%d)]", pData->byInvenPos);
-#endif // CONSOLE_DEBUG	
-}
-
-void ReceivePCRoomPointShopOpen(BYTE* ReceiveBuffer)
-{
-	LPPMSG_REQ_PCROOM_POINT_SHOP_OPEN pData = (LPPMSG_REQ_PCROOM_POINT_SHOP_OPEN)ReceiveBuffer;
-	
-	if (0 == pData->byResult)
-	{
-		CPCRoomPtSys::Instance().SetPCRoomPointShopMode();
-		g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCSHOP);
-	}
-}
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-
-#endif	// ADD_PCROOM_POINT_SYSTEM
-
 void ReceiveCursedTempleEnterInfo( BYTE* ReceiveBuffer )
 {
 	LPPMSG_CURSED_TEMPLE_USER_COUNT data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
@@ -11805,9 +11671,7 @@ void ReceiveCursedTempleEnterResult( BYTE* ReceiveBuffer )
 	{
 		g_pNewUISystem->HideAll();
 	}
-#ifdef PBG_FIX_CURSEDTEMPLE_SYSTEMMSG
 	g_CursedTemple->UpdateTempleSystemMsg(data->Result);
-#endif //PBG_FIX_CURSEDTEMPLE_SYSTEMMSG
 }
 
 void ReceiveCursedTempleInfo( BYTE* ReceiveBuffer )
@@ -11923,49 +11787,7 @@ void ReceiveCheckSumRequest( BYTE *ReceiveBuffer)
 #endif // CONSOLE_DEBUG
 }
 
-
-#ifdef NEW_USER_INTERFACE_SERVERMESSAGE
-
-void RecevieCashShopInOut( BYTE* ReceiveBuffer )
-{
-	TheShopServerProxy().RecevieShopInOut( ReceiveBuffer );
-}
-
-void RecevieCashShopCashPoint( BYTE* ReceiveBuffer )
-{
-	TheShopServerProxy().RecevieShopCashPoint( ReceiveBuffer );
-}
-//////////////////////////////////////////////////////////////////////////
-// [캐쉬 아이템 리스트 요청 결과] 0xF5, 0x06
-//////////////////////////////////////////////////////////////////////////
-void RecevieCashShopItemlist( BYTE* ReceiveBuffer )
-{
-	TheShopServerProxy().RecevieShopItemlist( ReceiveBuffer );
-}
-//////////////////////////////////////////////////////////////////////////
-// [캐쉬샵 구매 요청 결과] 0xF5, 0x08
-//////////////////////////////////////////////////////////////////////////
-void RecevieCashShopItemPurchase( BYTE* ReceiveBuffer )
-{
-	TheShopServerProxy().RecevieShopItemPurchase( ReceiveBuffer );
-}
-
-#ifdef PSW_CHARACTER_CARD
-void ReceiveBuyCharacterCard( BYTE* ReceiveBuffer )
-{
-	TheGameServerProxy().ReceiveBuyCharacterCard( ReceiveBuffer );
-}
-
-void ReceiveCharacterCard( BYTE* ReceiveBuffer )
-{
-	TheGameServerProxy().ReceiveCharacterCard( ReceiveBuffer );
-}
-#endif //PSW_CHARACTER_CARD
-
-#endif //NEW_USER_INTERFACE_SERVERMESSAGE
-
 void Action(CHARACTER *c,OBJECT *o,bool Now);
-
 
 extern int TimeRemain;
 
@@ -14701,37 +14523,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 			break;
 		}
-#ifdef ADD_PCROOM_POINT_SYSTEM
-	case 0xD0:
-		{
-			int nSubCode;
-			if (ReceiveBuffer[0] == 0xC1)
-			{
-				LPPHEADER_DEFAULT_SUBCODE pData = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
-				nSubCode = pData->SubCode;
-			}
-			else
-			{
-				LPPHEADER_DEFAULT_SUBCODE_WORD pData = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer;
-				nSubCode = pData->SubCode;
-			}
-			switch(nSubCode)
-			{
-			case 0x04:
-				ReceivePCRoomPointInfo(ReceiveBuffer);
-				break;
-#ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
-			case 0x05:
-				ReceivePCRoomPointUse(ReceiveBuffer);
-				break;
-			case 0x06:
-				ReceivePCRoomPointShopOpen(ReceiveBuffer);
-				break;
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-			}
-		}
-		break;
-#endif	// ADD_PCROOM_POINT_SYSTEM
 	case 0xBF:
 		{
 			int subcode;
@@ -14825,8 +14616,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				}
 			}
 			break;
-				
-#if defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
 			case 0xDE:
 				{
 					int subcode = 0;
@@ -14847,9 +14636,9 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 					}
 				}
 				break;
-#endif //defined PSW_CHARACTER_CARD || defined PBG_ADD_CHARACTERCARD
+
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-		case 0xD2:		// 인게임샵
+		case 0xD2:
 			{
 				PBMSG_HEADER2* Data = (PBMSG_HEADER2*)ReceiveBuffer;
 				switch(Data->m_bySubCode)

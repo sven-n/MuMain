@@ -37,15 +37,6 @@ struct SQuestProgress
 };
 #pragma pack(pop)
 
-#ifndef ASG_MOD_QUEST_WORDS_SCRIPTS
-struct SQuestWords
-{
-	short	m_nAction;
-	BYTE	m_byActCount;
-	string	m_strWords;
-};
-#endif	// ASG_MOD_QUEST_WORDS_SCRIPTS
-
 struct SQuestRequest
 {
 	DWORD	m_dwType;
@@ -109,11 +100,7 @@ struct SRequestRewardText
 typedef std::map<DWORD, SNPCDialogue> NPCDialogueMap;
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 typedef std::map<DWORD, SQuestProgress> QuestProgressMap;
-#ifdef ASG_MOD_QUEST_WORDS_SCRIPTS
 typedef std::map<int, std::string> QuestWordsMap;
-#else	// ASG_MOD_QUEST_WORDS_SCRIPTS
-typedef map<int, SQuestWords> QuestWordsMap;
-#endif	// ASG_MOD_QUEST_WORDS_SCRIPTS
 typedef std::map<DWORD, SQuestRequestReward> QuestRequestRewardMap;
 typedef std::list<DWORD> DWordList;
 

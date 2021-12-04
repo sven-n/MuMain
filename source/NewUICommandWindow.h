@@ -1,5 +1,4 @@
 // NewUICommandWindow.h: interface for the CNewUICommandWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICOMMANDWINDOW_H__6C0AA8A8_EF69_45F3_BCE4_F957F08310C5__INCLUDED_)
@@ -9,21 +8,10 @@
 
 #include "NewUIMyInventory.h"
 #include "NewUIButton.h"
-#ifdef ADD_PCROOM_POINT_SYSTEM
-#include "PCRoomPoint.h"
-#endif	// ADD_PCROOM_POINT_SYSTEM
 
-#ifdef KJH_DEL_PC_ROOM_SYSTEM
 #define MAX_COMMAND_BTN		( 11 )
-#else // KJH_DEL_PC_ROOM_SYSTEM
-#ifdef ADD_PCROOM_POINT_SYSTEM
-	#define MAX_COMMAND_BTN		( 12 )
-#else // ADD_PCROOM_POINT_SYSTEM
-	#define MAX_COMMAND_BTN		( 11 )
-#endif // ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 
-#define COMMAND_BTN_INTERVAL_SIZE	(1)				// 커맨드 버튼들 사이의 간격
+#define COMMAND_BTN_INTERVAL_SIZE	(1)
 
 namespace SEASON3B
 {
@@ -59,11 +47,8 @@ namespace SEASON3B
 		CNewUIButton				m_BtnExit;
 		int							m_iCurSelectCommand;
 		int							m_iCurMouseCursor;
-#ifdef BUGFIX_UI_COMMAND_CHAR_ON_MOUSE
 		bool						m_bSelectedChar;
 		bool						m_bCanCommand;
-#endif // BUGFIX_UI_COMMAND_CHAR_ON_MOUSE
-	
 		
 	public:		
 		CNewUICommandWindow();
@@ -91,23 +76,17 @@ namespace SEASON3B
 		void SetMouseCursor( int iCursorType );
 		int	 GetMouseCursor( );
 		
-		bool CommandTrade(CHARACTER* pSelectedCha);				// 거래 명령
-		bool CommandPurchase(CHARACTER* pSelectedCha);			// 구매 명령
-		bool CommandParty(SHORT iChaKey);						// 파티 명령
-		bool CommandWhisper(CHARACTER* pSelectedCha);			// 귓속말 명령	
-		bool CommandGuild(CHARACTER* pSelectedCha);				// 길드가입 명령
- 		bool CommandGuildUnion(CHARACTER* pSelectedCha);		// 길드연합 명령
- 		bool CommandGuildRival(CHARACTER* pSelectedCha);		// 적대길드 명령
- 		bool CommandCancelGuildRival(CHARACTER* pSelectedCha);	// 적대길드해제 명령
- 		bool CommandAddFriend(CHARACTER* pSelectedCha);			// 친구추가 명령
- 		bool CommandFollow(int iSelectedChaIndex);			// 따라가기 명령
- 		int CommandDual(CHARACTER* pSelectedCha);						// 결투명령
-#ifndef KJH_DEL_PC_ROOM_SYSTEM				// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM	
- 		bool CommandPCBangPoint();				// PC방 포인트 상점 명령
-#endif // ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-
+		bool CommandTrade(CHARACTER* pSelectedCha);
+		bool CommandPurchase(CHARACTER* pSelectedCha);
+		bool CommandParty(SHORT iChaKey);
+		bool CommandWhisper(CHARACTER* pSelectedCha);
+		bool CommandGuild(CHARACTER* pSelectedCha);
+ 		bool CommandGuildUnion(CHARACTER* pSelectedCha);
+ 		bool CommandGuildRival(CHARACTER* pSelectedCha);
+ 		bool CommandCancelGuildRival(CHARACTER* pSelectedCha);
+ 		bool CommandAddFriend(CHARACTER* pSelectedCha);
+ 		bool CommandFollow(int iSelectedChaIndex);
+ 		int CommandDual(CHARACTER* pSelectedCha);
 	private:
 		void LoadImages( );
 		void UnloadImages( );

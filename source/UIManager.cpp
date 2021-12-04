@@ -26,11 +26,6 @@
 #include "npcGateSwitch.h"
 #include "CComGem.h"
 #include "GM_Kanturu_2nd.h"
-#ifndef KJH_DEL_PC_ROOM_SYSTEM		// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-#include "PCRoomPoint.h"
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 #include "NewUICustomMessageBox.h"
 #include "NewUINPCShop.h"
 #include "MixMgr.h"

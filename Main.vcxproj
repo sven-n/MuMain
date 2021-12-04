@@ -1757,7 +1757,6 @@
     <ClCompile Include="source\Observer.cpp" />
     <ClCompile Include="source\OptionWin.cpp" />
     <ClCompile Include="source\PartyManager.cpp" />
-    <ClCompile Include="source\PCRoomPoint.cpp" />
     <ClCompile Include="source\PersonalShopTitleImp.cpp" />
     <ClCompile Include="source\PhysicsManager.cpp" />
     <ClCompile Include="source\PList.cpp" />
@@ -2496,7 +2495,6 @@
     <ClInclude Include="source\Observer.h" />
     <ClInclude Include="source\OptionWin.h" />
     <ClInclude Include="source\PartyManager.h" />
-    <ClInclude Include="source\PCRoomPoint.h" />
     <ClInclude Include="source\PersonalShopTitleImp.h" />
     <ClInclude Include="source\PhysicsManager.h" />
     <ClInclude Include="source\PList.h" />

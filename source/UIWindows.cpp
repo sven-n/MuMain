@@ -298,11 +298,7 @@ void CUIWindowMgr::RemoveWindow(DWORD dwUIID)
 }
 
 void RenderWindowVLine(float pos_x, float pos_y, float height);
-void RenderColor(float x,float y,float Width,float Height
-#ifdef PJH_ADD_MINIMAP
-				 ,float Alpha,int Flag
-#endif //PJH_ADD_MINIMAP
-				 );
+void RenderColor(float x,float y,float Width,float Height,float Alpha,int Flag);
 
 void CUIWindowMgr::Render()
 {

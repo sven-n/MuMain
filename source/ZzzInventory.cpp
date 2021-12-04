@@ -35,11 +35,6 @@
 #include "GMCrywolf1st.h"
 #include "CDirection.h"
 #include "ChangeRingManager.h"
-#ifndef KJH_DEL_PC_ROOM_SYSTEM			// #ifndef
-#ifdef ADD_PCROOM_POINT_SYSTEM
-#include "PCRoomPoint.h"
-#endif	// ADD_PCROOM_POINT_SYSTEM
-#endif // KJH_DEL_PC_ROOM_SYSTEM
 #include "MixMgr.h"
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
@@ -1350,15 +1345,10 @@ void RepairAllGold ( void )
 			{
 				continue;
 			}
-
-#ifdef PSW_CHARACTER_CARD
 			if( pItem->Type == ITEM_POTION+91 )
 			{
 				continue;
 			}
-#endif //PSW_CHARACTER_CARD	
-
-#ifdef PSW_NEW_CHAOS_CARD
 			if( pItem->Type >= ITEM_POTION+92 && pItem->Type <= ITEM_POTION+93 )
 			{
 				continue;
@@ -1367,8 +1357,6 @@ void RepairAllGold ( void )
 			{
 				continue;
 			}
-#endif //PSW_NEW_CHAOS_CARD
-
 			if( pItem->Type == ITEM_POTION+95 )
 			{
 				continue;
@@ -6363,9 +6351,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
         case AT_SKILL_BRAND_OF_SKILL:
             break;
 		case AT_SKILL_PLASMA_STORM_FENRIR:
-#ifdef PBG_FIX_SKILL_RECOVER_TOOLTIP
 		case AT_SKILL_RECOVER:
-#endif //PBG_FIX_SKILL_RECOVER_TOOLTIP
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		case AT_SKILL_ATT_UP_OURFORCES:
 		case AT_SKILL_HP_UP_OURFORCES:
@@ -10762,16 +10748,8 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	int ScreenPos_X=0, ScreenPos_Y=0;
 	Projection(Position,&ScreenPos_X, &ScreenPos_Y);
 #endif //PBG_ADD_ITEMRESIZE
-#ifdef NEW_USER_INTERFACE
-	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PARTCHARGE_SHOP) == true) {
-		float ChangeScale = (640.f/static_cast<float>(TheShell().GetWindowSize().x))*3.7f;
-		o->Scale = Scale-(Scale/ChangeScale);
-	}
-	else
-#endif // NEW_USER_INTERFACE
-	{
-		o->Scale = Scale;
-	}
+
+	o->Scale = Scale;
 		
 	VectorCopy(Position,o->Position);
 	
@@ -10789,13 +10767,6 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 	if((g_pPickedItem == NULL || PickUp) 
 		&& SEASON3B::CheckMouseIn(sx, sy, Width, Height))
 	{
-#ifdef NEW_USER_INTERFACE
-		if( g_pNewUISystem->IsVisible( SEASON3B::INTERFACE_PARTCHARGE_SHOP) ) 
-		{
-			Success = true;
-		}
-		else  
-#endif // NEW_USER_INTERFACE
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
 		if(g_pNewUISystem->IsVisible( SEASON3B::INTERFACE_INGAMESHOP))
 		{
@@ -11684,12 +11655,12 @@ void MovePersonalShop()
 		if(g_iPersonalShopMsgType == 1)
 		{
 			if(OkYesOrNo == 1) 
-			{				//. Ok
+			{
 				g_iPersonalShopMsgType = 0;
 				OkYesOrNo = -1;
 			}
 			else if(OkYesOrNo == 2) 
-			{			//. Cancel
+			{
 				g_iPersonalShopMsgType = 0;
 				OkYesOrNo = -1;
 			}

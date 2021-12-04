@@ -93,10 +93,8 @@ OBJECT::~OBJECT()
 
 void OBJECT::Initialize()
 {
-#if defined(PCROOM_EVENT)
+
 	m_bpcroom = false;
-#endif //PCROOM_EVENT
-	
 	Live = false;
 	bBillBoard = false;
 	m_bCollisionCheck = false;

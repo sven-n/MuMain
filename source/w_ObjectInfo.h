@@ -247,11 +247,8 @@ public:
 public:
 	short int		m_sTargetIndex;
 
-#if defined PCROOM_EVENT
 public:
-	BOOL		m_bpcroom;		// 피씨방 관련 이벤트 전용 NPC 체크 변수
-#endif //PCROOM_EVENT
-
+	BOOL		m_bpcroom;
 	vec3_t		m_v3PrePos1;
 	vec3_t		m_v3PrePos2;
 

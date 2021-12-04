@@ -16,7 +16,6 @@
 #include "MapManager.h"
 
 extern BYTE m_OccupationState;
-#ifdef PJH_ADD_MINIMAP
 
 using namespace SEASON3B;
 
@@ -350,4 +349,3 @@ bool SEASON3B::CNewUIMiniMap::Check_Btn(int mx,int my)
 	}
 	return false;
 }
-#endif //PJH_ADD_MINIMAP

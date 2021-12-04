@@ -485,9 +485,6 @@
     <ClCompile Include="source\PartyManager.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\PCRoomPoint.cpp">
-      <Filter>MU\Client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\PhysicsManager.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
@@ -1478,9 +1475,6 @@
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\PartyManager.h">
-      <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PCRoomPoint.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\PhysicsManager.h">

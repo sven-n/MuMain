@@ -2500,35 +2500,19 @@ void MainScene(HDC hDC)
 		g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);		
 	}
 	GrabEnable = false;
-#ifndef PBG_ADD_PCROOM_NEWUI
-#ifdef FOR_WORK
-#ifdef KJH_DEL_PC_ROOM_SYSTEM
-	if( CPCRoomPtSys::Instance().IsPCRoom() == true )
-	{
-		BeginBitmap();
-		g_pRenderText->SetFont(g_hFont);
-		g_pRenderText->SetTextColor(255, 255, 0, 255);
-		g_pRenderText->RenderText(65, 27, "PCRoom");
-		EndBitmap();
-	}
-#endif // KJH_DEL_PC_ROOM_SYSTEM
-#endif // FOR_WORK
-#endif //PBG_ADD_PCROOM_NEWUI
 
 #if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 	BeginBitmap();
 	unicode::t_char szDebugText[128];
-	unicode::_sprintf(szDebugText, "FPS : %.1f Connected: %d", FPS,g_bGameServerConnected);
+	unicode::_sprintf(szDebugText, "FPS : %.1f", FPS);
 	unicode::t_char szMousePos[128];
 	unicode::_sprintf(szMousePos, "MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0, 0, 0, 100);
 	g_pRenderText->SetTextColor(255, 255, 255, 200);
-	//g_pRenderText->RenderText(70, 8, szDebugText);
-	//g_pRenderText->RenderText(10, 40, szDebugText);
 	g_pRenderText->RenderText(10, 26, szDebugText);
 	g_pRenderText->RenderText(10, 36, szMousePos);
-		g_pRenderText->SetFont(g_hFont);
+	g_pRenderText->SetFont(g_hFont);
 	EndBitmap();
 #endif // defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 
