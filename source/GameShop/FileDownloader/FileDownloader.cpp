@@ -9,7 +9,7 @@
 //
 
 #include "stdafx.h"
-#if(DECOMPILE_INGAMESHOP==1)
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "GameShop\ShopListManager\interface\FileDownloader.h"
 #include "HTTPConnecter.h"
 #include "FTPConnecter.h"

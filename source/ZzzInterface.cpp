@@ -4382,10 +4382,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 	
 	g_csItemOption.CheckRenderOptionHelper ( Text );
 
-	
-#ifdef LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG					
 	return (IsIllegalMovementByUsingMsg(Text)) ? TRUE : FALSE;
-#endif //LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG
 	return false;
 }
 
@@ -9344,7 +9341,6 @@ bool IsNonAttackGM()
 	return false;
 }
 
-#ifdef LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG
 bool IsIllegalMovementByUsingMsg(const char *szChatText)
 {
 	bool bCantFly			= false;
@@ -9428,4 +9424,3 @@ bool IsIllegalMovementByUsingMsg(const char *szChatText)
 	
 	return false;	
 }
-#endif // LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG

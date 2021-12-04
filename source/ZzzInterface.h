@@ -199,9 +199,7 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance);
 bool IsGMCharacter();
 bool IsNonAttackGM();
 #endif // CSK_ADD_GM_ABILITY
-
-#ifdef LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG
 bool IsIllegalMovementByUsingMsg(const char *szChatText);
-#endif // LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG
+
 
 #endif //__ZZZINTERFACE_H__

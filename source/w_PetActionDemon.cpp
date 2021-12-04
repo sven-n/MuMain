@@ -52,11 +52,7 @@ bool PetActionDemon::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD t
 	float FlyRange = 50.f;
 	vec3_t Range, Direction;
 
-#ifdef LDK_FIX_PETPOSITION_MULTIPLY_OWNERSCALE
 	obj->Position[2] = obj->Owner->Position[2] + (230.0f * obj->Owner->Scale);
-#else
-	obj->Position[2] = obj->Owner->Position[2] + 200;
-#endif //LDK_FIX_PETPOSITION_MULTIPLY_OWNERSCALE
 
 	VectorSubtract( obj->Owner->Position, obj->Position, Range );
 

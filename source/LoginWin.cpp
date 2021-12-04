@@ -31,10 +31,8 @@ extern int g_iChatInputType;
 
 CLoginWin::CLoginWin()
 {
-#ifdef LDS_FIX_MEMORYLEAK_0910_LOGINWIN
 	m_pIDInputBox = NULL;
 	m_pPassInputBox = NULL;
-#endif // LDS_FIX_MEMORYLEAK_0910_LOGINWIN
 }
 
 CLoginWin::~CLoginWin()

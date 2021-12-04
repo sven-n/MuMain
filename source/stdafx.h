@@ -107,8 +107,6 @@
 #define DIRECTINPUT_VERSION	0x0800
 #define BYTECAST(T,X) static_cast<T>(X & 0xFF)
 
-#define DECOMPILE_INGAMESHOP 1
-
 //patch
 //winmain
 #include "Winmain.h"

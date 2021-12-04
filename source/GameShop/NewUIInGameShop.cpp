@@ -104,9 +104,7 @@ void CNewUIInGameShop::RenderFrame()
 		
 	// Category Deco Middle Render
 	POINT CategoryDecoMiddlePos;
-	CategoryDecoMiddlePos.x = m_CategoryButton.GetPos(0).x
-								+(IMAGE_IGS_CATEGORY_BTN_WIDTH/2)
-								-(IMAGE_IGS_CATEGORY_DECO_MIDDLE_WIDTH/2);
+	CategoryDecoMiddlePos.x = m_CategoryButton.GetPos(0).x+(IMAGE_IGS_CATEGORY_BTN_WIDTH/2)-(IMAGE_IGS_CATEGORY_DECO_MIDDLE_WIDTH/2);
 	
 	for(int i=0 ; i<iSizeCategory-1 ; i++)
 	{
@@ -227,15 +225,10 @@ void CNewUIInGameShop::RenderButtons()
 	m_CashChargeButton.Render();
 	m_CashRefreshButton.Render();
 	m_UseButton.Render();
-#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT			// #ifndef
-	m_DeleteButton.Render();
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	m_PrevButton.Render();
 	m_NextButton.Render();
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	m_StoragePrevButton.Render();
 	m_StorageNextButton.Render();
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	m_CloseButton.Render();
 
 
@@ -243,12 +236,7 @@ void CNewUIInGameShop::RenderButtons()
 
 void CNewUIInGameShop::RenderListBox()
 {	
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	m_StorageItemListBox.Render();
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-	if(m_InGameShopListBox[m_ListBoxTabButton.GetCurButtonIndex()].GetLineNum() != 0)
-		m_InGameShopListBox[m_ListBoxTabButton.GetCurButtonIndex()].Render();
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 }
 
 #ifdef PBG_ADD_ITEMRESIZE
@@ -380,40 +368,29 @@ bool CNewUIInGameShop::BtnProcess()
 		}
 	}
 	
-	// ListBox Tab 버튼
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	if( m_ListBoxTabButton.UpdateMouseEvent() != -1 )
 	{
-		
 		char szCode = GetCurrentStorageCode();
 		m_iSelectedStorageItemIndex = 0;
 		m_bRequestCurrentPage = true;
-		SendRequestIGS_ItemStorageList(1, &szCode);		// 보관함 리스트 요청
+		SendRequestIGS_ItemStorageList(1, &szCode);
 		return true;
 	}
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-	if( m_ListBoxTabButton.UpdateMouseEvent() != -1 )
-		return true;
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 
-	// 상세보기 버튼
 	for(int i=0 ; i<g_InGameShopSystem->GetSizePackageAsDisplayPackage() ; i++)
 	{
 		if( m_ViewDetailButton[i].UpdateMouseEvent() )
 		{
 			CShopPackage* pPackage = g_InGameShopSystem->GetDisplayPackage(i);
 			
-			// 단일/패키지 아이템
 			if( pPackage->PriceCount == 1 )
 			{
-				// 단일/패키지 아이템 구매창 출력
 				CMsgBoxIGSBuyPackageItem* pMsgBox = NULL;
 				CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxBuyPackageItemLayout), &pMsgBox);
 				pMsgBox->Initialize(pPackage);
 			}
 			else if(pPackage->PriceCount > 1)
 			{
-				// 선택아이템 구매창 출력
 				CMsgBoxIGSBuySelectItem* pMsgBox = NULL;
 				CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSBuySelectItemLayout), &pMsgBox);
 				pMsgBox->Initialize(pPackage);
@@ -423,27 +400,22 @@ bool CNewUIInGameShop::BtnProcess()
 		}
 	}
 
-	// 캐시 선물하기 버튼
 	if( m_CashGiftButton.UpdateMouseEvent() == true )
 	{
-		// 현재는 '지원되지 않는기능' MessageBox 띄우기
 		CMsgBoxIGSCommon* pMsgBox = NULL;
 		CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
 		pMsgBox->Initialize(GlobalText[2937], GlobalText[2938]);
 		return true;
 	}
 
-	// 캐시 충전하기 버튼
 	if( m_CashChargeButton.UpdateMouseEvent() == true )
 	{
-		// 현재는 '지원되지 않는기능' MessageBox 띄우기
 		CMsgBoxIGSCommon* pMsgBox = NULL;
 		CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
 		pMsgBox->Initialize(GlobalText[2937], GlobalText[2938]);
 		return true;
 	}
 
-	// 캐시 Refresh 버튼
 	if( m_CashRefreshButton.UpdateMouseEvent() == true )
 	{
 		SendRequestIGS_CashPointInfo();
@@ -451,25 +423,19 @@ bool CNewUIInGameShop::BtnProcess()
 		return true;
 	}
 
-	// 사용하기 버튼
 	if( m_UseButton.UpdateMouseEvent() == true )
 	{
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 		if( m_StorageItemListBox.GetLineNum() <= 0 )
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-		if( m_InGameShopListBox[m_ListBoxTabButton.GetCurButtonIndex()].GetLineNum() <= 0 )
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 		{
 			CMsgBoxIGSCommon* pMsgBox = NULL;
 			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-			// "에러", "사용할 수 있는 아이템이 없습니다."
 			pMsgBox->Initialize(GlobalText[3028], GlobalText[3033]);
 			return true;
 		}
 
 		int iStorageIndex = m_ListBoxTabButton.GetCurButtonIndex();
 
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+
 		IGS_StorageItem* pSelectItem = m_StorageItemListBox.GetSelectedText();
 		
 		if( iStorageIndex == IGS_SAFEKEEPING_LISTBOX )					// 보관함
@@ -487,50 +453,8 @@ bool CNewUIInGameShop::BtnProcess()
 				pSelectItem->m_szType, pSelectItem->m_szSendUserName, pSelectItem->m_szMessage, 
 				pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
 		}
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-		IGS_StorageItem* pSelectItem = m_InGameShopListBox[iStorageIndex].GetSelectedText();
-
-		if( iStorageIndex == CInGameShopSystem::IGS_SAFEKEEPING_LISTBOX )					// 보관함
-		{
-			CMsgBoxIGSStorageItemInfo* pMsgBox = NULL;
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSStorageItemInfoLayout), &pMsgBox);
-			pMsgBox->Initialize(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode, pSelectItem->m_szType, 
-				pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
-		}
-		else if( iStorageIndex == CInGameShopSystem::IGS_PRESENTBOX_LISTBOX )				// 선물 보관함
-		{
-			CMsgBoxIGSGiftStorageItemInfo* pMsgBox = NULL;
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSGiftStorageItemInfoLayout), &pMsgBox);
-			pMsgBox->Initialize(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode, 
-				pSelectItem->m_szType, pSelectItem->m_szSendUserName, pSelectItem->m_szMessage, 
-				pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
-		}
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-
 		return true;
 	}
-
-#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// #ifndef
-	// 보관함 아이템 지우기 버튼
-	if( m_DeleteButton.UpdateMouseEvent() == true )
-	{
-		if( m_InGameShopListBox[m_ListBoxTabButton.GetCurButtonIndex()].GetLineNum() <= 0 )
-		{
-			CMsgBoxIGSCommon* pMsgBox = NULL;
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-			// "에러", "삭제할 수 있는 아이템이 없습니다."
-			pMsgBox->Initialize(GlobalText[3028], GlobalText[3034]);
-			return true;
-		}
-
-		IGS_StorageItem* pSelectItem = m_InGameShopListBox[m_ListBoxTabButton.GetCurButtonIndex()].GetSelectedText();
-		CMsgBoxIGSDeleteItemConfirm* pMsgBox = NULL;
-		CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSDeleteItemConfirmLayout), &pMsgBox);
-		pMsgBox->Initialize(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_szType);
-
-		return true;
-	}
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 
 	// Prev Button
 	if(m_PrevButton.UpdateMouseEvent())
@@ -546,7 +470,6 @@ bool CNewUIInGameShop::BtnProcess()
 		return true;
  	}
 
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	// Storage Prev Button
 	if(m_StoragePrevButton.UpdateMouseEvent())
 	{
@@ -560,7 +483,6 @@ bool CNewUIInGameShop::BtnProcess()
 		StorageNextPage();
 		return true;
  	}
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 
 	if(m_CloseButton.UpdateMouseEvent() == true)
 	{	
@@ -579,110 +501,64 @@ bool CNewUIInGameShop::BtnProcess()
 
 void CNewUIInGameShop::SetBtnInfo()
 {
-	//닫기 버튼
 	m_CloseButton.ChangeButtonImgState(true, IMAGE_IGS_EXIT_BTN, false);
-	m_CloseButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_EXIT_BTN_POS_X, m_Pos.y+IMAGE_IGS_EXIT_BTN_POS_Y, 
-									IMAGE_IGS_EXIT_BTN_WIDTH, IMAGE_IGS_EXIT_BTN_HEIGHT);
+	m_CloseButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_EXIT_BTN_POS_X, m_Pos.y+IMAGE_IGS_EXIT_BTN_POS_Y,IMAGE_IGS_EXIT_BTN_WIDTH, IMAGE_IGS_EXIT_BTN_HEIGHT);
 	m_CloseButton.ChangeToolTipText(GlobalText[1002], true);
-
-	// ListBox Tab 버튼
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	m_ListBoxTabButton.CreateRadioGroup(IGS_TOTAL_LISTBOX, IMAGE_IGS_LEFT_TAB);
-	m_ListBoxTabButton.ChangeRadioButtonInfo(true, m_Pos.x+IMAGE_IGS_TAB_BTN_POS_X, m_Pos.y+IMAGE_IGS_TAB_BTN_POS_Y
-		,IMAGE_IGS_TAB_BTN_WIDTH, IMAGE_IGS_TAB_BTN_HEIGHT, IMAGE_IGS_TAB_BTN_DISTANCE);
+	m_ListBoxTabButton.ChangeRadioButtonInfo(true, m_Pos.x+IMAGE_IGS_TAB_BTN_POS_X, m_Pos.y+IMAGE_IGS_TAB_BTN_POS_Y,IMAGE_IGS_TAB_BTN_WIDTH, IMAGE_IGS_TAB_BTN_HEIGHT, IMAGE_IGS_TAB_BTN_DISTANCE);
 	m_ListBoxTabButton.ChangeButtonState( SEASON3B::BUTTON_STATE_DOWN, 0 );
 	m_ListBoxTabButton.ChangeButtonState( IGS_SAFEKEEPING_LISTBOX, BITMAP_UNKNOWN, SEASON3B::BUTTON_STATE_UP, 0 );
 	m_ListBoxTabButton.ChangeButtonState( IGS_PRESENTBOX_LISTBOX, BITMAP_UNKNOWN, SEASON3B::BUTTON_STATE_UP, 0 );
-	m_ListBoxTabButton.ChangeButtonState( IGS_PRESENTBOX_LISTBOX, IMAGE_IGS_RIGHT_TAB, SEASON3B::BUTTON_STATE_DOWN, 0 );
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-	m_ListBoxTabButton.CreateRadioGroup(CInGameShopSystem::IGS_TOTAL_LISTBOX, IMAGE_IGS_LEFT_TAB);
-	m_ListBoxTabButton.ChangeRadioButtonInfo(true, m_Pos.x+IMAGE_IGS_TAB_BTN_POS_X, m_Pos.y+IMAGE_IGS_TAB_BTN_POS_Y
-											,IMAGE_IGS_TAB_BTN_WIDTH, IMAGE_IGS_TAB_BTN_HEIGHT, IMAGE_IGS_TAB_BTN_DISTANCE);
-	m_ListBoxTabButton.ChangeButtonState( SEASON3B::BUTTON_STATE_DOWN, 0 );
-	m_ListBoxTabButton.ChangeButtonState( CInGameShopSystem::IGS_SAFEKEEPING_LISTBOX, BITMAP_UNKNOWN, SEASON3B::BUTTON_STATE_UP, 0 );
-	m_ListBoxTabButton.ChangeButtonState( CInGameShopSystem::IGS_PRESENTBOX_LISTBOX, BITMAP_UNKNOWN, SEASON3B::BUTTON_STATE_UP, 0 );
-	m_ListBoxTabButton.ChangeButtonState( CInGameShopSystem::IGS_PRESENTBOX_LISTBOX, IMAGE_IGS_RIGHT_TAB, SEASON3B::BUTTON_STATE_DOWN, 0 );
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	m_ListBoxTabButton.ChangeButtonState( IGS_PRESENTBOX_LISTBOX, IMAGE_IGS_RIGHT_TAB, SEASON3B::BUTTON_STATE_DOWN, 0);
 
 	unicode::t_string strText;
 	std::list<unicode::t_string> TextList;
-	strText = GlobalText[2888];		// "보관함"
+	strText = GlobalText[2888];
 	TextList.push_back(strText);
-	strText = GlobalText[2889];		// "선물함"
+	strText = GlobalText[2889];
 	TextList.push_back(strText);
 	
 	m_ListBoxTabButton.ChangeRadioText(TextList);
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	m_ListBoxTabButton.ChangeFrame(IGS_SAFEKEEPING_LISTBOX);
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-	m_ListBoxTabButton.ChangeFrame(CInGameShopSystem::IGS_SAFEKEEPING_LISTBOX);
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 
-	// 상세보기 버튼
 	for(int i=0 ; i<INGAMESHOP_DISPLAY_ITEMLIST_SIZE ; i++)
 	{
 		m_ViewDetailButton[i].ChangeButtonImgState(true, IMAGE_IGS_VIEWDETAIL_BTN, true, false, true);
-		m_ViewDetailButton[i].ChangeButtonInfo(IMAGE_IGS_VIEWDETAIL_BTN_POS_X+((i%IGS_NUM_ITEMS_WIDTH)*IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X),
-												IMAGE_IGS_VIEWDETAIL_BTN_POS_Y+((i/IGS_NUM_ITEMS_HEIGHT)*IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y),
-												IMAGE_IGS_VIEWDETAIL_BTN_WIDTH, IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT);
+		m_ViewDetailButton[i].ChangeButtonInfo(IMAGE_IGS_VIEWDETAIL_BTN_POS_X+((i%IGS_NUM_ITEMS_WIDTH)*IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X),IMAGE_IGS_VIEWDETAIL_BTN_POS_Y+((i/IGS_NUM_ITEMS_HEIGHT)*IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y),IMAGE_IGS_VIEWDETAIL_BTN_WIDTH, IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT);
 		m_ViewDetailButton[i].MoveTextPos(0, -1);
 		m_ViewDetailButton[i].ChangeText(GlobalText[2886]);
 	}
 
-	// 캐시 선물하기 버튼
 	m_CashGiftButton.ChangeButtonImgState(true, IMAGE_IGS_ITEMGIFT_BTN, true);
-	m_CashGiftButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_ITEMGIFT_BTN_POS_X, m_Pos.y+IMAGE_IGS_ICON_BTN_POS_Y, 
-										IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
+	m_CashGiftButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_ITEMGIFT_BTN_POS_X, m_Pos.y+IMAGE_IGS_ICON_BTN_POS_Y, IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
 	m_CashGiftButton.ChangeToolTipText(GlobalText[2939]);
-
-	// 캐시 충전하기 버튼
 	m_CashChargeButton.ChangeButtonImgState(true, IMAGE_IGS_CASHGIFT_BTN, true);
-	m_CashChargeButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_CASHGIFT_BTN_POS_X, m_Pos.y+IMAGE_IGS_ICON_BTN_POS_Y, 
-										IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
+	m_CashChargeButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_CASHGIFT_BTN_POS_X, m_Pos.y+IMAGE_IGS_ICON_BTN_POS_Y, IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
 	m_CashChargeButton.ChangeToolTipText(GlobalText[2940]);
 
-	// 캐시 Refresh 버튼
 	m_CashRefreshButton.ChangeButtonImgState(true, IMAGE_IGS_REFRESH_BTN, true);
-	m_CashRefreshButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_REFRESH_BTN_POS_X, m_Pos.y+IMAGE_IGS_ICON_BTN_POS_Y, 
-										IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
+	m_CashRefreshButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_REFRESH_BTN_POS_X, m_Pos.y+IMAGE_IGS_ICON_BTN_POS_Y, IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
 	m_CashRefreshButton.ChangeToolTipText(GlobalText[2941]);
 
-	// 사용하기 버튼
 	m_UseButton.ChangeButtonImgState(true, IMAGE_IGS_VIEWDETAIL_BTN, true, false, true);
-	m_UseButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_USE_BTN_POS_X, m_Pos.y+IMAGE_IGS_USE_BTN_POS_Y, 
-									IMAGE_IGS_VIEWDETAIL_BTN_WIDTH, IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT);
+	m_UseButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_USE_BTN_POS_X, m_Pos.y+IMAGE_IGS_USE_BTN_POS_Y, IMAGE_IGS_VIEWDETAIL_BTN_WIDTH, IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT);
 	m_UseButton.MoveTextPos(0, -1);
 	m_UseButton.ChangeText(GlobalText[2887]);
 
-#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// #ifndef
-	// 보관함 아이템 삭제하기 버튼
-	m_DeleteButton.ChangeButtonImgState(true, IMAGE_IGS_DELETE_BTN, true);
-	m_DeleteButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_DELETE_BTN_POS_X, m_Pos.y+IMAGE_IGS_DELETE_BTN_POS_Y, 
-									IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
-	m_DeleteButton.ChangeToolTipText(GlobalText[2942]);
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-
-	// prev 버튼
 	m_PrevButton.ChangeButtonImgState(true, IMAGE_IGS_PAGE_LEFT, true);
-	m_PrevButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_PAGE_LEFT_POS_X, m_Pos.y+IMAGE_IGS_PAGE_BUTTON_POS_Y, 
-									IMAGE_IGS_PAGE_BTN_WIDTH, IMAGE_IGS_PAGE_BTN_HEIGHT);
+	m_PrevButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_PAGE_LEFT_POS_X, m_Pos.y+IMAGE_IGS_PAGE_BUTTON_POS_Y,IMAGE_IGS_PAGE_BTN_WIDTH, IMAGE_IGS_PAGE_BTN_HEIGHT);
 	
-	// next 버튼
+	// next
 	m_NextButton.ChangeButtonImgState(true, IMAGE_IGS_PAGE_RIGHT, true);
-	m_NextButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_PAGE_RIGHT_POS_X, m_Pos.y+IMAGE_IGS_PAGE_BUTTON_POS_Y, 
-									IMAGE_IGS_PAGE_BTN_WIDTH, IMAGE_IGS_PAGE_BTN_HEIGHT);
+	m_NextButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_PAGE_RIGHT_POS_X, m_Pos.y+IMAGE_IGS_PAGE_BUTTON_POS_Y, IMAGE_IGS_PAGE_BTN_WIDTH, IMAGE_IGS_PAGE_BTN_HEIGHT);
 
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-	// Storage Page prev 버튼
+	// Storage Page prev
 	m_StoragePrevButton.ChangeButtonImgState(true, IMAGE_IGS_STORAGE_PAGE_LEFT, true);
-	m_StoragePrevButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_STORAGE_PAGE_LEFT_POS_X-12, m_Pos.y+IMAGE_IGS_STORAGE_PAGE_BTN_POS_Y-3, 
-										IMGAE_IGS_STORAGE_PAGE_BTN_WIDTH, IMGAE_IGS_STORAGE_PAGE_BTN_HEIGHT);
+	m_StoragePrevButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_STORAGE_PAGE_LEFT_POS_X-12, m_Pos.y+IMAGE_IGS_STORAGE_PAGE_BTN_POS_Y-3, IMGAE_IGS_STORAGE_PAGE_BTN_WIDTH, IMGAE_IGS_STORAGE_PAGE_BTN_HEIGHT);
 	
-	// Storage Page next 버튼
+	// Storage Page next
 	m_StorageNextButton.ChangeButtonImgState(true, IMAGE_IGS_STORAGE_PAGE_RIGHT, true);
-	m_StorageNextButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_STORAGE_PAGE_RIGHT_POS_X+10, m_Pos.y+IMAGE_IGS_STORAGE_PAGE_BTN_POS_Y-3, 
-										IMGAE_IGS_STORAGE_PAGE_BTN_WIDTH, IMGAE_IGS_STORAGE_PAGE_BTN_HEIGHT);
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+	m_StorageNextButton.ChangeButtonInfo(m_Pos.x+IMAGE_IGS_STORAGE_PAGE_RIGHT_POS_X+10, m_Pos.y+IMAGE_IGS_STORAGE_PAGE_BTN_POS_Y-3, IMGAE_IGS_STORAGE_PAGE_BTN_WIDTH, IMGAE_IGS_STORAGE_PAGE_BTN_HEIGHT);
 }
 
 bool CNewUIInGameShop::Update()
@@ -706,11 +582,7 @@ bool CNewUIInGameShop::UpdateMouseEvent()
 		
 	if(SEASON3B::CheckMouseIn(m_Pos.x, m_Pos.y, IMAGE_IGS_BACK_WIDTH, IMAGE_IGS_BACK_HEIGHT))
 	{
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 		m_StorageItemListBox.DoAction();
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-		m_InGameShopListBox[m_ListBoxTabButton.GetCurButtonIndex()].DoAction();
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 
 		if(SEASON3B::IsPress(VK_RBUTTON))
 		{
@@ -735,10 +607,9 @@ bool CNewUIInGameShop::UpdateKeyEvent()
 {
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == true)
 	{
-		//esc키를 사용하여 취소하는 경우
 		if(SEASON3B::IsPress(VK_ESCAPE) == true)
 		{
-			SendRequestIGS_CashShopOpen(1);		// 샵 Close요청
+			SendRequestIGS_CashShopOpen(1);
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
 
 			return false;
@@ -892,13 +763,7 @@ void CNewUIInGameShop::InitCategoryBtn()
 	m_CategoryButton.ChangeFrame(0);
 }
 
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-void CNewUIInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int iStorageGroupCode, int iProductSeq, int iPriceSeq, int iCashPoint,
-									   unicode::t_char chItemType, unicode::t_char* pszUserName /* = NULL */, unicode::t_char* pszMessage /* = NULL */)
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-void CNewUIInGameShop::AddStorageItem(int iListBoxIndex, int iStorageSeq, int iStorageItemSeq, int iStorageGroupCode, int iProductSeq, int iPriceSeq, 
-									   int iCashPoint, unicode::t_char chItemType, unicode::t_char* pszUserName /* = NULL */, unicode::t_char* pszMessage /* = NULL */)
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+void CNewUIInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int iStorageGroupCode, int iProductSeq, int iPriceSeq, int iCashPoint,unicode::t_char chItemType, unicode::t_char* pszUserName /* = NULL */, unicode::t_char* pszMessage /* = NULL */)
 {
 	int iValue = -1;
 	unicode::t_char szText[MAX_TEXT_LENGTH] = {'\0', };

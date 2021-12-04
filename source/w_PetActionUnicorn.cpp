@@ -68,7 +68,7 @@ bool PetActionUnicorn::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 	{
 		m_speed = obj->Velocity;
 	}
-	//------------------------------------------//
+
 	float FlyRange = 10.0f;
 	vec3_t targetPos, Range, Direction;
 	bool _isMove = false;
@@ -77,18 +77,13 @@ bool PetActionUnicorn::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 	m_fRadWidthStand = ((2*3.14f)/4000.0f) * (float)(tick%4000);
 	m_fRadWidthGet = ((2*3.14f)/2000.0f) * (float)(tick%2000);
 	
-#ifdef LDK_FIX_PETPOSITION_MULTIPLY_OWNERSCALE
 	obj->Position[2] = obj->Owner->Position[2] + (200.0f * obj->Owner->Scale);
-#else
-	obj->Position[2] = obj->Owner->Position[2] + 180.0f;
-#endif //LDK_FIX_PETPOSITION_MULTIPLY_OWNERSCALE
-	//------------------------------------------//
+
 	VectorSubtract( obj->Position, obj->Owner->Position, Range );
 
 	float Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 	if( Distance > SEARCH_LENGTH*3)
 	{
-		//맵 이동시 ...
 		obj->Position[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 		obj->Position[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 		
@@ -132,7 +127,6 @@ bool PetActionUnicorn::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 			obj->Direction[1] = -Speed;
 			obj->Direction[2] = 0.0f;
 
-			// 이동시 임의 속도 변경
 			if( Speed == 0)
 			{
 				obj->Velocity = m_speed * 0.35f;
@@ -158,7 +152,6 @@ bool PetActionUnicorn::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 			targetPos[2] = m_RootItem.position[2];// + 70 + (sinf(fRadHeight) * 70.0f);
 			
 			VectorSubtract( targetPos, obj->Position, Range );
-			//------------------------------//
 
 			Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 			if(Distance >= FlyRange)
@@ -207,10 +200,7 @@ bool PetActionUnicorn::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 
 			if(CompTimeControl(1000, m_dwSendDelayTime))
 			{
-#ifdef LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
 				if(&Hero->Object == obj->Owner)
-#endif //LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
-					//1000ms
 					SendRequestGetItem(m_RootItem.itemIndex);
 			}	
 			obj->Velocity = m_speed;
@@ -224,12 +214,11 @@ bool PetActionUnicorn::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 			targetPos[2] = obj->Owner->Position[2];// + 70 + (sinf(fRadHeight) * 70.0f);
 
 			VectorSubtract( targetPos, obj->Position, Range );
-			//------------------------------//
 
 			Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 			if(Distance >= FlyRange)
 			{
-				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] ); //test
+				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] ); 
 				obj->Angle[2] = TurnAngle2( obj->Angle[2], Angle, 20.0f );
 			}
 			

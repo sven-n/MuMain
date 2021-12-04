@@ -6042,46 +6042,6 @@ void CUIInGameShopListBox::AddText(IGS_StorageItem& _StorageItem)
 	}
 }
 
-#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT					// #ifndef
-void CUIInGameShopListBox::DelData(int iIndex)
-{
-	BOOL bFind = FALSE;
-	int iCnt = 0;
-	for (m_TextListIter = m_TextList.begin(); m_TextListIter != m_TextList.end(); ++m_TextListIter, iCnt++)
-	{
-		if (iCnt == iIndex)
-		{
-			bFind = TRUE;
-			break;
-		}
-	}
-	
-	if (bFind == FALSE)
-		return;
-	
-	if (m_TextList.size() == 1)
-	{
-		m_TextList.erase(m_TextListIter);
-		SLSetSelectLine(0);
-		return;
-	}
-	
-	if (SLGetSelectLineNum() != 1)
-		SLSelectNextLine();
-	
-	m_TextList.erase(m_TextListIter);
-
-	RemoveText();
-
-	if(GetLineNum() > m_iNumRenderLine) 
-		++m_iCurrentRenderEndLine;
-
-	if (GetLineNum() < m_iNumRenderLine);
-	else if(GetLineNum() - m_iCurrentRenderEndLine < m_iNumRenderLine) 
-		m_iCurrentRenderEndLine = GetLineNum() - m_iNumRenderLine;
-}
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-
 void CUIInGameShopListBox::SetNumRenderLine(int iLine)
 {
 	if (iLine < m_iNumRenderLine && iLine < GetLineNum())
@@ -6096,16 +6056,6 @@ void CUIInGameShopListBox::RenderInterface()
 {
 	if (GetState() != UISTATE_SCROLL)
 		ComputeScrollBar();
-
-#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// #ifndef
-	if (GetLineNum() <= m_iNumRenderLine)
-		return;
-
-	g_pGuardWindow->RenderScrollBarFrame(m_iPos_x + m_iWidth - 8, m_fScrollBarRange_top,
-		m_fScrollBarRange_bottom - m_fScrollBarRange_top);
-	g_pGuardWindow->RenderScrollBar(m_iPos_x + m_iWidth - 12, m_fScrollBarPos_y,
-		(GetState() == UISTATE_SCROLL && MouseLButtonPush));
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 }
 
 int CUIInGameShopListBox::GetRenderLinePos_y(int iLineNumber)
@@ -6131,11 +6081,7 @@ BOOL CUIInGameShopListBox::RenderDataLine(int iLineNumber)
 	g_pRenderText->SetTextColor(255, 230, 210, 255);
 	g_pRenderText->SetBgColor(0);
 	
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	int iPos_x = m_iPos_x;
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-	int iPos_x = m_iPos_x+3;
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	int iPos_y = GetRenderLinePos_y(iLineNumber);
 
 	unicode::t_char szItemName[MAX_TEXT_LENGTH];
@@ -6357,17 +6303,10 @@ void CUIPackCheckBuyingListBox::AddText(IGS_SelectBuyItem& _Item)
 	sItem.m_iDisplaySeq	= _Item.m_iDisplaySeq;
 	sItem.m_iPriceSeq	= _Item.m_iPriceSeq;
 	sItem.m_wItemCode	= _Item.m_wItemCode;
-#ifndef KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL		// #ifndef
-#ifdef KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
 	sItem.m_iCashType	= _Item.m_iCashType;
-#endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
-#endif // KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL
 	
 	strncpy(sItem.m_szItemName, _Item.m_szItemName, MAX_TEXT_LENGTH);
 	strncpy(sItem.m_szItemPrice, _Item.m_szItemPrice, MAX_TEXT_LENGTH);
-#ifdef KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL
-	strncpy(sItem.m_szItemPriceUnit, _Item.m_szItemPriceUnit, MAX_TEXT_LENGTH);
-#endif // KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL
 	strncpy(sItem.m_szItemPeriod, _Item.m_szItemPeriod, MAX_TEXT_LENGTH);
 	strncpy(sItem.m_szAttribute, _Item.m_szAttribute, MAX_TEXT_LENGTH);
 

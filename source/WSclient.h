@@ -3205,10 +3205,8 @@ typedef struct
 	BYTE				btViewType;
 
 	double				dTotalCash;
-#ifdef KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
 	double				dCashCredit;		// C (CreditCard)
 	double				dCashPrepaid;		// P (PrepaidCard)
-#endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
 	double				dTotalPoint;
 	double				dTotalMileage;
 }PMSG_CASHSHOP_CASHPOINT_ANS, *LPPMSG_CASHSHOP_CASHPOINT_ANS;
@@ -3290,27 +3288,20 @@ typedef struct
 typedef struct
 {
 	PBMSG_HEADER2		h;
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	int					iPageIndex;
 	char				chStorageType;
-#endif// KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 }PMSG_CASHSHOP_STORAGELIST_REQ, *LPPMSG_CASHSHOP_STORAGELIST_REQ;
 
 //----------------------------------------------------------------------------
-// 보관함 리스트 카운트 전달 (0xD2)(0x06)
+// (0xD2)(0x06)
 //----------------------------------------------------------------------------
 typedef struct
 {
 	PBMSG_HEADER2		h;
-
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 	WORD				wTotalItemCount;
 	WORD				wCurrentItemCount;
 	WORD				wPageIndex;
 	WORD				wTotalPage;
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-	WORD				wItemCount;
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 }PMSG_CASHSHOP_STORAGECOUNT, *LPPMSG_CASHSHOP_STORAGECOUNT;
 
 //----------------------------------------------------------------------------
@@ -3406,7 +3397,7 @@ typedef struct
 }PMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_REQ, *LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_REQ;
 
 //----------------------------------------------------------------------------
-// 상품 잔여 개수 조회 결과 (0xD2)(0x09)
+// (0xD2)(0x09)
 //----------------------------------------------------------------------------
 typedef struct
 {

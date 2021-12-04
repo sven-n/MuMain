@@ -110,9 +110,6 @@
 	//-----------------------------------------------------------------------------
 	// [ Season 5 - Part 3]
 	#define KJH_MOD_INGAMESHOP_UNITTTYPE_FILED_OF_PRODUCT_SCRIPT	// Product °ÔÀÓ¼¥ ½ºÅ©¸³Æ®ÀÇ UnitTypeÇÊµå·Î ´ÜÀ§¸í º¯°æ (10.04.22) - 10.03.29ÀÏÀÚ ÀÎ°ÔÀÓ¼¥ ¶óÀÌºê·¯¸® Àû¿ë
-	#define KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// ÀÎ°ÔÀÓ¼¥ º¸°üÇÔ ÆäÀÌÁö ´ÜÀ§ ¹æ½ÄÀ¸·Î º¯°æ (10.04.27)
-	#define KJH_MOD_INGAMESHOP_DOMAIN_EACH_NATION					// ±¹°¡º° °ÔÀÓ¼¥ µµ¸ÞÀÎ ¼³Á¤ (10.05.04)
-	#define KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL			// Global Ä³½Ã Æ÷ÀÎÆ® ½Ã½ºÅÛ. (10.04.19) - ±Û·Î¹ú Àü¿ë
 
 	//-----------------------------------------------------------------------------
 	// [ Season 5 - Part 3]
@@ -196,15 +193,9 @@
 	#define KJH_FIX_SHOP_EVENT_CATEGORY_PAGE					// ¼¥ ÀÌº¥Æ® Ä«Å×°í¸® ÆäÀÌÁö ¹ö±× ¼öÁ¤ (09.11.09)
 	#define KJH_FIX_EXPIRED_PERIODITEM_TOOLTIP					// ±â°£¸¸·áµÈ ±â°£Á¦ ¾ÆÀÌÅÛÀÇ ÅøÆÁRender°¡ ¾ÈµÅ´Â ¹ö±× ¼öÁ¤ (09.11.09)
 	#define LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR	// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛµéÁß ¹ÝÁö, ¸ñ°ÉÀÌ ½Ã¸®ÁîÀÇ STATUS ¼öÄ¡ ¹Ý¿µ.
-	#define LDK_FIX_NEWWEALTHSEAL_INFOTIMER_AND_MOVEWINDOW		// Ç³¿äÀÇÀÎÀå ¹öÇÁÁ¤º¸ ½Ã°£Ç¥½Ã Ãß°¡, ¹öÇÁ»ç¿ë½Ã ÀÌµ¿Ã¢ ºñÈ°¼ºÈ­ (09.11.06)
-	#define PBG_FIX_TRADECLOSE									// °Å·¡Áß ÀÎº¥À» ´ÝÀ»½Ã¿¡ °Å·¡Ã¢Àº ´ÝÈ÷Áö ¾Ê´Â ¹ö±× ¼öÁ¤(09.11.06)
-	#define LDS_FIX_INGAMESHOPITEM_PASSCHAOSCASTLE_REQUEST		// Ä«¿À½ºÄ³½½ ÀÚÀ¯ ÀÔÀå±Ç »ç¿ë½Ã ¼­¹ö·Î »ç¿ë¿¡ ´ëÇÑ ÆÐÅ¶ Á¤º¸¸¦ º¸³»Áö ¾Ê´Â ¹®Á¦ ¼öÁ¤ (09.11.02)
-	#define LDS_MOD_INGAMESHOPITEM_POSSIBLETRASH_SILVERGOLDBOX	// ±Ý,Àº »óÀÚ ¹ö¸®±â°¡ °¡´ÉÇÏµµ·Ï.
-	#define KJH_FIX_RENDER_PERIODITEM_DURABILITY				// ±â°£Á¦ ¾ÆÀÌÅÛÀÏ¶§ ³»±¸µµÁ¤º¸°¡ Render µÇ´Â ¹®Á¦ (2009.11.03)
 	#define KJH_MOD_RENDER_INGAMESHOP_KEEPBOX_ITEM				// °ÔÀÓ¼¥ º¸°üÇÔ ¾ÆÀÌÅÛÀÇ ¼ö·®ÀÌ 1°³ÀÏ¶§ Render ¾ÈÇÔ (2009.11.03)
 	#define LDK_MOD_INGAMESHOP_ITEM_CHANGE_VALUE				// È¥ÇÕÀ¯·áÈ­ ¾ÆÀÌÅÛ °¡°Ý º¯°æ(09.10.29)
 	#define KJH_MOD_INGAMESHOP_PATCH_091028						// ÀÎ°ÔÀÓ¼¥ ¼öÁ¤ - ÀÌº¥Æ® Ä«Å×°í¸®, ÀÎ°ÔÀÓ¼¥ ¶óÀÌºê·¯¸® ¾÷µ¥ÀÌÆ® (09.10.28)
-	#define LDK_FIX_BLUESERVER_UNLIMIT_AREA						// ºí·ç¼· Àü¿ë ÀÌµ¿Ã¢ ÀÌµ¿Á¦ÇÑ ¼³Á¤Áß Ãß°¡Áö¿ª Á¦ÇÑ ÇØÁ¦(09.10.28)
 
 	#define SEASON5_PART2
 	#ifdef SEASON5_PART2
@@ -225,9 +216,6 @@
 			//^#define LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
 		#endif //KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
-		//------------------------------------------------
-		// 2. °Õ½º½Ã½ºÅÛ
-		// - ¾È»ó±Ô
 		#define ASG_ADD_GENS_SYSTEM
 		#ifdef ASG_ADD_GENS_SYSTEM
 			#define ASG_ADD_UI_NPC_DIALOGUE						// NPC ´ëÈ­Ã¢(2009.09.14)
@@ -238,8 +226,6 @@
 			#define ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL				// Movereq.txt ÃÖ´ë ·¹º§ Ãß°¡.(2009.10.16)	[ÁÖÀÇ] ¸®¼Ò½º ÄÁ¹öÅÍ »õ·Î¿î ¼Ò½º·Î ÄÄÆÄÀÏ ÇÒ °Í.
 		#endif	// ASG_ADD_GENS_SYSTEM
 
-		//------------------------------------------------
-		// 3. Ãß°¡¾ÆÀÌÅÛ
 		#define INGAMESHOP_ITEM01							// ÇØ¿Ü¿¡¸¸ µî·ÏµÇ¾îÀÖ°Å³ª »õ·Î »ý¼ºµÈ ¾ÆÀÌÅÛ µðÆÄÀÎ Ãß°¡(2009.09.08)
 		#ifdef	INGAMESHOP_ITEM01
 			#define LDK_MOD_PREMIUMITEM_DROP					// ÇÁ¸®¹Ì¾ö¾ÆÀÌÅÛ ¹ö¸®±âÁ¦ÇÑÇØÁ¦(09.09.16)
@@ -253,7 +239,6 @@
 			#define LDK_ADD_INGAMESHOP_SMALL_WING				// ±â°£Á¦ ³¯°³ ÀÛÀº(±º¸Á, Àç³¯, ¿ä³¯, Ãµ³¯, »ç³¯)
 			#define LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL			// ½Å±Ô Ç³¿äÀÇ ÀÎÀå
 
-			// - ÀÌµ¿¼®
 			#define LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD	// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ¸®¼Â¿­¸Å5Á¾ // Åë¼Ö¸®¼Â¿­¸Å´Â ´Å©·Îµå¸¸ »ç¿ë°¡´ÉÇÑ ¸Þ¼¼Áö Ãâ·Â.
 			#define LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô »çÆÄÀÌ¾î(Çª¸¥»ö)¸µ	// MODEL_HELPER+109
 			#define LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô ·çºñ(ºÓÀº»ö)¸µ		// MODEL_HELPER+110
@@ -385,7 +370,6 @@
 
 			#define LDS_ADD_MODEL_ATTACH_SPECIFIC_NODE_			// Æ¯Á¤ ¸ðµ¨ÀÇ Æ¯Á¤ ³ëµå¿¡ ´¸¥ Æ¯Á¤ ¸ðµ¨À» ATTACH ÇÏ´Â ÇÔ¼ö¸¦ Ãß°¡ÇÕ´Ï´. (09.06.12)
 			#define LDS_ADD_INTERPOLATION_VECTOR3				// vec3_tÀÇ º¸°£ ÇÔ¼ö¸¦ zzzmathlib.h¿¡ Ãß°¡. (09.06.24)
-			#define LDS_MOD_INCREASE_BITMAPIDXBLURNUMBERS		// BITMAP_BLUR ÀÎµ¦½º ¼ö¸¦ ±âÁ¸4°³ ¿¡¼­ ½Ç»ç¿ë°¹¼öÀÎ 10°³·Î ´Ã¸³´Ï´. (09.07.02)
 			#define LDS_ADD_EFFECT_FIRESCREAM_FOR_MONSTER		// ´Å©·ÎµåÀÇ ÆÄÀÌ¾î½ºÅ©¸² ½ºÅ³¿¡ Æ¯Á¤ ¸ó½ºÅÍ(¿¡¸£Ä­´À)ÀÇ ÆÄÀÌ¾î½ºÅ©¸²À» Ãß°¡ÇÕ´Ï´. (09.07.07)
 			#define LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD		// EffectBlurSpark ÀÇ °Ë±âµéÀÇ °¹¼ö Á¦ÇÑ¿¡ ¹®Á¦·Î °Ë±â°¡ °£È¤ ±úÁö´Â Çö»óÀ¸·Î ºÎºÐ ¼öÁ¤. (09.07.28)
 			#define LDS_ADD_MAP_EMPIREGUARDIAN4_MAPEFFECT		// ÁÖ¸»¸ÊÀÇ ¸Ê Effect¿¡ Ãß°¡µÇ´Â ÆÄÆ¼Å¬, EFFECTµé.. 
@@ -406,7 +390,6 @@
 			#define ASG_ADD_UI_QUEST_PROGRESS_ETC				// Ä½ºÆ® ÁøÇà Ã¢(±âÅ¸¿ë)(2009.06.24)
 			#define ASG_MOD_UI_QUEST_INFO						// Ä½ºÆ® Á¤º¸ Ã¢(2009.07.06)
 			#define ASG_MOD_3D_CHAR_EXCLUSION_UI				// 3D Ä³¸¯ÅÍ Ç¥ÇöÀÌ ¾ø´Â UI·Î ¹²Þ.(2009.08.03)
-			//(!ÁÖÀÇ!) UI¿¡ 3DÄ³¸¯ÅÍ Ç¥ÇöÀÌ Ãß°¡ µÇ¸é ¿ø·¡´ë·Î µÇµ¹·Á¾ß µÇ¹Ç·Î Á¤¸®ÇÏÁö ¸» °Í.
 		#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
 
@@ -417,22 +400,6 @@
 		#define ASG_ADD_NEW_DIVIDE_STRING						// »õ·Î¿î ¹®Àå ³ª´©±â ±â´É.(2009.06.08)
 		#define PBG_ADD_DISABLERENDER_BUFF						// ·£´õ¾ÈÇÒ ¹öÇÁ ÀÌ¹ÌÁö Ã³¸®(09.08.10)
 
-		#define LDK_FIX_EMPIREGUARDIAN_UI_HOTKEY				// Á¦±¹ ¼öÈ£±ºnpc uiÃ¢ ¿­·ÁÀÖÀ»¶§ Ä³¸¯Ã¢, ÀÎº¥Ã¢ ¾È¿­¸®µµ·ÏÇÑ´(09.10.28)
-		#define LDK_FIX_PETPOSITION_MULTIPLY_OWNERSCALE			// Ä³¸¯ÅÍ ¼±ÅÃÃ¢ ¿¡¼­ Ä³¸¯ÅÍ Å©±â¿¡ µû¶ó ÆêÀ§Ä¡ ¼öÁ¤(09.10.28)
-		#define YDG_FIX_DOPPELGANGER_NPC_WINDOW_SCREEN_SIZE		// µµÇÃ°»¾î NPCÃ¢ ¿­·ÈÀ»‹š ÆÄÆ¼Ã¢°ú °ãÃÄÁö´Â ¹®Á¦(09.10.28)
-		#define YDG_FIX_MASTERLEVEL_PARTY_EXP_BONUS_BLOCK		// ¸¶½ºÅÍ·¹º§ÀÌ ÆÄÆ¼ °æÇèÄ¡ Áõ°¡ ¾ÆÀÌÅÛÀ» »çÁö ¸øÇÏµµ·Ï ¼öÁ¤(09.10.28)
-		#define YDG_FIX_SETITEM_REQUIRED_STATUS_SECRET_POTION	// ºñ¾à »ç¿ë½Ã ¼¼Æ® ¾ÆÀÌÅÛ ÀåÂø Á¤º¸ Àß¸ø ³ª¿À´Â ¹ö±× ¼öÁ¤ (09.10.29)
-		#define LJH_ADD_LOOK_FOR_MOVE_ILLEGALLY_BY_MSG			// À¯Àú°¡ Ã¤ÆÃ¸Þ¼¼Áö¸¦ ÀÌ¿ë ÀÌµ¿ÇÒ¼ö ¾ø´Â ¸Ê¿¡ ÀÌµ¿ÇÏ·Á ÇÏ´ÂÁö ÆÇÁ¤(2009.10.29)
-		#define PBG_FIX_SETOPTION_CALCULATE_SECRET_POTION		// ºñ¾à°ü·Ã ¼¼Æ® ¿É¼Ç Àû¿ë¹ö±×(09.11.04)
-				
-		// Season 5
-		#define LJH_FIX_BUG_BUYING_AG_AURA_WHEN_USING_SD_AURA	// SDÁõ°¡ ¿À¶ó¸¦ ÇÏ¿ëÇÏ´Â Áß AG¿À¶ó¸¦ ±¸ÀÔÇÒ ¼ö ÀÖ´Â ¹ö±× ¼öÁ¤(09.11.16)
-		#define PBG_FIX_JELINTNPC_TEXTWIDTH						// Á¦¸°Æ®npc ui¼³Á¤ ¹ö±× ¼öÁ¤(09.11.10)
-		#define PBG_FIX_STOPBGMSOUND							// ·ÎµÀÌÈÄ bgm»ç¿îµå Á¾·áµÇÁö ¾Ê´Â ¹ö±× ¼öÁ¤(09.11.10)
-		#define PBG_FIX_SDELITE_OVERLAY							// sd¿¤¸®Æ® ¹°¾à °ãÃÄÁöÁö ¾Ê´Â ¹ö±× ¼öÁ¤(09.11.17)
-		#define LJH_FIX_ITEM_CANNOT_BE_EQUIPPED_AFTER_LOGOUT	// (JP_575)Àç ·Î±×ÀÎ ½Ã Âø¿ëÇÏ°í ÀÖ´ø ¼¼Æ® ¾ÆÀÌÅÛÀÇ ¿É¼Ç ¹ÌÀû¿ëÀ¸·Î ±× ¾ÆÀÌÅÛÀ» ´õÀÌ»ó Âø¿ëÇÒ¼ö ¾ø´Â ¹ö±× ¼öÁ¤(09.12.10)-> ÇÑ±¹°ú µ¿ÀÏÇÏ°Ô
-		#define LJH_FIX_HERO_MOVES_EVEN_NOT_PRESENT				// (±¹³»¹ö±×)(JP_524)À¯ÀúÀÇ Ä³¸¯ÅÍ°¡ È­¸é¿¡ ¾øÀ»¶§µµ ÀÌµ¿ÇÒ ¼ö ÀÖ¾ú´ø ¹ö±× ¼öÁ¤ (¿¹:°ø¼º¼­¹öÀ¸·Î/¿¡¼­ ÀÌµ¿)(09.12.11)
-		#define LJH_FIX_NOT_CALCULATED_BUFF						// ¼¼Æ®°è»ê°ú °ü·ÃµÇ¾î ¹öÇÁ°¡ Àû¿ëµÇÁö ¾Ê¾Ò´ø ¹ö±× ¼öÁ¤(2010.01.15)
 	#endif	// SEASON5
 
 
@@ -492,41 +459,6 @@
 	#define LDS_FIX_SETITEM_WRONG_CALCULATION_IMPROVEATTACKVALUE	// ¼¼Æ®¾ÆÀÌÅÛÂø¿ë ÀÌÈÄ »ç¶ûÀÇ ¹¦¾àÀ» ¸ÔÀ¸¸é, ÄÉ¸¯ÅÍ Á¤º¸Ã¢¿¡ ÈûÁõ°¡ ½ºÅÈ¼öÄ¡°¡ ´¸¥Çö»ó. (09.04.23) wops_35131
 	#define LDS_FIX_MEMORYLEAK_PHYSICSMANAGER_RELEASE				// ¸Þ¸ð¸® ´©¼ö Á¦°Å, Physicsmanager Èü¿µ¿ª ¸Þ¸ð¸® ¹ÝÈ¯ Ã³¸®. (´Å©·Îµå ÄÉ¸¯ ·ÎµÀÌÈÄ Á¾·á ½Ã ¸¯ ¹ß»ý)(09.05.25)
 #endif // UPDATE_100527
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// [2010.03.25 1.03v]
-
-#define LDS_FIX_MEMORYLEAK_0910_LOGINWIN						// ¸Þ¸ð¸®¸¯ FIXED. Logwin.cppÀÇ ¾ÆÀÌµð, ÆÐ½º¿öµå context°¡ Àç·Î±×ÀÎ ÀÌ³ª ¼­¹ö¼±ÅÃµîÀ¸·Î ÀçÈ£Ãâ½Ã¿¡ ¸Þ¸ð¸® ¹Ì¹ÝÈ¯À¸·Î ¸¯¹ß»ý. (09.11.30)
-#define LDS_FIX_MEMORYLEAK_DUPLICATEDITEMS_INVENTORY_SAMEPOS	// ¸Þ¸ð¸®¸¯ FIXED. ÀÎº¥Åä¸®»ó¿¡ ¾ÆÀÌÅÛÀ» ÁýÀºÈÄ °°Àº À§Ä¡¿¡ ³õÀ»¶§¸¸ È½¼ö ¸¸Å­ ¸Þ¸ð¸® ¸¯ ¹ß»ý. (09.11.09)
-#define LDS_FIX_MEMORYLEAK_WHEN_MATCHEVENT_TERMINATE			// ¸ÅÄ¡ÀÌº¥Æ®(µµÇÃ°»¾î,ºí·¯µåÄ³½½,Ä«¿À½ºÄ³½½,È¯¿µÀÇ»ç¿ø) Á¾·á½Ã¸¶´ ¸Þ¸ð¸®¸¯ ¹ß»ý FIX. (10.01.29)
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << ¹ö±×¼öÁ¤ ÆÐÄ¡ >>
-//----------------------------------------------------------------------------------------------
-// [2010.03.25 ±Û·Î¹ú 1.03s] - ÀÌµ¿¼®
-
-#define LDS_MOD_URL_GLOBAL_TO_DOTCOM				// ±Û·Î¹ú ±âÈ¹ ¿äÃ» »çÇ× // ±Û·Î¹ú ¹ÂÀÎÅÍ³Ý ¼­¹ö ÁÖ¼Ò°¡ ±âÁ¸ webzen.net ¿¡¼­ webzen.comÀ¸·Î ÀÏ°ý º¯°æ (10.03.25)
-#define LDS_FIX_GLPARAM_SWAPMODE_BITMAP				// System ¾ÈÁ¤È­ (OPENGL ERROR) // Wrong OpenGL Texture Parameter SWAPMode  (10.02.19)
-#define LDS_FIX_NONINIT_TEXTBOLDTABLE				// °ÔÀÓ ¹ö±× FIXED // ¸¶½ºÅÍ½ºÅ³Ã¢ÀÇ TOOLTIP ·»´ý º¼µå ¹®Á¦. º¼µå ÅØ½ºÆ®TABLEÀÌ ÃÊ±âÈ­°¡ µÇÁö ¾Ê¾Æ ÀÌÀü TEXT¿¡¼­ »ç¿ëµÇ¾ú´ø Ç×¸ñº° BOLD ¿©ºÎ °ªÀÌ ±×´ë·Î Àû¿ëµÇ´Â ¿À·. (10.02.12)
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << ¹ö±×¼öÁ¤ ÆÐÄ¡ >>
-//----------------------------------------------------------------------------------------------
-// [2010.03.11 ±Û·Î¹ú 1.03r] - ÀÌµ¿¼®
-
-#define LDS_MOD_EVENTCHERRYBLOSSOM_FORENG				// º¢²É ÀÌº¥Æ®¸¦ ±Û·Î¹ú¿¡ ¸ÂÃç º¯°æ(10.03.10)
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------------------------
-// << ¹ö±×¼öÁ¤ ÆÐÄ¡ >>
-//----------------------------------------------------------------------------------------------
-// [2010.03.03 ±Û·Î¹ú 1.03q] - ÀÌµ¿¼®
 
 #define KJH_ADD_SERVER_LIST_SYSTEM						// ¼­¹ö¸®½ºÆ® ½Ã½ºÅÛ º¯°æ (09.10.19) - ±¹³»ÀÇ ³»¿ëÀ» ¹Ì¸® ´ç°Ü »ç¿ë.
 #define ASG_ADD_SERVER_LIST_SCRIPTS						// ServerList.txt ½ºÅ©¸³Æ® Ãß°¡.(2009.10.29) - ±¹³»ÀÇ ³»¿ëÀ» ¹Ì¸® ´ç°Ü »ç¿ë.

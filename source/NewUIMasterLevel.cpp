@@ -398,10 +398,7 @@ int Point_R = 0,Point_Tot = 0;
 							}
 						}
 
-#ifdef LDS_FIX_NONINIT_TEXTBOLDTABLE
-						// extern int TextBold[30];
 						memset( TextBold, 0, sizeof(int) * 30 );
-#endif // LDS_FIX_NONINIT_TEXTBOLDTABLE
 
 						for(int iu = 0; iu < Get_Magic; iu++)
 						Point += Master_Skill_Data[sy][iu];

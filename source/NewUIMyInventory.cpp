@@ -1273,10 +1273,8 @@ void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 				}
 			}
 			
-#ifdef KJH_FIX_RENDER_PERIODITEM_DURABILITY
 			if( (pEquipmentItemSlot->bPeriodItem == true) && (pEquipmentItemSlot->bExpiredPeriod == false) )
 				continue;
-#endif // KJH_FIX_RENDER_PERIODITEM_DURABILITY
 			
 			if(pEquipmentItemSlot->Durability <= 0)
 				glColor4f(1.f,0.f,0.f,0.25f);
@@ -1839,16 +1837,9 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 			|| pItem->Type == ITEM_POTION+133
 			)
 			{
-#ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-				if(pItem->Type == ITEM_POTION+11 && (pItem->Level >> 3) == 14)
-				{
-					g_pBlueLuckyBagEvent->StartBlueLuckyBag();
-				}
-#endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 				SendRequestUse(iIndex, 0);
 				return true;
 			}
-#ifdef PSW_SECRET_ITEM
 			else if( ( pItem->Type>=ITEM_POTION+78 && pItem->Type<=ITEM_POTION+82 ) )
 			{
 				std::list<eBuffState> secretPotionbufflist;
@@ -1866,10 +1857,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					SEASON3B::CreateOkMessageBox(GlobalText[2530], RGBA(255, 30, 0, 255) );
 				}
 			}
-#endif //PSW_SECRET_ITEM
-#ifdef PSW_FRUIT_ITEM
-			else if( ( pItem->Type>=ITEM_HELPER+54 && pItem->Type<=ITEM_HELPER+57 )
-				|| ( pItem->Type==ITEM_HELPER+58 && gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD ) )
+			else if( ( pItem->Type>=ITEM_HELPER+54 && pItem->Type<=ITEM_HELPER+57 )	|| ( pItem->Type==ITEM_HELPER+58 && gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD ) )
 			{
 				bool result = true;
 				WORD point[5] = { 0, };
@@ -1919,7 +1907,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				return true;				
 			}
 #endif // LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD
-#endif //PSW_FRUIT_ITEM
 			//////////////////////////////////////////////////////////////////////////
 			else if ( pItem->Type==ITEM_HELPER+29 )
 			{
@@ -1945,7 +1932,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-#ifdef CSK_FREE_TICKET
 			else if(pItem->Type == ITEM_HELPER+46)	
 			{
 				BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_DEVILSQUARE);
@@ -1967,15 +1953,12 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					SendRequestUse(iIndex, 0);
 				}
 			}
-#endif // CSK_FREE_TICKET
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
 			else if(pItem->Type == ITEM_HELPER+61)
 			{
 				BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_CURSEDTEMPLE);
 				SendRequestEventZoneOpenTime(5, byPossibleLevel);
 			}
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET			
-#ifdef LDS_FIX_INGAMESHOPITEM_PASSCHAOSCASTLE_REQUEST
+		
 			else if(pItem->Type == ITEM_HELPER+121)
 			{
 				if(Hero->SafeZone == false)
@@ -1989,7 +1972,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-#endif // LDS_FIX_INGAMESHOPITEM_PASSCHAOSCASTLE_REQUEST
 			else if( pItem->Type==ITEM_HELPER+51 )
 			{
 				SendRequestEventZoneOpenTime(5, ((pItem->Level>>3)&15));

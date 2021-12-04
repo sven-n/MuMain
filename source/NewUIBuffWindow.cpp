@@ -111,7 +111,7 @@ void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate )
 				buffstate.push_back( eBuffType );
 			}
 			else {
-				assert(!"µð¹ö±ë ÇÊ¿ä");
+				assert(!"SetDisableRenderBuff");
 			}
 		}
 	}	

@@ -1788,7 +1788,7 @@ void AttackEffect(CHARACTER *c)
 			}
 		}
 		break;
-	case 49://히드라
+	case 49:
 		if(c->AttackTime%5 == 1)
 		{
 			b->TransformPosition(o->BoneTransform[63],p,Position,true);
@@ -1811,7 +1811,7 @@ void AttackEffect(CHARACTER *c)
 			}
 		}
 		break;
-	case 42://드래곤
+	case 42:
 		if(( c->Skill) == AT_SKILL_BOSS)
 		{
 			if(c->AttackTime == 1)
@@ -1831,7 +1831,7 @@ void AttackEffect(CHARACTER *c)
 			PlayBuffer(SOUND_METEORITE01);
 		}
 		break;
-	case 35://데쓰 고르곤
+	case 35:
 		if(( c->Skill) == AT_SKILL_BOSS)
 		{
 			if(c->AttackTime == 1)
@@ -1845,8 +1845,8 @@ void AttackEffect(CHARACTER *c)
 			}
 		}
 		break;
-	case 38://발록
-	case 67://발록2
+	case 38:
+	case 67:
 		if(( c->Skill) == AT_SKILL_BOSS)
 		{
 			if(c->AttackTime == 1)

@@ -1107,11 +1107,7 @@ class CUIInGameShopListBox : public CUITextListBox<IGS_StorageItem>
 {
 	enum IMAGE_LISTBOX_SIZE
 	{
-#ifdef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 		LISTBOX_WIDTH =146,
-#else // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
-		LISTBOX_WIDTH =140,
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
 		LISTBOX_HEIGHT =115,
 	};
 public:
@@ -1122,9 +1118,7 @@ public:
 	virtual void SetNumRenderLine(int nLine);
 	IGS_StorageItem* GetSelectedText()
 	{ return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
-#ifndef KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT				// #ifndef
-	void DelData(int iIndex);
-#endif // KJH_MOD_INGAMESHOP_ITEM_STORAGE_PAGE_UNIT
+
 	
 protected:
 	virtual void RenderInterface();	
@@ -1132,7 +1126,6 @@ protected:
 	virtual BOOL DoLineMouseAction(int nLine);
 	virtual int GetRenderLinePos_y(int nLine);
 };
-
 
 #define LINE_TEXTMAX	64
 #define INFO_LINEMAX	10
@@ -1226,17 +1219,10 @@ typedef struct
 	int		m_iDisplaySeq;
 	int		m_iPriceSeq;
 	WORD	m_wItemCode;
-#ifndef KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL			// #ifndef
-#ifdef KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
 	int		m_iCashType;
-#endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
-#endif // KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL
 
 	unicode::t_char m_szItemName[MAX_TEXT_LENGTH];
 	unicode::t_char m_szItemPrice[MAX_TEXT_LENGTH];
-#ifdef KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL
-	unicode::t_char m_szItemPriceUnit[MAX_TEXT_LENGTH];
-#endif // KJH_MOD_INGAMESHOP_SELECT_CASHPOINT_SYSYEM_ONLY_GLOBAL
 	unicode::t_char m_szItemPeriod[MAX_TEXT_LENGTH];
 	unicode::t_char m_szAttribute[MAX_TEXT_LENGTH];
 

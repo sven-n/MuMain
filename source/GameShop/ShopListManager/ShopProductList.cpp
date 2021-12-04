@@ -9,7 +9,7 @@
 //
 
 #include "stdafx.h"
-#if(DECOMPILE_INGAMESHOP==1)
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopProductList.h"
 
 CShopProductList::CShopProductList() // OK

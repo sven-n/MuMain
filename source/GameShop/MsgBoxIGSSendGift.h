@@ -1,17 +1,8 @@
 // MsgBoxIGSSendGift.h: interface for the CMsgBoxIGSSendGift class.
-//
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_MSGBOXIGSSENDGIFT_H__83945BCF_C5C3_4FBC_832C_A5FD2B2588BD__INCLUDED_)
-#define AFX_MSGBOXIGSSENDGIFT_H__83945BCF_C5C3_4FBC_832C_A5FD2B2588BD__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
-
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-
 #include "UIControls.h"
 #include "NewUIMessageBox.h"
 #include "NewUICommonMessageBox.h"
@@ -23,7 +14,7 @@ class CMsgBoxIGSSendGift : public CNewUIMessageBoxBase
 public:
 	enum IMAGE_IGS_SEND_GIFT
 	{
-		IMAGE_IGS_BUTTON	= BITMAP_IGS_MSGBOX_BUTTON,					// 인게임샵 버튼
+		IMAGE_IGS_BUTTON	= BITMAP_IGS_MSGBOX_BUTTON,
 		IMAGE_IGS_FRAME		= BITMAP_IGS_MSGBOX_SEND_GIFT_FRAME,		// Frame
 		IMAGE_IGS_DECO		= BITMAP_IGS_MSGBOX_SEND_GIFT_DECO,			// Deco
 		IMAGE_IGS_INPUTTEXT = BITMAP_IGS_MSGBOX_SEND_GIFT_INPUTTEXT,	// Input TextBox
@@ -86,24 +77,7 @@ public:
 	bool Update();
 	bool Render();
 	
-#ifdef KJH_FIX_INGAMESHOP_SENDGIFT_ELIXIROFCONTROL
-		#ifdef KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
-			void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, 
-				unicode::t_char* pszName, unicode::t_char* pszPrice, unicode::t_char* pszPeriod);
-		#else // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
-			void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode,
-				unicode::t_char* pszName, unicode::t_char* pszPrice, unicode::t_char* pszPeriod);
-			#endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
-
-#else // KJH_FIX_INGAMESHOP_SENDGIFT_ELIXIROFCONTROL
-	#ifdef KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
-		void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iCashType,
-						unicode::t_char* pszName, unicode::t_char* pszPrice, unicode::t_char* pszPeriod);
-	#else // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
-		void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq,
-						unicode::t_char* pszName, unicode::t_char* pszPrice, unicode::t_char* pszPeriod);
-	#endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
-#endif // KJH_FIX_INGAMESHOP_SENDGIFT_ELIXIROFCONTROL
+	void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, unicode::t_char* pszName, unicode::t_char* pszPrice, unicode::t_char* pszPeriod);
 	
 	static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 	static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -135,15 +109,11 @@ private:
 	int		m_iPackageSeq;
 	int		m_iDisplaySeq;
 	int		m_iPriceSeq;
-#ifdef KJH_FIX_INGAMESHOP_SENDGIFT_ELIXIROFCONTROL
 	DWORD	m_wItemCode;
-#endif // KJH_FIX_INGAMESHOP_SENDGIFT_ELIXIROFCONTROL
-#ifdef KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
-	int		m_iCashType;		// 캐시타입 (C/P) - 글로벌 전용
-#endif // KJH_MOD_INGAMESHOP_GLOBAL_CASHPOINT_ONLY_GLOBAL
+	int		m_iCashType;
 	
-	unicode::t_char m_szID[MAX_ID_SIZE+1];				// 보낼 유저 ID
-	unicode::t_char m_szMessage[MAX_GIFT_MESSAGE_SIZE];	// 보낼 Meaasge
+	unicode::t_char m_szID[MAX_ID_SIZE+1];
+	unicode::t_char m_szMessage[MAX_GIFT_MESSAGE_SIZE];
 
 	unicode::t_char m_szName[MAX_TEXT_LENGTH];
 	unicode::t_char m_szPrice[MAX_TEXT_LENGTH];
@@ -154,9 +124,6 @@ private:
 	int		m_iNumNoticeLine;
 };
 
-////////////////////////////////////////////////////////////////////
-// LayOut
-////////////////////////////////////////////////////////////////////
 class CMsgBoxIGSSendGiftLayout : public TMsgBoxLayout<CMsgBoxIGSSendGift>
 {
 public:
@@ -166,4 +133,3 @@ public:
 
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-#endif // !defined(AFX_MSGBOXIGSSENDGIFT_H__83945BCF_C5C3_4FBC_832C_A5FD2B2588BD__INCLUDED_)
