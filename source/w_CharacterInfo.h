@@ -94,8 +94,6 @@ typedef struct
 	WORD        m_wAttackSuccess;
 } PET_INFO;
 
-#ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
-
 #define DEFAULT_MAX_POSTMOVEPCOCESS		15
 
 struct ST_POSTMOVE_PROCESS 
@@ -113,7 +111,6 @@ struct ST_POSTMOVE_PROCESS
 	{
 	}
 };
-#endif // LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 
 
 class CHARACTER  
@@ -236,14 +233,11 @@ public:
 	char        OwnerID[32];
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 		
-#ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 	private: 
 	ST_POSTMOVE_PROCESS*
 				m_pPostMoveProcess;
 
 	public:
-#endif // LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
-
 	void*		m_pTempParts;
 	int			m_iTempKey;	
 	WORD		m_CursedTempleCurSkill;

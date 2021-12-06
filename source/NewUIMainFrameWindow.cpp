@@ -2546,7 +2546,6 @@ void SEASON3B::CNewUISkillList::RenderSkillDelay(int iIndex, float x, float y, f
     {
         int iSkillType  = CharacterAttribute->Skill[iIndex];
 		
-#ifdef PBG_WOPS_DARKLOAD
 		if(iSkillType == AT_SKILL_PLASMA_STORM_FENRIR)
 		{
 			if(!CheckAttack())
@@ -2554,7 +2553,6 @@ void SEASON3B::CNewUISkillList::RenderSkillDelay(int iIndex, float x, float y, f
 				return;
 			}
 		}
-#endif //PBG_WOPS_DARKLOAD
 
         int iSkillMaxDelay = SkillAttribute[iSkillType].Delay;
 		

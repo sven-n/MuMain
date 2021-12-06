@@ -1,17 +1,9 @@
 // w_PetActionRound.cpp: implementation of the PetActionRound class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef LDK_ADD_NEW_PETPROCESS
-
 #include "w_PetActionRound.h"
 #include "ZzzAI.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 PetActionRoundPtr PetActionRound::Make()
 {
@@ -63,5 +55,3 @@ bool PetActionRound::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 {
 	return false;
 }
-
-#endif //LDK_ADD_NEW_PETPROCESS

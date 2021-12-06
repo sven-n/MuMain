@@ -178,9 +178,7 @@ int  WhisperIDCurrent = 2;
 char WhisperID[MAX_WHISPER_ID][256];
 DWORD g_dwOneToOneTick = 0;
 
-#ifdef CSK_ADD_GM_ABILITY
 bool g_bGMObservation = false;
-#endif // CSK_ADD_GM_ABILITY
 
 #ifdef LEM_FIX_USER_LOGOUT
 bool g_bExit = false;
@@ -4287,7 +4285,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 			}
 			return true;
 		}
-#ifdef CSK_ADD_GM_ABILITY
 		if(stricmp(Text, "/charactername") == NULL)
 		{
 			if(IsGMCharacter() == true)
@@ -4296,7 +4293,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 				return true;
 			}
 		}
-#endif // CSK_ADD_GM_ABILITY
 
 		for(int i=0;i<10;i++)
 		{
@@ -5073,11 +5069,9 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 		|| Skill == AT_SKILL_PLASMA_STORM_FENRIR
 		|| Skill == AT_SKILL_DARK_SCREAM
 		|| (AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP+4)
-#ifndef YDG_FIX_BLOCK_STAFF_WHEEL
 		|| Skill == AT_SKILL_WHEEL
 		|| (AT_SKILL_TORNADO_SWORDA_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDA_UP+4)
 		|| (AT_SKILL_TORNADO_SWORDB_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDB_UP+4)
-#endif	// YDG_FIX_BLOCK_STAFF_WHEEL
 		|| Skill == AT_SKILL_GIGANTIC_STORM
 		|| Skill == AT_SKILL_GAOTIC
 		) )
@@ -5202,7 +5196,6 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
                     c->Movement = 0;
                 }
                 break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_BLOOD_ATT_UP:
 			case AT_SKILL_BLOOD_ATT_UP+1:
 			case AT_SKILL_BLOOD_ATT_UP+2:
@@ -6255,22 +6248,18 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 		
 		switch(Skill)
 		{
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_ALICE_DRAINLIFE_UP:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+1:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+2:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+3:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+4:
-#endif
 		case AT_SKILL_ALICE_DRAINLIFE:
 		case AT_SKILL_ALICE_LIGHTNINGORB:
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+1:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+2:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+3:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+4:
-#endif
 		case AT_SKILL_ALICE_CHAINLIGHTNING:
 			{
 				c->TargetCharacter = SelectedCharacter;
@@ -6300,13 +6289,11 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 				}
 			}
 			break;
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_ALICE_SLEEP_UP:
 		case AT_SKILL_ALICE_SLEEP_UP+1:
 		case AT_SKILL_ALICE_SLEEP_UP+2:
 		case AT_SKILL_ALICE_SLEEP_UP+3:
 		case AT_SKILL_ALICE_SLEEP_UP+4:
-#endif
 		case AT_SKILL_ALICE_SLEEP:
 		case AT_SKILL_ALICE_BLIND:		
 			{
@@ -6540,9 +6527,7 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
             c->Movement = 0;
             break;
 			
-        case    AT_SKILL_REMOVAL_INVISIBLE:
-            //SendRequestMagic ( Skill, HeroKey );
-			
+        case AT_SKILL_REMOVAL_INVISIBLE:
 			if(SelectedCharacter == -1)
 			{
 				SendRequestMagic ( Skill, HeroKey );
@@ -6573,7 +6558,7 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
             c->Movement = 0;
             break;
 			
-        case    AT_SKILL_REMOVAL_BUFF:
+        case AT_SKILL_REMOVAL_BUFF:
 			
             if(SelectedCharacter == -1)
 			{
@@ -6607,7 +6592,6 @@ void AttackCommon(CHARACTER *c, int Skill, float Distance)
         }
     }
 }
-#endif	// YDG_FIX_SPLIT_ATTACK_FUNC
 
 bool SkillKeyPush(int Skill)
 {
@@ -6811,9 +6795,6 @@ void Attack(CHARACTER *c)
 				&& Skill!=AT_SKILL_PARTY_TELEPORT
 				&& ( Skill<AT_SKILL_STUN || Skill>AT_SKILL_REMOVAL_BUFF )
 				&& Skill!=AT_SKILL_BRAND_OF_SKILL 
-#ifdef PBG_FIX_BUFFSKILLCHAOS
-				&& !(AT_SKILL_ATT_UP_OURFORCES <= Skill && Skill <= AT_SKILL_DEF_UP_OURFORCES+4)
-#endif //PBG_FIX_BUFFSKILLCHAOS
 				)
 				return;
 			if (
@@ -6905,7 +6886,6 @@ void Attack(CHARACTER *c)
 				}
 			}
 			
-			// 흑마법사가 아니라면
 			if ( ClassIndex != CLASS_WIZARD )
 			{
 				CheckTarget(c);
@@ -7667,7 +7647,6 @@ int SelectItem()
 			Vector(0.2f,0.2f,0.2f,o->Light);
 		}
 	}
-	//InitCollisionDetectLineToFace();
 	float Luminosity = 1.5f;
 
 	for(int i=0;i<MAX_ITEMS;i++)
@@ -7677,9 +7656,6 @@ int SelectItem()
 		{
 			if(CollisionDetectLineToOBB(MousePosition,MouseTarget,o->OBB))
 			{
-				//BMD *b = &Models[o->Type];
-				//b->Animation(o->AnimationFrame,o->Position,o->Angle,&o->OBB);
-				//if(b->CollisionDetectLineToMesh(MousePosition,MouseTarget))
 				{
 					o->LightEnable = false;
 					Vector(Luminosity,Luminosity,Luminosity,o->Light);

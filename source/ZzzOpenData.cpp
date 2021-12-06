@@ -36,16 +36,9 @@
 #include "NewUISystem.h"
 #include "w_CursedTemple.h"
 #include "CameraMove.h"
-// ¸Ê °ü·Ã include
-#ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
-#endif // PSW_ADD_MAPSYSTEM
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 #include "QuestMng.h"
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
-#ifdef ASG_ADD_SERVER_LIST_SCRIPTS
 #include "ServerListManager.h"
-#endif	// ASG_ADD_SERVER_LIST_SCRIPTS
 #ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -1005,7 +998,6 @@ void OpenItems()
 
 	gLoadData.AccessModel(MODEL_COMPILED_CELE,"Data\\Item\\","Jewel",1);
 	gLoadData.AccessModel(MODEL_COMPILED_SOUL,"Data\\Item\\","Jewel",2);
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	gLoadData.AccessModel(MODEL_WING+136, "Data\\Item\\", "Jewel",	3);
 	gLoadData.AccessModel(MODEL_WING+137, "Data\\Item\\", "jewel",	22);
 	gLoadData.AccessModel(MODEL_WING+138, "Data\\Item\\", "suho", -1);
@@ -1014,7 +1006,6 @@ void OpenItems()
 	gLoadData.AccessModel(MODEL_WING+141, "Data\\Item\\", "Jewel", 15);
 	gLoadData.AccessModel(MODEL_WING+142, "Data\\Item\\", "LowRefineStone");
 	gLoadData.AccessModel(MODEL_WING+143, "Data\\Item\\", "HighRefineStone");
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
     gLoadData.AccessModel(MODEL_EVENT+4,"Data\\Item\\","MagicBox",2);
 	gLoadData.AccessModel(MODEL_EVENT+6,"Data\\Item\\","MagicBox",5);
@@ -1087,9 +1078,7 @@ void OpenItems()
 
 	gLoadData.AccessModel(MODEL_STAFF+21, "Data\\Item\\", "Book_of_Sahamutt");
 	gLoadData.AccessModel(MODEL_STAFF+22, "Data\\Item\\", "Book_of_Neil");
-#ifdef ASG_ADD_SUMMON_RARGLE
 	gLoadData.AccessModel(MODEL_STAFF+23, "Data\\Item\\", "Book_of_Rargle");
-#endif	// ASG_ADD_SUMMON_RARGLE
 
 	for(int i=0; i<9; ++i)
 	{
@@ -1485,7 +1474,6 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_COMPILED_CELE, "Item\\");
 	gLoadData.OpenTexture(MODEL_COMPILED_SOUL, "Item\\");
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	gLoadData.OpenTexture(MODEL_WING+136, "Item\\" );
 	gLoadData.OpenTexture(MODEL_WING+137, "Item\\" );
 	gLoadData.OpenTexture(MODEL_WING+138, "Item\\" );
@@ -1494,7 +1482,6 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_WING+141, "Item\\" );
 	gLoadData.OpenTexture(MODEL_WING+142, "Item\\" );
 	gLoadData.OpenTexture(MODEL_WING+143, "Item\\" );
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 	gLoadData.OpenTexture(MODEL_SWORD+22, "Item\\");
 	gLoadData.OpenTexture(MODEL_SWORD+23, "Item\\");
@@ -1661,11 +1648,9 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_POTION+149, "Item\\partCharge8\\");
 	gLoadData.OpenTexture(MODEL_POTION+150, "Item\\partCharge8\\");
 
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 	gLoadData.OpenTexture(MODEL_HELPER+125, "Item\\partCharge8\\");
 	gLoadData.OpenTexture(MODEL_HELPER+126, "Item\\partCharge8\\");
 	gLoadData.OpenTexture(MODEL_HELPER+127, "Item\\partCharge8\\");
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 	gLoadData.OpenTexture(MODEL_HELPER+128, "Item\\");
@@ -2690,7 +2675,6 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK  ].PlaySpeed = 0.3f;
 		b->Actions[MONSTER01_DIE	].PlaySpeed = 0.22f;
 		break;
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
 	case 127:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.40f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.40f;		
@@ -2698,8 +2682,6 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.40f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.50f;
 		break;
-#endif // PRUARIN_EVENT07_3COLORHARVEST
-#ifdef KJH_ADD_09SUMMER_EVENT
 	case 154:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;		
@@ -2707,8 +2689,6 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.50f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.50f;
 		break;
-#endif // KJH_ADD_09SUMMER_EVENT
-#ifdef PBG_ADD_PKFIELD
 	case 157:
 		{
 			b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
@@ -2774,7 +2754,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
 		}
 		break;
-#endif //PBG_ADD_PKFIELD
 	case 128:
 		b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.28f;
@@ -2881,33 +2860,24 @@ void OpenMonsterModel(int Type)
 		b->Actions[MONSTER01_WALK ].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.20f;
 		break;
-#ifdef CSK_ADD_MAP_ICECITY
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case 145:
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.6f;
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.4f;
 		b->Actions[MONSTER01_DIE    ].PlaySpeed = 0.35f;
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case 146:
 		break;
 	case 147:
-#ifdef ADD_RAKLION_MOB_ICEGIANT
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.13f;
-#endif	// ADD_RAKLION_MOB_ICEGIANT
 		break;
-#ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
 	case 148:
 		b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.46f;
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
-#ifdef ADD_RAKLION_IRON_KNIGHT
 	case 149:
 		b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.21f;
 		b->Actions[MONSTER01_DIE].PlaySpeed = 0.23f;
 		break;
-#endif	// ADD_RAKLION_IRON_KNIGHT
 	case 150:
 		b->Actions[MONSTER01_WALK].PlaySpeed = 0.20f;
 		b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
@@ -2922,7 +2892,6 @@ void OpenMonsterModel(int Type)
 	case 152:
 	case 153:
 		break;
-#endif // CSK_ADD_MAP_ICECITY
 	case 155:
 		b->Actions[MONSTER01_STOP2].PlaySpeed = 0.3f;
 		b->Actions[MONSTER01_WALK].PlaySpeed = 0.29f;
@@ -3093,7 +3062,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.40f;
 			break;
 	#endif // LDS_ADD_EG_2_MONSTER_GUARDIANPRIEST
-	#ifdef LDK_ADD_EG_MONSTER_KNIGHTS
 		case 180:
 	 		b->Actions[MONSTER01_STOP1].PlaySpeed =		0.25f;
 	 		b->Actions[MONSTER01_STOP2].PlaySpeed =		0.20f;
@@ -3103,8 +3071,6 @@ void OpenMonsterModel(int Type)
 	 		b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 	 		b->Actions[MONSTER01_DIE].PlaySpeed =		0.55f;
 			break;
-	#endif //LDK_ADD_EG_MONSTER_KNIGHTS
-	#ifdef LDK_ADD_EG_MONSTER_GUARD
 		case 181:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30f;
@@ -3114,8 +3080,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_SHOCK].PlaySpeed =		0.50f;
 			b->Actions[MONSTER01_DIE].PlaySpeed =		0.30f;
 			break;
-	#endif //LDK_ADD_EG_MONSTER_GUARD
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 		case 189:
 		case 190:
 			b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
@@ -3131,8 +3095,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.55f * 2.0f;
 			b->Actions[MONSTER01_APEAR].PlaySpeed = 0.33f * 3.0f;
 			break;
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 		case 192:
 			b->Actions[MONSTER01_STOP1].PlaySpeed =		0.30f;
 			b->Actions[MONSTER01_STOP2].PlaySpeed =		0.30;
@@ -3144,8 +3106,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_APEAR].PlaySpeed =		0.30;
 			b->Actions[MONSTER01_ATTACK3].PlaySpeed =	0.30;
 			break;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
 		case 205:
 			break;	
 		case 206:
@@ -3159,8 +3119,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_ATTACK1].PlaySpeed		= 0.21f;
 			b->Actions[MONSTER01_DIE].PlaySpeed			= 0.23f;
 			break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
-#ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
 		case 193:
 			break;
 		case 194:
@@ -3177,8 +3135,6 @@ void OpenMonsterModel(int Type)
 		case 196:
 			b->Actions[MONSTER01_DIE].PlaySpeed			= 0.2f;
 			break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
-#ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 		case 201:
 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 			break;
@@ -3189,8 +3145,6 @@ void OpenMonsterModel(int Type)
 		case 203:
 			b->Actions[MONSTER01_DIE  ].PlaySpeed = 0.25f;
 			break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
-#ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
 		case 197:
 			b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 			b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.25f;
@@ -3221,7 +3175,6 @@ void OpenMonsterModel(int Type)
 			b->Actions[MONSTER01_SHOCK  ].PlaySpeed = 0.5f;
 			b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
 			break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_KANTUR
 #ifdef ASG_ADD_KARUTAN_MONSTERS
 		case 209:
 			b->Actions[MONSTER01_WALK   ].PlaySpeed = 0.95f;
@@ -4144,9 +4097,7 @@ void OpenSkills()
 
     gLoadData.AccessModel ( MODEL_WARCRAFT,   "Data\\Skill\\", "HellGate" );
     Models[MODEL_WARCRAFT].Actions[0].LockPositions = false;
-#ifdef YDG_FIX_MEMORY_LEAK_0905
 	SAFE_DELETE_ARRAY(Models[MODEL_WARCRAFT].Actions[0].Positions);
-#endif	// YDG_FIX_MEMORY_LEAK_0905
     Models[MODEL_WARCRAFT].Actions[0].PlaySpeed = 0.15f;
 
 	gLoadData.AccessModel(MODEL_ARROW        ,"Data\\Skill\\","Arrow",1);
@@ -4612,12 +4563,6 @@ void SaveWorld(int World)
 
 void OpenImages()
 {
-
-	//skill
-#ifndef KJH_ADD_SKILLICON_RENEWAL				// #ifndef
-	LoadBitmap("Interface\\Skill.jpg"          ,BITMAP_SKILL_INTERFACE);
-	LoadBitmap("Interface\\Skill2.jpg"        ,BITMAP_SKILL_INTERFACE+1);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	LoadBitmap("Interface\\command.jpg"       ,BITMAP_SKILL_INTERFACE+2);
 	LoadBitmap("Interface\\Item_Back01.jpg"    ,BITMAP_INVENTORY  );
 	LoadBitmap("Interface\\Item_Money.jpg"     ,BITMAP_INVENTORY+11);
@@ -4814,21 +4759,17 @@ void OpenSounds()
 	//SOUND_FIRE_SCREAM
 	LoadWaveFile ( SOUND_FIRE_SCREAM,	"Data\\Sound\\Darklord_firescream.wav",	1 );
 
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
 	LoadWaveFile ( SOUND_MOONRABBIT_WALK,		"Data\\Sound\\SE_Ev_rabbit_walk.wav",	1 );
 	LoadWaveFile ( SOUND_MOONRABBIT_DAMAGE,		"Data\\Sound\\SE_Ev_rabbit_damage.wav", 1 );
 	LoadWaveFile ( SOUND_MOONRABBIT_DEAD,		"Data\\Sound\\SE_Ev_rabbit_death.wav", 1 );
 	LoadWaveFile ( SOUND_MOONRABBIT_EXPLOSION,	"Data\\Sound\\SE_Ev_rabbit_Explosion.wav", 1 );
-#endif // PRUARIN_EVENT07_3COLORHARVEST
 
 //	LoadWaveFile(SOUND_SUMMON_CASTING,		"Data\\Sound\\eSummon.wav"	,1);
 	LoadWaveFile(SOUND_SUMMON_SAHAMUTT,		"Data\\Sound\\SE_Ch_summoner_skill05_explosion01.wav"	,1);
 	LoadWaveFile(SOUND_SUMMON_EXPLOSION,	"Data\\Sound\\SE_Ch_summoner_skill05_explosion03.wav"	,1);
 	LoadWaveFile(SOUND_SUMMON_NEIL,			"Data\\Sound\\SE_Ch_summoner_skill06_requiem01.wav"		,1);
 	LoadWaveFile(SOUND_SUMMON_REQUIEM,		"Data\\Sound\\SE_Ch_summoner_skill06_requiem02.wav"		,1);
-#ifdef ASG_ADD_SUMMON_RARGLE_SOUND
 	LoadWaveFile(SOUND_SUMMOM_RARGLE, "Data\\Sound\\Rargle.wav", 1);
-#endif	// ASG_ADD_SUMMON_RARGLE_SOUND
 	LoadWaveFile(SOUND_SUMMON_SKILL_LIGHTORB,	"Data\\Sound\\SE_Ch_summoner_skill01_lightningof.wav"	,1);
 	LoadWaveFile(SOUND_SUMMON_SKILL_SLEEP,		"Data\\Sound\\SE_Ch_summoner_skill03_sleep.wav"			,1);
 	LoadWaveFile(SOUND_SUMMON_SKILL_BLIND,		"Data\\Sound\\SE_Ch_summoner_skill04_blind.wav"			,1);
@@ -4837,49 +4778,21 @@ void OpenSounds()
 	LoadWaveFile(SOUND_SKILL_DRAIN_LIFE,		"Data\\Sound\\SE_Ch_summoner_skill07_lifedrain.wav"		,1);
 	LoadWaveFile(SOUND_SKILL_WEAKNESS, "Data\\Sound\\SE_Ch_summoner_weakness.wav", 1);
 	LoadWaveFile(SOUND_SKILL_ENERVATION, "Data\\Sound\\SE_Ch_summoner_innovation.wav", 1);
-#ifdef ASG_ADD_SKILL_BERSERKER_SOUND
 	LoadWaveFile(SOUND_SKILL_BERSERKER, "Data\\Sound\\Berserker.wav", 1);
-#endif	// ASG_ADD_SKILL_BERSERKER_SOUND
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	LoadWaveFile(SOUND_CHERRYBLOSSOM_EFFECT0, "Data\\Sound\\cherryblossom\\Eve_CherryBlossoms01.wav");
 	LoadWaveFile(SOUND_CHERRYBLOSSOM_EFFECT1, "Data\\Sound\\cherryblossom\\Eve_CherryBlossoms02.wav");
-#endif //CSK_EVENT_CHERRYBLOSSOM
-
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION_SOUND
 	LoadWaveFile(SOUND_SKILL_BLOWOFDESTRUCTION, "Data\\Sound\\BLOW_OF_DESTRUCTION.wav");
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION_SOUND
-	
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE_SOUND
 	LoadWaveFile(SOUND_SKILL_FLAME_STRIKE, "Data\\Sound\\flame_strike.wav");
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE_SOUND
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM_SOUND
 	LoadWaveFile(SOUND_SKILL_GIGANTIC_STORM, "Data\\Sound\\gigantic_storm.wav");
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM_SOUND
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK_SOUND
 	LoadWaveFile(SOUND_SKILL_LIGHTNING_SHOCK, "Data\\Sound\\lightning_shock.wav");
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK_SOUND
-
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER_SOUND
 	LoadWaveFile(SOUND_SKILL_SWELL_OF_MAGICPOWER, "Data\\Sound\\SwellofMagicPower.wav");
-#endif	// KJH_ADD_SKILL_SWELL_OF_MAGICPOWER_SOUND
-
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 	LoadWaveFile(SOUND_SKILL_MULTI_SHOT, "Data\\Sound\\multi_shot.wav");
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	LoadWaveFile(SOUND_SKILL_RECOVER, "Data\\Sound\\recover.wav");
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 	LoadWaveFile(SOUND_SKILL_CAOTIC, "Data\\Sound\\caotic.wav");
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC	
 
-#ifdef YDG_ADD_FIRECRACKER_ITEM
 	LoadWaveFile(SOUND_XMAS_FIRECRACKER, "Data\\Sound\\xmas\\Christmas_Fireworks01.wav");
-#endif	// YDG_ADD_FIRECRACKER_ITEM
 
-#ifdef KJH_ADD_09SUMMER_EVENT
 	g_09SummerEvent->LoadSound();
-#endif // KJH_ADD_09SUMMER_EVENT
 
 #ifdef PBG_ADD_NEWCHAR_MONK
 	LoadWaveFile(SOUND_RAGESKILL_THRUST, "Data\\Sound\\Ragefighter\\Rage_Thrust.wav");
@@ -5497,10 +5410,8 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Monster\\serufanwand_R.jpg", BITMAP_SERUFAN_WAND_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif // CSK_ADD_MAP_ICECITY
 
-#ifdef YDG_ADD_SANTA_MONSTER
 	LoadBitmap("npc\\santa.jpg", BITMAP_GOOD_SANTA, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("npc\\santa_baggage.jpg", BITMAP_GOOD_SANTA_BAGGAGE, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif	// YDG_ADD_SANTA_MONSTER
 
 #ifdef PJH_ADD_PANDA_CHANGERING	
 		LoadBitmap("Item\\pandabody_R.jpg", BITMAP_PANDABODY_R, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR

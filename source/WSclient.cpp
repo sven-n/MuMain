@@ -63,18 +63,9 @@
 #include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM
 
-#ifdef LDK_ADD_NEW_PETPROCESS
 #include "w_PetProcess.h"
-#endif //LDK_ADD_NEW_PETPROCESS
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
 #include "PortalMgr.h"
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
-#ifdef CSK_HACK_TEST
-#include "HackTest.h"
-#endif // CSK_HACK_TEST
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 #include "DuelMgr.h"
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
 #ifdef LDK_ADD_GAMBLE_SYSTEM
 #include "GambleSystem.h"
@@ -488,11 +479,13 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
 	
 	LPPHEADER_DEFAULT_CHARACTER_LIST Data = (LPPHEADER_DEFAULT_CHARACTER_LIST)ReceiveBuffer;
     
-    SetCreateMaxClass ( Data->MaxClass );
-
     int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
 
-	g_ConsoleDebug->Write(MCD_RECEIVE, "[ReceiveList Count %d]",Data->Value);
+	#ifdef _DEBUG
+		g_ConsoleDebug->Write(MCD_RECEIVE, "[ReceiveList Count %d Max class %d]",Data->Value,Data->MaxClass);
+	#else
+		g_ErrorReport.Write("[ReceiveList Count %d Max class %d]",Data->Value,Data->MaxClass);
+	#endif
 	
 	for(int i=0;i<Data->Value;i++)
 	{
@@ -553,7 +546,7 @@ void ReceiveCharacterCard_New(BYTE* ReceiveBuffer)
 	if((Data->CharacterCard & CLASS_SUMMONER_CARD) == CLASS_SUMMONER_CARD)
 		g_CharCardEnable.bCharacterEnable[2] = true;
 
-	g_ConsoleDebug->Write(MCD_NORMAL, "[BOTH MESSAGE] CharacterCard Recv");
+	g_ConsoleDebug->Write(MCD_NORMAL, "[BOTH MESSAGE] CharacterCard Recv %d = %d %d %d",Data->CharacterCard,g_CharCardEnable.bCharacterEnable[0],g_CharCardEnable.bCharacterEnable[1],g_CharCardEnable.bCharacterEnable[2]);
 }
 
 void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
@@ -561,7 +554,7 @@ void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
 	LPPRECEIVE_CREATE_CHARACTER Data = (LPPRECEIVE_CREATE_CHARACTER)ReceiveBuffer;
 	if(Data->Result==1)
 	{
-		float fPos[2], fAngle = 0.0f;
+		float fPos[2] = { 0.0f,0.0f },fAngle = 0.0f;
 		
 		switch(Data->Index)
 		{
@@ -586,7 +579,7 @@ void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
 		DeleteCharacter( iCharacterKey );
 #endif
 		
-		CreateHero(Data->Index,CharacterView.Class,CharacterView.Skin,fPos[0],fPos[1],fAngle);
+		CreateHero(Data->Index,CharacterView.Class,CharacterView.Skin,fPos[0],fPos[1],fAngle); 
 		CharactersClient[Data->Index].Level = Data->Level;
 		
 		int iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
@@ -3617,8 +3610,7 @@ void SetPlayerBow(CHARACTER *c)
 
 void SetPlayerHighBow ( CHARACTER* c )
 {
-#ifdef KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
-		switch( gCharacterManager.GetEquipedBowType( c ))
+	switch( gCharacterManager.GetEquipedBowType( c ))
 	{
 	case BOWTYPE_BOW:
 		{
@@ -3659,35 +3651,6 @@ void SetPlayerHighBow ( CHARACTER* c )
 			}
 		}break;
 	}
-#else KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
-	switch( GetEquipedBowType( c ) )
-	{
-	case BOWTYPE_BOW:
-		{
-			if( (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
-			{
-				SetAction( &c->Object, PLAYER_ATTACK_FLY_BOW_UP );
-			}
-			else
-			{
-				SetAction( &c->Object, PLAYER_ATTACK_BOW_UP );
-			}
-		}
-		break;
-	case BOWTYPE_CROSSBOW:
-		{
-			if( (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF) && (c->Wing.Type!=-1) )
-			{
-				SetAction( &c->Object, PLAYER_ATTACK_FLY_CROSSBOW_UP );
-			}
-			else
-			{
-				SetAction( &c->Object, PLAYER_ATTACK_CROSSBOW_UP );
-			}
-		}
-		break;
-	}
-#endif // KJH_FIX_BOW_ANIMATION_ON_RIDE_PET
 }
 
 BOOL ReceiveMonsterSkill(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
@@ -4019,13 +3982,11 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				sc->AttackTime = 1;
 				PlayBuffer(SOUND_SKILL_SWORD4);
 				break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_POWER_SLASH_UP:
 			case AT_SKILL_POWER_SLASH_UP+1:
 			case AT_SKILL_POWER_SLASH_UP+2:
 			case AT_SKILL_POWER_SLASH_UP+3:
 			case AT_SKILL_POWER_SLASH_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ICE_BLADE:
 				SetAction ( so, PLAYER_ATTACK_TWO_HAND_SWORD_TWO );
 				sc->AttackTime = 1;
@@ -4039,13 +4000,11 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					SetAction(so,PLAYER_ATTACK_SKILL_SPEAR);
 				sc->AttackTime = 1;
 				break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_BLOW_UP:
 			case AT_SKILL_BLOW_UP+1:
 			case AT_SKILL_BLOW_UP+2:
 			case AT_SKILL_BLOW_UP+3:
 			case AT_SKILL_BLOW_UP+4:
-#endif	//PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_ONETOONE:
 				SetAction(so,PLAYER_ATTACK_ONETOONE);
 				if( sc != Hero && so->Type == MODEL_PLAYER)
@@ -4053,7 +4012,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					so->AnimationFrame = 0;
 				}
 				sc->AttackTime = 1;
-				//PlayBuffer(SOUND_FLASH);
 				break;
 			case AT_SKILL_MANY_ARROW_UP:
 			case AT_SKILL_MANY_ARROW_UP+1:
@@ -4141,13 +4099,11 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 						so->AnimationFrame = 0;
 					}
 				}
-				//        SetPlayerMagic(sc);
 				so->AnimationFrame = 0;
 				sc->AttackTime = 1;
 				break;
 				
 			case AT_SKILL_DEATH_CANNON:
-				//SetPlayerMagic(sc);
 				SetAction ( so, PLAYER_ATTACK_DEATH_CANNON );
 				so->AnimationFrame = 0;
 				sc->AttackTime = 1;
@@ -4278,11 +4234,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 						}
 						else
 							SetAction ( so, PLAYER_SKILL_VITALITY );
-						//		if ( sc->SkillSuccess )
-						//		{
-						//		    to->State |= STATE_INVISIBLE;
-						//		}
-						//		to->State |= STATE_INVISIBLE;
 						if ( sc->SkillSuccess )
 						{
 							if( !g_isCharacterBuff(to, eBuff_Cloaking) )
@@ -4359,7 +4310,7 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				{
 					UnRegisterBuff( eBuff_Attack, to );
 					UnRegisterBuff( eBuff_Defense, to );
-					UnRegisterBuff( eBuff_HpRecovery, to ); //eBuff_Life
+					UnRegisterBuff( eBuff_HpRecovery, to );
 					UnRegisterBuff( eBuff_PhysDefense, to );
 					UnRegisterBuff( eBuff_AddCriticalDamage, to );
 					UnRegisterBuff( eBuff_AddMana, to );
@@ -4495,25 +4446,18 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 				}
 				sc->AttackTime = 1;
 				break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_FIRE_SCREAM_UP:
 			case AT_SKILL_FIRE_SCREAM_UP+1:
 			case AT_SKILL_FIRE_SCREAM_UP+2:
 			case AT_SKILL_FIRE_SCREAM_UP+3:
 			case AT_SKILL_FIRE_SCREAM_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
 			case AT_SKILL_DARK_SCREAM:
 				{
-#ifdef KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					if( sc->Helper.Type == MODEL_HELPER+37 )				
 					{
 						SetAction( so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE );
 					}
-#ifdef PBG_FIX_CHAOTIC_ANIMATION
 					else if((sc->Helper.Type>=MODEL_HELPER+2) && (sc->Helper.Type<=MODEL_HELPER+4))
-#else //PBG_FIX_CHAOTIC_ANIMATION
-					else if((sc->Helper.Type>=MODEL_HELPER+2) || (sc->Helper.Type<=MODEL_HELPER+4))
-#endif //PBG_FIX_CHAOTIC_ANIMATION
 					{
 						SetAction( so, PLAYER_ATTACK_RIDE_STRIKE );
 					}
@@ -4521,12 +4465,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					{
 						SetAction( so, PLAYER_ATTACK_STRIKE );
 					}
-#else // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
-					if(sc->Helper.Type == MODEL_HELPER+37)
-						SetAction(so,PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
-					else
-						SetAction ( so, PLAYER_ATTACK_STRIKE );
-#endif // KJH_FIX_CHAOTIC_ANIMATION_ON_RIDE_PET
 					PlayBuffer(SOUND_FIRE_SCREAM);
 				}
 				break;
@@ -4611,8 +4549,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					}
 				}
 				break;
-
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 			case AT_SKILL_SWELL_OF_MAGICPOWER:
 				{
 					SetAttackSpeed();
@@ -4621,20 +4557,14 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					vec3_t vLight;
 					Vector( 0.3f, 0.2f, 0.9f, vLight );
 					CreateEffect( MODEL_SWELL_OF_MAGICPOWER, so->Position, so->Angle, vLight, 0, so );
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER_SOUND
 					PlayBuffer(SOUND_SKILL_SWELL_OF_MAGICPOWER);
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER_SOUND
 				}break;
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 			case AT_SKILL_DOPPELGANGER_SELFDESTRUCTION:
 				{
 					SetAction(so, MONSTER01_APEAR);
 					so->m_bActionStart = FALSE;
 				}
 				break;
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
-#ifdef LDK_MOD_EVERY_USE_SKILL_CAOTIC
 			case AT_SKILL_GAOTIC:
 				{
 					if(so->Type == MODEL_PLAYER)
@@ -4691,7 +4621,6 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					PlayBuffer(SOUND_SKILL_CAOTIC);
 				}
 				break;
-#endif //LDK_MOD_EVERY_USE_SKILL_CAOTIC
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_SKILL_THRUST:
 		{
@@ -6776,9 +6705,7 @@ void ReceiveGuildResult( BYTE *ReceiveBuffer )
 #ifdef ASG_ADD_GENS_SYSTEM
 	case 0xA1:g_pChatListBox->AddText("", GlobalText[2992], SEASON3B::TYPE_ERROR_MESSAGE);break;
 	case 0xA2:g_pChatListBox->AddText("", GlobalText[2995], SEASON3B::TYPE_ERROR_MESSAGE);break;
-#ifdef ASG_MOD_GUILD_RESULT_GENS_MSG
 	case 0xA3:g_pChatListBox->AddText("", GlobalText[2996], SEASON3B::TYPE_ERROR_MESSAGE);break;
-#endif	// ASG_MOD_GUILD_RESULT_GENS_MSG
 #endif	// ASG_ADD_GENS_SYSTEM
 	}
 }
@@ -7514,7 +7441,6 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 					if(AT_SKILL_HELL == CharacterAttribute->Skill[i])
 						CharacterAttribute->Skill[i] = 0;
 					break;
-#ifdef PJH_SEASON4_MASTER_RANK4
 				case AT_SKILL_EVIL_SPIRIT_UP:
 				case AT_SKILL_EVIL_SPIRIT_UP_M:
 					if(AT_SKILL_EVIL == CharacterAttribute->Skill[i])
@@ -7552,8 +7478,6 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 					if(AT_SKILL_BLAST_FREEZE == CharacterAttribute->Skill[i])
 						CharacterAttribute->Skill[i] = 0;
 					break;
-#endif //PJH_SEASON4_MASTER_RANK4
-#ifdef PJH_ADD_MASTERSKILL
 				case AT_SKILL_ALICE_SLEEP_UP:
 					if(AT_SKILL_ALICE_SLEEP == CharacterAttribute->Skill[i])
 						CharacterAttribute->Skill[i] = 0;
@@ -7570,7 +7494,6 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 					if(AT_SKILL_ALICE_DRAINLIFE == CharacterAttribute->Skill[i])
 						CharacterAttribute->Skill[i] = 0;
 					break;
-#endif
 				}
 			}
 			bool Check_Add = false;
@@ -11953,8 +11876,6 @@ void Receive_Check_Change_Name(BYTE *ReceiveBuffer)
 }
 #endif //PJH_CHARACTER_RENAME
 
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-
 bool ReceiveRegistedLuckyCoin(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_GET_COIN_COUNT _pData = (LPPMSG_ANS_GET_COIN_COUNT)ReceiveBuffer;
@@ -12028,9 +11949,6 @@ bool ReceiveRequestExChangeLuckyCoin(BYTE* ReceiveBuffer)
 	return true;
 }
 
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-
-#ifdef YDG_ADD_DOPPELGANGER_PROTOCOLS
 bool ReceiveEnterDoppelGangerEvent(BYTE* ReceiveBuffer)
 {
 	LPPMSG_RESULT_ENTER_DOPPELGANGER Data = (LPPMSG_RESULT_ENTER_DOPPELGANGER)ReceiveBuffer;
@@ -12057,16 +11975,6 @@ bool ReceiveEnterDoppelGangerEvent(BYTE* ReceiveBuffer)
 	case 4:
 		g_pDoppelGangerWindow->LockEnterButton(FALSE);
 		break;
-#ifdef KJH_MOD_ENTER_EVENTMAP_ERROR_MSG
-	case 5:
-		{
-			CMsgBoxIGSCommon* pMsgBox = NULL;
-			char szText[256];
-			sprintf(szText, GlobalText[1123], 150);
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-			pMsgBox->Initialize(GlobalText[3028], szText);
-		}break;
-#endif // KJH_MOD_ENTER_EVENTMAP_ERROR_MSG
 	default:
 		return false;
 	}
@@ -12077,10 +11985,7 @@ bool ReceiveEnterDoppelGangerEvent(BYTE* ReceiveBuffer)
 bool ReceiveDoppelGangerMonsterPosition(BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_MONSTER_POSITION Data = (LPPMSG_DOPPELGANGER_MONSTER_POSITION)ReceiveBuffer;
-
-	// 위치번호(0~22) 몬스터 리젠지점이 0
 	g_pDoppelGangerFrame->SetMonsterGauge((float)Data->btPosIndex / 22.0f);
-
 	return true;
 }
 
@@ -12203,9 +12108,7 @@ bool ReceiveDoppelGangerMonsterGoal(BYTE* ReceiveBuffer)
 
 	return true;
 }
-#endif	// YDG_ADD_DOPPELGANGER_PROTOCOLS
 
-#ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
 bool ReceiveMoveMapChecksum(BYTE* ReceiveBuffer)
 {
 	LPPMSG_MAPMOVE_CHECKSUM Data = (LPPMSG_MAPMOVE_CHECKSUM)ReceiveBuffer;
@@ -12243,9 +12146,7 @@ bool ReceiveRequestMoveMap(BYTE* ReceiveBuffer)
 
 	return true;
 }
-#endif	// YDG_ADD_MOVE_COMMAND_PROTOCOL
 
-#ifdef LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 bool ReceiveEnterEmpireGuardianEvent(BYTE* ReceiveBuffer)
 {
 	LPPMSG_RESULT_ENTER_EMPIREGUARDIAN Data = (LPPMSG_RESULT_ENTER_EMPIREGUARDIAN)ReceiveBuffer;
@@ -12294,16 +12195,6 @@ bool ReceiveEnterEmpireGuardianEvent(BYTE* ReceiveBuffer)
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
 			pMsgBox->AddMsg(GlobalText[2843], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
 		}break;
-#ifdef KJH_MOD_ENTER_EVENTMAP_ERROR_MSG
-	case 6:
-		{
-			CMsgBoxIGSCommon* pMsgBox = NULL;
-			char szText[256];
-			sprintf(szText, GlobalText[1123], 150);
-			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-			pMsgBox->Initialize(GlobalText[3028], szText);
-		}break;
-#endif // KJH_MOD_ENTER_EVENTMAP_ERROR_MSG
 
 	default:
 		return false;
@@ -12374,7 +12265,6 @@ bool ReceiveResultEmpireGuardian(BYTE* ReceiveBuffer)
 	
 	return true;
 }
-#endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
@@ -14386,7 +14276,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			case 0x0a:
 				ReceiveChainMagic( ReceiveBuffer );
 				break;
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 			case 0x0B:
 				ReceiveRegistedLuckyCoin(ReceiveBuffer);
 				break;
@@ -14396,8 +14285,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			case 0x0D:
 				ReceiveRequestExChangeLuckyCoin(ReceiveBuffer);
 				break;
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_DOPPELGANGER_PROTOCOLS
 			case 0x0E:
 				ReceiveEnterDoppelGangerEvent(ReceiveBuffer);
 				break;
@@ -14419,7 +14306,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			case 0x14:
 				ReceiveDoppelGangerMonsterGoal(ReceiveBuffer);
 				break;
-#endif	// YDG_ADD_DOPPELGANGER_PROTOCOLS
 #ifdef PBG_ADD_SECRETBUFF
 			case 0x15:
 				ReceiveFatigueTime(ReceiveBuffer);

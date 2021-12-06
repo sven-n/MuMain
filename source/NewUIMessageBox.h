@@ -1,9 +1,5 @@
 // NEWUIMESSAGEBOX.h: interface for the CNEWUIMESSAGEBOX class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUIMESSAGEBOX_H__04F9569D_E943_4995_8FB6_9EF3CB57AF82__INCLUDED_)
-#define AFX_NEWUIMESSAGEBOX_H__04F9569D_E943_4995_8FB6_9EF3CB57AF82__INCLUDED_
 
 #pragma once
 
@@ -95,14 +91,10 @@ namespace SEASON3B
 		MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_ATTACH_SOCKET,
 		MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_DETACH_SOCKET,
 	
-#ifdef PSW_ADD_RESET_CHARACTER_POINT
 		MSGBOX_EVENT_USER_CUSTOM_RESET_CHARACTER_POINT,
-#endif //PSW_ADD_RESET_CHARACTER_POINT
 		
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 		MSGBOX_EVENT_USER_CUSTOM_DELGARDO_REGISTRATION_LUCKY_COIN,
 		MSGBOX_EVENT_USER_CUSTOM_DELGARDO_EXCHANGE_LUCKY_COIN,
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
 		MSGBOX_EVENT_USER_CUSTOM_INGAMESHOP_PRESENT,
@@ -113,10 +105,8 @@ namespace SEASON3B
 		MSGBOX_EVENT_USER_CUSTOM_LUCKYITEM_REFINERY,
 #endif // LEM_ADD_LUCKYITEM
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		MSGBOX_EVENT_USER_CUSTOM_GEM_SELECTMIX,
 		MSGBOX_EVENT_USER_CUSTOM_GEM_SELECT,
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	};
 
 	class CNewUIManager;
@@ -163,13 +153,11 @@ namespace SEASON3B
 
 		void SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent);
 		void SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam);
-#ifdef PBG_ADD_MSGBACKOPACITY
 		void RenderMsgBackColor(bool _bRender = false);
 		void SetMsgBackOpacity(float _fAlpha = 0.5f);
 		const float& GetMsgBackOpacity() const { return m_fOpacityAlpha; }
 		void SetMsgBackColor(vec3_t _vColor = NULL);
 		const vec3_t& GetMsgBackColor() const { return m_vColor; }
-#endif //PBG_ADD_MSGBACKOPACITY
 	};
 
 	class CNewUIMessageBoxFactory
@@ -429,4 +417,3 @@ namespace SEASON3B
 #define MSGBOX_CLASS(x) SEASON3B::CNewUIMessageBoxFactory::TContainer<x>()
 #define g_MessageBox SEASON3B::CNewUIMessageBoxMng::GetInstance()
 
-#endif // !defined(AFX_NEWUIMESSAGEBOX_H__04F9569D_E943_4995_8FB6_9EF3CB57AF82__INCLUDED_)

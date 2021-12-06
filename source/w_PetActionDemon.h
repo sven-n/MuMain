@@ -1,16 +1,11 @@
 // w_PetActionDemon.h: interface for the PetActionDemon class.
-// LDK_2008/07/08
 //////////////////////////////////////////////////////////////////////
 
-#ifdef LDK_ADD_NEW_PETPROCESS
+#pragma once
 
 #include "w_PetAction.h"
 #include "ZzzBMD.h"
 
-#if !defined(AFX_W_PetActionDemon_H__C962E1B9_079B_4B48_AC98_62CCFBF3CBDB__INCLUDED_)
-#define AFX_W_PetActionDemon_H__C962E1B9_079B_4B48_AC98_62CCFBF3CBDB__INCLUDED_
-
-#pragma once
 
 BoostSmartPointer(PetActionDemon);
 class PetActionDemon : public PetAction
@@ -28,7 +23,4 @@ public:
 private:
 	PetActionDemon();
 };
-
-#endif // !defined(AFX_W_PetActionDemon_H__C962E1B9_079B_4B48_AC98_62CCFBF3CBDB__INCLUDED_)
-#endif //LDK_ADD_NEW_PETPROCESS
  

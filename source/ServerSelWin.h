@@ -30,23 +30,23 @@ private:
 	};
 
 protected:
-	CButton		m_aServerGroupBtn[SSW_SERVER_G_MAX];	// 서버 그룹 버튼.
-	CButton		m_aServerBtn[SSW_SERVER_MAX];			// 서버 버튼.
-	CGaugeBar	m_aServerGauge[SSW_SERVER_MAX];			// 서버 혼잡 게이지.
-	CSprite		m_aBtnDeco[2];					// 장식 스프라이트 좌우.
-	CSprite		m_aArrowDeco[2];				// 화살표 스프라이트 좌우.
-	CWinEx		m_winDescription;				// 서버 설명 배경.
+	CButton		m_aServerGroupBtn[SSW_SERVER_G_MAX];
+	CButton		m_aServerBtn[SSW_SERVER_MAX];
+	CGaugeBar	m_aServerGauge[SSW_SERVER_MAX];
+	CSprite		m_aBtnDeco[2];
+	CSprite		m_aArrowDeco[2];
+	CWinEx		m_winDescription;
 
-	int			m_icntServerGroup;				// 서버그룹 갯수
-	int			m_icntLeftServerGroup;			// 왼쪽 서버 그룹 갯수
-	int			m_icntRightServerGroup;			// 오른쪽 서버그룹 갯수
-	int			m_icntServer;					// 현재 선택된 서버그룹의 서버 갯수
-	bool		m_bTestServerBtn;				// 테스트 서버 버튼이 있는가?
+	int			m_icntServerGroup;
+	int			m_icntLeftServerGroup;
+	int			m_icntRightServerGroup;
+	int			m_icntServer;
+	bool		m_bTestServerBtn;
 	
-	int				m_iSelectServerBtnIndex;	// 선택된 서버버튼 인덱스
-	CServerGroup*	m_pSelectServerGroup;		// 선택된 서버그룹
+	int				m_iSelectServerBtnIndex;
+	CServerGroup*	m_pSelectServerGroup;
 	
-	unicode::t_char		m_szDescription[SSW_DESC_LINE_MAX][SSW_DESC_ROW_MAX];	// 서버 설명 문자열.
+	unicode::t_char		m_szDescription[SSW_DESC_LINE_MAX][SSW_DESC_ROW_MAX];
 
 public:
 	CServerSelWin();

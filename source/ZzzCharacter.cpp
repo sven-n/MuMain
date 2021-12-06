@@ -2557,34 +2557,15 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         g_iLimitAttackTime = 5;
         break;
 
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_BLOOD_ATT_UP:
 	case AT_SKILL_BLOOD_ATT_UP+1:
 	case AT_SKILL_BLOOD_ATT_UP+2:
 	case AT_SKILL_BLOOD_ATT_UP+3:
 	case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
-    case AT_SKILL_REDUCEDEFENSE:    //  마검사 방어력 감소.
-        if(o->Type == MODEL_PLAYER
-#ifndef CSK_FIX_DUEL_N_PK_SKILL		// 정리할 때 지워야 하는 소스	
-
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-			&& (o->CurrentAction==PLAYER_ATTACK_SKILL_WHEEL || o->CurrentAction==PLAYER_ATTACK_SKILL_WHEEL_UNI
-			|| o->CurrentAction==PLAYER_ATTACK_SKILL_WHEEL_DINO || o->CurrentAction==PLAYER_ATTACK_SKILL_WHEEL_FENRIR))
-#else	// YDG_ADD_SKILL_RIDING_ANIMATIONS
-			&& o->CurrentAction==PLAYER_ATTACK_SKILL_WHEEL
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
-
-#endif //! CSK_FIX_DUEL_N_PK_SKILL	// 정리할 때 지워야 하는 소스
-			)
+    case AT_SKILL_REDUCEDEFENSE:
+        if(o->Type == MODEL_PLAYER)
         {
-#ifdef CSK_FIX_DUEL_N_PK_SKILL
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-			SetActionBloodAttack(c, o);
-#else // YDG_ADD_SKILL_RIDING_ANIMATIONS
 			SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
-#endif // YDG_ADD_SKILL_RIDING_ANIMATIONS
-#endif // CSK_FIX_DUEL_N_PK_SKILL
 
             if( c->AttackTime >= 1 && c->AttackTime <= 2 )
             {
@@ -2599,39 +2580,28 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 
 				PlayBuffer( SOUND_SKILL_SWORD3);
 
-#ifdef PJH_FIX_BLOOD_ATTCK
 				if(iSkill == AT_SKILL_BLOOD_ATT_UP+4)
 				{
 					CreateEffect(BITMAP_SWORD_FORCE, o->Position, o->Angle, o->Light,1,o,o->PKKey,FindHotKey( iSkill ));
 				}
 				else
-#endif //PJH_FIX_BLOOD_ATTCK
 				{					
 					CreateEffect(BITMAP_SWORD_FORCE, o->Position, o->Angle, o->Light,0,o,o->PKKey,FindHotKey( iSkill ));
 				}
 
                 float AttackSpeed1 = CharacterAttribute->AttackSpeed*0.004f;//  
-
-                Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL ].PlaySpeed = 0.54f+AttackSpeed1;//0.44회오리베기
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-				Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL_UNI   ].PlaySpeed = 0.54f+AttackSpeed1;//0.44회오리베기
-				Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL_DINO  ].PlaySpeed = 0.54f+AttackSpeed1;//0.44회오리베기
-				Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL_FENRIR].PlaySpeed = 0.54f+AttackSpeed1;//0.44회오리베기
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
-
+                Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL ].PlaySpeed = 0.54f+AttackSpeed1;
                 c->AttackTime = 15;
             }
         }
         g_iLimitAttackTime = 15;
         break;
 
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_POWER_SLASH_UP:
 	case AT_SKILL_POWER_SLASH_UP+1:
 	case AT_SKILL_POWER_SLASH_UP+2:
 	case AT_SKILL_POWER_SLASH_UP+3:
 	case AT_SKILL_POWER_SLASH_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
     case AT_SKILL_ICE_BLADE:
 		if ( o->Type==MODEL_PLAYER && o->CurrentAction==PLAYER_ATTACK_TWO_HAND_SWORD_TWO)
 		{
@@ -2669,13 +2639,13 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 	case AT_SKILL_LIFE_UP+2:
 	case AT_SKILL_LIFE_UP+3:
 	case AT_SKILL_LIFE_UP+4:
-    case    AT_SKILL_VITALITY:  //  생명력증가.
+    case    AT_SKILL_VITALITY:
         if( c->AttackTime>9 && o->Type==MODEL_PLAYER && o->CurrentAction==PLAYER_SKILL_VITALITY )
         {
             c->AttackTime = 15;
         }
         break;
-    case    AT_SKILL_IMPROVE_AG:    //  AG증가 속도 증가.
+    case    AT_SKILL_IMPROVE_AG:
         if( o->AnimationFrame>=5.f && ((o->Type==MODEL_PLAYER && o->CurrentAction>=PLAYER_ATTACK_FIST && o->CurrentAction<=PLAYER_RIDE_SKILL) ||
  	           ((o->Type>=MODEL_MONSTER01 && o->Type<MODEL_MONSTER_END) && o->CurrentAction>=MONSTER01_ATTACK1 && o->CurrentAction<=MONSTER01_ATTACK2)))
         {
@@ -2684,7 +2654,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         break;
     case AT_SKILL_STRONG_PIER:
         if ( o->AnimationFrame>=3.f && o->Type==MODEL_PLAYER && ( o->CurrentAction==PLAYER_ATTACK_STRIKE || o->CurrentAction==PLAYER_ATTACK_RIDE_STRIKE 
-			|| o->CurrentAction==PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE	//^ 펜릴 스킬 관련
+			|| o->CurrentAction==PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE
 			) )
         {
             c->AttackTime = 15;
@@ -2697,16 +2667,14 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 	case AT_SKILL_FIRE_BUST_UP+4:
     case    AT_SKILL_LONGPIER_ATTACK:
         if ( o->AnimationFrame>=3.f && o->Type==MODEL_PLAYER && ( o->CurrentAction==PLAYER_ATTACK_STRIKE || o->CurrentAction==PLAYER_ATTACK_RIDE_STRIKE 
-			|| o->CurrentAction==PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE	//^ 펜릴 스킬 관련
-			) )
+			|| o->CurrentAction==PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE) )
         {
             c->AttackTime = 15;
         }
         break;
     case    AT_SKILL_THUNDER_STRIKE:
         if ( o->AnimationFrame>=5.5f && o->Type==MODEL_PLAYER && ( o->CurrentAction==PLAYER_SKILL_FLASH || o->CurrentAction==PLAYER_ATTACK_RIDE_ATTACK_FLASH 
-			|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH	//^ 펜릴 스킬 관련
-			) )
+			|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH	) )
         {
             c->AttackTime = 15;
         }
@@ -2728,8 +2696,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         break;
     case    AT_SKILL_PARTY_TELEPORT:
         if ( c->AttackTime>5 && o->Type==MODEL_PLAYER && ( o->CurrentAction==PLAYER_ATTACK_TELEPORT || o->CurrentAction==PLAYER_ATTACK_RIDE_TELEPORT 
-				|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT
-			) )
+				|| o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT) )
         {
             c->AttackTime = 15;
         }
@@ -2825,42 +2792,33 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             c->AttackTime = 15;
         }
         break;
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 	case AT_SKILL_FLAME_STRIKE:
         {
             c->AttackTime = 15;
         }
 		break;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 	case AT_SKILL_GIGANTIC_STORM:
         if ( o->AnimationFrame>7.f )
         {
             c->AttackTime = 15;
         }
 		break;
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_LIGHTNING_SHOCK_UP:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+1:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+2:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+3:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+4:
-#endif
+
 	case AT_SKILL_LIGHTNING_SHOCK:
         {
             c->AttackTime = 15;
         }
 		break;
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 	case AT_SKILL_BLOW_OF_DESTRUCTION:
 		{
 			c->AttackTime = 15;
 		}
 		break;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_SKILL_ATT_UP_OURFORCES:
 	case AT_SKILL_HP_UP_OURFORCES:
@@ -5341,12 +5299,10 @@ bool CheckFullSet(CHARACTER *c)
 		end = EQUIPMENT_HELM;
 	}
 
-#ifdef PBG_FIX_DEFENSEVALUE_DARK
     if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK )
     {
         end = EQUIPMENT_ARMOR;
     }
-#endif //PBG_FIX_DEFENSEVALUE_DARK
 
 	if(bHero == true)
 	{
@@ -6482,11 +6438,8 @@ void RenderBrightEffect(BMD *b,int Bitmap,int Link,float Scale,vec3_t Light,OBJE
 
 OBJECT g_ItemObject[ITEM_ETC+MAX_ITEM_INDEX];
 
-#ifdef CSK_REF_BACK_RENDERITEM
+
 void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,int Level,int Option1,bool Link,bool Translate,int RenderType, bool bRightHandItem)
-#else // CSK_REF_BACK_RENDERITEM
-void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,int Level,int Option1,bool Link,bool Translate,int RenderType)
-#endif // CSK_REF_BACK_RENDERITEM
 {		
 	OBJECT *o = &c->Object;
 	BMD    *b = &Models[Type];
@@ -6753,7 +6706,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Matrix[1][3] = 0.f;
 				Matrix[2][3] = 0.f;
 			}
-#ifdef CSK_REF_BACK_RENDERITEM
 			else if(Type >= MODEL_SHIELD && Type < MODEL_SHIELD+MAX_ITEM_INDEX)
 			{
 				if(Type == MODEL_SHIELD+16)
@@ -6787,7 +6739,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 					Matrix[2][3] = 0.f;
 				}
 			}
-#endif // CSK_REF_BACK_RENDERITEM
 			else
 			{
 				Matrix[0][3] = -20.f;
@@ -6805,7 +6756,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		}
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
-#ifdef CSK_REF_BACK_RENDERITEM
 		if (bRightHandItem == false	&& !(Type >= MODEL_SHIELD && Type < MODEL_SHIELD+MAX_ITEM_INDEX) && Type != MODEL_BOW+20)
 		{
 			vec3_t vNewAngle;
@@ -6828,7 +6778,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 
 			R_ConcatTransforms(Matrix, mNewRot, Matrix);
 		}
-#endif // CSK_REF_BACK_RENDERITEM
 		
 		R_ConcatTransforms(o->BoneTransform[f->LinkBone],Matrix,ParentMatrix);
 		VectorCopy(c->Object.Position, b->BodyOrigin);
@@ -7592,7 +7541,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite ( BITMAP_LIGHT, Position, 1.3f, Light, o );
 		}
 		break;
-#ifdef ADD_SOCKET_ITEM
 	case MODEL_SWORD+26:
 		{
 			Vector( 0.8f, 0.6f, 0.2f, Light );
@@ -7888,15 +7836,12 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformPosition(BoneTransform[3], Position, p, true);		// Red02
 			CreateSprite(BITMAP_LIGHT, p, 2.0f, vDLight, o);
 			CreateSprite(BITMAP_SHINY+6, p, fRendomScale, Light, o);
-			
-			// 잔상
+
 			vec3_t vColor;
 			VectorCopy(p, o->EyeRight);
 			Vector(0.9f, 0.f, 0.f, vColor);
 			CreateJoint(BITMAP_JOINT_ENERGY, p, p, o->Angle, 47, o, 25.f);
-			// CreateJoint()
-			// BITMAP_JOINT_ENERGY SubType
-			//CreateEffect(MODEL_EFFECT_TRACE, p, o->Angle, vColor, 0, NULL, -1, 0, 0, 0, 20.f);
+
 		}break;
 	case MODEL_STAFF+31:
 		{
@@ -7915,8 +7860,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_LIGHT, p, 2.f, Light, o);
 			Vector(0.9f,0.3f,0.5f,Light);
 			CreateSprite(BITMAP_SHINY+6, p, 0.8f, Light, o);
-			
-			// 깜빡깜박 이팩트
+
 			float fRendomScale = (float)(rand()%15)/20.0f + 1.0f;
 			CreateSprite(BITMAP_SHINY+1, p, fRendomScale, Light, o);
 			CreateSprite(BITMAP_SHINY+1, p, fRendomScale-0.3f, Light, o, 90.0f);
@@ -8026,27 +7970,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				break;
 			}
 		}break;
-	case MODEL_SHIELD+19:
-		{
-// 			float fScale = 1.0f;
-// 
-// 			float fLumi = absf((sinf( WorldTime*0.001f )))*0.8f + 0.2f;	// 페이드인/아웃
-// 			vec3_t vDLight;
-// 			Vector( fLumi*1.0f, fLumi*1.0f, fLumi*1.0f, vDLight);
-// 
-// 			b->TransformByObjectBone(Position, Object, 1);		// Zx01
-// 			CreateSprite(BITMAP_FLARE_BLUE, Position, 0.4f, vDLight, o);
-// 
-// 			b->TransformByObjectBone(Position, Object, 4);		// Zx02
-// 			CreateSprite(BITMAP_FLARE_BLUE, Position, 0.4f, vDLight, o);
-// 
-// 			b->TransformByObjectBone(Position, Object, 3);		// Zxt03
-// 			CreateSprite(BITMAP_FLARE_BLUE, Position, 0.4f, vDLight, o);
-// 
-// 			b->TransformByObjectBone(Position, Object, 2);		// Zxt04
-// 			CreateSprite(BITMAP_FLARE_BLUE, Position, 0.4f, vDLight, o);
-		}break;
-	case MODEL_SHIELD+20:		// 가디언실드
+	case MODEL_SHIELD+20:
 		{
 			Vector(0.f, 0.f, 0.f, Position);
 			float fLumi = fabs(sinf( WorldTime*0.001f ))+0.1f;
@@ -8070,8 +7994,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			b->TransformPosition(BoneTransform[9], Position, p, true);		// Object03
 			CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
 		}break;
-#endif // ADD_SOCKET_ITEM
-#ifdef CSK_ADD_ITEM_CROSSSHIELD
 	case MODEL_SHIELD+21:
 		{
 			vec3_t vPos, vLight;
@@ -8102,8 +8024,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			CreateSprite(BITMAP_LIGHT, vPos, 1.4f, vLight, Object);
 		}
 		break;
-#endif // CSK_ADD_ITEM_CROSSSHIELD
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 	case MODEL_STAFF+33:
 		{
 			vec3_t vPos, vLight;
@@ -8265,7 +8185,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			}
 		}
 		break;
-#endif //LDK_ADD_GAMBLERS_WEAPONS
 	}
 
 }
@@ -13269,8 +13188,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 1.7f;
 		o = &c->Object;
 		break;
-
-#ifdef YDG_ADD_SANTA_MONSTER
 	case 466:
     	OpenMonsterModel(156);
 		c = CreateCharacter(Key,MODEL_MONSTER01+156,PositionX,PositionY);
@@ -13285,7 +13202,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		strcpy(c->ID,"저주받은 산타");
 		o = &c->Object;
 		break;
-#endif	// YDG_ADD_SANTA_MONSTER
 		
 #ifdef LOREN_RAVINE_EVENT
 	case 300:
@@ -14335,8 +14251,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 	//	Models[MODEL_LUCKYITEM_NPC].Actions[1].PlaySpeed = 50.0f;
 		break;
 #endif // LEM_ADD_LUCKYITEM
-#ifdef ADD_SOCKET_MIX
-	case 452:	// 시드 마스터 NPC
+	case 452:
    		OpenNpc(MODEL_SEED_MASTER);
 		c = CreateCharacter(Key,MODEL_SEED_MASTER,PositionX,PositionY);
 		strcpy(c->ID,"시드마스터");
@@ -14352,21 +14267,8 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		//Models[MODEL_SEED_INVESTIGATOR].Actions[0].PlaySpeed = 0.2f;
 		//Models[MODEL_SEED_INVESTIGATOR].Actions[1].PlaySpeed = 0.1f;
 		break;
-#endif	// ADD_SOCKET_MIX
-#ifdef PSW_ADD_RESET_CHARACTER_POINT
 	case 464:
 		{
-#ifdef _PVP_ATTACK_GUARD
-			OpenNpc(MODEL_ANGEL);
-			c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
-			strcpy(c->ID,"Unknown");
-			SetCharacterScale(c);
-			c->Object.m_fEdgeScale = 1.15f;
-			c->Weapon[0].Type = MODEL_BOW+9;
-			c->Weapon[1].Type = MODEL_BOW+7;
-			if (World == WD_10HEAVEN)
-				c->Wing.Type = MODEL_WING+1;
-#else	// _PVP_ATTACK_GUARD
 			c = CreateCharacter(Key,MODEL_PLAYER,PositionX,PositionY);
 			//c->Class = 2;
 			strcpy(c->ID,"초기화 도우미");
@@ -14381,11 +14283,8 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 			c->Weapon[0].Type = MODEL_BOW+11;
 			c->Weapon[1].Type = MODEL_BOW+7;
 			SetCharacterScale(c);
-#endif	// _PVP_ATTACK_GUARD
 		}	
 		break;
-#endif //PSW_ADD_RESET_CHARACTER_POINT
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 	case 477:
 		OpenNpc(MODEL_XMAS2008_SNOWMAN);
 		c = CreateCharacter(Key,MODEL_XMAS2008_SNOWMAN,PositionX,PositionY);
@@ -14393,7 +14292,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.LifeTime = 100;
 		c->Object.Scale = 1.3f;
 		break;
-#endif //LDK_ADD_SNOWMAN_CHANGERING
 #ifdef PJH_ADD_PANDA_CHANGERING
 	case 503:
 		c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
@@ -14401,14 +14299,11 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.SubType = MODEL_PANDA;
 		break;
 #endif //PJH_ADD_PANDA_CHANGERING
-#ifdef YDG_ADD_SKELETON_CHANGE_RING
 	case 548:
 		c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
 		::strcpy(c->ID, "Unknown");
 		c->Object.SubType = MODEL_SKELETON_CHANGED;
 		break;
-#endif	// YDG_ADD_SKELETON_CHANGE_RING
-#ifdef PBG_ADD_LITTLESANTA_NPC
 	case 468:
 	case 469:
 	case 470:
@@ -14441,16 +14336,12 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		 	strcpy(c->ID, "little santa");
 		}
 		break;
-#endif //PBG_ADD_LITTLESANTA_NPC
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 	case 478:
 		//델가도
 		OpenNpc(MODEL_NPC_SERBIS);
 		c = CreateCharacter(Key, MODEL_NPC_SERBIS, PositionX, PositionY);
 		strcpy(c->ID, "Unknown");
 		break;
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-#ifdef YDG_ADD_NEW_DUEL_NPC
 	case 479:
 		// 결투장 문지기 NPC 타이투스
 		OpenNpc(MODEL_DUEL_NPC_TITUS);
@@ -14459,8 +14350,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 1.1f;
 		c->Object.m_fEdgeScale = 1.2f;
 		break;
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef LDK_ADD_GAMBLE_NPC_MOSS
 	case 492:
 		{
 			OpenNpc(MODEL_GAMBLE_NPC_MOSS);
@@ -14476,8 +14365,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 			}
 		}
 		break;
-#endif //LDK_ADD_GAMBLE_NPC_MOSS
-#ifdef CSK_ADD_GOLDCORPS_EVENT
 	case 502:
 		OpenMonsterModel(128);
 		c = CreateCharacter(Key, MODEL_MONSTER01+128, PositionX, PositionY);
@@ -14539,7 +14426,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Distance = (float)(rand()%20)/10.0f;
 		c->Weapon[0].Type = -1;
 		c->Weapon[1].Type = -1;
-		// 머리 끝 본
 		BoneManager::RegisterBone(c, "Twintail_Hair24", 16);
 		BoneManager::RegisterBone(c, "Twintail_Hair32", 24);
 		break;
@@ -14567,8 +14453,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Weapon[0].Type = -1;
 		c->Weapon[1].Type = -1;
 		break;
-#endif // CSK_ADD_GOLDCORPS_EVENT
-#ifdef YDG_ADD_DOPPELGANGER_NPC
 	case 540:
 		OpenNpc(MODEL_DOPPELGANGER_NPC_LUGARD);
 		c = CreateCharacter(Key, MODEL_DOPPELGANGER_NPC_LUGARD, PositionX, PositionY);
@@ -14576,7 +14460,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 1.1f;
 		c->Object.m_fEdgeScale = 1.2f;
 		break;
-	case 541:	// 중간보상상자
+	case 541:
 		OpenNpc(MODEL_DOPPELGANGER_NPC_BOX);
 		c = CreateCharacter(Key, MODEL_DOPPELGANGER_NPC_BOX, PositionX, PositionY);
 		strcpy(c->ID, "Unknown");
@@ -14590,8 +14474,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 3.3f;
 		c->Object.m_fEdgeScale = 1.1f;
 		break;
-#endif	// YDG_ADD_DOPPELGANGER_NPC
-#ifdef ASG_ADD_GENS_NPC
 	case 543:
 		OpenNpc(MODAL_GENS_NPC_DUPRIAN);
 		c = CreateCharacter(Key, MODAL_GENS_NPC_DUPRIAN, PositionX, PositionY);
@@ -14604,8 +14486,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		strcpy(c->ID, "Unknown");
 		c->Object.Scale = 1.0f;
 		break;
-#endif	// ASG_ADD_GENS_NPC
-#ifdef LDS_ADD_NPC_UNITEDMARKETPLACE
 	case 545:
 		OpenNpc(MODEL_UNITEDMARKETPLACE_CHRISTIN);
 		c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_CHRISTIN, PositionX, PositionY);
@@ -14627,7 +14507,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 1.0f;
 		c->Object.m_fEdgeScale = 1.1f;
 		break;
-#endif // LDS_ADD_NPC_UNITEDMARKETPLACE
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
 	case 566:
 		OpenNpc(MODEL_TIME_LIMIT_QUEST_NPC_TERSIA);
@@ -14857,7 +14736,6 @@ BOOL PlayMonsterSoundGlobal(OBJECT * pObject)
 	return FALSE;
 }
 
-#ifdef CSK_REF_BACK_RENDERITEM
 bool IsBackItem(CHARACTER *c, int iType)
 {
 	int iBowType = gCharacterManager.GetEquipedBowType(c);
@@ -15109,4 +14987,3 @@ bool RenderCharacterBackItem(CHARACTER *c, OBJECT* o, bool bTranslate)
 
 	return bBindBack;
 }
-#endif // CSK_REF_BACK_RENDERITEM

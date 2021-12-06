@@ -52,33 +52,11 @@
 		#define LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT		// Æò¿ÂÀÇ´Ë º¸½º ¸ó½ºÅÍ ¸Þµà»ç ´« ÀÜ»ó ÀÌÆåÆ®(10.03.03)
 		#define LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_WAND_EFFECT	// Æò¿ÂÀÇ´Ë º¸½º ¸ó½ºÅÍ ¸Þµà»ç ÁöÆÎÀÌ ÀÌÆåÆ®(10.03.04)
 		#define LDK_MOD_EVERY_USE_SKILL_CAOTIC					// Ä«¿ÀÆ½ µð¼¼ÀÌ¾î ¸ó½ºÅÍ »ç¿ë °¡´ÉÇÏµµ·Ï ¼öÁ¤(10.03.08)
-		#define LDK_FIX_AIDA_OBJ41_UV_FIX						// ¾ÆÀÌ´¸Ê 41¹ø obj(ºû) uv °ª °íÁ¤(10.03.16)
-		#define LDK_ADD_AIDA_OBJ77_OBJ78						// ¾ÆÀÌ´¸Ê 77,78¹ø obj uvÈå¸§ Ãß°¡(10.03.18)
 	#endif // LDK_LDS_EXTENSIONMAP_HUNTERZONE
 
-	#define LJH_ADD_SUPPORTING_MULTI_LANGUAGE					// ´±¹¾îÁö¿ø (10.05.19)
-	#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-		#define LJH_ADD_RESTRICTION_ON_ID						// ID, ±æµåÀÌ¸§, Ä³¸¯ÅÍ¸íÀº ¿µ¾î, ¼ýÀÚ, Æ¯¼ö±âÈ£¸¸ »ç¿ëÇÒ¼ö ÀÖ°Ô Á¦ÇÑ(10.09.17)
-	#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 	#define YDG_ADD_MOVE_COMMAND_PROTOCOL						// ÀÌµ¿¸í·É ÇÁ·ÎÅäÄÝ Ãß°¡(/ÀÌµ¿ Á¦°Å) (2009.04.01) [2009.04.22 Å×¼·]
-
-	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 4]
-	#define LDK_MOD_GUARDIAN_DROP_RESIZE					// µ¥¸ó ¼öÈ£Á¤·É ¹´Ú¿¡ ³õ¿´À»¶§ »çÀÌÁî Á¶Á¤(10.03.04)
-	#define PBG_FIX_SATAN_VALUEINCREASE						// »çÅº Âø¿ë½Ã ¼öÄ¡ Áõ°¡ ¹ö±× ¼öÁ¤(10.04.07)
-	#define PBG_MOD_GUARDCHARMTEXT							// ¼öÈ£ÀÇºÎÀû¾ÆÅÛ ¹®±¸¼öÁ¤(10.04.14)
-	#define LJH_FIX_REARRANGE_INVISIBLE_CLOAK_LEVEL_FOR_CHECKING_REMAINING_TIME	// Åõ¸í¸ÁÅä(lv1~8)°ú ºí·¯µåÄ³½½(lv0~7)ÀÇ Â÷ÀÌ¶§¹®¿¡ 8·¹º§ Åõ¸í¸ÁÅä ¿ìÅ¬¸¯ ÇÒ ¶§ ½Ã°£ÀÌ ÀÌ»óÇÏ°Ô ³ª¿À´Â ¹ö±× ¼öÁ¤(10.07.07) 
-	#define ASG_FIX_MONSTER_MAX_COUNT_1024					// #define MAX_MONSTER 512 -> 1024·Î ¼öÁ¤(10.06.29)
-	#define LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER	// ´¸¥ ÇÃ·¹ÀÌ¾îÀÇ ÆêÀÌ Á¨À» ¸Ô¾îÁÖ´Â ¹ö±× ¼öÁ¤(10.05.10)
-	#define LJH_FIX_BUG_DISPLAYING_NULL_TITLED_QUEST_LIST			// ¼­¹ö¿¡¼­ ¹ÞÀº Ä½ºÆ® ÀÎµ¦½º°¡ Á¸ÀçÇÏÁö ¾Ê¾Æ (null)·Î Ç¥½ÃµÇ´Â Ç×¸ñÀº Ä½ºÆ® ¸ñ·ÏÀ» ¸¸µé¶§ ³ÖÁö ¾Êµµ·Ï ¼öÁ¤(10.04.14)
-	#define LJH_FIX_BUG_SELLING_ITEM_CAUSING_OVER_LIMIT_OF_ZEN		// ¼ÒÁöÇÑµµ¾×À» ÃÊ°úÇÏ´Â ÆÇ¸Å¾×ÀÇ ¾ÆÀÌÅÛÀ» ÆÈÁö ¸øÇÏ°Ô ¼­¹ö·Î ¸Þ¼¼Áöµµ º¸³»Áö ¾Êµµ·Ï ¼öÁ¤(10.04.15)				
-	#define PBG_FIX_CHARACTERSELECTINDEX					// Ä³¸¯ÅÍ ÀÎµ¦½º ¹ö±×¼öÁ¤(10.07.05)
+	
 #endif //SEASON5_4
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define KJH_FIX_INGAMESHOP_SENDGIFT_ELIXIROFCONTROL		// ÀÎ°ÔÀÓ¼¥ ¼±¹°ÇÏ±â¿¡¼­ ´Å©·Îµå°¡ ¾Æ´Ñ Å¬·¡½ºµµ ¼±¹°ÇÏ±â ¹ÞÀ»¼ö ÀÖ´Â¹®Á¦ ¼öÁ¤ (10.06.23)
-#define KJH_FIX_SELL_EXPIRED_UNICON_PET					// ±â°£Áö³­ À¯´ÏÄÜÆê »óÁ¡ÆÇ¸Å °¡´ÉÇÏ°Ô ¼öÁ¤ (10.06.08)
-#define KJH_FIX_SELL_EXPIRED_CRITICAL_WIZARD_RING		// ±â°£Áö³­ Ä¡¸íÀûÀÎ ¸¶¹ý»çÀÇ ¹ÝÁö »óÁ¡ÆÇ¸Å °¡´ÉÇÏ°Ô ¼öÁ¤ (10.06.08)
 
 
 //----------------------------------------------------------------------------------------------
@@ -141,9 +119,6 @@
 	// [ Season 5 - Part 3]
 	#define SEASON5_PART3
 	#ifdef SEASON5_PART3
-		//------------------------------------------------
-		// 1. ·Î·»½ÃÀå
-		// - ÀÌµ¿¼®
 		#define LDS_ADD_MAP_UNITEDMARKETPLACE					// ÅëÇÕ ½ÃÀå ¼­¹ö (·Î·» ½ÃÀå) Ãß°¡ (09.12.04)
 		#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 			#define LDS_ADD_NPC_UNITEDMARKETPLACE					// NPC ·Î·»½ÃÀå 1.º¸¼®· Á¶ÇÕ ¹× ÇØÃ¼ ¶ó¿ï, 2.½ÃÀå »óÀÎ Á¸®¾Æ, 3.¹°¾à ¹× ±âÅ¸ ÀâÈ­ ¾ÆÀÌÅÛ »óÀÎ Å©¸®½ºÆ¾ (09.12.15)
@@ -157,45 +132,17 @@
 		#define PBG_ADD_GENSRANKING
 		#define KJH_ADD_SKILLICON_RENEWAL
 		#define PBG_MOD_PREMIUMITEM_TRADE_0118						// Ä«¿À½º Ä«µå,ºÎÀû,Çà¿îÀÇºÎÀû ·¹µåºí·ç °Å·¡°¡´ÉÀ¸·Î ±âÈ¹º¯°æ(10.01.18)
-		#define KJH_FIX_INGAMESHOP_SCRIPTDOWN_BUG2				// ÀÎ°ÔÀÓ¼¥ ½ºÅ©¸³Æ® ´¿î·Îµå ¹ö±×¼öÁ¤ 2 (10.01.14)
 		#define ASG_ADD_QUEST_REQUEST_REWARD_TYPE				// Ä½ºÆ® ¿ä±¸»çÇ×, º¸»ó Ãß°¡(2009.12.15)
 		#define YDG_MOD_SKELETON_NOTSELLING						// ½ºÄÌ·¹Åæ Æê ¹ÝÁö ¾ÈÆÈ¸®°Ô ¼³Á¤(2010.01.20)
 		#define YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK			// º¯½Å¹ÝÁö ½ºÅÈ¿Ã¸±¶§ ¸¸·á Ã¼Å© (2010.01.25)
-		#define YDG_FIX_SKELETON_PET_CREATE_POSITION			// ½ºÄÌ·¹Åæ Æê »ý¼º À§Ä¡ ¼öÁ¤ (2010.01.26)
 	#endif // SEASON5_PART3
 
 	//-----------------------------------------------------------------------------
 	// [ Season 5 - Part 2]
 
-	#define PBG_MOD_PANDAPETRING_NOTSELLING						// Ææ´õ Æê ¹ÝÁö ¾ÈÆÈ¸®°Ô ¼³Á¤(10.01.11)
-	#define LJH_FIX_EXTENDING_OVER_MAX_TIME_4S_To_10S			// ÇØ¿Ü»ç¿ëÀÚµé ÀÏºÎ »ç¿ëÀÚ¿¡°Ô Ä³½Ã¼¥ÀÌ ¿­¸®Áö ¾Ê¾Æ Max TimeÀ» ±âÁ¸ 4ÃÊ¿¡¼­ 10ÃÊ·Î º¯°æ(09.12.17)
-	#define KJH_FIX_INGAMESHOP_SCRIPTDOWN_BUG					// ÀÎ°ÔÀÓ¼¥ ½ºÅ©¸³Æ® ´¿î·Îµå ¹ö±× (09.12.28)
-	#define LDK_FIX_EXPIREDPERIOD_ITEM_EQUIP_WARNING			// ¸¸·áµÈ ¾ÆÀÌÅÛ ÀÛ¿ëºÒ°¡ ¹× °æ°í 
-	#define LDK_FIX_EQUIPED_EXPIREDPERIOD_RING_EXCEPTION		// Âø¿ëÁßÀÎ ¸¸·áµÈ ¹ÝÁö ´É·ÂÄ¡ °è»ê ¿¹¿ÜÃ³¸®(09.12.11)
-	#define LDK_FIX_EQUIPED_EXPIREDPERIOD_AMULET_EXCEPTION		// Âø¿ëÁßÀÎ ¸¸·áµÈ ¸ñ°ÉÀÌ ´É·ÂÄ¡ °è»ê ¿¹¿ÜÃ³¸®(09.12.11)
-	#define LDS_FIX_VISUALRENDER_PERIODITEM_EXPIRED_RE			// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛµéÁß ¸ñ°ÉÀÌ, ¹ÝÁöµé¿¡ ´ëÇÑ ±â°£Á¦ Á¾·á ÀÌÈÄ »ç¿ë ºÒ´É Ã³¸® (ÀÎº¥Åä¸®»ó¿¡¼­ ºñÁÖ¾ó Ã³¸®¸¸.) (09.12.10)
-	#define KJH_FIX_SOURCE_CODE_REPEATED						// °°Àº ¼Ò½ºÄÚµå Áßº¹µÈ°Í ¼öÁ¤ (09.10.12)
 	#define ASG_MOD_QUEST_OK_BTN_DISABLE						// Ä½ºÆ® ÁøÇà È®ÀÎ ¹öÆ° ºñÈ°¼ºÈ­ »óÅÂ Ãß°¡(2009.11.23)
-	#define KJH_FIX_MOVE_ICARUS_EQUIPED_PANDA_CHANGE_RING		// ÆÒ´õº¯½Å¹ÝÁö Âø¿ëÈÄ ÀÌÄ«·ç½º·Î ÀÌµ¿ÇÒ ¼ö ¾ø´Â Çö»ó (09.11.30)
-	#define ASG_MOD_GUILD_RESULT_GENS_MSG						// ±æµå °¡ÀÔ½Ã °Õ½º °ü·Ã ¸Þ½ÃÁö.(2009.11.23)
-	#define LDK_MOD_BUFFTIMERTYPE_SCRIPT						// ¹öÇÁÅ¸ÀÌ¸Ó Å¸ÀÔ°ªÀ» buffEffect.txtÀÇ Viewport·Î ¹Þ¾Æ¼­ Àû¿ë(09.11.10) - enum.h : Å¸ÀÌ¸Ó ÇÊ¿äÇÑ ¹ö½º µî·Ï½Ã eBuffTimeType¿¡ µî·Ï¾ÈÇØµµ µÊ
-	#define ASG_FIX_GENS_JOINING_ERR_CODE_ADD					// °Õ½º °¡ÀÔ ¿¡·¯ ÄÚµå Ãß°¡.(¿¬ÇÕ±æµåÀå °ü·Ã)(2009.11.12)
-	#define KJH_FIX_INGAMESHOP_INIT_BANNER						// ÀÎ°ÔÀÓ¼¥ ¹è³Ê ´¿î·Îµå ÈÄ ÃÊ±âÈ­µÇÁö ¾Ê¾Æ Render°¡ ¾ÈµÅ´Â Çö»ó (09.11.10)
-	#define LDK_MOD_PC4_GUARDIAN_EXPIREDPERIOD_NOTPRINT_INFO	// Ä³¸¯ÅÍÁ¤º¸Ã¢¿¡¼­ ¸¸·áµÈ µ¥¸ó, ¼öÈ£Á¤·Â ¼öÄ¡ Ç¥½Ã ¾ÈÇÔ(09.11.12)
-	#define LDK_MOD_ITEM_DROP_TRADE_SHOP_EXCEPTION				// Ä«¿À½ººÎÀû,Ä«¿À½ºÄ«µå,µ¥¸ó,¼öÈ£Á¤·É,ÆÒ´õÆê,ÆÒ´õº¯½Å¹ÝÁö,¸¶¹ý»çÀÇ¹ÝÁö ÀÏ¹Ý¾ÆÀÌÅÛ½Ã ¹ö¸®±â,°³ÀÎ»óÁ¡,°³ÀÎ°Å·¡ °¡´ÉÇÏµµ·Ï Ã³¸®(09.11.16)
-	#define YDG_ADD_GM_DISCHARGE_STAMINA_DEBUFF					// GMÀÌ °Å´Â ½ºÅÂ¹Ì³Ê ¹æÀü µð¹öÇÁ (2009.11.13)
-	#define PBG_FIX_MSGBUFFERSIZE								// ¸Þ½ÃÁö¹Ú½º³» ¹®±¸ Àß¸®´Â ¹ö±×¼öÁ¤(09.11.13)
-	#define PBG_FIX_MSGTITLENUM									// ¸Þ½ÃÁö¹Ú½º title¹®±¸ Àß¸ø³ª¿À´Â ¹ö±× ¼öÁ¤(09.11.13)
-	#define LDS_MOD_MODIFYTEXT_TOPAZRING_SAPIRERING				// »çÆÄÀÌ¾î¸µ°ú ÅäÆÄÁî ¸µÀÇ ÅØ½ºÆ® º¯°æ (09.11.06)
-	#define LDK_MOD_TRADEBAN_ITEMLOCK_AGAIN						// ÀÏºÎ À¯·á ¾ÆÀÌÅÛÁß Æ®·¹ÀÌµå °¡´É ºÒ°¡´É º¯°æ(NOT DEFINE Ã³¸®)(09.10.29) (±âÈ¹¿¡¼­ ¼ö½Ã·Î ¹²ñ ¤Ñ.¤Ñ+)
-	#define LDK_FIX_PERIODITEM_SELL_CHECK						// ÆÇ¸Å½Ã ±â°£Á¦ ¾ÆÀÌÅÛ È®ÀÎ Ãß°¡(09.11.09)
-	#define KJH_MOD_SHOP_SCRIPT_DOWNLOAD						// ¼¥ ½ºÅ©¸³Æ® ´¿î·Îµå ¹æ½Ä º¯°æ (09.11.09)
-	#define KJH_FIX_SHOP_EVENT_CATEGORY_PAGE					// ¼¥ ÀÌº¥Æ® Ä«Å×°í¸® ÆäÀÌÁö ¹ö±× ¼öÁ¤ (09.11.09)
-	#define KJH_FIX_EXPIRED_PERIODITEM_TOOLTIP					// ±â°£¸¸·áµÈ ±â°£Á¦ ¾ÆÀÌÅÛÀÇ ÅøÆÁRender°¡ ¾ÈµÅ´Â ¹ö±× ¼öÁ¤ (09.11.09)
-	#define LDS_MOD_INGAMESHOPITEM_RING_AMULET_CHARACTERATTR	// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛµéÁß ¹ÝÁö, ¸ñ°ÉÀÌ ½Ã¸®ÁîÀÇ STATUS ¼öÄ¡ ¹Ý¿µ.
-	#define KJH_MOD_RENDER_INGAMESHOP_KEEPBOX_ITEM				// °ÔÀÓ¼¥ º¸°üÇÔ ¾ÆÀÌÅÛÀÇ ¼ö·®ÀÌ 1°³ÀÏ¶§ Render ¾ÈÇÔ (2009.11.03)
-	#define LDK_MOD_INGAMESHOP_ITEM_CHANGE_VALUE				// È¥ÇÕÀ¯·áÈ­ ¾ÆÀÌÅÛ °¡°Ý º¯°æ(09.10.29)
-	#define KJH_MOD_INGAMESHOP_PATCH_091028						// ÀÎ°ÔÀÓ¼¥ ¼öÁ¤ - ÀÌº¥Æ® Ä«Å×°í¸®, ÀÎ°ÔÀÓ¼¥ ¶óÀÌºê·¯¸® ¾÷µ¥ÀÌÆ® (09.10.28)
+
+	
 
 	#define SEASON5_PART2
 	#ifdef SEASON5_PART2
@@ -211,6 +158,7 @@
 			#define PBG_ADD_ITEMRESIZE
 			#define PBG_FIX_ITEMANGLE
 			#define PBG_ADD_MU_LOGO
+			#define KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 			//^#define PBG_ADD_CHARACTERSLOT
 			#define PBG_ADD_CHARACTERCARD
 			//^#define LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
@@ -268,7 +216,6 @@
 		#define ADD_SKELETON_PET							// ½ºÄÌ·¹Åæ Æê (2009.12.03)
 		#ifdef  ADD_SKELETON_PET
 			#define YDG_ADD_SKELETON_PET					// ½ºÄÌ·¹Åæ Æê 
-			#define YDG_FIX_SKELETON_PET_CREATE_POSITION	// ½ºÄÌ·¹Åæ Æê »ý¼º À§Ä¡ ¼öÁ¤ (2010.01.26)
 			#ifndef KJH_ADD_PERIOD_ITEM_SYSTEM					// #ifndef
 				#define LJH_FIX_IGNORING_EXPIRATION_PERIOD		// ÀÏº»¿¡´Â ¾ÆÁ÷ ±â°£Á¦°¡ Àû¿ëµÇÁö ¾ÊÀ¸¹Ç·Î bExpiredPeriod¸¦ »ç¿ëÇÏÁö ¾Êµµ·Ï ¼öÁ¤(2010.02.11) - ±â°£Á¦ ½Ã½ºÅÛ µµÀÔ ÈÄ »èÁ¦
 			#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
@@ -392,9 +339,6 @@
 			#define ASG_MOD_3D_CHAR_EXCLUSION_UI				// 3D Ä³¸¯ÅÍ Ç¥ÇöÀÌ ¾ø´Â UI·Î ¹²Þ.(2009.08.03)
 		#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
-
-		// Season 5					
-		#define KJH_PBG_ADD_SEVEN_EVENT_2008					// ±¹³» »ó¿ëÈ­ 7ÁÖ³â ÀÌº¥Æ®	(´ÞÅä³¢)(2008.10.30) 
 		#define LJH_MOD_POSITION_OF_REGISTERED_LUCKY_COIN		// Çà¿îÀÇ µ¿Àü µî·Ï Á¦ÇÑ ¼ö°¡ 2^31ÀÌ µÊ¿¡ µû¶ó µ¿ÀüÀÌ¹ÌÁö¿Í °ãÄ¡´Â Çö»ó ¸·±âÀ§ÇØ ¼öÁ¤(2010.02.16)							
 		#define YDG_MOD_SEPARATE_EFFECT_SKILLS					// ½ºÅ³ °Ë»çÇÏ´Â ÀÌÆåÆ® ºÐ¸® (ºí·¯µå ¾îÅÃ µî) (2009.08.10)
 		#define ASG_ADD_NEW_DIVIDE_STRING						// »õ·Î¿î ¹®Àå ³ª´©±â ±â´É.(2009.06.08)

@@ -30,9 +30,7 @@ void CMixItem::Reset()
 	m_bFenrirAddedItem = FALSE;
 	m_bIsCharmItem = FALSE;
 	m_bIsChaosCharmItem = FALSE;
-#ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
 	m_bIsJewelItem = FALSE;
-#endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
 	m_wHarmonyOption = 0;
 	m_wHarmonyOptionLevel = 0;
 	m_bMixLuck = FALSE;
@@ -969,11 +967,9 @@ float CMixRecipes::MixrateFactor()
 	case MRCP_LEVEL1:
 		fValue = m_iFirstItemLevel;
 		break;
-#ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
 	case MRCP_NONJEWELITEM:
 		fValue = m_dwTotalNonJewelItemValue;
 		break;
-#endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
 	}
 	++m_iMixRateIter;
 	return fValue;
@@ -1110,12 +1106,10 @@ BOOL CMixRecipes::IsChaosCharmItem(CMixItem & rSource)
 	return rSource.m_bIsChaosCharmItem;
 }
 
-#ifdef YDG_FIX_SOCKETSPHERE_MIXRATE
 BOOL CMixRecipes::IsJewelItem(CMixItem & rSource)
 {
 	return rSource.m_bIsJewelItem;
 }
-#endif	// YDG_FIX_SOCKETSPHERE_MIXRATE
 
 void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char * szFileName)
 {

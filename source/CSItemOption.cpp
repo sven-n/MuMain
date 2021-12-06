@@ -1323,9 +1323,9 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum, b
 
 	count1 = Search_From_EquippedSetItemNameSequence( setOption.strSetName );
 
-	if( BYTE_MAX == count1 )
+	if( 255 == count1 )
 	{
-		byLimitOptionNum = 0;
+		byLimitOptionNum = 0; 
 	}	
 	else
 	{

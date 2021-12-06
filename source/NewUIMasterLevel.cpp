@@ -205,13 +205,11 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
 	case CLASS_LORDEMPEROR:
 		GetJob = 16;
 		break;
-#ifdef PJH_ADD_MASTERSKILL
 	case CLASS_SUMMONER:
 	case CLASS_BLOODYSUMMONER:
 	case CLASS_DIMENSIONMASTER:
 		GetJob = 20;
 		break;
-#endif
 	}
 
 	int Loc[4] = {37,237,362,488};
@@ -448,11 +446,7 @@ int Point_R = 0,Point_Tot = 0;
 							sprintf(TextList[StartText+2],GlobalText[1775],Master_Skill_Data[sy][Num_Master]);
 							if(Kind == true)
 							{
-#ifdef PJH_SEASON4_MASTER_RANK4
 								if(Check_View == true)
-#else
-								if(!(AT_SKILL_MANA_RECOVER == Skill_Num || AT_SKILL_HP_RECOVER == Skill_Num || AT_SKILL_SD_RECOVER == Skill_Num))
-#endif //PJH_SEASON4_MASTER_RANK4
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1776],SkillAttribute[Skill_Num + Num_Master].Damage);
 								else
 								{
@@ -463,11 +457,9 @@ int Point_R = 0,Point_Tot = 0;
 							{
 								if(AT_SKILL_TORNADO_SWORDA_UP == Skill_Num || AT_SKILL_TORNADO_SWORDB_UP == Skill_Num || AT_SKILL_HELL_FIRE_UP == Skill_Num
 									|| AT_SKILL_MANY_ARROW_UP == Skill_Num || AT_SKILL_BLAST_UP == Skill_Num || AT_SKILL_FIRE_BUST_UP == Skill_Num
-#ifdef PJH_SEASON4_MASTER_RANK4
 									|| AT_SKILL_EVIL_SPIRIT_UP == Skill_Num
 									|| AT_SKILL_EVIL_SPIRIT_UP_M == Skill_Num
 									|| AT_SKILL_ICE_UP == Skill_Num
-#endif //PJH_SEASON4_MASTER_RANK4
 									)
 								{
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
@@ -477,7 +469,6 @@ int Point_R = 0,Point_Tot = 0;
 									}
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
 								}
-#ifdef PJH_SEASON4_MASTER_RANK4
 								else
 								if(AT_SKILL_HP_RECOVER == Skill_Num)
 								{
@@ -494,15 +485,12 @@ int Point_R = 0,Point_Tot = 0;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1780],SkillAttribute[Skill_Num + Num_Master].Damage);
 								}
 								else
-#endif //#ifdef PJH_SEASON4_MASTER_RANK4
-#ifdef PJH_ADD_MASTERSKILL
 								if( AT_SKILL_ALICE_CHAINLIGHTNING_UP == Skill_Num
 									||	AT_SKILL_ALICE_DRAINLIFE_UP == Skill_Num)
 								{
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
 								}
 								else
-#endif
 								if(AT_SKILL_ASHAKE_UP == Skill_Num)
 								{
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
@@ -514,7 +502,6 @@ int Point_R = 0,Point_Tot = 0;
 								}
 								else
 								if(AT_SKILL_SOUL_UP == Skill_Num
-#ifdef PJH_SEASON4_MASTER_RANK4
 									|| AT_SKILL_BLOW_UP == Skill_Num
 									|| AT_SKILL_ANGER_SWORD_UP == Skill_Num
 									|| AT_SKILL_DEF_POWER_UP == Skill_Num
@@ -522,7 +509,6 @@ int Point_R = 0,Point_Tot = 0;
 									|| AT_SKILL_BLOOD_ATT_UP == Skill_Num
 									|| AT_SKILL_POWER_SLASH_UP == Skill_Num
 									|| AT_SKILL_FIRE_SCREAM_UP == Skill_Num
-#endif //PJH_SEASON4_MASTER_RANK4
 									)
 								{
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
@@ -549,21 +535,18 @@ int Point_R = 0,Point_Tot = 0;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
 								}
 								else
-#ifdef PJH_SEASON4_MASTER_RANK4
 								if(AT_SKILL_MANA_MINUS_ADD == Skill_Num)
 								{
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1788],SkillAttribute[Skill_Num + Num_Master].Damage);
 								}
 								else
-#endif //PJH_SEASON4_MASTER_RANK4
 								sprintf(TextList[StartText+Add_Tex+3],GlobalText[1777],SkillAttribute[Skill_Num + Num_Master].Damage);
 							}
 							StartText = 6 + Add_Tex;
-#ifdef PJH_SEASON4_MASTER_RANK4
+
 							if(Get_Magic == 5)
 								ib = StartText;
 							else
-#endif //PJH_SEASON4_MASTER_RANK4
 								ib = StartText+4 + Add_Tex;
 							Add_Tex = 0;
 						}
@@ -574,10 +557,9 @@ int Point_R = 0,Point_Tot = 0;
 								ib = 10 + Add_Tex;
 							else
 							 ib = 6 + Add_Tex;
-#ifdef PJH_SEASON4_MASTER_RANK4
+
 							if(Get_Magic == 0)
 								ib = 6 + Add_Tex;
-#endif //#ifdef PJH_SEASON4_MASTER_RANK4
 							sprintf(TextList[StartText],"         ");
 							sprintf(TextList[StartText+1],GlobalText[1774],Dan);
 							if(Set_Master <= 0)
@@ -596,15 +578,10 @@ int Point_R = 0,Point_Tot = 0;
 							sprintf(TextList[StartText+Add_Tex+2],GlobalText[1775],Master_Skill_Data[sy][Num_Master]);
 							if(Kind == true)
 							{
-#ifdef PJH_SEASON4_MASTER_RANK4
 								if(Check_View == true)
-#else
-								if(!(AT_SKILL_MANA_RECOVER == Skill_Num || AT_SKILL_HP_RECOVER == Skill_Num || AT_SKILL_SD_RECOVER == Skill_Num))
-#endif //PJH_SEASON4_MASTER_RANK4
 								sprintf(TextList[StartText+Add_Tex+3],GlobalText[1776],SkillAttribute[Skill_Num + Num_Master].Damage);
 								else
 								{
-//									Add_Tex++;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1780 + ((Skill_Num - AT_SKILL_MANA_RECOVER)/5)],SkillAttribute[Skill_Num + Num_Master].Damage);
 								}
 							}
@@ -612,11 +589,9 @@ int Point_R = 0,Point_Tot = 0;
 							{
 								if(AT_SKILL_TORNADO_SWORDA_UP == Skill_Num || AT_SKILL_TORNADO_SWORDB_UP == Skill_Num || AT_SKILL_HELL_FIRE_UP == Skill_Num
 									|| AT_SKILL_MANY_ARROW_UP == Skill_Num || AT_SKILL_BLAST_UP == Skill_Num || AT_SKILL_FIRE_BUST_UP == Skill_Num
-#ifdef PJH_SEASON4_MASTER_RANK4
 									|| AT_SKILL_EVIL_SPIRIT_UP == Skill_Num
 									|| AT_SKILL_EVIL_SPIRIT_UP_M == Skill_Num
 									|| AT_SKILL_ICE_UP == Skill_Num
-#endif //PJH_SEASON4_MASTER_RANK4
 									)
 								{
 									if(SkillAttribute[Skill_Num + Num_Master].Distance > 0)
@@ -626,7 +601,6 @@ int Point_R = 0,Point_Tot = 0;
 									}
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
 								}
-#ifdef PJH_SEASON4_MASTER_RANK4
 								else
 								if(AT_SKILL_HP_RECOVER == Skill_Num)
 								{
@@ -642,7 +616,6 @@ int Point_R = 0,Point_Tot = 0;
 								{
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1780],SkillAttribute[Skill_Num + Num_Master].Damage);
 								}
-#endif //#ifdef PJH_SEASON4_MASTER_RANK4
 								else
 								if(AT_SKILL_ASHAKE_UP == Skill_Num)
 								{
@@ -690,38 +663,31 @@ int Point_R = 0,Point_Tot = 0;
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
 								}
 								else
-#ifdef PJH_ADD_MASTERSKILL
 								if(	AT_SKILL_ALICE_CHAINLIGHTNING_UP == Skill_Num
 									||	AT_SKILL_ALICE_DRAINLIFE_UP == Skill_Num)
 								{
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[175],SkillAttribute[Skill_Num + Num_Master].Mana);
 								}
 								else
-#endif
-#ifdef PJH_SEASON4_MASTER_RANK4
 								if(AT_SKILL_MANA_MINUS_ADD == Skill_Num)
 								{
 									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1788],SkillAttribute[Skill_Num + Num_Master].Damage);
 								}
 								else
-#endif //PJH_SEASON4_MASTER_RANK4
 								sprintf(TextList[StartText+Add_Tex+3],GlobalText[1777],SkillAttribute[Skill_Num + Num_Master].Damage);
 							}
 							if(ib == 6 + Add_Tex)
 								ib = 10 + Add_Tex;
 							else
 								ib = StartText+4 + Add_Tex;
-#ifdef PJH_SEASON4_MASTER_RANK4
 							if(Get_Magic == 0)
 								ib = 6 + Add_Tex;
-#endif //PJH_SEASON4_MASTER_RANK4
 
 						}
 
 						if(AT_SKILL_LIFE_UP == Skill_Num || AT_SKILL_TORNADO_SWORDA_UP == Skill_Num || AT_SKILL_TORNADO_SWORDB_UP == Skill_Num
 							|| AT_SKILL_SOUL_UP == Skill_Num || AT_SKILL_MANY_ARROW_UP == Skill_Num || AT_SKILL_ASHAKE_UP == Skill_Num
 							|| AT_SKILL_FIRE_BUST_UP == Skill_Num || AT_SKILL_BLAST_UP == Skill_Num || AT_SKILL_HELL_FIRE_UP == Skill_Num
-#ifdef PJH_SEASON4_MASTER_RANK4
 							|| AT_SKILL_PET_DURABLE_SPD_DN  == Skill_Num
 							|| AT_SKILL_BLOW_UP == Skill_Num
 							|| AT_SKILL_ANGER_SWORD_UP == Skill_Num
@@ -733,13 +699,10 @@ int Point_R = 0,Point_Tot = 0;
 							|| AT_SKILL_BLOOD_ATT_UP == Skill_Num
 							|| AT_SKILL_POWER_SLASH_UP == Skill_Num
 							|| AT_SKILL_FIRE_SCREAM_UP == Skill_Num
-#endif //PJH_SEASON4_MASTER_RANK4
-#ifdef PJH_ADD_MASTERSKILL
 							|| AT_SKILL_ALICE_SLEEP_UP == Skill_Num
 							|| AT_SKILL_ALICE_CHAINLIGHTNING_UP == Skill_Num
 							|| AT_SKILL_LIGHTNING_SHOCK_UP == Skill_Num
 							|| AT_SKILL_ALICE_DRAINLIFE_UP == Skill_Num
-#endif //
 							)
 						{
 							sprintf(TextList[ib],"         ");
@@ -759,7 +722,6 @@ int Point_R = 0,Point_Tot = 0;
 							case AT_SKILL_TORNADO_SWORDA_UP:
 							case AT_SKILL_TORNADO_SWORDB_UP:
 							case AT_SKILL_HELL_FIRE_UP:
-#ifdef PJH_SEASON4_MASTER_RANK4
 							case AT_SKILL_ICE_UP:
 							case AT_SKILL_EVIL_SPIRIT_UP:
 							case AT_SKILL_EVIL_SPIRIT_UP_M:
@@ -768,24 +730,17 @@ int Point_R = 0,Point_Tot = 0;
 							case AT_SKILL_BLOOD_ATT_UP:
 							case AT_SKILL_POWER_SLASH_UP:
 							case AT_SKILL_FIRE_SCREAM_UP:
-#endif //#ifdef PJH_SEASON4_MASTER_RANK4
-#ifdef PJH_ADD_MASTERSKILL
 							case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
 							case AT_SKILL_LIGHTNING_SHOCK_UP:
 							case AT_SKILL_ALICE_DRAINLIFE_UP:
-#endif
 								sprintf(TextList[ib],GlobalText[1784]);
 								break;
-#ifdef PJH_SEASON4_MASTER_RANK4
-#ifdef PJH_ADD_MASTERSKILL
 							case AT_SKILL_ALICE_SLEEP_UP:
-#endif //PJH_ADD_MASTERSKILL
 							case AT_SKILL_PET_DURABLE_SPD_DN:
 							case AT_SKILL_DEF_POWER_UP:
 							case AT_SKILL_ATT_POWER_UP:
 								sprintf(TextList[ib],GlobalText[1787]);
 								break;
-#endif //
 							};
 							ib++;
 						}
@@ -795,7 +750,6 @@ int Point_R = 0,Point_Tot = 0;
 			}
 		}
 	}
-//////////////////////////////////////////////////////////////////////////
 }
 
 bool SEASON3B::CNewUIMasterLevel::Update()

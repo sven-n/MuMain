@@ -771,7 +771,7 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnOk;
 		CNewUIMessageBoxButton m_BtnCancel;
 	};
-#ifdef YDG_ADD_NEW_DUEL_UI
+
 	class CDuelResultMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -802,7 +802,6 @@ namespace SEASON3B
 		char m_szWinnerID[24];
 		char m_szLoserID[24];
 	};
-#endif	// YDG_ADD_NEW_DUEL_UI
 
 	class CGuild_ToPerson_Position : public CNewUIMessageBoxBase
 	{
@@ -858,8 +857,6 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnCancel;
 	};	
 
-
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	class CCherryBlossomMsgBox : public CNewUIMessageBoxBase
 	{
 	public:	
@@ -894,7 +891,6 @@ namespace SEASON3B
 
 		int m_iMiddleCount;
 	};
-#endif // CSK_EVENT_CHERRYBLOSSOM
 	
 #ifdef LEM_ADD_LUCKYITEM
 	class CLuckyTradeMenuMsgBox : public CNewUIMessageBoxBase
@@ -930,7 +926,7 @@ namespace SEASON3B
 		int m_iMiddleCount;
 	};
 #endif // LEM_ADD_LUCKYITEM
-#ifdef ADD_SOCKET_MIX
+
 	class CSeedMasterMenuMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -996,10 +992,7 @@ namespace SEASON3B
 
 		int m_iMiddleCount;
 	};
-#endif	// ADD_SOCKET_MIX
 
-
-#ifdef PSW_ADD_RESET_CHARACTER_POINT
 	class CResetCharacterPointMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -1030,9 +1023,7 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnExit;
 		int m_iMiddleCount;
 	};
-#endif	// PSW_ADD_RESET_CHARACTER_POINT
-	
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
+
 	class CDelgardoMainMenuMsgBox : public CNewUIMessageBoxBase
 	{
 	public:
@@ -1065,8 +1056,6 @@ namespace SEASON3B
 
 		int m_iMiddleCount;
 	};
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-
 	
 	class CTradeZenMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
@@ -1139,8 +1128,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 	};
 
-	//////////////////////////////////////////////////////////////////////////
-#ifdef LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 	class CStorageLockMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
 	{
 	public:
@@ -1161,7 +1148,6 @@ namespace SEASON3B
 		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);		
 	};
 
-#endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 
 	class CPasswordKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
 	{
@@ -1376,23 +1362,19 @@ namespace SEASON3B
 	public:
 		bool SetLayout();
 	};
-#ifdef YDG_ADD_NEW_DUEL_UI
+
 	class CDuelResultMsgBoxLayout : public TMsgBoxLayout<CDuelResultMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
-#endif	// YDG_ADD_NEW_DUEL_UI
 
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	class CCherryBlossomMsgBoxLayout : public TMsgBoxLayout<CCherryBlossomMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
-#endif // CSK_EVENT_CHERRYBLOSSOM
 
-#ifdef ADD_SOCKET_MIX
 	class CSeedMasterMenuMsgBoxLayout : public TMsgBoxLayout<CSeedMasterMenuMsgBox>
 	{
 	public:
@@ -1403,24 +1385,18 @@ namespace SEASON3B
 	public:
 		bool SetLayout();
 	};
-#endif	// ADD_SOCKET_MIX
 	
-
-#ifdef PSW_ADD_RESET_CHARACTER_POINT
 	class CResetCharacterPointMsgBoxLayout : public TMsgBoxLayout<CResetCharacterPointMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
-#endif //PSW_ADD_RESET_CHARACTER_POINT
 
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 	class CDelgardoMainMenuMsgBoxLayout : public TMsgBoxLayout<CDelgardoMainMenuMsgBox>
 	{
 	public:
 		bool SetLayout();
 	};
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 
 #ifdef LEM_ADD_LUCKYITEM
 	class CLuckyTradeMenuMsgBoxLayout : public TMsgBoxLayout<CLuckyTradeMenuMsgBox>

@@ -1112,9 +1112,8 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 		}
 		else
 		{
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 			BOOL bIsRendered = TRUE;
-#endif	// LDK_ADD_SNOWMAN_CHANGERING
+
 			if(g_isCharacterBuff(o, eDeBuff_Poison) && g_isCharacterBuff(o, eDeBuff_Freeze))
 			{
 			    Vector(0.3f,1.f,0.8f,b->BodyLight);
@@ -1127,12 +1126,10 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			{
 			    Vector(0.3f,0.5f,1.f,b->BodyLight);
 			}
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 			else if(g_isCharacterBuff(o, eDeBuff_BlowOfDestruction))
 			{
 				Vector(0.3f,0.5f,1.f,b->BodyLight);
 			}
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION	
 
             if ( o->Type==MODEL_MONSTER01+35 || o->Type==MODEL_MONSTER01+15 || o->Type==MODEL_MONSTER01+50 || o->Type==MODEL_MONSTER01+51 )
             {
@@ -1212,7 +1209,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->EndRender();
 			}
 			else
-#ifdef ADD_SOCKET_MIX
 			if (o->Type == MODEL_SEED_MASTER)
 			{
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1220,8 +1216,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderMesh(1,RENDER_TEXTURE|RENDER_BRIGHT,fLumi,1,fLumi,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 			}
 			else
-#endif	// ADD_SOCKET_MIX
-#ifdef LOREN_RAVINE_EVENT
 			if(o->Type == MODEL_MONSTER01+45)
 			{
 				if(ExtraMon)
@@ -1242,7 +1236,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				}
 			}
 			else
-#endif // LOREN_RAVINE_EVENT
 			if(o->Type==MODEL_MONSTER01+42 && o->SubType==1)
 			{
 				b->BeginRender(o->Alpha);
@@ -1819,26 +1812,21 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 	      		b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,0,o->Alpha,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1);
 	      		b->RenderMesh(1,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,1,o->Alpha,-WorldTime*0.001f,o->BlendMeshTexCoordV,-1);
 			}
-#ifdef ASG_ADD_SUMMON_RARGLE
 			else if (o->Type == MODEL_SUMMONER_SUMMON_LAGUL)
 			{
 				b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,0,o->Alpha,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1);
 	      		b->RenderMesh(1,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,1,o->Alpha,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,-1);
 			}
-#endif	// ASG_ADD_SUMMON_RARGLE
-#ifdef ADD_RAKLION_IRON_KNIGHT
 			else if (o->Type>=MODEL_EFFECT_BROKEN_ICE0 && o->Type<=MODEL_EFFECT_BROKEN_ICE3)
 			{
 				VectorCopy(o->Light, b->BodyLight);
 	      		b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,0,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif	// ADD_RAKLION_IRON_KNIGHT
 			else if( o->Type == MODEL_MOVE_TARGETPOSITION_EFFECT )
 			{
 				Vector(1.0f, 0.7f, 0.3f, b->BodyLight);
 				b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight);
 			}
-#ifdef ADD_SOCKET_ITEM
 			else if( o->Type == MODEL_ARROW_DARKSTINGER )
 			{
  				b->BodyLight[0] = 0.7f;
@@ -1862,14 +1850,10 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				else
 					b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, 0, o->Alpha, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);	
 			}
-#endif // ADD_SOCKET_ITEM
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 			else if( o->Type == MODEL_ARROW_GAMBLE )
 			{
 				b->RenderMesh(0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, 0, o->Alpha, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 			}
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-#ifdef LDK_ADD_PC4_GUARDIAN
 			else if( o->Type == MODEL_HELPER+64  )
 			{
 				b->RenderBody(RENDER_TEXTURE,o->Alpha ,o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1879,8 +1863,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			{
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 			else
 			{
 				bIsRendered = FALSE;
@@ -1945,8 +1927,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderMesh(3, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 				b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,1,0.5f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif //LDK_ADD_SNOWMAN_CHANGERING
-#ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 			else if( o->Type == MODEL_FEATHER_FOREIGN )
 			{
 				if(o->SubType == 2 || o->SubType == 3)
@@ -1954,8 +1934,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				else
 					b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, 0, o->Alpha, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);	
 			}
-#endif //LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 			else if( o->Type == MODEL_SWELL_OF_MAGICPOWER )
 			{
 				o->BlendMesh = 0;
@@ -1978,8 +1956,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				}
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#ifdef LDK_ADD_SNOWMAN_NPC
 			else if( o->Type == MODEL_XMAS2008_SNOWMAN_NPC )
 			{
 				vec3_t vRelativePos, vWorldPos, Light;
@@ -2000,8 +1976,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderMesh(3, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 				b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,1,0.5f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif //LDK_ADD_SNOWMAN_NPC
-#ifdef LDK_ADD_SANTA_NPC
 			else if( o->Type == MODEL_XMAS2008_SANTA_NPC )
 			{
 				vec3_t vRelativePos, vWorldPos, Light;
@@ -2076,24 +2050,18 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 					Vector(0.8f, 0.8f, 0.9f, Light);
 
 					if(o->AnimationFrame < 1) o->AI = 0;
-#ifdef YDG_ADD_FIRECRACKER_ITEM
 					if( o->AI == 0&&o->AnimationFrame > 1 )
 					{
 						o->AI = 1;
 						CreateSprite(BITMAP_LIGHT, vWorldPos, 0.5f, Light, o);
 						CreateSprite(BITMAP_DS_SHOCK, vWorldPos, 0.15f, Light, o);
 						CreateEffect(BITMAP_FIRECRACKER0002,vWorldPos,o->Angle,Light,o->Skill);
-
-						//CreateJoint(BITMAP_JOINT_SPIRIT, o->Position, o->Position, o->Angle, 25, o, 1.f, -1, 0 );
 					}
-#endif	// YDG_ADD_FIRECRACKER_ITEM
 					break;
 				}
 
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif //LDK_ADD_SANTA_NPC
-#ifdef YDG_ADD_SANTA_MONSTER
 			else if( o->Type==MODEL_MONSTER01+155)
 			{
 				if (o->CurrentAction == MONSTER01_DIE)
@@ -2199,9 +2167,7 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 						}
 						b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 						b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-						// 꽃 목걸이 생략
 
-						// 진동
 						if (o->WeaponLevel == 0)
 						{
 							o->WeaponLevel = 1;
@@ -2225,8 +2191,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 					b->RenderMesh(1, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 				}
 			}
-#endif	// YDG_ADD_SANTA_MONSTER
-#ifdef PBG_ADD_LITTLESANTA_NPC
 			else if(o->Type >= MODEL_LITTLESANTA && o->Type <= MODEL_LITTLESANTA_END)
 			{
  				float fLumi = (sinf(WorldTime*0.004f) + 1.2f) * 0.5f + 0.1f;
@@ -2282,8 +2246,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				Vector(b->BodyLight[0]*0.5f, b->BodyLight[0]*0.5f, b->BodyLight[0]*0.5f, b->BodyLight);
 				b->RenderBody(RENDER_BRIGHT|RENDER_TEXTURE,0.9f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 			}
-#endif // PBG_ADD_LITTLESANTA_NPC
-#ifdef YDG_ADD_NEW_DUEL_NPC
 			else if (o->Type == MODEL_DUEL_NPC_TITUS)
 			{
 				b->RenderMesh(1,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
@@ -2333,8 +2295,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 					}
 				}
 			}
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef LDK_ADD_GAMBLE_NPC_MOSS
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
 			else if(o->Type == MODEL_GAMBLE_NPC_MOSS || o->Type == MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO)
 #else	// ASG_ADD_TIME_LIMIT_QUEST_NPC
@@ -2354,8 +2314,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
  				b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 			}
-#endif //LDK_ADD_GAMBLE_NPC_MOSS
-#ifdef YDG_ADD_DOPPELGANGER_NPC
 			else if(o->Type == MODEL_DOPPELGANGER_NPC_LUGARD)
 			{
 				b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
@@ -2431,23 +2389,16 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 					float fRot = (WorldTime*0.0006f) * 360.0f;
 					CreateSprite(BITMAP_DS_EFFECT, vPos, 2.5f, vLight, o, fRot);
 					Vector(0.9f, 0.7f, 0.0f, vLight);
-#ifdef LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
-					CreateSprite(BITMAP_SHINY+6, vPos, 0.8f, vLight, o, -fRot);
-#else // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
 					CreateSprite(BITMAP_SHINY+5, vPos, 0.8f, vLight, o, -fRot);
-#endif // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
 		           	float fLight = (sinf(WorldTime*0.01f)+1.0f)*0.5f*0.9f+0.1f;
 					Vector(1.0f*fLight, 1.0f*fLight, 1.0f*fLight, vLight);
 					CreateSprite(BITMAP_FLARE, vPos, 1.5f, vLight, o);
 				}
 			}
-#endif	// YDG_ADD_DOPPELGANGER_NPC
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 			else if(o->Type == MODEL_DOPPELGANGER_SLIME_CHIP)
 			{
 				b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 #ifdef PBG_ADD_CHARACTERSLOT
 			else if(o->Type == MODEL_SLOT_LOCK)
 			{
@@ -2455,7 +2406,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderMesh(0,RENDER_CHROME6|RENDER_BRIGHT,o->Alpha*0.4f,0,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 			}
 #endif //PBG_ADD_CHARACTERSLOT
-#ifdef KJH_ADD_09SUMMER_EVENT
 			else if( o->Type == MODEL_MONSTER01+154 )
 			{
 				if( o->CurrentAction == MONSTER01_DIE )
@@ -2480,14 +2430,10 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 				b->RenderMesh(0,RENDER_BRIGHT|RENDER_CHROME,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 			}
-#endif // KJH_ADD_09SUMMER_EVENT
-#ifdef PBG_ADD_AURA_EFFECT
 			else if(o->Type == MODEL_EFFECT_SD_AURA)
 			{
 				b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,0,o->BlendMeshLight,o->BlendMeshTexCoordU, WorldTime*0.0006f);
 			}
-#endif //PBG_ADD_AURA_EFFECT
-#ifdef LDS_ADD_NPC_UNITEDMARKETPLACE
 			else if(o->Type == MODEL_UNITEDMARKETPLACE_CHRISTIN)
 			{				
       			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -2542,7 +2488,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif // LDS_ADD_NPC_UNITEDMARKETPLACE
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
 			else if(o->Type == MODEL_TIME_LIMIT_QUEST_NPC_TERSIA)
 			{
@@ -2703,15 +2648,11 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			{
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,-2,1.f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 			else if(g_isCharacterBuff(o, eDeBuff_BlowOfDestruction))
 			{
-#ifdef YDG_FIX_BLOWOFDESTRUCTION_EFFECT_BUG
 				Vector(0.3f,0.5f,1.f,b->BodyLight);
-#endif	// YDG_FIX_BLOWOFDESTRUCTION_EFFECT_BUG
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,-2,1.f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 
 
 			if(o->Type==MODEL_MONSTER01+37)

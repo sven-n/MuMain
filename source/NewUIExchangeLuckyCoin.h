@@ -1,9 +1,5 @@
 // NewUIExchangeLuckyCoin.h: interface for the CNewUIExchangeLuckyCoin class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUIEXCHANGELUCKYCOIN_H__77605429_E37C_4CE1_A112_CD8BD7EC8A16__INCLUDED_)
-#define AFX_NEWUIEXCHANGELUCKYCOIN_H__77605429_E37C_4CE1_A112_CD8BD7EC8A16__INCLUDED_
 
 #pragma once
 
@@ -11,9 +7,6 @@
 #include "NewUIManager.h"
 #include "NewUIMyInventory.h"
 #include "NewUIButton.h"
-//#include "NewUIMessageBox.h"
-
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 
 namespace SEASON3B
 {
@@ -43,19 +36,19 @@ namespace SEASON3B
 	public:
 		enum 
 		{
-			MAX_EXCHANGE_BTN = 3,					// 교환버튼 갯수
-			EXCHANGE_BTN_VAL = 33,					// 행운의동전 교환버튼 사이의 간격
-			EXCHANGE_TEXT_VAL = 14,					// Text사이의 간격
+			MAX_EXCHANGE_BTN = 3,
+			EXCHANGE_BTN_VAL = 33,
+			EXCHANGE_TEXT_VAL = 14,
 		};
 		
 	private:
 		CNewUIManager*				m_pNewUIMng;
-		POINT						m_Pos;					// Window위치
-		POINT						m_TextPos;				// Text위치
-		POINT						m_FirstBtnPos;			// 첫번째 버튼위치
+		POINT						m_Pos;
+		POINT						m_TextPos;
+		POINT						m_FirstBtnPos;
 		
-		CNewUIButton				m_BtnExchange[MAX_EXCHANGE_BTN];	// 행운의동전 교환버튼
-		CNewUIButton				m_BtnExit;							// Exit Button Class
+		CNewUIButton				m_BtnExchange[MAX_EXCHANGE_BTN];
+		CNewUIButton				m_BtnExit;
 		
 		
 	public:
@@ -91,8 +84,4 @@ namespace SEASON3B
 		void UnloadImages();
 	};
 }
-
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-
-#endif // !defined(AFX_NEWUIEXCHANGELUCKYCOIN_H__77605429_E37C_4CE1_A112_CD8BD7EC8A16__INCLUDED_)
 

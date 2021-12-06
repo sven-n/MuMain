@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "Slider.h"
-
 #include "GaugeBar.h"
 #include "Input.h"
 

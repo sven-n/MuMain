@@ -113,9 +113,7 @@ void CHARACTER::Initialize()
 	for( int i = 0; i < 32; ++i ) OwnerID[i] = 0;
 #endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
-#ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 	m_pPostMoveProcess	= NULL;
-#endif // LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 
 	m_pTempParts = NULL;
 	m_iTempKey = 0;
@@ -143,8 +141,6 @@ PET_INFO* CHARACTER::GetEquipedPetInfo(int iPetType)
 {
 	return &(m_PetInfo[iPetType]);
 }
-
-#ifdef LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL
 
 void CHARACTER::PostMoveProcess_Active( unsigned int uiLimitCount )
 {
@@ -192,4 +188,3 @@ bool CHARACTER::PostMoveProcess_Process()
 	return true;
 }
 
-#endif // LDS_FIX_MODULE_POSTMOVECHARACTER_SKILL_WHEEL

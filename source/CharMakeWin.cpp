@@ -267,25 +267,12 @@ void CCharMakeWin::UpdateDisplay()
 {
 	int i;
 
-	BYTE byMaxClass = ::GetCreateMaxClass();
-#ifdef PBG_ADD_NEWCHAR_MONK
 	const int _SecondClassCnt = 3;
-	int _LimitClass[_SecondClassCnt] = {CLASS_DARK_LORD, CLASS_DARK, CLASS_RAGEFIGHTER};
 
-	for(i=0; i<=MAX_CLASS; ++i)
+	for(i=0; i<=(MAX_CLASS-1); ++i)
 	{
-		m_abtnJob[i].SetEnable(true);
+		m_abtnJob[i].SetEnable(true); 
 	}
-	for(i=0; i<(_SecondClassCnt-byMaxClass); ++i)
-	{
-		m_abtnJob[_LimitClass[i]].SetEnable(false);
-	}
-#else //PBG_ADD_NEWCHAR_MONK
-	for (i = 0; i <= byMaxClass - 1; ++i)
-		m_abtnJob[i].SetEnable(true);
-	for (; i < CLASS_SUMMONER; ++i)
-		m_abtnJob[i].SetEnable(false);
-#endif //PBG_ADD_NEWCHAR_MONK
 
 #ifdef PBG_ADD_CHARACTERCARD
 	for(i=0; i<CLASS_CHARACTERCARD_TOTALCNT; ++i)
@@ -307,8 +294,7 @@ void CCharMakeWin::UpdateDisplay()
 	if(m_nSelJob == CLASS_RAGEFIGHTER)
 		nText = 3152;
 #endif //PBG_ADD_NEWCHAR_MONK
-	m_nDescLine = ::SeparateTextIntoLines(GlobalText[nText], m_aszJobDesc[0],
-		CMW_DESC_LINE_MAX, CMW_DESC_ROW_MAX);
+	m_nDescLine = ::SeparateTextIntoLines(GlobalText[nText], m_aszJobDesc[0],CMW_DESC_LINE_MAX, CMW_DESC_ROW_MAX);
 
 	SelectCreateCharacter();
 }

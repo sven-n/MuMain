@@ -2,9 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef YDG_ADD_MAP_SANTA_TOWN
-
 #include "GMSantaTown.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -13,9 +10,7 @@
 #include "ZzzEffect.h"
 #include "w_MapHeaders.h"
 #include "DSPlaySound.h"
-#ifdef LDK_ADD_SANTA_NPC
 #include "ZzzOpenData.h"
-#endif //LDK_ADD_SANTA_NPC
 
 extern char* g_lpszMp3[NUM_MUSIC];
 
@@ -67,22 +62,18 @@ CHARACTER* CGMSantaTown::CreateMonster(int iType, int PosX, int PosY, int Key)
 
  	switch (iType)
  	{
-#ifdef LDK_ADD_SANTA_NPC
 	case 465:
 		OpenNpc(MODEL_XMAS2008_SANTA_NPC);
 		pCharacter = CreateCharacter(Key,MODEL_XMAS2008_SANTA_NPC,PosX,PosY);
 		::strcpy(pCharacter->ID, "산타클로스");
 		pCharacter->Object.Scale = 1.7f;
 		break;
-#endif //LDK_ADD_SANTA_NPC
-#ifdef LDK_ADD_SNOWMAN_NPC
 	case 467:
 		OpenNpc(MODEL_XMAS2008_SNOWMAN_NPC);
 		pCharacter = CreateCharacter(Key,MODEL_XMAS2008_SNOWMAN_NPC,PosX,PosY);
 		::strcpy(pCharacter->ID, "눈사람");
 		pCharacter->Object.Scale = 1.3f;
 		break;
-#endif //LDK_ADD_SNOWMAN_NPC
 	}
 
 	return pCharacter;
@@ -302,4 +293,3 @@ void CGMSantaTown::PlayBGM()
 		PlayMp3(g_lpszMp3[MUSIC_SANTA_TOWN]);
 	}
 }
-#endif	// YDG_ADD_MAP_SANTA_TOWN

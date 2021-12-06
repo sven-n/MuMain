@@ -302,7 +302,6 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 		case 75:
 			{
 				Vector(0.f, 0.f, 0.f, p);
-				//Vector(1.f, 1.f, 1.f, Light);
 				pModel->TransformPosition(BoneTransform[4],p,Position,false);
 				float fLumi = (sinf(WorldTime*0.002f) + 1.0f) * 0.5f;
 				Vector(fLumi, fLumi, fLumi, Light);
@@ -310,7 +309,6 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				CreateSprite(BITMAP_FLARE,Position,3.0f,Light,pObject, (WorldTime/10.0f));
 			}
 			break;
-#ifdef LDK_ADD_AIDA_OBJ77_OBJ78
 		case 77:
 		case 78:
 			{
@@ -321,7 +319,6 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 				pModel->EndRender();
 			}
 			break;
-#endif //LDK_ADD_AIDA_OBJ77_OBJ78
 	}
 
 	return true;

@@ -1,11 +1,7 @@
 // w_PetActionCollecter.cpp: implementation of the PetActionStand class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef LDK_ADD_NEW_PETPROCESS
-
 #include "w_PetActionCollecter.h"
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
@@ -172,19 +168,14 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 				break;
 			}
 
-			//------------------------------//
 			VectorCopy ( m_RootItem.position, targetPos );
 
 			float Angle = CreateAngle(obj->Position[0], obj->Position[1], targetPos[0], targetPos[1] );
 			obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
-			//------------------------------//
 
 			if(CompTimeControl(1000, m_dwSendDelayTime))
 			{
-#ifdef LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
 				if(&Hero->Object == obj->Owner)
-#endif //LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
-					//1000m
 					SendRequestGetItem(m_RootItem.itemIndex);
 			}	
 		}
@@ -197,12 +188,11 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 			targetPos[2] = obj->Owner->Position[2];// + 70 + (sinf(fRadHeight) * 70.0f);
 
 			VectorSubtract( targetPos, obj->Position, Range );
-			//------------------------------//
 
 			Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 			if(Distance >= FlyRange)
 			{
-				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] ); //test
+				float Angle = CreateAngle( obj->Position[0],obj->Position[1], targetPos[0],targetPos[1] );
 				obj->Angle[2] = TurnAngle2( obj->Angle[2], Angle, 20.0f );
 			}
 			
@@ -230,8 +220,6 @@ bool PetActionCollecter::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 bool PetActionCollecter::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD tick, bool bForceRender )
 {
 	if( NULL == obj || NULL == Owner ) return FALSE;
-
-#ifdef LDK_ADD_RUDOLPH_PET
 
 	BMD* b = &Models[obj->Type];
 	vec3_t Position, vRelativePos, Light;
@@ -282,8 +270,6 @@ bool PetActionCollecter::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, D
 		Vector( 0.8f, 0.8f, 0.2f, Light);
 		CreateSprite(BITMAP_SHINY+1, Position, (0.4f * fSize2), Light, obj);
 	}
-
-#endif //LDK_ADD_RUDOLPH_PET
 	return TRUE;
 }
 
@@ -348,5 +334,3 @@ bool PetActionCollecter::CompTimeControl(const DWORD& dwCompTime, DWORD& dwTime)
 	}
 	return false;
 }
-
-#endif //LDK_ADD_NEW_PETPROCESS

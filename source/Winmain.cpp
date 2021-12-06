@@ -32,9 +32,6 @@
 #include "UIMapName.h"		// rozy
 #include "./ExternalObject/leaf/ExceptionHandler.h"
 #include "./Utilities/Dump/CrashReporter.h"
-#ifdef PROTECT_SYSTEMKEY
-	//#include "ProtectSysKey.h"
-#endif // PROTECT_SYSTEMKEY
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "ProtocolSend.h"
 
@@ -58,9 +55,7 @@
 	#include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM
 
-#ifdef LDK_ADD_NEW_PETPROCESS
-	#include "w_PetProcess.h"
-#endif //LDK_ADD_NEW_PETPROCESS
+#include "w_PetProcess.h"
 
 #include <ThemidaInclude.h>
 
@@ -452,16 +447,12 @@ void DestroyWindow()
 	SAFE_DELETE_ARRAY( CharacterMemoryDump );
 	SAFE_DELETE_ARRAY( ItemAttRibuteMemoryDump );
 	SAFE_DELETE_ARRAY( RendomMemoryDump );
-
-#ifdef LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
 	SAFE_DELETE_ARRAY( ModelsDump );
-#endif // LDS_FIX_MEMORYLEAK_BMDOPEN2_DUMPMODEL
 	
 #ifdef DYNAMIC_FRUSTRUM
 	DeleteAllFrustrum();
 #endif //DYNAMIC_FRUSTRUM
 
-///////////////////////////////////////////
 	SAFE_DELETE(g_pMercenaryInputBox);
 	SAFE_DELETE(g_pSingleTextInputBox);
 	SAFE_DELETE(g_pSinglePasswdInputBox);

@@ -1,18 +1,11 @@
 // w_PetActionDemon.cpp: implementation of the PetActionDemon class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef LDK_ADD_NEW_PETPROCESS
-
 #include "w_PetActionDemon.h"
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 PetActionDemonPtr PetActionDemon::Make()
 {
 	PetActionDemonPtr petAction( new PetActionDemon );
@@ -59,7 +52,6 @@ bool PetActionDemon::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD t
 	float Distance = Range[0]*Range[0]+Range[1]*Range[1];
 	if( Distance >= FlyRange*FlyRange*FlyRange*FlyRange )
 	{
-		//¸Ê ÀÌµ¿½Ã ...
 		VectorCopy ( obj->Owner->Position, obj->Position );
 		VectorCopy ( obj->Owner->Angle, obj->Angle );
 	}
@@ -84,8 +76,6 @@ bool PetActionDemon::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD t
 
 bool PetActionDemon::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD tick, bool bForceRender )
 {
-#ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-
 	BMD* b = &Models[obj->Type];
 	vec3_t Position, vRelativePos;
 	vec3_t Light, Light2;
@@ -105,12 +95,12 @@ bool PetActionDemon::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 		switch(i)
 		{
 
-		case 0: //»Ô
+		case 0:
 			CreateSprite(BITMAP_LIGHTMARKS_FOREIGN, Position, 1.0f, Light, obj);
 			CreateSprite(BITMAP_FLARE, Position, 0.5f, Light, obj);
 			break;
 
-		case 1: //³¯°³
+		case 1:
 		case 2:
 		case 3:
 		case 4:
@@ -118,21 +108,18 @@ bool PetActionDemon::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 			CreateParticle(BITMAP_CLUD64, Position, obj->Angle, Light, 11, 0.5f);
 			break;
 
-		case 6: //³¯°³ ¹ßÅé
+		case 6:
 		case 7:
 			CreateSprite(BITMAP_LIGHTMARKS_FOREIGN, Position, 0.5f, Light, obj);
 			break;
 
-		case 8: //²¿¸®
+		case 8:
 			CreateParticle(BITMAP_FIRE_HIK3,Position,obj->Angle,Light,1,0.4f);
 			CreateSprite(BITMAP_FLARE, Position, 1.5f, Light, obj);
 			CreateSprite(BITMAP_FLARE, Position, 0.5f, Light2, obj);
 			break;
 		}
 	}
-
-#endif //LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 	return TRUE;
 }
 
-#endif //LDK_ADD_NEW_PETPROCESS

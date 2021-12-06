@@ -3,7 +3,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 #include "NewUIExchangeLuckyCoin.h"
 #include "NewUISystem.h"
 #include "NewUICommon.h"
@@ -279,11 +278,6 @@ void CNewUIExchangeLuckyCoin::UnloadImages()
 	DeleteBitmap( IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BTN_EXIT );		// Exit Button
 	DeleteBitmap( IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN );			// Exchange Button
 }
-
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
-
-
-
 
 
 

@@ -2629,7 +2629,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 				o->Angle[2] = ( float)( rand() % 360);
 				o->Light[0] = o->Light[1] = o->Light[2] = 0.5+(rand()%6)*0.1f;
 				break;
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 			case MODEL_XMAS2008_SNOWMAN_HEAD:
 				{
 					o->LifeTime = 50;
@@ -2659,7 +2658,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Direction[2] = o->Owner->Direction[2];
 				}
 				break;
-#endif // LDK_ADD_SNOWMAN_CHANGERING
 			case MODEL_TOTEMGOLEM_PART1:
 			case MODEL_TOTEMGOLEM_PART2:
 			case MODEL_TOTEMGOLEM_PART3:
@@ -3218,7 +3216,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 
 				PlayBuffer(SOUND_FIRECRACKER1,o);
 				break;
-#ifdef YDG_ADD_FIRECRACKER_ITEM
 			case BITMAP_FIRECRACKER0001:
 				{
 					o->LifeTime = 31;
@@ -3270,7 +3267,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,
 					o->Angle[2] = rand()%360;
 				}
 				break;
-#endif	// YDG_ADD_FIRECRACKER_ITEM
             case BITMAP_SWORD_FORCE:
                 o->LifeTime = 30;
 				if(o->SubType == 0 || o->SubType == 1)
@@ -6663,69 +6659,50 @@ void CreateBomb(vec3_t p,bool Exp, int SubType)
 
 	Vector(1.f,1.f,1.f,Light);
 
-#ifdef ADD_RAKLION_MOB_ICEGIANT
 	if (SubType != 5)
 	{
-#endif	// ADD_RAKLION_MOB_ICEGIANT
-	for(int j=0;j<20;j++)
-	{
-		Vector((float)(rand()%60+60+90),0.f,(float)(rand()%30),Angle);
-		if(SubType == 2)
+		for(int j=0;j<20;j++)
 		{
-			Vector(0.7f,0.7f,1.f,Light);
-			CreateParticle(BITMAP_SPARK,Position,Angle,Light,8);
-		}
-		else if(SubType == 3)
-		{
-			Vector(1.0f,0.7f,0.4f,Light);
-			CreateParticle(BITMAP_SPARK,Position,Angle,Light,8);
-		}
-		else if(SubType == 4)
-		{
-			if(j == 5) break;
-			Vector(1.0f,0.5f,0.3f,Light);
-			//Vector(0.3f,0.5f,1.0f,Light);
-			CreateParticle(BITMAP_SPARK,Position,Angle,Light,8);
-		}
-#ifdef PJH_FIX_CAOTIC
-		else if(SubType == 6)
-		{
-			Vector(0.3f,0.3f,0.3f,Light);
-			CreateParticle(BITMAP_SPARK,Position,Angle,Light,10);
-//			CreateParticle(BITMAP_SMOKE+3, Position, Angle, Light, 3, 1.0f);
-		}
-#endif //PJH_FIX_CAOTIC
-		else
-		{
-			CreateParticle(BITMAP_SPARK,Position,Angle,Light,2);
+			Vector((float)(rand()%60+60+90),0.f,(float)(rand()%30),Angle);
+			if(SubType == 2)
+			{
+				Vector(0.7f,0.7f,1.f,Light);
+				CreateParticle(BITMAP_SPARK,Position,Angle,Light,8);
+			}
+			else if(SubType == 3)
+			{
+				Vector(1.0f,0.7f,0.4f,Light);
+				CreateParticle(BITMAP_SPARK,Position,Angle,Light,8);
+			}
+			else if(SubType == 4)
+			{
+				if(j == 5) break;
+				Vector(1.0f,0.5f,0.3f,Light);
+				CreateParticle(BITMAP_SPARK,Position,Angle,Light,8);
+			}
+			else if(SubType == 6)
+			{
+				Vector(0.3f,0.3f,0.3f,Light);
+				CreateParticle(BITMAP_SPARK,Position,Angle,Light,10);
+			}
+			else
+			{
+				CreateParticle(BITMAP_SPARK,Position,Angle,Light,2);
+			}
 		}
 	}
-#ifdef ADD_RAKLION_MOB_ICEGIANT
-	}
-#endif	// ADD_RAKLION_MOB_ICEGIANT
 
 	Vector(0.7f,0.7f,0.7f,Light);
 
 	if(Exp)
 	{
-		if(SubType == 2
-#ifdef ADD_RAKLION_MOB_ICEGIANT
-			|| SubType == 5
-#endif	// ADD_RAKLION_MOB_ICEGIANT
-#ifdef PJH_FIX_CAOTIC
-			|| SubType == 6
-#endif //#ifdef PJH_FIX_CAOTIC
-			)
+		if(SubType == 2	|| SubType == 5	|| SubType == 6	)
 		{
 			Vector(0.3f,0.6,1.f,Light);
-#ifdef PJH_FIX_CAOTIC
 			if(SubType == 6)
 			{
 				Vector(0.3f,0.3f,0.3f,Light);
-//				CreateParticle(BITMAP_SMOKE+3, vPos, o->Angle, vLight, 3, 1.0f);
 			}
-//			else
-#endif //#ifdef PJH_FIX_CAOTIC
 			CreateParticle(BITMAP_EXPLOTION_MONO,Position,Angle,Light);
 		}
 		else if(SubType == 3)
@@ -6736,10 +6713,8 @@ void CreateBomb(vec3_t p,bool Exp, int SubType)
 		else if(SubType == 4)
 		{
 			Vector(1.0f,0.4,0.2f,Light);
-			//Vector(0.2f,0.4,1.0f,Light);
 			CreateParticle(BITMAP_EXPLOTION_MONO,Position,Angle,Light, 0, 0.5f);
 			Vector(1.0f,0.6,0.2f,Light);
-			//Vector(0.2f,0.6,1.0f,Light);
 			CreateParticle(BITMAP_EXPLOTION_MONO,Position,Angle,Light, 0, 0.3f);
 		}
 		else
@@ -7372,7 +7347,6 @@ void MoveEffect( OBJECT *o, int iIndex)
             CreateEffect ( MODEL_WAVES, o->Position, o->Angle, o->Light, 3, NULL, 0 );
 		}
 		break;
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 		case MODEL_MULTI_SHOT3:
 			o->Scale += 0.25f;
 			o->BlendMeshLight = ( float)o->LifeTime/18.f;
@@ -7388,18 +7362,14 @@ void MoveEffect( OBJECT *o, int iIndex)
 			o->BlendMeshLight = ( float)o->LifeTime/18.f;
 			o->Alpha = o->BlendMeshLight;
 			break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 	case MODEL_BLADE_SKILL:
 		{
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			if(o->SubType == 0)
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			{
 			o->Scale -= 0.1f;
 			if(o->Scale < 0.8f)
 				o->Scale = 0.8f;
 			}
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			else
 			if(o->SubType == 1)
 			{
@@ -7407,7 +7377,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				o->BlendMeshLight = ( float)o->LifeTime/14.f;
 				o->Alpha = o->BlendMeshLight;
 
-#ifdef PJH_SEASON4_FIX_MULTI_SHOT
 				vec3_t p,Angle,Light;
 
 
@@ -7474,9 +7443,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 					CreateArrow(c,o->Owner,to,FindHotKey(( o->Skill)),1,0);
 					o->Owner->Angle[2] = Angle[2];
 				}
-#endif //#ifdef PJH_SEASON4_FIX_MULTI_SHOT
 			}
-#endif //#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 		}
 		break;
 	case MODEL_KENTAUROS_ARROW:
@@ -8725,20 +8692,16 @@ void MoveEffect( OBJECT *o, int iIndex)
 	case BITMAP_PIN_LIGHT:
 		switch (o->SubType)
 		{
-#ifdef PJH_SEASON4_FIX_MULTI_SHOT
 		case 3:
-#endif //PJH_SEASON4_FIX_MULTI_SHOT
 		case 0:
 			Position[0] = o->Position[0] + (float)(rand()%500-250);
 			Position[1] = o->Position[1] + (float)(rand()%500-250);
 			Position[2] = o->Position[2] - (float)(rand()%100)+150.0f;
 			if (rand()%2 == 0)
 			{
-#ifdef PJH_SEASON4_FIX_MULTI_SHOT
 				if(o->SubType == 3)
 					CreateParticle(o->Type, Position, o->Angle, o->Light, 1, o->Scale);
 				else
-#endif //PJH_SEASON4_FIX_MULTI_SHOT
 				CreateParticle(o->Type, Position, o->Angle, o->Light, 0, o->Scale);
 			}
 			break;
@@ -11798,7 +11761,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			o->Alpha -= 0.01f;
 		}
 		break;
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 	case MODEL_XMAS2008_SNOWMAN_HEAD:
 		{
 			if(o->LifeTime < 45)
@@ -11826,7 +11788,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			b->PlayAnimation( &o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity/5.f, o->Position, o->Angle );
 		}
 		break;
-#endif //LDK_ADD_SNOWMAN_CHANGERING
 	case MODEL_TOTEMGOLEM_PART1:
 	case MODEL_TOTEMGOLEM_PART2:
 	case MODEL_TOTEMGOLEM_PART3:
@@ -12914,7 +12875,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 		Vector(Luminosity*.4f,Luminosity*0.3f,Luminosity*0.2f,Light);
 		AddTerrainLight(o->Position[0],o->Position[1],Light,1,PrimaryTerrainLight);
 		break;
-#ifdef YDG_ADD_FIRECRACKER_ITEM
 	case BITMAP_FIRECRACKER0001:
 		{
 			if (o->LifeTime == 1 || o->LifeTime == 9 || o->LifeTime == 17
@@ -12964,13 +12924,11 @@ void MoveEffect( OBJECT *o, int iIndex)
 			CreateSprite(BITMAP_FIRECRACKER0001+iFrame, o->Position, o->Scale, o->Light, o, o->Angle[2]);
 		}
 		break;
-#endif	// YDG_ADD_FIRECRACKER_ITEM
     case BITMAP_SWORD_FORCE:
         if( o->LifeTime==30)
         {
             VectorCopy(o->Position,Position);
             Position[2] += 100.f;
-#ifdef PJH_FIX_BLOOD_ATTCK
 			if ( o->SubType==1 )
 			{
 				vec3_t Light;
@@ -12978,7 +12936,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				CreateJoint(BITMAP_JOINT_FORCE,Position,Position,o->HeadAngle,10,o->Owner,150.f,o->PKKey,o->Skill, 0, -1,Light);
 			}
 			else
-#endif //#ifdef PJH_FIX_BLOOD_ATTCK
 			if( o->SubType==0 )
 				CreateJoint(BITMAP_JOINT_FORCE,Position,Position,o->HeadAngle,0,o->Owner,150.f,o->PKKey,o->Skill);
 			else
@@ -19008,12 +18965,10 @@ void RenderEffects ( bool bRenderBlendMesh )
  				case MODEL_CURSEDTEMPLE_STATUE_PART2:
      				RenderObject(o);
 					break;
-#ifdef LDK_ADD_SNOWMAN_CHANGERING
 				case MODEL_XMAS2008_SNOWMAN_HEAD:
 				case MODEL_XMAS2008_SNOWMAN_BODY:
      				RenderObject(o);
 					break;
-#endif //LDK_ADD_SNOWMAN_CHANGERING
 #ifdef PJH_ADD_PANDA_CHANGERING
 				case MODEL_PANDA:
      				RenderObject(o);
@@ -19045,11 +19000,9 @@ void RenderEffects ( bool bRenderBlendMesh )
 				case MODEL_SHADOW_ROOK_KNEE_LEFT:		case MODEL_SHADOW_ROOK_KNEE_RIGHT:
 				case MODEL_SHADOW_ROOK_WRIST_LEFT:		case MODEL_SHADOW_ROOK_WRIST_RIGHT:
 
-#ifdef ADD_RAKLION_MOB_ICEGIANT
 				case MODEL_ICE_GIANT_PART1:				case MODEL_ICE_GIANT_PART2:
 				case MODEL_ICE_GIANT_PART3:				case MODEL_ICE_GIANT_PART4:
 				case MODEL_ICE_GIANT_PART5:				case MODEL_ICE_GIANT_PART6:
-#endif	// ADD_RAKLION_MOB_ICEGIANT
      				RenderObject(o);
 					break;
 
@@ -19084,9 +19037,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						}
 					}
 					break;
-
-#ifdef CSK_RAKLION_BOSS
-
 				case MODEL_RAKLION_BOSS_CRACKEFFECT:
 					{
 						RenderObject(o);
@@ -19097,9 +19047,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						RenderObject(o);
 					}
 					break;
-					
-#endif // CSK_RAKLION_BOSS
-#ifdef PBG_ADD_PKFIELD
 				case MODEL_LAVAGIANT_FOOTPRINT_R:
 				case MODEL_LAVAGIANT_FOOTPRINT_V:	
 					{
@@ -19115,7 +19062,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						DisableAlphaBlend();
 					}
 					break;
-#endif //PBG_ADD_PKFIELD
 #ifdef PBG_ADD_CHARACTERSLOT
 			case MODEL_SLOT_LOCK:
 				{
@@ -19134,15 +19080,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						RenderObject( o );
 					}
 					break;
-#ifdef CSK_EVENT_CHERRYBLOSSOM
-				//case MODEL_EFFECT_SKURA_ITEM:
-					//{
-						//RenderObject( o );
-					//}
-					//break;
-#endif //CSK_EVENT_CHERRYBLOSSOM
-			
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 				case MODEL_BLOW_OF_DESTRUCTION:
 					{
 						if(o->SubType == 0)
@@ -19177,8 +19114,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						RenderObject(o);		
 					}
 					break;	
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION	
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 				case MODEL_EFFECT_FLAME_STRIKE:
 					{
 						if(o->SubType == 0)
@@ -19208,9 +19143,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						}
 					}
 					break;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-
-#ifdef ASG_ADD_SKILL_BERSERKER
 				case BITMAP_LIGHT_MARKS:
 					{
 						float fLight = 1.035f;
@@ -19241,9 +19173,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						}
 					}
 					break;
-#endif	// ASG_ADD_SKILL_BERSERKER
-//--------------------------------------------------------------------------------------------------------------------------------
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 				case MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF:
 					{
 						if( o->SubType == 0 )
@@ -19268,8 +19197,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 							}
 						}
 					}break;
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 				case MODEL_PROJECTILE:
 					{
 						RenderObject(o);
@@ -19297,16 +19224,12 @@ void RenderEffects ( bool bRenderBlendMesh )
 						RenderObject(o);
 					}
 					break;
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
 				case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
 				case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
 				case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
 				case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
 					{
-//						RenderObject(o);
-						// 1. Attach Render
 						BMD *pBMDSwordModel = &Models[o->Type]; 
 						
 						vec3_t			*arrEachBoneTranslations;
@@ -19320,14 +19243,7 @@ void RenderEffects ( bool bRenderBlendMesh )
 							
 							int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		//INDEX. 
 							int iBoneIdx = arrBoneIdxs[o->Type-MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-							// 1-pBMDSwordModel attach Vertex
-#ifdef LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
-							pBMDSwordModel->AnimationTransformWithAttachHighModel_usingGlobalTM( o->Owner, pOwnerModel, iBoneIdx, 
-													v3CurrentHighHierarchyNodePos, arrEachBoneTranslations, true );
-#else // LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
-							pBMDSwordModel->AnimationTransformWithAttachHighModel( o->Owner, pOwnerModel, iBoneIdx, 
-													v3CurrentHighHierarchyNodePos, arrEachBoneTranslations );
-#endif // LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
+							pBMDSwordModel->AnimationTransformWithAttachHighModel_usingGlobalTM( o->Owner, pOwnerModel, iBoneIdx, v3CurrentHighHierarchyNodePos, arrEachBoneTranslations, true );
 						}
 	 					else
 	 					{
@@ -19462,8 +19378,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						RenderObject(o);
 					}
 					break;
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-#ifdef LDS_ADD_EG_4_MONSTER_JELINT
 				case MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION:
 					{
 						if(o->SubType == 0)
@@ -19491,14 +19405,11 @@ void RenderEffects ( bool bRenderBlendMesh )
 						}
 					}
 					break;
-#endif // LDS_ADD_EG_4_MONSTER_JELINT
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_WAND_EFFECT
 				case BITMAP_WATERFALL_4:
 					{
 						//CreateSprite(BITMAP_WATERFALL_4, o->Position, o->Scale, o->Light, o, o->Angle[0]);
 					}
 					break;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_WAND_EFFECT
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				case BITMAP_EVENT_CLOUD:
 					{

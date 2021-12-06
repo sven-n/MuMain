@@ -1,20 +1,11 @@
 //////////////////////////////////////////////////////////////////////////
-//  - 酒捞袍 可记 包访 -
-//  
-//  
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CSITEM_OPTION_H__
 #define __CSITEM_OPTION_H__
 
-/*+++++++++++++++++++++++++++++++++++++
-    INCLUDE.
-+++++++++++++++++++++++++++++++++++++*/
 #include "Singleton.h"
 #include "zzzinfomation.h"
-
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 #include <map>
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 
 
 const BYTE MAX_SET_OPTION = 64;
@@ -23,12 +14,6 @@ const BYTE MASTERY_OPTION = 24;
 const BYTE EXT_A_SET_OPTION  = 1;
 const BYTE EXT_B_SET_OPTION  = 2;
 
-/*+++++++++++++++++++++++++++++++++++++
-    CLASS.
-+++++++++++++++++++++++++++++++++++++*/
-//////////////////////////////////////////////////////////////////////////
-//  
-//////////////////////////////////////////////////////////////////////////
 class CSItemOption : public Singleton<CSItemOption>
 {
 private :
@@ -41,7 +26,6 @@ private :
     BYTE    m_bySameSetItem;
     char    m_strSetName[2][32];
 
-#ifdef LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE
 	typedef std::map<int, std::string>	MAP_EQUIPPEDSETITEMNAME;
 	typedef std::map<BYTE, int>		MAP_EQUIPPEDSETITEM_SEQUENCE;
 
@@ -88,9 +72,7 @@ public:
 		}
 	}
 
-#define	BYTE_MAX		255
-
-	BYTE	Search_From_EquippedSetItemNameSequence( char *szSetItemname )
+	BYTE Search_From_EquippedSetItemNameSequence( char *szSetItemname )
 	{
 		BYTE	byCur = 0;
 		int		iResult = Search_From_EquippedSetItemNameMapTable( szSetItemname );
@@ -106,17 +88,16 @@ public:
 			}
 		}
 		
-		return (BYTE)BYTE_MAX;
+		return 255;
 	}
 	
-#endif // LDS_FIX_OUTPUT_EQUIPMENTSETITEMOPTIONVALUE	
 
     BYTE	m_bySetOptionANum;
 	BYTE	m_bySetOptionBNum;
     BYTE    m_bySetOptionIndex[2];
-	BYTE	m_bySetOptionList[16][3];       //  可记 府胶飘.
-	BYTE	m_bySetOptionListOnOff[16];     //  荤侩等 可记.
-    int     m_iSetOptionListValue[16][2];   //  可记 蔼.
+	BYTE	m_bySetOptionList[16][3];
+	BYTE	m_bySetOptionListOnOff[16];
+    int     m_iSetOptionListValue[16][2];
 
 	bool	OpenItemSetType ( const char* filename );
 	bool	OpenItemSetOption ( const char* filename );
@@ -127,38 +108,16 @@ public:
 
 	void	getExplainText ( char* text, const BYTE option, const BYTE value, const BYTE SetA );
 
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION 
 	void    getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma );
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-    void    getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality );
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	
 	int     GetSetItmeCount( const ITEM* pselecteditem );
 	bool	isFullseteffect( const ITEM* ip );
 
-#ifdef LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
 public:	
 
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	void	getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma, 
-								WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality, WORD iC );
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	void	getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality,
-								WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality );
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	
-#ifdef LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	void	getAllAddStateOnlyAddValue ( WORD* AddStrength, 
-										WORD* AddDexterity, 
-										WORD* AddEnergy, 
-										WORD* AddVitality, 
-										WORD* AddCharisma );
-#else // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
-	void	getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality );
-#endif // LDS_ADD_CHARISMAVALUE_TOITEMOPTION
+	void	getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma, WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality, WORD iC );
 
-#endif // LDS_FIX_WRONG_CALCULATEEQUIPEDITEMOPTIONVALUE
-	
+	void	getAllAddStateOnlyAddValue ( WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma );
+
 public :
     CSItemOption ( void )  { init(); };
     ~CSItemOption ( void ) {};
@@ -204,8 +163,6 @@ public :
 	void	RenderSetOptionButton ( const int StartX, const int StartY );
 	void	RenderSetOptionList ( const int StartX, const int StartY );
  
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
-
 	int		m_arLimitSetItemOptionCount[MAX_EQUIPMENT];		
 
 	void	UpdateCount_SetOptionPerEquippedSetItem( const BYTE* byOptionList,int* arLimitSetItemOptionCount,ITEM* ItemsEquipment)
@@ -232,13 +189,13 @@ public :
 		{
 			ITEM_SET_OPTION& itemOption = m_ItemSetOption[byOptionList[i]];
 			
-			if( byOptionList[i] == itemSType.byOption[setItemType-1] )
+			if( byOptionList[i] == itemSType.byOption[(setItemType-1)] )
 			{
 				int iEquippedCount = byOptionList[i+1];
 				
 				if ( iEquippedCount>=itemOption.byOptionCount-1 )
 				{
-					return BYTE_MAX;
+					return 255;
 				}
 				
 				return iEquippedCount;
@@ -247,8 +204,6 @@ public :
 
 		return 0;
 	}
-
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 
 	int     RenderSetOptionListInItem ( const ITEM* ip, int TextNum, bool bIsEquippedItem = false );
 

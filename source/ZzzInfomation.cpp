@@ -1302,9 +1302,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		case 4:Energy = 170;break;
 		case 5:Energy = 210;break;
 		case 6:Energy = 300;break;
-#ifdef ADD_ELF_SUMMON
 		case 7:Energy = 500;break;
-#endif // ADD_ELF_SUMMON
         }
         ip->RequireEnergy = Energy;
     }
@@ -1335,14 +1333,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		ip->Type == ITEM_STAFF+12 ||
 		ip->Type == ITEM_BOW+21 ||
 		ip->Type == ITEM_MACE+14
-#ifdef ASG_ADD_STORMBLITZ_380ITEM
 		|| ITEM_STAFF+19 == ip->Type
 		|| ITEM_HELM+43 == ip->Type
 		|| ITEM_ARMOR+43 == ip->Type
 		|| ITEM_PANTS+43 == ip->Type
 		|| ITEM_GLOVES+43 == ip->Type
 		|| ITEM_BOOTS+43 == ip->Type
-#endif	// ASG_ADD_STORMBLITZ_380ITEM
 #ifdef LEM_ADD_LUCKYITEM
 		|| Check_LuckyItem( ip->Type )
 #endif // LEM_ADD_LUCKYITEM
@@ -1455,7 +1451,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			|| (ip->Type == ITEM_WING+50)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)	// 3차 날개
+		)
     {
         if ( excelWing&0x01 )
         {
@@ -1480,7 +1476,6 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
     }
 	if((Attribute1>>7)&1)
 	{        
-        //  스킬 연결.
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		if ( p->m_wSkillIndex!=0 )
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -1494,7 +1489,6 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
         }
     }
-	//옵션2(행운) 1/10
 	if((Attribute1>>2)&1)
 	{
 		if(ip->Type>=ITEM_SWORD && ip->Type<ITEM_BOOTS+MAX_ITEM_INDEX)
@@ -1512,7 +1506,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			|| ip->Type==ITEM_WING+49
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			) //  군주의 망토.
+			)
         {
    			ip->Special[ip->SpecialNum] = AT_LUCK;ip->SpecialNum++;
         }
@@ -3243,7 +3237,6 @@ void CHARACTER_MACHINE::CalculateDamage()
 			Character.AttackDamageMaxLeft += DamageMax;
 		}
 
-        //  액설런트.
 		PlusSpecial(&Character.AttackDamageMinLeft,AT_IMPROVE_DAMAGE_LEVEL,Left);
 		PlusSpecial(&Character.AttackDamageMaxLeft,AT_IMPROVE_DAMAGE_LEVEL,Left);
 		PlusSpecialPercent(&Character.AttackDamageMinLeft,AT_IMPROVE_DAMAGE_PERCENT,Left,2);
@@ -3309,7 +3302,6 @@ void CHARACTER_MACHINE::CalculateDamage()
         int LLevel = ((Left->Level>>3)&15);
         int RLevel = ((Right->Level>>3)&15);
 
-        //  ARROW의 LEVEL이 1이면은 공격력 증가. 공격력3% + 1 증가.
         if ( Left->Type==ITEM_BOW+7 && LLevel>=1 )
         {
             Character.AttackDamageMinRight += (WORD)(Character.AttackDamageMinRight*((LLevel*2+1)*0.01f)+1);
@@ -3322,7 +3314,6 @@ void CHARACTER_MACHINE::CalculateDamage()
             Character.AttackDamageMaxLeft += (WORD)(Character.AttackDamageMaxLeft*((RLevel*2+1)*0.01f)+1);
         }
     }
-#ifdef PSW_SCROLL_ITEM
 	if(g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll3)) 
 	{
 			ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 74);
@@ -3331,7 +3322,6 @@ void CHARACTER_MACHINE::CalculateDamage()
 			Character.AttackDamageMinLeft  += Item_data.m_byValue1;
 			Character.AttackDamageMaxLeft  += Item_data.m_byValue1;
 	}
-#endif //PSW_SCROLL_ITEM
 	if(g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2)) 
 	{
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 47);
@@ -3340,7 +3330,6 @@ void CHARACTER_MACHINE::CalculateDamage()
 		Character.AttackDamageMinLeft  += Item_data.m_byValue1;
 		Character.AttackDamageMaxLeft  += Item_data.m_byValue1;
 	}
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	if(g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal)) 
 	{
 		const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 87);
@@ -3349,14 +3338,10 @@ void CHARACTER_MACHINE::CalculateDamage()
 		Character.AttackDamageMinLeft  += Item_data.m_byValue1;
 		Character.AttackDamageMaxLeft  += Item_data.m_byValue1;
 	}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef ADD_SOCKET_STATUS_BONUS
 	Character.AttackDamageMinRight += g_SocketItemMgr.m_StatusBonus.m_iAttackDamageMinBonus;
 	Character.AttackDamageMaxRight += g_SocketItemMgr.m_StatusBonus.m_iAttackDamageMaxBonus;
 	Character.AttackDamageMinLeft  += g_SocketItemMgr.m_StatusBonus.m_iAttackDamageMinBonus;
 	Character.AttackDamageMaxLeft  += g_SocketItemMgr.m_StatusBonus.m_iAttackDamageMaxBonus;
-#endif	// ADD_SOCKET_STATUS_BONUS
-#ifdef PBG_ADD_SANTABUFF
 	if(g_isCharacterBuff((&Hero->Object), eBuff_BlessingOfXmax))	//크리스마스의 축복
 	{
 		int _Temp = 0;
@@ -3378,7 +3363,6 @@ void CHARACTER_MACHINE::CalculateDamage()
 		Character.AttackDamageMaxLeft += _Temp;
 
 	}
-#endif //PBG_ADD_SANTABUFF
 }
 
 void CHARACTER_MACHINE::CalculateCriticalDamage()

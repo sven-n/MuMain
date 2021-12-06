@@ -1645,7 +1645,6 @@ CALLBACK_RESULT SEASON3B::CInfinityArrowCancelMsgBoxLayout::CancelBtnDown(class 
 	return CALLBACK_BREAK;
 }
 
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
 {
 	extern int g_iCancelSkillTarget;
@@ -1689,7 +1688,6 @@ CALLBACK_RESULT SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::CancelBtnDown(class 
 
 	return CALLBACK_BREAK;
 }
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 
 bool SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout::SetLayout()
 {
@@ -1987,7 +1985,6 @@ CALLBACK_RESULT SEASON3B::CLuckyItemMsgBoxLayout::CancelBtnDown(class CNewUIMess
 	return CALLBACK_BREAK;
 }
 #endif // LEM_ADD_LUCKYITEM
-//////////////////////////////////////////////////////////////////////////
 
 bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
 {
@@ -2041,7 +2038,6 @@ CALLBACK_RESULT SEASON3B::CMixCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessa
 	return CALLBACK_BREAK;
 }
 
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
 bool SEASON3B::CUseReviveCharmMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -2073,9 +2069,7 @@ CALLBACK_RESULT SEASON3B::CUseReviveCharmMsgBoxLayout::CancelBtnDown(class CNewU
 
 	return CALLBACK_BREAK;
 }
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
 
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
 bool SEASON3B::CUsePortalCharmMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -2140,8 +2134,7 @@ CALLBACK_RESULT SEASON3B::CReturnPortalCharmMsgBoxLayout::CancelBtnDown(class CN
 
 	return CALLBACK_BREAK;
 }
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-#ifdef YDG_ADD_NEW_DUEL_UI
+
 bool SEASON3B::CDuelCreateErrorMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -2192,9 +2185,7 @@ CALLBACK_RESULT SEASON3B::CDuelWatchErrorMsgBoxLayout::OkBtnDown(class CNewUIMes
 
 	return CALLBACK_BREAK;
 }
-#endif	// YDG_ADD_NEW_DUEL_UI
 
-#ifdef YDG_ADD_DOPPELGANGER_UI
 bool SEASON3B::CDoppelGangerMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -2216,7 +2207,6 @@ CALLBACK_RESULT SEASON3B::CDoppelGangerMsgBoxLayout::OkBtnDown(class CNewUIMessa
 
 	return CALLBACK_BREAK;
 }
-#endif	// YDG_ADD_DOPPELGANGER_UI
 
 bool SEASON3B::CGuildRelationShipMsgBoxLayout::SetLayout()
 {
@@ -2433,7 +2423,6 @@ CALLBACK_RESULT SEASON3B::CGatemanFailMsgBoxLayout::OkBtnDown(class CNewUIMessag
 	return CALLBACK_BREAK;
 }
 
-#ifdef ASG_MOD_UI_QUEST_INFO
 bool SEASON3B::CQuestGiveUpMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -2467,7 +2456,6 @@ CALLBACK_RESULT SEASON3B::CQuestGiveUpMsgBoxLayout::CancelBtnDown(class CNewUIMe
 	
 	return CALLBACK_BREAK;
 }
-#endif	ASG_MOD_UI_QUEST_INFO
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
 bool SEASON3B::CQuestCountLimitMsgBoxLayout::SetLayout()
@@ -2644,8 +2632,6 @@ CALLBACK_RESULT SEASON3B::CUseFruitMsgBoxLayout::CancelBtnDown(class CNewUIMessa
 	return CALLBACK_BREAK;
 }
 
-#ifdef PSW_FRUIT_ITEM
-
 bool SEASON3B::CUsePartChargeFruitMsgBoxLayout::SetLayout()
 {
 	CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
@@ -2708,8 +2694,6 @@ CALLBACK_RESULT SEASON3B::CUsePartChargeFruitMsgBoxLayout::CancelBtnDown(class C
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 	return CALLBACK_BREAK;
 }
-
-#endif //PSW_FRUIT_ITEM
 
 bool SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::SetLayout()
 {
@@ -3405,7 +3389,6 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Out_MsgBoxLayout::OkBtnDown(class CNewUIMe
 	return CALLBACK_BREAK;
 }
 
-#ifdef PBG_ADD_SANTAINVITATION
 bool SEASON3B::CUseSantaInvitationMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -3447,9 +3430,7 @@ CALLBACK_RESULT SEASON3B::CUseSantaInvitationMsgBoxLayout::CancelBtnDown(class C
 	
 	return CALLBACK_BREAK;	
 }
-#endif //PBG_ADD_SANTAINVITATION
 
-#ifdef LDK_ADD_SNOWMAN_NPC
 bool CSantaTownLeaveMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -3481,9 +3462,7 @@ CALLBACK_RESULT CSantaTownLeaveMsgBoxLayout::CancelBtnDown(class CNewUIMessageBo
 	
 	return CALLBACK_BREAK;	
 }
-#endif //LDK_ADD_SNOWMAN_NPC
 
-#ifdef LDK_ADD_SANTA_NPC
 bool CSantaTownSantaMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -3514,9 +3493,7 @@ CALLBACK_RESULT CSantaTownSantaMsgBoxLayout::CancelBtnDown(class CNewUIMessageBo
 	
 	return CALLBACK_BREAK;	
 }
-#endif //LDK_ADD_SANTA_NPC
 
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 bool SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -3539,7 +3516,7 @@ CALLBACK_RESULT SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::OkBtnDown(class CNewU
 	
 	return CALLBACK_BREAK;	
 }
-#ifdef PBG_MOD_LUCKYCOINEVENT
+
 bool SEASON3B::CRegistOverLuckyCoinMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -3561,7 +3538,7 @@ CALLBACK_RESULT SEASON3B::CRegistOverLuckyCoinMsgBoxLayout::OkBtnDown(class CNew
 	
 	return CALLBACK_BREAK;
 }
-#endif //PBG_MOD_LUCKYCOINEVENT
+
 
 bool SEASON3B::CExchangeLuckyCoinMsgBoxLayout::SetLayout()
 {
@@ -3610,9 +3587,7 @@ CALLBACK_RESULT SEASON3B::CExchangeLuckyCoinInvenErrMsgBoxLayout::OkBtnDown(clas
 	
 	return CALLBACK_BREAK;	
 }
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
 
-#ifdef LDK_ADD_GAMBLE_SYSTEM
 bool SEASON3B::CGambleBuyMsgBoxLayout::SetLayout()
 {
 	CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
@@ -3640,7 +3615,6 @@ CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageB
 
 	if( gambleSys.IsGambleShop() )
 	{
-		//°×ºí ±¸ÀÔ
 		pItemInfo = gambleSys.GetBuyItemInfo();
 		SendRequestBuy(pItemInfo->ItemIndex, pItemInfo->ItemCost);
 	}
@@ -3658,9 +3632,7 @@ CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::CancelBtnDown(class CNewUIMess
 
 	return CALLBACK_BREAK;
 }
-#endif //LDK_ADD_GAMBLE_SYSTEM
 
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 bool SEASON3B::CEmpireGuardianMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -3673,6 +3645,7 @@ bool SEASON3B::CEmpireGuardianMsgBoxLayout::SetLayout()
 	
 	return TRUE;
 }
+
 CALLBACK_RESULT SEASON3B::CEmpireGuardianMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
 	PlayBuffer(SOUND_CLICK01);
@@ -3680,10 +3653,7 @@ CALLBACK_RESULT SEASON3B::CEmpireGuardianMsgBoxLayout::OkBtnDown(class CNewUIMes
 	
 	return CALLBACK_BREAK;	
 }
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
 
-
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 bool SEASON3B::CUnitedMarketPlaceMsgBoxLayout::SetLayout()
 {
 	CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -3703,4 +3673,4 @@ CALLBACK_RESULT SEASON3B::CUnitedMarketPlaceMsgBoxLayout::OkBtnDown(class CNewUI
 	
 	return CALLBACK_BREAK;	
 }
-#endif //LDS_ADD_UI_UNITEDMARKETPLACE
+

@@ -946,14 +946,6 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 			HideAllGroupA();
 			g_pQuestProgress->ProcessOpening();
 		}
-
-#ifdef ASG_ADD_UI_NPC_MENU
-		else if(dwKey == SEASON3B::INTERFACE_NPC_MENU)
-		{
-			HideAllGroupA();
-			g_pNPCMenu->ProcessOpening();
-		}
-#endif	// ASG_ADD_UI_NPC_MENU
 		else if(dwKey == SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
 		{
 			if (IsVisible(SEASON3B::INTERFACE_INVENTORY))
@@ -1033,12 +1025,10 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 			{
 				Hide(SEASON3B::INTERFACE_PET);
 			}
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 			if(IsVisible((SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)))
 			{
 				g_pQuestProgressByEtc->SetPos(640-190, 0);
 			}
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 		}
 		else if(dwKey == SEASON3B::INTERFACE_INVENTORY)
 		{
@@ -1069,9 +1059,7 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 			}
 			if(IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY))
 			{
-#ifdef LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 				g_pPurchaseShopInventory->ClosingProcess();
-#endif // LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 				m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY, false);
 			}
 			if(IsVisible(SEASON3B::INTERFACE_STORAGE))
@@ -1085,7 +1073,7 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 				g_pTrade->ProcessCloseBtn();
 				m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_TRADE, false);
 			}
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
+
 			if(IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION))
 			{
 				m_pNewLuckyCoinRegistration->ClosingProcess();
@@ -1096,7 +1084,6 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 				m_pNewExchangeLuckyCoinWindow->ClosingProcess();
 				m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN, false);
 			}
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 
 #ifdef LEM_ADD_LUCKYITEM
 			if(IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND))
@@ -2132,21 +2119,16 @@ CNewUICursedTempleResult* SEASON3B::CNewUISystem::GetUI_NewCursedTempleResultWin
 	return m_pNewCursedTempleResultWindow;
 }
 
-#ifdef PSW_GOLDBOWMAN
 CNewUIGoldBowmanWindow*	SEASON3B::CNewUISystem::GetUI_pNewGoldBowman() const
 {
 	return m_pNewGoldBowman;
 }
-#endif //PSW_GOLDBOWMAN
 
-#ifdef PSW_EVENT_LENA
 CNewUIGoldBowmanLena*	SEASON3B::CNewUISystem::GetUI_pNewGoldBowmanLena() const
 {
 	return m_pNewGoldBowmanLena;
 }
-#endif //PSW_EVENT_LENA	
 
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 CNewUIRegistrationLuckyCoin* SEASON3B::CNewUISystem::GetUI_pNewLuckyCoinRegistration() const
 {
 	return m_pNewLuckyCoinRegistration;
@@ -2156,20 +2138,17 @@ CNewUIExchangeLuckyCoin* SEASON3B::CNewUISystem::GetUI_pNewExchangeLuckyCoin() c
 {
 	return m_pNewExchangeLuckyCoinWindow;
 }
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 
 CNewUIMiniMap* SEASON3B::CNewUISystem::GetUI_pNewUIMiniMap() const
 {
 	return m_pNewMiniMap;
 }
 
-#ifdef YDG_ADD_NEW_DUEL_UI
 CNewUIDuelWatchWindow* SEASON3B::CNewUISystem::GetUI_pNewDuelWatch() const
 {
 	return m_pNewDuelWatchWindow;
 }
-#endif	// YDG_ADD_NEW_DUEL_UI	
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
+
 CNewUIDuelWatchMainFrameWindow* SEASON3B::CNewUISystem::GetUI_pNewDuelWatchMainFrame() const
 {
 	return m_pNewDuelWatchMainFrameWindow;
@@ -2179,7 +2158,6 @@ CNewUIDuelWatchUserListWindow* SEASON3B::CNewUISystem::GetUI_pNewDuelWatchUserLi
 {
 	return m_pNewDuelWatchUserListWindow;
 }
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 CNewUIInGameShop* SEASON3B::CNewUISystem::GetUI_pNewInGameShop() const
@@ -2188,7 +2166,6 @@ CNewUIInGameShop* SEASON3B::CNewUISystem::GetUI_pNewInGameShop() const
 }
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
-#ifdef YDG_ADD_DOPPELGANGER_UI
 CNewUIDoppelGangerWindow* SEASON3B::CNewUISystem::GetUI_pNewDoppelGangerWindow() const
 {
 	return m_pNewDoppelGangerWindow;
@@ -2198,21 +2175,16 @@ CNewUIDoppelGangerFrame* SEASON3B::CNewUISystem::GetUI_pNewDoppelGangerFrame() c
 {
 	return m_pNewDoppelGangerFrame;
 }
-#endif	// YDG_ADD_DOPPELGANGER_UI
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 CNewUINPCDialogue* SEASON3B::CNewUISystem::GetUI_NewNPCDialogue() const
 {
 	return m_pNewNPCDialogue;
 }
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 CNewUIQuestProgress* SEASON3B::CNewUISystem::GetUI_NewQuestProgress() const
 {
 	return m_pNewQuestProgress;
 }
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 
 #ifdef ASG_ADD_UI_NPC_MENU
 CNewUINPCMenu* SEASON3B::CNewUISystem::GetUI_NewNPCMenu() const
@@ -2221,14 +2193,11 @@ CNewUINPCMenu* SEASON3B::CNewUISystem::GetUI_NewNPCMenu() const
 }
 #endif	// ASG_ADD_UI_NPC_MENU
 
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 CNewUIQuestProgressByEtc* SEASON3B::CNewUISystem::GetUI_NewQuestProgressByEtc() const
 {
 	return m_pNewQuestProgressByEtc;
 }
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 CNewUIEmpireGuardianNPC* SEASON3B::CNewUISystem::GetUI_pNewEmpireGuardianNPC() const
 {
 	return m_pNewEmpireGuardianNPC;
@@ -2238,7 +2207,6 @@ CNewUIEmpireGuardianTimer* SEASON3B::CNewUISystem::GetUI_pNewEmpireGuardianTimer
 {
 	return m_pNewEmpireGuardianTimer;
 }
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
 
 #ifdef PBG_MOD_STAMINA_UI
 CNewUIStamina* SEASON3B::CNewUISystem::GetUI_pNewUIStamina() const
@@ -2253,12 +2221,11 @@ CNewUIGensRanking* SEASON3B::CNewUISystem::GetUI_NewGensRanking() const
 	return m_pNewGensRanking;
 }
 #endif //PBG_ADD_GENSRANKING
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
+
 CNewUIUnitedMarketPlaceWindow* SEASON3B::CNewUISystem::GetUI_pNewUnitedMarketPlaceWindow() const
 {
 	return m_pNewUnitedMarketPlaceWindow;
 }
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 
 #ifdef LEM_ADD_LUCKYITEM
 CNewUILuckyItemWnd* SEASON3B::CNewUISystem::Get_pNewUILuckyItemWnd() const

@@ -1,18 +1,12 @@
 // w_PetActionStand.h: interface for the PetActionStand class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#ifdef LDK_ADD_NEW_PETPROCESS
+#pragma once
 
 #include "w_PetAction.h"
 #include "ZzzBMD.h"
 
-#if !defined(AFX_W_PETACTIONSTAND_H__5F7FD6F9_0980_402C_9E5A_13928A221608__INCLUDED_)
-#define AFX_W_PETACTIONSTAND_H__5F7FD6F9_0980_402C_9E5A_13928A221608__INCLUDED_
-
-#pragma once
-
 BoostSmartPointer(PetActionStand);
+
 class PetActionStand : public PetAction
 {
 public:
@@ -28,6 +22,3 @@ public:
 private:
 	PetActionStand();
 };
-
-#endif // !defined(AFX_W_PETACTIONSTAND_H__5F7FD6F9_0980_402C_9E5A_13928A221608__INCLUDED_)
-#endif //LDK_ADD_NEW_PETPROCESS

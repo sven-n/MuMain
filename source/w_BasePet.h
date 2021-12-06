@@ -1,11 +1,5 @@
 // w_BasePet.h: interface for the BasePet class.
-// LDK_2008/07/08
 //////////////////////////////////////////////////////////////////////
-
-#ifdef LDK_ADD_NEW_PETPROCESS
-
-#if !defined(AFX_W_BASEPET_H__F071AE33_ED95_4AB3_B875_052B02C90553__INCLUDED_)
-#define AFX_W_BASEPET_H__F071AE33_ED95_4AB3_B875_052B02C90553__INCLUDED_
 
 #pragma once
 
@@ -18,21 +12,12 @@ class PetObject
 public:
 	enum ActionType{
 		eAction_Stand		= 0,
-#ifdef LDK_MOD_PETPROCESS_SYSTEM
 		eAction_Move,
 		eAction_Attack,
 		eAction_Skill,
-
 		eAction_Birth,
 		eAction_Dead,
 		eAction_End
-#else //LDK_MOD_PETPROCESS_SYSTEM
-		eAction_Attack		= 1,
-		eAction_Skill		= 2,
-		
-		eAction_Birth		= 3,
-		eAction_Dead		= 4,
-#endif //LDK_MOD_PETPROCESS_SYSTEM
 	};
 
 public:
@@ -44,12 +29,6 @@ public:
 	OBJECT* GetObject() { return m_obj; }
 	bool IsSameOwner( OBJECT *Owner );
 	bool IsSameObject( OBJECT *Owner, int itemType );
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-	//bool IsSameType( int itemType ) { return (m_itemType == itemType ? TRUE : FALSE); }
-	bool IsSameRegKey( int regstKey ) { return (m_regstKey == regstKey ? TRUE : FALSE); }
-
-	void SetRegKey( int regstKey ) { m_regstKey = regstKey; }
-#endif //LDK_MOD_NUMBERING_PETCREATE
 	void SetActions( ActionType type , BoostWeak_Ptr(PetAction) action, float speed );
 	void SetCommand( int targetKey, ActionType cmdType );
 
@@ -65,9 +44,7 @@ public:
 private:
 	bool UpdateMove( DWORD tick, bool bForceRender = false );
 	bool UpdateModel( DWORD tick, bool bForceRender = false );
-#ifdef LDK_ADD_NEW_PETPROCESS_ADD_SOUND
 	bool UpdateSound( DWORD tick, bool bForceRender = false );
-#endif //LDK_ADD_NEW_PETPROCESS_ADD_SOUND
 	
 	bool CreateEffect( DWORD tick, bool bForceRender = false );
 
@@ -90,16 +67,6 @@ private:
 	
 	DWORD m_startTick;
 
-	ActionType m_moveType; //실행중인 행동
-#ifdef LDK_MOD_PETPROCESS_SYSTEM
+	ActionType m_moveType;
 	ActionType m_oldMoveType;
-#endif //LDK_MOD_PETPROCESS_SYSTEM
-
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-	int m_regstKey;
-#endif //LDK_MOD_NUMBERING_PETCREATE
-
 };
-
-#endif // !defined(AFX_W_BASEPET_H__F071AE33_ED95_4AB3_B875_052B02C90553__INCLUDED_)
-#endif //LDK_ADD_NEW_PETPROCESS

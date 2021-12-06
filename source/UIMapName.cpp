@@ -103,47 +103,33 @@ void CUIMapName::InitImgPathMap()
 	m_mapImgPath[53] = strFolderName + "chaoscastle.tga";
 
 	m_mapImgPath[56] = strFolderName + "SwampOfCalmness.tga";
-#ifdef CSK_ADD_MAP_ICECITY
 	m_mapImgPath[57] = strFolderName + "mapname_raklion.tga";
 	m_mapImgPath[58] = strFolderName + "mapname_raklionboss.tga";
-#endif // CSK_ADD_MAP_ICECITY
 	
-#ifdef YDG_ADD_MAP_SANTA_TOWN
 	m_mapImgPath[62] = strFolderName + "santatown.tga";
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-#ifdef PBG_ADD_PKFIELD
+
 	m_mapImgPath[63] = strFolderName + "pkfield.tga";
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DUEL_ARENA
+
 	m_mapImgPath[64] = strFolderName + "duelarena.tga";
-#endif	// YDG_ADD_MAP_DUEL_ARENA
-#ifdef YDG_ADD_MAP_DOPPELGANGER1
+
 	m_mapImgPath[65] = strFolderName + "doppelganger.tga";
-#endif	// YDG_ADD_MAP_DOPPELGANGER1
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
+
 	m_mapImgPath[66] = strFolderName + "doppelganger.tga";
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
+
 	m_mapImgPath[67] = strFolderName + "doppelganger.tga";
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-#ifdef YDG_ADD_MAP_DOPPELGANGER4
+
 	m_mapImgPath[68] = strFolderName + "doppelganger.tga";
-#endif	// YDG_ADD_MAP_DOPPELGANGER4
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN1
+
 	m_mapImgPath[69] = strFolderName + "EmpireGuardian.tga";
-#endif //LDK_ADD_MAP_EMPIREGUARDIAN1
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN2
+
 	m_mapImgPath[70] = strFolderName + "EmpireGuardian.tga";
-#endif //LDS_ADD_MAP_EMPIREGUARDIAN2
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN3
+
 	m_mapImgPath[71] = strFolderName + "EmpireGuardian.tga";
-#endif //LDK_ADD_MAP_EMPIREGUARDIAN3
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN4
+
 	m_mapImgPath[72] = strFolderName + "EmpireGuardian.tga";
-#endif //LDS_ADD_MAP_EMPIREGUARDIAN4
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
+
 	m_mapImgPath[79] = strFolderName + "MapName_MarketRolen.tga";
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
+
 #ifdef ASG_ADD_MAP_KARUTAN
 	m_mapImgPath[80] = strFolderName + "MapName_Karutan.tga";
 	m_mapImgPath[81] = strFolderName + "MapName_Karutan.tga";
@@ -179,9 +165,7 @@ void CUIMapName::ShowMapName()
 		char szImgPath[128];
 		::strcpy(szImgPath, m_mapImgPath[gMapManager.WorldActive].data());
 
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 		DeleteBitmap(BITMAP_INTERFACE_EX+45);
-#endif	// LDS_ADD_EMPIRE_GUARDIAN
 		LoadBitmap(szImgPath, BITMAP_INTERFACE_EX+45);
 		
 		m_nOldWorld = gMapManager.WorldActive;
@@ -243,12 +227,10 @@ void CUIMapName::Render()
 #ifdef ASG_ADD_GENS_SYSTEM
 	if (m_bStrife)
 		::RenderBitmap(BITMAP_INTERFACE_EX+47, UIMN_IMG_POS_X, UIMN_STRIFE_POS_Y,
-			UIMN_IMG_WIDTH, UIMN_STRIFE_HEIGHT, 0.0f, 0.0f,
-			UIMN_IMG_WIDTH / 256.0f, UIMN_STRIFE_HEIGHT / 32.0f, false, false);
+			UIMN_IMG_WIDTH, UIMN_STRIFE_HEIGHT, 0.0f, 0.0f,	UIMN_IMG_WIDTH / 256.0f, UIMN_STRIFE_HEIGHT / 32.0f, false, false);
 #endif	// ASG_ADD_GENS_SYSTEM
 	::RenderBitmap(BITMAP_INTERFACE_EX+45, UIMN_IMG_POS_X, UIMN_IMG_POS_Y,
-		UIMN_IMG_WIDTH, UIMN_IMG_HEIGHT, 0.0f, 0.0f,
-		UIMN_IMG_WIDTH / 256.0f, UIMN_IMG_HEIGHT / 128.0f, false, false);
+		UIMN_IMG_WIDTH, UIMN_IMG_HEIGHT, 0.0f, 0.0f,UIMN_IMG_WIDTH / 256.0f, UIMN_IMG_HEIGHT / 128.0f, false, false);
 
 	::glColor4f(1.0f,1.0f,1.0f,1.0f);
 	::DisableAlphaBlend();

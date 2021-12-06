@@ -558,28 +558,17 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 				}
 				break;
 				
-				//////////////////////////////////////////////////////////////////////////
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 			case BITMAP_2LINE_GHOST:
 				{
 					if( o->SubType == 0 )
 					{
 						o->RenderType = RENDER_TYPE_ALPHA_BLEND_MINUS;
-#ifdef PJH_FIX_CAOTIC
 						o->Velocity = 40.f + rand()%20;
 						if(rand()%2 == 0)
 							o->LifeTime = 67;
 						else
 							o->LifeTime = 75;
 						o->MaxTails = 26;
-#else
-						o->Velocity = 15.f + rand()%20;
-						if(rand()%2 == 0)
-							o->LifeTime = 84;
-						else
-							o->LifeTime = 94;
-						o->MaxTails = 26;
-#endif //PJH_FIX_CAOTIC
 						o->Scale    = Scale + (rand()%200 + 1);
 						o->Direction[0] = 0;
 						o->m_sTargetIndex = 2;
@@ -616,7 +605,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					}
 				}
 				break;
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 			case BITMAP_JOINT_SPIRIT:
 			case BITMAP_JOINT_SPIRIT2:
                 o->RenderType = RENDER_TYPE_ALPHA_BLEND_MINUS;
@@ -871,8 +859,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->MaxTails = 0;
 					VectorCopy(o->Position,o->StartPosition);
 					break;
-#ifdef ASG_ADD_SUMMON_RARGLE
-				case 24:	// ¼ÒÈ¯¼ö ¶ó±Û ²¿¸® ÀÌÆåÆ®.
+				case 24:
 					{
 						o->RenderType = RENDER_TYPE_ALPHA_BLEND;
 						o->RenderFace = RENDER_FACE_TWO;
@@ -895,8 +882,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						}
 					}
 					break;
-#endif	// ASG_ADD_SUMMON_RARGLE
-#ifdef YDG_ADD_FIRECRACKER_ITEM
 				case 25:
 					{
 						o->RenderType = RENDER_TYPE_ALPHA_BLEND;
@@ -912,7 +897,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						VectorCopy ( o->Position, o->StartPosition );
 					}
 					break;
-#endif	// YDG_ADD_FIRECRACKER_ITEM
                 }
                 break;
 			case BITMAP_JOINT_LASER:
@@ -960,7 +944,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->MaxTails = 4;
 					Vector(1.f,0.2f,0.2f,o->Light);
 					break;
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
                 case 5:
 					o->Scale    = 2.f;
 					o->Velocity = (float)(rand()%20+6);
@@ -968,7 +951,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->MaxTails = 2;
 					Vector(0.7f,0.1f,0.1f,o->Light);
 					break;
-#endif //LDS_ADD_EMPIRE_GUARDIAN
 
                 }
 				break;
@@ -1075,10 +1057,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							Vector(0.f,0.3f,1.f,o->Light);
 						}
 					}
-					//CreateParticle(BITMAP_FIRE,o->Position,o->Angle,o->Light,rand()%4);
-					//PlayBuffer(SOUND_MAGIC_LASER01);
 					break;
-					/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				case BITMAP_JOINT_THUNDER:
 					o->Scale    = Scale;
 					o->MaxTails = MAX_TAILS;
@@ -2284,11 +2263,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                 VectorCopy(TargetPosition,o->TargetPosition);
                 break;
             case BITMAP_JOINT_FORCE:
-                if ( o->SubType==0 
-#ifdef PJH_FIX_BLOOD_ATTCK
-					|| o->SubType==10 
-#endif //#ifdef PJH_FIX_BLOOD_ATTCK
-					)
+                if ( o->SubType==0 || o->SubType==10 )
                 {
 					o->LifeTime = 20;
                     o->m_bCreateTails = false;
@@ -4237,7 +4212,6 @@ void MoveJoint( JOINT *o, int iIndex)
 				o->Angle[0] = 110.0f;
 			}
 		}
-#ifdef ASG_ADD_SUMMON_RARGLE
 		else if (o->SubType == 24)
 		{
 			if (o->Target == NULL || o->Target->Live == false)
@@ -4273,8 +4247,6 @@ void MoveJoint( JOINT *o, int iIndex)
 				VectorCopy(o->Angle, o->Target->Angle);
 			}
 		}
-#endif	// ASG_ADD_SUMMON_RARGLE
-#ifdef YDG_ADD_FIRECRACKER_ITEM
         else if ( o->SubType==25 )
         {
             if ( o->LifeTime<10 )
@@ -4304,7 +4276,6 @@ void MoveJoint( JOINT *o, int iIndex)
 				CreateEffect(BITMAP_FIRECRACKER0002,o->Position,o->Angle,o->Light,o->Skill);
 			}
         }
-#endif	// YDG_ADD_FIRECRACKER_ITEM
 		break;
 	case BITMAP_JOINT_SPARK:
         if ( o->SubType==1 )
@@ -4367,7 +4338,6 @@ void MoveJoint( JOINT *o, int iIndex)
 				if(c->Helper.Type != MODEL_HELPER+37 || c->SafeZone)
 					o->SubType = 4;
 			}
-#ifdef CSK_LUCKY_SEAL
 			else if(o->SubType == 10)
 			{
 				if((c->Helper.Type == MODEL_HELPER+2
@@ -4388,7 +4358,6 @@ void MoveJoint( JOINT *o, int iIndex)
 					o->SubType = 10;
 				}
 			}
-#endif // CSK_LUCKY_SEAL
 		}
 		if ( 2 == o->SubType)
 		{
@@ -5509,7 +5478,6 @@ void MoveJoint( JOINT *o, int iIndex)
             o->Position[1] = o->TargetPosition[1];
             o->Position[2] += o->Direction[2];
         }
-#ifdef PJH_SEASON4_FIX_MULTI_SHOT
 		if( o->SubType == 1)
 		{
 			o->Velocity += 0.1f;
@@ -5518,7 +5486,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			o->Light[2] = o->Light[0];
 		}
 		else
-#endif //PJH_SEASON4_FIX_MULTI_SHOT		
+
         if(o->LifeTime<5)
         {
             o->Light[0] /= 1.3f;
@@ -6426,7 +6394,6 @@ void MoveJoint( JOINT *o, int iIndex)
         break;
 		
     case BITMAP_JOINT_FORCE:
-#ifdef PJH_FIX_BLOOD_ATTCK
         if ( o->SubType==10 || o->SubType==8)
         {
 			Vector(0.f,-145.f,0.f,p);
@@ -6462,7 +6429,6 @@ void MoveJoint( JOINT *o, int iIndex)
                 }
                 if ( o->SubType==10 )
                 {
-#ifndef SV_RANGE_ATTACK_CHECK
                     if(o->Target == &Hero->Object && o->LifeTime>18 )
                     {
                         if( (j%5)==0 )
@@ -6480,7 +6446,6 @@ void MoveJoint( JOINT *o, int iIndex)
 							AttackCharacterRange(o->Skill, o->Position, 225.f, o->Weapon, o->PKKey);
                         }
                     }
-#endif // SV_RANGE_ATTACK_CHECK
                 }
             }
 			if(o->SubType==10 )
@@ -6505,7 +6470,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
         }
 		else
-#endif //PJH_FIX_BLOOD_ATTCK
         if ( o->SubType==0 )
         {
 			Vector(0.f,-145.f,0.f,p);

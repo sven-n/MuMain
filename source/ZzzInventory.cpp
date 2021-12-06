@@ -1767,7 +1767,6 @@ void GetItemName ( int iType, int iLevel, char* Text )
 	{
  		sprintf ( Text, "%s", p->Name ); 
 	}
-#ifdef GIFT_BOX_EVENT
 	else if(iType == ITEM_POTION+32)
 	{
 		switch(iLevel)
@@ -1792,8 +1791,6 @@ void GetItemName ( int iType, int iLevel, char* Text )
 		case 1:	sprintf ( Text, "%s", GlobalText[2014] ); break;
 		}
 	}
-#endif
-
     else if(iType == ITEM_HELPER+10)
 	{
 		for(int i=0;i<MAX_MONSTER;i++)
@@ -1829,13 +1826,10 @@ void GetItemName ( int iType, int iLevel, char* Text )
 		else
 			sprintf(Text,"%s +%d",p->Name,iLevel);
 	}
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if ( COMGEM::NOGEM != COMGEM::Check_Jewel_Com(iType) )
 	{
-		// º¸¼® ¹­À½
  		sprintf(Text,"%s +%d", p->Name, iLevel+1);
 	}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if ( iType==INDEX_COMPILED_CELE)
 	{
 		sprintf(Text,"%s +%d", GlobalText[1806], iLevel+1);
@@ -1850,15 +1844,12 @@ void GetItemName ( int iType, int iLevel, char* Text )
 	{
 		sprintf(Text,"%s",p->Name);
 	}
-#ifdef LJH_FIX_BUG_MISSING_ITEM_NAMES_ITEM_HELPER_7 
-    else if ( iType == ITEM_POTION+7 ) //  ½ºÆÐ¼È ¹°¾à.//Á¾ÈÆ¹°¾à
+    else if ( iType == ITEM_POTION+7 )
     {
 		int iTextIndex = 0;
-		
 		iTextIndex = (iLevel == 0) ? 1413 : 1414;
         sprintf ( Text, "%s", GlobalText[iTextIndex] );
     }
-#endif //LJH_FIX_BUG_MISSING_ITEM_NAMES_ITEM_HELPER_7
 	else
 	{
 		if(iLevel==0)
@@ -1914,25 +1905,19 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
         gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[920], iMana);
         break;
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 	case AT_SKILL_MULTI_SHOT:
         gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[920], iMana);
 		break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	case AT_SKILL_RECOVER:
         gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[920], iMana);
 		break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef PJH_SEASON4_MASTER_RANK4
 	case AT_SKILL_POWER_SLASH_UP:
 	case AT_SKILL_POWER_SLASH_UP+1:
 	case AT_SKILL_POWER_SLASH_UP+2:
 	case AT_SKILL_POWER_SLASH_UP+3:
 	case AT_SKILL_POWER_SLASH_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
     case AT_SKILL_ICE_BLADE:
         gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[98], iMana);
@@ -5711,7 +5696,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 
 		Height = (TextLine * TextSize.cy + EmptyLine * TextSize.cy / 2.0f) / fRateY;
 		
-#ifdef CSK_FIX_ITEMTOOLTIP_POS
 		int iScreenHeight	= 420;
 
 		int nInvenHeight	= p->Height*INVENTORY_SCALE;
@@ -5728,14 +5712,8 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		}
 
 #ifdef ASG_ADD_NEW_QUEST_SYSTEM
-	}	// if (!bItemTextListBoxUse) ³¡.
+	}
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
-#else // CSK_FIX_ITEMTOOLTIP_POS
-	if(sy-Height >= 0)
-		sy -= Height;
-	else
-		sy += p->Height*INVENTORY_SCALE;
-#endif // CSK_FIX_ITEMTOOLTIP_POS
 	
 	bool isrendertooltip = true;
 

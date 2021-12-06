@@ -35,10 +35,8 @@
 #include "GMAida.h"
 #include "GMCrywolf1st.h"
 #include "npcBreeder.h"
-#ifdef PET_SYSTEM
-	#include "CSPetSystem.h"
-	#include "GIPetManager.h"
-#endif// PET_SYSTEM
+#include "CSPetSystem.h"
+#include "GIPetManager.h"
 #include "CComGem.h"
 #include "UIMapName.h"	// rozy
 #include "./Time/Timer.h"
@@ -64,12 +62,8 @@
 #ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
 #endif // PSW_ADD_MAPSYSTEM
-#ifdef LDK_ADD_NEW_PETPROCESS
 #include "w_PetProcess.h"
-#endif //LDK_ADD_NEW_PETPROCESS
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
 #include "PortalMgr.h"
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
 #include "ServerListManager.h"
 #include "ProtocolSend.h"
 #include "MapManager.h"
@@ -214,18 +208,6 @@ void StopMusic()
 	{
 		StopMp3( g_lpszMp3[i]);
 	}
-}
-
-static BYTE g_byMaxClass = 0;
-
-void SetCreateMaxClass ( BYTE MaxClass )
-{
-    g_byMaxClass = MaxClass;
-}
-
-BYTE GetCreateMaxClass ( void ) 
-{ 
-    return g_byMaxClass;
 }
 
 bool CheckAbuseFilter(char *Text, bool bCheckSlash)
@@ -403,30 +385,7 @@ void WebzenScene(HDC hDC)
 
 	g_ErrorReport.Write( "> Loading ok.\r\n");
 
-#ifdef _DEBUG
 	SceneFlag = LOG_IN_SCENE;	//
-#else
-	gMapManager.WorldActive = 2;
-	SceneFlag = MAIN_SCENE;
-	SelectedHero = 0;
-	EnableMainRender = true;
-	CameraAngle[2] = -45.0;
-
-	gMapManager.LoadWorld(gMapManager.WorldActive);
-
-	// create user
-	CHARACTER* entity = CreateHero(0, 0, 0, 177 * 100.0f + 50.0f, 100 * 100.0f + 50.0f, 0.0);
-
-	entity->GuildMarkIndex = 0;
-
-	entity->PositionX = 177;
-	entity->PositionY = 100;
-
-	entity->Object.Angle[0] = 0.0f;
-	entity->Object.Angle[1] = 0.0f;
-	entity->Object.Angle[2] = 60.0f;
-#endif
-
 }
 
 int MenuStateCurrent = MENU_SERVER_LIST;

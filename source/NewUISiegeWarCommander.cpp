@@ -336,7 +336,7 @@ void SEASON3B::CNewUISiegeWarCommander::ClearGuildMemberLocation( void )
 
 void SEASON3B::CNewUISiegeWarCommander::SetGuildMemberLocation( BYTE type, int x, int y )
 {
-    VisibleUnitLocation vLocation = { type, x, y };
+    VisibleUnitLocation vLocation = { type, (BYTE)x, (BYTE)y };
 
     m_vGuildMemberLocationBuffer.push_back ( vLocation );
 }

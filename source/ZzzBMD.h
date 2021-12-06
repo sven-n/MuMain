@@ -138,13 +138,13 @@ typedef struct _Mesh_t
 	short         NumVertices;
 	short         NumNormals;
 	short         NumTexCoords;
-	short		  NumVertexColors;	//ver1.3 이상
+	short		  NumVertexColors;	//ver1.3
 	short         NumTriangles;
 	int           NumCommandBytes; //ver1.1
 	Vertex_t      *Vertices;
 	Normal_t      *Normals;
 	TexCoord_t    *TexCoords;
-	VertexColor_t* VertexColors;	//ver1.3 이상
+	VertexColor_t* VertexColors;	//ver1.3
 	Triangle_t    *Triangles;
 	unsigned char *Commands; //ver1.1
 
@@ -253,9 +253,6 @@ public:
 #else //PBG_ADD_NEWCHAR_MONK_ITEM
 	void Transform(float (*BoneMatrix)[3][4],vec3_t BoundingBoxMin,vec3_t BoundingBoxMax,OBB_t *OBB,bool Translate=false);
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-#ifdef LDS_ADD_RENDERMESHEFFECT_FOR_VBO
-	void TransformtoVertices(vec3_t (*Out_VertexTransform__)[MAX_VERTICES], float (*BoneMatrix)[3][4], bool Translate=false);
-#endif // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 
 	void TransformByObjectBone(vec3_t vResultPosition, OBJECT * pObject, int iBoneNumber, vec3_t vRelativePosition = NULL);
 	// (vResultPosition = (pObject->BoneTransform[iBoneNumber] * vRelativePosition) + pObject->Position)
@@ -264,11 +261,9 @@ public:
     void TransformPosition(float (*Matrix)[4],vec3_t Position,vec3_t WorldPosition,bool Translate=false);
     void RotationPosition(float (*Matrix)[4],vec3_t Position,vec3_t WorldPosition);
 
-#ifdef LDS_ADD_MODEL_ATTACH_SPECIFIC_NODE_
 	public:
 	//typedef vector<vec3_t>		VECVEC3_TS;
 
-#ifdef LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
 	void AnimationTransformWithAttachHighModel_usingGlobalTM( 
 				OBJECT* oHighHierarchyModel, 
 				BMD* bmdHighHierarchyModel, 
@@ -276,7 +271,6 @@ public:
 				vec3_t &vOutPosHighHiearachyModelBone,
 				vec3_t *arrOutSetfAllBonePositions,
 				bool bApplyTMtoVertices);
-#endif // LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
 
 	void AnimationTransformWithAttachHighModel( 
 				OBJECT* oHighHierarchyModel, 
@@ -295,11 +289,6 @@ public:
 									 OBJECT* oRefAnimation = NULL,
 									 const float fFrameArea = -1.0f,
 									 const float fWeight = -1.0f );	
-#endif // LDS_ADD_MODEL_ATTACH_SPECIFIC_NODE_
-
-#ifdef LDS_ADD_RENDERMESHEFFECT_FOR_VBO
-	void AnimationTransformOutAllVertices(vec3_t (*outVertexTransform__)[MAX_VERTICES], const OBJECT& oSelf );
-#endif // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 
     void Lighting(float *,Light_t *,vec3_t,vec3_t);
     void Chrome(float *,int,vec3_t);
@@ -310,11 +299,7 @@ public:
 	void BeginRender(float);
 	void EndRender();
 
-#ifdef LDS_ADD_RENDERMESHEFFECT_FOR_VBO
-    void RenderMeshEffect ( int i, int iType, int iSubType=0, vec3_t Angle=0, VOID* obj=NULL, const OBJECT* objSelf = NULL);
-#else // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 	void RenderMeshEffect ( int i, int iType, int iSubType=0, vec3_t Angle=0, VOID* obj=NULL );
-#endif // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 
     void RenderMesh(int i,int RenderFlag,float Alpha=1.f,int BlendMesh=-1,float BlendMeshLight=1.f,float BlendMeshTexCoordU=0.f,float BlendMeshTexCoordV=0.f,int Texture=-1);
 	void RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFlag,float Alpha=1.f,int BlendMesh=-1,float BlendMeshLight=1.f,float BlendMeshTexCoordU=0.f,float BlendMeshTexCoordV=0.f,int Texture=-1);
@@ -337,11 +322,7 @@ public:
 //#ifdef USE_SHADOWVOLUME
 	void FindNearTriangle( void);
 
-#ifdef LDS_OPTIMIZE_FORLOADING
-	void FindTriangleForEdge( Mesh_t* m, int iTriBasis );
-#else // LDS_OPTIMIZE_FORLOADING
 	void FindTriangleForEdge( int iMesh, int iTri, int iIndex11);
-#endif // LDS_OPTIMIZE_FORLOADING
 
 //#endif //USE_SHADOWVOLUME
 private:

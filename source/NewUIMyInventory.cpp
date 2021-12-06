@@ -2271,18 +2271,10 @@ void SEASON3B::CNewUIMyInventory::RenderItemToolTip(int iSlotIndex)
 			int iTargetX = m_EquipmentSlots[iSlotIndex].x + m_EquipmentSlots[iSlotIndex].width / 2;
 			int iTargetY = m_EquipmentSlots[iSlotIndex].y + m_EquipmentSlots[iSlotIndex].height / 2;
 
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 			pEquipmentItemSlot->bySelectedSlotIndex = iSlotIndex;
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 
 			if(m_RepairMode == REPAIR_MODE_OFF)
 			{
-#ifndef CSK_FIX_ITEMTOOLTIP_POS
-				if(iSlotIndex == EQUIPMENT_WEAPON_LEFT)
-				{
-					iTargetY += 100.f;
-				}
-#endif //! CSK_FIX_ITEMTOOLTIP_POS
 				RenderItemInfo(iTargetX, iTargetY, pEquipmentItemSlot, false);
 			}
 			else

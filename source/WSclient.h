@@ -159,6 +159,7 @@ typedef struct
 typedef struct 
 {
 	PBMSG_HEADER	header;
+	BYTE			Flag;
 	BYTE			CharacterCard;
 } PHEADER_CHARACTERCARD, *LPPHEADER_CHARACTERCARD;
 
@@ -2972,7 +2973,6 @@ typedef struct
 
 #endif // CSK_RAKLION_BOSS
 
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 //----------------------------------------------------------------------------
 // CG[0xBF][0x0b]
 //----------------------------------------------------------------------------
@@ -3027,9 +3027,6 @@ typedef struct
 	BYTE		btResult;
 }PMSG_ANS_TRADE_COIN, *LPPMSG_ANS_TREADE_COIN;
 
-#endif //KJH_PBG_ADD_SEVEN_EVENT_2008
-
-#ifdef YDG_ADD_DOPPELGANGER_PROTOCOLS
 //----------------------------------------------------------------------------
 // GC [0xBF][0x0E]
 //----------------------------------------------------------------------------
@@ -3100,8 +3097,6 @@ typedef struct
 	BYTE		btGoalCnt;	
 }PMSG_DOPPELGANGER_MONSTER_GOAL, * LPPMSG_DOPPELGANGER_MONSTER_GOAL;
 
-#endif	// YDG_ADD_DOPPELGANGER_PROTOCOLS
-
 #ifdef PBG_ADD_SECRETBUFF
 //----------------------------------------------------------------------------
 // GC [0xBF][0x15]
@@ -3127,7 +3122,6 @@ typedef struct _tagPMSG_ANS_INVENTORY_EQUIPMENT_ITEM
 } PMSG_ANS_INVENTORY_EQUIPMENT_ITEM, *LPPMSG_ANS_INVENTORY_EQUIPMENT_ITEM;
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 
-#ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
 //----------------------------------------------------------------------------
 // GC[0x8E][0x01]
 //----------------------------------------------------------------------------
@@ -3145,9 +3139,7 @@ typedef struct
 	PBMSG_HEADER2	h;
 	BYTE		btResult;		
 }PMSG_ANS_MAPMOVE, *LPPMSG_ANS_MAPMOVE;
-#endif	// YDG_ADD_MOVE_COMMAND_PROTOCOL
 
-#ifdef LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 //----------------------------------------------------------------------------
 // GC [0xF7][0x02]
 //----------------------------------------------------------------------------
@@ -3181,7 +3173,6 @@ typedef struct
 	BYTE		Result;
 	DWORD		Exp;
 } PMSG_CLEAR_RESULT_EMPIREGUARDIAN, *LPPMSG_CLEAR_RESULT_EMPIREGUARDIAN;
-#endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 

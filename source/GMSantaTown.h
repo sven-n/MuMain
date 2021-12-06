@@ -1,17 +1,13 @@
 // GMSantaTown.h: interface for the CGMSantaTown class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_GMSANTATOWN_H__BFA5CEE0_59CC_43E9_842B_C5DD402D263D__INCLUDED_)
-#define AFX_GMSANTATOWN_H__BFA5CEE0_59CC_43E9_842B_C5DD402D263D__INCLUDED_
 
 #pragma once
 
-#ifdef YDG_ADD_MAP_SANTA_TOWN
 
 #include "w_BaseMap.h"
 
 BoostSmartPointer( CGMSantaTown );
+
 class CGMSantaTown : public BaseMap  
 {
 public:
@@ -48,7 +44,3 @@ protected:
 };
 
 extern bool IsSantaTown();
-
-#endif	// YDG_ADD_MAP_SANTA_TOWN
-
-#endif // !defined(AFX_GMSANTATOWN_H__BFA5CEE0_59CC_43E9_842B_C5DD402D263D__INCLUDED_)

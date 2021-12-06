@@ -1106,13 +1106,11 @@ bool AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT
     case 277:
         switch ( ( c->Skill ) )
         {
-#ifdef PJH_SEASON4_MASTER_RANK4
 		case AT_SKILL_BLOOD_ATT_UP:
 		case AT_SKILL_BLOOD_ATT_UP+1:
 		case AT_SKILL_BLOOD_ATT_UP+2:
 		case AT_SKILL_BLOOD_ATT_UP+3:
 		case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
         case AT_SKILL_REDUCEDEFENSE:
             CreateMonsterSkill_ReduceDef ( o, c->AttackTime, 13, 200.f );
             break;
@@ -1284,13 +1282,11 @@ bool AttackEffect_HellasMonster ( CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT
     case 267:
         switch ( ( c->Skill ) )
         {
-#ifdef PJH_SEASON4_MASTER_RANK4
 		case AT_SKILL_BLOOD_ATT_UP:
 		case AT_SKILL_BLOOD_ATT_UP+1:
 		case AT_SKILL_BLOOD_ATT_UP+2:
 		case AT_SKILL_BLOOD_ATT_UP+3:
 		case AT_SKILL_BLOOD_ATT_UP+4:
-#endif //PJH_SEASON4_MASTER_RANK4
         case AT_SKILL_REDUCEDEFENSE:
             CreateMonsterSkill_ReduceDef ( o, c->AttackTime, 13, 200.f );
             break;

@@ -124,7 +124,6 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 			targetPos[2] = m_RootItem.position[2];// + 70 + (sinf(fRadHeight) * 70.0f);
 			
 			VectorSubtract( targetPos, obj->Position, Range );
-			//------------------------------//
 
 			Distance = sqrtf( Range[0]*Range[0] + Range[1]*Range[1] );
 			if(Distance >= FlyRange)
@@ -172,10 +171,7 @@ bool PetActionCollecterAdd::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, 
 
 			if(CompTimeControl(1000, m_dwSendDelayTime))
 			{
-#ifdef LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
 				if(&Hero->Object == obj->Owner)
-#endif //LJH_FIX_GETTING_ZEN_WITH_PET_OF_OTHER_PLAYER
-					//1000ms
 					SendRequestGetItem(m_RootItem.itemIndex);
 			}	
 		}

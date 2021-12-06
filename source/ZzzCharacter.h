@@ -14,15 +14,8 @@ DWORD GetGuildRelationShipBGColor( BYTE GuildRelationShip );
 CHARACTER* FindCharacterByID( char* szName );
 
 void CreateMonsterServer(int Type,vec3_t Position,vec3_t Angle,int Level=0);
-
 void CreateWeapon(int Type,int Level,CHARACTER *c,int Hand);
-
-#ifdef CSK_REF_BACK_RENDERITEM
 void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,int Level,int Option1,bool Link,bool Translate,int RenderType=0, bool bRightHandItem = true);
-#else // CSK_REF_BACK_RENDERITEM
-void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,int Level,int Option1,bool Link,bool Translate,int RenderType=0);
-#endif // CSK_REF_BACK_RENDERITEM
-
 void RenderCharacter(CHARACTER *c,OBJECT *o,int Select=0);
 void RenderCharactersClient();
 void RenderCharactersServer();
@@ -97,15 +90,7 @@ extern int       EquipmentLevelSet;
 extern bool      g_bAddDefense;
 
 void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int SubType=0,OBJECT *Target=NULL,float Scale=10.f,short PK=-1, WORD SkillIndex=0,WORD SkillSerialNum=0, int iChaIndex=-1, const float* vColor = NULL, short int sTargetIndex = -1);
-
-
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-void SetActionBloodAttack(CHARACTER *c, OBJECT* o);
-#endif // YDG_ADD_SKILL_RIDING_ANIMATIONS
-
-#ifdef CSK_REF_BACK_RENDERITEM
 bool RenderCharacterBackItem(CHARACTER *c, OBJECT* o, bool bTranslate);
 bool IsBackItem(CHARACTER *c, int iType);
-#endif // CSK_REF_BACK_RENDERITEM
 
 #endif

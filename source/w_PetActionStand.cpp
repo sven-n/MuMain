@@ -1,19 +1,11 @@
 // w_PetActionStand.cpp: implementation of the PetActionStand class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef LDK_ADD_NEW_PETPROCESS
-
 #include "w_PetActionStand.h"
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "ZzzCharacter.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 PetActionStandPtr PetActionStand::Make()
 {
@@ -33,10 +25,7 @@ PetActionStand::~PetActionStand()
 
 bool PetActionStand::Release( OBJECT* obj, CHARACTER *Owner )
 {
-#ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 	DeleteEffect(MODEL_FEATHER_FOREIGN, obj);
-#endif	// LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-
 	return TRUE;
 }
 
@@ -57,7 +46,6 @@ bool PetActionStand::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD t
 	float Distance = Range[0]*Range[0]+Range[1]*Range[1];
 	if( Distance >= FlyRange*FlyRange*FlyRange*FlyRange )
 	{
-		//맵 이동시 ...
 		VectorCopy ( obj->Owner->Position, obj->Position );
 		obj->Position[2] = obj->Owner->Position[2] + 200;
 		VectorCopy ( obj->Owner->Angle, obj->Angle );
@@ -83,8 +71,6 @@ bool PetActionStand::Move( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD t
 
 bool PetActionStand::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD tick, bool bForceRender )
 {
-
-#ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 	BMD* b = &Models[obj->Type];
 	vec3_t Position, vRelativePos;
 	vec3_t Light;
@@ -98,7 +84,6 @@ bool PetActionStand::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 	
 	b->Animation(BoneTransform,obj->AnimationFrame,obj->PriorAnimationFrame,obj->PriorAction, obj->Angle, obj->HeadAngle);
 
-	//후광
 	Vector(0.7f, 0.2f, 0.6f, Light);
 	b->TransformPosition(BoneTransform[3], vRelativePos, Position, false);
 	CreateSprite(BITMAP_LIGHTMARKS_FOREIGN, Position, 1.5f, Light, obj);
@@ -109,7 +94,6 @@ bool PetActionStand::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 	Position[2] -= 25.0f;
 	CreateEffect( MODEL_FEATHER_FOREIGN, Position, obj->Angle, Light, 4, NULL, -1, 0, 0, 0, 0.3f );
 
-	//----------------------------//
 	int temp[] = { 45, 42, 48, 54, 51, 57, 25, 26, 27, 38, 32 };
 
 	for( int i = 0; i < 11; ++i )
@@ -118,7 +102,7 @@ bool PetActionStand::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 
 		switch(i)
 		{
-		case 0: //날개
+		case 0:
 		case 1:
 		case 2:
 		case 3:
@@ -128,14 +112,14 @@ bool PetActionStand::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 			CreateSprite(BITMAP_LIGHTMARKS_FOREIGN, Position, 0.3f, Light, obj);
 			break;
 
-		case 6: //머리
+		case 6:
 		case 7:
 		case 8:
 			Vector(0.6f, 0.2f, 0.8f, Light);
 			CreateSprite(BITMAP_LIGHT, Position, 0.2f, Light, obj);
 			break;
 
-		case 9: //손
+		case 9:
 		case 10:
 			tempLight = (0 == i%2) ?  sinf(fRad1) * 2.0f : sinf(fRad2) * 2.0f;
 			Vector(tempLight, tempLight, tempLight, Light);
@@ -143,9 +127,5 @@ bool PetActionStand::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWORD
 			break;
 		}
 	}
-#endif //LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-
 	return TRUE;
 }
-
-#endif //LDK_ADD_NEW_PETPROCESS

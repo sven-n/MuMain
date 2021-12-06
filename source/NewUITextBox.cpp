@@ -147,7 +147,7 @@ unicode::t_string CNewUITextBox::GetFullText()
 
 unicode::t_string CNewUITextBox::GetLineText( int iLineIndex )
 {
-	if( 0 > iLineIndex || m_vecText.size() <= iLineIndex )
+	if( 0 > iLineIndex || (int)m_vecText.size() <= iLineIndex )
 		return "";
 
 	return m_vecText[ iLineIndex ];

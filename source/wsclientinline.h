@@ -521,7 +521,6 @@ extern DWORD g_dwLatestMagicTick;
 		spe.Init( 0xC1, 0x19);\
 		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
 		spe.Send( TRUE);\
-		hanguo_check3();\
 	}\
 }
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -2294,7 +2293,6 @@ __forceinline bool SendRequestMixExit()
 }
 #endif // PRUARIN_EVENT07_3COLORHARVEST
 
-#ifdef LDK_ADD_SANTA_NPC
 //----------------------------------------------------------------------------
 // CG [0xD0][0x10]
 //----------------------------------------------------------------------------
@@ -2305,7 +2303,6 @@ __forceinline bool SendRequestMixExit()
 	spe << (BYTE)0x10;\
 	spe.Send();\
 }
-#endif //LDK_ADD_SANTA_NPC
 
 //----------------------------------------------------------------------------
 // CG [0xD0][0x0a]

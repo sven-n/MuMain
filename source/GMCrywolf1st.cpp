@@ -240,10 +240,8 @@ void M34CryWolf1st::RenderNoticesCryWolf()
 	}
 	iTemp = 4 * iNextNotice;
 
-#ifdef ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
 	char szText[256];
 	int nText = 0;
-#endif	// ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
 
 	for(int i = 0; i < 4; i++)
 	{
@@ -255,7 +253,6 @@ void M34CryWolf1st::RenderNoticesCryWolf()
 		{
 			g_pRenderText->SetTextColor(100, 150, 255, 255);
 		}
-#ifdef ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
 		nText = 1957+i+iTemp;
 		if (1966 == nText || 1967 == nText)
 		{
@@ -264,9 +261,6 @@ void M34CryWolf1st::RenderNoticesCryWolf()
 		}
 		else
 			g_pRenderText->RenderText(190, 63+i*13, GlobalText[nText]);
-#else	// ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
-		g_pRenderText->RenderText(190,63+i*13,GlobalText[1957+i+iTemp]);
-#endif	// ASG_FIX_TEXT_SCRIPT_PERCENT_TREATMENT
 	}
 }
 

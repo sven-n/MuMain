@@ -235,12 +235,10 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 	if (iInfoWidth < iAddWidth)
 		iInfoWidth = iAddWidth;
 
-#ifdef CSK_FIX_MAGICALPOWER_INCREASE
 	if(iType == 5 && fNumAdd < 3.f)
 	{
 		TabSpace += 20;
 	}
-#endif // CSK_FIX_MAGICALPOWER_INCREASE
 
 	int iInfoNum = (WindowWidth <= 800 ? 46 : 51);
 	memset(TextList[TextNum], ' ', iInfoNum); 

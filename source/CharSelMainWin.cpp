@@ -194,12 +194,9 @@ void CCharSelMainWin::RenderControls()
 	{
 		g_pRenderText->SetTextColor(0, 0, 0, 255);
 		g_pRenderText->SetBgColor(255, 255, 0, 128);
-		g_pRenderText->RenderText(320, 330, GlobalText[436], 0, 0,
-			RT3_WRITE_CENTER);
-		g_pRenderText->RenderText(320, 348, GlobalText[437], 0, 0,
-			RT3_WRITE_CENTER);
+		g_pRenderText->RenderText(320, 330, GlobalText[436], 0, 0, RT3_WRITE_CENTER);
+		g_pRenderText->RenderText(320, 348, GlobalText[437], 0, 0, RT3_WRITE_CENTER);
 	}
-
 	CWin::RenderButtons();
 }
 

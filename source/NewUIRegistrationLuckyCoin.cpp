@@ -2,7 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
 #include "NewUIRegistrationLuckyCoin.h"
 #include "NewUISystem.h"
 #include "wsclientinline.h"
@@ -79,7 +78,6 @@ namespace SEASON3B
 		g_pRenderText->RenderText(_x, _y, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 		
 		g_pRenderText->SetFont(g_hFont);
-#ifdef PBG_MOD_LUCKYCOINEVENT
 		sprintf( szText, GlobalText[2855] );
 		g_pRenderText->RenderText(_x, _y+40, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 		sprintf( szText, GlobalText[2856] );
@@ -88,25 +86,14 @@ namespace SEASON3B
 		g_pRenderText->RenderText(_x, _y+80, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 		sprintf( szText, GlobalText[2858] );
 		g_pRenderText->RenderText(_x, _y+100, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-#else //PBG_MOD_LUCKYCOINEVENT
-		sprintf( szText, GlobalText[1935] );
-		g_pRenderText->RenderText(_x, _y+40, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-		sprintf( szText, GlobalText[1936] );
-		g_pRenderText->RenderText(_x, _y+60, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-		sprintf( szText, GlobalText[1937] );
-		g_pRenderText->RenderText(_x, _y+80, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-#endif //PBG_MOD_LUCKYCOINEVENT
+
 		g_pRenderText->SetFont(g_hFontBold);
 		
 		sprintf(szText, GlobalText[1889]);
 		g_pRenderText->RenderText(_x, _y+120, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);	
 		
 		sprintf(szText, GlobalText[1893], GetRegistCount());
-#ifdef LJH_MOD_POSITION_OF_REGISTERED_LUCKY_COIN
 		g_pRenderText->RenderText( _x+24, _y+150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-#else  //LJH_MOD_POSITION_OF_REGISTERED_LUCKY_COIN
-		g_pRenderText->RenderText( _x+10, _y+150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-#endif //LJH_MOD_POSITION_OF_REGISTERED_LUCKY_COIN
 	}
 	
 	void CNewUIRegistrationLuckyCoin::RenderLuckyCoin()
@@ -319,5 +306,3 @@ namespace SEASON3B
 	}
 	
 }
-
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008

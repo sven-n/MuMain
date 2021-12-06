@@ -74,11 +74,9 @@ void SEASON3B::CNewUIBuffWindow::SetPos(int iScreenWidth)
 	else if(iScreenWidth == 450) {
 		SetPos(125, 15);
 	}
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 	else if(iScreenWidth == 373) {
 		SetPos(86, 15);
 	}
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 	else if(iScreenWidth == 260) {
 		SetPos(30, 15);
 	}
@@ -97,9 +95,7 @@ void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate )
 	{
 		eBuffState eBuffType = g_CharacterBuff(pHeroObject, i);
 
-#ifdef PBG_ADD_DISABLERENDER_BUFF
 		if(SetDisableRenderBuff(eBuffType))	continue;
-#endif //PBG_ADD_DISABLERENDER_BUFF
 
 		if(eBuffType != eBuffNone) {
 			eBuffClass eBuffClassType = g_IsBuffClass(eBuffType);
@@ -116,7 +112,7 @@ void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate )
 		}
 	}	
 }
-#ifdef PBG_ADD_DISABLERENDER_BUFF
+
 bool SEASON3B::CNewUIBuffWindow::SetDisableRenderBuff(const eBuffState& _BuffState)
 {
 	switch(_BuffState)
@@ -127,16 +123,13 @@ bool SEASON3B::CNewUIBuffWindow::SetDisableRenderBuff(const eBuffState& _BuffSta
 	case eDeBuff_FlameStrikeDamage:
 	case eDeBuff_GiganticStormDamage:
 	case eDeBuff_LightningShockDamage:
-#ifdef YDG_ADD_GM_DISCHARGE_STAMINA_DEBUFF
 	case eDeBuff_Discharge_Stamina:
-#endif	// YDG_ADD_GM_DISCHARGE_STAMINA_DEBUFF
 		return true;
 	default:
 		return false;
 	}
 	return false;
 }
-#endif //PBG_ADD_DISABLERENDER_BUFF
 
 bool SEASON3B::CNewUIBuffWindow::UpdateMouseEvent()
 {
@@ -165,7 +158,6 @@ bool SEASON3B::CNewUIBuffWindow::UpdateMouseEvent()
 					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CInfinityArrowCancelMsgBoxLayout));
 				}
 			}
-#ifdef KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 			else if(buff == eBuff_SwellOfMagicPower)
 			{
 				if(SEASON3B::IsRelease(VK_RBUTTON))
@@ -173,7 +165,6 @@ bool SEASON3B::CNewUIBuffWindow::UpdateMouseEvent()
 					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut));
 				}
 			}
-#endif // KJH_ADD_SKILL_SWELL_OF_MAGICPOWER
 			
 			return false;
 		}
@@ -261,7 +252,6 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffIcon(eBuffState& eBuffType, float x, 
 	int iWidthIndex, iHeightIndex;
 	float u, v;
 
-#if defined ASG_ADD_SKILL_BERSERKER || defined PSW_PARTCHARGE_ITEM4 || defined PBG_ADD_SANTABUFF
 	if (eBuffType < 81) // eBuff_Berserker
 	{
 		iWidthIndex = (eBuffType - 1) % 10;
@@ -283,15 +273,6 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffIcon(eBuffState& eBuffType, float x, 
 		
 		RenderBitmap(IMAGE_BUFF_STATUS2, x, y, width, height, u, v, width/256.f, height/256.f);
 	}
-#else	// defined ASG_ADD_SKILL_BERSERKER || defined PSW_PARTCHARGE_ITEM4  || defined PBG_ADD_SANTABUFF
-	iWidthIndex = (eBuffType - 1) % 10;
-	iHeightIndex = (eBuffType - 1) / 10;
-	
-	u = iWidthIndex * width / 256.f;
-	v = iHeightIndex * height / 256.f;
-	
-	RenderBitmap(IMAGE_BUFF_STATUS, x, y, width, height, u, v, width/256.f, height/256.f);
-#endif	// defined ASG_ADD_SKILL_BERSERKER || defined PSW_PARTCHARGE_ITEM4
 }
 
 void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, eBuffState& eBuffType, float x, float y)
@@ -310,12 +291,12 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
 		
 		unicode::_sprintf(TextList[TextNum], temp.c_str());
 		
-		if( TextNum == 0 ) //이름
+		if( TextNum == 0 )
 		{
 			TextListColor[TextNum] = TEXT_COLOR_BLUE;
 			TextBold[TextNum] = true;
 		}
-		else // 설명
+		else
 		{
 			TextListColor[TextNum] = TEXT_COLOR_WHITE;
 			TextBold[TextNum] = false;
@@ -329,11 +310,7 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
 	
 	if( bufftime.size() != 0 )
 	{
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 		unicode::_sprintf(TextList[TextNum], GlobalText[2533], bufftime.c_str());
-#else //CSK_EVENT_CHERRYBLOSSOM
-		unicode::_sprintf(TextList[TextNum], bufftime.c_str());
-#endif //CSK_EVENT_CHERRYBLOSSOM
 		TextListColor[TextNum] = TEXT_COLOR_PURPLE;
 		TextBold[TextNum] = false;
 		TextNum += 1;
@@ -362,15 +339,11 @@ void SEASON3B::CNewUIBuffWindow::ClosingProcess()
 void SEASON3B::CNewUIBuffWindow::LoadImages()
 {
 	LoadBitmap("Interface\\newui_statusicon.jpg", IMAGE_BUFF_STATUS, GL_LINEAR);
-#if defined ASG_ADD_SKILL_BERSERKER || defined PSW_PARTCHARGE_ITEM4 || defined PBG_ADD_SANTABUFF
 	LoadBitmap("Interface\\newui_statusicon2.jpg", IMAGE_BUFF_STATUS2, GL_LINEAR);
-#endif	// defined ASG_ADD_SKILL_BERSERKER || defined PSW_PARTCHARGE_ITEM4
 }
 
 void SEASON3B::CNewUIBuffWindow::UnloadImages()
 {
-#if defined ASG_ADD_SKILL_BERSERKER || defined PSW_PARTCHARGE_ITEM4 || defined PBG_ADD_SANTABUFF
 	DeleteBitmap(IMAGE_BUFF_STATUS2);
-#endif	// defined ASG_ADD_SKILL_BERSERKER || defined PSW_PARTCHARGE_ITEM4
 	DeleteBitmap(IMAGE_BUFF_STATUS);	
 }

@@ -1,13 +1,7 @@
 // MultiLanguage.h: interface for the CMultiLanguage class.
-//
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_MULTILANGUAGE_H__01D5F840_67B5_4472_B89F_9C3EAF89107A__INCLUDED_)
-#define AFX_MULTILANGUAGE_H__01D5F840_67B5_4472_B89F_9C3EAF89107A__INCLUDED_
-
 #pragma once
-
-#ifdef LJH_ADD_SUPPORTING_MULTI_LANGUAGE
 
 class CMultiLanguage
 {
@@ -44,5 +38,3 @@ public:
 	
 	static CMultiLanguage* GetSingletonPtr() { return ms_Singleton; };
 };
-#endif //LJH_ADD_SUPPORTING_MULTI_LANGUAGE
-#endif // !defined(AFX_MULTILANGUAGE_H__01D5F840_67B5_4472_B89F_9C3EAF89107A__INCLUDED_)

@@ -36,8 +36,6 @@ int	SeparateTextIntoLines( const char* lpszText, char *lpszSeparated, int iMaxLi
 bool	GetTimeCheck(int DelayTime);
 void	SetEffectVolumeLevel(int level);
 void    SetViewPortLevel ( int level );
-void    SetCreateMaxClass ( BYTE MaxClass );
-BYTE    GetCreateMaxClass ( void );
 
 #ifdef PSW_BUGFIX_IME
 bool IsEnterPressed();

@@ -56,7 +56,7 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 	LoadImages();
 
 
-	POINT ptBtn = { m_Pos.x+INVENTORY_WIDTH*0.5f-22.f, m_Pos.y+380 };
+	POINT ptBtn = { m_Pos.x+(long)INVENTORY_WIDTH*0.5f-22.f, m_Pos.y+380 };
 
 	m_BtnMix.ChangeButtonImgState(true, IMAGE_MIXINVENTORY_MIXBTN, false);
 	m_BtnMix.ChangeButtonInfo(m_Pos.x+INVENTORY_WIDTH*0.5f-22.f, m_Pos.y+380, 44.f, 35.f);

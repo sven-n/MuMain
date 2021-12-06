@@ -1,18 +1,13 @@
 // w_PetActionRound.h: interface for the PetActionRound class.
-//
 //////////////////////////////////////////////////////////////////////
 
-#ifdef LDK_ADD_NEW_PETPROCESS
+#pragma once
 
 #include "w_PetAction.h"
 #include "ZzzBMD.h"
 
-#if !defined(AFX_W_PETACTIONROUND_H__74746333_F761_43C8_BAA7_AC9BB6F2F858__INCLUDED_)
-#define AFX_W_PETACTIONROUND_H__74746333_F761_43C8_BAA7_AC9BB6F2F858__INCLUDED_
-
-#pragma once
-
 BoostSmartPointer(PetActionRound);
+
 class PetActionRound : public PetAction
 {
 public:
@@ -28,6 +23,3 @@ public:
 private:
 	PetActionRound();
 };
-
-#endif // !defined(AFX_W_PETACTIONROUND_H__74746333_F761_43C8_BAA7_AC9BB6F2F858__INCLUDED_)
-#endif //LDK_ADD_NEW_PETPROCESS

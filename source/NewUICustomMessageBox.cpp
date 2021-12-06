@@ -5973,7 +5973,6 @@ bool SEASON3B::CDuelMsgBoxLayout::SetLayout()
 	return true;	
 }
 
-#ifdef YDG_ADD_NEW_DUEL_UI
 bool SEASON3B::CDuelResultMsgBoxLayout::SetLayout()
 {
 	CDuelResultMsgBox* pMsgBox = GetMsgBox();
@@ -5985,9 +5984,7 @@ bool SEASON3B::CDuelResultMsgBoxLayout::SetLayout()
 
 	return true;	
 }
-#endif	// YDG_ADD_NEW_DUEL_UI
 
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 bool CCherryBlossomMsgBoxLayout::SetLayout()
 {
 	CCherryBlossomMsgBox* pMsgBox = GetMsgBox();
@@ -5999,11 +5996,7 @@ bool CCherryBlossomMsgBoxLayout::SetLayout()
 
 	return true;
 }
-#endif // CSK_EVENT_CHERRYBLOSSOM
 
-//////////////////////////////////////////////////////////////////////////
-
-#ifdef ADD_SOCKET_MIX
 bool SEASON3B::CSeedMasterMenuMsgBoxLayout::SetLayout()
 {
 	CSeedMasterMenuMsgBox* pMsgBox = GetMsgBox();
@@ -6027,9 +6020,7 @@ bool SEASON3B::CSeedInvestigatorMenuMsgBoxLayout::SetLayout()
 
 	return true;
 }
-#endif	// ADD_SOCKET_MIX
 
-#ifdef PSW_ADD_RESET_CHARACTER_POINT
 bool SEASON3B::CResetCharacterPointMsgBoxLayout::SetLayout()
 {
 	CResetCharacterPointMsgBox* pMsgBox = GetMsgBox();
@@ -6041,10 +6032,7 @@ bool SEASON3B::CResetCharacterPointMsgBoxLayout::SetLayout()
 	
 	return true;
 }
-#endif //PSW_ADD_RESET_CHARACTER_POINT
 
-#ifdef KJH_PBG_ADD_SEVEN_EVENT_2008
-// 델가도(7주년기념이벤트) 메인메뉴
 bool SEASON3B::CDelgardoMainMenuMsgBoxLayout::SetLayout()
 {
 	CDelgardoMainMenuMsgBox* pMsgBox = GetMsgBox();
@@ -6056,7 +6044,6 @@ bool SEASON3B::CDelgardoMainMenuMsgBoxLayout::SetLayout()
 
 	return true;
 }
-#endif // KJH_PBG_ADD_SEVEN_EVENT_2008
 
 #ifdef LEM_ADD_LUCKYITEM
 bool SEASON3B::CLuckyTradeMenuMsgBoxLayout::SetLayout()

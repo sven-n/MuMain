@@ -377,8 +377,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename,
 		
 		char		szDebugOutput[256];
 		
-		iBuff = iBuff + sprintf( iBuff + szDebugOutput, "%d. Call No CLAMP & No REPEAT. \n", 
-			uiCnt2++);
+		iBuff = iBuff + sprintf( iBuff + szDebugOutput, "%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
 		OutputDebugString( szDebugOutput );
 #endif
 	}
@@ -396,8 +395,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename,
 			}
 			else
 			{
-				g_ErrorReport.Write("인덱스를 공유하거나 Delete없이 사용하였음%s(0x%00000008X)->%s\r\n", 
-					pBitmap->FileName, uiBitmapIndex, filename.c_str());
+				g_ErrorReport.Write("File not found %s (%d)->%s\r\n",pBitmap->FileName, uiBitmapIndex, filename.c_str());
 				UnloadImage(uiBitmapIndex, true);
 			}
 		}

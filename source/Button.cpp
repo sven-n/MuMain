@@ -57,10 +57,8 @@ void CButton::Create(int nWidth, int nHeight, int nTexID, int nMaxFrame,int nDow
 	m_anImgMap[BTN_DISABLE] = nDisableFrame;
 
 	m_anImgMap[BTN_UP_CHECK] = nCheckUpFrame;
-	m_anImgMap[BTN_DOWN_CHECK] = nCheckDownFrame > -1
-		? nCheckDownFrame : m_anImgMap[BTN_UP_CHECK];
-	m_anImgMap[BTN_ACTIVE_CHECK] = nCheckActiveFrame > -1
-		? nCheckActiveFrame : m_anImgMap[BTN_UP_CHECK];
+	m_anImgMap[BTN_DOWN_CHECK] = nCheckDownFrame > -1 ? nCheckDownFrame : m_anImgMap[BTN_UP_CHECK];
+	m_anImgMap[BTN_ACTIVE_CHECK] = nCheckActiveFrame > -1 ? nCheckActiveFrame : m_anImgMap[BTN_UP_CHECK];
 	m_anImgMap[BTN_DISABLE_CHECK] = nCheckDisableFrame;
 
 	m_bClick = m_bCheck = false;
@@ -208,9 +206,7 @@ void CButton::Render()
 
 	float fTextRelativeYPos = ((CSprite::GetHeight() - size.cy) / 2.0f);
 
-	g_pRenderText->RenderText(int(CSprite::GetXPos() / g_fScreenRate_x),
-		int(((float)CSprite::GetYPos() + fTextRelativeYPos) / g_fScreenRate_y
-		+ m_fTextAddYPos), m_szText, CSprite::GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(int(CSprite::GetXPos() / g_fScreenRate_x),int(((float)CSprite::GetYPos() + fTextRelativeYPos) / g_fScreenRate_y + m_fTextAddYPos), m_szText, CSprite::GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
 }
 
 void CButton::ReleaseText()

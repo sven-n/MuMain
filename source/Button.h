@@ -1,10 +1,5 @@
 //*****************************************************************************
 // File: Button.h
-//
-// Desc: interface for the CButton class.
-//		 버튼 클래스.
-//
-// producer: Ahn Sang-Kyu
 //*****************************************************************************
 
 #if !defined(AFX_BUTTON_H__7A986F2A_91A7_4525_8790_AC6C2E95AE63__INCLUDED_)
@@ -46,10 +41,7 @@ public:
 	virtual ~CButton();
 
 	void Release();
-	void Create(int nWidth, int nHeight, int nTexID, int nMaxFrame = 1,
-		int nDownFrame = -1, int nActiveFrame = -1, int nDisableFrame = -1,
-		int nCheckUpFrame = -1, int nCheckDownFrame = -1,
-		int nCheckActiveFrame = -1, int nCheckDisableFrame = -1);
+	void Create(int nWidth, int nHeight, int nTexID, int nMaxFrame = 1,int nDownFrame = -1, int nActiveFrame = -1, int nDisableFrame = -1,int nCheckUpFrame = -1, int nCheckDownFrame = -1,int nCheckActiveFrame = -1, int nCheckDisableFrame = -1);
 	void Update();
 	void Render();
 	void Show(bool bShow = true);

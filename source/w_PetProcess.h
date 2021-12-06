@@ -1,11 +1,5 @@
 // w_PetProcess.h: interface for the PetProcess class.
-// LDK_2008/07/08
 //////////////////////////////////////////////////////////////////////
-
-#ifdef LDK_ADD_NEW_PETPROCESS
-
-#if !defined(AFX_W_PETPROCESS_H__95A7D82D_B7F0_405F_A95B_FD4CBB548E5D__INCLUDED_)
-#define AFX_W_PETPROCESS_H__95A7D82D_B7F0_405F_A95B_FD4CBB548E5D__INCLUDED_
 
 #pragma once
 
@@ -19,12 +13,8 @@
 #ifdef PJH_ADD_PANDA_PET
 #define PANDA			5
 #endif //PJH_ADD_PANDA_PET
-#ifdef LDK_ADD_CS7_UNICORN_PET
 #define	UNICORN			6
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef YDG_ADD_SKELETON_PET
 #define SKELETON		7
-#endif	// YDG_ADD_SKELETON_PET
 
 BoostSmartPointer(PetInfo);
 class PetInfo
@@ -63,9 +53,8 @@ private:
 	int m_count;
 };
 
-//------------------------------------------------------------//
-
 BoostSmartPointer(PetProcess);
+
 class PetProcess  
 {
 public:
@@ -78,41 +67,24 @@ public:
 	virtual ~PetProcess();
 	
 private:
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-	int Register( BoostSmart_Ptr( PetObject ) pPet, int petNum );
-	bool UnRegister( CHARACTER *Owner, int petRegNum = -1 );
-#else //LDK_MOD_NUMBERING_PETCREATE
 	void Register( BoostSmart_Ptr( PetObject ) pPet );
 	void UnRegister( CHARACTER *Owner, int itemType, bool isUnregistAll = false );
-#endif //LDK_MOD_NUMBERING_PETCREATE
 
 	BoostWeak_Ptr(PetAction) Find( int key );
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-	BoostWeak_Ptr(PetObject) FindList( int key, PetList::iterator out_iter = NULL );
-#endif //LDK_MOD_NUMBERING_PETCREATE
+
 	void Init();
 	void Destroy();
 	PetProcess();
 
 public:
 	bool LoadData();
-
 	bool IsPet( int itemType );
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-	int CreatePet( int itemType, int modelType, vec3_t Position, CHARACTER *Owner, int SubType=0, int LinkBone=0 );
-	bool DeletePet( CHARACTER *Owner, int petRegNum = -1, bool ex = false ); //petRegNum -1이면 같은주인의 모든펫 삭제 3번째 파라메터는 예비용
-#else //LDK_MOD_NUMBERING_PETCREATE
 	bool CreatePet( int itemType, int modelType, vec3_t Position, CHARACTER *Owner, int SubType=0, int LinkBone=0 );
 	void DeletePet( CHARACTER *Owner, int itemType = -1, bool allDelete = false );
-#endif //LDK_MOD_NUMBERING_PETCREATE
 	void UpdatePets();
 	void RenderPets();
-
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-	bool SetCommandPet( CHARACTER *Owner, int petRegNum, int targetKey, PetObject::ActionType cmdType ); //petRegNum -1이면 같은주인의 모든펫 행동 변경
-#else //LDK_MOD_NUMBERING_PETCREATE
 	void SetCommandPet( CHARACTER *Owner, int targetKey, PetObject::ActionType cmdType );
-#endif //LDK_MOD_NUMBERING_PETCREATE
+
 
 private:
 	PetList m_petsList;
@@ -122,6 +94,3 @@ private:
 
 extern PetProcessPtr g_petProcess;
 extern PetProcess& ThePetProcess();
-
-#endif // !defined(AFX_W_PETPROCESS_H__95A7D82D_B7F0_405F_A95B_FD4CBB548E5D__INCLUDED_)
-#endif //LDK_ADD_NEW_PETPROCESS

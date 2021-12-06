@@ -2,7 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#ifdef LDK_ADD_NEW_PETPROCESS
 #include "w_PetActionStand.h"
 #include "w_PetActionRound.h"
 #include "w_PetActionDemon.h"
@@ -111,15 +110,11 @@ void PetProcess::Init()
 	m_petsAction.insert( make_pair( PANDA, actionCollecter_Add ) );
 #endif //#ifdef PJH_ADD_PANDA_PET
 
-#ifdef LDK_ADD_CS7_UNICORN_PET
  	PetActionUnicornPtr actionUnicorn = PetActionUnicorn::Make();
  	m_petsAction.insert( make_pair( UNICORN, actionUnicorn ) );
-#endif //LDK_ADD_CS7_UNICORN_PET
 	
-#ifdef YDG_ADD_SKELETON_PET
 	PetActionCollecterSkeletonPtr actionCollecter_Skeleton = PetActionCollecterSkeleton::Make();
 	m_petsAction.insert( make_pair( SKELETON, actionCollecter_Skeleton ) );
-#endif	// YDG_ADD_SKELETON_PET
 
 	LoadData();
 }
@@ -157,92 +152,11 @@ BoostWeak_Ptr(PetAction) PetProcess::Find( int key )
 	return temp;
 }
 
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-BoostWeak_Ptr(PetObject) PetProcess::FindList( int key, PetList::iterator out_iter )
-{
-	for( PetList::iterator iter = m_petsList.begin(); iter != m_petsList.end(); )
-	{
-		PetList::iterator tempiter = iter;
-		++iter;
-		BoostWeak_Ptr(PetObject) basepet = *tempiter;
-		
-		if( basepet.expired() == FALSE && basepet.lock()->IsSameRegKey(key) ) 
-		{
-			if(out_iter != NULL)
-			{
-				out_iter = tempiter;
-			}
-			
-			return basepet;
-		}
-	}
-	
-	BoostWeak_Ptr(PetObject) temp;
-	
-	return temp;
-}
-
-//////////////////////////////////////////////////////////////////////
-// 생성된 PetObject를 map에 등록 : 정해진 넘버로 등록( 무기등의 정해진 번호 사용시)
-//////////////////////////////////////////////////////////////////////
-int PetProcess::Register( BoostSmart_Ptr( PetObject ) pPet, int petNum )
-{
-	if( 0 >= petNum || FindList(petNum).expired() == FALSE ) return FALSE;
-
-	int temp = petNum + GetTickCount();
-	pPet->SetRegKey(temp);
-
-	m_petsList.push_back( pPet );
-
-	return temp;
-}
-//////////////////////////////////////////////////////////////////////
-// map에 등록된 PetObject를 지움 : 같은 Owner가 가진 펫중 등록번호 확인후 삭제
-//////////////////////////////////////////////////////////////////////
-bool PetProcess::UnRegister( CHARACTER *Owner, int petRegNum )
-{
-	if( NULL == Owner || -1 > petRegNum || 0 == m_petsList.size() ) return FALSE;
-
-	for( PetList::iterator iter = m_petsList.begin(); iter != m_petsList.end(); )
-	{
-		PetList::iterator tempiter = iter;
-		++iter;
-		BoostWeak_Ptr(PetObject) basepet = *tempiter;
-		
-		if( basepet.expired() == FALSE )
-		{
-			 if( -1 == petRegNum )
-			{
-				//전체삭제
-				basepet.lock()->Release();
-				m_petsList.erase( tempiter );
-			}
-			else if( basepet.lock()->IsSameOwner(&Owner->Object) && basepet.lock()->IsSameRegKey(petRegNum) )
-			{
-				//개별삭제
-				basepet.lock()->Release();
-				m_petsList.erase( tempiter );
-
-				return TRUE;
-			}
-		}
-	}
-
-	if( -1 == petRegNum ) return TRUE;
-
-	return FALSE;
-}
-#else //LDK_MOD_NUMBERING_PETCREATE
-//////////////////////////////////////////////////////////////////////
-// 생성된 PetObject를 list에 등록 : 등록 조건 강화 필요할듯..
-//////////////////////////////////////////////////////////////////////
 void PetProcess::Register( BoostSmart_Ptr( PetObject ) pPet )
 {
 	m_petsList.push_back( pPet );
 }
-//////////////////////////////////////////////////////////////////////
-// list에 등록된 PetObject를 지움 : 같은 Owner가 가진 여러마리의 펫에대한 처리 필요..
-//////////////////////////////////////////////////////////////////////
+
 void PetProcess::UnRegister(CHARACTER *Owner, int itemType, bool isUnregistAll)
 {
 	if( NULL == Owner ) return;
@@ -266,7 +180,6 @@ void PetProcess::UnRegister(CHARACTER *Owner, int itemType, bool isUnregistAll)
  		}
  	}
 }
-#endif //LDK_MOD_NUMBERING_PETCREATE
 
 bool PetProcess::LoadData()
 {
@@ -377,64 +290,10 @@ bool PetProcess::IsPet(int itemType)
 	return TRUE;
 }
 
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-int PetProcess::CreatePet( int itemType, int modelType, vec3_t Position, CHARACTER *Owner, int SubType, int LinkBone )
-{
-	if ( NULL == Owner ) return 0;
-	
-	PetObjectPtr _tempPet = PetObject::Make();
-	if( _tempPet->Create( itemType, modelType, Position, Owner, SubType, LinkBone ) )
-	{
-		//actions및 초기값 설정.-----------------------------//
-		InfoMap::iterator iter = m_petsInfo.find(itemType);
-		if( iter == m_petsInfo.end() ) return 0;
-		
-		BoostWeak_Ptr(PetInfo) petInfo = (*iter).second;
-		
-		int _count = 0;
-		int *action = NULL;
-		float *speed = NULL;
-		if( petInfo.expired() == FALSE ) 
-		{
-			_count = petInfo.lock()->GetActionsCount();
-			action = petInfo.lock()->GetActions();
-			speed =  petInfo.lock()->GetSpeeds();
-			
-			_tempPet->SetScale( petInfo.lock()->GetScale() );
-			_tempPet->SetBlendMesh( petInfo.lock()->GetBlendMesh() );
-		}
-		
-		for(int i=0; i<_count; i++)
-		{
-			_tempPet->SetActions( (PetObject::ActionType)i, Find(action[i]), speed[i] );
-		}
-		//---------------------------------------------------//
-		
-		return Register(_tempPet, itemType);
-	}
-	
-	return 0;
-}
-
-bool PetProcess::DeletePet( CHARACTER *Owner, int petRegNum, bool ex )
-{
-	if( NULL == Owner ) return FALSE;
-	
-	if( TRUE == ex )
-	{
-		petRegNum = -1;
-	}
-	
-	return UnRegister( Owner, petRegNum );
-}
-#else //LDK_MOD_NUMBERING_PETCREATE
 
 bool PetProcess::CreatePet( int itemType, int modelType, vec3_t Position, CHARACTER *Owner, int SubType, int LinkBone )
 {
 	if ( NULL == Owner ) return FALSE;
-#ifndef LDK_FIX_HIDE_PET_TO_NOT_MODEL_PLAYER //not defined 
-	if ( Owner->Object.Type != MODEL_PLAYER ) return FALSE;
-#endif LDK_FIX_HIDE_PET_TO_NOT_MODEL_PLAYER
 
 	PetObjectPtr _tempPet = PetObject::Make();
 	if( _tempPet->Create( itemType, modelType, Position, Owner, SubType, LinkBone ) )
@@ -474,48 +333,7 @@ void PetProcess::DeletePet(CHARACTER *Owner, int itemType, bool allDelete)
 
 	UnRegister( Owner, itemType, allDelete );
 }
-#endif //LDK_MOD_NUMBERING_PETCREATE
 
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-//////////////////////////////////////////////////////////////////////
-// 펫 행동 변경 함수 : 넘버링된 펫 행동 변경
-//////////////////////////////////////////////////////////////////////
-bool PetProcess::SetCommandPet( CHARACTER *Owner, int petRegNum, int targetKey, PetObject::ActionType cmdType )
-{
-	if( NULL == Owner || -1 > petRegNum ) return FALSE;
-
-	//m_petsMap 등록된 펫 정보 변경
-	if( -1 != petRegNum )
-	{
-		//개별 행동
-		BoostWeak_Ptr(PetObject) petReg = FindList(petRegNum);
-		if( petReg.expired() == FALSE && petReg.lock()->IsSameOwner(&Owner->Object) ) 
-		{
-			petReg.lock()->SetCommand( targetKey, cmdType );
-			
-			return TRUE;
-		}
-	}
-	else
-	{
-		//전체 행동
-		for( PetList::iterator iter = m_petsList.begin(); iter != m_petsList.end(); )
-		{
-			PetList::iterator tempiter = iter;
-			++iter;
-			BoostWeak_Ptr(PetObject) basepet = *tempiter;
-			
-			if( basepet.expired() == FALSE && basepet.lock()->IsSameOwner(&Owner->Object)  )
-			{
-				basepet.lock()->SetCommand( targetKey, cmdType );
-			}
-		}
-		return TRUE;
-	}
-
-	return FALSE;
-}
-#else //LDK_MOD_NUMBERING_PETCREATE
 void PetProcess::SetCommandPet(CHARACTER *Owner, int targetKey, PetObject::ActionType cmdType )
 {
 	if( NULL == Owner ) return;
@@ -535,7 +353,6 @@ void PetProcess::SetCommandPet(CHARACTER *Owner, int targetKey, PetObject::Actio
  		}
  	}
 }
-#endif //LDK_MOD_NUMBERING_PETCREATE
 
 void PetProcess::UpdatePets()
 {
@@ -566,5 +383,3 @@ void PetProcess::RenderPets()
  		}
  	}
 }
-
-#endif //LDK_ADD_NEW_PETPROCESS

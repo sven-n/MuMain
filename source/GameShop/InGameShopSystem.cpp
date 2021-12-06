@@ -258,13 +258,7 @@ bool CInGameShopSystem::IsScriptDownload()
 
 bool CInGameShopSystem::IsBannerDownload()
 {
-	if( ((m_BannerVerInfo.year == m_CurrentBannerVerInfo.year)
-		&& (m_BannerVerInfo.yearId == m_CurrentBannerVerInfo.yearId)
-		&& (m_BannerVerInfo.Zone == m_CurrentBannerVerInfo.Zone))
-#ifdef KJH_FIX_INGAMESHOP_SCRIPTDOWN_BUG
-		&& (m_bFirstBannerDownloaded == true)
-#endif // KJH_FIX_INGAMESHOP_SCRIPTDOWN_BUG
-		)
+	if( ((m_BannerVerInfo.year == m_CurrentBannerVerInfo.year) && (m_BannerVerInfo.yearId == m_CurrentBannerVerInfo.yearId)	&& (m_BannerVerInfo.Zone == m_CurrentBannerVerInfo.Zone)) && (m_bFirstBannerDownloaded == true))
 	{
 		return false;
 	}

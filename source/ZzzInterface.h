@@ -57,18 +57,7 @@ extern int  HeroTile;
 extern int  LoadingWorld;
 
 extern int ItemKey;
-
-#ifdef CSK_ADD_GM_ABILITY
 extern bool g_bGMObservation;
-#endif // CSK_ADD_GM_ABILITY
-
-#ifdef LEM_FIX_USER_LOGOUT
-extern bool g_bExit;
-#endif // LEM_FIX_USER_LOGOUT [lem_2010.8.18]
-
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-extern BOOL g_bReponsedMoveMapFromServer;
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 
 void Action(CHARACTER *c, OBJECT *o, bool Now);
 
@@ -90,10 +79,6 @@ void CreateWhisper(char *ID,const char* Text,int Type);
 void MoveWhispers();
 void RenderSwichState();
 void CheckChatText(char *Text);
-
-#if defined FOR_WORK && defined ENABLE_CHAT_IN_CHAOS
-bool IsManagerID(char* szID);
-#endif // FOR_WORK && ENABLE_CHAT_IN_CHAOS
 
 //  Whisper
 bool CheckWhisperLevel ( int lvl, char* text );
@@ -191,14 +176,10 @@ bool UseSkillRagePosition(CHARACTER* pCha);
 bool CheckTarget(CHARACTER *c);
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 void MouseRButtonReset();
-#ifdef CSK_FIX_DUEL_N_PK_SKILL
 void AttackKnight(CHARACTER *c, int Skill, float Distance);
-#endif // CSK_FIX_DUEL_N_PK_SKILL
 
-#ifdef CSK_ADD_GM_ABILITY
 bool IsGMCharacter();
 bool IsNonAttackGM();
-#endif // CSK_ADD_GM_ABILITY
 bool IsIllegalMovementByUsingMsg(const char *szChatText);
 
 

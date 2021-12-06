@@ -1,13 +1,8 @@
 // w_BasePet.cpp: implementation of the BasePet class.
-// LDK_2008/07/08
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef LDK_ADD_NEW_PETPROCESS
-
 #include "w_BasePet.h"
-
 #include "ZzzLodTerrain.h"
 #include "ZzzObject.h"
 #include "ZzzAI.h"
@@ -15,9 +10,6 @@
 
 extern float EarthQuake;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 PetObjectPtr PetObject::Make()
 {
 	PetObjectPtr PetObject( new PetObject );
@@ -26,18 +18,14 @@ PetObjectPtr PetObject::Make()
 }
 
 PetObject::PetObject():
-m_moveType(eAction_Stand),
-#ifdef LDK_MOD_PETPROCESS_SYSTEM
-m_oldMoveType(eAction_End),
-#endif //LDK_MOD_PETPROCESS_SYSTEM
-m_startTick(0),
-m_targetKey(-1),
-m_pOwner(NULL),
-m_itemType(-1)
+	m_moveType(eAction_Stand),
+	m_oldMoveType(eAction_End),
+	m_startTick(0),
+	m_targetKey(-1),
+	m_pOwner(NULL),
+	m_itemType(-1)
 {
-#ifdef LDK_MOD_NUMBERING_PETCREATE
-	m_regstKey = 0;
-#endif //LDK_MOD_NUMBERING_PETCREATE
+
 }
 
 PetObject::~PetObject()
@@ -50,18 +38,13 @@ void PetObject::Init()
 	m_obj = new OBJECT();
 }
 
-//////////////////////////////////////////////////////////////////////
-// 초기 설정 scale값 등록
-//////////////////////////////////////////////////////////////////////
 void PetObject::SetScale( float scale )
 {
 	if ( NULL == m_obj ) return;
 
     m_obj->Scale = scale;
 }
-//////////////////////////////////////////////////////////////////////
-// 초기 설정 blendMesh값 등록
-//////////////////////////////////////////////////////////////////////
+
 void PetObject::SetBlendMesh( int blendMesh )
 {
 	if ( NULL == m_obj ) return;
@@ -69,9 +52,6 @@ void PetObject::SetBlendMesh( int blendMesh )
     m_obj->BlendMesh = blendMesh;
 }
 
-//////////////////////////////////////////////////////////////////////
-// 생성 : 정확히는 초기화 및 링크??
-//////////////////////////////////////////////////////////////////////
 bool PetObject::Create( int itemType, int modelType, vec3_t Position, CHARACTER *Owner, int SubType, int LinkBone )
 {
 	assert( Owner );
@@ -107,31 +87,15 @@ bool PetObject::Create( int itemType, int modelType, vec3_t Position, CHARACTER 
 	m_obj->AnimationFrame      = 0.f;
 	m_obj->Velocity            = 0.5f;
 
-#ifdef YDG_FIX_SKELETON_PET_CREATE_POSITION
 	switch(m_obj->Type)
 	{
-	case MODEL_HELPER+123:	// 스켈레톤 팻 초기 위치 수정
+	case MODEL_HELPER+123:
 		m_obj->Position[1] += (60.0f * Owner->Object.Scale);
 		break;
 	}
-#endif	// YDG_FIX_SKELETON_PET_CREATE_POSITION
-
-//  	m_obj->BoneTransform = new vec34_t [Models[modelType].NumBones];
-// 
-//  	BMD* b = &Models[modelType];
-// 	for(int i=0; i<b->NumBones; i++)
-// 	{
-// 		memcpy( &m_obj->BoneTransform[i], &b->Bones[i], sizeof(Bone_t));
-// 	}
-// 
-// 	memcpy( m_obj->BoneTransform, b, sizeof(m_obj->BoneTransform));
-// 	VectorCopy(m_obj->Position,b->BodyOrigin);
-// 
 	return TRUE;
 }
-//////////////////////////////////////////////////////////////////////
-// 삭제 : PetAction에서 effect생성시 삭제 잘하자.
-//////////////////////////////////////////////////////////////////////
+
 void PetObject::Release()
 {
 	if(NULL != m_obj)
@@ -155,9 +119,6 @@ void PetObject::Release()
 	m_speedMap.clear();
 }
 
-//////////////////////////////////////////////////////////////////////
-// 갱신
-//////////////////////////////////////////////////////////////////////
 void PetObject::Update(bool bForceRender)
 {
 	if ( !m_obj->Live || NULL == m_obj->Owner || NULL == m_obj ) return;
@@ -171,21 +132,15 @@ void PetObject::Update(bool bForceRender)
 		}
     }
 
-	//공통 기능들 처리
 	Alpha ( m_obj );
 
 	//-----------------------------//
 	DWORD tick = GetNowTick();
 	UpdateModel( tick, bForceRender );
 	UpdateMove( tick, bForceRender );
-#ifdef LDK_ADD_NEW_PETPROCESS_ADD_SOUND
 	UpdateSound( tick, bForceRender );
-#endif //LDK_ADD_NEW_PETPROCESS_ADD_SOUND
 }
 
-//////////////////////////////////////////////////////////////////////
-// RenderUpdate 함수
-//////////////////////////////////////////////////////////////////////
 void PetObject::Render( bool bForceRender )
 {
 	if(m_obj->Live)
@@ -194,10 +149,6 @@ void PetObject::Render( bool bForceRender )
 
 		if(m_obj->Visible)
 		{
-#ifndef LDK_FIX_HIDE_PET_TO_NOT_MODEL_PLAYER //not defined 
- 			if ( m_obj->Owner->Type!=MODEL_PLAYER ) return;
-#endif LDK_FIX_HIDE_PET_TO_NOT_MODEL_PLAYER
-
 			int State = g_isCharacterBuff(m_obj->Owner, eBuff_Cloaking)? 10 : 0;
 
 			RenderObject ( m_obj , FALSE, 0, State);
@@ -222,9 +173,6 @@ bool PetObject::IsSameObject( OBJECT *Owner, int itemType )
 	return ( Owner == m_obj->Owner && itemType == m_itemType )? TRUE : FALSE;
 }
 
-//////////////////////////////////////////////////////////////////////
-// action의 주소를 등록
-//////////////////////////////////////////////////////////////////////
 void PetObject::SetActions( ActionType type, BoostWeak_Ptr(PetAction) action, float speed )
 {
 	if( action.expired() == TRUE ) return;
@@ -233,41 +181,24 @@ void PetObject::SetActions( ActionType type, BoostWeak_Ptr(PetAction) action, fl
 	m_speedMap.insert(std::make_pair( type, speed ) );
 }
 
-//////////////////////////////////////////////////////////////////////
-// 행동 변경값 등록
-//////////////////////////////////////////////////////////////////////
 void PetObject::SetCommand( int targetKey, ActionType cmdType )
 {
 	m_targetKey = targetKey;
 	m_moveType = cmdType;
 }
 
-//////////////////////////////////////////////////////////////////////
-// 내부 MoveUpdate 함수 : 이동에 관해서만 정의 하자
-//////////////////////////////////////////////////////////////////////
 bool PetObject::UpdateMove( DWORD tick, bool bForceRender )
 {
-#ifdef LDK_MOD_PETPROCESS_SYSTEM
 	if( m_oldMoveType != m_moveType )
 	{
 		m_oldMoveType = m_moveType;
 
-		//speed 변경
 		SpeedMap::iterator iter2 = m_speedMap.find(m_moveType);
 		if( iter2 == m_speedMap.end() ) return FALSE;
 		
 		m_obj->Velocity = (*iter2).second;
 	}
-#else
-	//speed 변경
-	SpeedMap::iterator iter2 = m_speedMap.find(m_moveType);
-	if( iter2 == m_speedMap.end() ) return FALSE;
-	
-	m_obj->Velocity = (*iter2).second;
 
-#endif //LDK_MOD_PETPROCESS_SYSTEM
-
-	//action 변경
 	ActionMap::iterator iter = m_actionMap.find(m_moveType);
 	if( iter == m_actionMap.end() )
 	{
@@ -286,9 +217,7 @@ bool PetObject::UpdateMove( DWORD tick, bool bForceRender )
 	
 	return TRUE;
 }
-//////////////////////////////////////////////////////////////////////
-// 내부 ModelUpdate 함수 : 모델의 변경과 애니에 관해서만 정의 하자
-//////////////////////////////////////////////////////////////////////
+
 bool PetObject::UpdateModel( DWORD tick, bool bForceRender )
 {
 	ActionMap::iterator iter = m_actionMap.find(m_moveType);
@@ -308,10 +237,6 @@ bool PetObject::UpdateModel( DWORD tick, bool bForceRender )
 	return TRUE;
 }
 
-#ifdef LDK_ADD_NEW_PETPROCESS_ADD_SOUND
-//////////////////////////////////////////////////////////////////////
-// 내부 SoundUpdate 함수 : 사운드 생성에 관해서만 정의 하자
-//////////////////////////////////////////////////////////////////////
 bool PetObject::UpdateSound( DWORD tick, bool bForceRender )
 {
 	ActionMap::iterator iter = m_actionMap.find(m_moveType);
@@ -326,11 +251,7 @@ bool PetObject::UpdateSound( DWORD tick, bool bForceRender )
 
 	return TRUE;
 }
-#endif //LDK_ADD_NEW_PETPROCESS_ADD_SOUND
 
-//////////////////////////////////////////////////////////////////////
-// 내부 EffectUpdate 함수 : 이펙트 생성에 관해서만 정의 하자
-//////////////////////////////////////////////////////////////////////
 bool PetObject::CreateEffect( DWORD tick, bool bForceRender )
 {
 	ActionMap::iterator iter = m_actionMap.find(m_moveType);
@@ -346,4 +267,3 @@ bool PetObject::CreateEffect( DWORD tick, bool bForceRender )
 	return TRUE;
 }
 
-#endif //LDK_ADD_NEW_PETPROCESS

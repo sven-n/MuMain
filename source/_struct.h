@@ -231,9 +231,7 @@ typedef struct tagITEM
 	BYTE  SpecialValue[MAX_ITEM_SPECIAL];
 	DWORD Key;	//client olny
 	
-#ifdef LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 	BYTE bySelectedSlotIndex;
-#endif // LDS_FIX_OUTPUT_WRONG_COUNT_EQUIPPEDSETITEMOPTIONVALUE
 
 	union 
 	{
