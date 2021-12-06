@@ -620,7 +620,7 @@ bool CNewUIInGameShop::UpdateKeyEvent()
 
 bool CNewUIInGameShop::IsInGameShopOpen()
 {
-	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", "CallStack - CNewUIInGameShop::IsInGameShopOpen()\r\n");
+	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt CallStack - CNewUIInGameShop::IsInGameShopOpen()");
 	if( Hero->Movement )
 		return false;
 
@@ -629,7 +629,7 @@ bool CNewUIInGameShop::IsInGameShopOpen()
 		CMsgBoxIGSCommon* pMsgBox = NULL;
 		CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
 		pMsgBox->Initialize(GlobalText[3028], GlobalText[3051]);
-		g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", " Return - false <%s>\r\n", GlobalText[3051]);
+		g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt Return - false <%s>", GlobalText[3051]);
 		return false;
 	}
 
@@ -638,10 +638,10 @@ bool CNewUIInGameShop::IsInGameShopOpen()
 		CMsgBoxIGSCommon* pMsgBox = NULL;
 		CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
 		pMsgBox->Initialize(GlobalText[3028], GlobalText[3035]);
-		g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", " Return - false <%s>\r\n", GlobalText[3035]);
+		g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt Return - false <%s>", GlobalText[3035]);
 		return false;
 	}
-	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", " Return - true\r\n");
+	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt Return - true");
 	return true;
 }
 
@@ -711,7 +711,7 @@ void CNewUIInGameShop::ReleaseBanner()
 void CNewUIInGameShop::OpeningProcess()
 {
 
-	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", "CallStack - CNewUIInGameShop::OpeningProcess()\r\n");
+	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt CallStack - CNewUIInGameShop::OpeningProcess()");
 	PlayBuffer(SOUND_CLICK01);
 	g_InGameShopSystem->Initalize();
 	g_InGameShopSystem->SelectZone(0);

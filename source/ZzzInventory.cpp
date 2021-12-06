@@ -121,9 +121,7 @@ int  g_shEventChipCount        = 0;
 short g_shMutoNumber[3]        = { -1, -1, -1 };
 
 bool g_bServerDivisionAccept   = false;
-#ifdef SCRATCH_TICKET
 char g_strGiftName[64];
-#endif
 
 bool RepairShop                = false;
 int  RepairEnable              = 0;
@@ -2533,7 +2531,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	{
 		sprintf ( TextList[TextNum], "%s", p->Name );
 	}
-#ifdef GIFT_BOX_EVENT
 	else if(ip->Type == ITEM_POTION+32)
 	{
 		switch(Level)
@@ -2564,7 +2561,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 			sprintf( TextList[TextNum], "%s", GlobalText[2014]); break;
 		}
 	}
-#endif
 	else if(ip->Type >= ITEM_HELPER+32 && ip->Type <= ITEM_HELPER+37)	
 	{
 		if(ip->Type == ITEM_HELPER+37)
@@ -2592,22 +2588,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		else
 			sprintf(TextList[TextNum],"%s +%d",p->Name,Level);
 	}
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if( nGemType != COMGEM::NOGEM && nGemType%2 == 1 )
 	{
 		int nGlobalIndex = COMGEM::GetJewelIndex( nGemType , COMGEM::eGEM_NAME );
 		sprintf(TextList[TextNum],"%s +%d", GlobalText[nGlobalIndex], Level+1);
 	}
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	else if ( ip->Type==INDEX_COMPILED_CELE)
-	{
-		sprintf(TextList[TextNum],"%s +%d", GlobalText[1806], Level+1);
-	}
-	else if ( ip->Type==INDEX_COMPILED_SOUL)
-	{
-		sprintf(TextList[TextNum],"%s +%d", GlobalText[1807], Level+1);
-	}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if( ip->Type == ITEM_POTION + 41 || ip->Type == ITEM_POTION + 42 ||
 			 ip->Type == ITEM_POTION + 43 || ip->Type == ITEM_POTION + 44 ||
 			 ip->Type == ITEM_HELPER + 38
@@ -4585,9 +4570,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch ( Level )
         {
-#ifndef BLOODCASTLE_2ND_PATCH
         case 1: sprintf ( TextList[TextNum], GlobalText[813] ); break;
-#endif
         case 2: sprintf ( TextList[TextNum], GlobalText[1099] ); break;
         case 3: sprintf ( TextList[TextNum], GlobalText[1291] ); break;
 		default: break;
@@ -11119,12 +11102,10 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 	{
 		RenderObjectScreen(MODEL_EVENT+9,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-#ifdef USE_EVENT_ELDORADO
 	else if ( Type==ITEM_POTION+11 && 8 <= ( Level>>3) && ( Level>>3) <= 12)
 	{
 		RenderObjectScreen(MODEL_EVENT+10,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-#endif
 	else if ( Type==ITEM_POTION+11 && ( Level>>3) == 13)
 	{
 		RenderObjectScreen(MODEL_EVENT+6,Level,Option1,ExtOption,Position,Success,PickUp);

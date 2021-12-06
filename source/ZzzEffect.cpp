@@ -1679,19 +1679,15 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
                         VectorCopy ( o->Owner->Position, o->StartPosition );
                     }
                     break;
-
                 case 1:
                     o->HiddenMesh = 0;
                     o->Scale = 24.f;
                     break;
-
 				case 2:
                     o->HiddenMesh	= 0;
                     o->Scale		= 12.f;
 					o->LifeTime 	= 10;
 					break;
-
-#ifdef CRYINGWOLF_2NDMVP
 				case 3:
 					{
 						o->Scale = 10.f;
@@ -1699,7 +1695,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
                         VectorCopy ( o->Owner->Position, o->StartPosition );
 					}
 					break;
-#endif // CRYINGWOLF_2NDMVP
                 }
 
                 CreateJoint(BITMAP_FLARE+1,o->Position,o->Position,o->Angle,0, o, o->Scale, 30, SubType );
@@ -1777,7 +1772,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
 
                 Vector( 0.f, 0.f, o->Angle[2], Angle );
 
-#ifdef CRYINGWOLF_2NDMVP
 				if(o->SubType == 1)
 				{
 					for ( int i=0; i<3; ++i )
@@ -1787,10 +1781,8 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
 						else
 							CreateJoint(BITMAP_FLARE,o->StartPosition,o->StartPosition,Angle,25,o,50.f);
 					}
-//					CheckTargetRange(o);
 				}
 				else 
-#endif // CRYINGWOLF_2NDMVP
 				{
 					for ( int i=0; i<4; ++i )
 					{
@@ -1931,7 +1923,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
                     o->AttackPoint[0] = 0;
                     o->Kind = 1;
                 }
-#ifdef CRYINGWOLF_2NDMVP
 				//. Create Effect
 				if(Type == MODEL_ARROW_NATURE && o->SubType == 1)
 				{	//. 褐事 苦 持失
@@ -1939,7 +1930,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
 //					CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 6, o, 20.f, 40 );
 //					CheckTargetRange(o);
 				}
-#endif // CRYINGWOLF_2NDMVP
 
                 if ( Type==MODEL_ARROW && ( o->SubType==3 || o->SubType==4 ) )
                 {
@@ -6817,19 +6807,14 @@ void CheckClientArrow(OBJECT *o)
                 break;
 
             default:
-#ifdef PJH_FIX_4_BUGFIX_7
-				if(Skill != AT_SKILL_DARK_SCREAM)
-#endif //#ifdef PJH_FIX_4_BUGFIX_7
-					o->Live = false;
+				o->Live = false;
 				if ( o->Type==MODEL_ARROW_BOMB || o->Type==MODEL_ARROW_HOLY	)
 				{
-#ifdef CRYINGWOLF_2NDMVP
 					if(o->SubType == 1)
 					{
 
 					}
 					else
-#endif // CRYINGWOLF_2NDMVP
 					{
 						CreateBomb(o->Position,true);
 					}
@@ -11875,8 +11860,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 		CheckClientArrow(o);
 		break;
 	case MODEL_ARROW_HOLY:
-
-#ifdef CRYINGWOLF_2NDMVP
 		if(o->SubType==1)
 		{
 			o->Angle[1] += 60.f;
@@ -11889,7 +11872,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			AddTerrainLight(o->Position[0],o->Position[1],Light,2,PrimaryTerrainLight);
 		}
 		else
-#endif // CRYINGWOLF_2NDMVP
 		{
 			o->Angle[1] += 30.f;
 
@@ -11963,7 +11945,6 @@ void MoveEffect( OBJECT *o, int iIndex)
     case MODEL_LACEARROW:
 		if(o->Type==MODEL_ARROW_NATURE)
 		{
-#ifdef CRYINGWOLF_2NDMVP
 			if(o->SubType==1) {
 				Vector(0.1f,0.4f,0.1f, Light);
 				CreateSprite(BITMAP_LIGHTNING+1,o->Position,0.3f,Light,o,(int)WorldTime*0.1f);
@@ -11987,7 +11968,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				}
 			}
 			else 
-#endif // CRYINGWOLF_2NDMVP
 			{
 				CreateSprite(BITMAP_LIGHTNING+1,o->Position,0.5f,o->Light,o,(int)WorldTime*0.1f);
 				CreateSprite(BITMAP_LIGHTNING+1,o->Position,1.f,o->Light,o,-(int)WorldTime*0.1f);
@@ -18616,13 +18596,11 @@ void RenderEffects ( bool bRenderBlendMesh )
 						break;
 					RenderObject(o);
                     break;
-#ifdef CRYINGWOLF_2NDMVP
 				case MODEL_PIERCING:
 					if(o->SubType == 3)
 						break;
 					RenderObject(o);
 					break;
-#endif // CRYINGWOLF_2NDMVP
                 case MODEL_TOWER_GATE_PLANE:
                     RenderObject ( o );
  

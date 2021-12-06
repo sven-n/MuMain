@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "_GlobalFunctions.h"
-
-#ifdef LDS_FIX_SKILLKEY_DISABLE_WHERE_EG_ALLTELESKILL
 #include "GMEmpireGuardian1.h"
-#endif // LDS_FIX_SKILLKEY_DISABLE_WHERE_EG_ALLTELESKILL
 
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
 bool g_bRenderBoundingBox = false; 

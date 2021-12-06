@@ -76,9 +76,7 @@ CUIManager::~CUIManager()
 void CUIManager::Init()
 {
 	g_pUIPopup->Init();
-#ifdef PET_SYSTEM
     giPetManager::InitPetManager ();
-#endif// PET_SYSTEM
 	ClearPersonalShop();
 }
 

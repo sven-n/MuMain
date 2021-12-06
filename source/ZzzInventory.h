@@ -122,10 +122,7 @@ extern int  g_bEventChipDialogEnable;
 extern int  g_shEventChipCount;
 extern short g_shMutoNumber[3];
 extern bool g_bServerDivisionAccept;
-
-#ifdef SCRATCH_TICKET
 extern char g_strGiftName[64];
-#endif //SCRATCH_TICKET
 
 extern bool RepairShop;
 extern int  RepairEnable;

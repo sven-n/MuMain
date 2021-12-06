@@ -24,6 +24,7 @@ bool CProtocolSend::ConnectServer()
 
 		return true;
 	}
+	return false;
 }
 
 void CProtocolSend::DisconnectServer()

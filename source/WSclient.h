@@ -1257,14 +1257,12 @@ typedef struct
     short        m_shMutoNum[3];
 } PRECEIVE_MUTONUMBER, * LPPRECEIVE_MUTONUMBER;
 
-#ifdef SCRATCH_TICKET
 typedef struct 
 {
 	PBMSG_HEADER Header;
 	BYTE		 m_byIsRegistered;
 	char		 m_strGiftName[64];
 } PRECEIVE_SCRATCH_TICKET_EVENT, *LPPRECEIVE_SCRATCH_TICKET_EVENT;
-#endif
 
 typedef struct {
 	PBMSG_HEADER Header;

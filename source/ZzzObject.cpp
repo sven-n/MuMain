@@ -3526,10 +3526,12 @@ void RenderObjects()
 									RenderObjectVisual(o);
 								}
 							}
+#ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
 							if(o->Visible == true && g_bRenderBoundingBox == true)
 							{
 								RenderBoundingBox(o);
 							}
+#endif // CSK_DEBUG_RENDER_BOUNDINGBOX
 						}
 
 						if(o->Next == NULL) break;
@@ -9531,11 +9533,9 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
             Level = 0;
         }
         break;
-#ifdef USE_EVENT_ELDORADO
 	case MODEL_EVENT+10:
 		Level = (Level - 8) * 2 + 1;
 		break;
-#endif
     case MODEL_EVENT+11:
         Level--;
         break;

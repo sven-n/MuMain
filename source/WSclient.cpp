@@ -86,9 +86,7 @@ extern BOOL g_bUseChatListBox;
 #ifdef WINDOWMODE
 extern BOOL g_bUseWindowMode;
 #endif //WINDOWMODE
-#ifdef SCRATCH_TICKET
 extern CUITextInputBox * g_pSingleTextInputBox;
-#endif // SCRATCH_TICKET
 
 extern CChatRoomSocketList * g_pChatRoomSocketList;
 
@@ -1695,9 +1693,7 @@ void ReceiveMovePosition( BYTE *ReceiveBuffer )
 	c->JumpTime = 1;
 }
 
-#ifdef USE_EVENT_ELDORADO
 extern int EnableEvent;
-#endif
 
 BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
@@ -6925,14 +6921,11 @@ void ReceiveGuildWarScore( BYTE *ReceiveBuffer )
 	EnableGuildWar = true;
 	
 #ifdef GUILD_WAR_EVENT
-	//나중에 꼭 고쳐야 함.
 	int t1 = Data->Score1 - GuildWarScore[0];
 	int t2 = Data->Score2 - GuildWarScore[1];
 	if(t1 == 20 || t2 == 20)
 	{
-		//우리 팀원들에게 이펙트 출력
 		if(t1 > t2) g_iGoalEffect = 1;
-		//상대 팀원들에게 이펙트 출력
 		else g_iGoalEffect = 2;
 	}
 #endif
@@ -7494,8 +7487,6 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 		}
 		break;
 	case 1:
-        // Data->Cmd2
-#ifndef LIMIT_CHAOS_MIX
 		if(Data->Cmd2 >= 20)
 		{
 			SEASON3B::CreateOkMessageBox(GlobalText[830 + Data->Cmd2 - 20]);
@@ -7504,19 +7495,14 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 		{
 			SEASON3B::CreateOkMessageBox(GlobalText[650 + Data->Cmd2]);	
 		}
-#endif //LIMIT_CHAOS_MIX
 		break;
 		
 	case 3:
 		SEASON3B::CreateOkMessageBox(GlobalText[710+Data->Cmd2]);
 		break;
-		
-#ifdef LENA_EXCHANGE_ZEN
     case 4:
 		SEASON3B::CreateOkMessageBox(GlobalText[725+Data->Cmd2]);
         break;
-#endif // LENA_EXCHANGE_ZEN
-		
 	case 5:
 		{
 			SEASON3B::CDialogMsgBox* pMsgBox = NULL;
@@ -9527,8 +9513,6 @@ void ReceiveServerImmigration( BYTE *ReceiveBuffer)
 	}
 }
 
-
-#ifdef SCRATCH_TICKET
 void ReceiveScratchResult ( BYTE* ReceiveBuffer )
 {
 	LPPRECEIVE_SCRATCH_TICKET_EVENT Data = (LPPRECEIVE_SCRATCH_TICKET_EVENT)ReceiveBuffer;
@@ -9550,7 +9534,6 @@ void ReceiveScratchResult ( BYTE* ReceiveBuffer )
 	
 	memcpy ( g_strGiftName, Data->m_strGiftName, sizeof( char )*64 );
 }
-#endif
 
 void ReceivePlaySoundEffect(BYTE* ReceiveBuffer)
 {
@@ -13497,11 +13480,9 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x99:
 		ReceiveServerImmigration(ReceiveBuffer);
 		break;
-#ifdef SCRATCH_TICKET
 	case 0x9D:
 		ReceiveScratchResult( ReceiveBuffer );
 		break;
-#endif
 	case 0x9E:
 		ReceivePlaySoundEffect( ReceiveBuffer );
 		break;
@@ -13625,7 +13606,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 		break;
 #endif	// ASG_ADD_UI_NPC_DIALOGUE
 
-#ifdef PET_SYSTEM
     case 0xA7:
         ReceivePetCommand ( ReceiveBuffer );
         break;
@@ -13635,7 +13615,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
     case 0xA9:
         ReceivePetInfo ( ReceiveBuffer );
         break;
-#endif// PET_SYSTEM
 		
 #ifdef YDG_ADD_NEW_DUEL_PROTOCOL
 	case 0xAA:

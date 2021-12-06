@@ -294,7 +294,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	else if(SEASON3B::IsPress('X') == true)
 	{
-		g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", "CallStack - CNewUIHotKey.UpdateKeyEvent()\r\n");
+		g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt CallStack - CNewUIHotKey.UpdateKeyEvent()");
 		if(g_pInGameShop->IsInGameShopOpen() == false)
 			return false;
 

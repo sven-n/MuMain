@@ -502,11 +502,7 @@ void CreateTerrainLight()
 		for(int x=0;x<TERRAIN_SIZE;x++)
 		{
 			int Index = TERRAIN_INDEX(x,y);
-#ifdef ON_AIR_BLOODCASTLE
-			float Luminosity = DotProduct(TerrainNormal[Index],Light) + 0.8f;
-#else
 			float Luminosity = DotProduct(TerrainNormal[Index],Light) + 0.5f;
-#endif// ON_AIR_BLOODCASTLE
 			if(Luminosity < 0.f) Luminosity = 0.f;
 			else if(Luminosity > 1.f) Luminosity = 1.f;
 			for(int i=0;i<3;i++)
@@ -900,9 +896,6 @@ void AddTerrainLight(float xf,float yf,vec3_t Light,int Range,vec3_t *Buffer)
 				for(int i=0;i<3;i++)
 				{
      				b[i] += Light[i] * lf;
-#ifdef ON_AIR_BLOODCASTLE
-                    b[i] *= 1.5f;
-#endif// ON_AIR_BLOODCASTLE
 					if ( b[i]<0.f ) b[i] = 0.f;
 				}
 			}
@@ -2368,9 +2361,7 @@ void DeleteAllFrustrum()
 }*/
 
 extern int RainCurrent;
-#ifdef USE_EVENT_ELDORADO
 extern int EnableEvent;
-#endif
 
 void InitTerrainLight()
 {
@@ -2387,11 +2378,8 @@ void InitTerrainLight()
 	}
 	float WindScale;
 	float WindSpeed;
-#ifdef USE_EVENT_ELDORADO
+
 	if(EnableEvent==0)
-#else
-	if(!EnableEvent)
-#endif
 	{
 		WindScale = 10.f;
 		WindSpeed = (int)WorldTime%(360000*2)*(0.002f);

@@ -1,12 +1,7 @@
 // DebugAngel.h: interface for the DebugAngel class.
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_DEBUGUTIL_H__61A6CA46_25FA_4ECB_8B5C_B554831D00B1__INCLUDED_)
-#define AFX_DEBUGUTIL_H__61A6CA46_25FA_4ECB_8B5C_B554831D00B1__INCLUDED_
-
 #pragma once
 
 void DebugAngel_Write( char *lpszFileName, ...);
 void DebugAngel_HexWrite( char *lpszFileName, void *pBuffer, int iSize);
-
-#endif // !defined(AFX_DEBUGUTIL_H__61A6CA46_25FA_4ECB_8B5C_B554831D00B1__INCLUDED_)

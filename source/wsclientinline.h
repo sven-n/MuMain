@@ -18,6 +18,7 @@ extern ItemAddOptioninfo*			g_pItemAddOptioninfo;
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "NewUISystem.h" 
 #include "ProtocolSend.h" 
+#include "Utilities\Log\DebugAngel.h" 
 
 #define PACKET_MOVE         0xD4
 #define PACKET_POSITION     0x15
@@ -795,8 +796,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 	spe.Send( FALSE);\
 }
 
-
-#ifdef SCRATCH_TICKET
 #define SendRequestScratchSerial( p_strSerial1, p_strSerial2, p_strSerial3 )\
 {\
 	CStreamPacketEngine spe;\
@@ -806,7 +805,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 	spe.AddData( p_strSerial3, 5 );\
 	spe.Send( FALSE );\
 }
-#endif
 
 #define SendRequestServerImmigration( p_ResidentNumber)\
 {\

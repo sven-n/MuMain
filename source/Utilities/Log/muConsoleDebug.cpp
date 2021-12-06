@@ -123,16 +123,6 @@ bool CmuConsoleDebug::CheckCommand(const std::string& strCommand)
 		g_bRenderBoundingBox = false;	
 	}
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-	else if(strCommand.compare("$unfixframe on") == NULL)
-	{
-		g_bUnfixedFixedFrame = true;
-	}
-	else if(strCommand.compare("$unfixframe off") == NULL)
-	{
-		g_bUnfixedFixedFrame = false;
-	}
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 	else if(strCommand.compare("$type_test") == NULL)
 	{
 		Write(MCD_SEND, "MCD_SEND");

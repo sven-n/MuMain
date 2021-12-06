@@ -3423,8 +3423,7 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 	int iSectionX = (iOffset % iPitch) / (LIMIT_WIDTH*3);
 	int iSectionY = iOffset / (iPitch*LIMIT_HEIGHT);
 
-	RECT rcCaret = { pt.x-LIMIT_WIDTH*iSectionX, pt.y-LIMIT_HEIGHT*iSectionY, 
-		pt.x-LIMIT_WIDTH*iSectionX+m_fCaretWidth, pt.y-LIMIT_HEIGHT*iSectionY+m_fCaretHeight };
+	RECT rcCaret = { pt.x-LIMIT_WIDTH*iSectionX, pt.y-LIMIT_HEIGHT*iSectionY,pt.x-LIMIT_WIDTH*iSectionX+m_fCaretWidth, pt.y-LIMIT_HEIGHT*iSectionY+m_fCaretHeight };
 
 	BITMAP_t * pBitmapFont = &Bitmaps[BITMAP_FONT];
 	for(int y = 0; y < iHeight; ++y)

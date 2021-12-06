@@ -13,8 +13,6 @@
 #include "GMCryingWolf2nd.h"
 #include "BoneManager.h"
 
-#ifdef CRYINGWOLF_2NDMVP
-
 bool M34CryingWolf2nd::IsCyringWolf2nd()
 { 
 	return (gMapManager.WorldActive == WD_35CRYWOLF_2ND) ? true : false; 
@@ -367,5 +365,3 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
 	}
 	return false;
 }
-
-#endif // CRYINGWOLF_2NDMVP

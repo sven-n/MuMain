@@ -34,6 +34,7 @@
 #include "./Utilities/Dump/CrashReporter.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "ProtocolSend.h"
+#include "ProtectSysKey.h"
 
 #include "CBTMessageBox.h"
 #include "./ExternalObject/leaf/regkey.h"
@@ -508,7 +509,18 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			return 0;
 		}
 		break;
-
+#if defined PROTECT_SYSTEMKEY && defined NDEBUG
+#ifndef FOR_WORK
+	case WM_SYSCOMMAND:
+		{
+			if(wParam == SC_KEYMENU || wParam == SC_SCREENSAVE)
+			{
+				return 0;
+			}
+		}
+		break;
+#endif // !FOR_WORK
+#endif // PROTECT_SYSTEMKEY && NDEBUG
     case WM_ACTIVATE:
 		if(LOWORD(wParam) == WA_INACTIVE)
 		{
@@ -1473,7 +1485,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	if (g_bUseWindowMode == FALSE)
 #endif	// USER_WINDOW_MODE
 	{
-    	//윈도우를 풀스크린으로 변환	
 		for(int n2=0; n2<nModes; n2++)
 		{
 			if(pDevmodes[n2].dmPelsWidth==WindowWidth && pDevmodes[n2].dmPelsHeight==WindowHeight && pDevmodes[n2].dmBitsPerPel == dwBitsPerPel)
@@ -1530,30 +1541,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	g_hFontBold = CreateFont(iFontSize,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
 	g_hFontBig	= CreateFont(iFontSize*2,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
 	g_hFixFont	= CreateFont(nFixFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH | FF_DONTCARE,GlobalText[18][0] ? GlobalText[18] : NULL);
-
-#ifdef PBG_ADD_INGAMESHOP_FONT
-	int _FontSize = 12;
-	switch(WindowWidth)
-	{
-	case 800:
-		_FontSize = 16;
-		break;
-	case 1024:
-		_FontSize = 19;
-		break;
-	case 1280:
-		_FontSize = 26;
-		break;
-	default:
-		_FontSize = 12;
-		break;
-	}
-
-	g_hInGameShopFont = CreateFont(_FontSize,0,0,0,FW_NORMAL,0,0,0,
-		g_dwCharSet[SELECTED_LANGUAGE],OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-		NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,
-		GlobalText[0][0] ? GlobalText[0] : NULL);
-#endif //PBG_ADD_INGAMESHOP_FONT
 
 	setlocale( LC_ALL, "english");
 

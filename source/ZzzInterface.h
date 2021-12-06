@@ -1,25 +1,19 @@
 #ifndef __ZZZINTERFACE_H__
 #define __ZZZINTERFACE_H__
 
-///////////////////////////////////////////////////////////////////////////////
-// Interface
-///////////////////////////////////////////////////////////////////////////////
 #define TRADELIMITLEVEL		( 6 )
 
 extern bool WhisperEnable;
 
 extern bool LockInputStatus;
 
-//  아이템 space로 자동 먹기.
 extern bool g_bAutoGetItem;
 
 extern bool InputEnable;
 extern bool TabInputEnable;
 extern bool GuildInputEnable;
 extern bool GoldInputEnable;
-#ifdef SCRATCH_TICKET
 extern bool g_bScratchTicket;
-#endif
 
 extern int  InputGold;
 extern int  InputResidentNumber;

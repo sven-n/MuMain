@@ -22,9 +22,7 @@
 #include "MapManager.h"
 #include "CameraMove.h"
 
-#ifdef USE_EVENT_ELDORADO
 int EnableEvent = 0;
-#endif
 
 static  const   BYTE    BOID_FLY    = 0;
 static  const   BYTE    BOID_DOWN   = 1;
@@ -1200,11 +1198,7 @@ void MoveBoidGroup ( OBJECT* o, int index )
 
 void MoveBoids ()
 {
-#ifdef USE_EVENT_ELDORADO
 	if ( EnableEvent!=0 )
-#else
-	if ( EnableEvent )
-#endif
 	{
 		OBJECT* o = &Hero->Object;
 		vec3_t Position, Angle, Light;
@@ -1280,11 +1274,7 @@ void MoveBoids ()
 		OBJECT* o = &Boids[i];
 		if ( !o->Live && bCreate )
 		{
-#ifdef USE_EVENT_ELDORADO
 			if ( EnableEvent!=0 )
-#else
-			if ( EnableEvent )
-#endif
 			{
 				if ( rand()%300==0 )
 				{
@@ -1303,12 +1293,10 @@ void MoveBoids ()
 					o->LifeTime    = 128+rand()%128;
 					o->Timer       = (float)(rand()%10)*0.1f;
 					Vector ( 0.f, 0.f, -90.f, o->Angle );
-#ifdef USE_EVENT_ELDORADO
 					if ( EnableEvent==3 )
 					{
 						o->SubType = 1;
 					}
-#endif
 					Vector ( Hero->Object.Position[0]+(float)(rand()%600-100),
 						     Hero->Object.Position[1]+(float)(rand()%400+200),
 						     Hero->Object.Position[2]+300.f, o->Position );
@@ -1319,11 +1307,7 @@ void MoveBoids ()
 					|| gMapManager.WorldActive==WD_3NORIA 
 					|| gMapManager.WorldActive==WD_4LOSTTOWER 
 					|| gMapManager.WorldActive==WD_10HEAVEN 
-					|| ( (gMapManager.WorldActive==WD_7ATLANSE
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-						|| gMapManager.WorldActive==WD_67DOPPLEGANGER3
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-						)  && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) )
+					|| ((gMapManager.WorldActive==WD_7ATLANSE|| gMapManager.WorldActive==WD_67DOPPLEGANGER3)  && ( TerrainWall[Index]==0 || TerrainWall[Index]==TW_CHARACTER ) )
                     || gMapManager.InBloodCastle()
                     || gMapManager.InHellas()
 					|| (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && i < 1 && rand()%500==0 && Hero->SafeZone!=true)
@@ -1553,17 +1537,13 @@ void RenderBoids ( bool bAfterCharacter )
                 switch ( o->Type )
                 {
                 case MODEL_MONSTER01+31:
-#ifdef USE_EVENT_ELDORADO
 				    if ( o->SubType==1 )
 				    {
 					    float Bright = 1.0f;
 					    RenderPartObjectBodyColor(&Models[o->Type],o,o->Type,o->Alpha,RENDER_METAL|RENDER_BRIGHT,Bright);
 					    RenderPartObjectBodyColor(&Models[o->Type],o,o->Type,o->Alpha,RENDER_CHROME|RENDER_BRIGHT,Bright);
 				    }
-#endif
-#ifdef USE_EVENT_ELDORADO
                     if ( EnableEvent!=0 )
-#endif
                     {
                         Vector(0.f,-50.f,0.f,p);
                         b->TransformPosition(BoneTransform[11],p,Position);
@@ -1602,8 +1582,6 @@ void RenderBoids ( bool bAfterCharacter )
 					CreateSprite ( BITMAP_LIGHT, Position, 0.1f, Light, o );
                     break;
                 }
-
-#ifndef USE_SHADOWVOLUME
 				if(gMapManager.WorldActive != WD_10HEAVEN)
 				{
 					EnableAlphaTest();
@@ -1627,8 +1605,6 @@ void RenderBoids ( bool bAfterCharacter )
 						b->RenderBodyShadow();
 					}
 				}
-#endif
-
 			}
 		}
 		if ( MODEL_SPEARSKILL != o->Type)

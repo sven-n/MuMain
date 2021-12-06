@@ -18,11 +18,7 @@
 #include "CSParts.h"
 #include "wsclientinline.h"
 #include "MapManager.h"
-
-#ifdef PET_SYSTEM
 #include "GIPetManager.h"
-#endif// PET_SYSTEM
-
 #include "BoneManager.h"
 #include "GMBattleCastle.h"
 
@@ -544,9 +540,7 @@ namespace battleCastle
 				    if(b->Live && b->Owner == o)
 					    b->Live = false;
 			    }
-    #ifdef PET_SYSTEM
                 DeletePet ( c );
-    #endif// PET_SYSTEM
 			    DeleteCloth( c, o);
                 DeleteParts ( c );
             }

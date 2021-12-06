@@ -196,7 +196,7 @@ void BuffTimeControl::GetStringTime( DWORD time, std::string& timeText, bool isS
 		}
 		else if( day == 0 && oClock == 0 && minutes == 0 )
 		{
-			std::sprintf(buffer, "s",GlobalText[2308]);
+			std::sprintf(buffer,"%s",GlobalText[2308]);
 			timeText = buffer;
 		}
 	}

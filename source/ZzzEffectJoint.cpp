@@ -13,11 +13,7 @@
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
 #include "WSClient.h"
-
-#ifdef PET_SYSTEM
 #include "CSPetSystem.h"
-#endif// PET_SYSTEM
-
 #include "GMBattleCastle.h"
 
 extern float g_fBoneSave[10][3][4];
@@ -5720,23 +5716,8 @@ void MoveJoint( JOINT *o, int iIndex)
 			
 			float fLife = ( float)o->LifeTime * 40.f / 30.f;
 			float fPos;
-			/*if ( fLife > 40.0f - 5.f)
-			{	// 시작
-			fPos = fLife * 4.0f - 60.0f;
-			}
-			else if ( fLife < 5.f)
-			{	// 끝
-			fPos = fLife * 4.0f;
-			}
-			else
-			{	// 중간
-			fPos = fLife * 2.0f + 10.0f;
-		}*/
-            if ( o->SubType==11 
-#ifdef CRYINGWOLF_2NDMVP
-				|| o->SubType==25
-#endif // CRYINGWOLF_2NDMVP
-				)   //  홀리 사이트 보우 화살.
+
+            if ( o->SubType==11 || o->SubType==25)
             {
                 if ( fLife < 20.f )
                 {
@@ -5792,7 +5773,6 @@ void MoveJoint( JOINT *o, int iIndex)
             {
 				o->Position[2] += 100.0f;
             }
-			//o->Direction[0];
 			
 			vec3_t Light = { .5f, .5f, 1.0f};
 			

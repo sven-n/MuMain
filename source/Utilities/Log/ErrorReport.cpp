@@ -13,18 +13,9 @@
 #include <imagehlp.h>
 #include "ErrorReport.h"
 
-
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-extern BOOL g_bUseWindowMode;
-#endif
-
 void DeleteSocket();
 
-
-//////////////////////////////////////////////////////////////////////
-// Xor Convert
-
-#define XOR_KEY_SIZE	( 16)
+#define XOR_KEY_SIZE	(16)
 
 void Xor_ConvertBlock( BYTE *lpBuffer, int iSize, int iKey)
 {
@@ -45,7 +36,7 @@ int Xor_ConvertBuffer( void *lpBuffer, int iSize, int iKey = 0)
 {
 	int iSizeLeft = iSize;
 	BYTE *lpCurrent = ( BYTE*)lpBuffer;
-	// 앞부분
+
 	int iConvertSize = min( ( XOR_KEY_SIZE - iKey) % XOR_KEY_SIZE, iSize);
 	Xor_ConvertBlock( lpCurrent, iConvertSize, iKey);
 	lpCurrent += iConvertSize;
@@ -54,7 +45,7 @@ int Xor_ConvertBuffer( void *lpBuffer, int iSize, int iKey = 0)
 	{
 		return ( iConvertSize + iKey);
 	}
-	// 중간
+
 	while ( iSizeLeft >= XOR_KEY_SIZE)
 	{
 		iConvertSize = XOR_KEY_SIZE;
@@ -62,7 +53,7 @@ int Xor_ConvertBuffer( void *lpBuffer, int iSize, int iKey = 0)
 		lpCurrent += iConvertSize;
 		iSizeLeft -= iConvertSize;
 	}
-	// 뒷부분
+
 	iConvertSize = iSizeLeft;
 	Xor_ConvertBlock( lpCurrent, iConvertSize, 0);
 	return ( iConvertSize);
@@ -84,52 +75,19 @@ void CErrorReport::Clear( void)
 	m_hFile = INVALID_HANDLE_VALUE;
 	m_lpszFileName[0] = '\0';
 	m_iKey = 0;
-#ifdef ASG_ADD_MULTI_CLIENT
-	m_nFileCount = 1;
-#endif	// ASG_ADD_MULTI_CLIENT
 }
 
-#ifdef ASG_ADD_MULTI_CLIENT
-void CErrorReport::Create(char* lpszFileName)
-{
-	char szTempFileName[128] = "";
-	::strcpy(szTempFileName, lpszFileName);
-	while (1)
-	{
-		m_hFile = ::CreateFile(szTempFileName, GENERIC_READ | GENERIC_WRITE,
-			FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
-		if (INVALID_HANDLE_VALUE == m_hFile)
-		{
-			if (ERROR_SHARING_VIOLATION == ::GetLastError())
-				::sprintf(szTempFileName, "MuError%d.log", ++m_nFileCount);
-			else
-				break;
-		}
-		else
-			break;
-	}
-
-	::strcpy(m_lpszFileName, szTempFileName);
-	m_iKey = 0;
-	
-	CutHead();
-	SetFilePointer(m_hFile, 0, NULL, FILE_END);
-}
-#else	// ASG_ADD_MULTI_CLIENT
 void CErrorReport::Create( char *lpszFileName)
 {
 	strcpy( m_lpszFileName, lpszFileName);
 
 	//DeleteFile( m_lpszFileName);
 	m_iKey = 0;
-	m_hFile = CreateFile( m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS,
-								FILE_ATTRIBUTE_NORMAL, NULL);
+	m_hFile = CreateFile( m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL, NULL);
 
 	CutHead();
 	SetFilePointer( m_hFile, 0, NULL, FILE_END);
 }
-#endif	// ASG_ADD_MULTI_CLIENT
 
 void CErrorReport::Destroy( void)
 {
@@ -142,7 +100,7 @@ void CErrorReport::CutHead( void)
 	DWORD dwNumber;
 	char lpszBuffer[128*1024];
 	ReadFile( m_hFile, lpszBuffer, 128*1024-1, &dwNumber, NULL);
-	m_iKey = Xor_ConvertBuffer( lpszBuffer, dwNumber);
+	//m_iKey = Xor_ConvertBuffer( lpszBuffer, dwNumber);
 	lpszBuffer[dwNumber] = '\0';
 	char *lpCut = CheckHeadToCut( lpszBuffer, dwNumber);
 	if ( dwNumber >= 32*1024-1)
@@ -153,8 +111,7 @@ void CErrorReport::CutHead( void)
 	{
 		CloseHandle( m_hFile);
 		DeleteFile( m_lpszFileName);
-		m_hFile = CreateFile( m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS,
-									FILE_ATTRIBUTE_NORMAL, NULL);
+		m_hFile = CreateFile( m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL, NULL);
 		DWORD dwSize = dwNumber - ( lpCut - lpszBuffer);
 		m_iKey = 0;
 		WriteFile( m_hFile, lpCut, dwSize, &dwNumber, NULL);
@@ -749,29 +706,6 @@ typedef HRESULT(WINAPI * DIRECTDRAWCREATEEX)( GUID*, VOID**, REFIID, IUnknown* )
 typedef HRESULT(WINAPI * DIRECTINPUTCREATE)( HINSTANCE, DWORD, LPDIRECTINPUT*,
                                              IUnknown* );
 
-//-----------------------------------------------------------------------------
-// Name: GetDXVersion()
-// Desc: This function returns the DirectX version number as follows:
-//          0x0000 = No DirectX installed
-//          0x0100 = DirectX version 1 installed
-//          0x0200 = DirectX 2 installed
-//          0x0300 = DirectX 3 installed
-//          0x0500 = At least DirectX 5 installed.
-//          0x0600 = At least DirectX 6 installed.
-//          0x0601 = At least DirectX 6.1 installed.
-//          0x0700 = At least DirectX 7 installed.
-//          0x0800 = At least DirectX 8 installed.
-//          0x0900 = At least DirectX 9 installed.
-// 
-//       Please note that this code is intended as a general guideline. Your
-//       app will probably be able to simply query for functionality (via
-//       QueryInterface) for one or two components.
-//
-//       Please also note:
-//          "if( dwDXVersion != 0x500 ) return FALSE;" is VERY BAD. 
-//          "if( dwDXVersion <  0x500 ) return FALSE;" is MUCH BETTER.
-//       to ensure your app will run on future releases of DirectX.
-//-----------------------------------------------------------------------------
 DWORD GetDXVersion()
 {
     DIRECTDRAWCREATE     DirectDrawCreate   = NULL;

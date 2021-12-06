@@ -158,9 +158,7 @@ bool GuildInputEnable = false;
 bool TabInputEnable  = false;
 bool GoldInputEnable = false;
 bool InputEnable     = true;
-#ifdef SCRATCH_TICKET
 bool g_bScratchTicket = false;
-#endif
 
 int  InputGold       = 0;
 int  InputNumber     = 2;
@@ -3796,7 +3794,6 @@ void SendMove(CHARACTER *c,OBJECT *o)
 	{
         SendRequestEventChipExit ();
 		
-#ifdef SCRATCH_TICKET
 		if ( g_bEventChipDialogEnable==EVENT_SCRATCH_TICKET )
 		{
 			ClearInput(FALSE);
@@ -3806,7 +3803,6 @@ void SendMove(CHARACTER *c,OBJECT *o)
 			StorageGoldFlag = 0;
 			g_bScratchTicket= false;
 		}
-#endif
         g_bEventChipDialogEnable  = EVENT_NONE;
 		
 #ifndef FOR_WORK

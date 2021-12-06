@@ -231,11 +231,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
 			BoneManager::RegisterBone(pCharacter, "Monster83_Tail", 62);
 		}
 		break;
-
-#ifdef LOREN_RAVINE_EVENT
 	case 303:
-#endif
-
 	case 293:
 		{
 			OpenMonsterModel(84);	// 84
@@ -251,11 +247,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
 			BoneManager::RegisterBone(pCharacter, "Monster84_RightHand", 50);
 		}
 		break;
-
-#ifdef LOREN_RAVINE_EVENT
 	case 302:
-#endif
-
 	case 294:
 		{
 			OpenMonsterModel(85);	//85
@@ -744,16 +736,10 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
 		{
 			pModel->BeginRender(1.f);
 			vec3_t LightBackup;
-#ifdef LOREN_RAVINE_EVENT
 			if(ExtraMon)
 			{
-//				pModel->BodyScale     = pObject->Scale;
-//				pObject->Scale     = pModel->BodyScale + (pModel->BodyScale/1.0f);
-//				pObject->Scale = 10.0f;
-//				Vector(0.7f,0.5f,0.8f,pModel->BodyLight);
 				Vector(1.f,1.f,1.f,pModel->BodyLight);
 			}
-#endif
 			VectorCopy(pModel->BodyLight, LightBackup);		//. backup
 			float Luminosity = sinf(WorldTime*0.0012f)*0.8f+1.3f;
 			if(Luminosity > 1.3f)
@@ -766,13 +752,11 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
 			pModel->StreamMesh = 1;
 			pModel->RenderMesh ( 1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, (int)WorldTime%10000*0.0002f, (int)WorldTime%10000*0.0002f );
 
-#ifdef LOREN_RAVINE_EVENT
 			if(ExtraMon)
 			{
 				pModel->RenderMesh(1,RENDER_CHROME|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,BITMAP_CHROME);
 			}
 			else
-#endif
 				pModel->RenderMesh ( 1, RENDER_TEXTURE|RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV );
 			
 			pModel->StreamMesh = -1;
@@ -780,21 +764,17 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
 			VectorCopy(LightBackup, pModel->BodyLight);		//. restore
 			
 			pModel->RenderMesh ( 0, RENDER_TEXTURE, sinf(WorldTime*0.0012f)*0.2f+0.8f, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV );
-#ifdef LOREN_RAVINE_EVENT
 			if(ExtraMon)
 			{
 				pModel->RenderMesh(0,RENDER_CHROME|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,BITMAP_CHROME);
 			}
-#endif
 			pModel->StreamMesh = 2;
 			pModel->RenderMesh ( 2, RENDER_TEXTURE, pObject->Alpha, 2, 0.5f, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV );
-#ifdef LOREN_RAVINE_EVENT
 			if(ExtraMon)
 			{
 				pModel->RenderMesh(2,RENDER_CHROME|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,BITMAP_CHROME);
 				pObject->Scale = pModel->BodyScale;
 			}
-#endif
 			pModel->StreamMesh = -1;
 			pModel->EndRender();
 			return true;
@@ -804,27 +784,25 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
 		{
 			pModel->BeginRender(1.f);
 			vec3_t LightBackup;
-#ifdef LOREN_RAVINE_EVENT
 			if(ExtraMon)
 			{
 				Vector(1.f,1.f,1.f,pModel->BodyLight);
 			}
-#endif
 			VectorCopy(pModel->BodyLight, LightBackup);		//. backup
 			pModel->BodyLight[0] *= 0.5f;
 			pModel->BodyLight[1] *= 0.6f;
 			pModel->BodyLight[2] *= 0.8f;
 			pModel->RenderMesh ( 0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV );
-#ifdef LOREN_RAVINE_EVENT
+
 			if(ExtraMon)
 				pModel->RenderMesh(0,RENDER_CHROME|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,BITMAP_CHROME);
-#endif
+
 			Vector ( 0.5f, 0.8f, 0.6f, pModel->BodyLight);
 			pModel->RenderMesh ( 1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV );
-#ifdef LOREN_RAVINE_EVENT
+
 			if(ExtraMon)
 				pModel->RenderMesh(1,RENDER_CHROME|RENDER_BRIGHT,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,BITMAP_CHROME);
-#endif
+
 			VectorCopy(LightBackup, pModel->BodyLight);		//. restore
 			pModel->EndRender();
 			return true;
@@ -902,20 +880,12 @@ bool M31HuntingGround::AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, O
 	case 290:
 		break;
 	case 292:
-
-#ifdef LOREN_RAVINE_EVENT
 	case 303:
-#endif
-
 	case 293:
 	case 291:
 	case 295:
 		return true;
-
-#ifdef LOREN_RAVINE_EVENT
 	case 302:
-#endif
-
 	case 294:
 		break;
 	}

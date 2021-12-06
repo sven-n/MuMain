@@ -1,7 +1,6 @@
 #ifndef __WINMAIN_H__
 #define __WINMAIN_H__
 
-#define FOR_LAST_TEST
 #define FOR_WORK
 /*--------------------------------------------------------------------------------------*/
 
@@ -41,55 +40,22 @@
 #endif // FOR_WORK
 
 #define WINDOWMODE						// (2006-07-18)
+//#define ENABLE_FULLSCREEN
 
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 #define ACTIVE_FOCUS_OUT
 #endif	// USER_WINDOW_MODE
 
-// 	#define LIMIT_CHAOS_MIX
-// 	#define LIMIT_SKILL
-	#define GRAMMAR_OF
+//#define DEVIAS_XMAS_EVENT  //more snow in devias
 
-
-//#define CSK_EVENT_HALLOWEEN_MAP
-//#define DEVIAS_XMAS_EVENT
-//#define LENA_EXCHANGE_ZEN
-#define BLOODCASTLE_2ND_PATCH
-#define USE_EVENT_ELDORADO
-#define SCRATCH_TICKET
-#define FRIEND_EVENT
-#define FRIENDLYSTONE_EXCHANGE_ZEN
-
-#define CASTLE_EVENT
-#ifdef CASTLE_EVENT
-	#undef FRIEND_EVENT
-	#undef FRIENDLYSTONE_EXCHANGE_ZEN
-	#undef LENA_EXCHANGE_ZEN
-	#define DISABLE_MUTO
-#endif
-
-#define LOREN_RAVINE_EVENT
 //#define GUILD_WAR_EVENT
-//#define MYSTERY_BEAD
 
 #define DUEL_SYSTEM
-#define PET_SYSTEM
-#define PROTECT_SYSTEMKEY
-#define CHANGE_RATE
-//#define SYSTEM_NOT_RENDER_TEXT
-//#define ON_AIR_BLOODCASTLE
+#define PROTECT_SYSTEMKEY   //alow alt+tab on fullscreen mode
 //#define CAMERA_TEST
-//#define CAMERA_TEST_FPS
-//#define DONTRENDER_TERRAIN
 
-
-#define CRYINGWOLF_2NDMVP
-#define GIFT_BOX_EVENT
-#define BUGFIX_CRYWOLF_END_COUNT
 #define WM_USER_MEMORYHACK	( WM_USER + 1)
 #define WM_NPROTECT_EXIT_TWO  (WM_USER + 10001)
-
-//#define PBG_ADD_INGAMESHOP_FONT
 
 extern bool ashies;
 extern int weather;
@@ -102,10 +68,6 @@ extern HFONT     g_hFont;
 extern HFONT     g_hFontBold;
 extern HFONT     g_hFontBig;
 extern HFONT     g_hFixFont;
-#ifdef PBG_ADD_INGAMESHOP_FONT
-extern HFONT	 g_hInGameShopFont;
-#endif //PBG_ADD_INGAMESHOP_FONT
-//extern HFONT     g_hFontSmall;
 extern bool      Destroy;
 extern int       RandomTable[];
 
@@ -131,16 +93,12 @@ extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();
 extern void DestroySound();
 
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-	extern bool g_bUnfixedFixedFrame;
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-
-#if defined _DEBUG || defined PBG_LOG_PACKET_WINSOCKERROR
-	#include "./Utilities/Log/DebugAngel.h"
-#define ExecutionLog	DebugAngel_Write
-#else
-#define ExecutionLog	{}
-#endif //_DEBUG
+//#if defined _DEBUG || defined PBG_LOG_PACKET_WINSOCKERROR
+//	#include "./Utilities/Log/DebugAngel.h"
+//#define ExecutionLog	DebugAngel_Write
+//#else
+//#define ExecutionLog	{}
+//#endif //_DEBUG
 
 #define FAKE_CODE( pos)\
 	_asm { jmp pos };\

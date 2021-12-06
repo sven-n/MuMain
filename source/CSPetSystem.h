@@ -1,9 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-#ifndef __CSPET_SYSTEM_H__
-#define __CSPET_SYSTEM_H__
-
-#ifdef PET_SYSTEM
+#pragma once
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
@@ -45,12 +42,10 @@ public :
     void    SetCommand ( int Key, BYTE cmd );
     void    SetAttack ( int Key, int attackType );
 
-#ifdef LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
 	int		GetObjectType()
 	{
 		return m_PetCharacter.Object.Type;
 	}
-#endif // LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
 };
 
 class CSPetDarkSpirit : public CSPetSystem
@@ -72,7 +67,3 @@ public :
     void    AttackEffect ( CHARACTER* c, OBJECT* o );
     void    RenderCmdType ( void );
 };
-
-#endif	// PET_SYSTEM
-
-#endif// __CSPET_SYSTEM_H__

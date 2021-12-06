@@ -920,7 +920,7 @@ void SEASON3B::CNewUISystem::Show(DWORD dwKey)
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 		else if(dwKey == SEASON3B::INTERFACE_INGAMESHOP)
 		{
-			g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", "CallStack - CNewUISystem.Show()\r\n");
+			g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt CallStack - CNewUISystem.Show()\r\n");
 			HideAll();
 			g_pInGameShop->OpeningProcess();
 #ifndef KJH_MOD_SHOP_SCRIPT_DOWNLOAD

@@ -150,8 +150,8 @@ bool CInGameShopSystem::ScriptDownload()
 
 	m_CurrentScriptVerInfo = m_ScriptVerInfo;
 
-	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", "<IngameShop Script Download Success!!!>\r\n");
-	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", " - Ver %d.%d.%d\r\n", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
+	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt <IngameShop Script Download Success!!!>");
+	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt - Ver %d.%d.%d", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
 
 	ShopOpenUnLock();
 
@@ -244,15 +244,15 @@ bool CInGameShopSystem::BannerDownload()
 #ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 bool CInGameShopSystem::IsScriptDownload()
 {
-	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", "CallStack - CInGameShopSystem::IsScriptDownload()\r\n");
-	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", " - Script Ver %d.%d.%d\r\n", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
-	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", " - Current Ver %d.%d.%d\r\n", m_CurrentScriptVerInfo.Zone, m_CurrentScriptVerInfo.year, m_CurrentScriptVerInfo.yearId);
+	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt CallStack - CInGameShopSystem::IsScriptDownload()");
+	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt - Script Ver %d.%d.%d", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
+	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt - Current Ver %d.%d.%d", m_CurrentScriptVerInfo.Zone, m_CurrentScriptVerInfo.year, m_CurrentScriptVerInfo.yearId);
 	if( ((m_ScriptVerInfo.year == m_CurrentScriptVerInfo.year) && (m_ScriptVerInfo.yearId == m_CurrentScriptVerInfo.yearId) && (m_ScriptVerInfo.Zone == m_CurrentScriptVerInfo.Zone)) && (m_bFirstScriptDownloaded == true))
 	{
-		g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", " Return - false\r\n");
+		g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt Return - false");
 		return false;
 	}
-	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt", " Return - true\r\n");
+	g_ConsoleDebug->Write(MCD_NORMAL,"InGameShopStatue.Txt Return - true");
 	return true;
 }
 

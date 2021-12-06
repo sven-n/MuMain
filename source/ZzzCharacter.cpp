@@ -29,16 +29,12 @@
 #include "GOBoid.h"
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
-#ifdef PET_SYSTEM
 #include "GIPetManager.h"
-#endif// PET_SYSTEM
 #include "GMHellas.h"
 #include "CSParts.h"
 #include "GMBattleCastle.h"
 #include "GMHuntingGround.h"
-#ifdef CRYINGWOLF_2NDMVP
 #include "GMCryingWolf2nd.h"
-#endif // CRYINGWOLF_2NDMVP
 #include "BoneManager.h"
 #include "GMAida.h"
 #include "GMCryWolf1st.h"
@@ -1591,9 +1587,7 @@ void AttackEffect(CHARACTER *c)
 			}
         }
         break;
-#ifdef LOREN_RAVINE_EVENT
 	case 301:
-#endif
     case 71:
 	case 74:
         if(c->Object.CurrentAction==MONSTER01_ATTACK1 || c->Object.CurrentAction==MONSTER01_ATTACK2)
@@ -4957,9 +4951,7 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
                 case 171 :
                 case 173 :
 				case 427:
-#ifdef LOREN_RAVINE_EVENT
 				case 303:
-#endif
 				case 293 :
 					break;
 				default:
@@ -5715,11 +5707,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 				CreatePointer(BITMAP_BLOOD,Position,o->Angle[0],o->Light,0.65f);
 			}
 			break;
-
-#ifdef LOREN_RAVINE_EVENT
 		case MODEL_MONSTER01+88:
-#endif
-
 		case MODEL_MONSTER01+45:
 			MoveEye(o,b,8,9);
 			MonsterMoveSandSmoke(o);
@@ -6688,14 +6676,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Matrix[1][3] = 5.f;
 				Matrix[2][3] = 10.f;
 			}
-			else if(Type == MODEL_POTION+45)
-			{
-				Vector(0.f,0.f,0.f,Angle);
-				AngleMatrix(Angle,Matrix);
-				Matrix[0][3] = 0.f;
-				Matrix[1][3] = 0.f;
-				Matrix[2][3] = 0.f;
-			}
 			else if(Type >= MODEL_SHIELD && Type < MODEL_SHIELD+MAX_ITEM_INDEX)
 			{
 				if(Type == MODEL_SHIELD+16)
@@ -6771,13 +6751,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		
 		R_ConcatTransforms(o->BoneTransform[f->LinkBone],Matrix,ParentMatrix);
 		VectorCopy(c->Object.Position, b->BodyOrigin);
-
-		if(Type == MODEL_POTION+45)
-		{
-			b->BodyOrigin[0] -= 10.f;
-			b->BodyOrigin[1] += 0.f;
-			b->BodyOrigin[2] -= 145.f;
-		}
     	Vector(0.f,0.f,0.f,Object->Angle);
 	}
 	else
@@ -8343,9 +8316,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	{
 		if(67==c->MonsterIndex || 74==c->MonsterIndex || 75==c->MonsterIndex
 			|| 135==c->MonsterIndex || 136==c->MonsterIndex || 137==c->MonsterIndex
-#ifdef LOREN_RAVINE_EVENT
 			|| 300==c->MonsterIndex || 301==c->MonsterIndex || 302==c->MonsterIndex || 303==c->MonsterIndex
-#endif
 			|| 314==c->MonsterIndex || 315==c->MonsterIndex || 316==c->MonsterIndex || 317==c->MonsterIndex || 318==c->MonsterIndex || 319==c->MonsterIndex
 			)
 		{
@@ -8360,14 +8331,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			else
 			{
 				RenderObject ( o, Translate,Select, 0);
-#ifdef CSK_EVENT_HALLOWEEN_MAP
-				if(o->Kind == KIND_NPC && o->Type == MODEL_STORAGE)
-				{
-					PART_t* pPart = &c->BodyPart[BODYPART_HEAD];
-					pPart->LinkBone = 34;
-					RenderLinkObject(0.f, 0.f, 0.f, c, pPart, MODEL_POTION+45, 0, 0, true, true);
-				}
-#endif // CSK_EVENT_HALLOWEEN_MAP
 			}
 		}
 	}
@@ -12973,8 +12936,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Scale = 1.19f;
 		strcpy(c->ID,"붉은해골기사");
         break;
-
-#ifdef USE_EVENT_ELDORADO
 	case 78:
     	OpenMonsterModel(19);
 		c = CreateCharacter(Key,MODEL_MONSTER01+19,PositionX,PositionY);
@@ -13024,7 +12985,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,2,o,30.f);
    		CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,3,o,30.f);
 		break;
-#endif
     case 68:
     	OpenMonsterModel(49);
 		c = CreateCharacter(Key,MODEL_MONSTER01+49,PositionX,PositionY);
@@ -13045,11 +13005,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
         c->Object.BlendMeshLight = 1.f;
 		c->Object.m_bRenderShadow = false;
         break;
-
-#ifdef LOREN_RAVINE_EVENT
 	case 301:
-#endif
-
     case 71:
 	case 74:
     	OpenMonsterModel(52);
@@ -13165,11 +13121,7 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		strcpy(c->ID,"저주받은 산타");
 		o = &c->Object;
 		break;
-		
-#ifdef LOREN_RAVINE_EVENT
 	case 300:
-#endif
-
 	case 62:
     	OpenMonsterModel(45);
 		c = CreateCharacter(Key,MODEL_MONSTER01+45,PositionX,PositionY);

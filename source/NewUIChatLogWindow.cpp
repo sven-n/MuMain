@@ -166,8 +166,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 
 		if(bRenderMessage && !pMsgText->GetText().empty())
 		{
-			POINT ptRenderPos = { fRenderPosX+WND_LEFT_RIGHT_EDGE, 
-				fRenderPosY+FONT_LEADING+(SCROLL_MIDDLE_PART_HEIGHT*s) };
+			POINT ptRenderPos = { fRenderPosX+WND_LEFT_RIGHT_EDGE, fRenderPosY+FONT_LEADING+(SCROLL_MIDDLE_PART_HEIGHT*s) };
 			if(!pMsgText->GetID().empty())
 			{
 				if(m_bPointedMessage == true && m_iPointedMessageIndex == i)
