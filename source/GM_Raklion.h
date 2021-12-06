@@ -1,13 +1,7 @@
 // GM_Raklion.h: interface for the CGM_Raklion class.
-//
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_GM_RAKLION_H__00399A9C_5F21_4784_B501_278DE4C74A81__INCLUDED_)
-#define AFX_GM_RAKLION_H__00399A9C_5F21_4784_B501_278DE4C74A81__INCLUDED_
-
 #pragma once
-
-#ifdef CSK_ADD_MAP_ICECITY
 
 class BMD;
 
@@ -109,7 +103,3 @@ namespace SEASON4A
 }
 
 extern bool IsIceCity();
-	
-#endif // CSK_ADD_MAP_ICECITY
-
-#endif // !defined(AFX_GM_RAKLION_H__00399A9C_5F21_4784_B501_278DE4C74A81__INCLUDED_)

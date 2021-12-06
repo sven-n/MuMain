@@ -2567,7 +2567,6 @@
     <ClInclude Include="source\Win.h" />
     <ClInclude Include="source\WinEx.h" />
     <ClInclude Include="source\Winmain.h" />
-    <ClInclude Include="source\Winmain_New.h" />
     <ClInclude Include="source\Winmain_New_Event.h" />
     <ClInclude Include="source\Winmain_New_Live.h" />
     <ClInclude Include="source\WSclient.h" />

@@ -41,10 +41,7 @@
 #include "w_CursedTemple.h"
 #include "GMSwampOfQuiet.h"
 #include "CharacterManager.h"
-
-#ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
-#endif // PSW_ADD_MAPSYSTEM
 #ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -515,7 +512,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			Vector(0.4f,0.5f,1.f,b->BodyLight);
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		}
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 		else if (o->Type == MODEL_SUMMON)
 		{
 //			Vector(0.4f,0.5f,1.f,b->BodyLight);
@@ -529,8 +525,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				Vector ( 1.f, 1.f, 1.f, b->BodyLight );
 			}
 		}
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef LDK_ADD_EG_MONSTER_DEASULER
 		else if( o->Type == MODEL_DEASULER)
 		{
 			b->RenderMesh ( 0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
@@ -572,7 +566,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderMesh ( 4, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
 			}
 		}
-#ifdef LDK_ADD_EG_MONSTER_ASSASSINMASTER
 		else
 		if (o->Type == MODEL_MONSTER01+176)
 		{
@@ -586,9 +579,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			Vector ( fLumi, fLumi, fLumi, b->BodyLight );
 			b->RenderMesh ( 0, RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_ASSASSIN_EFFECT1 );
 		}
-#endif //LDK_ADD_EG_MONSTER_ASSASSINMASTER
-#endif //LDK_ADD_EG_MONSTER_DEASULER
-#ifdef CSK_RAKLION_BOSS
 		else if(o->Type == MODEL_RAKLION_BOSS_CRACKEFFECT)
 		{
 			float fLumi = o->Alpha;
@@ -601,8 +591,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			Vector(o->Light[0]*fLumi,o->Light[1]*fLumi,o->Light[2]*fLumi,b->BodyLight);
 			b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		}
-#endif // CSK_RAKLION_BOSS
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 		else if(o->Type == MODEL_NIGHTWATER_01)
 		{
 			float fLumi = o->Alpha;
@@ -621,7 +609,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			Vector(o->Light[0]*fLumi,o->Light[1]*fLumi,o->Light[2]*fLumi,b->BodyLight);
 			b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,1,o->BlendMeshLight,o->BlendMeshTexCoordU,-(int)WorldTime%2000*0.0001f);
 		}
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 		else if(o->Type == MODEL_ALICE_BUFFSKILL_EFFECT || o->Type == MODEL_ALICE_BUFFSKILL_EFFECT2)
 		{
 			if(o->SubType == 1)
@@ -725,12 +712,11 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				o->m_bRenderAfterCharacter = true;
 			}
 		}
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 		else if(o->Type==MODEL_EFFECT_SKURA_ITEM)
 		{
 			b->RenderBody(RENDER_COLOR,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 		}
-#endif //CSK_EVENT_CHERRYBLOSSOM	
+
 		else if(o->Type==MODEL_MONSTER01+26)
 		{
 		    Vector(0.4f,0.6f,1.f,b->BodyLight);
@@ -1550,14 +1536,12 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				VectorCopy(o->Light, b->BodyLight);
 				b->RenderBody ( RENDER_TEXTURE|RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 			}
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 			else if(o->Type == MODEL_DESAIR)
 			{
 				Vector(1.f,1.f,1.f,o->Light);
 				VectorCopy(o->Light, b->BodyLight);
 				b->RenderBody ( RENDER_TEXTURE|RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
 			}
-#endif //SKILL_DEBUG
 			else if(o->Type == MODEL_DARK_SCREAM)
 			{
                 b->RenderBody ( RENDER_TEXTURE, o->Alpha, o->BlendMesh, 1.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh );
@@ -3457,7 +3441,6 @@ void RenderObjects()
  							RenderObjectVisual(o);
 						}
 #endif //PJH_NEW_SERVER_SELECT_MAP
-#ifdef CSK_ADD_MAP_ICECITY	
 						else if((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS)
 							&& (o->Type == 30 || o->Type == 31) 
 							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
@@ -3465,23 +3448,18 @@ void RenderObjects()
 							RenderObject(o);
 							RenderObjectVisual(o);
 						}
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef PBG_ADD_PKFIELD
 						else if(gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68)
 							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
 						{
 							RenderObject(o);
 							RenderObjectVisual(o);
 						}
-#endif //PBG_ADD_PKFIELD
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
 						else if(IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68)
 							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
 						{
 							RenderObject(o);
 							RenderObjectVisual(o);
 						}
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
 
 						if(o->Next == NULL)
 							break;
@@ -3510,20 +3488,10 @@ void RenderObjects()
 								) &&
 								((o->Type>=5 && o->Type<=14) || (o->Type>=87 && o->Type<=88) || (o->Type == 4 || o->Type == 129)));
 							else
-#ifdef CSK_ADD_MAP_ICECITY	
 							if((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && (o->Type == 30 || o->Type == 31 || o->Type == 76));
 							else
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef PBG_ADD_PKFIELD
-							if((gMapManager.IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-								|| IsDoppelGanger2())
-#else YDG_ADD_MAP_DOPPELGANGER2
-								)
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-								&& (o->Type == 16 || o->Type == 67 || o->Type == 68));
+							if((gMapManager.IsPKField()	|| IsDoppelGanger2()) && (o->Type == 16 || o->Type == 67 || o->Type == 68));
 							else
-#endif //PBG_ADD_PKFIELD
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 							if(gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE);
 #else
@@ -3558,13 +3526,10 @@ void RenderObjects()
 									RenderObjectVisual(o);
 								}
 							}
-
-#ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
 							if(o->Visible == true && g_bRenderBoundingBox == true)
 							{
 								RenderBoundingBox(o);
 							}
-#endif // CSK_DEBUG_RENDER_BOUNDINGBOX
 						}
 
 						if(o->Next == NULL) break;
@@ -4806,7 +4771,6 @@ OBJECT *CreateObject(int Type,vec3_t Position,vec3_t Angle,float Scale)
 	case WD_2DEVIAS:
 		switch(Type)
 		{
-#ifdef CSK_REPAIR_MAP_DEVIAS
 		case MODEL_WARP:
 			{
 				vec3_t Position;
@@ -4820,7 +4784,6 @@ OBJECT *CreateObject(int Type,vec3_t Position,vec3_t Angle,float Scale)
 				CreateEffect(MODEL_WARP3, Position, o->Angle, o->Light, 1);
 			}
 			break;
-#endif // CSK_REPAIR_MAP_DEVIAS
 		case 22:
 		case 25:
 		case 40:

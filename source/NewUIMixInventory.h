@@ -1,9 +1,5 @@
 // NewUIMixInventory.h: interface for the CNewUIMixInventory class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUIMIXINVENTORY_H__EBAA98CA_D9A0_423E_AFF8_08079E2637F7__INCLUDED_)
-#define AFX_NEWUIMIXINVENTORY_H__EBAA98CA_D9A0_423E_AFF8_08079E2637F7__INCLUDED_
 
 #pragma once
 
@@ -11,9 +7,7 @@
 #include "NewUIInventoryCtrl.h"
 #include "NewUIMessageBox.h"
 #include "NewUIMyInventory.h"
-#ifdef ADD_SOCKET_MIX
 #include "UIControls.h"
-#endif	// ADD_SOCKET_MIX
 
 namespace SEASON3B
 {
@@ -54,9 +48,7 @@ namespace SEASON3B
 		float m_fInventoryColor[3];
 		float m_fInventoryWarningColor[3];
 
-#ifdef ADD_SOCKET_MIX
 		CUISocketListBox m_SocketListBox;
-#endif	// ADD_SOCKET_MIX
 
 	public:
 		CNewUIMixInventory();
@@ -98,15 +90,14 @@ namespace SEASON3B
 		bool InventoryProcess();
 		bool BtnProcess();
 
-		void RenderMixDescriptions(float fPos_x, float fPos_y);	// 조합에 강제로 지정된 텍스트 출력
+		void RenderMixDescriptions(float fPos_x, float fPos_y);
 		
 		void CheckMixInventory();
 		bool Mix();
 		void RenderMixEffect();
 
-		int Rtn_MixRequireZen( int _nMixZen, int _nTax );	// 함수헤더 [lem.2010.7.29]
+		int Rtn_MixRequireZen( int _nMixZen, int _nTax );
 		
 	};
 }
 
-#endif // !defined(AFX_NEWUIMIXINVENTORY_H__EBAA98CA_D9A0_423E_AFF8_08079E2637F7__INCLUDED_)

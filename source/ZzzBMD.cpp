@@ -404,46 +404,6 @@ void BMD::RotationPosition(float (*Matrix)[4],vec3_t Position,vec3_t WorldPositi
 	}
 }
 
-/*void BMD::TransformScale(float Scale,bool Link)
-{
-	for(int i=0;i<NumMeshs;i++)
-	{
-       	Mesh_t *m = &Meshs[i];
-		for(int j=0;j<m->NumVertices;j++)
-		{
-			Vertex_t *v = &m->Vertices[j];
-			float *vp = VertexTransform[i][j];
-			vec3_t Position;
-			VectorCopy(v->Position,Position);
-			VectorScale(Position,Scale,Position);
-			if(Link == false) 
-				VectorTransform(Position,BoneMatrix[v->Node],vp);
-			else
-        		VectorTransform(Position,LinkBoneMatrix,vp);
-			VectorScale(vp,BodyScale,vp);
-			VectorAdd(vp,BodyOrigin,vp);
-		}
-	}
-}*/
-
-/*void BMD::TransformShadow()
-{
-	for(int i=0;i<NumMeshs;i++)
-	{
-       	Mesh_t *m = &Meshs[i];
-		for(int j=0;j<m->NumVertices;j++)
-		{
-			Vertex_t *v = &m->Vertices[j];
-			float *vp = VertexTransform[i][j];
-			VectorTransform(v->Position,BoneMatrix[v->Node],vp);
-			VectorScale(vp,BodyScale,vp);
-			//vp[0] += (vp[2])*(vp[0]+8000.f)/(vp[2]-10000.f);
-			vp[1] -= (vp[2])*(vp[1]+10000.f)/(vp[2]-8000.f);
-			vp[2] = 0.f;
-			VectorAdd(vp,BodyOrigin,vp);
-		}
-	}
-}*/
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
 bool BMD::PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigned short *PriorAction,float Speed,vec3_t Origin,vec3_t Angle)
 #else //PBG_ADD_NEWCHAR_MONK_ANI
@@ -452,15 +412,10 @@ bool BMD::PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigne
 {
 	bool Loop = true;
 
-#ifdef YDG_FIX_GIGANTIC_STORM_CRASH
 	if(AnimationFrame == NULL || PriorAnimationFrame == NULL || PriorAction == NULL || (NumActions > 0 && CurrentAction >= NumActions))
 	{
-#ifdef CONSOLE_DEBUG
-//		g_ConsoleDebug->Write(MCD_ERROR, "PlayAnimation(NumActions:%d, CurrentAction:%d)", NumActions, CurrentAction);
-#endif // CONSOLE_DEBUG
 		return Loop;
 	}
-#endif // YDG_FIX_GIGANTIC_STORM_CRASH
 
 	if(NumActions == 0 || Actions[CurrentAction].NumAnimationKeys <= 1) 
 	{

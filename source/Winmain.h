@@ -40,7 +40,7 @@
 #endif // _DEBUG
 #endif // FOR_WORK
 
-
+#define WINDOWMODE						// (2006-07-18)
 
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 #define ACTIVE_FOCUS_OUT

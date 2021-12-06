@@ -235,12 +235,8 @@ void CreateArrow(CHARACTER *c,OBJECT *o,OBJECT *to,
         case MODEL_BOW+20:CreateEffect(MODEL_LACEARROW   ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
         case MODEL_BOW+21:CreateEffect(MODEL_ARROW_SPARK ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
 		case MODEL_BOW+22:CreateEffect(MODEL_ARROW_RING   ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
-#ifdef ADD_SOCKET_ITEM
 		case MODEL_BOW+23:CreateEffect(MODEL_ARROW_DARKSTINGER   ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;	
-#endif	// ADD_SOCKET_ITEM
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 		case MODEL_BOW+24:CreateEffect(MODEL_ARROW_GAMBLE ,o->Position,o->Angle,o->Light,SubType,o,o->PKKey,SkillIndex,Skill);break;
-#endif //LDK_ADD_GAMBLERS_WEAPONS
         }                                                                               
     }
 }

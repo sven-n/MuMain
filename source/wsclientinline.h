@@ -7,9 +7,7 @@
 #include "zzzMixInventory.h"
 #include "SimpleModulus.h"
 #include "WSclient.h"
-#ifdef MODIFY_SOCKET_PROTOCOL
 #include "SocketSystem.h"
-#endif	// MODIFY_SOCKET_PROTOCOL
 #include "ItemAddOptioninfo.h"
 extern ItemAddOptioninfo*			g_pItemAddOptioninfo;
 #ifdef _DEBUG
@@ -735,7 +733,6 @@ extern bool Teleport;
 	spe.Send( FALSE);\
 }
 
-#ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
 #define SendRequestSell( p_Index)\
 {\
 	CStreamPacketEngine spe;\
@@ -744,15 +741,6 @@ extern bool Teleport;
 	spe.Send( TRUE);\
 	g_pNPCShop->SetSellingItem(true);\
 }
-#else // CSK_FIX_HIGHVALUE_MESSAGEBOX
-#define SendRequestSell( p_Index)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x33);\
-	spe << ( BYTE)( p_Index);\
-	spe.Send( TRUE);\
-}
-#endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
 
 extern int BuyCost;
 
@@ -1040,9 +1028,7 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 	spe << (BYTE)(iSrcType&0xff) << (BYTE)(iSrcIndex&0xff) << (BYTE)(pItem->Type&0xff) << (BYTE)(pItem->Level&0xff)
 		<< pItem->Durability << pItem->Option1 << pItem->ExtOption
 		<< splitType << spareBits
-#ifdef MODIFY_SOCKET_PROTOCOL
 		<< socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
-#endif	// MODIFY_SOCKET_PROTOCOL
 		<< (BYTE)(iDstType&0xff) << (BYTE)(iDstIndex&0xff);
 #else // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
 	spe << BYTECAST(char, iSrcType) << BYTECAST(char, iSrcIndex) << BYTECAST(char, pItem->Type) << BYTECAST(char, pItem->Level)
@@ -1543,7 +1529,6 @@ void InitGuildWar();
 	spe.Send();\
 }
 
-#ifdef ADD_SOCKET_MIX
 #define SendRequestMix( p_Type, p_SubType)\
 {	\
 	CStreamPacketEngine spe;\
@@ -1552,15 +1537,6 @@ void InitGuildWar();
     spe << ( BYTE)( p_SubType);\
 	spe.Send();\
 }
-#else	// ADD_SOCKET_MIX
-#define SendRequestMix( p_Type)\
-{	\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x86);\
-    spe << ( BYTE)( p_Type);\
-	spe.Send();\
-}
-#endif	// ADD_SOCKET_MIX
 
 __forceinline bool SendRequestMixExit()
 {
@@ -1647,8 +1623,6 @@ __forceinline bool SendRequestMixExit()
     spe.Send();\
 }
 
-#ifdef CSK_FIX_SKILLHOTKEY_PACKET
-
 #define SendRequestHotKey(option)\
 {\
 	CStreamPacketEngine spe;\
@@ -1657,19 +1631,6 @@ __forceinline bool SendRequestMixExit()
 	spe.AddData( option, 30);\
 	spe.Send();\
 }
-
-#else // CSK_FIX_SKILLHOTKEY_PACKET
-
-#define SendRequestHotKey(option)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF3);\
-	spe << ( BYTE)0x30;\
-	spe.AddData( option, 20);\
-	spe.Send();\
-}
-
-#endif // CSK_FIX_SKILLHOTKEY_PACKET
 
 #define SendRequestDuelStart(index, name)\
 {\
@@ -2383,7 +2344,6 @@ __forceinline bool SendRequestMixExit()
 }
 #endif //PJH_CHARACTER_RENAME
 
-#ifdef PSW_ADD_RESET_CHARACTER_POINT
 #define SendRequestResetCharacterPoint() \
 { \
     CStreamPacketEngine spe; \
@@ -2391,7 +2351,6 @@ __forceinline bool SendRequestMixExit()
 	spe << (BYTE)0x00;\
     spe.Send(); \
 }
-#endif //PSW_ADD_RESET_CHARACTER_POINT
 
 
 //////////////////////////////////////////////////////////////////////////

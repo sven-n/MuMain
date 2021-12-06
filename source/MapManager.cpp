@@ -477,10 +477,6 @@ void CMapManager::Load() // OK
 
 			gLoadData.AccessModel(MODEL_STORM2		,"Data\\SKill\\","boswind");
 			gLoadData.OpenTexture(MODEL_STORM2		,"SKill\\");
-#ifndef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-			gLoadData.AccessModel(MODEL_SUMMON		,"Data\\SKill\\","nightmaresum");
-			gLoadData.OpenTexture(MODEL_SUMMON		,"SKill\\");
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 			gLoadData.AccessModel(MODEL_STORM3		,"Data\\Skill\\","mayatonedo");
 			gLoadData.OpenTexture(MODEL_STORM3		,"Skill\\");
 			gLoadData.AccessModel(MODEL_MAYASTAR		,"Data\\Skill\\","arrowsre05");

@@ -211,14 +211,12 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->LifeTime = 12;
 					VectorCopy(o->Target->EyeLeft,o->Position);
 					break;
-#ifdef ADD_SOCKET_ITEM
 				case 47:
 					{
 						o->Velocity = 0.f;
 						o->LifeTime = 12;
 						VectorCopy(o->Target->EyeRight, o->Position);
 					}break;
-#endif // ADD_SOCKET_ITEM
 				case 2:
 				case 3:
 				case 4:
@@ -338,7 +336,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						o->Scale = Scale;
 					}			
 					break;
-#ifdef ASG_ADD_SUMMON_RARGLE
 				case 48:
 				case 49:
 				case 50:
@@ -349,7 +346,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->MaxTails = 3;
 					Vector(0.5f, 0.5f, 0.9f, o->Light);
 					break;
-#endif	// ASG_ADD_SUMMON_RARGLE
 				case 54:
                     o->Velocity = 0.f;
 					o->LifeTime = 999999999;
@@ -427,9 +423,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					case 42: Vector(0.0f, 0.0f, 0.0f, o->Light); break;
 					case 43: Vector(2.5f, 0.0f, 0.0f, o->Light); break;
 					case 46: Vector(0.1f, 0.25f, 0.1f, o->Light); break;
-#ifdef ADD_SOCKET_ITEM
 					case 47: Vector(0.9f, 0.f, 0.f, o->Light); break;
-#endif // ADD_SOCKET_ITEM
 					}					
 				}
 				
@@ -1320,7 +1314,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						o->LifeTime = rand()%8+8;
 						//o->MaxTails = 10;
 						break;
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 					case 27:
 					case 28:
 						{
@@ -1328,14 +1321,11 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							VectorCopy(vPriorColor, o->Light);
 						}
 						break;
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 					case 33:
 						Vector( 0.3f, 0.3f, 1.0f, o->Light );
 						o->Velocity = 20.f+(float)(rand()%10);
 						o->LifeTime = rand()%2+2;
 						break;
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
                 }
 				break;
 							
@@ -1524,7 +1514,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->MaxTails = 30;
                     o->TexType  = BITMAP_FLARE_BLUE;
                     break;
-#ifdef CSK_LUCKY_SEAL
 				case 10:
 				case 11:
 					Vector(1.f, 0.6f, 0.6f, o->Light);
@@ -1532,7 +1521,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->MaxTails = 30;
 					o->TexType  = BITMAP_LUCKY_SEAL_EFFECT;
 					break;
-#endif // CSK_LUCKY_SEAL
 				case 1:
 					Vector(.2f,.2f,.2f,o->Light);
 					o->LifeTime = 999999;
@@ -1630,7 +1618,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->MaxTails = 30;
                     o->TexType  = BITMAP_LIGHT;
                     break;
-#ifdef ASG_ADD_SUMMON_RARGLE
 				case 17:
 					Vector(0.7f, 0.2f, 1.f, o->Light);
 					o->LifeTime = 100;
@@ -1638,7 +1625,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                     o->TexType  = BITMAP_JOINT_SPIRIT;
 					VectorCopy(o->Target->Owner->Position, o->StartPosition);
 					break;
-#endif	// ASG_ADD_SUMMON_RARGLE
 				}
 				o->Scale = Scale;
 				break;
@@ -1945,7 +1931,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Direction[0] = ( float)( rand() % 3000);
 					o->Scale        = 30.f;
 				}
-#ifdef CRYINGWOLF_2NDMVP
 				else if(o->SubType==25)
 				{
 					Vector(0.9f,0.4f,0.6f,o->Light);
@@ -1955,7 +1940,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Direction[0] = ( float)( rand() % 3000);
 					o->Scale        = 30.f;
 				}
-#endif // CRYINGWOLF_2NDMVP
                 else if(o->SubType==13)
                 {
                     o->Direction[2] = (float)(rand()%20+35);
@@ -2019,7 +2003,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Direction[0] = ( float)( rand() % 3000);
 					o->Scale        = 30.f;
 				}
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 				else
 				if(o->SubType == 47)
 				{
@@ -2030,7 +2013,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Direction[0] = ( float)( rand() % 3000);
 					o->Scale        = 30.f;
 				}
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
                 else
                 {
                     o->m_bCreateTails = false;
@@ -2053,12 +2035,10 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							o->Scale = 40.f;
 							Vector(1.f,0.5f,0.f,o->Light);
 							break;
-#ifdef CRYINGWOLF_2NDMVP
 						case 3:
 							o->Scale = 20.f;
 							VectorCopy(Target->Light, o->Light);
 							break;
-#endif // CRYINGWOLF_2NDMVP
 						}
 						switch ( o->SubType )
 						{
@@ -2183,7 +2163,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							o->MaxTails = 16;
 							o->Velocity = 70.f;
 							break;
-#ifdef CRYINGWOLF_2NDMVP
 						case 13:
 							Vector(0.7f, 0.7f, 0.3f, o->Light);
 							o->RenderType = RENDER_TYPE_ALPHA_BLEND_OTHER;
@@ -2191,7 +2170,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							o->MaxTails = 16;
 							o->Velocity = 70.f;
 							break;
-#endif // CRYINGWOLF_2NDMVP
 						case 14:
 							Vector ( 1.0f, 1.0f, 1.0f, o->Light );
 							o->RenderType = RENDER_TYPE_ALPHA_BLEND;
@@ -2223,7 +2201,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 							o->MaxTails = 16;
 							o->Velocity = 70.f;
 							break;
-#ifdef ADD_SOCKET_ITEM
 						case 18:
 							{
 								if(vPriorColor)
@@ -2236,8 +2213,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 								o->Velocity = 70.f;
 							}
 							break;
-#endif // ADD_SOCKET_ITEM
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 						case 19:
 							{
 								Vector ( 0.5f, 0.5f, 1.0f, o->Light );
@@ -2258,7 +2233,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 								o->LifeTime = 50;
 							}
 							break;
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
                 }
                 VectorCopy(TargetPosition,o->TargetPosition);
                 break;
@@ -3118,10 +3092,7 @@ void MoveJoint( JOINT *o, int iIndex)
 		case 23:
 		case 24:
 		case 25:
-#ifdef ADD_SOCKET_ITEM
 		case 47:
-#endif // ADD_SOCKET_ITEM
-#ifdef ASG_ADD_SUMMON_RARGLE
 		case 48:
 		case 49:
 		case 50:
@@ -3129,13 +3100,9 @@ void MoveJoint( JOINT *o, int iIndex)
 		case 52:
 		case 53:
 		case 54:
-#endif	// ASG_ADD_SUMMON_RARGLE
 		case 55:
 		case 56:
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
 		case 57:
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
-
 			if(!o->Target->Live)
 			{
 				o->Live = false;
@@ -3177,9 +3144,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			case 29:
 			case 23:
 			case 25:
-#ifdef ADD_SOCKET_ITEM
 			case 47:
-#endif // ADD_SOCKET_ITEM
 				VectorCopy(o->Target->EyeRight, o->Position);
 				break;
 			case 21:
@@ -3213,15 +3178,12 @@ void MoveJoint( JOINT *o, int iIndex)
 			case 56:
  				VectorCopy(o->Target->EyeRight,o->Position);
 				break;
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
 			case 57:
 				Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,
 					o->Target->PriorAnimationFrame, o->Target->PriorAction, o->Target->Angle,
 					o->Target->HeadAngle, false, false);
 				Models[o->Target->Type].TransformByObjectBone(o->Position, o->Target, o->PKKey);
 				break;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
-#ifdef ASG_ADD_SUMMON_RARGLE
 			case 48:
 				Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,
 					o->Target->PriorAnimationFrame, o->Target->PriorAction, o->Target->Angle,
@@ -3258,7 +3220,6 @@ void MoveJoint( JOINT *o, int iIndex)
 					o->Target->HeadAngle, false, false);
 				Models[o->Target->Type].TransformByObjectBone(o->Position, o->Target, 52);
 				break;
-#endif	// ASG_ADD_SUMMON_RARGLE
 			}
 			switch(o->SubType)
 			{
@@ -3778,7 +3739,6 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
         }
 		break;
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 		case BITMAP_2LINE_GHOST:
 			{
 				if( o->SubType == 0 )
@@ -3817,7 +3777,6 @@ void MoveJoint( JOINT *o, int iIndex)
 				}
 			}
 			break;
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC		
 			case BITMAP_JOINT_SPIRIT:
 	case BITMAP_JOINT_SPIRIT2:
 		if ( 0 == o->SubType || o->SubType==5 || o->SubType==19 )
@@ -4542,11 +4501,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				VectorScale(o->TargetPosition, pModel->BodyScale, o->TargetPosition);
 				VectorAdd(o->Target->Position, o->TargetPosition, o->TargetPosition);
 			}
-			else if (o->SubType == 15
-#ifdef ASG_ADD_SUMMON_RARGLE
-				|| o->SubType == 17
-#endif	// ASG_ADD_SUMMON_RARGLE
-				)
+			else if (o->SubType == 15 || o->SubType == 17)
 			{
 				if (o->Target->Owner == NULL)
 				{
@@ -4691,7 +4646,6 @@ void MoveJoint( JOINT *o, int iIndex)
 					}
 				}
 				break;
-#ifdef ASG_ADD_SUMMON_RARGLE
 			case 17:
 				if (o->Target != NULL)
 				{
@@ -4707,7 +4661,6 @@ void MoveJoint( JOINT *o, int iIndex)
 					VectorCopy(o->TargetPosition, o->Position);
 				}
 				break;
-#endif	// ASG_ADD_SUMMON_RARGLE
 			}
 		}
 		break;
@@ -7189,9 +7142,7 @@ void RenderJoints( BYTE bRenderOneMore )
 				case 2:
                 case 4:
 				case 9:
-#ifdef CSK_LUCKY_SEAL
 				case 10:
-#endif // CSK_LUCKY_SEAL
 					fAlpha = ( float)min( o->LifeTime, 20) * 0.05f;
 					glColor3f( fAlpha*o->Light[0], fAlpha*o->Light[1], fAlpha*o->Light[2]);
 					break;
@@ -7202,9 +7153,7 @@ void RenderJoints( BYTE bRenderOneMore )
 				case 8:
 				case 16:
 				case 14:
-#ifdef ASG_ADD_SUMMON_RARGLE
 				case 17:
-#endif	// ASG_ADD_SUMMON_RARGLE
 					glColor3f( o->Light[0], o->Light[1], o->Light[2]);
 					break;
 				case 15:
@@ -7223,13 +7172,11 @@ void RenderJoints( BYTE bRenderOneMore )
                 float fAlpha = ( float)min( o->LifeTime, 20) * 0.1f;
 				glColor3f( fAlpha*o->Light[0], fAlpha*o->Light[1], fAlpha*o->Light[2]);
 			}
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 			else if (o->Type == BITMAP_JOINT_SPARK)
 			{
 				if(o->SubType == 5)
 					BindTexture(o->TexType);
 			}
-#endif //LDS_ADD_EMPIRE_GUARDIAN
             else
 			{
 				glColor3fv ( o->Light );

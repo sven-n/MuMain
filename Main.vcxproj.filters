@@ -1606,9 +1606,6 @@
     <ClInclude Include="source\Winmain.h">
       <Filter>MU\Client\core</Filter>
     </ClInclude>
-    <ClInclude Include="source\Winmain_New.h">
-      <Filter>MU\Client\core</Filter>
-    </ClInclude>
     <ClInclude Include="source\Winmain_New_Event.h">
       <Filter>MU\Client\core</Filter>
     </ClInclude>

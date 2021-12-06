@@ -27,12 +27,7 @@ namespace SEASON3B
 		virtual ~CNewUIItemMng();
 		
 		ITEM* CreateItem(BYTE* pbyItemPacket);	//. create instance
-		ITEM* CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel = 0, BYTE byDurability = 255, 
-			BYTE byOption1 = 0, BYTE byOptionEx = 0, BYTE byOption380 = 0, BYTE byOptionHarmony = 0
-#ifdef SOCKET_SYSTEM
-			, BYTE * pbySocketOptions = NULL
-#endif	// SOCKET_SYSTEM
-			);	//. create instance
+		ITEM* CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel = 0, BYTE byDurability = 255, BYTE byOption1 = 0, BYTE byOptionEx = 0, BYTE byOption380 = 0, BYTE byOptionHarmony = 0	, BYTE * pbySocketOptions = NULL);	//. create instance
 		ITEM* CreateItem(ITEM* pItem);		//. refer to the instance already existed
 		ITEM* DuplicateItem(ITEM* pItem);	//. create instance
 		void DeleteItem(ITEM* pItem);

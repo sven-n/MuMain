@@ -449,13 +449,8 @@ void SEASON3B::CNewUINPCShop::ClosingProcess()
 		m_pNewInventoryCtrl->RemoveAllItems();
 	}
 
-#ifdef LDK_ADD_GAMBLE_SYSTEM
 	GambleSystem::Instance().SetGambleShop(false);
-#endif //LDK_ADD_GAMBLE_SYSTEM
-
-#ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
 	m_bSellingItem = false;
-#endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
 }
 
 void SEASON3B::CNewUINPCShop::SetButtonInfo()
@@ -530,7 +525,6 @@ ITEM* SEASON3B::CNewUINPCShop::GetStandbyItem()
 	return NULL;
 }
 
-#ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
 void SEASON3B::CNewUINPCShop::SetSellingItem(bool bFlag)
 {
 	m_bSellingItem = bFlag;
@@ -540,4 +534,3 @@ bool SEASON3B::CNewUINPCShop::IsSellingItem()
 {
 	return m_bSellingItem;
 }
-#endif // CSK_FIX_HIGHVALUE_MESSAGEBOX

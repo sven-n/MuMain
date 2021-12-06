@@ -238,7 +238,7 @@ bool CNewUIGateSwitchWindow::BtnProcess()
 
 void CNewUIGateSwitchWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-	POINT ptOrigin = { fPos_x, fPos_y };
+	POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
 	float fBoxWidth = fWidth;
 
 	RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_TOP_LEFT, ptOrigin.x+12, ptOrigin.y-4, 14, 14);
@@ -248,7 +248,7 @@ void CNewUIGateSwitchWindow::RenderOutlineUpper(float fPos_x, float fPos_y, floa
 
 void CNewUIGateSwitchWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-	POINT ptOrigin = { fPos_x, fPos_y };
+	POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
 	float fBoxWidth = fWidth;
 	float fBoxHeight = fHeight;
 

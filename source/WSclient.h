@@ -2899,7 +2899,6 @@ typedef struct
 } PMSG_CHANGE_NAME_RESULT, *LPPMSG_CHANGE_NAME_RESULT;
 #endif //PJH_CHARACTER_RENAME
 
-#ifdef CSK_RAKLION_BOSS
 //----------------------------------------------------------------------------
 // GC [0xD1][0x10] 
 //----------------------------------------------------------------------------
@@ -2970,8 +2969,6 @@ typedef struct
 	BYTE			btMonsterCount;
 	BYTE			btUserCount;
 } PMSG_NOTIFY_RAKLION_USER_MONSTER_COUNT, *LPPMSG_NOTIFY_RAKLION_USER_MONSTER_COUNT;
-
-#endif // CSK_RAKLION_BOSS
 
 //----------------------------------------------------------------------------
 // CG[0xBF][0x0b]

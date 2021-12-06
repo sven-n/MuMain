@@ -584,13 +584,7 @@ void SetPlayerWalk(CHARACTER *c)
 			if( !(c->Object.SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || c->Object.SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER) && 
 				!c->SafeZone && c->Wing.Type!=-1)
 			{
-#ifdef ADD_SOCKET_ITEM
 				if( gCharacterManager.GetEquipedBowType( c ) == BOWTYPE_CROSSBOW )	
-#else // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
-				if( (c->Weapon[0].Type>=MODEL_BOW+8 && c->Weapon[0].Type<MODEL_BOW+15) ||
-					(c->Weapon[0].Type>=MODEL_BOW+16 && c->Weapon[0].Type<MODEL_BOW+17) || 
-					(c->Weapon[0].Type>=MODEL_BOW+18 && c->Weapon[0].Type<MODEL_BOW+MAX_ITEM_INDEX) )
-#endif // ADD_SOCKET_ITEM				// 정리할 때 지워야 하는 소스
     				SetAction(&c->Object,PLAYER_FLY_CROSSBOW);
 				else
     				SetAction(&c->Object,PLAYER_FLY);
@@ -3288,9 +3282,7 @@ void PlayerStopAnimationSetting ( CHARACTER* c, OBJECT* o )
 	  && o->CurrentAction!=PLAYER_SKILL_HELL_BEGIN
       && o->CurrentAction!=PLAYER_DARKLORD_WALK && o->CurrentAction!=PLAYER_RUN_RIDE_HORSE 
 	  && (o->CurrentAction < PLAYER_FENRIR_RUN || o->CurrentAction > PLAYER_FENRIR_RUN_ONE_LEFT_ELF)
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	  && o->CurrentAction!=PLAYER_RECOVER_SKILL
-#endif //#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	  ))
 
 		SetPlayerStop(c);
@@ -6223,12 +6215,10 @@ float CharacterMoveSpeed(CHARACTER *c)
 	{
 		Speed *= 0.5f;
 	}
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 	else if(g_isCharacterBuff((&c->Object), eDeBuff_BlowOfDestruction))
 	{
 		Speed *= 0.33f;
 	}
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 	
 	if(g_isCharacterBuff((&c->Object), eBuff_CursedTempleQuickness))
 	{
@@ -10308,12 +10298,10 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			{
 				Vector(0.8f, 0.5f, 0.2f, vLight);
 			}
-#ifdef ASG_ADD_SKILL_BERSERKER
 			else if(iSkillType == AT_SKILL_ALICE_BERSERKER)
 			{
 				Vector(1.0f, 0.1f, 0.2f, vLight);
 			}
-#endif	// ASG_ADD_SKILL_BERSERKER
 			else if(iSkillType == AT_SKILL_ALICE_WEAKNESS)
 			{
 				Vector(0.8f, 0.1f, 0.1f, vLight);
@@ -10324,12 +10312,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 
 			if(iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_THORNS
-#ifdef PJH_ADD_MASTERSKILL
-						|| (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4)
-#endif
-#ifdef ASG_ADD_SKILL_BERSERKER
+				|| (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4)
 				|| iSkillType == AT_SKILL_ALICE_BERSERKER
-#endif	// ASG_ADD_SKILL_BERSERKER
 				|| iSkillType == AT_SKILL_ALICE_WEAKNESS || iSkillType == AT_SKILL_ALICE_ENERVATION
 				)
 			{
@@ -10344,9 +10328,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 			// pin_light
 			if(iSkillType == AT_SKILL_ALICE_SLEEP
-#ifdef PJH_ADD_MASTERSKILL
 						|| (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4)
-#endif
 				)
 			{
 				Vector(0.7f, 0.0f, 0.8f, vLight);
@@ -10359,12 +10341,10 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			{
 				Vector(0.8f, 0.5f, 0.2f, vLight);
 			}
-#ifdef ASG_ADD_SKILL_BERSERKER
 			else if(iSkillType == AT_SKILL_ALICE_BERSERKER)
 			{
 				Vector(1.0f, 0.1f, 0.2f, vLight);
 			}
-#endif	// ASG_ADD_SKILL_BERSERKER
 			else if(iSkillType == AT_SKILL_ALICE_THORNS)
 			{
 				Vector(0.8f, 0.1f, 0.1f, vLight);
@@ -10375,12 +10355,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 
 			if(iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_THORNS
-#ifdef PJH_ADD_MASTERSKILL
-						|| (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4)
-#endif
-#ifdef ASG_ADD_SKILL_BERSERKER
+				|| (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4)
 				|| iSkillType == AT_SKILL_ALICE_BERSERKER
-#endif	// ASG_ADD_SKILL_BERSERKER
 				|| iSkillType == AT_SKILL_ALICE_WEAKNESS || iSkillType == AT_SKILL_ALICE_ENERVATION
 				)
 			{
@@ -10395,9 +10371,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			
 			// cra04, clud64
 			if(iSkillType == AT_SKILL_ALICE_SLEEP
-#ifdef PJH_ADD_MASTERSKILL
 						|| (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4)
-#endif
 				)
 			{
 				Vector(0.6f, 0.1f, 0.8f, vLight);
@@ -10410,12 +10384,10 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			{
 				Vector(0.8f, 0.5f, 0.2f, vLight);
 			}
-#ifdef ASG_ADD_SKILL_BERSERKER
 			else if(iSkillType == AT_SKILL_ALICE_BERSERKER)
 			{
 				Vector(1.0f, 0.1f, 0.2f, vLight);
 			}
-#endif	// ASG_ADD_SKILL_BERSERKER
 			else if(iSkillType == AT_SKILL_ALICE_THORNS)
 			{
 				Vector(0.8f, 0.1f, 0.1f, vLight);
@@ -10426,12 +10398,8 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 
 			if(iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_THORNS
-#ifdef PJH_ADD_MASTERSKILL
-						|| (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4)
-#endif
-#ifdef ASG_ADD_SKILL_BERSERKER
+				|| (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4)
 				|| iSkillType == AT_SKILL_ALICE_BERSERKER
-#endif	// ASG_ADD_SKILL_BERSERKER
 				|| iSkillType == AT_SKILL_ALICE_WEAKNESS || iSkillType == AT_SKILL_ALICE_ENERVATION
 				)
 			{
@@ -10501,7 +10469,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 		}
 
-#ifdef CSK_LUCKY_SEAL
 		if( g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal1) 
 		 || g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal2) 
 		 || g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal3)
@@ -10524,8 +10491,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			DeleteJoint(MODEL_SPEARSKILL, o, 10);
 			DeleteJoint(MODEL_SPEARSKILL, o, 11);
 		}
-
-#endif // CSK_LUCKY_SEAL
 		if(g_isCharacterBuff((&c->Object), eBuff_Thorns))
 		{
 			if(SearchJoint(BITMAP_FLARE, o, 43) == false)
@@ -10540,7 +10505,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			DeleteJoint(BITMAP_FLARE, o, 43);
 		}
 		
-#ifdef ASG_ADD_SKILL_BERSERKER
 		if (g_isCharacterBuff((&c->Object), eBuff_Berserker))
 		{
 			if (!SearchEffect(BITMAP_ORORA, o, 0))
@@ -10567,7 +10531,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 			DeleteEffect(BITMAP_LIGHT_MARKS, o);
 		}
-#endif	// ASG_ADD_SKILL_BERSERKER
 		
 		if(g_isCharacterBuff((&c->Object), eDeBuff_Blind))
 		{
@@ -14166,13 +14129,11 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 			CreateObject(MODEL_BC_BOX, c->Object.Position, c->Object.Angle);
 		}
 		break;
-#ifdef ADD_NPC_DEVIN 
 	case 406:
 		OpenNpc(MODEL_NPC_DEVIN);
 		c = CreateCharacter(Key,MODEL_NPC_DEVIN,PositionX,PositionY);
 		strcpy(c->ID,"사제데빈");
 		break;
-#endif	// ADD_NPC_DEVIN
 	case 407:
 		OpenNpc(MODEL_NPC_QUARREL);
 		c = CreateCharacter(Key,MODEL_NPC_QUARREL,PositionX,PositionY);

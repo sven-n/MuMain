@@ -59,17 +59,13 @@
 #include "GameShop\MsgBoxIGSCommon.h"
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-#ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
-#endif // PSW_ADD_MAPSYSTEM
 
 #include "w_PetProcess.h"
 #include "PortalMgr.h"
 #include "DuelMgr.h"
 
-#ifdef LDK_ADD_GAMBLE_SYSTEM
 #include "GambleSystem.h"
-#endif //LDK_ADD_GAMBLE_SYSTEM
 #ifdef ASG_ADD_NEW_QUEST_SYSTEM
 #include "QuestMng.h"
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
@@ -3465,9 +3461,6 @@ void ReceiveMagicFinish( BYTE *ReceiveBuffer )
 	case AT_SKILL_ATTACK:
 		UnRegisterBuff( eBuff_Attack, o);
 		break;
-		//#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-		//	case AT_SKILL_RECOVER:
-		//#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	case AT_SKILL_DEF_POWER_UP:
 	case AT_SKILL_DEF_POWER_UP+1:
 	case AT_SKILL_DEF_POWER_UP+2:
@@ -4489,32 +4482,26 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					PlayBuffer(SOUND_INFINITYARROW);
 				}	
 				break;
-#ifdef PJH_ADD_MASTERSKILL
-			case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
+		case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+1:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+2:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+3:
 		case AT_SKILL_ALICE_CHAINLIGHTNING_UP+4:
-#endif
 			case AT_SKILL_ALICE_CHAINLIGHTNING:
 				{
 					sc->AttackTime = 1;
 					PlayBuffer(SOUND_SKILL_CHAIN_LIGHTNING);
 				}
 				break;
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_ALICE_SLEEP_UP:
 		case AT_SKILL_ALICE_SLEEP_UP+1:
 		case AT_SKILL_ALICE_SLEEP_UP+2:
 		case AT_SKILL_ALICE_SLEEP_UP+3:
 		case AT_SKILL_ALICE_SLEEP_UP+4:
-#endif
-			case AT_SKILL_ALICE_SLEEP:
-			case AT_SKILL_ALICE_BLIND:
-			case AT_SKILL_ALICE_THORNS:
-#ifdef ASG_ADD_SKILL_BERSERKER
-			case AT_SKILL_ALICE_BERSERKER:
-#endif	// ASG_ADD_SKILL_BERSERKER
+		case AT_SKILL_ALICE_SLEEP:
+		case AT_SKILL_ALICE_BLIND:
+		case AT_SKILL_ALICE_THORNS:
+		case AT_SKILL_ALICE_BERSERKER:
 				{
 					sc->AttackTime = 1;
 					
@@ -4954,8 +4941,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 			case AT_SKILL_PLASMA_STORM_FENRIR:
 				SetAction_Fenrir_Skill(sc, so);
 				break;
-				
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 			case AT_SKILL_GAOTIC:
 				{
 					if( sc->Helper.Type == MODEL_HELPER+37 )				
@@ -5005,8 +4990,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					PlayBuffer(SOUND_SKILL_CAOTIC);
 				}
 				break;
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
 			case AT_SKILL_MULTI_SHOT:
 				{
 					SetPlayerBow(sc);
@@ -5058,8 +5041,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					CreateEffect(MODEL_BLADE_SKILL, Position, o->Angle, Light, 1, o, Key);
 				}
 				break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_MULTI_SHOT
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 			case AT_SKILL_RECOVER:
 				{
 					//			OBJECT* o = so;
@@ -5096,9 +5077,6 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					PlayBuffer(SOUND_SKILL_RECOVER);
 				}
 				break;
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-				
-				
 			case AT_SKILL_ALICE_LIGHTNINGORB:
 				{
 					switch(sc->Helper.Type)
@@ -5118,14 +5096,12 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					}
 				}
 				break;
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_ALICE_DRAINLIFE_UP:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+1:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+2:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+3:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+4:
-#endif				
-			case AT_SKILL_ALICE_DRAINLIFE:
+		case AT_SKILL_ALICE_DRAINLIFE:
 				{
 					switch(sc->Helper.Type)
 					{
@@ -5165,41 +5141,17 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 					
 			case AT_SKILL_SUMMON_EXPLOSION:
 			case AT_SKILL_SUMMON_REQUIEM:
-#ifdef ASG_ADD_SUMMON_RARGLE
 			case AT_SKILL_SUMMON_POLLUTION:
-#endif	// ASG_ADD_SUMMON_RARGLE
 				{
 					g_SummonSystem.CastSummonSkill(MagicNumber, sc, so, Data->PositionX, Data->PositionY);
 				}
 				break;
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 				case AT_SKILL_FLAME_STRIKE:
 					SetAction(so, PLAYER_SKILL_FLAMESTRIKE);
 					break;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 				case AT_SKILL_GIGANTIC_STORM:
-#ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
-					switch(sc->Helper.Type)
-					{
-					case MODEL_HELPER+2:
-						SetAction(so, PLAYER_SKILL_GIGANTICSTORM_UNI);
-						break;
-					case MODEL_HELPER+3:
-						SetAction(so, PLAYER_SKILL_GIGANTICSTORM_DINO);
-						break;
-					case MODEL_HELPER+37:
-						SetAction(so, PLAYER_SKILL_GIGANTICSTORM_FENRIR);
-						break;
-					default:
-						SetAction(so, PLAYER_SKILL_GIGANTICSTORM);
-						break;
-					}
-#else	// YDG_ADD_SKILL_RIDING_ANIMATIONS
 					SetAction(so, PLAYER_SKILL_GIGANTICSTORM);
-#endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
 					break;
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
 
 		case AT_SKILL_LIGHTNING_SHOCK_UP:
 		case AT_SKILL_LIGHTNING_SHOCK_UP+1:
@@ -6096,23 +6048,19 @@ void ReceiveSell( BYTE *ReceiveBuffer )
 	LPPRECEIVE_GOLD Data = (LPPRECEIVE_GOLD)ReceiveBuffer;
 	if(Data->Flag != 0)
 	{
-#ifdef PSW_FIX_EQUIREEQUIPITEMBUY
 		if( Data->Flag == 0xff )
 		{
 			SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 
 			g_pChatListBox->AddText(Hero->ID,GlobalText[733], SEASON3B::TYPE_ERROR_MESSAGE);
 		}
-#ifdef LDK_FIX_RECEIVEBUYSELL_RESULT_254
 		else if( Data->Flag == 0xfe )
 		{
 			g_pNewUISystem->HideAll();
 
 			g_pChatListBox->AddText(Hero->ID,GlobalText[733], SEASON3B::TYPE_ERROR_MESSAGE);
 		}
-#endif //LDK_FIX_RECEIVEBUYSELL_RESULT_254
 		else 
-#endif //PSW_FIX_EQUIREEQUIPITEMBUY
 		{
 			SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 			
@@ -6120,9 +6068,7 @@ void ReceiveSell( BYTE *ReceiveBuffer )
 			
 			PlayBuffer(SOUND_GET_ITEM01);
 
-#ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
 			g_pNPCShop->SetSellingItem(false);
-#endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
 		}
 	}
 	else
@@ -7797,10 +7743,8 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 			case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
 			case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
 			case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-#ifdef ADD_SOCKET_MIX
 			case SEASON3A::MIXTYPE_EXTRACT_SEED:
 			case SEASON3A::MIXTYPE_SEED_SPHERE:
-#endif	// ADD_SOCKET_MIX
 				unicode::_sprintf(szText, GlobalText[595]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
@@ -11664,7 +11608,6 @@ void ReceiveCursedTempleState( BYTE* ReceiveBuffer )
 	g_CursedTemple->ReceiveCursedTempleState( cursedtemple );
 }
 
-#ifdef CSK_RAKLION_BOSS
 void ReceiveRaklionStateInfo(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_RAKLION_STATE_INFO pData = (LPPMSG_ANS_RAKLION_STATE_INFO)ReceiveBuffer;
@@ -11697,7 +11640,6 @@ void RecevieRaklionUserMonsterCount(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NOTIFY_RAKLION_USER_MONSTER_COUNT pData = (LPPMSG_NOTIFY_RAKLION_USER_MONSTER_COUNT)ReceiveBuffer;
 }
-#endif // CSK_RAKLION_BOSS
 
 void ReceiveCheckSumRequest( BYTE *ReceiveBuffer)
 {
@@ -11705,9 +11647,7 @@ void ReceiveCheckSumRequest( BYTE *ReceiveBuffer)
 	DWORD dwCheckSum = GetCheckSum( Data->Value);
 	SendCheckSum( dwCheckSum );	
 	
-#ifdef CONSOLE_DEBUG
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveCheckSumRequest]");
-#endif // CONSOLE_DEBUG
 }
 
 void Action(CHARACTER *c,OBJECT *o,bool Now);
@@ -14207,7 +14147,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			case 0x07:
 				RecevieKanturu3rdLeftUserandMonsterCount(ReceiveBuffer);
 				break;
-#ifdef CSK_RAKLION_BOSS
 			case 0x10:
 				ReceiveRaklionStateInfo(ReceiveBuffer);
 				break;
@@ -14226,7 +14165,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			case 0x15:
 				RecevieRaklionUserMonsterCount(ReceiveBuffer);
 				break;	
-#endif // CSK_RAKLION_BOSS
 			}
 			break;
 		}
@@ -14469,9 +14407,7 @@ bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )
 				bufflist.push_back( eDeBuff_Defense );
 				bufflist.push_back( eDeBuff_Stun );
 				bufflist.push_back( eDeBuff_Sleep );
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 				bufflist.push_back( eDeBuff_BlowOfDestruction );
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
 
 				//buff
 				bufflist.push_back( eBuff_HpRecovery ); bufflist.push_back( eBuff_Attack );

@@ -7,9 +7,7 @@
 #include "CSItemOption.h"
 #include "GIPetManager.h"
 #include "ZzzInfomation.h"
-#ifdef SOCKET_SYSTEM
 #include "SocketSystem.h"
-#endif	// SOCKET_SYSTEM
 
 using namespace SEASON3B;
 
@@ -63,7 +61,6 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLe
 	pNewItem->Jewel_Of_Harmony_Option = (byOptionHarmony & 0xf0) >> 4;
 	pNewItem->Jewel_Of_Harmony_OptionLevel = byOptionHarmony & 0x0f;
 
-#ifdef SOCKET_SYSTEM
 	if (pbySocketOptions == NULL)
 	{
 		pNewItem->SocketCount = 0;
@@ -107,13 +104,11 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLe
 			pNewItem->SocketSeedSetOption = SOCKET_EMPTY;
 		}
 	}
-#endif	// SOCKET_SYSTEM
 
 	pNewItem->byColorState = ITEM_COLOR_NORMAL;
 
 	pNewItem->RefCount = 1;
 	
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 	if( ((byOption380&0x02) >> 1) > 0 )
 	{
 		pNewItem->bPeriodItem = true;
@@ -131,7 +126,6 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLe
 	{
 		pNewItem->bExpiredPeriod = false;
 	}
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
 	SetItemAttr(pNewItem, byLevel, byOption1, byOptionEx);
 

@@ -6886,7 +6886,6 @@ void SEASON3B::CElpisMsgBox::RenderButtons()
 	m_BtnExit.Render();
 }
 
-#ifdef ADD_SOCKET_MIX
 SEASON3B::CSeedMasterMenuMsgBox::CSeedMasterMenuMsgBox()
 {
 	m_iMiddleCount = 7;
@@ -7078,8 +7077,6 @@ void SEASON3B::CSeedMasterMenuMsgBox::RenderButtons()
 	m_BtnExit.Render();
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 SEASON3B::CSeedInvestigatorMenuMsgBox::CSeedInvestigatorMenuMsgBox()
 {
 	m_iMiddleCount = 7;
@@ -7270,9 +7267,7 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderButtons()
 	m_BtnDetachSocket.Render();
 	m_BtnExit.Render();
 }
-#endif	// ADD_SOCKET_MIX
 
-#ifdef PSW_ADD_RESET_CHARACTER_POINT
 SEASON3B::CResetCharacterPointMsgBox::CResetCharacterPointMsgBox()
 {
 	m_iMiddleCount = 7;
@@ -7455,8 +7450,6 @@ CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ExitBtnDown(class CNewUIMe
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 	return CALLBACK_BREAK;
 }
-
-#endif //PSW_ADD_RESET_CHARACTER_POINT
 
 bool SEASON3B::CGuildBreakPasswordMsgBoxLayout::SetLayout()
 {

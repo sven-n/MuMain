@@ -181,11 +181,8 @@ void SaveScreen()
 	unsigned char *Buffer = new unsigned char [(int)WindowWidth*(int)WindowHeight*3];
 	glReadPixels(0,0,(int)WindowWidth,(int)WindowHeight,GL_RGB,GL_UNSIGNED_BYTE,Buffer);
 	WriteJpeg(GrabFileName,(int)WindowWidth,(int)WindowHeight,Buffer,100);
-#ifdef KJH_FIX_ARRAY_DELETE
+
 	SAFE_DELETE_ARRAY(Buffer);
-#else // KJH_FIX_ARRAY_DELETE
-	delete Buffer;
-#endif // KJH_FIX_ARRAY_DELETE
 	
 	GrabScreen++;
 	GrabScreen %= 10000;

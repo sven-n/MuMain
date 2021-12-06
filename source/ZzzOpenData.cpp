@@ -279,8 +279,6 @@ void OpenPlayers()
 		gLoadData.AccessModel(MODEL_BOOTS2 +i, "Data\\Player\\", "BootElfC" , i+1);
 	}
 
-#ifdef ADD_SOCKET_ITEM
-
 	for(int i=45 ; i<=53 ; i++)
 	{
 		if( i==47 || i== 48)
@@ -295,7 +293,6 @@ void OpenPlayers()
 		gLoadData.AccessModel(MODEL_GLOVES+i, "Data\\Player\\", "GloveMale", i+1);
 		gLoadData.AccessModel(MODEL_BOOTS+i, "Data\\Player\\", "BootMale", i+1);
 	} // for()
-#endif // ADD_SOCKET_ITEM
 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 
@@ -593,7 +590,6 @@ void OpenPlayerTextures()
 		::LoadBitmap(szFileName, BITMAP_INVEN_PANTS+i);
 	}
 
-#ifdef ADD_SOCKET_ITEM
 	::sprintf(szFileName, "Player\\Item312_Armoritem.tga");
 	::LoadBitmap(szFileName, BITMAP_SKIN_ARMOR_DEVINE);
 	::sprintf(szFileName, "Player\\Item312_Pantitem.tga");
@@ -602,7 +598,6 @@ void OpenPlayerTextures()
 	::LoadBitmap(szFileName, BITMAP_SKIN_ARMOR_SUCCUBUS);
 	::sprintf(szFileName, "Player\\SkinClass706_loweritem.tga");
 	::LoadBitmap(szFileName, BITMAP_SKIN_PANTS_SUCCUBUS);
-#endif // ADD_SOCKET_ITEM
 
 	for (int i = 0; i < MODEL_ITEM_COMMON_NUM; ++i)
 	{
@@ -2438,7 +2433,6 @@ void OpenMonsterModel(int Type)
 		gLoadData.OpenTexture(Index,"Monster\\");
     }
 
-#ifdef ADD_RAKLION_MOB_ICEGIANT
 	switch(Type)
 	{
 	case 147:
@@ -2458,7 +2452,6 @@ void OpenMonsterModel(int Type)
 		}
 		break;
 	}
-#endif // ADD_RAKLION_MOB_ICEGIANT
 
 	b->Actions[MONSTER01_STOP1  ].PlaySpeed = 0.25f;
 	b->Actions[MONSTER01_STOP2  ].PlaySpeed = 0.2f;
@@ -5081,21 +5074,11 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\blood01.tga"      ,BITMAP_BLOOD     ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\blood.tga"        ,BITMAP_BLOOD+1   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\Explotion01.jpg"  ,BITMAP_EXPLOTION ,GL_LINEAR,GL_CLAMP_TO_EDGE);
-#ifdef PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
 	LoadBitmap("Skill\\twlighthik01.jpg"  ,BITMAP_TWLIGHT ,GL_LINEAR,GL_CLAMP_TO_EDGE);
-#endif //PJH_SEASON4_SPRITE_NEW_SKILL_RECOVER
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 	LoadBitmap("Skill\\2line_gost.jpg"  ,BITMAP_2LINE_GHOST ,GL_LINEAR,GL_CLAMP_TO_EDGE);
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
-#ifdef CSK_RAKLION_BOSS
 	LoadBitmap("Effect\\damage01mono.jpg", BITMAP_DAMAGE_01_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_RAKLION_BOSS
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 	LoadBitmap("Effect\\SwordEff_mono.jpg", BITMAP_SWORD_EFFECT_MONO, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 	LoadBitmap("Effect\\flamestani.jpg", BITMAP_FLAMESTANI, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
 
 	LoadBitmap("Effect\\Spark.jpg", BITMAP_SPARK+2, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\firehik02.jpg"  ,BITMAP_FIRE_CURSEDLICH ,GL_LINEAR,GL_CLAMP_TO_EDGE);
@@ -5331,55 +5314,40 @@ void OpenBasicData(HDC hDC)
 	::LoadBitmap("Interface\\op2_volume1.tga", BITMAP_SLIDER+2);
 	::LoadBitmap("Effect\\clouds2.jpg", BITMAP_EVENT_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\pin_lights.jpg", BITMAP_PIN_LIGHT, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#ifdef LDK_ADD_EG_MONSTER_DEASULER
 	LoadBitmap("Monster\\deasuler_cloth.tga", BITMAP_DEASULER_CLOTH, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //LDK_ADD_EG_MONSTER_DEASULER
 
-#ifdef ADD_SOCKET_ITEM
 	LoadBitmap("Item\\soketmagic_stape02.jpg", BITMAP_SOCKETSTAFF, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // ADD_SOCKET_ITEM
-#ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 	LoadBitmap("Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS_FOREIGN, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 
 	rUIMng.RenderTitleSceneUI(hDC, 1, 11);
 
-#ifdef CSK_FREE_TICKET
 	::LoadBitmap("Item\\partCharge1\\entrance_R.jpg", BITMAP_FREETICKET_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_FREE_TICKET
-#ifdef CSK_CHAOS_CARD
 	::LoadBitmap("Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_CHAOS_CARD
 
 	::LoadBitmap("Item\\partCharge1\\monmark01a.jpg", BITMAP_LUCKY_SEAL_EFFECT43, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge1\\monmark02a.jpg", BITMAP_LUCKY_SEAL_EFFECT44, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge1\\monmark03a.jpg", BITMAP_LUCKY_SEAL_EFFECT45, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-#ifdef CSK_LUCKY_CHARM
 	::LoadBitmap("Item\\partCharge1\\bujuck01alpa.jpg", BITMAP_LUCKY_CHARM_EFFECT53, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //CSK_LUCKY_CHARM
-#ifdef CSK_RARE_ITEM
 	::LoadBitmap("Item\\partCharge1\\expensiveitem01_R.jpg", BITMAP_RAREITEM1_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge1\\expensiveitem02a_R.jpg", BITMAP_RAREITEM2_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge1\\expensiveitem02b_R.jpg", BITMAP_RAREITEM3_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge1\\expensiveitem03a_R.jpg", BITMAP_RAREITEM4_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge1\\expensiveitem03b_R.jpg", BITMAP_RAREITEM5_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_RARE_ITEM
+
 	::LoadBitmap("Item\\partCharge3\\alicecard_R.tga", BITMAP_CHARACTERCARD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#ifdef PBG_ADD_CHARACTERCARD
+
 	::LoadBitmap("Item\\Ingameshop\\kacama_R.jpg", BITMAP_CHARACTERCARD_R_MA, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\Ingameshop\\kacada_R.jpg", BITMAP_CHARACTERCARD_R_DA, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //PBG_ADD_CHARACTERCARD
-#ifdef PSW_NEW_CHAOS_CARD
+
 	::LoadBitmap("Item\\partCharge3\\jujug_R.jpg", BITMAP_NEWCHAOSCARD_GOLD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge3\\jujul_R.jpg", BITMAP_NEWCHAOSCARD_RARE_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\partCharge3\\jujum_R.jpg", BITMAP_NEWCHAOSCARD_MINI_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // PSW_NEW_CHAOS_CARD       
-#ifdef CSK_EVENT_CHERRYBLOSSOM
+     
 	::LoadBitmap("Effect\\cherryblossom\\sakuras01.jpg", BITMAP_CHERRYBLOSSOM_EVENT_PETAL, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Effect\\cherryblossom\\sakuras02.jpg", BITMAP_CHERRYBLOSSOM_EVENT_FLOWER, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_EVENT_CHERRYBLOSSOM
+
 	::LoadBitmap("Object39\\k_effect_01.JPG", BITMAP_KANTURU_2ND_EFFECT1, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\deathbeamstone_R.jpg", BITMAP_ITEM_EFFECT_DBSTONE_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	::LoadBitmap("Item\\hellhorn_R.jpg", BITMAP_ITEM_EFFECT_HELLHORN_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -5405,10 +5373,8 @@ void OpenBasicData(HDC hDC)
 	::LoadBitmap("Interface\\Gens_mark_V_new.tga", BITMAP_GENS_MARK_BARNERT);
 #endif	// ASG_ADD_GENS_MARK
 
-#ifdef CSK_ADD_MAP_ICECITY
 	LoadBitmap("Monster\\serufanarm_R.jpg", BITMAP_SERUFAN_ARM_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Monster\\serufanwand_R.jpg", BITMAP_SERUFAN_WAND_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif // CSK_ADD_MAP_ICECITY
 
 	LoadBitmap("npc\\santa.jpg", BITMAP_GOOD_SANTA, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("npc\\santa_baggage.jpg", BITMAP_GOOD_SANTA_BAGGAGE, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -5417,26 +5383,18 @@ void OpenBasicData(HDC hDC)
 		LoadBitmap("Item\\pandabody_R.jpg", BITMAP_PANDABODY_R, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 #endif //PJH_ADD_PANDA_CHANGERING
 
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 		LoadBitmap("Monster\\DGicewalker_body.jpg", BITMAP_DOPPELGANGER_ICEWALKER0, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 		LoadBitmap("Monster\\DGicewalker_R.jpg", BITMAP_DOPPELGANGER_ICEWALKER1, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 		LoadBitmap("Monster\\Snake1.jpg", BITMAP_DOPPELGANGER_SNAKE01, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 
-#ifdef YDG_ADD_DOPPELGANGER_NPC
 		LoadBitmap("NPC\\goldboit.jpg", BITMAP_DOPPELGANGER_GOLDENBOX1, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
 		LoadBitmap("NPC\\goldline.jpg", BITMAP_DOPPELGANGER_GOLDENBOX2, GL_LINEAR, GL_LINEAR);	// OPENGL_ERROR
-#endif	// YDG_ADD_DOPPELGANGER_NPC
 
-#ifdef LDS_ADD_RESOURCE_FLARERED
 	//BITMAP_LIGHT_RED
 	LoadBitmap("effect\\flare01_red.jpg", BITMAP_LIGHT_RED, GL_LINEAR, GL_CLAMP_TO_EDGE );
-#endif // LDS_ADD_RESOURCE_FLARERED
 
-#ifdef KJH_ADD_09SUMMER_EVENT
 	LoadBitmap("effect\\gra.jpg", BITMAP_GRA, GL_LINEAR, GL_CLAMP_TO_EDGE );
 	LoadBitmap("effect\\ring_of_gradation.jpg", BITMAP_RING_OF_GRADATION, GL_LINEAR, GL_CLAMP_TO_EDGE );
-#endif // KJH_ADD_09SUMMER_EVENT
 
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
 	LoadBitmap("Interface\\InGameShop\\ingame_pack_check.tga", BITMAP_IGS_CHECK_BUTTON, GL_LINEAR);

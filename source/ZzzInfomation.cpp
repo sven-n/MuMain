@@ -315,10 +315,9 @@ void OpenGateScript(char *FileName)
 	}
 }
 
-//#ifdef ADD_MONSTER_SKILL
+
 void OpenMonsterSkillScript(char *FileName)
 {
-	// -1값으로 모든값을 초기화
 	memset(MonsterSkill, -1, sizeof(Script_Skill));
 
 	FILE *fp = fopen(FileName, "rb");
@@ -336,13 +335,8 @@ void OpenMonsterSkillScript(char *FileName)
 			int Seek = 0;
 			memcpy(&dummy,Buffer + Seek,sizeof(int));
 			Seek += sizeof(int);
-#ifdef CSK_FIX_MONSTERSKILL
 			memcpy(MonsterSkill[dummy].Skill_Num,Buffer + Seek,sizeof(int)*MAX_MONSTERSKILL_NUM);
 			Seek += (sizeof(int)*MAX_MONSTERSKILL_NUM);
-#else // CSK_FIX_MONSTERSKILL
-			memcpy(MonsterSkill[dummy].Skill_Num,Buffer + Seek,sizeof(int)*5);
-			Seek += (sizeof(int)*5);
-#endif // CSK_FIX_MONSTERSKILL
 			memcpy(&MonsterSkill[dummy].Slot,Buffer + Seek,sizeof(int));
 		}
 		delete [] Buffer;
@@ -357,10 +351,6 @@ void OpenMonsterSkillScript(char *FileName)
 		SendMessage(g_hWnd,WM_DESTROY,0,0);
 	}
 }
-//#endif
-///////////////////////////////////////////////////////////////////////////////
-// skill
-///////////////////////////////////////////////////////////////////////////////
 
 void OpenNpcScript(char *FileName)
 {

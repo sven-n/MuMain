@@ -23,9 +23,7 @@
 #include "CDirection.h"
 #include "MapManager.h"
 #include "./Utilities/Log/muConsoleDebug.h"
-#ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
-#endif // PSW_ADD_MAPSYSTEM
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 #include "CameraMove.h"
 #endif //PJH_NEW_SERVER_SELECT_MAP
@@ -2413,19 +2411,12 @@ void InitTerrainLight()
 	}
 #endif	// ASG_ADD_MAP_KARUTAN
 	yi = FrustrumBoundMinY;
-#ifdef YDG_FIX_INVALID_TERRAIN_LIGHT
-    for(;yi<=min(FrustrumBoundMaxY+3, TERRAIN_SIZE_MASK);yi+=1)
-#else	// YDG_FIX_INVALID_TERRAIN_LIGHT
-    for(;yi<=FrustrumBoundMaxY+3;yi+=1)
-#endif	// YDG_FIX_INVALID_TERRAIN_LIGHT
+
+	for(;yi<=min(FrustrumBoundMaxY+3, TERRAIN_SIZE_MASK);yi+=1)
 	{
 		xi = FrustrumBoundMinX;
 		float xf = (float)xi;
-#ifdef YDG_FIX_INVALID_TERRAIN_LIGHT
 		for(;xi<=min(FrustrumBoundMaxX+3, TERRAIN_SIZE_MASK);xi+=1,xf+=1.f)
-#else	// YDG_FIX_INVALID_TERRAIN_LIGHT
-		for(;xi<=FrustrumBoundMaxX+3;xi+=1,xf+=1.f)
-#endif	// YDG_FIX_INVALID_TERRAIN_LIGHT
         {
 			int Index = TERRAIN_INDEX(xi,yi);
 			if(gMapManager.WorldActive == WD_8TARKAN)
@@ -2439,13 +2430,12 @@ void InitTerrainLight()
 				g_fTerrainGrassWind1[Index] = sinf(WindSpeed1+xf*50.f)*WindScale1;
 			}
 #endif	// ASG_ADD_MAP_KARUTAN
-#ifdef CSK_ADD_MAP_ICECITY	
+
 			else if(gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS)
 			{
 				WindScale = 60.f;
 				TerrainGrassWind[Index] = sinf(WindSpeed+xf*50.f)*WindScale;
 			}
-#endif // CSK_ADD_MAP_ICECITY
 			else
 			{
      			TerrainGrassWind[Index] = sinf(WindSpeed+xf*5.f)*WindScale;

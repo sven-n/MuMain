@@ -8,8 +8,6 @@
 #include "UIControls.h"
 #include "CharacterManager.h"
 
-#ifdef SOCKET_SYSTEM
-
 using namespace SEASON4A;
 
 static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
@@ -524,25 +522,15 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 				case SOPT_ATTACK_N_MAGIC_DAMAGE_BONUS:
 					m_StatusBonus.m_iAttackDamageMinBonus += iBonus;
 					m_StatusBonus.m_iAttackDamageMaxBonus += iBonus;
-#ifdef YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
-					m_StatusBonus.m_iMagicPowerMinBonus += iBonus;
-					m_StatusBonus.m_iMagicPowerMaxBonus += iBonus;
-#endif	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 					break;
 				case SOPT_ATTACK_SPEED_BONUS:
 					m_StatusBonus.m_iAttackSpeedBonus += iBonus;
 					break;
 				case SOPT_ATTACT_N_MAGIC_DAMAGE_MAX_BONUS:
 					m_StatusBonus.m_iAttackDamageMaxBonus += iBonus;
-#ifdef YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
-					m_StatusBonus.m_iMagicPowerMaxBonus += iBonus;
-#endif	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 					break;
 				case SOPT_ATTACK_N_MAGIC_DAMAGE_MIN_BONUS:
 					m_StatusBonus.m_iAttackDamageMinBonus += iBonus;
-#ifdef YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
-					m_StatusBonus.m_iMagicPowerMinBonus += iBonus;
-#endif	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 					break;
 				case SOPT_DEFENCE_RATE_BONUS:
 					m_StatusBonus.m_fDefenceRateBonus *= 1.0f + iBonus * 0.01f;
@@ -553,38 +541,12 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 				case SOPT_SHIELD_DEFENCE_BONUS:
 					m_StatusBonus.m_iShieldDefenceBonus += iBonus;
 					break;
-// 				case SOPT_DECREASE_DAMAGE:
-// 				case SOPT_REFLECT_DAMAGE:
-
-// 				case SOPT_MONSTER_DEATH_LIFE_BONUS:
-// 				case SOPT_MONSTER_DEATH_MANA_BONUS:
-#ifdef YDG_FIX_SOCKET_BALANCE_PATCH
 				case SOPT_SKILL_DAMAGE_BONUS:
 					m_StatusBonus.m_iSkillAttackDamageBonus += iBonus;
 					break;
 				case SOPT_ATTACK_RATE_BONUS:
 					m_StatusBonus.m_iAttackRateBonus += iBonus;
 					break;
-// 				case SOPT_INCREASE_ITEM_DURABILITY:
-#endif	// YDG_FIX_SOCKET_BALANCE_PATCH
-// 				case SOPT_SD_USE_RATE_BONUS:
-// 				case SOPT_IGNORE_SD_RATE_BONUS:
-
-// 				case SOPT_LIFE_REGENERATION_BONUS:
-// 				case SOPT_MAX_LIFE_BONUS:
-// 				case SOPT_MAX_MANA_BONUS:
-// 				case SOPT_MANA_REGENERATION_BONUS:
-// 				case SOPT_MAX_AG_BONUS:
-// 				case SOPT_AG_REGENERATION_BONUS:
-#ifdef YDG_FIX_SOCKET_BALANCE_PATCH
-// 				case SOPT_MONSTER_DEATH_ZEN_BONUS:
-#endif	// YDG_FIX_SOCKET_BALANCE_PATCH
-
-// 				case SOPT_EXCELLENT_DAMAGE_BONUS:
-// 				case SOPT_EXCELLENT_DAMAGE_RATE_BONUS:
-// 				case SOPT_CRITICAL_DAMAGE_BONUS:
-// 				case SOPT_CRITICAL_DAMAGE_RATE_BONUS:
-
 				case SOPT_STRENGTH_BONUS:
 					m_StatusBonus.m_iStrengthBonus += iBonus;
 					break;
@@ -597,8 +559,6 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 				case SOPT_ENERGY_BONUS:	
 					m_StatusBonus.m_iEnergyBonus += iBonus;
 					break;
-// 				case SOPT_REQUIRED_STENGTH_BONUS:
-// 				case SOPT_REQUIRED_DEXTERITY_BONUS:
 				}
 			}
 		}
@@ -620,18 +580,11 @@ void CSocketItemMgr::CalcSocketStatusBonus()
 				break;
 			case SBOPT_MAGIC_POWER_BONUS:
 				m_StatusBonus.m_iAttackDamageMinBonus += iBonus;
-				m_StatusBonus.m_iAttackDamageMaxBonus += iBonus;
-#ifdef YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
-				m_StatusBonus.m_iMagicPowerMinBonus += iBonus;
-				m_StatusBonus.m_iMagicPowerMaxBonus += iBonus;
-#else	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 				m_StatusBonus.m_iMagicPowerBonus += iBonus;
-#endif	// YDG_FIX_SOCKET_MISSING_MAGIC_POWER_BONUS
 				break;
 			case SBOPT_DEFENCE_BONUS:
 				m_StatusBonus.m_iDefenceBonus += iBonus;
 				break;
-//			case SBOPT_MAX_LIFE_BONUS:
 			}
 		}
 	}
@@ -660,15 +613,6 @@ void CSocketItemMgr::OpenSocketItemScript(const unicode::t_char * szFileName)
 		}
 	}
 
-#ifndef YDG_FIX_SCRIPT_LEVEL_VALUE
-	iSize = sizeof(float);
-	for (int i = 0; i < MAX_SPHERE_LEVEL; ++i)
-	{
-		fread(&m_fSphereValues[i], iSize, 1, fp);
-		BuxConvert((BYTE*)&m_fSphereValues[i], iSize);
-	}
-#endif	// YDG_FIX_SCRIPT_LEVEL_VALUE
-	
 	fclose(fp); 
 
 	for (int i = 0; i < MAX_SOCKET_OPTION; ++i)
@@ -678,5 +622,3 @@ void CSocketItemMgr::OpenSocketItemScript(const unicode::t_char * szFileName)
 		if (pbySetTest[0] + pbySetTest[1] + pbySetTest[2] + pbySetTest[3] + pbySetTest[4] + pbySetTest[5] == 0) break;
 	}
 }
-
-#endif	// SOCKET_SYSTEM

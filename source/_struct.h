@@ -15,9 +15,7 @@ namespace SEASON3B
 	class CNewUIItemMng;
 }
 
-#ifdef CSK_FIX_MONSTERSKILL
 #define MAX_MONSTERSKILL_NUM	10
-#endif // CSK_FIX_MONSTERSKILL
 
 namespace info
 {

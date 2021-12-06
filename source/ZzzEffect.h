@@ -15,17 +15,11 @@ void MoveBlurs();
 void RenderBlurs();
 void ClearAllObjectBlurs();
 
-#ifdef LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 void CreateObjectBlur(OBJECT *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bool Short=false,int SubType = 0,int iLimitLifeTime = -1);
-#else // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
-void CreateObjectBlur(OBJECT *Owner,vec3_t p1,vec3_t p2,vec3_t Light,int Type,bool Short=false,int SubType = 0);
-#endif // LDS_MOD_EFFECTBLURSPARK_FORCEOFSWORD
 
 void MoveObjectBlurs();
 void RenderObjectBlurs();
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 void RemoveObjectBlurs(OBJECT *Owner,int SubType = 0);
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
 void CreateSpark(int Type,CHARACTER *tc,vec3_t Position,vec3_t Angle);
 void CreateBlood(OBJECT *o);
 
@@ -98,9 +92,7 @@ void CreateArrows(CHARACTER *c,OBJECT *o,OBJECT *to,WORD SkillIndex=0,WORD Skill
 
 void DeleteEffect( int efftype );
 
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 void EffectDestructor(OBJECT *o);
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
 
 #ifdef LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
 void TerminateOwnerEffectObject( int iOwnerObjectType = -1 );

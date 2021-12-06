@@ -38,14 +38,12 @@ void CMixItem::Reset()
 	m_bIsWing = FALSE;
 	m_bIsUpgradedWing = FALSE;
 	m_bIs3rdUpgradedWing = FALSE;
-#ifdef ADD_SOCKET_MIX
 	m_bySocketCount = 0;
 	for (int i = 0; i < MAX_SOCKETS; ++i)
 	{
 		m_bySocketSeedID[i] = SOCKET_EMPTY;
 		m_bySocketSphereLv[i] = 0;
 	}
-#endif	// ADD_SOCKET_MIX
 	m_bCanStack = FALSE;
 	m_dwMixValue = 0;
 	m_iCount = 0;
@@ -375,10 +373,8 @@ BOOL CMixRecipes::CheckRecipeSub(std::vector<MIX_RECIPE *>::iterator iter, int i
 		{
 			if (CheckItem((*iter)->m_MixSources[j], pMixItems[i]) && pMixItems[i].m_iTestCount > 0 &&
 				(*iter)->m_MixSources[j].m_iCountMax >= iMixRecipeTest[j] + pMixItems[i].m_iTestCount
-#ifdef YDG_FIX_SOCKET_ATTACH_CONDITION
 				&& !((*iter)->m_bMixOption == 'H' && IsSourceOfAttachSeedSphereToArmor(pMixItems[i]))
 				&& !((*iter)->m_bMixOption == 'I' && IsSourceOfAttachSeedSphereToWeapon(pMixItems[i]))
-#endif	// YDG_FIX_SOCKET_ATTACH_CONDITION
 				)
 			{
 				if (pMixItems[i].m_iTestCount >= (*iter)->m_MixSources[j].m_iCountMax)
@@ -527,9 +523,7 @@ bool CMixRecipes::CheckItem(MIX_RECIPE_ITEM & rItem, CMixItem & rSource)
 		(rItem.m_dwSpecialItem & RCP_SP_ADD380ITEM) <= (rSource.m_dwSpecialItem & RCP_SP_ADD380ITEM) &&
 		(rItem.m_dwSpecialItem & RCP_SP_SETITEM) <= (rSource.m_dwSpecialItem & RCP_SP_SETITEM)
 		&& (rItem.m_dwSpecialItem & RCP_SP_HARMONY) <= (rSource.m_dwSpecialItem & RCP_SP_HARMONY)
-#ifdef ADD_SOCKET_MIX
 		&& (rItem.m_dwSpecialItem & RCP_SP_SOCKETITEM) <= (rSource.m_dwSpecialItem & RCP_SP_SOCKETITEM)
-#endif	// ADD_SOCKET_MIX
 		)
 	{
 		return true;
@@ -1073,7 +1067,6 @@ BOOL CMixRecipes::IsSourceOfRefiningStone(CMixItem & rSource)
 	return TRUE;
 }
 
-#ifdef YDG_FIX_SOCKET_ATTACH_CONDITION
 BOOL CMixRecipes::IsSourceOfAttachSeedSphereToWeapon(CMixItem & rSource)
 {
 	if (rSource.m_sType >= ITEM_WING+100 && rSource.m_sType <= ITEM_WING+129)
@@ -1094,7 +1087,6 @@ BOOL CMixRecipes::IsSourceOfAttachSeedSphereToArmor(CMixItem & rSource)
 	}
 	return FALSE;
 }
-#endif	// YDG_FIX_SOCKET_ATTACH_CONDITION
 
 BOOL CMixRecipes::IsCharmItem(CMixItem & rSource)
 {
@@ -1138,8 +1130,6 @@ void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char * szFileName)
 	iSize = sizeof(MIX_RECIPE);
 	for (j = 0; j < MAX_MIX_TYPES; ++j)
 	{
-#ifdef SOCKET_SYSTEM
-
 		if (feof(fp) || iNumMixRecipes[j] > 1000)
 		{
 			unicode::t_char Text[256];
@@ -1150,7 +1140,6 @@ void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char * szFileName)
 			fclose(fp);
 			exit(0);
 		}
-#endif	// SOCKET_SYSTEM
 		for (i = 0; i < iNumMixRecipes[j]; ++i)
 		{
 			MIX_RECIPE * pMixRecipe = new MIX_RECIPE;
@@ -1186,13 +1175,10 @@ int CMixRecipeMgr::GetMixInventoryEquipmentIndex()
 		return REQUEST_EQUIPMENT_JERRIDON_MIX;
 	case SEASON3A::MIXTYPE_ELPIS:
 		return REQUEST_EQUIPMENT_ELPIS_MIX;
-#ifdef ADD_GLOBAL_MIX_MAR08
 	case SEASON3A::MIXTYPE_CHAOS_CARD:
 		return REQUEST_EQUIPMENT_CHAOS_CARD_MIX;
 	case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
 		return REQUEST_EQUIPMENT_CHERRYBLOSSOM_MIX;
-#endif //ADD_GLOBAL_MIX_MAR08
-#ifdef ADD_SOCKET_MIX
 	case SEASON3A::MIXTYPE_EXTRACT_SEED:
 		return REQUEST_EQUIPMENT_EXTRACT_SEED_MIX;
 	case SEASON3A::MIXTYPE_SEED_SPHERE:
@@ -1201,9 +1187,8 @@ int CMixRecipeMgr::GetMixInventoryEquipmentIndex()
 		return REQUEST_EQUIPMENT_ATTACH_SOCKET_MIX;
 	case SEASON3A::MIXTYPE_DETACH_SOCKET:
 		return REQUEST_EQUIPMENT_DETACH_SOCKET_MIX;
-#endif	// ADD_SOCKET_MIX
 	default:
-		assert(!"정의되지 않은 조합 창");
+		assert(!"Mix error");
 		return REQUEST_EQUIPMENT_CHAOS_MIX;
 	}
 }
@@ -1227,7 +1212,6 @@ void CMixRecipeMgr::CheckMixInventory()
 	CheckRecipeSimilarity(m_MixItemInventory.GetNumMixItems(), m_MixItemInventory.GetMixItems());
 }
 
-#ifdef ADD_SOCKET_MIX
 int CMixRecipeMgr::GetSeedSphereID(int iOrder)
 {
 	int iCurrOrder = 0;
@@ -1248,4 +1232,3 @@ int CMixRecipeMgr::GetSeedSphereID(int iOrder)
 	}
 	return SOCKET_EMPTY;
 }
-#endif	// ADD_SOCKET_MIX

@@ -2,9 +2,6 @@
 // GM_Raklion.cpp: implementation of the CGM_Raklion class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-
-#ifdef CSK_ADD_MAP_ICECITY
-
 #include "GM_Raklion.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -12,9 +9,7 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "ZzzOpenData.h"
-#ifdef PJH_GIANT_MAMUD	//cpjh
 #include "BoneManager.h"
-#endif //#ifdef PJH_GIANT_MAMUD
 #include "ZzzLodTerrain.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "w_MapHeaders.h"
@@ -98,7 +93,6 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 	CHARACTER* pCharacter = NULL;
 	switch (iType)
 	{
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case 454:
 		OpenMonsterModel(145);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+145, PosX, PosY);
@@ -108,9 +102,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 
-#ifdef PJH_GIANT_MAMUD	//cpjh
 	case 455:
 		OpenMonsterModel(146);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+146, PosX, PosY);
@@ -125,9 +117,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_SPAIN_2",4 );
 		BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_SPAIN_3", 5);
 		break;
-#endif //PJH_GIANT_MAMUD
 
-#ifdef ADD_RAKLION_MOB_ICEGIANT
 	case 456:
 		OpenMonsterModel(147);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+147, PosX, PosY);
@@ -137,9 +127,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		pCharacter->Weapon[1].Type = -1;
 		pCharacter->Object.LifeTime = 100;
 		break;
-#endif	// ADD_RAKLION_MOB_ICEGIANT
 
-#ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN	
 	case 457:
 		OpenMonsterModel(148);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+148, PosX, PosY);
@@ -148,9 +136,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
 
-#ifdef ADD_RAKLION_IRON_KNIGHT
 	case 458:
 		OpenMonsterModel(149);
 		pCharacter = CreateCharacter(Key, MODEL_MONSTER01+149, PosX, PosY);
@@ -159,7 +145,6 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-#endif	// ADD_RAKLION_IRON_KNIGHT
 
 	case 459:
 		{
@@ -214,7 +199,6 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 		}
 		break;
 
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
 	case 562:
 		{
 			OpenMonsterModel(205);
@@ -267,7 +251,6 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 			pCharacter->Weapon[1].Type = -1;			
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
 	}
 
 	return pCharacter;
@@ -307,7 +290,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
 	switch(o->Type)
 	{
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER	
 	case MODEL_MONSTER01+145:
 		{			
 			switch( o->CurrentAction )
@@ -370,8 +352,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 			} // switch( o->CurrentAction )	
 		}
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-#ifdef PJH_GIANT_MAMUD
 	case MODEL_MONSTER01+146:
 		{
 			float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
@@ -434,13 +414,11 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 			*/
 		}
 		break;
-#endif //PJH_GIANT_MAMUD
 	case MODEL_MONSTER01+147:
 		{
 
 		}
 		break;
-#ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
 	case MODEL_MONSTER01+148:
 		{
 			if( o->AnimationFrame >= 1.7f && o->AnimationFrame <= 2.0f )
@@ -532,14 +510,11 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
-#ifdef ADD_RAKLION_IRON_KNIGHT
 	case MODEL_MONSTER01+149:
 		{
 			
 		}
 		break;
-#endif	// ADD_RAKLION_IRON_KNIGHT
 	case MODEL_MONSTER01+150:
 		{
 			if(o->CurrentAction == MONSTER01_ATTACK1)
@@ -832,7 +807,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 			}
 		}
 		break;	
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
 		case MODEL_MONSTER01+205:
 			{
 				float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
@@ -996,7 +970,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
 			}
 			break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
 	}
 
 	return false;
@@ -1008,18 +981,15 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
 	switch(o->Type)
 	{
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case MODEL_MONSTER01+145:
 		{
 		}
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case MODEL_MONSTER01+146:
 		{
 		}
 		break;
 	case MODEL_MONSTER01+147:
-#ifdef ADD_RAKLION_MOB_ICEGIANT
 		{
 			float Start_Frame = 3.f;
 			float End_Frame = 8.0f;
@@ -1050,22 +1020,18 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 				}
 			}
 		}
-#endif	// ADD_RAKLION_MOB_ICEGIANT	
 		break;
-#ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN	
 	case MODEL_MONSTER01+148:
 		{
 			
 		}
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
-#ifdef ADD_RAKLION_IRON_KNIGHT
 		case MODEL_MONSTER01+149:
 		{
 			// RenderMonsterVisual()
 		}
 		break;
-#endif	// ADD_RAKLION_IRON_KNIGHT
+
 	case MODEL_MONSTER01+150:
 		{
 			// RenderMonsterVisual() 
@@ -1078,7 +1044,7 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			
 		}
 		break;	
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
+
 	case MODEL_MONSTER01+205:
 		{
 			
@@ -1126,7 +1092,7 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
+
 	}
 }
 
@@ -1482,7 +1448,6 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
 	switch(o->Type)
 	{
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case MODEL_MONSTER01+145:
 		{
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1491,8 +1456,6 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			return true;
 		}
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-#ifdef PJH_GIANT_MAMUD
 	case MODEL_MONSTER01+146:
 		{
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1506,11 +1469,8 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			return true;
 		}
 		break;
-		
-#endif // PJH_GIANT_MAMUD	
-
-#ifdef ADD_RAKLION_MOB_ICEGIANT	
-	case MODEL_MONSTER01+147:	// 아이스 자이언트
+	
+	case MODEL_MONSTER01+147:
 		if (o->CurrentAction != MONSTER01_DIE)
 		{
 			Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
@@ -1526,9 +1486,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			return true;
 		}
 		break;
-#endif	// ADD_RAKLION_MOB_ICEGIANT
 
-#ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
 	case MODEL_MONSTER01+148:
 		{
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1537,9 +1495,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			return true;
 		}
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
 
-#ifdef ADD_RAKLION_IRON_KNIGHT
 	case MODEL_MONSTER01+149:
 		if (o->CurrentAction == MONSTER01_DIE)
 		{
@@ -1557,7 +1513,6 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
 		return true;
 
-#endif	// ADD_RAKLION_IRON_KNIGHT
 	case MODEL_MONSTER01+150:
 		{
 			b->RenderMesh(0, RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1706,7 +1661,6 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			return true;
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
 	case MODEL_MONSTER01+205:
 		{
 			b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1758,8 +1712,6 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 			return true;
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
-
 	}
 
 	return false;
@@ -1824,20 +1776,17 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 	switch(o->Type)
 	{
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case MODEL_MONSTER01+145:
 		{
 
 		}
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case MODEL_MONSTER01+146:
 		{
 			
 		}
 		break;
 	case MODEL_MONSTER01+147:
-#ifdef ADD_RAKLION_MOB_ICEGIANT
 		if (o->CurrentAction == MONSTER01_ATTACK2 && o->AnimationFrame > 7.4f && o->AnimationFrame < 7.7f)
 		{
 			CreateInferno(o->Position, 5);
@@ -1873,16 +1822,12 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			b->TransformByObjectBone(vPos, o, 45);
 			CreateEffect(MODEL_ICE_GIANT_PART6,vPos,o->Angle,vLight,0,o,0,0);
 		}
-#endif	// ADD_RAKLION_MOB_ICEGIANT
 		break;
-#ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
-	case MODEL_MONSTER01+148:	// 쿨러틴
+	case MODEL_MONSTER01+148:
 		{
 			
 		}
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
-#ifdef ADD_RAKLION_IRON_KNIGHT
 	case MODEL_MONSTER01+149:
 		{
 			vec3_t  Light;
@@ -2010,7 +1955,6 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-#endif	// ADD_RAKLION_IRON_KNIGHT
 	case MODEL_MONSTER01+150:
 		{
 			vec3_t  Light;
@@ -2095,7 +2039,6 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			return true;
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
 	case MODEL_MONSTER01+205:
 		{
 
@@ -2272,7 +2215,6 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
 	}
 
 	return true;
@@ -2338,12 +2280,10 @@ bool IsIceCity()
 	{
 		return true;
 	}
-#ifdef YDG_ADD_MAP_DOPPELGANGER1
 	else if(gMapManager.WorldActive == WD_65DOPPLEGANGER1)
 	{
 		return true;
 	}
-#endif	// YDG_ADD_MAP_DOPPELGANGER1
 		
 	return false;
 }
@@ -2356,7 +2296,6 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 	
 	switch(c->MonsterIndex) 
 	{
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case 454:
 		{
 			if (c->MonsterSkill == 29)
@@ -2371,7 +2310,6 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case 455:
 		{
 			if (c->MonsterSkill == 30)
@@ -2386,7 +2324,6 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-#ifdef ADD_RAKLION_MOB_ICEGIANT
 	case 456:
 		{
 			if (c->MonsterSkill == 31)
@@ -2401,8 +2338,6 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-#endif	// ADD_RAKLION_MOB_ICEGIANT
-#ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
 	case 457:
 		{
 			if (c->MonsterSkill == 32)
@@ -2416,7 +2351,6 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			}
 			return true;
 		}
-#endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
 	case 458:
 		{
 			if (c->MonsterSkill == 33)
@@ -2444,7 +2378,6 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return false;
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
 	case 562:
 		{
 			if (c->MonsterSkill == ATMON_SKILL_EX_DARKMEMUD_ATTACKSKILL)
@@ -2505,7 +2438,6 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 			return true;
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
 	}
 	
 	return false;
@@ -2624,7 +2556,6 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 
 	switch(o->Type)
 	{
-#ifdef LDS_RAKLION_ADDMONSTER_ICEWALKER
 	case MODEL_MONSTER01+145:		// Ice Walker
 		if( MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 		{
@@ -2644,8 +2575,6 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 			}
 		}
 		return true;
-#endif // LDS_RAKLION_ADDMONSTER_ICEWALKER
-#ifdef PJH_GIANT_MAMUD
 		case MODEL_MONSTER01+146:
 		if( MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 		{
@@ -2665,8 +2594,6 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_DEATH);
 		}
 		return true;
-#endif //#ifdef PJH_GIANT_MAMUD
-#ifdef ADD_RAKLION_MOB_ICEGIANT
 	case MODEL_MONSTER01+147:
 		if (o->CurrentAction == MONSTER01_WALK)
 		{
@@ -2680,8 +2607,6 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_RAKLION_ICEGIANT_DEATH);
 		}
 		return true;
-#endif	// ADD_RAKLION_MOB_ICEGIANT
-#ifdef LDS_RAKLION_ADDMONSTER_COOLERTIN
 	case MODEL_MONSTER01+148:
 		if( MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 		{
@@ -2702,10 +2627,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 		}
 
 		return true;
-#endif // LDS_RAKLION_ADDMONSTER_COOLERTIN
-
-#ifdef ADD_RAKLION_IRON_KNIGHT
-	case MODEL_MONSTER01+149:	// 아이언 나이트
+	case MODEL_MONSTER01+149:
 		if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
 		{
 			PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_ATTACK);
@@ -2719,7 +2641,6 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_MONSTER+154);
 		}
 		return true;
-#endif	// ADD_RAKLION_IRON_KNIGHT
 
 	case MODEL_MONSTER01+150:
 		if(o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -2735,8 +2656,8 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 			PlayBuffer(SOUND_RAKLION_SERUFAN_WORD2);
 		}
 		return true;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_RAKLION
-		case MODEL_MONSTER01+205:
+
+	case MODEL_MONSTER01+205:
 			if( MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
 			{
 				PlayBuffer( SOUND_RAKLION_GIANT_MAMUD_ATTACK );
@@ -2800,7 +2721,6 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 			}
 			
 		return true;
-#endif // LDS_EXTENSIONMAP_MONSTERS_RAKLION
 	}
 
 	return false; 
@@ -3028,5 +2948,3 @@ void CGM_Raklion::PlayBGM()
 		StopMp3(g_lpszMp3[MUSIC_RAKLION_BOSS]);
 	}
 }
-
-#endif // CSK_ADD_MAP_ICECITY

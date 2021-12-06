@@ -296,7 +296,6 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 			iDecNeedDex      = SC.SI_NB.SI_activity;
 		}
 	}
-#ifdef ADD_SOCKET_STATUS_BONUS
 	if (pItem->SocketCount > 0)
 	{
 		for (int i = 0; i < pItem->SocketCount; ++i)
@@ -313,7 +312,6 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 			}
 		}
 	}
-#endif	// ADD_SOCKET_STATUS_BONUS
 
 	if ( pItem->RequireStrength - iDecNeedStrength > wStrength )
 		return false;
@@ -2022,14 +2020,12 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					
 						bReadBookGem = false;
 				}
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 				if(pItem->Type == ITEM_WING+48)
 				{
 					int Level = CharacterAttribute->Level;
 					if( Level<220 )
 						bReadBookGem = false;
 				}
-#endif //#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 				if ( bReadBookGem )
 				{
 					

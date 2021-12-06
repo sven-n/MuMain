@@ -126,7 +126,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 #endif //PJH_NEW_SERVER_SELECT_MAP
 					o->Position[2] -= 100.f;
 				}
-#ifdef YDG_ADD_DOPPELGANGER_PORTAL
 				else if(o->SubType == 6)
 				{
 					o->Gravity = (float)(rand()%20+80)*0.1f;
@@ -143,7 +142,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 
 					o->Position[2] -= 100.f;
 				}
-#endif	// YDG_ADD_DOPPELGANGER_PORTAL
 				break;
 
 			case BITMAP_FLOWER01:
@@ -387,7 +385,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 			case BITMAP_FIRE:
 			case BITMAP_FIRE+2:
             case BITMAP_FIRE+3:
-#ifdef KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
 				{
 					switch( o->SubType )
 					{
@@ -502,72 +499,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					}
 				}
 				break;
-#else // KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
-				o->LifeTime = 24;
-				Vector(0.f,-(float)(rand()%16+32)*0.1f,0.f,o->Velocity);
-				if ( o->SubType==0 )
-				{
-          			o->Scale = (float)(rand()%64+128)*0.01f;
-				}
-				else if(o->SubType==1)
-				{
-          			o->Scale = (float)(rand()%4+10)*0.01f;
-				}
-				else if ( o->SubType==5 )
-				{
-          			o->Scale = Scale*(float)(rand()%64+128)*0.01f;
-				}
-                else if ( o->SubType==7 )
-                {
-				    Vector(0.f,-(float)(rand()%32-16)*0.1f,0.f,o->Velocity);
-                    o->Scale = (float)(rand()%64+128)*0.008f+Scale;
-                }
-                else if ( o->SubType==9 )
-                {
-                    int range = rand()%60-30;
-                    o->StartPosition[0] = (float)range;
-                    o->StartPosition[1] = (float)range;
-                    o->StartPosition[2] = 190.f - abs( range )*1.5f;
-                }
-				else if ( o->SubType==10)
-				{	// 지정한 크기 적용
-				}
-                else if ( o->SubType==11 )
-                {
-					o->LifeTime = 24;
-				    Vector(0.f,-(float)(rand()%32-16)*0.1f,0.f,o->Velocity);
-                    o->Scale = (float)(rand()%64+128)*0.008f+Scale;
-                }
-				else if ( o->SubType==12 )
-				{
-                    o->Rotation = (float)(rand()%360);
-          			o->Scale = Scale*(float)(rand()%16+150)*0.012f;
-				}
-				else if ( o->SubType==13 )
-				{
-				    o->LifeTime = 20;
-				    Vector(0.f,0.f,(float)(rand()%128+128)*0.15f,o->Velocity);
-                    o->Rotation = (float)(rand()%360);
-          			o->Scale = (float)(rand()%16+150)*0.012f;
-				}
-				else if(o->SubType == 14)
-				{
-					o->LifeTime = 24;
-					o->Scale = 1.5f;
-					o->TexType = BITMAP_CLUD64;
-					Vector(0.f,0.0f,0.f,o->Velocity);
-				//	o->Gravity = (float)(rand()%60 - 30)/10.0f;
-				}
-				else if(o->SubType == 15)
-				{
-					o->LifeTime = 10;
-					o->Scale = (float)(rand()%64+128)*0.01f;
-					o->TexType = BITMAP_CLUD64;
-					Vector(0.f,0.0f,0.f,o->Velocity);
-				}
-				o->Rotation = (float)(rand()%360);
-				break;
-#endif // KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
 			case BITMAP_FIRE+1:
 				if(o->SubType==1)
 				{
@@ -753,7 +684,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Velocity[1] = (float)(rand()%10-5)*0.4f;
 					o->Velocity[2] = (float)(rand()%10+5)*0.2f;
 					break;
-#ifdef CSK_RAKLION_BOSS
 				case 11:
 					o->LifeTime = 20;
 					o->Rotation = (float)(rand()%360);
@@ -761,14 +691,11 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0.f,0.f,(float)(rand()%128+128)*0.15f,o->Velocity);
         		    o->Scale = Scale*(float)(rand()%64+64)*0.01f;
 					break;
-#endif // CSK_RAKLION_BOSS
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
                 case 12:
 					o->LifeTime = 10;
 					Vector(0.f,0.f,(float)(rand()%128+128)*0.15f,o->Velocity);
 					o->Scale = Scale*(float)(rand()%64+64)*0.01f;
                     break;
-#endif //LDS_ADD_EMPIRE_GUARDIAN
 				}
 				break;
 			case BITMAP_FIRE_RED:
@@ -1223,19 +1150,15 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				switch(SubType)
 				{
 				case 0:
-#ifdef PBG_ADD_PKFIELD
 				case 61:
-#endif //PBG_ADD_PKFIELD
 				case 4:
                 case 9://
 				case 23:
       				o->LifeTime = 16;
-#ifdef PBG_ADD_PKFIELD
 					if(o->Type == MODEL_MONSTER01+159)
 						o->Scale = (float)(rand()%3+28)*0.01f;
 					else
 						o->Scale = (float)(rand()%32+48)*0.01f;
-#endif //PBG_ADD_PKFIELD
       				o->Angle[0] = (float)(rand()%360);
                     o->Rotation = (float)((int)WorldTime%360);
 					break;
@@ -1350,12 +1273,8 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
       				o->Angle[0] = (float)(rand()%360);
                     o->Rotation = (float)((int)WorldTime%360);
                     break;
-#ifdef PJH_GIANT_MAMUD
 				case 53:
-#endif //#ifdef PJH_GIANT_MAMUD
-#ifdef ASG_ADD_SUMMON_RARGLE
 				case 56:
-#endif	// ASG_ADD_SUMMON_RARGLE
 				case 1:
      				o->LifeTime = 50;
      				o->Scale = (float)(rand()%32+80)*0.01f;
@@ -1435,9 +1354,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Gravity = (float)(rand()%32+60)*0.1f;
 					break;
 				case 24:
-#ifdef ASG_ADD_SUMMON_RARGLE
 				case 57:
-#endif	// ASG_ADD_SUMMON_RARGLE
       				o->LifeTime = 32;
      				o->Scale = Scale+(float)(rand()%32+48)*0.01f*Scale;
       				o->Angle[0] = (float)(rand()%360);
@@ -1563,9 +1480,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Rotation = (float)(rand()%360);
 					}
 					break;
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 				case 59:
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 				case 48:
       				o->LifeTime = 40;
      				o->Scale = (float)(rand()%64+64)*0.01f;
@@ -1600,7 +1515,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Gravity = (float)(rand()%32+60)*0.1f;
 					VectorCopy(Light, o->TurningForce);
 					break;
-#ifdef CSK_RAKLION_BOSS
 				case 52:
 					{
 						o->LifeTime = 40;
@@ -1616,8 +1530,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						VectorCopy(vPos2, o->Velocity);	
 					}
 					break;
-#endif // CSK_RAKLION_BOSS
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 				case 54:
 					{
 						//o->TexType = BITMAP_CLOUD;
@@ -1627,8 +1539,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Gravity = (float)(rand()%30+50)*0.05f;
 					}
 					break;
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 				case 55:
 					{
 						o->LifeTime = 30;
@@ -1637,8 +1547,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Rotation = (float)((int)WorldTime%360);	
 					}
 					break;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
 				case 58:
      				o->LifeTime = 50;
      				o->Scale = (float)(rand()%32+80)*0.01f;
@@ -1650,8 +1558,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
      				Vector(0.f,-(float)(rand()%8+40),0.f,o->Velocity);
 					VectorCopy(o->Light, o->StartPosition);
 					break;
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
-#if defined PBG_ADD_PKFIELD || defined LDS_ADD_EMPIRE_GUARDIAN
 				case 60:
 					{
 						Vector(0.4f, 0.4f, 0.4f, o->Light);
@@ -1661,8 +1567,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Gravity = (float)(rand()%32+60)*0.1f;
 					}
 					break;
-#endif //defined PBG_ADD_PKFIELD || defined LDS_ADD_EMPIRE_GUARDIAN
-#ifdef PBG_ADD_PKFIELD
 				case 62:
 					{
 						o->LifeTime = 50;
@@ -1676,8 +1580,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
      					Vector(0.f,-(float)(rand()%8),0.f,o->Velocity);
 					}
 					break;
-#endif //PBG_ADD_PKFIELD
-#ifdef PBG_ADD_PKFIELD
 				case 63:
 					{
 						o->TexType = BITMAP_CLUD64;
@@ -1687,8 +1589,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						Vector(0.0f, 30.0f, 15.0f, o->Velocity);
 					}
 					break;
-#endif //PBG_ADD_PKFIELD
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN4_MAPEFFECT
 				case 64:
 					{
 						o->LifeTime = 30;
@@ -1713,8 +1613,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Gravity = (float)(rand()%10+18)*0.1f;
 					}
 					break;
-#endif // LDS_ADD_MAP_EMPIREGUARDIAN4_MAPEFFECT
-#ifdef YDG_ADD_DOPPELGANGER_NPC
 				case 66:
 					{
 						//o->TexType = BITMAP_CLOUD;
@@ -1727,8 +1625,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->TurningForce[1] = cosf(iAngle/3.14f*180);
 					}
 					break;
-#endif	// YDG_ADD_DOPPELGANGER_NPC
-#ifdef LDK_ADD_CS7_UNICORN_PET
 				case 67:
 					{
 						o->LifeTime = 45;
@@ -1737,8 +1633,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Gravity = (float)(rand()%32+60)*0.1f;
 					}
 					break;
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef LDS_ADD_EFFECT_UNITEDMARKETPLACE
 				case 68:
 					{
 						o->LifeTime = 45;
@@ -1759,7 +1653,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						o->Velocity[2] = v3Dir[2] * 0.6f;
 					}
 					break;
-#endif // LDS_ADD_EFFECT_UNITEDMARKETPLACE
 #ifdef ASG_ADD_MAP_KARUTAN
 				case 69:
 					o->LifeTime = 60;
@@ -1808,14 +1701,12 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0.f, 0.0f, 0.0f,	o->Velocity);
 					o->Position[2] += (float)(rand()%16-8);
 				}
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 				else if(SubType == 6)
 				{
 					o->LifeTime = 40;
 					Vector(0.f, 0.0f, 0.0f,	o->Velocity);
 					o->Position[2] += (float)(rand()%16-8);
 				}
-#endif //LDS_ADD_EMPIRE_GUARDIAN
 				break;
 			case BITMAP_SMOKE+2:
 				o->LifeTime = 50;
@@ -1885,13 +1776,11 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 					)
 				{
-#ifdef PBG_ADD_PKFIELD
 					if(gMapManager.WorldActive == WD_63PK_FIELD)
 					{
 						o->LifeTime = 25;
 					}
 					else
-#endif //PBG_ADD_PKFIELD
 					{
 						o->LifeTime = 35;
 					}
@@ -1919,7 +1808,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0, 0, 0, o->Light);
 					VectorCopy(o->Target->Position, o->StartPosition);
 				}
-#ifdef ADD_RAKLION_IRON_KNIGHT
 				else if ( (o->SubType == 2) || (o->SubType == 3) )
 				{
       				o->LifeTime = 45;
@@ -1930,8 +1818,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#endif	// ADD_RAKLION_IRON_KNIGHT
-#ifdef LDK_ADD_CS7_UNICORN_PET
 				else if( o->SubType == 4 )
 				{
 					o->Position[0] += (float)(rand()%20-10)*2.f;
@@ -1945,7 +1831,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Gravity = 0.2f;
 					o->Rotation = (float)(rand()%360);
 				}
-#endif //LDK_ADD_CS7_UNICORN_PET
 				break;
 			case BITMAP_LIGHTNING_MEGA1:
 			case BITMAP_LIGHTNING_MEGA2:
@@ -1992,7 +1877,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#ifdef CSK_ADD_MAP_ICECITY
 				else if(o->SubType == 2)
 				{
 					o->LifeTime = rand()%5+27;
@@ -2005,8 +1889,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_NEW_DUEL_NPC
 				else if (o->SubType == 3)
 				{
       				o->LifeTime = rand()%5+27;
@@ -2017,8 +1899,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef YDG_ADD_SKELETON_PET
 				else if (o->SubType == 4)
 				{
 					o->LifeTime = 8;//rand()%5+5;
@@ -2030,7 +1910,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0, 0, 0, o->Light);
 					VectorCopy(o->Target->Position, o->StartPosition);
 				}
-#endif	// YDG_ADD_SKELETON_PET
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType==5)
 				{
@@ -2043,7 +1922,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0, 0, 0, o->Light);	
 				}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				if (o->SubType == 10)
 				{
 					o->LifeTime = rand()%5+47;
@@ -2054,13 +1932,10 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				break;
 
 			case BITMAP_FIRE_HIK3:
-#ifdef CSK_ADD_MAP_ICECITY
 			case BITMAP_FIRE_HIK3_MONO:	
-#endif // CSK_ADD_MAP_ICECITY
 				if (o->SubType == 0
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					|| o->SubType == 6
@@ -2085,7 +1960,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#ifdef CSK_ADD_MAP_ICECITY
 				else if(o->SubType == 2)
 				{
 					o->LifeTime = rand()%5+17;
@@ -2098,8 +1972,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);	
 				}
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_NEW_DUEL_NPC
 				else if (o->SubType == 3)
 				{
       				o->LifeTime = rand()%5+17;
@@ -2110,8 +1982,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 				else if (o->SubType == 4)
 				{
 					o->LifeTime = rand()%5+34;
@@ -2122,8 +1992,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
 				}
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-#ifdef YDG_ADD_SKELETON_PET
 				else if (o->SubType == 5)
 				{
 					o->LifeTime = 8;//rand()%5+5;
@@ -2135,8 +2003,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0, 0, 0, o->Light);
 					VectorCopy(o->Target->Position, o->StartPosition);
 				}
-#endif	// YDG_ADD_SKELETON_PET
-
 				break;
 			case BITMAP_LIGHT+1:
 				o->LifeTime = 20+rand()%8;
@@ -4597,7 +4463,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#ifdef CSK_ADD_MAP_ICECITY
 				else if(o->SubType == 6)
 				{
 					if (o->LifeTime < 10)
@@ -4630,8 +4495,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_NEW_DUEL_NPC
 				else if (o->SubType == 7)
 				{
 					if (o->LifeTime < 10)
@@ -4662,8 +4525,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef YDG_ADD_SKELETON_PET
 				else if (o->SubType == 8)
 				{
 					if (o->LifeTime < 5)
@@ -4703,7 +4564,6 @@ void MoveParticles()
 					
 					o->Rotation += 5.0f;
 				}
-#endif	// YDG_ADD_SKELETON_PET
 				break;
 			case BITMAP_LEAF_TOTEMGOLEM:
 				{
@@ -4726,7 +4586,6 @@ void MoveParticles()
 			case BITMAP_FIRE:
             case BITMAP_FIRE+2:
             case BITMAP_FIRE+3:
-#ifdef KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT	
                 switch ( o->SubType )
                 {
                 case    0 :
@@ -4889,87 +4748,6 @@ void MoveParticles()
                     break;
 				}
 				break;
-#else // KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
-				o->Gravity += 0.004f;
-				Luminosity = (float)(o->LifeTime)/24.f;
-                switch ( o->SubType )
-                {
-                case    0 :
-					o->Scale -= 0.04f;
-                    break;
-                case    5 :
-                case    6 :
-					o->Scale -= 0.04f;
-                    o->Rotation+=5;
-                    break;
-                case    7 :
-				    o->Frame = (15-o->LifeTime)/6;
-					o->Scale -= 0.04f;
-                    break;
-				case    8 :
-					o->Scale *= 0.95f;
-					o->Rotation+=5;
-					break;     
-				case    9 :
-                    o->Position[0] = o->Target->Position[0] + o->StartPosition[0];
-                    o->Position[1] = o->Target->Position[1] + o->StartPosition[1];
-                    o->Position[2] = o->Target->Position[2] + o->StartPosition[2];
-                    o->Gravity += ((rand()%60)+60)/100;
-                    o->Scale -= o->Gravity/90.f;
-                    break;
-                case    11 :
-					if ( o->LifeTime>12 )
-					{
-						o->Frame = (24-o->LifeTime)/3;
-					}
-					o->Scale += 0.04f;
-                    break;
-				case	10:
-					o->Scale *= 0.95f;
-					break;
-                case    12 :
-                    o->Rotation += (float)(rand()%10+10.f);
-					o->Scale -= 0.04f;
-                    Vector ( Luminosity, Luminosity, Luminosity, o->Light );
-                    break;
-                case    13 :
-                    o->Rotation += (float)(rand()%10+10.f);
-					o->Scale -= 0.04f;
-                    Vector ( Luminosity, Luminosity, Luminosity, o->Light );
-                    break;
-				case 14:
-					o->Rotation += o->Gravity;
-					o->Scale += 0.03f;
-					o->Light[0] /= 1.1f;
-					o->Light[1] /= 1.1f;
-					o->Light[2] /= 1.1f;
-					if(o->Light[2] <= 0.05f || o->Scale <= 0.0f)
-						o->Live = false;
-					break;
-				case 15:
-					o->Scale -= 0.04f;
-					o->Light[0] /= 1.1f;
-					o->Light[1] /= 1.1f;
-					o->Light[2] /= 1.1f;
-					if(o->Light[2] <= 0.05f || o->Scale <= 0.0f)
-						o->Live = false;
-					break;
-                default :
-					o->Scale += o->Gravity;
-      				VectorScale(o->Velocity,0.98f,o->Velocity);
-                    break;
-				}
-
-//                if( o->SubType!=7 )
-                {
-				    o->Frame = (23-o->LifeTime)/6;
-                }
-				o->Position[2] += o->Gravity*10.f;
-   				/*o->Position[0] -= o->Gravity;
-				o->Gravity += (float)(rand()%16)*0.01f;
-				Vector(o->Scale,o->Scale,o->Scale,o->Light);*/
-				break;
-#endif // KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
 			case BITMAP_FIRE+1:
 				if(o->SubType==1)
 				{
@@ -5163,13 +4941,11 @@ void MoveParticles()
 					o->Velocity[2] += 0.3f;
                     o->Scale += 0.07f;
 				break;
-#ifdef CSK_RAKLION_BOSS
 				case 11:
 					o->Light[0] /= 1.008f;
 					o->Light[1] /= 1.008f;
 					o->Light[2] /= 1.008f;
 					break;
-#endif // CSK_RAKLION_BOSS
 				}
                 break;
 			case BITMAP_FIRE_RED:
@@ -5193,7 +4969,6 @@ void MoveParticles()
 				}
 				else
 				{
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 					if( o->SubType == 2 )
 					{
 						Vector(0.03f,0.03f,0.03f,Light);
@@ -5204,10 +4979,6 @@ void MoveParticles()
 						Vector(0.05f,0.05f,0.05f,Light);
 						VectorSubtract(o->Light,Light,o->Light);
 					}
-#else // LDS_ADD_MAP_UNITEDMARKETPLACE
-					Vector(0.05f,0.05f,0.05f,Light);
-					VectorSubtract(o->Light,Light,o->Light);
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 				}
 				break;
 			case BITMAP_ENERGY:
@@ -5922,13 +5693,11 @@ void MoveParticles()
 						o->Scale += 1.0f;
 					}
 					break;
-#ifdef PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 				case 59:
      				Luminosity = (float)(o->LifeTime)/40.f;
     				Vector(Luminosity*0.9f,Luminosity*0.9f,Luminosity*0.9f,o->Light);
 					o->Scale += 0.09f;
 					break;
-#endif //PJH_SEASON4_DARK_NEW_SKILL_CAOTIC
 				case 48:
      				Luminosity = (float)(o->LifeTime)/40.f;
     				Vector(Luminosity*0.4f,Luminosity*0.4f,Luminosity*0.4f,o->Light);
@@ -5985,7 +5754,6 @@ void MoveParticles()
 					VectorScale(o->TurningForce, Luminosity, o->Light);
 					o->Scale += 0.09f;
 					break;
-#ifdef CSK_RAKLION_BOSS
 				case 52:
 					{
 						VectorAdd(o->Position, o->Velocity, o->Position);
@@ -5995,16 +5763,12 @@ void MoveParticles()
 						o->Light[2] /= 1.07f;
 					}
 					break;
-#endif // CSK_RAKLION_BOSS	
-#ifdef PJH_GIANT_MAMUD
 				case 53:
 					Luminosity = (float)(o->LifeTime)/50.f;
     				Vector(Luminosity*1.f,Luminosity*1.f,Luminosity*1.f,o->Light);
      				VectorScale(o->Velocity,0.4f,o->Velocity);
      				o->Scale += 0.05f;
 					break;
-#endif //#ifdef PJH_GIANT_MAMUD
-#ifdef YDG_ADD_SKILL_GIGANTIC_STORM
 				case 54:
 					{
 						o->Light[0]  /= 1.02f;
@@ -6019,8 +5783,6 @@ void MoveParticles()
 						o->Scale += o->Scale/100.0f;
 					}
 					break;
-#endif	// YDG_ADD_SKILL_GIGANTIC_STORM
-#ifdef CSK_ADD_SKILL_BLOWOFDESTRUCTION
 				case 55:
 					{
 						o->Gravity += 0.1f;
@@ -6032,8 +5794,6 @@ void MoveParticles()
 						o->Light[2] /= 1.08f;
 					}
 					break;
-#endif // CSK_ADD_SKILL_BLOWOFDESTRUCTION
-#ifdef ASG_ADD_SUMMON_RARGLE
 				case 56:
 					Luminosity = (float)(o->LifeTime)/50.f;
 					Vector(Luminosity*0.5f,Luminosity*0.1f,Luminosity*0.8f,o->Light);
@@ -6047,8 +5807,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Scale += 0.05f;
 					break;
-#endif	// ASG_ADD_SUMMON_RARGLE
-#ifdef YDG_ADD_SKILL_LIGHTNING_SHOCK
 				case 58:
 					Luminosity = (float)(o->LifeTime)/50.f;
     				Vector(Luminosity*o->StartPosition[0],Luminosity*o->StartPosition[1],
@@ -6056,8 +5814,6 @@ void MoveParticles()
      				VectorScale(o->Velocity,0.4f,o->Velocity);
      				o->Scale += 0.05f;
 					break;
-#endif	// YDG_ADD_SKILL_LIGHTNING_SHOCK
-#ifdef PBG_ADD_PKFIELD
 				case 60:
 					{
 						Luminosity = (float)(o->LifeTime)/50.f;
@@ -6068,8 +5824,6 @@ void MoveParticles()
 						o->Scale += 0.04f;
 					}
 					break;
-#endif //PBG_ADD_PKFIELD
-#ifdef PBG_ADD_PKFIELD
 				case 61:
 					{
 						Luminosity = (float)(o->LifeTime)/8.f;
@@ -6078,8 +5832,6 @@ void MoveParticles()
      					o->Scale += 0.05f;
 					}
 					break;
-#endif //PBG_ADD_PKFIELD
-#ifdef PBG_ADD_PKFIELD
 				case 62:
 					{
 						Luminosity = (float)(o->LifeTime)/50.f;
@@ -6089,8 +5841,6 @@ void MoveParticles()
      					o->Scale += 0.03f;
 					}
 					break;
-#endif //PBG_ADD_PKFIELD
-#ifdef PBG_ADD_PKFIELD
 				case 63:
 					{
 						o->Light[0] /= 1.1f;
@@ -6100,8 +5850,6 @@ void MoveParticles()
 						o->Velocity[1] += 1.5f;
 					}
 					break;
-#endif //PBG_ADD_PKFIELD
-#ifdef LDS_ADD_MAP_EMPIREGUARDIAN4_MAPEFFECT	
 				case 64:
 					{
 						Luminosity = (float)(o->LifeTime)/24.f;
@@ -6132,8 +5880,6 @@ void MoveParticles()
 						o->Position[2] += o->Gravity;
 					}
 					break;
-#endif // LDS_ADD_MAP_EMPIREGUARDIAN4_MAPEFFECT
-#ifdef YDG_ADD_DOPPELGANGER_NPC
 				case 66:
 					{
 						o->Light[0]  /= 1.02f;
@@ -6149,8 +5895,6 @@ void MoveParticles()
 						o->Scale += o->Scale/100.0f;
 					}
 					break;
-#endif	// YDG_ADD_DOPPELGANGER_NPC
-#ifdef LDK_ADD_CS7_UNICORN_PET
 				case 67:
 					{
 						o->Alpha -= 0.01f;
@@ -6167,8 +5911,6 @@ void MoveParticles()
 						o->Rotation += 0.01f;
 					}
 					break;
-#endif //LDK_ADD_CS7_UNICORN_PET
-#ifdef LDS_ADD_EFFECT_UNITEDMARKETPLACE
 				case 68:
 					{
 						Luminosity = (float)(o->LifeTime)/40.f;
@@ -6185,7 +5927,6 @@ void MoveParticles()
 						}
 					}
 					break;
-#endif // LDS_ADD_EFFECT_UNITEDMARKETPLACE
 #ifdef ASG_ADD_MAP_KARUTAN
 				case 69:
 					Luminosity = (float)(o->LifeTime)/50.f;
@@ -6342,7 +6083,6 @@ void MoveParticles()
 					VectorCopy(o->Target->Position, o->StartPosition);
 					VectorAdd(o->Position, o->StartPosition, o->Position);
 				}
-#ifdef ADD_RAKLION_IRON_KNIGHT
 				else if ( (o->SubType == 2) || (o->SubType == 3) )
 				{
 					if (o->LifeTime < 10)
@@ -6367,8 +6107,6 @@ void MoveParticles()
 					o->Scale += (rand()%3+6)*0.01f;
 					o->Position[2] += o->Gravity;
 				}
-#endif	// ADD_RAKLION_IRON_KNIGHT
-#ifdef LDK_ADD_CS7_UNICORN_PET
 				else if( o->SubType == 4 )
 				{
 					o->Position[2] += o->Gravity;
@@ -6385,7 +6123,6 @@ void MoveParticles()
 					o->Light[1] *= o->Alpha;
 					o->Light[2] *= o->Alpha;
 				}
-#endif //LDK_ADD_CS7_UNICORN_PET
 				break;
 			case BITMAP_LIGHTNING_MEGA1:
 			case BITMAP_LIGHTNING_MEGA2:
@@ -6481,7 +6218,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#ifdef CSK_ADD_MAP_ICECITY
 				else if(o->SubType == 2)
 				{
 					if (o->LifeTime < 10)
@@ -6514,8 +6250,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				else if (o->SubType == 10)
 				{
 					if (o->LifeTime < 15)
@@ -6546,8 +6280,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
-#ifdef YDG_ADD_NEW_DUEL_NPC
 				else if (o->SubType == 3)
 				{
 					if (o->LifeTime < 15)
@@ -6578,8 +6310,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef YDG_ADD_SKELETON_PET
 				else if (o->SubType == 4)
 				{
 					if (o->LifeTime < 5)
@@ -6619,7 +6349,6 @@ void MoveParticles()
 					
 					o->Rotation += 5.0f;
 				}
-#endif	// YDG_ADD_SKELETON_PET
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType==5)
 				{
@@ -6654,9 +6383,7 @@ void MoveParticles()
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				break;
 			case BITMAP_FIRE_HIK3:
-#ifdef CSK_ADD_MAP_ICECITY
 			case BITMAP_FIRE_HIK3_MONO:
-#endif // CSK_ADD_MAP_ICECITY
 				if (o->SubType == 0
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					|| o->SubType == 6
@@ -6728,7 +6455,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#ifdef CSK_ADD_MAP_ICECITY
 				else if(o->SubType == 2)
 				{
 					if (o->LifeTime < 10)
@@ -6761,8 +6487,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef YDG_ADD_NEW_DUEL_NPC
 				else if (o->SubType == 3)
 				{
 					if (o->LifeTime < 10)
@@ -6793,8 +6517,6 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#endif	// YDG_ADD_NEW_DUEL_NPC
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 				else if (o->SubType == 4)
 				{
 					if (o->LifeTime < 15)
@@ -6825,8 +6547,6 @@ void MoveParticles()
 					o->Position[2] += (o->Gravity);//*((float)o->LifeTime/39.0f));
 					o->Rotation += 3.0f;
 				}
-#endif //LDS_ADD_EMPIRE_GUARDIAN
-#ifdef YDG_ADD_SKELETON_PET
 				else if (o->SubType == 5)
 				{
 					if (o->LifeTime < 4)
@@ -6866,7 +6586,6 @@ void MoveParticles()
 					
 					o->Rotation += 5.0f;
 				}
-#endif	// YDG_ADD_SKELETON_PET
 				break;
 			case BITMAP_LIGHT+1:
 				if(o->SubType == 2)

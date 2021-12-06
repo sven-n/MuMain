@@ -59,9 +59,7 @@
 #include "PartyManager.h"
 #include "w_CursedTemple.h"
 #include "CameraMove.h"
-#ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
-#endif // PSW_ADD_MAPSYSTEM
 #include "w_PetProcess.h"
 #include "PortalMgr.h"
 #include "ServerListManager.h"
@@ -2562,19 +2560,15 @@ void MainScene(HDC hDC)
 //                PlayBuffer(SOUND_THUNDERS02);
             }
             break;
-#ifdef CSK_ADD_MAP_ICECITY	
 		case WD_58ICECITY_BOSS:
 			PlayBuffer(SOUND_WIND01, NULL, true);
 			break;
-#endif // CSK_ADD_MAP_ICECITY
-#ifdef LDS_ADD_SOUND_UNITEDMARKETPLACE
 		case WD_79UNITEDMARKETPLACE:
 			{
 				PlayBuffer(SOUND_WIND01,NULL,true);
 				PlayBuffer(SOUND_RAIN01,NULL,true);
 			}
 			break;
-#endif // LDS_ADD_SOUND_UNITEDMARKETPLACE
 #ifdef ASG_ADD_MAP_KARUTAN
 		case WD_80KARUTAN1:
 			PlayBuffer(SOUND_KARUTAN_DESERT_ENV, NULL, true);

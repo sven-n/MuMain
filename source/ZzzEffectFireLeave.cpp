@@ -23,12 +23,7 @@
 #include "GMCrywolf1st.h"
 #include "GM3rdChangeUp.h"
 #include "MapManager.h"
-#ifdef PSW_ADD_MAPSYSTEM
 #include "w_MapHeaders.h"
-#endif // PSW_ADD_MAPSYSTEM
-
-//----------------------------------------------------------------------------------------------------------------------------
-
 
 int RainTarget = 0;
 int RainCurrent = 0;

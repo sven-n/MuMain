@@ -114,14 +114,8 @@ bool CSkillEffectMgr::DeleteEffect(int Type,OBJECT *Owner, int iSubType)
 			{
 				if(o->Owner==Owner)
                 {
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 					EffectDestructor(o);
                     bDelete = true;
-#else	// YDG_ADD_SKILL_FLAME_STRIKE
-					o->Live = false;
-                    bDelete = true;
-					o->Owner = NULL;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
                 }
 			}
 		}
@@ -137,12 +131,7 @@ void CSkillEffectMgr::DeleteEffect( int efftype )
 		OBJECT *o = &m_SkillEffects[i];
 		if(o->Live && o->Type==efftype)
 		{
-#ifdef YDG_ADD_SKILL_FLAME_STRIKE
 			EffectDestructor(o);
-#else	// YDG_ADD_SKILL_FLAME_STRIKE
-			o->Live = false;
-			o->Owner = NULL;
-#endif	// YDG_ADD_SKILL_FLAME_STRIKE
 		}
 	}
 }

@@ -427,18 +427,12 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 			case TEXT_COLOR_REDPURPLE:
 				glColor3f(0.8f,0.5f,0.8f);
 				break;
-#ifdef SOCKET_SYSTEM
 			case TEXT_COLOR_VIOLET:
 				glColor3f(0.7f,0.4f,1.0f);
 				break;
-#endif	// SOCKET_SYSTEM
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 			case TEXT_COLOR_ORANGE:
 				glColor3f(0.9f, 0.42f, 0.04f );
 				break;
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
-
-				
 			}
 			if ( TEXT_COLOR_DARKRED == TextListColor[i])
 			{

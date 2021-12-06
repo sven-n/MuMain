@@ -57,10 +57,8 @@ namespace SEASON3B
 		CNewUIButton m_BtnRepairAll;
 		
 		DWORD m_dwStandbyItemKey;
-	
-#ifdef CSK_FIX_HIGHVALUE_MESSAGEBOX
+
 		bool m_bSellingItem;
-#endif // CSK_FIX_HIGHVALUE_MESSAGEBOX
 		
 	public:
 		CNewUINPCShop();

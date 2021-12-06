@@ -16,15 +16,9 @@
 #include "ZzzCharacter.h"
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
-#ifdef ADD_SOCKET_MIX
 #include "SocketSystem.h"
-#endif	// ADD_SOCKET_MIX
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIMixInventory::CNewUIMixInventory() 
 {
@@ -239,7 +233,6 @@ bool CNewUIMixInventory::Update()
 	if (IsVisible())
 	{
 		CheckMixInventory();
-#ifdef ADD_SOCKET_MIX
 		switch (g_MixRecipeMgr.GetMixInventoryType())
 		{
 		case SEASON3A::MIXTYPE_ATTACH_SOCKET:
@@ -275,7 +268,6 @@ bool CNewUIMixInventory::Update()
 			}
 			break;
 		}
-#endif //ADD_SOCKET_MIX
 	}
 
 	return true;
@@ -322,13 +314,11 @@ void CNewUIMixInventory::LoadImages()
 	LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_MIXINVENTORY_BOTTOM, GL_LINEAR);
 	LoadBitmap("Interface\\newui_bt_mix.tga", IMAGE_MIXINVENTORY_MIXBTN, GL_LINEAR);
 
-#ifdef ADD_SOCKET_MIX
 	LoadBitmap("Interface\\newui_scrollbar_up.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
 	LoadBitmap("Interface\\newui_scrollbar_m.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
 	LoadBitmap("Interface\\newui_scrollbar_down.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
 	LoadBitmap("Interface\\newui_scroll_on.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
 	LoadBitmap("Interface\\newui_scroll_off.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
-#endif	// ADD_SOCKET_MIX
 }
 void CNewUIMixInventory::UnloadImages()
 {
@@ -339,13 +329,11 @@ void CNewUIMixInventory::UnloadImages()
 	DeleteBitmap(IMAGE_MIXINVENTORY_BACK);
 	DeleteBitmap(IMAGE_MIXINVENTORY_MIXBTN);
 
-#ifdef ADD_SOCKET_MIX
 	DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
 	DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
 	DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
 	DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_ON);
 	DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_OFF);
-#endif	// ADD_SOCKET_MIX
 }
 
 void CNewUIMixInventory::RenderFrame()
@@ -364,7 +352,6 @@ void CNewUIMixInventory::RenderFrame()
 	g_pRenderText->SetTextColor(220, 220, 220, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-	// 조합창 제목 표시
 	switch (g_MixRecipeMgr.GetMixInventoryType())
 	{
 	case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
@@ -395,19 +382,14 @@ void CNewUIMixInventory::RenderFrame()
 		fLine_y += 5.0f;
 		unicode::_sprintf(szText, "%s", GlobalText[2063]);
 		break;
-#ifdef PSW_NEW_CHAOS_CARD
 	case SEASON3A::MIXTYPE_CHAOS_CARD:
 		fLine_y += 5.0f;
 		unicode::_sprintf(szText, "%s", GlobalText[2265]);
 		break;
-#endif	// PSW_NEW_CHAOS_CARD
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
 		fLine_y += 5.0f;
 		unicode::_sprintf(szText, "%s", GlobalText[2563]);
 		break;
-#endif	// CSK_EVENT_CHERRYBLOSSOM
-#ifdef ADD_SOCKET_MIX
 	case SEASON3A::MIXTYPE_EXTRACT_SEED:
 		fLine_y += 5.0f;
 		unicode::_sprintf(szText, "%s", GlobalText[2660]);
@@ -424,7 +406,6 @@ void CNewUIMixInventory::RenderFrame()
 		fLine_y += 5.0f;
 		unicode::_sprintf(szText, "%s", GlobalText[2663]);
 		break;
-#endif	// ADD_SOCKET_MIX
 	default:
 		fLine_y += 5.0f;
 		unicode::_sprintf(szText, "%s", GlobalText[583]);
@@ -432,7 +413,6 @@ void CNewUIMixInventory::RenderFrame()
 	}
 	g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 
-	// 세율 표시
 	fLine_y += 12;
 	switch (g_MixRecipeMgr.GetMixInventoryType())
 	{
@@ -475,10 +455,8 @@ void CNewUIMixInventory::RenderFrame()
 	case SEASON3A::MIXTYPE_OSBOURNE:
 	case SEASON3A::MIXTYPE_ELPIS:
 	case SEASON3A::MIXTYPE_TRAINER:
-#ifdef ADD_SOCKET_MIX
 	case SEASON3A::MIXTYPE_EXTRACT_SEED:
 	case SEASON3A::MIXTYPE_SEED_SPHERE:
-#endif	// ADD_SOCKET_MIX
 		if (g_MixRecipeMgr.IsReadyToMix() &&
 			g_MixRecipeMgr.GetPlusChaosRate() > 0 && g_MixRecipeMgr.GetCurRecipe()->m_bMixOption == 'F')
 		{
@@ -498,10 +476,8 @@ void CNewUIMixInventory::RenderFrame()
 			case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
 			case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
 			case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-#ifdef ADD_SOCKET_MIX
 			case SEASON3A::MIXTYPE_EXTRACT_SEED:
 			case SEASON3A::MIXTYPE_SEED_SPHERE:
-#endif	// ADD_SOCKET_MIX
 				unicode::_sprintf(szText,GlobalText[584],GlobalText[591],g_MixRecipeMgr.GetSuccessRate());
 				break;
 			case SEASON3A::MIXTYPE_TRAINER:
@@ -612,19 +588,11 @@ void CNewUIMixInventory::RenderFrame()
 		g_pRenderText->SetTextColor(255, 50, 20, 255);
 		g_pRenderText->SetBgColor(40, 40, 40, 128);
 
-#ifdef LDK_FIX_CHAR_NUMBER_OVER
 		unicode::_sprintf(szText, GlobalText[2334]," ");
 		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
 
 		unicode::_sprintf(szText, GlobalText[601]);
 		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y+(++iTextPos_y)*15, szText);
-
-#else //LDK_FIX_CHAR_NUMBER_OVER
-
-		unicode::_sprintf(szText, GlobalText[2334], GlobalText[601]);
-		g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
-		
-#endif //LDK_FIX_CHAR_NUMBER_OVER	
 	}
 	
 	++iTextPos_y;

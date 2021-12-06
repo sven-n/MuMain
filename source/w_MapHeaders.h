@@ -1,14 +1,6 @@
 // w_MapHeaders.h: interface for the BaseMap class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#ifndef _MAPHEADERS_H
-#define _MAPHEADERS_H
-
 #pragma once
-
-#ifdef PSW_ADD_MAPSYSTEM
-
 #include "w_MapProcess.h"
 #include "MapManager.h"
 
@@ -65,5 +57,4 @@ T& TheWorld( int type )
 #define g_Karutan1 TheWorld<CGMKarutan1>(WD_80KARUTAN1)
 #endif // ASG_ADD_MAP_KARUTAN
 
-#endif // PSW_ADD_MAPSYSTEM
-#endif //_MAPHEADERS_H
+

@@ -110,7 +110,6 @@
 //patch
 //winmain
 #include "Winmain.h"
-#include "Winmain_New.h"
 #include "Winmain_New_Live.h"
 #include "Defined_Global.h"
 #include "Winmain_New_Event.h"

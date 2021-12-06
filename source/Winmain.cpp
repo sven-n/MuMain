@@ -51,9 +51,7 @@
 #endif // MOVIE_DIRECTSHOW
 #include "GameCensorship.h"
 
-#ifdef PSW_ADD_MAPSYSTEM
-	#include "w_MapHeaders.h"
-#endif // PSW_ADD_MAPSYSTEM
+#include "w_MapHeaders.h"
 
 #include "w_PetProcess.h"
 
@@ -516,6 +514,9 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		{
 			FAKE_CODE( Pos_ActiveFalse);
 			Pos_ActiveFalse:
+#ifdef ACTIVE_FOCUS_OUT
+			if (g_bUseWindowMode == FALSE)
+#endif	// ACTIVE_FOCUS_OUT
 				g_bWndActive = false;
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 			if (g_bUseWindowMode == TRUE)

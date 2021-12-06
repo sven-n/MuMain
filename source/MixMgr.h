@@ -79,9 +79,7 @@ namespace SEASON3A
 		RCP_SP_ADD380ITEM = 2,
 		RCP_SP_SETITEM = 4,
 		RCP_SP_HARMONY = 8,
-#ifdef ADD_SOCKET_MIX
 		RCP_SP_SOCKETITEM = 16,
-#endif	// ADD_SOCKET_MIX
 	};
 
 	typedef struct _MIX_RECIPE_ITEM
