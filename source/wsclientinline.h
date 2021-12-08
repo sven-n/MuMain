@@ -66,17 +66,19 @@ extern CWsctlc * g_pSocketClient;
 
 __forceinline int SendPacket( char *buf, int len, BOOL bEncrypt = FALSE, BOOL bForceC4 = FALSE)
 {
+	#ifdef NEW_PROTOCOL_SYSTEM
+	gProtocolSend.SendPacketClassic((uint8_t*)buf,len);
+
+	if(SceneFlag >= CHARACTER_SCENE)
+		return 1;
+	#endif
+
 #ifdef SAVE_PACKET
 	LPPHEADER_DEFAULT_SUBCODE pData = ( LPPHEADER_DEFAULT_SUBCODE)buf;
 	std::string timeString;
 	leaf::GetTimeString(timeString);
 	DebugAngel_Write((char*)PACKET_SAVE_FILE, "%s Send \t0x%02X 0x%02X (size = %d)\r\n", timeString.c_str(), pData->Header.HeadCode, pData->SubCode, len);
 #endif
-
-	gProtocolSend.SendPacketClassic((uint8_t*)buf,len);
-
-	if(SceneFlag >= CHARACTER_SCENE)
-		return 1;
 
 	if ( !bEncrypt)
 	{

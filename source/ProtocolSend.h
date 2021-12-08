@@ -128,15 +128,15 @@ public:
 			Send(msg);
 		}
 	}
-
 };
 
 class CProtocolSend
 {
 public:
 	CProtocolSend();
-	bool ConnectServer();
+	bool ConnectServer(char* IP,uint16_t Port);
 	void DisconnectServer();
+	bool CheckConnected();
 	void SendPingTest();
 	void RecvMessage();
 	void SendPacket(ProtocolHead head,uint8_t* message, uint16_t size) { if(SocketConnect) SocketConnect->DataSend(head,message,size); }

@@ -131,14 +131,11 @@ int CWsctlc::Create(HWND hWnd, BOOL bGame)
 	{
 		g_bGameServerConnected = FALSE;
 	}
-#ifdef USE_SELFCHECKCODE
-	g_byNextFuncCrcCheck = 1;
-#endif
 
 	if( m_socket == INVALID_SOCKET ) 
 	{
 		char lpszMessage[128];
-		wsprintf(lpszMessage, "家南 积己 俊矾 %d", WSAGetLastError());
+		wsprintf(lpszMessage, "WSAGetLastError %d", WSAGetLastError());
 		g_ErrorReport.Write( lpszMessage);
 		g_ErrorReport.Write( "\r\n");
 		MessageBox(NULL,lpszMessage, "Error", MB_OK);
@@ -249,12 +246,6 @@ int CWsctlc::Connect(char *ip_addr, unsigned short port, DWORD WinMsgNum)
 		//cLogProc.Add("Client WSAAsyncSelect error %d", WSAGetLastError());
 		return FALSE;
     }
-
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-	g_SessionCryptorCS.Open( (int)m_socket );
-	g_SessionCryptorSC.Open( (int)m_socket );
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
-
 	return 1;
 }
 

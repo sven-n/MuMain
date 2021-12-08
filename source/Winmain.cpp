@@ -524,8 +524,6 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
     case WM_ACTIVATE:
 		if(LOWORD(wParam) == WA_INACTIVE)
 		{
-			FAKE_CODE( Pos_ActiveFalse);
-			Pos_ActiveFalse:
 #ifdef ACTIVE_FOCUS_OUT
 			if (g_bUseWindowMode == FALSE)
 #endif	// ACTIVE_FOCUS_OUT
@@ -549,8 +547,6 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		else
 		{
-			FAKE_CODE( Pos_ActiveTrue);
-Pos_ActiveTrue:
 			g_bWndActive = true;
 		}
 		break;
@@ -581,8 +577,6 @@ Pos_ActiveTrue:
 		break;
 	case WM_USER_MEMORYHACK:
 		//SetTimer( g_hWnd, WINDOWMINIMIZED_TIMER, 1*1000, NULL);
-		FAKE_CODE( Pos_UserMemoryHack);
-Pos_UserMemoryHack:
 		KillGLWindow();
 		break;
 	case WM_NPROTECT_EXIT_TWO:
@@ -661,9 +655,6 @@ Pos_UserMemoryHack:
 		{
 			if ( !( g_bMinimizedEnabled))
 			{
-				SendHackingChecked( 0x05, 0);
-				FAKE_CODE( Pos_Wm_Move_MinimizedNotEnabled);
-Pos_Wm_Move_MinimizedNotEnabled:
 				DWORD dwMess[SIZE_ENCRYPTION_KEY];
 				for ( int i = 0; i < SIZE_ENCRYPTION_KEY; ++i)
 				{
@@ -687,8 +678,6 @@ Pos_Wm_Move_MinimizedNotEnabled:
 			if ( !( g_bMinimizedEnabled))
 			{
 				SendHackingChecked( 0x05, 0);
-				FAKE_CODE( Pos_Wm_Move_MinimizedNotEnabled);
-Pos_Wm_Move_MinimizedNotEnabled:
 				DWORD dwMess[SIZE_ENCRYPTION_KEY];
 				for ( int i = 0; i < SIZE_ENCRYPTION_KEY; ++i)
 				{
@@ -729,8 +718,6 @@ Pos_Wm_Move_MinimizedNotEnabled:
 		}
 		break;
 	case WM_LBUTTONDOWN:
-		FAKE_CODE( Pos_LButtonDown);
-Pos_LButtonDown:
 		g_iNoMouseTime = 0;
 		MouseLButtonPop = false;
 		if(!MouseLButton) 
@@ -741,8 +728,6 @@ Pos_LButtonDown:
 #endif
 		break;
 	case WM_LBUTTONUP:
-		FAKE_CODE( Pos_LButtonUp);
-Pos_LButtonUp:
 		g_iNoMouseTime = 0;
 		MouseLButtonPush = false;
 		//if(MouseLButton) MouseLButtonPop = true;
@@ -1029,7 +1014,6 @@ HWND StartWindow(HINSTANCE hCurrentInst,int nCmdShow)
 	}
 #else //ENABLE_FULLSCREEN
 	{
-		// ★ 필요한 창 크기 계산
 		RECT rc = { 0, 0, WindowWidth, WindowHeight };
 #if defined WINDOWMODE
 		if (g_bUseWindowMode == TRUE)
@@ -1519,7 +1503,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
 
-	g_ErrorReport.WriteImeInfo( g_hWnd);
+	//g_ErrorReport.WriteImeInfo( g_hWnd);
 	g_ErrorReport.AddSeparator();
 	
 	switch(WindowWidth)
@@ -1720,16 +1704,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         }
      	else 
 		{
-#ifdef USE_SELFCHECKCODE
-			if ( TimeRemain >= 40)
-			{
-				SendCrcOfFunction( 15, 11, MoveObject, 0x7AC0);
-			}
-#endif
-
 			//Scene
-			FAKE_CODE( Pos_ActiveCheck);
-Pos_ActiveCheck:
 #if (defined WINDOWMODE)
 			if (g_bUseWindowMode == TRUE)
 			{
@@ -1766,8 +1741,16 @@ Pos_ActiveCheck:
 
 #endif	//WINDOWMODE(#else)
 		}
-        ProtocolCompiler();
+
+	#ifdef NEW_PROTOCOL_SYSTEM
+	if(SceneFlag < CHARACTER_SCENE)
+		ProtocolCompiler();
 		g_pChatRoomSocketList->ProtocolCompile();
+	#else
+		ProtocolCompiler();
+		g_pChatRoomSocketList->ProtocolCompile();
+	#endif
+
 		gProtocolSend.RecvMessage();
     } // while( 1 )
 

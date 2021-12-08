@@ -2461,7 +2461,7 @@ void MainScene(HDC hDC)
 #if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 	BeginBitmap();
 	unicode::t_char szDebugText[128];
-	unicode::_sprintf(szDebugText, "FPS : %.1f", FPS);
+	unicode::_sprintf(szDebugText, "FPS : %.1f Connected: %d", FPS,g_bGameServerConnected);
 	unicode::t_char szMousePos[128];
 	unicode::_sprintf(szMousePos, "MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
 	g_pRenderText->SetFont(g_hFontBold);
@@ -2493,7 +2493,11 @@ void MainScene(HDC hDC)
 
 	if(EnableSocket && SceneFlag==MAIN_SCENE)
 	{
+	#ifdef NEW_PROTOCOL_SYSTEM
+		if(!gProtocolSend.CheckConnected())
+	#else
 		if( SocketClient.GetSocket()==INVALID_SOCKET)
+	#endif
 		{
 			static BOOL s_bClosed = FALSE;
 			if ( !s_bClosed)
@@ -2810,15 +2814,8 @@ void Scene(HDC hDC)
 		break;
 	}
 
-	_asm { jmp Pos_NoMouseTimeCheck2 }
-	_asm { __emit 0xFF }
-	_asm { __emit 0x15 }
-Pos_NoMouseTimeCheck2:
 	if ( g_iNoMouseTime > 31)
 	{
-		SendHackingChecked( 0x02, 0);
-		FAKE_CODE( Pos_NoMouse_KillWindow);
-Pos_NoMouse_KillWindow:
 		KillGLWindow();
 	}
 }

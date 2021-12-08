@@ -200,7 +200,7 @@ BOOL CreateSocket(char *IpAddr, unsigned short Port)
 void DeleteSocket()
 {
 	SocketClient.Close();
-	gProtocolSend.DisconnectServer();
+	//gProtocolSend.DisconnectServer();
 }
 
 static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
@@ -332,17 +332,20 @@ void ReceiveServerConnect(BYTE* ReceiveBuffer) //Recebe informação do ConnectSer
 	memcpy(IP, (char*)Data->IP, 15);
 	g_ErrorReport.Write("[ReceiveServerConnect]");
 	SocketClient.Close();
-	//gProtocolSend.DisconnectServer();
+	gProtocolSend.DisconnectServer();
 
+#ifndef NEW_PROTOCOL_SYSTEM
 	if (CreateSocket(IP, Data->Port))
 	{
 		g_bGameServerConnected = TRUE;
 	}
-
-	if (gProtocolSend.ConnectServer())
+#else
+	if (gProtocolSend.ConnectServer(IP,Data->Port))
 	{
-		//g_bGameServerConnected = TRUE;
+		g_bGameServerConnected = TRUE;
+		g_ConsoleDebug->Write(MCD_NORMAL, " > ProtocolSend Connect");
 	}
+#endif
 	
 	char Text[100];
 	sprintf(Text,GlobalText[481],IP,Data->Port);

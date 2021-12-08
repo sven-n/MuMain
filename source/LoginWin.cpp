@@ -237,10 +237,13 @@ void CLoginWin::CancelLogin()
 
 void CLoginWin::ConnectConnectionServer()
 {
-	SocketClient.Close();
-	gProtocolSend.DisconnectServer();
+	//#ifdef NEW_PROTOCOL_SYSTEM
+		gProtocolSend.DisconnectServer();
+	//#else
+		SocketClient.Close();
+	//#endif
 
 	LogIn = 0;
 	CurrentProtocolState = REQUEST_JOIN_SERVER;
-    ::CreateSocket(szServerIpAddress, g_ServerPort);
+    CreateSocket(szServerIpAddress, g_ServerPort);
 }

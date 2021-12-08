@@ -5175,22 +5175,11 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 				break;
 			}
 		}
-		FAKE_CODE( Pos_PreventModifyingSkill1);
-Pos_PreventModifyingSkill1:
-		FAKE_CODE( Pos_PreventModifyingSkill2);
-Pos_PreventModifyingSkill2:
-		
+	
 		c->Skill      = 0;
 		c->Damage     = 0;
 		c->AttackFlag = ATTACK_FAIL;
 	}
-
-	FAKE_CODE( Pos_PreventModifyingSkill3);
-Pos_PreventModifyingSkill3:
-
-#ifdef USE_SELFCHECKCODE
-	SendCrcOfFunction( 0, 7, AttackCharacterRange, 0x8324);
-#endif
 
     if ( c->m_iDeleteTime>0 )
     {
@@ -5213,12 +5202,6 @@ Pos_PreventModifyingSkill3:
 	}
 
     giPetManager::MovePet ( c );
-
-#ifdef USE_SELFCHECKCODE
-	END_OF_FUNCTION( Pos_SelfCheck01);
-Pos_SelfCheck01:
-	;
-#endif
 
 	if ( c->Dead>0 )
 	{

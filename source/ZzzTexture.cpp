@@ -8,6 +8,7 @@
 #include "WSclient.h"
 #include "DSPlaySound.h"
 #include "Jpeglib.h"
+#include "ProtocolSend.h"
 
 CGlobalBitmap Bitmaps;
 
@@ -253,10 +254,13 @@ void PopUpErrorCheckMsgBox(const char* szErrorMsg, bool bForceDestroy)
 		}
 	}
 
-	SocketClient.Close();
-	//gProtocolSend.DisconnectServer();
+	//#ifdef NEW_PROTOCOL_SYSTEM
+		gProtocolSend.DisconnectServer();
+	//#else
+		SocketClient.Close();
+	//#endif
+
 	KillGLWindow();
-	
 	DestroySound();
 	DestroyWindow();
 	CloseMainExe();

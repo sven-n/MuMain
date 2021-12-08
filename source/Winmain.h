@@ -47,9 +47,7 @@
 #endif	// USER_WINDOW_MODE
 
 //#define DEVIAS_XMAS_EVENT  //more snow in devias
-
 //#define GUILD_WAR_EVENT
-
 #define DUEL_SYSTEM
 #define PROTECT_SYSTEMKEY   //alow alt+tab on fullscreen mode
 //#define CAMERA_TEST

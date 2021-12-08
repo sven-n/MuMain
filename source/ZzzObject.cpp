@@ -3427,9 +3427,7 @@ void RenderObjects()
 #ifndef PJH_NEW_SERVER_SELECT_MAP
 							|| World == WD_78NEW_CHARACTER_SCENE
 #endif //PJH_NEW_SERVER_SELECT_MAP
-							) &&
-							((o->Type>=5 && o->Type<=14) || (o->Type>=87 && o->Type<=88) || (o->Type == 4 || o->Type == 129))
-							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-400.f))
+							) && ((o->Type>=5 && o->Type<=14) || (o->Type>=87 && o->Type<=88) || (o->Type == 4 || o->Type == 129)) && TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-400.f))
 						{
 							RenderObject(o);
 							RenderObjectVisual(o);
@@ -3441,21 +3439,17 @@ void RenderObjects()
  							RenderObjectVisual(o);
 						}
 #endif //PJH_NEW_SERVER_SELECT_MAP
-						else if((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS)
-							&& (o->Type == 30 || o->Type == 31) 
-							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
+						else if((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && (o->Type == 30 || o->Type == 31) && TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
 						{
 							RenderObject(o);
 							RenderObjectVisual(o);
 						}
-						else if(gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68)
-							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
+						else if(gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
 						{
 							RenderObject(o);
 							RenderObjectVisual(o);
 						}
-						else if(IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68)
-							&& TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
+						else if(IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0]*0.01f,o->Position[1]*0.01f,-600.f)) 
 						{
 							RenderObject(o);
 							RenderObjectVisual(o);

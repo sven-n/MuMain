@@ -5,7 +5,6 @@
 #include "WSclient.h"
 #include "wsclientinline.h"
 
-
 CProtocolSend gProtocolSend;
 
 CProtocolSend::CProtocolSend()
@@ -13,15 +12,14 @@ CProtocolSend::CProtocolSend()
 	this->m_ClientAcceptThread = 0;
 }
 
-bool CProtocolSend::ConnectServer()
+bool CProtocolSend::ConnectServer(char* IP,uint16_t Port)
 {
 	this->SocketConnect = new CustomClient;
 
-	if (this->SocketConnect->Connect("127.0.0.1", 55905))
+	if (this->SocketConnect->Connect(IP,Port))
 	{
 		//if(this->m_ClientAcceptThread == 0)
 			//this->m_ClientAcceptThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)this->RecvMessage, this, 0, 0);
-
 		return true;
 	}
 	return false;
@@ -29,15 +27,19 @@ bool CProtocolSend::ConnectServer()
 
 void CProtocolSend::DisconnectServer()
 {
-	//if(this->m_ClientAcceptThread != 0)
-	//{
-	//	TerminateThread(this->m_ClientAcceptThread,0);
-	//	CloseHandle(this->m_ClientAcceptThread);
-	//	this->m_ClientAcceptThread = 0;
-	//}
-
-	if(this->SocketConnect && this->SocketConnect->IsConnected())
+	if(this->SocketConnect)
+	{
+		g_bGameServerConnected = FALSE;
 		this->SocketConnect->Disconnect();
+		g_ConsoleDebug->Write(MCD_NORMAL, " > ProtocolSend Disconnet");
+	}
+}
+
+bool CProtocolSend::CheckConnected()
+{
+	if(this->SocketConnect && this->SocketConnect->IsConnected())
+		return true;
+	return false;
 }
 
 void CProtocolSend::SendPingTest()
@@ -143,9 +145,9 @@ void CProtocolSend::RecvMessage()
 					break;
 				}
 			}
-		//}
+		}
 		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
+	//}
 }
 
 void CProtocolSend::SendCheckOnline()
