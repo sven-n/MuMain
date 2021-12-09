@@ -1,0 +1,241 @@
+﻿  pch.cpp
+  3way.cpp
+  adler32.cpp
+  algebra.cpp
+  algparam.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  arc4.cpp
+  asn.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  authenc.cpp
+  base32.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  base64.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  basecode.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  bfinit.cpp
+  blowfish.cpp
+  blumshub.cpp
+  camellia.cpp
+  cast.cpp
+  casts.cpp
+  cbcmac.cpp
+  ccm.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  channels.cpp
+  cmac.cpp
+  Compiling...
+  cpu.cpp
+  crc.cpp
+  cryptlib.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  default.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  des.cpp
+  dessp.cpp
+  dh.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  dh2.cpp
+  dsa.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  eax.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  ec2n.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  ecp.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  elgamal.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  emsa2.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  esign.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  files.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  filters.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  fips140.cpp
+  fipstest.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  gcm.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  Compiling...
+  gf256.cpp
+  gf2n.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  gf2_32.cpp
+  gfpcrypt.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  gost.cpp
+  gzip.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  hex.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  hmac.cpp
+  hrtimer.cpp
+  ida.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  idea.cpp
+  integer.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  luc.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  mars.cpp
+  marss.cpp
+  md2.cpp
+  md4.cpp
+  md5.cpp
+  misc.cpp
+  modes.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  Compiling...
+  mqueue.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  mqv.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  nbtheory.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  network.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  oaep.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  osrng.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  panama.cpp
+  pkcspad.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  polynomi.cpp
+  pssr.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  pubkey.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  queue.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  rabin.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  randpool.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  rc2.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  rc5.cpp
+  rc6.cpp
+  rdtables.cpp
+  rijndael.cpp
+  ripemd.cpp
+  Compiling...
+  rng.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  rsa.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  rw.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  safer.cpp
+  salsa.cpp
+  seal.cpp
+  seed.cpp
+  serpent.cpp
+  sha.cpp
+  sha3.cpp
+  shacal2.cpp
+  shark.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  sharkbox.cpp
+  simple.cpp
+  skipjack.cpp
+  socketft.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+D:\Source\Source MundoMU\Util\cryptoppVs2019\socketft.cpp(102,26): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+D:\Source\Source MundoMU\Util\cryptoppVs2019\socketft.cpp(136,23): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+D:\Source\Source MundoMU\Util\cryptoppVs2019\socketft.cpp(140,21): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  sosemanuk.cpp
+  square.cpp
+  squaretb.cpp
+  strciphr.cpp
+  Compiling...
+  tea.cpp
+  tftables.cpp
+  tiger.cpp
+  tigertab.cpp
+  trdlocal.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\trdlocal.cpp(38,1): warning C4297: 'CryptoPP::ThreadLocalStorage::~ThreadLocalStorage': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\trdlocal.cpp(38,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  ttmac.cpp
+  twofish.cpp
+  vmac.cpp
+  wait.cpp
+  wake.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\wake.cpp(28,3): warning C4838: conversion from 'unsigned int' to 'int' requires a narrowing conversion
+D:\Source\Source MundoMU\Util\cryptoppVs2019\wake.cpp(29,3): warning C4838: conversion from 'unsigned int' to 'int' requires a narrowing conversion
+D:\Source\Source MundoMU\Util\cryptoppVs2019\wake.cpp(30,3): warning C4838: conversion from 'unsigned int' to 'int' requires a narrowing conversion
+D:\Source\Source MundoMU\Util\cryptoppVs2019\wake.cpp(34,3): warning C4838: conversion from 'unsigned int' to 'int' requires a narrowing conversion
+  whrlpool.cpp
+  winpipes.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  xtr.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  xtrcrypt.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  zdeflate.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  zinflate.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  zlib.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  dll.cpp
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): warning C4297: 'CryptoPP::AlgorithmParametersBase::~AlgorithmParametersBase': function assumed not to throw an exception but does
+D:\Source\Source MundoMU\Util\cryptoppVs2019\algparam.h(277,1): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  iterhash.cpp
+  cryptlib.vcxproj -> D:\Source\Source MundoMU\Util\cryptoppVs2019\Win32\Output\Release\cryptlib.lib

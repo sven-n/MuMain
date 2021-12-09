@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Code">
+      <UniqueIdentifier>{b1c4478e-3743-4820-a9fc-4273720b60fd}</UniqueIdentifier>
+      <Extensions>.cpp;.h</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="adhoc.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="bench.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="bench2.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="datatest.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="dlltest.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="fipsalgt.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="regtest.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="validat1.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="validat2.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="validat3.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="bench.h">
+      <Filter>Source Code</Filter>
+    </ClInclude>
+    <ClInclude Include="validate.h">
+      <Filter>Source Code</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

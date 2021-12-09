@@ -1,10 +1,7 @@
 // NewUIGoldBowmanLena.cpp: implementation of the NewUIGoldBowmanLena class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#ifdef PSW_EVENT_LENA
-
 #include "NewUIGoldBowmanLena.h"
 #include "NewUISystem.h"
 #include "wsclientinline.h"
@@ -295,5 +292,3 @@ void CNewUIGoldBowmanLena::Render3D()
 	
 	BeginBitmap();
 }
-
-#endif //PSW_EVENT_LENA

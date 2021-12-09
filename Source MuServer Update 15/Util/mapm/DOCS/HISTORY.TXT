@@ -1,0 +1,467 @@
+    
+--------------------
+MAPM Library History
+--------------------
+
+V 1.00  -  June 1, 1999    Initial Release
+
+V 1.10  -  June 20, 1999   Use a stack implementation for local M_APM
+			   variables instead of static variables.
+
+			   Use a new faster algorithm for SIN & COS.
+
+V 1.20  -  July 10, 1999   Improve the algorithm for ARCSIN and ARCCOS
+			   when the input argument is near 1.0.
+
+			   Added the 'DUP' operator to the 'calc' demo
+			   program.
+
+V 1.30  -  July 31, 1999   Added a function to output M_APM values as
+			   integers.
+
+			   Supply another demo program which generates
+			   prime numbers (and uses the integer output
+			   format).
+
+			   Improved the 4 iterative routines, dynamically
+			   adjusting the local precision each time through
+			   the loop. Also changed the tolerance test to
+			   use integers (vs a MAPM number).
+
+V 2.00  -  Aug 15, 1999    Added a 'fast' multiplication algorithm.
+
+V 2.10  -  Sep 24, 1999    Added integer POW function.  Compute X^Y when
+			   'Y' is an integer.
+
+			   Added a random number generator (with a period
+			   of 1.0E+15).
+
+			   Added function to compute both sin and cos with
+			   one call.
+
+V 2.15  -  Feb 10, 2000    Allow caller to easily use their own memory
+                           management functions.
+
+			   Implement the real exponential algorithm as
+			   originally intended by David Bailey.
+
+			   Delete the extra recursive function from the
+			   fast multiply routine.
+
+			   Calculate a few extra digits in the intermediate
+			   results of 'calc' so the final answers are
+			   always consistent.
+
+V 2.20  -  Mar 30, 2000    Let log, arc-sin, and arc-cos determine the
+			   max number of iterations that should be required
+			   to calculate a given precision level.
+
+			   Optimize the raw series expansion for exp, sin,
+			   and cos to use integers instead of MAPM numbers
+			   in the tolerance test to determine loop termination.
+
+V 2.25  -  Apr 2, 2000     Added a CBRT function (cube root)
+
+			   Added the hyperbolic SIN, COS, and TAN functions
+			   plus their inverses.
+
+			   Alias m_apm_asin to m_apm_arcsin. Also for acos,
+			   atan, and atan2.
+
+			   Updated CALC and VALIDATE to use the new functions.
+
+V 3.00  -  Apr 7, 2000     Added the MAPM C++ wrapper class. Supplied by
+			   Orion Sky Lawlor  (olawlor@acm.org)
+			   This C++ class allows 'normal' syntax when using
+			   the library.
+
+V 3.05  -  Apr 14, 2000    Optimized the basic divide algorithm. It is now
+			   approx 10 - 15 % faster.
+
+                           Optimized the fast multiply algorithm. It is now
+			   approx 2X faster. (depends on input numbers,
+			   sometimes I got 50%, other times 3X)
+
+V 3.06  -  May 6, 2000     Optimized a few more functions.
+
+ 			   In 'CALC', recompute PI on the fly if more digits
+			   are asked for than the default precision.
+
+			   Changed default compile optimizations to use
+			   '-O2' instead of '-O'. Just making a note.
+			   in case some compilers don't handle this well.
+
+V 3.10  -  May 21, 2000    Eliminated all warnings due to internal constants
+			   lacking enough precision for a given calculation.
+			   Any internal constant (like PI, log(2)) lacking the
+			   precison needed for a given calculation will be
+			   re-computed on the fly as necessary.  The only
+			   warnings from the library now are legitimate domain
+			   errors, sqrt of a negative number, etc.
+
+V 3.15  -  May 26, 2000    Optimize the factorial function. It is now approx
+			   10X faster when N is large (i.e., N > 5000).
+
+			   Return 1 from pow function when computing 0^0.
+
+V 3.16  -  Jun 24, 2000    Added makefile for Borland 5.2 / 5.5 C++
+			   command line compilers for Win NT/9x.
+
+			   Fixed link problems due to some C libraries not
+			   having native cube root or inverse hyperbolic
+			   functions.
+
+V 3.50  -  Jul 4, 2000     Added an FFT (Fast Fourier Transform) based
+			   fast multiplication. The FFT fast multiplication
+			   is O(N * Log2(N)). The FFT used is from the
+			   Numerical Recipes book.
+
+			   Fixed extern int declare in M_APM.H due to
+			   variable name mangling in MSVC C++ compiler.
+
+V 3.51  -  Jul 7, 2000     Changed the FFT. The new FFT is from Takuya OOURA.
+			   email: ooura@mmm.t.u-tokyo.ac.jp
+
+			   Added build batch file for MSVC C++ compiler.
+			   (Note: I can't verify this works since I don't
+			   have MSVC C++)
+
+V 3.55  -  Jul 12, 2000    Optimized the FFT set-up wrapper function. Convert
+			   MAPM base 100 numbers into base 10000 before
+			   invoking the FFT. (2X speed improvement and 1/2
+			   the RAM usage)
+
+			   Use the AGM (Arithmetic-Geometric Mean) to
+			   calculate PI when a more precise value is needed.
+
+			   Added a real Makefile for Unix builds (finally!)
+
+V 3.56  -  Jul 19, 2000    Decrease the max number of bytes the FFT can
+			   handle. *Worst* case inputs (all 9's) could have
+			   caused the FFT math to overflow.
+
+			   Added a build batch file for older Borland
+			   compilers. (Works with Turbo C++ 3.00)
+
+V 3.60  -  Aug 24, 2000    Added 36 'memory' locations to the calc demo
+			   program.
+
+			   Added a new function to determine if a MAPM
+			   number is an integer value or not.
+
+			   When computing X^Y with the pow function,
+			   automatically call integer_pow if 'Y' is
+			   an integer value.
+
+V 3.65  -  Oct 1, 2000     Added a reciprocal function using an iterative
+                           method.
+
+			   Used the new reciprocal function to improve the
+			   divide function.
+
+			   Implemented an improved SQRT alogrithm. The new
+			   one only uses multiplication and subtraction.
+			   (The old algorithm used division which is slow).
+
+V 3.70  -  Nov 10, 2000    Use a more efficient 'log' algorithm and also
+			   use a series expansion if the input is very close
+			   to '1'.
+
+			   Made a minor speed optimization to cube root.
+
+			   Added build batch file for MSVC C++ compiler which
+			   also uses a real 'makefile'.
+
+V 3.75  -  Dec 10, 2000    Use more efficient 'arc' family of functions if
+			   the input arg is very close to zero.
+
+V 3.80  -  Mar 1, 2001     Improve the prime number demo program.
+
+			   A number of minor code tweaks. This was mainly
+			   in preparation for the upcoming 64 bit compilers.
+			   I think everything is ready, but I really won't
+			   know until I can actually get my hands on one ...
+
+V 3.85  -  Apr 2, 2001     Added new 'floor' and 'ceil' functions.
+
+			   Use a new multiplier in the random number generator.
+
+			   Added a build batch file for the LCC-WIN32 compiler.
+
+V 4.0   -  Jul 21, 2001    Added functions to compute GCD (greatest common
+			   divisor) and LCM (least common multiple).
+			   See 'm_apm_gcd' and 'm_apm_lcm'.
+
+			   Added GCD and LCM to the 'calc' demo program.
+
+			   Added new utility functions to determine if a MAPM
+			   integer value is EVEN or ODD. See 'm_apm_is_even'
+			   and 'm_apm_is_odd'.
+
+			   Added function to release ALL memory that MAPM
+			   has allocated. Added similiar function to trim
+			   memory usage of MAPM without impacting any library
+			   operation.  See 'm_apm_free_all_mem' and
+			   'm_apm_trim_mem_usage'.
+
+			   Made a minor speed optimization to SQRT.
+
+			   Optimized the normalization function.
+
+			   Optimized the series expansion function for
+			   sin/cos/exp. This has the added benefit of also
+			   speeding up log, log10, pow, arc_###, etc.
+
+V 4.1   -  Aug 10, 2001    Fixed a minor problem with m_apm_to_integer_string.
+			   If the input was 'slightly' smaller than an integer,
+			   it would round the value up to the next int.
+			   'Slightly' here means 1.0E-4 or smaller. If the
+			   input was NNN.9999+ then NNN+1 would be returned.
+			   The documented behavior is to truncate the value
+			   to the next smallest integer and it now behaves as
+			   expected.
+
+			   Note: The previous function always gave the correct
+			   output if the input was already an integer value
+			   (which is why I didn't notice for so long ...).
+
+			   Optimized the basic multiply function.
+
+			   Added a build batch file for the Watcom C 11.x
+			   compiler.
+
+			   Changed the MSVC C++ compiler build from a makefile
+			   back to a batch file (MKALLMSC.BAT). The makefile
+			   was cumbersome and difficult to maintain.  If the
+			   user consensus wants the makefile back, I'll put
+			   it back in.
+
+V 4.2   -   Oct 3, 2001    Added 3 functions to convert an MAPM number to a
+			   string in fixed point format. Format 1017.829 as
+			   "1017.829" instead of "1.017829E+3".
+
+			   See the following functions:
+
+			   m_apm_to_fixpt_string    (basic function)
+			   m_apm_to_fixpt_stringex  (extended function)
+			   m_apm_to_fixpt_stringexp (extended & returns char *)
+
+V 4.3   -  Feb 17, 2002    Include a PDF version of my article which was
+			   first published in the November 2001 issue of
+			   C/C++ Users Journal.
+
+			   Made a minor optimization to _scale (the speed is
+			   the same, but 2 temporary arrays were eliminated by
+			   processing the scaling operation in reverse).
+
+			   Added some comments and initial setup changes to
+			   the prime number demo program.
+
+			   Added some conditional compiler directives to
+			   support the Metrowerks CodeWarrior 7.0 compiler.
+			   (since I don't have it, I don't really know if
+			   this will work ...)
+
+			   Added a conditional compiler directive so the
+			   user can disable the FFT multiply algorithm.
+			   (the default is to still use the FFT multiply.)
+
+			   Add a new function to prime the random number
+			   generator with a known seed value (needed for
+			   repeatable random sequences).
+
+V 4.4   -  Jun 14, 2002    Added a build batch file for the MINGW-32 compiler.
+
+			   Change the internal stack used for temporary MAPM
+			   numbers into a dynamically malloc'ed array.
+
+			   Updated m_apm_cpp_precision so it can be called
+			   prior to a call to m_apm_init.
+
+			   Updated the documentation to indicate that the
+			   default library is *NOT* thread-safe and problems
+			   could occur in a multi-threaded application unless
+			   certain precautions are taken.
+
+			   Split mapmutil.c into 2 files since it was getting
+			   too big.
+
+V 4.5   -  Nov 10, 2002    Added a makefile for the MAC (OSX).
+
+			   Changed all library function parameter declarations
+			   to use the modern form instead of the classic form.
+
+			   Changed the order of the elements in the M_APM
+			   structure. The M_APM structure in m_apm.h is not
+			   compatible with previous versions of the library.
+			   This was done to optimize for future 64 bit
+			   architectures where sizeof(pointer) > sizeof(int).
+
+			   Added a new integer pow function that does not
+			   perform any rounding of the answer. This is needed
+			   for integer only applications where full precision
+			   must be maintained. See 'm_apm_integer_pow_nr'.
+
+V 4.6   -   Apr 7, 2003    Made a minor speed optimization in sqrt by rounding
+			   an intermediate result in the iteration.
+
+			   Implement a new cubically convergent log algorithm
+			   (each iteration yields 3X more digits).
+
+			   Compute internal constants log(2) and log(10) with
+			   an AGM algorithm.
+
+			   Move the output of all error messages into a
+			   stand-alone function. All error messages now call
+			   this function. This allows the user to easily
+			   change the default reaction (which is output to
+			   stderr) by only changing the one function.
+
+V 4.6.1 -  Apr 12, 2003    Fix a bug where specially contrived test input
+			   could result in the new log algorithm terminating
+			   too soon.
+
+			   Applied lessons learned from the log bug to make
+			   the asin & acos functions more efficient.
+
+V 4.7   -  Jun 10, 2003    Include the thread safe function wrappers in this
+			   release. The necessary files are in the directory
+			   'multi_thread' for the unix distribution and in
+			   'multithd' for the Win/Dos distribution.
+
+			   Added #define to obtain a clean compile with
+			   Open Watcom 1.0 (using mkallwat.bat).
+
+			   Add 2 functions to get the version of the compiled
+			   library. See 'm_apm_lib_version' and
+			   'm_apm_lib_short_version'. These could be very
+			   useful when MAPM is used as a shared library/DLL.
+			   (Long Overdue ....)
+
+			   Implement faster cbrt algorithm.
+
+			   Optimize the raw sin algorithm.
+
+			   Implement another log algorithm. See details in
+			   'algorithms.used'. Testing on my system has shown
+			   that it is faster than an AGM algorithm, up to
+			   ~100,000 digits anyway. An AGM _should_ eventually
+			   be faster, but I didn't find that cross-over point.
+
+			   Move the generic error handling function into it's
+			   own separate module. This allows the user to easily
+			   replace the function (with their own version)
+			   without changing the base library.
+
+V 4.8   -  Jul 27, 2003    Fix a bug in arctan. Very large inputs (> 1e16)
+			   could cause incorrect answers in the last few
+			   digits of the result and only under certain decimal
+			   place accuracies.  PI/2 was being returned (instead
+			   of PI/2 - epsilon) due to a rounding problem. Thanks
+			   to Ivano Primi for bringing this to my attention.
+
+			   Fix arcsinh when the input was a very large negative
+			   number. Under certain combinations of large input
+			   values with certain decimal place accuracy would
+			   result in a log(0).  Thanks again to Ivano Primi.
+
+			   Fix m_apm_set_double. An invalid input (NAN or
+			   +/- INF) could cause MAPM to crash. Lesson here is
+			   to always check return codes of function calls, even
+			   when they cannot possibly fail. Thanks to Luiz H. de
+			   Figueiredo (of the Lua project) for this report.
+
+			   Did a complete re-write of validate. The intent of
+			   this is to use the 'gcov' code coverage tool to get
+			   as much code coverage of the library that is
+			   practical. 100% code coverage is not obtained (nor
+			   practical), but it's quite close. (Needs more work
+			   in fixed point formatting.)
+
+			   Convert all build scripts/makefiles to use a common
+			   naming convention. All .a libraries will use the
+			   base name 'libmapm' (libmapm.a). All .lib libraries
+			   will use the basename 'mapm' (mapm.lib).
+
+			   Include a short script to build a Linux shared
+			   library. Other Unix systems should have similiar
+			   commands. Most users won't need this.
+
+			   Modify all error/warning messages so they have a
+			   consistent format.
+
+V 4.8.1 -  Nov 30, 2003    Added support for National Instruments LabWindows
+			   CVI. Some minimal help instructions on how to set up
+			   various project files can be found in 'labwindw.cvi'.
+			   This is the only update, so users of version 4.8
+			   will have no compelling reason to upgrade.
+
+V 4.9   -   Jan 3, 2004    Simplify logic and make minor optimization in AGM
+			   log algorithm.
+
+			   Simplify logic in the exp algorithm. This also
+			   resulted in the exp algorithm being more 'well
+			   behaved'.
+
+			   Include a new file (commentary.txt). This is just a
+			   brief discussion on a design decision of why there
+			   is (one) 'exit' call in the library.
+
+			   Include 4 sample programs to compute PI (in the
+			   directory 'pi_demo').  These are not meant to be
+			   the fastest programs for PI, they are here simply
+			   to demonstrate how to use the library. These could
+			   be used as a starting template for a new program.
+
+V 4.9.1 -   Apr 2, 2004    Added a warning to the exp function if the input is
+			   too large. If the input is too large, overflow can
+			   occur internally so a warning will be output and
+			   the result will be 0.
+
+			   Made minor optimizations to the basic multiply and
+			   the divide & conquer multiply.
+
+			   Checked out the library with a new free compiler, 
+			   DEV-CPP (DEV-C++) 5.0 Beta 8 release 4.9.8.0.  This 
+			   environment uses the mingw gcc compiler under the 
+			   hood, so everything worked fine using mkallmgw.bat 
+			   to compile the library.
+
+			   Document a known COMPILER BUG with Microsoft's
+			   Visual C++ 7.x (VS.NET 2003). This compiler bug
+			   outputs error C2676 in a C++ application. (C apps
+			   are OK). See the README file for a workaround.
+
+			   Document the numerical limitations of the library.
+			   (max/min significant digits, exponents, etc).
+			   See the README file for more details.
+
+V 4.9.2 -  Jun 10, 2004    Added the % operator (and %=) to the C++ wrapper.
+
+			   Added a MOD operator to 'calc' demo program.
+
+			   Fixed a potential buffer overflow in the 'exp' 
+			   function.
+
+V 4.9.5 -  Dec 10, 2007    Updated software license, allowing distribution
+			   of modified source code.
+
+			   The actual library source code is identical to
+			   version 4.9.2 (except the obvious library version 
+			   identifier, and Digital Mars #ifdef).
+
+			   Added support for the Digital Mars Compiler.
+
+			   Added build script for Intel Linux Compiler.
+
+V 4.9.5a - Feb 21, 2010    Updated authors email address. 
+
+			   Note that there are no changes to the library 
+			   source code - so the library will still identify
+			   itself as "4.9.5".
+
+			   Added Makefile for Microsoft Visual Studio 2005.
+
+			   Added another Makefile for MAC OSX (for 10.6).
+
+**************************************************************************

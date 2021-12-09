@@ -1,0 +1,205 @@
+#
+# Modified makefile for MAPM library version = 4.9.5
+# for use with OS X on x86
+# 
+# Run this makefile from the source subdirectory with
+#   make -f makefile.osx
+#
+#
+
+SHELL = /bin/sh
+CC = gcc
+CCP = g++
+
+CFLAGS = -Wall -O2 
+CFLAG3 = -Wall -O3
+LFLAGS = #-s -static
+
+OBJS =	mapmhasn.o \
+	mapmhsin.o \
+	mapm_pow.o \
+	mapm_log.o \
+	mapm_lg2.o \
+	mapm_lg4.o \
+	mapm_exp.o \
+	mapm_lg3.o \
+	mapmasin.o \
+	mapmasn0.o \
+	mapm_sin.o \
+	mapm5sin.o \
+	mapmrsin.o \
+	mapm_cpi.o \
+	mapmsqrt.o \
+	mapmcbrt.o \
+	mapmgues.o \
+	mapmfact.o \
+	mapm_gcd.o \
+	mapmipwr.o \
+	mapmpwr2.o \
+	mapm_rnd.o \
+	mapm_flr.o \
+	mapm_fpf.o \
+	mapm_rcp.o \
+	mapmstck.o \
+	mapm_div.o \
+	mapm_mul.o \
+	mapmfmul.o \
+	mapm_fft.o \
+	mapm_add.o \
+	mapmistr.o \
+	mapm_set.o \
+	mapm_fam.o \
+	mapmutil.o \
+	mapmutl2.o \
+	mapmutl1.o \
+	mapmcnst.o
+
+all: libmapm.a calc primenum validate cpp_demo
+
+calc: libmapm.a calc.o
+	$(CC) $(LFLAGS) -o calc calc.o libmapm.a -lm
+
+primenum: libmapm.a primenum.o
+	$(CC) $(LFLAGS) -o primenum primenum.o libmapm.a -lm
+
+validate: libmapm.a validate.o
+	$(CC) $(LFLAGS) -o validate validate.o libmapm.a -lm
+
+cpp_demo: libmapm.a cpp_demo.o
+	$(CCP) -o cpp_demo cpp_demo.o libmapm.a -lm
+
+libmapm.a: $(OBJS)
+	rm -f libmapm.a
+	ar rc libmapm.a $(OBJS)
+	ranlib libmapm.a 
+
+mapmhasn.o: mapmhasn.c
+	$(CC) -c $(CFLAGS) mapmhasn.c
+
+mapmhsin.o: mapmhsin.c
+	$(CC) -c $(CFLAGS) mapmhsin.c
+
+mapm_pow.o: mapm_pow.c
+	$(CC) -c $(CFLAGS) mapm_pow.c
+
+mapm_log.o: mapm_log.c
+	$(CC) -c $(CFLAGS) mapm_log.c
+
+mapm_lg2.o: mapm_lg2.c
+	$(CC) -c $(CFLAGS) mapm_lg2.c
+
+mapm_lg3.o: mapm_lg3.c
+	$(CC) -c $(CFLAGS) mapm_lg3.c
+
+mapm_lg4.o: mapm_lg4.c
+	$(CC) -c $(CFLAGS) mapm_lg4.c
+
+mapm_exp.o: mapm_exp.c
+	$(CC) -c $(CFLAGS) mapm_exp.c
+
+mapmasin.o: mapmasin.c
+	$(CC) -c $(CFLAGS) mapmasin.c
+
+mapmasn0.o: mapmasn0.c
+	$(CC) -c $(CFLAGS) mapmasn0.c
+
+mapm_sin.o: mapm_sin.c
+	$(CC) -c $(CFLAGS) mapm_sin.c
+
+mapm5sin.o: mapm5sin.c
+	$(CC) -c $(CFLAGS) mapm5sin.c
+
+mapm_cpi.o: mapm_cpi.c
+	$(CC) -c $(CFLAGS) mapm_cpi.c
+
+mapm_flr.o: mapm_flr.c
+	$(CC) -c $(CFLAGS) mapm_flr.c
+
+mapm_fpf.o: mapm_fpf.c
+	$(CC) -c $(CFLAGS) mapm_fpf.c
+
+mapm_gcd.o: mapm_gcd.c
+	$(CC) -c $(CFLAGS) mapm_gcd.c
+
+mapm_fam.o: mapm_fam.c
+	$(CC) -c $(CFLAGS) mapm_fam.c
+
+mapmrsin.o: mapmrsin.c
+	$(CC) -c $(CFLAGS) mapmrsin.c
+
+mapmsqrt.o: mapmsqrt.c
+	$(CC) -c $(CFLAGS) mapmsqrt.c
+
+mapmcbrt.o: mapmcbrt.c
+	$(CC) -c $(CFLAGS) mapmcbrt.c
+
+mapmgues.o: mapmgues.c
+	$(CC) -c $(CFLAGS) mapmgues.c
+
+mapmfact.o: mapmfact.c
+	$(CC) -c $(CFLAGS) mapmfact.c
+
+mapmipwr.o: mapmipwr.c
+	$(CC) -c $(CFLAGS) mapmipwr.c
+
+mapmpwr2.o: mapmpwr2.c
+	$(CC) -c $(CFLAGS) mapmpwr2.c
+
+mapm_rnd.o: mapm_rnd.c
+	$(CC) -c $(CFLAGS) mapm_rnd.c
+
+mapmstck.o: mapmstck.c
+	$(CC) -c $(CFLAGS) mapmstck.c
+
+mapm_rcp.o: mapm_rcp.c
+	$(CC) -c $(CFLAGS) mapm_rcp.c
+
+mapm_div.o: mapm_div.c
+	$(CC) -c $(CFLAGS) mapm_div.c
+
+mapm_mul.o: mapm_mul.c
+	$(CC) -c $(CFLAGS) mapm_mul.c
+
+mapmfmul.o: mapmfmul.c
+	$(CC) -c $(CFLAG3) mapmfmul.c
+
+mapm_fft.o: mapm_fft.c
+	$(CC) -c $(CFLAGS) mapm_fft.c
+
+mapm_add.o: mapm_add.c
+	$(CC) -c $(CFLAGS) mapm_add.c
+
+mapmistr.o: mapmistr.c
+	$(CC) -c $(CFLAGS) mapmistr.c
+
+mapm_set.o: mapm_set.c
+	$(CC) -c $(CFLAGS) mapm_set.c
+
+mapmutl1.o: mapmutl1.c
+	$(CC) -c $(CFLAGS) mapmutl1.c
+
+mapmutl2.o: mapmutl2.c
+	$(CC) -c $(CFLAGS) mapmutl2.c
+
+mapmutil.o: mapmutil.c
+	$(CC) -c $(CFLAG3) mapmutil.c
+
+mapmcnst.o: mapmcnst.c
+	$(CC) -c $(CFLAGS) mapmcnst.c
+
+calc.o: calc.c
+	$(CC) -c $(CFLAGS) calc.c
+
+primenum.o: primenum.c
+	$(CC) -c $(CFLAGS) primenum.c
+
+validate.o: validate.c
+	$(CC) -c $(CFLAGS) validate.c
+
+cpp_demo.o: cpp_demo.cpp
+	$(CCP) -c $(CFLAGS) cpp_demo.cpp
+
+clean: 
+	rm -f *.o 
+	rm -f calc primenum validate cpp_demo
+

@@ -11,6 +11,13 @@
 
 #define BoostRest(p) { if(p) { p.reset(); } }
 
+//util
+#define SAFE_DELETE(p)  { if(p) { delete (p);     (p)=NULL; } }
+#define SAFE_DELETE_ARRAY(p)  { if(p) { delete [] (p);     (p)=NULL; } }
+#define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
+#define DIRECTINPUT_VERSION	0x0800
+#define BYTECAST(T,X) static_cast<T>(X & 0xFF)
+
 ///////////////////////////////////////////////_Scene start_//////////////////////////////////////////////
 #define MAX_SERVER_HI   30
 #define MAX_SERVER_LOW  20

@@ -1,0 +1,216 @@
+
+-----------------------------------------------------------------------------
+                 MAPM C++ Wrapper Function Descriptions         June 10, 2004
+			  By: Orion Sky Lawlor
+		  Ongoing Maintenance by Michael Ring
+-----------------------------------------------------------------------------
+
+See the file 'cpp_demo.cpp.' This is a demo program which calls all possible
+C++ functions defined in the library. This should be a good starting point
+in your C++ applications.
+
+-----------------------------------------------------------------------------
+
+-------- CREATION / ASSIGNMENT: --------
+
+A MAPM object represents a single decimal number.  You can
+create a MAPM uninitialized, from a string (see m_apm_set_string),
+from an integral type, or from a float or double.
+e.g.:
+	MAPM a;             //a is uninitialized (value is undefined)
+	MAPM b="4.5e12";    //b is 4.5 trillion
+	MAPM c=3;           //c is now three
+	MAPM d=6.1;         //d is now six point one
+	MAPM e=c;           //e is now three
+
+You can also assign to a MAPM from any of these types, e.g.:
+	d="-2e-24";         // d is now minus two trillion-trillionths.
+
+You can also allocate arrays of MAPM objects, e.g.:
+	MAPM arr[17];
+	MAPM *parr=new MAPM[17];
+
+Arrays are always created uninitialized.
+
+
+------- ARITHMETIC OPERATORS: -------
+
+These operators are defined for MAPM objects:
+	arithmetic: +, -, *, /, %
+	assigment-arithmetic: +=, -=, *=, /=, %=
+	comparison operators: ==, !=, <, <=, >, >=
+	prefix: ++, --
+	postfix: ++, --
+	unary negation: -
+
+These operators have the same precedence, associativity,
+and semantics as the corresponding C operators.  The
+operators ||, &&, |, &, ~, ^, (), and ! are not defined.
+
+The increment/decrement operators are defined even for non-integer
+MAPM numbers, they simply add or subtract one from the value.
+
+The division operator uses the standard precision rule (below);
+all other operators maintain all digits.
+
+
+-------- LIBRARY ROUTINES: ------
+
+All routines below are available with or without specified precision,
+and in member and "math.h" form.  For example, for a one-input
+function foo(x), you can call foo with any of the forms:
+	MAPM x;
+	x.foo();       // Member function form
+	x.foo(n);      // with n digits of precision
+	foo(x);        // "math.h" form
+	foo(x,n);      // with n digits of precision
+
+For a two-input function bar(x,y), the forms are:
+	MAPM x,y;
+	x.bar(y);      // Member function form
+	x.bar(y,n);    // with n digits of precision
+	bar(x,y);      // "math.h" form
+	bar(x,y,n);    // with n digits of precision
+
+See the standard precision rules below if no precision is specified.
+
+The library functions are:
+
+z=sqrt(x)     -- Return the square root of x, so x==z*z
+z=cbrt(x)     -- Return the cube root of x, so x==z*z*z
+z=log(x)      -- Return the base-e logarithm of x, so x==exp(z)
+z=log10(x)    -- Return the base-10 logarithm of x, so x==pow(10,z)
+z=exp(x)      -- Return e raised to the power x, so x==log(z)
+pow(x,y)      -- Return x raised to the power y
+sin(x)        -- Return the sine of x, with x in radians
+cos(x)        -- Return the cosine of x, with x in radians
+tan(x)        -- Return the tangent of x, with x in radians
+asin(x)       -- Return the inverse sine of x, in radians
+acos(x)       -- Return the inverse cosine of x, in radians
+atan(x)       -- Return the inverse tangent of x, in radians
+atan2(y,x)    -- Return the 4 quadrant inverse tangent of y/x
+sinh(x)       -- Return the hyperbolic sine of x
+cosh(x)       -- Return the hyperbolic cosine of x
+tanh(x)       -- Return the hyperbolic tangent of x
+asinh(x)      -- Return the inverse hyperbolic sine of x
+acosh(x)      -- Return the inverse hyperbolic cosine of x
+atanh(x)      -- Return the inverse hyperbolic tangent of x
+
+Each function above is available in all four forms.
+
+Additional math.h type functions:
+
+get_random()  -- Return a "random" MAPM on [0,1).  see m_apm_get_random
+factorial(x)  -- Return the factorial of x.  see m_apm_factorial
+fabs(x)       -- Return the absolute value of x.
+floor(x)      -- Return the floor of x.
+ceil(x)       -- Return the ceil of x.
+gcd(x,y)      -- Return the GCD (greatest common divisor) of x, y.
+lcm(x,y)      -- Return the LCM (least common multiple) of x, y.
+
+
+---------- STANDARD PRECISION RULES: ---------
+
+Addition, subtraction, and multiplication maintain ALL significant
+digits.
+
+All other operations (divide, sin, etc) can take a number of
+digits n.  In this case, the result will have an n-digit mantissa.
+If no precision is specified, they use the following rules:
+
+1) if the operation uses only one input value [y = sin(x)], the
+   result 'y' will be the same precision as 'x' or the default
+   precision, whichever is larger.
+
+2) if the operation uses two input values [z = atan2(y,x)], the
+   result 'z' will be the digits of 'x', digits of 'y',  or the
+   default precision, whichever is larger.
+
+The default precision starts at 30 digits. You can change the
+precision at any time with the function 'm_apm_cpp_precision'
+(see function.ref).
+
+e.g.:
+      m_apm_cpp_precision(80);
+
+will result in all operations being accurate to a minimum of 80 significant
+digits. If any operand contains more than the minimum number of digits, then
+the result will contain the max number of digits of the operands.
+
+
+-------- UTILITY: --------
+
+m.sign() extracts the sign of a MAPM m, as
+	    -1 : m < 0
+	     0 : m = 0
+	     1 : m > 0
+
+m.exponent() returns the exponent (power of 10) of a MAPM m.
+
+m.significant_digits() returns the total number of decimal digits
+  in the mantissa of a MAPM m.
+
+m.is_integer() returns 1 (TRUE) if the MAPM number m is an integer
+  value, 0 (FALSE) if not.
+
+m.is_even() returns 1 (TRUE) if the MAPM number m is an EVEN integer
+  value, 0 (FALSE) if not.
+
+m.is_odd() returns 1 (TRUE) if the MAPM number m is an ODD integer
+  value, 0 (FALSE) if not.
+
+m.abs() and abs(m) return the absolute value of a MAPM m, which
+  remains unchanged.
+
+m.neg() is a faster version of the expression "-1*m".
+
+m.round(n) returns a version of a MAPM m rounded to n decimal places.
+  m remains unchanged.
+
+MAPM::random() returns a "random" MAPM on [0,1).  See also 'get_random'
+  above.
+
+m.ipow(k)    returns m to the integer power k with the standard precision.
+m.ipow(k,n)  returns m to the integer power k with n digits of precision.
+
+m.ipow_nr(k) returns m to the integer power k with ALL precision (No rounding
+	     takes place; more appropriate for integer only applications).
+	     'k' must be >= zero.
+
+m.div(d) returns the largest MAPM integer not greater than the
+quotient m/d. (MAPM m, d, return value;)
+
+m.rem(d) returns the remainder after dividing m by d. (MAPM m, d,
+return value;)
+
+m.integer_div_rem(d,q,r) sets the MAPM q and r to m.div(d) and
+m.rem(d) respectively. (but faster than calling div, rem separately).
+
+m.sincos(s,c) sets the MAPM s and c to m.sin() and m.cos()
+respectively. (but faster than calling them separately).
+m.sincos(s,c,n) is as above, but keeps exactly n digits of precision.
+
+
+-------- OUTPUT: ----------
+
+You can print a MAPM object by first converting it to a string with
+
+1)  toString           (see m_apm_to_string)
+2)  toFixPtString      (see m_apm_to_fixpt_string)
+3)  toFixPtStringEx    (see m_apm_to_fixpt_stringex)
+4)  toFixPtStringExp   (see m_apm_to_fixpt_stringexp)
+5)  toIntegerString    (see m_apm_to_integer_string)
+
+e.g.:
+	MAPM a=Factorial(17);
+	char obuf[1000];
+	a.toIntegerString(obuf);
+	cout<<obuf;
+
+Of course, obuf must be long enough to contain the digits of 'a'.
+
+If the required string length of the result is not known, use the
+'significant_digits' utility operator from above to determine how
+many bytes (+ some padding for the possible sign & exponent) to
+malloc/new.
+

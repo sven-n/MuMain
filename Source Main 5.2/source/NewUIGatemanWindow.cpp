@@ -324,13 +324,8 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
 	g_pRenderText->SetFont(g_hFont);
     ConvertGold ( g_pUIGateKeeper->GetViewEnteranceFee(), szGold );
 
-#ifdef PSW_BUGFIX_GATEMANWINDOW_TEXT
 	unicode::_sprintf( szText, "%s %s", szGold, GlobalText[224] );
 	g_pRenderText->RenderText(ptOrigin.x+30+50, ptOrigin.y+32, szText, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-#else  //PSW_BUGFIX_GATEMANWINDOW_TEXT
-	g_pRenderText->RenderText(ptOrigin.x+30+60, ptOrigin.y+32, szGold, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-	g_pRenderText->RenderText(ptOrigin.x+30+70, ptOrigin.y+32, GlobalText[224], 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-#endif //PSW_BUGFIX_GATEMANWINDOW_TEXT
 
     ptOrigin.y += 20;
 	m_BtnFeeUp.Render();

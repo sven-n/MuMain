@@ -1,0 +1,26 @@
+	#
+	#
+	#    short build script for use on Linux
+	#    (or generic Unix using gcc)
+	#
+	#
+rm -f pi_1 pi_2 pi_3 pi_4
+#
+gcc -c -Wall -O2 -I.. pi_1.c
+gcc -c -Wall -O2 -I.. pi_3.c
+#
+g++ -c -Wall -O2 -I.. pi_2.cpp
+g++ -c -Wall -O2 -I.. pi_4.cpp
+#
+#
+#
+gcc -o pi_1 pi_1.o ../libmapm.a -lm
+gcc -o pi_3 pi_3.o ../libmapm.a -lm
+#
+g++ -o pi_2 pi_2.o ../libmapm.a -lm
+g++ -o pi_4 pi_4.o ../libmapm.a -lm
+#
+#
+rm pi*.o
+#
+#

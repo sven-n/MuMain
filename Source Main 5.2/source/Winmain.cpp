@@ -815,7 +815,6 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 		}
 		break;
-#ifdef PSW_BUGFIX_IME
 	case WM_CHAR:
 		{
 			switch(wParam)
@@ -828,7 +827,6 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 		}
 		break;
-#endif //PSW_BUGFIX_IME
     }
 
 	if( g_BuffSystem ) {

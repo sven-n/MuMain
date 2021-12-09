@@ -1,0 +1,67 @@
+  
+**************************************************************************
+
+--------------------------------
+COMMENTARY ON A DESIGN DECISION:
+--------------------------------
+
+I've had a few comments (OK, 2) about 'exit' apprearing in the library.
+The basic comment was that it's a bad idea ...  and I agree completely.
+
+If you use any library in a commercial application, you certainly don't
+want code in the library to exit on you.
+
+Here's the rationale for this library. 'exit' is ONLY called when there
+is a malloc/realloc failure. If the computer is low on free memory, there
+is not a graceful way to continue with the calculations, i.e. in a
+handicapped manner.
+
+At one time I looked at returning an int error type code for malloc/realloc
+errors. For example, this calling sequence could happen:
+
+m_apm_arctan2
+  --> m_apm_arctan
+     --> m_apm_arcsin
+        --> m_apm_arccos
+          --> M_4x_cos
+            --> M_raw_cos
+               --> m_apm_divide
+                 --> m_apm_reciprocal
+                    --> m_apm_multiply
+                       --> M_fast_multiply
+                          --> M_fmul_div_conq
+                             --> M_get_stack_ptr   <<--- MALLOC FAIL HERE
+
+
+Returning an int error code up the chain gets real ugly, real fast.
+
+In this case, you would want m_apm_arctan2 to return the int error
+code, but it's not easy to get there.  Note that there are other
+'user callable' functions in the chain (arctan, arcsin, arccos, divide,
+etc) which also complicate the return code sequencing.
+
+I never came up with a good, straightforward solution (that wasn't more
+trouble than it was worth).
+
+If you truly want to guarantee defined behavior, I suggest the following:
+
+Compile the library with alternate malloc/realloc/free function wrappers,
+which can be easily accomplished by reading the comments and making the
+appropriate changes in m_apm_lc.h. If your app is a major "commercial"
+application, you likely already use your own memory management functions.
+
+These function wrappers can trap all malloc/realloc failures so the
+MAPM library never sees them. Then use setjmp/longjmp in these new
+malloc/realloc functions to handle the error yourself in the application,
+not in the library.
+
+The existing implementation works for 99+% of all users. For a "real"
+application where you truly do not want exit to be called, a simple
+setjmp/longjmp sequence will eliminate any malloc/realloc problems,
+and this also lets the application handle the error the best way for
+that particular application.
+
+Anyway, that's why there is (one) 'exit' in the library code.
+
+**************************************************************************
+

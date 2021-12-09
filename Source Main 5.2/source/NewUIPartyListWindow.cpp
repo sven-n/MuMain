@@ -134,14 +134,12 @@ bool CNewUIPartyListWindow::BtnProcess()
 		{
 			m_iSelectedCharacter = i;
 
-#ifdef PSW_FIX_PARTYLISTSELECTCHARACTER
 			if( SelectedCharacter==-1) {
 				CHARACTER *c = &CharactersClient[Party[i].index];
 				if( c && c != Hero ) {
 					CreateChat ( c->ID, "", c );
 				}
 			}
-#endif //PSW_FIX_PARTYLISTSELECTCHARACTER
 
 			if( SelectCharacterInPartyList(	&Party[i] ) )	
 			{

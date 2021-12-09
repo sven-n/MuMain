@@ -2023,7 +2023,6 @@ enum eCursorType
 	CURSOR_IDSELECT,
 };
 
-#ifdef LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 enum eTypeSkill
 {
 	eTypeSkill_None = -1,
@@ -2033,7 +2032,6 @@ enum eTypeSkill
 		eTypeSkill_FrendlySkill,
 		eTypeSkill_End,
 };
-#endif // LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 
 enum eBuffClass
 {

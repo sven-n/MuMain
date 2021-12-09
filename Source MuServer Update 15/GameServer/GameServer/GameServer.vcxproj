@@ -59,8 +59,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_EX502|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>Release\GameServer_EX401\</IntDir>
-    <OutDir>$(SolutionDir)Release\GameServer_EX401\</OutDir>
+    <IntDir>Release\GameServer_EX502\</IntDir>
+    <OutDir>$(SolutionDir)Release\GameServer_EX502\</OutDir>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\Libraries\boost_1_75_0\stage\lib</LibraryPath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Libraries\boost_1_75_0</IncludePath>
   </PropertyGroup>

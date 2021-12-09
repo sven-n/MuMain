@@ -31,13 +31,6 @@
 #define SEASON5_4
 #ifdef  SEASON5_4
 
-	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 4 ]
-	#define PJH_ADD_MASTERSKILL
-		#ifdef PJH_ADD_MASTERSKILL								
-		#undef KJH_FIX_WOPS_K22193_SUMMONER_MASTERSKILL_UI_ABNORMAL_TEXT	//해외에 소환술사 마스터스킬 추가(10.05.28)
-	#endif //PJH_ADD_MASTERSKILL								
-
 	#define ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND				// 칸투르 폐허3 분쟁지역화.(10.04.13)
 
 	#define KJH_FIX_POTION_PRICE							// 상점 물약가격 버그수정 (10.04.16)

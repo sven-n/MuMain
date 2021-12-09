@@ -324,7 +324,6 @@
     <ClCompile Include="source\GOBoid.cpp" />
     <ClCompile Include="source\GuildCache.cpp" />
     <ClCompile Include="source\GuildManager.cpp" />
-    <ClCompile Include="source\ImportanceData.cpp" />
     <ClCompile Include="source\Input.cpp" />
     <ClCompile Include="source\ItemAddOptioninfo.cpp" />
     <ClCompile Include="source\ItemInfo.cpp" />
@@ -914,7 +913,6 @@
     <ClInclude Include="source\GuildCache.h" />
     <ClInclude Include="source\GuildManager.h" />
     <ClInclude Include="source\iexplorer.h" />
-    <ClInclude Include="source\ImportanceData.h" />
     <ClInclude Include="source\InfoHelperFunctions.h" />
     <ClInclude Include="source\Input.h" />
     <ClInclude Include="source\interface.h" />
@@ -1095,8 +1093,6 @@
     <ClInclude Include="source\Win.h" />
     <ClInclude Include="source\WinEx.h" />
     <ClInclude Include="source\Winmain.h" />
-    <ClInclude Include="source\Winmain_New_Event.h" />
-    <ClInclude Include="source\Winmain_New_Live.h" />
     <ClInclude Include="source\WSclient.h" />
     <ClInclude Include="source\wsclientinline.h" />
     <ClInclude Include="source\wsctlc.h" />

@@ -1,0 +1,372 @@
+        
+============================================================================
+ This file describes the algorithms used in MAPM.              July 24, 2003
+============================================================================
+ (If this file doesn't look right, set your tab-stops to 8.)
+============================================================================
+
+ADD:	         There is nothing real interesting about the ADD function.
+		 If the signs of the numbers are the same, continue with
+		 the add routine. If they are opposite, change one of them
+		 and call the subtract function. In order to perform the
+		 add, the number with the smaller exponent is scaled so
+		 the exponents match, then the byte-wise add is performed.
+
+SUBTRACT:        There is nothing real interesting about the SUBTRACT function
+		 either.  If the signs of the numbers are the same, continue
+		 with the subtract routine. If they are opposite, change one
+		 of them and call the add function. In order to perform the
+		 subtraction, the number with the smaller exponent is scaled
+		 so the exponents match, then the byte-wise subtract is
+		 performed.
+
+MULTIPLY:	 Three multiply functions are used :
+
+		 The multiply function uses the simple O(n^2) model for
+		 small input numbers.
+
+		 It uses an FFT based multiplication next. The FFT used
+		 is from Takuya OOURA  (email: ooura@mmm.t.u-tokyo.ac.jp)
+		 This method results in only O(N * Log2(N)) growth. This
+		 method is used up to approx 512K digits.
+
+		 For numbers > 512K digits, the following algorithm is used.
+		 (sometimes called the divide-and-conquer technique.)
+		 When the divide-and-conquer has divided down to 512K digits,
+		 the FFT algorithm is used to finish up.
+
+		 The divide-and-conquer method results in approx O(N ^ 1.585)
+		 growth.
+
+ 		 assume we have 2 numbers (a & b) with 2N digits.
+
+		 let : a = (2^N) * A1 + A0 , b = (2^N) * B1 + B0
+
+		 where 'A1' is the 'most significant half' of 'a' and
+		 'A0' is the 'least significant half' of 'a'. Same for
+		 B1 and B0.
+
+		 Now use the identity :
+
+			  2N   N            N                    N
+		 ab  =  (2  + 2 ) A1B1  +  2 (A1-A0)(B0-B1)  + (2 + 1)A0B0
+
+
+		 The original problem of multiplying 2 (2N) digit numbers has
+ 		 been reduced to 3 multiplications of N digit numbers plus
+		 some additions, subtractions, and shifts.
+
+ 		 This multiplication algorithm is used recursively.
+
+RECIPROCAL:      Used Newton's method. The following iteration was used :
+
+		 X    =  X  *  [ 2 - N * X ]
+		  n+1
+
+DIVIDE:		 Two division functions are used :
+
+		 For dividing numbers < 250 digits
+
+		 Used Knuth's division algorithm from 'The Art of Computer
+		 Programming, Volume 2' with a slight modification. I
+		 determine right in step D3 whether q-hat is too big so
+		 step D6 is unnecessary. I use the first 3 (base 100) digits
+		 of the numerator and the first 2 digits of the denominator
+		 to determine our trial divisor, instead of Knuth's 2 & 1.
+
+		 For dividing numbers >= 250 digits
+
+		 Use the iterative reciprocal function from above and
+		 then multiply.
+
+
+		 NOTE: There is a subtle operational difference between these
+		 two division functions. The first one truncates the divide
+		 process at the specified digit (result is not *rounded*).
+		 The second function using the reciprocal returns a rounded
+		 result. For example, when dividing (2 / 3),
+
+		 the first  function will return -->  0.66.......66
+		 the second function will return -->  0.66.......67
+
+		 The first function is used for the integer_divide function
+		 (see below). Correct results require that the result remain
+		 un-rounded. It's also used for < 250 digits because that
+		 algorithm is faster for a fewer number of digits.
+
+INTEGER_DIVIDE:  Call Knuth's divide function with a few extra decimal places
+		 of precision and then truncates the result to the nearest
+		 integer.
+
+FACTORIAL:       Compute a series of partial products so the number of
+		 significant digits are nearly the same for all partial
+		 products and also the number of significant digits are
+		 near a power of 2. This is the optimum setup for the
+		 fast multiplication algorithm. See mapmfact.c for all
+		 the details.
+
+RANDOM NUMBERS:  Used Knuth's The Art of Computer Programming, Volume 2 as
+		 the basis. Assuming the random number is X, compute :
+		 (using all integer math)
+
+		 X = (a * X + c) MOD m
+
+		 From Knuth:
+
+		 'm' should be large, at least 2^30 : we use 1.0E+15
+
+		 'a' should be between .01m and .99m and not have a simple
+		 pattern. 'a' should not have any large factors in common
+		 with 'm' and (since 'm' is a power of 10) if 'a' MOD 200
+		 = 21 then all 'm' different possible values will be
+		 generated before 'X' starts to repeat.
+
+		 We use 'a' = 716805947629621.
+
+		 'a' MOD 200 = 21 and 'a' is also a prime number. The file
+		 mapm_rnd.c contains many potential multipliers commented
+		 out that are all prime and meet 'a' MOD 200 = 21.
+
+		 There are few restrictions on 'c' except 'c' can have no
+		 factor in common with 'm', hence we set 'c' = 'a'.
+
+		 On the first call, the system time is used to initialize X.
+
+SQUARE ROOT:     Used Newton's method. The following iteration was used :
+		 (which really finds 1/sqrt(N), multiply by N when complete
+		 to get the final sqrt).
+
+		 X    =  0.5 * X * [ 3 - N * X^2 ]
+		  n+1
+
+
+CUBE ROOT:       Used Newton's method. The following iteration was used :
+		 (which really finds 1/cbrt(N), to find the final cbrt
+		 compute N * X ^ 2)
+
+					 4
+		 X     =  [ 4 * X - N * X ] / 3
+		  n+1
+
+
+EXP:		 The exp function uses a modification of the Taylor series.
+		 The algorithm was borrowed from David H. Bailey's 'MPFUN'
+		 package.  This is a multiple precision floating point
+		 package for Fortran. Mr. Bailey's description for EXP
+		 follows verbatim :
+    "
+    Exp (t) =  (1 + r + r^2 / 2! + r^3 / 3! + r^4 / 4! ...) ^ q * 2 ^ n
+
+    where q = 256, r = t' / q, t' = t - n Log(2) and where n is chosen so
+    that -0.5 Log(2) < t' <= 0.5 Log(2).  Reducing t mod Log(2) and
+    dividing by 256 insures that -0.001 < r <= 0.001, which accelerates
+    convergence in the above series.
+    "
+
+
+POW:		 Calls the EXP function. The formula used is :
+
+		  Y        A
+		 X     =  e    where A = Y * log(X)
+
+
+INTEGER POW:     Compute X^N when N is an integer. Used Knuth's algorithm
+		 from The Art of Computer Programming, Volume 2.
+
+		 A1 : Y = 1, Z = X
+		 A2 : is N even/odd? and then N = N / 2
+		      if N was even, goto step A5
+		 A3 : Y = Z * Y
+		 A4 : if N == 0, terminate with Y as the answer
+		 A5 : Z = Z * Z
+		 A6 : goto A2
+
+
+LOG:  		 If the input is very close to '1', use a series expansion.
+		 Calculate log (1 + x) with the following series:
+
+		       x
+		 y = -----      ( |y| < 1 )
+		     x + 2
+
+		     [ 1 + y ]                 y^3     y^5     y^7
+		 log [-------]  =  2 * [ y  +  ---  +  ---  +  ---  ... ]
+		     [ 1 - y ]                  3       5       7
+
+
+		 For numbers not near '1' :
+
+		 For < 360 decimal places the following iteration was used :
+
+				   exp(X) - N
+		 X     =  X - 2 * ------------
+		  n+1              exp(X) + N
+
+		 This is a cubically convergent algorithm
+		 (each iteration yields 3X more digits)
+
+
+		 For >= 360 decimal places, use the following algorithm
+		 to compute log(N):
+
+
+		 Let 'X' be 'close' to the solution. Use the cubically
+		 convergent algorithm above to get 110 decimal places.
+
+		 Let Y = ( N * exp(-X) ) - 1
+
+		 Then :
+
+		 log(N) = X + log(1 + Y)
+
+		 Since 'Y' will be small, we can use the efficient
+		 'log_near_1' algorithm from above.
+
+
+LOG10:		 Calls the LOG function. The formula used is :
+
+		 log10(x)  =  A * log(x) where A = log  (e) [0.43429448190...]
+						      10
+
+SIN:		 The sin function uses the traditional series expansion,
+		 though not right away. Two translations are performed
+		 first and the series expansion is done in the third step.
+		 The reason for the manipulations is to minimize the
+		 magnitude of the number passed to the series expansion.
+		 The smaller that number is, the faster the series will
+		 converge to the precision desired.
+
+		 Step 1:  Limit input argument to +/- PI.
+
+		 Step 2:  Use the multiple angle identity for sin(5x) :
+			  We will use this recursively 3 times, i.e.
+			  we will multiply the input angle by 1 / (5*5*5).
+
+		 sin (5x) == 16 * sin^5 (x)  -  20 * sin^3 (x)  +  5 * sin(x)
+
+		 [ Step 2 yields a worst case |x| = ~0.0251  (PI / 125) ]
+
+		 Step 3:  Traditional series expansion :
+
+
+				x^3     x^5     x^7     x^9
+		 sin(x) == x -  ---  +  ---  -  ---  +  ---  ...
+				 3!      5!      7!      9!
+
+
+COS:		 The cos function is very similiar to sin.
+
+		 Step 1:  Limit input argument to +/- PI.
+
+		 Step 2:  Use the multiple angle identity for cos(4x).
+			  We will use this recursively 3 OR 4 times, i.e.
+			  we will multiply the input angle by 1 / (4 ^ 3)
+			  OR 1 / (4 ^ 4). If |x| is < 1 radian, we will
+			  recurse 3 times. If |x| >= 1 radian, we will
+			  recurse 4 times.
+
+		 cos (4x) == 8 * [ cos^4 (x)  -  cos^2 (x) ]  +  1
+
+		 [ Step 2 yields a worst case |x| = ~0.0156 ]
+		 [ (1 / 64)  >  (PI / 256) ]
+
+		 Step 4:  Traditional series expansion :
+
+
+				x^2     x^4     x^6     x^8
+		 cos(x) == 1 -  ---  +  ---  -  ---  +  ---  ...
+				 2!      4!      6!      8!
+
+
+TAN:		 Compute cos(x), then compute sin(x) = sqrt(1 - cos(x) ^ 2).
+
+		 Finally, tan(x) = sin(x) / cos(x).
+
+		 Note that we need to keep track of the sign for the
+		 'sin' after the sqrt since that result will always be
+		 positive.
+
+ARC_SIN:	 Since the 'arc' family of functions all converge very
+		 slowly, we will call the sin/cos functions and iterate
+		 using Newton's method. We actually just call the cos
+		 function and determine the sin value, as was done for TAN.
+		 The following iteration was used :
+
+				 sin(X) - N
+		 X     =  X  -  ------------
+		  n+1              cos(X)
+
+		 If we need the arcsin(x) and the magnitude of
+		 'x' is > 0.85, use the following identities:
+
+		 For x > 0 : arcsin(x) =  arccos(sqrt(1 - x^2))
+		 For x < 0 : arcsin(x) = -arccos(sqrt(1 - x^2))
+
+		 If the magnitude of 'x' is close to 0 (< 1.0E-4),
+		 use the following identity using arc-tan-near-0.
+
+						  x
+		 arcsin (x)  ==  arctan [ --------------- ]
+					   sqrt(1 - x^2)
+
+
+ARC_COS:	 The arccos function is similiar to the arcsin for the same
+		 reasons.  The following iteration was used :
+
+				 cos(X) - N
+		 X     =  X  +  ------------
+		  n+1              sin(X)
+
+		 If we need the arccos(x) and the magnitude of
+		 'x' is > 0.85, use the following identities:
+
+		 For x > 0 : arccos(x) =  arcsin(sqrt(1 - x^2))
+		 For x < 0 : arccos(x) =  PI - arcsin(sqrt(1 - x^2))
+
+		 If the magnitude of 'x' is close to 0 (< 1.0E-4)
+		 use the following identity using arc-sin-near-0.
+
+		 arccos (x)  ==  PI / 2 - arcsin (x)
+
+
+ARC_TAN:	 Use the identity :
+						x
+		 arctan (x) == arcsin [ --------------- ]
+					 sqrt(1 + x^2)
+
+
+		 If the magnitude of 'x' is large (> 1000), then use :
+
+		 arctan(x) =  (PI / 2)  -  arctan(1 / |x|)
+
+		 and sign of result = sign of original input
+
+
+		 If the magnitude of 'x' is close to 0 (< 1.0E-4)
+		 use the following series:
+
+				      x^3     x^5     x^7     x^9
+		 arctan (x)  =  x  -  ---  +  ---  -  ---  +  ---  ...
+				       3       5       7       9
+
+
+ARC_TAN2:	 Handle the special cases, x and/or y == 0.
+		 Call the arctan function with (y / x) as the argument.
+		 Adjust the returned value based on the signs of y, x.
+
+
+HYPERBOLIC FUNCTIONS:   Use the following identities :
+
+SINH(x)    == 0.5 * [ exp(x) - exp(-x) ]
+
+COSH(x)    == 0.5 * [ exp(x) + exp(-x) ]
+
+TANH(x)    == [ exp(x) - exp(-x) ]  /  [ exp(x) + exp(-x) ]
+
+ARCSINH(x) == log [ x + sqrt(x^2 + 1) ]  ( and also use asinh(-x) = -asinh(x) )
+
+ARCCOSH(x) == log [ x + sqrt(x^2 - 1) ]            ( x >= 1.0 )
+
+ARCTANH(x) == 0.5 * log [ (1 + x) / (1 - x) ]      ( |x| < 1.0 )
+
+============================================================================

@@ -864,3 +864,113 @@
 16:00:27 [Obj][9000] DelAccount (louismk)
 16:00:27 [Obj][9000] DelClient (192.168.0.104)
 16:01:01 [OnlineLoterry] No Winner
+16:23:36 Mu Debug Console Window Init - completed(Handle:0x00180C1A)
+
+16:23:36 [ServerInfo] CashShop loaded successfully
+16:23:36 [ServerInfo] ChaosMix loaded successfully
+16:23:36 [ServerInfo] Character loaded successfully
+16:23:36 [ServerInfo] Custom loaded successfully
+16:23:37 [ServerInfo] Command loaded successfully
+16:23:37 [ServerInfo] Common loaded successfully
+16:23:37 [ServerInfo] Event loaded successfully
+16:23:37 [ServerInfo] EventItemBag loaded successfully
+16:23:37 [ServerInfo] Hack loaded successfully
+16:23:37 [ServerInfo] Item loaded successfully
+16:23:37 [ServerInfo] Monster loaded successfully
+16:23:37 [ServerInfo] Move loaded successfully
+16:23:37 [ServerInfo] Quest loaded successfully
+16:23:37 [ServerInfo] Shop loaded successfully
+16:23:37 [ServerInfo] Skill loaded successfully
+16:23:37 [ServerInfo] Util loaded successfully
+16:23:37 [ReadBotInfo] BotSystem loaded successfully
+16:28:02 [Obj][9000] AddClientNew (192.168.0.104)
+16:28:05 [Obj][9000] AddAccount (louismk)
+16:28:05 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X31, SIZE: 03, PACKET: C10331
+16:28:05 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XA7, SIZE: 07, PACKET: C107A70078FFFF
+16:28:06 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XF3, SIZE: 14, PACKET: C10EF3154C75697341444D000000
+16:28:06 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XF3, SIZE: 14, PACKET: C10EF3034C75697341444D000000
+16:28:06 [Obj][9000] LogInCharacter (LuisADM)
+16:28:06 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X03, SIZE: 08, PACKET: C1080300A451D740
+16:28:06 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X66, SIZE: 08, PACKET: C108660003000000
+16:28:09 [Obj][9000] DelClientNew (192.168.0.104)
+16:28:09 [Obj][9000] LogOutCharacter (LuisADM)
+16:28:09 [Obj][9000] DelAccount (louismk)
+16:28:09 [Obj][9000] DelClient (192.168.0.104)
+16:28:21 Mu Debug Console Window Init - completed(Handle:0x000C0B24)
+
+16:28:21 [ServerInfo] CashShop loaded successfully
+16:28:21 [ServerInfo] ChaosMix loaded successfully
+16:28:21 [ServerInfo] Character loaded successfully
+16:28:21 [ServerInfo] Custom loaded successfully
+16:28:21 [ServerInfo] Command loaded successfully
+16:28:21 [ServerInfo] Common loaded successfully
+16:28:21 [ServerInfo] Event loaded successfully
+16:28:21 [ServerInfo] EventItemBag loaded successfully
+16:28:21 [ServerInfo] Hack loaded successfully
+16:28:21 [ServerInfo] Item loaded successfully
+16:28:21 [ServerInfo] Monster loaded successfully
+16:28:21 [ServerInfo] Move loaded successfully
+16:28:21 [ServerInfo] Quest loaded successfully
+16:28:21 [ServerInfo] Shop loaded successfully
+16:28:21 [ServerInfo] Skill loaded successfully
+16:28:21 [ServerInfo] Util loaded successfully
+16:28:21 [ReadBotInfo] BotSystem loaded successfully
+16:48:00 [CustomQuiz] Start
+16:50:00 [Invasion Manager] Index(3) Boss Position (Map: 2 X: 164 Y: 18)
+16:51:01 [CustomQuiz] Finish
+16:56:22 [Obj][9000] AddClientNew (192.168.0.104)
+16:56:23 [Obj][9000] AddAccount (louismk)
+16:56:24 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X31, SIZE: 03, PACKET: C10331
+16:56:24 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XA7, SIZE: 07, PACKET: C107A70078FFFF
+16:56:25 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XF3, SIZE: 14, PACKET: C10EF3154C75697341444D000000
+16:56:25 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XF3, SIZE: 14, PACKET: C10EF3034C75697341444D000000
+16:56:25 [Obj][9000] LogInCharacter (LuisADM)
+16:56:25 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X03, SIZE: 08, PACKET: C1080300A451D740
+16:56:25 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X66, SIZE: 08, PACKET: C108660003000000
+16:56:28 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X52, SIZE: 03, PACKET: C10352
+16:56:38 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X9F, SIZE: 04, PACKET: C1049F02
+16:56:38 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X9F, SIZE: 04, PACKET: C1049F03
+16:56:42 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X31, SIZE: 03, PACKET: C10331
+16:56:43 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XD2, SIZE: 05, PACKET: C105D20200
+16:56:43 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XD2, SIZE: 04, PACKET: C104D201
+16:56:43 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XD2, SIZE: 10, PACKET: C10AD2050100000053A4
+16:57:27 [Obj][9000] DelClientNew (192.168.0.104)
+16:57:27 [Obj][9000] LogOutCharacter (LuisADM)
+16:57:27 [Obj][9000] DelAccount (louismk)
+16:57:27 [Obj][9000] DelClient (192.168.0.104)
+17:01:01 [OnlineLoterry] No Winner
+17:09:12 [Obj][9000] AddClientNew (192.168.0.104)
+17:09:14 [Obj][9000] AddAccount (louismk)
+17:09:14 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X31, SIZE: 03, PACKET: C10331
+17:09:14 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XA7, SIZE: 07, PACKET: C107A70078FFFF
+17:09:15 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XF3, SIZE: 14, PACKET: C10EF3154C75697341444D000000
+17:09:15 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XF3, SIZE: 14, PACKET: C10EF3034C75697341444D000000
+17:09:15 [Obj][9000] LogInCharacter (LuisADM)
+17:09:15 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X03, SIZE: 08, PACKET: C1080300AA8132B3
+17:09:15 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X66, SIZE: 08, PACKET: C108660003000000
+17:09:28 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X30, SIZE: 05, PACKET: C105300007
+17:09:29 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X82, SIZE: 03, PACKET: C10382
+17:09:36 [Obj][9000] DelClientNew (192.168.0.104)
+17:09:36 [Obj][9000] LogOutCharacter (LuisADM)
+17:09:36 [Obj][9000] DelAccount (louismk)
+17:09:36 [Obj][9000] DelClient (192.168.0.104)
+17:20:54 [Obj][9000] AddClientNew (192.168.0.104)
+17:20:55 [Obj][9000] AddAccount (louismk)
+17:20:55 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X31, SIZE: 03, PACKET: C10331
+17:20:55 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XA7, SIZE: 07, PACKET: C107A70078FFFF
+17:20:56 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XF3, SIZE: 14, PACKET: C10EF3154C75697341444D000000
+17:20:56 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XF3, SIZE: 14, PACKET: C10EF3034C75697341444D000000
+17:20:56 [Obj][9000] LogInCharacter (LuisADM)
+17:20:56 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X03, SIZE: 08, PACKET: C1080300D4A30715
+17:20:56 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X66, SIZE: 08, PACKET: C108660003000000
+17:20:58 [Obj][9000] DelClientNew (192.168.0.104)
+17:20:58 [Obj][9000] LogOutCharacter (LuisADM)
+17:20:58 [Obj][9000] DelAccount (louismk)
+17:20:58 [Obj][9000] DelClient (192.168.0.104)
+17:30:14 [Obj][9000] AddClientNew (192.168.0.104)
+17:30:16 [Obj][9000] AddAccount (louismk)
+17:30:16 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0X31, SIZE: 03, PACKET: C10331
+17:30:16 PacketIN: INDEX: 9000 TYPE: 0XC1, HEAD: 0XA7, SIZE: 07, PACKET: C107A70078FFFF
+17:30:17 [Obj][9000] DelClientNew (192.168.0.104)
+17:30:17 [Obj][9000] DelAccount (louismk)
+17:30:17 [Obj][9000] DelClient (192.168.0.104)

@@ -43,7 +43,6 @@ bool SEASON3B::CNewUIFriendWindow::Create(CNewUIManager* pNewUIMng)
 	return true;
 }
 
-#ifdef KJH_FIX_WOPS_K29708_SHARE_LETTER
 void SEASON3B::CNewUIFriendWindow::Reset()
 {
 	m_pFriendWindowMgr->Reset();
@@ -52,7 +51,6 @@ void SEASON3B::CNewUIFriendWindow::Reset()
 	GetLetterList()->ClearLetterList();
 	GetFriendMenu()->Reset();
 }
-#endif // KJH_FIX_WOPS_K29708_SHARE_LETTER
 
 void SEASON3B::CNewUIFriendWindow::Release()
 {

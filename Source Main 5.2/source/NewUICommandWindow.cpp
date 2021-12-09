@@ -23,10 +23,8 @@ SEASON3B::CNewUICommandWindow::CNewUICommandWindow()
 	m_Pos.x = m_Pos.y = 0;
 	m_iCurSelectCommand = COMMAND_NONE;
 	m_iCurMouseCursor = CURSOR_NORMAL;
-#ifdef BUGFIX_UI_COMMAND_CHAR_ON_MOUSE
 	m_bSelectedChar = false;
 	m_bCanCommand = false;
-#endif // BUGFIX_UI_COMMAND_CHAR_ON_MOUSE
 }
 
 SEASON3B::CNewUICommandWindow::~CNewUICommandWindow()

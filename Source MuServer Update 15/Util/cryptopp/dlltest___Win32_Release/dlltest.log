@@ -1,0 +1,22 @@
+﻿Build started 06/10/2016 01:20:33.
+     1>Project "C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\dlltest.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating ".\dlltest___Win32_Release\dlltest.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O1 /Ob1 /Oy- /D WIN32 /D NDEBUG /D _CONSOLE /D CRYPTOPP_DLL_ONLY /D _VC80_UPGRADE=0x0600 /D _MBCS /GF /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo".\dlltest___Win32_Release\\" /Fd".\dlltest___Win32_Release\vc100.pdb" /Gz /TP /analyze- /errorReport:prompt dlltest.cpp
+         dlltest.cpp
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(990,5): warning MSB8012: TargetPath(C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\.\dlltest___Win32_Release\dlltest.exe) does not match the Linker's OutputFile property value (C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\DLL_Release\dlltest.exe). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"DLL_Release/dlltest.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:DLL_Release kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:".\dlltest___Win32_Release\dlltest.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\dlltest___Win32_Release\dlltest.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\dlltest___Win32_Release\dlltest.lib" /MACHINE:X86 .\dlltest___Win32_Release\dlltest.obj
+            Creating library .\dlltest___Win32_Release\dlltest.lib and object .\dlltest___Win32_Release\dlltest.exp
+         dlltest.vcxproj -> C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\.\dlltest___Win32_Release\dlltest.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"DLL_Release/dlltest.exe;#1" /manifest .\dlltest___Win32_Release\dlltest.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file ".\dlltest___Win32_Release\dlltest.unsuccessfulbuild".
+         Touching ".\dlltest___Win32_Release\dlltest.lastbuildstate".
+     1>Done Building Project "C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\dlltest.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.06

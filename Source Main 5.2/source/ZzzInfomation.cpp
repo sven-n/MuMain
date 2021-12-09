@@ -294,7 +294,6 @@ void OpenSkillScript(char *FileName)
 	}
 }
 
-#ifdef LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER	// LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 BOOL IsValidateSkillIdx( INT iSkillIdx )
 {
 	if( iSkillIdx >= MAX_SKILLS || iSkillIdx < 0 )
@@ -341,8 +340,6 @@ BOOL IsCorrectSkillType_CommonAttack( INT iSkillSeq )
 {
 	return IsCorrectSkillType( iSkillSeq, eTypeSkill_CommonAttack );
 }
-
-#endif // LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 
 ///////////////////////////////////////////////////////////////////////////////
 // dialog
@@ -2344,8 +2341,6 @@ EXIT_CALCULATE:
 	return (int)Gold;
 }
 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM
-
 bool IsRequireEquipItem(ITEM* pItem)
 {
 	if(pItem == NULL){
@@ -2423,17 +2418,13 @@ bool IsRequireEquipItem(ITEM* pItem)
 	return bEquipable;
 }
 
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM
-
 void PlusSpecial(WORD *Value,int Special,ITEM *Item)
 {
 	if(Item->Type == -1) {
 		return;
 	}
 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SPECIALOPTION
 	if( IsRequireEquipItem(Item) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SPECIALOPTION
 	{
 		for(int i=0;i<Item->SpecialNum;i++)
 		{
@@ -2447,9 +2438,7 @@ void PlusSpecialPercent(WORD *Value,int Special,ITEM *Item,WORD Percent)
 {
 	if(Item->Type == -1) return;
 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SPECIALOPTION
 	if( IsRequireEquipItem(Item) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SPECIALOPTION
 	{
 		for(int i=0;i<Item->SpecialNum;i++)
 		{
@@ -2463,9 +2452,7 @@ void PlusSpecialPercent2(WORD *Value,int Special,ITEM *Item)
 {
 	if(Item->Type == -1) return;
 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SPECIALOPTION
 	if( IsRequireEquipItem(Item) )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SPECIALOPTION
 	{
 		for(int i=0;i<Item->SpecialNum;i++)
 		{
@@ -3818,21 +3805,11 @@ void CHARACTER_MACHINE::CalculateMagicDefense()
 {
     for( int i=EQUIPMENT_HELM; i<=EQUIPMENT_WING; ++i )
     {
-        if( Equipment[i].Durability!=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDEFENSE
-			&& IsRequireEquipItem( &Equipment[i] )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_MAGICDEFENSE
-			)
+        if( Equipment[i].Durability!=0 )
         {
             Character.MagicDefense  = ItemMagicDefense(&Equipment[i]);
         }
     }
-//	Character.MagicDefense  = ItemMagicDefense(&Equipment[EQUIPMENT_HELM]);
-//	Character.MagicDefense += ItemMagicDefense(&Equipment[EQUIPMENT_ARMOR]);
-//	Character.MagicDefense += ItemMagicDefense(&Equipment[EQUIPMENT_PANTS]);
-//	Character.MagicDefense += ItemMagicDefense(&Equipment[EQUIPMENT_GLOVES]);
-//	Character.MagicDefense += ItemMagicDefense(&Equipment[EQUIPMENT_BOOTS]);
-//	Character.MagicDefense += ItemMagicDefense(&Equipment[EQUIPMENT_WING]);
 }
 
 void CHARACTER_MACHINE::CalculateWalkSpeed()

@@ -833,11 +833,7 @@ void CSItemOption::getAllAddState ( WORD* Strength, WORD* Dexterity, WORD* Energ
     {
 		ITEM* item = &CharacterMachine->Equipment[i];
 		
-        if ( item->Durability<=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-			|| ( IsRequireEquipItem( item ) == false )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-			)
+        if ( item->Durability<=0 )
         {
             continue;
         }
@@ -891,12 +887,8 @@ void CSItemOption::getAllAddOptionStatesbyCompare ( WORD* Strength, WORD* Dexter
 			continue;
 		}
 		
-        if ( item->Durability<=0 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-			|| ( IsRequireEquipItem( item ) == false )
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM_SETITEM
-			)
-        {
+        if ( item->Durability<=0)
+		{
             continue;
         }
 		

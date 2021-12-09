@@ -2592,9 +2592,8 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBas
 		{
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_GAMEOVER);
 
-#ifdef LDK_FIX_EXCEPTION_SETSTATEGAMEOVER			
 			if(Hero->PK) return CALLBACK_BREAK;
-#endif //LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
+
 			g_pNewUIHotKey->SetStateGameOver(true);	
 			
 			return CALLBACK_BREAK;
@@ -2603,9 +2602,8 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBas
 		{
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSESERVER);
 
-#ifdef LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
 			if(Hero->PK) return CALLBACK_BREAK;
-#endif //LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
+
 			g_pNewUIHotKey->SetStateGameOver(true);	
 
 			return CALLBACK_BREAK;
@@ -2614,9 +2612,8 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBas
 		{
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSECHARACTER);
 
-#ifdef LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
 			if(Hero->PK) return CALLBACK_BREAK;
-#endif //LDK_FIX_EXCEPTION_SETSTATEGAMEOVER
+
 			g_pNewUIHotKey->SetStateGameOver(true);	
 
 			return CALLBACK_BREAK;
@@ -4315,12 +4312,7 @@ CALLBACK_RESULT SEASON3B::CDuelMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOw
 
 CALLBACK_RESULT SEASON3B::CDuelMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, FALSE);
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-	SendRequestDuelOk(0, g_iDuelPlayerIndex, g_szDuelPlayerID);
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 	PlayBuffer(SOUND_CLICK01);
 	
@@ -4329,7 +4321,6 @@ CALLBACK_RESULT SEASON3B::CDuelMsgBox::CancelBtnDown(class CNewUIMessageBoxBase*
 
 //////////////////////////////////////////////////////////////////////////
 
-#ifdef YDG_ADD_NEW_DUEL_UI
 SEASON3B::CDuelResultMsgBox::CDuelResultMsgBox()
 {
 	m_szWinnerID[0] = '\0';
@@ -4486,10 +4477,7 @@ void CDuelResultMsgBox::SetIDs(char * pszWinnerID, char * pszLoserID)
 	strncpy(m_szLoserID, pszLoserID, MAX_ID_SIZE);
 	m_szLoserID[MAX_ID_SIZE] = '\0';
 }
-#endif	// YDG_ADD_NEW_DUEL_UI
-//////////////////////////////////////////////////////////////////////////
 
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 
 CCherryBlossomMsgBox::CCherryBlossomMsgBox()
 {
@@ -4703,11 +4691,6 @@ void CCherryBlossomMsgBox::RenderButtons()
 	m_BtnGoldCB.Render();
 	m_BtnExit.Render();
 }
-
-#endif // CSK_EVENT_CHERRYBLOSSOM
-
-
-//////////////////////////////////////////////////////////////////////////
 
 bool SEASON3B::CTradeZenMsgBoxLayout::SetLayout()
 {

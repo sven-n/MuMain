@@ -1,0 +1,88 @@
+
+*******************************************************
+****						   ****
+****  Build batch files and makefiles for various  ****
+****  compilers under Win NT/9x or straight DOS.   ****
+****						   ****
+*******************************************************
+****						   ****
+****  NOTE: If your compiler is not listed and you ****
+****        get MAPM working, please send me the   ****
+****        batch file/makefile you used and I'll  ****
+****        add it to the distribution.            ****
+****						   ****
+*******************************************************
+  
+========================================
+For National Instruments LabWindows CVI,
+see the file 'labwindw.cvi'
+========================================
+
+=================================
+GCC for DOS: (2.8.1 and 2.95.x)  
+(use this for DJ Delorie's DJGPP)
+=================================
+    run : mkallgcc.bat             (builds library + 3 executables)
+
+
+=====================
+Borland C++ 5.2 / 5.5
+=====================
+    run : make -f makefile.b32              (builds library)
+    run : mkdemb32.bat                      (builds 4 demo programs)
+
+
+================
+Borland C++ 3.00
+================
+    run : mkalltcc.bat             (builds library + 3 executables)
+
+
+==================
+LCC-WIN32  Ver 3.2
+==================
+    run : mkalllcc.bat             (builds library + 3 executables)
+
+
+===============================
+Watcom C 11.x , Open Watcom 1.0
+===============================
+    run : mkallwat.bat             (builds library + 4 executables)
+
+
+=================
+MinGW 32 Compiler
+=================
+    run : mkallmgw.bat             (builds library + 4 executables)
+
+
+=====================
+Digital Mars Compiler
+=====================
+    run : mkalldmc.bat             (builds library + 3 executables)
+
+
+========================
+Microsoft Visual C++ 6.0
+========================
+    run : mkallmsc.bat             (builds library + 4 executables)
+
+
+============================
+Microsoft Visual Studio 2005
+============================
+    use makefile.mvs               (builds library + 4 executables)
+
+
+========================================
+Microsoft C/C++ 8.00c  (16 bit compiler)
+========================================
+    run : mkallm80.bat             (builds library + 4 executables)
+
+
+==================================
+Microsoft C 5.1  (16 bit compiler)
+==================================
+    run : mkallm51.bat             (builds library + 3 executables)
+
+

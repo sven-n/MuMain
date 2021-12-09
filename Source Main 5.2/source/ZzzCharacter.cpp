@@ -4991,13 +4991,11 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 
 			case AT_SKILL_ALICE_SLEEP:
 			case AT_SKILL_ALICE_BLIND:
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_ALICE_SLEEP_UP:
 		case AT_SKILL_ALICE_SLEEP_UP+1:
 		case AT_SKILL_ALICE_SLEEP_UP+2:
 		case AT_SKILL_ALICE_SLEEP_UP+3:
 		case AT_SKILL_ALICE_SLEEP_UP+4:
-#endif
 			case AT_SKILL_ALICE_THORNS:
 				{
 					int iSkillIndex = ( c->Skill);		
@@ -10214,8 +10212,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
 			CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
 		}
-		else if (o->CurrentAction >= PLAYER_SKILL_SLEEP
-			&& o->CurrentAction <= PLAYER_SKILL_SLEEP_FENRIR)
+		else if (o->CurrentAction >= PLAYER_SKILL_SLEEP	&& o->CurrentAction <= PLAYER_SKILL_SLEEP_FENRIR)
 		{
 			int iSkillType = CharacterAttribute->Skill[Hero->CurrentSkill];
 
@@ -10228,11 +10225,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			float fRot = (WorldTime*0.0006f) * 360.0f;
 
 			// shiny
-			if(iSkillType == AT_SKILL_ALICE_SLEEP
-#ifdef PJH_ADD_MASTERSKILL
-						|| (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4)
-#endif
-				)	// nukun
+			if(iSkillType == AT_SKILL_ALICE_SLEEP || (AT_SKILL_ALICE_SLEEP_UP <= iSkillType && iSkillType <= AT_SKILL_ALICE_SLEEP_UP+4))	// nukun
 			{
 				Vector(0.5f, 0.2f, 0.8f, vLight);
 			}
@@ -14086,7 +14079,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.EnableShadow = false;
 		c->Object.m_bRenderShadow = false;
 		break;
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
 	case 413:
 		{
 			OpenMonsterModel(127);
@@ -14105,8 +14097,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		}
 		
 		break;
-#endif // PRUARIN_EVENT07_3COLORHARVEST
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	case 450:
 		{
 			OpenNpc ( MODEL_NPC_CHERRYBLOSSOM );
@@ -14118,8 +14108,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 			strcpy( c->ID, "º¢²ÉÀÇÁ¤·É" );
 		}
 		break;
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef PSW_EVENT_CHERRYBLOSSOMTREE
 	case 451:
 		{
 			OpenNpc ( MODEL_NPC_CHERRYBLOSSOMTREE );
@@ -14130,7 +14118,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 			strcpy( c->ID, "º¢²É³ª¹«" );
 		}
 		break;
-#endif //PSW_EVENT_CHERRYBLOSSOMTREE
 
 #ifdef LEM_ADD_LUCKYITEM
 	case 579:

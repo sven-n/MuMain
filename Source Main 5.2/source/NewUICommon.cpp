@@ -174,12 +174,10 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
 		}
 	}
 
-#ifdef PSW_BUGFIX_IME	
 	if( IsPress(VK_RETURN) && IsEnterPressed() == false ) {
 		m_pInputInfo[VK_RETURN].byKeyState = KEY_NONE;
 	}
 	SetEnterPressed( false );
-#endif //PSW_BUGFIX_IME
 }
 
 bool SEASON3B::CNewKeyInput::IsNone(int iVirtKey)

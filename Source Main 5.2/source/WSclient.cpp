@@ -574,11 +574,9 @@ void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
 #endif //PJH_NEW_SERVER_SELECT_MAP
 		}
 		
-#ifdef LDS_FIX_RESET_CHARACTERDELETED
 		INT		iCharacterKey;
 		iCharacterKey = Data->Index;
 		DeleteCharacter( iCharacterKey );
-#endif
 		
 		CreateHero(Data->Index,CharacterView.Class,CharacterView.Skin,fPos[0],fPos[1],fAngle); 
 		CharactersClient[Data->Index].Level = Data->Level;
@@ -711,9 +709,7 @@ void InitGame()
 	g_pMyShopInventory->ResetSubject();
 	g_pChatListBox->ResetFilter();
 
-#ifdef CSK_FIX_WOPS_K30866_GUILDNOTICE
 	g_pGuildInfoWindow->NoticeClear();
-#endif // CSK_FIX_WOPS_K30866_GUILDNOTICE
 }
 
 BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
@@ -6057,14 +6053,12 @@ void ReceiveBuy( BYTE *ReceiveBuffer )
 		
 		PlayBuffer(SOUND_GET_ITEM01);
 	}
-#ifdef LDK_FIX_RECEIVEBUYSELL_RESULT_254
 	if( Data->Index == 0xfe )
 	{
 		g_pNewUISystem->HideAll();
 
 		g_pChatListBox->AddText(Hero->ID,GlobalText[732], SEASON3B::TYPE_ERROR_MESSAGE);
 	}
-#endif //LDK_FIX_RECEIVEBUYSELL_RESULT_254
 	BuyCost = 0;
 	
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x32 [ReceiveBuy(%d)]", Data->Index);
@@ -7677,16 +7671,13 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 			Light[0] = Light[1] = Light[2] = 1.0f;
 			CreateEffect(BITMAP_FIRECRACKER0001,Position,Angle,Light,1);
 		}
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
+		break;
 	case 60:
 		g_PortalMgr.ResetRevivePosition();
 		break;
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
 	case 61:
 		g_PortalMgr.ResetPortalPosition();
 		break;
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
 	}
 }
 
@@ -7733,18 +7724,14 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 				unicode::_sprintf(szText, GlobalText[2112], GlobalText[2063]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
-#ifdef PSW_NEW_CHAOS_CARD
 			case SEASON3A::MIXTYPE_CHAOS_CARD:
 				unicode::_sprintf(szText, GlobalText[2112], GlobalText[2265]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
-#endif	// PSW_NEW_CHAOS_CARD
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 			case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
 				unicode::_sprintf(szText, GlobalText[2112], GlobalText[2560]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
 				break;
-#endif	// CSK_EVENT_CHERRYBLOSSOM
 			}
 		}
 		break;
@@ -7785,18 +7772,14 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 				unicode::_sprintf(szText, GlobalText[2113], GlobalText[2063]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
-#ifdef PSW_NEW_CHAOS_CARD
 			case SEASON3A::MIXTYPE_CHAOS_CARD:
 				unicode::_sprintf(szText, GlobalText[2113], GlobalText[2265]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
-#endif	// PSW_NEW_CHAOS_CARD
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 			case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
 				unicode::_sprintf(szText, GlobalText[2113], GlobalText[2560]);
 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				break;
-#endif	// CSK_EVENT_CHERRYBLOSSOM
 			}
 			
 			g_pMixInventory->DeleteAllItems();
@@ -8940,12 +8923,10 @@ void ReceiveRequestAcceptAddFriend(BYTE* ReceiveBuffer)
 	szText[MAX_ID_SIZE] = '\0';
 	strcat(szText, GlobalText[1051]);
 	
-#ifdef CSK_BUGFIX_NEWFRIEND_ADD
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == false)
 	{
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_FRIEND);
 	}
-#endif // CSK_BUGFIX_NEWFRIEND_ADD
 	
 	DWORD dwWindowID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText, -1);
 	if (dwWindowID != 0)
@@ -10250,7 +10231,6 @@ void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
 {
     LPPHEADER_MAP_CHANGESERVER_INFO Data = (LPPHEADER_MAP_CHANGESERVER_INFO)ReceiveBuffer;
 
-#ifdef LDK_FIX_FULLSERVER_CONNECT_ERROR
 	if( 0 == Data->m_vSvrInfo.m_wMapSvrPort	)
 	{
 #ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
@@ -10261,7 +10241,6 @@ void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
 		Teleport = false;
 		return;
 	}
-#endif //LDK_FIX_FULLSERVER_CONNECT_ERROR
 
 #ifdef YDG_ADD_CS5_PORTAL_CHARM
 	g_PortalMgr.Reset();

@@ -1,0 +1,75 @@
+#
+#     Tested against Microsoft Visual Studio 2005
+#
+#     Note: run VCVARS32.BAT in /bin directory of VCPP first to set
+#           the environment variables.
+
+# This file contributed to the public domain 
+# by James K. Lowden <jklowden@schemamania.org>. 
+
+#
+# Set -Zl when building the library to avoid references
+# to the default library.  
+#
+CC = cl -nologo -O2 -W3 -MTd -Zl -D_CRT_SECURE_NO_DEPRECATE
+
+#
+# When building executables, we need the default libraries.  
+#
+CX = cl -nologo -O2 -W3 -MTd     -D_CRT_SECURE_NO_DEPRECATE
+
+SRC = 	mapm5sin.c mapm_add.c mapm_cpi.c mapm_div.c \
+		mapm_exp.c mapm_fam.c mapm_fft.c mapm_flr.c \
+		mapm_fpf.c mapm_gcd.c mapm_lg2.c mapm_lg3.c \
+		mapm_lg4.c mapm_log.c mapm_mul.c mapm_pow.c \
+		mapm_rcp.c mapm_rnd.c mapm_set.c mapm_sin.c \
+		mapmasin.c mapmasn0.c mapmcbrt.c mapmcnst.c \
+		mapmfact.c mapmfmul.c mapmgues.c mapmhasn.c \
+		mapmhsin.c mapmipwr.c mapmistr.c mapmpwr2.c \
+		mapmrsin.c mapmsqrt.c mapmstck.c mapmutil.c \
+		mapmutl1.c mapmutl2.c
+
+OBJ = 	mapm5sin.obj mapm_add.obj mapm_cpi.obj mapm_div.obj \
+		mapm_exp.obj mapm_fam.obj mapm_fft.obj mapm_flr.obj \
+		mapm_fpf.obj mapm_gcd.obj mapm_lg2.obj mapm_lg3.obj \
+		mapm_lg4.obj mapm_log.obj mapm_mul.obj mapm_pow.obj \
+		mapm_rcp.obj mapm_rnd.obj mapm_set.obj mapm_sin.obj \
+		mapmasin.obj mapmasn0.obj mapmcbrt.obj mapmcnst.obj \
+		mapmfact.obj mapmfmul.obj mapmgues.obj mapmhasn.obj \
+		mapmhsin.obj mapmipwr.obj mapmistr.obj mapmpwr2.obj \
+		mapmrsin.obj mapmsqrt.obj mapmstck.obj mapmutil.obj \
+		mapmutl1.obj mapmutl2.obj
+
+EXE = validate.exe calc.exe primenum.exe cpp_demo.exe
+
+#
+# Create mamp.lib, then compile and link 
+# validate.c, calc.c, primenum.c, and cpp_demo.cpp
+#
+
+all: mapm.lib $(EXE)
+
+calc.exe: calc.c mapm.lib
+primenum.exe: primenum.c mapm.lib
+validate.exe: validate.c mapm.lib
+
+cpp_demo.exe: cpp_demo.cpp mapm.lib
+
+#
+# Create MAPM.LIB:
+#
+mapm.lib: $(OBJ)
+      lib -nologo -OUT:mapm.lib $**
+
+.c.exe:
+	$(CX) $** -link -map
+
+.cpp.exe:
+	$(CX) $** 
+
+cleanobj:
+	  del $(OBJ)
+
+clean:
+      del map*.obj mapm.lib $(EXE)
+

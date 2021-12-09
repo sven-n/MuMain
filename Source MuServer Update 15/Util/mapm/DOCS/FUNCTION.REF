@@ -1,0 +1,1104 @@
+                 
+-----------------------------------------------------------------------------
+                        MAPM Function Descriptions             April 12, 2009
+-----------------------------------------------------------------------------
+
+Note that the default MAPM library is *NOT* thread safe. MAPM internal data
+structures could get corrupted if multiple MAPM functions are active at the
+same time. The user should guarantee that only one thread is performing
+MAPM functions. This can usually be achieved by a call to the operating
+system to obtain a 'semaphore', 'mutex',  or 'critical code section' so
+the operating system will guarantee that only one MAPM thread will be
+active at a time.
+
+-----------------------------------------------------------------------------
+
+Prototype:  char   *m_apm_lib_version(char *);
+            char   *m_apm_lib_short_version(char *);
+
+Example:    char   lib_version[80];
+	    m_apm_lib_version(lib_version);
+	    m_apm_lib_short_version(lib_version);
+
+	    These 2 functions return the current version of the library.
+	    That is, the version of the library when it was compiled.
+
+	    The return value is the pointer to the input string. The length
+	    of the string will always be < 80 chars.
+
+	    'm_apm_lib_version' will fill the string parameter with the
+	    following format: (without the double quotes)
+
+     "MAPM Library Version x.y  Copyright (C) 1999-2004, Michael C. Ring"
+     "MAPM Library Version x.y.z  Copyright (C) 1999-2004, Michael C. Ring"
+
+	    'm_apm_lib_short_version' will fill the string parameter with
+	    the following format: (without the double quotes)
+
+	    "x.y"
+	    "x.y.z"
+
+	    where x,y,z will be single digits indicating the current
+	    version : "4.6.1", "4.7", etc.
+
+-----------------------------------------------------------------------------
+
+Prototype:  M_APM  m_apm_init(void);
+
+Example:    M_APM  apmvalue;
+            apmvalue = m_apm_init();
+
+            This function initializes a new MAPM value. The value 0 is
+	    assigned to the variable. This function must be called before
+	    any MAPM operation is performed on the value. This is because
+	    it is analogous to :
+
+	    char  *p;
+	    .
+	    .
+	    memset(p, 'A', 100000);
+
+	    The above example will likely fail because 'p' does not point
+	    to a valid memory block yet. The same is true of an MAPM value
+	    that is declared but not yet initialized.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_free(M_APM);
+
+Example:    M_APM  apmvalue;
+            m_apm_free(apmvalue);
+
+            This function will free the memory previously allocated by
+	    'm_apm_init'.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_free_all_mem(void);
+
+Example:    m_apm_free_all_mem();
+
+	    This function will free ALL the memory that MAPM has allocated
+	    internally.  It will NOT free variables that the user has
+	    initialized from m_apm_init(). The user is responsible for
+	    free'ing their own variables. The variables that the user has
+	    initialized are still valid MAPM numbers, but you won't be able
+	    to do anything useful with them. A call to a MAPM library
+	    function will likely result in a crash.
+
+	    The intent of this function is to free all MAPM allocated
+	    memory once your calculations are complete.
+
+	    A subsequent call to 'm_apm_trim_mem_usage()' will re-initialize
+	    the library and it will be ready for use again.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_trim_mem_usage(void);
+
+Example:    m_apm_trim_mem_usage();
+
+	    This function will reduce the memory used by MAPM to it's
+	    initial start-up state.
+
+	    The intent of this function is to minimize the memory footprint
+	    of MAPM while still maintaining full capabilities.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_cpp_precision(int);
+
+Example:    m_apm_cpp_precision(72);
+
+	    This function is only used by the C++ MAPM wrapper class.
+
+	    It specifies to the wrapper class the minimum number of
+	    significant digits that should be calculated for a given
+	    operation. This function specifies only the MINIMUM precision.
+	    The example above specifies 72 significant digits. Consider
+	    the statement y = sin(x);  If 'x' contains < 72 digits, 'y'
+	    will contain 72 digits of precision. If 'x' >= 72 digits,
+	    'y' will contain the number of digits that 'x' contains.
+
+            The default is 30.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_set_string(M_APM, char *);
+
+Example:    M_APM  apmvalue;
+	    char   in_string[128];
+            m_apm_set_string(apmvalue, in_string);
+
+            This function will set the MAPM value to the value specified
+	    by the string variable. Integers and floating point are supported
+	    as is floating point with scientific notation.
+
+	    o) Lead-in whitespace is ignored.
+	    o) A lead-in '+' sign is optional.
+	    o) A negative number must have '-' as the first non-whitespace char
+	    o) An exponent, 'E' or 'e', is optional.
+	    o) The decimal point is optional. The decimal point may be
+	       anywhere in the number, but before the exponent.
+	    o) The exponent may have an optional '+' sign.
+	    o) The exponent must be an integer value (no decimal point)
+
+            m_apm_set_string(apmvalue, "-23");
+            m_apm_set_string(apmvalue, "1964.425206");
+            m_apm_set_string(apmvalue, "-9.344218785E-12");
+            m_apm_set_string(apmvalue, "+987622.87633e+27");
+            m_apm_set_string(apmvalue, ".0000004217");
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_set_long(M_APM, long);
+
+Example:    M_APM  apmvalue;
+	    long   longval;
+            m_apm_set_long(apmvalue, longval);
+
+            This function will set the MAPM value to the value specified
+	    by the long variable.
+
+            m_apm_set_long(apmvalue, -203L);
+            m_apm_set_long(apmvalue, 1964L);
+            m_apm_set_long(apmvalue, 5219954L);
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_set_double(M_APM, double);
+
+Example:    M_APM   apmvalue;
+	    double  doubleval;
+            m_apm_set_double(apmvalue, doubleval);
+
+            This function will set the MAPM value to the value specified
+	    by the double variable. The double value will be rounded to
+	    the 15 most significant digits and then converted to the MAPM
+	    value. If you want an 'exact' conversion, use the m_apm_set_string
+	    function since some C floating point library's may round your
+	    double in an unpredictable manner.
+
+            m_apm_set_double(apmvalue, -2.03);
+            m_apm_set_double(apmvalue, 21887.4421964);
+            m_apm_set_double(apmvalue, -9.4421E-3);
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_to_string(char *, int, M_APM);
+
+Example:    M_APM   apmvalue;
+	    int     decimal_places;
+	    char    out_string[256];
+	    m_apm_to_string(out_string, decimal_places, apmvalue);
+
+	    This function will convert an MAPM value into a string and is
+	    meant to be used with floating point MAPM values.  The output
+	    string must be large enough to hold the result. The output
+	    string will always be in scientific (exponential) notation.
+	    There will be a leading '-' sign for negative numbers. There
+	    will be 'decimal_places' number of digits after the decimal
+	    point. If decimal_places is >= 0, the value will be rounded to
+	    that number of digits and then the string will be filled, with
+	    trailing zero's appended if necessary to fill out the decimal
+	    place specification. If decimal_places < 0, ALL the significant
+	    digits of the MAPM number will be output. In some applications,
+	    it is convenient to round the value yourself (see 'm_apm_round')
+	    and then display ALL the digits.
+
+	    If apmvalue is == 3.640083E-4 :
+
+            1)  m_apm_to_string(out_string, 4, apmvalue);
+	        out_string -> "3.6401E-4"
+
+            2)  m_apm_to_string(out_string, 14, apmvalue);
+	        out_string -> "3.64008300000000E-4"
+
+            3)  m_apm_to_string(out_string, -1, apmvalue);
+	        out_string -> "3.640083E-4"
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_to_fixpt_string(char *, int, M_APM);
+
+Example:    M_APM   apmvalue;
+	    int     decimal_places;
+	    char    out_string[256];
+            m_apm_to_fixpt_string(out_string, decimal_places, apmvalue);
+
+	    This function will convert an MAPM value into a string and the
+	    output will be formatted in fixed point notation. The output
+	    string must be large enough to hold the result.
+
+	    If decimal_places < 0, ALL the significant digits of the MAPM
+	    number will be output.
+
+	    If decimal_places == 0, the output will be the MAPM value rounded
+	    to the nearest integer and the decimal point will be suppressed.
+
+	    If decimal_places is > 0, the value will be rounded to that number
+	    of digits and then the string will be filled, with trailing zero's
+	    appended if necessary to fill out the decimal place specification.
+
+
+	    In some applications, it is convenient to round the value yourself
+	    (see 'm_apm_round') and then display ALL the digits.
+
+	    If apmvalue is == 3.6487451E+2 :
+
+	    1)  m_apm_to_fixpt_string(out_string, 10, apmvalue);
+	        out_string -> "364.8745100000"
+
+	    2)  m_apm_to_fixpt_string(out_string, 1, apmvalue);
+	        out_string -> "364.9"
+
+	    3)  m_apm_to_fixpt_string(out_string, 0, apmvalue);
+	        out_string -> "365"
+
+	    4)  m_apm_to_fixpt_string(out_string, -1, apmvalue);
+	        out_string -> "364.87451"
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_to_fixpt_stringex(char *, int, M_APM, char, char, int);
+
+Example:    char    out_string[256];
+	    int     decimal_places;
+	    M_APM   apmvalue;
+	    char    radix;
+	    char    separator_char;
+	    int     separator_count;
+
+            m_apm_to_fixpt_stringex(out_string, decimal_places, apmvalue,
+	    			    radix, separator_char, separator_count);
+
+
+	    The output string must be large enough to hold the result.
+	    This function is an extended version of the previous function,
+	    there are 3 additional function parameters:
+
+	    radix:
+
+	    Specify the radix character desired. For example, use ',' to
+	    set the radix char to a comma.
+
+	    separator_char:
+	    separator_count:
+
+	    Specify a character separator every 'separator_count' characters.
+	    This is used to split up a large number with a 'delimiter' for
+	    easier readability. For example,
+
+	    If separator_char = ',' and separator_count = 3, there will be a
+	    comma inserted before every group of 3 digits in the output string.
+
+	    6123456789.098765321 will be formatted as "6,123,456,789.098765321"
+
+	    Note that only digits before the radix char are separated.
+
+	    separator_char OR separator_count == 0 is used to disable
+	    the 'char separator' feature. This would typically be used
+	    when it is only desired to change the radix character.
+
+-----------------------------------------------------------------------------
+
+Prototype:  char    *m_apm_to_fixpt_stringexp(int, M_APM, char, char, int);
+
+Example:    char    *out_string;
+	    int     decimal_places;
+	    M_APM   apmvalue;
+	    char    radix;
+	    char    separator_char;
+	    int     separator_count;
+
+            out_string = m_apm_to_fixpt_stringexp(decimal_places, apmvalue,
+	    			    radix, separator_char, separator_count);
+
+	    if (out_string != NULL)
+	      {
+	       printf("%s\n", out_string);   <-- do something with the string
+	       free(out_string);             <-- now free the buffer
+	      }
+
+
+            This function is almost identical to the previous function.
+	    The difference is this function will malloc the desired buffer
+	    and return it to the caller. In the previous function, the caller
+	    supplied the buffer and the output had to fit in that buffer.
+
+	    If the malloc in this function fails, NULL will be returned.
+
+	    It is the callers responsibility to free the memory which this
+	    function 'mallocs'. If the user has re-defined malloc/realloc/free
+	    to use their own function wrappers, then your corresponding 'free'
+	    function should be used.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_to_integer_string(char *, M_APM);
+
+Example:    M_APM   apmvalue;
+	    char    out_string[256];
+            m_apm_to_integer_string(out_string, apmvalue);
+
+	    This function will convert an MAPM value into a string and is
+	    meant to be used with integer values. The output string must
+	    be large enough to hold the result. If the MAPM number is not
+	    an integer, the function will truncate the value to the nearest
+	    integer and the output will be formatted as an integer, with a
+	    possible leading '-' sign.
+
+	    Examples:
+
+	    M_APM Value            Output String
+	    -----------            -------------
+	    3.28E+2                "328"
+	    -4.56993E+2            "-456"
+	    4.32E-3                "0"
+	    -1.62E+5               "-162000"
+
+	    If you want the value 'rounded' to the nearest integer (NNN.99
+	    becomes NNN+1), use m_apm_to_fixpt_string with 0 decimal places.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_absolute_value(M_APM, M_APM);
+
+Example:    M_APM  apmresult, apmvalue;
+            m_apm_absolute_value(apmresult, apmvalue);
+
+            This function will take the absolute value of 'apmvalue'
+	    and put it in 'apmresult'.  The 'apmresult' parameter cannot
+	    be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_negate(M_APM, M_APM);
+
+Example:    M_APM  apmresult, apmvalue;
+            m_apm_negate(apmresult, apmvalue);
+
+            This function will negate the value of 'apmvalue' and put it
+	    in 'apmresult'.  The 'apmresult' parameter cannot be the
+	    other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_copy(M_APM, M_APM);
+
+Example:    M_APM  apmresult, apmvalue;
+            m_apm_copy(apmresult, apmvalue);
+
+            This function will copy the value of 'apmvalue' and put it
+	    in 'apmresult'.  The 'apmresult' parameter cannot be the
+	    other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_round(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apmvalue;
+	    int    decimal_places;
+            m_apm_round(apmresult, decimal_places, apmvalue);
+
+            This function will round the value of 'apmvalue' to the number
+	    of decimal places specified and put it in 'apmresult'. The
+	    decimal places parameter is referenced to the number when the
+	    number is in scientific notation.  The 'apmresult' parameter
+	    cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  int   m_apm_compare(M_APM, M_APM);
+
+Example:    M_APM   apm_num1, apm_num2;
+	    int     cmp_result;
+            cmp_result = m_apm_compare(apm_num1, apm_num2);
+
+            This function will compare the value of apm_num1 to apm_num2.
+	    The function will return :
+	    -1 : num1 < num2
+	     0 : num1 = num2
+	     1 : num1 > num2
+
+-----------------------------------------------------------------------------
+
+Prototype:  int   m_apm_sign(M_APM);
+
+Example:    M_APM   apm_num;
+	    int     sign_result;
+            sign_result = m_apm_sign(apm_num);
+
+            This function will return the sign of apm_num.
+	    The function will return :
+	    -1 : num < 0
+	     0 : num = 0
+	     1 : num > 0
+
+-----------------------------------------------------------------------------
+
+Prototype:  int   m_apm_exponent(M_APM);
+
+Example:    M_APM   apm_num;
+	    int     exponent;
+            exponent = m_apm_exponent(apm_num);
+
+            This function will return the exponent of apm_num.
+
+	    If apm_num = 3.86742E+12,    12 will be returned.
+	               = 9.61082E-56,   -56 will be returned.
+		       = 0.0              0 will be returned.
+
+-----------------------------------------------------------------------------
+
+Prototype:  int   m_apm_significant_digits(M_APM);
+
+Example:    M_APM   apm_num;
+	    int     digits;
+            digits = m_apm_significant_digits(apm_num);
+
+            This function will return the number of significant digits
+	    in apm_num. This may be used to determine how big to malloc
+	    a char array so the full number can be converted to a string.
+
+	    If apm_num = 3.86742E+12    :  6 will be returned.
+	               = -96108.27608   : 10 will be returned.
+
+-----------------------------------------------------------------------------
+
+Prototype:  int   m_apm_is_integer(M_APM);
+
+Example:    M_APM   apm_num;
+	    int     integer_flag;
+            integer_flag = m_apm_is_integer(apm_num);
+
+            This function will return 1 (TRUE) if apm_num is an
+	    integer value, 0 (FALSE) if not.
+
+-----------------------------------------------------------------------------
+
+Prototype:  int   m_apm_is_even(M_APM);
+
+Example:    M_APM   apm_int;
+	    int     even_flag;
+	    even_flag = m_apm_is_even(apm_int);
+
+	    This function will return 1 (TRUE) if apm_int is an
+	    even integer value, 0 (FALSE) if not.
+
+	    An input value that is not an integer will result in
+	    a warning on stderr and the return value is undefined.
+
+-----------------------------------------------------------------------------
+
+Prototype:  int   m_apm_is_odd(M_APM);
+
+Example:    M_APM   apm_int;
+	    int     odd_flag;
+	    odd_flag = m_apm_is_odd(apm_int);
+
+	    This function will return 1 (TRUE) if apm_int is an
+	    odd integer value, 0 (FALSE) if not.
+
+	    An input value that is not an integer will result in
+	    a warning on stderr and the return value is undefined.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void    m_apm_set_random_seed(char *);
+
+Example:    m_apm_set_random_seed("12345678");
+
+	    This function will set the random number generator to a
+	    known starting value.
+
+	    The char string argument should correspond to any *integer*
+	    value between 0 and (1.0E+15 - 1).
+
+	    This function can be called at any time, either before or
+	    anytime after 'm_apm_get_random'.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void    m_apm_get_random(M_APM);
+
+Example:    M_APM   random_number;
+	    m_apm_get_random(random_number);
+
+	    This function will return a random floating point number
+	    between the values 0 and 1. The first time the function is
+	    called the generator is initialized with the system time.
+	    This generator will not repeat its pattern until 1.0E+15
+	    numbers have been generated.
+
+	    Note that the MAPM parameter passed may be used for other
+	    purposes. The function itself maintains the correct sequence
+	    and just returns a copy of the next random number.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_add(M_APM, M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num1, apm_num2;
+            m_apm_add(apmresult, apm_num1, apm_num2);
+
+            This function will add apm_num1 to apm_num2 and put the result
+	    in 'apmresult'.  The 'apmresult' parameter cannot be one of
+	    the other MAPM parameters.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_subtract(M_APM, M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num1, apm_num2;
+            m_apm_subtract(apmresult, apm_num1, apm_num2);
+
+            This function will subtract apm_num2 from apm_num1 and put the
+	    result in 'apmresult'.  (result = num1 - num2)  The 'apmresult'
+	    parameter cannot be one of the other MAPM parameters.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_multiply(M_APM, M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num1, apm_num2;
+            m_apm_multiply(apmresult, apm_num1, apm_num2);
+
+            This function will multiply apm_num1 and apm_num2 and put the
+	    result in 'apmresult'.  The 'apmresult' parameter cannot be
+	    one of the other MAPM parameters.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_divide(M_APM, int, M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num1, apm_num2;
+	    int    decimal_places;
+            m_apm_divide(apmresult, decimal_places, apm_num1, apm_num2);
+
+            This function will divide apm_num1 by apm_num2 and put the
+	    result in 'apmresult'.  The 'apmresult' parameter cannot be
+	    one of the other MAPM parameters.
+
+            Unlike the other three basic operations, division cannot be
+	    counted on to produce non-repeating decimals, so the
+	    'decimal_places' variable is used to tell this routine how many
+            digits are to be calculated before stopping.
+
+	    Note that the number of decimal places is referenced to the
+	    value as if the number was in fixed point notation. m_apm_divide
+	    is the only function where decimal places is referenced to
+	    fixed point notation, all other functions are referenced to
+	    scientific notation. This was an intentional design decision
+	    so 'm_apm_integer_divide' and 'm_apm_integer_div_rem' would
+	    work as expected.
+
+            Division by zero creates a zero result and a warning on stderr.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_reciprocal(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_reciprocal(apmresult, decimal_places, apm_num);
+
+            This function will compute the reciprocal of 'apm_num' and it
+	    will put the result in 'apmresult' (compute 1.0 / apm_num). The
+	    result will be accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+            An input of zero creates a zero result and a warning on stderr.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_integer_divide(M_APM, M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num1, apm_num2;
+            m_apm_integer_divide(apmresult, apm_num1, apm_num2);
+
+            This function will divide apm_num1 by apm_num2, truncating the
+	    result to an integer and put the result in 'apmresult'.  The
+	    'apmresult' parameter cannot be one of the other MAPM parameters.
+
+            Division by zero creates a zero result and a warning on stderr.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_integer_div_rem(M_APM, M_APM, M_APM, M_APM);
+
+Example:    M_APM  quotient, remainder, num1, num2;
+            m_apm_integer_div_rem(quotient, remainder, num1, num2);
+
+            This function will divide num1 by num2, truncating the
+	    result to an integer and put the result in 'quotient' and it
+	    will put the remainder in 'remainder'. So, 173 / 26 will yield
+	    a quotient of 6 and a remainder of 17.
+
+	    Note that the input numbers do not necessarily have to be
+	    integers. This function can be used to split up the integer
+	    portion and fractional portion of a floating point number
+	    by calling the function with num2 set to 'MM_One'. So,
+	    32.17042 can be split up into '32' and '0.17042'.
+
+	    The 'quotient' and 'remainder' parameters cannot be one of the
+	    other MAPM parameters.
+
+            Division by zero creates a zero result and a warning on stderr.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_factorial(M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+            m_apm_factorial(apmresult, apm_num);
+
+            This function will compute the factorial of 'apm_num' and put
+	    the result in 'apmresult'.
+
+	    A non-integer input will yield nonsense. Actually, the algorithm
+	    simply multiplies : (though 0! and 1! return 1)
+
+	    N * (N - 1) * (N - 2) ... until N < 2.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_floor(M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+            m_apm_floor(apmresult, apm_num);
+
+            This function will round 'apm_num' downwards to the nearest
+	    integer and return the result in 'apmresult'. This has the
+	    same behavior as the 'C' function of the same name.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_ceil(M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+            m_apm_ceil(apmresult, apm_num);
+
+            This function will round 'apm_num' upwards to the nearest
+	    integer and return the result in 'apmresult'. This has the
+	    same behavior as the 'C' function of the same name.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_gcd(M_APM, M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num1, apm_num2;
+	    m_apm_gcd(apmresult, apm_num1, apm_num2);
+
+	    This function will compute the GCD (greatest common divisor) of
+	    apm_num1 and apm_num2 and put the result in 'apmresult'.
+
+	    The 'apmresult' parameter cannot be one of the other MAPM
+	    parameters.
+
+	    Non-integer inputs will create a zero result and a warning
+	    on stderr.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_lcm(M_APM, M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_num1, apm_num2;
+	    m_apm_lcm(apmresult, apm_num1, apm_num2);
+
+	    This function will compute the LCM (least common multiple) of
+	    apm_num1 and apm_num2 and put the result in 'apmresult'.
+
+	    The 'apmresult' parameter cannot be one of the other MAPM
+	    parameters.
+
+	    Non-integer inputs will create a zero result and a warning
+	    on stderr.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_sqrt(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_sqrt(apmresult, decimal_places, apm_num);
+
+            This function will take the square root of 'apm_num' and it
+	    will put the result in 'apmresult'. The result will be accurate
+	    to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+            An input < zero creates a zero result and a warning on stderr.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_cbrt(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_cbrt(apmresult, decimal_places, apm_num);
+
+            This function will take the cube root of 'apm_num' and it
+	    will put the result in 'apmresult'. The result will be accurate
+	    to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_log(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_log(apmresult, decimal_places, apm_num);
+
+            This function will take the natural log (base 2.718 ...) of
+	    'apm_num' and it will put the result in 'apmresult'. The result
+	    will be accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+            An input <= zero creates a zero result and a warning on stderr.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_log10(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_log10(apmresult, decimal_places, apm_num);
+
+            This function will take the common log (base 10) of 'apm_num'
+	    and it will put the result in 'apmresult'. The result will be
+	    accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+            An input <= zero creates a zero result and a warning on stderr.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_exp(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_exp(apmresult, decimal_places, apm_num);
+
+            This function will perform E ^ apm_num where 'E' is 2.718...
+	    (the exponential function) and it will put the result in
+	    'apmresult'. The result will be accurate to the number of
+	    decimal places specified.
+
+	    If the input to this function is too large, there will be a
+	    warning on stderr and the result will be zero.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_pow(M_APM, int, M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_x, apm_y;
+	    int    decimal_places;
+            m_apm_pow(apmresult, decimal_places, apm_x, apm_y);
+
+            This function will raise 'apm_x' to the 'apm_y' power and it
+	    will put the result in 'apmresult'. The result will be accurate
+	    to the number of decimal places specified.
+
+	    If 'apm_y' is an integer value, m_apm_integer_pow will be
+	    called automatically. (see the next function description).
+
+	    The 'apmresult' parameter cannot be one of the other MAPM
+	    parameters.
+
+            'apm_x' must be >= zero.
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_integer_pow(M_APM, int, M_APM, int);
+
+Example:    M_APM  apmresult, apm_x;
+	    int    decimal_places, ipower;
+	    m_apm_integer_pow(apmresult, decimal_places, apm_x, ipower);
+
+	    This function will raise 'apm_x' to the 'ipower' power and it
+	    will put the result in 'apmresult'. The result will be accurate
+	    to the number of decimal places specified.
+
+	    If calculating X^Y, this function should be used when 'Y'
+	    is an integer. This function is considerably faster than the
+	    generic 'm_apm_pow' function (when 'ipower' is not excessively
+	    large). 'apm_x' and/or 'ipower' may be negative.
+
+	    See the following function for a 'pow' function that does not
+	    perform any rounding operation and is more appropriate for
+	    integer only applications.
+
+	    Note that 'ipower' is an integer and not a MAPM number.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_integer_pow_nr(M_APM, M_APM, int);
+
+Example:    M_APM  apmresult, apm_x;
+	    int    ipower;
+	    m_apm_integer_pow_nr(apmresult, apm_x, ipower);
+
+	    This function will raise 'apm_x' to the 'ipower' power and it
+	    will put the result in 'apmresult'.
+
+	    This function is similar to the above function except the
+	    result is NOT ROUNDED (_nr). This function would typically be
+	    used is an integer only application where the full precision of
+	    the result is desired.
+
+	    Note that 'ipower' is an integer and not a MAPM number.
+
+	    'ipower' must be >= zero. 'ipower' < 0 creates a zero result
+	    and a warning on stderr.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_sin(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_sin(apmresult, decimal_places, apm_num);
+
+            This function will take the sine of 'apm_num' and it will put
+	    the result in 'apmresult'. The input angle is assumed to be in
+	    radians. The result will be accurate to the number of decimal
+	    places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_cos(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_cos(apmresult, decimal_places, apm_num);
+
+            This function will take the cosine of 'apm_num' and it will put
+	    the result in 'apmresult'. The input angle is assumed to be in
+	    radians. The result will be accurate to the number of decimal
+	    places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_sin_cos(M_APM, M_APM, int, M_APM);
+
+Example:    M_APM  sin_val, cos_val, apm_num;
+	    int    decimal_places;
+            m_apm_sin_cos(sin_val, cos_val, decimal_places, apm_num);
+
+            This function computes the sin and cos of apm_num and it will
+	    be more efficient than calling each function separately.
+	    The input angle is assumed to be in radians. The results will
+	    be accurate to the number of decimal places specified.
+
+	    The 'sin_val' and 'cos_val' parameter cannot be the input
+	    MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_tan(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_tan(apmresult, decimal_places, apm_num);
+
+            This function will take the tangent of 'apm_num' and it will put
+	    the result in 'apmresult'. The input angle is assumed to be in
+	    radians. The result will be accurate to the number of decimal
+	    places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_arcsin(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_arcsin(apmresult, decimal_places, apm_num);
+
+            This function will take the arc sine of 'apm_num' and it will put
+	    the result in 'apmresult'. The angle returned is in the range
+	    -PI / 2 to +PI / 2. The result will be accurate to the number of
+	    decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+            |Input| > 1 creates a zero result and a warning on stderr.
+
+	    Note: 'm_apm_asin' may also be used for this function name.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_arccos(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_arccos(apmresult, decimal_places, apm_num);
+
+            This function will take the arc cosine of 'apm_num' and it will
+	    put the result in 'apmresult'. The angle returned is in the range
+	    0 to +PI. The result will be accurate to the number of decimal
+	    places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+            |Input| > 1 creates a zero result and a warning on stderr.
+
+	    Note: 'm_apm_acos' may also be used for this function name.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_arctan(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_arctan(apmresult, decimal_places, apm_num);
+
+            This function will take the arc tangent of 'apm_num' and it will
+	    put the result in 'apmresult'. The angle returned is in the range
+	    -PI / 2 to +PI / 2. The result will be accurate to the number of
+	    decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+	    Note: 'm_apm_atan' may also be used for this function name.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_arctan2(M_APM, int, M_APM, M_APM);
+
+Example:    M_APM  apmresult, apm_x, apm_y;
+	    int    decimal_places;
+            m_apm_arctan2(apmresult, decimal_places, apm_y, apm_x);
+
+            This function will perform the 4 quadrant arc tangent of 'apm_y'
+	    and 'apm_x' and it will put the result in 'apmresult'. The angle
+	    returned is in the range -PI to +PI. The function will determine
+	    the quadrant based on the signs of the 2 inputs.  The result will
+	    be accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be one of the other MAPM
+	    parameters.
+
+            x, y both = zero yields a zero result and a warning on stderr.
+
+	    Note: 'm_apm_atan2' may also be used for this function name.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_sinh(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_sinh(apmresult, decimal_places, apm_num);
+
+            This function will take the hyperbolic sine of 'apm_num' and
+	    it will put the result in 'apmresult'. The result will be
+	    accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_cosh(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_cosh(apmresult, decimal_places, apm_num);
+
+            This function will take the hyperbolic cosine of 'apm_num' and
+	    it will put the result in 'apmresult'. The result will be
+	    accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_tanh(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_tanh(apmresult, decimal_places, apm_num);
+
+            This function will take the hyperbolic tangent of 'apm_num' and
+	    it will put the result in 'apmresult'. The result will be
+	    accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_arcsinh(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_arcsinh(apmresult, decimal_places, apm_num);
+
+            This function will take the hyperbolic arc-sin of 'apm_num' and
+	    it will put the result in 'apmresult'. The result will be
+	    accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+	    Note: 'm_apm_asinh' may also be used for this function name.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_arccosh(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_arccosh(apmresult, decimal_places, apm_num);
+
+            This function will take the hyperbolic arc-cos of 'apm_num' and
+	    it will put the result in 'apmresult'. The result will be
+	    accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+            Input < 1 creates a zero result and a warning on stderr.
+
+	    Note: 'm_apm_acosh' may also be used for this function name.
+
+-----------------------------------------------------------------------------
+
+Prototype:  void  m_apm_arctanh(M_APM, int, M_APM);
+
+Example:    M_APM  apmresult, apm_num;
+	    int    decimal_places;
+            m_apm_arctanh(apmresult, decimal_places, apm_num);
+
+            This function will take the hyperbolic arc-tan of 'apm_num' and
+	    it will put the result in 'apmresult'. The result will be
+	    accurate to the number of decimal places specified.
+
+	    The 'apmresult' parameter cannot be the other MAPM parameter.
+
+            |Input| >= 1 creates a zero result and a warning on stderr.
+
+	    Note: 'm_apm_atanh' may also be used for this function name.
+
+-----------------------------------------------------------------------------
+

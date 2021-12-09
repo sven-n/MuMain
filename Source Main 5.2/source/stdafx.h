@@ -70,19 +70,10 @@
 #include <gl/glew.h>
 #include <gl/gl.h>
 
-//util
-#define SAFE_DELETE(p)  { if(p) { delete (p);     (p)=NULL; } }
-#define SAFE_DELETE_ARRAY(p)  { if(p) { delete [] (p);     (p)=NULL; } }
-#define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
-#define DIRECTINPUT_VERSION	0x0800
-#define BYTECAST(T,X) static_cast<T>(X & 0xFF)
-
 //patch
 //winmain
 #include "Winmain.h"
-#include "Winmain_New_Live.h"
 #include "Defined_Global.h"
-#include "Winmain_New_Event.h"
 
 //client
 #include "_define.h"

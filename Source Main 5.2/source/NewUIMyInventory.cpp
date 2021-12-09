@@ -379,7 +379,6 @@ void SEASON3B::CNewUIMyInventory::DeleteItem(int iIndex)
 		{
 			m_pNewInventoryCtrl->RemoveItem(pItem);
 		}
-#ifdef CSK_FIX_WOPS_K30813_HOLLYITEM_SAVE
 		else
 		{
 			CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
@@ -394,7 +393,6 @@ void SEASON3B::CNewUIMyInventory::DeleteItem(int iIndex)
 				}
 			}
 		}
-#endif // CSK_FIX_WOPS_K30813_HOLLYITEM_SAVE
 	}
 }
 void SEASON3B::CNewUIMyInventory::DeleteAllItems()
@@ -2289,28 +2287,18 @@ bool SEASON3B::CNewUIMyInventory::CanRegisterItemHotKey(int iType)
 	case ITEM_POTION+48:
 	case ITEM_POTION+49:
 	case ITEM_POTION+50:
-#ifdef PSW_ELITE_ITEM
 	case ITEM_POTION+70:
 	case ITEM_POTION+71:
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_ELITE_ITEM
 	case ITEM_POTION+78:
 	case ITEM_POTION+79:
 	case ITEM_POTION+80:
 	case ITEM_POTION+81:
 	case ITEM_POTION+82:
-#endif //PSW_ELITE_ITEM
-#ifdef PSW_NEW_ELITE_ITEM
 	case ITEM_POTION+94:
-#endif //PSW_NEW_ELITE_ITEM
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 	case ITEM_POTION+85:
 	case ITEM_POTION+86:
 	case ITEM_POTION+87:
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef YDG_ADD_CS7_ELITE_SD_POTION
 	case ITEM_POTION+133:
-#endif	// YDG_ADD_CS7_ELITE_SD_POTION
 		return true;
 	}
 
@@ -2326,9 +2314,7 @@ bool SEASON3B::CNewUIMyInventory::CanOpenMyShopInterface()
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
 #endif // LEM_ADD_LUCKYITEM
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
-#ifdef LJH_MOD_CANT_OPENNING_PERSONALSHOP_WIN_IN_CURSED_TEMPLE 
-		|| g_CursedTemple->IsCursedTemple() 
-#endif //LJH_MOD_CANT_OPENNING_PERSONALSHOP_WIN_IN_CURSED_TEMPLE
+		|| gMapManager.IsCursedTemple() 
 		)
 	{
 		return false;

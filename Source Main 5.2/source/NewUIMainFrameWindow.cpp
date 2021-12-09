@@ -1681,13 +1681,11 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 				{
 					m_EventState = EVENT_NONE;
 
-#ifdef CSK_FIX_WOPS_K29010_HELLBUST
 #ifdef PBG_ADD_NEWCHAR_MONK
 					m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 #else //PBG_ADD_NEWCHAR_MONK
 					m_byHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 #endif //PBG_ADD_NEWCHAR_MONK
-#endif // CSK_FIX_WOPS_K29010_HELLBUST
 
 					Hero->CurrentSkill = i;
 					m_bSkillList = false;
@@ -1862,13 +1860,12 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
 			return;
 		}
 
-#ifdef CSK_FIX_WOPS_K29010_HELLBUST
 #ifdef PBG_ADD_NEWCHAR_MONK
 		m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 #else //PBG_ADD_NEWCHAR_MONK
 		m_byHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 #endif //PBG_ADD_NEWCHAR_MONK
-#endif // CSK_FIX_WOPS_K29010_HELLBUST
+
 		Hero->CurrentSkill = m_iHotKeySkillType[iHotKey];
 
 		WORD bySkill = CharacterAttribute->Skill[Hero->CurrentSkill];
@@ -2057,7 +2054,6 @@ float SEASON3B::CNewUISkillList::GetLayerDepth()
 	return 5.2f;
 }
 
-#ifdef CSK_FIX_WOPS_K29010_HELLBUST
 #ifdef PBG_ADD_NEWCHAR_MONK
 WORD SEASON3B::CNewUISkillList::GetHeroPriorSkill()
 {
@@ -2078,9 +2074,6 @@ void SEASON3B::CNewUISkillList::SetHeroPriorSkill(BYTE bySkill)
 	m_byHeroPriorSkill = bySkill;
 #endif //PBG_ADD_NEWCHAR_MONK
 }
-#endif // CSK_FIX_WOPS_K29010_HELLBUST
-
-
 
 void SEASON3B::CNewUISkillList::RenderPetSkill()
 {
@@ -2338,13 +2331,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		fV = 0.f;
 		iKindofSkill = KOS_COMMAND;
 	}
-	else if((bySkillType >= AT_SKILL_ALICE_DRAINLIFE && bySkillType <= AT_SKILL_ALICE_THORNS)
-		/*
-#ifdef PJH_ADD_MASTERSKILL
-		|| (AT_SKILL_ALICE_DRAINLIFE_UP<=bySkillType && bySkillType<= AT_SKILL_ALICE_DRAINLIFE_UP+4)
-#endif
-		*/
-		)
+	else if((bySkillType >= AT_SKILL_ALICE_DRAINLIFE && bySkillType <= AT_SKILL_ALICE_THORNS))
 	{
 		fU = ((bySkillType - AT_SKILL_ALICE_DRAINLIFE) % 8) * width / 256.f;
 		fV = 3 * height / 256.f;

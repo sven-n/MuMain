@@ -364,9 +364,6 @@
     <ClCompile Include="source\SlideInfo.cpp">
       <Filter>MU\Client\info\resource</Filter>
     </ClCompile>
-    <ClCompile Include="source\ImportanceData.cpp">
-      <Filter>MU\Client\core</Filter>
-    </ClCompile>
     <ClCompile Include="source\Winmain.cpp">
       <Filter>MU\Client\core</Filter>
     </ClCompile>
@@ -1560,16 +1557,7 @@
     <ClInclude Include="source\Defined_Global.h">
       <Filter>MU\Client\core</Filter>
     </ClInclude>
-    <ClInclude Include="source\ImportanceData.h">
-      <Filter>MU\Client\core</Filter>
-    </ClInclude>
     <ClInclude Include="source\Winmain.h">
-      <Filter>MU\Client\core</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Winmain_New_Event.h">
-      <Filter>MU\Client\core</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Winmain_New_Live.h">
       <Filter>MU\Client\core</Filter>
     </ClInclude>
     <ClInclude Include="source\ZzzScene.h">

@@ -35,9 +35,7 @@ bool	GetTimeCheck(int DelayTime);
 void	SetEffectVolumeLevel(int level);
 void    SetViewPortLevel ( int level );
 
-#ifdef PSW_BUGFIX_IME
 bool IsEnterPressed();
 void SetEnterPressed( bool enterpressed );
-#endif //PSW_BUGFIX_IME
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #if(GAMESERVER_UPDATE>=701)
-#include "..\\..\\Util\\mapm\\M_APM.h"
+#include "Util\\mapm\\M_APM.h"
 #endif
 #include "User.h"
 

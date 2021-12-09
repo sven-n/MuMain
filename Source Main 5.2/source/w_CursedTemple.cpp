@@ -129,25 +129,14 @@ bool CursedTemple::IsPartyMember( DWORD selectcharacterindex )
 {
 	if( PartyNumber == 0 ) return false;
 
-#ifdef LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 	CHARACTER* c = &CharactersClient[selectcharacterindex];
 	if( c == NULL ) return false;
-#endif // LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 
 	for ( int i=0; i<PartyNumber; ++i )
 	{
 		PARTY_t* p = &Party[i];
-#ifdef LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
         int length = max(1, strlen(c->ID));
         if ( !strncmp( p->Name, c->ID, length ) ) return true;
-#else // LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
-		if ( p->index == 0xffff ) continue;
-
-		if( selectcharacterindex == p->index )
-		{
-			return true;
-		}
-#endif // LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 	}
 	return false;
 }

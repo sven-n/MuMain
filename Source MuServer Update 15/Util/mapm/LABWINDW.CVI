@@ -1,0 +1,42 @@
+
+-----------------------------------------------------------
+Build Instructions for National Instrumwents LabWindows CVI
+
+(This was tested with LabWindows Version 6.0)
+-----------------------------------------------------------
+
+1)  Create a new project (mapm.prj)
+
+2)  Set this project to create a "STATIC" library.
+    (goto Build -> Target Type)
+
+3)  The following files should be part of this project
+
+    m_apm.h
+    m_apm_lc.h
+    mapm*.c          <---   38 files as of MAPM Version 4.8
+
+4)  Build the static library  (mapm.lib)
+
+
+To build the demo programs (for example 'validate')
+
+5)  Create a new project (validate.prj)
+
+6)  Set this project to create a RELEASE executable.
+    (The default is "DEBUG" executable which will work also.)
+
+7)  Build a console application.
+    (goto Build -> Target Settings)
+
+8)  The following files should be part of this project
+
+    m_apm.h
+    validate.c
+    mapm.lib         <---   built in step (4) above
+
+9)  Create the executable   
+
+10) In a DOS Window, you can now run validate.exe
+    When complete, should display 'PASS'.
+

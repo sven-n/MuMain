@@ -1,0 +1,108 @@
+
+Information from  
+
+Martin Pfingstl (Martin.Pfingstl@epost.de)
+ 
+on using the multi-threaded capable functions of MAPM
+under MS Windows (using Microsoft Visual C++)
+
+The default MAPM library is *NOT* thread safe. Martin
+created a set of stand-alone function wrappers so
+the MAPM library is thread-safe when using these 
+function wrappers.
+
+The general idea is to create a 'semaphore' from the
+operating system which guarantees that only 1 thread
+will have access to a critical section of code. The 
+following 4 functions will need to be created which 
+will depend on the compiler you are using.
+
+void	m_apm_enter(void)
+void	m_apm_leave(void)
+void	m_apm_init_semaphore(void)
+void	m_apm_free_semaphore(void)
+
+
+The example in mapm_mt.c shows how it is done
+with the latest Microsoft compilers. Other compilers
+should have similiar functions if they support 
+multi-threaded applications.
+
+The general usage is as follows:
+
+1)  compile the library normally, with make, script, batch file, whatever.
+2)  compile mapm_mt.c to create mapm_mt.o[bj]
+3)  all MAPM functions which are thread safe will have '_mt' at the end.
+    i.e., m_apm_sqrt becomes m_apm_sqrt_mt. all user defined functions 
+    have a thread-safe equivalent which has '_mt' on the end.
+4)  in the C++ wrapper class, the MAPM datatype becomes MAPMMT.
+5)  compile your application using m_apm_mt.h instead of m_apm.h
+6)  link your app with mapm_mt.o[bj] *and* the original library.
+
+M. Ring   June, 2002
+
+----->
+
+From Martin:
+
+In order to make code multi threading capable, one has two possibilities:
+Either one writes functions using no global parameters, or - second
+possibility - one makes the functions so that only one thread can execute
+them simultaneously.
+
+I implemented the second possibility and it works very good.
+
+The basic idea is:
+1. create a semaphore (mutual exclusive object, operating system ensures
+that only one thread can "have" it). Operating sytem provides functions for
+obtaining and releasing it. Once a thread has ownership of the semaphore,
+any other thread who wants ownership simply must wait (i.e. the ownership
+call blocks the thread and returns as soon as the other thread has released
+its ownership).
+
+2. For each publically available function in your library I created a second
+one with the same name but adding the extension "_mt" (multi threaded),
+which does the following:
+
+m_apm_xxx_mt(x,y,z);
+{
+  obtain semaphore();
+  m_apm_xxx(x,y,z);
+  release semaphore();
+}
+
+In addition to that I created a C++ wrapper class MAPMMT, which does exactly
+the same as MAPM except it calls the new "_mt" functions to provide thread
+security.
+
+For example, use function 'm_apm_sqrt_mt' instead of 'm_apm_sqrt'.
+
+In order to use it you need to include m_apm_mt.h in your application.
+
+The file mapm_mt.c is a stand-alone module now and it should be linked
+in with your application. The compiled object file could also be added 
+to the library if the user desires.
+
+The beginning of file mapm_mt.c contains platform specific stuff (semaphore
+handling): Currently only code for MS Windows is available. Their meaning
+should be self explanatory. Code for other operating systems must be added.
+
+Before using any "_mt"-function the user now has to initialize the semaphore
+by calling m_apm_init_semaphore.
+
+After that the user of the library can decide whether to use the old
+functions or the secured functions, depending on the needs. The user can
+also call m_apm_enter(); to manually get ownership of the semaphore, call all
+the old functions (your original functions) and at the end call
+m_apm_leave(). So the overhead from constantly getting and releasing
+a semaphore tends to go near 0.
+
+I tested the speed of m_apm_enter() and m_apm_leave on my system: The
+result was that it can do about 30 000 000 m_apm_enter and m_apm_leave's
+per second (2 Ghz Athlon).
+
+That's about the speed of 3 floating point divisions, or in other words:
+overhead from that functions is near 0.
+
+Martin
+

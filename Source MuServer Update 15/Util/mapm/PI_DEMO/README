@@ -1,0 +1,20 @@
+
+Here are some sample programs (C & C++) to
+calculate PI.  
+
+Note that these are not the fastest methods
+to compute PI, these are here simply for
+illustration.  These programs could be used 
+as a starting template for a new program.
+
+The fastest algorithm I came across for PI
+is actually used the library (mapm_cpi.c)
+
+I included a short build script for use 
+under Linux and generic Unix using gcc.
+It should be relatively easy to build these
+demo programs using other O/S's / compilers.
+
+M. Ring
+1-2-2004
+

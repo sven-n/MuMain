@@ -1,10 +1,6 @@
 // NewUIGoldBowmanWindow.cpp: implementation of the CNewUIGoldBowmanWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-
-#ifdef PSW_GOLDBOWMAN
-
 #include "NewUIGoldBowmanWindow.h"
 #include "NewUISystem.h"
 #include "wsclientinline.h"
@@ -341,5 +337,3 @@ void CNewUIGoldBowmanWindow::UnloadImages()
 	DeleteBitmap(IMAGE_GB_TOP);
 	DeleteBitmap(IMAGE_GB_BACK);
 }
-
-#endif //PSW_GOLDBOWMAN

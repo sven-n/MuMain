@@ -160,16 +160,12 @@ bool CNewUIMixInventory::ClosingProcess()
 		case SEASON3A::MIXTYPE_ELPIS:
 			SendRequestMixExit();
 			break;
-#if defined PSW_NEW_CHAOS_CARD || defined PBG_FIX_CHAOSCARD
 		case SEASON3A::MIXTYPE_CHAOS_CARD:
 			SendRequestMixExit();
 			break;
-#endif	// defined PSW_NEW_CHAOS_CARD || defined PBG_FIX_CHAOSCARD
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 		case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
 			SendRequestMixExit();
 			break;
-#endif	// CSK_EVENT_CHERRYBLOSSOM
 		case SEASON3A::MIXTYPE_ATTACH_SOCKET:
 		case SEASON3A::MIXTYPE_DETACH_SOCKET:
 			m_SocketListBox.Clear();

@@ -1,0 +1,90 @@
+# Borland makefile for MAPM library version 4.7 
+# (version 3.50, added MAPM_FFT  MCR)
+# (version 3.65, added MAPM_RCP  MCR)
+# (version 3.85, added MAPM_FLR, _CPI  MCR)
+# (version 4.0,  added MAPM_FAM, _GCD  MCR)
+# (version 4.2,  added MAPM_FPF  MCR)
+# (version 4.4,  added MAPMUTL2  MCR)
+# (version 4.5,  added MAPMPWR2  MCR)
+# (version 4.6,  added MAPM_LG2, _LG3  MCR)
+# (version 4.7,  added MAPMUTL1, _LG4  MCR)
+#
+# Tested with Borland C++ 5.2 and 5.5 command line compilers.
+#
+# Run this makefile from the source subdirectory with
+#   make -f makefile.b32
+#
+# Michael Bedward
+# mbedward@ozemail.com.au
+#
+# 7 June 2000
+
+LIBTARGET = mapm.lib
+CC = bcc32
+
+# -c   compile only
+# add -v if you want debugging info
+CFLAGS = -DMSDOS -c
+
+# uncomment the relevant BCCINC macro...
+#
+# this is for Borland 5.5 (edit for your path)
+BCCINC = -IC:/borland/bcc55/include
+
+# this is for Borland 5.2 which can find it's own headers
+#BCCINC =
+
+OBJECTS = MAPM5SIN.OBJ \
+	MAPMASIN.OBJ \
+	MAPMASN0.OBJ \
+	MAPMCBRT.OBJ \
+	MAPMCNST.OBJ \
+	MAPMFACT.OBJ \
+	MAPMFMUL.OBJ \
+	MAPMGUES.OBJ \
+	MAPMHASN.OBJ \
+	MAPMHSIN.OBJ \
+	MAPMIPWR.OBJ \
+	MAPMISTR.OBJ \
+	MAPMPWR2.OBJ \
+	MAPMRSIN.OBJ \
+	MAPMSQRT.OBJ \
+	MAPMSTCK.OBJ \
+	MAPMUTIL.OBJ \
+	MAPMUTL1.OBJ \
+	MAPMUTL2.OBJ \
+	MAPM_ADD.OBJ \
+	MAPM_CPI.OBJ \
+	MAPM_DIV.OBJ \
+	MAPM_EXP.OBJ \
+	MAPM_FAM.OBJ \
+	MAPM_FFT.OBJ \
+	MAPM_FLR.OBJ \
+	MAPM_FPF.OBJ \
+	MAPM_GCD.OBJ \
+	MAPM_LOG.OBJ \
+	MAPM_LG2.OBJ \
+	MAPM_LG3.OBJ \
+	MAPM_LG4.OBJ \
+	MAPM_MUL.OBJ \
+	MAPM_POW.OBJ \
+	MAPM_RCP.OBJ \
+	MAPM_RND.OBJ \
+	MAPM_SET.OBJ \
+	MAPM_SIN.OBJ
+
+.SUFFIXES: .c .obj
+
+.c.obj :
+	bcc32 $(CFLAGS) $(BCCINC) $< -o $@
+
+all: $(LIBTARGET)
+
+$(LIBTARGET): $(OBJECTS)
+	tlib $(LIBTARGET) /P1024 @&&!
+-+$(OBJECTS:.OBJ=.OBJ -+) 
+!
+
+clean:
+	-erase *.obj
+	-erase *.lib

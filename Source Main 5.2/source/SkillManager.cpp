@@ -358,7 +358,6 @@ int CSkillManager::MasterSkillToBaseSkillIndex(int iMasterSkillIndex)
 			iBaseSkillIndex = AT_SKILL_DARK_SCREAM;
 		}
 		break;	
-#ifdef PJH_ADD_MASTERSKILL
 	case AT_SKILL_ALICE_SLEEP_UP:
 	case AT_SKILL_ALICE_SLEEP_UP+1:
 	case AT_SKILL_ALICE_SLEEP_UP+2:
@@ -395,7 +394,6 @@ int CSkillManager::MasterSkillToBaseSkillIndex(int iMasterSkillIndex)
 			iBaseSkillIndex = AT_SKILL_ALICE_DRAINLIFE;
 		}
 		break;
-#endif // PJH_ADD_MASTERSKILL
 	default:
 		{
 			iBaseSkillIndex = iMasterSkillIndex;

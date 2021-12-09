@@ -6,9 +6,9 @@
 
 #if(GAMESERVER_UPDATE>=701)
 
-#include "..\\..\\Util\\cryptopp\\cryptlib.h"
-#include "..\\..\\Util\\cryptopp\\modes.h"
-#include "..\\..\\Util\\cryptopp\\des.h"
+#include "Util\\cryptopp\\cryptlib.h"
+#include "Util\\cryptopp\\modes.h"
+#include "\Util\\cryptopp\\des.h"
 
 using namespace CryptoPP;
 

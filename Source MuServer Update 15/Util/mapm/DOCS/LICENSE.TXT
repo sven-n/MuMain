@@ -1,0 +1,13 @@
+
+/*
+ *   THIS FILE HAS BEEN MODIFIED FROM THE OFFICIAL MAPM DISTRIBUTION
+ *   BY 'name/organization' on YYYY/MM/DD.
+ *
+ *   THIS FILE IS ORIGINALLY FROM MAPM VERSION 4.9.5.
+ *
+ *   .... OPTIONAL: a brief description of file changes here ....
+ */
+
+...  start of MAPM original file ...
+
+

@@ -1356,8 +1356,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 				b->RenderMesh(1,RENDER_TEXTURE|RENDER_WAVE,0.5f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 				b->RenderMesh(1,RENDER_TEXTURE|RENDER_WAVE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
 			else if( o->Type == MODEL_MONSTER01+127 )
 			{			
 				b->RenderBody(RENDER_TEXTURE, o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
@@ -1378,22 +1376,16 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			{
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif // PRUARIN_EVENT07_3COLORHARVEST
-#ifdef CSK_EVENT_CHERRYBLOSSOM
 			else if( o->Type==MODEL_NPC_CHERRYBLOSSOM )
 			{
 				b->RenderMesh(0,RENDER_TEXTURE,o->Alpha,o->BlendMesh,2.f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 				b->RenderMesh(0,RENDER_TEXTURE|RENDER_CHROME7,0.25f,o->BlendMesh,1.f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 				b->RenderBody(RENDER_TEXTURE,0.8f,o->BlendMesh,2.f,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,0);
 			}
-#endif //CSK_EVENT_CHERRYBLOSSOM
-#ifdef PSW_EVENT_CHERRYBLOSSOMTREE
 			else if( o->Type==MODEL_NPC_CHERRYBLOSSOMTREE )
 			{
 				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#endif //PSW_EVENT_CHERRYBLOSSOMTREE			
-
 			else if(o->Type==MODEL_MONSTER01+56)
 			{
 				b->StreamMesh = 0;

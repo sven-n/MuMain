@@ -1,0 +1,3 @@
+^D:\SOURCE\SOURCE MUNDOMU\UTIL\CRYPTOPPVS2019\ADHOC.CPP.PROTO
+if not exist adhoc.cpp copy "D:\Source\Source MundoMU\Util\cryptoppVs2019\adhoc.cpp.proto" adhoc.cpp
+echo: >> adhoc.cpp.copied

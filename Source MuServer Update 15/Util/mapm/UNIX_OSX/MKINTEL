@@ -1,0 +1,56 @@
+#!/bin/sh
+#  
+#    file: make_intel_linux
+#  
+#    Build script for Intel Linux Compiler  
+#
+#
+#    Tested with: Intel(R) C Compiler for 32-bit applications, Version 8.1 
+#                 Build 20050207Z Package ID: <installpackageid>
+#
+#
+#    Tested with: Intel(R) C++ Compiler for 32-bit applications, Version 7.0 
+#	          Build 20021021Z    
+#  
+#  
+rm -f libmapm.a map*.o
+rm -f calc validate primenum cpp_demo
+#  
+# icc -V
+#  
+#    compile the MAPM library files
+#
+icc -c -ip -O3 map*.c
+#  
+#  
+#   build the library and delete object files
+#  
+ar rc libmapm.a map*.o
+rm map*.o
+#  
+#  
+#    build the 4 demo programs
+#  
+#  
+icc -ip -O3 -o calc calc.c libmapm.a
+icc -ip -O3 -o validate validate.c libmapm.a
+icc -ip -O3 -o primenum primenum.c libmapm.a
+#  
+icpc -ip -O3 -o cpp_demo cpp_demo.cpp libmapm.a
+#  
+#  
+#  
+#   (to build statically linked executables)
+#
+#   icc -ip -O3 -o calc calc.c libmapm.a -static
+#   icc -ip -O3 -o validate validate.c libmapm.a -static
+#   icc -ip -O3 -o primenum primenum.c libmapm.a -static
+#  
+#   icpc -ip -O3 -o cpp_demo cpp_demo.cpp libmapm.a -static
+#  
+#  
+#   (to build statically linked C++ executable using Intel's C++ library's)
+#
+#   icpc -ip -O3 -o cpp_demo cpp_demo.cpp libmapm.a -static-libcxa
+#  
+#  

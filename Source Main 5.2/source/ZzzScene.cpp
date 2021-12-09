@@ -412,8 +412,6 @@ int  ErrorMessage = NULL;
 int	 ErrorMessageNext = NULL;
 extern bool g_bEnterPressed;
 
-#ifdef PSW_BUGFIX_IME
-
 bool IsEnterPressed() {
 	return g_bEnterPressed;
 }
@@ -421,8 +419,6 @@ bool IsEnterPressed() {
 void SetEnterPressed( bool enterpressed ) {
 	g_bEnterPressed = enterpressed;
 }
-
-#endif //PSW_BUGFIX_IME
 
 BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound = TRUE)
 {

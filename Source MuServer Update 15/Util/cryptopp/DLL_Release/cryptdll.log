@@ -1,0 +1,151 @@
+﻿Build started 06/10/2016 01:19:51.
+     1>Project "C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\cryptdll.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating ".\DLL_Release\cryptdll.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O1 /Ob1 /Oy- /D NDEBUG /D WIN32 /D _WINDOWS /D _USRDLL /D CRYPTOPP_EXPORTS /D CRYPTOPP_ENABLE_COMPLIANCE_WITH_FIPS_140_2=1 /D USE_PRECOMPILED_HEADERS /D _VC80_UPGRADE=0x0600 /D _WINDLL /D _MBCS /GF /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /GR /Yc"pch.h" /Fp".\DLL_Release\cryptdll.pch" /Fo".\DLL_Release\\" /Fd".\DLL_Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt pch.cpp  /Zm200   /Zm200 
+         pch.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O1 /Ob1 /Oy- /D NDEBUG /D WIN32 /D _WINDOWS /D _USRDLL /D CRYPTOPP_EXPORTS /D CRYPTOPP_ENABLE_COMPLIANCE_WITH_FIPS_140_2=1 /D USE_PRECOMPILED_HEADERS /D _VC80_UPGRADE=0x0600 /D _WINDLL /D _MBCS /GF /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /GR /Yu"pch.h" /Fp".\DLL_Release\cryptdll.pch" /Fo".\DLL_Release\\" /Fd".\DLL_Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt algebra.cpp algparam.cpp asn.cpp authenc.cpp basecode.cpp cbcmac.cpp ccm.cpp channels.cpp cmac.cpp cpu.cpp cryptlib.cpp des.cpp dessp.cpp dh.cpp dsa.cpp ec2n.cpp eccrypto.cpp ecp.cpp emsa2.cpp eprecomp.cpp files.cpp filters.cpp fips140.cpp fipstest.cpp gcm.cpp gf2n.cpp gfpcrypt.cpp hex.cpp hmac.cpp hrtimer.cpp integer.cpp misc.cpp modes.cpp mqueue.cpp nbtheory.cpp oaep.cpp osrng.cpp pkcspad.cpp pssr.cpp pubkey.cpp queue.cpp randpool.cpp rdtables.cpp rijndael.cpp rng.cpp rsa.cpp rw.cpp sha.cpp sha3.cpp simple.cpp skipjack.cpp strciphr.cpp trdlocal.cpp  /Zm200   /Zm200 
+         algebra.cpp
+         algparam.cpp
+         asn.cpp
+         authenc.cpp
+         basecode.cpp
+         cbcmac.cpp
+         ccm.cpp
+         channels.cpp
+         cmac.cpp
+         cpu.cpp
+         cryptlib.cpp
+         des.cpp
+         dessp.cpp
+         dh.cpp
+         dsa.cpp
+         ec2n.cpp
+         eccrypto.cpp
+         ecp.cpp
+         emsa2.cpp
+         eprecomp.cpp
+         Generating Code...
+         Compiling...
+         files.cpp
+         filters.cpp
+         fips140.cpp
+         fipstest.cpp
+         gcm.cpp
+         gf2n.cpp
+         gfpcrypt.cpp
+         hex.cpp
+         hmac.cpp
+         hrtimer.cpp
+         integer.cpp
+         misc.cpp
+         modes.cpp
+         mqueue.cpp
+         nbtheory.cpp
+         oaep.cpp
+         osrng.cpp
+         pkcspad.cpp
+         pssr.cpp
+         pubkey.cpp
+         Generating Code...
+         Compiling...
+         queue.cpp
+         randpool.cpp
+         rdtables.cpp
+         rijndael.cpp
+         rng.cpp
+         rsa.cpp
+         rw.cpp
+         sha.cpp
+         sha3.cpp
+         simple.cpp
+         skipjack.cpp
+         strciphr.cpp
+         trdlocal.cpp
+         Generating Code...
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O1 /Ob1 /Oy- /D NDEBUG /D WIN32 /D _WINDOWS /D _USRDLL /D CRYPTOPP_EXPORTS /D CRYPTOPP_ENABLE_COMPLIANCE_WITH_FIPS_140_2=1 /D USE_PRECOMPILED_HEADERS /D _VC80_UPGRADE=0x0600 /D _WINDLL /D _MBCS /GF /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo".\DLL_Release\\" /Fd".\DLL_Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt dll.cpp iterhash.cpp  /Zm200   /Zm200 
+         dll.cpp
+         iterhash.cpp
+         Generating Code...
+       ResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /D NDEBUG /D _VC80_UPGRADE=0x0600 /l"0x0409" /nologo /fo".\DLL_Release\cryptopp.res" cryptopp.rc 
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(990,5): warning MSB8012: TargetPath(C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\.\DLL_Release\cryptdll.dll) does not match the Linker's OutputFile property value (C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\DLL_Release\cryptopp.dll). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(992,5): warning MSB8012: TargetName(cryptdll) does not match the Linker's OutputFile property value (cryptopp). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"DLL_Release/cryptopp.dll" /INCREMENTAL:NO /NOLOGO advapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:".\DLL_Release\cryptdll.dll.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\DLL_Release\cryptdll.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /TLBID:1 /BASE:"0x42900000" /DYNAMICBASE /NXCOMPAT /IMPLIB:".\DLL_Release\cryptopp.lib" /MACHINE:X86 /DLL .\DLL_Release\cryptopp.res
+         .\DLL_Release\algebra.obj
+         .\DLL_Release\algparam.obj
+         .\DLL_Release\asn.obj
+         .\DLL_Release\authenc.obj
+         .\DLL_Release\basecode.obj
+         .\DLL_Release\cbcmac.obj
+         .\DLL_Release\ccm.obj
+         .\DLL_Release\channels.obj
+         .\DLL_Release\cmac.obj
+         .\DLL_Release\cpu.obj
+         .\DLL_Release\cryptlib.obj
+         .\DLL_Release\des.obj
+         .\DLL_Release\dessp.obj
+         .\DLL_Release\dh.obj
+         .\DLL_Release\dll.obj
+         .\DLL_Release\dsa.obj
+         .\DLL_Release\ec2n.obj
+         .\DLL_Release\eccrypto.obj
+         .\DLL_Release\ecp.obj
+         .\DLL_Release\emsa2.obj
+         .\DLL_Release\eprecomp.obj
+         .\DLL_Release\files.obj
+         .\DLL_Release\filters.obj
+         .\DLL_Release\fips140.obj
+         .\DLL_Release\fipstest.obj
+         .\DLL_Release\gcm.obj
+         .\DLL_Release\gf2n.obj
+         .\DLL_Release\gfpcrypt.obj
+         .\DLL_Release\hex.obj
+         .\DLL_Release\hmac.obj
+         .\DLL_Release\hrtimer.obj
+         .\DLL_Release\integer.obj
+         .\DLL_Release\iterhash.obj
+         .\DLL_Release\misc.obj
+         .\DLL_Release\modes.obj
+         .\DLL_Release\mqueue.obj
+         .\DLL_Release\nbtheory.obj
+         .\DLL_Release\oaep.obj
+         .\DLL_Release\osrng.obj
+         .\DLL_Release\pch.obj
+         .\DLL_Release\pkcspad.obj
+         .\DLL_Release\pssr.obj
+         .\DLL_Release\pubkey.obj
+         .\DLL_Release\queue.obj
+         .\DLL_Release\randpool.obj
+         .\DLL_Release\rdtables.obj
+         .\DLL_Release\rijndael.obj
+         .\DLL_Release\rng.obj
+         .\DLL_Release\rsa.obj
+         .\DLL_Release\rw.obj
+         .\DLL_Release\sha.obj
+         .\DLL_Release\sha3.obj
+         .\DLL_Release\simple.obj
+         .\DLL_Release\skipjack.obj
+         .\DLL_Release\strciphr.obj
+         .\DLL_Release\trdlocal.obj
+            Creating library .\DLL_Release\cryptopp.lib and object .\DLL_Release\cryptopp.exp
+         cryptdll.vcxproj -> C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\.\DLL_Release\cryptdll.dll
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"DLL_Release/cryptopp.dll;#2" /manifest .\DLL_Release\cryptdll.dll.intermediate.manifest
+       CustomBuildStep:
+         Description: Performing Custom Build Step
+         CTRelease\cryptest mac_dll C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\.\DLL_Release\cryptdll.dll 
+         echo mac done > .\DLL_Release\cryptopp.mac.done 
+         :VCEnd
+         'CTRelease\cryptest' não é reconhecido como um comando interno
+         ou externo, um programa operável ou um arquivo em lotes.
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppCommon.targets(183,5): error MSB3073: The command "CTRelease\cryptest mac_dll C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\.\DLL_Release\cryptdll.dll 
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppCommon.targets(183,5): error MSB3073: echo mac done > .\DLL_Release\cryptopp.mac.done 
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppCommon.targets(183,5): error MSB3073: :VCEnd" exited with code 9009.
+     1>Done Building Project "C:\Users\Administrador\Desktop\Sources\MuEmuS8Sources\MuEmu\Util\cryptopp\cryptdll.vcxproj" (build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:42.28

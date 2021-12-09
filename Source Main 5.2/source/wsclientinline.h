@@ -2239,7 +2239,6 @@ __forceinline bool SendRequestMixExit()
 	spe.Send();\
 }
 
-#ifdef PRUARIN_EVENT07_3COLORHARVEST
 //----------------------------------------------------------------------------
 // CG [0xD0][0x09]
 //----------------------------------------------------------------------------
@@ -2250,7 +2249,6 @@ __forceinline bool SendRequestMixExit()
 	spe << (BYTE)0x09;\
 	spe.Send();\
 }
-#endif // PRUARIN_EVENT07_3COLORHARVEST
 
 //----------------------------------------------------------------------------
 // CG [0xD0][0x10]

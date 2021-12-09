@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "SkillManager.h"
-#include "..\\..\\Util\\Math.h"
+#include "..\\..\\Util\Math.h"
 #include "Attack.h"
 #include "CastleSiege.h"
 #include "CustomArena.h"

@@ -2390,7 +2390,6 @@ void UseSkillElf( CHARACTER *c, OBJECT *o)
 		
     case AT_SKILL_PARALYZE:
 		{
-#ifdef PSW_FRUIT_ITEM_CHECK_SKILL
 			WORD Dexterity;
 			const WORD notDexterity = 646;
 			Dexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
@@ -2398,7 +2397,6 @@ void UseSkillElf( CHARACTER *c, OBJECT *o)
 			{
 				break;
 			}
-#endif //PSW_FRUIT_ITEM_CHECK_SKILL
 			if(!CheckArrow()) 
 				break;
 			SendRequestMagic(Skill,CharactersClient[g_MovementSkill.m_iTarget].Key);
@@ -2421,22 +2419,17 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 	
 	switch(iSkill)
 	{
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_ALICE_DRAINLIFE_UP:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+1:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+2:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+3:
 		case AT_SKILL_ALICE_DRAINLIFE_UP+4:
-#endif
 	case AT_SKILL_ALICE_DRAINLIFE:	
 	case AT_SKILL_ALICE_LIGHTNINGORB:
 		{
 			LetHeroStop();
 			if(iSkill == AT_SKILL_ALICE_DRAINLIFE 
-#ifdef PJH_ADD_MASTERSKILL
-			|| (AT_SKILL_ALICE_DRAINLIFE_UP <= iSkill && iSkill <= AT_SKILL_ALICE_DRAINLIFE_UP+4)
-#endif
-				)
+			|| (AT_SKILL_ALICE_DRAINLIFE_UP <= iSkill && iSkill <= AT_SKILL_ALICE_DRAINLIFE_UP+4))
 			{
 				switch(pCha->Helper.Type)
 				{
@@ -2515,13 +2508,11 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 		break;
 	case AT_SKILL_ALICE_SLEEP:
 	case AT_SKILL_ALICE_BLIND:
-#ifdef PJH_ADD_MASTERSKILL
 		case AT_SKILL_ALICE_SLEEP_UP:
 		case AT_SKILL_ALICE_SLEEP_UP+1:
 		case AT_SKILL_ALICE_SLEEP_UP+2:
 		case AT_SKILL_ALICE_SLEEP_UP+3:
 		case AT_SKILL_ALICE_SLEEP_UP+4:
-#endif
 	case AT_SKILL_ALICE_THORNS:	
 		{
 			LetHeroStop();

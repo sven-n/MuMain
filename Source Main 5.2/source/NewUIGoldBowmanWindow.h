@@ -1,13 +1,7 @@
 // NewUIGoldBowmanWindow.h: interface for the CNewUIGoldBowmanWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_NEWUIGOLDBOWMANWINDOW_H__B1287970_FF70_4AE6_B38E_31AA3EC0341F__INCLUDED_)
-#define AFX_NEWUIGOLDBOWMANWINDOW_H__B1287970_FF70_4AE6_B38E_31AA3EC0341F__INCLUDED_
-
 #pragma once
-
-#ifdef PSW_GOLDBOWMAN
-
 #include "NewUIManager.h"
 #include "NewUIInventoryCtrl.h"
 #include "NewUIMessageBox.h"
@@ -88,7 +82,3 @@ namespace SEASON3B
 		return m_Pos;
 	}
 };
-
-#endif //PSW_GOLDBOWMAN
-
-#endif // !defined(AFX_NEWUIGOLDBOWMANWINDOW_H__B1287970_FF70_4AE6_B38E_31AA3EC0341F__INCLUDED_)

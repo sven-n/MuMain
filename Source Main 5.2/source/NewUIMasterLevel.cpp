@@ -802,16 +802,12 @@ void SEASON3B::CNewUIMasterLevel::Render_Text()
 	case CLASS_LORDEMPEROR:
 		Job = 1767;
 		break;
-#ifdef PJH_ADD_MASTERSKILL
 	case CLASS_SUMMONER:
 	case CLASS_BLOODYSUMMONER:
 	case CLASS_DIMENSIONMASTER:
 		Job = 3136;
 		break;
-#endif
 	}
-
-
 
 	g_pRenderText->SetTextColor(255, 155, 0, 255);
 	unicode::_sprintf( lpszStr, GlobalText[Job],JobPoint[0]);
@@ -1030,13 +1026,11 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
 	case CLASS_LORDEMPEROR:
 		GetJob = 16;
 		break;
-#ifdef PJH_ADD_MASTERSKILL
 	case CLASS_SUMMONER:
 	case CLASS_BLOODYSUMMONER:
 	case CLASS_DIMENSIONMASTER:
 		GetJob = 20;
 		break;
-#endif
 	}
 
 	int Loc[4] = {37,237,362,488};

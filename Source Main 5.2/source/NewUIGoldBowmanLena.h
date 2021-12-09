@@ -1,13 +1,7 @@
 // NewUIGoldBowmanLena.h: interface for the NewUIGoldBowmanLena class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUIGOLDBOWMANLENA_H__3E8D9875_C82F_4D55_934E_2A4C93206109__INCLUDED_)
-#define AFX_NEWUIGOLDBOWMANLENA_H__3E8D9875_C82F_4D55_934E_2A4C93206109__INCLUDED_
-
 #pragma once
 
-#ifdef PSW_EVENT_LENA
 
 #include "NewUIManager.h"
 #include "NewUIInventoryCtrl.h"
@@ -40,10 +34,10 @@ namespace SEASON3B
 		};
 
 	public:
-		CNewUIManager*			m_pNewUIMng;			// UI 매니저.
+		CNewUIManager*			m_pNewUIMng;
 		CNewUIButton			m_BtnRegister;
 		CNewUIButton			m_BtnExit;
-		POINT					m_Pos;					// 창의 위치.
+		POINT					m_Pos;
 
 	public:
 		CNewUIGoldBowmanLena();
@@ -87,7 +81,3 @@ namespace SEASON3B
 		return m_Pos;
 	}
 };
-
-#endif //PSW_EVENT_LENA
-
-#endif // !defined(AFX_NEWUIGOLDBOWMANLENA_H__3E8D9875_C82F_4D55_934E_2A4C93206109__INCLUDED_)

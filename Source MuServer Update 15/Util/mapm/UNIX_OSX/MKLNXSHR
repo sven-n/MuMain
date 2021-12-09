@@ -1,0 +1,40 @@
+	#  
+	#
+#
+#  short script to build a Linux shared library. 
+#
+#  fix as needed for your system,
+#  this works on my Linux system.
+#
+#
+#  The shared library (libmapm.so.0) will need to be copied to
+#  a directory where the run time loader knows where to look,
+#  like '/usr/lib'. Typically, this would be copied to 'usr/local/lib'
+#  and symbolic links set in '/usr/lib'. If you don't know what 
+#  this means, then just copy libmapm.so.0 to '/usr/lib'. Also 
+#  create another file called libmapm.so. Then you will be able
+#  to link with '-lmapm' on the gcc command line and this library
+#  will be used at run-time.
+#
+#  for example, to build the application 'calc' :
+#
+#  gcc -Wall -O2 -o calc calc.c -s -lmapm -lm
+#
+#
+rm -f map*.o libmapm.so.0
+#
+#
+#  compile MAPM with position independent code (-fPIC)
+#
+echo 'Compile MAPM library ...'
+gcc -c -Wall -O2 -fPIC map*.c
+#
+#
+#   build the shared library : libmapm.so.0
+#
+echo 'Build Shared Library libmapm.so.0 ...'
+gcc -shared -o libmapm.so.0 map*.o
+#
+rm -f map*.o
+#
+#
