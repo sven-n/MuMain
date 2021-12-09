@@ -1,23 +1,2 @@
-*.ilk
-*.exe
-.vs/
-/*.dat
-*.sdf
-.tmp/
-.tmp\
-*.obj
-*.sbr
-*.tlog
-*.idb
-*.pdb
-*.log
-*.pch
-*.recipe
-*.bsc
-*\.pch
-/*.pch
-*.iobj
-.build/
-*.txt
-*.jpg
-build/bin/x86/Global Debug/Main.exe
+
+.vs/Main/v16/Browse.VC.db

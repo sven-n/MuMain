@@ -1,0 +1,6 @@
+// Local.h: interface for the Local
+//////////////////////////////////////////////////////////////////////
+#pragma once
+
+
+extern bool CheckSpecialText(char *Text);
