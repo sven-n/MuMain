@@ -1,0 +1,42 @@
+//=================================================================================================================
+// Custom Auto Quiz System
+//=================================================================================================================
+0
+//Index   Year   Month   Day   DoW   Hour   Minute   Second
+0         *      *       *     *     *      48       0
+end
+
+1
+//Index   Name                       AlarmTime   EventTime
+0         "Quiz"                        3           3
+end
+
+
+//=================================================================================================================
+// Questions
+//=================================================================================================================
+//  ID  	->  Question ID
+//  WC 		->  Premiação em WCoinC
+//  WP      	->  Premiação em WCoinP
+//  GP      	->  Premiação em Goblin Point
+//  Question   	->  Pergunta
+//  Answer   	->  Resposta
+//=================================================================================================================
+// Obs: Evite usar respostas que possuem acentos. 
+//=================================================================================================================
+//=================================================================================================================
+//       #ID     #WC     #WP	 #GP         #Question				      		        #Answer		 
+//=================================================================================================================
+2
+	  0      10       0       0	     "Cidade Maravilhosa?"					"Rio de Janeiro"	
+	  1      10       0       0	     "10+2x2?"							"14"
+	  2      10       0       0	     "Qual o site do jogo?"					"www.seusite.com"
+	  3      10       0       0	     "Um dos maiores cientistas do mundo?"			"Albert Einstein"
+	  4      10       0       0	     "Quantas vezes o Brasil foi campeão mundial(futebol)?"	"5"
+	  5      10       0       0	     "Em que ano foi lançado o jogo Mu Online?"			"2003"
+	  6      10       0       0	     "Qual o nick exato do ADM do jogo?"			"TesteADM"
+	  7      10       0       0	     "Qual o nome exato do servidor?"				"Seu Servidor"
+	  8      10       0       0	     "Quando um jogador é novato, qual nome lhe damos?"		"Noob"
+	  9      10       0       0	     "Quantos estados tem o Brasil?"				"26"
+	  10     10       0       0	     "Em que continente fica localizada a Itália?"		"Continente Europeu"
+end

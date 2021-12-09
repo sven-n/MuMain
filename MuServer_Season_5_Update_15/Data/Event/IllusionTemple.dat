@@ -1,0 +1,35 @@
+0
+//WarningTime   NotifyTime   EventTime   CloseTime
+5               1            15          4         
+end
+
+1
+//Year   Month   Day   DoW   Hour   Minute   Second
+*        *       *     *     1      30       0
+*        *       *     *     5      30       0
+*        *       *     *     9      30       0
+*        *       *     *     13     30       0
+*        *       *     *     17     30       0
+*        *       *     *     21     30       0
+end
+
+2
+//Level   ExperienceTable1   ExperienceTable2
+0         300000             50000
+1         340000             60000
+2         380000             70000
+3         420000             80000
+4         460000             90000
+5         500000             100000
+end
+
+//Reward 
+3
+//Level   	WC	WP	GP 
+0		10	0	0		
+1		10	0	0
+2		10	0	0
+3		10	0	0
+4		10	0	0
+5		10	0	0
+end

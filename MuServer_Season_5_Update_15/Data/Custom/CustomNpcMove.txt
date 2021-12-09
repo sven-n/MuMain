@@ -1,0 +1,4 @@
+//Index   Npc	NpcMap	NpcX	NpcY	MoveMap	MoveX	MoveY	MinLevel	MaxLevel	MinReset	MaxReset	MinMReset	MaxMReset	AccountLevel	PKMove	Comment
+0         501	0	126	143	2	222	62	50		*		*		*		*		*		0		1	//Move To Devias Teste
+1         502	0	128	143	2	222	62	50		*		*		*		*		*		0		1	//Move To Devias Teste
+end

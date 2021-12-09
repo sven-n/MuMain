@@ -1,0 +1,18 @@
+//Desenvolvido por louis - www.jogandomu.com.br
+//Sistema que realiza um sorteio entre todos os usários online, dropando itens ao vencedor
+//Sorteio realizado de acordo com os horários e prêmios abaixo
+0
+//Index   Year   Month   Day   DoW   Hour   Minute   Second
+0         *      *       *     *     *      01        0
+end
+
+1
+//Index   Name                                 DropMap      AlarmTime
+0         "Sorteio Online"                     0            0            
+end
+
+//Reward 
+2
+//Index   	Cash	Gold	PcCoint 
+0		0	0	0		
+end

@@ -1,0 +1,26 @@
+//Index   Npc	Map	X	Y	Comment
+0         251	*	*	*	//Hanzo the Blacksmith
+1         255	*	*	*	//Liaman the Barmaid
+2         254	*	*	*	//Pasi the Wizard
+3         250	*	*	*	//Harold the Wandering Merchant
+4         248	*	*	*	//Martin the Wandering Merchant
+5         253	*	*	*	//Amy the Potion Girl
+6         244	*	*	*	//Lumen the Barmaid
+7         245	*	*	*	//Isabel the Wizard
+8         246	*	*	*	//Zienna the Weapon Merchant
+9         243	*	*	*	//Eo the Craftsman
+10        242	*	*	*	//Elf Lala
+11        230	*	*	*	//Alex the Wandering Merchant
+12        231	*	*	*	//Thompson Kenel
+13        376	*	*	*	//Drink Seller Hillary
+14        377	*	*	*	//Drink Seller Lindsay
+15        379	*	*	*	//Fireworks Girl
+16        415	*	*	*	//Sivia
+17        416	*	*	*	//Leah
+18        417	*	*	*	//Marseille
+19        492	*	*	*	//Moss Merchant
+20        545	*	*	*	//Christine
+21        239	*	*	*	//Stadium Guard
+22        259	*	*	*	//Priestess Reira
+23        500	0	124	143	//Hanzo the Blacksmith (Teste)
+end

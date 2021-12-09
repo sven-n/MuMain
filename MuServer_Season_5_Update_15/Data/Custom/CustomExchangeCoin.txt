@@ -1,0 +1,4 @@
+//	#Index 	#Command		#RequireCoin1	#RequireCoin2 	#RequireCoin3	#RewardCoin1	#RewardCoin2	#RewardCoin3
+	1	"/trocargoldxcash"	2		*		*		*		*		4		
+	2	"/trocarcashxgold"	10		*		*		*		1000		*	
+end

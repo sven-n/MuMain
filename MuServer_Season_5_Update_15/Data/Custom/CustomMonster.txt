@@ -1,0 +1,3 @@
+//	Index	Map	MaxLife	   DamageMin   	DamageMax   	Defense		AttackRate   	DefenseRate   	ExperienceRate   KillMessage   	InfoMessage   	RewardValue1   	RewardValue2	SummonMonster	SummonMonterCount   SummonMonsterRate
+	77	10	100	   100		100		100		100		100		100		 *		*		0		0		*		*		    100
+end

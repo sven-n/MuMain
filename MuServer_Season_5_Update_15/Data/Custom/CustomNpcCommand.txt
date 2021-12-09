@@ -1,0 +1,4 @@
+//Index   Npc	NpcMap	NpcX	NpcY	NpcTalk	Command Text	Comment
+0         501	0	126	143	1	"/reset "	//NPC RESET
+1         502	0	128	143	1	"/pk"		//NPC PKCLEAR
+end

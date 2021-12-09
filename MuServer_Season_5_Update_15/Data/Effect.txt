@@ -1,0 +1,174 @@
+//Index   Group   ItemIndex   Name                                 Save   Type   Flag   Count   Value1   Value2   Value3   Value4
+1         1       *           "Greater Damage"                     1      0      0      *       *        *        *        * 
+2         2       *           "Greater Defense"                    1      0      0      *       *        *        *        * 
+3         3       *           "Elf Buffer"                         1      0      0      *       *        *        *        * 
+4         4       *           "Mana Shield"                        1      0      0      *       *        *        *        * 
+5         5       *           "Greater Critical Damage"            1      0      0      *       *        *        *        * 
+6         6       *           "Infinity Arrrow"                    1      0      0      *       *        *        *        * 
+7         7       *           "BP Recovery"                        0      0      0      *       *        *        *        * 
+8         8       *           "Greater Life"                       1      0      0      *       *        *        *        * 
+9         9       *           "Greater Mana"                       1      0      0      *       *        *        *        * 
+10        10      *           "Bless Potion"                       1      0      0      *       *        *        *        * 
+11        11      *           "Soul Potion"                        1      0      0      *       *        *        *        * 
+12        12      *           "Disable Magic"                      0      0      0      *       *        *        *        * 
+13        13      *           "Castle Gate State"                  0      0      0      *       *        *        *        * 
+14        14      *           "Guild State 1"                      0      0      0      *       *        *        *        * 
+15        14      *           "Guild State 2"                      0      0      0      *       *        *        *        * 
+16        14      *           "Guild State 3"                      0      0      0      *       *        *        *        * 
+17        14      *           "Guild State 4"                      0      0      0      *       *        *        *        * 
+18        15      *           "Invisibility"                       0      0      0      *       *        *        *        * 
+19        16      *           "Guild State 5"                      0      0      0      *       *        *        *        * 
+20        17      *           "Guild State 6"                      0      0      0      *       *        *        *        * 
+21        18      *           "Crywolf State 1"                    0      0      0      *       *        *        *        * 
+22        18      *           "Crywolf State 2"                    0      0      0      *       *        *        *        * 
+23        18      *           "Crywolf State 3"                    0      0      0      *       *        *        *        * 
+24        18      *           "Crywolf State 4"                    0      0      0      *       *        *        *        * 
+25        18      *           "Crywolf State 5"                    0      0      0      *       *        *        *        * 
+26        18      *           "Crywolf State 6"                    0      0      0      *       *        *        *        * 
+27        19      *           "Crywolf State 7"                    0      0      0      *       *        *        *        * 
+28        20      *           "Game Master"                        0      1      0      *       *        *        *        * 
+29        60      6699        "Seal of Ascension"                  1      2      0      1800    50       *        *        * 
+30        61      6700        "Seal of Wealth"                     1      2      0      1800    100      50       *        * 
+31        62      6701        "Seal of Sustenance"                 1      2      0      1800    *        *        *        * 
+32        22      *           "Order of Speed"                     0      0      0      *       *        *        *        * 
+33        22      *           "Order of Sublimation"               0      0      0      *       *        *        *        * 
+34        22      *           "Order of Protection"                0      0      0      *       *        *        *        * 
+35        23      7214        "Halloween 1"                        1      1      0      1800    10       *        *        * 
+36        23      7215        "Halloween 2"                        1      1      0      1800    25       *        *        * 
+37        23      7216        "Halloween 3"                        1      1      0      1800    100      *        *        * 
+38        23      7217        "Halloween 4"                        1      1      0      1800    500      *        *        * 
+39        23      7218        "Halloween 5"                        1      1      0      1800    600      *        *        * 
+40        60      6699        "Seal of Ascension"                  1      2      0      1800    50       *        *        * 
+41        61      6700        "Seal of Wealth"                     1      2      0      1800    100      50       *        * 
+42        65      6701        "Seal of Sustenance"                 1      2      0      1800    *        *        *        * 
+43        57      6715        "Seal of Movement"                   1      2      0      1800    *        *        *        * 
+44        67      7240        "Scroll of Quick"                    1      2      0      1800    15       *        *        * 
+45        68      7241        "Scroll of Defense"                  1      2      0      1800    60       *        *        * 
+46        69      7242        "Scroll of Damage"                   1      2      0      1800    30       *        *        * 
+47        70      7243        "Scroll of Magic Damage"             1      2      0      1800    30       *        *        * 
+48        71      7244        "Scroll of Life"                     1      2      0      1800    200      *        *        * 
+49        72      7245        "Scroll of Mana"                     1      2      0      1800    300      *        *        * 
+50        26      7246        "Elixir of Strength"                 1      2      0      1800    50       *        *        * 
+51        26      7247        "Elixir of Dexterity"                1      2      0      1800    50       *        *        * 
+52        26      7248        "Elixir of Vitality"                 1      2      0      1800    50       *        *        * 
+53        26      7249        "Elixir of Energy"                   1      2      0      1800    50       *        *        * 
+54        26      7250        "Elixir of Leadership"               1      2      0      1800    50       *        *        * 
+55        27      *           "Poison"                             0      0      1      *       *        *        *        * 
+56        28      *           "Ice"                                0      0      1      *       *        *        *        * 
+57        29      *           "Ice Arrow"                          0      0      1      *       *        *        *        * 
+58        30      *           "Fire Slash"                         1      0      1      *       *        *        *        * 
+59        31      *           "Physi Damage Immunity"              0      0      0      *       *        *        *        * 
+60        32      *           "Magic Damage Immunity"              0      0      0      *       *        *        *        * 
+61        33      *           "Stern"                              0      0      1      *       *        *        *        * 
+62        34      *           "Magic Defense"                      0      0      0      *       *        *        *        * 
+63        35      *           "Monster Physi Damage Immunity"      0      0      0      *       *        *        *        * 
+64        36      *           "Monster Magic Damage Immunity"      0      0      0      *       *        *        *        * 
+65        37      *           "Order of Restraint"                 0      0      1      *       *        *        *        * 
+66        38      *           "Crywolf State 8"                    0      0      0      *       *        *        *        * 
+67        38      *           "Crywolf State 9"                    0      0      0      *       *        *        *        * 
+68        38      *           "Crywolf State 10"                   0      0      0      *       *        *        *        * 
+69        38      *           "Crywolf State 11"                   0      0      0      *       *        *        *        * 
+70        38      *           "Crywolf State 12"                   0      0      0      *       *        *        *        * 
+71        39      *           "Damage Reflect"                     1      0      0      *       *        *        *        * 
+72        40      *           "Sleep"                              0      0      1      *       *        *        *        * 
+73        40      *           "Blind"                              1      0      1      *       *        *        *        *
+74        41      *           "Neil"                               0      0      1      *       *        *        *        * 
+75        42      *           "Sahamutt"                           0      0      1      *       *        *        *        * 
+76        43      *           "Lesser Damage"                      1      0      1      *       *        *        *        * 
+77        44      *           "Lesser Defense"                     1      0      1      *       *        *        *        * 
+78        23      7253        "Cherry Blossom 1"                   1      1      0      1800    700      *        *        * 
+79        23      7254        "Cherry Blossom 2"                   1      1      0      1800    700      *        *        * 
+80        23      7255        "Cherry Blossom 3"                   1      1      0      1800    40       *        *        * 
+81        21      *           "Sword Power"                        1      0      0      *       *        *        *        * 
+82        45      *           "Magic Circle"                       1      0      0      *       *        *        *        * 
+83        46      *           "Sword Slash"                        0      0      1      *       *        *        *        * 
+84        47      *           "Lightning Storm"                    0      0      1      *       *        *        *        * 
+85        48      *           "Red Storm"                          0      0      1      *       *        *        *        * 
+86        49      *           "Frozen Stab"                        0      0      1      *       *        *        *        * 
+87        13      6718        "Seal of Life"                       1      2      0      1800    50       5        *        * 
+88        13      6719        "Seal of Mana"                       1      2      0      1800    50       5        *        * 
+89        73      7265        "Scroll of Battle"                   1      2      0      1800    20       *        *        * 
+90        74      7266        "Scroll of Strength"                 1      2      0      1800    20       *        *        * 
+91        23      *           "Christmas 1"                        1      1      0      1800    *        *        *        * 
+92        23      *           "Christmas 2"                        1      1      0      1800    500      *        *        * 
+93        23      *           "Christmas 3"                        1      1      0      1800    500      *        *        * 
+94        23      *           "Christmas 4"                        1      1      0      1800    30       *        *        * 
+95        23      *           "Christmas 5"                        1      1      0      1800    100      *        *        * 
+96        23      *           "Christmas 6"                        1      1      0      1800    15       *        *        * 
+97        23      *           "Christmas 7"                        1      1      0      1800    5        *        *        * 
+98        50      *           "Duel Arena Watch"                   0      0      0      *       *        *        *        * 
+99        52      6737        "Talisman of Guardian"               1      2      0      1800    *        *        *        * 
+100       53      6738        "Talisman of Protection"             1      2      0      1800    *        *        *        * 
+101       60      6749        "Master Seal of Ascension"           1      2      0      1800    50       *        *        * 
+102       61      6750        "Master Seal of Wealth"              1      2      0      1800    100      50       *        * 
+103       51      *           "Gladiator's Glory"                  1      0      0      *       *        *        *        * 
+105       54      *           "Double Goer Delete"                 0      0      0      *       *        *        *        *
+112       24      6759        "Party Experience Bonus"             1      2      0      1800    90       10       *        *
+113       58      6760        "Max AG Boost Aura"                  1      2      0      1800    10       *        *        *
+114       58      6761        "Max SD Boost Aura"                  1      2      0      1800    10       *        *        *
+121       75      7308        "Scroll of Healing"		   1      2      0      1800    3        100      *        * 
+122       76      6784        "Hawk Figurine"                      0      1      0      *       10       *        *        *
+123       76      6785        "Goat Figurine"                      0      1      0      *       10       *        *        *
+124       77      6786        "Oak Charm"                          0      1      0      *       50       *        *        *
+125       77      6787        "Maple Charm"                        0      1      0      *       50       *        *        *
+126       77      6788        "Golden Oak Charm"                   0      1      0      *       100      500      *        *
+127       77      6789        "Golden Maple Charm"                 0      1      0      *       150      50       *        *
+128       78      6790        "Worn Horseshoe"                     0      1      0      *       20       *        *        *
+129       79      *           "Greater Ignore Defense Rate"	   1      0      0      *       *        *        *        * 
+130       80      *           "Fitness"			           1      0      0      *       *        *        *        * 
+131       81      *           "Greater Defense Success Rate"	   1      0      0      *       *        *        *        * 
+134       84      *           "Iron Defense"                       1      0      0      *       *        *        *        * 
+135       8       *           "Greater Life Enhanced"              1      0      0      *       *        *        *        *
+136       8       *           "Greater Life Mastered"              1      0      0      *       *        *        *        * 
+137       85      *           "Death Stab Enhanced"                0      0      1      *       *        *        *        * 
+138       45      *           "Magic Circle Improved"              1      0      0      *       *        *        *        * 
+139       45      *           "Magic Circle Enhanced"              1      0      0      *       *        *        *        *
+140       4       *           "Mana Shield Mastered"               1      0      0      *       *        *        *        * 
+141       86      *           "Frozen Stab Mastered"               0      0      1      *       *        *        *        * 
+142       87      *           "Bless"                              0      0      0      *       *        *        *        * 
+143       6       *           "Infinity Arrrow Improved"           1      0      0      *       *        *        *        * 
+144       88      *           "Blind Improved"                     1      0      1      *       *        *        *        * 
+145       89      *           "Drain Life Enhanced"                0      0      1      *       *        *        *        * 
+146       90      *           "Ice Storm Enhanced"                 0      0      1      *       *        *        *        * 
+147       91      *           "Earth Prison"                       0      0      1      *       *        *        *        * 
+148       5       *           "Greater Critical D. Mastered"       1      0      0      *       *        *        *        *
+149       5       *           "Greater Critical D. Extended"       1      0      0      *       *        *        *        *
+150       21      *           "Sword Power Improved"               1      0      0      *       *        *        *        * 
+151       21      *           "Sword Power Enhanced"               1      0      0      *       *        *        *        * 
+152       21      *           "Sword Power Mastered"               1      0      0      *       *        *        *        * 
+153       81      *           "Greater D. S. Rate Improved"	   1      0      0      *       *        *        *        * 
+154       81      *           "Greater D. S. Rate Enhanced"	   1      0      0      *       *        *        *        * 
+155       80      *           "Fitness Improved"	           1      0      0      *       *        *        *        * 
+157       92      *           "Dragon Lore Enhanced"               0      0      1      *       *        *        *        * 
+158       93      *           "Chain Driver Enhanced"              0      0      1      *       *        *        *        * 
+159       94      *           "Poison Arrow"                       0      0      1      *       *        *        *        * 
+160       94      *           "Poison Arrow Improved"              0      0      1      *       *        *        *        * 
+161       87      *           "Bless Improved"                     0      0      0      *       *        *        *        * 
+162       43      *           "Lesser Damage Improved"             1      0      1      *       *        *        *        * 
+163       44      *           "Lesser Defense Improved"            1      0      1      *       *        *        *        * 
+164       30      *           "Fire Slash Enhanced"                1      0      1      *       *        *        *        *
+165       84      *           "Iron Defense Improved"              1      0      0      *       *        *        *        * 
+166       95      *           "Blood Howling"                      1      0      0      *       *        *        *        *
+167       95      *           "Blood Howling Improved"             1      0      0      *       *        *        *        *
+174       98      *           "Pentagram Jewel Half SD"            1      0      1      *       *        *        *        *
+175       99      *           "Pentagram Jewel Half MP"            1      0      1      *       *        *        *        *
+176       100     *           "Pentagram Jewel Half Speed"         1      0      1      *       *        *        *        *
+177       101     *           "Pentagram Jewel Half HP"            1      0      1      *       *        *        *        *
+178       102     *           "Pentagram Jewel Stun"               1      0      1      *       *        *        *        *
+186       109     *           "Pentagram Jewel Slow"               1      0      1      *       *        *        *        *
+190       115     6833        "Talisman of Ascension 1"            1      1      0      1800    50       *        *        *
+191       115     6834        "Talisman of Ascension 2"            1      1      0      1800    100      *        *        *
+192       115     6835        "Talisman of Ascension 3"            1      1      0      1800    200      *        *        *
+193       60      6836        "Seal of Ascension"                  1      2      0      1800    100      *        *        *
+194       60      6837        "Master Seal of Ascension"           1      2      0      1800    100      *        *        *
+195       116     7392        "Blessing of Light"                  1      1      0      1800    200      *        *        *
+196       68      7393        "Master Scroll of Defense"           1      2      0      1800    120      *        *        *
+197       70      7394        "Master Scroll of Magic Damage"      1      2      0      1800    60       *        *        *
+198       71      7395        "Master Scroll of Life"              1      2      0      1800    400      *        *        *
+199       72      7396        "Master Scroll of Mana"              1      2      0      1800    600      *        *        *
+200       69      7397        "Master Scroll of Damage"            1      2      0      1800    60       *        *        *
+201       75      7398        "Master Scroll of Healing"           1      2      0      1800    4        200      *        *
+202       14      7399        "Master Scroll of Battle"            1      2      0      1800    25       *        *        *
+203       14      7400        "Master Scroll of Strength"          1      2      0      1800    25       *        *        *
+204       67      7403        "Master Scroll of Quick"             1      2      0      1800    20       *        *        *
+end

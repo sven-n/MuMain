@@ -1,0 +1,11 @@
+//Number   Type   Index   Quantity   Level   Option1   Option2   Option3   NewOption   RequireIndex   RequireState   DW      DK      FE      MG      DL      SU
+0          1      200     10         0       0         0         0         0           0              1              1       1       1       0       0       1
+0          1      200     10         0       0         0         0         0           1              1              1       1       1       0       0       1
+1          2      201     0          0       0         0         0         0           1              1              1       1       1       0       0       1
+0          4      202     0          0       0         0         0         0           2              1              2       2       2       0       0       2
+0          8      203     0          0       0         0         0         0           3              1              0       2       0       0       0       0
+0          1      200     20         0       0         0         0         0           4              1              2       2       2       1       1       2
+0          1      200     20         0       0         0         0         0           5              1              2       2       2       1       1       2
+0          1      200     30         0       0         0         0         0           6              1              2       2       2       1       1       2
+1          16     204     0          0       0         0         0         0           6              1              2       2       2       1       1       2
+end

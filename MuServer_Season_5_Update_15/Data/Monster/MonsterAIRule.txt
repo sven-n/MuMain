@@ -1,0 +1,3 @@
+0
+//Index   Monster   Name                                 AIUnit   RuleCondition   WaitTime   ContinuanceTime   Month   Day   Week   Hour   Minute
+end

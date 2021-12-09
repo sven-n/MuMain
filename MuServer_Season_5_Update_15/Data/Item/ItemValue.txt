@@ -1,0 +1,232 @@
+//Index   Level   OpExe   Zen Value	Coin1	Coin2	Coin3	SellValue	Comment
+26	  0       *       15            30	0	0	7		//Sword
+26	  10      *       150000        0	0	0	0		//Sword  
+7168	  0       *       15            0	0	12	6		//Sword 
+2055      0       *       100           0	0	0	0		//Bolt
+2055      1       *       1400          0	0	0	0		//Bolt
+2055      2       *       2200          0	0	0	0		//Bolt
+2055      3       *       3000          0	0	0	0		//Bolt
+2063      0       *       70            0	0	0	0		//Arrow
+2063      1       *       1200          0	0	0	0		//Arrow
+2063      2       *       2000          0	0	0	0		//Arrow
+2063      3       *       2800          0	0	0	0		//Arrow
+6159      *       *       810000        0	0	0	0		//Jewel of Chaos
+6170      0       *       60000         0	0	0	0		//Gem of Secret
+6174      0       *       90000000      0	0	0	0		//Bundle of Jewel of Bless 1
+6174      1       *       180000000     0	0	0	0		//Bundle of Jewel of Bless 2
+6174      2       *       270000000     0	0	0	0		//Bundle of Jewel of Bless 3
+6175      0       *       60000000      0	0	0	0		//Bundle of Jewel of Soul 1
+6175      1       *       120000000     0	0	0	0		//Bundle of Jewel of Soul 2
+6175      0       *       180000000     0	0	0	0		//Bundle of Jewel of Soul 3
+6274      *       *       240           0	0	0	0		//Small Cape of Lord
+6275      *       *       240           0	0	0	0		//Small Wing of Curse
+6276      *       *       240           0	0	0	0		//Small Wings of Elf
+6277      *       *       240           0	0	0	0		//Small Wings of Heaven
+6278      *       *       240           0	0	0	0		//Small Wings of Satan
+6279      *       *       240           0	0	0	0		//Little Warrior's Cloak
+6280      0       *       450000000     0	0	0	0		//Jewel of Life Bundle 1
+6280      1       *       900000000     0	0	0	0		//Jewel of Life Bundle 2
+6280      2       *       1350000000    0	0	0	0		//Jewel of Life Bundle 3
+6281      0       *       360000000     0	0	0	0		//Jewel of Creation Bundle 1
+6281      1       *       720000000     0	0	0	0		//Jewel of Creation Bundle 2
+6281      2       *       1080000000    0	0	0	0		//Jewel of Creation Bundle 3
+6282      0       *       600000000     0	0	0	0		//Jewel of Guardian Bundle 1
+6282      1       *       1200000000    0	0	0	0		//Jewel of Guardian Bundle 2
+6282      2       *       1800000000    0	0	0	0		//Jewel of Guardian Bundle 3
+6285      0       *       8100000       0	0	0	0		//Jewel of Chaos Bundle 1
+6285      1       *       16200000      0	0	0	0		//Jewel of Chaos Bundle 2
+6285      2       *       24300000      0	0	0	0		//Jewel of Chaos Bundle 3
+6288      *       *       300000        0	0	0	0		//Mithril Fragment
+6290      *       *       300000        0	0	0	0		//Elixir Fragment
+6410      *       *       300000000     0	0	0	0		//Wings of Conqueror
+6411      *       *       3000000       0	0	0	0		//Wings of Angel and Devil
+6659      *       0       960000        0	0	0	0		//Horn of Dinorant
+6659      *       1       1260000       0	0	0	0		//Horn of Dinorant
+6659      *       2       1260000       0	0	0	0		//Horn of Dinorant
+6659      *       4       1260000       0	0	0	0		//Horn of Dinorant
+6659      *       3       1560000       0	0	0	0		//Horn of Dinorant
+6659      *       5       1560000       0	0	0	0		//Horn of Dinorant
+6659      *       6       1560000       0	0	0	0		//Horn of Dinorant
+6663      0       *       1500000       0	0	0	0		//Contract (Summon)
+6663      1       *       1200000       0	0	0	0		//Contract (Summon)
+6667      1       *       2400000       0	0	0	0		//Order (Guardian/Life Stone)
+6670      0       *       180000        0	0	0	0		//Loch's Feather
+6670      1       *       7500000       0	0	0	0		//Crest of Monarch
+6671      *       *       33000000      0	0	0	0		//Fruits
+6672      1       *       15000         0	0	0	0		//Scroll of Archangel 1
+6672      2       *       21000         0	0	0	0		//Scroll of Archangel 2
+6672      3       *       30000         0	0	0	0		//Scroll of Archangel 3
+6672      4       *       39000         0	0	0	0		//Scroll of Archangel 4
+6672      5       *       48000         0	0	0	0		//Scroll of Archangel 5
+6672      6       *       60000         0	0	0	0		//Scroll of Archangel 6
+6672      7       *       75000         0	0	0	0		//Scroll of Archangel 7
+6672      8       *       90000         0	0	0	0		//Scroll of Archangel 8
+6673      1       *       15000         0	0	0	0		//Blood Bone 1
+6673      2       *       21000         0	0	0	0		//Blood Bone 2
+6673      3       *       30000         0	0	0	0		//Blood Bone 3
+6673      4       *       39000         0	0	0	0		//Blood Bone 4
+6673      5       *       48000         0	0	0	0		//Blood Bone 5
+6673      6       *       60000         0	0	0	0		//Blood Bone 6
+6673      7       *       75000         0	0	0	0		//Blood Bone 7
+6673      8       *       90000         0	0	0	0		//Blood Bone 8
+6674      1       *       150000        0	0	0	0		//Invisibility Cloak 1
+6674      2       *       660000        0	0	0	0		//Invisibility Cloak 2
+6674      3       *       720000        0	0	0	0		//Invisibility Cloak 3
+6674      4       *       780000        0	0	0	0		//Invisibility Cloak 4
+6674      5       *       840000        0	0	0	0		//Invisibility Cloak 5
+6674      6       *       900000        0	0	0	0		//Invisibility Cloak 6
+6674      7       *       960000        0	0	0	0		//Invisibility Cloak 7
+6674      8       *       1020000       0	0	0	0		//Invisibility Cloak 8
+6676      0       *       30000         0	0	0	0		//Wizards Ring
+6685      *       *       5000          0	0	0	0		//Armor of Guardsman
+6687      0       *       30000000      0	0	0	0		//Spirit
+6687      1       *       15000000      0	0	0	0		//Spirit
+6688      *       *       150           0	0	0	0		//Splinter of Armor
+6689      *       *       300           0	0	0	0		//Bless of Guardian
+6690      *       *       3000          0	0	0	0		//Claw of Beast
+6691      *       *       30000         0	0	0	0		//Fragment of Horn
+6692      *       *       90000         0	0	0	0		//Broken Horn
+6693      *       *       150000        0	0	0	0		//Horn of Fenrir
+6694      *       *       9300          0	0	0	0		//Moonstone Pendant
+6705      1       *       500000        0	0	0	0		//Old Scroll 1
+6705      2       *       600000        0	0	0	0		//Old Scroll 2
+6705      3       *       800000        0	0	0	0		//Old Scroll 3
+6705      4       *       1000000       0	0	0	0		//Old Scroll 4
+6705      5       *       1200000       0	0	0	0		//Old Scroll 5
+6705      6       *       1400000       0	0	0	0		//Old Scroll 6
+6706      1       *       500000        0	0	0	0		//Illusion Sorcerer Covenant 1
+6706      2       *       600000        0	0	0	0		//Illusion Sorcerer Covenant 2
+6706      3       *       800000        0	0	0	0		//Illusion Sorcerer Covenant 3
+6706      4       *       1000000       0	0	0	0		//Illusion Sorcerer Covenant 4
+6706      5       *       1200000       0	0	0	0		//Illusion Sorcerer Covenant 5
+6706      6       *       1400000       0	0	0	0		//Illusion Sorcerer Covenant 6
+6707      1       *       500000        0	0	0	0		//Scroll of Blood 1
+6707      2       *       600000        0	0	0	0		//Scroll of Blood 2
+6707      3       *       800000        0	0	0	0		//Scroll of Blood 3
+6707      4       *       1000000       0	0	0	0		//Scroll of Blood 4
+6707      5       *       1200000       0	0	0	0		//Scroll of Blood 5
+6707      6       *       1400000       0	0	0	0		//Scroll of Blood 6
+6708      *       *       3000000       0	0	0	0		//Condor Flame
+6709      *       *       3000000       0	0	0	0		//Condor Feather
+6720      *       *       3000          0	0	0	0		//Demon
+6721      *       *       3000          0	0	0	0		//Spirit of Guardian
+6727      *       *       1000000       0	0	0	0		//Sword/Mace/Spear
+6728      *       *       1000000       0	0	0	0		//Staff
+6729      *       *       1000000       0	0	0	0		//Bow/Crossbow
+6730      *       *       1000000       0	0	0	0		//Scepter
+6731      *       *       1000000       0	0	0	0		//Stick
+6732      *       *       3000          0	0	0	0		//Panda Ring
+6733      *       *       3000          0	0	0	0		//Brown Panda Ring
+6734      *       *       3000          0	0	0	0		//Pink Panda Ring
+6736      *       *       3000          0	0	0	0		//Pet Panda
+6765      *       *       3000          0	0	0	0		//Sapphire Ring
+6766      *       *       3000          0	0	0	0		//Ruby Ring
+6767      *       *       3000          0	0	0	0		//Topaz Ring
+6768      *       *       3000          0	0	0	0		//Amethyst Ring
+6769      *       *       3000          0	0	0	0		//Ruby Necklace
+6770      *       *       3000          0	0	0	0		//Emerald Necklace
+6771      *       *       3000          0	0	0	0		//Sapphire Necklace
+6778      *       *       6000          0	0	0	0		//Skeleton Transformation Ring
+6779      *       *       6000          0	0	0	0		//Pet Skeleton
+6819      *       *       6000          0	0	0	0		//Robot Knight Ring
+6820      *       *       6000          0	0	0	0		//Mini Robot Ring
+6821      *       *       6000          0	0	0	0		//Great Heavenly Mage Ring
+6825      *       *       90000         0	0	0	0		//Decoration Ring
+6826      *       *       90000         0	0	0	0		//Blessed Decoration Ring
+6867      *       *       600000        0	0	0	0		//Evolution Stone
+6895      *       *       600000        0	0	0	0		//Muun Energy Converter
+6896      *       *       600000        0	0	0	0		//Wizardry Stone
+7175      0       *       900000        0	0	0	0		//Siege Potion
+7175      1       *       450000        0	0	0	0		//Siege Potion
+7177      1       *       1000          0	0	0	0		//Ale
+7181      *       *       9000000       0	0	0	0		//Jewel of Bless
+7182      *       *       6000000       0	0	0	0		//Jewel of Soul
+7184      *       *       45000000      0	0	0	0		//Jewel of Life
+7185      1       *       15000         0	0	0	0		//Devil's Eye 1
+7185      2       *       21000         0	0	0	0		//Devil's Eye 2
+7185      3       *       30000         0	0	0	0		//Devil's Eye 3
+7185      4       *       45000         0	0	0	0		//Devil's Eye 4
+7185      5       *       60000         0	0	0	0		//Devil's Eye 5
+7185      6       *       75000         0	0	0	0		//Devil's Eye 6
+7185      7       *       90000         0	0	0	0		//Devil's Eye 7
+7186      1       *       15000         0	0	0	0		//Devil's Key 1
+7186      2       *       21000         0	0	0	0		//Devil's Key 2
+7186      3       *       30000         0	0	0	0		//Devil's Key 3
+7186      4       *       45000         0	0	0	0		//Devil's Key 4
+7186      5       *       60000         0	0	0	0		//Devil's Key 5
+7186      6       *       75000         0	0	0	0		//Devil's Key 6
+7186      7       *       90000         0	0	0	0		//Devil's Key 7
+7187      1       *       60000         0	0	0	0		//Devil's Invitation 1
+7187      2       *       84000         0	0	0	0		//Devil's Invitation 2
+7187      3       *       120000        0	0	0	0		//Devil's Invitation 3
+7187      4       *       180000        0	0	0	0		//Devil's Invitation 4
+7187      5       *       240000        0	0	0	0		//Devil's Invitation 5
+7187      6       *       300000        0	0	0	0		//Devil's Invitation 6
+7187      7       *       180000        0	0	0	0		//Devil's Invitation 7
+7188      *       *       900           0	0	0	0		//Remedy of Love
+7189      0       *       9000          0	0	0	0		//Rena
+7189      3       *       3900          0	0	0	0		//Mark of Lord
+7190      *       *       36000000      0	0	0	0		//Jewel of Creation
+7191      *       *       9000          0	0	0	0		//Scroll of the Emperor
+7192      *       *       9000          0	0	0	0		//Broken Sword
+7193      *       *       9000          0	0	0	0		//Tear of Elf
+7194      *       *       9000          0	0	0	0		//Soul Shard of Wizard
+7196      *       *       600000        0	0	0	0		//Lost Map
+7197      *       *       30000         0	0	0	0		//Symbol of Kundun
+7199      *       *       60000000      0	0	0	0		//Jewel of Guardian
+7203      *       *       2000          0	0	0	0		//Small SD Potion
+7204      *       *       4000          0	0	0	0		//SD Potion
+7205      *       *       6000          0	0	0	0		//Large SD Potion
+7206      *       *       2500          0	0	0	0		//Small Complex Potion
+7207      *       *       5000          0	0	0	0		//Complex Potion
+7208      *       *       7500          0	0	0	0		//Large Complex Potion
+7213      *       *       150           0	0	0	0		//Pumpkin of Luck
+7214      *       *       150           0	0	0	0		//Jack O'Lantern Blessings
+7215      *       *       150           0	0	0	0		//Jack O'Lantern Wrath
+7216      *       *       150           0	0	0	0		//Jack O'Lantern Cry
+7217      *       *       150           0	0	0	0		//Jack O'Lantern Food
+7218      *       *       150           0	0	0	0		//Jack O'Lantern Drink
+7219      *       *       200000        0	0	0	0		//Chistmas Star
+7223      *       *       9000          0	0	0	0		//Green Chaos Box
+7224      *       *       9000          0	0	0	0		//Red Chaos Box
+7225      *       *       9000          0	0	0	0		//Purple Chaos Box
+7231      *       *       200000        0	0	0	0		//Firecracker
+7232      *       *       9000          0	0	0	0		//Cursed Castle Water
+7233      *       *       9000          0	0	0	0		//Death-beam Knight Flame
+7234      *       *       9000          0	0	0	0		//Hell-Miner Horn
+7235      *       *       9000          0	0	0	0		//Dark Phoenix Feather
+7236      *       *       9000          0	0	0	0		//Abyssal Eye
+7253      *       *       300           0	0	0	0		//Cherry Blossom Wine
+7254      *       *       300           0	0	0	0		//Cherry Blossom Rice Cake
+7255      *       *       300           0	0	0	0		//Cherry Blossom Flower Petal
+7256      *       *       300           0	0	0	0		//White Cherry Blossom Branch
+7257      *       *       300           0	0	0	0		//Red Cherry Blossom Branch
+7258      *       *       300           0	0	0	0		//Golden Cherry Blossom Branch
+7268      *       *       300           0	0	0	0		//Lucky Coin
+7269      *       *       30000         0	0	0	0		//Suspicious Scrap of Paper
+7270      *       *       30000         0	0	0	0		//Gaion's Order
+7271      *       *       30000         0	0	0	0		//First Secromicon Fragment
+7272      *       *       30000        	0	0	0	0		//Second Secromicon Fragment
+7273      *       *       30000         0	0	0	0		//Third Secromicon Fragment
+7274      *       *       30000         0	0	0	0		//Fourth Secromicon Fragment
+7275      *       *       30000         0	0	0	0		//Fifth Secromicon Fragment
+7276      *       *       30000         0	0	0	0		//Sixth Secromicon Fragment
+7277      *       *       30000         0	0	0	0		//Complete Secromicon
+7278      *       *       30000         0	0	0	0		//Sign of Dimensions
+7279      *       *       600000        0	0	0	0		//Mirror of Dimensions
+7280      *       *       3000          0	0	0	0		//Silver Key
+7281      *       *       3000          0	0	0	0		//Golden Key
+7289      *       *       3000          0	0	0	0		//Sealed Golden Box
+7290      *       *       3000          0	0	0	0		//Sealed Silver Box
+7291      *       *       3000          0	0	0	0		//Golden Box
+7292      *       *       3000          0	0	0	0		//Silver Box
+7309      *       *       672000        0	0	0	0		//Shining Jewelry Case
+7310      *       *       546000        0	0	0	0		//Elegant Jewelry Case
+7311      *       *       471000        0	0	0	0		//Steel Jewelry Case
+7312      *       *       363000        0	0	0	0		//Old Jewelry Case
+7385      *       *       300000        0	0	0	0		//Titan's Anger
+7386      *       *       300000        0	0	0	0		//Tantalose's Punishment
+7387      *       *       300000        0	0	0	0		//Erohim's Nightmare
+7388      *       *       300000        0	0	0	0		//Hell Maine's Insanity
+7389      *       *       300000        0	0	0	0		//Kundun's Greed
+end

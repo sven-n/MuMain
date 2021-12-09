@@ -1,0 +1,112 @@
+//Index   AllowDrop   AllowSell   AllowTrade   AllowVault   Comment
+6144      0           1           1            1            //Wings of Elf
+6145      0           1           1            1            //Wings of Heaven
+6146      0           1           1            1            //Wings of Satan
+6147      0           1           1            1            //Wings of Spirits
+6148      0           1           1            1            //Wings of Soul
+6149      0           1           1            1            //Wings of Dragon
+6150      0           1           1            1            //Wings of Darkness
+6159      0           1           1            1            //Jewel of Chaos
+6174      0           1           1            1            //Bundled Jewel of Bless
+6175      0           1           1            1            //Bundled Jewel of Soul
+6180      0           1           1            1            //Wing of Storm
+6181      0           1           1            1            //Wing of Eternal
+6182      0           1           1            1            //Wing of Illusion
+6183      0           1           1            1            //Wing of Ruin
+6184      0           1           1            1            //Cape of Emperor
+6185      0           1           1            1            //Wing of Curse
+6186      0           1           1            1            //Wind of Despair
+6187      0           1           1            1            //Wing of Dimension
+6204      0           1           1            1            //Seed (Fire)
+6205      0           1           1            1            //Seed (Water)
+6206      0           1           1            1            //Seed (Ice)
+6207      0           1           1            1            //Seed (Wind)
+6208      0           1           1            1            //Seed (Lightning)
+6209      0           1           1            1            //Seed (Earth)
+6214      0           1           1            1            //Sphere (Mono)
+6215      0           1           1            1            //Sphere (Di)
+6216      0           1           1            1            //Sphere (Tri)
+6217      0           1           1            1            //Sphere (Tetra)
+6218      0           1           1            1            //Sphere (Penta)
+6244      0           1           1            1            //Seed Sphere (Fire)
+6245      0           1           1            1            //Seed Sphere (Water)
+6246      0           1           1            1            //Seed Sphere (Ice)
+6247      0           1           1            1            //Seed Sphere (Wind)
+6248      0           1           1            1            //Seed Sphere (Lightning)
+6249      0           1           1            1            //Seed Sphere (Earth)
+6250      0           1           1            1            //Seed Sphere (Fire)
+6251      0           1           1            1            //Seed Sphere (Water)
+6252      0           1           1            1            //Seed Sphere (Ice)
+6253      0           1           1            1            //Seed Sphere (Wind)
+6254      0           1           1            1            //Seed Sphere (Lightning)
+6255      0           1           1            1            //Seed Sphere (Earth)
+6256      0           1           1            1            //Seed Sphere (Fire)
+6257      0           1           1            1            //Seed Sphere (Water)
+6258      0           1           1            1            //Seed Sphere (Ice)
+6259      0           1           1            1            //Seed Sphere (Wind)
+6260      0           1           1            1            //Seed Sphere (Lightning)
+6261      0           1           1            1            //Seed Sphere (Earth)
+6262      0           1           1            1            //Seed Sphere (Fire)
+6263      0           1           1            1            //Seed Sphere (Water)
+6264      0           1           1            1            //Seed Sphere (Ice)
+6265      0           1           1            1            //Seed Sphere (Wind)
+6266      0           1           1            1            //Seed Sphere (Lightning)
+6267      0           1           1            1            //Seed Sphere (Earth)
+6268      0           1           1            1            //Seed Sphere (Fire)
+6269      0           1           1            1            //Seed Sphere (Water)
+6270      0           1           1            1            //Seed Sphere (Ice)
+6271      0           1           1            1            //Seed Sphere (Wind)
+6272      0           1           1            1            //Seed Sphere (Lightning)
+6273      0           1           1            1            //Seed Sphere (Earth)
+6274      0           1           1            1            //Small Cape of Lord
+6275      0           1           1            1            //Small Wing of Curse
+6276      0           1           1            1            //Small Wings of Elf
+6277      0           1           1            1            //Small Wings of Heaven
+6278      0           1           1            1            //Small Wings of Satan
+6279      0           1           1            1            //Small Cloak of Warrior
+6406      0           1           1            1            //Cloak of Death
+6407      0           1           1            1            //Wings of Chaos
+6408      0           1           1            1            //Wings of Magic
+6409      0           1           1            1            //Wings of Life
+6410      0           1           1            1            //Wings of Conqueror
+6411      0           1           1            1            //Wings of Angel and Devil
+6280      0           1           1            1            //Bundled Jewel of Life
+6281      0           1           1            1            //Bundled Jewel of Creation
+6282      0           1           1            1            //Bundled Jewel of Guardian
+6283      0           1           1            1            //Bundled Gemstone
+6284      0           1           1            1            //Bundled Jewel of Harmony
+6285      0           1           1            1            //Bundled Jewel of Chaos
+6286      0           1           1            1            //Bundled Lower Refining Stone
+6287      0           1           1            1            //Bundled Higer Refining Stone
+6656      0           1           1            1            //Guardian Angel
+6657      0           1           1            1            //Imp
+6658      0           1           1            1            //Horn of Uniria
+6659      0           1           1            1            //Horn of Dinorant
+6675      1           0           0            0            //Absolute Weapon of Archangel
+6676      1           1           0            0            //Wizards Ring
+6693      0           1           1            1            //Horn of Fenrir
+6694      1           1           0            1            //Moonstone Pendant
+6695      1           1           0            1            //Eilte Transfer Skeleton Ring
+6710      0           1           1            1            //Reset Fruit Strength
+6711      0           1           1            1            //Reset Fruit Quickness
+6712      0           1           1            1            //Reset Fruit Health
+6713      0           1           1            1            //Reset Fruit Energy
+6714      0           1           1            1            //Reset Fruit Control
+6720      0           1           1            1            //Demon
+6721      0           1           1            1            //Spirit of Guardian
+6723      0           1           1            1            //Pet Rudolf
+6736      0           1           1            1            //Pet Panda
+7181      0           1           1            1            //Jewel of Bless
+7182      0           1           1            1            //Jewel of Soul
+7184      0           1           1            1            //Jewel of Life
+7190      0           1           1            1            //Jewel of Creation
+7209      0           1           1            1            //Gemstone
+7210      0           1           1            1            //Jewel of Harmony
+7211      0           1           1            1            //Lower refining stone
+7212      0           1           1            1            //Higher refining stone
+7221      0           1           1            1            //Talisman of Luck
+7232      1           0           0            0            //Cursed Castle Water
+7264      0           1           1            1            //Talisman of Chaos Assembly
+7357      0           1           1            1            //Elemental Talisman of Luck
+7358      0           1           1            1            //Elemental Talisman of Chaos Assembly		
+end

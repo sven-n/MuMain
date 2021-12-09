@@ -1,0 +1,29 @@
+0
+//Index   ItemIndex   MinItemLevel   MaxItemLevel   MaxItemOption1   MaxItemOption2   MinItemOption3   MaxItemOption3   MinItemNewOption   MaxItemNewOption   MaxItemSetOption   MinItemSocketOption   MaxItemSocketOption   EnableSlotWeapon   EnableSlotArmor   EnableSlotWing   SuccessRate_AL0   SuccessRate_AL1   SuccessRate_AL2   SuccessRate_AL3   SalePrice   ModelName
+  0       7412        0              12             *                *                *                *                *                  *                  *                  *                     *                     *                  *                 *                100                100               100               100               20          "Jewel180"    //Jewel Of Level
+  1       7413        0              15             0                *                *                *                *                  *                  *                  *                     *                     *                  *                 *                100                100               100               100               20          "Jewel181"    //Jewel Of Skill
+  2       7414        0              15             *                0                *                *                *                  *                  *                  *                     *                     *                  *                 *                100                100               100               100               20          "Jewel182"    //Jewel Of Luck
+  3       7415        0              15             *                *                0                6                *                  *                  *                  *                     *                     *                  *                 *                100                100               100               100               20          "Jewel183"    //Jewel Of Adicional
+  4       7416        0              15             *                *                *                *                0                  5                  *                  *                     *                     *                  *                 *                100                100               100               100               20          "Jewel184"    //Jewel Of Excelentt
+  5       7417        0              15             *                *                *                *                *                  *                  *                  0                     4                     *                  *                 *                100                100               100               100               20          "Jewel185"    //Jewel Of Socket
+  6       7418        0              15             *                *                *                *                *                  *                  1                  *                     *                     *                  *                 *                100                100               100               100               20          "Jewel187"    //Jewel Of Ancient 1
+  7       7419        0              15             *                *                *                *                *                  *                  2                  *                     *                     *                  *                 *                100                100               100               100               20          "Jewel188"    //Jewel Of Ancient 2
+  8       7420        0              15             *                *                *                *                *                  *                  *                  *                     *                     *                  *                 *                100                100               100               100               20          "Jewel186"    //Jewel Of Full
+end
+
+1
+//Index   Level   Option1   Option2   Option3   NewOption   SetOption   SocketOption
+  0       13      0         0         0         0           0           0
+  1       0       1         0         0         0           0           0
+  2       0       0         1         0         0           0           0
+  3       0       0         0         7         0           0           0
+  4       0       0         0         0         1           0           0
+  5       0       0         0         0         0           0           1
+  6       0       0         0         0         0           5           0
+  7       0       0         0         0         0           6           0
+  8       13      1         1         7         6           0           0
+end
+
+2
+//Index   Level   Option1   Option2   Option3   NewOption   SetOption   SocketOption
+end

@@ -1,0 +1,7 @@
+//SkillIndex  	MinSpeed  MaxSpeed  MaxDelay     MaxCount   Comment
+230       	000        125        1000       30         //Red Storm
+230       	126        250        1000       30         //Red Storm
+230       	251        500        1000       30         //Red Storm
+230       	501        1000       1000       30         //Red Storm
+230       	1001       *          1000       30         //Red Storm
+end

@@ -1,0 +1,152 @@
+[GameServerInfo]
+;==================================================
+; Announce Chaos Mix Settings
+;==================================================
+AnnounceChaosMix = 0
+AnnounceChaosMixText = %s put the item %s +13
+
+;==================================================
+; Custom Arena Settings
+;==================================================
+CustomArenaSwitch = 1
+CustomArenaVictimScoreDecrease = 0
+CustomArenaKillerScoreIncrease = 100
+CustomArenaText1 = [%s] fecha em %d minuto(s)
+CustomArenaText2 = [%s] fechou
+CustomArenaText3 = [%s] inicia em %d minuto(s)
+CustomArenaText4 = [%s] começou
+CustomArenaText5 = [%s] terminou
+CustomArenaText6 = [%s] %s venceu o evento
+CustomArenaText7 = [%s] Você está na %d posição com %d pontos.
+CustomArenaText8 = Você não pode entrar na arena
+CustomArenaText9 = A Arena não está aberta no momento
+CustomArenaText10 = Não tem mais vagas
+CustomArenaText11 = Você precisa estar no level %d
+CustomArenaText12 = Você não pode estar acima do level %d
+CustomArenaText13 = Voce deve ter %d Master Level
+CustomArenaText14 = Você não pode estar acima do %d Master Level
+CustomArenaText15 = Você precisa ter %d Resets
+CustomArenaText16 = Você não pode ter mais de %d Resets
+CustomArenaText17 = Você precisa ter %d Master Resets
+CustomArenaText18 = Você não pode ter mais de %d Master Resets
+CustomArenaText19 = Essa classe não é permitida
+
+;==================================================
+; Custom Event Drop Settings
+;==================================================
+CustomEventDropSwitch = 1
+CustomEventDropText1 = %s em lorencia começa em %d minuto(s)
+CustomEventDropText2 = %s começou em lorencia(x145,y135)
+CustomEventDropText3 = %s terminou
+
+;==================================================
+; Custom Store Settings
+;==================================================
+CustomStoreTime_AL0 = 60
+CustomStoreTime_AL1 = 60
+CustomStoreTime_AL2 = 60
+CustomStoreTime_AL3 = 60
+CustomStoreCommandJoBSyntax = bless
+CustomStoreCommandJoSSyntax = soul
+CustomStoreCommandJoCSyntax = chaos
+CustomStoreCommandWCCSyntax = cash
+CustomStoreCommandWCPSyntax = gold
+CustomStoreCommandPCPSyntax = pcp
+CustomStoreJoBName = .::BLESS STORE::.
+CustomStoreJoSName = .::SOUL STORE::.
+CustomStoreJoCName = .::CHAOS STORE::.
+CustomStoreWCCName = .::CASH STORE::.
+CustomStoreWCPName = .::GOLD STORE::.
+CustomStorePCPName = .::PCP STORE::.
+
+;==================================================
+; Custom Attack Settings
+;==================================================
+CustomAttackTime_AL0 = 0
+CustomAttackTime_AL1 = 0
+CustomAttackTime_AL2 = 0
+CustomAttackTime_AL3 = 0
+CustomAttackDelay = 0
+CustomAttackAutoPotionDelay = 0
+CustomAttackAutoBuff_AL0 = 1
+CustomAttackAutoBuff_AL1 = 1
+CustomAttackAutoBuff_AL2 = 1
+CustomAttackAutoBuff_AL3 = 1
+CustomAttackAutoBuffDelay = 10000
+CustomAttackAutoResume_AL0 = 1
+CustomAttackAutoResume_AL1 = 1
+CustomAttackAutoResume_AL2 = 1
+CustomAttackAutoResume_AL3 = 1
+
+;==================================================
+; Custom Online Lottery Settings
+;==================================================
+CustomOnlineLotterySwitch = 1
+CustomOnlineLotteryText1 = %s em %d minuto(s)
+CustomOnlineLotteryText2 = %s foi o vencedor do sorteio. Parabéns!
+CustomOnlineLotteryText3 = %s não teve vencedor
+CustomOnlineLotteryNoOff = 1
+
+;==================================================
+; Custom Quest Settings (CustomQuest.txt)
+;==================================================
+CustomQuestSwitch = 1
+
+;==================================================
+; Custom Death Message
+;==================================================
+CustomDeathMessageSwitch = 1
+
+;==================================================
+; Custom Quiz
+;==================================================
+CustomQuizSwitch = 1
+
+;==================================================
+; Custom RankUser Settings (CustomRankUser.txt)
+;==================================================
+CustomRankUserSwitch = 1
+CustomRankUserRewardSwitch = 1
+CustomRankUserNoticeToAll = 1
+CustomRankUserNoticeToUser = 1
+
+;==================================================
+; Custom NpcCollector Settings (CustomNpcCollector.txt)
+;==================================================
+CustomNpcCollectorSwitch = 1
+
+;==================================================
+; Custom Ranking Settings (CustomRanking.txt) F8 in game
+;==================================================
+CustomRankingSwitch = 1
+
+;==================================================
+; Custom EventTime Settings H in game
+;==================================================
+CustomEventTimeSwitch = 1
+
+;==================================================
+; Custom Guild Warehouse
+; Member Status to use: 
+; 0 All Members
+; 32 Battle Master+
+; 64 Guild Assistente+ 
+; 128 Guild Master+
+;==================================================
+GuildWarehouseEnable = 1
+GuildWarehouseStatus = 0
+
+;==================================================
+; Custom Shop MessageBox
+;==================================================
+; Types:
+; 0: Disabled
+; 1: Only for coins
+; 2: All purchases
+;==================================================
+CustomShopMessageBox = 2
+
+;==================================================
+; Custom Quest Settings (CustomNpcQuest.txt)
+;==================================================
+CustomNpcQuestSwitch = 1

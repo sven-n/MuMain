@@ -1,0 +1,381 @@
+[GameServerInfo]
+;==================================================
+; Character Damage Rate Settings
+;==================================================
+DuelDamageRate = 80
+CustomArenaDamageRate = 80
+ChaosCastleDamageRate = 80
+IllusionTempleDamageRate = 50
+CastleSiegeDamageRate1 = 80
+CastleSiegeDamageRate2 = 0
+CastleSiegeDamageRate3 = 5
+GeneralDamageRatePvP = 80
+GeneralDamageRatePvM = 80
+ReflectDamageRatePvP = 30
+ReflectDamageRatePvM = 30
+
+;==================================================
+; Character Class Damage Rate Settings
+;==================================================
+DWDamageRatePvP = 50
+DKDamageRatePvP = 30
+FEDamageRatePvP = 100
+MGDamageRatePvP = 50
+DLDamageRatePvP = 50
+SUDamageRatePvP = 60
+DWDamageRatePvM = 80
+DKDamageRatePvM = 80
+FEDamageRatePvM = 80
+MGDamageRatePvM = 90
+DLDamageRatePvM = 80
+SUDamageRatePvM = 80
+
+;==================================================
+; Character Class x Class Damage Rate Settings
+;==================================================
+DWDamageRateToDW = 250
+DWDamageRateToDK = 312
+DWDamageRateToFE = 178
+DWDamageRateToMG = 188
+DWDamageRateToDL = 197
+DWDamageRateToSU = 230
+DKDamageRateToDW = 213
+DKDamageRateToDK = 235
+DKDamageRateToFE = 157
+DKDamageRateToMG = 168
+DKDamageRateToDL = 100
+DKDamageRateToSU = 160
+FEDamageRateToDW = 234
+FEDamageRateToDK = 312
+FEDamageRateToFE = 223
+FEDamageRateToMG = 159
+FEDamageRateToDL = 190
+FEDamageRateToSU = 168
+MGDamageRateToDW = 256
+MGDamageRateToDK = 234
+MGDamageRateToFE = 189
+MGDamageRateToMG = 210
+MGDamageRateToDL = 159
+MGDamageRateToSU = 168
+DLDamageRateToDW = 235
+DLDamageRateToDK = 263
+DLDamageRateToFE = 185
+DLDamageRateToMG = 126
+DLDamageRateToDL = 230
+DLDamageRateToSU = 185
+SUDamageRateToDW = 234
+SUDamageRateToDK = 280
+SUDamageRateToFE = 138
+SUDamageRateToMG = 215
+SUDamageRateToDL = 139
+SUDamageRateToSU = 200
+
+;==================================================
+; Character Stuck Rate Settings
+;==================================================
+DWDamageStuckRate = 0
+DKDamageStuckRate = 0
+FEDamageStuckRate = 0
+MGDamageStuckRate = 0
+DLDamageStuckRate = 0
+SUDamageStuckRate = 0
+
+;==================================================
+; Character Damage Multiplier Settings
+;==================================================
+DKDamageMultiplierConstA = 8
+DLDamageMultiplierConstA = 20
+DKDamageMultiplierMaxRate = 500
+DLDamageMultiplierMaxRate = 500
+
+;==================================================
+; Character Dark Spirit Settings
+;==================================================
+DarkSpiritRangeAttackRate = 30
+DarkSpiritCriticalDamageRate = 30
+DarkSpiritExcellentDamageRate = 0
+DarkSpiritAttackDamageMinConstA = 180
+DarkSpiritAttackDamageMinConstB = 15
+DarkSpiritAttackDamageMinConstC = 8
+DarkSpiritAttackDamageMaxConstA = 200
+DarkSpiritAttackDamageMaxConstB = 15
+DarkSpiritAttackDamageMaxConstC = 4
+DarkSpiritAttackSpeedConstA = 20
+DarkSpiritAttackSpeedConstB = 4
+DarkSpiritAttackSpeedConstC = 5
+DarkSpiritAttackSpeedConstD = 50
+DarkSpiritAttackSuccessRateConstA = 1000
+DarkSpiritAttackSuccessRateConstB = 16
+DarkSpiritAttackSuccessRateConstC = 1
+
+;==================================================
+; Character Guardian Inc Damage Settings
+;==================================================
+SatanIncDamageConstA = 30
+DinorantIncDamageConstA = 15
+BlackFenrirIncDamageConstA = 10
+DemonIncDamageConstA = 40
+SkeletonIncDamageConstA = 20
+
+;==================================================
+; Character Guardian Dec Damage Settings
+;==================================================
+AngelDecDamageConstA = 20
+DinorantDecDamageConstA = 10
+DinorantDecDamageConstB = 5
+DarkHorseDecDamageConstA = 30
+DarkHorseDecDamageConstB = 2
+BlueFenrirDecDamageConstA = 10
+MariaDecDamageConstA = 30
+
+;==================================================
+; Character Combo Skill Damage Settings
+;==================================================
+ComboDamageConstA = 2
+ComboDamageConstB = 1
+
+;==================================================
+; Character Earthquake Skill Damage Settings
+;==================================================
+EarthquakeDamageConstA = 10
+EarthquakeDamageConstB = 5
+EarthquakeDamageConstC = 10
+
+;==================================================
+; Character Electric Spark Skill Damage Settings
+;==================================================
+ElectricSparkDamageConstA = 10
+ElectricSparkDamageConstB = 250
+
+;==================================================
+; Character Dark Lord Skill Damage Settings
+;==================================================
+DLSkillDamageConstA = 25
+DLSkillDamageConstB = 50
+
+;==================================================
+; Character Nova Skill Damage Settings
+;==================================================
+NovaDamageConstA = 8
+NovaDamageConstB = 5
+NovaDamageConstC = 2
+
+;==================================================
+; Character HP Recovery Settings
+;==================================================
+DWHPRecoveryRate = 0
+DKHPRecoveryRate = 0
+FEHPRecoveryRate = 0
+MGHPRecoveryRate = 0
+DLHPRecoveryRate = 0
+SUHPRecoveryRate = 0
+
+;==================================================
+; Character MP Recovery Settings
+;==================================================
+DWMPRecoveryRate = 4
+DKMPRecoveryRate = 4
+FEMPRecoveryRate = 4
+MGMPRecoveryRate = 4
+DLMPRecoveryRate = 4
+SUMPRecoveryRate = 4
+
+;==================================================
+; Character BP Recovery Settings
+;==================================================
+DWBPRecoveryRate = 3
+DKBPRecoveryRate = 5
+FEBPRecoveryRate = 3
+MGBPRecoveryRate = 3
+DLBPRecoveryRate = 3
+SUBPRecoveryRate = 3
+
+;==================================================
+; Character SD Recovery Settings
+;==================================================
+DWSDRecoveryRate = 4
+DKSDRecoveryRate = 4
+FESDRecoveryRate = 4
+MGSDRecoveryRate = 4
+DLSDRecoveryRate = 4
+SUSDRecoveryRate = 4
+
+;==================================================
+; Character Plasma Storm Skill Damage Settings
+;==================================================
+DWPlasmaStormDamageConstA = 8
+DWPlasmaStormDamageConstB = 5
+DWPlasmaStormDamageConstC = 7
+DWPlasmaStormDamageConstD = 3
+DKPlasmaStormDamageConstA = 3
+DKPlasmaStormDamageConstB = 5
+DKPlasmaStormDamageConstC = 5
+DKPlasmaStormDamageConstD = 7
+FEPlasmaStormDamageConstA = 5
+FEPlasmaStormDamageConstB = 3
+FEPlasmaStormDamageConstC = 7
+FEPlasmaStormDamageConstD = 5
+MGPlasmaStormDamageConstA = 3
+MGPlasmaStormDamageConstB = 5
+MGPlasmaStormDamageConstC = 5
+MGPlasmaStormDamageConstD = 7
+DLPlasmaStormDamageConstA = 5
+DLPlasmaStormDamageConstB = 5
+DLPlasmaStormDamageConstC = 7
+DLPlasmaStormDamageConstD = 3
+DLPlasmaStormDamageConstE = 3
+SUPlasmaStormDamageConstA = 5
+SUPlasmaStormDamageConstB = 5
+SUPlasmaStormDamageConstC = 7
+SUPlasmaStormDamageConstD = 3
+
+;==================================================
+; Character Damage Settings
+;==================================================
+DWPhysiDamageMinConstA = 6
+DWPhysiDamageMaxConstA = 4
+DWMagicDamageMinConstA = 9
+DWMagicDamageMaxConstA = 4
+DKPhysiDamageMinConstA = 8
+DKPhysiDamageMaxConstA = 4
+DKMagicDamageMinConstA = 9
+DKMagicDamageMaxConstA = 4
+FEPhysiDamageMinConstA = 7
+FEPhysiDamageMaxConstA = 4
+FEPhysiDamageMinBowConstA = 14
+FEPhysiDamageMinBowConstB = 7
+FEPhysiDamageMaxBowConstA = 8
+FEPhysiDamageMaxBowConstB = 4
+FEMagicDamageMinConstA = 9
+FEMagicDamageMaxConstA = 4
+MGPhysiDamageMinConstA = 6
+MGPhysiDamageMinConstB = 12
+MGPhysiDamageMaxConstA = 4
+MGPhysiDamageMaxConstB = 8
+MGMagicDamageMinConstA = 9
+MGMagicDamageMaxConstA = 4
+DLPhysiDamageMinConstA = 7
+DLPhysiDamageMinConstB = 14
+DLPhysiDamageMaxConstA = 5
+DLPhysiDamageMaxConstB = 10
+DLMagicDamageMinConstA = 9
+DLMagicDamageMaxConstA = 4
+SUPhysiDamageMinConstA = 8
+SUPhysiDamageMaxConstA = 4
+SUMagicDamageMinConstA = 9
+SUMagicDamageMaxConstA = 4
+
+;==================================================
+; Character Attack Success Rate Settings
+;==================================================
+DWAttackSuccessRateConstA = 5
+DWAttackSuccessRateConstB = 3
+DWAttackSuccessRateConstC = 2
+DWAttackSuccessRateConstD = 4
+DKAttackSuccessRateConstA = 5
+DKAttackSuccessRateConstB = 3
+DKAttackSuccessRateConstC = 2
+DKAttackSuccessRateConstD = 4
+FEAttackSuccessRateConstA = 5
+FEAttackSuccessRateConstB = 3
+FEAttackSuccessRateConstC = 2
+FEAttackSuccessRateConstD = 4
+MGAttackSuccessRateConstA = 5
+MGAttackSuccessRateConstB = 3
+MGAttackSuccessRateConstC = 2
+MGAttackSuccessRateConstD = 4
+DLAttackSuccessRateConstA = 5
+DLAttackSuccessRateConstB = 6
+DLAttackSuccessRateConstC = 2
+DLAttackSuccessRateConstD = 4
+DLAttackSuccessRateConstE = 10
+SUAttackSuccessRateConstA = 5
+SUAttackSuccessRateConstB = 3
+SUAttackSuccessRateConstC = 2
+SUAttackSuccessRateConstD = 4
+
+;==================================================
+; Character Attack Success Rate PvP Settings
+;==================================================
+DWAttackSuccessRatePvPConstA = 3
+DWAttackSuccessRatePvPConstB = 1
+DWAttackSuccessRatePvPConstC = 4
+DWAttackSuccessRatePvPConstD = 1
+DKAttackSuccessRatePvPConstA = 3
+DKAttackSuccessRatePvPConstB = 1
+DKAttackSuccessRatePvPConstC = 45
+DKAttackSuccessRatePvPConstD = 10
+FEAttackSuccessRatePvPConstA = 3
+FEAttackSuccessRatePvPConstB = 1
+FEAttackSuccessRatePvPConstC = 6
+FEAttackSuccessRatePvPConstD = 10
+MGAttackSuccessRatePvPConstA = 3
+MGAttackSuccessRatePvPConstB = 1
+MGAttackSuccessRatePvPConstC = 35
+MGAttackSuccessRatePvPConstD = 10
+DLAttackSuccessRatePvPConstA = 3
+DLAttackSuccessRatePvPConstB = 1
+DLAttackSuccessRatePvPConstC = 4
+DLAttackSuccessRatePvPConstD = 1
+SUAttackSuccessRatePvPConstA = 3
+SUAttackSuccessRatePvPConstB = 1
+SUAttackSuccessRatePvPConstC = 35
+SUAttackSuccessRatePvPConstD = 10
+
+;==================================================
+; Character Speed Settings
+;==================================================
+DWPhysiSpeedConstA = 20
+DWMagicSpeedConstA = 10
+DKPhysiSpeedConstA = 15
+DKMagicSpeedConstA = 20
+FEPhysiSpeedConstA = 50
+FEMagicSpeedConstA = 50
+MGPhysiSpeedConstA = 15
+MGMagicSpeedConstA = 20
+DLPhysiSpeedConstA = 10
+DLMagicSpeedConstA = 10
+SUPhysiSpeedConstA = 20
+SUMagicSpeedConstA = 20
+
+;==================================================
+; Character Defense Success Rate Settings
+;==================================================
+DWDefenseSuccessRateConstA = 3
+DKDefenseSuccessRateConstA = 3
+FEDefenseSuccessRateConstA = 4
+MGDefenseSuccessRateConstA = 3
+DLDefenseSuccessRateConstA = 7
+SUDefenseSuccessRateConstA = 4
+
+;==================================================
+; Character Defense Success Rate PvP Settings
+;==================================================
+DWDefenseSuccessRatePvPConstA = 2
+DWDefenseSuccessRatePvPConstB = 1
+DWDefenseSuccessRatePvPConstC = 4
+DKDefenseSuccessRatePvPConstA = 2
+DKDefenseSuccessRatePvPConstB = 1
+DKDefenseSuccessRatePvPConstC = 2
+FEDefenseSuccessRatePvPConstA = 2
+FEDefenseSuccessRatePvPConstB = 1
+FEDefenseSuccessRatePvPConstC = 10
+MGDefenseSuccessRatePvPConstA = 2
+MGDefenseSuccessRatePvPConstB = 1
+MGDefenseSuccessRatePvPConstC = 4
+DLDefenseSuccessRatePvPConstA = 2
+DLDefenseSuccessRatePvPConstB = 1
+DLDefenseSuccessRatePvPConstC = 2
+SUDefenseSuccessRatePvPConstA = 2
+SUDefenseSuccessRatePvPConstB = 1
+SUDefenseSuccessRatePvPConstC = 2
+
+;==================================================
+; Character Defense Settings
+;==================================================
+DWDefenseConstA = 4
+DKDefenseConstA = 3
+FEDefenseConstA = 10
+MGDefenseConstA = 4
+DLDefenseConstA = 7
+SUDefenseConstA = 3

@@ -1,0 +1,21 @@
+0
+//Index   Year   Month   Day   DoW   Hour   Minute   Second
+0         *      1       *     *     0      0        0
+1         *      10      *     *     0      0        0
+2         *      12      *     *     0      0        0
+end
+
+1
+//Index   StartMessage   FinalMessage   BonusTime
+0         *              *              86400
+1         *              *              86400
+2         *              *              86400
+end
+
+2
+//Index   BonusIndex   BonusValue_AL0   BonusValue_AL1   BonusValue_AL2   BonusValue_AL3   ItemIndex   ItemLevel   MapNumber   MonsterClass   MonsterLevelMin   MonsterLevelMax
+0         3            1000             1000             1000             1000             7179        3           *           *              12                69   
+1         3            5000             5000             5000             5000             7213        *           *           *              25                150   
+2         3            3000             3000             3000             3000             6722        *           *           466            *                 *
+2         3            3000             3000             3000             3000             7179        1           *           *              12                69   
+end

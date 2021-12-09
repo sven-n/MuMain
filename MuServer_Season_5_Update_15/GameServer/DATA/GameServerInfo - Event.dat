@@ -1,0 +1,177 @@
+[GameServerInfo]
+;==================================================
+; Blood Castle Event Settings
+;==================================================
+BloodCastleEvent = 1
+BloodCastleMaxUser = 10
+
+;==================================================
+; Bonus Manager Settings
+;==================================================
+BonusManagerSwitch = 1
+
+;==================================================
+; Castle Deep Event Settings
+;==================================================
+CastleDeepEvent = 0
+CastleDeepEventTime = 30
+
+;==================================================
+; Castle Siege Event Settings
+;==================================================
+CastleSiegeEvent = 0
+CastleSiegeCycleStartYear = 0
+CastleSiegeCycleStartMonth = 0
+CastleSiegeCycleStartDay = 0
+CastleSiegeSpecificState = 0
+CastleSiegeStateStartYear = 0
+CastleSiegeStateStartMonth = 0
+CastleSiegeStateStartDay = 0
+CastleSiegeStateStartHour = 0
+CastleSiegeStateStartMinute = 0
+CastleSiegeOffensiveWeaponDamage = 300
+CastleSiegeDefensiveWeaponDamage = 200
+CastleSiegeLowerAccumulatedTimeValue = 0
+CastleSiegeDecayAccumulatedTimeValue = 0
+
+;==================================================
+; Chaos Castle Event Settings
+;==================================================
+ChaosCastleEvent = 1
+ChaosCastleMinUser = 1
+ChaosCastleBlowUserRate = 50
+
+;==================================================
+; Crywolf Event Settings
+;==================================================
+CrywolfEvent = 0
+CrywolfBenefitSwitch = 1
+CrywolfBenefitChaosRate = 10
+CrywolfBenefitMonsterLife = 80
+CrywolfPenaltySwitch = 0
+CrywolfPenaltyJewelDrop = 70
+CrywolfPenaltyExperience = 70
+
+;==================================================
+; Devil Square Event Settings
+;==================================================
+DevilSquareEvent = 1
+DevilSquareMaxUser = 15
+
+;==================================================
+; Illusion Temple Event Settings
+;==================================================
+IllusionTempleEvent = 1
+IllusionTempleMinUser = 2
+IllusionTempleRewardFenrirRate = 5
+
+;==================================================
+; Invasion Manager Settings
+;==================================================
+InvasionManagerSwitch = 1
+
+;==================================================
+; Kanturu Event Settings
+;==================================================
+KanturuEvent = 1
+
+;==================================================
+; Raklion Event Settings
+;==================================================
+RaklionEvent = 1
+
+;==================================================
+; ReiDoMU Event Settings
+;==================================================
+ReiDoMUEvent = 1
+ReiDoMUMap = 2
+ReiDoMUCordX = 225
+ReiDoMUCordY = 237
+ReiDoMUGuildMinMembers = 1
+
+;==================================================
+; Quickly Event (Veloz)
+;==================================================
+QuicklyEvent = 1;
+QuicklyEventAutoReward1 = 10;
+QuicklyEventAutoReward2 = 3;
+QuicklyEventAutoReward3 = 0;
+
+;==================================================
+; Event Start (Iniciar evento)
+;==================================================
+EventStartSwitch = 1;
+EventStartTime   = 15;
+
+;==================================================
+; Event Hide and Seek (Esconde-Esconde)
+;==================================================
+EventHideAndSeekSwitch = 1;
+EventHideAndSeekMaxTime= 5;
+EventHideAndSeekAutoReward1 = 0;
+EventHideAndSeekAutoReward2 = 0;
+EventHideAndSeekAutoReward3 = 0;
+
+;==================================================
+; Event Run And Catch (Pega-Pega)
+;==================================================
+EventRunAndCatchSwitch = 1;
+EventRunAndCatchTimeToEnter = 20;
+EventRunAndCatchMaxTime= 10;
+EventRunAndCatchAutoReward1 = 0;
+EventRunAndCatchAutoReward2 = 0;
+EventRunAndCatchAutoReward3 = 0;
+
+;==================================================
+; Event Russian Roulette (Roleta Russa)
+;==================================================
+EventRussianRouletteSwitch 	= 1;
+EventRussianRouletteMaxTime	= 10;
+EventRussianRouletteMaxPlayer	= 8;
+EventRussianRouletteAutoReward1 = 0;
+EventRussianRouletteAutoReward2 = 0;
+EventRussianRouletteAutoReward3 = 0;
+
+;==================================================
+; Event PvP  (1x1)
+;==================================================
+EventPvPSwitch = 1
+EventPvPMaxScore = 3
+EventPvPMaxTime= 3
+EventPvPAutoReward1 = 0
+EventPvPAutoReward2 = 0
+EventPvPAutoReward3 = 100
+
+;==================================================
+; Event Kill All (Mata-Mata Geral)
+;==================================================
+EventKillAllSwitch = 1
+EventKillAllTimeToEnter = 20
+EventKillAllDeadDecrease = 1
+EventKillAllKillIncrease = 2
+EventKillAllMaxScore = 20
+EventKillAllMinPlayers = 2
+EventKillAllMaxPlayers = 20
+EventKillAllMaxTime= 2
+EventKillAllAutoReward1Rank1 = 0
+EventKillAllAutoReward1Rank2 = 0
+EventKillAllAutoReward1Rank3 = 0
+EventKillAllAutoReward2Rank1 = 0
+EventKillAllAutoReward2Rank2 = 0
+EventKillAllAutoReward2Rank3 = 0
+EventKillAllAutoReward3Rank1 = 100
+EventKillAllAutoReward3Rank2 = 50
+EventKillAllAutoReward3Rank3 = 30
+
+;==================================================
+; Event Team vs Team
+;==================================================
+EventTvtSwitch = 1
+EventTvtNpc = 380
+EventTvtNpcMap = 0
+EventTvtNpcX = 130
+EventTvtNpcY = 121
+EventTvtMinUsers = 2
+EventTvtMaxUsers = 20
+
+

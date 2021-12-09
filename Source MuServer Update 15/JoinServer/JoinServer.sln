@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JoinServer", "JoinServer\JoinServer.vcxproj", "{1BEFA73B-17C6-4E97-A35F-A4CBFA7678A1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release_EX401|Win32 = Release_EX401|Win32
+		Release_EX603|Win32 = Release_EX603|Win32
+		Release_EX803|Win32 = Release_EX803|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1BEFA73B-17C6-4E97-A35F-A4CBFA7678A1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1BEFA73B-17C6-4E97-A35F-A4CBFA7678A1}.Debug|Win32.Build.0 = Debug|Win32
+		{1BEFA73B-17C6-4E97-A35F-A4CBFA7678A1}.Release_EX401|Win32.ActiveCfg = Release_EX401|Win32
+		{1BEFA73B-17C6-4E97-A35F-A4CBFA7678A1}.Release_EX401|Win32.Build.0 = Release_EX401|Win32
+		{1BEFA73B-17C6-4E97-A35F-A4CBFA7678A1}.Release_EX603|Win32.ActiveCfg = Release_EX603|Win32
+		{1BEFA73B-17C6-4E97-A35F-A4CBFA7678A1}.Release_EX603|Win32.Build.0 = Release_EX603|Win32
+		{1BEFA73B-17C6-4E97-A35F-A4CBFA7678A1}.Release_EX803|Win32.ActiveCfg = Release_EX803|Win32
+		{1BEFA73B-17C6-4E97-A35F-A4CBFA7678A1}.Release_EX803|Win32.Build.0 = Release_EX803|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

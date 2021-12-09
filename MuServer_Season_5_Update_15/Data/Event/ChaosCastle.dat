@@ -1,0 +1,43 @@
+0
+//WarningTime   NotifyTime   EventTime   CloseTime
+5               1            10          4         
+end
+
+1
+//Year   Month   Day   DoW   Hour   Minute   Second
+*        *       *     *     1      0        0
+*        *       *     *     3      0        0
+*        *       *     *     5      0        0
+*        *       *     *     7      0        0
+*        *       *     *     9      0        0
+*        *       *     *     11     0        0
+*        *       *     *     13     0        0
+*        *       *     *     15     0        0
+*        *       *     *     17     0        0
+*        *       *     *     19     0        0
+*        *       *     *     21     0        0
+*        *       *     *     23     0        0
+end
+
+2
+//Level   ExperienceTable1   ExperienceTable2
+0         1000               500
+1         1500               100
+2         2000               1500
+3         2500               2000
+4         3000               2500
+5         3500               3000
+6         4000               3500
+end
+
+//Reward 
+3
+//Level   	Cash	Gold	PcCoint 
+0		0	0	0		
+1		0	0	0
+2		0	0	0
+3		0	0	0
+4		0	0	0
+5		0	0	0
+6		0	0	0
+end

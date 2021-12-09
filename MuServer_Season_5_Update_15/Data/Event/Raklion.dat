@@ -1,0 +1,19 @@
+0
+//AppearanceDelay   BossZoneCloseDelay   BossZoneOpenDelay
+5		    300		         300
+end
+
+1
+//BossEggHalf   BossEggMax
+5		15
+end
+
+2
+//SkillDelay
+1500
+end
+
+3
+//Pattern1   Pattern2   Pattern3   Pattern4   Pattern5   Pattern6
+80	     60	        50	   40	      20	 10
+end

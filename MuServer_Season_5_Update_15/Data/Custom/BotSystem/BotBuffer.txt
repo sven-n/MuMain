@@ -1,0 +1,60 @@
+//=======================================================
+// GameServer Ver: 2b.1.0.0
+// ------------------------------------------------------
+// Description: BOT_BUFFER Settings eX803
+// -  ---------------------------------------------------
+// -  Revision: 	17:37 04.07.2016
+// -
+// - Add : PerfectionMu ( Callejero )
+// - ====================================================
+// - ColorName Max: 7
+// - AL  = This bot is only for VIP users
+// - Class    = 0,1,2	DW,SM,GM  = 16,17,18	DK,BK,BM  = 32,33,34	Elf,ME,HE
+// -	      = 48,49,50 MG,DM    = 64,65,66	DL,LE     = 80,81,82	SU,BS,DS
+// -
+// - GensFamily (1 Vanert, 2 Duprian)
+// - Attention: if or if put 10 letters in the names of the Bot
+//======================================================================================
+//BotIndex	Class	Enabled	 ColorName	Zen	PCPoint	MaxLvl	   Name		Map	X	Y	Dir
+1
+0		34	1	    0		100	0	400	"BufferElfa"	0	165	126	2
+1		2	1	    0		100	0	400	"BufferSoul"	0	165	129	2
+end
+
+// -   Bot	Only	Active!		GensReq		Gens
+// -   Index	_AL	ReqGens		Contribution	Family
+2
+	0	0	   0	  100		0
+	1	0	   0	  100		0
+end
+
+// - 0 = Sword	1 = Shield	2 = Helm	3 = Armor	
+// - 4 = Pants	5 = Gloves	6 = Boots	7 = Wings	8 = Pet
+
+// - BotIndex	Slot	Type	Index	Level	Opt
+3
+	0	2	7	19	13	0
+	0	3	8	19	13	0
+	0	4	9	19	13	0
+	0	5	10	19	13	0
+	0	6	11	19	13	0
+	0	7	12	38	13	0
+	1	2	7	18	13	0
+	1	3	8	18	13	0
+	1	4	9	18	13	0
+	1	5	10	18	13	0
+	1	6	11	18	13	15
+	1	7	12	37	13	15
+end
+
+// - 28	(Greater Damage), 27 (Greater Defense),  16 (Greater Mana Shield),  64 (Critical Damage)
+// - 48	(Greater Life), 217 (Reflect), 82 (Magic Circle), 129 (Greater Ignore Defense Rate), 130 (Fitness)
+// -
+// - MAX SKILLS PER BOT = 5
+// - BotIndex	Skill		MinusTime       % Força da Skill
+
+4
+	0	28		5		30	//Buffer ELF
+	1	16		5		30	//Buffer SM
+end
+

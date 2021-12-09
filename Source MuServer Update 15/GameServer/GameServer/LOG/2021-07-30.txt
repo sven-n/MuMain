@@ -1,0 +1,37 @@
+11:24:40 Could not start GameServer
+11:26:15 Could not start, port in use (0)
+11:35:04 Could not start, port in use
+12:01:18 Mu Debug Console Window Init - completed(Handle:0x008C10CE)
+
+12:01:18 [ServerInfo] CashShop loaded successfully
+12:01:18 [ServerInfo] ChaosMix loaded successfully
+13:00:10 Could not start, port in use
+13:05:23 Mu Debug Console Window Init - completed(Handle:0x01C209B8)
+
+13:05:23 [ServerInfo] CashShop loaded successfully
+13:05:23 [ServerInfo] ChaosMix loaded successfully
+13:06:13 Mu Debug Console Window Init - completed(Handle:0x00830C18)
+
+13:06:13 [ServerInfo] CashShop loaded successfully
+13:06:13 [ServerInfo] ChaosMix loaded successfully
+13:09:20 Could not start, port in use
+13:10:51 Mu Debug Console Window Init - completed(Handle:0x00400942)
+
+13:10:51 [ServerInfo] CashShop loaded successfully
+13:10:51 [ServerInfo] ChaosMix loaded successfully
+13:17:58 Mu Debug Console Window Init - completed(Handle:0x00BC0E08)
+
+13:17:58 [ServerInfo] CashShop loaded successfully
+13:17:58 [ServerInfo] ChaosMix loaded successfully
+13:28:03 Mu Debug Console Window Init - completed(Handle:0x00B30E22)
+
+13:28:03 [ServerInfo] CashShop loaded successfully
+13:28:03 [ServerInfo] ChaosMix loaded successfully
+13:55:26 Mu Debug Console Window Init - completed(Handle:0x008109E0)
+
+13:55:26 [ServerInfo] CashShop loaded successfully
+13:55:26 [ServerInfo] ChaosMix loaded successfully
+14:02:11 Mu Debug Console Window Init - completed(Handle:0x00400A72)
+
+14:02:11 [ServerInfo] CashShop loaded successfully
+14:02:11 [ServerInfo] ChaosMix loaded successfully

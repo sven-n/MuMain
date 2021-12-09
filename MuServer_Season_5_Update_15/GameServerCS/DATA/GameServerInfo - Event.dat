@@ -1,0 +1,82 @@
+[GameServerInfo]
+;==================================================
+; Blood Castle Event Settings
+;==================================================
+BloodCastleEvent = 0
+BloodCastleMaxUser = 10
+
+;==================================================
+; Bonus Manager Settings
+;==================================================
+BonusManagerSwitch = 1
+
+;==================================================
+; Castle Deep Event Settings
+;==================================================
+CastleDeepEvent = 1
+CastleDeepEventTime = 30
+
+;==================================================
+; Castle Siege Event Settings
+;==================================================
+CastleSiegeEvent = 1
+CastleSiegeCycleStartYear =0
+CastleSiegeCycleStartMonth =0
+CastleSiegeCycleStartDay =0
+CastleSiegeSpecificState =0
+CastleSiegeStateStartYear =0
+CastleSiegeStateStartMonth =0
+CastleSiegeStateStartDay =0
+CastleSiegeStateStartHour =0
+CastleSiegeStateStartMinute =0
+CastleSiegeOffensiveWeaponDamage = 300
+CastleSiegeDefensiveWeaponDamage = 200
+CastleSiegeLowerAccumulatedTimeValue = 0
+CastleSiegeDecayAccumulatedTimeValue = 0
+CastleSiegeGetCrownUserGuildLevel = 128
+
+;==================================================
+; Chaos Castle Event Settings
+;==================================================
+ChaosCastleEvent = 0
+ChaosCastleMinUser = 1
+ChaosCastleBlowUserRate = 50
+
+;==================================================
+; Crywolf Event Settings
+;==================================================
+CrywolfEvent = 1
+CrywolfBenefitSwitch = 1
+CrywolfBenefitChaosRate = 10
+CrywolfBenefitMonsterLife = 80
+CrywolfPenaltySwitch = 0
+CrywolfPenaltyJewelDrop = 70
+CrywolfPenaltyExperience = 70
+
+;==================================================
+; Devil Square Event Settings
+;==================================================
+DevilSquareEvent = 0
+DevilSquareMaxUser = 15
+
+;==================================================
+; Illusion Temple Event Settings
+;==================================================
+IllusionTempleEvent = 0
+IllusionTempleMinUser = 2
+IllusionTempleRewardFenrirRate = 5
+
+;==================================================
+; Invasion Manager Settings
+;==================================================
+InvasionManagerSwitch = 0
+
+;==================================================
+; Kanturu Event Settings
+;==================================================
+KanturuEvent = 0
+
+;==================================================
+; Raklion Event Settings
+;==================================================
+RaklionEvent = 0

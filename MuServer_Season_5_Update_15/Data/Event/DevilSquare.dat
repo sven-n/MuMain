@@ -1,0 +1,48 @@
+0
+//WarningTime   NotifyTime   EventTime   CloseTime
+5               1            20          4         
+end
+
+1
+//Year   Month   Day   DoW   Hour   Minute   Second
+*        *       *     *     0      30       0
+*        *       *     *     4      30       0
+*        *       *     *     8      30       0
+*        *       *     *     12     30       0
+*        *       *     *     16     30       0
+*        *       *     *     20     30       0
+end
+
+2
+//Level   RewardExperience1   RewardExperience2   RewardExperience3   RewardExperience4   RewardExperience5   RewardExperience6   RewardExperience7   RewardExperience8   RewardExperience9   RewardExperience10
+0         6000                4000                4000                2000                2000                2000                1000                1000                1000                1000
+1         8000                6000                6000                4000                4000                4000                2000                2000                2000                2000
+2         10000               8000                8000                6000                6000                6000                4000                4000                4000                4000
+3         20000               10000               10000               8000                8000                8000                6000                6000                6000                6000
+4         22000               20000               20000               10000               10000               10000               8000                8000                8000                8000
+5         24000               22000               22000               20000               20000               20000               10000               10000               10000               10000
+6         26000               24000               24000               22000               22000               22000               20000               20000               20000               20000
+end
+
+3
+//Level   RewardMoney1   RewardMoney2   RewardMoney3   RewardMoney4   RewardMoney5   RewardMoney6   RewardMoney7   RewardMoney8   RewardMoney9   RewardMoney10
+0         30000          25000          25000          20000          20000          20000          15000          15000          15000          15000
+1         40000          35000          35000          30000          30000          30000          25000          25000          25000          25000
+2         50000          45000          45000          40000          40000          40000          35000          35000          35000          35000
+3         60000          55000          55000          50000          50000          50000          45000          45000          45000          45000
+4         70000          65000          65000          60000          60000          60000          55000          55000          55000          55000
+5         80000          75000          75000          70000          70000          70000          65000          65000          65000          65000
+6         150000         140000         140000         120000         120000         120000         90000          90000          90000          90000
+end
+
+//Reward 
+4
+//Level   	Cash	Gold	PcCoint 
+0		0	0	0		
+1		0	0	0
+2		0	0	0
+3		0	0	0
+4		0	0	0
+5		0	0	0
+6		0	0	0
+end

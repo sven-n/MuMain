@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release_EX502|Win32">
+      <Configuration>Release_EX502</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DCCBB883-D3B5-486A-8658-4E469C575023}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>DataServer</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_EX502|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_EX502|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_EX502|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Release\DataServer_EX403\</OutDir>
+    <IntDir>Release\DataServer_EX403\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_EX502|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;DATASERVER_UPDATE=501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="DataServer.ico" />
+    <None Include="ReadMe.txt" />
+    <None Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AllowableIpList.h" />
+    <ClInclude Include="ArcaBattle.h" />
+    <ClInclude Include="BadSyntax.h" />
+    <ClInclude Include="CashShop.h" />
+    <ClInclude Include="CastleDBSet.h" />
+    <ClInclude Include="CharacterManager.h" />
+    <ClInclude Include="CommandManager.h" />
+    <ClInclude Include="CriticalSection.h" />
+    <ClInclude Include="CSProtocol.h" />
+    <ClInclude Include="DataServer.h" />
+    <ClInclude Include="DataServerProtocol.h" />
+    <ClInclude Include="ESProtocol.h" />
+    <ClInclude Include="EventInventory.h" />
+    <ClInclude Include="GensSystem.h" />
+    <ClInclude Include="GuildManager.h" />
+    <ClInclude Include="GuildMatching.h" />
+    <ClInclude Include="Helper.h" />
+    <ClInclude Include="Log.h" />
+    <ClInclude Include="LuckyCoin.h" />
+    <ClInclude Include="LuckyItem.h" />
+    <ClInclude Include="MasterSkillTree.h" />
+    <ClInclude Include="MemScript.h" />
+    <ClInclude Include="MiniDump.h" />
+    <ClInclude Include="MuRummy.h" />
+    <ClInclude Include="MuunSystem.h" />
+    <ClInclude Include="NpcTalk.h" />
+    <ClInclude Include="PartyMatching.h" />
+    <ClInclude Include="PcPoint.h" />
+    <ClInclude Include="PentagramSystem.h" />
+    <ClInclude Include="PersonalShop.h" />
+    <ClInclude Include="Protect.h" />
+    <ClInclude Include="QueryManager.h" />
+    <ClInclude Include="Quest.h" />
+    <ClInclude Include="QuestWorld.h" />
+    <ClInclude Include="Queue.h" />
+    <ClInclude Include="ReiDoMU.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="ServerDisplayer.h" />
+    <ClInclude Include="ServerManager.h" />
+    <ClInclude Include="SocketManager.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="ThemidaSDK.h" />
+    <ClInclude Include="Util.h" />
+    <ClInclude Include="Warehouse.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AllowableIpList.cpp" />
+    <ClCompile Include="ArcaBattle.cpp" />
+    <ClCompile Include="BadSyntax.cpp" />
+    <ClCompile Include="CashShop.cpp" />
+    <ClCompile Include="CastleDBSet.cpp" />
+    <ClCompile Include="CharacterManager.cpp" />
+    <ClCompile Include="CommandManager.cpp" />
+    <ClCompile Include="CriticalSection.cpp" />
+    <ClCompile Include="CSProtocol.cpp" />
+    <ClCompile Include="DataServer.cpp" />
+    <ClCompile Include="DataServerProtocol.cpp" />
+    <ClCompile Include="ESProtocol.cpp" />
+    <ClCompile Include="EventInventory.cpp" />
+    <ClCompile Include="GensSystem.cpp" />
+    <ClCompile Include="GuildManager.cpp" />
+    <ClCompile Include="GuildMatching.cpp" />
+    <ClCompile Include="Helper.cpp" />
+    <ClCompile Include="Log.cpp" />
+    <ClCompile Include="LuckyCoin.cpp" />
+    <ClCompile Include="LuckyItem.cpp" />
+    <ClCompile Include="MasterSkillTree.cpp" />
+    <ClCompile Include="MemScript.cpp" />
+    <ClCompile Include="MiniDump.cpp" />
+    <ClCompile Include="MuRummy.cpp" />
+    <ClCompile Include="MuunSystem.cpp" />
+    <ClCompile Include="NpcTalk.cpp" />
+    <ClCompile Include="PartyMatching.cpp" />
+    <ClCompile Include="PcPoint.cpp" />
+    <ClCompile Include="PentagramSystem.cpp" />
+    <ClCompile Include="PersonalShop.cpp" />
+    <ClCompile Include="Protect.cpp" />
+    <ClCompile Include="QueryManager.cpp" />
+    <ClCompile Include="Quest.cpp" />
+    <ClCompile Include="QuestWorld.cpp" />
+    <ClCompile Include="Queue.cpp" />
+    <ClCompile Include="ReiDoMU.cpp" />
+    <ClCompile Include="ServerDisplayer.cpp" />
+    <ClCompile Include="ServerManager.cpp" />
+    <ClCompile Include="SocketManager.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_EX502|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Util.cpp" />
+    <ClCompile Include="Warehouse.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DataServer.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

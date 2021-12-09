@@ -1,0 +1,390 @@
+<HTML>
+
+<HEAD>
+ <LINK rel="stylesheet" type="text/css" href="../style.css">
+ <LINK rel="shortcut icon" href="../img/favicon.ico">
+</HEAD>
+
+<SCRIPT type="text/javascript" src="../fun/helptip.js"></script>
+
+<SCRIPT LANGUAGE="JavaScript">
+V01 = "<font color='#FF5500'>Close ConfigMaker, Close and not saved any change!!</font>";
+V02 = "<font color='#FF5500'>Select the language to display<br>Error and Warnings Messages";
+V03 = "<font color='#FF5500'>Name of your Server<br>NickName identificator</font>";
+V04 = "<font color='#FF5500'>If your server is on the same PC<br>that MuMaker selected Local.</font>";
+V05 = "<font color='#FF5500'>If your server is on other PC<br>that MuMaker, selected Remote.</font>";
+V06 = "<font color='#FF5500'>If you use Remote connection<br>Need put the Remote IP of SQL</font>";
+V07 = "<font color='#FF5500'>If you use Remote connection<br>Need put the Remote PORT of SQL</font>";
+V08 = "<font color='#FF5500'>To delete and Regenerate SQL MMK_Procedures</font>";
+V09 = "<font color='#FF5500'>To store the PassWord and User of SQL.<br>The PassWord is saved Encrypted for more Security</font>";
+V10 = "<font color='#FF5500'>To put your SQL User</font>";
+V11 = "<font color='#FF5500'>To Load all Accounts in the 1º Opened.<br>Then you can reLoad whit the button<br>'ReloadAccount' in Main Windows</font>";
+V12 = "<font color='#FF5500'>To put your SQL PassWord</font>";
+V13 = "<font color='#FF5500'>To Auto Reload all Accounts when you Create<br>Delete or Modified any Account</font>";
+V14 = "<font color='#FF5500'>The time limit that the SQL WAIT DATA<br>If you have many accounts you need put more time<br>Only numbers. The unit are Seconds!!</font>";
+V15 = "<font color='#FF5500'>To habilite MD5 in MuMaker.<br>If you use MD5 in your server you need checked!!</font>";
+V16 = "<font color='#FF5500'>To create the Colum os Resets System</font>";
+V17 = "<font color='#FF5500'>To indicate the name of MuOnline DB<br>MuOnline, Mu, Me_MuOnline, Mu0001...!!</font>";
+V18 = "<font color='#FF5500'>If you use Reset System you need checked<br>and indicate the name of your Colum Reset!!</font>";
+V19 = "<font color='#FF5500'>If you use Reset System you need indicate<br> the name of your Colum Reset!!</font>";
+V20 = "<font color='#FF5500'>To indicate the name of MuRanking DB<br>Ranking, MuRanking, Rank, MuRank0001...!!</font>";
+V21 = "<font color='#FF5500'>If you use ExtraWareHous System you need checked<br>and indicate the name of your Table of this System!!</font>";
+V22 = "<font color='#FF5500'>To indicate the name of MuEvent DB<br>MuEvent, Mu_Event_2003, Evnt, MuEven0001...!!</font>";
+V23 = "<font color='#FF5500'>If you use ExtraWareHous System you need indicate<br>the name of your Table of this System!!</font>";
+V24 = "<font color='#FF5500'>If you use ExtraWareHous System you need indicate<br>the number of extra warehous that you used in this System!!</font>";
+V25 = "<font color='#FF5500'>OK, Close and Saved all changes and Restarting the MuMaker automatly</font>";
+V26 = "<font color='#FF5500'>CANCEL, Close and not saved any change!!</font>";
+</script>
+
+<a href="?" class=helpLink onClick="showHelpTip(event,Vxx,false); return false"></a>
+
+<BODY>
+<br>
+<table id="Tabla_01" width="493" height="369" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td colspan="25">
+			<img src="../img/configmaker/ConfigMaker_01.gif" width="465" height="27" alt=""></td>
+		<td colspan="4">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V01,false); return false"><img src="../img/configmaker/ConfigMaker_02.gif" width="27" height="27" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="27" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="29">
+			<img src="../img/configmaker/ConfigMaker_03.gif" width="492" height="11" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="11" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="15">
+			<img src="../img/configmaker/ConfigMaker_04.gif" width="267" height="4" alt=""></td>
+		<td colspan="12" rowspan="6">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V02,false); return false"><img src="../img/configmaker/ConfigMaker_05.gif" width="214" height="74" alt=""></td>
+		<td colspan="2" rowspan="19">
+			<img src="../img/configmaker/ConfigMaker_06.gif" width="11" height="208" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="4" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="2" rowspan="8">
+			<img src="../img/configmaker/ConfigMaker_07.gif" width="13" height="96" alt=""></td>
+		<td colspan="12">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V03,false); return false"><img src="../img/configmaker/ConfigMaker_08.gif" width="244" height="20" alt=""></td>
+		<td rowspan="29">
+			<img src="../img/configmaker/ConfigMaker_09.gif" width="10" height="326" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="20" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="12">
+			<img src="../img/configmaker/ConfigMaker_10.gif" width="244" height="13" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="13" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="6" rowspan="2">
+			<img src="../img/configmaker/ConfigMaker_11.gif" width="110" height="29" alt=""></td>
+		<td colspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V04,false); return false"><img src="../img/configmaker/ConfigMaker_12.gif" width="55" height="20" alt=""></td>
+		<td rowspan="2">
+			<img src="../img/configmaker/ConfigMaker_13.gif" width="13" height="29" alt=""></td>
+		<td colspan="3">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V05,false); return false"><img src="../img/configmaker/ConfigMaker_14.gif" width="66" height="20" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="20" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<img src="../img/configmaker/ConfigMaker_15.gif" width="55" height="9" alt=""></td>
+		<td colspan="3">
+			<img src="../img/configmaker/ConfigMaker_16.gif" width="66" height="9" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="9" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="5" rowspan="4">
+			<img src="../img/configmaker/ConfigMaker_17.gif" width="92" height="34" alt=""></td>
+		<td colspan="5" rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V06,false); return false"><img src="../img/configmaker/ConfigMaker_18.gif" width="100" height="19" alt=""></td>
+		<td rowspan="7">
+			<img src="../img/configmaker/ConfigMaker_19.gif" width="13" height="64" alt=""></td>
+		<td rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V07,false); return false"><img src="../img/configmaker/ConfigMaker_20.gif" width="39" height="19" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="8" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="12" rowspan="2">
+			<img src="../img/configmaker/ConfigMaker_21.gif" width="214" height="16" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="11" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="5" rowspan="5">
+			<img src="../img/configmaker/ConfigMaker_22.gif" width="100" height="45" alt=""></td>
+		<td rowspan="5">
+			<img src="../img/configmaker/ConfigMaker_23.gif" width="39" height="45" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="5" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="2" rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V08,false); return false"><img src="../img/configmaker/ConfigMaker_24.gif" width="32" height="23" alt=""></td>
+		<td colspan="10" rowspan="8">
+			<img src="../img/configmaker/ConfigMaker_25.gif" width="182" height="88" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="10" alt=""></td>
+	</tr>
+	<tr>
+		<td rowspan="21">
+			<img src="../img/configmaker/ConfigMaker_26.gif" width="8" height="230" alt=""></td>
+		<td colspan="2" rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V09,false); return false"><img src="../img/configmaker/ConfigMaker_27.gif" width="14" height="17" alt=""></td>
+		<td colspan="4" rowspan="3">
+			<img src="../img/configmaker/ConfigMaker_28.gif" width="83" height="30" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="13" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="2" rowspan="2">
+			<img src="../img/configmaker/ConfigMaker_29.gif" width="32" height="17" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="4" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="2" rowspan="6">
+			<img src="../img/configmaker/ConfigMaker_30.gif" width="14" height="76" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="13" alt=""></td>
+	</tr>
+	<tr>
+		<td rowspan="18">
+			<img src="../img/configmaker/ConfigMaker_31.gif" width="52" height="200" alt=""></td>
+		<td colspan="10" rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V10,false); return false"><img src="../img/configmaker/ConfigMaker_32.gif" width="183" height="23" alt=""></td>
+		<td>
+			<a href="?" class=helpLink onClick="showHelpTip(event,V11,false); return false"><img src="../img/configmaker/ConfigMaker_33.gif" width="16" height="14" alt=""></td>
+		<td rowspan="4">
+			<img src="../img/configmaker/ConfigMaker_34.gif" width="16" height="48" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="14" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="../img/configmaker/ConfigMaker_35.gif" width="16" height="9" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="9" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="10" rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V12,false); return false"><img src="../img/configmaker/ConfigMaker_36.gif" width="183" height="25" alt=""></td>
+		<td>
+			<a href="?" class=helpLink onClick="showHelpTip(event,V13,false); return false"><img src="../img/configmaker/ConfigMaker_37.gif" width="16" height="14" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="14" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="../img/configmaker/ConfigMaker_38.gif" width="16" height="11" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="11" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="10" rowspan="4">
+			<img src="../img/configmaker/ConfigMaker_39.gif" width="183" height="39" alt=""></td>
+		<td colspan="3" rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V14,false); return false"><img src="../img/configmaker/ConfigMaker_40.gif" width="36" height="20" alt=""></td>
+		<td colspan="9" rowspan="3">
+			<img src="../img/configmaker/ConfigMaker_41.gif" width="178" height="30" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="15" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="2" rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V15,false); return false"><img src="../img/configmaker/ConfigMaker_42.gif" width="14" height="15" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="5" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="3" rowspan="2">
+			<img src="../img/configmaker/ConfigMaker_43.gif" width="36" height="19" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="10" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="2" rowspan="11">
+			<img src="../img/configmaker/ConfigMaker_44.gif" width="14" height="122" alt=""></td>
+		<td colspan="4">
+			<img src="../img/configmaker/ConfigMaker_45.gif" width="135" height="9" alt=""></td>
+		<td colspan="6" rowspan="3">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V16,false); return false"><img src="../img/configmaker/ConfigMaker_46.gif" width="50" height="29" alt=""></td>
+		<td rowspan="11">
+			<img src="../img/configmaker/ConfigMaker_47.gif" width="4" height="122" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="9" alt=""></td>
+	</tr>
+	<tr>
+		<td rowspan="10">
+			<img src="../img/configmaker/ConfigMaker_48.gif" width="20" height="113" alt=""></td>
+		<td colspan="9" rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V17,false); return false"><img src="../img/configmaker/ConfigMaker_49.gif" width="163" height="20" alt=""></td>
+		<td>
+			<a href="?" class=helpLink onClick="showHelpTip(event,V18,false); return false"><img src="../img/configmaker/ConfigMaker_50.gif" width="16" height="15" alt=""></td>
+		<td colspan="3" rowspan="6">
+			<img src="../img/configmaker/ConfigMaker_51.gif" width="76" height="51" alt=""></td>
+		<td colspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V19,false); return false"><img src="../img/configmaker/ConfigMaker_52.gif" width="73" height="15" alt=""></td>
+		<td rowspan="6">
+			<img src="../img/configmaker/ConfigMaker_53.gif" width="6" height="51" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="15" alt=""></td>
+	</tr>
+	<tr>
+		<td rowspan="3">
+			<img src="../img/configmaker/ConfigMaker_54.gif" width="16" height="15" alt=""></td>
+		<td colspan="2" rowspan="5">
+			<img src="../img/configmaker/ConfigMaker_55.gif" width="73" height="36" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="5" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="9">
+			<img src="../img/configmaker/ConfigMaker_56.gif" width="163" height="6" alt=""></td>
+		<td colspan="6" rowspan="4">
+			<img src="../img/configmaker/ConfigMaker_57.gif" width="50" height="31" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="6" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="9" rowspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V20,false); return false"><img src="../img/configmaker/ConfigMaker_58.gif" width="163" height="19" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="4" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<a href="?" class=helpLink onClick="showHelpTip(event,V21,false); return false"><img src="../img/configmaker/ConfigMaker_59.gif" width="16" height="15" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="15" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="9">
+			<img src="../img/configmaker/ConfigMaker_60.gif" width="163" height="6" alt=""></td>
+		<td>
+			<img src="../img/configmaker/ConfigMaker_61.gif" width="16" height="6" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="6" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="9">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V22,false); return false"><img src="../img/configmaker/ConfigMaker_62.gif" width="163" height="19" alt=""></td>
+		<td colspan="8">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V23,false); return false"><img src="../img/configmaker/ConfigMaker_63.gif" width="183" height="19" alt=""></td>
+		<td rowspan="4">
+			<img src="../img/configmaker/ConfigMaker_64.gif" width="7" height="62" alt=""></td>
+		<td colspan="2">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V24,false); return false"><img src="../img/configmaker/ConfigMaker_65.gif" width="20" height="19" alt=""></td>
+		<td colspan="2" rowspan="4">
+			<img src="../img/configmaker/ConfigMaker_66.gif" width="11" height="62" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="19" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="9">
+			<img src="../img/configmaker/ConfigMaker_67.gif" width="163" height="11" alt=""></td>
+		<td colspan="8">
+			<img src="../img/configmaker/ConfigMaker_68.gif" width="183" height="11" alt=""></td>
+		<td colspan="2" rowspan="3">
+			<img src="../img/configmaker/ConfigMaker_69.gif" width="20" height="43" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="11" alt=""></td>
+	</tr>
+	<tr>
+		<td rowspan="2">
+			<img src="../img/configmaker/ConfigMaker_70.gif" width="7" height="32" alt=""></td>
+		<td colspan="3">
+			<a href="?" class=helpLink onClick="showHelpTip(event,V25,false); return false"><img src="../img/configmaker/ConfigMaker_71.gif" width="51" height="27" alt=""></td>
+		<td colspan="5" rowspan="2">
+			<img src="../img/configmaker/ConfigMaker_72.gif" width="105" height="32" alt=""></td>
+		<td colspan="4" rowspan="2">
+			<img src="../img/configmaker/ConfigMaker_73.gif" width="92" height="32" alt=""></td>
+		<td>
+			<a href="?" class=helpLink onClick="showHelpTip(event,V26,false); return false"><img src="../img/configmaker/ConfigMaker_74.gif" width="51" height="27" alt=""></td>
+		<td colspan="3" rowspan="2">
+			<img src="../img/configmaker/ConfigMaker_75.gif" width="40" height="32" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="27" alt=""></td>
+	</tr>
+	<tr>
+		<td colspan="3">
+			<img src="../img/configmaker/ConfigMaker_76.gif" width="51" height="5" alt=""></td>
+		<td>
+			<img src="../img/configmaker/ConfigMaker_77.gif" width="51" height="5" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="1" height="5" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="../img/espacio.gif" width="8" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="5" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="9" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="52" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="20" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="7" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="4" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="18" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="29" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="26" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="13" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="14" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="13" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="39" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="10" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="16" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="16" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="4" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="56" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="51" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="22" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="6" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="12" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="7" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="8" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="12" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="4" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="7" height="1" alt=""></td>
+		<td>
+			<img src="../img/espacio.gif" width="4" height="1" alt=""></td>
+		<td></td>
+	</tr>
+</table>
+</BODY>
+
+</HTML>

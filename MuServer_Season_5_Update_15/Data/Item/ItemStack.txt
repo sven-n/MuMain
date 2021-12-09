@@ -1,0 +1,46 @@
+//Index   MaxStack   CreateIndex   Comment
+2055      255        *             //Bolt
+2063      255        *             //Arrow
+6688      20         *             //Splinter of Armor
+6689      20         *             //Bless of Guardian
+6690      10         *             //Claw of Beast
+6288      5          6292          //Mithril Fragment
+6290      5          6293          //Elixir Fragment
+6801      5          6802          //Spirit Map Fragment
+6803      10         *             //Trophies of Battle
+7168      255        *             //Apple
+7169      255        *             //Small Healing Potion
+7170      255        *             //Healing Potion
+7171      255        *             //Large Healing Potion
+7172      255        *             //Small Mana Potion
+7173      255        *             //Mana Potion
+7174      255        *             //Large Mana Potion
+7175      255        *             //Siege Potion
+7176      255        *             //Antidote
+7189      255        *             //Rena
+7197      5          7196          //Symbol of Kundun
+7203      255        *             //Small SD Potion
+7204      255        *             //SD Potion
+7205      255        *             //Large SD Potion
+7206      255        *             //Small Complex Potion
+7207      255        *             //Complex Potion
+7208      255        *             //Large Complex Potion
+7214      3          *             //Jack O'Lantern Blessings
+7215      3          *             //Jack O'Lantern Wrath
+7216      3          *             //Jack O'Lantern Cry
+7217      3          *             //Jack O'Lantern Food
+7218      3          *             //Jack O'Lantern Drink
+7238      255        *             //Elite Healing Potion
+7239      255        *             //Elite Mana Potion
+7253      3          *             //Cherry Blossom Wine
+7254      3          *             //Cherry Blossom Rice Cake
+7255      3          *             //Cherry Blossom Flower Petal
+7256      10         *             //White Cherry Blossom Branch
+7257      30         *             //Red Cherry Blossom Branch
+7258      255        *             //Golden Cherry Blossom Branch
+7268      255        *             //Lucky Coin
+7269      5          7270          //Suspicious Scrap of Paper
+7278      5          7279          //Sign of Dimensions
+7301      255        *             //Elite SD Potion
+7383      24         7384          //Card Piece
+end

@@ -1,0 +1,120 @@
+Efeitos Dinamicos
+
+32289 Cristal de Gelo
+32290 Cristal de Gelo 2
+31108 Bolinhas
+32027 Quadrados
+32028 bugado
+32241 brilando tosco
+31685 Fumaça
+32213 Bugado
+32027 bugado
+32524 Testar em estatico
+32054 Fogo Toppp
+32055 bolas de fogo
+32056 Gelo Top
+32246 Fogo
+32244 Fogo
+32245 Fumaça Preta
+32265 Meteorito
+32256 Meteoro
+32257 Setas
+32259 Bolas de gelo 1
+32060 Fogo
+32002 Bolinhas
+32123 Bolas de gelo 2
+32124 Bolas de gelo 3
+32125 Efeito Fraco
+32031 Areia
+32032 Areia 2
+32084 Fogo Verde
+32085 Fumaça Marrom
+32088 Fumaça Preta
+32066 Fumaça Preta 2
+32067 Fumaça Preta 3
+32078 Fogo
+32260 Bola de Gelo
+32261 Bolinhas de Gelo
+32262 Meteorito bugado
+32033 Explosão com faisca Legal =P
+32316 Aneis Gigantes
+32317 Fogo
+32320 Meteorito branco
+32321 Muito loco Circulo pontiagudo
+32102 luzes caindo
+32323 Bolinhas
+32324 EFEITO EM X
+32325 EFEITO EM X
+32329 Não lembro
+32332 Parece um raio ^^
+32333 Parece um raio 2
+32334 Parece um raio 3
+32335 Chamas
+32336 Chamas
+32337 Chamas Brancas
+32339 Chamas Brancas
+32342 Estrelas
+32301 Sei la o que é mais é branco
+32241 Luz braca
+32272 Estrela
+32237 Risco
+32220 Testar em estatico
+32134 Bolhas que estora
+32079 Bolas roxas
+32096 Estrela que Gira topppppppp
+32099 Testar em estatico
+32100 Luz Branca
+32101 Luz Branca 2
+32025 Bugado
+32018 Bugado
+32026 Bugado
+32019 Bugado
+32020 Bugado
+32224 Bugado
+32049 Bugado
+32037 Luz Roxa
+32203 ArEIA
+32117 Raios
+32201 lixo
+32204 LIXO VERDE
+32121 LIXO
+32196 FOGO
+32192 FOGOS DE ARTIFICIOS BACANA
+32114 BOLINHAS MANEIRA
+32197 Gelo
+32248 Gelo
+32249 bugado
+32250 bugado
+32251 Não sei o que pe mais é maneiro
+32252 Universo muito toppppppppppp
+32253 bugado
+32254 Testar em estatico
+32351 Gelo
+32352 Gelo
+32353 Gelo
+32354 Gelo
+32297 Bugado
+32210 Melhor efeito de luzes que tem =P
+32211 setinhas
+32115 Testar em estatico
+32057 efeito de luzes
+32247 efeito de luzes
+32267 Testar em estatico
+32268 Melhor efeito de luzes que tem =P
+32269 Areia
+32217 Onda
+32221 Bolas pretas muito foda =P
+32222 Escudos toppppppppppp
+32223 Cruz de Vida Topppppppp
+32231 bugado
+32232 Gelo
+32219 Meteoro
+32281 Bolhas de sabão toppppppp =p
+32004 Gelo
+32003 estrela
+31685 vapor
+32319 Matrix
+32345 bolinha
+32298 Coração muito topppppp =P
+32299 Gelo
+32270 Agua Topppppppppp =p

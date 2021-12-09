@@ -1,0 +1,41 @@
+//=================================================================================================================
+//-- Definições do Ranking
+//=================================================================================================================
+//  RankIndex ->  Index do Ranking
+//  Name      ->  Titulo do Rank
+//  ResetMin  ->  Minimo de Resets para determinado Rank
+//  ResetMin  ->  Maximo de Resets para determinado Rank
+//  Cash      ->  Premiação em Cash ao antigir a patente
+//  Gold      ->  Premiação em Gold ao antigir a patente
+//  PcPoint   ->  Premiação em PcPoint ao antigir a patente
+//=================================================================================================================
+//-- Obs: Obrigatorio o Ultimo Rank o ResetMax ter o valor (-1)
+//=================================================================================================================
+
+//=================================================================================================================
+//     #RankIndex          #Name            #ResetMin        #ResetMax       #Cash      #Gold     #PcPoint		 
+//=================================================================================================================
+0
+            0            "Novato"             0                50               0          0           0		
+            1            "Aprendiz"           51               100              2          0           0	
+            2            "Mensageiro"         101              150              2          0           0	
+            3            "Caçador"            151              200              2          0           0	
+            4            "Assasino"           201              250              2          0           0	
+            5            "Arqueiro"           251              300              2          0           0	
+            6            "Lanceiro"           301              350              2          0           0	
+            7            "Cavaleiro"          351              400              2          0           0	
+            8            "Soldado"            401              450              2          0           0	
+            9            "Mago"               451              500              2          0           0	
+            10           "Guerreiro"          501              550              2          0           0	
+            11           "Gladiador"          551              600              2          0           0	
+            12           "General"            601              650              2          0           0	
+            13           "Batlle Master"      651              700              2          0           0	
+            14           "Libertador"         701              750              2          0           0	
+            15           "Lord"               751              800              2          0           0	
+            16           "Mito"               801              850              2          0           0	
+            17           "Semideus"           851              900              2          0           0	
+            18           "Imortal"            901              950              2          0           0	
+            19           "Alpha"              951              1000             2          0           0	
+            20           "Heroi"              1001             1100             2          0           0	
+            21           "Supremo"            1101             -1               2          0           0
+end

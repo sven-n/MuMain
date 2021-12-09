@@ -1,0 +1,23 @@
+0
+//WarningTime   EventTime
+5               2              
+end
+
+1
+//Year   Month   Day   DoW   Hour   Minute   Second
+*        *       *     *     0     12      0
+*        *       *     *     14     5       0
+*        *       *     *     22     5       0
+end
+
+//Reward Guild
+2
+//Cash	Gold	PcCoint
+10	0	0
+end
+
+//Reward Characters 
+3
+//Cash	Gold	PcCoint
+8	0	0
+end

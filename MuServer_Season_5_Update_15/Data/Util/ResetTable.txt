@@ -1,0 +1,2 @@
+//MinReset   MaxReset   Level_AL0   Level_AL1   Level_AL2   Level_AL3   Money_AL0   Money_AL1   Money_AL2   Money_AL3   Point_AL0   Point_AL1   Point_AL2   Point_AL3
+end

@@ -1,0 +1,174 @@
+body
+ {
+  padding-top:2px;
+  padding-left:5px;
+  padding-right:0px;
+  padding-bottom:4px;
+  margin: 0px;
+  font-family: tahoma, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #CACACA;
+  background: #000000;
+ }
+
+td
+ {
+  font-family: tahoma, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: #FF1100;
+ }
+
+H1
+ {
+  padding-top:0px;
+  padding-left:20px;
+  padding-right:0px;
+  padding-bottom:0px;
+  font-family: tahoma, Helvetica, sans-serif;
+  font-size: 30px;
+  font-weight: bold;
+  color: #FF1100;
+ }
+
+H2
+ {
+  padding-top:0px;
+  padding-left:0px;
+  padding-right:0px;
+  padding-bottom:0px;
+  font-family: tahoma, Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: #FF1100;
+ }
+
+H3
+ {
+  padding-top:0px;
+  padding-left:0px;
+  padding-right:0px;
+  padding-bottom:0px;
+  font-family: tahoma, Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: #CACACA;
+ }
+
+img
+ {
+  border: 0px;
+ }
+
+a img
+ {
+  border: 0px;
+ }
+
+a
+ {
+  font-weight: bold;
+  color: #FF5500;
+  text-decoration: none;
+ }
+a:hover
+ {
+  font-weight: bold;
+  color: #FF5500;
+  text-decoration: underline;
+ }
+
+ul
+ {
+  margin:5px;
+  padding-top:2px;
+  padding-left:2px;
+  padding-right:2px;
+  padding-bottom:2px;
+ }
+
+#Menu01
+ {
+  font-family: tahoma, Helvetica, sans-serif;
+  font-size: 11px;
+  color: #FF1100;
+ }
+
+#Menu02
+ {
+  font-family: tahoma, Helvetica, sans-serif;
+  font-size: 11px;
+  list-style-type: disc;
+  color: #FF9900;
+ }
+
+#Menu03
+ {
+  font-family: tahoma, Helvetica, sans-serif;
+  font-size: 11px;
+  list-style-type: square;
+  color: #FFCC00;
+ }
+
+/** Menu Emergente **/
+
+a.helpLink
+ {
+  color: #969696;
+  text-decoration: none;
+  cursor: help;
+}
+
+a.helpLink:hover
+ {
+  color: #969696;
+  text-decoration: none;
+  cursor: help;
+}
+
+.help-tooltip
+ {
+  position: absolute;
+  border: 1px Solid #AA0000;
+  background: #333333;
+  font-family:Verdana,Helvetica,sans-serif;
+  font-size:10px;
+  font-weight:bold;
+  line-height:14px;
+  color: #C0C0C0;
+  padding: 6px;
+  filter: progid:DXImageTransform.Microsoft.Shadow(color="#969696", Direction=135, Strength=4);
+  z-index: 10000;
+}
+
+.help-tooltip a,
+.help-tooltip a:hover
+ {
+  color: #F99500 !important;
+  background: none;
+ }
+ 
+#item
+ {
+  background-color:#333333;
+ }
+ 
+#axcelent
+ {
+  background-color:#333333;
+ }
+ 
+#ancient
+ {
+  background-color:#0000FF;
+ }
+
+
+#texto
+ {
+  font-family:Verdana,Helvetica,sans-serif;
+  font-size:11px;
+  line-height:19px;
+  color:#CCCCCC;
+ }

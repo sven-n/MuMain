@@ -1,0 +1,89 @@
+//Index   Level   Grade   Option0   Option1   Option2   Option3   Option4   Option5   Option6   Duration   MapNumber   MonsterClass   MonsterLevelMin   MonsterLevelMax   DropRate   Comment
+6159      0       0       *         *         *         *         *         *         *         0          *           *              12                150               1000       //Jewel of Chaos
+6176      0       0       *         *         *         *         *         *         *         0          *           *              12                49                0          //Box of Red Ribbon
+6177      0       0       *         *         *         *         *         *         *         0          *           *              50                69                0          //Box of Green Ribbon
+6178      0       0       *         *         *         *         *         *         *         0          *           *              70                97                0          //Box of Blue Ribbon
+6214      0       0       *         *         *         *         *         *         *         0          *           *              58                76                1000       //Sphere (Mono)    
+6215      0       0       *         *         *         *         *         *         *         0          *           *              77                101               1000       //Sphere (Di)
+6216      0       0       *         *         *         *         *         *         *         0          *           *              102               150               1000       //Sphere (Tri)
+6670      0       0       *         *         *         *         *         *         *         0          10          *              25                150               1000       //Loch's Feather  
+6670      1       0       *         *         *         *         *         *         *         0          10          *              25                150               1000       //Monarch's Crest 
+6672      1       0       *         *         *         *         *         *         *         0          *           *              1                 32                1000       //Scroll of Archangel 1
+6672      2       0       *         *         *         *         *         *         *         0          *           *              33                45                1000       //Scroll of Archangel 2
+6672      3       0       *         *         *         *         *         *         *         0          *           *              46                57                1000       //Scroll of Archangel 3
+6672      4       0       *         *         *         *         *         *         *         0          *           *              58                68                1000       //Scroll of Archangel 4
+6672      5       0       *         *         *         *         *         *         *         0          *           *              69                76                1000       //Scroll of Archangel 5
+6672      6       0       *         *         *         *         *         *         *         0          *           *              77                84                1000       //Scroll of Archangel 6
+6672      7       0       *         *         *         *         *         *         *         0          *           *              85                101               1000       //Scroll of Archangel 7
+6672      8       0       *         *         *         *         *         *         *         0          *           *              102               150               1000       //Scroll of Archangel 8
+6673      1       0       *         *         *         *         *         *         *         0          *           *              1                 32                1000       //Blood Bone 1
+6673      2       0       *         *         *         *         *         *         *         0          *           *              33                45                1000       //Blood Bone 2
+6673      3       0       *         *         *         *         *         *         *         0          *           *              46                57                1000       //Blood Bone 3
+6673      4       0       *         *         *         *         *         *         *         0          *           *              58                68                1000       //Blood Bone 4
+6673      5       0       *         *         *         *         *         *         *         0          *           *              69                76                1000       //Blood Bone 5
+6673      6       0       *         *         *         *         *         *         *         0          *           *              77                84                1000       //Blood Bone 6
+6673      7       0       *         *         *         *         *         *         *         0          *           *              85                101               1000       //Blood Bone 7
+6673      8       0       *         *         *         *         *         *         *         0          *           *              102               150               1000       //Blood Bone 8
+6687      0       0       *         *         *         *         *         *         *         0          *           *              25                150               1000       //Spirit of Dark Horse        
+6687      1       0       *         *         *         *         *         *         *         0          *           *              25                150               1000       //Spirit of Dark Spirit
+6688      0       0       *         *         *         *         *         *         *         0          34          *              97                134               2000       //Splinter of Armor
+6689      0       0       *         *         *         *         *         *         *         0          34          *              97                134               2000       //Bless of Guardian
+6690      0       0       *         *         *         *         *         *         *         0          34          *              97                134               2000       //Claw of Beast
+6694      0       0       *         *         *         *         *         *         *         0          38          *              25                150               5000       //Moonstone Pendant               
+6705      1       0       *         *         *         *         *         *         *         0          *           *              46                57                1000       //Old Scroll 1
+6705      2       0       *         *         *         *         *         *         *         0          *           *              58                68                1000       //Old Scroll 2
+6705      3       0       *         *         *         *         *         *         *         0          *           *              69                76                1000       //Old Scroll 3
+6705      4       0       *         *         *         *         *         *         *         0          *           *              77                84                1000       //Old Scroll 4
+6705      5       0       *         *         *         *         *         *         *         0          *           *              85                101               1000       //Old Scroll 5
+6705      6       0       *         *         *         *         *         *         *         0          *           *              102               150               1000       //Old Scroll 6
+6706      1       0       *         *         *         *         *         *         *         0          *           *              46                57                1000       //Illusion Sorcerer Covenant 1
+6706      2       0       *         *         *         *         *         *         *         0          *           *              58                68                1000       //Illusion Sorcerer Covenant 2
+6706      3       0       *         *         *         *         *         *         *         0          *           *              69                76                1000       //Illusion Sorcerer Covenant 3
+6706      4       0       *         *         *         *         *         *         *         0          *           *              77                84                1000       //Illusion Sorcerer Covenant 4
+6706      5       0       *         *         *         *         *         *         *         0          *           *              85                101               1000       //Illusion Sorcerer Covenant 5
+6706      6       0       *         *         *         *         *         *         *         0          *           *              102               150               1000       //Illusion Sorcerer Covenant 6
+6708      0       0       *         *         *         *         *         *         *         0          41          *              25                150               1000       //Condor Flame
+6722      0       0       *         *         *         *         *         *         *         0          *           466            *                 *                 0          //Invitation to Santa Village
+7179      1       0       *         *         *         *         *         *         *         0          *           *              12                69                0          //Star of Christmas
+7179      3       0       *         *         *         *         *         *         *         0          *           *              12                69                0          //Heart of Love
+7179      5       0       *         *         *         *         *         *         *         0          *           *              12                49                0          //Silver Medal
+7179      6       0       *         *         *         *         *         *         *         0          *           *              50                69                0          //Gold Medal
+7179      7       0       *         *         *         *         *         *         *         0          *           *              50                69                0          //Box of Heaven
+7179      13      0       *         *         *         *         *         *         *         0          *           *              50                69                0          //Blue Heart
+7181      0       0       *         *         *         *         *         *         *         0          *           *              25                150               1000       //Jewel of Bless
+7182      0       0       *         *         *         *         *         *         *         0          *           *              25                150               1000       //Jewel of Soul
+7184      0       0       *         *         *         *         *         *         *         0          *           *              25                150               1000       //Jewel of Life      
+7185      1       0       *         *         *         *         *         *         *         0          *           *              1                 32                1000       //Devil's Eye 1
+7185      2       0       *         *         *         *         *         *         *         0          *           *              33                45                1000       //Devil's Eye 2
+7185      3       0       *         *         *         *         *         *         *         0          *           *              46                57                1000       //Devil's Eye 3
+7185      4       0       *         *         *         *         *         *         *         0          *           *              58                68                1000       //Devil's Eye 4
+7185      5       0       *         *         *         *         *         *         *         0          *           *              69                76                1000       //Devil's Eye 5
+7185      6       0       *         *         *         *         *         *         *         0          *           *              77                84                1000       //Devil's Eye 6
+7185      7       0       *         *         *         *         *         *         *         0          *           *              85                150               1000       //Devil's Eye 7
+7186      1       0       *         *         *         *         *         *         *         0          *           *              1                 32                1000       //Devil's Key 1
+7186      2       0       *         *         *         *         *         *         *         0          *           *              33                45                1000       //Devil's Key 2
+7186      3       0       *         *         *         *         *         *         *         0          *           *              46                57                1000       //Devil's Key 3
+7186      4       0       *         *         *         *         *         *         *         0          *           *              58                68                1000       //Devil's Key 4
+7186      5       0       *         *         *         *         *         *         *         0          *           *              69                76                1000       //Devil's Key 5
+7186      6       0       *         *         *         *         *         *         *         0          *           *              77                84                1000       //Devil's Key 6
+7186      7       0       *         *         *         *         *         *         *         0          *           *              85                150               1000       //Devil's Key 7
+7189      3       0       *         *         *         *         *         *         *         0          *           *              25                150               3000       //Sign of the Lord
+7190      0       0       *         *         *         *         *         *         *         0          *           *              46                150               1000       //Jewel of Creation
+7197      1       0       *         *         *         *         *         *         *         0          *           *              25                46                1000       //Symbol of Kundun 1
+7197      2       0       *         *         *         *         *         *         *         0          *           *              47                65                1000       //Symbol of Kundun 2
+7197      3       0       *         *         *         *         *         *         *         0          *           *              66                77                1000       //Symbol of Kundun 3
+7197      4       0       *         *         *         *         *         *         *         0          *           *              78                83                1000       //Symbol of Kundun 4
+7197      5       0       *         *         *         *         *         *         *         0          *           *              84                91                1000       //Symbol of Kundun 5
+7197      6       0       *         *         *         *         *         *         *         0          *           *              92                113               1000       //Symbol of Kundun 6
+7197      7       0       *         *         *         *         *         *         *         0          *           *              114               150               1000       //Symbol of Kundun 7
+7200      0       0       *         *         *         *         *         *         *         0          *           *              12                49                0          //Pink Chocolate Box
+7200      1       0       *         *         *         *         *         *         *         0          *           *              12                49                0          //Lilac Candy Box
+7201      0       0       *         *         *         *         *         *         *         0          *           *              50                69                0          //Red Chocolate Box
+7201      1       0       *         *         *         *         *         *         *         0          *           *              50                69                0          //Orange Candy Box
+7202      0       0       *         *         *         *         *         *         *         0          *           *              70                97                0          //Blue Chocolate Box
+7202      1       0       *         *         *         *         *         *         *         0          *           *              70                97                0          //Navy Candy Box
+7209      0       0       *         *         *         *         *         *         *         0          39          *              69                150               1000       //Gemstone
+7213      0       0       *         *         *         *         *         *         *         0          *           *              25                150               0          //Pumpkin of Luck      
+7258      0       0       *         *         *         *         *         *         *         0          *           *              58                150               0          //Golden Cherry Blossom Branch
+7268      0       0       *         *         *         *         *         *         *         0          *           *              25                150               0          //Lucky Coin
+end

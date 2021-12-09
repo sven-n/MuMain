@@ -1,0 +1,92 @@
+//Index   ItemIndex   ItemLevel   MonsterClass   SpecialValue   Comment
+0         7179        0           *              *              //Box of Luck
+1         *           *           55             *              //Skeleton King
+2         *           *           42             *              //Red Dragon
+3         7179        1           *              *              //Star of Christmas
+4         7179        3           *              *              //Heart of Love
+5         7179        5           *              *              //Silver Medal
+6         7179        6           *              *              //Gold Medal
+7         7179        8           *              *              //Box of Kundun 1
+8         7179        9           *              *              //Box of Kundun 2
+9         7179        10          *              *              //Box of Kundun 3
+10        7179        11          *              *              //Box of Kundun 4
+11        7179        12          *              *              //Box of Kundun 5
+12        *           *           *              0              //Blood Castle 1
+13        *           *           *              1              //Blood Castle 2
+14        *           *           *              2              //Blood Castle 3
+15        *           *           *              3              //Blood Castle 4
+16        *           *           *              4              //Blood Castle 5
+17        *           *           *              5              //Blood Castle 6
+18        *           *           *              6              //Blood Castle 7
+19        *           *           *              7              //Blood Castle 8
+20        *           *           *              8              //Chaos Castle 1
+21        *           *           *              9              //Chaos Castle 2
+22        *           *           *              10             //Chaos Castle 3
+23        *           *           *              11             //Chaos Castle 4
+24        *           *           *              12             //Chaos Castle 5
+25        *           *           *              13             //Chaos Castle 6
+26        *           *           *              14             //Chaos Castle 7
+27        *           *           135            *              //White Wizard
+28        *           *           *              15             //Starter Ring 40
+29        *           *           *              16             //Starter Ring 80
+30        7179        7           *              *              //Box of Heaven
+31        7179        13          *              *              //Blue Heart
+32        *           *           275            *              //Kundun
+33        *           *           295            *              //Erohim
+34        *           *           *              17             //Senior Mix
+35        6176        *           *              *              //Red Ribbon Box
+36        6177        *           *              *              //Green Ribbon Box
+37        6178        *           *              *              //Blue Ribbon Box
+38        7200        0           *              *              //Pink Chocolate Box
+39        7201        0           *              *              //Red Chocolate Box
+40        7202        0           *              *              //Blue Chocolate Box
+41        7200        1           *              *              //Purple Candy Box
+42        7201        1           *              *              //Red Candy Box
+43        7202        1           *              *              //Blue Candy Box
+44        *           *           340            *              //Dark Elf
+45        *           *           349            *              //Balgass
+46        *           *           362            *              //Maya Hand Left
+47        *           *           363            *              //Maya Hand Right
+48        *           *           361            *              //Nightmare
+49        7213        *           *              *              //Halloween Pumpkin
+50        *           *           365            *              //Fortune Pouch
+51        7220        *           *              *              //Game Master Box
+52        7223        *           *              *              //Green Mistery Box
+53        7224        *           *              *              //Pink Mistery Box
+54        7225        *           *              *              //Purple Mistery Box
+55        *           *           *              18             //Leo the Helper
+56        *           *           *              19             //Illusion Temple 1
+57        *           *           *              20             //Illusion Temple 2
+58        *           *           *              21             //Illusion Temple 3
+59        *           *           *              22             //Illusion Temple 4
+60        *           *           *              23             //Illusion Temple 5
+61        *           *           *              24             //Illusion Temple 6
+62        *           *           413            *              //Lunar Rabbit
+63        7252        *           *              *              //Cherry Blossom Box
+64        *           *           *              25             //Cherry Blossom Mix 1
+65        *           *           *              26             //Cherry Blossom Mix 2
+66        *           *           *              27             //Cherry Blossom Mix 3
+67        *           *           459            *              //Selupan
+68        *           *           463            *              //Fire Flame Ghost
+69        *           *           *              28             //Santa Claus
+70        *           *           *              29             //Lucky Coin 1
+71        *           *           *              30             //Lucky Coin 2
+72        *           *           *              31             //Lucky Coin 3
+73        *           *           *              32             //Chaos Card Mix 1 
+74        *           *           *              33             //Chaos Card Mix 2
+75        *           *           *              34             //Chaos Card Mix 3
+76        *           *           *              35             //Chaos Card Mix 4
+77        *           *           *              36             //Chaos Card Mix 5
+107       *           *           *              57             //Crywolf
+108       *           *           43             *              //Golden Budge Dragon
+109       *           *           78             *              //Golden Goblin
+110       *           *           54             *              //Golden Soldier
+111       *           *           53             *              //Golden Titan
+112       *           *           79             *              //Golden Dragon
+113       *           *           80             *              //Golden Lizard King
+114       *           *           81             *              //Golden Vepar
+115       *           *           82             *              //Golden Tantalos
+116       *           *           83             *              //Golden Iron Wheel
+117       *           *           *              60             //Online Lottery 
+118       *           *           *              61             //Custom Gift
+end

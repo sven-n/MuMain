@@ -1,0 +1,12 @@
+0
+//EventName              DropZen   ItemDropRate   ItemDropCount   SetItemDropRate   ItemDropType   Fireworks	
+"Cherry Blossom Mix 1"	 1000	   100		  1		  0		    0		   0
+end
+
+1
+//Section   Type   MinLevel   MaxLevel   Skill   Luck   Option   Excellent
+13          1      0          0          0       0      0        0
+13          2      0          0          0       0      0        0
+13          0      0          0          0       0      0        0
+13          3      0          0          0       0      0        0
+end

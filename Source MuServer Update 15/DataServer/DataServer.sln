@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31911.196
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataServer", "DataServer\DataServer.vcxproj", "{DCCBB883-D3B5-486A-8658-4E469C575023}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release_EX502|Win32 = Release_EX502|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DCCBB883-D3B5-486A-8658-4E469C575023}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DCCBB883-D3B5-486A-8658-4E469C575023}.Debug|Win32.Build.0 = Debug|Win32
+		{DCCBB883-D3B5-486A-8658-4E469C575023}.Release_EX502|Win32.ActiveCfg = Release_EX502|Win32
+		{DCCBB883-D3B5-486A-8658-4E469C575023}.Release_EX502|Win32.Build.0 = Release_EX502|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5352D3F9-B282-4741-83E7-1A6AA67954D9}
+	EndGlobalSection
+EndGlobal

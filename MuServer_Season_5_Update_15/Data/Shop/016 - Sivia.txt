@@ -1,0 +1,4 @@
+//Section   Type   Level   Dur   Skill   Luck   Option   Excellent
+14          10     0       1     0       0      0        0	0	0	0	255	255	255	255	255
+13          29     0       1     0       0      0        0	0	0	0	255	255	255	255	255
+end

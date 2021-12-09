@@ -1,0 +1,4 @@
+//Skill damager system for increase or decrease skill power vs user or monster
+//	#Skill	#DamageRateUser	#DamageRateMonster
+
+end

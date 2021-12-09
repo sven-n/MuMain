@@ -1,0 +1,33 @@
+0
+//Index   Year   Month   Day   DoW   Hour   Minute   Second
+0         *      *       *     *     12     0        0
+0         *      *       *     *     19     0        0
+0         *      *       *     *     23     0        0
+end
+
+1
+//Index   Name                                 DropMap   DropX   DropY   DropRange   AlarmTime   EventTime
+0         "Drop de itens"                  	0         145     135     5           5           3
+end
+
+2
+//Index   ItemIndex   ItemLevel   DropCount   DropDelay   Comment
+0         6159        0           3           00          //Jewel of Chaos
+0         6159        0           3           10          //Jewel of Chaos
+0         7181        0           3           20          //Jewel of Chaos
+0         7181        0           3           30          //Jewel of Bless
+0         7181        0           3           40          //Jewel of Bless
+0         7181        0           3           50          //Jewel of Bless
+0         7182        0           3           60          //Jewel of Soul
+0         7182        0           3           70          //Jewel of Soul
+0         7182        0           3           80          //Jewel of Soul
+0         7184        0           3           90          //Jewel of Life
+0         7184        0           3           100         //Jewel of Life
+0         7184        0           3           110         //Jewel of Life
+0         7179        8           2           120         //Box of Kundun 4
+0         7179        9           2           130         //Box of Kundun 4
+0         7179        10          2           140         //Box of Kundun 4
+0         7179        10          2           150         //Box of Kundun 5
+0         7179        11          2           160         //Box of Kundun 5
+0         7179        12          2           170         //Box of Kundun 5
+end

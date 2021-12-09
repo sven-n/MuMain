@@ -1,0 +1,12 @@
+0
+//EventName             DropZen   ItemDropRate   ItemDropCount   SetItemDropRate   ItemDropType   Fireworks	
+"Chaos Castle 3"	1000	  100		 1		 1000		   0		  0
+end
+
+1
+//Section   Type   MinLevel   MaxLevel   Skill   Luck   Option   Excellent
+14          13     0          0          0       0      0        0
+14          14     0          0          0       0      0        0
+14          16     0          0          0       0      0        0
+14          22     0          0          0       0      0        0
+end

@@ -1,0 +1,2 @@
+//Section   Type   Level   Dur   Skill   Luck   Option   Excellent
+end

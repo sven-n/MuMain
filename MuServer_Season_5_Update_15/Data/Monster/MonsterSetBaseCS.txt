@@ -1,0 +1,471 @@
+//=========================================================================================================================================
+// NPCS
+//=========================================================================================================================================
+0
+//Monster      MapNumber      Range      PositionX      PositionY      Direction      Comment
+217            30             00         167            195            07             //Crown Switch 2
+218            30             00         184            195            07             //Crown Switch 1
+216            30             00         176            212            01             //Crown
+220            30             00         139            101            03             //Gatekeeper
+224            30             00         086            061            01             //Guardsman
+224            30             00         099            061            01             //Guardsman
+223            30             00         179            214            01             //Senior
+376            30             00         090            044            01             //Pamela the Supplier
+377            30             00         089            218            03             //Angela the Supplier
+end
+
+0
+//Monster      MapNumber      Range      PositionX      PositionY      Direction      Comment
+226            34             00         135            047            02             //Trainer
+256            34             00         096            025            02             //Lahap
+251            34             00         145            014            01             //Hanzo the Blacksmith
+240            34             00         113            056            02             //Safety Guardian
+224            34             00         118            011            04             //Guardsman
+204            34             00         121            031            02             //Wolf Status
+205            34             00         125            027            02             //Wolf Altar 1
+206            34             00         126            035            02             //Wolf Altar 2
+207            34             00         120            038            02             //Wolf Altar 3
+208            34             00         115            035            02             //Wolf Altar 4
+209            34             00         117            027            02             //Wolf Altar 5
+406            34             00         228            048            01             //Apostle Devin
+407            34             00         062            239            01             //Werewolf Quarel
+248            34             00         099            040            02             //Wandering Merchant Martin
+end
+
+0
+//Monster      MapNumber      Range      PositionX      PositionY      Direction      Comment
+408            41             00         119            168            02             //Gatekeeper
+end
+
+//=========================================================================================================================================
+// MONSTERS
+//=========================================================================================================================================
+2
+//Monster      MapNumber      Range      PositionX      PositionY      Direction      Comment
+294            31             30         228            042            -1             //Ax Warrior
+294            31             30         182            031            -1             //Ax Warrior
+291            31             30         105            190            -1             //Fire Golem
+294            31             30         185            015            -1             //Ax Warrior
+294            31             30         193            012            -1             //Ax Warrior
+292            31             30         098            175            -1             //Queen Bee
+294            31             30         196            026            -1             //Ax Warrior
+294            31             30         202            012            -1             //Ax Warrior
+291            31             30         088            183            -1             //Fire Golem
+294            31             30         214            014            -1             //Ax Warrior
+294            31             30         202            020            -1             //Ax Warrior
+294            31             30         206            028            -1             //Ax Warrior
+290            31             30         212            022            -1             //Lizard Warrior
+294            31             30         221            017            -1             //Ax Warrior
+294            31             30         224            025            -1             //Ax Warrior
+294            31             30         228            031            -1             //Ax Warrior
+294            31             30         218            031            -1             //Ax Warrior
+294            31             30         211            039            -1             //Ax Warrior
+290            31             30         233            036            -1             //Lizard Warrior
+294            31             30         235            045            -1             //Ax Warrior
+292            31             30         224            147            -1             //Queen Bee
+291            31             30         225            141            -1             //Fire Golem
+293            31             30         225            132            -1             //Poison Golem
+293            31             30         224            124            -1             //Poison Golem
+293            31             30         218            110            -1             //Poison Golem
+293            31             30         219            119            -1             //Poison Golem
+293            31             30         227            116            -1             //Poison Golem
+290            31             30         228            109            -1             //Lizard Warrior
+293            31             30         230            102            -1             //Poison Golem
+293            31             30         222            098            -1             //Poison Golem
+294            31             30         223            054            -1             //Ax Warrior
+290            31             30         204            061            -1             //Lizard Warrior
+291            31             30         064            213            -1             //Fire Golem
+291            31             30         048            207            -1             //Fire Golem
+290            31             30         209            067            -1             //Lizard Warrior
+290            31             30         218            065            -1             //Lizard Warrior
+290            31             30         234            075            -1             //Lizard Warrior
+290            31             30         234            066            -1             //Lizard Warrior
+290            31             30         234            055            -1             //Lizard Warrior
+291            31             30         018            173            -1             //Fire Golem
+291            31             30         038            172            -1             //Fire Golem
+291            31             30         028            185            -1             //Fire Golem
+291            31             30         031            209            -1             //Fire Golem
+291            31             30         040            231            -1             //Fire Golem
+291            31             30         056            227            -1             //Fire Golem
+291            31             30         081            221            -1             //Fire Golem
+291            31             30         080            234            -1             //Fire Golem
+290            31             30         231            095            -1             //Lizard Warrior
+293            31             30         230            086            -1             //Poison Golem
+290            31             30         222            087            -1             //Lizard Warrior
+293            31             30         220            074            -1             //Poison Golem
+290            31             30         226            063            -1             //Lizard Warrior
+290            31             30         214            053            -1             //Lizard Warrior
+290            31             30         223            039            -1             //Lizard Warrior
+290            31             30         191            021            -1             //Lizard Warrior
+292            31             30         037            222            -1             //Queen Bee
+292            31             30         048            221            -1             //Queen Bee
+292            31             30         072            232            -1             //Queen Bee
+292            31             30         075            204            -1             //Queen Bee
+292            31             30         027            174            -1             //Queen Bee
+292            31             30         041            185            -1             //Queen Bee
+291            31             30         052            188            -1             //Fire Golem
+292            31             30         071            194            -1             //Queen Bee
+292            31             30         092            225            -1             //Queen Bee
+293            31             30         227            077            -1             //Poison Golem
+292            31             30         097            200            -1             //Queen Bee
+294            31             30         057            012            -1             //Ax Warrior
+294            31             30         062            011            -1             //Ax Warrior
+294            31             30         058            019            -1             //Ax Warrior
+294            31             30         067            017            -1             //Ax Warrior
+294            31             30         038            035            -1             //Ax Warrior
+294            31             30         059            040            -1             //Ax Warrior
+294            31             30         041            041            -1             //Ax Warrior
+294            31             30         050            037            -1             //Ax Warrior
+294            31             30         052            043            -1             //Ax Warrior
+294            31             30         072            039            -1             //Ax Warrior
+294            31             30         078            045            -1             //Ax Warrior
+294            31             30         072            050            -1             //Ax Warrior
+294            31             30         064            053            -1             //Ax Warrior
+294            31             30         093            035            -1             //Ax Warrior
+294            31             30         097            039            -1             //Ax Warrior
+294            31             30         103            036            -1             //Ax Warrior
+294            31             30         102            028            -1             //Ax Warrior
+294            31             30         053            052            -1             //Ax Warrior
+294            31             30         043            062            -1             //Ax Warrior
+294            31             30         127            036            -1             //Ax Warrior
+294            31             30         130            029            -1             //Ax Warrior
+294            31             30         137            029            -1             //Ax Warrior
+294            31             30         133            037            -1             //Ax Warrior
+294            31             30         132            046            -1             //Ax Warrior
+294            31             30         014            043            -1             //Ax Warrior
+294            31             30         143            037            -1             //Ax Warrior
+294            31             30         150            033            -1             //Ax Warrior
+294            31             30         163            037            -1             //Ax Warrior
+294            31             30         170            045            -1             //Ax Warrior
+294            31             30         143            056            -1             //Ax Warrior
+294            31             30         059            071            -1             //Ax Warrior
+294            31             30         073            069            -1             //Ax Warrior
+290            31             30         050            060            -1             //Lizard Warrior
+290            31             30         054            065            -1             //Lizard Warrior
+290            31             30         059            059            -1             //Lizard Warrior
+290            31             30         082            074            -1             //Lizard Warrior
+290            31             30         092            083            -1             //Lizard Warrior
+290            31             30         094            092            -1             //Lizard Warrior
+290            31             30         139            050            -1             //Lizard Warrior
+290            31             30         157            034            -1             //Lizard Warrior
+290            31             30         170            055            -1             //Lizard Warrior
+290            31             30         172            062            -1             //Lizard Warrior
+290            31             30         142            066            -1             //Lizard Warrior
+290            31             30         153            059            -1             //Lizard Warrior
+290            31             30         155            070            -1             //Lizard Warrior
+290            31             30         162            061            -1             //Lizard Warrior
+290            31             30         165            070            -1             //Lizard Warrior
+290            31             30         170            074            -1             //Lizard Warrior
+290            31             30         167            082            -1             //Lizard Warrior
+290            31             30         156            089            -1             //Lizard Warrior
+290            31             30         144            077            -1             //Lizard Warrior
+290            31             30         087            077            -1             //Lizard Warrior
+290            31             30         122            081            -1             //Lizard Warrior
+293            31             30         063            134            -1             //Poison Golem
+293            31             30         076            140            -1             //Poison Golem
+293            31             30         070            149            -1             //Poison Golem
+293            31             30         081            150            -1             //Poison Golem
+293            31             30         058            124            -1             //Poison Golem
+293            31             30         066            120            -1             //Poison Golem
+293            31             30         071            113            -1             //Poison Golem
+293            31             30         080            111            -1             //Poison Golem
+293            31             30         114            088            -1             //Poison Golem
+293            31             30         124            088            -1             //Poison Golem
+293            31             30         131            079            -1             //Poison Golem
+293            31             30         137            083            -1             //Poison Golem
+293            31             30         155            079            -1             //Poison Golem
+293            31             30         163            089            -1             //Poison Golem
+293            31             30         180            086            -1             //Poison Golem
+293            31             30         188            105            -1             //Poison Golem
+293            31             30         188            099            -1             //Poison Golem
+293            31             30         186            092            -1             //Poison Golem
+292            31             30         187            159            -1             //Queen Bee
+295            31             30         220            211            -1             //Erohim
+291            31             30         222            221            -1             //Fire Golem
+291            31             30         231            211            -1             //Fire Golem
+291            31             30         208            217            -1             //Fire Golem
+292            31             30         229            227            -1             //Queen Bee
+292            31             30         182            177            -1             //Queen Bee
+292            31             30         191            182            -1             //Queen Bee
+292            31             30         196            173            -1             //Queen Bee
+292            31             30         198            151            -1             //Queen Bee
+292            31             30         183            140            -1             //Queen Bee
+293            31             30         182            129            -1             //Poison Golem
+292            31             30         175            127            -1             //Queen Bee
+292            31             30         191            120            -1             //Queen Bee
+293            31             30         189            138            -1             //Poison Golem
+293            31             30         192            127            -1             //Poison Golem
+293            31             30         180            117            -1             //Poison Golem
+293            31             30         191            112            -1             //Poison Golem
+293            31             30         166            122            -1             //Poison Golem
+292            31             30         152            112            -1             //Queen Bee
+292            31             30         146            126            -1             //Queen Bee
+292            31             30         159            121            -1             //Queen Bee
+293            31             30         151            121            -1             //Poison Golem
+293            31             30         067            095            -1             //Poison Golem
+290            31             30         069            103            -1             //Lizard Warrior
+290            31             30         077            102            -1             //Lizard Warrior
+290            31             30         067            085            -1             //Lizard Warrior
+290            31             30         069            075            -1             //Lizard Warrior
+290            31             30         070            065            -1             //Lizard Warrior
+292            31             30         123            146            -1             //Queen Bee
+292            31             30         133            145            -1             //Queen Bee
+292            31             30         128            136            -1             //Queen Bee
+292            31             30         138            133            -1             //Queen Bee
+293            31             30         087            140            -1             //Poison Golem
+292            31             30         095            138            -1             //Queen Bee
+293            31             30         103            133            -1             //Poison Golem
+293            31             30         111            138            -1             //Poison Golem
+293            31             30         117            143            -1             //Poison Golem
+292            31             30         120            132            -1             //Queen Bee
+292            31             30         133            168            -1             //Queen Bee
+292            31             30         141            182            -1             //Queen Bee
+291            31             30         138            173            -1             //Fire Golem
+292            31             30         144            169            -1             //Queen Bee
+291            31             30         134            229            -1             //Fire Golem
+291            31             30         155            227            -1             //Fire Golem
+291            31             30         145            209            -1             //Fire Golem
+291            31             30         144            198            -1             //Fire Golem
+291            31             30         131            215            -1             //Fire Golem
+291            31             30         120            225            -1             //Fire Golem
+292            31             30         128            224            -1             //Queen Bee
+292            31             30         141            221            -1             //Queen Bee
+292            31             30         163            225            -1             //Queen Bee
+292            31             30         155            218            -1             //Queen Bee
+293            31             30         152            098            -1             //Poison Golem
+293            31             30         150            106            -1             //Poison Golem
+291            31             30         233            199            -1             //Fire Golem
+292            31             30         223            204            -1             //Queen Bee
+292            31             30         208            208            -1             //Queen Bee
+291            31             30         197            204            -1             //Fire Golem
+291            31             30         198            192            -1             //Fire Golem
+291            31             30         187            175            -1             //Fire Golem
+291            31             30         216            183            -1             //Fire Golem
+292            31             30         227            180            -1             //Queen Bee
+292            31             30         224            191            -1             //Queen Bee
+291            31             30         193            167            -1             //Fire Golem
+290            31             30         103            091            -1             //Lizard Warrior
+end
+
+2
+//Monster      MapNumber      Range      PositionX      PositionY      Direction      Comment
+310            34             30         058            047            -1             //Hammer Scout
+310            34             30         060            038            -1             //Hammer Scout
+310            34             30         065            024            -1             //Hammer Scout
+310            34             30         070            037            -1             //Hammer Scout
+310            34             30         074            020            -1             //Hammer Scout
+310            34             30         077            032            -1             //Hammer Scout
+310            34             30         078            051            -1             //Hammer Scout
+310            34             30         079            043            -1             //Hammer Scout
+310            34             30         083            010            -1             //Hammer Scout
+310            34             30         088            050            -1             //Hammer Scout
+310            34             30         088            060            -1             //Hammer Scout
+310            34             30         094            054            -1             //Hammer Scout
+310            34             30         098            060            -1             //Hammer Scout
+310            34             30         150            060            -1             //Hammer Scout
+310            34             30         159            060            -1             //Hammer Scout
+310            34             30         162            041            -1             //Hammer Scout
+310            34             30         164            018            -1             //Hammer Scout
+310            34             30         169            060            -1             //Hammer Scout
+310            34             30         176            032            -1             //Hammer Scout
+310            34             30         178            022            -1             //Hammer Scout
+310            34             30         179            048            -1             //Hammer Scout
+310            34             30         185            035            -1             //Hammer Scout
+310            34             30         191            027            -1             //Hammer Scout
+310            34             30         194            044            -1             //Hammer Scout
+310            34             30         195            033            -1             //Hammer Scout
+310            34             30         199            060            -1             //Hammer Scout
+310            34             30         201            040            -1             //Hammer Scout
+310            34             30         205            046            -1             //Hammer Scout
+310            34             30         206            045            -1             //Hammer Scout
+310            34             30         214            060            -1             //Hammer Scout
+311            34             30         022            100            -1             //Lance Scout
+311            34             30         027            122            -1             //Lance Scout
+311            34             30         035            078            -1             //Lance Scout
+311            34             30         047            053            -1             //Lance Scout
+311            34             30         047            065            -1             //Lance Scout
+311            34             30         079            078            -1             //Lance Scout
+311            34             30         082            067            -1             //Lance Scout
+311            34             30         095            078            -1             //Lance Scout
+311            34             30         103            071            -1             //Lance Scout
+311            34             30         113            078            -1             //Lance Scout
+311            34             30         117            099            -1             //Lance Scout
+311            34             30         122            078            -1             //Lance Scout
+311            34             30         135            069            -1             //Lance Scout
+311            34             30         138            078            -1             //Lance Scout
+311            34             30         146            068            -1             //Lance Scout
+311            34             30         156            069            -1             //Lance Scout
+311            34             30         157            078            -1             //Lance Scout
+311            34             30         159            049            -1             //Lance Scout
+311            34             30         170            047            -1             //Lance Scout
+311            34             30         170            078            -1             //Lance Scout
+311            34             30         173            097            -1             //Lance Scout
+311            34             30         174            054            -1             //Lance Scout
+311            34             30         177            078            -1             //Lance Scout
+311            34             30         197            078            -1             //Lance Scout
+311            34             30         210            088            -1             //Lance Scout
+311            34             30         211            069            -1             //Lance Scout
+311            34             30         221            078            -1             //Lance Scout
+311            34             30         223            120            -1             //Lance Scout
+311            34             30         225            068            -1             //Lance Scout
+311            34             30         231            078            -1             //Lance Scout
+312            34             30         021            088            -1             //Bow Scout
+312            34             30         023            115            -1             //Bow Scout
+312            34             30         030            088            -1             //Bow Scout
+312            34             30         056            115            -1             //Bow Scout
+312            34             30         068            115            -1             //Bow Scout
+312            34             30         078            088            -1             //Bow Scout
+312            34             30         079            115            -1             //Bow Scout
+312            34             30         083            101            -1             //Bow Scout
+312            34             30         090            088            -1             //Bow Scout
+312            34             30         100            088            -1             //Bow Scout
+312            34             30         114            088            -1             //Bow Scout
+312            34             30         122            115            -1             //Bow Scout
+312            34             30         124            088            -1             //Bow Scout
+312            34             30         135            088            -1             //Bow Scout
+312            34             30         145            099            -1             //Bow Scout
+312            34             30         146            088            -1             //Bow Scout
+312            34             30         155            115            -1             //Bow Scout
+312            34             30         156            084            -1             //Bow Scout
+312            34             30         168            088            -1             //Bow Scout
+312            34             30         178            088            -1             //Bow Scout
+312            34             30         192            088            -1             //Bow Scout
+312            34             30         201            089            -1             //Bow Scout
+312            34             30         202            098            -1             //Bow Scout
+312            34             30         217            094            -1             //Bow Scout
+312            34             30         233            102            -1             //Bow Scout
+312            34             30         236            088            -1             //Bow Scout
+313            34             30         019            131            -1             //Werewolf
+313            34             30         020            145            -1             //Werewolf
+313            34             30         033            130            -1             //Werewolf
+313            34             30         046            123            -1             //Werewolf
+313            34             30         071            109            -1             //Werewolf
+313            34             30         076            145            -1             //Werewolf
+313            34             30         082            107            -1             //Werewolf
+313            34             30         082            130            -1             //Werewolf
+313            34             30         088            144            -1             //Werewolf
+313            34             30         119            108            -1             //Werewolf
+313            34             30         123            130            -1             //Werewolf
+313            34             30         123            145            -1             //Werewolf
+313            34             30         149            110            -1             //Werewolf
+313            34             30         155            098            -1             //Werewolf
+313            34             30         163            130            -1             //Werewolf
+313            34             30         164            144            -1             //Werewolf
+313            34             30         197            145            -1             //Werewolf
+313            34             30         204            130            -1             //Werewolf
+313            34             30         204            130            -1             //Werewolf
+313            34             30         206            110            -1             //Werewolf
+313            34             30         218            110            -1             //Werewolf
+313            34             30         226            130            -1             //Werewolf
+313            34             30         235            110            -1             //Werewolf
+313            34             30         237            144            -1             //Werewolf
+313            34             30         240            131            -1             //Werewolf
+314            34             30         016            156            -1             //Scout(Hero)
+314            34             30         028            156            -1             //Scout(Hero)
+314            34             30         065            148            -1             //Scout(Hero)
+314            34             30         092            156            -1             //Scout(Hero)
+314            34             30         119            156            -1             //Scout(Hero)
+314            34             30         159            156            -1             //Scout(Hero)
+314            34             30         171            148            -1             //Scout(Hero)
+314            34             30         177            156            -1             //Scout(Hero)
+314            34             30         236            156            -1             //Scout(Hero)
+314            34             30         236            156            -1             //Scout(Hero)
+315            34             30         030            172            -1             //Werewolf(Hero)
+315            34             30         049            194            -1             //Werewolf(Hero)
+315            34             30         051            213            -1             //Werewolf(Hero)
+315            34             30         052            171            -1             //Werewolf(Hero)
+315            34             30         059            211            -1             //Werewolf(Hero)
+315            34             30         068            224            -1             //Werewolf(Hero)
+315            34             30         073            210            -1             //Werewolf(Hero)
+315            34             30         085            230            -1             //Werewolf(Hero)
+315            34             30         092            219            -1             //Werewolf(Hero)
+315            34             30         100            182            -1             //Werewolf(Hero)
+315            34             30         102            171            -1             //Werewolf(Hero)
+315            34             30         115            204            -1             //Werewolf(Hero)
+315            34             30         117            193            -1             //Werewolf(Hero)
+315            34             30         133            195            -1             //Werewolf(Hero)
+315            34             30         133            214            -1             //Werewolf(Hero)
+315            34             30         145            208            -1             //Werewolf(Hero)
+315            34             30         148            195            -1             //Werewolf(Hero)
+315            34             30         159            206            -1             //Werewolf(Hero)
+315            34             30         170            208            -1             //Werewolf(Hero)
+315            34             30         175            197            -1             //Werewolf(Hero)
+315            34             30         199            200            -1             //Werewolf(Hero)
+315            34             30         222            189            -1             //Werewolf(Hero)
+316            34             30         047            184            -1             //Balram
+316            34             30         084            201            -1             //Balram
+316            34             30         104            194            -1             //Balram
+316            34             30         117            184            -1             //Balram
+316            34             30         146            184            -1             //Balram
+316            34             30         161            194            -1             //Balram
+316            34             30         173            184            -1             //Balram
+316            34             30         212            193            -1             //Balram
+316            34             30         228            180            -1             //Balram
+317            34             30         014            164            -1             //Soram
+317            34             30         025            164            -1             //Soram
+317            34             30         041            171            -1             //Soram
+317            34             30         056            164            -1             //Soram
+317            34             30         065            234            -1             //Soram
+317            34             30         096            164            -1             //Soram
+317            34             30         114            164            -1             //Soram
+317            34             30         116            172            -1             //Soram
+317            34             30         140            230            -1             //Soram
+317            34             30         145            174            -1             //Soram
+317            34             30         147            164            -1             //Soram
+317            34             30         168            229            -1             //Soram
+317            34             30         177            167            -1             //Soram
+317            34             30         233            169            -1             //Soram
+316            34             30         054            217            -1             //Balram
+316            34             30         066            217            -1             //Balram
+316            34             30         083            217            -1             //Balram
+316            34             30         100            217            -1             //Balram
+316            34             30         134            215            -1             //Balram
+316            34             30         153            215            -1             //Balram
+317            34             30         115            221            -1             //Soram
+317            34             30         103            206            -1             //Soram
+end
+
+2
+//Monster      MapNumber      Range      PositionX      PositionY      Direction      Comment
+409            41             30         039            101            -1             //Balram
+409            41             30         044            110            -1             //Balram
+409            41             30         052            134            -1             //Balram
+409            41             30         067            112            -1             //Balram
+409            41             30         087            090            -1             //Balram
+409            41             30         090            067            -1             //Balram
+409            41             30         090            078            -1             //Balram
+409            41             30         071            101            -1             //Balram
+409            41             30         071            101            -1             //Balram
+409            41             30         064            132            -1             //Balram
+409            41             30         109            101            -1             //Balram
+410            41             30         098            096            -1             //Death Spirit
+410            41             30         122            090            -1             //Death Spirit
+410            41             30         125            099            -1             //Death Spirit
+410            41             30         137            140            -1             //Death Spirit
+410            41             30         140            150            -1             //Death Spirit
+410            41             30         044            127            -1             //Death Spirit
+410            41             30         057            123            -1             //Death Spirit
+410            41             30         079            086            -1             //Death Spirit
+410            41             30         101            069            -1             //Death Spirit
+410            41             30         121            118            -1             //Death Spirit
+411            41             30         127            127            -1             //Soram
+411            41             30         126            164            -1             //Soram
+411            41             30         123            160            -1             //Soram
+411            41             30         132            156            -1             //Soram
+411            41             30         132            136            -1             //Soram
+411            41             30         116            103            -1             //Soram
+411            41             30         129            146            -1             //Soram
+end
+
+2
+//Monster      MapNumber      Range      PositionX      PositionY      Direction      Comment
+412            42             30         097            187            -1             //Dark Elf
+411            42             30         092            174            -1             //Soram
+411            42             30         111            190            -1             //Soram
+411            42             30         094            202            -1             //Soram
+411            42             30         082            190            -1             //Soram
+410            42             30         104            179            -1             //Death Spirit
+410            42             30         104            200            -1             //Death Spirit
+410            42             30         085            179            -1             //Death Spirit
+410            42             30         086            199            -1             //Death Spirit
+end

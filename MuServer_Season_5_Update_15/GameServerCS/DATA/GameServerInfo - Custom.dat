@@ -1,0 +1,123 @@
+[GameServerInfo]
+;==================================================
+; Announce Chaos Mix Settings
+;==================================================
+AnnounceChaosMix = 0
+AnnounceChaosMixText = %s put the item %s +13
+
+;==================================================
+; Custom Arena Settings
+;==================================================
+CustomArenaSwitch = 1
+CustomArenaVictimScoreDecrease = 0
+CustomArenaKillerScoreIncrease = 100
+CustomArenaText1 = [%s] will close in %d minute(s)
+CustomArenaText2 = [%s] closed
+CustomArenaText3 = [%s] will start in %d minute(s)
+CustomArenaText4 = [%s] started
+CustomArenaText5 = [%s] finished
+CustomArenaText6 = [%s] %s is the winner
+CustomArenaText7 = [%s] You got in the %d position with %d points
+CustomArenaText8 = You can not enter the arena
+CustomArenaText9 = This arena is not currently open
+CustomArenaText10 = Exceeded maximum number of players
+CustomArenaText11 = You must be at least Level %d
+CustomArenaText12 = You must be a maximum of Level %d
+CustomArenaText13 = You must be at least Master Level %d
+CustomArenaText14 = You must be at most Master Level %d
+CustomArenaText15 = You must be at least %d Resets
+CustomArenaText16 = You need to have a maximum of %d Resets
+CustomArenaText17 = You must be at least %d Master Resets
+CustomArenaText18 = You need to have a maximum of %d Master Resets
+CustomArenaText19 = His class is not allowed in the arena
+
+;==================================================
+; Custom Event Drop Settings
+;==================================================
+CustomEventDropSwitch = 0
+CustomEventDropText1 = [%s] will start in %d minute(s)
+CustomEventDropText2 = [%s] started
+CustomEventDropText3 = [%s] finished
+
+
+;==================================================
+; Custom Store Settings
+;==================================================
+CustomStoreTime_AL0 = 60
+CustomStoreTime_AL1 = 60
+CustomStoreTime_AL2 = 60
+CustomStoreTime_AL3 = 60
+CustomStoreCommandJoBSyntax = bless
+CustomStoreCommandJoSSyntax = soul
+CustomStoreCommandJoCSyntax = chaos
+CustomStoreCommandWCCSyntax = cash
+CustomStoreCommandWCPSyntax = gold
+CustomStoreCommandPCPSyntax = pcp
+CustomStoreJoBName = .::BLESS STORE::.
+CustomStoreJoSName = .::SOUL STORE::.
+CustomStoreJoCName = .::CHAOS STORE::.
+CustomStoreWCCName = .::CASH STORE::.
+CustomStoreWCPName = .::GOLD STORE::.
+CustomStorePCPName = .::PCP STORE::.
+
+;==================================================
+; Custom Attack Settings
+;==================================================
+CustomAttackTime_AL0 = 0
+CustomAttackTime_AL1 = 0
+CustomAttackTime_AL2 = 0
+CustomAttackTime_AL3 = 0
+CustomAttackDelay = 0
+CustomAttackAutoPotionDelay = 0
+CustomAttackAutoBuff_AL0 = 1
+CustomAttackAutoBuff_AL1 = 1
+CustomAttackAutoBuff_AL2 = 1
+CustomAttackAutoBuff_AL3 = 1
+CustomAttackAutoBuffDelay = 10000
+CustomAttackAutoResume_AL0 = 1
+CustomAttackAutoResume_AL1 = 1
+CustomAttackAutoResume_AL2 = 1
+CustomAttackAutoResume_AL3 = 1
+
+;==================================================
+; Custom Quest Settings (CustomQuest.txt)
+;==================================================
+CustomQuestSwitch = 1
+
+;==================================================
+; Custom Death Message
+;==================================================
+CustomDeathMessageSwitch = 1
+
+;==================================================
+; Custom RankUser Settings (CustomRankUser.txt)
+;==================================================
+CustomRankUserSwitch = 1
+CustomRankUserRewardSwitch = 1
+CustomRankUserNoticeToAll = 1
+CustomRankUserNoticeToUser = 1
+
+;==================================================
+; Custom Ranking Settings (CustomRanking.txt) F8 in game
+;==================================================
+CustomRankingSwitch = 1
+
+;==================================================
+; Custom EventTime Settings H in game
+;==================================================
+CustomEventTimeSwitch = 1
+
+;==================================================
+; Custom Shop MessageBox
+;==================================================
+; Types:
+; 0: Disabled
+; 1: Only for coins
+; 2: All purchases
+;==================================================
+CustomShopMessageBox = 2
+
+;==================================================
+; Custom Quest Settings (CustomNpcQuest.txt)
+;==================================================
+CustomNpcQuestSwitch = 1
