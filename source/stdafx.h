@@ -65,7 +65,6 @@
 #include <stdarg.h>
 #include <conio.h>
 
-#ifdef _DEBUG
 #include <string>
 #include <list>
 #include <map>
@@ -73,29 +72,6 @@
 #include <algorithm>
 #include <vector>
 #include <queue>
-#include <thread>
-#include <chrono>
-#else // _DEBUG		// Release
-#ifdef _MT			
-#undef _MT
-#include <string>
-#include <list>
-#include <map>
-#include <deque>
-#include <algorithm>
-#include <vector>
-#include <queue>
-#define _MT
-#else //_MT
-#include <string>
-#include <list>
-#include <map>
-#include <deque>
-#include <algorithm>
-#include <vector>
-#include <queue>
-#endif // _MT
-#endif // _DEBUG
 
 #pragma warning( pop )
 

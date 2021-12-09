@@ -11,10 +11,6 @@
     <Filter Include="Utilities">
       <UniqueIdentifier>{1a7667a9-0f3c-4e7e-b90e-24b53dc23a71}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utilities\debugprofiling">
-      <UniqueIdentifier>{cd9cf2fa-c7d2-4e1a-b5c8-5dbb8e0ca9fb}</UniqueIdentifier>
-      <Extensions>Profiling For Debuging</Extensions>
-    </Filter>
     <Filter Include="Utilities\debugcamera">
       <UniqueIdentifier>{209f0108-3b30-43fa-85e2-718767892f2c}</UniqueIdentifier>
     </Filter>
@@ -23,9 +19,6 @@
     </Filter>
     <Filter Include="Utilities\memory">
       <UniqueIdentifier>{842676d0-97dc-418a-ae84-69610ecb5343}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Utilities\debug">
-      <UniqueIdentifier>{8141915d-8f95-439c-aeb2-8957dc36e983}</UniqueIdentifier>
     </Filter>
     <Filter Include="Utilities\dump">
       <UniqueIdentifier>{2f5e25ac-f12f-49eb-93ed-37dba5598850}</UniqueIdentifier>
@@ -2097,9 +2090,6 @@
     </ClInclude>
     <ClInclude Include="source\Utilities\Memory\MemoryLock.h">
       <Filter>Utilities\memory</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Utilities\Debug\debugSingleton_.h">
-      <Filter>Utilities\debug</Filter>
     </ClInclude>
     <ClInclude Include="source\Utilities\Dump\CrashHandler.h">
       <Filter>Utilities\dump</Filter>

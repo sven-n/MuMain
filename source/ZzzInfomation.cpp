@@ -68,39 +68,6 @@ char AbuseNameFilter[MAX_NAMEFILTERS][20];
 int  AbuseFilterNumber = 0;
 int  AbuseNameFilterNumber = 0;
 
-void OpenFilterFileText(char *FileName)
-{
-	if((SMDFile=fopen(FileName,"rb")) == NULL)	return;
-	SMDToken Token;
-	while(true)
-	{
-		Token = (*GetToken)();
-		if(Token == END) break;
-		strcpy(AbuseFilter[AbuseFilterNumber],TokenString);
-		AbuseFilterNumber++;
-	}
-	fclose(SMDFile);
-}
-
-void SaveFilterFile(char *FileName)
-{
-	FILE *fp = fopen(FileName,"wb");
-	int Size = 20;
-	BYTE *Buffer = new BYTE [Size*MAX_FILTERS];
-	BYTE *pSeek = Buffer;
-	for(int i=0;i<MAX_FILTERS;i++)
-	{
-		memcpy(pSeek,AbuseFilter[i],Size);
-		BuxConvert(pSeek,Size);
-		pSeek += Size;
-	}
-	DWORD dwCheckSum = GenerateCheckSum2( Buffer, Size*MAX_FILTERS, 0x3E7D);
-	fwrite(Buffer,Size*MAX_FILTERS,1,fp);
-	fwrite(&dwCheckSum,sizeof ( DWORD),1,fp);
-	delete [] Buffer;
-	fclose(fp);
-}
-
 void OpenFilterFile(char *FileName)
 {
 	FILE *fp = fopen(FileName,"rb");
@@ -113,19 +80,6 @@ void OpenFilterFile(char *FileName)
 		SendMessage(g_hWnd,WM_DESTROY,0,0);
 		return;
 	}
-	/*int Size = 20;
-	BYTE *Buffer = new BYTE [Size];
-	for(int i=0;i<MAX_FILTERS;i++)
-	{
-		fread(Buffer,Size,1,fp);
-		BuxConvert(Buffer,Size);
-		memcpy(AbuseFilter[i],Buffer,Size);
-        if(AbuseFilter[i][0] == NULL)
-		{
-			AbuseFilterNumber = i;
-			break;
-		}
-	}*/
 
 	int Size = 20;
 	BYTE *Buffer = new BYTE [Size*MAX_FILTERS];
@@ -134,15 +88,6 @@ void OpenFilterFile(char *FileName)
 	fread(&dwCheckSum,sizeof ( DWORD),1,fp);
 	fclose(fp);
 
-	/*if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_FILTERS, 0x3E7D))
-	{
-		char Text[256];
-    	sprintf(Text,"%s - File corrupted.",FileName);
-		g_ErrorReport.Write( Text);
-		MessageBox(g_hWnd,Text,NULL,MB_OK);
-		SendMessage(g_hWnd,WM_DESTROY,0,0);
-	}
-	else*/
 	{
 		BYTE *pSeek = Buffer;
 		for(int i=0;i<MAX_FILTERS;i++)
@@ -158,39 +103,6 @@ void OpenFilterFile(char *FileName)
 		}
 	}
 
-	delete [] Buffer;
-	fclose(fp);
-}
-
-void OpenNameFilterFileText(char *FileName)
-{
-	if((SMDFile=fopen(FileName,"rb")) == NULL)	return;
-	SMDToken Token;
-	while(true)
-	{
-		Token = (*GetToken)();
-		if(Token == END) break;
-		strcpy(AbuseNameFilter[AbuseNameFilterNumber],TokenString);
-		AbuseNameFilterNumber++;
-	}
-	fclose(SMDFile);
-}
-
-void SaveNameFilterFile(char *FileName)
-{
-	FILE *fp = fopen(FileName,"wb");
-	int Size = 20;
-	BYTE *Buffer = new BYTE [Size*MAX_FILTERS];
-	BYTE *pSeek = Buffer;
-	for(int i=0;i<MAX_FILTERS;i++)
-	{
-		memcpy(pSeek,AbuseNameFilter[i],Size);
-		BuxConvert(pSeek,Size);
-		pSeek += Size;
-	}
-	DWORD dwCheckSum = GenerateCheckSum2( Buffer, Size*MAX_FILTERS, 0x2BC1);
-	fwrite(Buffer,Size*MAX_FILTERS,1,fp);
-	fwrite(&dwCheckSum,sizeof ( DWORD),1,fp);
 	delete [] Buffer;
 	fclose(fp);
 }
@@ -241,53 +153,9 @@ void OpenNameFilterFile(char *FileName)
 	delete [] Buffer;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // gate
 ///////////////////////////////////////////////////////////////////////////////
-
-void OpenGateScriptText(char *FileName)
-{
-	if((SMDFile=fopen(FileName,"rb")) == NULL)	return;
-	SMDToken Token;
-	while(true)
-	{
-		Token = (*GetToken)();
-		if(Token == END) break;
-		if(Token == NAME && strcmp("end",TokenString)==NULL) break;
-		if(Token == NUMBER)
-		{
-			int Index = (int)TokenNumber;
-			GATE_ATTRIBUTE *p = &GateAttribute[Index];
-			
-			Token = (*GetToken)();p->Flag   = (int)TokenNumber;
-			Token = (*GetToken)();p->Map    = (int)TokenNumber;
-			Token = (*GetToken)();p->x1     = (int)TokenNumber;
-			Token = (*GetToken)();p->y1     = (int)TokenNumber;
-			Token = (*GetToken)();p->x2     = (int)TokenNumber;
-			Token = (*GetToken)();p->y2     = (int)TokenNumber;
-			Token = (*GetToken)();p->Target = (int)TokenNumber;
-			Token = (*GetToken)();p->Angle  = (int)TokenNumber;
-			Token = (*GetToken)();p->Level  = (int)TokenNumber;
-		}
-	}
-	fclose(SMDFile);
-}
-
-void SaveGateScript(char *FileName)
-{
-	FILE *fp = fopen(FileName,"wb");
-	int Size = sizeof(GATE_ATTRIBUTE);
-	BYTE *Buffer = new BYTE [Size];
-	for(int i=0;i<MAX_GATES;i++)
-	{
-		memcpy(Buffer,&GateAttribute[i],Size);
-        BuxConvert(Buffer,Size);
-    	fwrite(Buffer,Size,1,fp);
-	}
-	delete [] Buffer;
-	fclose(fp);
-}
 
 void OpenGateScript(char *FileName)
 {
@@ -379,56 +247,6 @@ void OpenNpcScript(char *FileName)
 		}
 	}
 	fclose(SMDFile);
-}
-
-void OpenSkillScriptText(char *FileName)
-{
-	if((SMDFile=fopen(FileName,"rb")) == NULL)	return;
-	SMDToken Token;
-	while(true)
-	{
-		Token = (*GetToken)();
-		if(Token == END) break;
-		if(Token == NAME && strcmp("end",TokenString)==NULL) break;
-		if(Token == NUMBER)
-		{
-			int Index = (int)TokenNumber;
-			SKILL_ATTRIBUTE *p = &SkillAttribute[Index];
-			
-			Token = (*GetToken)();strcpy(p->Name,TokenString);
-			Token = (*GetToken)();p->Level    = (int)TokenNumber;
-			Token = (*GetToken)();p->Damage   = (int)TokenNumber;
-			Token = (*GetToken)();p->Mana     = (int)TokenNumber;
-			Token = (*GetToken)();p->AbilityGuage = (int)TokenNumber;
-			Token = (*GetToken)();p->Distance = (int)TokenNumber;
-			Token = (*GetToken)();p->Energy = (int)TokenNumber;
-			Token = (*GetToken)();
-			Token = (*GetToken)();
-			Token = (*GetToken)();
-			Token = (*GetToken)();
-		}
-	}
-	fclose(SMDFile);
-}
-
-void SaveSkillScript(char *FileName)
-{
-	FILE *fp = fopen(FileName,"wb");
-	int Size = sizeof(SKILL_ATTRIBUTE);
-	BYTE *Buffer = new BYTE [Size*MAX_SKILLS];
-	BYTE *pSeek = Buffer;
-	for(int i=0;i<MAX_SKILLS;i++)
-	{
-		memcpy(pSeek,&SkillAttribute[i],Size);
-        BuxConvert(pSeek,Size);
-
-		pSeek += Size;
-	}
-   	fwrite(Buffer,Size*MAX_SKILLS,1,fp);
-	DWORD dwCheckSum = GenerateCheckSum2( Buffer, Size*MAX_SKILLS, 0x5A18);
-   	fwrite(&dwCheckSum, sizeof( DWORD),1,fp);
-	delete [] Buffer;
-	fclose(fp);
 }
 
 void OpenSkillScript(char *FileName)
@@ -566,145 +384,6 @@ int ConvertItemType(BYTE *Item)
 	int ret = 0;
 	ret = Item[0]+(Item[3]&128)*2+ (Item[5]&240)*32;
 	return ret;
-}
-
-void OpenItemScriptText(char *FileName)	// 0.1 ( 2003.01.08)
-{
-	if((SMDFile=fopen(FileName,"rb")) == NULL)	return;
-	SMDToken Token;
-	while(true)
-	{
-		Token = (*GetToken)();
-		if(Token == END) break;
-		if(Token == NUMBER)
-		{
-			int Type = (int)TokenNumber;
-			while(true)
-			{
-				Token = (*GetToken)();
-				int Index = (int)TokenNumber;
-				if(Token==NAME && strcmp("end",TokenString)==NULL) break;
-				int iItemIndex = Type*MAX_ITEM_INDEX+Index;
-               	ITEM_ATTRIBUTE *p = &ItemAttribute[iItemIndex];
-				memset(p,0,sizeof(ITEM_ATTRIBUTE));
-
-				Token = (*GetToken)();p->Width  = (int)TokenNumber;
-				Token = (*GetToken)();p->Height = (int)TokenNumber;
-				Token = (*GetToken)();
-				Token = (*GetToken)();
-				Token = (*GetToken)();
-				Token = (*GetToken)();strcpy(p->Name,TokenString);
-				if(Type>=0 && Type<=5)
-				{
-					Token = (*GetToken)();p->Level	      	  = (int)TokenNumber;
-					Token = (*GetToken)();p->DamageMin		  = (int)TokenNumber;
-					Token = (*GetToken)();p->DamageMax		  = (int)TokenNumber;
-					Token = (*GetToken)();p->WeaponSpeed	  = (int)TokenNumber;
-					Token = (*GetToken)();p->Durability       = (int)TokenNumber;
-					Token = (*GetToken)();p->MagicDur        = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireStrength  = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireDexterity = (int)TokenNumber;
-					if(p->Width >= 2) p->TwoHand = true;
-				}
-				if(Type>=6 && Type<=11)
-				{
-      				Token = (*GetToken)();p->Level            = (int)TokenNumber;
-					if(Type==6)
-					{
-						Token = (*GetToken)();p->Defense      = (int)TokenNumber;
-						Token = (*GetToken)();p->SuccessfulBlocking = (int)TokenNumber;
-					}
-					else if(Type>=7 && Type<=9)
-					{
-						Token = (*GetToken)();p->Defense      = (int)TokenNumber;
-						Token = (*GetToken)();p->MagicDefense = (int)TokenNumber;
-					}
-					else if(Type==10)
-					{
-						Token = (*GetToken)();p->Defense      = (int)TokenNumber;
-						Token = (*GetToken)();p->WeaponSpeed  = (int)TokenNumber;
-					}
-					else if(Type==11)
-					{
-						Token = (*GetToken)();p->Defense      = (int)TokenNumber;
-						Token = (*GetToken)();p->WalkSpeed    = (int)TokenNumber;
-					}
-					Token = (*GetToken)();p->Durability		  = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireLevel		  = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireStrength  = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireDexterity = (int)TokenNumber;
-				}
-				if(Type==12)
-				{
-      				Token = (*GetToken)();p->Level         = (int)TokenNumber;
-					Token = (*GetToken)();p->Defense       = (int)TokenNumber;
-					Token = (*GetToken)();p->Durability	   = (int)TokenNumber;
-      				Token = (*GetToken)();p->RequireLevel  = (int)TokenNumber;
-      				Token = (*GetToken)();p->RequireEnergy = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireStrength = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireDexterity = (int)TokenNumber;
-				}
-				if(Type==13)
-				{
-      				Token = (*GetToken)();p->Level          = (int)TokenNumber;
-      				Token = (*GetToken)();p->Durability     = (int)TokenNumber;
-					Token = (*GetToken)();p->Resistance[0]  = (int)TokenNumber;
-					Token = (*GetToken)();p->Resistance[1]  = (int)TokenNumber;
-					Token = (*GetToken)();p->Resistance[2]  = (int)TokenNumber;
-					Token = (*GetToken)();p->Resistance[3]  = (int)TokenNumber;
-					p->RequireLevel = p->Level;
-				}
-				if(Type==14)
-				{
-					Token = (*GetToken)();p->Value = (int)TokenNumber;
-      				Token = (*GetToken)();p->Level = (int)TokenNumber;
-				}
-				if(Type==15)
-				{
-      				Token = (*GetToken)();p->Level         = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireLevel = (int)TokenNumber;
-      				Token = (*GetToken)();p->RequireEnergy = (int)TokenNumber;
-                    p->DamageMin = p->Level;
-                    p->DamageMax = p->Level+p->Level/2;
-				}
-				if(Type<=13 || Type==15)
-				{
-					Token = (*GetToken)();p->RequireClass[0]  = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireClass[1]  = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireClass[2]  = (int)TokenNumber;
-					Token = (*GetToken)();p->RequireClass[3]  = (int)TokenNumber;
-				}
-			}
-		}
-	}
-	fclose(SMDFile);
-	/*for(int i=0;i<MAX_ITEM_INDEX/2;i++)
-	{
-		memcpy(&ItemAttribute[ITEM_ARMOR+i+MAX_ITEM_INDEX/2],&ItemAttribute[ITEM_ARMOR+i],sizeof(ITEM_ATTRIBUTE));
-		memcpy(&ItemAttribute[ITEM_PANTS+i+MAX_ITEM_INDEX/2],&ItemAttribute[ITEM_PANTS+i],sizeof(ITEM_ATTRIBUTE));
-		memcpy(&ItemAttribute[ITEM_GLOVE+i+MAX_ITEM_INDEX/2],&ItemAttribute[ITEM_GLOVE+i],sizeof(ITEM_ATTRIBUTE));
-		memcpy(&ItemAttribute[ITEM_BOOTS +i+MAX_ITEM_INDEX/2],&ItemAttribute[ITEM_BOOTS +i],sizeof(ITEM_ATTRIBUTE));
-	}*/
-}
-
-void SaveItemScript(char *FileName)
-{
-	FILE *fp = fopen(FileName,"wb");
-	int Size = sizeof(ITEM_ATTRIBUTE);
-	BYTE *Buffer = new BYTE [Size*MAX_ITEM];
-	BYTE *pSeek = Buffer;
-	for(int i=0;i<MAX_ITEM;i++)
-	{
-   		memcpy(pSeek,&ItemAttribute[i],Size);
-        BuxConvert(pSeek,Size);
-
-		pSeek += Size;
-	}
-   	fwrite(Buffer,Size*MAX_ITEM,1,fp);
-	DWORD dwCheckSum = GenerateCheckSum2( Buffer, Size*MAX_ITEM, 0xE2F1);
-   	fwrite(&dwCheckSum, sizeof( DWORD),1,fp);
-	delete [] Buffer;
-	fclose(fp);
 }
 
 void OpenItemScript(char *FileName)

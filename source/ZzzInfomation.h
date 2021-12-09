@@ -12,17 +12,11 @@ extern char AbuseNameFilter[MAX_NAMEFILTERS][20];
 extern int  AbuseFilterNumber;
 extern int  AbuseNameFilterNumber;
 
-void OpenFilterFileText(char *FileName);
-void SaveFilterFile(char *FileName);
 void OpenFilterFile(char *FileName);
-void OpenNameFilterFileText(char *FileName);
-void SaveNameFilterFile(char *FileName);
 void OpenNameFilterFile(char *FileName);
 
 extern GATE_ATTRIBUTE *GateAttribute;
 
-void OpenGateScriptText(char *FileName);
-void SaveGateScript(char *FileName);
 void OpenGateScript(char *FileName);
 void OpenMonsterSkillScript(char *FileName);
 
@@ -33,8 +27,6 @@ void OpenDialogFile(char *FileName);
 extern ITEM_ATTRIBUTE *ItemAttribute;
 
 extern int  ConvertItemType(BYTE *Item);
-extern void OpenItemScriptText(char *FileName);
-extern void SaveItemScript(char *FileName);
 extern void OpenItemScript(char *FileName);
 extern BYTE getSkillIndexByBook ( int Type );
 extern void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 );
@@ -50,30 +42,18 @@ extern char* getMonsterName ( int type );
 
 extern SKILL_ATTRIBUTE *SkillAttribute;
 
-void OpenSkillScriptText(char *FileName);
-void SaveSkillScript(char *FileName);
 void OpenSkillScript(char *FileName);
 
-#ifdef LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 BOOL IsValidateSkillIdx( INT iSkillIdx );
-
 BOOL IsCorrectSkillType( INT iSkillSeq, eTypeSkill iSkillTypeIdx );
-
 BOOL IsCorrectSkillType_FrendlySkill( INT iSkillSeq );
-
 BOOL IsCorrectSkillType_Buff( INT iSkillSeq );
-
 BOOL IsCorrectSkillType_DeBuff( INT iSkillSeq );
-
 BOOL IsCorrectSkillType_CommonAttack( INT iSkillSeq );
-
-#endif // LDS_FIX_APPLYSKILLTYPE_AND_CURSEDTEMPLEWRONGPARTYMEMBER
 
 extern CLASS_ATTRIBUTE ClassAttribute[MAX_CLASS];
 
-#ifdef PSW_BUGFIX_REQUIREEQUIPITEM
 bool IsRequireEquipItem(ITEM* pItem);
-#endif //PSW_BUGFIX_REQUIREEQUIPITEM
 
 class CHARACTER_MACHINE
 {

@@ -2552,7 +2552,6 @@
     <ClInclude Include="source\Utilities\DebugCamera\DebugCameraInterface.h" />
     <ClInclude Include="source\Utilities\DebugCamera\DebugCameraManager.h" />
     <ClInclude Include="source\Utilities\DebugCamera\DebugCameraTopView.h" />
-    <ClInclude Include="source\Utilities\Debug\debugSingleton_.h" />
     <ClInclude Include="source\Utilities\Dump\CrashHandler.h" />
     <ClInclude Include="source\Utilities\Dump\CrashReporter.h" />
     <ClInclude Include="source\Utilities\Dump\Logger.h" />

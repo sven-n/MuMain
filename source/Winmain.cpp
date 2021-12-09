@@ -844,44 +844,6 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
     return DefWindowProc(hwnd,msg,wParam,lParam);
 }
 
-BOOL g_bSavage = FALSE;
-bool CreateOpenglWindow();
-
-BOOL IsUsingSavage( HINSTANCE hCurrentInst)
-{
-    char *windowName = "MU launching";
-    WNDCLASS wndClass;
-	
-    wndClass.style         = CS_OWNDC | CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
-    wndClass.lpfnWndProc   = DefWindowProc;
-    wndClass.cbClsExtra    = 0;
-    wndClass.cbWndExtra    = 0;
-    wndClass.hInstance     = hCurrentInst;
-    wndClass.hIcon         = LoadIcon(NULL, "IDI_ICON1");
-    wndClass.hCursor	   = LoadCursor(NULL, IDC_ARROW);
-    wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    wndClass.lpszMenuName  = NULL;
-    wndClass.lpszClassName = windowName;
-    RegisterClass(&wndClass);
-
-	g_hWnd = CreateWindow(windowName, windowName,WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,0,0,100,40,NULL, NULL, hCurrentInst, NULL);
-
-	g_ErrorReport.Write("Create OpenGL Window For Savage Test.\n\r");
-	if ( !CreateOpenglWindow())
-	{
-		return ( FALSE);
-	}
-
-	char *lpszRenderer = ( char*)glGetString( GL_VENDOR);
-	char *lpszSavage = "s3";
-	BOOL bResult = ( 0 == strnicmp( lpszRenderer, lpszSavage, 2));
-
-	KillGLWindow();
-	DestroyWindow( g_hWnd);
-
-	return ( bResult);
-}
-
 bool CreateOpenglWindow()
 {
     PIXELFORMATDESCRIPTOR pfd;

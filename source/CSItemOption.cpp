@@ -93,7 +93,7 @@ bool	CSItemOption::OpenItemSetType ( const char* filename )
 	return true;
 }
 
-bool	CSItemOption::OpenItemSetOption ( const char* filename )
+bool CSItemOption::OpenItemSetOption ( const char* filename )
 {
 	FILE* fp = fopen ( filename, "rb" );
 	if(fp != NULL)
@@ -1404,11 +1404,7 @@ int     CSItemOption::RenderSetOptionListInItem ( const ITEM* ip, int TextNum, b
 				&& byLimitOptionNum!=255
 				&& iLimitOptionCount > i
 				&& byLimitOptionNum!=0			
-#ifdef PBG_FIX_SETITEMTOOLTIP
-				&& bIsEquippedItem == false
-#else //PBG_FIX_SETITEMTOOLTIP
 				&& bIsEquippedItem == true
-#endif //PBG_FIX_SETITEMTOOLTIP
 				)
             {
                 TextListColor[TNum] = TEXT_COLOR_BLUE; 
