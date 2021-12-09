@@ -392,7 +392,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 		pCharacter->Weapon[0].Type = -1;
 		pCharacter->Weapon[1].Type = -1;
 		break;
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 	case 561:
 		OpenMonsterModel(192);
 		pCharacter = CreateCharacter(Key,MODEL_MONSTER01+192,PosX,PosY);
@@ -400,8 +399,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 		pCharacter->Object.Scale = 1.5f;
 		pCharacter->Object.LifeTime = 100;
 		break;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
-#ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	case 557:
 	case 560:
 		OpenMonsterModel(201);
@@ -428,7 +425,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
 		pCharacter->Weapon[1].Type = -1;
 		pCharacter->Object.LifeTime = 100;
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	}
 
 	return pCharacter;
@@ -546,7 +542,6 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 			}
 		}
 		break;
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 	case MODEL_MONSTER01+192:
 		{
 			vec3_t vPos, vColor;
@@ -598,8 +593,6 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 			}
 		}
 		break;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
-#ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	case MODEL_MONSTER01+202:
 		if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
 		{	
@@ -631,7 +624,6 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 			}
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	}
 	return false;
 }
@@ -777,7 +769,6 @@ void GMSwampOfQuiet::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 		break;
 	case MODEL_MONSTER01+142:
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	case MODEL_MONSTER01+201:
 	case MODEL_MONSTER01+204:
 		{
@@ -819,7 +810,6 @@ void GMSwampOfQuiet::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD*
 			}
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	}
 }
 				
@@ -1066,7 +1056,6 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			}
 		}
 		break;
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 	case MODEL_MONSTER01+192:
 		{
 			vec3_t vColor;
@@ -1124,7 +1113,6 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			pModel->TransformByObjectBone(vPos, pObject, 70);
 			CreateSprite(BITMAP_LIGHT_RED, vPos, 0.4f, vColor, pObject);
 			
-			//¿À¶ó 
 			int temp[] = { 5, 37, 52};
 			Vector(0.25f, 1.0f, 0.0f, vColor);
 			for (int i = 0; i < 3; ++i)
@@ -1160,8 +1148,6 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			}
 		}
 		break;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
-#ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	case MODEL_MONSTER01+201:
 	case MODEL_MONSTER01+204:
 		{
@@ -1260,7 +1246,6 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 			}
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	}
 
 	return false;
@@ -1394,14 +1379,11 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
 		}
 		return true;
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 	case MODEL_MONSTER01+192:
 		{
 			
 		}
 		return true;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
-#ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	case MODEL_MONSTER01+201:
 	case MODEL_MONSTER01+204:
 		if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
@@ -1446,7 +1428,6 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
 			PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
 		}
 		return true;
-#endif // LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	}
 
 	return false;
@@ -1465,10 +1446,8 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
 	if(!IsCurrentMap())
 		return false;
 
-#ifdef LDK_LDS_EXTENSIONMAP_HUNTERZONE
 	switch(pObject->Type)
 	{
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
 	case MODEL_MONSTER01+192:
 		{
 			switch(pCharacter->Skill)
@@ -1501,8 +1480,6 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
 			}
 		}
 		return true;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA
-#ifdef LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	case MODEL_MONSTER01+201:
 	case MODEL_MONSTER01+204:
 		{
@@ -1549,11 +1526,8 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
 			return true;
 		}
 		return true;
-#endif // LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET
 	default:
 		return false;
 	}
-#endif // LDK_LDS_EXTENSIONMAP_HUNTERZONE
-
 	return false;
 }

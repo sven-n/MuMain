@@ -105,7 +105,6 @@ inline unsigned char GetBlue(unsigned long rgba)
 extern bool g_bRenderBoundingBox;
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
 
-#ifdef KWAK_ADD_TRACE_FUNC
 inline void __TraceF(const TCHAR* pFmt, ...)
 {
 #ifdef _DEBUG
@@ -117,6 +116,5 @@ inline void __TraceF(const TCHAR* pFmt, ...)
 	OutputDebugString(szMsg);
 #endif // _DEBUG
 }
-#endif // KWAK_ADD_TRACE_FUNC
 
 #endif	// _GLOBAL_FUNCTIONS_H

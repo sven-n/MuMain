@@ -1,14 +1,8 @@
 //=============================================================================
-//
 //	NewUIGroup.cpp
-//
-//	Copyright 2010 Webzen Mu-Studio
-//
 //=============================================================================
 #pragma once
 #include "StdAfx.h"
-
-#ifdef KJW_ADD_NEWUI_GROUP
 #include "NewUIGroup.h"
 
 using namespace SEASON3B;
@@ -125,18 +119,10 @@ void CNewUIGroup::Release()
 		CNewUIObj* pUIObj = (*vi);
 		if( pUIObj != NULL )
 		{
-#ifdef KWAK_ADD_TRACE_FUNC
-			__TraceF( TEXT( "UIÅ¬·¡½º ±×·ì ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(ÀÎµ¦½º:%d)ÀÌ ÀÖ½À´Ï´. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´. vecUI \n" ), iCount );
-#else // KWAK_ADD_TRACE_FUNC
-			char	szOutput[128];
-			sprintf( szOutput, "UIÅ¬·¡½º ±×·ì ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(ÀÎµ¦½º:%d)ÀÌ ÀÖ½À´Ï´. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´. vecUI \n", iCount );
-			OutputDebugString( szOutput );
-#endif // KWAK_ADD_TRACE_FUNC
+			__TraceF( TEXT( "vecUI \n" ), iCount );
 		}
 		iCount++;
 	}
 
 	m_vecUI.clear();
 }
-
-#endif // KJW_ADD_NEWUI_GROUP

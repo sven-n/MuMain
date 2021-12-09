@@ -3,9 +3,6 @@
 //=============================================================================
 #pragma once
 #include "StdAfx.h"
-
-#ifdef KJW_ADD_NEWUI_TEXTBOX
-
 #include "NewUITextBox.h"
 #include "UIControls.h"
 #include "wsclientinline.h"
@@ -161,5 +158,3 @@ int CNewUITextBox::GetMoveableLine()
 
 	return iMoveableLine;
 }
-
-#endif // KJW_ADD_NEWUI_TEXTBOX

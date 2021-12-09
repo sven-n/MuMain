@@ -10,12 +10,7 @@
 
 inline DWORD _ARGB(BYTE a, BYTE r, BYTE g, BYTE b) { return (a << 24) + (b << 16) + (g << 8) + (r); }
 
-#ifndef ASG_ADD_NEW_QUEST_SYSTEM
-void CutText2(const char* Text,char* Text1,char* Text2,int Length);
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
-#ifdef KJH_FIX_BTS158_TEXT_CUT_ROUTINE
 int CutStr(const char* pszText, char * pTextOut, const int iTargetPixelWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab = 0);
-#endif // KJH_FIX_BTS158_TEXT_CUT_ROUTINE
 int CutText3(const char* pszText, char* pTextOut, const int TargetWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab = 0, const BOOL bReverseWrite = FALSE);
 void CutText4(const char* pszSource, char* pszResult1, char* pszResult2, int iCutCount);
 

@@ -1,11 +1,7 @@
 //=============================================================================
 //	NewUIScrollBar.h
 //=============================================================================
-#ifndef _NEWUISCROLLBAR_H_
-#define _NEWUISCROLLBAR_H_
-
-#ifdef KJW_ADD_NEWUI_SCROLLBAR
-
+#pragma once
 #include "NewUIBase.h"
 #include "NewUIManager.h"
 #include "NewUIChatLogWindow.h"
@@ -102,7 +98,3 @@ namespace SEASON3B
 		void SetCurPos( int iMoveValue );
 	};
 }
-
-#endif // KJW_ADD_NEWUI_SCROLLBAR
-
-#endif // _NEWUISCROLLBAR_H_

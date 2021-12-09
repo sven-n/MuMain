@@ -407,7 +407,6 @@
     <ClCompile Include="source\NewUIMyShopInventory.cpp" />
     <ClCompile Include="source\NewUINameWindow.cpp" />
     <ClCompile Include="source\NewUINPCDialogue.cpp" />
-    <ClCompile Include="source\NewUINPCMenu.cpp" />
     <ClCompile Include="source\NewUINPCQuest.cpp" />
     <ClCompile Include="source\NewUINPCShop.cpp" />
     <ClCompile Include="source\NewUIOptionWindow.cpp" />
@@ -999,7 +998,6 @@
     <ClInclude Include="source\NewUIMyShopInventory.h" />
     <ClInclude Include="source\NewUINameWindow.h" />
     <ClInclude Include="source\NewUINPCDialogue.h" />
-    <ClInclude Include="source\NewUINPCMenu.h" />
     <ClInclude Include="source\NewUINPCQuest.h" />
     <ClInclude Include="source\NewUINPCShop.h" />
     <ClInclude Include="source\NewUIOptionWindow.h" />

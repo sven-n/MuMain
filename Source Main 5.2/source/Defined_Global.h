@@ -1,58 +1,10 @@
 
 #define NEW_PROTOCOL_SYSTEM
-
-#define PBG_FIX_DROPBAN_GENS
-
-#define KJW_FIX_ITEMNAME_ORB_OF_SUMMONING
-#define KJW_FIX_ITEMNAME_CRITICAL_SCROLL
-#define KJW_FIX_MYSHOP
-
-#define KJW_FIX_CHAOSCASTLE_MESSAGE
-#define KJW_FIX_QUEST_INFO_DUPLICATE
 #define KJW_FIX_GENS_WINDOW_OPEN
 
-#define KJW_ADD_NEWUI_SCROLLBAR
-#define KJW_ADD_NEWUI_TEXTBOX
-#define KJW_ADD_NEWUI_GROUP
-
-#define KWAK_ADD_TRACE_FUNC
 #ifdef _DEBUG
 	#define KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK
 #endif // _DEBUG
-
-
-#define KJW_FIX_SLEEPUP_SKILL_INFO
-#define KJW_FIX_LOGIN_ID_BLACK_SPACE
-#define KJW_FIX_SLIDE_MOVE
-
-//----------------------------------------------------------------------------------------------
-// << Season 5-4 >>
-
-#define SEASON5_4
-#ifdef  SEASON5_4
-
-	#define ASG_ADD_STRIFE_KANTURU_RUIN_ISLAND				// Ä­Åõ¸£ ÆóÇã3 ºÐÀïÁö¿ªÈ­.(10.04.13)
-
-	#define KJH_FIX_POTION_PRICE							// »óÁ¡ ¹°¾à°¡°Ý ¹ö±×¼öÁ¤ (10.04.16)
-	#define KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT			// ºñÁ¤»óÀûÀûÀÎ Á¾·á½Ã ÀÌº¥Æ®¸Ê ÃÊ±âÈ­ (10.04.20)
-	#define LDK_LDS_EXTENSIONMAP_HUNTERZONE					// »ç³ÉÅÍ È®Àå ¸Ê (±âÁ¸ ¸Ê ¸®´º¾ó ¹× ¸ó½ºÅÍ, º¸½º±Þ ¸ó½ºÅÍ Ãß°¡.). (10.02.18)
-
-	#ifdef LDK_LDS_EXTENSIONMAP_HUNTERZONE						
-		#define LDS_EXTENSIONMAP_MONSTERS_RAKLION				// È®Àå ¸Ê³»ÀÇ ÀÏ¹Ý ¸÷µé. ¶óÅ¬¸®¿Â (10.02.18)
-		#define LDS_EXTENSIONMAP_MONSTERS_AIDA					// È®Àå ¸Ê³»ÀÇ ÀÏ¹Ý ¸÷µé. ¾ÆÀÌ´ (10.02.26)
-		#define LDS_EXTENSIONMAP_MONSTERS_KANTUR				// È®Àå ¸Ê³»ÀÇ ÀÏ¹Ý ¸÷µé. Ä­Åõ¸£ (10.03.02)
-		#define LDS_EXTENSIONMAP_MONSTERS_SWAMPOFQUIET			// È®Àå ¸Ê³»ÀÇ ÀÏ¹Ý ¸÷µé. Æò¿øÀÇ´Ë (10.03.02)
-		#define LDS_MOD_EXTEND_MAXMODELLIMITS_200TO400			// ±âÁ¸ ¸ó½ºÅÍ¸ðµ¨ °¹¼ö Á¦ÇÑ (MAX_MODEL_MONSTER=200)°³¸¦ ÃÊ°úÇÏ¿© ¿À· ¹ß»ýÀ¸·Î (MAX_MODEL_MONSTER=400)¼³Á¤. (10.03.15)
-		#define LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA				// Æò¿ÂÀÇ´Ë º¸½º ¸ó½ºÅÍ ¸Þµà»ç (10.02.19)
-		#define LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT		// Æò¿ÂÀÇ´Ë º¸½º ¸ó½ºÅÍ ¸Þµà»ç ´« ÀÜ»ó ÀÌÆåÆ®(10.03.03)
-		#define LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_WAND_EFFECT	// Æò¿ÂÀÇ´Ë º¸½º ¸ó½ºÅÍ ¸Þµà»ç ÁöÆÎÀÌ ÀÌÆåÆ®(10.03.04)
-		#define LDK_MOD_EVERY_USE_SKILL_CAOTIC					// Ä«¿ÀÆ½ µð¼¼ÀÌ¾î ¸ó½ºÅÍ »ç¿ë °¡´ÉÇÏµµ·Ï ¼öÁ¤(10.03.08)
-	#endif // LDK_LDS_EXTENSIONMAP_HUNTERZONE
-
-	#define YDG_ADD_MOVE_COMMAND_PROTOCOL						// ÀÌµ¿¸í·É ÇÁ·ÎÅäÄÝ Ãß°¡(/ÀÌµ¿ Á¦°Å) (2009.04.01) [2009.04.22 Å×¼·]
-	
-#endif //SEASON5_4
-
 
 //----------------------------------------------------------------------------------------------
 // << Season 5 - Part 1 
@@ -60,42 +12,6 @@
 #define UPDATE_100527
 #ifdef UPDATE_100527
 
-	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 3]
-	#define KJH_FIX_BTS158_TEXT_CUT_ROUTINE							// UI¿¡ ¸Â°Ô Text¸¦ ÀÚ¸¦½Ã ÀÌ»óÇö»ó ¼öÁ¤ (10.05.07)
-	#define KJH_FIX_BTS179_INGAMESHOP_STORAGE_UPDATE_WHEN_ITEM_BUY	// ÀÎ°ÔÀÓ¼¥ ¾ÆÀÌÅÛ ±¸ÀÔ½Ã ¼±¹°ÇÔ ÅÇ¿¡¼­ º¸°üÇÔ ¾ÆÀÌÅÛÀÌ °»½ÅµÇ´Â ¹ö±×¼öÁ¤ (10.05.13)
-	#define KJH_FIX_MINIMAP_NAME									// ¹Ì´Ï¸Ê¿¡¼­ NPC/Portal Name ÀÌ Â©¸®´Â ¹ö±× ¼öÁ¤ (10.05.14) - minimap ½ºÅ©¸³Æ® ¸ðµÎ ÀçÄÁ¹öÆÃ
-	#define KJH_MOD_BTS184_REQUIRE_STAT_WHEN_SPELL_SKILL			// ½ºÅ³ ½ÃÀü½Ã ½ºÅÝ ¿ä±¸Ä¡¿¡ µû¶ó ½ºÅ³ »ç¿ë º¯°æ (10.05.17)
-	#define KJH_FIX_EMPIREGUARDIAN_ENTER_UI_RENDER_TEXT_ONLY_GLOBAL	// Á¦±¹¼öÈ£±º ÀÔÀå UI(Á¦¸°Æ®NPC) Text ¼öÁ¤ (10.05.17) - ±Û·Î¹ú Àü¿ë
-	#define KJH_FIX_DOPPELGANGER_ENTER_UI_RENDER_TEXT_ONLY_GLOBAL	// µµÆç°»¾î ÀÔÀå UI(·ç°¡µåNPC) Text ¼öÁ¤ (10.05.19) - ±Û·Î¹ú Àü¿ë
-	#define KJH_FIX_BTS167_MOVE_NPC_IN_VIEWPORT						// ºäÆ÷Æ®¾È¿¡ NPC°¡ µé¾î¿À¸é NPC°¡ °©ÀÚ±â ÀÌµ¿ÇÏ´Â ¹ö±×¼öÁ¤ (10.05.17)
-	#define KJH_FIX_BTS204_INGAMESHOP_ITEM_STORAGE_SELECT_LINE		// ÀÎ°ÔÀÓ¼¥ º¸°üÇÔ¿¡¼­ 1¹øÂ° ¾ÆÀÌÅÛ »ç¿ë½Ã, Æ÷Ä¿½ÌÀÌ 3¹øÂ° ¾ÆÀÌÅÛÀ¸·Î ¼±ÅÃµÇ´Â ¹ö±×¼öÁ¤ (10.05.18)
-	#define	KJH_FIX_BTS206_INGAMESHOP_SEND_GIFT_MSGBOX_BLANK_ID		// ÀÎ°ÔÀÓ¼¥ ¼±¹°ÇÏ±â ¸Þ¼¼ÁöÃ¢¿¡¼­ IDÀÔ·ÂÇÏÁö ¾Ê°í È®ÀÎ ¹öÆ° Å¬¸¯½Ã, ¼±¹°È®ÀÎ ¸Þ¼¼ÁöÃ¢ÀÌ ¶ß´Â ¹ö±× (10.05.18)
-	#define KJH_MOD_COMMON_MSG_BOX_BTN_DISABLE_TEXT_COLOR			// °øÅë ¸Þ¼¼Áö¹Ú½º ¹öÆ° Disable½Ã ±ÛÀÚ»ö ¼öÁ¤ (10.05.18)
-	#define	KJH_MOD_BTS208_CANNOT_MOVE_TO_VULCANUS_IN_NONPVP_SERVER	// nonPVP ¼­¹öÀÏ´ë ºÒÄ«´©½º·Î ÀÌµ¿ºÒ°¡ (10.05.18)
-	#define KJH_FIX_BTS207_INGAMESHOP_SEND_GIFT_ERRORMSG_INCORRECT_ID	// ÀÎ°ÔÀÓ¼¥ ¼±¹°ÇÏ±â¿¡¼­ »ó´ë¹æ ¾ÆÀÌµð°¡ Æ²·ÈÀ»¶§ ¿¡·¯ ¸Þ¼¼Áö (10.05.19)
-	#define KJH_FIX_BTS251_ELITE_SD_POTION_TOOLTIP					// ¿¤¸®Æ® SD¹°¾à ÅøÆÁÀÌ ¾È³ª¿À´Â ¹ö±× ¼öÁ¤ (10.05.24)
-	#define KJH_FIX_BTS260_PERIOD_ITEM_INFO_TOOLTIP					// ±â°£Á¦¾ÆÀÌÅÛ ±â°£Á¦ Á¤º¸ ÅøÆÁ ¹ö±× ¼öÁ¤ (10.05.24)
-	#define KJH_FIX_BTS295_DONT_EXPIRED_WIZARD_RING_RENDER_SELL_PRICE	// ±â°£Á¦ ¸¶¹ý»ç¹ÝÁö°¡ ±â°£ÀÌ ¸¸·áµÇÁö ¾Ê¾Ò´Âµ¥ ÆÇ¸Å°¡°ÝÀÌ ³ª¿À´Â ¹ö±× ¼öÁ¤ (10.05.25)
-	#define KJH_MOD_INGAMESHOP_GIFT_FLAG							// ÀÎ°ÔÀÓ¼¥ ¼±¹°ÇÏ±â Flag·Î ¼±¹°ÇÏ±â ¹öÆ° On/Off (10.05.25)
-	#define ASG_FIX_QUEST_GIVE_UP									// Ä½ºÆ® Æ÷±â ¹ö±× ¼öÁ¤. Ä½ºÆ® »óÅÂ(QS) 0xfe»èÁ¦µÊ.(10.05.26)
-
-	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 3]
-	#define KJH_MOD_INGAMESHOP_UNITTTYPE_FILED_OF_PRODUCT_SCRIPT	// Product °ÔÀÓ¼¥ ½ºÅ©¸³Æ®ÀÇ UnitTypeÇÊµå·Î ´ÜÀ§¸í º¯°æ (10.04.22) - 10.03.29ÀÏÀÚ ÀÎ°ÔÀÓ¼¥ ¶óÀÌºê·¯¸® Àû¿ë
-
-	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 3]
-	#define KJH_FIX_INIT_EVENT_MAP_AT_ABNORMAL_EXIT			// ºñÁ¤»óÀûÀûÀÎ Á¾·á½Ã ÀÌº¥Æ®¸Ê ÃÊ±âÈ­ (10.04.20)
-
-	#define LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM	// ·Î·» ½ÃÀå ¼­¹ö·ÎºÎÅÍ °³ÀÎ»óÁ¡ ±¸¸ÅÀÌÈÄ ReceiveRefreshPersonalShopItem ¹ÞÀ» ¶§ Error Log Á¤º¸¸¦ ´õ ÀÚ¼¼È÷ Ãâ·Â (10.03.30)
-	#define LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE		// ·Î·»½ÃÀå DEADÇö»ó : NewUI ³» Æó±â Ã³¸® ¸Þ¸ð¸® ¹Ì¹ÝÈ¯À¸·Î ÀÎÇÑ ¸Þ¸ð¸® ´©¼ö ÀÛ¾÷ (10.03.23)
-	#define ASG_MOD_GM_VIEW_NAME_IN_GENS_STRIFE_MAP			// °Õ½º ºÐÀïÁö¿ª¿¡¼­ GMÀº Å¸¼¼·Â Ä³¸¯ÅÍ ÀÌ¸§ º¸ÀÌ°Ô(10.02.26)
-	//^#define KJH_FIX_MOVE_MAP_GENERATE_KEY				// ¸Ê ÀÌµ¿(&´õ¹Ì½ºÅ³ ÇÁ·ÎÅäÄÝ)½Ã »ý¼ºµÇ´Â Å°°ª ¼öÁ¤
-
-	#define ASG_FIX_GENS_STRIFE_FRIEND_NAME_BLOCK			// °Õ½º ºÐÀïÁö¿ª¿¡¼­ Ä£±¸ ÀÌ¸§ ÀÚµ¿ÀÔ·Â ¸·±â(2010.02.03)
-	#define ASG_MOD_GENS_STRIFE_ADD_PARTY_MSG				// °Õ½º ºÐÀïÁö¿ª °ü·Ã ÆÄÆ¼ ¸Þ½ÃÁö Ãß°¡.(2010.02.03)
-	#define PBG_MOD_STRIFE_GENSMARKRENDER					// ºÐÀïÁö¿ªÀ¯ÀúÇ¥½Ã º¯°æ(10.02.18)
 	#define YDG_FIX_MOVE_ICARUS_EQUIPED_SKELETON_CHANGE_RING	// ½ºÄÌ·¹Åæº¯½Å¹ÝÁö Âø¿ëÈÄ ÀÌÄ«·ç½º·Î ÀÌµ¿ÇÒ ¼ö ¾ø´Â Çö»ó (10.02.16)
 	#define ASG_ADD_LEAP_OF_CONTROL_TOOLTIP_TEXT			// Åë¼ÖÀÇ ºñ¾à ÅøÆÁ ÅØ½ºÆ® Ãß°¡(2010.01.28)
 	#define PBG_FIX_GAMECENSORSHIP_1215							// 12/15¼¼ ÀÌ¿ë°¡´É ¸¶Å© ÃâÇö ¹ö±×¼öÁ¤(10.02.09)
@@ -161,12 +77,13 @@
 
 		#define ASG_ADD_GENS_SYSTEM
 		#ifdef ASG_ADD_GENS_SYSTEM
-			#define ASG_ADD_UI_NPC_DIALOGUE						// NPC ´ëÈ­Ã¢(2009.09.14)
-			#define ASG_ADD_INFLUENCE_GROUND_EFFECT				// °Õ½º ¼¼·Â ±¸ºÐ ¹´Ú ÀÌÆåÆ®(2009.10.07)
-			#define ASG_ADD_GENS_MARK							// °Õ½º ¸¶Å© Ç¥½Ã(2009.10.09)
-			#define ASG_ADD_GENS_NPC							// °Õ½º NPC Ãß°¡(2009.10.12)
-			#define ASG_ADD_GATE_TEXT_MAX_LEVEL					// Gate.txt ÃÖ´ë ·¹º§ Ãß°¡.(2009.10.16)	[ÁÖÀÇ] ¸®¼Ò½º ÄÁ¹öÅÍ »õ·Î¿î ¼Ò½º·Î ÄÄÆÄÀÏ ÇÒ °Í.
-			#define ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL				// Movereq.txt ÃÖ´ë ·¹º§ Ãß°¡.(2009.10.16)	[ÁÖÀÇ] ¸®¼Ò½º ÄÁ¹öÅÍ »õ·Î¿î ¼Ò½º·Î ÄÄÆÄÀÏ ÇÒ °Í.
+			#define ASG_ADD_UI_NPC_DIALOGUE
+			#define ASG_ADD_INFLUENCE_GROUND_EFFECT
+			#define ASG_ADD_GENS_MARK
+			#define ASG_ADD_GENS_NPC
+			#define ASG_ADD_GATE_TEXT_MAX_LEVEL
+			#define ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
+			#define PBG_MOD_STRIFE_GENSMARKRENDER
 		#endif	// ASG_ADD_GENS_SYSTEM
 
 		#define INGAMESHOP_ITEM01							// ÇØ¿Ü¿¡¸¸ µî·ÏµÇ¾îÀÖ°Å³ª »õ·Î »ý¼ºµÈ ¾ÆÀÌÅÛ µðÆÄÀÎ Ãß°¡(2009.09.08)
@@ -207,7 +124,6 @@
 		#define LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12		// Èñ±Í¾ÆÀÌÅÛ Æ¼ÄÏ 7-12 Ãß°¡ (2010.02.12)
 		#define LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH	//µµÇÃ°»¾î, ¹¸£Ä«, ¹¸£Ä« Á¦ 7¸Ê ÀÚÀ¯ÀÔÀå±Ç Ãß°¡(2010.02.17)
 
-		#define YDG_ADD_SKELETON_CHANGE_RING				// ½ºÄÌ·¹Åæ º¯½Å¹ÝÁö (2009.12.03)
 		#define ADD_SKELETON_PET							// ½ºÄÌ·¹Åæ Æê (2009.12.03)
 		#ifdef  ADD_SKELETON_PET
 			#define YDG_ADD_SKELETON_PET					// ½ºÄÌ·¹Åæ Æê 

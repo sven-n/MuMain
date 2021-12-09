@@ -1,11 +1,7 @@
 //=============================================================================
 //	NewUIScrollBar.cpp
 //=============================================================================
-
 #include "StdAfx.h"
-
-#ifdef KJW_ADD_NEWUI_SCROLLBAR
-
 #include "NewUIScrollBar.h"
 
 using namespace SEASON3B;
@@ -247,5 +243,3 @@ void CNewUIScrollBar::SetCurPos( int iPosValue )
 	m_fPercentOfSize = (float)m_iCurPos / (float)m_iMaxPos;
 	UpdateScrolling();
 }
-
-#endif // KJW_ADD_NEWUI_SCROLLBAR

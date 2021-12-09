@@ -1,11 +1,8 @@
 
 #include "stdafx.h"
-
 #include "NewUIManager.h"
-
-#ifdef LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM
 #include "./Utilities/Log/ErrorReport.h"
-#endif // LDS_ADD_OUTPUTERRORLOG_WHEN_RECEIVEREFRESHPERSONALSHOPITEM
+
 
 using namespace SEASON3B;
 
@@ -68,7 +65,7 @@ void SEASON3B::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
 
 void SEASON3B::CNewUIManager::RemoveAllUIObjs()
 {
-#if defined(_DEBUG) && defined(LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE)
+#if defined(_DEBUG)
 	
 	{
 		unsigned int uiUIManageCNT = m_mapUI.size();
@@ -80,9 +77,7 @@ void SEASON3B::CNewUIManager::RemoveAllUIObjs()
 			CNewUIObj* pUIObj = (*mi).second;
 			if( pUIObj != NULL )
 			{
-			#ifdef KWAK_ADD_TRACE_FUNC
-				__TraceF(TEXT("UIÅ¬·¡½º ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(°¹¼ö:%d)ÀÌ ÀÖ½À´Ï´. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´. UIKEY(%d) : mapUI \n"), uiUIManageCNT, dwKey);
-			#endif // KWAK_ADD_TRACE_FUNC
+				__TraceF(TEXT("UIKEY(%d) : mapUI \n"), uiUIManageCNT, dwKey);
 			}
 		}
 		
@@ -92,14 +87,12 @@ void SEASON3B::CNewUIManager::RemoveAllUIObjs()
 			CNewUIObj* pUIObj = (*vi);
 			if( pUIObj != NULL )
 			{
-			#ifdef KWAK_ADD_TRACE_FUNC
-				__TraceF(TEXT("UIÅ¬·¡½º ÄÄÆ÷³ÍÆ® Áß »èÁ¦ ¾ÈµÈ°Í(°¹¼ö:%d)ÀÌ ÀÖ½À´Ï´. Á¾Á¾ ¹ÂDEADÀÇ ¿øÀÎÀÌ µË´Ï´. vecUI \n"), uiUIManageCNT);
-			#endif // KWAK_ADD_TRACE_FUNC
+				__TraceF(TEXT("vecUI \n"), uiUIManageCNT);
 			}
 		}
 	}
 
-#endif // defined(_DEBUG) && defined(LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE)
+#endif // defined(_DEBUG)
 	m_vecUI.clear();
 	m_mapUI.clear();
 }
@@ -168,32 +161,11 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
 
 		if((*vi)->IsEnabled() && hWnd == hRelatedWnd)
 		{
-#ifdef LJH_FIX_DEREFERENCE_VECTOR_ITER_FOR_DELETED_UI_OBJ
-			CNewUIObj *obj_backup = (*vi);
-			bool bResult = (*vi)->UpdateKeyEvent();
-
-			type_vector_uibase::iterator vi2 = std::find(m_vecUI.begin(), m_vecUI.end(), obj_backup);
-			if( vi2 != m_vecUI.end() )
-			{
-				vi = vi2;
-			}
-			else
-			{
-				break;
-			}
-
-			if( bResult == false )
-			{
-				m_pActiveMouseUIObj = *vi;
-				return false;
-			}
-#else // LJH_FIX_DEREFERENCE_VECTOR_ITER_FOR_DELETED_UI_OBJ
 			if(false == (*vi)->UpdateKeyEvent())
 			{
 				m_pActiveKeyUIObj = (*vi);
 				return false;		//. stop calling UpdateKeyEvent functions
 			}
-#endif // LJH_FIX_DEREFERENCE_VECTOR_ITER_FOR_DELETED_UI_OBJ
 		}
 	}
 	return true;

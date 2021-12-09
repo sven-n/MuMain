@@ -426,7 +426,6 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 //			BoneManager::RegisterBone(pCharacter, "Monster105_Footsteps", 1);
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
 	case 549:
 		{
 			OpenMonsterModel(193);
@@ -484,7 +483,6 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
 			BoneManager::RegisterBone(pCharacter, "Monster100_z05",	     110);
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
 	}
 	return pCharacter;
 }
@@ -514,7 +512,6 @@ bool M33Aida::MoveAidaMonsterVisual(OBJECT* pObject, BMD* pModel)
 			AddTerrainLight(pObject->Position[0], pObject->Position[1],Light,3,PrimaryTerrainLight);
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
 	case MODEL_MONSTER01+195:
 		{
 			vec3_t Light;
@@ -529,7 +526,6 @@ bool M33Aida::MoveAidaMonsterVisual(OBJECT* pObject, BMD* pModel)
 			AddTerrainLight(pObject->Position[0], pObject->Position[1],Light,3,PrimaryTerrainLight);
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
 	}
 	return false;
 }
@@ -634,7 +630,6 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 			}
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
 	case MODEL_MONSTER01+193:
 		{
 			if(pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
@@ -703,7 +698,6 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 			}
 		}
 		break;	
-#endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
 	}
 }
 
@@ -1094,7 +1088,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 				pObject->SubType = FALSE;
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
 	case MODEL_MONSTER01+193:
 		{
 			if(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
@@ -1332,14 +1325,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 					}
 					if(pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK2)
 					{
-#ifdef LDS_MOD_BLOODWITCHQUEEN_EFFECT_ATTACK2
-						vec3_t		v3Light;
-						float		fScale = 1.8f;
-						Vector(1.0f, 0.0f, 0.4f, v3Light);
-						CreateParticle(BITMAP_LIGHT+1,vTemp, Angle, v3Light, 3, fScale);
-#else // LDS_MOD_BLOODWITCHQUEEN_EFFECT_ATTACK2
 						CreateJoint(BITMAP_JOINT_THUNDER, to->Position, vTemp, pObject->Angle, 16);
-#endif // LDS_MOD_BLOODWITCHQUEEN_EFFECT_ATTACK2
 					}
 				}
 			}
@@ -1348,7 +1334,6 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 				pObject->SubType = FALSE;			
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
 	}
 	return false;
 }
@@ -1431,7 +1416,6 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel,bool Extr
 			return true;
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
 	case MODEL_MONSTER01+194:
 		{
 			pModel->BeginRender(1.f);
@@ -1472,7 +1456,6 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel,bool Extr
 			return true;
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
 	}
 	return false;
 } 
@@ -1517,20 +1500,16 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
 				}
 			}
 			return true;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
 		case 552:
 			{
-#ifndef LDS_MOD_BLOODWITCHQUEEN_EFFECT_ATTACK2		// #ifndef
 				if(pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2 )
 				{
 					vec3_t Light;
 					Vector(1.f,1.f,1.f,Light);
 					CreateEffect(BITMAP_JOINT_FORCE, pObject->Position, pObject->Angle, Light, 1);
 				}
-#endif // LDS_MOD_BLOODWITCHQUEEN_EFFECT_ATTACK2
 			}
 			return true;
-#endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
 	}
 	return false;
 }
@@ -1547,7 +1526,6 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
 	case 305:
 	case 309:
 		return CheckMonsterSkill(pCharacter, pObject);
-#ifdef LDS_EXTENSIONMAP_MONSTERS_AIDA
 	case 549:
 	case 550:
 		return CheckMonsterSkill(pCharacter, pObject);
@@ -1581,7 +1559,6 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
 			return true;
 		}
 		return true;
-#endif // LDS_EXTENSIONMAP_MONSTERS_AIDA
 	}
 	return false;
 }

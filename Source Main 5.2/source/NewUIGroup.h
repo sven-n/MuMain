@@ -1,14 +1,7 @@
 //=============================================================================
-//
 //	NewUIGroup.h
-//
-//	Copyright 2010 Webzen Mu-Studio
-//
 //=============================================================================
-#ifndef _NEWUIGROUP_H_
-#define _NEWUIGROUP_H_
 
-#ifdef KJW_ADD_NEWUI_GROUP
 #pragma once
 #include "NewUIBase.h"
 #include <vector>
@@ -44,6 +37,5 @@ namespace SEASON3B
 		float GetLayerDepth(){ return  m_fLayerDepth; }
 	};
 }
-#endif // KJW_ADD_NEWUI_GROUP
-#endif // _NEWUIGROUP_H_
+
 

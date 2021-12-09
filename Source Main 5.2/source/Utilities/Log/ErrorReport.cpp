@@ -738,9 +738,7 @@ DWORD GetDXVersion()
         dwDXVersion = 0;
         FreeLibrary( hDDrawDLL );
 
-#ifdef KWAK_ADD_TRACE_FUNC
 		__TraceF(TEXT("===> Couldn't LoadLibrary DDraw\r\n"));
-#endif // KWAK_ADD_TRACE_FUNC
 		return dwDXVersion;
     }
 
@@ -749,9 +747,7 @@ DWORD GetDXVersion()
     {
         dwDXVersion = 0;
         FreeLibrary( hDDrawDLL );
-#ifdef KWAK_ADD_TRACE_FUNC
 		__TraceF(TEXT("===> Couldn't create DDraw\r\n"));
-#endif // KWAK_ADD_TRACE_FUNC
 		return dwDXVersion;
     }
 
@@ -765,9 +761,7 @@ DWORD GetDXVersion()
         // No IDirectDraw2 exists... must be DX1
         pDDraw->Release();
         FreeLibrary( hDDrawDLL );
-#ifdef KWAK_ADD_TRACE_FUNC
 		__TraceF(TEXT("===> Couldn't QI DDraw2\r\n"));
-#endif // KWAK_ADD_TRACE_FUNC
         return dwDXVersion;
     }
 
@@ -785,9 +779,7 @@ DWORD GetDXVersion()
     if( hDInputDLL == NULL )
     {
         // No DInput... must not be DX3
-#ifdef KWAK_ADD_TRACE_FUNC
 		__TraceF(TEXT("===> Couldn't LoadLibrary DInput\r\n"));
-#endif // KWAK_ADD_TRACE_FUNC
         pDDraw->Release();
         return dwDXVersion;
     }
@@ -800,9 +792,7 @@ DWORD GetDXVersion()
         FreeLibrary( hDInputDLL );
         FreeLibrary( hDDrawDLL );
         pDDraw->Release();
-#ifdef KWAK_ADD_TRACE_FUNC
 		__TraceF(TEXT("===> Couldn't GetProcAddress DInputCreate\r\n"));
-#endif // KWAK_ADD_TRACE_FUNC
         return dwDXVersion;
     }
 
@@ -832,9 +822,7 @@ DWORD GetDXVersion()
         pDDraw->Release();
         FreeLibrary( hDDrawDLL );
         dwDXVersion = 0;
-#ifdef KWAK_ADD_TRACE_FUNC
 		__TraceF(TEXT("===> Couldn't Set coop level\r\n"));
-#endif // KWAK_ADD_TRACE_FUNC
         return dwDXVersion;
     }
 
@@ -845,9 +833,7 @@ DWORD GetDXVersion()
         pDDraw->Release();
         FreeLibrary( hDDrawDLL );
         dwDXVersion = 0;
-#ifdef KWAK_ADD_TRACE_FUNC
 		__TraceF(TEXT("===> Couldn't CreateSurface\r\n"));
-#endif // KWAK_ADD_TRACE_FUNC
         return dwDXVersion;
     }
 
@@ -894,9 +880,7 @@ DWORD GetDXVersion()
                            IID_IDirectMusic, (VOID**)&pDMusic );
     if( FAILED(hr) )
     {
-#ifdef KWAK_ADD_TRACE_FUNC
 		__TraceF(TEXT("===> Couldn't create CLSID_DirectMusic\r\n"));
-#endif // KWAK_ADD_TRACE_FUNC
         FreeLibrary( hDDrawDLL );
         return dwDXVersion;
     }

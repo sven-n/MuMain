@@ -4,13 +4,7 @@
 #include "stdafx.h"
 #include "KeyGenerater.h"
 
-#ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
-
 CKeyGenerater g_KeyGenerater;
-
-#ifdef USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
-#include "LargeRand.h"
-#endif // USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
 
 static int KEY_GENERATE_FILTER[MAX_KEY_GENERATER_FILTER][4] = 
 {
@@ -50,12 +44,7 @@ DWORD CKeyGenerater::GenerateKeyValue(DWORD dwKeyValue)
 
 	btNumericValue = dwKeyValue % MAX_KEY_GENERATER_FILTER;
 
-#ifdef KJH_FIX_MOVE_MAP_GENERATE_KEY
-	dwRegenerateKeyValue = ( ( dwKeyValue % KEY_GENERATE_FILTER[btNumericValue][2] ) * KEY_GENERATE_FILTER[btNumericValue][0] ) + KEY_GENERATE_FILTER[btNumericValue][1] - KEY_GENERATE_FILTER[btNumericValue][3];
-#else // KJH_FIX_MOVE_MAP_GENERATE_KEY
 	dwRegenerateKeyValue = dwKeyValue * KEY_GENERATE_FILTER[btNumericValue][0] + KEY_GENERATE_FILTER[btNumericValue][1] - KEY_GENERATE_FILTER[btNumericValue][2] / KEY_GENERATE_FILTER[btNumericValue][3];
-#endif // KJH_FIX_MOVE_MAP_GENERATE_KEY
-
 	return dwRegenerateKeyValue;
 }
 
@@ -86,5 +75,3 @@ void CKeyGenerater::_SimulationKeyGenerate()
 	}
 }
 #endif // USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
-
-#endif // YDG_ADD_MOVE_COMMAND_PROTOCOL

@@ -500,3 +500,20 @@ EnableCsSkillsAllMaps = 1
 ; Enable Combo to all Classes
 ;==================================================
 EnableComboToAllSwitch = 1
+
+;==================================================
+; Gens System Settings
+;==================================================
+GensSystemSwitch = 1
+GensSystemGuildLock = 0
+GensSystemPartyLock = 0
+GensSystemInsertMinLevel = 50
+GensSystemContributionFloodTime = 30
+GensSystemVictimContributionDecrease = 3
+GensSystemKillerContributionIncrease = 500
+GensSystemVictimMinContributionDecrease = 1
+GensSystemVictimMaxContributionDecrease = 15
+GensSystemKillerMinContributionIncrease = 1
+GensSystemKillerMaxContributionIncrease = 15
+GensSystemStartRewardDay = 1
+GensSystemFinalRewardDay = 7

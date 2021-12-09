@@ -718,9 +718,6 @@
     <ClCompile Include="source\NewUINPCDialogue.cpp">
       <Filter>MU\Interface\NewUI</Filter>
     </ClCompile>
-    <ClCompile Include="source\NewUINPCMenu.cpp">
-      <Filter>MU\Interface\NewUI</Filter>
-    </ClCompile>
     <ClCompile Include="source\NewUINPCQuest.cpp">
       <Filter>MU\Interface\NewUI</Filter>
     </ClCompile>
@@ -1723,9 +1720,6 @@
       <Filter>MU\Interface\NewUI</Filter>
     </ClInclude>
     <ClInclude Include="source\NewUINPCDialogue.h">
-      <Filter>MU\Interface\NewUI</Filter>
-    </ClInclude>
-    <ClInclude Include="source\NewUINPCMenu.h">
       <Filter>MU\Interface\NewUI</Filter>
     </ClInclude>
     <ClInclude Include="source\NewUINPCQuest.h">

@@ -1,5 +1,4 @@
 // NewUIMyShopInventory.cpp: implementation of the CNewUIMyShopInventory class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -9,9 +8,7 @@
 #include "wsclientinline.h"
 #include "PersonalShopTitleImp.h"
 
-#ifdef KJW_FIX_MYSHOP
 const int iMAX_SHOPTITLE_MULTI = 26;
-#endif // KJW_FIX_MYSHOP
 
 namespace
 {
@@ -33,9 +30,6 @@ namespace
 
 using namespace SEASON3B;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 SEASON3B::CNewUIMyShopInventory::CNewUIMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop( false ) , MAX_SHOPTITLE_UTF16(min(26, (int)(MAX_SHOPTITLE/g_pMultiLanguage->GetNumByteForOneCharUTF8())))
 {
 	m_pNewUIMng = NULL;

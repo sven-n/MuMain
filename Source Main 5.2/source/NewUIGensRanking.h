@@ -1,10 +1,5 @@
 // NewUIGensRanking.h: interface for the CNewUIGensRanking class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUIGENSRANKING_H__67F934E4_256C_4A48_AE15_A13D3D9475DA__INCLUDED_)
-#define AFX_NEWUIGENSRANKING_H__67F934E4_256C_4A48_AE15_A13D3D9475DA__INCLUDED_
-
 #pragma once
 
 #ifdef PBG_ADD_GENSRANKING
@@ -14,10 +9,8 @@
 #include "NewUIMessageBox.h"
 #include "NewUIMyInventory.h"
 #include "NewUIButton.h"
-#ifdef KJW_FIX_GENS_WINDOW_OPEN
 #include "NewUIScrollBar.h"
 #include "NewUITextBox.h"
-#endif // KJW_FIX_GENS_WINDOW_OPEN
 #define MAX_TITLELENGTH		32
 
 namespace SEASON3B
@@ -53,11 +46,7 @@ namespace SEASON3B
 		{
 			GENSRANKING_WIDTH = 190,
 			GENSRANKING_HEIGHT = 429,
-#ifdef LJH_FIX_DEFINE_GENS_TEAMNAME_LENTH_TO_16
-			TEAMNAME_LENTH = 16,
-#else  //LJH_FIX_DEFINE_GENS_TEAMNAME_LENTH_TO_16
 			TEAMNAME_LENTH = 10,
-#endif //LJH_FIX_DEFINE_GENS_TEAMNAME_LENTH_TO_16
 			GENSMARK_WIDTH = 50,
 			GENSMARK_HEIGHT = 69,
 			GENSRANKBACK_WIDTH = 170,
@@ -113,10 +102,8 @@ namespace SEASON3B
 
 	public:
 		CNewUIManager* m_pNewUIMng;
-#ifdef KJW_FIX_GENS_WINDOW_OPEN
 		CNewUIScrollBar* m_pScrollBar;
 		CNewUITextBox* m_pTextBox;
-#endif // KJW_FIX_GENS_WINDOW_OPEN
 		CNewUIGensRanking();
 		virtual ~CNewUIGensRanking();
 		
@@ -165,5 +152,3 @@ namespace SEASON3B
 }
 
 #endif //PBG_ADD_GENSRANKING
-
-#endif // !defined(AFX_NEWUIGENSRANKING_H__67F934E4_256C_4A48_AE15_A13D3D9475DA__INCLUDED_)

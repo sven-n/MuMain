@@ -1250,8 +1250,6 @@ extern int SendDropItem;
 	spe.Send();\
 }
 
-#ifdef YDG_ADD_MOVE_COMMAND_PROTOCOL
-
 __forceinline void SendRequestMoveMap(DWORD dwBlockKey,WORD wMapIndex)
 {
 	CStreamPacketEngine spe;
@@ -1262,7 +1260,6 @@ __forceinline void SendRequestMoveMap(DWORD dwBlockKey,WORD wMapIndex)
 
 	g_ConsoleDebug->Write(MCD_SEND, "0x8E [SendRequestMoveMap(%d %d)]", dwBlockKey, wMapIndex);
 }
-#endif	// YDG_ADD_MOVE_COMMAND_PROTOCOL
 
 __forceinline void SendRequestStorageGold(int Flag,int Gold)
 {
@@ -1284,8 +1281,6 @@ __forceinline bool SendRequestStorageExit()
 	return true;
 }
 
-#ifdef LDK_MOD_PASSWORD_LENGTH_20
-
 #define SendStoragePassword( p_byType, p_wPassword, p_ResidentNumber)\
 {\
 	CStreamPacketEngine spe;\
@@ -1294,16 +1289,6 @@ __forceinline bool SendRequestStorageExit()
 	spe.AddData( ( p_ResidentNumber), 20);\
 	spe.Send( TRUE);\
 }
-#else //LDK_MOD_PASSWORD_LENGTH_20
-#define SendStoragePassword( p_byType, p_wPassword, p_ResidentNumber)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x83);\
-	spe << ( BYTE)( p_byType) << ( WORD)( p_wPassword);\
-	spe.AddData( ( p_ResidentNumber), 10);\
-	spe.Send( TRUE);\
-}
-#endif //LDK_MOD_PASSWORD_LENGTH_20
 
 #define SendRequestParty( p_Key)\
 {\

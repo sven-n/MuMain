@@ -160,7 +160,6 @@ bool CNewUIDoppelGangerWindow::Render()
 	char szText[256];
 
 	g_pRenderText->SetFont(g_hFont);
-#ifdef KJH_FIX_DOPPELGANGER_ENTER_UI_RENDER_TEXT_ONLY_GLOBAL
 	char szTextOut[2][300];
 	CutStr(GlobalText[2757], szTextOut[0], 140, 2, 300);
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTextOut[0], 190, 0, RT3_SORT_CENTER);
@@ -169,11 +168,6 @@ bool CNewUIDoppelGangerWindow::Render()
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+30, szTextOut[0], 190, 0, RT3_SORT_CENTER);
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+45, szTextOut[1], 190, 0, RT3_SORT_CENTER);
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+60, GlobalText[2759], 190, 0, RT3_SORT_CENTER);
-#else // KJH_FIX_DOPPELGANGER_ENTER_UI_RENDER_TEXT_ONLY_GLOBAL
-	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+10, GlobalText[2757], 190, 0, RT3_SORT_CENTER);
-	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+30, GlobalText[2758], 190, 0, RT3_SORT_CENTER);
-	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+50, GlobalText[2759], 190, 0, RT3_SORT_CENTER);
-#endif // KJH_FIX_DOPPELGANGER_ENTER_UI_RENDER_TEXT_ONLY_GLOBAL
 
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y+120, GlobalText[2760], 190, 0, RT3_SORT_CENTER);

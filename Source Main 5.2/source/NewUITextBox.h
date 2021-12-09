@@ -1,10 +1,6 @@
 //=============================================================================
 //	NewUITextBox.h
 //=============================================================================
-#ifndef _NEWUITEXTBOX_H_
-#define _NEWUITEXTBOX_H_
-
-#ifdef KJW_ADD_NEWUI_TEXTBOX
 #pragma once
 #include "NewUIBase.h"
 
@@ -57,7 +53,3 @@ namespace SEASON3B
 		void SetCurLine( int iLine ){ m_iCurLine = iLine; }
 	};
 }
-
-#endif // KJW_ADD_NEWUI_TEXTBOX
-#endif _NEWUITEXTBOX_H_
-

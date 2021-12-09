@@ -525,7 +525,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 			strcpy( pCharacter->ID, "ÄËÅ¸¿ì·Î½º" );	
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	case 553:
 		{
 			OpenMonsterModel(197);
@@ -584,7 +583,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 			BoneManager::RegisterBone(pCharacter, "GENO_WP", 47);
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	}
 	
 	return pCharacter;
@@ -624,7 +622,6 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
 
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	case 553:
 		{
 			if(c->MonsterSkill == ATMON_SKILL_EX_BERSERKERWARRIOR_ATTACKSKILL)
@@ -671,7 +668,6 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
 			
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	}
 
 	return false;
@@ -808,7 +804,6 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 			return true;
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	case MODEL_MONSTER01+197:
 		{
 			
@@ -877,7 +872,6 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 			return true;
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	}
 
 	return false;
@@ -895,7 +889,6 @@ bool M37Kanturu1st::MoveKanturu1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 		break;
 	case MODEL_MONSTER01+111:
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	case MODEL_MONSTER01+197:
 		{
 			
@@ -916,7 +909,6 @@ bool M37Kanturu1st::MoveKanturu1stMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b)
 			
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	}
 	
 	return false;
@@ -1043,7 +1035,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			return true;
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	case MODEL_MONSTER01+197:
 		{
 			b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
@@ -1100,7 +1091,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b,int Extr
 			return true;	
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	}
 
 	return false;
@@ -1443,7 +1433,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			}
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	case MODEL_MONSTER01+197:
 		{
 			if (o->CurrentAction == MONSTER01_WALK)
@@ -1620,7 +1609,6 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 			}
 		}
 		return true;
-#endif // LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	}
 	return false;
 }
@@ -1824,7 +1812,6 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-#ifdef LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	case MODEL_MONSTER01+197:
 		{
 			if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 6.7f
@@ -1951,6 +1938,5 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-#endif // LDS_EXTENSIONMAP_MONSTERS_KANTUR
 	}
 }

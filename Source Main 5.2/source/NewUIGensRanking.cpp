@@ -18,7 +18,6 @@ CNewUIGensRanking::CNewUIGensRanking() : m_fBooleanSize(0.8f)
 
 CNewUIGensRanking::~CNewUIGensRanking()
 {
-#ifdef KJW_FIX_GENS_WINDOW_OPEN
 	if( m_pScrollBar ) 
 		m_pScrollBar->Release();
 
@@ -28,8 +27,6 @@ CNewUIGensRanking::~CNewUIGensRanking()
 		m_pTextBox->Release();
 
 	SAFE_DELETE( m_pTextBox );
-#endif // KJW_FIX_GENS_WINDOW_OPEN
-
 	Destroy();
 }
 
@@ -57,13 +54,11 @@ void CNewUIGensRanking::Destroy()
 {
 	UnloadImages();
 
-#ifdef LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 	if (m_pNewUIMng)
 	{
 		m_pNewUIMng->RemoveUIObj(this);
 		m_pNewUIMng = NULL;
 	}
-#endif // LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 }
 
 bool CNewUIGensRanking::Create(CNewUIManager* pNewUIMng, int x, int y)
@@ -74,13 +69,11 @@ bool CNewUIGensRanking::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_pNewUIMng = pNewUIMng;
 	m_pNewUIMng->AddUIObj(INTERFACE_GENSRANKING, this);
 
-#ifdef KJW_FIX_GENS_WINDOW_OPEN
 	m_pScrollBar = new CNewUIScrollBar();
 	m_pScrollBar->Create( x, y, 110 );
 
 	m_pTextBox = new CNewUITextBox();
 	m_pTextBox->Create( x, y, 200, 110 );
-#endif // KJW_FIX_GENS_WINDOW_OPEN
 
 	SetPos(x, y);
 	SetBtnInfo(450, 0);
@@ -95,13 +88,11 @@ void CNewUIGensRanking::SetPos(int x, int y)
 {
 	m_Pos.x = x;
 	m_Pos.y = y;
-#ifdef KJW_FIX_GENS_WINDOW_OPEN
 	if( m_pScrollBar )
 		m_pScrollBar->SetPos( x + 20 + 150, y + 273 );
 
 	if( m_pTextBox )
 		m_pTextBox->SetPos( x + 20, y + 280, 150, 110 );
-#endif // KJW_FIX_GENS_WINDOW_OPEN
 }
 
 bool CNewUIGensRanking::Render()
@@ -113,14 +104,11 @@ bool CNewUIGensRanking::Render()
 	RenderButtons();	
 	DisableAlphaBlend();
 
-#ifdef KJW_FIX_GENS_WINDOW_OPEN
 	if( m_pScrollBar )
 		m_pScrollBar->Render();
 
 	if( m_pTextBox )
 		m_pTextBox->Render();
-#endif KJW_FIX_GENS_WINDOW_OPEN
-
 	return true;
 }
 
@@ -238,26 +226,6 @@ void CNewUIGensRanking::RenderTexts()
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetFont(g_hFont);
 
-#ifndef KJW_FIX_GENS_WINDOW_OPEN
-	memset(_szTempText, 0, sizeof(char)*TEMP_MAX_TEXT_LENGTH);
-	memset(_szText, 0, sizeof(char)*NUM_LINE_CMB*MAX_TEXT_LENGTH);
-	unicode::_sprintf(_szTempText, GlobalText[3101]);
-	
-	_TextLineCnt = ::DivideStringByPixel(&_szText[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, _szTempText, 140, true, '#');
-	_y += 18;
-	_fWidth=150, _fHeight=12;
-	for (int i=0; i<_TextLineCnt; ++i)
-		g_pRenderText->RenderText(_x+20,  _y+(i*_fHeight),  _szText[i], _fWidth, 0, RT3_SORT_LEFT);
-
-	memset(_szTempText, 0, sizeof(char)*TEMP_MAX_TEXT_LENGTH);
-	memset(_szText, 0, sizeof(char)*NUM_LINE_CMB*MAX_TEXT_LENGTH);
-	unicode::_sprintf(_szTempText, GlobalText[3102]);
-
-	int _TextNextLineCnt = ::DivideStringByPixel(&_szText[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, _szTempText, 140, true, '#');
-	_TextNextLineCnt += _TextLineCnt;
-	for (int i=_TextLineCnt; i<_TextNextLineCnt; ++i)
-		g_pRenderText->RenderText(_x+20,  _y+(i*_fHeight),  _szText[i-_TextLineCnt], _fWidth, 0, RT3_SORT_LEFT);
-#endif // KJW_FIX_GENS_WINDOW_OPEN
 }
 
 void CNewUIGensRanking::RenderButtons()
@@ -275,7 +243,6 @@ bool CNewUIGensRanking::Update()
 	if( !IsVisible() )
 		return true;
 
-#ifdef KJW_FIX_GENS_WINDOW_OPEN
 	if( m_pTextBox )
 	{
 		m_pTextBox->ClearText();
@@ -303,9 +270,6 @@ bool CNewUIGensRanking::Update()
 			}
 		}
 	}
-#endif // KJW_FIX_GENS_WINDOW_OPEN
-
-	//n/a
 	return true;
 }
 
@@ -314,10 +278,8 @@ bool CNewUIGensRanking::UpdateMouseEvent()
 	if(!g_pNewUISystem->IsVisible(INTERFACE_GENSRANKING))
 		return true;
 
-#ifdef KJW_FIX_GENS_WINDOW_OPEN
 	if( m_pScrollBar ) 
 		m_pScrollBar->UpdateMouseEvent();
-#endif // KJW_FIX_GENS_WINDOW_OPEN
 
 	if(BtnProcess())
 		return false;
@@ -492,12 +454,7 @@ void CNewUIGensRanking::SetTitleName()
 {
 	unicode::t_char _szTempText[256] = {0,};
 	unicode::_sprintf(_szTempText, GlobalText[3104]);
-#ifdef LJH_FIX_DIVIDE_LINE_BY_PIXEL_FOR_GENS_RANK 
 	::DivideStringByPixel(&m_szTitleName[0][0], TITLENAME_END, MAX_TITLELENGTH, _szTempText, 240, true, '#');
-#else  //LJH_FIX_DIVIDE_LINE_BY_PIXEL_FOR_GENS_RANK
-	::DivideStringByPixel(&m_szTitleName[0][0], TITLENAME_END, MAX_TITLELENGTH, _szTempText, 140, true, '#');
-#endif //LJH_FIX_DIVIDE_LINE_BY_PIXEL_FOR_GENS_RANK
-	
 }
 
 const char* CNewUIGensRanking::GetTitleName(BYTE _index)

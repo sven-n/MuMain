@@ -250,7 +250,7 @@ bool CNpcTalk::NpcTalk(LPOBJ lpNpc,LPOBJ lpObj) // OK
 		case 475:
 			this->NpcChristmas(lpNpc,lpObj);
 			break;
-#if(GAMESERVER_UPDATE>=603)
+#if(GAMESERVER_UPDATE>=502)
 		case 478:
 			this->NpcDelgado(lpNpc,lpObj);
 			break;

@@ -874,13 +874,7 @@ void RenderBoolean(int x,int y,CHAT *c)
 		RenderPos.x = x;
 		RenderPos.y += iLineHeight;
 	}
-#ifdef PBG_MOD_STRIFE_GENSMARKRENDER
-#ifdef ASG_MOD_GM_VIEW_NAME_IN_GENS_STRIFE_MAP
-	else if(::IsStrifeMap(gMapManager.WorldActive) && Hero->m_byGensInfluence != c->Owner->m_byGensInfluence
-		&& !::IsGMCharacter())
-#else	// ASG_MOD_GM_VIEW_NAME_IN_GENS_STRIFE_MAP
-	else if(::IsStrifeMap(World) && Hero->m_byGensInfluence != c->Owner->m_byGensInfluence)
-#endif	// ASG_MOD_GM_VIEW_NAME_IN_GENS_STRIFE_MAP
+	else if(::IsStrifeMap(gMapManager.WorldActive) && Hero->m_byGensInfluence != c->Owner->m_byGensInfluence && !::IsGMCharacter())
 	{
 		if(!c->Owner->m_nContributionPoint)
 			return;
@@ -901,7 +895,6 @@ void RenderBoolean(int x,int y,CHAT *c)
 			}	
 		}
 	}
-#endif //PBG_MOD_STRIFE_GENSMARKRENDER
 	
 	bool bGmMode = false;
 	

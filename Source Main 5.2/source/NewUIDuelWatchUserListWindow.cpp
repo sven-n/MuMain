@@ -22,9 +22,7 @@ CNewUIDuelWatchUserListWindow::CNewUIDuelWatchUserListWindow()
 
 CNewUIDuelWatchUserListWindow::~CNewUIDuelWatchUserListWindow()
 {
-#ifdef LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 	Release();
-#endif // LDS_FIX_MEMORYLEAK_WHERE_NEWUI_DEINITIALIZE
 }
 
 bool CNewUIDuelWatchUserListWindow::Create(CNewUIManager* pNewUIMng, int x, int y)

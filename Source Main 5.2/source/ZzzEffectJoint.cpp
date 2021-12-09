@@ -114,14 +114,12 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
                 bCreateStartTail = false;
                 o->NumTails = -1;
             }
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
             else if ( Type==BITMAP_JOINT_ENERGY && o->SubType==57 )
             {
                 bCreateStartTail = false;
                 o->NumTails = -1;
             }
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
-			
+		
             if ( Type==BITMAP_FLARE_FORCE && ( o->SubType==5 || o->SubType==6 || o->SubType==7 ) ) 
             {
                 bCreateStartTail = false;
@@ -378,7 +376,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						}
 					}
 					break;
-#ifdef LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
 				case 57:
 					{
 						o->Velocity = 0.f;
@@ -387,7 +384,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 						o->TexType = BITMAP_JOINT_ENERGY;
 					}
 					break;
-#endif //LDK_ADD_EXTENSIONMAP_BOSS_MEDUSA_EYE_EFFECT
 				}
 				
 				if(!vPriorColor)

@@ -5856,14 +5856,7 @@ void ReceiveModifyItem( BYTE *ReceiveBuffer )
 
 BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0x30);
-//		return ( FALSE);
-//	}
-//#endif
+
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	
 	g_pNewUISystem->HideAll();
@@ -5990,7 +5983,7 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	case 0x23:
 		{
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_DOPPELGANGER_NPC);
-			BYTE * pbtRemainTime = (&Data->Value) + 1;	// 남은 시간
+			BYTE * pbtRemainTime = (&Data->Value) + 1;
 			g_pDoppelGangerWindow->SetRemainTime(*pbtRemainTime);
 		}
 		break;
@@ -6538,13 +6531,9 @@ void ReceivePartyResult( BYTE *ReceiveBuffer )
 	case 3:g_pChatListBox->AddText("", GlobalText[500], SEASON3B::TYPE_ERROR_MESSAGE);break;
 	case 4:g_pChatListBox->AddText("", GlobalText[501], SEASON3B::TYPE_ERROR_MESSAGE);break;
 	case 5:g_pChatListBox->AddText("", GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE);break;
-#ifdef ASG_ADD_GENS_SYSTEM
 	case 6:g_pChatListBox->AddText("", GlobalText[2990], SEASON3B::TYPE_ERROR_MESSAGE);break;
-#endif	// ASG_ADD_GENS_SYSTEM
-#ifdef ASG_MOD_GENS_STRIFE_ADD_PARTY_MSG
 	case 7:g_pChatListBox->AddText("", GlobalText[2997], SEASON3B::TYPE_ERROR_MESSAGE);break;
 	case 8:g_pChatListBox->AddText("", GlobalText[2998], SEASON3B::TYPE_ERROR_MESSAGE);break;
-#endif	// ASG_MOD_GENS_STRIFE_ADD_PARTY_MSG
 	}
 }
 
@@ -6565,9 +6554,6 @@ void ReceivePartyList( BYTE *ReceiveBuffer )
 		p->y = Data2->y;
         p->currHP = Data2->currHP;
         p->maxHP = Data2->maxHP;
-#ifdef LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER	
-		g_PKSystem->SetHeroPartyPKState(Data2->PKPartyLevel);
-#endif //LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER	
 		Offset += sizeof(PRECEIVE_PARTY_LIST);
 	}
 	
@@ -6596,11 +6582,6 @@ void ReceivePartyLeave( BYTE *ReceiveBuffer )
 	PartyNumber = 0;
 	g_pChatListBox->AddText("", GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE);
 
-#ifdef LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER	
-	g_PKSystem->SetHeroPartyPKState(Hero->PK);
-#endif //LJH_ADD_MORE_ZEN_FOR_ONE_HAVING_A_PARTY_WITH_MURDERER	
-
-    //  따라가고 있을때 서로 파티가 아니면은 X.
     if ( g_iFollowCharacter>=0 )
     {
         bool IsParty = false;
@@ -6673,11 +6654,9 @@ void ReceiveGuildResult( BYTE *ReceiveBuffer )
 	case 5:g_pChatListBox->AddText("", GlobalText[508], SEASON3B::TYPE_ERROR_MESSAGE);break;
 	case 6:g_pChatListBox->AddText("", GlobalText[509], SEASON3B::TYPE_ERROR_MESSAGE);break;
 	case 7:g_pChatListBox->AddText("", GlobalText[510], SEASON3B::TYPE_ERROR_MESSAGE);break;
-#ifdef ASG_ADD_GENS_SYSTEM
 	case 0xA1:g_pChatListBox->AddText("", GlobalText[2992], SEASON3B::TYPE_ERROR_MESSAGE);break;
 	case 0xA2:g_pChatListBox->AddText("", GlobalText[2995], SEASON3B::TYPE_ERROR_MESSAGE);break;
 	case 0xA3:g_pChatListBox->AddText("", GlobalText[2996], SEASON3B::TYPE_ERROR_MESSAGE);break;
-#endif	// ASG_ADD_GENS_SYSTEM
 	}
 }
 
@@ -9792,17 +9771,9 @@ void ReceiveQuestByEtcEPList(BYTE* ReceiveBuffer)
 void ReceiveQuestByNPCEPList(BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPCTALK_QUESTLIST pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE))
 		g_pNPCDialogue->ProcessQuestListReceive(
 			(DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)), pData->m_wQuestCount);
-#else	// ASG_ADD_UI_NPC_DIALOGUE
-	g_QuestMng.SetNPC(int(pData->m_wNPCIndex));
-#ifdef ASG_ADD_UI_NPC_MENU
-	g_pNPCMenu->SetContents((DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)),
-		pData->m_wQuestCount);
-#endif	// ASG_ADD_UI_NPC_MENU
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 }
 
 void ReceiveQuestQSSelSentence(BYTE* ReceiveBuffer)

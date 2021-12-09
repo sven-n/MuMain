@@ -17,8 +17,10 @@
 257            00             00         132            165            03             //Shadow Phantom Soldier
 257            00             00         132            090            03             //Shadow Phantom Soldier
 257            00             00         170            129            01             //Shadow Phantom Soldier
-248	0	0	125	146	1 // Harold The Wandering Merchant
-250	0	0	129	146	1 // Martin The Wandering Merchant
+248	       00	      00	 125	        146	       01 	      // Harold The Wandering Merchant
+250	       00	      00	 129	        146	       01             // Martin The Wandering Merchant
+543            00             00         137		121            03             //Gens Duprian Steward
+544            00             00         137		133            03             //Gens Vanert Steward
 end
 
 0

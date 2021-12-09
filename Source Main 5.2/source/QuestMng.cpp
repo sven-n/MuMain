@@ -965,11 +965,7 @@ void CQuestMng::AddCurQuestIndexList(DWORD dwQuestIndex)
 	{
 		if (wEP == HIWORD(*iter))
 		{
-#ifdef ASG_FIX_QUEST_GIVE_UP
 			if (wQS != 0x0000 && wQS != 0x00ff)
-#else	// ASG_FIX_QUEST_GIVE_UP
-			if (wQS != 0x0000 && wQS != 0x00fe && wQS != 0x00ff)
-#endif	// ASG_FIX_QUEST_GIVE_UP
 				m_listCurQuestIndex.insert(iter, dwQuestIndex);
 
 			m_listCurQuestIndex.erase(iter);
@@ -981,11 +977,7 @@ void CQuestMng::AddCurQuestIndexList(DWORD dwQuestIndex)
 
 	if (bNotFound)
 	{
-#ifdef ASG_FIX_QUEST_GIVE_UP
 		if (wQS != 0x0000 && wQS != 0x00ff)
-#else	// ASG_FIX_QUEST_GIVE_UP
-		if (wQS != 0x0000 && wQS != 0x00fe && wQS != 0x00ff)
-#endif	// ASG_FIX_QUEST_GIVE_UP
 			m_listCurQuestIndex.push_back(dwQuestIndex);
 	}
 
