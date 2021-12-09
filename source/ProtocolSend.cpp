@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#ifdef NEW_PROTOCOL_SYSTEM
 #include "ProtocolSend.h"
 #include "GuildCache.h"
 #include "UIMng.h"
@@ -417,3 +418,4 @@ void CProtocolSend::RecvLoginNew(PMSG_SIMPLE_RESULT_RECV* pMsg)
 			break;
 		}
 }
+#endif

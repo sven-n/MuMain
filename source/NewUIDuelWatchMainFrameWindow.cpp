@@ -105,7 +105,7 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
 	if (g_DuelMgr.GetCurrentChannel() == -1)
 		return true;
 
-	POINT ptOrigin = { 0, 480.f - 51.f };
+	POINT ptOrigin = { 0, (long)(480.f - 51.f)};
 
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->RenderText(ptOrigin.x + 320 - 80, ptOrigin.y + 36, g_DuelMgr.GetDuelPlayerID(DUEL_HERO), 55, 0, RT3_SORT_CENTER);

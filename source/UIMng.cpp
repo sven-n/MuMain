@@ -170,7 +170,7 @@ void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 	}
 #ifndef KJH_ADD_EVENT_LOADING_SCENE				// #ifndef
 #ifdef PBG_ADD_NEWLOGO_IMAGECHANGE
-	m_asprTitle[UIM_TS_MU].Render();
+	//m_asprTitle[UIM_TS_MU].Render();
 #endif //PBG_ADD_NEWLOGO_IMAGECHANGE
 #endif // KJH_ADD_EVENT_LOADING_SCENE
 

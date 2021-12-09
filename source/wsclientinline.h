@@ -171,8 +171,6 @@ __forceinline void SendCheck( void)
 
 	g_ConsoleDebug->Write(MCD_SEND, "SendCheck");
 
-	return;
-
 	CStreamPacketEngine spe;
 	spe.Init( 0xC1, 0x0E);
 	DWORD dwTick = GetTickCount();

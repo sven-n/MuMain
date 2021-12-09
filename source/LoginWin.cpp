@@ -223,8 +223,13 @@ void CLoginWin::RequestLogin()
 			g_ErrorReport.Write("> Login Request.\r\n");
 			g_ErrorReport.Write("> Try to Login \"%s\"\r\n", szID);
 			// SendRequestLogIn()
-			//SendRequestLogIn(szID, szPass);
- 			gProtocolSend.SendRequestLogInNew(szID, szPass);
+
+			#ifdef NEW_PROTOCOL_SYSTEM
+				gProtocolSend.SendRequestLogInNew(szID, szPass);
+			#else
+				SendRequestLogIn(szID, szPass);
+			#endif
+ 			
 		}
 	}
 }
@@ -237,11 +242,9 @@ void CLoginWin::CancelLogin()
 
 void CLoginWin::ConnectConnectionServer()
 {
-	//#ifdef NEW_PROTOCOL_SYSTEM
+	#ifdef NEW_PROTOCOL_SYSTEM
 		gProtocolSend.DisconnectServer();
-	//#else
-		SocketClient.Close();
-	//#endif
+	#endif
 
 	LogIn = 0;
 	CurrentProtocolState = REQUEST_JOIN_SERVER;

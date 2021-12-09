@@ -1,4 +1,5 @@
 #pragma once
+#ifdef NEW_PROTOCOL_SYSTEM
 #include <cstdint>
 #include "ProtocolAsio.h"
 #include "./Utilities/Log/muConsoleDebug.h"
@@ -146,7 +147,6 @@ public:
 	void SendRequestCharactersListNew();
 	void SendPositionNew(uint8_t PosX, uint8_t PosY);
 	void SendCharacterMoveNew(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
-
 	void RecvJoinServerNew(PMSG_CONNECT_CLIENT_RECV* pMsg);
 	void RecvLoginNew(PMSG_SIMPLE_RESULT_RECV* pMsg);
 private:
@@ -156,3 +156,4 @@ private:
 }; 
 
 extern CProtocolSend gProtocolSend;
+#endif

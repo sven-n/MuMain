@@ -530,61 +530,8 @@ BOOL IsCorrectSkillType_CommonAttack( INT iSkillSeq )
 // dialog
 ///////////////////////////////////////////////////////////////////////////////
 
-
 int g_iCurrentDialog = -1;
 DIALOG_SCRIPT g_DialogScript[MAX_DIALOG];
-
-void OpenDialogFileText(char *FileName)
-{
-	ZeroMemory( g_DialogScript, MAX_DIALOG * sizeof ( DIALOG_SCRIPT));
-
-	if((SMDFile=fopen(FileName,"rb")) == NULL)	return;
-	SMDToken Token;
-	while(true)
-	{
-		Token = (*GetToken)();
-		if(Token == END) break;
-		if(Token == NUMBER)
-		{
-			int Index = (int)TokenNumber;
-			Token = (*GetToken)();
-			strcpy( g_DialogScript[Index].m_lpszText, TokenString);
-
-			g_DialogScript[Index].m_iNumAnswer = 0;
-			while(true)
-			{
-				Token = (*GetToken)();
-				int Link = (int)TokenNumber;
-				if(Token==NAME && strcmp("end",TokenString)==NULL) break;
-				g_DialogScript[Index].m_iLinkForAnswer[g_DialogScript[Index].m_iNumAnswer] = Link;
-				Token = (*GetToken)();
-				int Return = (int)TokenNumber;
-				g_DialogScript[Index].m_iReturnForAnswer[g_DialogScript[Index].m_iNumAnswer] = Return;
-				Token = (*GetToken)();
-				strcpy( g_DialogScript[Index].m_lpszAnswer[g_DialogScript[Index].m_iNumAnswer], TokenString);
-
-				g_DialogScript[Index].m_iNumAnswer++;
-			}
-			g_DialogScript[Index].m_iLinkForAnswer[g_DialogScript[Index].m_iNumAnswer] = -1;
-		}
-	}
-	fclose(SMDFile);
-}
-
-void SaveDialogFile(char *FileName)
-{
-	FILE *fp = fopen(FileName,"wb");
-	int Size = sizeof ( DIALOG_SCRIPT);
-	BYTE *Buffer = new BYTE [Size];
-	for(int i=0;i<MAX_DIALOG;i++)
-	{
-		memcpy(Buffer,&g_DialogScript[i],Size);
-		BuxConvert(Buffer,Size);
-		fwrite(Buffer,Size,1,fp);
-	}
-	delete [] Buffer;
-	fclose(fp);
-}
 
 void OpenDialogFile(char *FileName)
 {

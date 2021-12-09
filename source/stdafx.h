@@ -15,14 +15,15 @@
 #pragma warning( disable : 4237 )
 #pragma warning( disable : 4305 )
 #pragma warning( disable : 4503 ) 
-
+#pragma warning( disable : 4267 ) 
+#pragma warning( disable : 4091 ) 
 #pragma warning( disable : 4819 )
 #pragma warning( disable : 4505 )
 #pragma warning( disable : 4100 )
 #pragma warning( disable : 4127 )
 #pragma warning( disable : 4702 )
+#pragma warning( disable : 4838 )
 #pragma warning( disable : 5208 )
-//#pragma warning( disable : 4018 )
 //#pragma warning( disable : 4482 )
 //#pragma warning( disable : 4700 )
 //#pragma warning( disable : 4748 )
@@ -72,6 +73,8 @@
 #include <algorithm>
 #include <vector>
 #include <queue>
+#include <thread>
+#include <chrono>
 #else // _DEBUG		// Release
 #ifdef _MT			
 #undef _MT

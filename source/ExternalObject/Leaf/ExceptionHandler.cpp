@@ -269,7 +269,6 @@ void CExceptionHandler::SetExceptionInfoHeader(DMPEXCEPTIONINFOHEADER* pExceptio
 		pExceptionInfoHeader->ExceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
 		pExceptionInfoHeader->ExceptionAddress = (DWORD)pExceptionInfo->ExceptionRecord->ExceptionAddress;
 		
-		//-> 여기서 발생
 		std::string strExceptionCode;
 		GetExceptionCodeString(pExceptionInfo->ExceptionRecord, strExceptionCode);
 		lstrcpyn(pExceptionInfoHeader->ExceptionCodeString, strExceptionCode.c_str(),128);

@@ -163,10 +163,9 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 			bRenderMessage = false;
 		}
 
-
 		if(bRenderMessage && !pMsgText->GetText().empty())
 		{
-			POINT ptRenderPos = { fRenderPosX+WND_LEFT_RIGHT_EDGE, fRenderPosY+FONT_LEADING+(SCROLL_MIDDLE_PART_HEIGHT*s) };
+			POINT ptRenderPos = { (long)fRenderPosX+(long)WND_LEFT_RIGHT_EDGE, (long)fRenderPosY+(long)FONT_LEADING+((long)SCROLL_MIDDLE_PART_HEIGHT*(long)s) };
 			if(!pMsgText->GetID().empty())
 			{
 				if(m_bPointedMessage == true && m_iPointedMessageIndex == i)

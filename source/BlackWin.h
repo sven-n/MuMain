@@ -1,9 +1,5 @@
 // BlackWin.h: interface for the CBlackWin class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_BLACKWIN_H__C8CD4546_6A49_4ABD_BA54_A5DADEFD65FC__INCLUDED_)
-#define AFX_BLACKWIN_H__C8CD4546_6A49_4ABD_BA54_A5DADEFD65FC__INCLUDED_
 
 #pragma once
 
@@ -12,7 +8,7 @@
 class CBlackWin : public CWin  
 {
 protected:
-	double	m_dFadeDeltaTickSum;	// »Â∏• Ω√∞£.
+	double	m_dFadeDeltaTickSum;
 
 public:
 	CBlackWin();
@@ -24,6 +20,3 @@ public:
 protected:
 	void UpdateWhileActive(double dDeltaTick);
 };
-
-
-#endif // !defined(AFX_BLACKWIN_H__C8CD4546_6A49_4ABD_BA54_A5DADEFD65FC__INCLUDED_)

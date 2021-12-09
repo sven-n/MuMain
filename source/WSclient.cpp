@@ -332,7 +332,6 @@ void ReceiveServerConnect(BYTE* ReceiveBuffer) //Recebe informação do ConnectSer
 	memcpy(IP, (char*)Data->IP, 15);
 	g_ErrorReport.Write("[ReceiveServerConnect]");
 	SocketClient.Close();
-	gProtocolSend.DisconnectServer();
 
 #ifndef NEW_PROTOCOL_SYSTEM
 	if (CreateSocket(IP, Data->Port))
@@ -340,6 +339,8 @@ void ReceiveServerConnect(BYTE* ReceiveBuffer) //Recebe informação do ConnectSer
 		g_bGameServerConnected = TRUE;
 	}
 #else
+	gProtocolSend.DisconnectServer();
+
 	if (gProtocolSend.ConnectServer(IP,Data->Port))
 	{
 		g_bGameServerConnected = TRUE;
@@ -405,8 +406,11 @@ void ReceiveJoinServer( BYTE *ReceiveBuffer )
 		if ( Util_CheckOption( GetCommandLine(), 'i', lpszTemp))
 		{
 			g_ErrorReport.Write( "> Try to Login \"%s\"\r\n", m_ID);
-			gProtocolSend.SendRequestLogInNew(m_ID, lpszTemp);
-			//SendRequestLogIn(m_ID, lpszTemp);
+			#ifdef NEW_PROTOCOL_SYSTEM
+				gProtocolSend.SendRequestLogInNew(m_ID, lpszTemp);
+			#else
+				SendRequestLogIn(m_ID, lpszTemp);
+			#endif
 		}
 	}
 #endif
@@ -722,12 +726,14 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		SendMessage(g_hWnd, WM_DESTROY, 0, 0);
 		break;
 	case 1:
-		//if ( !bEncrypted)
-		//{
-		//	GO_DEBUG;
-		//	SendHackingChecked( 0x00, 0xF1);
-		//	return ( FALSE);
-		//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//		if ( !bEncrypted)
+//		{
+//			GO_DEBUG;
+//			SendHackingChecked( 0x00, 0xF1);
+//			return ( FALSE);
+//		}
+//#endif
 		StopMusic();
         AllStopSound();
 		
@@ -737,8 +743,12 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		CryWolfMVPInit();
 		
 		SceneFlag = CHARACTER_SCENE;
-		//SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
-		gProtocolSend.SendRequestCharactersListNew();
+
+		#ifdef NEW_PROTOCOL_SYSTEM
+			gProtocolSend.SendRequestCharactersListNew();
+		#else
+			SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
+		#endif
 								
 		InitCharacterScene = false;
         InitMainScene = false;
@@ -756,15 +766,21 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 			ReleaseMainData();
 		}
 		
-		//if ( !bEncrypted)
-		//{
-		//	GO_DEBUG;
-		//	SendHackingChecked( 0x00, 0xF1);
-		//	return ( FALSE);
-		//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//		if ( !bEncrypted)
+//		{
+//			GO_DEBUG;
+//			SendHackingChecked( 0x00, 0xF1);
+//			return ( FALSE);
+//		}
+//#endif
 		g_ErrorReport.Write("[ReceiveLogOut]");
 		SocketClient.Close();
-		gProtocolSend.DisconnectServer();
+
+		#ifdef NEW_PROTOCOL_SYSTEM
+			gProtocolSend.DisconnectServer();
+		#endif
+
 		ReleaseCharacterSceneData();
 		SceneFlag = LOG_IN_SCENE;
 								
@@ -793,20 +809,16 @@ int HeroIndex;
 
 BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0xF3);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0xF3);
+//		return ( FALSE);
+//	}
+//#endif
 	MouseLButton = false;
 	
-#ifdef PJH_DEBUG
-	char Text[300];
-	wsprintf(Text,"¸ÊÀÌµ¿ (join)[time : %d]", GetTickCount());
-	g_pChatListBox->AddText("DEBUG",Text, SEASON3B::TYPE_GM_MESSAGE);
-#endif
-
 	LPPRECEIVE_JOIN_MAP_SERVER Data = (LPPRECEIVE_JOIN_MAP_SERVER)ReceiveBuffer;
 	
 
@@ -1285,12 +1297,14 @@ BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	g_pMyInventory->DeleteAllItems();
 	g_pMyShopInventory->DeleteAllItems();
 
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0xF3);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0xF3);
+//		return ( FALSE);
+//	}
+//#endif
 	
 	LPPHEADER_DEFAULT_SUBCODE_WORD Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer; //LPPHEADER_DEFAULT_SUBCODE_WORD 6byte
 	int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
@@ -1700,12 +1714,14 @@ extern int EnableEvent;
 
 BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0x1C);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0x1C);
+//		return ( FALSE);
+//	}
+//#endif
 	
 	SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 	
@@ -3687,12 +3703,14 @@ BOOL ReceiveMonsterSkill(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 
 BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 {
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0x19);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0x19);
+//		return ( FALSE);
+//	}
+//#endif
 	
 	LPPRECEIVE_MAGIC Data = (LPPRECEIVE_MAGIC)ReceiveBuffer;
 	int SourceKey = ((int)(Data->SourceKeyH )<<8) + Data->SourceKeyL;
@@ -4732,12 +4750,14 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 
 BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 {
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0x1E);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0x1E);
+//		return ( FALSE);
+//	}
+//#endif
 	
 	LPPRECEIVE_MAGIC_CONTINUE Data = (LPPRECEIVE_MAGIC_CONTINUE)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH )<<8) + Data->KeyL;
@@ -5310,12 +5330,14 @@ void ReceiveSkillCount ( BYTE* ReceiveBuffer )
 
 BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 {
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0x16);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0x16);
+//		return ( FALSE);
+//	}
+//#endif
 	
 	LPPRECEIVE_DIE Data = (LPPRECEIVE_DIE)ReceiveBuffer;
 	int     Key    = ((int)(Data->KeyH   )<<8) + Data->KeyL;
@@ -5380,12 +5402,14 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 
 BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
 {
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0x9C);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0x9C);
+//		return ( FALSE);
+//	}
+//#endif
 	
 	LPPRECEIVE_DIE2 Data = (LPPRECEIVE_DIE2)ReceiveBuffer;
 	int     Key    = ((int)(Data->KeyH   )<<8) + Data->KeyL;
@@ -5700,12 +5724,14 @@ void ReceiveTradeExit( BYTE *ReceiveBuffer );
 
 BOOL ReceiveEquipmentItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
- //	if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0x16);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+// 	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0x16);
+//		return ( FALSE);
+//	}
+//#endif
 	
 	EquipmentItem = false;
 	LPPHEADER_DEFAULT_SUBCODE_ITEM Data = (LPPHEADER_DEFAULT_SUBCODE_ITEM)ReceiveBuffer;
@@ -5834,12 +5860,14 @@ void ReceiveModifyItem( BYTE *ReceiveBuffer )
 
 BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0x30);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0x30);
+//		return ( FALSE);
+//	}
+//#endif
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	
 	g_pNewUISystem->HideAll();
@@ -6331,12 +6359,14 @@ void ReceiveDurability( BYTE *ReceiveBuffer )
 
 BOOL ReceiveHelperItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0x29);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0x29);
+//		return ( FALSE);
+//	}
+//#endif
 	
     LPPRECEIVE_HELPER_ITEM Data = (LPPRECEIVE_HELPER_ITEM)ReceiveBuffer;
    	CharacterAttribute->AbilityTime[Data->Index] = Data->Time*24;
@@ -6396,12 +6426,14 @@ void ReceiveSummonLife( BYTE *ReceiveBuffer )
 }
 BOOL ReceiveTrade(BYTE *ReceiveBuffer, BOOL bEncrypted)
 {
-	//if ( !bEncrypted)
-	//{
-	//	GO_DEBUG;
-	//	SendHackingChecked( 0x00, 0x36);
-	//	return ( FALSE);
-	//}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if ( !bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked( 0x00, 0x36);
+//		return ( FALSE);
+//	}
+//#endif
 	
 	LPPCHATING Data = (LPPCHATING)ReceiveBuffer;
 	g_pTrade->ProcessToReceiveTradeRequest(Data->ID);
@@ -12771,12 +12803,14 @@ bool ReceivePeriodItemList(BYTE* pReceiveBuffer)
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 BOOL ReceiveStraightAttack(BYTE *ReceiveBuffer, int Size, BOOL bEncrypted)
 {
-	if(!bEncrypted)
-	{
-		GO_DEBUG;
-		SendHackingChecked(0x00, 0x4A);
-		return (FALSE);
-	}
+//#ifndef NEW_PROTOCOL_SYSTEM
+//	if(!bEncrypted)
+//	{
+//		GO_DEBUG;
+//		SendHackingChecked(0x00, 0x4A);
+//		return (FALSE);
+//	}
+//#endif
 	
 	LPPRECEIVE_STRAIGHTATTACK Data = (LPPRECEIVE_STRAIGHTATTACK)ReceiveBuffer;
 	int SourceKey = ((int)(Data->SourceKeyH)<<8) + Data->SourceKeyL;

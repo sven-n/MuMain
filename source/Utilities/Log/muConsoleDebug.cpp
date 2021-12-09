@@ -1,5 +1,4 @@
 // muDebugHelper.cpp: implementation of the CmuConsoleDebug class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -15,12 +14,6 @@
 #ifdef CSK_DEBUG_MAP_PATHFINDING
 #include "ZzzPath.h"
 #endif // CSK_DEBUG_MAP_PATHFINDING
-#ifdef CSK_HACK_TEST
-#include "wsclientinline.h"
-#include "HackTest.h"
-#endif // CSK_HACK_TEST
-
-//extern CGlobalBitmap Bitmaps;
 
 CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
 {

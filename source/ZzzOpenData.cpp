@@ -5178,8 +5178,6 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("Effect\\firecracker0007.jpg"	,BITMAP_FIRECRACKER0007, GL_NEAREST, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\Shiny05.jpg"     	,BITMAP_SHINY+5   ,GL_LINEAR,GL_CLAMP_TO_EDGE);
 
-
-
 	LoadBitmap("Effect\\partCharge1\\bujuckline.jpg", BITMAP_LUCKY_SEAL_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
 	LoadBitmap("Item\\nfm03.jpg"			,BITMAP_BLUECHROME,GL_NEAREST,GL_REPEAT);
@@ -5439,7 +5437,10 @@ void OpenBasicData(HDC hDC)
 	::LoadBitmap("NPC\\voloE.jpg", BITMAP_VOLO_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif	// ASG_ADD_KARUTAN_NPC
 
+	g_ErrorReport.Write( "> First Load Files OK.\r\n");
+
 	OpenPlayers();
+
 
 	rUIMng.RenderTitleSceneUI(hDC, 2, 11);
 

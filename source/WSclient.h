@@ -146,6 +146,10 @@ typedef struct
 //receive Character List 
 typedef struct 
 {
+#ifndef NEW_PROTOCOL_SYSTEM
+	PBMSG_HEADER Header;
+	BYTE         SubCode;
+#endif
     BYTE         MaxClass;
 	BYTE		 MoveCount;
 	BYTE         Value;
@@ -615,6 +619,9 @@ typedef struct {
 
 //receive move character
 typedef struct {
+#ifndef NEW_PROTOCOL_SYSTEM
+	PBMSG_HEADER  Header;
+#endif
 	BYTE          KeyH;
 	BYTE          KeyL;
 	BYTE          PositionX;
@@ -1917,6 +1924,15 @@ typedef struct
 
 typedef struct
 {
+	void			Clear()
+	{ 
+		memset(&m_MatchTeamName1, NULL, MAX_ID_SIZE); 
+		memset(&m_MatchTeamName2, NULL, MAX_ID_SIZE);
+		m_Score1 = 0;
+		m_Score2 = 0;
+		m_Type = 0;
+	}
+
 	PBMSG_HEADER	m_Header;
 	BYTE			m_subCode;
 	BYTE			m_Type;
@@ -1926,14 +1942,7 @@ typedef struct
 
 	char			m_MatchTeamName2[MAX_ID_SIZE];
 	WORD			m_Score2;
-	void			Clear()
-	{ 
-		memset(&m_MatchTeamName1, NULL, MAX_ID_SIZE); 
-		memset(&m_MatchTeamName2, NULL, MAX_ID_SIZE);
-		m_Score1 = 0;
-		m_Score2 = 0;
-		m_Type = 0;
-	}
+
 }PMSG_MATCH_RESULT, *LPPMSG_MATCH_RESULT;
 
 typedef struct 

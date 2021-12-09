@@ -339,9 +339,9 @@
     <OutDir>$(SolutionDir)build\bin\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\Obj\$(ProjectName)\$(PlatformShortName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);C:\Libraries\boost_1_75_0</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\Libraries\boost_1_75_0\stage\lib</LibraryPath>
-    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(VC_ExecutablePath_x86);$(CommonExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Chinese Debug|Win32'">
     <OutDir>.\tmp\$(Configuration)\</OutDir>
@@ -622,7 +622,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\include\ShopListManager;$(SolutionDir)\dependencies\include\ShopListManager\interface;source;$(SolutionDir)\dependencies\include;$(MU_SDK)\Boost;$(MU_SDK)\DXSDK\Include;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <SmallerTypeCheck>true</SmallerTypeCheck>
@@ -639,7 +639,7 @@
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
@@ -1113,7 +1113,6 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
       <AdditionalOptions>
       </AdditionalOptions>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -1127,7 +1126,7 @@
       <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;jpeglib.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;Jpeglib.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories);C:\Libraries\boost_1_75_0\stage\lib</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>

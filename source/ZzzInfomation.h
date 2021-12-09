@@ -28,8 +28,6 @@ void OpenMonsterSkillScript(char *FileName);
 
 extern DIALOG_SCRIPT g_DialogScript[MAX_DIALOG];
 
-void OpenDialogFileText(char *FileName);
-void SaveDialogFile(char *FileName);
 void OpenDialogFile(char *FileName);
 
 extern ITEM_ATTRIBUTE *ItemAttribute;

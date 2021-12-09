@@ -172,7 +172,11 @@ extern char LogInID[];
 
 void CheckHack( void)
 {
-	gProtocolSend.SendCheckOnline();
+	#ifdef NEW_PROTOCOL_SYSTEM
+		gProtocolSend.SendCheckOnline();
+	#else
+		SendCheck();
+	#endif
 }
 
 GLvoid KillGLWindow(GLvoid)								
@@ -613,7 +617,11 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 #endif // CONSOLE_DEBUG
 			SocketClient.Close();
-			gProtocolSend.DisconnectServer(); 
+
+			#ifdef NEW_PROTOCOL_SYSTEM
+				gProtocolSend.DisconnectServer();
+			#endif	
+
 			CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
 			break;
 		}
@@ -638,7 +646,11 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		{
 			Destroy = true;
 			SocketClient.Close();
-			gProtocolSend.DisconnectServer();
+
+			#ifdef NEW_PROTOCOL_SYSTEM
+				gProtocolSend.DisconnectServer();
+			#endif	
+
 			DestroySound();
 			//DestroyWindow();
 			KillGLWindow();	
@@ -1496,9 +1508,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
 	g_ErrorReport.Write( "> OpenGL init success.\r\n");
 	g_ErrorReport.AddSeparator();
-	g_ErrorReport.WriteOpenGLInfo();
+	//g_ErrorReport.WriteOpenGLInfo();
 	g_ErrorReport.AddSeparator();
-	g_ErrorReport.WriteSoundCardInfo();
+	g_ErrorReport.WriteSoundCardInfo(); 
 
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
@@ -1743,15 +1755,17 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		}
 
 	#ifdef NEW_PROTOCOL_SYSTEM
-	if(SceneFlag < CHARACTER_SCENE)
-		ProtocolCompiler();
+		if(SceneFlag < CHARACTER_SCENE)
+			ProtocolCompiler();
+
 		g_pChatRoomSocketList->ProtocolCompile();
+		gProtocolSend.RecvMessage();
 	#else
 		ProtocolCompiler();
 		g_pChatRoomSocketList->ProtocolCompile();
 	#endif
 
-		gProtocolSend.RecvMessage();
+		
     } // while( 1 )
 
 #ifdef DO_PROCESS_DEBUGCAMERA	

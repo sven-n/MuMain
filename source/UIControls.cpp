@@ -56,7 +56,7 @@ int CutStr(const char* pszSrcText, char * pTextOut, const int iTargetPixelWidth,
 	SIZE iSize;
 
 
-	while (iCharIndex < wstrUTF16.length() && iLineIndex < iMaxOutLine)
+	while (iCharIndex < (int)wstrUTF16.length() && iLineIndex < iMaxOutLine)
 	{
 		g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), wstrUTF16.c_str(), iCharIndex, &iSize);
 		g_pMultiLanguage->ConvertWideCharToStr(strText, (wstrUTF16.substr(0, iCharIndex)).c_str(), iConversionType);
@@ -64,7 +64,7 @@ int CutStr(const char* pszSrcText, char * pTextOut, const int iTargetPixelWidth,
 		if (iLineIndex == 0) 
 			iSize.cx += iFirstLineTab;
 
-		if (iSize.cx >= iScreenRatePixelWidth || strText.length() >= iOutStrLength-1)
+		if (iSize.cx >= iScreenRatePixelWidth || (int)strText.length() >= iOutStrLength-1)
 		{
 			int iPosLastSpace = wstrUTF16.find_last_of(L" ", iCharIndex);
 			iCharIndex = (iPosLastSpace == std::wstring::npos) ? iCharIndex-1 : iPosLastSpace;
@@ -2786,7 +2786,7 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const unicode::t_
 	
 	MU_POINTF RealBoxPos = { (float)iPos_x*g_fScreenRate_x, (float)iPos_y*g_fScreenRate_y };
 	SIZEF RealBoxSize = { (float)iBoxWidth*g_fScreenRate_x, (float)iBoxHeight*g_fScreenRate_y };
-	SIZEF RealRenderingSize = { RealTextSize.cx, RealTextSize.cy };	
+	SIZEF RealRenderingSize = { (long)RealTextSize.cx, (long)RealTextSize.cy };	
 	
 	if(RealBoxSize.cx == 0)
 		RealBoxSize.cx = RealTextSize.cx;
@@ -2883,7 +2883,7 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const unicode::t_
 	int iNumberOfSections = (RealRenderingSize.cx / LIMIT_WIDTH) + ((iRealRenderWidth % LIMIT_WIDTH >= 0) ? 1 : 0);
 	for(int i=0; i<iNumberOfSections; i++)
 	{
-		SIZE RealSectionLine = { LIMIT_WIDTH, RealRenderingSize.cy };
+		SIZE RealSectionLine = { (long)LIMIT_WIDTH, (long)RealRenderingSize.cy };
 		if(i == iNumberOfSections-1)
 			RealSectionLine.cx = iRealRenderWidth % LIMIT_WIDTH;
 		
@@ -3416,7 +3416,7 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 	POINT pt;
 	GetCaretPos(&pt);
 
-	SIZE RealBoxSize = { m_iWidth*g_fScreenRate_x, m_iHeight*g_fScreenRate_y };
+	SIZE RealBoxSize = { (long)m_iWidth*g_fScreenRate_x, (long)m_iHeight*g_fScreenRate_y };
 	const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
 	int iPitch = ((RealBoxSize.cx*24+31)&~31)>>3;
 

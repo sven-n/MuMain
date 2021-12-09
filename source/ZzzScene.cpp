@@ -1289,8 +1289,11 @@ void NewMoveLogInScene()
 
 		SceneFlag = CHARACTER_SCENE;
 
-		//SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
-		gProtocolSend.SendRequestCharactersListNew();
+		#ifdef NEW_PROTOCOL_SYSTEM
+			gProtocolSend.SendRequestCharactersListNew();
+		#else
+			SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
+		#endif
 
         ReleaseLogoSceneData();
 
@@ -1638,7 +1641,13 @@ bool MoveMainCamera()
 			BYTE PathY[1];
 			PathX[0] = (BYTE)(Hero->Object.Position[0]/TERRAIN_SCALE);
 			PathY[0] = (BYTE)(Hero->Object.Position[1]/TERRAIN_SCALE);
-			gProtocolSend.SendCharacterMoveNew(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,PathX[0],PathY[0]);
+
+			#ifdef NEW_PROTOCOL_SYSTEM
+				gProtocolSend.SendCharacterMoveNew(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,PathX[0],PathY[0]);
+			#else
+				SendCharacterMove(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,PathX[0],PathY[0]);
+			#endif
+
             Hero->Path.PathNum = 0;
 		}
 	}
