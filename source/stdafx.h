@@ -1,12 +1,5 @@
 // stdafx.h : include file for standard system include files,
-//  or project specific include files that are used frequently, but
-//      are changed infrequently
-//
-
-#if !defined(AFX_STDAFX_H__B9DB83DB_A9ZD_12D0_BFJ1_447553540000__INCLUDED_)
-#define AFX_STDAFX_H__B9DB83DB_A9ZD_12D0_BFJ1_447553540000__INCLUDED_
-
-//#define KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
+#pragma once
 
 //warining
 #pragma warning( disable : 4786 ) 
@@ -31,8 +24,6 @@
 #pragma warning( disable : 28159 )
 #pragma warning( disable : 26812 )
 
-#pragma once
-
 // Exclude rarely-used stuff from Windows headers
 #define WIN32_LEAN_AND_MEAN	
 	
@@ -46,7 +37,7 @@
 #pragma warning( push, 3 )
 
 #include <windows.h>
-#ifndef KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE
+
 //windows
 #include <WinSock2.h>
 #include <mmsystem.h>
@@ -107,5 +98,3 @@
 #include "./Math/ZzzMathLib.h"
 #include "ZzzOpenglUtil.h"
 
-#endif // KJH_ADD_VS2008PORTING_ARRANGE_INCLUDE		// #ifndef
-#endif // !defined(AFX_STDAFX_H__B9DB83DB_A9ZD_12D0_BFJ1_447553540000__INCLUDED_)

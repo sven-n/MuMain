@@ -1323,19 +1323,12 @@ void MoveObject(OBJECT *o);
 
 bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo )
 {
-#ifndef MSZ_ADD_CRASH_DUMP_UPLOAD
-	if(leaf::SaveExceptionDumpFile("MuError.dmp", pExceptionInfo->ContextRecord, pExceptionInfo))
-	{
-		g_ErrorReport.Write("Save DumpFile complete - MuError.dmp\r\n");
-	}
-#endif
-
 #ifdef ENABLE_FULLSCREEN
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 	if (g_bUseWindowMode == FALSE)
 #endif	// USER_WINDOW_MODE
 	{
-		ChangeDisplaySettings(NULL,0);					// 데스크탑 설정으로 복귀
+		ChangeDisplaySettings(NULL,0);
 	}
 #endif //ENABLE_FULLSCREEN
 
