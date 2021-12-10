@@ -17,26 +17,18 @@
 
 using namespace SEASON3B;
 
-#ifdef CSK_LUCKY_SEAL
-
 namespace 
 {
-#ifdef LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
-	const int MapNameCount = 7;
-#else  //LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
 	const int MapNameCount = 6;
-#endif // LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
 
-	const std::string MapName[MapNameCount] = {
+	const std::string MapName[MapNameCount] = 
+	{
 		"Lorencia",
 		"Noria",
 		"Elbeland",
 		"Dungeon",
 		"Devias",
 		"LostTower",
-#ifdef LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
-		"Loren_Market",
-#endif // LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
 	};
 
 	const bool IsLuckySeal( const std::string& name )
@@ -52,8 +44,6 @@ namespace
 		return false;
 	}
 };
-
-#endif //CSK_LUCKY_SEAL
 
 CNewUIMoveCommandWindow::CNewUIMoveCommandWindow()
 {
@@ -820,11 +810,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 				|| GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 				) 
-			&& (iReqLevel != 400)
-#ifdef LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
-			&& (iReqLevel != 1)	
-#endif // LDS_ADD_MOVEMAP_UNITEDMARKETPLACE
-			 )
+			&& (iReqLevel != 400) )
 		{
 			iReqLevel = int(float(iReqLevel)*2.f/3.f);
 		}

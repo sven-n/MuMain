@@ -66,32 +66,17 @@ SEASON3B::CNewUISystem::CNewUISystem()
 	m_pNewGoldBowmanLena = NULL;
 	m_pNewLuckyCoinRegistration = NULL;
 	m_pNewExchangeLuckyCoinWindow = NULL;
-#ifdef YDG_ADD_NEW_DUEL_UI
 	m_pNewDuelWatchWindow = NULL;
-#endif	// YDG_ADD_NEW_DUEL_UI	
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	m_pNewInGameShop = NULL;
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
-#ifdef YDG_ADD_DOPPELGANGER_UI
 	m_pNewDoppelGangerWindow = NULL;
 	m_pNewDoppelGangerFrame = NULL;
-#endif	// YDG_ADD_DOPPELGANGER_UI
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	m_pNewNPCDialogue = NULL;
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 	m_pNewQuestProgress = NULL;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
-#ifdef ASG_ADD_UI_NPC_MENU
-	m_pNewNPCMenu = NULL;
-#endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 	m_pNewQuestProgressByEtc = NULL;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 	m_pNewEmpireGuardianNPC = NULL;
 	m_pNewEmpireGuardianTimer = NULL;
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
 	m_pNewMiniMap = NULL;
 #ifdef PBG_MOD_STAMINA_UI
 	m_pNewUIStamina = NULL;
@@ -99,9 +84,7 @@ SEASON3B::CNewUISystem::CNewUISystem()
 #ifdef PBG_ADD_GENSRANKING
 	m_pNewGensRanking = NULL;
 #endif //PBG_ADD_GENSRANKING
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 	m_pNewUnitedMarketPlaceWindow = NULL;
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 }
 
 SEASON3B::CNewUISystem::~CNewUISystem() 
@@ -441,14 +424,7 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 		return false;
 
 	m_pNewDoppelGangerFrame = new CNewUIDoppelGangerFrame;
-#ifdef MOD_DOPPELGANGERFRAME_POSITION
-	// 도플갱어 진행 UI 위치 수정(2010.09.07)
-	float _cx = 640-227;
-	float _cy = GFxProcess::GetInstancePtr()->GetUISelect() == 0 ? 480-51-87 : 480-51-87-15;
-	if( m_pNewDoppelGangerFrame->Create(m_pNewUIMng, _cx, _cy) == false )
-#else //MOD_DOPPELGANGERFRAME_POSITION
 	if( m_pNewDoppelGangerFrame->Create(m_pNewUIMng, 640-227, 480-51-87) == false )
-#endif //MOD_DOPPELGANGERFRAME_POSITION
 		return false;
 
 	m_pNewNPCDialogue = new CNewUINPCDialogue;
@@ -456,24 +432,12 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 		return false;
 
 	m_pNewQuestProgress = new CNewUIQuestProgress;
-#ifdef ASG_MOD_3D_CHAR_EXCLUSION_UI
 	if (m_pNewQuestProgress->Create(m_pNewUIMng, 640-190, 0) == false)
-#else	// ASG_MOD_3D_CHAR_EXCLUSION_UI
-	if (m_pNewQuestProgress->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640-267, 0) == false)
-#endif	// ASG_MOD_3D_CHAR_EXCLUSION_UI
 		return false;
 
-#ifdef ASG_ADD_UI_NPC_MENU
-	m_pNewNPCMenu = new CNewUINPCMenu;
-	if (m_pNewNPCMenu->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640-190, 0) == false)
-		return false;
-#endif	// ASG_ADD_UI_NPC_MENU
-
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 	m_pNewQuestProgressByEtc = new CNewUIQuestProgressByEtc;
 	if (m_pNewQuestProgressByEtc->Create(m_pNewUIMng, 640-190, 0) == false)
 		return false;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 
 	m_pNewEmpireGuardianNPC = new CNewUIEmpireGuardianNPC;
 	if( m_pNewEmpireGuardianNPC->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 450, 0) == false )
@@ -566,29 +530,18 @@ void SEASON3B::CNewUISystem::UnloadMainSceneInterface()
 	SAFE_DELETE(m_pNewGoldBowmanLena);
 	SAFE_DELETE(m_pNewLuckyCoinRegistration);
 	SAFE_DELETE(m_pNewExchangeLuckyCoinWindow);
-
 	SAFE_DELETE(m_pNewDuelWatchWindow);
 	SAFE_DELETE(m_pNewDuelWindow);
-
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 	SAFE_DELETE(m_pNewDuelWatchMainFrameWindow);
 	SAFE_DELETE(m_pNewDuelWatchUserListWindow);
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	SAFE_DELETE(m_pNewInGameShop);
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
-
 	SAFE_DELETE(m_pNewDoppelGangerWindow);
 	SAFE_DELETE(m_pNewDoppelGangerFrame);
 	SAFE_DELETE(m_pNewNPCDialogue);
 	SAFE_DELETE(m_pNewQuestProgress);
-#ifdef ASG_ADD_UI_NPC_MENU
-	SAFE_DELETE(m_pNewNPCMenu);
-#endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 	SAFE_DELETE(m_pNewQuestProgressByEtc);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 	SAFE_DELETE(m_pNewEmpireGuardianNPC);
 	SAFE_DELETE(m_pNewEmpireGuardianTimer);
 	SAFE_DELETE(m_pNewMiniMap);
@@ -598,7 +551,6 @@ void SEASON3B::CNewUISystem::UnloadMainSceneInterface()
 #endif //PBG_MOD_STAMINA_UI
 	SAFE_DELETE(m_pNewGensRanking);
 	SAFE_DELETE(m_pNewUnitedMarketPlaceWindow);
-
 #ifdef LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
 	SAFE_DELETE( m_pNewUILuckyItemWnd );
 #endif // LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
@@ -1322,12 +1274,6 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		{
 			m_pNewQuestProgress->ProcessClosing();
 		}
-#ifdef ASG_ADD_UI_NPC_MENU
-		else if (dwKey == SEASON3B::INTERFACE_NPC_MENU)
-		{
-			m_pNewNPCMenu->ProcessClosing();
-		}
-#endif	// ASG_ADD_UI_NPC_MENU
 		else if (dwKey == SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
 		{
 			m_pNewQuestProgressByEtc->ProcessClosing();
@@ -1348,12 +1294,10 @@ void SEASON3B::CNewUISystem::Hide(DWORD dwKey)
 		{
 			g_pNewUIGensRanking->ClosingProcess();
 		}
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 		else if( dwKey == SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA )
 		{
 			m_pNewUnitedMarketPlaceWindow->ClosingProcess();
 		}
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 #ifdef LEM_ADD_LUCKYITEM
 		else if( dwKey == SEASON3B::INTERFACE_LUCKYITEMWND )
 		{
@@ -1432,9 +1376,6 @@ void SEASON3B::CNewUISystem::HideAllGroupA()
 		SEASON3B::INTERFACE_GOLD_BOWMAN_LENA,
 		SEASON3B::INTERFACE_NPC_DIALOGUE,
 		SEASON3B::INTERFACE_QUEST_PROGRESS,
-#ifdef ASG_ADD_UI_NPC_MENU
-		SEASON3B::INTERFACE_NPC_MENU,
-#endif	// ASG_ADD_UI_NPC_MENU
 		SEASON3B::INTERFACE_QUEST_PROGRESS_ETC,
 		SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC,
 #ifdef PBG_MOD_STAMINA_UI
@@ -1443,9 +1384,7 @@ void SEASON3B::CNewUISystem::HideAllGroupA()
 #ifdef PBG_ADD_GENSRANKING
 		SEASON3B::INTERFACE_GENSRANKING,
 #endif //PBG_ADD_GENSRANKING
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 		SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA,
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 
 #ifdef LEM_ADD_LUCKYITEM
 		SEASON3B::INTERFACE_LUCKYITEMWND,
@@ -1491,42 +1430,24 @@ void SEASON3B::CNewUISystem::HideAllGroupB()
 		SEASON3B::INTERFACE_GUILDINFO,
 		SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC,
 		SEASON3B::INTERFACE_CURSEDTEMPLE_NPC,
-#ifdef YDG_ADD_NEW_DUEL_UI
 		SEASON3B::INTERFACE_DUELWATCH,
-#endif	// YDG_ADD_NEW_DUEL_UI
-#ifdef YDG_ADD_DOPPELGANGER_UI
 		SEASON3B::INTERFACE_DOPPELGANGER_NPC,
-#endif	// YDG_ADD_DOPPELGANGER_UI
 		//SEASON3B::INTERFACE_HELP,
 		//SEASON3B::INTERFACE_ITEM_EXPLANATION,
 		//SEASON3B::INTERFACE_SETITEM_EXPLANATION,	
 		SEASON3B::INTERFACE_GOLD_BOWMAN,
 		SEASON3B::INTERFACE_GOLD_BOWMAN_LENA,
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 		SEASON3B::INTERFACE_NPC_DIALOGUE,
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 		SEASON3B::INTERFACE_QUEST_PROGRESS,
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
-#ifdef ASG_ADD_UI_NPC_MENU
-		SEASON3B::INTERFACE_NPC_MENU,
-#endif	// ASG_ADD_UI_NPC_MENU
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		SEASON3B::INTERFACE_QUEST_PROGRESS_ETC,
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 		SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC,
-#endif //LDK_ADD_EMPIREGUARDIAN_UI
 #ifdef PBG_MOD_STAMINA_UI
 		SEASON3B::INTERFACE_STAMINA_GAUGE,
 #endif //PBG_MOD_STAMINA_UI
 #ifdef PBG_ADD_GENSRANKING
 		SEASON3B::INTERFACE_GENSRANKING,
 #endif //PBG_ADD_GENSRANKING
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 		SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA,
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
-
 #ifdef LEM_ADD_LUCKYITEM
 		SEASON3B::INTERFACE_LUCKYITEMWND,
 #endif // LEM_ADD_LUCKYITEM
@@ -1809,10 +1730,6 @@ void SEASON3B::CNewUISystem::UpdateSendMoveInterface()
 	{
 		Hide(SEASON3B::INTERFACE_QUEST_PROGRESS);
 	}
-#ifdef ASG_ADD_UI_NPC_MENU
-	if (IsVisible(SEASON3B::INTERFACE_NPC_MENU))
-		Hide(SEASON3B::INTERFACE_NPC_MENU);
-#endif	// ASG_ADD_UI_NPC_MENU
 	if (IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
 	{
 		Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
@@ -2169,13 +2086,6 @@ CNewUIQuestProgress* SEASON3B::CNewUISystem::GetUI_NewQuestProgress() const
 {
 	return m_pNewQuestProgress;
 }
-
-#ifdef ASG_ADD_UI_NPC_MENU
-CNewUINPCMenu* SEASON3B::CNewUISystem::GetUI_NewNPCMenu() const
-{
-	return m_pNewNPCMenu;
-}
-#endif	// ASG_ADD_UI_NPC_MENU
 
 CNewUIQuestProgressByEtc* SEASON3B::CNewUISystem::GetUI_NewQuestProgressByEtc() const
 {

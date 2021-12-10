@@ -8,8 +8,6 @@
 #include "wsclientinline.h"
 #include "UsefulDef.h"
 
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
-
 using namespace SEASON3B;
 
 #define QPE_NPC_MAX_LINE_PER_PAGE	7
@@ -39,13 +37,9 @@ bool CNewUIQuestProgressByEtc::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	LoadImages();
 
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 	m_btnProgressL.ChangeButtonImgState(true, IMAGE_QPE_BTN_L);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 	m_btnProgressL.ChangeButtonInfo(x + 131, y + 165, 17, 18);
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 	m_btnProgressR.ChangeButtonImgState(true, IMAGE_QPE_BTN_R);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 	m_btnProgressR.ChangeButtonInfo(x + 153, y + 165, 17, 18);
 
 	m_btnComplete.ChangeText(GlobalText[2811]);	// "확     인"
@@ -315,10 +309,8 @@ void CNewUIQuestProgressByEtc::LoadImages()
 	LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_QPE_BOTTOM, GL_LINEAR);
 
 	LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_QPE_LINE, GL_LINEAR);
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 	LoadBitmap("Interface\\Quest_bt_L.tga", IMAGE_QPE_BTN_L, GL_LINEAR);
 	LoadBitmap("Interface\\Quest_bt_R.tga", IMAGE_QPE_BTN_R, GL_LINEAR);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 	LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_QPE_BTN_COMPLETE, GL_LINEAR);
 	LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_QPE_BTN_CLOSE, GL_LINEAR);
 }
@@ -327,10 +319,8 @@ void CNewUIQuestProgressByEtc::UnloadImages()
 {
 	DeleteBitmap(IMAGE_QPE_BTN_CLOSE);
 	DeleteBitmap(IMAGE_QPE_BTN_COMPLETE);
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 	DeleteBitmap(IMAGE_QPE_BTN_R);
 	DeleteBitmap(IMAGE_QPE_BTN_L);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 	DeleteBitmap(IMAGE_QPE_LINE);
 
 	DeleteBitmap(IMAGE_QPE_BOTTOM);
@@ -447,19 +437,13 @@ void CNewUIQuestProgressByEtc::SetCurRequestReward()
 
 	m_RequestRewardListBox.Clear();
 
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 	SRequestRewardText aRequestRewardText[13];
 	m_bRequestComplete
 		= g_QuestMng.GetRequestRewardText(aRequestRewardText, 13, m_dwCurQuestIndex);
-#else	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-	SRequestRewardText aRequestRewardText[12];
-	m_bRequestComplete
-		= g_QuestMng.GetRequestRewardText(aRequestRewardText, 12, m_dwCurQuestIndex);
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 
 	int i = 0;
 	int j, nLoop;
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
+
 	for (j = 0; j < 3; ++j)
 	{
 		if (0 == j)	
@@ -478,43 +462,14 @@ void CNewUIQuestProgressByEtc::SetCurRequestReward()
 		}
 		else
 			nLoop = 0;
-#else	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-	for (j = 0; j < 2; ++j)
-	{
-		if (0 == j)	// 요구사항
-		{
-			nLoop = 1 + pQuestRequestReward->m_byRequestCount;
-		}
-		else		// 보상
-		{
-			m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");
-			nLoop = 1 + pQuestRequestReward->m_byRewardCount + i;
-		}
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 
 		for (; i < nLoop; ++i)
 			m_RequestRewardListBox.AddText(&aRequestRewardText[i], RT3_SORT_CENTER);
 	}
 
-#ifdef ASG_MOD_QUEST_OK_BTN_DISABLE
 	EnableCompleteBtn(m_bRequestComplete);
-#else	// ASG_MOD_QUEST_OK_BTN_DISABLE
-	if (m_bRequestComplete)	
-	{
-		m_btnComplete.UnLock();
-		m_btnComplete.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-		m_btnComplete.ChangeTextColor(RGBA(255, 230, 210, 255));
-	}
-	else
-	{
-		m_btnComplete.Lock();
-		m_btnComplete.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-		m_btnComplete.ChangeTextColor(RGBA(170, 170, 170, 255));
-	}
-#endif	// ASG_MOD_QUEST_OK_BTN_DISABLE
 }
 
-#ifdef ASG_MOD_QUEST_OK_BTN_DISABLE
 
 void CNewUIQuestProgressByEtc::EnableCompleteBtn(bool bEnable)
 {
@@ -531,6 +486,3 @@ void CNewUIQuestProgressByEtc::EnableCompleteBtn(bool bEnable)
 		m_btnComplete.ChangeTextColor(RGBA(170, 170, 170, 255));
 	}
 }
-#endif	// ASG_MOD_QUEST_OK_BTN_DISABLE
-
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC

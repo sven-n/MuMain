@@ -1509,7 +1509,6 @@ typedef struct
 	BYTE			m_byRewardResult;
 }PMSG_GENS_REWARD_CODE, *LPPMSG_GENS_REWARD_CODE;
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 //----------------------------------------------------------------------------
 // GC[0xF9][0x01]
 //----------------------------------------------------------------------------
@@ -1521,7 +1520,6 @@ typedef struct
 	WORD			m_wNPCIndex;
 	DWORD			m_dwContributePoint;
 } PMSG_ANS_NPC_CLICK, *LPPMSG_ANS_NPC_CLICK;
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 
 typedef struct {
     BYTE        m_byX;

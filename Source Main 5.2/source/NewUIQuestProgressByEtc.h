@@ -1,13 +1,7 @@
 //*****************************************************************************
 // File: NewUIQuestProgressByEtc.h
 //*****************************************************************************
-
-#if !defined(AFX_NEWUIQUESTPROGRESSBYETC_H__0D2110D4_FB24_4DA3_A2BC_198111DF4413__INCLUDED_)
-#define AFX_NEWUIQUESTPROGRESSBYETC_H__0D2110D4_FB24_4DA3_A2BC_198111DF4413__INCLUDED_
-
 #pragma once
-
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 
 #include "NewUIBase.h"
 #include "NewUIMyQuestInfoWindow.h"
@@ -32,10 +26,8 @@ namespace SEASON3B
 			IMAGE_QPE_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
 
 			IMAGE_QPE_LINE = CNewUIMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 			IMAGE_QPE_BTN_L = CNewUIQuestProgress::IMAGE_QP_BTN_L,				// Quest_bt_L.tga	(17,36)
 			IMAGE_QPE_BTN_R = CNewUIQuestProgress::IMAGE_QP_BTN_R,				// Quest_bt_R.tga	(17,36)
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 			IMAGE_QPE_BTN_COMPLETE = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
 			IMAGE_QPE_BTN_CLOSE = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
 		};	
@@ -80,46 +72,30 @@ namespace SEASON3B
 	public:
 		CNewUIQuestProgressByEtc();
 		virtual ~CNewUIQuestProgressByEtc();
-
 		bool Create(CNewUIManager* pNewUIMng, int x, int y);
 		void Release();
-		
 		void SetPos(int x, int y);
-		
 		bool UpdateMouseEvent();
 		bool UpdateKeyEvent();
 		bool Update();
 		bool Render();
-		
 		bool IsVisible() const;
-		
 		float GetLayerDepth();	//. 3.1f
-		
 		void ProcessOpening();
 		bool ProcessClosing();
-		
 		void SetContents(DWORD dwQuestIndex);
-#ifdef ASG_MOD_QUEST_OK_BTN_DISABLE
 		void EnableCompleteBtn(bool bEnable);
-#endif	// ASG_MOD_QUEST_OK_BTN_DISABLE
 		
 	private:
 		void LoadImages();
 		void UnloadImages();
-		
 		bool UpdateSelTextMouseEvent();
 		void RenderBackImage();
 		void RenderSelTextBlock();
 		void RenderText();
-		
 		bool ProcessBtns();
-		
 		void SetCurNPCWords();
 		void SetCurPlayerWords();
 		void SetCurRequestReward();
 	};
 }
-
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-
-#endif // !defined(AFX_NEWUIQUESTPROGRESSBYETC_H__0D2110D4_FB24_4DA3_A2BC_198111DF4413__INCLUDED_)

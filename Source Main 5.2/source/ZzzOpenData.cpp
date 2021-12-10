@@ -1727,46 +1727,20 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_HELPER+103,"Item\\partcharge7\\");
 	gLoadData.OpenTexture(MODEL_POTION+133,"Item\\partcharge7\\");
 
-
-
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
 	gLoadData.OpenTexture(MODEL_HELPER+109,"Item\\InGameShop\\");
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
 	gLoadData.OpenTexture(MODEL_HELPER+110,"Item\\InGameShop\\");
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
 	gLoadData.OpenTexture(MODEL_HELPER+111,"Item\\InGameShop\\");
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
-#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
 	gLoadData.OpenTexture(MODEL_HELPER+112,"Item\\InGameShop\\");
-#endif // LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY
 	gLoadData.OpenTexture(MODEL_HELPER+113,"Item\\InGameShop\\");
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD
 	gLoadData.OpenTexture(MODEL_HELPER+114,"Item\\InGameShop\\");
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD
-#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE
 	gLoadData.OpenTexture(MODEL_HELPER+115,"Item\\InGameShop\\");
-#endif // LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE
 
-#ifdef LDK_ADD_INGAMESHOP_GOBLIN_GOLD
 	gLoadData.OpenTexture(MODEL_POTION+120,"Item\\InGameShop\\");
-#endif //LDK_ADD_INGAMESHOP_GOBLIN_GOLD
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
 	gLoadData.OpenTexture(MODEL_POTION+121,"Item\\InGameShop\\");
-#endif //LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
 	gLoadData.OpenTexture(MODEL_POTION+122,"Item\\InGameShop\\");
-#endif //LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_GOLD_CHEST
 	gLoadData.OpenTexture(MODEL_POTION+123,"Item\\InGameShop\\");
-#endif //LDK_ADD_INGAMESHOP_GOLD_CHEST
-#ifdef LDK_ADD_INGAMESHOP_SILVER_CHEST
 	gLoadData.OpenTexture(MODEL_POTION+124,"Item\\InGameShop\\");
-#endif //LDK_ADD_INGAMESHOP_SILVER_CHEST
-#ifdef LDK_ADD_INGAMESHOP_PACKAGE_BOX
+
 	for(int k=0; k<6; k++)
 	{
 		gLoadData.OpenTexture(MODEL_POTION+134+k,"Item\\InGameShop\\");
@@ -1777,10 +1751,9 @@ void OpenItemTextures()
 	LoadBitmap("Item\\InGameShop\\membership_item_pouple.jpg"	,BITMAP_PACKAGEBOX_PUPLE,GL_LINEAR,GL_REPEAT);
 	LoadBitmap("Item\\InGameShop\\membership_item_red.jpg"		,BITMAP_PACKAGEBOX_RED	,GL_LINEAR,GL_REPEAT);
 	LoadBitmap("Item\\InGameShop\\membership_item_sky.jpg"		,BITMAP_PACKAGEBOX_SKY	,GL_LINEAR,GL_REPEAT);
-#endif //LDK_ADD_INGAMESHOP_PACKAGE_BOX
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
+	
 	gLoadData.OpenTexture(MODEL_HELPER+116, "Item\\");
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
+
 	
 	gLoadData.OpenTexture(MODEL_WING+130, "Item\\");
 	for(int j=0; j<4; j++)
@@ -1792,42 +1765,26 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_POTION+112, "Item\\Ingameshop\\");
 	gLoadData.OpenTexture(MODEL_POTION+113, "Item\\Ingameshop\\");
 
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6
+	for(int k=0; k<6; k++)
 	{
-		for(int k=0; k<6; k++)
-		{
-			gLoadData.OpenTexture(MODEL_POTION+114+k,"Item\\InGameShop\\");
-		}
-
-		LoadBitmap("Item\\InGameShop\\mebership_3items_green.jpg"	,BITMAP_INGAMESHOP_PRIMIUM6	,GL_LINEAR, GL_REPEAT);
+		gLoadData.OpenTexture(MODEL_POTION+114+k,"Item\\InGameShop\\");
 	}
-#endif //LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6
-#ifdef LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4
+
+	LoadBitmap("Item\\InGameShop\\mebership_3items_green.jpg"	,BITMAP_INGAMESHOP_PRIMIUM6	,GL_LINEAR, GL_REPEAT);
+	for(int k=0; k<4; k++)
 	{
-		for(int k=0; k<4; k++)
-		{
-			gLoadData.OpenTexture(MODEL_POTION+126+k,"Item\\InGameShop\\");
-		}
-
-		LoadBitmap("Item\\InGameShop\\mebership_3items_red.jpg"	,BITMAP_INGAMESHOP_COMMUTERTICKET4	,GL_LINEAR, GL_REPEAT);
+		gLoadData.OpenTexture(MODEL_POTION+126+k,"Item\\InGameShop\\");
 	}
-#endif //LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4
-#ifdef LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3
+
+	LoadBitmap("Item\\InGameShop\\mebership_3items_red.jpg"	,BITMAP_INGAMESHOP_COMMUTERTICKET4	,GL_LINEAR, GL_REPEAT);
+	for(int k=0; k<3; k++)
 	{
-		for(int k=0; k<3; k++)
-		{
-			gLoadData.OpenTexture(MODEL_POTION+130+k,"Item\\InGameShop\\");
-		}
-
-		LoadBitmap("Item\\InGameShop\\mebership_3items_yellow.jpg"	,BITMAP_INGAMESHOP_SIZECOMMUTERTICKET3	,GL_LINEAR, GL_REPEAT);
+		gLoadData.OpenTexture(MODEL_POTION+130+k,"Item\\InGameShop\\");
 	}
-#endif //LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3
 
-#ifdef LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE
-	{
-		gLoadData.OpenTexture(MODEL_HELPER+121,"Item\\InGameShop\\");
-	}
-#endif // LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE
+	LoadBitmap("Item\\InGameShop\\mebership_3items_yellow.jpg"	,BITMAP_INGAMESHOP_SIZECOMMUTERTICKET3	,GL_LINEAR, GL_REPEAT);
+
+	gLoadData.OpenTexture(MODEL_HELPER+121,"Item\\InGameShop\\");
 
 #ifdef PBG_ADD_GENSRANKING
 	for(int _index=0; _index<4; ++_index)

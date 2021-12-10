@@ -21,15 +21,9 @@ namespace
 			outtokenbufflist.push_back( eBuff_CrywolfAltarOccufied ); outtokenbufflist.push_back( eBuff_CrywolfHeroContracted );
 			outtokenbufflist.push_back( eBuff_CrywolfNPCHide );
 		}
-#ifdef LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 		if( (curbufftype >= eBuff_PcRoomSeal1 && curbufftype <= eBuff_PcRoomSeal3) || curbufftype == eBuff_NewWealthSeal )
 		{
 			outtokenbufflist.push_back( eBuff_NewWealthSeal );
-#else //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
-		if(curbufftype >= eBuff_PcRoomSeal1 && curbufftype <= eBuff_PcRoomSeal3)
-		{
-			list<eBuffState> tokenbufflist;
-#endif //LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL
 			outtokenbufflist.push_back( eBuff_PcRoomSeal1 ); outtokenbufflist.push_back( eBuff_PcRoomSeal2 ); 
 			outtokenbufflist.push_back( eBuff_PcRoomSeal3 );
 		}
@@ -52,10 +46,8 @@ namespace
 			outtokenbufflist.push_back( eBuff_EliteScroll1 ); outtokenbufflist.push_back( eBuff_EliteScroll2 ); 
 			outtokenbufflist.push_back( eBuff_EliteScroll3 ); outtokenbufflist.push_back( eBuff_EliteScroll4 );
 			outtokenbufflist.push_back( eBuff_EliteScroll5 ); outtokenbufflist.push_back( eBuff_EliteScroll6 );
-#ifdef PSW_ADD_PC4_SCROLLITEM
 			outtokenbufflist.push_back( eBuff_Scroll_Battle );
 			outtokenbufflist.push_back( eBuff_Scroll_Strengthen );
-#endif //PSW_ADD_PC4_SCROLLITEM
 		}
 		if(curbufftype >= eBuff_SecretPotion1 && curbufftype <= eBuff_SecretPotion5)
 		{

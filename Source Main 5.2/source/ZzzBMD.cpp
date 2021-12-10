@@ -477,11 +477,6 @@ bool BMD::PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigne
 
 	return Loop;
 }
-
-
-#ifdef LDS_ADD_MODEL_ATTACH_SPECIFIC_NODE_
-
-#ifdef LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
 void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(OBJECT* oHighHierarchyModel,BMD* bmdHighHierarchyModel,int iBoneNumberHighHierarchyModel,vec3_t &vOutPosHighHiearachyModelBone,vec3_t *arrOutSetfAllBonePositions,bool bApplyTMtoVertices)
 {
 	if( NumBones < 1) return;
@@ -537,7 +532,6 @@ void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(OBJECT* oHighHiera
 
 	delete [] arrBonesTMLocal;
 }
-#endif // LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM
 						
 void BMD::AnimationTransformWithAttachHighModel(OBJECT* oHighHierarchyModel,BMD* bmdHighHierarchyModel,int iBoneNumberHighHierarchyModel,vec3_t &vOutPosHighHiearachyModelBone,vec3_t *arrOutSetfAllBonePositions )
 {
@@ -684,40 +678,6 @@ void BMD::AnimationTransformOnlySelf( vec3_t *arrOutSetfAllBonePositions,
 	
 	delete [] arrBonesTMLocal;
 }
-
-#endif // LDS_ADD_MODEL_ATTACH_SPECIFIC_NODE_
-
-
-#ifdef LDS_ADD_RENDERMESHEFFECT_FOR_VBO
-// 외부object의 rts => RootRTS로 animate되어 각 Bone별 Position 값 array 반환
-void BMD::AnimationTransformOutAllVertices(vec3_t (*outVertexTransform__)[MAX_VERTICES], const OBJECT& oSelf)
-{
-	if( NumBones < 1) return;
-	if( NumBones > MAX_BONES ) return;
-	
-	vec34_t*	arrBonesTMLocal;
-	
-	vec3_t		Temp;
-	int			iBoneCount = NumBones;	
-	
-	arrBonesTMLocal = new vec34_t[NumBones];
-	Vector( 0.0f, 0.0f, 0.0f, Temp );
-	
-	memset( arrBonesTMLocal, 0, sizeof(vec34_t) * NumBones );
-	
-	// ㄷ. 자체 에니메이션 산출 : (외부 인자값=rotation), (내부인자값=BodyScale,Position)
-	//Animation( arrBonesTMLocal, oSelf.AnimationFrame,oSelf.PriorAnimationFrame,oSelf.PriorAction, const_cast<OBJECT&>(oSelf).Angle, Temp, false, true );
-	Animation( arrBonesTMLocal, oSelf.AnimationFrame,oSelf.PriorAnimationFrame,oSelf.PriorAction, const_cast<OBJECT&>(oSelf).Angle, Temp, false, false );
-	
-	// ㅂ. WorldBone arr 모두 vertex로 연산.
-	//TransformtoVertices( outVertexTransform__, arrBonesTMLocal, false );
-	TransformtoVertices( outVertexTransform__, arrBonesTMLocal, true );
-	
-	delete [] arrBonesTMLocal;
-}
-#endif // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
-
-
 
 vec3_t		g_vright;		// needs to be set to viewer's right in order for chrome to work
 int			g_smodels_total = 1;				// cookie
@@ -919,109 +879,6 @@ void BMD::CreateLightMapSurface(Light_t *lp,Mesh_t *m,int i,int j,int MapWidth,i
 
 void BMD::CreateLightMaps()
 {
-	/*if(LightMapEnable == true) return;
-
-	int i,j,k,l;
-	NumLightMaps = 0;
-	for(i=0;i<NumMeshs;i++)
-	{
-       	Mesh_t *m = &Meshs[i];
-		for(j=0;j<m->NumNormals;j++)
-		{
-			Normal_t *np = &m->Normals[j];
-			VectorRotate(np->Normal,BoneTransform[np->Node],NormalTransform[i][j]);
-		}
-		for(j=0;j<m->NumTriangles;j++)
-		{
-			Triangle_t *tp = &m->Triangles[j];
-			vec3_t BoundingMin,BoundingMax;
-			Vector(99999.f,99999.f,99999.f,BoundingMin);
-			Vector(-99999.f,-99999.f,-99999.f,BoundingMax);
-			for(k=0;k<tp->Polygon;k++)
-			{
-				float *vp = VertexTransform[i][tp->VertexIndex[k]];
-				for(l=0;l<3;l++)
-				{
-					if(vp[l] < BoundingMin[l]) BoundingMin[l] = vp[l];
-					if(vp[l] > BoundingMax[l]) BoundingMax[l] = vp[l];
-				}
-			}
-
-			float *np = NormalTransform[i][tp->NormalIndex[0]];
-			float NormalX = absf(np[0]);
-			float NormalY = absf(np[1]);
-			float NormalZ = absf(np[2]);
-			float NormalAxisMax = maxf(maxf(NormalX,NormalY),NormalZ);
-			int Axis;
-			int MapWidth;
-			int MapHeight;
-			if(NormalAxisMax == NormalZ)
-			{
-				Axis = AXIS_Z;
-				MapWidth  = (int)((BoundingMax[0]-BoundingMin[0])/SubPixel)+1;
-				MapHeight = (int)((BoundingMax[1]-BoundingMin[1])/SubPixel)+1;
-			}
-			else if(NormalAxisMax == NormalY)
-			{
-				Axis = AXIS_Y;
-				MapWidth  = (int)((BoundingMax[0]-BoundingMin[0])/SubPixel)+1;
-				MapHeight = (int)((BoundingMax[2]-BoundingMin[2])/SubPixel)+1;
-			}
-			else if(NormalAxisMax == NormalX)
-			{
-				Axis = AXIS_X;
-				MapWidth  = (int)((BoundingMax[2]-BoundingMin[2])/SubPixel)+1;
-				MapHeight = (int)((BoundingMax[1]-BoundingMin[1])/SubPixel)+1;
-			}
-			
-			int MapWidthMax = 1;
-			int MapHeightMax = 1;
-			while(MapWidth >= MapWidthMax) MapWidthMax <<= 1;
-			while(MapHeight >= MapHeightMax) MapHeightMax <<= 1;
-			if(MapWidthMax  < 4) MapWidthMax  = 4;
-			if(MapHeightMax < 4) MapHeightMax = 4;
-			if(MapWidthMax  > 256) MapWidthMax  = 256;
-			if(MapHeightMax > 256) MapHeightMax = 256;
-			if(MapWidth  > MapWidthMax ) MapWidth  = MapWidthMax;
-			if(MapHeight > MapHeightMax) MapHeight = MapHeightMax;
-			float ScaleU = (float)MapWidthMax*SubPixel;
-			float ScaleV = (float)MapHeightMax*SubPixel;
-
-			for(k=0;k<tp->Polygon;k++)
-			{
-				float *vp = VertexTransform[i][tp->VertexIndex[k]];
-    			if(NormalAxisMax == NormalZ)
-				{
-					tp->LightMapCoord[k].TexCoordU = (vp[0]-BoundingMin[0])/ScaleU;
-					tp->LightMapCoord[k].TexCoordV = (vp[1]-BoundingMin[1])/ScaleV;
-				}
-    			else if(NormalAxisMax == NormalY)
-				{
-					tp->LightMapCoord[k].TexCoordU = (vp[0]-BoundingMin[0])/ScaleU;
-					tp->LightMapCoord[k].TexCoordV = (vp[2]-BoundingMin[2])/ScaleV;
-				}
-    			else if(NormalAxisMax == NormalX)
-				{
-					tp->LightMapCoord[k].TexCoordU = (vp[2]-BoundingMin[2])/ScaleU;
-					tp->LightMapCoord[k].TexCoordV = (vp[1]-BoundingMin[1])/ScaleV;
-				}
-			}
-			Light_t Light;
-			Light.Range = 300.f;
-			Vector(200.f,0.f,200.f,Light.Position);
-			Vector(40.f/255.f,80.f/255.f,124.f/255.f,Light.Color);
-			CreateLightMapSurface(&Light,m,i,j,MapWidth,MapHeight,MapWidthMax,MapHeightMax,BoundingMin,BoundingMax,Axis);
-
-			Light.Range = 400.f;
-			Vector(0.f,0.f,200.f,Light.Position);
-			Vector(70.f/255.f,40.f/255.f,10.f/255.f,Light.Color);
-			Vector(150.f/255.f,130.f/255.f,100.f/255.f,Light.Color);
-			CreateLightMapSurface(&Light,m,i,j,MapWidth,MapHeight,MapWidthMax,MapHeightMax,BoundingMin,BoundingMax,Axis);
-         	
-			tp->LightMapIndexes = NumLightMaps;
-	        NumLightMaps++;
-		}
-	}*/
 }
 
 void BMD::BindLightMaps()
@@ -1045,11 +902,6 @@ void BMD::BindLightMaps()
 			glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,lmp->Width,lmp->Height,0,GL_RGB,GL_UNSIGNED_BYTE,lmp->Buffer);
 		}
 	}
-	/*glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);*/
 	LightMapEnable = true;
 }
 
@@ -1071,21 +923,12 @@ void BMD::ReleaseLightMaps()
 void BMD::BeginRender(float Alpha)
 {
 	glPushMatrix();
-    //glTranslatef(BodyOrigin[0],BodyOrigin[1],BodyOrigin[2]);
-	//glScalef(BodyScale,BodyScale,BodyScale);
-	//glRotatef(-90.f,0.f,0.f,1.f);
 }
 
 void BMD::EndRender()
 {
     glPopMatrix();
 }
-
-#ifdef TEST_STREAM
-float TexCoordStream[2048*2];
-float ColorStream[2048*3];
-float VertexStream[2048*3];
-#endif// TEST_STREAM
 
 extern float WorldTime;
 extern int WaterTextureNumber;
@@ -1099,7 +942,7 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
 	if(m->NumTriangles == 0) return;
 
 	float Wave = (int)WorldTime%10000 * 0.0001f;
-	//텍스쳐
+
 	int Texture = IndexTexture[m->Texture];
     if(Texture == BITMAP_HIDE)
 		return;
@@ -1117,12 +960,7 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
 		if(HideSkin) return;
         Texture = BITMAP_HAIR+(Skin-8);
     }
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
-// 	if (RenderFlag & RENDER_DOPPELGANGER)
-// 	{
-// 		Texture = BITMAP_CLOUD;
-// 	}
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
+
 	if(MeshTexture != -1)
 		Texture = MeshTexture;
 
@@ -1140,13 +978,9 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
 	if((i==BlendMesh||i==streamMesh) && (BlendMeshTexCoordU!=0.f || BlendMeshTexCoordV!=0.f))
     	EnableWave = true;
 
-//	EnableWave = true;
-	//박종훈...
 	bool EnableLight = LightEnable;
 	if(i==StreamMesh)
 	{
-		//vec3_t Light;
-		//Vector(1.f,1.f,1.f,Light);
 		glColor3fv(BodyLight);
 		EnableLight = false;
 	}
@@ -1192,9 +1026,6 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
               (RenderFlag&RENDER_CHROME5)==RENDER_CHROME5   ||
 			  (RenderFlag&RENDER_CHROME6)==RENDER_CHROME6	||
 			  (RenderFlag&RENDER_CHROME7)==RENDER_CHROME7	||
-#ifdef PJH_NEW_CHROME
-			  (RenderFlag&RENDER_CHROME8)==RENDER_CHROME8	||
-#endif //#ifdef PJH_NEW_CHROME
               (RenderFlag&RENDER_METAL)==RENDER_METAL       ||
               (RenderFlag&RENDER_OIL)==RENDER_OIL
             )
@@ -1212,12 +1043,6 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
         {
             Render = RENDER_CHROME4;
         }
-#ifdef PJH_NEW_CHROME
-        if ( (RenderFlag&RENDER_CHROME8)==RENDER_CHROME8 )
-        {
-            Render = RENDER_CHROME8;
-        }
-#endif //PJH_NEW_CHROME
         if ( (RenderFlag&RENDER_OIL)==RENDER_OIL )
         {
             Render = RENDER_OIL;
@@ -1265,15 +1090,6 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
 				g_chrome[j][0] = (Normal[2]+Normal[0])*0.8f + WorldTime * 0.00006f;
 				g_chrome[j][1] = (Normal[2]+Normal[0])*0.8f + WorldTime * 0.00006f;
 			}
-#ifdef PJH_NEW_CHROME
-			
-            else if((RenderFlag&RENDER_CHROME8)==RENDER_CHROME8)
-            {
-				g_chrome[j][0] = Normal[0];
-				g_chrome[j][1] = Normal[1];
-            }
-			
-#endif //PJH_NEW_CHROME
             else if((RenderFlag&RENDER_OIL)==RENDER_OIL)
             {
 				g_chrome[j][0] = Normal[0];
@@ -1295,9 +1111,6 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
 			|| (RenderFlag&RENDER_CHROME4)==RENDER_CHROME4
 			|| (RenderFlag&RENDER_CHROME5)==RENDER_CHROME5
 			|| (RenderFlag&RENDER_CHROME7)==RENDER_CHROME7
-#ifdef PJH_NEW_CHROME
-			|| (RenderFlag&RENDER_CHROME8)==RENDER_CHROME8
-#endif //PJH_NEW_CHROME
 			)
         {
 			if ( Alpha < 0.99f)
@@ -1344,12 +1157,6 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
         {
 			BindTexture(BITMAP_CHROME2);
         }
-#ifdef PJH_NEW_CHROME
-        else if((RenderFlag&RENDER_CHROME8)==RENDER_CHROME8 && MeshTexture==-1)
-        {
-			BindTexture(BITMAP_CHROME9);
-        }
-#endif //PJH_NEW_CHROME
         else if((RenderFlag&RENDER_CHROME6)==RENDER_CHROME6 && MeshTexture==-1)
         {
 			BindTexture(BITMAP_CHROME6);
@@ -1426,7 +1233,6 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
 	{
     	Render = RENDER_TEXTURE;
 	}
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 	if (RenderFlag & RENDER_DOPPELGANGER)
 	{
 		if (pBitmap->Components!=4)
@@ -1435,7 +1241,6 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
 			EnableDepthMask();
 		}
 	}
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 
     // ver 1.0 (triangle)
 	glBegin(GL_TRIANGLES);
@@ -1486,19 +1291,6 @@ void BMD::RenderMesh(int i,int RenderFlag,float Alpha,int BlendMesh,float BlendM
 					glTexCoord2f(g_chrome[ni][0],g_chrome[ni][1]);
 					break;
 				}
-#ifdef PJH_NEW_CHROME
-				case RENDER_CHROME8:
-					{
-						if(Alpha >= 0.99f)
-							glColor3fv(BodyLight);
-						else
-							glColor4f(BodyLight[0],BodyLight[1],BodyLight[2],Alpha);
-						int ni = tp->NormalIndex[k];  
-//						glTexCoord2f(g_chrome[ni][0],g_chrome[ni][1]);
-						glTexCoord2f(g_chrome[ni][0]+BlendMeshTexCoordU,g_chrome[ni][1]+BlendMeshTexCoordV);
-						break;
-					}
-#endif //PJH_NEW_CHROME
             case RENDER_CHROME4:
 				{
 					if(Alpha >= 0.99f)
@@ -1897,29 +1689,12 @@ void BMD::RenderMeshAlternative( int iRndExtFlag, int iParam, int i,int RenderFl
 }
 
 
-#ifdef LDS_ADD_RENDERMESHEFFECT_FOR_VBO
-void BMD::RenderMeshEffect ( int i, int iType, int iSubType, vec3_t Angle, VOID* obj, const OBJECT* objSelf )
-#else // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 void BMD::RenderMeshEffect ( int i, int iType, int iSubType, vec3_t Angle, VOID* obj )
-#endif // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 {
     if ( i>=NumMeshs || i<0 ) return;
 
     Mesh_t *m = &Meshs[i];
 	if(m->NumTriangles <= 0) return;
-
-#ifdef LDS_ADD_RENDERMESHEFFECT_FOR_VBO
-	if( objSelf == NULL ) return;
-
-	this->BodyHeight     = 0.f;
-	this->ContrastEnable = objSelf->ContrastEnable;
-	this->BodyScale     = objSelf->Scale;
-	this->CurrentAction = objSelf->CurrentAction;
-	VectorCopy(objSelf->Position, this->BodyOrigin);
-	
-	// 모든 Animation TM 연산을 VertexTrasform으로 적용.
-	AnimationTransformOutAllVertices( VertexTransform, *objSelf );
-#endif // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 
     vec3_t angle, Light;
 	int iEffectCount = 0;

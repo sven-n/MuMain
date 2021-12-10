@@ -766,11 +766,7 @@ void CSPetDarkSpirit::AttackEffect ( CHARACTER* c, OBJECT* o )
 
 				if ( to!=NULL )
 				{
-#ifdef LDS_ADD_RENDERMESHEFFECT_FOR_VBO
-					b->RenderMeshEffect ( 1, BITMAP_LIGHT, 1, o->Angle, to, o );
-#else // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 					b->RenderMeshEffect ( 1, BITMAP_LIGHT, 1, o->Angle, to );
-#endif // LDS_ADD_RENDERMESHEFFECT_FOR_VBO
 				}
 
 				SetAI ( PET_FLYING );

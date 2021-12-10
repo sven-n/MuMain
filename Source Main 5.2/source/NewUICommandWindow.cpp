@@ -603,7 +603,6 @@ bool SEASON3B::CNewUICommandWindow::CommandFollow(int iSelectedChaIndex)
 
 int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
 {
-#ifdef YDG_ADD_NEW_DUEL_UI
 	int iLevel = CharacterAttribute->Level;
 	if(iLevel < 30)
 	{
@@ -617,13 +616,11 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
 		g_pChatListBox->AddText("", GlobalText[2866], SEASON3B::TYPE_ERROR_MESSAGE);
 		return 3;
 	}
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 	else if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
 	{
 		g_pChatListBox->AddText("", GlobalText[3063], SEASON3B::TYPE_ERROR_MESSAGE);
 		return 3;
 	}
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 	else if ( !g_DuelMgr.IsDuelEnabled() )
 	{
 		SendRequestDuelStart ( pSelectedCha->Key, pSelectedCha->ID );
@@ -639,31 +636,5 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
 		g_pChatListBox->AddText("", GlobalText[915], SEASON3B::TYPE_ERROR_MESSAGE);
 		return 3;
 	}
-#else	// YDG_ADD_NEW_DUEL_UI
-#ifdef DUEL_SYSTEM
-	if ( !g_bEnableDuel )
-	{
-		SendRequestDuelStart ( pSelectedCha->Key, pSelectedCha->ID );
-		return 1;
-	}
-	else if ( g_bEnableDuel==true && strcmp( pSelectedCha->ID, g_szDuelPlayerID )==NULL )
-	{
-		SendRequestDuelEnd ();
-		return 2;
-	}
-	else
-	{
-		g_pChatListBox->AddText("", GlobalText[915], SEASON3B::TYPE_ERROR_MESSAGE);
-		return 3;
-	}
-	
-#endif// DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_UI
-
-	// return 1 : DualStart 성공
-	// return 2 : DualEnd 성공
-	// return 3 : Dual 중임
-	// return 0 : 실패 (Dual System이 아님)
-	
 	return 0;
 }

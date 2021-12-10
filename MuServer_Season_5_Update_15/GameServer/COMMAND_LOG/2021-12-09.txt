@@ -1,0 +1,2 @@
+23:06:28 [CommandSpot][louismk][LuisADM] - (Monster: 10, Qtd: 10)
+23:09:19 [CommandSpot][louismk][LuisADM] - (Monster: 10, Qtd: 10)

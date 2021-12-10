@@ -1,13 +1,7 @@
 //*****************************************************************************
 // File: NewUINPCDialogue.h
 //*****************************************************************************
-
-#if !defined(AFX_NEWUINPCDIALOGUE_H__5E3DE00E_7D68_42C8_A796_AA368AD96ECC__INCLUDED_)
-#define AFX_NEWUINPCDIALOGUE_H__5E3DE00E_7D68_42C8_A796_AA368AD96ECC__INCLUDED_
-
 #pragma once
-
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 
 #include "NewUIBase.h"
 #include "NewUIQuestProgress.h"
@@ -137,7 +131,3 @@ namespace SEASON3B
 		void ProcessSelTextResult();
 	};
 }
-
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
-
-#endif // !defined(AFX_NEWUINPCDIALOGUE_H__5E3DE00E_7D68_42C8_A796_AA368AD96ECC__INCLUDED_)

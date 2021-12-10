@@ -15,8 +15,6 @@
 #include "DSPlaySound.h"
 #include "MapManager.h"
 
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
-
 using namespace SEASON3B;
 
 CNewUIUnitedMarketPlaceWindow::CNewUIUnitedMarketPlaceWindow()
@@ -288,14 +286,7 @@ bool CNewUIUnitedMarketPlaceWindow::BtnProcess()
 
 	if (m_BtnEnter.UpdateMouseEvent() == true)
 	{
-#ifdef LDS_FIX_DISABLEALLKEYEVENT_WHENMAPLOADING
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		LoadingWorld = 200;
-		g_bReponsedMoveMapFromServer = FALSE;
-#else // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 		LoadingWorld = 9999999;
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-#endif // LDS_FIX_DISABLEALLKEYEVENT_WHENMAPLOADING
 
 		SendRequestEnterUnitedMarketPlaceEvent();
 		m_bIsEnterButtonLocked = true;
@@ -324,4 +315,3 @@ void CNewUIUnitedMarketPlaceWindow::LockEnterButton(BOOL bLock)
 {
 	m_bIsEnterButtonLocked = bLock;
 }
-#endif	// LDS_ADD_UI_UNITEDMARKETPLACE

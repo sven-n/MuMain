@@ -162,10 +162,8 @@ void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 
 	for (int i = 0; i < UIM_TS_MAX; ++i)
 	{
-#ifdef PBG_ADD_NEWLOGO_IMAGECHANGE
 		if(i==2)
 			continue;
-#endif //PBG_ADD_NEWLOGO_IMAGECHANGE
 		m_asprTitle[i].Render();
 	}
 

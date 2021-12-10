@@ -1,11 +1,7 @@
 // GMUnitedMarketPlace.cpp: implementation of the GMUnitedMarketPlace class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
-
 #include "GMUnitedMarketPlace.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -22,10 +18,6 @@
 #include "GOBoid.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 GMUnitedMarketPlacePtr GMUnitedMarketPlace::Make()
 {
@@ -503,26 +495,6 @@ bool GMUnitedMarketPlace::PlayMonsterSound(OBJECT* o)
 	if (fDistance > 500.0f) 
 		return true;
 
-// 	switch(o->Type)
-// 	{	
-// 	case MODEL_MONSTER01+179:
-// 		{
-// 			switch(o->CurrentAction)
-// 			{
-// 			case MONSTER01_STOP1:	
-// 			case MONSTER01_STOP2:
-// 				{
-// 					PlayBuffer(SOUND_EMPIREGUARDIAN_PRIEST_STOP);
-// 				}break;
-// 			case MONSTER01_ATTACK1:
-// 				{
-// 					PlayBuffer(SOUND_THUNDERS01);
-// 				}break;
-// 			}
-// 		} // MODEL_MONSTER01+179:
-// 		return true;
-// 	}
-
 	return false; 
 }
 
@@ -570,7 +542,6 @@ bool GMUnitedMarketPlace::MoveRain( PARTICLE* o )
 		return false;
 	}
 
-	// ºñÈ¿°ú
 	if(o->Type==BITMAP_RAIN)
 	{
 		VectorAdd(o->Position,o->Velocity,o->Position);
@@ -615,5 +586,3 @@ bool IsUnitedMarketPlace()
 	return false;
 }
 
-
-#endif // #ifdef LDS_ADD_MAP_UNITEDMARKETPLACE

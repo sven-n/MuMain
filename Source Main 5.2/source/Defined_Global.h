@@ -1,59 +1,27 @@
 
-#define NEW_PROTOCOL_SYSTEM
-#define KJW_FIX_GENS_WINDOW_OPEN
+
 
 #ifdef _DEBUG
 	#define KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK
 #endif // _DEBUG
+
+#define NEW_PROTOCOL_SYSTEM
+
+#define PJH_NEW_SERVER_SELECT_MAP
+
+#define ASG_ADD_GENS_SYSTEM
+#ifdef ASG_ADD_GENS_SYSTEM
+	#define ASG_ADD_INFLUENCE_GROUND_EFFECT
+	#define ASG_ADD_GENS_MARK
+	#define PBG_MOD_STRIFE_GENSMARKRENDER
+	#define PBG_ADD_GENSRANKING
+#endif	// ASG_ADD_GENS_SYSTEM
 
 //----------------------------------------------------------------------------------------------
 // << Season 5 - Part 1 
 
 #define UPDATE_100527
 #ifdef UPDATE_100527
-
-	#define YDG_FIX_MOVE_ICARUS_EQUIPED_SKELETON_CHANGE_RING	// ½ºÄÌ·¹Åæº¯½Å¹ÝÁö Âø¿ëÈÄ ÀÌÄ«·ç½º·Î ÀÌµ¿ÇÒ ¼ö ¾ø´Â Çö»ó (10.02.16)
-	#define ASG_ADD_LEAP_OF_CONTROL_TOOLTIP_TEXT			// Åë¼ÖÀÇ ºñ¾à ÅøÆÁ ÅØ½ºÆ® Ãß°¡(2010.01.28)
-	#define PBG_FIX_GAMECENSORSHIP_1215							// 12/15¼¼ ÀÌ¿ë°¡´É ¸¶Å© ÃâÇö ¹ö±×¼öÁ¤(10.02.09)
-	#define LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT		// ÅëÇÕ½ÃÀå ÀÌµ¿ ½Ã¿¡ »ç¿ëÀÚÀÇ Å° ¹× ¸¶¿ì½º ÀÎÇ² ÀÔ·ÂÀ» ¸·Áö ¾Ê¾Æ »ý±â´Â ¹®Á¦·Î ÀÏ°ý Skip Ã³¸®. (10.02.02) 
-	//^#define PBG_MOD_GAMECENSORSHIP_RED						// ·¹µåÀÇ °æ¿ìµµ 18ÀÌ»ó°¡´É°¡·Î Á¶Á¤(09.01.26)[10.02.04º»¼·ÆÐÄ¡½Ã Å×¼·/º»¼· ºí·ç µ¿½Ã Àû¿ë]
-	#define LDS_FIX_DISABLEALLKEYEVENT_WHENMAPLOADING			// ¸ÊÀÌµ¿ ¿äÃ»ÀÌÈÄ ¼­¹ö·ÎºÎÅÍ ¸ÊÀÌµ¿ °á°ú°¡ ¿À±âÀü±îÁö ¸ðµç Å°ÀÔ·ÂÀ» ¸·½À´Ï´. (·Î·»½ÃÀå, °ø¼º ¼­¹ö ÀÌµ¿ ¿äÃ»½Ã¿¡ esc·Î ¿É¼ÇÃ¢ "°ÔÀÓÁ¾·á"È£ÃâÀÌÈÄ ¸ðµç Å°ÀÔ·ÂÀÌ ¾ÈµÇ´Â ¹ö±× ). (10.01.28)
-	#define PBG_FIX_GENSREWARDNOTREG							// °Õ½º ¹Ì°¡ÀÔÀÚ°¡ º¸»ó¹ÞÀ»½Ã ¹®±¸ ¼öÁ¤(10.01.28)
-
-	#define LJH_ADD_SAVEOPTION_WHILE_MOVING_FROM_OR_TO_DIFF_SERVER	// (JP_622, JP_624)(±¹³»¹ö±×)´¸¥ ¼­¹ö(ÇöÀç °ø¼º¼­¹ö, ·Î·»½ÃÀå)¿¡¼­ºÎÅÍ ¶Ç´Â ´¸¥ ¼­¹ö·Î ÀÌµ¿ÇÒ ¶§ ¿É¼ÇÀÌ ÀúÀå µÇÁö ¾Ê´Â ¹ö±× ¼öÁ¤(10.04.16)
-	#define LJH_FIX_DIVIDE_LINE_BY_PIXEL_FOR_GENS_RANK	// °Õ½º¿¡¼­ ·©Å©ÀÌ¸§ÀÌ ³Ê¹« ±æ¾î ÇÑÁ¿¡ ´ ³ª¿ÀÁö ¾Ê¾Æ nPixelPerLine = 240À¸·Î ¼öÁ¤ _ ÀÏº» ¶§¹®(10.03.10)
-	#define LJH_FIX_UNABLE_TO_TRADE_OR_PURCHASE_IN_TROUBLED_AREAS	// ºÐÀïÁö¿ª¿¡¼­ /°Å·¡, /±¸ÀÔ ¸í·É¾î Á¦ÇÑ (10.03.31)
-	#define LJH_FIX_NO_EFFECT_ON_WEAPONS_IN_SAFE_ZONE_OF_CURSED_TEMPLE	// È¯¿µ»ç¿øÀÇ ¾ÈÀüÁö¿ª¿¡¼­ 15·¹º§ ¾ÆÀÌÅÛ ÀÌÆåÆ® ³ª¿ÀÁö ¾Ê´Â ¹ö±× ¼öÁ¤(10.04.16)
-
-
-	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 3]
-	#define SEASON5_PART3
-	#ifdef SEASON5_PART3
-		#define LDS_ADD_MAP_UNITEDMARKETPLACE					// ÅëÇÕ ½ÃÀå ¼­¹ö (·Î·» ½ÃÀå) Ãß°¡ (09.12.04)
-		#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
-			#define LDS_ADD_NPC_UNITEDMARKETPLACE					// NPC ·Î·»½ÃÀå 1.º¸¼®· Á¶ÇÕ ¹× ÇØÃ¼ ¶ó¿ï, 2.½ÃÀå »óÀÎ Á¸®¾Æ, 3.¹°¾à ¹× ±âÅ¸ ÀâÈ­ ¾ÆÀÌÅÛ »óÀÎ Å©¸®½ºÆ¾ (09.12.15)
-			#define LDS_ADD_UI_UNITEDMARKETPLACE					// UI ·Î·»½ÃÀå ¸Þ¼¼Áö Ã³¸® 1.Ä«¿À½ºÄÉ½½ ÀÔÀå ºÒ°¡ 2.°áÅõ½ÅÃ»ºÒ°¡ 3.ÆÄÆ¼½ÅÃ» ºÒ°¡ 4.
-			#define LDS_ADD_SERVERPROCESSING_UNITEDMARKETPLACE		// ¼­¹ö¿ÍÀÇ ±³½Å Ã³¸® 1.ÅëÇÕ½ÃÀå¸ÊÀ¸·Î ÀÌµ¿ 2. (09.12.23)
-			#define LDS_ADD_SOUND_UNITEDMARKETPLACE					// ÅëÇÕ½ÃÀå È¯°æÀ½, ¹è°æÀ½ Ã³¸®. (10.01.12)
-			//#define LDS_ADD_MOVEMAP_UNITEDMARKETPLACE				// ¸ÊÀÌµ¿ À©µµ¿ì¿¡ "ÅëÇÕ ½ÃÀå" Ãß°¡. (10.01.12)
-			#define LDS_ADD_EFFECT_UNITEDMARKETPLACE				// ÅëÇÕ½ÃÀå NPC µî¿¡ Ãß°¡ EFFECT. (10.01.14)
-		#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
-
-		#define PBG_ADD_GENSRANKING
-		#define KJH_ADD_SKILLICON_RENEWAL
-		#define PBG_MOD_PREMIUMITEM_TRADE_0118						// Ä«¿À½º Ä«µå,ºÎÀû,Çà¿îÀÇºÎÀû ·¹µåºí·ç °Å·¡°¡´ÉÀ¸·Î ±âÈ¹º¯°æ(10.01.18)
-		#define ASG_ADD_QUEST_REQUEST_REWARD_TYPE				// Ä½ºÆ® ¿ä±¸»çÇ×, º¸»ó Ãß°¡(2009.12.15)
-		#define YDG_MOD_SKELETON_NOTSELLING						// ½ºÄÌ·¹Åæ Æê ¹ÝÁö ¾ÈÆÈ¸®°Ô ¼³Á¤(2010.01.20)
-		#define YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK			// º¯½Å¹ÝÁö ½ºÅÈ¿Ã¸±¶§ ¸¸·á Ã¼Å© (2010.01.25)
-	#endif // SEASON5_PART3
-
-	//-----------------------------------------------------------------------------
-	// [ Season 5 - Part 2]
-
-	#define ASG_MOD_QUEST_OK_BTN_DISABLE						// Ä½ºÆ® ÁøÇà È®ÀÎ ¹öÆ° ºñÈ°¼ºÈ­ »óÅÂ Ãß°¡(2009.11.23)
-
-	
 
 	#define SEASON5_PART2
 	#ifdef SEASON5_PART2
@@ -75,46 +43,6 @@
 			//^#define LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
 		#endif //KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
-		#define ASG_ADD_GENS_SYSTEM
-		#ifdef ASG_ADD_GENS_SYSTEM
-			#define ASG_ADD_UI_NPC_DIALOGUE
-			#define ASG_ADD_INFLUENCE_GROUND_EFFECT
-			#define ASG_ADD_GENS_MARK
-			#define ASG_ADD_GENS_NPC
-			#define ASG_ADD_GATE_TEXT_MAX_LEVEL
-			#define ASG_ADD_MOVEREQ_TEXT_MAX_LEVEL
-			#define PBG_MOD_STRIFE_GENSMARKRENDER
-		#endif	// ASG_ADD_GENS_SYSTEM
-
-		#define INGAMESHOP_ITEM01							// ÇØ¿Ü¿¡¸¸ µî·ÏµÇ¾îÀÖ°Å³ª »õ·Î »ý¼ºµÈ ¾ÆÀÌÅÛ µðÆÄÀÎ Ãß°¡(2009.09.08)
-		#ifdef	INGAMESHOP_ITEM01
-			#define LDK_MOD_PREMIUMITEM_DROP					// ÇÁ¸®¹Ì¾ö¾ÆÀÌÅÛ ¹ö¸®±âÁ¦ÇÑÇØÁ¦(09.09.16)
-			#define LDK_MOD_PREMIUMITEM_SELL					// ÇÁ¸®¹Ì¾ö¾ÆÀÌÅÛ ÆÇ¸ÅÁ¦ÇÑÇØÁ¦(09.09.25)
-			#define LDK_ADD_INGAMESHOP_GOBLIN_GOLD				// °íºí¸°±ÝÈ­
-			#define LDK_ADD_INGAMESHOP_LOCKED_GOLD_CHEST		// ºÀÀÎµÈ ±Ý»ö»óÀÚ
-			#define LDK_ADD_INGAMESHOP_LOCKED_SILVER_CHEST		// ºÀÀÎµÈ Àº»ö»óÀÚ
-			#define LDK_ADD_INGAMESHOP_GOLD_CHEST				// ±Ý»ö»óÀÚ
-			#define LDK_ADD_INGAMESHOP_SILVER_CHEST				// Àº»ö»óÀÚ
-			#define LDK_ADD_INGAMESHOP_PACKAGE_BOX				// ÆÐÅ°Áö »óÀÚA-F
-			#define LDK_ADD_INGAMESHOP_SMALL_WING				// ±â°£Á¦ ³¯°³ ÀÛÀº(±º¸Á, Àç³¯, ¿ä³¯, Ãµ³¯, »ç³¯)
-			#define LDK_ADD_INGAMESHOP_NEW_WEALTH_SEAL			// ½Å±Ô Ç³¿äÀÇ ÀÎÀå
-
-			#define LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD	// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ¸®¼Â¿­¸Å5Á¾ // Åë¼Ö¸®¼Â¿­¸Å´Â ´Å©·Îµå¸¸ »ç¿ë°¡´ÉÇÑ ¸Þ¼¼Áö Ãâ·Â.
-			#define LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE		// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô »çÆÄÀÌ¾î(Çª¸¥»ö)¸µ	// MODEL_HELPER+109
-			#define LDS_ADD_INGAMESHOP_ITEM_RINGRUBY			// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô ·çºñ(ºÓÀº»ö)¸µ		// MODEL_HELPER+110
-			#define LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ			// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô ÅäÆÄÁî(ÁÖÈ²)¸µ		// MODEL_HELPER+111
-			#define LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST		// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô ÀÚ¼öÁ¤(º¸¶ó»ö)¸µ		// MODEL_HELPER+112
-			#define LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY			// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô ·çºñ(ºÓÀº»ö) ¸ñ°ÉÀÌ	// MODEL_HELPER+113
-			#define LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD		// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô ¿¡¸Þ¶öµå(Çª¸¥) ¸ñ°ÉÀÌ// MODEL_HELPER+114
-			#define LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE		// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô »çÆÄÀÌ¾î(³ì»ö) ¸ñ°ÉÀÌ// MODEL_HELPER+115
-			#define LDS_ADD_INGAMESHOP_ITEM_KEYSILVER			// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô Å°(½Ç¹ö)				// MODEL_POTION+112
-			#define LDS_ADD_INGAMESHOP_ITEM_KEYGOLD				// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ½Å±Ô Å°(°ñµå)				// MODEL_POTION+113
-			#define LDS_ADD_INGAMESHOP_ITEM_PASSCHAOSCASTLE		// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // Ä«¿À½ºÄÉ½½ ÀÚÀ¯ÀÔÀå±Ç		// MODEL_HELPER+121
-			#define LDS_ADD_INGAMESHOP_ITEM_PRIMIUMSERVICE6		// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // ÇÁ¸®¹Ì¾ö¼­ºñ½º6Á¾			// MODEL_POTION+114~119
-			#define LDS_ADD_INGAMESHOP_ITEM_COMMUTERTICKET4		// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // Á¤¾×±Ç4Á¾					// MODEL_POTION+126~129
-			#define LDS_ADD_INGAMESHOP_ITEM_SIZECOMMUTERTICKET3	// ÀÎ°ÔÀÓ˜Þ ¾ÆÀÌÅÛ // Á¤·®±Ç3Á¾					// MODEL_POTION+130~132
-		#endif	//INGAMESHOP_ITEM01
-
 	#endif // SEASON5_PART2
 
 	#define ADD_TOTAL_CHARGE_8TH
@@ -130,38 +58,12 @@
 			#ifndef KJH_ADD_PERIOD_ITEM_SYSTEM					// #ifndef
 				#define LJH_FIX_IGNORING_EXPIRATION_PERIOD		// ÀÏº»¿¡´Â ¾ÆÁ÷ ±â°£Á¦°¡ Àû¿ëµÇÁö ¾ÊÀ¸¹Ç·Î bExpiredPeriod¸¦ »ç¿ëÇÏÁö ¾Êµµ·Ï ¼öÁ¤(2010.02.11) - ±â°£Á¦ ½Ã½ºÅÛ µµÀÔ ÈÄ »èÁ¦
 			#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
-			#define YDG_FIX_CHANGERING_STATUS_EXPIRE_CHECK	// º¯½Å¹ÝÁö ½ºÅÈ¿Ã¸±¶§ ¸¸·á Ã¼Å© (2010.01.25)
 			#define LDK_FIX_PC4_GUARDIAN_DEMON_INFO			// µ¥¸ó Ä³¸¯ÅÍÁ¤º¸Ã¢¿¡ °ø°Ý·Â,¸¶·Â,ÀúÁÖ·Â Ãß°¡ µ¥¹ÌÁö Àû¿ë(09.10.15) - Ä³¸¯ÅÍÁ¤º¸Ã¢¿¡ Æê Á¾·¿¡ ÀÇÇÑ ÀúÁÖ·Â Ãß°¡ µ¥¹ÌÁö¸¦ Àû¿ë ½ÃÅ°±â À§ÇØ Ãß°¡
 			#define LJH_FIX_NOT_POP_UP_HIGHVALUE_MSGBOX_FOR_BANNED_TO_TRADE	//NPC¿¡°Ô ÆÇ¸Å ±ÝÁöµÈ ¾ÆÀÌÅÛÀ» ÆÇ¸ÅÇÏ·Á°í ÇÒ¶§ °í°¡ÀÇ ¾ÆÀÌÅÛÀÌ¶ó°í ³ª¿À´Â ¸Þ¼¼Áö Ã¢À» ¾È³ª¿À°Ô ¼öÁ¤(10.02.19)
 		#endif  //ADD_SKELETON_PET
 
 		#define YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT			// º¯½Å¹ÝÁö ÇÑÁ¾·¸¸ ÀåºñÇÏµµ·Ï ¼öÁ¤ (2009.12.28)
 	#endif  //ADD_TOTAL_CHARGE_8TH
-
-	//-----------------------------------------------------------------------------
-	// [ Seaso 5 - Part 1]
-
-	#define LDS_ADD_SET_BMDMODELSEQUENCE_					// BMD Å¬·¡½ºÀÇ »ç¿ëµÇÁö ¾Ê´Â º¯¼öÀÎ BmdSequenceID¿¡ BMDSequence ¼³Á¤. (09.08.05)
-	#define LDS_FIX_MEMORYLEAK_BMDWHICHBONECOUNTZERO		// BoneCount==0 ÀÎ BMDµé¿¡ ´ëÇÑ BMD Destruct ½ÃÁ¡¿¡ ¹ß»ýÇÏ´Â ¸Þ¸ð¸® ¸¯ FIX. (09.08.13)
-	#define LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER	// Á¦±¹ ¼öÈ£±º ¹æÆÐº´ÀÇ ¼­¹ö·ÎºÎÅÍÀÇ ¸ó½ºÅÍ ½ºÅ³==>Action ¿¬°á ÀÛ¾÷. (09.08.18)
-	#define LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER_EX	// ¹æÆÐº´ÀÇ 1¹ø ½ºÅ³(44)µ¿ÀÛÀÇ ±âÁ¸¹æ½Ä°ú ´¸¥ ¹æ½ÄÀÇ ¿¡´Ï¸ÞÀÌ¼Ç È£Ãâ Àç ¼öÁ¤ (09.08.21)
-	#define LDS_FIX_EG_COLOR_CHANDELIER							// release ¸ðµå¼­¸¸ Á¦±¹ ¼öÈ£±º ÁÖ¸»¸Ê ¼§µé¸®¿¡ ¿¬±â »ö ´¸¥ ¹ö±× ¼öÁ¤ (09.08.21)
-	#define LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER_EX2	// ¹æÆÐº´ 44¹ø ¹æÆÐ¸·±â ½ºÅ³½Ã °£È¤ ·»´ý¹æÇâ ¹¶óº¸´Â ¹ö±× ¼öÁ¤ (09.08.24)
-	#define LDS_FIX_SKILLKEY_DISABLE_WHERE_EG_ALLTELESKILL	// ¹ý»ç ÅÚ·¹°è¿­(ÅÚ·¹Å°³×½Ã½º,¼ø°£ÀÌµ¿) ½ºÅ³µéÀº Á¦±¹¼öÈ£±º ¿µ¿ª¿¡¼­ »ç¿ë ¸øÇÏµµ·Ï ¼³Á¤(09.08.28)
-	#define LDS_FIX_EG_JERINT_ATTK1_ATTK2_SPEED				// Á¦±¹¼öÈ£±º Á¦¸°Æ® °ø°Ý1, °ø°Ý2 ¼Óµµ Àß¸øµÈ ¼öÄ¡·Î FIX ÀÛ¾÷ (09.09.04)
-	#define LDS_MOD_ANIMATIONTRANSFORM_WITHHIGHMODEL			// AnimationTransformWithAttachHighModelÇÔ¼ö¿¡¼­ ÇöÀç arrayBone¸¸ ÇÊ¿äÇÒ °æ¿ì´Â TransformÀ¸·Î BoneÀÌ Vertices¿¡ °öÇÏÁö ¾Êµµ·Ï º¯°æ. (2009.09.09)
-	#define LDS_ADD_ANIMATIONTRANSFORMWITHMODEL_USINGGLOBALTM	// AnimationTransformWithAttachHighModelÇÔ¼ö³» TMArray°¡ LocalÀÎ ÀÌÀ¯·Î ÀÌÈÄ ¿¬»ê¿¡ TMÀÌ Point¸¦ ÀÒ¾î¹ö¸®´Â Çö»óÀ¸·Î TMÀ» Global À¸·Î º¯°æ. (09.09.07)
-	#define LDS_FIX_EG_JERINT_ANIMATION_AND_SWORDFORCE_SPEED	// Á¦¸°Æ®ÀÇ °ø°Ý ¼Óµµ ¹× °Ë±â ½Ã°£ ¹üÀ§ ÀçÀÛ¾÷ (09.09.08) 
-
-	#define YDG_FIX_DOPPELGANGER_BUTTON_COLOR				// µµÇÃ°»¾î UI ¹öÆ° Àá±Û¶§ »ö ÀÌ»óÇÑ ¹®Á¦ (2009.08.14)
-	#define YDG_MOD_DOPPELGANGER_END_SOUND					// µµÇÃ°»¾î Á¾·á »ç¿îµå Ãß°¡ (2009.08.20)
-	#define YDG_MOD_TOURMODE_MAXSPEED						// Åõ¾î¸ðµå ÃÖ°í¼Óµµ ¿Ã¸² (2009.07.10)
-
-	#define ASG_FIX_QUEST_PROTOCOL_ADD						// ½Å±Ô Ä½ºÆ® ÇÁ·ÎÅäÄÝ Ãß°¡.(2009.09.07)
-
-	#define PBG_ADD_NEWLOGO_IMAGECHANGE						// ·ÎµÈ­¸é ÀÌ¹ÌÁö º¯°æ(09.08.12)
-
-	#define PJH_NEW_SERVER_SELECT_MAP						// ¼­¹ö ¼±ÅÃÈ­¸é º¯°æ(09.08.17)
 
 
 	//-----------------------------------------------------------------------------
@@ -242,9 +144,6 @@
 		#define ASG_ADD_NEW_QUEST_SYSTEM						// ´º Ä½ºÆ® ½Ã½ºÅÛ(2009.05.20)
 		#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 			#define ASG_ADD_UI_QUEST_PROGRESS					// Ä½ºÆ® ÁøÇà Ã¢(NPC¿ë)(2009.05.27)
-		#ifndef ASG_ADD_UI_NPC_DIALOGUE								// #ifndef Á¤¸®½Ã ASG_ADD_UI_NPC_MENU µðÆÄÀÎ ¸ðµÎ »èÁ¦.
-			#define ASG_ADD_UI_NPC_MENU							// NPC ¸Þ´ºÃ¢(2009.06.17)
-		#endif	// ASG_ADD_UI_NPC_DIALOGUE
 			#define ASG_ADD_UI_QUEST_PROGRESS_ETC				// Ä½ºÆ® ÁøÇà Ã¢(±âÅ¸¿ë)(2009.06.24)
 			#define ASG_MOD_UI_QUEST_INFO						// Ä½ºÆ® Á¤º¸ Ã¢(2009.07.06)
 			#define ASG_MOD_3D_CHAR_EXCLUSION_UI				// 3D Ä³¸¯ÅÍ Ç¥ÇöÀÌ ¾ø´Â UI·Î ¹²Þ.(2009.08.03)

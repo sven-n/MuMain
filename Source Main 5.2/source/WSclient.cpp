@@ -903,11 +903,6 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 
 	gMapManager.LoadWorld(gMapManager.WorldActive);
 
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-	g_bReponsedMoveMapFromServer = TRUE;
-	LoadingWorld = 30;
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-	
 	if(gMapManager.WorldActive == WD_34CRYWOLF_1ST)
 	{
 		SendRequestCrywolfInfo();
@@ -2952,10 +2947,6 @@ void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 	bool bComboEnable	= (Data->DamageType>>7)&0x01;
 	WORD ShieldDamage	= (((WORD)(Data->ShieldDamageH)<<8) + Data->ShieldDamageL);
 
-#ifdef CSK_HACK_TEST
-	g_pHackTest->ReceiveDamage(c, o, Success, Damage, DamageType, bDoubleEnable, bComboEnable, ShieldDamage, Key);
-#endif // CSK_HACK_TEST
-	
 	if(Success)
 	{
 		SetPlayerShock(c,Damage);
@@ -3010,11 +3001,6 @@ void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 					CreateEffect( MODEL_MAGIC_CAPSULE2, o->Position, Angle, o->Light, 0, o);
 				}
 			}
-			
-#ifdef _PVP_ADD_MOVE_SCROLL
-			if (Damage > 0)
-				g_MurdererMove.CancelMove();
-#endif	// _PVP_ADD_MOVE_SCROLL
 		}
 		else
 		{
@@ -9736,7 +9722,6 @@ void ReceiveQuestMonKillInfo(BYTE* ReceiveBuffer)
 	g_csQuest.SetKillMobInfo(pData->anKillCountInfo);
 }
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
 
 void ReceiveQuestLimitResult(BYTE* ReceiveBuffer)
@@ -9800,36 +9785,28 @@ void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
 	case 0:
 		break;
 	case 1:
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 
 		g_QuestMng.SetEPRequestRewardState(pData->m_dwQuestIndex, false);
 		g_QuestMng.RemoveCurQuestIndexList(pData->m_dwQuestIndex);
 		break;
 
 	case 2:
-#ifdef ASG_MOD_QUEST_OK_BTN_DISABLE
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
 			g_pQuestProgress->EnableCompleteBtn(false);
 		else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
 			g_pQuestProgressByEtc->EnableCompleteBtn(false);
-#endif	// ASG_MOD_QUEST_OK_BTN_DISABLE
 		g_pChatListBox->AddText("", GlobalText[2816], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
 
 	case 3:
-#ifdef ASG_MOD_QUEST_OK_BTN_DISABLE
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
 			g_pQuestProgress->EnableCompleteBtn(false);
 		else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
 			g_pQuestProgressByEtc->EnableCompleteBtn(false);
-#endif	// ASG_MOD_QUEST_OK_BTN_DISABLE
 		g_pChatListBox->AddText("", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
 		g_pChatListBox->AddText("", GlobalText[374], SEASON3B::TYPE_ERROR_MESSAGE);
 		break;
@@ -9856,15 +9833,12 @@ void ReceiveProgressQuestRequestReward(BYTE* ReceiveBuffer)
 	g_pMyQuestInfoWindow->SetSelQuestRequestReward();
 }
 
-#ifdef ASG_FIX_QUEST_PROTOCOL_ADD
 void ReceiveProgressQuestListReady(BYTE* ReceiveBuffer)
 {
 	g_QuestMng.SetQuestIndexByEtcList(NULL, 0);
 	SendRequestProgressQuestList();
 	SendRequestQuestByEtcEPList();
 }
-#endif	// ASG_FIX_QUEST_PROTOCOL_ADD
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
 
 void ReceiveGensJoining(BYTE* ReceiveBuffer)
@@ -9918,8 +9892,6 @@ void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 	}
 }
 
-
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 void ReceiveNPCDlgUIStart(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_NPC_CLICK pData = (LPPMSG_ANS_NPC_CLICK)ReceiveBuffer;
@@ -9930,7 +9902,6 @@ void ReceiveNPCDlgUIStart(BYTE* ReceiveBuffer)
 		g_pNewUISystem->Show(SEASON3B::INTERFACE_NPC_DIALOGUE);
 	}
 }
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 
 #ifdef PBG_ADD_GENSRANKING
 void ReceiveReward(BYTE* ReceiveBuffer)
@@ -10204,18 +10175,13 @@ void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
 
 	if( 0 == Data->m_vSvrInfo.m_wMapSvrPort	)
 	{
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		g_bReponsedMoveMapFromServer = TRUE;
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 		LoadingWorld = 0;
 
 		Teleport = false;
 		return;
 	}
 
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
 	g_PortalMgr.Reset();
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
 
     g_csMapServer.ConnectChangeMapServer( Data->m_vSvrInfo );
 }
@@ -13491,7 +13457,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0xA4:
 		ReceiveQuestMonKillInfo(ReceiveBuffer);
 		break;
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 	case 0xF6:
 		{
 			LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
@@ -13530,16 +13495,12 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			case 0x1B:
 				ReceiveProgressQuestRequestReward(ReceiveBuffer);
 				break;
-#ifdef ASG_FIX_QUEST_PROTOCOL_ADD
 			case 0x20:
 				ReceiveProgressQuestListReady(ReceiveBuffer);
 				break;
-#endif	// ASG_FIX_QUEST_PROTOCOL_ADD
 			}
 		}
 		break;
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
-
 #ifdef ASG_ADD_GENS_SYSTEM
 	case 0xF8:
 		{
@@ -13579,7 +13540,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 		}
 		break;
 #endif	// ASG_ADD_GENS_SYSTEM
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	case 0xF9:
 		{
 			LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
@@ -13591,7 +13551,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 		}
 		break;
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 
     case 0xA7:
         ReceivePetCommand ( ReceiveBuffer );
@@ -13603,7 +13562,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
         ReceivePetInfo ( ReceiveBuffer );
         break;
 		
-#ifdef YDG_ADD_NEW_DUEL_PROTOCOL
 	case 0xAA:
 		{
 			LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
@@ -13651,24 +13609,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 		}
 		break;
-#else	// YDG_ADD_NEW_DUEL_PROTOCOL
-#ifdef DUEL_SYSTEM
-	case 0xAA:
-		ReplyDuelStart( ReceiveBuffer );
-		break;
-	case 0xAB:
-		ReplyDuelEnd( ReceiveBuffer );
-		break;
-	case 0xAC:
-		NotifyDuelStart( ReceiveBuffer );
-		break;
-	case 0xAD:
-		NotifyDuelScore( ReceiveBuffer );
-		break;
-#endif // DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_PROTOCOL
-#ifdef LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
-		//제국 수호군
 	case 0xF7:
 		{
 			LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
@@ -13688,7 +13628,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			}
 		}
 		break;
-#endif //LDK_ADD_EMPIREGUARDIAN_PROTOCOLS
 	case 0x3F:
 		{
 			int subcode;

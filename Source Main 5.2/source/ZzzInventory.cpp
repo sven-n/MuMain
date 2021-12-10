@@ -1443,44 +1443,26 @@ void RepairAllGold ( void )
 				continue;
 
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-#ifdef LEM_FIX_SHOPITEM_DURABILITY_REPAIRGOLD
-		#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
+
 			if( pItem->Type >= ITEM_WING+130 && pItem->Type <= ITEM_WING+134 )
 				continue;
-		#endif
-		#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGSAPPHIRE
 			if( pItem->Type == ITEM_HELPER+109 )
 				continue;
-		#endif
-		#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGRUBY
 			if( pItem->Type == ITEM_HELPER+110 )
 				continue;
-		#endif
-		#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGTOPAZ
 			if( pItem->Type == ITEM_HELPER+111 )
 				continue;
-		#endif
-		#ifdef LDS_ADD_INGAMESHOP_ITEM_RINGAMETHYST
 			if( pItem->Type == ITEM_HELPER+112 )
 				continue;
-		#endif
-		#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETRUBY
 			if( pItem->Type == ITEM_HELPER+113 )
 				continue;
-		#endif
-		#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETEMERALD
 			if( pItem->Type == ITEM_HELPER+114 )
 				continue;
-		#endif
-		#ifdef LDS_ADD_INGAMESHOP_ITEM_AMULETSAPPHIRE
 			if( pItem->Type == ITEM_HELPER+115 )
 				continue;
-		#endif
-		#ifdef YDG_ADD_CS7_CRITICAL_MAGIC_RING
 			if( pItem->Type == ITEM_HELPER+107 )
 				continue;
-		#endif			
-#endif	// LEM_FIX_SHOPITEM_DURABILITY_REPAIRGOLD
+
 #ifdef LEM_ADD_LUCKYITEM
 		if( Check_ItemAction( pItem, eITEM_REPAIR ) )	continue;
 #endif // LEM_ADD_LUCKYITEM
@@ -4351,7 +4333,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		sprintf(TextList[TextNum],GlobalText[579]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
     }
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	else if( ITEM_WING+130 <= ip->Type && 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		ip->Type <= ITEM_WING+135
@@ -4381,10 +4362,9 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 				TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 			}break;
 		}
-		sprintf(TextList[TextNum],GlobalText[579]);             //  이동 속도 향상.
+		sprintf(TextList[TextNum],GlobalText[579]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 	else if ( ip->Type==ITEM_HELPER+3 )
     {
 		sprintf(TextList[TextNum],GlobalText[577],15 );
@@ -5794,7 +5774,6 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 		return;
 	}
 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 	if( ITEM_WING+130 <= ip->Type && 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		ip->Type <= ITEM_WING+135
@@ -5805,7 +5784,6 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 	{
 		return;
 	}
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 
 	if( ITEM_POTION+114 <= ip->Type && ip->Type <= ITEM_POTION+119)
 	{
@@ -7360,7 +7338,6 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
 
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 		else if( ITEM_WING+130 <= o->Type && 
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			o->Type <= ITEM_WING+135
@@ -7372,7 +7349,6 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			glColor3f ( 0.9f, 0.53f, 0.13f );
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 
 		else if( MODEL_POTION+114 <= o->Type && o->Type <= MODEL_POTION+119 )
 		{
@@ -7800,7 +7776,6 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 
 			if ( Index==EQUIPMENT_WING)
 			{
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 				if (Type==ITEM_WING+39 || 
 					Type==ITEM_HELPER+30 || 
 					Type==ITEM_WING+130 ||
@@ -7810,9 +7785,6 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 					Type==ITEM_WING+135||
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 					Type==ITEM_WING+40 )
-#else //LDK_ADD_INGAMESHOP_SMALL_WING
-				if (Type==ITEM_WING+39 || Type==ITEM_HELPER+30 || Type==ITEM_WING+40)
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 				{
 					DeleteCloth(Hero, &Hero->Object);
 				}

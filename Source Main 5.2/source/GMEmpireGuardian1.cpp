@@ -913,9 +913,6 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-#ifdef KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
-
-#ifdef LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER
 	case MODEL_MONSTER01+178:
 		{
 			// HeadTargetAngle
@@ -952,32 +949,6 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			VectorCopy( o->Angle, o->EyeRight3 );
 		}
 		return true;
-
-#else // LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER
-	case MODEL_MONSTER01+178:	// ¼öÈ£±º ¹æÆÐº´
-		{
-			if( o->CurrentAction == MONSTER01_ATTACK2 )
-			{
-				if( 4.0f <= o->AnimationFrame && o->AnimationFrame < 5.0f )
-				{
-					vec3_t vLook, vPosition, vLight;
-					float matRotate[3][4];
-					Vector(0.0f, -100.0f, 100.0f, vPosition );
-					AngleMatrix ( o->Angle, matRotate );
-					VectorRotate( vPosition, matRotate, vLook );
-					VectorAdd( o->Position, vLook, vPosition );
-
-					Vector(0.8f, 0.8f, 1.0f, vLight);
-					
-					CreateEffect(MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2, vPosition, o->Angle, vLight, 0, o);
-				}
-			}
-		}
-		break;
-#endif // LDS_ADD_EG_ADDMONSTER_ACTION_GUARDIANDEFENDER
-
-#endif // KJH_ADD_EG_MONSTER_GUARDIANDEFENDER_EFFECT
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 	case MODEL_MONSTER01+179:
 		{
 			vec3_t vRelative, vLight, vPos;
@@ -1049,7 +1020,6 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		return true;
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 	} //switch end
 
 	return false;
@@ -1070,7 +1040,6 @@ void GMEmpireGuardian1::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 	
 	switch(o->Type)
 	{
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 	case MODEL_MONSTER01+166:
 		{
 			float Start_Frame = 0.0f;
@@ -1130,8 +1099,6 @@ void GMEmpireGuardian1::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-	
 	case MODEL_MONSTER01+171:
 		{
 			switch(o->CurrentAction)
@@ -1302,7 +1269,6 @@ void GMEmpireGuardian1::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			} // attack switch end
 		}
 		break;
-#ifdef LDK_ADD_EG_MONSTER_KNIGHTS
 	case MODEL_MONSTER01+180:
 		{
 			if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1331,8 +1297,6 @@ void GMEmpireGuardian1::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-#endif	// LDK_ADD_EG_MONSTER_KNIGHTS
-#ifdef ASG_ADD_EG_MONSTER_GUARD_EFFECT
 	case MODEL_MONSTER01+181:
 		{
 			float Start_Frame = 0.f;
@@ -1365,7 +1329,6 @@ void GMEmpireGuardian1::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 			}
 		}
 		break;
-#endif	// ASG_ADD_EG_MONSTER_GUARD_EFFECT
 	} //switch end
 }
 
@@ -1599,21 +1562,12 @@ bool GMEmpireGuardian1::RenderObjectVisual( OBJECT* o, BMD* b )
 			Vector(flumi, flumi, flumi, vLight1);
 			Vector(0.9f, 0.1f, 0.1f, vLight2);
 			b->TransformPosition(BoneTransform[2], vRelativePos, vPos);
-#ifdef LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
-			CreateSprite(BITMAP_SHINY+6, vPos, 0.5f, vLight2, o );
-			CreateSprite(BITMAP_SHINY+6, vPos, fScale, vLight1, o );
-			Vector(3.f, -3.f, -3.5f, vRelativePos);
-			b->TransformPosition(BoneTransform[3], vRelativePos, vPos);
-			CreateSprite(BITMAP_SHINY+6, vPos, 0.5f, vLight2, o );
-			CreateSprite(BITMAP_SHINY+6, vPos, fScale, vLight1, o );
-#else // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
 			CreateSprite(BITMAP_SHINY+5, vPos, 0.5f, vLight2, o );
 			CreateSprite(BITMAP_SHINY+5, vPos, fScale, vLight1, o );
 			Vector(3.f, -3.f, -3.5f, vRelativePos);
 			b->TransformPosition(BoneTransform[3], vRelativePos, vPos);
 			CreateSprite(BITMAP_SHINY+5, vPos, 0.5f, vLight2, o );
 			CreateSprite(BITMAP_SHINY+5, vPos, fScale, vLight1, o );
-#endif // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
 		}
 		return true;
 
@@ -2107,17 +2061,6 @@ bool GMEmpireGuardian1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 			Vector(0.0f, 0.0f, 10.0f, vRelative);
 			b->TransformByObjectBone(vPos, o, 42, vRelative);
 			CreateSprite(BITMAP_LIGHT, vPos, 1.0f+fLumi1, vLight, o);
-			
-			// 			// Ä®³¯ ¹ß±¤È¿°ú
-			// 			Vector(0.0f, 0.0f, -10.0f, vRelative);
-			// 			b->TransformByObjectBone(vPos, o, 43, vRelative);
-			// 			CreateSprite(BITMAP_LIGHT, vPos, 1.0f+fLumi1, vLight, o);
-			// 			
-			// 			// Ä®³¯ ¹ß±¤È¿°ú
-			// 			Vector(0.0f, 0.0f, 10.0f, vRelative);
-			// 			b->TransformByObjectBone(vPos, o, 43, vRelative);
-			//  			CreateSprite(BITMAP_LIGHT, vPos, 1.0f+fLumi1, vLight, o);
-			
 			
 			float fScale = 1.2f;
 			for( int i = 50; i <= 55; ++i )

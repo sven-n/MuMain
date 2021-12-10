@@ -1,5 +1,4 @@
 // GameCensorship.cpp: implementation of the CGameCensorship class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -8,11 +7,6 @@
 
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 
 SEASON3A::CGameCensorship::CGameCensorship()
 {
@@ -148,53 +142,24 @@ void SEASON3A::CGameCensorship::SetState(DWORD dwState)
 	{
 	case STATE_LOADING:
 		{
-#ifdef PBG_ADD_NEWLOGO_IMAGECHANGE
-#ifdef PBG_MOD_GAMECENSORSHIP_RED
-			m_ImageSprite[SPRITE_18].SetPosition((iScreenWidth-iWidth*2), 5);
-#else //PBG_MOD_GAMECENSORSHIP_RED
 			m_ImageSprite[SPRITE_12].SetPosition((iScreenWidth-iWidth*5), 5);
 			m_ImageSprite[SPRITE_15].SetPosition((iScreenWidth-iWidth*4), 5);
 			m_ImageSprite[SPRITE_18].SetPosition((iScreenWidth-iWidth*3), 5);
 			m_ImageSprite[SPRITE_FEAR].SetPosition((iScreenWidth-iWidth*2), 5);
-#endif //PBG_MOD_GAMECENSORSHIP_RED
 			m_ImageSprite[SPRITE_VIOLENCE].SetPosition((iScreenWidth-iWidth*1), 5);
-#else //PBG_ADD_NEWLOGO_IMAGECHANGE
 			m_ImageSprite[SPRITE_12].SetPosition((iScreenWidth-iWidth*5), 62);
 			m_ImageSprite[SPRITE_15].SetPosition((iScreenWidth-iWidth*4), 62);
 			m_ImageSprite[SPRITE_18].SetPosition((iScreenWidth-iWidth*3), 62);
 			m_ImageSprite[SPRITE_FEAR].SetPosition((iScreenWidth-iWidth*2), 62);
 			m_ImageSprite[SPRITE_VIOLENCE].SetPosition((iScreenWidth-iWidth*1), 62);
-#endif //PBG_ADD_NEWLOGO_IMAGECHANGE
 		}
 		break;
-#ifndef PBG_FIX_GAMECENSORSHIP_1215
-	case STATE_12:
-		{
-			m_ImageSprite[SPRITE_12].SetPosition(iScreenWidth-iWidth*3, 0);
-			m_ImageSprite[SPRITE_FEAR].SetPosition(iScreenWidth-iWidth*2, 0);
-			m_ImageSprite[SPRITE_VIOLENCE].SetPosition(iScreenWidth-iWidth, 0);
-		}
-		break;
-	case STATE_15:
-		{
-			m_ImageSprite[SPRITE_15].SetPosition(iScreenWidth-iWidth*3, 0);
-			m_ImageSprite[SPRITE_FEAR].SetPosition(iScreenWidth-iWidth*2, 0);
-			m_ImageSprite[SPRITE_VIOLENCE].SetPosition(iScreenWidth-iWidth, 0);
-		}
-		break;
-#endif //PBG_FIX_GAMECENSORSHIP_1215
-#ifdef PBG_FIX_GAMECENSORSHIP_1215
 	case STATE_12:
 	case STATE_15:
-#endif //PBG_FIX_GAMECENSORSHIP_1215
 	case STATE_18:
 		{
-#ifdef PBG_MOD_GAMECENSORSHIP_RED
-			m_ImageSprite[SPRITE_18].SetPosition(iScreenWidth-iWidth*2, 0);
-#else //PBG_MOD_GAMECENSORSHIP_RED
 			m_ImageSprite[SPRITE_18].SetPosition(iScreenWidth-iWidth*3, 0);
 			m_ImageSprite[SPRITE_FEAR].SetPosition(iScreenWidth-iWidth*2, 0);
-#endif //PBG_MOD_GAMECENSORSHIP_RED
 			m_ImageSprite[SPRITE_VIOLENCE].SetPosition(iScreenWidth-iWidth, 0);
 		}
 		break;

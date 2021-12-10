@@ -1877,17 +1877,13 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-#ifdef LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD
 			else if( pItem->Type==ITEM_HELPER+58 && gCharacterManager.GetBaseClass( Hero->Class )!=CLASS_DARK_LORD )
 			{
 				SEASON3B::CreateOkMessageBox(GlobalText[1905]);
 				return true;				
 			}
-#endif // LDS_ADD_NOTICEBOX_STATECOMMAND_ONLYUSEDARKLORD
-			//////////////////////////////////////////////////////////////////////////
 			else if ( pItem->Type==ITEM_HELPER+29 )
 			{
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 				if( true == IsUnitedMarketPlace() )
 				{
 					char	szOutputText[512];
@@ -1896,7 +1892,6 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					SEASON3B::CreateOkMessageBox(szOutputText);
 					return true;
 				}
-#endif // LDS_ADD_UI_UNITEDMARKETPLACE
 
 				if(Hero->SafeZone == false)
 				{

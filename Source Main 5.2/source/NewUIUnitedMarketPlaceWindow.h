@@ -1,13 +1,6 @@
 // NewUIUnitedMarketPlaceWindow.h: interface for the CNewUIUnitedMarketPlaceWindow class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUIUNITEDMARKETPLACEWINDOW_H__CA8ADA8A_CF29_46AA_A5BF_9A6F0E935AEB__INCLUDED_)
-#define AFX_NEWUIUNITEDMARKETPLACEWINDOW_H__CA8ADA8A_CF29_46AA_A5BF_9A6F0E935AEB__INCLUDED_
-
 #pragma once
-
-#ifdef LDS_ADD_UI_UNITEDMARKETPLACE
 
 #include "NewUIBase.h"
 #include "NewUIButton.h"
@@ -42,8 +35,8 @@ namespace SEASON3B
 		CNewUI3DRenderMng*		m_pNewUI3DRenderMng;
 		POINT m_Pos;
 		
-		CNewUIButton m_BtnEnter;		// 입장 버튼
-		CNewUIButton m_BtnClose;		// 닫기 버튼
+		CNewUIButton m_BtnEnter;
+		CNewUIButton m_BtnClose;
 		
 	public:
 		CNewUIUnitedMarketPlaceWindow();
@@ -84,6 +77,3 @@ namespace SEASON3B
 		BOOL m_bIsEnterButtonLocked;
 	};
 }
-#endif	// LDS_ADD_UI_UNITEDMARKETPLACE
-
-#endif // !defined(AFX_NEWUIUNITEDMARKETPLACEWINDOW_H__CA8ADA8A_CF29_46AA_A5BF_9A6F0E935AEB__INCLUDED_)

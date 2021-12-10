@@ -9375,7 +9375,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					pCloth[2].AddCollisionSphere( -10.f, -10.0f, 20.0f, 27.0f, 17);
 					pCloth[2].AddCollisionSphere( 10.f, -10.0f, 20.0f, 27.0f, 17);
 				}
-#ifdef LDK_ADD_INGAMESHOP_SMALL_WING
 				else if(c->Wing.Type == MODEL_WING+130)
 				{
 					pCloth[2].Create( o, 19, 0.0f, 8.0f, 10.0f, 10, 10, 100.0f, 100.0f, BITMAP_ROBE+7, BITMAP_ROBE+7, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA );
@@ -9384,7 +9383,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					pCloth[2].AddCollisionSphere( -10.f, -10.0f, 20.0f, 27.0f, 17);
 					pCloth[2].AddCollisionSphere( 10.f, -10.0f, 20.0f, 27.0f, 17);
 				}
-#endif //LDK_ADD_INGAMESHOP_SMALL_WING
 				else
 				{
 					// 

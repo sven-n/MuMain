@@ -1,29 +1,19 @@
 //*****************************************************************************
 // File: QuestMng.h
 //*****************************************************************************
-
-#if !defined(AFX_QUESTMNG_H__1ACBD446_412D_488D_9E0F_AC5BC22BEFE8__INCLUDED_)
-#define AFX_QUESTMNG_H__1ACBD446_412D_488D_9E0F_AC5BC22BEFE8__INCLUDED_
-
 #pragma once
-
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 
 #include "WSclient.h"
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 #define QM_MAX_ND_ANSWER	10
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 #define QM_MAX_ANSWER		5
 #define QM_MAX_REQUEST_REWARD_TEXT_LEN	64
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 struct SNPCDialogue
 {
 	int		m_nNPCWords;
 	int		m_anAnswer[QM_MAX_ND_ANSWER*2];
 };
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 
 #pragma pack(push, 1)
 struct SQuestProgress
@@ -58,7 +48,6 @@ struct SQuestReward
 	ITEM*	m_pItem;
 };
 
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 struct SQuestRequestReward
 {
 	BYTE	m_byRequestCount;
@@ -68,15 +57,6 @@ struct SQuestRequestReward
 	SQuestRequest	m_aRequest[5];
 	SQuestReward	m_aReward[5];
 };
-#else	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-struct SQuestRequestReward
-{
-	BYTE	m_byRequestCount;
-	BYTE	m_byRewardCount;
-	SQuestRequest	m_aRequest[5];
-	SQuestReward	m_aReward[5];
-};
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 
 enum REQUEST_REWARD_CLASSIFY
 {
@@ -96,9 +76,7 @@ struct SRequestRewardText
 	ITEM*	m_pItem;
 };
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 typedef std::map<DWORD, SNPCDialogue> NPCDialogueMap;
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 typedef std::map<DWORD, SQuestProgress> QuestProgressMap;
 typedef std::map<int, std::string> QuestWordsMap;
 typedef std::map<DWORD, SQuestRequestReward> QuestRequestRewardMap;
@@ -107,9 +85,7 @@ typedef std::list<DWORD> DWordList;
 class CQuestMng  
 {
 protected:
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	NPCDialogueMap			m_mapNPCDialogue;
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 	QuestProgressMap		m_mapQuestProgress;
 	QuestWordsMap			m_mapQuestWords;
 	QuestRequestRewardMap	m_mapQuestRequestReward;
@@ -137,11 +113,9 @@ public:
 	void SetCurQuestProgress(DWORD dwQuestIndex);
 
 	const char* GetWords(int nWordsIndex);
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	const char* GetNPCDlgNPCWords(DWORD dwDlgState);
 	const char* GetNPCDlgAnswer(DWORD dwDlgState, int nAnswer);
 	int GetNPCDlgAnswerResult(DWORD dwDlgState, int nAnswer);
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 	const char* GetNPCWords(DWORD dwQuestIndex);
 	const char* GetPlayerWords(DWORD dwQuestIndex);
 	const char* GetAnswer(DWORD dwQuestIndex, int nAnswer);
@@ -164,15 +138,9 @@ public:
 	bool IsIndexInCurQuestIndexList(DWORD dwQuestIndex);
 
 protected:
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 	void LoadNPCDialogueScript();
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 	void LoadQuestProgressScript();
 	void LoadQuestWordsScript();
 };
 
 extern CQuestMng g_QuestMng;
-
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
-
-#endif // !defined(AFX_QUESTMNG_H__1ACBD446_412D_488D_9E0F_AC5BC22BEFE8__INCLUDED_)

@@ -36,7 +36,6 @@ void CQuestMng::LoadQuestScript()
 	LoadQuestWordsScript();
 }
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 void CQuestMng::LoadNPCDialogueScript()
 {
 	FILE* fp = ::fopen(QM_NPCDIALOGUE_FILE, "rb");
@@ -67,7 +66,6 @@ void CQuestMng::LoadNPCDialogueScript()
 	
 	::fclose(fp);
 }
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 
 void CQuestMng::LoadQuestProgressScript()
 {
@@ -151,13 +149,9 @@ void CQuestMng::SetQuestRequestReward(BYTE* pbyRequestRewardPacket)
 	{
 		for (i = 0; i < pOldRequestReward->m_byRequestCount; ++i)
 			g_pNewItemMng->DeleteItem(pOldRequestReward->m_aRequest[i].m_pItem);
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 		BYTE byRewardCount
 			= pOldRequestReward->m_byGeneralRewardCount + pOldRequestReward->m_byRandRewardCount;
 		for (i = 0; i < byRewardCount; ++i)
-#else	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-		for (i = 0; i < pOldRequestReward->m_byRewardCount; ++i)
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 			g_pNewItemMng->DeleteItem(pOldRequestReward->m_aReward[i].m_pItem);
 	}
 
@@ -195,15 +189,10 @@ void CQuestMng::SetQuestRequestReward(BYTE* pbyRequestRewardPacket)
 
 	if (pRewardPacket->m_dwType == QUEST_REWARD_NONE || pRequestRewardPacket->m_byRewardCount == 0)
 	{
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 		sRequestReward.m_byGeneralRewardCount = 1;
-#else	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-		sRequestReward.m_byRewardCount = 1;
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 	}
 	else
 	{
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 		sRequestReward.m_byRandGiveCount = pRequestRewardPacket->m_byRandRewardCount;
 
 		BYTE byGeneralCount = 0;
@@ -241,19 +230,6 @@ void CQuestMng::SetQuestRequestReward(BYTE* pbyRequestRewardPacket)
 
 		for (i = 0; i < sRequestReward.m_byRandRewardCount; ++i)
 			sRequestReward.m_aReward[byGeneralCount++] = aTempRandReward[i];
-#else	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-		sRequestReward.m_byRewardCount = pRequestRewardPacket->m_byRewardCount;
-		for (i = 0; i < sRequestReward.m_byRewardCount; ++i)
-		{
-			sRequestReward.m_aReward[i].m_dwType = pRewardPacket->m_dwType;
-			sRequestReward.m_aReward[i].m_wIndex = pRewardPacket->m_wIndex;
-			sRequestReward.m_aReward[i].m_dwValue = pRewardPacket->m_dwValue;
-			if (pRewardPacket->m_dwType == QUEST_REWARD_ITEM)
-				sRequestReward.m_aReward[i].m_pItem
-				= g_pNewItemMng->CreateItem(pRewardPacket->m_byItemInfo);
-			++pRewardPacket;
-		}
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 	}
 
 	m_mapQuestRequestReward[dwQuestIndex] = sRequestReward;
@@ -331,7 +307,6 @@ const char* CQuestMng::GetWords(int nWordsIndex)
 	return iter->second.c_str();
 }
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
 const char* CQuestMng::GetNPCDlgNPCWords(DWORD dwDlgState)
 {
 	if (0 == m_nNPCIndex)
@@ -385,7 +360,6 @@ int CQuestMng::GetNPCDlgAnswerResult(DWORD dwDlgState, int nAnswer)
 
 	return iter->second.m_anAnswer[nAnswer*2+1];
 }
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 
 const char* CQuestMng::GetNPCWords(DWORD dwQuestIndex)
 {
@@ -623,9 +597,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 			break;
 
 		case QUEST_REQUEST_BUFF:
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 			{
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
 				if (pRequestInfo->m_dwCurValue == 0)
 #else	// ASG_ADD_TIME_LIMIT_QUEST
@@ -640,26 +612,9 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
 				const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRequestInfo->m_wIndex);
 				::sprintf(aDest[nLine].m_szText, "Bonus: %s", buffinfo.s_BuffName);
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 			}
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 			break;
 
-#ifdef ASG_ADD_QUEST_REQUEST_NPC_SEARCH
-		case QUEST_REQUEST_NPC_TALK:
-			if (pRequestInfo->m_dwCurValue == 0)
-			{
-				aDest[nLine].m_dwColor = ARGB(255, 255, 30, 30);
-				bRequestComplete = false;
-			}
-			else
-				aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
-
-			::sprintf(aDest[nLine].m_szText, "%s", GlobalText[3249]);
-			break;
-#endif	// ASG_ADD_QUEST_REQUEST_NPC_SEARCH
-
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 		case QUEST_REQUEST_EVENT_MAP_MON_KILL:
 		case QUEST_REQUEST_EVENT_MAP_BLOOD_GATE:
 		case QUEST_REQUEST_EVENT_MAP_USER_KILL:
@@ -739,12 +694,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 				::sprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex);
 			}
 			break;
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 		}
 		aDest[nLine].m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN - 1] = 0;
 	}
 
-#ifdef ASG_ADD_QUEST_REQUEST_REWARD_TYPE
 	BYTE byRewardCount;
 	SQuestReward* pRewardInfo;
 	i = 0;
@@ -813,63 +766,6 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 			aDest[nLine].m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN - 1] = 0;
 		}
 	}
-#else	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-	aDest[nLine].m_hFont = g_hFontBold;
-	aDest[nLine].m_dwColor = ARGB(255, 179, 230, 77);
-	::strcpy(aDest[nLine++].m_szText, GlobalText[2810]);
-
-	SQuestReward* pRewardInfo;
-	for (i = 0; i < pRequestReward->m_byRewardCount; ++i, ++nLine)
-	{
-		pRewardInfo = &pRequestReward->m_aReward[i];
-
-		aDest[nLine].m_hFont = g_hFont;
-		aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
-		aDest[nLine].m_eRequestReward = RRC_REWARD;
-		aDest[nLine].m_dwType = pRewardInfo->m_dwType;
-		aDest[nLine].m_wIndex = pRewardInfo->m_wIndex;
-		aDest[nLine].m_pItem = pRewardInfo->m_pItem;
-
-		switch (pRewardInfo->m_dwType)
-		{
-		case QUEST_REWARD_NONE:
-			::strcpy(aDest[nLine].m_szText, GlobalText[1361]);
-			break;
-
-		case QUEST_REWARD_EXP:
-			::sprintf(aDest[nLine].m_szText, "Exp.: %lu", pRewardInfo->m_dwValue);
-			break;
-
-		case QUEST_REWARD_ZEN:
-			::sprintf(aDest[nLine].m_szText, "Zen: %lu", pRewardInfo->m_dwValue);
-			break;
-			
-		case QUEST_REWARD_ITEM:
-			char szItemName[32];
-			::GetItemName((int)pRewardInfo->m_pItem->Type, (pRewardInfo->m_pItem->Level>>3)&15,
-				szItemName);
-			::sprintf(aDest[nLine].m_szText, "Item: %s x %lu",
-				szItemName, pRewardInfo->m_dwValue);
-			break;
-			
-		case QUEST_REWARD_BUFF:
-			{
-				const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRewardInfo->m_wIndex);
-				::sprintf(aDest[nLine].m_szText, "Bonus: %s x %lu%s", buffinfo.s_BuffName,
-					pRewardInfo->m_dwValue, GlobalText[2300]);
-			}
-			break;
-
-#ifdef ASG_ADD_GENS_SYSTEM
-		case QUEST_REWARD_CONTRIBUTE:
-			::sprintf(aDest[nLine].m_szText, GlobalText[2994], pRewardInfo->m_dwValue);
-			break;
-#endif	// ASG_ADD_GENS_SYSTEM
-		}
-		aDest[nLine].m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN - 1] = 0;
-	}
-#endif	// ASG_ADD_QUEST_REQUEST_REWARD_TYPE
-
 	return bRequestComplete;
 }
 

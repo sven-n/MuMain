@@ -7,8 +7,6 @@
 #include "wsclientinline.h"
 #include "CRTDBG.h"
 
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
-
 using namespace SEASON3B;
 
 #define ND_NPC_MAX_LINE_PER_PAGE		7
@@ -723,4 +721,3 @@ void CNewUINPCDialogue::ProcessGensRewardReceive(BYTE byResult)
 		break;
 	}
 }
-#endif	// ASG_ADD_UI_NPC_DIALOGUE

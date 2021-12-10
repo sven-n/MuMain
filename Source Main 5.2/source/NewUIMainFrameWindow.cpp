@@ -827,6 +827,48 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
 			PlayBuffer(SOUND_CLICK01);
 			return true;
 		}
+
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+		else if(m_BtnCShop.UpdateMouseEvent() == true)
+		{
+			if(g_pInGameShop->IsInGameShopOpen() == false)
+				return false;
+
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+			if( g_InGameShopSystem->IsScriptDownload() == true )
+			{
+				if( g_InGameShopSystem->ScriptDownload() == false )
+					return false;
+			}
+			
+			if( g_InGameShopSystem->IsBannerDownload() == true )
+			{
+				g_InGameShopSystem->BannerDownload();
+			}
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+			
+			if( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == false)
+			{
+				if( g_InGameShopSystem->GetIsRequestShopOpenning() == false )		
+				{
+					SendRequestIGS_CashShopOpen(0);
+					g_InGameShopSystem->SetIsRequestShopOpenning(true);
+
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+					g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+
+				}
+			}
+			else
+			{
+				SendRequestIGS_CashShopOpen(1);
+				g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
+			}		
+
+			return true;
+		}
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 	}
 
 	return false;
@@ -1333,11 +1375,9 @@ void SEASON3B::CNewUISkillList::LoadImages()
 	LoadBitmap("Interface\\newui_command.jpg", IMAGE_COMMAND, GL_LINEAR);
 	LoadBitmap("Interface\\newui_skillbox.jpg", IMAGE_SKILLBOX, GL_LINEAR);
 	LoadBitmap("Interface\\newui_skillbox2.jpg", IMAGE_SKILLBOX_USE, GL_LINEAR);
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	LoadBitmap("Interface\\newui_non_skill.jpg", IMAGE_NON_SKILL1, GL_LINEAR);
 	LoadBitmap("Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
 	LoadBitmap("Interface\\newui_non_command.jpg", IMAGE_NON_COMMAND, GL_LINEAR);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	LoadBitmap("Interface\\newui_skill3.jpg", IMAGE_SKILL3, GL_LINEAR);
 	LoadBitmap("Interface\\newui_non_skill3.jpg", IMAGE_NON_SKILL3, GL_LINEAR);
@@ -2190,18 +2230,14 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 /*박종훈*/
 	if( bySkillType>=AT_PET_COMMAND_DEFAULT && bySkillType<AT_PET_COMMAND_END )
 	{
-		int iCharisma = CharacterAttribute->Charisma+CharacterAttribute->AddCharisma;	// 마이너스 열매 작업
+		int iCharisma = CharacterAttribute->Charisma+CharacterAttribute->AddCharisma;
 		PET_INFO PetInfo;
 		giPetManager::GetPetInfo(PetInfo, 421-PET_TYPE_DARK_SPIRIT);
 		int RequireCharisma = (185+(PetInfo.m_wLevel*15));
 		if( RequireCharisma > iCharisma ) 
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 		{
 			bCantSkill = true;
 		}
-#else // KJH_ADD_SKILLICON_RENEWAL
-			glColor3f(1.f, 0.5f, 0.5f);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 	}
 #endif //PJH_FIX_SPRIT
 	if( (bySkillType == AT_SKILL_INFINITY_ARROW) || (bySkillType == AT_SKILL_SWELL_OF_MAGICPOWER))

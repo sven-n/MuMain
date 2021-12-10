@@ -105,13 +105,8 @@ void CCameraMove::AddWayPoint(int iGridX, int iGridY, float fCameraMoveAccel, fl
 	pWayPoint->fCameraY = iGridY*TERRAIN_SCALE;
 	pWayPoint->fCameraZ = RequestTerrainHeight(pWayPoint->fCameraX,pWayPoint->fCameraY);
 	
-#ifdef YDG_MOD_TOURMODE_MAXSPEED
 	if(fCameraMoveAccel > 40.f)
 		fCameraMoveAccel = 40.f;
-#else	// YDG_MOD_TOURMODE_MAXSPEED
-	if(fCameraMoveAccel > 20.f)
-		fCameraMoveAccel = 20.f;
-#endif	// YDG_MOD_TOURMODE_MAXSPEED
 	if(fCameraMoveAccel < 0.1f)
 		fCameraMoveAccel = 0.1f;
 	pWayPoint->fCameraMoveAccel = fCameraMoveAccel;
@@ -144,13 +139,8 @@ void CCameraMove::SetCameraMoveAccel(int iTileIndex, float fCameraMoveAccel)
 	t_WayPointList::iterator iter = m_listWayPoint.begin();
 	for(; iter != m_listWayPoint.end(); iter++) {
 		if((*iter)->iIndex == iTileIndex) {
-#ifdef YDG_MOD_TOURMODE_MAXSPEED
 			if(fCameraMoveAccel > 40.f)
 				fCameraMoveAccel = 40.f;
-#else	// YDG_MOD_TOURMODE_MAXSPEED
-			if(fCameraMoveAccel > 20.f)
-				fCameraMoveAccel = 20.f;
-#endif	// YDG_MOD_TOURMODE_MAXSPEED
 			if(fCameraMoveAccel < 0.1f)
 				fCameraMoveAccel = 0.1f;
 

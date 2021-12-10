@@ -109,9 +109,7 @@ void CHARACTER::Initialize()
 	InitPetInfo(PET_TYPE_DARK_HORSE);
 	InitPetInfo(PET_TYPE_DARK_SPIRIT);
 
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	for( int i = 0; i < 32; ++i ) OwnerID[i] = 0;
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
 	m_pPostMoveProcess	= NULL;
 

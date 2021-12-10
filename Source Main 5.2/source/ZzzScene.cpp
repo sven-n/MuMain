@@ -1503,12 +1503,7 @@ void LoadingScene(HDC hDC)
 	CUIMng& rUIMng = CUIMng::Instance();
 	if (!InitLoading)
 	{
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-		g_bReponsedMoveMapFromServer = FALSE;
-		LoadingWorld = 200;
-#else // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 		LoadingWorld = 9999999;
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 
 		InitLoading = true;
 		

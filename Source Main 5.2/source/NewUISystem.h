@@ -72,9 +72,6 @@
 #include "NewUIDoppelGangerWindow.h"
 #include "NewUIDoppelGangerFrame.h"
 #include "NewUIQuestProgress.h"
-#ifdef ASG_ADD_UI_NPC_MENU
-#include "NewUINPCMenu.h"
-#endif	// ASG_ADD_UI_NPC_MENU
 #include "NewUIQuestProgressByEtc.h"
 #include "NewUIEmpireGuardianNPC.h"
 #include "NewUIEmpireGuardianTimer.h"
@@ -367,9 +364,6 @@ namespace SEASON3B
 #define g_pDoppelGangerFrame SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewDoppelGangerFrame()
 #define g_pNPCDialogue SEASON3B::CNewUISystem::GetInstance()->GetUI_NewNPCDialogue()
 #define g_pQuestProgress SEASON3B::CNewUISystem::GetInstance()->GetUI_NewQuestProgress()
-#ifdef ASG_ADD_UI_NPC_MENU
-#define g_pNPCMenu SEASON3B::CNewUISystem::GetInstance()->GetUI_NewNPCMenu()
-#endif	// ASG_ADD_UI_NPC_MENU
 #define g_pQuestProgressByEtc SEASON3B::CNewUISystem::GetInstance()->GetUI_NewQuestProgressByEtc()
 #define g_pEmpireGuardianNPC SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewEmpireGuardianNPC()
 #define g_pEmpireGuardianTimer SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewEmpireGuardianTimer()

@@ -914,7 +914,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 
-#ifdef ASG_FIX_QUEST_PROTOCOL_ADD
 #define SendRequestQuestByEtcEPList()\
 {\
     CStreamPacketEngine spe;\
@@ -922,11 +921,9 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 	spe << (BYTE)0x21;\
     spe.Send();\
 }
-#endif	// ASG_FIX_QUEST_PROTOCOL_ADD
 #endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
 #ifdef ASG_ADD_GENS_SYSTEM
-
 #define SendRequestGensJoining(byInfluence)\
 {\
     CStreamPacketEngine spe;\
@@ -944,8 +941,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 
-#endif	// ASG_ADD_GENS_SYSTEM
-#ifdef PBG_ADD_GENSRANKING
 #define SendRequestGensReward(byInfluence)\
 {\
     CStreamPacketEngine spe;\
@@ -962,7 +957,7 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 #endif //PBG_ADD_GENSRANKING
-#ifdef ASG_ADD_UI_NPC_DIALOGUE
+
 // (0xF6 0x0A)
 #define SendRequestQuestByNPCEPList()\
 {\
@@ -979,7 +974,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 	spe << (BYTE)0x31;\
     spe.Send();\
 }
-#endif	// ASG_ADD_UI_NPC_DIALOGUE
 
 __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pItem, int iDstType,int iDstIndex)
 {
@@ -998,7 +992,6 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 	else
 		splitType = ((BYTE)(pItem->Type>>5)&240);
 
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 	if( pItem->bPeriodItem == true )
 	{
 		splitType |= 0x02;
@@ -1008,7 +1001,6 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 	{
 		splitType |= 0x04;
 	}
-#endif // #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 
 	BYTE spareBits;
 	if (g_SocketItemMgr.IsSocketItem(pItem))

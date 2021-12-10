@@ -34,7 +34,6 @@ namespace SEASON3B
 		MAINFRAME_BTN_WINDOW,
 	};
 
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	enum KINDOFSKILL
 	{
 		KOS_COMMAND = 1,
@@ -44,7 +43,6 @@ namespace SEASON3B
 		KOS_SKILL3,
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	};
-#endif // KJH_ADD_SKILLICON_RENEWAL
 
 	class CNewUIItemHotKey
 	{
@@ -105,11 +103,9 @@ namespace SEASON3B
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 			IMAGE_SKILLBOX,
 			IMAGE_SKILLBOX_USE,
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 			IMAGE_NON_SKILL1,
 			IMAGE_NON_SKILL2,
 			IMAGE_NON_COMMAND,
-#endif // KJH_ADD_SKILLICON_RENEWAL
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			IMAGE_NON_SKILL3,
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -262,9 +258,7 @@ namespace SEASON3B
 		void RenderExperience();
 		void RenderHotKeyItemCount();
 		void RenderButtons();
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		void RenderCharInfoButton();
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 		void RenderFriendButton();
 		void RenderFriendButtonState();
 
@@ -292,10 +286,7 @@ namespace SEASON3B
 		CNewUIButton m_BtnFriend;
 		CNewUIButton m_BtnWindow;
 
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		bool m_bButtonBlink;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
-
 	};
 
 }

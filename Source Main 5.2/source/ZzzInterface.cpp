@@ -91,9 +91,6 @@ MovementSkill g_MovementSkill;
 
 const   float   AutoMouseLimitTime = (1.f * 60.f*60.f);
 int   LoadingWorld       = 0;
-#ifdef LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
-BOOL g_bReponsedMoveMapFromServer	= TRUE;
-#endif // LDS_FIX_DISABLE_INPUTJUNKKEY_WHEN_LORENMARKT_EX01
 int   ItemHelp           = 0;
 int   MouseUpdateTime    = 0;
 int   MouseUpdateTimeMax = 6;
@@ -3685,7 +3682,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					break;
 				}
 			}
-#ifdef LDS_ADD_MAP_UNITEDMARKETPLACE
 			else if(gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
 			{
 				switch(TargetType)
@@ -3698,7 +3694,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					break;
 				}
 			}
-#endif // LDS_ADD_MAP_UNITEDMARKETPLACE
 			if(Healing)
 			{
 				if(!gCharacterManager.IsFemale(c->Class))

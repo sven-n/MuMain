@@ -176,20 +176,16 @@ bool CNewUIDoppelGangerWindow::Render()
 	{
 		m_BtnEnter.Lock();
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-#ifdef YDG_FIX_DOPPELGANGER_BUTTON_COLOR
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(100, 100, 100, 255));
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_OVER, RGBA(100, 100, 100, 255));
-#endif	// YDG_FIX_DOPPELGANGER_BUTTON_COLOR
 		m_BtnEnter.ChangeTextColor(RGBA(100, 100, 100, 255));
 	}
 	else
 	{
 		m_BtnEnter.UnLock();
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-#ifdef YDG_FIX_DOPPELGANGER_BUTTON_COLOR
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 		m_BtnEnter.ChangeImgColor(BUTTON_STATE_OVER, RGBA(255, 255, 255, 255));
-#endif	// YDG_FIX_DOPPELGANGER_BUTTON_COLOR
 		m_BtnEnter.ChangeTextColor(RGBA(255, 255, 255, 255));
 	}
 	m_BtnEnter.Render();

@@ -331,10 +331,9 @@ void SEASON3B::CNewUICursedTempleSystem::LoadImages()
 	LoadBitmap("Interface\\newui_msgbox_back.jpg",			IMAGE_CURSEDTEMPLESYSTEM_BACK,		GL_LINEAR);
 	LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_CURSEDTEMPLESYSTEM_BTN,		GL_LINEAR);
 
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	LoadBitmap("Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
 	LoadBitmap("Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
-#endif // KJH_ADD_SKILLICON_RENEWAL
+
 }
 
 void SEASON3B::CNewUICursedTempleSystem::UnloadImages()
@@ -386,10 +385,8 @@ void SEASON3B::CNewUICursedTempleSystem::UnloadImages()
 	DeleteBitmap( IMAGE_CURSEDTEMPLESYSTEM_MINIMAP );
 	DeleteBitmap( IMAGE_CURSEDTEMPLESYSTEM_MINIMAPFRAME );
 
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	DeleteBitmap(IMAGE_SKILL2);
 	DeleteBitmap(IMAGE_NON_SKILL2);
-#endif // KJH_ADD_SKILLICON_RENEWAL
 }
 
 void SEASON3B::CNewUICursedTempleSystem::ResetCursedTempleSystemInfo()
@@ -837,10 +834,8 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 		RenderTipTextList(x,y-20,TextNum,0);
 	}
 
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	glColor4f ( 1.f, 1.f, 1.f, 1.f );
 	DisableAlphaBlend();
-#endif // KJH_ADD_SKILLICON_RENEWAL
 }
 
 void SEASON3B::CNewUICursedTempleSystem::RenderGameTime()
@@ -884,10 +879,8 @@ void SEASON3B::CNewUICursedTempleSystem::RenderMiniMap()
 
 	glColor4f ( 1.f, 1.f, 1.f, m_Alph );
 
-#ifdef KJH_ADD_SKILLICON_RENEWAL
 	x = 512.f; y = 232.f-53.f; Width=128.f; Height=53.f; 
 	RenderBitmap ( IMAGE_CURSEDTEMPLESYSTEM_SKILLFRAME, x, y, Width, Height, 0.f, 0.f, Width/128.f, Height/64.f );
-#endif // KJH_ADD_SKILLICON_RENEWAL
 
 	x = 512.f; y = 263.f; Width = 128.f; Height = 128.f;
 	RenderBitmap ( IMAGE_CURSEDTEMPLESYSTEM_MINIMAP, x, y, Width, Height, 0.f, 0.f, 1.f, 1.f );
