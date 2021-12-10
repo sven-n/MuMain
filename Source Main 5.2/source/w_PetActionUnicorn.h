@@ -1,11 +1,5 @@
 // w_PetActionUnicorn.h: interface for the w_PetActionUnicorn class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_W_PETACTIONUNICORN_H__3F921335_4F54_4FFA_8808_0869016403DA__INCLUDED_)
-#define AFX_W_PETACTIONUNICORN_H__3F921335_4F54_4FFA_8808_0869016403DA__INCLUDED_
-
-#ifdef LDK_ADD_CS7_UNICORN_PET
 
 #pragma once
 
@@ -62,7 +56,3 @@ private:
 	
 	//test
 };
-
-#endif //LDK_ADD_CS7_UNICORN_PET
-
-#endif // !defined(AFX_W_PETACTIONUNICORN_H__3F921335_4F54_4FFA_8808_0869016403DA__INCLUDED_)

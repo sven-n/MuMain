@@ -1,13 +1,6 @@
 // CNewUIEmpireGuardianNPC.h: interface for the CNewUIEmpireGuardianNPC class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_CNewUIEmpireGuardianNPC_H__C9BF91CC_CF17_459C_942F_51F6BBE2C11E__INCLUDED_)
-#define AFX_CNewUIEmpireGuardianNPC_H__C9BF91CC_CF17_459C_942F_51F6BBE2C11E__INCLUDED_
-
 #pragma once
-
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 
 #include "NewUIBase.h"
 #include "NewUIManager.h"
@@ -42,8 +35,8 @@ namespace SEASON3B
 		CNewUI3DRenderMng*		m_pNewUI3DRenderMng;
 
 		POINT				m_Pos;
-		CNewUIButton		m_btPositive;	// ¿‘¿Â.
-		CNewUIButton		m_btNegative;	// ¥›±‚.
+		CNewUIButton		m_btPositive;
+		CNewUIButton		m_btNegative;
 		bool				m_bCanClick;
 		
 	public:
@@ -79,7 +72,3 @@ namespace SEASON3B
 
 	};
 }
-#endif	// LDK_ADD_EMPIREGUARDIAN_UI
-
-#endif // !defined(AFX_CNewUIEmpireGuardianNPC_H__C9BF91CC_CF17_459C_942F_51F6BBE2C11E__INCLUDED_)
-

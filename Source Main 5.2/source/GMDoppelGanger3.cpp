@@ -1,11 +1,6 @@
 // GMDoppelGanger3.cpp: implementation of the CGMDoppelGanger3 class.
-//
 //////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
-
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-
 #include "GMDoppelGanger3.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -18,10 +13,6 @@
 #include "ZzzLodTerrain.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CGMDoppelGanger3Ptr CGMDoppelGanger3::Make()
 {
@@ -501,18 +492,6 @@ bool CGMDoppelGanger3::PlayMonsterSound(OBJECT* o)
 	
 	return g_DoppelGanger1.PlayMonsterSound(o);
 
-// 	float fDis_x, fDis_y;
-// 	fDis_x = o->Position[0] - Hero->Object.Position[0];
-// 	fDis_y = o->Position[1] - Hero->Object.Position[1];
-// 	float fDistance = sqrtf(fDis_x*fDis_x+fDis_y*fDis_y);
-// 	
-// 	if (fDistance > 500.0f) 
-// 		return true;
-// 
-// 	switch(o->Type)
-// 	{
-// 	}
-
 	return false; 
 }
 
@@ -520,4 +499,3 @@ void CGMDoppelGanger3::PlayObjectSound(OBJECT* o)
 {
 
 }
-#endif	// YDG_ADD_MAP_DOPPELGANGER3

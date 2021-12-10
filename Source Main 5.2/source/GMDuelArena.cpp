@@ -2,9 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef YDG_ADD_MAP_DUEL_ARENA
-
 #include "GMDuelArena.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -221,28 +218,13 @@ bool CGMDuelArena::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 	return false;
 }
 
-// 몬스터 사운드
 bool CGMDuelArena::PlayMonsterSound(OBJECT* o) 
 {
 	if(IsDuelArena() == false)
 		return false;
-	
-// 	float fDis_x, fDis_y;
-// 	fDis_x = o->Position[0] - Hero->Object.Position[0];
-// 	fDis_y = o->Position[1] - Hero->Object.Position[1];
-// 	float fDistance = sqrtf(fDis_x*fDis_x+fDis_y*fDis_y);
-// 	
-// 	if (fDistance > 500.0f) 
-// 		return true;
-// 
-// 	switch(o->Type)
-// 	{
-// 	}
-
 	return false; 
 }
 
-// 오브젝트 사운드
 void CGMDuelArena::PlayObjectSound(OBJECT* o)
 {
 
@@ -255,4 +237,3 @@ void CGMDuelArena::PlayBGM()
 		PlayMp3(g_lpszMp3[MUSIC_DUEL_ARENA]);
 	}
 }
-#endif	// YDG_ADD_MAP_DUEL_ARENA

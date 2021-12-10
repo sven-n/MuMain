@@ -8928,7 +8928,6 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 			//Vector(1.0f,0.5f,0.0f,b->BodyLight);
 		}
     }
-#ifdef CSK_ADD_GOLDCORPS_EVENT
 	else if(iMonsterIndex >= 493 && iMonsterIndex <= 502)
 	{
 		if(iMonsterIndex == 495)
@@ -8952,7 +8951,6 @@ void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderT
 			Vector(1.f, 0.6f, 0.1f, b->BodyLight);
 		}
 	}
-#endif // CSK_ADD_GOLDCORPS_EVENT
 	else
 	{
 		PartObjectColor(Type,Alpha,Bright,b->BodyLight, (RenderType&RENDER_EXTRA) ? true : false );

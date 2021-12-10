@@ -134,18 +134,11 @@ void RenderBlurs()
 			{
 				nTexture = BITMAP_BLUR;
 			}
-#ifdef PBG_ADD_PKFIELD
 			else if(Type == 5)
 			{
 				nTexture = BITMAP_BLUR+3;
 			}
-#endif //PBG_ADD_PKFIELD
-#if defined PBG_ADD_PKFIELD || defined LDS_ADD_EMPIRE_GUARDIAN
-			if(b->Owner->Level == 0 
-				&& (Type<=3 || ( Type >= 5 && Type <= 10) ))
-#else //PBG_ADD_PKFIELD || LDS_ADD_EMPIRE_GUARDIAN
-			if(b->Owner->Level == 0 && Type<=3 )
-#endif //PBG_ADD_PKFIELD
+			if(b->Owner->Level == 0 && (Type<=3 || ( Type >= 5 && Type <= 10) ))
 			{
               	EnableAlphaBlend();
 			}

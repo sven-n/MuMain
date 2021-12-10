@@ -2,8 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN3
-
 #include "GMEmpireGuardian3.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -1434,4 +1432,3 @@ void GMEmpireGuardian3::PlayBGM()
 		StopMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN3]);
 	}
 }
-#endif	// LDK_ADD_MAP_EMPIREGUARDIAN3

@@ -1,9 +1,6 @@
 // GMEmpireGuardian1.cpp: implementation of the GMEmpireGuardian1 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-
-#ifdef LDK_ADD_MAP_EMPIREGUARDIAN1
-
 #include "GMEmpireGuardian1.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -2915,4 +2912,3 @@ void GMEmpireGuardian1::PlayBGM()
 		StopMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN1]);
 	}
 }
-#endif	// LDK_ADD_MAP_EMPIREGUARDIAN1

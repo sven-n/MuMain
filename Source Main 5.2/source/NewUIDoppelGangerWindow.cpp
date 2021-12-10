@@ -15,8 +15,6 @@
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
 
-#ifdef YDG_ADD_DOPPELGANGER_UI
-
 using namespace SEASON3B;
 
 CNewUIDoppelGangerWindow::CNewUIDoppelGangerWindow()
@@ -119,27 +117,7 @@ bool CNewUIDoppelGangerWindow::Update()
 {
 	if(IsVisible())
 	{
-// 		for (int i = 0; i < 4; ++i)
-// 		{
-// 			if (g_DuelMgr.IsDuelChannelEnabled(i))
-// 				m_bChannelEnable[i] = TRUE;
-// 			else
-// 				m_bChannelEnable[i] = FALSE;
-// 
-// 			// 버튼 잠금
-// 			if (m_bChannelEnable[i] == TRUE && g_DuelMgr.IsDuelChannelJoinable(i))
-// 			{
-// 				m_BtnChannel[i].UnLock();
-// 				m_BtnChannel[i].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-// 				m_BtnChannel[i].ChangeTextColor(RGBA(255, 255, 255, 255));
-// 			}
-// 			else
-// 			{
-// 				m_BtnChannel[i].Lock();
-// 				m_BtnChannel[i].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-// 				m_BtnChannel[i].ChangeTextColor(RGBA(100, 100, 100, 255));
-// 			}
-// 		}
+
 	}
 	return true;
 }
@@ -331,4 +309,3 @@ void CNewUIDoppelGangerWindow::LockEnterButton(BOOL bLock)
 {
 	m_bIsEnterButtonLocked = bLock;
 }
-#endif	// YDG_ADD_DOPPELGANGER_UI

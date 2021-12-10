@@ -1,13 +1,7 @@
 // w_ObjectInfo.h: interface for the ObjectInfo class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_W_OBJECT_H__4FAC8EFA_AAC5_490A_B4A1_FD61801D8AE0__INCLUDED_)
-#define AFX_W_OBJECT_H__4FAC8EFA_AAC5_490A_B4A1_FD61801D8AE0__INCLUDED_
-
 #pragma once
 
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 #include <vector>
 #include "./Math/ZzzMathLib.h"
 
@@ -97,10 +91,6 @@ public:
 		CInterpolateContainer(){};
 		~CInterpolateContainer(){};
 };
-
-
-
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 
 typedef struct tagMU_POINTF
 {
@@ -252,9 +242,6 @@ public:
 	vec3_t		m_v3PrePos1;
 	vec3_t		m_v3PrePos2;
 
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 	CInterpolateContainer	m_Interpolates;
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 };
 
-#endif // !defined(AFX_W_OBJECT_H__4FAC8EFA_AAC5_490A_B4A1_FD61801D8AE0__INCLUDED_)

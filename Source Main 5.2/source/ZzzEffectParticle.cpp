@@ -2034,15 +2034,11 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				break;
 			case BITMAP_SPARK:
      			o->Scale = (float)(rand()%4+4)*0.1f;
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 				if(o->SubType==0 || o->SubType==2 || o->SubType==3 || o->SubType==4 || o->SubType==6 || o->SubType==11 
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					|| o->SubType==13
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 					)
-#else
-      			if(o->SubType==0 || o->SubType==2 || o->SubType==3 || o->SubType==4 || o->SubType==6)
-#endif //LDS_ADD_EMPIRE_GUARDIAN
 				{
 					o->LifeTime = rand()%16+24;
 					o->Angle[2] = (float)(rand()%360);
@@ -2068,12 +2064,10 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                         o->TexType = BITMAP_SPARK+1;
 						Vector(0.f,(float)(rand()%20+20)*0.2f,0.f,p);
 					}
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 					else if (o->SubType==11)
 					{
 						Vector(1.0f,0.3f,0.3f,o->Light);
 					}
-#endif //LDS_ADD_EMPIRE_GUARDIAN
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					else if(o->SubType==13)
 					{

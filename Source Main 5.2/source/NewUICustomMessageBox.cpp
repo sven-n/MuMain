@@ -3999,11 +3999,7 @@ void SEASON3B::CDuelMsgBox::RenderTexts()
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
 	g_pRenderText->SetTextColor(255, 255, 0, 255);
 	g_pRenderText->SetFont(g_hFontBold);
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	sprintf(strDuelID, "[%s]", g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-	sprintf(strDuelID, "[%s]", g_szDuelPlayerID);
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 	g_pRenderText->RenderText(GetPos().x, GetPos().y + 115, strDuelID, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 
 	g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -4041,15 +4037,9 @@ CALLBACK_RESULT SEASON3B::CDuelMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOw
 
 CALLBACK_RESULT SEASON3B::CDuelMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, TRUE);
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-	SendRequestDuelOk(1, g_iDuelPlayerIndex, g_szDuelPlayerID);
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 	PlayBuffer(SOUND_CLICK01);
-
 	return CALLBACK_CONTINUE;
 }
 
@@ -4058,11 +4048,8 @@ CALLBACK_RESULT SEASON3B::CDuelMsgBox::CancelBtnDown(class CNewUIMessageBoxBase*
 	g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, FALSE);
 	g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 	PlayBuffer(SOUND_CLICK01);
-	
 	return CALLBACK_CONTINUE;
 }
-
-//////////////////////////////////////////////////////////////////////////
 
 SEASON3B::CDuelResultMsgBox::CDuelResultMsgBox()
 {

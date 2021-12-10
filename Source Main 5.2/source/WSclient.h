@@ -43,9 +43,7 @@
 #define RECEIVE_LOG_IN_FAIL_INVALID_IP			36
 #define RECEIVE_LOG_IN_FAIL_NO_PAYMENT_INFO		37
 #define RECEIVE_LOG_IN_FAIL_ONLY_OVER_15		38
-#ifdef ASG_ADD_CHARGED_CHANNEL_TICKET
 #define RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL		39
-#endif	// ASG_ADD_CHARGED_CHANNEL_TICKET
 
 #define	REQUEST_CHARACTERS_LIST			        50
 #define	RECEIVE_CHARACTERS_LIST			        51
@@ -1307,8 +1305,6 @@ typedef struct {
     BYTE         m_byNumber;
 } PRECEIVE_QUEST_REPARATION, * LPPRECEIVE_QUEST_REPARATION;
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
-
 // GC[0xF6][0x0A]
 typedef struct 
 {	
@@ -1427,8 +1423,6 @@ typedef struct
 
 	BYTE			m_byQuestCount;
 } PMSG_ANS_QUESTEXP_PROGRESS_LIST, *LPPMSG_ANS_QUESTEXP_PROGRESS_LIST;
-
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
 //----------------------------------------------------------------------------
 // GC[0xF8][0x02]

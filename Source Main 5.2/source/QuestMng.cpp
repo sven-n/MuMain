@@ -9,8 +9,6 @@
 
 #include <crtdbg.h>
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
-
 #define	QM_NPCDIALOGUE_FILE			"Data\\Local\\NPCDialogue.bmd"
 #define	QM_QUESTPROGRESS_FILE		"Data\\Local\\QuestProgress.bmd"
 
@@ -266,14 +264,10 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
 
 	if (LOWORD(dwQuestIndex) == 0x00FF)
 	{
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 
 		g_pChatListBox->AddText("", GlobalText[2814], SEASON3B::TYPE_ERROR_MESSAGE);
 
@@ -282,19 +276,15 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
 
 	if (0 == m_mapQuestProgress[dwQuestIndex].m_byUIType)
 	{
-#ifdef ASG_ADD_UI_QUEST_PROGRESS
 		g_pQuestProgress->SetContents(dwQuestIndex);
 		if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_QUEST_PROGRESS);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS
 	}
 	else
 	{
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 		g_pQuestProgressByEtc->SetContents(dwQuestIndex);
 		if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
 			g_pNewUISystem->Show(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 	}
 }
 
@@ -910,5 +900,3 @@ bool CQuestMng::IsIndexInCurQuestIndexList(DWORD dwQuestIndex)
 
 	return false;
 }
-
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM

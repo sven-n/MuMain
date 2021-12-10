@@ -440,28 +440,9 @@ bool IsAliceRideAction_Fenrir(BYTE byAction)
 	return false;	
 }
 
-#ifdef CSK_FIX_ANIMATION_BLENDING
-void SetAction(OBJECT *o,int Action, bool bBlending)
-#else // CSK_FIX_ANIMATION_BLENDING
-void SetAction(OBJECT *o,int Action)
-#endif // CSK_FIX_ANIMATION_BLENDING
-{
-#ifdef CSK_HACK_TEST
-	OBJECT* pHeroObj = &Hero->Object;
-	if(pHeroObj == o)
-	{
-		if(o->CurrentAction != Action)
-		{
-#ifdef CONSOLE_DEBUG
-			if(Action > PLAYER_RUN_RIDE_WEAPON)
-			{
-				g_ConsoleDebug->Write(MCD_NORMAL, "PLAYER_RUN_RIDE_WEAPON : %d", Action);
-			}
-#endif // CONSOLE_DEBUG
-		}
-	}
-#endif // CSK_HACK_TEST
 
+void SetAction(OBJECT *o,int Action, bool bBlending)
+{
 	BMD *b = &Models[o->Type];
 	if(Action >= b->NumActions /*&& Action!=PLAYER_FLY_RIDE_WEAPON && Action!=PLAYER_FLY_RIDE*/) return;
 	if(o->CurrentAction != Action)
@@ -470,12 +451,10 @@ void SetAction(OBJECT *o,int Action)
 		o->PriorAnimationFrame = o->AnimationFrame;
 		o->CurrentAction = Action;
 		o->AnimationFrame = 0;
-#ifdef CSK_FIX_ANIMATION_BLENDING
 		if(bBlending == false)
 		{
 			o->PriorAnimationFrame = 0;	
 		}
-#endif // CSK_FIX_ANIMATION_BLENDING
 	}
 }
 

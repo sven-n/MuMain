@@ -1,11 +1,6 @@
 // GMDoppelGanger1.cpp: implementation of the CGMDoppelGanger1 class.
-//
 //////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
-
-#ifdef YDG_ADD_MAP_DOPPELGANGER1
-
 #include "GMDoppelGanger1.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -22,10 +17,6 @@
 
 extern char* g_lpszMp3[NUM_MUSIC];
 extern int GetMp3PlayPosition();
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CGMDoppelGanger1Ptr CGMDoppelGanger1::Make()
 {
@@ -371,14 +362,12 @@ bool CGMDoppelGanger1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 	switch(o->Type)
 	{
-#ifdef YDG_ADD_DOPPELGANGER_PORTAL
 	case 19:
 	case 20:
 	case 31:
 	case 33:
 		o->m_bRenderAfterCharacter = true;
 		return true;
-#endif	// YDG_ADD_DOPPELGANGER_PORTAL
 	case 76:
 		b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
 		b->RenderMesh(0,RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
@@ -720,4 +709,3 @@ void CGMDoppelGanger1::PlayBGM()
 		}
 	}
 }
-#endif	// YDG_ADD_MAP_DOPPELGANGER1

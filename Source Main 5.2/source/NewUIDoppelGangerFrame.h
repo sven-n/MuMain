@@ -1,13 +1,6 @@
 // NewUIDoppelGangerFrame.h: interface for the CNewUIDoppelGangerFrame class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUIDOPPELGANGERFRAME_H__91BBA47F_0EE6_4FA3_A600_8004EC875FD6__INCLUDED_)
-#define AFX_NEWUIDOPPELGANGERFRAME_H__91BBA47F_0EE6_4FA3_A600_8004EC875FD6__INCLUDED_
-
 #pragma once
-
-#ifdef YDG_ADD_DOPPELGANGER_UI
 
 #include "NewUIBase.h"
 #include "NewUIManager.h"
@@ -41,7 +34,7 @@ namespace SEASON3B
 		typedef struct _PARTY_POSITION
 		{
 			float m_fPositionRcvd;
-			float m_fPosition;		// 출력용(보간)
+			float m_fPosition;
 		} PARTY_POSITION;
 
 	public:
@@ -85,21 +78,18 @@ namespace SEASON3B
 
 		int m_iEnteredMonsters;
 		int m_iMaxMonsters;
-		float m_fMonsterGauge;		// 출력용(보간)
+		float m_fMonsterGauge;
 		float m_fMonsterGaugeRcvd;
 
 		std::map<WORD, PARTY_POSITION> m_PartyPositionMap;
 		int m_iTime;
 		BOOL m_bStopTimer;
 
-		// 아이스워커 포지션
 		BOOL m_bIceWalkerEnabled;
 		float m_fIceWalkerPositionRcvd;
-		float m_fIceWalkerPosition;		// 출력용(보간)
+		float m_fIceWalkerPosition;
 
 		BOOL m_bIsEnabled;
 	};
 }
-#endif	// YDG_ADD_DOPPELGANGER_UI
 
-#endif // !defined(AFX_NEWUIDOPPELGANGERFRAME_H__91BBA47F_0EE6_4FA3_A600_8004EC875FD6__INCLUDED_)

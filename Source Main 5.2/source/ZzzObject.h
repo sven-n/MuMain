@@ -61,11 +61,7 @@ void DeleteItem(int Key);
 void PartObjectColor(int Type,float Alpha,float Bright,vec3_t Light,bool ExtraMon=false);
 void PartObjectColor2(int Type,float Alpha,float Bright,vec3_t Light,bool ExtraMon=false);
 
-#ifdef CSK_ADD_GOLDCORPS_EVENT
 void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType,float Bright,int Texture=-1, int iMonsterIndex=-1);
-#else // CSK_ADD_GOLDCORPS_EVENT
-void RenderPartObjectBodyColor(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType,float Bright,int Texture=-1);
-#endif // CSK_ADD_GOLDCORPS_EVENT
 void RenderPartObjectBodyColor2(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType,float Bright,int Texture=-1);
 void RenderPartObjectBody(BMD *b,OBJECT *o,int Type,float Alpha,int RenderType);
 

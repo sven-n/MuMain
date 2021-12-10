@@ -1,12 +1,6 @@
 // GambleSystem.h: interface for the GembleSystem class.
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_GEMBLESYSTEM_H__366551E9_005D_44AC_844B_B78AC928455B__INCLUDED_)
-#define AFX_GEMBLESYSTEM_H__366551E9_005D_44AC_844B_B78AC928455B__INCLUDED_
-
 #pragma once
-
-#ifdef LDK_ADD_GAMBLE_SYSTEM
 
 typedef struct _buyItemInfo
 {
@@ -45,7 +39,3 @@ private:
 	GambleSystem() { Init(); }
 
 };
-
-#endif //LDK_ADD_GAMBLE_SYSTEM
-
-#endif // !defined(AFX_GEMBLESYSTEM_H__366551E9_005D_44AC_844B_B78AC928455B__INCLUDED_)

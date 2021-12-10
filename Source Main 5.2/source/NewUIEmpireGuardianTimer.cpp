@@ -1,11 +1,8 @@
 // NewUIEmpireGuardianTimer.cpp: implementation of the CNewUIEmpireGuardianTimer class.
 //////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
 #include "NewUISystem.h"
 #include "NewUIEmpireGuardianTimer.h"
-
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 
 using namespace SEASON3B;
 
@@ -159,4 +156,3 @@ void CNewUIEmpireGuardianTimer::UnloadImages()
 {
 	DeleteBitmap( IMAGE_EMPIREGUARDIAN_TIMER_WINDOW );
 }
-#endif	// LDK_ADD_EMPIREGUARDIAN_UI

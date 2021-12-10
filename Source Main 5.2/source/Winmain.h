@@ -81,9 +81,7 @@ extern DWORD GetCheckSum( WORD wKey);
 extern void StopMp3(char *Name, BOOL bEnforce=false);
 extern void PlayMp3(char *Name, BOOL bEnforce=false);
 extern bool IsEndMp3();
-#ifdef YDG_ADD_DOPPELGANGER_SOUND
 extern int GetMp3PlayPosition();
-#endif	// YDG_ADD_DOPPELGANGER_SOUND
 extern unsigned int GenID();
 
 extern void CloseMainExe( void);

@@ -4045,7 +4045,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 			HideShopTitles();
 			g_pChatListBox->AddText("", GlobalText[1139], SEASON3B::TYPE_ERROR_MESSAGE);
 		}
-#ifdef DUEL_SYSTEM
 		if(strcmp(Text,GlobalText[908])==0 || stricmp(Text, "/duelstart")==0)
 		{
 #ifndef GUILD_WAR_EVENT
@@ -4055,13 +4054,8 @@ bool CheckCommand(char *Text, bool bMacroText )
 				return false;
 			}
 #endif// UILD_WAR_EVENT
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 			if(!g_DuelMgr.IsDuelEnabled())
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-			if(!g_bEnableDuel)
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 			{
-#ifdef YDG_ADD_NEW_DUEL_UI
 				int iLevel = CharacterAttribute->Level;
 				if(iLevel < 30)
 				{
@@ -4071,7 +4065,6 @@ bool CheckCommand(char *Text, bool bMacroText )
 					return 3;
 				}
 				else
-#endif	// YDG_ADD_NEW_DUEL_UI
 				if(SelectedCharacter!=-1)
 				{
 					CHARACTER *c = &CharactersClient[SelectedCharacter];
@@ -4116,16 +4109,11 @@ bool CheckCommand(char *Text, bool bMacroText )
 				return false;
 			}
 #endif// GUILD_WAR_EVENT
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 			if(g_DuelMgr.IsDuelEnabled())
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-			if(g_bEnableDuel)
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 			{
 				SendRequestDuelEnd();
 			}
 		}
-#endif // DUEL_SYSTEM
 		if(strcmp(Text,GlobalText[254])==NULL || stricmp(Text,"/guild")==NULL)
 		{
 			if ( gMapManager.InChaosCastle()==true )
@@ -5078,12 +5066,10 @@ void AttackKnight(CHARACTER *c, int Skill, float Distance)
 		if(g_csItemOption.Special_Option_Check() == false && (Skill == AT_SKILL_ICE_BLADE || (AT_SKILL_POWER_SLASH_UP<= Skill && AT_SKILL_POWER_SLASH_UP + 5 > Skill)))
 			Success = false;
 
-#ifdef YDG_ADD_NEW_DUEL_UI
 		if (Skill==AT_SKILL_PARTY_TELEPORT && g_DuelMgr.IsDuelEnabled())
 		{
 			Success = false;
 		}
-#endif	// YDG_ADD_NEW_DUEL_UI
 		
 		if (Skill==AT_SKILL_PARTY_TELEPORT && (IsDoppelGanger1() || IsDoppelGanger2() || IsDoppelGanger3() || IsDoppelGanger4()))
 		{

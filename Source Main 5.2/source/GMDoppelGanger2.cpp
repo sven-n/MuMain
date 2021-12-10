@@ -1,11 +1,6 @@
 // GMDoppelGanger2.cpp: implementation of the GMDoppelGanger2 class.
-//
 //////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
-
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-
 #include "GMDoppelGanger2.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -19,10 +14,6 @@
 #include "MapManager.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CGMDoppelGanger2Ptr CGMDoppelGanger2::Make()
 {
@@ -253,7 +244,6 @@ bool CGMDoppelGanger2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
 	switch(o->Type)
 	{
-#ifdef YDG_ADD_DOPPELGANGER_PORTAL
 	case 10:
 	case 19:
 	case 20:
@@ -261,7 +251,6 @@ bool CGMDoppelGanger2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 	case 33:
 		o->m_bRenderAfterCharacter = true;
 		return true;
-#endif	// YDG_ADD_DOPPELGANGER_PORTAL
 	case 15:
 		{
 			b->StreamMesh = 0;
@@ -509,7 +498,6 @@ bool CGMDoppelGanger2::RenderObjectVisual( OBJECT* o, BMD* b )
 			}
 		}
 		return true;
-#ifdef YDG_ADD_DOPPELGANGER_PORTAL
 	case 47:
 		{
 			vec3_t vLight;
@@ -541,7 +529,6 @@ bool CGMDoppelGanger2::RenderObjectVisual( OBJECT* o, BMD* b )
 			CreateParticle(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
 		}
 		return true;
-#endif	// YDG_ADD_DOPPELGANGER_PORTAL
 	}
 	
 	return false;
@@ -714,7 +701,6 @@ bool CGMDoppelGanger2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 	return false;
 }
 
-// 몬스터 사운드
 bool CGMDoppelGanger2::PlayMonsterSound(OBJECT* o) 
 {
 	if(IsDoppelGanger2() == false)
@@ -722,24 +708,10 @@ bool CGMDoppelGanger2::PlayMonsterSound(OBJECT* o)
 	
 	return g_DoppelGanger1.PlayMonsterSound(o);
 
-// 	float fDis_x, fDis_y;
-// 	fDis_x = o->Position[0] - Hero->Object.Position[0];
-// 	fDis_y = o->Position[1] - Hero->Object.Position[1];
-// 	float fDistance = sqrtf(fDis_x*fDis_x+fDis_y*fDis_y);
-// 	
-// 	if (fDistance > 500.0f) 
-// 		return true;
-// 
-// 	switch(o->Type)
-// 	{
-// 	}
-
 	return false; 
 }
 
-// 오브젝트 사운드
 void CGMDoppelGanger2::PlayObjectSound(OBJECT* o)
 {
 
 }
-#endif	// YDG_ADD_MAP_DOPPELGANGER2

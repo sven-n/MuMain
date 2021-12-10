@@ -66,9 +66,7 @@
 #include "DuelMgr.h"
 
 #include "GambleSystem.h"
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 #include "QuestMng.h"
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 #ifdef PBG_ADD_SECRETBUFF
 #include "FatigueTimeSystem.h"
 #endif //PBG_ADD_SECRETBUFF
@@ -108,9 +106,7 @@ extern int g_iKeyPadEnable;
 
 extern CUIMapName* g_pUIMapName; // rozy
 
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM
 extern bool g_PetEnableDuel;
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
 MASTER_LEVEL_VALUE	Master_Level_Data;
 
@@ -686,11 +682,7 @@ void InitGame()
 	
 	g_csQuest.clearQuest ();
 
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	g_DuelMgr.Reset();
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-	ClearDuelWindow();
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 	g_pNewUISystem->Hide( SEASON3B::INTERFACE_DUEL_WINDOW );
 	
 	if( g_pUIManager )
@@ -11736,13 +11728,11 @@ bool ReceiveRegistLuckyCoin(BYTE* ReceiveBuffer)
 			g_pLuckyCoinRegistration->SetRegistCount(_pData->nCurCoinCnt);
 		}
 		break;
-#ifdef PBG_MOD_LUCKYCOINEVENT
 	case 100:
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CRegistOverLuckyCoinMsgBoxLayout));
 		}
 		break;
-#endif //PBG_MOD_LUCKYCOINEVENT
 	default:
 		return false;
 	}

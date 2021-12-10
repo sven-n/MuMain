@@ -2,9 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#ifdef LDK_ADD_CS7_UNICORN_PET
-
 #include "w_PetActionUnicorn.h"
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
@@ -248,8 +245,6 @@ bool PetActionUnicorn::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
 {
 	if( NULL == obj || NULL == Owner ) return FALSE;
 
-#ifdef LDK_ADD_CS7_UNICORN_PET
- 
  	BMD* b = &Models[obj->Type];
  	vec3_t Position, vRelativePos, Light;
  
@@ -282,7 +277,6 @@ bool PetActionUnicorn::Effect( OBJECT* obj, CHARACTER *Owner, int targetKey, DWO
  	CreateParticle(BITMAP_SMOKELINE2,Position,obj->Angle,Light,4,0.6f,obj);
  	CreateParticle(BITMAP_SMOKELINE3,Position,obj->Angle,Light,4,0.6f,obj);
 
-#endif //LDK_ADD_CS7_UNICORN_PET
 	return TRUE;
 }
 
@@ -347,5 +341,3 @@ bool PetActionUnicorn::CompTimeControl(const DWORD& dwCompTime, DWORD& dwTime)
 	}
 	return false;
 }
-
-#endif //LDK_ADD_CS7_UNICORN_PET

@@ -12,7 +12,6 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 
-#ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
 CSkillEffectMgr g_SkillEffects;
 
 void MoveEffect( OBJECT *o, int iIndex);
@@ -191,4 +190,3 @@ void CSkillEffectMgr::MoveEffects()
 		}
 	}
 }
-#endif

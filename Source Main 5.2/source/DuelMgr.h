@@ -1,12 +1,7 @@
 // DuelMgr.h: interface for the CDuelMgr class.
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_DUELMGR_H__9B443DA1_CBFB_49E7_9BE9_2BB718489DE3__INCLUDED_)
-#define AFX_DUELMGR_H__9B443DA1_CBFB_49E7_9BE9_2BB718489DE3__INCLUDED_
-
 #pragma once
 
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 
 typedef struct _DUEL_PLAYER_INFO
 {
@@ -97,7 +92,3 @@ protected:
 };
 
 extern CDuelMgr g_DuelMgr;
-
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-
-#endif // !defined(AFX_DUELMGR_H__9B443DA1_CBFB_49E7_9BE9_2BB718489DE3__INCLUDED_)

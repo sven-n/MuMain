@@ -346,7 +346,6 @@ int Point_R = 0,Point_Tot = 0;
 					Dir = Skill_Num/10000;
 					Skill_Num = Skill_Num%10000;
 				}
-//PJH_FIX_4_BUGFIX_33
 				char Name[300];
 				Skill_Icon = SkillAttribute[Skill_Num].Magic_Icon;
 				strcpy(Name,SkillAttribute[Skill_Num].Name);

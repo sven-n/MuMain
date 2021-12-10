@@ -1,11 +1,6 @@
 // GMDoppelGanger4.cpp: implementation of the CGMDoppelGanger4 class.
-//
 //////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
-
-#ifdef YDG_ADD_MAP_DOPPELGANGER4
-
 #include "GMDoppelGanger4.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -750,4 +745,3 @@ void CGMDoppelGanger4::PlayObjectSound(OBJECT* o)
 {
 
 }
-#endif	// YDG_ADD_MAP_DOPPELGANGER4

@@ -104,18 +104,6 @@ int  StorageGoldFlag            = 0;
 int ListCount                = 0;
 int GuildListPage            = 0;
 
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef DUEL_SYSTEM
-bool g_bEnableDuel = false;
-bool g_PetEnableDuel = true;
-
-int g_iDuelPlayerIndex = 0;
-char g_szDuelPlayerID[24] = { 0, };
-extern int g_iMyPlayerScore = 0;
-extern int g_iDuelPlayerScore = 0;
-#endif // DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-
 int  g_bEventChipDialogEnable  = EVENT_NONE;
 int  g_shEventChipCount        = 0;
 short g_shMutoNumber[3]        = { -1, -1, -1 };
@@ -5595,11 +5583,8 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		TextNum++;
 	}
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 	if (!bItemTextListBoxUse)
 	{
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
-
 		bool bThisisEquippedItem = false;
 
 		SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
@@ -5643,10 +5628,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		{
 			
 		}
-
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 	}
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 	
 	bool isrendertooltip = true;
 
@@ -11686,15 +11668,6 @@ bool IsCorrectShopTitle(const char* szShopTitle)
 		return false;
 	return true;
 }
-
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM
-void ClearDuelWindow()
-{
-	g_bEnableDuel = false;
-	g_iMyPlayerScore = 0;
-	g_iDuelPlayerScore = 0;
-}
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;

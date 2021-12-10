@@ -559,13 +559,9 @@ __forceinline void SendRequestMagic(int Type,int Key)
 	spe.Send( TRUE);\
 }
 
-//마법공격
-#ifdef PBG_FIX_DARK_FIRESCREAM_HACKCHECK
 BYTE MakeSkillSerialNumber(BYTE * pSerialNumber);
-#endif //PBG_FIX_DARK_FIRESCREAM_HACKCHECK
 
 #ifndef ENABLE_EDIT
-#ifdef PBG_FIX_DARK_FIRESCREAM_HACKCHECK
 #define SendRequestMagicAttack( p_Type, p_x, p_y, p_Serial, p_Count, p_Key, p_SkillSerial)\
 {\
     if(!FindText2(Hero->ID,"webzen"))\
@@ -583,25 +579,6 @@ BYTE MakeSkillSerialNumber(BYTE * pSerialNumber);
 		spe.Send( TRUE);\
 	}\
 }
-#else //PBG_FIX_DARK_FIRESCREAM_HACKCHECK
-#define SendRequestMagicAttack( p_Type, p_x, p_y, p_Serial, p_Count, p_Key, p_SkillSerial)\
-{\
-    if(!FindText2(Hero->ID,"webzen"))\
-	{\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC1, PACKET_MAGIC_ATTACK );\
-		WORD Type = (WORD)p_Type;\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << ( BYTE)( p_x) << ( BYTE)( p_y) << ( BYTE)( p_Serial) << ( BYTE)( p_Count);\
-		int *pKey = ( int*)( p_Key);\
-		for (int i=0;i<p_Count;i++)\
-		{\
-			spe << ( BYTE)(pKey[i]>>8) << ( BYTE)( pKey[i]&0xff);\
-			spe << ( BYTE)p_SkillSerial;\
-		}\
-		spe.Send( TRUE);\
-	}\
-}
-#endif //PBG_FIX_DARK_FIRESCREAM_HACKCHECK
 #else // ENABLE_EDIT
 __forceinline void SendRequestMagicAttack(int Type,int x,int y,BYTE Serial,int Count,int *Key, WORD SkillSerial)
 {
@@ -639,9 +616,6 @@ inline BYTE GetDestValue( int xPos, int yPos, int xDst, int yDst)
 	BYTE byValue2 = ( ( BYTE)( DestY + 8)) & 0xf;
 	return ( byValue1 | byValue2);
 }
-#ifndef PBG_FIX_DARK_FIRESCREAM_HACKCHECK
-BYTE MakeSkillSerialNumber(BYTE * pSerialNumber);
-#endif //PBG_FIX_DARK_FIRESCREAM_HACKCHECK
 
 #ifndef ENABLE_EDIT
 #define SendRequestMagicContinue( p_Type, p_x, p_y,p_Angle,p_Dest,p_Tpos,p_TKey,p_SkillSerial)\
@@ -849,7 +823,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 #define SendQuestSelection(dwQuestIndex, byResult)\
 {\
     CStreamPacketEngine spe;\
@@ -921,7 +894,6 @@ __forceinline void SendRequestBuy(int Index,int Cost)
 	spe << (BYTE)0x21;\
     spe.Send();\
 }
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 
 #ifdef ASG_ADD_GENS_SYSTEM
 #define SendRequestGensJoining(byInfluence)\

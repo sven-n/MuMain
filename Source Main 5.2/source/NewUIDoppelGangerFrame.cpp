@@ -5,8 +5,6 @@
 #include "NewUIDoppelGangerFrame.h"
 #include "NewUISystem.h"
 
-#ifdef YDG_ADD_DOPPELGANGER_UI
-
 using namespace SEASON3B;
 
 CNewUIDoppelGangerFrame::CNewUIDoppelGangerFrame()
@@ -321,4 +319,3 @@ void CNewUIDoppelGangerFrame::SetIceWalkerMap(BOOL bEnable, float fPosition)
 		m_fIceWalkerPositionRcvd = 0.0f;
 	}
 }
-#endif	// YDG_ADD_DOPPELGANGER_UI

@@ -1661,16 +1661,10 @@ bool MoveMainCamera()
 		{
 			CameraViewFar = 2800.f * 1.15f;
 		}
-#ifdef PBG_ADD_PKFIELD
- 		else if(gMapManager.IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-			|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-			)
+ 		else if(gMapManager.IsPKField()	|| IsDoppelGanger2())
 		{
 			CameraViewFar = 3700.0f;
  		}
-#endif //PBG_ADD_PKFIELD
         else
         {
             switch ( g_shCameraLevel )
@@ -2390,12 +2384,10 @@ void MainScene(HDC hDC)
 		glClearColor(0.f,0.f,0.f,1.f);
 	}
 #endif //PJH_NEW_SERVER_SELECT_MAP
-#ifdef YDG_ADD_MAP_DOPPELGANGER1
 	else if(gMapManager.WorldActive == WD_65DOPPLEGANGER1)
 	{
 		glClearColor(148.f/256.f,179.f/256.f,223.f/256.f,1.f);
 	}
-#endif	// YDG_ADD_MAP_DOPPELGANGER1
     else
     {
         glClearColor(0/256.f,0/256.f,0/256.f,1.f);

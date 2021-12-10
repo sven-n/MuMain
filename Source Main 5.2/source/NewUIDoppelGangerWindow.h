@@ -1,14 +1,6 @@
 // NewUIDoppelGangerWindow.h: interface for the CNewUIDoppelGangerWindow class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUIDOPPELGANGERWINDOW_H__538453D7_982F_440B_8B4B_2CE12BF9E6FE__INCLUDED_)
-#define AFX_NEWUIDOPPELGANGERWINDOW_H__538453D7_982F_440B_8B4B_2CE12BF9E6FE__INCLUDED_
-
 #pragma once
-
-#ifdef YDG_ADD_DOPPELGANGER_UI
-
 #include "NewUIBase.h"
 #include "NewUIButton.h"
 #include "NewUIMessageBox.h"
@@ -41,8 +33,8 @@ namespace SEASON3B
 		CNewUI3DRenderMng*		m_pNewUI3DRenderMng;
 		POINT m_Pos;
 
-		CNewUIButton m_BtnEnter;		// 입장 버튼
-		CNewUIButton m_BtnClose;		// 닫기 버튼
+		CNewUIButton m_BtnEnter;
+		CNewUIButton m_BtnClose;
 
 	public:
 		CNewUIDoppelGangerWindow();
@@ -83,6 +75,3 @@ namespace SEASON3B
 		BOOL m_bIsEnterButtonLocked;
 	};
 }
-#endif	// YDG_ADD_DOPPELGANGER_UI
-
-#endif // !defined(AFX_NEWUIDOPPELGANGERWINDOW_H__538453D7_982F_440B_8B4B_2CE12BF9E6FE__INCLUDED_)

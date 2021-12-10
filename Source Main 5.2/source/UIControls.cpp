@@ -5672,8 +5672,6 @@ BOOL CUIMoveCommandListBox::DoLineMouseAction(int iLineNumber)
 	return TRUE;
 }
 
-#ifdef ASG_MOD_UI_QUEST_INFO
-
 CUICurQuestListBox::CUICurQuestListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
@@ -5828,9 +5826,7 @@ void CUICurQuestListBox::DeleteText(DWORD dwQuestIndex)
 
 	m_TextList.erase(m_TextListIter);
 }
-#endif	// ASG_MOD_UI_QUEST_INFO
 
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 CUIQuestContentsListBox::CUIQuestContentsListBox()
 {
 	m_iMaxLineCount = UIMAX_TEXT_LINE;
@@ -5960,7 +5956,6 @@ BOOL CUIQuestContentsListBox::DoLineMouseAction(int iLineNumber)
 
 	return TRUE;
 }
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM 
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 CUIInGameShopListBox::CUIInGameShopListBox()

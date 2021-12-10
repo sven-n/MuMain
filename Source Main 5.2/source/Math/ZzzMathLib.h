@@ -31,7 +31,7 @@ int QuaternionCompare (vec4_t v1, vec4_t v2);
 #define VectorScale(a,b,c) {(c)[0]=(b)*(a)[0];(c)[1]=(b)*(a)[1];(c)[2]=(b)*(a)[2];}
 #define DotProduct(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
 #define VectorFill(a,b) { (a)[0]=(b); (a)[1]=(b); (a)[2]=(b);}
-#ifdef LDS_ADD_INTERPOLATION_VECTOR3
+
 inline void SETLIMITS(float& VALUE_,const float MAX_,const float MIN_) 
 {
 	if(VALUE_>MAX_)
@@ -66,19 +66,16 @@ void VectorDistanceInterpolation_F( vec3_t& v_out,
 float VectorDistance3D(const vec3_t& vPosStart, const vec3_t& vPosEnd);
 void VectorDistance3D_Dir(const vec3_t& vPosStart, const vec3_t& vPosEnd, vec3_t& vOut);
 float VectorDistance3D_DirDist(const vec3_t& vPosStart, const vec3_t& vPosEnd, vec3_t& vOut);
-#endif // LDS_ADD_INTERPOLATION_VECTOR3
+
 
 vec_t Q_rint (vec_t in);
 inline float VectorLength(vec3_t v) { return sqrtf (v[0]*v[0] + v[1]*v[1] + v[2]*v[2]); }
 
 void VectorMul (vec3_t va, vec3_t vb, vec3_t vc);
-#ifdef LDS_ADD_INTERPOLATION_VECTOR3
 void VectorMulF (const vec3_t vIn01, const float fIn01, vec3_t vOut);
 void VectorDivF (const vec3_t vIn01, const float fIn01, vec3_t vOut);
 void VectorDivFSelf (vec3_t vInOut, const float fIn01);
 void VectorDistNormalize (const vec3_t vInFrom, const vec3_t vInTo, vec3_t vOut);
-#endif // LDS_ADD_INTERPOLATION_VECTOR3
-
 void VectorMA (vec3_t va, float scale, vec3_t vb, vec3_t vc);
 
 void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);

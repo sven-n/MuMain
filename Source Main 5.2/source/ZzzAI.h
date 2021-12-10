@@ -1,4 +1,3 @@
-// 캐릭터 에니메이션 디파인 설정
 int CalcAngle(float PositionX,float PositionY,float TargetX,float TargetY);
 float CreateAngle(float x1,float y1,float x2,float y2);
 int TurnAngle(int iTheta, int iHeading, int maxTURN);
@@ -13,11 +12,7 @@ void PushObject(vec3_t PushPosition,vec3_t Position,float Power,vec3_t Angle);
 bool CollisionCharacters(CHARACTER *Hero);
 bool CollisionObjects(CHARACTER *Hero);
 
-#ifdef CSK_FIX_ANIMATION_BLENDING
 void SetAction(OBJECT *o,int Action, bool bBlending=true);
-#else // CSK_FIX_ANIMATION_BLENDING 
-void SetAction(OBJECT *o,int Action);
-#endif // CSK_FIX_ANIMATION_BLENDING
 
 bool TestDistance(CHARACTER *c,vec3_t TargetPosition,float Range);
 
@@ -28,20 +23,11 @@ int  CalculateAttackPoint(CHARACTER *sc,CHARACTER *tc);
 void AttackCharacter(CHARACTER *sc,CHARACTER *tc,float AttackRange,int AttackPoint,bool Success=true);
 void AttackObject(int Type,vec3_t Position,CHARACTER *Owner);
 
-
-// 길찾기 관련 함수
 bool PathFinding(int sx,int sy,int tx,int ty,PATH_t *a);
 bool MovePath(CHARACTER *c,bool Turn=true);
 void InitPath();
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 bool PathFinding2(int sx,int sy,int tx,int ty,PATH_t *a, float fDistance = 0.0f, int iDefaultWall = TW_CHARACTER);
-#else	// YDG_ADD_DOPPELGANGER_MONSTER
-bool PathFinding2(int sx,int sy,int tx,int ty,PATH_t *a, float fDistance = 0.0f);
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 
-
-
-//^ 펜릴 스킬 관련
 void SetAction_Fenrir_Skill(CHARACTER* c, OBJECT* o);
 void SetAction_Fenrir_Damage(CHARACTER* c, OBJECT* o);
 void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o);

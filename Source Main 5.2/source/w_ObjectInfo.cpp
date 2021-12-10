@@ -1,12 +1,9 @@
 // w_ObjectInfo.cpp: implementation of the OBJECT class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "w_ObjectInfo.h"
 
-
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 void CInterpolateContainer::GetCurrentValue(vec3_t& v3Out, float fCurrentRate, VEC_INTERPOLATES& vecInterpolates )
 {
 	VEC_INTERPOLATES::iterator	iterBegin = vecInterpolates.begin();
@@ -79,7 +76,6 @@ void CInterpolateContainer::ClearContainer()
 	m_vecInterpolatesScale.clear();
 	m_vecInterpolatesAlpha.clear();
 }
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 
 OBJECT::OBJECT()
 {

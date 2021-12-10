@@ -1,13 +1,6 @@
 // NewUIDuelWatchMainFrameWindow.h: interface for the CNewUIDuelWatchMainFrameWindow class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUIDUELWATCHMAINFRAMEWINDOW_H__A1E5647D_BE3D_4A3B_825A_464B5D3100C1__INCLUDED_)
-#define AFX_NEWUIDUELWATCHMAINFRAMEWINDOW_H__A1E5647D_BE3D_4A3B_825A_464B5D3100C1__INCLUDED_
-
 #pragma once
-
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 
 #include "NewUIBase.h"
 #include "NewUIButton.h"
@@ -82,6 +75,3 @@ namespace SEASON3B
 		bool BtnProcess();
 	};
 }
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-
-#endif // !defined(AFX_NEWUIDUELWATCHMAINFRAMEWINDOW_H__A1E5647D_BE3D_4A3B_825A_464B5D3100C1__INCLUDED_)

@@ -1,9 +1,6 @@
 // Event.h: interface for the CEvent class.
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_EVENT_H__8075B067_D2AB_48AC_8A39_370D3B3DD089__INCLUDED_)
-#define AFX_EVENT_H__8075B067_D2AB_48AC_8A39_370D3B3DD089__INCLUDED_
-
 #pragma once
 
 #define XMAS_EVENT_TIME		60000
@@ -48,7 +45,6 @@ public:
 
 #define g_NewYearsDayEvent	CNewYearsDayEvent::GetInstance()
 
-#ifdef KJH_ADD_09SUMMER_EVENT
 class C09SummerEvent
 {
 public:
@@ -65,7 +61,4 @@ public:
 };
 
 #define g_09SummerEvent		C09SummerEvent::GetInstance()
-#endif // KJH_ADD_09SUMMER_EVENT
 
-
-#endif // !defined(AFX_EVENT_H__8075B067_D2AB_48AC_8A39_370D3B3DD089__INCLUDED_)

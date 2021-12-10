@@ -7,9 +7,7 @@
 #include "NewUICommonMessageBox.h"
 #include "ZzzInventory.h"
 #include "wsclientinline.h"
-#ifdef LDK_ADD_GAMBLE_SYSTEM
 #include "GambleSystem.h"
-#endif //LDK_ADD_GAMBLE_SYSTEM
 
 using namespace SEASON3B;
 
@@ -108,11 +106,8 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 			if((m_bIsNPCShopOpen == true) && (pItem) && (SEASON3B::IsRelease(VK_LBUTTON)))
 			{
 				int iIndex = (pItem->y * m_pNewInventoryCtrl->GetNumberOfColumn()) + pItem->x;
-#ifdef LDK_ADD_GAMBLE_SYSTEM
 				GambleSystem& _gambleSys = GambleSystem::Instance();
-#endif //LDK_ADD_GAMBLE_SYSTEM
 
-#ifdef LDK_ADD_GAMBLE_SYSTEM
 				if( _gambleSys.IsGambleShop() )
 				{
 					_gambleSys.SetBuyItemInfo(iIndex, ItemValue(pItem, 0));
@@ -123,7 +118,6 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 					return false;
 				}
 				else
-#endif //LDK_ADD_GAMBLE_SYSTEM
 				{
 					if(BuyCost == 0)
 					{

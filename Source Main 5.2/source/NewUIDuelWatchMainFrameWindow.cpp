@@ -7,8 +7,6 @@
 #include "DuelMgr.h"
 #include "wsclientinline.h"
 
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
-
 using namespace SEASON3B;
 
 CNewUIDuelWatchMainFrameWindow::CNewUIDuelWatchMainFrameWindow()
@@ -313,4 +311,3 @@ bool CNewUIDuelWatchMainFrameWindow::BtnProcess()
 
 	return false;
 }
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF

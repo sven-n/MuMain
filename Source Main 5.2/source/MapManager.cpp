@@ -122,9 +122,7 @@ void CMapManager::Load() // OK
 		gLoadData.OpenTexture(MODEL_BUG01		     ,"Object7\\");
 		break;
 	case WD_7ATLANSE:
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
 	case WD_67DOPPLEGANGER3:
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
 		for(int i=1;i<9;i++)
 		{
 			gLoadData.AccessModel(MODEL_FISH01+i,"Data\\Object8\\","Fish",i+1);
@@ -645,7 +643,6 @@ void CMapManager::Load() // OK
 			LoadWaveFile ( SOUND_ELBELAND_ENTERATLANCE01,				"Data\\Sound\\w52\\SE_Amb_enteratlance01.wav", 1 );
 		}
 		break;
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
 	case WD_66DOPPLEGANGER2:
 		{
 			LoadBitmap("Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -654,8 +651,6 @@ void CMapManager::Load() // OK
 			LoadBitmap("Effect\\clud64.jpg", BITMAP_CLUD64, GL_LINEAR, GL_CLAMP_TO_EDGE);
 		}
 		break;
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-#ifdef PBG_ADD_PKFIELD
 	case WD_63PK_FIELD:
 		{
 			gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD,"Data\\Monster\\","pk_manhead_green");
@@ -671,7 +666,6 @@ void CMapManager::Load() // OK
 			gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY,"Monster\\");
 		}
 		break;
-#endif //PBG_ADD_PKFIELD
 	case WD_56MAP_SWAMP_OF_QUIET:
 		LoadBitmap( "Effect\\Map_Smoke1.jpg" ,BITMAP_CHROME+2, GL_LINEAR, GL_REPEAT );
 		LoadBitmap( "Effect\\Map_Smoke2.tga" ,BITMAP_CHROME+3, GL_LINEAR, GL_REPEAT );
@@ -1509,19 +1503,12 @@ void CMapManager::LoadWorld(int Map)
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 		}
 #endif //PJH_NEW_SERVER_SELECT_MAP
-#ifdef PBG_ADD_PKFIELD
-		if(IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-			|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-			)
+		if(IsPKField() || IsDoppelGanger2())
 		{
-		//	sprintf(FileName,"%s\\song_lava1.jpg",WorldName);
-		//	LoadBitmap(FileName,BITMAP_MAPTILE+11,GL_NEAREST,GL_REPEAT,false);
+
 			LoadBitmap("Object64\\song_lava1.jpg", BITMAP_MAPTILE+11,GL_NEAREST,GL_REPEAT,false);
 		}
 		else
-#endif //PBG_ADD_PKFIELD
 		{
 			sprintf (FileName,"%s\\TileRock05.jpg",WorldName);
 			LoadBitmap(FileName,BITMAP_MAPTILE+11,GL_NEAREST,GL_REPEAT,false);
@@ -1551,18 +1538,12 @@ void CMapManager::LoadWorld(int Map)
 				sprintf (FileName,"%s\\ExtTile0%d.jpg",WorldName, i);
 			LoadBitmap(FileName,BITMAP_MAPTILE+13+i ,GL_NEAREST,GL_REPEAT,false);
 		}
-#ifdef PBG_ADD_PKFIELD
-		if(IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-			|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-			)
+		if(IsPKField() || IsDoppelGanger2())
 		{
 			sprintf(FileName,"%s\\TileGrass01_R.jpg",WorldName);
 			LoadBitmap(FileName, BITMAP_MAPGRASS, GL_LINEAR, GL_REPEAT,false);
 		}
 		else
-#endif //PBG_ADD_PKFIELD
 		{
 			sprintf (FileName,"%s\\TileGrass01.tga",WorldName);
 			LoadBitmap(FileName,BITMAP_MAPGRASS  ,GL_NEAREST,GL_REPEAT,false);
@@ -1595,14 +1576,11 @@ void CMapManager::LoadWorld(int Map)
 	    sprintf(FileName,"%s\\rain03.tga" ,"World10");
 	    LoadBitmap(FileName,BITMAP_RAIN_CIRCLE+1  ,GL_NEAREST,GL_CLAMP_TO_EDGE,false);
 
-#ifdef LDS_ADD_EMPIRE_GUARDIAN
 		if( IsEmpireGuardian1() || IsEmpireGuardian2() || IsEmpireGuardian3() || IsEmpireGuardian4())		
 		{
 			sprintf(FileName,"%s\\AlphaTile01.Tga",WorldName);
 			LoadBitmap(FileName,BITMAP_MAPTILE+10,GL_NEAREST,GL_REPEAT,false);
 		}
-#endif // LDS_ADD_EMPIRE_GUARDIAN
-
     }
 
 	if(iMapWorld != 74 && iMapWorld != 75)

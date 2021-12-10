@@ -25,10 +25,7 @@
 #include "GMDoppelGanger2.h"
 #include "GMDoppelGanger3.h"
 #include "GMDoppelGanger4.h"
-
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 #include "./Time/CTimCheck.h"
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -51,9 +48,7 @@ SEASON3B::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
 	m_dwExpEffectTime = 0;
 	m_dwPreExp = 0;
 	m_dwGetExp = 0;
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 	m_bButtonBlink = false;
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 }
 
 SEASON3B::CNewUIMainFrameWindow::~CNewUIMainFrameWindow() 
@@ -678,7 +673,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderButtons()
 	m_BtnWindow.Render();
 }
 
-#ifdef ASG_ADD_UI_QUEST_PROGRESS_ETC
 void SEASON3B::CNewUIMainFrameWindow::RenderCharInfoButton()
 {
 	m_BtnChaInfo.Render();
@@ -696,7 +690,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCharInfoButton()
 			RenderImage(IMAGE_MENU_BTN_CHAINFO, 489+30, 480-51, 30, 41, 0.0f, 41.f);
 	}
 }
-#endif	// ASG_ADD_UI_QUEST_PROGRESS_ETC
 
 void SEASON3B::CNewUIMainFrameWindow::RenderFriendButton()
 {

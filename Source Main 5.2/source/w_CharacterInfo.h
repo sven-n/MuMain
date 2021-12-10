@@ -228,10 +228,7 @@ public:
 	void*       m_pPet;
 	PET_INFO	m_PetInfo[PET_TYPE_END];
 
-	
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	char        OwnerID[32];
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 		
 	private: 
 	ST_POSTMOVE_PROCESS*

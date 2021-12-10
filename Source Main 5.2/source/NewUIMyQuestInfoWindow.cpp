@@ -383,7 +383,6 @@ void SEASON3B::CNewUIMyQuestInfoWindow::SetButtonInfo()
 	m_btnQuestGiveUp.ChangeToolTipText(GlobalText[2823], true);
 }
 
-#ifdef ASG_MOD_UI_QUEST_INFO
 CNewUIMyQuestInfoWindow::TAB_BUTTON_INDEX CNewUIMyQuestInfoWindow::UpdateTabBtn()
 {
 	if (!(SEASON3B::IsPress(VK_LBUTTON)))
@@ -582,5 +581,3 @@ void CNewUIMyQuestInfoWindow::SetMessage(int nGlobalTextIndex)
 	g_pRenderText->SetFont(g_hFontBold);
 	m_nMsgLine = ::DivideStringByPixel(&m_aszMsg[0][0], 2, 64, GlobalText[nGlobalTextIndex], 140);
 }
-
-#endif	// ASG_MOD_UI_QUEST_INFO

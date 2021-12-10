@@ -147,10 +147,8 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 	{
 		if ( SceneFlag==MAIN_SCENE )
         {
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 			if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4);
 			else
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
       		if ( !o->Owner->Live || o->Owner->Kind!=KIND_PLAYER )
 			{
 	    		o->Live = false;

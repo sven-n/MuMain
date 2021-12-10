@@ -608,15 +608,7 @@ unsigned char BMPHeader[1080];
 
 bool IsTerrainHeightExtMap(int iWorld)
 {
-#ifdef PBG_ADD_PKFIELD
-	if(iWorld == WD_42CHANGEUP3RD_2ND || gMapManager.IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-		|| iWorld == WD_66DOPPLEGANGER2
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-		)// 63 PKÇÊµå
-#else //PBG_ADD_PKFIELD
-	if(iWorld == WD_42CHANGEUP3RD_2ND)
-#endif //PBG_ADD_PKFIELD
+	if(iWorld == WD_42CHANGEUP3RD_2ND || gMapManager.IsPKField() || iWorld == WD_66DOPPLEGANGER2)
 	{
 		return true;
 	}
@@ -1541,15 +1533,8 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 			{
 				Water = true;
 			}
-#ifdef PBG_ADD_PKFIELD
-			if(Texture == 11
-				&& (gMapManager.IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-				|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-				))
+			if(Texture == 11 && (gMapManager.IsPKField() || IsDoppelGanger2()))
 				Water = true;
-#endif //PBG_ADD_PKFIELD
 		}
 		FaceTexture(Texture,xf,yf,Water,false);
     	RenderFace(Texture,xi,yi);
@@ -1559,11 +1544,7 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 			|| TerrainMappingAlpha[TerrainIndex3] > 0.f 
 			|| TerrainMappingAlpha[TerrainIndex4] > 0.f )
         {
-    		if ( (gMapManager.WorldActive == WD_7ATLANSE
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-				|| IsDoppelGanger3()
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-				) && TerrainMappingLayer2[TerrainIndex1] == 5 )
+    		if ( (gMapManager.WorldActive == WD_7ATLANSE || IsDoppelGanger3()) && TerrainMappingLayer2[TerrainIndex1] == 5 )
             {
 			    Texture = BITMAP_WATER-BITMAP_MAPTILE+WaterTextureNumber;
 			    FaceTexture(Texture,xf,yf,false,true);
@@ -1599,14 +1580,10 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 			{
 				float Height = pBitmap->Height * 2.f;
 				BindTexture(Texture);
-#ifdef PBG_ADD_PKFIELD
-				if(gMapManager.IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-					|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-					)
+
+				if(gMapManager.IsPKField() || IsDoppelGanger2()	)
 					EnableAlphaBlend();
-#endif //PBG_ADD_PKFIELD
+
            		float Width  = 64.f/256.f;
          		float su = xf*Width;
 				su += TerrainGrassTexture[yi&TERRAIN_SIZE_MASK];
@@ -1648,15 +1625,9 @@ void RenderTerrainFace(float xf,float yf,int xi,int yi,float lodf)
 				glColor3fv(PrimaryTerrainLight[TerrainIndex4]);
 				glVertex3fv(TerrainVertex[3]);
 				glEnd();
-#ifdef PBG_ADD_PKFIELD
-				if(gMapManager.IsPKField()
-#ifdef YDG_ADD_MAP_DOPPELGANGER2
-					|| IsDoppelGanger2()
-#endif	// YDG_ADD_MAP_DOPPELGANGER2
-					)
-					DisableAlphaBlend();
-#endif //PBG_ADD_PKFIELD
 
+				if(gMapManager.IsPKField() || IsDoppelGanger2())
+					DisableAlphaBlend();
 			}
 		}
 	}

@@ -2348,7 +2348,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					VectorAdd(o->Position,Position,o->Position);
 //					Vector(1.f,1.f,1.f,o->Light);
                 }
-#ifdef LDS_ADD_EFFECT_FIRESCREAM_FOR_MONSTER
 				else if( o->SubType==20 )	// SubType : 7
 				{
 					o->Scale    = Scale;
@@ -2363,10 +2362,7 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Velocity = 10.f;
 					o->LifeTime = 20;
 				}
-#endif // LDS_ADD_EFFECT_FIRESCREAM_FOR_MONSTER
-
                 break;
-				
 			case BITMAP_LIGHT:
                 o->m_bCreateTails = false;
                 if ( o->SubType==0 )
@@ -2845,13 +2841,8 @@ void CreateTailAxis(JOINT *o, float Matrix[3][4], float ScaleX, float ScaleY, BY
 
 
 
-void CreateTail(JOINT *o,float Matrix[3][4]
-#ifdef LDK_ADD_EG_MONSTER_DEASULER
-				,bool Blur
-#endif //LDK_ADD_EG_MONSTER_DEASULER
-				)
+void CreateTail(JOINT *o,float Matrix[3][4],bool Blur)
 {
-#ifdef LDK_ADD_EG_MONSTER_DEASULER
 	if(Blur == true)
 	{
 		int i = 0;
@@ -2916,7 +2907,6 @@ void CreateTail(JOINT *o,float Matrix[3][4]
 		}
 	}
 	else
-#endif //#ifdef LDK_ADD_EG_MONSTER_DEASULER
 	{
 		o->NumTails++;
 		if(o->NumTails > o->MaxTails-1) 
@@ -4799,13 +4789,9 @@ void MoveJoint( JOINT *o, int iIndex)
             case 2:
 			case 16:
 			case 21:
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
 			case 27:
 			case 28:
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 			case 33:
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
 				if ( o->Target)
 				{
 					VectorCopy(o->Target->Position, o->TargetPosition);
@@ -4819,15 +4805,13 @@ void MoveJoint( JOINT *o, int iIndex)
 				Distance = MoveHumming(o->Position,o->Angle,o->TargetPosition,50.f);
                 break;
 				
-            case 4:     //  전격 마법.( 위에서 아래로 )
+            case 4:
                 Position[0] = o->TargetPosition[0];
                 Position[1] = o->TargetPosition[1];
 				Position[2] = o->TargetPosition[2] - 300.f;
 				
 				Distance = MoveHumming(o->Position,o->Angle,Position,-10);//-25.f);
                 break;  
-				
-				//  전격 마법 ( 아래에서 위로 )
             case 5:
                 Position[0] = o->TargetPosition[0];
                 Position[1] = o->TargetPosition[1];
@@ -4836,7 +4820,7 @@ void MoveJoint( JOINT *o, int iIndex)
 				Distance = MoveHumming(Position,o->Angle,o->Position,-10);//-25.f);
                 break;
 				
-            case 6: //  벼락.
+            case 6:
 				VectorCopy(o->Target->Position,o->TargetPosition);
                 o->TargetPosition[0] += (2050.f+rand()%200);
                 o->TargetPosition[1] += (2050.f+rand()%200);
@@ -4938,11 +4922,7 @@ void MoveJoint( JOINT *o, int iIndex)
                 break;
             }
 	
-            if ( o->SubType==1
-#ifdef PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-				|| o->SubType == 28
-#endif //PBG_ADD_RAYMOND_GUARDIANPRIEST_MONSTER_EFFECT
-				)
+            if ( o->SubType==1 || o->SubType == 28)
 			{
 				o->Direction[0] = (float)(rand()%256-128);
 				o->Direction[2] = (float)(rand()%256-128);
@@ -6202,7 +6182,6 @@ void MoveJoint( JOINT *o, int iIndex)
                 o->Live = false;
             }
         }
-#ifdef LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
   		else if( o->SubType == 19 )
   		{
 			vec3_t  pos;
@@ -6259,7 +6238,6 @@ void MoveJoint( JOINT *o, int iIndex)
 						CreateTail(o,Mat);
 				}
   		}
-#endif // LDS_ADD_EG_4_MONSTER_WORLDBOSS_GAIONKALEIN
         else
         {
             vec3_t  pos;

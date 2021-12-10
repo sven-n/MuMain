@@ -2,9 +2,6 @@
 // file    : GM_PK_Field.cpp
 //*****************************************************************************
 #include "stdafx.h"
-
-#ifdef PBG_ADD_PKFIELD
-
 #include "GM_PK_Field.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -1242,5 +1239,3 @@ void CGM_PK_Field::PlayBGM()
 		StopMp3(g_lpszMp3[MUSIC_PKFIELD]);
 	}
 }
-
-#endif //PBG_ADD_PKFIELD

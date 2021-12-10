@@ -14,8 +14,6 @@
 #include "wsclientinline.h"
 #include "CharacterManager.h"
 
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
-
 CDuelMgr g_DuelMgr;
 
 CDuelMgr::CDuelMgr()
@@ -190,4 +188,3 @@ char * CDuelMgr::GetDuelWatchUser(int iIndex)
 	}
 	return NULL;
 }
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM

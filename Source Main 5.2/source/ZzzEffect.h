@@ -84,8 +84,7 @@ void CreateTeleportEnd(OBJECT *o);
 void CreateMagicShiny(CHARACTER *c,int Hand=0);
 
 bool AddRangeAttack( vec3_t Position, float Range, short PKKey, int DamageKey[], int *piCount, int iMaxKey);
-bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,short PKKey=-1,
-						  WORD SkillSerialNum=0);
+bool AttackCharacterRange(int Index,vec3_t Position,float Range,BYTE Serial,short PKKey=-1, WORD SkillSerialNum=0);
 
 void CreateArrow(CHARACTER *c,OBJECT *o,OBJECT *to,WORD SkillIndex,WORD Skill,WORD SKKey);
 void CreateArrows(CHARACTER *c,OBJECT *o,OBJECT *to,WORD SkillIndex=0,WORD Skill=1,WORD SKKey=0);
@@ -94,9 +93,8 @@ void DeleteEffect( int efftype );
 
 void EffectDestructor(OBJECT *o);
 
-#ifdef LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
 void TerminateOwnerEffectObject( int iOwnerObjectType = -1 );
-#endif // LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
+
 
 bool DeleteEffect(int Type,OBJECT *Owner, int iSubType = -1);
 bool SearchEffect(int iType, OBJECT* pOwner, int iSubType = -1);
@@ -122,11 +120,7 @@ void RenderBackLight( OBJECT* o, vec3_t Position, vec3_t Light1, vec3_t Light2 )
 //void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int SubType=0,OBJECT *Target=NULL,float Scale=10.f,short PK=-1,BYTE SkillIndex=0,BYTE SkillSerialNum=0, int iChaIndex=-1, const float* vColor = NULL, short int sTargetIndex = -1);
 void DeleteJoint( int Type, OBJECT *Target, int SubType=-1 );
 bool SearchJoint( int Type, OBJECT *Target, int SubType=-1 );
-void CreateTail(JOINT *o,float Matrix[3][4]
-#ifdef LDK_ADD_EG_MONSTER_DEASULER
-				, bool Blur = false
-#endif //#ifdef LDK_ADD_EG_MONSTER_DEASULER
-				);
+void CreateTail(JOINT *o,float Matrix[3][4], bool Blur = false);
 void CreateTail(JOINT *o,float Matrix[3][4], float ScaleX, float ScaleY );
 
 void CreateTailAxis(JOINT *o, float Matrix[3][4], BYTE axis = 0);

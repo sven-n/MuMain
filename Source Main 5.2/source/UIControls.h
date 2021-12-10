@@ -620,7 +620,6 @@ protected:
 	virtual int GetRenderLinePos_y(int iLineNumber);
 };
 
-#ifdef ASG_MOD_UI_QUEST_INFO
 struct SCurQuestItem
 {
 	BOOL	m_bIsSelected;
@@ -685,8 +684,6 @@ protected:
 	virtual BOOL DoLineMouseAction(int nLine);
 	virtual int GetRenderLinePos_y(int nLine);
 };
-
-#endif	// ASG_MOD_UI_QUEST_INFO
 
 struct TEXTCOLOR_DATA
 {

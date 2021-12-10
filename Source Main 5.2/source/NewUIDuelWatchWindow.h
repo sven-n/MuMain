@@ -1,13 +1,7 @@
 // NewUIDuelWatchWindow.h: interface for the CNewUIDuelWatchWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_NEWUIDUELWATCHWINDOW_H__3E1DAC48_FC3E_463D_8DCE_5CC18F4DFC22__INCLUDED_)
-#define AFX_NEWUIDUELWATCHWINDOW_H__3E1DAC48_FC3E_463D_8DCE_5CC18F4DFC22__INCLUDED_
-
 #pragma once
-
-#ifdef YDG_ADD_NEW_DUEL_UI
 
 #include "NewUIBase.h"
 #include "NewUIButton.h"
@@ -40,8 +34,8 @@ namespace SEASON3B
 		CNewUIManager*			m_pNewUIMng;
 		POINT m_Pos;
 
-		CNewUIButton m_BtnChannel[4];		// 관전 버튼
-		BOOL m_bChannelEnable[4];	// 방 입장 가능 상태인가(개설/비개설)
+		CNewUIButton m_BtnChannel[4];
+		BOOL m_bChannelEnable[4];
 	public:
 		CNewUIDuelWatchWindow();
 		virtual ~CNewUIDuelWatchWindow();
@@ -71,6 +65,3 @@ namespace SEASON3B
 		void InitButton(CNewUIButton * pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char * pCaption);
 	};
 }
-#endif	// YDG_ADD_NEW_DUEL_UI
-
-#endif // !defined(AFX_NEWUIDUELWATCHWINDOW_H__3E1DAC48_FC3E_463D_8DCE_5CC18F4DFC22__INCLUDED_)

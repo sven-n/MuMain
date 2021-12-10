@@ -1,5 +1,4 @@
 // NewUIDuelWindow.cpp: implementation of the CNewUIDuelWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -9,15 +8,9 @@
 #include "ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "UIControls.h"
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 #include "DuelMgr.h"
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUIDuelWindow::CNewUIDuelWindow()
 {
@@ -97,7 +90,6 @@ void SEASON3B::CNewUIDuelWindow::RenderFrame()
 
 void SEASON3B::CNewUIDuelWindow::RenderContents()
 {
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 	unicode::t_char strMyScore[12];
 	unicode::t_char strDuelScore[12];
 	unicode::_sprintf(strMyScore, "%d", g_DuelMgr.GetScore(DUEL_HERO));
@@ -112,22 +104,6 @@ void SEASON3B::CNewUIDuelWindow::RenderContents()
 	g_pRenderText->SetTextColor(255, 25, 25, 255);
 	g_pRenderText->RenderText(m_Pos.x+55, m_Pos.y+56, g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
 	g_pRenderText->RenderText(m_Pos.x+31, m_Pos.y+56, strDuelScore);
-#else	// YDG_ADD_NEW_DUEL_SYSTEM
-	unicode::t_char strMyScore[12];
-	unicode::t_char strDuelScore[12];
-	unicode::_sprintf(strMyScore, "%d", g_iMyPlayerScore);
-	unicode::_sprintf(strDuelScore, "%d", g_iDuelPlayerScore);
-
-	g_pRenderText->SetFont(g_hFontBold);
-	g_pRenderText->SetTextColor(0, 0, 0, 255);
-	g_pRenderText->SetBgColor(0);
-	g_pRenderText->SetTextColor(0, 150, 255, 255);
-	g_pRenderText->RenderText(m_Pos.x+55, m_Pos.y+33, Hero->ID);
-	g_pRenderText->RenderText(m_Pos.x+31, m_Pos.y+33, strMyScore);
-	g_pRenderText->SetTextColor(255, 25, 25, 255);
-	g_pRenderText->RenderText(m_Pos.x+55, m_Pos.y+56, g_szDuelPlayerID);
-	g_pRenderText->RenderText(m_Pos.x+31, m_Pos.y+56, strDuelScore);
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 }
 
 float SEASON3B::CNewUIDuelWindow::GetLayerDepth()

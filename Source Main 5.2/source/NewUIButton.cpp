@@ -789,9 +789,7 @@ void CNewUIRadioGroupButton::Initialize()
 
 void CNewUIRadioGroupButton::Destroy()
 {
-#ifdef YDG_FIX_MEMORY_LEAK_0905
 	UnRegisterRadioButton();
-#endif	// YDG_FIX_MEMORY_LEAK_0905
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM

@@ -13,9 +13,7 @@ void MoveBugs ( void );
 bool RenderBug ( OBJECT* o, bool bForceRender=false );
 void RenderBugs ( void );
 void RenderDarkHorseSkill ( OBJECT* o, BMD* b );
-#ifdef LDS_ADD_EG_2_MONSTER_2NDCORP_VERMONT
 void RenderSkillEarthQuake ( CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill = 30);
-#endif // LDS_ADD_EG_2_MONSTER_2NDCORP_VERMONT
 void DeleteBug(OBJECT *Owner);
 // 아이템이 펫 아이템인가?
 bool IsBug(ITEM* pItem);	

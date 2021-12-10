@@ -1903,14 +1903,12 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
      				o->Direction[1] = -70.f;
 					o->LifeTime		= 30;
 				}
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 				else if( Type == MODEL_ARROW_GAMBLE )
 				{
 					o->Scale        = 0.8f;
      				o->Direction[1] = -70.f;
 					o->LifeTime		= 30;
 				}
-#endif //LDK_ADD_GAMBLERS_WEAPONS
 				else
 				{
 					o->Scale        = 0.8f;
@@ -10411,22 +10409,16 @@ void MoveEffect( OBJECT *o, int iIndex)
 			{
 //               Vector(0.f,0.f,(float)(rand()%360),o->Angle);
 
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 				if(o->SubType == 2)
 				{
 					VectorCopy(o->Owner->Position, o->Position);
 					o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 22.0f;
 				}
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 
                 Loc[0] = o->Position[0] + rand()%200-100;
                 Loc[1] = o->Position[1] + rand()%200-100;
                 Loc[2] = o->Position[2] - 200;
-				if(o->SubType == 0
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
-					|| o->SubType == 2
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
-					)
+				if(o->SubType == 0 || o->SubType == 2)
 				{
 					CreateJoint(BITMAP_FLARE,Loc,Loc,o->Angle,50,NULL,40);
 				}
@@ -10447,13 +10439,11 @@ void MoveEffect( OBJECT *o, int iIndex)
 				BMD *b = &Models[o->Type];
 				b->PlayAnimation( &o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity/3.f, o->Position, o->Angle );
 			}
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 			else if(o->SubType == 2)
 			{
 				BMD *b = &Models[o->Type];
 				b->PlayAnimation( &o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity/3.f, o->Position, o->Angle );
 			}
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 		}
 		break;
 	case MODEL_CHANGE_UP_NASA:
@@ -10486,13 +10476,11 @@ void MoveEffect( OBJECT *o, int iIndex)
 		break;
 	case MODEL_CHANGE_UP_CYLINDER:
 		{
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 			if(o->SubType == 2)
 			{
 				VectorCopy(o->Owner->Position, o->Position);
 				o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
 			}
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 
 			vec3_t  Go;
 			AngleMatrix ( Angle, Matrix );
@@ -11643,7 +11631,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 		}
 		break;
-#ifdef YDG_ADD_DOPPELGANGER_MONSTER
 	case MODEL_DOPPELGANGER_SLIME_CHIP:
 		o->HeadAngle[2] -= o->Gravity;
 		VectorCopy(o->Light,Light);
@@ -11686,7 +11673,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 			o->Angle[1] -= 0.35f * o->LifeTime;
 		}
 		break;
-#endif	// YDG_ADD_DOPPELGANGER_MONSTER
 
 	case MODEL_SHADOW_PAWN_ANKLE_LEFT:		case MODEL_SHADOW_PAWN_ANKLE_RIGHT:
 	case MODEL_SHADOW_PAWN_BELT:			case MODEL_SHADOW_PAWN_CHEST:

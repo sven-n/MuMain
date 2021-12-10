@@ -1,13 +1,6 @@
 // CNewUIEmpireGuardianTimer.h: interface for the CNewUIEmpireGuardianTimer class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_CNewUIEmpireGuardianTimer_H__8AD8FE50_F906_4AB7_8944_FD34CB3D3F91__INCLUDED_)
-#define AFX_CNewUIEmpireGuardianTimer_H__8AD8FE50_F906_4AB7_8944_FD34CB3D3F91__INCLUDED_
-
 #pragma once
-
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
 
 #include "NewUIBase.h"
 #include "NewUIManager.h"
@@ -84,7 +77,3 @@ namespace SEASON3B
 		int m_iMonsterCount;
 	};
 }
-#endif	// LDK_ADD_EMPIREGUARDIAN_UI
-
-#endif // !defined(AFX_CNewUIEmpireGuardianTimer_H__8AD8FE50_F906_4AB7_8944_FD34CB3D3F91__INCLUDED_)
-

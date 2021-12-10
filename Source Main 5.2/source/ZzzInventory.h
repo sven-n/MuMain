@@ -108,15 +108,6 @@ extern int g_iPersonalShopMsgType;
 extern char g_szPersonalShopTitle[64];
 extern CHARACTER g_PersonalShopSeller;
 
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM
-#ifdef DUEL_SYSTEM
-extern bool g_bEnableDuel;
-extern int g_iDuelPlayerIndex;
-extern char g_szDuelPlayerID[24];
-extern int g_iMyPlayerScore;
-extern int g_iDuelPlayerScore;
-#endif // DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 extern bool EnableRenderInventory;
 extern int  g_bEventChipDialogEnable;
 extern int  g_shEventChipCount;
@@ -174,12 +165,6 @@ bool IsExistUndecidedPrice();
 void OpenPersonalShopMsgWnd(int iMsgType);
 bool IsCorrectShopTitle(const char* szShopTitle);
 
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM	
-#ifdef DUEL_SYSTEM
-void ClearDuelWindow();
-#endif // DUEL_SYSTEM
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-
 void CreateGuildMark( int nMarkIndex, bool blend=true );
 void RenderGuildColor(float x,float y,int SizeX,int SizeY,int Index);
 void CreateCastleMark ( int Type, BYTE* buffer=NULL, bool blend=true );
@@ -193,11 +178,7 @@ void GetSpecialOptionText ( int Type, char* Text, WORD Option, BYTE Value, int i
 #else //PBG_ADD_NEWCHAR_MONK_SKILL
 void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int iMana );
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
-#ifdef ASG_ADD_NEW_QUEST_SYSTEM
 void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
-#else	// ASG_ADD_NEW_QUEST_SYSTEM
-void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype = 0);
-#endif	// ASG_ADD_NEW_QUEST_SYSTEM
 void RenderRepairInfo(int sz, int sy, ITEM* ip, bool Sell);
 void RenderSkillInfo(int sx,int sy,int Type,int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE *p);

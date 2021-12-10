@@ -28,7 +28,6 @@ int QuaternionCompare (vec4_t v1, vec4_t v2)
 }
 
 
-#ifdef LDS_ADD_INTERPOLATION_VECTOR3
 void VectorInterpolation( vec3_t& v_out, const vec3_t& v_1, const vec3_t& v_2, const float fWeight )
 {	
 	LInterpolationF(v_out[0], v_1[0], v_2[0], fWeight);
@@ -81,7 +80,6 @@ float VectorDistance3D_DirDist(const vec3_t& vPosStart, const vec3_t& vPosEnd, v
 	VectorSubtract(vPosEnd, vPosStart, vOut);
 	return sqrt(vOut[0]*vOut[0] + vOut[1]*vOut[1] +vOut[2]*vOut[2]);
 }
-#endif // LDS_ADD_INTERPOLATION_VECTOR3
 
 
 vec_t Q_rint (vec_t in)
@@ -96,7 +94,6 @@ void VectorMul (vec3_t va, vec3_t vb, vec3_t vc)
 	vc[2] = va[2]*vb[2];
 }
 
-#ifdef LDS_ADD_INTERPOLATION_VECTOR3
 void VectorMulF (const vec3_t vIn01, const float fIn01, vec3_t vOut)
 {
 	vOut[0] = vIn01[0] * fIn01;
@@ -135,9 +132,7 @@ void VectorDistNormalize (const vec3_t vInFrom, const vec3_t vInTo, vec3_t vOut)
 	VectorSubtract( vInTo, vInFrom, vOut );
 	VectorNormalize(vOut);
 }
-#endif // LDS_ADD_INTERPOLATION_VECTOR3
 
-//vc = va + scale*vb
 void VectorMA (vec3_t va, float scale, vec3_t vb, vec3_t vc)
 {
 	vc[0] = va[0] + scale*vb[0];

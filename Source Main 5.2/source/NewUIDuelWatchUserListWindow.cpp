@@ -1,5 +1,4 @@
 // NewUIDuelWatchUserListWindow.cpp: implementation of the CNewUIDuelWatchUserListWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -7,13 +6,7 @@
 #include "NewUISystem.h"
 #include "DuelMgr.h"
 
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
-
 using namespace SEASON3B;
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CNewUIDuelWatchUserListWindow::CNewUIDuelWatchUserListWindow()
 {
@@ -97,9 +90,6 @@ bool CNewUIDuelWatchUserListWindow::Render()
 	extern float g_fScreenRate_y;
 
 	SIZE TextSize;
-#ifdef LJH_FIX_CHANING_FONT_FOR_DUAL_WATCHUSER_NAME
-	g_pRenderText->SetFont(g_hFontBold);
-#endif //LJH_FIX_CHANING_FONT_FOR_DUAL_WATCHUSER_NAME
 
 	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), "Q", 1, &TextSize);
 	float fFontHeight = TextSize.cy / g_fScreenRate_y;
@@ -161,4 +151,3 @@ bool CNewUIDuelWatchUserListWindow::BtnProcess()
 {
 	return false;
 }
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF

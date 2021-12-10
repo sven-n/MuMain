@@ -1,13 +1,7 @@
 // SkillEffectMgr.h: interface for the CSkillEffectMgr class.
-//
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_SKILLEFFECTMGR_H__F6B84A39_B629_44F1_80C7_1CCD996154D6__INCLUDED_)
-#define AFX_SKILLEFFECTMGR_H__F6B84A39_B629_44F1_80C7_1CCD996154D6__INCLUDED_
-
 #pragma once
-
-#ifdef YDG_MOD_SEPARATE_EFFECT_SKILLS
 
 class CSkillEffectMgr  
 {
@@ -37,6 +31,3 @@ protected:
 
 extern CSkillEffectMgr g_SkillEffects;
 
-#endif	// YDG_MOD_SEPARATE_EFFECT_SKILLS
-
-#endif // !defined(AFX_SKILLEFFECTMGR_H__F6B84A39_B629_44F1_80C7_1CCD996154D6__INCLUDED_)

@@ -415,12 +415,6 @@ bool CBlueLuckyBagEvent::IsEnableBlueLuckyBag()
 }
 #endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-// 09년 일본 여름 이벤트
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifdef KJH_ADD_09SUMMER_EVENT
 C09SummerEvent::C09SummerEvent()
 {
 
@@ -531,4 +525,3 @@ bool C09SummerEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 	return true;
 }
-#endif // KJH_ADD_09SUMMER_EVENT

@@ -14,11 +14,7 @@
 #include "ZzzCharacter.h"
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
-#ifdef YDG_ADD_NEW_DUEL_SYSTEM
 #include "DuelMgr.h"
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
-
-#ifdef YDG_ADD_NEW_DUEL_UI
 
 using namespace SEASON3B;
 
@@ -271,4 +267,3 @@ bool CNewUIDuelWatchWindow::BtnProcess()
 
 	return false;
 }
-#endif	// YDG_ADD_NEW_DUEL_UI

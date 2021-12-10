@@ -1,14 +1,6 @@
 // GMDoppelGanger3.h: interface for the GMDoppelGanger3 class.
-//
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_GMDOPPELGANGER3_H__EE74650C_6401_4751_B2A8_64BF23A42B68__INCLUDED_)
-#define AFX_GMDOPPELGANGER3_H__EE74650C_6401_4751_B2A8_64BF23A42B68__INCLUDED_
-
 #pragma once
-
-#ifdef YDG_ADD_MAP_DOPPELGANGER3
-
 #include "w_BaseMap.h"
 
 BoostSmartPointer( CGMDoppelGanger3 );
@@ -59,7 +51,3 @@ protected:
 };
 
 extern bool IsDoppelGanger3();
-
-#endif	// YDG_ADD_MAP_DOPPELGANGER3
-
-#endif // !defined(AFX_GMDOPPELGANGER3_H__EE74650C_6401_4751_B2A8_64BF23A42B68__INCLUDED_)

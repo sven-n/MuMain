@@ -8,8 +8,6 @@
 #include "wsclientinline.h"
 #include "UIControls.h"
 
-#ifdef LDK_ADD_EMPIREGUARDIAN_UI
-
 using namespace SEASON3B;
 
 CNewUIEmpireGuardianNPC::CNewUIEmpireGuardianNPC()
@@ -249,4 +247,3 @@ void CNewUIEmpireGuardianNPC::RenderItem3D()
 	
 	::RenderItem3D(ptOrigin.x+(190-20)/2, ptOrigin.y+70, 20.0f, 27.0f, nItemType, nItemLevel, 0, 0, false);
 }
-#endif	// LDK_ADD_EMPIREGUARDIAN_UI

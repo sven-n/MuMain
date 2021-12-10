@@ -1,13 +1,7 @@
 // NewUIDuelWatchUserListWindow.h: interface for the CNewUIDuelWatchUserListWindow class.
-//
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_NEWUIDUELWATCHUSERLISTWINDOW_H__504CDBE7_ECB4_43AF_ADAA_2C0867DBA6AA__INCLUDED_)
-#define AFX_NEWUIDUELWATCHUSERLISTWINDOW_H__504CDBE7_ECB4_43AF_ADAA_2C0867DBA6AA__INCLUDED_
-
 #pragma once
-
-#ifdef YDG_ADD_NEW_DUEL_WATCH_BUFF
 
 #include "NewUIBase.h"
 #include "NewUIManager.h"
@@ -52,7 +46,3 @@ namespace SEASON3B
 		void RenderFrame();
 	};
 }
-
-#endif	// YDG_ADD_NEW_DUEL_WATCH_BUFF
-
-#endif // !defined(AFX_NEWUIDUELWATCHUSERLISTWINDOW_H__504CDBE7_ECB4_43AF_ADAA_2C0867DBA6AA__INCLUDED_)

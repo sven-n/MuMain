@@ -22,9 +22,7 @@
 #include "DuelMgr.h"
 #include "MapManager.h"
 
-#ifndef YDG_ADD_NEW_DUEL_SYSTEM	
 extern bool g_PetEnableDuel;
-#endif	// YDG_ADD_NEW_DUEL_SYSTEM
 
 extern  int     MoveSceneFrame;
 extern  float   WorldTime;
@@ -34,12 +32,10 @@ extern	int     TextBold[30];
 extern  float   g_fScreenRate_x;
 extern  float   g_fScreenRate_y;
 
-#ifdef YDG_FIX_MEMORY_LEAK_0905
 CSPetSystem::~CSPetSystem()
 {
 	SAFE_DELETE_ARRAY(m_PetCharacter.Object.BoneTransform);
 }
-#endif	// YDG_FIX_MEMORY_LEAK_0905
 
 void CSPetSystem::CreatePetPointer ( int Type, unsigned char PositionX, unsigned char PositionY, float Rotation )
 {
@@ -265,7 +261,7 @@ void CSPetSystem::SetAttack ( int Key, int attackType )
     }
 }
 
-void    CSPetSystem::MoveInventory ( void )
+void CSPetSystem::MoveInventory ( void )
 {
 }
 
@@ -281,14 +277,12 @@ CSPetDarkSpirit::CSPetDarkSpirit ( CHARACTER* c )
     m_PetCharacter.Object.CurrentAction = 0;
 }
 
-#ifdef YDG_FIX_MEMORY_LEAK_0905_2ND
 CSPetDarkSpirit::~CSPetDarkSpirit ( void )
 {
 	SAFE_DELETE_ARRAY(m_PetCharacter.Object.BoneTransform);
 }
-#endif	// YDG_FIX_MEMORY_LEAK_0905_2ND
 
-void    CSPetDarkSpirit::MovePet ( void )
+void CSPetDarkSpirit::MovePet ( void )
 {
     bool    Play;
     CHARACTER* c = &m_PetCharacter;
