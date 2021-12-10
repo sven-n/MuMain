@@ -1442,7 +1442,6 @@ __forceinline bool SendRequestStorageExit()
 	spe.Send();\
 }
 
-#ifdef LDK_MOD_PASSWORD_LENGTH_20
 #define SendRequestGuildLeave( p_ID, p_ResidentNumber)\
 {\
 	CStreamPacketEngine spe;\
@@ -1451,16 +1450,6 @@ __forceinline bool SendRequestStorageExit()
 	spe.AddData( ( p_ResidentNumber), 20);\
 	spe.Send();\
 }
-#else //LDK_MOD_PASSWORD_LENGTH_20
-#define SendRequestGuildLeave( p_ID, p_ResidentNumber)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x53);\
-	spe.AddData( ( p_ID), MAX_ID_SIZE);\
-	spe.AddData( ( p_ResidentNumber), 10);\
-	spe.Send();\
-}
-#endif //LDK_MOD_PASSWORD_LENGTH_20
 
 #define SendRequestDeclareWar( p_Name)\
 {\
@@ -2295,27 +2284,6 @@ __forceinline bool SendRequestMixExit()
 	spe << (int)SkillNum;\
 	spe.Send(); \
 }
-
-#ifdef PJH_CHARACTER_RENAME
-#define SendRequestCheckChangeName( PCharaterName ) \
-{ \
-    CStreamPacketEngine spe; \
-    spe.Init( 0xC1, 0xF3); \
-	spe << (BYTE)0x15;\
-	spe.AddData( (PCharaterName), MAX_ID_SIZE);\
-    spe.Send(); \
-}
-
-#define SendRequestChangeName( POldName, PNewName ) \
-{ \
-    CStreamPacketEngine spe; \
-    spe.Init( 0xC1, 0xF3); \
-	spe << (BYTE)0x16;\
-	spe.AddData( (POldName), MAX_ID_SIZE);\
-	spe.AddData( (PNewName), MAX_ID_SIZE);\
-    spe.Send(); \
-}
-#endif //PJH_CHARACTER_RENAME
 
 #define SendRequestResetCharacterPoint() \
 { \

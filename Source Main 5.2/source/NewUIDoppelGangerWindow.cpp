@@ -293,12 +293,10 @@ bool CNewUIDoppelGangerWindow::BtnProcess()
 	if (m_BtnEnter.UpdateMouseEvent() == true)
 	{
 		int iPos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex( ITEM_POTION+111, 0 );
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 		if(iPos == -1)
 		{
 			iPos = g_pMyInventory->FindItemIndex( ITEM_HELPER+125, -1 );
 		}
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH		
 		if( iPos != -1 )
 		{
 			SendRequestEnterDoppelGangerEvent((BYTE)iPos);

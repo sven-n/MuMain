@@ -239,7 +239,6 @@ void CNewUIInGameShop::RenderListBox()
 	m_StorageItemListBox.Render();
 }
 
-#ifdef PBG_ADD_ITEMRESIZE
 bool CNewUIInGameShop::IsInGameShopRect(float _x,float _y)
 {
 	if(!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP))
@@ -295,12 +294,10 @@ void CNewUIInGameShop::SetRateScale(int _ItemType)
 	{
 		m_fRate_Scale = _fRate_Value*0.7f;
 	}
-#ifdef PBG_MOD_SECRETITEM
 	else if(_ItemType >= ITEM_HELPER+117 && _ItemType <= ITEM_HELPER+120)
 	{
 		m_fRate_Scale = _fRate_Value*1.6f;
 	}
-#endif //PBG_MOD_SECRETITEM
 	else if(pItemAttr->Height >= 4)
 	{
 		m_fRate_Scale = _fRate_Value*0.7f;
@@ -310,7 +307,6 @@ void CNewUIInGameShop::SetRateScale(int _ItemType)
 		m_fRate_Scale = _fRate_Value;
 	}
 }
-#endif //PBG_ADD_ITEMRESIZE
 
 void CNewUIInGameShop::RenderDisplayItems()
 {		
@@ -351,7 +347,6 @@ bool CNewUIInGameShop::BtnProcess()
 {	
 	if( g_InGameShopSystem->IsRequestEventPackge() == true )
 	{
-		// 상위 카테고리(Zone) 버튼
 		if( m_ZoneButton.UpdateMouseEvent() != -1 )
 		{
 			g_InGameShopSystem->SelectZone(m_ZoneButton.GetCurButtonIndex());
@@ -360,7 +355,6 @@ bool CNewUIInGameShop::BtnProcess()
 			return true;
 		}
 		
-		// 하위 카테고리(Category) 버튼
 		if( m_CategoryButton.UpdateMouseEvent() != -1 )
 		{
 			g_InGameShopSystem->SelectCategory(m_CategoryButton.GetCurButtonIndex());
@@ -751,11 +745,7 @@ void CNewUIInGameShop::InitCategoryBtn()
 		return;
 
 	m_CategoryButton.UnRegisterRadioButton();
-#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-	m_CategoryButton.CreateRadioGroup(g_InGameShopSystem->GetSizeCategoriesAsSelectedZone(), IMAGE_IGS_CATEGORY_BTN, true, true);
-#else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 	m_CategoryButton.CreateRadioGroup(g_InGameShopSystem->GetSizeCategoriesAsSelectedZone(), IMAGE_IGS_CATEGORY_BTN, true);
-#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 	m_CategoryButton.ChangeRadioButtonInfo(false, m_Pos.x+IMAGE_IGS_CATEGORY_BTN_POS_X, m_Pos.y+IMAGE_IGS_CATEGORY_BTN_POS_Y,IMAGE_IGS_CATEGORY_BTN_WIDTH, IMAGE_IGS_CATEGORY_BTN_HEIGHT, IMAGE_IGS_CATEGORY_BTN_DISTANCE);
 	m_CategoryButton.ChangeButtonState( SEASON3B::BUTTON_STATE_DOWN, 2 );
 	m_CategoryButton.SetFont(g_hFontBold);

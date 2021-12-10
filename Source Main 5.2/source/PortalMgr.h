@@ -1,12 +1,7 @@
 // PortalMgr.h: interface for the CPortalMgr class.
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_PORTALMGR_H__55104483_515C_4618_A100_F3BD8533591D__INCLUDED_)
-#define AFX_PORTALMGR_H__55104483_515C_4618_A100_F3BD8533591D__INCLUDED_
-
 #pragma once
 
-#ifdef YDG_ADD_CS5_PORTAL_CHARM
 
 class CPortalMgr  
 {
@@ -41,6 +36,3 @@ protected:
 
 extern CPortalMgr g_PortalMgr;
 
-#endif	// YDG_ADD_CS5_PORTAL_CHARM
-
-#endif // !defined(AFX_PORTALMGR_H__55104483_515C_4618_A100_F3BD8533591D__INCLUDED_)

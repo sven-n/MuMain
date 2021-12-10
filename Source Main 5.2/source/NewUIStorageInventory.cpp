@@ -465,15 +465,9 @@ bool CNewUIStorageInventory::ProcessBtns()
 	else if (m_abtn[BTN_LOCK].UpdateMouseEvent())
 	{
 		if (m_bLock)
-#ifdef LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageUnlockMsgBoxLayout));
 		}
-#else //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
-		{
-			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageUnlockKeyPadMsgBoxLayout));
-		}
-#endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 		else
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageLockKeyPadMsgBoxLayout));

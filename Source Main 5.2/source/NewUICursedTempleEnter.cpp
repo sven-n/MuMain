@@ -138,13 +138,11 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckEnterLevel( int& enterlevel )
 
 bool SEASON3B::CNewUICursedTempleEnter::CheckEnterItem( ITEM* p, int enterlevel )
 {
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
 	if( p->Type == ITEM_HELPER+61 )
 	{
 		if( !CheckEnterLevel( enterlevel ) ) return false;
 	}
 	else
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
 	{
 		if( p->Type != ITEM_HELPER+51 ) 
 			return false;
@@ -174,14 +172,11 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckInventory( BYTE& itempos, int enter
 		return true;
 	}
 
-#ifdef PSW_CURSEDTEMPLE_FREE_TICKET
 	pos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex( ITEM_HELPER+61, -1 );
 	if( pos != -1 ) {
 		itempos = pos;
 		return true;
 	}
-#endif //PSW_CURSEDTEMPLE_FREE_TICKET
-
 	return false;
 }
 

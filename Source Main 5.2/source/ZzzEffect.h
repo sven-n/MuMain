@@ -99,9 +99,7 @@ void TerminateOwnerEffectObject( int iOwnerObjectType = -1 );
 #endif // LDS_FIX_AFTER_PETDESTRUCTOR_ATTHESAMETIME_TERMINATE_EFFECTOWNER
 
 bool DeleteEffect(int Type,OBJECT *Owner, int iSubType = -1);
-#ifdef CSK_LUCKY_SEAL
 bool SearchEffect(int iType, OBJECT* pOwner, int iSubType = -1);
-#endif // CSK_LUCKY_SEAL
 
 void CreateBomb(vec3_t p,bool Exp, int SubType = 0);
 void CreateBomb2(vec3_t p,bool Exp, int SubType = 0, float Scale = 0.0f);

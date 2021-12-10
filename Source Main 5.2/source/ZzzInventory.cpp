@@ -2194,13 +2194,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	    }
     }
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int nGemType = COMGEM::Check_Jewel( ip->Type );
 	if( nGemType != COMGEM::NOGEM)
 	{
 		Color = TEXT_COLOR_YELLOW;
 	}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 	if ( g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && !IsSellingBan(ip) )
 	{
@@ -4167,7 +4165,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	char tCount = COMGEM::CalcCompiledCount(ip);
 	if(tCount > 0)
 	{
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		int	nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
 		if( nJewelIndex != COMGEM::NOGEM )
 		{
@@ -4176,27 +4173,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 			sprintf(TextList[TextNum], GlobalText[1820]);
 			TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 		}
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		switch(COMGEM::CheckOneItem(ip))
-		{
-			case COMGEM::COMCELE:
-				{
-					sprintf(TextList[TextNum], GlobalText[1819], tCount, GlobalText[1806]);
-					TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-					sprintf(TextList[TextNum], GlobalText[1820]);
-					TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-				}
-				break;
-			case COMGEM::COMSOUL:
-				{
-					sprintf(TextList[TextNum], GlobalText[1819], tCount, GlobalText[1807]);
-					TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-					sprintf(TextList[TextNum], GlobalText[1820]);
-					TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-				}
-				break;
-		}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	}
 	if(ip->Type==ITEM_POTION+13)
 	{
@@ -6843,7 +6819,6 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		sprintf(Name, ItemAttribute[ITEM_HELPER+133].Name);
 	}
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if ( COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true) )
 	{
 		int iJewelItemIndex = COMGEM::GetJewelIndex(COMGEM::Check_Jewel_Com(o->Type, true), COMGEM::eGEM_NAME);
@@ -6851,7 +6826,6 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		glColor3f(1.f,0.8f,0.1f);
 		sprintf(Name,"%s",GlobalText[iJewelItemIndex]);
 	}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if(o->Type==MODEL_COMPILED_CELE)
 	{
 		g_pRenderText->SetFont(g_hFontBold);
@@ -7927,29 +7901,8 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 bool EquipmentItem = false;
 extern int BuyCost;
 
-#if defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
-
 bool IsPartChargeItem(ITEM* pItem)
 {
-#if !defined(PSW_PARTCHARGE_ITEM1) && defined(LDK_ADD_CASHSHOP_FUNC)
-	//국내 유료 아이템 처리
-	switch(pItem->Type)
-	{
-#ifdef PSW_ADD_PC4_CHAOSCHARMITEM
-	case ITEM_POTION+96:
-#endif //PSW_ADD_PC4_CHAOSCHARMITEM
-#ifdef LDK_ADD_PC4_GUARDIAN
-	case ITEM_HELPER+64:
-	case ITEM_HELPER+65:
-#endif //LDK_ADD_PC4_GUARDIAN
-#ifdef PBG_FIX_CHAOSCARD
-	case ITEM_POTION+54:
-#endif //PBG_FIX_CHAOSCARD
-		return true;
-	default:
-		return false;
-	}
-#else 
 	if(	(pItem->Type >= ITEM_HELPER+46 && pItem->Type <= ITEM_HELPER+48)
 		|| (pItem->Type == ITEM_POTION+54)
 		|| (pItem->Type >= ITEM_POTION+58 && pItem->Type <= ITEM_POTION+62)
@@ -8031,11 +7984,9 @@ bool IsPartChargeItem(ITEM* pItem)
 	{
 		return true;
 	}
-#endif //!defined(PSW_PARTCHARGE_ITEM1) && defined(LDK_ADD_CASHSHOP_FUNC)
-	
+
 	return false;
 }
-#endif //defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
 
 bool IsHighValueItem(ITEM* pItem)
 {
@@ -8106,9 +8057,7 @@ bool IsHighValueItem(ITEM* pItem)
 #ifdef KJH_FIX_SELL_LUCKYITEM
 		|| ( Check_ItemAction(pItem, eITEM_SELL) && pItem->Durability > 0 )
 #endif // KJH_FIX_SELL_LUCKYITEM
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		|| ( COMGEM::isCompiledGem( pItem ) )
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		)
 	{
 		if(true == pItem->bPeriodItem && false == pItem->bExpiredPeriod)
@@ -9720,7 +9669,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
 #endif // LEM_ADD_LUCKYITEM
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if( COMGEM::Check_Jewel_Com(Type-MODEL_ITEM) != COMGEM::NOGEM)
 	{
 		Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
@@ -9740,7 +9688,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		break;
 		}
 	}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 	switch (Type)
 	{
@@ -9915,7 +9862,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	{
         if(Type==MODEL_WING+6)
             Scale = 0.0015f;
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		else if( COMGEM::Check_Jewel_Com(Type-MODEL_ITEM) != COMGEM::NOGEM)
 		{
 			Scale = 0.004f;
@@ -9955,10 +9901,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 
 			}
 		}
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		else if(Type==MODEL_COMPILED_CELE || Type==MODEL_COMPILED_SOUL)
-			Scale = 0.004f;
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		else if ( Type>=MODEL_WING+32 && Type<=MODEL_WING+34)
 		{
 			Scale = 0.001f;
@@ -11003,13 +10945,11 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		//sy += Height*0.28f;
 		sy += Height*0.28f;
 	}
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if (COMGEM::Check_Jewel_Com(Type) != COMGEM::NOGEM)
 	{
 		sx += Width*0.55f;
 		sy += Height*0.82f;
 	}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	else if(Type>=ITEM_POTION && Type<ITEM_POTION+MAX_ITEM_INDEX)
 	{
 		sx += Width*0.5f;

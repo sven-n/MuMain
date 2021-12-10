@@ -165,7 +165,7 @@ public:
 	WORD		Skill;
 	BYTE        SwordCount;
 	BYTE		byExtensionSkill;
-	BYTE		m_byDieType;
+	WORD		m_byDieType;
 	BYTE		StormTime;
 	BYTE		JumpTime;
 	BYTE        TargetX;

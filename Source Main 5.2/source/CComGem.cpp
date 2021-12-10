@@ -34,20 +34,12 @@ namespace COMGEM
 void COMGEM::SendReqUnMix()
 {
 	iUnMixIndex += 12;
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	SendRequestGemUnMix(m_cGemType/2, iUnMixLevel, iUnMixIndex);
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	SendRequestGemUnMix(m_cGemType, iUnMixLevel, iUnMixIndex);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 }
 
 void COMGEM::SendReqMix()
 {
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	SendRequestGemMix(m_cGemType/2, (m_cComType/10-1));
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	SendRequestGemMix(m_cGemType, (m_cComType/10-1));
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 }
 
 void COMGEM::ProcessCSAction()
@@ -72,43 +64,25 @@ bool COMGEM::FindWantedList()
 	SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
 	ITEM * pItem = NULL;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	bool	bReturn			= false;
 	int		nInvenMaxIndex	= MAX_MY_INVENTORY_INDEX;
 	ResetWantedList();
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		for (int i = 0; i < nInvenMaxIndex; ++i)
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	for (int i = 0; i < (int)pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
+	for (int i = 0; i < nInvenMaxIndex; ++i)
 	{
 		pItem = pNewInventoryCtrl->GetItem(i);
 		if( !pItem ) continue;
-	#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		if( isCompiledGem( pItem ) )
-	#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		if((pItem->Type == INDEX_COMPILED_CELE && m_cGemType == CELE) 
-			|| (pItem->Type == INDEX_COMPILED_SOUL && m_cGemType == SOUL))
-	#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		{
 			INTBYTEPAIR p;
 			int Level = (pItem->Level>>3) & 15;
 			p.first = pItem->y*pNewInventoryCtrl->GetNumberOfColumn()+pItem->x;
 			p.second = Level;
 			m_UnmixTarList.AddText(p.first, p.second);
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		bReturn = true;
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
+			bReturn = true;
 		}
 	}
-
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	return bReturn;		
-#else 
-	return false;
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 }
 
 void COMGEM::SelectFromList(int iIndex, int iLevel)
@@ -141,17 +115,7 @@ void COMGEM::RenderUnMixList()
 
 char COMGEM::CheckOneItem(const ITEM* p)
 {
-
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	return Check_Jewel(p->Type);
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	if(p->Type == INDEX_COMPILED_CELE) return COMCELE;
-	else if(p->Type == INDEX_COMPILED_SOUL) return COMSOUL;
-	else if(p->Type == ITEM_POTION+13) return CELE;
-	else if(p->Type == ITEM_POTION+14) return SOUL;
-	
-	return NOGEM;
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 }
 
 bool COMGEM::CheckInv()
@@ -179,29 +143,18 @@ bool COMGEM::CheckMyInvValid()
 	m_cPercent = 0;
 	m_cCount = 0;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int nInvenMaxIndex	 = MAX_MY_INVENTORY_INDEX;
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	
 	if(m_bType == ATTACH)
 	{
 		SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
 		ITEM * pItem = NULL;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		for (int i = 0; i < nInvenMaxIndex; ++i)
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		for (int i = 0; i < (int)pNewInventoryCtrl->GetNumberOfItems(); ++i)
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		{
 			pItem = pNewInventoryCtrl->GetItem(i);
-	#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		if( !pItem ) continue;
 		if( m_cGemType == Check_Jewel_Unit( pItem->Type ) )	++m_cCount;
-	#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		if(	(pItem->Type == ITEM_POTION+14 && m_cGemType == SOUL) ||
-			(pItem->Type == ITEM_POTION+13 && m_cGemType == CELE) ) ++m_cCount;
-	#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 			if(m_cCount == m_cComType)
 			{
@@ -230,12 +183,7 @@ bool COMGEM::CheckMyInvValid()
 		//ITEM * pItem = pNewInventoryCtrl->GetItem(iUnMixIndex);
 		ITEM * pItem = g_pMyInventory->FindItem(iUnMixIndex);
 
-	#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		if( isCompiledGem( pItem ) )
-	#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		if( (pItem->Type == INDEX_COMPILED_CELE && m_cGemType == CELE) ||
-			(pItem->Type == INDEX_COMPILED_SOUL && m_cGemType == SOUL) )
-	#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		
 		{
 			++m_cCount;
@@ -271,19 +219,8 @@ char COMGEM::CalcCompiledCount(const ITEM* p)
 {
 	int Level = (p->Level>>3)&15;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	if( CheckOneItem(p) % 2 )	return (Level+1) * FIRST;
 	else						return 0;
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	switch(CheckOneItem(p))
-	{
-	case COMCELE:
-	case COMSOUL:
-		return (Level+1) * FIRST;
-	default:
-		return 0;
-	}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 }
 
 int	COMGEM::CalcItemValue(const ITEM* p)
@@ -293,7 +230,6 @@ int	COMGEM::CalcItemValue(const ITEM* p)
 	{
 	case NOGEM:
 		return 0;
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case eBLESS_C:
 		return 9000000 * (Level+1) * FIRST;
 	break;
@@ -303,7 +239,7 @@ int	COMGEM::CalcItemValue(const ITEM* p)
 	case eLIFE_C:
 		return 45000000 * (Level+1) * FIRST;
 	break;
-	case eCREATE_C:	// 창조의 보석
+	case eCREATE_C:
 		return 36000000 * (Level+1) * FIRST;
 	break;
 	case ePROTECT_C:
@@ -318,16 +254,6 @@ int	COMGEM::CalcItemValue(const ITEM* p)
 	case eUPPER_C:
 		return 18600 * (Level+1) * FIRST;
 	break;
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	case ITEM_POTION+13:
-		return 9000000;
-	case ITEM_POTION+14:
-		return 6000000;
-	case COMCELE:
-		return 9000000 * (Level+1) * FIRST;
-	case COMSOUL:
-		return 6000000 * (Level+1) * FIRST;
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	default:
 		return 0;
 	}
@@ -376,7 +302,6 @@ void COMGEM::Exit()
 	SendExitInventory();
 }
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 int	COMGEM::GetJewelRequireCount( int i )
 {
 	if( i == 0 )	return FIRST;
@@ -514,4 +439,3 @@ int COMGEM::GetJewelIndex( int _nJewel, int _nType )
 
 	return -1;
 }
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX

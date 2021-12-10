@@ -3881,7 +3881,6 @@ bool CHARACTER_MACHINE::IsZeroDurability()
     return  false;
 }
 
-#ifdef PSW_SECRET_ITEM
 void CHARACTER_MACHINE::CalculateBasicState()
 {
 	if(g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
@@ -3925,8 +3924,6 @@ void CHARACTER_MACHINE::CalculateBasicState()
 	}
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 }
-
-#endif //PSW_SECRET_ITEM
 
 void CHARACTER_MACHINE::getAllAddStateOnlyExValues( int &iAddStrengthExValues, int &iAddDexterityExValues, int &iAddVitalityExValues, int &iAddEnergyExValues, int &iAddCharismaExValues )
 {

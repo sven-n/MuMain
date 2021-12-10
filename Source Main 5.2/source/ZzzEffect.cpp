@@ -12225,8 +12225,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 		}
 		break;
-
-#ifdef LDK_ADD_GAMBLERS_WEAPONS
 	case MODEL_ARROW_GAMBLE:
 		{
 			vec3_t vLight;
@@ -12250,8 +12248,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 			CheckClientArrow(o);
 		}break;
-#endif //LDK_ADD_GAMBLERS_WEAPONS
-#ifdef LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 	case MODEL_FEATHER_FOREIGN:
 		{
 			switch( o->SubType )
@@ -12269,7 +12265,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				break;
 			}
 		}break;
-#endif //LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
 	case MODEL_DUNGEON_STONE01:
 		o->Position[2] += o->Gravity;
 		o->Gravity -= 1.f;

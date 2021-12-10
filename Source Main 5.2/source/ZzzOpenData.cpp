@@ -5351,27 +5351,19 @@ void OpenBasicData(HDC hDC)
 	LoadBitmap("effect\\gra.jpg", BITMAP_GRA, GL_LINEAR, GL_CLAMP_TO_EDGE );
 	LoadBitmap("effect\\ring_of_gradation.jpg", BITMAP_RING_OF_GRADATION, GL_LINEAR, GL_CLAMP_TO_EDGE );
 
-#ifdef PBG_ADD_INGAMESHOPMSGBOX
 	LoadBitmap("Interface\\InGameShop\\ingame_pack_check.tga", BITMAP_IGS_CHECK_BUTTON, GL_LINEAR);
-#endif //PBG_ADD_INGAMESHOPMSGBOX
-#ifdef LDK_ADD_EG_MONSTER_ASSASSINMASTER
 	LoadBitmap("Monster\\AssassinLeader_body_R.jpg"	, BITMAP_ASSASSIN_EFFECT1, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //LDK_ADD_EG_MONSTER_ASSASSINMASTER
 
-#ifdef LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
 	LoadBitmap("Item\\partCharge8\\rareitem_ticket_7_body.jpg", BITMAP_RAREITEM7, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Item\\partCharge8\\rareitem_ticket_8_body.jpg", BITMAP_RAREITEM8, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Item\\partCharge8\\rareitem_ticket_9_body.jpg", BITMAP_RAREITEM9, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Item\\partCharge8\\rareitem_ticket_10_body.jpg", BITMAP_RAREITEM10, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Item\\partCharge8\\rareitem_ticket_11_body.jpg", BITMAP_RAREITEM11, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Item\\partCharge8\\rareitem_ticket_12_body.jpg", BITMAP_RAREITEM12, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12
 	
-#ifdef LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 	LoadBitmap("Item\\partCharge8\\DoppelCard.jpg", BITMAP_DOPPLEGANGGER_FREETICKET, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Item\\partCharge8\\BarcaCard.jpg", BITMAP_BARCA_FREETICKET, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Item\\partCharge8\\Barca7Card.jpg", BITMAP_BARCA7TH_FREETICKET, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH
 	
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 	LoadBitmap("Item\\ork_cham_R.jpg",				BITMAP_ORK_CHAM_LAYER_R,			GL_LINEAR, GL_CLAMP_TO_EDGE);

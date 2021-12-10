@@ -39,11 +39,6 @@ public:
 	void Show(bool bShow);
 	bool CursorInWin(int nArea);
 	void UpdateDisplay();
-#ifdef PJH_CHARACTER_RENAME
-	bool ReName_Inter;
-	void Set_State(bool Set = false);
-#endif //PJH_CHARACTER_RENAME
-
 protected:
 	void PreRelease();
 	void UpdateWhileActive(double dDeltaTick);

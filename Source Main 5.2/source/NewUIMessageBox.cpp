@@ -28,10 +28,8 @@ bool SEASON3B::CNewUIMessageBoxBase::Create(int x, int y, int width, int height,
 	SetPos(x, y);
 	SetSize(width, height);
 	m_fPriority = fPriority;
-#ifdef PBG_ADD_MSGBACKOPACITY
 	m_fOpacityAlpha = 0.5f;
 	Vector(0.0f,0.0f,0.0f,m_vColor);
-#endif //PBG_ADD_MSGBACKOPACITY
 	return true;
 }
 
@@ -119,7 +117,7 @@ void SEASON3B::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWO
 { 
 	CNewUIMessageBoxMng::GetInstance()->SendEvent(pOwner, dwEvent, xParam); 
 }
-#ifdef PBG_ADD_MSGBACKOPACITY
+
 void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
 {
 	float _fWidth = 640, _fHeight = 480;
@@ -153,10 +151,6 @@ void SEASON3B::CNewUIMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
 		VectorCopy(_vColor, m_vColor);
 	}
 }
-#endif //PBG_ADD_MSGBACKOPACITY
-//////////////////////////////////////////////////////////////////////
-// CNewUIMessageBoxMng
-//////////////////////////////////////////////////////////////////////
 
 SEASON3B::CNewUIMessageBoxMng::CNewUIMessageBoxMng() : m_pNewUIMng(NULL), m_pMsgBoxFactory(NULL) 
 {

@@ -204,9 +204,7 @@ void RequireClass(ITEM_ATTRIBUTE *p);
 bool IsRequireClassRenderItem(const short sType);
 unsigned int getGoldColor ( DWORD Gold );
 
-#if defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
 bool IsPartChargeItem(ITEM* pItem);
-#endif //defined(PSW_PARTCHARGE_ITEM1) || defined(LDK_ADD_CASHSHOP_FUNC)
 bool IsHighValueItem(ITEM* pItem);
 bool IsPersonalShopBan(ITEM* pItem);
 bool IsTradeBan(ITEM* pItem);
@@ -221,9 +219,7 @@ void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y);
 void RenderHelpLine(int iColumnType, const char * pPrintStyle, int & TabSpace, const char * pGapText = NULL, int Pos_y = 0, int iType=0);
 void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOption,bool Sort);
 
-#ifdef CSK_FREE_TICKET
 BYTE CaculateFreeTicketLevel(int iType);
-#endif //CSK_FREE_TICKET
 
 #ifdef LEM_ADD_LUCKYITEM
 bool Check_ItemAction( ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType = false );

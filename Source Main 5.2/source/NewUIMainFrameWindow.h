@@ -124,11 +124,7 @@ namespace SEASON3B
 		void RenderSkillInfo();
 		float GetLayerDepth();		// 10.6f
 		
-#ifdef PBG_ADD_NEWCHAR_MONK
 		WORD GetHeroPriorSkill();
-#else //PBG_ADD_NEWCHAR_MONK
-		BYTE GetHeroPriorSkill();
-#endif //PBG_ADD_NEWCHAR_MONK
 		void SetHeroPriorSkill(BYTE bySkill);
 
 		void Reset();
@@ -170,12 +166,7 @@ namespace SEASON3B
 		int m_iRenderSkillInfoPosY;
 
 		EVENT_STATE m_EventState;
-		
-#ifdef PBG_ADD_NEWCHAR_MONK
 		WORD m_wHeroPriorSkill;
-#else //PBG_ADD_NEWCHAR_MONK
-		BYTE m_byHeroPriorSkill;
-#endif //PBG_ADD_NEWCHAR_MONK
 	};
 
 	class CNewUIMainFrameWindow	: public CNewUIObj, public INewUI3DRenderObj

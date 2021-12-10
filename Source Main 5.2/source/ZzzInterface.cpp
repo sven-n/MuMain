@@ -8182,7 +8182,6 @@ extern char TextList[30][100];
 extern int  TextListColor[30];
 extern int  TextBold[30];
 
-#ifdef CSK_LUCKY_SEAL
 void GetTime( DWORD time, std::string& timeText, bool isSecond )
 {
 	char buff[100];
@@ -8211,10 +8210,6 @@ void GetTime( DWORD time, std::string& timeText, bool isSecond )
 		}
 		else if( day == 0 && oClock == 0 && minutes == 0 )
 		{
-		/*
-		timeText = ( format( "%1% %2%" ) % second
-								% GlobalText[2301] ).str();
-			*/
 			timeText = GlobalText[2308];
 		}
 	}
@@ -8241,7 +8236,6 @@ void GetTime( DWORD time, std::string& timeText, bool isSecond )
 		}
 	}
 }
-#endif //CSK_LUCKY_SEAL
 
 void RenderBar(float x,float y,float Width,float Height,float Bar,bool Disabled,bool clipping)
 {

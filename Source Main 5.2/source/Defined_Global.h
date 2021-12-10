@@ -17,54 +17,23 @@
 	#define PBG_ADD_GENSRANKING
 #endif	// ASG_ADD_GENS_SYSTEM
 
-//----------------------------------------------------------------------------------------------
-// << Season 5 - Part 1 
+#define KJH_PBG_ADD_INGAMESHOP_SYSTEM
+#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
+	#define PBG_ADD_INGAMESHOP_UI_MAINFRAME
+	#define PBG_ADD_INGAMESHOP_UI_ITEMSHOP
+	#define PBG_ADD_NAMETOPMSGBOX
+	#define KJH_ADD_INGAMESHOP_UI_SYSTEM
+	#define KJH_ADD_PERIOD_ITEM_SYSTEM
+	#define PBG_ADD_INGAMESHOPMSGBOX
+	#define PBG_ADD_ITEMRESIZE
+	#define KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+	//^#define PBG_ADD_CHARACTERSLOT
+	#define PBG_ADD_CHARACTERCARD
+	//^#define LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
+#endif //KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
 #define UPDATE_100527
 #ifdef UPDATE_100527
-
-	#define SEASON5_PART2
-	#ifdef SEASON5_PART2
-		#define KJH_PBG_ADD_INGAMESHOP_SYSTEM
-		#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-			#define PBG_ADD_INGAMESHOP_UI_MAINFRAME
-			#define PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-			#define PBG_ADD_NAMETOPMSGBOX
-			#define KJH_ADD_INGAMESHOP_UI_SYSTEM
-			#define KJH_ADD_PERIOD_ITEM_SYSTEM
-			#define PBG_ADD_INGAMESHOPMSGBOX
-			#define PBG_ADD_MSGBACKOPACITY
-			#define PBG_ADD_ITEMRESIZE
-			#define PBG_FIX_ITEMANGLE
-			#define PBG_ADD_MU_LOGO
-			#define KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-			//^#define PBG_ADD_CHARACTERSLOT
-			#define PBG_ADD_CHARACTERCARD
-			//^#define LDK_ADD_INGAMESHOP_LIMIT_MOVE_WINDOW
-		#endif //KJH_PBG_ADD_INGAMESHOP_SYSTEM
-
-	#endif // SEASON5_PART2
-
-	#define ADD_TOTAL_CHARGE_8TH
-	#ifdef  ADD_TOTAL_CHARGE_8TH
-		#define YDG_ADD_HEALING_SCROLL						// Ä¡À¯ÀÇ ½ºÅ©·Ñ (2009.12.03)
-
-		#define LJH_ADD_RARE_ITEM_TICKET_FROM_7_TO_12		// Èñ±Í¾ÆÀÌÅÛ Æ¼ÄÏ 7-12 Ãß°¡ (2010.02.12)
-		#define LJH_ADD_FREE_TICKET_FOR_DOPPELGANGGER_BARCA_BARCA_7TH	//µµÇÃ°»¾î, ¹¸£Ä«, ¹¸£Ä« Á¦ 7¸Ê ÀÚÀ¯ÀÔÀå±Ç Ãß°¡(2010.02.17)
-
-		#define ADD_SKELETON_PET							// ½ºÄÌ·¹Åæ Æê (2009.12.03)
-		#ifdef  ADD_SKELETON_PET
-			#define YDG_ADD_SKELETON_PET					// ½ºÄÌ·¹Åæ Æê 
-			#ifndef KJH_ADD_PERIOD_ITEM_SYSTEM					// #ifndef
-				#define LJH_FIX_IGNORING_EXPIRATION_PERIOD		// ÀÏº»¿¡´Â ¾ÆÁ÷ ±â°£Á¦°¡ Àû¿ëµÇÁö ¾ÊÀ¸¹Ç·Î bExpiredPeriod¸¦ »ç¿ëÇÏÁö ¾Êµµ·Ï ¼öÁ¤(2010.02.11) - ±â°£Á¦ ½Ã½ºÅÛ µµÀÔ ÈÄ »èÁ¦
-			#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
-			#define LDK_FIX_PC4_GUARDIAN_DEMON_INFO			// µ¥¸ó Ä³¸¯ÅÍÁ¤º¸Ã¢¿¡ °ø°Ý·Â,¸¶·Â,ÀúÁÖ·Â Ãß°¡ µ¥¹ÌÁö Àû¿ë(09.10.15) - Ä³¸¯ÅÍÁ¤º¸Ã¢¿¡ Æê Á¾·¿¡ ÀÇÇÑ ÀúÁÖ·Â Ãß°¡ µ¥¹ÌÁö¸¦ Àû¿ë ½ÃÅ°±â À§ÇØ Ãß°¡
-			#define LJH_FIX_NOT_POP_UP_HIGHVALUE_MSGBOX_FOR_BANNED_TO_TRADE	//NPC¿¡°Ô ÆÇ¸Å ±ÝÁöµÈ ¾ÆÀÌÅÛÀ» ÆÇ¸ÅÇÏ·Á°í ÇÒ¶§ °í°¡ÀÇ ¾ÆÀÌÅÛÀÌ¶ó°í ³ª¿À´Â ¸Þ¼¼Áö Ã¢À» ¾È³ª¿À°Ô ¼öÁ¤(10.02.19)
-		#endif  //ADD_SKELETON_PET
-
-		#define YDG_MOD_CHANGE_RING_EQUIPMENT_LIMIT			// º¯½Å¹ÝÁö ÇÑÁ¾·¸¸ ÀåºñÇÏµµ·Ï ¼öÁ¤ (2009.12.28)
-	#endif  //ADD_TOTAL_CHARGE_8TH
-
 
 	//-----------------------------------------------------------------------------
 	// [ Season 5 - Part 1] (09.09.11)
@@ -283,68 +252,4 @@
 // (2009.04.23)
 #define PJH_CHARACTER_RENAME
 #define LDK_MOD_GLOBAL_PORTAL_LOGO
-
-//#define LDK_MOD_GLOBAL_PORTAL_CASHSHOP_BUTTON_DENY	// (09.04.07)
-#define LDK_FIX_MOVEWINDOW_SCROLL_BUG				// (2009.04.22)
-#define LDK_MOD_PASSWORD_LENGTH_20					// (2009.04.24)
-#define LDK_MOD_GLOBAL_STORAGELOCK_CHANGE			// (2009.04.27)
-
-#define ADD_CASH_SHOP_5TH
-
-#ifdef ADD_CASH_SHOP_5TH
-	#define LDK_FIX_CS5_HIDE_SEEDLEVEL
-	#define YDG_ADD_CS5_REVIVAL_CHARM
-	#define YDG_ADD_CS5_PORTAL_CHARM
-#endif	// YDG_ADD_CASH_SHOP_5TH
-
-#define PBG_WOPS_CURSEDTEMPLEBASKET_MOVING			//(2008.12.18)
-
-#define PSW_PARTCHARGE_ITEM4
-
-#ifdef PSW_PARTCHARGE_ITEM4
-	#define PSW_ADD_PC4_SEALITEM
-	#define PSW_ADD_PC4_SCROLLITEM
-	#define PSW_ADD_PC4_CHAOSCHARMITEM
-	#define LDK_ADD_PC4_GUARDIAN
-	#define	LDK_FIX_GUARDIAN_CHANGE_LIFEWORD			//(2009.01.14)
-	#define LDK_ADD_PC4_GUARDIAN_EFFECT_IMAGE
-#endif //PSW_PARTCHARGE_ITEM4
-
-
-#define PSW_ADD_FOREIGN_HELPWINDOW
-
-#define PSW_PARTCHARGE_ITEM3
-
-#ifdef PSW_PARTCHARGE_ITEM3
-	#define PSW_NEW_CHAOS_CARD
-	#define PSW_NEW_ELITE_ITEM
-#endif //PSW_PARTCHARGE_ITEM3
-
-
-#define PSW_PARTCHARGE_ITEM2
-
-#ifdef PSW_PARTCHARGE_ITEM2
-	#define PSW_ELITE_ITEM
-	#define PSW_SCROLL_ITEM
-	#define PSW_SEAL_ITEM
-	#define PSW_FRUIT_ITEM
-	#define PSW_SECRET_ITEM
-	#define PSW_INDULGENCE_ITEM
-	#define PSW_RARE_ITEM
-	#define PSW_CURSEDTEMPLE_FREE_TICKET
-#endif //PSW_PARTCHARGE_ITEM2
-
-
-#define PSW_PARTCHARGE_ITEM1
-				
-#ifdef PSW_PARTCHARGE_ITEM1
-	#define CSK_FREE_TICKET						// (2007.02.06)
-	#define CSK_CHAOS_CARD						// (2007.02.07)
-	#define CSK_RARE_ITEM						// (2006.02.15)
-	#define CSK_LUCKY_CHARM						// ( 2007.02.22 )
-	#define CSK_LUCKY_SEAL						// ( 2007.02.22 )	
-#endif //PSW_PARTCHARGE_ITEM1
-
-#define LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-
 

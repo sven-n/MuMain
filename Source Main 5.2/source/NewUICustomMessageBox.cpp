@@ -1286,13 +1286,11 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::DisjointBtnDown(class CNewUIMes
 {
 	COMGEM::SetMode(COMGEM::DETACH);
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	if( !COMGEM::FindWantedList() )	
 	{
 		g_pChatListBox->AddText("", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
 		return CALLBACK_BREAK;
 	}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	
 	SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationDisjointMsgBoxLayout));
 
@@ -1429,20 +1427,12 @@ bool SEASON3B::CGemIntegrationUnityMsgBox::Create(float fPriority)
 	CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
 
 	AddMsg(GlobalText[1801], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	SetText();
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	AddMsg(GlobalText[1804]);
-	AddMsg(GlobalText[1805]);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-
 	SetButtonInfo();
 
 	return true;
 }
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 void SEASON3B::CGemIntegrationUnityMsgBox::SetText(void)
 {
 	m_MsgDataList.clear();
@@ -1457,7 +1447,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetText(void)
 		AddMsg(GlobalText[3310]);
 	}
 }
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
+
 void SEASON3B::CGemIntegrationUnityMsgBox::Release()
 {
 	CNewUIMessageBoxBase::Release();
@@ -1472,7 +1462,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::Release()
 
 bool SEASON3B::CGemIntegrationUnityMsgBox::Update()
 {
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int i;
 	switch( COMGEM::m_cGemType )
 	{
@@ -1485,28 +1474,6 @@ bool SEASON3B::CGemIntegrationUnityMsgBox::Update()
 			m_cMixButton[i].Update();
 		break;
 	}
-
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	if(COMGEM::m_cGemType == COMGEM::CELE || COMGEM::m_cGemType == COMGEM::SOUL)
-	{
-		m_BtnTen.SetEnable(true);
-		m_BtnTwenty.SetEnable(true);
-		m_BtnThirty.SetEnable(true);	
-	}
-	else
-	{
-		m_BtnTen.SetEnable(false);
-		m_BtnTwenty.SetEnable(false);
-		m_BtnThirty.SetEnable(false);
-	}
-
-	m_BtnBlessing.Update();
-	m_BtnSoul.Update();
-	m_BtnTen.Update();
-	m_BtnTwenty.Update();
-	m_BtnThirty.Update();
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-
 	m_BtnCancel.Update();
 
 	return true;
@@ -1545,14 +1512,9 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetAddCallbackFunc()
 	AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::TwentyBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_TWENTY);
 	AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::ThirtyBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_THIRTY);
 	AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::SelectMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_SELECTMIX);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	
 }
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 void SEASON3B::CGemIntegrationUnityMsgBox::ResetWndSize( int _nType )
 {
 	int	height;
@@ -1570,7 +1532,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::ResetWndSize( int _nType )
 	SetSize(GetSize().cx, height);
 	m_BtnCancel.SetPos(m_BtnCancel.GetPosX(), GetPos().y + GetSize().cy - 50 );
 }
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 {
@@ -1583,7 +1544,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 	height = MSGBOX_BTN_EMPTY_HEIGHT;
 	btnhalfwidth = width / 2.f;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int	  nNum = 0;
 	int	  nBtnIndex[COMGEM::eGEMTYPE_END]	= { 1806, 1807, 3312, 3313, 3314, 2081, 3315, 3316, 3317, 3318 };
 	unicode::t_char szTemp[256] = {0, };
@@ -1614,46 +1574,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
 	m_BtnCancel.SetText(GlobalText[1002]);	
 
 	ResetWndSize(0);
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	x = GetPos().x + (msgboxhalfwidth / 2) - btnhalfwidth;
-	y = GetPos().y + 60;
-	m_BtnBlessing.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	m_BtnBlessing.SetText(GlobalText[1806]);
-
-	x = GetPos().x + msgboxhalfwidth + (msgboxhalfwidth / 2) - btnhalfwidth;
-	m_BtnSoul.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	m_BtnSoul.SetText(GlobalText[1807]);
-
-	width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-	btnhalfwidth = width / 2.f;
-	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-	y += 40.f;
-	m_BtnTen.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	unicode::t_char strText[256] = {0, };
-	unicode::_sprintf(strText, GlobalText[1808], 10, 500000);
-	m_BtnTen.SetText(strText);
-	m_BtnTen.SetEnable(false);
-
-	y += 40.f;
-	m_BtnTwenty.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	unicode::_sprintf(strText, GlobalText[1808], 10*2, 500000*2);
-	m_BtnTwenty.SetText(strText);
-	m_BtnTwenty.SetEnable(false);
-
-	y += 40.f;
-	m_BtnThirty.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-	unicode::_sprintf(strText, GlobalText[1808], 10*3, 500000*3);
-	m_BtnThirty.SetText(strText);
-	m_BtnThirty.SetEnable(false);
-	
-
-	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-	btnhalfwidth = width / 2.f;
-	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-	y += 40;
-	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	m_BtnCancel.SetText(GlobalText[1002]);	
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 }
 
 void SEASON3B::CGemIntegrationUnityMsgBox::RenderFrame()
@@ -1668,11 +1588,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderFrame()
 
 	x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	for(int i=0; i< m_nMiddleCount; ++i)
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	for(int i=0; i<MIDDLE_COUNT; ++i)
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	{
 		RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
 		y += height;
@@ -1720,7 +1636,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderTexts()
 
 void SEASON3B::CGemIntegrationUnityMsgBox::RenderButtons()
 {
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int i;
 	switch( COMGEM::m_cGemType )
 	{
@@ -1733,35 +1648,6 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderButtons()
 			m_cMixButton[i].Render();
 		break;
 	}
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-
-	if(COMGEM::m_cGemType == COMGEM::CELE)
-	{
-		glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
-		m_BtnBlessing.Render();
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	}
-	else
-	{
-		m_BtnBlessing.Render();
-	}	
-	
-	if(COMGEM::m_cGemType == COMGEM::SOUL)
-	{
-		glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
-		m_BtnSoul.Render();
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	}
-	else
-	{
-		m_BtnSoul.Render();
-	}
-	
-	m_BtnTen.Render();
-	m_BtnTwenty.Render();
-	m_BtnThirty.Render();
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-
 	m_BtnCancel.Render();
 }
 
@@ -1770,7 +1656,6 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::LButtonUp(class CNewUIMess
 	CGemIntegrationUnityMsgBox* pMsgBox = dynamic_cast<CGemIntegrationUnityMsgBox*>(pOwner);
 	if(pMsgBox)
 	{
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		int i;
 		switch( COMGEM::m_cGemType )
 		{
@@ -1796,34 +1681,6 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::LButtonUp(class CNewUIMess
 				break;
 		}
 
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-		if(pMsgBox->m_BtnBlessing.IsMouseIn() == true)
-		{
-			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING);
-			return CALLBACK_BREAK;
-		}
-		if(pMsgBox->m_BtnSoul.IsMouseIn() == true)
-		{
-			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_SOUL);
-			return CALLBACK_BREAK;
-		}
-		if(pMsgBox->m_BtnTen.IsMouseIn() == true)
-		{
-			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_TEN);
-			return CALLBACK_BREAK;
-		}
-		if(pMsgBox->m_BtnTwenty.IsMouseIn() == true)
-		{
-			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_TWENTY);
-			return CALLBACK_BREAK;
-		}
-		if(pMsgBox->m_BtnThirty.IsMouseIn() == true)
-		{
-			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_THIRTY);
-			return CALLBACK_BREAK;
-		}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-
 		if(pMsgBox->m_BtnCancel.IsMouseIn() == true)
 		{
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -1848,7 +1705,6 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SoulBtnDown(class CNewUIMe
 	return CALLBACK_CONTINUE;
 }
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
 	if( !COMGEM::CheckInv() )	
@@ -1874,7 +1730,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CNe
 
 	return CALLBACK_BREAK;
 }
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
+
 CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TenBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
 	COMGEM::SetComType(COMGEM::FIRST);
@@ -2031,12 +1887,9 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Create(float fPriority)
 
 	AddMsg(GlobalText[1800], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 	SetButtonInfo();
-	
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	ChangeMiddleFrameBig();	
 	AddMsg(" ", RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 	AddMsg(GlobalText[3311], CLRDW_YELLOW, MSGBOX_FONT_BOLD);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 	return true;
 }
@@ -2055,19 +1908,9 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::Release()
 
 bool SEASON3B::CGemIntegrationDisjointMsgBox::Update()
 {
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	m_BtnCancel.Update();
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	m_BtnBlessing.Update();
-	m_BtnSoul.Update();
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	
-
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	if( true )
-#else
-	if(COMGEM::m_cGemType != COMGEM::NOGEM)
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	{
 		COMGEM::MoveUnMixList();
 
@@ -2112,11 +1955,7 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameBig()
 {
 	int height = 0;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	m_iMiddleFrameCount = 10;
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	m_iMiddleFrameCount = 13;
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	height = MSGBOX_TOP_HEIGHT + (m_iMiddleFrameCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 	
 	SetSize(GetSize().cx, height);
@@ -2242,7 +2081,6 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
 		{
 			unicode::t_char strText[256] = {0, };
 			int	iGemLevel = COMGEM::GetUnMixGemLevel()+1;
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 			ITEM* pItem	= g_pMyInventory->GetInventoryCtrl()->FindItem(pUT->m_iInvenIdx);
 			int	  nIdx	= COMGEM::Check_Jewel( pItem->Type );
 			COMGEM::SetGem(nIdx);
@@ -2251,19 +2089,6 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
 			pMsgBox->AddMsg(strText, CLRDW_DARKYELLOW, MSGBOX_FONT_BOLD );
 			sprintf(strText, GlobalText[1814], COMGEM::m_iValue);
 			pMsgBox->AddMsg(strText, CLRDW_DARKYELLOW, MSGBOX_FONT_BOLD );
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-			if(COMGEM::m_cGemType == 0)
-			{
-				sprintf(strText, GlobalText[1813], GlobalText[1806], iGemLevel);
-			}
-			else
-			{
-				sprintf(strText, GlobalText[1813], GlobalText[1807], iGemLevel);
-			}
-			pMsgBox->AddMsg(strText);
-			sprintf(strText, GlobalText[1814], COMGEM::m_iValue);
-			pMsgBox->AddMsg(strText);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		}
 	}
 
@@ -2293,30 +2118,12 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::SetButtonInfo()
 	height = MSGBOX_BTN_EMPTY_HEIGHT;
 	btnhalfwidth = width / 2.f;
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
 	btnhalfwidth = width / 2.f;
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	y = GetPos().y + 40;
 	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
 	m_BtnCancel.SetText(GlobalText[1002]);
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	x = GetPos().x + (msgboxhalfwidth / 2) - btnhalfwidth;
-	y = GetPos().y + 40;
-	m_BtnBlessing.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	m_BtnBlessing.SetText(GlobalText[1806]);
-
-	x = GetPos().x + msgboxhalfwidth + (msgboxhalfwidth / 2) - btnhalfwidth;
-	m_BtnSoul.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	m_BtnSoul.SetText(GlobalText[1807]);
-
-	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-	btnhalfwidth = width / 2.f;
-	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-	y += 40;
-	m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-	m_BtnCancel.SetText(GlobalText[1002]);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 	x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 	width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
@@ -2387,71 +2194,19 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderGemList()
 	extern float g_fScreenRate_x;
 	extern float g_fScreenRate_y;
 	
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	int x, y;
 	y = GetPos().y + 80;
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	if(COMGEM::m_cGemType != COMGEM::CELE && COMGEM::m_cGemType != COMGEM::SOUL)
-	{
-		return;
-	}
-	
-	unicode::t_char strText[256] = {0, };
-	unicode::_sprintf(strText, GlobalText[1821], COMGEM::CalcEmptyInv());
-	
-	int x, y;
-	y = GetPos().y + 80;
-	SIZE TextSize;
-	size_t TextExtentWidth, TextExtentHeight;
-
-	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strText, unicode::_strlen(strText), &TextSize);
-	TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-	TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
-	
-	x = GetPos().x + (GetSize().cx / 2) - (TextExtentWidth / 2);
-	g_pRenderText->RenderText(x, y, strText);
-	y += TextExtentHeight + 4;
-	g_pRenderText->RenderText(x, y, GlobalText[1822]);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 	m_BtnDisjoint.Render();
 
 	x = GetPos().x + (GetSize().cx / 2) - (COMGEM::m_UnmixTarList.GetWidth() / 2);
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	COMGEM::m_UnmixTarList.SetPosition(x, y + 40 + COMGEM::m_UnmixTarList.GetHeight()/2.0f);
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	COMGEM::m_UnmixTarList.SetPosition(x, y + 20 + COMGEM::m_UnmixTarList.GetHeight());
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	COMGEM::RenderUnMixList();
 }
 
 void SEASON3B::CGemIntegrationDisjointMsgBox::RenderButtons()
 {
-#ifndef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	if(COMGEM::m_cGemType == COMGEM::CELE)
-	{
-		glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
-		m_BtnBlessing.Render();
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	}
-	else
-	{
-		m_BtnBlessing.Render();
-	}	
-	
-	if(COMGEM::m_cGemType == COMGEM::SOUL)
-	{
-		glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
-		m_BtnSoul.Render();
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	}
-	else
-	{
-		m_BtnSoul.Render();
-	}
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-
 	m_BtnCancel.Render();
 }
 
@@ -2667,9 +2422,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
 
 	SaveOptions();
 	SaveMacro("Data\\Macro.txt");
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-	g_pMoveCommandWindow->ResetWindowOpenCount();
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
 	{
@@ -2679,9 +2431,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
 	{
 		g_pNewUIMng->ResetActiveUIObj();
 		SendRequestLogOut(2);
-	#ifdef LEM_FIX_USER_LOGOUT
-		g_bExit = true;
-	#endif	// LEM_FIX_USER_LOGOUT [lem_2010.8.18]
 	}
 
 	PlayBuffer(SOUND_CLICK01);
@@ -2702,9 +2451,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
     //  게임내에서 설정한 데이터 저장.
     SaveOptions();
 	SaveMacro("Data\\Macro.txt");
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-	g_pMoveCommandWindow->ResetWindowOpenCount();
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
 	{
@@ -2714,9 +2460,6 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
 	{
 		g_pNewUIMng->ResetActiveUIObj();
 	    SendRequestLogOut(1);
-	#ifdef LEM_FIX_USER_LOGOUT
-		g_bExit = true;
-	#endif	// LEM_FIX_USER_LOGOUT [lem_2010.8.18]
 	}
 
 	PlayBuffer(SOUND_CLICK01);
@@ -5214,21 +4957,7 @@ CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMes
 
 	if(pMsgBox->GetInputSize() == pMsgBox->GetInputLimit())
 	{
-		/*
-		if(pMsgBox->IsAllSameNumber() == true)
-		{
-			pMsgBox->ClearInput();
-			SEASON3B::CreateOkMessageBox(GlobalText[442]);
-			PlayBuffer(SOUND_CLICK01);
-			return CALLBACK_BREAK;
-		}
-		*/
-
-#ifdef LDK_MOD_PASSWORD_LENGTH_20
 		BYTE byTemp[20] = {0, };
-#else //LDK_MOD_PASSWORD_LENGTH_20
-		BYTE byTemp[10] = {0, };
-#endif //LDK_MOD_PASSWORD_LENGTH_20
 		WORD wInputNumber = (WORD)atoi(pMsgBox->GetInputText());
 		SendStoragePassword(0, wInputNumber, byTemp);
 	}
@@ -5356,21 +5085,13 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class C
 		{
 			WORD wInputNumber = (WORD)atoi(pMsgBox->GetInputText());
 
-#ifdef LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 			CNewUITextInputMsgBox* pPassword = NULL;
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageLockMsgBoxLayout), &pPassword);
 			if( pPassword )
 			{
 				pPassword->SetPassword(wInputNumber);
 			}
-#else //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
-			CNewUIKeyPadMsgBox* pFinalMsgBox = NULL;
-			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout), &pFinalMsgBox);
-			if(pFinalMsgBox)
-			{
-				pFinalMsgBox->SetStoragePassword(wInputNumber);
-			}
-#endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
+
 			g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 			return CALLBACK_BREAK;
 		}
@@ -5394,7 +5115,6 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown(cla
 	return CALLBACK_BREAK;
 }
 
-#ifdef LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 bool SEASON3B::CStorageLockMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
@@ -5462,7 +5182,6 @@ CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::CancelBtnDown(class CNewUIMe
 
 	return CALLBACK_BREAK;
 }
-#endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 
 bool SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
 {
@@ -5513,7 +5232,6 @@ CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown(cla
 	return CALLBACK_BREAK;
 }
 
-#ifdef LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 bool SEASON3B::CStorageUnlockMsgBoxLayout::SetLayout()
 {
 	CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
@@ -5573,7 +5291,6 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::CancelBtnDown(class CNewUI
 
 	return CALLBACK_BREAK;
 }
-#endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 
 bool SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
 {

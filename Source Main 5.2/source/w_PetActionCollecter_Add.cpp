@@ -320,7 +320,6 @@ bool PetActionCollecterAdd::CompTimeControl(const DWORD& dwCompTime, DWORD& dwTi
 
 #endif //PJH_ADD_PANDA_PET
 
-#ifdef YDG_ADD_SKELETON_PET
 PetActionCollecterSkeleton::PetActionCollecterSkeleton()
 {
 	m_isRooting = false;
@@ -592,4 +591,4 @@ bool PetActionCollecterSkeleton::Effect( OBJECT* obj, CHARACTER *Owner, int targ
 
 	return TRUE;
 }
-#endif	// YDG_ADD_SKELETON_PET
+

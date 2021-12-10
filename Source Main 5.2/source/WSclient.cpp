@@ -5514,10 +5514,6 @@ void ReceiveDie(BYTE *ReceiveBuffer,int Size)
 
 	WORD SkillType = ((int)(Data->MagicH )<<8) + Data->MagicL;
 
-#ifdef CSK_HACK_TEST
-	g_pHackTest->ReceiveDie(c, o, SkillType, Key);
-#endif // CSK_HACK_TEST
-	
 	c->m_byDieType = SkillType;
 	
     if ( gMapManager.InBloodCastle() == true )
@@ -5530,12 +5526,10 @@ void ReceiveDie(BYTE *ReceiveBuffer,int Size)
     }
     else
     {
-#ifdef YDG_ADD_CS5_REVIVAL_CHARM
 		if (c == Hero && g_PortalMgr.IsPortalUsable())
 		{
 			g_PortalMgr.SaveRevivePosition();
 		}
-#endif	// YDG_ADD_CS5_REVIVAL_CHARM
 
         o->m_bActionStart = false;
 
@@ -10026,8 +10020,6 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
 			SEASON3B::CreateOkMessageBox(strText);
 		}
 		break;
-		
-#ifdef PSW_FRUIT_ITEM
 	case 0x06:
 		if(fruit >=0 && fruit <= 4)
 		{
@@ -10075,8 +10067,6 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
 		sprintf ( Text, GlobalText[1904], GlobalText[1903]);
 		SEASON3B::CreateOkMessageBox( Text );
 		break;
-#endif //PSW_FRUIT_ITEM
-		
 	case 0x10:
 		{
 			SEASON3B::CreateOkMessageBox(GlobalText[1909]);
@@ -11716,40 +11706,6 @@ void ProtocolCompiler( CWsctlc *pSocketClient, int iTranslation, int iParam)
 	}
 }
 
-#ifdef PJH_CHARACTER_RENAME
-void Receive_Change_Name_Result(BYTE *ReceiveBuffer)
-{
-	LPPMSG_CHANGE_NAME_RESULT Data = (LPPMSG_CHANGE_NAME_RESULT)ReceiveBuffer;
-	
-	if(Data->btResult == 0)
-	{
-		::strcpy(CharactersClient[SelectedHero].ID, Data->NewName);
-		::StartGame(true);
-	}
-	else
-	{
-		CUIMng::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL);
-	}
-}
-
-void Receive_Check_Change_Name(BYTE *ReceiveBuffer)
-{
-	LPPMSG_ANS_CHECK_CHANGE_NAME Data = (LPPMSG_ANS_CHECK_CHANGE_NAME)ReceiveBuffer;
-	
-	if(Data->btResult == 0)
-	{
-		::StartGame(true);
-	}
-	else
-		if(Data->btResult == 1)
-		{
-			CUIMng& rUIMng = CUIMng::Instance();
-			rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
-			rUIMng.m_CharMakeWin.Set_State(true);
-		}
-}
-#endif //PJH_CHARACTER_RENAME
-
 bool ReceiveRegistedLuckyCoin(BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_GET_COIN_COUNT _pData = (LPPMSG_ANS_GET_COIN_COUNT)ReceiveBuffer;
@@ -13015,12 +12971,6 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				break;
 			case 0x52:
 				Receive_Master_LevelGetSkill(ReceiveBuffer);
-				break;
-			case 0x15:
-				Receive_Check_Change_Name(ReceiveBuffer);
-				break;
-			case 0x16:
-				Receive_Change_Name_Result(ReceiveBuffer);
 				break;
 			}
 			break;

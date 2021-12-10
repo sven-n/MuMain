@@ -12,6 +12,7 @@
 
 struct PMSG_ATTACK_RECV
 {
+	PBMSG_HEAD header; // C1:[PROTOCOL_CODE2]
 	BYTE index[2];
 	BYTE action;
 	BYTE dir;

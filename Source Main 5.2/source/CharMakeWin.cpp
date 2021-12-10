@@ -36,69 +36,6 @@ CCharMakeWin::CCharMakeWin()
 CCharMakeWin::~CCharMakeWin()
 {
 }
-#ifdef PJH_CHARACTER_RENAME
-void CCharMakeWin::Set_State(bool Set)
-{
-	ReName_Inter = Set;
-
-	if(ReName_Inter == true)
-	{
-		if(SelectedHero >= 0)
-		{
-			m_nSelJob = gCharacterManager.GetBaseClass(CharactersClient[SelectedHero].Class);
-			switch(gCharacterManager.GetBaseClass(m_nSelJob))
-			{
-			case CLASS_SOULMASTER:
-				m_nSelJob = CLASS_WIZARD;
-				break;
-			case CLASS_BLADEKNIGHT:
-				m_nSelJob = CLASS_KNIGHT;
-				break;
-			case CLASS_MUSEELF:
-				m_nSelJob = CLASS_ELF;
-				break;
-			case CLASS_BLOODYSUMMONER:
-				m_nSelJob = CLASS_SUMMONER;
-				break;
-			case CLASS_GRANDMASTER:
-				m_nSelJob = CLASS_WIZARD;
-				break;
-			case CLASS_BLADEMASTER:
-				m_nSelJob = CLASS_KNIGHT;
-				break;
-			case CLASS_HIGHELF:
-				m_nSelJob = CLASS_ELF;
-				break;
-			case CLASS_DUELMASTER:
-				m_nSelJob = CLASS_DARK;
-				break;
-			case CLASS_LORDEMPEROR:
-				m_nSelJob = CLASS_DARK_LORD;
-				break;
-			case CLASS_DIMENSIONMASTER:
-				m_nSelJob = CLASS_SUMMONER;
-				break;
-#ifdef PBG_ADD_NEWCHAR_MONK
-			case CLASS_TEMPLENIGHT:
-				m_nSelJob = CLASS_RAGEFIGHTER;
-				break;
-#endif //PBG_ADD_NEWCHAR_MONK
-			};
-		}
-
-
-		UpdateDisplay();
-
-		for (int i = 0; i < MAX_CLASS; ++i)
-		{
-			m_abtnJob[i].SetEnable(false);
-		}
-		m_abtnJob[m_nSelJob].SetEnable(true);
-	}
-	else
-		UpdateDisplay();
-}
-#endif //#ifdef PJH_CHARACTER_RENAME
 
 void CCharMakeWin::Create()
 {
@@ -229,11 +166,7 @@ void CCharMakeWin::Show(bool bShow)
 		if (g_iChatInputType == 1)
 		{
 			g_pSingleTextInputBox->SetState(UISTATE_NORMAL);
-#ifdef LJH_ADD_RESTRICTION_ON_ID
-			g_pSingleTextInputBox->SetOption(UIOPTION_NOLOCALIZEDCHARACTERS);
-#else  //LJH_ADD_RESTRICTION_ON_ID
 			g_pSingleTextInputBox->SetOption(UIOPTION_NULL);
-#endif //LJH_ADD_RESTRICTION_ON_ID
 			g_pSingleTextInputBox->SetBackColor(0, 0, 0, 0);
 			g_pSingleTextInputBox->SetTextLimit(10);
 			g_pSingleTextInputBox->GiveFocus();
@@ -302,9 +235,6 @@ void CCharMakeWin::UpdateDisplay()
 void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
 {
 	int i, j;
-#ifdef PJH_CHARACTER_RENAME
-	if(ReName_Inter == false)
-#endif //PJH_CHARACTER_RENAME
 	{
 		for (i = 0; i < MAX_CLASS; ++i)
 		{
@@ -323,12 +253,7 @@ void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
 			}
 		}
 	}
-	/*
-SendRequestChangeName( POldName, PNewName )
-	*/
-#ifdef PJH_CHARACTER_RENAME
-	if(ReName_Inter == false)
-#endif //PJH_CHARACTER_RENAME
+
 	{
 		if(m_aBtn[CMW_OK].IsClick())
 		{
@@ -350,55 +275,6 @@ SendRequestChangeName( POldName, PNewName )
 			CUIMng::Instance().SetSysMenuWinShow(false);
 		}
 	}
-#ifdef PJH_CHARACTER_RENAME
-	else
-	if(ReName_Inter == true)
-	{
-	if (m_aBtn[CMW_OK].IsClick())
-	{
-		if (g_iChatInputType == 1)
-			g_pSingleTextInputBox->GetText(InputText[0]);
-
-		CUIMng& rUIMng = CUIMng::Instance();
-
-		if (::strlen(InputText[0]) < 4)
-			rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
-		else if(::CheckName())
-			rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);
-		else if(CheckSpecialText(InputText[0]))
-			rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
-		else
-			SendRequestChangeName( CharactersClient[SelectedHero].ID, InputText[0] );
-	}
-	else if(m_aBtn[CMW_CANCEL].IsClick())
-	{
-		CUIMng::Instance().HideWin(this);
-	}
-	else if (CInput::Instance().IsKeyDown(VK_RETURN))
-	{
-		::PlayBuffer(SOUND_CLICK01);
-		if (g_iChatInputType == 1)
-			g_pSingleTextInputBox->GetText(InputText[0]);
-		
-		CUIMng& rUIMng = CUIMng::Instance();
-		if (::strlen(InputText[0]) < 4)
-			rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
-		else if(::CheckName())
-			rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);
-		else if(CheckSpecialText(InputText[0]))
-			rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
-		else
-			SendRequestChangeName( CharactersClient[SelectedHero].ID, InputText[0] );
-	}
-	else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-	{
-		::PlayBuffer(SOUND_CLICK01);
-		CUIMng::Instance().HideWin(this);
-		CUIMng::Instance().SetSysMenuWinShow(false);
-	}
-	}
-#endif //PJH_CHARACTER_RENAME
-
 	UpdateCreateCharacter();
 }
 
@@ -431,10 +307,6 @@ void CCharMakeWin::RenderControls()
 	int i;
 	for (i = 0; i < CMW_SPR_MAX; ++i)
 	{
-#ifdef PJH_CHARACTER_RENAME
-		if(i == CMW_SPR_STAT && ReName_Inter == true)
-			continue;
-#endif //PJH_CHARACTER_RENAME
 		m_asprBack[i].Render();
 	}
 	CWin::RenderButtons();
@@ -458,10 +330,6 @@ void CCharMakeWin::RenderControls()
 	int nStatY;
 	for (i = 0; i < 4; ++i)
 	{
-#ifdef PJH_CHARACTER_RENAME
-		if(ReName_Inter == true)
-			continue;
-#endif //PJH_CHARACTER_RENAME		
 		nStatY = int((m_asprBack[CMW_SPR_STAT].GetYPos() + 10 + i * 17)
 			/ g_fScreenRate_y);
 
@@ -473,11 +341,7 @@ void CCharMakeWin::RenderControls()
 			GlobalText[1701 + i]);
 	}
 
-	if (m_nSelJob == CLASS_DARK_LORD
-#ifdef PJH_CHARACTER_RENAME
-		&& ReName_Inter == false
-#endif //PJH_CHARACTER_RENAME
-		)
+	if (m_nSelJob == CLASS_DARK_LORD)
 	{
 		nStatY = int((m_asprBack[CMW_SPR_STAT].GetYPos() + 10 + 4 * 17)	/ g_fScreenRate_y);
 
@@ -487,15 +351,6 @@ void CCharMakeWin::RenderControls()
 		g_pRenderText->RenderText(int(nStatBaseX / g_fScreenRate_x), nStatY, GlobalText[1738]);
 	}
 
-#ifdef PJH_CHARACTER_RENAME
-	if(ReName_Inter == true)
-	{
-		g_pRenderText->RenderText(int((m_asprBack[CMW_SPR_DESC].GetXPos() + 10) / g_fScreenRate_x),
-			int((m_asprBack[CMW_SPR_DESC].GetYPos() + 12)
-			/ g_fScreenRate_y), GlobalText[676]);
-	}
-	else
-#endif //PJH_CHARACTER_RENAME
 	{
 		for (i = 0; i < m_nDescLine; ++i)
 		{

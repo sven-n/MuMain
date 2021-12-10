@@ -14012,7 +14012,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 		c->Object.Position[2] += 140.0f;
 		strcpy(c->ID,"KalimaShop");
 		break;
-#ifdef CSK_CHAOS_CARD
 	case 375:
 		{
 			c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
@@ -14034,7 +14033,6 @@ CHARACTER *CreateMonster(int Type,int PositionX,int PositionY,int Key)
 			c->Object.SubType = Type;	
 		}
 		break;
-#endif // CSK_CHAOS_CARD
 	case 376:
 		{
 			OpenNpc(MODEL_BC_NPC1);

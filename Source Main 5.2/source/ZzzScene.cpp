@@ -851,20 +851,8 @@ extern BOOL g_bIMEBlock;
 int SelectedHero = -1;
 bool MoveMainCamera();
 
-void StartGame(
-#ifdef PJH_CHARACTER_RENAME
-			   bool IsConnect
-#endif //#ifdef PJH_CHARACTER_RENAME
-			   )
+void StartGame()
 {
-#ifdef PJH_CHARACTER_RENAME
-	if(IsConnect == false)
-	{
-		//CharactersClient[SelectedHero].Class
-		SendRequestCheckChangeName(CharactersClient[SelectedHero].ID);
-	}
-	else
-#endif //PJH_CHARACTER_RENAME
 	{
 		if (CTLCODE_01BLOCKCHAR & CharactersClient[SelectedHero].CtlCode)
 			CUIMng::Instance().PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);

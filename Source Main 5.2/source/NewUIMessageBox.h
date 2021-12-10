@@ -122,10 +122,8 @@ namespace SEASON3B
 		
 		type_map_callback	m_mapCallbacks;
 
-#ifdef PBG_ADD_MSGBACKOPACITY
 		float m_fOpacityAlpha;
 		vec3_t m_vColor;
-#endif //PBG_ADD_MSGBACKOPACITY
 	public:
 		CNewUIMessageBoxBase();
 		virtual ~CNewUIMessageBoxBase();

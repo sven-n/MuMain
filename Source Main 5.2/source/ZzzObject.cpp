@@ -2375,13 +2375,6 @@ void Draw_RenderObject(OBJECT *o,bool Translate,int Select, int ExtraMon)
 			{
 				b->RenderBody(RENDER_TEXTURE|RENDER_BRIGHT,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 			}
-#ifdef PBG_ADD_CHARACTERSLOT
-			else if(o->Type == MODEL_SLOT_LOCK)
-			{
-				b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight, o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-				b->RenderMesh(0,RENDER_CHROME6|RENDER_BRIGHT,o->Alpha*0.4f,0,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV);
-			}
-#endif //PBG_ADD_CHARACTERSLOT
 			else if( o->Type == MODEL_MONSTER01+154 )
 			{
 				if( o->CurrentAction == MONSTER01_DIE )
@@ -9410,12 +9403,9 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 	case MODEL_POTION+14:
 	case MODEL_POTION+16:
 	case MODEL_POTION+31:
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case MODEL_WING+136:
 	case MODEL_WING+138:
 	case MODEL_WING+141:
-
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case MODEL_COMPILED_CELE:
 	case MODEL_COMPILED_SOUL:
 	case MODEL_WING+15:Level = 8;break;
@@ -9475,17 +9465,13 @@ void RenderPartObjectEffect(OBJECT *o,int Type,vec3_t Light,float Alpha,int Item
 		break;
 	case MODEL_POTION+20:Level = 9;break;
     case MODEL_POTION+22:Level = 8;break;
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case MODEL_WING+137:Level = 8;break;
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
     case MODEL_POTION+25:Level = 8;break;
     case MODEL_POTION+26:Level = 8;break;
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case MODEL_WING+139:
 	case MODEL_WING+140:
 	case MODEL_WING+142:
 	case MODEL_WING+143:
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	case MODEL_POTION+41:
 		Level = 0;break;
 	case MODEL_POTION+42:

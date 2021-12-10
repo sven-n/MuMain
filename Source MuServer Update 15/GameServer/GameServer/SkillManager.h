@@ -165,6 +165,7 @@ enum eSkillNumber
 
 struct PMSG_MULTI_SKILL_ATTACK_RECV
 {
+	PBMSG_HEAD header; // C3:[PROTOCOL_CODE4]
 	#if(GAMESERVER_UPDATE>=701)
 	BYTE skillH;
 	BYTE count;

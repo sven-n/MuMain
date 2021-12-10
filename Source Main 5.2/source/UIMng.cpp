@@ -286,7 +286,6 @@ void CUIMng::CreateCharacterScene()
 
 	m_CharMakeWin.Create();
 	m_WinList.AddHead(&m_CharMakeWin);
-	m_CharMakeWin.Set_State();
 
 	m_CharMakeWin.SetPosition((rInput.GetScreenWidth() - 454) / 2,
 		(rInput.GetScreenHeight() - 406) / 2);

@@ -1076,13 +1076,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-
-#ifdef PSW_SCROLL_ITEM
 	if( g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll2) )
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-#endif //PSW_SCROLL_ITEM
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(g_isCharacterBuff((&Hero->Object), eBuff_Def_up_Ourforces))
 	{

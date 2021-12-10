@@ -1,5 +1,4 @@
 // w_PetActionCollecter_Add.h: interface for the PetActionStand class.
-//
 //////////////////////////////////////////////////////////////////////
 
 #ifdef PJH_ADD_PANDA_PET
@@ -40,11 +39,7 @@ public:
 		eAction_End_NotUse,
 	};
 
-#ifdef YDG_ADD_SKELETON_PET
 protected:
-#else	// YDG_ADD_SKELETON_PET
-private:
-#endif	// YDG_ADD_SKELETON_PET
 	PetActionCollecterAdd();
 
 	//test
@@ -65,7 +60,6 @@ private:
 };
 #endif //PJH_ADD_PANDA_PET
 
-#ifdef YDG_ADD_SKELETON_PET
 BoostSmartPointer(PetActionCollecterSkeleton);
 class PetActionCollecterSkeleton : public PetActionCollecterAdd
 {
@@ -83,4 +77,3 @@ protected:
 
 	BOOL m_bIsMoving;
 };
-#endif	// YDG_ADD_SKELETON_PET

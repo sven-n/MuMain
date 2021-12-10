@@ -94,14 +94,12 @@ namespace SEASON3B
 		CNewUIMessageBoxButton m_BtnOk;
 		CNewUIMessageBoxButton m_BtnCancel;
 
-#ifdef LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 	public:
 		void SetPassword(WORD password) { m_password = password; }
 		WORD GetPassword() { return m_password; }
 
 	private:
 		WORD m_password;
-#endif //LDK_MOD_GLOBAL_STORAGELOCK_CHANGE
 	};
 
 	class CNewUIKeyPadButton : public CNewUIMessageBoxButton
@@ -313,10 +311,7 @@ namespace SEASON3B
 		static CALLBACK_RESULT TwentyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 		static CALLBACK_RESULT ThirtyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 		static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-		
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		static CALLBACK_RESULT SelectMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	private:
 		void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
 		void SetAddCallbackFunc();
@@ -330,13 +325,11 @@ namespace SEASON3B
 		type_vector_msgdata m_MsgDataList;
 		// button
 
-	#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 		void SetText( void );
 		void ResetWndSize( int _nType );
 		std::vector<CNewUIMessageBoxButton>	m_cJewelButton;
 		std::vector<CNewUIMessageBoxButton>	m_cMixButton;
 		int									m_nMiddleCount;
-	#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 
 		CNewUIMessageBoxButton m_BtnBlessing;
 		CNewUIMessageBoxButton m_BtnSoul;

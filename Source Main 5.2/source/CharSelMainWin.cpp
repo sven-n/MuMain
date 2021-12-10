@@ -153,7 +153,6 @@ void CCharSelMainWin::UpdateDisplay()
 	{
 		CUIMng& rUIMng = CUIMng::Instance();
 		rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
-		rUIMng.m_CharMakeWin.Set_State();
 	}
 }
 
@@ -171,7 +170,6 @@ void CCharSelMainWin::UpdateWhileActive(double dDeltaTick)
 	{
 		CUIMng& rUIMng = CUIMng::Instance();
 		rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
-		rUIMng.m_CharMakeWin.Set_State();
 
 	}
 	else if (m_aBtn[CSMW_BTN_DELETE].IsClick())

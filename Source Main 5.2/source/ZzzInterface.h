@@ -130,22 +130,13 @@ void MoveTournamentInterface();
 void MoveBattleSoccerEffect(CHARACTER* c);
 void RenderTournamentInterface();
 
-#ifdef CSK_LUCKY_SEAL
 void GetTime( DWORD time, std::string& timeText, bool isSecond = true );
-#endif //CSK_LUCKY_SEAL
 
 extern int   TargetNpc;
-
-
-
-#ifdef PK_ATTACK_TESTSERVER_LOG
-void PrintPKLog(CHARACTER* pCha);
-#endif // PK_ATTACK_TESTSERVER_LOG
 
 // skill.
 bool IsCanBCSkill(int nType);
 bool CheckSkillUseCondition( OBJECT* o, int Type );
-// 공격시 중간에 장애물이 있는 확인시 사용됨
 bool CheckWall(int sx1,int sy1,int sx2,int sy2);
 bool CheckTile(CHARACTER *c,OBJECT *o,float Range);
 void LetHeroStop( CHARACTER * c = NULL, BOOL bSetMovementFalse = FALSE);

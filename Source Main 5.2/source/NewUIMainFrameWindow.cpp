@@ -992,7 +992,6 @@ bool SEASON3B::CNewUIItemHotKey::UpdateKeyEvent()
 	{
 		ITEM* pItem = NULL;
 		pItem = g_pMyInventory->FindItem(iIndex);
-#ifdef PSW_SECRET_ITEM
 		if( ( pItem->Type>=ITEM_POTION+78 && pItem->Type<=ITEM_POTION+82 ) )
 		{
 			std::list<eBuffState> secretPotionbufflist;
@@ -1010,7 +1009,7 @@ bool SEASON3B::CNewUIItemHotKey::UpdateKeyEvent()
 			}
 		}
 		else
-#endif //PSW_SECRET_ITEM			
+		
 		{
 			SendRequestUse(iIndex, 0);
 		}
@@ -1550,11 +1549,7 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 					if(m_iRenderSkillInfoType == m_iHotKeySkillType[iIndex])
 					{
 						m_EventState = EVENT_NONE;
-#ifdef PBG_ADD_NEWCHAR_MONK
 						m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-#else //PBG_ADD_NEWCHAR_MONK
-						m_byHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-#endif //PBG_ADD_NEWCHAR_MONK
 						Hero->CurrentSkill = m_iHotKeySkillType[iIndex];
 						PlayBuffer(SOUND_CLICK01);
 						return false;
@@ -1668,11 +1663,7 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 		{
 			m_EventState = EVENT_NONE;
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 			m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-#else //PBG_ADD_NEWCHAR_MONK
-			m_byHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-#endif //PBG_ADD_NEWCHAR_MONK
 
 			Hero->CurrentSkill = i;
 			m_bSkillList = false;
@@ -1721,11 +1712,7 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 				{
 					m_EventState = EVENT_NONE;
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 					m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-#else //PBG_ADD_NEWCHAR_MONK
-					m_byHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-#endif //PBG_ADD_NEWCHAR_MONK
 
 					Hero->CurrentSkill = i;
 					m_bSkillList = false;
@@ -1900,11 +1887,7 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
 			return;
 		}
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 		m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-#else //PBG_ADD_NEWCHAR_MONK
-		m_byHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-#endif //PBG_ADD_NEWCHAR_MONK
 
 		Hero->CurrentSkill = m_iHotKeySkillType[iHotKey];
 
@@ -2094,25 +2077,14 @@ float SEASON3B::CNewUISkillList::GetLayerDepth()
 	return 5.2f;
 }
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 WORD SEASON3B::CNewUISkillList::GetHeroPriorSkill()
 {
 	return m_wHeroPriorSkill;
 }
-#else //PBG_ADD_NEWCHAR_MONK
-BYTE SEASON3B::CNewUISkillList::GetHeroPriorSkill()
-{
-	return m_byHeroPriorSkill;
-}
-#endif //PBG_ADD_NEWCHAR_MONK
 
 void SEASON3B::CNewUISkillList::SetHeroPriorSkill(BYTE bySkill)
 {
-#ifdef PBG_ADD_NEWCHAR_MONK
 	m_wHeroPriorSkill = bySkill;
-#else //PBG_ADD_NEWCHAR_MONK
-	m_byHeroPriorSkill = bySkill;
-#endif //PBG_ADD_NEWCHAR_MONK
 }
 
 void SEASON3B::CNewUISkillList::RenderPetSkill()

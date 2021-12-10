@@ -5068,11 +5068,7 @@ void CUIUnmixgemList::SetNumRenderLine(int iLine)
 
 bool lessfunc(const UNMIX_TEXT& lhs, const UNMIX_TEXT& rhs)
 {
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	return (lhs.m_iInvenIdx > rhs.m_iInvenIdx );
-#else // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	return (lhs.m_iInvenIdx < rhs.m_iInvenIdx );
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 }
 
 void CUIUnmixgemList::Sort()
@@ -5173,18 +5169,12 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
 	
 	char oText[MAX_GLOBAL_TEXT_STRING] = {0,};
 
-#ifdef LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
 	ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(m_TextListIter->m_iInvenIdx);
 	if(pItem)
 	{
 		int	  nIdx	= COMGEM::Check_Jewel( pItem->Type );
 		sprintf(oText, "%s,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
 	}
-#else
-	if(COMGEM::m_cGemType == COMGEM::CELE) sprintf(oText, "%s,  %d", GlobalText[1806], (m_TextListIter->m_cLevel + 1) * 10);
-	else sprintf(oText, "%s,  %d", GlobalText[1807], (m_TextListIter->m_cLevel + 1) * 10);
-#endif // LEM_ADD_SEASON5_PART5_MINIUPDATE_JEWELMIX
-	
 	
 	g_pRenderText->RenderText(iPos_x + 2, iPos_y, oText);
 

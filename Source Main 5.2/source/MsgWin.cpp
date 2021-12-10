@@ -429,12 +429,10 @@ void CMsgWin::PopUp(int nMsgCode, char* pszMsg)
 		break;
 	case RECEIVE_CREATE_CHARACTER_FAIL:
 		rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
-		rUIMng.m_CharMakeWin.Set_State(rUIMng.m_CharMakeWin.ReName_Inter);
 		lpszMsg = GlobalText[1716];
 		break;
 	case RECEIVE_CREATE_CHARACTER_FAIL2:
 		rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
-		rUIMng.m_CharMakeWin.Set_State();
 		lpszMsg = GlobalText[396];
 		break;
 	default:

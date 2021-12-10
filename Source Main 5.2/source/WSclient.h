@@ -68,14 +68,6 @@
 #define RECEIVE_CHANGE_PASSWORD_FAIL_RESIDENT   70
 #define RECEIVE_CHANGE_PASSWORD_FAIL_PASSWORD   71
 
-
-#ifdef PJH_CHARACTER_RENAME
-#define REQUEST_CHECK_CHANGE_NAME				72
-#define RECEIVE_CHECK_CHANGE_NAME				73
-#define REQUEST_CHANGE_NAME						74
-#define RECEIVE_CHANGE_NAME_RESULT				75
-#endif //PJH_CHARACTER_RENAME
-
 #define PACKET_ITEM_LENGTH  12
 
 #define EQUIPMENT_LENGTH    17
@@ -2880,29 +2872,6 @@ typedef struct
 	int			nSkillNum;
 	int			nSkillLevel;
 } PMSG_ANS_MASTERLEVEL_SKILL, *LPPMSG_ANS_MASTERLEVEL_SKILL;
-
-#ifdef PJH_CHARACTER_RENAME
-//----------------------------------------------------------------------------
-// GC [0xF3][0x15]
-//----------------------------------------------------------------------------
-typedef struct
-{
-	PBMSG_HEADER2 h;
-	char		Name[MAX_ID_SIZE];
-	BYTE		btResult;
-} PMSG_ANS_CHECK_CHANGE_NAME, *LPPMSG_ANS_CHECK_CHANGE_NAME;
-
-//----------------------------------------------------------------------------
-// GC [0xF3][0x16]
-//----------------------------------------------------------------------------
-typedef struct
-{
-	PBMSG_HEADER2 h;
-	char		Name[MAX_ID_SIZE];
-	char		NewName[MAX_ID_SIZE];
-	BYTE		btResult;
-} PMSG_CHANGE_NAME_RESULT, *LPPMSG_CHANGE_NAME_RESULT;
-#endif //PJH_CHARACTER_RENAME
 
 //----------------------------------------------------------------------------
 // GC [0xD1][0x10] 

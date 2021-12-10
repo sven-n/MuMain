@@ -210,12 +210,10 @@ bool CNewUIEnterDevilSquare::BtnProcess()
 			iItemIndex = g_pMyInventory->FindItemIndex( ITEM_POTION+19, m_iNumActiveBtn+1 );
 		}
 
-#ifdef CSK_FREE_TICKET
 		if(iItemIndex == -1)
 		{
 			iItemIndex = g_pMyInventory->FindItemIndex( ITEM_HELPER+46, -1 );
 		}
-#endif // CSK_FREE_TICKET
 		
 		if( iItemIndex > -1)	
 		{

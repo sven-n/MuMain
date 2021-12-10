@@ -69,7 +69,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->m_iChaIndex = iChaIndex;
 				o->Target = Target;
 			}
-#ifdef CSK_LUCKY_SEAL
 			else if(Type == MODEL_SPEARSKILL && (o->SubType == 10 || o->SubType == 11))
 			{
 				if(iChaIndex != -1)
@@ -78,7 +77,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 				}
 				o->Target = Target;
 			}
-#endif // CSK_LUCKY_SEAL
 			else
 			{
 				o->Target = Target;
@@ -4439,7 +4437,6 @@ void MoveJoint( JOINT *o, int iIndex)
 				break;
 			}
 			
-#ifdef CSK_LUCKY_SEAL
 			if(o->SubType == 10 || o->SubType == 11)
 			{
 				float fLumi = (float)(rand()%4+4)*0.1f;
@@ -4453,7 +4450,6 @@ void MoveJoint( JOINT *o, int iIndex)
 					CreateParticle(BITMAP_SPARK+1, o->Position, o->Angle, Light, 19);
 				}
 			}
-#endif // CSK_LUCKY_SEAL
 			
             if ( o->SubType==4 || o->SubType == 9)
             {
@@ -4470,9 +4466,7 @@ void MoveJoint( JOINT *o, int iIndex)
             }
 			
 			if ( 0 == o->SubType || o->SubType==4 || o->SubType == 9
-#ifdef CSK_LUCKY_SEAL
 				|| o->SubType == 10 || o->SubType == 11
-#endif // CSK_LUCKY_SEAL
 				|| o->SubType == 14
 				|| o->SubType == 16
 				)
@@ -4522,9 +4516,7 @@ void MoveJoint( JOINT *o, int iIndex)
 			}
 			
 			if ( 0 == o->SubType || o->SubType==4 || o->SubType == 9
-#ifdef CSK_LUCKY_SEAL
 				|| o->SubType == 10 || o->SubType == 11
-#endif // CSK_LUCKY_SEAL
 				|| o->SubType == 14
 				|| o->SubType == 16 
 				)
@@ -4570,7 +4562,6 @@ void MoveJoint( JOINT *o, int iIndex)
 				o->Position[1] = o->TargetPosition[1] + vDir[1] * 80.0f;// + ( float)( rand() % 11 - 5);
 				o->Position[2] = 140.0f + o->TargetPosition[2] + vDir[2] * 120.0f;
 				break;
-#ifdef CSK_LUCKY_SEAL
 			case 10:
 				o->Position[0] = o->TargetPosition[0] + vDir[0] * 60.0f;// + ( float)( rand() % 11 - 5);
 				o->Position[1] = o->TargetPosition[1] + vDir[1] * 60.0f;// + ( float)( rand() % 11 - 5);
@@ -4581,20 +4572,12 @@ void MoveJoint( JOINT *o, int iIndex)
 				o->Position[1] = o->TargetPosition[1] + vDir[1] * 60.0f;// + ( float)( rand() % 11 - 5);
 				o->Position[2] = 100.0f + o->TargetPosition[2] + vDir[2] * 60.0f;
 				break;
-#endif // CSK_LUCKY_SEAL
 			case 1:
 				o->Position[0] = o->TargetPosition[0] + vDir[0] * 70.0f;// + ( float)( rand() % 11 - 5);
 				o->Position[1] = o->TargetPosition[1] + vDir[1] * 70.0f;// + ( float)( rand() % 11 - 5);
 				o->Position[2] = o->TargetPosition[2] + vDir[2] * 140.0f;
 				
 				Vector( 0.2f, 0.2f, 0.4f + 0.2f*fSinAdd, o->Light);
-				
-				// 머리
-				/*{
-				vec3_t Light = { .5f, .5f, .5f};
-				CreateSprite(BITMAP_SHINY+1,o->Position,(float)(rand()%2+4)*0.05f,Light,o->Target,(float)(rand()%360));
-				CreateSprite(BITMAP_LIGHT,o->Position,(float)(rand()%2+4)*0.1f,Light,o->Target,(float)(rand()%360));
-			}*/
 				break;
 			case 14:	// 소환 손목링
 				if (o->Target != NULL)
