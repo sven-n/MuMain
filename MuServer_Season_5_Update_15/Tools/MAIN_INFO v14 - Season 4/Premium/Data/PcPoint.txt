@@ -1,6 +1,0 @@
-//Section   Type   Level   Price
-13          43     0       99
-13          45     0       98
-14          57     0       97
-end
-
