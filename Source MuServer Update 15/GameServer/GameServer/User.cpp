@@ -86,7 +86,6 @@
 #include "PcPoint.h"
 #include "PentagramSystem.h"
 #include "PersonalShop.h"
-#include "Protect.h"
 #include "Quest.h"
 #include "QuestWorld.h"
 #include "ReiDoMU.h"
@@ -527,27 +526,6 @@ void gObjMathAuthenticatorProc() // OK
 void gObjAuthProc() // OK
 {
 	return; 
-
-	AuthCount++;
-
-	if(AuthCount == 1)
-	{
-		return;
-	}
-
-	if(AuthCount >= 10)
-	{
-		if(gCloseMsg == 0)
-		{
-			gCloseMsg = 1;
-			gCloseMsgTime = 180;
-			gNotice.GCNoticeSendToAll(0,0,0,0,0,0,gMessage.GetMessage(488));
-		}
-	}
-	else
-	{
-		gProtect.OnlineAuth();
-	}
 }
 //**************************************************************************//
 // OBJECT BASE FUNCTIONS ***************************************************//

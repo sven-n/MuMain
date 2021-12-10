@@ -45,7 +45,6 @@
 #include "PartyMatching.h"
 #include "PcPoint.h"
 #include "PersonalShop.h"
-#include "Protect.h"
 #include "Quest.h"
 #include "QuestWorld.h"
 #include "Reconnect.h"
@@ -58,8 +57,6 @@
 
 void DataServerProtocolCore(BYTE head,BYTE* lpMsg,int size) // OK
 {
-	PROTECT_START
-
 	switch(head)
 	{
 		case 0x00:
@@ -615,8 +612,6 @@ void DataServerProtocolCore(BYTE head,BYTE* lpMsg,int size) // OK
 			}
 			break;
 	}
-
-	PROTECT_FINAL
 }
 
 void DGServerInfoRecv(SDHP_DATA_SERVER_INFO_RECV* lpMsg) // OK

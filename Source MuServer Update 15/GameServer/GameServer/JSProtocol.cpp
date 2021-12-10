@@ -9,14 +9,11 @@
 #include "Message.h"
 #include "Notice.h"
 #include "ObjectManager.h"
-#include "Protect.h"
 #include "ServerInfo.h"
 #include "Util.h"
 
 void JoinServerProtocolCore(BYTE head,BYTE* lpMsg,int size) // OK
 {
-	PROTECT_START
-
 	switch(head)
 	{
 		case 0x00:
@@ -44,8 +41,6 @@ void JoinServerProtocolCore(BYTE head,BYTE* lpMsg,int size) // OK
 			JGAccountAlreadyConnectedRecv((SDHP_ACCOUNT_ALREADY_CONNECTED_RECV*)lpMsg);
 			break;
 	}
-
-	PROTECT_FINAL
 }
 
 void JGServerInfoRecv(SDHP_JOIN_SERVER_INFO_RECV* lpMsg) // OK
@@ -511,8 +506,6 @@ void GJAccountLockSaveSend(int aIndex,int Lock) // OK
 
 void GJServerUserInfoSend() // OK
 {
-	PROTECT_START
-
 	SDHP_SERVER_USER_INFO_SEND pMsg;
 
 	pMsg.header.set(0x20,sizeof(pMsg));
@@ -522,6 +515,4 @@ void GJServerUserInfoSend() // OK
 	pMsg.MaxUserCount = (WORD)gServerInfo.m_ServerMaxUserNumber;
 
 	gJoinServerConnection.DataSend((BYTE*)&pMsg,pMsg.header.size);
-
-	PROTECT_FINAL
 }

@@ -922,7 +922,6 @@ HWND StartWindow(HINSTANCE hCurrentInst,int nCmdShow)
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 		if (g_bUseWindowMode == TRUE)
 		{
-			// ★ 필요한 창 크기 계산
 			RECT rc = { 0, 0, WindowWidth, WindowHeight };
 #if defined WINDOWMODE
 			if (g_bUseWindowMode == TRUE)
@@ -1141,17 +1140,6 @@ BOOL OpenInitFile()
 			strcpy(g_aszMLSelection, "Eng");
 		}
 		g_strSelectedML = g_aszMLSelection;
-
-#ifdef ADD_GFX_REG_OPTION
-		//레지스트레에서 ui설정값 확인
-		dwSize = sizeof (int);
-		int _iUiSelection = 0;
-		if ( RegQueryValueEx (hKey, "UiSelection", 0, NULL, (LPBYTE) & _iUiSelection, &dwSize) != ERROR_SUCCESS)
-		{
-			_iUiSelection = 0;
-		}
-		GFxProcess::GetInstancePtr()->SetUISelect(_iUiSelection);
-#endif //ADD_GFX_REG_OPTION
 	}
 	RegCloseKey( hKey);
 

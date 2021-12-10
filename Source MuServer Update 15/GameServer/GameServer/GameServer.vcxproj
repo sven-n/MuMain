@@ -336,8 +336,6 @@
     <ClInclude Include="PentagramSystem.h" />
     <ClInclude Include="PersonalShop.h" />
     <ClInclude Include="PG_Custom.h" />
-    <ClInclude Include="Protect.h" />
-    <ClInclude Include="Protocol.h" />
     <ClInclude Include="Quest.h" />
     <ClInclude Include="QuestObjective.h" />
     <ClInclude Include="QuestReward.h" />
@@ -591,7 +589,6 @@
     <ClCompile Include="PcPoint.cpp" />
     <ClCompile Include="PentagramSystem.cpp" />
     <ClCompile Include="PersonalShop.cpp" />
-    <ClCompile Include="Protect.cpp" />
     <ClCompile Include="Protocol.cpp" />
     <ClCompile Include="Quest.cpp" />
     <ClCompile Include="QuestObjective.cpp" />

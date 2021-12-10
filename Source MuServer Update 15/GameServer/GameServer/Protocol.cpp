@@ -62,7 +62,6 @@
 #include "PcPoint.h"
 #include "PentagramSystem.h"
 #include "PersonalShop.h"
-#include "Protect.h"
 #include "SocketManagerModern.h"
 #include "Quest.h"
 #include "QuestWorld.h"
@@ -75,8 +74,6 @@
 
 void ProtocolCore(BYTE head,BYTE* lpMsg,int size,int aIndex,int encrypt,int serial) // OK
 {
-	PROTECT_START
-
 	//if(gObj[aIndex].Type == OBJECT_USER && gHackPacketCheck.CheckPacketHack(aIndex,head,((lpMsg[0]==0xC1)?lpMsg[3]:lpMsg[4]),encrypt,serial) == 0)
 	//{
 	//	return;
@@ -1155,8 +1152,6 @@ void ProtocolCore(BYTE head,BYTE* lpMsg,int size,int aIndex,int encrypt,int seri
 			#endif
 			break;
 	}
-
-	PROTECT_FINAL
 }
 
 void CGChatRecv(PMSG_CHAT_RECV* lpMsg,int aIndex) // OK

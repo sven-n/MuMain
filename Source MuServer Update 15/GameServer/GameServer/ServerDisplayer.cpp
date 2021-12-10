@@ -7,7 +7,6 @@
 #include "CustomArena.h"
 #include "GameMain.h"
 #include "Log.h"
-#include "Protect.h"
 #include "resource.h"
 #include "ServerInfo.h"
 #include "SocketManager.h"
@@ -50,11 +49,7 @@ CServerDisplayer::~CServerDisplayer() // OK
 
 void CServerDisplayer::Init(HWND hWnd) // OK
 {
-	PROTECT_START
-
 	this->m_hwnd = hWnd;
-
-	PROTECT_FINAL
 
 	gLog.AddLog(1,"LOG");
 
@@ -1569,8 +1564,6 @@ void CServerDisplayer::LogTextPaintGlobalMessage() // OK
 
 void CServerDisplayer::LogAddText(eLogColor color,char* text,int size) // OK
 {
-	PROTECT_START
-
 	size = ((size>=MAX_LOG_TEXT_SIZE)?(MAX_LOG_TEXT_SIZE-1):size);
 
 	memset(&this->m_log[this->m_count].text,0,sizeof(this->m_log[this->m_count].text));
@@ -1581,15 +1574,11 @@ void CServerDisplayer::LogAddText(eLogColor color,char* text,int size) // OK
 
 	this->m_count = (((++this->m_count)>=MAX_LOG_TEXT_LINE)?0:this->m_count);
 
-	PROTECT_FINAL
-
 	gLog.Output(LOG_GENERAL,"%s",&text[9]);
 }
 
 void CServerDisplayer::LogAddTextConnect(eLogColor color,char* text,int size) // OK
 {
-	PROTECT_START
-
 	size = ((size>=MAX_LOGCONNECT_TEXT_SIZE)?(MAX_LOGCONNECT_TEXT_SIZE-1):size);
 
 	memset(&this->m_logConnect[this->m_countConnect].text,0,sizeof(this->m_logConnect[this->m_countConnect].text));
@@ -1600,15 +1589,11 @@ void CServerDisplayer::LogAddTextConnect(eLogColor color,char* text,int size) //
 
 	this->m_countConnect = (((++this->m_countConnect)>=MAX_LOGCONNECT_TEXT_LINE)?0:this->m_countConnect);
 
-	PROTECT_FINAL
-
 	gLog.Output(LOG_GENERAL,"%s",&text[9]);
 }
 
 void CServerDisplayer::LogAddTextGlobal(eLogColor color,char* text,int size) // OK
 {
-	PROTECT_START
-
 	size = ((size>=MAX_LOGGLOBAL_TEXT_SIZE)?(MAX_LOGGLOBAL_TEXT_SIZE-1):size);
 
 	memset(&this->m_logGlobal[this->m_countGlobal].text,0,sizeof(this->m_logGlobal[this->m_countGlobal].text));
@@ -1618,6 +1603,4 @@ void CServerDisplayer::LogAddTextGlobal(eLogColor color,char* text,int size) // 
 	this->m_logGlobal[this->m_countGlobal].color = color;
 
 	this->m_countGlobal = (((++this->m_countGlobal)>=MAX_LOGGLOBAL_TEXT_LINE)?0:this->m_countGlobal);
-
-	PROTECT_FINAL
 }

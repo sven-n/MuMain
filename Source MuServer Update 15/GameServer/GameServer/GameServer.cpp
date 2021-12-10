@@ -20,7 +20,6 @@
 #include "Message.h"
 #include "MiniDump.h"
 #include "Notice.h"
-#include "Protect.h"
 #include "QueueTimer.h"
 #include "ServerDisplayer.h"
 #include "ServerInfo.h"
@@ -55,20 +54,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine
 	SetLargeRand();
 
 	gServerInfo.ReadStartupInfo("GameServerInfo",".\\Data\\GameServerInfo - Common.dat");
-
-	//#if(PROTECT_STATE==1)
-
-	#if(GAMESERVER_UPDATE>=801)
-	gProtect.StartAuth(AUTH_SERVER_TYPE_S8_GAME_SERVER);
-	#elif(GAMESERVER_UPDATE>=601)
-	gProtect.StartAuth(AUTH_SERVER_TYPE_S6_GAME_SERVER);
-	#elif(GAMESERVER_UPDATE>=401)
-	gProtect.StartAuth(AUTH_SERVER_TYPE_S4_GAME_SERVER);
-	#else
-	gProtect.StartAuth(AUTH_SERVER_TYPE_S2_GAME_SERVER);
-	#endif
-
-	//#endif
 
 	char buff[256];
 

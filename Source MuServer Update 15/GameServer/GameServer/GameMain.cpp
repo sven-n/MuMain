@@ -10,7 +10,6 @@
 #include "MonsterAI.h"
 #include "MonsterManager.h"
 #include "ObjectManager.h"
-#include "Protect.h"
 #include "QueueTimer.h"
 #include "ServerInfo.h"
 #include "SocketManagerUdp.h"
@@ -28,8 +27,6 @@ void GameMainInit(HWND hwnd) // OK
 		ErrorMessageBox("Could not open GameServer");
 		return;
 	}
-
-	PROTECT_START
 
 	gObjInit();
 
@@ -49,24 +46,19 @@ void GameMainInit(HWND hwnd) // OK
 
 	gMonsterManager.SetMonsterData();
 
-	#if(GAMESERVER_UPDATE>=401)
+#if(GAMESERVER_UPDATE>=401)
 
 	gMasterSkillTree.SetMasterLevelExperienceTable();
 
-	#endif
+#endif
 
 	gJoinServerConnection.Init(hwnd,JoinServerProtocolCore);
 
 	gDataServerConnection.Init(hwnd,DataServerProtocolCore);
-
-	PROTECT_FINAL
-
 }
 
 void ConnectServerInfoSend() // OK
 {
-	PROTECT_START
-
 	SDHP_GAME_SERVER_LIVE_SEND pMsg;
 
 	pMsg.header.set(0x01,sizeof(pMsg));
@@ -84,8 +76,6 @@ void ConnectServerInfoSend() // OK
 	pMsg.MaxUserCount = (WORD)gServerInfo.m_ServerMaxUserNumber;
 
 	gSocketManagerUdp.DataSend((BYTE*)&pMsg,pMsg.header.size);
-
-	PROTECT_FINAL
 }
 
 bool JoinServerConnect(DWORD wMsg) // OK
@@ -168,8 +158,6 @@ void DataServerMsgProc(WPARAM wParam,LPARAM lParam) // OK
 
 void CALLBACK QueueTimerCallback(PVOID lpParameter,BOOLEAN TimerOrWaitFired) // OK
 {
-	PROTECT_START
-
 	static CCriticalSection critical;
 
 	critical.lock();
@@ -210,11 +198,8 @@ void CALLBACK QueueTimerCallback(PVOID lpParameter,BOOLEAN TimerOrWaitFired) // 
 			gObjPickProc();
 			break;
 		case QUEUE_TIMER_AUTH_COMMAND:
-			gObjAuthProc();
 			break;
 	}
 
 	critical.unlock();
-
-	PROTECT_FINAL
 }

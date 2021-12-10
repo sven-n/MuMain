@@ -7,7 +7,6 @@
 #include "GuildClass.h"
 #include "Message.h"
 #include "Notice.h"
-#include "Protect.h"
 #include "ServerInfo.h"
 #include "Union.h"
 #include "Util.h"
@@ -89,8 +88,6 @@ void ESDataRecv(BYTE head,BYTE* lpMsg,int size) // OK
 
 void ExDBServerProtocolCore(BYTE head,BYTE* lpMsg,int size) // OK
 {
-	PROTECT_START
-
 	BYTE* aRecv = lpMsg;
 
 	switch(head)
@@ -158,8 +155,6 @@ void ExDBServerProtocolCore(BYTE head,BYTE* lpMsg,int size) // OK
 			}
 			break;
 	}
-
-	PROTECT_FINAL
 }
 
 void GDCharClose(int type, char* GuildName, char* Name)

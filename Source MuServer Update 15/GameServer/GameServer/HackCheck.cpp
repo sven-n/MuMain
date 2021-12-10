@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "HackCheck.h"
-#include "Protect.h"
 #include "ServerInfo.h"
 #include "ThemidaSDK.h"
 

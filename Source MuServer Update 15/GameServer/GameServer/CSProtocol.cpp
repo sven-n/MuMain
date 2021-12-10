@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "CSProtocol.h"
 #include "GameMain.h"
-#include "Protect.h"
 #include "ServerInfo.h"
 #include "Util.h"
 
@@ -81,8 +80,6 @@ void CSDataRecv(BYTE head,BYTE* lpMsg,int size) // OK
 
 void ChatServerProtocolCore(BYTE head,BYTE* lpMsg,int size) // OK
 {
-	PROTECT_START
-
 	BYTE* aRecv = lpMsg;
 
 	switch(head)
@@ -124,8 +121,6 @@ void ChatServerProtocolCore(BYTE head,BYTE* lpMsg,int size) // OK
 			FriendRoomInvitationRecv((FHP_FRIEND_INVITATION_RET *)aRecv);
 			break;
 	}
-
-	PROTECT_FINAL
 }
 
 void FriendListRequest(int aIndex)

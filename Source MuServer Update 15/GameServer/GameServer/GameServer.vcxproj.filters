@@ -312,12 +312,6 @@
     <ClInclude Include="PersonalShop.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Protect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Protocol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Quest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1059,9 +1053,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PersonalShop.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Protect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Protocol.cpp">
