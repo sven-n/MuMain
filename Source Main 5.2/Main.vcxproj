@@ -45,8 +45,8 @@
     <_ProjectFileVersion>14.0.25431.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Global Debug|Win32'">
-    <OutDir>$(SolutionDir)build\bin\$(PlatformShortName)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\Obj\$(ProjectName)\$(PlatformShortName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)source\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Libraries\boost_1_75_0;$(DXSDK_DIR)DXSDK61\Include;</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Libraries\boost_1_75_0\stage\lib;$(DXSDK_DIR)DXSDK61\Lib;</LibraryPath>
@@ -57,8 +57,8 @@
     </PublicModuleDirectories>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Global Release|Win32'">
-    <OutDir>$(SolutionDir)build\bin\$(PlatformShortName)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\Obj\$(ProjectName)\$(PlatformShortName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)source\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
@@ -75,7 +75,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\include\ShopListManager;$(SolutionDir)\dependencies\include\ShopListManager\interface;source;$(SolutionDir)\dependencies\include;$(MU_SDK)\Boost;$(MU_SDK)\DXSDK\Include;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)source\;$(SolutionDir)dependencies\include;$(SolutionDir)dependencies\include\asio</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -86,10 +86,10 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(OutDir)Main.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(OutDir)</AssemblerListingLocation>
-      <ObjectFileName>$(OutDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(OutDir)</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)Main.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
       <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
       <BrowseInformation>true</BrowseInformation>
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
@@ -111,9 +111,8 @@
       <IgnoreSpecificDefaultLibraries>libc.lib;libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <GenerateMapFile>false</GenerateMapFile>
-      <MapFileName>
-      </MapFileName>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(OutDir)$(TargetName)</MapFileName>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
@@ -140,17 +139,17 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\include\asio;$(SolutionDir)\dependencies\include\ShopListManager;$(SolutionDir)\dependencies\include\ShopListManager\interface;source;$(SolutionDir)\dependencies\include;$(MU_SDK)\Boost;$(MU_SDK)\DXSDK\Include;%(AdditionalIncludeDirectories);C:\Libraries\boost_1_75_0\boost</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)source\;$(SolutionDir)dependencies\include;$(SolutionDir)dependencies\include\asio</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_FOREIGN_NDEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;LDS_PATCH_GLOBAL_100520;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>
       </RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(OutDir)Main.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(OutDir)</AssemblerListingLocation>
-      <ObjectFileName>$(OutDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(OutDir)</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)Main.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
       <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
       <BrowseInformation>false</BrowseInformation>
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
@@ -175,9 +174,8 @@
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <GenerateMapFile>false</GenerateMapFile>
-      <MapFileName>
-      </MapFileName>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(OutDir)$(TargetName)</MapFileName>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
@@ -601,221 +599,6 @@
     <ClInclude Include="source\DuelMgr.h" />
     <ClInclude Include="source\Event.h" />
     <ClInclude Include="source\ExplanationInfo.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\Chilkat_C.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkAesInterop.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkAtom.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkAtomProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkAtomW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkBounce.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkBounceW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkByteData.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkBz2.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkBz2Progress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkBz2W.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCache.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCacheW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCert.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCertChain.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCertChainW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCertCollection.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCertCollectionW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCertStore.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCertStoreW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCertW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCgi.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCharset.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCharsetW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCompression.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCompressionW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCreateCS.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCreateCSW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCrypt.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCrypt2.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCrypt2Progress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCrypt2W.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCSP.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCspW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCsv.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkCsvW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkDh.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkDhProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkDhW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkDirTree.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkDkim.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkDkimProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkDsa.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkDsaProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkDsaW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkEmail.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkEmailBundle.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkEmailBundleW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkEmailW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkFileAccess.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkFileAccessW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkFileList.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkFileListW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkFtp.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkFtp2.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkFtp2W.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkFtpProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkGzip.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkGzipProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkGzipW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHtmlToText.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHtmlToTextW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHtmlToXml.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHtmlToXmlW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHttp.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHttpProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHttpRequest.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHttpRequestW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHttpResponse.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHttpResponseW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkHttpW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkIcon.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkImap.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkImapProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkImapW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkKeyContainer.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkKeyContainerW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMailboxes.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMailboxesW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMailMan.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMailManW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMailProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMessageSet.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMessageSetW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMht.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMhtProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMhtW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMime.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkMimeW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkNtlm.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkNtlmW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkObject.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkObjectArray.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkOmaDrm.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkOmaDrmW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkPfx.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkPfxW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkPrivateKey.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkPrivateKeyW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkPublicKey.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkPublicKeyW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkRar.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkRarEntry.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkRarEntryW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkRarW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkRsa.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkRsaW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkRss.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkRssProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkRssW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkService.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkServiceW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSettings.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSFtp.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSFtpDir.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSFtpDirW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSFtpFile.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSFtpFileW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSFtpProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSFtpW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSocket.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSocketProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSocketW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSocksProxy.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSocksProxyProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSocksProxyW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSpider.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSpiderProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSpiderW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSsh.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSshKey.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSshKeyW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSshProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSshTunnel.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSshTunnelW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkSshW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkString.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkStringArray.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkStringArrayW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkTar.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkTarProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkTarW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkUnixCompress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkUnixCompressW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkUpload.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkUploadW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkXml.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkXmlW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkXmp.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkXmpW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkZip.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkZipCrc.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkZipEntry.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkZipEntryW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkZipProgress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\CkZipW.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkAtom.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkBounce.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkByteData.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkBz2.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkCert.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkCertStore.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkCgi.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkCharset.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkCkSettings.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkCompression.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkCreateCS.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkCrypt2.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkCsp.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkDh.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkDsa.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkEmail.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkEmailBundle.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkFtp2.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkGzip.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkHtmlToText.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkHtmlToXml.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkHttp.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkHttpRequest.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkHttpResponse.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkImap.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkKeyContainer.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkMailboxes.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkMailMan.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkMessageSet.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkMht.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkMime.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkNtlm.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkPrivateKey.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkPublicKey.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkRar.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkRarEntry.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkRsa.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkRss.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkSFtp.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkSFtpDir.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkSFtpFile.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkSocket.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkSpider.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkSsh.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkSshKey.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkSshTunnel.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkString.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkStringArray.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkTar.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkUnixCompress.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkUpload.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkXml.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkXmp.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkZip.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkZipCrc.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\C_CkZipEntry.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\FileTime.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\int64.h" />
-    <ClInclude Include="source\ExternalObject\Chilkat\SystemTime.h" />
     <ClInclude Include="source\ExternalObject\Leaf\callstackdmp.h" />
     <ClInclude Include="source\ExternalObject\Leaf\checkintegrity.h" />
     <ClInclude Include="source\ExternalObject\Leaf\ExceptionHandler.h" />

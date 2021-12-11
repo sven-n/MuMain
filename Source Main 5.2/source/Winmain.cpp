@@ -899,7 +899,7 @@ bool CreateOpenglWindow()
 
 HWND StartWindow(HINSTANCE hCurrentInst,int nCmdShow)
 {
-    char *windowName = "MU";
+    char *windowName = "MU - Louis";
 
     WNDCLASS wndClass;
     HWND hWnd;
@@ -909,7 +909,7 @@ HWND StartWindow(HINSTANCE hCurrentInst,int nCmdShow)
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = 0;
     wndClass.hInstance     = hCurrentInst;
-    wndClass.hIcon         = LoadIcon(NULL, "IDI_ICON1");
+    wndClass.hIcon		   = LoadIcon(hCurrentInst, (LPCTSTR)IDI_ICON1);
     wndClass.hCursor	   = LoadCursor(NULL, IDC_ARROW);
     wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wndClass.lpszMenuName  = NULL;
