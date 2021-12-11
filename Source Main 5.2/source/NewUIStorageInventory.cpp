@@ -425,17 +425,16 @@ void CNewUIStorageInventory::SendRequestItemToMyInven(ITEM* pItemObj, int nStora
 
 void CNewUIStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex, int nStorageIndex)
 {
-#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-		// MessageBox
-		CMsgBoxIGSCommon* pMsgBox = NULL;
-		CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
- 		pMsgBox->Initialize(GlobalText[3028], GlobalText[667]);
-#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
-
 	if (::IsStoreBan(pItemObj))
 	{
-		g_pChatListBox->AddText(
-			"", GlobalText[667], SEASON3B::TYPE_ERROR_MESSAGE);
+		#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
+			// MessageBox
+			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
+ 			pMsgBox->Initialize(GlobalText[3028], GlobalText[667]);
+		#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
+
+		g_pChatListBox->AddText("", GlobalText[667], SEASON3B::TYPE_ERROR_MESSAGE);
 		SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 
 		if (IsItemAutoMove())
