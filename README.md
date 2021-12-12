@@ -16,7 +16,7 @@ Main features:
 - All files updated for visual studio 2019.
 - New ASIO protocol (On/Off included).
 - CashShop included direct to the soure, without LIB.
-- Main Scene Update to Season 6 System (FPS)
+- Main Scene Updated to Season 6 System (FPS)
 - Compilation in Debug and Release mode working.
 - Removed all languages ​​leaving only English.
 - Removed all build languages ​​leaving only the global one.
