@@ -1,7 +1,7 @@
-﻿  ServerDisplayer.cpp
+﻿  ItemManager.cpp
   Generating code
-  240 of 14788 functions ( 1.6%) were compiled, the rest were copied from previous compilation.
+  3 of 14788 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    282 functions had inline decision re-evaluated but remain unchanged
+    213 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   GameServer.vcxproj -> D:\Source\Outras\Source main 5.2 + pdb\Main5.2New\Source MuServer Update 15\GameServer\Release\GameServer_EX502\GameServer.exe

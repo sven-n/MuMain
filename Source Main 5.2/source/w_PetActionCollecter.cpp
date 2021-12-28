@@ -309,7 +309,7 @@ void PetActionCollecter::FindZen(OBJECT* obj)
 		if( SEARCH_LENGTH > dl )
 		{
 			//if( -1 == g_pMyInventory->FindEmptySlot(&Items[i].Item) && Items[i].Item.Type != ITEM_POTION+15 )
-			if( Items[i].Item.Type != ITEM_POTION+15 ) //Á¨¸¸ ¸ÔÀÚ
+			if( Items[i].Item.Type != ITEM_POTION+15 )
 			{
 				continue;
 			}

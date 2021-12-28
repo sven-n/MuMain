@@ -858,24 +858,24 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		|| (ip->Type == ITEM_WING+49)
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		|| ip->Type >= ITEM_HELPER))
-     	ip->RequireLevel = p->RequireLevel+Level*addValue;//¹ÝÁö,¸ñ°ÉÀÌ;
+     	ip->RequireLevel = p->RequireLevel+Level*addValue;
 	else
 		ip->RequireLevel = 0;
 
 
-    if(p->RequireStrength)   //Èû
+    if(p->RequireStrength)
 		ip->RequireStrength  = 20+(p->RequireStrength)*(ItemLevel+Level*3)*3/100;
 	else	ip->RequireStrength  = 0;
 
-	if(p->RequireDexterity)  //¹ÎÃ¸
+	if(p->RequireDexterity)
 		ip->RequireDexterity = 20+(p->RequireDexterity)*(ItemLevel+Level*3)*3/100;
 	else	ip->RequireDexterity = 0;
 
-	if(p->RequireVitality)  //Ã¼·Â
+	if(p->RequireVitality)
 		ip->RequireVitality = 20+(p->RequireVitality)*(ItemLevel+Level*3)*3/100;
 	else	ip->RequireVitality = 0;
 
-	if(p->RequireEnergy)  //¿¡³ÊÁö
+	if(p->RequireEnergy)
 	{
 		if (ip->Type >= ITEM_STAFF+21 && ip->Type <= ITEM_STAFF+29)
 		{
@@ -1420,9 +1420,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         giPetManager::SetPetItemConvert( ip, giPetManager::GetPetInfo(ip) );
     }
 
-	if((ip->Type>=ITEM_SHIELD && ip->Type<ITEM_BOOTS+MAX_ITEM_INDEX) ||
-	    (ip->Type>=ITEM_HELPER+8 && ip->Type<=ITEM_HELPER+9)
-       || (ip->Type>=ITEM_HELPER+21 && ip->Type<=ITEM_HELPER+24))
+	if((ip->Type>=ITEM_SHIELD && ip->Type<ITEM_BOOTS+MAX_ITEM_INDEX) || (ip->Type>=ITEM_HELPER+8 && ip->Type<=ITEM_HELPER+9) || (ip->Type>=ITEM_HELPER+21 && ip->Type<=ITEM_HELPER+24))
 	{
 		if((Attribute2>>5)&1)
 		{
@@ -1449,9 +1447,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 			ip->Special[ip->SpecialNum] = AT_IMPROVE_GAIN_GOLD;ip->SpecialNum++;
 		}	
 	}
-	if((ip->Type>=ITEM_SWORD && ip->Type<ITEM_STAFF+MAX_ITEM_INDEX) ||
-       (ip->Type>=ITEM_HELPER+12 && ip->Type<=ITEM_HELPER+13) 
-       || (ip->Type>=ITEM_HELPER+25 && ip->Type<=ITEM_HELPER+28))
+	if((ip->Type>=ITEM_SWORD && ip->Type<ITEM_STAFF+MAX_ITEM_INDEX) || (ip->Type>=ITEM_HELPER+12 && ip->Type<=ITEM_HELPER+13) || (ip->Type>=ITEM_HELPER+25 && ip->Type<=ITEM_HELPER+28))
 	{
 		if((Attribute2>>5)&1)
 		{

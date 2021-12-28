@@ -74,7 +74,7 @@ public:
 	bool Create();
 	void Release();
 
-	void Add(GLuint uiBitmapIndex, BITMAP_t* pBitmap);	//. 주의: 중복등록에 대한 예외처리 없음!!
+	void Add(GLuint uiBitmapIndex, BITMAP_t* pBitmap);
 	void Remove(GLuint uiBitmapIndex);
 	void RemoveAll();
 

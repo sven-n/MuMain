@@ -442,7 +442,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 				g_pRenderText->SetBgColor(0);
 			}
 			SIZE TextSize;
-			g_pRenderText->RenderText(fsx,fsy,TextList[i],(fWidth-2),0,iSort, &TextSize);	// ¡Ú
+			g_pRenderText->RenderText(fsx,fsy,TextList[i],(fWidth-2),0,iSort, &TextSize);
 			fHeight = TextSize.cy;
 		}
 		fsy += fHeight * 1.1f;
@@ -454,9 +454,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 
 bool IsCanUseItem()
 {
-	if(	g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
-		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
-		)
+	if(	g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE) || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
 	{
 		return false;
 	}

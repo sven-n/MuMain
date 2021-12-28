@@ -4182,36 +4182,36 @@ void CItemManager::CGItemBuyRecv(PMSG_ITEM_BUY_RECV* lpMsg,int aIndex,int ok) //
 		return;
 	}
 
-	if (ok == 0 && gServerInfo.m_CustomShopMessageBox > 0)
-	{
-		
-		if(gServerInfo.m_CustomShopMessageBox == 1 && (item.Coin1 > 0 || item.Coin2 > 0 || item.Coin3 > 0))
-		{
-			DataSend(aIndex,(BYTE*)&pMsg,pMsg.header.size);
+	//if (ok == 0 && gServerInfo.m_CustomShopMessageBox > 0)
+	//{
+	//	
+	//	if(gServerInfo.m_CustomShopMessageBox == 1 && (item.Coin1 > 0 || item.Coin2 > 0 || item.Coin3 > 0))
+	//	{
+	//		DataSend(aIndex,(BYTE*)&pMsg,pMsg.header.size);
 
-			PMSG_ITEM_BUY_NEW pMsg;
+	//		PMSG_ITEM_BUY_NEW pMsg;
 
-			pMsg.header.set(0xF3,0xED,sizeof(pMsg));
+	//		pMsg.header.set(0xF3,0xED,sizeof(pMsg));
 
-			pMsg.slot = lpMsg->slot;
+	//		pMsg.slot = lpMsg->slot;
 
-			DataSend(aIndex,(LPBYTE)&pMsg,pMsg.header.size);
-			return;
-		}
-		if(gServerInfo.m_CustomShopMessageBox == 2)
-		{
-			DataSend(aIndex,(BYTE*)&pMsg,pMsg.header.size);
+	//		DataSend(aIndex,(LPBYTE)&pMsg,pMsg.header.size);
+	//		return;
+	//	}
+	//	if(gServerInfo.m_CustomShopMessageBox == 2)
+	//	{
+	//		DataSend(aIndex,(BYTE*)&pMsg,pMsg.header.size);
 
-			PMSG_ITEM_BUY_NEW pMsg;
+	//		PMSG_ITEM_BUY_NEW pMsg;
 
-			pMsg.header.set(0xF3,0xED,sizeof(pMsg));
+	//		pMsg.header.set(0xF3,0xED,sizeof(pMsg));
 
-			pMsg.slot = lpMsg->slot;
+	//		pMsg.slot = lpMsg->slot;
 
-			DataSend(aIndex,(LPBYTE)&pMsg,pMsg.header.size);
-			return;
-		}
-	}
+	//		DataSend(aIndex,(LPBYTE)&pMsg,pMsg.header.size);
+	//		return;
+	//	}
+	//}
 
 	int tax = (item.m_BuyMoney*gCastleSiegeSync.GetTaxRateStore(lpObj->Index))/100;
 

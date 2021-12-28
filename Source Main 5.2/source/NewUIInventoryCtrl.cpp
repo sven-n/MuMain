@@ -1061,8 +1061,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 											}
 										}
 
-										if(pPickItem->Type == ITEM_POTION+13 
-											&& iType == ITEM_HELPER+37 && iDurability != 255)
+										if(pPickItem->Type == ITEM_POTION+13 && iType == ITEM_HELPER+37 && iDurability != 255)
 										{
 											bSuccess = true;
 										}
@@ -1103,8 +1102,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 								{
 									glColor4f(m_afColorStateNormal[0], m_afColorStateNormal[1], m_afColorStateNormal[2], 0.4f);
 								}
-								RenderColor(m_Pos.x+(iSquarePosX*INVENTORY_SQUARE_WIDTH), m_Pos.y+(iSquarePosY*INVENTORY_SQUARE_HEIGHT), 
-									INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
+								RenderColor(m_Pos.x+(iSquarePosX*INVENTORY_SQUARE_WIDTH), m_Pos.y+(iSquarePosY*INVENTORY_SQUARE_HEIGHT),INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
 							}
 						}
 						EndRenderColor();

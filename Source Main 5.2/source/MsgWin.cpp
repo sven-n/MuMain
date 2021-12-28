@@ -451,10 +451,12 @@ void CMsgWin::ManageOKClick()
 
 	switch (m_nMsgCode)
 	{
+	case RECEIVE_LOG_IN_FAIL_VERSION:
+		::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+		break;
 	case MESSAGE_SERVER_LOST:
 	case MESSAGE_VERSION:
 	case RECEIVE_LOG_IN_FAIL_ERROR:
-	case RECEIVE_LOG_IN_FAIL_VERSION:
 	case MESSAGE_INPUT_ID:
 	case RECEIVE_LOG_IN_FAIL_ID:
 	case RECEIVE_LOG_IN_FAIL_ID_CONNECTED:

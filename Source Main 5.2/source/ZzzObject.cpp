@@ -6227,6 +6227,7 @@ void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)
 		case 1:
 			o->Type = MODEL_EVENT+12;
 			break;
+			break;
 		}
 	}
 	else if ( Type==ITEM_POTION+24 )

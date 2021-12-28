@@ -137,16 +137,6 @@ GuildWarehouseEnable = 1
 GuildWarehouseStatus = 0
 
 ;==================================================
-; Custom Shop MessageBox
-;==================================================
-; Types:
-; 0: Disabled
-; 1: Only for coins
-; 2: All purchases
-;==================================================
-CustomShopMessageBox = 2
-
-;==================================================
 ; Custom Quest Settings (CustomNpcQuest.txt)
 ;==================================================
 CustomNpcQuestSwitch = 1
