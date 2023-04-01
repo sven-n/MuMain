@@ -12141,7 +12141,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
     }
 
 	Type = (Equipment[4]>>2)&3;
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
+
 	//신규캐릭터 추가로 인한 날개 인덱스 확장 구조변경
 	if(Type == 1)			//1차 날개
 	{
@@ -12193,55 +12193,7 @@ void ChangeCharacterExt(int Key,BYTE *Equipment, CHARACTER * pCharacter, OBJECT 
         c->Wing.Option1 = 0;
         c->Wing.ExtOption = 0;
 	}
-#else //PBG_ADD_NEWCHAR_MONK_ITEM
-	if(Type == 3)
-    {
-        Type = Equipment[8]&0x07;
-        if ( Type!=0 )
-        {
-			switch (Type)
-			{
-			case 5:		c->Wing.Type = MODEL_HELPER+30;	break;
-			case 6:		c->Wing.Type = MODEL_WING+41;	break;
-			case 7:		c->Wing.Type = MODEL_WING+42;	break;
-			default:	c->Wing.Type = MODEL_WING+Type+2;
-			}
-        }
-        else
-        {
-		    c->Wing.Type = -1;
-            c->Wing.Option1 = 0;
-            c->Wing.ExtOption = 0;
-        }
-    }
-	else
-	{
-		c->Wing.Type = MODEL_WING + Type;
-	}
 
-	Type = (Equipment[15] >> 2) & 0x07;
-	if(Type > 0)
-	{
-		switch (Type)
-		{
-		case 6:		c->Wing.Type = MODEL_WING+43;	break;
-		default:	c->Wing.Type = MODEL_WING+35+Type;
-		}
-	}
-
-	Type = (Equipment[16] >> 5);
-	if(Type > 0)
-	{
-		switch (Type)
-		{
-		case 0x01: c->Wing.Type = MODEL_WING+130;	break;
-		case 0x02: c->Wing.Type = MODEL_WING+131;	break;
-		case 0x03: c->Wing.Type = MODEL_WING+132;	break;
-		case 0x04: c->Wing.Type = MODEL_WING+133;	break;
-		case 0x05: c->Wing.Type = MODEL_WING+134;	break;
-		}
-	}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 	if (pHelper == NULL)
 	{
    		DeleteBug(o);
