@@ -2599,7 +2599,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 			BYTE TargetPosX = (BYTE)(pCha->TargetPosition[0]/TERRAIN_SCALE);
 			BYTE TargetPosY = (BYTE)(pCha->TargetPosition[1]/TERRAIN_SCALE);
 			
-			if ((InBloodCastle()) || iSkill==AT_SKILL_OCCUPY 
+			if ((gMapManager.InBloodCastle()) || iSkill==AT_SKILL_OCCUPY 
 				|| CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex==277 
 				|| CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex==283 
 				|| CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex==278 
@@ -2735,7 +2735,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 		{
 			pObj->Angle[2] = CreateAngle(pObj->Position[0],pObj->Position[1],pCha->TargetPosition[0],pCha->TargetPosition[1]);
 			
-			CheckSkillDelay(Hero->CurrentSkill);
+			gSkillManager.CheckSkillDelay(Hero->CurrentSkill);
 
 			BYTE pos = CalcTargetPos(pObj->Position[0], pObj->Position[1], pCha->TargetPosition[0],pCha->TargetPosition[1]);
 			WORD TKey = 0xffff;
@@ -2760,7 +2760,7 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 	OBJECT *pObj = &pCha->Object;
 
 	int iMana, iSkillMana;
-	GetSkillInformation(nSkill, 1, NULL, &iMana, NULL, &iSkillMana);
+	gSkillManager.GetSkillInformation(nSkill, 1, NULL, &iMana, NULL, &iSkillMana);
 	
 	if(CharacterAttribute->Mana < iMana)
 	{
@@ -2775,7 +2775,7 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 	if(iSkillMana > CharacterAttribute->SkillMana)
 		return;
 
-	if(!CheckSkillDelay(Hero->CurrentSkill))
+	if(!gSkillManager.CheckSkillDelay(Hero->CurrentSkill))
         return;
 					
 	bool bSuccess = CheckTarget(pCha);
@@ -2802,7 +2802,7 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 				if(SelectedCharacter<=-1) 
 					return;
 
-				fDistance = GetSkillDistance(nSkill, pCha)*1.2f;
+				fDistance = gSkillManager.GetSkillDistance(nSkill, pCha)*1.2f;
 
 				pCha->TargetCharacter = SelectedCharacter;
 				if(CharactersClient[SelectedCharacter].Dead==0)
@@ -2841,7 +2841,7 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 			break;
 		case AT_SKILL_PLASMA_STORM_FENRIR:
 			{
-				if(InChaosCastle())
+				if(gMapManager.InChaosCastle())
 					break;
 
 				int nTargetX = (int)(pCha->TargetPosition[0]/TERRAIN_SCALE);
@@ -7046,7 +7046,7 @@ void CheckGate()
 					
 					if (gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
-						|| GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
+						|| gCharacterManager.GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 						)
 						Level = gs->Level*2/3;

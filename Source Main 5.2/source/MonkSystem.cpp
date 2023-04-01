@@ -3,14 +3,21 @@
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
+
+
 #ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
-#include "ZzzOpenData.h"
+//#include "ZzzOpenData.h"
+#include <LoadData.h>
 #include "ZzzEffect.h"
 #include "ZzzAI.h"
 #include "ZzzLodTerrain.h"
 #include "wsclientinline.h"
 #include "CSChaosCastle.h"
+#include "SkillManager.h"
+#include <CharacterManager.h>
+#include <MapManager.h>
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -83,40 +90,40 @@ void CMonkSystem::RegistItem()
 
 void CMonkSystem::LoadModelItem()
 {
-	AccessModel(MODEL_SWORD+32, "Data\\Item\\", "Sword33");	
-	AccessModel(MODEL_SWORD_32_LEFT, "Data\\Item\\", "SwordL33");
-	AccessModel(MODEL_SWORD_32_RIGHT, "Data\\Item\\", "SwordR33");
+	gLoadData.AccessModel(MODEL_SWORD+32, "Data\\Item\\", "Sword33");
+	gLoadData.AccessModel(MODEL_SWORD_32_LEFT, "Data\\Item\\", "SwordL33");
+	gLoadData.AccessModel(MODEL_SWORD_32_RIGHT, "Data\\Item\\", "SwordR33");
 
-	AccessModel(MODEL_SWORD+33, "Data\\Item\\", "Sword34");	
-	AccessModel(MODEL_SWORD_33_LEFT, "Data\\Item\\", "SwordL34");
-	AccessModel(MODEL_SWORD_33_RIGHT, "Data\\Item\\", "SwordR34");
+	gLoadData.AccessModel(MODEL_SWORD+33, "Data\\Item\\", "Sword34");
+	gLoadData.AccessModel(MODEL_SWORD_33_LEFT, "Data\\Item\\", "SwordL34");
+	gLoadData.AccessModel(MODEL_SWORD_33_RIGHT, "Data\\Item\\", "SwordR34");
 
-	AccessModel(MODEL_SWORD+34, "Data\\Item\\", "Sword35");	
-	AccessModel(MODEL_SWORD_34_LEFT, "Data\\Item\\", "SwordL35");
-	AccessModel(MODEL_SWORD_34_RIGHT, "Data\\Item\\", "SwordR35");
+	gLoadData.AccessModel(MODEL_SWORD+34, "Data\\Item\\", "Sword35");
+	gLoadData.AccessModel(MODEL_SWORD_34_LEFT, "Data\\Item\\", "SwordL35");
+	gLoadData.AccessModel(MODEL_SWORD_34_RIGHT, "Data\\Item\\", "SwordR35");
 
-	AccessModel(MODEL_ARMORINVEN_60, "Data\\player\\", "Armor_inventory60");
-	AccessModel(MODEL_ARMORINVEN_61, "Data\\player\\", "ArmorMale61_inventory");
-	AccessModel(MODEL_ARMORINVEN_62, "Data\\player\\", "ArmorMale62_inventory");
+	gLoadData.AccessModel(MODEL_ARMORINVEN_60, "Data\\player\\", "Armor_inventory60");
+	gLoadData.AccessModel(MODEL_ARMORINVEN_61, "Data\\player\\", "ArmorMale61_inventory");
+	gLoadData.AccessModel(MODEL_ARMORINVEN_62, "Data\\player\\", "ArmorMale62_inventory");
 }
 
 void CMonkSystem::LoadModelItemTexture()
 {
-	OpenTexture(MODEL_SWORD+32, "player\\");	
-	OpenTexture(MODEL_SWORD_32_LEFT, "player\\");
-	OpenTexture(MODEL_SWORD_32_RIGHT, "player\\");
+	gLoadData.OpenTexture(MODEL_SWORD+32, "player\\");
+	gLoadData.OpenTexture(MODEL_SWORD_32_LEFT, "player\\");
+	gLoadData.OpenTexture(MODEL_SWORD_32_RIGHT, "player\\");
 
-	OpenTexture(MODEL_SWORD+33, "Item\\");
-	OpenTexture(MODEL_SWORD_33_LEFT, "Item\\");
-	OpenTexture(MODEL_SWORD_33_RIGHT, "Item\\");
+	gLoadData.OpenTexture(MODEL_SWORD+33, "Item\\");
+	gLoadData.OpenTexture(MODEL_SWORD_33_LEFT, "Item\\");
+	gLoadData.OpenTexture(MODEL_SWORD_33_RIGHT, "Item\\");
 
-	OpenTexture(MODEL_SWORD+34, "player\\");
-	OpenTexture(MODEL_SWORD_34_LEFT, "player\\");
-	OpenTexture(MODEL_SWORD_34_RIGHT, "player\\");
+	gLoadData.OpenTexture(MODEL_SWORD+34, "player\\");
+	gLoadData.OpenTexture(MODEL_SWORD_34_LEFT, "player\\");
+	gLoadData.OpenTexture(MODEL_SWORD_34_RIGHT, "player\\");
 	
-	OpenTexture(MODEL_ARMORINVEN_60, "player\\");
-	OpenTexture(MODEL_ARMORINVEN_61, "player\\");
-	OpenTexture(MODEL_ARMORINVEN_62, "player\\");
+	gLoadData.OpenTexture(MODEL_ARMORINVEN_60, "player\\");
+	gLoadData.OpenTexture(MODEL_ARMORINVEN_61, "player\\");
+	gLoadData.OpenTexture(MODEL_ARMORINVEN_62, "player\\");
 }
 
 int CMonkSystem::GetSubItemType(int _Type, int _Left)
@@ -191,7 +198,7 @@ int CMonkSystem::ModifyTypeCommonItemMonk(int _OrginalType)
 
 bool CMonkSystem::IsRagefighterCommonWeapon(BYTE _Class, int _Type)
 {
-	if((GetBaseClass(_Class) ==  CLASS_RAGEFIGHTER) && 
+	if((gCharacterManager.GetBaseClass(_Class) ==  CLASS_RAGEFIGHTER) && 
 	((_Type == MODEL_SWORD+0) || (_Type == MODEL_SWORD+1)
 	|| (_Type == MODEL_AXE+0) || (_Type == MODEL_AXE+1) || (_Type == MODEL_AXE+3)
 	|| (_Type == MODEL_MACE+0) || (_Type == MODEL_MACE+1) || (_Type == MODEL_MACE+2)
@@ -1421,7 +1428,7 @@ void CDummyUnit::CalDummyPosition(vec3_t vOutPos, float& fAni)
 	}
 	fAni = m_fAniFrame;
 	float _fDisFrame = m_fDisFrame*0.7f;
-	if(InChaosCastle()
+	if(gMapManager.InChaosCastle()
 #ifdef PBG_MOD_RAGEFIGHTERSOUND
 		|| bChange
 #endif //PBG_MOD_RAGEFIGHTERSOUND

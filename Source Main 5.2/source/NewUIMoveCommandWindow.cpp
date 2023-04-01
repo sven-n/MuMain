@@ -336,7 +336,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 
 		if( ( gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
-				|| GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
+				|| gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 			)
 			&& (iReqLevel != 400) )
@@ -807,7 +807,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 		iReqLevel = (*li)->_ReqInfo.iReqLevel;
 		if ( (gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK_LORD
 #ifdef PBG_ADD_NEWCHAR_MONK
-				|| GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
+				|| gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 				) 
 			&& (iReqLevel != 400) )

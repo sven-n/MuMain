@@ -2303,7 +2303,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	ITEM* pRightRing = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 	
 	if(g_CMonkSystem.IsChangeringNotUseSkill(pLeftRing->Type, pRightRing->Type, pLeftRing->Level, pRightRing->Level)
-		&& (GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER))
+		&& (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER))
 	{
 		bCantSkill = true;
 	}

@@ -181,7 +181,7 @@ void SetPlayerStop(CHARACTER *c)
 		{
 	
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-			if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)//레이지파이터이면
+			if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)//레이지파이터이면
 			{
 				if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
 					SetAction(&c->Object, PLAYER_RAGE_FENRIR_STAND_TWO_SWORD);
@@ -224,7 +224,7 @@ void SetPlayerStop(CHARACTER *c)
 			if(c->Weapon[0].Type==-1 && c->Weapon[1].Type==-1)
 				SetAction(&c->Object,PLAYER_STOP_RIDE);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-			else if(GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
+			else if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 				SetAction(&c->Object,PLAYER_RAGE_UNI_STOP_ONE_RIGHT);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 			else
@@ -288,7 +288,7 @@ void SetPlayerStop(CHARACTER *c)
 					else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER && !gMapManager.InChaosCastle())	// 소환술사는 카오스캐슬에선 남자 애니메이션.
 						SetAction(&c->Object, PLAYER_STOP_SUMMONER);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-					else if (GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+					else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 						SetAction(&c->Object, PLAYER_STOP_RAGEFIGHTER);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 					else
@@ -352,7 +352,7 @@ void SetPlayerStop(CHARACTER *c)
 						else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER)
 							SetAction(&c->Object, PLAYER_STOP_SUMMONER);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-						else if (GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+						else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 							SetAction(&c->Object, PLAYER_STOP_RAGEFIGHTER);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 						else
@@ -419,7 +419,7 @@ void SetPlayerWalk(CHARACTER *c)
 	{
 		if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
-			|| GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
+			|| gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 			|| ( ( gMapManager.WorldActive != WD_7ATLANSE && !gMapManager.InHellas() && gMapManager.WorldActive != WD_67DOPPLEGANGER3) && c->BodyPart[BODYPART_BOOTS ].Type!=-1 && c->BodyPart[BODYPART_BOOTS ].Level>=5) 
 			|| ( ( gMapManager.WorldActive == WD_7ATLANSE ||  gMapManager.InHellas()
@@ -444,7 +444,7 @@ void SetPlayerWalk(CHARACTER *c)
 		for(int i=PLAYER_WALK_MALE;i<=PLAYER_WALK_CROSSBOW;i++)
 		{
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-			if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)	
+			if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 				Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.32f;
 			else
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -463,7 +463,7 @@ void SetPlayerWalk(CHARACTER *c)
 		for(int i=PLAYER_RUN;i<=PLAYER_RUN_RIDE_WEAPON;i++)
 		{
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-			if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+			if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 				Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.28f;
 			else
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -523,7 +523,7 @@ void SetPlayerWalk(CHARACTER *c)
 		else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)
 		{
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-			if(GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
+			if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 			{				
 				if(c->Weapon[0].Type==-1 && c->Weapon[1].Type==-1)
 					SetAction(&c->Object,PLAYER_RAGE_UNI_RUN);
@@ -554,7 +554,7 @@ void SetPlayerWalk(CHARACTER *c)
             else
             {
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-				if(GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
+				if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 				{
 					if(c->Weapon[0].Type==-1 && c->Weapon[1].Type==-1)
 						SetAction(&c->Object,PLAYER_RAGE_UNI_RUN);
@@ -667,7 +667,7 @@ void SetPlayerWalk(CHARACTER *c)
 							if(c->Weapon[1].Type>=MODEL_SWORD && c->Weapon[1].Type<MODEL_MACE+MAX_ITEM_INDEX)
 							{
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-								if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+								if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 								{
 									SetAction(&c->Object,PLAYER_RUN);
 								}
@@ -971,7 +971,7 @@ void SetPlayerAttack(CHARACTER *c)
 				else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
 					SetAction(&c->Object, PLAYER_FENRIR_ATTACK_ONE_SWORD);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-				else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1 && (GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
+				else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1 && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 					SetAction(&c->Object, PLAYER_RAGE_FENRIR_ATTACK_RIGHT);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 				else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
@@ -1008,7 +1008,7 @@ void SetPlayerAttack(CHARACTER *c)
 				if(c->Weapon[0].Type == -1)
 				{
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-					if(GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
+					if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 						SetAction(&c->Object,PLAYER_RAGE_UNI_ATTACK);
 					else
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
@@ -1017,7 +1017,7 @@ void SetPlayerAttack(CHARACTER *c)
 				else
 				{
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-					if(GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
+					if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 					{
 						if(!ItemAttribute[c->Weapon[0].Type-MODEL_ITEM].TwoHand)
 							SetAction(&c->Object,PLAYER_RAGE_UNI_ATTACK);
@@ -5274,7 +5274,7 @@ bool CheckFullSet(CHARACTER *c)
 		for(int i = start; i >= end; i--)
 		{
 #ifdef PBG_ADD_NEWCHAR_MONK
-			if((GetBaseClass(c->Class)==CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
+			if((gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
 				continue;
 #endif //PBG_ADD_NEWCHAR_MONK
 
@@ -5292,7 +5292,7 @@ bool CheckFullSet(CHARACTER *c)
 			for(int i = start; i >= end; i--)	
 			{
 #ifdef PBG_ADD_NEWCHAR_MONK
-				if((GetBaseClass(c->Class)==CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
+				if((gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
 					continue;
 #endif //PBG_ADD_NEWCHAR_MONK
 				int Level = (CharacterMachine->Equipment[i].Level >> 3) & 15;
@@ -8811,7 +8811,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
 	if((gCharacterManager.GetCharacterClass(c->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| GetBaseClass(c->Class)==CLASS_RAGEFIGHTER
+		|| gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		) && o->Type==MODEL_PLAYER)
 	{
@@ -9198,12 +9198,12 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
                 RenderType |= RENDER_CHROME;
             }
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-			if((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) && (GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
+			if((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 			{
 				p->Type = MODEL_ANGEL;
 				RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
 			}
-			else if((GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
+			else if((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 			{
 				OBJECT* pObj = &c->Object;
 				if(pObj->m_sTargetIndex<0 || c->JumpTime > 0)
@@ -9242,15 +9242,15 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						}
 					}
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-					else if(CLASS_RAGEFIGHTER == GetBaseClass(c->Class))
+					else if(CLASS_RAGEFIGHTER == gCharacterManager.GetBaseClass(c->Class))
 						Type = g_CMonkSystem.ModifyTypeCommonItemMonk(Type);
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
 					BMD *b = &Models[Type];
 #ifdef PBG_ADD_NEWCHAR_MONK
-					if(CLASS_RAGEFIGHTER == GetBaseClass(c->Class))
+					if(CLASS_RAGEFIGHTER == gCharacterManager.GetBaseClass(c->Class))
 					{
-						b->Skin = GetBaseClass(c->Class)*2 + IsThirdClass(c->Class);
+						b->Skin = gCharacterManager.GetBaseClass(c->Class)*2 + gCharacterManager.IsThirdClass(c->Class);
 					}
 					else
 #endif //PBG_ADD_NEWCHAR_MONK
@@ -9284,12 +9284,12 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					else
 					{
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-						if((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) && (GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
+						if((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 						{
 							RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
 						}
 						else
-						if((o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY) && (GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
+						if((o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY) && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 						{
 #ifdef PBG_MOD_RAGEFIGHTERSOUND
 							if(o->m_sTargetIndex<0 || c->JumpTime>0)
@@ -9317,7 +9317,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			{
 				CreateGuildMark(c->GuildMarkIndex);
 #ifdef PBG_ADD_NEWCHAR_MONK
-				if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+				if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 				{
 					vec3_t vPos;
 					if(c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+59
@@ -9428,7 +9428,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				o->m_byNumCloth = numCloth;
             }
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			else if(GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
+			else if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 			{
 				int numCloth = (c->Wing.Type == MODEL_WING+50) ? 3 : 1;
 				
@@ -9596,7 +9596,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					}
                 }
 #ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-				if(GetBaseClass( c->Class )==CLASS_RAGEFIGHTER)
+				if(gCharacterManager.GetBaseClass( c->Class )==CLASS_RAGEFIGHTER)
 				{
 					if(i==0 && ((c->Wing.Type!=MODEL_WING+49
 						&& c->Wing.Type!=MODEL_WING+50
@@ -14837,7 +14837,7 @@ bool RenderCharacterBackItem(CHARACTER *c, OBJECT* o, bool bTranslate)
 				w->PlaySpeed = 0.5f;
 				iOption1 = w->Option1;
 #ifdef PBG_ADD_NEWCHAR_MONK
-				if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER 
+				if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
 					&& (c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+59
 					|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+60
 					|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+61))
@@ -14848,7 +14848,7 @@ bool RenderCharacterBackItem(CHARACTER *c, OBJECT* o, bool bTranslate)
 				vec3_t vRelativePos, vPos, vLight;
 				Vector(20.f, 0.f, 15.f, vRelativePos);
 #ifdef PBG_ADD_NEWCHAR_MONK
-				if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER 
+				if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
 					&& (c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+59
 					|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+60
 					|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+61))

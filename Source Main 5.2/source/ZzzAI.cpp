@@ -248,7 +248,7 @@ void PushObject(vec3_t PushPosition,vec3_t Position,float Power,vec3_t Angle)
 void SetAction_Fenrir_Skill(CHARACTER* c, OBJECT* o)
 {
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-	if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+	if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
 			SetAction(&c->Object, PLAYER_RAGE_FENRIR_TWO_SWORD);
@@ -278,7 +278,7 @@ void SetAction_Fenrir_Skill(CHARACTER* c, OBJECT* o)
 void SetAction_Fenrir_Damage(CHARACTER* c, OBJECT* o)
 {
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-	if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+	if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
 			SetAction(o, PLAYER_RAGE_FENRIR_DAMAGE_TWO_SWORD);
@@ -318,7 +318,7 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)
 			SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD_MAGOM);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-		else if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 			SetAction(o, PLAYER_RAGE_FENRIR_RUN_TWO_SWORD);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 		else
@@ -331,7 +331,7 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT_MAGOM);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-		else if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 			SetAction(o, PLAYER_RAGE_FENRIR_RUN_ONE_RIGHT);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 		else
@@ -346,7 +346,7 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT_MAGOM);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-		else if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 			SetAction(o, PLAYER_RAGE_FENRIR_RUN_ONE_LEFT);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 		else
@@ -361,7 +361,7 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)
 			SetAction(o, PLAYER_FENRIR_RUN_MAGOM);
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-		else if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 			SetAction(o, PLAYER_RAGE_FENRIR_RUN);
 #endif //PBG_ADD_NEWCHAR_MONK_ANI
 		else
@@ -372,7 +372,7 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o)
 {
 #ifdef PBG_ADD_NEWCHAR_MONK_ANI
-	if(GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+	if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
 			SetAction(o, PLAYER_RAGE_FENRIR_WALK_TWO_SWORD);

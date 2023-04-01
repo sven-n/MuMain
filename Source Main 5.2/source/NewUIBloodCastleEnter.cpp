@@ -288,7 +288,7 @@ void CNewUIEnterBloodCastle::OpenningProcess()
 	int iLimitLVIndex = 0;
 	if( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
-		|| GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
+		|| gCharacterManager.GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 		)
 	{

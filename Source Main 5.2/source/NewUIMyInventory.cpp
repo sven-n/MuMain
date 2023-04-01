@@ -228,7 +228,7 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 	{
 		if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK
 #ifdef PBG_ADD_NEWCHAR_MONK
-			|| GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER
+			|| gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 			)
 		{
@@ -261,7 +261,7 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 		}
 	}
 #ifdef PBG_ADD_NEWCHAR_MONK
-	if(GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
+	if(gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(iIndex == EQUIPMENT_GLOVES)
 			bEquipable = false;
@@ -1223,7 +1223,7 @@ void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 			}
 		}
 #ifdef PBG_ADD_NEWCHAR_MONK
-		if((i == EQUIPMENT_GLOVES) && (GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER))
+		if((i == EQUIPMENT_GLOVES) && (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER))
 			continue;	
 #endif //PBG_ADD_NEWCHAR_MONK
 
@@ -1280,7 +1280,7 @@ void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 		ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[m_iPointedSlot];
 		if( pItemObj && (pEquipmentItemSlot->Type != -1 || false == IsEquipable(m_iPointedSlot, pItemObj)) 
 #ifdef PBG_ADD_NEWCHAR_MONK
-			&& !((GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER) && (m_iPointedSlot == EQUIPMENT_GLOVES))			
+			&& !((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER) && (m_iPointedSlot == EQUIPMENT_GLOVES))
 #endif //PBG_ADD_NEWCHAR_MONK
 			)
 		{

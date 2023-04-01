@@ -3488,7 +3488,7 @@ void RenderObjects()
 									int Level;
 									if ( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
-										|| GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
+										|| gCharacterManager.GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 										)
 										Level = 50*2/3;
@@ -3694,7 +3694,7 @@ void RenderObjects_AfterCharacter()
 
 									if ( gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
-										|| GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
+										|| gCharacterManager.GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 										)
 										Level = 80*2/3;
@@ -5438,6 +5438,8 @@ void ItemAngle(OBJECT *o)
 {
 	Vector(0.f,0.f,-45.f,o->Angle);
 
+	o->Angle[0] = 0.f;
+
 	if(o->Type>=MODEL_SWORD && o->Type<MODEL_AXE+MAX_ITEM_INDEX)
 	{
 		o->Angle[0] = 60.f;
@@ -6076,14 +6078,14 @@ void ItemAngle(OBJECT *o)
 		o->Angle[0] = 270.f;
 		o->Scale = 0.8f;
 	}
+	
 #endif //PBG_ADD_NEWCHAR_MONK_ITEM
-	else if(o->Type>=MODEL_WING && o->Type<MODEL_WING+MAX_ITEM_INDEX)
-	{
+		if (o->Type >= MODEL_WING && o->Type < MODEL_WING + MAX_ITEM_INDEX)
 		{
 			o->Angle[0] = 270.f;
 			o->Angle[2] = 90.f - 45.f;
 		}
-	}
+
 #ifdef LEM_ADD_LUCKYITEM
 	else if( o->Type >= MODEL_HELPER+135 && o->Type <= MODEL_HELPER+145 )
 	{
@@ -6102,10 +6104,7 @@ void ItemAngle(OBJECT *o)
 		o->Angle[2] = 45.0f;
 	}
 #endif // LEM_ADD_LUCKYITEM
-	else
-	{
-		o->Angle[0] = 0.f;
-	}
+
 }
 
 void CreateItem(ITEM_t *ip,BYTE *Item,vec3_t Position,int CreateFlag)

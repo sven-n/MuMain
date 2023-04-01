@@ -2039,11 +2039,11 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
 		break;
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_SKILL_THRUST:
-		GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+		gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[3153], iMana);
 		break;
 	case AT_SKILL_STAMP:
-		GetSkillInformation( Option, 1, NULL, &iMana, NULL);
+		gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[3154], iMana);
 		break;
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
@@ -4461,7 +4461,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
         int startIndex = 0;
         if ( gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD 
 #ifdef PBG_ADD_NEWCHAR_MONK
-			|| GetBaseClass( Hero->Class )==CLASS_RAGEFIGHTER
+			|| gCharacterManager.GetBaseClass( Hero->Class )==CLASS_RAGEFIGHTER
 #endif //PBG_ADD_NEWCHAR_MONK
 			)
 		{
@@ -6015,7 +6015,7 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
         }
     }
 #ifdef PBG_ADD_NEWCHAR_MONK
-	else if(GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
+	else if(gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(l->Type>=ITEM_SWORD && l->Type<ITEM_MACE+MAX_ITEM_INDEX && r->Type>=ITEM_SWORD && r->Type<ITEM_MACE+MAX_ITEM_INDEX)
 		{
@@ -11256,7 +11256,7 @@ void RenderEqiupmentBox()
     RenderBitmap(BITMAP_INVENTORY+16,x+StartX,y+StartY,Width,Height,0.f,0.f,Width/64.f,Height/64.f);
     //glove
 #ifdef PBG_ADD_NEWCHAR_MONK
-	if(GetBaseClass(CharacterAttribute->Class)!=CLASS_RAGEFIGHTER)
+	if(gCharacterManager.GetBaseClass(CharacterAttribute->Class)!=CLASS_RAGEFIGHTER)
 	{
 #endif //PBG_ADD_NEWCHAR_MONK
 	Width=40.f;Height=40.f;x=15.f;y=152.f;

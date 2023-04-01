@@ -3247,7 +3247,7 @@ void CHARACTER_MACHINE::CalculateAttackRating()
     if ( gCharacterManager.GetBaseClass( Character.Class )==CLASS_DARK_LORD )
 	    Character.AttackRating  = static_cast<WORD>(((Character.Level*5)+(Dexterity*5)/2)+(Strength/6)+(Charisma/10) & 0xFFFF);
 #ifdef PBG_ADD_NEWCHAR_MONK
-	else if(GetBaseClass( Character.Class )==CLASS_RAGEFIGHTER)
+	else if(gCharacterManager.GetBaseClass( Character.Class )==CLASS_RAGEFIGHTER)
 	{
 		Character.AttackRating = ((Character.Level*3)+(Dexterity*5)/4)+(Strength/6);
 	}
