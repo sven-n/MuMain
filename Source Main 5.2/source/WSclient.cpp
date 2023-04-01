@@ -479,12 +479,12 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
     int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
 
 	#ifdef _DEBUG
-		g_ConsoleDebug->Write(MCD_RECEIVE, "[ReceiveList Count %d Max class %d]",Data->Value,Data->MaxClass);
+		g_ConsoleDebug->Write(MCD_RECEIVE, "[ReceiveList Count %d Max class %d]",Data->CharacterCount,Data->MaxClass);
 	#else
 		g_ErrorReport.Write("[ReceiveList Count %d Max class %d]",Data->Value,Data->MaxClass);
 	#endif
 	
-	for(int i=0;i<Data->Value;i++)
+	for(int i=0;i<Data->CharacterCount;i++)
 	{
 		LPPRECEIVE_CHARACTER_LIST Data2 = (LPPRECEIVE_CHARACTER_LIST)(ReceiveBuffer+Offset);
 		

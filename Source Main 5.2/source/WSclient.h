@@ -142,7 +142,8 @@ typedef struct
 #endif
     BYTE         MaxClass;
 	BYTE		 MoveCount;
-	BYTE         Value;
+	BYTE         CharacterCount;
+	// season 6: BYTE		IsVaultExtended;
 } PHEADER_DEFAULT_CHARACTER_LIST, * LPPHEADER_DEFAULT_CHARACTER_LIST;
 
 #define CLASS_SUMMONER_CARD		0x01
