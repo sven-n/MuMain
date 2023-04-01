@@ -873,19 +873,19 @@ void RenderBoolean(int x,int y,CHAT *c)
 	}
 	else if(::IsStrifeMap(gMapManager.WorldActive) && Hero->m_byGensInfluence != c->Owner->m_byGensInfluence && !::IsGMCharacter())
 	{
-		if(!c->Owner->m_nContributionPoint)
+		if(!c->Owner->GensContributionPoints)
 			return;
 
 		if(KIND_PLAYER == c->Owner->Object.Kind && MODEL_PLAYER == c->Owner->Object.Type)
 		{
-			int _TempX = (int)(c->x + c->Width*0.5f+20.0f);
+			int tempX = (int)(c->x + c->Width*0.5f+20.0f);
 			switch(c->Owner->m_byGensInfluence)
 			{
 			case 1:
-				g_pNewUIGensRanking->RanderMark(_TempX, y, c->Owner->m_byGensInfluence, c->Owner->m_byRankIndex, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
+				g_pNewUIGensRanking->RanderMark(tempX, y, (SEASON3B::CNewUIGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
 				return;
 			case 2:
-				g_pNewUIGensRanking->RanderMark(_TempX, y, c->Owner->m_byGensInfluence, c->Owner->m_byRankIndex, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
+				g_pNewUIGensRanking->RanderMark(tempX, y, (SEASON3B::CNewUIGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
 				return;
 			default:
 				break;
@@ -1012,9 +1012,9 @@ void RenderBoolean(int x,int y,CHAT *c)
 			RenderPos.y -= iLineHeight;
 
 		if (1 == c->Owner->m_byGensInfluence)
-			g_pNewUIGensRanking->RanderMark(x, y, c->Owner->m_byGensInfluence, c->Owner->m_byRankIndex, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
+			g_pNewUIGensRanking->RanderMark(x, y, (SEASON3B::CNewUIGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
 		else if (2 == c->Owner->m_byGensInfluence)
-			g_pNewUIGensRanking->RanderMark(x, y, c->Owner->m_byGensInfluence, c->Owner->m_byRankIndex, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
+			g_pNewUIGensRanking->RanderMark(x, y, (SEASON3B::CNewUIGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, SEASON3B::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
 	}
 
 }

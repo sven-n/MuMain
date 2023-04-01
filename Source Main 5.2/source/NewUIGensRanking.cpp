@@ -40,7 +40,7 @@ void CNewUIGensRanking::Init()
 
 	memset(m_szGensTeam, 0, sizeof(char)*TEAMNAME_LENTH);
 
-	m_byGensInfluence = 0;
+	m_byGensInfluence = GENSTYPE_NONE;
 	m_ptRenderMarkPos.x = 0;
 	m_ptRenderMarkPos.y = 0;
 
@@ -178,7 +178,7 @@ void CNewUIGensRanking::RenderTexts()
 	_y += 24;
 	g_pRenderText->RenderText(_x+100, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
-	sprintf(szText, "%s", GetTitleName(Hero->m_byRankIndex));
+	sprintf(szText, "%s", GetTitleName(Hero->GensRanking));
 	g_pRenderText->RenderText(_x+66, _y, szText+1, GENSRANKING_WIDTH-16, 0, RT3_SORT_CENTER);
 
 	g_pRenderText->SetTextColor(230, 230, 0, 255);
@@ -233,9 +233,9 @@ void CNewUIGensRanking::RenderButtons()
 	m_BtnExit.Render();
 }
 
-void CNewUIGensRanking::RenderMark(int _x, int _y, BYTE _GensInfluence)
+void CNewUIGensRanking::RenderMark(int _x, int _y, GENS_TYPE gensType)
 {
-	RanderMark(_x, _y, (GENS_TYPE)_GensInfluence, Hero->m_byRankIndex);
+	RanderMark(_x, _y, gensType, Hero->GensRanking);
 }
 
 bool CNewUIGensRanking::Update()
@@ -415,7 +415,7 @@ int CNewUIGensRanking::GetNextContribution()
 
 bool CNewUIGensRanking::SetGensInfo()
 {
-	m_byGensInfluence = Hero->m_byGensInfluence;
+	m_byGensInfluence = (GENS_TYPE)Hero->m_byGensInfluence;
 
 	if((m_byGensInfluence & GENSTYPE_DUPRIAN)==GENSTYPE_DUPRIAN)
 	{
@@ -465,46 +465,52 @@ const char* CNewUIGensRanking::GetTitleName(BYTE _index)
 		return m_szTitleName[TITLENAME_END-1];
 }
 
-void CNewUIGensRanking::RanderMark(float _x, float _y, BYTE _GensInfluence, BYTE _GensRankInfo, int _ImageArea, float _RenderY)
+void CNewUIGensRanking::RanderMark(float x, float y, GENS_TYPE gensType, BYTE rankIndex, IMAGE_AREA imageArea, float yOffset)
 {
-	if(!_GensInfluence)
+	if (gensType == GENSTYPE_NONE)
+	{
 		return;
+	}
 
-	if(_GensRankInfo < TITLENAME_START || _GensRankInfo > TITLENAME_END)
-		_GensRankInfo = TITLENAME_END;
-
-	int _Image_Type = (_GensInfluence == 1) ? IMAGE_NEWMARK_DUPRIAN : IMAGE_NEWMARK_BARNERT;
+	int imageType = (gensType == GENSTYPE_DUPRIAN) ? IMAGE_NEWMARK_DUPRIAN : IMAGE_NEWMARK_BARNERT;
 
 	float _width= GENSMARK_WIDTH;
 	float _height = GENSMARK_HEIGHT;
-	BITMAP_t* pBitmap = Bitmaps.GetTexture(_Image_Type);
-	float _BitmapWidth = pBitmap->Width;
-	float _BitmapHeight = pBitmap->Height;
+	BITMAP_t* texture = Bitmaps.GetTexture(imageType);
+	float imageWidth = texture->Width;
+	float imageHeight = texture->Height;
 	
-	if(_ImageArea == MARK_BOOLEAN)
+	if(imageArea == MARK_BOOLEAN)
 	{
 		_width= GENSMARK_WIDTH * m_fBooleanSize;
 		_height = GENSMARK_HEIGHT * m_fBooleanSize;
-		_BitmapWidth = pBitmap->Width * m_fBooleanSize;
-		_BitmapHeight = pBitmap->Height * m_fBooleanSize;
-		_y = (_RenderY - _y - _height) / 2 + _y;
-		_x = (float)(_x - _width + 1);
+		imageWidth = texture->Width * m_fBooleanSize;
+		imageHeight = texture->Height * m_fBooleanSize;
+		y = (yOffset - y - _height) / 2 + y;
+		x = (float)(x - _width + 1);
 	}
 
-	int _ImgIndex = GetImageIndex(_GensRankInfo);
-	float iWidthIndex = _ImgIndex % 5;
-	float iHeightIndex = _ImgIndex / 5;
-	float u = iWidthIndex * _width / _BitmapWidth;
-	float v = iHeightIndex * _height / _BitmapHeight;
+	int imageIndex = GetImageIndex(rankIndex);
+	float columnIndex = imageIndex % 5;
+	float rowIndex = imageIndex / 5;
+	float u = columnIndex * _width / imageWidth;
+	float v = rowIndex * _height / imageHeight;
 	
-	RenderBitmap(_Image_Type, _x, _y, _width, _height, u, v, _width/_BitmapWidth, _height/_BitmapHeight);	
+	RenderBitmap(imageType, x, y, _width, _height, u, v, _width/imageWidth, _height/imageHeight);	
 }
 
-int CNewUIGensRanking::GetImageIndex(BYTE _index)
+int CNewUIGensRanking::GetImageIndex(BYTE rankIndex)
 {
-	if(_index > TITLENAME_END || _index <= TITLENAME_NONE)
-		return -1;
+	if (rankIndex < TITLENAME_START || rankIndex > TITLENAME_END)
+	{
+		rankIndex = TITLENAME_END;
+	}
 
-	return TITLENAME_END - _index;
+	if (rankIndex > TITLENAME_END || rankIndex <= TITLENAME_NONE)
+	{
+		return -1;
+	}
+
+	return TITLENAME_END - rankIndex;
 }
 #endif //PBG_ADD_GENSRANKING

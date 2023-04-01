@@ -1,6 +1,7 @@
 // NewUIGensRanking.h: interface for the CNewUIGensRanking class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
+#include "_TextureIndex.h"
 
 #ifdef PBG_ADD_GENSRANKING
 
@@ -55,13 +56,6 @@ namespace SEASON3B
 			GENSRANKTEXTBACK_HEIGHT = 21,
 		};
 
-		enum GENS_TYPE
-		{
-			GENSTYPE_NONE=0,
-			GENSTYPE_DUPRIAN,
-			GENSTYPE_BARNERT,
-		};
-
 		enum IMAGE_INDEX
 		{
 			TITLENAME_NONE =	0,
@@ -75,6 +69,13 @@ namespace SEASON3B
 			MARK_UIINFO =0,
 			MARK_BOOLEAN,
 			MARK_RANKINFOWIN,
+		};
+
+		enum GENS_TYPE
+		{
+			GENSTYPE_NONE = 0,
+			GENSTYPE_DUPRIAN,
+			GENSTYPE_BARNERT,
 		};
 
 	private:
@@ -91,7 +92,7 @@ namespace SEASON3B
 		unicode::t_char m_szRanking[TEAMNAME_LENTH];
 		unicode::t_char m_szGensTeam[TEAMNAME_LENTH];
 
-		BYTE m_byGensInfluence;
+		GENS_TYPE m_byGensInfluence;
 		POINT m_ptRenderMarkPos;
 		
 		CNewUIButton m_BtnExit;
@@ -115,7 +116,7 @@ namespace SEASON3B
 		void RenderFrame();
 		void RenderTexts();
 		void RenderButtons();
-		void RenderMark(int x, int y, BYTE _GensInfluence);
+		void RenderMark(int x, int y, GENS_TYPE _GensInfluence);
 		void RenderInfoFrame(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth = 60, int iTitleHeight = 20);
 
 		bool Update();
@@ -146,7 +147,7 @@ namespace SEASON3B
 		void SetTitleName();
 		const unicode::t_char* GetTitleName(BYTE _index);
 
-		void RanderMark(float _x, float _y, BYTE _GensInfluence, BYTE _GensRankInfo, int _ImageArea = MARK_RANKINFOWIN, float _RenderY = 0);
+		void RanderMark(float _x, float _y, GENS_TYPE _GensInfluence, BYTE _GensRankInfo, IMAGE_AREA _ImageArea = MARK_RANKINFOWIN, float _RenderY = 0);
 		int GetImageIndex(BYTE _index);
 	};
 }

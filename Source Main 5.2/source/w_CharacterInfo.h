@@ -241,10 +241,10 @@ public:
 	bool		m_CursedTempleCurSkillPacket;
 	OBJECT	    Object;
 #ifdef PBG_ADD_GENSRANKING
-	BYTE		m_byRankIndex;
+	BYTE		GensRanking;
 #endif //PBG_ADD_GENSRANKING
 #ifdef PBG_MOD_STRIFE_GENSMARKRENDER
-	BYTE		m_nContributionPoint;
+	BYTE		GensContributionPoints;
 #endif //PBG_MOD_STRIFE_GENSMARKRENDER
 };
 

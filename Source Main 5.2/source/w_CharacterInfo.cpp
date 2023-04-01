@@ -5,6 +5,8 @@
 #include "w_CharacterInfo.h"
 #include "SkillManager.h"
 
+#include <NewUIGensRanking.h>
+
 CHARACTER::CHARACTER()
 {
 	Initialize();
@@ -117,12 +119,8 @@ void CHARACTER::Initialize()
 	m_iTempKey = 0;
 	m_CursedTempleCurSkill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
 	m_CursedTempleCurSkillPacket = false;
-#ifdef PBG_ADD_GENSRANKING
-	m_byRankIndex=0;
-#endif //PBG_ADD_GENSRANKING
-#ifdef PBG_MOD_STRIFE_GENSMARKRENDER
-	m_nContributionPoint=0;
-#endif //PBG_MOD_STRIFE_GENSMARKRENDER
+	GensRanking=0;
+	GensContributionPoints=0;
 }
 
 void CHARACTER::Destroy()

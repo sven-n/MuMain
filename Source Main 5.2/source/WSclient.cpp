@@ -9845,7 +9845,7 @@ void ReceivePlayerGensInfluence(BYTE* ReceiveBuffer)
 {
 	LPPMSG_MSG_SEND_GENS_INFO pData = (LPPMSG_MSG_SEND_GENS_INFO)ReceiveBuffer;
 	Hero->m_byGensInfluence = pData->m_byInfluence;
-	Hero->m_byRankIndex = pData->m_nGensClass;
+	Hero->GensRanking = pData->m_nGensClass;
 	g_pNewUIGensRanking->SetContribution(pData->m_nContributionPoint);
 	g_pNewUIGensRanking->SetRanking(pData->m_nRanking);
 	g_pNewUIGensRanking->SetNextContribution(pData->m_nNextContributionPoint);
@@ -9864,8 +9864,8 @@ void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 		CHARACTER *c = &CharactersClient[nIndex];
 		
 		c->m_byGensInfluence = Data2->m_byInfluence;
-		c->m_byRankIndex = Data2->m_nGensClass;
-		c->m_nContributionPoint = Data2->m_nContributionPoint;
+		c->GensRanking = Data2->m_nGensClass;
+		c->GensContributionPoints = Data2->m_nContributionPoint;
 		if (::IsStrifeMap(gMapManager.WorldActive))
 		{
 			vec3_t vTemp = {0.f, 0.f, 0.f};
