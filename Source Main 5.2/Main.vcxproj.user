@@ -7,5 +7,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Global Debug|Win32'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)Bin\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerDebuggerType>NativeWithManagedCore</LocalDebuggerDebuggerType>
   </PropertyGroup>
 </Project>

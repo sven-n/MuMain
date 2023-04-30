@@ -190,6 +190,9 @@
     <Filter Include="External Object\Leaf">
       <UniqueIdentifier>{3b92a23e-4343-428e-9736-2f625e9e74b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MU\Dotnet">
+      <UniqueIdentifier>{b3403733-92ae-4eab-9619-948b4a78f0a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="source\icon1.ico">
@@ -1009,9 +1012,6 @@
     <ClCompile Include="source\SkillManager.cpp">
       <Filter>MU\Skill</Filter>
     </ClCompile>
-    <ClCompile Include="source\ProtocolSend.cpp">
-      <Filter>MU\Network</Filter>
-    </ClCompile>
     <ClCompile Include="source\CharacterManager.cpp">
       <Filter>MU\Character</Filter>
     </ClCompile>
@@ -1176,6 +1176,12 @@
     </ClCompile>
     <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp">
       <Filter>External Object\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Dotnet\DotNetRuntime.cpp">
+      <Filter>MU\Dotnet</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Dotnet\Connection.cpp">
+      <Filter>MU\Dotnet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2046,9 +2052,6 @@
     <ClInclude Include="source\ProtocolAsio.h">
       <Filter>MU\Network</Filter>
     </ClInclude>
-    <ClInclude Include="source\ProtocolSend.h">
-      <Filter>MU\Network</Filter>
-    </ClInclude>
     <ClInclude Include="source\CharacterManager.h">
       <Filter>MU\Character</Filter>
     </ClInclude>
@@ -2249,6 +2252,15 @@
     </ClInclude>
     <ClInclude Include="afxres.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\DotNetRuntime.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\Connection.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinLock.h">
+      <Filter>MU\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
