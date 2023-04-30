@@ -2450,13 +2450,15 @@ void MainScene(HDC hDC)
 	}
 
 	DifTimer = TimePrior - LastTimeCurrent;
-
-	if (DifTimer < 40)
+	constexpr int TargetFps = 30;
+	constexpr int MsPerFrame = 1000 / TargetFps;
+	if (DifTimer < MsPerFrame)
 	{
-		int32_t dwMilliseconds = 40 - DifTimer;
-		std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds)); 
+		int32_t dwMilliseconds = MsPerFrame - DifTimer;
+		Sleep(dwMilliseconds);
+		//std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds)); 
 		TimePrior += dwMilliseconds;
-		DifTimer = 40;
+		DifTimer = MsPerFrame;
 	}
 
 	DifTimer = DifTimer + Remain;
