@@ -65,8 +65,8 @@ namespace SEASON3B
 		float GetLayerDepth();	//. 5.0f
 
 	public:
-		void SetCursedTempleEnterInfo( BYTE* cursedtempleinfo );
-		void ReceiveCursedTempleEnterInfo( BYTE* cursedtempleinfo );
+		void SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo );
+		void ReceiveCursedTempleEnterInfo(const BYTE* cursedtempleinfo );
 
 	private:
 		void Initialize();

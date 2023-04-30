@@ -21,7 +21,6 @@
 #define	SMW_BTN_GAP		4
 
 extern int  SceneFlag;
-extern CWsctlc SocketClient;
 
 CSysMenuWin::CSysMenuWin()
 {

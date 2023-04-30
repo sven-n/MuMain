@@ -254,11 +254,11 @@ void PopUpErrorCheckMsgBox(const char* szErrorMsg, bool bForceDestroy)
 		}
 	}
 
-	#ifdef NEW_PROTOCOL_SYSTEM
-		gProtocolSend.DisconnectServer();
-	#endif
+	if (SocketClient != nullptr)
+	{
+		SocketClient->Close();
+	}
 
-	SocketClient.Close();
 	KillGLWindow();
 	DestroySound();
 	DestroyWindow();

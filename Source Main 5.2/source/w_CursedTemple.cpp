@@ -1189,7 +1189,7 @@ void CursedTemple::ReceiveCursedTempleState( const eCursedTempleState state )
 	}
 }
 
-void CursedTemple::ReceiveCursedTempleInfo( BYTE* ReceiveBuffer )
+void CursedTemple::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_CURSED_TAMPLE_STATE data =(LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
 	

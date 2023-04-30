@@ -115,11 +115,11 @@ namespace SEASON3B
 
 	public:
 		void SetCursedTempleSkill( CHARACTER* c, OBJECT* o, DWORD selectcharacterindex );
-		void ReceiveCursedTempRegisterSkill( BYTE* ReceiveBuffer );
-		void ReceiveCursedTempUnRegisterSkill( BYTE* ReceiveBuffer );
-		void ReceiveCursedTempleInfo( BYTE* ReceiveBuffer );
-		void ReceiveCursedTempSkillPoint( BYTE* ReceiveBuffer );
-		void ReceiveCursedTempleHolyItemRelics( BYTE* ReceiveBuffer );
+		void ReceiveCursedTempRegisterSkill(const BYTE* ReceiveBuffer );
+		void ReceiveCursedTempUnRegisterSkill(const BYTE* ReceiveBuffer );
+		void ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer );
+		void ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer );
+		void ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer );
 
 	private:
 		void Initialize();

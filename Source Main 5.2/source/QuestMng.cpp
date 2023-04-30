@@ -135,7 +135,7 @@ void CQuestMng::LoadQuestWordsScript()
 	::fclose(fp);
 }
 
-void CQuestMng::SetQuestRequestReward(BYTE* pbyRequestRewardPacket)
+void CQuestMng::SetQuestRequestReward(const BYTE* pbyRequestRewardPacket)
 {
 	LPPMSG_NPC_QUESTEXP_INFO pRequestRewardPacket
 		= (LPPMSG_NPC_QUESTEXP_INFO)pbyRequestRewardPacket;

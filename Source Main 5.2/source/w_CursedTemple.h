@@ -32,7 +32,7 @@ namespace SEASON3A
 	public:
 		bool IsHolyItemPickState();
 		bool IsPartyMember( DWORD selectcharacterindex );
-		void ReceiveCursedTempleInfo( BYTE* ReceiveBuffer );
+		void ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer );
 		void ReceiveCursedTempleState( const eCursedTempleState state );
 
 	public:

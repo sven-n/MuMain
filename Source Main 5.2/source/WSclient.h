@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include "wsctlc.h"
-#include "SimpleModulus.h"
+#include "Dotnet/Connection.h"
 #include "CSMapServer.h"
 
 #define WM_ASYNCSELECTMSG (WM_USER+0)
@@ -136,14 +135,12 @@ typedef struct
 //receive Character List 
 typedef struct 
 {
-#ifndef NEW_PROTOCOL_SYSTEM
 	PBMSG_HEADER Header;
 	BYTE         SubCode;
-#endif
     BYTE         MaxClass;
 	BYTE		 MoveCount;
 	BYTE         CharacterCount;
-	// season 6: BYTE		IsVaultExtended;
+	BYTE		 IsVaultExtended;
 } PHEADER_DEFAULT_CHARACTER_LIST, * LPPHEADER_DEFAULT_CHARACTER_LIST;
 
 #define CLASS_SUMMONER_CARD		0x01
@@ -610,9 +607,7 @@ typedef struct {
 
 //receive move character
 typedef struct {
-#ifndef NEW_PROTOCOL_SYSTEM
 	PBMSG_HEADER  Header;
-#endif
 	BYTE          KeyH;
 	BYTE          KeyL;
 	BYTE          PositionX;
@@ -3512,7 +3507,7 @@ typedef struct {
 //////////////////////////////////////////////////////////////////////////
 // ?????????????????????????????????????
 //////////////////////////////////////////////////////////////////////////
-extern CWsctlc SocketClient;
+extern Connection* SocketClient;
 extern int HeroKey;
 
 extern int SummonLife;
@@ -3530,14 +3525,6 @@ extern int  SoccerTime;
 extern char SoccerTeamName[2][8+1];
 extern bool SoccerObserver;
 
-#ifdef PKD_ADD_ENHANCED_ENCRYPTION
-extern CSessionCryptor g_SessionCryptorCS;
-extern CSessionCryptor g_SessionCryptorSC;
-#else
-extern CSimpleModulus g_SimpleModulusCS;
-extern CSimpleModulus g_SimpleModulusSC;
-#endif // PKD_ADD_ENHANCED_ENCRYPTION
-
 #ifdef ACC_PACKETSIZE
 extern int g_iTotalPacketRecv;
 extern int g_iTotalPacketSend;
@@ -3547,11 +3534,12 @@ extern DWORD g_dwPacketInitialTick;
 
 BOOL CreateSocket(char *IpAddr, unsigned short Port);
 void DeleteSocket();
-void ProtocolCompiler( CWsctlc *pSocketClient = &SocketClient, int iTranslation = 0, int iParam = 0);
-void ReceiveCharacterList(BYTE* ReceiveBuffer);
-void ReceiveMovePosition(BYTE* ReceiveBuffer);
-void ReceiveMoveCharacter(BYTE* ReceiveBuffer);
-BOOL TranslateProtocol(int HeadCode,BYTE* ReceiveBuffer,int Size,BOOL bEncrypted);
+//void ProtocolCompiler( CWsctlc *pSocketClient = &SocketClient, int iTranslation = 0, int iParam = 0);
+void ReceiveCharacterList(const BYTE* ReceiveBuffer);
+void ReceiveMovePosition(const BYTE* ReceiveBuffer);
+void ReceiveMoveCharacter(const BYTE* ReceiveBuffer);
+//BOOL TranslateProtocol(int HeadCode,BYTE* ReceiveBuffer,int Size,BOOL bEncrypted);
+//static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
 
 
 void InitGame ();

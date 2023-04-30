@@ -332,7 +332,7 @@ bool SEASON3B::CNewUICursedTempleResult::Render()
 	return true;
 }
 
-void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult( BYTE* ReceiveBuffer )
+void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_CURSED_TEMPLE_RESULT data = (LPPMSG_CURSED_TEMPLE_RESULT)ReceiveBuffer;
 

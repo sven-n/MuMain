@@ -75,6 +75,8 @@
 #include "MonkSystem.h"
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
+#include "Dotnet/Connection.h"
+
 #define MAX_DEBUG_MAX 10
 
 extern BYTE m_AltarState[];
@@ -85,8 +87,6 @@ extern BOOL g_bUseChatListBox;
 extern BOOL g_bUseWindowMode;
 #endif //WINDOWMODE
 extern CUITextInputBox * g_pSingleTextInputBox;
-
-extern CChatRoomSocketList * g_pChatRoomSocketList;
 
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;
@@ -110,13 +110,14 @@ extern bool g_PetEnableDuel;
 
 MASTER_LEVEL_VALUE	Master_Level_Data;
 
-BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '4'+3, '0'+4, '5'+5};
-BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"TbYehR2hFUPBKgZj"};
+//BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '4'+3, '0'+4, '5'+5};
+//BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"TbYehR2hFUPBKgZj"};
+BYTE Version[SIZE_PROTOCOLVERSION] = { '1' + 1, '0' + 2, '4' + 3, '0' + 4, '4' + 5 };
+BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 
-CWsctlc     SocketClient;
-CWsctlc*    g_pSocketClient = &SocketClient;
-CSimpleModulus g_SimpleModulusCS;
-CSimpleModulus g_SimpleModulusSC;
+Connection* g_pSocketClient = nullptr;
+
+Connection* SocketClient = nullptr;
 
 BYTE    g_byPacketSerialSend = 0;
 BYTE    g_byPacketSerialRecv = 0;
@@ -141,7 +142,7 @@ char    Question[31];
 
 #define FIRST_CROWN_SWITCH_NUMBER	322
 
-void AddDebugText(unsigned char *Buffer,int Size)
+void AddDebugText(const unsigned char *Buffer,int Size)
 {
 	if(DebugTextCount > MAX_DEBUG_MAX-1)
 	{
@@ -160,43 +161,36 @@ void AddDebugText(unsigned char *Buffer,int Size)
 	}
 }
 
-BOOL CreateSocket(char *IpAddr, unsigned short Port) 
+// Forward declaration
+static void HandleIncomingPacketLocked(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
+
+BOOL CreateSocket(char* IpAddr, unsigned short Port) 
 {
 	BOOL bResult = TRUE;
-	
-	static bool First;
-	if(!First)
-	{
-		First = true;
-		SocketClient.Startup();
-#ifdef _DEBUG
-		SocketClient.LogPrintOn();
-#endif
-	}
-	g_ErrorReport.Write("[Connect to Server] ip address = %s, port = %d\r\n", IpAddr, Port);
-
-	g_ConsoleDebug->Write(MCD_NORMAL, "[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
-
-	SocketClient.Create(g_hWnd, TRUE);
-	if( SocketClient.Connect(IpAddr,Port,WM_ASYNCSELECTMSG) == FALSE )
-	{
-		g_ErrorReport.Write( "Failed to connect. ");
-		g_ErrorReport.WriteCurrentTime();
-		
-		CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
-		
-		bResult = FALSE;
-	}
 	g_byPacketSerialSend = 0;
 	g_byPacketSerialRecv = 0;
-	
-	return ( bResult);
+	g_ConsoleDebug->Write(MCD_NORMAL, "[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
+	SocketClient = new Connection(IpAddr, Port, &HandleIncomingPacketLocked);
+	if (!SocketClient->IsConnected())
+	{
+		bResult = FALSE;
+		g_ErrorReport.Write("Failed to connect. ");
+		g_ErrorReport.WriteCurrentTime();
+		free(SocketClient);
+		SocketClient = nullptr;
+		CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
+	}
+
+	return bResult;
 }
 
 void DeleteSocket()
 {
-	SocketClient.Close();
-	//gProtocolSend.DisconnectServer();
+	if (SocketClient)
+	{
+		SocketClient->Close();
+		SocketClient = nullptr;
+	}
 }
 
 static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
@@ -286,7 +280,7 @@ void InitGuildWar()
 
 BOOL Util_CheckOption( char *lpszCommandLine, unsigned char cOption, char *lpszString);
 
-void ReceiveServerList( BYTE *ReceiveBuffer )
+void ReceiveServerList( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_SUBCODE_WORD Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer;
 	int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
@@ -320,42 +314,35 @@ void ReceiveServerList( BYTE *ReceiveBuffer )
 		
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList]");
 }
-void ReceiveServerConnect(BYTE* ReceiveBuffer) //Recebe informação do ConnectServer sobre a sala e envia a conexão para a sala escolhida
+void ReceiveServerConnect(const BYTE* ReceiveBuffer) //Recebe informação do ConnectServer sobre a sala e envia a conexão para a sala escolhida
 {
 	LPPRECEIVE_SERVER_ADDRESS Data = (LPPRECEIVE_SERVER_ADDRESS)ReceiveBuffer;
 	char IP[16];
 	memset(IP, 0, 16);
 	memcpy(IP, (char*)Data->IP, 15);
 	g_ErrorReport.Write("[ReceiveServerConnect]");
-	SocketClient.Close();
+	if (SocketClient != nullptr)
+	{
+		SocketClient->Close();
+	}
 
-#ifndef NEW_PROTOCOL_SYSTEM
 	if (CreateSocket(IP, Data->Port))
 	{
 		g_bGameServerConnected = TRUE;
 	}
-#else
-	gProtocolSend.DisconnectServer();
-
-	if (gProtocolSend.ConnectServer(IP,Data->Port))
-	{
-		g_bGameServerConnected = TRUE;
-		g_ConsoleDebug->Write(MCD_NORMAL, " > ProtocolSend Connect");
-	}
-#endif
 	
 	char Text[100];
 	sprintf(Text,GlobalText[481],IP,Data->Port);
 	g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);	
 }
 
-void ReceiveServerConnectBusy( BYTE *ReceiveBuffer )
+void ReceiveServerConnectBusy( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_SERVER_BUSY Data = ( LPPRECEIVE_SERVER_BUSY)ReceiveBuffer;
 	SendRequestServerList();
 }
 
-void ReceiveJoinServer( BYTE *ReceiveBuffer )
+void ReceiveJoinServer( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_JOIN_SERVER Data2 = (LPPRECEIVE_JOIN_SERVER)ReceiveBuffer;
 	
@@ -402,17 +389,13 @@ void ReceiveJoinServer( BYTE *ReceiveBuffer )
 		if ( Util_CheckOption( GetCommandLine(), 'i', lpszTemp))
 		{
 			g_ErrorReport.Write( "> Try to Login \"%s\"\r\n", m_ID);
-			#ifdef NEW_PROTOCOL_SYSTEM
-				gProtocolSend.SendRequestLogInNew(m_ID, lpszTemp);
-			#else
-				SendRequestLogIn(m_ID, lpszTemp);
-			#endif
+			SendRequestLogIn(m_ID, lpszTemp);
 		}
 	}
 #endif
 }
 
-void ReceiveConfirmPassword( BYTE *ReceiveBuffer )
+void ReceiveConfirmPassword( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_CONFIRM_PASSWORD Data = (LPPRECEIVE_CONFIRM_PASSWORD)ReceiveBuffer;
 	switch(Data->Result)
@@ -428,7 +411,7 @@ void ReceiveConfirmPassword( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveConfirmPassword2( BYTE *ReceiveBuffer )
+void ReceiveConfirmPassword2( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_CONFIRM_PASSWORD2 Data = (LPPRECEIVE_CONFIRM_PASSWORD2)ReceiveBuffer;
 	switch(Data->Result)
@@ -450,7 +433,7 @@ void ReceiveConfirmPassword2( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveChangePassword( BYTE *ReceiveBuffer )
+void ReceiveChangePassword( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 	switch(Data->Value)
@@ -470,7 +453,7 @@ void ReceiveChangePassword( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveCharacterList( BYTE *ReceiveBuffer )
+void ReceiveCharacterList( const BYTE *ReceiveBuffer )
 {
 	InitGuildWar();
 	
@@ -525,9 +508,10 @@ void ReceiveCharacterList( BYTE *ReceiveBuffer )
 	}
 	CurrentProtocolState = RECEIVE_CHARACTERS_LIST;
 }
+
 CHARACTER_ENABLE g_CharCardEnable;
 
-void ReceiveCharacterCard_New(BYTE* ReceiveBuffer)
+void ReceiveCharacterCard_New(const BYTE* ReceiveBuffer)
 {
 	LPPHEADER_CHARACTERCARD Data = (LPPHEADER_CHARACTERCARD)ReceiveBuffer;
 	g_CharCardEnable.bCharacterEnable[0] = false;
@@ -546,7 +530,7 @@ void ReceiveCharacterCard_New(BYTE* ReceiveBuffer)
 	g_ConsoleDebug->Write(MCD_NORMAL, "[BOTH MESSAGE] CharacterCard Recv %d = %d %d %d",Data->CharacterCard,g_CharCardEnable.bCharacterEnable[0],g_CharCardEnable.bCharacterEnable[1],g_CharCardEnable.bCharacterEnable[2]);
 }
 
-void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
+void ReceiveCreateCharacter( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_CREATE_CHARACTER Data = (LPPRECEIVE_CREATE_CHARACTER)ReceiveBuffer;
 	if(Data->Result==1)
@@ -596,7 +580,7 @@ void ReceiveCreateCharacter( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x01 [ReceiveCreateCharacter]");
 }
 
-void ReceiveDeleteCharacter( BYTE *ReceiveBuffer )
+void ReceiveDeleteCharacter( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 	switch (Data->Value)
@@ -704,7 +688,7 @@ void InitGame()
 	g_pGuildInfoWindow->NoticeClear();
 }
 
-BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
 	LogOut = false;
 	LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
@@ -714,14 +698,6 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		SendMessage(g_hWnd, WM_DESTROY, 0, 0);
 		break;
 	case 1:
-//#ifndef NEW_PROTOCOL_SYSTEM
-//		if ( !bEncrypted)
-//		{
-//			GO_DEBUG;
-//			SendHackingChecked( 0x00, 0xF1);
-//			return ( FALSE);
-//		}
-//#endif
 		StopMusic();
         AllStopSound();
 		
@@ -731,12 +707,7 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		CryWolfMVPInit();
 		
 		SceneFlag = CHARACTER_SCENE;
-
-		#ifdef NEW_PROTOCOL_SYSTEM
-			gProtocolSend.SendRequestCharactersListNew();
-		#else
-			SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
-		#endif
+		SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
 								
 		InitCharacterScene = false;
         InitMainScene = false;
@@ -753,21 +724,12 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 			SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 			ReleaseMainData();
 		}
-		
-//#ifndef NEW_PROTOCOL_SYSTEM
-//		if ( !bEncrypted)
-//		{
-//			GO_DEBUG;
-//			SendHackingChecked( 0x00, 0xF1);
-//			return ( FALSE);
-//		}
-//#endif
-		g_ErrorReport.Write("[ReceiveLogOut]");
-		SocketClient.Close();
 
-		#ifdef NEW_PROTOCOL_SYSTEM
-			gProtocolSend.DisconnectServer();
-		#endif
+		g_ErrorReport.Write("[ReceiveLogOut]");
+		if (SocketClient != nullptr)
+		{
+			SocketClient->Close();
+		}
 
 		ReleaseCharacterSceneData();
 		SceneFlag = LOG_IN_SCENE;
@@ -795,16 +757,8 @@ BOOL ReceiveLogOut(BYTE *ReceiveBuffer, BOOL bEncrypted)
 
 int HeroIndex;
 
-BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0xF3);
-//		return ( FALSE);
-//	}
-//#endif
 	MouseLButton = false;
 	
 	LPPRECEIVE_JOIN_MAP_SERVER Data = (LPPRECEIVE_JOIN_MAP_SERVER)ReceiveBuffer;
@@ -890,7 +844,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	
 	CharacterMachine->Gold            = Data->Gold;
 	//CharacterAttribute->SkillMana     = CharacterAttribute->Energy*10+CharacterAttribute->ManaMax*10/6;
-
+	
 	gMapManager.WorldActive = Data->Map;
 
 	gMapManager.LoadWorld(gMapManager.WorldActive);
@@ -899,15 +853,14 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	{
 		SendRequestCrywolfInfo();
 	}
-	
-    matchEvent::CreateEventMatch ( gMapManager.WorldActive );
 
+    matchEvent::CreateEventMatch ( gMapManager.WorldActive );
 	HeroIndex = rand()%MAX_CHARACTERS_CLIENT;
 	CHARACTER *c = &CharactersClient[HeroIndex];
 	CreateCharacterPointer(c,MODEL_PLAYER,Data->PositionX,Data->PositionY,((float)Data->Angle-1.f)*45.f);
 	c->Key = HeroKey;
 
-	g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d",c->Key,gMapManager.WorldActive,Data->PositionX,Data->PositionY);
+	g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d",c->Key, Data->Map,Data->PositionX,Data->PositionY);
 	
     OBJECT *o = &c->Object;
 	c->Class = CharacterAttribute->Class;
@@ -1011,7 +964,7 @@ BOOL ReceiveJoinMapServer(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	return ( TRUE);
 }
 
-void ReceiveRevival( BYTE *ReceiveBuffer )
+void ReceiveRevival( const BYTE *ReceiveBuffer )
 {
 	MouseLButton = false;
 	Teleport = false;
@@ -1106,10 +1059,10 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
     if(gMapManager.WorldActive != Data->Map)
 	{
         int OldWorld = gMapManager.WorldActive;
-		
+
 		gMapManager.WorldActive = Data->Map;
 		gMapManager.LoadWorld(gMapManager.WorldActive);
-	
+
         if ( ( gMapManager.InChaosCastle( OldWorld ) == true && OldWorld!=gMapManager.WorldActive ) 
 			|| gMapManager.InChaosCastle() == true )
         {
@@ -1169,7 +1122,7 @@ void ReceiveRevival( BYTE *ReceiveBuffer )
 	
 }
 
-void ReceiveMagicList( BYTE *ReceiveBuffer )
+void ReceiveMagicList( const BYTE *ReceiveBuffer )
 {
 	int Master_Skill_Bool = -1;
 	int Skill_Bool = -1;
@@ -1267,7 +1220,7 @@ void ReceiveMagicList( BYTE *ReceiveBuffer )
 
 }
 
-BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveInventory(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
 	for(int i=0;i<MAX_EQUIPMENT;i++)
 	{
@@ -1279,15 +1232,6 @@ BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	g_pMyInventory->UnequipAllItems();
 	g_pMyInventory->DeleteAllItems();
 	g_pMyShopInventory->DeleteAllItems();
-
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0xF3);
-//		return ( FALSE);
-//	}
-//#endif
 	
 	LPPHEADER_DEFAULT_SUBCODE_WORD Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer; //LPPHEADER_DEFAULT_SUBCODE_WORD 6byte
 	int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
@@ -1325,7 +1269,7 @@ BOOL ReceiveInventory(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	return ( TRUE);
 }
 
-void ReceiveDeleteInventory( BYTE *ReceiveBuffer )
+void ReceiveDeleteInventory( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 	if(Data->SubCode != 0xff)
@@ -1355,7 +1299,7 @@ void ReceiveDeleteInventory( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x28 [ReceiveDeleteInventory(%d %d)]", Data->SubCode, Data->Value);
 }
 
-void ReceiveTradeInventory( BYTE *ReceiveBuffer )
+void ReceiveTradeInventory( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_SUBCODE_WORD Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer;
 	int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
@@ -1414,7 +1358,7 @@ void ReceiveTradeInventory( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x31 [ReceiveTradeInventory]");
 }
 
-void ReceiveChat( BYTE *ReceiveBuffer )
+void ReceiveChat( const BYTE *ReceiveBuffer )
 {
 	if(SceneFlag == LOG_IN_SCENE)
 	{
@@ -1511,7 +1455,7 @@ void ReceiveChat( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveChatWhisper( BYTE *ReceiveBuffer )
+void ReceiveChatWhisper( const BYTE *ReceiveBuffer )
 {
 	if(g_pChatInputBox->IsBlockWhisper() == true)
 	{
@@ -1538,7 +1482,7 @@ void ReceiveChatWhisper( BYTE *ReceiveBuffer )
 	g_pChatListBox->AddText(ID,Text, SEASON3B::TYPE_WHISPER_MESSAGE);
 }
 
-void ReceiveChatWhisperResult( BYTE *ReceiveBuffer )
+void ReceiveChatWhisperResult( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	switch(Data->Value)
@@ -1550,7 +1494,7 @@ void ReceiveChatWhisperResult( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveChatKey( BYTE *ReceiveBuffer )
+void ReceiveChatKey( const BYTE *ReceiveBuffer )
 {
 	LPPCHATING_KEY Data = (LPPCHATING_KEY)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH)<<8) + Data->KeyL;
@@ -1574,7 +1518,7 @@ void ReceiveChatKey( BYTE *ReceiveBuffer )
 	CreateChat(CharactersClient[Index].ID,(char *)Data->ChatText,&CharactersClient[Index]);
 }
 
-void ReceiveNotice( BYTE *ReceiveBuffer )
+void ReceiveNotice( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_NOTICE Data = (LPPRECEIVE_NOTICE)ReceiveBuffer;
 	if(Data->Result==0)
@@ -1612,7 +1556,7 @@ void ReceiveNotice( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x0D [ReceiveNotice(%s)]", Data->Notice);
 }
 
-void ReceiveMoveCharacter(BYTE *ReceiveBuffer)
+void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
 {
 	LPPMOVE_CHARACTER Data = (LPPMOVE_CHARACTER)ReceiveBuffer;
 	int  Key = ((int)(Data->KeyH)<<8) + Data->KeyL;
@@ -1670,7 +1614,7 @@ void ReceiveMoveCharacter(BYTE *ReceiveBuffer)
 	}
 }
 
-void ReceiveMovePosition( BYTE *ReceiveBuffer )
+void ReceiveMovePosition( const BYTE *ReceiveBuffer )
 {
     LPPRECEIVE_MOVE_POSITION Data = (LPPRECEIVE_MOVE_POSITION)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH)<<8) + Data->KeyL;
@@ -1695,17 +1639,8 @@ void ReceiveMovePosition( BYTE *ReceiveBuffer )
 
 extern int EnableEvent;
 
-BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0x1C);
-//		return ( FALSE);
-//	}
-//#endif
-	
 	SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 	
 	LPPRECEIVE_TELEPORT_POSITION Data = (LPPRECEIVE_TELEPORT_POSITION)ReceiveBuffer;
@@ -1755,10 +1690,10 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 		if(gMapManager.WorldActive != Data->Map)
 		{
             int OldWorld = gMapManager.WorldActive;
-			
+
 			gMapManager.WorldActive = Data->Map;
 			gMapManager.LoadWorld(gMapManager.WorldActive);
-			
+
 			if(gMapManager.WorldActive == WD_34CRYWOLF_1ST)
 				SendRequestCrywolfInfo();
 			
@@ -1861,14 +1796,14 @@ BOOL ReceiveTeleport(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	return (TRUE);
 }
 
-void ReceiveEquipment( BYTE *ReceiveBuffer )
+void ReceiveEquipment( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_EQUIPMENT Data = (LPPRECEIVE_EQUIPMENT)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH )<<8) + Data->KeyL;
 	ChangeCharacterExt(FindCharacterIndex(Key),Data->Equipment);
 }
 
-void ReceiveChangePlayer( BYTE *ReceiveBuffer )
+void ReceiveChangePlayer( const BYTE *ReceiveBuffer )
 {	
 	LPPCHANGE_CHARACTER Data = (LPPCHANGE_CHARACTER)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH )<<8) + Data->KeyL;
@@ -2091,7 +2026,7 @@ void RegisterBuff( eBuffState buff, OBJECT* o, const int bufftime = 0 );
 
 void UnRegisterBuff( eBuffState buff, OBJECT* o );
 
-void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
+void ReceiveCreatePlayerViewport(const BYTE* ReceiveBuffer,int Size)
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	int Offset = sizeof(PWHEADER_DEFAULT_WORD);
@@ -2306,7 +2241,7 @@ void ReceiveCreatePlayerViewport(BYTE *ReceiveBuffer,int Size)
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x12 [ReceiveCreatePlayerViewport(%d)]", Data->Value);
 }
 
-void ReceiveCreateTransformViewport( BYTE *ReceiveBuffer )
+void ReceiveCreateTransformViewport( const BYTE *ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	int Offset = sizeof(PWHEADER_DEFAULT_WORD);
@@ -2509,7 +2444,7 @@ void AppearMonster(CHARACTER *c)
 	}
 }
 
-void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
+void ReceiveCreateMonsterViewport( const BYTE *ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	int Offset = sizeof(PWHEADER_DEFAULT_WORD);
@@ -2638,7 +2573,7 @@ void ReceiveCreateMonsterViewport( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveCreateSummonViewport( BYTE *ReceiveBuffer )
+void ReceiveCreateSummonViewport( const BYTE *ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	int Offset = sizeof(PWHEADER_DEFAULT_WORD);
@@ -2717,7 +2652,7 @@ void ReceiveCreateSummonViewport( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x1F [ReceiveCreateSummonViewport(%d)]", Data->Value);
 }
 
-void ReceiveDeleteCharacterViewport( BYTE *ReceiveBuffer )
+void ReceiveDeleteCharacterViewport( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	int Offset = sizeof(PHEADER_DEFAULT);
@@ -2775,7 +2710,7 @@ void ReceiveDeleteCharacterViewport( BYTE *ReceiveBuffer )
 }
 int AttackPlayer = 0;
 
-void ReceiveDamage( BYTE *ReceiveBuffer )
+void ReceiveDamage( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_DAMAGE Data = (LPPRECEIVE_DAMAGE)ReceiveBuffer;
 	int Damage = ((int)(Data->DamageH)<<8) + Data->DamageL;
@@ -2908,7 +2843,7 @@ void ProcessDamageCastle( LPPRECEIVE_ATTACK Data)
 	c->Hit = Damage;
 }
 
-void ReceiveAttackDamage( BYTE *ReceiveBuffer )
+void ReceiveAttackDamage( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_ATTACK Data = (LPPRECEIVE_ATTACK)ReceiveBuffer;
 
@@ -3117,7 +3052,7 @@ void ReceiveAttackDamage( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, Damage);
 }
 
-void ReceiveAction(BYTE *ReceiveBuffer,int Size)
+void ReceiveAction(const BYTE* ReceiveBuffer,int Size)
 {
 	LPPRECEIVE_ACTION Data = (LPPRECEIVE_ACTION)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH )<<8) + Data->KeyL;
@@ -3352,7 +3287,7 @@ void ReceiveAction(BYTE *ReceiveBuffer,int Size)
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x18 [ReceiveAction(%d)]", Data->Angle);
 }
 
-void ReceiveSkillStatus( BYTE *ReceiveBuffer )
+void ReceiveSkillStatus( const BYTE *ReceiveBuffer )
 {
 	LPPMSG_VIEWSKILLSTATE Data = (LPPMSG_VIEWSKILLSTATE)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH )<<8) + Data->KeyL;
@@ -3425,7 +3360,7 @@ void ReceiveSkillStatus( BYTE *ReceiveBuffer )
 	
 }
 
-void ReceiveMagicFinish( BYTE *ReceiveBuffer )
+void ReceiveMagicFinish( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_VALUE_KEY Data = (LPPHEADER_DEFAULT_VALUE_KEY)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH )<<8) + Data->KeyL;
@@ -3635,7 +3570,7 @@ void SetPlayerHighBow ( CHARACTER* c )
 	}
 }
 
-BOOL ReceiveMonsterSkill(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
+BOOL ReceiveMonsterSkill(const BYTE* ReceiveBuffer,int Size, BOOL bEncrypted)
 {
 	LPPRECEIVE_MONSTERSKILL Data = (LPPRECEIVE_MONSTERSKILL)ReceiveBuffer;
 	
@@ -3675,17 +3610,8 @@ BOOL ReceiveMonsterSkill(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 		return ( TRUE);
 }
 
-BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
+BOOL ReceiveMagic(const BYTE* ReceiveBuffer,int Size, BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0x19);
-//		return ( FALSE);
-//	}
-//#endif
-	
 	LPPRECEIVE_MAGIC Data = (LPPRECEIVE_MAGIC)ReceiveBuffer;
 	int SourceKey = ((int)(Data->SourceKeyH )<<8) + Data->SourceKeyL;
 	int TargetKey = ((int)(Data->TargetKeyH )<<8) + Data->TargetKeyL;
@@ -4722,17 +4648,8 @@ BOOL ReceiveMagic(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 	return ( TRUE);
 }
 
-BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
+BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer,int Size, BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0x1E);
-//		return ( FALSE);
-//	}
-//#endif
-	
 	LPPRECEIVE_MAGIC_CONTINUE Data = (LPPRECEIVE_MAGIC_CONTINUE)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH )<<8) + Data->KeyL;
 	WORD MagicNumber = ((WORD)(Data->MagicH )<<8) + Data->MagicL;
@@ -5188,7 +5105,7 @@ BOOL ReceiveMagicContinue(BYTE *ReceiveBuffer,int Size, BOOL bEncrypted)
 }
 
 // ChainLightning
-void ReceiveChainMagic( BYTE *ReceiveBuffer )
+void ReceiveChainMagic( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_CHAIN_MAGIC pPacketData = (LPPRECEIVE_CHAIN_MAGIC)ReceiveBuffer;
 	
@@ -5242,7 +5159,7 @@ void ReceiveChainMagic( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveMagicPosition(BYTE *ReceiveBuffer,int Size)
+void ReceiveMagicPosition(const BYTE* ReceiveBuffer,int Size)
 {
 	LPPRECEIVE_MAGIC_POSITIONS Data = (LPPRECEIVE_MAGIC_POSITIONS)ReceiveBuffer;
 	int SourceKey = ((int)(Data->KeyH )<<8) + Data->KeyL;
@@ -5284,7 +5201,7 @@ void ReceiveMagicPosition(BYTE *ReceiveBuffer,int Size)
 	}
 }
 
-void ReceiveSkillCount ( BYTE* ReceiveBuffer )
+void ReceiveSkillCount (const BYTE* ReceiveBuffer )
 {
 	LPPRECEIVE_EX_SKILL_COUNT Data = (LPPRECEIVE_EX_SKILL_COUNT)ReceiveBuffer;
 	int TargetKey = ((int)(Data->KeyH)<<8) + Data->KeyL;
@@ -5302,17 +5219,8 @@ void ReceiveSkillCount ( BYTE* ReceiveBuffer )
 	}
 }
 
-BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
+BOOL ReceiveDieExp(const BYTE* ReceiveBuffer,BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0x16);
-//		return ( FALSE);
-//	}
-//#endif
-	
 	LPPRECEIVE_DIE Data = (LPPRECEIVE_DIE)ReceiveBuffer;
 	int     Key    = ((int)(Data->KeyH   )<<8) + Data->KeyL;
 	DWORD   Exp    = ((DWORD)(Data->ExpH   )<<8) + Data->ExpL;
@@ -5374,17 +5282,8 @@ BOOL ReceiveDieExp(BYTE *ReceiveBuffer,BOOL bEncrypted)
 	return ( TRUE);
 }
 
-BOOL ReceiveDieExpLarge(BYTE *ReceiveBuffer,BOOL bEncrypted)
+BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer,BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0x9C);
-//		return ( FALSE);
-//	}
-//#endif
-	
 	LPPRECEIVE_DIE2 Data = (LPPRECEIVE_DIE2)ReceiveBuffer;
 	int     Key    = ((int)(Data->KeyH   )<<8) + Data->KeyL;
 	DWORD   Exp    = ((DWORD)(Data->ExpH   )<<16) + Data->ExpL;
@@ -5491,7 +5390,7 @@ void FallingStartCharacter ( CHARACTER* c, OBJECT* o )
     }
 }
 
-void ReceiveDie(BYTE *ReceiveBuffer,int Size)
+void ReceiveDie(const BYTE* ReceiveBuffer,int Size)
 {
 	LPPHEADER_DEFAULT_DIE Data = (LPPHEADER_DEFAULT_DIE)ReceiveBuffer;
 	
@@ -5555,7 +5454,7 @@ void ReceiveDie(BYTE *ReceiveBuffer,int Size)
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x17 [ReceiveDie(%d)]", Key);
 }
 
-void ReceiveCreateItemViewport( BYTE *ReceiveBuffer )
+void ReceiveCreateItemViewport( const BYTE *ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	int Offset = sizeof(PWHEADER_DEFAULT_WORD);
@@ -5585,7 +5484,7 @@ void ReceiveCreateItemViewport( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x20 [ReceiveCreateItemViewport]");
 }
 
-void ReceiveDeleteItemViewport( BYTE *ReceiveBuffer )
+void ReceiveDeleteItemViewport( const BYTE *ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	int Offset = sizeof(PWHEADER_DEFAULT_WORD);
@@ -5604,7 +5503,7 @@ static  const   BYTE    NOT_GET_ITEM = 0xff;
 static  const   BYTE    GET_ITEM_ZEN = 0xfe;
 static  const   BYTE    GET_ITEM_MULTI=0xfd;
 extern int ItemKey;
-void ReceiveGetItem( BYTE *ReceiveBuffer )
+void ReceiveGetItem( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_GET_ITEM Data = (LPPRECEIVE_GET_ITEM)ReceiveBuffer;
 	if ( Data->Result==NOT_GET_ITEM )
@@ -5660,7 +5559,7 @@ void ReceiveGetItem( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x22 [ReceiveGetItem(%d)]", Data->Result);
 }
 
-void ReceiveDropItem( BYTE *ReceiveBuffer )
+void ReceiveDropItem( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_KEY Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
 	if(Data->KeyH)
@@ -5688,19 +5587,10 @@ void ReceiveDropItem( BYTE *ReceiveBuffer )
 BOOL g_bPacketAfter_EquipmentItem = FALSE;
 BYTE g_byPacketAfter_EquipmentItem[256];
 
-void ReceiveTradeExit( BYTE *ReceiveBuffer );
+void ReceiveTradeExit( const BYTE *ReceiveBuffer );
 
-BOOL ReceiveEquipmentItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-// 	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0x16);
-//		return ( FALSE);
-//	}
-//#endif
-	
 	EquipmentItem = false;
 	LPPHEADER_DEFAULT_SUBCODE_ITEM Data = (LPPHEADER_DEFAULT_SUBCODE_ITEM)ReceiveBuffer;
 	if(Data->SubCode != 255)
@@ -5798,7 +5688,7 @@ BOOL ReceiveEquipmentItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	return ( TRUE);
 }
 
-void ReceiveModifyItem( BYTE *ReceiveBuffer )
+void ReceiveModifyItem( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_SUBCODE_ITEM Data = (LPPHEADER_DEFAULT_SUBCODE_ITEM)ReceiveBuffer;
 	
@@ -5826,7 +5716,7 @@ void ReceiveModifyItem( BYTE *ReceiveBuffer )
 	}
 }
 
-BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
 
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
@@ -6000,7 +5890,7 @@ BOOL ReceiveTalk(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	return ( TRUE);
 }
 
-void ReceiveBuy( BYTE *ReceiveBuffer )
+void ReceiveBuy( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_ITEM Data = (LPPHEADER_DEFAULT_ITEM)ReceiveBuffer;
 	if(Data->Index != 255)
@@ -6029,7 +5919,7 @@ void ReceiveBuy( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x32 [ReceiveBuy(%d)]", Data->Index);
 }
 
-void ReceiveSell( BYTE *ReceiveBuffer )
+void ReceiveSell( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_GOLD Data = (LPPRECEIVE_GOLD)ReceiveBuffer;
 	if(Data->Flag != 0)
@@ -6063,7 +5953,7 @@ void ReceiveSell( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveRepair( BYTE *ReceiveBuffer )
+void ReceiveRepair( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_REPAIR_GOLD Data = (LPPRECEIVE_REPAIR_GOLD)ReceiveBuffer;
 	
@@ -6077,7 +5967,7 @@ void ReceiveRepair( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x34 [ReceiveRepair(%d)]", Data->Gold);
 }
 
-void ReceiveLevelUp( BYTE *ReceiveBuffer )
+void ReceiveLevelUp( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_LEVEL_UP Data			= (LPPRECEIVE_LEVEL_UP)ReceiveBuffer;
 	CharacterAttribute->Level			= Data->Level;
@@ -6124,7 +6014,7 @@ void ReceiveLevelUp( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x05 [ReceiveLevelUp]");
 }
 
-void ReceiveAddPoint( BYTE *ReceiveBuffer )
+void ReceiveAddPoint( const BYTE *ReceiveBuffer )
 {
     LPPRECEIVE_ADD_POINT Data = (LPPRECEIVE_ADD_POINT)ReceiveBuffer;
 	if(Data->Result>>4)
@@ -6156,7 +6046,7 @@ void ReceiveAddPoint( BYTE *ReceiveBuffer )
     CharacterMachine->CalculateAll();
 }
 
-void ReceiveLife( BYTE *ReceiveBuffer )
+void ReceiveLife( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_LIFE Data = (LPPRECEIVE_LIFE)ReceiveBuffer;
 	switch(Data->Index)
@@ -6199,7 +6089,7 @@ void ReceiveLife( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveMana( BYTE *ReceiveBuffer )
+void ReceiveMana( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_LIFE Data = (LPPRECEIVE_LIFE)ReceiveBuffer;
 	switch(Data->Index)
@@ -6236,7 +6126,7 @@ void ReceiveMana( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceivePK( BYTE *ReceiveBuffer )
+void ReceivePK( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_PK Data = (LPPRECEIVE_PK)ReceiveBuffer;
 	int Key = ((int)(Data->KeyH   )<<8) + Data->KeyL;
@@ -6289,7 +6179,7 @@ void ReceivePK( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveDurability( BYTE *ReceiveBuffer )
+void ReceiveDurability( const BYTE *ReceiveBuffer )
 {
     LPPHEADER_DEFAULT_VALUE_KEY Data = (LPPHEADER_DEFAULT_VALUE_KEY)ReceiveBuffer;
 	
@@ -6316,17 +6206,8 @@ void ReceiveDurability( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x2A [ReceiveDurability(%d %d)]", Data->Value, Data->KeyL);
 }
 
-BOOL ReceiveHelperItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveHelperItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0x29);
-//		return ( FALSE);
-//	}
-//#endif
-	
     LPPRECEIVE_HELPER_ITEM Data = (LPPRECEIVE_HELPER_ITEM)ReceiveBuffer;
    	CharacterAttribute->AbilityTime[Data->Index] = Data->Time*24;
 	switch (Data->Index)
@@ -6350,7 +6231,7 @@ BOOL ReceiveHelperItem(BYTE *ReceiveBuffer, BOOL bEncrypted)
 	return ( TRUE);
 }
 
-void ReceiveWeather( BYTE *ReceiveBuffer )
+void ReceiveWeather( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	int Weather = (Data->Value>>4);
@@ -6360,7 +6241,7 @@ void ReceiveWeather( BYTE *ReceiveBuffer )
 		RainTarget = (Data->Value&15)*6;
 }
 
-void ReceiveEvent( BYTE *ReceiveBuffer )
+void ReceiveEvent( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_EVENT Data = (LPPHEADER_EVENT)ReceiveBuffer;
 	
@@ -6378,29 +6259,20 @@ void ReceiveEvent( BYTE *ReceiveBuffer )
     DeleteBoids();
 }
 
-void ReceiveSummonLife( BYTE *ReceiveBuffer )
+void ReceiveSummonLife( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 	SummonLife = Data->Value;
 }
-BOOL ReceiveTrade(BYTE *ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveTrade(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if ( !bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked( 0x00, 0x36);
-//		return ( FALSE);
-//	}
-//#endif
-	
 	LPPCHATING Data = (LPPCHATING)ReceiveBuffer;
 	g_pTrade->ProcessToReceiveTradeRequest(Data->ID);
 	
 	return ( TRUE);
 }
 
-void ReceiveTradeResult( BYTE *ReceiveBuffer )
+void ReceiveTradeResult( const BYTE *ReceiveBuffer )
 {
 	LPPTRADE Data = (LPPTRADE)ReceiveBuffer;
 	g_pTrade->ProcessToReceiveTradeResult(Data);
@@ -6408,38 +6280,38 @@ void ReceiveTradeResult( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x37 [ReceiveTradeResult(%d)]", Data->ID);
 }
 
-void ReceiveTradeYourInventoryDelete( BYTE *ReceiveBuffer )
+void ReceiveTradeYourInventoryDelete( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	g_pTrade->ProcessToReceiveYourItemDelete(Data->Value);
 }
 
-void ReceiveTradeYourInventory( BYTE *ReceiveBuffer )
+void ReceiveTradeYourInventory( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_ITEM Data = (LPPHEADER_DEFAULT_ITEM)ReceiveBuffer;
 	g_pTrade->ProcessToReceiveYourItemAdd(Data->Index, Data->Item);
 }
 
-void ReceiveTradeMyGold( BYTE *ReceiveBuffer )
+void ReceiveTradeMyGold( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	g_pTrade->ProcessToReceiveMyTradeGold(Data->Value);
 }
 
-void ReceiveTradeYourGold( BYTE *ReceiveBuffer )
+void ReceiveTradeYourGold( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_DWORD Data = (LPPHEADER_DEFAULT_DWORD)ReceiveBuffer;
 	g_pTrade->SetYourTradeGold(int(Data->Value));
 }
 
-void ReceiveTradeYourResult( BYTE *ReceiveBuffer )
+void ReceiveTradeYourResult( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	g_pTrade->ProcessToReceiveYourConfirm(Data->Value);
 }
 
 
-void ReceiveTradeExit( BYTE *ReceiveBuffer )
+void ReceiveTradeExit( const BYTE *ReceiveBuffer )
 {
 	if(EquipmentItem)
 	{
@@ -6455,12 +6327,12 @@ void ReceiveTradeExit( BYTE *ReceiveBuffer )
 	g_pTrade->ProcessToReceiveTradeExit(Data->Value);
 }
 
-void ReceivePing( BYTE *ReceiveBuffer)
+void ReceivePing( const BYTE *ReceiveBuffer)
 {
 	SendPing();
 }
 
-void ReceiveStorageGold( BYTE *ReceiveBuffer )
+void ReceiveStorageGold( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_STORAGE_GOLD Data = (LPPRECEIVE_STORAGE_GOLD)ReceiveBuffer;
 	if(Data->Result)
@@ -6472,19 +6344,19 @@ void ReceiveStorageGold( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x81 [ReceiveStorageGold(%d %d %d)]", Data->Result, Data->StorageGold, Data->Gold);
 }
 
-void ReceiveStorageExit( BYTE *ReceiveBuffer )
+void ReceiveStorageExit( const BYTE *ReceiveBuffer )
 {
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x82 [ReceiveStorageExit]");
 }
 
-void ReceiveStorageStatus( BYTE *ReceiveBuffer )
+void ReceiveStorageStatus( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = ( LPPHEADER_DEFAULT)ReceiveBuffer;
 	
 	g_pStorageInventory->ProcessToReceiveStorageStatus(Data->Value);
 }
 
-void ReceiveParty( BYTE *ReceiveBuffer )
+void ReceiveParty( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_KEY Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
 	PartyKey = ((int)(Data->KeyH )<<8) + Data->KeyL;
@@ -6492,7 +6364,7 @@ void ReceiveParty( BYTE *ReceiveBuffer )
 	SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPartyMsgBoxLayout));
 }
 
-void ReceivePartyResult( BYTE *ReceiveBuffer )
+void ReceivePartyResult( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	switch(Data->Value)
@@ -6509,7 +6381,7 @@ void ReceivePartyResult( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceivePartyList( BYTE *ReceiveBuffer )
+void ReceivePartyList( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_PARTY_LISTS Data = (LPPRECEIVE_PARTY_LISTS)ReceiveBuffer;
 	int Offset = sizeof(PRECEIVE_PARTY_LISTS);
@@ -6532,7 +6404,7 @@ void ReceivePartyList( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
 }
 
-void ReceivePartyInfo( BYTE *ReceiveBuffer )
+void ReceivePartyInfo( const BYTE *ReceiveBuffer )
 {
     LPPRECEIVE_PARTY_INFOS Data = (LPPRECEIVE_PARTY_INFOS)ReceiveBuffer;
     int Offset = sizeof( PRECEIVE_PARTY_INFOS);
@@ -6549,7 +6421,7 @@ void ReceivePartyInfo( BYTE *ReceiveBuffer )
     }
 }
 
-void ReceivePartyLeave( BYTE *ReceiveBuffer )
+void ReceivePartyLeave( const BYTE *ReceiveBuffer )
 {
 	PartyNumber = 0;
 	g_pChatListBox->AddText("", GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE);
@@ -6573,7 +6445,7 @@ void ReceivePartyLeave( BYTE *ReceiveBuffer )
     }
 }
 
-void ReceivePartyGetItem ( BYTE* ReceiveBuffer )
+void ReceivePartyGetItem (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_GETITEMINFO_FOR_PARTY Data = (LPPRECEIVE_GETITEMINFO_FOR_PARTY)ReceiveBuffer;
     int Key = ((int)(Data->KeyH )<<8) + Data->KeyL;
@@ -6602,7 +6474,7 @@ void ReceivePartyGetItem ( BYTE* ReceiveBuffer )
 
 extern int ErrorMessage;
 
-void ReceiveGuild( BYTE *ReceiveBuffer )
+void ReceiveGuild( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_KEY Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
 	GuildPlayerKey = ((int)(Data->KeyH )<<8) + Data->KeyL;
@@ -6613,7 +6485,7 @@ void ReceiveGuild( BYTE *ReceiveBuffer )
 	pMsgBox->AddMsg(GlobalText[429]);
 }
 
-void ReceiveGuildResult( BYTE *ReceiveBuffer )
+void ReceiveGuildResult( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	switch(Data->Value)
@@ -6632,7 +6504,7 @@ void ReceiveGuildResult( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveGuildList( BYTE *ReceiveBuffer )
+void ReceiveGuildList( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_GUILD_LISTS Data = (LPPRECEIVE_GUILD_LISTS)ReceiveBuffer;
 	int Offset = sizeof(PRECEIVE_GUILD_LISTS);
@@ -6658,7 +6530,7 @@ void ReceiveGuildList( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveGuildLeave( BYTE *ReceiveBuffer )
+void ReceiveGuildLeave( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	switch(Data->Value)
@@ -6697,16 +6569,16 @@ void ReceiveGuildLeave( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveCreateGuildInterface( BYTE *ReceiveBuffer )
+void ReceiveCreateGuildInterface( const BYTE *ReceiveBuffer )
 {
 	g_pNewUISystem->Show( SEASON3B::INTERFACE_NPCGUILDMASTER );
 }
 
-void ReceiveCreateGuildMasterInterface( BYTE *ReceiveBuffer )
+void ReceiveCreateGuildMasterInterface( const BYTE *ReceiveBuffer )
 {
 }
 
-void ReceiveDeleteGuildViewport( BYTE *ReceiveBuffer )
+void ReceiveDeleteGuildViewport( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_KEY Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
     int Key = ((int)(Data->KeyH&0x7f)<<8) + Data->KeyL;
@@ -6724,7 +6596,7 @@ void ReceiveDeleteGuildViewport( BYTE *ReceiveBuffer )
 	g_pNewUISystem->Hide(SEASON3B::INTERFACE_GUILDINFO);
 }
 
-void ReceiveCreateGuildResult( BYTE *ReceiveBuffer )
+void ReceiveCreateGuildResult( const BYTE *ReceiveBuffer )
 {
 	LPPMSG_GUILD_CREATE_RESULT Data = (LPPMSG_GUILD_CREATE_RESULT)ReceiveBuffer;
 	switch(Data->Value)
@@ -6759,7 +6631,7 @@ int  SoccerTime;
 char SoccerTeamName[2][8+1];
 bool SoccerObserver = false;
 
-void ReceiveDeclareWar( BYTE *ReceiveBuffer )
+void ReceiveDeclareWar( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_WAR Data = (LPPRECEIVE_WAR)ReceiveBuffer;
 	memset(GuildWarName,0,8);
@@ -6776,7 +6648,7 @@ void ReceiveDeclareWar( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveDeclareWarResult( BYTE *ReceiveBuffer )
+void ReceiveDeclareWarResult( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	switch(Data->Value)
@@ -6795,7 +6667,7 @@ void ReceiveDeclareWarResult( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveGuildBeginWar( BYTE *ReceiveBuffer )
+void ReceiveGuildBeginWar( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_WAR Data = (LPPRECEIVE_WAR)ReceiveBuffer;
 	EnableGuildWar = true;
@@ -6847,7 +6719,7 @@ void ReceiveGuildBeginWar( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x62 [ReceiveGuildBeginWar(%d)]", Data->Team);
 }
 
-void ReceiveGuildEndWar( BYTE *ReceiveBuffer )
+void ReceiveGuildEndWar( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	char Text[100];
@@ -6895,7 +6767,7 @@ void ReceiveGuildEndWar( BYTE *ReceiveBuffer )
 	g_pNewUISystem->Hide(SEASON3B::INTERFACE_BATTLE_SOCCER_SCORE);
 }
 
-void ReceiveGuildWarScore( BYTE *ReceiveBuffer )
+void ReceiveGuildWarScore( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_WAR_SCORE Data = (LPPRECEIVE_WAR_SCORE)ReceiveBuffer;
 	EnableGuildWar = true;
@@ -6914,7 +6786,7 @@ void ReceiveGuildWarScore( BYTE *ReceiveBuffer )
 	GuildWarScore[1] = Data->Score2;
 }
 
-void ReceiveGuildIDViewport( BYTE *ReceiveBuffer )
+void ReceiveGuildIDViewport( const BYTE *ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	int Offset = sizeof(PWHEADER_DEFAULT_WORD);
@@ -6961,14 +6833,14 @@ void ReceiveGuildIDViewport( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveGuildInfo( BYTE *ReceiveBuffer )
+void ReceiveGuildInfo( const BYTE *ReceiveBuffer )
 {
 	LPPPRECEIVE_GUILDINFO Data = (LPPPRECEIVE_GUILDINFO)ReceiveBuffer;
 	int Index = g_GuildCache.SetGuildMark( Data->GuildKey, Data->UnionName, Data->GuildName, Data->Mark );
 }
 
 // ±æµåÁ÷Ã¥À» ÀÓ¸í/º¯°æ/ÇØÁ¦ °á°ú
-void ReceiveGuildAssign( BYTE *ReceiveBuffer )
+void ReceiveGuildAssign( const BYTE *ReceiveBuffer )
 {
 	char szTemp[MAX_GLOBAL_TEXT_STRING] = "Invalid GuildAssign";
 	LPPRECEIVE_GUILD_ASSIGN pData = (LPPRECEIVE_GUILD_ASSIGN)ReceiveBuffer;
@@ -7014,14 +6886,14 @@ void ReceiveGuildAssign( BYTE *ReceiveBuffer )
 	g_pChatListBox->AddText("", szTemp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
-void ReceiveGuildRelationShip( BYTE *ReceiveBuffer )
+void ReceiveGuildRelationShip( const BYTE *ReceiveBuffer )
 {
 	LPPMSG_GUILD_RELATIONSHIP pData = (LPPMSG_GUILD_RELATIONSHIP)ReceiveBuffer;
 
 	g_pGuildInfoWindow->ReceiveGuildRelationShip( pData->byRelationShipType, pData->byRequestType, pData->byTargetUserIndexH, pData->byTargetUserIndexL );
 }
 
-void ReceiveGuildRelationShipResult( BYTE *ReceiveBuffer )
+void ReceiveGuildRelationShipResult( const BYTE *ReceiveBuffer )
 {
 	char szTemp[MAX_GLOBAL_TEXT_STRING] = "Invalid GuildRelationShipResult";
 	LPPMSG_GUILD_RELATIONSHIP_RESULT pData = (LPPMSG_GUILD_RELATIONSHIP_RESULT)ReceiveBuffer;
@@ -7118,7 +6990,7 @@ void ReceiveGuildRelationShipResult( BYTE *ReceiveBuffer )
 		GuildMark[Hero->GuildMarkIndex].UnionName[0] = NULL;
 }
 
-void ReceiveBanUnionGuildResult( BYTE *ReceiveBuffer )
+void ReceiveBanUnionGuildResult( const BYTE *ReceiveBuffer )
 {
 	LPPMSG_BAN_UNIONGUILD pData = (LPPMSG_BAN_UNIONGUILD)ReceiveBuffer;
 	if( pData->byResult == 0x01 )
@@ -7136,7 +7008,7 @@ void ReceiveBanUnionGuildResult( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveUnionViewportNotify( BYTE *ReceiveBuffer )
+void ReceiveUnionViewportNotify( const BYTE *ReceiveBuffer )
 {
 	LPPMSG_UNION_VIEWPORT_NOTIFY_COUNT pData = (LPPMSG_UNION_VIEWPORT_NOTIFY_COUNT)ReceiveBuffer;
 	int Offset = sizeof(PMSG_UNION_VIEWPORT_NOTIFY_COUNT);
@@ -7157,7 +7029,7 @@ void ReceiveUnionViewportNotify( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveUnionList( BYTE *ReceiveBuffer )
+void ReceiveUnionList( const BYTE *ReceiveBuffer )
 {
 	LPPMSG_UNIONLIST_COUNT pData = (LPPMSG_UNIONLIST_COUNT)ReceiveBuffer;
 	g_pGuildInfoWindow->UnionGuildClear();
@@ -7184,13 +7056,13 @@ void ReceiveUnionList( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveSoccerTime( BYTE *ReceiveBuffer )
+void ReceiveSoccerTime( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_SOCCER_TIME Data = (LPPRECEIVE_SOCCER_TIME)ReceiveBuffer;
 	SoccerTime = Data->Time;
 }
 
-void ReceiveSoccerScore( BYTE *ReceiveBuffer )
+void ReceiveSoccerScore( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_SOCCER_SCORE Data = (LPPRECEIVE_SOCCER_SCORE)ReceiveBuffer;
 	memcpy(SoccerTeamName[0],Data->Name1,8);
@@ -7220,7 +7092,7 @@ void ReceiveSoccerScore( BYTE *ReceiveBuffer )
 	CreateEffect(BITMAP_FIRECRACKERRISE,Position,Angle,Light);
 }
 
-void ReceiveSoccerGoal( BYTE *ReceiveBuffer )
+void ReceiveSoccerGoal( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	char Text[100];
@@ -7231,7 +7103,7 @@ void ReceiveSoccerGoal( BYTE *ReceiveBuffer )
 	g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
-void Receive_Master_LevelUp( BYTE *ReceiveBuffer )
+void Receive_Master_LevelUp( const BYTE *ReceiveBuffer )
 {
 	LPPMSG_MASTERLEVEL_UP Data = (LPPMSG_MASTERLEVEL_UP)ReceiveBuffer;
 	Master_Level_Data.nMLevel			= Data->nMLevel;
@@ -7265,7 +7137,7 @@ void Receive_Master_LevelUp( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x51 [Receive_Master_LevelUp]");
 }
 
-void Receive_Master_Level_Exp( BYTE *ReceiveBuffer )
+void Receive_Master_Level_Exp( const BYTE *ReceiveBuffer )
 {
 	LPPMSG_MASTERLEVEL_INFO Data = (LPPMSG_MASTERLEVEL_INFO)ReceiveBuffer;
 	Master_Level_Data.nMLevel = Data->nMLevel;
@@ -7311,7 +7183,7 @@ void Receive_Master_Level_Exp( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x50 [Receive_Master_Level_Exp]");
 }
 
-void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
+void Receive_Master_LevelGetSkill( const BYTE *ReceiveBuffer )
 {
 	LPPMSG_ANS_MASTERLEVEL_SKILL Data = (LPPMSG_ANS_MASTERLEVEL_SKILL)ReceiveBuffer;
 	
@@ -7447,7 +7319,7 @@ void Receive_Master_LevelGetSkill( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x52 [Receive_Master_LevelGetSkill]");
 }
 
-void ReceiveServerCommand( BYTE *ReceiveBuffer )
+void ReceiveServerCommand( const BYTE *ReceiveBuffer )
 {
 	LPPRECEIVE_SERVER_COMMAND Data = (LPPRECEIVE_SERVER_COMMAND)ReceiveBuffer;
 	switch( Data->Cmd1)
@@ -7632,7 +7504,7 @@ void ReceiveServerCommand( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveMix( BYTE *ReceiveBuffer )
+void ReceiveMix( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT_ITEM Data = (LPPHEADER_DEFAULT_ITEM)ReceiveBuffer;
 	
@@ -7784,12 +7656,12 @@ void ReceiveMix( BYTE *ReceiveBuffer )
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x86 [ReceiveMix(%d)]", Data->Index);
 }
 
-void ReceiveMixExit( BYTE *ReceiveBuffer )
+void ReceiveMixExit( const BYTE *ReceiveBuffer )
 {
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x87 [ReceiveMixExit]");
 }
 
-void ReceiveGemMixResult(BYTE* ReceiveBuffer)
+void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_JEWEL_MIX Data = (LPPMSG_ANS_JEWEL_MIX)ReceiveBuffer;
 	char sBuf[256];
@@ -7825,7 +7697,7 @@ void ReceiveGemMixResult(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveGemUnMixResult(BYTE* ReceiveBuffer)
+void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_JEWEL_UNMIX Data = (LPPMSG_ANS_JEWEL_UNMIX)ReceiveBuffer;
 	char sBuf[256];
@@ -7870,7 +7742,7 @@ void ReceiveGemUnMixResult(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveMoveToDevilSquareResult( BYTE *ReceiveBuffer )
+void ReceiveMoveToDevilSquareResult( const BYTE *ReceiveBuffer )
 {
 	g_pNewUISystem->Hide( SEASON3B::INTERFACE_DEVILSQUARE );
 	
@@ -7909,7 +7781,7 @@ void ReceiveMoveToDevilSquareResult( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveDevilSquareOpenTime( BYTE *ReceiveBuffer )
+void ReceiveDevilSquareOpenTime( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = ( LPPHEADER_DEFAULT)ReceiveBuffer;
 	if ( 0 == Data->Value)
@@ -7924,7 +7796,7 @@ void ReceiveDevilSquareOpenTime( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveDevilSquareCountDown( BYTE *ReceiveBuffer )
+void ReceiveDevilSquareCountDown( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_DEFAULT Data = ( LPPHEADER_DEFAULT)ReceiveBuffer;
 	
@@ -7950,13 +7822,13 @@ void ReceiveDevilSquareCountDown( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveDevilSquareRank( BYTE *ReceiveBuffer )
+void ReceiveDevilSquareRank( const BYTE *ReceiveBuffer )
 {
 	LPPDEVILRANK Data = ( LPPDEVILRANK)ReceiveBuffer;
     matchEvent::SetMatchResult ( Data->m_Count, Data->m_MyRank, ( MatchResult*)&Data->m_byRank, Data->m_MyRank );
 }
 
-void ReceiveMoveToEventMatchResult( BYTE *ReceiveBuffer )
+void ReceiveMoveToEventMatchResult( const BYTE *ReceiveBuffer )
 {
 	g_pNewUISystem->HideAll();
 	
@@ -8025,7 +7897,7 @@ void ReceiveMoveToEventMatchResult( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveEventZoneOpenTime( BYTE *ReceiveBuffer )
+void ReceiveEventZoneOpenTime( const BYTE *ReceiveBuffer )
 {
 	LPPHEADER_MATCH_OPEN_VALUE Data = (LPPHEADER_MATCH_OPEN_VALUE)ReceiveBuffer;
 	if (Data->Value == 1)
@@ -8117,7 +7989,7 @@ void ReceiveEventZoneOpenTime( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveMoveToEventMatchResult2( BYTE *ReceiveBuffer )
+void ReceiveMoveToEventMatchResult2( const BYTE *ReceiveBuffer )
 {
 	g_pNewUISystem->HideAll();
 	
@@ -8176,7 +8048,7 @@ void ReceiveMoveToEventMatchResult2( BYTE *ReceiveBuffer )
 	}
 }
 
-void ReceiveSetAttribute ( BYTE* ReceiveBuffer )
+void ReceiveSetAttribute (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_SET_MAPATTRIBUTE Data = (LPPRECEIVE_SET_MAPATTRIBUTE)ReceiveBuffer;
 
@@ -8221,14 +8093,14 @@ void ReceiveSetAttribute ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveMatchGameCommand ( BYTE* ReceiveBuffer )
+void ReceiveMatchGameCommand (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_MATCH_GAME_STATE Data = (LPPRECEIVE_MATCH_GAME_STATE)ReceiveBuffer;
 	
     matchEvent::SetMatchGameCommand ( Data );
 }
 
-void ReceiveDuelRequest(BYTE* ReceiveBuffer)
+void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
 {
 	if(g_MessageBox->IsEmpty() == false)
 	{
@@ -8249,7 +8121,7 @@ void ReceiveDuelRequest(BYTE* ReceiveBuffer)
 	PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }
 
-void ReceiveDuelStart(BYTE* ReceiveBuffer)
+void ReceiveDuelStart(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_INVITE Data = (LPPMSG_ANS_DUEL_INVITE)ReceiveBuffer;
 	char szMessage[256];
@@ -8288,7 +8160,7 @@ void ReceiveDuelStart(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveDuelEnd(BYTE* ReceiveBuffer)
+void ReceiveDuelEnd(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_EXIT Data = (LPPMSG_ANS_DUEL_EXIT)ReceiveBuffer;
 
@@ -8309,7 +8181,7 @@ void ReceiveDuelEnd(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveDuelScore(BYTE* ReceiveBuffer)
+void ReceiveDuelScore(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_SCORE_BROADCAST Data = (LPPMSG_DUEL_SCORE_BROADCAST)ReceiveBuffer;
 
@@ -8325,7 +8197,7 @@ void ReceiveDuelScore(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveDuelHP(BYTE* ReceiveBuffer)
+void ReceiveDuelHP(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_HP_BROADCAST Data = (LPPMSG_DUEL_HP_BROADCAST)ReceiveBuffer;
 
@@ -8345,7 +8217,7 @@ void ReceiveDuelHP(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveDuelChannelList(BYTE* ReceiveBuffer)
+void ReceiveDuelChannelList(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_CHANNELLIST Data = (LPPMSG_ANS_DUEL_CHANNELLIST)ReceiveBuffer;
 	for (int i = 0; i < 4; ++i)
@@ -8354,7 +8226,7 @@ void ReceiveDuelChannelList(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveDuelWatchRequestReply(BYTE* ReceiveBuffer)
+void ReceiveDuelWatchRequestReply(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_JOINCNANNEL Data = (LPPMSG_ANS_DUEL_JOINCNANNEL)ReceiveBuffer;
 	if (Data->nResult == 0)
@@ -8378,13 +8250,13 @@ void ReceiveDuelWatchRequestReply(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveDuelWatcherJoin(BYTE* ReceiveBuffer)
+void ReceiveDuelWatcherJoin(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_JOINCNANNEL_BROADCAST Data = (LPPMSG_DUEL_JOINCNANNEL_BROADCAST)ReceiveBuffer;
 	g_DuelMgr.AddDuelWatchUser(Data->szID);
 }
 
-void ReceiveDuelWatchEnd(BYTE* ReceiveBuffer)
+void ReceiveDuelWatchEnd(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_DUEL_LEAVECNANNEL Data = (LPPMSG_ANS_DUEL_LEAVECNANNEL)ReceiveBuffer;
 	if (Data->nResult == 0)
@@ -8396,13 +8268,13 @@ void ReceiveDuelWatchEnd(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveDuelWatcherQuit(BYTE* ReceiveBuffer)
+void ReceiveDuelWatcherQuit(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_LEAVECNANNEL_BROADCAST Data = (LPPMSG_DUEL_LEAVECNANNEL_BROADCAST)ReceiveBuffer;
 	g_DuelMgr.RemoveDuelWatchUser(Data->szID);
 }
 
-void ReceiveDuelWatcherList(BYTE* ReceiveBuffer)
+void ReceiveDuelWatcherList(const BYTE* ReceiveBuffer)
 {
 	g_DuelMgr.RemoveAllDuelWatchUser();
 	
@@ -8413,7 +8285,7 @@ void ReceiveDuelWatcherList(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveDuelResult(BYTE* ReceiveBuffer)
+void ReceiveDuelResult(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_RESULT_BROADCAST Data = (LPPMSG_DUEL_RESULT_BROADCAST)ReceiveBuffer;
 
@@ -8430,7 +8302,7 @@ void ReceiveDuelResult(BYTE* ReceiveBuffer)
 	PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }
 
-void ReceiveDuelRound(BYTE* ReceiveBuffer)
+void ReceiveDuelRound(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DUEL_ROUNDSTART_BROADCAST Data = (LPPMSG_DUEL_ROUNDSTART_BROADCAST)ReceiveBuffer;
 
@@ -8447,7 +8319,7 @@ void ReceiveDuelRound(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveCreateShopTitleViewport(BYTE* ReceiveBuffer)
+void ReceiveCreateShopTitleViewport(const BYTE* ReceiveBuffer)
 {
 	LPPSHOPTITLE_HEADERINFO Header = (LPPSHOPTITLE_HEADERINFO)ReceiveBuffer;
 	
@@ -8466,7 +8338,7 @@ void ReceiveCreateShopTitleViewport(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveShopTitleChange(BYTE* ReceiveBuffer)
+void ReceiveShopTitleChange(const BYTE* ReceiveBuffer)
 {
 	LPPSHOPTITLE_CHANGEINFO Header = (LPPSHOPTITLE_CHANGEINFO)ReceiveBuffer;
 	
@@ -8483,7 +8355,7 @@ void ReceiveShopTitleChange(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveSetPriceResult(BYTE* ReceiveBuffer)
+void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
 {
 	LPPSHOPSETPRICE_RESULTINFO Header = (LPPSHOPSETPRICE_RESULTINFO)ReceiveBuffer;
 	
@@ -8502,7 +8374,7 @@ void ReceiveSetPriceResult(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveCreatePersonalShop(BYTE* ReceiveBuffer)
+void ReceiveCreatePersonalShop(const BYTE* ReceiveBuffer)
 {
 	LPCREATEPSHOP_RESULSTINFO Header = (LPCREATEPSHOP_RESULSTINFO)ReceiveBuffer;
 	if(Header->byResult == 0x01) 
@@ -8518,7 +8390,7 @@ void ReceiveCreatePersonalShop(BYTE* ReceiveBuffer)
 		g_ErrorReport.Write("@ [Fault] ReceiveCreatePersonalShop (result : %d)\n", Header->byResult);
 	}
 }
-void ReceiveDestroyPersonalShop(BYTE* ReceiveBuffer)
+void ReceiveDestroyPersonalShop(const BYTE* ReceiveBuffer)
 {
 	LPDESTROYPSHOP_RESULTINFO Header = (LPDESTROYPSHOP_RESULTINFO)ReceiveBuffer;
 	if(Header->byResult == 0x01) 
@@ -8541,7 +8413,7 @@ void ReceiveDestroyPersonalShop(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
+void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
 {
 	LPGETPSHOPITEMLIST_HEADERINFO Header = (LPGETPSHOPITEMLIST_HEADERINFO)ReceiveBuffer;
 	if(Header->byResult == 0x01) 
@@ -8615,7 +8487,7 @@ void ReceivePersonalShopItemList(BYTE* ReceiveBuffer)
 	g_ConsoleDebug->Write(MCD_RECEIVE, "0x05 [ReceivePersonalShopItemList]");
 }
 
-void ReceiveRefreshItemList(BYTE* ReceiveBuffer)
+void ReceiveRefreshItemList(const BYTE* ReceiveBuffer)
 {
 	LPGETPSHOPITEMLIST_HEADERINFO Header = (LPGETPSHOPITEMLIST_HEADERINFO)ReceiveBuffer;
 	
@@ -8648,7 +8520,7 @@ void ReceiveRefreshItemList(BYTE* ReceiveBuffer)
 }
 
 
-void ReceivePurchaseItem(BYTE* ReceiveBuffer)
+void ReceivePurchaseItem(const BYTE* ReceiveBuffer)
 {
 	LPPURCHASEITEM_RESULTINFO Header = (LPPURCHASEITEM_RESULTINFO)ReceiveBuffer;
 	
@@ -8698,7 +8570,7 @@ void ReceivePurchaseItem(BYTE* ReceiveBuffer)
 	}
 }
 
-void NotifySoldItem(BYTE* ReceiveBuffer)
+void NotifySoldItem(const BYTE* ReceiveBuffer)
 {
 	LPSOLDITEM_RESULTINFO Header = (LPSOLDITEM_RESULTINFO)ReceiveBuffer;
 	char szId[MAX_ID_SIZE+2]= {0,};
@@ -8710,7 +8582,7 @@ void NotifySoldItem(BYTE* ReceiveBuffer)
 	g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
-void NotifyClosePersonalShop(BYTE* ReceiveBuffer)
+void NotifyClosePersonalShop(const BYTE* ReceiveBuffer)
 {
 	if( g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE )
 	{
@@ -8721,7 +8593,7 @@ void NotifyClosePersonalShop(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveDisplayEffectViewport(BYTE* ReceiveBuffer)
+void ReceiveDisplayEffectViewport(const BYTE* ReceiveBuffer)
 {
 	LPDISPLAYEREFFECT_NOTIFYINFO Header = (LPDISPLAYEREFFECT_NOTIFYINFO)ReceiveBuffer;
 	
@@ -8786,7 +8658,7 @@ void ReceiveDisplayEffectViewport(BYTE* ReceiveBuffer)
 
 int g_iMaxLetterCount = 0;
 
-void ReceiveFriendList(BYTE* ReceiveBuffer)
+void ReceiveFriendList(const BYTE* ReceiveBuffer)
 {
 	g_pWindowMgr->Reset();
 	LPFS_FRIEND_LIST_HEADER Header = (LPFS_FRIEND_LIST_HEADER)ReceiveBuffer;
@@ -8818,7 +8690,7 @@ void ReceiveFriendList(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveAddFriendResult(BYTE* ReceiveBuffer)
+void ReceiveAddFriendResult(const BYTE* ReceiveBuffer)
 {
 	LPFS_FRIEND_RESULT Data = (LPFS_FRIEND_RESULT)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -8863,7 +8735,7 @@ void ReceiveAddFriendResult(BYTE* ReceiveBuffer)
 	};
 }
 
-void ReceiveRequestAcceptAddFriend(BYTE* ReceiveBuffer)
+void ReceiveRequestAcceptAddFriend(const BYTE* ReceiveBuffer)
 {
 	LPFS_ACCEPT_ADD_FRIEND_RESULT Data = (LPFS_ACCEPT_ADD_FRIEND_RESULT)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -8887,7 +8759,7 @@ void ReceiveRequestAcceptAddFriend(BYTE* ReceiveBuffer)
 	PlayBuffer(SOUND_FRIEND_LOGIN_ALERT);
 }
 
-void ReceiveDeleteFriendResult(BYTE* ReceiveBuffer)
+void ReceiveDeleteFriendResult(const BYTE* ReceiveBuffer)
 {
 	LPFS_FRIEND_RESULT Data = (LPFS_FRIEND_RESULT)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -8907,7 +8779,7 @@ void ReceiveDeleteFriendResult(BYTE* ReceiveBuffer)
 	};
 }
 
-void ReceiveFriendStateChange(BYTE* ReceiveBuffer)
+void ReceiveFriendStateChange(const BYTE* ReceiveBuffer)
 {
 	LPFS_FRIEND_STATE_CHANGE Data = (LPFS_FRIEND_STATE_CHANGE)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -8943,7 +8815,7 @@ void ReceiveFriendStateChange(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveLetterSendResult(BYTE* ReceiveBuffer)
+void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
 {
 	LPFS_SEND_LETTER_RESULT Data = (LPFS_SEND_LETTER_RESULT)ReceiveBuffer;
 	switch(Data->Result)
@@ -8992,7 +8864,7 @@ void ReceiveLetterSendResult(BYTE* ReceiveBuffer)
 	};
 }
 
-void ReceiveLetter(BYTE* ReceiveBuffer)
+void ReceiveLetter(const BYTE* ReceiveBuffer)
 {
 	//g_pLetterList->ClearLetterList();
 	
@@ -9039,7 +8911,7 @@ void ReceiveLetter(BYTE* ReceiveBuffer)
 
 extern int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
-void ReceiveLetterText(BYTE* ReceiveBuffer)
+void ReceiveLetterText(const BYTE* ReceiveBuffer)
 {
 	LPFS_LETTER_TEXT Data = (LPFS_LETTER_TEXT)ReceiveBuffer;
 	Data->Memo[Data->MemoSize] = '\0';
@@ -9088,7 +8960,7 @@ void ReceiveLetterText(BYTE* ReceiveBuffer)
 	pWindow->SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
 }
 
-void ReceiveLetterDeleteResult(BYTE* ReceiveBuffer)
+void ReceiveLetterDeleteResult(const BYTE* ReceiveBuffer)
 {
 	LPFS_LETTER_RESULT Data = (LPFS_LETTER_RESULT)ReceiveBuffer;
 	switch(Data->Result)
@@ -9107,7 +8979,7 @@ void ReceiveLetterDeleteResult(BYTE* ReceiveBuffer)
 	g_pWindowMgr->RefreshMainWndLetterList();
 }
 
-void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)
+void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
 {
 	LPFS_CHAT_CREATE_RESULT Data = (LPFS_CHAT_CREATE_RESULT)ReceiveBuffer;
 	char szName[MAX_ID_SIZE + 1] = {0};
@@ -9135,7 +9007,7 @@ void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)
 			if (dwUIID == 0)
 			{
 				dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);
-				((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char *)szIP, Data->RoomNumber, Data->Ticket);
+				((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char*)szIP, Data->RoomNumber, Data->Ticket);
 				g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
 				g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
 				if (g_pWindowMgr->GetFriendMainWindow() != NULL)
@@ -9172,7 +9044,7 @@ void ReceiveCreateChatRoomResult(BYTE* ReceiveBuffer)
 	};
 }
 
-void ReceiveChatRoomInviteResult(BYTE* ReceiveBuffer)
+void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
 {
 	LPFS_CHAT_INVITE_RESULT Data = (LPFS_CHAT_INVITE_RESULT)ReceiveBuffer;
 	CUIChatWindow * pChatWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(Data->WindowGuid);
@@ -9205,114 +9077,8 @@ void ReceiveChatRoomInviteResult(BYTE* ReceiveBuffer)
 	};
 }
 
-void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
-{
-	LPFS_CHAT_JOIN_RESULT Data = (LPFS_CHAT_JOIN_RESULT)ReceiveBuffer;
-	switch(Data->Result)
-	{
-	case 0x00:
-		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1058]);
-		break;
-	case 0x01:
-		break;
-	default:
-		break;
-	};
-}
 
-void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
-{
-	LPFS_CHAT_CHANGE_STATE Data = (LPFS_CHAT_CHANGE_STATE)ReceiveBuffer;
-	CUIChatWindow * pChatWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(dwWindowUIID);
-	if (pChatWindow == NULL) return;
-	char szName[MAX_ID_SIZE + 1] = {0};
-	strncpy(szName, (const char *)Data->Name, MAX_ID_SIZE);
-	szName[MAX_ID_SIZE] = '\0';
-	char szText[MAX_TEXT_LENGTH + 1] = {0};
-	strncpy(szText, (const char *)Data->Name, MAX_ID_SIZE);
-	szText[MAX_ID_SIZE] = '\0';
-	switch(Data->Type)
-	{
-	case 0x00:
-		if (pChatWindow->AddChatPal(szName, Data->Index, 0) >= 3)
-		{
-			strcat(szText, GlobalText[1059]);
-			pChatWindow->AddChatText(255, szText, 1, 0);
-		}
-		break;
-	case 0x01:
-		if (pChatWindow->GetUserCount() >= 3)
-		{
-			strcat(szText, GlobalText[1060]);
-			pChatWindow->AddChatText(255, szText, 1, 0);
-		}
-		pChatWindow->RemoveChatPal(szName);
-		break;
-	default:
-		return;
-		break;
-	};
-	if (pChatWindow->GetShowType() == 2)
-		pChatWindow->UpdateInvitePalList();
-}
-
-void ReceiveChatRoomUserList(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
-{
-	LPFS_CHAT_USERLIST_HEADER Header = (LPFS_CHAT_USERLIST_HEADER)ReceiveBuffer;
-	int iMoveOffset = sizeof(FS_CHAT_USERLIST_HEADER);
-	char szName[MAX_ID_SIZE + 1] = {0};
-	for (int i = 0; i < Header->Count; ++i)
-	{
-		LPFS_CHAT_USERLIST_DATA Data = (LPFS_CHAT_USERLIST_DATA)(ReceiveBuffer+iMoveOffset);
-		strncpy(szName, (const char *)Data->Name, MAX_ID_SIZE);
-		szName[MAX_ID_SIZE] = '\0';
-		((CUIChatWindow *)g_pWindowMgr->GetWindow(dwWindowUIID))->AddChatPal(szName, Data->Index, 0);
-		iMoveOffset += sizeof(FS_CHAT_USERLIST_DATA);
-	}
-}
-
-void ReceiveChatRoomChatText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
-{
-	LPFS_CHAT_TEXT Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
-	CUIChatWindow * pChatWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(dwWindowUIID);
-	if (pChatWindow == NULL) return;
-	
-	char ChatMsg[MAX_CHATROOM_TEXT_LENGTH] = {'\0'};
-	if (Data->MsgSize >= MAX_CHATROOM_TEXT_LENGTH) return;
-
-	memcpy(ChatMsg, Data->Msg, Data->MsgSize);
-	BuxConvert((LPBYTE)ChatMsg, Data->MsgSize);
-	
-	if (pChatWindow->GetState() == UISTATE_READY)
-	{
-		g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
-		g_pChatListBox->AddText("", GlobalText[1063], SEASON3B::TYPE_SYSTEM_MESSAGE);
-		pChatWindow->SetState(UISTATE_HIDE);
-		if (g_pWindowMgr->GetFriendMainWindow() != NULL)
-		{
-			g_pWindowMgr->GetFriendMainWindow()->AddWindow(dwWindowUIID, g_pWindowMgr->GetWindow(dwWindowUIID)->GetTitle());
-		}
-	}
-	else if (pChatWindow->GetState() == UISTATE_HIDE || g_pWindowMgr->GetTopWindowUIID() != dwWindowUIID)
-	{
-		g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
-	}
-	pChatWindow->AddChatText(Data->Index, (char *)ChatMsg, 3, 0);
-}
-
-void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
-{
-	LPFS_CHAT_TEXT Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
-	Data->Msg[99] = '\0';
-	if (Data->Msg[0] == '\0')
-	{
-		return;
-	}
-	
-	g_pChatListBox->AddText("", (char *)Data->Msg, SEASON3B::TYPE_SYSTEM_MESSAGE);
-}
-
-void ReceiveOption(BYTE* ReceiveBuffer)
+void ReceiveOption(const BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_OPTION Data = (LPPRECEIVE_OPTION)ReceiveBuffer;
 	
@@ -9380,7 +9146,7 @@ void ReceiveOption(BYTE* ReceiveBuffer)
 	g_pMainFrame->SetItemHotKey(SEASON3B::HOTKEY_R, Data->KeyR+ITEM_POTION, byRLevel);
 }
 
-void ReceiveEventChipInfomation( BYTE* ReceiveBuffer )
+void ReceiveEventChipInfomation(const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_EVENT_CHIP_INFO Data = (LPPRECEIVE_EVENT_CHIP_INFO)ReceiveBuffer;
 	
@@ -9424,14 +9190,14 @@ void ReceiveEventChipInfomation( BYTE* ReceiveBuffer )
 
 }
 
-void ReceiveEventChip( BYTE* ReceiveBuffer)
+void ReceiveEventChip(const BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_EVENT_CHIP Data = (LPPRECEIVE_EVENT_CHIP)ReceiveBuffer;
 	if( Data->m_unChipCount != 0xFFFFFFFF )
         g_shEventChipCount = Data->m_unChipCount;
 }
 
-void ReceiveBuffState( BYTE* ReceiveBuffer )
+void ReceiveBuffState(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ITEMEFFECTCANCEL Data = (LPPMSG_ITEMEFFECTCANCEL)ReceiveBuffer;
 	
@@ -9454,7 +9220,7 @@ void ReceiveBuffState( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveMutoNumber( BYTE* ReceiveBuffer)
+void ReceiveMutoNumber(const BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_MUTONUMBER Data = (LPPRECEIVE_MUTONUMBER)ReceiveBuffer;
 	
@@ -9465,7 +9231,7 @@ void ReceiveMutoNumber( BYTE* ReceiveBuffer)
 }
 
 
-void ReceiveServerImmigration( BYTE *ReceiveBuffer)
+void ReceiveServerImmigration( const BYTE *ReceiveBuffer)
 {
 	LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 	
@@ -9480,7 +9246,7 @@ void ReceiveServerImmigration( BYTE *ReceiveBuffer)
 	}
 }
 
-void ReceiveScratchResult ( BYTE* ReceiveBuffer )
+void ReceiveScratchResult (const BYTE* ReceiveBuffer )
 {
 	LPPRECEIVE_SCRATCH_TICKET_EVENT Data = (LPPRECEIVE_SCRATCH_TICKET_EVENT)ReceiveBuffer;
 	
@@ -9502,7 +9268,7 @@ void ReceiveScratchResult ( BYTE* ReceiveBuffer )
 	memcpy ( g_strGiftName, Data->m_strGiftName, sizeof( char )*64 );
 }
 
-void ReceivePlaySoundEffect(BYTE* ReceiveBuffer)
+void ReceivePlaySoundEffect(const BYTE* ReceiveBuffer)
 {
 	LPPRECEIVE_PLAY_SOUND_EFFECT Data = (LPPRECEIVE_PLAY_SOUND_EFFECT)ReceiveBuffer;
 	
@@ -9522,21 +9288,21 @@ void ReceivePlaySoundEffect(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveEventCount ( BYTE* ReceiveBuffer )
+void ReceiveEventCount (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_EVENT_COUNT Data = (LPPRECEIVE_EVENT_COUNT)ReceiveBuffer;
 	
     g_csQuest.SetEventCount ( Data->m_wEventType, Data->m_wLeftEnterCount );
 }
 
-void ReceiveQuestHistory ( BYTE* ReceiveBuffer )
+void ReceiveQuestHistory (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_QUEST_HISTORY Data = (LPPRECEIVE_QUEST_HISTORY)ReceiveBuffer;
 	
     g_csQuest.setQuestLists ( Data->m_byQuest, Data->m_byCount, Hero->Class );
 }
 
-void ReceiveQuestState ( BYTE* ReceiveBuffer )
+void ReceiveQuestState (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_QUEST_STATE Data = (LPPRECEIVE_QUEST_STATE)ReceiveBuffer;
 	
@@ -9545,7 +9311,7 @@ void ReceiveQuestState ( BYTE* ReceiveBuffer )
 	g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCQUEST);
 }
 
-void ReceiveQuestResult ( BYTE* ReceiveBuffer )
+void ReceiveQuestResult (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_QUEST_RESULT Data = (LPPRECEIVE_QUEST_RESULT)ReceiveBuffer;
 	
@@ -9557,7 +9323,7 @@ void ReceiveQuestResult ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
+void ReceiveQuestPrize (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_QUEST_REPARATION Data = (LPPRECEIVE_QUEST_REPARATION)ReceiveBuffer;
 	
@@ -9701,7 +9467,7 @@ void ReceiveQuestPrize ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveQuestMonKillInfo(BYTE* ReceiveBuffer)
+void ReceiveQuestMonKillInfo(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUEST_MONKILL_INFO pData = (LPPMSG_ANS_QUEST_MONKILL_INFO)ReceiveBuffer;
 	
@@ -9710,7 +9476,7 @@ void ReceiveQuestMonKillInfo(BYTE* ReceiveBuffer)
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
 
-void ReceiveQuestLimitResult(BYTE* ReceiveBuffer)
+void ReceiveQuestLimitResult(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_RESULT pData = (LPPMSG_ANS_QUESTEXP_RESULT)ReceiveBuffer;
 
@@ -9725,21 +9491,21 @@ void ReceiveQuestLimitResult(BYTE* ReceiveBuffer)
 }
 
 
-void ReceiveQuestByItemUseEP(BYTE* ReceiveBuffer)
+void ReceiveQuestByItemUseEP(const BYTE* ReceiveBuffer)
 {
 	DWORD* pdwQuestIndex = (DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST));
 	SendQuestSelection(*pdwQuestIndex, 0);
 }
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
-void ReceiveQuestByEtcEPList(BYTE* ReceiveBuffer)
+void ReceiveQuestByEtcEPList(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPCTALK_QUESTLIST pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
 	g_QuestMng.SetQuestIndexByEtcList((DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)),
 		pData->m_wQuestCount);
 }
 
-void ReceiveQuestByNPCEPList(BYTE* ReceiveBuffer)
+void ReceiveQuestByNPCEPList(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPCTALK_QUESTLIST pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE))
@@ -9747,14 +9513,14 @@ void ReceiveQuestByNPCEPList(BYTE* ReceiveBuffer)
 			(DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)), pData->m_wQuestCount);
 }
 
-void ReceiveQuestQSSelSentence(BYTE* ReceiveBuffer)
+void ReceiveQuestQSSelSentence(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPC_QUESTEXP_INFO pData = (LPPMSG_NPC_QUESTEXP_INFO)ReceiveBuffer;
 
 	g_QuestMng.SetCurQuestProgress(pData->m_dwQuestIndex);
 }
 
-void ReceiveQuestQSRequestReward(BYTE* ReceiveBuffer)
+void ReceiveQuestQSRequestReward(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPC_QUESTEXP_INFO pData = (LPPMSG_NPC_QUESTEXP_INFO)ReceiveBuffer;
 	g_QuestMng.SetQuestRequestReward(ReceiveBuffer);
@@ -9762,7 +9528,7 @@ void ReceiveQuestQSRequestReward(BYTE* ReceiveBuffer)
 	g_QuestMng.SetEPRequestRewardState(pData->m_dwQuestIndex, true);
 }
 
-void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
+void ReceiveQuestCompleteResult(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_COMPLETE pData = (LPPMSG_ANS_QUESTEXP_COMPLETE)ReceiveBuffer;
 
@@ -9799,27 +9565,27 @@ void ReceiveQuestCompleteResult(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveQuestGiveUp(BYTE* ReceiveBuffer)
+void ReceiveQuestGiveUp(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_GIVEUP pData = (LPPMSG_ANS_QUESTEXP_GIVEUP)ReceiveBuffer;
 	g_QuestMng.RemoveCurQuestIndexList(pData->m_dwQuestGiveUpIndex);
 }
 
-void ReceiveProgressQuestList(BYTE* ReceiveBuffer)
+void ReceiveProgressQuestList(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_QUESTEXP_PROGRESS_LIST pData = (LPPMSG_ANS_QUESTEXP_PROGRESS_LIST)ReceiveBuffer;
 	g_QuestMng.SetCurQuestIndexList((DWORD*)(ReceiveBuffer + sizeof(PMSG_ANS_QUESTEXP_PROGRESS_LIST)),
 		int(pData->m_byQuestCount));
 }
 
-void ReceiveProgressQuestRequestReward(BYTE* ReceiveBuffer)
+void ReceiveProgressQuestRequestReward(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_NPC_QUESTEXP_INFO pData = (LPPMSG_NPC_QUESTEXP_INFO)ReceiveBuffer;
 	g_QuestMng.SetQuestRequestReward(ReceiveBuffer);
 	g_pMyQuestInfoWindow->SetSelQuestRequestReward();
 }
 
-void ReceiveProgressQuestListReady(BYTE* ReceiveBuffer)
+void ReceiveProgressQuestListReady(const BYTE* ReceiveBuffer)
 {
 	g_QuestMng.SetQuestIndexByEtcList(NULL, 0);
 	SendRequestProgressQuestList();
@@ -9827,21 +9593,21 @@ void ReceiveProgressQuestListReady(BYTE* ReceiveBuffer)
 }
 
 
-void ReceiveGensJoining(BYTE* ReceiveBuffer)
+void ReceiveGensJoining(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_REG_GENS_MEMBER pData = (LPPMSG_ANS_REG_GENS_MEMBER)ReceiveBuffer;
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE))
 		g_pNPCDialogue->ProcessGensJoiningReceive(pData->m_byResult, pData->m_byInfluence);
 }
 
-void ReceiveGensSecession(BYTE* ReceiveBuffer)
+void ReceiveGensSecession(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_SECEDE_GENS_MEMBER pData = (LPPMSG_ANS_SECEDE_GENS_MEMBER)ReceiveBuffer;
 	if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE))
 		g_pNPCDialogue->ProcessGensSecessionReceive(pData->m_byResult);
 }
 
-void ReceivePlayerGensInfluence(BYTE* ReceiveBuffer)
+void ReceivePlayerGensInfluence(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_MSG_SEND_GENS_INFO pData = (LPPMSG_MSG_SEND_GENS_INFO)ReceiveBuffer;
 	Hero->m_byGensInfluence = pData->m_byInfluence;
@@ -9851,7 +9617,7 @@ void ReceivePlayerGensInfluence(BYTE* ReceiveBuffer)
 	g_pNewUIGensRanking->SetNextContribution(pData->m_nNextContributionPoint);
 }
 
-void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
+void ReceiveOtherPlayerGensInfluenceViewport(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_SEND_GENS_MEMBER_VIEWPORT Data = (LPPMSG_SEND_GENS_MEMBER_VIEWPORT)ReceiveBuffer;
 	int nOffset = sizeof(PMSG_SEND_GENS_MEMBER_VIEWPORT);
@@ -9878,7 +9644,7 @@ void ReceiveOtherPlayerGensInfluenceViewport(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveNPCDlgUIStart(BYTE* ReceiveBuffer)
+void ReceiveNPCDlgUIStart(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_NPC_CLICK pData = (LPPMSG_ANS_NPC_CLICK)ReceiveBuffer;
 	if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE))
@@ -9890,7 +9656,7 @@ void ReceiveNPCDlgUIStart(BYTE* ReceiveBuffer)
 }
 
 #ifdef PBG_ADD_GENSRANKING
-void ReceiveReward(BYTE* ReceiveBuffer)
+void ReceiveReward(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_GENS_REWARD_CODE pData = (LPPMSG_GENS_REWARD_CODE)ReceiveBuffer;
 	
@@ -9899,7 +9665,7 @@ void ReceiveReward(BYTE* ReceiveBuffer)
 }
 #endif //PBG_ADD_GENSRANKING
 
-void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
+void ReceiveUseStateItem (const BYTE* ReceiveBuffer )
 {
 	LPPMSG_USE_STAT_FRUIT Data = (LPPMSG_USE_STAT_FRUIT)ReceiveBuffer;
 	
@@ -10081,7 +9847,7 @@ void ReceiveUseStateItem ( BYTE* ReceiveBuffer )
     EnableUse = 0;
 }
 
-void ReceivePetCommand ( BYTE* ReceiveBuffer )
+void ReceivePetCommand (const BYTE* ReceiveBuffer )
 {
 	LPPRECEIVE_PET_COMMAND Data = ( LPPRECEIVE_PET_COMMAND )ReceiveBuffer;
 	WORD Key = ((WORD)(Data->m_byKeyH)<<8) + Data->m_byKeyL;
@@ -10089,7 +9855,7 @@ void ReceivePetCommand ( BYTE* ReceiveBuffer )
     giPetManager::SetPetCommand ( Hero, Key, Data->m_byCommand );
 }
 
-void ReceivePetAttack ( BYTE* ReceiveBuffer )
+void ReceivePetAttack (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_PET_ATTACK Data = ( LPPRECEIVE_PET_ATTACK )ReceiveBuffer;
     WORD Key = ((WORD)(Data->m_byKeyH)<<8) + Data->m_byKeyL;
@@ -10101,7 +9867,7 @@ void ReceivePetAttack ( BYTE* ReceiveBuffer )
     giPetManager::SetAttack ( sc, Key, Data->m_bySkillType );
 }
 
-void ReceivePetInfo ( BYTE* ReceiveBuffer )
+void ReceivePetInfo (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_PET_INFO Data = ( LPPRECEIVE_PET_INFO )ReceiveBuffer;
 	
@@ -10116,14 +9882,14 @@ void ReceivePetInfo ( BYTE* ReceiveBuffer )
 	giPetManager::SetPetInfo( Data->m_byInvType, Data->m_byPos, &Petinfo );
 }
 
-void ReceiveWTTimeLeft(BYTE* ReceiveBuffer)
+void ReceiveWTTimeLeft(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_MATCH_TIMEVIEW Data = (LPPMSG_MATCH_TIMEVIEW)ReceiveBuffer;
 	g_wtMatchTimeLeft.m_Time = Data->m_Time;
 	g_wtMatchTimeLeft.m_Type = Data->m_Type;
 }
 
-void ReceiveWTMatchResult(BYTE* ReceiveBuffer)
+void ReceiveWTMatchResult(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_MATCH_RESULT	Data = (LPPMSG_MATCH_RESULT)ReceiveBuffer;
 	if(Data->m_Type >= 0 && Data->m_Type < 3)
@@ -10138,7 +9904,7 @@ void ReceiveWTMatchResult(BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveWTBattleSoccerGoalIn(BYTE* ReceiveBuffer)
+void ReceiveWTBattleSoccerGoalIn(const BYTE* ReceiveBuffer)
 {
 /*	LPPMSG_SOCCER_GOALIN Data = (LPPMSG_SOCCER_GOALIN)ReceiveBuffer;
 
@@ -10151,7 +9917,7 @@ void ReceiveWTBattleSoccerGoalIn(BYTE* ReceiveBuffer)
 	CreateEffect(BITMAP_FIRECRACKERRISE,Position,Angle,Light);*/
 }
 
-void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
+void ReceiveChangeMapServerInfo (const BYTE* ReceiveBuffer )
 {
     LPPHEADER_MAP_CHANGESERVER_INFO Data = (LPPHEADER_MAP_CHANGESERVER_INFO)ReceiveBuffer;
 
@@ -10168,7 +9934,7 @@ void ReceiveChangeMapServerInfo ( BYTE* ReceiveBuffer )
     g_csMapServer.ConnectChangeMapServer( Data->m_vSvrInfo );
 }
 
-void ReceiveChangeMapServerResult ( BYTE* ReceiveBuffer )
+void ReceiveChangeMapServerResult (const BYTE* ReceiveBuffer )
 {
     LPPHEADER_DEFAULT Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 
@@ -10176,7 +9942,7 @@ void ReceiveChangeMapServerResult ( BYTE* ReceiveBuffer )
 }
 
 
-void ReceiveBCStatus( BYTE* ReceiveBuffer )
+void ReceiveBCStatus(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_CASTLESIEGESTATE Data = (LPPMSG_ANS_CASTLESIEGESTATE)ReceiveBuffer;
 	
@@ -10199,7 +9965,7 @@ void ReceiveBCStatus( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCReg( BYTE* ReceiveBuffer )
+void ReceiveBCReg(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_REGCASTLESIEGE Data = (LPPMSG_ANS_REGCASTLESIEGE)ReceiveBuffer;
 	
@@ -10239,7 +10005,7 @@ void ReceiveBCReg( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCGiveUp( BYTE* ReceiveBuffer )
+void ReceiveBCGiveUp(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_GIVEUPCASTLESIEGE Data = (LPPMSG_ANS_GIVEUPCASTLESIEGE)ReceiveBuffer;
 	
@@ -10266,7 +10032,7 @@ void ReceiveBCGiveUp( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCRegInfo( BYTE* ReceiveBuffer )
+void ReceiveBCRegInfo(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_GUILDREGINFO Data = (LPPMSG_ANS_GUILDREGINFO)ReceiveBuffer;
 	
@@ -10293,7 +10059,7 @@ void ReceiveBCRegInfo( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCRegMark( BYTE* ReceiveBuffer )
+void ReceiveBCRegMark(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_REGGUILDMARK Data = (LPPMSG_ANS_REGGUILDMARK)ReceiveBuffer;
 	
@@ -10322,7 +10088,7 @@ void ReceiveBCRegMark( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCNPCBuy( BYTE* ReceiveBuffer )
+void ReceiveBCNPCBuy(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_NPCBUY Data = (LPPMSG_ANS_NPCBUY)ReceiveBuffer;
 	switch( Data->btResult )
@@ -10345,7 +10111,7 @@ void ReceiveBCNPCBuy( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCNPCRepair( BYTE* ReceiveBuffer )
+void ReceiveBCNPCRepair(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_NPCREPAIR Data = (LPPMSG_ANS_NPCREPAIR)ReceiveBuffer;
 	switch( Data->btResult )
@@ -10373,7 +10139,7 @@ void ReceiveBCNPCRepair( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCNPCUpgrade( BYTE* ReceiveBuffer )
+void ReceiveBCNPCUpgrade(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_NPCUPGRADE Data = (LPPMSG_ANS_NPCUPGRADE)ReceiveBuffer;
 	switch( Data->btResult )
@@ -10414,7 +10180,7 @@ void ReceiveBCNPCUpgrade( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCGetTaxInfo( BYTE* ReceiveBuffer )
+void ReceiveBCGetTaxInfo(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_TAXMONEYINFO Data = (LPPMSG_ANS_TAXMONEYINFO)ReceiveBuffer;
 	switch( Data->btResult )
@@ -10431,7 +10197,7 @@ void ReceiveBCGetTaxInfo( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCChangeTaxRate( BYTE* ReceiveBuffer )
+void ReceiveBCChangeTaxRate(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_TAXRATECHANGE Data = (LPPMSG_ANS_TAXRATECHANGE)ReceiveBuffer;
 	switch( Data->btResult )
@@ -10455,7 +10221,7 @@ void ReceiveBCChangeTaxRate( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCWithdraw( BYTE* ReceiveBuffer )
+void ReceiveBCWithdraw(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_MONEYDRAWOUT Data = (LPPMSG_ANS_MONEYDRAWOUT)ReceiveBuffer;
 	switch( Data->btResult )
@@ -10472,7 +10238,7 @@ void ReceiveBCWithdraw( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveTaxInfo( BYTE* ReceiveBuffer )
+void ReceiveTaxInfo(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_MAPSVRTAXINFO Data = (LPPMSG_ANS_MAPSVRTAXINFO)ReceiveBuffer;
 
@@ -10491,7 +10257,7 @@ void ReceiveTaxInfo( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveHuntZoneEnter ( BYTE* ReceiveBuffer )
+void ReceiveHuntZoneEnter (const BYTE* ReceiveBuffer )
 {
     LPPMSG_CSHUNTZONEENTER pData = (LPPMSG_CSHUNTZONEENTER)ReceiveBuffer;
 	
@@ -10517,7 +10283,7 @@ void ReceiveHuntZoneEnter ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveBCNPCList( BYTE* ReceiveBuffer )
+void ReceiveBCNPCList(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_NPCDBLIST Data = (LPPMSG_ANS_NPCDBLIST)ReceiveBuffer;
 	int Offset = sizeof(PMSG_ANS_NPCDBLIST);
@@ -10543,7 +10309,7 @@ void ReceiveBCNPCList( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCDeclareGuildList( BYTE* ReceiveBuffer )
+void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_CSREGGUILDLIST Data = (LPPMSG_ANS_CSREGGUILDLIST)ReceiveBuffer;
 	int Offset = sizeof(PMSG_ANS_CSREGGUILDLIST);
@@ -10577,7 +10343,7 @@ void ReceiveBCDeclareGuildList( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBCGuildList( BYTE* ReceiveBuffer )
+void ReceiveBCGuildList(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_CSATTKGUILDLIST Data = (LPPMSG_ANS_CSATTKGUILDLIST)ReceiveBuffer;
 	int Offset = sizeof(PMSG_ANS_CSATTKGUILDLIST);
@@ -10609,7 +10375,7 @@ void ReceiveBCGuildList( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveGateState ( BYTE* ReceiveBuffer )
+void ReceiveGateState (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_GATE_STATE Data = (LPPRECEIVE_GATE_STATE)ReceiveBuffer;
 	int Key = ((int)(Data->m_byKeyH)<<8) + Data->m_byKeyL;
@@ -10635,7 +10401,7 @@ void ReceiveGateState ( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveGateOperator ( BYTE* ReceiveBuffer )
+void ReceiveGateOperator (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_GATE_OPERATOR Data = (LPPRECEIVE_GATE_OPERATOR)ReceiveBuffer;
     int Key = ((int)(Data->m_byKeyH)<<8) + Data->m_byKeyL;
@@ -10643,7 +10409,7 @@ void ReceiveGateOperator ( BYTE* ReceiveBuffer )
     npcGateSwitch::ProcessState ( Key, Data->m_byOperator, Data->m_byResult );
 }
 
-void ReceiveGateCurrentState ( BYTE* ReceiveBuffer )
+void ReceiveGateCurrentState (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_GATE_CURRENT_STATE Data = (LPPRECEIVE_GATE_CURRENT_STATE)ReceiveBuffer;
     int Key = ((int)(Data->m_byKeyH)<<8) + Data->m_byKeyL;
@@ -10666,7 +10432,7 @@ void ReceiveGateCurrentState ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveCrownSwitchState ( BYTE* ReceiveBuffer )
+void ReceiveCrownSwitchState (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_SWITCH_PROC pData = (LPPRECEIVE_SWITCH_PROC)ReceiveBuffer;
 	
@@ -10742,7 +10508,7 @@ int DenyCrownRegistPopupClose( POPUP_RESULT Result )
 	return 1;
 }
 
-void ReceiveCrownRegist ( BYTE* ReceiveBuffer )
+void ReceiveCrownRegist (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CROWN_STATE pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
 	
@@ -10799,7 +10565,7 @@ void ReceiveCrownRegist ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveCrownState ( BYTE* ReceiveBuffer )
+void ReceiveCrownState (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CROWN_STATE pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
 	
@@ -10837,7 +10603,7 @@ void ReceiveCrownState ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveBattleCastleRegiment ( BYTE* ReceiveBuffer )
+void ReceiveBattleCastleRegiment (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CROWN_STATE pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
 	
@@ -10861,7 +10627,7 @@ void ReceiveBattleCastleRegiment ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveBattleCasleSwitchInfo( BYTE* ReceiveBuffer )
+void ReceiveBattleCasleSwitchInfo(const BYTE* ReceiveBuffer )
 {
 	LPRECEIVE_CROWN_SWITCH_INFO pData = (LPRECEIVE_CROWN_SWITCH_INFO)ReceiveBuffer;
 	Check_Switch (pData);
@@ -10943,7 +10709,7 @@ bool Delete_Switch()
 	return true;
 }
 
-void ReceiveBattleCastleStart ( BYTE* ReceiveBuffer )
+void ReceiveBattleCastleStart (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CROWN_STATE pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
 	
@@ -10961,7 +10727,7 @@ void ReceiveBattleCastleStart ( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveBattleCastleProcess ( BYTE* ReceiveBuffer )
+void ReceiveBattleCastleProcess (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_BC_PROCESS pData = (LPPRECEIVE_BC_PROCESS)ReceiveBuffer;
 	
@@ -10996,7 +10762,7 @@ void ReceiveBattleCastleProcess ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveKillCount ( BYTE* ReceiveBuffer )
+void ReceiveKillCount (const BYTE* ReceiveBuffer )
 {
     LPPWHEADER_DEFAULT_WORD pData = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
     if ( pData->Value==0 )
@@ -11014,7 +10780,7 @@ void ReceiveKillCount ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveBuildTime ( BYTE* ReceiveBuffer )
+void ReceiveBuildTime (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_MONSTER_BUILD_TIME pData = (LPPRECEIVE_MONSTER_BUILD_TIME)ReceiveBuffer;
 	int Key = ((int)(pData->m_byKeyH)<<8) + pData->m_byKeyL;
@@ -11026,7 +10792,7 @@ void ReceiveBuildTime ( BYTE* ReceiveBuffer )
     o->m_byBuildTime = pData->m_byBuildTime;
 }
 
-void    ReceiveCastleGuildMark ( BYTE* ReceiveBuffer )
+void    ReceiveCastleGuildMark (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_CASTLE_FLAG pData = (LPPRECEIVE_CASTLE_FLAG)ReceiveBuffer;
 	
@@ -11041,9 +10807,9 @@ void    ReceiveCastleGuildMark ( BYTE* ReceiveBuffer )
     CreateCastleMark ( BITMAP_INTERFACE_MAP, GuildMark ); 
 }
 
-void ReceiveCastleHuntZoneInfo ( BYTE* RecevieBuffer )
+void ReceiveCastleHuntZoneInfo (const BYTE* ReceiveBuffer )
 {
-    LPPRECEIVE_CASTLE_HUNTZONE_INFO pData = (LPPRECEIVE_CASTLE_HUNTZONE_INFO)RecevieBuffer;
+    LPPRECEIVE_CASTLE_HUNTZONE_INFO pData = (LPPRECEIVE_CASTLE_HUNTZONE_INFO)ReceiveBuffer;
 	
     if ( pData->m_byResult==0 )
     {
@@ -11056,7 +10822,7 @@ void ReceiveCastleHuntZoneInfo ( BYTE* RecevieBuffer )
     }
 }
 
-void ReceiveCastleHuntZoneResult ( BYTE* ReceiveBuffer )
+void ReceiveCastleHuntZoneResult (const BYTE* ReceiveBuffer )
 {
     LPPRECEVIE_CASTLE_HUNTZONE_RESULT pData = (LPPRECEVIE_CASTLE_HUNTZONE_RESULT)ReceiveBuffer;
 	
@@ -11066,7 +10832,7 @@ void ReceiveCastleHuntZoneResult ( BYTE* ReceiveBuffer )
     }
 }
 
-void ReceiveCatapultState(BYTE* ReceiveBuffer)
+void ReceiveCatapultState(const BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_CATAPULT_STATE pData = (LPPRECEIVE_CATAPULT_STATE)ReceiveBuffer;
 	
@@ -11083,7 +10849,7 @@ void ReceiveCatapultState(BYTE* ReceiveBuffer)
     }
 }
 
-void ReceiveCatapultFire(BYTE* ReceiveBuffer)
+void ReceiveCatapultFire(const BYTE* ReceiveBuffer)
 {
     LPPRECEIVE_WEAPON_FIRE pData = (LPPRECEIVE_WEAPON_FIRE)ReceiveBuffer;
     
@@ -11099,14 +10865,14 @@ void ReceiveCatapultFire(BYTE* ReceiveBuffer)
     }
 }
 
-void    ReceiveCatapultFireToMe ( BYTE* ReceiveBuffer )
+void    ReceiveCatapultFireToMe (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_BOMBING_ALERT pData = (LPPRECEIVE_BOMBING_ALERT)ReceiveBuffer;
 	
 	g_pCatapultWindow->DoFireFixStartPosition(pData->m_byWeaponType, pData->m_byTargetX, pData->m_byTargetY);
 }
 
-void ReceivePreviewPort ( BYTE* ReceiveBuffer )
+void ReceivePreviewPort (const BYTE* ReceiveBuffer )
 {
 	LPPWHEADER_DEFAULT_WORD pData = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
 	int Offset = sizeof(PWHEADER_DEFAULT_WORD);
@@ -11191,12 +10957,12 @@ void ReceivePreviewPort ( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveMapInfoResult ( BYTE* ReceiveBuffer )
+void ReceiveMapInfoResult (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_MAP_INFO_RESULT pData = (LPPRECEIVE_MAP_INFO_RESULT)ReceiveBuffer;
 }
 
-void ReceiveGuildCommand ( BYTE* ReceiveBuffer )
+void ReceiveGuildCommand (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_GUILD_COMMAND  pData = (LPPRECEIVE_GUILD_COMMAND)ReceiveBuffer;
     GuildCommander            GCmd = { pData->m_byTeam, pData->m_byX, pData->m_byY, pData->m_byCmd };
@@ -11207,7 +10973,7 @@ void ReceiveGuildCommand ( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveGuildMemberLocation ( BYTE* ReceiveBuffer )
+void ReceiveGuildMemberLocation (const BYTE* ReceiveBuffer )
 {
 	if( g_pSiegeWarfare->GetCurSiegeWarType() != TYPE_GUILD_COMMANDER )
 		return;
@@ -11227,7 +10993,7 @@ void ReceiveGuildMemberLocation ( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveGuildNpcLocation ( BYTE* ReceiveBuffer )
+void ReceiveGuildNpcLocation (const BYTE* ReceiveBuffer )
 {
 	if( g_pSiegeWarfare->GetCurSiegeWarType() != TYPE_GUILD_COMMANDER )
 		return;
@@ -11244,14 +11010,14 @@ void ReceiveGuildNpcLocation ( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveMatchTimer ( BYTE* ReceiveBuffer )
+void ReceiveMatchTimer (const BYTE* ReceiveBuffer )
 {
     LPPRECEIVE_MATCH_TIMER pData = (LPPRECEIVE_MATCH_TIMER)ReceiveBuffer;
 	
 	g_pSiegeWarfare->SetTime( pData->m_byHour, pData->m_byMinute );
 }
 
-void ReceiveCrywolfInfo ( BYTE* ReceiveBuffer )
+void ReceiveCrywolfInfo (const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_CRYWOLF_INFO pData = (LPPMSG_ANS_CRYWOLF_INFO)ReceiveBuffer;
 	
@@ -11260,7 +11026,7 @@ void ReceiveCrywolfInfo ( BYTE* ReceiveBuffer )
 	
 }
 
-void ReceiveCrywolStateAltarfInfo ( BYTE* ReceiveBuffer )
+void ReceiveCrywolStateAltarfInfo (const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_CRYWOLF_STATE_ALTAR_INFO pData = (LPPMSG_ANS_CRYWOLF_STATE_ALTAR_INFO)ReceiveBuffer;
 	
@@ -11272,7 +11038,7 @@ void ReceiveCrywolStateAltarfInfo ( BYTE* ReceiveBuffer )
 		pData->btAltarState5);
 }
 
-void ReceiveCrywolfAltarContract ( BYTE* ReceiveBuffer )
+void ReceiveCrywolfAltarContract (const BYTE* ReceiveBuffer )
 {
 	LPPPMSG_ANS_CRYWOLF_ALTAR_CONTRACT pData = (LPPPMSG_ANS_CRYWOLF_ALTAR_CONTRACT)ReceiveBuffer;
 	
@@ -11311,7 +11077,7 @@ void ReceiveCrywolfAltarContract ( BYTE* ReceiveBuffer )
 	}
 }
 
-void ReceiveCrywolfLifeTime ( BYTE* ReceiveBuffer )
+void ReceiveCrywolfLifeTime (const BYTE* ReceiveBuffer )
 {
     LPPPMSG_ANS_CRYWOLF_LEFTTIME pData = (LPPPMSG_ANS_CRYWOLF_LEFTTIME)ReceiveBuffer;
 	
@@ -11319,35 +11085,35 @@ void ReceiveCrywolfLifeTime ( BYTE* ReceiveBuffer )
 	g_pCryWolfInterface->SetTime( (int)(pData->btHour), (int)(pData->btMinute) );
 }
 
-void ReceiveCrywolfTankerHit ( BYTE* ReceiveBuffer )
+void ReceiveCrywolfTankerHit (const BYTE* ReceiveBuffer )
 {
     LPPMSG_NOTIFY_REGION_MONSTER_ATTACK pData = (LPPMSG_NOTIFY_REGION_MONSTER_ATTACK)ReceiveBuffer;
 	
     M34CryWolf1st::DoTankerFireFixStartPosition ( pData->btSourceX, pData->btSourceY, pData->btPointX, pData->btPointY );
 }
 
-void ReceiveCrywolfBenefitPlusChaosRate( BYTE* ReceiveBuffer )
+void ReceiveCrywolfBenefitPlusChaosRate(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ANS_CRYWOLF_BENEFIT_PLUS_CHAOSRATE pData = (LPPMSG_ANS_CRYWOLF_BENEFIT_PLUS_CHAOSRATE)ReceiveBuffer;
 	
 	g_MixRecipeMgr.SetPlusChaosRate(pData->btPlusChaosRate);
 }
 
-void ReceiveCrywolfBossMonsterInfo( BYTE* ReceiveBuffer)
+void ReceiveCrywolfBossMonsterInfo(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_CRYWOLF_BOSSMONSTER_INFO pData = (LPPMSG_ANS_CRYWOLF_BOSSMONSTER_INFO)ReceiveBuffer;
 	
 	M34CryWolf1st::Set_BossMonster(pData->btBossHP,pData->btMonster2);
 }
 
-void ReceiveCrywolfPersonalRank( BYTE* ReceiveBuffer)
+void ReceiveCrywolfPersonalRank(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_CRYWOLF_PERSONAL_RANK pData = (LPPMSG_ANS_CRYWOLF_PERSONAL_RANK)ReceiveBuffer;
 	
 	M34CryWolf1st::Set_MyRank(pData->btRank,pData->iGettingExp);
 }
 
-void ReceiveCrywolfHeroList( BYTE* ReceiveBuffer)
+void ReceiveCrywolfHeroList(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_CRYWOLF_HERO_LIST_INFO_COUNT pData = (LPPMSG_ANS_CRYWOLF_HERO_LIST_INFO_COUNT)ReceiveBuffer;
 	int Offset = sizeof(PMSG_ANS_CRYWOLF_HERO_LIST_INFO_COUNT);
@@ -11359,27 +11125,27 @@ void ReceiveCrywolfHeroList( BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveKanturu3rdStateInfo(BYTE* ReceiveBuffer)
+void ReceiveKanturu3rdStateInfo(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_KANTURU_STATE_INFO pData = (LPPMSG_ANS_KANTURU_STATE_INFO)ReceiveBuffer;
 	
 	g_pKanturu2ndEnterNpc->ReceiveKanturu3rdInfo(pData->btState, pData->btDetailState, pData->btEnter, pData->btUserCount, pData->iRemainTime);
 }
 
-void ReceiveKanturu3rdEnterBossMap(BYTE* ReceiveBuffer)
+void ReceiveKanturu3rdEnterBossMap(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_ENTER_KANTURU_BOSS_MAP pData = (LPPMSG_ANS_ENTER_KANTURU_BOSS_MAP)ReceiveBuffer;
 	g_pKanturu2ndEnterNpc->ReceiveKanturu3rdEnter(pData->btResult);
 }
 
-void ReceiveKanturu3rdCurrentState( BYTE* ReceiveBuffer)
+void ReceiveKanturu3rdCurrentState(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_KANTURU_CURRENT_STATE pData = (LPPMSG_ANS_KANTURU_CURRENT_STATE)ReceiveBuffer;
 	M39Kanturu3rd::Kanturu3rdState(pData->btCurrentState, pData->btCurrentDetailState);
 	M39Kanturu3rd::CheckSuccessBattle(pData->btCurrentState, pData->btCurrentDetailState);
 }
 
-void ReceiveKanturu3rdState( BYTE* ReceiveBuffer)
+void ReceiveKanturu3rdState(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_KANTURU_STATE_CHANGE pData = (LPPMSG_ANS_KANTURU_STATE_CHANGE)ReceiveBuffer;
 	
@@ -11415,38 +11181,38 @@ void ReceiveKanturu3rdState( BYTE* ReceiveBuffer)
 	}
 }
 
-void ReceiveKanturu3rdResult( BYTE* ReceiveBuffer)
+void ReceiveKanturu3rdResult(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_KANTURU_BATTLE_RESULT pData = (LPPMSG_ANS_KANTURU_BATTLE_RESULT)ReceiveBuffer;
 	M39Kanturu3rd::Kanturu3rdResult(pData->btResult);
 }
 
-void ReceiveKanturu3rdTimer ( BYTE* ReceiveBuffer )
+void ReceiveKanturu3rdTimer (const BYTE* ReceiveBuffer )
 {
     LPPMSG_ANS_KANTURU_BATTLE_SCENE_TIMELIMIT pData = (LPPMSG_ANS_KANTURU_BATTLE_SCENE_TIMELIMIT)ReceiveBuffer;
 	g_pKanturuInfoWindow->SetTime(pData->btTimeLimit);
 }
 
-void RecevieKanturu3rdMayaSKill( BYTE* ReceiveBuffer)
+void RecevieKanturu3rdMayaSKill(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_NOTIFY_KANTURU_WIDE_AREA_ATTACK pData = (LPPMSG_NOTIFY_KANTURU_WIDE_AREA_ATTACK)ReceiveBuffer;
 	M39Kanturu3rd::MayaSceneMayaAction(pData->btType);
 }
 
-void RecevieKanturu3rdLeftUserandMonsterCount( BYTE* ReceiveBuffer)
+void RecevieKanturu3rdLeftUserandMonsterCount(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_NOTIFY_KANTURU_USER_MONSTER_COUNT pData = (LPPMSG_NOTIFY_KANTURU_USER_MONSTER_COUNT)ReceiveBuffer;
 	M39Kanturu3rd::Kanturu3rdUserandMonsterCount(pData->bMonsterCount, pData->btUserCount);
 }
 
-void ReceiveCursedTempleEnterInfo( BYTE* ReceiveBuffer )
+void ReceiveCursedTempleEnterInfo(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_CURSED_TEMPLE_USER_COUNT data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
 	
 	g_pCursedTempleEnterWindow->ReceiveCursedTempleEnterInfo( ReceiveBuffer );
 }
 
-void ReceiveCursedTempleEnterResult( BYTE* ReceiveBuffer )
+void ReceiveCursedTempleEnterResult(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_RESULT_ENTER_CURSED_TEMPLE data = (LPPMSG_RESULT_ENTER_CURSED_TEMPLE)ReceiveBuffer;
 
@@ -11457,33 +11223,33 @@ void ReceiveCursedTempleEnterResult( BYTE* ReceiveBuffer )
 	g_CursedTemple->UpdateTempleSystemMsg(data->Result);
 }
 
-void ReceiveCursedTempleInfo( BYTE* ReceiveBuffer )
+void ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer )
 {
 	g_pCursedTempleWindow->ReceiveCursedTempleInfo( ReceiveBuffer );
 	g_CursedTemple->ReceiveCursedTempleInfo( ReceiveBuffer );
 }
 
-void ReceiveCursedTempMagicResult( BYTE* ReceiveBuffer )
+void ReceiveCursedTempMagicResult(const BYTE* ReceiveBuffer )
 {
 	g_pCursedTempleWindow->ReceiveCursedTempRegisterSkill( ReceiveBuffer );
 }
 
-void ReceiveCursedTempSkillEnd( BYTE* ReceiveBuffer )
+void ReceiveCursedTempSkillEnd(const BYTE* ReceiveBuffer )
 {
 	g_pCursedTempleWindow->ReceiveCursedTempUnRegisterSkill( ReceiveBuffer );
 }
 
-void ReceiveCursedTempSkillPoint( BYTE* ReceiveBuffer )
+void ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer )
 {
 	g_pCursedTempleWindow->ReceiveCursedTempSkillPoint( ReceiveBuffer );
 }
 
-void ReceiveCursedTempleHolyItemRelics( BYTE* ReceiveBuffer )
+void ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer )
 {
 	g_pCursedTempleWindow->ReceiveCursedTempleHolyItemRelics( ReceiveBuffer );
 }
 
-void ReceiveCursedTempleGameResult( BYTE* ReceiveBuffer )
+void ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer )
 {
 	g_pNewUISystem->HideAll();
 	
@@ -11502,7 +11268,7 @@ void ReceiveCursedTempleGameResult( BYTE* ReceiveBuffer )
 	g_pCursedTempleResultWindow->ReceiveCursedTempleGameResult(ReceiveBuffer);
 }
 
-void ReceiveCursedTempleState( BYTE* ReceiveBuffer )
+void ReceiveCursedTempleState(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_ILLUSION_TEMPLE_STATE data = (LPPMSG_ILLUSION_TEMPLE_STATE)ReceiveBuffer;
 	
@@ -11524,40 +11290,40 @@ void ReceiveCursedTempleState( BYTE* ReceiveBuffer )
 	g_CursedTemple->ReceiveCursedTempleState( cursedtemple );
 }
 
-void ReceiveRaklionStateInfo(BYTE* ReceiveBuffer)
+void ReceiveRaklionStateInfo(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_RAKLION_STATE_INFO pData = (LPPMSG_ANS_RAKLION_STATE_INFO)ReceiveBuffer;
 	g_Raklion.SetState(pData->btState, pData->btDetailState);
 }
 
-void ReceiveRaklionCurrentState(BYTE* ReceiveBuffer)
+void ReceiveRaklionCurrentState(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_RAKLION_CURRENT_STATE pData = (LPPMSG_ANS_RAKLION_CURRENT_STATE)ReceiveBuffer;
 	g_Raklion.SetState(pData->btCurrentState, pData->btCurrentDetailState);
 }
 
-void RecevieRaklionStateChange(BYTE* ReceiveBuffer)
+void RecevieRaklionStateChange(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_RAKLION_STATE_CHANGE pData = (LPPMSG_ANS_RAKLION_STATE_CHANGE)ReceiveBuffer;
 	g_Raklion.SetState(pData->btState, pData->btDetailState);
 }
 
-void RecevieRaklionBattleResult(BYTE* ReceiveBuffer)
+void RecevieRaklionBattleResult(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_RAKLION_BATTLE_RESULT pData = (LPPMSG_ANS_RAKLION_BATTLE_RESULT)ReceiveBuffer;	
 }
 
-void RecevieRaklionWideAreaAttack(BYTE* ReceiveBuffer)
+void RecevieRaklionWideAreaAttack(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_NOTIFY_RAKLION_WIDE_AREA_ATTACK pData = (LPPMSG_NOTIFY_RAKLION_WIDE_AREA_ATTACK)ReceiveBuffer;
 }
 
-void RecevieRaklionUserMonsterCount(BYTE* ReceiveBuffer)
+void RecevieRaklionUserMonsterCount(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_NOTIFY_RAKLION_USER_MONSTER_COUNT pData = (LPPMSG_NOTIFY_RAKLION_USER_MONSTER_COUNT)ReceiveBuffer;
 }
 
-void ReceiveCheckSumRequest( BYTE *ReceiveBuffer)
+void ReceiveCheckSumRequest( const BYTE *ReceiveBuffer)
 {
 	LPPHEADER_DEFAULT_WORD Data = (LPPHEADER_DEFAULT_WORD)ReceiveBuffer;
 	DWORD dwCheckSum = GetCheckSum( Data->Value);
@@ -11573,132 +11339,7 @@ extern int TimeRemain;
 BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEcrypted);
 void TranslateChattingProtocol(DWORD dwWindowUIID, int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEcrypted);
 
-void ProtocolCompiler( CWsctlc *pSocketClient, int iTranslation, int iParam)
-{
-	//if(CurrentProtocolState >= RECEIVE_JOIN_MAP_SERVER)
-	//	return;
-	int HeadCode;
-	int Size = 0;
-	
-	while(1)
-	{
-		BYTE *ReceiveBuffer = pSocketClient->GetReadMsg();
-		if( ReceiveBuffer == NULL )
-		{
-			break;
-		}
-		else 
-		{
-			BOOL bEncrypted = FALSE;
-			BYTE byDec[MAX_SPE_BUFFERSIZE_];
-			if( ReceiveBuffer[0] == 0xC1 )
-			{
-				LPPBMSG_HEADER lpHeader = (LPPBMSG_HEADER)ReceiveBuffer;
-				HeadCode = lpHeader->HeadCode;
-				Size     = lpHeader->Size;
-			}
-			else if( ReceiveBuffer[0] == 0xC2 )
-			{
-				LPPWMSG_HEADER lpHeader = (LPPWMSG_HEADER)ReceiveBuffer;
-				HeadCode = lpHeader->HeadCode;
-				Size     = ((int)(lpHeader->SizeH)<<8) + lpHeader->SizeL;
-			}
-			else if( ReceiveBuffer[0] == 0xC3 || ReceiveBuffer[0] == 0xC4)
-			{
-				int iSize;
-				if ( ReceiveBuffer[0] == 0xC3)
-				{
-					LPPBMSG_ENCRYPTED lpHeader = (LPPBMSG_ENCRYPTED)ReceiveBuffer;
-					Size     = lpHeader->Size;
-					iSize = g_SimpleModulusSC.Decrypt( byDec + 2, ReceiveBuffer + 2, Size - 2);
-				}
-				else
-				{
-					LPWBMSG_ENCRYPTED lpHeader = (LPWBMSG_ENCRYPTED)ReceiveBuffer;
-					Size     = ((int)(lpHeader->SizeH)<<8) + lpHeader->SizeL;
-					iSize = g_SimpleModulusSC.Decrypt( byDec + 2, ReceiveBuffer + 3, Size - 3);
-				}
-				bEncrypted = TRUE;
-				
-				if ( iSize < 0)
-				{
-					SendHackingChecked( 0x06, 0);
-					g_byPacketSerialRecv++;
-					continue;
-				}
-				
-				if ( ( g_byPacketSerialRecv) != byDec[2])
-				{
-					bEncrypted = FALSE;
-					g_byPacketSerialRecv = byDec[2];
-					
-					g_ErrorReport.Write("Decrypt error : g_byPacketSerialRecv(0x%02X), byDec(0x%02X)\r\n", g_byPacketSerialRecv, byDec[2]);
-					g_ErrorReport.Write("Dump : \r\n");
-					g_ErrorReport.HexWrite(ReceiveBuffer, Size);
-					g_ErrorReport.Write("\r\n");
-					g_ErrorReport.HexWrite(byDec+2, iSize);
-				}
-				else
-				{
-					g_byPacketSerialRecv++;
-				}
-
-				if ( ReceiveBuffer[0] == 0xC3)
-				{
-					LPPBMSG_HEADER pHeader = (LPPBMSG_HEADER)&( byDec[1]);
-					pHeader->Code = 0xC1;
-					pHeader->Size = ( BYTE)iSize;
-					HeadCode = pHeader->HeadCode;
-					ReceiveBuffer = (BYTE*)pHeader;
-				}
-				else
-				{
-					LPPWMSG_HEADER pHeader = (LPPWMSG_HEADER)byDec;
-					pHeader->Code = 0xC2;
-					pHeader->SizeH = ( BYTE)( iSize / 256);
-					pHeader->SizeL = ( BYTE)( iSize % 256);
-					HeadCode = pHeader->HeadCode;
-					ReceiveBuffer = (BYTE*)pHeader;
-				}
-				Size = iSize;
-			}
-			TotalPacketSize += Size;       
-#ifdef SAVE_PACKET
-			SOCKET socket = pSocketClient->GetSocket();
-			
-			SOCKADDR_IN sockaddr;
-			int isockaddrlen	= sizeof(sockaddr);
-			getpeername(socket, (SOCKADDR*)&sockaddr, &isockaddrlen);
-			
-			std::string timeString;
-			leaf::GetTimeString(timeString);
-			DebugAngel_Write( PACKET_SAVE_FILE, "%s [%d.%d.%d.%d] Receive ", timeString.c_str(),
-				(UCHAR)sockaddr.sin_addr.S_un.S_un_b.s_b1, (UCHAR)sockaddr.sin_addr.S_un.S_un_b.s_b2, 
-				(UCHAR)sockaddr.sin_addr.S_un.S_un_b.s_b3, (UCHAR)sockaddr.sin_addr.S_un.S_un_b.s_b4);
-			for(int i=0; i<6; i++) {
-				DebugAngel_Write( PACKET_SAVE_FILE, "%02X", ReceiveBuffer[i]);
-			}
-			DebugAngel_Write( PACKET_SAVE_FILE, "\r\n");
-#endif
-				
-			switch ( iTranslation)
-			{
-			case 1:
-				TranslateChattingProtocol(iParam, HeadCode, ReceiveBuffer, Size, bEncrypted);
-				break;
-			default:
-				if ( !TranslateProtocol( HeadCode, ReceiveBuffer, Size, bEncrypted))
-				{
-					g_ErrorReport.Write( "Strange packet\r\n");
-					g_ErrorReport.HexWrite( ReceiveBuffer, Size);
-				}
-				break;
-			}
-		}
-	}
-}
-
-bool ReceiveRegistedLuckyCoin(BYTE* ReceiveBuffer)
+bool ReceiveRegistedLuckyCoin(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_GET_COIN_COUNT _pData = (LPPMSG_ANS_GET_COIN_COUNT)ReceiveBuffer;
 	
@@ -11710,7 +11351,7 @@ bool ReceiveRegistedLuckyCoin(BYTE* ReceiveBuffer)
 	return false;
 }
 
-bool ReceiveRegistLuckyCoin(BYTE* ReceiveBuffer)
+bool ReceiveRegistLuckyCoin(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_REGEIST_COIN _pData = (LPPMSG_ANS_REGEIST_COIN)ReceiveBuffer;
 
@@ -11740,7 +11381,7 @@ bool ReceiveRegistLuckyCoin(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveRequestExChangeLuckyCoin(BYTE* ReceiveBuffer)
+bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_TREADE_COIN _pData = (LPPMSG_ANS_TREADE_COIN)ReceiveBuffer;
 
@@ -11769,7 +11410,7 @@ bool ReceiveRequestExChangeLuckyCoin(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveEnterDoppelGangerEvent(BYTE* ReceiveBuffer)
+bool ReceiveEnterDoppelGangerEvent(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_RESULT_ENTER_DOPPELGANGER Data = (LPPMSG_RESULT_ENTER_DOPPELGANGER)ReceiveBuffer;
 
@@ -11802,14 +11443,14 @@ bool ReceiveEnterDoppelGangerEvent(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveDoppelGangerMonsterPosition(BYTE* ReceiveBuffer)
+bool ReceiveDoppelGangerMonsterPosition(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_MONSTER_POSITION Data = (LPPMSG_DOPPELGANGER_MONSTER_POSITION)ReceiveBuffer;
 	g_pDoppelGangerFrame->SetMonsterGauge((float)Data->btPosIndex / 22.0f);
 	return true;
 }
 
-bool ReceiveDoppelGangerState(BYTE* ReceiveBuffer)
+bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_STATE Data = (LPPMSG_DOPPELGANGER_STATE)ReceiveBuffer;
 
@@ -11839,7 +11480,7 @@ bool ReceiveDoppelGangerState(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveDoppelGangerIcewalkerState(BYTE* ReceiveBuffer)
+bool ReceiveDoppelGangerIcewalkerState(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_ICEWORKER_STATE Data = (LPPMSG_DOPPELGANGER_ICEWORKER_STATE)ReceiveBuffer;
 
@@ -11856,7 +11497,7 @@ bool ReceiveDoppelGangerIcewalkerState(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveDoppelGangerTimePartyState(BYTE* ReceiveBuffer)
+bool ReceiveDoppelGangerTimePartyState(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_PLAY_INFO Data = (LPPMSG_DOPPELGANGER_PLAY_INFO)ReceiveBuffer;
 
@@ -11871,7 +11512,7 @@ bool ReceiveDoppelGangerTimePartyState(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveDoppelGangerResult(BYTE* ReceiveBuffer)
+bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_RESULT Data = (LPPMSG_DOPPELGANGER_RESULT)ReceiveBuffer;
 
@@ -11919,7 +11560,7 @@ bool ReceiveDoppelGangerResult(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveDoppelGangerMonsterGoal(BYTE* ReceiveBuffer)
+bool ReceiveDoppelGangerMonsterGoal(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_DOPPELGANGER_MONSTER_GOAL Data = (LPPMSG_DOPPELGANGER_MONSTER_GOAL)ReceiveBuffer;
 
@@ -11929,7 +11570,7 @@ bool ReceiveDoppelGangerMonsterGoal(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveMoveMapChecksum(BYTE* ReceiveBuffer)
+bool ReceiveMoveMapChecksum(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_MAPMOVE_CHECKSUM Data = (LPPMSG_MAPMOVE_CHECKSUM)ReceiveBuffer;
 
@@ -11938,7 +11579,7 @@ bool ReceiveMoveMapChecksum(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveRequestMoveMap(BYTE* ReceiveBuffer)
+bool ReceiveRequestMoveMap(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_ANS_MAPMOVE Data = (LPPMSG_ANS_MAPMOVE)ReceiveBuffer;
 
@@ -11967,7 +11608,7 @@ bool ReceiveRequestMoveMap(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveEnterEmpireGuardianEvent(BYTE* ReceiveBuffer)
+bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_RESULT_ENTER_EMPIREGUARDIAN Data = (LPPMSG_RESULT_ENTER_EMPIREGUARDIAN)ReceiveBuffer;
 	
@@ -12023,7 +11664,7 @@ bool ReceiveEnterEmpireGuardianEvent(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveRemainTickEmpireGuardian(BYTE* ReceiveBuffer)
+bool ReceiveRemainTickEmpireGuardian(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_REMAINTICK_EMPIREGUARDIAN Data =  (LPPMSG_REMAINTICK_EMPIREGUARDIAN)ReceiveBuffer;
 
@@ -12039,7 +11680,7 @@ bool ReceiveRemainTickEmpireGuardian(BYTE* ReceiveBuffer)
 	return true;
 }
 
-bool ReceiveResultEmpireGuardian(BYTE* ReceiveBuffer)
+bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
 {
 	LPPMSG_CLEAR_RESULT_EMPIREGUARDIAN Data =  (LPPMSG_CLEAR_RESULT_EMPIREGUARDIAN)ReceiveBuffer;
 	
@@ -12089,7 +11730,7 @@ bool ReceiveResultEmpireGuardian(BYTE* ReceiveBuffer)
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 // (0xD2)(0x01)
-bool ReceiveIGS_CashPoint(BYTE* pReceiveBuffer)
+bool ReceiveIGS_CashPoint(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_CASHPOINT_ANS Data =  (LPPMSG_CASHSHOP_CASHPOINT_ANS)pReceiveBuffer;
 	g_InGameShopSystem->SetTotalCash((double)Data->dTotalCash);
@@ -12101,7 +11742,7 @@ bool ReceiveIGS_CashPoint(BYTE* pReceiveBuffer)
 }
 
 // (0xD2)(0x02)
-bool ReceiveIGS_ShopOpenResult(BYTE* pReceiveBuffer)
+bool ReceiveIGS_ShopOpenResult(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_SHOPOPEN_ANS Data = (LPPMSG_CASHSHOP_SHOPOPEN_ANS)pReceiveBuffer;
 
@@ -12122,7 +11763,7 @@ bool ReceiveIGS_ShopOpenResult(BYTE* pReceiveBuffer)
 }
 
 // (0xD2)(0x03)
-bool ReceiveIGS_BuyItem(BYTE* pReceiveBuffer)
+bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_BUYITEM_ANS Data = (LPPMSG_CASHSHOP_BUYITEM_ANS)pReceiveBuffer;
 
@@ -12228,7 +11869,7 @@ bool ReceiveIGS_BuyItem(BYTE* pReceiveBuffer)
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x04)
-bool ReceiveIGS_SendItemGift(BYTE* pReceiveBuffer)
+bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_GIFTSEND_ANS Data = (LPPMSG_CASHSHOP_GIFTSEND_ANS)pReceiveBuffer;
 
@@ -12346,7 +11987,7 @@ bool ReceiveIGS_SendItemGift(BYTE* pReceiveBuffer)
 }
 
 // (0xD2)(0x06)
-bool ReceiveIGS_StorageItemListCount(BYTE* pReceiveBuffer)
+bool ReceiveIGS_StorageItemListCount(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_STORAGECOUNT Data = (LPPMSG_CASHSHOP_STORAGECOUNT)pReceiveBuffer;
 	g_pInGameShop->InitStorage((int)Data->wTotalItemCount, (int)Data->wCurrentItemCount, (int)Data->wTotalPage, (int)Data->wPageIndex);
@@ -12354,7 +11995,7 @@ bool ReceiveIGS_StorageItemListCount(BYTE* pReceiveBuffer)
 }
 
 // (0xD2)(0x0D)
-bool ReceiveIGS_StorageItemList(BYTE* pReceiveBuffer)
+bool ReceiveIGS_StorageItemList(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_STORAGELIST Data = (LPPMSG_CASHSHOP_STORAGELIST)pReceiveBuffer;
 
@@ -12368,7 +12009,7 @@ bool ReceiveIGS_StorageItemList(BYTE* pReceiveBuffer)
 }
 
 // (0xD2)(0x0E)
-bool ReceiveIGS_StorageGiftItemList(BYTE* pReceiveBuffer)
+bool ReceiveIGS_StorageGiftItemList(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_GIFTSTORAGELIST Data = (LPPMSG_CASHSHOP_GIFTSTORAGELIST)pReceiveBuffer;
 
@@ -12391,7 +12032,7 @@ bool ReceiveIGS_StorageGiftItemList(BYTE* pReceiveBuffer)
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x07)
-bool ReceiveIGS_SendCashGift(BYTE* pReceiveBuffer)
+bool ReceiveIGS_SendCashGift(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_CASHSEND_ANS Data = (LPPMSG_CASHSHOP_CASHSEND_ANS)pReceiveBuffer;
 	return true;
@@ -12399,21 +12040,21 @@ bool ReceiveIGS_SendCashGift(BYTE* pReceiveBuffer)
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x08)
-bool ReceiveIGS_PossibleBuy(BYTE* pReceiveBuffer)
+bool ReceiveIGS_PossibleBuy(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_ITEMBUY_CONFIRM_ANS Data = (LPPMSG_CASHSHOP_ITEMBUY_CONFIRM_ANS)pReceiveBuffer;
 	return true;
 }
 
 // (0xD2)(0x09)
-bool ReceiveIGS_LeftCountItem(BYTE* pReceiveBuffer)
+bool ReceiveIGS_LeftCountItem(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS Data = (LPPMSG_CASHSHOP_ITEMBUY_LEFT_COUNT_ANS)pReceiveBuffer;
 	return true;
 }
 
 // (0xD2)(0x0B)
-bool ReceiveIGS_UseStorageItem(BYTE* pReceiveBuffer)
+bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_STORAGE_ITEM_USE_ANS Data = (LPPMSG_CASHSHOP_STORAGE_ITEM_USE_ANS)pReceiveBuffer;
 	
@@ -12504,7 +12145,7 @@ bool ReceiveIGS_UseStorageItem(BYTE* pReceiveBuffer)
 }
 
 // (0xD2)(0x0C)
-bool ReceiveIGS_UpdateScript(BYTE* pReceiveBuffer)
+bool ReceiveIGS_UpdateScript(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_VERSION_UPDATE Data = (LPPMSG_CASHSHOP_VERSION_UPDATE)pReceiveBuffer;
 
@@ -12535,7 +12176,7 @@ bool ReceiveIGS_UpdateScript(BYTE* pReceiveBuffer)
 }
 
 // (0xD2)(0x13)
-bool ReceiveIGS_EventItemlistCnt(BYTE* pReceiveBuffer)
+bool ReceiveIGS_EventItemlistCnt(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_EVENTITEM_COUNT Data = (LPPMSG_CASHSHOP_EVENTITEM_COUNT)pReceiveBuffer;
 
@@ -12545,7 +12186,7 @@ bool ReceiveIGS_EventItemlistCnt(BYTE* pReceiveBuffer)
 }
 
 //(0xD2)(0x14)
-bool ReceiveIGS_EventItemlist(BYTE* pReceiveBuffer)
+bool ReceiveIGS_EventItemlist(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_CASHSHOP_EVENTITEM_LIST Data = (LPPMSG_CASHSHOP_EVENTITEM_LIST)pReceiveBuffer;
 	g_InGameShopSystem->InsertEventPackage((int*)Data->lPackageSeq);
@@ -12553,7 +12194,7 @@ bool ReceiveIGS_EventItemlist(BYTE* pReceiveBuffer)
 }
 
 // (0xD2)(0x15)
-bool ReceiveIGS_UpdateBanner(BYTE* pReceiveBuffer)
+bool ReceiveIGS_UpdateBanner(const BYTE* pReceiveBuffer)
 {
 #ifndef KWAK_FIX_COMPILE_LEVEL4_WARNING_EX
 	LPPMSG_CASHSHOP_BANNER_UPDATE Data = (LPPMSG_CASHSHOP_BANNER_UPDATE)pReceiveBuffer;
@@ -12586,7 +12227,7 @@ bool ReceiveIGS_UpdateBanner(BYTE* pReceiveBuffer)
 
 
 #ifdef PBG_ADD_SECRETBUFF
-bool ReceiveFatigueTime(BYTE* pReceiveBuffer)
+bool ReceiveFatigueTime(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_FATIGUEPERCENTAGE Data = (LPPMSG_FATIGUEPERCENTAGE)pReceiveBuffer;
 
@@ -12606,7 +12247,7 @@ bool ReceiveFatigueTime(BYTE* pReceiveBuffer)
 #endif //PBG_ADD_SECRETBUFF
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-bool ReceiveEquippingInventoryItem(BYTE* pReceiveBuffer)
+bool ReceiveEquippingInventoryItem(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_ANS_INVENTORY_EQUIPMENT_ITEM Data = (LPPMSG_ANS_INVENTORY_EQUIPMENT_ITEM)pReceiveBuffer;
 
@@ -12634,13 +12275,13 @@ bool ReceiveEquippingInventoryItem(BYTE* pReceiveBuffer)
 
 #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
 
-bool ReceivePeriodItemListCount(BYTE* pReceiveBuffer)
+bool ReceivePeriodItemListCount(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_PERIODITEMEX_ITEMCOUNT Data = (LPPMSG_PERIODITEMEX_ITEMCOUNT)pReceiveBuffer;
 	return true;
 }
 
-bool ReceivePeriodItemList(BYTE* pReceiveBuffer)
+bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
 {
 	LPPMSG_PERIODITEMEX_ITEMLIST Data = (LPPMSG_PERIODITEMEX_ITEMLIST)pReceiveBuffer;
 
@@ -12663,17 +12304,8 @@ bool ReceivePeriodItemList(BYTE* pReceiveBuffer)
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
 #ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-BOOL ReceiveStraightAttack(BYTE *ReceiveBuffer, int Size, BOOL bEncrypted)
+BOOL ReceiveStraightAttack(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 {
-//#ifndef NEW_PROTOCOL_SYSTEM
-//	if(!bEncrypted)
-//	{
-//		GO_DEBUG;
-//		SendHackingChecked(0x00, 0x4A);
-//		return (FALSE);
-//	}
-//#endif
-	
 	LPPRECEIVE_STRAIGHTATTACK Data = (LPPRECEIVE_STRAIGHTATTACK)ReceiveBuffer;
 	int SourceKey = ((int)(Data->SourceKeyH)<<8) + Data->SourceKeyL;
 	int TargetKey = ((int)(Data->TargetKeyH)<<8) + Data->TargetKeyL;
@@ -12733,7 +12365,7 @@ BOOL ReceiveStraightAttack(BYTE *ReceiveBuffer, int Size, BOOL bEncrypted)
 	return (TRUE);
 }
 
-void ReceiveDarkside(BYTE* ReceiveBuffer)
+void ReceiveDarkside(const BYTE* ReceiveBuffer)
 {
 	LPPRECEIVE_DARKSIDE_INDEX Data = (LPPRECEIVE_DARKSIDE_INDEX)ReceiveBuffer;
 	
@@ -12745,8 +12377,19 @@ void ReceiveDarkside(BYTE* ReceiveBuffer)
 }
 #endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
-BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncrypted)
+static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size)
 {
+	BYTE HeadCode = 0;
+	BOOL bEncrypted = ReceiveBuffer[0] >= 0xC3;
+	BOOL bIsC1C3 = ReceiveBuffer[0] % 2 == 1;
+	if (bIsC1C3) // C1 and C3
+	{
+		HeadCode = ReceiveBuffer[2];
+	}
+	else
+	{
+		HeadCode = ReceiveBuffer[3];
+	}
 	switch( HeadCode )
 	{
 	case 0xF1:     			
@@ -12835,7 +12478,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				case 0x02:
 					if ( !ReceiveLogOut(ReceiveBuffer, bEncrypted))
 					{
-						return ( FALSE);
+						//return ( FALSE);
 					}
 					break;
 				case 0x12: //0x02 receive create account
@@ -12869,7 +12512,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0xF3:     			
 		{
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -12896,7 +12539,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			case 0x03: //receive join map server
                 if ( !ReceiveJoinMapServer(ReceiveBuffer, bEncrypted))
 				{
-					return ( FALSE);
+					//return ( FALSE);
 				}
 				break;
 			case 0x04: //receive revival
@@ -12906,7 +12549,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
                 //AddDebugText(ReceiveBuffer,Size);
                 if ( !ReceiveInventory(ReceiveBuffer, bEncrypted))
 				{
-					return ( FALSE);
+					//return ( FALSE);
 				}
 				break;
 			case 0x05: //receive level up
@@ -12968,7 +12611,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0xF4:     			
 		{
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -13061,7 +12704,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
         AddDebugText(ReceiveBuffer,Size);
         if ( !ReceiveEquipmentItem(ReceiveBuffer, bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
 	case 0x25://change character
@@ -13076,13 +12719,13 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x19://magic
         if ( !ReceiveMagic(ReceiveBuffer,Size, bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
 	case 0x69:
         if ( !ReceiveMonsterSkill(ReceiveBuffer,Size, bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
 	case 0x1A://magic
@@ -13091,7 +12734,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x1E://magic
         if ( !ReceiveMagicContinue(ReceiveBuffer,Size, bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
 	case 0x1B://magic
@@ -13103,13 +12746,13 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x16://die character(exp)
         if ( !ReceiveDieExp(ReceiveBuffer,bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
 	case 0x9C://die character(exp)
         if ( !ReceiveDieExpLarge(ReceiveBuffer,bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
 	case 0x17://die character
@@ -13132,7 +12775,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
         //AddDebugText(ReceiveBuffer,Size);
         if ( !ReceiveHelperItem(ReceiveBuffer,bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
     case 0x2c:
@@ -13141,7 +12784,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x30:
         if ( !ReceiveTalk(ReceiveBuffer, bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
 	case 0x31:
@@ -13160,7 +12803,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x36:
         if ( !ReceiveTrade(ReceiveBuffer, bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
 	case 0x37:
@@ -13195,7 +12838,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
         AddDebugText(ReceiveBuffer,Size);
 		if ( !ReceiveTeleport(ReceiveBuffer, bEncrypted))
 		{
-			return ( FALSE);
+			//return ( FALSE);
 		}
 		break;
 	case 0x40:
@@ -13446,7 +13089,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 		{
 			BYTE bySubcode;
 
-			if (ReceiveBuffer[0] == 0xC1)
+			if (bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				bySubcode = Data->SubCode;
@@ -13571,7 +13214,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0x3F:
 		{
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -13630,7 +13273,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
     case 0xB1:
         {
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -13655,7 +13298,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0xB2:
 		{
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -13780,7 +13423,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
     case 0xB7:
         {
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -13814,7 +13457,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
     case 0xB8:
         {
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -13838,7 +13481,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
     case 0xB9:
         {
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -13875,7 +13518,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0xBD:
 		{
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -13956,7 +13599,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0xD1:
 		{
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -14016,7 +13659,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 	case 0xBF:
 		{
 			int subcode;
-			if( ReceiveBuffer[0] == 0xC1 )
+			if(bIsC1C3)
 			{
 				LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 				subcode = Data->SubCode;
@@ -14106,7 +13749,7 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 				{
 					int subcode = 0;
 					
-					if( ReceiveBuffer[0] == 0xC1 ) {
+					if(bIsC1C3) {
 						LPPHEADER_DEFAULT_SUBCODE Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
 						subcode = Data->SubCode;
 					}
@@ -14198,31 +13841,22 @@ BOOL TranslateProtocol( int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEncry
 			break;
 	}
 	
-	return ( TRUE);
+	//return ( TRUE);
 }
 
-void TranslateChattingProtocol(DWORD dwWindowUIID, int HeadCode, BYTE *ReceiveBuffer, int Size, BOOL bEcrypted)
+static void HandleIncomingPacketLocked(int32_t Handle, const BYTE * ReceiveBuffer, int32_t Size)
 {
-	switch( HeadCode )
+	g_render_lock->lock();
+	wglMakeCurrent(g_hDC, g_hRC);
+	try
 	{
-	case 0x00:
-		ReceiveChatRoomConnectResult(dwWindowUIID, ReceiveBuffer);
-		break;
-	case 0x01:
-		ReceiveChatRoomUserStateChange(dwWindowUIID, ReceiveBuffer);
-		break;
-	case 0x02:
-		ReceiveChatRoomUserList(dwWindowUIID, ReceiveBuffer);
-		break;
-	case 0x04:
-		ReceiveChatRoomChatText(dwWindowUIID, ReceiveBuffer);
-		break;
-	case 0x0D:
-		ReceiveChatRoomNoticeText(dwWindowUIID, ReceiveBuffer);
-		break;
-	default:
-		break;
+		HandleIncomingPacket(Handle, ReceiveBuffer, Size);
 	}
+	catch (const std::exception&)
+	{
+	}
+	wglMakeCurrent(nullptr, nullptr);
+	g_render_lock->unlock();
 }
 
 bool CheckExceptionBuff( eBuffState buff, OBJECT* o, bool iserase )

@@ -1220,7 +1220,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill( CHARACTER* c, OBJ
 	}
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill( BYTE* ReceiveBuffer )
+void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT data =(LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT)ReceiveBuffer;
 
@@ -1306,7 +1306,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill( BYTE* R
 	}
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill( BYTE* ReceiveBuffer )
+void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_CURSED_TEMPLE_SKILL_END data = (LPPMSG_CURSED_TEMPLE_SKILL_END)ReceiveBuffer;
 
@@ -1346,7 +1346,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill( BYTE*
 	}
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo( BYTE* ReceiveBuffer )
+void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_CURSED_TAMPLE_STATE data =(LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
 
@@ -1421,7 +1421,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo( BYTE* ReceiveB
 	}
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint( BYTE* ReceiveBuffer )
+void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_CURSED_TEMPLE_SKILL_POINT data = (LPPMSG_CURSED_TEMPLE_SKILL_POINT)ReceiveBuffer;
 
@@ -1436,7 +1436,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint( BYTE* Rece
 	m_SkillPoint = data->btSkillPoint;
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleHolyItemRelics( BYTE* ReceiveBuffer )
+void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_RELICS_GET_USER data = (LPPMSG_RELICS_GET_USER)ReceiveBuffer;
 }

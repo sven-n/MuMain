@@ -9,6 +9,7 @@
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "WSclient.h"
+#include "Dotnet/Connection.h"
 
 #define WM_CHATROOMMSG_BEGIN (WM_USER+0x100)
 #define WM_CHATROOMMSG_END (WM_USER+0x200)
@@ -98,6 +99,8 @@ protected:
 
 class CUIChatWindow : public CUIBaseWindow
 {
+	static void HandlePacketS(int32_t handle, const BYTE* ReceiveBuffer, int32_t Size);
+	Connection* _connection;
 public:
 	CUIChatWindow();
 	virtual ~CUIChatWindow();
@@ -110,7 +113,7 @@ public:
 	void AddChatText(BYTE byIndex, const char* pszText, int iType, int iColor);
 	void ConnectToChatServer(const char* pszIP, DWORD dwRoomNumber, DWORD dwTicket);
 	void DisconnectToChatServer();
-	CWsctlc * GetCurrentSocket();
+	Connection* GetCurrentSocket() { return _connection; }
 	GUILDLIST_TEXT * GetCurrentInvitePal() { return m_InvitePalListBox.GetSelectedText(); }
 	void UpdateInvitePalList();
 	int GetShowType() { return m_iShowType; }
@@ -322,37 +325,6 @@ protected:
 	CUIButton m_LetterButton;
 };
 
-struct CHATROOM_SOCKET
-{
-	DWORD m_dwRoomID;
-	CWsctlc m_WSClient;
-	DWORD m_dwWindowUIID;
-};
-
-class CChatRoomSocketList
-{
-public:
-	CChatRoomSocketList() { ClearChatRoomSocketList(); }
-	~CChatRoomSocketList() { ClearChatRoomSocketList(); }
-	BOOL AddChatRoomSocket(DWORD dwRoomID, DWORD dwWindowUIID, const char* pszIP);
-	void RemoveChatRoomSocket(DWORD dwRoomID);
-	void ClearChatRoomSocketList();
-	CHATROOM_SOCKET * GetChatRoomSocketData(DWORD dwRoomID);
-	void ProcessSocketMessage(DWORD dwSocketID, WORD wMessage);
-	void ProtocolCompile();
-private:
-	DWORD CreateChatRoomSocketID(DWORD dwRoomID);
-	DWORD GetChatRoomSocketID(DWORD dwSocketID);
-
-private:
-	BYTE m_bCurrectCreateID;
-	BYTE m_bChatRoomSocketStatus[256];
-	std::map<DWORD, DWORD, std::less<DWORD> > m_ChatRoomSocketStatusMap;
-	std::map<DWORD, DWORD, std::less<DWORD> >::iterator m_ChatRoomSocketStatusMapIter;
-
-	std::map<DWORD, CHATROOM_SOCKET *, std::less<DWORD> > m_ChatRoomSocketMap;
-	std::map<DWORD, CHATROOM_SOCKET *, std::less<DWORD> >::iterator m_ChatRoomSocketMapIter;
-};
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CUIChatRoomListTabWindow : public CUITabWindow

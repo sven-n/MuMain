@@ -92,7 +92,7 @@ namespace SEASON3B
 		void SetMyTeam( SEASON3A::eCursedTempleTeam myteam );
 
 	public:
-		void ReceiveCursedTempleGameResult( BYTE* ReceiveBuffer );
+		void ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer );
 		void ResetGameResultInfo();
 
 	private:

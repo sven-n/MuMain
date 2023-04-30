@@ -103,7 +103,7 @@ public:
 	virtual ~CQuestMng();
 
 	void LoadQuestScript();
-	void SetQuestRequestReward(BYTE* pbyRequestRewardPacket);
+	void SetQuestRequestReward(const BYTE* pbyRequestRewardPacket);
 	const SQuestRequestReward* GetRequestReward(DWORD dwQuestIndex);
 
 	void SetNPC(int nNPCIndex);

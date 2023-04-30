@@ -45,6 +45,7 @@
 #include "Input.h"
 #include "./Time/Timer.h"
 #include "UIMng.h"
+#include "./Dotnet/DotNetRuntime.h"
 
 #ifdef MOVIE_DIRECTSHOW
 #include <dshow.h>
@@ -65,8 +66,6 @@ CUITextInputBox * g_pSingleTextInputBox = NULL;
 CUITextInputBox * g_pSinglePasswdInputBox = NULL;
 int g_iChatInputType = 1;
 extern BOOL g_bIMEBlock;
-
-CChatRoomSocketList * g_pChatRoomSocketList = NULL;
 
 CMultiLanguage *pMultiLanguage = NULL;
 
@@ -167,23 +166,14 @@ extern char LogInID[];
 
 void CheckHack( void)
 {
-	#ifdef NEW_PROTOCOL_SYSTEM
-		gProtocolSend.SendCheckOnline();
-	#else
-		SendCheck();
-	#endif
+	SendCheck();
 }
 
 GLvoid KillGLWindow(GLvoid)								
 {
 	if (g_hRC)
 	{
-		if (!wglMakeCurrent(NULL,NULL))
-		{
-			g_ErrorReport.Write( "GL - Release Of DC And RC Failed\r\n");
-			MessageBox(NULL,"Release Of DC And RC Failed.","Error",MB_OK | MB_ICONINFORMATION);
-		}
-
+		wglMakeCurrent(nullptr, nullptr);
 		if (!wglDeleteContext(g_hRC))
 		{
 			g_ErrorReport.Write( "GL - Release Rendering Context Failed\r\n");
@@ -455,7 +445,6 @@ void DestroyWindow()
 	SAFE_DELETE(g_pSingleTextInputBox);
 	SAFE_DELETE(g_pSinglePasswdInputBox);
 
-	SAFE_DELETE(g_pChatRoomSocketList);
 	SAFE_DELETE(g_pUIMapName);	// rozy
 	SAFE_DELETE( g_pTimer );
 	SAFE_DELETE(g_pUIManager);
@@ -589,10 +578,6 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		case FD_CONNECT :
 			break;
 		case FD_READ :
-			SocketClient.nRecv();
-			break;
-		case FD_WRITE :
-			SocketClient.FDWriteSend();
 			break;
 		case FD_CLOSE :
 			g_pChatListBox->AddText("", GlobalText[3], SEASON3B::TYPE_SYSTEM_MESSAGE);
@@ -611,12 +596,12 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			}
 #endif // CONSOLE_DEBUG
-			SocketClient.Close();
 
-			#ifdef NEW_PROTOCOL_SYSTEM
-				gProtocolSend.DisconnectServer();
-			#endif	
-
+			if (SocketClient != nullptr)
+			{
+				SocketClient->Close();
+			}
+			
 			CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
 			break;
 		}
@@ -640,11 +625,10 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_DESTROY:
 		{
 			Destroy = true;
-			SocketClient.Close();
-
-			#ifdef NEW_PROTOCOL_SYSTEM
-				gProtocolSend.DisconnectServer();
-			#endif	
+			if (SocketClient != nullptr)
+			{
+				SocketClient->Close();
+			}
 
 			DestroySound();
 			//DestroyWindow();
@@ -656,52 +640,10 @@ LONG FAR PASCAL WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
     case WM_SETCURSOR:
         ShowCursor(false);
 		break;
-#if (defined WINDOWMODE)
-	case WM_SIZE:
-		if ( SIZE_MINIMIZED == wParam && g_bUseWindowMode == FALSE )
-		{
-			if ( !( g_bMinimizedEnabled))
-			{
-				DWORD dwMess[SIZE_ENCRYPTION_KEY];
-				for ( int i = 0; i < SIZE_ENCRYPTION_KEY; ++i)
-				{
-					dwMess[i] = GetTickCount();
-				}
-				g_SimpleModulusCS.LoadKeyFromBuffer( ( BYTE*)dwMess, FALSE, FALSE, FALSE, TRUE);
-			}
-		}
-		break;
-#else
-#ifdef NDEBUG
-#ifndef FOR_WORK
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-	case WM_SIZE:
-		if ( SIZE_MINIMIZED == wParam
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-			&& g_bUseWindowMode == FALSE
-#endif
-			)
-		{
-			if ( !( g_bMinimizedEnabled))
-			{
-				SendHackingChecked( 0x05, 0);
-				DWORD dwMess[SIZE_ENCRYPTION_KEY];
-				for ( int i = 0; i < SIZE_ENCRYPTION_KEY; ++i)
-				{
-					dwMess[i] = GetTickCount();
-				}
-				g_SimpleModulusCS.LoadKeyFromBuffer( ( BYTE*)dwMess, FALSE, FALSE, FALSE, TRUE);
-			}
-		}
-		break;
-#endif
-#endif
-#endif
-#endif	//WINDOWMODE(#else)
 //-----------------------------
 	default:
-		if (msg >= WM_CHATROOMMSG_BEGIN && msg < WM_CHATROOMMSG_END)
-			g_pChatRoomSocketList->ProcessSocketMessage(msg - WM_CHATROOMMSG_BEGIN, WSAGETSELECTEVENT(lParam));
+		//if (msg >= WM_CHATROOMMSG_BEGIN && msg < WM_CHATROOMMSG_END)
+		//	g_pChatRoomSocketList->ProcessSocketMessage(msg - WM_CHATROOMMSG_BEGIN, WSAGETSELECTEVENT(lParam));
 		break;
 	}
 
@@ -1216,6 +1158,7 @@ BOOL UpdateFile( char *lpszOld, char *lpszNew)
 
 #include <tlhelp32.h>
 
+
 BOOL KillExeProcess( char *lpszExe)
 {
 	HANDLE hProcessSnap = NULL; 
@@ -1315,10 +1258,63 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo )
 	return true;
 }
 
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
+MSG MainLoop()
 {
 	MSG msg;
+	while (1)
+	{
+		if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+		{
+			if (!GetMessage(&msg, NULL, 0, 0))
+			{
+				break;
+			}
 
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else
+		{
+			//Scene
+#if (defined WINDOWMODE)
+			if (g_bUseWindowMode || g_bWndActive)
+			{
+				Scene(g_hDC);
+			}
+#ifndef FOR_WORK
+			else if (g_bUseWindowMode == FALSE)
+			{
+				SetForegroundWindow(g_hWnd);
+				SetFocus(g_hWnd);
+
+				if (g_iInactiveWarning > 1)
+				{
+					SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, NULL);
+					PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+				}
+				else
+				{
+					g_iInactiveWarning++;
+					g_bMinimizedEnabled = TRUE;
+					ShowWindow(g_hWnd, SW_MINIMIZE);
+					g_bMinimizedEnabled = FALSE;
+					ShowWindow(g_hWnd, SW_MAXIMIZE);
+				}
+			}
+#endif//FOR_WORK
+#else//WINDOWMODE
+			if (g_bWndActive)
+				Scene(g_hDC);
+
+#endif	//WINDOWMODE(#else)
+		}
+	} // while( 1 )
+
+	return msg;
+}
+
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
+{
 	leaf::AttachExceptionHandler(ExceptionCallback);
 
 	char lpszExeVersion[256] = "unknown";
@@ -1369,12 +1365,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	{
 		return false;
 	}
-
-	// PKD_ADD_BINARY_PROTECTION
-	VM_START
-	g_SimpleModulusCS.LoadEncryptionKey( "Data\\Enc1.dat");
-	g_SimpleModulusSC.LoadDecryptionKey( "Data\\Dec2.dat");
-	VM_END
 
 	g_ErrorReport.Write( "> To read config.ini.\r\n");
 	if( OpenInitFile() == FALSE )
@@ -1452,13 +1442,24 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
 	//g_ErrorReport.WriteImeInfo( g_hWnd);
 	g_ErrorReport.AddSeparator();
-	
+
+	//g_dotnet = new DotNetRuntime();
+	if (g_dotnet->is_initialized())
+	{
+		g_ErrorReport.Write(".net runtime loaded :)");
+	}
+	else
+	{
+		g_ErrorReport.Write(".net runtime failed to load :(");
+	}
+
 	switch(WindowWidth)
 	{
-	case 640 :FontHeight = 12;break;
-	case 800 :FontHeight = 13;break;
-	case 1024:FontHeight = 14;break;
-	case 1280:FontHeight = 15;break;
+		case 640 :FontHeight = 12;break;
+		case 800 :FontHeight = 13;break;
+		case 1024:FontHeight = 14;break;
+		case 1280:FontHeight = 15;break;
+		default  :FontHeight = 15;break;
 	}
 	
 	int nFixFontHeight = 13;
@@ -1541,7 +1542,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		 g_pSinglePasswdInputBox = new CUITextInputBox;
 	}
 	
-	g_pChatRoomSocketList = new CChatRoomSocketList;
 	g_pUIManager = new CUIManager;
 	g_pUIMapName = new CUIMapName;	// rozy
 	g_pTimer = new CTimer();
@@ -1612,74 +1612,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	ProtectSysKey::AttachProtectSysKey(g_hInst, g_hWnd);
 #endif // !FOR_WORK
 #endif // PROTECT_SYSTEMKEY && NDEBUG
-	
-    while( 1 )
-    {
-        if( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
-        {
-            if( !GetMessage( &msg, NULL, 0, 0 ) )
-            {
-				break;
-            }
-            else
-			{
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-        }
-     	else 
-		{
-			//Scene
-#if (defined WINDOWMODE)
-			if (g_bUseWindowMode == TRUE)
-			{
-				Scene(g_hDC);
-			}
-			else if(g_bWndActive)
-			{
-		       	Scene(g_hDC);
-			}
-#ifndef FOR_WORK
-			else if (g_bUseWindowMode == FALSE)
-			{
-				SetForegroundWindow( g_hWnd);
-				SetFocus(g_hWnd);
 
-				if ( g_iInactiveWarning > 1)
-				{
-					SetTimer( g_hWnd, WINDOWMINIMIZED_TIMER, 1*1000, NULL);
-					PostMessage(g_hWnd, WM_CLOSE, 0, 0);
-				}
-				else
-				{
-					g_iInactiveWarning++;
-					g_bMinimizedEnabled = TRUE;
-					ShowWindow( g_hWnd, SW_MINIMIZE);
-					g_bMinimizedEnabled = FALSE;
-					ShowWindow( g_hWnd, SW_MAXIMIZE);
-				}
-			}
-#endif//FOR_WORK
-#else//WINDOWMODE
-			if(g_bWndActive)
-		       	Scene(g_hDC);
-
-#endif	//WINDOWMODE(#else)
-		}
-
-	#ifdef NEW_PROTOCOL_SYSTEM
-		if(SceneFlag < CHARACTER_SCENE)
-			ProtocolCompiler();
-
-		g_pChatRoomSocketList->ProtocolCompile();
-		gProtocolSend.RecvMessage();
-	#else
-		ProtocolCompiler();
-		g_pChatRoomSocketList->ProtocolCompile();
-	#endif
-
-		
-    } // while( 1 )
+	const MSG msg = MainLoop();
 
 	DestroyWindow();
 

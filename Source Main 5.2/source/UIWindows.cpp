@@ -25,11 +25,9 @@ extern int	 g_iChatInputType;
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
 extern CUITextInputBox * g_pSingleTextInputBox;
-extern CChatRoomSocketList * g_pChatRoomSocketList;
-extern CUITextInputBox * g_pSingleTextInputBox;
 extern DWORD g_dwTopWindow;
 extern DWORD g_dwKeyFocusUIID;
-extern void ReceiveLetterText(BYTE* ReceiveBuffer);
+extern void ReceiveLetterText(const BYTE* ReceiveBuffer);
 
 int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
@@ -1373,43 +1371,41 @@ void CUIChatWindow::Refresh()
 	g_dwKeyFocusUIID = m_PalListBox.GetUIID();
 }
 
-CWsctlc * CUIChatWindow::GetCurrentSocket()
+void CUIChatWindow::HandlePacketS(int32_t handle, const BYTE* ReceiveBuffer, int32_t Size)
 {
-	CHATROOM_SOCKET * pCRSocket = g_pChatRoomSocketList->GetChatRoomSocketData(m_dwRoomNumber);
-	if (pCRSocket != NULL) return &pCRSocket->m_WSClient;
-	else
-	{
-		assert(!"방 소켓 검색 실패!!!");
-		return NULL;
-	}
+	// todo: map connection handle to CUIChatWindow
+	//TranslateChattingProtocol(ReceiveBuffer, Size);
+	
 }
 
-void CUIChatWindow::ConnectToChatServer(const char * pszIP, DWORD dwRoomNumber, DWORD dwTicket)
+void CUIChatWindow::ConnectToChatServer(const char* pszIP, DWORD dwRoomNumber, DWORD dwTicket)
 {
 	m_dwRoomNumber = dwRoomNumber;
-	BOOL bResult = g_pChatRoomSocketList->AddChatRoomSocket(dwRoomNumber, GetUIID(), pszIP);
-	if (bResult == FALSE) return;
 
+	_connection = new Connection(pszIP, 55980, &HandlePacketS);
+
+	if (!_connection->IsConnected())
+	{
+		// todo: write message, that it failed?
+		return;
+	}
+
+	// Convert the ticket into a string:
 	char szTicketStr[11] = {0};
-
 	_ultoa_s(dwTicket, szTicketStr, 10);
-
 	szTicketStr[10] = '\0';
+	BuxConvert((BYTE*)szTicketStr, 10); // XOR3
 
-	BuxConvert((BYTE *)szTicketStr, 10);
-
-	CWsctlc * pSocket = GetCurrentSocket();
-	if (pSocket != NULL)
-		SendRequestCRConnectRoom(pSocket, dwRoomNumber, szTicketStr);
-	//SendRequestCRConnectRoom(GetCurrentSocket(), dwRoomNumber, dwTicket);
+	SendRequestCRConnectRoom(_connection, dwRoomNumber, szTicketStr);
 }
 
 void CUIChatWindow::DisconnectToChatServer()
 {
-	CWsctlc * pSocket = GetCurrentSocket();
-	if (pSocket != NULL)
-		SendRequestCRDisconnectRoom(pSocket);
-	g_pChatRoomSocketList->RemoveChatRoomSocket(m_dwRoomNumber);
+	if (_connection != nullptr)
+	{
+		SendRequestCRDisconnectRoom(_connection)
+		_connection->Close();
+	}
 }
 
 int CUIChatWindow::AddChatPal(const char * pszID, BYTE Number, BYTE Server)
@@ -1598,10 +1594,11 @@ BOOL CUIChatWindow::HandleMessage()
 
 				if (pszText[0] != '\0')
 				{
-					CWsctlc * pSocket = GetCurrentSocket();
 					int iSize = strlen(pszText);
-					if (pSocket != NULL)
-						SendRequestCRChatText(pSocket, 0, iSize, pszText);
+					if (_connection != nullptr)
+					{
+						SendRequestCRChatText(_connection, 0, iSize, pszText);
+					}
 				}
 			}
 
@@ -3597,8 +3594,11 @@ void CUIFriendListTabWindow::RefreshPalList()
 	m_PalListBox.Scrolling(0);
 }
 
-BOOL CChatRoomSocketList::AddChatRoomSocket(DWORD dwRoomID, DWORD dwWindowUIID, const char * pszIP)
+/*
+BOOL CChatRoomSocketList::AddChatRoomSocket(DWORD dwRoomID, DWORD dwWindowUIID, const std::string pszIP, void(*packetHandler)(int32_t Handle, const BYTE*, int32_t))
 {
+	int32_t usPort = 55980;
+
 	DWORD dwSocketID = CreateChatRoomSocketID(dwRoomID);
 	if (dwSocketID == -1) return FALSE;
 
@@ -3606,14 +3606,10 @@ BOOL CChatRoomSocketList::AddChatRoomSocket(DWORD dwRoomID, DWORD dwWindowUIID, 
 	pCRSocket = new CHATROOM_SOCKET;
 	pCRSocket->m_dwRoomID = dwRoomID;
 	pCRSocket->m_dwWindowUIID = dwWindowUIID;
-	pCRSocket->m_WSClient.Startup();
-#ifdef _DEBUG
-	pCRSocket->m_WSClient.LogPrintOn();
-#endif
-	pCRSocket->m_WSClient.Create(g_hWnd);
+	pCRSocket->m_WSClient = new Connection(pszIP, usPort, packetHandler);
 
-	unsigned short usPort = 55980;
-	if (pCRSocket->m_WSClient.Connect(const_cast<char*>(pszIP), usPort, WM_CHATROOMMSG_BEGIN + dwSocketID) == FALSE)
+	
+	if (!pCRSocket->m_WSClient->IsConnected())
 	{
 		assert(!"RemoveChatRoomSocket Connect!!!");
 		return FALSE;
@@ -3623,6 +3619,7 @@ BOOL CChatRoomSocketList::AddChatRoomSocket(DWORD dwRoomID, DWORD dwWindowUIID, 
 
 	return TRUE;
 }
+
 
 void CChatRoomSocketList::RemoveChatRoomSocket(DWORD dwRoomID)
 {
@@ -3708,13 +3705,147 @@ CHATROOM_SOCKET * CChatRoomSocketList::GetChatRoomSocketData(DWORD dwRoomID)
 		return NULL;
 	}
 	return m_ChatRoomSocketMapIter->second;
+}*/
+
+
+void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+{
+	LPFS_CHAT_JOIN_RESULT Data = (LPFS_CHAT_JOIN_RESULT)ReceiveBuffer;
+	switch (Data->Result)
+	{
+	case 0x00:
+		g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1058]);
+		break;
+	case 0x01:
+		break;
+	default:
+		break;
+	};
 }
 
+void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+{
+	LPFS_CHAT_CHANGE_STATE Data = (LPFS_CHAT_CHANGE_STATE)ReceiveBuffer;
+	CUIChatWindow* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
+	if (pChatWindow == NULL) return;
+	char szName[MAX_ID_SIZE + 1] = { 0 };
+	strncpy(szName, (const char*)Data->Name, MAX_ID_SIZE);
+	szName[MAX_ID_SIZE] = '\0';
+	char szText[MAX_TEXT_LENGTH + 1] = { 0 };
+	strncpy(szText, (const char*)Data->Name, MAX_ID_SIZE);
+	szText[MAX_ID_SIZE] = '\0';
+	switch (Data->Type)
+	{
+	case 0x00:
+		if (pChatWindow->AddChatPal(szName, Data->Index, 0) >= 3)
+		{
+			strcat(szText, GlobalText[1059]);
+			pChatWindow->AddChatText(255, szText, 1, 0);
+		}
+		break;
+	case 0x01:
+		if (pChatWindow->GetUserCount() >= 3)
+		{
+			strcat(szText, GlobalText[1060]);
+			pChatWindow->AddChatText(255, szText, 1, 0);
+		}
+		pChatWindow->RemoveChatPal(szName);
+		break;
+	default:
+		return;
+		break;
+	};
+	if (pChatWindow->GetShowType() == 2)
+		pChatWindow->UpdateInvitePalList();
+}
+
+void ReceiveChatRoomUserList(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+{
+	LPFS_CHAT_USERLIST_HEADER Header = (LPFS_CHAT_USERLIST_HEADER)ReceiveBuffer;
+	int iMoveOffset = sizeof(FS_CHAT_USERLIST_HEADER);
+	char szName[MAX_ID_SIZE + 1] = { 0 };
+	for (int i = 0; i < Header->Count; ++i)
+	{
+		LPFS_CHAT_USERLIST_DATA Data = (LPFS_CHAT_USERLIST_DATA)(ReceiveBuffer + iMoveOffset);
+		strncpy(szName, (const char*)Data->Name, MAX_ID_SIZE);
+		szName[MAX_ID_SIZE] = '\0';
+		((CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID))->AddChatPal(szName, Data->Index, 0);
+		iMoveOffset += sizeof(FS_CHAT_USERLIST_DATA);
+	}
+}
+
+void ReceiveChatRoomChatText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+{
+	LPFS_CHAT_TEXT Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
+	CUIChatWindow* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
+	if (pChatWindow == NULL) return;
+
+	char ChatMsg[MAX_CHATROOM_TEXT_LENGTH] = { '\0' };
+	if (Data->MsgSize >= MAX_CHATROOM_TEXT_LENGTH) return;
+
+	memcpy(ChatMsg, Data->Msg, Data->MsgSize);
+	BuxConvert((LPBYTE)ChatMsg, Data->MsgSize);
+
+	if (pChatWindow->GetState() == UISTATE_READY)
+	{
+		g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
+		g_pChatListBox->AddText("", GlobalText[1063], SEASON3B::TYPE_SYSTEM_MESSAGE);
+		pChatWindow->SetState(UISTATE_HIDE);
+		if (g_pWindowMgr->GetFriendMainWindow() != NULL)
+		{
+			g_pWindowMgr->GetFriendMainWindow()->AddWindow(dwWindowUIID, g_pWindowMgr->GetWindow(dwWindowUIID)->GetTitle());
+		}
+	}
+	else if (pChatWindow->GetState() == UISTATE_HIDE || g_pWindowMgr->GetTopWindowUIID() != dwWindowUIID)
+	{
+		g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
+	}
+	pChatWindow->AddChatText(Data->Index, (char*)ChatMsg, 3, 0);
+}
+
+void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+{
+	LPFS_CHAT_TEXT Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
+	Data->Msg[99] = '\0';
+	if (Data->Msg[0] == '\0')
+	{
+		return;
+	}
+
+	g_pChatListBox->AddText("", (char*)Data->Msg, SEASON3B::TYPE_SYSTEM_MESSAGE);
+}
+
+void TranslateChattingProtocol(DWORD dwWindowUIID, int HeadCode, BYTE* ReceiveBuffer, int Size, BOOL bEcrypted)
+{
+	switch (HeadCode)
+	{
+	case 0x00:
+		ReceiveChatRoomConnectResult(dwWindowUIID, ReceiveBuffer);
+		break;
+	case 0x01:
+		ReceiveChatRoomUserStateChange(dwWindowUIID, ReceiveBuffer);
+		break;
+	case 0x02:
+		ReceiveChatRoomUserList(dwWindowUIID, ReceiveBuffer);
+		break;
+	case 0x04:
+		ReceiveChatRoomChatText(dwWindowUIID, ReceiveBuffer);
+		break;
+	case 0x0D:
+		ReceiveChatRoomNoticeText(dwWindowUIID, ReceiveBuffer);
+		break;
+	default:
+		break;
+	}
+}
+
+/*
 void CChatRoomSocketList::ProcessSocketMessage(DWORD dwSocketID, WORD wMessage)
 {
 	CHATROOM_SOCKET * pChatroomSocket = GetChatRoomSocketData(GetChatRoomSocketID(dwSocketID));
 	if (pChatroomSocket == NULL) return;
-	CWsctlc * pSocketClient = &pChatroomSocket->m_WSClient;
+	Connection* pSocketClient = &pChatroomSocket->m_WSClient;
+
 	if (pSocketClient == NULL)
 	{
 		return;
@@ -3724,10 +3855,10 @@ void CChatRoomSocketList::ProcessSocketMessage(DWORD dwSocketID, WORD wMessage)
 	case FD_CONNECT:
 		break;
 	case FD_READ :
-		pSocketClient->nRecv();
+		// pSocketClient->nRecv();
 		break;
 	case FD_WRITE :
-		pSocketClient->FDWriteSend();
+		// pSocketClient->FDWriteSend();
 		break;
 	case FD_CLOSE :
 		CUIChatWindow * pWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(pChatroomSocket->m_dwWindowUIID);
@@ -3738,13 +3869,15 @@ void CChatRoomSocketList::ProcessSocketMessage(DWORD dwSocketID, WORD wMessage)
 	}
 }
 
-void CChatRoomSocketList::ProtocolCompile()
-{
-	for (m_ChatRoomSocketMapIter = m_ChatRoomSocketMap.begin(); m_ChatRoomSocketMapIter != m_ChatRoomSocketMap.end(); ++m_ChatRoomSocketMapIter)
-	{
-		ProtocolCompiler(&m_ChatRoomSocketMapIter->second->m_WSClient, 1, m_ChatRoomSocketMapIter->second->m_dwWindowUIID);
-	}
-}
+//void CChatRoomSocketList::ProtocolCompile()
+//{
+//	// TODO: Change that
+//	for (m_ChatRoomSocketMapIter = m_ChatRoomSocketMap.begin(); m_ChatRoomSocketMapIter != m_ChatRoomSocketMap.end(); ++m_ChatRoomSocketMapIter)
+//	{
+//		ProtocolCompiler(&m_ChatRoomSocketMapIter->second->m_WSClient, 1, m_ChatRoomSocketMapIter->second->m_dwWindowUIID);
+//	}
+//}
+*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUIChatRoomListTabWindow::Init(const char * pszTitle, DWORD dwParentID)
@@ -5486,15 +5619,16 @@ DWORD CUIFriendMenu::CheckChatRoomDuplication(const char * pszTargetName)
 
 void CUIFriendMenu::SendChatRoomConnectCheck()
 {
-	CUIChatWindow * pChatWindow = NULL;
 	for (m_WindowListIter = m_WindowList.begin(); m_WindowListIter != m_WindowList.end(); ++m_WindowListIter)
 	{
-		pChatWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(*m_WindowListIter);
+		CUIChatWindow* pChatWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(*m_WindowListIter);
 		if (pChatWindow != NULL)
 		{
-			CWsctlc * pSocket = pChatWindow->GetCurrentSocket();
+			Connection* pSocket = pChatWindow->GetCurrentSocket();
 			if (pSocket != NULL)
+			{
 				SendRequestCRConnectCheck(pSocket);
+			}
 		}
 	}
 }

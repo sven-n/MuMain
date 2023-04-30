@@ -16,7 +16,7 @@
 #include "wsclientinline.h"
 #include "DSPlaySound.h"
 #include "./Utilities/Log/muConsoleDebug.h"
-#include "ProtocolSend.h"
+
 #include "ServerListManager.h"
 
 #define	LIW_ACCOUNT		0
@@ -222,13 +222,8 @@ void CLoginWin::RequestLogin()
 
 			g_ErrorReport.Write("> Login Request.\r\n");
 			g_ErrorReport.Write("> Try to Login \"%s\"\r\n", szID);
-			// SendRequestLogIn()
-
-			#ifdef NEW_PROTOCOL_SYSTEM
-				gProtocolSend.SendRequestLogInNew(szID, szPass);
-			#else
-				SendRequestLogIn(szID, szPass);
-			#endif
+			
+			SendRequestLogIn(szID, szPass);
  			
 		}
 	}
@@ -242,10 +237,6 @@ void CLoginWin::CancelLogin()
 
 void CLoginWin::ConnectConnectionServer()
 {
-	#ifdef NEW_PROTOCOL_SYSTEM
-		gProtocolSend.DisconnectServer();
-	#endif
-
 	LogIn = 0;
 	CurrentProtocolState = REQUEST_JOIN_SERVER;
     CreateSocket(szServerIpAddress, g_ServerPort);

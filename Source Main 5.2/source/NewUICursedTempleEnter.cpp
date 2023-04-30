@@ -344,13 +344,13 @@ void SEASON3B::CNewUICursedTempleEnter::RenderButtons()
 }
 
 //ServerMessage
-void SEASON3B::CNewUICursedTempleEnter::SetCursedTempleEnterInfo( BYTE* cursedtempleinfo )
+void SEASON3B::CNewUICursedTempleEnter::SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo )
 {
 	m_EnterTime  = static_cast<int>(cursedtempleinfo[0]);
 	m_EnterCount = static_cast<int>(cursedtempleinfo[1]);
 }
 
-void SEASON3B::CNewUICursedTempleEnter::ReceiveCursedTempleEnterInfo( BYTE* ReceiveBuffer )
+void SEASON3B::CNewUICursedTempleEnter::ReceiveCursedTempleEnterInfo(const BYTE* ReceiveBuffer )
 {
 	LPPMSG_CURSED_TEMPLE_USER_COUNT data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
 

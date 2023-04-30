@@ -68,6 +68,9 @@
 #include <chrono>
 #include <thread>
 
+#include "../SpinLock.h"
+
+class SpinLock;
 extern CUITextInputBox * g_pSingleTextInputBox;
 extern CUITextInputBox * g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
@@ -90,6 +93,8 @@ int 	g_iBackupTime = 0;
 float	g_fMULogoAlpha = 0;
 
 
+
+
    // extern CGuildCache g_GuildCache;
 
 extern float g_fSpecialHeight;
@@ -107,7 +112,7 @@ int g_iLengthAuthorityCode = 20;
 
 char *szServerIpAddress = "127.127.127.127";
 //char *szServerIpAddress = "210.181.89.215";
-WORD g_ServerPort = 55901;
+WORD g_ServerPort = 55900;
 
 #ifdef MOVIE_DIRECTSHOW
 int  SceneFlag = MOVIE_SCENE;
@@ -1273,12 +1278,7 @@ void NewMoveLogInScene()
 		CCameraMove::GetInstancePtr()->SetTourMode(FALSE);
 
 		SceneFlag = CHARACTER_SCENE;
-
-		#ifdef NEW_PROTOCOL_SYSTEM
-			gProtocolSend.SendRequestCharactersListNew();
-		#else
-			SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
-		#endif
+		SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
 
         ReleaseLogoSceneData();
 
@@ -1622,11 +1622,7 @@ bool MoveMainCamera()
 			PathX[0] = (BYTE)(Hero->Object.Position[0]/TERRAIN_SCALE);
 			PathY[0] = (BYTE)(Hero->Object.Position[1]/TERRAIN_SCALE);
 
-			#ifdef NEW_PROTOCOL_SYSTEM
-				gProtocolSend.SendCharacterMoveNew(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,PathX[0],PathY[0]);
-			#else
-				SendCharacterMove(Hero->Key,Hero->Object.Angle[2],1,PathX,PathY,PathX[0],PathY[0]);
-			#endif
+			SendCharacterMove(Hero->Key, Hero->Object.Angle[2], 1, PathX, PathY, PathX[0], PathY[0]);
 
             Hero->Path.PathNum = 0;
 		}
@@ -2402,20 +2398,24 @@ void MainScene(HDC hDC)
 
 	bool Success = false;
 
-	if(SceneFlag == LOG_IN_SCENE)
-	{
-		Success = NewRenderLogInScene(hDC);
-	}
-	else if(SceneFlag == CHARACTER_SCENE)
-	{
-		Success = NewRenderCharacterScene(hDC);
-	}
-	else if(SceneFlag == MAIN_SCENE)
-	{
-		Success = RenderMainScene();
-	}
+	//g_render_lock->lock();
+    try
+    {
+		if (SceneFlag == LOG_IN_SCENE)
+		{
+			Success = NewRenderLogInScene(hDC);
+		}
+		else if (SceneFlag == CHARACTER_SCENE)
+		{
+			Success = NewRenderCharacterScene(hDC);
+		}
+		else if (SceneFlag == MAIN_SCENE)
+		{
+			Success = RenderMainScene();
+		}
 
-	g_PhysicsManager.Render();
+		g_PhysicsManager.Render();
+
 
 	if(GrabEnable)
 	{
@@ -2463,11 +2463,7 @@ void MainScene(HDC hDC)
 
 	if(EnableSocket && SceneFlag==MAIN_SCENE)
 	{
-	#ifdef NEW_PROTOCOL_SYSTEM
-		if(!gProtocolSend.CheckConnected())
-	#else
-		if( SocketClient.GetSocket()==INVALID_SOCKET)
-	#endif
+		if( SocketClient == nullptr || !SocketClient->IsConnected())
 		{
 			static BOOL s_bClosed = FALSE;
 			if ( !s_bClosed)
@@ -2752,6 +2748,13 @@ void MainScene(HDC hDC)
 		g_Karutan1.PlayBGM();
 #endif	// ASG_ADD_MAP_KARUTAN
 	}
+
+			}
+			catch (const std::exception&)
+			{
+			}
+
+			//g_render_lock->unlock();
 	TimeRemain = DifTimer;
 }
 
@@ -2763,31 +2766,44 @@ extern GLvoid KillGLWindow(GLvoid);
 
 void Scene(HDC hDC)
 {
-	g_Luminosity = sinf(WorldTime*0.004f)*0.15f+0.6f;
-	switch(SceneFlag)
+	g_render_lock->lock();
+	wglMakeCurrent(hDC, g_hRC);
+	try
 	{
-#ifdef MOVIE_DIRECTSHOW
-	case MOVIE_SCENE:
-		MovieScene(hDC);
-		break;
-#endif // MOVIE_DIRECTSHOW
-	case WEBZEN_SCENE:
-        WebzenScene(hDC);
-		break;
-	case LOADING_SCENE:
-      	LoadingScene(hDC);
-		break;
-	case LOG_IN_SCENE:
-	case CHARACTER_SCENE:
-	case MAIN_SCENE:
-		MainScene(hDC);
-		break;
+
+		g_Luminosity = sinf(WorldTime*0.004f)*0.15f+0.6f;
+		switch(SceneFlag)
+		{
+	#ifdef MOVIE_DIRECTSHOW
+		case MOVIE_SCENE:
+			MovieScene(hDC);
+			break;
+	#endif // MOVIE_DIRECTSHOW
+		case WEBZEN_SCENE:
+	        WebzenScene(hDC);
+			break;
+		case LOADING_SCENE:
+      		LoadingScene(hDC);
+			break;
+		case LOG_IN_SCENE:
+		case CHARACTER_SCENE:
+		case MAIN_SCENE:
+			MainScene(hDC);
+			break;
+		}
+
+		if ( g_iNoMouseTime > 31)
+		{
+			KillGLWindow();
+		}
+
+	}
+	catch (const std::exception&)
+	{
 	}
 
-	if ( g_iNoMouseTime > 31)
-	{
-		KillGLWindow();
-	}
+	wglMakeCurrent(nullptr, nullptr);
+	g_render_lock->unlock();
 }
 
 bool GetTimeCheck(int DelayTime)
