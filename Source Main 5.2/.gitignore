@@ -20,4 +20,5 @@
 .build/
 *.txt
 *.jpg
+*.wav
 build/bin/x86/Global Debug/Main.exe
