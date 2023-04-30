@@ -6936,17 +6936,17 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		glColor3f ( 0.3f, 0.3f, 1.f );
 		sprintf(Name, ItemAttribute[ITEM_WING+34].Name);	
 	}
-	else if(o->Type == ITEM_HELPER+49)
+	else if(o->Type == MODEL_HELPER+49)
 	{
 		glColor3f ( 1.f, 0.8f, 0.1f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+49].Name);
 	}
-	else if(o->Type == ITEM_HELPER+50)
+	else if(o->Type == MODEL_HELPER +50)
 	{
 		glColor3f ( 1.f, 0.8f, 0.1f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+50].Name);
 	}
-	else if(o->Type == ITEM_HELPER+51)
+	else if(o->Type == MODEL_HELPER +51)
 	{
 		glColor3f ( 1.f, 0.8f, 0.1f );
 		sprintf(Name, ItemAttribute[ITEM_HELPER+51].Name);
