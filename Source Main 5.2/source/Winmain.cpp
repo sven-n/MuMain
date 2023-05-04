@@ -841,7 +841,7 @@ bool CreateOpenglWindow()
 
 HWND StartWindow(HINSTANCE hCurrentInst,int nCmdShow)
 {
-    char *windowName = "MU - Louis";
+    char *windowName = "MU Online";
 
     WNDCLASS wndClass;
     HWND hWnd;

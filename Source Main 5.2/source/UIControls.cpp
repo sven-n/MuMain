@@ -3223,7 +3223,8 @@ void CUITextInputBox::SetText(const char * pszText)
 {
 	if (pszText == NULL)
 	{
-		SetWindowTextW(m_hEditWnd, L"");
+		const auto strText = L"";
+		PostMessageW(m_hEditWnd, WM_SETTEXT, 0, (LPARAM)&strText);
 		return ;
 	}
 	
