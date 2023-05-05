@@ -171,6 +171,7 @@ BOOL CreateSocket(char* IpAddr, unsigned short Port)
 	g_byPacketSerialRecv = 0;
 	g_ConsoleDebug->Write(MCD_NORMAL, "[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
 	SocketClient = new Connection(IpAddr, Port, &HandleIncomingPacketLocked);
+	g_pSocketClient = SocketClient;
 	if (!SocketClient->IsConnected())
 	{
 		bResult = FALSE;
