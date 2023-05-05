@@ -74,10 +74,17 @@ public unsafe class ConnectionManager
     {
         if (Connections.TryGetValue(handle, out var connection))
         {
-            var bytes = new Span<byte>(data, count);
-            bytes.SetPacketSize();
-            connection.Send(bytes);
-            Console.WriteLine("Sent {0} bytes with handle {1}", count, handle);
+            try
+            {
+                var bytes = new Span<byte>(data, count);
+                bytes.SetPacketSize();
+                connection.Send(bytes);
+                Console.WriteLine("Sent {0} bytes with handle {1}", count, handle);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending {0} bytes with handle {1}: {2}", count, handle, ex);
+            }
         }
         else
         {
