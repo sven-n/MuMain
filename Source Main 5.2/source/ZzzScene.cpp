@@ -2245,7 +2245,7 @@ bool RenderMainScene()
 	return true;
 }
 
-int TimeRemain = 40;
+
 extern int ChatTime;
 extern int WaterTextureNumber;
 
@@ -2254,15 +2254,16 @@ extern int  GrabScreen;
 
 void MoveCharacter(CHARACTER *c,OBJECT *o);
 
-int TimePrior = GetTickCount();
+constexpr int target_fps = 30;
+constexpr int ms_per_frame = 1000 / target_fps;
+
+uint64_t current_tick_count = GetTickCount64();
 
 void MainScene(HDC hDC)
 {
    	CalcFPS();
 	
-	int32_t Remain = 0;
-
-	for (Remain = TimeRemain; Remain >= 40; Remain -= 40)
+	for (int32_t remain = ms_per_frame; remain >= ms_per_frame; remain -= ms_per_frame)
 	{
 		g_pNewKeyInput->ScanAsyncKeyState();
 
@@ -2307,6 +2308,9 @@ void MainScene(HDC hDC)
 			else
 				GrabEnable = true;
 		}
+
+		// TODO: Refactor the depending code of these frame counting things
+		//       so they use the actual time instead. See also 'WorldTime'.
         if(ChatTime > 0) ChatTime--;
 		if(MacroTime > 0) MacroTime--;
 		WaterTextureNumber++;
@@ -2392,9 +2396,8 @@ void MainScene(HDC hDC)
 		
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-	int32_t DifTimer = 0;
-	uint32_t LastTimeCurrent = TimePrior;
-	TimePrior = GetTickCount();
+	const uint64_t last_render_tick_count = current_tick_count;
+	current_tick_count = GetTickCount64();
 
 	bool Success = false;
 
@@ -2449,19 +2452,13 @@ void MainScene(HDC hDC)
 		SwapBuffers(hDC);
 	}
 
-	DifTimer = TimePrior - LastTimeCurrent;
-	constexpr int TargetFps = 30;
-	constexpr int MsPerFrame = 1000 / TargetFps;
-	if (DifTimer < MsPerFrame)
+	const uint64_t current_frame_time_ms = current_tick_count - last_render_tick_count;
+	if (current_frame_time_ms < ms_per_frame)
 	{
-		int32_t dwMilliseconds = MsPerFrame - DifTimer;
-		Sleep(dwMilliseconds);
-		//std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds)); 
-		TimePrior += dwMilliseconds;
-		DifTimer = MsPerFrame;
+		const uint64_t rest_ms = ms_per_frame - current_frame_time_ms;
+		std::this_thread::sleep_for(std::chrono::milliseconds(rest_ms));
+		current_tick_count += rest_ms;
 	}
-
-	DifTimer = DifTimer + Remain;
 
 	if(EnableSocket && SceneFlag==MAIN_SCENE)
 	{
@@ -2755,9 +2752,6 @@ void MainScene(HDC hDC)
 			catch (const std::exception&)
 			{
 			}
-
-			//g_render_lock->unlock();
-	TimeRemain = DifTimer;
 }
 
 float g_Luminosity;
