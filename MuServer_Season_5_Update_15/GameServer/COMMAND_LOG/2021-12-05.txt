@@ -1,2 +1,0 @@
-23:28:52 [CommandChange][louismk4][NewChar2] - (ChangeUp: 0)
-23:28:55 [CommandChange][louismk4][NewChar2] - (ChangeUp: 1)

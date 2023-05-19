@@ -1,7 +1,0 @@
-17:11:53 [CommandSpot][louismk][LuisADM] - (Monster: 371, Qtd: 1)
-18:08:40 [CommandMake][louismk][LuisADM] - (Section: 12, Type: 136, Level: 0, Skill: 0, Luck: 0, Option: 0, Exc: 0, Set: 0, Sockets: 0, [Amount: 1])
-18:09:34 [Command Clear Iventory] Use for:[louismk][LuisADM]
-18:09:45 [Command Clear Iventory] Use for:[louismk][LuisADM]
-18:09:46 [CommandMake][louismk][LuisADM] - (Section: 12, Type: 136, Level: 0, Skill: 0, Luck: 0, Option: 0, Exc: 0, Set: 0, Sockets: 0, [Amount: 1])
-19:03:16 [CommandMake][louismk][LuisADM] - (Section: 13, Type: 22, Level: 0, Skill: 0, Luck: 0, Option: 0, Exc: 0, Set: 0, Sockets: 0, [Amount: 1])
-19:03:43 [CommandMake][louismk][LuisADM] - (Section: 12, Type: 30, Level: 0, Skill: 0, Luck: 0, Option: 0, Exc: 0, Set: 0, Sockets: 0, [Amount: 1])

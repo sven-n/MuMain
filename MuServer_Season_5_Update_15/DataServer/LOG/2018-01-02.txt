@@ -1,3 +1,0 @@
-22:59:00 [ServerManager][0] AddServer (127.0.0.1)
-22:59:00 [ServerManager][0] ServerInfo (MuEMU) (55901) (0)
-23:33:03 [ServerManager][0] DelServer (127.0.0.1)

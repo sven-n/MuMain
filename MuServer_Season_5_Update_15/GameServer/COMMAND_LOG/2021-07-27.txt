@@ -1,3 +1,0 @@
-18:46:37 [CommandMake][louismk][LuisADM] - (Section: 7, Type: 1, Level: 15, Skill: 1, Luck: 1, Option: 7, Exc: 63, Set: 0, Sockets: 0, [Amount: 1])
-18:46:47 [CommandMake][louismk][LuisADM] - (Section: 7, Type: 1, Level: 15, Skill: 1, Luck: 1, Option: 7, Exc: 63, Set: 5, Sockets: 0, [Amount: 1])
-18:47:09 [CommandMake][louismk][LuisADM] - (Section: 7, Type: 1, Level: 15, Skill: 1, Luck: 1, Option: 7, Exc: 63, Set: 6, Sockets: 0, [Amount: 1])

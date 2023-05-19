@@ -1,3 +1,0 @@
-//Account         Name         Level
-"louismk" "LuisADM" 2
-end

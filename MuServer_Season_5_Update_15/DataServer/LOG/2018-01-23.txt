@@ -1,3 +1,0 @@
-00:46:46 [ServerManager][0] DelServer (127.0.0.1)
-00:56:15 [ServerManager][0] AddServer (127.0.0.1)
-00:56:15 [ServerManager][0] ServerInfo (JogandoMU) (55901) (11)

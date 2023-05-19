@@ -1,3 +1,0 @@
-//Message                                                            Type   Count   Opacity   Delay   Red   Green   Blue   Speed   RepeatTime
-"www.perfectzone.com.br"                                                  0      0       0         0       0     0       0      0       60
-end

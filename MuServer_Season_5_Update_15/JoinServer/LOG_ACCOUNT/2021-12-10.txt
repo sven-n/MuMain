@@ -1,8 +1,0 @@
-00:39:25 [AccountInfo] Account connected (Account: louismk, IpAddress: 192.168.0.104, GameServerCode: 0)
-00:39:32 [AccountInfo] Account disconnected (Account: louismk, IpAddress: 192.168.0.104, GameServerCode: 0)
-00:59:43 [AccountInfo] Account connected (Account: louismk, IpAddress: 192.168.0.104, GameServerCode: 0)
-00:59:47 [AccountInfo] Account disconnected (Account: louismk, IpAddress: 192.168.0.104, GameServerCode: 0)
-00:59:51 [AccountInfo] Account connected (Account: louismk4, IpAddress: 192.168.0.104, GameServerCode: 0)
-01:00:20 [AccountInfo] Account disconnected (Account: louismk4, IpAddress: 192.168.0.104, GameServerCode: 0)
-01:00:24 [AccountInfo] Account connected (Account: louismk, IpAddress: 192.168.0.104, GameServerCode: 0)
-01:00:45 [AccountInfo] Account disconnected (Account: louismk, IpAddress: 192.168.0.104, GameServerCode: 0)

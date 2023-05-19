@@ -1,6 +1,0 @@
-00:11:01 [ServerList] GameServer offline (GameServer) (0)
-09:33:57 [ServerList] GameServer online (GameServer) (0)
-16:35:47 [ServerList] GameServer offline (GameServer) (0)
-18:46:21 [ServerList] JoinServer offline
-18:46:22 [ServerList] JoinServer online
-19:53:27 [ServerList] GameServer online (GameServer) (0)

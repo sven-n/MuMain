@@ -1,2 +1,0 @@
-22:26:21 [ServerInfo] CashShop loaded successfully
-22:26:21 [ServerInfo] ChaosMix loaded successfully

@@ -1,3 +1,0 @@
-08:25:04 [SocketManager] Server started at port [55960]
-08:25:39 [ServerManager][0] AddServer (127.0.0.1)
-08:25:39 [ServerManager][0] ServerInfo (MuEMU) (55901) (0)

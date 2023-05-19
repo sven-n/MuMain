@@ -1,5 +1,0 @@
-//Command Rename - Block name or part of the name
-//Max 10 caracters
-//Label
-"[gm]"
-end

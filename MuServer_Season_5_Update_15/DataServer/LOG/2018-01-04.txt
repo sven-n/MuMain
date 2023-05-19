@@ -1,9 +1,0 @@
-22:59:08 [ServerManager][0] DelServer (127.0.0.1)
-22:59:43 [SocketManager] Server started at port [55960]
-23:21:22 [ServerManager][0] AddServer (127.0.0.1)
-23:21:22 [ServerManager][0] ServerInfo (MuEMU) (55901) (0)
-23:24:29 [SocketManager] Server started at port [55960]
-23:24:32 [ServerManager][0] AddServer (127.0.0.1)
-23:24:32 [ServerManager][0] ServerInfo (MuEMU) (55901) (0)
-23:32:22 EXEC WZ_GetCoin 'louismk'
-23:32:22 [QueryManager] State (42S22), Diagnostic: [Microsoft][SQL Server Native Client 11.0][SQL Server]Nome de coluna 'Cash' inválido.

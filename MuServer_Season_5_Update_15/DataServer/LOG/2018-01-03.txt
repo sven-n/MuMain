@@ -1,2 +1,0 @@
-18:38:15 [ServerManager][0] AddServer (127.0.0.1)
-18:38:15 [ServerManager][0] ServerInfo (MuEMU) (55901) (0)

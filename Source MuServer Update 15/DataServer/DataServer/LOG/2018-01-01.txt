@@ -1,2 +1,0 @@
-19:33:42 Could not connect to database
-19:34:06 Could not connect to database

@@ -1,5 +1,0 @@
-16:27:37 [Connection] connect() failed with error: 10061
-16:27:47 [Connection] connect() failed with error: 10061
-16:27:49 [Connection] connect() failed with error: 10061
-16:27:57 [Connection] connect() failed with error: 10061
-16:27:59 [Connection] connect() failed with error: 10061
