@@ -10,7 +10,7 @@ What has been done by me yet:
     to apply changes. I embedded a .NET 7 runtime for that and had to adapt some
     code to allow async networking.
   * Network protocol has been adapted for season 6 episode 3 - there are probably
-    still some things to do, but it connects to [OpenMU]() and is playable.
+    still some things to do, but it connects to [OpenMU](https://github.com/MUnique/OpenMU) and is playable.
   * The frame rate has been increased to 30 fps. However, some further adaptions
     are required so that some animations (which rely on frame counting) run at
     normal speed. If that's solved, we can go even higher.
