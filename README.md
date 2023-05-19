@@ -6,8 +6,8 @@ The ultimate goal is to clean it up and make it compatible and feature complete
 to Season 6 Episode 3.
 
 What I have done so far:
-  * Replaced the network stack with MUnique.OpenMU.Network to make it easier to make
-    to apply changes. I included a .NET 7 runtime for this and had to change some
+  * Replaced the network stack with MUnique.OpenMU.Network to make it easier to
+    apply changes. I included a .NET 7 runtime for this and had to change some
     code to allow async networking.
   * The network protocol has been adapted for Season 6 Episode 3 - there is probably
     still some work to do, but it connects to [OpenMU](https://github.com/MUnique/OpenMU)
