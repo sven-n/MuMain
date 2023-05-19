@@ -3,7 +3,6 @@
 Source MuServer Update 15/GameServer/.vs/GameServer/v16/Browse.VC.db
 Source MuServer Update 15/GameServer/.vs/GameServer/v16/ipch/632af44e4d05f982.ipch
 *.ipch
-*.obj
 Source MuServer Update 15/GameServer/GameServer/Release/GameServer_EX401/WindowsConsole.obj
 Source MuServer Update 15/GameServer/GameServer/Release/GameServer_EX401/Warehouse.obj
 Source MuServer Update 15/GameServer/GameServer/Release/GameServer_EX401/Viewport.obj
