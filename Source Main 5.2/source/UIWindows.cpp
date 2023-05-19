@@ -2443,10 +2443,10 @@ BOOL CUIPhotoViewer::DoMouseAction()
 }
 
 extern int TextNum;
-extern char TextList[30][100];
-extern int  TextListColor[30];
-extern int  TextBold[30];
-extern SIZE Size[30];
+extern char TextList[50][100];
+extern int  TextListColor[50];
+extern int  TextBold[50];
+extern SIZE Size[50];
 
 void CUIPhotoViewer::Render()
 {

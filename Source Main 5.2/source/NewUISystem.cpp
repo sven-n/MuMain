@@ -467,6 +467,10 @@ bool SEASON3B::CNewUISystem::LoadMainSceneInterface()
 		return false;
 #endif // LEM_ADD_LUCKYITEM
 
+	m_pNewUIMuHelper = new CNewUIMuHelper;
+	if(m_pNewUIMuHelper->Create(m_pNewUIMng, 640-190, 0) == false)
+		return false;
+
 	return true;
 }
 
@@ -2127,3 +2131,8 @@ CNewUILuckyItemWnd* SEASON3B::CNewUISystem::Get_pNewUILuckyItemWnd() const
 	return m_pNewUILuckyItemWnd;
 }
 #endif // LEM_ADD_LUCKYITEM
+
+CNewUIMuHelper* SEASON3B::CNewUISystem::Get_pNewUIMuHelper() const
+{
+	return m_pNewUIMuHelper;
+}

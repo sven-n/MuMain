@@ -148,14 +148,10 @@ typedef struct
 typedef struct
 {
 	char Name[30];
-	WORD TwoHand;
+	bool TwoHand;
 	WORD Level;
-	WORD m_byItemSlot;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
+	BYTE m_byItemSlot;
 	WORD m_wSkillIndex;
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-	WORD m_bySkillIndex;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	BYTE Width;
 	BYTE Height;
 	BYTE DamageMin;
@@ -171,13 +167,13 @@ typedef struct
 	WORD RequireStrength;
 	WORD RequireDexterity;
 	WORD RequireEnergy;
-	WORD  RequireVitality;
+	WORD RequireVitality;
 	WORD RequireCharisma;
 	WORD RequireLevel;
-	WORD Value;
+	BYTE Value;
 	int  iZen;
 	BYTE  AttType;
-	BYTE RequireClass[MAX_CLASS+1];
+	BYTE RequireClass[MAX_CLASS];
 	BYTE Resistance[MAX_RESISTANCE+1];
 } ITEM_ATTRIBUTE;
 
@@ -221,11 +217,7 @@ typedef struct tagITEM
 	WORD  RequireCharisma;
 	WORD  RequireLevel;
 	BYTE  SpecialNum;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	WORD  Special     [MAX_ITEM_SPECIAL];
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-	BYTE  Special     [MAX_ITEM_SPECIAL];
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	BYTE  SpecialValue[MAX_ITEM_SPECIAL];
 	DWORD Key;	//client olny
 	
@@ -298,6 +290,34 @@ typedef struct
 	MONSTER_ATTRIBUTE Attribute;
 } MONSTER;
 
+
+typedef struct
+{
+	/*+00*/	char Name[32];
+	/*+32*/	WORD Level;
+	/*+34*/	WORD Damage;
+	/*+36*/	WORD Mana;
+	/*+38*/	WORD AbilityGuage;
+	/*+40*/	DWORD Distance;
+	/*+44*/	int Delay;
+	/*+48*/	int Energy;
+	/*+52*/	WORD Charisma;
+	/*+54*/	BYTE MasteryType;
+	/*+55*/	BYTE SkillUseType;
+	/*+56*/	DWORD SkillBrand;
+	/*+60*/	BYTE KillCount;
+	/*+61*/	BYTE RequireDutyClass[MAX_DUTY_CLASS];
+	/*+64*/	BYTE RequireClass[MAX_CLASS];
+	/*+71*/	BYTE SkillRank;
+	/*+72*/	WORD Magic_Icon;
+	/*+74*/	BYTE TypeSkill;
+	/*+76*/	int Strength;
+	/*+80*/	int Dexterity;
+	/*+84*/	BYTE ItemSkill;
+	/*+85*/	BYTE IsDamage;
+	/*+86*/	WORD Effect;
+} SKILL_ATTRIBUTE;
+/* 
 typedef struct
 {
 	char Name[32];
@@ -325,7 +345,7 @@ typedef struct
 	int Dexterity;
 
 } SKILL_ATTRIBUTE;
-
+*/
 
 typedef struct
 {
@@ -464,10 +484,8 @@ typedef struct
 	vec3_t TurningForce;
 	vec3_t StartPosition; 
 	int iNumBone;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	bool bRepeatedly;
 	float fRepeatedlyHeight;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 } PARTICLE;
 
 typedef struct

@@ -51,10 +51,7 @@
 #include "DuelMgr.h"
 #include "ChangeRingManager.h"
 #include "NewUIGensRanking.h"
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-
 #include "ProtocolSend.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
@@ -2202,10 +2199,8 @@ void UseSkillWarrior( CHARACTER *c, OBJECT *o)
 		&& Skill!=AT_SKILL_SPACE_SPLIT
 		&& Skill!=AT_SKILL_DARK_SCREAM     
 		&& !(AT_SKILL_FIRE_SCREAM_UP <= Skill && AT_SKILL_FIRE_SCREAM_UP+4 >= Skill)
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		&& Skill!=AT_SKILL_THRUST
 		&& Skill!=AT_SKILL_STAMP
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		&& !(AT_SKILL_FIRE_BUST_UP <= Skill && AT_SKILL_FIRE_BUST_UP+4 >= Skill))
     {
         CreateParticle(BITMAP_SHINY+2,o->Position,o->Angle,Light,0,0.f,o);
@@ -2544,7 +2539,6 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 			break;
 	}
 }
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 
 void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 {
@@ -2751,6 +2745,8 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 	int iMana, iSkillMana;
 	gSkillManager.GetSkillInformation(nSkill, 1, NULL, &iMana, NULL, &iSkillMana);
 	
+	g_ConsoleDebug->Write(MCD_RECEIVE, "AttackRagefighter ID : %d, Dis : %.2f | %d %d / %d | %d", nSkill, fDistance, iMana, iSkillMana, CharacterAttribute->Mana, gSkillManager.CheckSkillDelay(Hero->CurrentSkill));
+
 	if(CharacterAttribute->Mana < iMana)
 	{
 		int Index = g_pMyInventory->FindManaItemIndex();
@@ -2764,8 +2760,10 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 	if(iSkillMana > CharacterAttribute->SkillMana)
 		return;
 
-	if(!gSkillManager.CheckSkillDelay(Hero->CurrentSkill))
+	/*if (!gSkillManager.CheckSkillDelay(Hero->CurrentSkill)) {
+		g_ConsoleDebug->Write(MCD_RECEIVE, "CheckSkillDelay %d", Hero->CurrentSkill);
         return;
+	}*/
 					
 	bool bSuccess = CheckTarget(pCha);
 	bool bCheckAttack = CheckAttack();
@@ -2777,6 +2775,8 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 	else
 		g_MovementSkill.m_iTarget = -1;
 
+	g_ConsoleDebug->Write(MCD_SEND, "AttackRagefighter ID : %d, Success : %d, SelectedCharacter: %d %d | 5d", nSkill, bSuccess, SelectedCharacter, CharactersClient[SelectedCharacter].Dead, bCheckAttack);
+
 	if(bSuccess)
 	{
 		switch(nSkill)
@@ -2787,6 +2787,7 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 		case AT_SKILL_DRAGON_KICK:
 		case AT_SKILL_DRAGON_LOWER:
 		case AT_SKILL_OCCUPY:
+		case AT_SKILL_PHOENIX_SHOT:
 			{
 				if(SelectedCharacter<=-1) 
 					return;
@@ -2804,6 +2805,7 @@ void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance)
 						if(CheckTile(pCha, pObj, fDistance) && pCha->SafeZone == false)
 						{
 							bool bNoneWall = CheckWall((pCha->PositionX), (pCha->PositionY), TargetX, TargetY);
+							g_ConsoleDebug->Write(MCD_SEND, "check wall %d", bNoneWall);
 							if(bNoneWall)
 								UseSkillRagefighter(pCha, pObj);
 						}
@@ -2909,7 +2911,6 @@ bool UseSkillRagePosition(CHARACTER* pCha)
 	}
 	return false;
 }
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
 void ReloadArrow()
 {
@@ -3119,10 +3120,7 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					&& o->CurrentAction != PLAYER_STOP_RIDE_HORSE
 					&& o->CurrentAction != PLAYER_STOP_TWO_HAND_SWORD_TWO
 					&& o->CurrentAction == PLAYER_FENRIR_SKILL_ONE_RIGHT
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-					&& o->CurrentAction == PLAYER_RAGE_FENRIR_ONE_RIGHT
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-					)
+					&& o->CurrentAction == PLAYER_RAGE_FENRIR_ONE_RIGHT)
 					break;
 			}
 			else
@@ -3329,22 +3327,26 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					AttackKnight(c, iSkill, Distance);
 				}
 				break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case AT_SKILL_THRUST:
 			case AT_SKILL_STAMP:
 			case AT_SKILL_GIANTSWING:
 			case AT_SKILL_DRAGON_KICK:
 			case AT_SKILL_DRAGON_LOWER:
 			case AT_SKILL_OCCUPY:
+			case AT_SKILL_PHOENIX_SHOT:
 				{
+					g_ConsoleDebug->Write(MCD_RECEIVE, "Action ID : %d, %d | %d %d | %d %d", iSkill, Distance, CharactersClient[g_MovementSkill.m_iTarget].Dead, g_MovementSkill.m_iTarget,
+						CheckTile(c, o, Distance * 1.2f), !c->SafeZone);
 					if(CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
 					{
 						if ( g_MovementSkill.m_iTarget<=-1 ) break;
 
 						TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0]/TERRAIN_SCALE);
 						TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1]/TERRAIN_SCALE);
-						if(CheckTile( c, o, Distance*1.2f ) && !c->SafeZone)
+						if (CheckTile(c, o, Distance * 1.2f) && !c->SafeZone) {
 							UseSkillRagefighter(c, o);
+							g_ConsoleDebug->Write(MCD_RECEIVE, "Success attack ID : %d, %d", iSkill, Distance);
+						}
 						else
 						{
 							if(PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance*1.2f))
@@ -3353,7 +3355,6 @@ void Action(CHARACTER *c,OBJECT *o,bool Now)
 					}
 				}
 				break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 			}
 		}
 		break;
@@ -3854,7 +3855,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 
 		if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
 		{
-			if(strcmp(Name,GlobalText[258])==NULL || strcmp(Name,GlobalText[259])==NULL || stricmp(Name,"/trade")==NULL)
+			if(strcmp(Name,GlobalText[258])==NULL || strcmp(Name,GlobalText[259])==NULL || stricmp(Text,"/trade")==NULL)
 			{
 				if ( gMapManager.InChaosCastle()==true )
 				{
@@ -4401,11 +4402,8 @@ void SetActionClass(CHARACTER *c,OBJECT *o,int Action,int ActionType)
 {
 	if ( ( o->CurrentAction>=PLAYER_STOP_MALE && o->CurrentAction<=PLAYER_STOP_RIDE_WEAPON )
 		|| o->CurrentAction==PLAYER_STOP_TWO_HAND_SWORD_TWO 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		|| o->CurrentAction==PLAYER_RAGE_UNI_STOP_ONE_RIGHT 
-		|| o->CurrentAction==PLAYER_STOP_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-		)
+		|| o->CurrentAction==PLAYER_STOP_RAGEFIGHTER)
 	{
 		if(!gCharacterManager.IsFemale(c->Class) || (Action>=PLAYER_RESPECT1 && Action<=PLAYER_RUSH1))
 			SetAction(o,Action);
@@ -6037,12 +6035,8 @@ void AttackWizard(CHARACTER *c, int Skill, float Distance)
 				{	
 					return;
 				}
-
-#ifdef PBG_ADD_NEWCHAR_MONK
+				
 				WORD byHeroPriorSkill = g_pSkillList->GetHeroPriorSkill();
-#else //PBG_ADD_NEWCHAR_MONK
-				BYTE byHeroPriorSkill = g_pSkillList->GetHeroPriorSkill();
-#endif //PBG_ADD_NEWCHAR_MONK
 				if(c == Hero && byHeroPriorSkill == AT_SKILL_BLAST_HELL)
 				{
 					g_pSkillList->SetHeroPriorSkill(AT_SKILL_TELEPORT);
@@ -6804,12 +6798,10 @@ void Attack(CHARACTER *c)
 				{
 					Attacking = -1;
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(AT_SKILL_ATT_UP_OURFORCES <= Skill && Skill <= AT_SKILL_DEF_UP_OURFORCES)
 				{
 					Attacking = -1;
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				else
 				{
 					Attacking = 2;
@@ -6828,12 +6820,9 @@ void Attack(CHARACTER *c)
 					&& o->CurrentAction!=PLAYER_FENRIR_STAND_TWO_SWORD
 					&& o->CurrentAction!=PLAYER_FENRIR_STAND_ONE_RIGHT
 					&& o->CurrentAction!=PLAYER_FENRIR_STAND_ONE_LEFT
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 					&& !(o->CurrentAction>=PLAYER_RAGE_FENRIR_STAND && o->CurrentAction<=PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
 					&& o->CurrentAction!=PLAYER_RAGE_UNI_STOP_ONE_RIGHT
-					&& o->CurrentAction!=PLAYER_STOP_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-					)
+					&& o->CurrentAction!=PLAYER_STOP_RAGEFIGHTER)
 				{
 					MouseRButtonPress	= 0;
 					return;
@@ -6856,10 +6845,7 @@ void Attack(CHARACTER *c)
 					for(int i=EQUIPMENT_WEAPON_RIGHT; i<=EQUIPMENT_WEAPON_LEFT; i++)
 					{
 						if ( ClassIndex==CLASS_KNIGHT || ClassIndex==CLASS_DARK || ClassIndex==CLASS_DARK_LORD 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-							|| ClassIndex==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-							)
+							|| ClassIndex==CLASS_RAGEFIGHTER)
 						{
 							bool bOk = false;
 							if ( c->Helper.Type != MODEL_HELPER+2
@@ -6952,13 +6938,10 @@ void Attack(CHARACTER *c)
 			{
 				AttackKnight(c,Skill,Distance);
 			}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			if(ClassIndex == CLASS_RAGEFIGHTER)
 			{
 				AttackRagefighter(c,Skill,Distance);
 			}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-
 			if ( ClassIndex==CLASS_WIZARD || ClassIndex==CLASS_DARK || ClassIndex==CLASS_SUMMONER)
 			{
 				AttackWizard(c,Skill,Distance);
@@ -6997,10 +6980,7 @@ void CheckGate()
 					int Level;
 					
 					if (gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(Hero->Class)==CLASS_DARK_LORD 
-#ifdef PBG_ADD_NEWCHAR_MONK
-						|| gCharacterManager.GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-						)
+						|| gCharacterManager.GetBaseClass(Hero->Class)==CLASS_RAGEFIGHTER)
 						Level = gs->Level*2/3;
 					else
 						Level = gs->Level;
@@ -7027,11 +7007,8 @@ void CheckGate()
 							|| CharacterMachine->Equipment[EQUIPMENT_HELPER].Type==ITEM_HELPER+37
 							|| (CharacterMachine->Equipment[EQUIPMENT_WING].Type>=ITEM_WING+36 && CharacterMachine->Equipment[EQUIPMENT_WING].Type<=ITEM_WING+43)
 							|| ( ITEM_WING+130 <= CharacterMachine->Equipment[EQUIPMENT_WING].Type && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING+134 )
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 							|| (CharacterMachine->Equipment[EQUIPMENT_WING].Type>=ITEM_WING+49 && CharacterMachine->Equipment[EQUIPMENT_WING].Type<=ITEM_WING+50)
-							|| (CharacterMachine->Equipment[EQUIPMENT_WING].Type==ITEM_WING+135)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-							))
+							|| (CharacterMachine->Equipment[EQUIPMENT_WING].Type==ITEM_WING+135)))
 						{
 							g_pChatListBox->AddText("", GlobalText[263], SEASON3B::TYPE_ERROR_MESSAGE);
 
@@ -7173,10 +7150,7 @@ void MoveHero()
 	
 	if( g_isCharacterBuff(o, eDeBuff_Stun)
 		|| g_isCharacterBuff(o, eDeBuff_Sleep)
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-		|| o->CurrentAction == PLAYER_SKILL_GIANTSWING
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-			)
+		|| o->CurrentAction == PLAYER_SKILL_GIANTSWING)
 	{
 		Angle = (int)Hero->Object.Angle[2];
 		bLookAtMouse = false;
@@ -7199,10 +7173,7 @@ void MoveHero()
 		&& gMapManager.WorldActive!=WD_6STADIUM 
 		&& gMapManager.InChaosCastle()==false ) 
 		|| o->CurrentAction == PLAYER_ATTACK_SKILL_FURY_STRIKE 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-		|| o->CurrentAction == PLAYER_SKILL_GIANTSWING
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-		)
+		|| o->CurrentAction == PLAYER_SKILL_GIANTSWING)
 	{
 		bLookAtMouse = false;
 	}
@@ -7266,10 +7237,8 @@ void MoveHero()
 			o->CurrentAction!=PLAYER_ATTACK_TELEPORT &&
 			o->CurrentAction!=PLAYER_ATTACK_RIDE_TELEPORT &&
 			o->CurrentAction != PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT &&
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			o->CurrentAction != PLAYER_SKILL_ATT_UP_OURFORCES &&
 			o->CurrentAction != PLAYER_SKILL_HP_UP_OURFORCES &&
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 			Hero->AttackTime == 0)
 		{
 			StandTime = 0;
@@ -7286,9 +7255,8 @@ void MoveHero()
 				SendRequestAction(AT_STAND1,((BYTE)((HeroAngle+22.5f)/360.f*8.f+1.f)%8));
 			}
 		}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-	UseSkillRagePosition(c);
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
+
+		UseSkillRagePosition(c);
 	}
 		
 	CheckGate();
@@ -7362,22 +7330,11 @@ void MoveHero()
 				( o->CurrentAction<PLAYER_ATTACK_FIST || o->CurrentAction>PLAYER_RIDE_SKILL )
 				&& ( o->CurrentAction<PLAYER_SKILL_SLEEP || o->CurrentAction>PLAYER_SKILL_LIGHTNING_SHOCK )
 				&& o->CurrentAction!=PLAYER_RECOVER_SKILL
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-				&& (o->CurrentAction<PLAYER_SKILL_THRUST || 
-#ifdef PBG_FIX_NEWCHAR_MONK_UNIANI
-				o->CurrentAction>PLAYER_RAGE_UNI_ATTACK_ONE_RIGHT
-#else //PBG_FIX_NEWCHAR_MONK_UNIANI
-				o->CurrentAction>PLAYER_SKILL_HP_UP_OURFORCES
-#endif //PBG_FIX_NEWCHAR_MONK_UNIANI
-				)
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-				)
+				&& (o->CurrentAction<PLAYER_SKILL_THRUST || o->CurrentAction>PLAYER_SKILL_HP_UP_OURFORCES))
 				||( o->CurrentAction>=PLAYER_STOP_TWO_HAND_SWORD_TWO && o->CurrentAction<=PLAYER_RUN_TWO_HAND_SWORD_TWO )
 				||( o->CurrentAction>=PLAYER_DARKLORD_STAND && o->CurrentAction<=PLAYER_RUN_RIDE_HORSE )
 				|| (o->CurrentAction >= PLAYER_FENRIR_RUN && o->CurrentAction <= PLAYER_FENRIR_WALK_ONE_LEFT)
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 				|| (o->CurrentAction >= PLAYER_RAGE_FENRIR_WALK && o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 				) )
 			{
 				int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
@@ -8078,10 +8035,7 @@ void MoveInterface()
 bool IsCanBCSkill(int Type)
 {
 	if( Type==44 || Type==45 || Type==46 || Type==57 || Type==73 || Type==74 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-		|| Type == AT_SKILL_OCCUPY
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-		)
+		|| Type == AT_SKILL_OCCUPY)
 	{
 		if( !gMapManager.InBattleCastle() || !battleCastle::IsBattleCastleStart() )
 		{
@@ -8112,9 +8066,9 @@ bool CheckSkillUseCondition ( OBJECT* o, int Type )
 		return true;
 }
 
-extern char TextList[30][100];
-extern int  TextListColor[30];
-extern int  TextBold[30];
+extern char TextList[50][100];
+extern int  TextListColor[50];
+extern int  TextBold[50];
 
 void GetTime( DWORD time, std::string& timeText, bool isSecond )
 {
@@ -8643,10 +8597,10 @@ void RenderBooleans()
 }
 
 extern int TextNum;
-extern char TextList[30][100];
-extern int  TextListColor[30];
-extern int  TextBold[30];
-extern SIZE Size[30];
+extern char TextList[50][100];
+extern int  TextListColor[50];
+extern int  TextBold[50];
+extern SIZE Size[50];
 
 void RenderTimes()
 {

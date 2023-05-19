@@ -137,48 +137,26 @@ void SaveScreen()
 {
 	GrabFirst = true;
 
-	/*if(!GrabFirst)
-	{
-		GrabFirst = true;
-		for(int i=0;i<10000;i++)
+	auto Buffer = new unsigned char[WindowWidth * WindowHeight * 4];
+
+	glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGBA, GL_UNSIGNED_BYTE, &Buffer[0]);
+
+	auto BufferNew = new unsigned char[WindowWidth * WindowHeight * 3];
+
+	int counter = 0;
+	for (int i = 0; i < WindowWidth * WindowHeight * 4; i += 4)
 		{
-			GrabScreen = i;
-			if(GrabScreen<10)
-				sprintf(GrabFileName,"Screen000%d",GrabScreen);
-			else if(GrabScreen<100)
-				sprintf(GrabFileName,"Screen00%d",GrabScreen);
-			else if(GrabScreen<1000)
-				sprintf(GrabFileName,"Screen0%d",GrabScreen);
-			else
-				sprintf(GrabFileName,"Screen%d",GrabScreen);
+		BufferNew[counter + 0] = Buffer[i + 0];
+		BufferNew[counter + 1] = Buffer[i + 1];
+		BufferNew[counter + 2] = Buffer[i + 2];
 
-			strcat( GrabFileName, lpszFileName);
-			FILE *fp = fopen(GrabFileName,"rb");
-			if(fp==NULL)
-				break;
-			else
-				fclose(fp);
-		}
+		counter += 3;
 	}
-	else
-	{
-		if(GrabScreen<10)
-			sprintf(GrabFileName,"Screen000%d",GrabScreen);
-		else if(GrabScreen<100)
-			sprintf(GrabFileName,"Screen00%d",GrabScreen);
-		else if(GrabScreen<1000)
-			sprintf(GrabFileName,"Screen0%d",GrabScreen);
-		else
-			sprintf(GrabFileName,"Screen%d",GrabScreen);
 
-		strcat( GrabFileName, lpszFileName);
-	}*/
-
-	unsigned char *Buffer = new unsigned char [(int)WindowWidth*(int)WindowHeight*3];
-	glReadPixels(0,0,(int)WindowWidth,(int)WindowHeight,GL_RGB,GL_UNSIGNED_BYTE,Buffer);
-	WriteJpeg(GrabFileName,(int)WindowWidth,(int)WindowHeight,Buffer,100);
+	WriteJpeg(GrabFileName, WindowWidth, WindowHeight, &BufferNew[0], 100);
 
 	SAFE_DELETE_ARRAY(Buffer);
+	SAFE_DELETE_ARRAY(BufferNew);
 	
 	GrabScreen++;
 	GrabScreen %= 10000;

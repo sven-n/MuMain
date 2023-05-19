@@ -3,20 +3,17 @@
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
-
-
-#ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
-//#include "ZzzOpenData.h"
-#include <LoadData.h>
+#include "ZzzOpenData.h"
 #include "ZzzEffect.h"
 #include "ZzzAI.h"
 #include "ZzzLodTerrain.h"
 #include "wsclientinline.h"
 #include "CSChaosCastle.h"
+#include "LoadData.h"
+#include "CharacterManager.h"
 #include "SkillManager.h"
-#include <CharacterManager.h>
-#include <MapManager.h>
+#include "MapManager.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -86,6 +83,9 @@ void CMonkSystem::RegistItem()
 
 	m_cItemEqualType.SetModelType(MODEL_SWORD+34, MODEL_SWORD_34_LEFT, MODEL_SWORD_34_RIGHT);
 	m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
+
+	m_cItemEqualType.SetModelType(MODEL_SWORD+35, MODEL_SWORD_35_LEFT, MODEL_SWORD_35_RIGHT);
+	m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
 }
 
 void CMonkSystem::LoadModelItem()
@@ -102,9 +102,14 @@ void CMonkSystem::LoadModelItem()
 	gLoadData.AccessModel(MODEL_SWORD_34_LEFT, "Data\\Item\\", "SwordL35");
 	gLoadData.AccessModel(MODEL_SWORD_34_RIGHT, "Data\\Item\\", "SwordR35");
 
+	gLoadData.AccessModel(MODEL_SWORD + 35, "Data\\Item\\", "Sword36");
+	gLoadData.AccessModel(MODEL_SWORD_35_LEFT, "Data\\Item\\", "Sword36L");
+	gLoadData.AccessModel(MODEL_SWORD_35_RIGHT, "Data\\Item\\", "Sword36R");
+
 	gLoadData.AccessModel(MODEL_ARMORINVEN_60, "Data\\player\\", "Armor_inventory60");
 	gLoadData.AccessModel(MODEL_ARMORINVEN_61, "Data\\player\\", "ArmorMale61_inventory");
 	gLoadData.AccessModel(MODEL_ARMORINVEN_62, "Data\\player\\", "ArmorMale62_inventory");
+	gLoadData.AccessModel(MODEL_ARMORINVEN_74, "Data\\player\\", "ArmorMale74_inven");
 }
 
 void CMonkSystem::LoadModelItemTexture()
@@ -120,10 +125,15 @@ void CMonkSystem::LoadModelItemTexture()
 	gLoadData.OpenTexture(MODEL_SWORD+34, "player\\");
 	gLoadData.OpenTexture(MODEL_SWORD_34_LEFT, "player\\");
 	gLoadData.OpenTexture(MODEL_SWORD_34_RIGHT, "player\\");
+
+	gLoadData.OpenTexture(MODEL_SWORD+35, "player\\");
+	gLoadData.OpenTexture(MODEL_SWORD_35_LEFT, "player\\");
+	gLoadData.OpenTexture(MODEL_SWORD_35_RIGHT, "player\\");
 	
 	gLoadData.OpenTexture(MODEL_ARMORINVEN_60, "player\\");
 	gLoadData.OpenTexture(MODEL_ARMORINVEN_61, "player\\");
 	gLoadData.OpenTexture(MODEL_ARMORINVEN_62, "player\\");
+	gLoadData.OpenTexture(MODEL_ARMORINVEN_74, "player\\");
 }
 
 int CMonkSystem::GetSubItemType(int _Type, int _Left)
@@ -226,6 +236,13 @@ bool CMonkSystem::IsSwordformGloves(int _Type)
 		return true;
 	
 	return false;
+}
+
+void CMonkSystem::RenderPhoenixGloves(CHARACTER* _pCha, BYTE _Hand)
+{
+	PART_t* w = &_pCha->Weapon[_Hand];
+	w->LinkBone = _Hand ? 37 : 28;
+	RenderLinkObject(_Hand ? 100.f : 80.f, 10.0, -75.0, _pCha, w, MODEL_SWORD_35_WING, 0, 0, true, true, 0, 1);
 }
 
 void CMonkSystem::RenderSwordformGloves(CHARACTER *_pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate, int _Select)
@@ -495,7 +512,7 @@ bool CMonkSystem::RageFighterEffect(OBJECT* _pObj, int _Type)
 		b->RenderBody(RENDER_BRIGHT|RENDER_COLOR, _pObj->Alpha, _pObj->BlendMesh, _pObj->BlendMeshLight, _pObj->BlendMeshTexCoordU, _pObj->BlendMeshTexCoordV);
 		b->RenderBody(RENDER_TEXTURE, fAlpha, _pObj->BlendMesh, _pObj->BlendMeshLight, _pObj->BlendMeshTexCoordU, _pObj->BlendMeshTexCoordV);
 		
-		return true;
+		return false;
 	}
 	return false;
 }
@@ -752,7 +769,6 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t *pPart, bool Transla
 		
 		for(int index=0; index<m_nDummyIndex; ++index)
 		{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 			bool bChange=false;
 			if(pObj->Kind == KIND_PLAYER && pObj->Type == MODEL_PLAYER && 
 				(pObj->SubType == MODEL_SKELETON_CHANGED || pObj->SubType == MODEL_PANDA
@@ -763,7 +779,6 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t *pPart, bool Transla
 			}
 
 			if(IsDummyRender(pObj->Position, vPos, m_fDummyAniFrame, index, bChange))
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 			{
 				tm_DummyUnit::iterator iter = m_tmDummyUnit.find(index);
 				if(iter == m_tmDummyUnit.end())
@@ -841,11 +856,8 @@ void CMonkSystem::SetDummy(vec3_t pos, vec3_t target, int dummyindex)
 	m_CDummyUnit.Init(pos, target);
 	m_tmDummyUnit.insert(tm_DummyUnit::value_type(dummyindex, m_CDummyUnit));
 }
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
+
 bool CMonkSystem::IsDummyRender(vec3_t vOutPos, vec3_t Target, float& pAni, int DummyIndex, bool Change)
-#else //PBG_MOD_RAGEFIGHTERSOUND
-bool CMonkSystem::IsDummyRender(vec3_t vOutPos, vec3_t Target, float& pAni, int DummyIndex)
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 {
 	tm_DummyUnit::iterator iter = m_tmDummyUnit.find(DummyIndex);
 
@@ -856,19 +868,11 @@ bool CMonkSystem::IsDummyRender(vec3_t vOutPos, vec3_t Target, float& pAni, int 
 
 	if(pDummy->IsDistance())
 	{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 		pDummy->CalDummyPosition(vOutPos, pAni, Change);
-#else //PBG_MOD_RAGEFIGHTERSOUND
-		pDummy->CalDummyPosition(vOutPos, pAni);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 		return true;
 	}
-	else
-	{
-		return false;
-	}
 
-	return true;
+	return false;
 }
 
 void CMonkSystem::InitConsecutiveState(float _fFirstFrame, float _fSecondFrame, BYTE _btAttState)
@@ -1180,10 +1184,10 @@ bool CMonkSystem::RageCreateEffect(OBJECT *_pObj, int _nSkill)
 			CreateEffect(MODEL_DRAGON_KICK_DUMMY, _pObj->Position, _pObj->Angle, vLight, 0, _pObj, -1, 0 ,0, 0, 1.0f);
 
 			vec3_t Light,Position,P,dp, vAngle;
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
+
 			if(_pObj->m_sTargetIndex<0)
 				return true;
-#endif //PBG_MOD_RAGEFIGHTERSOUND
+
 			VectorCopy(CharactersClient[_pObj->m_sTargetIndex].Object.Position, Position);
 			VectorCopy(_pObj->Angle, vAngle);
 			vAngle[2] = CreateAngle(_pObj->Position[0],_pObj->Position[1],Position[0],Position[1]);
@@ -1286,6 +1290,23 @@ bool CMonkSystem::RageCreateEffect(OBJECT *_pObj, int _nSkill)
 			CreateEffect ( MODEL_MULTI_SHOT2, Position, _pObj->Angle, Light, 0);
 		}
 		break;
+	case AT_SKILL_PHOENIX_SHOT:
+		if (m_bUseEffectOnce)
+			return false;
+
+		m_bUseEffectOnce = true;
+
+		if (_pObj->m_sTargetIndex < 0)
+			return true;
+
+		vec3_t Position, vAngle, Light;
+		_pObj->Owner = &CharactersClient[_pObj->m_sTargetIndex].Object;
+		VectorCopy(CharactersClient[_pObj->m_sTargetIndex].Object.Position, Position);
+		VectorCopy(_pObj->Angle, vAngle);
+		vAngle[2] = CreateAngle(_pObj->Position[0], _pObj->Position[1], Position[0], Position[1]);
+		Vector(1.f, 1.f, 1.f, Light);
+		CreateEffect(MODEL_PHOENIX_SHOT, Position, vAngle, Light, 0, _pObj, -1, 0, 0, 0, 1.f);
+		break;
 	default:
 		break;
 	}
@@ -1347,9 +1368,7 @@ void CDummyUnit::Init(vec3_t Pos, vec3_t Target)
 	m_fDisFrame = 0.0f;
 	m_fAlpha =0.2f;
 
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 	m_fAniFrameSpeed = 30.0f;
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 }
 
 void CDummyUnit::Destroy()
@@ -1414,11 +1433,8 @@ float CDummyUnit::GetAlpha()
 {
 	return m_fAlpha;
 }
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
+
 void CDummyUnit::CalDummyPosition(vec3_t vOutPos, float& fAni,bool bChange)
-#else //PBG_MOD_RAGEFIGHTERSOUND
-void CDummyUnit::CalDummyPosition(vec3_t vOutPos, float& fAni)
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 {
 	m_fDisFrame += 0.7f;
 	m_fAniFrame += 0.05f;
@@ -1428,23 +1444,13 @@ void CDummyUnit::CalDummyPosition(vec3_t vOutPos, float& fAni)
 	}
 	fAni = m_fAniFrame;
 	float _fDisFrame = m_fDisFrame*0.7f;
-	if(gMapManager.InChaosCastle()
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
-		|| bChange
-#endif //PBG_MOD_RAGEFIGHTERSOUND
-		)
+	if(gMapManager.InChaosCastle() || bChange)
 	{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 		_fDisFrame*=m_fAniFrameSpeed;
 		fAni *= m_fAniFrameSpeed;
-#else //PBG_MOD_RAGEFIGHTERSOUND
-		_fDisFrame*=30.0f;
-		fAni *= 30.0f;
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 	}
 	VectorNormalize(m_vDirection);
 	VectorScale(m_vDirection, _fDisFrame , m_vDirection);
 	VectorAdd(m_vPosition, m_vDirection, m_vPosition);
 	VectorCopy(m_vPosition, vOutPos);
 }
-#endif //PBG_ADD_NEWCHAR_MONK

@@ -90,14 +90,12 @@ void CPhysicsVertex::UpdateForce( unsigned int iKey, DWORD dwType, float fWind)
 		m_vForce[2] += fRand * (fWind + 0.1f) * 0.5f * (float)sinf(WorldTime*0.003f) * 5.0f;
 		m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 50.0f;
 		break;
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case PCT_ELASTIC_RAGE_L:
 		m_vForce[0] += -(fRand * fWind * 0.8f);
 		break;
 	case PCT_ELASTIC_RAGE_R:
 		m_vForce[0] -= -(fRand * fWind * 0.8f);
 		break;
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 	}
 
 	switch ( PCT_MASK_WEIGHT & dwType)	// m_dwType
@@ -671,14 +669,12 @@ void CPhysicsCloth::MoveVertices( float fTime)
 					case PCT_ELASTIC_HALLOWEEN:
 						vForce[i] *= 2.0f;
 						break;
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 					case PCT_ELASTIC_RAGE_L:
 					case PCT_ELASTIC_RAGE_R:
 						{
 							vForce[i] *= 1.0f;
 						}
 						break;
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 					}
 
 				}

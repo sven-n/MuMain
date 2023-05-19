@@ -8,6 +8,7 @@
 #include "ZzzCharacter.h"
 
 CSkillManager gSkillManager;
+extern bool CheckAttack();
 
 CSkillManager::CSkillManager() // OK
 {
@@ -127,14 +128,13 @@ bool CSkillManager::CheckSkillDelay ( int SkillIndex )
 
     int Delay = SkillAttribute[Skill].Delay;
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!CheckAttack() && (Skill == AT_SKILL_GIANTSWING || Skill == AT_SKILL_DRAGON_LOWER ||
 		Skill == AT_SKILL_DRAGON_KICK))
 	{
 		return false;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-    if ( Delay>0 )
+
+	if ( Delay>0 )
     {
         if ( CharacterAttribute->SkillDelay[SkillIndex] > 0 )
         {

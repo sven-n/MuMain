@@ -90,10 +90,7 @@ void CheckSkull(OBJECT *o)
 	vec3_t Position;
 	VectorCopy(Hero->Object.Position,Position);
 	if(Hero->Object.CurrentAction>=PLAYER_WALK_MALE && Hero->Object.CurrentAction<=PLAYER_RUN_RIDE_WEAPON
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-		|| (Hero->Object.CurrentAction==PLAYER_RAGE_UNI_RUN || Hero->Object.CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-		)
+		|| (Hero->Object.CurrentAction==PLAYER_RAGE_UNI_RUN || Hero->Object.CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT))
 	{
 		if(o->Direction[0] < 0.1f)
 		{

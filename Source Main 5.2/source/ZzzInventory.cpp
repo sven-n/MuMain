@@ -178,10 +178,10 @@ int getLevelGeneration ( int level, unsigned int* color )
     return lvl;
 }
 
-char TextList[30][100];
-int  TextListColor[30];
-int  TextBold[30];
-SIZE Size[30];
+char TextList[50][100];
+int  TextListColor[50];
+int  TextBold[50];
+SIZE Size[50];
 
 int RenderTextList(int sx,int sy,int TextNum,int Tab, int iSort = RT3_SORT_CENTER)
 {
@@ -704,7 +704,6 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 				TextBold[TextNum] = false;	TextNum++;
 			}
 			break;
-#ifdef PBG_ADD_NEWCHAR_MONK
 		case CLASS_RAGEFIGHTER:
 			{
 				if(byRequireClass==1)
@@ -720,7 +719,6 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
 				TextBold[TextNum] = false;	TextNum++;
 			}
 			break;
-#endif //PBG_ADD_NEWCHAR_MONK
 		}
 	}
 }
@@ -1561,10 +1559,7 @@ WORD calcMaxDurability ( const ITEM* ip, ITEM_ATTRIBUTE *p, int Level )
 		&& ( ip->Type<ITEM_WING+36 || ip->Type>ITEM_WING+40 )
 		&& (ip->Type<ITEM_WING+42 || ip->Type>ITEM_WING+43)
 		&& ip->Type!=ITEM_MACE+13
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		&& !(ip->Type >= ITEM_WING+49 && ip->Type <= ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-	  )
+		&& !(ip->Type >= ITEM_WING+49 && ip->Type <= ITEM_WING+50))
     {
         maxDurability += 15;
     }
@@ -1769,10 +1764,7 @@ void GetItemName ( int iType, int iLevel, char* Text )
 			sprintf(Text,"%s +%d",p->Name,iLevel);
     }
 	else if ((iType>=ITEM_WING+36 && iType<=ITEM_WING+40) || (iType>=ITEM_WING+42 && iType<=ITEM_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| (iType == ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+		|| (iType == ITEM_WING+50))
     {
 		if(iLevel==0)
 			sprintf(Text,"%s",p->Name);
@@ -1819,11 +1811,8 @@ void GetItemName ( int iType, int iLevel, char* Text )
 	}
 }
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
+
 void GetSpecialOptionText ( int Type, char* Text, WORD Option, BYTE Value, int iMana )
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int iMana )
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 {
     switch(Option)
     {
@@ -2037,7 +2026,6 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
 	case AT_SKILL_SUMMON_POLLUTION:
 		sprintf(Text, GlobalText[1789], iMana );
 		break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_SKILL_THRUST:
 		gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[3153], iMana);
@@ -2046,7 +2034,6 @@ void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int i
 		gSkillManager.GetSkillInformation( Option, 1, NULL, &iMana, NULL);
         sprintf(Text,GlobalText[3154], iMana);
 		break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
     }
 }
 
@@ -2158,10 +2145,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
     if ( ( ip->Type>=ITEM_WING+3 && ip->Type<=ITEM_WING+6 ) || ip->Type==ITEM_HELPER+30 
 		|| ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )
 		|| (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+		|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50))
     {
 	    if ( Level >= 7 )
 	    {
@@ -2443,10 +2427,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 			sprintf(TextList[TextNum],"%s +%d",p->Name,Level);
     }
 	else if ((ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40) || (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+			|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50))
     {
 		if(Level==0)
 			sprintf(TextList[TextNum],"%s",p->Name);
@@ -4270,20 +4251,11 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
     }
 	else if ((ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40) || ip->Type==ITEM_WING+43
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| ip->Type==ITEM_WING+50
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+		|| ip->Type==ITEM_WING+50)
     {
 		sprintf(TextList[TextNum],GlobalText[577],39+Level*2);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
-		if ( ip->Type==ITEM_WING+40 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-#ifndef PBG_MOD_NEWCHAR_MONK_WING
-			|| ip->Type==ITEM_WING+50
-#endif //PBG_MOD_NEWCHAR_MONK_WING
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)
+		if ( ip->Type==ITEM_WING+40 || ip->Type==ITEM_WING+50)
 		{
 			sprintf(TextList[TextNum],GlobalText[578],24+Level*2);
 		}
@@ -4295,13 +4267,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		sprintf(TextList[TextNum],GlobalText[579]);
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
     }
-	else if( ITEM_WING+130 <= ip->Type && 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		ip->Type <= ITEM_WING+135
-#else //PBG_ADD_NEWCHAR_MONK_ITEM
-		ip->Type <= ITEM_WING+134
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+	else if( ITEM_WING+130 <= ip->Type && ip->Type <= ITEM_WING+135)
 	{
 		switch(ip->Type)
 		{
@@ -4460,9 +4426,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
     {
         int startIndex = 0;
         if ( gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD 
-#ifdef PBG_ADD_NEWCHAR_MONK
 			|| gCharacterManager.GetBaseClass( Hero->Class )==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
 			)
 		{
             startIndex = 6;
@@ -4523,7 +4487,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
     {
         TextNum = RenderHellasItemInfo ( ip, TextNum );
     }
-#ifdef PBG_MOD_NEWCHAR_MONK_WING_2
 	else if(ip->Type==ITEM_WING+49 || ip->Type==ITEM_HELPER+30)
 	{
 		// 망토 관련 옵션변경
@@ -4533,17 +4496,13 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		sprintf(TextList[TextNum],GlobalText[578],_iDamage);  //  데미지 몇%흡수
 		TextListColor[TextNum] = TEXT_COLOR_WHITE;TextBold[TextNum] = false;TextNum++;
 	}
-#endif //PBG_MOD_NEWCHAR_MONK_WING_2
 
 	BOOL bDurExist = FALSE;
 	if ( ( p->Durability || p->MagicDur ) && 
          ( (ip->Type<ITEM_WING || ip->Type>=ITEM_HELPER ) && ip->Type<ITEM_POTION ) ||
            (ip->Type>=ITEM_WING && ip->Type<=ITEM_WING+6)
 		|| (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-       )
+		|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50))
 	{
 		bDurExist = TRUE;
 	}
@@ -5062,16 +5021,16 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 			sprintf(TextList[TextNum],"\n");TextNum++;SkipNum++;
 		}
 	}
-#ifndef PBG_MOD_NEWCHAR_MONK_WING_2
-#ifdef PBG_MOD_NEWCHAR_MONK_WING
-	if(ip->Type==ITEM_WING+49)
-	{
-		sprintf(TextList[TextNum],GlobalText[578],15+Level);
-		TextListColor[TextNum] = TEXT_COLOR_BLUE;
-		TextNum++;
-	}
-#endif //PBG_MOD_NEWCHAR_MONK_WING
-#endif //PBG_MOD_NEWCHAR_MONK_WING_2
+//#ifndef PBG_MOD_NEWCHAR_MONK_WING_2
+//#ifdef PBG_MOD_NEWCHAR_MONK_WING
+//	if(ip->Type==ITEM_WING+49)
+//	{
+//		sprintf(TextList[TextNum],GlobalText[578],15+Level);
+//		TextListColor[TextNum] = TEXT_COLOR_BLUE;
+//		TextNum++;
+//	}
+//#endif //PBG_MOD_NEWCHAR_MONK_WING
+//#endif //PBG_MOD_NEWCHAR_MONK_WING_2
 	if (g_SocketItemMgr.IsSocketItem(ip));
 	else
 	if( ip->Jewel_Of_Harmony_Option != 0 )
@@ -5549,7 +5508,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		TextNum++;
 	}
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-#ifdef PBG_ADD_NEWCHAR_MONK
     else if(ip->Type == ITEM_HELPER+68)
 	{
 		sprintf(TextList[TextNum], GlobalText[3088]);
@@ -5557,7 +5515,6 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 		TextBold[TextNum] = false;
 		TextNum++;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
 
 	if( ip->bPeriodItem == true )
 	{
@@ -5730,13 +5687,7 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
 		return;
 	}
 
-	if( ITEM_WING+130 <= ip->Type && 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		ip->Type <= ITEM_WING+135
-#else //PBG_ADD_NEWCHAR_MONK_ITEM
-		ip->Type <= ITEM_WING+134
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+	if( ITEM_WING+130 <= ip->Type && ip->Type <= ITEM_WING+135)
 	{
 		return;
 	}
@@ -5809,10 +5760,7 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
          || ip->Type>=ITEM_HELPER+30
 		 || ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )
 		 || (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		 || (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-       )  
+		 || (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50))  
 	{
 	    if ( Level >= 7 )
 	    {
@@ -5888,10 +5836,7 @@ void RenderRepairInfo(int sx,int sy,ITEM *ip,bool Sell)
              || ip->Type>=ITEM_HELPER+30
 			 || ( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40 )
 			 || (ip->Type>=ITEM_WING+42 && ip->Type<=ITEM_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			 || (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-            )
+			 || (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50))
     {
 		if(Level==0)
 			sprintf(TextList[TextNum],"%s",p->Name);
@@ -6014,7 +5959,6 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
             }
         }
     }
-#ifdef PBG_ADD_NEWCHAR_MONK
 	else if(gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(l->Type>=ITEM_SWORD && l->Type<ITEM_MACE+MAX_ITEM_INDEX && r->Type>=ITEM_SWORD && r->Type<ITEM_MACE+MAX_ITEM_INDEX)
@@ -6024,7 +5968,6 @@ bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage )
 			AttackDamageMax = ((CharacterAttribute->AttackDamageMaxRight+CharacterAttribute->AttackDamageMaxLeft)*65/100);
 		}
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
 
 	if ( CharacterAttribute->Ability&ABILITY_PLUS_DAMAGE )
 	{
@@ -6166,10 +6109,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
         }
 	}
     if ( HeroClass==CLASS_KNIGHT || HeroClass==CLASS_DARK || HeroClass==CLASS_ELF || HeroClass==CLASS_DARK_LORD 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-		|| HeroClass==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-		)
+		|| HeroClass==CLASS_RAGEFIGHTER)
     {
         switch ( CharacterAttribute->Skill[Type] )
         {
@@ -6241,11 +6181,9 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
             break;
 		case AT_SKILL_PLASMA_STORM_FENRIR:
 		case AT_SKILL_RECOVER:
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		case AT_SKILL_ATT_UP_OURFORCES:
 		case AT_SKILL_HP_UP_OURFORCES:
 		case AT_SKILL_DEF_UP_OURFORCES:
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 			break;
         default :
 		    sprintf(TextList[TextNum],GlobalText[879],iSkillMinDamage,iSkillMaxDamage + skillattackpowerRate);
@@ -6275,12 +6213,11 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 		{
 			iSkillMinDamage = (Strength/5)+(Dexterity/5)+(Vitality/7)+(Energy/3)+(Charisma/3)+iSkillDamage;
 		}
-#ifdef PBG_ADD_NEWCHAR_MONK
 		else if(HeroClass == CLASS_RAGEFIGHTER)
 		{
 			iSkillMinDamage = (Strength/5)+(Dexterity/5)+(Vitality/3)+(Energy/7)+iSkillDamage;
 		}
-#endif //PBG_ADD_NEWCHAR_MONK
+
 		iSkillMaxDamage = iSkillMinDamage + 30;
 		
 		sprintf(TextList[TextNum],GlobalText[879],iSkillMinDamage,iSkillMaxDamage + skillattackpowerRate);
@@ -6453,9 +6390,7 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	if(CharacterAttribute->Skill[Type] == AT_SKILL_RUSH || CharacterAttribute->Skill[Type] == AT_SKILL_SPACE_SPLIT
 		|| CharacterAttribute->Skill[Type] == AT_SKILL_DEEPIMPACT || CharacterAttribute->Skill[Type] == AT_SKILL_JAVELIN
 		|| CharacterAttribute->Skill[Type] == AT_SKILL_ONEFLASH || CharacterAttribute->Skill[Type] == AT_SKILL_DEATH_CANNON
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		|| CharacterAttribute->Skill[Type] == AT_SKILL_OCCUPY
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		)
 	{
 		sprintf ( TextList[TextNum], GlobalText[2047] );
@@ -6492,6 +6427,12 @@ void RenderSkillInfo(int sx,int sy,int Type,int SkillNum, int iRenderPoint /*= S
 	RenderTipTextList(sx,sy,TextNum,0, RT3_SORT_CENTER, iRenderPoint);
 }
 
+void SetJewelColor()
+{
+	g_pRenderText->SetFont(g_hFontBold);
+	glColor3f(1.f, 0.8f, 0.1f);
+}
+
 void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOption,bool Sort)
 {
 	char Name[80];
@@ -6504,27 +6445,52 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 
 	bool bFirstOK = true;
 
-	if(o->Type==MODEL_POTION+15)
+	// Color:
+	switch (o->Type)
 	{
+		case MODEL_POTION + 13:
+		case MODEL_POTION + 15:
+			glColor3f(1.f, 0.8f, 0.1f);
+			break;
+		case MODEL_WING + 11:
+			glColor3f(0.7f, 0.7f, 0.7f);
+			break;
+	}
+
+	// Use the item name by default
+	if (Level == 0)
+	{
+		sprintf(Name, "%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
+	}
+	else
+	{
+		sprintf(Name, "%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, Level);
+	}
+
+
+	if(o->Type==MODEL_POTION+15) // Zen
+	{
+		
 		glColor3f(1.f,0.8f,0.1f);
        	sprintf(Name,"%s %d",ItemAttribute[o->Type-MODEL_ITEM].Name,ItemLevel);
 	}
 	else if( (o->Type==MODEL_POTION+13) 
 		  || (o->Type==MODEL_POTION+14)
 		  || (o->Type==MODEL_POTION+16)
-		  || (o->Type==MODEL_WING+15)
+		  || (o->Type==MODEL_WING+15) // Chaos
 		  || (o->Type==MODEL_POTION+22)
 		  || (o->Type==MODEL_POTION+31)
-		  || (o->Type==MODEL_HELPER+14)
+		  || (o->Type==MODEL_HELPER+14) // Feather
 		  || (o->Type==MODEL_POTION+41)
 		  || (o->Type==MODEL_POTION+42)
 		  || (o->Type==MODEL_POTION+43)
 		  || (o->Type==MODEL_POTION+44)
 		   )
 	{
+		// Jewels ...
 		g_pRenderText->SetFont(g_hFontBold);
 		glColor3f(1.f,0.8f,0.1f);
-       	sprintf(Name,"%s",ItemAttribute[o->Type-MODEL_ITEM].Name);
+       	sprintf(Name,"%s",ItemAttribute[o->Type - MODEL_ITEM].Name);
 	}
 	else if( o->Type == MODEL_WING+11)
 	{
@@ -7239,10 +7205,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
         else if((ItemOption&63) > 0 && ( o->Type<MODEL_WING+3 || o->Type>MODEL_WING+6 ) && o->Type!=MODEL_HELPER+30 
 			&& ( o->Type<MODEL_WING+36 || o->Type>MODEL_WING+40 )
 			&& (o->Type<MODEL_WING+42 || o->Type>MODEL_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			&& !(o->Type>=MODEL_WING+49 && o->Type<=MODEL_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			) 
+			&& !(o->Type>=MODEL_WING+49 && o->Type<=MODEL_WING+50)) 
 		{
 			glColor3f(0.1f,1.f,0.5f);
 		}
@@ -7292,13 +7255,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 			sprintf(Name, ItemAttribute[o->Type].Name);
 		}
 
-		else if( ITEM_WING+130 <= o->Type && 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			o->Type <= ITEM_WING+135
-#else //PBG_ADD_NEWCHAR_MONK_ITEM
-			o->Type <= ITEM_WING+134 
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)
+		else if( ITEM_WING+130 <= o->Type && o->Type <= ITEM_WING+135)
 		{
 			glColor3f ( 0.9f, 0.53f, 0.13f );
 			sprintf(Name, ItemAttribute[o->Type].Name);
@@ -7365,6 +7322,7 @@ void RenderItemName(int i,OBJECT *o,int ItemLevel,int ItemOption,int ItemExtOpti
 		char TextName[64];
 		if ( g_csItemOption.GetSetItemName( TextName, o->Type-MODEL_ITEM, ItemExtOption ) )
 		{
+			// Excellent or Ancient item?
             glColor3f ( 1.f, 1.f, 1.f );
 			g_pRenderText->SetFont(g_hFontBold);
 			g_pRenderText->SetTextColor(0, 255, 0, 255);
@@ -7480,6 +7438,7 @@ int GetScreenWidth()
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DOPPELGANGER_NPC)
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
 		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GENSRANKING)
+		|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MUHELPER)
 		) 
 	{
         iWidth = 640 - 190;
@@ -7733,11 +7692,9 @@ void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool Fi
 				if (Type==ITEM_WING+39 || 
 					Type==ITEM_HELPER+30 || 
 					Type==ITEM_WING+130 ||
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 					Type==ITEM_WING+49 ||
 					Type==ITEM_WING+50 ||
 					Type==ITEM_WING+135||
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 					Type==ITEM_WING+40 )
 				{
 					DeleteCloth(Hero, &Hero->Object);
@@ -7939,9 +7896,7 @@ bool IsPartChargeItem(ITEM* pItem)
 		|| pItem->Type == ITEM_WING+132			
 		|| pItem->Type == ITEM_WING+133			
 		|| pItem->Type == ITEM_WING+134	
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| pItem->Type == ITEM_WING+135
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		|| pItem->Type == ITEM_HELPER+116
 		|| pItem->Type == ITEM_HELPER+106
 		|| pItem->Type == ITEM_HELPER+124
@@ -8009,9 +7964,7 @@ bool IsHighValueItem(ITEM* pItem)
 		|| pItem->Type == ITEM_WING+132
 		|| pItem->Type == ITEM_WING+133
 		|| pItem->Type == ITEM_WING+134
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| pItem->Type == ITEM_WING+135
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		|| pItem->Type == ITEM_HELPER+80
 		|| pItem->Type == ITEM_HELPER+76
 		|| pItem->Type == ITEM_HELPER+122
@@ -8031,9 +7984,7 @@ bool IsHighValueItem(ITEM* pItem)
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| (g_pMyInventory->IsInvenItem(pItem->Type) && pItem->Durability == 255)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (pItem->Type >= ITEM_WING+49 && pItem->Type <= ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 #ifdef KJH_FIX_SELL_LUCKYITEM
 		|| ( Check_ItemAction(pItem, eITEM_SELL) && pItem->Durability > 0 )
 #endif // KJH_FIX_SELL_LUCKYITEM
@@ -8376,9 +8327,7 @@ bool IsSellingBan(ITEM* pItem)
 		|| pItem->Type == ITEM_WING+132
 		|| pItem->Type == ITEM_WING+133
 		|| pItem->Type == ITEM_WING+134
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| pItem->Type == ITEM_WING+135
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		|| pItem->Type == ITEM_HELPER+80
 		|| pItem->Type == ITEM_HELPER+76
 		|| pItem->Type == ITEM_HELPER+122
@@ -8537,11 +8486,9 @@ bool IsWingItem(ITEM* pItem)
 	case ITEM_WING+132:
 	case ITEM_WING+133:
 	case ITEM_WING+134:
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case ITEM_WING+49:
 	case ITEM_WING+50:
 	case ITEM_WING+135:
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		return true;
 	}
 
@@ -9588,7 +9535,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] -= 0.04f;
 		Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type == MODEL_HELM+59)
 	{
 		Position[1] += 0.04f;
@@ -9602,6 +9548,12 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.08f;
 		Vector(0.f,0.f,0.f,ObjectSelect.Angle);
 	}
+	else if (Type == MODEL_ARMORINVEN_74)
+	{
+		Position[0] += 0.01f;
+		Position[1] += 0.05f;
+		Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
+	}
 	else if(Type == MODEL_SWORD+32)
 	{
 		Position[0] += 0.005f;
@@ -9612,6 +9564,12 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 	{
 		Position[0] += 0.002f;
 		Position[1] += 0.02f;
+		Vector(0.f,0.f,0.f,ObjectSelect.Angle);
+	}
+	else if (Type == MODEL_SWORD+35)
+	{
+		Position[0] -= 0.005f;
+		Position[1] += 0.015f;
 		Vector(0.f,0.f,0.f,ObjectSelect.Angle);
 	}
 	else if(Type==MODEL_WING+49)
@@ -9636,7 +9594,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		Position[1] += 0.05f;
 		Position[0] += 0.005f;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 #ifdef LEM_ADD_LUCKYITEM
 	else if( Type >= MODEL_HELPER+135 && Type <= MODEL_HELPER+145 )
 	{
@@ -9754,12 +9711,10 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 
 	ObjectSelect.Type = Type;
 	if(ObjectSelect.Type>=MODEL_HELM && ObjectSelect.Type<MODEL_BOOTS+MAX_ITEM_INDEX
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| ObjectSelect.Type == MODEL_ARMORINVEN_60
 		|| ObjectSelect.Type == MODEL_ARMORINVEN_61
 		|| ObjectSelect.Type == MODEL_ARMORINVEN_62
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+		|| ObjectSelect.Type == MODEL_ARMORINVEN_74)
 		ObjectSelect.Type = MODEL_PLAYER;
 	else if(ObjectSelect.Type==MODEL_POTION+12)
 	{
@@ -10536,7 +10491,6 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		}
 		else if(Type == MODEL_HELPER+124)
 			Scale = 0.0018f;
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		else if(Type >= MODEL_WING+49 && Type <= MODEL_WING+50)
 		{
 			Scale = 0.002f;
@@ -10549,16 +10503,19 @@ void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t 
 		{
 			Scale = 0.0035f;
 		}
+		else if (Type == MODEL_SWORD+35)
+		{
+			Scale = 0.003f;
+		}
 		else if(Type >= MODEL_ETC+30 && Type <= MODEL_ETC+36)
 		{
 			Scale = 0.0023f;
 		}
-		else if(Type == MODEL_ARMORINVEN_60 || Type == MODEL_ARMORINVEN_62 || Type == MODEL_ARMORINVEN_61)
+		else if(Type == MODEL_ARMORINVEN_60 || Type == MODEL_ARMORINVEN_62 || Type == MODEL_ARMORINVEN_61 || Type == MODEL_ARMORINVEN_74)
 		{
 			b->BodyHeight = -100.f;
 			Scale = 0.0039f;
 		}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 #ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리 스케일 설정 [lem_2010.9.7]
 		// LEM_TSET  상승의 보석, 연장의 보석 스케일[lem_2010.9.7]
 		else if(Type >= MODEL_HELPER+135 && Type <= MODEL_HELPER+145)
@@ -10945,7 +10902,6 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		sx += Width*1.5f;
 		sy += Height*1.5f;
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type==ITEM_WING+49)
 	{
 		sx += Width*0.5f;
@@ -10956,20 +10912,17 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 		sx += Width*0.5f;
 		sy += Height*0.5f;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 	else
 	{
 		sx += Width*0.5f;
 		sy += Height*0.6f;
 	}
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-	if(Type>=ITEM_SWORD+32 && Type<=ITEM_SWORD+34)
+	if(Type>=ITEM_SWORD+32 && Type<=ITEM_SWORD+35)
 	{
 		sx -= Width*0.25f;
 		sy -= Height*0.25f;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
 	vec3_t Position;
 	CreateScreenVector((int)(sx),(int)(sy),Position, false);
@@ -11155,7 +11108,6 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 
 		RenderObjectScreen(MODEL_POTION+100,Level,Option1,ExtOption,Position,_Angle,PickUp);
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(Type == ITEM_ARMOR+59)
 	{
 		RenderObjectScreen(MODEL_ARMORINVEN_60,Level,Option1,ExtOption,Position,Success,PickUp);
@@ -11168,7 +11120,10 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 	{
 		RenderObjectScreen(MODEL_ARMORINVEN_62,Level,Option1,ExtOption,Position,Success,PickUp);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
+	else if(Type == ITEM_ARMOR+73)
+	{
+		RenderObjectScreen(MODEL_ARMORINVEN_74,Level,Option1,ExtOption,Position,Success,PickUp);
+	}
 	else
 	{
 		RenderObjectScreen(Type+MODEL_ITEM,Level,Option1,ExtOption,Position,Success,PickUp);
@@ -11255,16 +11210,13 @@ void RenderEqiupmentBox()
     InventoryColor(&CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT]);
     RenderBitmap(BITMAP_INVENTORY+16,x+StartX,y+StartY,Width,Height,0.f,0.f,Width/64.f,Height/64.f);
     //glove
-#ifdef PBG_ADD_NEWCHAR_MONK
 	if(gCharacterManager.GetBaseClass(CharacterAttribute->Class)!=CLASS_RAGEFIGHTER)
 	{
-#endif //PBG_ADD_NEWCHAR_MONK
-	Width=40.f;Height=40.f;x=15.f;y=152.f;
-    InventoryColor(&CharacterMachine->Equipment[EQUIPMENT_GLOVES]);
-    RenderBitmap(BITMAP_INVENTORY+7,x+StartX,y+StartY,Width,Height,0.f,0.f,Width/64.f,Height/64.f);
-#ifdef PBG_ADD_NEWCHAR_MONK
+		Width=40.f;Height=40.f;x=15.f;y=152.f;
+	    InventoryColor(&CharacterMachine->Equipment[EQUIPMENT_GLOVES]);
+	    RenderBitmap(BITMAP_INVENTORY+7,x+StartX,y+StartY,Width,Height,0.f,0.f,Width/64.f,Height/64.f);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
+
     //boot
 	Width=40.f;Height=40.f;x=134.f;y=152.f;
     InventoryColor(&CharacterMachine->Equipment[EQUIPMENT_BOOTS]);

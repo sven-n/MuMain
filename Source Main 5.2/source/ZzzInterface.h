@@ -147,12 +147,10 @@ void UseSkillWarrior(CHARACTER *c, OBJECT *o);
 void UseSkillWizard(CHARACTER *c, OBJECT *o);
 void UseSkillElf(CHARACTER *c, OBJECT *o);
 void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj);
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj);
 void AttackRagefighter(CHARACTER *pCha, int nSkill, float fDistance);
 bool UseSkillRagePosition(CHARACTER* pCha);
 bool CheckTarget(CHARACTER *c);
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 void MouseRButtonReset();
 void AttackKnight(CHARACTER *c, int Skill, float Distance);
 

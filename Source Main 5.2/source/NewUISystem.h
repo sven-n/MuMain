@@ -83,6 +83,7 @@
 #ifdef LEM_ADD_LUCKYITEM
 #include "NewUILuckyItemWnd.h"
 #endif // LEM_ADD_LUCKYITEM
+#include "NewUIMuHelper.h"
 
 namespace SEASON3B
 {
@@ -214,6 +215,7 @@ namespace SEASON3B
 #ifdef LEM_ADD_LUCKYITEM
 		CNewUILuckyItemWnd*			m_pNewUILuckyItemWnd;
 #endif // LEM_ADD_LUCKYITEM
+		CNewUIMuHelper*				m_pNewUIMuHelper;
 	public:
 		CNewUIChatInputBox* GetUI_NewChatInputBox() const;
 		CNewUIChatLogWindow* GetUI_NewChatLogWindow() const;
@@ -291,6 +293,7 @@ namespace SEASON3B
 #ifdef LEM_ADD_LUCKYITEM
 		CNewUILuckyItemWnd*	Get_pNewUILuckyItemWnd() const;
 #endif // LEM_ADD_LUCKYITEM
+		CNewUIMuHelper* Get_pNewUIMuHelper() const;
 	};
 }
 
@@ -375,4 +378,5 @@ namespace SEASON3B
 #ifdef LEM_ADD_LUCKYITEM
 #define g_pLuckyItemWnd	SEASON3B::CNewUISystem::GetInstance()->Get_pNewUILuckyItemWnd()
 #endif // LEM_ADD_LUCKYITEM
+#define g_pNewUIMuHelper SEASON3B::CNewUISystem::GetInstance()->Get_pNewUIMuHelper();
 #endif // _NEWUISYSTEM_H_

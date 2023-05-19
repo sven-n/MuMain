@@ -1328,14 +1328,12 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
                     o->LifeTime = 20;
                     o->Scale = Scale * 0.1f;
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType==13 || o->SubType==14)
 				{
 					o->LifeTime = 30;
                     o->Scale = 1.0f;
 					VectorCopy(Light, o->Light);
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
                 break;
 
 			case BITMAP_MAGIC+1:
@@ -2911,11 +2909,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
 					o->Gravity = (float)(rand()%16+8);
 					break;
 				}
-				else if (o->SubType == 13
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType == 14
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+				else if (o->SubType == 13 || o->SubType == 14)
 				{
 					o->Direction[0] = 0;
 					o->Direction[1] = 0;
@@ -2923,9 +2917,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
 
 					o->LifeTime = rand()%16+20;
 					o->Scale    = (float)(rand()%13+3)*0.08f;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					o->Scale *= Scale;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 					o->Gravity = (float)(rand()%3+3);
 
 					o->Angle[2] = (float)(rand()%360);
@@ -4771,11 +4763,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
                 break;
 			case MODEL_SWORD_FORCE :
                 o->Velocity = 0.25f;
-                if ( o->SubType==0 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType==2
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+                if ( o->SubType==0 || o->SubType==2 )
                 {
 					o->LifeTime = 15;
                     o->Scale    = 0.f;
@@ -4783,11 +4771,7 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
                     o->Position[2] += 100.f;
                     Vector ( 0.f, -10.f, 0.f, o->Direction );
                 }
-                else if ( o->SubType==1 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-						|| o->SubType==3
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-						)
+                else if ( o->SubType==1 || o->SubType==3 )
                 {
                     o->LifeTime = 5;
                     o->Scale = 3.5f;
@@ -5043,7 +5027,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
 						o->Position[2] = 150.f;
 						o->Scale = 5.f;
 					}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					else if(o->SubType==2)
 					{
 						o->LifeTime = 50;
@@ -5058,7 +5041,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
 						VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, o->StartPosition);
 						o->Scale =  0.5f;
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
 				break;
 			case MODEL_NIGHTWATER_01:
@@ -6082,7 +6064,6 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
 					o->Timer = (float)(rand()%360);
 				}
 				break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case MODEL_WOLF_HEAD_EFFECT:
 				{
 					BMD* b = &Models[o->Owner->Type];
@@ -6478,7 +6459,15 @@ void CreateEffect(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubType
 					o->HeadAngle[2] += 25.0f;
 				}
 				break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
+			case MODEL_PHOENIX_SHOT:
+				{
+					if (o->Live)
+					{
+
+					}
+				}
+				break;
+
 			}
 			return;
 		}
@@ -6627,11 +6616,8 @@ void CreateBomb2(vec3_t p,bool Exp, int SubType, float Scale)
 		CreateParticle(BITMAP_EXPLOTION+1,Position,Angle,Light, 0, 4.f);
 	}
 }
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
+
 void CreateBomb3(vec3_t vPos, int iSubType, float fScale)
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-void CreateBomb3(vec3_t vPos, int iSubType)
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 {
 	vec3_t vBombPos, vAngle, vLight;
 	Vector((float)(rand()%60+60+90),0.f,(float)(rand()%30),vAngle);
@@ -6649,67 +6635,48 @@ void CreateBomb3(vec3_t vPos, int iSubType)
 			else if (rand()%5 == 0) break;
 			Vector(vPos[0] + rand()%80-40, vPos[1] + rand()%80-40, vPos[2] + rand()%120+30, vBombPos);
 		}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		else if(iSubType == 3)
 		{
 			Vector(vPos[0] + rand()%90-40, vPos[1] + rand()%90-40, vPos[2] + rand()%100+70, vBombPos);
 		}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		else
 		{
 			if (i == 1) break;
 			else if (rand()%3 != 0) break;
 			Vector(vPos[0] + rand()%30-15, vPos[1] + rand()%30-15, vPos[2] + rand()%80+30, vBombPos);
 		}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		if(fScale!=1.0f)
 			CreateParticle(BITMAP_SUMMON_SAHAMUTT_EXPLOSION,vBombPos,vAngle,vLight,0,fScale);
 		else
-#endif ///PBG_ADD_NEWCHAR_MONK_SKILL
- 		CreateParticle(BITMAP_SUMMON_SAHAMUTT_EXPLOSION,vBombPos,vAngle,vLight,0,0.15f*(rand()%10));
+ 			CreateParticle(BITMAP_SUMMON_SAHAMUTT_EXPLOSION,vBombPos,vAngle,vLight,0,0.15f*(rand()%10));
 	}
 
 	Vector(1.0f,0.5f,0.2f,vLight);
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(fScale!=1.0f)
 		CreateParticle(BITMAP_MAGIC+1,vBombPos,vAngle,vLight,0,2.2f*fScale);
 	else 
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
- 	CreateParticle(BITMAP_MAGIC+1,vBombPos,vAngle,vLight,0,1.0f);
+ 		CreateParticle(BITMAP_MAGIC+1,vBombPos,vAngle,vLight,0,1.0f);
 	Vector(1.0f,0.6f,0.2f,vLight);
 
 	for (int i = 0; i < 3; ++i)
 	{
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		if(fScale!=1.0f)
 			CreateEffect(MODEL_STONE1+rand()%2,vBombPos,vAngle,vLight,14,NULL,-1,0,0,0,2.2f*fScale);
 		else 
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
- 		CreateEffect(MODEL_STONE1+rand()%2,vBombPos,vAngle,vLight,13);
+ 			CreateEffect(MODEL_STONE1+rand()%2,vBombPos,vAngle,vLight,13);
 	}
 	Vector(1.0f,1.0f,1.0f,vLight);
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	int nParCnt = 5;
 	if(iSubType==3)
 	{
 		nParCnt = 20;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	for (int i = 0; i < nParCnt; ++i)
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-	for (int i = 0; i < 5; ++i)
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	{
 		CreateParticle(BITMAP_SPARK,vBombPos,vAngle,vLight,2);
 	}
-// 	for (i = 0; i < 2; ++i)
-// 	{
-// 		Vector(1.0f,1.0f,1.0f,vLight);	// ¿¬±â Æã
-// 		CreateParticle(BITMAP_SMOKE,vBombPos,vAngle,vLight,7);	// ¿¬±â
-// 	}
 }
 
 void CreateInferno(vec3_t Position, int SubType)
@@ -8316,7 +8283,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				o->Light[2] *= 0.5f;
 			}
 		}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		else if(o->SubType==13)
 		{
 			o->Scale *= 1.1f;
@@ -8343,7 +8309,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 				VectorScale(o->Light, 0.5f, o->Light);
 			}
 		}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
         break;
 	case BITMAP_MAGIC+1:
 	case BITMAP_MAGIC+2:
@@ -11067,11 +11032,7 @@ void MoveEffect( OBJECT *o, int iIndex)
             }
             break;
         }
-		else if (o->SubType == 13
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-			|| o->SubType == 14
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-			)
+		else if (o->SubType == 13 || o->SubType == 14)
 		{
 			o->HeadAngle[2] -= o->Gravity;
 
@@ -12303,10 +12264,7 @@ void MoveEffect( OBJECT *o, int iIndex)
                     {
                         if ( ( o->Owner->CurrentAction>=PLAYER_WALK_MALE && o->Owner->CurrentAction<=PLAYER_RUN_RIDE_WEAPON ) ||
                              ( o->Owner->CurrentAction>=PLAYER_FLY_RIDE  && o->Owner->CurrentAction<=PLAYER_FLY_RIDE_WEAPON ) 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-							 || ( o->Owner->CurrentAction==PLAYER_RAGE_UNI_RUN || o->Owner->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT )
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-							 )
+							 || ( o->Owner->CurrentAction==PLAYER_RAGE_UNI_RUN || o->Owner->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT ))
                         {
                             o->AnimationFrame = 0.f;
                             o->PriorAnimationFrame = 0.f;
@@ -14765,25 +14723,19 @@ void MoveEffect( OBJECT *o, int iIndex)
 			}
 
 		case MODEL_SWORD_FORCE:
-            if ( o->SubType==0 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-				|| o->SubType==2
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-				)
+            if ( o->SubType==0 || o->SubType==2	)
             {
                 if ( o->LifeTime>12 )
                 {
                     o->Scale += 0.9f;
 
                     o->Direction[1] -= 2.f;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					if(o->SubType==2)
 					{
 						CreateEffect( MODEL_SWORD_FORCE, o->Position, o->Angle, o->Light, 3, o );
 					}
 					else
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-                    CreateEffect( MODEL_SWORD_FORCE, o->Position, o->Angle, o->Light, 1, o );
+						CreateEffect( MODEL_SWORD_FORCE, o->Position, o->Angle, o->Light, 1, o );
                 }
                 else
                 {
@@ -14804,24 +14756,18 @@ void MoveEffect( OBJECT *o, int iIndex)
 			        {
 				        Vector ( (float)(rand()%60+60+90), 0.f, o->Angle[2], Angle );
 				        CreateJoint ( BITMAP_JOINT_SPARK, Position, Position, Angle );
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 						if(o->SubType==2)
 						{
 							CreateParticle(BITMAP_FIRE, Position, Angle, o->Light, 18, 1.5f);
 						}
 						else
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-				        CreateParticle ( BITMAP_FIRE, Position, Angle, o->Light, 2, 1.5f );
+							CreateParticle ( BITMAP_FIRE, Position, Angle, o->Light, 2, 1.5f );
 			        }
                 }
                 Vector ( 1.f, 0.8f, 0.6f, Light );
                 AddTerrainLight ( o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight );
             }
-            else if ( o->SubType==1 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-						|| o->SubType==3
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+            else if ( o->SubType==1 || o->SubType==3 )
             {
                 o->BlendMeshLight = ( float)o->LifeTime/10.f;
                 o->Alpha = o->BlendMeshLight;
@@ -15248,7 +15194,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 						o->Light[2] /= 1.05f;
 					}
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType==2)
 				{
 					vec3_t vLight;
@@ -15278,7 +15223,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 						CreateEffect(BITMAP_LIGHT_RED, vPos, vAngle, vLight, 4, o,-1,0,0,0, 3.0f);
 					}		
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 			}
 			break;	
 		case MODEL_NIGHTWATER_01:
@@ -17052,7 +16996,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					}
 				}
 				break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case MODEL_WOLF_HEAD_EFFECT:
 				{
 					if(o->SubType == 0)
@@ -17117,15 +17060,9 @@ void MoveEffect( OBJECT *o, int iIndex)
 						float Scale = 1.5f+(rand()%10*0.02f);
 						CreateParticle(BITMAP_SBUMB, vPosition, o->Angle, vLight, 0, Scale*o->Scale, o->Owner);
 					}
-					if(o->LifeTime==15
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
-						|| o->LifeTime==9 || o->LifeTime==6
-#endif //PBG_MOD_RAGEFIGHTERSOUND
-						)
+					if(o->LifeTime==15 || o->LifeTime==9 || o->LifeTime==6)
 					{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 						StopBuffer(SOUND_RAGESKILL_THRUST_ATTACK, true);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 						PlayBuffer(SOUND_RAGESKILL_THRUST_ATTACK);
 					}
 				}
@@ -17142,15 +17079,11 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 						if(o->AnimationFrame >= 5.0f && o->LifeTime > 50)
 						{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 							if(o->Owner->m_sTargetIndex<0)
 								break;
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 							CreateBomb3(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, 3, 0.9f);
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 							StopBuffer(SOUND_RAGESKILL_STAMP_ATTACK, true);
 							PlayBuffer(SOUND_RAGESKILL_STAMP_ATTACK);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 							o->LifeTime = 40;						
 						}
 
@@ -17187,14 +17120,10 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 						if(o->AnimationFrame >= 3.0f && o->LifeTime > 50)
 						{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 							if(o->Owner->m_sTargetIndex<0)
 								break;
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 							CreateBomb3(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, 3, 0.9f);
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 							StopBuffer(SOUND_RAGESKILL_STAMP_ATTACK, true);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 							PlayBuffer(SOUND_RAGESKILL_STAMP_ATTACK);
 							o->LifeTime = 40;
 						}
@@ -17246,10 +17175,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 							break;
 
 						CreateEffect(BITMAP_DAMAGE1, CharactersClient[o->Owner->m_sTargetIndex].Object.Position, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 1.4f);
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 						StopBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK, true);
 						PlayBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 						o->LifeTime = 45;
 					}
 
@@ -17277,9 +17204,7 @@ void MoveEffect( OBJECT *o, int iIndex)
 
 						VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
 						CreateEffect(BITMAP_SHINY+4, vPosition, o->Angle, Light, 0, o->Owner, -1, 0, 0, 0, 1.9f);
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 						StopBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK, true);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 						PlayBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK);
 						o->LifeTime = 20;
 					}
@@ -17725,10 +17650,8 @@ void MoveEffect( OBJECT *o, int iIndex)
 						}
 
 						vec3_t vPosition;
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 						if(o->Owner->m_sTargetIndex<0)
 							break;
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 						VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
 						if(o->Owner->AnimationFrame > 5)
 						{
@@ -18054,7 +17977,6 @@ void MoveEffect( OBJECT *o, int iIndex)
 					}
 				}
 				break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}	
 
 	if(	   
@@ -19087,7 +19009,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						//CreateSprite(BITMAP_WATERFALL_4, o->Position, o->Scale, o->Light, o, o->Angle[0]);
 					}
 					break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				case BITMAP_EVENT_CLOUD:
 					{
 						EnableAlphaBlend();
@@ -19187,7 +19108,6 @@ void RenderEffects ( bool bRenderBlendMesh )
 						}
 					}
 					break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				default:
 					if(o->Type>=MODEL_SKILL_BEGIN && o->Type<MODEL_SKILL_END)
 					{
@@ -19322,13 +19242,11 @@ void RenderEffectShadows()
 					    RenderTerrainAlphaBitmap ( o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2] );
 					    RenderTerrainAlphaBitmap ( o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2] );
 					}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					else if(o->SubType==13 || o->SubType==14)
 					{
 						RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
 						RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
                     break;
 				case BITMAP_MAGIC+1:
 					Luminosity = 1.f;

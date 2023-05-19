@@ -3482,7 +3482,6 @@ typedef struct
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 //----------------------------------------------------------------------------
 // 0x4A
 //----------------------------------------------------------------------------
@@ -3503,7 +3502,7 @@ typedef struct {
 	WORD		 MagicNumber;
 	WORD		 TargerIndex[DARKSIDE_TARGET_MAX];
 } PRECEIVE_DARKSIDE_INDEX, * LPPRECEIVE_DARKSIDE_INDEX;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
+
 //////////////////////////////////////////////////////////////////////////
 // ?????????????????????????????????????
 //////////////////////////////////////////////////////////////////////////

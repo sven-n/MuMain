@@ -454,7 +454,7 @@ extern DWORD g_dwLatestMagicTick;
 
 #ifndef _DEBUG
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
+
 #define SendRequestMagic( p_Type, p_Key)\
 {\
 	if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || p_Type==263 || p_Type==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))\
@@ -468,32 +468,14 @@ extern DWORD g_dwLatestMagicTick;
 		hanguo_check3();\
 	}\
 }
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-	if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))\
-	{\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC3, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send();\
-	}\
-}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-
 #else // _DEBUG
 __forceinline void SendRequestMagic(int Type,int Key)
 {
 	if( !IsCanBCSkill(Type) )
 		return;
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
+
 	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || Type==263 || Type==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-	if(!FindText2(Hero->ID,"webzen") && ( Type==40 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	{
 		g_dwLatestMagicTick = GetTickCount();
 		CStreamPacketEngine spe;
@@ -2435,7 +2417,7 @@ __forceinline bool SendRequestEquippingInventoryItem(int iItemPos, int iValue)
 
 }
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
+
 #ifdef _DEBUG
 __forceinline void SendRequestRageAtt(int Type,int Key)
 {
@@ -2480,5 +2462,4 @@ __forceinline void SendRequestDarkside(WORD nSkill, int Key)
     spe.Send(); \
 }
 #endif //_DEBUG
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 

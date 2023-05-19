@@ -79,10 +79,10 @@ extern int AllRepairGold;
 //////////////////////////////////////////////////////////////////////////
 // text ฐüทร
 //////////////////////////////////////////////////////////////////////////
-extern char TextList[30][100];
-extern int TextListColor[30];
-extern int TextBold[30];
-extern SIZE Size[30];
+extern char TextList[50][100];
+extern int TextListColor[50];
+extern int TextBold[50];
+extern SIZE Size[50];
 
 ///////////////////////////////////////////////////////////////////////////////
 // party
@@ -173,11 +173,7 @@ void RenderItem3D(float sx,float sy,float Width,float Height,int Type,int Level,
 void RenderObjectScreen(int Type,int ItemLevel,int Option1,int ExtOption,vec3_t Target,int Select,bool PickUp);
 bool GetAttackDamage ( int* iMinDamage, int* iMaxDamage );
 void GetItemName ( int iType, int iLevel, char* Text );
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 void GetSpecialOptionText ( int Type, char* Text, WORD Option, BYTE Value, int iMana );
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-void GetSpecialOptionText ( int Type, char* Text, BYTE Option, BYTE Value, int iMana );
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
 void RenderRepairInfo(int sz, int sy, ITEM* ip, bool Sell);
 void RenderSkillInfo(int sx,int sy,int Type,int SkillNum = 0, int iRenderPoint = STRP_NONE);

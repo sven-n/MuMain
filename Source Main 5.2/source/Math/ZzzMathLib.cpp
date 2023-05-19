@@ -5,14 +5,17 @@
 
 vec3_t vec3_origin = {0,0,0};
 
-int VectorCompare (vec3_t v1, vec3_t v2)
+int VectorCompare(const vec3_t v1, const vec3_t v2)
 {
-	int		i;
-	
-	for (i=0 ; i<3 ; ++i)
-		if (fabs(v1[i]-v2[i]) > EQUAL_EPSILON)
+	const float EPSILON = 0.0001f;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (fabsf(v1[i] - v2[i]) > EPSILON)
+		{
 			return false;
-			
+		}
+	}
+	
 	return true;
 }
 

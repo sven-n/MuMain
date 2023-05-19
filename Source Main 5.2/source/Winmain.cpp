@@ -91,7 +91,7 @@ HFONT     g_hFontBold = NULL;
 HFONT     g_hFontBig = NULL;
 HFONT     g_hFixFont = NULL;
 
-CTimer*		g_pTimer = NULL;	// performance counter.
+CTimer*	  g_pTimer = NULL;	// performance counter.
 bool      Destroy = false;
 bool      ActiveIME = false;
 
@@ -839,126 +839,54 @@ bool CreateOpenglWindow()
 	return true;
 }
 
-HWND StartWindow(HINSTANCE hCurrentInst,int nCmdShow)
+HWND StartWindow(HINSTANCE hInstance, int nCmdShow)
 {
-    char *windowName = "MU Online";
+	char* windowName = "MU Online";
+	WNDCLASS wndClass;
+	HWND hWnd;
 
-    WNDCLASS wndClass;
-    HWND hWnd;
-	
-    wndClass.style         = CS_OWNDC | CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
-    wndClass.lpfnWndProc   = WndProc;
-    wndClass.cbClsExtra    = 0;
-    wndClass.cbWndExtra    = 0;
-    wndClass.hInstance     = hCurrentInst;
-    wndClass.hIcon		   = LoadIcon(hCurrentInst, (LPCTSTR)IDI_ICON1);
-    wndClass.hCursor	   = LoadCursor(NULL, IDC_ARROW);
-    wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    wndClass.lpszMenuName  = NULL;
-    wndClass.lpszClassName = windowName;
-    RegisterClass(&wndClass);
+	wndClass.style = CS_HREDRAW | CS_VREDRAW;
+	wndClass.lpfnWndProc = WndProc;
+	wndClass.cbClsExtra = 0;
+	wndClass.cbWndExtra = 0;
+	wndClass.hInstance = hInstance;
+	wndClass.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_ICON1);
+	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	wndClass.lpszMenuName = NULL;
+	wndClass.lpszClassName = windowName;
 
-#ifdef ENABLE_FULLSCREEN
+	if (!RegisterClass(&wndClass))
 	{
-#ifndef FOR_WORK
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
-		if (g_bUseWindowMode == TRUE)
-		{
-			RECT rc = { 0, 0, WindowWidth, WindowHeight };
-#if defined WINDOWMODE
-			if (g_bUseWindowMode == TRUE)
-				AdjustWindowRect(&rc, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, NULL);
-			else
-#endif	//WINDOWMODE
-			AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, NULL);
-			rc.right -= rc.left;
-			rc.bottom -= rc.top;
-
-#if defined WINDOWMODE
-			if (g_bUseWindowMode == TRUE)
-			{
-			hWnd = CreateWindow(
-				windowName, windowName,
-				WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
-				(GetSystemMetrics(SM_CXSCREEN) - rc.right) / 2,
-				(GetSystemMetrics(SM_CYSCREEN) - rc.bottom) / 2,
-				rc.right,
-				rc.bottom,
-				NULL, NULL, hCurrentInst, NULL);
-			}
-			else
-#endif//WINDOWMODE
-			{
-			hWnd = CreateWindow(
-				windowName, windowName,
-				WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-				(GetSystemMetrics(SM_CXSCREEN) - rc.right) / 2,
-				(GetSystemMetrics(SM_CYSCREEN) - rc.bottom) / 2,
-				rc.right,
-				rc.bottom,
-				NULL, NULL, hCurrentInst, NULL);
-			}
-		}
-		else
-#endif//WINDOWMODE
-		{
-			hWnd = CreateWindowEx( WS_EX_TOPMOST | WS_EX_APPWINDOW,
-				windowName, windowName,
-				WS_POPUP,
-				0, 0,
-				WindowWidth,
-				WindowHeight,
-				NULL, NULL, hCurrentInst, NULL);
-		}
-#else //FOR_WORK
-		hWnd = CreateWindow(
-			windowName, windowName,
-			WS_POPUP,
-			0, 0,
-			WindowWidth,
-			WindowHeight,
-			NULL, NULL, hCurrentInst, NULL);
-#endif
+		MessageBox(NULL, "Windows aplication error!", "Aplication Error", MB_ICONERROR);
+		return 0;
 	}
-#else //ENABLE_FULLSCREEN
+
+	if (g_bUseWindowMode == TRUE)
 	{
 		RECT rc = { 0, 0, WindowWidth, WindowHeight };
-#if defined WINDOWMODE
-		if (g_bUseWindowMode == TRUE)
-			AdjustWindowRect(&rc, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, NULL);
-		else
-#endif
-		AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, NULL);
-		rc.right -= rc.left;
-		rc.bottom -= rc.top;
-#if defined WINDOWMODE
-		if (g_bUseWindowMode == TRUE)
-		{
+		AdjustWindowRect(&rc, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, NULL);
 		hWnd = CreateWindow(
 			windowName, windowName,
 			WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
 			(GetSystemMetrics(SM_CXSCREEN) - rc.right) / 2,
 			(GetSystemMetrics(SM_CYSCREEN) - rc.bottom) / 2,
-			rc.right,
-			rc.bottom,
-			NULL, NULL, hCurrentInst, NULL);
-		}
-		else
-#endif
-		{
-		hWnd = CreateWindow(
-			windowName, windowName,
-			WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-			(GetSystemMetrics(SM_CXSCREEN) - rc.right) / 2,
-			(GetSystemMetrics(SM_CYSCREEN) - rc.bottom) / 2,
-			rc.right,
-			rc.bottom,
-			NULL, NULL, hCurrentInst, NULL);
-		}
+			rc.right - rc.left,
+			rc.bottom - rc.top,
+			NULL, NULL, hInstance, NULL);
 	}
-#endif //ENABLE_FULLSCREEN
-	
-    return hWnd;
+	else
+	{
+		hWnd = CreateWindowEx(
+			WS_EX_TOPMOST | WS_EX_APPWINDOW,
+			windowName, windowName,
+			WS_POPUP,
+			0, 0,
+			WindowWidth,
+			WindowHeight,
+			NULL, NULL, hInstance, NULL);
+	}
+	return hWnd;
 }
 
 char m_ID[11];
@@ -1068,13 +996,11 @@ BOOL OpenInitFile()
 
 		g_iChatInputType = 1;
 
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 		dwSize = sizeof ( int);
 		if ( RegQueryValueEx (hKey, "WindowMode", 0, NULL, (LPBYTE) & g_bUseWindowMode, &dwSize) != ERROR_SUCCESS)
 		{
 			g_bUseWindowMode = FALSE;
 		}
-#endif // USER_WINDOW_MODE
 
 		dwSize = MAX_LANGUAGE_NAME_LENGTH;
 		if ( RegQueryValueEx (hKey, "LangSelection", 0, NULL, (LPBYTE)g_aszMLSelection, &dwSize) != ERROR_SUCCESS)
@@ -1085,17 +1011,59 @@ BOOL OpenInitFile()
 	}
 	RegCloseKey( hKey);
 
-	switch(m_Resolution)
+	switch (m_Resolution)
 	{
-	case 0:WindowWidth=640 ;WindowHeight=480 ;break;
-	case 1:WindowWidth=800 ;WindowHeight=600 ;break;
-	case 2:WindowWidth=1024;WindowHeight=768 ;break;
-	case 3:WindowWidth=1280;WindowHeight=1024;break;
-	//case 3:WindowWidth=1920;WindowHeight=1440;break;
-	case 4:WindowWidth=1600;WindowHeight=1200;break;
+	case 0:
+		WindowWidth = 640;
+		WindowHeight = 480;
+		break;
+	case 1:
+		WindowWidth = 800;
+		WindowHeight = 600;
+		break;
+	case 2:
+		WindowWidth = 1024;
+		WindowHeight = 768;
+		break;
+	case 3:
+		WindowWidth = 1280;
+		WindowHeight = 1024;
+		break;
+	case 4:
+		WindowWidth = 1600;
+		WindowHeight = 1200;
+		break;
+	case 5:
+		WindowWidth = 1864;
+		WindowHeight = 1400;
+		break;
+	case 6:
+		WindowWidth = 1600;
+		WindowHeight = 900;
+		break;
+	case 7:
+		WindowWidth = 1600;
+		WindowHeight = 1280;
+		break;
+	case 8:
+		WindowWidth = 1680;
+		WindowHeight = 1050;
+		break;
+	case 9:
+		WindowWidth = 1920;
+		WindowHeight = 1080;
+		break;
+	case 10:
+		WindowWidth = 2560;
+		WindowHeight = 1440;
+		break;
+	default:
+		WindowWidth = 640;
+		WindowHeight = 480;
+		break;
 	}
-	
-	g_fScreenRate_x = (float)WindowWidth / 640;		// ¡Ø
+
+	g_fScreenRate_x = (float)WindowWidth / 640;
 	g_fScreenRate_y = (float)WindowHeight / 480;
 
 	return TRUE;
@@ -1443,7 +1411,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	//g_ErrorReport.WriteImeInfo( g_hWnd);
 	g_ErrorReport.AddSeparator();
 
-	//g_dotnet = new DotNetRuntime();
 	if (g_dotnet->is_initialized())
 	{
 		g_ErrorReport.Write(".net runtime loaded :)");
@@ -1453,15 +1420,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 		g_ErrorReport.Write(".net runtime failed to load :(");
 	}
 
-	switch(WindowWidth)
+	switch (WindowWidth)
 	{
-		case 640 :FontHeight = 12;break;
-		case 800 :FontHeight = 13;break;
-		case 1024:FontHeight = 14;break;
-		case 1280:FontHeight = 15;break;
-		default  :FontHeight = 15;break;
+		case 640: FontHeight = 10; break;
+		case 800: FontHeight = 12; break;
+		case 1024: FontHeight = 13; break;
+		case 1280: FontHeight = 13; break;
+		case 1366: FontHeight = 14; break;	
+		case 1440: FontHeight = 16; break;
+		case 1864: FontHeight = 16; break;
+		case 1600: FontHeight = 16; break;
+		case 1680: FontHeight = 16; break;
+		case 1920: FontHeight = 18; break;
+		case 2560: FontHeight = 20; break;
 	}
-	
+
 	int nFixFontHeight = 13;
 	int nFixFontSize;
 	int iFontSize;
@@ -1469,10 +1442,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 	iFontSize = FontHeight - 1;
 	nFixFontSize = nFixFontHeight - 1;
 
-	g_hFont		= CreateFont(iFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
-	g_hFontBold = CreateFont(iFontSize,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
-	g_hFontBig	= CreateFont(iFontSize*2,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
-	g_hFixFont	= CreateFont(nFixFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH | FF_DONTCARE,GlobalText[18][0] ? GlobalText[18] : NULL);
+	g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Tahoma");
+	g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Tahoma");
+	g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Tahoma");
+	g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Tahoma");
+
+	//g_hFont		= CreateFont(iFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
+	//g_hFontBold = CreateFont(iFontSize,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
+	//g_hFontBig	= CreateFont(iFontSize*2,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
+	//g_hFixFont	= CreateFont(nFixFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH | FF_DONTCARE,GlobalText[18][0] ? GlobalText[18] : NULL);
 
 	setlocale( LC_ALL, "english");
 

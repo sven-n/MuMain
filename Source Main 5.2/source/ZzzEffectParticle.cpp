@@ -312,11 +312,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Gravity = (rand()%15+15)*0.02f;
 					VectorCopy(o->Target->Position, o->StartPosition);
 				}
-				else if (o->SubType == 4
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-						|| o->SubType == 9
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+				else if (o->SubType == 4 || o->SubType == 9)
 				{
       				o->LifeTime = rand()%5+12;
      				o->Scale = (float)(rand()%72+72)*0.01f*Scale;
@@ -479,7 +475,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 						{
 							o->LifeTime = 4;
 						}break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					case 18:
 						{
 							o->LifeTime = 24;
@@ -489,7 +484,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 							Vector(1.0f, 1.0f, 1.0f, o->Light);
 						}
 						break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 					default:
 						{
 							o->LifeTime = 24;
@@ -748,12 +742,10 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				{
 					o->LifeTime = 20;
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType == 7)
 				{
 					o->LifeTime = 5;
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				break;
 			case BITMAP_MAGIC:
 				{
@@ -1770,11 +1762,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 			case BITMAP_SMOKELINE1:
 			case BITMAP_SMOKELINE2:
 			case BITMAP_SMOKELINE3:
-				if (o->SubType == 0
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType == 5
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+				if (o->SubType == 0	|| o->SubType == 5)
 				{
 					if(gMapManager.WorldActive == WD_63PK_FIELD)
 					{
@@ -1790,12 +1778,10 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Alpha = 0;
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					if(o->SubType == 5)
 					{
 						VectorCopy(o->Target->Position, o->StartPosition);
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
 				else if (o->SubType == 1)
 				{
@@ -1853,11 +1839,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 				break;
 			case BITMAP_FIRE_HIK1:
 			case BITMAP_FIRE_HIK1_MONO:	
-				if (o->SubType == 0
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType == 6
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+				if (o->SubType == 0 || o->SubType == 6)
 				{
       				o->LifeTime = rand()%5+27;
      				o->Scale = (float)(rand()%72+72)*0.01f*Scale;
@@ -1910,7 +1892,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0, 0, 0, o->Light);
 					VectorCopy(o->Target->Position, o->StartPosition);
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType==5)
 				{
 					o->LifeTime = rand()%5+27;
@@ -1921,7 +1902,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					VectorCopy(Light, o->TurningForce);
 					Vector(0, 0, 0, o->Light);	
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				if (o->SubType == 10)
 				{
 					o->LifeTime = rand()%5+47;
@@ -1936,11 +1916,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 
 			case BITMAP_FIRE_HIK3:
 			case BITMAP_FIRE_HIK3_MONO:	
-				if (o->SubType == 0
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType == 6
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+				if (o->SubType == 0 || o->SubType == 6)
 				{
       				o->LifeTime = rand()%5+17;
      				o->Scale = (float)(rand()%72+72)*0.01f*Scale;
@@ -2035,10 +2011,7 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 			case BITMAP_SPARK:
      			o->Scale = (float)(rand()%4+4)*0.1f;
 				if(o->SubType==0 || o->SubType==2 || o->SubType==3 || o->SubType==4 || o->SubType==6 || o->SubType==11 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType==13
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+					|| o->SubType==13)
 				{
 					o->LifeTime = rand()%16+24;
 					o->Angle[2] = (float)(rand()%360);
@@ -2068,14 +2041,12 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					{
 						Vector(1.0f,0.3f,0.3f,o->Light);
 					}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					else if(o->SubType==13)
 					{
 						o->Scale *= 1.6f;
 						VectorScale(p,1.5f,p);
 						o->TexType = BITMAP_SPARK+1;
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
 					VectorRotate(p,Matrix,o->Velocity);
 				}
@@ -2111,7 +2082,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0.f,(float)(rand()%10+10)*0.05f,0.f,p);
 					VectorRotate(p,Matrix,o->Velocity);
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType == 12)
 				{
 					o->Scale = Scale + (float)(rand()%4+4)*0.1f;
@@ -2122,7 +2092,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0.f,(float)(rand()%20+20)*0.1f,0.f,p);
 					VectorRotate(p,Matrix,o->Velocity);
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
       			else
 				{
 					if (o->SubType==5)
@@ -2727,12 +2696,10 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
                     o->Gravity  = 0.f;
                     o->Rotation = (float)(rand()%360);
                 }
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType==2)
 				{
 					o->LifeTime = 8;
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
  				break;
 			case BITMAP_SHINY+6:
 				if(o->SubType == 0)
@@ -3855,7 +3822,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					Vector(0, 0, 0, o->Light);
 				}
 				break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case BITMAP_SBUMB:
 				{
 					o->LifeTime = 4;
@@ -3881,7 +3847,6 @@ int CreateParticle(int Type,vec3_t Position,vec3_t Angle,vec3_t Light,int SubTyp
 					o->Position[2] += 80.0f+rand()%20;
 				}
 				break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 			}
 			return i;
 		}
@@ -4386,11 +4351,7 @@ void MoveParticles()
 						VectorAdd(o->Position, o->StartPosition, o->Position);
 					}
 				}
-				else if (o->SubType == 4
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType == 9
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+				else if (o->SubType == 4 || o->SubType == 9)
 				{
 					if (o->LifeTime < 10)
 					{
@@ -4419,13 +4380,11 @@ void MoveParticles()
 					}
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					if(o->SubType==9)
 					{
 						o->Rotation = 0.0f;
 						o->Position[2] += o->Gravity*1.2f;
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
 				else if (o->SubType == 5)
 				{
@@ -4717,7 +4676,6 @@ void MoveParticles()
 						o->Light[2] /= 1.7f;
 						o->Scale *= 1.1f;
 					}break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				case 18:
 					{
 						o->Gravity += 0.004f;
@@ -4729,7 +4687,6 @@ void MoveParticles()
 						VectorScale(o->Light, 0.95f, o->Light);
 					}
 					break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
                 default :
 					{
 						o->Gravity += 0.004f;
@@ -5017,12 +4974,10 @@ void MoveParticles()
 						o->Light[1] /= 1.01f;
 						o->Light[2] /= 1.01f;
 					}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					else if(o->SubType==7)
 					{
 						VectorScale(o->Light, 0.97f, o->Light);
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
 				break;
 			case BITMAP_MAGIC:
@@ -5124,10 +5079,7 @@ void MoveParticles()
                 {
                     if((o->Target->CurrentAction>=PLAYER_WALK_MALE && o->Target->CurrentAction<=PLAYER_RUN_RIDE_WEAPON) || 
                        (o->Target->CurrentAction>=PLAYER_ATTACK_SKILL_SWORD1 && o->Target->CurrentAction<=PLAYER_ATTACK_SKILL_SWORD5 ) 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-					   || (o->Target->CurrentAction==PLAYER_RAGE_UNI_RUN || o->Target->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-					   )
+					   || (o->Target->CurrentAction==PLAYER_RAGE_UNI_RUN || o->Target->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT))
                     {
                         o->SubType  = 1;
                         o->LifeTime = min ( 20, o->LifeTime );
@@ -6007,11 +5959,7 @@ void MoveParticles()
 			case BITMAP_SMOKELINE1:
 			case BITMAP_SMOKELINE2:
 			case BITMAP_SMOKELINE3:
-				if (o->SubType == 0
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType == 5
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+				if (o->SubType == 0	|| o->SubType == 5)
 				{
 					if (o->LifeTime < 10)
 					{
@@ -6034,14 +5982,12 @@ void MoveParticles()
     				Vector(o->TurningForce[0]*Luminosity,o->TurningForce[1]*Luminosity,o->TurningForce[2]*Luminosity,o->Light);
 					o->Scale += (rand()%3+6)*0.01f;//0.07f;
 					o->Position[2] += o->Gravity;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					if(o->SubType == 5)
 					{
 						VectorSubtract(o->Position, o->StartPosition, o->Position);
 						VectorCopy(o->Target->Position, o->StartPosition);
 						VectorAdd(o->Position, o->StartPosition, o->Position);
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
 				else if (o->SubType == 1)
 				{
@@ -6141,11 +6087,7 @@ void MoveParticles()
 				break;
 			case BITMAP_FIRE_HIK1:
 			case BITMAP_FIRE_HIK1_MONO:
-				if (o->SubType == 0
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType == 6
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+				if (o->SubType == 0	|| o->SubType == 6)
 				{
 					if (o->LifeTime < 15)
 					{
@@ -6174,13 +6116,11 @@ void MoveParticles()
 					}
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					if(o->SubType==6)
 					{
 						o->Rotation = 0.0f;
 						o->Position[2] += o->Gravity*1.2f;
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
 				else if (o->SubType == 1)
 				{
@@ -6343,7 +6283,6 @@ void MoveParticles()
 					
 					o->Rotation += 5.0f;
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType==5)
 				{
 					if (o->LifeTime < 15)
@@ -6374,15 +6313,10 @@ void MoveParticles()
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				break;
 			case BITMAP_FIRE_HIK3:
 			case BITMAP_FIRE_HIK3_MONO:
-				if (o->SubType == 0
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-					|| o->SubType == 6
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-					)
+				if (o->SubType == 0	|| o->SubType == 6)
 				{
 					if (o->LifeTime < 10)
 					{
@@ -6411,13 +6345,11 @@ void MoveParticles()
 					}
 					o->Position[2] += o->Gravity;
 					o->Rotation += 3.0f;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 					if(o->SubType==6)
 					{
 						o->Rotation = 0.0f;
 						o->Position[2] += o->Gravity*1.2f;
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				}
 				else if (o->SubType == 1)
 				{
@@ -7414,13 +7346,11 @@ void MoveParticles()
                         o->Light[2] *= 0.5f;
                     }
                 }
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType==2)
 				{
 					o->Scale *= 1.1f;
 					VectorScale(o->Light, 0.9f, o->Light);
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				break;
 			case BITMAP_SHINY+6:
 				if(o->SubType == 0)
@@ -8918,7 +8848,6 @@ void MoveParticles()
 					}
 				}
 				break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case BITMAP_SBUMB:
 				{
 					o->Frame = 4-o->LifeTime;
@@ -8963,7 +8892,6 @@ void MoveParticles()
 					VectorScale(o->Light, 0.55f, o->Light);
 				}
 				break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
             }
 		}
 	}
@@ -9144,13 +9072,11 @@ void RenderParticles ( BYTE byRenderOneMore )
                 {
 				    RenderSprite(o->TexType,o->Position,Width*0.25f,Height,o->Light,o->Rotation,o->Frame%4*0.25f,0.f,0.25f,1.f);
                 }
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				else if(o->SubType == 18)
 				{	
 					EnableAlphaBlend3();
 					RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				else if( o->SubType == 14 || o->SubType == 15)
 					RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);
                 else
@@ -9306,7 +9232,6 @@ void RenderParticles ( BYTE byRenderOneMore )
 					}
 					RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);
 				}break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case BITMAP_SBUMB:
 				{
 					RenderSprite(o->TexType, o->Position, Width*0.25f, Height, o->Light, 0.0f, o->Frame%4*0.25f+0.005f, 0.0f, 0.25f-0.01f, 1.0f);
@@ -9334,7 +9259,6 @@ void RenderParticles ( BYTE byRenderOneMore )
 					RenderSprite(o->TexType,o->Position,Width,Height,vLight,o->Rotation);
 				}
 				break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
             case BITMAP_TRUE_FIRE:
             default:
 				RenderSprite(o->TexType,o->Position,Width,Height,o->Light,o->Rotation);
@@ -9343,6 +9267,3 @@ void RenderParticles ( BYTE byRenderOneMore )
 		}
 	}
 }
-
-
-

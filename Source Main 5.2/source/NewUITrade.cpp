@@ -664,9 +664,7 @@ void CNewUITrade::BackUpYourInven(ITEM* pYourItemObj)
 		|| (pYourItemObj->Type>=ITEM_HELPER+30)
 		|| (pYourItemObj->Type>=ITEM_WING+36 && pYourItemObj->Type<=ITEM_WING+43)
         || (pYourItemObj->Type==ITEM_WING+15 )
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (pYourItemObj->Type>=ITEM_WING+49 && pYourItemObj->Type<=ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		|| ((((pYourItemObj->Level>>3)&15)>4 && pYourItemObj->Type<ITEM_WING) || (pYourItemObj->Option1&63)>0))	
     {
 		int nCompareValue;

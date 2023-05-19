@@ -1532,6 +1532,8 @@ void LoadingScene(HDC hDC)
 
 float CameraDistanceTarget = 1000.f;
 float CameraDistance = CameraDistanceTarget;
+float	Camera3DFov = 0.f;
+bool	Camera3DRoll = false;
 
 bool MoveMainCamera()
 {
@@ -1849,6 +1851,18 @@ bool MoveMainCamera()
             }
         }
     }
+
+	if (SceneFlag == MAIN_SCENE)
+	{
+		if (MouseWheel)
+		{
+			Camera3DFov += MouseWheel;
+			MouseWheel = 0;
+		}
+		CameraFOV += Camera3DFov;
+	}
+
+
     return bLockCamera;
 }
 
@@ -2437,11 +2451,14 @@ void MainScene(HDC hDC)
 	unicode::_sprintf(szDebugText, "FPS : %.1f Connected: %d", FPS,g_bGameServerConnected);
 	unicode::t_char szMousePos[128];
 	unicode::_sprintf(szMousePos, "MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
+	unicode::t_char szCamera3D[128];
+	unicode::_sprintf(szCamera3D, "Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(0, 0, 0, 100);
 	g_pRenderText->SetTextColor(255, 255, 255, 200);
 	g_pRenderText->RenderText(10, 26, szDebugText);
 	g_pRenderText->RenderText(10, 36, szMousePos);
+	g_pRenderText->RenderText(10, 46, szCamera3D);
 	g_pRenderText->SetFont(g_hFont);
 	EndBitmap();
 #endif // defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)

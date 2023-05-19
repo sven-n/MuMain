@@ -22,9 +22,9 @@
 #include "SkillManager.h"
 
 extern  int  WaterTextureNumber;
-extern	char TextList[30][100];
-extern  int  TextListColor[30];
-extern	int  TextBold[30];
+extern	char TextList[50][100];
+extern  int  TextListColor[50];
+extern	int  TextBold[50];
 
 static  CSWaterTerrain* g_pCSWaterTerrain = NULL;
 static  std::queue<ObjectDescript> g_qObjDes;
@@ -131,11 +131,8 @@ void SettingHellasColor()
 BYTE GetHellasLevel(int Class, int Level)
 {
     int startIndex = 0;
-    if (gCharacterManager.GetBaseClass( Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Class )==CLASS_DARK_LORD   
-#ifdef PBG_ADD_NEWCHAR_MONK
-		|| gCharacterManager.GetBaseClass( Class )==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-		)
+    int baseClass = gCharacterManager.GetBaseClass(Class);
+    if (baseClass == CLASS_DARK || baseClass == CLASS_DARK_LORD || baseClass == CLASS_RAGEFIGHTER)
     {
         startIndex = NUM_HELLAS;
     }
@@ -156,11 +153,8 @@ bool EnableKalima(int Class, int Level, int ItemLevel)
 {
     int startIndex = 0;
 
-    if(gCharacterManager.GetBaseClass( Class ) == CLASS_DARK || gCharacterManager.GetBaseClass( Class ) == CLASS_DARK_LORD
-#ifdef PBG_ADD_NEWCHAR_MONK
-		|| gCharacterManager.GetBaseClass( Class ) == CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-		)
+    int baseClass = gCharacterManager.GetBaseClass(Class);
+    if(baseClass == CLASS_DARK || baseClass == CLASS_DARK_LORD || baseClass == CLASS_RAGEFIGHTER)
     {
         startIndex = NUM_HELLAS;
     }
@@ -179,11 +173,8 @@ bool GetUseLostMap ( bool bDrawAlert )
 
     int startIndex = 0;
 
-    if(gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD  
-#ifdef PBG_ADD_NEWCHAR_MONK
-		|| gCharacterManager.GetBaseClass( Hero->Class )==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-		)
+    int baseClass = gCharacterManager.GetBaseClass(Hero->Class);
+    if(baseClass ==CLASS_DARK || baseClass ==CLASS_DARK_LORD || baseClass == CLASS_RAGEFIGHTER)
     {
         startIndex = NUM_HELLAS;
     }
@@ -217,11 +208,8 @@ int RenderHellasItemInfo(ITEM* ip, int textNum )
     case ITEM_POTION+28:
         {
             int startIndex = 0;
-            if (gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK || gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD  
-#ifdef PBG_ADD_NEWCHAR_MONK
-					|| gCharacterManager.GetBaseClass( Hero->Class )==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-				)
+            int baseClass = gCharacterManager.GetBaseClass(Hero->Class);
+            if (baseClass == CLASS_DARK || baseClass  == CLASS_DARK_LORD || baseClass == CLASS_RAGEFIGHTER)
             {
                 startIndex = NUM_HELLAS;
             }
@@ -406,12 +394,9 @@ void CheckGrass(OBJECT* o)
 	if ( Hero->Object.CurrentAction>=PLAYER_WALK_MALE && Hero->Object.CurrentAction<=PLAYER_RUN_RIDE_WEAPON
 		|| Hero->Object.CurrentAction>=PLAYER_FENRIR_RUN && Hero->Object.CurrentAction<=PLAYER_FENRIR_RUN_ONE_LEFT_ELF
 		|| Hero->Object.CurrentAction>=PLAYER_FENRIR_WALK && Hero->Object.CurrentAction<=PLAYER_FENRIR_WALK_ONE_LEFT
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		|| Hero->Object.CurrentAction>=PLAYER_RAGE_FENRIR_RUN && Hero->Object.CurrentAction<=PLAYER_RAGE_FENRIR_RUN_ONE_LEFT
 		|| Hero->Object.CurrentAction>=PLAYER_RAGE_FENRIR_WALK && Hero->Object.CurrentAction<=PLAYER_RAGE_FENRIR_WALK_TWO_SWORD
-		|| Hero->Object.CurrentAction>=PLAYER_RAGE_UNI_RUN && Hero->Object.CurrentAction>=PLAYER_RAGE_UNI_RUN_ONE_RIGHT
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-		)
+		|| Hero->Object.CurrentAction>=PLAYER_RAGE_UNI_RUN && Hero->Object.CurrentAction>=PLAYER_RAGE_UNI_RUN_ONE_RIGHT	)
 	{
 		if ( o->Direction[0]<0.1f )
 		{

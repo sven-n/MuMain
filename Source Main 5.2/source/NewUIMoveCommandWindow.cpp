@@ -114,8 +114,11 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
 	m_Pos.y = y;
 
 	m_StrifePos.x = m_Pos.x + 20;
-	switch( WindowWidth )
+	switch (WindowWidth)
 	{
+	case 640:
+		m_MapNameUISize.x = 220; m_MapNamePos.x = m_Pos.x + 62; m_ReqLevelPos.x = m_Pos.x + 119; m_ReqZenPos.x = m_Pos.x + 159;
+		break;
 	case 800:
 		m_MapNameUISize.x = 200; m_MapNamePos.x = m_Pos.x + 69; m_ReqLevelPos.x = m_Pos.x + 129; m_ReqZenPos.x = m_Pos.x + 174;
 		break;
@@ -124,6 +127,24 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
 		break;
 	case 1280:
 		m_MapNameUISize.x = 160; m_MapNamePos.x = m_Pos.x + 59; m_ReqLevelPos.x = m_Pos.x + 104; m_ReqZenPos.x = m_Pos.x + 139;
+		break;
+	case 1366:
+		m_MapNameUISize.x = 150; m_MapNamePos.x = m_Pos.x + 56; m_ReqLevelPos.x = m_Pos.x + 101; m_ReqZenPos.x = m_Pos.x + 134;
+		break;
+	case 1440:
+		m_MapNameUISize.x = 140; m_MapNamePos.x = m_Pos.x + 53; m_ReqLevelPos.x = m_Pos.x + 97; m_ReqZenPos.x = m_Pos.x + 129;
+		break;
+	case 1600:
+		m_MapNameUISize.x = 120; m_MapNamePos.x = m_Pos.x + 46; m_ReqLevelPos.x = m_Pos.x + 86; m_ReqZenPos.x = m_Pos.x + 114;
+		break;
+	case 1680:
+		m_MapNameUISize.x = 115; m_MapNamePos.x = m_Pos.x + 44; m_ReqLevelPos.x = m_Pos.x + 83; m_ReqZenPos.x = m_Pos.x + 110;
+		break;
+	case 1920:
+		m_MapNameUISize.x = 110; m_MapNamePos.x = m_Pos.x + 38; m_ReqLevelPos.x = m_Pos.x + 70; m_ReqZenPos.x = m_Pos.x + 93;
+		break;
+	default:
+		// handle unsupported resolutions here
 		break;
 	}
 
@@ -335,10 +356,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 		iReqZen = (*li)->_ReqInfo.iReqZen;
 
 		if( ( gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK_LORD 
-#ifdef PBG_ADD_NEWCHAR_MONK
-				|| gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-			)
+				|| gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER)
 			&& (iReqLevel != 400) )
 		{
 			iReqLevel = int(float(iReqLevel)*2.f/3.f);
@@ -362,11 +380,8 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
 					|| (pEquipedWing->Type >= ITEM_WING+36 && pEquipedWing->Type <= ITEM_WING+43)			
 					|| (pEquipedWing->Type >= ITEM_WING && pEquipedWing->Type <= ITEM_WING+6) 
 					|| ( ITEM_WING+130 <= pEquipedWing->Type && pEquipedWing->Type <= ITEM_WING+134 )
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 					|| (pEquipedWing->Type >= ITEM_WING+49 && pEquipedWing->Type <= ITEM_WING+50)
-					|| (pEquipedWing->Type == ITEM_WING+135)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-					)
+					|| (pEquipedWing->Type == ITEM_WING+135))
 					&& !( pEquipedHelper->Type == ITEM_HELPER+2 )
 					&& ( g_ChangeRingMgr->CheckBanMoveIcarusMap(pEquipedRightRing->Type, pEquipedLeftRing->Type) == false )
 					)
@@ -806,10 +821,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 
 		iReqLevel = (*li)->_ReqInfo.iReqLevel;
 		if ( (gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_DARK_LORD
-#ifdef PBG_ADD_NEWCHAR_MONK
-				|| gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-				) 
+				|| gCharacterManager.GetBaseClass(CharacterAttribute->Class)==CLASS_RAGEFIGHTER) 
 			&& (iReqLevel != 400) )
 		{
 			iReqLevel = int(float(iReqLevel)*2.f/3.f);

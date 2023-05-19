@@ -550,13 +550,10 @@ bool PetActionCollecterSkeleton::Effect( OBJECT* obj, CHARACTER *Owner, int targ
 		|| (Owner->Object.CurrentAction >= PLAYER_FENRIR_DAMAGE && Owner->Object.CurrentAction <= PLAYER_FENRIR_DAMAGE_ONE_LEFT)
 		|| (Owner->Object.CurrentAction >= PLAYER_FENRIR_STAND && Owner->Object.CurrentAction <= PLAYER_FENRIR_STAND_ONE_LEFT)
 		|| (Owner->Object.CurrentAction >= PLAYER_DEFENSE1 && Owner->Object.CurrentAction <= PLAYER_CHANGE_UP)
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		|| (Owner->Object.CurrentAction >= PLAYER_RAGE_FENRIR_STAND && Owner->Object.CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
 		|| (Owner->Object.CurrentAction >= PLAYER_RAGE_FENRIR_DAMAGE && Owner->Object.CurrentAction <= PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT)
 		|| Owner->Object.CurrentAction == PLAYER_RAGE_UNI_STOP_ONE_RIGHT
-		|| Owner->Object.CurrentAction == PLAYER_STOP_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-		);
+		|| Owner->Object.CurrentAction == PLAYER_STOP_RAGEFIGHTER);
 	
 	if (m_bIsMoving == TRUE)
 	{

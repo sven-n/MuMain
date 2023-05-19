@@ -82,39 +82,41 @@ inline int TERRAIN_INDEX(int x,int y)
 
 inline int TERRAIN_INDEX_REPEAT(int x,int y)
 {
-	return (y&TERRAIN_SIZE_MASK)*TERRAIN_SIZE+(x&TERRAIN_SIZE_MASK);
+	return ((y & TERRAIN_SIZE_MASK) * TERRAIN_SIZE) + (x & TERRAIN_SIZE_MASK);
 }
 
-inline WORD TERRAIN_ATTRIBUTE(float x,float y)
+inline BYTE TERRAIN_ATTRIBUTE(float x, float y)
 {
-    int xf = (int)(x/TERRAIN_SCALE);
-    int yf = (int)(y/TERRAIN_SCALE);
-    return TerrainWall[(yf)*TERRAIN_SIZE+(xf)];
+	const int xf = static_cast<int>(x / TERRAIN_SCALE + 0.5f);
+	const int yf = static_cast<int>(y / TERRAIN_SCALE + 0.5f);
+	return TerrainWall[yf * TERRAIN_SIZE + xf];
 }
 
 void InitTerrainMappingLayer()
 {
-	for(int i=0;i<TERRAIN_SIZE*TERRAIN_SIZE;i++)
+	for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; ++i)
 	{
 		TerrainMappingLayer1[i] = 0;
 		TerrainMappingLayer2[i] = 255;
-		TerrainMappingAlpha[i] = 0.f;
-        TerrainGrassTexture[i] = (float)((rand()%4)/4.f);
+		TerrainMappingAlpha[i] = 0.0f;
+		TerrainGrassTexture[i] = static_cast<float>(rand() % 4) / 4.0f;
+#ifdef ASG_ADD_MAP_KARUTAN
+		g_fTerrainGrassWind1[i] = 0.0f;
+#endif
 	}
 }
 
 void ExitProgram()
 {
 	MessageBox(g_hWnd,GlobalText[11],NULL,MB_OK);
-	SendMessage(g_hWnd,WM_DESTROY,0,0);
+	PostQuitMessage(0);
 }
 
-
-static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
+static const BYTE bBuxCode[3] = { 0xFC, 0xCF, 0xAB };
 
 static void BuxConvert(BYTE *Buffer,int Size)
 {
-	for(int i=0;i<Size;i++)
+	for (int i = 0; i < Size; ++i)
 		Buffer[i] ^= bBuxCode[i%3];
 }
 
@@ -131,45 +133,43 @@ int OpenTerrainAttribute(char *FileName)
 		SendMessage(g_hWnd,WM_DESTROY,0,0);
 		return ( -1);
 	}
-
-	BYTE Version;
-	BYTE Width;
-	BYTE Height;
-
+	// Read file data
 	fseek(fp,0,SEEK_END);
-	int EncBytes = ftell(fp);	//
+	long file_size = ftell(fp);
 	fseek(fp,0,SEEK_SET);
-	unsigned char *EncData = new unsigned char [EncBytes];
-	fread( EncData, EncBytes, 1, fp);
+	unsigned char* file_data = new unsigned char[file_size];
+	fread(file_data, file_size, 1, fp);
 
-	int iSize = MapFileDecrypt( NULL, EncData, EncBytes);	//
-	unsigned char *byBuffer = new unsigned char[iSize];		//
-	MapFileDecrypt( byBuffer, EncData, EncBytes);	//
-	delete [] EncData;		//
+	// Decrypt file data
+	int iSize = MapFileDecrypt(NULL, file_data, file_size);
+	unsigned char* decrypted_data = new unsigned char[iSize];
+	MapFileDecrypt(decrypted_data, file_data, file_size);
+	delete[] file_data;
 
+	// Check file size
     bool extAtt = false;
-
-    if ( iSize!=131076 && iSize!=65540 )
+	if (iSize != (TERRAIN_SIZE * TERRAIN_SIZE + 4) && iSize != (TERRAIN_SIZE * TERRAIN_SIZE * sizeof(WORD) + 4))
 	{
-		delete [] byBuffer;
+		delete[] decrypted_data;
 		return ( -1);
 	}
-
-    if ( iSize==131076 )
+	if (iSize == (TERRAIN_SIZE * TERRAIN_SIZE * sizeof(WORD) + 4))
     {
         extAtt = true;
     }
 
-	BuxConvert( byBuffer, iSize);
-	Version = byBuffer[0];
-	int iMap = byBuffer[1];
-	Width = byBuffer[2];
-	Height = byBuffer[3];
+	// Extract file header
+	BuxConvert(decrypted_data, iSize);
+	BYTE Version = decrypted_data[0];
+	int iMap = decrypted_data[1];
+	BYTE Width = decrypted_data[2];
+	BYTE Height = decrypted_data[3];
 
-    if ( extAtt==false )
+	// Extract terrain attribute data
+	if (!extAtt)
     {
         unsigned char TWall[TERRAIN_SIZE*TERRAIN_SIZE];
-    	memcpy ( TWall, &byBuffer[4], TERRAIN_SIZE*TERRAIN_SIZE );
+		memcpy(TWall, &decrypted_data[4], TERRAIN_SIZE * TERRAIN_SIZE);
 
         for ( int i=0; i<TERRAIN_SIZE*TERRAIN_SIZE; ++i )
         {
@@ -178,37 +178,45 @@ int OpenTerrainAttribute(char *FileName)
     }
     else
     {
-	    memcpy ( TerrainWall, &byBuffer[4], TERRAIN_SIZE*TERRAIN_SIZE*sizeof(WORD) );
+		memcpy(TerrainWall, &decrypted_data[4], TERRAIN_SIZE * TERRAIN_SIZE * sizeof(WORD));
     }
 
-	delete [] byBuffer;	//
+	delete[] decrypted_data;
 
+	// Check file header
 	bool Error = false;
 	if(Version!=0 || Width!=255 || Height!=255)
 	{
 		Error = true;
 	}
 
+	// Check active world
 	switch(gMapManager.WorldActive)
 	{
-	case WD_0LORENCIA:if(TerrainWall[123*256+135]!=5) Error=true;break;
-	case WD_1DUNGEON:if(TerrainWall[120*256+227]!=4) Error=true;break;
-	case WD_2DEVIAS:if(TerrainWall[ 55*256+208]!=5) Error=true;break;
-	case WD_3NORIA:if(TerrainWall[119*256+186]!=5) Error=true;break;
-	case WD_4LOSTTOWER:if(TerrainWall[ 75*256+193]!=5) Error=true;break;
+	case WD_0LORENCIA:
+		if (TerrainWall[123 * TERRAIN_SIZE + 135] != 5) Error = true;
+		break;
+	case WD_1DUNGEON:
+		if (TerrainWall[120 * TERRAIN_SIZE + 227] != 4) Error = true;
+		break;
+	case WD_2DEVIAS:
+		if (TerrainWall[55 * TERRAIN_SIZE + 208] != 5) Error = true;
+		break;
+	case WD_3NORIA:
+		if (TerrainWall[119 * TERRAIN_SIZE + 186] != 5) Error = true;
+		break;
+	case WD_4LOSTTOWER:
+		if (TerrainWall[75 * TERRAIN_SIZE + 193] != 5) Error = true;
+		break;
 	}
 	
-	for(int i=0;i<256*256;i++)
+	for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; i++)
 	{
-		WORD wWall = TerrainWall[i];
-		//Wall = ( Wall ^ ( Wall & 8)) | ( (TerrainWall[i]&4) << 1);
-		//Wall = ( Wall ^ ( Wall & 4)) | ( (TerrainWall[i]&8) >> 1);
-		TerrainWall[i] = wWall;
 		TerrainWall[i] = TerrainWall[i] & 0xFF;
-
-		if((BYTE)TerrainWall[i] >= 128)
+		if (TerrainWall[i] >= 128)
 			Error = true;
 	}
+
 	if(Error)
 	{
 		ExitProgram();
@@ -222,15 +230,27 @@ int OpenTerrainAttribute(char *FileName)
 bool SaveTerrainAttribute(char *FileName, int iMap)
 {
 	FILE *fp = fopen(FileName,"wb");
+	if (fp == NULL) {
+		char Text[256];
+		sprintf_s(Text, sizeof(Text), "%s file not found.", FileName);
+		g_ErrorReport.Write(Text);
+		g_ErrorReport.Write("\r\n");
+		MessageBoxA(g_hWnd, Text, NULL, MB_OK);
+		SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+		return false;
+	}
+	const BYTE Version = 0;
+	const BYTE Width = 255;
+	const BYTE Height = 255;
 
-	BYTE Version = 0;
-	BYTE Width   = 255;
-	BYTE Height  = 255;
- 	fwrite(&Version,1,1,fp);
-	fwrite(&iMap,1,1,fp);
- 	fwrite(&Width,1,1,fp);
- 	fwrite(&Height,1,1,fp);
- 	fwrite(TerrainWall,TERRAIN_SIZE*TERRAIN_SIZE,1,fp);
+	fwrite(&Version, sizeof(Version), 1, fp);
+	fwrite(&iMap, sizeof(iMap), 1, fp);
+	fwrite(&Width, sizeof(Width), 1, fp);
+	fwrite(&Height, sizeof(Height), 1, fp);
+
+	// Add Frustum Culling here
+
+	fwrite(TerrainWall, TERRAIN_SIZE * TERRAIN_SIZE * sizeof(WORD), 1, fp);
 
 	fclose(fp);
     return true;
@@ -239,10 +259,8 @@ bool SaveTerrainAttribute(char *FileName, int iMap)
 void AddTerrainAttribute ( int x, int y, BYTE att )
 {
     int     iIndex = (x+(y*TERRAIN_SIZE));
-
     TerrainWall[iIndex] |= att;
 }
-
 
 void SubTerrainAttribute ( int x, int y, BYTE att )
 {
@@ -273,6 +291,7 @@ void SetTerrainWaterState(std::list<int>& terrainIndex, int state )
 {
 	if( state == 0 )
 	{
+		terrainIndex.clear();
 		for ( int i = 0; i < TERRAIN_SIZE*TERRAIN_SIZE; ++i )
 		{
 			if( (TerrainWall[i]&TW_WATER)==TW_WATER )
@@ -284,73 +303,69 @@ void SetTerrainWaterState(std::list<int>& terrainIndex, int state )
 	}
 	else
 	{
-		for (std::list<int>::iterator iter = terrainIndex.begin(); iter != terrainIndex.end(); )
+		for (std::list<int>::iterator iter = terrainIndex.begin(); iter != terrainIndex.end(); ++iter)
 		{
-			std::list<int>::iterator curiter = iter;
-			++iter;
-			int index = *curiter;
+			int index = *iter;
 			TerrainWall[index] = TW_WATER;
 		}
 	}
 }
 
-int OpenTerrainMapping(char *FileName)	//
-{
+int OpenTerrainMapping(char* FileName) {
     InitTerrainMappingLayer();
-
     FILE *fp = fopen(FileName,"rb");
-	if(fp == NULL)
-	{
-		return ( -1);
+	if (fp == NULL) {
+		return -1;
 	}
+
 	fseek(fp,0,SEEK_END);
-	int EncBytes = ftell(fp);	//
+	int EncBytes = ftell(fp);
 	fseek(fp,0,SEEK_SET);
-    unsigned char *EncData = new unsigned char[EncBytes];	//
-	fread(EncData,1,EncBytes,fp);	//
+
+	unsigned char* EncData = new unsigned char[EncBytes];
+	fread(EncData, 1, EncBytes, fp);
 	fclose(fp);
 
-	int DataBytes = MapFileDecrypt( NULL, EncData, EncBytes);	//
-	unsigned char *Data = new unsigned char[DataBytes];		//
-	MapFileDecrypt( Data, EncData, EncBytes);	//
-	delete [] EncData;		//
+	int DataBytes = MapFileDecrypt(NULL, EncData, EncBytes);
+	unsigned char* Data = new unsigned char[DataBytes];
+	MapFileDecrypt(Data, EncData, EncBytes);
+	delete[] EncData;
 
 	int DataPtr = 0;
 	DataPtr+=1;
-	int iMapNumber = ( int)*((BYTE *)(Data+DataPtr));DataPtr+=1;		//
-	memcpy(TerrainMappingLayer1,Data+DataPtr,256*256);DataPtr+=256*256;
-	memcpy(TerrainMappingLayer2,Data+DataPtr,256*256);DataPtr+=256*256;
-	for(int i=0;i<TERRAIN_SIZE*TERRAIN_SIZE;i++)
-	{
-		BYTE Alpha;
-      	Alpha = *((BYTE *)(Data+DataPtr));DataPtr+=1;
-		TerrainMappingAlpha[i] = (float)Alpha/255.f;
+
+	int iMapNumber = static_cast<int>(*reinterpret_cast<BYTE*>(Data + DataPtr));
+	DataPtr += 1;
+
+	memcpy(TerrainMappingLayer1, Data + DataPtr, 256 * 256);
+	DataPtr += 256 * 256;
+
+	memcpy(TerrainMappingLayer2, Data + DataPtr, 256 * 256);
+	DataPtr += 256 * 256;
+
+	for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; i++) {
+		BYTE Alpha = *(Data + DataPtr);
+		DataPtr += 1;
+		TerrainMappingAlpha[i] = static_cast<float>(Alpha) / 255.f;
 	}
-	delete [] Data;
 	
-	fclose(fp);
+	delete[] Data;
 
     TerrainGrassEnable = true;
 
-    if ( gMapManager.InChaosCastle()==true )
-    {
-        TerrainGrassEnable = false;
-    }
-    if ( gMapManager.InBattleCastle() )
-    {
+	if (gMapManager.InChaosCastle() || gMapManager.InBattleCastle()) {
         TerrainGrassEnable = false;
     }
 
-    return ( iMapNumber);
+	return iMapNumber;
 }
 
-bool SaveTerrainMapping(char *FileName, int iMapNumber)	//
+bool SaveTerrainMapping(char* FileName, int iMapNumber)
 {
 	FILE *fp = fopen(FileName,"wb");
-
 	BYTE Version = 0;
  	fwrite(&Version,1,1,fp);
-	fwrite(&iMapNumber,1,1,fp);	//
+	fwrite(&iMapNumber, 1, 1, fp);
  	fwrite(TerrainMappingLayer1,TERRAIN_SIZE*TERRAIN_SIZE,1,fp);
  	fwrite(TerrainMappingLayer2,TERRAIN_SIZE*TERRAIN_SIZE,1,fp);
 	for(int i=0;i<TERRAIN_SIZE*TERRAIN_SIZE;i++)
@@ -382,16 +397,16 @@ bool SaveTerrainMapping(char *FileName, int iMapNumber)	//
 			return ( false);
 		}
 		fseek(fp,0,SEEK_END);
-		int EncBytes = ftell(fp);	//
+		int EncBytes = ftell(fp);
 		fseek(fp,0,SEEK_SET);
-		unsigned char *EncData = new unsigned char[EncBytes];	//
-		fread(EncData,1,EncBytes,fp);	//
+		unsigned char* EncData = new unsigned char[EncBytes];
+		fread(EncData, 1, EncBytes, fp);
 		fclose(fp);
 
-		int DataBytes = MapFileEncrypt( NULL, EncData, EncBytes);	//
-		unsigned char *Data = new unsigned char[DataBytes];		//
-		MapFileEncrypt( Data, EncData, EncBytes);	//
-		delete [] EncData;		//
+		int DataBytes = MapFileEncrypt(NULL, EncData, EncBytes);
+		unsigned char* Data = new unsigned char[DataBytes];
+		MapFileEncrypt(Data, EncData, EncBytes);
+		delete[] EncData;
 
 		fp = fopen(FileName,"wb");
 		fwrite( Data, DataBytes, 1, fp);
@@ -454,34 +469,39 @@ void CreateTerrainNormal()
 		{
 			int Index = TERRAIN_INDEX(x,y);
 			vec3_t v1,v2,v3,v4;
-			Vector((x  )*TERRAIN_SCALE,(y  )*TERRAIN_SCALE,BackTerrainHeight[TERRAIN_INDEX_REPEAT(x  ,y  )],v4);
-			Vector((x+1)*TERRAIN_SCALE,(y  )*TERRAIN_SCALE,BackTerrainHeight[TERRAIN_INDEX_REPEAT(x+1,y  )],v1);
-			Vector((x+1)*TERRAIN_SCALE,(y+1)*TERRAIN_SCALE,BackTerrainHeight[TERRAIN_INDEX_REPEAT(x+1,y+1)],v2);
-			Vector((x  )*TERRAIN_SCALE,(y+1)*TERRAIN_SCALE,BackTerrainHeight[TERRAIN_INDEX_REPEAT(x  ,y+1)],v3);
-			FaceNormalize(v1,v2,v3,TerrainNormal[Index]);
+			Vector((x * TERRAIN_SCALE), (y * TERRAIN_SCALE), BackTerrainHeight[TERRAIN_INDEX_REPEAT(x, y)], v4);
+			Vector(((x + 1) * TERRAIN_SCALE), (y * TERRAIN_SCALE), BackTerrainHeight[TERRAIN_INDEX_REPEAT((x + 1), y)], v1);
+			Vector(((x + 1) * TERRAIN_SCALE), ((y + 1) * TERRAIN_SCALE), BackTerrainHeight[TERRAIN_INDEX_REPEAT((x + 1), (y + 1))], v2);
+			Vector((x * TERRAIN_SCALE), ((y + 1) * TERRAIN_SCALE), BackTerrainHeight[TERRAIN_INDEX_REPEAT(x, (y + 1))], v3);
+			vec3_t face_normal;
+			FaceNormalize(v1, v2, v3, face_normal);
+			VectorAdd(TerrainNormal[Index], face_normal, TerrainNormal[Index]);
+			FaceNormalize(v3, v4, v1, face_normal);
+			VectorAdd(TerrainNormal[Index], face_normal, TerrainNormal[Index]);
 		}
 	}
 }
 
 void CreateTerrainNormal_Part ( int xi, int yi )
 {
-    if ( xi>TERRAIN_SIZE-4 ) xi = TERRAIN_SIZE-4;
-    else if ( xi<4 )         xi = 4;
-    
-    if ( yi>TERRAIN_SIZE-4 ) yi = TERRAIN_SIZE-4;
-    else if ( yi<4 )         yi = 4;
-
+	// Clamp xi and yi to ensure they are within valid range
+	xi = (xi > TERRAIN_SIZE - 4) ? TERRAIN_SIZE - 4 : ((xi < 4) ? 4 : xi);
+	yi = (yi > TERRAIN_SIZE - 4) ? TERRAIN_SIZE - 4 : ((yi < 4) ? 4 : yi);
 	for(int y=yi-4;y<yi+4;y++)
 	{
 		for(int x=xi-4;x<xi+4;x++)
 		{
 			int Index = TERRAIN_INDEX(x,y);
 			vec3_t v1,v2,v3,v4;
-			Vector((x  )*TERRAIN_SCALE,(y  )*TERRAIN_SCALE,BackTerrainHeight[TERRAIN_INDEX_REPEAT(x  ,y  )],v4);
-			Vector((x+1)*TERRAIN_SCALE,(y  )*TERRAIN_SCALE,BackTerrainHeight[TERRAIN_INDEX_REPEAT(x+1,y  )],v1);
-			Vector((x+1)*TERRAIN_SCALE,(y+1)*TERRAIN_SCALE,BackTerrainHeight[TERRAIN_INDEX_REPEAT(x+1,y+1)],v2);
-			Vector((x  )*TERRAIN_SCALE,(y+1)*TERRAIN_SCALE,BackTerrainHeight[TERRAIN_INDEX_REPEAT(x  ,y+1)],v3);
-			FaceNormalize(v1,v2,v3,TerrainNormal[Index]);
+			Vector((x * TERRAIN_SCALE), (y * TERRAIN_SCALE), BackTerrainHeight[TERRAIN_INDEX_REPEAT(x, y)], v4);
+			Vector(((x + 1) * TERRAIN_SCALE), (y * TERRAIN_SCALE), BackTerrainHeight[TERRAIN_INDEX_REPEAT((x + 1), y)], v1);
+			Vector(((x + 1) * TERRAIN_SCALE), ((y + 1) * TERRAIN_SCALE), BackTerrainHeight[TERRAIN_INDEX_REPEAT((x + 1), (y + 1))], v2);
+			Vector((x * TERRAIN_SCALE), ((y + 1) * TERRAIN_SCALE), BackTerrainHeight[TERRAIN_INDEX_REPEAT(x, (y + 1))], v3);
+			vec3_t face_normal;
+			FaceNormalize(v1, v2, v3, face_normal);
+			VectorAdd(TerrainNormal[Index], face_normal, TerrainNormal[Index]);
+			FaceNormalize(v3, v4, v1, face_normal);
+			VectorAdd(TerrainNormal[Index], face_normal, TerrainNormal[Index]);
 		}
 	}
 }
@@ -503,14 +523,17 @@ void CreateTerrainLight()
 		{
 			int Index = TERRAIN_INDEX(x,y);
 			float Luminosity = DotProduct(TerrainNormal[Index],Light) + 0.5f;
-			if(Luminosity < 0.f) Luminosity = 0.f;
-			else if(Luminosity > 1.f) Luminosity = 1.f;
+			if (Luminosity < 0.f)
+				Luminosity = 0.f;
+			else if (Luminosity > 1.f)
+				Luminosity = 1.f;
 			for(int i=0;i<3;i++)
+			{
     			BackTerrainLight[Index][i] = TerrainLight[Index][i] * Luminosity;
 		}
 	}
 }
-
+}
 
 void CreateTerrainLight_Part ( int xi, int yi )
 {
@@ -539,59 +562,54 @@ void CreateTerrainLight_Part ( int xi, int yi )
 void OpenTerrainLight(char *FileName)
 {
     OpenJpegBuffer(FileName,&TerrainLight[0][0]);
-
-	/*float Light;
-	for(int i=0;i<256*256;i++)
+	// Apply corrections to the loaded terrain light
+	for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; i++)
 	{
-		Light = TerrainLight[i][2];
-		Light -= 0.3f;
-		if(Light < 0.f) Light = 0.f;
-		TerrainLight[i][2] = Light;
+     	TerrainLight[i][2] -= 0.f; // < - Add/Color
+		TerrainLight[i][1] -= 0.f; 
 
-		Light = TerrainLight[i][1];
-		Light -= 0.2f;
-		if(Light < 0.f) Light = 0.f;
-		TerrainLight[i][1] = Light;
-	}*/
+		// Clamp channels to [0, 1]
+		for (int j = 0; j < 3; j++)
+	{
+			if (TerrainLight[i][j] < 0.f)
+				TerrainLight[i][j] = 0.f;
+			else if (TerrainLight[i][j] > 1.f)
+				TerrainLight[i][j] = 1.f;
+		}
+	}
 
 	CreateTerrainNormal();
     CreateTerrainLight();
 
 /*
 #ifdef BATTLE_CASTLE
-    if ( 1 )//battleCastle::InBattleCastle() )
-    {
+		if (battleCastle::InBattleCastle())
         g_fFrustumRange = -80.f;
-    }
     else
-#endif// BATTLE_CASTLE
-    {
+	#endif
         g_fFrustumRange = -40.f;
-    }
 */
 }
 
 void SaveTerrainLight(char *FileName)
 {
 	unsigned char *Buffer = new unsigned char [TERRAIN_SIZE*TERRAIN_SIZE*3];
-	for(int i=0;i<TERRAIN_SIZE*TERRAIN_SIZE;i++)
+	for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; ++i)
 	{
-		for(int j=0;j<3;j++)
+		for (int j = 0; j < 3; ++j)
 		{
 			float Light = TerrainLight[i][j]*255.f;
-			if(Light < 0.f) Light = 0.f;
-			else if(Light > 255.f) Light = 255.f;
-			Buffer[i*3+j] = (unsigned char)(Light);
+			Light = (Light < 0.f) ? 0.f : (Light > 255.f) ? 255.f : Light;
+			Buffer[i * 3 + j] = static_cast<unsigned char>(Light);
 		}
 	}
 	WriteJpeg(FileName,TERRAIN_SIZE,TERRAIN_SIZE,Buffer,100);
-	SAFE_DELETE_ARRAY(Buffer);
+	delete[] Buffer;
 }
 
 void CreateTerrain(char *FileName, bool bNew)
 {
 	ActiveTerrain = true;
-
 	if(bNew)
 	{
 		OpenTerrainHeightNew(FileName);
@@ -608,16 +626,13 @@ unsigned char BMPHeader[1080];
 
 bool IsTerrainHeightExtMap(int iWorld)
 {
-	if(iWorld == WD_42CHANGEUP3RD_2ND || gMapManager.IsPKField() || iWorld == WD_66DOPPLEGANGER2)
-	{
-		return true;
-	}
-
-	return false;
+	return (iWorld == WD_42CHANGEUP3RD_2ND || gMapManager.IsPKField() || iWorld == WD_66DOPPLEGANGER2);
 }
 
 bool OpenTerrainHeight(char *filename)
 {
+	const int Index = 1080;
+	const int Size = 256 * 256 + Index;
 	char FileName[256];
 
 	char NewFileName[256];
@@ -629,43 +644,46 @@ bool OpenTerrainHeight(char *filename)
 		if(filename[i]=='.') 
 			break;
 	}
-	strcpy(FileName,"Data\\");
-    strcat(FileName,NewFileName);
-	strcat(FileName,"OZB");
 	
-    FILE *fp = fopen(FileName,"rb");
-    if(fp == NULL)
+	strcpy_s(FileName, "Data\\");
+	strcat_s(FileName, NewFileName);
+	strcat_s(FileName, "OZB");
+
+	FILE* fp;
+	errno_t err = fopen_s(&fp, FileName, "rb");
+	if (err != 0 || fp == NULL)
 	{
 		char Text[256];
-   		sprintf(Text,"%s file not found.",FileName);
+		sprintf_s(Text, "%s file not found.", FileName);
 		g_ErrorReport.Write( Text);
 		g_ErrorReport.Write( "\r\n");
 		MessageBox(g_hWnd,Text,NULL,MB_OK);
 		SendMessage(g_hWnd,WM_DESTROY,0,0);
 		return false;
 	}
-	fseek(fp,4,SEEK_SET);
-	int Index = 1080;
-	int Size = 256*256+Index;
+
 	unsigned char *Buffer = new unsigned char [Size];
-   	fread(Buffer,1,Size,fp);
+
+	fseek(fp, 4, SEEK_SET);
+	fread_s(Buffer, Size, 1, Size, fp);
 	fclose(fp);
+
 	memcpy(BMPHeader,Buffer,Index);
 
     for(int i=0;i<256;i++)
 	{
-		unsigned char *src = &Buffer[Index+i*256];
+		const unsigned char* src = &Buffer[Index + i * 256];
 		float *dst = &BackTerrainHeight[i*256];
+		const float factor = (gMapManager.WorldActive == WD_55LOGINSCENE) ? 3.0f : 1.5f;
 		for(int j=0;j<256;j++)
 		{
-			if(gMapManager.WorldActive == WD_55LOGINSCENE)
-				*dst = (float)(*src)*3.0f;
-			else
-     			*dst = (float)(*src)*1.5f;
-			src++;dst++;
+			*dst = (float)(*src) * factor;
+			src++;
+			dst++;
 		}
 	}
-	SAFE_DELETE_ARRAY(Buffer);
+
+	delete[] Buffer;
 	return true;
 }
 
@@ -676,20 +694,17 @@ void SaveTerrainHeight(char *name)
 	{
 		float *src = &BackTerrainHeight[i*256];
 		unsigned char *dst = &Buffer[(255-i)*256];
+		const float factor = (gMapManager.WorldActive == WD_55LOGINSCENE) ? 3.0f : 1.5f;
 		for(int j=0;j<256;j++)
 		{
-			float Height;
-			if(gMapManager.WorldActive == WD_55LOGINSCENE)
-				Height = *src/3.0f;
-			else
-				Height = *src/1.5f;
+			float Height = *src / factor;
 			if(Height < 0.f) Height = 0.f;
 			else if(Height > 255.f) Height = 255.f;
 			*dst = (unsigned char)(Height);
-			src++;dst++;
+			src++;
+			dst++;
 		}
 	}
-
     FILE *fp = fopen(name,"wb");
 	fwrite(BMPHeader,1080,1,fp);
 
@@ -704,11 +719,13 @@ bool OpenTerrainHeightNew(const char* strFilename)
 	char FileName[256];
 	char NewFileName[256];
 
-	for(int i=0;i<(int)strlen(strFilename);i++)
+	for (int i = 0; i < (int)strlen(strFilename); ++i)
 	{
 		NewFileName[i] = strFilename[i];
 		NewFileName[i+1] = NULL;
-		if(strFilename[i]=='.') break;
+
+		if (strFilename[i] == '.')
+			break;
 	}
 
 	strcpy(FileName,"Data\\");
@@ -716,9 +733,21 @@ bool OpenTerrainHeightNew(const char* strFilename)
 	strcat(FileName,"OZB");
 
 	FILE* fp = fopen(FileName, "rb");
+	if (!fp)
+	{
+		char Text[256];
+		sprintf(Text, "%s file not found.", FileName);
+		g_ErrorReport.Write(Text);
+		g_ErrorReport.Write("\r\n");
+		MessageBox(g_hWnd, Text, NULL, MB_OK);
+		SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+		return false;
+	}
+
 	fseek(fp, 0, SEEK_END);
 	int iBytes = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
+
 	BYTE *pbyData = new BYTE[iBytes];
 	fread(pbyData, 1, iBytes, fp);
 	fclose(fp);
@@ -728,12 +757,17 @@ bool OpenTerrainHeightNew(const char* strFilename)
 
 	BITMAPINFOHEADER bmiHeader;
     BITMAPFILEHEADER header;
-	memcpy(&header, &pbyData[dwCurPos], sizeof(BITMAPFILEHEADER)); dwCurPos += sizeof(BITMAPFILEHEADER);
-	memcpy(&bmiHeader, &pbyData[dwCurPos], sizeof(BITMAPINFOHEADER)); dwCurPos += sizeof(BITMAPINFOHEADER);
+
+	memcpy(&header, &pbyData[dwCurPos], sizeof(BITMAPFILEHEADER));
+	dwCurPos += sizeof(BITMAPFILEHEADER);
+
+	memcpy(&bmiHeader, &pbyData[dwCurPos], sizeof(BITMAPINFOHEADER));
+	dwCurPos += sizeof(BITMAPINFOHEADER);
 
     for(int i=0; i<TERRAIN_SIZE*TERRAIN_SIZE; ++i)
 	{
 		BYTE* pbysrc = &pbyData[dwCurPos + i * 3];
+
 		DWORD dwHeight = 0;
 		BYTE* pbyHeight = (BYTE*)&dwHeight;
 		
@@ -746,21 +780,19 @@ bool OpenTerrainHeightNew(const char* strFilename)
 	}
 
 	delete[] pbyData;
-
 	return true;
 }
 
 extern int SceneFlag;
 
-float RequestTerrainHeight(float xf,float yf)
-{
+float RequestTerrainHeight(float xf, float yf) {
 	if ( SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
-		return 0.f;
-    if ( xf<0.f || yf<0.f )
-		return 0.f;
+		return 0.0f;
+	if (xf < 0.0f || yf < 0.0f)
+		return 0.0f;
 
-    xf = xf/TERRAIN_SCALE;
-    yf = yf/TERRAIN_SCALE;
+	xf /= TERRAIN_SCALE;
+	yf /= TERRAIN_SCALE;
 
 	unsigned int Index = TERRAIN_INDEX(xf,yf);
 
@@ -768,14 +800,12 @@ float RequestTerrainHeight(float xf,float yf)
 		return g_fSpecialHeight;
 
     if ( (TerrainWall[Index]&TW_HEIGHT)==TW_HEIGHT )
-    {
         return g_fSpecialHeight;
-    }
 
-    int xi = (int)xf;
-    int yi = (int)yf;
-    float xd = xf-(float)xi;
-    float yd = yf-(float)yi;
+	int xi = static_cast<int>(xf);
+	int yi = static_cast<int>(yf);
+	float xd = xf - static_cast<float>(xi);
+	float yd = yf - static_cast<float>(yi);
     unsigned int Index1 = TERRAIN_INDEX_REPEAT(xi  ,yi  );
     unsigned int Index2 = TERRAIN_INDEX_REPEAT(xi  ,yi+1);
     unsigned int Index3 = TERRAIN_INDEX_REPEAT(xi+1,yi  );
@@ -1956,7 +1986,7 @@ void CreateFrustrum2D(vec3_t Position)
 
     if ( gMapManager.WorldActive==WD_6STADIUM && ( FindText( Hero->ID, "webzen" ) || FindText( Hero->ID, "webzen2" ) )  )
     {
-        Width = (float)GetScreenWidth()/640.f;
+        Width = (float)GetScreenWidth()/500.f;
 	    CameraViewFar    = 8500.f;
 	    CameraViewNear   = CameraViewFar*0.05f;
 	    CameraViewTarget = CameraViewFar*0.47f;
@@ -1967,7 +1997,7 @@ void CreateFrustrum2D(vec3_t Position)
     {
         if ( gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
         {
-            Width = (float)GetScreenWidth()/640.f;// * 0.1f;
+            Width = (float)GetScreenWidth()/480.f;// * 0.1f;
             if ( battleCastle::InBattleCastle2( Hero->Object.Position ) && ( Hero->Object.Position[0]<17100.f || Hero->Object.Position[0]>18300.f ) )
             {
                 CameraViewFar    = 5100.f;// * 0.1f;
@@ -1987,7 +2017,7 @@ void CreateFrustrum2D(vec3_t Position)
         }
 		else if(gMapManager.WorldActive == WD_62SANTA_TOWN)
 		{
-			Width = (float)GetScreenWidth()/640.f * 1.0f;
+			Width = (float)GetScreenWidth()/450.f * 1.0f;
 	        CameraViewFar    = 2400.f;
 			CameraViewNear   = CameraViewFar*0.19f;
 			CameraViewTarget = CameraViewFar*0.47f;
@@ -1997,7 +2027,7 @@ void CreateFrustrum2D(vec3_t Position)
 		}
 		else if(gMapManager.IsPKField()	|| IsDoppelGanger2())
 		{
-			Width = (float)GetScreenWidth()/640.f;
+			Width = (float)GetScreenWidth()/500.f;
 			CameraViewFar    = 1700.0f;
 			CameraViewNear   = 55.0f;
 			CameraViewTarget = 830.0f;
@@ -2028,7 +2058,8 @@ void CreateFrustrum2D(vec3_t Position)
 				}
 				else
 				{
-					Width = (float)GetScreenWidth()/640.f;
+					// Width = (float)GetScreenWidth()/640.f;
+					Width = (float)GetScreenWidth()/640.f * 9.1f * 0.404998f;
 				}
 
 				if(SceneFlag == LOG_IN_SCENE)
@@ -2065,7 +2096,7 @@ void CreateFrustrum2D(vec3_t Position)
 				}
                 break;
             case 1:
-                Width = (float)GetScreenWidth()/640.f+0.1f;// * 0.1f;
+                Width = (float)GetScreenWidth()/500.f+0.1f;// * 0.1f;
                 CameraViewFar    = 2700.f;// * 0.1f;
                 CameraViewNear   = CameraViewFar*0.19f;//0.22
                 CameraViewTarget = CameraViewFar*0.47f;//0.47
@@ -2073,7 +2104,7 @@ void CreateFrustrum2D(vec3_t Position)
                 WidthNear = 540.f*Width; // 540.f
                 break;
             case 2:
-                Width = (float)GetScreenWidth()/640.f+0.1f;// * 0.1f;
+                Width = (float)GetScreenWidth()/500.f+0.1f;// * 0.1f;
                 CameraViewFar    = 3000.f;// * 0.1f;
                 CameraViewNear   = CameraViewFar*0.19f;//0.22
                 CameraViewTarget = CameraViewFar*0.47f;//0.47
@@ -2081,7 +2112,7 @@ void CreateFrustrum2D(vec3_t Position)
                 WidthNear = 540.f*Width; // 540.f
                 break;
             case 3:
-                Width = (float)GetScreenWidth()/640.f+0.1f;// * 0.1f;
+                Width = (float)GetScreenWidth()/500.f+0.1f;// * 0.1f;
                 CameraViewFar    = 3300.f;// * 0.1f;
                 CameraViewNear   = CameraViewFar*0.19f;//0.22
                 CameraViewTarget = CameraViewFar*0.47f;//0.47
@@ -2089,8 +2120,15 @@ void CreateFrustrum2D(vec3_t Position)
                 WidthNear = 580.f*Width; // 540.f
                 break;
 			case 4:
+				Width = (float)GetScreenWidth()/500.f+0.1f;// * 0.1f;
+				CameraViewFar = 5100.f;// * 0.1f;
+				CameraViewNear = CameraViewFar * 0.19f;//0.22
+				CameraViewTarget = CameraViewFar * 0.47f;//0.47
+				WidthFar = 2250.f * Width; // 1140.f
+				WidthNear = 540.f * Width; // 540.f
+				break;
 			case 5:
-                Width = (float)GetScreenWidth()/640.f+0.1f;// * 0.1f;
+                Width = (float)GetScreenWidth()/500.f+0.1f;// * 0.1f;
                 CameraViewFar    = 3400.f;// * 0.1f;
                 CameraViewNear   = CameraViewFar*0.19f;//0.22
                 CameraViewTarget = CameraViewFar*0.47f;//0.47
@@ -2120,7 +2158,6 @@ void CreateFrustrum2D(vec3_t Position)
 		CCameraMove::GetInstancePtr()->SetFrustumAngle(89.5f);
 		vec3_t _Temp = { CCameraMove::GetInstancePtr()->GetFrustumAngle(), 0.0f, 0.0f};
 		VectorAdd(Angle,_Temp,Angle);
-//		Angle[2] -= 180.0f;
 	}
 	else
 	{
@@ -2191,14 +2228,10 @@ void CreateFrustrum(float Aspect, vec3_t position)
 	FrustrumBoundMinY = (int)(FrustrumMinY/TERRAIN_SCALE)/tileWidth*tileWidth-tileWidth;
 	FrustrumBoundMaxX = (int)(FrustrumMaxX/TERRAIN_SCALE)/tileWidth*tileWidth+tileWidth;
 	FrustrumBoundMaxY = (int)(FrustrumMaxY/TERRAIN_SCALE)/tileWidth*tileWidth+tileWidth;
-	if(FrustrumBoundMinX < 0) FrustrumBoundMinX = 0;
-	if(FrustrumBoundMinY < 0) FrustrumBoundMinY = 0;
-	if(FrustrumBoundMaxX < 0) FrustrumBoundMaxX = 0;
-	if(FrustrumBoundMaxY < 0) FrustrumBoundMaxY = 0;
-	if(FrustrumBoundMinX > TERRAIN_SIZE_MASK-tileWidth) FrustrumBoundMinX = TERRAIN_SIZE_MASK-tileWidth;
-	if(FrustrumBoundMinY > TERRAIN_SIZE_MASK-tileWidth) FrustrumBoundMinY = TERRAIN_SIZE_MASK-tileWidth;
-	if(FrustrumBoundMaxX > TERRAIN_SIZE_MASK-tileWidth) FrustrumBoundMaxX = TERRAIN_SIZE_MASK-tileWidth;
-	if(FrustrumBoundMaxY > TERRAIN_SIZE_MASK-tileWidth) FrustrumBoundMaxY = TERRAIN_SIZE_MASK-tileWidth;
+	FrustrumBoundMinX = FrustrumBoundMinX < 0 ? 0 : FrustrumBoundMinX;
+	FrustrumBoundMinY = FrustrumBoundMinY < 0 ? 0 : FrustrumBoundMinY;
+	FrustrumBoundMaxX = FrustrumBoundMaxX > TERRAIN_SIZE_MASK - tileWidth ? TERRAIN_SIZE_MASK - tileWidth : FrustrumBoundMaxX;
+	FrustrumBoundMaxY = FrustrumBoundMaxY > TERRAIN_SIZE_MASK - tileWidth ? TERRAIN_SIZE_MASK - tileWidth : FrustrumBoundMaxY;
 
 	FaceNormalize(FrustrumVertex[0],FrustrumVertex[1],FrustrumVertex[2],FrustrumFaceNormal[0]);
 	FaceNormalize(FrustrumVertex[0],FrustrumVertex[2],FrustrumVertex[3],FrustrumFaceNormal[1]);

@@ -49,11 +49,7 @@ float ParentMatrix[3][4];
 static vec3_t LightVector = { 0.f, -0.1f, -0.8f };
 static vec3_t LightVector2 = { 0.f, -0.5f, -0.8f };
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 void BMD::Animation(float (*BoneMatrix)[3][4],float AnimationFrame,float PriorFrame,unsigned short PriorAction,vec3_t Angle,vec3_t HeadAngle,bool Parent,bool Translate)
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-void BMD::Animation(float (*BoneMatrix)[3][4],float AnimationFrame,float PriorFrame,unsigned char PriorAction,vec3_t Angle,vec3_t HeadAngle,bool Parent,bool Translate)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 {
     if ( NumActions<=0 ) return;
 
@@ -178,11 +174,7 @@ extern int EditFlag;
 bool HighLight = true;
 float BoneScale = 1.f;
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 void BMD::Transform(float (*BoneMatrix)[3][4],vec3_t BoundingBoxMin,vec3_t BoundingBoxMax,OBB_t *OBB,bool Translate, float _Scale)
-#else //PBG_ADD_NEWCHAR_MONK_ITEM
-void BMD::Transform(float (*BoneMatrix)[3][4],vec3_t BoundingBoxMin,vec3_t BoundingBoxMax,OBB_t *OBB,bool Translate)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 {
 	// transform
 	vec3_t LightPosition;
@@ -229,7 +221,6 @@ void BMD::Transform(float (*BoneMatrix)[3][4],vec3_t BoundingBoxMin,vec3_t Bound
 
 			if(BoneScale == 1.f)
 			{
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
  				if(_Scale)
  				{
 					vec3_t Position;
@@ -238,8 +229,7 @@ void BMD::Transform(float (*BoneMatrix)[3][4],vec3_t BoundingBoxMin,vec3_t Bound
 					VectorTransform(Position,BoneMatrix[v->Node],vp);
  				}
  				else
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				VectorTransform(v->Position,BoneMatrix[v->Node],vp);
+					VectorTransform(v->Position,BoneMatrix[v->Node],vp);
 				if(Translate)
 					VectorScale(vp,BodyScale,vp);
 			}
@@ -404,11 +394,7 @@ void BMD::RotationPosition(float (*Matrix)[4],vec3_t Position,vec3_t WorldPositi
 	}
 }
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 bool BMD::PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigned short *PriorAction,float Speed,vec3_t Origin,vec3_t Angle)
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-bool BMD::PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigned char *PriorAction,float Speed,vec3_t Origin,vec3_t Angle)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 {
 	bool Loop = true;
 
@@ -646,11 +632,7 @@ void BMD::AnimationTransformOnlySelf( vec3_t *arrOutSetfAllBonePositions,
 	{
 		float			fAnimationFrame = oRefAnimation->AnimationFrame, 
 						fPiriorAnimationFrame = oRefAnimation->PriorAnimationFrame;
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		unsigned short	iPiriorAction = oRefAnimation->PriorAction;
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-		unsigned char	iPiriorAction = oRefAnimation->PriorAction;
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 
 		if( fWeight >= 0.0f && fFrameArea > 0.0f )
 		{
@@ -3012,11 +2994,9 @@ BMD::~BMD()
 	Release();
 }
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 void BMD::InterpolationTrans(float (*Mat1)[4], float (*TransMat2)[4], float _Scale)
 {
 	TransMat2[0][3] = TransMat2[0][3] - (TransMat2[0][3] - Mat1[0][3]) * (1-_Scale);
 	TransMat2[1][3] = TransMat2[1][3] - (TransMat2[1][3] - Mat1[1][3]) * (1-_Scale);
 	TransMat2[2][3] = TransMat2[2][3] - (TransMat2[2][3] - Mat1[2][3]) * (1-_Scale);
 }
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM

@@ -74,12 +74,7 @@ bool CheckMonsterInRange( CHARACTER* c, float Range );
 bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 void RenderGuild(OBJECT *o,int Type=-1, vec3_t vPos = NULL);
-#else //PBG_ADD_NEWCHAR_MONK
-void RenderGuild(OBJECT *o,int Type=-1);
-#endif //PBG_ADD_NEWCHAR_MONK
-
 void RenderLight(OBJECT *o,int Texture,float Scale,int Bone,float x,float y,float z);
 void RenderProtectGuildMark(CHARACTER * c);
 

@@ -139,7 +139,6 @@ BYTE CCharacterManager::GetCharacterClass(const BYTE byClass)
 				byCharacterClass = CLASS_SUMMONER;
 		}
 		break;
-#ifdef PBG_ADD_NEWCHAR_MONK
 	case 6:
 		{
 			if(byThirdClass)
@@ -151,7 +150,6 @@ BYTE CCharacterManager::GetCharacterClass(const BYTE byClass)
 				byCharacterClass = CLASS_RAGEFIGHTER;
 			}
 		}
-#endif //PBG_ADD_NEWCHAR_MONK
 	}
 
 	return byCharacterClass;
@@ -180,66 +178,65 @@ const char* CCharacterManager::GetCharacterClassText(const BYTE byClass)
 	{
 		return GlobalText[20];
 	}
-	else if(byCharacterClass == CLASS_SOULMASTER)
+	if(byCharacterClass == CLASS_SOULMASTER)
 	{
 		return GlobalText[25];
 	}
-	else if(byCharacterClass == CLASS_GRANDMASTER)
+	if(byCharacterClass == CLASS_GRANDMASTER)
 	{
 		return GlobalText[1669];
 	}
-	else if(byCharacterClass == CLASS_KNIGHT)
+	if(byCharacterClass == CLASS_KNIGHT)
 	{
 		return GlobalText[21];
 	}
-	else if(byCharacterClass == CLASS_BLADEKNIGHT)
+	if(byCharacterClass == CLASS_BLADEKNIGHT)
 	{
 		return GlobalText[26];
 	}
-	else if(byCharacterClass == CLASS_BLADEMASTER)
+	if(byCharacterClass == CLASS_BLADEMASTER)
 	{
 		return GlobalText[1668];
 	}
-	else if(byCharacterClass == CLASS_ELF)
+	if(byCharacterClass == CLASS_ELF)
 	{
 		return GlobalText[22];
 	}
-	else if(byCharacterClass == CLASS_MUSEELF)
+	if(byCharacterClass == CLASS_MUSEELF)
 	{
 		return GlobalText[27];
 	}
-	else if(byCharacterClass == CLASS_HIGHELF)
+	if(byCharacterClass == CLASS_HIGHELF)
 	{
 		return GlobalText[1670];
 	}
-	else if(byCharacterClass == CLASS_DARK)
+	if(byCharacterClass == CLASS_DARK)
 	{
 		return GlobalText[23];
 	}
-	else if(byCharacterClass == CLASS_DUELMASTER)
+	if(byCharacterClass == CLASS_DUELMASTER)
 	{
 		return GlobalText[1671];
 	}
-	else if(byCharacterClass == CLASS_DARK_LORD)
+	if(byCharacterClass == CLASS_DARK_LORD)
 	{
 		return GlobalText[24];
 	}
-	else if(byCharacterClass == CLASS_LORDEMPEROR)
+	if(byCharacterClass == CLASS_LORDEMPEROR)
 	{
 		return GlobalText[1672];
 	}
-	else if (byCharacterClass == CLASS_SUMMONER)
+	if (byCharacterClass == CLASS_SUMMONER)
 		return GlobalText[1687];
-	else if (byCharacterClass == CLASS_BLOODYSUMMONER)
+	if (byCharacterClass == CLASS_BLOODYSUMMONER)
 		return GlobalText[1688];
-	else if (byCharacterClass == CLASS_DIMENSIONMASTER)
+	if (byCharacterClass == CLASS_DIMENSIONMASTER)
 		return GlobalText[1689];
-#ifdef PBG_ADD_NEWCHAR_MONK
-	else if(byCharacterClass == CLASS_RAGEFIGHTER)
+	if(byCharacterClass == CLASS_RAGEFIGHTER)
 		return GlobalText[3150];	// 3150 "레이지파이터"
-	else if(byCharacterClass == CLASS_TEMPLENIGHT)
-		return GlobalText[3151];	// 3151 "템플나이트"
-#endif //PBG_ADD_NEWCHAR_MONK
+	if(byCharacterClass == CLASS_TEMPLENIGHT)
+		return GlobalText[3151];
+	// 3151 "템플나이트"
 	return GlobalText[2305];
 }
 
@@ -341,10 +338,7 @@ bool CCharacterManager::IsEquipedWing()
 		|| (pEquippedItem->Type >= ITEM_WING+36 && pEquippedItem->Type <= ITEM_WING+43)
 		|| (pEquippedItem->Type == ITEM_HELPER+30)
 		|| ( ITEM_WING+130 <= pEquippedItem->Type && pEquippedItem->Type <= ITEM_WING+134 )
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| (pEquippedItem->Type >= ITEM_WING+49 && pEquippedItem->Type <= ITEM_WING+50)	|| (pEquippedItem->Type == ITEM_WING+135)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+		|| (pEquippedItem->Type >= ITEM_WING+49 && pEquippedItem->Type <= ITEM_WING+50)	|| (pEquippedItem->Type == ITEM_WING+135))
 	{
 		return true;
 	}

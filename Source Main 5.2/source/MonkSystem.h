@@ -7,7 +7,6 @@
 
 #pragma once
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -42,9 +41,8 @@ private:
 	float m_fDisFrame;
 	float m_fAniFrame;
 	float m_fAlpha;
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 	float m_fAniFrameSpeed;
-#endif //PBG_MOD_RAGEFIGHTERSOUND
+
 public:
 	CDummyUnit();
 	~CDummyUnit();
@@ -56,11 +54,7 @@ public:
 	vec_t* GetStartPosition();
 	float GetAniFrame();
 	float GetAlpha();
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 	void CalDummyPosition(vec3_t vOutPos, float& fAni, bool bChange=false);
-#else //PBG_MOD_RAGEFIGHTERSOUND
-	void CalDummyPosition(vec3_t vOutPos, float& fAni);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 };
 typedef std::map<int, CDummyUnit>	tm_DummyUnit;
 
@@ -138,6 +132,7 @@ public:
 	int ModifyTypeCommonItemMonk(int _OrginalType);
 	bool IsRagefighterCommonWeapon(BYTE _Class, int _Type);
 	bool IsSwordformGloves(int _Type);
+	void RenderPhoenixGloves(CHARACTER* _pCha, BYTE slot = 0);
 	void RenderSwordformGloves(CHARACTER *_pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate=false, int _Select=0);
 	int ModifyTypeSwordformGloves(int _ModelType, int _LeftHand);
 	int EqualItemModelType(int _Type);
@@ -169,11 +164,7 @@ public:
 	void InitDummyCal();
 	void DestroyDummy();
 	void SetDummy(vec3_t pos, vec3_t startpos, int dummyindex);
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 	bool IsDummyRender(vec3_t vOutPos, vec3_t Target, float& fAni, int DummyIndex, bool Change=false);
-#else //PBG_MOD_RAGEFIGHTERSOUND
-	bool IsDummyRender(vec3_t vOutPos, vec3_t Target, float& fAni, int DummyIndex);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 	void InitConsecutiveState(float _fFirstFrame=0, float _fSecondFrame=0, BYTE _btAttState = NONE_ATT);
 	bool IsConsecutiveAtt(float _fAttFrame);
 	void RenderRepeatedly(int _Key, OBJECT *pObj);
@@ -189,5 +180,4 @@ public:
 };
 
 extern CMonkSystem g_CMonkSystem;
-#endif //PBG_ADD_NEWCHAR_MONK
 #endif // !defined(AFX_MONKSYSTEM_H__BB2D80C0_92D7_4E8D_BF3E_32C643EDD764__INCLUDED_)

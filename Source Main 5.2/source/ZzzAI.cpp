@@ -247,7 +247,6 @@ void PushObject(vec3_t PushPosition,vec3_t Position,float Power,vec3_t Angle)
 
 void SetAction_Fenrir_Skill(CHARACTER* c, OBJECT* o)
 {
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 	if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
@@ -261,23 +260,21 @@ void SetAction_Fenrir_Skill(CHARACTER* c, OBJECT* o)
 	}
 	else
 	{
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-	if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
-		SetAction(o, PLAYER_FENRIR_SKILL_TWO_SWORD);
-	else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
-		SetAction(o, PLAYER_FENRIR_SKILL_ONE_RIGHT);
-	else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
-		SetAction(o, PLAYER_FENRIR_SKILL_ONE_LEFT);
-	else
-		SetAction(o, PLAYER_FENRIR_SKILL);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
+
+		if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
+			SetAction(o, PLAYER_FENRIR_SKILL_TWO_SWORD);
+		else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
+			SetAction(o, PLAYER_FENRIR_SKILL_ONE_RIGHT);
+		else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
+			SetAction(o, PLAYER_FENRIR_SKILL_ONE_LEFT);
+		else
+			SetAction(o, PLAYER_FENRIR_SKILL);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 }
 
 void SetAction_Fenrir_Damage(CHARACTER* c, OBJECT* o)
 {
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
+
 	if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
@@ -291,22 +288,19 @@ void SetAction_Fenrir_Damage(CHARACTER* c, OBJECT* o)
 	}
 	else
 	{
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-	if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
-		SetAction(o, PLAYER_FENRIR_DAMAGE_TWO_SWORD);
-	else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
-		SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_RIGHT);
-	else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type ==MODEL_BOW+7)
-		SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_RIGHT);
-	else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
-		SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
-	else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type ==MODEL_BOW+15)
-		SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
-	else	// 맨손
-		SetAction(o, PLAYER_FENRIR_DAMAGE);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
+		if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
+			SetAction(o, PLAYER_FENRIR_DAMAGE_TWO_SWORD);
+		else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
+			SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_RIGHT);
+		else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type ==MODEL_BOW+7)
+			SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_RIGHT);
+		else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
+			SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
+		else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type ==MODEL_BOW+15)
+			SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
+		else	// 맨손
+			SetAction(o, PLAYER_FENRIR_DAMAGE);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 }
 
 void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
@@ -317,10 +311,8 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 			SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD_ELF);
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)
 			SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD_MAGOM);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 			SetAction(o, PLAYER_RAGE_FENRIR_RUN_TWO_SWORD);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 		else
 			SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD);
 	}
@@ -330,10 +322,8 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT_ELF);
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT_MAGOM);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 			SetAction(o, PLAYER_RAGE_FENRIR_RUN_ONE_RIGHT);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 		else
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT);
 	}
@@ -345,10 +335,8 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT_ELF);
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT_MAGOM);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 			SetAction(o, PLAYER_RAGE_FENRIR_RUN_ONE_LEFT);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 		else
 			SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT);
 	}
@@ -360,10 +348,8 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 			SetAction(o, PLAYER_FENRIR_RUN_ELF);
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK)
 			SetAction(o, PLAYER_FENRIR_RUN_MAGOM);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		else if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 			SetAction(o, PLAYER_RAGE_FENRIR_RUN);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 		else
 			SetAction(o, PLAYER_FENRIR_RUN);
 	}
@@ -371,7 +357,6 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 
 void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o)
 {
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 	if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
@@ -385,28 +370,23 @@ void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o)
 	}
 	else
 	{
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-	if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type !=MODEL_BOW+15 && c->Weapon[1].Type !=MODEL_BOW+7)
-		SetAction(o, PLAYER_FENRIR_WALK_TWO_SWORD);
-	else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
-		SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
-	else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type ==MODEL_BOW+7)
-		SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
-	else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
-		SetAction(o, PLAYER_FENRIR_WALK_ONE_LEFT);
-	else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type ==MODEL_BOW+15)
-		SetAction(o, PLAYER_FENRIR_WALK_ONE_LEFT);
-	else
-		SetAction(o, PLAYER_FENRIR_WALK);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
+
+		if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type !=MODEL_BOW+15 && c->Weapon[1].Type !=MODEL_BOW+7)
+			SetAction(o, PLAYER_FENRIR_WALK_TWO_SWORD);
+		else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
+			SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
+		else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type ==MODEL_BOW+7)
+			SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
+		else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
+			SetAction(o, PLAYER_FENRIR_WALK_ONE_LEFT);
+		else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type ==MODEL_BOW+15)
+			SetAction(o, PLAYER_FENRIR_WALK_ONE_LEFT);
+		else
+			SetAction(o, PLAYER_FENRIR_WALK);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 }
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
+
 bool IsAliceRideAction_UniDino(unsigned short byAction)
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-bool IsAliceRideAction_UniDino(BYTE byAction)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 {
 	if(
 		byAction == PLAYER_SKILL_CHAIN_LIGHTNING_UNI
@@ -422,11 +402,8 @@ bool IsAliceRideAction_UniDino(BYTE byAction)
 
 	return false;
 }
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
+
 bool IsAliceRideAction_Fenrir(unsigned short byAction)
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-bool IsAliceRideAction_Fenrir(BYTE byAction)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 {
 	if(
 		byAction == PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR

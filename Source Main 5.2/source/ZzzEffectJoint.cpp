@@ -2643,7 +2643,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					}
 				}
 				break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case BITMAP_PIN_LIGHT:
 				{
 					o->Scale    = Scale;
@@ -2697,7 +2696,6 @@ void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int
 					o->Velocity = Models[o->Target->Type].Actions[o->Target->CurrentAction].PlaySpeed;
 				}
 				break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
             }
 			if(o->MaxTails > MAX_TAILS)
 				o->MaxTails = MAX_TAILS;
@@ -5808,10 +5806,7 @@ void MoveJoint( JOINT *o, int iIndex)
         {
             if(((o->Target->CurrentAction>=PLAYER_WALK_MALE /*&& o->Target->CurrentAction<=PLAYER_RUN_RIDE_WEAPON*/) || 
                 (o->Target->CurrentAction>=PLAYER_ATTACK_SKILL_SWORD1 && o->Target->CurrentAction<=PLAYER_ATTACK_SKILL_SWORD5 ) 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-				 && (o->Target->CurrentAction!=PLAYER_RAGE_UNI_STOP_ONE_RIGHT)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-				) )
+				 && (o->Target->CurrentAction!=PLAYER_RAGE_UNI_STOP_ONE_RIGHT)))
             {
                 o->LifeTime-=10;
             }
@@ -5974,10 +5969,7 @@ void MoveJoint( JOINT *o, int iIndex)
         {
             if(((o->Target->CurrentAction>=PLAYER_WALK_MALE && o->Target->CurrentAction<=PLAYER_RUN_RIDE_WEAPON) || 
                 (o->Target->CurrentAction>=PLAYER_ATTACK_SKILL_SWORD1 && o->Target->CurrentAction<=PLAYER_ATTACK_SKILL_SWORD5 ) 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-				|| (o->Target->CurrentAction==PLAYER_RAGE_UNI_RUN || o->Target->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-				) )
+				|| (o->Target->CurrentAction==PLAYER_RAGE_UNI_RUN || o->Target->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT)))
             {
                 o->SubType = 1;
                 o->m_bCreateTails = false;
@@ -6913,7 +6905,6 @@ void MoveJoint( JOINT *o, int iIndex)
 				break;	
 			}
 		}break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case BITMAP_PIN_LIGHT:
 				{
 					o->Velocity += 0.1f;
@@ -6990,7 +6981,6 @@ void MoveJoint( JOINT *o, int iIndex)
 					VectorScale(o->Light, 0.8f, o->Light);
 				}
 				break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
     }
 	
     if ( o->m_bCreateTails )

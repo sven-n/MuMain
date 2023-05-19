@@ -139,9 +139,7 @@ void CMixItem::SetItem(ITEM * pItem, DWORD dwMixValue)
 	case ITEM_WING+6:
 	case ITEM_HELPER+30:
 	case ITEM_WING+42:
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case ITEM_WING+49:
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		m_bIsUpgradedWing = TRUE;
 		break;
 	case ITEM_WING+36:
@@ -150,9 +148,7 @@ void CMixItem::SetItem(ITEM * pItem, DWORD dwMixValue)
 	case ITEM_WING+39:
 	case ITEM_WING+40:
 	case ITEM_WING+43:
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case ITEM_WING+50:
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		m_bIs3rdUpgradedWing = TRUE;
 	}
 

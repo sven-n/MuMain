@@ -26,9 +26,7 @@
 #include "GMDoppelGanger3.h"
 #include "GMDoppelGanger4.h"
 #include "./Time/CTimCheck.h"
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #include "GameShop/InGameShopSystem.h"
@@ -1370,10 +1368,8 @@ void SEASON3B::CNewUISkillList::LoadImages()
 	LoadBitmap("Interface\\newui_non_skill.jpg", IMAGE_NON_SKILL1, GL_LINEAR);
 	LoadBitmap("Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
 	LoadBitmap("Interface\\newui_non_command.jpg", IMAGE_NON_COMMAND, GL_LINEAR);
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	LoadBitmap("Interface\\newui_skill3.jpg", IMAGE_SKILL3, GL_LINEAR);
 	LoadBitmap("Interface\\newui_non_skill3.jpg", IMAGE_NON_SKILL3, GL_LINEAR);
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 }
 
 void SEASON3B::CNewUISkillList::UnloadImages()
@@ -1386,10 +1382,8 @@ void SEASON3B::CNewUISkillList::UnloadImages()
 	DeleteBitmap(IMAGE_NON_SKILL1);
 	DeleteBitmap(IMAGE_NON_SKILL2);
 	DeleteBitmap(IMAGE_NON_COMMAND);
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	DeleteBitmap(IMAGE_SKILL3);
 	DeleteBitmap(IMAGE_NON_SKILL3);
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 }
 
 bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
@@ -2289,7 +2283,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		bCantSkill = true;
 	}
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(!g_CMonkSystem.IsSwordformGlovesUseSkill(bySkillType))
 	{
 		bCantSkill = true;
@@ -2307,7 +2300,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	{
 		bCantSkill = true;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	
 	float fU, fV;
 	int iKindofSkill = 0;
@@ -2441,14 +2433,12 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		fV = (height/256.f)*((Skill_Icon/12)+4);
 		iKindofSkill = KOS_SKILL2;
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	else if(bySkillType >= AT_SKILL_THRUST)
 	{
 		fU = ((bySkillType - 260) % 12) * width / 256.f;
 		fV = ((bySkillType - 260) / 12) * height / 256.f;
 		iKindofSkill = KOS_SKILL3;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	else if(bySkillType >= 57)
     {
 		fU = ((bySkillType - 57) % 8) * width / 256.f;
@@ -2476,21 +2466,15 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 		{
 			iSkillIndex = IMAGE_SKILL2;
 		}break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case KOS_SKILL3:
 		{
 			iSkillIndex = IMAGE_SKILL3;
 		}break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}
 
 	if( bCantSkill == true )
 	{
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		iSkillIndex += 6;
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-		iSkillIndex += 5;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}
 	
 	if( iSkillIndex != 0)
@@ -2512,16 +2496,14 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 	{
 		glColor3f(1.f, 0.9f, 0.8f);
 		SEASON3B::RenderNumber(x+20, y+20, iHotKey);
+		glColor3f(1.f, 1.f, 1.f);
 	}
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if((bySkillType == AT_SKILL_GIANTSWING || bySkillType == AT_SKILL_DRAGON_KICK
 		|| bySkillType == AT_SKILL_DRAGON_LOWER) && (bCantSkill))
 		return;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
 	if( (bySkillType != AT_SKILL_INFINITY_ARROW) && (bySkillType != AT_SKILL_SWELL_OF_MAGICPOWER))
-
 	{
 		RenderSkillDelay(iIndex, x, y, width, height);
 	}

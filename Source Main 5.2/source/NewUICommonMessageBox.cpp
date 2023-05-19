@@ -320,21 +320,20 @@ DWORD SEASON3B::CNewUICommonMessageBox::GetType()
 
 bool SEASON3B::CNewUICommonMessageBox::Create(DWORD dwType, float fPriority)
 {
-	int x, y, width, height;
-
 	m_dwType = dwType;
 
 	SetAddCallbackFunc();
 
-	x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-	y = 100;
-	width = MSGBOX_WIDTH;
-	height = MSGBOX_TOP_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
+	const int x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
+	const int y = 100;
+	const int width = MSGBOX_WIDTH;
+	const int height = MSGBOX_TOP_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
 
-	CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+	if (!CNewUIMessageBoxBase::Create(x, y, width, height, fPriority))
+		return false;
 
 	SetButtonInfo();
-	
+
 	return true;
 }
 

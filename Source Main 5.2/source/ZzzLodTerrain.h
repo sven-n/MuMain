@@ -13,7 +13,7 @@ extern WORD          TerrainWall         [];
 
 extern inline int TERRAIN_INDEX(int x,int y);
 extern inline int TERRAIN_INDEX_REPEAT(int x,int y);
-extern inline WORD TERRAIN_ATTRIBUTE(float x,float y);
+extern inline BYTE TERRAIN_ATTRIBUTE(float x,float y);
 
 bool OpenTerrainHeight(char *name);
 void SaveTerrainHeight(char *name);

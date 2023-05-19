@@ -42,7 +42,7 @@ void CDirection::Init()
 	m_fCount = 0.0f;
 	m_fLength = 0.0f;
 	m_fCameraSpeed = 100.0f;
-	m_fCameraViewFar = 1000.0f;
+	m_fCameraViewFar = 2000.0f;
 
 	m_iCheckTime = 0;
 	m_iTimeSchedule = 0;

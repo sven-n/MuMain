@@ -32,9 +32,7 @@
 #endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 #include "GMUnitedMarketPlace.h"
 #include "ChangeRingManager.h"
-#ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
-#endif //PBG_ADD_NEWCHAR_MONK
 #include "CharacterManager.h"
 
 using namespace SEASON3B;
@@ -227,10 +225,7 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 	else if(pItemAttr->m_byItemSlot == EQUIPMENT_WEAPON_RIGHT && iIndex == EQUIPMENT_WEAPON_LEFT)
 	{
 		if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK
-#ifdef PBG_ADD_NEWCHAR_MONK
-			|| gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-			)
+			|| gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
 		{
 			if (!pItemAttr->TwoHand)
 				bEquipable = true;
@@ -260,7 +255,7 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 				bEquipable = false;
 		}
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK
+
 	if(gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
 	{
 		if(iIndex == EQUIPMENT_GLOVES)
@@ -268,7 +263,6 @@ bool SEASON3B::CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 		else if(pItemAttr->m_byItemSlot == EQUIPMENT_WEAPON_RIGHT)
 			bEquipable = g_CMonkSystem.RageEquipmentWeapon(iIndex, pItem->Type);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
 
 	if(bEquipable == false)
 		return false;
@@ -1007,10 +1001,8 @@ void SEASON3B::CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
 	}
 	if (pItem->Type==ITEM_WING+39 || pItem->Type==ITEM_HELPER+30 || 
 		pItem->Type == ITEM_WING+130 ||
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		(pItem->Type >= ITEM_WING+49 && pItem->Type <= ITEM_WING+50) ||
 		(pItem->Type == ITEM_WING+135) ||
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		pItem->Type==ITEM_WING+40)
 	{
 		DeleteCloth(Hero, &Hero->Object);
@@ -1030,11 +1022,9 @@ void SEASON3B::CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
 	case ITEM_WING+39:	
 	case ITEM_WING+40:
 	case ITEM_WING+130:
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case ITEM_WING+49:
 	case ITEM_WING+50:
 	case ITEM_WING+135:
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		DeleteCloth(Hero, &Hero->Object);
 		return;
 	}
@@ -1222,10 +1212,8 @@ void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 				continue;
 			}
 		}
-#ifdef PBG_ADD_NEWCHAR_MONK
 		if((i == EQUIPMENT_GLOVES) && (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER))
 			continue;	
-#endif //PBG_ADD_NEWCHAR_MONK
 
 		EnableAlphaTest();
 		
@@ -1279,10 +1267,7 @@ void SEASON3B::CNewUIMyInventory::RenderEquippedItem()
 		ITEM* pItemObj = CNewUIInventoryCtrl::GetPickedItem()->GetItem();
 		ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[m_iPointedSlot];
 		if( pItemObj && (pEquipmentItemSlot->Type != -1 || false == IsEquipable(m_iPointedSlot, pItemObj)) 
-#ifdef PBG_ADD_NEWCHAR_MONK
-			&& !((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER) && (m_iPointedSlot == EQUIPMENT_GLOVES))
-#endif //PBG_ADD_NEWCHAR_MONK
-			)
+			&& !((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER) && (m_iPointedSlot == EQUIPMENT_GLOVES)))
 		{
 			glColor4f(0.9f, 0.1f, 0.1f, 0.4f);
 			EnableAlphaTest();
@@ -1352,251 +1337,280 @@ void SEASON3B::CNewUIMyInventory::RenderInventoryDetails()
 
 bool SEASON3B::CNewUIMyInventory::EquipmentWindowProcess()
 {
-	if(m_iPointedSlot != -1 && IsRelease(VK_LBUTTON))
+	if (m_iPointedSlot != -1)
 	{
-		CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-		if(pPickedItem)
+		if (IsRelease(VK_LBUTTON))
 		{
-			ITEM* pItemObj = pPickedItem->GetItem();
+			CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 
-			if( pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
+			if (pPickedItem)
 			{
-				g_pChatListBox->AddText("", GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
-				CNewUIInventoryCtrl::BackupPickedItem();
-				
-				ResetMouseLButton();
-				return false;
-			}
-			
-			ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[m_iPointedSlot];
-			if(pEquipmentItemSlot && pEquipmentItemSlot->Type != -1)
-			{
-				return true;
-			}
+				ITEM* pItemObj = pPickedItem->GetItem();
 
-			if (g_ChangeRingMgr->CheckChangeRing(pPickedItem->GetItem()->Type))
-			{
-				ITEM * pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
-				ITEM * pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-
-				if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
+				if (pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
 				{
-					g_pChatListBox->AddText("", GlobalText[3089], SEASON3B::TYPE_ERROR_MESSAGE);
+					g_pChatListBox->AddText("", GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
 					CNewUIInventoryCtrl::BackupPickedItem();
-					
+
 					ResetMouseLButton();
 					return false;
 				}
-			}
 
-			if(IsEquipable(m_iPointedSlot, pItemObj))
-			{
-				if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
+				ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[m_iPointedSlot];
+				if (pEquipmentItemSlot && pEquipmentItemSlot->Type != -1)
 				{
-					int iSourceIndex = pPickedItem->GetSourceLinealPos();
-					int iTargetIndex = m_iPointedSlot;
-					SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex, 
-						pItemObj, REQUEST_EQUIPMENT_INVENTORY, iTargetIndex);
-					
 					return true;
 				}
-				else if(pPickedItem->GetOwnerInventory() == g_pMixInventory->GetInventoryCtrl())
+
+				if (g_ChangeRingMgr->CheckChangeRing(pPickedItem->GetItem()->Type))
 				{
-					int iSourceIndex = pPickedItem->GetSourceLinealPos();
-					int iTargetIndex = m_iPointedSlot;
+					ITEM* pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
+					ITEM* pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
 
-					SendRequestEquipmentItem(g_MixRecipeMgr.GetMixInventoryEquipmentIndex(), iSourceIndex, 
-						pItemObj, REQUEST_EQUIPMENT_INVENTORY, iTargetIndex);
-					
-					return true;
-				}
-				else if(pPickedItem->GetOwnerInventory() == g_pStorageInventory->GetInventoryCtrl())
-				{
-					int iSourceIndex = pPickedItem->GetSourceLinealPos();
-					int iTargetIndex = m_iPointedSlot;
-
-					g_pStorageInventory->SendRequestItemToMyInven(
-						pItemObj, iSourceIndex, iTargetIndex);
-
-					return true;
-				}
-				else if(pPickedItem->GetOwnerInventory() == g_pTrade->GetMyInvenCtrl())
-				{
-					int iSourceIndex = pPickedItem->GetSourceLinealPos();
-					int iTargetIndex = m_iPointedSlot;
-
-					g_pTrade->SendRequestItemToMyInven(
-						pItemObj, iSourceIndex, iTargetIndex);
-
-					return true;
-				}
-				else if(pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
-				{
-					int iSourceIndex = pPickedItem->GetSourceLinealPos();
-					int iTargetIndex = m_iPointedSlot;
-
-					SendRequestEquipmentItem(REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iSourceIndex, pItemObj, 
-						REQUEST_EQUIPMENT_INVENTORY, iTargetIndex);
-
-					return true;
-				}
- 				else if(pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT && EquipmentItem == false)
-				{
-					if(pPickedItem->GetSourceLinealPos() == m_iPointedSlot)
+					if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
 					{
+						g_pChatListBox->AddText("", GlobalText[3089], SEASON3B::TYPE_ERROR_MESSAGE);
 						CNewUIInventoryCtrl::BackupPickedItem();
+
+						ResetMouseLButton();
+						return false;
 					}
-					else
+				}
+
+				if (IsEquipable(m_iPointedSlot, pItemObj))
+				{
+					if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
 					{
-						int iSourceIndex = pItemObj->lineal_pos;
+						int iSourceIndex = pPickedItem->GetSourceLinealPos();
 						int iTargetIndex = m_iPointedSlot;
-						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex, 
+						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX + iSourceIndex,
 							pItemObj, REQUEST_EQUIPMENT_INVENTORY, iTargetIndex);
-						
+
+						return true;
+					}
+					else if (pPickedItem->GetOwnerInventory() == g_pMixInventory->GetInventoryCtrl())
+					{
+						int iSourceIndex = pPickedItem->GetSourceLinealPos();
+						int iTargetIndex = m_iPointedSlot;
+
+						SendRequestEquipmentItem(g_MixRecipeMgr.GetMixInventoryEquipmentIndex(), iSourceIndex,
+							pItemObj, REQUEST_EQUIPMENT_INVENTORY, iTargetIndex);
+
+						return true;
+					}
+					else if (pPickedItem->GetOwnerInventory() == g_pStorageInventory->GetInventoryCtrl())
+					{
+						int iSourceIndex = pPickedItem->GetSourceLinealPos();
+						int iTargetIndex = m_iPointedSlot;
+
+						g_pStorageInventory->SendRequestItemToMyInven(
+							pItemObj, iSourceIndex, iTargetIndex);
+
+						return true;
+					}
+					else if (pPickedItem->GetOwnerInventory() == g_pTrade->GetMyInvenCtrl())
+					{
+						int iSourceIndex = pPickedItem->GetSourceLinealPos();
+						int iTargetIndex = m_iPointedSlot;
+
+						g_pTrade->SendRequestItemToMyInven(
+							pItemObj, iSourceIndex, iTargetIndex);
+
+						return true;
+					}
+					else if (pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
+					{
+						int iSourceIndex = pPickedItem->GetSourceLinealPos();
+						int iTargetIndex = m_iPointedSlot;
+
+						SendRequestEquipmentItem(REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX + iSourceIndex, pItemObj,
+							REQUEST_EQUIPMENT_INVENTORY, iTargetIndex);
+
+						return true;
+					}
+					else if (pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT && EquipmentItem == false)
+					{
+						if (pPickedItem->GetSourceLinealPos() == m_iPointedSlot)
+						{
+							CNewUIInventoryCtrl::BackupPickedItem();
+						}
+						else
+						{
+							int iSourceIndex = pItemObj->lineal_pos;
+							int iTargetIndex = m_iPointedSlot;
+							SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex,
+								pItemObj, REQUEST_EQUIPMENT_INVENTORY, iTargetIndex);
+
+							return true;
+						}
+					}
+				}
+			}
+			else // pPickedItem == NULL
+			{
+				if (GetRepairMode() == REPAIR_MODE_ON)
+				{
+					ITEM* pEquippedItem = &CharacterMachine->Equipment[m_iPointedSlot];
+
+					if (pEquippedItem == NULL)
+					{
+						return true;
+					}
+
+					if (IsRepairBan(pEquippedItem) == true)
+					{
+						return true;
+					}
+
+					if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
+					{
+						SendRequestRepair(m_iPointedSlot, 0);
+					}
+					else if (m_bRepairEnableLevel == true)
+					{
+						SendRequestRepair(m_iPointedSlot, 1);
+					}
+
+					return true;
+				}
+				else
+				{
+					ITEM* pEquippedItem = &CharacterMachine->Equipment[m_iPointedSlot];
+					if (pEquippedItem->Type >= 0)
+					{
+						if (gMapManager.WorldActive == WD_10HEAVEN)
+						{
+							ITEM* pEquippedPetItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
+							bool bPicked = true;
+
+							if (m_iPointedSlot == EQUIPMENT_HELPER || m_iPointedSlot == EQUIPMENT_WING)
+							{
+								if (((m_iPointedSlot == EQUIPMENT_HELPER) && !gCharacterManager.IsEquipedWing()))
+								{
+									bPicked = false;
+								}
+								else if (((m_iPointedSlot == EQUIPMENT_WING) && !((pEquippedPetItem->Type == ITEM_HELPER + 3) || (pEquippedPetItem->Type == ITEM_HELPER + 4) || (pEquippedPetItem->Type == ITEM_HELPER + 37)))
+									)
+								{
+									bPicked = false;
+								}
+							}
+
+							if (bPicked == true)
+							{
+								if (CNewUIInventoryCtrl::CreatePickedItem(NULL, pEquippedItem))
+								{
+									UnequipItem(m_iPointedSlot);
+								}
+							}
+						}
+						else
+						{
+							if (CNewUIInventoryCtrl::CreatePickedItem(NULL, pEquippedItem))
+							{
+								UnequipItem(m_iPointedSlot);
+							}
+						}
+					}
+				}
+			}
+		}
+		if (IsRelease(VK_RBUTTON))
+		{
+			CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+
+			if (GetRepairMode() != REPAIR_MODE_ON && EquipmentItem == false
+				&& pPickedItem == NULL)
+			{
+				ResetMouseRButton();
+
+				ITEM* pEquippedItem = &CharacterMachine->Equipment[m_iPointedSlot];
+
+				if (pEquippedItem->Type >= 0)
+				{
+					int nDstIndex = FindEmptySlot(pEquippedItem);
+
+					if (-1 != nDstIndex)
+					{
+						if (CNewUIInventoryCtrl::CreatePickedItem(NULL, pEquippedItem))
+						{
+							CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+
+							UnequipItem(m_iPointedSlot);
+							pPickedItem->HidePickedItem();
+						}
+						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, m_iPointedSlot, pEquippedItem, REQUEST_EQUIPMENT_INVENTORY, nDstIndex + 12);
 						return true;
 					}
 				}
 			}
 		}
-		else // pPickedItem == NULL
-		{
-			if(GetRepairMode() == REPAIR_MODE_ON)
-			{
-				ITEM* pEquippedItem = &CharacterMachine->Equipment[m_iPointedSlot];
-				
-				if(pEquippedItem == NULL)
-				{
-					return true;
-				}
-
-				if(IsRepairBan(pEquippedItem) == true)
-				{
-					return true;
-				}
-
-				if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
-				{
-					SendRequestRepair(m_iPointedSlot, 0);
-				}
-				else if(m_bRepairEnableLevel == true)
-				{
-					SendRequestRepair(m_iPointedSlot, 1);
-				}
-				
-				return true;
-			}
-			else
-			{
-				ITEM* pEquippedItem = &CharacterMachine->Equipment[m_iPointedSlot];
-				if(pEquippedItem->Type >= 0)
-				{
-					if( gMapManager.WorldActive == WD_10HEAVEN )		
-					{
-						ITEM* pEquippedPetItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-						bool bPicked = true;
-
-						if( m_iPointedSlot == EQUIPMENT_HELPER || m_iPointedSlot == EQUIPMENT_WING )
-						{
-							if( ((m_iPointedSlot == EQUIPMENT_HELPER) && !gCharacterManager.IsEquipedWing()) )
-							{
-								bPicked = false;
-							}
-							else if( ((m_iPointedSlot == EQUIPMENT_WING) && !((pEquippedPetItem->Type == ITEM_HELPER+3)	|| (pEquippedPetItem->Type == ITEM_HELPER+4) || (pEquippedPetItem->Type == ITEM_HELPER+37)))
-								)
-							{
-								bPicked = false;
-							}
-						}
-						
-						if( bPicked == true )
-						{
-							if(CNewUIInventoryCtrl::CreatePickedItem(NULL, pEquippedItem))
-							{	
-								UnequipItem(m_iPointedSlot);
-							}
-						}
-					}
-					else 
-					{
-						if(CNewUIInventoryCtrl::CreatePickedItem(NULL, pEquippedItem))
-						{	
-							UnequipItem(m_iPointedSlot);
-						}
-					}
-				}
-			}
-
-		}
 	}
-
 	return false;
 }
 
 bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 {
-	if(CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
+	if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
 	{
 		return false;
 	}
 
 	CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-	if(m_pNewInventoryCtrl && pPickedItem && SEASON3B::IsRelease(VK_LBUTTON))
+	if (m_pNewInventoryCtrl && pPickedItem && SEASON3B::IsRelease(VK_LBUTTON))
 	{
 		ITEM* pPickItem = pPickedItem->GetItem();
-		if(pPickItem == NULL)
+		if (pPickItem == NULL)
 		{
 			return false;
 		}
-		if(pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
-		{	
+		if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
+		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 
-			if(pPickItem->Type == ITEM_POTION+13
-				|| pPickItem->Type == ITEM_POTION+14
-				|| pPickItem->Type == ITEM_POTION+16
-				|| pPickItem->Type == ITEM_POTION+42
-				|| pPickItem->Type == ITEM_POTION+43
-				|| pPickItem->Type == ITEM_POTION+44
+			if (pPickItem->Type == ITEM_POTION + 13
+				|| pPickItem->Type == ITEM_POTION + 14
+				|| pPickItem->Type == ITEM_POTION + 16
+				|| pPickItem->Type == ITEM_POTION + 42
+				|| pPickItem->Type == ITEM_POTION + 43
+				|| pPickItem->Type == ITEM_POTION + 44
 #ifdef LEM_ADD_LUCKYITEM
-				|| pPickItem->Type == ITEM_POTION+160
-				|| pPickItem->Type == ITEM_POTION+161
+				|| pPickItem->Type == ITEM_POTION + 160
+				|| pPickItem->Type == ITEM_POTION + 161
 #endif // LEM_ADD_LUCKYITEM
 				)
 			{
 				ITEM* pItem = m_pNewInventoryCtrl->FindItem(iTargetIndex);
-				if(pItem)
+				if (pItem)
 				{
 					int	iType = pItem->Type;
 					int	iLevel = (pItem->Level >> 3) & 15;
 					int	iDurability = pItem->Durability;
-					
+
 					bool bSuccess = true;
-					
-					if(iType > ITEM_WING+6
-						&& iType != ITEM_HELPER+30
-						&& !(iType >= ITEM_WING+36 && iType <= ITEM_WING+43)
-						&& !( ITEM_WING+130 <= iType && iType <= ITEM_WING+134 )
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-						&& !( iType >= ITEM_WING+49 && iType <= ITEM_WING+50 )
-						&& (iType != ITEM_WING+135)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-						)
-					{
-						bSuccess = false;
-					}
-					
-					if(iType==ITEM_BOW+7 || iType==ITEM_BOW+15)
+
+					if (iType > ITEM_WING + 6
+						&& iType != ITEM_HELPER + 30
+						&& !(iType >= ITEM_WING + 36 && iType <= ITEM_WING + 43)
+						&& !(ITEM_WING + 130 <= iType && iType <= ITEM_WING + 134)
+						&& !(iType >= ITEM_WING + 49 && iType <= ITEM_WING + 50)
+						&& (iType != ITEM_WING + 135))
 					{
 						bSuccess = false;
 					}
 
-					if((pPickItem->Type==ITEM_POTION+13 && iLevel >= 6) || (pPickItem->Type==ITEM_POTION+14 && iLevel >= 9)) 
+					if (iType == ITEM_BOW + 7 || iType == ITEM_BOW + 15)
 					{
 						bSuccess = false;
 					}
-					
-					if(pPickItem->Type == ITEM_POTION+13 && iType == ITEM_HELPER+37 && iDurability != 255)
+
+					if ((pPickItem->Type == ITEM_POTION + 13 && iLevel >= 6) || (pPickItem->Type == ITEM_POTION + 14 && iLevel >= 9))
+					{
+						bSuccess = false;
+					}
+
+					if (pPickItem->Type == ITEM_POTION + 13 && iType == ITEM_HELPER + 37 && iDurability != 255)
 					{
 						SEASON3B::CFenrirRepairMsgBox* pMsgBox = NULL;
 						SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CFenrirRepairMsgBoxLayout), &pMsgBox);
@@ -1604,62 +1618,62 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 
 						int iIndex = pItem->x + pItem->y * m_pNewInventoryCtrl->GetNumberOfColumn();
 						pMsgBox->SetTargetIndex(MAX_EQUIPMENT_INDEX + iIndex);
-						
+
 						pPickedItem->HidePickedItem();
 						return true;
 					}
-					
-					if(pPickItem->Type==ITEM_POTION+42 )
+
+					if (pPickItem->Type == ITEM_POTION + 42)
 					{
 						if (g_SocketItemMgr.IsSocketItem(pItem))
 						{
 							bSuccess = false;
 						}
 						else
-						if(pItem->Jewel_Of_Harmony_Option != 0  )
-						{
-							bSuccess = false;
-						}
-						else
-						{
-							StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType( static_cast<int>(pItem->Type) );
-							
-							if( strengthitem == SI_None )
+							if (pItem->Jewel_Of_Harmony_Option != 0)
 							{
 								bSuccess = false;
 							}
-						}
+							else
+							{
+								StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pItem->Type));
+
+								if (strengthitem == SI_None)
+								{
+									bSuccess = false;
+								}
+							}
 					}
-					
-					if(pPickItem->Type == ITEM_POTION+43 || pPickItem->Type == ITEM_POTION+44 )
+
+					if (pPickItem->Type == ITEM_POTION + 43 || pPickItem->Type == ITEM_POTION + 44)
 					{
 						if (g_SocketItemMgr.IsSocketItem(pItem))
 						{
 							bSuccess = false;
 						}
-						else if( pItem->Jewel_Of_Harmony_Option == 0 )
+						else if (pItem->Jewel_Of_Harmony_Option == 0)
 						{
 							bSuccess = false;
 						}
 					}
 
 #ifdef LEM_ADD_LUCKYITEM
-					if( Check_LuckyItem( pItem->Type ) )
+					if (Check_LuckyItem(pItem->Type))
 					{
-						bSuccess	= false;
-						if( pPickItem->Type == ITEM_POTION+161 )
+						bSuccess = false;
+						if (pPickItem->Type == ITEM_POTION + 161)
 						{
-							if(pItem->Jewel_Of_Harmony_Option == 0  )	bSuccess = true;
+							if (pItem->Jewel_Of_Harmony_Option == 0)	bSuccess = true;
 						}
-						else if( pPickItem->Type == ITEM_POTION+160 )
+						else if (pPickItem->Type == ITEM_POTION + 160)
 						{
-							if( pItem->Durability > 0)					bSuccess = true;
+							if (pItem->Durability > 0)					bSuccess = true;
 						}
 					}
 #endif // LEM_ADD_LUCKYITEM
-					
-					if(bSuccess)
-					{		
+
+					if (bSuccess)
+					{
 						int iTargetBaseIndex = m_pNewInventoryCtrl->FindBaseIndexByITEM(pItem);
 						SendRequestUse(iSourceIndex, MAX_EQUIPMENT_INDEX + iTargetBaseIndex);
 						PlayBuffer(SOUND_GET_ITEM01);
@@ -1667,189 +1681,185 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					}
 				}
 			}
-			else if(iTargetIndex != -1)
+			else if (iTargetIndex != -1)
 			{
 				ITEM* pItem = m_pNewInventoryCtrl->FindItem(iTargetIndex);
-				if(pItem)
+				if (pItem)
 				{
 					bool bOverlay = m_pNewInventoryCtrl->IsOverlayItem(pPickItem, pItem);
 
-					if(bOverlay)
+					if (bOverlay)
 					{
-						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex,	pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);
+						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX + iSourceIndex, pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX + iTargetIndex);
 					}
 				}
 			}
-			
-			if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
+
+			if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
-				if(pPickedItem->GetSourceLinealPos() != iTargetIndex)
+				if (pPickedItem->GetSourceLinealPos() != iTargetIndex)
 				{
-					SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex, pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);
+					SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX + iSourceIndex, pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX + iTargetIndex);
 				}
 				else
 				{
 					SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 				}
-				
+
 				return true;
 			}
 		}
-		else if(pPickedItem->GetOwnerInventory() == g_pStorageInventory->GetInventoryCtrl())
+		else if (pPickedItem->GetOwnerInventory() == g_pStorageInventory->GetInventoryCtrl())
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 			if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
-				g_pStorageInventory->SendRequestItemToMyInven(pPickItem, iSourceIndex, MAX_EQUIPMENT_INDEX+iTargetIndex);
+				g_pStorageInventory->SendRequestItemToMyInven(pPickItem, iSourceIndex, MAX_EQUIPMENT_INDEX + iTargetIndex);
 				return true;
 			}
 		}
-		else if(pPickedItem->GetOwnerInventory() == g_pTrade->GetMyInvenCtrl())
+		else if (pPickedItem->GetOwnerInventory() == g_pTrade->GetMyInvenCtrl())
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 			if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
-				g_pTrade->SendRequestItemToMyInven(pPickItem, iSourceIndex, MAX_EQUIPMENT_INDEX+iTargetIndex);
+				g_pTrade->SendRequestItemToMyInven(pPickItem, iSourceIndex, MAX_EQUIPMENT_INDEX + iTargetIndex);
 
 				return true;
 			}
 		}
 #ifdef LEM_ADD_LUCKYITEM
-		else if(pPickedItem->GetOwnerInventory() == g_pLuckyItemWnd->GetInventoryCtrl())
+		else if (pPickedItem->GetOwnerInventory() == g_pLuckyItemWnd->GetInventoryCtrl())
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
-			if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
+			if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
-				SendRequestEquipmentItem( g_pLuckyItemWnd->SetWndAction( eLuckyItem_Move ), iSourceIndex, 
-					pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);
+				SendRequestEquipmentItem(g_pLuckyItemWnd->SetWndAction(eLuckyItem_Move), iSourceIndex,
+					pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX + iTargetIndex);
 				return true;
 			}
 		}
 #endif // LEM_ADD_LUCKYITEM
-		else if(pPickedItem->GetOwnerInventory() == g_pMixInventory->GetInventoryCtrl())
+		else if (pPickedItem->GetOwnerInventory() == g_pMixInventory->GetInventoryCtrl())
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
-			if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
+			if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
-				SendRequestEquipmentItem(g_MixRecipeMgr.GetMixInventoryEquipmentIndex(), iSourceIndex, 
-					pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);
+				SendRequestEquipmentItem(g_MixRecipeMgr.GetMixInventoryEquipmentIndex(), iSourceIndex,
+					pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX + iTargetIndex);
 				return true;
 			}
 		}
-		else if(pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
+		else if (pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 
-			if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
+			if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
-				SendRequestEquipmentItem(REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iSourceIndex, 
-					pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);
+				SendRequestEquipmentItem(REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX + iSourceIndex,
+					pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX + iTargetIndex);
 				return true;
 			}
 		}
-		else if(pPickItem->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
+		else if (pPickItem->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
-			if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
+			if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pPickItem))
 			{
-				SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex, 
-					pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iTargetIndex);	
+				SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex,
+					pPickItem, REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX + iTargetIndex);
 				return true;
 			}
 		}
 	}
-	else if(m_pNewInventoryCtrl && GetRepairMode() == REPAIR_MODE_OFF && SEASON3B::IsPress(VK_RBUTTON))
+	else if (m_pNewInventoryCtrl && GetRepairMode() == REPAIR_MODE_OFF && SEASON3B::IsPress(VK_RBUTTON))
 	{
 		ResetMouseRButton();
 
-		if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
+		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
 		{
 			g_pStorageInventory->ProcessMyInvenItemAutoMove();
 		}
-		else if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
-			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)==false
-			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)==false
-			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DEVILSQUARE)==false
-			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE)==false
+		else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
+			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == false
+			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE) == false
+			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DEVILSQUARE) == false
+			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE) == false
 #ifdef LEM_ADD_LUCKYITEM
-			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)==false
+			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false
 #endif // LEM_ADD_LUCKYITEM
-			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)==false)
+			&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY) == false)
 		{
 			ITEM* pItem = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
-			if(pItem == NULL)
+			if (pItem == NULL)
 			{
 				return false;
 			}
 
-			int iIndex = pItem->x+pItem->y*m_pNewInventoryCtrl->GetNumberOfColumn();
-			if(pItem->Type == ITEM_POTION+10)
+			int iIndex = pItem->x + pItem->y * m_pNewInventoryCtrl->GetNumberOfColumn();
+			if (pItem->Type == ITEM_POTION + 10)
 			{
-				if ( !Teleport)
-				{	
+				if (!Teleport)
+				{
 					SendRequestUse(iIndex, 0);
 					return true;
 				}
 			}
 
-			if( (pItem->Type >= ITEM_POTION+0 && pItem->Type <= ITEM_POTION+9)
-			|| (pItem->Type==ITEM_POTION+20 && ((pItem->Level>>3)&15) == 0)
-			|| (pItem->Type>=ITEM_POTION+35 && pItem->Type <=ITEM_POTION+40)
-			||( pItem->Type>=ITEM_POTION+46 && pItem->Type<=ITEM_POTION+50 )
-			|| ( pItem->Type==ITEM_POTION+11 && ((pItem->Level>>3)&15)==14 )
-			|| ( pItem->Type>=ITEM_POTION+70 &&pItem->Type<=ITEM_POTION+71 )
-			|| ( pItem->Type>=ITEM_POTION+72 &&pItem->Type<=ITEM_POTION+77 )
-			|| pItem->Type==ITEM_HELPER+60
-			|| pItem->Type==ITEM_POTION+94
-			|| ( pItem->Type>=ITEM_POTION+85 && pItem->Type<=ITEM_POTION+87 )
-			|| ( pItem->Type>=ITEM_POTION+97 &&pItem->Type<=ITEM_POTION+98 )
-			|| pItem->Type == ITEM_HELPER+81
-			|| pItem->Type == ITEM_HELPER+82
-			|| pItem->Type == ITEM_POTION+133
-			)
+			if ((pItem->Type >= ITEM_POTION + 0 && pItem->Type <= ITEM_POTION + 9)
+				|| (pItem->Type == ITEM_POTION + 20 && ((pItem->Level >> 3) & 15) == 0)
+				|| (pItem->Type >= ITEM_POTION + 35 && pItem->Type <= ITEM_POTION + 40)
+				|| (pItem->Type >= ITEM_POTION + 46 && pItem->Type <= ITEM_POTION + 50)
+				|| (pItem->Type == ITEM_POTION + 11 && ((pItem->Level >> 3) & 15) == 14)
+				|| (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71)
+				|| (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77)
+				|| pItem->Type == ITEM_HELPER + 60
+				|| pItem->Type == ITEM_POTION + 94
+				|| (pItem->Type >= ITEM_POTION + 85 && pItem->Type <= ITEM_POTION + 87)
+				|| (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98)
+				|| pItem->Type == ITEM_HELPER + 81
+				|| pItem->Type == ITEM_HELPER + 82
+				|| pItem->Type == ITEM_POTION + 133
+				)
 			{
 				SendRequestUse(iIndex, 0);
 				return true;
 			}
-			else if( ( pItem->Type>=ITEM_POTION+78 && pItem->Type<=ITEM_POTION+82 ) )
+			else if ((pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82))
 			{
 				std::list<eBuffState> secretPotionbufflist;
-				secretPotionbufflist.push_back( eBuff_SecretPotion1 );
-				secretPotionbufflist.push_back( eBuff_SecretPotion2 );
-				secretPotionbufflist.push_back( eBuff_SecretPotion3 );
-				secretPotionbufflist.push_back( eBuff_SecretPotion4 );
-				secretPotionbufflist.push_back( eBuff_SecretPotion5 );
+				secretPotionbufflist.push_back(eBuff_SecretPotion1);
+				secretPotionbufflist.push_back(eBuff_SecretPotion2);
+				secretPotionbufflist.push_back(eBuff_SecretPotion3);
+				secretPotionbufflist.push_back(eBuff_SecretPotion4);
+				secretPotionbufflist.push_back(eBuff_SecretPotion5);
 
-				if( g_isCharacterBufflist( (&Hero->Object), secretPotionbufflist ) == eBuffNone ) {
+				if (g_isCharacterBufflist((&Hero->Object), secretPotionbufflist) == eBuffNone) {
 					SendRequestUse(iIndex, 0);
 					return true;
 				}
 				else {
-					SEASON3B::CreateOkMessageBox(GlobalText[2530], RGBA(255, 30, 0, 255) );
+					SEASON3B::CreateOkMessageBox(GlobalText[2530], RGBA(255, 30, 0, 255));
 				}
 			}
-			else if( ( pItem->Type>=ITEM_HELPER+54 && pItem->Type<=ITEM_HELPER+57 )	|| ( pItem->Type==ITEM_HELPER+58 && gCharacterManager.GetBaseClass( Hero->Class )==CLASS_DARK_LORD ) )
+			else if ((pItem->Type >= ITEM_HELPER + 54 && pItem->Type <= ITEM_HELPER + 57) || (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD))
 			{
 				bool result = true;
 				WORD point[5] = { 0, };
 
 				point[0] = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
 				point[1] = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-				point[2] = CharacterAttribute->Vitality   + CharacterAttribute->AddVitality;
-				point[3] = CharacterAttribute->Energy   + CharacterAttribute->AddEnergy;
-				point[4] = CharacterAttribute->Charisma   + CharacterAttribute->AddCharisma;
+				point[2] = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
+				point[3] = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
+				point[4] = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 				char nStat[MAX_CLASS][5] =
-#else //PBG_ADD_NEWCHAR_MONK
-				char nStat[6][5] =
-#endif //PBG_ADD_NEWCHAR_MONK
 				{
 					18, 18, 15, 30,	0,
 					28, 20, 25, 10,	0,
@@ -1857,18 +1867,16 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					26, 26, 26, 26,	0,
 					26, 20, 20, 15, 25,
 					21, 21, 18, 23,	0,
-#ifdef PBG_ADD_NEWCHAR_MONK
 					32, 27, 25, 20, 0,
-#endif //PBG_ADD_NEWCHAR_MONK
 				};
-				point[pItem->Type-(ITEM_HELPER+54)] -= nStat[gCharacterManager.GetBaseClass(Hero->Class)][pItem->Type-(ITEM_HELPER+54)];
+				point[pItem->Type - (ITEM_HELPER + 54)] -= nStat[gCharacterManager.GetBaseClass(Hero->Class)][pItem->Type - (ITEM_HELPER + 54)];
 
-				if(point[pItem->Type-(ITEM_HELPER+54)] < (pItem->Durability*10) ) 
+				if (point[pItem->Type - (ITEM_HELPER + 54)] < (pItem->Durability * 10))
 				{
 					result = false;
 				}
-				
-				if( result == false ) {
+
+				if (result == false) {
 					SetStandbyItemKey(pItem->Key);
 					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUsePartChargeFruitMsgBoxLayout));
 				}
@@ -1877,84 +1885,84 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-			else if( pItem->Type==ITEM_HELPER+58 && gCharacterManager.GetBaseClass( Hero->Class )!=CLASS_DARK_LORD )
+			else if (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
 			{
 				SEASON3B::CreateOkMessageBox(GlobalText[1905]);
-				return true;				
+				return true;
 			}
-			else if ( pItem->Type==ITEM_HELPER+29 )
+			else if (pItem->Type == ITEM_HELPER + 29)
 			{
-				if( true == IsUnitedMarketPlace() )
+				if (true == IsUnitedMarketPlace())
 				{
 					char	szOutputText[512];
-					sprintf( szOutputText, "%s %s", GlobalText[3014], GlobalText[3015] );
+					sprintf(szOutputText, "%s %s", GlobalText[3014], GlobalText[3015]);
 
 					SEASON3B::CreateOkMessageBox(szOutputText);
 					return true;
 				}
 
-				if(Hero->SafeZone == false)
+				if (Hero->SafeZone == false)
 				{
 					SEASON3B::CreateOkMessageBox(GlobalText[2330]);
 				}
 				else
 				{
-					SendRequestEventZoneOpenTime (4, ((pItem->Level>>3)&15));
+					SendRequestEventZoneOpenTime(4, ((pItem->Level >> 3) & 15));
 					SetStandbyItemKey(pItem->Key);
 					return true;
 				}
 			}
-			else if(pItem->Type == ITEM_HELPER+46)	
+			else if (pItem->Type == ITEM_HELPER + 46)
 			{
 				BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_DEVILSQUARE);
 				SendRequestEventZoneOpenTime(1, byPossibleLevel);
 			}
-			else if(pItem->Type == ITEM_HELPER+47)
+			else if (pItem->Type == ITEM_HELPER + 47)
 			{
 				BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_BLOODCASTLE);
 				SendRequestEventZoneOpenTime(2, byPossibleLevel);
 			}
-			else if(pItem->Type == ITEM_HELPER+48)
+			else if (pItem->Type == ITEM_HELPER + 48)
 			{
-				if(Hero->SafeZone || gMapManager.InHellas()) 
+				if (Hero->SafeZone || gMapManager.InHellas())
 				{
 					g_pChatListBox->AddText("", GlobalText[1238], SEASON3B::TYPE_ERROR_MESSAGE);
 				}
-				else 
+				else
 				{
 					SendRequestUse(iIndex, 0);
 				}
 			}
-			else if(pItem->Type == ITEM_HELPER+61)
+			else if (pItem->Type == ITEM_HELPER + 61)
 			{
 				BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_CURSEDTEMPLE);
 				SendRequestEventZoneOpenTime(5, byPossibleLevel);
 			}
-		
-			else if(pItem->Type == ITEM_HELPER+121)
+
+			else if (pItem->Type == ITEM_HELPER + 121)
 			{
-				if(Hero->SafeZone == false)
+				if (Hero->SafeZone == false)
 				{
 					SEASON3B::CreateOkMessageBox(GlobalText[2330]);
 				}
 				else
 				{
-					SendRequestEventZoneOpenTime (4, ((pItem->Level>>3)&15));
+					SendRequestEventZoneOpenTime(4, ((pItem->Level >> 3) & 15));
 					SetStandbyItemKey(pItem->Key);
 					return true;
 				}
 			}
-			else if( pItem->Type==ITEM_HELPER+51 )
+			else if (pItem->Type == ITEM_HELPER + 51)
 			{
-				SendRequestEventZoneOpenTime(5, ((pItem->Level>>3)&15));
+				SendRequestEventZoneOpenTime(5, ((pItem->Level >> 3) & 15));
 				return true;
 			}
-			else if(pItem->Type==ITEM_POTION+19)
+			else if (pItem->Type == ITEM_POTION + 19)
 			{
-				SendRequestEventZoneOpenTime(1, ((pItem->Level>>3)&15));
+				SendRequestEventZoneOpenTime(1, ((pItem->Level >> 3) & 15));
 				return true;
 			}
-			else if(pItem->Type==ITEM_HELPER+18)
+			else if (pItem->Type == ITEM_HELPER + 18)
 			{
 				if (pItem->Level == 0)
 				{
@@ -1962,52 +1970,52 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 				}
 				else
 				{
-					SendRequestEventZoneOpenTime(2, ((pItem->Level>>3)&15)-1);
+					SendRequestEventZoneOpenTime(2, ((pItem->Level >> 3) & 15) - 1);
 				}
 				return true;
 			}
-			else if( (pItem->Type >= ITEM_ETC+0 && pItem->Type < ITEM_ETC+MAX_ITEM_INDEX)
-				|| (pItem->Type >= ITEM_WING+7 && pItem->Type <= ITEM_WING+14)
-				|| (pItem->Type >= ITEM_WING+16 && pItem->Type <= ITEM_WING+19)
-				|| (pItem->Type == ITEM_WING+20)
-				|| (pItem->Type >= ITEM_WING+21 && pItem->Type <= ITEM_WING+24)
-				|| (pItem->Type == ITEM_WING+35)
-				|| (pItem->Type == ITEM_WING+44)
-				|| (pItem->Type == ITEM_WING+47)
-				|| (pItem->Type==ITEM_WING+46)
-				|| (pItem->Type==ITEM_WING+45)
-				|| (pItem->Type==ITEM_WING+48)
-				|| (pItem->Type == ITEM_ETC+29)
-				|| ( pItem->Type == ITEM_ETC+28)
+			else if ((pItem->Type >= ITEM_ETC + 0 && pItem->Type < ITEM_ETC + MAX_ITEM_INDEX)
+				|| (pItem->Type >= ITEM_WING + 7 && pItem->Type <= ITEM_WING + 14)
+				|| (pItem->Type >= ITEM_WING + 16 && pItem->Type <= ITEM_WING + 19)
+				|| (pItem->Type == ITEM_WING + 20)
+				|| (pItem->Type >= ITEM_WING + 21 && pItem->Type <= ITEM_WING + 24)
+				|| (pItem->Type == ITEM_WING + 35)
+				|| (pItem->Type == ITEM_WING + 44)
+				|| (pItem->Type == ITEM_WING + 47)
+				|| (pItem->Type == ITEM_WING + 46)
+				|| (pItem->Type == ITEM_WING + 45)
+				|| (pItem->Type == ITEM_WING + 48)
+				|| (pItem->Type == ITEM_ETC + 29)
+				|| (pItem->Type == ITEM_ETC + 28)
 				)
 			{
 				bool bReadBookGem = true;
 
-				if ( (pItem->Type==ITEM_ETC+18)
-					|| (pItem->Type == ITEM_ETC+28)	
-					|| pItem->Type == ITEM_WING+45
-					|| (pItem->Type == ITEM_WING+46)
-					|| (pItem->Type == ITEM_WING+44)
+				if ((pItem->Type == ITEM_ETC + 18)
+					|| (pItem->Type == ITEM_ETC + 28)
+					|| pItem->Type == ITEM_WING + 45
+					|| (pItem->Type == ITEM_WING + 46)
+					|| (pItem->Type == ITEM_WING + 44)
 					)
 				{
-					if ( g_csQuest.getQuestState2( QUEST_CHANGE_UP_3 )!=QUEST_END )
-					
+					if (g_csQuest.getQuestState2(QUEST_CHANGE_UP_3) != QUEST_END)
+
 						bReadBookGem = false;
 				}
-				if(pItem->Type == ITEM_WING+48)
+				if (pItem->Type == ITEM_WING + 48)
 				{
 					int Level = CharacterAttribute->Level;
-					if( Level<220 )
+					if (Level < 220)
 						bReadBookGem = false;
 				}
-				if ( bReadBookGem )
+				if (bReadBookGem)
 				{
-					
+
 					WORD Strength, Energy;
 					Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-					Energy	 = CharacterAttribute->Energy   + CharacterAttribute->AddEnergy;  
-					
-					if(CharacterAttribute->Level >= ItemAttribute[pItem->Type].RequireLevel &&
+					Energy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
+
+					if (CharacterAttribute->Level >= ItemAttribute[pItem->Type].RequireLevel &&
 						Energy >= pItem->RequireEnergy &&
 						Strength >= pItem->RequireStrength)
 					{
@@ -2017,25 +2025,25 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-			else if ( pItem->Type==ITEM_HELPER+15)
+			else if (pItem->Type == ITEM_HELPER + 15)
 			{
 				int Level = CharacterAttribute->Level;
-				
-				if( Level>=10 )	
+
+				if (Level >= 10)
 				{
-					bool bEquipmentEmpty = true;	
-					for(int i=0; i<MAX_EQUIPMENT; i++)
+					bool bEquipmentEmpty = true;
+					for (int i = 0; i < MAX_EQUIPMENT; i++)
 					{
-						if(CharacterMachine->Equipment[i].Type != -1)
+						if (CharacterMachine->Equipment[i].Type != -1)
 						{
 							bEquipmentEmpty = false;
 						}
 					}
 					int Class = CharacterAttribute->Class;
-					
-					if(bEquipmentEmpty == true)
+
+					if (bEquipmentEmpty == true)
 					{
-						if(pItem->Level == 32)
+						if (pItem->Level == 32)
 						{
 							if (gCharacterManager.GetBaseClass(Class) != CLASS_DARK_LORD)
 							{
@@ -2059,17 +2067,17 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-			else if( pItem->Type==ITEM_HELPER+11)
+			else if (pItem->Type == ITEM_HELPER + 11)
 			{
 				bool bUse = false;
-				int  Level = (pItem->Level>>3)&15;
-				switch ( Level )
+				int  Level = (pItem->Level >> 3) & 15;
+				switch (Level)
 				{
 				case 0:
 					bUse = true;
 					break;
 				case 1:
-					if ( Hero->GuildStatus!=G_MASTER )
+					if (Hero->GuildStatus != G_MASTER)
 						bUse = true;
 					break;
 				}
@@ -2079,7 +2087,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					return true;
 				}
 			}
-			else if( pItem->Type==ITEM_HELPER+69 )
+			else if (pItem->Type == ITEM_HELPER + 69)
 			{
 				if (g_PortalMgr.IsRevivePositionSaved())
 				{
@@ -2094,7 +2102,7 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					}
 				}
 			}
-			else if( pItem->Type==ITEM_HELPER+70)
+			else if (pItem->Type == ITEM_HELPER + 70)
 			{
 				if (g_PortalMgr.IsPortalUsable())
 				{
@@ -2121,54 +2129,113 @@ bool SEASON3B::CNewUIMyInventory::InventoryProcess()
 					SEASON3B::CreateOkMessageBox(GlobalText[2608]);
 				}
 			}
-			else if( pItem->Type == ITEM_HELPER + 66 )
+			else if (pItem->Type == ITEM_HELPER + 66)
 			{
 				SetStandbyItemKey(pItem->Key);
 				SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseSantaInvitationMsgBoxLayout));
 			}
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-			else if(g_pMyInventory->IsInvenItem(pItem->Type))
+			else if (g_pMyInventory->IsInvenItem(pItem->Type))
 			{
 #ifdef LJH_FIX_APP_SHUTDOWN_WEQUIPPING_INVENITEM_WITH_CLICKING_MOUSELBTN
 				if (MouseLButton || MouseLButtonPop || MouseLButtonPush)
 					return false;
 #endif //LJH_FIX_APP_SHUTDOWN_WEQUIPPING_INVENITEM_WITH_CLICKING_MOUSELBTN
-				if (pItem->Durability == 0) 
-					return false; 
+				if (pItem->Durability == 0)
+					return false;
 
 				int iChangeInvenItemStatus = 0;
 				(pItem->Durability == 255) ? iChangeInvenItemStatus = 254 : iChangeInvenItemStatus = 255;
 
-				SendRequestEquippingInventoryItem(MAX_EQUIPMENT_INDEX+iIndex, iChangeInvenItemStatus);
+				SendRequestEquippingInventoryItem(MAX_EQUIPMENT_INDEX + iIndex, iChangeInvenItemStatus);
 			}
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
+			//-- Equip item
+			if (EquipmentItem == false)
+			{
+				int iSrcIndex = iIndex;
+
+				ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
+
+				int nDstIndex = pItemAttr->m_byItemSlot;
+
+				if (nDstIndex >= 0 && nDstIndex < 12)
+				{
+					ITEM* pEquipment = &CharacterMachine->Equipment[nDstIndex];
+
+					if (pEquipment && pEquipment->Type != -1)
+					{
+						if (nDstIndex == EQUIPMENT_WEAPON_RIGHT)
+						{
+							if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK
+								|| gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
+							{
+								if (!pItemAttr->TwoHand)
+								{
+									nDstIndex = EQUIPMENT_WEAPON_LEFT;
+									pEquipment = &CharacterMachine->Equipment[nDstIndex];
+
+									if (!(pEquipment && pEquipment->Type != -1))
+									{
+										goto LABEL_32;
+									}
+								}
+							}
+						}
+						else if (nDstIndex == EQUIPMENT_RING_RIGHT)
+						{
+							nDstIndex = EQUIPMENT_RING_LEFT;
+							pEquipment = &CharacterMachine->Equipment[nDstIndex];
+
+							if (!(pEquipment && pEquipment->Type != -1))
+							{
+								goto LABEL_32;
+							}
+						}
+						return true;
+					}
+				LABEL_32:
+					if (IsEquipable(nDstIndex, pItem))
+					{
+						if (CNewUIInventoryCtrl::CreatePickedItem(NULL, pItem))
+						{
+							m_pNewInventoryCtrl->RemoveItem(pItem);
+
+							CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+							pPickedItem->HidePickedItem();
+						}
+						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSrcIndex + MAX_EQUIPMENT_INDEX, pItem, REQUEST_EQUIPMENT_INVENTORY, nDstIndex);
+					}
+				}
+				return true;
+			}
 		}
 	}
-	else if(m_pNewInventoryCtrl && GetRepairMode() == REPAIR_MODE_ON && SEASON3B::IsPress(VK_LBUTTON))
+	else if (m_pNewInventoryCtrl && GetRepairMode() == REPAIR_MODE_ON && SEASON3B::IsPress(VK_LBUTTON))
 	{
 		ITEM* pItem = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
-		if(pItem == NULL)
+		if (pItem == NULL)
 		{
 			return false;
 		}
 
-		if(IsRepairBan(pItem) == true)
+		if (IsRepairBan(pItem) == true)
 		{
 			return false;
 		}
 
-		int iIndex = MAX_EQUIPMENT + pItem->x+pItem->y*m_pNewInventoryCtrl->GetNumberOfColumn();
-		
-		if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
+		int iIndex = MAX_EQUIPMENT + pItem->x + pItem->y * m_pNewInventoryCtrl->GetNumberOfColumn();
+
+		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
 		{
 			SendRequestRepair(iIndex, 0);
 		}
-		else if(m_bRepairEnableLevel == true)
+		else if (m_bRepairEnableLevel == true)
 		{
 			SendRequestRepair(iIndex, 1);
 		}
-		
+
 		return true;
 	}
 

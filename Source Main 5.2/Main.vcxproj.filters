@@ -1042,9 +1042,6 @@
     <ClCompile Include="source\ItemManager.cpp">
       <Filter>MU\Item</Filter>
     </ClCompile>
-    <ClCompile Include="source\WSctlc.cpp">
-      <Filter>MU\Network</Filter>
-    </ClCompile>
     <ClCompile Include="source\MoveCommandData.cpp">
       <Filter>MU\Map</Filter>
     </ClCompile>
@@ -1453,9 +1450,6 @@
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\SideHair.h">
-      <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\SimpleModulus.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Singleton.h">
@@ -2049,9 +2043,6 @@
     <ClInclude Include="source\SkillManager.h">
       <Filter>MU\Skill</Filter>
     </ClInclude>
-    <ClInclude Include="source\ProtocolAsio.h">
-      <Filter>MU\Network</Filter>
-    </ClInclude>
     <ClInclude Include="source\CharacterManager.h">
       <Filter>MU\Character</Filter>
     </ClInclude>
@@ -2081,12 +2072,6 @@
     </ClInclude>
     <ClInclude Include="source\ItemManager.h">
       <Filter>MU\Item</Filter>
-    </ClInclude>
-    <ClInclude Include="source\wsctlc.h">
-      <Filter>MU\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="source\wsctlc_addon.h">
-      <Filter>MU\Network</Filter>
     </ClInclude>
     <ClInclude Include="source\MoveCommandData.h">
       <Filter>MU\Map</Filter>

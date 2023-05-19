@@ -251,10 +251,7 @@ void CNewUINPCQuest::RenderText()
 
 	g_pRenderText->SetTextColor(150, 255, 240, 255);
 	if ((Hero->Class == CLASS_DARK_LORD || Hero->Class == CLASS_DARK
-#ifdef PBG_ADD_NEWCHAR_MONK
-		|| Hero->Class == CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-		)
+		|| Hero->Class == CLASS_RAGEFIGHTER)
 		&& bCheckNPC)
 		g_pRenderText->RenderText(m_Pos.x, m_Pos.y+16,
 			g_csQuest.GetNPCName(2), NPCQUEST_WIDTH, 0, RT3_SORT_CENTER);
@@ -265,10 +262,7 @@ void CNewUINPCQuest::RenderText()
 
 	g_pRenderText->SetTextColor(200, 220, 255, 255);
 	if ((Hero->Class != CLASS_DARK_LORD && Hero->Class != CLASS_DARK
-#ifdef PBG_ADD_NEWCHAR_MONK
-		&& Hero->Class != CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-		)
+		&& Hero->Class != CLASS_RAGEFIGHTER)
 		|| !bCheckNPC)
 		g_pRenderText->RenderText(m_Pos.x, m_Pos.y+29,
 			g_csQuest.getQuestTitle(), NPCQUEST_WIDTH, 0, RT3_SORT_CENTER);

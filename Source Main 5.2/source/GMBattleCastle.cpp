@@ -27,10 +27,10 @@ extern  int     WaterTextureNumber;
 extern  char*   g_lpszMp3[NUM_MUSIC];
 
 extern int TextNum;
-extern char TextList[30][100];
-extern int  TextListColor[30];
-extern int  TextBold[30];
-extern SIZE Size[30];
+extern char TextList[50][100];
+extern int  TextListColor[50];
+extern int  TextBold[50];
+extern SIZE Size[50];
 
 namespace battleCastle
 {

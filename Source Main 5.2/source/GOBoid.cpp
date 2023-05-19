@@ -193,10 +193,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 
             if((o->Owner->CurrentAction >= PLAYER_FENRIR_ATTACK && o->Owner->CurrentAction <= PLAYER_FENRIR_ATTACK_BOW)
 				|| IsAliceRideAction_Fenrir(o->Owner->CurrentAction) == true
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-				|| o->Owner->CurrentAction == PLAYER_RAGE_FENRIR_ATTACK_RIGHT
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-				)
+				|| o->Owner->CurrentAction == PLAYER_RAGE_FENRIR_ATTACK_RIGHT)
             {
                 SetAction(o, FENRIR_ATTACK);
         		o->Velocity = 0.4f;
@@ -221,7 +218,6 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 				SetAction(o, FENRIR_STAND);
 				o->Velocity = 0.4f;
 			}
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 			else if(o->Owner->CurrentAction >= PLAYER_RAGE_FENRIR_DAMAGE && o->Owner->CurrentAction <= PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT)
 			{
 				SetAction(o, FENRIR_DAMAGE);
@@ -242,7 +238,6 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 				SetAction(o, FENRIR_STAND);
 				o->Velocity = 0.4f;
 			}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 			else
 			{
 				if(o->Owner->CurrentAction >= PLAYER_FENRIR_WALK && o->Owner->CurrentAction <= PLAYER_FENRIR_WALK_ONE_LEFT)
@@ -255,7 +250,6 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 					SetAction(o, FENRIR_RUN);
 					o->Velocity = 0.6f;	
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 				else if(o->Owner->CurrentAction >=PLAYER_RAGE_FENRIR_RUN && o->Owner->CurrentAction <=PLAYER_RAGE_FENRIR_RUN_ONE_LEFT)
 				{
 					SetAction(o, FENRIR_RUN);
@@ -266,7 +260,6 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 					SetAction(o, FENRIR_WALK);
 					o->Velocity = 1.0f;				
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 
 				Vector ( 1.f, 1.f, 1.f, Light );
                 if ( gMapManager.WorldActive==WD_10HEAVEN )
@@ -520,10 +513,7 @@ bool MoveBug ( OBJECT* o, bool bForceRender )
 			VectorCopy ( o->Owner->Angle,o->Angle );
 			if (   o->Owner->CurrentAction>=PLAYER_WALK_MALE && o->Owner->CurrentAction<=PLAYER_RUN_RIDE_WEAPON
                 || o->Owner->CurrentAction==PLAYER_FLY_RIDE  || o->Owner->CurrentAction==PLAYER_FLY_RIDE_WEAPON 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-				|| o->Owner->CurrentAction==PLAYER_RAGE_UNI_RUN || o->Owner->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-               )
+				|| o->Owner->CurrentAction==PLAYER_RAGE_UNI_RUN || o->Owner->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT )
 			{
                 //  페가수스.
                 if ( o->Type==MODEL_PEGASUS )

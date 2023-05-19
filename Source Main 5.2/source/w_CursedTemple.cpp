@@ -29,8 +29,8 @@ extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 
 extern int TextNum;
-extern char TextList[30][100];
-extern int  TextListColor[30];
+extern char TextList[50][100];
+extern int  TextListColor[50];
 extern char* g_lpszMp3[NUM_MUSIC];
 
 using namespace SEASON3A;

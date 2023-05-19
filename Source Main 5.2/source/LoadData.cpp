@@ -58,27 +58,30 @@ void CLoadData::OpenTexture(int Model,char *SubFolder, int Wrap, int Type,bool C
 		
 		char __ext[_MAX_EXT] = {0, };
 		_splitpath(pTexture->FileName, NULL, NULL, NULL, __ext);
-		if(pTexture->FileName[0]=='s' && pTexture->FileName[1]=='k' && pTexture->FileName[2]=='i')
+		if (pTexture->FileName[0] == 's' && pTexture->FileName[1] == 'k' && pTexture->FileName[2] == 'i')
+		{
 			pModel->IndexTexture[i] = BITMAP_SKIN;
-#ifdef PBG_ADD_NEWCHAR_MONK
+		}
 		else if(!strnicmp(pTexture->FileName, "level", 5))
 		{
 			pModel->IndexTexture[i] = BITMAP_SKIN;
 		}
-#else //PBG_ADD_NEWCHAR_MONK
-		else if(pTexture->FileName[0]=='l' && pTexture->FileName[1]=='e' && pTexture->FileName[2]=='v' &&
-			pTexture->FileName[3]=='e' && pTexture->FileName[4]=='l')
-			pModel->IndexTexture[i] = BITMAP_SKIN;
-#endif //PBG_ADD_NEWCHAR_MONK
-		else if(pTexture->FileName[0]=='h' && pTexture->FileName[1]=='i' && pTexture->FileName[2]=='d')
+		else if (pTexture->FileName[0] == 'h' && pTexture->FileName[1] == 'i' && pTexture->FileName[2] == 'd')
+		{
 			pModel->IndexTexture[i] = BITMAP_HIDE;
-		else if (pTexture->FileName[0]=='h' && pTexture->FileName[1]=='a' && pTexture->FileName[2]=='i' && 
-			pTexture->FileName[3]=='r' )
+		}
+		else if (pTexture->FileName[0]=='h' && pTexture->FileName[1]=='a' && pTexture->FileName[2]=='i' && pTexture->FileName[3] == 'r')
+		{
 			pModel->IndexTexture[i] = BITMAP_HAIR;
-		else if(tolower(__ext[1])=='t')
-			pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath,GL_NEAREST,Wrap);
-		else if(tolower(__ext[1])=='j')
-			pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath,Type,Wrap);
+		}
+		else if (tolower(__ext[1]) == 't')
+		{
+			pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath, GL_NEAREST, Wrap);
+		}
+		else if (tolower(__ext[1]) == 'j')
+		{
+			pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath, Type, Wrap);
+		}
 
 		if(pModel->IndexTexture[i] == BITMAP_UNKNOWN)
 		{

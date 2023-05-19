@@ -197,13 +197,8 @@ public:
 	char          Skin;
 	bool          HideSkin;
     float         Velocity;
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 	unsigned short CurrentAction;
 	unsigned short PriorAction;
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-	unsigned char CurrentAction;
-	unsigned char PriorAction;
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 	float         CurrentAnimation;
 	short         CurrentAnimationFrame;
 	short         Sounds[MAX_MONSTER_SOUND];
@@ -240,20 +235,10 @@ public:
     void CreateBoundingBox();
 
     //transform
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 	bool PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigned short *PriorAction,float Speed,vec3_t Origin,vec3_t Angle);
     void Animation(float (*BoneTransform)[3][4],float AnimationFrame,float PriorAnimationFrame,unsigned short PriorAction,vec3_t Angle,vec3_t HeadAngle,bool Parent=false,bool Translate=true);
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-    bool PlayAnimation(float *AnimationFrame,float *PriorAnimationFrame,unsigned char *PriorAction,float Speed,vec3_t Origin,vec3_t Angle);
-    void Animation(float (*BoneTransform)[3][4],float AnimationFrame,float PriorAnimationFrame,unsigned char PriorAction,vec3_t Angle,vec3_t HeadAngle,bool Parent=false,bool Translate=true);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	void InterpolationTrans(float (*Mat1)[4], float (*TransMat2)[4], float _Scale);
 	void Transform(float (*BoneMatrix)[3][4],vec3_t BoundingBoxMin,vec3_t BoundingBoxMax,OBB_t *OBB,bool Translate=false, float _Scale = 0.0f);
-#else //PBG_ADD_NEWCHAR_MONK_ITEM
-	void Transform(float (*BoneMatrix)[3][4],vec3_t BoundingBoxMin,vec3_t BoundingBoxMax,OBB_t *OBB,bool Translate=false);
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-
 	void TransformByObjectBone(vec3_t vResultPosition, OBJECT * pObject, int iBoneNumber, vec3_t vRelativePosition = NULL);
 	// (vResultPosition = (pObject->BoneTransform[iBoneNumber] * vRelativePosition) + pObject->Position)
 	void TransformByBoneMatrix(vec3_t vResultPosition, float (*BoneMatrix)[4], vec3_t vWorldPosition = NULL, vec3_t vRelativePosition = NULL);

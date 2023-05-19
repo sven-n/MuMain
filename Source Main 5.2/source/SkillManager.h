@@ -150,6 +150,7 @@ enum ActionSkillType
 	AT_SKILL_HP_UP_OURFORCES = 267,		// Rage fighter
 	AT_SKILL_DEF_UP_OURFORCES = 268,	// Rage fighter
 	AT_SKILL_OCCUPY = 269,				// Rage fighter
+	AT_SKILL_PHOENIX_SHOT = 270,		// Rage fighter
 	AT_SKILL_ATTACK_RATEUP		= 300,
 	AT_SKILL_TOMAN_ATTACKUP		= AT_SKILL_ATTACK_RATEUP + 5,
 	AT_SKILL_TOMAN_DEFENCEUP	= AT_SKILL_TOMAN_ATTACKUP + 5,
@@ -206,7 +207,7 @@ enum ActionSkillType
 typedef struct DemendConditionInfo
 {
 	WORD SkillType;
-//	char SkillName[100];
+    char SkillName[100];
 	WORD SkillLevel;
 	WORD SkillStrength;
 	WORD SkillDexterity;
@@ -217,7 +218,7 @@ typedef struct DemendConditionInfo
 	DemendConditionInfo() : SkillType( 0 ), SkillLevel( 0 ), SkillStrength( 0 ),
 		SkillDexterity( 0 ), SkillVitality( 0 ), SkillEnergy( 0 ), SkillCharisma( 0 )
 	{
-//		ZeroMemory( SkillName, 100 );
+    ZeroMemory( SkillName, 100 );
 	}
 	BOOL operator<=(const DemendConditionInfo& rhs) const
 	{

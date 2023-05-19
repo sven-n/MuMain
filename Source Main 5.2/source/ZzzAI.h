@@ -32,10 +32,5 @@ void SetAction_Fenrir_Skill(CHARACTER* c, OBJECT* o);
 void SetAction_Fenrir_Damage(CHARACTER* c, OBJECT* o);
 void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o);
 void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 bool IsAliceRideAction_UniDino(unsigned short byAction);
 bool IsAliceRideAction_Fenrir(unsigned short byAction);
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-bool IsAliceRideAction_UniDino(BYTE byAction);
-bool IsAliceRideAction_Fenrir(BYTE byAction);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI

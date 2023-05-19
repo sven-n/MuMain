@@ -139,13 +139,8 @@ public:
 
 public:
 	unsigned char AI;
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI	
 	unsigned short CurrentAction;
 	unsigned short PriorAction;
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-	unsigned char CurrentAction;
-	unsigned char PriorAction;
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 
 public:
 	BYTE          ExtState;

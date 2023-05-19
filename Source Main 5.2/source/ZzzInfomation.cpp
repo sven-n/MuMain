@@ -581,11 +581,8 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		|| ip->Type==ITEM_MACE+13
 		|| ip->Type == ITEM_HELPER+30
 		|| ( ITEM_WING+130 <= ip->Type && ip->Type <= ITEM_WING+134 )
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (ip->Type >= ITEM_WING+49 && ip->Type <= ITEM_WING+50)
-		|| (ip->Type == ITEM_WING+135)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		) 
+		|| (ip->Type == ITEM_WING+135)) 
     {
         excel = 0;
     }
@@ -733,13 +730,13 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		default: break;
 		};
 	}
-#ifdef PBG_MOD_NEWCHAR_MONK_WING_2
+
 	if(ip->Type==ITEM_HELPER+30)
 	{
 		p->Defense = 15;
 		ip->Defense = 15;
 	}
-#endif //PBG_MOD_NEWCHAR_MONK_WING_2
+
 	if ( p->Defense>0 )
 	{
 		if(ip->Type>=ITEM_SHIELD && ip->Type<ITEM_SHIELD+MAX_ITEM_INDEX)
@@ -767,18 +764,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
                 ip->Defense     += (min(9,Level)*2);	// ~ +9
             }
             else if ( ip->Type==ITEM_HELPER+30 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-				|| ip->Type==ITEM_WING+49
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				)
+				|| ip->Type==ITEM_WING+49)
             {
                 ip->Defense     += ( min( 9, Level )*2 );	// ~ +9
             }
 			else if ((ip->Type >= ITEM_WING+36 && ip->Type <= ITEM_WING+40) || ip->Type == ITEM_WING+43
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-				|| (ip->Type == ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				)
+				|| (ip->Type == ITEM_WING+50))
 			{
                 ip->Defense     += (min(9,Level)*4);	// ~ +9
 			}
@@ -787,10 +778,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
                 ip->Defense     += (min(9,Level)*3);	// ~ +9
             }
 			if ((ip->Type >= ITEM_WING+36 && ip->Type <= ITEM_WING+40) || ip->Type == ITEM_WING+43
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-				|| ip->Type == ITEM_WING+50
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				)
+				|| ip->Type == ITEM_WING+50)
 			{
 				switch(Level - 9)
 				{
@@ -801,7 +789,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 				case 2: ip->Defense += 6;break;	// +11
 				case 1: ip->Defense += 5;break;	// +10
 				default: break;
-				};
+				}
 			}
 			else
 			{
@@ -814,7 +802,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 				case 2: ip->Defense += 5;break;	// +11
 				case 1: ip->Defense += 4;break;	// +10
 				default: break;
-				};
+				}
 			}
 		}
 	}
@@ -847,16 +835,11 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		|| (ip->Type == ITEM_HELPER+37)
 		|| (ip->Type >= ITEM_WING+7 && ip->Type <= ITEM_WING+40)
 		|| (ip->Type >= ITEM_WING+43 && ip->Type < ITEM_HELPER)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		&& (ip->Type != ITEM_WING+49)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		))
+		&& (ip->Type != ITEM_WING+49)))
 		ip->RequireLevel = p->RequireLevel;
 	else if (p->RequireLevel && ((ip->Type >= ITEM_WING && ip->Type <= ITEM_WING+7)
 		|| (ip->Type >= ITEM_WING+41 && ip->Type <= ITEM_WING+42)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (ip->Type == ITEM_WING+49)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		|| ip->Type >= ITEM_HELPER))
      	ip->RequireLevel = p->RequireLevel+Level*addValue;
 	else
@@ -997,41 +980,38 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         }
     }
     else if ( ip->Type==ITEM_HELPER+30 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			|| ip->Type==ITEM_WING+49
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)
+			|| ip->Type==ITEM_WING+49)
     {
-#ifndef PBG_MOD_NEWCHAR_MONK_WING_2
-
-		int Cal = 0;
-		if(Level <= 9)
-			Cal = Level;
-		else
-			Cal = 9;
-		ip->SpecialValue[ip->SpecialNum] = 15+Cal*2;
-		switch(Level - 9)
-		{
-		case 6: ip->SpecialValue[ip->SpecialNum] += 9; break;	// +15
-		case 5: ip->SpecialValue[ip->SpecialNum] += 8; break;	// +14
-		case 4: ip->SpecialValue[ip->SpecialNum] += 7; break;	// +13
-		case 3: ip->SpecialValue[ip->SpecialNum] += 6; break;	// +12
-		case 2: ip->SpecialValue[ip->SpecialNum] += 5; break;	// +11
-		case 1: ip->SpecialValue[ip->SpecialNum] += 4; break;	// +10
-		default: break;
-		};
-#ifdef PBG_MOD_NEWCHAR_MONK_WING
-		if(ip->Type!=ITEM_WING+49)
-		{
-#endif //PBG_MOD_NEWCHAR_MONK_WING
-		ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_DEFENCE; ip->SpecialNum++;
-#ifdef PBG_MOD_NEWCHAR_MONK_WING
-		}
-#endif //PBG_MOD_NEWCHAR_MONK_WING
-
-		ip->SpecialValue[ip->SpecialNum] = 20+Level*2;
-		ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_DAMAGE; ip->SpecialNum++;
-#endif //PBG_MOD_NEWCHAR_MONK_WING_2
+//#ifndef PBG_MOD_NEWCHAR_MONK_WING_2
+//
+//		int Cal = 0;
+//		if(Level <= 9)
+//			Cal = Level;
+//		else
+//			Cal = 9;
+//		ip->SpecialValue[ip->SpecialNum] = 15+Cal*2;
+//		switch(Level - 9)
+//		{
+//		case 6: ip->SpecialValue[ip->SpecialNum] += 9; break;	// +15
+//		case 5: ip->SpecialValue[ip->SpecialNum] += 8; break;	// +14
+//		case 4: ip->SpecialValue[ip->SpecialNum] += 7; break;	// +13
+//		case 3: ip->SpecialValue[ip->SpecialNum] += 6; break;	// +12
+//		case 2: ip->SpecialValue[ip->SpecialNum] += 5; break;	// +11
+//		case 1: ip->SpecialValue[ip->SpecialNum] += 4; break;	// +10
+//		default: break;
+//		};
+//#ifdef PBG_MOD_NEWCHAR_MONK_WING
+//		if(ip->Type!=ITEM_WING+49)
+//		{
+//#endif //PBG_MOD_NEWCHAR_MONK_WING
+//		ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_DEFENCE; ip->SpecialNum++;
+//#ifdef PBG_MOD_NEWCHAR_MONK_WING
+//		}
+//#endif //PBG_MOD_NEWCHAR_MONK_WING
+//
+//		ip->SpecialValue[ip->SpecialNum] = 20+Level*2;
+//		ip->Special[ip->SpecialNum] = AT_SET_OPTION_IMPROVE_DAMAGE; ip->SpecialNum++;
+//#endif //PBG_MOD_NEWCHAR_MONK_WING_2
         if ( excelWing&0x01 )
         {
 			ip->SpecialValue[ip->SpecialNum] = 50+Level*5;
@@ -1051,9 +1031,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         }
         
         if ( (excelWing>>3)&0x01 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			&& (ip->Type != ITEM_WING+49)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 			)
         {
 		    ip->SpecialValue[ip->SpecialNum] = 10+Level*5;
@@ -1061,10 +1039,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
         }
     }
 	else if ((ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40) || ip->Type == ITEM_WING+43
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			|| (ip->Type == ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+			|| (ip->Type == ITEM_WING+50))
     {
         if ( excelWing&0x01 )
         {
@@ -1089,17 +1064,9 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
     }
 	if((Attribute1>>7)&1)
 	{        
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		if ( p->m_wSkillIndex!=0 )
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-        if ( p->m_bySkillIndex!=0 )
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
         {
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			ip->Special[ip->SpecialNum] = p->m_wSkillIndex; ip->SpecialNum++;
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-            ip->Special[ip->SpecialNum] = p->m_bySkillIndex; ip->SpecialNum++;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
         }
     }
 	if((Attribute1>>2)&1)
@@ -1116,18 +1083,12 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
    			ip->Special[ip->SpecialNum] = AT_LUCK;ip->SpecialNum++;
 		}
         if ( ip->Type==ITEM_HELPER+30 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			|| ip->Type==ITEM_WING+49
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)
+			|| ip->Type==ITEM_WING+49)
         {
    			ip->Special[ip->SpecialNum] = AT_LUCK;ip->SpecialNum++;
         }
 		if (( ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+40) || ip->Type==ITEM_WING+43
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			|| (ip->Type==ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)
+			|| (ip->Type==ITEM_WING+50))
         {
    			ip->Special[ip->SpecialNum] = AT_LUCK;ip->SpecialNum++;
         }
@@ -1277,7 +1238,6 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 				ip->SpecialValue[ip->SpecialNum] = Option3*4;
 				ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE;ip->SpecialNum++;
 			}
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			else if(ip->Type==ITEM_WING+49)
 			{
 				if((excelWing>>5)&0x01)
@@ -1291,7 +1251,6 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 					ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION;ip->SpecialNum++;
 				}
 			}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 			else if (ip->Type == ITEM_WING+42)
 			{
 				ip->SpecialValue[ip->SpecialNum] = Option3*4;
@@ -1374,10 +1333,7 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 				}
 			}
 			else if ( ip->Type==ITEM_WING+40 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-				|| (ip->Type==ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				)
+				|| (ip->Type==ITEM_WING+50))
 			{
  				if ( (excelWing>>4)&0x01 )
 				{
@@ -1564,10 +1520,8 @@ void ItemConvert(ITEM *ip,BYTE Attribute1,BYTE Attribute2, BYTE Attribute3 )
 		ip->Part = EQUIPMENT_AMULET;
 	else if(ip->Type>=ITEM_HELPER+12 && ip->Type<ITEM_HELPER+MAX_ITEM_INDEX)
 		ip->Part = EQUIPMENT_AMULET;
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	else if(ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
 		ip->Part = EQUIPMENT_WING;
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 	else 
 		ip->Part = -1;
 }
@@ -1984,9 +1938,7 @@ int ItemValue(ITEM *ip,int goldType)
     }
 	else if( ( ( Type==12 && (ip->Type>ITEM_WING+6
 		&& !(ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		&& (ip->Type!=ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		) ) || Type==13 || Type==15 ) )
 	{
 		Gold = (long long)100+Level2*Level2*Level2;
@@ -2022,10 +1974,7 @@ int ItemValue(ITEM *ip,int goldType)
         case 15:Level2 += 365;break;
         }
 	    if( ( Type==12 && ip->Type<=ITEM_WING+6) || ip->Type==ITEM_HELPER+30 || (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-			|| (ip->Type==ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-			)
+			|| (ip->Type==ITEM_WING+50))
         {
             Gold = (long long)(40000000+((40+Level2)*Level2*Level2*11)); 
         }
@@ -2063,10 +2012,8 @@ int ItemValue(ITEM *ip,int goldType)
 			case AT_SKILL_POWER_SLASH_UP+3:
 			case AT_SKILL_POWER_SLASH_UP+4:
 			case AT_SKILL_ICE_BLADE:
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			case AT_SKILL_THRUST:
 			case AT_SKILL_STAMP:
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				Gold += (long long)((double)Gold*1.5f);
 				break;
 			case AT_IMPROVE_DAMAGE:
@@ -2077,9 +2024,7 @@ int ItemValue(ITEM *ip,int goldType)
                 if ( ( Type==12 && ip->Type<=ITEM_WING+6 )
 
 					|| (ip->Type>=ITEM_WING+36 && ip->Type<=ITEM_WING+43)
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 					|| (ip->Type>=ITEM_WING+49 && ip->Type<=ITEM_WING+50)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 					)    //  날개.
                 {
 					int iOption = ip->SpecialValue[i];
@@ -2233,9 +2178,7 @@ int ItemValue(ITEM *ip,int goldType)
 	case ITEM_WING+132:
 	case ITEM_WING+133:
 	case ITEM_WING+134:
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case ITEM_WING+135:
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		Gold = 80;
 		break;
 	}
@@ -2267,9 +2210,7 @@ int ItemValue(ITEM *ip,int goldType)
 	case ITEM_WING+132:
 	case ITEM_WING+133:
 	case ITEM_WING+134:
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	case ITEM_WING+135:
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		goto EXIT_CALCULATE;
 	case ITEM_HELPER+122:
 		goto EXIT_CALCULATE;
@@ -2554,9 +2495,7 @@ void CreateClassAttributes()
 	CreateClassAttribute( 3, 30, 30, 30, 30,	 120, 80,	  1, 1, 2, 2 );
 	CreateClassAttribute( 4, 30, 30, 30, 30,	 120, 80,	  1, 1, 2, 2 );
 	CreateClassAttribute( 5, 50, 50, 50, 30,	 110, 30,	 110, 30, 6, 3 );
-#ifdef PBG_ADD_NEWCHAR_MONK
 	CreateClassAttribute( 6, 32, 27, 25, 20,	 100, 40,	 /*사용안함 => */1, 3, 1, 1);
-#endif //PBG_ADD_NEWCHAR_MONK
 }
 
 float CalcDurabilityPercent ( BYTE dur, BYTE maxDur, int Level, int option, int ExtOption )
@@ -2669,14 +2608,10 @@ void CHARACTER_MACHINE::CalculateDamage()
 	ITEM *RRing  = &Equipment[EQUIPMENT_RING_RIGHT];
 	ITEM *LRing  = &Equipment[EQUIPMENT_RING_LEFT];
 
-	WORD Strength, Dexterity, Energy;
-
-	Strength = Character.Strength + Character.AddStrength;
-	Dexterity= Character.Dexterity+ Character.AddDexterity;
-	Energy	 = Character.Energy   + Character.AddEnergy;
-#ifdef PBG_ADD_NEWCHAR_MONK
+	WORD Strength = Character.Strength + Character.AddStrength;
+	WORD Dexterity= Character.Dexterity+ Character.AddDexterity;
+	WORD Energy	 = Character.Energy   + Character.AddEnergy;
 	WORD Vitality = Character.Vitality + Character.AddVitality;
-#endif //PBG_ADD_NEWCHAR_MONK
 
     int CharacterClass = gCharacterManager.GetBaseClass ( Character.Class );
 
@@ -2739,16 +2674,12 @@ void CHARACTER_MACHINE::CalculateDamage()
 			Character.AttackDamageMinLeft  = (Strength+Dexterity)/7;
 			Character.AttackDamageMaxLeft  = (Strength+Dexterity)/4;
 			break;
-#ifdef PBG_ADD_NEWCHAR_MONK
 		case CLASS_RAGEFIGHTER:
-			{
 			Character.AttackDamageMinRight = Strength/7 + Vitality/15;
 			Character.AttackDamageMaxRight = Strength/5 + Vitality/12;
 			Character.AttackDamageMinLeft  = Strength/7 + Vitality/15;
 			Character.AttackDamageMaxLeft  = Strength/5 + Vitality/12;
-			}
 			break;
-#endif //PBG_ADD_NEWCHAR_MONK
         default :
 			Character.AttackDamageMinRight = Strength/8;
 			Character.AttackDamageMaxRight = Strength/4;
@@ -3238,22 +3169,22 @@ void CHARACTER_MACHINE::CalculateCurseDamage()
 
 void CHARACTER_MACHINE::CalculateAttackRating()
 {
-	WORD Strength, Dexterity, Charisma;
+	WORD Strength = Character.Strength + Character.AddStrength;
+	WORD Dexterity = Character.Dexterity + Character.AddDexterity;
+    WORD Charisma = Character.Charisma + Character.AddCharisma;
 
-	Strength = Character.Strength + Character.AddStrength;
-	Dexterity= Character.Dexterity+ Character.AddDexterity;
-    Charisma = Character.Charisma + Character.AddCharisma;
-
-    if ( gCharacterManager.GetBaseClass( Character.Class )==CLASS_DARK_LORD )
-	    Character.AttackRating  = static_cast<WORD>(((Character.Level*5)+(Dexterity*5)/2)+(Strength/6)+(Charisma/10) & 0xFFFF);
-#ifdef PBG_ADD_NEWCHAR_MONK
-	else if(gCharacterManager.GetBaseClass( Character.Class )==CLASS_RAGEFIGHTER)
+	if (gCharacterManager.GetBaseClass(Character.Class) == CLASS_DARK_LORD)
 	{
-		Character.AttackRating = ((Character.Level*3)+(Dexterity*5)/4)+(Strength/6);
+		Character.AttackRating = static_cast<WORD>(((Character.Level * 5) + (Dexterity * 5) / 2) + (Strength / 6) + (Charisma / 10) & 0xFFFF);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
-    else
-	    Character.AttackRating  = static_cast<WORD>((((Character.Level*5)+(Dexterity*3)/2)+(Strength/4)) & 0xFFFF);
+	else if (gCharacterManager.GetBaseClass(Character.Class) == CLASS_RAGEFIGHTER)
+	{
+		Character.AttackRating = ((Character.Level * 3) + (Dexterity * 5) / 4) + (Strength / 6) & 0xFFFF;
+	}
+	else
+	{
+		Character.AttackRating = static_cast<WORD>((((Character.Level * 5) + (Dexterity * 3) / 2) + (Strength / 4)) & 0xFFFF);
+	}
 
 	g_csItemOption.PlusSpecial ( &Character.AttackRating, AT_SET_OPTION_IMPROVE_ATTACKING_PERCENT );
 
@@ -3285,11 +3216,9 @@ void CHARACTER_MACHINE::CalculateAttackRatingPK()
 		case CLASS_WIZARD:
 			tmpf = (float)Character.Level * 3 + (float)Dexterity * 4.f;
 			break;
-#ifdef PBG_ADD_NEWCHAR_MONK
 		case CLASS_RAGEFIGHTER:
 			tmpf = (float)Character.Level * 2.6f + (float)Dexterity * 3.6f;
 			break;
-#endif //PBG_ADD_NEWCHAR_MONK
 	}
 
 	Character.AttackRatingPK = (WORD)tmpf;
@@ -3324,13 +3253,11 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 		Character.AttackSpeed = Dexterity/20;
         Character.MagicSpeed = Dexterity/20;
     }
-#ifdef PBG_ADD_NEWCHAR_MONK
 	else if(CharacterClass == CLASS_RAGEFIGHTER)
 	{
 		Character.AttackSpeed = Dexterity/9;
         Character.MagicSpeed = Dexterity/9;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
 	else
     {
         Character.AttackSpeed = Dexterity/20;
@@ -3592,40 +3519,34 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlockingPK()
 		case CLASS_SUMMONER:
 			tmpf = (float)Character.Level * 2 + (float)Dexterity * 0.5f;
 			break;
-#ifdef PBG_ADD_NEWCHAR_MONK
 		case CLASS_RAGEFIGHTER:
 			tmpf = (float)Character.Level * 1.5f + (float)Dexterity * 0.2f;
 			break;
-#endif //PBG_ADD_NEWCHAR_MONK
 	}
 	Character.SuccessfulBlockingPK = (WORD)tmpf;
 }
 
 void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
 {
-	WORD Dexterity;
-
-	Dexterity= Character.Dexterity+ Character.AddDexterity;
+	WORD Dexterity= Character.Dexterity+ Character.AddDexterity;
 
     int CharacterClass = gCharacterManager.GetBaseClass ( Character.Class );
 
-	if (CharacterClass==CLASS_ELF || CharacterClass==CLASS_SUMMONER)
+	if (CharacterClass == CLASS_ELF || CharacterClass == CLASS_SUMMONER)
 	{
-        Character.SuccessfulBlocking = Dexterity/4;
+		Character.SuccessfulBlocking = Dexterity / 4;
 	}
-    else if ( CharacterClass==CLASS_DARK_LORD )
+	else if (CharacterClass == CLASS_DARK_LORD)
 	{
-        Character.SuccessfulBlocking = Dexterity/7;
+		Character.SuccessfulBlocking = Dexterity / 7;
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK
-	else if(CharacterClass==CLASS_RAGEFIGHTER)
+	else if (CharacterClass == CLASS_RAGEFIGHTER)
 	{
-		Character.SuccessfulBlocking = Dexterity/10;
+		Character.SuccessfulBlocking = Dexterity / 10;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
 	else
 	{
-      	Character.SuccessfulBlocking = Dexterity/3;
+		Character.SuccessfulBlocking = Dexterity / 3;
 	}
 
 	ITEM* Left = &Equipment[EQUIPMENT_WEAPON_LEFT];
@@ -3634,8 +3555,7 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
         ITEM_ATTRIBUTE* p = &ItemAttribute[Left->Type];
         float percent = CalcDurabilityPercent(Left->Durability,p->Durability,Left->Level,Left->Option1,Left->ExtOption);
 
-        WORD SuccessBlocking = 0;
-        SuccessBlocking = Left->SuccessfulBlocking - (WORD)(Left->SuccessfulBlocking*percent);
+		WORD SuccessBlocking = Left->SuccessfulBlocking - (WORD)(Left->SuccessfulBlocking*percent);
 
 		Character.SuccessfulBlocking += SuccessBlocking;
         
@@ -3683,12 +3603,10 @@ void CHARACTER_MACHINE::CalculateDefense()
     {
         Character.Defense  = Dexterity/7;
     }
-#ifdef PBG_ADD_NEWCHAR_MONK
 	else if ( CharacterClass==CLASS_RAGEFIGHTER )
     {
         Character.Defense  = Dexterity/8;
     }
-#endif //PBG_ADD_NEWCHAR_MONK
 	else
     {
         Character.Defense  = Dexterity/5;
@@ -3780,11 +3698,7 @@ void CHARACTER_MACHINE::CalculateDefense()
     }
 
     PlusSpecial ( &Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_HELPER] );
-    if ( Equipment[EQUIPMENT_WING].Type==ITEM_HELPER+30 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| Equipment[EQUIPMENT_WING].Type==ITEM_WING+49
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+    if (Equipment[EQUIPMENT_WING].Type==ITEM_HELPER+30 || Equipment[EQUIPMENT_WING].Type==ITEM_WING+49)
     {
 		PlusSpecial ( &Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE, &Equipment[EQUIPMENT_WING] );
     }
@@ -3904,21 +3818,18 @@ void CHARACTER_MACHINE::CalculateBasicState()
 		ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 82);
 		Character.AddCharisma += (WORD)Item_data.m_byValue1;
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
 	{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
-		WORD _AddStat = (WORD)(30+(WORD)((Character.Energy-132)/10));
-#else //PBG_MOD_RAGEFIGHTERSOUND
-		WORD _AddStat = (WORD)(30+(WORD)((Character.Energy-380)/10));
-#endif //PBG_MOD_RAGEFIGHTERSOUND
+		WORD _AddStat = 0;
+		if (Character.Energy >= 132) {
+			_AddStat= (WORD)(30 + (WORD)((Character.Energy - 132) / 10));
+		}
 		if(_AddStat > 200)
 		{
 			_AddStat = 200;
 		}
 		Character.AddVitality += _AddStat;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 }
 
 void CHARACTER_MACHINE::getAllAddStateOnlyExValues( int &iAddStrengthExValues, int &iAddDexterityExValues, int &iAddVitalityExValues, int &iAddEnergyExValues, int &iAddCharismaExValues )

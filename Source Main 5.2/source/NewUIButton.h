@@ -143,6 +143,7 @@ namespace SEASON3B
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 		void ChangeButtonState( BUTTON_STATE eventstate, int iButtonState );
 		void MoveTextPos(int iX, int iY);
+		void MoveTextTipPos(int iX, int iY);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 		void ChangeTextBackColor( const DWORD bcolor );
@@ -194,6 +195,8 @@ namespace SEASON3B
 		bool					m_bClickEffect;
 		int						m_iMoveTextPosX;
 		int						m_iMoveTextPosY;
+		int						m_iMoveTextTipPosX;
+		int						m_iMoveTextTipPosY;
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 	};
 
@@ -404,6 +407,32 @@ namespace SEASON3B
 	{
 		return m_CurButtonIndex;
 	}
+
+	class CNewUICheckBox
+	{
+	public:
+		CNewUICheckBox();
+		virtual ~CNewUICheckBox();
+		void CheckBoxImgState(int imgindex);
+		void RegisterBoxState(bool eventstate);
+		void ChangeText(unicode::t_string btname);
+		void CheckBoxInfo(int x, int y, int sx, int sy);
+		bool GetBoxState();
+
+		void Render();
+		bool UpdateMouseEvent();
+	private:
+		int						s_ImgIndex;
+		POINT					m_Pos;
+		POINT					m_Size;
+		unicode::t_string		m_Name;
+		HFONT					m_hTextFont;
+		DWORD					m_NameColor;
+		DWORD					m_NameBackColor;
+		float					m_ImgWidth;
+		float					m_ImgHeight;
+		bool					State;
+	};
 };
 
 #endif // !defined(AFX_NEWUIBUTTON_H__7DC4490D_D859_4159_9EE5_FBC4ECDE209A__INCLUDED_)

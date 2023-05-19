@@ -56,11 +56,7 @@
 #include "w_MapHeaders.h"
 #include "w_PetProcess.h"
 #include "DuelMgr.h"
-
-#ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
-#endif //PBG_ADD_NEWCHAR_MONK
-
 //#include "GMEmpireGuardian1.h"
 
 CHARACTER *CharactersClient;
@@ -179,8 +175,6 @@ void SetPlayerStop(CHARACTER *c)
 	{
 		if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone)
 		{
-	
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 			if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)//레이지파이터이면
 			{
 				if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)
@@ -194,18 +188,15 @@ void SetPlayerStop(CHARACTER *c)
 			}
 			else
 			{
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-			if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)	// 양손무기
-				SetAction(&c->Object, PLAYER_FENRIR_STAND_TWO_SWORD);
-			else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1) // 오른손 무기
-				SetAction(&c->Object, PLAYER_FENRIR_STAND_ONE_RIGHT);
-			else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1) // 왼손 무기
-				SetAction(&c->Object, PLAYER_FENRIR_STAND_ONE_LEFT);
- 			else	// 맨손
-				SetAction(&c->Object, PLAYER_FENRIR_STAND);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
+				if(c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1)	// 양손무기
+					SetAction(&c->Object, PLAYER_FENRIR_STAND_TWO_SWORD);
+				else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1) // 오른손 무기
+					SetAction(&c->Object, PLAYER_FENRIR_STAND_ONE_RIGHT);
+				else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1) // 왼손 무기
+					SetAction(&c->Object, PLAYER_FENRIR_STAND_ONE_LEFT);
+ 				else	// 맨손
+					SetAction(&c->Object, PLAYER_FENRIR_STAND);
 			}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 		}
 		else if ( c->Helper.Type==MODEL_HELPER+4 && !c->SafeZone )
 		{
@@ -223,10 +214,8 @@ void SetPlayerStop(CHARACTER *c)
 		{
 			if(c->Weapon[0].Type==-1 && c->Weapon[1].Type==-1)
 				SetAction(&c->Object,PLAYER_STOP_RIDE);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 			else if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 				SetAction(&c->Object,PLAYER_RAGE_UNI_STOP_ONE_RIGHT);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 			else
 				SetAction(&c->Object,PLAYER_STOP_RIDE_WEAPON);
 		}
@@ -287,10 +276,8 @@ void SetPlayerStop(CHARACTER *c)
 						SetAction(&c->Object, PLAYER_STOP_FEMALE);
 					else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER && !gMapManager.InChaosCastle())	// 소환술사는 카오스캐슬에선 남자 애니메이션.
 						SetAction(&c->Object, PLAYER_STOP_SUMMONER);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 					else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 						SetAction(&c->Object, PLAYER_STOP_RAGEFIGHTER);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 					else
 						SetAction(&c->Object, PLAYER_STOP_MALE);
 				}
@@ -351,10 +338,8 @@ void SetPlayerStop(CHARACTER *c)
 							SetAction(&c->Object, PLAYER_STOP_FEMALE);
 						else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER)
 							SetAction(&c->Object, PLAYER_STOP_SUMMONER);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 						else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 							SetAction(&c->Object, PLAYER_STOP_RAGEFIGHTER);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 						else
 							SetAction(&c->Object, PLAYER_STOP_MALE);
 					}
@@ -418,9 +403,7 @@ void SetPlayerWalk(CHARACTER *c)
 	if(!c->SafeZone && c->Run < 40)
 	{
 		if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD 
-#ifdef PBG_ADD_NEWCHAR_MONK
 			|| gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
 			|| ( ( gMapManager.WorldActive != WD_7ATLANSE && !gMapManager.InHellas() && gMapManager.WorldActive != WD_67DOPPLEGANGER3) && c->BodyPart[BODYPART_BOOTS ].Type!=-1 && c->BodyPart[BODYPART_BOOTS ].Level>=5) 
 			|| ( ( gMapManager.WorldActive == WD_7ATLANSE ||  gMapManager.InHellas()
 			|| gMapManager.WorldActive == WD_67DOPPLEGANGER3
@@ -443,12 +426,10 @@ void SetPlayerWalk(CHARACTER *c)
 	{
 		for(int i=PLAYER_WALK_MALE;i<=PLAYER_WALK_CROSSBOW;i++)
 		{
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 				Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.32f;
 			else
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-			Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.33f;
+				Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.33f;
 
 			if( g_isCharacterBuff(o, eDeBuff_Freeze) )
 			{
@@ -462,17 +443,13 @@ void SetPlayerWalk(CHARACTER *c)
 
 		for(int i=PLAYER_RUN;i<=PLAYER_RUN_RIDE_WEAPON;i++)
 		{
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 				Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.28f;
 			else
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-			Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.34f;
+				Models[MODEL_PLAYER].Actions[i].PlaySpeed = 0.34f;
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 			Models[MODEL_PLAYER].Actions[PLAYER_RAGE_UNI_RUN].PlaySpeed = 0.34f;
 			Models[MODEL_PLAYER].Actions[PLAYER_RAGE_UNI_RUN_ONE_RIGHT].PlaySpeed = 0.34f;
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 
 			if( g_isCharacterBuff(o, eDeBuff_Freeze) )
 			{
@@ -516,13 +493,12 @@ void SetPlayerWalk(CHARACTER *c)
 		{
 			SetAction(&c->Object,PLAYER_RUN_RIDE_HORSE );
 		}
-        else if ( c->Weapon[1].Type==MODEL_HELPER+5 && c->SafeZone)
-        {
-            SetAction ( &c->Object, PLAYER_DARKLORD_WALK );
-        }
+		else if (c->SafeZone && c->m_PetInfo->m_dwPetType == PET_TYPE_DARK_SPIRIT)
+		{ 
+			SetAction(&c->Object, PLAYER_DARKLORD_WALK); 
+		}
 		else if( c->Helper.Type==MODEL_HELPER+2 && !c->SafeZone)
 		{
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 			if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 			{				
 				if(c->Weapon[0].Type==-1 && c->Weapon[1].Type==-1)
@@ -532,14 +508,11 @@ void SetPlayerWalk(CHARACTER *c)
 			}
 			else
 			{
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
             if(c->Weapon[0].Type==-1 && c->Weapon[1].Type==-1)
 				SetAction(&c->Object,PLAYER_RUN_RIDE);
 			else
 				SetAction(&c->Object,PLAYER_RUN_RIDE_WEAPON);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 			}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
         }
         else if( c->Helper.Type==MODEL_HELPER+3 && !c->SafeZone )   //  페가시아를 타고있음.
 		{
@@ -553,7 +526,6 @@ void SetPlayerWalk(CHARACTER *c)
             }
             else
             {
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 				if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 				{
 					if(c->Weapon[0].Type==-1 && c->Weapon[1].Type==-1)
@@ -563,14 +535,11 @@ void SetPlayerWalk(CHARACTER *c)
 				}
 				else
 				{
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
                 if(c->Weapon[0].Type==-1 && c->Weapon[1].Type==-1)
 				    SetAction(&c->Object,PLAYER_RUN_RIDE);
 			    else
 				    SetAction(&c->Object,PLAYER_RUN_RIDE_WEAPON);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
             }
 		}
 		else
@@ -666,14 +635,12 @@ void SetPlayerWalk(CHARACTER *c)
 						{
 							if(c->Weapon[1].Type>=MODEL_SWORD && c->Weapon[1].Type<MODEL_MACE+MAX_ITEM_INDEX)
 							{
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 								if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 								{
 									SetAction(&c->Object,PLAYER_RUN);
 								}
 								else
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-								SetAction(&c->Object,PLAYER_RUN_TWO_SWORD);
+									SetAction(&c->Object,PLAYER_RUN_TWO_SWORD);
 							}
 							else if(!ItemAttribute[c->Weapon[0].Type-MODEL_ITEM].TwoHand)
 							{
@@ -741,7 +708,6 @@ void SetPlayerWalk(CHARACTER *c)
 	{
 		PlayBuffer ( SOUND_FENRIR_RUN_1+rand()%2, o );	
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 	else if(c->Helper.Type == MODEL_HELPER+37 && !c->SafeZone
 			&& (c->Object.CurrentAction >= PLAYER_RAGE_FENRIR_RUN && c->Object.CurrentAction <= PLAYER_RAGE_FENRIR_RUN_ONE_LEFT))
 	{
@@ -752,7 +718,6 @@ void SetPlayerWalk(CHARACTER *c)
 	{
 		PlayBuffer ( SOUND_FENRIR_RUN_1+rand()%2, o );	
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 	else if((c==Hero&&rand()%64==0) || (c!=Hero&&rand()%16==0))
 	{
 		if(o->Type!=MODEL_PLAYER || (o->SubType>=MODEL_SKELETON1 && o->SubType<=MODEL_SKELETON3))
@@ -889,7 +854,6 @@ void SetAttackSpeed()
 	Models[MODEL_PLAYER].Actions[PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT].PlaySpeed = 0.3f;
 	Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_REMOVAL].PlaySpeed	= 0.28f;
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	float RageAttackSpeed = CharacterAttribute->AttackSpeed * 0.002f;
 
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_THRUST].PlaySpeed = 0.4f + RageAttackSpeed;
@@ -902,7 +866,6 @@ void SetAttackSpeed()
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_ATT_UP_OURFORCES].PlaySpeed = 0.35f;
 	Models[MODEL_PLAYER].Actions[PLAYER_SKILL_HP_UP_OURFORCES].PlaySpeed = 0.35f;
 	Models[MODEL_PLAYER].Actions[PLAYER_RAGE_FENRIR_ATTACK_RIGHT].PlaySpeed	= 0.25f + RageAttackSpeed;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 }
 
 
@@ -970,10 +933,8 @@ void SetPlayerAttack(CHARACTER *c)
 					SetAction(&c->Object, PLAYER_FENRIR_ATTACK_TWO_SWORD);
 				else if(c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
 					SetAction(&c->Object, PLAYER_FENRIR_ATTACK_ONE_SWORD);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 				else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1 && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 					SetAction(&c->Object, PLAYER_RAGE_FENRIR_ATTACK_RIGHT);
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 				else if(c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
 					SetAction(&c->Object, PLAYER_FENRIR_ATTACK_ONE_SWORD);
 				else
@@ -1007,16 +968,13 @@ void SetPlayerAttack(CHARACTER *c)
 			{
 				if(c->Weapon[0].Type == -1)
 				{
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 					if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 						SetAction(&c->Object,PLAYER_RAGE_UNI_ATTACK);
 					else
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-					SetAction(&c->Object,PLAYER_ATTACK_RIDE_SWORD);
+						SetAction(&c->Object,PLAYER_ATTACK_RIDE_SWORD);
 				}
 				else
 				{
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 					if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 					{
 						if(!ItemAttribute[c->Weapon[0].Type-MODEL_ITEM].TwoHand)
@@ -1026,14 +984,11 @@ void SetPlayerAttack(CHARACTER *c)
 					}
 					else
 					{
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-					if(!ItemAttribute[c->Weapon[0].Type-MODEL_ITEM].TwoHand)
-						SetAction(&c->Object,PLAYER_ATTACK_RIDE_SWORD);
-					else
-						SetAction(&c->Object,PLAYER_ATTACK_RIDE_TWO_HAND_SWORD);
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
+						if(!ItemAttribute[c->Weapon[0].Type-MODEL_ITEM].TwoHand)
+							SetAction(&c->Object,PLAYER_ATTACK_RIDE_SWORD);
+						else
+							SetAction(&c->Object,PLAYER_ATTACK_RIDE_TWO_HAND_SWORD);
 					}
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 				}
 			}
 		}
@@ -1263,13 +1218,10 @@ void SetPlayerShock(CHARACTER *c,int Hit)
 
     if ( o->CurrentAction==PLAYER_ATTACK_SKILL_FURY_STRIKE || o->CurrentAction==PLAYER_SKILL_VITALITY ) return;
 	if ( o->CurrentAction==PLAYER_SKILL_HELL_BEGIN 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		|| (o->CurrentAction==PLAYER_SKILL_ATT_UP_OURFORCES || o->CurrentAction==PLAYER_SKILL_HP_UP_OURFORCES
 		|| o->CurrentAction==PLAYER_SKILL_GIANTSWING
-		|| o->CurrentAction==PLAYER_SKILL_DRAGONLORE
-		)
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-		) return;
+		|| o->CurrentAction==PLAYER_SKILL_DRAGONLORE))
+		return;
 
 	if(Hit > 0)
 	{
@@ -2333,9 +2285,7 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
 			case MODEL_FACE+3:
 			case MODEL_FACE+4:
 			case MODEL_FACE+5:
-#ifdef PBG_ADD_NEWCHAR_MONK
 			case MODEL_FACE+6:
-#endif //PBG_ADD_NEWCHAR_MONK
 				PlaySpeed *=2.0f;
 				break;
 			}
@@ -2714,9 +2664,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         break;
 
     case    AT_SKILL_RUSH :
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_SKILL_OCCUPY:
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
         if ( o->AnimationFrame>5.f )
         {
             c->AttackTime = 15;
@@ -2733,14 +2681,10 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 			{
 				Vector ( (float)(rand()%60+60+90), 0.f, o->Angle[2], Angle );
 				CreateJoint ( BITMAP_JOINT_SPARK, Position, Position, Angle );
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-				if(iSkill==AT_SKILL_OCCUPY)
-				{
+				if (iSkill == AT_SKILL_OCCUPY)
 					CreateParticle(BITMAP_FIRE, Position, Angle, o->Light, 18, 1.5f);
-				}
 				else
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-				CreateParticle ( BITMAP_FIRE, Position, Angle, o->Light, 2, 1.5f );
+					CreateParticle(BITMAP_FIRE, Position, Angle, o->Light, 2, 1.5f);
 			}
 		}
         break;
@@ -2807,7 +2751,6 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 			c->AttackTime = 15;
 		}
 		break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_SKILL_ATT_UP_OURFORCES:
 	case AT_SKILL_HP_UP_OURFORCES:
 	case AT_SKILL_DEF_UP_OURFORCES:
@@ -2826,7 +2769,6 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 			o->m_sTargetIndex = c->TargetCharacter;
 		}
 		break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
     default :
         if ( o->AnimationFrame>=1.f && o->Type==MODEL_PLAYER && o->CurrentAction==PLAYER_ATTACK_SKILL_FURY_STRIKE )
         {
@@ -3264,12 +3206,10 @@ void PlayerStopAnimationSetting ( CHARACTER* c, OBJECT* o )
 	if( o->CurrentAction<PLAYER_WALK_MALE ||
 		(o->CurrentAction>=PLAYER_PROVOCATION && o->CurrentAction<=PLAYER_CHEERS) ||
 		(o->CurrentAction>=PLAYER_IDLE1_DARKHORSE && o->CurrentAction<=PLAYER_IDLE2_DARKHORSE) ||
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		((o->CurrentAction>=PLAYER_SKILL_THRUST && o->CurrentAction<=PLAYER_RAGE_FENRIR_ATTACK_RIGHT) &&
 		!(o->CurrentAction >= PLAYER_RAGE_FENRIR_RUN && o->CurrentAction <= PLAYER_RAGE_FENRIR_RUN_ONE_LEFT) &&
 		!(o->CurrentAction >= PLAYER_RAGE_UNI_RUN && o->CurrentAction <= PLAYER_RAGE_UNI_STOP_ONE_RIGHT)) ||
 		o->CurrentAction==PLAYER_STOP_RAGEFIGHTER ||
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 	  ( o->CurrentAction>=PLAYER_ATTACK_FIST && o->CurrentAction<=PLAYER_SHOCK 
 	  && o->CurrentAction!=PLAYER_WALK_TWO_HAND_SWORD_TWO && o->CurrentAction!=PLAYER_RUN_TWO_HAND_SWORD_TWO 
 	  && o->CurrentAction!=PLAYER_FLY_RIDE && o->CurrentAction!=PLAYER_FLY_RIDE_WEAPON
@@ -3362,9 +3302,7 @@ void EtcStopAnimationSetting ( CHARACTER* c, OBJECT* o )
 		case MODEL_FACE+3:
 		case MODEL_FACE+4:
 		case MODEL_FACE+5:
-#ifdef PBG_ADD_NEWCHAR_MONK
 		case MODEL_FACE+6:
-#endif //PBG_ADD_NEWCHAR_MONK
 			break;
 		case MODEL_ELBELAND_SILVIA:
 		case MODEL_ELBELAND_RHEA:
@@ -3781,12 +3719,10 @@ void CreateWeaponBlur ( CHARACTER* c, OBJECT* o, BMD* b )
 			    b->TransformPosition(o->BoneTransform[c->Weapon[Hand2].LinkBone],Pos2,p2,true);
 			    CreateBlur(c,p,p2,Light,BlurMapping);
             }
-#ifdef PBG_ADD_NEWCHAR_MONK
 			else if(g_CMonkSystem.IsSwordformGloves(Type))
 			{
 				g_CMonkSystem.MoveBlurEffect(c, o, b);
 			}
-#endif //PBG_ADD_NEWCHAR_MONK
             else
             {
                 float inter = 10.f;
@@ -4510,14 +4446,12 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 			CreateEffect( MODEL_SWORD_FORCE, o->Position, o->Angle, Light, 0, o );
             PlayBuffer ( SOUND_BCS_RUSH );
             break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		case AT_SKILL_OCCUPY:
 			{
 				CreateEffect(MODEL_SWORD_FORCE, o->Position, o->Angle, Light, 2, o);
 				PlayBuffer (SOUND_BCS_RUSH);
 			}
 			break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
         case AT_SKILL_ONEFLASH:
             break;
 
@@ -4619,7 +4553,6 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 				PlayBuffer(SOUND_SKILL_LIGHTNING_SHOCK);
 			}
 			break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		case AT_SKILL_THRUST:
 			{
 				o->Angle[2] = CreateAngle(o->Position[0],o->Position[1],c->TargetPosition[0],c->TargetPosition[1]);
@@ -4631,7 +4564,6 @@ void MoveCharacter(CHARACTER *c,OBJECT *o)
 				o->m_sTargetIndex = c->TargetCharacter;
 			}
 			break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		}
 
 		if(c->TargetCharacter == -1)
@@ -5273,10 +5205,8 @@ bool CheckFullSet(CHARACTER *c)
 	{
 		for(int i = start; i >= end; i--)
 		{
-#ifdef PBG_ADD_NEWCHAR_MONK
 			if((gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
 				continue;
-#endif //PBG_ADD_NEWCHAR_MONK
 
 			if(CharacterMachine->Equipment[i].Type == -1)
 			{
@@ -5291,10 +5221,8 @@ bool CheckFullSet(CHARACTER *c)
 			tmpLevel = (CharacterMachine->Equipment[EQUIPMENT_BOOTS].Level >> 3) & 15;
 			for(int i = start; i >= end; i--)	
 			{
-#ifdef PBG_ADD_NEWCHAR_MONK
 				if((gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
 					continue;
-#endif //PBG_ADD_NEWCHAR_MONK
 				int Level = (CharacterMachine->Equipment[i].Level >> 3) & 15;
 				if(Level<9)
 				{
@@ -5474,12 +5402,9 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 
 		if( !g_isCharacterBuff(o, eDeBuff_Harden) && !g_isCharacterBuff(o, eDeBuff_Stun) 
 			&& !g_isCharacterBuff(o, eDeBuff_Sleep) 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			&& !g_isCharacterBuff(o, eBuff_Att_up_Ourforces)
 			&& !g_isCharacterBuff(o, eBuff_Hp_up_Ourforces)
-			&& !g_isCharacterBuff(o, eBuff_Def_up_Ourforces)
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-			)
+			&& !g_isCharacterBuff(o, eBuff_Def_up_Ourforces))
         {
             if(o->Type != MODEL_PLAYER)
                 MoveHead(c);
@@ -6064,10 +5989,7 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 			if ( ( o->CurrentAction>=PLAYER_WALK_MALE && o->CurrentAction<=PLAYER_RUN_RIDE_WEAPON )
 			  || ( o->CurrentAction==PLAYER_WALK_TWO_HAND_SWORD_TWO || o->CurrentAction==PLAYER_RUN_TWO_HAND_SWORD_TWO )
               || ( o->CurrentAction==PLAYER_RUN_RIDE_HORSE ) 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-			  || ( o->CurrentAction==PLAYER_RAGE_UNI_RUN || o->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT )
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-			  )
+			  || ( o->CurrentAction==PLAYER_RAGE_UNI_RUN || o->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT ))
 			{
          		Vector(0.f,0.f,0.f,p);
 				if(o->AnimationFrame>=1.5f && !c->Foot[0])
@@ -6084,10 +6006,8 @@ void MoveCharacterVisual(CHARACTER *c,OBJECT *o)
 		}
 
         if ( ( o->CurrentAction==PLAYER_RUN_RIDE 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 			|| o->CurrentAction==PLAYER_RAGE_UNI_RUN
 			|| o->CurrentAction==PLAYER_RAGE_UNI_RUN_ONE_RIGHT
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 			|| o->CurrentAction==PLAYER_RUN_RIDE_WEAPON || o->CurrentAction==PLAYER_RUN_SWIM || o->CurrentAction==PLAYER_WALK_SWIM || o->CurrentAction==PLAYER_FLY || o->CurrentAction==PLAYER_FLY_CROSSBOW || o->CurrentAction==PLAYER_RUN_RIDE_HORSE ) && 
                o->Type==MODEL_PLAYER && gMapManager.InHellas() )
         {
@@ -6342,11 +6262,8 @@ void MoveCharactersClient()
 }
 
 extern float  ParentMatrix[3][4];
-#ifdef PBG_ADD_NEWCHAR_MONK
+
 void RenderGuild(OBJECT *o,int Type, vec3_t vPos)
-#else //PBG_ADD_NEWCHAR_MONK
-void RenderGuild(OBJECT *o,int Type)
-#endif //PBG_ADD_NEWCHAR_MONK
 {
 	EnableAlphaTest();
     EnableCullFace();
@@ -6371,14 +6288,14 @@ void RenderGuild(OBJECT *o,int Type)
     {
     	Matrix[2][3] = -10.f;//-5
     }
-#ifdef PBG_ADD_NEWCHAR_MONK
+
 	if(vPos != NULL)
 	{
 		Matrix[0][3] = vPos[0];
 		Matrix[1][3] = vPos[1];
 		Matrix[2][3] = vPos[2];
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
+
 	R_ConcatTransforms(o->BoneTransform[26],Matrix,ParentMatrix);
 	glTranslatef(o->Position[0],o->Position[1],o->Position[2]);
 	RenderPlane3D(5.f,7.f,ParentMatrix);
@@ -6409,18 +6326,13 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		else if (Type >= MODEL_WING+36 && Type <= MODEL_WING+43)
 			return;
 		else if( ITEM_WING+130 <= Type && Type <= ITEM_WING+134 ) return;
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		else if (Type >= MODEL_WING+49 && Type <= MODEL_WING+50) return;
 		else if (Type == MODEL_WING+135) return;
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 	}
 
     if ( Type == MODEL_HELPER+30 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		|| (Type == MODEL_WING+49)
-		|| (Type == MODEL_WING+135)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		)
+		|| (Type == MODEL_WING+135))
 		return;
 
 	if( ITEM_WING+130 == Type )
@@ -6491,7 +6403,14 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Matrix[2][3] = 80.f;
 			}
 		}
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
+		else if (Type == MODEL_SWORD_35_WING)
+		{
+			Vector(x, y, z, Angle);
+			AngleMatrix(Angle, Matrix);
+			Matrix[0][3] = 15.f;
+			Matrix[1][3] = -5.f;
+			Matrix[2][3] = 0.f;
+		}
 		else if(Type == MODEL_WING+50)
 		{
 			Vector(0.f,90.f,0.f,Angle);
@@ -6500,7 +6419,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			Matrix[1][3] = -15.f;
 			Matrix[2][3] = 0.f;
 		}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 		else if(Type>=MODEL_WING+40)
 		{
     		Vector(0.f,90.f,0.f,Angle);
@@ -6698,20 +6616,17 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			}
 		}
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 		if(g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type))
 		{
 			Matrix[1][3] += 10.0f;
 			Matrix[2][3] += 25.0f;
 			b->BodyScale = 0.9f;
 		}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
 		if (bRightHandItem == false	&& !(Type >= MODEL_SHIELD && Type < MODEL_SHIELD+MAX_ITEM_INDEX) && Type != MODEL_BOW+20)
 		{
 			vec3_t vNewAngle;
 			float mNewRot[3][4];
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			float _Angle = 275.0f;
 			if(g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type))
 			{
@@ -6719,9 +6634,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 				Matrix[1][3] += 7.0f;
 			}
 			Vector(145.f, 0.f, _Angle, vNewAngle);
-#else //PBG_ADD_NEWCHAR_MONK_ITEM
-			Vector(145.f, 0.f, 275.f, vNewAngle);
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 			AngleMatrix(vNewAngle, mNewRot);
 			mNewRot[0][3] = 0.f;
 			mNewRot[1][3] = 10.f;
@@ -6774,7 +6686,6 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 
 	vec3_t Temp;
 	b->Animation(BoneTransform,f->AnimationFrame,f->PriorAnimationFrame,f->PriorAction,Object->Angle,Object->Angle,true);
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	if(g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type) && !Link)
 	{
 		float _KnightScale = 0.9f;
@@ -6783,8 +6694,7 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 		b->Transform(BoneTransform,Temp,Temp,&OBB,Translate,_KnightScale);
 	}
 	else
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-   	b->Transform(BoneTransform,Temp,Temp,&OBB,Translate);
+   		b->Transform(BoneTransform,Temp,Temp,&OBB,Translate);
 
 	RenderPartObjectEffect(Object,Type,c->Light,o->Alpha,Level<<3,Option1,false,0,RenderType | ((c->MonsterIndex==67 || c->MonsterIndex==137) ? ( RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
 	
@@ -8129,6 +8039,22 @@ void RenderLinkObject(float x,float y,float z,CHARACTER *c,PART_t *f,int Type,in
 			}
 		}
 		break;
+	case MODEL_SWORD_35_WING:
+		vec3_t vLight;
+		float fSize = (double)(rand() % 30) / 300.0;
+		Vector(0.18f, 0.45f, 0.22f, vLight);
+		Vector(0.f, 0.f, 0.f, p);
+		for (int i = 0; i < 8; ++i)
+		{
+			b->TransformPosition(BoneTransform[3+i], p, Position, true);
+			CreateSprite(BITMAP_LIGHT_MARKS, Position, fSize + 0.3f, vLight, Object, rand() % 360);
+		}
+		for (int i = 0; i < 8; ++i)
+		{
+			b->TransformPosition(BoneTransform[13 + i], p, Position, true);
+			CreateSprite(BITMAP_LIGHT_MARKS, Position, fSize + 0.3f, vLight, Object, rand() % 360);
+		}
+		break;
 	}
 
 }
@@ -8341,11 +8267,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 
             if ( o->Type!=MODEL_MONSTER01+60 && o->Type!=MODEL_MONSTER01+61
 				&& !( o->Type >= MODEL_FACE 
-#ifdef PBG_ADD_NEWCHAR_MONK
 				&& o->Type <= MODEL_FACE+6) )
-#else //PBG_ADD_NEWCHAR_MONK
-				&& o->Type <= MODEL_FACE+5) )
-#endif //PBG_ADD_NEWCHAR_MONK
             {
                 o->EnableShadow = true;
 				RenderPartObject(&c->Object,o->Type,NULL,c->Light,o->Alpha,0,0,0,false,false,Translate);
@@ -8810,10 +8732,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	bool bCloak = false;
 
 	if((gCharacterManager.GetCharacterClass(c->Class)==CLASS_DARK || gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-		|| gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-		) && o->Type==MODEL_PLAYER)
+		|| gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER) && o->Type==MODEL_PLAYER)
 	{
 		if(c->Change == false || (c->Change == true && c->Object.Type == MODEL_PLAYER))
 		{
@@ -8996,8 +8915,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
     {
         RenderPartObject(&c->Object,o->SubType,NULL,c->Light,o->Alpha,c->Level<<3,0,0,false,false,Translate,Select);
     }
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
-	else if(o->Kind==KIND_PLAYER && o->Type==MODEL_PLAYER && GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
+	else if(o->Kind==KIND_PLAYER && o->Type==MODEL_PLAYER && gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
 		&& (o->SubType==MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN
 		|| o->SubType == MODEL_PANDA || o->SubType == MODEL_SKELETON_CHANGED
 		|| o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL || o->SubType == MODEL_SKELETON1))
@@ -9042,7 +8960,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 		}
 	}
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 	else if(o->Kind==KIND_PLAYER && o->Type==MODEL_PLAYER && o->SubType==MODEL_SKELETON_PCBANG)
 	{
         RenderPartObject(&c->Object,o->SubType,NULL,c->Light,o->Alpha,0,0,0,false,false,Translate,Select);
@@ -9197,7 +9114,7 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
             {
                 RenderType |= RENDER_CHROME;
             }
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
+
 			if((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 			{
 				p->Type = MODEL_ANGEL;
@@ -9217,8 +9134,9 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				}
 			}
 			else
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-			RenderPartObject ( &c->Object, MODEL_ANGEL, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select, RenderType );
+			{
+				RenderPartObject(&c->Object, MODEL_ANGEL, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select, RenderType);
+			}
         }
         else
 #endif// GUILD_WAR_EVENT
@@ -9241,20 +9159,21 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 							Type = MODEL_HELM2 + (nItemType - 7) * MODEL_ITEM_COMMON_NUM + nItemSubType - 10;
 						}
 					}
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-					else if(CLASS_RAGEFIGHTER == gCharacterManager.GetBaseClass(c->Class))
+					else if (CLASS_RAGEFIGHTER == gCharacterManager.GetBaseClass(c->Class))
+					{
 						Type = g_CMonkSystem.ModifyTypeCommonItemMonk(Type);
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
+					}
 
 					BMD *b = &Models[Type];
-#ifdef PBG_ADD_NEWCHAR_MONK
+
 					if(CLASS_RAGEFIGHTER == gCharacterManager.GetBaseClass(c->Class))
 					{
-						b->Skin = gCharacterManager.GetBaseClass(c->Class)*2 + gCharacterManager.IsThirdClass(c->Class);
+						b->Skin = gCharacterManager.GetBaseClass(c->Class) * 2 + gCharacterManager.IsThirdClass(c->Class);
 					}
 					else
-#endif //PBG_ADD_NEWCHAR_MONK
-					b->Skin = gCharacterManager.GetBaseClass(c->Class)*2 + gCharacterManager.IsSecondClass(c->Class);
+					{
+						b->Skin = gCharacterManager.GetBaseClass(c->Class) * 2 + gCharacterManager.IsSecondClass(c->Class);
+					}
 
                     if ( gCharacterManager.GetBaseClass(c->Class)==CLASS_DARK_LORD && i==BODYPART_HELM )
                     {
@@ -9283,7 +9202,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					}
 					else
 					{
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 						if((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 						{
 							RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
@@ -9291,18 +9209,19 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						else
 						if((o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY) && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
 						{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 							if(o->m_sTargetIndex<0 || c->JumpTime>0)
 							{
 								RenderPartObject(&c->Object,Type,p,c->Light,o->Alpha,p->Level<<3,p->Option1,p->ExtOption,false,false,Translate,Select);
 							}
 							else
-#endif //PBG_MOD_RAGEFIGHTERSOUND
-							g_CMonkSystem.DarksideRendering(c, p, Translate, Select);
+							{
+								g_CMonkSystem.DarksideRendering(c, p, Translate, Select);
+							}
 						}
 						else
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-						RenderPartObject(&c->Object,Type,p,c->Light,o->Alpha,p->Level<<3,p->Option1,p->ExtOption,false,false,Translate,Select);
+						{
+							RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level << 3, p->Option1, p->ExtOption, false, false, Translate, Select);
+						}
 
 					}
 				}
@@ -9316,13 +9235,13 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				&& ( !g_isCharacterBuff(o, eBuff_Cloaking) ) )
 			{
 				CreateGuildMark(c->GuildMarkIndex);
-#ifdef PBG_ADD_NEWCHAR_MONK
 				if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
 				{
 					vec3_t vPos;
 					if(c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+59
 						|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+60
-						|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+61)
+						|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+61
+						|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+73)
 					{
 						Vector(5.0f, 0.0f, -35.0f, vPos);
 					}
@@ -9333,8 +9252,9 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					RenderGuild(o,c->BodyPart[BODYPART_ARMOR].Type, vPos);
 				}
 				else
-#endif //PBG_ADD_NEWCHAR_MONK
-				RenderGuild(o,c->BodyPart[BODYPART_ARMOR].Type);
+				{
+					RenderGuild(o, c->BodyPart[BODYPART_ARMOR].Type);
+				}
 			}
         }
 	}
@@ -9427,7 +9347,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				o->m_pCloth = ( void*)pCloth;
 				o->m_byNumCloth = numCloth;
             }
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 			else if(gCharacterManager.GetBaseClass(c->Class)==CLASS_RAGEFIGHTER)
 			{
 				int numCloth = (c->Wing.Type == MODEL_WING+50) ? 3 : 1;
@@ -9473,7 +9392,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 				o->m_pCloth = (void*)pCloth;
 				o->m_byNumCloth = numCloth;
 			}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
             else
             {
 				CPhysicsCloth *pCloth = new CPhysicsCloth [1];
@@ -9595,7 +9513,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						continue;
 					}
                 }
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				if(gCharacterManager.GetBaseClass( c->Class )==CLASS_RAGEFIGHTER)
 				{
 					if(i==0 && ((c->Wing.Type!=MODEL_WING+49
@@ -9606,7 +9523,6 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 						continue;
 					}
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 				if(i == 0 && g_ChangeRingMgr->CheckDarkCloak(c->Class, c->Object.SubType) == true)
 				{
 					continue;
@@ -9671,6 +9587,12 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 	if(!gMapManager.InChaosCastle() && !(gMapManager.IsCursedTemple() && !c->SafeZone))
 	{
 		NextGradeObjectRender(c);
+	}
+
+	for (int i = 0; i < 2; i++) {
+		if (g_CMonkSystem.EqualItemModelType(c->Weapon[i].Type) == MODEL_SWORD+35) {
+			g_CMonkSystem.RenderPhoenixGloves(c, i);
+		}
 	}
 
 	bool Bind = false;
@@ -9774,6 +9696,17 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					w->CurrentAction = 0;
 					w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed*15.f;
 				}
+				else if (w->Type == MODEL_SWORD+35) {
+					if (w->AnimationFrame < 2.f) {
+						w->CurrentAction = 0;
+						w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_RAGEFIGHTER].PlaySpeed * 1.5f;
+						PlayBuffer(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02);
+					}
+					else
+					{
+						w->AnimationFrame = 2.f;
+					}
+				}
 				else if(w->Type>=MODEL_SWORD && w->Type<MODEL_SWORD+MAX_ITEM_INDEX)
 				{
 					w->CurrentAction = 0;
@@ -9794,19 +9727,17 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 					w->CurrentAction = 0;
 					w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
 				}
-
 				else
 				{
 					w->CurrentAction       = 0;
 					w->PlaySpeed           = 0.f;
-					w->AnimationFrame      = 0.f;
+					w->AnimationFrame      = 0.001f;
 					w->PriorAnimationFrame = 0.f;
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
+
 				if(g_CMonkSystem.IsSwordformGloves(w->Type))
 					g_CMonkSystem.RenderSwordformGloves(c, w->Type, i, o->Alpha, Translate, Select);
 				else
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 				RenderLinkObject(0.f,0.f,0.f,c,w,w->Type,w->Level,w->Option1,false,Translate);
 
 				if(w->Level >= 7)
@@ -10111,6 +10042,20 @@ void RenderCharacter(CHARACTER *c,OBJECT *o,int Select)
 			}
 		}
 	}
+
+	else {
+		for (int i = 0; i < 2; i++) {
+			if (c->Weapon[i].Type == MODEL_SWORD+35) {
+				if (c->Weapon[i].AnimationFrame != 0.f);
+					PlayBuffer(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02);
+				c->Weapon[i].CurrentAction = 0;
+				c->Weapon[i].AnimationFrame = 0;
+				c->Weapon[i].PriorAnimationFrame = 0;
+				c->Weapon[i].PlaySpeed = 0;
+			}
+		}
+	}
+
 	switch ( o->Type )
 	{
 	case MODEL_PLAYER:
@@ -11329,14 +11274,10 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
 	c->m_CursedTempleCurSkill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
 	c->m_CursedTempleCurSkillPacket = false;
 
-	if(Type<MODEL_FACE 
-#ifdef PBG_ADD_NEWCHAR_MONK
-		|| Type>MODEL_FACE+6
-#else //PBG_ADD_NEWCHAR_MONK
-		|| Type>MODEL_FACE+5
-#endif //PBG_ADD_NEWCHAR_MONK
-		)
-     	c->Class = 0;
+	if (Type < MODEL_FACE || Type > MODEL_FACE + 6)
+	{
+		c->Class = 0;
+	}
 
 	if(Type==MODEL_PLAYER)
 	{
@@ -11348,7 +11289,7 @@ void CreateCharacterPointer(CHARACTER *c,int Type,unsigned char PositionX,unsign
      	o->PriorAction   = 0;
     	o->CurrentAction = 0;
 	}
-    o->AnimationFrame = 0.f;
+    o->AnimationFrame = 0.002f;
 	o->PriorAnimationFrame   = 0;
 	c->JumpTime         = 0;
 	o->HiddenMesh       = -1;
@@ -11745,9 +11686,7 @@ void SetCharacterScale(CHARACTER *c)
 			case CLASS_DARK  :    c->Object.Scale = 1.2f;break;
 			case CLASS_DARK_LORD: c->Object.Scale = 1.2f;break;
 			case CLASS_SUMMONER:	c->Object.Scale = 1.2f;break;
-#ifdef PBG_ADD_NEWCHAR_MONK
 			case CLASS_RAGEFIGHTER:	c->Object.Scale = 1.35f;break;
-#endif //PBG_ADD_NEWCHAR_MONK
 			}
 		}
 		else
@@ -11760,9 +11699,7 @@ void SetCharacterScale(CHARACTER *c)
 			case CLASS_DARK  :    c->Object.Scale = 1.2f;break;
 			case CLASS_DARK_LORD: c->Object.Scale = 1.2f;break;
 			case CLASS_SUMMONER:	c->Object.Scale = 1.2f;break;
-#ifdef PBG_ADD_NEWCHAR_MONK
 			case CLASS_RAGEFIGHTER:	c->Object.Scale = 1.35f;break;
-#endif //PBG_ADD_NEWCHAR_MONK
 			}
 		}
 	}
@@ -11779,9 +11716,7 @@ void SetCharacterScale(CHARACTER *c)
 			case CLASS_DARK  :    c->Object.Scale = 0.95f;break;
 			case CLASS_DARK_LORD: c->Object.Scale = 0.92f;break;
 			case CLASS_SUMMONER:	c->Object.Scale = 0.90f;break;
-#ifdef PBG_ADD_NEWCHAR_MONK
 			case CLASS_RAGEFIGHTER:	c->Object.Scale = 1.03f;break;
-#endif //PBG_ADD_NEWCHAR_MONK
 			}
 		}
 		else
@@ -11794,9 +11729,7 @@ void SetCharacterScale(CHARACTER *c)
 			case CLASS_DARK  :    c->Object.Scale = 0.95f;break;
 			case CLASS_DARK_LORD: c->Object.Scale = 0.92f;break;
 			case CLASS_SUMMONER:	c->Object.Scale = 0.90f;break;
-#ifdef PBG_ADD_NEWCHAR_MONK
 			case CLASS_RAGEFIGHTER:	c->Object.Scale = 1.03f;break;
-#endif //PBG_ADD_NEWCHAR_MONK
 			}
 		}
 #ifdef PJH_NEW_SERVER_SELECT_MAP
@@ -11853,10 +11786,8 @@ void SetCharacterClass(CHARACTER *c)
 	c->Weapon[1].Level = (p[EQUIPMENT_WEAPON_LEFT ].Level>>3)&15;
 	c->Weapon[0].Option1 = p[EQUIPMENT_WEAPON_RIGHT].Option1;
 	c->Weapon[1].Option1 = p[EQUIPMENT_WEAPON_LEFT ].Option1;
-#ifdef PBG_ADD_NEWCHAR_MONK
 	c->Weapon[0].ExtOption = p[EQUIPMENT_WEAPON_RIGHT].ExtOption;
 	c->Weapon[1].ExtOption = p[EQUIPMENT_WEAPON_LEFT ].ExtOption;
-#endif //PBG_ADD_NEWCHAR_MONK
 	c->Wing.Level = (p[EQUIPMENT_WING].Level>>3)&15;
 	c->Helper.Level = (p[EQUIPMENT_HELPER].Level>>3)&15;
 
@@ -14696,10 +14627,8 @@ bool RenderCharacterBackItem(CHARACTER *c, OBJECT* o, bool bTranslate)
 					RenderLinkObject(0.f, 0.f, 15.f, c, pWeapon, iType, iLevel, iOption1, true, bTranslate);
 					pWeapon->LinkBone = byTempLinkBone;
 				}
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				else if(g_CMonkSystem.IsSwordformGloves(iType))
 					g_CMonkSystem.RenderSwordformGloves(c, iType, i, o->Alpha, bTranslate);
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 				else
 				{
 					bool bRightHandItem = false;
@@ -14766,9 +14695,7 @@ bool RenderCharacterBackItem(CHARACTER *c, OBJECT* o, bool bTranslate)
 				switch(w->Type)		
 				{
 				case MODEL_WING+40:
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				case MODEL_WING+50:
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 					w->LinkBone  = 19;
 					RenderLinkObject(0.f,0.f,15.f,c,w,w->Type,w->Level,w->Option1,true,bTranslate);
 					break;
@@ -14788,27 +14715,26 @@ bool RenderCharacterBackItem(CHARACTER *c, OBJECT* o, bool bTranslate)
 				w->LinkBone  = 34;
 				w->PlaySpeed = 0.5f;
 				iOption1 = w->Option1;
-#ifdef PBG_ADD_NEWCHAR_MONK
-				if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
-					&& (c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+59
-					|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+60
-					|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+61))
+				vec3_t vRelativePos;
+				if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
+					&& (c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR + 59
+						|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR + 60
+						|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR + 61
+						|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR + 73))
+				{
 					RenderLinkObject(20.f, -5.f, 20.f, c, w, iType, iLevel, iOption1, false, bTranslate);
-				else
-#endif //PBG_ADD_NEWCHAR_MONK
-				RenderLinkObject(20.f, 0.f, 0.f, c, w, iType, iLevel, iOption1, false, bTranslate);
-				vec3_t vRelativePos, vPos, vLight;
-				Vector(20.f, 0.f, 15.f, vRelativePos);
-#ifdef PBG_ADD_NEWCHAR_MONK
-				if(gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
-					&& (c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+59
-					|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+60
-					|| c->BodyPart[BODYPART_ARMOR].Type == MODEL_ARMOR+61))
 					Vector(20.f, -5.f, 35.f, vRelativePos);
-#endif //PBG_ADD_NEWCHAR_MONK
+				}
+				else
+				{
+					RenderLinkObject(20.f, 0.f, 0.f, c, w, iType, iLevel, iOption1, false, bTranslate);
+					Vector(20.f, 0.f, 15.f, vRelativePos);
+				}
+				
+				vec3_t vPos;
 				Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], vRelativePos, vPos, true);
 
-				// 스프라이트
+				vec3_t vLight;
 				float fLuminosity = (float)(rand()%30+70)*0.01f;
 				Vector(fLuminosity*0.5f, fLuminosity*0.f, fLuminosity*0.f, vLight);
 				CreateSprite(BITMAP_LIGHT, vPos, 1.5f, vLight ,o);

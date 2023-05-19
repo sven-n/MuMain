@@ -3871,11 +3871,8 @@ bool SEASON3B::CCursedTempleProgressMsgBox::CheckHeroAction()
 	 && !(action == PLAYER_STOP_RIDE_HORSE)
 	 && !(action == PLAYER_ATTACK_STRIKE)
 	 && !(action == PLAYER_STOP_TWO_HAND_SWORD_TWO)
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 	 && !(action >= PLAYER_RAGE_FENRIR_STAND && action <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
-	 && !(action == PLAYER_RAGE_UNI_STOP_ONE_RIGHT)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
-	 )
+	 && !(action == PLAYER_RAGE_UNI_STOP_ONE_RIGHT))
 	{
 		return false;
 	}

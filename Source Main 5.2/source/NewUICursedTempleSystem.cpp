@@ -24,8 +24,8 @@
 #include "SkillManager.h"
 
 extern int TextNum;
-extern char TextList[30][100];
-extern int  TextListColor[30];
+extern char TextList[50][100];
+extern int  TextListColor[50];
 
 using namespace SEASON3B;
 

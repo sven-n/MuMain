@@ -172,10 +172,7 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 	if(m_BtnMasterLevel.UpdateMouseEvent() == true)
 	{
 		if(gCharacterManager.IsMasterLevel( Hero->Class ) == true 
-#ifdef PBG_ADD_NEWCHAR_MONK
-			&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT
-#endif //PBG_ADD_NEWCHAR_MONK
-			)
+			&& gCharacterManager.GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT)
 			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
 		return true;
 	}
@@ -269,7 +266,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
 	char strID[256];
 	sprintf(strID, "%s", CharacterAttribute->Name);
 	unicode::t_char strClassName[256];
-	unicode::_sprintf(strClassName, "(%s)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
+	unicode::_sprintf(strClassName, "(%s) %d", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class), CharacterAttribute->Class);
 	
 	g_pRenderText->SetFont(g_hFontBold);
 	g_pRenderText->SetBgColor(20, 20, 20, 20);
@@ -872,7 +869,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			    break;
 		    }
         }
-#ifdef PBG_ADD_NEWCHAR_MONK
 		else if(iBaseClass == CLASS_RAGEFIGHTER)
 		{
 			if((CharacterMachine->Equipment[i].Type == -1 && ( i!=EQUIPMENT_GLOVES && iBaseClass == CLASS_RAGEFIGHTER)) 
@@ -882,7 +878,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			    break;
 		    }
 		}
-#endif //PBG_ADD_NEWCHAR_MONK
         else
         {
 		    if((CharacterMachine->Equipment[i].Type == -1 ) ||
@@ -926,10 +921,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         {
 		    for(int i=EQUIPMENT_ARMOR; i<=EQUIPMENT_BOOTS; ++i)
 		    {
-#ifdef PBG_ADD_NEWCHAR_MONK
 				if(iBaseClass==CLASS_RAGEFIGHTER && i == EQUIPMENT_GLOVES)
 					continue;
-#endif //PBG_ADD_NEWCHAR_MONK
 			    if(iType != CharacterMachine->Equipment[i].Type % MAX_ITEM_INDEX)
 			    {
 				    bDexSuccess = false;
@@ -996,29 +989,22 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
 	unicode::t_char strBlocking[256];
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	int nAdd_FulBlocking = 0;
 	if(g_isCharacterBuff((&Hero->Object), eBuff_Def_up_Ourforces))
 	{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 		int _AddStat = (10 + (float)(CharacterAttribute->Energy-80) / 10);
-#else //PBG_MOD_RAGEFIGHTERSOUND
-		int _AddStat = (10 + (float)(CharacterAttribute->Energy-160) / 50);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
-
 		if(_AddStat>100)
 			_AddStat = 100;
 
 		_AddStat = CharacterAttribute->SuccessfulBlocking * _AddStat / 100;
 		nAdd_FulBlocking += _AddStat;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
+
 	if(bDexSuccess)
 	{
 		// memorylock
 		if(CharacterAttribute->SuccessfulBlocking > 0)
 		{
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			if(nAdd_FulBlocking)
 			{
 				unicode::_sprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,
@@ -1029,9 +1015,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 				unicode::_sprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,
 				CharacterAttribute->SuccessfulBlocking,(CharacterAttribute->SuccessfulBlocking) / 10);
 			}
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-			unicode::_sprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,CharacterAttribute->SuccessfulBlocking,(CharacterAttribute->SuccessfulBlocking) / 10);
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		}
 		else
 		{
@@ -1042,7 +1025,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	{
 		if(CharacterAttribute->SuccessfulBlocking > 0)
 		{
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			if(nAdd_FulBlocking)
 			{
 				unicode::_sprintf(strBlocking, GlobalText[206],t_adjdef + maxdefense + iChangeRingAddDefense,CharacterAttribute->SuccessfulBlocking, nAdd_FulBlocking);
@@ -1051,13 +1033,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 			{
 				unicode::_sprintf(strBlocking, GlobalText[208],t_adjdef + maxdefense + iChangeRingAddDefense,CharacterAttribute->SuccessfulBlocking);
 			}
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-			// 208 "방어력(율): %d (%d)"
-          	unicode::_sprintf(strBlocking, GlobalText[208],
-				t_adjdef + maxdefense + iChangeRingAddDefense,
-				CharacterAttribute->SuccessfulBlocking
-				);
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		}
 		else
 		{
@@ -1080,12 +1055,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	{
 		g_pRenderText->SetTextColor(255, 0, 240, 255);
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	if(g_isCharacterBuff((&Hero->Object), eBuff_Def_up_Ourforces))
 	{
 		g_pRenderText->SetTextColor(100, 150, 255, 255);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	g_pRenderText->SetBgColor(0);
 	g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strBlocking);
 
@@ -1147,26 +1120,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	{
 		g_pRenderText->SetTextColor(255, 120, 0, 255);
 	}
-	else
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
-	if(g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
+	else if(g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
 	{
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 		CharacterMachine->CalculateAll();
 		wVitality = CharacterAttribute->Vitality+ CharacterAttribute->AddVitality;
-#else //PBG_MOD_RAGEFIGHTERSOUND
-		WORD _AddStat = (WORD)(30+(WORD)((CharacterAttribute->Energy-380)/10));
-		if(_AddStat > 200)
-		{
-			_AddStat = 200;
-		}
-		wVitality = CharacterAttribute->Vitality + _AddStat;
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 		g_pRenderText->SetTextColor(100, 150, 255, 255);
 	}
-	else
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-    if( CharacterAttribute->AddVitality )
+	else if( CharacterAttribute->AddVitality )
     {
 		g_pRenderText->SetTextColor(100, 150, 255, 255);
     }
@@ -1222,7 +1182,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 	iY = HEIGHT_VITALITY+24;
 	g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strVitality);
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 	if(iBaseClass==CLASS_RAGEFIGHTER)
 	{
 		iY += 13;
@@ -1230,7 +1189,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		unicode::_sprintf(strVitality, GlobalText[3155], 50+(wVitality/10));
 		g_pRenderText->RenderText(m_Pos.x+20, m_Pos.y+iY, strVitality);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
 
 	g_pRenderText->SetFont(g_hFontBold);
 	
@@ -1554,7 +1512,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		unicode::_sprintf( strEnergy, GlobalText[582], 200+(wEnergy/20) );
 		g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK
+
 	if(iBaseClass==CLASS_RAGEFIGHTER)
 	{
 		//마법공격력
@@ -1565,7 +1523,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 		unicode::_sprintf(strEnergy, GlobalText[3157], 100+(wDexterity/8+wEnergy/10));
 		g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
 
 	if(iBaseClass == CLASS_DARK_LORD)
 	{
@@ -1686,11 +1643,7 @@ void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
 {
 	ResetEquipmentLevel();
 
-	if(gCharacterManager.IsMasterLevel(Hero->Class) == true
-#ifdef PBG_ADD_NEWCHAR_MONK
-		&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT
-#endif //PBG_ADD_NEWCHAR_MONK
-		)
+	if(gCharacterManager.IsMasterLevel(Hero->Class) == true	&& gCharacterManager.GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT)
 	{
 		m_BtnMasterLevel.UnLock();
 		m_BtnMasterLevel.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));

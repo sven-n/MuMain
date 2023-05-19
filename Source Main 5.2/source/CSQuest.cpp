@@ -169,11 +169,7 @@ void CSQuest::setQuestLists ( BYTE* byList, int num, int Class )
 				break;
 		}
 	}
-	else if (CLASS_DARK == m_byClass || CLASS_DARK_LORD == m_byClass
-#ifdef PBG_ADD_NEWCHAR_MONK
-			|| CLASS_RAGEFIGHTER == m_byClass
-#endif //PBG_ADD_NEWCHAR_MONK
-		)
+	else if (CLASS_DARK == m_byClass || CLASS_DARK_LORD == m_byClass || CLASS_RAGEFIGHTER == m_byClass)
 	{
 		for (i = 4; i < num; ++i)
 		{

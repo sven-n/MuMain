@@ -51,11 +51,7 @@ typedef struct _PART_t
 	BYTE  ExtOption;
 	BYTE  LinkBone;
 	BYTE  CurrentAction;
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 	unsigned short  PriorAction;
-#else //PBG_ADD_NEWCHAR_MONK_ANI
-	BYTE  PriorAction;
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 	float AnimationFrame;
 	float PriorAnimationFrame;
 	float PlaySpeed;

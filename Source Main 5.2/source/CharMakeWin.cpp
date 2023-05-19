@@ -69,11 +69,7 @@ void CCharMakeWin::Create()
 	for (i = 0; i < MAX_CLASS; ++i)
 	{
 		m_abtnJob[i].Create(108, 26, BITMAP_LOG_IN+1, 4, 2, 1, 0, 3, 3, 3, 0);
-#ifdef PBG_ADD_NEWCHAR_MONK
 		int _btn_classname[MAX_CLASS] = {20, 21, 22, 23, 24, 1687, 3150};
-#else //PBG_ADD_NEWCHAR_MONK
-		int _btn_classname[MAX_CLASS] = {20, 21, 22, 23, 24, 1687};
-#endif //PBG_ADD_NEWCHAR_MONK
 		nText = _btn_classname[i];
 		m_abtnJob[i].SetText(GlobalText[nText], adwJobBtnClr);
 		CWin::RegisterButton(&m_abtnJob[i]);
@@ -117,15 +113,10 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 	m_abtnJob[CLASS_SUMMONER].SetPosition(nBaseX, nBaseY + 3 * nBtnHeight);
 	nBaseY = nYCoord + 246;
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 	m_abtnJob[CLASS_RAGEFIGHTER].SetPosition(nBaseX, nBaseY);
 
 	for (; i <= CLASS_DARK_LORD; ++i)
 		m_abtnJob[i].SetPosition(nBaseX, nBaseY + (i - 2) * nBtnHeight);
-#else //PBG_ADD_NEWCHAR_MONK
-	for (; i <= CLASS_DARK_LORD; ++i)
-		m_abtnJob[i].SetPosition(nBaseX, nBaseY + (i - 3) * nBtnHeight);
-#endif //PBG_ADD_NEWCHAR_MONK
 
 	nBaseY = nYCoord + 325;
 	m_aBtn[CMW_OK].SetPosition(nBaseX, nBaseY);
@@ -223,10 +214,8 @@ void CCharMakeWin::UpdateDisplay()
 		m_asprBack[CMW_SPR_STAT].SetSize(0, 80, Y);
 
 	int nText = m_nSelJob == CLASS_SUMMONER ? 1690 : 1705 + m_nSelJob;
-#ifdef PBG_ADD_NEWCHAR_MONK
 	if(m_nSelJob == CLASS_RAGEFIGHTER)
 		nText = 3152;
-#endif //PBG_ADD_NEWCHAR_MONK
 	m_nDescLine = ::SeparateTextIntoLines(GlobalText[nText], m_aszJobDesc[0],CMW_DESC_LINE_MAX, CMW_DESC_ROW_MAX);
 
 	SelectCreateCharacter();
@@ -322,9 +311,7 @@ void CCharMakeWin::RenderControls()
 		"26", "26", "26", "26",
 		"26", "20", "20", "15",
 		"21", "21", "18", "23",
-#ifdef PBG_ADD_NEWCHAR_MONK
 		"32", "27", "25", "20",
-#endif //PBG_ADD_NEWCHAR_MONK
 	};
 	int nStatBaseX = m_asprBack[CMW_SPR_STAT].GetXPos() + 22;
 	int nStatY;
@@ -432,14 +419,12 @@ void CCharMakeWin::RenderCreateCharacter()
 		CharacterView.Object.Position[0] += 4.8f;
 		CharacterView.Object.Position[2] += 4.0f;
 	}
-#ifdef PBG_ADD_NEWCHAR_MONK
 	else if (CharacterView.Class == CLASS_RAGEFIGHTER)
 	{
 		o->Scale = 6.0f;
 		CharacterView.Object.Position[0] += 9.8f;
 		CharacterView.Object.Position[2] -= 7.5f;
 	}
-#endif //PBG_ADD_NEWCHAR_MONK
 
 	RenderCharacter(&CharacterView,o);
 

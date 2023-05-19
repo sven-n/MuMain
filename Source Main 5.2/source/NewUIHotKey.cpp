@@ -230,12 +230,12 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 	}
 	else if(SEASON3B::IsPress('A'))
 	{
-		if(gCharacterManager.IsMasterLevel( Hero->Class ) == true 
-#ifdef PBG_ADD_NEWCHAR_MONK
-			&& GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT
-#endif //PBG_ADD_NEWCHAR_MONK
-			)
+		if (gCharacterManager.IsMasterLevel(Hero->Class) == true
+			&& gCharacterManager.GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT)
+		{
 			g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
+		}
+
 		PlayBuffer(SOUND_CLICK01);
 
 		return false;
@@ -339,6 +339,12 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 			return false;
 
 		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_GENSRANKING);
+		PlayBuffer(SOUND_CLICK01);
+		return false;
+	}
+	else if (SEASON3B::IsPress('Z'))
+	{
+		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MUHELPER);
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}

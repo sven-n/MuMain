@@ -38,11 +38,7 @@ bool DeleteParticle(int iType);
 
 void RenderLeaves();
 bool MoveLeaves();
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 void CreatePoint(vec3_t Position,int Value,vec3_t Color,float scale=15.f, bool bMove=true, bool bRepeatedly = false);
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-void CreatePoint(vec3_t Position,int Value,vec3_t Color,float scale=15.f, bool bMove=true);
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 void RenderPoints( BYTE byRenderOneMore=0 );
 void MovePoints();
 
@@ -101,12 +97,7 @@ bool SearchEffect(int iType, OBJECT* pOwner, int iSubType = -1);
 
 void CreateBomb(vec3_t p,bool Exp, int SubType = 0);
 void CreateBomb2(vec3_t p,bool Exp, int SubType = 0, float Scale = 0.0f);
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 void CreateBomb3(vec3_t vPos, int iSubType, float fScale = 1.0f);
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-void CreateBomb3(vec3_t vPos, int iSubType);
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-
 void CreateInferno(vec3_t Position, int SubType = 0);
 void RenderSky3();
 void RenderBackLight( vec3_t Position, vec3_t Light );

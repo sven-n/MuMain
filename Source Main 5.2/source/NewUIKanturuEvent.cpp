@@ -503,11 +503,8 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 				|| pItemHelper->Type == ITEM_HELPER+4
 				|| pItemWing->Type == ITEM_HELPER+30
 				|| pItemHelper->Type == ITEM_HELPER+37
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				|| (pItemWing->Type >= ITEM_WING+49 && pItemWing->Type <= ITEM_WING+50 )
-				|| (pItemWing->Type == ITEM_WING+135)
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
-				) )
+				|| (pItemWing->Type == ITEM_WING+135)))
 			{
 				CreateMessageBox(POPUP_NOT_HELPER);
 				return true;

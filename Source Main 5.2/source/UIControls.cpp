@@ -6135,7 +6135,7 @@ CUIBuyingListBox::CUIBuyingListBox()
 	SetSize(LISTBOX_WIDTH, LISTBOX_HEIGHT);
 }
 
-extern char TextList[30][100];
+extern char TextList[50][100];
 
 void CUIBuyingListBox::AddText(const char* pszExplanationText)
 {

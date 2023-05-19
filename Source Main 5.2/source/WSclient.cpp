@@ -71,9 +71,7 @@
 #include "FatigueTimeSystem.h"
 #endif //PBG_ADD_SECRETBUFF
 #include "ServerListManager.h"
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 #include "MonkSystem.h"
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
 #include "Dotnet/Connection.h"
 
@@ -1935,11 +1933,9 @@ void ReceiveChangePlayer( const BYTE *ReceiveBuffer )
 			if (c->Wing.Type == MODEL_WING+39 ||
 				c->Wing.Type==MODEL_HELPER+30 ||
 				c->Wing.Type==MODEL_WING+130 ||
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				c->Wing.Type == MODEL_WING+49 ||
 				c->Wing.Type == MODEL_WING+50 ||
 				c->Wing.Type == MODEL_WING+135||
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 				c->Wing.Type==MODEL_WING+40)
 			{
 				DeleteCloth(c, o);
@@ -1953,11 +1949,9 @@ void ReceiveChangePlayer( const BYTE *ReceiveBuffer )
 			if (c->Wing.Type == MODEL_WING+39 ||
 				c->Wing.Type==MODEL_HELPER+30 ||
 				c->Wing.Type==MODEL_WING+130 ||
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 				c->Wing.Type == MODEL_WING+49 ||
 				c->Wing.Type == MODEL_WING+50 ||
 				c->Wing.Type == MODEL_WING+135||
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM				
 				c->Wing.Type==MODEL_WING+40)
 			{
 				DeleteCloth(c, o);
@@ -2863,14 +2857,10 @@ void ReceiveAttackDamage( const BYTE *ReceiveBuffer )
 	OBJECT *o = &c->Object;
 	vec3_t Light;
 	WORD Damage			= (((WORD)(Data->DamageH)<<8) + Data->DamageL);
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	// DamageType
 	int	 DamageType		= (Data->DamageType)&0x0f;
 	bool bRepeatedly = (Data->DamageType>>4)&0x01;
 	bool bEndRepeatedly = (Data->DamageType>>5)&0x01;
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-	int	 DamageType		= (Data->DamageType)&0x3f;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
     bool bDoubleEnable  = (Data->DamageType>>6)&0x01;
 	bool bComboEnable	= (Data->DamageType>>7)&0x01;
 	WORD ShieldDamage	= (((WORD)(Data->ShieldDamageH)<<8) + Data->ShieldDamageL);
@@ -2998,7 +2988,6 @@ void ReceiveAttackDamage( const BYTE *ReceiveBuffer )
 			}
 		}
 		
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		if(bRepeatedly || bEndRepeatedly)
 		{
 			g_CMonkSystem.SetRepeatedly(Damage, DamageType, bDoubleEnable, bEndRepeatedly);
@@ -3007,9 +2996,7 @@ void ReceiveAttackDamage( const BYTE *ReceiveBuffer )
 				g_CMonkSystem.RenderRepeatedly(Key, o);
 			}
 		}
-		else
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
-		if(Damage == 0)
+		else if(Damage == 0)
 			CreatePoint(o->Position,-1,Light);
 		else
         {
@@ -3266,7 +3253,6 @@ void ReceiveAction(const BYTE* ReceiveBuffer,int Size)
 			PlayBuffer(SOUND_XMAS_TURN);
 		}
 		break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_RAGEBUFF_1:
 		{
 			SetAction(o, PLAYER_SKILL_ATT_UP_OURFORCES);
@@ -3279,7 +3265,6 @@ void ReceiveAction(const BYTE* ReceiveBuffer,int Size)
 			PlayBuffer(SOUND_RAGESKILL_BUFF_2);
 		}
 		break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	default:
 		SetAction(&c->Object,Data->Action);
 		break;
@@ -3460,7 +3445,6 @@ void ReceiveMagicFinish( const BYTE *ReceiveBuffer )
         SetActionDestroy_Def ( o );
 		UnRegisterBuff( eBuff_PhysDefense, o);
         break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_SKILL_ATT_UP_OURFORCES:
 		UnRegisterBuff( eBuff_Att_up_Ourforces, o);
 		break;
@@ -3470,7 +3454,6 @@ void ReceiveMagicFinish( const BYTE *ReceiveBuffer )
 	case AT_SKILL_DEF_UP_OURFORCES:
 		UnRegisterBuff( eBuff_Def_up_Ourforces, o);
 		break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}
 }
 
@@ -4526,7 +4509,6 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer,int Size, BOOL bEncrypted)
 					PlayBuffer(SOUND_SKILL_CAOTIC);
 				}
 				break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case AT_SKILL_THRUST:
 		{
 			g_CMonkSystem.SetRageSkillAni(MagicNumber, so);
@@ -4627,9 +4609,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer,int Size, BOOL bEncrypted)
 			}
 
 			CreateEffect(MODEL_TARGETMON_EFFECT, to->Position, to->Angle, vLight, 0, to, -1, 0, 0, 0, 1.0f);
-#ifdef PBG_MOD_RAGEFIGHTERSOUND
 			StopBuffer(SOUND_RAGESKILL_DRAGONLOWER_ATTACK, true);
-#endif //PBG_MOD_RAGEFIGHTERSOUND
 			PlayBuffer(SOUND_RAGESKILL_DRAGONLOWER_ATTACK);
 		}
 		break;
@@ -4639,7 +4619,6 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer,int Size, BOOL bEncrypted)
 				g_CMonkSystem.SetDarksideCnt();
 		}
 		break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}
 	
 #ifdef CONSOLE_DEBUG
@@ -5072,7 +5051,6 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer,int Size, BOOL bEncrypted)
 				case AT_SKILL_LIGHTNING_SHOCK:
 					SetAction(so, PLAYER_SKILL_LIGHTNING_SHOCK);
 					break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				case AT_SKILL_DRAGON_LOWER:
 				{
 					if(sc != Hero)
@@ -5081,7 +5059,6 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer,int Size, BOOL bEncrypted)
 					g_CMonkSystem.SetRageSkillAni(MagicNumber, so);
 				}
 				break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 				default:
 					SetPlayerMagic(sc);
 					break;
@@ -12304,7 +12281,6 @@ bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
 }
 #endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 BOOL ReceiveStraightAttack(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 {
 	LPPRECEIVE_STRAIGHTATTACK Data = (LPPRECEIVE_STRAIGHTATTACK)ReceiveBuffer;
@@ -12376,7 +12352,6 @@ void ReceiveDarkside(const BYTE* ReceiveBuffer)
 		g_CMonkSystem.SetDarksideTargetIndex(Data->TargerIndex);
 	}
 }
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
 static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size)
 {
@@ -13830,14 +13805,12 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
 			}break;
 
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM	
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 		case 0x4A:
 			ReceiveStraightAttack(ReceiveBuffer, Size, bEncrypted);
 			break;
 		case 0x4B:
 			ReceiveDarkside(ReceiveBuffer);
 			break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 		default:
 			break;
 	}
@@ -14540,7 +14513,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			}
 		}
 		break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case eBuff_Att_up_Ourforces:
 		{
 			DeleteEffect(BITMAP_LIGHT_RED, o, 1);
@@ -14559,7 +14531,6 @@ void InsertBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			CreateEffect(BITMAP_LIGHT_RED, o->Position, o->Angle, o->Light, 2, o,-1,0,0,0,1.5f);		
 		}
 		break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}
 }
 
@@ -14719,7 +14690,7 @@ void ClearBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 		}break;
 	case eBuff_Doppelganger_Ascension:
 		{
-// 			DeleteEffect(BITMAP_JOINT_THUNDER, o, 0);
+ 			DeleteEffect(BITMAP_JOINT_THUNDER, o, 0);
 		}
 		break;
 	case eBuff_SD_Addition:
@@ -14732,7 +14703,6 @@ void ClearBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			DeleteParticle(BITMAP_AG_ADDITION_EFFECT);
 		}
 		break;
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	case eBuff_Att_up_Ourforces:
 		{
 			DeleteEffect(BITMAP_LIGHT_RED, o, 1);
@@ -14748,7 +14718,6 @@ void ClearBuffPhysicalEffect( eBuffState buff, OBJECT* o )
 			DeleteEffect(BITMAP_LIGHT_RED, o, 2);
 		}
 		break;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 	}	
 }
 

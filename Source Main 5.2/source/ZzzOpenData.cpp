@@ -39,10 +39,7 @@
 #include "w_MapHeaders.h"
 #include "QuestMng.h"
 #include "ServerListManager.h"
-#ifdef PBG_ADD_NEWCHAR_MONK
 #include "MonkSystem.h"
-#endif //PBG_ADD_NEWCHAR_MONK
-
 
 ///////////////////////////////////////////
 extern BOOL g_bUseChatListBox;
@@ -128,11 +125,7 @@ void OpenPlayers()
 		gLoadData.AccessModel(MODEL_BODY_GLOVES+i, "Data\\Player\\", "GloveClass", i+1);
 		gLoadData.AccessModel(MODEL_BODY_BOOTS +i, "Data\\Player\\", "BootClass" , i+1);
 
-		if (CLASS_DARK != i && CLASS_DARK_LORD != i
-#ifdef PBG_ADD_NEWCHAR_MONK
-			&& (CLASS_RAGEFIGHTER != i)
-#endif //PBG_ADD_NEWCHAR_MONK
-			)
+		if (CLASS_DARK != i && CLASS_DARK_LORD != i	&& CLASS_RAGEFIGHTER != i)
 		{
 			gLoadData.AccessModel(MODEL_BODY_HELM  +MAX_CLASS+i, "Data\\Player\\", "HelmClass2" , i+1);
     		gLoadData.AccessModel(MODEL_BODY_ARMOR +MAX_CLASS+i, "Data\\Player\\", "ArmorClass2", i+1);
@@ -294,8 +287,6 @@ void OpenPlayers()
 		gLoadData.AccessModel(MODEL_BOOTS+i, "Data\\Player\\", "BootMale", i+1);
 	} // for()
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
-
 	for (int i = 0; i<MODEL_ITEM_COMMONCNT_RAGEFIGHTER; ++i)
 	{
 		gLoadData.AccessModel(MODEL_HELM_MONK  +i, "Data\\Player\\", "HelmMonk" , i+1);
@@ -311,7 +302,11 @@ void OpenPlayers()
 		gLoadData.AccessModel(MODEL_PANTS +59+i, "Data\\Player\\", "PantMale", 60+i);
 		gLoadData.AccessModel(MODEL_BOOTS +59+i, "Data\\Player\\", "BootMale", 60+i);
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
+
+	gLoadData.AccessModel(MODEL_HELM+73, "Data\\Player\\", "HelmMale74", -1);
+	gLoadData.AccessModel(MODEL_ARMOR+73, "Data\\Player\\", "ArmorMale74", -1);
+	gLoadData.AccessModel(MODEL_PANTS+73, "Data\\Player\\", "PantMale74", -1);
+	gLoadData.AccessModel(MODEL_BOOTS+73, "Data\\Player\\", "BootMale74", -1);
 
 	{
 		CPhysicsClothMesh *pCloth = new CPhysicsClothMesh [1];
@@ -423,8 +418,6 @@ void OpenPlayers()
 
     Models[MODEL_PLAYER].Actions[PLAYER_HIGH_SHOCK].PlaySpeed         = 0.3f;
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
-
 	for(int i=PLAYER_RAGE_FENRIR; i<=PLAYER_RAGE_FENRIR_ATTACK_RIGHT; i++)
 	{
 		if(i>=PLAYER_RAGE_FENRIR_TWO_SWORD && i<= PLAYER_RAGE_FENRIR_ONE_LEFT)
@@ -443,13 +436,9 @@ void OpenPlayers()
 		Models[MODEL_PLAYER].Actions[i].PlaySpeed		= 0.355f;
 	}
 	Models[MODEL_PLAYER].Actions[PLAYER_RAGE_UNI_RUN].PlaySpeed = 0.3f;
-#ifndef PBG_FIX_NEWCHAR_MONK_UNIANI
 	Models[MODEL_PLAYER].Actions[PLAYER_RAGE_UNI_ATTACK_ONE_RIGHT].PlaySpeed = 0.2f;
-#endif //PBG_FIX_NEWCHAR_MONK_UNIANI
 	Models[MODEL_PLAYER].Actions[PLAYER_RAGE_UNI_STOP_ONE_RIGHT].PlaySpeed = 0.18f;
-
 	Models[MODEL_PLAYER].Actions[PLAYER_STOP_RAGEFIGHTER].PlaySpeed = 0.16f;
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 	SetAttackSpeed();
 	
 	gLoadData.AccessModel(MODEL_GM_CHARACTER, "Data\\Skill\\", "youngza");
@@ -466,11 +455,9 @@ void OpenPlayerTextures()
    	LoadBitmap("Player\\skin_special_01.jpg"  ,BITMAP_SKIN+6);
 	LoadBitmap("Player\\level_man02.jpg"      ,BITMAP_SKIN+8);
 	LoadBitmap("Player\\hair_r.jpg"       ,BITMAP_HAIR);
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	LoadBitmap("Player\\LevelClass107.jpg"   ,BITMAP_SKIN+12);
 	LoadBitmap("Player\\LevelClass207.jpg"   ,BITMAP_SKIN+13);
 	LoadBitmap("Player\\LevelClass207_1.jpg" ,BITMAP_SKIN+14);
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
 	int nIndex;
 
@@ -479,11 +466,7 @@ void OpenPlayerTextures()
 		for (int i = 0; i < MAX_CLASS; ++i)
 		{
 			nIndex = MAX_CLASS*j+i;
-			if (1 == j && (CLASS_DARK == i || CLASS_DARK_LORD == i
-#ifdef PBG_ADD_NEWCHAR_MONK
-				|| (CLASS_RAGEFIGHTER == i)
-#endif //PBG_ADD_NEWCHAR_MONK
-				))
+			if (1 == j && (CLASS_DARK == i || CLASS_DARK_LORD == i || CLASS_RAGEFIGHTER == i))
 				continue;
 
 			gLoadData.OpenTexture(MODEL_BODY_HELM  +nIndex, "Player\\");
@@ -626,7 +609,6 @@ void OpenPlayerTextures()
 
 	gLoadData.OpenTexture(MODEL_GM_CHARACTER, "Skill\\");
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	for (int i = 0; i<MODEL_ITEM_COMMONCNT_RAGEFIGHTER; ++i)
 	{
 		gLoadData.OpenTexture(MODEL_HELM_MONK  +i, "Player\\");
@@ -642,7 +624,10 @@ void OpenPlayerTextures()
 		gLoadData.OpenTexture(MODEL_PANTS +59+i, "Player\\");
 		gLoadData.OpenTexture(MODEL_BOOTS +59+i, "Player\\");
 	}
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
+	gLoadData.OpenTexture(MODEL_HELM+73, "Player\\");
+	gLoadData.OpenTexture(MODEL_ARMOR+73, "Player\\");
+	gLoadData.OpenTexture(MODEL_PANTS+73, "Player\\");
+	gLoadData.OpenTexture(MODEL_BOOTS+73, "Player\\");
 }
 
 void OpenItems()
@@ -1243,7 +1228,6 @@ void OpenItems()
 	gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT,	"Data\\Item\\", "class15_pantleft");
 	gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT,	"Data\\Item\\", "class15_pantright");
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	gLoadData.AccessModel(MODEL_WING+49, "Data\\Item\\", "Wing", 50);
 	gLoadData.AccessModel(MODEL_WING+50, "Data\\Item\\", "Wing", 51);
 	gLoadData.AccessModel(MODEL_WING+135, "Data\\Item\\", "Wing", 50);
@@ -1253,7 +1237,6 @@ void OpenItems()
 	g_CMonkSystem.LoadModelItem();
 	for(int _nRollIndex=0; _nRollIndex<7; ++_nRollIndex)
 		gLoadData.AccessModel(MODEL_ETC+30+_nRollIndex, "Data\\Item\\", "rollofpaper");
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
 
 #ifdef LEM_ADD_LUCKYITEM	// LuckyItem Data AccesModel
 	gLoadData.AccessModel(MODEL_HELPER+135, "Data\\Item\\LuckyItem\\", "LuckyCardgreen");				
@@ -1802,14 +1785,14 @@ void OpenItemTextures()
 	gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT,	"Item\\");	// 14, 15
 	LoadBitmap("Item\\rgb_mix.jpg"	,BITMAP_RGB_MIX	,GL_LINEAR, GL_REPEAT);
 
-#ifdef PBG_ADD_NEWCHAR_MONK_ITEM
 	gLoadData.OpenTexture(MODEL_WING+49, "Item\\");
 	gLoadData.OpenTexture(MODEL_WING+50, "Item\\");
 	gLoadData.OpenTexture(MODEL_WING+135, "Item\\");
 	g_CMonkSystem.LoadModelItemTexture();
 	for(int _nRollIndex=0; _nRollIndex<7; ++_nRollIndex)
 		gLoadData.OpenTexture(MODEL_ETC+30+_nRollIndex, "Item\\");
-#endif //PBG_ADD_NEWCHAR_MONK_ITEM
+
+	LoadBitmap("Item\\PhoenixSoul_render.JPG", BITMAP_PHOENIXSOULWING, GL_LINEAR, GL_REPEAT);
 
 #ifdef LEM_ADD_LUCKYITEM
 	gLoadData.OpenTexture(MODEL_HELPER+135, "Item\\LuckyItem\\" );
@@ -4423,7 +4406,6 @@ void OpenSkills()
 	gLoadData.OpenTexture(MODEL_DEASULER, "Monster\\");
 	gLoadData.AccessModel(MODEL_EFFECT_SD_AURA, "Data\\Effect\\", "shield_up" );
 	gLoadData.OpenTexture(MODEL_EFFECT_SD_AURA, "Effect\\");
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 	gLoadData.AccessModel(MODEL_WOLF_HEAD_EFFECT, "Data\\Effect\\", "wolf_head_effect" );
 	gLoadData.OpenTexture(MODEL_WOLF_HEAD_EFFECT, "Effect\\");
 	LoadBitmap("Effect\\sbumb.jpg", BITMAP_SBUMB, GL_LINEAR, GL_REPEAT);
@@ -4464,7 +4446,19 @@ void OpenSkills()
 	gLoadData.OpenTexture(MODEL_SHOCKWAVE03, "Effect\\");
 	LoadBitmap("Effect\\ground_smoke.tga", BITMAP_GROUND_SMOKE, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	LoadBitmap("Effect\\knightSt_blue.jpg", BITMAP_KNIGHTST_BLUE, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
+
+	gLoadData.AccessModel(MODEL_PHOENIX_SHOT, "Data\\Effect\\", "phoenix_shot_effect");
+	gLoadData.OpenTexture(MODEL_PHOENIX_SHOT, "Effect\\");
+	gLoadData.AccessModel(MODEL_WINDSPIN01, "Data\\Effect\\", "wind_spin01");
+	gLoadData.OpenTexture(MODEL_WINDSPIN01, "Effect\\");
+	gLoadData.AccessModel(MODEL_WINDSPIN02, "Data\\Effect\\", "wind_spin02");
+	gLoadData.OpenTexture(MODEL_WINDSPIN02, "Effect\\");
+	gLoadData.AccessModel(MODEL_WINDSPIN03, "Data\\Effect\\", "wind_spin03");
+	gLoadData.OpenTexture(MODEL_WINDSPIN03, "Effect\\");
+
+	gLoadData.AccessModel(MODEL_SWORD_35_WING, "Data\\Item\\", "sword36wing");
+	gLoadData.OpenTexture(MODEL_SWORD_35_WING, "Item\\");
+
 #ifdef ASG_ADD_KARUTAN_MONSTERS
 	// 콘드라 돌조각
 	gLoadData.AccessModel(MODEL_CONDRA_STONE, "Data\\Monster\\", "condra_7_stone" );
@@ -4744,7 +4738,6 @@ void OpenSounds()
 
 	g_09SummerEvent->LoadSound();
 
-#ifdef PBG_ADD_NEWCHAR_MONK
 	LoadWaveFile(SOUND_RAGESKILL_THRUST, "Data\\Sound\\Ragefighter\\Rage_Thrust.wav");
 	LoadWaveFile(SOUND_RAGESKILL_THRUST_ATTACK, "Data\\Sound\\Ragefighter\\Rage_Thrust_Att.wav");
 	LoadWaveFile(SOUND_RAGESKILL_STAMP, "Data\\Sound\\Ragefighter\\Rage_Stamp.wav");
@@ -4759,7 +4752,6 @@ void OpenSounds()
 	LoadWaveFile(SOUND_RAGESKILL_DRAGONKICK_ATTACK, "Data\\Sound\\Ragefighter\\Rage_Dragonkick_Att.wav");
 	LoadWaveFile(SOUND_RAGESKILL_BUFF_1, "Data\\Sound\\Ragefighter\\Rage_Buff_1.wav");
 	LoadWaveFile(SOUND_RAGESKILL_BUFF_2, "Data\\Sound\\Ragefighter\\Rage_Buff_2.wav");
-#endif //PBG_ADD_NEWCHAR_MONK
 }
 
 extern int	g_iRenderTextType;
@@ -4799,7 +4791,7 @@ void OpenMacro(char *FileName)
 void SaveOptions()
 {
 	// 0 ~ 19 skill hotkey
-	BYTE options[30] = { 0x00, };
+	BYTE options[50] = { 0x00, };
 
 	int iSkillType = -1;
 	for(int i=0; i<10; ++i)

@@ -18,9 +18,9 @@
 #include "NewUISystem.h"
 #include "SkillManager.h"
 
-extern	char TextList[30][100];
-extern	int  TextListColor[30];
-extern	int  TextBold[30];
+extern	char TextList[50][100];
+extern	int  TextListColor[50];
+extern	int  TextBold[50];
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 
@@ -359,10 +359,8 @@ void	CSItemOption::calcSetOptionList ( BYTE* optionList )
 			if ( itemOption.byRequireClass[4]==1 && Class==CLASS_DARK_LORD && ExClass) RequireClass = 1;
             if ( itemOption.byRequireClass[5]==1 && Class==CLASS_SUMMONER ) RequireClass = 1;
 			if ( itemOption.byRequireClass[5]==1 && Class==CLASS_SUMMONER && ExClass) RequireClass = 1;
-#ifdef PBG_ADD_NEWCHAR_MONK
 			if ( itemOption.byRequireClass[6]==1 && Class==CLASS_RAGEFIGHTER ) RequireClass = 1;
 			if ( itemOption.byRequireClass[6]==1 && Class==CLASS_RAGEFIGHTER && ExClass) RequireClass = 1;
-#endif //PBG_ADD_NEWCHAR_MONK
             setType = optionList[i+2];
             m_bySetOptionIndex[setType] = optionList[i];
             if ( m_strSetName[setType][0]!=0 && strcmp( m_strSetName[setType], itemOption.strSetName )!=NULL )
@@ -929,38 +927,43 @@ void CSItemOption::CheckItemSetOptions ( void )
 	BYTE byOptionList[30] = { 0, };
 	ITEM* itemTmp = NULL;
 
-    memset ( m_bySetOptionList, 0, sizeof( BYTE ) * 16 );
+	ZeroMemory(m_bySetOptionList, sizeof(BYTE) * 16);
 
-	for ( int i=0; i<MAX_EQUIPMENT_INDEX; ++i )
-	{	
-		if ( i==EQUIPMENT_WING || i==EQUIPMENT_HELPER ) continue;
-
-		ITEM *ip = &CharacterMachine->Equipment[i];
-
-		if( ip->Durability <= 0 ) {
+	for (int i = 0; i < MAX_EQUIPMENT_INDEX; ++i)
+	{
+		if (i == EQUIPMENT_WING || i == EQUIPMENT_HELPER)
+		{
 			continue;
 		}
 
-        if (itemTmp ==nullptr || ((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT) && itemTmp->Type == ip->Type && itemTmp->ExtOption == (ip->ExtOption % 0x04)))
-        {
-            continue;
-        }
+		ITEM* ip = &CharacterMachine->Equipment[i];
 
-		if ( ip->Type>-1 )
+		if (ip->Durability <= 0)
 		{
-			checkItemType( byOptionList, ip->Type, ip->ExtOption );
+			continue;
 		}
 
-        if ( i==EQUIPMENT_WEAPON_RIGHT || i==EQUIPMENT_RING_RIGHT )
-        {
-            itemTmp->Type = ip->Type;
-            itemTmp->ExtOption = (ip->ExtOption%0x04);
-        }
+		if ((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT) && itemTmp->Type == ip->Type && itemTmp->ExtOption == (ip->ExtOption % 0x04))
+		{
+			continue;
+		}
+
+		if (ip->Type > -1)
+		{
+			checkItemType(byOptionList, ip->Type, ip->ExtOption);
+		}
+
+		if (i == EQUIPMENT_WEAPON_RIGHT || i == EQUIPMENT_RING_RIGHT)
+		{
+			// TODO: How logical is that? In the end, you're just modifying ip?
+			itemTmp = ip;
+			itemTmp->Type = ip->Type;
+			itemTmp->ExtOption = (ip->ExtOption % 0x04);
+		}
 	}
 
-	calcSetOptionList( byOptionList );
-
-	getAllAddStateOnlyAddValue ( &CharacterAttribute->AddStrength,	&CharacterAttribute->AddDexterity, &CharacterAttribute->AddEnergy, &CharacterAttribute->AddVitality, &CharacterAttribute->AddCharisma);
+	calcSetOptionList(byOptionList);
+	getAllAddStateOnlyAddValue(&CharacterAttribute->AddStrength, &CharacterAttribute->AddDexterity, &CharacterAttribute -> AddEnergy, &CharacterAttribute->AddVitality, &CharacterAttribute->AddCharisma);
 
     WORD AllStrength  = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
     WORD AllDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
@@ -969,39 +972,43 @@ void CSItemOption::CheckItemSetOptions ( void )
 	WORD AllCharisma  = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 	WORD AllLevel     = CharacterAttribute->Level;
 
-    memset ( byOptionList, 0, sizeof( BYTE ) * 30 );
-    memset ( m_bySetOptionList, 255, sizeof( BYTE ) * 16 );
+	ZeroMemory(byOptionList, sizeof(BYTE) * 30);
+	memset(m_bySetOptionList, 255, sizeof(BYTE) * 16);
 
-	for (int i=0; i<MAX_EQUIPMENT_INDEX; ++i )
+	for (int i = 0; i < MAX_EQUIPMENT_INDEX; ++i)
 	{
-		if ( i==EQUIPMENT_WING || i==EQUIPMENT_HELPER ) continue;
-
-		ITEM *ip = &CharacterMachine->Equipment[i];
-
-        if ( ip->RequireDexterity>AllDexterity || ip->RequireEnergy>AllEnergy || ip->RequireStrength>AllStrength || ip->RequireLevel > AllLevel || ip->RequireCharisma > AllCharisma || ip->Durability <= 0 || ( IsRequireEquipItem( ip ) == false ))
-        {
-            continue;
-        }
-
-        if (!itemTmp || (( i==EQUIPMENT_WEAPON_LEFT || i==EQUIPMENT_RING_LEFT ) && itemTmp->Type==ip->Type && itemTmp->ExtOption==(ip->ExtOption%0x04) ))
-        {
-            continue;
-        }
-
-		if ( ip->Type>-1 )
+		if (i == EQUIPMENT_WING || i == EQUIPMENT_HELPER)
 		{
-			checkItemType( byOptionList, ip->Type, ip->ExtOption );
+			continue;
 		}
 
-        if ( i==EQUIPMENT_WEAPON_RIGHT || i==EQUIPMENT_RING_RIGHT )
-        {
-            itemTmp->Type		= ip->Type;
-            itemTmp->ExtOption	= (ip->ExtOption%0x04);
-        }
+		ITEM* ip = &CharacterMachine->Equipment[i];
+
+		if (ip->RequireDexterity > AllDexterity || ip->RequireEnergy > AllEnergy || ip->RequireStrength > AllStrength || ip->RequireLevel > AllLevel || ip->RequireCharisma > AllCharisma || ip->Durability <= 0 || (IsRequireEquipItem(ip) == false)) {
+			continue;
+		}
+
+		if (((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT) && itemTmp->Type == ip->Type && itemTmp->ExtOption == (ip->ExtOption % 0x04)))
+		{
+			continue;
+		}
+
+		if (ip->Type > -1)
+		{
+			checkItemType(byOptionList, ip->Type, ip->ExtOption);
+		}
+
+		if (i == EQUIPMENT_WEAPON_RIGHT || i == EQUIPMENT_RING_RIGHT)
+		{
+			// TODO: How logical is that? In the end, you're just modifying ip?
+			itemTmp = ip;
+			itemTmp->Type = ip->Type;
+			itemTmp->ExtOption = (ip->ExtOption % 0x04);
+		}
 	}
 
-	UpdateCount_SetOptionPerEquippedSetItem( byOptionList, m_arLimitSetItemOptionCount, CharacterMachine->Equipment );
-	calcSetOptionList( byOptionList );
+	UpdateCount_SetOptionPerEquippedSetItem(byOptionList, m_arLimitSetItemOptionCount, CharacterMachine->Equipment);
+	calcSetOptionList(byOptionList);
 }
 
 void CSItemOption::MoveSetOptionList ( const int StartX, const int StartY )

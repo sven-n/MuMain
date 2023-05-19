@@ -3,8 +3,6 @@
 	#define KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK
 #endif // _DEBUG
 
-// #define NEW_PROTOCOL_SYSTEM
-
 #define PJH_NEW_SERVER_SELECT_MAP
 
 #define ASG_ADD_GENS_SYSTEM
@@ -32,9 +30,3 @@
 
 #define PJH_ADD_PANDA_PET
 #define PJH_ADD_PANDA_CHANGERING
-
-
-
-
-
-

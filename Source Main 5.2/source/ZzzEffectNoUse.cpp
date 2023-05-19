@@ -559,9 +559,7 @@ void RenderBackLight( OBJECT* o, vec3_t Position, vec3_t Light1, vec3_t Light2 )
     DisableAlphaBlend();
     
     if((o->CurrentAction<PLAYER_WALK_MALE || o->CurrentAction>PLAYER_RUN_RIDE_WEAPON) 
-#ifdef PBG_ADD_NEWCHAR_MONK_ANI
 		&& (o->CurrentAction!=PLAYER_RAGE_UNI_RUN && o->CurrentAction!=PLAYER_RAGE_UNI_RUN_ONE_RIGHT)
-#endif //PBG_ADD_NEWCHAR_MONK_ANI
 		&& light>1.1f)
     {
         vec3_t  a, Light;

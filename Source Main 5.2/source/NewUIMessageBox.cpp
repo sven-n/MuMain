@@ -120,26 +120,26 @@ void SEASON3B::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWO
 
 void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
 {
-	float _fWidth = 640, _fHeight = 480;
-	float _fPosX=0.0f,_fPosY=0.0f;
-	if(_bRender)
+	float fWidth = 640.0f, fHeight = 480.0f;
+	float fPosX = 0.0f, fPosY = 0.0f;
+	if (_bRender)
 	{
-		EnableAlphaTest();
-		//glColor4f(0.2f, 0.2f, 0.2f, m_fOpacityAlpha);
+		glEnable(GL_ALPHA_TEST);
 		glColor4f(m_vColor[0], m_vColor[1], m_vColor[2], m_fOpacityAlpha);
-		// 메인프레임에서 높이값을 51을 잡고있음
-		RenderColor(_fPosX, _fPosY, _fWidth, _fHeight-50.0f);
+		RenderColor(fPosX, fPosY, fWidth, fHeight - 50.0f);
+
 		glEnable(GL_TEXTURE_2D);
-		
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		DisableAlphaBlend();
-		EnableAlphaTest();
+		glDisable(GL_BLEND);
+		glEnable(GL_ALPHA_TEST);
 	}
 }
+
 void SEASON3B::CNewUIMessageBoxBase::SetMsgBackOpacity(float _fAlpha)
 {
 	m_fOpacityAlpha = _fAlpha;
 }
+
 void SEASON3B::CNewUIMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
 {
 	if(!_vColor)
@@ -154,7 +154,6 @@ void SEASON3B::CNewUIMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
 
 SEASON3B::CNewUIMessageBoxMng::CNewUIMessageBoxMng() : m_pNewUIMng(NULL), m_pMsgBoxFactory(NULL) 
 {
-
 }
 
 SEASON3B::CNewUIMessageBoxMng::~CNewUIMessageBoxMng() 

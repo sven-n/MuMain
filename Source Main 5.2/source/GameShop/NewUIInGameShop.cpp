@@ -316,7 +316,7 @@ void CNewUIInGameShop::RenderDisplayItems()
 	glPushMatrix();
 	glLoadIdentity();
 	glViewport2(0,0,WindowWidth,WindowHeight);
-	gluPerspective2(1.f, (float)(WindowWidth)/(float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
+	gluPerspective2(2.0f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();

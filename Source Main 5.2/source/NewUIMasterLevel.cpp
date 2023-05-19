@@ -21,10 +21,10 @@ int						JobPoint[4] = {0,0,0,0};
 char Need_Point = 0;
 int	 In_Skill = 0;
 using namespace SEASON3B;
-extern char TextList[30][100];
-extern int  TextListColor[30];
-extern int  TextBold[30];
-extern SIZE Size[30];
+extern char TextList[50][100];
+extern int  TextListColor[50];
+extern int  TextBold[50];
+extern SIZE Size[50];
 
 SEASON3B::CNewUIMasterLevel::CNewUIMasterLevel()
 {
@@ -704,7 +704,7 @@ int Point_R = 0,Point_Tot = 0;
 							|| AT_SKILL_ALICE_DRAINLIFE_UP == Skill_Num
 							)
 						{
-							sprintf(TextList[ib],"         ");
+							sprintf(TextList[ib],"");
 							ib++;
 							switch(Skill_Num)
 							{

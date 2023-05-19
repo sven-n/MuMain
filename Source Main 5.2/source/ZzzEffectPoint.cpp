@@ -19,11 +19,8 @@ PARTICLE  Points	[MAX_POINTS];
 
 int g_iLatestPoint = -1;
 
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
+
 void CreatePoint(vec3_t Position,int Value,vec3_t Color,float scale, bool bMove, bool bRepeatedly)
-#else //PBG_ADD_NEWCHAR_MONK_SKILL
-void CreatePoint(vec3_t Position,int Value,vec3_t Color,float scale, bool bMove)
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 {
 	for(int i=0;i<MAX_POINTS;i++)
 	{
@@ -35,10 +32,8 @@ void CreatePoint(vec3_t Position,int Value,vec3_t Color,float scale, bool bMove)
 			VectorCopy(Position,o->Position);
 			o->Position[2] += 140.f;
 			VectorCopy(Color,o->Angle);
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			o->bRepeatedly = bRepeatedly;
 			o->fRepeatedlyHeight = RequestTerrainHeight(o->Position[0], o->Position[1])+140.0f;
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 			o->Gravity  = 10.f;
 			o->Scale    = scale;
 			o->LifeTime = 0;
@@ -65,12 +60,10 @@ void RenderPoints( BYTE byRenderOneMore )
             {
                 if ( o->Position[2]<=300.f ) continue;
             }
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 			else if(o->bRepeatedly)
 			{
 				if( o->Position[2] <= o->fRepeatedlyHeight) continue;
 			}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
 
             RenderNumber(o->Position,o->Type,o->Angle,o->Gravity*0.4f,o->Scale);
 		}
@@ -87,13 +80,11 @@ void MovePoints()
 			o->LifeTime--;
 			if(o->LifeTime < 0)
 			{
-#ifdef PBG_ADD_NEWCHAR_MONK_SKILL
 				if(o->bRepeatedly && o->Position[2]>o->fRepeatedlyHeight)
 				{
 					o->Gravity = 10.0f;
 					o->bRepeatedly = false;
 				}
-#endif //PBG_ADD_NEWCHAR_MONK_SKILL
                 if ( o->bEnableMove )
                 {
 				    o->Position[2] += o->Gravity;

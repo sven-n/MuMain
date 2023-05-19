@@ -71,11 +71,7 @@ void    ChangeChaosCastleUnit ( CHARACTER* c )
 	
     int Class = gCharacterManager.GetBaseClass(c->Class);
     
-    if ( Class==CLASS_KNIGHT ||  Class==CLASS_DARK || Class==CLASS_DARK_LORD 
-#ifdef PBG_ADD_NEWCHAR_MONK
-		|| Class == CLASS_RAGEFIGHTER
-#endif //PBG_ADD_NEWCHAR_MONK
-		)
+    if (Class==CLASS_KNIGHT ||  Class==CLASS_DARK || Class==CLASS_DARK_LORD || Class == CLASS_RAGEFIGHTER)
     {
         c->Weapon[0].Type = MODEL_SWORD+16;
         c->Weapon[0].Level= 0;
