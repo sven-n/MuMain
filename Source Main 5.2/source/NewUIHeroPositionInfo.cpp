@@ -125,15 +125,18 @@ bool CNewUIHeroPositionInfo::BtnProcess()
 {
 	if (m_BtnConfig.UpdateMouseEvent())
 	{
+		g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MUHELPER);
+		PlayBuffer(SOUND_CLICK01);
 		return true;
 	}
-	else
+
+	if (m_BtnStart.UpdateMouseEvent())
 	{
-		if (m_BtnStart.UpdateMouseEvent())
-		{
-			return true;
-		}
+		// todo: start mu helper when it's implemented :)
+		PlayBuffer(SOUND_CLICK01);
+		return true;
 	}
+
 	return false;
 }
 
