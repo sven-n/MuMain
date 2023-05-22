@@ -37,6 +37,12 @@ What needs to be done for Season 6:
   * Karutan Map
   * MU Helper
 
+## How to build & run
+
+Because of the integrated .NET code, you need to publish the ManagedLibrary first
+to the debug output folder of the main.exe, so that all required managed DLLs are
+copied. A simple build is not enough in this case, however the publish just needs
+to be done once.
 
 ## Credits
 
