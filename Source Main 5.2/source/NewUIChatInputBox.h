@@ -79,10 +79,13 @@ namespace SEASON3B
 		typedef std::basic_string<unicode::t_char, std::char_traits<unicode::t_char>, std::allocator<unicode::t_char> > type_string;
 		typedef std::vector<type_string>	type_vec_history;
 
+		const uint64_t ChatCooldownMs = 1000; // 1 Second
+		uint64_t  m_lastChatTime = 0;
+
 		CNewUIManager*			m_pNewUIMng;
 		CNewUIChatLogWindow*	m_pNewUIChatLogWnd;
-		POINT	m_WndPos;
-		SIZE	m_WndSize;
+		POINT	m_WndPos{};
+		SIZE	m_WndSize{};
 
 		CUITextInputBox*	m_pChatInputBox, * m_pWhsprIDInputBox;
 		type_vec_history	m_vecChatHistory, m_vecWhsprIDHistory;

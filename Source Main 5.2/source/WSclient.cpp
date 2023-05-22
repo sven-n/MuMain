@@ -209,8 +209,6 @@ int FirstTime = 0;
 
 bool LogOut = false;
 
-int  ChatTime = 0;
-char ChatText[256];
 
 char ChatWhisperID[MAX_ID_SIZE+1];
 

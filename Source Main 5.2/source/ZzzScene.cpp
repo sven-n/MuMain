@@ -2325,7 +2325,6 @@ void MainScene(HDC hDC)
 
 		// TODO: Refactor the depending code of these frame counting things
 		//       so they use the actual time instead. See also 'WorldTime'.
-        if(ChatTime > 0) ChatTime--;
 		if(MacroTime > 0) MacroTime--;
 		WaterTextureNumber++;
 		WaterTextureNumber%=32;

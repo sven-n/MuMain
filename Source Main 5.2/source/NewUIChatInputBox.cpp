@@ -6,30 +6,32 @@
 #include "UIControls.h"
 #include "NewUISystem.h"
 #include "wsclientinline.h"
-#include "CSChaosCastle.h"
 #include "ZzzOpenData.h"
 #include "MapManager.h"
 using namespace SEASON3B;
 
-SEASON3B::CNewUIChatInputBox::CNewUIChatInputBox() : MAX_CHAT_SIZE_UTF16((int)(MAX_CHAT_SIZE/(g_pMultiLanguage->GetNumByteForOneCharUTF8())))
-
-{ 
-	Init(); 
+SEASON3B::CNewUIChatInputBox::CNewUIChatInputBox() : MAX_CHAT_SIZE_UTF16((int)(MAX_CHAT_SIZE / (g_pMultiLanguage->GetNumByteForOneCharUTF8())))
+{
+	Init();
 }
 
 SEASON3B::CNewUIChatInputBox::~CNewUIChatInputBox() 
 { 
-	Release(); 
+	Release();
 }
 
 void SEASON3B::CNewUIChatInputBox::Init()
 {
-	m_pNewUIMng = NULL;
-	m_pNewUIChatLogWnd = NULL;
+	m_pNewUIMng = nullptr;
+	m_pNewUIChatLogWnd = nullptr;
+	m_pChatInputBox = nullptr;
+	m_pWhsprIDInputBox = nullptr;
+	m_WndPos = {};
+	m_WndSize = {};
 	m_WndPos.x = m_WndPos.y = 0;
 	m_WndSize.cx = m_WndSize.cy = 0;
-	m_pChatInputBox = m_pWhsprIDInputBox = NULL;
-	m_iCurChatHistory = m_iCurWhisperIDHistory = 0;
+	m_iCurChatHistory = 0;
+	m_iCurWhisperIDHistory = 0;
 
 	m_iTooltipType = INPUT_TOOLTIP_NOTHING;
 	m_iInputMsgType = INPUT_CHAT_MESSAGE;
@@ -73,7 +75,7 @@ bool SEASON3B::CNewUIChatInputBox::Create(CNewUIManager* pNewUIMng, CNewUIChatLo
 {
 	Release();
 	
-	if(NULL == pNewUIChatLogWnd || NULL == pNewUIMng)
+	if(nullptr == pNewUIChatLogWnd || nullptr == pNewUIMng)
 		return false;
 
 	m_pNewUIMng = pNewUIMng;
@@ -126,9 +128,9 @@ void SEASON3B::CNewUIChatInputBox::Release()
 	if(m_pNewUIMng)
 	{
 		m_pNewUIMng->RemoveUIObj(this);
-		m_pNewUIMng = NULL;
+		m_pNewUIMng = nullptr;
 	}
-	
+
 	Init();
 }
 
@@ -461,8 +463,11 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 		return false;
 	}
 
-	if(IsVisible() && HaveFocus() && SEASON3B::IsPress(VK_RETURN))
+	const uint64_t currentTickCount = GetTickCount64();
+	if(IsVisible() && HaveFocus() && SEASON3B::IsPress(VK_RETURN)
+		&& m_lastChatTime < currentTickCount - ChatCooldownMs)
 	{
+		m_lastChatTime = currentTickCount;
 		char	szChatText[MAX_CHAT_SIZE+1]	= {'\0'};
 		char	szWhisperID[MAX_ID_SIZE+1]	= {'\0'};		
 		wchar_t *szReceivedChat = new wchar_t[MAX_CHAT_SIZE_UTF16];

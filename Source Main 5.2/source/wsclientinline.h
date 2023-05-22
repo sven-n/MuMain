@@ -281,21 +281,11 @@ extern DWORD g_dwLatestZoneMoving;
 	g_bWhileMovingZone = FALSE;\
 }
 
-extern int  ChatTime;
-extern char ChatText[256];
+inline char ChatText[256];
 
 __forceinline void SendChat(const char* Text)
 {
-	if(ChatTime > 50)
-	{
-		return;
-	}
-	else if(ChatTime > 0)
-	{
-		if(strcmp(ChatText,Text)==NULL) return;
-	}
 	strcpy(ChatText,Text);
-	ChatTime = 70;
 
     if(FindText2(Hero->ID, (char*)"webzen"))
 	{
