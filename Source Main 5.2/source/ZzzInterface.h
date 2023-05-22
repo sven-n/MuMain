@@ -26,7 +26,7 @@ extern char InputTextIME[12][4];
 extern int  InputLength[12];
 extern char InputTextHide[12];
 extern char MacroText[10][256];
-extern int  MacroTime;
+extern uint64_t  RemainingMacroCooldownTime;
 extern int  FontHeight;
 extern int  ItemHelp;
 extern bool DontMove;

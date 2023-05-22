@@ -82,8 +82,6 @@ extern vec3_t MousePosition, MouseTarget;
 extern void RegisterBuff( eBuffState buff, OBJECT* o, const int bufftime = 0 );
 extern void UnRegisterBuff( eBuffState buff, OBJECT* o );
 
-extern BYTE m_CrywolfState;
-
 MovementSkill g_MovementSkill;
 
 const   float   AutoMouseLimitTime = (1.f * 60.f*60.f);
@@ -165,7 +163,10 @@ char InputTextIME[12][4];
 char InputTextHide[12];
 int  InputLength[12];
 char MacroText[10][256];
-int  MacroTime = 0;
+
+constexpr uint64_t MacroCooldownMs = 4000; // 4 Seconds
+uint64_t  LastMacroTime = 0;
+
 int  WhisperIDCurrent = 2;
 char WhisperID[MAX_WHISPER_ID][256];
 DWORD g_dwOneToOneTick = 0;
@@ -4270,7 +4271,7 @@ bool CheckCommand(char *Text, bool bMacroText )
 				}
 
 				int iTextSize = 0;
-				for(int j=3;j<(int)strlen(Text);j++)
+				for(int j=3;j<=(int)strlen(Text);j++)
 				{
 					MacroText[i][j-3] = Text[j];
 					iTextSize = j;
@@ -7926,17 +7927,22 @@ void SendMacroChat(char *Text)
 {
 	if(!CheckCommand(Text, true))
 	{
-		if( ( Hero->Helper.Type<MODEL_HELPER+2 || Hero->Helper.Type>MODEL_HELPER+4 ) || Hero->SafeZone)
+		if ((Hero->Helper.Type<MODEL_HELPER + 2 || Hero->Helper.Type>MODEL_HELPER + 4) || Hero->SafeZone)
+		{
+			// Send animation for specific texts
 			CheckChatText(Text);
-		if(CheckAbuseFilter(Text))
+		}
+
+		if (CheckAbuseFilter(Text))
+		{
 			SendChat(GlobalText[570]);
+		}
 		else
+		{
 			SendChat(Text);
-#ifdef _DEBUG
-		MacroTime = 10;
-#else
-		MacroTime = 100;
-#endif
+		}
+
+		LastMacroTime = GetTickCount64();
 	}
 }
 
@@ -7955,9 +7961,7 @@ void MoveInterface()
 		}
 	}	
 
-	int x,y,Width,Height;
-	
-	if(MacroTime == 0)
+	if (LastMacroTime < GetTickCount64() - MacroCooldownMs)
 	{
         if ( gMapManager.InChaosCastle()==false )
         {
@@ -7985,49 +7989,50 @@ void MoveInterface()
 	
 	if( g_pUIManager->IsInputEnable() )
 	{
-			if (g_iChatInputType == 0)
-			{
-				Width=190;Height=29;x=186;y=415;
-				if(MouseX>=x && MouseX<x+Width && MouseY>=
-					y && MouseY<y+Height)
-				{
-					if(MouseLButtonPush)
-					{
-						MouseLButtonPush = false;
-						InputIndex = 0;
-						MouseUpdateTime = 0;
-						MouseUpdateTimeMax = 6;
-						PlayBuffer(SOUND_CLICK01);
-					}
-				}
-				Width=58;Height=29;x=186+190;y=415;
-				if(MouseX>=x && MouseX<x+Width && MouseY>=y && MouseY<y+Height)
-				{
-					if(MouseLButtonPush)
-					{
-						MouseLButtonPush = false;
-						InputIndex = 1;
-						MouseUpdateTime = 0;
-						MouseUpdateTimeMax = 6;
-						PlayBuffer(SOUND_CLICK01);
-					}
-				}
-			}
-			Width=20;Height=29;x=186+190+58;y=415;
-			if(MouseX>=x && MouseX<x+Width && MouseY>=y && MouseY<y+Height)
+		int x, y, Width, Height;
+		if (g_iChatInputType == 0)
+		{
+			Width=190;Height=29;x=186;y=415;
+			if(MouseX>=x && MouseX<x+Width && MouseY>=
+				y && MouseY<y+Height)
 			{
 				if(MouseLButtonPush)
 				{
 					MouseLButtonPush = false;
-					if(WhisperEnable)
-						WhisperEnable = false;
-					else
-						WhisperEnable = true;
+					InputIndex = 0;
 					MouseUpdateTime = 0;
 					MouseUpdateTimeMax = 6;
 					PlayBuffer(SOUND_CLICK01);
 				}
 			}
+			Width=58;Height=29;x=186+190;y=415;
+			if(MouseX>=x && MouseX<x+Width && MouseY>=y && MouseY<y+Height)
+			{
+				if(MouseLButtonPush)
+				{
+					MouseLButtonPush = false;
+					InputIndex = 1;
+					MouseUpdateTime = 0;
+					MouseUpdateTimeMax = 6;
+					PlayBuffer(SOUND_CLICK01);
+				}
+			}
+		}
+		Width=20;Height=29;x=186+190+58;y=415;
+		if(MouseX>=x && MouseX<x+Width && MouseY>=y && MouseY<y+Height)
+		{
+			if(MouseLButtonPush)
+			{
+				MouseLButtonPush = false;
+				if(WhisperEnable)
+					WhisperEnable = false;
+				else
+					WhisperEnable = true;
+				MouseUpdateTime = 0;
+				MouseUpdateTimeMax = 6;
+				PlayBuffer(SOUND_CLICK01);
+			}
+		}
 	}
 	
 }
@@ -8596,28 +8601,27 @@ void RenderBooleans()
 	}
 }
 
-extern int TextNum;
-extern char TextList[50][100];
-extern int  TextListColor[50];
-extern int  TextBold[50];
-extern SIZE Size[50];
-
 void RenderTimes()
 {
-	float x,y,Width,Height;
-	
-    if(MacroTime > 0)
+	const uint64_t currentTickCount = GetTickCount64();
+	if (LastMacroTime > currentTickCount - MacroCooldownMs)
 	{
-		Width=50;Height=2;x=(GetScreenWidth()-Width)/2;y=480-48-40;
-		
-		int Time = MacroTime*(int)Width/100;
-       	EnableAlphaTest();
-		g_pRenderText->RenderText((int)x,(int)y,"Macro Time");
-		RenderBar(x,y+12,Width,Height,(float)Time);
+		constexpr float width = 50;
+		constexpr float height = 2;
+		constexpr int y = 480 - 48 - 40;
+		const float x = (static_cast<float>(GetScreenWidth()) - width) / 2.0f;
+
+		const uint64_t remainingMacroCooldownTime = MacroCooldownMs - (currentTickCount - LastMacroTime);
+		const float progressValue = static_cast<float>(remainingMacroCooldownTime) / MacroCooldownMs * width;
+
+		EnableAlphaTest();
+		g_pRenderText->RenderText(static_cast<int>(x), y, "Macro Time");
+		RenderBar(x, y + 12, width, height, (float)progressValue);
 	}
-	glColor3f(1.f,1.f,1.f);
-	
-    matchEvent::RenderTime();
+
+	glColor3f(1.f, 1.f, 1.f);
+
+	matchEvent::RenderTime();
 }
 
 extern int g_iKeyPadEnable;
