@@ -2323,13 +2323,13 @@ void MainScene(HDC hDC)
 				GrabEnable = true;
 		}
 
+		constexpr int NumberOfWaterTextures = 32;
+		constexpr double timePerFrame = NumberOfWaterTextures / 25.0;
+		WaterTextureNumber = static_cast<uint64_t>(timeGetTime() * timePerFrame) % NumberOfWaterTextures;
 		// TODO: Refactor the depending code of these frame counting things
 		//       so they use the actual time instead. See also 'WorldTime'.
-		if(MacroTime > 0) MacroTime--;
-		WaterTextureNumber++;
-		WaterTextureNumber%=32;
 		MoveSceneFrame++;
-	} 
+	}
 
 	if (Destroy) {
 		return;

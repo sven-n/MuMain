@@ -23,6 +23,9 @@ extern  int     MoveSceneFrame;
 extern  float   TerrainMappingAlpha[TERRAIN_SIZE*TERRAIN_SIZE];
 extern  float   g_chrome[MAX_VERTICES][2];
 
+constexpr float WavePeriodMs = 40.0 / 25.0 * 1000.0; // = 1600 ms
+float LastWaveStart = 0;
+
 void CSWaterTerrain::Init ( void )
 {
     Vector ( 1.f, -1.f, 1.f, m_vLightVector );
@@ -32,17 +35,17 @@ void CSWaterTerrain::Init ( void )
 
 void CSWaterTerrain::Update ( void )
 {
-    if ( !gMapManager.InHellas(m_iMapIndex) ) return;
+	if (!gMapManager.InHellas(m_iMapIndex))
+	{
+		// We're not in Kalima, so we don't need to update.
+		return;
+	}
 
-    int WaveX;
-    int WaveY; 
-    //int Deep1 = (int)( 1050+sin(WorldTime*0.003f)*100 );
-
-    if ( (MoveSceneFrame%40)==0 )
+    if (LastWaveStart < WorldTime - WavePeriodMs)
     {
-        WaveX = ((Hero->PositionX)*2)+(rand()%30)-15;
-        WaveY = ((Hero->PositionY)*2)+25;
-        addSineWave ( WaveX, WaveY, 20, 2, 2000 );
+        int waveX = ((Hero->PositionX)*2)+(rand()%30)-15;
+        int waveY = ((Hero->PositionY)*2)+25;
+        addSineWave ( waveX, waveY, 20, 2, 2000 );
     }
 
     m_iWaterPage ^= 1;
