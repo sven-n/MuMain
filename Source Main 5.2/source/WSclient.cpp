@@ -1391,6 +1391,12 @@ void ReceiveChat( const BYTE *ReceiveBuffer )
 				Text[i] = Data->ChatText[i+1];
 			g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_GUILD_MESSAGE);	
 		}
+		else if (Data->ChatText[0] == '$')
+		{
+			for (int i = 0; i < MAX_CHAT_SIZE - 1; i++)
+				Text[i] = Data->ChatText[i + 2];
+			g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_GENS_MESSAGE);
+		}
 		else if(Data->ChatText[0]=='#')
 		{
 			for(int i=0;i<MAX_CHAT_SIZE-1;i++)

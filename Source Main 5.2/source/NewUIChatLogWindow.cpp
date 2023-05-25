@@ -22,7 +22,7 @@ SEASON3B::CNewUIChatLogWindow::~CNewUIChatLogWindow()
 
 void SEASON3B::CNewUIChatLogWindow::Init()
 {
-	m_pNewUIMng = NULL;
+	m_pNewUIMng = nullptr;
 	m_WndPos.x = m_WndPos.y = 0;
 	m_ScrollBtnPos.x = m_ScrollBtnPos.y = 0;
 	m_WndSize.cx = WND_WIDTH; m_WndSize.cy = 0;
@@ -83,7 +83,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 
 	type_vector_msgs* pvecMsgs = GetMsgs( GetCurrentMsgType() );
 
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		assert(!"empty chat!");
 		return false;
@@ -110,7 +110,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 		bool bRenderMessage = true;	
 		g_pRenderText->SetFont(g_hFont);
 
-		CMessageText* pMsgText = (*pvecMsgs)[i];
+		auto const pMsgText = (*pvecMsgs)[i];
 
 		if( pMsgText->GetType() == TYPE_WHISPER_MESSAGE )
 		{
@@ -142,14 +142,14 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 			g_pRenderText->SetBgColor(0, 255, 150, 200);
 			g_pRenderText->SetTextColor(0, 0, 0, 255);
 		}
-		else if( pMsgText->GetType() == TYPE_GUILD_MESSAGE )
-		{
-			g_pRenderText->SetBgColor(0, 255, 150, 200);
-			g_pRenderText->SetTextColor(0, 0, 0, 255);
-		}
 		else if( pMsgText->GetType() == TYPE_UNION_MESSAGE  )
 		{
 			g_pRenderText->SetBgColor(200, 200, 0, 200);
+			g_pRenderText->SetTextColor(0, 0, 0, 255);
+		}
+		else if (pMsgText->GetType() == TYPE_GENS_MESSAGE)
+		{
+			g_pRenderText->SetBgColor(150, 200, 100, 200);
 			g_pRenderText->SetTextColor(0, 0, 0, 255);
 		}
 		else if( pMsgText->GetType() == TYPE_GM_MESSAGE )
@@ -193,7 +193,8 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
 {
 	if(m_bShowFrame)
 	{
-		float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy;
+		float const fRenderPosX = m_WndPos.x;
+		float const fRenderPosY = m_WndPos.y - m_WndSize.cy;
 
 		EnableAlphaTest();
 		if(m_EventState == EVENT_RESIZING_BTN_DOWN)
@@ -204,21 +205,21 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
 		{
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		}
-		RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY-(float)RESIZING_BTN_HEIGHT, 254.0f, 10.0f);
+		RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY-(float)RESIZING_BTN_HEIGHT, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT);
 		DisableAlphaBlend();
 		
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-		RenderImage(IMAGE_SCROLL_TOP, fRenderPosX+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE, fRenderPosY+WND_TOP_BOTTOM_EDGE, 7, 3);
+		RenderImage(IMAGE_SCROLL_TOP, fRenderPosX+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE, fRenderPosY+WND_TOP_BOTTOM_EDGE, SCROLL_BAR_WIDTH, WND_TOP_BOTTOM_EDGE);
 		
 		for(int i=0; i<(int)GetNumberOfShowingLines(); i++)
 		{
 			RenderImage(IMAGE_SCROLL_MIDDLE, fRenderPosX+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE, 
-				fRenderPosY+WND_TOP_BOTTOM_EDGE+(float)(i*SCROLL_MIDDLE_PART_HEIGHT+SCROLL_TOP_BOTTOM_PART_HEIGHT), 7, 15);
+				fRenderPosY+WND_TOP_BOTTOM_EDGE+(float)(i*SCROLL_MIDDLE_PART_HEIGHT+SCROLL_TOP_BOTTOM_PART_HEIGHT), SCROLL_BAR_WIDTH, SCROLL_MIDDLE_PART_HEIGHT);
 		}
 		
 		RenderImage(IMAGE_SCROLL_BOTTOM, fRenderPosX+m_WndSize.cx-SCROLL_BAR_WIDTH-WND_LEFT_RIGHT_EDGE, 
-			m_WndPos.y-WND_TOP_BOTTOM_EDGE-SCROLL_TOP_BOTTOM_PART_HEIGHT, 7, 3);
+			m_WndPos.y-WND_TOP_BOTTOM_EDGE-SCROLL_TOP_BOTTOM_PART_HEIGHT, SCROLL_BAR_WIDTH, SCROLL_TOP_BOTTOM_PART_HEIGHT);
 		
 		EnableAlphaTest();
 		if(m_EventState == EVENT_SCROLL_BTN_DOWN)
@@ -240,7 +241,7 @@ bool SEASON3B::CNewUIChatLogWindow::Create(CNewUIManager* pNewUIMng, int x, int 
 {
 	Release();
 
-	if(NULL == pNewUIMng)
+	if(nullptr == pNewUIMng)
 		return false;
 
 	m_pNewUIMng = pNewUIMng;
@@ -260,8 +261,9 @@ void SEASON3B::CNewUIChatLogWindow::Release()
 	if(m_pNewUIMng)
 	{
 		m_pNewUIMng->RemoveUIObj(this);
-		m_pNewUIMng = NULL;
+		m_pNewUIMng = nullptr;
 	}
+
 	Init();
 }
 
@@ -288,7 +290,7 @@ void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type
 		RemoveFrontLine(TYPE_ALL_MESSAGE);
 	}
 	
-	if(m_vecFilters.empty() == true)
+	if(m_vecFilters.empty())
 	{
 		ProcessAddText(strID, strText, MsgType, ErrMsgType);	
 	}
@@ -313,7 +315,7 @@ void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type
 void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType)
 {
 	type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		assert(!"Empty Message");
 		return;
@@ -326,7 +328,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 		SeparateText(strID, strText, strText1, strText2);
 		if(!strText1.empty())
 		{
-			CMessageText* pMsgText = new CMessageText;
+			const auto pMsgText = new CMessageText;
 			if(!pMsgText->Create(strID, strText1, MsgType))
 				delete pMsgText;
 			else
@@ -334,9 +336,11 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 				pvecMsgs->push_back(pMsgText);
 			}
 
-			CMessageText* pAllMsgText = new CMessageText;
-			if(!pAllMsgText->Create(strID, strText1, MsgType))
+			const auto pAllMsgText = new CMessageText;
+			if (!pAllMsgText->Create(strID, strText1, MsgType))
+			{
 				delete pAllMsgText;
+			}
 			else
 			{
 				m_vecAllMsgs.push_back(pAllMsgText);
@@ -345,13 +349,13 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 			if( (MsgType == TYPE_ERROR_MESSAGE) && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE) )
 			{
 				type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
-				if( pErrvecMsgs == NULL )
+				if( pErrvecMsgs == nullptr )
 				{
 					assert(!"Error Chat");
 					return;
 				}
 
-				CMessageText* pErrMsgText = new CMessageText;
+				const auto pErrMsgText = new CMessageText;
 				if(!pErrMsgText->Create(strID, strText1, MsgType))
 					delete pErrMsgText;
 				else
@@ -367,15 +371,15 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 		}
 		if(!strText2.empty())
 		{
-			CMessageText* pMsgText = new CMessageText;
+			const auto pMsgText = new CMessageText;
 			if(!pMsgText->Create("", strText2, MsgType))
 				delete pMsgText;
 			else
 			{
 				pvecMsgs->push_back(pMsgText);
 			}
-			
-			CMessageText* pAllMsgText = new CMessageText;
+
+			const auto pAllMsgText = new CMessageText;
 			if(!pAllMsgText->Create("", strText2, MsgType))
 				delete pAllMsgText;
 			else
@@ -386,13 +390,13 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 			if( (MsgType == TYPE_ERROR_MESSAGE) && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE) )
 			{
 				type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
-				if( pErrvecMsgs == NULL )
+				if( pErrvecMsgs == nullptr )
 				{
 					assert(!"Error chat 2");
 					return;
 				}
-				
-				CMessageText* pErrMsgText = new CMessageText;
+
+				const auto pErrMsgText = new CMessageText;
 				if(!pErrMsgText->Create("", strText2, MsgType))
 					delete pErrMsgText;
 				else
@@ -409,15 +413,15 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 	}
 	else
 	{
-		CMessageText* pMsgText = new CMessageText;
+		const auto pMsgText = new CMessageText;
 		if(!pMsgText->Create(strID, strText, MsgType))
 			delete pMsgText;
 		else
 		{
 			pvecMsgs->push_back(pMsgText);
 		}
-		
-		CMessageText* pAllMsgText = new CMessageText;
+
+		const auto pAllMsgText = new CMessageText;
 		if(!pAllMsgText->Create(strID, strText, MsgType))
 			delete pAllMsgText;
 		else
@@ -429,13 +433,13 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 			&& (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE) )
 		{
 			type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
-			if( pErrvecMsgs == NULL )
+			if( pErrvecMsgs == nullptr )
 			{
 				assert(!"Error chat 3");
 				return;
 			}
-			
-			CMessageText* pErrMsgText = new CMessageText;
+
+			const auto pErrMsgText = new CMessageText;
 			if(!pErrMsgText->Create(strID, strText, MsgType))
 				delete pErrMsgText;
 			else
@@ -451,7 +455,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
 	}
 
 	pvecMsgs = GetMsgs( GetCurrentMsgType() );
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		assert(!"Error chat 4");
 		return;
@@ -468,13 +472,13 @@ void SEASON3B::CNewUIChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
 {
 	type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
 
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		assert(!"Empty Message RemoveFrontLine");
 		return;
 	}
 
-	type_vector_msgs::iterator vi = pvecMsgs->begin();
+	auto vi = pvecMsgs->begin();
 	if(vi != pvecMsgs->end())
 	{
 		delete (*vi);
@@ -490,13 +494,13 @@ void SEASON3B::CNewUIChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
 void SEASON3B::CNewUIChatLogWindow::Clear(MESSAGE_TYPE MsgType)
 {
 	type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		assert(!"Empty Message CNewUIChatLogWindow");
 		return;
 	}
 
-	type_vector_msgs::iterator vi_msg = pvecMsgs->begin();
+	auto vi_msg = pvecMsgs->begin();
 	for(; vi_msg != pvecMsgs->end(); vi_msg++)
 		delete (*vi_msg);
 	pvecMsgs->clear();
@@ -510,7 +514,7 @@ void SEASON3B::CNewUIChatLogWindow::Clear(MESSAGE_TYPE MsgType)
 size_t SEASON3B::CNewUIChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgType)
 { 
 	type_vector_msgs* pvecMsgs = GetMsgs( MsgType );
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		return 0;
 	}
@@ -526,7 +530,7 @@ int SEASON3B::CNewUIChatLogWindow::GetCurrentRenderEndLine() const
 void SEASON3B::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
 {
 	type_vector_msgs* pvecMsgs = GetMsgs( m_CurrentRenderMsgType );
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		assert(!"Empty message Scrolling");
 		return;
@@ -562,9 +566,9 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
 	unicode::_strncpy(szTemp, strFilterText.c_str(), MAX_CHAT_BUFFER_SIZE);
 	szTemp[MAX_CHAT_BUFFER_SIZE] = '\0';
 	unicode::t_char* token = unicode::_strtok(szTemp, " ");
-	token = unicode::_strtok(NULL, " ");
+	token = unicode::_strtok(nullptr, " ");
 
-	if(token == NULL)
+	if(token == nullptr)
 	{
 		ResetFilter();
 		AddText("", GlobalText[756], TYPE_SYSTEM_MESSAGE);
@@ -573,12 +577,12 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
 	{
 		for(int i=0; i<5; i++)
 		{
-			if(NULL == token) 
+			if(nullptr == token) 
 			{
 				break;
 			}
 			AddFilterWord(token);
-			token = unicode::_strtok(NULL, " ");
+			token = unicode::_strtok(nullptr, " ");
 		}
 		
 		AddText("", GlobalText[755], TYPE_SYSTEM_MESSAGE);
@@ -595,7 +599,7 @@ void SEASON3B::CNewUIChatLogWindow::SetSizeAuto()
 	SetNumberOfShowingLines(GetNumberOfShowingLines()+3);
 }
 
-void SEASON3B::CNewUIChatLogWindow::SetNumberOfShowingLines(int nShowingLines, OUT LPSIZE lpBoxSize/* = NULL*/)
+void SEASON3B::CNewUIChatLogWindow::SetNumberOfShowingLines(int nShowingLines, OUT LPSIZE lpBoxSize/* = nullptr*/)
 {
 	m_nShowingLines = (int)(nShowingLines/3)*3;
 	if(m_nShowingLines<3)
@@ -697,7 +701,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 		for(int i=iRenderStartLine, s=0; i<=GetCurrentRenderEndLine(); i++, s++)
 		{
 			type_vector_msgs* pvecMsgs = GetMsgs( GetCurrentMsgType() );
-			if( pvecMsgs == NULL )
+			if( pvecMsgs == nullptr )
 			{
 				return false;
 			}
@@ -709,6 +713,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 				|| pMsgText->GetType() == TYPE_PARTY_MESSAGE
 				|| pMsgText->GetType() == TYPE_GUILD_MESSAGE
 				|| pMsgText->GetType() == TYPE_UNION_MESSAGE
+				|| pMsgText->GetType() == TYPE_GENS_MESSAGE
 				|| pMsgText->GetType() == TYPE_GM_MESSAGE
 				)
 			{
@@ -895,13 +900,13 @@ float SEASON3B::CNewUIChatLogWindow::GetKeyEventOrder()
 bool SEASON3B::CNewUIChatLogWindow::CheckChatRedundancy(const type_string& strText, int iSearchLine/* = 1*/)
 {
 	type_vector_msgs* pvecMsgs = GetMsgs( TYPE_ALL_MESSAGE );
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		return 0;
 	}
 
 	if( pvecMsgs->empty() ) return false;
-	type_vector_msgs::reverse_iterator vri_msgs = pvecMsgs->rbegin();
+	auto vri_msgs = pvecMsgs->rbegin();
 	for(int i = 0; (i < iSearchLine) || (vri_msgs != pvecMsgs->rend()); vri_msgs++, i++)
 		if(0 == (*vri_msgs)->GetText().compare(strText)) return true;
 	return false;
@@ -938,7 +943,7 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
 }
 bool SEASON3B::CNewUIChatLogWindow::CheckFilterText(const type_string& strTestText)
 {
-	type_vector_filters::iterator vi_filters = m_vecFilters.begin();
+	auto vi_filters = m_vecFilters.begin();
 	for(; vi_filters != m_vecFilters.end(); vi_filters++)
 	{
 		if(FindText(strTestText.c_str(), (*vi_filters).c_str()) == true)
@@ -983,7 +988,7 @@ void SEASON3B::CNewUIChatLogWindow::AddFilterWord(const type_string& strWord)
 	if(m_vecFilters.size() > 5)
 		return;
 
-	type_vector_filters::iterator vi_filters = m_vecFilters.begin();
+	auto vi_filters = m_vecFilters.begin();
 	for(; vi_filters != m_vecFilters.end(); vi_filters++)
 	{
 		if(0 == (*vi_filters).compare(strWord))
@@ -1025,11 +1030,13 @@ SEASON3B::CNewUIChatLogWindow::type_vector_msgs* SEASON3B::CNewUIChatLogWindow::
 			return &m_vecGuildMsgs;
 		case TYPE_UNION_MESSAGE:
 			return &m_vecUnionMsgs;
+		case TYPE_GENS_MESSAGE:
+			return &m_vecGensMsgs;
 		case TYPE_GM_MESSAGE:
 			return &m_vecGMMsgs;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void SEASON3B::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
@@ -1038,7 +1045,7 @@ void SEASON3B::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
 	m_CurrentRenderMsgType = MsgType;
 
 	type_vector_msgs* pvecMsgs = GetMsgs( GetCurrentMsgType() );
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		return;
 	}
@@ -1056,7 +1063,7 @@ void SEASON3B::CNewUIChatLogWindow::ShowChatLog()
 	m_bShowChatLog = true;
 
 	type_vector_msgs* pvecMsgs = GetMsgs( GetCurrentMsgType() );
-	if( pvecMsgs == NULL )
+	if( pvecMsgs == nullptr )
 	{
 		return;
 	}

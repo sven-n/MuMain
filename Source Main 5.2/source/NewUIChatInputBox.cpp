@@ -49,6 +49,7 @@ void SEASON3B::CNewUIChatInputBox::LoadImages()
 	LoadBitmap("Interface\\newui_chat_normal_on.jpg", IMAGE_INPUTBOX_NORMAL_ON, GL_LINEAR);
 	LoadBitmap("Interface\\newui_chat_party_on.jpg", IMAGE_INPUTBOX_PARTY_ON, GL_LINEAR);
 	LoadBitmap("Interface\\newui_chat_guild_on.jpg", IMAGE_INPUTBOX_GUILD_ON, GL_LINEAR);
+	LoadBitmap("Interface\\newui_chat_gens_on.jpg", IMAGE_INPUTBOX_GENS_ON, GL_LINEAR);
 	LoadBitmap("Interface\\newui_chat_whisper_on.jpg", IMAGE_INPUTBOX_WHISPER_ON, GL_LINEAR);
 	LoadBitmap("Interface\\newui_chat_system_on.jpg", IMAGE_INPUTBOX_SYSTEM_ON, GL_LINEAR);
 	LoadBitmap("Interface\\newui_chat_chat_on.jpg", IMAGE_INPUTBOX_CHATLOG_ON, GL_LINEAR);
@@ -66,6 +67,7 @@ void SEASON3B::CNewUIChatInputBox::UnloadImages()
 	DeleteBitmap(IMAGE_INPUTBOX_CHATLOG_ON);
 	DeleteBitmap(IMAGE_INPUTBOX_WHISPER_ON);
 	DeleteBitmap(IMAGE_INPUTBOX_GUILD_ON);
+	DeleteBitmap(IMAGE_INPUTBOX_GENS_ON);
 	DeleteBitmap(IMAGE_INPUTBOX_PARTY_ON);
 	DeleteBitmap(IMAGE_INPUTBOX_NORMAL_ON);
 	DeleteBitmap(IMAGE_INPUTBOX_BACK);
@@ -137,16 +139,16 @@ void SEASON3B::CNewUIChatInputBox::Release()
 void SEASON3B::CNewUIChatInputBox::SetButtonInfo()
 {
 	m_BtnSize.ChangeButtonImgState( true, IMAGE_INPUTBOX_BTN_SIZE, false );
-	m_BtnSize.ChangeButtonInfo(m_WndPos.x+200, m_WndPos.y, 27, 26);
+	m_BtnSize.ChangeButtonInfo(m_WndPos.x+ FRAME_RESIZE_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT);
 
 	m_BtnTransparency.ChangeButtonImgState( true, IMAGE_INPUTBOX_BTN_TRANSPARENCY, false );
-	m_BtnTransparency.ChangeButtonInfo(m_WndPos.x+227, m_WndPos.y, 27, 26);
+	m_BtnTransparency.ChangeButtonInfo(m_WndPos.x+ TRANSPARENCY_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT);
 }
 
 void SEASON3B::CNewUIChatInputBox::SetWndPos(int x, int y)
 {
 	m_WndPos.x = x; m_WndPos.y = y;
-	m_WndSize.cx = WND_WIDTH; m_WndSize.cy = WND_HEIGHT;
+	m_WndSize.cx = CHATBOX_WIDTH; m_WndSize.cy = CHATBOX_HEIGHT;
 
 	if(m_pChatInputBox && m_pWhsprIDInputBox)
 	{
@@ -237,69 +239,89 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 		return true;
 	}
 
-	if(SelectedCharacter >= 0)
+	auto const releaseMouse = SEASON3B::IsRelease(VK_LBUTTON);
+
+	if(SelectedCharacter >= 0 && (IsVisible() && releaseMouse))
 	{
-		if(IsVisible() && SEASON3B::IsRelease(VK_RBUTTON))
+		auto const character = &CharactersClient[SelectedCharacter];	
+
+		if(character->Object.Kind == KIND_PLAYER
+			&& !gMapManager.InChaosCastle()
+			&& !(::IsStrifeMap(gMapManager.WorldActive) 
+				&& Hero->m_byGensInfluence != character->m_byGensInfluence))
 		{
-			CHARACTER* pCha = &CharactersClient[SelectedCharacter];	
-
-			if(pCha->Object.Kind == KIND_PLAYER && !gMapManager.InChaosCastle()	&& !(::IsStrifeMap(gMapManager.WorldActive) && Hero->m_byGensInfluence != pCha->m_byGensInfluence)
-
-				)
-			{
-				SetWhsprID(pCha->ID);
-			}
+			SetWhsprID(character->ID);
 		}
 	}
 
 	m_iTooltipType = INPUT_TOOLTIP_NOTHING;
-	int i, x;
-	for(i=0; i<9; ++i)
+
+	int iSelectedInputType = -1;
+	for (int i = 0; i < INPUT_MESSAGE_TYPE_COUNT; ++i)
 	{
-		x = m_WndPos.x + (i*27) + (i/3*6);
-		
-		if(CheckMouseIn(x, m_WndPos.y, 27, 26) == true)
+		if (CheckMouseIn(m_WndPos.x + (i * BUTTON_WIDTH), m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
 		{
-			m_iTooltipType = i;
-			break;
+			iSelectedInputType = i;
+			m_iTooltipType = INPUT_TOOLTIP_NORMAL + i;
 		}
 	}
 
-	int iSelectedInputType = -1;
-	for(i=0; i<3; ++i)
-	{
-		if(CheckMouseIn(m_WndPos.x+(i*27), m_WndPos.y, 27, 26) == true)
-		{
-			iSelectedInputType = i;
-		}
-	}
-	if(iSelectedInputType > -1 && SEASON3B::IsRelease(VK_LBUTTON))
+	if(iSelectedInputType > -1 && releaseMouse)
 	{
 		SetInputMsgType(INPUT_CHAT_MESSAGE+iSelectedInputType);
 		PlayBuffer(SOUND_CLICK01);
 		return false;
 	}
 
-	if(CheckMouseIn(m_WndPos.x+87, m_WndPos.y, 27, 26) == true && SEASON3B::IsRelease(VK_LBUTTON))
+	if (CheckMouseIn(m_WndPos.x + BLOCK_WHISPER_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
 	{
-		m_bBlockWhisper = !m_bBlockWhisper;
-		PlayBuffer(SOUND_CLICK01);
-		return false;
+		m_iTooltipType = INPUT_TOOLTIP_WHISPER;
+		if (releaseMouse)
+		{
+			m_bBlockWhisper = !m_bBlockWhisper;
+			PlayBuffer(SOUND_CLICK01);
+			return false;
+		}
 	}
 
 	if(m_bShowChatLog)
 	{
-		if(CheckMouseIn(m_WndPos.x+114, m_WndPos.y, 27, 26) == true && SEASON3B::IsRelease(VK_LBUTTON))
-		{	
-			m_bOnlySystemMessage = !m_bOnlySystemMessage;
-
-			if(m_bOnlySystemMessage)
+		if(CheckMouseIn(m_WndPos.x+SYSTEM_ON_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
+		{
+			m_iTooltipType = INPUT_TOOLTIP_SYSTEM;
+			if (releaseMouse)
 			{
-				m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_SYSTEM_MESSAGE);
+				m_bOnlySystemMessage = !m_bOnlySystemMessage;
+
+				if (m_bOnlySystemMessage)
+				{
+					m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_SYSTEM_MESSAGE);
+				}
+				else
+				{
+					m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_ALL_MESSAGE);
+				}
+
+				PlayBuffer(SOUND_CLICK01);
+				return false;
+			}
+		}
+	}
+
+	if(CheckMouseIn(m_WndPos.x+CHATLOG_ON_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
+	{
+		m_iTooltipType = INPUT_TOOLTIP_CHAT;
+		if (releaseMouse)
+		{
+			m_bShowChatLog = !m_bShowChatLog;
+
+			if (m_bShowChatLog)
+			{
+				m_pNewUIChatLogWnd->ShowChatLog();
 			}
 			else
 			{
-				m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_ALL_MESSAGE);
+				m_pNewUIChatLogWnd->HideChatLog();
 			}
 
 			PlayBuffer(SOUND_CLICK01);
@@ -307,40 +329,38 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 		}
 	}
 
-	if(CheckMouseIn(m_WndPos.x+141, m_WndPos.y, 27, 26) == true && SEASON3B::IsRelease(VK_LBUTTON))
+	if(CheckMouseIn(m_WndPos.x+FRAME_ON_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
 	{
-		m_bShowChatLog = !m_bShowChatLog;
-
-		if(m_bShowChatLog)
+		m_iTooltipType = INPUT_TOOLTIP_FRAME;
+		if (releaseMouse)
 		{
-			m_pNewUIChatLogWnd->ShowChatLog();
-		}
-		else
-		{
-			m_pNewUIChatLogWnd->HideChatLog();
-		}
+			if (m_pNewUIChatLogWnd->IsShowFrame())
+			{
+				m_pNewUIChatLogWnd->HideFrame();
+			}
+			else
+			{
+				m_pNewUIChatLogWnd->ShowFrame();
+			}
 
-		PlayBuffer(SOUND_CLICK01);
-		return false;
+			PlayBuffer(SOUND_CLICK01);
+			return false;
+		}
 	}
 
-	if(CheckMouseIn(m_WndPos.x+173, m_WndPos.y, 27, 26) == true && SEASON3B::IsRelease(VK_LBUTTON))
+	if (CheckMouseIn(m_WndPos.x + FRAME_RESIZE_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
 	{
-		if(m_pNewUIChatLogWnd->IsShowFrame())
-		{
-			m_pNewUIChatLogWnd->HideFrame();
-		}
-		else
-		{
-			m_pNewUIChatLogWnd->ShowFrame();
-		}
-		PlayBuffer(SOUND_CLICK01);
-		return false;
+		m_iTooltipType = INPUT_TOOLTIP_SIZE;
+	}
+
+	if (CheckMouseIn(m_WndPos.x + TRANSPARENCY_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
+	{
+		m_iTooltipType = INPUT_TOOLTIP_TRANSPARENCY;
 	}
 
 	if(m_pNewUIChatLogWnd->IsShowFrame())
 	{
-		if(m_BtnSize.UpdateMouseEvent() == true)
+		if(m_BtnSize.UpdateMouseEvent())
 		{
 			m_pNewUIChatLogWnd->SetSizeAuto();
 			m_pNewUIChatLogWnd->UpdateWndSize();
@@ -349,20 +369,15 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
 			return false;
 		}
 
-		if(m_BtnTransparency.UpdateMouseEvent() == true)
+		if(m_BtnTransparency.UpdateMouseEvent())
 		{
 			m_pNewUIChatLogWnd->SetBackAlphaAuto();
 			PlayBuffer(SOUND_CLICK01);
 			return false;
 		}
 	}
-
-	if(CheckMouseIn(m_WndPos.x, m_WndPos.y, m_WndSize.cx, m_WndSize.cy) == true)
-	{
-		return false;
-	}
-
-	return true;
+	
+	return !CheckMouseIn(m_WndPos.x, m_WndPos.y, m_WndSize.cx, m_WndSize.cy);
 }
 
 bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
@@ -488,6 +503,9 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 				break;
 			case INPUT_GUILD_MESSAGE:
 				wstrText = L"@";
+				break;
+			case INPUT_GENS_MESSAGE:
+				wstrText = L"$";
 				break;
 			default:
 				break;
@@ -686,40 +704,37 @@ bool SEASON3B::CNewUIChatInputBox::Render()
 
 bool SEASON3B::CNewUIChatInputBox::RenderFrame()
 {
-	RenderImage(IMAGE_INPUTBOX_BACK, m_WndPos.x, m_WndPos.y, WND_WIDTH, WND_HEIGHT);
+	RenderImage(IMAGE_INPUTBOX_BACK, m_WndPos.x, m_WndPos.y, CHATBOX_WIDTH, CHATBOX_HEIGHT);
 
 	return true;
 }
 
 void SEASON3B::CNewUIChatInputBox::RenderButtons()
 {
-	// 채팅 타입 버튼
-	RenderImage(IMAGE_INPUTBOX_NORMAL_ON+m_iInputMsgType, m_WndPos.x+27*m_iInputMsgType, m_WndPos.y, 27, 26);
+	auto windowX = static_cast<float>(m_WndPos.x);
+	auto windowY = static_cast<float>(m_WndPos.y);
 
-	// 귓속말 차단 On/Off
+	RenderImage(IMAGE_INPUTBOX_NORMAL_ON+m_iInputMsgType, windowX + BUTTON_WIDTH * m_iInputMsgType, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
+
 	if(m_bBlockWhisper)
 	{
-		RenderImage(IMAGE_INPUTBOX_WHISPER_ON, m_WndPos.x+87, m_WndPos.y, 27, 26);
+		RenderImage(IMAGE_INPUTBOX_WHISPER_ON, windowX + BLOCK_WHISPER_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
 	}
 
-	// 채팅 로그 출력 On/Off
 	if(m_bShowChatLog)
 	{
-		RenderImage(IMAGE_INPUTBOX_CHATLOG_ON, m_WndPos.x+141, m_WndPos.y, 27, 26);
-
-		// 시스템 메세지만 출력 On/Off
+		RenderImage(IMAGE_INPUTBOX_CHATLOG_ON, windowX + CHATLOG_ON_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
 		if(m_bOnlySystemMessage)
 		{
-			RenderImage(IMAGE_INPUTBOX_SYSTEM_ON, m_WndPos.x+114, m_WndPos.y, 27, 26);
+			RenderImage(IMAGE_INPUTBOX_SYSTEM_ON, windowX + SYSTEM_ON_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
 		}
 	}
 
-	// 채팅 로그 출력 On/Off
+
 	if(m_pNewUIChatLogWnd->IsShowFrame())
 	{
-		RenderImage(IMAGE_INPUTBOX_FRAME_ON, m_WndPos.x+173, m_WndPos.y, 27, 26);
+		RenderImage(IMAGE_INPUTBOX_FRAME_ON, windowX + FRAME_ON_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
 
-		// 사이즈 변경, 투명도 조절 버튼
 		m_BtnSize.Render();
 		m_BtnTransparency.Render();
 	}
@@ -727,29 +742,41 @@ void SEASON3B::CNewUIChatInputBox::RenderButtons()
 
 void SEASON3B::CNewUIChatInputBox::RenderTooltip()
 {
-	if(m_iTooltipType == INPUT_TOOLTIP_NOTHING)
+	if (m_iTooltipType == INPUT_TOOLTIP_NOTHING)
+	{
 		return;
+	}
 
 	unicode::t_char strTooltip[256];
 
-	const int iTextIndex[9] = { 1681, 1682, 1683, 1684, 1685, 750, 1686, 751, 752};
+	const int iTextIndex[10] = {
+		1681, 1682, 1683, 3321,
+		1684, 1685, 750, 1686, 751, 752};
 
 	unicode::_sprintf(strTooltip, "%s", GlobalText[iTextIndex[m_iTooltipType]]);
 
-	SIZE Fontsize;
+	SIZE fontsize;
 	g_pRenderText->SetFont(g_hFont);
-	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, unicode::_strlen(strTooltip), &Fontsize);
+	g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, unicode::_strlen(strTooltip), &fontsize);
 
-	Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
-	Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
+	const auto multiplier = ((float)WindowHeight / 480);
+	fontsize.cx = fontsize.cx / multiplier;
+	fontsize.cy = fontsize.cy / multiplier;
 
-	int x = m_WndPos.x + (m_iTooltipType*27) + (m_iTooltipType/3*6) + 10 - (Fontsize.cx / 2); 
-	if(x < 0) x = 0;
-	int y = m_WndPos.y - (Fontsize.cy + 1);
+	int x = m_WndPos.x
+		+ (m_iTooltipType*BUTTON_WIDTH)
+		+ (m_iTooltipType/3 * GROUP_SEPARATING_WIDTH)
+		+ 10 - (fontsize.cx / 2); 
+	if (x < 0)
+	{
+		x = 0;
+	}
+
+	int y = m_WndPos.y - (fontsize.cy + 1);
 
 	g_pRenderText->SetTextColor(255, 255, 255, 255);
 	g_pRenderText->SetBgColor(0, 0, 0, 180);
-	g_pRenderText->RenderText(x, y, strTooltip, Fontsize.cx+6, 0, RT3_SORT_CENTER);
+	g_pRenderText->RenderText(x, y, strTooltip, fontsize.cx+6, 0, RT3_SORT_CENTER);
 }
 
 float SEASON3B::CNewUIChatInputBox::GetLayerDepth() 

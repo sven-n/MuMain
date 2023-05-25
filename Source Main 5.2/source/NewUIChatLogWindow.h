@@ -6,6 +6,7 @@
 
 #include "NewUIBase.h"
 #include "ZzzTexture.h"
+#include "NewUIChatInputBox.h"
 
 #pragma warning(disable : 4786)
 #include <string>
@@ -25,6 +26,7 @@ namespace SEASON3B
 		TYPE_PARTY_MESSAGE,
 		TYPE_GUILD_MESSAGE,
 		TYPE_UNION_MESSAGE,
+		TYPE_GENS_MESSAGE,
 		TYPE_GM_MESSAGE,
 			
 		NUMBER_OF_TYPES,
@@ -88,7 +90,7 @@ namespace SEASON3B
 		{
 			MAX_CHAT_BUFFER_SIZE = 60,
 			MAX_NUMBER_OF_LINES = 200,
-			WND_WIDTH = 254,
+			WND_WIDTH = CNewUIChatInputBox::CHATBOX_WIDTH,
 			FONT_LEADING = 4,
 			WND_TOP_BOTTOM_EDGE = 2,
 			WND_LEFT_RIGHT_EDGE = 4,
@@ -123,6 +125,7 @@ namespace SEASON3B
 		type_vector_msgs	m_vecPartyMsgs;
 		type_vector_msgs	m_vecGuildMsgs;
 		type_vector_msgs	m_vecUnionMsgs;
+		type_vector_msgs	m_vecGensMsgs;
 		type_vector_msgs	m_VecSystemMsgs;
 		type_vector_msgs	m_vecErrorMsgs;
 		type_vector_msgs	m_vecGMMsgs;
