@@ -8067,7 +8067,7 @@ bool IsPersonalShopBan(ITEM* pItem)
 		|| pItem->Type == ITEM_HELPER+76
 		|| pItem->Type == ITEM_HELPER+122
 		|| pItem->Type == ITEM_HELPER+123
-		|| (pItem->Type == MODEL_POTION+96)
+		|| (pItem->Type == ITEM_POTION+96)
 		|| pItem->Type ==ITEM_HELPER+109
 		|| pItem->Type ==ITEM_HELPER+110
 		|| pItem->Type ==ITEM_HELPER+111
@@ -8401,9 +8401,9 @@ bool IsRepairBan(ITEM* pItem)
 	}
 
 	if(	(  pItem->Type >= ITEM_POTION+55 && pItem->Type <= ITEM_POTION+57)
-		|| pItem->Type == MODEL_HELPER+43
-		|| pItem->Type == MODEL_HELPER+44
-		|| pItem->Type == MODEL_HELPER+45
+		|| pItem->Type == ITEM_HELPER+43
+		|| pItem->Type == ITEM_HELPER+44
+		|| pItem->Type == ITEM_HELPER+45
 		|| (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+3)
 		|| pItem->Type == ITEM_BOW+7
 		|| pItem->Type == ITEM_BOW+15
