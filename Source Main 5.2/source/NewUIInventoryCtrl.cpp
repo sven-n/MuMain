@@ -7,49 +7,48 @@
 #include "NewUIItemMng.h"
 #include "NewUISystem.h"
 #include "ZzzInventory.h"
-#include "UIControls.h"
 #include "CComGem.h"
 #include "GIPetManager.h"
 #include "CSItemOption.h"
 #include "SocketSystem.h"
-#include "CSChaosCastle.h"
 #include "MapManager.h"
+#include "MixMgr.h"
 using namespace SEASON3B;
 
 SEASON3B::CNewUIPickedItem::CNewUIPickedItem()
 {
-	m_pNewItemMng = NULL;
-	m_pSrcInventory = NULL;
-	m_pPickedItem = NULL;
+	m_pNewItemMng = nullptr;
+	m_pSrcInventory = nullptr;
+	m_pPickedItem = nullptr;
 	m_bShow = true;
 	m_Pos.x = m_Pos.y = 0;
 	m_Size.cx = m_Size.cy = 0;
 }
 
-SEASON3B::CNewUIPickedItem::~CNewUIPickedItem() 
-{ 
-	Release(); 
+SEASON3B::CNewUIPickedItem::~CNewUIPickedItem()
+{
+	Release();
 }
 
 bool SEASON3B::CNewUIPickedItem::Create(CNewUIItemMng* pNewItemMng, CNewUIInventoryCtrl* pSrc, ITEM* pItem)
 {
-	if(g_pNewUI3DRenderMng == NULL || pNewItemMng == NULL || pItem == NULL)
+	if (g_pNewUI3DRenderMng == nullptr || pNewItemMng == nullptr || pItem == nullptr)
 		return false;
-	
+
 	m_pNewItemMng = pNewItemMng;
 	m_pSrcInventory = pSrc;
-	if( NULL == (m_pPickedItem = m_pNewItemMng->DuplicateItem(pItem)) )
+	if (nullptr == (m_pPickedItem = m_pNewItemMng->DuplicateItem(pItem)))
 	{
 		return false;
 	}
 
 	g_pNewUI3DRenderMng->Add3DRenderObj(this, INFORMATION_CAMERA_Z_ORDER);
-	
-	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pPickedItem->Type];
-	m_Size.cx = pItemAttr->Width*INVENTORY_SQUARE_WIDTH;
-	m_Size.cy = pItemAttr->Height*INVENTORY_SQUARE_HEIGHT;
-	m_Pos.x = MouseX - m_Size.cx/2;
-	m_Pos.y = MouseY - m_Size.cy/2;
+
+	const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pPickedItem->Type];
+	m_Size.cx = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
+	m_Size.cy = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
+	m_Pos.x = MouseX - m_Size.cx / 2;
+	m_Pos.y = MouseY - m_Size.cy / 2;
 
 	return true;
 }
@@ -58,30 +57,51 @@ void SEASON3B::CNewUIPickedItem::Release()
 {
 	g_pNewUI3DRenderMng->Remove3DRenderObj(this);
 	m_pNewItemMng->DeleteDuplicatedItem(m_pPickedItem);
-	m_pPickedItem = NULL;
-	m_pNewItemMng = NULL;
-	m_pSrcInventory = NULL;
+	m_pPickedItem = nullptr;
+	m_pNewItemMng = nullptr;
+	m_pSrcInventory = nullptr;
 	m_bShow = true;
 }
 
-CNewUIInventoryCtrl* SEASON3B::CNewUIPickedItem::GetOwnerInventory() const 
-{ 
-	return m_pSrcInventory; 
+CNewUIInventoryCtrl* SEASON3B::CNewUIPickedItem::GetOwnerInventory() const
+{
+	return m_pSrcInventory;
 }
 
-ITEM* SEASON3B::CNewUIPickedItem::GetItem() const 
-{ 
-	return m_pPickedItem; 
+STORAGE_TYPE CNewUIPickedItem::GetSourceStorageType() const
+{
+	if (m_pSrcInventory)
+	{
+		const auto storageType = m_pSrcInventory->GetStorageType();
+		if (storageType != CHAOS_MIX)
+		{
+			return storageType;
+		}
+
+		return g_MixRecipeMgr.GetMixInventoryEquipmentIndex();
+	}
+
+	if (m_pPickedItem && m_pPickedItem->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
+	{
+		return INVENTORY;
+	}
+
+	return UNDEFINED;
 }
 
-const POINT& SEASON3B::CNewUIPickedItem::GetPos() const 
-{ 
-	return m_Pos; 
+ITEM* SEASON3B::CNewUIPickedItem::GetItem() const
+{
+	return m_pPickedItem;
 }
 
-const SIZE& SEASON3B::CNewUIPickedItem::GetSize() const 
-{ 
-	return m_Size; 
+const POINT& SEASON3B::CNewUIPickedItem::GetPos() const
+{
+	return m_Pos;
+}
+
+const SIZE& SEASON3B::CNewUIPickedItem::GetSize() const
+{
+	return m_Size;
 }
 
 void SEASON3B::CNewUIPickedItem::GetRect(RECT& rcBox)
@@ -94,11 +114,12 @@ void SEASON3B::CNewUIPickedItem::GetRect(RECT& rcBox)
 
 int SEASON3B::CNewUIPickedItem::GetSourceLinealPos()
 {
-	if(m_pSrcInventory)
+	if (m_pSrcInventory)
 	{
-		return m_pPickedItem->y*m_pSrcInventory->GetNumberOfColumn()+m_pPickedItem->x;
+		return m_pSrcInventory->GetIndex(m_pPickedItem->x, m_pPickedItem->y);
 	}
-	else if(m_pPickedItem && m_pPickedItem->ex_src_type > 0)
+
+	if (m_pPickedItem && m_pPickedItem->ex_src_type > 0)
 	{
 		return m_pPickedItem->lineal_pos;
 	}
@@ -107,15 +128,15 @@ int SEASON3B::CNewUIPickedItem::GetSourceLinealPos()
 
 bool SEASON3B::CNewUIPickedItem::GetTargetPos(CNewUIInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY)
 {
-	if(pDest != NULL)
+	if (pDest != nullptr)
 	{
 		RECT rcInventory;
 		pDest->GetRect(rcInventory);
-		
-		ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pPickedItem->Type];
-		int iPickedItemX = MouseX - ((pItemAttr->Width - 1) * INVENTORY_SQUARE_WIDTH / 2);
-		int iPickedItemY = MouseY - ((pItemAttr->Height - 1) * INVENTORY_SQUARE_HEIGHT / 2);
-		
+
+		const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pPickedItem->Type];
+		const int iPickedItemX = MouseX - ((pItemAttr->Width - 1) * INVENTORY_SQUARE_WIDTH / 2);
+		const int iPickedItemY = MouseY - ((pItemAttr->Height - 1) * INVENTORY_SQUARE_HEIGHT / 2);
+
 		return pDest->GetSquarePosAtPt(iPickedItemX, iPickedItemY, iTargetColumnX, iTargetRowY);
 	}
 	return false;
@@ -124,65 +145,65 @@ bool SEASON3B::CNewUIPickedItem::GetTargetPos(CNewUIInventoryCtrl* pDest, int& i
 int SEASON3B::CNewUIPickedItem::GetTargetLinealPos(CNewUIInventoryCtrl* pDest)
 {
 	int iTargetColumnX, iTargetRowY;
-	if(GetTargetPos(pDest, iTargetColumnX, iTargetRowY))
+	if (GetTargetPos(pDest, iTargetColumnX, iTargetRowY))
 	{
-		return iTargetRowY*pDest->GetNumberOfColumn() + iTargetColumnX;
+		return pDest->GetIndex(iTargetColumnX, iTargetRowY);
 	}
 	return -1;
 }
 
-bool SEASON3B::CNewUIPickedItem::IsVisible() const 
-{ 
-	return m_bShow; 
+bool SEASON3B::CNewUIPickedItem::IsVisible() const
+{
+	return m_bShow;
 }
 
-void SEASON3B::CNewUIPickedItem::ShowPickedItem() 
-{ 
-	m_bShow = true; 
+void SEASON3B::CNewUIPickedItem::ShowPickedItem()
+{
+	m_bShow = true;
 }
 
-void SEASON3B::CNewUIPickedItem::HidePickedItem() 
-{ 
-	m_bShow = false; 
+void SEASON3B::CNewUIPickedItem::HidePickedItem()
+{
+	m_bShow = false;
 }
 
-void SEASON3B::CNewUIPickedItem::Render3D() 
-{	
-	if(m_pPickedItem && m_pPickedItem->Type >= 0)
+void SEASON3B::CNewUIPickedItem::Render3D()
+{
+	if (m_pPickedItem && m_pPickedItem->Type >= 0)
 	{
-		m_Pos.x = MouseX - m_Size.cx/2;
-		m_Pos.y = MouseY - m_Size.cy/2;
-		RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level,m_pPickedItem->Option1, m_pPickedItem->ExtOption, true);	
+		m_Pos.x = MouseX - m_Size.cx / 2;
+		m_Pos.y = MouseY - m_Size.cy / 2;
+		RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level, m_pPickedItem->Option1, m_pPickedItem->ExtOption, true);
 	}
 }
 
-CNewUIPickedItem* SEASON3B::CNewUIInventoryCtrl::ms_pPickedItem = NULL;
+CNewUIPickedItem* SEASON3B::CNewUIInventoryCtrl::ms_pPickedItem = nullptr;
 
-SEASON3B::CNewUIInventoryCtrl::CNewUIInventoryCtrl() 
-{ 
-	Init(); 
+SEASON3B::CNewUIInventoryCtrl::CNewUIInventoryCtrl()
+{
+	Init();
 }
 
-SEASON3B::CNewUIInventoryCtrl::~CNewUIInventoryCtrl() 
-{ 
-	Release(); 
+SEASON3B::CNewUIInventoryCtrl::~CNewUIInventoryCtrl()
+{
+	Release();
 }
 
 void SEASON3B::CNewUIInventoryCtrl::Init()
 {
-	m_pNew3DRenderMng = NULL;
-	m_pNewItemMng = NULL;
-	m_pOwner = NULL;
+	m_pNew3DRenderMng = nullptr;
+	m_pNewItemMng = nullptr;
+	m_pOwner = nullptr;
 	m_Pos.x = m_Pos.y = 0;
 	m_Size.cx = m_Size.cy = 0;
 	m_nColumn = m_nRow = 0;
-	m_pdwItemCheckBox = NULL;
+	m_pdwItemCheckBox = nullptr;
 	m_EventState = EVENT_NONE;
 	m_iPointedSquareIndex = -1;
 	m_bShow = true;
 	m_bLock = false;
 	m_ToolTipType = TOOLTIP_TYPE_INVENTORY;
-	m_pToolTipItem = NULL;
+	m_pToolTipItem = nullptr;
 	m_bRepairMode = false;
 	m_bCanPushItem = true;
 	Vector(0.1f, 0.4f, 0.8f, m_afColorStateNormal);
@@ -200,7 +221,7 @@ void SEASON3B::CNewUIInventoryCtrl::LoadImages()
 	LoadBitmap("Interface\\newui_item_table03(Dw).tga", IMAGE_ITEM_TABLE_BOTTOM_PIXEL);
 	LoadBitmap("Interface\\newui_item_table03(L).tga", IMAGE_ITEM_TABLE_LEFT_PIXEL);
 	LoadBitmap("Interface\\newui_item_table03(R).tga", IMAGE_ITEM_TABLE_RIGHT_PIXEL);
-	
+
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 	LoadBitmap("Interface\\newui_inven_usebox_01.tga", IMAGE_ITEM_SQUARE_FOR_1_BY_1);
 	LoadBitmap("Interface\\newui_inven_usebox_02.tga", IMAGE_ITEM_SQUARE_TOP_RECT);
@@ -229,86 +250,86 @@ void SEASON3B::CNewUIInventoryCtrl::UnloadImages()
 
 void SEASON3B::CNewUIInventoryCtrl::SetItemColorState(ITEM* pItem)
 {
-	if(pItem == NULL)
+	if (pItem == nullptr)
 	{
 		return;
 	}
 
-	if(pItem->byColorState == ITEM_COLOR_TRADE_WARNING)
+	if (pItem->byColorState == ITEM_COLOR_TRADE_WARNING)
 	{
 		return;
 	}
 
 	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-	int iLevel = (pItem->Level>>3)&15;
-	int iMaxDurability = calcMaxDurability(pItem, pItemAttr, iLevel);	
+	const int iLevel = (pItem->Level >> 3) & 15;
+	const int iMaxDurability = calcMaxDurability(pItem, pItemAttr, iLevel);
 
-	if(pItem->Durability <= 0)
+	if (pItem->Durability <= 0)
 	{
 		pItem->byColorState = ITEM_COLOR_DURABILITY_100;
 	}
-	else if(pItem->Durability <= (iMaxDurability*0.2f))
+	else if (pItem->Durability <= (iMaxDurability * 0.2f))
 	{
-		pItem->byColorState = ITEM_COLOR_DURABILITY_80;	
+		pItem->byColorState = ITEM_COLOR_DURABILITY_80;
 	}
-	else if(pItem->Durability <= (iMaxDurability*0.3f))
+	else if (pItem->Durability <= (iMaxDurability * 0.3f))
 	{
 		pItem->byColorState = ITEM_COLOR_DURABILITY_70;
 	}
-	else if(pItem->Durability <= (iMaxDurability*0.5f))
+	else if (pItem->Durability <= (iMaxDurability * 0.5f))
 	{
 		pItem->byColorState = ITEM_COLOR_DURABILITY_50;
 	}
 	else
 	{
-		pItem->byColorState = ITEM_COLOR_NORMAL;	
+		pItem->byColorState = ITEM_COLOR_NORMAL;
 	}
 }
 
 bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 {
-	if(pItem == NULL)
+	if (pItem == nullptr)
 	{
 		return false;
 	}
 
-	if(pItem->Type < ITEM_WING)
+	if (pItem->Type < ITEM_WING)
 	{
 		return true;
 	}
 
-	if( pItem->Type == ITEM_BOW+7 || pItem->Type == ITEM_BOW+15 )
+	if (pItem->Type == ITEM_BOW + 7 || pItem->Type == ITEM_BOW + 15)
 	{
 		return false;
 	}
 
-	if( pItem->Type == ITEM_HELPER+20 && ((pItem->Level>>3)&15) == 1 || ((pItem->Level>>3)&15) == 2 )
+	if (pItem->Type == ITEM_HELPER + 20 && ((pItem->Level >> 3) & 15) == 1 || ((pItem->Level >> 3) & 15) == 2)
 	{
 		return false;
 	}
-	
-	if( pItem->Type >= ITEM_HELPER+8 && pItem->Type <= ITEM_HELPER+9 
-		|| pItem->Type == ITEM_HELPER+10 
-		|| pItem->Type >= ITEM_HELPER+12 && pItem->Type <= ITEM_HELPER+13
-		|| pItem->Type == ITEM_HELPER+20
-		|| pItem->Type >= ITEM_HELPER+21 && pItem->Type <= ITEM_HELPER+28
-		|| pItem->Type >= ITEM_HELPER+38 && pItem->Type <= ITEM_HELPER+42 
+
+	if (pItem->Type >= ITEM_HELPER + 8 && pItem->Type <= ITEM_HELPER + 9
+		|| pItem->Type == ITEM_HELPER + 10
+		|| pItem->Type >= ITEM_HELPER + 12 && pItem->Type <= ITEM_HELPER + 13
+		|| pItem->Type == ITEM_HELPER + 20
+		|| pItem->Type >= ITEM_HELPER + 21 && pItem->Type <= ITEM_HELPER + 28
+		|| pItem->Type >= ITEM_HELPER + 38 && pItem->Type <= ITEM_HELPER + 42
 #ifdef PJH_ADD_PANDA_CHANGERING
-		|| pItem->Type == ITEM_HELPER+76
+		|| pItem->Type == ITEM_HELPER + 76
 #endif //PJH_ADD_PANDA_CHANGERING
-		|| pItem->Type == ITEM_HELPER+122
-		|| pItem->Type == ITEM_HELPER+80
-		|| pItem->Type == ITEM_HELPER+64
-		|| pItem->Type == ITEM_HELPER+65
-		|| pItem->Type == ITEM_HELPER+123
-		|| pItem->Type == ITEM_HELPER+107
-		|| pItem->Type == ITEM_HELPER+109
-		|| pItem->Type == ITEM_HELPER+110
-		|| pItem->Type == ITEM_HELPER+111
-		|| pItem->Type == ITEM_HELPER+112
-		|| pItem->Type == ITEM_HELPER+113
-		|| pItem->Type == ITEM_HELPER+114
-		|| pItem->Type == ITEM_HELPER+115
+		|| pItem->Type == ITEM_HELPER + 122
+		|| pItem->Type == ITEM_HELPER + 80
+		|| pItem->Type == ITEM_HELPER + 64
+		|| pItem->Type == ITEM_HELPER + 65
+		|| pItem->Type == ITEM_HELPER + 123
+		|| pItem->Type == ITEM_HELPER + 107
+		|| pItem->Type == ITEM_HELPER + 109
+		|| pItem->Type == ITEM_HELPER + 110
+		|| pItem->Type == ITEM_HELPER + 111
+		|| pItem->Type == ITEM_HELPER + 112
+		|| pItem->Type == ITEM_HELPER + 113
+		|| pItem->Type == ITEM_HELPER + 114
+		|| pItem->Type == ITEM_HELPER + 115
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 		|| g_pMyInventory->IsInvenItem(pItem->Type)
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
@@ -316,49 +337,56 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 	{
 		return true;
 	}
-	
-	if( pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER+5 || pItem->Type == ITEM_HELPER+37 || pItem->Type == ITEM_HELPER+106)
+
+	if (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER + 5 || pItem->Type == ITEM_HELPER + 37 || pItem->Type == ITEM_HELPER + 106)
 	{
 		return true;
 	}
-	
-	if(IsWingItem(pItem) == true)
+
+	if (IsWingItem(pItem) == true)
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::Create(CNewUI3DRenderMng* pNew3DRenderMng, CNewUIItemMng* pNewItemMng, 
-								 CNewUIObj* pOwner, int x, int y, int nColumn, int nRow)
+bool SEASON3B::CNewUIInventoryCtrl::Create(STORAGE_TYPE storageType, CNewUI3DRenderMng* pNew3DRenderMng, CNewUIItemMng* pNewItemMng,
+	CNewUIObj* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset)
 {
-	if(m_pdwItemCheckBox || false == m_vecItem.empty())
+	m_StorageType = storageType;
+	m_nIndexOffset = nIndexOffset;
+	if (m_pdwItemCheckBox || false == m_vecItem.empty())
 		return false;
-	if(pNew3DRenderMng == NULL || pNewItemMng == NULL)
+	if (pNew3DRenderMng == nullptr || pNewItemMng == nullptr)
 		return false;
 
 	m_pNew3DRenderMng = pNew3DRenderMng;
 	m_pNew3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
-	
+
 	m_pNewItemMng = pNewItemMng;
 	m_pOwner = pOwner;
 	m_Pos.x = x;
 	m_Pos.y = y;
-	m_Size.cx = nColumn*INVENTORY_SQUARE_WIDTH;
-	m_Size.cy = nRow*INVENTORY_SQUARE_HEIGHT;
+	m_Size.cx = nColumn * INVENTORY_SQUARE_WIDTH;
+	m_Size.cy = nRow * INVENTORY_SQUARE_HEIGHT;
 	m_nColumn = nColumn;
 	m_nRow = nRow;
-	m_pdwItemCheckBox = new DWORD[nColumn*nRow];
-	memset(m_pdwItemCheckBox, 0, sizeof(DWORD)*m_nColumn*m_nRow);
+	m_pdwItemCheckBox = new DWORD[nColumn * nRow];
+	memset(m_pdwItemCheckBox, 0, sizeof(DWORD) * m_nColumn * m_nRow);
 
 	LoadImages();
+
+	if (m_StorageType == UNDEFINED)
+	{
+		LockInventory();
+	}
 
 	return true;
 }
 void SEASON3B::CNewUIInventoryCtrl::Release()
 {
-	if(m_pNew3DRenderMng)
+	if (m_pNew3DRenderMng)
 		m_pNew3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
 
 	RemoveAllItems();
@@ -366,7 +394,7 @@ void SEASON3B::CNewUIInventoryCtrl::Release()
 
 	SAFE_DELETE(m_pdwItemCheckBox);
 
-	if(m_pNew3DRenderMng)
+	if (m_pNew3DRenderMng)
 		m_pNew3DRenderMng->Remove3DRenderObj(this);
 
 	Init();
@@ -374,42 +402,43 @@ void SEASON3B::CNewUIInventoryCtrl::Release()
 
 bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iLinealPos, BYTE* pbyItemPacket)
 {
-	if(iLinealPos < 0 || iLinealPos >= m_nColumn*m_nRow)
+	iLinealPos -= m_nIndexOffset;
+	if (iLinealPos < 0 || iLinealPos >= m_nColumn * m_nRow)
 		return false;
 
-	int iColumnX = iLinealPos % m_nColumn;
-	int iRowY = iLinealPos / m_nColumn;
+	const int iColumnX = iLinealPos % m_nColumn;
+	const int iRowY = iLinealPos / m_nColumn;
 
 	return AddItem(iColumnX, iRowY, pbyItemPacket);
 }
 
 bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE* pbyItemPacket)
 {
-	if(iColumnX < 0 || iRowY < 0 || 
+	if (iColumnX < 0 || iRowY < 0 ||
 		iColumnX >= m_nColumn || iRowY >= m_nRow)
 	{
 		return false;
 	}
 
 	ITEM* pNewItem = m_pNewItemMng->CreateItem(pbyItemPacket);
-	if(NULL == pNewItem)
+	if (nullptr == pNewItem)
 		return false;
 
-	if(!CanMove(iColumnX, iRowY, pNewItem))
+	if (!CanMove(iColumnX, iRowY, pNewItem))
 	{
 		m_pNewItemMng->DeleteItem(pNewItem);
 		return false;
 	}
-	
-	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pNewItem->Type];
+
+	const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pNewItem->Type];
 	pNewItem->x = iColumnX;
 	pNewItem->y = iRowY;
-	
-	for(int y=0; y<pItemAttr->Height; y++)
+
+	for (int y = 0; y < pItemAttr->Height; y++)
 	{
-		for(int x=0; x<pItemAttr->Width; x++)
+		for (int x = 0; x < pItemAttr->Width; x++)
 		{
-			int iCurIndex = (pNewItem->y+y)*m_nColumn+(pNewItem->x+x);
+			const int iCurIndex = (pNewItem->y + y) * m_nColumn + (pNewItem->x + x);
 			m_pdwItemCheckBox[iCurIndex] = pNewItem->Key;
 		}
 	}
@@ -420,28 +449,28 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE* pbyIt
 
 bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, ITEM* pItem)
 {
-	if(iColumnX < 0 || iRowY < 0 || 
+	if (iColumnX < 0 || iRowY < 0 ||
 		iColumnX >= m_nColumn || iRowY >= m_nRow) return false;
 
 	ITEM* pNewItem = m_pNewItemMng->CreateItem(pItem);
-	if(NULL == pNewItem)
+	if (nullptr == pNewItem)
 		return false;
-	
-	if(!CanMove(iColumnX, iRowY, pNewItem))
+
+	if (!CanMove(iColumnX, iRowY, pNewItem))
 	{
 		m_pNewItemMng->DeleteItem(pNewItem);
 		return false;
 	}
-	
-	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pNewItem->Type];
+
+	const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pNewItem->Type];
 	pNewItem->x = iColumnX;
 	pNewItem->y = iRowY;
-	
-	for(int y=0; y<pItemAttr->Height; y++)
+
+	for (int y = 0; y < pItemAttr->Height; y++)
 	{
-		for(int x=0; x<pItemAttr->Width; x++)
+		for (int x = 0; x < pItemAttr->Width; x++)
 		{
-			int iCurIndex = (pNewItem->y+y)*m_nColumn+(pNewItem->x+x);
+			const int iCurIndex = (pNewItem->y + y) * m_nColumn + (pNewItem->x + x);
 			m_pdwItemCheckBox[iCurIndex] = pNewItem->Key;
 		}
 	}
@@ -451,29 +480,29 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, ITEM* pItem
 
 bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE byType, BYTE bySubType, BYTE byLevel, BYTE byDurability, BYTE byOption1, BYTE byOptionEx, BYTE byOption380, BYTE byOptionHarmony)
 {
-	if(iColumnX < 0 || iRowY < 0 || 
+	if (iColumnX < 0 || iRowY < 0 ||
 		iColumnX >= m_nColumn || iRowY >= m_nRow) return false;
 
-	ITEM* pNewItem = m_pNewItemMng->CreateItem(byType, bySubType, byLevel, byDurability, 
+	ITEM* pNewItem = m_pNewItemMng->CreateItem(byType, bySubType, byLevel, byDurability,
 		byOption1, byOptionEx, byOption380, byOptionHarmony);
-	if(NULL == pNewItem)
+	if (nullptr == pNewItem)
 		return false;
 
-	if(!CanMove(iColumnX, iRowY, pNewItem))
+	if (!CanMove(iColumnX, iRowY, pNewItem))
 	{
 		m_pNewItemMng->DeleteItem(pNewItem);
 		return false;
 	}
-	
-	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pNewItem->Type];
+
+	const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pNewItem->Type];
 	pNewItem->x = iColumnX;
 	pNewItem->y = iRowY;
-	
-	for(int y=0; y<pItemAttr->Height; y++)
+
+	for (int y = 0; y < pItemAttr->Height; y++)
 	{
-		for(int x=0; x<pItemAttr->Width; x++)
+		for (int x = 0; x < pItemAttr->Width; x++)
 		{
-			int iCurIndex = (pNewItem->y+y)*m_nColumn+(pNewItem->x+x);
+			const int iCurIndex = (pNewItem->y + y) * m_nColumn + (pNewItem->x + x);
 			m_pdwItemCheckBox[iCurIndex] = pNewItem->Key;
 		}
 	}
@@ -483,19 +512,19 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE byType
 
 void SEASON3B::CNewUIInventoryCtrl::RemoveItem(ITEM* pItem)
 {
-	type_vec_item::iterator li = m_vecItem.begin();
-	for(; li != m_vecItem.end(); li++)
+	auto li = m_vecItem.begin();
+	for (; li != m_vecItem.end(); ++li)
 	{
-		if((*li) == pItem)
+		if ((*li) == pItem)
 		{
 			m_vecItem.erase(li);
 
-			ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-			for(int y=0; y<pItemAttr->Height; y++)
+			const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
+			for (int y = 0; y < pItemAttr->Height; y++)
 			{
-				for(int x=0; x<pItemAttr->Width; x++)
+				for (int x = 0; x < pItemAttr->Width; x++)
 				{
-					int iCurIndex = (pItem->y+y)*m_nColumn+(pItem->x+x);
+					const int iCurIndex = (pItem->y + y) * m_nColumn + (pItem->x + x);
 					m_pdwItemCheckBox[iCurIndex] = 0;
 				}
 			}
@@ -507,10 +536,10 @@ void SEASON3B::CNewUIInventoryCtrl::RemoveItem(ITEM* pItem)
 
 void SEASON3B::CNewUIInventoryCtrl::RemoveAllItems()
 {
-	memset(m_pdwItemCheckBox, 0, sizeof(DWORD)*m_nColumn*m_nRow);
+	memset(m_pdwItemCheckBox, 0, sizeof(DWORD) * m_nColumn * m_nRow);
 
-	type_vec_item::iterator li = m_vecItem.begin();
-	for(; li != m_vecItem.end(); li++)
+	auto li = m_vecItem.begin();
+	for (; li != m_vecItem.end(); ++li)
 	{
 		ITEM* pItem = (*li);
 		m_pNewItemMng->DeleteItem(pItem);
@@ -520,14 +549,14 @@ void SEASON3B::CNewUIInventoryCtrl::RemoveAllItems()
 }
 
 size_t SEASON3B::CNewUIInventoryCtrl::GetNumberOfItems()
-{ 
-	return m_vecItem.size(); 
+{
+	return m_vecItem.size();
 }
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::GetItem(int iIndex)
 {
-	if(iIndex < 0 || iIndex >= (int)m_vecItem.size())
-		return NULL;
+	if (iIndex < 0 || iIndex >= static_cast<int>(m_vecItem.size()))
+		return nullptr;
 	return m_vecItem[iIndex];
 }
 
@@ -553,42 +582,43 @@ void SEASON3B::CNewUIInventoryCtrl::GetSquareColorWarning(float* pfParams) const
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItem(int iLinealPos)
 {
-	if(iLinealPos >= 0 && iLinealPos < m_nColumn*m_nRow)
+	iLinealPos -= m_nIndexOffset;
+	if (iLinealPos >= 0 && iLinealPos < m_nColumn * m_nRow)
 	{
-		DWORD dwKey = m_pdwItemCheckBox[iLinealPos];
+		const DWORD dwKey = m_pdwItemCheckBox[iLinealPos];
 		return FindItemByKey(dwKey);
 	}
-	return NULL;
+	return nullptr;
 }
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItem(int iColumnX, int iRowY)
 {
-	return FindItem(iRowY*m_nColumn+iColumnX);
+	return FindItem(iRowY * m_nColumn + iColumnX);
 }
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItemByKey(DWORD dwKey)
 {
-	type_vec_item::iterator li = m_vecItem.begin();
-	for(; li != m_vecItem.end(); li++)
-		if((*li)->Key == dwKey)
+	auto li = m_vecItem.begin();
+	for (; li != m_vecItem.end(); ++li)
+		if ((*li)->Key == dwKey)
 			return (*li);
-	return NULL;
+	return nullptr;
 }
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindTypeItem(short int siType)
 {
-	type_vec_item::iterator li = m_vecItem.begin();
-	for(; li != m_vecItem.end(); li++)
-		if((*li)->Type == siType)
+	auto li = m_vecItem.begin();
+	for (; li != m_vecItem.end(); ++li)
+		if ((*li)->Type == siType)
 			return (*li);
-	return NULL;
+	return nullptr;
 }
 
 bool SEASON3B::CNewUIInventoryCtrl::IsItem(short int siType)
 {
-	type_vec_item::iterator li = m_vecItem.begin();
-	for(; li != m_vecItem.end(); li++)
-		if((*li)->Type == siType)
+	auto li = m_vecItem.begin();
+	for (; li != m_vecItem.end(); ++li)
+		if ((*li)->Type == siType)
 			return true;
 	return false;
 }
@@ -596,30 +626,30 @@ bool SEASON3B::CNewUIInventoryCtrl::IsItem(short int siType)
 int SEASON3B::CNewUIInventoryCtrl::GetItemCount(short int siType, int iLevel)
 {
 	int count = 0;
-	type_vec_item::iterator li = m_vecItem.begin();
-	for(; li != m_vecItem.end(); li++) {
-		if((*li)->Type == siType) {
-			if( iLevel == -1 || (((*li)->Level>>3)&15) == iLevel )
+	auto li = m_vecItem.begin();
+	for (; li != m_vecItem.end(); ++li) {
+		if ((*li)->Type == siType) {
+			if (iLevel == -1 || (((*li)->Level >> 3) & 15) == iLevel)
 			{
-				count += ((*li)->Durability==0) ? 1 : (*li)->Durability;
+				count += ((*li)->Durability == 0) ? 1 : (*li)->Durability;
 			}
 		}
 	}
 	return count;
 }
 
-int SEASON3B::CNewUIInventoryCtrl::FindItemIndex( short int siType, int iLevel )
+int SEASON3B::CNewUIInventoryCtrl::FindItemIndex(short int siType, int iLevel)
 {
-	type_vec_item::iterator li = m_vecItem.begin();
-	for(; li != m_vecItem.end(); li++)
+	auto li = m_vecItem.begin();
+	for (; li != m_vecItem.end(); ++li)
 	{
-		if( (*li)->Type == siType )
+		if ((*li)->Type == siType)
 		{
-			if( iLevel == -1 || (((*li)->Level>>3)&15) == iLevel )
+			if (iLevel == -1 || (((*li)->Level >> 3) & 15) == iLevel)
 			{
-				return (*li)->y*GetNumberOfColumn()+(*li)->x;
+				return (*li)->y * GetNumberOfColumn() + (*li)->x + m_nIndexOffset;
 			}
-		}	
+		}
 	}
 
 	return -1;
@@ -627,43 +657,48 @@ int SEASON3B::CNewUIInventoryCtrl::FindItemIndex( short int siType, int iLevel )
 
 int SEASON3B::CNewUIInventoryCtrl::FindItemReverseIndex(short sType, int iLevel)
 {
-	for(int x=m_nColumn-1; x>=0; x--)
+	for (int x = m_nColumn - 1; x >= 0; x--)
 	{
-		for(int y=m_nRow-1; y>=0; y--)
+		for (int y = m_nRow - 1; y >= 0; y--)
 		{
-			ITEM* pItem = FindItem(x, y);
-			
-			if(pItem)
+			const ITEM* pItem = FindItem(x, y);
+
+			if (pItem)
 			{
-				if(pItem->Type == sType)
+				if (pItem->Type == sType)
 				{
-					if( iLevel == -1 || ((pItem->Level>>3)&15) == iLevel )
+					if (iLevel == -1 || ((pItem->Level >> 3) & 15) == iLevel)
 					{
-						return (pItem->y * GetNumberOfColumn()) + pItem->x;
-					}	
+						return (pItem->y * GetNumberOfColumn()) + pItem->x + m_nIndexOffset;
+					}
 				}
 			}
 		}
 	}
 
 	return -1;
-}	
+}
 
-int SEASON3B::CNewUIInventoryCtrl::FindBaseIndexByITEM(ITEM* pItem)
+int SEASON3B::CNewUIInventoryCtrl::GetIndexByItem(ITEM* pItem)
 {
-	return pItem->y*GetNumberOfColumn()+pItem->x;
+	if (pItem == nullptr)
+	{
+		return -1;
+	}
+
+	return this->GetIndex(pItem->x, pItem->y);
 }
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItemPointedSquareIndex()
 {
-	if(m_iPointedSquareIndex != -1)
+	if (m_iPointedSquareIndex != -1)
 	{
-		ITEM* pItem = NULL;
-		pItem = FindItemByKey(m_pdwItemCheckBox[m_iPointedSquareIndex]);
+		ITEM* pItem = nullptr;
+		pItem = FindItemByKey(m_pdwItemCheckBox[m_iPointedSquareIndex - m_nIndexOffset]);
 		return pItem;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int SEASON3B::CNewUIInventoryCtrl::GetPointedSquareIndex()
@@ -674,19 +709,19 @@ int SEASON3B::CNewUIInventoryCtrl::GetPointedSquareIndex()
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItemAtPt(int x, int y)
 {
-	int iIndex = GetSquareIndexAtPt(x, y);
+	const int iIndex = GetSquareIndexAtPt(x, y);
 	return FindItem(iIndex);
 }
 
 int SEASON3B::CNewUIInventoryCtrl::FindItemptIndex(int x, int y)
 {
-	int iIndex = GetSquareIndexAtPt(x, y);
+	const int iIndex = GetSquareIndexAtPt(x, y);
 
-	ITEM* p = FindItem(iIndex);
+	const ITEM* p = FindItem(iIndex);
 
-	if( p )
+	if (p)
 	{
-		return p->y*GetNumberOfColumn()+p->x;
+		return p->y * GetNumberOfColumn() + p->x;
 	}
 
 	return -1;
@@ -694,11 +729,11 @@ int SEASON3B::CNewUIInventoryCtrl::FindItemptIndex(int x, int y)
 
 int SEASON3B::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy)
 {
-	for(int i=0; i<m_nColumn*m_nRow; i++)
+	for (int i = 0; i < m_nColumn * m_nRow; i++)
 	{
-		if(CheckSlot(i, cx, cy) && (i%m_nColumn < (m_nColumn - (cx-1))))
+		if (CheckSlot(i, cx, cy) && (i % m_nColumn < (m_nColumn - (cx - 1))))
 		{
-			return i;
+			return i + m_nIndexOffset;
 		}
 	}
 
@@ -706,11 +741,11 @@ int SEASON3B::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy)
 }
 bool SEASON3B::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy, OUT int& iColumnX, OUT int& iColumnY)
 {
-	for(int y=0; y<m_nRow; y++)
+	for (int y = 0; y < m_nRow; y++)
 	{
-		for(int x=0; x<m_nColumn; x++)
+		for (int x = 0; x < m_nColumn; x++)
 		{
-			if(CheckSlot(x, y, cx, cy))
+			if (CheckSlot(x, y, cx, cy))
 			{
 				iColumnX = x;
 				iColumnY = y;
@@ -721,19 +756,19 @@ bool SEASON3B::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy, OUT int&
 	return false;
 }
 
-int SEASON3B::CNewUIInventoryCtrl::GetNumItemByKey( DWORD dwItemKey )
+int SEASON3B::CNewUIInventoryCtrl::GetNumItemByKey(DWORD dwItemKey)
 {
 	int iCntItem = 0;
-	for(int y=0; y<m_nRow; y++)
+	for (int y = 0; y < m_nRow; y++)
 	{
-		for(int x=0; x<m_nColumn; x++)
+		for (int x = 0; x < m_nColumn; x++)
 		{
-			ITEM* pItem = NULL;
+			const ITEM* pItem = nullptr;
 			pItem = FindItem(x, y);
-			if( pItem == NULL)
+			if (pItem == nullptr)
 				return 0;
 
-			if( pItem->Key == dwItemKey )
+			if (pItem->Key == dwItemKey)
 			{
 				iCntItem++;
 			}
@@ -746,15 +781,15 @@ int SEASON3B::CNewUIInventoryCtrl::GetNumItemByKey( DWORD dwItemKey )
 int SEASON3B::CNewUIInventoryCtrl::GetNumItemByType(short sItemType)
 {
 	int iCntItem = 0;
-	for(int y=0; y<m_nRow; y++)
+	for (int y = 0; y < m_nRow; y++)
 	{
-		for(int x=0; x<m_nColumn; x++)
+		for (int x = 0; x < m_nColumn; x++)
 		{
-			ITEM* pItem = NULL;
+			const ITEM* pItem = nullptr;
 			pItem = FindItem(x, y);
-			if(pItem)			
+			if (pItem)
 			{
-				if(pItem->Type == sItemType)
+				if (pItem->Type == sItemType)
 				{
 					iCntItem++;
 				}
@@ -763,17 +798,17 @@ int SEASON3B::CNewUIInventoryCtrl::GetNumItemByType(short sItemType)
 	}
 
 	return iCntItem;
-}	
+}
 
 int SEASON3B::CNewUIInventoryCtrl::GetEmptySlotCount()
 {
 	int iResult = 0;
-	for(int y=0; y<m_nRow; y++)
+	for (int y = 0; y < m_nRow; y++)
 	{
-		for(int x=0; x<m_nColumn; x++)
+		for (int x = 0; x < m_nColumn; x++)
 		{
-			int iIndex = y*m_nColumn+x;
-			if(m_pdwItemCheckBox[iIndex] == 0)
+			const int iIndex = y * m_nColumn + x;
+			if (m_pdwItemCheckBox[iIndex] == 0)
 			{
 				++iResult;
 			}
@@ -784,49 +819,49 @@ int SEASON3B::CNewUIInventoryCtrl::GetEmptySlotCount()
 
 bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
 {
-	if(m_EventState == EVENT_NONE 
-		&& SEASON3B::IsNone(VK_LBUTTON) 
+	if (m_EventState == EVENT_NONE
+		&& SEASON3B::IsNone(VK_LBUTTON)
 		&& m_iPointedSquareIndex != -1)
 	{
 		m_EventState = EVENT_HOVER;
 	}
-	else if(m_EventState == EVENT_HOVER 
-		&& SEASON3B::IsRelease(VK_LBUTTON) 
-		&& m_iPointedSquareIndex != -1 
-		&& NULL == GetPickedItem() 
+	else if (m_EventState == EVENT_HOVER
+		&& SEASON3B::IsRelease(VK_LBUTTON)
+		&& m_iPointedSquareIndex != -1
+		&& nullptr == GetPickedItem()
 		&& false == IsLocked()
 		&& m_bRepairMode == false
 		)
 	{
 		m_EventState = EVENT_PICKING;
-		ITEM* pItem = FindItemByKey(m_pdwItemCheckBox[m_iPointedSquareIndex]);
-		if(pItem)
+		ITEM* pItem = FindItemByKey(m_pdwItemCheckBox[m_iPointedSquareIndex - m_nIndexOffset]);
+		if (pItem)
 		{
-			if(CreatePickedItem(this, pItem))
+			if (CreatePickedItem(this, pItem))
 			{
 				RemoveItem(pItem);
 				return false;
 			}
 		}
 	}
-	else if(m_EventState == EVENT_HOVER 
-		&& SEASON3B::IsNone(VK_LBUTTON) 
-		&& m_iPointedSquareIndex != -1 
-		&& NULL == GetPickedItem()
-		&& (m_pdwItemCheckBox[m_iPointedSquareIndex] > 1) && g_pNewUIMng)
+	else if (m_EventState == EVENT_HOVER
+		&& SEASON3B::IsNone(VK_LBUTTON)
+		&& m_iPointedSquareIndex != -1
+		&& nullptr == GetPickedItem()
+		&& (m_pdwItemCheckBox[m_iPointedSquareIndex - m_nIndexOffset] > 1) && g_pNewUIMng)
 	{
-		ITEM* pItem = FindItemByKey(m_pdwItemCheckBox[m_iPointedSquareIndex]);
-		if(pItem != m_pToolTipItem)
+		ITEM* pItem = FindItemByKey(m_pdwItemCheckBox[m_iPointedSquareIndex - m_nIndexOffset]);
+		if (pItem != m_pToolTipItem)
 		{
 			CreateItemToolTip(pItem);
 
-			if( (pItem->Type == ITEM_HELPER+4) || (pItem->Type == ITEM_HELPER+5) )
+			if ((pItem->Type == ITEM_HELPER + 4) || (pItem->Type == ITEM_HELPER + 5))
 			{
-				ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
-				int iTargetX = m_Pos.x + m_pToolTipItem->x*INVENTORY_SQUARE_WIDTH + pItemAttr->Width*INVENTORY_SQUARE_WIDTH/2;
-				int iTargetY = m_Pos.y + m_pToolTipItem->y*INVENTORY_SQUARE_HEIGHT;
+				const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
+				const int iTargetX = m_Pos.x + m_pToolTipItem->x * INVENTORY_SQUARE_WIDTH + pItemAttr->Width * INVENTORY_SQUARE_WIDTH / 2;
+				const int iTargetY = m_Pos.y + m_pToolTipItem->y * INVENTORY_SQUARE_HEIGHT;
 				giPetManager::RequestPetInfo(iTargetX, iTargetY, pItem);
-			}	
+			}
 		}
 	}
 	return true;
@@ -834,7 +869,7 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
 
 bool SEASON3B::CNewUIInventoryCtrl::Update()
 {
-	if(IsVisible())
+	if (IsVisible())
 	{
 		UpdateProcess();
 	}
@@ -843,16 +878,16 @@ bool SEASON3B::CNewUIInventoryCtrl::Update()
 
 void SEASON3B::CNewUIInventoryCtrl::UpdateProcess()
 {
-	int iCurSquareIndex = GetSquareIndexAtPt(MouseX, MouseY);
-	if(iCurSquareIndex != m_iPointedSquareIndex)
+	const int iCurSquareIndex = GetSquareIndexAtPt(MouseX, MouseY);
+	if (iCurSquareIndex != m_iPointedSquareIndex)
 	{
-		if( (GetPickedItem() == NULL) && (g_pMyShopInventory->IsEnableInputValueTextBox() == false) )
+		if ((GetPickedItem() == nullptr) && (g_pMyShopInventory->IsEnableInputValueTextBox() == false))
 			giPetManager::InitItemBackup();
 		m_iPointedSquareIndex = iCurSquareIndex;
 	}
-	
-	if(m_iPointedSquareIndex == -1 
-		|| (m_iPointedSquareIndex != -1 && m_pdwItemCheckBox[m_iPointedSquareIndex] == 0))
+
+	if (m_iPointedSquareIndex == -1
+		|| (m_iPointedSquareIndex != -1 && m_pdwItemCheckBox[m_iPointedSquareIndex - m_nIndexOffset] == 0))
 	{
 		m_EventState = EVENT_NONE;
 		DeleteItemToolTip();
@@ -862,46 +897,46 @@ void SEASON3B::CNewUIInventoryCtrl::UpdateProcess()
 void SEASON3B::CNewUIInventoryCtrl::Render()
 {
 	int x, y;
-	for(y=0; y<m_nRow; y++)
+	for (y = 0; y < m_nRow; y++)
 	{
-		for(x=0; x<m_nColumn; x++)
+		for (x = 0; x < m_nColumn; x++)
 		{
-			int iCurSquareIndex = y*m_nColumn+x;
+			const int iCurSquareIndex = y * m_nColumn + x;
 
-			if(m_pdwItemCheckBox[iCurSquareIndex] > 1)
+			if (m_pdwItemCheckBox[iCurSquareIndex] > 1)
 			{
 				EnableAlphaTest();
 
 				ITEM* pItem = FindItemByKey(m_pdwItemCheckBox[iCurSquareIndex]);
 
-				if(pItem)
+				if (pItem)
 				{
-					if(CanChangeItemColorState(pItem) == true)
+					if (CanChangeItemColorState(pItem) == true)
 					{
 						SetItemColorState(pItem);
 					}
-					
-					if(pItem->byColorState == ITEM_COLOR_NORMAL)
+
+					if (pItem->byColorState == ITEM_COLOR_NORMAL)
 					{
 						glColor4f(0.3f, 0.5f, 0.5f, 0.6f);
 					}
-					else if(pItem->byColorState == ITEM_COLOR_DURABILITY_50)
+					else if (pItem->byColorState == ITEM_COLOR_DURABILITY_50)
 					{
 						glColor4f(1.0f, 1.0f, 0.f, 0.4f);
 					}
-					else if(pItem->byColorState == ITEM_COLOR_DURABILITY_70)
+					else if (pItem->byColorState == ITEM_COLOR_DURABILITY_70)
 					{
 						glColor4f(1.0f, 0.66f, 0.f, 0.4f);
 					}
-					else if(pItem->byColorState == ITEM_COLOR_DURABILITY_80)
+					else if (pItem->byColorState == ITEM_COLOR_DURABILITY_80)
 					{
 						glColor4f(1.0f, 0.33f, 0.f, 0.4f);
 					}
-					else if(pItem->byColorState == ITEM_COLOR_DURABILITY_100)
+					else if (pItem->byColorState == ITEM_COLOR_DURABILITY_100)
 					{
 						glColor4f(1.0f, 0.f, 0.f, 0.4f);
 					}
-					else if(pItem->byColorState == ITEM_COLOR_TRADE_WARNING)
+					else if (pItem->byColorState == ITEM_COLOR_TRADE_WARNING)
 					{
 						glColor4f(1.0f, 0.2f, 0.1f, 0.4f);
 					}
@@ -910,101 +945,101 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 				{
 					glColor4f(0.3f, 0.5f, 0.5f, 0.6f);
 				}
-				
-				RenderColor(m_Pos.x+(x*INVENTORY_SQUARE_WIDTH), m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT),INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
+
+				RenderColor(m_Pos.x + (x * INVENTORY_SQUARE_WIDTH), m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT), INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
 				EndRenderColor();
 			}
 
 			EnableAlphaTest();
-			RenderImage(IMAGE_ITEM_SQUARE, m_Pos.x+(x*INVENTORY_SQUARE_WIDTH),m_Pos.y+(y*INVENTORY_SQUARE_HEIGHT), 21, 21);
+			RenderImage(IMAGE_ITEM_SQUARE, m_Pos.x + (x * INVENTORY_SQUARE_WIDTH), m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT), 21, 21);
 		}
 	}
 
 	EnableAlphaTest();
-	RenderImage(IMAGE_ITEM_TABLE_TOP_LEFT, m_Pos.x-WND_LEFT_EDGE, m_Pos.y-WND_TOP_EDGE, 14, 14);
-	RenderImage(IMAGE_ITEM_TABLE_TOP_RIGHT, m_Pos.x+m_Size.cx-WND_RIGHT_EDGE, m_Pos.y-WND_TOP_EDGE, 14, 14);
-	RenderImage(IMAGE_ITEM_TABLE_BOTTOM_LEFT, m_Pos.x-WND_LEFT_EDGE, m_Pos.y+m_Size.cy-WND_BOTTOM_EDGE, 14, 14);
-	RenderImage(IMAGE_ITEM_TABLE_BOTTOM_RIGHT, m_Pos.x+m_Size.cx-WND_RIGHT_EDGE, m_Pos.y+m_Size.cy-WND_BOTTOM_EDGE, 14, 14);
-	
-	for(x=m_Pos.x-WND_LEFT_EDGE+14; x<m_Pos.x+m_Size.cx-WND_RIGHT_EDGE; x++)
+	RenderImage(IMAGE_ITEM_TABLE_TOP_LEFT, m_Pos.x - WND_LEFT_EDGE, m_Pos.y - WND_TOP_EDGE, 14, 14);
+	RenderImage(IMAGE_ITEM_TABLE_TOP_RIGHT, m_Pos.x + m_Size.cx - WND_RIGHT_EDGE, m_Pos.y - WND_TOP_EDGE, 14, 14);
+	RenderImage(IMAGE_ITEM_TABLE_BOTTOM_LEFT, m_Pos.x - WND_LEFT_EDGE, m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, 14, 14);
+	RenderImage(IMAGE_ITEM_TABLE_BOTTOM_RIGHT, m_Pos.x + m_Size.cx - WND_RIGHT_EDGE, m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, 14, 14);
+
+	for (x = m_Pos.x - WND_LEFT_EDGE + 14; x < m_Pos.x + m_Size.cx - WND_RIGHT_EDGE; x++)
 	{
-		RenderImage(IMAGE_ITEM_TABLE_TOP_PIXEL, x, m_Pos.y-WND_TOP_EDGE, 1, 14);
-		RenderImage(IMAGE_ITEM_TABLE_BOTTOM_PIXEL, x, m_Pos.y+m_Size.cy-WND_BOTTOM_EDGE, 1, 14);
+		RenderImage(IMAGE_ITEM_TABLE_TOP_PIXEL, x, m_Pos.y - WND_TOP_EDGE, 1, 14);
+		RenderImage(IMAGE_ITEM_TABLE_BOTTOM_PIXEL, x, m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, 1, 14);
 	}
-	for(y=m_Pos.y-WND_TOP_EDGE+14; y<m_Pos.y+m_Size.cy-WND_BOTTOM_EDGE; y++)
+	for (y = m_Pos.y - WND_TOP_EDGE + 14; y < m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE; y++)
 	{
-		RenderImage(IMAGE_ITEM_TABLE_LEFT_PIXEL, m_Pos.x-WND_LEFT_EDGE, y, 14, 1);
-		RenderImage(IMAGE_ITEM_TABLE_RIGHT_PIXEL, m_Pos.x+m_Size.cx-WND_RIGHT_EDGE, y, 14, 1);
+		RenderImage(IMAGE_ITEM_TABLE_LEFT_PIXEL, m_Pos.x - WND_LEFT_EDGE, y, 14, 1);
+		RenderImage(IMAGE_ITEM_TABLE_RIGHT_PIXEL, m_Pos.x + m_Size.cx - WND_RIGHT_EDGE, y, 14, 1);
 	}
 
-	if( ms_pPickedItem )
+	if (ms_pPickedItem)
 	{
-		bool pickitemvisible = ms_pPickedItem->IsVisible();
-		
-		if( pickitemvisible )
+		const bool pickitemvisible = ms_pPickedItem->IsVisible();
+
+		if (pickitemvisible)
 		{
 			RECT rcPickedItem, rcInventory, rcIntersect;
 			ms_pPickedItem->GetRect(rcPickedItem);
 			GetRect(rcInventory);
-			
-			if(IntersectRect(&rcIntersect, &rcPickedItem, &rcInventory))
+
+			if (IntersectRect(&rcIntersect, &rcPickedItem, &rcInventory))
 			{
 				ITEM* pPickItem = ms_pPickedItem->GetItem();
-				ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pPickItem->Type];
-				int iPickedItemX = MouseX - ((pItemAttr->Width - 1) * INVENTORY_SQUARE_WIDTH / 2);
-				int iPickedItemY = MouseY - ((pItemAttr->Height - 1) * INVENTORY_SQUARE_HEIGHT / 2);
-				
+				const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pPickItem->Type];
+				const int iPickedItemX = MouseX - ((pItemAttr->Width - 1) * INVENTORY_SQUARE_WIDTH / 2);
+				const int iPickedItemY = MouseY - ((pItemAttr->Height - 1) * INVENTORY_SQUARE_HEIGHT / 2);
+
 				int iColumnX = 0, iRowY = 0;
 				int nItemColumn = pItemAttr->Width, nItemRow = pItemAttr->Height;
-				if(false == GetSquarePosAtPt(iPickedItemX, iPickedItemY, iColumnX, iRowY))
+				if (false == GetSquarePosAtPt(iPickedItemX, iPickedItemY, iColumnX, iRowY))
 				{
 					iColumnX = ((iPickedItemX - rcInventory.left) / INVENTORY_SQUARE_WIDTH);
-					
-					if(iPickedItemX - rcInventory.left < 0)
+
+					if (iPickedItemX - rcInventory.left < 0)
 						iColumnX = ((iPickedItemX - rcInventory.left) / INVENTORY_SQUARE_WIDTH) - 1;
 					else
 						iColumnX = (iPickedItemX - rcInventory.left) / INVENTORY_SQUARE_WIDTH;
-					
-					if(iPickedItemY - rcInventory.top < 0)
+
+					if (iPickedItemY - rcInventory.top < 0)
 						iRowY = ((iPickedItemY - rcInventory.top) / INVENTORY_SQUARE_HEIGHT) - 1;
 					else
 						iRowY = (iPickedItemY - rcInventory.top) / INVENTORY_SQUARE_HEIGHT;
 				}
-				
+
 				bool bWarning = false;
 				//. Clipping
-				if(iColumnX < 0 && iColumnX >= -nItemColumn)
+				if (iColumnX < 0 && iColumnX >= -nItemColumn)
 				{
 					nItemColumn = nItemColumn + iColumnX;
 					iColumnX = 0;
 					bWarning = true;
 				}
-				if(iColumnX+nItemColumn > m_nColumn && iColumnX < m_nColumn)
+				if (iColumnX + nItemColumn > m_nColumn && iColumnX < m_nColumn)
 				{
 					nItemColumn = m_nColumn - iColumnX;
 					bWarning = true;
 				}
-				if(iRowY < 0 && iRowY >= -nItemRow)
+				if (iRowY < 0 && iRowY >= -nItemRow)
 				{
 					nItemRow = nItemRow + iRowY;
 					iRowY = 0;
 					bWarning = true;
 				}
-				if(iRowY+nItemRow > m_nRow && iRowY < m_nRow)
+				if (iRowY + nItemRow > m_nRow && iRowY < m_nRow)
 				{
 					nItemRow = m_nRow - iRowY;
 					bWarning = true;
 				}
-				
-				int iDestPosX = m_Pos.x + iColumnX * INVENTORY_SQUARE_WIDTH;
-				int iDestPosY = m_Pos.y + iRowY * INVENTORY_SQUARE_HEIGHT;
-				int iDestWidth = nItemColumn * INVENTORY_SQUARE_WIDTH;
-				int iDestHeight = nItemRow * INVENTORY_SQUARE_HEIGHT;
-				
+
+				const int iDestPosX = m_Pos.x + iColumnX * INVENTORY_SQUARE_WIDTH;
+				const int iDestPosY = m_Pos.y + iRowY * INVENTORY_SQUARE_HEIGHT;
+				const int iDestWidth = nItemColumn * INVENTORY_SQUARE_WIDTH;
+				const int iDestHeight = nItemRow * INVENTORY_SQUARE_HEIGHT;
+
 				m_bCanPushItem = bWarning;
-				
+
 				//. Rendering Routine
-				if(bWarning)
+				if (bWarning)
 				{
 					EnableAlphaTest();
 					glColor4f(1.f, 0.2f, 0.2f, 0.4f);
@@ -1013,81 +1048,81 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 				}
 				else
 				{
-					if(iColumnX >= 0 && iColumnX < m_nColumn && iRowY >= 0 && iRowY < m_nRow)
+					if (iColumnX >= 0 && iColumnX < m_nColumn && iRowY >= 0 && iRowY < m_nRow)
 					{
 						EnableAlphaTest();
-						for(int y=0; y<nItemRow; y++)
+						for (int y = 0; y < nItemRow; y++)
 						{
-							for(int x=0; x<nItemColumn; x++)
+							for (int x = 0; x < nItemColumn; x++)
 							{
-								int iSquarePosX = iColumnX+x;
-								int iSquarePosY = iRowY+y;
-								int iCurSquareIndex = iSquarePosY*m_nColumn+iSquarePosX;
-								if(m_pdwItemCheckBox[iCurSquareIndex] > 1)
+								const int iSquarePosX = iColumnX + x;
+								const int iSquarePosY = iRowY + y;
+								const int iCurSquareIndex = iSquarePosY * m_nColumn + iSquarePosX;
+								if (m_pdwItemCheckBox[iCurSquareIndex] > 1)
 								{
 									bool bSuccess = false;
-									
+
 									ITEM* pTargetItem = FindItemByKey(m_pdwItemCheckBox[iCurSquareIndex]);
-									if(pTargetItem)
+									if (pTargetItem)
 									{
-										int	iType = pTargetItem->Type;
+										const int	iType = pTargetItem->Type;
 
 										int	iLevel = (pTargetItem->Level >> 3) & 15;
 
-										int	iDurability = pTargetItem->Durability;
-										
-										if((pPickItem->Type==ITEM_POTION+13) || (pPickItem->Type==ITEM_POTION+14)) 
-										{	   
+										const int	iDurability = pTargetItem->Durability;
+
+										if ((pPickItem->Type == ITEM_POTION + 13) || (pPickItem->Type == ITEM_POTION + 14))
+										{
 											bSuccess = CanUpgradeItem(pPickItem, pTargetItem);
 										}
-										else if(pPickItem->Type == ITEM_POTION+42 )
+										else if (pPickItem->Type == ITEM_POTION + 42)
 										{
-											if(pTargetItem->Jewel_Of_Harmony_Option == 0  )
+											if (pTargetItem->Jewel_Of_Harmony_Option == 0)
 											{
-												StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType( static_cast<int>(pTargetItem->Type) );
-												
-												if( (strengthitem != SI_None) && (!g_SocketItemMgr.IsSocketItem(pTargetItem)) 
+												const StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pTargetItem->Type));
+
+												if ((strengthitem != SI_None) && (!g_SocketItemMgr.IsSocketItem(pTargetItem))
 													&& ((pTargetItem->ExtOption % 0x04) != EXT_A_SET_OPTION && (pTargetItem->ExtOption % 0x04) != EXT_B_SET_OPTION))
 												{
 													bSuccess = true;
 												}
 											}
 										}
-										else if(pPickItem->Type == ITEM_POTION+43 || pPickItem->Type == ITEM_POTION+44 )
+										else if (pPickItem->Type == ITEM_POTION + 43 || pPickItem->Type == ITEM_POTION + 44)
 										{
-											if( pTargetItem->Jewel_Of_Harmony_Option != 0 )
+											if (pTargetItem->Jewel_Of_Harmony_Option != 0)
 											{
 												bSuccess = true;
 											}
 										}
 
-										if(pPickItem->Type == ITEM_POTION+13 && iType == ITEM_HELPER+37 && iDurability != 255)
+										if (pPickItem->Type == ITEM_POTION + 13 && iType == ITEM_HELPER + 37 && iDurability != 255)
 										{
 											bSuccess = true;
 										}
 
-										if(bSuccess == false && m_pOwner == g_pMyInventory)
+										if (bSuccess == false && m_pOwner == g_pMyInventory)
 										{
-											bSuccess = IsOverlayItem(pPickItem, pTargetItem);
+											bSuccess = AreItemsStackable(pPickItem, pTargetItem);
 										}
 
 #ifdef LEM_ADD_LUCKYITEM
-										if( Check_LuckyItem( pTargetItem->Type ) )
+										if (Check_LuckyItem(pTargetItem->Type))
 										{
-											bSuccess	= false;
-											if( pPickItem->Type == ITEM_POTION+161 )
+											bSuccess = false;
+											if (pPickItem->Type == ITEM_POTION + 161)
 											{
-												if(pTargetItem->Jewel_Of_Harmony_Option == 0  )	bSuccess = true;
+												if (pTargetItem->Jewel_Of_Harmony_Option == 0)	bSuccess = true;
 											}
-											else if( pPickItem->Type == ITEM_POTION+160 )
+											else if (pPickItem->Type == ITEM_POTION + 160)
 											{
-												if( pTargetItem->Durability > 0)				bSuccess = true;
+												if (pTargetItem->Durability > 0)				bSuccess = true;
 											}
-										}			
+										}
 #endif // LEM_ADD_LUCKYITEM
 									}
-									
-									if(bSuccess)
+
+									if (bSuccess)
 									{
 										SetSquareColorWarning(0.2f, 0.4f, 0.2f);
 									}
@@ -1095,14 +1130,14 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 									{
 										SetSquareColorWarning(1.f, 0.2f, 0.2f);
 									}
-									
+
 									glColor4f(m_afColorStateWarning[0], m_afColorStateWarning[1], m_afColorStateWarning[2], 0.4f);
 								}
 								else
 								{
 									glColor4f(m_afColorStateNormal[0], m_afColorStateNormal[1], m_afColorStateNormal[2], 0.4f);
 								}
-								RenderColor(m_Pos.x+(iSquarePosX*INVENTORY_SQUARE_WIDTH), m_Pos.y+(iSquarePosY*INVENTORY_SQUARE_HEIGHT),INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
+								RenderColor(m_Pos.x + (iSquarePosX * INVENTORY_SQUARE_WIDTH), m_Pos.y + (iSquarePosY * INVENTORY_SQUARE_HEIGHT), INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
 							}
 						}
 						EndRenderColor();
@@ -1112,14 +1147,14 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 		}
 	}
 
-	bool tooltipvisible = true;
+	const bool tooltipvisible = true;
 
-	if(m_pNew3DRenderMng)
+	if (m_pNew3DRenderMng)
 	{
 		m_pNew3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, RENDER_NUMBER_OF_ITEM, 0);
-		if(m_pToolTipItem && GetPickedItem() == NULL)
+		if (m_pToolTipItem && GetPickedItem() == nullptr)
 		{
-			if( tooltipvisible )
+			if (tooltipvisible)
 			{
 				m_pNew3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, RENDER_ITEM_TOOLTIP, 0);
 			}
@@ -1133,19 +1168,19 @@ void SEASON3B::CNewUIInventoryCtrl::SetPos(int x, int y)
 	m_Pos.y = y;
 }
 
-const POINT& SEASON3B::CNewUIInventoryCtrl::GetPos() const 
-{ 
-	return m_Pos; 
+const POINT& SEASON3B::CNewUIInventoryCtrl::GetPos() const
+{
+	return m_Pos;
 }
 
-int SEASON3B::CNewUIInventoryCtrl::GetNumberOfColumn() const 
-{ 
-	return m_nColumn; 
+int SEASON3B::CNewUIInventoryCtrl::GetNumberOfColumn() const
+{
+	return m_nColumn;
 }
 
-int SEASON3B::CNewUIInventoryCtrl::GetNumberOfRow() const 
-{ 
-	return m_nRow; 
+int SEASON3B::CNewUIInventoryCtrl::GetNumberOfRow() const
+{
+	return m_nRow;
 }
 
 void SEASON3B::CNewUIInventoryCtrl::GetRect(RECT& rcBox)
@@ -1157,52 +1192,52 @@ void SEASON3B::CNewUIInventoryCtrl::GetRect(RECT& rcBox)
 }
 
 CNewUIInventoryCtrl::EVENT_STATE SEASON3B::CNewUIInventoryCtrl::GetEventState()
-{ 
-	return m_EventState; 
+{
+	return m_EventState;
 }
 
 CNewUIObj* SEASON3B::CNewUIInventoryCtrl::GetOwner() const
-{ 
-	return m_pOwner; 
+{
+	return m_pOwner;
 }
 
 bool SEASON3B::CNewUIInventoryCtrl::IsVisible() const
 {
-	if(m_pOwner)
+	if (m_pOwner)
 		return (m_pOwner->IsVisible() && m_bShow);
 	return m_bShow;
 }
 
 void SEASON3B::CNewUIInventoryCtrl::ShowInventory()
-{ 
-	m_bShow = true; 
+{
+	m_bShow = true;
 }
 
 void SEASON3B::CNewUIInventoryCtrl::HideInventory()
-{ 
-	m_bShow = false; 
+{
+	m_bShow = false;
 }
 
 bool SEASON3B::CNewUIInventoryCtrl::IsLocked() const
-{ 
-	return m_bLock; 
+{
+	return m_bLock;
 }
 
 void SEASON3B::CNewUIInventoryCtrl::LockInventory()
-{ 
-	m_bLock = true; 
+{
+	m_bLock = true;
 }
 
 void SEASON3B::CNewUIInventoryCtrl::UnlockInventory()
-{ 
-	m_bLock = false; 
+{
+	m_bLock = false;
 }
 
 int SEASON3B::CNewUIInventoryCtrl::GetSquareIndexAtPt(int x, int y)
 {
 	int iColumnX, iRowY;
-	if(GetSquarePosAtPt(x, y, iColumnX, iRowY))
-		return iRowY*m_nColumn+iColumnX;
+	if (GetSquarePosAtPt(x, y, iColumnX, iRowY))
+		return iRowY * m_nColumn + iColumnX + m_nIndexOffset;
 	return -1;
 }
 
@@ -1211,7 +1246,7 @@ bool SEASON3B::CNewUIInventoryCtrl::GetSquarePosAtPt(int x, int y, int& iColumnX
 	RECT rcBox;
 	GetRect(rcBox);
 
-	if(x < rcBox.left || x >= rcBox.right || y < rcBox.top || y >= rcBox.bottom)
+	if (x < rcBox.left || x >= rcBox.right || y < rcBox.top || y >= rcBox.bottom)
 		return false;
 
 	iColumnX = (x - rcBox.left) / INVENTORY_SQUARE_WIDTH;
@@ -1220,19 +1255,20 @@ bool SEASON3B::CNewUIInventoryCtrl::GetSquarePosAtPt(int x, int y, int& iColumnX
 	return true;
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::CheckSlot(int iLinealPos, int cx, int cy)
+bool SEASON3B::CNewUIInventoryCtrl::CheckSlot(int startIndex, int width, int height)
 {
-	for(int y=0; y<cy; y++)
+	for (int y = 0; y < height; y++)
 	{
-		for(int x=0; x<cx; x++)
+		for (int x = 0; x < width; x++)
 		{
-			int iIndex = iLinealPos + (y * m_nColumn) + x;
+			const int iIndex = startIndex + (y * m_nColumn) + x;
 
-			if(iIndex >= (m_nColumn * m_nRow))
+			if (iIndex >= (m_nColumn * m_nRow))
 			{
 				return false;
 			}
-			else if(m_pdwItemCheckBox[iIndex] != 0)
+
+			if (m_pdwItemCheckBox[iIndex] != 0)
 			{
 				return false;
 			}
@@ -1242,10 +1278,15 @@ bool SEASON3B::CNewUIInventoryCtrl::CheckSlot(int iLinealPos, int cx, int cy)
 	return true;
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::CheckSlot(int iColumnX, int iRowY, int cx, int cy)
+bool SEASON3B::CNewUIInventoryCtrl::CheckSlot(int iColumnX, int iRowY, int width, int height)
 {
-	int iIndex = iRowY*m_nColumn+iColumnX;
-	return CheckSlot(iIndex, cx, cy);
+	const int iIndex = iRowY * m_nColumn + iColumnX;
+	return CheckSlot(iIndex, width, height);
+}
+
+int CNewUIInventoryCtrl::GetIndex(int column, int row)
+{
+	return column + row * m_nColumn + m_nIndexOffset;
 }
 
 bool SEASON3B::CNewUIInventoryCtrl::CheckPtInRect(int x, int y)
@@ -1253,7 +1294,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CheckPtInRect(int x, int y)
 	RECT rcSquare;
 	GetRect(rcSquare);
 
-	if(x < rcSquare.left || x >= rcSquare.right || y < rcSquare.top || y >= rcSquare.bottom)
+	if (x < rcSquare.left || x >= rcSquare.right || y < rcSquare.top || y >= rcSquare.bottom)
 		return false;
 	return true;
 }
@@ -1263,7 +1304,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CheckRectInRect(const RECT& rcBox)
 	RECT rcSquare;
 	GetRect(rcSquare);
 
-	if(rcBox.left >= rcSquare.left && rcBox.right <= rcSquare.right 
+	if (rcBox.left >= rcSquare.left && rcBox.right <= rcSquare.right
 		&& rcBox.top >= rcSquare.top && rcBox.bottom <= rcSquare.bottom)
 		return true;
 	return false;
@@ -1271,23 +1312,26 @@ bool SEASON3B::CNewUIInventoryCtrl::CheckRectInRect(const RECT& rcBox)
 
 bool SEASON3B::CNewUIInventoryCtrl::CanMove(int iLinealPos, ITEM* pItem)
 {
-	if(iLinealPos < 0 || iLinealPos >= m_nColumn*m_nRow)
+	const auto startIndex = iLinealPos - m_nIndexOffset;
+	if (startIndex < 0 || startIndex >= m_nColumn * m_nRow)
+	{
 		return false;
+	}
 
-	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-	return CheckSlot(iLinealPos, pItemAttr->Width, pItemAttr->Height);
+	const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
+	return CheckSlot(startIndex, pItemAttr->Width, pItemAttr->Height);
 }
 
 bool SEASON3B::CNewUIInventoryCtrl::CanMove(int iColumnX, int iRowY, ITEM* pItem)
 {
-	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
+	const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
 	return CheckSlot(iColumnX, iRowY, pItemAttr->Width, pItemAttr->Height);
 }
 
 bool SEASON3B::CNewUIInventoryCtrl::CanMoveToPt(int x, int y, ITEM* pItem)
 {
 	int iColumnX, iRowY;
-	if(GetSquarePosAtPt(x, y, iColumnX, iRowY))
+	if (GetSquarePosAtPt(x, y, iColumnX, iRowY))
 		return CanMove(iColumnX, iRowY, pItem);
 	return false;
 }
@@ -1299,19 +1343,19 @@ void SEASON3B::CNewUIInventoryCtrl::SetToolTipType(TOOLTIP_TYPE ToolTipType)
 
 void SEASON3B::CNewUIInventoryCtrl::CreateItemToolTip(ITEM* pItem)
 {
-	if(m_pToolTipItem)
+	if (m_pToolTipItem)
 		DeleteItemToolTip();
 
-	if(g_pNewItemMng)
+	if (g_pNewItemMng)
 		m_pToolTipItem = g_pNewItemMng->CreateItem(pItem);
 }
 
 void SEASON3B::CNewUIInventoryCtrl::DeleteItemToolTip()
 {
-	if(m_pToolTipItem && g_pNewItemMng)
+	if (m_pToolTipItem && g_pNewItemMng)
 	{
 		g_pNewItemMng->DeleteItem(m_pToolTipItem);
-		m_pToolTipItem = NULL;
+		m_pToolTipItem = nullptr;
 	}
 }
 
@@ -1319,7 +1363,7 @@ void SEASON3B::CNewUIInventoryCtrl::SetRepairMode(bool bRepair)
 {
 	m_bRepairMode = bRepair;
 
-	if(m_bRepairMode == true)
+	if (m_bRepairMode == true)
 	{
 		SetToolTipType(TOOLTIP_TYPE_REPAIR);
 	}
@@ -1338,61 +1382,61 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
 {
 	EnableAlphaTest();
 	glColor3f(1.f, 1.f, 1.f);
-	type_vec_item::iterator li = m_vecItem.begin();
-	for(; li != m_vecItem.end(); li++)
+	auto li = m_vecItem.begin();
+	for (; li != m_vecItem.end(); ++li)
 	{
-		ITEM* pItem = (*li);
-		ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-		float x = m_Pos.x+(pItem->x*INVENTORY_SQUARE_WIDTH);
-		float y = m_Pos.y+(pItem->y*INVENTORY_SQUARE_HEIGHT);
-		float width = pItemAttr->Width*INVENTORY_SQUARE_WIDTH;
-		float height = pItemAttr->Height*INVENTORY_SQUARE_HEIGHT;
+		const ITEM* pItem = (*li);
+		const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
+		const float x = m_Pos.x + (pItem->x * INVENTORY_SQUARE_WIDTH);
+		const float y = m_Pos.y + (pItem->y * INVENTORY_SQUARE_HEIGHT);
+		const float width = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
+		float height = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
 
-		if(pItem->Type>=ITEM_POTION && pItem->Type<=ITEM_POTION+8 && pItem->Durability > 1)
+		if (pItem->Type >= ITEM_POTION && pItem->Type <= ITEM_POTION + 8 && pItem->Durability > 1)
 		{
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
+			glColor3f(1.f, 0.9f, 0.7f);
+			SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
 		}
-		else if(pItem->Type>=ITEM_POTION+46 && pItem->Type<=ITEM_POTION+50 && pItem->Durability > 1)
+		else if (pItem->Type >= ITEM_POTION + 46 && pItem->Type <= ITEM_POTION + 50 && pItem->Durability > 1)
 		{
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
+			glColor3f(1.f, 0.9f, 0.7f);
+			SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
 		}
-		else if(pItem->Type>=ITEM_POTION+35 && pItem->Type<=ITEM_POTION+40 && pItem->Durability > 1)
+		else if (pItem->Type >= ITEM_POTION + 35 && pItem->Type <= ITEM_POTION + 40 && pItem->Durability > 1)
 		{
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
+			glColor3f(1.f, 0.9f, 0.7f);
+			SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
 		}
-		else if(pItem->Type>=ITEM_POTION+70 && pItem->Type<=ITEM_POTION+71 && pItem->Durability > 1)
+		else if (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71 && pItem->Durability > 1)
 		{
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
+			glColor3f(1.f, 0.9f, 0.7f);
+			SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
 		}
-		else if(pItem->Type==ITEM_POTION+94 && pItem->Durability > 1) 
+		else if (pItem->Type == ITEM_POTION + 94 && pItem->Durability > 1)
 		{
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
+			glColor3f(1.f, 0.9f, 0.7f);
+			SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
 		}
-		else if(pItem->Type>=ITEM_POTION+78 && pItem->Type<=ITEM_POTION+82 && pItem->Durability > 1)
+		else if (pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82 && pItem->Durability > 1)
 		{
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
+			glColor3f(1.f, 0.9f, 0.7f);
+			SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
 		}
-		else if(pItem->Type>=ITEM_POTION+85 && pItem->Type<=ITEM_POTION+90 && pItem->Durability > 1)
+		else if (pItem->Type >= ITEM_POTION + 85 && pItem->Type <= ITEM_POTION + 90 && pItem->Durability > 1)
 		{
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
+			glColor3f(1.f, 0.9f, 0.7f);
+			SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
 		}
-		else if(pItem->Type==ITEM_POTION+133 && pItem->Durability > 1)
+		else if (pItem->Type == ITEM_POTION + 133 && pItem->Durability > 1)
 		{
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, pItem->Durability);
+			glColor3f(1.f, 0.9f, 0.7f);
+			SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
 		}
-		else if(COMGEM::isCompiledGem(pItem)) 
+		else if (COMGEM::isCompiledGem(pItem))
 		{
-			int Level = (pItem->Level>>3)&15;
-			glColor3f(1.f,0.9f,0.7f);
-			SEASON3B::RenderNumber(x+width-6, y+1, (Level + 1) * COMGEM::FIRST);
+			const int Level = (pItem->Level >> 3) & 15;
+			glColor3f(1.f, 0.9f, 0.7f);
+			SEASON3B::RenderNumber(x + width - 6, y + 1, (Level + 1) * COMGEM::FIRST);
 		}
 	}
 	glColor3f(1.f, 1.f, 1.f);
@@ -1400,61 +1444,61 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
 }
 
 void SEASON3B::CNewUIInventoryCtrl::RenderItemToolTip()
-{	
-	if(m_pToolTipItem)
+{
+	if (m_pToolTipItem)
 	{
-		ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
-		int iTargetX = m_Pos.x + m_pToolTipItem->x*INVENTORY_SQUARE_WIDTH + pItemAttr->Width*INVENTORY_SQUARE_WIDTH/2;
-		int iTargetY = m_Pos.y + m_pToolTipItem->y*INVENTORY_SQUARE_HEIGHT;
+		const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
+		const int iTargetX = m_Pos.x + m_pToolTipItem->x * INVENTORY_SQUARE_WIDTH + pItemAttr->Width * INVENTORY_SQUARE_WIDTH / 2;
+		int iTargetY = m_Pos.y + m_pToolTipItem->y * INVENTORY_SQUARE_HEIGHT;
 
 		if (pItemAttr->Height == 1)
 		{
-			iTargetY += INVENTORY_SQUARE_HEIGHT/2;
+			iTargetY += INVENTORY_SQUARE_HEIGHT / 2;
 		}
-		
-		if(m_ToolTipType == TOOLTIP_TYPE_INVENTORY)
+
+		if (m_ToolTipType == TOOLTIP_TYPE_INVENTORY)
 		{
 			RenderItemInfo(iTargetX, iTargetY, m_pToolTipItem, false);
 		}
-		else if(m_ToolTipType == TOOLTIP_TYPE_REPAIR)
+		else if (m_ToolTipType == TOOLTIP_TYPE_REPAIR)
 		{
 			RenderRepairInfo(iTargetX, iTargetY, m_pToolTipItem, false);
 		}
-		else if(m_ToolTipType == TOOLTIP_TYPE_NPC_SHOP)
+		else if (m_ToolTipType == TOOLTIP_TYPE_NPC_SHOP)
 		{
 			RenderItemInfo(iTargetX, iTargetY, m_pToolTipItem, true);
 		}
-		else if( m_ToolTipType == TOOLTIP_TYPE_MY_SHOP )
+		else if (m_ToolTipType == TOOLTIP_TYPE_MY_SHOP)
 		{
 			RenderItemInfo(iTargetX, iTargetY, m_pToolTipItem, false, m_ToolTipType);
 		}
-		else if( m_ToolTipType == TOOLTIP_TYPE_PURCHASE_SHOP )
+		else if (m_ToolTipType == TOOLTIP_TYPE_PURCHASE_SHOP)
 		{
 			RenderItemInfo(iTargetX, iTargetY, m_pToolTipItem, false, m_ToolTipType);
 		}
-	}	
+	}
 }
 
 void SEASON3B::CNewUIInventoryCtrl::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
-	if(pClass)
+	if (pClass)
 	{
-		CNewUIInventoryCtrl* pInventoryCtrl = (CNewUIInventoryCtrl*)pClass;
-		if(dwParamA == RENDER_NUMBER_OF_ITEM)
+		auto* pInventoryCtrl = static_cast<CNewUIInventoryCtrl*>(pClass);
+		if (dwParamA == RENDER_NUMBER_OF_ITEM)
 			pInventoryCtrl->RenderNumberOfItem();
-		else if(dwParamA == RENDER_ITEM_TOOLTIP)
+		else if (dwParamA == RENDER_ITEM_TOOLTIP)
 			pInventoryCtrl->RenderItemToolTip();
 	}
 }
 
 CNewUIPickedItem* SEASON3B::CNewUIInventoryCtrl::GetPickedItem()
-{ 
-	return ms_pPickedItem; 
+{
+	return ms_pPickedItem;
 }
 
 bool SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem)
 {
-	if(g_pNewItemMng)
+	if (g_pNewItemMng)
 	{
 		ms_pPickedItem = new CNewUIPickedItem;
 		return ms_pPickedItem->Create(g_pNewItemMng, pSrc, pItem);
@@ -1464,10 +1508,10 @@ bool SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(CNewUIInventoryCtrl* pSrc, 
 
 void SEASON3B::CNewUIInventoryCtrl::DeletePickedItem()
 {
-	if(ms_pPickedItem)
+	if (ms_pPickedItem)
 	{
 		CNewUIInventoryCtrl* pOwner = ms_pPickedItem->GetOwnerInventory();
-		if(pOwner)
+		if (pOwner)
 		{
 			pOwner->SetEventState(CNewUIInventoryCtrl::EVENT_NONE);
 		}
@@ -1478,28 +1522,28 @@ void SEASON3B::CNewUIInventoryCtrl::DeletePickedItem()
 
 void SEASON3B::CNewUIInventoryCtrl::BackupPickedItem()
 {
-	if(ms_pPickedItem && EquipmentItem == false)
+	if (ms_pPickedItem && EquipmentItem == false)
 	{
 		CNewUIInventoryCtrl* pOwner = ms_pPickedItem->GetOwnerInventory();
 		ITEM* pItemObj = ms_pPickedItem->GetItem();
-		if(pOwner)
+		if (pOwner)
 		{
 			pOwner->AddItem(pItemObj->x, pItemObj->y, pItemObj);
-			
+
 			DeletePickedItem();
 		}
-		else if(pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
+		else if (pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
 		{
 			ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[pItemObj->lineal_pos];
 			memcpy(pEquipmentItemSlot, pItemObj, sizeof(ITEM));
 
 			g_pMyInventory->CreateEquippingEffect(pEquipmentItemSlot);
 
-			if (pEquipmentItemSlot->Type == ITEM_HELPER+5 && !gMapManager.InChaosCastle())
+			if (pEquipmentItemSlot->Type == ITEM_HELPER + 5 && !gMapManager.InChaosCastle())
 			{
 				PET_INFO* pPetInfo = giPetManager::GetPetInfo(pEquipmentItemSlot);
 				giPetManager::CreatePetDarkSpirit_Now(Hero);
-				((CSPetSystem*)Hero->m_pPet)->SetPetInfo(pPetInfo);
+				static_cast<CSPetSystem*>(Hero->m_pPet)->SetPetInfo(pPetInfo);
 			}
 			DeletePickedItem();
 		}
@@ -1513,142 +1557,169 @@ void SEASON3B::CNewUIInventoryCtrl::SetEventState(EVENT_STATE es)
 
 void SEASON3B::CNewUIInventoryCtrl::Render3D()
 {
-	type_vec_item::iterator li = m_vecItem.begin();
-	for(; li != m_vecItem.end(); li++)
+	auto li = m_vecItem.begin();
+	for (; li != m_vecItem.end(); ++li)
 	{
-		ITEM* pItem = (*li);
-		ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
+		const ITEM* pItem = (*li);
+		const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
 
-		float x = m_Pos.x+(pItem->x*INVENTORY_SQUARE_WIDTH);
-		float y = m_Pos.y+(pItem->y*INVENTORY_SQUARE_HEIGHT);
- 		float width = pItemAttr->Width*INVENTORY_SQUARE_WIDTH;
-		float height = pItemAttr->Height*INVENTORY_SQUARE_HEIGHT;
+		const float x = m_Pos.x + (pItem->x * INVENTORY_SQUARE_WIDTH);
+		const float y = m_Pos.y + (pItem->y * INVENTORY_SQUARE_HEIGHT);
+		const float width = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
+		const float height = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
 		glColor4f(1.f, 1.f, 1.f, 1.f);
-		
+
 		RenderItem3D(x, y, width, height, pItem->Type, pItem->Level, pItem->Option1, pItem->ExtOption, false);
 	}
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::IsOverlayItem(ITEM* pSourceItem, ITEM* pTargetItem)
+bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* pTargetItem)
 {
-	if(pSourceItem == NULL || pTargetItem == NULL)
+	if (pSourceItem == nullptr || pTargetItem == nullptr)
 	{
 		return false;
 	}
 
-	int iSrcType = pSourceItem->Type;
-	int iTarType = pTargetItem->Type;
-	int iSrcLevel = pSourceItem->Level;
-	int iTarLevel = pTargetItem->Level;
-	int iSrcDurability = pSourceItem->Durability;
-	int iTarDurability = pTargetItem->Durability;
+	const int iSrcType = pSourceItem->Type;
+	const int iTarType = pTargetItem->Type;
+	const int iSrcLevel = pSourceItem->Level;
+	const int iTarLevel = pTargetItem->Level;
+	const int iSrcDurability = pSourceItem->Durability;
+	const int iTarDurability = pTargetItem->Durability;
 
-	if(iSrcType == iTarType)
+	if (iSrcType != iTarType)
 	{
-		if(iSrcType == ITEM_POTION+7 && iTarType == ITEM_POTION+7 && (iSrcDurability < 250 && iTarDurability < 250))
-		{
-			return true;
-		}
-		else if((iSrcType >= ITEM_POTION && iSrcType <= ITEM_POTION+8 && iSrcType != ITEM_POTION+7)	&& (iTarType >= ITEM_POTION && iTarType <= ITEM_POTION+8 && iTarType != ITEM_POTION+7)&& (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		if((iSrcType >= ITEM_POTION+38 && iSrcType <= ITEM_POTION+40) && (iTarType >= ITEM_POTION+38 && iTarType <= ITEM_POTION+40) && (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		if((iSrcType == ITEM_BOW+7 && iTarType == ITEM_BOW+7) && (iSrcLevel == iTarLevel))
-		{
-			return true;
-		}
-		if((iSrcType == ITEM_BOW+15 && iTarType == ITEM_BOW+15)	&& (iSrcLevel == iTarLevel))
-		{
-			return true;
-		}
-		if(iSrcType == ITEM_POTION+29 && iTarType == ITEM_POTION+29)
-		{
-			return true;
-		}
-		if((iSrcType >= ITEM_HELPER+32 && iSrcType <= ITEM_HELPER+34) && (iTarType >= ITEM_HELPER+32 && iTarType <= ITEM_HELPER+34))
-		{
-			return true;
-		}
-		if((iSrcType >= ITEM_POTION+46 && iSrcType <= ITEM_POTION+50) && (iTarType >= ITEM_POTION+46 && iTarType <= ITEM_POTION+50)	&& (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+70 && iTarType == ITEM_POTION+70 && (iSrcDurability < 50 && iTarDurability < 50))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+71 && iTarType == ITEM_POTION+71 && (iSrcDurability < 50 && iTarDurability < 50))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+78 && iTarType == ITEM_POTION+78 && (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+79 && iTarType == ITEM_POTION+79 && (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+80 && iTarType == ITEM_POTION+80 && (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+81 && iTarType == ITEM_POTION+81 && (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+82 && iTarType == ITEM_POTION+82 && (iSrcDurability < 3 && iTarDurability < 3) )
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+94 && iTarType == ITEM_POTION+94 && (iSrcDurability < 50 && iTarDurability < 50))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+85 && iTarType == ITEM_POTION+85 && (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+86 && iTarType == ITEM_POTION+86 && (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+87 && iTarType == ITEM_POTION+87 && (iSrcDurability < 3 && iTarDurability < 3))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+88 && iTarType == ITEM_POTION+88 && (iSrcDurability < 10 && iTarDurability < 10))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+89 && iTarType == ITEM_POTION+89 && (iSrcDurability < 30 && iTarDurability < 30))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+90 && iTarType == ITEM_POTION+90 && (iSrcDurability < 50 && iTarDurability < 50))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+100 && (iSrcDurability < 255 && iTarDurability < 255))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+110 && iTarType == ITEM_POTION+110)
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+101 && iTarType == ITEM_POTION+101 && (iSrcDurability < 5 && iTarDurability < 5))
-		{
-			return true;
-		}
-		else if(iSrcType == ITEM_POTION+133	&& (iSrcDurability < 50 && iTarDurability < 50))
-		{
-			return true;
-		}
+		return false;
+	}
+
+	if (iSrcType == ITEM_POTION + 7 && iTarType == ITEM_POTION + 7 && (iSrcDurability < 250 && iTarDurability < 250))
+	{
+		return true;
+	}
+
+	if ((iSrcType >= ITEM_POTION && iSrcType <= ITEM_POTION + 8 && iSrcType != ITEM_POTION + 7) && (iTarType >= ITEM_POTION && iTarType <= ITEM_POTION + 8 && iTarType != ITEM_POTION + 7) && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if ((iSrcType >= ITEM_POTION + 38 && iSrcType <= ITEM_POTION + 40) && (iTarType >= ITEM_POTION + 38 && iTarType <= ITEM_POTION + 40) && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if ((iSrcType == ITEM_BOW + 7 && iTarType == ITEM_BOW + 7) && (iSrcLevel == iTarLevel))
+	{
+		return true;
+	}
+
+	if ((iSrcType == ITEM_BOW + 15 && iTarType == ITEM_BOW + 15) && (iSrcLevel == iTarLevel))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 29 && iTarType == ITEM_POTION + 29)
+	{
+		return true;
+	}
+
+	if ((iSrcType >= ITEM_HELPER + 32 && iSrcType <= ITEM_HELPER + 34) && (iTarType >= ITEM_HELPER + 32 && iTarType <= ITEM_HELPER + 34))
+	{
+		return true;
+	}
+
+	if ((iSrcType >= ITEM_POTION + 46 && iSrcType <= ITEM_POTION + 50) && (iTarType >= ITEM_POTION + 46 && iTarType <= ITEM_POTION + 50) && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 70 && iTarType == ITEM_POTION + 70 && (iSrcDurability < 50 && iTarDurability < 50))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 71 && iTarType == ITEM_POTION + 71 && (iSrcDurability < 50 && iTarDurability < 50))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 78 && iTarType == ITEM_POTION + 78 && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 79 && iTarType == ITEM_POTION + 79 && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 80 && iTarType == ITEM_POTION + 80 && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 81 && iTarType == ITEM_POTION + 81 && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 82 && iTarType == ITEM_POTION + 82 && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 94 && iTarType == ITEM_POTION + 94 && (iSrcDurability < 50 && iTarDurability < 50))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 85 && iTarType == ITEM_POTION + 85 && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 86 && iTarType == ITEM_POTION + 86 && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 87 && iTarType == ITEM_POTION + 87 && (iSrcDurability < 3 && iTarDurability < 3))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 88 && iTarType == ITEM_POTION + 88 && (iSrcDurability < 10 && iTarDurability < 10))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 89 && iTarType == ITEM_POTION + 89 && (iSrcDurability < 30 && iTarDurability < 30))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 90 && iTarType == ITEM_POTION + 90 && (iSrcDurability < 50 && iTarDurability < 50))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 100 && (iSrcDurability < 255 && iTarDurability < 255))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 110 && iTarType == ITEM_POTION + 110)
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 101 && iTarType == ITEM_POTION + 101 && (iSrcDurability < 5 && iTarDurability < 5))
+	{
+		return true;
+	}
+
+	if (iSrcType == ITEM_POTION + 133 && (iSrcDurability < 50 && iTarDurability < 50))
+	{
+		return true;
 	}
 
 	return false;
@@ -1661,25 +1732,27 @@ bool SEASON3B::CNewUIInventoryCtrl::CanPushItem()
 
 bool SEASON3B::CNewUIInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem)
 {
-	int	iTargetLevel = (pTargetItem->Level >> 3) & 15;
+	const int	iTargetLevel = (pTargetItem->Level >> 3) & 15;
 
-	if( ((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING )
-		&&(pTargetItem->Type != ITEM_BOW+7)
-		&&(pTargetItem->Type != ITEM_BOW+15))
-		||(pTargetItem->Type >= ITEM_WING && pTargetItem->Type <= ITEM_WING+6)
-		||(pTargetItem->Type >= ITEM_WING+36 && pTargetItem->Type <= ITEM_WING+43)
+	if (((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING)
+		&& (pTargetItem->Type != ITEM_BOW + 7)
+		&& (pTargetItem->Type != ITEM_BOW + 15))
+		|| (pTargetItem->Type >= ITEM_WING && pTargetItem->Type <= ITEM_WING + 6)
+		|| (pTargetItem->Type >= ITEM_WING + 36 && pTargetItem->Type <= ITEM_WING + 43)
 		)
 	{
-		if( (pSourceItem->Type == ITEM_POTION+13)
-			&& (iTargetLevel >= 0 && iTargetLevel <= 5) )		
+		if ((pSourceItem->Type == ITEM_POTION + 13)
+			&& (iTargetLevel >= 0 && iTargetLevel <= 5))
 		{
 			return true;
 		}
-		else if( (pSourceItem->Type == ITEM_POTION+14)
-			&& (iTargetLevel >= 0 && iTargetLevel <= 8) )	
+
+		if ((pSourceItem->Type == ITEM_POTION + 14)
+			&& (iTargetLevel >= 0 && iTargetLevel <= 8))
 		{
 			return true;
 		}
 	}
+
 	return false;
 }

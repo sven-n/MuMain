@@ -208,6 +208,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\NewUIInventoryExtension.cpp" />
     <ClCompile Include="source\Dotnet\DotNetRuntime.cpp" />
     <ClCompile Include="source\BlackWin.cpp" />
     <ClCompile Include="source\BoneManager.cpp" />
@@ -429,6 +430,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClCompile Include="source\NewUISiegeWarSoldier.cpp" />
     <ClCompile Include="source\NewUISlideWindow.cpp" />
     <ClCompile Include="source\NewUIStorageInventory.cpp" />
+    <ClCompile Include="source\NewUIStorageInventoryExt.cpp" />
     <ClCompile Include="source\NewUISystem.cpp" />
     <ClCompile Include="source\NewUITextBox.cpp" />
     <ClCompile Include="source\NewUITrade.cpp" />
@@ -566,6 +568,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="afxres.h" />
+    <ClInclude Include="source\NewUIInventoryExtension.h" />
     <ClInclude Include="source\Dotnet\DotNetRuntime.h" />
     <ClInclude Include="source\BaseCls.h" />
     <ClInclude Include="source\BlackWin.h" />
@@ -807,6 +810,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClInclude Include="source\NewUISiegeWarSoldier.h" />
     <ClInclude Include="source\NewUISlideWindow.h" />
     <ClInclude Include="source\NewUIStorageInventory.h" />
+    <ClInclude Include="source\NewUIStorageInventoryExt.h" />
     <ClInclude Include="source\NewUISystem.h" />
     <ClInclude Include="source\NewUITextBox.h" />
     <ClInclude Include="source\NewUITrade.h" />
@@ -920,7 +924,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClInclude Include="source\_struct.h" />
     <ClInclude Include="source\_TextureIndex.h" />
     <ClInclude Include="source\_types.h" />
-    <ClInclude Include="SpinLock.h" />
+    <ClInclude Include="source\SpinLock.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="script\Mu_Chs.py" />

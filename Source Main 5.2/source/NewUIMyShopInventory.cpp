@@ -58,7 +58,7 @@ bool SEASON3B::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int x, in
 	LoadImages();
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if(false == m_pNewInventoryCtrl->Create(g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x+16, m_Pos.y+90, 8, 4))
+	if(false == m_pNewInventoryCtrl->Create(MYSHOP, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x+16, m_Pos.y+90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -142,6 +142,17 @@ void SEASON3B::CNewUIMyShopInventory::SetPos(int x, int y)
 {
 	m_Pos.x = x;
 	m_Pos.y = y;
+
+	if (m_pNewInventoryCtrl)
+	{
+		m_pNewInventoryCtrl->SetPos(m_Pos.x + 16, m_Pos.y + 90);
+	}
+	if (m_Button)
+	{
+		m_Button[MYSHOPINVENTORY_EXIT].SetPos(m_Pos.x + 13, m_Pos.y + 391);
+		m_Button[MYSHOPINVENTORY_OPEN].SetPos(m_Pos.x + 53, m_Pos.y + 391);
+		m_Button[MYSHOPINVENTORY_CLOSE].SetPos(m_Pos.x + 93, m_Pos.y + 391);
+	}
 }
 
 void SEASON3B::CNewUIMyShopInventory::GetTitle( unicode::t_string& titletext )
@@ -300,7 +311,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 
 			if(m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
 			{
-				ChangeSourceIndex(iSourceIndex + MAX_EQUIPMENT);
+				ChangeSourceIndex(iSourceIndex);
 				ChangeTargetIndex(iTargetIndex);
 				
 				CreateMessageBox(MSGBOX_LAYOUT_CLASS(CPersonalShopItemValueMsgBoxLayout));
@@ -336,8 +347,8 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 			{
 				ChangeSourceIndex(iSourceIndex);
 				ChangeTargetIndex(iTargetIndex);
-				SendRequestEquipmentItem( REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iSourceIndex, pItemObj,
-					                      REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);
+				SendRequestEquipmentItem( MYSHOP, iSourceIndex, pItemObj,
+					                      MYSHOP, iTargetIndex);
 				return true;
 			}
 		}
@@ -423,6 +434,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
 							
 							g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
 							g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
+							g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY_EXT);
 						}	
 					}
 					else
@@ -437,6 +449,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
 					
 					g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
 					g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
+					g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY_EXT);
 				}
 			    return false;
 			}
@@ -474,17 +487,16 @@ bool SEASON3B::CNewUIMyShopInventory::Update()
 
 void SEASON3B::CNewUIMyShopInventory::RenderFrame()
 {
-	RenderImage(IMAGE_MYSHOPINVENTORY_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-	RenderImage(IMAGE_MYSHOPINVENTORY_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
+	RenderImage(IMAGE_MYSHOPINVENTORY_BACK, m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT);
+	RenderImage(IMAGE_MYSHOPINVENTORY_TOP, m_Pos.x, m_Pos.y, INVENTORY_WIDTH, 64.f);
 	RenderImage(IMAGE_MYSHOPINVENTORY_LEFT, m_Pos.x, m_Pos.y+64, 21.f, 320.f);
-	RenderImage(IMAGE_MYSHOPINVENTORY_RIGHT, m_Pos.x+190-21, m_Pos.y+64, 21.f, 320.f);
-	RenderImage(IMAGE_MYSHOPINVENTORY_BOTTOM, m_Pos.x, m_Pos.y+429-45, 190.f, 45.f);
+	RenderImage(IMAGE_MYSHOPINVENTORY_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
+	RenderImage(IMAGE_MYSHOPINVENTORY_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, INVENTORY_WIDTH, 45.f);
 	RenderImage(IMAGE_MYSHOPINVENTORY_EDIT, m_Pos.x+12, m_Pos.y+49, 169.f, 26.f);
 
-	unicode::t_char Text[100];
-	memset(&Text, 0, sizeof(unicode::t_char)*100);
+	unicode::t_char Text[100] = {};
 	sprintf( Text, GlobalText[1102]);
-	RenderText( Text, m_Pos.x, m_Pos.y+15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER );
+	RenderText(Text, m_Pos.x, m_Pos.y + 15, INVENTORY_WIDTH, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
@@ -493,7 +505,7 @@ void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
 
 	if(m_EnablePersonalShop)
 	{
-		RenderText(GlobalText[1103], m_Pos.x, m_Pos.y+200, 190, 0, RGBA(215, 138, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold );
+		RenderText(GlobalText[1103], m_Pos.x, m_Pos.y+200, INVENTORY_WIDTH, 0, RGBA(215, 138, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold );
 	}
 
 	memset(&Text, 0, sizeof(unicode::t_char)*100);
@@ -567,14 +579,7 @@ void SEASON3B::CNewUIMyShopInventory::ClosingProcess()
 
 int SEASON3B::CNewUIMyShopInventory::GetPointedItemIndex()
 {
-	int iPointedItemIndex = m_pNewInventoryCtrl->GetPointedSquareIndex();
-
-	if(iPointedItemIndex != -1)
-	{
-		iPointedItemIndex += MAX_MY_INVENTORY_INDEX;
-	}
-
-	return iPointedItemIndex;
+	return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }	
 
 void SEASON3B::CNewUIMyShopInventory::ResetSubject()

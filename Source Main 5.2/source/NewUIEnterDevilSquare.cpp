@@ -217,7 +217,7 @@ bool CNewUIEnterDevilSquare::BtnProcess()
 		
 		if( iItemIndex > -1)	
 		{
-			SendRequestMoveToDevilSquare( m_iNumActiveBtn, MAX_EQUIPMENT+iItemIndex );	
+			SendRequestMoveToDevilSquare( m_iNumActiveBtn, iItemIndex );	
 		}
 		else
 		{

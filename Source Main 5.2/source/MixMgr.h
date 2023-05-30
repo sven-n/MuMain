@@ -269,7 +269,7 @@ namespace SEASON3A
 
 		void SetMixType(int iMixType) { this->m_iMixType = iMixType; }
 		int GetMixInventoryType();
-		int GetMixInventoryEquipmentIndex();
+		STORAGE_TYPE GetMixInventoryEquipmentIndex();
 		void ResetMixItemInventory();
 		void AddItemToMixItemInventory(ITEM * pItem);
 		void CheckMixInventory();

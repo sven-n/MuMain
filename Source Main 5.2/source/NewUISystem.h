@@ -24,6 +24,7 @@
 #include "NewUIGatemanWindow.h"
 #include "NewUIGateSwitchWindow.h"
 #include "NewUIStorageInventory.h"
+#include "NewUIStorageInventoryExt.h"
 #include "NewUIGuildInfoWindow.h"
 #include "NewUIMyShopInventory.h"
 #include "NewUIPurchaseShopInventory.h"
@@ -76,6 +77,7 @@
 #include "NewUIEmpireGuardianNPC.h"
 #include "NewUIEmpireGuardianTimer.h"
 #include "NewUINPCDialogue.h"
+#include "NewUIInventoryExtension.h"
 #include "NewUIMiniMap.h"
 #include "NewUIGensRanking.h"
 #include "NewUIUnitedMarketPlaceWindow.h"
@@ -147,6 +149,7 @@ namespace SEASON3B
 		CNewUISkillList*				m_pNewSkillList;
 		CNewUIItemMng*					m_pNewItemMng;
 		CNewUIMyInventory*				m_pNewMyInventory;
+		CNewUIInventoryExtension*		m_pNewMyInventoryExt;
 		CNewUINPCShop*					m_pNewNPCShop;
 		CNewUIPetInfoWindow*			m_pNewPetInfoWindow;
 		CNewUIMixInventory*				m_pNewMixInventory;
@@ -155,6 +158,7 @@ namespace SEASON3B
 		CNewUIGatemanWindow*			m_pNewGatemanWindow;
 		CNewUIGateSwitchWindow*			m_pNewGateSwitchWindow;
 		CNewUIStorageInventory*			m_pNewStorageInventory;
+		CNewUIStorageInventoryExt*		m_pNewStorageInventoryExt;
 		CNewUIGuildMakeWindow*			m_pNewGuildMakeWindow;
 		CNewUIGuildInfoWindow*			m_pNewGuildInfoWindow;
 		CNewUIMyShopInventory*			m_pNewMyShopInventory;
@@ -226,6 +230,7 @@ namespace SEASON3B
 		CNewUISkillList* GetUI_NewSkillList() const;	
 		CNewUIItemMng*	GetUI_NewItemMng() const;
 		CNewUIMyInventory* GetUI_NewMyInventory() const;
+		CNewUIInventoryExtension* GetUI_NewMyInventoryExt() const;
 		CNewUINPCShop* GetUI_NewNpcShop() const;
 		CNewUIPetInfoWindow* GetUI_NewPetInfoWindow() const;
 		CNewUIMixInventory* GetUI_NewMixInventory() const;
@@ -234,6 +239,7 @@ namespace SEASON3B
 		CNewUIGatemanWindow* GetUI_NewGatemanWindow() const;
 		CNewUIGateSwitchWindow* GetUI_NewGateSwitchWindow() const;
 		CNewUIStorageInventory* GetUI_NewStorageInventory() const;
+		CNewUIStorageInventoryExt* GetUI_NewStorageInventoryExt() const;
 		CNewUIGuildInfoWindow* GetUI_NewGuildInfoWindow() const;
 		CNewUIMyShopInventory* GetUI_NewMyShopInventory() const;
 		CNewUIPurchaseShopInventory* GetUI_NewPurchaseShopInventory() const;
@@ -309,6 +315,7 @@ namespace SEASON3B
 #define g_pMainFrame SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMainFrameWindow()
 #define g_pSkillList SEASON3B::CNewUISystem::GetInstance()->GetUI_NewSkillList()
 #define g_pMyInventory SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMyInventory()
+#define g_pMyInventoryExt SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMyInventoryExt()
 #define g_pNPCShop SEASON3B::CNewUISystem::GetInstance()->GetUI_NewNpcShop()
 #define g_pPetInfoWindow	SEASON3B::CNewUISystem::GetInstance()->GetUI_NewPetInfoWindow()
 #define g_pMixInventory SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMixInventory()
@@ -317,6 +324,7 @@ namespace SEASON3B
 #define g_pGatemanWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewGatemanWindow()
 #define g_pGateSwitchWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewGateSwitchWindow()
 #define g_pStorageInventory SEASON3B::CNewUISystem::GetInstance()->GetUI_NewStorageInventory()
+#define g_pStorageInventoryExt SEASON3B::CNewUISystem::GetInstance()->GetUI_NewStorageInventoryExt()
 #define g_pGuildMakeWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewGuildMakeWindow()
 #define g_pGuildInfoWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewGuildInfoWindow()
 #define g_pMyShopInventory SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMyShopInventory()

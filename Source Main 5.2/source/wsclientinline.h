@@ -1035,14 +1035,10 @@ __forceinline void SendRequestUse(int Index,int Target)
 	EnableUse = 10;
 	CStreamPacketEngine spe;
 	spe.Init( 0xC3, 0x26);
-	spe << ( BYTE)( Index+MAX_EQUIPMENT_INDEX ) << ( BYTE)Target;
+	spe << ( BYTE)(Index) << ( BYTE)Target;
 	spe << (BYTE)g_byItemUseType;
 	spe.Send();
-	if(Inventory[Index].Type==ITEM_POTION)
-		PlayBuffer(SOUND_EAT_APPLE01);
-	else if(Inventory[Index].Type>=ITEM_POTION + 1 && Inventory[Index].Type<=ITEM_POTION + 9)
-		PlayBuffer(SOUND_DRINK01);
-
+	
 	g_ConsoleDebug->Write(MCD_SEND, "0x26 [SendRequestUse(%d)]", Index+12);
 }
 #endif //ENABLE_EDIT

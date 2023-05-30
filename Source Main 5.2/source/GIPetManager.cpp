@@ -291,6 +291,10 @@ namespace giPetManager
 			{
 				iInvenType = 1;
 			}
+			else if ((iItemIndex = g_pStorageInventoryExt->GetPointedItemIndex()) != -1)
+			{
+				iInvenType = 1;
+			}
 			else if ((iItemIndex = g_pTrade->GetPointedItemIndexMyInven()) != -1)
 			{
 				iInvenType = 2;
@@ -481,7 +485,7 @@ namespace giPetManager
 		else if ((iInvenType == SEASON3B::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP))
 		{
 			int price = 0;
-			int indexInv = (MAX_EQUIPMENT + MAX_INVENTORY) + (pItem->y * COL_PERSONALSHOP_INVEN) + pItem->x;
+			int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(pItem);
 			char Text[100];
 
 			if (GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop))

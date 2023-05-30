@@ -28,7 +28,7 @@ namespace SEASON3B
 		HWND m_hRelatedWnd;
 		bool m_bRender, m_bUpdate;
 	public:
-		CNewUIObj() : m_hRelatedWnd(NULL), m_bRender(true), m_bUpdate(true) {}
+		CNewUIObj() : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true) {}
 		virtual ~CNewUIObj() {}
 
 		void SetRelatedWnd(HWND hWnd = g_hWnd) 
@@ -46,14 +46,8 @@ namespace SEASON3B
 			m_bUpdate = bEnable; 
 		}
 
-		bool IsVisible() const 
-		{ 
-			return m_bRender; 
-		}
-		bool IsEnabled() const 
-		{ 
-			return m_bUpdate; 
-		}
+		bool IsVisible() const override	{ return m_bRender; }
+		bool IsEnabled() const override	{ return m_bUpdate; }
 
 		virtual float GetKeyEventOrder() { return 3.0f; }		//. Default 
 	};

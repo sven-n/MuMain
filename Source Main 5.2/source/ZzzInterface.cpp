@@ -2939,7 +2939,7 @@ void ReloadArrow()
 					SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
 					if(pItem)
 					{
-						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, Index+MAX_EQUIPMENT, pItem, REQUEST_EQUIPMENT_INVENTORY, EQUIPMENT_WEAPON_RIGHT);	
+						SendRequestEquipmentItem(INVENTORY, Index, pItem, INVENTORY, EQUIPMENT_WEAPON_RIGHT);	
 					}
 					g_pMyInventory->DeleteItem(Index);
 					g_pChatListBox->AddText("", GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);	
@@ -2951,7 +2951,7 @@ void ReloadArrow()
 					SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
 					if(pItem)
 					{
-						SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, Index+MAX_EQUIPMENT, pItem, REQUEST_EQUIPMENT_INVENTORY, EQUIPMENT_WEAPON_LEFT);	
+						SendRequestEquipmentItem(INVENTORY, Index, pItem, INVENTORY, EQUIPMENT_WEAPON_LEFT);	
 					}
 					g_pMyInventory->DeleteItem(Index);
 					g_pChatListBox->AddText("", GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);
@@ -8697,7 +8697,7 @@ void RenderCursor()
 			RenderBitmap(BITMAP_CURSOR+1,(float)MouseX-2.f,(float)MouseY-2.f,24.f,24.f);
 		}
 	}
-	else if( (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
+	else if(((g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY) || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY))
 		&& g_pMyInventory->GetRepairMode() == SEASON3B::CNewUIMyInventory::REPAIR_MODE_ON)
 		|| (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) 
 		&& g_pNPCShop->GetShopState() == SEASON3B::CNewUINPCShop::SHOP_STATE_REPAIR)

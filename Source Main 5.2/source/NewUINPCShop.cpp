@@ -43,7 +43,7 @@ bool SEASON3B::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_NPCSHOP, this);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if(false == m_pNewInventoryCtrl->Create(g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+50, 8, 15))
+	if(false == m_pNewInventoryCtrl->Create(UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+50, 8, 15))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -51,7 +51,6 @@ bool SEASON3B::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	if(m_pNewInventoryCtrl)
 	{
-		m_pNewInventoryCtrl->LockInventory();
 		m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_NPC_SHOP);
 	}
 
@@ -117,8 +116,6 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 
 					return false;
 				}
-				else
-				{
 					if(BuyCost == 0)
 					{
 						SendRequestBuy(iIndex, ItemValue(pItem, 0));
@@ -126,13 +123,12 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 
 					return false;
 				}
-			}
-			else if(SEASON3B::IsRelease(VK_LBUTTON))
+			if(SEASON3B::IsRelease(VK_LBUTTON))
 			{
 				m_bIsNPCShopOpen = true;
 				return false;
 			}
-			else if(SEASON3B::IsPress(VK_LBUTTON))
+			if(SEASON3B::IsPress(VK_LBUTTON))
 			{
 				return false;
 			}
@@ -175,8 +171,7 @@ bool SEASON3B::CNewUINPCShop::UpdateKeyEvent()
 		SendRequestRepair(255, 0);
 		return false;
 	}
-
-	else if(SEASON3B::IsPress('L'))
+	if(SEASON3B::IsPress('L'))
     {
 		if(m_bRepairShop && CNewUIInventoryCtrl::GetPickedItem() == NULL )	
         {
@@ -351,14 +346,14 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 
 			return true;
 		}
-		else if(pItem && IsSellingBan(pItem) == true)
+		if(pItem && IsSellingBan(pItem) == true)
 		{
 			g_pChatListBox->AddText("", GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
 			m_pNewInventoryCtrl->BackupPickedItem();
 			
 			return true;
 		}
-		else if(pItem && IsHighValueItem(pItem) == true)
+		if(pItem && IsHighValueItem(pItem) == true)
 		{
 			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHighValueItemCheckMsgBoxLayout));
 			pPickedItem->HidePickedItem();
@@ -366,14 +361,7 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 			return true;
 		}
 
-		if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
-		{
-			int iSourceIndex = pPickedItem->GetSourceLinealPos() + MAX_EQUIPMENT_INDEX;
-			SendRequestSell(iSourceIndex);
-
-			return true;
-		}
-		else if(pPickedItem->GetOwnerInventory() == NULL)
+		if (pPickedItem->GetSourceStorageType() == INVENTORY)
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			SendRequestSell(iSourceIndex);

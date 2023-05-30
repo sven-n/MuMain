@@ -75,6 +75,7 @@ ITEM   PickItem;
 ITEM   TargetItem;
 
 ITEM Inventory         [MAX_INVENTORY];
+ITEM InventoryExt	   [MAX_INVENTORY_EXT];
 ITEM ShopInventory     [MAX_SHOP_INVENTORY];
 ITEM g_PersonalShopInven	[MAX_PERSONALSHOP_INVEN];
 ITEM g_PersonalShopBackup	[MAX_PERSONALSHOP_INVEN];
@@ -2200,7 +2201,7 @@ void RenderItemInfo(int sx,int sy,ITEM *ip,bool Sell, int Inventype, bool bItemT
 	{
 		{
 			int price = 0;
-			int indexInv = (MAX_EQUIPMENT + MAX_INVENTORY)+(ip->y*COL_PERSONALSHOP_INVEN)+ip->x;
+			int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(ip);
 			char Text[100];
 
 			if(GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop)) 
@@ -7379,13 +7380,23 @@ int GetScreenWidth()
 {
 	int iWidth = 0;
 
+	// TODO: Refactor this. Wouldn't it be easier to just count how many windows are open? ;)
+
 	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
+		&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT)
+		&& g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY))
+	{
+		iWidth = 640 - (190 * 3);
+	}
+	else if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
 		&& (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
+			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE_EXT)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY)
+			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY)
 			|| g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION)
 #ifdef LEM_ADD_LUCKYITEM
@@ -7462,6 +7473,11 @@ void ClearInventory()
 	{
 		Inventory[i].Type = -1;
 		Inventory[i].Number = 0;
+	}
+	for (int i = 0; i < MAX_INVENTORY_EXT; i++)
+	{
+		InventoryExt[i].Type = -1;
+		InventoryExt[i].Number = 0;
 	}
 	for(int i=0;i<MAX_SHOP_INVENTORY;i++)
 	{
@@ -7600,240 +7616,6 @@ int CompareItem ( ITEM item1, ITEM item2 )
     return  equal;
 }
 
-void InsertInventory(ITEM *Inv,int Width,int Height,int Index,BYTE *Item,bool First)
-{
-	int Type = ConvertItemType(Item);
-
-	if(Type == 0x1FFF) return;
-
-	if(Inv==Inventory)
-	{
-		if(Index < 12)
-		{
-			ITEM *ip = &CharacterMachine->Equipment[Index];
-			ip->Type       = Type;
-			ip->Durability = Item[2];
-			ip->Option1    = Item[3];
-            ip->ExtOption  = Item[4];
-			ip->Number     = 1;
-			ip->option_380 = false;
-			BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
-			ip->option_380 = b;
-			ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;
-			ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;
-
-			ItemConvert(ip,Item[1],Item[3],Item[4]);			
-            SetCharacterClass(Hero);
-			OBJECT *o = &Hero->Object;
-			if(Index==EQUIPMENT_HELPER)
-			{
-                if ( gMapManager.InChaosCastle()==false )
-                {
-                    switch(Type)
-                    {
-                    case ITEM_HELPER  :CreateBug(MODEL_HELPER  ,o->Position,o);break;
-                    case ITEM_HELPER+2:CreateBug(MODEL_UNICON  ,o->Position,o);
-                        if(!Hero->SafeZone)
-                            CreateEffect(BITMAP_MAGIC+1,o->Position,o->Angle,o->Light,1,o);
-                        break;
-                    case ITEM_HELPER+3:CreateBug(MODEL_PEGASUS, o->Position,o);
-                        if(!Hero->SafeZone)
-                            CreateEffect(BITMAP_MAGIC+1,o->Position,o->Angle,o->Light,1,o);
-                        break;
-                    case ITEM_HELPER+4:CreateBug(MODEL_DARK_HORSE ,o->Position,o);
-                        if(!Hero->SafeZone)
-                            CreateEffect(BITMAP_MAGIC+1,o->Position,o->Angle,o->Light,1,o);
-                        break;
-					case ITEM_HELPER+37:
-						Hero->Helper.Option1 = ip->Option1;
-						if(ip->Option1 == 0x01)
-						{
-							CreateBug(MODEL_FENRIR_BLACK, o->Position, o);
-						}
-						else if(ip->Option1 == 0x02)
-						{
-							CreateBug(MODEL_FENRIR_BLUE, o->Position, o);
-						}
-						else if(ip->Option1 == 0x04)
-						{
-							CreateBug(MODEL_FENRIR_GOLD, o->Position, o);
-						}
-						else
-						{
-							CreateBug(MODEL_FENRIR_RED, o->Position, o);
-						}
-						if(!Hero->SafeZone)
-                            CreateEffect(BITMAP_MAGIC+1,o->Position,o->Angle,o->Light,1,o);
-						break;
-                    }
-                }
-			}
-            else if ( Index==EQUIPMENT_WEAPON_LEFT )
-            {
-                switch ( Type )
-                {
-                case ITEM_HELPER+5:
-                    giPetManager::CreatePetDarkSpirit ( Hero );            
-                    break;
-                }
-            }
-
-            if ( Index==EQUIPMENT_RING_LEFT || Index==EQUIPMENT_RING_RIGHT && ( Hero->EtcPart<=0 || Hero->EtcPart>3 ) )
-            {
-                if ( Type==ITEM_HELPER+20 && (ip->Level>>3)==3 )
-                {
-                    DeleteParts ( Hero );
-                    Hero->EtcPart = PARTS_LION;
-                }
-            }
-
-			if ( Index==EQUIPMENT_WING)
-			{
-				if (Type==ITEM_WING+39 || 
-					Type==ITEM_HELPER+30 || 
-					Type==ITEM_WING+130 ||
-					Type==ITEM_WING+49 ||
-					Type==ITEM_WING+50 ||
-					Type==ITEM_WING+135||
-					Type==ITEM_WING+40 )
-				{
-					DeleteCloth(Hero, &Hero->Object);
-				}
-			}
-
-		}
-		else if(Index >= 12 && Index < 76)
-		{
-			int InventoryIndex = Index - 12;
-			ITEM_ATTRIBUTE *ap = &ItemAttribute[Type];
-			for(int i=0;i<ap->Height;i++)
-			{
-				for(int j=0;j<ap->Width;j++)
-				{
-					ITEM *ip = &Inv[InventoryIndex+i*Width+j];
-					ip->Type       = Type;
-           			ip->Durability = Item[2];
-           			ip->Option1    = Item[3];
-                    ip->ExtOption  = Item[4];
-					ip->x          = InventoryIndex%8;
-					ip->y          = InventoryIndex/8;
-					ip->option_380 = false;
-					BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
-					ip->option_380 = b;
-					ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;
-					ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;
-
-					if(i==0 && j==0)
-						ip->Number = 1;
-					else
-						ip->Number = 0;
-		        	ItemConvert(ip,Item[1],Item[3],Item[4]);
-
-
-				}
-			}
-
-            if( SrcInventoryIndex < 12 )
-            {
-        		if(CharacterAttribute->AbilityTime[0] != 0)
-                {
-                    CharacterMachine->CalculateAttackSpeed();
-                }
-        		if(CharacterAttribute->AbilityTime[2] != 0)
-                {
-                    CharacterMachine->CalculateAttackSpeed();
-                }
-            }
-		}
-		else
-		{
-			int InventoryIndex = Index - 76;
-			ITEM_ATTRIBUTE *ap = &ItemAttribute[Type];
-			for(int i=0;i<ap->Height;i++)
-			{
-				for(int j=0;j<ap->Width;j++)
-				{
-					ITEM *ip = &g_PersonalShopInven[InventoryIndex+i*Width+j];
-					ip->Type       = Type;
-					ip->Durability = Item[2];
-					ip->Option1    = Item[3];
-                    ip->ExtOption  = Item[4];
-					ip->x          = InventoryIndex%8;
-					ip->y          = InventoryIndex/8;
-					ip->option_380 = false;
-					BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
-					ip->option_380 = b;
-					ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;
-					ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;
-					if(i==0 && j==0)
-						ip->Number = 1;
-					else
-						ip->Number = 0;
-					ItemConvert(ip,Item[1],Item[3],Item[4]);
-				}
-			}
-			
-            if( SrcInventoryIndex < 12 )
-            {
-				if(CharacterAttribute->AbilityTime[0] != 0)
-                {
-                    CharacterMachine->CalculateAttackSpeed();
-                }
-				if(CharacterAttribute->AbilityTime[2] != 0)
-                {
-                    CharacterMachine->CalculateAttackSpeed();
-                }
-            }
-		}
-	}
-	else
-	{
-		int InventoryIndex = Index;
-		ITEM_ATTRIBUTE *ap = &ItemAttribute[Type];
-		for(int i=0;i<ap->Height;i++)
-		{
-			for(int j=0;j<ap->Width;j++)
-			{
-				ITEM *ip = &Inv[InventoryIndex+i*Width+j];
-				ip->Type       = Type;
-       			ip->Durability = Item[2];
-      			ip->Option1    = Item[3];
-                ip->ExtOption  = Item[4];
-				ip->x          = InventoryIndex%8;
-				ip->y          = InventoryIndex/8;
-				ip->option_380 = false;
-				BYTE b = ( ( (Item[5] & 0x08) << 4) >>7);
-				ip->option_380 = b;
-				ip->Jewel_Of_Harmony_Option = (Item[6] & 0xf0) >> 4;
-				ip->Jewel_Of_Harmony_OptionLevel = Item[6] & 0x0f;
-				if(i==0 && j==0)
-					ip->Number = 1;
-				else
-					ip->Number = 0;
-	    		ItemConvert(ip,Item[1],Item[3],Item[4]);
-			}
-		}
-	}
-
-	if(!First)
-	{
-		if(CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == -1)
-    		DeleteBug(&Hero->Object);
-        if ( CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type==-1 )
-            giPetManager::DeletePet ( Hero );            
-
-        ITEM& rl = CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
-        ITEM& rr = CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-        if ( ( rl.Type!=ITEM_HELPER+20 || (rl.Level>>3)!=3 ) && ( rr.Type!=ITEM_HELPER+20 || (rr.Level>>3)!=3 ) )
-        {
-            if ( Hero->EtcPart<PARTS_ATTACK_TEAM_MARK )
-            {
-                DeleteParts ( Hero );
-                if ( Hero->EtcPart>3 ) Hero->EtcPart = 0;
-            }
-        }
-	}
-}
 
 bool EquipmentItem = false;
 extern int BuyCost;
@@ -11547,8 +11329,7 @@ bool IsExistUndecidedPrice()
 		if(pItem)
 		{
 			bResult = false;
-
-			iIndex = MAX_MY_INVENTORY_INDEX + (pItem->y*COL_PERSONALSHOP_INVEN)+pItem->x;
+			iIndex = MAX_MY_INVENTORY_EX_INDEX + (pItem->y*COL_PERSONALSHOP_INVEN)+pItem->x;
 			if(GetPersonalItemPrice(iIndex, iPrice, g_IsPurchaseShop) == false)
 			{
 				return true;
