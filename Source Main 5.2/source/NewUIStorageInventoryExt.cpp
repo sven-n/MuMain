@@ -8,9 +8,6 @@
 #include "NewUICustomMessageBox.h"
 #include "ZzzInventory.h"
 #include "wsclientinline.h"
-#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-#include "GameShop\MsgBoxIGSCommon.h"
-#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
 using namespace SEASON3B;
 
@@ -52,7 +49,6 @@ bool CNewUIStorageInventoryExt::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
 	m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
 	SetItemAutoMove(false);
-	InitBackupItemInfo();
 
 	Show(false);
 
@@ -294,54 +290,6 @@ void CNewUIStorageInventoryExt::ProcessStorageItemAutoMove()
 	}
 }
 
-//void CNewUIStorageInventoryExt::ProcessMyInvenItemAutoMove()
-//{
-//	if (g_pPickedItem && g_pPickedItem->GetItem())
-//	{
-//		return;
-//	}
-//		
-//	if (IsItemAutoMove())
-//	{
-//		return;
-//	}
-//		
-//	const auto pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
-//	if (const auto pItemObj = pMyInvenCtrl->FindItemAtPt(MouseX, MouseY))
-//	{
-//		if (pItemObj->Type == ITEM_HELPER+20)
-//			return;
-//
-//		const int emptySlotIndex = FindEmptySlot(pItemObj);
-//		if (-1 != emptySlotIndex)
-//		{
-//			SetItemAutoMove(true);
-//
-//			const int nSrcIndex = pMyInvenCtrl->GetIndexByItem(pItemObj);
-//			g_pStorageInventory->SendRequestItemToStorage(pItemObj, nSrcIndex, emptySlotIndex);
-//
-//			PlayBuffer(SOUND_GET_ITEM01);
-//		}
-//	}
-//}
-
-//void CNewUIStorageInventoryExt::SendRequestItemToMyInven(ITEM* pItemObj, int nStorageIndex, int nInvenIndex)
-//{
-//	if (!g_pStorageInventory->IsStorageLocked() || g_pStorageInventory->IsCorrectPassword())
-//	{
-//		SendRequestEquipmentItem(VAULT, nStorageIndex,
-//			pItemObj, INVENTORY, nInvenIndex);
-//	}
-//	else
-//	{
-//		SetBackupInvenIndex(nInvenIndex);
-//		if (!IsItemAutoMove())
-//			g_pPickedItem->HidePickedItem();
-//
-//		CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPasswordKeyPadMsgBoxLayout));
-//	}
-//}
-
 bool CNewUIStorageInventoryExt::ProcessBtns() const
 {
 	if (IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x+169, m_Pos.y+7, 13, 12))
@@ -366,16 +314,6 @@ void CNewUIStorageInventoryExt::SetItemAutoMove(bool bItemAutoMove)
 	{
 		m_nBackupMouseX = m_nBackupMouseY = 0;
 	}
-}
-
-void CNewUIStorageInventoryExt::InitBackupItemInfo()
-{
-	m_nBackupInvenIndex = -1;
-}
-
-void CNewUIStorageInventoryExt::SetBackupInvenIndex(int nInvenIndex)
-{
-	m_nBackupInvenIndex = nInvenIndex;
 }
 
 int CNewUIStorageInventoryExt::FindEmptySlot(const ITEM* pItemObj) const
@@ -426,7 +364,6 @@ void CNewUIStorageInventoryExt::ProcessStorageItemAutoMoveFailure()
 	if (!IsVisible())
 		return;
 
-	InitBackupItemInfo();
 	SetItemAutoMove(false);
 }
 

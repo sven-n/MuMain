@@ -30,8 +30,7 @@ namespace SEASON3B
 			STORAGE_WIDTH = 190,
 			STORAGE_HEIGHT = 429,
 		};
-		
-		
+
 		CNewUIManager*			m_pNewUIMng;
 		POINT					m_Pos;
 
@@ -42,7 +41,6 @@ namespace SEASON3B
 		int						m_nBackupMouseX;
 		int						m_nBackupMouseY;
 		
-		int						m_nBackupInvenIndex;
 		
 	public:
 		CNewUIStorageInventoryExt();
@@ -68,10 +66,6 @@ namespace SEASON3B
 		
 		bool IsItemAutoMove() const { return m_bItemAutoMove; }
 
-		void ProcessMyInvenItemAutoMove();
-
-		void SendRequestItemToMyInven(ITEM* pItemObj, int nStorageIndex, int nInvenIndex);
-
 		void ProcessToReceiveStorageItems(int nIndex, BYTE* pbyItemPacket);
 		void ProcessStorageItemAutoMoveSuccess();
 		void ProcessStorageItemAutoMoveFailure();
@@ -88,10 +82,6 @@ namespace SEASON3B
 		void RenderText() const;
 
 		void DeleteAllItems() const;
-
-		void InitBackupItemInfo();
-		void SetBackupInvenIndex(int nInvenIndex);
-		int GetBackupInvenIndex(){ return m_nBackupInvenIndex; }
 
 		void ProcessInventoryCtrl();
 		bool ProcessBtns() const;

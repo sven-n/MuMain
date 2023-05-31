@@ -25,8 +25,6 @@ namespace SEASON3B
 			IMAGE_EXTENSION_NO2,
 			IMAGE_EXTENSION_NO3,
 			IMAGE_EXTENSION_NO4,
-
-
 		};
 
 	private:
@@ -42,7 +40,7 @@ namespace SEASON3B
 		CNewUIManager* m_pNewUIMng;
 		CNewUIInventoryCtrl* m_extensions[MAX_INVENTORY_EXT_COUNT];
 		POINT m_Pos;
-				
+
 		CNewUIButton m_BtnExit;
 	protected:
 		void SetButtonInfo();
@@ -66,16 +64,6 @@ namespace SEASON3B
 		void DeleteItem(int iIndex) const;
 		void DeleteAllItems() const;
 		CNewUIInventoryCtrl* GetOwnerOf(const CNewUIPickedItem* pPickedItem) const;
-		// void ClosingProcess();
-
-		// int GetPointedItemIndex();
-
-		//. Exporting Functions
-		//void SetStandbyItemKey(DWORD dwItemKey);
-		//DWORD GetStandbyItemKey() const;
-		// int GetStandbyItemIndex();
-		//ITEM* GetStandbyItem();
-
 	private:
 		void Init();
 
