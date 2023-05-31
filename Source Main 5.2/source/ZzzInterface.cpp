@@ -8697,7 +8697,7 @@ void RenderCursor()
 			RenderBitmap(BITMAP_CURSOR+1,(float)MouseX-2.f,(float)MouseY-2.f,24.f,24.f);
 		}
 	}
-	else if(((g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY) || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY))
+	else if(((g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY) || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT))
 		&& g_pMyInventory->GetRepairMode() == SEASON3B::CNewUIMyInventory::REPAIR_MODE_ON)
 		|| (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) 
 		&& g_pNPCShop->GetShopState() == SEASON3B::CNewUINPCShop::SHOP_STATE_REPAIR)
