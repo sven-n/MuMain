@@ -2,6 +2,7 @@
 
 using System;
 using System.Buffers;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using MUnique.OpenMU.Network;
 using Nito.AsyncEx.Synchronous;
@@ -80,7 +81,7 @@ public sealed class ConnectionWrapper : IDisposable
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Debug.WriteLine(ex);
             }
         });
     }
@@ -113,7 +114,7 @@ public sealed class ConnectionWrapper : IDisposable
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Debug.WriteLine(ex);
             }
         }
 
@@ -129,7 +130,7 @@ public sealed class ConnectionWrapper : IDisposable
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Debug.WriteLine(ex);
         }
 
         return ValueTask.CompletedTask;

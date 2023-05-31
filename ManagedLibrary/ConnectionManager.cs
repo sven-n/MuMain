@@ -6,6 +6,7 @@ namespace MUnique.Client.ManagedLibrary;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -58,7 +59,7 @@ public unsafe class ConnectionManager
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error establishing connection: {ex}");
+            Debug.WriteLine($"Error establishing connection: {ex}");
             return -1;
         }
     }
@@ -79,16 +80,16 @@ public unsafe class ConnectionManager
                 var bytes = new Span<byte>(data, count);
                 bytes.SetPacketSize();
                 connection.Send(bytes);
-                Console.WriteLine("Sent {0} bytes with handle {1}", count, handle);
+                Debug.WriteLine("Sent {0} bytes with handle {1}", count, handle);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending {0} bytes with handle {1}: {2}", count, handle, ex);
+                Debug.WriteLine($"Error sending {0} bytes with handle {1}: {2}", count, handle, ex);
             }
         }
         else
         {
-            Console.WriteLine("Connection with handle {0} not found.", handle);
+            Debug.WriteLine("Connection with handle {0} not found.", handle);
         }
     }
 
