@@ -8410,8 +8410,7 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
 			SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 		}
 
-		// TODO: CHECK IF MAX_MY_INVENTORY_EX_INDEX needs to be added
-		RemovePersonalItemPrice(MAX_MY_INVENTORY_EX_INDEX + g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
+		RemovePersonalItemPrice(g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
 		
 		SendRequestInventory();
 		
