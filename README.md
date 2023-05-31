@@ -15,6 +15,7 @@ What I have done so far:
   * The framerate has been increased to 30 fps. However, some further adjustments
     so that some animations (which rely on frame counting) can run at normal speed.
     Once that's fixed, we can go even higher.
+  * Added inventory and vault extensions.
   * Significant changes from Qubit have been incorporated, such as
     * Rage Fighter class
     * Visual bug when Dark Lord walks with Raven
@@ -22,20 +23,20 @@ What I have done so far:
     * Glow for red, blue and black fenrir
     * Additional screen resolutions
     * MU helper dialog (not fully functional yet)
-  * Removed definitions for Rage Fighter class as we are targeting Season 6.    
-  * Some minor bug fixes
+  * Removed if-defs for Rage Fighter class as we are targeting Season 6, so Rage
+    Fighter should always be included.
+  * Some minor bug fixes, e.g.:
     * Storm Crow item labels
     * Ancient set labels
 
 What needs to be done for Season 6:
-  * Inventory and Vault extensions
   * The master skill tree system needs to be overhauled:
     * The old one has up to 5 master levels per skill, and each was a separate skill.
     * The new system has one per normal skill, one per master skill, and additional
       levels that are sent to the client.
   * Lucky Items
   * Karutan Map
-  * MU Helper
+  * MU Helper logic
 
 ## How to build & run
 
@@ -49,4 +50,4 @@ to be done once.
   * Webzen
   * Louis
   * Qubit (tuservermu.com.ve)
-  * Community members of RaGEZONE for posting fixes
+  * Community members of RaGEZONE and tuservermu.com.ve for posting fixes
