@@ -709,22 +709,8 @@ int SEASON3B::CNewUIInventoryCtrl::GetPointedSquareIndex()
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItemAtPt(int x, int y)
 {
-	const int iIndex = GetSquareIndexAtPt(x, y);
+	const int iIndex = GetIndexAtPt(x, y);
 	return FindItem(iIndex);
-}
-
-int SEASON3B::CNewUIInventoryCtrl::FindItemptIndex(int x, int y)
-{
-	const int iIndex = GetSquareIndexAtPt(x, y);
-
-	const ITEM* p = FindItem(iIndex);
-
-	if (p)
-	{
-		return p->y * GetNumberOfColumn() + p->x;
-	}
-
-	return -1;
 }
 
 int SEASON3B::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy)
@@ -878,7 +864,7 @@ bool SEASON3B::CNewUIInventoryCtrl::Update()
 
 void SEASON3B::CNewUIInventoryCtrl::UpdateProcess()
 {
-	const int iCurSquareIndex = GetSquareIndexAtPt(MouseX, MouseY);
+	const int iCurSquareIndex = GetIndexAtPt(MouseX, MouseY);
 	if (iCurSquareIndex != m_iPointedSquareIndex)
 	{
 		if ((GetPickedItem() == nullptr) && (g_pMyShopInventory->IsEnableInputValueTextBox() == false))
@@ -1233,7 +1219,7 @@ void SEASON3B::CNewUIInventoryCtrl::UnlockInventory()
 	m_bLock = false;
 }
 
-int SEASON3B::CNewUIInventoryCtrl::GetSquareIndexAtPt(int x, int y)
+int SEASON3B::CNewUIInventoryCtrl::GetIndexAtPt(int x, int y)
 {
 	int iColumnX, iRowY;
 	if (GetSquarePosAtPt(x, y, iColumnX, iRowY))

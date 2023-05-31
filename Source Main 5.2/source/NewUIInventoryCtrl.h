@@ -160,7 +160,6 @@ namespace SEASON3B
 
 		bool CheckSlot(int startIndex, int width, int height);
 		bool CheckSlot(int iColumnX, int iRowY, int width, int height);
-		int GetSquareIndexAtPt(int x, int y);
 	public:
 		CNewUIInventoryCtrl();
 		virtual ~CNewUIInventoryCtrl();
@@ -187,7 +186,6 @@ namespace SEASON3B
 		ITEM* FindItem(int iColumnX, int iRowY);
 		ITEM* FindItemByKey(DWORD dwKey);
 		ITEM* FindItemAtPt(int x, int y);
-		int FindItemptIndex(int x, int y);
 		ITEM* FindTypeItem(short int siType);
 		int FindItemIndex( short int siType, int iLevel );
 		int FindItemReverseIndex(short sType, int iLevel);
@@ -242,6 +240,7 @@ namespace SEASON3B
 
 		bool CheckPtInRect(int x, int y);
 		bool CheckRectInRect(const RECT& rcBox);
+		int GetIndexAtPt(int x, int y);
 
 		int GetIndex(int column, int row);
 		bool CanMove(int iLinealPos, ITEM* pItem);

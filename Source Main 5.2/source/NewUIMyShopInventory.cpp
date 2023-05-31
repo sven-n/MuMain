@@ -355,7 +355,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 	}
 	else if(m_pNewInventoryCtrl && !pPickedItem && IsPress(VK_RBUTTON))
 	{
-		int iCurSquareIndex = m_pNewInventoryCtrl->FindItemptIndex(MouseX, MouseY);
+		int iCurSquareIndex = m_pNewInventoryCtrl->GetIndexAtPt(MouseX, MouseY);
 
 		if( iCurSquareIndex != -1 )
 		{

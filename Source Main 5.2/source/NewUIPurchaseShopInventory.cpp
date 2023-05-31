@@ -197,7 +197,7 @@ bool SEASON3B::CNewUIPurchaseShopInventory::PurchaseShopInventoryProcess()
 {
 	if(m_pNewInventoryCtrl && IsPress(VK_LBUTTON))
 	{
-		int iCurSquareIndex = m_pNewInventoryCtrl->FindItemptIndex(MouseX, MouseY);
+		int iCurSquareIndex = m_pNewInventoryCtrl->GetIndexAtPt(MouseX, MouseY);
 		if( iCurSquareIndex != -1 )
 		{
 			ChangeSourceIndex(iCurSquareIndex);

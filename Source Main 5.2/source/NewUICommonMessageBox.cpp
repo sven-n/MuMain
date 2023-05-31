@@ -2827,7 +2827,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
 
 	if( pItem && pCha )
 	{
-		int sourceIndex = MAX_MY_INVENTORY_EX_INDEX +g_pPurchaseShopInventory->GetSourceIndex();
+		int sourceIndex = g_pPurchaseShopInventory->GetSourceIndex();
 		SendRequestPurchase(pCha->Key, pCha->ID, sourceIndex);
 	}
 
