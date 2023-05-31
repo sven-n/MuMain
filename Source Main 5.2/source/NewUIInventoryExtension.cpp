@@ -249,9 +249,9 @@ void CNewUIInventoryExtension::LoadImages()
 	LoadBitmap("Interface\\newui_item_add_marking_non.jpg", IMAGE_EXTENSION_EMPTY, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_add_table.tga", IMAGE_EXTENSION_TABLE, GL_LINEAR);
 	LoadBitmap("Interface\\newui_item_add_marking_no01.tga", IMAGE_EXTENSION_NO1, GL_LINEAR);
-	LoadBitmap("Interface\\newui_item_add_marking_no02.tga", IMAGE_EXTENSION_NO1 + 1, GL_LINEAR);
-	LoadBitmap("Interface\\newui_item_add_marking_no03.tga", IMAGE_EXTENSION_NO1 + 2, GL_LINEAR);
-	LoadBitmap("Interface\\newui_item_add_marking_no04.tga", IMAGE_EXTENSION_NO1 + 3, GL_LINEAR);
+	LoadBitmap("Interface\\newui_item_add_marking_no02.tga", IMAGE_EXTENSION_NO2, GL_LINEAR);
+	LoadBitmap("Interface\\newui_item_add_marking_no03.tga", IMAGE_EXTENSION_NO3, GL_LINEAR);
+	LoadBitmap("Interface\\newui_item_add_marking_no04.tga", IMAGE_EXTENSION_NO4, GL_LINEAR);
 }
 
 void CNewUIInventoryExtension::UnloadImages()
