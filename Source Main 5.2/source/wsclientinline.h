@@ -878,7 +878,7 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 
-__forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pItem, int iDstType,int iDstIndex)
+__forceinline bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType,int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType,int iDstIndex)
 {
 	if(EquipmentItem || NULL == pItem) return false;
 
@@ -924,11 +924,11 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 		<< socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
 		<< (BYTE)(iDstType&0xff) << (BYTE)(iDstIndex&0xff);
 #else // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
-	spe << BYTECAST(char, iSrcType) << BYTECAST(char, iSrcIndex) << BYTECAST(char, pItem->Type) << BYTECAST(char, pItem->Level)
+	spe << static_cast<BYTE>(iSrcType) << BYTECAST(char, iSrcIndex) << BYTECAST(char, pItem->Type) << BYTECAST(char, pItem->Level)
 		<< BYTECAST(char,pItem->Durability) << BYTECAST(char,pItem->Option1) << BYTECAST(char,pItem->ExtOption)
 		<< splitType << spareBits
 		<< socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
-		<< ( BYTE)iDstType << ( BYTE)iDstIndex;
+		<< static_cast<BYTE>(iDstType) << static_cast<BYTE>(iDstIndex);
 #endif // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
 	spe.Send();
 
@@ -1035,14 +1035,10 @@ __forceinline void SendRequestUse(int Index,int Target)
 	EnableUse = 10;
 	CStreamPacketEngine spe;
 	spe.Init( 0xC3, 0x26);
-	spe << ( BYTE)( Index+MAX_EQUIPMENT_INDEX ) << ( BYTE)Target;
+	spe << ( BYTE)(Index) << ( BYTE)Target;
 	spe << (BYTE)g_byItemUseType;
 	spe.Send();
-	if(Inventory[Index].Type==ITEM_POTION)
-		PlayBuffer(SOUND_EAT_APPLE01);
-	else if(Inventory[Index].Type>=ITEM_POTION + 1 && Inventory[Index].Type<=ITEM_POTION + 9)
-		PlayBuffer(SOUND_DRINK01);
-
+	
 	g_ConsoleDebug->Write(MCD_SEND, "0x26 [SendRequestUse(%d)]", Index+12);
 }
 #endif //ENABLE_EDIT

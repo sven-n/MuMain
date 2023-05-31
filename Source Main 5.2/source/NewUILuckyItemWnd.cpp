@@ -260,7 +260,7 @@ bool CNewUILuckyItemWnd::Create(CNewUIManager* pNewUIMng, int x, int y)
  	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_LUCKYITEMWND, this);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if(false == m_pNewInventoryCtrl->Create(g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+110, 8, 4))
+	if(false == m_pNewInventoryCtrl->Create(15/*todo?*/, g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+110, 8, 4))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -464,7 +464,7 @@ bool CNewUILuckyItemWnd::Process_InventoryCtrl( void )
 			if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
 			{
 				int		nMoveIndex	= SetWndAction( eLuckyItem_Move );
-				if(SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex, pItemObj, nMoveIndex, iTargetIndex))
+				if(SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex, pItemObj, nMoveIndex, iTargetIndex))
 				return true;
 			}
 		}

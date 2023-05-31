@@ -4717,35 +4717,29 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 
 			if(pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
 			{
-				BYTE byIndex = MAX_EQUIPMENT_INDEX+iSourceIndex;
-				SendRequestSetSalePrice(byIndex, iInputZen);
+				SendRequestSetSalePrice(iSourceIndex, iInputZen);
 
-				SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT+iSourceIndex, pItemObj,REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);
+				SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
 			}
 			else if(pPickedItem->GetOwnerInventory() == NULL)
 			{
-				BYTE byIndex = iSourceIndex;
-				SendRequestSetSalePrice(byIndex, iInputZen);	
+				SendRequestSetSalePrice(iSourceIndex, iInputZen);
 
-				SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex, pItemObj,REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);
+				SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
 			}
 			else if(pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
 			{
-				BYTE byIndex = MAX_MY_INVENTORY_INDEX+iSourceIndex;
-				SendRequestSetSalePrice(byIndex, iInputZen);
+				SendRequestSetSalePrice(iSourceIndex, iInputZen);
 
-				SendRequestEquipmentItem(REQUEST_EQUIPMENT_MYSHOP, MAX_EQUIPMENT_INDEX+iSourceIndex, pItemObj,REQUEST_EQUIPMENT_MYSHOP, MAX_MY_INVENTORY_INDEX+iTargetIndex);
+				SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
 			}
 			
-			AddPersonalItemPrice(MAX_MY_INVENTORY_INDEX+iTargetIndex, iInputZen, g_IsPurchaseShop);
+			AddPersonalItemPrice(iTargetIndex, iInputZen, g_IsPurchaseShop);
 		}
 		else 
 		{
 			iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-			iSourceIndex = MAX_MY_INVENTORY_INDEX + iSourceIndex;
-
-			BYTE byIndex = iSourceIndex;
-			SendRequestSetSalePrice(byIndex, iInputZen);
+			SendRequestSetSalePrice(iSourceIndex, iInputZen);
 			AddPersonalItemPrice(iSourceIndex, iInputZen, g_IsPurchaseShop);
 		}	
 	}

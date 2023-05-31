@@ -25,6 +25,7 @@ namespace SEASON3B
 			IMAGE_STORAGE_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
 			IMAGE_STORAGE_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
 			IMAGE_STORAGE_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+			IMAGE_STORAGE_EXPAND_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXPAND_BTN,
 
 			IMAGE_STORAGE_BTN_INSERT_ZEN = BITMAP_INTERFACE_NEW_STORAGE_BEGIN,
 			IMAGE_STORAGE_BTN_TAKE_ZEN = BITMAP_INTERFACE_NEW_STORAGE_BEGIN + 1,
@@ -52,6 +53,7 @@ namespace SEASON3B
 		CNewUIManager*			m_pNewUIMng;
 		POINT					m_Pos;
 		CNewUIButton			m_abtn[MAX_BTN];
+		CNewUIButton			m_BtnExpand;
 		CNewUIInventoryCtrl*	m_pNewInventoryCtrl;
 
 		bool					m_bLock;
@@ -93,7 +95,7 @@ namespace SEASON3B
 
 		void SetBackupTakeZen(int nZen);
 
-		void ProcessMyInvenItemAutoMove();
+		bool ProcessMyInvenItemAutoMove();
 
 		void SendRequestItemToMyInven(ITEM* pItemObj, int nStorageIndex, int nInvenIndex);
 
@@ -105,7 +107,7 @@ namespace SEASON3B
 		int GetPointedItemIndex();
 
 		void SetItemAutoMove(bool bItemAutoMove);
-		
+		void SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex, int nStorageIndex);
 	private:
 		void LoadImages();
 		void UnloadImages();
@@ -128,9 +130,6 @@ namespace SEASON3B
 		void ProcessInventoryCtrl();
 		bool ProcessBtns();
 		void ProcessStorageItemAutoMove();
-
-		void SendRequestItemToStorage(ITEM* pItemObj,
-			int nInvenIndex, int nStorageIndex);
 	};
 }
 

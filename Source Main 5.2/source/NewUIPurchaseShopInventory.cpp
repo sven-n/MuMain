@@ -54,7 +54,7 @@ bool SEASON3B::CNewUIPurchaseShopInventory::Create(CNewUIManager* pNewUIMng, int
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY, this);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if(false == m_pNewInventoryCtrl->Create(g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x+16, m_Pos.y+90, 8, 4))
+	if(false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x+16, m_Pos.y+90, 8, 4))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -197,7 +197,7 @@ bool SEASON3B::CNewUIPurchaseShopInventory::PurchaseShopInventoryProcess()
 {
 	if(m_pNewInventoryCtrl && IsPress(VK_LBUTTON))
 	{
-		int iCurSquareIndex = m_pNewInventoryCtrl->FindItemptIndex(MouseX, MouseY);
+		int iCurSquareIndex = m_pNewInventoryCtrl->GetIndexAtPt(MouseX, MouseY);
 		if( iCurSquareIndex != -1 )
 		{
 			ChangeSourceIndex(iCurSquareIndex);
@@ -304,13 +304,6 @@ void SEASON3B::CNewUIPurchaseShopInventory::ClosingProcess()
 
 int SEASON3B::CNewUIPurchaseShopInventory::GetPointedItemIndex()
 {
-	int iPointedItemIndex = m_pNewInventoryCtrl->GetPointedSquareIndex();
-	
-	if(iPointedItemIndex != -1)
-	{
-		iPointedItemIndex += MAX_MY_INVENTORY_INDEX;
-	}
-	
-	return iPointedItemIndex;
+	return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }
 

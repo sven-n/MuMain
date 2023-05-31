@@ -39,7 +39,7 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MIXINVENTORY, this);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if(false == m_pNewInventoryCtrl->Create(g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+110, 8, 4))
+	if(false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::CHAOS_MIX, g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+110, 8, 4))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -140,37 +140,28 @@ bool CNewUIMixInventory::ClosingProcess()
 		g_pChatListBox->AddText("", GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
  		return false;
  	}
-	else
-	{
+
 		switch (g_MixRecipeMgr.GetMixInventoryType())
 		{
 		case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
 		case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
 		case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-			SendRequestMixExit();
-			break;
 		case SEASON3A::MIXTYPE_CASTLE_SENIOR:
+		case SEASON3A::MIXTYPE_OSBOURNE:
+		case SEASON3A::MIXTYPE_JERRIDON:
+		case SEASON3A::MIXTYPE_ELPIS:
+		case SEASON3A::MIXTYPE_CHAOS_CARD:
+		case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
+		case SEASON3A::MIXTYPE_EXTRACT_SEED:
+		case SEASON3A::MIXTYPE_SEED_SPHERE:
 			SendRequestMixExit();
 			break;
 		case SEASON3A::MIXTYPE_TRAINER:
 			SendExitInventory();
 			break;
-		case SEASON3A::MIXTYPE_OSBOURNE:
-		case SEASON3A::MIXTYPE_JERRIDON:
-		case SEASON3A::MIXTYPE_ELPIS:
-			SendRequestMixExit();
-			break;
-		case SEASON3A::MIXTYPE_CHAOS_CARD:
-			SendRequestMixExit();
-			break;
-		case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-			SendRequestMixExit();
-			break;
 		case SEASON3A::MIXTYPE_ATTACH_SOCKET:
 		case SEASON3A::MIXTYPE_DETACH_SOCKET:
 			m_SocketListBox.Clear();
-		case SEASON3A::MIXTYPE_EXTRACT_SEED:
-		case SEASON3A::MIXTYPE_SEED_SPHERE:
 			SendRequestMixExit();
 			break;
 		default:
@@ -180,7 +171,6 @@ bool CNewUIMixInventory::ClosingProcess()
 		g_MixRecipeMgr.ClearCheckRecipeResult();
 		return true;
 	}
-}
 
 void CNewUIMixInventory::SetPos(int x, int y)
 {
@@ -918,7 +908,7 @@ bool CNewUIMixInventory::InventoryProcess()
 
 	if(m_pNewInventoryCtrl && pPickedItem)
 	{
-		int iCurInventory = g_MixRecipeMgr.GetMixInventoryEquipmentIndex();
+		const auto iCurInventory = g_MixRecipeMgr.GetMixInventoryEquipmentIndex();
 
 		ITEM* pItemObj = pPickedItem->GetItem();
 		if (GetMixState() == MIX_READY && g_MixRecipeMgr.IsMixSource(pPickedItem->GetItem()) &&
@@ -931,8 +921,8 @@ bool CNewUIMixInventory::InventoryProcess()
 				int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 				if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
 				{
- 					if(SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, MAX_EQUIPMENT_INDEX+iSourceIndex, 
- 						pItemObj, iCurInventory, iTargetIndex))
+ 					if(SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, 
+                                                pItemObj, iCurInventory, iTargetIndex))
  					{
  						return true;
  					}
@@ -966,8 +956,8 @@ bool CNewUIMixInventory::InventoryProcess()
 				int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 				if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
 				{
-					SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex, 
-						pItemObj, iCurInventory, iTargetIndex);	
+					SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, 
+					                         pItemObj, iCurInventory, iTargetIndex);	
 					return true;
 				}
 			}

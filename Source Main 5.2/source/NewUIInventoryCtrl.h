@@ -56,6 +56,7 @@ namespace SEASON3B
 		void Release();
 
 		CNewUIInventoryCtrl* GetOwnerInventory() const;
+		STORAGE_TYPE GetSourceStorageType() const;
 		ITEM* GetItem() const;
 
 		const POINT& GetPos() const;
@@ -126,10 +127,16 @@ namespace SEASON3B
 		type_vec_item	m_vecItem;
 		POINT	m_Pos;
 		SIZE	m_Size;
+		STORAGE_TYPE m_StorageType;
 		int	m_nColumn, m_nRow;
+		/**
+		 * \brief The index of the first slot for this control.
+		 * For example, the box of an inventory starts at 12.
+		 */
+		int m_nIndexOffset;
 		DWORD*	m_pdwItemCheckBox;
 		EVENT_STATE	m_EventState;
-		int	m_iPointedSquareIndex;
+		int	m_iPointedSquareIndex; // has m_nIndexOffset included
 		bool m_bShow, m_bLock;
 
 		TOOLTIP_TYPE	m_ToolTipType;
@@ -149,11 +156,15 @@ namespace SEASON3B
 		void SetItemColorState(ITEM* pItem);
 		bool CanChangeItemColorState(ITEM* pItem);
 
+		void UpdateProcess();
+
+		bool CheckSlot(int startIndex, int width, int height);
+		bool CheckSlot(int iColumnX, int iRowY, int width, int height);
 	public:
 		CNewUIInventoryCtrl();
 		virtual ~CNewUIInventoryCtrl();
 
-		bool Create(CNewUI3DRenderMng* pNew3DRenderMng, CNewUIItemMng* pNewItemMng, CNewUIObj* pOwner, int x, int y, int nColumn, int nRow);
+		bool Create(STORAGE_TYPE storageType, CNewUI3DRenderMng* pNew3DRenderMng, CNewUIItemMng* pNewItemMng, CNewUIObj* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
 		void Release();
 
 		bool AddItem(int iLinealPos, BYTE* pbyItemPacket);
@@ -175,11 +186,10 @@ namespace SEASON3B
 		ITEM* FindItem(int iColumnX, int iRowY);
 		ITEM* FindItemByKey(DWORD dwKey);
 		ITEM* FindItemAtPt(int x, int y);
-		int FindItemptIndex(int x, int y);
 		ITEM* FindTypeItem(short int siType);
 		int FindItemIndex( short int siType, int iLevel );
 		int FindItemReverseIndex(short sType, int iLevel);
-		int FindBaseIndexByITEM(ITEM* pItem);
+		int GetIndexByItem(ITEM* pItem);
 		short int FindItemTypeByPos(int iColumnX, int iRowY);
 
 		ITEM* FindItemPointedSquareIndex();
@@ -196,7 +206,7 @@ namespace SEASON3B
 
 		bool UpdateMouseEvent();
 		bool Update();
-		void UpdateProcess();
+		
 		void Render();
 
 		void SetPos(int x, int y);
@@ -204,6 +214,8 @@ namespace SEASON3B
 		int GetNumberOfColumn() const;
 		int GetNumberOfRow() const;
 		void GetRect(RECT& rcBox);
+
+		STORAGE_TYPE GetStorageType() const { return m_StorageType; }
 
 		void SetSquareColorNormal(float fRed, float fGreen, float fBlue);
 		void GetSquareColorNormal(float* pfParams) const;
@@ -224,13 +236,13 @@ namespace SEASON3B
 		//. Check Functions
 		/* Caution: It's square index, not list index */
 		bool GetSquarePosAtPt(int x, int y, int& iColumnX, int& iRowY);
-		int GetSquareIndexAtPt(int x, int y);
 		
-		bool CheckSlot(int iLinealPos, int cx, int cy);
-		bool CheckSlot(int iColumnX, int iRowY, int cx, int cy);
+
 		bool CheckPtInRect(int x, int y);
 		bool CheckRectInRect(const RECT& rcBox);
+		int GetIndexAtPt(int x, int y);
 
+		int GetIndex(int column, int row);
 		bool CanMove(int iLinealPos, ITEM* pItem);
 		bool CanMove(int iColumnX, int iRowY, ITEM* pItem);
 		bool CanMoveToPt(int x, int y, ITEM* pItem);
@@ -242,7 +254,7 @@ namespace SEASON3B
 		void SetRepairMode(bool bRepair);
 		bool IsRepairMode();
 
-		bool IsOverlayItem(ITEM* pSourceItem, ITEM* pTargetItem);
+		bool AreItemsStackable(ITEM* pSourceItem, ITEM* pTargetItem);
 		bool CanPushItem();
 		bool CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem);
 		

@@ -1,6 +1,6 @@
 #pragma once
 #include "zzzinfomation.h"
-#include "../SpinLock.h"
+#include "SpinLock.h"
 
 extern int MenuStateCurrent;
 extern int MenuStateNext;

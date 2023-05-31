@@ -447,6 +447,7 @@ typedef struct
     WORD         Charisma;
 	WORD		 wMinusPoint;
 	WORD		 wMaxMinusPoint;
+	BYTE		 InventoryExtensions;
 } PRECEIVE_JOIN_MAP_SERVER, * LPPRECEIVE_JOIN_MAP_SERVER;
 
 //receive revival

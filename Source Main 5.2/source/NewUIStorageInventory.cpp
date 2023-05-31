@@ -19,8 +19,8 @@ using namespace SEASON3B;
 //////////////////////////////////////////////////////////////////////
 CNewUIStorageInventory::CNewUIStorageInventory() 
 {
-	m_pNewUIMng = NULL;
-	m_pNewInventoryCtrl = NULL;
+	m_pNewUIMng = nullptr;
+	m_pNewInventoryCtrl = nullptr;
 	m_Pos.x = m_Pos.y = 0;
 }
 
@@ -31,16 +31,15 @@ CNewUIStorageInventory::~CNewUIStorageInventory()
 
 bool CNewUIStorageInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
-	if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng
-		|| NULL == g_pNewItemMng)
+	if (nullptr == pNewUIMng || nullptr == g_pNewUI3DRenderMng
+		|| nullptr == g_pNewItemMng)
 		return false;
 
 	m_pNewUIMng = pNewUIMng;
-	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_STORAGE, this);
+	m_pNewUIMng->AddUIObj(INTERFACE_STORAGE, this);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if (false == m_pNewInventoryCtrl->Create(
-		g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 36, 8, 15))
+	if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 36, 8, 15))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -50,14 +49,15 @@ bool CNewUIStorageInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 	LoadImages();
 
-	int anBtnPosX[MAX_BTN] = { 38, 78, 118 };
-	int anToolTipText[MAX_BTN] = { 235, 236, 242 };
+	constexpr int anToolTipText[MAX_BTN] = { 235, 236, 242 };
 	for (int i = BTN_INSERT_ZEN; i < MAX_BTN; ++i)
 	{
 		m_abtn[i].ChangeButtonImgState(true, IMAGE_STORAGE_BTN_INSERT_ZEN + i);
-		m_abtn[i].ChangeButtonInfo(x + anBtnPosX[i], y + 390, 36, 29);
 		m_abtn[i].ChangeToolTipText(GlobalText[anToolTipText[i]], true);
 	}
+
+	m_BtnExpand.ChangeButtonImgState(true, IMAGE_STORAGE_EXPAND_BTN, false);
+	m_BtnExpand.ChangeToolTipText(GlobalText[3338], true);
 
 	m_bLock = false;
 	SetItemAutoMove(false);
@@ -77,7 +77,7 @@ void CNewUIStorageInventory::Release()
 	if(m_pNewUIMng)
 	{
 		m_pNewUIMng->RemoveUIObj(this);
-		m_pNewUIMng = NULL;
+		m_pNewUIMng = nullptr;
 	}
 }
 
@@ -85,6 +85,19 @@ void CNewUIStorageInventory::SetPos(int x, int y)
 {
 	m_Pos.x = x;
 	m_Pos.y = y;
+	if (m_pNewInventoryCtrl)
+	{
+		m_pNewInventoryCtrl->SetPos(x + 15, y + 36);
+	}
+
+	constexpr int xOffsetPerButton = 37;
+	constexpr int xFirstButton = 13;
+	for (int i = BTN_INSERT_ZEN; i < MAX_BTN; ++i)
+	{
+		m_abtn[i].ChangeButtonInfo(x + xFirstButton + i * xOffsetPerButton, y + 391, 36, 29);
+	}
+
+	m_BtnExpand.ChangeButtonInfo(x + xFirstButton + MAX_BTN * xOffsetPerButton, y + 391, 36, 29);
 }
 
 bool CNewUIStorageInventory::UpdateMouseEvent()
@@ -99,7 +112,7 @@ bool CNewUIStorageInventory::UpdateMouseEvent()
 
 	if(CheckMouseIn(m_Pos.x, m_Pos.y, STORAGE_WIDTH, STORAGE_HEIGHT))
 	{
-		if(SEASON3B::IsPress(VK_RBUTTON))
+		if(IsPress(VK_RBUTTON))
 		{
 			MouseRButton = false;
 			MouseRButtonPop = false;
@@ -107,7 +120,7 @@ bool CNewUIStorageInventory::UpdateMouseEvent()
 			return false;
 		}
 
-		if(SEASON3B::IsNone(VK_LBUTTON) == false)
+		if(!IsNone(VK_LBUTTON))
 		{
 			return false;
 		}
@@ -118,31 +131,37 @@ bool CNewUIStorageInventory::UpdateMouseEvent()
 
 bool CNewUIStorageInventory::UpdateKeyEvent()
 {
-	if(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE) == true)
+	if(!g_pNewUISystem->IsVisible(INTERFACE_STORAGE))
 	{
-		if(SEASON3B::IsPress(VK_ESCAPE) == true)
+		return true;
+	}
+
+	if(IsPress(VK_ESCAPE) == true)
 		{
-			g_pNewUISystem->Hide(SEASON3B::INTERFACE_STORAGE);
+		g_pNewUISystem->Hide(INTERFACE_STORAGE);
 			PlayBuffer(SOUND_CLICK01);
 			return false;
 		}
+
+	if (CharacterAttribute->IsVaultExtended > 0 && IsPress('H'))
+	{
+		g_pNewUISystem->Toggle(INTERFACE_STORAGE_EXT);
+		PlayBuffer(SOUND_CLICK01);
+		return false;
 	}
 	return true;
 }
 
 bool CNewUIStorageInventory::Update()
 {
-	if(m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
-		return false;
-
-	return true;
+	return !(m_pNewInventoryCtrl && !m_pNewInventoryCtrl->Update());
 }
 
 bool CNewUIStorageInventory::Render()
 {
-	::EnableAlphaTest();
+	EnableAlphaTest();
 
-	::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 	RenderBackImage();
 	RenderText();
@@ -153,26 +172,27 @@ bool CNewUIStorageInventory::Render()
 	for (int i = BTN_INSERT_ZEN; i < MAX_BTN; ++i)
 		m_abtn[i].Render();
 
-	::DisableAlphaBlend();
+	if (CharacterAttribute->IsVaultExtended > 0)
+	{
+		m_BtnExpand.Render();
+	}
+
+	DisableAlphaBlend();
 	
 	return true;
 }
 
 void CNewUIStorageInventory::RenderBackImage()
 {
-	RenderImage(IMAGE_STORAGE_BACK,
-		m_Pos.x, m_Pos.y, float(STORAGE_WIDTH), float(STORAGE_HEIGHT));
-	RenderImage(IMAGE_STORAGE_TOP,
-		m_Pos.x, m_Pos.y, float(STORAGE_WIDTH), 64.f);
-	RenderImage(IMAGE_STORAGE_LEFT,
-		m_Pos.x, m_Pos.y+64, 21.f, 320.f);
-	RenderImage(IMAGE_STORAGE_RIGHT,
-		m_Pos.x+STORAGE_WIDTH-21, m_Pos.y+64, 21.f, 320.f);
-	RenderImage(IMAGE_STORAGE_BOTTOM,
-		m_Pos.x, m_Pos.y+STORAGE_HEIGHT-45, float(STORAGE_WIDTH), 45.f);
+	const auto x = static_cast<float>(m_Pos.x);
+	const auto y = static_cast<float>(m_Pos.y);
+	RenderImage(IMAGE_STORAGE_BACK, x, y, STORAGE_WIDTH, STORAGE_HEIGHT);
+	RenderImage(IMAGE_STORAGE_TOP, x, y, STORAGE_WIDTH, 64.f);
+	RenderImage(IMAGE_STORAGE_LEFT, x, y + 64, 21.f, 320.f);
+	RenderImage(IMAGE_STORAGE_RIGHT, x + STORAGE_WIDTH - 21, y + 64, 21.f, 320.f);
+	RenderImage(IMAGE_STORAGE_BOTTOM, x, y + STORAGE_HEIGHT - 45, STORAGE_WIDTH, 45.f);
 
-	RenderImage(IMAGE_STORAGE_MONEY,
-		m_Pos.x+10, m_Pos.y+342, 170.f, 46.f);
+	RenderImage(IMAGE_STORAGE_MONEY, x + 10, y + 342, 170.f, 46.f);
 }
 
 void CNewUIStorageInventory::RenderText()
@@ -193,8 +213,8 @@ void CNewUIStorageInventory::RenderText()
 		m_Pos.x, m_Pos.y+11, szTemp, STORAGE_WIDTH, 0, RT3_SORT_CENTER);
 
 	nTempZen = CharacterMachine->StorageGold;
-    ::ConvertGold(nTempZen, szTemp);
-	g_pRenderText->SetTextColor(::getGoldColor(nTempZen));
+	ConvertGold(nTempZen, szTemp);
+	g_pRenderText->SetTextColor(getGoldColor(nTempZen));
 	g_pRenderText->RenderText(
 		m_Pos.x+168, m_Pos.y+342+8, szTemp, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
@@ -212,7 +232,7 @@ void CNewUIStorageInventory::RenderText()
 	else if (nTempZen >= 100)
 		nTempZen = nTempZen / 10 * 10;
 
-    ::ConvertGold(nTempZen, szTemp);
+	ConvertGold(nTempZen, szTemp);
 	g_pRenderText->SetTextColor(255, 220, 150, 255);
 	g_pRenderText->RenderText(m_Pos.x+168, m_Pos.y+342+29, szTemp, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 }
@@ -275,7 +295,7 @@ bool CNewUIStorageInventory::ProcessClosing()
 	if (EquipmentItem)
 		return false;
 
-	SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+	CNewUIInventoryCtrl::BackupPickedItem();
 	DeleteAllItems();
 	SendRequestStorageExit();
 	return true;
@@ -297,39 +317,25 @@ void CNewUIStorageInventory::DeleteAllItems()
 
 void CNewUIStorageInventory::ProcessInventoryCtrl()
 {
-	if (NULL == m_pNewInventoryCtrl)
+	if (nullptr == m_pNewInventoryCtrl)
 		return;
 	CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 
 	if( pPickedItem )
 	{
 		ITEM* pItemObj = pPickedItem->GetItem();
-		if (NULL == pItemObj)	return;
-		if (SEASON3B::IsPress(VK_LBUTTON))
+		if (nullptr == pItemObj)	return;
+		if (IsPress(VK_LBUTTON))
 		{
-			if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
+			const int nDstIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
+			
+			if (nDstIndex >= 0 && m_pNewInventoryCtrl->CanMove(nDstIndex, pItemObj))
 			{
-				int nSrcIndex = pPickedItem->GetSourceLinealPos();
-				int nDstIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
-				if (nDstIndex != -1 && m_pNewInventoryCtrl->CanMove(nDstIndex, pItemObj))
-					SendRequestItemToStorage(pItemObj, MAX_EQUIPMENT_INDEX+nSrcIndex, nDstIndex);
-			}
-			else if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
-			{
-				int nSrcIndex = pPickedItem->GetSourceLinealPos();
-				int nDstIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
-				if (nDstIndex != -1 && m_pNewInventoryCtrl->CanMove(nDstIndex, pItemObj))
-				{
-					SendRequestEquipmentItem(REQUEST_EQUIPMENT_STORAGE, nSrcIndex,
-						pItemObj, REQUEST_EQUIPMENT_STORAGE, nDstIndex);
-				}
-			}
-			else if (pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
-			{
-				int nSrcIndex = pPickedItem->GetSourceLinealPos();
-				int nDstIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
-				if (nDstIndex != -1 && m_pNewInventoryCtrl->CanMove(nDstIndex, pItemObj))
-					SendRequestItemToStorage(pItemObj, nSrcIndex, nDstIndex);
+				const int nSrcIndex = pPickedItem->GetSourceLinealPos();
+				const auto sourceStorageType = pPickedItem->GetSourceStorageType();
+				const auto targetStorageType = m_pNewInventoryCtrl->GetStorageType();
+				SendRequestEquipmentItem(sourceStorageType, nSrcIndex,
+					pItemObj, targetStorageType, nDstIndex);
 			}
 		}
 		else
@@ -340,7 +346,7 @@ void CNewUIStorageInventory::ProcessInventoryCtrl()
 		#endif // LEM_ADD_LUCKYITEM
 		}	
 	}
-	else if (SEASON3B::IsPress(VK_RBUTTON))
+	else if (IsPress(VK_RBUTTON))
 	{
 		ProcessStorageItemAutoMove();
 	}
@@ -366,51 +372,52 @@ void CNewUIStorageInventory::ProcessStorageItemAutoMove()
 			int nSrcIndex
 				= pItemObj->y * m_pNewInventoryCtrl->GetNumberOfColumn()
 					+ pItemObj->x;
-			SendRequestItemToMyInven(pItemObj, nSrcIndex, MAX_EQUIPMENT_INDEX+nDstIndex);
+			SendRequestItemToMyInven(pItemObj, nSrcIndex, nDstIndex);
 
-			::PlayBuffer(SOUND_GET_ITEM01);
+			PlayBuffer(SOUND_GET_ITEM01);
 		}
 	}
 }
 
-void CNewUIStorageInventory::ProcessMyInvenItemAutoMove()
+bool CNewUIStorageInventory::ProcessMyInvenItemAutoMove()
 {
-	if (g_pPickedItem)
-		if (g_pPickedItem->GetItem())
-			return;
-		
-	if (IsItemAutoMove())
-		return;
-		
-	CNewUIInventoryCtrl* pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
-	ITEM* pItemObj = pMyInvenCtrl->FindItemAtPt(MouseX, MouseY);
-	if (pItemObj)
+	if (g_pPickedItem && g_pPickedItem->GetItem())
 	{
-		if (pItemObj->Type == ITEM_HELPER+20)
-			return;
+		return false;
+	}
 
-		int nDstIndex = FindEmptySlot(pItemObj);
-		if (-1 != nDstIndex)
+	if (IsItemAutoMove())
+	{
+		return false;
+	}
+
+	const auto pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
+	if (const auto pItemObj = pMyInvenCtrl->FindItemAtPt(MouseX, MouseY))
+	{
+		if (pItemObj->Type == ITEM_HELPER + 20)
+			return false;
+
+		const int emptySlotIndex = FindEmptySlot(pItemObj);
+		if (-1 != emptySlotIndex)
 		{
 			SetItemAutoMove(true);
-			
-			int nSrcIndex
-				= pItemObj->y * pMyInvenCtrl->GetNumberOfColumn()
-				+ pItemObj->x;
-			SendRequestItemToStorage(pItemObj, MAX_EQUIPMENT_INDEX+nSrcIndex, nDstIndex);
-			
-			::PlayBuffer(SOUND_GET_ITEM01);
+
+			const int nSrcIndex = pMyInvenCtrl->GetIndexByItem(pItemObj);
+			SendRequestItemToStorage(pItemObj, nSrcIndex, emptySlotIndex);
+			PlayBuffer(SOUND_GET_ITEM01);
+			return true;
 		}
 	}
+
+	return false;
 }
 
 void CNewUIStorageInventory::SendRequestItemToMyInven(ITEM* pItemObj, int nStorageIndex, int nInvenIndex)
 {
 	if (!IsStorageLocked() || IsCorrectPassword())
 	{
-		SendRequestEquipmentItem(REQUEST_EQUIPMENT_STORAGE, nStorageIndex,
-			pItemObj, REQUEST_EQUIPMENT_INVENTORY, nInvenIndex);
-
+		SendRequestEquipmentItem(STORAGE_TYPE::VAULT, nStorageIndex,
+		                         pItemObj, STORAGE_TYPE::INVENTORY, nInvenIndex);
 	}
 	else
 	{
@@ -418,64 +425,71 @@ void CNewUIStorageInventory::SendRequestItemToMyInven(ITEM* pItemObj, int nStora
 		if (!IsItemAutoMove())
 			g_pPickedItem->HidePickedItem();
 
-		SEASON3B::CreateMessageBox(
+		CreateMessageBox(
 			MSGBOX_LAYOUT_CLASS(SEASON3B::CPasswordKeyPadMsgBoxLayout));
 	}
 }
 
 void CNewUIStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex, int nStorageIndex)
 {
-	if (::IsStoreBan(pItemObj))
+	if (IsStoreBan(pItemObj))
 	{
 		#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
 			// MessageBox
-			CMsgBoxIGSCommon* pMsgBox = NULL;
+			CMsgBoxIGSCommon* pMsgBox = nullptr;
 			CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
  			pMsgBox->Initialize(GlobalText[3028], GlobalText[667]);
 		#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
-		g_pChatListBox->AddText("", GlobalText[667], SEASON3B::TYPE_ERROR_MESSAGE);
-		SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+		g_pChatListBox->AddText("", GlobalText[667], TYPE_ERROR_MESSAGE);
+			CNewUIInventoryCtrl::BackupPickedItem();
 
 		if (IsItemAutoMove())
 			SetItemAutoMove(false);
 	}
 	else
 	{
-     	SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, nInvenIndex,
-			pItemObj, REQUEST_EQUIPMENT_STORAGE, nStorageIndex);
+     	SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, nInvenIndex,
+                                 pItemObj, STORAGE_TYPE::VAULT, nStorageIndex);
 	}
 }
 
 bool CNewUIStorageInventory::ProcessBtns()
 {
+	if (CharacterAttribute->IsVaultExtended > 0 && m_BtnExpand.UpdateMouseEvent())
+	{
+		g_pNewUISystem->Toggle(INTERFACE_STORAGE_EXT);
+		return true;
+	}
+
 	if (m_abtn[BTN_INSERT_ZEN].UpdateMouseEvent())
 	{
-		SEASON3B::CreateMessageBox(
-			MSGBOX_LAYOUT_CLASS(SEASON3B::CZenReceiptMsgBoxLayout));
+		CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CZenReceiptMsgBoxLayout));
 		return true;
 	}
-	else if (m_abtn[BTN_TAKE_ZEN].UpdateMouseEvent())
+
+	if (m_abtn[BTN_TAKE_ZEN].UpdateMouseEvent())
 	{
-		SEASON3B::CreateMessageBox(
-			MSGBOX_LAYOUT_CLASS(SEASON3B::CZenPaymentMsgBoxLayout));
+		CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CZenPaymentMsgBoxLayout));
 		return true;
 	}
-	else if (m_abtn[BTN_LOCK].UpdateMouseEvent())
+
+	if (m_abtn[BTN_LOCK].UpdateMouseEvent())
 	{
 		if (m_bLock)
 		{
-			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageUnlockMsgBoxLayout));
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageUnlockMsgBoxLayout));
 		}
 		else
 		{
-			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageLockKeyPadMsgBoxLayout));
+			CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageLockKeyPadMsgBoxLayout));
 		}
 		return true;
 	}
-	else if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x+169, m_Pos.y+7, 13, 12))
+
+	if (IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x+169, m_Pos.y+7, 13, 12))
 	{
-		g_pNewUISystem->Hide(SEASON3B::INTERFACE_STORAGE);
+		g_pNewUISystem->Hide(INTERFACE_STORAGE);
 		return true;
 	}
 
@@ -516,7 +530,7 @@ void CNewUIStorageInventory::SetBackupInvenIndex(int nInvenIndex)
 
 int CNewUIStorageInventory::FindEmptySlot(ITEM* pItemObj)
 {
-	if (pItemObj == NULL)
+	if (pItemObj == nullptr)
 		return -1;
 
 	ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItemObj->Type];
@@ -542,13 +556,13 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
 		break;
 
 	case 10:
-		SEASON3B::CreateOkMessageBox(GlobalText[440]);
-		SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+		CreateOkMessageBox(GlobalText[440]);
+		CNewUIInventoryCtrl::BackupPickedItem();
 		ProcessStorageItemAutoMoveFailure();
 		break;
 
 	case 11:
-		SEASON3B::CreateOkMessageBox(GlobalText[441]);
+		CreateOkMessageBox(GlobalText[441]);
 		break;
 
 	case 12:
@@ -579,8 +593,8 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
 				}
 
 				SendRequestEquipmentItem(
-					REQUEST_EQUIPMENT_STORAGE, nStorageIndex,
-					pItemObj, REQUEST_EQUIPMENT_INVENTORY, GetBackupInvenIndex());
+					STORAGE_TYPE::VAULT, nStorageIndex,
+					pItemObj, STORAGE_TYPE::INVENTORY, GetBackupInvenIndex());
 
 				InitBackupItemInfo();
 			}
@@ -590,14 +604,14 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
 		break;
 
 	case 13:
-		SEASON3B::CreateOkMessageBox(GlobalText[401]);
+		CreateOkMessageBox(GlobalText[401]);
 		break;
 	}
 }
 
 void CNewUIStorageInventory::ProcessToReceiveStorageItems(int nIndex, BYTE* pbyItemPacket)
 {
-	SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+	CNewUIInventoryCtrl::DeletePickedItem();
 
 	if (nIndex >= 0 && nIndex < (m_pNewInventoryCtrl->GetNumberOfColumn()
 		* m_pNewInventoryCtrl->GetNumberOfRow()))
@@ -638,7 +652,7 @@ void CNewUIStorageInventory::ProcessStorageItemAutoMoveFailure()
 	SetItemAutoMove(false);
 }
 
-int SEASON3B::CNewUIStorageInventory::GetPointedItemIndex()
+int CNewUIStorageInventory::GetPointedItemIndex()
 {
 	return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }

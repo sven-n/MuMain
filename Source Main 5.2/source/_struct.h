@@ -368,6 +368,8 @@ typedef struct
 	char Name[MAX_ID_SIZE+1];
 	BYTE Class;
 	BYTE Skin;
+	BYTE InventoryExtensions;
+	BYTE IsVaultExtended;
 	WORD Level;
 	DWORD Experience;
 	DWORD NextExperince;

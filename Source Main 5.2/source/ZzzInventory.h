@@ -97,6 +97,7 @@ extern int     PartyNumber;
 ///////////////////////////////////////////////////////////////////////////////
 
 extern ITEM Inventory         [MAX_INVENTORY];
+extern ITEM InventoryExt	  [MAX_INVENTORY_EXT];
 extern ITEM ShopInventory     [MAX_SHOP_INVENTORY];
 extern int  InventoryType;
 extern ITEM g_PersonalShopInven[MAX_PERSONALSHOP_INVEN];

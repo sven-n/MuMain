@@ -68,7 +68,7 @@
 #include <chrono>
 #include <thread>
 
-#include "../SpinLock.h"
+#include "SpinLock.h"
 
 class SpinLock;
 extern CUITextInputBox * g_pSingleTextInputBox;

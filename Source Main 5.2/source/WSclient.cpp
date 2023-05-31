@@ -464,6 +464,7 @@ void ReceiveCharacterList( const BYTE *ReceiveBuffer )
 		g_ErrorReport.Write("[ReceiveList Count %d Max class %d]",Data->Value,Data->MaxClass);
 	#endif
 	
+	CharacterAttribute->IsVaultExtended = Data->IsVaultExtended;
 	for(int i=0;i<Data->CharacterCount;i++)
 	{
 		LPPRECEIVE_CHARACTER_LIST Data2 = (LPPRECEIVE_CHARACTER_LIST)(ReceiveBuffer+Offset);
@@ -642,6 +643,7 @@ void InitGame()
 	
 	ClearNotice ();
 	
+	CharacterAttribute->InventoryExtensions = 0;
 	CharacterAttribute->Ability = 0;
 	CharacterAttribute->AbilityTime[0] = 0;
 	CharacterAttribute->AbilityTime[1] = 0;
@@ -838,6 +840,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     CharacterAttribute->MaxAddPoint		= Data->MaxAddPoint;
 	CharacterAttribute->wMinusPoint     = Data->wMinusPoint;
     CharacterAttribute->wMaxMinusPoint  = Data->wMaxMinusPoint;
+	CharacterAttribute->InventoryExtensions = Data->InventoryExtensions;
 	
 	CharacterMachine->Gold            = Data->Gold;
 	//CharacterAttribute->SkillMana     = CharacterAttribute->Energy*10+CharacterAttribute->ManaMax*10/6;
@@ -1228,6 +1231,7 @@ BOOL ReceiveInventory(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
 	g_pMyInventory->UnequipAllItems();
 	g_pMyInventory->DeleteAllItems();
+	g_pMyInventoryExt->DeleteAllItems();
 	g_pMyShopInventory->DeleteAllItems();
 	
 	LPPHEADER_DEFAULT_SUBCODE_WORD Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer; //LPPHEADER_DEFAULT_SUBCODE_WORD 6byte
@@ -1249,12 +1253,14 @@ BOOL ReceiveInventory(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 		}
 		else if(itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
 		{
-			itemindex = itemindex - MAX_EQUIPMENT_INDEX;
 			g_pMyInventory->InsertItem(itemindex, Data2->Item);
 		}
-		else if(itemindex >= (MAX_EQUIPMENT_INDEX + MAX_INVENTORY) && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+		else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
 		{
-			itemindex = itemindex - (MAX_EQUIPMENT_INDEX + MAX_INVENTORY);
+			g_pMyInventoryExt->InsertItem(itemindex, Data2->Item);
+		}
+		else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+		{
 			g_pMyShopInventory->InsertItem(itemindex, Data2->Item);
 		}
 
@@ -1278,12 +1284,14 @@ void ReceiveDeleteInventory( const BYTE *ReceiveBuffer )
 		}
 		else if(itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
 		{
-			itemindex = itemindex - MAX_EQUIPMENT_INDEX;
 			g_pMyInventory->DeleteItem(itemindex);
 		}
-		else if(itemindex >= (MAX_EQUIPMENT_INDEX + MAX_INVENTORY) && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+		else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
 		{
-			itemindex = itemindex - (MAX_EQUIPMENT_INDEX + MAX_INVENTORY);
+			g_pMyInventoryExt->DeleteItem(itemindex);
+		}
+		else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+		{
 			g_pMyShopInventory->DeleteItem(itemindex);
 		}
 	}
@@ -1345,7 +1353,14 @@ void ReceiveTradeInventory( const BYTE *ReceiveBuffer )
 			}
 			else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
 			{
+				if (Data2->Index < MAX_SHOP_INVENTORY)
+				{
 				g_pStorageInventory->InsertItem(Data2->Index, Data2->Item);
+			}
+				else
+				{
+					g_pStorageInventoryExt->InsertItem(Data2->Index, Data2->Item);
+				}
 			}
 		}
 		
@@ -5509,10 +5524,17 @@ void ReceiveGetItem( const BYTE *ReceiveBuffer )
 		}
 		else
 		{
-            if ( Data->Result!=GET_ITEM_MULTI )
+			auto itemIndex = Data->Result;
+            if (itemIndex !=GET_ITEM_MULTI )
             {
-				if(Data->Result >= MAX_EQUIPMENT_INDEX && Data->Result < MAX_MY_INVENTORY_INDEX)
-					g_pMyInventory->InsertItem(Data->Result-MAX_EQUIPMENT_INDEX, Data->Item);
+				if (itemIndex >= MAX_EQUIPMENT_INDEX && itemIndex < MAX_MY_INVENTORY_INDEX)
+            {
+					g_pMyInventory->InsertItem(itemIndex, Data->Item);
+				}
+				else if (itemIndex >= MAX_MY_INVENTORY_INDEX && Data->Result < MAX_MY_INVENTORY_EX_INDEX)
+				{
+					g_pMyInventoryExt->InsertItem(itemIndex, Data->Item);
+				}
             }
 			
             char szItem[64] = {0, };
@@ -5552,7 +5574,7 @@ void ReceiveDropItem( const BYTE *ReceiveBuffer )
 		}
 		else
 		{
-			g_pMyInventory->DeleteItem( Data->KeyL-MAX_EQUIPMENT_INDEX );
+			g_pMyInventory->DeleteItem( Data->KeyL );
 		}
 
 		SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
@@ -5577,34 +5599,28 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 	LPPHEADER_DEFAULT_SUBCODE_ITEM Data = (LPPHEADER_DEFAULT_SUBCODE_ITEM)ReceiveBuffer;
 	if(Data->SubCode != 255)
 	{
+		const auto storageType = static_cast<STORAGE_TYPE>(Data->SubCode);
 		SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
 		int iSourceIndex = g_pMyShopInventory->GetSourceIndex();
 		if(pPickedItem)
 		{
-			if(pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
-			{	
-				iSourceIndex += MAX_EQUIPMENT_INDEX;
-			}
-			else if(pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
-			{
-				iSourceIndex += MAX_MY_INVENTORY_INDEX;
-			}
+			iSourceIndex = pPickedItem->GetSourceLinealPos();
 		}
 		
-		if(iSourceIndex >= MAX_MY_INVENTORY_INDEX)
+		if(iSourceIndex >= MAX_MY_INVENTORY_EX_INDEX)
 		{
 			int price = 0;
 			if(GetPersonalItemPrice(iSourceIndex, price, g_IsPurchaseShop))
 			{
 				RemovePersonalItemPrice(iSourceIndex, g_IsPurchaseShop);
-				if(Data->Index >= MAX_MY_INVENTORY_INDEX)
+				if(Data->Index >= MAX_MY_INVENTORY_EX_INDEX)
 				{
 					AddPersonalItemPrice(Data->Index, price, g_IsPurchaseShop);
 				}
 			}
 		}
 		
-		if(Data->SubCode == 0)
+		if(storageType == STORAGE_TYPE::INVENTORY)
 		{
 			SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 			
@@ -5617,35 +5633,44 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 			else if(itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
 			{
 				g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
-				itemindex = itemindex - MAX_EQUIPMENT_INDEX;
+				g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
 				g_pMyInventory->InsertItem(itemindex, Data->Item);
 			}
-			else if(itemindex >= (MAX_EQUIPMENT_INDEX + MAX_INVENTORY) && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+			else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
 			{
-				itemindex = itemindex - (MAX_EQUIPMENT_INDEX + MAX_INVENTORY);
+				g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
+				g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
+				g_pMyInventoryExt->InsertItem(itemindex, Data->Item);
+			}
+			else if(itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+			{
 				g_pMyShopInventory->InsertItem(itemindex, Data->Item);
 			}
 		}
-		else if (1 == Data->SubCode)
+		else if (storageType == STORAGE_TYPE::TRADE)
 		{
 			g_pTrade->ProcessToReceiveTradeItems(Data->Index, Data->Item);
 		}
-		else if (2 == Data->SubCode)
+		else if (storageType == STORAGE_TYPE::VAULT)
+		{
+			if (Data->Index < MAX_SHOP_INVENTORY)
 		{
 			g_pStorageInventory->ProcessToReceiveStorageItems(Data->Index, Data->Item);
 		}
-		if(Data->SubCode == 3 || (Data->SubCode >= 5 && Data->SubCode <= 8)
-			|| (Data->SubCode == 9) 
-			|| (Data->SubCode == 10)
-			|| (Data->SubCode >= REQUEST_EQUIPMENT_EXTRACT_SEED_MIX && Data->SubCode <= REQUEST_EQUIPMENT_DETACH_SOCKET_MIX)
-			)
+			else
+			{
+				g_pStorageInventoryExt->ProcessToReceiveStorageItems(Data->Index, Data->Item);
+			}
+		}
+		if(storageType == STORAGE_TYPE::CHAOS_MIX
+			|| (storageType >= STORAGE_TYPE::TRAINER_MIX && storageType <= STORAGE_TYPE::DETACH_SOCKET_MIX))
 		{
 			SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 			if(Data->Index >= 0 && Data->Index < MAX_MIX_INVENTORY)
 				g_pMixInventory->InsertItem(Data->Index, Data->Item);
 		}
 #ifdef LEM_ADD_LUCKYITEM
-		else if ( 15 == Data->SubCode || 16 == Data->SubCode )
+		else if ( 15 == storageType || 16 == storageType)
 		{
 			g_pLuckyItemWnd->GetResult(1, Data->Index, Data->Item);
 		}
@@ -5656,7 +5681,15 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 	else
 	{
 		SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+		if (g_pStorageInventory->IsItemAutoMove())
+		{
 		g_pStorageInventory->ProcessStorageItemAutoMoveFailure();
+	}
+	
+		if (g_pStorageInventoryExt->IsItemAutoMove())
+		{
+			g_pStorageInventoryExt->ProcessStorageItemAutoMoveFailure();
+		}
 	}
 	
 	if ( g_bPacketAfter_EquipmentItem)
@@ -5677,11 +5710,20 @@ void ReceiveModifyItem( const BYTE *ReceiveBuffer )
 	if(SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
 		SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 	
-	int itemindex = Data->Index - MAX_EQUIPMENT_INDEX;
+	int itemindex = Data->Index;
 	if(g_pMyInventory->FindItem(itemindex))
+	{
 		g_pMyInventory->DeleteItem(itemindex);
+	}
 	
+	if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+	{
 	g_pMyInventory->InsertItem(itemindex, Data->Item);
+	}
+	else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+	{
+		g_pMyInventoryExt->InsertItem(itemindex, Data->Item);
+	}
 	
 	int iType = ConvertItemType(Data->Item);
 	if(iType == ITEM_POTION+28 || iType == ITEM_POTION+111)
@@ -5879,7 +5921,11 @@ void ReceiveBuy( const BYTE *ReceiveBuffer )
 	{
 		if(Data->Index >= MAX_EQUIPMENT_INDEX && Data->Index < MAX_MY_INVENTORY_INDEX)
 		{
-			g_pMyInventory->InsertItem(Data->Index-MAX_EQUIPMENT_INDEX, Data->Item);
+			g_pMyInventory->InsertItem(Data->Index, Data->Item);
+		}
+		else if (Data->Index >= MAX_MY_INVENTORY_INDEX && Data->Index < MAX_MY_INVENTORY_EX_INDEX)
+		{
+			g_pMyInventoryExt->InsertItem(Data->Index, Data->Item);
 		}
 		else
 		{
@@ -6056,17 +6102,14 @@ void ReceiveLife( const BYTE *ReceiveBuffer )
 		EnableUse = 0;
 		break;
 	default:
-		{
-			int itemindex = Data->Index-MAX_EQUIPMENT_INDEX;
-			ITEM* pItem = g_pMyInventory->FindItem(itemindex);
-			if(pItem)
+		if(ITEM* pItem = g_pMyInventory->FindItem(Data->Index))
 			{
 				if(pItem->Durability > 0)
 					pItem->Durability--;
 				if(pItem->Durability <= 0)
-					g_pMyInventory->DeleteItem(itemindex);
-			}
+				g_pMyInventory->DeleteItem(Data->Index);
 		}
+		
 		break;
 	}
 }
@@ -6097,12 +6140,31 @@ void ReceiveMana( const BYTE *ReceiveBuffer )
 		break;
 	default:
 		CharacterAttribute->Mana = ((WORD)(Data->Life[0])<<8) + Data->Life[1];
-		if(Inventory[Data->Index-12].Durability > 0)
-			Inventory[Data->Index-12].Durability --;
-		if(Inventory[Data->Index-12].Durability <= 0)
+
+		auto itemIndex = Data->Index - MAX_EQUIPMENT;
+		ITEM* item = nullptr;
+
+		if (itemIndex < MAX_INVENTORY)
 		{
-			Inventory[Data->Index-12].Type = -1;
-			Inventory[Data->Index-12].Number = 0;
+			item = &Inventory[itemIndex];
+		}
+		else
+		{
+			item = &InventoryExt[itemIndex - MAX_INVENTORY];
+		}
+
+		if (item)
+		{
+			if (item->Durability > 0)
+			{
+				item->Durability--;
+			}
+
+			if (item->Durability <= 0)
+		{
+				item->Type = -1;
+				item->Number = 0;
+			}
 		}
 		break;
 	}
@@ -6165,14 +6227,13 @@ void ReceiveDurability( const BYTE *ReceiveBuffer )
 {
     LPPHEADER_DEFAULT_VALUE_KEY Data = (LPPHEADER_DEFAULT_VALUE_KEY)ReceiveBuffer;
 	
-	if(Data->Value < 12)
+	if(Data->Value < MAX_EQUIPMENT)
 	{
 		CharacterMachine->Equipment[Data->Value].Durability = Data->KeyH;
 	}
 	else
 	{
-		int iItemIndex = Data->Value-MAX_EQUIPMENT_INDEX;
-		ITEM* pItem = g_pMyInventory->FindItem(iItemIndex);
+		ITEM* pItem = g_pMyInventory->FindItem(Data->Value);
 		
 		if(pItem)
 		{
@@ -8348,7 +8409,8 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
 		{
 			SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 		}
-		RemovePersonalItemPrice(MAX_MY_INVENTORY_INDEX+g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
+
+		RemovePersonalItemPrice(g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
 		
 		SendRequestInventory();
 		
@@ -8403,6 +8465,7 @@ void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
 		{
 			g_pNewUISystem->Hide(SEASON3B::INTERFACE_STORAGE);
+			g_pNewUISystem->Hide(SEASON3B::INTERFACE_STORAGE_EXT);
 		}
 
 		if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY))
@@ -8427,8 +8490,7 @@ void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
 		{
 			if(pShopItem->iItemPrice > 0) 
 			{
-				int itemindex = pShopItem->byPos - (MAX_EQUIPMENT_INDEX + MAX_INVENTORY);
-				g_pPurchaseShopInventory->InsertItem( itemindex, pShopItem->byItemInfo );
+				g_pPurchaseShopInventory->InsertItem(pShopItem->byPos, pShopItem->byItemInfo);
 				AddPersonalItemPrice(pShopItem->byPos, pShopItem->iItemPrice, PSHOPWNDTYPE_PURCHASE);
 			}
 			else 
@@ -8480,8 +8542,7 @@ void ReceiveRefreshItemList(const BYTE* ReceiveBuffer)
 		LPGETPSHOPITEM_DATAINFO pShopItem = (LPGETPSHOPITEM_DATAINFO)(ReceiveBuffer+sizeof(GETPSHOPITEMLIST_HEADERINFO));
 		for(int i=0; i<Header->byCount; i++, pShopItem++) 
 		{
-			int itemindex = pShopItem->byPos - (MAX_EQUIPMENT_INDEX + MAX_INVENTORY);
-			g_pPurchaseShopInventory->InsertItem( itemindex, pShopItem->byItemInfo );
+			g_pPurchaseShopInventory->InsertItem(pShopItem->byPos, pShopItem->byItemInfo );
 			AddPersonalItemPrice(pShopItem->byPos, pShopItem->iItemPrice, PSHOPWNDTYPE_PURCHASE);
 		}
 	}
@@ -8512,15 +8573,20 @@ void ReceivePurchaseItem(const BYTE* ReceiveBuffer)
 		{			
 			RemovePersonalItemPrice(g_pPurchaseShopInventory->GetSourceIndex(), PSHOPWNDTYPE_PURCHASE);
 			g_pPurchaseShopInventory->DeleteItem(g_pPurchaseShopInventory->GetSourceIndex());
-			
-			int myinvenitemindex = Header->byPos - MAX_EQUIPMENT_INDEX;
-			g_pMyInventory->InsertItem( myinvenitemindex, Header->byItemInfo );
 		}
 		else 
 		{	
 			RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE);
-			int myinvenitemindex = Header->byPos - MAX_EQUIPMENT_INDEX;
-			g_pMyInventory->InsertItem( myinvenitemindex, Header->byItemInfo );
+		}
+
+		auto itemindex = Header->byPos;
+		if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+		{
+			g_pMyInventory->InsertItem(itemindex, Header->byItemInfo);
+		}
+		else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+		{
+			g_pMyInventoryExt->InsertItem(itemindex, Header->byItemInfo);
 		}
 	}
 	else if(Header->byResult == 0x06)
@@ -12235,12 +12301,11 @@ bool ReceiveEquippingInventoryItem(const BYTE* pReceiveBuffer)
 
 	int iResult	 = (int)Data->btResult;
 	int iItemPos = (int)Data->btItemPos;
-	iItemPos -= MAX_EQUIPMENT_INDEX;
 	
 	if (!(iResult == 254 || iResult == 255))
 		return false;
 
-	if (iItemPos < 0 || iItemPos >= MAX_INVENTORY)
+	if (iItemPos < MAX_EQUIPMENT || iItemPos >= MAX_INVENTORY)
 		return false;
 	
 	ITEM* pItem = g_pMyInventory->FindItem(iItemPos);
@@ -12273,7 +12338,7 @@ bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
 	}
 	else
 	{
-		ITEM* pItem = g_pMyInventory->FindItem(Data->wItemSlotIndex-MAX_EQUIPMENT_INDEX);
+		ITEM* pItem = g_pMyInventory->FindItem(Data->wItemSlotIndex);
 
 		if( pItem == NULL )
 			return false;

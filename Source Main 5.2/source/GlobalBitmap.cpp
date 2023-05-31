@@ -598,6 +598,7 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
 
 	if(cinfo.output_width<=MAX_WIDTH && cinfo.output_height<=MAX_HEIGHT)
 	{
+		// rounds up to the next n^2 value
 		int Width, Height;
 		for(int i=1;i<=MAX_WIDTH;i<<=1)
 		{
