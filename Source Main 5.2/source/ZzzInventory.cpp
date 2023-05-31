@@ -11329,7 +11329,7 @@ bool IsExistUndecidedPrice()
 		if(pItem)
 		{
 			bResult = false;
-			iIndex = MAX_MY_INVENTORY_EX_INDEX + (pItem->y*COL_PERSONALSHOP_INVEN)+pItem->x;
+			iIndex = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(pItem);
 			if(GetPersonalItemPrice(iIndex, iPrice, g_IsPurchaseShop) == false)
 			{
 				return true;
