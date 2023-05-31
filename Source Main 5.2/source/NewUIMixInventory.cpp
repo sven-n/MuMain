@@ -39,7 +39,7 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MIXINVENTORY, this);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if(false == m_pNewInventoryCtrl->Create(CHAOS_MIX, g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+110, 8, 4))
+	if(false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::CHAOS_MIX, g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+110, 8, 4))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -908,7 +908,7 @@ bool CNewUIMixInventory::InventoryProcess()
 
 	if(m_pNewInventoryCtrl && pPickedItem)
 	{
-		int iCurInventory = g_MixRecipeMgr.GetMixInventoryEquipmentIndex();
+		const auto iCurInventory = g_MixRecipeMgr.GetMixInventoryEquipmentIndex();
 
 		ITEM* pItemObj = pPickedItem->GetItem();
 		if (GetMixState() == MIX_READY && g_MixRecipeMgr.IsMixSource(pPickedItem->GetItem()) &&
@@ -921,8 +921,8 @@ bool CNewUIMixInventory::InventoryProcess()
 				int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 				if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
 				{
- 					if(SendRequestEquipmentItem(INVENTORY, iSourceIndex, 
- 						pItemObj, iCurInventory, iTargetIndex))
+ 					if(SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, 
+                                                pItemObj, iCurInventory, iTargetIndex))
  					{
  						return true;
  					}
@@ -956,8 +956,8 @@ bool CNewUIMixInventory::InventoryProcess()
 				int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 				if(iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
 				{
-					SendRequestEquipmentItem(INVENTORY, iSourceIndex, 
-						pItemObj, iCurInventory, iTargetIndex);	
+					SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, 
+					                         pItemObj, iCurInventory, iTargetIndex);	
 					return true;
 				}
 			}

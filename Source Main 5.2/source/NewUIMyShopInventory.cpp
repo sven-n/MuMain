@@ -58,7 +58,7 @@ bool SEASON3B::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int x, in
 	LoadImages();
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if(false == m_pNewInventoryCtrl->Create(MYSHOP, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x+16, m_Pos.y+90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
+	if(false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::MYSHOP, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x+16, m_Pos.y+90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -347,8 +347,8 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
 			{
 				ChangeSourceIndex(iSourceIndex);
 				ChangeTargetIndex(iTargetIndex);
-				SendRequestEquipmentItem( MYSHOP, iSourceIndex, pItemObj,
-					                      MYSHOP, iTargetIndex);
+				SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj,
+				                         STORAGE_TYPE::MYSHOP, iTargetIndex);
 				return true;
 			}
 		}

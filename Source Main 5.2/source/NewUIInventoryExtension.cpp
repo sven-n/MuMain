@@ -39,7 +39,7 @@ bool CNewUIInventoryExtension::Create(CNewUIManager* pNewUIMng, int x, int y)
 		m_extension = new CNewUIInventoryCtrl();
 
 		const int indexOffset = MAX_MY_INVENTORY_INDEX + i * MAX_INVENTORY_EXT_ONE;
-		if (false == m_extension->Create(INVENTORY, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 45 + HEIGHT_PER_EXT * i, COLUMN_INVENTORY, ROW_INVENTORY_EXT, indexOffset))
+		if (false == m_extension->Create(STORAGE_TYPE::INVENTORY, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 45 + HEIGHT_PER_EXT * i, COLUMN_INVENTORY, ROW_INVENTORY_EXT, indexOffset))
 		{
 			SAFE_DELETE(m_extension);
 			return false;

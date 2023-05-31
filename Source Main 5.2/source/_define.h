@@ -178,7 +178,7 @@
 /**
  * \brief Types of storage where items can be moved from/to.
  */
-enum STORAGE_TYPE
+enum struct STORAGE_TYPE
 {
     UNDEFINED = -1,
     INVENTORY = 0,

@@ -878,7 +878,7 @@ __forceinline void SendRequestBuy(int Index,int Cost)
     spe.Send();\
 }
 
-__forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pItem, int iDstType,int iDstIndex)
+__forceinline bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType,int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType,int iDstIndex)
 {
 	if(EquipmentItem || NULL == pItem) return false;
 
@@ -924,11 +924,11 @@ __forceinline bool SendRequestEquipmentItem(int iSrcType,int iSrcIndex, ITEM* pI
 		<< socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
 		<< (BYTE)(iDstType&0xff) << (BYTE)(iDstIndex&0xff);
 #else // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
-	spe << BYTECAST(char, iSrcType) << BYTECAST(char, iSrcIndex) << BYTECAST(char, pItem->Type) << BYTECAST(char, pItem->Level)
+	spe << static_cast<BYTE>(iSrcType) << BYTECAST(char, iSrcIndex) << BYTECAST(char, pItem->Type) << BYTECAST(char, pItem->Level)
 		<< BYTECAST(char,pItem->Durability) << BYTECAST(char,pItem->Option1) << BYTECAST(char,pItem->ExtOption)
 		<< splitType << spareBits
 		<< socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
-		<< ( BYTE)iDstType << ( BYTE)iDstIndex;
+		<< static_cast<BYTE>(iDstType) << static_cast<BYTE>(iDstIndex);
 #endif // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
 	spe.Send();
 

@@ -4719,19 +4719,19 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 			{
 				SendRequestSetSalePrice(iSourceIndex, iInputZen);
 
-				SendRequestEquipmentItem(INVENTORY, iSourceIndex, pItemObj,MYSHOP, iTargetIndex);
+				SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
 			}
 			else if(pPickedItem->GetOwnerInventory() == NULL)
 			{
 				SendRequestSetSalePrice(iSourceIndex, iInputZen);
 
-				SendRequestEquipmentItem(INVENTORY, iSourceIndex, pItemObj,MYSHOP, iTargetIndex);
+				SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
 			}
 			else if(pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
 			{
 				SendRequestSetSalePrice(iSourceIndex, iInputZen);
 
-				SendRequestEquipmentItem(MYSHOP, iSourceIndex, pItemObj,MYSHOP, iTargetIndex);
+				SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
 			}
 			
 			AddPersonalItemPrice(iTargetIndex, iInputZen, g_IsPurchaseShop);

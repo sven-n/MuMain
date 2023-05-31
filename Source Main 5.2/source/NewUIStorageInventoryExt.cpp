@@ -41,7 +41,7 @@ bool CNewUIStorageInventoryExt::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_pNewUIMng->AddUIObj(INTERFACE_STORAGE_EXT, this);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if (false == m_pNewInventoryCtrl->Create(VAULT, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 36, 8, 15, MAX_SHOP_INVENTORY))
+	if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 36, 8, 15, MAX_SHOP_INVENTORY))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -250,8 +250,8 @@ void CNewUIStorageInventoryExt::ProcessInventoryCtrl()
 			if (nDstIndex >= 0 && m_pNewInventoryCtrl->CanMove(nDstIndex, pItemObj))
 			{
 				const int nSrcIndex = pPickedItem->GetSourceLinealPos();
-				const int sourceStorageType = pPickedItem->GetSourceStorageType();
-				const int targetStorageType = m_pNewInventoryCtrl->GetStorageType();
+				const auto sourceStorageType = pPickedItem->GetSourceStorageType();
+				const auto targetStorageType = m_pNewInventoryCtrl->GetStorageType();
 				SendRequestEquipmentItem(sourceStorageType, nSrcIndex,
 					pItemObj, targetStorageType, nDstIndex);
 			}

@@ -72,7 +72,7 @@ bool CNewUIMyInventory::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNew
 	m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if (false == m_pNewInventoryCtrl->Create(INVENTORY, m_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 200, 8, 8, MAX_EQUIPMENT))
+	if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::INVENTORY, m_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 200, 8, 8, MAX_EQUIPMENT))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -1397,13 +1397,13 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 			{
 				const STORAGE_TYPE sourceType = pPickedItem->GetSourceStorageType();
 
-				if (sourceType == INVENTORY && iSourceIndex == iTargetIndex)
+				if (sourceType == STORAGE_TYPE::INVENTORY && iSourceIndex == iTargetIndex)
 				{
 					CNewUIInventoryCtrl::BackupPickedItem();
 				}
 				else
 				{
-					SendRequestEquipmentItem(sourceType, iSourceIndex, pItemObj, INVENTORY, iTargetIndex);
+					SendRequestEquipmentItem(sourceType, iSourceIndex, pItemObj, STORAGE_TYPE::INVENTORY, iTargetIndex);
 					return true;
 				}
 			}
@@ -1505,7 +1505,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 						pPickedItem->HidePickedItem();
 					}
 
-					SendRequestEquipmentItem(INVENTORY, iSourceIndex, pEquippedItem, INVENTORY, emptySlotIndex);
+					SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pEquippedItem, STORAGE_TYPE::INVENTORY, emptySlotIndex);
 					return true;
 				}
 			}
@@ -1656,7 +1656,7 @@ bool CNewUIMyInventory::TryStackItems(CNewUIInventoryCtrl* targetControl, ITEM* 
 	{
 		if (targetControl->AreItemsStackable(pPickItem, pItem))
 		{
-			SendRequestEquipmentItem(INVENTORY, iSourceIndex, pPickItem, INVENTORY, iTargetIndex);
+			SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pPickItem, STORAGE_TYPE::INVENTORY, iTargetIndex);
 			return true;
 		}
 	}
@@ -2083,8 +2083,8 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
 		// If nothing of above applied, we try to move the item.
 		if (iTargetIndex >= 0 && targetControl->CanMove(iTargetIndex, pPickItem))
 		{
-			const int sourceStorageType = pPickedItem->GetSourceStorageType();
-			const int targetStorageType = targetControl->GetStorageType();
+			const auto sourceStorageType = pPickedItem->GetSourceStorageType();
+			const auto targetStorageType = targetControl->GetStorageType();
 			if (iTargetIndex != iSourceIndex)
 			{
 				return SendRequestEquipmentItem(sourceStorageType, iSourceIndex,
@@ -2199,7 +2199,7 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
 							pPickedItem->HidePickedItem();
 						}
 
-						SendRequestEquipmentItem(INVENTORY, iSrcIndex, pItem, INVENTORY, nDstIndex);
+						SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSrcIndex, pItem, STORAGE_TYPE::INVENTORY, nDstIndex);
 					}
 				}
 

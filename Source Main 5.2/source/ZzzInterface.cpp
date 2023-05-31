@@ -2939,7 +2939,7 @@ void ReloadArrow()
 					SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
 					if(pItem)
 					{
-						SendRequestEquipmentItem(INVENTORY, Index, pItem, INVENTORY, EQUIPMENT_WEAPON_RIGHT);	
+						SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_RIGHT);	
 					}
 					g_pMyInventory->DeleteItem(Index);
 					g_pChatListBox->AddText("", GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);	
@@ -2951,7 +2951,7 @@ void ReloadArrow()
 					SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
 					if(pItem)
 					{
-						SendRequestEquipmentItem(INVENTORY, Index, pItem, INVENTORY, EQUIPMENT_WEAPON_LEFT);	
+						SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_LEFT);	
 					}
 					g_pMyInventory->DeleteItem(Index);
 					g_pChatListBox->AddText("", GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);

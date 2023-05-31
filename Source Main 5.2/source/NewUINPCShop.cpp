@@ -43,7 +43,7 @@ bool SEASON3B::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_NPCSHOP, this);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if(false == m_pNewInventoryCtrl->Create(UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+50, 8, 15))
+	if(false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, x+15, y+50, 8, 15))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -361,7 +361,7 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 			return true;
 		}
 
-		if (pPickedItem->GetSourceStorageType() == INVENTORY)
+		if (pPickedItem->GetSourceStorageType() == STORAGE_TYPE::INVENTORY)
 		{
 			int iSourceIndex = pPickedItem->GetSourceLinealPos();
 			SendRequestSell(iSourceIndex);

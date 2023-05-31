@@ -73,7 +73,7 @@ STORAGE_TYPE CNewUIPickedItem::GetSourceStorageType() const
 	if (m_pSrcInventory)
 	{
 		const auto storageType = m_pSrcInventory->GetStorageType();
-		if (storageType != CHAOS_MIX)
+		if (storageType != STORAGE_TYPE::CHAOS_MIX)
 		{
 			return storageType;
 		}
@@ -83,10 +83,10 @@ STORAGE_TYPE CNewUIPickedItem::GetSourceStorageType() const
 
 	if (m_pPickedItem && m_pPickedItem->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
 	{
-		return INVENTORY;
+		return STORAGE_TYPE::INVENTORY;
 	}
 
-	return UNDEFINED;
+	return STORAGE_TYPE::UNDEFINED;
 }
 
 ITEM* SEASON3B::CNewUIPickedItem::GetItem() const
@@ -377,7 +377,7 @@ bool SEASON3B::CNewUIInventoryCtrl::Create(STORAGE_TYPE storageType, CNewUI3DRen
 
 	LoadImages();
 
-	if (m_StorageType == UNDEFINED)
+	if (m_StorageType == STORAGE_TYPE::UNDEFINED)
 	{
 		LockInventory();
 	}

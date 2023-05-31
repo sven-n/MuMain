@@ -34,16 +34,16 @@ bool CNewUITrade::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_TRADE, this);
 
 	m_pYourInvenCtrl = new CNewUIInventoryCtrl;
-	if (false == m_pYourInvenCtrl->Create(UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng,
-		this, x + 16, y + 68, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
+	if (false == m_pYourInvenCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng,
+	                                      this, x + 16, y + 68, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
 	{
 		SAFE_DELETE(m_pYourInvenCtrl);
 		return false;
 	}
 
 	m_pMyInvenCtrl = new CNewUIInventoryCtrl;
-	if (false == m_pMyInvenCtrl->Create(TRADE, g_pNewUI3DRenderMng, g_pNewItemMng,
-		this, x + 16, y + 274, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
+	if (false == m_pMyInvenCtrl->Create(STORAGE_TYPE::TRADE, g_pNewUI3DRenderMng, g_pNewItemMng,
+	                                    this, x + 16, y + 274, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
 	{
 		SAFE_DELETE(m_pMyInvenCtrl);
 		return false;
@@ -451,7 +451,7 @@ void CNewUITrade::ProcessMyInvenCtrl()
 			int nDstIndex = pPickedItem->GetTargetLinealPos(m_pMyInvenCtrl);
 			if (nDstIndex != -1 && m_pMyInvenCtrl->CanMove(nDstIndex, pItemObj))
 			{
-				SendRequestEquipmentItem(TRADE, nSrcIndex, pItemObj, TRADE, nDstIndex);
+				SendRequestEquipmentItem(STORAGE_TYPE::TRADE, nSrcIndex, pItemObj, STORAGE_TYPE::TRADE, nDstIndex);
 			}
 		}
 		else if (pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
@@ -477,14 +477,14 @@ void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
 		m_bMyConfirm = false;
 		SendRequestTradeResult(m_bMyConfirm);
 
-		SendRequestEquipmentItem(INVENTORY, nInvenIndex,
-			pItemObj, TRADE, nTradeIndex);
+		SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, nInvenIndex,
+		                         pItemObj, STORAGE_TYPE::TRADE, nTradeIndex);
 	}
 }
 
 void CNewUITrade::SendRequestItemToMyInven(ITEM* pItemObj, int nTradeIndex, int nInvenIndex)
 {
-	SendRequestEquipmentItem(TRADE, nTradeIndex, pItemObj, INVENTORY, nInvenIndex);
+	SendRequestEquipmentItem(STORAGE_TYPE::TRADE, nTradeIndex, pItemObj, STORAGE_TYPE::INVENTORY, nInvenIndex);
 
 	if (m_bMyConfirm)
 	{

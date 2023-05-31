@@ -2755,7 +2755,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
 		{
 			int iItemPrice = pMsgBox->GetItemValue();
 			SendRequestSetSalePrice(iSourceIndex, iItemPrice);
-			SendRequestEquipmentItem(INVENTORY, iSourceIndex, pItemObj,MYSHOP, iTargetIndex);
+			SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
 		}
 		else if(pPickedItem->GetOwnerInventory() == NULL)
 		{
@@ -2763,7 +2763,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
 			BYTE byIndex = iSourceIndex;
 			SendRequestSetSalePrice(byIndex, iItemPrice);
 
-			SendRequestEquipmentItem(INVENTORY, iSourceIndex, pItemObj,MYSHOP, iTargetIndex);
+			SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
 		}
 		else if(pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
 		{
@@ -2771,7 +2771,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
 			BYTE byIndex = MAX_MY_INVENTORY_EX_INDEX +iSourceIndex;
 			SendRequestSetSalePrice(byIndex, iItemPrice);
 
-			SendRequestEquipmentItem(MYSHOP, iSourceIndex, pItemObj,MYSHOP, iTargetIndex);
+			SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
 		}
 		
 		AddPersonalItemPrice(iTargetIndex, pMsgBox->GetItemValue(), g_IsPurchaseShop);

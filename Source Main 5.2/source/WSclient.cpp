@@ -5599,6 +5599,7 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 	LPPHEADER_DEFAULT_SUBCODE_ITEM Data = (LPPHEADER_DEFAULT_SUBCODE_ITEM)ReceiveBuffer;
 	if(Data->SubCode != 255)
 	{
+		const auto storageType = static_cast<STORAGE_TYPE>(Data->SubCode);
 		SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
 		int iSourceIndex = g_pMyShopInventory->GetSourceIndex();
 		if(pPickedItem)
@@ -5619,7 +5620,7 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 			}
 		}
 		
-		if(Data->SubCode == INVENTORY)
+		if(storageType == STORAGE_TYPE::INVENTORY)
 		{
 			SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 			
@@ -5646,11 +5647,11 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 				g_pMyShopInventory->InsertItem(itemindex, Data->Item);
 			}
 		}
-		else if (Data->SubCode == TRADE)
+		else if (storageType == STORAGE_TYPE::TRADE)
 		{
 			g_pTrade->ProcessToReceiveTradeItems(Data->Index, Data->Item);
 		}
-		else if (Data->SubCode == VAULT)
+		else if (storageType == STORAGE_TYPE::VAULT)
 		{
 			if (Data->Index < MAX_SHOP_INVENTORY)
 		{
@@ -5661,15 +5662,15 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 				g_pStorageInventoryExt->ProcessToReceiveStorageItems(Data->Index, Data->Item);
 			}
 		}
-		if(Data->SubCode == CHAOS_MIX
-			|| (Data->SubCode >= TRAINER_MIX && Data->SubCode <= DETACH_SOCKET_MIX))
+		if(storageType == STORAGE_TYPE::CHAOS_MIX
+			|| (storageType >= STORAGE_TYPE::TRAINER_MIX && storageType <= STORAGE_TYPE::DETACH_SOCKET_MIX))
 		{
 			SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 			if(Data->Index >= 0 && Data->Index < MAX_MIX_INVENTORY)
 				g_pMixInventory->InsertItem(Data->Index, Data->Item);
 		}
 #ifdef LEM_ADD_LUCKYITEM
-		else if ( 15 == Data->SubCode || 16 == Data->SubCode )
+		else if ( 15 == storageType || 16 == storageType)
 		{
 			g_pLuckyItemWnd->GetResult(1, Data->Index, Data->Item);
 		}

@@ -39,7 +39,7 @@ bool CNewUIStorageInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 	m_pNewUIMng->AddUIObj(INTERFACE_STORAGE, this);
 
 	m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-	if (false == m_pNewInventoryCtrl->Create(VAULT, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 36, 8, 15))
+	if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 36, 8, 15))
 	{
 		SAFE_DELETE(m_pNewInventoryCtrl);
 		return false;
@@ -332,8 +332,8 @@ void CNewUIStorageInventory::ProcessInventoryCtrl()
 			if (nDstIndex >= 0 && m_pNewInventoryCtrl->CanMove(nDstIndex, pItemObj))
 			{
 				const int nSrcIndex = pPickedItem->GetSourceLinealPos();
-				const int sourceStorageType = pPickedItem->GetSourceStorageType();
-				const int targetStorageType = m_pNewInventoryCtrl->GetStorageType();
+				const auto sourceStorageType = pPickedItem->GetSourceStorageType();
+				const auto targetStorageType = m_pNewInventoryCtrl->GetStorageType();
 				SendRequestEquipmentItem(sourceStorageType, nSrcIndex,
 					pItemObj, targetStorageType, nDstIndex);
 			}
@@ -416,8 +416,8 @@ void CNewUIStorageInventory::SendRequestItemToMyInven(ITEM* pItemObj, int nStora
 {
 	if (!IsStorageLocked() || IsCorrectPassword())
 	{
-		SendRequestEquipmentItem(VAULT, nStorageIndex,
-			pItemObj, INVENTORY, nInvenIndex);
+		SendRequestEquipmentItem(STORAGE_TYPE::VAULT, nStorageIndex,
+		                         pItemObj, STORAGE_TYPE::INVENTORY, nInvenIndex);
 	}
 	else
 	{
@@ -449,8 +449,8 @@ void CNewUIStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInven
 	}
 	else
 	{
-     	SendRequestEquipmentItem(INVENTORY, nInvenIndex,
-			pItemObj, VAULT, nStorageIndex);
+     	SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, nInvenIndex,
+                                 pItemObj, STORAGE_TYPE::VAULT, nStorageIndex);
 	}
 }
 
@@ -593,8 +593,8 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
 				}
 
 				SendRequestEquipmentItem(
-					VAULT, nStorageIndex,
-					pItemObj, INVENTORY, GetBackupInvenIndex());
+					STORAGE_TYPE::VAULT, nStorageIndex,
+					pItemObj, STORAGE_TYPE::INVENTORY, GetBackupInvenIndex());
 
 				InitBackupItemInfo();
 			}
