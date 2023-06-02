@@ -132,7 +132,7 @@ unicode::t_string CNewUITextBox::GetFullText()
 {
     unicode::t_string strTemp;
 
-    type_vector_textbase::iterator vi = m_vecText.begin();
+    auto vi = m_vecText.begin();
     for (; vi != m_vecText.end(); vi++)
     {
         strTemp += (*vi);

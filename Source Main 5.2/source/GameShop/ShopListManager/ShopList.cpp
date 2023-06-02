@@ -240,7 +240,7 @@ std::string CShopList::GetDecodeingString(const char* str, FILE_ENCODE encode) /
     if (encode == FE_UTF8)
     {
         int cchWideChar = MultiByteToWideChar(CP_UTF8, 0, str, -1, 0, 0);
-        LPWSTR lpWideCharStr = new WCHAR[cchWideChar + 1];
+        auto lpWideCharStr = new WCHAR[cchWideChar + 1];
         MultiByteToWideChar(CP_UTF8, 0, str, -1, lpWideCharStr, cchWideChar);
 
         cchWideChar = WideCharToMultiByte(0, 0, lpWideCharStr, -1, 0, 0, 0, 0);

@@ -213,7 +213,7 @@ namespace SEASON3B
 
         void DeleteMessageBox(const CNewUIMessageBoxBase* pObj)
         {
-            type_list_msgbox::iterator li =
+            auto li =
                 std::find(m_listMsgBoxes.begin(), m_listMsgBoxes.end(), pObj);
             if (li != m_listMsgBoxes.end())
             {
@@ -223,7 +223,7 @@ namespace SEASON3B
         }
         void DeleteAllMessageBoxes()
         {
-            type_list_msgbox::iterator li = m_listMsgBoxes.begin();
+            auto li = m_listMsgBoxes.begin();
             for (; li != m_listMsgBoxes.end(); li++)
                 delete (*li);	//. delete instance
             m_listMsgBoxes.clear();

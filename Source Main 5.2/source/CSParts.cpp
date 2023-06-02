@@ -89,7 +89,7 @@ void RenderParts(CHARACTER* c)
 
     if (c->m_pTempParts != NULL)
     {
-        CSIPartsMDL* pTempParts = (CSIPartsMDL*)c->m_pTempParts;
+        auto* pTempParts = (CSIPartsMDL*)c->m_pTempParts;
         pTempParts->IRender(c);
     }
 
@@ -98,7 +98,7 @@ void RenderParts(CHARACTER* c)
         return;
     }
 
-    CSIPartsMDL* pParts = (CSIPartsMDL*)c->m_pParts;
+    auto* pParts = (CSIPartsMDL*)c->m_pParts;
 
     pParts->IRender(c);
 }

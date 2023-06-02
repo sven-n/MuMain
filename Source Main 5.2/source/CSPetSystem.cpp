@@ -298,7 +298,7 @@ void CSPetDarkSpirit::MovePet(void)
     if (!g_DuelMgr.IsPetDuelEnabled())
     {
         m_byCommand = 0;
-        CSPetSystem* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
+        auto* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
         SendRequestPetCommand(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xffff);
         g_DuelMgr.EnablePetDuel(TRUE);
     }
@@ -310,7 +310,7 @@ void CSPetDarkSpirit::MovePet(void)
         if ((g_isCharacterBuff((&tc->Object), eBuff_Cloaking) || g_isCharacterBuff(Owner, eBuff_Cloaking))
             && (o->AI == PET_ATTACK || o->AI == PET_ESCAPE || o->AI == PET_ATTACK_MAGIC))
         {
-            CSPetSystem* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
+            auto* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
 
             float dx = o->Position[0] - Owner->Position[0];
             float dy = o->Position[1] - Owner->Position[1];
@@ -328,7 +328,7 @@ void CSPetDarkSpirit::MovePet(void)
     }
     else if ((g_isCharacterBuff(Owner, eBuff_Cloaking)) && (o->AI == PET_ATTACK || o->AI == PET_ESCAPE || o->AI == PET_ATTACK_MAGIC))
     {
-        CSPetSystem* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
+        auto* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
 
         float dx = o->Position[0] - Owner->Position[0];
         float dy = o->Position[1] - Owner->Position[1];

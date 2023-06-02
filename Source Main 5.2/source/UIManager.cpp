@@ -212,9 +212,9 @@ void CUIManager::GetInsertInterface(std::list<DWORD>& outflag, DWORD insertflag)
 
 void CUIManager::GetDeleteInterface(std::list<DWORD>& outflag, DWORD deleteflag)
 {
-    for (std::list<DWORD>::iterator iter = outflag.begin(); iter != outflag.end(); )
+    for (auto iter = outflag.begin(); iter != outflag.end(); )
     {
-        std::list<DWORD>::iterator Tempiter = iter;
+        auto Tempiter = iter;
         ++iter;
         DWORD Tempflag = *Tempiter;
 

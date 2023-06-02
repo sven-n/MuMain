@@ -156,7 +156,7 @@ void SEASON3B::CNewUIMyShopInventory::SetPos(int x, int y)
 
 void SEASON3B::CNewUIMyShopInventory::GetTitle(unicode::t_string& titletext)
 {
-    wchar_t* pwszTitle = new wchar_t[iMAX_SHOPTITLE_MULTI];
+    auto* pwszTitle = new wchar_t[iMAX_SHOPTITLE_MULTI];
     m_EditBox->GetText(pwszTitle, iMAX_SHOPTITLE_MULTI);
     g_pMultiLanguage->ConvertWideCharToStr(titletext, pwszTitle, CP_UTF8);
     delete[] pwszTitle;

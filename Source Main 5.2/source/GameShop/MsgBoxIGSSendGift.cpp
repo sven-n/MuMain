@@ -147,7 +147,7 @@ void CMsgBoxIGSSendGift::SetAddCallbackFunc()
 
 CALLBACK_RESULT CMsgBoxIGSSendGift::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CMsgBoxIGSSendGift* pOwnMsgBox = dynamic_cast<CMsgBoxIGSSendGift*>(pOwner);
+    auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSSendGift*>(pOwner);
 
     if (pOwnMsgBox)
     {
@@ -168,7 +168,7 @@ CALLBACK_RESULT CMsgBoxIGSSendGift::LButtonUp(class CNewUIMessageBoxBase* pOwner
 
 CALLBACK_RESULT CMsgBoxIGSSendGift::OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CMsgBoxIGSSendGift* pOwnMsgBox = dynamic_cast<CMsgBoxIGSSendGift*>(pOwner);
+    auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSSendGift*>(pOwner);
 
     if (pOwnMsgBox->m_szID[0] == '\0')
     {

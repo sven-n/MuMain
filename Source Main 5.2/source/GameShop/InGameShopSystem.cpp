@@ -439,7 +439,7 @@ type_listName CInGameShopSystem::GetCategoryName()
 
 WORD CInGameShopSystem::GetPackageItemCode(int iIndex)
 {
-    type_listPackage::iterator iterPackage = m_listDisplayPackage.begin();
+    auto iterPackage = m_listDisplayPackage.begin();
 
     for (int i = 0; i < (int)m_listDisplayPackage.size(); i++)
     {
@@ -507,7 +507,7 @@ double CInGameShopSystem::GetCashPrepaid()
 
 CShopPackage* CInGameShopSystem::GetDisplayPackage(int iIndex)
 {
-    type_listPackage::iterator iterPackage = m_listDisplayPackage.begin();
+    auto iterPackage = m_listDisplayPackage.begin();
 
     for (int i = 0; i < (int)m_listDisplayPackage.size(); i++)
     {
@@ -828,7 +828,7 @@ int CInGameShopSystem::GetZoneSeqIndexByIndex(int iIndex)
     if (GetSizeZones() <= 0)
         return INGAMESHOP_ERROR_ZERO_SIZE;
 
-    type_mapZoneSeq::iterator iterZoneSeqIndex = m_mapZoneSeqIndex.find(iIndex);
+    auto iterZoneSeqIndex = m_mapZoneSeqIndex.find(iIndex);
 
     if (iterZoneSeqIndex == m_mapZoneSeqIndex.end())
         return INGAMESHOP_ERROR_INVALID_INDEX;

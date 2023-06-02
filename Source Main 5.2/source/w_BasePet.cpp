@@ -192,13 +192,13 @@ bool PetObject::UpdateMove(DWORD tick, bool bForceRender)
     {
         m_oldMoveType = m_moveType;
 
-        SpeedMap::iterator iter2 = m_speedMap.find(m_moveType);
+        auto iter2 = m_speedMap.find(m_moveType);
         if (iter2 == m_speedMap.end()) return FALSE;
 
         m_obj->Velocity = (*iter2).second;
     }
 
-    ActionMap::iterator iter = m_actionMap.find(m_moveType);
+    auto iter = m_actionMap.find(m_moveType);
     if (iter == m_actionMap.end())
     {
         m_moveType = eAction_Stand;
@@ -219,7 +219,7 @@ bool PetObject::UpdateMove(DWORD tick, bool bForceRender)
 
 bool PetObject::UpdateModel(DWORD tick, bool bForceRender)
 {
-    ActionMap::iterator iter = m_actionMap.find(m_moveType);
+    auto iter = m_actionMap.find(m_moveType);
     if (iter == m_actionMap.end()) return FALSE;
 
     BoostWeak_Ptr(PetAction) petAction = (*iter).second;
@@ -238,7 +238,7 @@ bool PetObject::UpdateModel(DWORD tick, bool bForceRender)
 
 bool PetObject::UpdateSound(DWORD tick, bool bForceRender)
 {
-    ActionMap::iterator iter = m_actionMap.find(m_moveType);
+    auto iter = m_actionMap.find(m_moveType);
     if (iter == m_actionMap.end()) return FALSE;
 
     BoostWeak_Ptr(PetAction) petAction = (*iter).second;
@@ -253,7 +253,7 @@ bool PetObject::UpdateSound(DWORD tick, bool bForceRender)
 
 bool PetObject::CreateEffect(DWORD tick, bool bForceRender)
 {
-    ActionMap::iterator iter = m_actionMap.find(m_moveType);
+    auto iter = m_actionMap.find(m_moveType);
     if (iter == m_actionMap.end()) return FALSE;
 
     BoostWeak_Ptr(PetAction) petAction = (*iter).second;

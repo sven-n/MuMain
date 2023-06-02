@@ -83,7 +83,7 @@ bool Buff::isBuff(eBuffState buffstate)
 {
     if (!isBuff()) return false;
 
-    BuffStateMap::iterator iter = m_Buff.find(buffstate);
+    auto iter = m_Buff.find(buffstate);
 
     if (iter != m_Buff.end())
     {
@@ -97,10 +97,10 @@ const eBuffState Buff::isBuff(std::list<eBuffState> buffstatelist)
 {
     if (!isBuff()) return eBuffNone;
 
-    for (std::list<eBuffState>::iterator iter = buffstatelist.begin();
-        iter != buffstatelist.end(); )
+    for (auto iter = buffstatelist.begin();
+         iter != buffstatelist.end(); )
     {
-        std::list<eBuffState>::iterator Tempiter = iter;
+        auto Tempiter = iter;
         ++iter;
         eBuffState tempbufftype = (*Tempiter);
 
@@ -124,7 +124,7 @@ const DWORD Buff::GetBuffCount(eBuffState buffstate)
 
     if (!isBuff()) return tempcount;
 
-    BuffStateMap::iterator iter = m_Buff.find(buffstate);
+    auto iter = m_Buff.find(buffstate);
 
     if (iter != m_Buff.end())
     {
@@ -146,9 +146,9 @@ const eBuffState Buff::GetBuff(int iterindex)
 
     int i = 0;
 
-    for (BuffStateMap::iterator iter = m_Buff.begin(); iter != m_Buff.end(); )
+    for (auto iter = m_Buff.begin(); iter != m_Buff.end(); )
     {
-        BuffStateMap::iterator tempiter = iter;
+        auto tempiter = iter;
         ++iter;
 
         if (i == iterindex)
@@ -164,7 +164,7 @@ const eBuffState Buff::GetBuff(int iterindex)
 
 bool Buff::IsEqualBuffType(IN int iBuffType, OUT unicode::t_char* szBuffName)
 {
-    BuffStateMap::iterator iter = m_Buff.begin();
+    auto iter = m_Buff.begin();
     BuffInfo buffinfo;
 
     while (iter != m_Buff.end())
@@ -184,7 +184,7 @@ bool Buff::IsEqualBuffType(IN int iBuffType, OUT unicode::t_char* szBuffName)
 
 void Buff::RegisterBuff(eBuffState buffstate)
 {
-    BuffStateMap::iterator iter = m_Buff.find(buffstate);
+    auto iter = m_Buff.find(buffstate);
 
     if (iter == m_Buff.end())
     {
@@ -194,9 +194,9 @@ void Buff::RegisterBuff(eBuffState buffstate)
 
 void Buff::RegisterBuff(std::list<eBuffState> buffstate)
 {
-    for (std::list<eBuffState>::iterator iter = buffstate.begin(); iter != buffstate.end(); )
+    for (auto iter = buffstate.begin(); iter != buffstate.end(); )
     {
-        std::list<eBuffState>::iterator tempiter = iter;
+        auto tempiter = iter;
         ++iter;
         eBuffState& tempdata = (*tempiter);
 
@@ -211,7 +211,7 @@ void Buff::UnRegisterBuff(eBuffState buffstate)
         return;
     }
 
-    BuffStateMap::iterator iter = m_Buff.find(buffstate);
+    auto iter = m_Buff.find(buffstate);
 
     if (iter != m_Buff.end())
     {
@@ -228,9 +228,9 @@ void Buff::UnRegisterBuff(eBuffState buffstate)
 
 void Buff::UnRegisterBuff(std::list<eBuffState> buffstate)
 {
-    for (std::list<eBuffState>::iterator iter = buffstate.begin(); iter != buffstate.end(); )
+    for (auto iter = buffstate.begin(); iter != buffstate.end(); )
     {
-        std::list<eBuffState>::iterator tempiter = iter;
+        auto tempiter = iter;
         ++iter;
         eBuffState& tempdata = (*tempiter);
 

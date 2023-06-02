@@ -178,7 +178,7 @@ bool SEASON3B::CNewUIChatInputBox::HaveFocus()
 
 void SEASON3B::CNewUIChatInputBox::AddChatHistory(const type_string& strText)
 {
-    type_vec_history::iterator vi = std::find(m_vecChatHistory.begin(), m_vecChatHistory.end(), strText);
+    auto vi = std::find(m_vecChatHistory.begin(), m_vecChatHistory.end(), strText);
     if (vi != m_vecChatHistory.end())
         m_vecChatHistory.erase(vi);
     else if (m_vecChatHistory.size() > 12)
@@ -199,7 +199,7 @@ void SEASON3B::CNewUIChatInputBox::RemoveAllChatHIstory()
 
 void SEASON3B::CNewUIChatInputBox::AddWhsprIDHistory(const type_string& strWhsprID)
 {
-    type_vec_history::iterator vi = std::find(m_vecWhsprIDHistory.begin(), m_vecWhsprIDHistory.end(), strWhsprID);
+    auto vi = std::find(m_vecWhsprIDHistory.begin(), m_vecWhsprIDHistory.end(), strWhsprID);
     if (vi != m_vecWhsprIDHistory.end())
         m_vecWhsprIDHistory.erase(vi);
     else if (m_vecWhsprIDHistory.size() > 5)
@@ -483,7 +483,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
         m_lastChatTime = currentTickCount;
         char	szChatText[MAX_CHAT_SIZE + 1] = { '\0' };
         char	szWhisperID[MAX_ID_SIZE + 1] = { '\0' };
-        wchar_t* szReceivedChat = new wchar_t[MAX_CHAT_SIZE_UTF16];
+        auto* szReceivedChat = new wchar_t[MAX_CHAT_SIZE_UTF16];
 
         m_pChatInputBox->GetText(szReceivedChat, MAX_CHAT_SIZE_UTF16);
         m_pWhsprIDInputBox->GetText(szWhisperID, MAX_ID_SIZE + 1);

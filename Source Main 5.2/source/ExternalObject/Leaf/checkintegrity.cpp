@@ -112,7 +112,7 @@ bool CCheckSumGenerator::AddSegmentFromBuffer(const std::string& dataname, const
 {
     if (!GetSegmentInfo(dataname))
     {
-        SEGMENTINFO* pSegmentInfo = new SEGMENTINFO;
+        auto* pSegmentInfo = new SEGMENTINFO;
         if (GenerateCheckSumTable(pBuffer, size, &pSegmentInfo->cs_table))
         {
             pSegmentInfo->name = dataname;
@@ -127,7 +127,7 @@ bool CCheckSumGenerator::AddSegmentFromFile(const std::string& filename)
 {
     if (!GetSegmentInfo(filename))
     {
-        SEGMENTINFO* pSegmentInfo = new SEGMENTINFO;
+        auto* pSegmentInfo = new SEGMENTINFO;
         if (GenerateCheckSumTable(filename, &pSegmentInfo->cs_table))
         {
             pSegmentInfo->name = filename;
@@ -140,7 +140,7 @@ bool CCheckSumGenerator::AddSegmentFromFile(const std::string& filename)
 }
 bool CCheckSumGenerator::RemoveSegment(const std::string& name)
 {
-    std::vector<SEGMENTINFO*>::iterator vi = m_listSegment.begin();
+    auto vi = m_listSegment.begin();
     for (; vi != m_listSegment.end(); vi++)
     {
         if ((*vi)->name == name)
@@ -156,7 +156,7 @@ bool CCheckSumGenerator::RemoveSegment(int index)
 {
     if (index >= 0 && index < (int)m_listSegment.size())
     {
-        std::vector<SEGMENTINFO*>::iterator where = m_listSegment.begin() + index;
+        auto where = m_listSegment.begin() + index;
         delete (*where);
         m_listSegment.erase(where);
         return true;
@@ -165,7 +165,7 @@ bool CCheckSumGenerator::RemoveSegment(int index)
 }
 void CCheckSumGenerator::RemoveAllSegment()
 {
-    std::vector<SEGMENTINFO*>::iterator vi = m_listSegment.begin();
+    auto vi = m_listSegment.begin();
     for (; vi != m_listSegment.end(); vi++)
         delete (*vi);
     m_listSegment.clear();
@@ -196,7 +196,7 @@ const CCheckSumGenerator::SEGMENTINFO* CCheckSumGenerator::GetSegmentInfo(int in
 bool CCheckSumGenerator::Generate(OUT LPCHECKSUMTABLE lpCheckSumTable)
 {
     leaf::xstreambuf xBuffer;
-    std::vector<SEGMENTINFO*>::iterator vi = m_listSegment.begin();
+    auto vi = m_listSegment.begin();
     for (; vi != m_listSegment.end(); vi++)
         xBuffer.write((*vi)->cs_table.pdwTable, (*vi)->cs_table.TABLE_SIZE);
     return GenerateCheckSumTable(xBuffer.data(), xBuffer.size(), lpCheckSumTable);
@@ -204,7 +204,7 @@ bool CCheckSumGenerator::Generate(OUT LPCHECKSUMTABLE lpCheckSumTable)
 bool CCheckSumGenerator::Generate(const std::string& out_filename)
 {
     leaf::xstreambuf xBuffer;
-    std::vector<SEGMENTINFO*>::iterator vi = m_listSegment.begin();
+    auto vi = m_listSegment.begin();
     for (; vi != m_listSegment.end(); vi++)
         xBuffer.write((*vi)->cs_table.pdwTable, (*vi)->cs_table.TABLE_SIZE);
     return GenerateCheckSumFile(xBuffer.data(), xBuffer.size(), out_filename);
@@ -422,7 +422,7 @@ bool CCyclicRedundancyCheck32::GenerateCrc32Code(const std::string& filename, DW
                     LODWORD(qwFileOffset),
                     dwViewSize);
 
-                LPBYTE pbyBase = (LPBYTE)dwBaseAddress;
+                auto pbyBase = (LPBYTE)dwBaseAddress;
                 GenerateCrc32SeedAssembly(pbyBase, dwViewSize, dwCrc32);
                 UnmapViewOfFile((LPVOID)dwBaseAddress);
 

@@ -231,7 +231,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
     {
         vec3_t Position, Light;
 
-        float Rotation = (float)(rand() % 360);
+        auto Rotation = (float)(rand() % 360);
         float Luminosity = sinf(WorldTime * 0.0012f) * 0.8f + 1.3f;
 
         float fScalePercent = 1.f;

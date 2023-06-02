@@ -26,7 +26,7 @@ CServerListManager* CServerListManager::GetInstance()
 
 void CServerListManager::Release()
 {
-    type_mapServerGroup::iterator iterServerGroup = m_mapServerGroup.begin();
+    auto iterServerGroup = m_mapServerGroup.begin();
     for (; iterServerGroup != m_mapServerGroup.end(); iterServerGroup++)
     {
         delete iterServerGroup->second;
@@ -107,7 +107,7 @@ void CServerListManager::InsertServerGroup(int iConnectIndex, int iServerPercent
 {
     CServerGroup* pServerGroup = NULL;
 
-    type_mapServerGroup::iterator iterServerGroup = m_mapServerGroup.begin();
+    auto iterServerGroup = m_mapServerGroup.begin();
 
     bool bEqual = false;
     while (iterServerGroup != m_mapServerGroup.end())
@@ -167,7 +167,7 @@ bool CServerListManager::MakeServerGroup(IN int iServerGroupIndex, OUT CServerGr
 
 void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIndex, int iServerPercent)
 {
-    CServerInfo* pServerInfo = new CServerInfo;
+    auto* pServerInfo = new CServerInfo;
     pServerInfo->m_iSequence = pServerGroup->GetServerSize();
     pServerInfo->m_iIndex = (iConnectIndex % 20) + 1;
     pServerInfo->m_iConnectIndex = iConnectIndex;
@@ -242,7 +242,7 @@ bool CServerListManager::GetNext(OUT CServerGroup*& pServerGroup)
 
 CServerGroup* CServerListManager::GetServerGroupByBtnPos(int iBtnPos)
 {
-    type_mapServerGroup::iterator iterServerGroup = m_mapServerGroup.begin();
+    auto iterServerGroup = m_mapServerGroup.begin();
 
     while (iterServerGroup != m_mapServerGroup.end())
     {

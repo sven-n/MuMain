@@ -2249,7 +2249,7 @@ int ItemValue(ITEM* ip, int goldType)
                 //int repairGold = ConvertRepairGold(Gold,ip->Durability, p->Durability, ip->Type, Text);
         DWORD maxDurability = calcMaxDurability(ip, p, Level);
         float persent = 1.f - ((float)ip->Durability / (float)maxDurability);
-        DWORD repairGold = (DWORD)(Gold * 0.6f * persent);
+        auto repairGold = (DWORD)(Gold * 0.6f * persent);
 
         if (ip->Type == ITEM_HELPER + 31)
             repairGold = 0;

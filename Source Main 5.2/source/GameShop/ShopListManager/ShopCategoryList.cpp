@@ -43,7 +43,7 @@ void CShopCategoryList::Append(CShopCategory category) // OK
 
     if (category.Root != 1)
     {
-        std::map<int, CShopCategory>::iterator it = this->m_Categroys.find(category.ParentProductDisplaySeq);
+        auto it = this->m_Categroys.find(category.ParentProductDisplaySeq);
 
         if (it == this->m_Categroys.end())
         {
@@ -71,7 +71,7 @@ bool CShopCategoryList::GetNext(CShopCategory& category) // OK
 
 bool CShopCategoryList::GetValueByKey(int nKey, CShopCategory& category) // OK
 {
-    std::map<int, CShopCategory>::iterator it = this->m_Categroys.find(nKey);
+    auto it = this->m_Categroys.find(nKey);
 
     if (it == this->m_Categroys.end())
     {
@@ -94,7 +94,7 @@ bool CShopCategoryList::GetValueByIndex(int nIndex, CShopCategory& category) // 
 
 bool CShopCategoryList::InsertPackage(int Category, int Package) // OK
 {
-    std::map<int, CShopCategory>::iterator it = this->m_Categroys.find(Category);
+    auto it = this->m_Categroys.find(Category);
 
     if (it == this->m_Categroys.end())
     {
@@ -107,7 +107,7 @@ bool CShopCategoryList::InsertPackage(int Category, int Package) // OK
 
 bool CShopCategoryList::RefreshPackageSeq(int Category, int PackageSeqs[], int PackageCount) // OK
 {
-    std::map<int, CShopCategory>::iterator it = this->m_Categroys.find(Category);
+    auto it = this->m_Categroys.find(Category);
 
     if (it == this->m_Categroys.end())
     {

@@ -251,7 +251,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::string& src)
             if (lpszStr2 == NULL) return false;
 
             SettingCanMoveMap();
-            std::list<CMoveCommandData::MOVEINFODATA*>::iterator li = m_listMoveInfoData.begin();
+            auto li = m_listMoveInfoData.begin();
             for (int i = 0; i < m_iRenderEndTextIndex; i++, li++) {
                 if (!strcmp(lpszStr2, (*li)->_ReqInfo.szMainMapName)) {
                     if ((*li)->_bCanMove == true) {
@@ -269,7 +269,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::string& src)
             if (lpszStr2 == NULL) return false;
 
             SettingCanMoveMap();
-            std::list<CMoveCommandData::MOVEINFODATA*>::iterator li = m_listMoveInfoData.begin();
+            auto li = m_listMoveInfoData.begin();
             for (int i = 0; i < m_iRenderEndTextIndex; i++, li++) {
                 if (!stricmp(lpszStr2, (*li)->_ReqInfo.szMainMapName)) {
                     if ((*li)->_bCanMove == true) {
@@ -333,7 +333,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
     DWORD iZen;
     int iLevel, iReqLevel, iReqZen;
 
-    std::list<CMoveCommandData::MOVEINFODATA*>::iterator li = m_listMoveInfoData.begin();
+    auto li = m_listMoveInfoData.begin();
     for (int i = 0; i < m_iRenderEndTextIndex; i++, li++)
     {
         if (li == m_listMoveInfoData.end())
@@ -499,7 +499,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
         }
         MouseWheel = 0;
 
-        std::list<CMoveCommandData::MOVEINFODATA*>::iterator li = m_listMoveInfoData.begin();
+        auto li = m_listMoveInfoData.begin();
         int iCurRenderTextIndex = 0;
         for (int i = 0; i < m_iRenderEndTextIndex; i++, li++)
         {
@@ -791,7 +791,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 
     RenderFrame();
 
-    std::list<CMoveCommandData::MOVEINFODATA*>::iterator li = m_listMoveInfoData.begin();
+    auto li = m_listMoveInfoData.begin();
     int iX, iY;
 
     int iLevel = CharacterAttribute->Level;

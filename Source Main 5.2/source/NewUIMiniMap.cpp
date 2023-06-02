@@ -137,8 +137,8 @@ bool SEASON3B::CNewUIMiniMap::Render()
     EnableAlphaTest();
     glColor4f(1.f, 1.f, 1.f, 1.f);
 
-    float Ty = (float)(((float)Hero->PositionX / 256.f) * m_Lenth[m_MiniPos].y);
-    float Tx = (float)(((float)Hero->PositionY / 256.f) * m_Lenth[m_MiniPos].x);
+    auto Ty = (float)(((float)Hero->PositionX / 256.f) * m_Lenth[m_MiniPos].y);
+    auto Tx = (float)(((float)Hero->PositionY / 256.f) * m_Lenth[m_MiniPos].x);
     float Ty1;
     float Tx1;
     float uvxy = (41.7f / 64.f);

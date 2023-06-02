@@ -6,7 +6,7 @@
 
 bool CheckSpecialText(char* Text)
 {
-    for (unsigned char* lpszCheck = (unsigned char*)Text; *lpszCheck; ++lpszCheck)
+    for (auto* lpszCheck = (unsigned char*)Text; *lpszCheck; ++lpszCheck)
     {
         if (1 == _mbclen(lpszCheck))
         {

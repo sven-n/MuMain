@@ -228,7 +228,7 @@ void CSocketItemMgr::CreateSocketOptionText(char* pszOptionText, int iSeedID, in
 
     SOCKET_OPTION_INFO* pInfo = &m_SocketOptionInfo[SOT_SOCKET_ITEM_OPTIONS][iSeedID];
 
-    float fOptionValue = (float)pInfo->m_iOptionValue[iSphereLv - 1];
+    auto fOptionValue = (float)pInfo->m_iOptionValue[iSphereLv - 1];
 
     CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, fOptionValue);
 
@@ -382,7 +382,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
 
         char szOptionValueText[16] = { 0, };
 
-        float fOptionValue = (float)pInfo->m_iOptionValue[(pItem->Type - (ITEM_WING + 100)) / 6];
+        auto fOptionValue = (float)pInfo->m_iOptionValue[(pItem->Type - (ITEM_WING + 100)) / 6];
         CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, fOptionValue);
 
         sprintf(TextList[iTextNum], "%s %s", pInfo->m_szOptionName, szOptionValueText);
@@ -483,7 +483,7 @@ int CSocketItemMgr::GetSocketOptionValue(const ITEM* pItem, int iSocketIndex)
     {
         SOCKET_OPTION_INFO* pInfo = NULL;
         pInfo = &m_SocketOptionInfo[SOT_SOCKET_ITEM_OPTIONS][pItem->SocketSeedID[iSocketIndex]];
-        float fOptionValue = (float)pInfo->m_iOptionValue[pItem->SocketSphereLv[iSocketIndex] - 1];
+        auto fOptionValue = (float)pInfo->m_iOptionValue[pItem->SocketSphereLv[iSocketIndex] - 1];
         return CalcSocketOptionValue(pInfo->m_bOptionType, fOptionValue);
     }
     else
@@ -511,7 +511,7 @@ void CSocketItemMgr::CalcSocketStatusBonus()
             if (pItem->SocketSeedID[j] != SOCKET_EMPTY)
             {
                 pInfo = &m_SocketOptionInfo[SOT_SOCKET_ITEM_OPTIONS][pItem->SocketSeedID[j]];
-                float fOptionValue = (float)pInfo->m_iOptionValue[pItem->SocketSphereLv[j] - 1];
+                auto fOptionValue = (float)pInfo->m_iOptionValue[pItem->SocketSphereLv[j] - 1];
                 int iBonus = CalcSocketOptionValue(pInfo->m_bOptionType, fOptionValue);
 
                 switch (pInfo->m_iOptionID)

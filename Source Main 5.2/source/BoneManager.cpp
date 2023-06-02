@@ -56,7 +56,7 @@ void CBoneManager::RegisterBone(CHARACTER* pCharacter, const std::string& name, 
             if (FindBone(&pCharacter->Object, name) != NULL)
                 UnregisterBone(pCharacter, name);
 
-            LPBONEINFO _lpBoneInfo = new BONEINFO;
+            auto _lpBoneInfo = new BONEINFO;
             _lpBoneInfo->name = name;
             _lpBoneInfo->pCharacter = pCharacter;
             _lpBoneInfo->pModel = pModel;
@@ -78,7 +78,7 @@ void CBoneManager::UnregisterBone(CHARACTER* pCharacter, const std::string& name
 }
 void CBoneManager::UnregisterBone(CHARACTER* pCharacter)
 {
-    t_bone_list::iterator iter = m_listBone.begin();
+    auto iter = m_listBone.begin();
     for (; iter != m_listBone.end(); ) {
         LPBONEINFO _lpBoneInfo = (*iter);
         if (_lpBoneInfo->pCharacter == pCharacter) {
@@ -91,7 +91,7 @@ void CBoneManager::UnregisterBone(CHARACTER* pCharacter)
 }
 void CBoneManager::UnregisterAll()
 {
-    t_bone_list::iterator iter = m_listBone.begin();
+    auto iter = m_listBone.begin();
     for (; iter != m_listBone.end(); iter++)
         delete (*iter);
     m_listBone.clear();
@@ -145,7 +145,7 @@ CBoneManager* CBoneManager::GetInstance()
 
 CBoneManager::LPBONEINFO CBoneManager::FindBone(OBJECT* pObject, const std::string& name)
 {
-    t_bone_list::iterator iter = m_listBone.begin();
+    auto iter = m_listBone.begin();
     for (; iter != m_listBone.end(); iter++)
     {
         LPBONEINFO _lpBoneInfo = (*iter);

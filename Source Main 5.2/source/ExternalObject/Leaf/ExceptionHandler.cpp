@@ -252,7 +252,7 @@ void CExceptionHandler::SetProcessInfoHeader(DMPPROCESSINFOHEADER* pProcessInfoH
             ModuleEntry.dwSize = sizeof(MODULEENTRY32);
             if (Module32First(hModuleSnap, &ModuleEntry)) {
                 do {
-                    DMPMODULEINFO* pModuleInfo = (DMPMODULEINFO*)((*ppModuleInfo) + NumOfModules);
+                    auto* pModuleInfo = (DMPMODULEINFO*)((*ppModuleInfo) + NumOfModules);
                     lstrcpyn(pModuleInfo->szModuleBaseName, ModuleEntry.szModule, 128);
                     lstrcpyn(pModuleInfo->szModulePath, ModuleEntry.szExePath, 256);
                     pModuleInfo->lpBaseAddr = ModuleEntry.modBaseAddr;
@@ -402,14 +402,14 @@ bool CDmpFileLoader::Create(const std::string& dmpfile)
 
     for (int i = 0; i < (int)pProcessInfoHeader->NumOfModules; i++)
     {
-        DMPMODULEINFO* pModuleInfo = new DMPMODULEINFO;
+        auto* pModuleInfo = new DMPMODULEINFO;
         fread(pModuleInfo, sizeof(DMPMODULEINFO), 1, fd);
         m_listModule.push_back(pModuleInfo);
     }
 
     for (int j = 0; j < (int)m_DmpFileHeader.CallStackDepth; j++)
     {
-        DMPCALLSTACKFRAME* pCallstackFrame = new DMPCALLSTACKFRAME;
+        auto* pCallstackFrame = new DMPCALLSTACKFRAME;
         fread(pCallstackFrame, sizeof(DMPCALLSTACKFRAME), 1, fd);
         m_listStackFrame.push_back(pCallstackFrame);
     }
@@ -420,13 +420,13 @@ bool CDmpFileLoader::Create(const std::string& dmpfile)
 }
 void CDmpFileLoader::Release() {
     if (!m_listModule.empty()) {	//. Release module list
-        t_modulevect::iterator mviter = m_listModule.begin();
+        auto mviter = m_listModule.begin();
         for (; mviter != m_listModule.end(); mviter++)
             delete (*mviter);
         m_listModule.clear();
     }
     if (!m_listStackFrame.empty()) {	//. Release callstack frame list
-        t_framevect::iterator fviter = m_listStackFrame.begin();
+        auto fviter = m_listStackFrame.begin();
         for (; fviter != m_listStackFrame.end(); fviter++)
             delete (*fviter);
         m_listStackFrame.clear();

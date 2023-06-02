@@ -20,7 +20,7 @@ SEASON3B::CNewUIManager::~CNewUIManager()
 
 void SEASON3B::CNewUIManager::AddUIObj(DWORD dwKey, CNewUIObj* pUIObj)
 {
-    type_map_uibase::iterator mi = m_mapUI.find(dwKey);
+    auto mi = m_mapUI.find(dwKey);
     if (mi == m_mapUI.end())
     {
         m_vecUI.push_back(pUIObj);
@@ -30,10 +30,10 @@ void SEASON3B::CNewUIManager::AddUIObj(DWORD dwKey, CNewUIObj* pUIObj)
 
 void SEASON3B::CNewUIManager::RemoveUIObj(DWORD dwKey)
 {
-    type_map_uibase::iterator mi = m_mapUI.find(dwKey);
+    auto mi = m_mapUI.find(dwKey);
     if (mi != m_mapUI.end())
     {
-        type_vector_uibase::iterator vi = std::find(m_vecUI.begin(), m_vecUI.end(), (*mi).second);
+        auto vi = std::find(m_vecUI.begin(), m_vecUI.end(), (*mi).second);
         if (vi != m_vecUI.end())
         {
             m_vecUI.erase(vi);
@@ -44,7 +44,7 @@ void SEASON3B::CNewUIManager::RemoveUIObj(DWORD dwKey)
 
 void SEASON3B::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
 {
-    type_map_uibase::iterator mi = m_mapUI.begin();
+    auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
     {
         if ((*mi).second == pUIObj)
@@ -54,7 +54,7 @@ void SEASON3B::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
         }
     }
 
-    type_vector_uibase::iterator vi = std::find(m_vecUI.begin(), m_vecUI.end(), pUIObj);
+    auto vi = std::find(m_vecUI.begin(), m_vecUI.end(), pUIObj);
     if (vi != m_vecUI.end())
     {
         m_vecUI.erase(vi);
@@ -97,7 +97,7 @@ void SEASON3B::CNewUIManager::RemoveAllUIObjs()
 
 CNewUIObj* SEASON3B::CNewUIManager::FindUIObj(DWORD dwKey)
 {
-    type_map_uibase::iterator mi = m_mapUI.find(dwKey);
+    auto mi = m_mapUI.find(dwKey);
     if (mi != m_mapUI.end())
         return (*mi).second;
     return NULL;
@@ -109,7 +109,7 @@ bool SEASON3B::CNewUIManager::UpdateMouseEvent()
 
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepthReverse);
 
-    type_vector_uibase::iterator vi = m_vecUI.begin();
+    auto vi = m_vecUI.begin();
     vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
     {
@@ -118,7 +118,7 @@ bool SEASON3B::CNewUIManager::UpdateMouseEvent()
             CNewUIObj* obj_backup = (*vi);
             bool bResult = (*vi)->UpdateMouseEvent();
 
-            type_vector_uibase::iterator vi2 = std::find(m_vecUI.begin(), m_vecUI.end(), obj_backup);
+            auto vi2 = std::find(m_vecUI.begin(), m_vecUI.end(), obj_backup);
             if (vi2 != m_vecUI.end())
             {
                 vi = vi2;
@@ -144,7 +144,7 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
     m_pActiveKeyUIObj = NULL;
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareKeyEventOrder);
 
-    type_vector_uibase::iterator vi = m_vecUI.begin();
+    auto vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
     {
         HWND hRelatedWnd = (*vi)->GetRelatedWnd();
@@ -171,7 +171,7 @@ bool SEASON3B::CNewUIManager::Update()
 {
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
 
-    type_vector_uibase::iterator vi = m_vecUI.begin();
+    auto vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
     {
         if ((*vi)->IsEnabled())
@@ -190,7 +190,7 @@ bool SEASON3B::CNewUIManager::Render()
 {
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
 
-    type_vector_uibase::iterator vi = m_vecUI.begin();
+    auto vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
     {
         if ((*vi)->IsVisible())
@@ -252,14 +252,14 @@ void SEASON3B::CNewUIManager::EnableInterface(DWORD dwKey, bool bEnable/* = true
 
 void SEASON3B::CNewUIManager::ShowAllInterfaces(bool bShow/* = true*/)
 {
-    type_map_uibase::iterator mi = m_mapUI.begin();
+    auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bShow);
 }
 
 void SEASON3B::CNewUIManager::EnableAllInterfaces(bool bEnable/* = true*/)
 {
-    type_map_uibase::iterator mi = m_mapUI.begin();
+    auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bEnable);
 }

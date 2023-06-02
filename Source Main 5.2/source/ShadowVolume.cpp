@@ -81,8 +81,8 @@ void RenderShadowToScreen(void)
 
     //RenderTerrainAlphaBitmap(BITMAP_HIDE, Hero->Object.Position[0],Hero->Object.Position[1],20.f,20.f,vLight,0.f,fAlpha);
     float p[4][2];
-    float Width = (float)WindowWidth;
-    float Height = (float)WindowHeight;
+    auto Width = (float)WindowWidth;
+    auto Height = (float)WindowHeight;
     p[0][0] = 0.f; p[0][1] = 0.f;
     p[1][0] = 0.f; p[1][1] = Height;
     p[2][0] = 0.f + Width; p[2][1] = Height;

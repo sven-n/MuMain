@@ -106,7 +106,7 @@ bool CursedTemple::GetInterfaceState(int type, int subtype)
 
     if (type == INTERFACE_COMMAND)
     {
-        COMMAND_TYPE tempSubtype = (COMMAND_TYPE)(subtype);
+        auto tempSubtype = (COMMAND_TYPE)(subtype);
 
         if (subtype == COMMAND_PARTY)
         {
@@ -1190,7 +1190,7 @@ void CursedTemple::ReceiveCursedTempleState(const eCursedTempleState state)
 
 void CursedTemple::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
 {
-    LPPMSG_CURSED_TAMPLE_STATE data = (LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
+    auto data = (LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
 
     if (m_AlliedPoint != data->btAlliedPoint)
     {

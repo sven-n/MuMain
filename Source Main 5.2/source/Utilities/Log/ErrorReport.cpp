@@ -292,7 +292,7 @@ typedef struct tagSOUNDDEVICEENUM {
 INT_PTR CALLBACK DSoundEnumCallback(GUID* pGUID, LPSTR strDesc, LPSTR strDrvName, VOID* pContext)
 {
     if (pGUID) {
-        ER_SOUNDDEVICEENUMINFO* pSoundDeviceEnumInfo = (ER_SOUNDDEVICEENUMINFO*)pContext;
+        auto* pSoundDeviceEnumInfo = (ER_SOUNDDEVICEENUMINFO*)pContext;
         strcpy(pSoundDeviceEnumInfo->GetNextDevice().szDeviceName, strDesc);
         strcpy(pSoundDeviceEnumInfo->GetNextDevice().szDriverName, strDrvName);
         pSoundDeviceEnumInfo->nDeivceCount++;
@@ -526,7 +526,7 @@ __int64 GetCPUFrequency(unsigned int uiMeasureMSecs)
 
     // And finally the frequency is the clock difference divided by the time
     // difference.
-    __int64 llFrequency = (__int64)(((double)llDif) / (((double)llTimeDif) / llFreq));
+    auto llFrequency = (__int64)(((double)llDif) / (((double)llTimeDif) / llFreq));
     // At last we just return the frequency that is also stored in the call
     // member var uqwFrequency
     return llFrequency;

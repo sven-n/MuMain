@@ -98,7 +98,7 @@ void CSkillManager::GetSkillInformation_Damage(int iType, int* piDamage)
 
 float CSkillManager::GetSkillDistance(int Index, CHARACTER* c)
 {
-    float Distance = (float)(SkillAttribute[Index].Distance);
+    auto Distance = (float)(SkillAttribute[Index].Distance);
 
     if (Index == AT_SKILL_BLOW_UP + 4)
     {

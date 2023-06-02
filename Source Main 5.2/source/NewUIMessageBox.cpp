@@ -82,7 +82,7 @@ bool SEASON3B::CNewUIMessageBoxBase::CanMove()
 
 void SEASON3B::CNewUIMessageBoxBase::AddCallbackFunc(EVENT_CALLBACK pFunc, DWORD dwEvent)
 {
-    type_map_callback::iterator mi = m_mapCallbacks.find(dwEvent);
+    auto mi = m_mapCallbacks.find(dwEvent);
     if (mi != m_mapCallbacks.end())
         m_mapCallbacks.erase(mi);
     m_mapCallbacks.insert(type_map_callback::value_type(dwEvent, pFunc));
@@ -90,7 +90,7 @@ void SEASON3B::CNewUIMessageBoxBase::AddCallbackFunc(EVENT_CALLBACK pFunc, DWORD
 
 void SEASON3B::CNewUIMessageBoxBase::RemoveCallbackFunc(DWORD dwEvent)
 {
-    type_map_callback::iterator mi = m_mapCallbacks.find(dwEvent);
+    auto mi = m_mapCallbacks.find(dwEvent);
     if (mi != m_mapCallbacks.end())
         m_mapCallbacks.erase(mi);
 }
@@ -102,7 +102,7 @@ void SEASON3B::CNewUIMessageBoxBase::RemoveAllCallbackFuncs()
 
 EVENT_CALLBACK SEASON3B::CNewUIMessageBoxBase::GetCallbackFunc(DWORD dwEvent)
 {
-    type_map_callback::iterator mi = m_mapCallbacks.find(dwEvent);
+    auto mi = m_mapCallbacks.find(dwEvent);
     if (mi != m_mapCallbacks.end())
         return (*mi).second;
     return NULL;
@@ -195,7 +195,7 @@ void SEASON3B::CNewUIMessageBoxMng::Release()
 bool SEASON3B::CNewUIMessageBoxMng::UpdateMouseEvent()
 {
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
-    type_vector_msgbox::iterator vi = m_vecMsgBoxes.begin();
+    auto vi = m_vecMsgBoxes.begin();
     if (vi == m_vecMsgBoxes.end())
         return true;
 
@@ -274,7 +274,7 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateMouseEvent()
 bool SEASON3B::CNewUIMessageBoxMng::UpdateKeyEvent()
 {
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
-    type_vector_msgbox::iterator vi = m_vecMsgBoxes.begin();
+    auto vi = m_vecMsgBoxes.begin();
     if (vi == m_vecMsgBoxes.end())
         return true;
 
@@ -300,7 +300,7 @@ bool SEASON3B::CNewUIMessageBoxMng::Update()
 {
     //. Update
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
-    type_vector_msgbox::iterator vi = m_vecMsgBoxes.begin();
+    auto vi = m_vecMsgBoxes.begin();
     if (vi == m_vecMsgBoxes.end())
     {
         return true;
@@ -347,7 +347,7 @@ bool SEASON3B::CNewUIMessageBoxMng::Update()
 bool SEASON3B::CNewUIMessageBoxMng::Render()
 {
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
-    type_vector_msgbox::iterator vi = m_vecMsgBoxes.begin();
+    auto vi = m_vecMsgBoxes.begin();
     if (vi == m_vecMsgBoxes.end())
     {
         return true;
@@ -380,7 +380,7 @@ void SEASON3B::CNewUIMessageBoxMng::DeleteMessageBox(const CNewUIMessageBoxBase*
 {
     if (m_pMsgBoxFactory)
         m_pMsgBoxFactory->DeleteMessageBox(pObj);
-    type_vector_msgbox::iterator vi = m_vecMsgBoxes.begin();
+    auto vi = m_vecMsgBoxes.begin();
     for (; vi != m_vecMsgBoxes.end(); vi++)
     {
         if ((*vi) == pObj)
@@ -396,7 +396,7 @@ void SEASON3B::CNewUIMessageBoxMng::PopMessageBox()
     if (m_vecMsgBoxes.empty() == false)
     {
         std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
-        type_vector_msgbox::iterator vi = m_vecMsgBoxes.begin();
+        auto vi = m_vecMsgBoxes.begin();
         m_pMsgBoxFactory->DeleteMessageBox((*vi));
         m_vecMsgBoxes.erase(vi);
     }
@@ -415,13 +415,13 @@ bool SEASON3B::CNewUIMessageBoxMng::IsEmpty()
 
 void SEASON3B::CNewUIMessageBoxMng::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent)
 {
-    CNewUIEvent* pEvent = new CNewUIEvent(pOwner, dwEvent);
+    auto* pEvent = new CNewUIEvent(pOwner, dwEvent);
     m_queueEvents.push(pEvent);
 }
 
 void SEASON3B::CNewUIMessageBoxMng::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
 {
-    CNewUIEvent* pEvent = new CNewUIEvent(pOwner, dwEvent, xParam);
+    auto* pEvent = new CNewUIEvent(pOwner, dwEvent, xParam);
     m_queueEvents.push(pEvent);
 }
 

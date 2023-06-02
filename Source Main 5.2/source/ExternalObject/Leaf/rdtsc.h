@@ -106,7 +106,7 @@ namespace leaf {
 
         // And finally the frequency is the clock difference divided by the time
         // difference.
-        __int64 llFrequency = (__int64)(((double)llDif) / (((double)llTimeDif) / llFreq));
+        auto llFrequency = (__int64)(((double)llDif) / (((double)llTimeDif) / llFreq));
         // At last we just return the frequency that is also stored in the call
         // member var uqwFrequency
         return llFrequency;

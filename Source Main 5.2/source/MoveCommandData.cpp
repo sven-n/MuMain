@@ -31,7 +31,7 @@ bool CMoveCommandData::Create(const std::string& filename)
 
     for (int i = 0; i < count; i++)
     {
-        MOVEINFODATA* pMoveInfoData = new MOVEINFODATA;
+        auto* pMoveInfoData = new MOVEINFODATA;
         fread(&(pMoveInfoData->_ReqInfo), sizeof(MOVEREQINFO), 1, fp);
         BuxConvert((BYTE*)&(pMoveInfoData->_ReqInfo), sizeof(MOVEREQINFO));
         m_listMoveInfoData.push_back(pMoveInfoData);
@@ -43,7 +43,7 @@ bool CMoveCommandData::Create(const std::string& filename)
 
 void CMoveCommandData::Release()
 {
-    std::list<MOVEINFODATA*>::iterator li = m_listMoveInfoData.begin();
+    auto li = m_listMoveInfoData.begin();
     for (; li != m_listMoveInfoData.end(); li++)
         delete (*li);
     m_listMoveInfoData.clear();
@@ -71,7 +71,7 @@ int CMoveCommandData::GetNumMoveMap()
 
 const CMoveCommandData::MOVEINFODATA* CMoveCommandData::GetMoveCommandDataByIndex(int iIndex)
 {
-    std::list<MOVEINFODATA*>::iterator li = m_listMoveInfoData.begin();
+    auto li = m_listMoveInfoData.begin();
     for (; li != m_listMoveInfoData.end(); li++)
     {
         if ((*li)->_ReqInfo.index == iIndex)

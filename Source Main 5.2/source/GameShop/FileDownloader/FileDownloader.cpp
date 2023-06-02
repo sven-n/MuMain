@@ -125,7 +125,7 @@ WZResult 			FileDownloader::CreateConnection()
     {
         unsigned int ThreadID = 0;
 
-        HANDLE hHandle = (HANDLE)_beginthreadex(0, 0, FileDownloader::RunConnectThread, this, 0, &ThreadID);
+        auto hHandle = (HANDLE)_beginthreadex(0, 0, FileDownloader::RunConnectThread, this, 0, &ThreadID);
 
         if (hHandle == INVALID_HANDLE_VALUE)
         {
@@ -160,7 +160,7 @@ WZResult 			FileDownloader::CreateConnection()
 
 unsigned int WINAPI FileDownloader::RunConnectThread(LPVOID pParam)
 {
-    FileDownloader* p = reinterpret_cast<FileDownloader*>(pParam);
+    auto* p = reinterpret_cast<FileDownloader*>(pParam);
 
     if (p)
     {

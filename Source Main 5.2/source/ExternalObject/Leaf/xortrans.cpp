@@ -92,11 +92,11 @@ bool CCyclicXorTrans::Trans(const void* src, size_t size, void* dest, DWORD dwSt
         }*/
 
         // Head
-    DWORD* pdwKeyTable = (DWORD*)m_xfKeyTable.data();
+    auto* pdwKeyTable = (DWORD*)m_xfKeyTable.data();
     size_t KeyTableSize = m_xfKeyTable.size() / 4;
 
-    DWORD* pdwSrc = (DWORD*)src;
-    DWORD* pdwDest = (DWORD*)dest;
+    auto* pdwSrc = (DWORD*)src;
+    auto* pdwDest = (DWORD*)dest;
 
     int iHead;
 
@@ -133,10 +133,10 @@ bool CCyclicXorTrans::Trans(const void* src, size_t size, xstreambuf& out, DWORD
         */
 
         // Head
-    DWORD* pdwKeyTable = (DWORD*)m_xfKeyTable.data();
+    auto* pdwKeyTable = (DWORD*)m_xfKeyTable.data();
     size_t KeyTableSize = m_xfKeyTable.size() / 4;
 
-    DWORD* pdwSrc = (DWORD*)src;
+    auto* pdwSrc = (DWORD*)src;
 
     int iHead;
 

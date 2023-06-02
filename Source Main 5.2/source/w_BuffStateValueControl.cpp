@@ -74,7 +74,7 @@ const BuffStateValueControl::BuffStateValueInfo BuffStateValueControl::GetValue(
 {
     BuffStateValueInfo tempvalueinfo;
 
-    BuffStateValueMap::iterator iter = m_BuffStateValue.find(bufftype);
+    auto iter = m_BuffStateValue.find(bufftype);
 
     if (iter == m_BuffStateValue.end())
     {

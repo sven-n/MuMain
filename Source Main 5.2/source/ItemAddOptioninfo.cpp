@@ -14,7 +14,7 @@
 
 ItemAddOptioninfo* ItemAddOptioninfo::MakeInfo()
 {
-    ItemAddOptioninfo* option = new ItemAddOptioninfo();
+    auto* option = new ItemAddOptioninfo();
     return option;
 }
 

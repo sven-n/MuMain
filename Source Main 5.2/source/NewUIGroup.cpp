@@ -27,7 +27,7 @@ bool CNewUIGroup::Render()
     if (IsVisible() == false)
         return false;
 
-    type_vector_uibase::iterator vi = m_vecUI.begin();
+    auto vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
     {
         if ((*vi)->IsVisible() == true)
@@ -44,7 +44,7 @@ bool CNewUIGroup::Update()
     if (IsEnabled() == false)
         return false;
 
-    type_vector_uibase::iterator vi = m_vecUI.begin();
+    auto vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
     {
         if ((*vi)->IsEnabled() == true)
@@ -61,7 +61,7 @@ bool CNewUIGroup::Update()
 
 bool CNewUIGroup::UpdateMouseEvent()
 {
-    type_vector_uibase::iterator vi = m_vecUI.begin();
+    auto vi = m_vecUI.begin();
 
     for (; vi != m_vecUI.end(); vi++)
     {
@@ -79,7 +79,7 @@ bool CNewUIGroup::UpdateMouseEvent()
 
 bool CNewUIGroup::UpdateKeyEvent()
 {
-    type_vector_uibase::iterator vi = m_vecUI.begin();
+    auto vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
     {
         HWND hRelatedWnd = (*vi)->GetRelatedWnd();
@@ -104,7 +104,7 @@ bool CNewUIGroup::UpdateKeyEvent()
 
 void CNewUIGroup::Release()
 {
-    type_vector_uibase::iterator vi = m_vecUI.begin();
+    auto vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
     {
         CNewUIObj* pUIObj = (*vi);

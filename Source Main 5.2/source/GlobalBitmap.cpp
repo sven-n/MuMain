@@ -137,25 +137,25 @@ void CBitmapCache::Remove(GLuint uiBitmapIndex)
 
     if (BITMAP_PLAYER_TEXTURE_BEGIN <= uiBitmapIndex && BITMAP_PLAYER_TEXTURE_END >= uiBitmapIndex)
     {
-        type_cache_map::iterator mi = m_mapCachePlayer.find(uiBitmapIndex);
+        auto mi = m_mapCachePlayer.find(uiBitmapIndex);
         if (mi != m_mapCachePlayer.end())
             m_mapCachePlayer.erase(mi);
     }
     else if (BITMAP_INTERFACE_TEXTURE_BEGIN <= uiBitmapIndex && BITMAP_INTERFACE_TEXTURE_END >= uiBitmapIndex)
     {
-        type_cache_map::iterator mi = m_mapCacheInterface.find(uiBitmapIndex);
+        auto mi = m_mapCacheInterface.find(uiBitmapIndex);
         if (mi != m_mapCacheInterface.end())
             m_mapCacheInterface.erase(mi);
     }
     else if (BITMAP_EFFECT_TEXTURE_BEGIN <= uiBitmapIndex && BITMAP_EFFECT_TEXTURE_END >= uiBitmapIndex)
     {
-        type_cache_map::iterator mi = m_mapCacheEffect.find(uiBitmapIndex);
+        auto mi = m_mapCacheEffect.find(uiBitmapIndex);
         if (mi != m_mapCacheEffect.end())
             m_mapCacheEffect.erase(mi);
     }
     else
     {
-        type_cache_map::iterator mi = m_mapCacheMain.find(uiBitmapIndex);
+        auto mi = m_mapCacheMain.find(uiBitmapIndex);
         if (mi != m_mapCacheMain.end())
             m_mapCacheMain.erase(mi);
     }
@@ -184,7 +184,7 @@ void CBitmapCache::Update()
 
     if (m_ManageTimer.IsTime())
     {
-        type_cache_map::iterator mi = m_mapCacheMain.begin();
+        auto mi = m_mapCacheMain.begin();
         for (; mi != m_mapCacheMain.end(); )
         {
             BITMAP_t* pBitmap = (*mi).second;
@@ -276,7 +276,7 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
 
     if (BITMAP_PLAYER_TEXTURE_BEGIN <= uiBitmapIndex && BITMAP_PLAYER_TEXTURE_END >= uiBitmapIndex)
     {
-        type_cache_map::iterator mi = m_mapCachePlayer.find(uiBitmapIndex);
+        auto mi = m_mapCachePlayer.find(uiBitmapIndex);
         if (mi != m_mapCachePlayer.end())
         {
             *ppBitmap = (*mi).second;
@@ -286,7 +286,7 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
     }
     else if (BITMAP_INTERFACE_TEXTURE_BEGIN <= uiBitmapIndex && BITMAP_INTERFACE_TEXTURE_END >= uiBitmapIndex)
     {
-        type_cache_map::iterator mi = m_mapCacheInterface.find(uiBitmapIndex);
+        auto mi = m_mapCacheInterface.find(uiBitmapIndex);
         if (mi != m_mapCacheInterface.end())
         {
             *ppBitmap = (*mi).second;
@@ -296,7 +296,7 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
     }
     else if (BITMAP_EFFECT_TEXTURE_BEGIN <= uiBitmapIndex && BITMAP_EFFECT_TEXTURE_END >= uiBitmapIndex)
     {
-        type_cache_map::iterator mi = m_mapCacheEffect.find(uiBitmapIndex);
+        auto mi = m_mapCacheEffect.find(uiBitmapIndex);
         if (mi != m_mapCacheEffect.end())
         {
             *ppBitmap = (*mi).second;
@@ -306,7 +306,7 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
     }
     else
     {
-        type_cache_map::iterator mi = m_mapCacheMain.find(uiBitmapIndex);
+        auto mi = m_mapCacheMain.find(uiBitmapIndex);
         if (mi != m_mapCacheMain.end())
         {
             *ppBitmap = (*mi).second;
@@ -382,7 +382,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename,
 #endif
     }
 
-    type_bitmap_map::iterator mi = m_mapBitmap.find(uiBitmapIndex);
+    auto mi = m_mapBitmap.find(uiBitmapIndex);
     if (mi != m_mapBitmap.end())
     {
         BITMAP_t* pBitmap = (*mi).second;
@@ -413,7 +413,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename,
 }
 void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 {
-    type_bitmap_map::iterator mi = m_mapBitmap.find(uiBitmapIndex);
+    auto mi = m_mapBitmap.find(uiBitmapIndex);
     if (mi != m_mapBitmap.end())
     {
         BITMAP_t* pBitmap = (*mi).second;
@@ -443,7 +443,7 @@ void CGlobalBitmap::UnloadAllImages()
         g_ErrorReport.Write("Unload Images\r\n");
 #endif // _DEBUG
 
-    type_bitmap_map::iterator mi = m_mapBitmap.begin();
+    auto mi = m_mapBitmap.begin();
     for (; mi != m_mapBitmap.end(); mi++)
     {
         BITMAP_t* pBitmap = (*mi).second;
@@ -470,7 +470,7 @@ BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
     BITMAP_t* pBitmap = NULL;
     if (false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))
     {
-        type_bitmap_map::iterator mi = m_mapBitmap.find(uiBitmapIndex);
+        auto mi = m_mapBitmap.find(uiBitmapIndex);
         if (mi != m_mapBitmap.end())
             pBitmap = (*mi).second;
         m_BitmapCache.Add(uiBitmapIndex, pBitmap);
@@ -489,7 +489,7 @@ BITMAP_t* CGlobalBitmap::FindTexture(GLuint uiBitmapIndex)
     BITMAP_t* pBitmap = NULL;
     if (false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))
     {
-        type_bitmap_map::iterator mi = m_mapBitmap.find(uiBitmapIndex);
+        auto mi = m_mapBitmap.find(uiBitmapIndex);
         if (mi != m_mapBitmap.end())
             pBitmap = (*mi).second;
         if (pBitmap != NULL)
@@ -500,7 +500,7 @@ BITMAP_t* CGlobalBitmap::FindTexture(GLuint uiBitmapIndex)
 
 BITMAP_t* CGlobalBitmap::FindTexture(const std::string& filename)
 {
-    type_bitmap_map::iterator mi = m_mapBitmap.begin();
+    auto mi = m_mapBitmap.begin();
     for (; mi != m_mapBitmap.end(); mi++)
     {
         BITMAP_t* pBitmap = (*mi).second;
@@ -512,7 +512,7 @@ BITMAP_t* CGlobalBitmap::FindTexture(const std::string& filename)
 
 BITMAP_t* CGlobalBitmap::FindTextureByName(const std::string& name)
 {
-    type_bitmap_map::iterator mi = m_mapBitmap.begin();
+    auto mi = m_mapBitmap.begin();
     for (; mi != m_mapBitmap.end(); mi++)
     {
         BITMAP_t* pBitmap = (*mi).second;
@@ -560,7 +560,7 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
 {
     if (m_uiAlternate > 0)
     {
-        type_index_list::iterator li = std::find(m_listNonamedIndex.begin(), m_listNonamedIndex.end(), uiSeed + 1);
+        auto li = std::find(m_listNonamedIndex.begin(), m_listNonamedIndex.end(), uiSeed + 1);
         if (li != m_listNonamedIndex.end())
             return FindAvailableTextureIndex(uiSeed + 1);
     }
@@ -611,7 +611,7 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
             if (i >= (int)cinfo.output_height) break;
         }
 
-        BITMAP_t* pNewBitmap = new BITMAP_t;
+        auto* pNewBitmap = new BITMAP_t;
         memset(pNewBitmap, 0, sizeof(BITMAP_t));
 
         pNewBitmap->BitmapIndex = uiBitmapIndex;
@@ -676,7 +676,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
     int Size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    unsigned char* PakBuffer = new unsigned char[Size];
+    auto* PakBuffer = new unsigned char[Size];
     fread(PakBuffer, 1, Size, fp);
     fclose(fp);
 
@@ -705,7 +705,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
         if (i >= ny) break;
     }
 
-    BITMAP_t* pNewBitmap = new BITMAP_t;
+    auto* pNewBitmap = new BITMAP_t;
     memset(pNewBitmap, 0, sizeof(BITMAP_t));
 
     pNewBitmap->BitmapIndex = uiBitmapIndex;
@@ -861,7 +861,7 @@ bool CGlobalBitmap::Save_Image(const unicode::t_string& src, const unicode::t_st
 
 void CGlobalBitmap::my_error_exit(j_common_ptr cinfo)
 {
-    my_error_ptr myerr = (my_error_ptr)cinfo->err;
+    auto myerr = (my_error_ptr)cinfo->err;
     (*cinfo->err->output_message) (cinfo);
     longjmp(myerr->setjmp_buffer, 1);
 }

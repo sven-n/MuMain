@@ -138,7 +138,7 @@ void CMonkSystem::LoadModelItemTexture()
 int CMonkSystem::GetSubItemType(int _Type, int _Left)
 {
     int iType = _Type;
-    tm_ItemEqualType::iterator iter = m_mapItemEqualType.find(iType);
+    auto iter = m_mapItemEqualType.find(iType);
 
     CItemEqualType _SubType;
     if (iter == m_mapItemEqualType.end())
@@ -156,7 +156,7 @@ int CMonkSystem::GetSubItemType(int _Type, int _Left)
 
 int CMonkSystem::GetModelItemType(int _Type)
 {
-    for (tm_ItemEqualType::iterator iter = m_mapItemEqualType.begin(); iter != m_mapItemEqualType.end(); ++iter)
+    for (auto iter = m_mapItemEqualType.begin(); iter != m_mapItemEqualType.end(); ++iter)
     {
         CItemEqualType _ItemType;
         if (iter == m_mapItemEqualType.end())
@@ -223,7 +223,7 @@ bool CMonkSystem::IsSwordformGloves(int _Type)
 {
     _Type = EqualItemModelType(_Type);
 
-    tm_ItemEqualType::iterator iter = m_mapItemEqualType.find(_Type);
+    auto iter = m_mapItemEqualType.find(_Type);
 
     CItemEqualType _SubType;
     if (iter == m_mapItemEqualType.end())
@@ -298,7 +298,7 @@ void CMonkSystem::MoveBlurEffect(CHARACTER* _pCha, OBJECT* _pObj, BMD* pModel)
 
 void CMonkSystem::SetSwordformGlovesItemType()
 {
-    for (tm_ItemEqualType::iterator iter = m_mapItemEqualType.begin(); iter != m_mapItemEqualType.end(); ++iter)
+    for (auto iter = m_mapItemEqualType.begin(); iter != m_mapItemEqualType.end(); ++iter)
     {
         CItemEqualType _ItemType;
         if (iter == m_mapItemEqualType.end())
@@ -548,7 +548,7 @@ WORD CMonkSystem::GetDarksideTargetIndex(int _nIndex)
         return 0;
     }
 
-    vec_DarkTargetIndex::iterator iter = m_DarkTargetIndex.begin();
+    auto iter = m_DarkTargetIndex.begin();
     if (iter == m_DarkTargetIndex.end())
     {
         return 0;
@@ -577,7 +577,7 @@ bool CMonkSystem::SendDarksideAtt(OBJECT* _pObj)
         return false;
     }
 
-    vec_DarkIndex::iterator iter = m_DarksideIndex.begin();
+    auto iter = m_DarksideIndex.begin();
     if (iter == m_DarksideIndex.end())
     {
         return false;
@@ -606,14 +606,14 @@ void CMonkSystem::InitDarksideTarget()
     m_bDarkSideEffOnce = false;
     m_bDarkSideEffOnce2 = false;
 
-    vec_DarkIndex::iterator iter = m_DarksideIndex.begin();
+    auto iter = m_DarksideIndex.begin();
     for (; iter != m_DarksideIndex.end(); ++iter)
     {
         *iter = DS_TARGET_NONE;
     }
     m_DarksideIndex.clear();
 
-    vec_DarkTargetIndex::iterator itertarget = m_DarkTargetIndex.begin();
+    auto itertarget = m_DarkTargetIndex.begin();
     for (; itertarget != m_DarkTargetIndex.end(); ++itertarget)
     {
         *itertarget = -1;
@@ -777,7 +777,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
 
             if (IsDummyRender(pObj->Position, vPos, m_fDummyAniFrame, index, bChange))
             {
-                tm_DummyUnit::iterator iter = m_tmDummyUnit.find(index);
+                auto iter = m_tmDummyUnit.find(index);
                 if (iter == m_tmDummyUnit.end())
                     break;
 
@@ -856,7 +856,7 @@ void CMonkSystem::SetDummy(vec3_t pos, vec3_t target, int dummyindex)
 
 bool CMonkSystem::IsDummyRender(vec3_t vOutPos, vec3_t Target, float& pAni, int DummyIndex, bool Change)
 {
-    tm_DummyUnit::iterator iter = m_tmDummyUnit.find(DummyIndex);
+    auto iter = m_tmDummyUnit.find(DummyIndex);
 
     if (iter == m_tmDummyUnit.end())
         return false;

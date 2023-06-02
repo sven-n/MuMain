@@ -53,7 +53,7 @@ bool CShopPackageList::GetNext(CShopPackage& package) // OK
 
 bool CShopPackageList::GetValueByKey(int nKey, CShopPackage& package) // OK
 {
-    std::map<int, CShopPackage>::iterator it = this->m_Packages.find(nKey);
+    auto it = this->m_Packages.find(nKey);
 
     if (it == this->m_Packages.end())
         return 0;
@@ -75,7 +75,7 @@ bool CShopPackageList::GetValueByIndex(int nIndex, CShopPackage& package) // OK
 
 bool CShopPackageList::SetPacketLeftCount(int PackageSeq, int nCount) // OK
 {
-    std::map<int, CShopPackage>::iterator it = this->m_Packages.find(PackageSeq);
+    auto it = this->m_Packages.find(PackageSeq);
 
     if (it == this->m_Packages.end())
         return 0;

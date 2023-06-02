@@ -856,8 +856,8 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
 
         vec3_t Position, Light;
         int dummy = rand() % 14;
-        float Data = (float)((float)dummy / (float)100);
-        float Rot = (float)(rand() % 360);
+        auto Data = (float)((float)dummy / (float)100);
+        auto Rot = (float)(rand() % 360);
         Vector(1.0f, 1.0f, 1.0f, Light);
         BoneManager::GetBonePosition(o, "Monster94_zx", Position);
         CreateSprite(BITMAP_DS_EFFECT, Position, 1.5f, Light, o);

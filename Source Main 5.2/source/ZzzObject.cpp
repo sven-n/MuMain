@@ -532,13 +532,13 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
             if (!o->m_pCloth)
             {
-                CPhysicsCloth* pCloth = new CPhysicsCloth[1];
+                auto* pCloth = new CPhysicsCloth[1];
                 pCloth[0].Create(o, 10, 0.0f, -10.0f, 0.0f, 5, 12, 150.0f, 190.0f, BITMAP_DEASULER_CLOTH, BITMAP_DEASULER_CLOTH, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
                 pCloth[0].AddCollisionSphere(50.0f, -140.0f, -20.0f, 30.0f, 2);
                 o->m_pCloth = (void*)pCloth;
                 o->m_byNumCloth = 1;
             }
-            CPhysicsCloth* pCloth = (CPhysicsCloth*)o->m_pCloth;
+            auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
             if (!pCloth[0].Move2(0.005f, 5))
             {
                 CHARACTER* c = &CharactersClient[o->PKKey];
@@ -1235,7 +1235,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                         b->BeginRender(o->Alpha);
                                                         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                                                         b->EndRender();
-                                                        CSideHair* pSideHair = new CSideHair;
+                                                        auto* pSideHair = new CSideHair;
                                                         pSideHair->Create(VertexTransform, b, o);
                                                         pSideHair->Render(VertexTransform, LightTransform);
                                                         pSideHair->Destroy();
@@ -2162,7 +2162,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 else if (o->Type >= MODEL_LITTLESANTA && o->Type <= MODEL_LITTLESANTA_END)
                 {
                     float fLumi = (sinf(WorldTime * 0.004f) + 1.2f) * 0.5f + 0.1f;
-                    float Rotation = (float)((int)(WorldTime * 0.1f) % 360);
+                    auto Rotation = (float)((int)(WorldTime * 0.1f) % 360);
                     vec3_t vWorldPos, vLight;
 
                     switch (o->Type)
@@ -4551,7 +4551,7 @@ OBJECT* CreateObject(int Type, vec3_t Position, vec3_t Angle, float Scale)
 
     BYTE Block = i * 16 + j;
     OBJECT_BLOCK* ob = &ObjectBlock[Block];
-    OBJECT* o = new OBJECT;
+    auto* o = new OBJECT;
 
     o->Initialize();
 
@@ -5004,7 +5004,7 @@ int OpenObjects(char* FileName)
     fseek(fp, 0, SEEK_END);
     int EncBytes = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    unsigned char* EncData = new unsigned char[EncBytes];
+    auto* EncData = new unsigned char[EncBytes];
     fread(EncData, 1, EncBytes, fp);
     fclose(fp);
 
@@ -5047,12 +5047,12 @@ int OpenObjectsEnc(char* FileName)
     fseek(fp, 0, SEEK_END);
     int EncBytes = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    unsigned char* EncData = new unsigned char[EncBytes];
+    auto* EncData = new unsigned char[EncBytes];
     fread(EncData, 1, EncBytes, fp);
     fclose(fp);
 
     int DataBytes = MapFileDecrypt(NULL, EncData, EncBytes);
-    unsigned char* Data = new unsigned char[DataBytes];
+    auto* Data = new unsigned char[DataBytes];
     MapFileDecrypt(Data, EncData, EncBytes);
     delete[] EncData;
 
@@ -5124,12 +5124,12 @@ bool SaveObjects(char* FileName, int iMapNumber)
         fseek(fp, 0, SEEK_END);
         int EncBytes = ftell(fp);
         fseek(fp, 0, SEEK_SET);
-        unsigned char* EncData = new unsigned char[EncBytes];
+        auto* EncData = new unsigned char[EncBytes];
         fread(EncData, 1, EncBytes, fp);
         fclose(fp);
 
         int DataBytes = MapFileEncrypt(NULL, EncData, EncBytes);
-        unsigned char* Data = new unsigned char[DataBytes];
+        auto* Data = new unsigned char[DataBytes];
         MapFileEncrypt(Data, EncData, EncBytes);
         delete[] EncData;
 
@@ -8196,12 +8196,12 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         if (o->m_pCloth == NULL)
         {
             int iTex = BITMAP_CURSEDTEMPLE_ALLIED_PHYSICSCLOTH;
-            CPhysicsCloth* pCloth = new CPhysicsCloth[1];
+            auto* pCloth = new CPhysicsCloth[1];
             pCloth[0].Create(o, 19, 0.0f, 8.0f, 0.0f, 10, 10, 140.0f, 140.0f, iTex, iTex, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
             o->m_pCloth = (void*)pCloth;
             o->m_byNumCloth = 1;
         }
-        CPhysicsCloth* pCloth = (CPhysicsCloth*)o->m_pCloth;
+        auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
         if (pCloth)
         {
             float Flag = 0.005f;
@@ -8252,12 +8252,12 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         if (o->m_pCloth == NULL)
         {
             int iTex = BITMAP_CURSEDTEMPLE_ILLUSION_PHYSICSCLOTH;
-            CPhysicsCloth* pCloth = new CPhysicsCloth[2];
+            auto* pCloth = new CPhysicsCloth[2];
             pCloth[0].Create(o, 20, -4.0f, 5.0f, 0.0f, 10, 20, 17.0f, 100.0f, iTex, iTex, PCT_SHAPE_HALLOWEEN | PCT_ELASTIC_HALLOWEEN | PCT_MASK_ALPHA);
             o->m_pCloth = (void*)pCloth;
             o->m_byNumCloth = 1;
         }
-        CPhysicsCloth* pCloth = (CPhysicsCloth*)o->m_pCloth;
+        auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
         if (pCloth)
         {
             float Flag = 0.005f;
@@ -8419,12 +8419,12 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         if (o->m_pCloth == NULL)
         {
             int iTex = BITMAP_ROBE + 3;
-            CPhysicsCloth* pCloth = new CPhysicsCloth[1];
+            auto* pCloth = new CPhysicsCloth[1];
             pCloth[0].Create(o, 19, 0.0f, 10.0f, 0.0f, 10, 20, 30.0f, 200.0f, iTex, iTex, PCT_SHAPE_HALLOWEEN | PCT_ELASTIC_HALLOWEEN | PCT_MASK_ALPHA);
             o->m_pCloth = (void*)pCloth;
             o->m_byNumCloth = 1;
         }
-        CPhysicsCloth* pCloth = (CPhysicsCloth*)o->m_pCloth;
+        auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
         if (pCloth)
         {
             if (pCloth[0].Move2(0.005f, 5) == FALSE)
@@ -10548,7 +10548,7 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
         return;
     }
 
-    PART_t* p = (PART_t*)p2;
+    auto* p = (PART_t*)p2;
 
     if (Type == MODEL_POTION + 12)
     {
@@ -10683,7 +10683,7 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
             {
                 for (int i = 0; i < p->m_byNumCloth; ++i)
                 {
-                    CPhysicsCloth* pCloth = (CPhysicsCloth*)p->m_pCloth[i];
+                    auto* pCloth = (CPhysicsCloth*)p->m_pCloth[i];
                     if (!pCloth->Move2(0.005f, 5))
                     {
                         DeleteCloth(NULL, o, p);

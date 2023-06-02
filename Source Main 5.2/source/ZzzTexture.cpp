@@ -22,7 +22,7 @@ typedef struct my_error_mgr* my_error_ptr;
 
 METHODDEF(void) my_error_exit(j_common_ptr cinfo)
 {
-    my_error_ptr myerr = (my_error_ptr)cinfo->err;
+    auto myerr = (my_error_ptr)cinfo->err;
     (*cinfo->err->output_message) (cinfo);
     longjmp(myerr->setjmp_buffer, 1);
 }
@@ -169,7 +169,7 @@ bool OpenJpegBuffer(char* filename, float* BufferFloat)
     row_stride = cinfo.output_width * cinfo.output_components;
     buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
 
-    unsigned char* Buffer = (unsigned char*) new BYTE[cinfo.output_width * cinfo.output_height * cinfo.output_components];
+    auto* Buffer = (unsigned char*) new BYTE[cinfo.output_width * cinfo.output_height * cinfo.output_components];
     while (cinfo.output_scanline < cinfo.output_height)
     {
         (void)jpeg_read_scanlines(&cinfo, buffer, 1);

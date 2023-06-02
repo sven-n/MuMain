@@ -118,7 +118,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 
     bool bRenderRingWarning = false;
     int	icntItemDurIcon = 0;
-    POINT ItemDurPos = POINT(m_ItemDurUIStartPos);
+    auto ItemDurPos = POINT(m_ItemDurUIStartPos);
 
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < MAX_EQUIPMENT; ++i)
     {
@@ -571,7 +571,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
 
     glColor4f(1.f, 1.f, 1.f, 1.f);
 
-    POINT ItemDurPos = POINT(m_ItemDurUIStartPos);
+    auto ItemDurPos = POINT(m_ItemDurUIStartPos);
     int icntItemDurIcon = 0;
     int iTempImageIndex;
     bool bRenderRingWarning = false;

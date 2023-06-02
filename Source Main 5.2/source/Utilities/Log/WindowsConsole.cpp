@@ -243,7 +243,7 @@ bool CConsoleWindow::SaveScreenBuffer(const std::string& filename)
     BufferSize.X = csbi.dwSize.X;
     BufferSize.Y = csbi.dwCursorPosition.Y + 1;
 
-    CHAR_INFO* pbyCharBuffer = new CHAR_INFO[BufferSize.X * BufferSize.Y];
+    auto* pbyCharBuffer = new CHAR_INFO[BufferSize.X * BufferSize.Y];
 
     COORD StartPointToWrite = { 0, 0 };
     SMALL_RECT RectToRead = { 0, 0, BufferSize.X, BufferSize.Y };
@@ -288,7 +288,7 @@ DWORD CConsoleWindow::Get32ColorFromColorIndex(WORD wColorIndex)
 }
 BOOL CALLBACK CConsoleWindow::EnumChildProc(HWND hWnd, LPARAM lParam)
 {
-    CConsoleWindow* pConsoleWnd = (CConsoleWindow*)(lParam);
+    auto* pConsoleWnd = (CConsoleWindow*)(lParam);
     DWORD dwProcessId = 0;
     if (GetWindowThreadProcessId(hWnd, &dwProcessId) == GetCurrentThreadId()
         && dwProcessId == GetCurrentProcessId())

@@ -513,10 +513,10 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
     progressnpcindexlist.push_back(AlliedHolyItemBoxNpc);
     progressnpcindexlist.push_back(IllusionHolyItemBoxNpc);
 
-    for (std::list<DWORD>::iterator iter = progressnpcindexlist.begin();
-        iter != progressnpcindexlist.end();)
+    for (auto iter = progressnpcindexlist.begin();
+         iter != progressnpcindexlist.end();)
     {
-        std::list<DWORD>::iterator curiter = iter;
+        auto curiter = iter;
         ++iter;
         DWORD progressnpcindex = *curiter;
 
@@ -1216,7 +1216,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJE
 
 void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill(const BYTE* ReceiveBuffer)
 {
-    LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT data = (LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT)ReceiveBuffer;
+    auto data = (LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT)ReceiveBuffer;
 
     WORD magNumber = ((WORD)(data->MagicH) << 8) + data->MagicL;
 
@@ -1302,7 +1302,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill(const BY
 
 void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const BYTE* ReceiveBuffer)
 {
-    LPPMSG_CURSED_TEMPLE_SKILL_END data = (LPPMSG_CURSED_TEMPLE_SKILL_END)ReceiveBuffer;
+    auto data = (LPPMSG_CURSED_TEMPLE_SKILL_END)ReceiveBuffer;
 
     WORD magNumber = ((WORD)(data->MagicH) << 8) + data->MagicL;
 
@@ -1342,7 +1342,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const 
 
 void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
 {
-    LPPMSG_CURSED_TAMPLE_STATE data = (LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
+    auto data = (LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
 
     m_EventMapTime = data->wRemainSec;
 
@@ -1399,7 +1399,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
 
     for (int i = 0; i < m_CursedTempleMyTeamCount; i++)
     {
-        LPPMSG_CURSED_TAMPLE_PARTY_POS data2 = (LPPMSG_CURSED_TAMPLE_PARTY_POS)(ReceiveBuffer + Offset);
+        auto data2 = (LPPMSG_CURSED_TAMPLE_PARTY_POS)(ReceiveBuffer + Offset);
 
         if (data2->wPartyUserIndex != 0xffff)
         {
@@ -1417,7 +1417,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
 
 void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer)
 {
-    LPPMSG_CURSED_TEMPLE_SKILL_POINT data = (LPPMSG_CURSED_TEMPLE_SKILL_POINT)ReceiveBuffer;
+    auto data = (LPPMSG_CURSED_TEMPLE_SKILL_POINT)ReceiveBuffer;
 
     if (m_SkillPoint < data->btSkillPoint)
     {
@@ -1432,5 +1432,5 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE*
 
 void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer)
 {
-    LPPMSG_RELICS_GET_USER data = (LPPMSG_RELICS_GET_USER)ReceiveBuffer;
+    auto data = (LPPMSG_RELICS_GET_USER)ReceiveBuffer;
 }

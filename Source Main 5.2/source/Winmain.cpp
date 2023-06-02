@@ -277,7 +277,7 @@ WORD DecryptCheckSumKey(WORD wSource)
 
 DWORD GenerateCheckSum(BYTE* pbyBuffer, DWORD dwSize, WORD wKey)
 {
-    DWORD dwKey = (DWORD)wKey;
+    auto dwKey = (DWORD)wKey;
     DWORD dwResult = dwKey << 9;
     for (DWORD dwChecked = 0; dwChecked <= dwSize - 4; dwChecked += 4)
     {
@@ -1081,7 +1081,7 @@ BOOL Util_CheckOption(char* lpszCommandLine, unsigned char cOption, char* lpszSt
     }
 
     int nFind = (int)'/';
-    unsigned char* lpFound = (unsigned char*)lpszCommandLine;
+    auto* lpFound = (unsigned char*)lpszCommandLine;
     while (lpFound)
     {
         lpFound = (unsigned char*)strchr((char*)(lpFound + 1), nFind);

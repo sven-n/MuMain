@@ -209,7 +209,7 @@ void CNewUITrade::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwPara
 {
     if (pClass)
     {
-        CNewUITrade* pNewUITrade = (CNewUITrade*)pClass;
+        auto* pNewUITrade = (CNewUITrade*)pClass;
         pNewUITrade->RenderWarningArrow();
     }
 }

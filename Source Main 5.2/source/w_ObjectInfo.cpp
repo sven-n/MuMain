@@ -6,8 +6,8 @@
 
 void CInterpolateContainer::GetCurrentValue(vec3_t& v3Out, float fCurrentRate, VEC_INTERPOLATES& vecInterpolates)
 {
-    VEC_INTERPOLATES::iterator	iterBegin = vecInterpolates.begin();
-    VEC_INTERPOLATES::iterator	iterEnd = vecInterpolates.end();
+    auto iterBegin = vecInterpolates.begin();
+    auto iterEnd = vecInterpolates.end();
     VEC_INTERPOLATES::iterator	iter_;
 
     INTERPOLATE_FACTOR* pCurFactor = NULL;
@@ -38,8 +38,8 @@ void CInterpolateContainer::GetCurrentValue(vec3_t& v3Out, float fCurrentRate, V
 
 void CInterpolateContainer::GetCurrentValueF(float& fOut, float fCurrentRate, VEC_INTERPOLATES_F& vecInterpolates)
 {
-    VEC_INTERPOLATES_F::iterator	iterBegin = vecInterpolates.begin();
-    VEC_INTERPOLATES_F::iterator	iterEnd = vecInterpolates.end();
+    auto iterBegin = vecInterpolates.begin();
+    auto iterEnd = vecInterpolates.end();
     VEC_INTERPOLATES_F::iterator	iter_;
 
     INTERPOLATE_FACTOR_F* pCurFactor = NULL;

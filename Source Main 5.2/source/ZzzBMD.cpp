@@ -1807,7 +1807,7 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
                     Vector(1.f, 0.8f, 0.2f, Light);
                     if ((j % 22) == 0)
                     {
-                        OBJECT* o = (OBJECT*)obj;
+                        auto* o = (OBJECT*)obj;
 
                         angle[0] = -(float)(rand() % 90);
                         angle[1] = 0.f;
@@ -2489,7 +2489,7 @@ bool BMD::Open(char* DirName, char* ModelFileName)
     fseek(fp, 0, SEEK_END);
     int DataBytes = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    unsigned char* Data = new unsigned char[DataBytes];
+    auto* Data = new unsigned char[DataBytes];
     fread(Data, 1, DataBytes, fp);
     fclose(fp);
 
@@ -2698,7 +2698,7 @@ bool BMD::Open2(char* DirName, char* ModelFileName, bool bReAlloc)
     fseek(fp, 0, SEEK_END);
     int DataBytes = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    unsigned char* Data = new unsigned char[DataBytes];
+    auto* Data = new unsigned char[DataBytes];
     fread(Data, 1, DataBytes, fp);
     fclose(fp);
 

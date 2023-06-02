@@ -477,7 +477,7 @@ void SEASON3B::CNewUIMuHelper::RegisterButton(int Identificador, CButtonTap butt
 
 void SEASON3B::CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Identificador)
 {
-    cButtonMap::iterator li = m_ButtonList.find(Identificador);
+    auto li = m_ButtonList.find(Identificador);
 
     if (li != m_ButtonList.end())
     {
@@ -496,7 +496,7 @@ void SEASON3B::CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Id
 void SEASON3B::CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, unicode::t_string btname, unicode::t_string tooltiptext, int Identificador, int iNumTab)
 {
     CButtonTap cBTN;
-    CNewUIButton* button = new CNewUIButton();
+    auto* button = new CNewUIButton();
 
     button->ChangeButtonImgState(1, imgindex, overflg, isimgwidth, bClickEffect);
     button->ChangeButtonInfo(x, y, sx, sy);
@@ -518,7 +518,7 @@ void SEASON3B::CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, 
 
 void SEASON3B::CNewUIMuHelper::RenderBtnList()
 {
-    cButtonMap::iterator li = m_ButtonList.begin();
+    auto li = m_ButtonList.begin();
 
     for (; li != m_ButtonList.end(); li++)
     {
@@ -535,7 +535,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBtnList()
 {
     int Identificador = -1;
 
-    cButtonMap::iterator li = m_ButtonList.begin();
+    auto li = m_ButtonList.begin();
 
     for (; li != m_ButtonList.end(); li++)
     {
@@ -557,7 +557,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBtnList()
 
 void SEASON3B::CNewUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Identificador)
 {
-    cCheckBoxMap::iterator li = m_CheckBoxList.find(Identificador);
+    auto li = m_CheckBoxList.find(Identificador);
 
     if (li != m_CheckBoxList.end())
     {
@@ -583,7 +583,7 @@ void SEASON3B::CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx
 {
     CheckBoxTap cBOX;
 
-    CNewUICheckBox* cbox = new CNewUICheckBox;
+    auto* cbox = new CNewUICheckBox;
 
     cbox->CheckBoxImgState(imgindex);
     cbox->CheckBoxInfo(x, y, sx, sy);
@@ -600,7 +600,7 @@ void SEASON3B::CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx
 
 void SEASON3B::CNewUIMuHelper::RenderBoxList()
 {
-    cCheckBoxMap::iterator li = m_CheckBoxList.begin();
+    auto li = m_CheckBoxList.begin();
 
     for (; li != m_CheckBoxList.end(); li++)
     {
@@ -617,7 +617,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBoxList()
 {
     int Identificador = -1;
 
-    cCheckBoxMap::iterator li = m_CheckBoxList.begin();
+    auto li = m_CheckBoxList.begin();
 
     for (; li != m_CheckBoxList.end(); li++)
     {
@@ -639,7 +639,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBoxList()
 
 void SEASON3B::CNewUIMuHelper::RenderTextureList()
 {
-    cTextureMap::iterator li = m_TextureList.begin();
+    auto li = m_TextureList.begin();
 
     for (; li != m_TextureList.end(); li++)
     {
@@ -656,7 +656,7 @@ int SEASON3B::CNewUIMuHelper::UpdateTextureList()
 {
     int Identificador = -1;
 
-    cTextureMap::iterator li = m_TextureList.begin();
+    auto li = m_TextureList.begin();
 
     for (; li != m_TextureList.end(); li++)
     {
@@ -676,7 +676,7 @@ int SEASON3B::CNewUIMuHelper::UpdateTextureList()
 
 void SEASON3B::CNewUIMuHelper::RegisterTextureCharacter(BYTE class_character, int Identificador)
 {
-    cTextureMap::iterator li = m_TextureList.find(Identificador);
+    auto li = m_TextureList.find(Identificador);
 
     if (li != m_TextureList.end())
     {
@@ -719,7 +719,7 @@ void SEASON3B::CNewUIMuHelper::InsertTexture(int imgindex, int x, int y, int sx,
 
 void SEASON3B::CNewUIMuHelper::RenderTextList()
 {
-    cTextNameMap::iterator li = m_TextNameList.begin();
+    auto li = m_TextNameList.begin();
 
     for (; li != m_TextNameList.end(); li++)
     {
@@ -734,7 +734,7 @@ void SEASON3B::CNewUIMuHelper::RenderTextList()
 
 void SEASON3B::CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int Identificador)
 {
-    cTextNameMap::iterator li = m_TextNameList.find(Identificador);
+    auto li = m_TextNameList.find(Identificador);
 
     if (li != m_TextNameList.end())
     {

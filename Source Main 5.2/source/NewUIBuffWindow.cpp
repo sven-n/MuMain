@@ -142,7 +142,7 @@ bool SEASON3B::CNewUIBuffWindow::UpdateMouseEvent()
     std::list<eBuffState>::iterator iter;
     for (iter = buffstate.begin(); iter != buffstate.end(); )
     {
-        std::list<eBuffState>::iterator tempiter = iter;
+        auto tempiter = iter;
         ++iter;
         eBuffState buff = (*tempiter);
 
@@ -214,7 +214,7 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffStatus(BUFF_RENDER renderstate)
     std::list<eBuffState>::iterator iter;
     for (iter = buffstate.begin(); iter != buffstate.end(); )
     {
-        std::list<eBuffState>::iterator tempiter = iter;
+        auto tempiter = iter;
         ++iter;
         eBuffState buff = (*tempiter);
 

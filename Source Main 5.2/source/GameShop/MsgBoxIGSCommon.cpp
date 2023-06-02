@@ -87,7 +87,7 @@ bool CMsgBoxIGSCommon::Render()
 
 CALLBACK_RESULT CMsgBoxIGSCommon::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CMsgBoxIGSCommon* pOwnMsgBox = dynamic_cast<CMsgBoxIGSCommon*>(pOwner);
+    auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSCommon*>(pOwner);
 
     if (pOwnMsgBox)
     {

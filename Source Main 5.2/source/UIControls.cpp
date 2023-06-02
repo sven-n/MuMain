@@ -179,7 +179,7 @@ void CUIMessage::GetUIMessage()
 {
     if (m_MessageList.empty()) return;
 
-    std::deque<UI_MESSAGE>::iterator msgiter = m_MessageList.begin();
+    auto msgiter = m_MessageList.begin();
     m_WorkMessage.m_iMessage = msgiter->m_iMessage;
     m_WorkMessage.m_iParam1 = msgiter->m_iParam1;
     m_WorkMessage.m_iParam2 = msgiter->m_iParam2;
@@ -1275,7 +1275,7 @@ BOOL CUIGuildListBox::DoSubMouseAction()
             float fWidth = 12;
             float fHeight = 10;
             float x = (float)m_iPos_x + m_iWidth - 20 - fWidth;
-            float y = (float)iPos_y;
+            auto y = (float)iPos_y;
             if (MouseX >= x && MouseX < x + fWidth && MouseY >= y && MouseY < y + fHeight)
             {
                 if (MouseLButtonPush)
@@ -3026,7 +3026,7 @@ BOOL ClipboardCheck(HWND hWnd)
     {
         HGLOBAL hglb = GetClipboardData(CF_TEXT);
         if (hglb) {
-            LPSTR lpstr = (LPSTR)GlobalLock(hglb);
+            auto lpstr = (LPSTR)GlobalLock(hglb);
             int iLength = strlen(lpstr);
             for (int i = 0; i < iLength; ++i)
             {
@@ -3049,7 +3049,7 @@ BOOL ClipboardCheck(HWND hWnd)
 
 LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    CUITextInputBox* pTextInputBox = (CUITextInputBox*)GetWindowLongW(hWnd, GWL_USERDATA);
+    auto* pTextInputBox = (CUITextInputBox*)GetWindowLongW(hWnd, GWL_USERDATA);
 
     if (pTextInputBox == NULL)
         return 0;
@@ -3105,7 +3105,7 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         default:
         {
-            wchar_t Char = (wchar_t)(wParam);
+            auto Char = (wchar_t)(wParam);
             if (Char >= 25 && Char <= 28) return 0;
 
             wParam = g_pMultiLanguage->ConvertFulltoHalfWidthChar(wParam);

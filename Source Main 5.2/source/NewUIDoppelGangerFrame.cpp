@@ -283,7 +283,7 @@ void CNewUIDoppelGangerFrame::SetPartyMemberRcvd()
 
 void CNewUIDoppelGangerFrame::SetPartyMemberInfo(WORD wIndex, float fPosition)
 {
-    std::map<WORD, PARTY_POSITION>::iterator iter = m_PartyPositionMap.find(wIndex);
+    auto iter = m_PartyPositionMap.find(wIndex);
     if (iter == m_PartyPositionMap.end())
     {
         PARTY_POSITION party_pos;

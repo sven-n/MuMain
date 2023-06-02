@@ -289,7 +289,7 @@ void CNewUIMixInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD
 {
     if (pClass)
     {
-        CNewUIMixInventory* pMixInventory = (CNewUIMixInventory*)pClass;
+        auto* pMixInventory = (CNewUIMixInventory*)pClass;
         pMixInventory->RenderMixEffect();
     }
 }

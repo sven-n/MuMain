@@ -796,7 +796,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_MONSTER01 + 162:
     case MODEL_MONSTER01 + 163:
     {
-        float fRotation = (float)((int)(WorldTime * 0.1f) % 360);
+        auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
         float fAngle = (sinf(WorldTime * 0.003f) + 1.0f) * 0.4f + 1.5f;
         vec3_t vWorldPos, vLight;
         switch (o->Type)
@@ -882,7 +882,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         return false;
     }
 
-    float fRotation = (float)((int)(WorldTime * 0.1f) % 360);
+    auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
     float fAngle = (sinf(WorldTime * 0.004f) + 1.0f) * 0.4f + 0.2f;
     vec3_t vWorldPos, vLight;
     Vector(0.1f, 0.4f, 0.5f, vLight);

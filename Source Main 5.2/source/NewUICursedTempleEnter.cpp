@@ -350,7 +350,7 @@ void SEASON3B::CNewUICursedTempleEnter::SetCursedTempleEnterInfo(const BYTE* cur
 
 void SEASON3B::CNewUICursedTempleEnter::ReceiveCursedTempleEnterInfo(const BYTE* ReceiveBuffer)
 {
-    LPPMSG_CURSED_TEMPLE_USER_COUNT data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
+    auto data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
 
     int enterlevel = -1;
 

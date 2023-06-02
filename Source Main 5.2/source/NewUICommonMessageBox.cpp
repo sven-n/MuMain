@@ -300,7 +300,7 @@ SEASON3B::CNewUICommonMessageBox::CNewUICommonMessageBox()
 
 SEASON3B::CNewUICommonMessageBox::~CNewUICommonMessageBox()
 {
-    type_vector_msgdata::iterator vi = m_MsgDataList.begin();
+    auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
     {
         SAFE_DELETE(*vi);
@@ -488,7 +488,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 
     if (TextExtentWidth <= (DWORD)_TextSize)
     {
-        MSGBOX_TEXTDATA* pMsg = new MSGBOX_TEXTDATA;
+        auto* pMsg = new MSGBOX_TEXTDATA;
         pMsg->strMsg = strMsg;
         pMsg->dwColor = dwColor;
         pMsg->byFontType = byFontType;
@@ -520,7 +520,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
                 strCutText = type_string(strRemainText, 0, prev_offset/* size */);
                 strRemainText = type_string(strRemainText, prev_offset, strRemainText.size() - prev_offset/* size */);
 
-                MSGBOX_TEXTDATA* pMsg = new MSGBOX_TEXTDATA;
+                auto* pMsg = new MSGBOX_TEXTDATA;
                 pMsg->strMsg = strCutText;
                 pMsg->dwColor = dwColor;
                 pMsg->byFontType = byFontType;
@@ -532,7 +532,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 
                 if (TextExtentWidth <= (DWORD)_TextSize)
                 {
-                    MSGBOX_TEXTDATA* pMsg = new MSGBOX_TEXTDATA;
+                    auto* pMsg = new MSGBOX_TEXTDATA;
                     pMsg->strMsg = strRemainText;
                     pMsg->dwColor = dwColor;
                     pMsg->byFontType = byFontType;
@@ -608,7 +608,7 @@ void SEASON3B::CNewUICommonMessageBox::RenderTexts()
     float x, y;
 
     x = GetPos().x; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
-    type_vector_msgdata::iterator vi = m_MsgDataList.begin();
+    auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
     {
         g_pRenderText->SetTextColor((*vi)->dwColor);
@@ -657,7 +657,7 @@ void SEASON3B::CNewUICommonMessageBox::LockOkButton()
 
 CALLBACK_RESULT SEASON3B::CNewUICommonMessageBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CNewUICommonMessageBox* pMsgBox = dynamic_cast<CNewUICommonMessageBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CNewUICommonMessageBox*>(pOwner);
     if (pMsgBox)
     {
         switch (pMsgBox->GetType())
@@ -766,7 +766,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::Release()
     if (g_pNewUI3DRenderMng)
         g_pNewUI3DRenderMng->Remove3DRenderObj(this);
 
-    type_vector_msgdata::iterator vi = m_MsgDataList.begin();
+    auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
     {
         SAFE_DELETE(*vi);
@@ -815,7 +815,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::AddMsg(const type_string& strMsg, DWORD
 
 CALLBACK_RESULT SEASON3B::CNewUI3DItemCommonMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CNewUI3DItemCommonMsgBox* pMsgBox = dynamic_cast<CNewUI3DItemCommonMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CNewUI3DItemCommonMsgBox*>(pOwner);
     if (pMsgBox)
     {
         switch (pMsgBox->GetType())
@@ -900,7 +900,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
 
     if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
     {
-        MSGBOX_TEXTDATA* pMsg = new MSGBOX_TEXTDATA;
+        auto* pMsg = new MSGBOX_TEXTDATA;
         pMsg->strMsg = strMsg;
         pMsg->dwColor = dwColor;
         pMsg->byFontType = byFontType;
@@ -934,7 +934,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
                 strCutText = type_string(strRemainText, 0, prev_offset/* size */);
                 strRemainText = type_string(strRemainText, prev_offset, strRemainText.size() - prev_offset/* size */);
 
-                MSGBOX_TEXTDATA* pMsg = new MSGBOX_TEXTDATA;
+                auto* pMsg = new MSGBOX_TEXTDATA;
                 pMsg->strMsg = strCutText;
                 pMsg->dwColor = dwColor;
                 pMsg->byFontType = byFontType;
@@ -946,7 +946,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
 
                 if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
                 {
-                    MSGBOX_TEXTDATA* pMsg = new MSGBOX_TEXTDATA;
+                    auto* pMsg = new MSGBOX_TEXTDATA;
                     pMsg->strMsg = strRemainText;
                     pMsg->dwColor = dwColor;
                     pMsg->byFontType = byFontType;
@@ -1080,7 +1080,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderTexts()
     float x, y;
 
     x = GetPos().x + MSGBOX_TEXT_LEFT_BLANK_3DITEM; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
-    type_vector_msgdata::iterator vi = m_MsgDataList.begin();
+    auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
     {
         g_pRenderText->SetTextColor((*vi)->dwColor);
@@ -1550,7 +1550,7 @@ bool SEASON3B::CFenrirRepairMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CFenrirRepairMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CFenrirRepairMsgBox* pMsgBox = dynamic_cast<CFenrirRepairMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CFenrirRepairMsgBox*>(pOwner);
     if (pMsgBox == false)
     {
         return CALLBACK_CONTINUE;
@@ -2722,7 +2722,7 @@ bool SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CNewUI3DItemCommonMsgBox* pMsgBox = dynamic_cast<CNewUI3DItemCommonMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CNewUI3DItemCommonMsgBox*>(pOwner);
     if (pMsgBox == false)
     {
         return CALLBACK_CONTINUE;

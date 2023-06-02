@@ -662,7 +662,7 @@ CBNode<T, S>* CBTree<T, S>::Add(T NewElement, S CompValue)
     if (pNode == NULL)
     {
         m_lCount++;
-        CBNode<T, S>* pOne = new CBNode<T, S>(NewElement, CompValue);
+        auto* pOne = new CBNode<T, S>(NewElement, CompValue);
 
         if (CompValue < pPrev->GetValue())
         {

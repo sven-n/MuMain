@@ -1652,8 +1652,8 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     vec3_t Angle = { 0.f, 0.f, 0.f };
                     for (int i = 0; i < 2; ++i)
                     {
-                        float fAngle = float(rand() % 360);
-                        float fDistance = float(rand() % 600 + 200);
+                        auto fAngle = float(rand() % 360);
+                        auto fDistance = float(rand() % 600 + 200);
                         Position[0] = o->Position[0] + sinf(fAngle) * fDistance;
                         Position[1] = o->Position[1] + cosf(fAngle) * fDistance;
                         Position[2] = o->Position[2] + 800.f;

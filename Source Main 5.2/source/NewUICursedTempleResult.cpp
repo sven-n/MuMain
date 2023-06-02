@@ -279,9 +279,9 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
     DrawText(Text, m_Pos.x, m_Pos.y + 38, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 
     int i = 0;
-    for (CT_GameResult_list::iterator iter = m_AlliedTeamGameResult.begin(); iter != m_AlliedTeamGameResult.end(); )
+    for (auto iter = m_AlliedTeamGameResult.begin(); iter != m_AlliedTeamGameResult.end(); )
     {
-        CT_GameResult_list::iterator curiter = iter;
+        auto curiter = iter;
         ++iter;
         CursedTempleGameResult& info = *curiter;
 
@@ -295,9 +295,9 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
     }
 
     i = 0;
-    for (CT_GameResult_list::iterator emiter = m_IllusionTeamGameResult.begin(); emiter != m_IllusionTeamGameResult.end(); )
+    for (auto emiter = m_IllusionTeamGameResult.begin(); emiter != m_IllusionTeamGameResult.end(); )
     {
-        CT_GameResult_list::iterator curiter = emiter;
+        auto curiter = emiter;
         ++emiter;
         CursedTempleGameResult& info = *curiter;
 
@@ -332,7 +332,7 @@ bool SEASON3B::CNewUICursedTempleResult::Render()
 
 void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
 {
-    LPPMSG_CURSED_TEMPLE_RESULT data = (LPPMSG_CURSED_TEMPLE_RESULT)ReceiveBuffer;
+    auto data = (LPPMSG_CURSED_TEMPLE_RESULT)ReceiveBuffer;
 
     int	alliedPoint = data->btAlliedPoint;
     int	illusionPoint = data->btIllusionPoint;
@@ -361,7 +361,7 @@ void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYT
 
     for (int i = 0; i < userCount; i++)
     {
-        LPPMSG_CURSED_TEMPLE_USER_ADD_EXP data2 = (LPPMSG_CURSED_TEMPLE_USER_ADD_EXP)(ReceiveBuffer + Offset);
+        auto data2 = (LPPMSG_CURSED_TEMPLE_USER_ADD_EXP)(ReceiveBuffer + Offset);
 
         CursedTempleGameResult TempData;
         memset(&TempData.s_characterId, 0, sizeof(char) * (MAX_ID_SIZE + 1));

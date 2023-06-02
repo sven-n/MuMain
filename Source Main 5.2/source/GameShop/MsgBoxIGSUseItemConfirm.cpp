@@ -112,7 +112,7 @@ bool CMsgBoxIGSUseItemConfirm::Render()
 // LButtonUp
 CALLBACK_RESULT CMsgBoxIGSUseItemConfirm::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CMsgBoxIGSUseItemConfirm* pOwnMsgBox = dynamic_cast<CMsgBoxIGSUseItemConfirm*>(pOwner);
+    auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSUseItemConfirm*>(pOwner);
 
     if (pOwnMsgBox)
     {
@@ -136,7 +136,7 @@ CALLBACK_RESULT CMsgBoxIGSUseItemConfirm::LButtonUp(class CNewUIMessageBoxBase* 
 // OKButtonDown
 CALLBACK_RESULT CMsgBoxIGSUseItemConfirm::OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CMsgBoxIGSUseItemConfirm* pOwnMsgBox = dynamic_cast<CMsgBoxIGSUseItemConfirm*>(pOwner);
+    auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSUseItemConfirm*>(pOwner);
 
     // 현재버프증 사용하려는 버프타입이 같으면 경고 메세지 처리
     BuffScriptLoader& pBuffInfo = TheBuffInfo();

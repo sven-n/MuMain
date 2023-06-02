@@ -59,7 +59,7 @@ bool CCameraMove::LoadCameraWalkScript(const std::string& filename)
 
     for (int i = 0; i < (int)size; i++)
     {
-        WAYPOINT* pWayPoint = new WAYPOINT;
+        auto* pWayPoint = new WAYPOINT;
         fread(pWayPoint, sizeof(WAYPOINT), 1, fp);
         m_listWayPoint.push_back(pWayPoint);
     }
@@ -69,7 +69,7 @@ bool CCameraMove::LoadCameraWalkScript(const std::string& filename)
 }
 void CCameraMove::UnLoadCameraWalkScript()
 {
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++)
         delete (*iter);
     m_listWayPoint.clear();
@@ -87,7 +87,7 @@ bool CCameraMove::SaveCameraWalkScript(const std::string& filename)
         fwrite(&dwSign, 4, 1, fp);
         size_t size = m_listWayPoint.size();
         fwrite(&size, sizeof(size_t), 1, fp);
-        t_WayPointList::iterator iter = m_listWayPoint.begin();
+        auto iter = m_listWayPoint.begin();
         for (; iter != m_listWayPoint.end(); iter++) {
             fwrite((*iter), sizeof(WAYPOINT), 1, fp);
         }
@@ -99,7 +99,7 @@ bool CCameraMove::SaveCameraWalkScript(const std::string& filename)
 
 void CCameraMove::AddWayPoint(int iGridX, int iGridY, float fCameraMoveAccel, float fCameraDistanceLevel, int iDelay)
 {
-    WAYPOINT* pWayPoint = new WAYPOINT;
+    auto* pWayPoint = new WAYPOINT;
     pWayPoint->iIndex = TERRAIN_INDEX_REPEAT(iGridX, iGridY);
     pWayPoint->fCameraX = iGridX * TERRAIN_SCALE;
     pWayPoint->fCameraY = iGridY * TERRAIN_SCALE;
@@ -123,7 +123,7 @@ void CCameraMove::AddWayPoint(int iGridX, int iGridY, float fCameraMoveAccel, fl
 }
 void CCameraMove::RemoveWayPoint(int iGridX, int iGridY)
 {
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++) {
         if ((*iter)->iIndex == TERRAIN_INDEX_REPEAT(iGridX, iGridY)) {
             if ((*iter)->iIndex == (int)GetSelectedTile())
@@ -136,7 +136,7 @@ void CCameraMove::RemoveWayPoint(int iGridX, int iGridY)
 
 void CCameraMove::SetCameraMoveAccel(int iTileIndex, float fCameraMoveAccel)
 {
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++) {
         if ((*iter)->iIndex == iTileIndex) {
             if (fCameraMoveAccel > 40.f)
@@ -150,7 +150,7 @@ void CCameraMove::SetCameraMoveAccel(int iTileIndex, float fCameraMoveAccel)
 }
 void CCameraMove::SetCameraDistanceLevel(int iTileIndex, float fCameraDistanceLevel)
 {
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++) {
         if ((*iter)->iIndex == iTileIndex) {
             if (fCameraDistanceLevel > 20.f)
@@ -164,7 +164,7 @@ void CCameraMove::SetCameraDistanceLevel(int iTileIndex, float fCameraDistanceLe
 }
 void CCameraMove::SetDelay(int iTileIndex, int iDelay)
 {
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++) {
         if ((*iter)->iIndex == iTileIndex) {
             if (iDelay < 0)
@@ -175,7 +175,7 @@ void CCameraMove::SetDelay(int iTileIndex, int iDelay)
 }
 float CCameraMove::GetCameraMoveAccel(int iTileIndex)
 {
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++) {
         if ((*iter)->iIndex == iTileIndex) {
             return (*iter)->fCameraMoveAccel;
@@ -185,7 +185,7 @@ float CCameraMove::GetCameraMoveAccel(int iTileIndex)
 }
 float CCameraMove::GetCameraDistanceLevel(int iTileIndex)
 {
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++) {
         if ((*iter)->iIndex == iTileIndex) {
             return (*iter)->fCameraDistanceLevel;
@@ -195,7 +195,7 @@ float CCameraMove::GetCameraDistanceLevel(int iTileIndex)
 }
 int CCameraMove::GetDelay(int iTileIndex)
 {
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++) {
         if ((*iter)->iIndex == iTileIndex) {
             return (*iter)->iDelay;
@@ -360,7 +360,7 @@ void CCameraMove::RenderWayPoint()
 
     glBegin(GL_QUADS);
     glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++) {
         WAYPOINT* pWayPoint = (*iter);
         glNormal3f(0.0f, 0.0f, 1.0f);
@@ -389,7 +389,7 @@ void CCameraMove::RenderWayPoint()
 void CCameraMove::SetSelectedTile(int iTileIndex)
 {
     //. find
-    t_WayPointList::iterator iter = m_listWayPoint.begin();
+    auto iter = m_listWayPoint.begin();
     for (; iter != m_listWayPoint.end(); iter++) {
         if ((*iter)->iIndex == iTileIndex) {
             m_iSelectedTile = iTileIndex;

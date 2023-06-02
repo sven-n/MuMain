@@ -156,7 +156,7 @@ void SEASON3B::CNewUIItemMng::DeleteItem(ITEM* pItem)
 
     if (--pItem->RefCount <= 0)
     {
-        type_list_item::iterator li = m_listItem.begin();
+        auto li = m_listItem.begin();
         for (; li != m_listItem.end(); li++)
         {
             if ((*li) == pItem)
@@ -182,7 +182,7 @@ void SEASON3B::CNewUIItemMng::DeleteDuplicatedItem(ITEM* pItem)
 
 void SEASON3B::CNewUIItemMng::DeleteAllItems()
 {
-    type_list_item::iterator li = m_listItem.begin();
+    auto li = m_listItem.begin();
     for (; li != m_listItem.end(); li++)
     {
         SAFE_DELETE(*li);
@@ -203,7 +203,7 @@ void SEASON3B::CNewUIItemMng::Update()
     m_UpdateTimer.UpdateTime();
     if (m_UpdateTimer.IsTime())
     {
-        type_list_item::iterator li = m_listItem.begin();
+        auto li = m_listItem.begin();
         for (; li != m_listItem.end(); )
         {
             if ((*li)->RefCount <= 0)
@@ -233,7 +233,7 @@ DWORD SEASON3B::CNewUIItemMng::FindAvailableKeyIndex(DWORD dwSeed)
 {
     if (m_dwAlternate > 0)
     {
-        type_list_item::iterator li = m_listItem.begin();
+        auto li = m_listItem.begin();
         for (; li != m_listItem.end(); li++)
         {
             ITEM* pItem = (*li);

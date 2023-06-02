@@ -108,7 +108,7 @@ void CMsgBoxIGSStorageItemInfo::SetAddCallbackFunc()
 
 CALLBACK_RESULT CMsgBoxIGSStorageItemInfo::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CMsgBoxIGSStorageItemInfo* pOwnMsgBox = dynamic_cast<CMsgBoxIGSStorageItemInfo*>(pOwner);
+    auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSStorageItemInfo*>(pOwner);
 
     if (pOwnMsgBox)
     {
@@ -130,7 +130,7 @@ CALLBACK_RESULT CMsgBoxIGSStorageItemInfo::LButtonUp(class CNewUIMessageBoxBase*
 
 CALLBACK_RESULT CMsgBoxIGSStorageItemInfo::OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    CMsgBoxIGSStorageItemInfo* pOwnMsgBox = dynamic_cast<CMsgBoxIGSStorageItemInfo*>(pOwner);
+    auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSStorageItemInfo*>(pOwner);
 
     CMsgBoxIGSUseItemConfirm* pMsgBox = NULL;
     CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSUseItemConfirmLayout), &pMsgBox);

@@ -74,7 +74,7 @@ namespace giPetManager
     {
         if (c->m_pPet != NULL)
         {
-            CSPetSystem* pPet = (CSPetSystem*)c->m_pPet;
+            auto* pPet = (CSPetSystem*)c->m_pPet;
             pPet->MovePet();
         }
     }
@@ -84,7 +84,7 @@ namespace giPetManager
         OBJECT* o = &c->Object;
         if (c->m_pPet != NULL)
         {
-            CSPetSystem* pPet = (CSPetSystem*)c->m_pPet;
+            auto* pPet = (CSPetSystem*)c->m_pPet;
 
             if (g_isCharacterBuff(o, eBuff_Cloaking))
             {
@@ -157,7 +157,7 @@ namespace giPetManager
             {
                 if (Index >= AT_PET_COMMAND_DEFAULT && Index < AT_PET_COMMAND_END)
                 {
-                    CSPetSystem* pPet = (CSPetSystem*)c->m_pPet;
+                    auto* pPet = (CSPetSystem*)c->m_pPet;
 
                     if (Index == AT_PET_COMMAND_TARGET)
                     {
@@ -190,7 +190,7 @@ namespace giPetManager
     {
         if (c->m_pPet != NULL)
         {
-            CSPetSystem* pPet = (CSPetSystem*)c->m_pPet;
+            auto* pPet = (CSPetSystem*)c->m_pPet;
             pPet->SetCommand(Key, Cmd);
         }
     }
@@ -199,7 +199,7 @@ namespace giPetManager
     {
         if (c->m_pPet != NULL)
         {
-            CSPetSystem* pPet = (CSPetSystem*)c->m_pPet;
+            auto* pPet = (CSPetSystem*)c->m_pPet;
             pPet->SetAttack(Key, attackType);
         }
     }

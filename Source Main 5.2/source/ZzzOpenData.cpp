@@ -308,7 +308,7 @@ void OpenPlayers()
     gLoadData.AccessModel(MODEL_BOOTS + 73, "Data\\Player\\", "BootMale74", -1);
 
     {
-        CPhysicsClothMesh* pCloth = new CPhysicsClothMesh[1];
+        auto* pCloth = new CPhysicsClothMesh[1];
         pCloth[0].Create(&Hero->Object, 2, 17, 0.0f, 0.0f, 0.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL, BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_PANTS + 18);
         delete[] pCloth;
     }

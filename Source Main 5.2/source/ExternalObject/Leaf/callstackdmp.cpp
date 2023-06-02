@@ -46,10 +46,10 @@ CCallStackDump::~CCallStackDump() { Clear(); }
 void CCallStackDump::Dump(const CONTEXT* pContext) {
     Clear();
 
-    DWORD* pEbp = (DWORD*)pContext->Ebp;
+    auto* pEbp = (DWORD*)pContext->Ebp;
     for (int i = 0; i < 64; i++)
     {
-        CCallStackFrame* pCallStackFrame = new CCallStackFrame;
+        auto* pCallStackFrame = new CCallStackFrame;
         if (!pCallStackFrame->Create(pEbp))
         {
             delete pCallStackFrame; break;
@@ -74,7 +74,7 @@ void CCallStackDump::Dump()
 }
 void CCallStackDump::Clear()
 {
-    type_framevect::iterator fvi = m_listFrame.begin();
+    auto fvi = m_listFrame.begin();
     for (; fvi != m_listFrame.end(); fvi++)
         delete (*fvi);
     m_listFrame.clear();

@@ -382,8 +382,8 @@ void CNewUINPCQuest::RenderItem3D()
     if (QUEST_ING != byCurQuestState)
         return;
 
-    float x = float(m_Pos.x + 30);
-    float y = float(m_Pos.y + 235);
+    auto x = float(m_Pos.x + 30);
+    auto y = float(m_Pos.y + 235);
     const float Height = 27.f;
 
     QUEST_ATTRIBUTE* pQuest = g_csQuest.GetCurQuestAttribute();

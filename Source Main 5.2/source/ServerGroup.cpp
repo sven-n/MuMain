@@ -20,7 +20,7 @@ CServerGroup::~CServerGroup()
 
 void CServerGroup::Release()
 {
-    type_listServer::iterator iterServer = m_listServerInfo.begin();
+    auto iterServer = m_listServerInfo.begin();
     for (; iterServer != m_listServerInfo.end(); iterServer++)
     {
         delete (*iterServer);
@@ -66,7 +66,7 @@ int CServerGroup::GetServerSize()
 
 CServerInfo* CServerGroup::GetServerInfo(int iSequence)
 {
-    type_listServer::iterator iterServer = m_listServerInfo.begin();
+    auto iterServer = m_listServerInfo.begin();
 
     while (iterServer != m_listServerInfo.end())
     {

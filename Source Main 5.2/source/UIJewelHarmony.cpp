@@ -58,7 +58,7 @@ namespace
 
 JewelHarmonyInfo* JewelHarmonyInfo::MakeInfo()
 {
-    JewelHarmonyInfo* info = new JewelHarmonyInfo;
+    auto* info = new JewelHarmonyInfo;
     return info;
 }
 

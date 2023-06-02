@@ -106,7 +106,7 @@ int CMultiLanguage::ConvertCharToWideStr(std::wstring& wstrDest, LPCSTR lpString
     // calculate the number of characters needed to hold the wide-character version of the string.
     nLenOfWideCharStr = MultiByteToWideChar(iConversionType, 0, lpString, -1, NULL, 0);
     // memory allocation
-    wchar_t* pwszStr = new wchar_t[nLenOfWideCharStr];
+    auto* pwszStr = new wchar_t[nLenOfWideCharStr];
 
     // convert the multi-byte string to a wide-character string.
     MultiByteToWideChar(iConversionType, 0, lpString, -1, pwszStr, nLenOfWideCharStr);
@@ -218,7 +218,7 @@ BOOL CMultiLanguage::_TextOut(HDC hdc, int nXStart, int nYStart, LPCSTR lpString
 
 WPARAM CMultiLanguage::ConvertFulltoHalfWidthChar(DWORD wParam)
 {
-    wchar_t Char = (wchar_t)(wParam);
+    auto Char = (wchar_t)(wParam);
 
     if (Char >= 0xFF01 && Char <= 0xFF5A)
         wParam -= 0xFEE0;

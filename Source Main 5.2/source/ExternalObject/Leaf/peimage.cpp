@@ -17,7 +17,7 @@ PIMAGE_DOS_HEADER leaf::GetPtrOfImageDosHeader(void* pImage)
     if (IsBadReadPtr(pImage, sizeof(IMAGE_DOS_HEADER)))
         return NULL;
 
-    PIMAGE_DOS_HEADER _pImageDosHeader = (PIMAGE_DOS_HEADER)pImage;
+    auto _pImageDosHeader = (PIMAGE_DOS_HEADER)pImage;
     if (_pImageDosHeader->e_magic != IMAGE_DOS_SIGNATURE)
         return NULL;
 
@@ -34,7 +34,7 @@ PIMAGE_NT_HEADERS leaf::GetPtrOfImageNtHeaders(void* pImage)
     if (NULL == pImageDosHeader)
         return NULL;
 
-    PIMAGE_NT_HEADERS _pImageNtHeaders = (PIMAGE_NT_HEADERS)((BYTE*)pImage + pImageDosHeader->e_lfanew);
+    auto _pImageNtHeaders = (PIMAGE_NT_HEADERS)((BYTE*)pImage + pImageDosHeader->e_lfanew);
     if (IsBadReadPtr(_pImageNtHeaders, sizeof(IMAGE_NT_HEADERS)))
         return NULL;
     if (_pImageNtHeaders->Signature != IMAGE_NT_SIGNATURE)
@@ -189,7 +189,7 @@ PPE_INJECTION_PACK_HEADER leaf::GetPtrOfInjectionPackHeader(void* pImage)
         + sizeof(IMAGE_NT_HEADERS) /* NT Headers */
         + (sizeof(IMAGE_SECTION_HEADER) * pImageNtHeaders->FileHeader.NumberOfSections); /* Section Headers */
 
-    PPE_INJECTION_PACK_HEADER _pIPH = (PPE_INJECTION_PACK_HEADER)((BYTE*)pImage + dwBaseOfIPH);
+    auto _pIPH = (PPE_INJECTION_PACK_HEADER)((BYTE*)pImage + dwBaseOfIPH);
     if (_pIPH->dwSignature != PE_INJECTION_PACK_SIGNATURE)	//. PIPH
         return NULL;
 
@@ -208,7 +208,7 @@ PPE_INJECTION_DATA_HEADER leaf::GetPtrOfInjectionDataHeader(void* pImage, int in
 
     BYTE* pbyIPD = (BYTE*)pImage + _pIPH->dwBaseOfIPD;
 
-    PPE_INJECTION_DATA_HEADER _pNextIDH = (PPE_INJECTION_DATA_HEADER)pbyIPD;
+    auto _pNextIDH = (PPE_INJECTION_DATA_HEADER)pbyIPD;
 
     for (int i = 0; i < (int)_pIPH->dwNumberOfIPD; i++)
     {
@@ -248,7 +248,7 @@ PPE_INJECTION_DATA_HEADER leaf::GetPtrOfInjectionDataHeader(void* pImage, const 
         return false;
 
     BYTE* pbyIPD = (BYTE*)pImage + _pIPH->dwBaseOfIPD;
-    PPE_INJECTION_DATA_HEADER _pNextIDH = (PPE_INJECTION_DATA_HEADER)pbyIPD;
+    auto _pNextIDH = (PPE_INJECTION_DATA_HEADER)pbyIPD;
     for (int i = 0; i < (int)_pIPH->dwNumberOfIPD; i++)
     {
         PPE_INJECTION_DATA_HEADER _pCurIDH = _pNextIDH;
@@ -444,7 +444,7 @@ bool CPeImageDataInjector::PushBack(const std::string& strDataName, IN const std
     if (0xFFFFFFFF == dwSizeOfFile || NO_ERROR != GetLastError())
         return false;
 
-    INJECTION_DATA* pInjectionData = new INJECTION_DATA;
+    auto* pInjectionData = new INJECTION_DATA;
     pInjectionData->strDataName = strDataName;
     pInjectionData->SizeOfBuffer = dwSizeOfFile;
     pInjectionData->pvBuffer = new char[dwSizeOfFile];
@@ -472,7 +472,7 @@ bool CPeImageDataInjector::PushBack(const std::string& strDataName, IN const voi
     if (IsBadReadPtr(pcvBuffer, SizeOfBuffer))
         return false;
 
-    INJECTION_DATA* pInjectionData = new INJECTION_DATA;
+    auto* pInjectionData = new INJECTION_DATA;
     pInjectionData->strDataName = strDataName;
     pInjectionData->SizeOfBuffer = SizeOfBuffer;
     pInjectionData->pvBuffer = new char[SizeOfBuffer];
@@ -494,7 +494,7 @@ bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN 
     if (0xFFFFFFFF == dwSizeOfFile || NO_ERROR != GetLastError())
         return false;
 
-    INJECTION_DATA* pInjectionData = new INJECTION_DATA;
+    auto* pInjectionData = new INJECTION_DATA;
     pInjectionData->strDataName = strDataName;
     pInjectionData->SizeOfBuffer = dwSizeOfFile;
     pInjectionData->pvBuffer = new char[dwSizeOfFile];
@@ -505,7 +505,7 @@ bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN 
     {
         if (Index >= 0 && Index < (int)m_listInjectionData.size())
         {
-            std::vector<INJECTION_DATA*>::iterator where = m_listInjectionData.begin() + Index;
+            auto where = m_listInjectionData.begin() + Index;
             m_listInjectionData.insert(where, pInjectionData);
 
             CloseHandle(hFile);
@@ -526,7 +526,7 @@ bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN 
     if (IsBadReadPtr(pcvBuffer, SizeOfBuffer))
         return false;
 
-    INJECTION_DATA* pInjectionData = new INJECTION_DATA;
+    auto* pInjectionData = new INJECTION_DATA;
     pInjectionData->strDataName = strDataName;
     pInjectionData->SizeOfBuffer = SizeOfBuffer;
     pInjectionData->pvBuffer = new char[SizeOfBuffer];
@@ -535,7 +535,7 @@ bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN 
 
     if (Index >= 0 && Index < (int)m_listInjectionData.size())
     {
-        std::vector<INJECTION_DATA*>::iterator where = m_listInjectionData.begin() + Index;
+        auto where = m_listInjectionData.begin() + Index;
         m_listInjectionData.insert(where, pInjectionData);
 
         return true;
@@ -550,7 +550,7 @@ void CPeImageDataInjector::Remove(int Index)
 {
     if (Index >= 0 && Index < (int)m_listInjectionData.size())
     {
-        std::vector<INJECTION_DATA*>::iterator where = m_listInjectionData.begin() + Index;
+        auto where = m_listInjectionData.begin() + Index;
 
         delete[](*where)->pvBuffer;
         delete (*where);
@@ -560,7 +560,7 @@ void CPeImageDataInjector::Remove(int Index)
 }
 void CPeImageDataInjector::Remove(const std::string& strDataName)
 {
-    std::vector<INJECTION_DATA*>::iterator vi = m_listInjectionData.begin();
+    auto vi = m_listInjectionData.begin();
     for (; vi != m_listInjectionData.end(); vi++)
     {
         if ((*vi)->strDataName == strDataName)
@@ -574,7 +574,7 @@ void CPeImageDataInjector::Remove(const std::string& strDataName)
 }
 void CPeImageDataInjector::RemoveAll()
 {
-    std::vector<INJECTION_DATA*>::iterator vi = m_listInjectionData.begin();
+    auto vi = m_listInjectionData.begin();
     for (; vi != m_listInjectionData.end(); vi++)
     {
         delete[](*vi)->pvBuffer;
@@ -688,7 +688,7 @@ bool CPeImageDataInjector::BuildInjectionPack(const void* pOrigImage, bool bInje
     if (false == XorTrans.LoadKeyTable((PBYTE)pOrigImage + pOrigCodeSectionHeader->PointerToRawData, 0x200))
         return false;
 
-    std::vector<INJECTION_DATA*>::iterator vi = m_listInjectionData.begin();
+    auto vi = m_listInjectionData.begin();
     for (int index = 0; vi != m_listInjectionData.end(); vi++, index++)
     {
         INJECTION_DATA* pInjectionData = (*vi);

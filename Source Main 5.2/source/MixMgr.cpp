@@ -438,7 +438,7 @@ int CMixRecipes::CheckRecipeSimilarity(int iNumMixItems, CMixItem* pMixItems)
     memset(m_iMixSourceTest, 0, sizeof(int) * MAX_MIX_SOURCES);
 
     int iSimilarityPoint;
-    for (std::vector<MIX_RECIPE*>::iterator iter = m_Recipes.begin(); iter != m_Recipes.end(); ++iter)
+    for (auto iter = m_Recipes.begin(); iter != m_Recipes.end(); ++iter)
     {
         memset(m_iMixSourceTest, 0, sizeof(int) * MAX_MIX_SOURCES);
         for (int i = 0; i < (*iter)->m_iNumMixSoruces; ++i)
@@ -1137,7 +1137,7 @@ void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char* szFileName)
         }
         for (i = 0; i < iNumMixRecipes[j]; ++i)
         {
-            MIX_RECIPE* pMixRecipe = new MIX_RECIPE;
+            auto* pMixRecipe = new MIX_RECIPE;
             fread(pMixRecipe, iSize, 1, fp);
             BuxConvert((BYTE*)pMixRecipe, iSize);
             m_MixRecipe[j].AddRecipe(pMixRecipe);

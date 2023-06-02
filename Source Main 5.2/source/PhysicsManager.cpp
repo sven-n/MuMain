@@ -59,7 +59,7 @@ void CPhysicsVertex::UpdateForce(unsigned int iKey, DWORD dwType, float fWind)
     float fGravityRate = 1.0f;
 
     int iTemp = min(max(0, 5 - iKey), 4);
-    float fRand = (float)(iTemp == 0 ? 0 : iTemp + 2);
+    auto fRand = (float)(iTemp == 0 ? 0 : iTemp + 2);
 #ifndef DISABLE_WIND
     for (int i = 0; i < 3; ++i)
     {
@@ -753,7 +753,7 @@ BOOL CPhysicsCloth::PreventFromStretching(void)
 
 void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
 {
-    vec3_t* pvRenderPos = new vec3_t[m_iNumVertices];
+    auto* pvRenderPos = new vec3_t[m_iNumVertices];
 
     for (int j = 0; j < m_iNumVer; ++j)
     {
@@ -898,7 +898,7 @@ void CPhysicsCloth::RenderCollisions(void)
 void CPhysicsCloth::AddCollisionSphere(float fXPos, float fYPos, float fZPos, float fRadius, int iBone)
 {
 #ifdef ADD_COLLISION
-    CPhysicsColSphere* pCol = new CPhysicsColSphere;
+    auto* pCol = new CPhysicsColSphere;
     pCol->Init(fXPos, fYPos, fZPos, fRadius, iBone);
     m_lstCollision.AddTail(pCol);
 #endif

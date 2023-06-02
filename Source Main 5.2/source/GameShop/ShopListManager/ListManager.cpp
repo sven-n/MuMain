@@ -168,7 +168,7 @@ WZResult		CListManager::FileDownLoad() // OK
     {
         unsigned int ThreadID = 0;
 
-        HANDLE hHandle = (HANDLE)_beginthreadex(0, 0, CListManager::RunFileDownLoadThread, this, 0, &ThreadID);
+        auto hHandle = (HANDLE)_beginthreadex(0, 0, CListManager::RunFileDownLoadThread, this, 0, &ThreadID);
 
         if (hHandle == INVALID_HANDLE_VALUE)
         {
@@ -238,7 +238,7 @@ WZResult		CListManager::FileDownLoadImpl() // OK
 
 unsigned int __stdcall CListManager::RunFileDownLoadThread(LPVOID pParam) // OK
 {
-    CListManager* p = reinterpret_cast<CListManager*>(pParam);
+    auto* p = reinterpret_cast<CListManager*>(pParam);
 
     p->m_Result = p->FileDownLoadImpl();
 
