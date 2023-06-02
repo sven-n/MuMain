@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 // 공통 코드

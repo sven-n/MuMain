@@ -12,20 +12,20 @@ extern MARK_t GuildMark[MAX_MARKS];
 class CGuildCache
 {
 public:
-	CGuildCache();
-	virtual ~CGuildCache();
+    CGuildCache();
+    virtual ~CGuildCache();
 
 protected:
-	DWORD	m_dwCurrIndex;
+    DWORD	m_dwCurrIndex;
 
 public:
-	void Reset();
+    void Reset();
 
-	BOOL IsExistGuildMark( int nGuildKey );
-	int GetGuildMarkIndex( int nGuildKey );
+    BOOL IsExistGuildMark(int nGuildKey);
+    int GetGuildMarkIndex(int nGuildKey);
 
-	int MakeGuildMarkIndex( int nGuildKey );
-	int SetGuildMark( int nGuildKey, BYTE* UnionName, BYTE* GuildName,BYTE* Mark );
+    int MakeGuildMarkIndex(int nGuildKey);
+    int SetGuildMark(int nGuildKey, BYTE* UnionName, BYTE* GuildName, BYTE* Mark);
 };
 
 extern CGuildCache g_GuildCache;

@@ -107,7 +107,7 @@
 #define RENDER_ITEMVIEW_FAR   2000.f
 #define RENDER_ITEMVIEW_NEAR  20.f
 
-#define MAX_MODEL_MONSTER	400		
+#define MAX_MODEL_MONSTER	400
 
 #define MODEL_MONSTER01		MODEL_SKILL_END+1
 #define MODEL_MONSTER_END	MODEL_MONSTER01+MAX_MODEL_MONSTER
@@ -197,7 +197,7 @@ enum struct STORAGE_TYPE
     ATTACH_SOCKET_MIX = 13,
     DETACH_SOCKET_MIX = 14,
 #ifdef LEM_ADD_LUCKYITEM
-    LUCKYITEM_? = 15, TODO
+    LUCKYITEM_ ? = 15, TODO
     LUCKYITEM_ ? = 16, TODO
 #endif
 };
@@ -222,7 +222,6 @@ enum struct STORAGE_TYPE
 
 #define MAX_SETITEM_OPTIONS		12
 
-
 #define MAX_MY_SHOP_INVENTORY_INDEX (MAX_MY_INVENTORY_EX_INDEX + MAX_SHOP_INVENTORY)
 
 #define MAX_SHOPTITLE 36
@@ -232,7 +231,7 @@ enum struct STORAGE_TYPE
 
 #define MAX_KEYPADINPUT	( 10)
 
-#define TEXT_COLOR_WHITE    0 
+#define TEXT_COLOR_WHITE    0
 #define TEXT_COLOR_BLUE     1
 #define TEXT_COLOR_RED      2
 #define TEXT_COLOR_YELLOW   3
@@ -246,7 +245,6 @@ enum struct STORAGE_TYPE
 #define TEXT_COLOR_REDPURPLE  11
 #define TEXT_COLOR_VIOLET	12
 #define TEXT_COLOR_ORANGE	13
-
 
 ////////////////////////////////////////_inventory end_///////////////////////////////////////////////////////
 ////////////////////////////////////////_LodTerrain start_//////////////////////////////////////////////////////
@@ -328,7 +326,6 @@ enum struct STORAGE_TYPE
 #define MAX_CHATROOM_TEXT_LENGTH	150
 #define MAX_LANGUAGE_NAME_LENGTH	4
 
-
 #define MAX_GATES           512
 #define MAX_DIALOG			200
 
@@ -336,17 +333,13 @@ enum struct STORAGE_TYPE
 #define MAX_GIFT_MESSAGE_SIZE	200
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-
 #define MAX_LENGTH_DIALOG		( 300)
-
 
 #define MAX_ANSWER_FOR_DIALOG	( 10)
 
 #define MAX_LENGTH_ANSWER		( 64)
 
-
 #define MAX_ITEM_TYPE      16
-
 
 #define MAX_ITEM_INDEX     512
 
@@ -371,7 +364,7 @@ enum struct STORAGE_TYPE
 #define ITEM_SPEAR		 (3*MAX_ITEM_INDEX)
 #define ITEM_BOW		 (4*MAX_ITEM_INDEX)
 #define ITEM_STAFF		 (5*MAX_ITEM_INDEX)
-#define ITEM_SHIELD		 (6*MAX_ITEM_INDEX) 
+#define ITEM_SHIELD		 (6*MAX_ITEM_INDEX)
 #define ITEM_HELM		 (7*MAX_ITEM_INDEX)
 #define ITEM_ARMOR		 (8*MAX_ITEM_INDEX)
 #define ITEM_PANTS		 (9*MAX_ITEM_INDEX)
@@ -392,37 +385,37 @@ enum struct STORAGE_TYPE
 
 #define MAX_DUTY_CLASS		3
 
-#define SKILL_SWORD            0 
-#define SKILL_MACE             2 
-#define SKILL_BOW              3 
-#define SKILL_SPEAR            4 
-#define SKILL_STAFF            5 
+#define SKILL_SWORD            0
+#define SKILL_MACE             2
+#define SKILL_BOW              3
+#define SKILL_SPEAR            4
+#define SKILL_STAFF            5
 
-#define SKILL_CRY              8 
-#define SKILL_INVINCIBILITY    9 
-#define SKILL_DUAL_WEAPON      10 
+#define SKILL_CRY              8
+#define SKILL_INVINCIBILITY    9
+#define SKILL_DUAL_WEAPON      10
 #define SKILL_BASH             11
 #define SKILL_HEALING          12
 #define SKILL_SACRIFICE        13
 
-#define SKILL_STEALTH          16 
-#define SKILL_TRAP             17 
-#define SKILL_JAP              19 
-#define SKILL_TELEPORT         20 
-#define SKILL_DECOY            21 
+#define SKILL_STEALTH          16
+#define SKILL_TRAP             17
+#define SKILL_JAP              19
+#define SKILL_TELEPORT         20
+#define SKILL_DECOY            21
 
-#define SKILL_MULTIPLE_SHOT    24 
+#define SKILL_MULTIPLE_SHOT    24
 #define SKILL_CHARM            25
 #define SKILL_CONFUSE          26
 #define SKILL_CHANGE_SHAPE     27
 #define SKILL_INFRAVISION      28
 #define SKILL_PROTECTION       29
 
-#define SKILL_FIRE             32 
-#define SKILL_COLD             33 
-#define SKILL_MANA             35 
-#define SKILL_ANTIDOTE         36 
-#define SKILL_REFLECTION       37 
+#define SKILL_FIRE             32
+#define SKILL_COLD             33
+#define SKILL_MANA             35
+#define SKILL_ANTIDOTE         36
+#define SKILL_REFLECTION       37
 
 ///////////////////////////////////////////_Infomation end_//////////////////////////////////////////////////////
 ////////////////////////////////////////////_effect start_//////////////////////////////////////////////////////
@@ -481,7 +474,6 @@ enum struct STORAGE_TYPE
 #define RENDER_FACE_ONE 0x01
 #define RENDER_FACE_TWO 0x02
 
-
 //////////////////////////////////////////_character end_/////////////////////////////////////////////////
 /////////////////////////////////////////////_ai start_/////////////////////////////////////////////////
 
@@ -539,12 +531,10 @@ enum struct STORAGE_TYPE
 ////////////////////////////////////////_matchevent end_//////////////////////////////////////////////////////
 ////////////////////////////////////_gmbattlecastle start_////////////////////////////////////////////////////
 
-
 #define BATTLE_CASTLE_WALL1 61
 #define BATTLE_CASTLE_WALL2 62
 #define BATTLE_CASTLE_WALL3 63
 #define BATTLE_CASTLE_WALL4 64
-
 
 //////////////////////////////////////_gmbattlecastle end_////////////////////////////////////////////////////
 ////////////////////////////////////_gm_kanturu_2nd start_////////////////////////////////////////////////////
@@ -557,7 +547,6 @@ enum struct STORAGE_TYPE
 
 #define KANTURU2ND_NPC_ANI_STOP	0
 #define KANTURU2ND_NPC_ANI_ROT	1
-
 
 //////////////////////////////////////_gm_kanturu_2nd end_////////////////////////////////////////////////////
 /////////////////////////////////////_cswaterterrain start_////////////////////////////////////////////////////
@@ -582,7 +571,6 @@ enum struct STORAGE_TYPE
 
 #define MAX_DEVIL_SQUARE_ENTER  6
 #define BLOODCASTLE_QUEST_NUM   3
-
 
 //////////////////////////////////////////_csquest end_////////////////////////////////////////////////////
 /////////////////////////////////////_csmapinterface start_////////////////////////////////////////////////////
@@ -624,4 +612,3 @@ enum struct STORAGE_TYPE
 #define BUFFINDEX( buff )				static_cast<eBuffState>(buff)
 #define BUFFTIMEINDEX( timetype )		static_cast<eBuffTimeType>(timetype)
 #define ITEMINDEX( type, index )        static_cast<DWORD>((type*MAX_ITEM_INDEX)+index)
-

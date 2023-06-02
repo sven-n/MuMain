@@ -28,29 +28,29 @@
 
 namespace SEASON3A
 {
-	class CUIDefaultBase  
-	{
-		UIInitializeFunction( CUIDefaultBase );
-		UIDefaultFunction;
-	};
-	
-	inline
-	void CUIDefaultBase::Open()
-	{
-		m_IsOpen = true;
-	}
+    class CUIDefaultBase
+    {
+        UIInitializeFunction(CUIDefaultBase);
+        UIDefaultFunction;
+    };
 
-	inline
-	void CUIDefaultBase::Close()
-	{
-		m_IsOpen = false;
-	}
+    inline
+        void CUIDefaultBase::Open()
+    {
+        m_IsOpen = true;
+    }
 
-	inline
-	bool CUIDefaultBase::IsOpen()
-	{
-		return m_IsOpen;
-	}
+    inline
+        void CUIDefaultBase::Close()
+    {
+        m_IsOpen = false;
+    }
+
+    inline
+        bool CUIDefaultBase::IsOpen()
+    {
+        return m_IsOpen;
+    }
 };
 
 #endif // !defined(AFX_UIDEFAULTBASE_H__9F7419C7_E7DA_4EED_B32B_A40D3F6932F1__INCLUDED_)

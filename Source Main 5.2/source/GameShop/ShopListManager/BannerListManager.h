@@ -1,4 +1,3 @@
-
 /**************************************************************************************************
 
 ¿€º∫¿œ: 2009.10.06
@@ -15,13 +14,13 @@
 class CBannerListManager : public CListManager
 {
 public:
-	CBannerListManager();	
-	virtual ~CBannerListManager();
+    CBannerListManager();
+    virtual ~CBannerListManager();
 
-	CBannerInfoList*	GetListPtr() {return m_BannerInfoList;};
+    CBannerInfoList* GetListPtr() { return m_BannerInfoList; };
 
 private:
-	CBannerInfoList*	m_BannerInfoList;
+    CBannerInfoList* m_BannerInfoList;
 
-	WZResult			LoadScript(bool bDonwLoad);
+    WZResult			LoadScript(bool bDonwLoad);
 };

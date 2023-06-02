@@ -24,63 +24,62 @@ typedef int POPUP_RESULT;
 
 enum POPUP_ALIGN
 {
-	PA_CENTER,
-	PA_TOP
+    PA_CENTER,
+    PA_TOP
 };
 
 #define MAX_POPUP_TEXTLINE		10
 #define MAX_POPUP_TEXTLENGTH	256
 
-
-class CUIPopup  
+class CUIPopup
 {
 public:
-	CUIPopup();
-	virtual ~CUIPopup();
+    CUIPopup();
+    virtual ~CUIPopup();
 
 protected:
-	int (*PopupResultFuncPointer)( POPUP_RESULT Result );
-	void (*PopupUpdateInputFuncPointer)();
-	void (*PopupRenderFuncPointer)();
+    int (*PopupResultFuncPointer)(POPUP_RESULT Result);
+    void (*PopupUpdateInputFuncPointer)();
+    void (*PopupRenderFuncPointer)();
 
-	DWORD			m_dwPopupID;
-	int				m_nPopupTextCount;
-	char			m_szPopupText[MAX_POPUP_TEXTLINE][MAX_POPUP_TEXTLENGTH];
-	int				m_PopupType;
-	SIZE			m_sizePopup;
-	POPUP_ALIGN		m_Align;
+    DWORD			m_dwPopupID;
+    int				m_nPopupTextCount;
+    char			m_szPopupText[MAX_POPUP_TEXTLINE][MAX_POPUP_TEXTLENGTH];
+    int				m_PopupType;
+    SIZE			m_sizePopup;
+    POPUP_ALIGN		m_Align;
 
-	char			m_szInputText[1024];
-	int				m_nInputSize;
-	int				m_nInputTextLength;
-	UIOPTIONS		m_InputOptions;
+    char			m_szInputText[1024];
+    int				m_nInputSize;
+    int				m_nInputTextLength;
+    UIOPTIONS		m_InputOptions;
 
-	DWORD			m_dwPopupStartTime;
-	DWORD			m_dwPopupEndTime;
-	DWORD			m_dwPopupElapseTime;
+    DWORD			m_dwPopupStartTime;
+    DWORD			m_dwPopupEndTime;
+    DWORD			m_dwPopupElapseTime;
 
-	CUIButton		m_OkButton;
-	CUIButton		m_CancelButton;
-	CUIButton		m_YesButton;
-	CUIButton		m_NoButton;
+    CUIButton		m_OkButton;
+    CUIButton		m_CancelButton;
+    CUIButton		m_YesButton;
+    CUIButton		m_NoButton;
 
 protected:
-	bool CheckTimeOut();
+    bool CheckTimeOut();
 
 public:
-	void Init();
-	DWORD SetPopup( const char* pszText, int nLineCount, int nBufferSize, int Type, int (*ResultFunc)( POPUP_RESULT Result ), POPUP_ALIGN Align=PA_CENTER );
-	void SetPopupExtraFunc( void (*InputFunc)(), void (*RenderFunc)() );
-	void SetInputMode( int nSize, int nTextLength, UIOPTIONS Options );
-	bool IsInputEnable();
-	void SetTimeOut( DWORD dwElapseTime );
-	char* GetInputText();
-	DWORD GetPopupID();
-	void Close();
-	void CancelPopup();
-	bool PressKey( int nKey );
-	void UpdateInput();
-	void Render();
+    void Init();
+    DWORD SetPopup(const char* pszText, int nLineCount, int nBufferSize, int Type, int (*ResultFunc)(POPUP_RESULT Result), POPUP_ALIGN Align = PA_CENTER);
+    void SetPopupExtraFunc(void (*InputFunc)(), void (*RenderFunc)());
+    void SetInputMode(int nSize, int nTextLength, UIOPTIONS Options);
+    bool IsInputEnable();
+    void SetTimeOut(DWORD dwElapseTime);
+    char* GetInputText();
+    DWORD GetPopupID();
+    void Close();
+    void CancelPopup();
+    bool PressKey(int nKey);
+    void UpdateInput();
+    void Render();
 };
 
 #endif // !defined(AFX_UIPOPUP_H__1FD0B6C0_1EB3_4805_965C_C53A6A9A39B3__INCLUDED_)

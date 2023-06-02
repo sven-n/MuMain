@@ -11,13 +11,13 @@ using string_t = std::basic_string<char_t>;
 class DotNetRuntime
 {
 public:
-	
+
     DotNetRuntime();
-	~DotNetRuntime();
+    ~DotNetRuntime();
     [[nodiscard]] bool is_initialized() const;
 
     void* get_method(const char_t* type_name, const char_t* method_name) const;
-	
+
 private:
     string_t dotnetlib_path;
 
@@ -26,7 +26,7 @@ private:
     hostfxr_get_runtime_delegate_fn get_delegate_fptr_ = nullptr;
     hostfxr_close_fn close_fptr_ = nullptr;
 
-	load_assembly_and_get_function_pointer_fn load_func = nullptr;
+    load_assembly_and_get_function_pointer_fn load_func = nullptr;
 
     bool is_initialized_ = false;
 
@@ -40,6 +40,4 @@ private:
     get_function_pointer_fn get_function_pointer_function() const;
 };
 
-
 inline DotNetRuntime* g_dotnet = new DotNetRuntime();
-

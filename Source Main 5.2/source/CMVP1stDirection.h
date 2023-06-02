@@ -9,28 +9,27 @@
 class CMVP1STDirection
 {
 private:
-	bool	m_bTimerCheck;
+    bool	m_bTimerCheck;
 
-	void IsCryWolfDirectionTimer();
+    void IsCryWolfDirectionTimer();
 
-	void MoveBeginDirection();
-		void BeginDirection0();
-		void BeginDirection1();
-		void BeginDirection2();
-		void BeginDirection3();
-		void BeginDirection4();
-		void BeginDirection5();
+    void MoveBeginDirection();
+    void BeginDirection0();
+    void BeginDirection1();
+    void BeginDirection2();
+    void BeginDirection3();
+    void BeginDirection4();
+    void BeginDirection5();
 public:
-	int		m_iCryWolfState;
+    int		m_iCryWolfState;
 
-	CMVP1STDirection();
-	virtual ~CMVP1STDirection(); 
+    CMVP1STDirection();
+    virtual ~CMVP1STDirection();
 
-	void Init();
-	void GetCryWolfState(BYTE CryWolfState);
-	bool IsCryWolfDirection();
-	void CryWolfDirection();
-
+    void Init();
+    void GetCryWolfState(BYTE CryWolfState);
+    bool IsCryWolfDirection();
+    void CryWolfDirection();
 };
 
 #endif //_MVP1STINTERFACE_H_

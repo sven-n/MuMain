@@ -9,31 +9,31 @@
 
 namespace SEASON3B
 {
-	class CPartyManager  
-	{
-	protected:
-		CPartyManager( );
+    class CPartyManager
+    {
+    protected:
+        CPartyManager();
 
-	public:
-		virtual ~CPartyManager( );
-		
-	private:
-		static CPartyManager*	m_pPartyManager;
-		
-	public:
-		bool Create( );
-		void Release( );
-		bool Update( );
-		bool Render( );
-		
-	public:
-		void SearchPartyMember( );
-		bool IsPartyMember ( int index );
-		bool IsPartyMemberChar( CHARACTER * c );
+    public:
+        virtual ~CPartyManager();
 
-	public:
-		static CPartyManager*	GetInstance( );
-	};
+    private:
+        static CPartyManager* m_pPartyManager;
+
+    public:
+        bool Create();
+        void Release();
+        bool Update();
+        bool Render();
+
+    public:
+        void SearchPartyMember();
+        bool IsPartyMember(int index);
+        bool IsPartyMemberChar(CHARACTER* c);
+
+    public:
+        static CPartyManager* GetInstance();
+    };
 }
 
 #define g_pPartyManager SEASON3B::CPartyManager::GetInstance()

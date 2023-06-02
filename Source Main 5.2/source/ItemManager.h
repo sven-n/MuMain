@@ -5,10 +5,9 @@
 class CItemManager
 {
 public:
-	CItemManager();
-	virtual ~CItemManager();
+    CItemManager();
+    virtual ~CItemManager();
 public:
-
 };
 
 extern CItemManager gItemManager;

@@ -17,49 +17,49 @@
 
 namespace SEASON3B
 {
-	class CNewUIBattleSoccerScore : public CNewUIObj  
-	{
-	public:
-		enum IMAGE_LIST
-		{
-			IMAGE_BSS_BACK = BITMAP_INTERFACE_NEW_BATTLE_SOCCER_SCORE_BEGIN,
-		};
+    class CNewUIBattleSoccerScore : public CNewUIObj
+    {
+    public:
+        enum IMAGE_LIST
+        {
+            IMAGE_BSS_BACK = BITMAP_INTERFACE_NEW_BATTLE_SOCCER_SCORE_BEGIN,
+        };
 
-	private:
-		enum
-		{
-			BSS_WIDTH = 131,
-			BSS_HEIGHT = 70,
-		};
+    private:
+        enum
+        {
+            BSS_WIDTH = 131,
+            BSS_HEIGHT = 70,
+        };
 
-		CNewUIManager*			m_pNewUIMng;			// UI 매니저.
-		POINT					m_Pos;					// 창의 위치.
+        CNewUIManager* m_pNewUIMng;			// UI 매니저.
+        POINT					m_Pos;					// 창의 위치.
 
-	public:
-		CNewUIBattleSoccerScore();
-		virtual ~CNewUIBattleSoccerScore();
+    public:
+        CNewUIBattleSoccerScore();
+        virtual ~CNewUIBattleSoccerScore();
 
-		bool Create(CNewUIManager* pNewUIMng, int x, int y);
-		void Release();
-		
-		void SetPos(int x, int y);
-		
-		bool UpdateMouseEvent();
-		bool UpdateKeyEvent();
-		bool Update();
-		bool Render();
+        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        void Release();
 
-		float GetLayerDepth();	//. 1.8f
+        void SetPos(int x, int y);
 
-	private:
-		void LoadImages();
-		void UnloadImages();
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
 
-		void RenderBackImage();
-		void RenderContents();
+        float GetLayerDepth();	//. 1.8f
 
-		int FindGuildMark(char* pszGuildName);
-	};
+    private:
+        void LoadImages();
+        void UnloadImages();
+
+        void RenderBackImage();
+        void RenderContents();
+
+        int FindGuildMark(char* pszGuildName);
+    };
 }
 
 #endif // !defined(AFX_NEWUIBATTLESOCCERSCORE_H__68E768E4_5FB7_4D33_A604_54315C1D26C6__INCLUDED_)

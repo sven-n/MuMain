@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////
-//  
+//
 //////////////////////////////////////////////////////////////////////////
 #ifndef __NPC_BREEDER_H__
 #define __NPC_BREEDER_H__
 
 namespace npcBreeder
 {
-    int     CalcRecoveryZen ( BYTE type, char* Text );
-	void	RecoverPet( BYTE type );
+    int     CalcRecoveryZen(BYTE type, char* Text);
+    void	RecoverPet(BYTE type);
 }
 
 using namespace npcBreeder;

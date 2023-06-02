@@ -11,27 +11,25 @@
 class HTTPConnecter : public IConnecter
 {
 public:
-// Constructor, Destructor
+    // Constructor, Destructor
 
-	HTTPConnecter(DownloadServerInfo *	pServerInfo,
-				   DownloadFileInfo *	pFileInfo);
-	~HTTPConnecter();
+    HTTPConnecter(DownloadServerInfo* pServerInfo,
+        DownloadFileInfo* pFileInfo);
+    ~HTTPConnecter();
 
+    // abstract Function
 
-// abstract Function
-
-	//						세션
-	virtual WZResult		CreateSession(HINTERNET& hSession);
-	//						커낵트
-	virtual WZResult		CreateConnection(HINTERNET& hSession, 
-											 HINTERNET& hConnection);
-	//						다운로드 파일 오픈 & 사이즈 가져오기
-	virtual WZResult		OpenRemoteFile(HINTERNET& hConnection, 
-										   HINTERNET& hRemoteFile, 
-										   ULONGLONG& nFileLength);
-	//						리모트 파일 읽기
-	virtual WZResult		ReadRemoteFile(HINTERNET& hRemoteFile, 
-										   BYTE* byReadBuffer, 
-										   DWORD* dwBytesRead);
+        //						세션
+    virtual WZResult		CreateSession(HINTERNET& hSession);
+    //						커낵트
+    virtual WZResult		CreateConnection(HINTERNET& hSession,
+        HINTERNET& hConnection);
+    //						다운로드 파일 오픈 & 사이즈 가져오기
+    virtual WZResult		OpenRemoteFile(HINTERNET& hConnection,
+        HINTERNET& hRemoteFile,
+        ULONGLONG& nFileLength);
+    //						리모트 파일 읽기
+    virtual WZResult		ReadRemoteFile(HINTERNET& hRemoteFile,
+        BYTE* byReadBuffer,
+        DWORD* dwBytesRead);
 };
-

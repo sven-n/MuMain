@@ -5,19 +5,16 @@
 
 GambleSystem& GambleSystem::Instance()
 {
-	static GambleSystem s_GambleSys;                  
-	return s_GambleSys;
+    static GambleSystem s_GambleSys;
+    return s_GambleSys;
 }
 
 GambleSystem::~GambleSystem()
 {
-
 }
 
 void GambleSystem::Init()
 {
-	m_isGambleShop = false;
-	m_byBuyItemPos = 0;
+    m_isGambleShop = false;
+    m_byBuyItemPos = 0;
 }
-
-

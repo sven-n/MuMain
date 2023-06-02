@@ -17,24 +17,24 @@
 #define SELECTED_LANGUAGE	( LANGUAGE_ENGLISH )
 
 #ifdef _DEBUG
-	#define ENABLE_EDIT
-	#define ENABLE_EDIT2
-	//#define DEBUG_BITMAP_CACHE
+#define ENABLE_EDIT
+#define ENABLE_EDIT2
+//#define DEBUG_BITMAP_CACHE
 #endif // _DEBUG
 
 #ifdef FOR_WORK
 #ifdef _DEBUG
 
-	#define CSK_LH_DEBUG_CONSOLE
-	#ifdef CSK_LH_DEBUG_CONSOLE
-		#define CONSOLE_DEBUG
-	#endif // CSK_LH_DEBUG_CONSOLE
+#define CSK_LH_DEBUG_CONSOLE
+#ifdef CSK_LH_DEBUG_CONSOLE
+#define CONSOLE_DEBUG
+#endif // CSK_LH_DEBUG_CONSOLE
 
-	#define CSK_DEBUG_MAP_ATTRIBUTE
+#define CSK_DEBUG_MAP_ATTRIBUTE
 
-	#define CSK_DEBUG_RENDER_BOUNDINGBOX
+#define CSK_DEBUG_RENDER_BOUNDINGBOX
 
-	#define CSK_DEBUG_MAP_PATHFINDING
+#define CSK_DEBUG_MAP_PATHFINDING
 
 #endif // _DEBUG
 #endif // FOR_WORK
@@ -74,17 +74,17 @@ extern char m_Version[];
 extern int  m_SoundOnOff;
 extern int  m_MusicOnOff;
 extern int  m_Resolution;
-extern int m_nColorDepth;	
+extern int m_nColorDepth;
 
-extern void CheckHack( void);
-extern DWORD GetCheckSum( WORD wKey);
-extern void StopMp3(char *Name, BOOL bEnforce=false);
-extern void PlayMp3(char *Name, BOOL bEnforce=false);
+extern void CheckHack(void);
+extern DWORD GetCheckSum(WORD wKey);
+extern void StopMp3(char* Name, BOOL bEnforce = false);
+extern void PlayMp3(char* Name, BOOL bEnforce = false);
 extern bool IsEndMp3();
 extern int GetMp3PlayPosition();
 extern unsigned int GenID();
 
-extern void CloseMainExe( void);
+extern void CloseMainExe(void);
 extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();
 extern void DestroySound();
@@ -100,6 +100,5 @@ extern void DestroySound();
 	_asm { jmp pos };\
 	_asm { __emit 0xFF };\
 	_asm { __emit 0x15 }
-
 
 #endif

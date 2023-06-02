@@ -1,4 +1,3 @@
-
 #ifndef _SYSINFO_H_
 #define _SYSINFO_H_
 
@@ -8,11 +7,10 @@
 #include <string>
 
 namespace leaf {
+    //. Interface Declaration
 
-	//. Interface Declaration
-
-	bool GetOSInfoString(OUT std::string& osinfo);		//. Get OS infomation
-	void GetCPUInfoString(OUT std::string& cpuinfo);	//. Get CPU infomation (Do NOT support duel CPU.)
+    bool GetOSInfoString(OUT std::string& osinfo);		//. Get OS infomation
+    void GetCPUInfoString(OUT std::string& cpuinfo);	//. Get CPU infomation (Do NOT support duel CPU.)
 }
 
 #endif // _SYSINFO_H_

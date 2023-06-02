@@ -5,10 +5,10 @@
 #include "MapManager.h"
 
 template<typename T>
-T& TheWorld( int type ) 
+T& TheWorld(int type)
 {
-	//return static_cast<T&>(TheMapProcess().GetMap(type));
-	return dynamic_cast<T&>(TheMapProcess().GetMap(type));
+    //return static_cast<T&>(TheMapProcess().GetMap(type));
+    return dynamic_cast<T&>(TheMapProcess().GetMap(type));
 }
 
 #include "GM_Raklion.h"
@@ -56,5 +56,3 @@ T& TheWorld( int type )
 #include "GMKarutan1.h"
 #define g_Karutan1 TheWorld<CGMKarutan1>(WD_80KARUTAN1)
 #endif // ASG_ADD_MAP_KARUTAN
-
-

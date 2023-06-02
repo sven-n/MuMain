@@ -13,51 +13,51 @@
 
 class CGaugeBar;
 
-class CSlider  
+class CSlider
 {
 protected:
-	bool		m_bVertical;
-	BYTE		m_byState;
+    bool		m_bVertical;
+    BYTE		m_byState;
 
-	POINT		m_ptPos;
-	SIZE		m_Size;
-	int			m_nSlideRange;
-	int			m_nSlidePos;
-	int			m_nThumbRange;
-	CButton		m_btnThumb;	
-	CGaugeBar*	m_pGaugeBar;
-	CSprite*	m_psprBack;
+    POINT		m_ptPos;
+    SIZE		m_Size;
+    int			m_nSlideRange;
+    int			m_nSlidePos;
+    int			m_nThumbRange;
+    CButton		m_btnThumb;
+    CGaugeBar* m_pGaugeBar;
+    CSprite* m_psprBack;
 
-	double		m_dThumbMoveStartTime;
-	double		m_dThumbMoveTime;
-	int			m_nCapturePos;
-	int			m_nLimitPos;
+    double		m_dThumbMoveStartTime;
+    double		m_dThumbMoveTime;
+    int			m_nCapturePos;
+    int			m_nLimitPos;
 
 public:
-	CSlider();
-	virtual ~CSlider();
+    CSlider();
+    virtual ~CSlider();
 
-	void Create(SImgInfo* piiThumb, SImgInfo* piiBack, SImgInfo* piiGauge = NULL,RECT* prcGauge = NULL, bool bVertical = false);
-	void Release();
-	void SetPosition(int nXCoord, int nYCoord);
-	int GetXPos() { return m_ptPos.x; }
-	int GetYPos() { return m_ptPos.y; }
-	int GetWidth() { return m_Size.cx; }
-	int GetHeight() { return m_Size.cy; }
-	void SetSlideRange(int nSlideRange);
-	void Update(double dDeltaTick);
-	void Render();
-	void SetEnable(bool bEnable);
-	bool IsEnable() { return m_btnThumb.IsEnable(); }
-	void Show(bool bShow);
-	bool IsShow() { return m_btnThumb.IsShow(); }
-	BOOL CursorInObject();
-	void SetSlidePos(int nSlidePos);
-	int GetSlidePos() { return m_nSlidePos; }
-	BYTE GetState() { return m_byState; }
+    void Create(SImgInfo* piiThumb, SImgInfo* piiBack, SImgInfo* piiGauge = NULL, RECT* prcGauge = NULL, bool bVertical = false);
+    void Release();
+    void SetPosition(int nXCoord, int nYCoord);
+    int GetXPos() { return m_ptPos.x; }
+    int GetYPos() { return m_ptPos.y; }
+    int GetWidth() { return m_Size.cx; }
+    int GetHeight() { return m_Size.cy; }
+    void SetSlideRange(int nSlideRange);
+    void Update(double dDeltaTick);
+    void Render();
+    void SetEnable(bool bEnable);
+    bool IsEnable() { return m_btnThumb.IsEnable(); }
+    void Show(bool bShow);
+    bool IsShow() { return m_btnThumb.IsShow(); }
+    BOOL CursorInObject();
+    void SetSlidePos(int nSlidePos);
+    int GetSlidePos() { return m_nSlidePos; }
+    BYTE GetState() { return m_byState; }
 
 protected:
-	void SetThumbPosition();
-	void LineUp();
-	void LineDown();
+    void SetThumbPosition();
+    void LineUp();
+    void LineDown();
 };

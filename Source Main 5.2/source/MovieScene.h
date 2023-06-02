@@ -8,49 +8,48 @@
 
 #ifdef MOVIE_DIRECTSHOW
 
-class CMovieScene  
+class CMovieScene
 {
 private:
-	HWND			m_hWnd;
+    HWND			m_hWnd;
 
-	IVideoWindow*	m_pVideoWindow;
-	IGraphBuilder*	m_pGraphBuilder;
-    IMediaControl*	m_pMediaControl;
-    IMediaEventEx*	m_pMediaEventEx;
+    IVideoWindow* m_pVideoWindow;
+    IGraphBuilder* m_pGraphBuilder;
+    IMediaControl* m_pMediaControl;
+    IMediaEventEx* m_pMediaEventEx;
 
-	IBaseFilter*		m_pReader;
-	IFileSourceFilter*	m_pFileSource;
+    IBaseFilter* m_pReader;
+    IFileSourceFilter* m_pFileSource;
 
-	BOOL			m_bOneTimeInit;
-	BOOL			m_bOneTimePlay;
-	BOOL			m_bEndMovie;
-	BOOL			m_bIsFile;
-	BOOL			m_bFailDirectShow;
+    BOOL			m_bOneTimeInit;
+    BOOL			m_bOneTimePlay;
+    BOOL			m_bEndMovie;
+    BOOL			m_bIsFile;
+    BOOL			m_bFailDirectShow;
 
-	int				m_iPlayNum;
+    int				m_iPlayNum;
 
 private:
-	void	Init();
-	void	ToggleFullScreen();
-	BOOL	IsWindowsMediaFile(char* strFileName);
-	BOOL	IsFileInFolder(char* strFileName);
-	void	CreateFilter(REFCLSID clsid, IBaseFilter **ppFilter);
-	HRESULT RenderOutputPins(IGraphBuilder *pGB, IBaseFilter *pFilter);
-	
-public:
-	void	InitOpenGLClear(HDC hDC);
-	void	Initialize_DirectShow(HWND hWnd, char* strFileName);
-	void	PlayMovie();
-	BOOL	IsEndMovie();
-	BOOL	IsFile();
-	BOOL	IsFailDirectShow();
-	int		GetPlayNum();
-	void	OpenMovieTxt(char* strFileName);
-	void	SaveMovieTxt(char* strFileName);
-	void	Destroy();
-	CMovieScene();
-	virtual ~CMovieScene();
+    void	Init();
+    void	ToggleFullScreen();
+    BOOL	IsWindowsMediaFile(char* strFileName);
+    BOOL	IsFileInFolder(char* strFileName);
+    void	CreateFilter(REFCLSID clsid, IBaseFilter** ppFilter);
+    HRESULT RenderOutputPins(IGraphBuilder* pGB, IBaseFilter* pFilter);
 
+public:
+    void	InitOpenGLClear(HDC hDC);
+    void	Initialize_DirectShow(HWND hWnd, char* strFileName);
+    void	PlayMovie();
+    BOOL	IsEndMovie();
+    BOOL	IsFile();
+    BOOL	IsFailDirectShow();
+    int		GetPlayNum();
+    void	OpenMovieTxt(char* strFileName);
+    void	SaveMovieTxt(char* strFileName);
+    void	Destroy();
+    CMovieScene();
+    virtual ~CMovieScene();
 };
 
 #endif // MOVIE_DIRECTSHOW

@@ -30,257 +30,255 @@ extern  char g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_C
 
 static  CSQuest csQuest;
 
-static BYTE bBuxCode[3] = {0xfc,0xcf,0xab};
+static BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
 
-static void BuxConvert(BYTE *Buffer,int Size)
+static void BuxConvert(BYTE* Buffer, int Size)
 {
-	for(int i=0;i<Size;i++)
-		Buffer[i] ^= bBuxCode[i%3];
+    for (int i = 0; i < Size; i++)
+        Buffer[i] ^= bBuxCode[i % 3];
 }
 
-CSQuest::CSQuest(void) : m_byClass( 255 ), m_byCurrQuestIndex( 0 ), m_byCurrQuestIndexWnd( 0 ),
-						m_byStartQuestList( 0 ), m_shCurrPage( 0 ), m_byViewQuest( QUEST_VIEW_NONE ), m_byQuestType( TYPE_QUEST ), m_iStartX(640-190), m_iStartY(0) 
+CSQuest::CSQuest(void) : m_byClass(255), m_byCurrQuestIndex(0), m_byCurrQuestIndexWnd(0),
+m_byStartQuestList(0), m_shCurrPage(0), m_byViewQuest(QUEST_VIEW_NONE), m_byQuestType(TYPE_QUEST), m_iStartX(640 - 190), m_iStartY(0)
 {
-
 }
 
 CSQuest::~CSQuest(void)
 {
-
 }
 
 bool CSQuest::IsInit(void)
 {
-    if(m_byClass == 255)
-	{
-		return true;
-	}
+    if (m_byClass == 255)
+    {
+        return true;
+    }
 
     return false;
 }
 
 void CSQuest::clearQuest(void)
 {
-	m_byClass = 255;
-	m_shCurrPage = 0;
-	m_byViewQuest = QUEST_VIEW_NONE;
-	m_byStartQuestList = 0;
-	m_byCurrQuestIndex = 0;
-	m_byCurrQuestIndexWnd = 0;
-	memset(m_byQuestList, 0, sizeof( BYTE )*(MAX_QUESTS/4));
-	memset(m_byEventCount, 0, sizeof( BYTE )*TYPE_QUEST_END);
+    m_byClass = 255;
+    m_shCurrPage = 0;
+    m_byViewQuest = QUEST_VIEW_NONE;
+    m_byStartQuestList = 0;
+    m_byCurrQuestIndex = 0;
+    m_byCurrQuestIndexWnd = 0;
+    memset(m_byQuestList, 0, sizeof(BYTE) * (MAX_QUESTS / 4));
+    memset(m_byEventCount, 0, sizeof(BYTE) * TYPE_QUEST_END);
 
-	for (int i = 0; i < 5; ++i)
-	{
-		m_anKillMobType[i] = m_anKillMobCount[i] = -1;
-	}
+    for (int i = 0; i < 5; ++i)
+    {
+        m_anKillMobType[i] = m_anKillMobCount[i] = -1;
+    }
 }
 
 BYTE CSQuest::getCurrQuestState(void)
 {
-	return CheckQuestState ();
+    return CheckQuestState();
 }
 
 unicode::t_char* CSQuest::GetNPCName(BYTE byQuestIndex)
 {
-	return ::getMonsterName(int(m_Quest[byQuestIndex].wNpcType));
+    return ::getMonsterName(int(m_Quest[byQuestIndex].wNpcType));
 }
 
 unicode::t_char* CSQuest::getQuestTitle()
 {
-	return m_Quest[m_byCurrQuestIndex].strQuestName;
+    return m_Quest[m_byCurrQuestIndex].strQuestName;
 }
 
-unicode::t_char* CSQuest::getQuestTitle( BYTE byQuestIndex )
+unicode::t_char* CSQuest::getQuestTitle(BYTE byQuestIndex)
 {
-	return m_Quest[byQuestIndex].strQuestName;
+    return m_Quest[byQuestIndex].strQuestName;
 }
 
 unicode::t_char* CSQuest::getQuestTitleWindow()
 {
-	return m_Quest[m_byCurrQuestIndexWnd].strQuestName;
+    return m_Quest[m_byCurrQuestIndexWnd].strQuestName;
 }
 
-void CSQuest::SetEventCount( BYTE type, BYTE count )
+void CSQuest::SetEventCount(BYTE type, BYTE count)
 {
-	if(type > TYPE_QUEST_END)
-	{
-		return;
-	}
+    if (type > TYPE_QUEST_END)
+    {
+        return;
+    }
 
-	m_byEventCount[type] = count;
+    m_byEventCount[type] = count;
 }
 
 int CSQuest::GetEventCount(BYTE byType)
 {
-	if(byType > TYPE_QUEST_END)
-	{
-		return 0;
-	}
-
-	return m_byEventCount[byType];
-}
-
-bool CSQuest::OpenQuestScript ( char* filename )
-{
-	FILE* fp = fopen ( filename, "rb" );
-	if ( fp==NULL )                
-	{
-		char Text[256];
-    	sprintf ( Text,"%s - File not exist.",filename );
-		return  FALSE;
-	}
-
-    memset ( m_Quest, 0, sizeof( QUEST_ATTRIBUTE )*MAX_QUESTS );
-
-	int     Size    = sizeof ( QUEST_ATTRIBUTE );
-	BYTE*   Buffer  = new BYTE [Size];
-	for ( int i=0; i<MAX_QUESTS; i++ )
-	{
-		fread ( Buffer, Size, 1, fp );
-		BuxConvert ( Buffer, Size );
-		memcpy ( &m_Quest[i], Buffer, Size );
-	}
-	SAFE_DELETE_ARRAY(Buffer);
-	fclose ( fp );
-
-	return  TRUE;
-}
-
-void CSQuest::setQuestLists ( BYTE* byList, int num, int Class )
-{
-    if ( Class!=-1 )
+    if (byType > TYPE_QUEST_END)
     {
-		m_bOnce = true;
-		bCheckNPC = false;
-
-        m_byClass   = gCharacterManager.GetBaseClass(Class);
+        return 0;
     }
 
-    memset ( m_byQuestList, 0, sizeof( BYTE )*(MAX_QUESTS/4) );
-	::memcpy(m_byQuestList, byList, sizeof (BYTE) * (num / 4 + 1));
-
-	int i;
-	if (CLASS_KNIGHT == m_byClass)
-	{
-		for (i = 0; i < num; ++i)
-		{
-			if (getQuestState(i) != QUEST_END)
-				break;
-		}
-	}
-	else if (CLASS_DARK == m_byClass || CLASS_DARK_LORD == m_byClass || CLASS_RAGEFIGHTER == m_byClass)
-	{
-		for (i = 4; i < num; ++i)
-		{
-			if (getQuestState(i) != QUEST_END)
-				break;
-		}
-	}
-	else
-	{
-		for (i = 0; i < num; ++i)
-		{
-			if (QUEST_COMBO == i)
-				continue;
-			if (getQuestState(i) != QUEST_END)
-				break;
-		}
-	}
-
-	m_byCurrQuestIndex = i;
-    m_byCurrQuestIndexWnd = i;
-
-	Hero->byExtensionSkill = 0;
-	if ( getQuestState( QUEST_COMBO )==QUEST_END )
-	{
-		Hero->byExtensionSkill = 1;
-	}
+    return m_byEventCount[byType];
 }
 
-void CSQuest::setQuestList ( int index, int result )
+bool CSQuest::OpenQuestScript(char* filename)
+{
+    FILE* fp = fopen(filename, "rb");
+    if (fp == NULL)
+    {
+        char Text[256];
+        sprintf(Text, "%s - File not exist.", filename);
+        return  FALSE;
+    }
+
+    memset(m_Quest, 0, sizeof(QUEST_ATTRIBUTE) * MAX_QUESTS);
+
+    int     Size = sizeof(QUEST_ATTRIBUTE);
+    BYTE* Buffer = new BYTE[Size];
+    for (int i = 0; i < MAX_QUESTS; i++)
+    {
+        fread(Buffer, Size, 1, fp);
+        BuxConvert(Buffer, Size);
+        memcpy(&m_Quest[i], Buffer, Size);
+    }
+    SAFE_DELETE_ARRAY(Buffer);
+    fclose(fp);
+
+    return  TRUE;
+}
+
+void CSQuest::setQuestLists(BYTE* byList, int num, int Class)
+{
+    if (Class != -1)
+    {
+        m_bOnce = true;
+        bCheckNPC = false;
+
+        m_byClass = gCharacterManager.GetBaseClass(Class);
+    }
+
+    memset(m_byQuestList, 0, sizeof(BYTE) * (MAX_QUESTS / 4));
+    ::memcpy(m_byQuestList, byList, sizeof(BYTE) * (num / 4 + 1));
+
+    int i;
+    if (CLASS_KNIGHT == m_byClass)
+    {
+        for (i = 0; i < num; ++i)
+        {
+            if (getQuestState(i) != QUEST_END)
+                break;
+        }
+    }
+    else if (CLASS_DARK == m_byClass || CLASS_DARK_LORD == m_byClass || CLASS_RAGEFIGHTER == m_byClass)
+    {
+        for (i = 4; i < num; ++i)
+        {
+            if (getQuestState(i) != QUEST_END)
+                break;
+        }
+    }
+    else
+    {
+        for (i = 0; i < num; ++i)
+        {
+            if (QUEST_COMBO == i)
+                continue;
+            if (getQuestState(i) != QUEST_END)
+                break;
+        }
+    }
+
+    m_byCurrQuestIndex = i;
+    m_byCurrQuestIndexWnd = i;
+
+    Hero->byExtensionSkill = 0;
+    if (getQuestState(QUEST_COMBO) == QUEST_END)
+    {
+        Hero->byExtensionSkill = 1;
+    }
+}
+
+void CSQuest::setQuestList(int index, int result)
 {
     m_byCurrQuestIndex = index;
 
-    m_byCurrQuestIndexWnd = max( index, m_byCurrQuestIndexWnd );
-    
-    int questIndex = (int)(m_byCurrQuestIndex/4);
+    m_byCurrQuestIndexWnd = max(index, m_byCurrQuestIndexWnd);
+
+    int questIndex = (int)(m_byCurrQuestIndex / 4);
     m_byQuestList[questIndex] = result;
 
-	Hero->byExtensionSkill = 0;
-	if ( getQuestState( QUEST_COMBO )==QUEST_END )
-	{
-		Hero->byExtensionSkill = 1;
-	}
+    Hero->byExtensionSkill = 0;
+    if (getQuestState(QUEST_COMBO) == QUEST_END)
+    {
+        Hero->byExtensionSkill = 1;
+    }
 }
 
-short   CSQuest::FindQuestContext ( QUEST_ATTRIBUTE* pQuest, int index )
+short   CSQuest::FindQuestContext(QUEST_ATTRIBUTE* pQuest, int index)
 {
-    for ( int i=0; i<pQuest->shQuestConditionNum; ++i )
+    for (int i = 0; i < pQuest->shQuestConditionNum; ++i)
     {
-        if ( pQuest->QuestAct[i].byRequestClass[m_byClass]>=1  )
+        if (pQuest->QuestAct[i].byRequestClass[m_byClass] >= 1)
         {
             return pQuest->QuestAct[i].shQuestStartText[index];
         }
     }
 
-	m_byCurrQuestIndex--;
-    CheckQuestState ();
+    m_byCurrQuestIndex--;
+    CheckQuestState();
 
     return m_shCurrPage;
 }
 
-bool    CSQuest::CheckRequestCondition ( QUEST_ATTRIBUTE* pQuest, bool bLastCheck )
+bool    CSQuest::CheckRequestCondition(QUEST_ATTRIBUTE* pQuest, bool bLastCheck)
 {
     int iRequestType;
-    for ( int i=0; i<pQuest->shQuestConditionNum; ++i )
+    for (int i = 0; i < pQuest->shQuestConditionNum; ++i)
     {
-        if ( pQuest->QuestAct[i].byRequestClass[m_byClass]!=0 )
+        if (pQuest->QuestAct[i].byRequestClass[m_byClass] != 0)
         {
             iRequestType = pQuest->QuestAct[i].byRequestType;
-            for ( int j=0; j<pQuest->shQuestRequestNum; ++j )
+            for (int j = 0; j < pQuest->shQuestRequestNum; ++j)
             {
-                if ( pQuest->QuestRequest[j].byType==iRequestType || pQuest->QuestRequest[j].byType==255 )
+                if (pQuest->QuestRequest[j].byType == iRequestType || pQuest->QuestRequest[j].byType == 255)
                 {
-					if ( pQuest->QuestRequest[j].wCompleteQuestIndex!=65535 )
-					{
-						if ( getQuestState2( pQuest->QuestRequest[j].wCompleteQuestIndex )!=QUEST_END )
-						{
-							m_shCurrPage = pQuest->QuestRequest[j].shErrorText;
-							m_byCurrState= QUEST_ERROR;
-							return false;
-						}
-					}
-                    if ( pQuest->QuestRequest[j].wLevelMin>0 )
+                    if (pQuest->QuestRequest[j].wCompleteQuestIndex != 65535)
                     {
-                        WORD level = CharacterAttribute->Level;
-
-                        if ( pQuest->QuestRequest[j].wLevelMin>level )
+                        if (getQuestState2(pQuest->QuestRequest[j].wCompleteQuestIndex) != QUEST_END)
                         {
                             m_shCurrPage = pQuest->QuestRequest[j].shErrorText;
                             m_byCurrState = QUEST_ERROR;
                             return false;
                         }
                     }
-                    if ( pQuest->QuestRequest[j].wLevelMax>0 )
+                    if (pQuest->QuestRequest[j].wLevelMin > 0)
                     {
                         WORD level = CharacterAttribute->Level;
 
-                        if ( pQuest->QuestRequest[j].wLevelMax<level )
+                        if (pQuest->QuestRequest[j].wLevelMin > level)
                         {
                             m_shCurrPage = pQuest->QuestRequest[j].shErrorText;
                             m_byCurrState = QUEST_ERROR;
                             return false;
                         }
                     }
-                    if ( pQuest->QuestRequest[j].dwZen>0 )
+                    if (pQuest->QuestRequest[j].wLevelMax > 0)
                     {
-                        if ( bLastCheck )
+                        WORD level = CharacterAttribute->Level;
+
+                        if (pQuest->QuestRequest[j].wLevelMax < level)
                         {
-							DWORD gold = CharacterMachine->Gold;
+                            m_shCurrPage = pQuest->QuestRequest[j].shErrorText;
+                            m_byCurrState = QUEST_ERROR;
+                            return false;
+                        }
+                    }
+                    if (pQuest->QuestRequest[j].dwZen > 0)
+                    {
+                        if (bLastCheck)
+                        {
+                            DWORD gold = CharacterMachine->Gold;
 
                             m_dwNeedZen = pQuest->QuestRequest[j].dwZen;
-                            if ( m_dwNeedZen>gold )
+                            if (m_dwNeedZen > gold)
                             {
                                 m_shCurrPage = pQuest->QuestRequest[j].shErrorText;
                                 m_byCurrState = QUEST_ERROR;
@@ -299,262 +297,261 @@ bool    CSQuest::CheckRequestCondition ( QUEST_ATTRIBUTE* pQuest, bool bLastChec
     return true;
 }
 
-bool CSQuest::CheckActCondition ( QUEST_ATTRIBUTE* pQuest )
+bool CSQuest::CheckActCondition(QUEST_ATTRIBUTE* pQuest)
 {
-    for ( int i=0; i<pQuest->shQuestConditionNum; ++i )
+    for (int i = 0; i < pQuest->shQuestConditionNum; ++i)
     {
-        if ( pQuest->QuestAct[i].byRequestClass[m_byClass]>=1 )
+        if (pQuest->QuestAct[i].byRequestClass[m_byClass] >= 1)
         {
-            switch ( pQuest->QuestAct[i].byQuestType )
+            switch (pQuest->QuestAct[i].byQuestType)
             {
             case QUEST_ITEM:
-                {
-					int itemType
-						= (pQuest->QuestAct[i].wItemType*MAX_ITEM_INDEX)
-							+ pQuest->QuestAct[i].byItemSubType;
-					int itemLevel	= -1;
-                    int itemNum     = pQuest->QuestAct[i].byItemNum;
+            {
+                int itemType
+                    = (pQuest->QuestAct[i].wItemType * MAX_ITEM_INDEX)
+                    + pQuest->QuestAct[i].byItemSubType;
+                int itemLevel = -1;
+                int itemNum = pQuest->QuestAct[i].byItemNum;
 
-					itemLevel	= pQuest->QuestAct[i].byItemLevel;
-                    
-					if (FindQuestItemsInInven(itemType, itemNum, itemLevel))
-                    {
-                        m_shCurrPage = FindQuestContext ( pQuest, 1 );
-                        return false;
-                    }
+                itemLevel = pQuest->QuestAct[i].byItemLevel;
+
+                if (FindQuestItemsInInven(itemType, itemNum, itemLevel))
+                {
+                    m_shCurrPage = FindQuestContext(pQuest, 1);
+                    return false;
                 }
-                break;
+            }
+            break;
 
             case QUEST_MONSTER:
+            {
+                bool bFind = false;
+
+                for (int j = 0; j < 5; ++j)
                 {
-					bool bFind = false;
-
-					for (int j = 0; j < 5; ++j)
-					{
-						if (m_anKillMobType[j] == int(pQuest->QuestAct[i].wItemType)
-							&& m_anKillMobCount[j] >= int(pQuest->QuestAct[i].byItemNum))
-						{
-							bFind = true;
-							break;
-						}
-					}
-
-					if (!bFind)
-					{
-						m_shCurrPage = FindQuestContext(pQuest, 1);
-                        return false;
-					}
+                    if (m_anKillMobType[j] == int(pQuest->QuestAct[i].wItemType)
+                        && m_anKillMobCount[j] >= int(pQuest->QuestAct[i].byItemNum))
+                    {
+                        bFind = true;
+                        break;
+                    }
                 }
-                break;
+
+                if (!bFind)
+                {
+                    m_shCurrPage = FindQuestContext(pQuest, 1);
+                    return false;
+                }
+            }
+            break;
             }
         }
     }
     return true;
 }
 
-BYTE CSQuest::getQuestState ( int questIndex )
+BYTE CSQuest::getQuestState(int questIndex)
 {
     int  Index;
-	BYTE byCurrState;
+    BYTE byCurrState;
     int  SubIndex;
 
-	if (questIndex == -1)
+    if (questIndex == -1)
     {
         Index = int(m_byCurrQuestIndex) / 4;
-	    SubIndex= m_byCurrQuestIndex % 4;
+        SubIndex = m_byCurrQuestIndex % 4;
     }
     else
     {
         Index = questIndex / 4;
-	    SubIndex= questIndex % 4;
+        SubIndex = questIndex % 4;
     }
 
-	byCurrState = (m_byQuestList[Index] >> (SubIndex * 2)) & 0x03;
+    byCurrState = (m_byQuestList[Index] >> (SubIndex * 2)) & 0x03;
 
-	if ( questIndex==-1 )
-	{
-		m_byCurrState = byCurrState;
-	}
+    if (questIndex == -1)
+    {
+        m_byCurrState = byCurrState;
+    }
 
     return byCurrState;
 }
 
-
-BYTE CSQuest::getQuestState2 ( int questIndex )
+BYTE CSQuest::getQuestState2(int questIndex)
 {
     int  Index;
-	BYTE byCurrState;
-    
-    Index = questIndex/4;
-	int SubIndex = questIndex % 4;
-	byCurrState = (m_byQuestList[Index] >> (SubIndex * 2)) & 0x03;
+    BYTE byCurrState;
+
+    Index = questIndex / 4;
+    int SubIndex = questIndex % 4;
+    byCurrState = (m_byQuestList[Index] >> (SubIndex * 2)) & 0x03;
 
     return byCurrState;
 }
 
-BYTE CSQuest::CheckQuestState ( BYTE state )
+BYTE CSQuest::CheckQuestState(BYTE state)
 {
-    if ( Hero->Class !=-1 )
+    if (Hero->Class != -1)
     {
-		if(m_bOnce)
-		{
-			m_bOnce		= false;
-			m_byClass   = gCharacterManager.GetBaseClass( Hero->Class );
-		}
+        if (m_bOnce)
+        {
+            m_bOnce = false;
+            m_byClass = gCharacterManager.GetBaseClass(Hero->Class);
+        }
     }
 
     QUEST_ATTRIBUTE* lpQuest = &m_Quest[m_byCurrQuestIndex];
-//    m_byCurrState = m_byQuestList[m_byCurrQuestIndex];
+    //    m_byCurrState = m_byQuestList[m_byCurrQuestIndex];
 
-    if ( state==255 )
+    if (state == 255)
     {
-        getQuestState ();
+        getQuestState();
     }
     else
     {
         m_byCurrState = state;
     }
-    switch ( m_byCurrState )
+    switch (m_byCurrState)
     {
-    case QUEST_NO :
+    case QUEST_NO:
+    {
+        if (CheckRequestCondition(lpQuest))
         {
-            if ( CheckRequestCondition( lpQuest ) )
-            {
-                m_shCurrPage = FindQuestContext ( lpQuest, 0 );
-            }
+            m_shCurrPage = FindQuestContext(lpQuest, 0);
         }
-        break;
+    }
+    break;
 
-    case QUEST_ING : 
+    case QUEST_ING:
+    {
+        if (CheckActCondition(lpQuest))
         {
-            if ( CheckActCondition( lpQuest ) )
-            {
-                m_shCurrPage = FindQuestContext ( lpQuest, 2 );
-                m_byCurrState = QUEST_ITEM;
-            }
+            m_shCurrPage = FindQuestContext(lpQuest, 2);
+            m_byCurrState = QUEST_ITEM;
         }
-        break;
+    }
+    break;
 
-    case QUEST_END :
-        {
-            m_shCurrPage = FindQuestContext ( lpQuest, 3 );
-        }
-        break;
+    case QUEST_END:
+    {
+        m_shCurrPage = FindQuestContext(lpQuest, 3);
+    }
+    break;
     }
 
-	return m_byCurrState;
+    return m_byCurrState;
 }
 
-void CSQuest::ShowDialogText ( int iDialogIndex )
+void CSQuest::ShowDialogText(int iDialogIndex)
 {
-	g_iCurrentDialogScript = iDialogIndex;
+    g_iCurrentDialogScript = iDialogIndex;
 
-	g_iNumLineMessageBoxCustom = SeparateTextIntoLines( g_DialogScript[g_iCurrentDialogScript].m_lpszText, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
+    g_iNumLineMessageBoxCustom = SeparateTextIntoLines(g_DialogScript[g_iCurrentDialogScript].m_lpszText, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 
-	char lpszAnswer[MAX_LENGTH_ANSWER+8];
-	g_iNumAnswer = 0;
-	ZeroMemory( g_lpszDialogAnswer, MAX_ANSWER_FOR_DIALOG * NUM_LINE_DA * MAX_LENGTH_CMB);
+    char lpszAnswer[MAX_LENGTH_ANSWER + 8];
+    g_iNumAnswer = 0;
+    ZeroMemory(g_lpszDialogAnswer, MAX_ANSWER_FOR_DIALOG * NUM_LINE_DA * MAX_LENGTH_CMB);
 
-	int iTextSize=0;
+    int iTextSize = 0;
 
-	for ( int i = 0; i < g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer; ++i)
-	{
-		wsprintf( lpszAnswer, "%d) %s", i + 1, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
-		int iNumLine = SeparateTextIntoLines( lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB );
-		if ( iNumLine < NUM_LINE_DA - 1)
-		{
-			g_lpszDialogAnswer[i][iNumLine][0] = '\0';
-		}
-		g_iNumAnswer++;
-		iTextSize = i;
-	}
+    for (int i = 0; i < g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer; ++i)
+    {
+        wsprintf(lpszAnswer, "%d) %s", i + 1, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
+        int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
+        if (iNumLine < NUM_LINE_DA - 1)
+        {
+            g_lpszDialogAnswer[i][iNumLine][0] = '\0';
+        }
+        g_iNumAnswer++;
+        iTextSize = i;
+    }
 
-	if ( 0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
-	{
-		wsprintf( lpszAnswer, "%d) %s", iTextSize + 1, GlobalText[609]);
-		strcpy( g_lpszDialogAnswer[0][0], lpszAnswer );
-		g_iNumAnswer = 1;
-	}
+    if (0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
+    {
+        wsprintf(lpszAnswer, "%d) %s", iTextSize + 1, GlobalText[609]);
+        strcpy(g_lpszDialogAnswer[0][0], lpszAnswer);
+        g_iNumAnswer = 1;
+    }
 }
 
-void CSQuest::ShowQuestPreviewWindow ( int index )
+void CSQuest::ShowQuestPreviewWindow(int index)
 {
-    if(index != -1)
-	{
-		m_byCurrQuestIndex = index;
-	}
+    if (index != -1)
+    {
+        m_byCurrQuestIndex = index;
+    }
 
     m_byViewQuest = QUEST_VIEW_PREVIEW;
 
     BYTE tmp = m_byCurrQuestIndex;
     m_byCurrQuestIndex = m_byCurrQuestIndexWnd;
 
-    CheckQuestState ();
-    ShowDialogText ( m_shCurrPage );
+    CheckQuestState();
+    ShowDialogText(m_shCurrPage);
 
     m_byCurrQuestIndex = tmp;
 }
 
-void CSQuest::ShowQuestNpcWindow ( int index )
+void CSQuest::ShowQuestNpcWindow(int index)
 {
-    if ( index!=-1 ) m_byCurrQuestIndex = index;
+    if (index != -1) m_byCurrQuestIndex = index;
 
     g_bEventChipDialogEnable = EVENT_NONE;
 
-    CheckQuestState ();
-    ShowDialogText ( m_shCurrPage );
+    CheckQuestState();
+    ShowDialogText(m_shCurrPage);
 }
 
-bool CSQuest::BeQuestItem ( void )
+bool CSQuest::BeQuestItem(void)
 {
     bool bCompleteItem = false;
 
-    if ( m_byCurrState==QUEST_ING )
+    if (m_byCurrState == QUEST_ING)
     {
         QUEST_ATTRIBUTE* pQuest = &m_Quest[m_byCurrQuestIndex];
 
-        for ( int i=0; i<pQuest->shQuestConditionNum; ++i )
+        for (int i = 0; i < pQuest->shQuestConditionNum; ++i)
         {
-            if ( pQuest->QuestAct[i].byRequestClass[m_byClass]>0 )
+            if (pQuest->QuestAct[i].byRequestClass[m_byClass] > 0)
             {
-                switch ( pQuest->QuestAct[i].byQuestType )
+                switch (pQuest->QuestAct[i].byQuestType)
                 {
                 case QUEST_ITEM:
+                {
+                    bCompleteItem = true;
+
+                    int itemType
+                        = (pQuest->QuestAct[i].wItemType * MAX_ITEM_INDEX)
+                        + pQuest->QuestAct[i].byItemSubType;
+                    int itemLevel = -1;
+                    int itemNum = pQuest->QuestAct[i].byItemNum;
+
+                    itemLevel = pQuest->QuestAct[i].byItemLevel;
+                    if (FindQuestItemsInInven(itemType, itemNum, itemLevel))
                     {
-                        bCompleteItem = true;
+                        return false;
+                    }
+                }
+                break;
+                case QUEST_MONSTER:
+                {
+                    bCompleteItem = true;
+                    bool bFind = false;
 
-						int itemType
-							= (pQuest->QuestAct[i].wItemType*MAX_ITEM_INDEX)
-								+ pQuest->QuestAct[i].byItemSubType;
-						int itemLevel	= -1;
-                        int itemNum     = pQuest->QuestAct[i].byItemNum;
-
-                        itemLevel	= pQuest->QuestAct[i].byItemLevel;
-						if (FindQuestItemsInInven(itemType, itemNum, itemLevel))
+                    for (int j = 0; j < 5; ++j)
+                    {
+                        if (m_anKillMobType[j] == int(pQuest->QuestAct[i].wItemType)
+                            && m_anKillMobCount[j] >= int(pQuest->QuestAct[i].byItemNum))
                         {
-                            return false;
+                            bFind = true;
+                            break;
                         }
                     }
-					break;
-				case QUEST_MONSTER:
-					{
-						bCompleteItem = true;
-						bool bFind = false;
 
-						for (int j = 0; j < 5; ++j)
-						{
-							if (m_anKillMobType[j] == int(pQuest->QuestAct[i].wItemType)
-								&& m_anKillMobCount[j] >= int(pQuest->QuestAct[i].byItemNum))
-							{
-								bFind = true;
-								break;
-							}
-						}
-
-						if (!bFind)
-							return false;
-					}
-					break;
+                    if (!bFind)
+                        return false;
+                }
+                break;
                 }
             }
         }
@@ -565,91 +562,91 @@ bool CSQuest::BeQuestItem ( void )
 
 int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
 {
-	SEASON3B::CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
+    SEASON3B::CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
 
-	int nItemsInInven = pInvenCtrl->GetNumberOfItems();
-	ITEM* pItem = NULL;
-	int nFindItemCount = 0;
-	
-	for (int i = 0; i < nItemsInInven; ++i)
-	{
-		pItem = pInvenCtrl->GetItem(i);
-		if (nType == pItem->Type)
-		{
-			if (nLevel == -1 || nLevel == (int)((pItem->Level>>3)&15))
-			{	
+    int nItemsInInven = pInvenCtrl->GetNumberOfItems();
+    ITEM* pItem = NULL;
+    int nFindItemCount = 0;
+
+    for (int i = 0; i < nItemsInInven; ++i)
+    {
+        pItem = pInvenCtrl->GetItem(i);
+        if (nType == pItem->Type)
+        {
+            if (nLevel == -1 || nLevel == (int)((pItem->Level >> 3) & 15))
+            {
                 if (nCount <= ++nFindItemCount)
                     return 0;
-			}
-		}
-	}
-			
-	return nCount - nFindItemCount;
+            }
+        }
+    }
+
+    return nCount - nFindItemCount;
 }
 
 int CSQuest::GetKillMobCount(int nMobType)
 {
-	for (int i = 0; i < 5; ++i)
-	{
-		if (nMobType == m_anKillMobType[i])
-			return m_anKillMobCount[i];
-	}
+    for (int i = 0; i < 5; ++i)
+    {
+        if (nMobType == m_anKillMobType[i])
+            return m_anKillMobCount[i];
+    }
 
-	return 0;
+    return 0;
 }
 
 bool CSQuest::ProcessNextProgress()
 {
-	QUEST_ATTRIBUTE* lpQuest = &m_Quest[m_byCurrQuestIndex];
+    QUEST_ATTRIBUTE* lpQuest = &m_Quest[m_byCurrQuestIndex];
     if (!CheckRequestCondition(lpQuest, true))
     {
         ShowDialogText(m_shCurrPage);
-		return true;
+        return true;
     }
     else
     {
         SendRequestQuestState(m_byCurrQuestIndex, 1);
-		return false;
+        return false;
     }
 }
 
 void CSQuest::SetKillMobInfo(int* anKillMobInfo)
 {
-	for (int i = 0; i < 10; i += 2)
-	{
-		m_anKillMobType[i / 2] = anKillMobInfo[i];
-		m_anKillMobCount[i / 2] = anKillMobInfo[i + 1];
-	}
+    for (int i = 0; i < 10; i += 2)
+    {
+        m_anKillMobType[i / 2] = anKillMobInfo[i];
+        m_anKillMobCount[i / 2] = anKillMobInfo[i + 1];
+    }
 }
 
-void CSQuest::RenderDevilSquare ( void )
+void CSQuest::RenderDevilSquare(void)
 {
-	g_pRenderText->SetFont(g_hFontBold);
-	g_pRenderText->SetTextColor(230, 230, 230, 255);
-	g_pRenderText->SetBgColor(20, 20, 20, 255);
-	g_pRenderText->RenderText(m_iStartX+95-60, m_iStartY+12, GlobalText[1145],120, 0, RT3_SORT_CENTER);
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetTextColor(230, 230, 230, 255);
+    g_pRenderText->SetBgColor(20, 20, 20, 255);
+    g_pRenderText->RenderText(m_iStartX + 95 - 60, m_iStartY + 12, GlobalText[1145], 120, 0, RT3_SORT_CENTER);
 
-	g_pRenderText->SetTextColor(200, 220, 255, 255);
-//	RenderText ( m_iStartX+95-73, m_iStartY+22, m_Quest[m_byCurrQuestIndex].strQuestName, 150*WindowWidth/640, true );
+    g_pRenderText->SetTextColor(200, 220, 255, 255);
+    //	RenderText ( m_iStartX+95-73, m_iStartY+22, m_Quest[m_byCurrQuestIndex].strQuestName, 150*WindowWidth/640, true );
 }
 
-void CSQuest::RenderBloodCastle ( void )
+void CSQuest::RenderBloodCastle(void)
 {
     char Text[100];
-	g_pRenderText->SetFont(g_hFontBold);
-	g_pRenderText->SetTextColor(230, 230, 230, 255);
-	g_pRenderText->SetBgColor(20, 20, 20, 255);
-	g_pRenderText->RenderText(m_iStartX+95-60, m_iStartY+12, GlobalText[1146],120, 0, RT3_SORT_CENTER);
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetTextColor(230, 230, 230, 255);
+    g_pRenderText->SetBgColor(20, 20, 20, 255);
+    g_pRenderText->RenderText(m_iStartX + 95 - 60, m_iStartY + 12, GlobalText[1146], 120, 0, RT3_SORT_CENTER);
 
-	g_pRenderText->SetTextColor(223, 191, 103, 255);
-	g_pRenderText->SetBgColor(0);
-	sprintf ( Text, GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
-	g_pRenderText->RenderText(m_iStartX+95, m_iStartY+80, Text, 0 ,0, RT3_WRITE_CENTER);
-	g_pRenderText->SetTextColor(255, 230, 210, 255);
-	g_pRenderText->RenderText(m_iStartX+85, m_iStartY+100, GlobalText[877], 0 ,0, RT3_WRITE_CENTER);
-    g_pRenderText->RenderText(m_iStartX+105, m_iStartY+120, GlobalText[878], 0 ,0, RT3_WRITE_CENTER);
+    g_pRenderText->SetTextColor(223, 191, 103, 255);
+    g_pRenderText->SetBgColor(0);
+    sprintf(Text, GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
+    g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 80, Text, 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->SetTextColor(255, 230, 210, 255);
+    g_pRenderText->RenderText(m_iStartX + 85, m_iStartY + 100, GlobalText[877], 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_iStartX + 105, m_iStartY + 120, GlobalText[878], 0, 0, RT3_WRITE_CENTER);
 
-	g_pRenderText->SetFont(g_hFontBig);
-	sprintf ( Text, GlobalText[868], m_byEventCount[m_byQuestType] );
-	g_pRenderText->RenderText(m_iStartX+95, m_iStartY+65+60*4, Text, 0 ,0, RT3_WRITE_CENTER);
+    g_pRenderText->SetFont(g_hFontBig);
+    sprintf(Text, GlobalText[868], m_byEventCount[m_byQuestType]);
+    g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 65 + 60 * 4, Text, 0, 0, RT3_WRITE_CENTER);
 }

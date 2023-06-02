@@ -8,63 +8,62 @@
 
 SEASON3B::CNewUISlideWindow::CNewUISlideWindow()
 {
-	m_pNewUIMng = NULL;
-	m_pSlideMgr = NULL;
+    m_pNewUIMng = NULL;
+    m_pSlideMgr = NULL;
 }
 
-SEASON3B::CNewUISlideWindow::~CNewUISlideWindow() 
-{ 
-	Release(); 
+SEASON3B::CNewUISlideWindow::~CNewUISlideWindow()
+{
+    Release();
 }
 
 bool SEASON3B::CNewUISlideWindow::Create(CNewUIManager* pNewUIMng)
 {
-	if(NULL == pNewUIMng)
-		return false;
+    if (NULL == pNewUIMng)
+        return false;
 
-	m_pNewUIMng = pNewUIMng;
-	m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_SLIDEWINDOW, this);
-	m_pSlideMgr = new CSlideHelpMgr;
-	std::string strFileName = "Data\\Local\\"+g_strSelectedML+"\\Slide_"+g_strSelectedML+".bmd";
-	m_pSlideMgr->OpenSlideTextFile(strFileName.c_str());
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_SLIDEWINDOW, this);
+    m_pSlideMgr = new CSlideHelpMgr;
+    std::string strFileName = "Data\\Local\\" + g_strSelectedML + "\\Slide_" + g_strSelectedML + ".bmd";
+    m_pSlideMgr->OpenSlideTextFile(strFileName.c_str());
 
-	return true;
+    return true;
 }
 
 void SEASON3B::CNewUISlideWindow::Release()
 {
-	SAFE_DELETE(m_pSlideMgr);
+    SAFE_DELETE(m_pSlideMgr);
 
-	if(m_pNewUIMng)
-	{
-		m_pNewUIMng->RemoveUIObj(this);
-		m_pNewUIMng = NULL;
-	}
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
 }
 
 bool SEASON3B::CNewUISlideWindow::UpdateMouseEvent()
 {
-	return true;
+    return true;
 }
 bool SEASON3B::CNewUISlideWindow::UpdateKeyEvent()
 {
-	return true;
+    return true;
 }
 bool SEASON3B::CNewUISlideWindow::Update()
 {
-	m_pSlideMgr->ManageSlide();
+    m_pSlideMgr->ManageSlide();
 
-	return true;
+    return true;
 }
 bool SEASON3B::CNewUISlideWindow::Render()
 {
-	m_pSlideMgr->Render();
+    m_pSlideMgr->Render();
 
-	return true;
+    return true;
 }
 
 float SEASON3B::CNewUISlideWindow::GetLayerDepth()
 {
-	return 1.91f;
+    return 1.91f;
 }
-

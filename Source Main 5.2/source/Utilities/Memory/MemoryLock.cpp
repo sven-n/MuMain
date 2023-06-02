@@ -5,14 +5,11 @@
 #include "stdafx.h"
 #include "MemoryLock.h"
 
-
 #define ML_TABLE_SIZE	( 1024)
-
 
 BYTE CMemoryLock::s_byXor[SIZE_XOR_MEMORYLOCK] =
 { 0x93, 0xd2, 0xb5, 0x7e, 0xa3, 0xcf, 0x39, 0x6d,
-	0xeb, 0x1a, 0x7d, 0x47, 0x29, 0xe3, 0xfb, 0x49};
-
+    0xeb, 0x1a, 0x7d, 0x47, 0x29, 0xe3, 0xfb, 0x49 };
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -20,25 +17,25 @@ BYTE CMemoryLock::s_byXor[SIZE_XOR_MEMORYLOCK] =
 
 CMemoryLock::CMemoryLock()
 {
-	return;
+    return;
 }
 
 CMemoryLock::~CMemoryLock()
 {
-	return;
+    return;
 }
 
-void CMemoryLock::Clear( void)
+void CMemoryLock::Clear(void)
 {
-	return;
+    return;
 }
 
-void CMemoryLock::Destroy( void)
+void CMemoryLock::Destroy(void)
 {
-	return;
+    return;
 }
 
-void CMemoryLock::Init( HWND hWnd, UINT uiMessage)
+void CMemoryLock::Init(HWND hWnd, UINT uiMessage)
 {
-	return;
+    return;
 }

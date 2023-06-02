@@ -16,82 +16,81 @@
 
 CBannerInfoList::CBannerInfoList() // OK
 {
-	this->Clear();
+    this->Clear();
 }
 
 CBannerInfoList::~CBannerInfoList() // OK
 {
-
 }
 
-WZResult CBannerInfoList::LoadBanner(std::string strDirPath,std::string strScriptFileName,bool bDonwLoad)
+WZResult CBannerInfoList::LoadBanner(std::string strDirPath, std::string strScriptFileName, bool bDonwLoad)
 {
-	static WZResult result;
+    static WZResult result;
 
-	result.BuildSuccessResult();
+    result.BuildSuccessResult();
 
-	std::ifstream ifs;
+    std::ifstream ifs;
 
-	std::string path = strDirPath+strScriptFileName;
+    std::string path = strDirPath + strScriptFileName;
 
-	ifs.open(path.c_str(),std::ifstream::in);
+    ifs.open(path.c_str(), std::ifstream::in);
 
-	if(ifs.is_open())
-	{
-		this->Clear();
+    if (ifs.is_open())
+    {
+        this->Clear();
 
-		char buff[1024] = {0};
+        char buff[1024] = { 0 };
 
-		while(true)
-		{
-			if(!ifs.getline(buff,sizeof(buff)))
-				break;
+        while (true)
+        {
+            if (!ifs.getline(buff, sizeof(buff)))
+                break;
 
-			CBannerInfo info;
+            CBannerInfo info;
 
-			if(info.SetBanner(buff,strDirPath,bDonwLoad))
-			{
-				this->Append(info);
-			}
-		}
+            if (info.SetBanner(buff, strDirPath, bDonwLoad))
+            {
+                this->Append(info);
+            }
+        }
 
-		ifs.close();
-	}
-	else
-	{
-		result.SetResult(6,GetLastError(),"Banner file open fail");
-	}
+        ifs.close();
+    }
+    else
+    {
+        result.SetResult(6, GetLastError(), "Banner file open fail");
+    }
 
-	return result;
+    return result;
 }
 
 void CBannerInfoList::Clear() // OK
 {
-	this->m_BannerInfos.clear();
+    this->m_BannerInfos.clear();
 }
 
 int CBannerInfoList::GetSize() // OK
 {
-	return this->m_BannerInfos.size();
+    return this->m_BannerInfos.size();
 }
 
 void CBannerInfoList::Append(CBannerInfo banner) // OK
 {
-	this->m_BannerInfos.insert(std::make_pair(banner.BannerSeq,banner));
+    this->m_BannerInfos.insert(std::make_pair(banner.BannerSeq, banner));
 }
 
 void CBannerInfoList::SetFirst() // OK
 {
-	this->m_BannerInfoIter = this->m_BannerInfos.begin();
+    this->m_BannerInfoIter = this->m_BannerInfos.begin();
 }
 bool CBannerInfoList::GetNext(CBannerInfo& banner) // OK
 {
-	if(this->m_BannerInfoIter==this->m_BannerInfos.end())
-		return 0;
+    if (this->m_BannerInfoIter == this->m_BannerInfos.end())
+        return 0;
 
-	banner = this->m_BannerInfoIter->second;
+    banner = this->m_BannerInfoIter->second;
 
-	this->m_BannerInfoIter++;
-	return 1;
+    this->m_BannerInfoIter++;
+    return 1;
 }
 #endif

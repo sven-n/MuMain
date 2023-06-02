@@ -13,30 +13,30 @@
 
 using namespace info;
 
-FilterInfoPtr FilterInfo::MakeInfo( const std::string& filename )
+FilterInfoPtr FilterInfo::MakeInfo(const std::string& filename)
 {
-	FilterInfoPtr info ( new FilterInfo( filename ) );
-	return info;
+    FilterInfoPtr info(new FilterInfo(filename));
+    return info;
 }
 
-FilterInfo::FilterInfo( const std::string& filename ) : InfoFile( filename ), m_IsOpenFile( false )
+FilterInfo::FilterInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
-	m_IsOpenFile = OpenFile( filename );
+    m_IsOpenFile = OpenFile(filename);
 
-	if( !m_IsOpenFile )
-	{
-		assert(0);
-	}
+    if (!m_IsOpenFile)
+    {
+        assert(0);
+    }
 }
 
 FilterInfo::~FilterInfo()
 {
-	clear();
+    clear();
 }
 
-bool FilterInfo::OpenFile( const std::string& filename )
+bool FilterInfo::OpenFile(const std::string& filename)
 {
-	return true;
+    return true;
 }
 
 #endif //INFO_BUILDER

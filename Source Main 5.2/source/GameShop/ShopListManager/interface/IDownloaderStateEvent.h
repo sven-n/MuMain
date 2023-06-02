@@ -11,19 +11,17 @@
 class IDownloaderStateEvent
 {
 public:
-// Constructor, Destructor
+    // Constructor, Destructor
 
-	IDownloaderStateEvent(){};
-	virtual ~IDownloaderStateEvent(){};
+    IDownloaderStateEvent() {};
+    virtual ~IDownloaderStateEvent() {};
 
+    // abstract Function
 
-// abstract Function
-
-	//				다운로드 시작 이벤트 핸들러
-	virtual void	OnStartedDownloadFile(TCHAR* szFileName, ULONGLONG uFileLength) = 0;
-	//				다운로드 진행 상황 이벤트 핸들러 : 패킷 단위
-	virtual void	OnProgressDownloadFile(TCHAR* szFileName, ULONGLONG uDownloadFileLength) = 0;
-	//				다운로드 종료 이벤트 핸들러
-	virtual void	OnCompletedDownloadFile(TCHAR* szFileName, WZResult wzResult) = 0;
+        //				다운로드 시작 이벤트 핸들러
+    virtual void	OnStartedDownloadFile(TCHAR* szFileName, ULONGLONG uFileLength) = 0;
+    //				다운로드 진행 상황 이벤트 핸들러 : 패킷 단위
+    virtual void	OnProgressDownloadFile(TCHAR* szFileName, ULONGLONG uDownloadFileLength) = 0;
+    //				다운로드 종료 이벤트 핸들러
+    virtual void	OnCompletedDownloadFile(TCHAR* szFileName, WZResult wzResult) = 0;
 };
-

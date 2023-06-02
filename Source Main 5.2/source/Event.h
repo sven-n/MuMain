@@ -8,22 +8,22 @@
 class CXmasEvent
 {
 public:
-	CXmasEvent(void);
-	~CXmasEvent(void);
-	
-	static CXmasEvent* GetInstance() { static CXmasEvent s_Instance; return &s_Instance; }
+    CXmasEvent(void);
+    ~CXmasEvent(void);
 
-	void LoadXmasEvent();
-	void LoadXmasEventEffect();
-	void LoadXmasEventItem();
-	void LoadXmasEventSound();
+    static CXmasEvent* GetInstance() { static CXmasEvent s_Instance; return &s_Instance; }
 
-	void CreateXmasEventEffect(CHARACTER* pCha, OBJECT *pObj, int iType);
+    void LoadXmasEvent();
+    void LoadXmasEventEffect();
+    void LoadXmasEventItem();
+    void LoadXmasEventSound();
 
-	void GenID();
+    void CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType);
+
+    void GenID();
 
 public:
-	int m_iEffectID;
+    int m_iEffectID;
 };
 
 #define g_XmasEvent	CXmasEvent::GetInstance()
@@ -31,16 +31,16 @@ public:
 class CNewYearsDayEvent
 {
 public:
-	CNewYearsDayEvent();
-	~CNewYearsDayEvent();
+    CNewYearsDayEvent();
+    ~CNewYearsDayEvent();
 
-	static CNewYearsDayEvent* GetInstance() { static CNewYearsDayEvent s_Instance; return &s_Instance; }
+    static CNewYearsDayEvent* GetInstance() { static CNewYearsDayEvent s_Instance; return &s_Instance; }
 
-	void LoadModel();
-	void LoadSound();
+    void LoadModel();
+    void LoadSound();
 
-	CHARACTER* CreateMonster(int iType, int iPosX, int iPosY, int iKey);
-	bool MoveMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b);
+    CHARACTER* CreateMonster(int iType, int iPosX, int iPosY, int iKey);
+    bool MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
 };
 
 #define g_NewYearsDayEvent	CNewYearsDayEvent::GetInstance()
@@ -48,17 +48,16 @@ public:
 class C09SummerEvent
 {
 public:
-	C09SummerEvent();
-	~C09SummerEvent();
+    C09SummerEvent();
+    ~C09SummerEvent();
 
-	static C09SummerEvent* GetInstance() { static C09SummerEvent s_Instance; return &s_Instance; }
+    static C09SummerEvent* GetInstance() { static C09SummerEvent s_Instance; return &s_Instance; }
 
-	void LoadModel();
-	void LoadSound();
-	
-	CHARACTER* CreateMonster(int iType, int iPosX, int iPosY, int iKey);
-	bool MoveMonsterVisual(CHARACTER* c,OBJECT* o, BMD* b);
+    void LoadModel();
+    void LoadSound();
+
+    CHARACTER* CreateMonster(int iType, int iPosX, int iPosY, int iKey);
+    bool MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
 };
 
 #define g_09SummerEvent		C09SummerEvent::GetInstance()
-

@@ -14,43 +14,43 @@
 
 CShopListManager::CShopListManager() // OK
 {
-	this->m_ShopList = new CShopList;
+    this->m_ShopList = new CShopList;
 
-	this->m_vScriptFiles.push_back(SHOPLIST_SCRIPT_CATEGORY);
-	this->m_vScriptFiles.push_back(SHOPLIST_SCRIPT_PACKAGE);
-	this->m_vScriptFiles.push_back(SHOPLIST_SCRIPT_PRODUCT);
+    this->m_vScriptFiles.push_back(SHOPLIST_SCRIPT_CATEGORY);
+    this->m_vScriptFiles.push_back(SHOPLIST_SCRIPT_PACKAGE);
+    this->m_vScriptFiles.push_back(SHOPLIST_SCRIPT_PRODUCT);
 
-	//setlocale(0,"Koraen");
+    //setlocale(0,"Koraen");
 }
 
 CShopListManager::~CShopListManager() // OK
 {
-	SAFE_DELETE(m_ShopList);
+    SAFE_DELETE(m_ShopList);
 }
 
 WZResult		CShopListManager::LoadScript(bool bDonwLoad) // OK
 {
-	if(this->m_ShopList)
-	{
-		std::string path = this->GetScriptPath();
+    if (this->m_ShopList)
+    {
+        std::string path = this->GetScriptPath();
 
-		this->m_Result = this->m_ShopList->LoadCategroy(std::string(path+SHOPLIST_SCRIPT_CATEGORY).c_str());
+        this->m_Result = this->m_ShopList->LoadCategroy(std::string(path + SHOPLIST_SCRIPT_CATEGORY).c_str());
 
-		if(this->m_Result.IsSuccess())
-		{
-			this->m_Result = this->m_ShopList->LoadPackage(std::string(path+SHOPLIST_SCRIPT_PACKAGE).c_str());
+        if (this->m_Result.IsSuccess())
+        {
+            this->m_Result = this->m_ShopList->LoadPackage(std::string(path + SHOPLIST_SCRIPT_PACKAGE).c_str());
 
-			if(this->m_Result.IsSuccess())
-			{
-				this->m_Result = this->m_ShopList->LoadProduct(std::string(path+SHOPLIST_SCRIPT_PRODUCT).c_str());
-			}
-		}
-	}
-	else
-	{
-		this->m_Result.SetResult(PT_NO_INFO,0,"[CShopListManager::LoadScript] Failed");
-	}
+            if (this->m_Result.IsSuccess())
+            {
+                this->m_Result = this->m_ShopList->LoadProduct(std::string(path + SHOPLIST_SCRIPT_PRODUCT).c_str());
+            }
+        }
+    }
+    else
+    {
+        this->m_Result.SetResult(PT_NO_INFO, 0, "[CShopListManager::LoadScript] Failed");
+    }
 
-	return this->m_Result;
+    return this->m_Result;
 }
 #endif

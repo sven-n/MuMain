@@ -17,26 +17,26 @@
 #define	CSMW_BTN_DELETE			3
 #define	CSMW_BTN_MAX			4
 
-class CCharSelMainWin : public CWin  
+class CCharSelMainWin : public CWin
 {
 protected:
-	CSprite	m_asprBack[CSMW_SPR_MAX];
-	CButton	m_aBtn[CSMW_BTN_MAX];
-	bool	m_bAccountBlockItem;
+    CSprite	m_asprBack[CSMW_SPR_MAX];
+    CButton	m_aBtn[CSMW_BTN_MAX];
+    bool	m_bAccountBlockItem;
 
 public:
-	CCharSelMainWin();
-	virtual ~CCharSelMainWin();
-	
-	void Create();
-	void SetPosition(int nXCoord, int nYCoord);
-	void Show(bool bShow);
-	bool CursorInWin(int nArea);
-	void UpdateDisplay();
+    CCharSelMainWin();
+    virtual ~CCharSelMainWin();
+
+    void Create();
+    void SetPosition(int nXCoord, int nYCoord);
+    void Show(bool bShow);
+    bool CursorInWin(int nArea);
+    void UpdateDisplay();
 
 protected:
-	void PreRelease();
-	void UpdateWhileActive(double dDeltaTick);
-	void RenderControls();
-	void DeleteCharacter();
+    void PreRelease();
+    void UpdateWhileActive(double dDeltaTick);
+    void RenderControls();
+    void DeleteCharacter();
 };

@@ -2,16 +2,16 @@
 #pragma once
 
 //warining
-#pragma warning( disable : 4067 ) 
-#pragma warning( disable : 4786 ) 
-#pragma warning( disable : 4800 ) 
-#pragma warning( disable : 4996 ) 
+#pragma warning( disable : 4067 )
+#pragma warning( disable : 4786 )
+#pragma warning( disable : 4800 )
+#pragma warning( disable : 4996 )
 #pragma warning( disable : 4244 )
 #pragma warning( disable : 4237 )
 #pragma warning( disable : 4305 )
-#pragma warning( disable : 4503 ) 
-#pragma warning( disable : 4267 ) 
-#pragma warning( disable : 4091 ) 
+#pragma warning( disable : 4503 )
+#pragma warning( disable : 4267 )
+#pragma warning( disable : 4091 )
 #pragma warning( disable : 4819 )
 #pragma warning( disable : 4505 )
 #pragma warning( disable : 4100 )
@@ -27,10 +27,10 @@
 #pragma warning( disable : 26812 )
 
 // Exclude rarely-used stuff from Windows headers
-#define WIN32_LEAN_AND_MEAN	
-	
+#define WIN32_LEAN_AND_MEAN
+
 #ifndef _USE_32BIT_TIME_T
-	#define _USE_32BIT_TIME_T
+#define _USE_32BIT_TIME_T
 #endif //_USE_32BIT_TIME_T
 
 #define _CRT_SECURE_NO_DEPRECATE
@@ -81,13 +81,12 @@
 #include "_define.h"
 #include "_enum.h"
 #include "_types.h"
-#include "_struct.h"	
+#include "_struct.h"
 #include "w_WindowMessageHandler.h"
 #include "_GlobalFunctions.h"
-#include "_TextureIndex.h"	
+#include "_TextureIndex.h"
 #include "InfoHelperFunctions.h"
 #include "UIDefaultBase.h"
 #include "NewUICommon.h"
 #include "./Math/ZzzMathLib.h"
 #include "ZzzOpenglUtil.h"
-

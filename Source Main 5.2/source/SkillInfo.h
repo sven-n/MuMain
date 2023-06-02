@@ -14,51 +14,50 @@
 
 namespace info
 {
-	BoostSmartPointer(SkillInfo);
-	class SkillInfo : public InfoFile
-	{
-	public:
-		static SkillInfoPtr MakeInfo( const std::string& filename );
-		virtual ~SkillInfo();
+    BoostSmartPointer(SkillInfo);
+    class SkillInfo : public InfoFile
+    {
+    public:
+        static SkillInfoPtr MakeInfo(const std::string& filename);
+        virtual ~SkillInfo();
 
-	protected:
-		virtual bool isopenfile();
-		virtual void clear();
+    protected:
+        virtual bool isopenfile();
+        virtual void clear();
 
-	public:
-		const Script_Skill* GetData( int index ) const;
+    public:
+        const Script_Skill* GetData(int index) const;
 
-	private:
-		bool OpenFile( const std::string& filename );
-		SkillInfo( const std::string& filename );
+    private:
+        bool OpenFile(const std::string& filename);
+        SkillInfo(const std::string& filename);
 
-	private:
-		typedef std::vector<Script_Skill>	SkillVECTOR;
+    private:
+        typedef std::vector<Script_Skill>	SkillVECTOR;
 
-	private:
-		bool			m_IsOpenFile;
-		SkillVECTOR     m_Info;
-	};
+    private:
+        bool			m_IsOpenFile;
+        SkillVECTOR     m_Info;
+    };
 };
 
 inline
 bool info::SkillInfo::isopenfile()
 {
-	return m_IsOpenFile;
+    return m_IsOpenFile;
 }
 
 inline
 void info::SkillInfo::clear()
 {
-
 }
 
 inline
-const info::Script_Skill* info::SkillInfo::GetData( int index ) const
+const info::Script_Skill* info::SkillInfo::GetData(int index) const
 {
-	if( index >= m_Info.size() ) 
-		assert(0);
-	return &m_Info[index];
+    if (index >= m_Info.size())
+        assert(0);
+    return &m_Info[index];
 }
 
 #endif // !defined(AFX_SKILLINFO_H__3FF63040_0D46_4FFC_BFD9_86B9CE56C47A__INCLUDED_)

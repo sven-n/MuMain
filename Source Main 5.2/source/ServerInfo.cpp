@@ -7,11 +7,8 @@
 
 CServerInfo::CServerInfo()
 {
-
 }
 
 CServerInfo::~CServerInfo()
 {
-
 }
-

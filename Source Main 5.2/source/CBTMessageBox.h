@@ -7,37 +7,35 @@
 #include <string>
 
 namespace leaf {
+    //. Interface Declaration
 
-	//. Interface Declaration
-	
-	int CBTMessageBox(HWND hWnd, const std::string& text, const std::string& caption, UINT uType, bool bAlwaysOnTop = false);
+    int CBTMessageBox(HWND hWnd, const std::string& text, const std::string& caption, UINT uType, bool bAlwaysOnTop = false);
 
+    //. class CCBTMessageBox
 
-	//. class CCBTMessageBox
+    class CCBTMessageBox
+    {
+        HWND	m_hParentWnd;
+        HHOOK	m_hCBT;
+        bool	m_bAlwaysOnTop;
 
-	class CCBTMessageBox
-	{
-		HWND	m_hParentWnd;
-		HHOOK	m_hCBT;
-		bool	m_bAlwaysOnTop;
-		
-	public:
-		CCBTMessageBox();
-		~CCBTMessageBox();
-		
-		int OpenMessageBox(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, bool bAlwaysOnTop);
+    public:
+        CCBTMessageBox();
+        ~CCBTMessageBox();
 
-		HWND GetParentWndHandle() const;
-		bool IsAlwaysOnTop() const;
+        int OpenMessageBox(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, bool bAlwaysOnTop);
 
-		bool HookCBT();
-		void UnhookCBT();
-		HHOOK GetHookHandle() const;
+        HWND GetParentWndHandle() const;
+        bool IsAlwaysOnTop() const;
 
-		static CCBTMessageBox* GetInstance();
+        bool HookCBT();
+        void UnhookCBT();
+        HHOOK GetHookHandle() const;
 
-		static LRESULT CALLBACK CBTProc(INT nCode, WPARAM wParam, LPARAM lParam);
-	};
+        static CCBTMessageBox* GetInstance();
+
+        static LRESULT CALLBACK CBTProc(INT nCode, WPARAM wParam, LPARAM lParam);
+    };
 }
 
 #endif // _CBTMESSAGEBOX_H_

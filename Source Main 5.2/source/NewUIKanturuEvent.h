@@ -13,149 +13,146 @@
 
 namespace SEASON3B
 {
-	
-	class CNewUIKanturu2ndEnterNpc  : public CNewUIObj
-	{
-	public:
-		enum IMAGE_LIST
-		{
-			IMAGE_KANTURU2ND_TOP = CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP,	
-			IMAGE_KANTURU2ND_MIDDLE = CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE,
-			IMAGE_KANTURU2ND_BOTTOM = CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM,
-			IMAGE_KANTURU2ND_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	
-			IMAGE_KANTURU2ND_BTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
-		};
-		enum
-		{
-			KANTURU2ND_ENTER_WINDOW_WIDTH = 230,
-			KANTURU2ND_ENTER_WINDOW_HEIGHT = 267,
-		};
+    class CNewUIKanturu2ndEnterNpc : public CNewUIObj
+    {
+    public:
+        enum IMAGE_LIST
+        {
+            IMAGE_KANTURU2ND_TOP = CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP,
+            IMAGE_KANTURU2ND_MIDDLE = CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE,
+            IMAGE_KANTURU2ND_BOTTOM = CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM,
+            IMAGE_KANTURU2ND_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_KANTURU2ND_BTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
+        };
+        enum
+        {
+            KANTURU2ND_ENTER_WINDOW_WIDTH = 230,
+            KANTURU2ND_ENTER_WINDOW_HEIGHT = 267,
+        };
 
-		enum MSGBOX_TYPE
-		{
-			POPUP_NONE = 0,
-			POPUP_USER_OVER,
-			POPUP_NOT_MUNSTONE,
-			POPUP_FAILED,
-			POPUP_FAILED2,
-			POPUP_UNIRIA = 5,
-			POPUP_CHANGERING,
-			POPUP_NOT_HELPER,
-		};
+        enum MSGBOX_TYPE
+        {
+            POPUP_NONE = 0,
+            POPUP_USER_OVER,
+            POPUP_NOT_MUNSTONE,
+            POPUP_FAILED,
+            POPUP_FAILED2,
+            POPUP_UNIRIA = 5,
+            POPUP_CHANGERING,
+            POPUP_NOT_HELPER,
+        };
 
-	public:
-		CNewUIKanturu2ndEnterNpc();
-		virtual ~CNewUIKanturu2ndEnterNpc();
+    public:
+        CNewUIKanturu2ndEnterNpc();
+        virtual ~CNewUIKanturu2ndEnterNpc();
 
-		bool Create(CNewUIManager* pNewUIMng, int x, int y);
-		void Release();
-		
-		void SetPos(int x, int y);
-		
-		bool UpdateMouseEvent();
-		bool UpdateKeyEvent();
-		bool Update();
-		bool Render();
-		
-		float GetLayerDepth();	//. 10.1f
+        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        void Release();
 
-		void SetNpcObject(OBJECT* pObj);
-		bool IsNpcAnimation();
-		void SetNpcAnimation(bool bValue);
-		bool IsEnterRequest();
-		void SetEnterRequest(bool bValue);
-		void CreateMessageBox(BYTE btResult);
+        void SetPos(int x, int y);
 
-		void ReceiveKanturu3rdInfo(BYTE btState, BYTE btDetailState, BYTE btEnter, BYTE btUserCount, int iRemainTime);
-		void ReceiveKanturu3rdEnter(BYTE btResult);
-		void SendRequestKanturu3rdInfo();
-		void SendRequestKanturu3rdEnter();
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
 
-	private:
-		void Initialize();
+        float GetLayerDepth();	//. 10.1f
 
-		void LoadImages();
-		void UnloadImages();
+        void SetNpcObject(OBJECT* pObj);
+        bool IsNpcAnimation();
+        void SetNpcAnimation(bool bValue);
+        bool IsEnterRequest();
+        void SetEnterRequest(bool bValue);
+        void CreateMessageBox(BYTE btResult);
 
-		void SetButtonInfo();
+        void ReceiveKanturu3rdInfo(BYTE btState, BYTE btDetailState, BYTE btEnter, BYTE btUserCount, int iRemainTime);
+        void ReceiveKanturu3rdEnter(BYTE btResult);
+        void SendRequestKanturu3rdInfo();
+        void SendRequestKanturu3rdEnter();
 
-		bool BtnProcess();
+    private:
+        void Initialize();
 
-		void RenderFrame();
-		void RenderButtons();
-		void RenderTexts();
+        void LoadImages();
+        void UnloadImages();
 
-	private:
-		CNewUIManager* m_pNewUIMng;
-		POINT m_Pos;
+        void SetButtonInfo();
 
-		BYTE m_byState;
+        bool BtnProcess();
 
-		bool m_bNpcAnimation;
-		OBJECT*	m_pNpcObject;
-		
-		bool m_bEnterRequest;
+        void RenderFrame();
+        void RenderButtons();
+        void RenderTexts();
 
-		DWORD m_dwRefreshTime;
-		DWORD m_dwRefreshButtonGapTime;
+    private:
+        CNewUIManager* m_pNewUIMng;
+        POINT m_Pos;
 
-		unicode::t_char m_strSubject[MAX_GLOBAL_TEXT_STRING];
-		unicode::t_char m_strStateText[KANTURU2ND_STATETEXT_MAX][MAX_GLOBAL_TEXT_STRING];
-		int	m_iStateTextNum;
+        BYTE m_byState;
 
-		CNewUIButton m_BtnEnter;
-		CNewUIButton m_BtnRefresh;
-		CNewUIButton m_BtnClose;
-	};
-	
+        bool m_bNpcAnimation;
+        OBJECT* m_pNpcObject;
 
-	class CNewUIKanturuInfoWindow  : public CNewUIObj
-	{
-	public:
-		enum IMAGE_LIST
-		{
-			IMAGE_KANTURUINFO_WINDOW = BITMAP_KANTURU_INFO_BEGIN,	
-		};
-		enum
-		{
-			KANTURUINFO_WINDOW_WIDTH = 99,
-			KANTURUINFO_WINDOW_HEIGHT = 78,
-		};
-	public:
-		CNewUIKanturuInfoWindow();
-		virtual ~CNewUIKanturuInfoWindow();
+        bool m_bEnterRequest;
 
-		bool Create(CNewUIManager* pNewUIMng, int x, int y);
-		void Release();
-		
-		void SetPos(int x, int y);
-		
-		bool UpdateMouseEvent();
-		bool UpdateKeyEvent();
-		bool Update();
-		bool Render();
-		
-		float GetLayerDepth();	//. 1.92f
-		float GetKeyEventOrder();	//. 9.1f
+        DWORD m_dwRefreshTime;
+        DWORD m_dwRefreshButtonGapTime;
 
-		void SetTime(int iTimeLimit);
+        unicode::t_char m_strSubject[MAX_GLOBAL_TEXT_STRING];
+        unicode::t_char m_strStateText[KANTURU2ND_STATETEXT_MAX][MAX_GLOBAL_TEXT_STRING];
+        int	m_iStateTextNum;
 
-	private:
-		void LoadImages();
-		void UnloadImages();
+        CNewUIButton m_BtnEnter;
+        CNewUIButton m_BtnRefresh;
+        CNewUIButton m_BtnClose;
+    };
 
-		void RenderFrame();
-		void RenderInfo();
+    class CNewUIKanturuInfoWindow : public CNewUIObj
+    {
+    public:
+        enum IMAGE_LIST
+        {
+            IMAGE_KANTURUINFO_WINDOW = BITMAP_KANTURU_INFO_BEGIN,
+        };
+        enum
+        {
+            KANTURUINFO_WINDOW_WIDTH = 99,
+            KANTURUINFO_WINDOW_HEIGHT = 78,
+        };
+    public:
+        CNewUIKanturuInfoWindow();
+        virtual ~CNewUIKanturuInfoWindow();
 
-	private:
-		CNewUIManager* m_pNewUIMng;
-		POINT m_Pos;
-		
-		int m_iMinute;
-		int m_iSecond;
-		DWORD m_dwSyncTime;
-	};
-	
+        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        void Release();
+
+        void SetPos(int x, int y);
+
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
+
+        float GetLayerDepth();	//. 1.92f
+        float GetKeyEventOrder();	//. 9.1f
+
+        void SetTime(int iTimeLimit);
+
+    private:
+        void LoadImages();
+        void UnloadImages();
+
+        void RenderFrame();
+        void RenderInfo();
+
+    private:
+        CNewUIManager* m_pNewUIMng;
+        POINT m_Pos;
+
+        int m_iMinute;
+        int m_iSecond;
+        DWORD m_dwSyncTime;
+    };
 }
 
 #endif // !defined(AFX_NEWUIKANTURU2NDENTERNPC_H__4CDE30B6_3570_47BA_9401_0EA282BA1949__INCLUDED_)

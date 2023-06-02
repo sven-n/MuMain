@@ -12,30 +12,30 @@
 
 using namespace info;
 
-ExplanationInfoPtr ExplanationInfo::MakeInfo( const std::string& filename )
+ExplanationInfoPtr ExplanationInfo::MakeInfo(const std::string& filename)
 {
-	ExplanationInfoPtr info ( new ExplanationInfo( filename ) );
-	return info;
+    ExplanationInfoPtr info(new ExplanationInfo(filename));
+    return info;
 }
 
-ExplanationInfo::ExplanationInfo( const std::string& filename ) : InfoFile( filename ), m_IsOpenFile( false )
+ExplanationInfo::ExplanationInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
-	m_IsOpenFile = OpenFile( filename );
+    m_IsOpenFile = OpenFile(filename);
 
-	if(  !m_IsOpenFile )
-	{
-		assert( 0 );
-	}
+    if (!m_IsOpenFile)
+    {
+        assert(0);
+    }
 }
 
 ExplanationInfo::~ExplanationInfo()
 {
-	clear();
+    clear();
 }
 
-bool ExplanationInfo::OpenFile( const std::string& filename )
+bool ExplanationInfo::OpenFile(const std::string& filename)
 {
-	return true;
+    return true;
 }
 
 #endif //INFO_BUILDER

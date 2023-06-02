@@ -12,88 +12,88 @@
 #include "CSMapServer.h"
 
 extern int  LogIn;
-extern char LogInID[MAX_ID_SIZE+1];
+extern char LogInID[MAX_ID_SIZE + 1];
 extern int HeroKey;
 
 static  CSMServer csMapServer;
 
-CSMServer::CSMServer ()
+CSMServer::CSMServer()
 {
-    Init ();
+    Init();
 }
 
-void CSMServer::Init ( void )
+void CSMServer::Init(void)
 {
     m_bFillServerInfo = false;
-    memset ( &m_vServerInfo, 0, sizeof( MServerInfo ) );
+    memset(&m_vServerInfo, 0, sizeof(MServerInfo));
 }
 
-void CSMServer::SetHeroID ( char* ID )
+void CSMServer::SetHeroID(char* ID)
 {
     m_strHeroID = ID;
 }
 
-void CSMServer::SetServerInfo ( MServerInfo sInfo )
+void CSMServer::SetServerInfo(MServerInfo sInfo)
 {
-    memcpy ( &m_vServerInfo, &sInfo, sizeof( MServerInfo) );
+    memcpy(&m_vServerInfo, &sInfo, sizeof(MServerInfo));
 
     m_bFillServerInfo = true;
 }
 
-void CSMServer::GetServerInfo ( MServerInfo& sInfo )
+void CSMServer::GetServerInfo(MServerInfo& sInfo)
 {
-    if ( m_bFillServerInfo )
+    if (m_bFillServerInfo)
     {
-        memcpy ( &sInfo, &m_vServerInfo, sizeof( MServerInfo ) );
+        memcpy(&sInfo, &m_vServerInfo, sizeof(MServerInfo));
     }
     else
     {
-        memset ( &sInfo, 0, sizeof( MServerInfo ) );
+        memset(&sInfo, 0, sizeof(MServerInfo));
     }
 }
 
-void CSMServer::GetServerAddress ( char* szAddress )
+void CSMServer::GetServerAddress(char* szAddress)
 {
-    if ( m_bFillServerInfo )
+    if (m_bFillServerInfo)
     {
-        memcpy ( szAddress, m_vServerInfo.m_szMapSvrIpAddress, sizeof( char )*16 );
+        memcpy(szAddress, m_vServerInfo.m_szMapSvrIpAddress, sizeof(char) * 16);
     }
     else
     {
-        memset ( szAddress, 0, sizeof( char )*16 );
+        memset(szAddress, 0, sizeof(char) * 16);
     }
 }
 
 void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
 {
-    SetServerInfo ( sInfo );
+    SetServerInfo(sInfo);
 
-    if ( m_bFillServerInfo && LogIn!=0 )
+    if (m_bFillServerInfo && LogIn != 0)
     {
-		DeleteSocket ();
+        DeleteSocket();
         SaveOptions();
-		SaveMacro("Data\\Macro.txt");
+        SaveMacro("Data\\Macro.txt");
 
-		::Sleep ( 20 );
+        ::Sleep(20);
 
-        if ( CreateSocket( m_vServerInfo.m_szMapSvrIpAddress, m_vServerInfo.m_wMapSvrPort ) )
+        if (CreateSocket(m_vServerInfo.m_szMapSvrIpAddress, m_vServerInfo.m_wMapSvrPort))
         {
             g_bGameServerConnected = TRUE;
         }
     }
 }
 
-void CSMServer::SendChangeMapServer ( void )
+void CSMServer::SendChangeMapServer(void)
 {
-    if ( m_bFillServerInfo==false || LogIn==0 ) return;
+    if (m_bFillServerInfo == false || LogIn == 0) return;
 
-    char  CharID[MAX_ID_SIZE+1];
+    char  CharID[MAX_ID_SIZE + 1];
 
-    strcpy ( CharID, m_strHeroID.c_str() );
-//	memcpy ( CharID, m_strHeroID.c_str(), MAX_ID_SIZE );
-	CharID[MAX_ID_SIZE] = NULL;
+    strcpy(CharID, m_strHeroID.c_str());
+    //	memcpy ( CharID, m_strHeroID.c_str(), MAX_ID_SIZE );
+    CharID[MAX_ID_SIZE] = NULL;
 
-    ClearCharacters ( -1 );
-    InitGame ();
-    SendChangeMServer(LogInID,CharID,m_vServerInfo.m_iJoinAuthCode1,m_vServerInfo.m_iJoinAuthCode2,m_vServerInfo.m_iJoinAuthCode3,m_vServerInfo.m_iJoinAuthCode4);
+    ClearCharacters(-1);
+    InitGame();
+    SendChangeMServer(LogInID, CharID, m_vServerInfo.m_iJoinAuthCode1, m_vServerInfo.m_iJoinAuthCode2, m_vServerInfo.m_iJoinAuthCode3, m_vServerInfo.m_iJoinAuthCode4);
 }

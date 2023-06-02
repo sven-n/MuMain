@@ -14,93 +14,93 @@ extern int s_nTargetFireMemberIndex;
 
 enum GUILD_STATUS
 {
-	G_NONE			= (BYTE)-1,
-	G_PERSON		= 0,
-	G_MASTER		= 128,
-	G_SUB_MASTER	= 64,
-	G_BATTLE_MASTER	= 32
+    G_NONE = (BYTE)-1,
+    G_PERSON = 0,
+    G_MASTER = 128,
+    G_SUB_MASTER = 64,
+    G_BATTLE_MASTER = 32
 };
 
 enum GUILD_TYPE
 {
-	GT_NORMAL		= 0x00,
-	GT_ANGEL		= 0x01
+    GT_NORMAL = 0x00,
+    GT_ANGEL = 0x01
 };
 
 enum GUILD_RELATIONSHIP
 {
-	GR_NONE			= 0x00,
-	GR_UNION		= 0x01,
-	GR_UNIONMASTER	= 0x04,
-	GR_RIVAL		= 0x02,
-	GR_RIVALUNION	= 0x08
+    GR_NONE = 0x00,
+    GR_UNION = 0x01,
+    GR_UNIONMASTER = 0x04,
+    GR_RIVAL = 0x02,
+    GR_RIVALUNION = 0x08
 };
 
 class CUIGuildInfo : public CUIControl
 {
 public:
-	CUIGuildInfo();
-	virtual ~CUIGuildInfo();
+    CUIGuildInfo();
+    virtual ~CUIGuildInfo();
 
 protected:
-	bool			m_bOpened;
-	int				m_nCurrentTab;
+    bool			m_bOpened;
+    int				m_nCurrentTab;
 
-	BOOL			m_bRequestUnionList;
+    BOOL			m_bRequestUnionList;
 
-	char			m_szRivalGuildName[MAX_GUILDNAME+1];
+    char			m_szRivalGuildName[MAX_GUILDNAME + 1];
 
-	CUINewGuildMemberListBox	m_GuildMemberListBox;
-	CUIGuildNoticeListBox		m_GuildNoticeListBox;
-	CUIUnionGuildListBox		m_UnionListBox;
+    CUINewGuildMemberListBox	m_GuildMemberListBox;
+    CUIGuildNoticeListBox		m_GuildNoticeListBox;
+    CUIUnionGuildListBox		m_UnionListBox;
 
-	DWORD			m_dwPopupID;
-	CUIButton		m_BreakUpGuildButton;
-	CUIButton		m_AppointButton;
-	CUIButton		m_DisbandButton;
-	CUIButton		m_FireButton;
-	CUIButton		m_BreakUnionButton;
-	CUIButton		m_BanUnionButton;
-	
+    DWORD			m_dwPopupID;
+    CUIButton		m_BreakUpGuildButton;
+    CUIButton		m_AppointButton;
+    CUIButton		m_DisbandButton;
+    CUIButton		m_FireButton;
+    CUIButton		m_BreakUnionButton;
+    CUIButton		m_BanUnionButton;
+
 protected:
-	BOOL IsGuildMaster()	{ return ( Hero->GuildStatus == G_MASTER ); }
-	BOOL IsSubGuildMaster()	{ return ( Hero->GuildStatus == G_SUB_MASTER ); }
-	BOOL IsBattleMaster()	{ return ( Hero->GuildStatus == G_BATTLE_MASTER ); }
+    BOOL IsGuildMaster() { return (Hero->GuildStatus == G_MASTER); }
+    BOOL IsSubGuildMaster() { return (Hero->GuildStatus == G_SUB_MASTER); }
+    BOOL IsBattleMaster() { return (Hero->GuildStatus == G_BATTLE_MASTER); }
 
-	int GetGuildMemberIndex( char* szName );
-	const char* GetGuildMasterName();
-	const char* GetSubGuildMasterName();
-	const char* GetBattleMasterName();
+    int GetGuildMemberIndex(char* szName);
+    const char* GetGuildMasterName();
+    const char* GetSubGuildMasterName();
+    const char* GetBattleMasterName();
 
-	void CloseMyPopup();
-	
-	void DoGuildInfoTabMouseAction();
-	void RenderGuildInfoTab();
+    void CloseMyPopup();
 
-	void DoGuildMemberTabMouseAction();
-	void RenderGuildMemberTab();
+    void DoGuildInfoTabMouseAction();
+    void RenderGuildInfoTab();
 
-	void DoGuildUnionMouseAction();
-	void RenderGuildUnionTab();
+    void DoGuildMemberTabMouseAction();
+    void RenderGuildMemberTab();
+
+    void DoGuildUnionMouseAction();
+    void RenderGuildUnionTab();
 
 public:
-	void SetRivalGuildName( char* szName );
+    void SetRivalGuildName(char* szName);
 
-	void AddGuildNotice( char* szText );
-	void ClearGuildLog();
+    void AddGuildNotice(char* szText);
+    void ClearGuildLog();
 
-	void AddMemberList( GUILD_LIST_t* pInfo );
-	void ClearMemberList();
+    void AddMemberList(GUILD_LIST_t* pInfo);
+    void ClearMemberList();
 
-	void AddUnionList( BYTE* pGuildMark, char* szGuildName, int nMemberCount );
-	int GetUnionCount();
-	void ClearUnionList();
+    void AddUnionList(BYTE* pGuildMark, char* szGuildName, int nMemberCount);
+    int GetUnionCount();
+    void ClearUnionList();
 
-	virtual BOOL DoMouseAction();
-	virtual void Render();
-	void Open();
-	bool IsOpen();
-	virtual void Close();
+    virtual BOOL DoMouseAction();
+    virtual void Render();
+    void Open();
+    bool IsOpen();
+    virtual void Close();
 };
 
-void    UseBattleMasterSkill ( void );
+void    UseBattleMasterSkill(void);

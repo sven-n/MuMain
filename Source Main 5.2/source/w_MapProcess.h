@@ -8,56 +8,56 @@
 #include "MapManager.h"
 
 BoostSmartPointer(MapProcess);
-class MapProcess  
+class MapProcess
 {
 public:
-	static MapProcessPtr Make();
-	virtual ~MapProcess();
-	
-public:
-	bool LoadMapData();
+    static MapProcessPtr Make();
+    virtual ~MapProcess();
 
 public:
-	bool CreateObject(OBJECT* o);
-	bool MoveObject(OBJECT* o);
-	bool RenderObjectVisual(OBJECT* o, BMD* b);
-	bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-	void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-	void RenderFrontSideVisual();
-	
-public:
-	CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
-	bool MoveMonsterVisual(OBJECT* o, BMD* b);
-	void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-	bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
-	bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
-	bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
+    bool LoadMapData();
 
 public:
-	bool PlayMonsterSound(OBJECT* o);
+    bool CreateObject(OBJECT* o);
+    bool MoveObject(OBJECT* o);
+    bool RenderObjectVisual(OBJECT* o, BMD* b);
+    bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    void RenderFrontSideVisual();
 
 public:
-	bool ReceiveMapMessage( BYTE code, BYTE subcode, BYTE* ReceiveBuffer );
+    CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
+    bool MoveMonsterVisual(OBJECT* o, BMD* b);
+    void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
+    bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+    bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
+    bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
 public:
-	void Register( BoostSmart_Ptr( BaseMap ) pMap );
-	void UnRegister( ENUM_WORLD type );
+    bool PlayMonsterSound(OBJECT* o);
 
 public:
-	BaseMap& GetMap( int type );
-	
+    bool ReceiveMapMessage(BYTE code, BYTE subcode, BYTE* ReceiveBuffer);
+
+public:
+    void Register(BoostSmart_Ptr(BaseMap) pMap);
+    void UnRegister(ENUM_WORLD type);
+
+public:
+    BaseMap& GetMap(int type);
+
 private:
-	bool FindMap( ENUM_WORLD type );
-	BaseMap& FindBaseMap( ENUM_WORLD type );
-	void Init();
-	void Destroy();
-	MapProcess();
-	
+    bool FindMap(ENUM_WORLD type);
+    BaseMap& FindBaseMap(ENUM_WORLD type);
+    void Init();
+    void Destroy();
+    MapProcess();
+
 private:
-	typedef std::list< BoostSmart_Ptr(BaseMap) >		MapList;
-	
+    typedef std::list< BoostSmart_Ptr(BaseMap) >		MapList;
+
 private:
-	MapList				m_MapList;
+    MapList				m_MapList;
 };
 
 extern MapProcessPtr g_MapProcess;

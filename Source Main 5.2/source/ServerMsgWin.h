@@ -15,20 +15,20 @@
 class CServerMsgWin : public CWinEx
 {
 protected:
-	char	m_aszMsg[SMW_MSG_LINE_MAX][SMW_MSG_ROW_MAX];
-	int		m_nMsgLine;
+    char	m_aszMsg[SMW_MSG_LINE_MAX][SMW_MSG_ROW_MAX];
+    int		m_nMsgLine;
 
 public:
-	CServerMsgWin();
-	virtual ~CServerMsgWin();
+    CServerMsgWin();
+    virtual ~CServerMsgWin();
 
-	void Create();
-	bool CursorInWin(int nArea);
+    void Create();
+    bool CursorInWin(int nArea);
 
-	void AddMsg(char* pszMsg);
+    void AddMsg(char* pszMsg);
 
 protected:
-	void RenderControls();
+    void RenderControls();
 };
 
 #endif // !defined(AFX_SERVERMSGWIN_H__8C6AB678_703D_4A60_B334_C30A97EEC64B__INCLUDED_)

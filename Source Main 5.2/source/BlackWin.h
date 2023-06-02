@@ -5,18 +5,18 @@
 
 #include "Win.h"
 
-class CBlackWin : public CWin  
+class CBlackWin : public CWin
 {
 protected:
-	double	m_dFadeDeltaTickSum;
+    double	m_dFadeDeltaTickSum;
 
 public:
-	CBlackWin();
-	virtual ~CBlackWin();
+    CBlackWin();
+    virtual ~CBlackWin();
 
-	void Create();
-	bool CursorInWin(int nArea);
+    void Create();
+    bool CursorInWin(int nArea);
 
 protected:
-	void UpdateWhileActive(double dDeltaTick);
+    void UpdateWhileActive(double dDeltaTick);
 };

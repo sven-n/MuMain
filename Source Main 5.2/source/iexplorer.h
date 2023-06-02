@@ -3,18 +3,16 @@
 
 #pragma once
 
-
 namespace leaf {
-	/* Open URL for default web-browser    */
-	/* This function return process handle */
-	inline bool OpenExplorer(const std::string& url)
-	{
-		// SW_SHOW
-		if(32 < (UINT)ShellExecute(NULL, "open", url.c_str(), NULL, NULL, SW_NORMAL))
-			return true;
-		return false;
-	}
+    /* Open URL for default web-browser    */
+    /* This function return process handle */
+    inline bool OpenExplorer(const std::string& url)
+    {
+        // SW_SHOW
+        if (32 < (UINT)ShellExecute(NULL, "open", url.c_str(), NULL, NULL, SW_NORMAL))
+            return true;
+        return false;
+    }
 }
-
 
 #endif // _IEXPLORER_H_

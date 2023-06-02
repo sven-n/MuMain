@@ -9,9 +9,7 @@
 #ifndef WAVE_READ_H
 #define WAVE_READ_H
 
-
 #include <mmreg.h>
-
 
 //-----------------------------------------------------------------------------
 // Name: class CWaveSoundRead
@@ -29,15 +27,10 @@ public:
     CWaveSoundRead();
     ~CWaveSoundRead();
 
-    HRESULT Open( CHAR* strFilename );
+    HRESULT Open(CHAR* strFilename);
     HRESULT Reset();
-    HRESULT Read( UINT nSizeToRead, BYTE* pbData, UINT* pnSizeRead );
+    HRESULT Read(UINT nSizeToRead, BYTE* pbData, UINT* pnSizeRead);
     HRESULT Close();
-
 };
 
-
 #endif WAVE_READ_H
-
-
-

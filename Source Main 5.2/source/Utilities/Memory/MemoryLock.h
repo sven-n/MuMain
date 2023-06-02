@@ -23,85 +23,84 @@
 class CMemoryLock : public CHashTable <BYTE*, void*>
 {
 public:
-	CMemoryLock();
-	virtual ~CMemoryLock();
-	void Clear();
+    CMemoryLock();
+    virtual ~CMemoryLock();
+    void Clear();
 
-	virtual void Destroy();
+    virtual void Destroy();
 
 protected:
-	HWND m_hWnd;
-	UINT m_uiMessage;
+    HWND m_hWnd;
+    UINT m_uiMessage;
 #ifdef _DEBUG
-	int m_iUsedCount;
+    int m_iUsedCount;
 #endif
 
 public:
-	static BYTE s_byXor[SIZE_XOR_MEMORYLOCK];
+    static BYTE s_byXor[SIZE_XOR_MEMORYLOCK];
 
 public:
-	void Init( HWND hWnd, UINT uiMessage);
+    void Init(HWND hWnd, UINT uiMessage);
 
-	template <class T>
-	void Lock( T &Data)
-	{
-		return;
-	}
+    template <class T>
+    void Lock(T& Data)
+    {
+        return;
+    }
 
-	template <class T>
-	void UnLock( T &Data)
-	{
-		return;
-	}
+    template <class T>
+    void UnLock(T& Data)
+    {
+        return;
+    }
 
-	template <class T>
-	T Get( T &Data)
-	{
-		return Data;
-	}
+    template <class T>
+    T Get(T& Data)
+    {
+        return Data;
+    }
 
-	template <class T>
-	void Release( T &Data)
-	{
-		return;
-	}
-	
-protected:
-	template <class T>
-	void MakeConvertedDataAndCorrupt( BYTE *pbyDst, T &Data)
-	{
-		return;
-	}
-
-	template <class T>
-	void RestoreConvertedData( T &Data, BYTE *pbySrc)
-	{
-		return;
-	}
+    template <class T>
+    void Release(T& Data)
+    {
+        return;
+    }
 
 protected:
-	void *m_pDumpMemory;
-	DWORD m_dwHashKey;
-	BYTE **m_ppDataTableAlloc;
-	void **m_ppKeyTableAlloc;
-	void ResetDumpMemory()
-	{
-		return;
-	}
-	void RegenerateHashKey()
-	{
-		return;
-	}
+    template <class T>
+    void MakeConvertedDataAndCorrupt(BYTE* pbyDst, T& Data)
+    {
+        return;
+    }
+
+    template <class T>
+    void RestoreConvertedData(T& Data, BYTE* pbySrc)
+    {
+        return;
+    }
+
+protected:
+    void* m_pDumpMemory;
+    DWORD m_dwHashKey;
+    BYTE** m_ppDataTableAlloc;
+    void** m_ppKeyTableAlloc;
+    void ResetDumpMemory()
+    {
+        return;
+    }
+    void RegenerateHashKey()
+    {
+        return;
+    }
 public:
-	virtual DWORD Hash(void *pKey)
-	{
-		return 0;
-	}
-	void Reposition()
-	{
-		return;
-	}
+    virtual DWORD Hash(void* pKey)
+    {
+        return 0;
+    }
+    void Reposition()
+    {
+        return;
+    }
 };
-
 
 #endif // !defined(AFX_MEMORYLOCK_H__ED135F22_F857_4DDE_9846_52935BCE88FD__INCLUDED_)

@@ -18,15 +18,15 @@ CGuildManager::~CGuildManager() // OK
 
 bool CGuildManager::IsGuildMaster()
 {
-	return ( Hero->GuildStatus == G_MASTER );
+    return (Hero->GuildStatus == G_MASTER);
 }
 
 bool CGuildManager::IsSubGuildMaster()
 {
-	return ( Hero->GuildStatus == G_SUB_MASTER );
-}		
+    return (Hero->GuildStatus == G_SUB_MASTER);
+}
 
 bool CGuildManager::IsBattleMaster()
 {
-	return ( Hero->GuildStatus == G_BATTLE_MASTER );
-}		
+    return (Hero->GuildStatus == G_BATTLE_MASTER);
+}

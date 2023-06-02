@@ -15,106 +15,106 @@
 
 namespace SEASON3B
 {
-	class CNewUINPCShop : public CNewUIObj
-	{
-	public:
-		enum IMAGE_LIST
-		{
-			IMAGE_NPCSHOP_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-			IMAGE_NPCSHOP_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,
-			IMAGE_NPCSHOP_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-			IMAGE_NPCSHOP_RIGHT= CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-			IMAGE_NPCSHOP_BOTTOM= CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-			IMAGE_NPCSHOP_BTN_REPAIR = CNewUIMyInventory::IMAGE_INVENTORY_REPAIR_BTN,
-			IMAGE_NPCSHOP_REPAIR_MONEY = BITMAP_INTERFACE_NEW_NPCSHOP_BEGIN,
-		};
-		
-		enum
-		{
-			NPCSHOP_POS_X = 260,
-			NPCSHOP_POS_Y = 0,
-			SHOP_STATE_BUYNSELL = 1,
-			SHOP_STATE_REPAIR = 2,
-		};
-		
-	private:
-		enum
-		{
-			NPCSHOP_WIDTH = 190,
-			NPCSHOP_HEIGHT = 429,
-		};
+    class CNewUINPCShop : public CNewUIObj
+    {
+    public:
+        enum IMAGE_LIST
+        {
+            IMAGE_NPCSHOP_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_NPCSHOP_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,
+            IMAGE_NPCSHOP_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_NPCSHOP_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_NPCSHOP_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_NPCSHOP_BTN_REPAIR = CNewUIMyInventory::IMAGE_INVENTORY_REPAIR_BTN,
+            IMAGE_NPCSHOP_REPAIR_MONEY = BITMAP_INTERFACE_NEW_NPCSHOP_BEGIN,
+        };
 
-		CNewUIManager*			m_pNewUIMng;
-		CNewUIInventoryCtrl*	m_pNewInventoryCtrl;
-		POINT m_Pos;
+        enum
+        {
+            NPCSHOP_POS_X = 260,
+            NPCSHOP_POS_Y = 0,
+            SHOP_STATE_BUYNSELL = 1,
+            SHOP_STATE_REPAIR = 2,
+        };
 
-		DWORD m_dwShopState;
-		int m_iTaxRate;
-		bool m_bRepairShop;
-		bool m_bIsNPCShopOpen;
+    private:
+        enum
+        {
+            NPCSHOP_WIDTH = 190,
+            NPCSHOP_HEIGHT = 429,
+        };
 
-		CNewUIButton m_BtnRepair;
-		CNewUIButton m_BtnRepairAll;
-		
-		DWORD m_dwStandbyItemKey;
+        CNewUIManager* m_pNewUIMng;
+        CNewUIInventoryCtrl* m_pNewInventoryCtrl;
+        POINT m_Pos;
 
-		bool m_bSellingItem;
-		
-	public:
-		CNewUINPCShop();
-		virtual ~CNewUINPCShop();
+        DWORD m_dwShopState;
+        int m_iTaxRate;
+        bool m_bRepairShop;
+        bool m_bIsNPCShopOpen;
 
-		bool Create(CNewUIManager* pNewUIMng, int x, int y);
-		void Release();
+        CNewUIButton m_BtnRepair;
+        CNewUIButton m_BtnRepairAll;
 
-		void SetPos(int x, int y);
+        DWORD m_dwStandbyItemKey;
 
-		bool UpdateMouseEvent();
-		bool UpdateKeyEvent();
-		bool Update();
-		bool Render();
+        bool m_bSellingItem;
 
-		float GetLayerDepth();	//. 2.5f
+    public:
+        CNewUINPCShop();
+        virtual ~CNewUINPCShop();
 
-		void SetTaxRate(int iTaxRate);
-		int GetTaxRate();
+        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        void Release();
 
-		bool InsertItem(int iIndex, BYTE* pbyItemPacket);
-		
-		void OpenningProcess();
+        void SetPos(int x, int y);
 
-		void ClosingProcess();
-		void SetRepairShop(bool bRepair);
-		bool IsRepairShop();
-		void ToggleState();
-		DWORD GetShopState();
-		
-		int GetPointedItemIndex();
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
 
-		//. Exporting Functions
-		void SetStandbyItemKey(DWORD dwItemKey);
-		DWORD GetStandbyItemKey() const;
-		int GetStandbyItemIndex();
-		ITEM* GetStandbyItem();
+        float GetLayerDepth();	//. 2.5f
 
-		void SetSellingItem(bool bFlag);
-		bool IsSellingItem();
+        void SetTaxRate(int iTaxRate);
+        int GetTaxRate();
 
-	private:
-		void Init();
-		void SetButtonInfo();
-		
-		void LoadImages();
-		void UnloadImages();
+        bool InsertItem(int iIndex, BYTE* pbyItemPacket);
 
-		bool InventoryProcess();
-		bool BtnProcess();
+        void OpenningProcess();
 
-		void RenderFrame();
-		void RenderTexts();
-		void RenderButton();
-		void RenderRepairMoney();
-	};
+        void ClosingProcess();
+        void SetRepairShop(bool bRepair);
+        bool IsRepairShop();
+        void ToggleState();
+        DWORD GetShopState();
+
+        int GetPointedItemIndex();
+
+        //. Exporting Functions
+        void SetStandbyItemKey(DWORD dwItemKey);
+        DWORD GetStandbyItemKey() const;
+        int GetStandbyItemIndex();
+        ITEM* GetStandbyItem();
+
+        void SetSellingItem(bool bFlag);
+        bool IsSellingItem();
+
+    private:
+        void Init();
+        void SetButtonInfo();
+
+        void LoadImages();
+        void UnloadImages();
+
+        bool InventoryProcess();
+        bool BtnProcess();
+
+        void RenderFrame();
+        void RenderTexts();
+        void RenderButton();
+        void RenderRepairMoney();
+    };
 }
 
 #endif // !defined(AFX_NEWUINPCSHOP_H__EEE639A8_C89E_47B3_8DBA_22560F102D98__INCLUDED_)

@@ -13,63 +13,63 @@
 
 struct _BUFFINFO
 {
-	short	s_BuffIndex;
-	BYTE	s_BuffEffectType;
-	BYTE	s_ItemType;
-	BYTE	s_ItemIndex;
-	char	s_BuffName[MAX_BUFF_NAME_LENGTH];
-	BYTE	s_BuffClassType;
-	BYTE	s_NoticeType;
-	BYTE	s_ClearType;
-	char	s_BuffDescript[MAX_DESCRIPT_LENGTH];
+    short	s_BuffIndex;
+    BYTE	s_BuffEffectType;
+    BYTE	s_ItemType;
+    BYTE	s_ItemIndex;
+    char	s_BuffName[MAX_BUFF_NAME_LENGTH];
+    BYTE	s_BuffClassType;
+    BYTE	s_NoticeType;
+    BYTE	s_ClearType;
+    char	s_BuffDescript[MAX_DESCRIPT_LENGTH];
 };
 
 class BuffInfo
 {
 public:
-	BuffInfo();
-	virtual ~BuffInfo();
-	
+    BuffInfo();
+    virtual ~BuffInfo();
+
 public:
-	short	s_BuffIndex;
-	BYTE	s_BuffEffectType;
-	BYTE	s_ItemType;
-	BYTE	s_ItemIndex;
-	char	s_BuffName[MAX_BUFF_NAME_LENGTH];
-	BYTE	s_BuffClassType;
-	BYTE	s_NoticeType;
-	BYTE	s_ClearType;
-	char	s_BuffDescript[MAX_DESCRIPT_LENGTH];
-	std::list<std::string> s_BuffDescriptlist;
+    short	s_BuffIndex;
+    BYTE	s_BuffEffectType;
+    BYTE	s_ItemType;
+    BYTE	s_ItemIndex;
+    char	s_BuffName[MAX_BUFF_NAME_LENGTH];
+    BYTE	s_BuffClassType;
+    BYTE	s_NoticeType;
+    BYTE	s_ClearType;
+    char	s_BuffDescript[MAX_DESCRIPT_LENGTH];
+    std::list<std::string> s_BuffDescriptlist;
 };
 
-BoostSmartPointer( BuffScriptLoader );
+BoostSmartPointer(BuffScriptLoader);
 class BuffScriptLoader
 {
 public:
-	static BuffScriptLoaderPtr Make();
-	virtual ~BuffScriptLoader();
+    static BuffScriptLoaderPtr Make();
+    virtual ~BuffScriptLoader();
 
 private:
-	bool Load(const std::string& pchFileName);
+    bool Load(const std::string& pchFileName);
 
 public:
-	const BuffInfo GetBuffinfo( eBuffState type ) const;
-	eBuffClass IsBuffClass( eBuffState type ) const;
+    const BuffInfo GetBuffinfo(eBuffState type) const;
+    eBuffClass IsBuffClass(eBuffState type) const;
 
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-	int GetBuffIndex(int iItemCode);
-	int GetBuffType(int iItemCode);
+    int GetBuffIndex(int iItemCode);
+    int GetBuffType(int iItemCode);
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
 private:
-	BuffScriptLoader();
+    BuffScriptLoader();
 
 private:
-	typedef std::map<eBuffState, BuffInfo> BuffInfoMap;
+    typedef std::map<eBuffState, BuffInfo> BuffInfoMap;
 
 private:
-	BuffInfoMap			m_Info;
+    BuffInfoMap			m_Info;
 };
 
 #endif // !defined(AFX_BUFFSCRIPTLOADER_H__AD3819A4_1C9A_4886_AB83_DA77FAAD7433__INCLUDED_)

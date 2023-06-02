@@ -9,32 +9,32 @@
 
 class CSubject;
 
-class CObserver  
+class CObserver
 {
 public:
-	virtual ~CObserver();
-	virtual void UpdateData(CSubject* pChangedSubject) = 0;
+    virtual ~CObserver();
+    virtual void UpdateData(CSubject* pChangedSubject) = 0;
 
 protected:
-	CObserver();
+    CObserver();
 };
 
 #include "PList.h"
 
-class CSubject  
+class CSubject
 {
 public:
-	virtual ~CSubject();
+    virtual ~CSubject();
 
-	virtual void Attach(CObserver* pObserver);
-	virtual void Detach(CObserver* pObserver);
-	virtual void Notify();
+    virtual void Attach(CObserver* pObserver);
+    virtual void Detach(CObserver* pObserver);
+    virtual void Notify();
 
 protected:
-	CSubject();
+    CSubject();
 
 private:
-	CPList m_ObserverList;
+    CPList m_ObserverList;
 };
 
 #endif // !defined(AFX_OBSERVER_H__D77AB996_491E_44AD_AE54_179DE70DFC3B__INCLUDED_)

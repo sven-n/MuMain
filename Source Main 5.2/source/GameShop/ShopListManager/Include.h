@@ -1,4 +1,3 @@
-
 #pragma once
 
 #define STRSAFE_NO_DEPRECATE
@@ -46,46 +45,44 @@
 #include "GameShop\ShopListManager\interface\DownloadInfo.h"
 #include "GameShop\ShopListManager\interface\FileDownloader.h"
 
-#if !defined (INVALID_FILE_ATTRIBUTES) 
-#define INVALID_FILE_ATTRIBUTES ((DWORD)-1) 
+#if !defined (INVALID_FILE_ATTRIBUTES)
+#define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
 #endif
 
 //#ifdef _DEBUG
 //	#pragma  comment(lib, "FileDownloader.lib")
 //#else
 //	#pragma  comment(lib, "FileDownloader.lib")
-//#endif	
+//#endif
 
-
-enum FTP_SERVICE_MODE {FTP_MODE_ACTIVE, FTP_MODE_PASSIVE};
+enum FTP_SERVICE_MODE { FTP_MODE_ACTIVE, FTP_MODE_PASSIVE };
 enum FILE_ENCODE
 {
-	FE_ANSI,
-	FE_UTF8,
-	FE_UNICODE
+    FE_ANSI,
+    FE_UTF8,
+    FE_UNICODE
 };
 
 class CListVersionInfo
 {
 public:
-	unsigned short Zone;
-	unsigned short year;
-	unsigned short yearId;
+    unsigned short Zone;
+    unsigned short year;
+    unsigned short yearId;
 };
 
 class CListManagerInfo
 {
 public:
-	DownloaderType		m_DownloaderType;
-	std::string			m_strServerIP;
-	unsigned short		m_nPortNum;
-	std::string			m_strUserID;
-	std::string			m_strPWD;
-	std::string			m_strRemotePath;
-	FTP_SERVICE_MODE	m_ftpMode;
-	std::string			m_strLocalPath;
-	DWORD				m_dwDownloadMaxTime;
+    DownloaderType		m_DownloaderType;
+    std::string			m_strServerIP;
+    unsigned short		m_nPortNum;
+    std::string			m_strUserID;
+    std::string			m_strPWD;
+    std::string			m_strRemotePath;
+    FTP_SERVICE_MODE	m_ftpMode;
+    std::string			m_strLocalPath;
+    DWORD				m_dwDownloadMaxTime;
 
-	CListVersionInfo	m_Version;
+    CListVersionInfo	m_Version;
 };
-

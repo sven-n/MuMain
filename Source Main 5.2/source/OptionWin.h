@@ -17,25 +17,25 @@
 #define OW_SLD_RENDER_LV		1
 #define OW_SLD_MAX				2
 
-class COptionWin : public CWin  
+class COptionWin : public CWin
 {
 protected:
-	CWinEx		m_winBack;
-	CButton		m_aBtn[OW_BTN_MAX];
-	CSlider		m_aSlider[OW_SLD_MAX];
+    CWinEx		m_winBack;
+    CButton		m_aBtn[OW_BTN_MAX];
+    CSlider		m_aSlider[OW_SLD_MAX];
 
 public:
-	COptionWin();
-	virtual ~COptionWin();
+    COptionWin();
+    virtual ~COptionWin();
 
-	void Create();
-	void SetPosition(int nXCoord, int nYCoord);
-	void Show(bool bShow);
-	bool CursorInWin(int nArea);
-	void UpdateDisplay();
+    void Create();
+    void SetPosition(int nXCoord, int nYCoord);
+    void Show(bool bShow);
+    bool CursorInWin(int nArea);
+    void UpdateDisplay();
 
 protected:
-	void PreRelease();
-	void UpdateWhileActive(double dDeltaTick);
-	void RenderControls();
+    void PreRelease();
+    void UpdateWhileActive(double dDeltaTick);
+    void RenderControls();
 };

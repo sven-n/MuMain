@@ -13,30 +13,30 @@
 
 using namespace info;
 
-SlideInfoPtr SlideInfo::MakeInfo( const std::string& filename )
+SlideInfoPtr SlideInfo::MakeInfo(const std::string& filename)
 {
-	SlideInfoPtr info ( new SlideInfo( filename ) );
-	return info;
+    SlideInfoPtr info(new SlideInfo(filename));
+    return info;
 }
 
-SlideInfo::SlideInfo( const std::string& filename ) : InfoFile( filename ), m_IsOpenFile( false )
+SlideInfo::SlideInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
-	m_IsOpenFile = OpenFile( filename );
+    m_IsOpenFile = OpenFile(filename);
 
-	if( !m_IsOpenFile )
-	{
-		assert(0);
-	}
+    if (!m_IsOpenFile)
+    {
+        assert(0);
+    }
 }
 
 SlideInfo::~SlideInfo()
 {
-	clear();
+    clear();
 }
 
-bool SlideInfo::OpenFile( const std::string& filename )
+bool SlideInfo::OpenFile(const std::string& filename)
 {
-	return true;
+    return true;
 }
 
 #endif //INFO_BUILDER

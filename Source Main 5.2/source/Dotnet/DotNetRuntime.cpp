@@ -11,7 +11,6 @@
 #include <hostfxr.h>
 #include <cassert>
 
-
 DotNetRuntime::~DotNetRuntime()
 {
     if (cxt_ != nullptr)
@@ -37,8 +36,6 @@ struct FooStruct
 
     void (*f1)(int) = Foo1;
     void (*f2)(int) = Foo2;
-
-    
 };
 
 void _cdecl foo(int32_t bar)
@@ -78,16 +75,14 @@ DotNetRuntime::DotNetRuntime()
     load_func = get_dotnet_load_assembly(config_path.c_str());
     assert(load_func != nullptr && "Failure: get_dotnet_load_assembly()");
 	dotnetlib_path = runtimePath + L"\\MUnique.Client.ManagedLibrary.dll";
-        
+
     is_initialized_ = true;
 }
-
 
 bool DotNetRuntime::is_initialized() const
 {
     return is_initialized_;
 }
-
 
 void* DotNetRuntime::get_method(const char_t* type_name, const char_t* method_name) const
 {
@@ -103,7 +98,6 @@ void* DotNetRuntime::get_method(const char_t* type_name, const char_t* method_na
     assert(resultCode == 0 && result != nullptr && "Failure: couldn't get method");
     return result;
 }
-
 
 bool DotNetRuntime::load_hostfxr()
 {
@@ -154,7 +148,6 @@ load_assembly_and_get_function_pointer_fn DotNetRuntime::get_dotnet_load_assembl
 
     return (load_assembly_and_get_function_pointer_fn)load_assembly_and_get_function_pointer;
 }
-
 
 get_function_pointer_fn DotNetRuntime::get_function_pointer_function() const
 {

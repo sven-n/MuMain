@@ -12,37 +12,36 @@
 
 namespace SEASON3B
 {
-	class CNewUIManager;
-	
-	class CNewUISlideWindow  :	public CNewUIObj
-	{
-		CNewUIManager*	m_pNewUIMng;
-	public:
-		CNewUISlideWindow();
-		virtual ~CNewUISlideWindow();
+    class CNewUIManager;
 
-		bool Create(CNewUIManager* pNewUIMng);
-		void Release();
+    class CNewUISlideWindow : public CNewUIObj
+    {
+        CNewUIManager* m_pNewUIMng;
+    public:
+        CNewUISlideWindow();
+        virtual ~CNewUISlideWindow();
 
-		bool UpdateMouseEvent();
-		bool UpdateKeyEvent();
-		bool Update();
-		bool Render();
-		
-		float GetLayerDepth();		// 1.91f
+        bool Create(CNewUIManager* pNewUIMng);
+        void Release();
 
-		// wrapping
-		void Init() { m_pSlideMgr->Init(); }
-		void CreateSlideText() { m_pSlideMgr->CreateSlideText(); }
-		void AddSlide(int iLoopCount, int iLoopDelay, const char* strText, int iType, float fSpeed, DWORD dwTextColor = (255<<24)+(200<<16)+(220<<8)+(230))
-		{ 
-			m_pSlideMgr->AddSlide(iLoopCount, iLoopDelay, strText, iType, fSpeed, dwTextColor);
-		}
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
 
-	private:
-		CSlideHelpMgr* m_pSlideMgr;
-	};
+        float GetLayerDepth();		// 1.91f
 
+        // wrapping
+        void Init() { m_pSlideMgr->Init(); }
+        void CreateSlideText() { m_pSlideMgr->CreateSlideText(); }
+        void AddSlide(int iLoopCount, int iLoopDelay, const char* strText, int iType, float fSpeed, DWORD dwTextColor = (255 << 24) + (200 << 16) + (220 << 8) + (230))
+        {
+            m_pSlideMgr->AddSlide(iLoopCount, iLoopDelay, strText, iType, fSpeed, dwTextColor);
+        }
+
+    private:
+        CSlideHelpMgr* m_pSlideMgr;
+    };
 }
 
 extern std::string g_strSelectedML;

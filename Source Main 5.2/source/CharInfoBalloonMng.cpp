@@ -17,17 +17,16 @@
 
 CCharInfoBalloonMng::CCharInfoBalloonMng() : m_pCharInfoBalloon(NULL)
 {
-
 }
 
 CCharInfoBalloonMng::~CCharInfoBalloonMng()
 {
-	Release();
+    Release();
 }
 
 void CCharInfoBalloonMng::Release()
 {
-	SAFE_DELETE_ARRAY(m_pCharInfoBalloon);
+    SAFE_DELETE_ARRAY(m_pCharInfoBalloon);
 }
 
 //*****************************************************************************
@@ -37,11 +36,11 @@ void CCharInfoBalloonMng::Release()
 //*****************************************************************************
 void CCharInfoBalloonMng::Create()
 {
-	if (NULL == m_pCharInfoBalloon)
-		m_pCharInfoBalloon = new CCharInfoBalloon[5];
+    if (NULL == m_pCharInfoBalloon)
+        m_pCharInfoBalloon = new CCharInfoBalloon[5];
 
-	for (int i = 0; i < 5; ++i)
-		m_pCharInfoBalloon[i].Create(&CharactersClient[i]);
+    for (int i = 0; i < 5; ++i)
+        m_pCharInfoBalloon[i].Create(&CharactersClient[i]);
 }
 
 //*****************************************************************************
@@ -50,11 +49,11 @@ void CCharInfoBalloonMng::Create()
 //*****************************************************************************
 void CCharInfoBalloonMng::Render()
 {
-	if (NULL == m_pCharInfoBalloon)
-		return;
+    if (NULL == m_pCharInfoBalloon)
+        return;
 
-	for (int i = 0; i < 5; ++i)
-		m_pCharInfoBalloon[i].Render();
+    for (int i = 0; i < 5; ++i)
+        m_pCharInfoBalloon[i].Render();
 }
 
 //*****************************************************************************
@@ -63,9 +62,9 @@ void CCharInfoBalloonMng::Render()
 //*****************************************************************************
 void CCharInfoBalloonMng::UpdateDisplay()
 {
-	if (NULL == m_pCharInfoBalloon)
-		return;
+    if (NULL == m_pCharInfoBalloon)
+        return;
 
-	for (int i = 0; i < 5; ++i)
-		m_pCharInfoBalloon[i].SetInfo();
+    for (int i = 0; i < 5; ++i)
+        m_pCharInfoBalloon[i].SetInfo();
 }

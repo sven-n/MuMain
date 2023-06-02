@@ -18,7 +18,7 @@ char_t* type_name = L"MUnique.Client.ManagedLibrary.ConnectionManager, MUnique.C
 Connect dotnet_connect = reinterpret_cast<Connect>(
     g_dotnet->get_method(
         type_name,
-    L"Connect"));
+        L"Connect"));
 
 Disconnect dotnet_disconnect = reinterpret_cast<Disconnect>(
     g_dotnet->get_method(
@@ -34,7 +34,6 @@ Send dotnet_send = reinterpret_cast<Send>(
     g_dotnet->get_method(
         type_name,
         L"Send"));
-
 
 void Connection::OnPacketReceivedS(const int32_t handle, const int32_t size, BYTE* data)
 {
@@ -56,9 +55,9 @@ void Connection::OnDisconnectedS(const int32_t handle)
 
 Connection::Connection(const char* host, int32_t port, void(*packetHandler)(int32_t, const BYTE*, int32_t))
 {
-	this->_packetHandler = packetHandler;
-	this->_handle = dotnet_connect(host, port, &OnPacketReceivedS, &OnDisconnectedS);
-    
+    this->_packetHandler = packetHandler;
+    this->_handle = dotnet_connect(host, port, &OnPacketReceivedS, &OnDisconnectedS);
+
     if (IsConnected())
     {
         connections[this->_handle] = this;
@@ -70,7 +69,7 @@ Connection::~Connection()
 {
     if (!IsConnected())
     {
-	    return;
+        return;
     }
 
     dotnet_disconnect(_handle);
@@ -117,4 +116,3 @@ void Connection::OnPacketReceived(const BYTE* data, const int32_t size)
     printf("Received packet, size %d", size);
     this->_packetHandler(this->_handle, data, size);
 }
-

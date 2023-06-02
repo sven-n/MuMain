@@ -11,47 +11,44 @@
 
 namespace SEASON3B
 {
-	
-	class CNewUIDuelWindow  : public CNewUIObj  
-	{
-	private:
-		enum IMAGE_LIST
-		{
-			IMAGE_DUEL_BACK = BITMAP_INTERFACE_NEW_BATTLE_SOCCER_SCORE_BEGIN,
-		};
-		enum
-		{
-			DUEL_WND_WIDTH = 131,
-			DUEL_WND_HEIGHT = 70,
-		};
-	public:
-		CNewUIDuelWindow();
-		virtual ~CNewUIDuelWindow();
+    class CNewUIDuelWindow : public CNewUIObj
+    {
+    private:
+        enum IMAGE_LIST
+        {
+            IMAGE_DUEL_BACK = BITMAP_INTERFACE_NEW_BATTLE_SOCCER_SCORE_BEGIN,
+        };
+        enum
+        {
+            DUEL_WND_WIDTH = 131,
+            DUEL_WND_HEIGHT = 70,
+        };
+    public:
+        CNewUIDuelWindow();
+        virtual ~CNewUIDuelWindow();
 
-		bool Create(CNewUIManager* pNewUIMng, int x, int y);
-		void Release();
-		
-		void SetPos(int x, int y);
-		
-		bool UpdateMouseEvent();
-		bool UpdateKeyEvent();
-		bool Update();
-		bool Render();
+        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        void Release();
 
-		float GetLayerDepth();	//. 1.1f
+        void SetPos(int x, int y);
 
-	private:
-		void LoadImages();
-		void UnloadImages();
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
 
-		void RenderFrame();
-		void RenderContents();
-		
-		CNewUIManager* m_pNewUIMng;		// UI 매니저.
-		POINT m_Pos;					// 창의 위치.
-		
-	};
-	
+        float GetLayerDepth();	//. 1.1f
+
+    private:
+        void LoadImages();
+        void UnloadImages();
+
+        void RenderFrame();
+        void RenderContents();
+
+        CNewUIManager* m_pNewUIMng;		// UI 매니저.
+        POINT m_Pos;					// 창의 위치.
+    };
 }
 
 #endif // !defined(AFX_NEWUIDUELWINDOW_H__446BA52D_E675_4B70_8A9B_65A672B9FBEB__INCLUDED_)

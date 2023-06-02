@@ -13,30 +13,30 @@
 
 using namespace info;
 
-DialogInfoPtr DialogInfo::MakeInfo( const std::string& filename )
+DialogInfoPtr DialogInfo::MakeInfo(const std::string& filename)
 {
-	DialogInfoPtr info ( new DialogInfo( filename ) );
-	return info;
+    DialogInfoPtr info(new DialogInfo(filename));
+    return info;
 }
 
-DialogInfo::DialogInfo( const std::string& filename ) : InfoFile( filename ), m_IsOpenFile( false )
+DialogInfo::DialogInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
-	m_IsOpenFile = OpenFile( filename );
+    m_IsOpenFile = OpenFile(filename);
 
-	if( !m_IsOpenFile )
-	{
-		assert(0);
-	}
+    if (!m_IsOpenFile)
+    {
+        assert(0);
+    }
 }
 
 DialogInfo::~DialogInfo()
 {
-	clear();
+    clear();
 }
 
-bool DialogInfo::OpenFile( const std::string& filename )
+bool DialogInfo::OpenFile(const std::string& filename)
 {
-	return true;
+    return true;
 }
 
 #endif //INFO_BUILDER

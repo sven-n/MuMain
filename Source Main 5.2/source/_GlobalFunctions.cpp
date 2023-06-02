@@ -3,29 +3,25 @@
 #include "GMEmpireGuardian1.h"
 
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
-bool g_bRenderBoundingBox = false; 
+bool g_bRenderBoundingBox = false;
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
 
 BuffStateSystemPtr			g_BuffSystem;
 
-BuffStateSystem& TheBuffStateSystem() 
+BuffStateSystem& TheBuffStateSystem()
 {
-	assert( g_BuffSystem ); 
-	return *g_BuffSystem;
+    assert(g_BuffSystem);
+    return *g_BuffSystem;
 }
 
 BuffScriptLoader& TheBuffInfo() {
-	return TheBuffStateSystem().GetBuffInfo();
+    return TheBuffStateSystem().GetBuffInfo();
 }
 
 BuffTimeControl& TheBuffTimeControl() {
-	return TheBuffStateSystem().GetBuffTimeControl();
+    return TheBuffStateSystem().GetBuffTimeControl();
 }
 
 BuffStateValueControl& TheBuffStateValueControl() {
-	return TheBuffStateSystem().GetBuffStateValueControl();
+    return TheBuffStateSystem().GetBuffStateValueControl();
 }
-
-
-
-

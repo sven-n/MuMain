@@ -18,37 +18,37 @@
 #define	CMW_DESC_LINE_MAX	2
 #define	CMW_DESC_ROW_MAX	75
 
-class CCharMakeWin : public CWin  
+class CCharMakeWin : public CWin
 {
 protected:
-	CWin	m_winBack;
-	CSprite	m_asprBack[CMW_SPR_MAX];
-	CButton	m_abtnJob[MAX_CLASS];
-	CButton	m_aBtn[2];
+    CWin	m_winBack;
+    CSprite	m_asprBack[CMW_SPR_MAX];
+    CButton	m_abtnJob[MAX_CLASS];
+    CButton	m_aBtn[2];
 
-	int		m_nSelJob;
-	char	m_aszJobDesc[CMW_DESC_LINE_MAX][CMW_DESC_ROW_MAX];
-	int		m_nDescLine;
+    int		m_nSelJob;
+    char	m_aszJobDesc[CMW_DESC_LINE_MAX][CMW_DESC_ROW_MAX];
+    int		m_nDescLine;
 
 public:
-	CCharMakeWin();
-	virtual ~CCharMakeWin();
+    CCharMakeWin();
+    virtual ~CCharMakeWin();
 
-	void Create();
-	void SetPosition(int nXCoord, int nYCoord);
-	void Show(bool bShow);
-	bool CursorInWin(int nArea);
-	void UpdateDisplay();
+    void Create();
+    void SetPosition(int nXCoord, int nYCoord);
+    void Show(bool bShow);
+    bool CursorInWin(int nArea);
+    void UpdateDisplay();
 protected:
-	void PreRelease();
-	void UpdateWhileActive(double dDeltaTick);
-	void RenderControls();
+    void PreRelease();
+    void UpdateWhileActive(double dDeltaTick);
+    void RenderControls();
 
-	void RequestCreateCharacter();
+    void RequestCreateCharacter();
 
-	void SelectCreateCharacter();
-	void UpdateCreateCharacter();
-	void RenderCreateCharacter();
+    void SelectCreateCharacter();
+    void UpdateCreateCharacter();
+    void RenderCreateCharacter();
 };
 
 #endif // !defined(AFX_CHARMAKEWIN_H__7740CE2F_2BE7_4705_91DD_CCF55256B1D3__INCLUDED_)

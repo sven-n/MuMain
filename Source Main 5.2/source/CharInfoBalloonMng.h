@@ -14,19 +14,19 @@
 
 class CCharInfoBalloon;
 
-class CCharInfoBalloonMng  
+class CCharInfoBalloonMng
 {
 protected:
-	CCharInfoBalloon*	m_pCharInfoBalloon;	// 캐릭터 정보 풍선 배열의 주소.
+    CCharInfoBalloon* m_pCharInfoBalloon;	// 캐릭터 정보 풍선 배열의 주소.
 
 public:
-	CCharInfoBalloonMng();
-	virtual ~CCharInfoBalloonMng();
+    CCharInfoBalloonMng();
+    virtual ~CCharInfoBalloonMng();
 
-	void Release();
-	void Create();
-	void Render();
-	void UpdateDisplay();
+    void Release();
+    void Create();
+    void Render();
+    void UpdateDisplay();
 };
 
 #endif // !defined(AFX_CHARINFOBALLOONMNG_H__37129186_F7FE_4FBC_87BD_189E01191E8F__INCLUDED_)

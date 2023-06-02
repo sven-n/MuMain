@@ -13,30 +13,30 @@ using namespace info;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-MovereqInfoPtr MovereqInfo::MakeInfo( const std::string& filename )
+MovereqInfoPtr MovereqInfo::MakeInfo(const std::string& filename)
 {
-	MovereqInfoPtr info ( new MovereqInfo( filename ) );
-	return info;
+    MovereqInfoPtr info(new MovereqInfo(filename));
+    return info;
 }
 
-MovereqInfo::MovereqInfo( const std::string& filename ) : InfoFile( filename ), m_IsOpenFile( false )
+MovereqInfo::MovereqInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
-	m_IsOpenFile = OpenFile( filename );
+    m_IsOpenFile = OpenFile(filename);
 
-	if( !m_IsOpenFile )
-	{
-		assert( 0 );
-	}
+    if (!m_IsOpenFile)
+    {
+        assert(0);
+    }
 }
 
 MovereqInfo::~MovereqInfo()
 {
-	clear();
+    clear();
 }
 
-bool MovereqInfo::OpenFile( const std::string& filename )
+bool MovereqInfo::OpenFile(const std::string& filename)
 {
-	return true;
+    return true;
 }
 
 #endif //INFO_BUILDER

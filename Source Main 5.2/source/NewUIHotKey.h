@@ -1,4 +1,3 @@
-
 #ifndef _NEWUIHOTKEY_H_
 #define _NEWUIHOTKEY_H_
 
@@ -8,40 +7,39 @@
 
 namespace SEASON3B
 {
-	class CNewUIManager;
+    class CNewUIManager;
 
-	class CNewUIHotKey : public CNewUIObj
-	{
-		CNewUIManager*	m_pNewUIMng;
-		bool			m_bStateGameOver;
-		
-	public:
-		CNewUIHotKey();
-		virtual ~CNewUIHotKey();
+    class CNewUIHotKey : public CNewUIObj
+    {
+        CNewUIManager* m_pNewUIMng;
+        bool			m_bStateGameOver;
 
-		bool Create(CNewUIManager* pNewUIMng);
-		void Release();
+    public:
+        CNewUIHotKey();
+        virtual ~CNewUIHotKey();
 
-		bool UpdateMouseEvent();
-		bool UpdateKeyEvent();
-		bool Update();
-		bool Render();
+        bool Create(CNewUIManager* pNewUIMng);
+        void Release();
 
-		float GetLayerDepth();	//. 1.0f
-		float GetKeyEventOrder();	//. 1.0f
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
 
-		bool CanUpdateKeyEvent();
-		bool CanUpdateKeyEventRelatedMyInventory();
+        float GetLayerDepth();	//. 1.0f
+        float GetKeyEventOrder();	//. 1.0f
 
-		void SetStateGameOver( bool bGameOver );	// 게임오버중인 상태
-		bool IsStateGameOver( );
-		
-		bool AutoGetItem();
-		
-	private:
-		void ResetMouseRButton();
-		
-	};
+        bool CanUpdateKeyEvent();
+        bool CanUpdateKeyEventRelatedMyInventory();
+
+        void SetStateGameOver(bool bGameOver);	// 게임오버중인 상태
+        bool IsStateGameOver();
+
+        bool AutoGetItem();
+
+    private:
+        void ResetMouseRButton();
+    };
 }
 
 #endif	// _NEWUIHOTKEY_H_

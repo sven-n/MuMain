@@ -12,135 +12,135 @@
 #include "NewUIMessageBox.h"
 #include "NewUIButton.h"
 
-namespace SEASON3B  
+namespace SEASON3B
 {
-	class CNewUICursedTempleResult : public CNewUIObj  
-	{
-	public:
-		enum IMAGE_LIST
-		{
-			IMAGE_CURSEDTEMPLERESULT_SUCCESS = BITMAP_CURSEDTEMPLE_BEGIN, 
-			IMAGE_CURSEDTEMPLERESULT_FAILURE, 
-		};
+    class CNewUICursedTempleResult : public CNewUIObj
+    {
+    public:
+        enum IMAGE_LIST
+        {
+            IMAGE_CURSEDTEMPLERESULT_SUCCESS = BITMAP_CURSEDTEMPLE_BEGIN,
+            IMAGE_CURSEDTEMPLERESULT_FAILURE,
+        };
 
-		enum UI_SIZE
-		{
-			CURSEDTEMPLE_RESULT_WINDOW_WIDTH  = 230,
-			CURSEDTEMPLE_RESULT_WINDOW_HEIGHT = 282,
-		};
+        enum UI_SIZE
+        {
+            CURSEDTEMPLE_RESULT_WINDOW_WIDTH = 230,
+            CURSEDTEMPLE_RESULT_WINDOW_HEIGHT = 282,
+        };
 
-		enum
-		{
-			CURSEDTEMPLERESULT_CLOSE = 0,
-			CURSEDTEMPLERESULT_MAXBUTTONCOUNT,
-		};
+        enum
+        {
+            CURSEDTEMPLERESULT_CLOSE = 0,
+            CURSEDTEMPLERESULT_MAXBUTTONCOUNT,
+        };
 
-		struct CursedTempleGameResult 
-		{
-			char		s_characterId[MAX_ID_SIZE+1];
-			short		s_mapnumber;
-			SEASON3A::eCursedTempleTeam		s_team;
-			BYTE		s_point;
-			BYTE        s_class;
-			DWORD       s_addexp;
+        struct CursedTempleGameResult
+        {
+            char		s_characterId[MAX_ID_SIZE + 1];
+            short		s_mapnumber;
+            SEASON3A::eCursedTempleTeam		s_team;
+            BYTE		s_point;
+            BYTE        s_class;
+            DWORD       s_addexp;
 
-			CursedTempleGameResult() : s_mapnumber( -1 ), s_team( SEASON3A::eTeam_Count ), s_point( 0xff ), s_class( 0xff ), s_addexp( 0xff )
-			{
-				memset(&s_characterId, 0, sizeof(char)*(MAX_ID_SIZE+1));
-			}
-		};
-		
-	public:
-		CNewUICursedTempleResult();
-		virtual ~CNewUICursedTempleResult();
+            CursedTempleGameResult() : s_mapnumber(-1), s_team(SEASON3A::eTeam_Count), s_point(0xff), s_class(0xff), s_addexp(0xff)
+            {
+                memset(&s_characterId, 0, sizeof(char) * (MAX_ID_SIZE + 1));
+            }
+        };
 
-		bool Create( CNewUIManager* pNewUIMng, int x, int y );
+    public:
+        CNewUICursedTempleResult();
+        virtual ~CNewUICursedTempleResult();
 
-	private:
-		void LoadImages();
-		void UnloadImages();
-		void SetButtonInfo();
+        bool Create(CNewUIManager* pNewUIMng, int x, int y);
 
-	public:
-		bool UpdateMouseEvent();
-		bool UpdateKeyEvent();
-		bool Update();
-		
-	public:
-		void OpenningProcess();
-		void ClosingProcess();
+    private:
+        void LoadImages();
+        void UnloadImages();
+        void SetButtonInfo();
 
-	private:
-		void UpdateResult();
+    public:
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
 
-	public:
-		bool Render();
+    public:
+        void OpenningProcess();
+        void ClosingProcess();
 
-	private:
-		void RenderResultPanel();
-		void RenderFrame();
-		void RenderTextLine( const CursedTempleGameResult& resultinfo, int x, int y, DWORD color, DWORD backcolor );
-		void RenderText();
-		void RenderButtons();
+    private:
+        void UpdateResult();
 
-	public:
-		const POINT& GetPos() const;
-		float GetLayerDepth();	//. 5.0f
+    public:
+        bool Render();
 
-	public:
-		void SetPos( int x, int y );
-		void SetMyTeam( SEASON3A::eCursedTempleTeam myteam );
+    private:
+        void RenderResultPanel();
+        void RenderFrame();
+        void RenderTextLine(const CursedTempleGameResult& resultinfo, int x, int y, DWORD color, DWORD backcolor);
+        void RenderText();
+        void RenderButtons();
 
-	public:
-		void ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer );
-		void ResetGameResultInfo();
+    public:
+        const POINT& GetPos() const;
+        float GetLayerDepth();	//. 5.0f
 
-	private:
-		void Initialize();
-		void Destroy();
+    public:
+        void SetPos(int x, int y);
+        void SetMyTeam(SEASON3A::eCursedTempleTeam myteam);
 
-	private:
-		typedef std::list<CursedTempleGameResult>  CT_GameResult_list;
+    public:
+        void ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer);
+        void ResetGameResultInfo();
 
-	private:
-		CT_GameResult_list		m_AlliedTeamGameResult;
-		CT_GameResult_list		m_IllusionTeamGameResult;
+    private:
+        void Initialize();
+        void Destroy();
 
-	private:
-		CNewUIManager*			m_pNewUIMng;
-		CNewUIButton			m_Button[CURSEDTEMPLERESULT_MAXBUTTONCOUNT];
-		POINT					m_Pos;
-		
-		std::string				m_infoText;
-		float					m_ResultEffectAlph;
-		int						m_WinState;
-		SHORT					m_CharacterKey;
-		SEASON3A::eCursedTempleTeam		m_MyTeam;
-	};
+    private:
+        typedef std::list<CursedTempleGameResult>  CT_GameResult_list;
 
-	inline
-	void CNewUICursedTempleResult::SetPos( int x, int y )
-	{
-		m_Pos.x = x; m_Pos.y = y;
-	}
+    private:
+        CT_GameResult_list		m_AlliedTeamGameResult;
+        CT_GameResult_list		m_IllusionTeamGameResult;
 
-	inline
-	void CNewUICursedTempleResult::SetMyTeam( SEASON3A::eCursedTempleTeam myteam )
-	{
-		m_MyTeam = myteam;
-	}
+    private:
+        CNewUIManager* m_pNewUIMng;
+        CNewUIButton			m_Button[CURSEDTEMPLERESULT_MAXBUTTONCOUNT];
+        POINT					m_Pos;
 
-	inline
-	const POINT& CNewUICursedTempleResult::GetPos() const
-	{
-		return m_Pos;
-	}
+        std::string				m_infoText;
+        float					m_ResultEffectAlph;
+        int						m_WinState;
+        SHORT					m_CharacterKey;
+        SEASON3A::eCursedTempleTeam		m_MyTeam;
+    };
 
-	inline
-	float CNewUICursedTempleResult::GetLayerDepth()	//. 5.0f
-	{
-		return 10.2f;
-	}
+    inline
+        void CNewUICursedTempleResult::SetPos(int x, int y)
+    {
+        m_Pos.x = x; m_Pos.y = y;
+    }
+
+    inline
+        void CNewUICursedTempleResult::SetMyTeam(SEASON3A::eCursedTempleTeam myteam)
+    {
+        m_MyTeam = myteam;
+    }
+
+    inline
+        const POINT& CNewUICursedTempleResult::GetPos() const
+    {
+        return m_Pos;
+    }
+
+    inline
+        float CNewUICursedTempleResult::GetLayerDepth()	//. 5.0f
+    {
+        return 10.2f;
+    }
 };
 
 #endif // !defined(AFX_NEWUICURSEDTEMPLERESULT_H__573A17F1_A967_4C70_AF42_6214CCD165EE__INCLUDED_)

@@ -1,4 +1,4 @@
- // standard leaf header
+// standard leaf header
 
 #ifndef _STDLEAF_H_
 #define _STDLEAF_H_
@@ -42,37 +42,36 @@ typedef __int64	QWORD;
 #endif // MAKE_STRING
 
 namespace leaf {
+    /* File I/O Functions */
 
-	/* File I/O Functions */
+    bool CreateDirectoryIncSub(const std::string& path);
+    bool DeleteDirectoryIncSub(const std::string& path);
 
-	bool CreateDirectoryIncSub(const std::string& path);
-	bool DeleteDirectoryIncSub(const std::string& path);
+    bool GetFileSizeQW(const HANDLE hFile, QWORD& qwSize);
 
-	bool GetFileSizeQW(const HANDLE hFile, QWORD &qwSize);
+    void GetAbsolutePath(IN const std::string& path, OUT std::string& abspath);
+    void GetAbsoluteFilePath(IN const std::string& path, OUT std::string& abspath, OUT std::string& filename);
 
-	void GetAbsolutePath(IN const std::string& path, OUT std::string& abspath);
-	void GetAbsoluteFilePath(IN const std::string& path, OUT std::string& abspath, OUT std::string& filename);
+    void SplitFileName(IN const std::string& filepath, OUT std::string& filename, bool bIncludeExt = true);
+    void SplitDirectoryPath(IN const std::string& filepath, OUT std::string& dir);
+    void SplitExt(IN const std::string& filepath, OUT std::string& ext, bool bIncludeDot = false);
 
-	void SplitFileName(IN const std::string& filepath, OUT std::string& filename, bool bIncludeExt = true);
-	void SplitDirectoryPath(IN const std::string& filepath, OUT std::string& dir);
-	void SplitExt(IN const std::string& filepath, OUT std::string& ext, bool bIncludeDot = false);
+    void ExtractDirectoryName(IN const std::string& path, OUT std::string& dirname);
+    void ExchangeExt(IN const std::string& in_filepath, IN const std::string& ext, OUT std::string& out_filepath);
 
-	void ExtractDirectoryName(IN const std::string& path, OUT std::string& dirname);
-	void ExchangeExt(IN const std::string& in_filepath, IN const std::string& ext, OUT std::string& out_filepath);
+    bool CompareFilePath(IN const std::string& path1, IN const std::string& path2, size_t size);
+    void AppendFilePath(IN const std::string& dir, IN const std::string& to_append, OUT std::string& out_path);
 
-	bool CompareFilePath(IN const std::string& path1, IN const std::string& path2, size_t size);
-	void AppendFilePath(IN const std::string& dir, IN const std::string& to_append, OUT std::string& out_path);
+    /* Time Functions */
 
-	/* Time Functions */
-	
-	bool GetFileCreationTime(IN const std::string& path, OUT SYSTEMTIME& systime, bool bLocalTime = true);
-	bool GetFileLastModifiedTime(IN const std::string& path, OUT SYSTEMTIME& systime, bool bLocalTime = true);
-	bool GetFileLastAccessedTime(IN const std::string& path, OUT SYSTEMTIME& systime, bool bLocalTime = true);
-	
-	/* Tools */
-	
-	const char* FormatString(const char* pFormat, ...);		//. return formatted string
-	void GetTimeString(OUT std::string& str);				//. get time string ex) 2004/09/08 21:43:52:001
+    bool GetFileCreationTime(IN const std::string& path, OUT SYSTEMTIME& systime, bool bLocalTime = true);
+    bool GetFileLastModifiedTime(IN const std::string& path, OUT SYSTEMTIME& systime, bool bLocalTime = true);
+    bool GetFileLastAccessedTime(IN const std::string& path, OUT SYSTEMTIME& systime, bool bLocalTime = true);
+
+    /* Tools */
+
+    const char* FormatString(const char* pFormat, ...);		//. return formatted string
+    void GetTimeString(OUT std::string& str);				//. get time string ex) 2004/09/08 21:43:52:001
 }
 
 #endif // _STDLEAF_H_

@@ -14,23 +14,23 @@
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 
-class CCharInfoBalloon : public CSprite  
+class CCharInfoBalloon : public CSprite
 {
 protected:
-	CHARACTER*	m_pCharInfo;
-	DWORD		m_dwNameColor;
-	char		m_szName[64];
-	char		m_szGuild[64];
-	char		m_szClass[64];
+    CHARACTER* m_pCharInfo;
+    DWORD		m_dwNameColor;
+    char		m_szName[64];
+    char		m_szGuild[64];
+    char		m_szClass[64];
 
 public:
-	CCharInfoBalloon();
-	virtual ~CCharInfoBalloon();
+    CCharInfoBalloon();
+    virtual ~CCharInfoBalloon();
 
-	void Create(CHARACTER* pCharInfo);
-	void Render();
+    void Create(CHARACTER* pCharInfo);
+    void Render();
 
-	void SetInfo();
+    void SetInfo();
 };
 
 #endif // !defined(AFX_CHARINFOBALLOON_H__DC2BBC6F_834B_4738_AB09_361BF8484977__INCLUDED_)

@@ -14,114 +14,113 @@
 
 CShopCategoryList::CShopCategoryList() // OK
 {
-	this->Clear();
+    this->Clear();
 }
 
 CShopCategoryList::~CShopCategoryList() // OK
 {
-
 }
 
 void CShopCategoryList::Clear() // OK
 {
-	this->m_Categroys.clear();
-	this->m_CategoryIndex.clear();
+    this->m_Categroys.clear();
+    this->m_CategoryIndex.clear();
 }
 
 int CShopCategoryList::GetSize() // OK
 {
-	return static_cast<int>(this->m_Categroys.size());
+    return static_cast<int>(this->m_Categroys.size());
 }
 
 void CShopCategoryList::Append(CShopCategory category) // OK
 {
-	if(this->m_Categroys.find(category.ProductDisplaySeq)!=this->m_Categroys.end())
-		return;
+    if (this->m_Categroys.find(category.ProductDisplaySeq) != this->m_Categroys.end())
+        return;
 
-	this->m_Categroys.insert(std::make_pair(category.ProductDisplaySeq,category));
+    this->m_Categroys.insert(std::make_pair(category.ProductDisplaySeq, category));
 
-	this->m_CategoryIndex.push_back(category.ProductDisplaySeq);
+    this->m_CategoryIndex.push_back(category.ProductDisplaySeq);
 
-	if(category.Root!=1)
-	{
-		std::map<int,CShopCategory>::iterator it = this->m_Categroys.find(category.ParentProductDisplaySeq);
+    if (category.Root != 1)
+    {
+        std::map<int, CShopCategory>::iterator it = this->m_Categroys.find(category.ParentProductDisplaySeq);
 
-		if(it==this->m_Categroys.end())
-		{
-			return;
-		}
+        if (it == this->m_Categroys.end())
+        {
+            return;
+        }
 
-		it->second.CategoryList.push_back(category.ProductDisplaySeq);
-	}
+        it->second.CategoryList.push_back(category.ProductDisplaySeq);
+    }
 }
 
 void CShopCategoryList::SetFirst() // OK
 {
-	this->m_Categoryiter = this->m_Categroys.begin();
+    this->m_Categoryiter = this->m_Categroys.begin();
 }
 
 bool CShopCategoryList::GetNext(CShopCategory& category) // OK
 {
-	if(this->m_Categoryiter==this->m_Categroys.end())
-		return 0;
+    if (this->m_Categoryiter == this->m_Categroys.end())
+        return 0;
 
-	category = this->m_Categoryiter->second;
-	this->m_Categoryiter++;
-	return 1;
+    category = this->m_Categoryiter->second;
+    this->m_Categoryiter++;
+    return 1;
 }
 
-bool CShopCategoryList::GetValueByKey(int nKey,CShopCategory& category) // OK
+bool CShopCategoryList::GetValueByKey(int nKey, CShopCategory& category) // OK
 {
-	std::map<int,CShopCategory>::iterator it = this->m_Categroys.find(nKey);
+    std::map<int, CShopCategory>::iterator it = this->m_Categroys.find(nKey);
 
-	if(it==this->m_Categroys.end())
-	{
-		return 0;
-	}
+    if (it == this->m_Categroys.end())
+    {
+        return 0;
+    }
 
-	category = it->second;
-	return 1;
+    category = it->second;
+    return 1;
 }
 
-bool CShopCategoryList::GetValueByIndex(int nIndex,CShopCategory& category) // OK
+bool CShopCategoryList::GetValueByIndex(int nIndex, CShopCategory& category) // OK
 {
-	if(nIndex < 0 || nIndex>=static_cast<int>(this->m_CategoryIndex.size()))
-	{
-		return 0;
-	}
+    if (nIndex < 0 || nIndex >= static_cast<int>(this->m_CategoryIndex.size()))
+    {
+        return 0;
+    }
 
-	return this->GetValueByKey(this->m_CategoryIndex[nIndex],category);
+    return this->GetValueByKey(this->m_CategoryIndex[nIndex], category);
 }
 
-bool CShopCategoryList::InsertPackage(int Category,int Package) // OK
+bool CShopCategoryList::InsertPackage(int Category, int Package) // OK
 {
-	std::map<int,CShopCategory>::iterator it = this->m_Categroys.find(Category);
+    std::map<int, CShopCategory>::iterator it = this->m_Categroys.find(Category);
 
-	if(it==this->m_Categroys.end())
-	{
-		return 0;
-	}
+    if (it == this->m_Categroys.end())
+    {
+        return 0;
+    }
 
-	it->second.AddPackageSeq(Package);
-	return 1;
+    it->second.AddPackageSeq(Package);
+    return 1;
 }
 
-bool CShopCategoryList::RefreshPackageSeq(int Category,int PackageSeqs[],int PackageCount) // OK
+bool CShopCategoryList::RefreshPackageSeq(int Category, int PackageSeqs[], int PackageCount) // OK
 {
-	std::map<int,CShopCategory>::iterator it = this->m_Categroys.find(Category);
+    std::map<int, CShopCategory>::iterator it = this->m_Categroys.find(Category);
 
-	if(it==this->m_Categroys.end())
-	{
-		return 0;
-	}
+    if (it == this->m_Categroys.end())
+    {
+        return 0;
+    }
 
-	it->second.ClearPackageSeq();
+    it->second.ClearPackageSeq();
 
-	for(int n = 0;n<PackageCount;n++)
-	{
-		it->second.AddPackageSeq(PackageSeqs[n]);
-	}
+    for (int n = 0; n < PackageCount; n++)
+    {
+        it->second.AddPackageSeq(PackageSeqs[n]);
+    }
 
-	return 1;
+    return 1;
 }
 #endif

@@ -13,30 +13,30 @@
 
 using namespace info;
 
-CreditInfoPtr CreditInfo::MakeInfo( const std::string& filename )
+CreditInfoPtr CreditInfo::MakeInfo(const std::string& filename)
 {
-	CreditInfo* info ( new CreditInfo( filename ) );
-	return info;
+    CreditInfo* info(new CreditInfo(filename));
+    return info;
 }
 
-CreditInfo::CreditInfo( const std::string& filename ) : InfoFile( filename ), m_IsOpenFile( false )
+CreditInfo::CreditInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
-	m_IsOpenFile = OpenFile( filename );
+    m_IsOpenFile = OpenFile(filename);
 
-	if( !m_IsOpenFile )
-	{
-		assert(0);
-	}
+    if (!m_IsOpenFile)
+    {
+        assert(0);
+    }
 }
 
 CreditInfo::~CreditInfo()
 {
-	clear();
+    clear();
 }
 
-bool CreditInfo::OpenFile( const std::string& filename )
+bool CreditInfo::OpenFile(const std::string& filename)
 {
-	return true;
+    return true;
 }
 
 #endif //INFO_BUILDER

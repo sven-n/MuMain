@@ -12,43 +12,42 @@ class BMD;
 #include "./Time/Timer.h"
 
 BoostSmartPointer(CGM_PK_Field);
-class CGM_PK_Field: public BaseMap
+class CGM_PK_Field : public BaseMap
 {
 public:
-	static CGM_PK_FieldPtr Make();
-	virtual ~CGM_PK_Field();
+    static CGM_PK_FieldPtr Make();
+    virtual ~CGM_PK_Field();
 
 public:
-	virtual bool CreateObject(OBJECT* o);
-	virtual bool MoveObject(OBJECT* o);
-	virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
-	virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-	virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-	
-public:
-	bool CreateFireSpark(PARTICLE* o);
+    virtual bool CreateObject(OBJECT* o);
+    virtual bool MoveObject(OBJECT* o);
+    virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
+    virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
 
 public:
-	virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
-	virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
-	virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-	virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+    bool CreateFireSpark(PARTICLE* o);
 
 public:
-	virtual bool PlayMonsterSound(OBJECT* o);
-	virtual void PlayObjectSound(OBJECT* o);
-	void PlayBGM();
-		
+    virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
+    virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
+    virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
+    virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+
 public:
-	void Init();
-	void Destroy();
-	
+    virtual bool PlayMonsterSound(OBJECT* o);
+    virtual void PlayObjectSound(OBJECT* o);
+    void PlayBGM();
+
+public:
+    void Init();
+    void Destroy();
+
 private:
-	CGM_PK_Field();
-		bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    CGM_PK_Field();
+    bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
 };
 
 extern bool IsPKField();
-
 
 #endif //_GM_PK_FIELD_H_

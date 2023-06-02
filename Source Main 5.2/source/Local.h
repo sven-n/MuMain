@@ -2,5 +2,4 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-
-extern bool CheckSpecialText(char *Text);
+extern bool CheckSpecialText(char* Text);

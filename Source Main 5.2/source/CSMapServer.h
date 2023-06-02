@@ -24,26 +24,24 @@ private:
     MServerInfo m_vServerInfo;
 
 public:
-    CSMServer ();
-    ~CSMServer (){}
+    CSMServer();
+    ~CSMServer() {}
 
-    void    Init ( void );
+    void    Init(void);
 
-    void    SetHeroID ( char* ID );
+    void    SetHeroID(char* ID);
 
-    void    SetServerInfo ( MServerInfo sInfo );
-    void    GetServerInfo ( MServerInfo& sInfo );
+    void    SetServerInfo(MServerInfo sInfo);
+    void    GetServerInfo(MServerInfo& sInfo);
 
-    void    GetServerAddress ( char* szAddress );
-    WORD    GetServerPort ( void ) { return (m_bFillServerInfo ? m_vServerInfo.m_wMapSvrPort : 0); }
-    WORD    GetServerCode ( void ) { return (m_bFillServerInfo ? m_vServerInfo.m_wMapSvrCode : 0); }
+    void    GetServerAddress(char* szAddress);
+    WORD    GetServerPort(void) { return (m_bFillServerInfo ? m_vServerInfo.m_wMapSvrPort : 0); }
+    WORD    GetServerCode(void) { return (m_bFillServerInfo ? m_vServerInfo.m_wMapSvrCode : 0); }
 
-    void    ConnectChangeMapServer ( MServerInfo sInfo );
-    void    SendChangeMapServer ( void );
+    void    ConnectChangeMapServer(MServerInfo sInfo);
+    void    SendChangeMapServer(void);
 };
-
 
 #define g_csMapServer CSMServer::GetSingleton ()
 
 #endif// __CS_MAP_SERVER_H__
-

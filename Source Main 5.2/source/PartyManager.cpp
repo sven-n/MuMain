@@ -11,59 +11,56 @@ using namespace SEASON3B;
 
 CPartyManager::CPartyManager()
 {
-
 }
 
 CPartyManager::~CPartyManager()
 {
-	Release( );
+    Release();
 }
 
-bool CPartyManager::Create( )
+bool CPartyManager::Create()
 {
-	return true;
+    return true;
 }
 
-void CPartyManager::Release( )
+void CPartyManager::Release()
 {
-
 }
 
-bool CPartyManager::Update( )
+bool CPartyManager::Update()
 {
-	return true;
+    return true;
 }
 
-bool CPartyManager::Render( )
+bool CPartyManager::Render()
 {
-
-	return true;
+    return true;
 }
 
-CPartyManager* CPartyManager::GetInstance( )
+CPartyManager* CPartyManager::GetInstance()
 {
-	static CPartyManager sPartyManager;
-	return &sPartyManager;
+    static CPartyManager sPartyManager;
+    return &sPartyManager;
 }
 
 void CPartyManager::SearchPartyMember()
 {
-	for(int i=0;i<MAX_CHARACTERS_CLIENT;i++)
-	{
-		CHARACTER *c = &CharactersClient[i];
-		OBJECT *o = &c->Object;
-		if( o->Type==MODEL_PLAYER && o->Kind==KIND_PLAYER && o->Live && o->Visible && o->Alpha>0.f && c->Dead==0 )
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+    {
+        CHARACTER* c = &CharactersClient[i];
+        OBJECT* o = &c->Object;
+        if (o->Type == MODEL_PLAYER && o->Kind == KIND_PLAYER && o->Live && o->Visible && o->Alpha > 0.f && c->Dead == 0)
         {
-            for ( int j=0; j<PartyNumber; ++j )
+            for (int j = 0; j < PartyNumber; ++j)
             {
-		        PARTY_t *p = &Party[j];
+                PARTY_t* p = &Party[j];
 
-                if ( p->index!=-2 ) continue;
-                if ( p->index>-1 ) continue;
+                if (p->index != -2) continue;
+                if (p->index > -1) continue;
 
-                int length = max( strlen( p->Name ), max(1,strlen(c->ID) ));
-				
-                if ( !strncmp( p->Name, c->ID, length ) )
+                int length = max(strlen(p->Name), max(1, strlen(c->ID)));
+
+                if (!strncmp(p->Name, c->ID, length))
                 {
                     p->index = i;
                     break;
@@ -72,15 +69,15 @@ void CPartyManager::SearchPartyMember()
         }
     }
 
-    for ( int j=0; j<PartyNumber; ++j )
+    for (int j = 0; j < PartyNumber; ++j)
     {
-		PARTY_t *p = &Party[j];
+        PARTY_t* p = &Party[j];
 
-        if ( p->index>=0 ) continue;
+        if (p->index >= 0) continue;
 
-        int length = max(strlen(p->Name), max(1,strlen(Hero->ID)));
+        int length = max(strlen(p->Name), max(1, strlen(Hero->ID)));
 
-        if ( !strncmp( p->Name, Hero->ID, length ) )
+        if (!strncmp(p->Name, Hero->ID, length))
         {
             p->index = -3;
         }
@@ -91,20 +88,20 @@ void CPartyManager::SearchPartyMember()
     }
 }
 
-bool CPartyManager::IsPartyMember ( int index )
+bool CPartyManager::IsPartyMember(int index)
 {
     CHARACTER* c = &CharactersClient[index];
-	return IsPartyMemberChar( c );
+    return IsPartyMemberChar(c);
 }
 
-bool CPartyManager::IsPartyMemberChar( CHARACTER * c )
+bool CPartyManager::IsPartyMemberChar(CHARACTER* c)
 {
-    for ( int i=0; i<PartyNumber; ++i )
+    for (int i = 0; i < PartyNumber; ++i)
     {
-		PARTY_t *p = &Party[i];
+        PARTY_t* p = &Party[i];
 
         int length = max(1, strlen(c->ID));
-        if ( !strncmp( p->Name, c->ID, length ) ) return true;
+        if (!strncmp(p->Name, c->ID, length)) return true;
     }
 
     return false;

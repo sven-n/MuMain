@@ -14,263 +14,262 @@
 
 namespace SEASON3B
 {
-	class CNewUIItemMng;
-	class CNewUIInventoryCtrl;
+    class CNewUIItemMng;
+    class CNewUIInventoryCtrl;
 
-	enum
-	{
-		INVENTORY_SQUARE_WIDTH = 20,
-		INVENTORY_SQUARE_HEIGHT = 20,
-	};
-	enum TOOLTIP_TYPE
-	{
-		UNKNOWN_TOOLTIP_TYPE = 0,
-		TOOLTIP_TYPE_INVENTORY,
-		TOOLTIP_TYPE_REPAIR,
-		TOOLTIP_TYPE_NPC_SHOP,
-		TOOLTIP_TYPE_MY_SHOP,
-		TOOLTIP_TYPE_PURCHASE_SHOP,
-	};
-	enum SQUARE_COLOR_STATE
-	{
-		UNKNOWN_COLOR_STATE = 0,
-		COLOR_STATE_NORMAL,
-		COLOR_STATE_WARNING,
-	};
-	
-	class CNewUIPickedItem : public INewUI3DRenderObj
-	{
-		CNewUIItemMng*	m_pNewItemMng;
-		CNewUIInventoryCtrl*	m_pSrcInventory;
-		ITEM*	m_pPickedItem;
-		
-		bool	m_bShow;
-		POINT	m_Pos;
-		SIZE	m_Size;
+    enum
+    {
+        INVENTORY_SQUARE_WIDTH = 20,
+        INVENTORY_SQUARE_HEIGHT = 20,
+    };
+    enum TOOLTIP_TYPE
+    {
+        UNKNOWN_TOOLTIP_TYPE = 0,
+        TOOLTIP_TYPE_INVENTORY,
+        TOOLTIP_TYPE_REPAIR,
+        TOOLTIP_TYPE_NPC_SHOP,
+        TOOLTIP_TYPE_MY_SHOP,
+        TOOLTIP_TYPE_PURCHASE_SHOP,
+    };
+    enum SQUARE_COLOR_STATE
+    {
+        UNKNOWN_COLOR_STATE = 0,
+        COLOR_STATE_NORMAL,
+        COLOR_STATE_WARNING,
+    };
 
-	public:
-		CNewUIPickedItem();
-		virtual ~CNewUIPickedItem();
+    class CNewUIPickedItem : public INewUI3DRenderObj
+    {
+        CNewUIItemMng* m_pNewItemMng;
+        CNewUIInventoryCtrl* m_pSrcInventory;
+        ITEM* m_pPickedItem;
 
-		bool Create(CNewUIItemMng* pNewItemMng, CNewUIInventoryCtrl* pSrc, ITEM* pItem);
-		void Release();
+        bool	m_bShow;
+        POINT	m_Pos;
+        SIZE	m_Size;
 
-		CNewUIInventoryCtrl* GetOwnerInventory() const;
-		STORAGE_TYPE GetSourceStorageType() const;
-		ITEM* GetItem() const;
+    public:
+        CNewUIPickedItem();
+        virtual ~CNewUIPickedItem();
 
-		const POINT& GetPos() const;
-		const SIZE& GetSize() const;
-		void GetRect(RECT& rcBox);
+        bool Create(CNewUIItemMng* pNewItemMng, CNewUIInventoryCtrl* pSrc, ITEM* pItem);
+        void Release();
 
-		int GetSourceLinealPos();
-		bool GetTargetPos(CNewUIInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY);
-		int GetTargetLinealPos(CNewUIInventoryCtrl* pDest);
-		
-		bool IsVisible() const;
-		void ShowPickedItem();
-		void HidePickedItem();
+        CNewUIInventoryCtrl* GetOwnerInventory() const;
+        STORAGE_TYPE GetSourceStorageType() const;
+        ITEM* GetItem() const;
 
-		void Render3D();
-	};
+        const POINT& GetPos() const;
+        const SIZE& GetSize() const;
+        void GetRect(RECT& rcBox);
 
-	class CNewUIInventoryCtrl : public INewUI3DRenderObj
-	{
-	public:
-		enum EVENT_STATE
-		{
-			EVENT_NONE = 0,
-			EVENT_HOVER,
-			EVENT_PICKING,
-		};
-		enum IMAGE_LIST
-		{
-			IMAGE_ITEM_SQUARE = BITMAP_INTERFACE_NEW_INVENTORY_BASE_BEGIN,	//. newui_item_box.tga
-			IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga
-			IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga
-			IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga
-			IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga
-			IMAGE_ITEM_TABLE_TOP_PIXEL,		//. newui_item_table03(Up).tga
-			IMAGE_ITEM_TABLE_BOTTOM_PIXEL,	//. newui_item_table03(Dw).tga
-			IMAGE_ITEM_TABLE_LEFT_PIXEL,	//. newui_item_table03(L).tga
-			IMAGE_ITEM_TABLE_RIGHT_PIXEL,	//. newui_item_table03(R).tga
+        int GetSourceLinealPos();
+        bool GetTargetPos(CNewUIInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY);
+        int GetTargetLinealPos(CNewUIInventoryCtrl* pDest);
+
+        bool IsVisible() const;
+        void ShowPickedItem();
+        void HidePickedItem();
+
+        void Render3D();
+    };
+
+    class CNewUIInventoryCtrl : public INewUI3DRenderObj
+    {
+    public:
+        enum EVENT_STATE
+        {
+            EVENT_NONE = 0,
+            EVENT_HOVER,
+            EVENT_PICKING,
+        };
+        enum IMAGE_LIST
+        {
+            IMAGE_ITEM_SQUARE = BITMAP_INTERFACE_NEW_INVENTORY_BASE_BEGIN,	//. newui_item_box.tga
+            IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga
+            IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga
+            IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga
+            IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga
+            IMAGE_ITEM_TABLE_TOP_PIXEL,		//. newui_item_table03(Up).tga
+            IMAGE_ITEM_TABLE_BOTTOM_PIXEL,	//. newui_item_table03(Dw).tga
+            IMAGE_ITEM_TABLE_LEFT_PIXEL,	//. newui_item_table03(L).tga
+            IMAGE_ITEM_TABLE_RIGHT_PIXEL,	//. newui_item_table03(R).tga
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-			IMAGE_ITEM_SQUARE_FOR_1_BY_1,	//. newui_inven_usebox_01.tga
-			IMAGE_ITEM_SQUARE_TOP_RECT,		//. newui_inven_usebox_02.tga
-			IMAGE_ITEM_SQUARE_BOTTOM_RECT,	//. newui_inven_usebox_03.tga
+            IMAGE_ITEM_SQUARE_FOR_1_BY_1,	//. newui_inven_usebox_01.tga
+            IMAGE_ITEM_SQUARE_TOP_RECT,		//. newui_inven_usebox_02.tga
+            IMAGE_ITEM_SQUARE_BOTTOM_RECT,	//. newui_inven_usebox_03.tga
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-		};
+        };
 
-	private:
-		enum
-		{
-			ITEM_SQUARE_WITH = 20,
-			ITEM_SQUARE_HEIGHT = 20,
-			WND_TOP_EDGE = 3,
-			WND_LEFT_EDGE = 4,
-			WND_BOTTOM_EDGE = 8,
-			WND_RIGHT_EDGE = 9,
+    private:
+        enum
+        {
+            ITEM_SQUARE_WITH = 20,
+            ITEM_SQUARE_HEIGHT = 20,
+            WND_TOP_EDGE = 3,
+            WND_LEFT_EDGE = 4,
+            WND_BOTTOM_EDGE = 8,
+            WND_RIGHT_EDGE = 9,
 
-			RENDER_NUMBER_OF_ITEM = 1,
-			RENDER_ITEM_TOOLTIP = 2,
-		};
-		
-		typedef std::vector<ITEM*>	type_vec_item;
+            RENDER_NUMBER_OF_ITEM = 1,
+            RENDER_ITEM_TOOLTIP = 2,
+        };
 
-		static CNewUIPickedItem*	ms_pPickedItem;
+        typedef std::vector<ITEM*>	type_vec_item;
 
-		CNewUI3DRenderMng*	m_pNew3DRenderMng;
-		CNewUIItemMng*	m_pNewItemMng;
-		CNewUIObj*	m_pOwner;
+        static CNewUIPickedItem* ms_pPickedItem;
 
-		type_vec_item	m_vecItem;
-		POINT	m_Pos;
-		SIZE	m_Size;
-		STORAGE_TYPE m_StorageType;
-		int	m_nColumn, m_nRow;
-		/**
-		 * \brief The index of the first slot for this control.
-		 * For example, the box of an inventory starts at 12.
-		 */
-		int m_nIndexOffset;
-		DWORD*	m_pdwItemCheckBox;
-		EVENT_STATE	m_EventState;
-		int	m_iPointedSquareIndex; // has m_nIndexOffset included
-		bool m_bShow, m_bLock;
+        CNewUI3DRenderMng* m_pNew3DRenderMng;
+        CNewUIItemMng* m_pNewItemMng;
+        CNewUIObj* m_pOwner;
 
-		TOOLTIP_TYPE	m_ToolTipType;
-		ITEM*			m_pToolTipItem;
+        type_vec_item	m_vecItem;
+        POINT	m_Pos;
+        SIZE	m_Size;
+        STORAGE_TYPE m_StorageType;
+        int	m_nColumn, m_nRow;
+        /**
+         * \brief The index of the first slot for this control.
+         * For example, the box of an inventory starts at 12.
+         */
+        int m_nIndexOffset;
+        DWORD* m_pdwItemCheckBox;
+        EVENT_STATE	m_EventState;
+        int	m_iPointedSquareIndex; // has m_nIndexOffset included
+        bool m_bShow, m_bLock;
 
-		float m_afColorStateNormal[3], m_afColorStateWarning[3];
+        TOOLTIP_TYPE	m_ToolTipType;
+        ITEM* m_pToolTipItem;
 
-		bool m_bRepairMode;
+        float m_afColorStateNormal[3], m_afColorStateWarning[3];
 
-		bool m_bCanPushItem;
-		
-		void Init();
+        bool m_bRepairMode;
 
-		void LoadImages();
-		void UnloadImages();
+        bool m_bCanPushItem;
 
-		void SetItemColorState(ITEM* pItem);
-		bool CanChangeItemColorState(ITEM* pItem);
+        void Init();
 
-		void UpdateProcess();
+        void LoadImages();
+        void UnloadImages();
 
-		bool CheckSlot(int startIndex, int width, int height);
-		bool CheckSlot(int iColumnX, int iRowY, int width, int height);
-	public:
-		CNewUIInventoryCtrl();
-		virtual ~CNewUIInventoryCtrl();
+        void SetItemColorState(ITEM* pItem);
+        bool CanChangeItemColorState(ITEM* pItem);
 
-		bool Create(STORAGE_TYPE storageType, CNewUI3DRenderMng* pNew3DRenderMng, CNewUIItemMng* pNewItemMng, CNewUIObj* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
-		void Release();
+        void UpdateProcess();
 
-		bool AddItem(int iLinealPos, BYTE* pbyItemPacket);
-		bool AddItem(int iColumnX, int iRowY, BYTE* pbyItemPacket);
-		bool AddItem(int iColumnX, int iRowY, ITEM* pItem);
-		bool AddItem(int iColumnX, int iRowY, BYTE byType, BYTE bySubType, BYTE byLevel = 0, BYTE byDurability = 255, 
-			BYTE byOption1 = 0, BYTE byOptionEx = 0, BYTE byOption380 = 0, BYTE byOptionHarmony = 0);
-		void RemoveItem(ITEM* pItem);
-		void RemoveAllItems();
+        bool CheckSlot(int startIndex, int width, int height);
+        bool CheckSlot(int iColumnX, int iRowY, int width, int height);
+    public:
+        CNewUIInventoryCtrl();
+        virtual ~CNewUIInventoryCtrl();
 
-		size_t GetNumberOfItems();
+        bool Create(STORAGE_TYPE storageType, CNewUI3DRenderMng* pNew3DRenderMng, CNewUIItemMng* pNewItemMng, CNewUIObj* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
+        void Release();
 
-		bool IsItem(short int siType);
-		int GetItemCount( short int siType, int iLevel = -1 );
+        bool AddItem(int iLinealPos, BYTE* pbyItemPacket);
+        bool AddItem(int iColumnX, int iRowY, BYTE* pbyItemPacket);
+        bool AddItem(int iColumnX, int iRowY, ITEM* pItem);
+        bool AddItem(int iColumnX, int iRowY, BYTE byType, BYTE bySubType, BYTE byLevel = 0, BYTE byDurability = 255,
+            BYTE byOption1 = 0, BYTE byOptionEx = 0, BYTE byOption380 = 0, BYTE byOptionHarmony = 0);
+        void RemoveItem(ITEM* pItem);
+        void RemoveAllItems();
 
-		ITEM* GetItem(int iIndex/* 0 <= iIndex < GetNumberOfItems() */);
-		
-		ITEM* FindItem(int iLinealPos);
-		ITEM* FindItem(int iColumnX, int iRowY);
-		ITEM* FindItemByKey(DWORD dwKey);
-		ITEM* FindItemAtPt(int x, int y);
-		ITEM* FindTypeItem(short int siType);
-		int FindItemIndex( short int siType, int iLevel );
-		int FindItemReverseIndex(short sType, int iLevel);
-		int GetIndexByItem(ITEM* pItem);
-		short int FindItemTypeByPos(int iColumnX, int iRowY);
+        size_t GetNumberOfItems();
 
-		ITEM* FindItemPointedSquareIndex();
-		int GetPointedSquareIndex();
-		
-		int	GetNumItemByKey( DWORD dwItemKey );
-		int GetNumItemByType(short sItemType);
+        bool IsItem(short int siType);
+        int GetItemCount(short int siType, int iLevel = -1);
 
-		void SetEventState(EVENT_STATE es);
-		
-		int FindEmptySlot(IN int cx, IN int cy);	//. return lineal position
-		bool FindEmptySlot(IN int cx, IN int cy, OUT int& iColumnX, OUT int& iColumnY);
-		int GetEmptySlotCount();
+        ITEM* GetItem(int iIndex/* 0 <= iIndex < GetNumberOfItems() */);
 
-		bool UpdateMouseEvent();
-		bool Update();
-		
-		void Render();
+        ITEM* FindItem(int iLinealPos);
+        ITEM* FindItem(int iColumnX, int iRowY);
+        ITEM* FindItemByKey(DWORD dwKey);
+        ITEM* FindItemAtPt(int x, int y);
+        ITEM* FindTypeItem(short int siType);
+        int FindItemIndex(short int siType, int iLevel);
+        int FindItemReverseIndex(short sType, int iLevel);
+        int GetIndexByItem(ITEM* pItem);
+        short int FindItemTypeByPos(int iColumnX, int iRowY);
 
-		void SetPos(int x, int y);
-		const POINT& GetPos() const;
-		int GetNumberOfColumn() const;
-		int GetNumberOfRow() const;
-		void GetRect(RECT& rcBox);
+        ITEM* FindItemPointedSquareIndex();
+        int GetPointedSquareIndex();
 
-		STORAGE_TYPE GetStorageType() const { return m_StorageType; }
+        int	GetNumItemByKey(DWORD dwItemKey);
+        int GetNumItemByType(short sItemType);
 
-		void SetSquareColorNormal(float fRed, float fGreen, float fBlue);
-		void GetSquareColorNormal(float* pfParams) const;
-		void SetSquareColorWarning(float fRed, float fGreen, float fBlue);
-		void GetSquareColorWarning(float* pfParams) const;
+        void SetEventState(EVENT_STATE es);
 
-		EVENT_STATE GetEventState();
+        int FindEmptySlot(IN int cx, IN int cy);	//. return lineal position
+        bool FindEmptySlot(IN int cx, IN int cy, OUT int& iColumnX, OUT int& iColumnY);
+        int GetEmptySlotCount();
 
-		CNewUIObj* GetOwner() const;
-		bool IsVisible() const;
-		void ShowInventory();
-		void HideInventory();
+        bool UpdateMouseEvent();
+        bool Update();
 
-		bool IsLocked() const;
-		void LockInventory();
-		void UnlockInventory();
+        void Render();
 
-		//. Check Functions
-		/* Caution: It's square index, not list index */
-		bool GetSquarePosAtPt(int x, int y, int& iColumnX, int& iRowY);
-		
+        void SetPos(int x, int y);
+        const POINT& GetPos() const;
+        int GetNumberOfColumn() const;
+        int GetNumberOfRow() const;
+        void GetRect(RECT& rcBox);
 
-		bool CheckPtInRect(int x, int y);
-		bool CheckRectInRect(const RECT& rcBox);
-		int GetIndexAtPt(int x, int y);
+        STORAGE_TYPE GetStorageType() const { return m_StorageType; }
 
-		int GetIndex(int column, int row);
-		bool CanMove(int iLinealPos, ITEM* pItem);
-		bool CanMove(int iColumnX, int iRowY, ITEM* pItem);
-		bool CanMoveToPt(int x, int y, ITEM* pItem);
+        void SetSquareColorNormal(float fRed, float fGreen, float fBlue);
+        void GetSquareColorNormal(float* pfParams) const;
+        void SetSquareColorWarning(float fRed, float fGreen, float fBlue);
+        void GetSquareColorWarning(float* pfParams) const;
 
-		void SetToolTipType(TOOLTIP_TYPE ToolTipType);
-		void CreateItemToolTip(ITEM* pItem);
-		void DeleteItemToolTip();
+        EVENT_STATE GetEventState();
 
-		void SetRepairMode(bool bRepair);
-		bool IsRepairMode();
+        CNewUIObj* GetOwner() const;
+        bool IsVisible() const;
+        void ShowInventory();
+        void HideInventory();
 
-		bool AreItemsStackable(ITEM* pSourceItem, ITEM* pTargetItem);
-		bool CanPushItem();
-		bool CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem);
-		
-		static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
+        bool IsLocked() const;
+        void LockInventory();
+        void UnlockInventory();
 
-		//. PickedItem Control Functions
-		static CNewUIPickedItem* GetPickedItem();
-		static bool CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem);
-		static void DeletePickedItem();
-		static void BackupPickedItem();
+        //. Check Functions
+        /* Caution: It's square index, not list index */
+        bool GetSquarePosAtPt(int x, int y, int& iColumnX, int& iRowY);
 
-	//protected:
-		void Render3D();
-		void RenderNumberOfItem();
-		void RenderItemToolTip();
-	};
+        bool CheckPtInRect(int x, int y);
+        bool CheckRectInRect(const RECT& rcBox);
+        int GetIndexAtPt(int x, int y);
+
+        int GetIndex(int column, int row);
+        bool CanMove(int iLinealPos, ITEM* pItem);
+        bool CanMove(int iColumnX, int iRowY, ITEM* pItem);
+        bool CanMoveToPt(int x, int y, ITEM* pItem);
+
+        void SetToolTipType(TOOLTIP_TYPE ToolTipType);
+        void CreateItemToolTip(ITEM* pItem);
+        void DeleteItemToolTip();
+
+        void SetRepairMode(bool bRepair);
+        bool IsRepairMode();
+
+        bool AreItemsStackable(ITEM* pSourceItem, ITEM* pTargetItem);
+        bool CanPushItem();
+        bool CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem);
+
+        static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
+
+        //. PickedItem Control Functions
+        static CNewUIPickedItem* GetPickedItem();
+        static bool CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem);
+        static void DeletePickedItem();
+        static void BackupPickedItem();
+
+        //protected:
+        void Render3D();
+        void RenderNumberOfItem();
+        void RenderItemToolTip();
+    };
 }
 
 #define g_pPickedItem SEASON3B::CNewUIInventoryCtrl::GetPickedItem()

@@ -1,4 +1,3 @@
-
 /*
 작성일: 2009-07-24
 작성자: 문상현
@@ -14,13 +13,13 @@
 class CShopListManager : public CListManager
 {
 public:
-	CShopListManager();	
-	virtual ~CShopListManager();
+    CShopListManager();
+    virtual ~CShopListManager();
 
-	CShopList*		GetListPtr() {return m_ShopList;};
+    CShopList* GetListPtr() { return m_ShopList; };
 
 private:
-	CShopList*		m_ShopList;
+    CShopList* m_ShopList;
 
-	WZResult		LoadScript(bool bDonwLoad);
+    WZResult		LoadScript(bool bDonwLoad);
 };

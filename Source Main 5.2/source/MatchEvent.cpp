@@ -13,41 +13,40 @@ extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
 
 namespace   matchEvent
 {
-    CSBaseMatch*    g_csMatchInfo = NULL;
+    CSBaseMatch* g_csMatchInfo = NULL;
 
-    void    CreateEventMatch ( int iWorld )
-    {		
-		DeleteEventMatch ();
+    void    CreateEventMatch(int iWorld)
+    {
+        DeleteEventMatch();
 
-        if ( gMapManager.InBloodCastle() == true )
+        if (gMapManager.InBloodCastle() == true)
         {
-			g_csMatchInfo = new SEASON3B::CNewBloodCastleSystem;
+            g_csMatchInfo = new SEASON3B::CNewBloodCastleSystem;
         }
-        else if ( gMapManager.InChaosCastle()==true )
+        else if (gMapManager.InChaosCastle() == true)
         {
-			g_csMatchInfo = new SEASON3B::CNewChaosCastleSystem;
+            g_csMatchInfo = new SEASON3B::CNewChaosCastleSystem;
         }
-        else if ( gMapManager.InDevilSquare() )
+        else if (gMapManager.InDevilSquare())
         {
             g_csMatchInfo = new CSDevilSquareMatch;
         }
-		else if ( gMapManager.IsCursedTemple() )
-		{
-			g_csMatchInfo = new CCursedTempleMatch;
-		}
-		else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
-		{
-			g_csMatchInfo = new CDoppelGangerMatch;
-		}
+        else if (gMapManager.IsCursedTemple())
+        {
+            g_csMatchInfo = new CCursedTempleMatch;
+        }
+        else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
+        {
+            g_csMatchInfo = new CDoppelGangerMatch;
+        }
     }
 
-    void    DeleteEventMatch ( void )
+    void    DeleteEventMatch(void)
     {
-        if ( g_csMatchInfo!=NULL )
+        if (g_csMatchInfo != NULL)
         {
             delete g_csMatchInfo;
             g_csMatchInfo = NULL;
         }
     }
-
 }

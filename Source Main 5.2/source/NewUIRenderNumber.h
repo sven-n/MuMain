@@ -11,25 +11,25 @@
 
 namespace SEASON3B
 {
-	class CNewUIRenderNumber  
-	{
-	public:
-		enum IMAGE_LIST
-		{	//. max: 1°³
-			IMAGE_NUMBER1 = BITMAP_INTERFACE_NEW_NUMBER_BEGIN,	// newui_number1.tga
-		};
+    class CNewUIRenderNumber
+    {
+    public:
+        enum IMAGE_LIST
+        {	//. max: 1°³
+            IMAGE_NUMBER1 = BITMAP_INTERFACE_NEW_NUMBER_BEGIN,	// newui_number1.tga
+        };
 
-		virtual ~CNewUIRenderNumber();
-		static CNewUIRenderNumber* GetInstance();
+        virtual ~CNewUIRenderNumber();
+        static CNewUIRenderNumber* GetInstance();
 
-		float RenderNumber(float x, float y, int iNum, float fScale = 1.0f);
+        float RenderNumber(float x, float y, int iNum, float fScale = 1.0f);
 
-	private:
-		CNewUIRenderNumber();
+    private:
+        CNewUIRenderNumber();
 
-		void LoadImage();
-		void ReleaseImage();
-	};
+        void LoadImage();
+        void ReleaseImage();
+    };
 }
 
 #define g_RenderNumber CNewUIRenderNumber::GetInstance()

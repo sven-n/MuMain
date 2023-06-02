@@ -1,5 +1,3 @@
-
-
 #ifndef _GMGMAREA_H_
 #define _GMGMAREA_H_
 
@@ -7,7 +5,7 @@
 
 namespace M40GMArea
 {
-	bool IsGmArea();
+    bool IsGmArea();
 }
 
 #endif /* _GMGMAREA_H_ */

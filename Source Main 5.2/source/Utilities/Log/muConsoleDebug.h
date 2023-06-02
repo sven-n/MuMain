@@ -6,25 +6,25 @@
 
 enum MSG_TYPE
 {
-	MCD_SEND = 0x01,
-	MCD_RECEIVE,
-	MCD_ERROR,
-	MCD_NORMAL
+    MCD_SEND = 0x01,
+    MCD_RECEIVE,
+    MCD_ERROR,
+    MCD_NORMAL
 };
 
-class CmuConsoleDebug  
+class CmuConsoleDebug
 {
-	bool	m_bInit;
+    bool	m_bInit;
 public:
-	virtual ~CmuConsoleDebug();
-	static CmuConsoleDebug* GetInstance();
+    virtual ~CmuConsoleDebug();
+    static CmuConsoleDebug* GetInstance();
 
-	void UpdateMainScene();
-	bool CheckCommand(const std::string& strCommand);
-	void Write(int iType, const char* pStr, ...);
+    void UpdateMainScene();
+    bool CheckCommand(const std::string& strCommand);
+    void Write(int iType, const char* pStr, ...);
 
 protected:
-	CmuConsoleDebug();	//. ban to create instance
+    CmuConsoleDebug();	//. ban to create instance
 };
 
 #define g_ConsoleDebug	CmuConsoleDebug::GetInstance()
@@ -32,21 +32,19 @@ protected:
 class CmuSimpleLog
 {
 public:
-	CmuSimpleLog(void);
-	~CmuSimpleLog(void);
-	static CmuSimpleLog* getInstance() { static CmuSimpleLog sInstance; return &sInstance; }
-	
-	void setFilename(const char* strFilename);
-	void log(char *str, ...);
-	
+    CmuSimpleLog(void);
+    ~CmuSimpleLog(void);
+    static CmuSimpleLog* getInstance() { static CmuSimpleLog sInstance; return &sInstance; }
+
+    void setFilename(const char* strFilename);
+    void log(char* str, ...);
+
 private:
-	bool m_bLogfirst;
-	
-	std::string m_strFilename;
-	
-	FILE *m_pFile;
+    bool m_bLogfirst;
+
+    std::string m_strFilename;
+
+    FILE* m_pFile;
 };
 
 #define g_ConsoleDebugLog	CmuSimpleLog::getInstance()
-
-
