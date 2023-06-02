@@ -461,7 +461,7 @@ void ReceiveCharacterList( const BYTE *ReceiveBuffer )
 	#ifdef _DEBUG
 		g_ConsoleDebug->Write(MCD_RECEIVE, "[ReceiveList Count %d Max class %d]",Data->CharacterCount,Data->MaxClass);
 	#else
-		g_ErrorReport.Write("[ReceiveList Count %d Max class %d]",Data->Value,Data->MaxClass);
+		g_ErrorReport.Write("[ReceiveList Count %d Max class %d]",Data->CharacterCount,Data->MaxClass);
 	#endif
 	
 	CharacterAttribute->IsVaultExtended = Data->IsVaultExtended;

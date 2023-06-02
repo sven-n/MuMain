@@ -455,7 +455,6 @@ extern DWORD g_dwLatestMagicTick;
 		spe.Init( 0xC3, 0x19);\
 		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
 		spe.Send();\
-		hanguo_check3();\
 	}\
 }
 #else // _DEBUG
@@ -2436,7 +2435,6 @@ __forceinline void SendRequestDarkside(WORD nSkill, int Key)
 		spe.Init( 0xC3, 0x4A);\
 		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << (BYTE)(0) << ( BYTE)( (p_Key)>>8) << ( BYTE)( (p_Key)&0xff);\
 		spe.Send();\
-		hanguo_check3();\
 	}\
 }
 
