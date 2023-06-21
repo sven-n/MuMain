@@ -23,6 +23,11 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 
+inline float CreateAngle2D(const vec3_t from, const vec2_t to)
+{
+    return CreateAngle(from[0], from[1], to[0], to[1]);
+}
+
 float CreateAngle(float x1, float y1, float x2, float y2)
 {
     float nx2 = x2 - x1, ny2 = y2 - y1;
@@ -129,14 +134,13 @@ int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY)
 
 float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn)
 {
-    float TargetAngle;
-    TargetAngle = CreateAngle(Position[0], Position[1], TargetPosition[0], TargetPosition[1]);
-    Angle[2] = TurnAngle2(Angle[2], TargetAngle, Turn);
+    float targetAngle = CreateAngle2D(Position, TargetPosition);
+    Angle[2] = TurnAngle2(Angle[2], targetAngle, Turn);
     vec3_t Range;
     VectorSubtract(Position, TargetPosition, Range);
-    float Distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
-    TargetAngle = 360.f - CreateAngle(Position[2], Distance, TargetPosition[2], 0.f);
-    Angle[0] = TurnAngle2(Angle[0], TargetAngle, Turn);
+    float distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
+    targetAngle = 360.f - CreateAngle(Position[2], distance, TargetPosition[2], 0.f);
+    Angle[0] = TurnAngle2(Angle[0], targetAngle, Turn);
     return VectorLength(Range);
 }
 
@@ -198,12 +202,12 @@ void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
         {
             vec3_t Range;
             VectorSubtract(o->Position, t->Position, Range);
-            float Distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
-            if (Distance < 400.f)
+            const auto distance = VectorLength(Range);
+            if (distance < 400.f)
             {
                 float xdist = t->Direction[0] - t->Position[0];
                 float ydist = t->Direction[1] - t->Position[1];
-                if (Distance < 80.f)
+                if (distance < 80.f)
                 {
                     xdist -= t->Direction[0] - o->Position[0];
                     ydist -= t->Direction[1] - o->Position[1];
@@ -232,7 +236,7 @@ void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
 void PushObject(vec3_t PushPosition, vec3_t Position, float Power, vec3_t Angle)
 {
     Vector(0.f, 0.f, 0.f, Angle);
-    Angle[2] = CreateAngle(PushPosition[0], PushPosition[1], Position[0], Position[1]) + 180.f;
+    Angle[2] = CreateAngle2D(PushPosition, Position) + 180.f;
     if (Angle[2] >= 360.f) Angle[2] -= 360.f;
 
     float Matrix[3][4];
@@ -442,17 +446,30 @@ bool TestDistance(CHARACTER* c, vec3_t TargetPosition, float Range)
     return false;
 }
 
-void LookAtTarget(OBJECT* o, CHARACTER* tc)
+void LookAtTarget(OBJECT* o, const CHARACTER* targetCharacter)
 {
-    if (tc == NULL) return;
-    OBJECT* to = &tc->Object;
-    float Angle = CreateAngle(o->Position[0], o->Position[1], to->Position[0], to->Position[1]);
-    if (FarAngle(o->Angle[2], Angle) < 90.f)
+    if (targetCharacter == nullptr)
     {
-        o->HeadTargetAngle[0] = (o->Angle[2] - Angle);
-        o->HeadTargetAngle[1] = (to->Position[2] - (o->Position[2] + 50.f)) * 0.2f;
-        for (int i = 0; i < 2; i++)
-            if (o->HeadTargetAngle[i] < 0) o->HeadTargetAngle[i] += 360.f;
+        return;
+    }
+
+    const auto targetObject = &targetCharacter->Object;
+    const auto angle = CreateAngle2D(o->Position, targetObject->Position);
+    const auto deltaAngle = FarAngle(o->Angle[2], angle);
+
+    if (deltaAngle < 90.f)
+    {
+        o->HeadTargetAngle[0] = o->Angle[2] - angle;
+        o->HeadTargetAngle[1] = (targetObject->Position[2] - (o->Position[2] + 50.f)) * 0.2f;
+        if (o->HeadTargetAngle[0] < 0)
+        {
+            o->HeadTargetAngle[0] += 360.f;
+        }
+
+        if (o->HeadTargetAngle[1] < 0)
+        {
+            o->HeadTargetAngle[1] += 360.f;
+        }
     }
     else
     {

@@ -3,14 +3,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
-vec3_t vec3_origin = { 0,0,0 };
-
-int VectorCompare(const vec3_t v1, const vec3_t v2)
+bool VectorCompare(const vec3_t v1, const vec3_t v2)
 {
-    const float EPSILON = 0.0001f;
     for (int i = 0; i < 3; ++i)
     {
-        if (fabsf(v1[i] - v2[i]) > EPSILON)
+        if (fabsf(v1[i] - v2[i]) > EPSILON_V)
         {
             return false;
         }
@@ -19,13 +16,15 @@ int VectorCompare(const vec3_t v1, const vec3_t v2)
     return true;
 }
 
-int QuaternionCompare(vec4_t v1, vec4_t v2)
+bool QuaternionCompare(const vec4_t v1, const vec4_t v2)
 {
-    int		i;
-
-    for (i = 0; i < 4; i++)
-        if (fabs(v1[i] - v2[i]) > EQUAL_EPSILON)
+    for (int32_t i = 0; i < 4; ++i)
+    {
+        if (fabsf(v1[i] - v2[i]) > EQUAL_EPSILON)
+        {
             return false;
+        }
+    }
 
     return true;
 }
@@ -69,7 +68,7 @@ float VectorDistance3D(const vec3_t& vPosStart, const vec3_t& vPosEnd)
 {
     vec3_t	v3Dist;
     VectorSubtract(vPosEnd, vPosStart, v3Dist);
-    return sqrt(v3Dist[0] * v3Dist[0] + v3Dist[1] * v3Dist[1] + v3Dist[2] * v3Dist[2]);
+    return sqrtf(v3Dist[0] * v3Dist[0] + v3Dist[1] * v3Dist[1] + v3Dist[2] * v3Dist[2]);
 }
 
 void VectorDistance3D_Dir(const vec3_t& vPosStart, const vec3_t& vPosEnd, vec3_t& vDirDist)
@@ -80,12 +79,12 @@ void VectorDistance3D_Dir(const vec3_t& vPosStart, const vec3_t& vPosEnd, vec3_t
 float VectorDistance3D_DirDist(const vec3_t& vPosStart, const vec3_t& vPosEnd, vec3_t& vOut)
 {
     VectorSubtract(vPosEnd, vPosStart, vOut);
-    return sqrt(vOut[0] * vOut[0] + vOut[1] * vOut[1] + vOut[2] * vOut[2]);
+    return sqrtf(vOut[0] * vOut[0] + vOut[1] * vOut[1] + vOut[2] * vOut[2]);
 }
 
 vec_t Q_rint(vec_t in)
 {
-    return floor(in + 0.5);
+    return floorf(in + 0.5f);
 }
 
 void VectorMul(vec3_t va, vec3_t vb, vec3_t vc)
@@ -150,21 +149,16 @@ void CrossProduct(vec3_t v1, vec3_t v2, vec3_t cross)
 
 vec_t VectorNormalize(vec3_t v)
 {
-    int		i;
-    float	length;
+    float lengthSquared = 0.0f;
+    for (int i = 0; i < 3; i++)
+        lengthSquared += v[i] * v[i];
 
-    if (fabs(v[1] - 0.000215956) < 0.0001)
-        i = 1;
-
-    length = 0;
-    for (i = 0; i < 3; i++)
-        length += v[i] * v[i];
-    length = sqrtf(length);
-    if (length == 0)
-        return 0;
-
-    for (i = 0; i < 3; i++)
-        v[i] /= length;
+    const auto length = sqrtf(lengthSquared);
+    if (length != 0.0f)
+    {
+        for (int i = 0; i < 3; i++)
+            v[i] /= length;
+    }
 
     return length;
 }
@@ -337,19 +331,19 @@ void AngleQuaternion(const vec3_t angles, vec4_t quaternion)
     quaternion[3] = cr * cp * cy + sr * sp * sy; // W
 }
 
-void QuaternionMatrix(const vec4_t quaternion, float(*matrix)[4])
+void QuaternionMatrix(const vec4_t quaternion, float matrix[3][4])
 {
-    matrix[0][0] = 1.0 - 2.0 * quaternion[1] * quaternion[1] - 2.0 * quaternion[2] * quaternion[2];
-    matrix[1][0] = 2.0 * quaternion[0] * quaternion[1] + 2.0 * quaternion[3] * quaternion[2];
-    matrix[2][0] = 2.0 * quaternion[0] * quaternion[2] - 2.0 * quaternion[3] * quaternion[1];
+    matrix[0][0] = 1.0f - 2.0f * quaternion[1] * quaternion[1] - 2.0f * quaternion[2] * quaternion[2];
+    matrix[1][0] = 2.0f * quaternion[0] * quaternion[1] + 2.0f * quaternion[3] * quaternion[2];
+    matrix[2][0] = 2.0f * quaternion[0] * quaternion[2] - 2.0f * quaternion[3] * quaternion[1];
 
-    matrix[0][1] = 2.0 * quaternion[0] * quaternion[1] - 2.0 * quaternion[3] * quaternion[2];
-    matrix[1][1] = 1.0 - 2.0 * quaternion[0] * quaternion[0] - 2.0 * quaternion[2] * quaternion[2];
-    matrix[2][1] = 2.0 * quaternion[1] * quaternion[2] + 2.0 * quaternion[3] * quaternion[0];
+    matrix[0][1] = 2.0f * quaternion[0] * quaternion[1] - 2.0f * quaternion[3] * quaternion[2];
+    matrix[1][1] = 1.0f - 2.0f * quaternion[0] * quaternion[0] - 2.0f * quaternion[2] * quaternion[2];
+    matrix[2][1] = 2.0f * quaternion[1] * quaternion[2] + 2.0f * quaternion[3] * quaternion[0];
 
-    matrix[0][2] = 2.0 * quaternion[0] * quaternion[2] + 2.0 * quaternion[3] * quaternion[1];
-    matrix[1][2] = 2.0 * quaternion[1] * quaternion[2] - 2.0 * quaternion[3] * quaternion[0];
-    matrix[2][2] = 1.0 - 2.0 * quaternion[0] * quaternion[0] - 2.0 * quaternion[1] * quaternion[1];
+    matrix[0][2] = 2.0f * quaternion[0] * quaternion[2] + 2.0f * quaternion[3] * quaternion[1];
+    matrix[1][2] = 2.0f * quaternion[1] * quaternion[2] - 2.0f * quaternion[3] * quaternion[0];
+    matrix[2][2] = 1.0f - 2.0f * quaternion[0] * quaternion[0] - 2.0f * quaternion[1] * quaternion[1];
 }
 
 void QuaternionSlerp(const vec4_t p, vec4_t q, float t, vec4_t qt)
@@ -380,7 +374,7 @@ void QuaternionSlerp(const vec4_t p, vec4_t q, float t, vec4_t qt)
             sclq = sinf(t * omega) / sinom;
         }
         else {
-            sclp = 1.0 - t;
+            sclp = 1.0f - t;
             sclq = t;
         }
         for (i = 0; i < 4; i++) {

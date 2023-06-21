@@ -93,7 +93,7 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
 
         if (80.0f >= FlyRange)
         {
-            float Angle = CreateAngle(obj->Position[0], obj->Position[1], targetPos[0], targetPos[1]);
+            float Angle = CreateAngle2D(obj->Position, targetPos);
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f);
         }
 
@@ -128,7 +128,7 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
         Distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
         if (Distance >= FlyRange)
         {
-            float Angle = CreateAngle(obj->Position[0], obj->Position[1], targetPos[0], targetPos[1]); //test
+            float Angle = CreateAngle2D(obj->Position, targetPos); //test
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
         }
 
@@ -165,7 +165,7 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
         //------------------------------//
         VectorCopy(m_RootItem.position, targetPos);
 
-        float Angle = CreateAngle(obj->Position[0], obj->Position[1], targetPos[0], targetPos[1]);
+        float Angle = CreateAngle2D(obj->Position, targetPos);
         obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
         //------------------------------//
 
@@ -189,7 +189,7 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
         Distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
         if (Distance >= FlyRange)
         {
-            float Angle = CreateAngle(obj->Position[0], obj->Position[1], targetPos[0], targetPos[1]); //test
+            float Angle = CreateAngle2D(obj->Position, targetPos); //test
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
         }
 
@@ -393,7 +393,7 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
 
         if (80.0f >= FlyRange)
         {
-            float Angle = CreateAngle(obj->Position[0], obj->Position[1], targetPos[0], targetPos[1]); //test
+            float Angle = CreateAngle2D(obj->Position, targetPos); //test
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f);
         }
 
@@ -428,7 +428,7 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         Distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
         if (Distance >= FlyRange)
         {
-            float Angle = CreateAngle(obj->Position[0], obj->Position[1], targetPos[0], targetPos[1]);
+            float Angle = CreateAngle2D(obj->Position, targetPos);
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
         }
 
@@ -464,7 +464,7 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         //------------------------------//
         VectorCopy(m_RootItem.position, targetPos);
 
-        float Angle = CreateAngle(obj->Position[0], obj->Position[1], targetPos[0], targetPos[1]);
+        float Angle = CreateAngle2D(obj->Position, targetPos);
         obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
         //------------------------------//
 
@@ -488,7 +488,7 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         Distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
         if (Distance >= FlyRange)
         {
-            float Angle = CreateAngle(obj->Position[0], obj->Position[1], targetPos[0], targetPos[1]);
+            float Angle = CreateAngle2D(obj->Position, targetPos);
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
         }
 

@@ -55,7 +55,7 @@ bool PetActionDemon::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD ti
     }
     else if (Distance >= FlyRange * FlyRange)
     {
-        float Angle = CreateAngle(obj->Position[0], obj->Position[1], obj->Owner->Position[0], obj->Owner->Position[1]);
+        float Angle = CreateAngle2D(obj->Position, obj->Owner->Position);
         obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
     }
 

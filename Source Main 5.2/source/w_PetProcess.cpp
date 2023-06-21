@@ -40,22 +40,19 @@ PetInfo::~PetInfo()
 
 void PetInfo::Destroy()
 {
-    if (NULL != m_actions)
-    {
-        delete[] m_actions;
-    }
-    m_actions = NULL;
 
-    if (NULL != m_speeds)
-    {
-        delete[] m_speeds;
-    }
+    delete[] m_actions;
+    m_actions = NULL;
+    delete[] m_speeds;
     m_speeds = NULL;
 }
 
 void PetInfo::SetActions(int count, int* actions, float* speeds)
 {
-    if (NULL == actions || 0 >= count || NULL == speeds) return;
+    if (NULL == actions || 0 >= count || NULL == speeds)
+    {
+        return;
+    }
 
     m_count = count;
     m_actions = new int[count]();

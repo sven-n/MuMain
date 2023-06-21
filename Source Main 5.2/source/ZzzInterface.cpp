@@ -2102,7 +2102,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         float Distance = gSkillManager.GetSkillDistance(CharacterAttribute->Skill[Hero->CurrentSkill], c);
         if (CheckTile(c, o, Distance))
         {
-            o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+            o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
             WORD TKey = 0xffff;
 
             if (g_MovementSkill.m_iTarget != -1)
@@ -2198,7 +2198,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
     }
 
     VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
-    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
     if (Skill != AT_SKILL_GAOTIC)
         SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
@@ -2279,7 +2279,7 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     }
 
     VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
-    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
     switch (Skill)
     {
     case AT_SKILL_POISON:
@@ -2326,7 +2326,7 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     int Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
 
     VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
-    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
     switch (Skill)
     {
     case AT_SKILL_HEAL_UP:
@@ -2480,7 +2480,7 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
         LetHeroStop();
 
         VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
-        pObj->Angle[2] = CreateAngle(pObj->Position[0], pObj->Position[1], pCha->TargetPosition[0], pCha->TargetPosition[1]);
+        pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
 
         WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         SendRequestMagic(iSkill, wTargetKey);
@@ -2564,7 +2564,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
         VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
-        pObj->Angle[2] = CreateAngle(pObj->Position[0], pObj->Position[1], pCha->TargetPosition[0], pCha->TargetPosition[1]);
+        pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
         SendRequestMagic(iSkill, wTargetKey);
 
         BYTE TargetPosX = (BYTE)(pCha->TargetPosition[0] / TERRAIN_SCALE);
@@ -2704,7 +2704,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     break;
     case AT_SKILL_PLASMA_STORM_FENRIR:
     {
-        pObj->Angle[2] = CreateAngle(pObj->Position[0], pObj->Position[1], pCha->TargetPosition[0], pCha->TargetPosition[1]);
+        pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
 
         gSkillManager.CheckSkillDelay(Hero->CurrentSkill);
 
@@ -2889,7 +2889,7 @@ bool UseSkillRagePosition(CHARACTER* pCha)
     }
     else if (pObj->CurrentAction == PLAYER_SKILL_THRUST)
     {
-        pObj->Angle[2] = CreateAngle(pObj->Position[0], pObj->Position[1], pCha->TargetPosition[0], pCha->TargetPosition[1]);
+        pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
         pObj->m_sTargetIndex = g_MovementSkill.m_iTarget;
     }
     else
@@ -3030,7 +3030,7 @@ bool SkillElf(CHARACTER* c, ITEM* p)
                 }
                 if (CheckTile(c, o, Distance))
                 {
-                    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                     WORD TKey = 0xffff;
                     if (g_MovementSkill.m_iTarget != -1)
                     {
@@ -3053,7 +3053,7 @@ bool SkillElf(CHARACTER* c, ITEM* p)
                 }
                 if (CheckTile(c, o, Distance))
                 {
-                    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                     BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
 
                     BYTE angle = (BYTE)((((o->Angle[2] + 180.f) / 360.f) * 255.f));
@@ -3143,7 +3143,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         SetPlayerAttack(c);
         c->AttackTime = 1;
         VectorCopy(CharactersClient[ActionTarget].Object.Position, c->TargetPosition);
-        o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+        o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
         LetHeroStop();
         c->Movement = false;
         BYTE PathX[1];
@@ -4668,7 +4668,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
                 break;
             if (CheckTile(c, o, Distance))
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                 WORD TKey = 0xffff;
                 if (g_MovementSkill.m_iTarget != -1)
@@ -4843,7 +4843,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
 
         if (gCharacterManager.GetEquipedBowType_Skill() == BOWTYPE_NONE)
             return;
-        o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+        o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
         if (CheckTile(c, o, Distance))
         {
@@ -4944,7 +4944,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
             WORD TKey = 0xffff;
             if (g_MovementSkill.m_iTarget != -1)
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                 gSkillManager.CheckSkillDelay(Hero->CurrentSkill);
 
@@ -5113,7 +5113,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_TORNADO_SWORDB_UP + 3:
             case AT_SKILL_TORNADO_SWORDB_UP + 4:
             case AT_SKILL_WHEEL:
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                 {
                     BYTE PathX[1];
                     BYTE PathY[1];
@@ -5141,7 +5141,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_BLOOD_ATT_UP + 3:
             case AT_SKILL_BLOOD_ATT_UP + 4:
             case AT_SKILL_REDUCEDEFENSE:
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                 {
                     WORD Strength;
                     const WORD notStrength = 596;
@@ -5177,7 +5177,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_ICE_BLADE:
                 if (c->Helper.Type<MODEL_HELPER + 2 || c->Helper.Type>MODEL_HELPER + 4 && c->Helper.Type != MODEL_HELPER + 37)
                 {
-                    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                     if (CheckTile(c, o, Distance))
                     {
@@ -5213,7 +5213,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                 break;
             case AT_SKILL_GAOTIC:
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                 if (CheckTile(c, o, Distance))
                 {
@@ -5301,7 +5301,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             break;
             case AT_SKILL_FLAME_STRIKE:
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                 if (CheckTile(c, o, Distance))
                 {
@@ -5331,7 +5331,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             break;
             case AT_SKILL_GIGANTIC_STORM:
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                 if (CheckTile(c, o, Distance))
                 {
@@ -5394,7 +5394,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                     {
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                     }
-                    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                     CheckClientArrow(o);
                     SendRequestMagicContinue(Skill, (c->PositionX),
                         (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, pos, TKey, 0);
@@ -5442,7 +5442,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                     {
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                     }
-                    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                     SendRequestMagicContinue(Skill, (c->PositionX),
                         (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, pos, TKey, 0);
                     SetAttackSpeed();
@@ -5491,7 +5491,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_ANGER_SWORD_UP + 4:
             case AT_SKILL_FURY_STRIKE:
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                 int TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
                 int TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);
@@ -5517,7 +5517,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             break;
             case AT_SKILL_BLOW_OF_DESTRUCTION:
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                 int TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
                 int TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);
@@ -5549,7 +5549,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                     WORD TKey = 0xffff;
                     if (g_MovementSkill.m_iTarget != -1)
                     {
-                        o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                        o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                         gSkillManager.CheckSkillDelay(Hero->CurrentSkill);
 
@@ -5764,7 +5764,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             WORD TKey = 0xffff;
             if (g_MovementSkill.m_iTarget != -1)
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                 gSkillManager.CheckSkillDelay(Hero->CurrentSkill);
 
@@ -5867,7 +5867,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         }
         if (Success)
         {
-            o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+            o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
             switch (Skill)
             {
             case AT_SKILL_STORM:
@@ -5998,7 +5998,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
                         if (count > 10) return;
                     }
-                    to->Angle[2] = CreateAngle(to->Position[0], to->Position[1], tc->TargetPosition[0], tc->TargetPosition[1]);
+                    to->Angle[2] = CreateAngle2D(to->Position, tc->TargetPosition);
                     bool bResult;
                     SendRequestMagicTeleportB(&bResult, tc->Key, TargetX, TargetY);
                     if (bResult)
@@ -6049,7 +6049,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 if ((Wall & TW_HEIGHT) == TW_HEIGHT) Wall -= TW_HEIGHT;
                 if (Wall == 0)
                 {
-                    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                     bool bResult;
                     SendRequestMagicTeleport(&bResult, 0, TargetX, TargetY);
                     if (bResult)
@@ -6151,7 +6151,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         case AT_SKILL_LIGHTNING_SHOCK_UP + 4:
         case AT_SKILL_LIGHTNING_SHOCK:
         {
-            o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+            o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
             if (CheckTile(c, o, Distance))
             {
@@ -6323,7 +6323,7 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
         {
             //	                        if ( CheckTile( c, o, Distance ) )
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
                 int TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
                 int TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);

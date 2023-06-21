@@ -560,11 +560,12 @@ void CPhysicsCloth::SetFixedVertices(float Matrix[3][4])
 
 void CPhysicsCloth::SetLink(int iLink, int iVertex1, int iVertex2, float fDistanceSmall, float fDistanceLarge, BYTE byStyle)
 {
-    m_pLink[iLink].m_nVertices[0] = iVertex1;
-    m_pLink[iLink].m_nVertices[1] = iVertex2;
-    m_pLink[iLink].m_fDistance[0] = fDistanceSmall;
-    m_pLink[iLink].m_fDistance[1] = fDistanceLarge;
-    m_pLink[iLink].m_byStyle = byStyle;
+    auto& link = m_pLink[iLink];
+    link.m_nVertices[0] = iVertex1;
+    link.m_nVertices[1] = iVertex2;
+    link.m_fDistance[0] = fDistanceSmall;
+    link.m_fDistance[1] = fDistanceLarge;
+    link.m_byStyle = byStyle;
 }
 
 BOOL CPhysicsCloth::Move2(float fTime, int iCount)
@@ -1197,8 +1198,8 @@ void CPhysicsManager::Clear(void)
 void CPhysicsManager::Move(float fTime)
 {
     float fPlus = ((rand() % 200) - 100) * 0.001f;
-    CPhysicsManager::s_fWind += fPlus;
-    CPhysicsManager::s_fWind = min(max(-.2f, CPhysicsManager::s_fWind), 1.0f);
+    s_fWind += fPlus;
+    s_fWind = std::clamp(s_fWind, -0.2f, 1.0f);
 
     CNode<CPhysicsCloth*>* pNode = m_lstCloth.FindHead();
     for (; pNode; pNode = m_lstCloth.GetNext(pNode))

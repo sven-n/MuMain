@@ -89,28 +89,29 @@ void CBitmapCache::Release()
 
     RemoveAll();
 
-    for (int i = 0; i < NUMBER_OF_QUICK_CACHE; i++)
+    for (const auto& cache : m_QuickCache)
     {
-        if (m_QuickCache[i].ppBitmap)
-            delete[] m_QuickCache[i].ppBitmap;
+        delete[] cache.ppBitmap;
     }
+
     memset(m_QuickCache, 0, sizeof(QUICK_CACHE) * NUMBER_OF_QUICK_CACHE);
 }
 
 void CBitmapCache::Add(GLuint uiBitmapIndex, BITMAP_t* pBitmap)
 {
-    for (int i = 0; i < NUMBER_OF_QUICK_CACHE; i++)
+    for (const auto& cache : m_QuickCache)
     {
-        if (uiBitmapIndex > m_QuickCache[i].dwBitmapIndexMin && uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
+        if (uiBitmapIndex > cache.dwBitmapIndexMin && uiBitmapIndex < cache.dwBitmapIndexMax)
         {
-            DWORD dwVI = uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin;
+            const auto dwVI = uiBitmapIndex - cache.dwBitmapIndexMin;
             if (pBitmap)
-                m_QuickCache[i].ppBitmap[dwVI] = pBitmap;
+                cache.ppBitmap[dwVI] = pBitmap;
             else
-                m_QuickCache[i].ppBitmap[dwVI] = m_pNullBitmap;
+                cache.ppBitmap[dwVI] = m_pNullBitmap;
             return;
         }
     }
+
     if (pBitmap)
     {
         if (BITMAP_PLAYER_TEXTURE_BEGIN <= uiBitmapIndex && BITMAP_PLAYER_TEXTURE_END >= uiBitmapIndex)

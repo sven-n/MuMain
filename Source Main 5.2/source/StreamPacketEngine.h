@@ -50,9 +50,11 @@ public:
         switch (m_byBuffer[0])
         {
         case 0xC1:
+        case 0xC3:
             memcpy(&m_byBuffer[1], &m_wSize, 1);
             break;
         case 0xC2:
+        case 0xC4:
             memcpy(&m_byBuffer[1], ((BYTE*)&m_wSize) + 1, 1);
             memcpy(&m_byBuffer[2], &m_wSize, 1);
             break;

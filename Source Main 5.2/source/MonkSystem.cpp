@@ -459,7 +459,7 @@ bool CMonkSystem::SendAttackPacket(CHARACTER* _pCha, int _nMoveTarget, int _nSki
         VectorCopy(CharactersClient[_nMoveTarget].Object.Position, _pCha->TargetPosition);
         //몬스터의 넉백효과의 의해 이펙트가 혼란스러움 방지
         if (!(pObj->CurrentAction == PLAYER_SKILL_GIANTSWING && m_btAttState == FRAME_SECONDATT))
-            pObj->Angle[2] = CreateAngle(pObj->Position[0], pObj->Position[1], _pCha->TargetPosition[0], _pCha->TargetPosition[1]);
+            pObj->Angle[2] = CreateAngle2D(pObj->Position, _pCha->TargetPosition);
 
         SendRequestMagic(_nSkill, CharactersClient[_nMoveTarget].Key);
         return true;
@@ -642,7 +642,7 @@ bool CMonkSystem::CalculateDarksideTrans(OBJECT* _pObj, vec3_t _vPos, float _fAn
 
     vec3_t vAngle;
     VectorCopy(_pObj->Angle, vAngle);
-    vAngle[2] = CreateAngle(_StartPos[0], _StartPos[1], _TargetPos[0], _TargetPos[1]);
+    vAngle[2] = CreateAngle2D(_StartPos, _TargetPos);
     VectorCopy(vAngle, _pObj->Angle);
 
     if (_fNextAni)
@@ -788,7 +788,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
 
                 vec3_t vAngle;
                 VectorCopy(pObj->Angle, vAngle);
-                vAngle[2] = CreateAngle(pObj->StartPosition[0], pObj->StartPosition[1], pObj->Position[0], pObj->Position[1]);
+                vAngle[2] = CreateAngle2D(pObj->StartPosition, pObj->Position);
                 VectorCopy(vAngle, pObj->Angle);
 
                 vec3_t vLight;
@@ -1072,7 +1072,7 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
         m_bUseEffectOnce = true;
         vec3_t vPosition;
         VectorCopy(CharactersClient[_pObj->m_sTargetIndex].Object.Position, vPosition);
-        _pObj->Angle[2] = CreateAngle(_pObj->Position[0], _pObj->Position[1], vPosition[0], vPosition[1]);
+        _pObj->Angle[2] = CreateAngle2D(_pObj->Position, vPosition);
         CreateEffect(MODEL_WOLF_HEAD_EFFECT, _pObj->Position, _pObj->Angle, _pObj->Light, 0, _pObj);
         CreateEffect(BITMAP_SBUMB, vPosition, _pObj->Angle, _pObj->Light, 0, _pObj, -1, 0, 0, 0, 2.1f);
 
@@ -1199,7 +1199,7 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
 
         VectorCopy(CharactersClient[_pObj->m_sTargetIndex].Object.Position, Position);
         VectorCopy(_pObj->Angle, vAngle);
-        vAngle[2] = CreateAngle(_pObj->Position[0], _pObj->Position[1], Position[0], Position[1]);
+        vAngle[2] = CreateAngle2D(_pObj->Position, Position);
 
         float Matrix[3][4];
         Vector(0.f, 20.f, 0.f, P);
@@ -1312,7 +1312,7 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
         _pObj->Owner = &CharactersClient[_pObj->m_sTargetIndex].Object;
         VectorCopy(CharactersClient[_pObj->m_sTargetIndex].Object.Position, Position);
         VectorCopy(_pObj->Angle, vAngle);
-        vAngle[2] = CreateAngle(_pObj->Position[0], _pObj->Position[1], Position[0], Position[1]);
+        vAngle[2] = CreateAngle2D(_pObj->Position, Position);
         Vector(1.f, 1.f, 1.f, Light);
         CreateEffect(MODEL_PHOENIX_SHOT, Position, vAngle, Light, 0, _pObj, -1, 0, 0, 0, 1.f);
         break;

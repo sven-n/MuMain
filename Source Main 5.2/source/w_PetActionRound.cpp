@@ -43,7 +43,7 @@ bool PetActionRound::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD ti
     obj->Position[1] = TargetPosition[1] + (cosf(fRadWidth) * 150.0f);
     obj->Position[2] = TargetPosition[2] + 100 + (sinf(fRadHeight) * 30.0f);
 
-    float Angle = CreateAngle(obj->Position[0], obj->Position[1], TargetPosition[0], TargetPosition[1]);
+    float Angle = CreateAngle2D(obj->Position, TargetPosition);
     obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle + 270, 20.0f);
     //*/
     return TRUE;

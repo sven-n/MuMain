@@ -10766,7 +10766,7 @@ void ShadowAngle(OBJECT* Owner)
                         {
                             o->Distance = Distance;
                             o->ShadowAlpha = (400.f*400.f-Distance)/(400.f*400.f);
-                            o->ShadowAngle[2] = 360.f-CreateAngle(o->Position[0],o->Position[1],Owner->Position[0],Owner->Position[1]);
+                            o->ShadowAngle[2] = 360.f-CreateAngle2D(o->Position, Owner->Position);
                         }
                     }
                     if(o->Next == NULL) break;

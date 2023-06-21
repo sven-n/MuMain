@@ -585,7 +585,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
 
                     VectorSubtract(o->TargetPosition, o->Position, o->Direction);
 
-                    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], o->TargetPosition[0], o->TargetPosition[1]);
+                    o->Angle[2] = CreateAngle2D(o->Position, o->TargetPosition);
                 }
             }
             break;
@@ -1382,7 +1382,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     Vector(1.f, 0.8f, 1.f, o->Light);
                     VectorCopy(TargetPosition, o->TargetPosition);
                     o->TargetPosition[2] += 100.f;
-                    Angle[2] = CreateAngle(o->Position[0], o->Position[1], o->TargetPosition[0], o->TargetPosition[1]);
+                    Angle[2] = CreateAngle2D(o->Position, o->TargetPosition);
                 }
                 else if (o->SubType == 8)
                 {
@@ -2968,7 +2968,7 @@ float Distance = Range[0]*Range[0]+Range[1]*Range[1];
 float CollisionRange = 100.f*100.f;
 if(Distance <= CollisionRange)
 {
-float Rotation = 360.f-CreateAngle(Position[0],Position[1],to->Position[0],to->Position[1]);
+float Rotation = 360.f-CreateAngle2D(Position, to->Position);
 Angle[2] = TurnAngle2(Angle[2],Rotation,FarAngle(Angle[2],Rotation)*0.2f);
 }
 else Angle[2] = TurnAngle2(Angle[2],0.f,FarAngle(Angle[2],0.f)*0.5f);
@@ -3465,7 +3465,7 @@ void MoveJoint(JOINT* o, int iIndex)
             VectorCopy(o->Target->Position, o->TargetPosition);
             o->TargetPosition[2] += 100.f;
             float TargetAngle;
-            TargetAngle = CreateAngle(o->Position[0], o->Position[1], o->TargetPosition[0], o->TargetPosition[1]);
+            TargetAngle = CreateAngle2D(o->Position, o->TargetPosition);
             o->Angle[2] = TargetAngle;
             Distance = MoveHumming(o->Position, o->Angle, o->TargetPosition, o->Velocity);
 
@@ -3731,7 +3731,7 @@ void MoveJoint(JOINT* o, int iIndex)
         else if (o->SubType == 1)
         {
             float TargetAngleH;
-            TargetAngleH = CreateAngle(o->Position[0], o->Position[1], o->TargetPosition[0], o->TargetPosition[1]);
+            TargetAngleH = CreateAngle2D(o->Position, o->TargetPosition);
             o->Angle[2] = TargetAngleH - 65;
 
             float TargetAngleV;
@@ -5049,7 +5049,7 @@ void MoveJoint(JOINT* o, int iIndex)
                         VectorCopy(to->Position, o->TargetPosition);
                         VectorCopy(o->Angle, Angle);
                         o->TargetPosition[2] += 100.f;
-                        Angle[2] = CreateAngle(o->Position[0], o->Position[1], o->TargetPosition[0], o->TargetPosition[1]);
+                        Angle[2] = CreateAngle2D(o->Position, o->TargetPosition);
 
                         CreateJoint(BITMAP_JOINT_THUNDER, Position, o->TargetPosition, Angle, 0, NULL, 50.f);
                         CreateJoint(BITMAP_JOINT_THUNDER, Position, o->TargetPosition, Angle, 0, NULL, 10.f);

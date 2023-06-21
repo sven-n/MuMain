@@ -144,7 +144,7 @@ void SaveScreen()
     auto BufferNew = new unsigned char[WindowWidth * WindowHeight * 3];
 
     int counter = 0;
-    for (int i = 0; i < WindowWidth * WindowHeight * 4; i += 4)
+    for (uint32_t i = 0; i < WindowWidth * WindowHeight * 4; i += 4)
     {
         BufferNew[counter + 0] = Buffer[i + 0];
         BufferNew[counter + 1] = Buffer[i + 1];

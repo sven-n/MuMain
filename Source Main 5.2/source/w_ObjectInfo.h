@@ -10,24 +10,22 @@ class	CInterpolateContainer
 public:
     struct INTERPOLATE_FACTOR
     {
-        float	fRateStart;
-        float	fRateEnd;
+        float	fRateStart = 0;
+        float	fRateEnd = 0;
 
-        vec3_t	v3Start;
-        vec3_t	v3End;
-        INTERPOLATE_FACTOR(float fRateStart_, float fRateEnd_,
-            vec3_t& v3Start_, vec3_t& v3End_)
+        vec3_t	v3Start = {};
+        vec3_t	v3End = {};
+        INTERPOLATE_FACTOR(const float fRateStart_, const float fRateEnd_,
+                           const vec3_t& v3Start_, const vec3_t& v3End_)
         {
             fRateStart = fRateStart_;
             fRateEnd = fRateEnd_;
 
             VectorCopy(v3Start_, v3Start);
             VectorCopy(v3End_, v3End);
-        };
+        }
 
-        INTERPOLATE_FACTOR()
-        {
-        };
+        INTERPOLATE_FACTOR() = default;
     };
 
     struct INTERPOLATE_FACTOR_F
@@ -37,19 +35,17 @@ public:
 
         float	fStart;
         float	fEnd;
-        INTERPOLATE_FACTOR_F(float fRateStart_, float fRateEnd_,
-            float& fStart_, float& fEnd_)
+        INTERPOLATE_FACTOR_F(const float fRateStart_, const float fRateEnd_,
+                             const float& fStart_, const float& fEnd_)
         {
             fRateStart = fRateStart_;
             fRateEnd = fRateEnd_;
 
-            fStart = fStart_;
+            fStart = fStart_; 
             fEnd = fEnd_;
         };
 
-        INTERPOLATE_FACTOR_F()
-        {
-        };
+        INTERPOLATE_FACTOR_F() = default;
     };
 
 public:
@@ -85,8 +81,8 @@ public:
 public:
     void ClearContainer();
 
-    CInterpolateContainer() {};
-    ~CInterpolateContainer() {};
+    CInterpolateContainer() = default;
+    ~CInterpolateContainer() = default;
 };
 
 typedef struct tagMU_POINTF

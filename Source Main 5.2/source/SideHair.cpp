@@ -58,7 +58,7 @@ void CSideHair::Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* 
     m_iNumEdge = 0;
     m_pEdges = new St_Edges[iNumTriangles * 3];
 
-    for (int i = 1; i < 2; ++i)
+    for (short i = 1; i < 2; ++i)
     {
         if (nHiddenMesh == i || nBlendMesh == i)
         {
@@ -77,14 +77,8 @@ void CSideHair::Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* 
 
 void CSideHair::Destroy(void)
 {
-    if (m_pEdges)
-    {
-        delete[] m_pEdges;
-    }
-    if (m_pVertices)
-    {
-        delete[] m_pVertices;
-    }
+    delete[] m_pEdges;
+    delete[] m_pVertices;
 }
 
 void CSideHair::Render(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], vec3_t ppLightTransformed[MAX_MESH][MAX_VERTICES])
@@ -104,7 +98,7 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
 
     glColor3f(1.f, 1.f, 1.f);
     VectorSubtract(v2, v1, d);
-    float fLength = VectorLength(d);
+    const float fLength = VectorLength(d);
     float fTextureMove = 0.0f;
     fTextureMove = (50.0f - fLength) * 0.5f / 50.0f;
 

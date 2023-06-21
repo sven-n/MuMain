@@ -4,6 +4,11 @@
 
 namespace MUnique.Client.ManagedLibrary;
 
+using Microsoft.Extensions.Logging.Abstractions;
+using MUnique.OpenMU.Network;
+using MUnique.OpenMU.Network.SimpleModulus;
+using MUnique.OpenMU.Network.Xor;
+using Pipelines.Sockets.Unofficial;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,11 +16,6 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using MUnique.OpenMU.Network;
-using MUnique.OpenMU.Network.SimpleModulus;
-using MUnique.OpenMU.Network.Xor;
-using Pipelines.Sockets.Unofficial;
 
 /// <summary>
 /// Class which manages the connections which are created through the game client.

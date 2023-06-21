@@ -399,15 +399,10 @@ void DestroyWindow()
 
     ReleaseCharacters();
 
-    if (path != NULL)
-    {
-        delete path;
-    }
+    delete path;
+
     SAFE_DELETE(GateAttribute);
 
-    for (int i = 0; i < MAX_SKILLS; ++i)
-    {
-    }
     SAFE_DELETE(SkillAttribute);
 
     SAFE_DELETE(CharacterMachine);

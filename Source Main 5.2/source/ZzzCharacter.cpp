@@ -4541,7 +4541,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         break;
         case AT_SKILL_THRUST:
         {
-            o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
+            o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
             o->m_sTargetIndex = c->TargetCharacter;
         }
         break;
@@ -4629,7 +4629,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             }
             vec3_t Angle;
             VectorCopy(o->Angle, Angle);
-            Angle[2] = CreateAngle(o->Position[0], o->Position[1], to->Position[0], to->Position[1]);
+            Angle[2] = CreateAngle2D(o->Position, to->Position);
             switch ((c->Skill))
             {
             case AT_SKILL_MANY_ARROW_UP:

@@ -14,13 +14,14 @@ extern "C" {
 
 #define	Q_PI         	3.14159265358979323846f
 #define	ON_EPSILON		0.01
-#define	EQUAL_EPSILON	0.001
+#define	EQUAL_EPSILON	0.001f
+#define EPSILON_V       0.0001f
 #define ANGLE_TO_RAD	0.017453292519943294f
 #define RAD_TO_ANGLE	57.29577951308232089f
 
 #define swaps( a, b)		( ( a) ^= ( b) ^= ( a) ^= ( b))
-    int VectorCompare(vec3_t v1, vec3_t v2);
-    int QuaternionCompare(vec4_t v1, vec4_t v2);
+    bool VectorCompare(const vec3_t v1, const vec3_t v2);
+    bool QuaternionCompare(const vec4_t v1, const vec4_t v2);
 
 #define Vector(a,b,c,d) {(d)[0]=a;(d)[1]=b;(d)[2]=c;}
 #define VectorAvg(a) ( ( (a)[0] + (a)[1] + (a)[2] ) / 3 )

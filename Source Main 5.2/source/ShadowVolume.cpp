@@ -180,12 +180,9 @@ void CShadowVolume::Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], B
     delete[] m_pEdges;
 }
 
-void CShadowVolume::Destroy(void)
+void CShadowVolume::Destroy()
 {
-    if (m_pVertices)
-    {
-        delete[] m_pVertices;
-    }
+    delete[] m_pVertices;
 }
 
 void CShadowVolume::AddEdge(short nV1, short nV2, short nMesh)

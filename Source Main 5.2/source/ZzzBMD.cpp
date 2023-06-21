@@ -831,15 +831,7 @@ void BMD::CreateLightMapSurface(Light_t* lp, Mesh_t* m, int i, int j, int MapWid
             VectorNormalize(Direction);
             VectorSubtract(p, Direction, p);
             bool success = CollisionDetectLineToMesh(lp->Position, p, true, i, j);
-            /*if(success == true)
-            {
-                DisableTexture();
-                glBegin(GL_LINES);
-                glColor3fv(lp->Color);
-                glVertex3fv(p);
-                glVertex3fv(lp->Position);
-                glEnd();
-            }*/
+
             if (success == false)
             {
                 unsigned char* Bitmap = &lmp->Buffer[(k * MapWidthMax + l) * 3];
@@ -848,11 +840,10 @@ void BMD::CreateLightMapSurface(Light_t* lp, Mesh_t* m, int i, int j, int MapWid
                 Lighting(Light, lp, p, np);
                 for (int c = 0; c < 3; c++)
                 {
-                    int Color;
-                    Color = Bitmap[c];
-                    Color += (unsigned char)(Light[c] * 255.f);
-                    if (Color > 255) Color = 255;
-                    Bitmap[c] = Color;
+                    int color = Bitmap[c];
+                    color += (unsigned char)(Light[c] * 255.f);
+                    if (color > 255) color = 255;
+                    Bitmap[c] = color;
                 }
             }
         }
@@ -2238,7 +2229,6 @@ void BMD::RenderObjectBoundingBox()
             }
 
             glBegin(GL_QUADS);
-            //glBegin(GL_LINES);
             glColor3f(0.2f, 0.2f, 0.2f);
             glTexCoord2f(1.0F, 1.0F); glVertex3fv(BoundingVertices[7]);
             glTexCoord2f(1.0F, 0.0F); glVertex3fv(BoundingVertices[6]);
@@ -2315,12 +2305,8 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
                 glBegin(GL_LINES);
                 glVertex3fv(BoneVertices[0]);
                 glVertex3fv(BoneVertices[1]);
-                glEnd();
-                glBegin(GL_LINES);
                 glVertex3fv(BoneVertices[1]);
                 glVertex3fv(BoneVertices[2]);
-                glEnd();
-                glBegin(GL_LINES);
                 glVertex3fv(BoneVertices[2]);
                 glVertex3fv(BoneVertices[0]);
                 glEnd();
@@ -2549,8 +2535,10 @@ bool BMD::Open(char* DirName, char* ModelFileName)
         }
         else
         {
-            m->m_csTScript = NULL;
+            m->m_csTScript = nullptr;
         }
+
+        delete (TextureScript*)&TSParsing;
     }
     //#ifdef USE_SHADOWVOLUME
         /*for(i=0;i<NumMeshs;i++)

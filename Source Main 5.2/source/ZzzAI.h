@@ -1,5 +1,6 @@
 int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY);
 float CreateAngle(float x1, float y1, float x2, float y2);
+inline float CreateAngle2D(const vec3_t from, const vec2_t to);
 int TurnAngle(int iTheta, int iHeading, int maxTURN);
 float TurnAngle2(float angle, float a, float d);
 float FarAngle(float angle1, float angle2, bool abs = true);
@@ -16,7 +17,7 @@ void SetAction(OBJECT* o, int Action, bool bBlending = true);
 
 bool TestDistance(CHARACTER* c, vec3_t TargetPosition, float Range);
 
-void LookAtTarget(OBJECT* o, CHARACTER* tc);
+void LookAtTarget(OBJECT* o, const CHARACTER* targetCharacter);
 void MoveHead(CHARACTER* c);
 void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint, bool Hit);
 int  CalculateAttackPoint(CHARACTER* sc, CHARACTER* tc);

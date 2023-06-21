@@ -417,7 +417,7 @@ void CSPetDarkSpirit::MovePet(void)
         float Distance = Range[0] * Range[0] + Range[1] * Range[1];
         if (Distance >= FlyRange * FlyRange)
         {
-            float Angle = CreateAngle(o->Position[0], o->Position[1], TargetPosition[0], TargetPosition[1]);
+            float Angle = CreateAngle2D(o->Position, TargetPosition);
             o->Angle[2] = TurnAngle2(o->Angle[2], Angle, rand() % 15 + 5.f);
         }
         AngleMatrix(o->Angle, o->Matrix);
@@ -525,7 +525,7 @@ void CSPetDarkSpirit::MovePet(void)
             CHARACTER* tc = &CharactersClient[c->TargetCharacter];
             OBJECT* to = &tc->Object;
 
-            float Angle = CreateAngle(o->Position[0], o->Position[1], to->Position[0], to->Position[1]);
+            float Angle = CreateAngle2D(o->Position, to->Position);
             o->Angle[2] = TurnAngle2(o->Angle[2], Angle, 40.f);
         }
     }

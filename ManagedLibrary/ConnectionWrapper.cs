@@ -1,11 +1,11 @@
 ﻿namespace MUnique.Client.ManagedLibrary;
 
+using MUnique.OpenMU.Network;
+using Nito.AsyncEx.Synchronous;
 using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using MUnique.OpenMU.Network;
-using Nito.AsyncEx.Synchronous;
 
 /// <summary>
 /// A wrapper for a <see cref="Connection"/>.

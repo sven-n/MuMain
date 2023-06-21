@@ -2817,7 +2817,7 @@ void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
             {
                 CHARACTER* cm = &CharactersClient[AttackPlayer];
                 OBJECT* om = &cm->Object;
-                float fAngle = CreateAngle(om->Position[0], om->Position[1], o->Position[0], o->Position[1]);
+                float fAngle = CreateAngle2D(om->Position, o->Position);
                 if (fabs(fAngle - om->Angle[2]) < 10.f)
                 {
                     vec3_t Angle = { 0.0f, 0.0f, fAngle + 180.f };
@@ -2920,7 +2920,7 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
             {
                 CHARACTER* cm = &CharactersClient[AttackPlayer];
                 OBJECT* om = &cm->Object;
-                float fAngle = CreateAngle(om->Position[0], om->Position[1], o->Position[0], o->Position[1]);
+                float fAngle = CreateAngle2D(om->Position, o->Position);
                 if (fabs(fAngle - om->Angle[2]) < 10.f)
                 {
                     vec3_t Angle = { 0.0f, 0.0f, fAngle + 180.f };
@@ -3588,7 +3588,7 @@ BOOL ReceiveMonsterSkill(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
     if (SkillNumber > ATMON_SKILL_BIGIN && SkillNumber < ATMON_SKILL_END)
     {
-        sc->Object.Angle[2] = CreateAngle(so->Position[0], so->Position[1], to->Position[0], to->Position[1]);
+        sc->Object.Angle[2] = CreateAngle2D(so->Position, to->Position);
         SetPlayerAttack(sc);
         so->AnimationFrame = 0;
         sc->AttackTime = 1;
@@ -3633,7 +3633,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     if (MagicNumber != AT_SKILL_COMBO)
     {
         if (sc != Hero && MagicNumber != AT_SKILL_TELEPORT && MagicNumber != AT_SKILL_TELEPORT_B && to->Visible)
-            so->Angle[2] = CreateAngle(so->Position[0], so->Position[1], to->Position[0], to->Position[1]);
+            so->Angle[2] = CreateAngle2D(so->Position, to->Position);
         sc->TargetCharacter = TargetIndex;
 
         if (MagicNumber == AT_SKILL_PLASMA_STORM_FENRIR)
@@ -5424,7 +5424,7 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
             CHARACTER* tc = &CharactersClient[TIndex];
             OBJECT* to = &tc->Object;
 
-            o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], to->Position[0], to->Position[1]);
+            o->Angle[2] = CreateAngle2D(o->Position, to->Position);
 
             VectorCopy(o->Angle, o->HeadAngle);
         }
@@ -12331,7 +12331,7 @@ BOOL ReceiveStraightAttack(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     OBJECT* to = &tc->Object;
 
     if (sc != Hero && to->Visible)
-        so->Angle[2] = CreateAngle(so->Position[0], so->Position[1], to->Position[0], to->Position[1]);
+        so->Angle[2] = CreateAngle2D(so->Position, to->Position);
 
     sc->TargetCharacter = TargetIndex;
 

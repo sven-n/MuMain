@@ -30,9 +30,7 @@ xstreambuf::xstreambuf(const xstreambuf& xbuf)
 }
 xstreambuf::~xstreambuf()
 {
-    if (m_pBuffer) {
-        delete[] m_pBuffer;
-    }
+    delete[] m_pBuffer;
 }
 
 void xstreambuf::seek(unsigned int n, XBUF_POS pos)
@@ -72,9 +70,8 @@ xstreambuf& xstreambuf::read(void* dest, unsigned int n)
 
 void xstreambuf::clear()
 {
-    if (m_pBuffer) {
-        delete[] m_pBuffer;
-    }
+    delete[] m_pBuffer;
+
     init();
 }
 void xstreambuf::flush()

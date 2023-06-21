@@ -4868,7 +4868,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     o->Scale = 1.1f;
                     VectorSubtract(o->Owner->Position, o->Position, o->Direction);
                     VectorNormalize(o->Direction);
-                    o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], o->Owner->Position[0], o->Owner->Position[1]);
+                    o->Angle[2] = CreateAngle2D(o->Position, o->Owner->Position);
                 }
             }
             break;
@@ -8012,7 +8012,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             o->Alpha += 0.05f;
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], o->HeadTargetAngle[0], o->HeadTargetAngle[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, o->HeadTargetAngle);
                 float dx = o->HeadTargetAngle[0] - o->Position[0];
                 float dy = o->HeadTargetAngle[1] - o->Position[1];
                 o->Distance = sqrtf(dx * dx + dy * dy);
@@ -8055,7 +8055,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
             if (o->AnimationFrame <= 4.0f)
             {
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], o->HeadTargetAngle[0], o->HeadTargetAngle[1]);
+                o->Angle[2] = CreateAngle2D(o->Position, o->HeadTargetAngle);
                 float dx = o->HeadTargetAngle[0] - o->Position[0];
                 float dy = o->HeadTargetAngle[1] - o->Position[1];
                 o->Distance = sqrtf(dx * dx + dy * dy);
