@@ -2162,9 +2162,20 @@ void BMD::RenderBodyShadow(int BlendMesh, int HiddenMesh, int StartMeshNumber, i
 {
     if (NumMeshs == 0) return;
 
+    if (gMapManager.WorldActive != WD_7ATLANSE)
+    {
+        EnableAlphaTest(false);
+    }
+
+    glColor4f(0.0f, 0.0f, 0.0f, 0.7f); // 30% opacity for shadow
+
     DisableTexture();
     DisableDepthMask();
     BeginRender(1.f);
+
+    // enable stencil and continue draw
+    glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 
     int startMesh = 0;
     int endMesh = NumMeshs;
@@ -2209,6 +2220,8 @@ void BMD::RenderBodyShadow(int BlendMesh, int HiddenMesh, int StartMeshNumber, i
     }
     EndRender();
     EnableDepthMask();
+
+    glDisable(GL_STENCIL_TEST);
 }
 
 void BMD::RenderObjectBoundingBox()
