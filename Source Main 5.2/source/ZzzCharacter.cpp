@@ -8034,6 +8034,31 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         }
         break;
     }
+
+    if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE && !g_Direction.m_CKanturu.IsMayaScene())
+    {
+        switch (Type)        // 날개인지 검사
+        {
+        case MODEL_WING + 0:        // 요정날개
+        case MODEL_WING + 1:        // 천공날개
+        case MODEL_WING + 2:        // 사탄날개
+        case MODEL_WING + 3:        // 정령날개
+        case MODEL_WING + 4:        // 영혼날개
+        case MODEL_WING + 5:        // 드라곤날개
+        case MODEL_WING + 6:        // 암흑날개
+            //case MODEL_HELPER + 30:    // 군주의 망토
+        case MODEL_WING + 36:        // 폭풍의날개
+        case MODEL_WING + 37:        // 시공의날개
+        case MODEL_WING + 38:        // 환영의날개
+        case MODEL_WING + 39:        // 파멸의날개
+            //case MODEL_WING + 40:        // 제왕의망토
+        {
+            b->RenderBodyShadow();
+        }
+
+        break;
+        }
+    }
 }
 
 void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z)
@@ -8190,7 +8215,37 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 }
             }
             o->EnableShadow = true;
-            RenderPartObject(&c->Object, MODEL_SHADOW_BODY, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
+            for (int i = MAX_BODYPART - 1; i >= 0; i--)
+            {
+                PART_t* p = &c->BodyPart[i];
+                if (p->Type != -1)
+                {
+                    int Type = p->Type;
+
+                    RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
+                }
+                else
+                {
+                    RenderPartObject(&c->Object, MODEL_SHADOW_BODY, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
+                }
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                if (c->Weapon[i].Type >= MODEL_BOW + 0 && c->Weapon[i].Type <= MODEL_BOW + 32)
+                {
+                    continue;
+                }
+
+                PART_t* p = &c->Weapon[i];
+
+                if (p->Type != -1 && c->SafeZone == false)
+                {
+                    int Type = p->Type;
+
+                    RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
+                }
+            }
             o->EnableShadow = false;
         }
     }
