@@ -165,7 +165,7 @@ public:
     int           BlendMesh;
     int           AttackPoint[2];
     int           RenderType;
-    int			  InitialSceneFrame;
+    int			  InitialSceneTime;
     int           LinkBone;
 
 public:
@@ -187,6 +187,9 @@ public:
     float         PriorAnimationFrame;
     float	      AlphaTarget;
     float         Alpha;
+
+
+    float       LastHorseWaveEffect;
 
 public:
     vec3_t        Light;

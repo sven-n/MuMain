@@ -133,7 +133,7 @@ void OBJECT::Initialize()
     AttackPoint[0] = 0;
     AttackPoint[1] = 0;
     RenderType = 0;
-    InitialSceneFrame = 0;
+    InitialSceneTime = 0;
     LinkBone = 0;
 
     m_dwTime = 0;

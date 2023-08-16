@@ -5,7 +5,6 @@
 extern int MenuStateCurrent;
 extern int MenuStateNext;
 extern int  SceneFlag;
-extern int  MoveSceneFrame;
 //extern bool EnableEdit;
 extern int  ErrorMessage;
 extern bool InitServerList;

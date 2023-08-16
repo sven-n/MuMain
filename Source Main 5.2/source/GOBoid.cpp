@@ -713,23 +713,26 @@ void RenderBugs()
     }
 }
 
+constexpr float HorseEffectInterval = 10 * (1000.f / 25.f); // every 10 frames on a 25fps basis (400 ms)
+
 void RenderDarkHorseSkill(OBJECT* o, BMD* b)
 {
     if (o == NULL)	return;
     if (b == NULL)	return;
-    float  Matrix[3][4];
-    vec3_t Angle, p, Position;
 
     o->WeaponLevel++;
-    if ((MoveSceneFrame % 10) == 0)
+    if (o->LastHorseWaveEffect < WorldTime - HorseEffectInterval)
     {
         CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, o->Light);
+        o->LastHorseWaveEffect = WorldTime;
     }
 
     if (o->AnimationFrame >= 8.f && o->AnimationFrame <= 9.5f)
     {
         if ((o->WeaponLevel % 2) == 1)
         {
+            float  Matrix[3][4];
+            vec3_t Angle, p, Position;
             Vector(0.f, 150.f * (o->WeaponLevel / 2), 0.f, p);
             Vector(0.f, 0.f, (float)(rand() % 360), Angle);
             for (int i = 0; i < 6; ++i)
@@ -991,7 +994,7 @@ void MoveBird(OBJECT* o)
 
 void MoveHeavenBug(OBJECT* o, int index)
 {
-    int iFrame = MoveSceneFrame;
+    const float iFrame = WorldTime / 40.0f;
 
     o->Position[0] += o->Velocity * (float)sinf(o->Angle[2]);
     o->Position[1] -= o->Velocity * (float)cosf(o->Angle[2]);

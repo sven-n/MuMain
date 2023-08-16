@@ -46,8 +46,6 @@ void CPhysicsVertex::Init(float fXPos, float fYPos, float fZPos, BOOL bFixed)
     }
 }
 
-extern int MoveSceneFrame;
-
 void CPhysicsVertex::UpdateForce(unsigned int iKey, DWORD dwType, float fWind)
 {
     if (PVS_FIXEDPOS & m_byState)
@@ -625,7 +623,7 @@ BOOL CPhysicsCloth::Move(float fTime)
 
 void CPhysicsCloth::InitForces(void)
 {
-    int iSeed = ((MoveSceneFrame / 10) * 101) % m_iNumVertices;
+    const int iSeed = static_cast<int>(WorldTime / 400.f) * 101 % m_iNumVertices;
 
     for (int iVertex = 0; iVertex < m_iNumVertices; ++iVertex)
     {
@@ -1160,7 +1158,7 @@ void CPhysicsClothMesh::InitForces(void)
         return;
     }
 
-    int iSeed = ((MoveSceneFrame / 10) * 101) % m_iNumVertices;
+    const int iSeed = static_cast<int>(WorldTime / 400.f) * 101 % m_iNumVertices;
 
     for (int iVertex = 0; iVertex < m_iNumVertices; ++iVertex)
     {

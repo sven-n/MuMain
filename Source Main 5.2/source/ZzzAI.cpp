@@ -765,10 +765,12 @@ float   DeltaT = 0.1f;
 float   FPS;
 float   WorldTime = 0.f;
 
+float WorldTimeWrapOffset = 0.f;
+
 void CalcFPS()
 {
     static int timeinit = 0;
-    static int start, start2, current, last;
+    static long start, start2, current, last;
     static int frame = 0, frame2 = 0;
     if (!timeinit)
     {
@@ -778,8 +780,19 @@ void CalcFPS()
     }
     frame++;
     frame2++;
-    WorldTime = (float)(timeGetTime());
+
     current = timeGetTime(); // found in winmm.
+
+    auto currentFloat = static_cast<float>(current);
+    if (WorldTime > (currentFloat + WorldTimeWrapOffset))
+    {
+        // every 49,71 days without reboot, the value gets wrapped around 0 again.
+        // so we simply add this to an offset.
+        WorldTimeWrapOffset += 4294967295.0f;
+    }
+
+    WorldTime = currentFloat + WorldTimeWrapOffset;
+
     int    difTime = current - last;
     double dif = (double)(current - start) / CLOCKS_PER_SEC;
     double rv = (dif) ? (double)frame / (double)dif : -1.0;

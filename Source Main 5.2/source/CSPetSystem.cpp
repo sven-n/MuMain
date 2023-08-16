@@ -24,7 +24,6 @@
 
 extern bool g_PetEnableDuel;
 
-extern  int     MoveSceneFrame;
 extern  float   WorldTime;
 extern	char    TextList[50][100];
 extern	int     TextListColor[50];
@@ -120,7 +119,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->Position[0] = (float)(PositionX * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
     o->Position[1] = (float)(PositionY * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
 
-    o->InitialSceneFrame = MoveSceneFrame;
+    o->InitialSceneTime = WorldTime;
     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
 
     Vector(0.f, 0.f, Rotation, o->Angle);
@@ -567,7 +566,7 @@ void CSPetDarkSpirit::MovePet(void)
             c->AttackTime = 15;
         }
     }
-    if ((rand() % 100) == 0 && (MoveSceneFrame % 60) == 0)
+    if ((rand() % 100) == 0 && (rand() % 60) == 0)
     {
         PlayBuffer(SOUND_DSPIRIT_SHOUT, o);
     }
