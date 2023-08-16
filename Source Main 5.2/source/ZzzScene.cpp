@@ -115,8 +115,6 @@ int  SceneFlag = MOVIE_SCENE;
 int  SceneFlag = WEBZEN_SCENE;
 #endif // MOVIE_DIRECTSHOW
 
-int  MoveSceneFrame = 0;
-
 extern int g_iKeyPadEnable;
 
 CPhysicsManager g_PhysicsManager;
@@ -2262,6 +2260,7 @@ constexpr int target_fps = 30;
 constexpr int ms_per_frame = 1000 / target_fps;
 
 uint64_t current_tick_count = GetTickCount64();
+uint64_t last_water_change = GetTickCount64();
 
 void MainScene(HDC hDC)
 {
@@ -2314,11 +2313,16 @@ void MainScene(HDC hDC)
         }
 
         constexpr int NumberOfWaterTextures = 32;
-        constexpr double timePerFrame = NumberOfWaterTextures / 25.0;
-        WaterTextureNumber = static_cast<uint64_t>(timeGetTime() * timePerFrame) % NumberOfWaterTextures;
-        // TODO: Refactor the depending code of these frame counting things
-        //       so they use the actual time instead. See also 'WorldTime'.
-        MoveSceneFrame++;
+        constexpr double timePerFrame = 1000 / 25.0;
+        int64_t time_since_last_render = current_tick_count - last_water_change;
+
+        while (time_since_last_render > timePerFrame)
+        {
+            WaterTextureNumber++;
+            WaterTextureNumber %= NumberOfWaterTextures;
+            time_since_last_render -= timePerFrame;
+            last_water_change = current_tick_count;
+        }
     }
 
     if (Destroy) {

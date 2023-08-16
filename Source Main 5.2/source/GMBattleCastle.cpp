@@ -51,6 +51,18 @@ namespace battleCastle
     static  bool    g_bBattleCastleStartBackup = false;
     static  float   g_iMp3PlayTime = 0.f;
 
+    static float LastHealingParticle = 0.0f;
+    static constexpr float HealingParticleInterval = 400; // every 400 ms
+
+    static float LastStoneFlyEffect = 0.0f;
+    static constexpr float StoneFlyEffectInterval = 800; // every 800 ms
+
+    static float LastArrowEffectOnBattlefield = 0.0f;
+    static constexpr float ArrowEffectOnBattlefieldInterval = 2400; // every 2400 ms
+
+    static float LastArrowEffectInStampRoom = 0.0f;
+    static constexpr float ArrowEffectInStampRoomInterval = 400; // every 400 ms
+
     std::queue<BuildTime>   g_qBuildTimeLocation;
 
     enum
@@ -728,8 +740,9 @@ namespace battleCastle
 
         if (IsBattleCastleStart())
         {
-            if ((MoveSceneFrame % 20) == 0)
+            if (LastStoneFlyEffect < WorldTime - StoneFlyEffectInterval)
             {
+                LastStoneFlyEffect = WorldTime;
                 int HeroY = (Hero->PositionY);
                 if (rand() % 3)
                 {
@@ -792,8 +805,9 @@ namespace battleCastle
             int HeroY = (Hero->PositionY);
             if ((HeroY > 58 && HeroY < 113) || (HeroY > 117 && HeroY < 159))
             {
-                if ((MoveSceneFrame % 60) == 0)
+                if (LastArrowEffectOnBattlefield < WorldTime - ArrowEffectOnBattlefieldInterval)
                 {
+                    LastArrowEffectOnBattlefield = WorldTime;
                     int length = (rand() % 4 + 2) / 2;
                     int dx = (rand() % 1400 - 700) - 60.f * length;
 
@@ -839,8 +853,9 @@ namespace battleCastle
                 }
             }
 
-            if ((MoveSceneFrame % 10) == 0)
+            if (LastArrowEffectInStampRoom < WorldTime - ArrowEffectInStampRoomInterval)
             {
+                LastArrowEffectInStampRoom = WorldTime;
                 if (HeroY > 58 && HeroY < 159)
                 {
                     vec3_t Position;
@@ -1734,8 +1749,9 @@ namespace battleCastle
             }
         }
 
-        if (bHealing && MoveSceneFrame % 10 == 0)
+        if (bHealing && LastHealingParticle < WorldTime - HealingParticleInterval)
         {
+            LastHealingParticle = WorldTime;
             CreateParticle(BITMAP_PLUS, o->Position, o->Angle, o->Light);
         }
     }

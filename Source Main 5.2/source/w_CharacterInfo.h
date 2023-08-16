@@ -198,6 +198,7 @@ public:
     int         PositionY;
     int         m_iDeleteTime;
     int			m_iFenrirSkillTarget;
+    float       LastCritDamageEffect;
 
     float		ProtectGuildMarkWorldTime;
     float		AttackRange;

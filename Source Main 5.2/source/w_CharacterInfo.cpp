@@ -95,6 +95,7 @@ void CHARACTER::Initialize()
     PositionY = 0;
     m_iDeleteTime = 0;
     m_iFenrirSkillTarget = -1;
+    LastCritDamageEffect = 0;
 
     ProtectGuildMarkWorldTime = 0.0f;
     AttackRange = 0.0f;

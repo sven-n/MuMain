@@ -1391,7 +1391,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     else if (o->Type == MODEL_MONSTER01 + 60)
                                                     {
                                                         if (o->CurrentAction == MONSTER01_DIE ||
-                                                            (MoveSceneFrame - o->InitialSceneFrame) < 25
+                                                            (WorldTime - o->InitialSceneTime) < 1000
                                                             )
                                                         {
                                                             if (o->CurrentAction == MONSTER01_DIE)

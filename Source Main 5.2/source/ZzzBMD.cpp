@@ -906,7 +906,6 @@ void BMD::EndRender()
 
 extern float WorldTime;
 extern int WaterTextureNumber;
-extern int MoveSceneFrame;
 
 void BMD::RenderMesh(int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
 {

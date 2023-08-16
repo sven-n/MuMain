@@ -33,8 +33,6 @@ PARTICLE  Leaves[MAX_LEAVES];
 #endif // DEVIAS_XMAS_EVENT
 JOINT     Joints[MAX_JOINTS];
 
-extern int MoveSceneFrame;
-
 BYTE    g_byUpperBoneLocation[7] = { 25, 26, 27, 20, 34, 35, 36 };
 
 OBJECT Effects[MAX_EFFECTS];

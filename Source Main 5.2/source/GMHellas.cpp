@@ -297,13 +297,21 @@ void RenderObjectDescription()
     }
 }
 
+float LastAmbientSoundPlay = 0.0f;
+const float AmbientSoundInterval = 4000.0f; // every 4 seconds.
+
+float LastKundunSoundPlay = 0.0f;
+const float KundunSoundInterval = 2000.0f; // every 2 seconds.
+
 bool MoveHellasObjectSetting(int& objCount, int object)
 {
     if (gMapManager.InHellas() == false) return false;
 
     PlayBuffer(SOUND_KALIMA_AMBIENT);
-    if ((MoveSceneFrame % 100) == 0)
+    
+    if (LastAmbientSoundPlay < WorldTime - AmbientSoundInterval)
     {
+        LastAmbientSoundPlay = WorldTime;
         PlayBuffer(SOUND_KALIMA_AMBIENT2 + rand() % 2);
     }
 
@@ -312,8 +320,9 @@ bool MoveHellasObjectSetting(int& objCount, int object)
         int CurrX = (Hero->PositionX);
         int CurrY = (Hero->PositionY);
 
-        if ((CurrX >= 25 && CurrY >= 44) && (CurrX <= 51 && CurrY <= 119) && (MoveSceneFrame % 50) == 0)
+        if ((CurrX >= 25 && CurrY >= 44) && (CurrX <= 51 && CurrY <= 119) && (LastKundunSoundPlay < WorldTime - KundunSoundInterval))
         {
+            LastKundunSoundPlay = WorldTime;
             PlayBuffer(SOUND_KUNDUN_AMBIENT1 + rand() % 2);
         }
     }
@@ -615,12 +624,16 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
     return false;
 }
 
+float LastBigMonCreation = 0.0f;
+const float BigMonInterval = 4000.0f; // every 4 seconds.
+
 int CreateBigMon(OBJECT* o)
 {
     if (gMapManager.InHellas() == false) return 0;
 
-    if ((MoveSceneFrame % 100) == 0)
+    if (LastBigMonCreation < WorldTime - BigMonInterval)
     {
+        LastBigMonCreation = WorldTime;
         o->Live = true;
         OpenMonsterModel(33);
         o->Type = MODEL_MONSTER01 + 33;

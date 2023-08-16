@@ -9640,7 +9640,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     {
         if (!g_isCharacterBuff(o, eBuff_Cloaking))
         {
-            if (g_isCharacterBuff(o, eBuff_AddCriticalDamage) && o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && (MoveSceneFrame % 30) == 0)
+            constexpr float CritDamageEffectInterval = 1200.0f;
+            if (g_isCharacterBuff(o, eBuff_AddCriticalDamage) && o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && (c->LastCritDamageEffect < WorldTime - CritDamageEffectInterval))
             {
                 bool    renderSkillWave = (rand() % 20) ? true : false;
                 short   weaponType = -1;
@@ -10703,25 +10704,25 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 12)
                         {
-                            if ((MoveSceneFrame % 6) == 0)
+                            if ((rand() % 6) == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
-                            else if ((MoveSceneFrame % 3) == 0)
+                            else if ((rand() % 3) == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                             }
                         }
                         else if (EquipmentLevelSet == 13)
                         {
-                            if ((MoveSceneFrame % 6) == 0)
+                            if ((rand() % 6) == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if ((MoveSceneFrame % 4) == 0)
+                            if ((rand() % 4) == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -10729,13 +10730,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 14)
                         {
-                            if ((MoveSceneFrame % 6) == 0)
+                            if ((rand() % 6) == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if ((MoveSceneFrame % 4) == 0)
+                            if ((rand() % 4) == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -10743,13 +10744,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 15)
                         {
-                            if ((MoveSceneFrame % 6) == 0)
+                            if ((rand() % 6) == 0)
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if ((MoveSceneFrame % 4) == 0)
+                            if ((rand() % 4) == 0)
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -11349,7 +11350,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->Position[0] = (float)((c->PositionX) * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
     o->Position[1] = (float)((c->PositionY) * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
 
-    o->InitialSceneFrame = MoveSceneFrame;
+    o->InitialSceneTime = WorldTime;
 
     if (gMapManager.WorldActive == -1 || c->Helper.Type != MODEL_HELPER + 3 || c->SafeZone)
     {
