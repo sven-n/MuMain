@@ -18,6 +18,7 @@
 #include "GMBattleCastle.h"
 #include "UIMng.h"
 #include "CameraMove.h"
+#include "PhysicsManager.h"
 
 //BMD Models[MAX_MODELS];
 BMD* Models;
@@ -2158,16 +2159,120 @@ void BMD::RenderBodyTranslate(int Flag, float Alpha, int BlendMesh, float BlendM
     EndRender();
 }
 
-void BMD::RenderBodyShadow(int BlendMesh, int HiddenMesh, int StartMeshNumber, int EndMeshNumber)
+__forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, const float sx, const float sy)
 {
-    if (NumMeshs == 0) return;
+    vec3_t result;
+    VectorCopy(*position, result);
 
-    if (gMapManager.WorldActive != WD_7ATLANSE)
+    // Subtract the origin (position of the character) from the current position of the vertex
+    // The result is the relative coordinate of the vertex to the origin.
+    VectorSubtract(result, origin, result)
+
+    // scale the shadow in the x direction
+    result[0] += result[2] * (result[0] + sx) / (result[2] - sy);
+
+    // put it on the ground by setting Z to 5.
+    result[2] = 5.f;
+
+    // Add the origin again, to get the absolute coordinate of the vertex again
+    VectorAdd(result, origin, result);
+
+    // copy to result
+    VectorCopy(result, *position);
+}
+
+__forceinline void GetClothShadowPosition(vec3_t* target, CPhysicsCloth* pCloth, const int index, const vec3_t origin, const float sx, const float sy)
+{
+    pCloth->GetPosition(index, target);
+    CalcShadowPosition(target, origin, sx, sy);
+}
+
+void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const float sx, const float sy) const
+{
+    glBegin(GL_TRIANGLES);
+    for (int i = 0; i < clothesCount; i++)
     {
-        EnableAlphaTest(false);
+        auto* const pCloth = &static_cast<CPhysicsCloth*>(pClothes)[i];
+        auto const columns = pCloth->GetVerticalCount();
+        auto const rows = pCloth->GetHorizontalCount();
+        
+        for (int col = 0; col < columns - 1; ++col)
+        {
+            for (int row = 0; row < rows - 1; ++row)
+            {
+                // first we take each point for an square from which we derive
+                // a A-Triangle and the V-Triangle.
+                int a = rows * col + row;
+                int b = rows * (col + 1) + row;
+                int c = rows * col + row + 1;
+                int d = rows * (col + 1) + row + 1;
+
+                vec3_t posA, posB, posC, posD;
+
+                GetClothShadowPosition(&posA, pCloth, a, BodyOrigin, sx, sy);
+                GetClothShadowPosition(&posB, pCloth, b, BodyOrigin, sx, sy);
+                GetClothShadowPosition(&posC, pCloth, c, BodyOrigin, sx, sy);
+                GetClothShadowPosition(&posD, pCloth, d, BodyOrigin, sx, sy);
+                
+                // A-Triangle:
+                glVertex3fv(posA);
+                glVertex3fv(posB);
+                glVertex3fv(posC);
+
+                // V-Triangle:
+                glVertex3fv(posD);
+                glVertex3fv(posB);
+                glVertex3fv(posC);
+            }
+        }
     }
 
-    glColor4f(0.0f, 0.0f, 0.0f, 0.7f); // 30% opacity for shadow
+    glEnd();
+}
+
+void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh, const float sx, const float sy) const
+{
+    glBegin(GL_TRIANGLES);
+    for (int i = startMesh; i < endMesh; i++)
+    {
+        if (i == hiddenMesh)
+        {
+            continue;
+        }
+
+        const Mesh_t* mesh = &Meshs[i];
+        if (mesh->NumTriangles <= 0 || mesh->Texture == blendMesh)
+        {
+            continue;
+        }
+
+        for (int j = 0; j < mesh->NumTriangles; j++)
+        {
+            const auto* tp = &mesh->Triangles[j];
+            for (int k = 0; k < tp->Polygon; k++)
+            {
+                const int vertexIndex = tp->VertexIndex[k];
+                vec3_t position{};
+                VectorCopy(VertexTransform[i][vertexIndex], position);
+                CalcShadowPosition(&position, BodyOrigin, sx, sy);
+                glVertex3fv(position);
+            }
+        }
+    }
+
+    glEnd();
+}
+
+void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber, const int endMeshNumber, void* pClothes, const int clothesCount)
+{
+    if (NumMeshs == 0 && clothesCount == 0)
+    {
+        return;
+    }
+
+    EnableAlphaTest(false);
+
+    glColor4f(0.0f, 0.0f, 0.0f, 0.5f); // 50% opacity for shadows
 
     DisableTexture();
     DisableDepthMask();
@@ -2180,44 +2285,28 @@ void BMD::RenderBodyShadow(int BlendMesh, int HiddenMesh, int StartMeshNumber, i
     int startMesh = 0;
     int endMesh = NumMeshs;
 
-    if (StartMeshNumber != -1) startMesh = StartMeshNumber;
-    if (EndMeshNumber != -1)   endMesh = EndMeshNumber;
-
-    float sx = 2000.f;
-    float sy = 4000.f;
-
-    if (gMapManager.InBattleCastle())
+    if (startMeshNumber != -1)
     {
-        sx = 2500.f;
-        sy = 4000.f;
+        startMesh = startMeshNumber;
     }
 
-    for (int i = startMesh; i < endMesh; i++)
+    if (endMeshNumber != -1)
     {
-        if (i != HiddenMesh)
-        {
-            Mesh_t* m = &Meshs[i];
-            if (m->NumTriangles > 0 && m->Texture != BlendMesh)
-            {
-                glBegin(GL_TRIANGLES);
-                for (int j = 0; j < m->NumTriangles; j++)
-                {
-                    Triangle_t* tp = &m->Triangles[j];
-                    for (int k = 0; k < tp->Polygon; k++)
-                    {
-                        int vi = tp->VertexIndex[k];
-                        vec3_t Position;
-                        VectorSubtract(VertexTransform[i][vi], BodyOrigin, Position);
-                        Position[0] += Position[2] * (Position[0] + sx) / (Position[2] - sy);
-                        Position[2] = 5.f;
-                        VectorAdd(Position, BodyOrigin, Position);
-                        glVertex3fv(Position);
-                    }
-                }
-                glEnd();
-            }
-        }
+        endMesh = endMeshNumber;
     }
+
+    const float sx = gMapManager.InBattleCastle() ? 2500.f : 2000.f;
+    const float sy = 4000.f;
+
+    if (clothesCount == 0)
+    {
+        AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy);
+    }
+    else
+    {
+        AddClothesShadowTriangles(pClothes, clothesCount, sx, sy);
+    }
+
     EndRender();
     EnableDepthMask();
 
