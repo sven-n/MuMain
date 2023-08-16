@@ -6307,21 +6307,18 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
 
     if (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
     {
-        if (Type >= MODEL_WING && Type <= MODEL_WING + 6) return;
-        else if (Type >= MODEL_WING + 36 && Type <= MODEL_WING + 43)
+        if (Type >= MODEL_WING && Type <= MODEL_WING + 6) return; // 1st and 2nd Wings
+        else if (Type >= MODEL_WING + 36 && Type <= MODEL_WING + 43) // 3rd Wings
             return;
-        else if (ITEM_WING + 130 <= Type && Type <= ITEM_WING + 134) return;
-        else if (Type >= MODEL_WING + 49 && Type <= MODEL_WING + 50) return;
-        else if (Type == MODEL_WING + 135) return;
+        else if (MODEL_WING + 130 >= Type && Type <= MODEL_WING + 135) return; // Small Wings and Capes
+        else if (Type >= MODEL_WING + 49 && Type <= MODEL_WING + 50) return; // Capes
     }
 
-    if (Type == MODEL_HELPER + 30
-        || (Type == MODEL_WING + 49)
-        || (Type == MODEL_WING + 135))
-        return;
-
-    if (ITEM_WING + 130 == Type)
-        return;
+    //if (Type == MODEL_HELPER + 30
+    //    || (Type == MODEL_WING + 49)
+    //    || (Type == MODEL_WING + 135)
+    //    || (Type == MODEL_WING +130))
+    //    return;
 
     if (Type >= MODEL_STAFF + 21 && Type <= MODEL_STAFF + 29)
     {
@@ -8039,24 +8036,38 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     {
         switch (Type)        // 날개인지 검사
         {
-        case MODEL_WING + 0:        // 요정날개
-        case MODEL_WING + 1:        // 천공날개
-        case MODEL_WING + 2:        // 사탄날개
-        case MODEL_WING + 3:        // 정령날개
-        case MODEL_WING + 4:        // 영혼날개
-        case MODEL_WING + 5:        // 드라곤날개
-        case MODEL_WING + 6:        // 암흑날개
-            //case MODEL_HELPER + 30:    // 군주의 망토
-        case MODEL_WING + 36:        // 폭풍의날개
-        case MODEL_WING + 37:        // 시공의날개
-        case MODEL_WING + 38:        // 환영의날개
-        case MODEL_WING + 39:        // 파멸의날개
-            //case MODEL_WING + 40:        // 제왕의망토
-        {
-            b->RenderBodyShadow();
-        }
+        case MODEL_WING + 0:        // Wings of Elf
+        case MODEL_WING + 1:        // Wings of Heaven
+        case MODEL_WING + 2:        // Wings of Satan
+        case MODEL_WING + 41:       // Wing of Curse
 
-        break;
+        case MODEL_WING + 3:        // Wings of Spirits
+        case MODEL_WING + 4:        // Wings of Soul
+        case MODEL_WING + 5:        // Wings of Dragon
+        case MODEL_WING + 6:        // Wings of Darkness
+        case MODEL_WING + 42:        // Wings of Despair
+        
+        case MODEL_WING + 36:        // Wing of Storm
+        case MODEL_WING + 37:        // Wing of Eternal
+        case MODEL_WING + 38:        // Wing of Illusion
+        case MODEL_WING + 39:        // Wing of Ruin
+        case MODEL_WING + 43:        // Wing of Dimension
+
+        case MODEL_WING + 131:        // Small Wing of Curse
+        case MODEL_WING + 132:        // Small Wings of Elf
+        case MODEL_WING + 133:        // Small Wings of Heaven
+        case MODEL_WING + 134:        // Small Wings of Satan
+            b->RenderBodyShadow();
+            break;
+            
+        case MODEL_HELPER + 30:    // Cape of Lord
+        case MODEL_WING + 49:      // Cape of Fighter
+        case MODEL_WING + 40:        // Cape of Emperor
+        case MODEL_WING + 50:        // Cape of Overrule
+        case MODEL_WING + 130:        // Small Cape of Lord
+        case MODEL_WING + 135:        // Little Warrior's Cloak
+            b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
+            break;
         }
     }
 }

@@ -618,6 +618,11 @@ BOOL CPhysicsCloth::Move(float fTime)
     return (TRUE);
 }
 
+void CPhysicsCloth::GetPosition(int index, vec3_t* pPos)
+{
+    m_pVertices[index].GetPosition(pPos);
+}
+
 #ifdef _DEBUG
 #include "ZzzCharacter.h"
 #include "ZzzEffect.h"

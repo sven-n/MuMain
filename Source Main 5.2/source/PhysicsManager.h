@@ -188,6 +188,10 @@ protected:
 public:
     BOOL Move2(float fTime, int iCount);
     BOOL Move(float fTime);
+    void GetPosition(int index, vec3_t* pPos);
+    int GetVerticesCount() const { return m_iNumVertices; }
+    int GetHorizontalCount() const { return m_iNumHor; }
+    int GetVerticalCount() const { return m_iNumVer; }
 protected:
     virtual void InitForces(void);
     void MoveVertices(float fTime);

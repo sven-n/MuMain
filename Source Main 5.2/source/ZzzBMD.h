@@ -290,7 +290,7 @@ public:
     void RenderBodyAlternative(int iRndExtFlag, int iParam, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
     void RenderMeshTranslate(int i, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int Texture = -1);
     void RenderBodyTranslate(int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
-    void RenderBodyShadow(int BlendMesh = -1, int HiddenMesh = -1, int StartMeshNumber = -1, int EndMeshNumber = -1);
+    void RenderBodyShadow(int blendMesh = -1, int hiddenMesh = -1, int startMeshNumber = -1, int endMeshNumber = -1, void* pClothes = nullptr, int clothesCount = 0);
 
     void SetBodyLight(vec3_t right) { VectorCopy(right, BodyLight); }
 
@@ -311,6 +311,9 @@ public:
 private:
     BMD(const BMD& b);
     BMD& operator=(const BMD& b);
+
+    void AddClothesShadowTriangles(void* pClothes, int clothesCount, float sx, float sy) const;
+    void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy) const;
 };
 
 //extern BMD   Models[];
