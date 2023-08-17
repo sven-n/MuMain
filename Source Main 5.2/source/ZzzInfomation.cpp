@@ -2418,23 +2418,30 @@ WORD ItemWalkSpeed(ITEM* Item)
     return WalkSpeed;
 }
 
-extern int HeroKey;
 int EditMonsterNumber = 0;
 int MonsterKey = 0;
 
 void OpenMonsterScript(char* FileName)
 {
-    if ((SMDFile = fopen(FileName, "rb")) == NULL)	return;
-    SMDToken Token;
+    if ((SMDFile = fopen(FileName, "rb")) == nullptr)
+    {
+        char Text[256];
+        sprintf(Text, "%s - File not exist.", FileName);
+        g_ErrorReport.Write(Text);
+        MessageBox(g_hWnd, Text, NULL, MB_OK);
+        return;
+    }
+
     while (true)
     {
-        Token = (*GetToken)();//¹øÈ£
-        if (Token == END) break;
-        if (Token == NAME && strcmp("end", TokenString) == NULL) break;
+        SMDToken token = GetToken();
+        if (token == END) break;
+        if (token == NAME && strcmp("end", TokenString) == NULL) break;
         MONSTER_SCRIPT* m = &MonsterScript[EditMonsterNumber++];
-        m->Type = (int)TokenNumber;
-        Token = (*GetToken)();
-        Token = (*GetToken)(); strcpy(m->Name, TokenString);
+        m->Type = static_cast<int>(TokenNumber);
+        token = GetToken();
+        token = GetToken();
+        strcpy(m->Name, TokenString);
         //Token = (*GetToken)();m->Level = (int)TokenNumber;
         //for(int i=0;i<23;i++) Token = (*GetToken)();
     }
@@ -2450,7 +2457,8 @@ char* getMonsterName(int type)
             return MonsterScript[i].Name;
         }
     }
-    return NULL;
+
+    return R"("")";
 }
 
 void MonsterConvert(MONSTER* m, int Level)

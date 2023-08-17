@@ -1,0 +1,674 @@
+// MAX : 512			
+//블러드캐슬			
+//블러드캐슬1			
+84	1	"Chief Skeleton Warrior"	
+85	1	"Chief Skeleton Archer"	
+86	1	"Dark Skull Soldier"	
+87	1	"Giant Ogre"	
+88	1	"Red Skeleton Knight"	
+89	1	"Magic Skeleton"	
+//블러드캐슬2			
+90	1	"Chief Skeleton Warrior"	
+91	1	"Chief Skeleton Archer"	
+92	1	"Dark Skull Soldier"	
+93	1	"Giant Ogre"	
+94	1	"Red Skeleton Knight"	
+95	1	"Magic Skeleton"	
+//블러드캐슬3			
+96	1	"Chief Skeleton Warrior"	
+97	1	"Chief Skeleton Archer"	
+98	1	"Dark Skull Soldier"	
+99	1	"Giant Ogre"	
+111	1	"Red Skeleton Knight"	
+112	1	"Magic Skeleton"	
+//블러드캐슬4			
+113	1	"Chief Skeleton Warrior"	
+114	1	"Chief Skeleton Archer"	
+115	1	"Dark Skull Soldier"	
+116	1	"Giant Ogre"	
+117	1	"Red Skeleton Knight"	
+118	1	"Magic Skeleton"	
+//블러드캐슬5			
+119	1	"Chief Skeleton Warrior"	
+120	1	"Chief Skeleton Archer"	
+121	1	"Dark Skull Soldier"	
+122	1	"Giant Ogre"	
+123	1	"Red Skeleton Knight"	
+124	1	"Magic Skeleton"	
+//블러드캐슬6			
+125	1	"Chief Skeleton Warrior"	
+126	1	"Chief Skeleton Archer"	
+127	1	"Dark Skull Soldier"	
+128	1	"Giant Ogre"	
+129	1	"Red Skeleton Knight"	
+130	1	"Magic Skeleton"	
+131	1	"Castle Gate"	
+132	1	"Statue of Saint"	
+133	1	"Statue of Saint"	
+134	1	"Statue of Saint"	
+			
+// 반지의 전쟁			
+135	1	"White wizard"	
+136	1	"Destructive ogre soldier"	
+137	1	"Destructive ogre archer"	
+			
+//블러드캐슬7			
+138	1	"Chief Skeleton Warrior"	
+139	1	"Chief Skeleton Archer"	
+140	1	"Dark Skull Soldier"	
+141	1	"Giant Ogre"	
+142	1	"Red Skeleton Knight"	
+143	1	"Magic Skeleton"	
+			
+//칼리마_오후 7:05 2004-08-25			
+// 1 칼리마			
+147	1	"Aegis"	
+148	1	"Rogue Centurion"	
+146	1	"Blood Soldier"	
+144	1	"Death Angel"	
+149	1	"Necron"	
+145	1	"Death Centurion"	
+160	1	"Schriker"	
+161	1	"Illusion of Kundun"	
+// 2 칼리마			
+177	1	"Aegis"	
+178	1	"Rogue Centurion"	
+176	1	"Blood Soldier"	
+174	1	"Death Angel"	
+179	1	"Necron"	
+175	1	"Death Centurion"	
+180	1	"Schriker"	
+181	1	"Illusion of Kundun"	
+// 3 칼리마			
+185	1	"Aegis"	
+186	1	"Rogue Centurion"	
+184	1	"Blood Soldier"	
+182	1	"Death Angel"	
+187	1	"Necron"	
+183	1	"Death Centurion"	
+188	1	"Schriker"	
+189	1	"Illusion of Kundun"	
+// 4 칼리마			
+193	1	"Aegis"	
+194	1	"Rogue Centurion"	
+192	1	"Blood Soldier"	
+190	1	"Death Angel"	
+195	1	"Necron"	
+191	1	"Death Centurion"	
+196	1	"Schriker"	
+197	1	"Illusion of Kundun"	
+ 			
+//카오스캐슬 몬스터.			
+162	1	"Chaos Castle 1"	
+163	1	"Chaos Castle 2"	
+164	1	"Chaos Castle 3"	
+165	1	"Chaos Castle 4"	
+166	1	"Chaos Castle 5"	
+167	1	"Chaos Castle 6"	
+168	1	"Chaos Castle 7"	
+169	1	"Chaos Castle 8"	
+170	1	"Chaos Castle 9"	
+171	1	"Chaos Castle 10"	
+172	1	"Chaos Castle 11"	
+173	1	"Chaos Castle 12"	
+			
+83	1	"Golden Wheel"	
+82	1	"Golden Tantalos"	
+81	1	"Golden Vepar"	
+80	1	"Golden Lizard King"	
+79	1	"Golden Derkon"	
+78	1	"Golden Goblin"	
+			
+77	1	"Phoenix of Darkness"	
+76	1	"Phoenix Darkness shield"	
+75	1	"Great Drakan"	
+74	1	"Alpha Crust"	
+73	1	"Drakan"	
+72	1	"Phantom Knight"	
+71	1	"Mega Crust"	
+70	1	"Queen Rainier"	
+69	1	"Alquamos"	
+68	1	"Molt"	
+			
+57	1	"Iron Wheel"	
+58	1	"Tantalos"	
+59	1	"Zaikan"	
+60	1	"Bloody wolf"	
+61	1	"Beam Knight"	
+62	1	"Mutant"	
+63	1	"Death Beam Knight"	
+			
+64	1	"Ogre archer"	
+65	1	"Elite Ogre"	
+66	1	"Cursed king"	
+67	1	"Metal Balrog"	
+			
+36	1	"Shadow"	
+39	1	"Poison Shadow"	
+34	1	"Cursed Wizard"	
+41	1	"Death Cow"	
+37	1	"Devil"	
+40	1	"Death Knight"	
+35	1	"Death Gorgon"	
+38	1	"Balrog"	
+			
+3	1	"Spider"	
+26	1	"Goblin"	
+2	1	"Budge Dragon"	
+27	1	"Chain Scorpion"	
+0	1	"Bull Fighter"	
+33	1	"Elite Goblin"	
+1	1	"Hound"	
+28	1	"Beetle Monster"	
+4	1	"Elite Bull Fighter"	
+29	1	"Hunter"	
+6	1	"LIch"	
+30	1	"Forest Monster"	
+31	1	"Agon"	
+7	1	"Giant"	
+32	1	"Stone Golem"	
+14	1	"Skeleton"	
+24	1	"Worm"	
+22	1	"Ice Monster"	
+23	1	"Hommerd"	
+12	1	"Larva"	
+21	1	"Assassin"	
+17	1	"Cyclops"	
+19	1	"Yeti"	
+11	1	"Ghost"	
+15	1	"Skeleton Archer"	
+20	1	"Elite Yeti"	
+5	1	"Hell Hound"	
+13	1	"Hell Spider"	
+16	1	"Chief Skeleton Warrior"	
+9	1	"Thunder Lich"	
+8	1	"Poison Bull Fighter"	
+10	1	"Dark Knight"	
+25	1	"Ice Queen"	
+18	1	"Gorgon"	
+			
+45	1	"Bahamut"	
+46	1	"Vepar"	
+47	1	"Valkyrie"	
+48	1	"Lizard King"	
+49	1	"Hydra"	
+50	1	"Sea Worm"	
+51	1	"Great Bahamut"	
+52	1	"Silver Valkyrie"	
+			
+43	1	"Golden Budge Dragon"	
+44	1	"Dragon"	
+53	1	"Golden Titan"	
+54	1	"Golden Soldier"	
+55	1	"Death King"	
+56	1	"Death Bone"	
+			
+150	1	"Bali"	
+151	1	"Soldier"	
+152	1	"Magic stone of %s "	
+153	1	"Magic stone of %s "	
+154	1	"Magic stone of %s "	
+155	1	"Magic stone of %s "	
+156	1	"Magic stone of %s "	
+157	1	"Magic stone of %s "	
+158	1	"Magic stone of %s "	
+//158	1	"Shadow Knight"	'- 쉐도우나이트라는 몹이 없으므로
+			
+// 함정 ( 100 ~ 110 )			
+100	1	"Lance"	
+101	1	"Iron Stick"	
+102	1	"Fire"	
+103	1	"Meteorite"	
+			
+// 공성트랩.            			
+104	1	"Trap"	
+105	1	"Canon Trap"	
+106	1	"Laser Trap"	
+200	1	"Soccer Ball"	
+			
+// 크라이울프 레이드 MVP (2005.9.23 이혁재 추가)			
+204	1	"Wolf Status"	
+205	1	"Wolf Altar1"	
+206	1	"Wolf Altar2"	
+207	1	"Wolf Altar3"	
+208	1	"Wolf Altar4"	
+209	1	"Wolf Altar5"	
+215	1	"Shield"	
+// 공성			
+216	1	"Crown"	
+217	1	"Crown Switch2"	
+218	1	"Crown Switch1"	
+219	1	"Castle Gate Switch"	
+220	1	"Gatekeeper"	
+221	1	"Slingshot attack"	
+222	1	"Slingshot defense"	
+//NPC			
+223	1	"Senior"	
+224	1	"Guardsman"	
+226	1	"Trainer"	
+//227	1	"McDonalds"	
+//228	1	"Popeyes"	
+229	1	"Marlon"	
+230	1	"Wandering Merchant Alex"	
+231	1	"Thompson Kenel"	
+232	1	"Archangel"	
+233	1	"Messenger of Archangel"	
+234	1	"Pet Trainer"	
+235	1	"Sebina the Priest"	
+236	1	"Golden Archer"	
+237	1	"Charon"	
+238	1	"Chaos Goblin"	
+239	1	"Arena Guard"	
+240	1	"Safety Guardian"
+241	1	"Royal Guard Captain Lorence"	
+242	1	"Elf Lala"	
+243	1	"Eo the Craftsman"	
+244	1	"Caren the Barmaid"	
+245	1	"Wizard Izabel"	
+246	1	"Weapons Merchant Zienna"	
+247	1	"Guard"	
+248	1	"Wandering Merchant Martin"	
+249	1	"Guard"	
+250	1	"Wandering Merchant"	
+251	1	"Hanzo the Blacksmith"	
+252	1	""	
+253	1	"Potion Girl Amy"	
+254	1	"Pasi the Mage"	
+255	1	"Lumen the Barmaid"	
+256	1	"Lahap"	
+257	1	"Shadow Phantom Soldier"	
+			
+//칼리마 몬스터			
+// 5 칼리마			
+263	1	"Aegis"	
+264	1	"Rogue Centurion"	
+262	1	"Blood Soldier"	
+260	1	"Death Angel"	
+265	1	"Necron"	
+261	1	"Death Centurion"	
+266	1	"Schriker"	
+267	1	"Illusion of Kundun"	
+// 6 칼리마			
+271	1	"Aegis"	
+272	1	"Rogue Centurion"	
+270	1	"Blood Soldier"	
+268	1	"Death Angel"	
+273	1	"Necron"	
+269	1	"Death Centurion"	
+274	1	"Schriker"	
+275	1	"Kundun"	
+			
+// 공성전 몬스터.			
+277	1	"Castle Gate"	
+278	1	"Life Stone"	
+283	1	"Guardian Statue"	
+285	1	"Guardian"	
+286	1	"Archer"	
+287	1	"Spearman"	
+288	1	"Canon Tower"	
+			
+//시련의 땅			
+290	1	"Lizard Warrior"	
+291	1	"Fire Golem"	
+292	1	"Queen Bee"	
+293	1	"Poison Golem"	
+294	1	"Ax Warrior"	
+295	1	"Erohim"	
+296	1	"Monster7"	
+			
+// 로랜협곡이벤트 몬스터.			
+300	1	"Hero Mutant"	
+301	1	"Omega Wing"	
+302	1	"Axl Hero"	
+303	1	"Gigas Golem"	
+			
+			
+//아이다. 크라이울프. 잃어버린 칼리마 추가 작업_기획/정동일 (오후 3:18 2005-07-26)			
+			
+//아이다 몬스터			
+308	1	"Death Tree"	
+307	1	"Forest Orc"	
+306	1	"Death Rider"	
+305	1	"Blue Golem"	
+304	1	"Witch Queen"	
+309	1	"Hell Maine"	
+			
+//크라이울프			
+310	1	"Hammer Scout"	
+311	1	"Lance Scout"	
+312	1	"Bow Scout"	
+313	1	"Werewolf"	
+314	1	"Scout(Hero)"	
+315	1	"Werewolf(Hero)"	
+316	1	"Balram"	
+317	1	"Soram"	
+			
+// 크라이울프 MVP 몬스터 - 추가 2005.11.23 (이혁재)			
+340	1	"Dark Elf"	
+341	1	"Soram"	
+344	1	"Balram"	
+345	1	"Death spirit"	
+348	1	"Tanker"	
+349	1	"Balgass"	//MVP 보스
+			
+//잃어버린 칼리마			
+331	1	"Aegis"	
+332	1	"Rogue Centurion"	
+333	1	"Blood Soldier"	
+334	1	"Death Angel"	
+335	1	"Necron"	
+336	1	"Death Centurion"	
+337	1	"Schriker"	
+338	1	"Illusion of Kundun"	//제 6칼리마 위치
+			
+// 크라이울프 요새 맵 상인 _ 8월 8일 ( 오승언 ) : 크라이울프 요새 조련사 및 세르비스 몹 번호 수정			
+// 아래 2 NPC는 추후 추가			
+// 팻 시스템 이후 등록			
+//344	1	"Summoner"	
+// 노리아의 조합 고블린과 동일. 조합 수정한 이후 배치 ( 현시점에서는 추가 금지 )			
+//345	1	"Chaos Goblin"	
+			
+//이벤트 전용 NPC 추가 - 2006.1.23 (이민정)			
+258	1	"Luke the Helper"	
+//2006.4.17 추가 (이민정)			
+259	1	"Oracle Layla"	
+			
+//칸투르 몬스터 추가 - 2006.5.16 (김보경)			
+350	1	"Berserker"	
+351	1	"Splinter Wolf"	
+352	1	"Iron Rider"	
+353	1	"Satyros"	
+354	1	"Blade Hunter"	
+355	1	"Kentauros"	
+356	1	"Gigantis"	
+357	1	"Genocider"	
+358	1	"Persona"	
+359	1	"Twin Tale"	
+360	1	"Dreadfear"	
+361	1	"Nightmare"	
+362	1	"Maya Hand"	
+363	1	"Maya Hand"	
+364	1	"Maya"	
+			
+//칸투르 npc			
+367	1	"Gateway Machine"	
+368	1	"Elpis"	
+//조화의 보석 관련 npc			
+369	1	"Osbourne"	
+370	1	"Jerridon"	
+			
+//화이트엔젤 이벤트 아이템 지급 NPC 추가 - 2006.8.23 이민정			
+371	1	"Leo the Helper"	
+			
+//엘리트해골전사변신반지 NPC 추가 - 2006.9.5 이민정			
+372	1	"Elite Skull Soldier"	
+			
+//할로윈이벤트 NPC 추가 - 2006.9.12 이민정			
+373	1	"Jack Olantern"	
+			
+//크리스마스 변신반지용 NPC 추가 - 2006.11.30 이민정			
+374	1	"Santa"	
+			
+// 카오스카드 담당			
+375	1	"Chaos Card Master"	
+			
+// 공성전 신규 물약 NPC - 2007.1.22 김보경			
+376	1	"Pamela the Supplier"	
+377	1	"Angela the Supplier"	
+			
+// 설날 복주머니 이름			
+365	1	"Pouch of Blessing"	
+378	1	"GameMaster"	
+379	1	"Natasha the Firecracker Merchant"	
+			
+//신규 이벤트맵			
+380	1	"Stone Statue"	
+381	1	"MU Allies General"	
+382	1	"Illusion Sorcerer Elder"	
+383	1	"Alliance Sacred Item Storage"	
+384	1	"Illusion Castle Sacred Item Storage"	
+385	1	"Mirage"	
+// 신규 이벤트맵 1 (레벨 220~270)			
+386	1	"Illusion Sorcerer Spirit"	
+387	1	"Illusion Sorcerer Spirit"	
+388	1	"Illusion Sorcerer Spirit"	
+// 신규 이벤트맵 2 (레벨 271~320)			
+389	1	"Illusion Sorcerer Spirit"	
+390	1	"Illusion Sorcerer Spirit"	
+391	1	"Illusion Sorcerer Spirit"	
+// 신규 이벤트맵 3 (레벨 321~350)			
+392	1	"Illusion Sorcerer Spirit"	
+393	1	"Illusion Sorcerer Spirit"	
+394	1	"Illusion Sorcerer Spirit"	
+// 신규 이벤트맵 4 (레벨 351~380)			
+395	1	"Illusion Sorcerer Spirit"	
+396	1	"Illusion Sorcerer Spirit"	
+397	1	"Illusion Sorcerer Spirit"	
+// 신규 이벤트맵 5 (레벨 381~399)			
+398	1	"Illusion Sorcerer Spirit"	
+399	1	"Illusion Sorcerer Spirit"	
+400	1	"Illusion Sorcerer Spirit"	
+// 신규 이벤트맵 6 (레벨 400)			
+401	1	"Illusion Sorcerer Spirit"	
+402	1	"Illusion Sorcerer Spirit"	
+403	1	"Illusion Sorcerer Spirit"	
+// 이벤트맵 캐릭터 변신용 인덱스			
+404	1	"MU Allies"	
+405	1	"Illusion Sorcerer"	
+			
+// 3차 체인지업			
+406	1	"Apostle Devin"	
+407	1	"Werewolf Quarel"	
+408	1	"Gatekeeper"	
+409	1	"Balram (Trainee Soldier)"	
+410	1	"Death Spirit (Trainee Soldier)"	
+411	1	"Soram (Trainee Soldier)"	
+412	1	"Dark Elf (Trainee Soldier)"	
+			
+// 추석(2007)이벤트			
+413	1	"Lunar Rabbit"	
+414	1	"Helper Ellen"	
+// 엘베란드  NPC			
+415	1	"Silvia"	
+416	1	"Rhea"	
+417	1	"Marce"	
+// 엘베란드 사냥터 (2007-09-18 김현지)			
+418	1	"Strange Rabbit"	
+419	1	"Hideous Rabbit"	
+420	1	"Werewolf"	
+421	1	"Polluted Butterfly"	
+422	1	"Cursed Lich"	
+423	1	"Totem Golem"	
+424	1	"Grizzly"	
+425	1	"Captain Grizzly"	
+// 이벤트맵 등급 추가로 인한 몬스터 추가(2007.10.16)			
+//카오스캐슬7_확장			
+426	1	"Chaos Castle13"	
+427	1	"Chaos Castle14"	
+//블러드캐슬8_확장			
+428	1	"Chief Skeleton Warrior"	
+429	1	"Chief Skeleton Archer"	
+430	1	"Dark Skull Soldier"	
+431	1	"Giant Ogre"	
+432	1	"Red Skeleton Knight"	
+433	1	"Magic Skeleton"	
+//악마의광장7_확장			
+434	1	"Gigantis"	
+435	1	"Berserker"	
+436	1	"Balram (Trainee Soldier)"	
+437	1	"Soram (Trainee Soldier)"	
+438	1	"Persona"	
+439	1	"Dreadfear"	
+440	1	"Dark Elf"	
+// 평온의 늪 몬스터 추가			
+441	1	"Sapi-Unus"	
+442	1	"Sapi-Duo"	
+443	1	"Sapi-Tres"	
+444	1	"Shadow Pawn"	
+445	1	"Shadow Knight"	
+446	1	"Shadow Look"	
+447	1	"Thunder Napin"	
+448	1	"Ghost Napin"	
+449	1	"Blaze Napin"	 
+// 벚꽃이벤트 npc 추가			
+450	1	"Cherry Blossom Spirit"	
+451	1	"Cherry Blossom Tree"	
+// 소켓 시스템 NPC			
+452	1	"Seed Master"	
+453	1	"Seed Researcher"	
+// 라클리온 몬스터 추가			
+454	1	"Ice Walker"	
+455	1	"Giant Mammoth"	
+456	1	"Ice Giant"	
+457	1	"Coolutin"	
+458	1	"Iron Knight"	
+459	1	"Selupan"	
+460	1	"Spider Eggs"	
+461	1	"Spider Eggs"	
+462	1	"Spider Eggs"	
+// 불꽃주머니 추가			
+463	1	"Fire Flame Ghost"	
+// 체험서버용 NPC 추가			
+//464	1	"Re-Initialization Helper"	
+// 상용화 7주년 이벤트 NPC 추가			
+478	1	"Delgado"	
+// 크리스마스이벤트 NPC 추가(국내 적용 추가)			
+465	1	"Santa Claus"	
+466	1	"Cursed Goblin"	
+467	1	"Snowman"	
+468	1	"Dasher"	
+469	1	"Kermit"	
+470	1	"Little Santa"	
+471	1	"Cupid"	
+472	1	"Prancer"	
+473	1	"Donner"	
+474	1	"Vixen"	
+475	1	"Blitzen"	
+476	1	"Cursed Santa"	
+477	1	"Transformed Snowman"	
+// PK필드 몬스터 NPC 추가			
+479	1	"Doorkeeper Titus"	
+480	1	"Zombie Fighter"	
+481	1	"Zombie Fighter"	
+482	1	"Resurrected Gladiator"	
+483	1	"Resurrected Gladiator"	
+484	1	"Ash Slaughterer"	
+485	1	"Ash Slaughterer"	
+486	1	"Blood Assassin"	
+487	1	"Cruel Blood Assassin"	
+488	1	"Cruel Blood Assassin"	
+489	1	"Burning Lava Giant"	
+490	1	"Ruthless Lava Giant"	
+491	1	"Ruthless Lava Giant"	
+// 겜블 NPC 추가			
+492	1	"Moss"	
+// 황금군단이벤트(일본)			
+502	1	"Golden Rabbit"	
+493	1	"Golden Dark Knight"	
+494	1	"Golden Devil"	
+495	1	"Golden Stone Golem"	
+496	1	"Golden Crust"	
+497	1	"Golden Satyros"	
+498	1	"Golden Twin Tail"	
+499	1	"Golden Iron Knight"	
+500	1	"Golden Napin"	
+501	1	"Great Golden Dragon"	
+// 5월 프리미엄 아이템 (팬더변신반지)			
+503	1	"Transformed Panda"	
+// 제국 수호군 몬스터 NPC 추가			
+// 몬스터			
+504	1	"Gaion Kharein"	
+// 맵 보스			
+505	1	"Jerint"	
+506	1	"Raymond"	
+507	1	"Erkanne"	
+508	1	"Destler"	
+509	1	"Vermont"	
+510	1	"Kato"	
+511	1	"Galia"	
+// 존 보스			
+512	1	"Quartermaster"	
+513	1	"Combat Instructor"	
+514	1	"Knight Commander"	
+515	1	"Grand Wizard"	
+516	1	"Master Assassin"	
+517	1	"Cavalry Captain"	
+// 일반 몬스터			
+518	1	"Shield Bearer"	
+519	1	"Medic"	
+520	1	"Knights"	
+521	1	"Bodyguard"	
+// NPC			
+522	1	"Jerint the Assistant"	
+// 오브젝트 NPC			
+523	1	"Trap"	
+524	1	"Castle Gate 1"	//내려가는 성문(평일)
+525	1	"Castle Gate 2"	//파괴되는 성문(평일)
+526	1	"Stone Statue 1"	
+527	1	"Castle Gate 3"	//내려가는 성문(주말)
+528	1	"Castle Gate 4"	//파괴되는 성문(주말)
+// 도플갱어 몬스터 NPC 추가			
+// 몬스터			
+// 보스 몬스터			
+529	1	"Furious Slaughterer"	
+530	1	"Slaughterer"	
+// 미션 몬스터			
+531	1	"Ice Walker"	
+// 일반 몬스터			
+532	1	"Larva"	
+533	1	"Doppelganger"	
+534	1	"Doppelganger Elf"	
+535	1	"Doppelganger Knight"	
+536	1	"Doppelganger Wizard"	
+537	1	"Doppelganger Magic Gladiator"	
+538	1	"Doppelganger Dark Lord"	
+539	1	"Doppelganger Summoner"	
+// NPC			
+540	1	"Lugard"	
+541	1	"Interim Reward Chest"	
+542	1	"Final Reward Chest"	
+// 겐스 NPC			
+543	1	"Gens Duprian Steward"	
+544	1	"Gens Vanert Steward"	
+//로랜시장 NPC 추가 2009.11.24 홍승욱			
+545	1	"Christine the General Goods Merchant"	
+546	1	"Jeweler Raul"	
+547	1	"Market Union Member Julia"	
+//스켈레톤변신반지용 변신스켈레톤 추가			
+548	1	"Transformed Skeleton"	
+549	1	"Bloody Orc"	
+550	1	"Bloody Death Rider"	
+551	1	"Bloody Golem"	
+552	1	"Bloody Witch Queen"	
+553	1	"Berserker Warrior"	
+554	1	"Kentauros Warrior"	
+555	1	"Gigantis Warrior"	
+556	1	"Genocider Warrior"	
+557	1	"Sapi Queen"	
+558	1	"Ice Napin"	
+559	1	"Shadow Master"	
+560	1	"Sapi Queen"	
+561	1	"Medusa"	
+562	1	"Dark Mammoth"	
+563	1	"Dark Giant"	
+564	1	"Dark Coolutin"	
+565	1	"Dark Iron Knight"
+566	1	"Mercenary Guild Manager Tercia"
+567	1	"Priestess Veina"
+568	1	"Wandering Merchant Zyro"
+// 칼루탄 몬스터 추가 2010-06-30 홍승욱	
+569	1	"Venomous Chain Scorpion"
+570	1	"Bone Scorpion"
+571	1	"Orcus"
+572	1	"Gollock"
+573	1	"Crypta"
+574	1	"Crypos"
+575	1	"Condra"
+576	1	"Narcondra"																						
+// 칼루탄 NPC 추가 2010-06-30 홍승욱																													
+577	1	"Leina the General Goods Merchant"																											
+578	1	"Weapons Merchant Bolo"																											
+// 럭키아이템 NPC 추가 2010-09-01 이기수																													
+579	1	"David"	
+585	1	"Scarecrow"	
+end			
