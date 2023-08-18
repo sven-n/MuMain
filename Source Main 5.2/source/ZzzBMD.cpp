@@ -2170,11 +2170,11 @@ __forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, con
     // scale the shadow in the x direction
     result[0] += result[2] * (result[0] + sx) / (result[2] - sy);
 
-    // put it on the ground by setting Z to 5.
-    result[2] = 5.f;
-
     // Add the origin again, to get the absolute coordinate of the vertex again
     VectorAdd(result, origin, result);
+
+    // put it on the ground by adding 5 to the actual ground coordinate.
+    result[2] = RequestTerrainHeight(result[0], result[1]) + 5.f;
 
     // copy to result
     VectorCopy(result, *position);
