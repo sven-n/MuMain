@@ -2440,7 +2440,7 @@ void MainScene(HDC hDC)
 #if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
         BeginBitmap();
         unicode::t_char szDebugText[128];
-        unicode::_sprintf(szDebugText, "FPS : %.1f Connected: %d", FPS, g_bGameServerConnected);
+        unicode::_sprintf(szDebugText, "FPS : %.1f Connected: %d", FPS_AVG, g_bGameServerConnected);
         unicode::t_char szMousePos[128];
         unicode::_sprintf(szMousePos, "MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
         unicode::t_char szCamera3D[128];

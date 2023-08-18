@@ -8,6 +8,7 @@ extern unsigned int WindowWidth;
 extern unsigned int WindowHeight;
 extern vec3_t CollisionPosition;
 extern double  FPS;
+extern double  FPS_AVG;
 extern double  FPS_ANIMATION_FACTOR;
 #if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)		// 실FPS.(고정 20FPS 상황에서 추정용.)
 extern float g_fFrameEstimate;

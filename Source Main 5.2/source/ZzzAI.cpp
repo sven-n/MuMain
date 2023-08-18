@@ -778,17 +778,16 @@ double   WorldTime = 0.0;
 void CalcFPS()
 {
     static int timeinit = 0;
-    static double start, start2, last;
-    static int frame = 0, frame2 = 0;
+    static double start, last;
+    static int frame = 0;
     if (!timeinit)
     {
         g_WorldTime->ResetTimer();
         start = g_WorldTime->GetTimeElapsed();
         timeinit = 1;
     }
-    frame++;
-    frame2++;
 
+    frame++;
     WorldTime = g_WorldTime->GetTimeElapsed();
 
     const double differenceMs = WorldTime - last;
@@ -802,18 +801,14 @@ void CalcFPS()
     }
 
     FPS_ANIMATION_FACTOR = DEFAULT_ANIMATION_FPS / FPS;
-    
-    //double dif = differenceMs / CLOCKS_PER_SEC;
 
-    // Calculate average fps every 2 seconds or 10 frames
+    // Calculate average fps every 2 seconds or 25 frames
     const double diffSinceStart = WorldTime - start;
-    if (diffSinceStart > 2000.0 && frame > 10)
+    if (diffSinceStart > 2000.0 || frame > 25)
     {
-        start = start2;
-        frame = frame2;
-        start2 = g_WorldTime->GetTimeElapsed();
-        frame2 = 0;
-        FPS_AVG = frame / diffSinceStart;
+        FPS_AVG = (1000 * frame) / diffSinceStart;
+        start = WorldTime;
+        frame = 0;
     }
 
     DeltaT = (float)differenceMs / CLOCKS_PER_SEC;
