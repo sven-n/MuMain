@@ -6320,12 +6320,6 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         else if (Type >= MODEL_WING + 49 && Type <= MODEL_WING + 50) return; // Capes
     }
 
-    //if (Type == MODEL_HELPER + 30
-    //    || (Type == MODEL_WING + 49)
-    //    || (Type == MODEL_WING + 135)
-    //    || (Type == MODEL_WING +130))
-    //    return;
-
     if (Type >= MODEL_STAFF + 21 && Type <= MODEL_STAFF + 29)
     {
         return;
@@ -6684,7 +6678,14 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     else
         b->Transform(BoneTransform, Temp, Temp, &OBB, Translate);
 
-    RenderPartObjectEffect(Object, Type, c->Light, o->Alpha, Level << 3, Option1, false, 0, RenderType | ((c->MonsterIndex == 67 || c->MonsterIndex == 137) ? (RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
+    if (Type != MODEL_HELPER + 30 // Cape of Lord
+        && Type != MODEL_WING + 49 // Cape of Fighter
+        && Type != MODEL_WING + 130 // Small Cape of Lord
+        && Type != MODEL_WING + 135 // Small Cape of Fighter
+        )
+    {
+        RenderPartObjectEffect(Object, Type, c->Light, o->Alpha, Level << 3, Option1, false, 0, RenderType | ((c->MonsterIndex == 67 || c->MonsterIndex == 137) ? (RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
+    }
 
     float Luminosity;
     vec3_t Light;
