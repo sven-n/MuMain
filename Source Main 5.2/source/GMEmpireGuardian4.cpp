@@ -473,10 +473,8 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 vec3_t vPosBlur01, vPosBlurRelative01;
                 vec3_t vPosBlur02, vPosBlurRelative02;
 
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
                 float fSpeedPerFrame = fActionSpeed / 10.f;
-
                 float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
                 int iSwordForceType = 0;
@@ -514,7 +512,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (8.0f <= o->AnimationFrame && o->AnimationFrame < 10.1f)
             {
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
                 float fSpeedPerFrame = fActionSpeed / 10.f;
                 float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -556,7 +554,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 vec3_t vPosBlur01, vPosBlurRelative01;
                 vec3_t vPosBlur02, vPosBlurRelative02;
 
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
                 float fSpeedPerFrame = fActionSpeed / 10.f;
                 float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -596,7 +594,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 vec3_t vPosBlur03, vPosBlurRelative03;
                 vec3_t vPosBlur04, vPosBlurRelative04;
 
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
                 float fSpeedPerFrame = fActionSpeed / 10.f;
 
                 float fAnimationFrame = o->AnimationFrame - fActionSpeed;

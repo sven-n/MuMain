@@ -544,9 +544,9 @@ namespace battleCastle
                 o->Live = false;
                 BoneManager::UnregisterBone(c);
 
-                for (int j = 0; j < MAX_BUTTERFLES; j++)
+                for (int j = 0; j < MAX_MOUNTS; j++)
                 {
-                    OBJECT* b = &Butterfles[j];
+                    OBJECT* b = &Mounts[j];
                     if (b->Live && b->Owner == o)
                         b->Live = false;
                 }

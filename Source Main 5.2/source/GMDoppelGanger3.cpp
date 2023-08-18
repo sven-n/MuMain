@@ -227,7 +227,7 @@ void CGMDoppelGanger3::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
         vec3_t StartPos, StartRelative;
         vec3_t EndPos, EndRelative;
 
-        float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+        float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fSpeedPerFrame = fActionSpeed / 10.f;
         float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
         for (int i = 0; i < 10; i++)

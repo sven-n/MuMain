@@ -215,7 +215,7 @@ UPDATE_WAY_POINT_ENTRY:
     if (m_dwCameraWalkState == CAMERAWALK_STATE_MOVE && m_listWayPoint.empty() == false) {
         if (m_dwCurrentIndex < m_listWayPoint.size()) {
             WAYPOINT* pTargetWayPoint = m_listWayPoint[m_dwCurrentIndex];
-
+            const float cameraMoveAccel = pTargetWayPoint->fCameraMoveAccel;// todo? *static_cast<float>(FPS_ANIMATION_FACTOR);
             if (m_iDelayCount >= pTargetWayPoint->iDelay)
             {
                 float fSubVector[2] = { pTargetWayPoint->fCameraX - m_CurrentCameraPos[0], pTargetWayPoint->fCameraY - m_CurrentCameraPos[1] };
@@ -223,7 +223,7 @@ UPDATE_WAY_POINT_ENTRY:
                 float fDirVector[2] = { fSubVector[0] / fSubDistance, fSubVector[1] / fSubDistance };
                 float fDirDistance = sqrt(fDirVector[0] * fDirVector[0] + fDirVector[1] * fDirVector[1]);
 
-                if (fSubDistance <= fDirDistance * pTargetWayPoint->fCameraMoveAccel)
+                if (fSubDistance <= fDirDistance * cameraMoveAccel)
                 {
                     m_dwCurrentIndex++;
                     m_iDelayCount = 0;
@@ -231,25 +231,26 @@ UPDATE_WAY_POINT_ENTRY:
                 }
                 else
                 {
-                    m_CurrentCameraPos[0] += (fDirVector[0] * pTargetWayPoint->fCameraMoveAccel);
-                    m_CurrentCameraPos[1] += (fDirVector[1] * pTargetWayPoint->fCameraMoveAccel);
+                    m_CurrentCameraPos[0] += (fDirVector[0] * cameraMoveAccel);
+                    m_CurrentCameraPos[1] += (fDirVector[1] * cameraMoveAccel);
                     m_CurrentCameraPos[2] = RequestTerrainHeight(m_CurrentCameraPos[0], m_CurrentCameraPos[1]);
 
                     if (m_fCurrentDistanceLevel < pTargetWayPoint->fCameraDistanceLevel)
                     {
-                        m_fCurrentDistanceLevel += (pTargetWayPoint->fCameraMoveAccel * 0.005f);
+                        m_fCurrentDistanceLevel += cameraMoveAccel * 0.005f;
                         if (m_fCurrentDistanceLevel > pTargetWayPoint->fCameraDistanceLevel)
                             m_fCurrentDistanceLevel = pTargetWayPoint->fCameraDistanceLevel;
                     }
                     if (m_fCurrentDistanceLevel > pTargetWayPoint->fCameraDistanceLevel)
                     {
-                        m_fCurrentDistanceLevel -= (pTargetWayPoint->fCameraMoveAccel * 0.005f);
+                        m_fCurrentDistanceLevel -= cameraMoveAccel * 0.005f;
                         if (m_fCurrentDistanceLevel < pTargetWayPoint->fCameraDistanceLevel)
                             m_fCurrentDistanceLevel = pTargetWayPoint->fCameraDistanceLevel;
                     }
                 }
             }
-            m_iDelayCount++;
+
+            m_iDelayCount += FPS_ANIMATION_FACTOR;
         }
         else if (m_dwCurrentIndex == m_listWayPoint.size())
         {
@@ -477,6 +478,13 @@ UPDATE_WAY_POINT_ENTRY:
         WAYPOINT* pTargetWayPoint = m_listWayPoint[dwTargetIndex];
         DWORD dwOriginIndex = (m_dwCurrentIndex > 0 ? m_dwCurrentIndex - 1 : m_listWayPoint.size() - 1);
         WAYPOINT* pOriginWayPoint = m_listWayPoint[dwOriginIndex];
+        float targetCameraAcc = pTargetWayPoint->fCameraMoveAccel * static_cast<float>(FPS_ANIMATION_FACTOR);
+        float originCameraAcc = pOriginWayPoint->fCameraMoveAccel * static_cast<float>(FPS_ANIMATION_FACTOR);
+
+        targetCameraAcc = min(targetCameraAcc, 100);
+        originCameraAcc = min(originCameraAcc, 100);
+        targetCameraAcc = max(targetCameraAcc, 0.1f);
+        originCameraAcc = max(originCameraAcc, 0.1f);
 
         if (m_iDelayCount >= pTargetWayPoint->iDelay)
         {
@@ -514,11 +522,17 @@ UPDATE_WAY_POINT_ENTRY:
                 fTourDirVector[1] = fDirVector[1] * fBlendRate + fPrevDirVector[1] * (1.0f - fBlendRate);
             }
 
-            float fSpeed = 1.0f;
-            if (m_fForceSpeed > 0) fSpeed = m_fForceSpeed;
-            else if (m_fForceSpeed < 0) fSpeed = -m_fForceSpeed;
+            auto fSpeed = static_cast<float>(FPS_ANIMATION_FACTOR);
+            if (m_fForceSpeed > 0)
+            {
+                fSpeed *= m_fForceSpeed;
+            }
+            else if (m_fForceSpeed < 0)
+            {
+                fSpeed *= -m_fForceSpeed;
+            }
 
-            if (m_fForceSpeed >= 0 && fSubDistance <= pTargetWayPoint->fCameraMoveAccel * fSpeed)
+            if (m_fForceSpeed >= 0 && fSubDistance <= targetCameraAcc * fSpeed)
             {
                 if (m_dwCurrentIndex < m_listWayPoint.size())
                     m_dwCurrentIndex++;
@@ -527,7 +541,8 @@ UPDATE_WAY_POINT_ENTRY:
                 m_iDelayCount = 0;
                 goto UPDATE_WAY_POINT_ENTRY;
             }
-            else if (m_fForceSpeed < 0 && fOrgDistance <= pTargetWayPoint->fCameraMoveAccel * fSpeed)
+
+            if (m_fForceSpeed < 0 && fOrgDistance <= targetCameraAcc * fSpeed)
             {
                 if (m_dwCurrentIndex > 0)
                     m_dwCurrentIndex--;
@@ -536,74 +551,91 @@ UPDATE_WAY_POINT_ENTRY:
                 m_iDelayCount = 0;
                 goto UPDATE_WAY_POINT_ENTRY;
             }
-            else
+
+            if (fSubDistance > 5.0f && fOrgDistance > 5.0f)
             {
-                if (fSubDistance > 5.0f && fOrgDistance > 5.0f)
+                m_fTargetTourCameraAngle = CreateAngle(0, 0, fTourDirVector[0], -fTourDirVector[1]);
+            }
+            //if (m_fTargetTourCameraAngle != m_fTourCameraAngle)
+            {
+                float fRotDir = 0;
+                float fAngleDistance = 0;
+                float fAngleTest = absf(m_fTargetTourCameraAngle - m_fTourCameraAngle);
+                if (fAngleTest > 180)
                 {
-                    m_fTargetTourCameraAngle = CreateAngle(0, 0, fTourDirVector[0], -fTourDirVector[1]);
-                }
-                //if (m_fTargetTourCameraAngle != m_fTourCameraAngle)
-                {
-                    float fRotDir = 0;
-                    float fAngleDistance = 0;
-                    float fAngleTest = absf(m_fTargetTourCameraAngle - m_fTourCameraAngle);
-                    if (fAngleTest > 180)
-                    {
-                        fRotDir = (m_fTargetTourCameraAngle - m_fTourCameraAngle > 0.f ? -1.0f : 1.0f);
-                        fAngleDistance = 360.0f - fAngleTest;
-                    }
-                    else
-                    {
-                        fRotDir = (m_fTargetTourCameraAngle - m_fTourCameraAngle > 0.f ? 1.0f : -1.0f);
-                        fAngleDistance = fAngleTest;
-                    }
-
-                    const float fMaxRotateSpeed = 1.0f;
-                    float fRotateSpeed = 0;
-                    if (fAngleDistance > 0) fRotateSpeed = fAngleDistance / 30.0f;
-                    if (fRotateSpeed > fMaxRotateSpeed) fRotateSpeed = fMaxRotateSpeed;
-                    fRotateSpeed *= fSpeed;
-
-                    if (fAngleDistance <= fRotateSpeed)
-                        m_fTourCameraAngle = m_fTargetTourCameraAngle;
-                    else
-                        m_fTourCameraAngle += fRotateSpeed * fRotDir;
-
-                    if (m_fTourCameraAngle < 0.0f) m_fTourCameraAngle += 360.0f;
-                    else if (m_fTourCameraAngle > 360.0f) m_fTourCameraAngle -= 360.0f;
-                }
-
-                if (IsTourPaused())
-                {
-                    if (m_fForceSpeed > 0)
-                    {
-                        m_CurrentCameraPos[0] += (fDirVector[0] * pTargetWayPoint->fCameraMoveAccel * m_fForceSpeed);
-                        m_CurrentCameraPos[1] += (fDirVector[1] * pTargetWayPoint->fCameraMoveAccel * m_fForceSpeed);
-                        m_vTourCameraPos[0] += (fTourDirVector[0] * pTargetWayPoint->fCameraMoveAccel * m_fForceSpeed);
-                        m_vTourCameraPos[1] += (fTourDirVector[1] * pTargetWayPoint->fCameraMoveAccel * m_fForceSpeed);
-                    }
-                    else if (m_fForceSpeed < 0)
-                    {
-                        m_CurrentCameraPos[0] += (fRvsDirVector[0] * pOriginWayPoint->fCameraMoveAccel * m_fForceSpeed);
-                        m_CurrentCameraPos[1] += (fRvsDirVector[1] * pOriginWayPoint->fCameraMoveAccel * m_fForceSpeed);
-                        m_vTourCameraPos[0] += (fTourDirVector[0] * pOriginWayPoint->fCameraMoveAccel * m_fForceSpeed);
-                        m_vTourCameraPos[1] += (fTourDirVector[1] * pOriginWayPoint->fCameraMoveAccel * m_fForceSpeed);
-                    }
+                    fRotDir = (m_fTargetTourCameraAngle - m_fTourCameraAngle > 0.f ? -1.0f : 1.0f);
+                    fAngleDistance = 360.0f - fAngleTest;
                 }
                 else
                 {
-                    m_CurrentCameraPos[0] += (fDirVector[0] * pTargetWayPoint->fCameraMoveAccel);
-                    m_CurrentCameraPos[1] += (fDirVector[1] * pTargetWayPoint->fCameraMoveAccel);
-                    m_vTourCameraPos[0] += (fTourDirVector[0] * pTargetWayPoint->fCameraMoveAccel);
-                    m_vTourCameraPos[1] += (fTourDirVector[1] * pTargetWayPoint->fCameraMoveAccel);
+                    fRotDir = (m_fTargetTourCameraAngle - m_fTourCameraAngle > 0.f ? 1.0f : -1.0f);
+                    fAngleDistance = fAngleTest;
                 }
-                m_vTourCameraPos[2] = -300;//RequestTerrainHeight(m_CurrentCameraPos[0],m_CurrentCameraPos[1]);
 
-                m_fCurrentDistanceLevel = pOriginWayPoint->fCameraDistanceLevel * fSubDistance / (fOrgDistance + fSubDistance)
-                    + pTargetWayPoint->fCameraDistanceLevel * fOrgDistance / (fOrgDistance + fSubDistance);
+                const float fMaxRotateSpeed = 1.0;
+                float fRotateSpeed = 0;
+                if (fAngleDistance > 0)
+                {
+                    fRotateSpeed = fAngleDistance / 30.0f;
+                    //fRotateSpeed *= FPS_ANIMATION_FACTOR;
+                }
+
+                if (fRotateSpeed > fMaxRotateSpeed)
+                {
+                    fRotateSpeed = fMaxRotateSpeed;
+                }
+
+                //fRotateSpeed *= fSpeed;
+
+                if (fAngleDistance <= fRotateSpeed)
+                {
+                    m_fTourCameraAngle = m_fTargetTourCameraAngle;
+                }
+                else
+                {
+                    m_fTourCameraAngle += fRotateSpeed * fRotDir;
+                }
+
+                if (m_fTourCameraAngle < 0.0f)
+                {
+                    m_fTourCameraAngle += 360.0f;
+                }
+                else if (m_fTourCameraAngle > 360.0f)
+                {
+                    m_fTourCameraAngle -= 360.0f;
+                }
             }
+
+            if (IsTourPaused())
+            {
+                if (m_fForceSpeed > 0)
+                {
+                    m_CurrentCameraPos[0] += (fDirVector[0] * targetCameraAcc * m_fForceSpeed);
+                    m_CurrentCameraPos[1] += (fDirVector[1] * targetCameraAcc * m_fForceSpeed);
+                    m_vTourCameraPos[0] += (fTourDirVector[0] * targetCameraAcc * m_fForceSpeed);
+                    m_vTourCameraPos[1] += (fTourDirVector[1] * targetCameraAcc * m_fForceSpeed);
+                }
+                else if (m_fForceSpeed < 0)
+                {
+                    m_CurrentCameraPos[0] += (fRvsDirVector[0] * originCameraAcc * m_fForceSpeed);
+                    m_CurrentCameraPos[1] += (fRvsDirVector[1] * originCameraAcc * m_fForceSpeed);
+                    m_vTourCameraPos[0] += (fTourDirVector[0] * originCameraAcc * m_fForceSpeed);
+                    m_vTourCameraPos[1] += (fTourDirVector[1] * originCameraAcc * m_fForceSpeed);
+                }
+            }
+            else
+            {
+                m_CurrentCameraPos[0] += (fDirVector[0] * targetCameraAcc);
+                m_CurrentCameraPos[1] += (fDirVector[1] * targetCameraAcc);
+                m_vTourCameraPos[0] += (fTourDirVector[0] * targetCameraAcc);
+                m_vTourCameraPos[1] += (fTourDirVector[1] * targetCameraAcc);
+            }
+            m_vTourCameraPos[2] = -300;//RequestTerrainHeight(m_CurrentCameraPos[0],m_CurrentCameraPos[1]);
+
+            m_fCurrentDistanceLevel = pOriginWayPoint->fCameraDistanceLevel * fSubDistance / (fOrgDistance + fSubDistance)
+                + pTargetWayPoint->fCameraDistanceLevel * fOrgDistance / (fOrgDistance + fSubDistance);
         }
-        m_iDelayCount++;
+        m_iDelayCount += FPS_ANIMATION_FACTOR;
     }
     else
     {

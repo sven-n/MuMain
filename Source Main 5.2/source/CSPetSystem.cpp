@@ -24,7 +24,7 @@
 
 extern bool g_PetEnableDuel;
 
-extern  float   WorldTime;
+extern  double   WorldTime;
 extern	char    TextList[50][100];
 extern	int     TextListColor[50];
 extern	int     TextBold[50];

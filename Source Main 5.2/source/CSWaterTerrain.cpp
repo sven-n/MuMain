@@ -18,7 +18,7 @@
 #include "GMHellas.h"
 #include "MapManager.h"
 
-extern  float   WorldTime;
+extern  double   WorldTime;
 extern  float   TerrainMappingAlpha[TERRAIN_SIZE * TERRAIN_SIZE];
 extern  float   g_chrome[MAX_VERTICES][2];
 

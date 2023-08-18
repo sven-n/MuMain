@@ -44,6 +44,9 @@ extern int  MouseX;
 extern int  MouseY;
 extern bool MouseLButton;
 
+extern double FPS;
+extern double FPS_ANIMATION_FACTOR;
+
 bool  StopMotion = false;
 float ParentMatrix[3][4];
 
@@ -399,7 +402,7 @@ bool BMD::PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsig
 {
     bool Loop = true;
 
-    if (AnimationFrame == NULL || PriorAnimationFrame == NULL || PriorAction == NULL || (NumActions > 0 && CurrentAction >= NumActions))
+    if (AnimationFrame == nullptr || PriorAnimationFrame == nullptr || PriorAction == nullptr || (NumActions > 0 && CurrentAction >= NumActions))
     {
         return Loop;
     }
@@ -409,12 +412,12 @@ bool BMD::PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsig
         return Loop;
     }
 
-    int Temp = (int)*AnimationFrame;
-    *AnimationFrame += Speed;
-    if (Temp != (int)*AnimationFrame)
+    const int priorAnimationFrame = (int)*AnimationFrame;
+    *AnimationFrame += Speed * FPS_ANIMATION_FACTOR;
+    if (priorAnimationFrame != (int)*AnimationFrame)
     {
         *PriorAction = CurrentAction;
-        *PriorAnimationFrame = (float)Temp;
+        *PriorAnimationFrame = (float)priorAnimationFrame;
     }
     if (*AnimationFrame <= 0.f)
     {
@@ -904,7 +907,7 @@ void BMD::EndRender()
     glPopMatrix();
 }
 
-extern float WorldTime;
+extern double WorldTime;
 extern int WaterTextureNumber;
 
 void BMD::RenderMesh(int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
@@ -914,7 +917,7 @@ void BMD::RenderMesh(int i, int RenderFlag, float Alpha, int BlendMesh, float Bl
     Mesh_t* m = &Meshs[i];
     if (m->NumTriangles == 0) return;
 
-    float Wave = (int)WorldTime % 10000 * 0.0001f;
+    float Wave = (long)WorldTime % 10000 * 0.0001f;
 
     int Texture = IndexTexture[m->Texture];
     if (Texture == BITMAP_HIDE)

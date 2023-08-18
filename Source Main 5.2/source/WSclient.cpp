@@ -1228,7 +1228,7 @@ BOOL ReceiveInventory(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     auto Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer; //LPPHEADER_DEFAULT_SUBCODE_WORD 6byte
     int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
-    DeleteBug(&Hero->Object);
+    DeleteMount(&Hero->Object);
     giPetManager::DeletePet(Hero);
 
     ThePetProcess().DeletePet(Hero);
@@ -1714,7 +1714,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_FRIEND);
 
                 SetCharacterClass(Hero);
-                DeleteBug(&Hero->Object);
+                DeleteMount(&Hero->Object);
             }
             if (gMapManager.InChaosCastle() == false)
             {
@@ -1973,7 +1973,7 @@ void ReceiveChangePlayer(const BYTE* ReceiveBuffer)
         if (Type == 0x1FFF)
         {
             c->Helper.Type = -1;
-            DeleteBug(o);
+            DeleteMount(o);
             ThePetProcess().DeletePet(c, c->Helper.Type, true);
         }
         else
@@ -1983,27 +1983,27 @@ void ReceiveChangePlayer(const BYTE* ReceiveBuffer)
             c->Helper.Level = 0;
             switch (Type)
             {
-            case ITEM_HELPER:CreateBug(MODEL_HELPER, o->Position, o); break;
-            case ITEM_HELPER + 2:CreateBug(MODEL_UNICON, o->Position, o); break;
-            case ITEM_HELPER + 3:CreateBug(MODEL_PEGASUS, o->Position, o); break;
-            case ITEM_HELPER + 4:CreateBug(MODEL_DARK_HORSE, o->Position, o); break;
+            case ITEM_HELPER:CreateMount(MODEL_HELPER, o->Position, o); break;
+            case ITEM_HELPER + 2:CreateMount(MODEL_UNICON, o->Position, o); break;
+            case ITEM_HELPER + 3:CreateMount(MODEL_PEGASUS, o->Position, o); break;
+            case ITEM_HELPER + 4:CreateMount(MODEL_DARK_HORSE, o->Position, o); break;
             case ITEM_HELPER + 37:
                 c->Helper.Option1 = Option;
                 if (Option == 0x01)
                 {
-                    CreateBug(MODEL_FENRIR_BLACK, o->Position, o);
+                    CreateMount(MODEL_FENRIR_BLACK, o->Position, o);
                 }
                 else if (Option == 0x02)
                 {
-                    CreateBug(MODEL_FENRIR_BLUE, o->Position, o);
+                    CreateMount(MODEL_FENRIR_BLUE, o->Position, o);
                 }
                 else if (Option == 0x04)
                 {
-                    CreateBug(MODEL_FENRIR_GOLD, o->Position, o);
+                    CreateMount(MODEL_FENRIR_GOLD, o->Position, o);
                 }
                 else
                 {
-                    CreateBug(MODEL_FENRIR_RED, o->Position, o);
+                    CreateMount(MODEL_FENRIR_RED, o->Position, o);
                 }
                 break;
             case ITEM_HELPER + 64:

@@ -351,7 +351,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
     break;
     case MODEL_MONSTER01 + 146:
     {
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t Light;
         vec3_t EndPos, EndRelative;
         Vector(1.f, 1.f, 1.f, Light);
@@ -802,7 +802,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
     break;
     case MODEL_MONSTER01 + 205:
     {
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t Light;
         vec3_t EndPos, EndRelative;
         Vector(1.f, 1.f, 1.f, Light);
@@ -991,7 +991,7 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1049,7 +1049,7 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1813,7 +1813,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         vec3_t StartPos, StartRelative;
         vec3_t EndPos, EndRelative;
 
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fSpeedPerFrame = fActionSpeed / 10.f;
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         for (int i = 0; i < 10; i++)
@@ -1940,7 +1940,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         vec3_t StartPos, StartRelative;
         vec3_t EndPos, EndRelative;
 
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fSpeedPerFrame = fActionSpeed / 10.f;
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         for (int i = 0; i < 10; i++)
@@ -2067,7 +2067,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         vec3_t StartPos, StartRelative;
         vec3_t EndPos, EndRelative;
 
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fSpeedPerFrame = fActionSpeed / 10.f;
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         for (int i = 0; i < 10; i++)

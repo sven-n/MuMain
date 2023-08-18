@@ -382,7 +382,7 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
 {
     if (!gMapManager.IsCursedTemple()) return;
 
-    float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+    float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
 
     switch (o->Type)
     {
@@ -494,7 +494,7 @@ void CursedTemple::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -778,7 +778,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_STOP2)
         {
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
 
             if (o->AnimationFrame > 0.5f && o->AnimationFrame < (8.5f + fActionSpeed))
             {
@@ -1228,7 +1228,7 @@ void CursedTemple::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
                 BMD* b = &Models[o->Type];
                 VectorCopy(o->Position, b->BodyOrigin);
 
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
 
                 float fSpeedPerFrame = fActionSpeed / 10.f;
 

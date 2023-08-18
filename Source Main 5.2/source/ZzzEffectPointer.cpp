@@ -61,7 +61,7 @@ void MovePointers()
         PARTICLE* o = &Pointers[i];
         if (o->Live)
         {
-            o->LifeTime--;
+            o->LifeTime -= FPS_ANIMATION_FACTOR;
             switch (o->Type)
             {
             case BITMAP_CURSOR + 5:

@@ -29,11 +29,11 @@ static  const   BYTE    BOID_DOWN = 1;
 static  const   BYTE    BOID_GROUND = 2;
 static  const   BYTE    BOID_UP = 3;
 
-void DeleteBug(OBJECT* Owner)
+void DeleteMount(OBJECT* Owner)
 {
-    for (int i = 0; i < MAX_BUTTERFLES; i++)
+    for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Butterfles[i];
+        OBJECT* o = &Mounts[i];
         if (o->Live)
         {
             if (o->Owner == Owner)
@@ -42,7 +42,7 @@ void DeleteBug(OBJECT* Owner)
     }
 }
 
-bool IsBug(ITEM* pItem)
+bool IsMount(ITEM* pItem)
 {
     if (pItem == NULL)
     {
@@ -64,9 +64,12 @@ bool IsBug(ITEM* pItem)
     return false;
 }
 
-bool CreateBugSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int SubType, int LinkBone)
+bool CreateMountSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int SubType, int LinkBone)
 {
-    if (gMapManager.InChaosCastle() == true) return false;
+    if (gMapManager.InChaosCastle() == true)
+    {
+        return false;
+    }
 
     if (!o->Live)
     {
@@ -122,26 +125,32 @@ bool CreateBugSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int SubTy
             o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(rand() % 100);
             break;
         }
+
         return FALSE;
     }
+
     return TRUE;
 }
 
-void CreateBug(int Type, vec3_t Position, OBJECT* Owner, int SubType, int LinkBone)
+void CreateMount(int Type, vec3_t Position, OBJECT* Owner, int SubType, int LinkBone)
 {
     if (gMapManager.InChaosCastle() == true) return;
 
     if (Owner->Type != MODEL_PLAYER && Type != MODEL_HELPER)
         return;
 
-    for (int i = 0; i < MAX_BUTTERFLES; i++)
+    for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Butterfles[i];
-        if (CreateBugSub(Type, Position, Owner, o, SubType, LinkBone) == FALSE) return;
+        OBJECT* o = &Mounts[i];
+        if (CreateMountSub(Type, Position, Owner, o, SubType, LinkBone) == FALSE)
+        {
+            // False means, it has been successful ...
+            return;
+        }
     }
 }
 
-bool MoveBug(OBJECT* o, bool bForceRender)
+bool MoveMount(OBJECT* o, bool bForceRender)
 {
     if (o->Live)
     {
@@ -321,10 +330,11 @@ bool MoveBug(OBJECT* o, bool bForceRender)
 
             b->BoneHead = 7;
 
+            // Take riders position and angle:
             VectorCopy(o->Owner->HeadAngle, o->HeadAngle);
             VectorCopy(o->Owner->Position, o->Position);
-
             VectorCopy(o->Owner->Angle, o->Angle);
+
             if (o->Owner->CurrentAction == PLAYER_ATTACK_DARKHORSE)
             {
                 SetAction(o, 3);
@@ -381,15 +391,15 @@ bool MoveBug(OBJECT* o, bool bForceRender)
                 {
                     if (o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking))
                     {
+                        // Smoke at the back feet of the horse.
                         Vector(o->Position[0] + (float)(rand() % 64 - 32),
                             o->Position[1] + (float)(rand() % 64 - 32),
                             o->Position[2] + (float)(rand() % 32 - 16), Position);
 
                         if (gMapManager.WorldActive == WD_2DEVIAS)
                             CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light);
-                        else if (gMapManager.WorldActive != WD_10HEAVEN)
-                            if (!g_Direction.m_CKanturu.IsMayaScene())
-                                CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
+                        else if (gMapManager.WorldActive != WD_10HEAVEN && !g_Direction.m_CKanturu.IsMayaScene())
+                            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
                     }
                 }
 
@@ -417,7 +427,8 @@ bool MoveBug(OBJECT* o, bool bForceRender)
                 o->Velocity = 0.3f;
             }
 
-            if (o->CurrentAction != 1)
+            // Breathing smoke/bubbles:
+            //if (o->CurrentAction != 1)
             {
                 if (o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking))
                 {
@@ -609,6 +620,7 @@ bool MoveBug(OBJECT* o, bool bForceRender)
             break;
         }
         b->CurrentAction = o->CurrentAction;
+
         b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity, o->Position, o->Angle);
 
         if (o->Type == MODEL_HELPER || o->Type == MODEL_HELPER + 1)
@@ -646,16 +658,16 @@ bool MoveBug(OBJECT* o, bool bForceRender)
     }
     return TRUE;
 }
-void MoveBugs()
+void MoveMounts()
 {
-    for (int i = 0; i < MAX_BUTTERFLES; i++)
+    for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Butterfles[i];
-        if (MoveBug(o) == FALSE) return;
+        OBJECT* o = &Mounts[i];
+        if (MoveMount(o) == FALSE) return;
     }
 }
 
-bool RenderBug(OBJECT* o, bool bForceRender)
+bool RenderMount(OBJECT* o, bool bForceRender)
 {
     if (o->Live)
     {
@@ -701,12 +713,12 @@ bool RenderBug(OBJECT* o, bool bForceRender)
     return TRUE;
 }
 
-void RenderBugs()
+void RenderMount()
 {
-    for (int i = 0; i < MAX_BUTTERFLES; i++)
+    for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Butterfles[i];
-        if (RenderBug(o) == FALSE)
+        OBJECT* o = &Mounts[i];
+        if (RenderMount(o) == FALSE)
         {
             return;
         }

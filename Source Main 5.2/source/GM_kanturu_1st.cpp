@@ -1619,7 +1619,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1655,7 +1655,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1691,7 +1691,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1723,7 +1723,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1760,7 +1760,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 18; i++)
@@ -1814,7 +1814,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1850,7 +1850,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1886,7 +1886,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 18; i++)

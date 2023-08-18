@@ -120,7 +120,7 @@
 //struct
 #define MAX_BOIDS         40
 #define MAX_FISHS         10
-#define MAX_BUTTERFLES    10
+#define MAX_MOUNTS    10
 //bodypart
 #define BODYPART_HEAD   0
 #define BODYPART_HELM   1

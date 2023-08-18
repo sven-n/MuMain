@@ -23,7 +23,7 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 
-inline float CreateAngle2D(const vec3_t from, const vec2_t to)
+float CreateAngle2D(const vec3_t from, const vec2_t to)
 {
     return CreateAngle(from[0], from[1], to[0], to[1]);
 }
@@ -146,10 +146,14 @@ float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Tu
 
 void MovePosition(vec3_t Position, vec3_t Angle, vec3_t Speed)
 {
+    VectorScale(Speed, FPS_ANIMATION_FACTOR, Speed)
+
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
+
     vec3_t Velocity;
     VectorRotate(Speed, Matrix, Velocity);
+
     VectorAdd(Position, Velocity, Position);
 }
 
@@ -761,59 +765,67 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
     return false;
 }
 
-float   DeltaT = 0.1f;
-float   FPS;
-float   WorldTime = 0.f;
+CTimer* g_WorldTime = new CTimer();
 
-float WorldTimeWrapOffset = 0.f;
+constexpr double DEFAULT_ANIMATION_FPS = 25.0;
+
+float   DeltaT = 0.1f;
+double   FPS;
+double   FPS_ANIMATION_FACTOR;
+double   FPS_AVG;
+double   WorldTime = 0.0;
 
 void CalcFPS()
 {
     static int timeinit = 0;
-    static long start, start2, current, last;
+    static double start, start2, last;
     static int frame = 0, frame2 = 0;
     if (!timeinit)
     {
-        frame = 0;
-        start = timeGetTime();
+        g_WorldTime->ResetTimer();
+        start = g_WorldTime->GetTimeElapsed();
         timeinit = 1;
     }
     frame++;
     frame2++;
 
-    current = timeGetTime(); // found in winmm.
+    WorldTime = g_WorldTime->GetTimeElapsed();
 
-    auto currentFloat = static_cast<float>(current);
-    if (WorldTime > (currentFloat + WorldTimeWrapOffset))
+    const double differenceMs = WorldTime - last;
+    if (differenceMs <= 0)
     {
-        // every 49,71 days without reboot, the value gets wrapped around 0 again.
-        // so we simply add this to an offset.
-        WorldTimeWrapOffset += 4294967295.0f;
+        FPS = 0.01;
+    }
+    else
+    {
+        FPS = 1000 / differenceMs;
     }
 
-    WorldTime = currentFloat + WorldTimeWrapOffset;
+    FPS_ANIMATION_FACTOR = DEFAULT_ANIMATION_FPS / FPS;
+    
+    //double dif = differenceMs / CLOCKS_PER_SEC;
 
-    int    difTime = current - last;
-    double dif = (double)(current - start) / CLOCKS_PER_SEC;
-    double rv = (dif) ? (double)frame / (double)dif : -1.0;
-    if (dif > 2.0 && frame > 10)
+    // Calculate average fps every 2 seconds or 10 frames
+    const double diffSinceStart = WorldTime - start;
+    if (diffSinceStart > 2000.0 && frame > 10)
     {
         start = start2;
         frame = frame2;
-        start2 = timeGetTime();
+        start2 = g_WorldTime->GetTimeElapsed();
         frame2 = 0;
+        FPS_AVG = frame / diffSinceStart;
     }
-    DeltaT = (float)(current - last) / CLOCKS_PER_SEC;
-    if (current == last)
+
+    DeltaT = (float)differenceMs / CLOCKS_PER_SEC;
+    if (WorldTime == last)
     {
         DeltaT = 0.1f / CLOCKS_PER_SEC;  // it just cant be 0
     }
-    // if(DeltaT>1.0) DeltaT=1.0;
-    FPS = (float)rv;
-    last = current;
+
+    last = WorldTime;
 
     if (SceneFlag == MAIN_SCENE)
     {
-        gSkillManager.CalcSkillDelay(difTime);
+        gSkillManager.CalcSkillDelay((int)DeltaT);
     }
 }

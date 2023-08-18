@@ -936,20 +936,20 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
         switch (pItem->Type)
         {
         case ITEM_HELPER:
-            CreateBug(MODEL_HELPER, pHeroObject->Position, pHeroObject);
+            CreateMount(MODEL_HELPER, pHeroObject->Position, pHeroObject);
             break;
         case ITEM_HELPER + 2:
-            CreateBug(MODEL_UNICON, pHeroObject->Position, pHeroObject);
+            CreateMount(MODEL_UNICON, pHeroObject->Position, pHeroObject);
             if (!Hero->SafeZone)
                 CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
             break;
         case ITEM_HELPER + 3:
-            CreateBug(MODEL_PEGASUS, pHeroObject->Position, pHeroObject);
+            CreateMount(MODEL_PEGASUS, pHeroObject->Position, pHeroObject);
             if (!Hero->SafeZone)
                 CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
             break;
         case ITEM_HELPER + 4:
-            CreateBug(MODEL_DARK_HORSE, pHeroObject->Position, pHeroObject);
+            CreateMount(MODEL_DARK_HORSE, pHeroObject->Position, pHeroObject);
             if (!Hero->SafeZone)
                 CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
             break;
@@ -957,19 +957,19 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
             Hero->Helper.Option1 = pItem->Option1;
             if (pItem->Option1 == 0x01)
             {
-                CreateBug(MODEL_FENRIR_BLACK, pHeroObject->Position, pHeroObject);
+                CreateMount(MODEL_FENRIR_BLACK, pHeroObject->Position, pHeroObject);
             }
             else if (pItem->Option1 == 0x02)
             {
-                CreateBug(MODEL_FENRIR_BLUE, pHeroObject->Position, pHeroObject);
+                CreateMount(MODEL_FENRIR_BLUE, pHeroObject->Position, pHeroObject);
             }
             else if (pItem->Option1 == 0x04)
             {
-                CreateBug(MODEL_FENRIR_GOLD, pHeroObject->Position, pHeroObject);
+                CreateMount(MODEL_FENRIR_GOLD, pHeroObject->Position, pHeroObject);
             }
             else
             {
-                CreateBug(MODEL_FENRIR_RED, pHeroObject->Position, pHeroObject);
+                CreateMount(MODEL_FENRIR_RED, pHeroObject->Position, pHeroObject);
             }
 
             if (!Hero->SafeZone)
@@ -1035,9 +1035,9 @@ void CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
         return;
     }
 
-    if (IsBug(pItem) == true)
+    if (IsMount(pItem) == true)
     {
-        DeleteBug(&Hero->Object);
+        DeleteMount(&Hero->Object);
     }
 }
 

@@ -470,7 +470,7 @@ typedef struct
     vec3_t Angle;
     vec3_t Light;
     float  Alpha;
-    int    LifeTime;
+    float  LifeTime;
     OBJECT* Target;
     float  Rotation;
     int    Frame;

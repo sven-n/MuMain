@@ -270,8 +270,9 @@ void CMonkSystem::MoveBlurEffect(CHARACTER* _pCha, OBJECT* _pObj, BMD* pModel)
     vec3_t Light;
     vec3_t StartPos, StartLocal, EndPos, EndLocal;
     float fDelay = 10.0f;
-    float fSpeedPerFrame = b->Actions[_pObj->CurrentAction].PlaySpeed / fDelay;
-    float fAnimationFrame = _pObj->AnimationFrame - b->Actions[_pObj->CurrentAction].PlaySpeed;
+    float fPlaySpeed = b->Actions[_pObj->CurrentAction].PlaySpeed * FPS_ANIMATION_FACTOR;
+    float fSpeedPerFrame = fPlaySpeed / fDelay;
+    float fAnimationFrame = _pObj->AnimationFrame - fPlaySpeed;
 
     if (fAnimationFrame > 5.5f)
         return;

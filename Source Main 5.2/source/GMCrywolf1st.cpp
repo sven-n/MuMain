@@ -724,7 +724,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
     case MODEL_MONSTER01 + 98:
     {
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
         vec3_t Light;
@@ -756,7 +756,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     break;
     case MODEL_MONSTER01 + 94:
     {
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t Light;
         vec3_t EndPos, EndRelative;
         Vector(1.f, 1.f, 1.f, Light);
@@ -796,7 +796,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_MONSTER01 + 89:
     {
         MoveEye(o, b, 9, 10);
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
         vec3_t Light;
@@ -884,7 +884,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             CreateSprite(BITMAP_LIGHT, Position, 3.5f, Light, o);
         }
 
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t EndPos, EndRelative;
         Vector(1.f, 1.f, 1.f, Light);
 
@@ -1105,7 +1105,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             //				vec3_t StartPos;//, StartRelative;
             vec3_t EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             VectorCopy(o->Angle, TempAngle);
@@ -1160,7 +1160,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1197,7 +1197,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -1248,7 +1248,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -1292,7 +1292,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -1340,7 +1340,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -1375,7 +1375,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -2076,7 +2076,7 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
             float Matrix[3][4];
             AngleMatrix(Hero->Object.Angle, Matrix);
             vec3_t Velocity, Direction;
-            Vector(0.f, -45.f * CharacterMoveSpeed(Hero), 0.f, Velocity);
+            Vector(0.f, -45.f * ScaledCharacterMoveSpeed(Hero), 0.f, Velocity);
             VectorRotate(Velocity, Matrix, Direction);
             VectorAdd(TargetPosition, Direction, TargetPosition);
         }

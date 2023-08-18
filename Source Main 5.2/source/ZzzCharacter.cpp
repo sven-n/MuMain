@@ -417,7 +417,8 @@ void SetPlayerWalk(CHARACTER* c)
                 || c->Object.SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER
                 || c->Object.SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
             {
-                c->Run++;
+                // RUN are the number of frames which are required until running gets active
+                c->Run += FPS_ANIMATION_FACTOR;
             }
         }
     OBJECT* o = &c->Object;
@@ -3711,11 +3712,11 @@ void CreateWeaponBlur(CHARACTER* c, OBJECT* o, BMD* b)
             }
             else
             {
-                float inter = 10.f;
-                float animationFrame = o->AnimationFrame - b->Actions[b->CurrentAction].PlaySpeed;
-                float priorAnimationFrame = o->PriorAnimationFrame;
-                float animationSpeed = b->Actions[b->CurrentAction].PlaySpeed / inter;
-
+                constexpr float inter = 10.f;
+                const float playSpeed = b->Actions[b->CurrentAction].PlaySpeed * FPS_ANIMATION_FACTOR;
+                float animationFrame = o->AnimationFrame - playSpeed;
+                const float priorAnimationFrame = o->PriorAnimationFrame;
+                const float animationSpeed = playSpeed / inter;
                 for (int i = 0; i < (int)(inter); ++i)
                 {
                     b->Animation(BoneTransform, animationFrame, priorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
@@ -6104,13 +6105,18 @@ float CharacterMoveSpeed(CHARACTER* c)
     return Speed;
 }
 
+float ScaledCharacterMoveSpeed(CHARACTER* c)
+{
+    return CharacterMoveSpeed(c) * FPS_ANIMATION_FACTOR;
+}
+
 void MoveCharacterPosition(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     vec3_t v, Velocity;
-    Vector(0.f, -CharacterMoveSpeed(c), 0.f, v);
+    Vector(0.f, -ScaledCharacterMoveSpeed(c), 0.f, v);
     VectorRotate(v, Matrix, Velocity);
     VectorAdd(o->Position, Velocity, o->Position);
 
@@ -11097,9 +11103,9 @@ void ClearCharacters(int Key)
 
             BoneManager::UnregisterBone(c);
 
-            for (int j = 0; j < MAX_BUTTERFLES; j++)
+            for (int j = 0; j < MAX_MOUNTS; j++)
             {
-                OBJECT* b = &Butterfles[j];
+                OBJECT* b = &Mounts[j];
                 if (b->Live && b->Owner == o)
                     b->Live = false;
             }
@@ -11123,9 +11129,9 @@ void DeleteCharacter(int Key)
 
             BoneManager::UnregisterBone(c);
 
-            for (int j = 0; j < MAX_BUTTERFLES; j++)
+            for (int j = 0; j < MAX_MOUNTS; j++)
             {
-                OBJECT* b = &Butterfles[j];
+                OBJECT* b = &Mounts[j];
                 if (b->Live && b->Owner == o)
                     b->Live = false;
             }
@@ -11143,9 +11149,9 @@ void DeleteCharacter(CHARACTER* c, OBJECT* o)
 
     BoneManager::UnregisterBone(c);
 
-    for (int j = 0; j < MAX_BUTTERFLES; j++)
+    for (int j = 0; j < MAX_MOUNTS; j++)
     {
-        OBJECT* b = &Butterfles[j];
+        OBJECT* b = &Mounts[j];
         if (b->Live && b->Owner == o)
             b->Live = false;
     }
@@ -12159,7 +12165,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
 
     if (pHelper == NULL)
     {
-        DeleteBug(o);
+        DeleteMount(o);
         ThePetProcess().DeletePet(c, c->Helper.Type, true);
     }
     else
@@ -12174,9 +12180,9 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
         {
             c->Helper.Type = MODEL_HELPER + 3;
             if (pHelper == NULL)
-                CreateBug(MODEL_PEGASUS, o->Position, o);
+                CreateMount(MODEL_PEGASUS, o->Position, o);
             else
-                CreateBugSub(MODEL_PEGASUS, o->Position, o, pHelper);
+                CreateMountSub(MODEL_PEGASUS, o->Position, o, pHelper);
         }
         else
         {
@@ -12221,9 +12227,9 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
             if (bCreateHelper == TRUE)
             {
                 if (pHelper == NULL)
-                    CreateBug(HelperType, o->Position, o);
+                    CreateMount(HelperType, o->Position, o);
                 else
-                    CreateBugSub(HelperType, o->Position, o, pHelper);
+                    CreateMountSub(HelperType, o->Position, o, pHelper);
             }
         }
     }
@@ -12233,9 +12239,9 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     {
         c->Helper.Type = MODEL_HELPER + 4;
         if (pHelper == NULL)
-            CreateBug(MODEL_DARK_HORSE, o->Position, o);
+            CreateMount(MODEL_DARK_HORSE, o->Position, o);
         else
-            CreateBugSub(MODEL_DARK_HORSE, o->Position, o, pHelper);
+            CreateMountSub(MODEL_DARK_HORSE, o->Position, o, pHelper);
     }
 
     Type = Equipment[11] & 0x04;
@@ -12255,30 +12261,30 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
         if (Type == 0x01)
         {
             if (pHelper == NULL)
-                CreateBug(MODEL_FENRIR_BLACK, o->Position, o);
+                CreateMount(MODEL_FENRIR_BLACK, o->Position, o);
             else
-                CreateBugSub(MODEL_FENRIR_BLACK, o->Position, o, pHelper);
+                CreateMountSub(MODEL_FENRIR_BLACK, o->Position, o, pHelper);
         }
         else if (Type == 0x02)
         {
             if (pHelper == NULL)
-                CreateBug(MODEL_FENRIR_BLUE, o->Position, o);
+                CreateMount(MODEL_FENRIR_BLUE, o->Position, o);
             else
-                CreateBugSub(MODEL_FENRIR_BLUE, o->Position, o, pHelper);
+                CreateMountSub(MODEL_FENRIR_BLUE, o->Position, o, pHelper);
         }
         else if (Type == 0x04)
         {
             if (pHelper == NULL)
-                CreateBug(MODEL_FENRIR_GOLD, o->Position, o);
+                CreateMount(MODEL_FENRIR_GOLD, o->Position, o);
             else
-                CreateBugSub(MODEL_FENRIR_GOLD, o->Position, o, pHelper);
+                CreateMountSub(MODEL_FENRIR_GOLD, o->Position, o, pHelper);
         }
         else
         {
             if (pHelper == NULL)
-                CreateBug(MODEL_FENRIR_RED, o->Position, o);
+                CreateMount(MODEL_FENRIR_RED, o->Position, o);
             else
-                CreateBugSub(MODEL_FENRIR_RED, o->Position, o, pHelper);
+                CreateMountSub(MODEL_FENRIR_RED, o->Position, o, pHelper);
         }
     }
 

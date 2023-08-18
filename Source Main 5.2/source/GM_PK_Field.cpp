@@ -236,7 +236,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
             float fDelay = 5.0f;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / fDelay;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < fDelay; i++)

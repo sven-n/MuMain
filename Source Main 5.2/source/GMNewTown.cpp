@@ -465,7 +465,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Weapon[1].Level = 0;
                 pCharacter->Wing.Type = MODEL_WING + 5;
                 pCharacter->Helper.Type = MODEL_HELPER + 37;
-                CreateBug(MODEL_FENRIR_BLUE, pNewObject->Position, pNewObject);
+                CreateMount(MODEL_FENRIR_BLUE, pNewObject->Position, pNewObject);
                 break;
                 // 			case 137:
             case 138:
@@ -576,7 +576,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Weapon[1].Level = 0;
                 pCharacter->Wing.Type = MODEL_HELPER + 30;
                 pCharacter->Helper.Type = MODEL_HELPER + 4;
-                CreateBug(MODEL_DARK_HORSE, pNewObject->Position, pNewObject);
+                CreateMount(MODEL_DARK_HORSE, pNewObject->Position, pNewObject);
                 CreatePetDarkSpirit_Now(pCharacter);
                 break;
             case 147:
@@ -1114,7 +1114,7 @@ void GMNewTown::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pMod
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)

@@ -2,7 +2,7 @@
 #define ZZZ_OBJECT_H
 
 extern OBJECT_BLOCK ObjectBlock[256];
-extern OBJECT       Butterfles[];
+extern OBJECT       Mounts[];
 extern OBJECT       Boids[];
 extern OBJECT       Fishs[];
 

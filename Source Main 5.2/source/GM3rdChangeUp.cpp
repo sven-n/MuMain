@@ -516,7 +516,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJE
     break;
     case MODEL_MONSTER01 + 94:
     {
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t Light;
         vec3_t EndPos, EndRelative;
         Vector(1.f, 1.f, 1.f, Light);
@@ -598,7 +598,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -645,7 +645,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
         {
             vec3_t EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             VectorCopy(o->Angle, TempAngle);
@@ -686,7 +686,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 

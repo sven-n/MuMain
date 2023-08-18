@@ -331,7 +331,7 @@ void M31HuntingGround::MoveHuntingGroundBlurEffect(CHARACTER* pCharacter, OBJECT
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -967,7 +967,7 @@ bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
             float Matrix[3][4];
             AngleMatrix(Hero->Object.Angle, Matrix);
             vec3_t Velocity, Direction;
-            Vector(0.f, -45.f * CharacterMoveSpeed(Hero), 0.f, Velocity);
+            Vector(0.f, -45.f * ScaledCharacterMoveSpeed(Hero), 0.f, Velocity);
             VectorRotate(Velocity, Matrix, Direction);
             VectorAdd(TargetPosition, Direction, TargetPosition);
         }

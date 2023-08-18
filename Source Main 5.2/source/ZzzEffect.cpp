@@ -2754,8 +2754,8 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 {
                     o->LifeTime = 40;
                     o->Scale = (float)(rand() % 8 + 10) * 0.1f;
-                    o->Position[0] += 130.f + rand() % 32;
-                    o->Position[2] += 400.f;
+                    o->Position[0] += (130.f + rand() % 32) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += 400.f * FPS_ANIMATION_FACTOR;
                     Vector(0.f, 0.f, -50.f, o->Direction);
                     Vector(0.f, 20.f, 0.f, o->Angle);
                 }
@@ -15250,11 +15250,11 @@ void MoveEffect(OBJECT* o, int iIndex)
                 vec3_t StartPos, StartRelative;
                 vec3_t EndPos, EndRelative;
 
-                float fOwnerActionSpeed = pOwnerModel->Actions[pOwnerModel->CurrentAction].PlaySpeed;
+                float fOwnerActionSpeed = pOwnerModel->Actions[pOwnerModel->CurrentAction].PlaySpeed * FPS_ANIMATION_FACTOR;
                 float fOwnerSpeedPerFrame = fOwnerActionSpeed / 10.f;
                 float fOwnerAnimationFrame = pOwner->AnimationFrame - fOwnerActionSpeed;
 
-                float fActionSpeed = pObject->Velocity;
+                float fActionSpeed = pObject->Velocity * FPS_ANIMATION_FACTOR;
                 float fSpeedPerFrame = fActionSpeed / 10.f;
                 float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
 
@@ -17569,7 +17569,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->Owner->AnimationFrame > 4 && o->Owner->AnimationFrame < 5)
             {
                 float fDelay = o->Velocity * 10.0f;
-                float fActionSpeed = pModel->Actions[o->CurrentAction].PlaySpeed;
+                float fActionSpeed = pModel->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
                 float fSpeedPerFrame = fActionSpeed / fDelay;
                 float fAnimationFrame = o->Owner->AnimationFrame - fActionSpeed;
                 o->AlphaTarget = fSpeedPerFrame * (o->Velocity / pModel->Actions[o->CurrentAction].PlaySpeed);
@@ -17658,7 +17658,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             vec3_t _StartPos, _EndPos;
 
             float fDelay = o->Velocity * 10.0f;
-            float fActionSpeed = pModel->Actions[o->Owner->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[o->Owner->CurrentAction].PlaySpeed * FPS_ANIMATION_FACTOR;
             float fSpeedPerFrame = fActionSpeed / fDelay;
             float fAnimationFrame = o->Owner->AnimationFrame - fActionSpeed;
 

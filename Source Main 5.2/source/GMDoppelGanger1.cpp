@@ -159,7 +159,7 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[0].Type = MODEL_MACE + 10;
         pCharacter->Weapon[1].Type = MODEL_SHIELD + 7;
         pCharacter->Helper.Type = MODEL_HELPER + 4;
-        CreateBug(MODEL_DARK_HORSE, pCharacter->Object.Position, &pCharacter->Object, 1);
+        CreateMount(MODEL_DARK_HORSE, pCharacter->Object.Position, &pCharacter->Object, 1);
         break;
     case 539:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
@@ -331,7 +331,7 @@ void CGMDoppelGanger1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
         vec3_t StartPos, StartRelative;
         vec3_t EndPos, EndRelative;
 
-        float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+        float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fSpeedPerFrame = fActionSpeed / 10.f;
         float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
         for (int i = 0; i < 10; i++)

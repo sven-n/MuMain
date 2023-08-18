@@ -34,15 +34,15 @@ bool CTimeCheck::GetTimeCheck(int index, int DelayTime)
 {
     int I = CheckIndex(index);
 
-    int PresentTime = timeGetTime();
+    const auto presentTime = WorldTime;
 
     if (stl_Time[I].bTimeCheck)
     {
-        stl_Time[I].iBackupTime = PresentTime;
+        stl_Time[I].iBackupTime = presentTime;
         stl_Time[I].bTimeCheck = false;
     }
 
-    if (stl_Time[I].iBackupTime + DelayTime <= PresentTime)
+    if (stl_Time[I].iBackupTime + DelayTime <= presentTime)
     {
         stl_Time[I].bTimeCheck = true;
         return true;

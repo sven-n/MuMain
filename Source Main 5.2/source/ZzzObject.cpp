@@ -51,7 +51,7 @@ int          g_iTotalObj = 0;
 OBJECT_BLOCK ObjectBlock[256];
 OBJECT       Boids[MAX_BOIDS];
 OBJECT       Fishs[MAX_FISHS];
-OBJECT       Butterfles[MAX_BUTTERFLES];
+OBJECT       Mounts[MAX_MOUNTS];
 OPERATE      Operates[MAX_OPERATES];
 //int   World = -1;
 float EarthQuake;
@@ -1751,7 +1751,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                             vec3_t StartPos, StartRelative;
                                                             vec3_t EndPos, EndRelative;
 
-                                                            float fActionSpeed = o->Velocity;
+                                                            float fActionSpeed = o->Velocity * static_cast<float>(FPS_ANIMATION_FACTOR);
                                                             float fSpeedPerFrame = fActionSpeed / 10.f;
                                                             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
                                                             for (int i = 0; i < 10; i++)
@@ -3242,7 +3242,10 @@ void RenderObjectVisual(OBJECT* o)
 
             if (iTimeCheck >= 7950)
             {
-                Vector(o->Position[0] + rand() % 2048 - 1024, o->Position[1] + rand() % 2048 - 1024, o->Position[2] + 3000 + rand() % 600, Position);
+                Vector(o->Position[0] + (rand() % 2048 - 1024) * FPS_ANIMATION_FACTOR,
+                    o->Position[1] + (rand() % 2048 - 1024) * FPS_ANIMATION_FACTOR,
+                    o->Position[2] + (3000 + rand() % 600) * FPS_ANIMATION_FACTOR,
+                    Position);
                 CreateEffect(MODEL_FIRE, Position, o->Angle, o->Light, 9);
             }
         }

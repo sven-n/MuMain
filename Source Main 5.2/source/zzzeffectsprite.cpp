@@ -43,7 +43,7 @@ void RenderSprite(OBJECT* o, OBJECT* Owner)
 {
     if (o->Visible)
     {
-        o->AnimationFrame += 0.1f;
+        o->AnimationFrame += 0.1f * static_cast<float>(FPS_ANIMATION_FACTOR);
         if (o->AnimationFrame > 1.f)
         {
             o->AnimationFrame = 1.f;
@@ -51,7 +51,7 @@ void RenderSprite(OBJECT* o, OBJECT* Owner)
     }
     else
     {
-        o->AnimationFrame -= 0.1f;
+        o->AnimationFrame -= 0.1f * static_cast<float>(FPS_ANIMATION_FACTOR);
         if (o->AnimationFrame < 0.2f)
         {
             o->AnimationFrame = 0.2f;
