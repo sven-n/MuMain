@@ -1008,9 +1008,9 @@ void MoveHeavenBug(OBJECT* o, int index)
 {
     const float iFrame = WorldTime / 40.0f;
 
-    o->Position[0] += o->Velocity * (float)sinf(o->Angle[2]);
-    o->Position[1] -= o->Velocity * (float)cosf(o->Angle[2]);
-    o->Angle[2] += 0.01f * cosf((float)(34571 + iFrame + index * 41273) * 0.0003f) * sinf((float)(17732 + iFrame + index * 5161) * 0.0003f);
+    o->Position[0] += o->Velocity * (float)sinf(o->Angle[2]) * FPS_ANIMATION_FACTOR;
+    o->Position[1] -= o->Velocity * (float)cosf(o->Angle[2]) * FPS_ANIMATION_FACTOR;
+    o->Angle[2] += 0.01f * cosf((float)(34571 + iFrame + index * 41273) * 0.0003f) * sinf((float)(17732 + iFrame + index * 5161) * 0.0003f) * FPS_ANIMATION_FACTOR;
 
     float dx = o->Position[0] - Hero->Object.Position[0];
     float dy = o->Position[1] - Hero->Object.Position[1];
@@ -1095,8 +1095,8 @@ void MoveEagle(OBJECT* o)
             o->AI = BOID_FLY;
             o->HeadAngle[2] = 0;
 
-            o->HeadAngle[0] = cosf(fSeedAngle) * fFlyRange;
-            o->HeadAngle[1] = sinf(fSeedAngle) * fFlyRange;
+            o->HeadAngle[0] = cosf(fSeedAngle) * fFlyRange * FPS_ANIMATION_FACTOR;
+            o->HeadAngle[1] = sinf(fSeedAngle) * fFlyRange * FPS_ANIMATION_FACTOR;
             fAngle = CreateAngle(o->Position[0], o->Position[1], o->Position[0] + o->HeadAngle[0], o->Position[1] + o->HeadAngle[1]);
         }
     }
@@ -1115,10 +1115,10 @@ void MoveTornado(OBJECT* o)
     {
         o->HeadAngle[0] = (rand() % 314) / 100.0f;
     }
-    o->Position[0] += sinf(o->HeadAngle[0]) * 2.0f;
-    o->Position[1] += cosf(o->HeadAngle[0]) * 2.0f;
+    o->Position[0] += sinf(o->HeadAngle[0]) * 2.0f * FPS_ANIMATION_FACTOR;
+    o->Position[1] += cosf(o->HeadAngle[0]) * 2.0f * FPS_ANIMATION_FACTOR;
     o->Angle[2] = 0;
-    if (o->BlendMeshLight < 1.0f) o->BlendMeshLight += 0.1f;
+    if (o->BlendMeshLight < 1.0f) o->BlendMeshLight += 0.1f * FPS_ANIMATION_FACTOR;
 }
 
 void MoveBoidGroup(OBJECT* o, int index)
@@ -1126,7 +1126,10 @@ void MoveBoidGroup(OBJECT* o, int index)
     if (o->AI != BOID_GROUND)
     {
         if (o->Type != MODEL_BUTTERFLY01 || rand() % 4 == 0)
+        {
             MoveBoid(o, index, Boids, MAX_BOIDS);
+        }
+
         AngleMatrix(o->Angle, o->Matrix);
         vec3_t p, Direction;
         if (gMapManager.WorldActive == WD_7ATLANSE || gMapManager.WorldActive == WD_67DOPPLEGANGER3)
@@ -1135,20 +1138,20 @@ void MoveBoidGroup(OBJECT* o, int index)
             {
                 if (index < 35)
                 {
-                    Vector(o->Velocity * (float)(rand() % 16 + 8), 0.f, o->Direction[2], Direction);
+                    Vector(FPS_ANIMATION_FACTOR * o->Velocity * (float)(rand() % 16 + 8), 0.f, o->Direction[2], Direction);
                 }
                 else
                 {
-                    Vector(o->Velocity * (float)(rand() % 16 + 16), 0.f, o->Direction[2], Direction);
+                    Vector(FPS_ANIMATION_FACTOR * o->Velocity * (float)(rand() % 16 + 16), 0.f, o->Direction[2], Direction);
                 }
                 o->Gravity = 15;
             }
             else
             {
-                Vector(o->Velocity * (float)(rand() % 32 + 32), 0.f, o->Direction[2], Direction);
+                Vector(FPS_ANIMATION_FACTOR * o->Velocity * (float)(rand() % 32 + 32), 0.f, o->Direction[2], Direction);
                 o->Gravity = 5;
             }
-            o->Timer += 0.1f;
+            o->Timer += 0.1f * FPS_ANIMATION_FACTOR;
             if (o->Timer >= 10)
             {
                 o->Timer = 0.f;
@@ -1205,9 +1208,10 @@ void MoveBoids()
         vec3_t Position, Angle, Light;
         if (rand() % 40 == 0)
         {
-            Vector(Hero->Object.Position[0] + (float)(rand() % 600 - 200),
-                Hero->Object.Position[1] + (float)(rand() % 400 + 200),
-                Hero->Object.Position[2] + 300.f, Position);
+            Vector(Hero->Object.Position[0] + (float)(rand() % 600 - 200) * FPS_ANIMATION_FACTOR,
+                Hero->Object.Position[1] + (float)(rand() % 400 + 200) * FPS_ANIMATION_FACTOR,
+                Hero->Object.Position[2] + 300.f * FPS_ANIMATION_FACTOR,
+                Position);
             Vector(0.f, 0.f, 0.f, Angle);
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(MODEL_FIRE, Position, Angle, Light, 3);
@@ -1300,7 +1304,8 @@ void MoveBoids()
                     }
                     Vector(Hero->Object.Position[0] + (float)(rand() % 600 - 100),
                         Hero->Object.Position[1] + (float)(rand() % 400 + 200),
-                        Hero->Object.Position[2] + 300.f, o->Position);
+                        Hero->Object.Position[2] + 300.f,
+                        o->Position);
                 }
             }
             else if (gMapManager.WorldActive == WD_0LORENCIA
@@ -1402,13 +1407,13 @@ void MoveBoids()
                 b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, PlaySpeed, o->Position, o->Angle);
                 AngleMatrix(o->Angle, o->Matrix);
                 vec3_t Position, Direction;
-                Vector(o->Scale * 40.f, 0.f, 0.f, Position);
+                Vector(o->Scale * 40.f * FPS_ANIMATION_FACTOR, 0.f, 0.f, Position);
                 VectorRotate(Position, o->Matrix, Direction);
                 VectorAdd(o->Position, Direction, o->Position);
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 300.f;
                 o->Position[2] += -absf(sinf(o->Timer)) * 100.f + 100.f;
-                o->Timer += o->Scale * 0.05f;
-                o->LifeTime--;
+                o->Timer += o->Scale * 0.05f * FPS_ANIMATION_FACTOR;
+                o->LifeTime -= FPS_ANIMATION_FACTOR;
                 if (o->LifeTime <= 0)
                     o->Live = false;
                 if (rand() % 128 == 0)
@@ -1470,9 +1475,16 @@ void MoveBoids()
                     o->SubType++;
                 }
 
-                if (o->Type == MODEL_EAGLE || o->Type == MODEL_MAP_TORNADO);
-                else if (o->SubType >= 2) o->Live = false;
-                o->LifeTime--;
+                if (o->Type == MODEL_EAGLE || o->Type == MODEL_MAP_TORNADO)
+                {
+                    // do nothing?
+                }
+                else if (o->SubType >= 2)
+                {
+                    o->Live = false;
+                }
+
+                o->LifeTime -= FPS_ANIMATION_FACTOR;
 
                 float dx = o->Position[0] - Hero->Object.Position[0];
                 float dy = o->Position[1] - Hero->Object.Position[1];
@@ -1791,7 +1803,7 @@ void MoveFishs()
             if (o->Type == MODEL_FISH01 + 7 || o->Type == MODEL_FISH01 + 8)
             {
                 o->BlendMeshLight = sinf(o->Timer) * 0.4f + 0.5f;
-                o->Timer += 0.1f;
+                o->Timer += 0.1f * FPS_ANIMATION_FACTOR;
             }
 
             if ((o->Type >= MODEL_FISH01 && o->Type <= MODEL_FISH01 + 10) ||
@@ -1806,7 +1818,7 @@ void MoveFishs()
                 MoveBoid(o, i, Fishs, MAX_FISHS);
                 AngleMatrix(o->Angle, o->Matrix);
                 vec3_t Position, Direction;
-                Vector(o->Velocity * (float)(rand() % 4 + 6), 0.f, 0.f, Position);
+                Vector(o->Velocity * (float)(rand() % 4 + 6) * FPS_ANIMATION_FACTOR, 0.f, 0.f, Position);
                 VectorRotate(Position, o->Matrix, Direction);
                 VectorAdd(o->Position, Direction, o->Position);
                 if (gMapManager.WorldActive != 7 || gMapManager.InHellas() == false || gMapManager.WorldActive != WD_67DOPPLEGANGER3)
@@ -1871,7 +1883,7 @@ void MoveFishs()
                 SetAction(o, 0);
             }
 
-            o->LifeTime--;
+            o->LifeTime -= FPS_ANIMATION_FACTOR;
             if (o->LifeTime <= 0)
             {
                 if (o->Type == MODEL_BUG01)

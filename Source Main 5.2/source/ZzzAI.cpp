@@ -220,6 +220,9 @@ void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
                     xdist += t->Direction[0] - o->Position[0];
                     ydist += t->Direction[1] - o->Position[1];
                 }
+
+                xdist *= FPS_ANIMATION_FACTOR;
+                ydist *= FPS_ANIMATION_FACTOR;
                 float pdist = sqrtf(xdist * xdist + ydist * ydist);
                 TargetX += xdist / pdist;
                 TargetY += ydist / pdist;
