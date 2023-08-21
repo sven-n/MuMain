@@ -78,7 +78,7 @@ CMovieScene* g_pMovieScene = NULL;
 CUIManager* g_pUIManager = NULL;
 CUIMapName* g_pUIMapName = NULL;		// rozy
 
-int Time_Effect = 0;
+float Time_Effect = 0;
 bool ashies = false;
 int weather = rand() % 3;
 

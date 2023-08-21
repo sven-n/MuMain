@@ -345,7 +345,7 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
     {
     case MODEL_MONSTER01 + 96:
     {
-        if (pCharacter->AttackTime == 14)
+        if ((int)pCharacter->AttackTime == 14)
         {
             CreateEffect(MODEL_ARROW_NATURE, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, pObject->PKKey);
             return true;
@@ -354,7 +354,7 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
     break;
     case MODEL_MONSTER01 + 91:
     {
-        if (pCharacter->AttackTime == 14)
+        if ((int)pCharacter->AttackTime == 14)
         {
             CreateEffect(MODEL_ARROW_HOLY, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, pObject->PKKey);
             return true;

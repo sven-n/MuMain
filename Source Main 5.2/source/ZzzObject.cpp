@@ -541,7 +541,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
             auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
             if (!pCloth[0].Move2(0.005f, 5))
             {
-                CHARACTER* c = &CharactersClient[o->PKKey];
+                CHARACTER* c = &CharactersClient[(int)o->PKKey];
                 DeleteCloth(c, o);
             }
             else
@@ -3281,7 +3281,7 @@ void RenderObjects()
 
     if (Time_Effect > 40)
         Time_Effect = 0;
-    Time_Effect++;
+    Time_Effect += FPS_ANIMATION_FACTOR;
 
     for (int i = 0; i < 16; i++)
     {
@@ -3573,7 +3573,7 @@ void RenderObjects_AfterCharacter()
 
     if (Time_Effect > 40)
         Time_Effect = 0;
-    Time_Effect++;
+    Time_Effect += FPS_ANIMATION_FACTOR;
 
     for (int i = 0; i < 16; i++)
     {
@@ -6336,7 +6336,7 @@ void MoveItems()
         OBJECT* o = &Items[i].Object;
         if (o->Live)
         {
-            o->Position[2] += o->Gravity;
+            o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
             o->Gravity -= 6.f;
             float Height = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
             if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
@@ -6349,9 +6349,9 @@ void MoveItems()
             else
             {
                 if (o->Type >= MODEL_SHIELD && o->Type < MODEL_SHIELD + MAX_ITEM_INDEX)
-                    o->Angle[1] = -o->Gravity * 10.f;
+                    o->Angle[1] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
                 else
-                    o->Angle[0] = -o->Gravity * 10.f;
+                    o->Angle[0] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
             }
             CreateShiny(o);
         }
@@ -6913,12 +6913,12 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         glColor3fv(b->BodyLight);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        float fU = 0.f;
-        static int s_iTexAni = 0;
-        s_iTexAni++;
+
+        static float s_iTexAni = 0;
+        s_iTexAni += FPS_ANIMATION_FACTOR;
         if (s_iTexAni > 15)
             s_iTexAni = 0;
-        fU = (s_iTexAni / 4) * 0.25f;
+        float fU = ((int)s_iTexAni / 4) * 0.25f;
         Vector(0.9f, 0.6f, 0.3f, b->BodyLight);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, fU, o->BlendMeshTexCoordV, o->HiddenMesh);
         Vector(1.f, 1.f, 1.f, b->BodyLight);

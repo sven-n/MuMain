@@ -1501,7 +1501,7 @@ void AttackEffect(CHARACTER* c)
         {
             if ((rand() % 2) == 0)
             {
-                if (c->AttackTime == 1)
+                if ((int)c->AttackTime == 1)
                 {
                     CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 1);
                 }
@@ -1520,7 +1520,7 @@ void AttackEffect(CHARACTER* c)
     case 69:
         break;
     case 70:
-        if (c->AttackTime == 5)
+        if ((int)c->AttackTime == 5)
         {
             if (c->TargetCharacter != -1)
             {
@@ -1538,7 +1538,7 @@ void AttackEffect(CHARACTER* c)
     case 74:
         if (c->Object.CurrentAction == MONSTER01_ATTACK1 || c->Object.CurrentAction == MONSTER01_ATTACK2)
         {
-            if (c->AttackTime == 5)
+            if ((int)c->AttackTime == 5)
             {
                 CreateInferno(o->Position);
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light);
@@ -1548,7 +1548,7 @@ void AttackEffect(CHARACTER* c)
     case 72:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if (c->AttackTime == 14)
+            if ((int)c->AttackTime == 14)
             {
                 vec3_t Angle = { 0.0f, 0.0f, 0.0f };
                 int iCount = 36;
@@ -1571,7 +1571,7 @@ void AttackEffect(CHARACTER* c)
     case 75:
         if (c->Object.CurrentAction == MONSTER01_ATTACK1)
         {
-            if (c->AttackTime == 11)
+            if ((int)c->AttackTime == 11)
             {
                 CreateInferno(o->Position);
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light);
@@ -1592,7 +1592,7 @@ void AttackEffect(CHARACTER* c)
         }
         else
         {
-            if (c->AttackTime == 13)
+            if ((int)c->AttackTime == 13)
             {
                 Vector(1.f, 0.5f, 0.f, Light);
                 Vector(-50.f, 100.f, 0.f, p);
@@ -1603,7 +1603,7 @@ void AttackEffect(CHARACTER* c)
                 CreateEffect(MODEL_PIERCING + 1, Position, Angle, Light, 1, o);
                 PlayBuffer(SOUND_METEORITE01);
             }
-            else if (c->AttackTime == 9)
+            else if ((int)c->AttackTime == 9)
             {
                 Vector(1.f, 0.5f, 0.f, Light);
                 Vector(0.f, 0.f, 0.f, p);
@@ -1617,7 +1617,7 @@ void AttackEffect(CHARACTER* c)
     case 77:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if (c->AttackTime == 2 || c->AttackTime == 6)
+            if ((int)c->AttackTime == 2 || c->AttackTime == 6)
             {
                 vec3_t Angle = { 0.0f, 0.0f, 0.0f };
                 int iCount = 40;
@@ -1639,7 +1639,7 @@ void AttackEffect(CHARACTER* c)
     case 61:
         if (c->MonsterIndex == 63)
         {
-            if (c->AttackTime == 1)
+            if ((int)c->AttackTime == 1)
             {
                 CreateInferno(o->Position);
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light);
@@ -1651,7 +1651,7 @@ void AttackEffect(CHARACTER* c)
                     Vector(o->Position[0] + rand() % 800 - 400, o->Position[1] + rand() % 800 - 400, o->Position[2], Position);
                     CreateEffect(MODEL_SKILL_BLAST, Position, o->Angle, o->Light);
                 }
-                if (c->AttackTime == 14)
+                if ((int)c->AttackTime == 14)
                 {
                     for (int i = 0; i < 18; i++)
                     {
@@ -1664,7 +1664,7 @@ void AttackEffect(CHARACTER* c)
         }
         else
         {
-            if (c->AttackTime == 1)
+            if ((int)c->AttackTime == 1)
             {
                 //CreateInferno(o->Position);
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light);
@@ -1674,7 +1674,7 @@ void AttackEffect(CHARACTER* c)
     case 66:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if (c->AttackTime == 1)
+            if ((int)c->AttackTime == 1)
             {
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 1);
             }
@@ -1683,7 +1683,7 @@ void AttackEffect(CHARACTER* c)
     case 54:
     case 57:
     case 151:
-        if (c->AttackTime == 1)
+        if ((int)c->AttackTime == 1)
         {
             Vector(60.f, -110.f, 0.f, p);
             b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
@@ -1702,11 +1702,11 @@ void AttackEffect(CHARACTER* c)
     case 53:
     case 58:
     case 59:
-        if (c->AttackTime == 1)
+        if ((int)c->AttackTime == 1)
         {
             CreateInferno(o->Position);
         }
-        if (c->AttackTime == 14)
+        if ((int)c->AttackTime == 14)
         {
             if (c->MonsterIndex == 59)
             {
@@ -1723,14 +1723,14 @@ void AttackEffect(CHARACTER* c)
         }
         break;
     case 49:
-        if (c->AttackTime % 5 == 1)
+        if ((int)c->AttackTime % 5 == 1)
         {
             b->TransformPosition(o->BoneTransform[63], p, Position, true);
             CreateEffect(BITMAP_BOSS_LASER + 1, Position, o->Angle, o->Light);
         }
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if (c->AttackTime == 1)
+            if ((int)c->AttackTime == 1)
             {
                 VectorCopy(o->Angle, Angle); Angle[2] += 20.f;
                 VectorCopy(o->Position, p); p[2] += 50.f;
@@ -1748,7 +1748,7 @@ void AttackEffect(CHARACTER* c)
     case 42:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if (c->AttackTime == 1)
+            if ((int)c->AttackTime == 1)
             {
                 Vector(0.f, 0.f, 0.f, p);
                 b->TransformPosition(o->BoneTransform[11], p, Position, true);
@@ -1768,7 +1768,7 @@ void AttackEffect(CHARACTER* c)
     case 35:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if (c->AttackTime == 1)
+            if ((int)c->AttackTime == 1)
             {
                 for (int i = 0; i < 18; i++)
                 {
@@ -1783,7 +1783,7 @@ void AttackEffect(CHARACTER* c)
     case 67:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if (c->AttackTime == 1)
+            if ((int)c->AttackTime == 1)
             {
                 CreateEffect(MODEL_CIRCLE, o->Position, o->Angle, o->Light);
                 CreateEffect(MODEL_CIRCLE_LIGHT, o->Position, o->Angle, o->Light);
@@ -1833,14 +1833,14 @@ void AttackEffect(CHARACTER* c)
             case 427:
                 if (c->Weapon[0].Type == MODEL_BOW + 19)
                 {
-                    if (c->AttackTime == 8)
+                    if ((int)c->AttackTime == 8)
                     {
                         CreateArrows(c, o, o, 0, 0, 0);
                     }
                 }
                 else if (c->Object.CurrentAction == MONSTER01_ATTACK1)
                 {
-                    if (c->AttackTime == 15)
+                    if ((int)c->AttackTime == 15)
                     {
                         CalcAddPosition(o, -20.f, -90.f, 100.f, Position);
                         CreateEffect(BITMAP_BOSS_LASER, Position, o->Angle, Light, 0, o);
@@ -1848,7 +1848,7 @@ void AttackEffect(CHARACTER* c)
                 }
                 else if (c->Object.CurrentAction == MONSTER01_ATTACK2)
                 {
-                    if (c->AttackTime == 8)
+                    if ((int)c->AttackTime == 8)
                     {
                         if (rand() % 2 == 0)
                         {
@@ -1889,7 +1889,7 @@ void AttackEffect(CHARACTER* c)
             case 122:	//. 자이언트오거5
             case 128:	//. 자이언트오거6
             case 141:
-                if (c->AttackTime == 13)
+                if ((int)c->AttackTime == 13)
                 {
                     Vector(1.0f, 1.0f, 1.0f, Light);
                     Vector(60.f, 30.f, 0.f, p);
@@ -1918,7 +1918,7 @@ void AttackEffect(CHARACTER* c)
             case 75:
                 if (c->Object.CurrentAction == MONSTER01_ATTACK2)
                 {
-                    if (c->AttackTime == 13)
+                    if ((int)c->AttackTime == 13)
                     {
                         Vector(1.f, 0.5f, 0.f, Light);
                         Vector(-50.f, 100.f, 0.f, p);
@@ -1931,7 +1931,7 @@ void AttackEffect(CHARACTER* c)
                 }
                 break;
             case 69:
-                if (c->AttackTime == 1)
+                if ((int)c->AttackTime == 1)
                 {
                     for (int i = 0; i < 4; ++i)
                     {
@@ -1951,7 +1951,7 @@ void AttackEffect(CHARACTER* c)
                     CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 10.f);
                 }
 
-                if (c->AttackTime == 1)
+                if ((int)c->AttackTime == 1)
                     PlayBuffer(SOUND_EVIL);
 
                 for (int i = 0; i < 4; i++)
@@ -1965,7 +1965,7 @@ void AttackEffect(CHARACTER* c)
                 }
                 break;
             case 46:
-                if (c->AttackTime == 1)
+                if ((int)c->AttackTime == 1)
                     PlayBuffer(SOUND_EVIL);
 
                 for (int i = 0; i < 4; i++)
@@ -1979,7 +1979,7 @@ void AttackEffect(CHARACTER* c)
                 }
                 break;
             case 37:
-                if (c->AttackTime == 1)
+                if ((int)c->AttackTime == 1)
                     PlayBuffer(SOUND_EVIL);
 
                 for (int i = 0; i < 4; i++)
@@ -1994,9 +1994,9 @@ void AttackEffect(CHARACTER* c)
                 break;
             case 66:
             {
-                if (c->AttackTime == 1)
+                if ((int)c->AttackTime == 1)
                     PlayBuffer(SOUND_THUNDER01);
-                float fAngle = (float)(45.f - (c->AttackTime * 3 + (int)WorldTime / 10) % 90) + 180.f;
+                float fAngle = (float)((int)(45.f - (c->AttackTime * 3 + (int)WorldTime / 10)) % 90) + 180.f;
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -2025,9 +2025,9 @@ void AttackEffect(CHARACTER* c)
             case 130:
             case 143:
             {
-                if (c->AttackTime == 1)
+                if ((int)c->AttackTime == 1)
                     PlayBuffer(SOUND_THUNDER01);
-                float fAngle = (float)(45.f - (c->AttackTime * 3 + (int)WorldTime / 10) % 90) + 180.f;
+                float fAngle = (float)(45.f - (int)(c->AttackTime * 3 + (int)WorldTime / 10) % 90) + 180.f;
                 for (int i = 0; i < 4; i++)
                 {
                     b->TransformPosition(o->BoneTransform[c->Weapon[i % 2].LinkBone], p, Position, true);
@@ -2052,7 +2052,7 @@ void AttackEffect(CHARACTER* c)
                 }
                 break;
             case 37://데빌
-                if (c->AttackTime == 1)
+                if ((int)c->AttackTime == 1)
                     PlayBuffer(SOUND_EVIL);
 
                 for (int i = 0; i < 4; i++)
@@ -2366,7 +2366,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
                 CreateJoint(MODEL_SPEARSKILL, TempPos, TempPos, o->Angle, 2, o, 40.0f);
             }
         }
-        if (c->AttackTime <= 8)
+        if ((int)c->AttackTime <= 8)
         {	// 기 모일 곳 위치
             vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
             b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], Position2, o->m_vPosSword, true);
@@ -2406,7 +2406,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
                 }
             }
         }
-        if (c->AttackTime >= 12)
+        if ((int)c->AttackTime >= 12)
         {
             c->AttackTime = g_iLimitAttackTime;
         }
@@ -2417,11 +2417,11 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         BMD* b = &Models[o->Type];
 
         vec3_t p;
-        if (c->AttackTime == 10)
+        if ((int)c->AttackTime == 10)
         {
             PlayBuffer(SOUND_RIDINGSPEAR);
         }
-        else if (c->AttackTime == 4)
+        else if ((int)c->AttackTime == 4)
         {	// 준비동작
             vec3_t Light = { 1.0f, 1.0f, .5f };
             vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
@@ -2451,7 +2451,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
                 Position[2] += 110.0f;
                 //vec3_t Light = { .6f, .6f, .2f};
                 vec3_t Light = { .3f, .3f, .3f };
-                if (c->AttackTime == 11)
+                if ((int)c->AttackTime == 11)
                 {
                     /*Light[0] = 1.0f;
                     Light[1] = 0.5f;
@@ -2479,7 +2479,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             }
         }
 
-        if (c->AttackTime == 3)  //  氣 모으기.
+        if ((int)c->AttackTime == 3)  //  氣 모으기.
         {
             CreateEffect(BITMAP_GATHERING, o->Position, o->Angle, o->Light, 0, o);
             PlayBuffer(SOUND_PIERCING, o);
@@ -2497,7 +2497,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         {
             SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
 
-            if (c->AttackTime >= 1 && c->AttackTime <= 2)
+            if ((int)c->AttackTime >= 1 && c->AttackTime <= 2)
             {
                 vec3_t Angle;
                 Vector(1.f, 0.f, 0.f, Angle);
@@ -2569,7 +2569,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
     case AT_SKILL_LIFE_UP + 3:
     case AT_SKILL_LIFE_UP + 4:
     case    AT_SKILL_VITALITY:
-        if (c->AttackTime > 9 && o->Type == MODEL_PLAYER && o->CurrentAction == PLAYER_SKILL_VITALITY)
+        if ((int)c->AttackTime > 9 && o->Type == MODEL_PLAYER && o->CurrentAction == PLAYER_SKILL_VITALITY)
         {
             c->AttackTime = 15;
         }
@@ -2624,7 +2624,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         }
         break;
     case    AT_SKILL_PARTY_TELEPORT:
-        if (c->AttackTime > 5 && o->Type == MODEL_PLAYER && (o->CurrentAction == PLAYER_ATTACK_TELEPORT || o->CurrentAction == PLAYER_ATTACK_RIDE_TELEPORT
+        if ((int)c->AttackTime > 5 && o->Type == MODEL_PLAYER && (o->CurrentAction == PLAYER_ATTACK_TELEPORT || o->CurrentAction == PLAYER_ATTACK_RIDE_TELEPORT
             || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT))
         {
             c->AttackTime = 15;
@@ -2771,7 +2771,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
             int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 
-            if (c->AttackTime >= 1 && LeftType == ITEM_BOW + 21 && o->Type == MODEL_PLAYER)
+            if ((int)c->AttackTime >= 1 && LeftType == ITEM_BOW + 21 && o->Type == MODEL_PLAYER)
             {
                 for (int i = 0; i < 20; i++)
                 {
@@ -2859,7 +2859,7 @@ void  PushingCharacter(CHARACTER* c, OBJECT* o)
     if (c->StormTime > 0)
     {
         o->Angle[2] += c->StormTime * 10;
-        c->StormTime--;
+        c->StormTime -= FPS_ANIMATION_FACTOR;
     }
     if (c->JumpTime > 0)
     {
@@ -2870,9 +2870,9 @@ void  PushingCharacter(CHARACTER* c, OBJECT* o)
         }
         if (gMapManager.InChaosCastle() == true)
         {
-            o->Position[0] += (((float)c->TargetX) * TERRAIN_SCALE - o->Position[0]) * Speed;
-            o->Position[1] += (((float)c->TargetY) * TERRAIN_SCALE - o->Position[1]) * Speed;
-            c->JumpTime++;
+            o->Position[0] += (((float)c->TargetX) * TERRAIN_SCALE - o->Position[0]) * Speed * FPS_ANIMATION_FACTOR;
+            o->Position[1] += (((float)c->TargetY) * TERRAIN_SCALE - o->Position[1]) * Speed * FPS_ANIMATION_FACTOR;
+            c->JumpTime += FPS_ANIMATION_FACTOR;
             if (c->JumpTime > 15)
             {
                 SetPlayerStop(c);
@@ -2888,11 +2888,12 @@ void  PushingCharacter(CHARACTER* c, OBJECT* o)
         }
         else
         {
-            o->Position[0] += (((float)c->TargetX + 0.5f) * TERRAIN_SCALE - o->Position[0]) * Speed;
-            o->Position[1] += (((float)c->TargetY + 0.5f) * TERRAIN_SCALE - o->Position[1]) * Speed;
+            o->Position[0] += (((float)c->TargetX + 0.5f) * TERRAIN_SCALE - o->Position[0]) * Speed + FPS_ANIMATION_FACTOR;
+            o->Position[1] += (((float)c->TargetY + 0.5f) * TERRAIN_SCALE - o->Position[1]) * Speed + FPS_ANIMATION_FACTOR;
             if (o->Type != MODEL_BALL)
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-            if (c->JumpTime++ > 15)
+            c->JumpTime += FPS_ANIMATION_FACTOR;
+            if (c->JumpTime > 15)
             {
                 if (o->Type == MODEL_MONSTER01 + 52)
                     SetPlayerStop(c);
@@ -3840,14 +3841,14 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         CreateParticle(BITMAP_LIGHT, Position, o->Angle, Light);
     }
 
-    if (c->AttackTime > 0)
+    if ((int)c->AttackTime > 0)
     {
         AttackStage(c, o);
         AttackEffect(c);
-        c->AttackTime++;
+        c->AttackTime += FPS_ANIMATION_FACTOR;
     }
 
-    if (c->AttackTime >= g_iLimitAttackTime)
+    if ((int)c->AttackTime >= g_iLimitAttackTime)
     {
         c->AttackTime = 0;
         o->PKKey = getTargetCharacterKey(c, SelectedCharacter);
@@ -5100,7 +5101,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
 
     if (c->m_iDeleteTime > 0)
     {
-        c->m_iDeleteTime--;
+        c->m_iDeleteTime -= FPS_ANIMATION_FACTOR;
     }
     if (c->m_iDeleteTime != -128 && c->m_iDeleteTime <= 0)
     {
@@ -10571,7 +10572,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                     c->ExtendStateTime = 0;
                 }
-                c->ExtendStateTime++;
+                c->ExtendStateTime += min(1, FPS_ANIMATION_FACTOR);
             }
             if (fullset)
             {

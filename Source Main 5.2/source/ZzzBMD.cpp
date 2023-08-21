@@ -45,7 +45,7 @@ extern int  MouseY;
 extern bool MouseLButton;
 
 extern double FPS;
-extern double FPS_ANIMATION_FACTOR;
+extern float FPS_ANIMATION_FACTOR;
 
 bool  StopMotion = false;
 float ParentMatrix[3][4];

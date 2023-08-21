@@ -2248,7 +2248,6 @@ bool RenderMainScene()
     return true;
 }
 
-extern int ChatTime;
 extern int WaterTextureNumber;
 
 int TestTime = 0;
@@ -2256,8 +2255,14 @@ extern int  GrabScreen;
 
 void MoveCharacter(CHARACTER* c, OBJECT* o);
 
-constexpr int target_fps = 60;
-constexpr int ms_per_frame = 1000 / target_fps;
+float target_fps = 60;
+float ms_per_frame = 1000.f / target_fps;
+
+void SetTargetFps(float targetFps)
+{
+    target_fps = targetFps;
+    ms_per_frame = 1000 / target_fps;
+}
 
 uint64_t current_tick_count = GetTickCount64();
 uint64_t last_water_change = GetTickCount64();
@@ -2266,7 +2271,7 @@ void MainScene(HDC hDC)
 {
     CalcFPS();
 
-    for (int32_t remain = ms_per_frame; remain >= ms_per_frame; remain -= ms_per_frame)
+    for (float remain = ms_per_frame; remain >= ms_per_frame; remain -= ms_per_frame)
     {
         g_pNewKeyInput->ScanAsyncKeyState();
 
@@ -2437,7 +2442,7 @@ void MainScene(HDC hDC)
         }
         GrabEnable = false;
 
-#if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
+#ifndef  defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
         BeginBitmap();
         unicode::t_char szDebugText[128];
         unicode::_sprintf(szDebugText, "FPS : %.1f Connected: %d", FPS_AVG, g_bGameServerConnected);

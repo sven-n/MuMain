@@ -536,14 +536,15 @@ void CreateNotice(char* Text, int Color)
 
 void MoveNotices()
 {
-    if (NoticeTime-- <= 0)
+    NoticeTime -= FPS_ANIMATION_FACTOR;
+    if (NoticeTime <= 0)
     {
         NoticeTime = 300;
         CreateNotice("", 0);
     }
 }
 
-int NoticeInverse = 0;
+float NoticeInverse = 0;
 
 void RenderNotices()
 {
@@ -563,7 +564,7 @@ void RenderNotices()
         if (n->Color == 0)
         {
             g_pRenderText->SetBgColor(0, 0, 0, 128);
-            if (NoticeInverse % 10 < 5)
+            if ((int)NoticeInverse % 10 < 5)
             {
                 g_pRenderText->SetTextColor(255, 200, 80, 128);
             }
@@ -587,7 +588,8 @@ void RenderNotices()
             g_pRenderText->RenderText(320, 300 + i * 13, n->Text, 0, 0, RT3_WRITE_CENTER);
         }
     }
-    NoticeInverse++;
+
+    NoticeInverse += FPS_ANIMATION_FACTOR;
 }
 
 void CutText(const char* Text, char* Text1, char* Text2, int Length)

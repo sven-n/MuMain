@@ -73,35 +73,35 @@ void CPhysicsVertex::UpdateForce(unsigned int iKey, DWORD dwType, float fWind)
     switch (PCT_MASK_ELASTIC & dwType)	// m_dwType
     {
     case PCT_RUBBER:
-        m_vForce[2] += fRand * (fWind + 0.1f) * 1.f;
+        m_vForce[2] += fRand * (fWind + 0.1f) * 1.f * FPS_ANIMATION_FACTOR;
         break;
     case PCT_RUBBER2:
-        m_vForce[2] += fRand * (fWind);
+        m_vForce[2] += fRand * (fWind) * FPS_ANIMATION_FACTOR;
         break;
     }
 
     switch (PCT_MASK_ELASTIC_EXT & dwType)
     {
     case PCT_ELASTIC_HALLOWEEN:
-        m_vForce[0] += -(fRand * fWind * 0.5f);
-        m_vForce[2] += fRand * (fWind + 0.1f) * 0.5f * (float)sinf(WorldTime * 0.003f) * 5.0f;
-        m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 50.0f;
+        m_vForce[0] += -(fRand * fWind * 0.5f * FPS_ANIMATION_FACTOR);
+        m_vForce[2] += fRand * (fWind + 0.1f) * 0.5f * (float)sinf(WorldTime * 0.003f) * 5.0f * FPS_ANIMATION_FACTOR;
+        m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 50.0f * FPS_ANIMATION_FACTOR;
         break;
     case PCT_ELASTIC_RAGE_L:
-        m_vForce[0] += -(fRand * fWind * 0.8f);
+        m_vForce[0] += -(fRand * fWind * 0.8f * FPS_ANIMATION_FACTOR);
         break;
     case PCT_ELASTIC_RAGE_R:
-        m_vForce[0] -= -(fRand * fWind * 0.8f);
+        m_vForce[0] -= -(fRand * fWind * 0.8f * FPS_ANIMATION_FACTOR);
         break;
     }
 
     switch (PCT_MASK_WEIGHT & dwType)	// m_dwType
     {
     case PCT_HEAVY:
-        m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 180.0f;
+        m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 180.0f * FPS_ANIMATION_FACTOR;
         break;
     default:
-        m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 100.0f;
+        m_vForce[2] -= s_Gravity * fGravityRate * s_fMass * 100.0f * FPS_ANIMATION_FACTOR;
         break;
     }
 }

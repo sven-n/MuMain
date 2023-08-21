@@ -1369,7 +1369,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (c->AttackTime == 14)
+            if ((int)c->AttackTime == 14)
             {
                 vec3_t vPos, vRelative, Light;
                 Vector(140.f, 0.f, -30.f, vRelative);
@@ -1399,16 +1399,16 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             CreateInferno(o->Position);
-            if (c->AttackTime == 10)
+            if ((int)c->AttackTime == 10)
                 CreateEffect(MODEL_CIRCLE, o->Position, o->Angle, Light, 4, o);
-            else if (c->AttackTime == 14)
+            else if ((int)c->AttackTime == 14)
                 CreateEffect(MODEL_CIRCLE, o->Position, o->Angle, Light, 4, o);
         }
     }
     return true;
     case 362:
     {
-        if (o->CurrentAction == MONSTER01_ATTACK1 && c->AttackTime == 14)
+        if (o->CurrentAction == MONSTER01_ATTACK1 && (int)c->AttackTime == 14)
         {
             CreateInferno(o->Position, 2);
             Vector(0.0f, 0.5f, 1.0f, Light);
@@ -1416,7 +1416,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYAHAND_ATTACK1);
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK2 && c->AttackTime == 14)
+        else if (o->CurrentAction == MONSTER01_ATTACK2 && (int)c->AttackTime == 14)
         {
             float Matrix[3][4];
             Vector(0.0f, 0.0f, 0.0f, Angle);
@@ -1434,7 +1434,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
     return true;
     case 363:
     {
-        if (o->CurrentAction == MONSTER01_ATTACK1 && c->AttackTime == 14)
+        if (o->CurrentAction == MONSTER01_ATTACK1 && (int)c->AttackTime == 14)
         {
             CreateInferno(o->Position, 3);
             Vector(1.0f, 0.5f, 0.0f, Light);
@@ -1442,7 +1442,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYAHAND_ATTACK1);
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK2 && c->AttackTime == 14)
+        else if (o->CurrentAction == MONSTER01_ATTACK2 && (int)c->AttackTime == 14)
         {
             float Matrix[3][4];
             Vector(0.0f, 0.0f, 0.0f, Angle);

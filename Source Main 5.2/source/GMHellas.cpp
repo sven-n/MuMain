@@ -1078,7 +1078,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case 260:
     case 268:
     case 276:
-        if (c->AttackTime == 14)
+        if ((int)c->AttackTime == 14)
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1122,7 +1122,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_MAGIC_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 c->AttackTime = 15;
@@ -1131,7 +1131,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_PHY_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_Defense);
                 c->AttackTime = 15;
@@ -1157,7 +1157,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case 262:
     case 270:
     case 278:
-        if (c->AttackTime == 14)
+        if ((int)c->AttackTime == 14)
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1197,7 +1197,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
-            if (c->AttackTime == 14)
+            if ((int)c->AttackTime == 14)
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 1, o, -1, 0, 1);
             }
@@ -1218,7 +1218,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
-            if (c->AttackTime == 14)
+            if ((int)c->AttackTime == 14)
             {
                 vec3_t Light, Position;
 
@@ -1236,7 +1236,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_ENERGYBALL:
-            if (c->AttackTime == 14)
+            if ((int)c->AttackTime == 14)
             {
                 if (c->TargetCharacter >= 0 && c->TargetCharacter < MAX_CHARACTERS_CLIENT)
                 {
@@ -1298,7 +1298,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_MAGIC_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 c->AttackTime = 15;
@@ -1307,7 +1307,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_PHY_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_Defense);
                 c->AttackTime = 15;
@@ -1321,11 +1321,11 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (c->AttackTime == 7)
+            if ((int)c->AttackTime == 7)
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 0);
             }
-            else if (c->AttackTime >= 13)
+            else if ((int)c->AttackTime >= 13)
             {
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 0, o);
                 CreateEffect(BITMAP_FLAME, o->Position, o->Angle, o->Light, 1, o);
@@ -1354,7 +1354,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_MAGIC_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 c->AttackTime = 15;
@@ -1364,7 +1364,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_PHY_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_Defense);
                 c->AttackTime = 15;

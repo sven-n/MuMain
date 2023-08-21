@@ -146,14 +146,13 @@ float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Tu
 
 void MovePosition(vec3_t Position, vec3_t Angle, vec3_t Speed)
 {
-    VectorScale(Speed, FPS_ANIMATION_FACTOR, Speed)
 
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
 
     vec3_t Velocity;
     VectorRotate(Speed, Matrix, Velocity);
-
+    VectorScale(Velocity, FPS_ANIMATION_FACTOR, Velocity)
     VectorAdd(Position, Velocity, Position);
 }
 
@@ -767,11 +766,24 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
 
 CTimer* g_WorldTime = new CTimer();
 
-constexpr double DEFAULT_ANIMATION_FPS = 25.0;
+/**
+ * \brief It's the FPS for which the game was initially developed.
+ * All speeds of animations, positional movements, etc. are based on it.
+ * Increasing this value means increasing the speed on which the game is running.
+ * It's not recommended to change this value.
+ */
+constexpr double REFERENCE_FPS = 25.0;
 
-float   DeltaT = 0.1f;
 double   FPS;
-double   FPS_ANIMATION_FACTOR;
+
+/**
+ * \brief A factor which should applied to all values which get an added offset, frame-by-frame.
+ * E.g. you have an object which moves by 10 x positions at every frame on a 25fps basis,
+ * you'll simply multiply this 10 positions with this factor. If you have a current
+ * frame rate of 50 fps, this factor is 0.5f, so it moves just 5 positions in this frame.
+ * Therefore, the speed of the game is maintained even when the FPS change dynamically.
+ */
+float   FPS_ANIMATION_FACTOR;
 double   FPS_AVG;
 double   WorldTime = 0.0;
 
@@ -800,7 +812,7 @@ void CalcFPS()
         FPS = 1000 / differenceMs;
     }
 
-    FPS_ANIMATION_FACTOR = DEFAULT_ANIMATION_FPS / FPS;
+    FPS_ANIMATION_FACTOR = static_cast<float>(REFERENCE_FPS / FPS);
 
     // Calculate average fps every 2 seconds or 25 frames
     const double diffSinceStart = WorldTime - start;
@@ -811,16 +823,10 @@ void CalcFPS()
         frame = 0;
     }
 
-    DeltaT = (float)differenceMs / CLOCKS_PER_SEC;
-    if (WorldTime == last)
-    {
-        DeltaT = 0.1f / CLOCKS_PER_SEC;  // it just cant be 0
-    }
-
     last = WorldTime;
 
     if (SceneFlag == MAIN_SCENE)
     {
-        gSkillManager.CalcSkillDelay((int)DeltaT);
+        gSkillManager.CalcSkillDelay(static_cast<int>(differenceMs));
     }
 }

@@ -1401,7 +1401,7 @@ void CTrapCanon::Render_Object(OBJECT* o, BMD* b)
 
 void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (c->AttackTime == 0)
+    if ((int)c->AttackTime == 0)
     {
         float fLumi;
         vec3_t vPos, vLight;
@@ -1421,7 +1421,7 @@ void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 
 void CTrapCanon::Render_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (c->AttackTime == 1)
+    if ((int)c->AttackTime == 1)
     {
         CHARACTER* tc = &CharactersClient[c->TargetCharacter];
         OBJECT* to = &tc->Object;

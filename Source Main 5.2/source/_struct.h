@@ -527,14 +527,14 @@ typedef struct
     int			NumTails;
     int			MaxTails;
     vec3_t		Tails[MAX_TAILS][4];
-    int  		LifeTime;
+    float  		LifeTime;
     bool        Collision;
     float		Velocity;
     vec3_t		Direction;
     short       PKKey;
     WORD		Skill;
     BYTE		Weapon;
-    int			MultiUse;
+    float			MultiUse;
     bool        bTileMapping;
     BYTE        m_byReverseUV;
     bool        m_bCreateTails;
