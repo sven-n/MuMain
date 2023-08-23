@@ -1501,7 +1501,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 Vector(1.f, 0.1f, 0.1f, Light);
                 CreateParticle(BITMAP_HOLE, Position, o->Angle, Light, 0, 3.f);
             }
-            o->LifeTime++;
+            o->LifeTime += FPS_ANIMATION_FACTOR;
             if (o->LifeTime >= 5)
             {
                 o->LifeTime = 0;

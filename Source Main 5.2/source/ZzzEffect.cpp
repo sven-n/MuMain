@@ -3658,7 +3658,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
 
             case MODEL_DARKLORD_SKILL:
             {
-                o->LifeTime = 10;
+                o->LifeTime = 10 * FPS_ANIMATION_FACTOR;
                 o->Scale = 0.2f;
                 o->Velocity = 0.1f;
 
@@ -3681,7 +3681,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 }
                 else if (o->SubType == 2)
                 {
-                    o->LifeTime = 12;
+                    o->LifeTime = 12 * FPS_ANIMATION_FACTOR;
                     o->Velocity = 0.4f;
                 }
             }
@@ -8357,7 +8357,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             else if (o->AlphaTarget < 1.0f)
                 o->AlphaTarget += (0.02f) * FPS_ANIMATION_FACTOR;
 
-            if (1 == o->LifeTime)
+            if (1 <= o->LifeTime)
                 o->LifeTime = 50;
         }
         break;
@@ -9040,7 +9040,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, pTargetObj->Angle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
             }
 
-            if (o->LifeTime == 15)
+            if ((int)o->LifeTime == 15)
             {
                 int iNumBones = pTargetModel->NumBones;
                 float fRandom;
