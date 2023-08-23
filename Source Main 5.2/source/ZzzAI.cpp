@@ -769,14 +769,6 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
 
 CTimer* g_WorldTime = new CTimer();
 
-/**
- * \brief It's the FPS for which the game was initially developed.
- * All speeds of animations, positional movements, etc. are based on it.
- * Increasing this value means increasing the speed on which the game is running.
- * It's not recommended to change this value.
- */
-constexpr double REFERENCE_FPS = 25.0;
-
 double   FPS;
 
 /**
